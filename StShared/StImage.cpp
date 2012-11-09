@@ -9,6 +9,7 @@
 #include <StImage/StImage.h>
 
 StString StImage::formatImgColorModel(ImgColorModel theColorModel) {
+#ifdef __ST_DEBUG__
     switch(theColorModel) {
         case ImgColor_RGB:     return "ImgColor_RGB";
         case ImgColor_RGBA:    return "ImgColor_RGBA";
@@ -20,6 +21,19 @@ StString StImage::formatImgColorModel(ImgColorModel theColorModel) {
         case ImgColor_HSL:     return "ImgColor_HSL";
         default:               return "ImgColor_UNKNOWN";
     }
+#else
+    switch(theColorModel) {
+        case ImgColor_RGB:     return "RGB";
+        case ImgColor_RGBA:    return "RGBA";
+        case ImgColor_GRAY:    return "Grayscale";
+        case ImgColor_YUV:     return "YUV";
+        case ImgColor_YUVjpeg: return "YUV fullscale";
+        case ImgColor_CMYK:    return "CMYK";
+        case ImgColor_HSV:     return "HSV";
+        case ImgColor_HSL:     return "HSL";
+        default:               return StString("UNKNOWN[") + theColorModel + "]";
+    }
+#endif
 }
 
 StImage::StImage()

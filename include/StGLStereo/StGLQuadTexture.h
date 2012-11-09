@@ -72,7 +72,7 @@ class ST_LOCAL StGLFrameTextures : public StGLResource {
      */
     virtual void release(StGLContext& theCtx);
 
-    StHandle<StStereoParams> getSource() {
+    StHandle<StStereoParams> getSource() const {
         return myParams;
     }
 

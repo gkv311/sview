@@ -163,6 +163,33 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         myTextureQueue->push(*stImageL, *stImageR, theParams, aSrcFormatCurr, 0.0);
     }
 
+    StHandle<StImageInfo> anImgInfo = new StImageInfo();
+    anImgInfo->myId = theParams;
+
+    StString aTitleString, aFolder;
+    if(theSource->size() >= 2) {
+        StFileNode::getFolderAndFile(theSource->getValue(0)->getPath(), aFolder, aTitleString);
+        anImgInfo->myInfo.add(StArgument("Name (L)", aTitleString));
+        StFileNode::getFolderAndFile(theSource->getValue(1)->getPath(), aFolder, aTitleString);
+        anImgInfo->myInfo.add(StArgument("Name (R)", aTitleString));
+    } else {
+        StFileNode::getFolderAndFile(fileToLoadPath, aFolder, aTitleString);
+        anImgInfo->myInfo.add(StArgument("Name", aTitleString));
+    }
+    if(!stImageR->isNull()) {
+        anImgInfo->myInfo.add(StArgument("Dimensions (L)",  StString() + stImageL->getSizeX()
+                                                               + " x " + stImageL->getSizeY()));
+        anImgInfo->myInfo.add(StArgument("Dimensions (R)",  StString() + stImageR->getSizeX()
+                                                               + " x " + stImageR->getSizeY()));
+        anImgInfo->myInfo.add(StArgument("Color Model (L)", stImageL->formatImgColorModel()));
+        anImgInfo->myInfo.add(StArgument("Color Model (R)", stImageR->formatImgColorModel()));
+    } else {
+        anImgInfo->myInfo.add(StArgument("Dimensions",      StString() + stImageL->getSizeX()
+                                                               + " x " + stImageL->getSizeY()));
+        anImgInfo->myInfo.add(StArgument("Color Model",     stImageL->formatImgColorModel()));
+    }
+    myImgInfo = anImgInfo;
+
     // clean up - close opened files and reset memory
     stImageL->close();
     stImageL->nullify();

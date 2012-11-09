@@ -112,6 +112,8 @@ class ST_LOCAL StImageViewerGUI : public StGLRootWidget {
     bool toHideCursor() const;
     void showUpdatesNotify();
 
+    void doAboutImage(const size_t );
+
         private: //!< callback Slots
 
     void doAboutProgram(const size_t );

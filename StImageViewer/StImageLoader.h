@@ -28,6 +28,16 @@
 
 class StLangMap;
 
+struct ST_LOCAL StImageInfo {
+
+    StHandle<StStereoParams> myId;
+    StArgumentsMap           myInfo;
+
+};
+
+/**
+ * Auxiliary class to load images from dedicated thread.
+ */
 class ST_LOCAL StImageLoader {
 
         public:
@@ -52,6 +62,11 @@ class ST_LOCAL StImageLoader {
     void doSaveImageAs(const size_t theImgType) {
         myToSave = StImageFile::ImageType(theImgType);
         myLoadNextEvent.set();
+    }
+
+    StHandle<StImageInfo> getFileInfo(const StHandle<StStereoParams>& theParams) const {
+        StHandle<StImageInfo> anInfo = myImgInfo;
+        return (anInfo->myId == theParams) ? anInfo : NULL;
     }
 
     StPlayList& getPlayList() {
@@ -111,6 +126,7 @@ class ST_LOCAL StImageLoader {
     StEvent                    myLoadNextEvent;
     StFormatEnum               mySrcFormat;     //!< target source format (auto-detect by default)
     StHandle<StGLTextureQueue> myTextureQueue;  //!< decoded frames queue
+    StHandle<StImageInfo>      myImgInfo;       //!< info about currently loaded image
 
     volatile StImageFile::ImageClass myImageLib;
     volatile StImageFile::ImageType  myToSave;

@@ -324,6 +324,32 @@ void StImageViewerGUI::doAboutSystem(const size_t ) {
     aSysInfoDialog->signals.onClickRight.connect(aSysInfoDialog, &StGLMessageBox::doKillSelf);
 }
 
+void StImageViewerGUI::doAboutImage(const size_t ) {
+    StHandle<StFileNode>     aFileNode;
+    StHandle<StStereoParams> aParams;
+    StHandle<StImageInfo>    anExtraInfo;
+    StArrayList<StString> anInfoList(10);
+    if(myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo) && !anExtraInfo.isNull()) {
+        for(size_t aKeyIter = 0; aKeyIter < anExtraInfo->myInfo.size(); ++aKeyIter) {
+            const StArgument& aPair = anExtraInfo->myInfo.getFromIndex(aKeyIter);
+            anInfoList.add(aPair.getKey() + ": " + aPair.getValue() + "\n");
+        }
+    }
+
+    StString aTitle = "Image Info";
+    StString anInfo;
+    for(size_t anIter = 0; anIter < anInfoList.size(); ++anIter) {
+        anInfo += anInfoList[anIter];
+    }
+    StString aString = aTitle + "\n\n \n" + anInfo;
+    StGLMessageBox* anInfoDialog = new StGLMessageBox(this, aString, 512, 256);
+
+    anInfoDialog->setVisibility(true, true);
+    anInfoDialog->stglInit();
+    anInfoDialog->signals.onClickLeft.connect(anInfoDialog,  &StGLMessageBox::doKillSelf);
+    anInfoDialog->signals.onClickRight.connect(anInfoDialog, &StGLMessageBox::doKillSelf);
+}
+
 void StImageViewerGUI::doCheckUpdates(const size_t ) {
     StSocket::openURL("http://www.sview.ru/download");
 }

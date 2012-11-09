@@ -115,6 +115,13 @@ class ST_LOCAL StImageViewer : public StDrawerInterface {
 
     } params;
 
+    /**
+     * Retrieve current playlist item.
+     */
+    bool getCurrentFile(StHandle<StFileNode>&     theFileNode,
+                        StHandle<StStereoParams>& theParams,
+                        StHandle<StImageInfo>&    theInfo);
+
         private: //! @name private callback Slots
 
     void doFullscreen(const bool theIsFullscreen);

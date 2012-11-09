@@ -659,17 +659,15 @@ void StImageViewer::keysSrcFormat(bool* keysMap) {
         params.srcFormat->setValue(ST_V_SRC_OVER_UNDER_RL);
         keysMap[ST_VK_O] = false;
     }
-    if(keysMap[ST_VK_I]) {
-        params.srcFormat->setValue(ST_V_SRC_ROW_INTERLACE);
-        keysMap[ST_VK_I] = false;
-    }
-    if(keysMap[ST_VK_R]) {
-        params.srcFormat->setValue(ST_V_SRC_ANAGLYPH_RED_CYAN);
-        keysMap[ST_VK_R] = false;
-    }
 }
 
 void StImageViewer::keysFileWalk(bool* keysMap) {
+    if(keysMap[ST_VK_I]) {
+        myGUI->doAboutImage(3);
+        ///params.srcFormat->setValue(ST_V_SRC_ROW_INTERLACE);
+        keysMap[ST_VK_I] = false;
+    }
+
     if(keysMap[ST_VK_O] && keysMap[ST_VK_CONTROL]) {
         doOpenFileDialog(this, 1);
         keysMap[ST_VK_O] = false;
@@ -711,6 +709,17 @@ void StImageViewer::keysFileWalk(bool* keysMap) {
         }
         keysMap[ST_VK_DELETE] = false;
     }
+}
+
+bool StImageViewer::getCurrentFile(StHandle<StFileNode>&     theFileNode,
+                                   StHandle<StStereoParams>& theParams,
+                                   StHandle<StImageInfo>&    theInfo) {
+    theInfo.nullify();
+    if(!myLoader->getPlayList().getCurrentFile(theFileNode, theParams)) {
+        return false;
+    }
+    theInfo = myLoader->getFileInfo(theParams);
+    return true;
 }
 
 void StImageViewer::keysCommon(bool* keysMap) {
