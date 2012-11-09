@@ -33,6 +33,13 @@
 class StSubQueue;
 class StLangMap;
 
+struct ST_LOCAL StMovieInfo {
+
+    StHandle<StStereoParams> myId;
+    StArgumentsMap           myInfo;
+
+};
+
 /**
  * Special class for video playback.
  */
@@ -55,6 +62,8 @@ class ST_LOCAL StVideo {
     StHandle<StSubtitleQueue>     mySubtitles;    //!< subtitles decoding thread
 
     StPlayList                    myPlayList;     //!< play list
+    StHandle<StMovieInfo>         myFileInfo;     //!< info about currently loaded file
+    StHandle<StMovieInfo>         myFileInfoTmp;
     StHandle<StFileNode>          myCurrNode;     //!< active (played) file node
     StHandle<StStereoParams>      myCurrParams;   //!< paramters for active file node
     StHandle<StGLTextureQueue>    myTextureQueue; //!< decoded frames queue
@@ -202,6 +211,11 @@ class ST_LOCAL StVideo {
      */
     void setSrcFormat(const StFormatEnum theSrcFormat) {
         myVideoMaster->setSrcFormat(theSrcFormat);
+    }
+
+    StHandle<StMovieInfo> getFileInfo(const StHandle<StStereoParams>& theParams) const {
+        StHandle<StMovieInfo> anInfo = myFileInfo;
+        return (!anInfo.isNull() && anInfo->myId == theParams) ? anInfo : NULL;
     }
 
         public: //!< callback Slots

@@ -66,7 +66,7 @@ class ST_LOCAL StImageLoader {
 
     StHandle<StImageInfo> getFileInfo(const StHandle<StStereoParams>& theParams) const {
         StHandle<StImageInfo> anInfo = myImgInfo;
-        return (anInfo->myId == theParams) ? anInfo : NULL;
+        return (!anInfo.isNull() && anInfo->myId == theParams) ? anInfo : NULL;
     }
 
     StPlayList& getPlayList() {

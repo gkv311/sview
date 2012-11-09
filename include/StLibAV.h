@@ -170,6 +170,8 @@ namespace stLibAV {
         extern const PixelFormat BGR24;    ///< packed RGB 8:8:8, 24bpp, BGRBGR...
         extern const PixelFormat RGBA32;
         extern const PixelFormat BGRA32;
+
+        StString getString(const PixelFormat theFrmt);
     };
 
     /**

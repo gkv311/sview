@@ -92,6 +92,38 @@ namespace {
 const PixelFormat stLibAV::PIX_FMT::RGBA32   = (AvPixFmtRGBA != stLibAV::PIX_FMT::NONE) ? AvPixFmtRGBA : AvPixFmtBGR32;
 const PixelFormat stLibAV::PIX_FMT::BGRA32   = (AvPixFmtBGRA != stLibAV::PIX_FMT::NONE) ? AvPixFmtBGRA : AvPixFmtRGB32;
 
+StString stLibAV::PIX_FMT::getString(const PixelFormat theFrmt) {
+    if(theFrmt == stLibAV::PIX_FMT::YUV420P) {
+        return "yuv420p";
+    } else if(theFrmt == stLibAV::PIX_FMT::GRAY8) {
+        return "gray";
+    } else if(theFrmt == stLibAV::PIX_FMT::YUV422P) {
+        return "yuv422p";
+    } else if(theFrmt == stLibAV::PIX_FMT::YUV444P) {
+        return "yuv444p";
+    } else if(theFrmt == stLibAV::PIX_FMT::YUV410P) {
+        return "yuv410p";
+    } else if(theFrmt == stLibAV::PIX_FMT::YUV411P) {
+        return "yuv411p";
+    } else if(theFrmt == stLibAV::PIX_FMT::YUV440P) {
+        return "yuv440p";
+    } else if(theFrmt == stLibAV::PIX_FMT::YUVJ420P) {
+        return "yuvj420p";
+    } else if(theFrmt == stLibAV::PIX_FMT::YUVJ422P) {
+        return "yuvj422p";
+    } else if(theFrmt == stLibAV::PIX_FMT::YUVJ444P) {
+        return "yuvj444p";
+    } else if(theFrmt == stLibAV::PIX_FMT::YUVJ440P) {
+        return "yuvj440p";
+    } else if(theFrmt == stLibAV::PIX_FMT::RGB24) {
+        return "rgb24";
+    } else if(theFrmt == stLibAV::PIX_FMT::BGR24) {
+        return "bgr24";
+    } else {
+        return "unknown";
+    }
+}
+
 namespace {
 
     static bool initOnce() {

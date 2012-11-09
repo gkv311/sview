@@ -112,6 +112,10 @@ class ST_LOCAL StVideoQueue : public StAVPacketQueue {
         return aPts;
     }
 
+    StString getPixelFormatString() const {
+        return stLibAV::PIX_FMT::getString(myCodecCtx->pix_fmt);
+    }
+
     StFormatEnum getSrcFormat() const {
         // TODO (Kirill Gavrilov#4#) not thread safe
         return mySrcFormat;

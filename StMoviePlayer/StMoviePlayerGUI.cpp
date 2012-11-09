@@ -31,6 +31,8 @@
 #include "StSeekBar.h"
 #include "StTimeBox.h"
 
+#include "StVideo/StVideo.h"
+
 #include <StCore/StCore.h>
 #include <StCore/StWindow.h>
 
@@ -443,6 +445,32 @@ void StMoviePlayerGUI::doAboutProgram(const size_t ) {
     aboutDialog->stglInit();
     aboutDialog->signals.onClickLeft.connect(aboutDialog,  &StGLMessageBox::doKillSelf);
     aboutDialog->signals.onClickRight.connect(aboutDialog, &StGLMessageBox::doKillSelf);
+}
+
+void StMoviePlayerGUI::doAboutFile(const size_t ) {
+    StHandle<StFileNode>     aFileNode;
+    StHandle<StStereoParams> aParams;
+    StHandle<StMovieInfo>    anExtraInfo;
+    StArrayList<StString> anInfoList(10);
+    if(myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo) && !anExtraInfo.isNull()) {
+        for(size_t aKeyIter = 0; aKeyIter < anExtraInfo->myInfo.size(); ++aKeyIter) {
+            const StArgument& aPair = anExtraInfo->myInfo.getFromIndex(aKeyIter);
+            anInfoList.add(aPair.getKey() + ": " + aPair.getValue() + "\n");
+        }
+    }
+
+    StString aTitle = "File Info";
+    StString anInfo;
+    for(size_t anIter = 0; anIter < anInfoList.size(); ++anIter) {
+        anInfo += anInfoList[anIter];
+    }
+    StString aString = aTitle + "\n\n \n" + anInfo;
+    StGLMessageBox* anInfoDialog = new StGLMessageBox(this, aString, 512, 256);
+
+    anInfoDialog->setVisibility(true, true);
+    anInfoDialog->stglInit();
+    anInfoDialog->signals.onClickLeft.connect(anInfoDialog,  &StGLMessageBox::doKillSelf);
+    anInfoDialog->signals.onClickRight.connect(anInfoDialog, &StGLMessageBox::doKillSelf);
 }
 
 void StMoviePlayerGUI::doCheckUpdates(const size_t ) {

@@ -31,6 +31,9 @@ class StWindow;
 class StVideo;
 class StMoviePlayerGUI;
 class StCheckUpdates;
+class StStereoParams;
+class StFileNode;
+struct StMovieInfo;
 
 class ST_LOCAL StALDeviceParam : public StInt32Param {
 
@@ -128,6 +131,10 @@ class ST_LOCAL StMoviePlayer : public StDrawerInterface {
     void keysCommon(bool* keysMap);
 
         public: //! @name Properties
+
+    bool getCurrentFile(StHandle<StFileNode>&     theFileNode,
+                        StHandle<StStereoParams>& theParams,
+                        StHandle<StMovieInfo>&    theInfo);
 
     struct {
 

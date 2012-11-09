@@ -141,6 +141,8 @@ class ST_LOCAL StMoviePlayerGUI : public StGLRootWidget {
     void updateAudioStreamsMenu    (const StHandle< StArrayList<StString> >& theStreamsList);
     void updateSubtitlesStreamsMenu(const StHandle< StArrayList<StString> >& theStreamsList);
 
+    void doAboutFile(const size_t );
+
         private: //!< callback Slots
 
     void doAboutProgram (const size_t );

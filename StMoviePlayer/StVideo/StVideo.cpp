@@ -262,6 +262,11 @@ bool StVideo::addFile(const StString& theFileToLoad,
 #else
     dump_format(aFormatCtx, 0, theFileToLoad.toCString(), false);
 #endif
+
+    StString aTitleString, aFolder;
+    StFileNode::getFolderAndFile(theFileToLoad, aFolder, aTitleString);
+    myFileInfoTmp->myInfo.add(StArgument("File name", aTitleString));
+
     theMaxDuration = stMax(theMaxDuration, stLibAV::unitsToSeconds(aFormatCtx->duration));
     for(unsigned int aStreamId = 0; aStreamId < aFormatCtx->nb_streams; ++aStreamId) {
         AVStream* aStream = aFormatCtx->streams[aStreamId];
@@ -272,9 +277,25 @@ bool StVideo::addFile(const StString& theFileToLoad,
             if(!myVideoMaster->isInitialized()) {
                 myVideoMaster->init(aFormatCtx, aStreamId);
                 myVideoMaster->setSlave(NULL);
+
+                if(myVideoMaster->isInitialized()) {
+                    myFileInfoTmp->myInfo.add(StArgument("Video Dimensions",
+                        StString() + myVideoMaster->sizeX() + " x " + myVideoMaster->sizeY()));
+                    myFileInfoTmp->myInfo.add(StArgument("Pixel Format",
+                        myVideoMaster->getPixelFormatString()));
+                    myFileInfoTmp->myInfo.add(StArgument("Pixel Ratio",
+                        StString() + myVideoMaster->getPixelRatio()));
+                    myFileInfoTmp->myInfo.add(StArgument("Duration",
+                        StFormatTime::formatSeconds(theMaxDuration)));
+                }
             } else if(!myVideoSlave->isInitialized()) {
                 myVideoSlave->init(aFormatCtx, aStreamId);
                 myVideoMaster->setSlave(myVideoSlave);
+
+                if(myVideoSlave->isInitialized()) {
+                    myFileInfoTmp->myInfo.add(StArgument("Video Dimensions (slave)",
+                        StString() + myVideoSlave->sizeX() + " x " + myVideoSlave->sizeY()));
+                }
             }
         } else if(aStream->codec->codec_type == AVMEDIA_TYPE_AUDIO) {
             // audio track
@@ -348,6 +369,8 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
     // just for safe - close previously opened video
     close();
 
+    myFileInfoTmp = new StMovieInfo();
+
     double aDuration = 0.0;
     StHandle< StArrayList<StString> > aStreamsListA = new StArrayList<StString>(8);
     StHandle< StArrayList<StString> > aStreamsListS = new StArrayList<StString>(8);
@@ -374,6 +397,8 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
 
     myCurrNode   = theNewSource;
     myCurrParams = theNewParams;
+    myFileInfoTmp->myId = myCurrParams;
+    myFileInfo   = myFileInfoTmp;
     params.activeAudio->setList(aStreamsListA, aStreamsListA->isEmpty() ? -1 : 0);
     params.activeSubtitles->setList(aStreamsListS, -1); // do not show subtitles by default
 

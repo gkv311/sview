@@ -797,10 +797,6 @@ void StMoviePlayer::keysSrcFormat(bool* keysMap) {
         params.srcFormat->setValue(ST_V_SRC_OVER_UNDER_RL);
         keysMap[ST_VK_O] = false;
     }
-    if(keysMap[ST_VK_I]) {
-        params.srcFormat->setValue(ST_V_SRC_ROW_INTERLACE);
-        keysMap[ST_VK_I] = false;
-    }
     if(keysMap[ST_VK_R]) {
         params.srcFormat->setValue(ST_V_SRC_ANAGLYPH_RED_CYAN);
         keysMap[ST_VK_R] = false;
@@ -828,6 +824,11 @@ void StMoviePlayer::keysSrcFormat(bool* keysMap) {
 }
 
 void StMoviePlayer::keysFileWalk(bool* keysMap) {
+    if(keysMap[ST_VK_I]) {
+        myGUI->doAboutFile(0);
+        keysMap[ST_VK_I] = false;
+    }
+
     if(keysMap[ST_VK_O] && keysMap[ST_VK_CONTROL]) {
         doOpen1File();
         keysMap[ST_VK_O] = false;
@@ -850,6 +851,17 @@ void StMoviePlayer::keysFileWalk(bool* keysMap) {
         doListLast();
         keysMap[ST_VK_END] = false;
     }
+}
+
+bool StMoviePlayer::getCurrentFile(StHandle<StFileNode>&     theFileNode,
+                                   StHandle<StStereoParams>& theParams,
+                                   StHandle<StMovieInfo>&    theInfo) {
+    theInfo.nullify();
+    if(!myVideo->getPlayList().getCurrentFile(theFileNode, theParams)) {
+        return false;
+    }
+    theInfo = myVideo->getFileInfo(theParams);
+    return true;
 }
 
 void StMoviePlayer::keysCommon(bool* keysMap) {

@@ -663,8 +663,7 @@ void StImageViewer::keysSrcFormat(bool* keysMap) {
 
 void StImageViewer::keysFileWalk(bool* keysMap) {
     if(keysMap[ST_VK_I]) {
-        myGUI->doAboutImage(3);
-        ///params.srcFormat->setValue(ST_V_SRC_ROW_INTERLACE);
+        myGUI->doAboutImage(0);
         keysMap[ST_VK_I] = false;
     }
 
