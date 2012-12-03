@@ -1,0 +1,31 @@
+#define ST_RESOURCE_COMPILER
+
+#include <windows.h>
+#include <StVersion.h>  // header for version
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     SVIEW_SDK_VERSION
+PRODUCTVERSION  SVIEW_SDK_VERSION
+FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+ST_WIN32_FILEFLAGS
+FILEOS          VOS_NT
+FILETYPE        VFT_DLL
+FILESUBTYPE     VFT2_UNKNOWN
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN BLOCK "040904E4" // Language type = U.S English(0x0409) and Character Set = Windows, Multilingual(0x04E4)
+    BEGIN
+      VALUE "FileDescription", "IZ3D Renderer library\000"
+      VALUE "FileVersion",     SVIEW_SDK_VER_STRING "\000"
+      VALUE "LegalCopyright",  "\251 2009-2011 Kirill Gavrilov. Copyright \251 iZ3D LLC. All rights for codes for iZ3D conversion reserved for iZ3D LLC 2007-2009\000"
+      VALUE "ProductName",     "StOutIZ3D\000"
+      VALUE "ProductVersion",  SVIEW_SDK_VER_STRING "\000"
+      VALUE "OfficialSite",    "www.sview.ru\000"
+      VALUE "Contacts",        "kirill@sview.ru\000"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x0409, 0x04E4
+  END
+END

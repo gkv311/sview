@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Name=sView - Stereoscopic Image Viewer
+Comment=View stereoscopic images
+Name[ru]=sView - Просмотрщик стереоизображений
+Comment[ru]=Универсальный проигрыватель стереоскопического видео, аудио и изображений
+Exec=sView --in=image - %U
+Icon=/usr/share/sView/icons/menu.xpm
+Terminal=false
+Type=Application
+Categories=AudioVideo;Player;
+MimeType=image/x-jps;image/x-pns;image/x-mpo;image/jpg;image/jpeg;

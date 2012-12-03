@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="sView" />
+		<Option pch_mode="2" />
+		<Option compiler="windows_sdk_x86" />
+		<Build>
+			<Target title="WIN_gcc_x86">
+				<Option output="../bin/$(TARGET_NAME)/sView" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../bin/$(TARGET_NAME)/" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option parameters="demo.jps" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-std=c++0x" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-mmmx" />
+					<Add option="-msse" />
+					<Add option="-DUNICODE" />
+					<Add option="-D__ST_DEBUG__" />
+				</Compiler>
+				<Linker>
+					<Add library="gdi32" />
+					<Add library="user32" />
+					<Add library="kernel32" />
+					<Add library="Comdlg32" />
+					<Add library="Version" />
+				</Linker>
+			</Target>
+			<Target title="WIN_vc_x86">
+				<Option output="../bin/$(TARGET_NAME)/sView" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../bin/$(TARGET_NAME)/" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="1" />
+				<Option compiler="windows_sdk_x86" />
+				<Option parameters="demo.jps" />
+				<Compiler>
+					<Add option="/MD" />
+					<Add option="/Ox" />
+					<Add option="/W4" />
+					<Add option="/EHsc" />
+					<Add option="/MP" />
+					<Add option="/DUNICODE" />
+					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
+					<Add option="/DNDEBUG" />
+				</Compiler>
+				<Linker>
+					<Add option="/MANIFEST" />
+					<Add library="gdi32" />
+					<Add library="user32" />
+					<Add library="kernel32" />
+					<Add library="Shell32" />
+					<Add library="Advapi32" />
+					<Add library="Comdlg32" />
+				</Linker>
+				<ExtraCommands>
+					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;1' />
+				</ExtraCommands>
+			</Target>
+			<Target title="WIN_vc_x86_DEBUG">
+				<Option output="../bin/$(TARGET_NAME)/sView" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../bin/$(TARGET_NAME)/" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="1" />
+				<Option compiler="windows_sdk_x86" />
+				<Option parameters="demo.jps" />
+				<Compiler>
+					<Add option="/MDd" />
+					<Add option="/Od" />
+					<Add option="/W4" />
+					<Add option="/Zi /D_DEBUG" />
+					<Add option="/Zi" />
+					<Add option="/EHsc" />
+					<Add option="/MP" />
+					<Add option="/DUNICODE" />
+					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
+					<Add option="/D__ST_DEBUG__" />
+				</Compiler>
+				<Linker>
+					<Add option="/DEBUG" />
+					<Add option="/MANIFEST" />
+					<Add library="gdi32" />
+					<Add library="user32" />
+					<Add library="kernel32" />
+					<Add library="Shell32" />
+					<Add library="Advapi32" />
+					<Add library="Comdlg32" />
+					<Add library="Version" />
+				</Linker>
+				<ExtraCommands>
+					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;1' />
+				</ExtraCommands>
+			</Target>
+			<Target title="WIN_vc_AMD64">
+				<Option output="../bin/$(TARGET_NAME)/sView" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../bin/$(TARGET_NAME)/" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="1" />
+				<Option compiler="windows_sdk_x86_64" />
+				<Option parameters="demo.jps" />
+				<Compiler>
+					<Add option="/MD" />
+					<Add option="/Ox" />
+					<Add option="/W4" />
+					<Add option="/EHsc" />
+					<Add option="/MP" />
+					<Add option="/DUNICODE" />
+					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
+					<Add option="/DNDEBUG" />
+				</Compiler>
+				<Linker>
+					<Add option="/MANIFEST" />
+					<Add library="gdi32" />
+					<Add library="user32" />
+					<Add library="kernel32" />
+					<Add library="Shell32" />
+					<Add library="Advapi32" />
+					<Add library="Comdlg32" />
+				</Linker>
+				<ExtraCommands>
+					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;1' />
+				</ExtraCommands>
+			</Target>
+			<Target title="LINUX_gcc">
+				<Option output="../bin/$(TARGET_NAME)/sView" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../bin/$(TARGET_NAME)/" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option parameters="demo.jps" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-std=c++0x" />
+					<Add option="-Wall" />
+					<Add option="-mmmx" />
+					<Add option="-msse" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="`pkg-config gtk+-2.0 --libs`" />
+					<Add library="gthread-2.0" />
+				</Linker>
+			</Target>
+			<Target title="LINUX_gcc_DEBUG">
+				<Option output="../bin/$(TARGET_NAME)/sView" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../bin/$(TARGET_NAME)/" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option parameters="demo.jps" />
+				<Compiler>
+					<Add option="-std=c++0x" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-mmmx" />
+					<Add option="-msse" />
+					<Add option="-D__ST_DEBUG__" />
+				</Compiler>
+				<Linker>
+					<Add option="`pkg-config gtk+-2.0 --libs`" />
+					<Add library="gthread-2.0" />
+				</Linker>
+			</Target>
+			<Target title="MAC_gcc">
+				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/sView" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../bin/$(TARGET_NAME)/" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option parameters="demo.jps" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-Wall" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-framework Appkit" />
+					<Add library="objc" />
+				</Linker>
+				<ExtraCommands>
+					<Add before='cp -f -r Contents/* &quot;$(TARGET_OUTPUT_DIR)../&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../Resources/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../Resources/English.lproj/&quot;' />
+					<Add before='cp -f Resources/sView.icns &quot;$(TARGET_OUTPUT_DIR)../Resources/&quot;' />
+					<Add before='cp -f Resources/sView_Media.icns &quot;$(TARGET_OUTPUT_DIR)../Resources/&quot;' />
+					<Add before='ibtool --compile &quot;$(TARGET_OUTPUT_DIR)../Resources/English.lproj/MainMenu.nib&quot; Resources/English.lproj/MainMenu.xib' />
+				</ExtraCommands>
+			</Target>
+			<Target title="MAC_gcc_DEBUG">
+				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/sView" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../bin/$(TARGET_NAME)/" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option parameters="demo.jps" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-D__ST_DEBUG__" />
+				</Compiler>
+				<Linker>
+					<Add option="-framework Appkit" />
+					<Add library="objc" />
+				</Linker>
+				<ExtraCommands>
+					<Add before='cp -f -r Contents/* &quot;$(TARGET_OUTPUT_DIR)../&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../Resources/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../Resources/English.lproj/&quot;' />
+					<Add before='cp -f Resources/sView.icns &quot;$(TARGET_OUTPUT_DIR)../Resources/&quot;' />
+					<Add before='cp -f Resources/sView_Media.icns &quot;$(TARGET_OUTPUT_DIR)../Resources/&quot;' />
+					<Add before='ibtool --compile &quot;$(TARGET_OUTPUT_DIR)../Resources/English.lproj/MainMenu.nib&quot; Resources/English.lproj/MainMenu.xib' />
+				</ExtraCommands>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add directory="../3rdparty/include" />
+			<Add directory="../include" />
+		</Compiler>
+		<ResourceCompiler>
+			<Add directory="../include" />
+		</ResourceCompiler>
+		<Linker>
+			<Add library="libStShared" />
+			<Add directory="../3rdparty/lib/$(TARGET_NAME)" />
+			<Add directory="../lib/$(TARGET_NAME)" />
+		</Linker>
+		<Unit filename="Contents/Info.plist" />
+		<Unit filename="Contents/PkgInfo" />
+		<Unit filename="Resources/English.lproj/MainMenu.xib" />
+		<Unit filename="Resources/sView.icns" />
+		<Unit filename="Resources/sView_Media.icns" />
+		<Unit filename="StAppResponder.h">
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="main.cpp">
+			<Option target="WIN_gcc_x86" />
+			<Option target="WIN_vc_x86" />
+			<Option target="WIN_vc_x86_DEBUG" />
+			<Option target="WIN_vc_AMD64" />
+			<Option target="LINUX_gcc" />
+			<Option target="LINUX_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="main.mm">
+			<Option compile="1" />
+			<Option link="1" />
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="sview.ico" />
+		<Unit filename="sview.rc">
+			<Option compilerVar="WINDRES" />
+			<Option target="WIN_vc_x86" />
+			<Option target="WIN_vc_AMD64" />
+			<Option target="WIN_gcc_x86" />
+			<Option target="WIN_vc_x86_DEBUG" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

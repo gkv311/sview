@@ -1,0 +1,57 @@
+This is a root of sView repository.
+
+In this file will be useful information about sView development and repository access.
+
+#############################################################
+#   Prepare development enviroment
+#############################################################
+
+ Ubuntu
+
+1.1) Install main IDE CodeBlocks:
+sudo apt-get install codeblocks;
+
+1.2) Install main compiler g++:
+sudo apt-get install g++;
+
+1.3) Configure CodeBlocks - add empty (gcc-clones) compilers with names:
+windows_sdk_x86
+windows_sdk_x86_64
+
+1.4) Configure CodeBlocks Editor:
+end-of-line mode: CR LF
+default encoding: UTF-8
+source formatter: JAVA
+
+2) External dependences:
+
+sudo apt-get install
+libgtk2.0-dev
+libopenal-dev
+libglew1.5-dev
+libglu1-mesa-dev libgl1-mesa-dev xorg-driver-fglrx-dev;
+libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev
+libconfig++8-dev libconfig8-dev
+libxpm-dev
+
+ RPM-based distributive
+
+yum install gcc gcc-c++
+yum install gtk+-devel gtk2-devel
+yum install mesa-libGLU-devel glew-devel
+yum install openal-devel
+yum install libconfig-devel
+
+rpm -Uvh http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-stable.noarch.rpm
+yum install ffmpeg-devel
+#yum install libavcodec-devel libavdevice-devel libavformat-devel libavutil-devel libswscale-devel
+
+su
+yum install rpm-build
+
+mkdir -p ${HOME}/workspace/redhat/{RPMS,SRPMS,SPECS,SOURCES,BUILD}
+echo "%_topdir ${HOME}/workspace/redhat" > ${HOME}/.rpmmacros
+
+wget https://launchpad.net/~sview/+archive/stable/+files/sview_12.05-1%7Eprecise.tar.gz
+mv sview_12.05-1~precise.tar.gz $HOME/workspace/redhat/SOURCES/sview_12.05-1.tar.gz
+rpmbuild -ba distribution/sView.rpm.spec

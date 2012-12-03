@@ -1,0 +1,22 @@
+--- a/libavcodec/options.c	2011-03-24 18:57:37.000000000 +0300
++++ b/libavcodec/options.c	2011-03-29 00:00:43.357079203 +0400
+@@ -448,8 +448,19 @@
+ 
+ static const AVClass av_codec_context_class = { "AVCodecContext", context_to_name, options, LIBAVUTIL_VERSION_INT, OFFSET(log_level_offset) };
+ 
++static AVCodecContext *av_codec_context_default = NULL;
++
+ void avcodec_get_context_defaults2(AVCodecContext *s, enum AVMediaType codec_type){
+     int flags=0;
++    if(av_codec_context_default==NULL && codec_type==AVMEDIA_TYPE_UNKNOWN){
++        av_codec_context_default= av_malloc(sizeof(AVCodecContext));
++        avcodec_get_context_defaults2(av_codec_context_default, codec_type);
++    } else if(s!=av_codec_context_default && codec_type==AVMEDIA_TYPE_UNKNOWN){
++        /* copy default instance - to save the time */
++        memcpy(s, av_codec_context_default, sizeof(AVCodecContext));
++        return;
++    }
++
+     memset(s, 0, sizeof(AVCodecContext));
+ 
+     s->av_class= &av_codec_context_class;

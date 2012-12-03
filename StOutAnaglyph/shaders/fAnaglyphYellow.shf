@@ -1,0 +1,31 @@
+/**
+ * Simple Yellow Anaglyphs fragment shader.
+ * Copyright © 2007-2010 Kirill Gavrilov <kirill@sview.ru>
+ *
+ * StOutAnaglyph library is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * StOutAnaglyph library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library.
+ * If not, see <http://www.gnu.org/licenses/>.
+ */
+
+uniform sampler2D texL, texR;
+varying vec2 fTexCoord;
+
+void main(void) {
+    vec4 colorL = texture2D(texL, fTexCoord);
+    vec4 colorR = texture2D(texR, fTexCoord);
+
+    colorL.b = 0.0;
+    colorR.r = 0.0;
+    colorR.g = 0.0;
+    gl_FragColor = colorL + colorR;
+}

@@ -1,0 +1,19 @@
+French translation file for StOutInterlace library
+@author gramoun for Kirill Gavrilov
+
+--------
+1000="Lignes entrelacées"
+1001="Ecrans entrelacés par lignes: Zalman, Hyundai,..."
+1002="Colonnes entrelacées"
+1003="Ecrans entrelacés par colonnes"
+1006="DLP TV (échiquier)"
+1007="DLP TV (échiquier)"
+1008="Interlaced ED"
+1009="EDimensional en mode entrelacé"
+1100="Synchro Vert."
+1101="Affiche I/S"
+1102="Reverse Order"
+1103="Bind to supported monitor"
+2000="sView - Interlaced Output module"
+2001="version"
+2002="© 2009-2012 Kirill Gavrilov <kirill@sview.ru>\nSite Officiel site: www.sview.ru\n\nThis library distributed under LGPL3.0"

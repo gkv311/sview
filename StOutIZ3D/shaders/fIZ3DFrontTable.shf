@@ -1,0 +1,76 @@
+/**
+ * iZ3D frontScreen fragment shader.
+ * Copyright © 2007-2009 iZ3D LLC
+ * Copyright © 2007-2010 Kirill Gavrilov <kirill@sview.ru>
+ *
+ * StOutIZ3D library is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * StOutIZ3D library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library.
+ * If not, see <http://www.gnu.org/licenses/>.
+ */
+
+uniform sampler2D texL, texR, textT;
+varying vec2 fTexCoord;
+
+// threshold is subject to adjust...
+const float cTreshold = 0.025;
+const float cDiv2 = 0.5;
+
+vec3 frontColorDflt = vec3(0.72974, 0.72974, 0.72974);
+
+// returns coordinates in table-texture for input colors
+vec2 color2Table(in float cX, in float cY, in float xDispl) {
+    return vec2((xDispl + cX * (255.0 / 512.0) + 1.0 / 1024.0), (cY * (255.0 / 256.0) + 1.0 / 512.0));
+}
+
+// compute back color
+vec4 getBackColor(in vec4 cL, in vec4 cR) {
+   vec2 tCoordR = color2Table(cL.r, cR.r, 0.0);
+   vec2 tCoordG = color2Table(cL.g, cR.g, 0.0);
+   vec2 tCoordB = color2Table(cL.b, cR.b, 0.0);
+   vec4 cB;
+   cB.r = texture2D(textT, tCoordR).r;
+   cB.g = texture2D(textT, tCoordG).g;
+   cB.b = texture2D(textT, tCoordB).b;
+   cB.a = cL.a;
+   return cB;
+}
+
+// compute front color
+vec4 getFrontColor(in vec4 cL, in vec4 cR, in vec4 cB) {
+   vec2 tR = color2Table(cL.r, cR.r, cDiv2);
+   vec2 tG = color2Table(cL.g, cR.g, cDiv2);
+   vec2 tB = color2Table(cL.b, cR.b, cDiv2);
+   vec3 cF;
+   cF.r = texture2D(textT, tR).r;
+   cF.g = texture2D(textT, tG).g;
+   cF.b = texture2D(textT, tB).b;
+   float rcDot = dot(cB.rgb, cF.rgb);
+   float rcSum = dot(cB.rgb, vec3(1.0));
+   float rVal = rcDot / rcSum;
+   vec3 c = (rcSum >= cTreshold ? vec3(rVal) : frontColorDflt);
+   return vec4(c, cR.a);
+}
+
+void main(void) {
+    // top-right pixel of the table texture
+    vec2 dfltCoord = vec2(
+        1.0 * (511.0 / 512.0) + 1.0 / 1024.0,
+        1.0 * (255.0 / 256.0) + 1.0 / 512.0
+    );
+    frontColorDflt = texture2D(textT, dfltCoord).rgb;
+    vec4 cL = texture2D(texL, fTexCoord);
+    vec4 cR = texture2D(texR, fTexCoord);
+    vec4 backColor = getBackColor(cL, cR);
+    vec4 frontColor = getFrontColor(cL, cR, backColor);
+    gl_FragColor = frontColor;
+}

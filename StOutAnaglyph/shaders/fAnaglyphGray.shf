@@ -1,0 +1,43 @@
+/**
+ * Gray Anaglyph fragment shader.
+ * Copyright © 2007-2011 Kirill Gavrilov <kirill@sview.ru>
+ *
+ * StOutAnaglyph library is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * StOutAnaglyph library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library.
+ * If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * We use luminance vector (0.3086, 0.6094, 0.0820) here to convert image to grayscale.
+ * Notice here that we do not use the standard NTSC weights of 0.299, 0.587, and 0.114.
+ * The NTSC weights are only applicable to RGB colors in a gamma 2.2 color space.
+ * For linear RGB colors the values above are better.
+ */
+mat4 multL = mat4(0.3086,      0,      0,      0,
+                  0.6094,      0,      0,      0,
+                  0.0820,      0,      0,      0,
+                       0,      0,      0,      0);
+mat4 multR = mat4(     0, 0.3086, 0.3086,      0,
+                       0, 0.6094, 0.6094,      0,
+                       0, 0.0820, 0.0820,      0,
+                       0,      0,      0,      0);
+
+uniform sampler2D texL, texR;
+varying vec2 fTexCoord;
+
+void main(void) {
+    vec4 colorL = texture2D(texL, fTexCoord);
+    vec4 colorR = texture2D(texR, fTexCoord);
+
+    gl_FragColor = multL * colorL + multR * colorR;
+}

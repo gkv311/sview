@@ -1,0 +1,127 @@
+== sView 2011 ==
+
+11.05 (2011.05.29)
+  Intermidiate experimental version.
+  + added support for 8-bit and 32-bit audio formats;
+  + added (optional) FreeImage library support;
+  + added playback for mk3d files (matroska 3D-stereo) within stereo format flag;
+  + read parallax value stored in MPO images by Fujifilm cameras;
+  + read EXR and HDR images (using FreeImage and DevIL);
+  + added brightness and saturation control;
+  + added new experimental plugin - CAD Viewer based on Open CASCADE Technology
+    (reading CAD models in formats IGES, STEP, BREP; triangulation in format OBJ);
+  * eliminate system windows - use GL widgets to show warnings / errors when applicable;
+  * Windows, improved NPAPI plugin stability;
+  * images with alpha channel now shown with checkboard background;
+  * Linux (Xlib), improved fullscreen switch rootines:
+     - task bar was not overlaped in some case;
+     - now keyboard input not locked to sView in fullscreen;
+  * improved windowed stereo - offscreen frame buffer now trimmed to window dimensions (to avoid image blurring);
+  * added mouse wheel control for NVIDIA 3DVision output.
+
+11.03 (2011.03.27)
+  First public experimental version.
+  * package for Windows now packed with multi-theaded decoding enabled FFmpeg libraries;
+  * replace DevIL with FFmpeg for image processing (increase image loading time, use native YUV colorspace for JPEGs);
+  * added experimental frame-sequential source stereo format for video player;
+  * use GLSL for all planar YUV formats (not only YUV420p as before);
+  * detach most GLSL programs from binaries to dedicated files (thus allow others to customize them).
+
+== sView 2009 ==
+
+11.02 (2011.02.20)
+  + added Green/Magenta anaglyph filter;
+  + new menu item to change GUI language;
+  + implemented changeable monitors configuration to allow configurations like AMD Eyefinity for advanced user;
+  + 64bit version of NPAPI browser plugin now registered in Windows system too (to be used with 64bit Browsers like Firefox 3.6.3 x86_64);
+  * NPAPI browser plugin MIME-types list was extended with image/jps, image/pns and image/mpo (improve compatibility with some galleries);
+  * small fixes of GUI elements;
+  * fixed BUG that may cause significant slowdown of application GUI in some cases (long system inactivity);
+  * demo image was updated;
+  * fixed multichannel audio playback on the Linux distributives with modern FFmpeg version (Ubuntu 10.10+);
+  * fixed errors that may cause OpenGL calls to release video memory when OpenGL context was already destroyed (may cause application crash on some OpenGL-drivers);
+  * added more standard paths for standard fonts (Gentoo and Fedora);
+  * NPAPI-plugin now registered within DEB-package installation (notice: it is still not totally stable, you may consider to disable it in the browser settings);
+
+10.11 (2010.11.14)
+  + added experimental diagnostics module (for stereoscopic displays calibration);
+  * fixed left/right reversion for anaglyph and iZ3D outputs;
+  * fixed videoplayback issue which may cause wrong FPS and seek problems for some videos;
+  * fixed out-of-window mouse unclick problem on Windows;
+  * improved compatibility with old GPU hardware without GL_RED texture support (YUV video playback);
+  * on Windows systems within only one monitor slave window now hidden (Dual Output and iZ3D output);
+
+10.08 (2010.08.22)
+  First official release.
+
+9.05 (2009.05.24)
+  First public experimental version based on new code. Changes relative to sView 2008:
+  * new systems support: Windows Vista, Window7 and Linux Ubuntu;
+  * Internet Browser plugin for embedded stereo (supported NPAPI browsers);
+  * Audio/Video playback via FFmpeg and OpenAL libraries;
+  * enhanced devices support list, output mode auto-detection mechanism (for some devices);
+  * GLSL (OpenGL shader language) and OpenGL2, speed up rendering on modern hardware;
+  * mono output support (program now more universal!);
+  * spheric panorama output (sphere - 'P' key);
+  * better fit to the screen feature;
+  * native Unicode support;
+  * better multi-monitors configurations support;
+  * module architecture, another developers could provide own stereo-devices support extensions;
+  * Drag&Drop support;
+  * no files count limit;
+  * Windows AMD64 builds;
+  * language translations now loaded from external text files;
+  * new version scheme, Ubuntu-style;
+  * better multi-threading support;
+  * a lot of user-friendly improvements;
+
+== sView 2008 ==
+
+0.4.0.9 (2008.01.11)
+  * improved common-picture rotates for several stereo-outputs (for mirrored output still WRONG);
+  + added QuadBuffered stereo output (hardware accelerated);
+
+0.4.0.8 (2008.01.10)
+  * improved extensions in open-file dialog;
+  * walk-speed is changed to FAST at install;
+  + added another anaglyph algorithm;
+  ^ anaglyph and iZ3D modes were optimized;
+  - removed halfcolor anaglyph mode;
+
+0.4.0.6 (2007.12.13)
+  + added walk-speed choice;
+  * fixed second window position for Dual-window modes;
+
+0.4.0.5 (2007.12.13)
+  * improved error handling;
+  * improved iZ3D - default L/R were swapped;
+  * improved iZ3D - back color for optimal;
+
+0.4 (2007.12.08)
+  + menus were added (available in 2 languages: Russian and English due install process);
+  + new stereo output modes are supported (Horizontal Mirror; Dual output; iZ3D; Anaglyph; mono);
+  + slide-show added;
+  * main program icons are updated to fully support Vista OS;
+  * CPU load were decreased (just sleeps);
+  - fullscreen modes were removed;
+  - BlueLine support was removed;
+  + many other improvements;
+
+0.3.4 (3578)
+  * fixed File Searching (last file);
+  * improved some file-change routine
+
+0.3.4 (3374)
+  + add *.pns searching;
+  + now try to check OpenGL extension "wglSwapIntervalEXT" to force Vertical Sync ON (if possible);
+  ^ improved speed for load Images (for Images less Current Texture Size NO rescale);
+  ^ improved WinAPI BlueLine (now resolution checks);
+  * use DevIL library for image decoding;
+
+0.1.x (2007.06.04)
+  First public win32 alpha version without GUI. Key features:
+  . render side-by-side stereo-pair for shutter glasses (software emulated Quadbuffered pageflip);
+  . windowed and fullscreen output;
+  . navigation through the image files in the current directory (next/previous);
+  . keyboard control (hot-keys);
+  . in first versions console calls to the IrfranView program were used to convert the image to BMP format.

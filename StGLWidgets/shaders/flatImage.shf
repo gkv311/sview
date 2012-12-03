@@ -1,0 +1,34 @@
+/**
+ * Copyright © 2010-2011 Kirill Gavrilov <kirill@sview.ru>
+ *
+ * Distributed under the Boost Software License, Version 1.0.
+ * See accompanying file license-boost.txt or copy at
+ * http://www.boost.org/LICENSE_1_0.txt
+ */
+
+varying vec2 fTexCoord;
+varying vec2 fTexUVCoord;
+
+// we split these functions for two reasons:
+// - to change function code (like color conversion);
+// - to optimize rendering on old hardware not supported conditions (GeForce FX for example).
+vec4 getColor(in vec2 texCoord);
+void convertToRGB(inout vec4 color, in vec2 texUVCoord);
+void applyCorrection(inout vec4 color);
+void applyGamma(inout vec4 color);
+
+void main(void) {
+    // extract color from main texture
+    vec4 color = getColor(fTexCoord);
+
+    // convert from alien color model (like YUV) to RGB
+    convertToRGB(color, fTexUVCoord);
+
+    // color processing (saturation, brightness, etc)
+    applyCorrection(color);
+
+    // gamma correction
+    applyGamma(color);
+
+    gl_FragColor = color;
+}

@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="StBrowserPlugin" />
+		<Option pch_mode="2" />
+		<Option compiler="windows_sdk_x86" />
+		<Build>
+			<Target title="WIN_gcc_x86">
+				<Option output="../bin/$(TARGET_NAME)/StBrowserPlugins/npStBrowserPlugin" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-std=c++0x" />
+					<Add option="-shared" />
+					<Add option="-mmmx" />
+					<Add option="-msse" />
+					<Add option="-DUNICODE" />
+					<Add option="-D__ST_DEBUG__" />
+				</Compiler>
+				<Linker>
+					<Add option="--input-def StBrowserPlugin.def" />
+					<Add library="user32" />
+					<Add library="advapi32" />
+					<Add library="shell32" />
+					<Add library="Version" />
+				</Linker>
+			</Target>
+			<Target title="WIN_vc_x86">
+				<Option output="../bin/$(TARGET_NAME)/StBrowserPlugins/npStBrowserPlugin" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="windows_sdk_x86" />
+				<Compiler>
+					<Add option="/MT" />
+					<Add option="/Ox" />
+					<Add option="/W4" />
+					<Add option="/EHsc" />
+					<Add option="/DUNICODE" />
+					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
+					<Add option="/D_USRDLL" />
+					<Add option="/D_ATL_CSTRING_EXPLICIT_CONSTRUCTORS" />
+					<Add directory="../3rdparty/atlmfc/include" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="../3rdparty/atlmfc/include" />
+				</ResourceCompiler>
+				<Linker>
+					<Add option="/DEF:StBrowserPlugin.def" />
+					<Add library="user32" />
+					<Add library="advapi32" />
+					<Add library="shell32" />
+					<Add directory="../3rdparty/atlmfc/lib" />
+				</Linker>
+				<ExtraCommands>
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OBJECT_DIR)&quot; MKDIR &quot;$(TARGET_OBJECT_DIR)&quot;' />
+					<Add before='midl /nologo /win32 /W1 $res_includes /client none /tlb &quot;$(TARGET_OBJECT_DIR)\StActiveX.idl.tlb&quot; StActiveX.idl' />
+				</ExtraCommands>
+			</Target>
+			<Target title="WIN_vc_x86_DEBUG">
+				<Option output="../bin/$(TARGET_NAME)/StBrowserPlugins/npStBrowserPlugin" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="windows_sdk_x86" />
+				<Compiler>
+					<Add option="/MDd" />
+					<Add option="/Od" />
+					<Add option="/W4" />
+					<Add option="/Zi /D_DEBUG" />
+					<Add option="/EHsc" />
+					<Add option="/DUNICODE" />
+					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
+					<Add option="/D_USRDLL" />
+					<Add option="/D_ATL_CSTRING_EXPLICIT_CONSTRUCTORS" />
+					<Add option="/D_AFXDLL" />
+					<Add option="/D__ST_DEBUG__" />
+					<Add directory="../3rdparty/atlmfc/include" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="../3rdparty/atlmfc/include" />
+				</ResourceCompiler>
+				<Linker>
+					<Add option="/DEBUG" />
+					<Add option="/DEF:StBrowserPlugin.def" />
+					<Add library="user32" />
+					<Add library="advapi32" />
+					<Add library="shell32" />
+					<Add library="Version" />
+					<Add directory="../3rdparty/atlmfc/lib" />
+				</Linker>
+				<ExtraCommands>
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OBJECT_DIR)&quot; MKDIR &quot;$(TARGET_OBJECT_DIR)&quot;' />
+					<Add before='midl /nologo /win32 /W1 $res_includes /client none /tlb &quot;$(TARGET_OBJECT_DIR)\StActiveX.idl.tlb&quot; StActiveX.idl' />
+				</ExtraCommands>
+			</Target>
+			<Target title="WIN_vc_AMD64">
+				<Option output="../bin/$(TARGET_NAME)/StBrowserPlugins/npStBrowserPlugin" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="windows_sdk_x86_64" />
+				<Compiler>
+					<Add option="/MT" />
+					<Add option="/Ox" />
+					<Add option="/W4" />
+					<Add option="/EHsc" />
+					<Add option="/DUNICODE" />
+					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
+					<Add option="/D_USRDLL" />
+					<Add option="/D_ATL_CSTRING_EXPLICIT_CONSTRUCTORS" />
+					<Add directory="../3rdparty/atlmfc/include" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="../3rdparty/atlmfc/include" />
+				</ResourceCompiler>
+				<Linker>
+					<Add option="/DEF:StBrowserPlugin.def" />
+					<Add library="user32" />
+					<Add library="advapi32" />
+					<Add library="shell32" />
+					<Add directory="../3rdparty/atlmfc/lib/amd64" />
+				</Linker>
+				<ExtraCommands>
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OBJECT_DIR)&quot; MKDIR &quot;$(TARGET_OBJECT_DIR)&quot;' />
+					<Add before='midl /nologo /x64 /W1 $res_includes /client none /tlb &quot;$(TARGET_OBJECT_DIR)\StActiveX.idl.tlb&quot; StActiveX.idl' />
+				</ExtraCommands>
+			</Target>
+			<Target title="LINUX_gcc">
+				<Option output="../bin/$(TARGET_NAME)/StBrowserPlugins/npStBrowserPlugin" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-std=c++0x" />
+					<Add option="-Wall" />
+					<Add option="-shared" />
+					<Add option="-fPIC" />
+					<Add option="-mmmx" />
+					<Add option="-msse" />
+					<Add option="`pkg-config gtk+-2.0 --cflags`" />
+					<Add option="-DXP_UNIX" />
+					<Add option="-DMOZ_X11" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="LINUX_gcc_DEBUG">
+				<Option output="../bin/$(TARGET_NAME)/StBrowserPlugins/npStBrowserPlugin" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-std=c++0x" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-shared" />
+					<Add option="-fPIC" />
+					<Add option="-mmmx" />
+					<Add option="-msse" />
+					<Add option="`pkg-config gtk+-2.0 --cflags`" />
+					<Add option="-DXP_UNIX" />
+					<Add option="-DMOZ_X11" />
+					<Add option="-D__ST_DEBUG__" />
+				</Compiler>
+			</Target>
+			<Target title="MAC_gcc">
+				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/StBrowserPlugins/npStBrowserPlugin" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-Wall" />
+					<Add option="-fPIC" />
+					<Add option="-DXP_MACOSX" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-framework Appkit" />
+					<Add library="objc" />
+				</Linker>
+			</Target>
+			<Target title="MAC_gcc_DEBUG">
+				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/StBrowserPlugins/npStBrowserPlugin" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-fPIC" />
+					<Add option="-DXP_MACOSX" />
+					<Add option="-D__ST_DEBUG__" />
+				</Compiler>
+				<Linker>
+					<Add option="-framework Appkit" />
+					<Add library="objc" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add directory="../3rdparty/include" />
+			<Add directory="../include" />
+		</Compiler>
+		<ResourceCompiler>
+			<Add directory="../include" />
+		</ResourceCompiler>
+		<Linker>
+			<Add directory="../3rdparty/lib/$(TARGET_NAME)" />
+			<Add directory="../lib/$(TARGET_NAME)" />
+		</Linker>
+		<Unit filename="NSPluginBase.h" />
+		<Unit filename="StActiveX.idl">
+			<Option target="WIN_vc_x86" />
+			<Option target="WIN_vc_x86_DEBUG" />
+			<Option target="WIN_vc_AMD64" />
+		</Unit>
+		<Unit filename="StActiveXCtrl.cpp">
+			<Option target="WIN_vc_x86" />
+			<Option target="WIN_vc_x86_DEBUG" />
+			<Option target="WIN_vc_AMD64" />
+		</Unit>
+		<Unit filename="StActiveXCtrl.h" />
+		<Unit filename="StActiveXModule.cpp">
+			<Option target="WIN_vc_x86" />
+			<Option target="WIN_vc_x86_DEBUG" />
+			<Option target="WIN_vc_AMD64" />
+		</Unit>
+		<Unit filename="StActiveXModule.h" />
+		<Unit filename="StBrPluginInfo.h" />
+		<Unit filename="StBrowserPlugin.cpp" />
+		<Unit filename="StBrowserPlugin.def">
+			<Option target="WIN_gcc_x86" />
+		</Unit>
+		<Unit filename="StBrowserPlugin.h" />
+		<Unit filename="StBrowserPlugin.rc">
+			<Option compilerVar="WINDRES" />
+			<Option compiler="windows_sdk_x86_64" use="1" buildCommand='$rescomp -DST_OCX_TLB_PATH=&quot;$(TARGET_OBJECT_DIR)/StActiveX.idl.tlb&quot; $res_includes -fo $resource_output $file' />
+			<Option compiler="windows_sdk_x86" use="1" buildCommand='$rescomp -DST_OCX_TLB_PATH=&quot;$(TARGET_OBJECT_DIR)/StActiveX.idl.tlb&quot; $res_includes -fo $resource_output $file' />
+			<Option target="WIN_gcc_x86" />
+			<Option target="WIN_vc_x86" />
+			<Option target="WIN_vc_x86_DEBUG" />
+			<Option target="WIN_vc_AMD64" />
+		</Unit>
+		<Unit filename="npEntry.cpp" />
+		<Unit filename="npapi.h" />
+		<Unit filename="npfunctions.h" />
+		<Unit filename="npnGate.cpp" />
+		<Unit filename="nppGate.cpp" />
+		<Unit filename="npplat.h" />
+		<Unit filename="npruntime.h" />
+		<Unit filename="nptypes.h" />
+		<Unit filename="../StShared/StApplication.cpp" />
+		<Unit filename="../StShared/StCocoaLocalPool.mm">
+			<Option compile="1" />
+			<Option link="1" />
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="../StShared/StCore.cpp" />
+		<Unit filename="../StShared/StDrawer.cpp" />
+		<Unit filename="../StShared/StDrawerInfo.cpp" />
+		<Unit filename="../StShared/StEDIDParser.cpp" />
+		<Unit filename="../StShared/StFileNode.cpp" />
+		<Unit filename="../StShared/StFolder.cpp" />
+		<Unit filename="../StShared/StFormatEnum.cpp" />
+		<Unit filename="../StShared/StLogger.ObjC.mm">
+			<Option compile="1" />
+			<Option link="1" />
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="../StShared/StLogger.cpp" />
+		<Unit filename="../StShared/StMonitor.cpp" />
+		<Unit filename="../StShared/StProcess.cpp" />
+		<Unit filename="../StShared/StProcess2.cpp" />
+		<Unit filename="../StShared/StRendererInfo.cpp" />
+		<Unit filename="../StShared/StRendererPlugin.cpp" />
+		<Unit filename="../StShared/StStringUnicode.ObjC.mm">
+			<Option compile="1" />
+			<Option link="1" />
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="../StShared/StWindow.cpp" />
+		<Unit filename="../StShared/stConsole.cpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

@@ -1,0 +1,41 @@
+/**
+ * Copyright © 2012 Kirill Gavrilov <kirill@sview.ru>
+ *
+ * Distributed under the Boost Software License, Version 1.0.
+ * See accompanying file license-boost.txt or copy at
+ * http://www.boost.org/LICENSE_1_0.txt
+ */
+
+#ifndef __StGLCore21_h_
+#define __StGLCore21_h_
+
+#include <StGLCore/StGLCore20.h>
+
+/**
+ * OpenGL 2.1 core based on 2.0 version.
+ */
+template<typename theBaseClass_t>
+struct ST_LOCAL stglTmplCore21 : public theBaseClass_t {
+
+        public: //! @name OpenGL 2.1 additives to 2.0
+
+    using theBaseClass_t::glUniformMatrix2x3fv;
+    using theBaseClass_t::glUniformMatrix3x2fv;
+    using theBaseClass_t::glUniformMatrix2x4fv;
+    using theBaseClass_t::glUniformMatrix4x2fv;
+    using theBaseClass_t::glUniformMatrix3x4fv;
+    using theBaseClass_t::glUniformMatrix4x3fv;
+
+};
+
+/**
+ * OpenGL 2.1 core based on 2.0 version.
+ */
+typedef stglTmplCore21<StGLCore20>    StGLCore21;
+
+/**
+ * OpenGL 2.1 without deprecated entry points.
+ */
+typedef stglTmplCore21<StGLCore20Fwd> StGLCore21Fwd;
+
+#endif // __StGLCore21_h_

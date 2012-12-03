@@ -1,0 +1,52 @@
+/**
+ * Dubois amber blue anaglyph fragment shader.
+ * Copyright © 2012 Kirill Gavrilov <kirill@sview.ru>
+ *
+ * StOutAnaglyph library is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * StOutAnaglyph library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library.
+ * If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * http://www.site.uottawa.ca/~edubois/anaglyph/
+ */
+mat4 multL = mat4( 1.062, -0.026, -0.038,      0,
+                  -0.205,  0.908, -0.173,      0,
+                   0.299,  0.068,  0.022,      0,
+                       0,      0,      0,      0);
+mat4 multR = mat4(-0.016,  0.006,  0.094,      0,
+                  -0.123,  0.062,  0.185,      0,
+                  -0.017, -0.017,  0.911,      0,
+                       0,      0,      0,      0);
+
+// normalize multipliers
+vec4 multUp = vec4(2.2, 2.2, 2.2, 1.0);
+vec4 multDw = 1.0 / multUp;
+
+uniform sampler2D texL, texR;
+varying vec2 fTexCoord;
+
+void main(void) {
+    vec4 colorL = texture2D(texL, fTexCoord);
+    vec4 colorR = texture2D(texR, fTexCoord);
+
+    // normalize
+    colorL = pow(colorL, multUp);
+    colorR = pow(colorR, multUp);
+
+    // summ
+    vec4 color = multR * colorR + multL * colorL;
+
+    // return to normal
+    gl_FragColor = pow(color, multDw);
+}

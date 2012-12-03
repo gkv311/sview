@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -e
+
+#DEBHELPER#
+
+if [ -x /usr/bin/update-menus ]; then
+  update-menus
+fi

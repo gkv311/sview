@@ -1,0 +1,23 @@
+/**
+ * Shader assume ALPHA channel texture!
+ * Coefficients here for normal YUV data (16..235).
+ *
+ * Copyright © 2010-2011 Kirill Gavrilov <kirill@sview.ru>
+ *
+ * Distributed under the Boost Software License, Version 1.0.
+ * See accompanying file license-boost.txt or copy at
+ * http://www.boost.org/LICENSE_1_0.txt
+ */
+
+uniform sampler2D uTextureU;
+uniform sampler2D uTextureV;
+
+void convertToRGB(inout vec4 color, in vec2 texCoordUV) {
+    vec3 colorYUV = vec3(color.a, texture2D(uTextureU, texCoordUV).a, texture2D(uTextureV, texCoordUV).a);
+    colorYUV.x = 1.1643 * (colorYUV.x - 0.0625);
+    colorYUV.y -= 0.5;
+    colorYUV.z -= 0.5;
+    color.r = colorYUV.x +  1.5958 * colorYUV.z;
+    color.g = colorYUV.x - 0.39173 * colorYUV.y - 0.81290 * colorYUV.z;
+    color.b = colorYUV.x +   2.017 * colorYUV.y;
+}

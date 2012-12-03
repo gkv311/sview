@@ -1,0 +1,57 @@
+/**
+ * iZ3D frontScreen fragment shader.
+ * Copyright © 2007-2008 iZ3D LLC
+ * Copyright © 2007-2010 Kirill Gavrilov <kirill@sview.ru>
+ *
+ * StOutIZ3D library is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * StOutIZ3D library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library.
+ * If not, see <http://www.gnu.org/licenses/>.
+ */
+
+vec4 vecOne   = vec4(    1.0,     1.0,     1.0,     1.0);
+vec4 vecMinC  = vec4(  0.003,   0.003,   0.003,   0.003);
+vec4 vecHalfG = vec4(0.72974, 0.72974, 0.72974, 0.72974);
+
+// normalize multipliers
+float multUp = 2.2;
+float multDw = 1.0 / multUp;
+
+// process power operation for rgb components
+vec4 POW3(vec4 v, float m) {
+    return vec4(pow(abs(v.r), m), pow(abs(v.g), m), pow(abs(v.b), m), 0.0);
+}
+
+uniform sampler2D texL, texR;
+varying vec2 fTexCoord;
+void main(void) {
+    vec4 colorL = texture2D(texL, fTexCoord); // got texture Left
+    vec4 colorR = texture2D(texR, fTexCoord); // got texture Right
+
+    colorL = POW3(colorL, multUp); // firstly process normalize
+    colorR = POW3(colorR, multUp);
+
+    colorL = vec4(dot(colorL, vecOne)); // DP3
+    colorR = vec4(dot(colorR, vecOne)); // DP3
+
+    colorL += colorR; // ADD
+
+    vec4 vecDelta = colorL - vecMinC; // SUB
+
+    colorL = vec4(1.0 / colorL.r);    // RCP
+    colorL *= colorR;                 // MUL
+    colorL = POW3(colorL, multDw);
+
+    gl_FragColor.r = (vecDelta.r < 0.0) ? vecHalfG.r : colorL.r; // CMP
+    gl_FragColor.g = (vecDelta.g < 0.0) ? vecHalfG.g : colorL.g;
+    gl_FragColor.b = (vecDelta.b < 0.0) ? vecHalfG.b : colorL.b;
+}

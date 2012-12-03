@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="StCore" />
+		<Option pch_mode="2" />
+		<Option compiler="windows_sdk_x86" />
+		<Build>
+			<Target title="WIN_gcc_x86">
+				<Option output="../bin/$(TARGET_NAME)/StCore" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-std=c++0x" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-shared" />
+					<Add option="-mmmx" />
+					<Add option="-msse" />
+					<Add option="-DUNICODE" />
+					<Add option="-D_WIN32_WINNT=0x0502" />
+					<Add option="-D__ST_DEBUG__" />
+				</Compiler>
+				<Linker>
+					<Add library="opengl32" />
+					<Add library="gdi32" />
+					<Add library="Comdlg32" />
+					<Add library="Winmm" />
+					<Add library="Version" />
+					<Add library="nvapi" />
+				</Linker>
+			</Target>
+			<Target title="WIN_vc_x86">
+				<Option output="../bin/$(TARGET_NAME)/StCore" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="windows_sdk_x86" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="/MD" />
+					<Add option="/Ox" />
+					<Add option="/W4" />
+					<Add option="/EHsc" />
+					<Add option="/MP" />
+					<Add option="/DUNICODE" />
+					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
+					<Add option="/DNDEBUG" />
+				</Compiler>
+				<Linker>
+					<Add option="/NODEFAULTLIB:libcmt.lib" />
+					<Add option="/MANIFEST" />
+					<Add library="opengl32" />
+					<Add library="user32" />
+					<Add library="gdi32" />
+					<Add library="Advapi32" />
+					<Add library="shell32" />
+					<Add library="Comdlg32" />
+					<Add library="Winmm" />
+					<Add library="nvapi" />
+				</Linker>
+				<ExtraCommands>
+					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;2' />
+				</ExtraCommands>
+			</Target>
+			<Target title="WIN_vc_x86_DEBUG">
+				<Option output="../bin/$(TARGET_NAME)/StCore" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="windows_sdk_x86" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="/MDd" />
+					<Add option="/Od" />
+					<Add option="/W4" />
+					<Add option="/Zi /D_DEBUG" />
+					<Add option="/Zi" />
+					<Add option="/EHsc" />
+					<Add option="/MP" />
+					<Add option="/DUNICODE" />
+					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
+					<Add option="/DNDEBUG" />
+					<Add option="/D__ST_DEBUG__" />
+				</Compiler>
+				<Linker>
+					<Add option="/DEBUG" />
+					<Add option="/NODEFAULTLIB:libcmt.lib" />
+					<Add option="/MANIFEST" />
+					<Add library="opengl32" />
+					<Add library="user32" />
+					<Add library="gdi32" />
+					<Add library="Advapi32" />
+					<Add library="shell32" />
+					<Add library="Comdlg32" />
+					<Add library="Winmm" />
+					<Add library="Version" />
+					<Add library="nvapi" />
+				</Linker>
+				<ExtraCommands>
+					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;2' />
+				</ExtraCommands>
+			</Target>
+			<Target title="WIN_vc_AMD64">
+				<Option output="../bin/$(TARGET_NAME)/StCore" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="windows_sdk_x86_64" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="/MD" />
+					<Add option="/Ox" />
+					<Add option="/W4" />
+					<Add option="/EHsc" />
+					<Add option="/MP" />
+					<Add option="/DUNICODE" />
+					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
+					<Add option="/DNDEBUG" />
+				</Compiler>
+				<Linker>
+					<Add option="/NODEFAULTLIB:libcmt.lib" />
+					<Add option="/MANIFEST" />
+					<Add library="opengl32" />
+					<Add library="user32" />
+					<Add library="gdi32" />
+					<Add library="Advapi32" />
+					<Add library="shell32" />
+					<Add library="Comdlg32" />
+					<Add library="Winmm" />
+					<Add library="nvapi64" />
+				</Linker>
+				<ExtraCommands>
+					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;2' />
+				</ExtraCommands>
+			</Target>
+			<Target title="LINUX_gcc">
+				<Option output="../bin/$(TARGET_NAME)/StCore" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-std=c++0x" />
+					<Add option="-Wall" />
+					<Add option="-fPIC" />
+					<Add option="-mmmx" />
+					<Add option="-msse" />
+					<Add option="`pkg-config gtk+-2.0 --cflags`" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="`pkg-config gtk+-2.0 --libs`" />
+					<Add library="GL" />
+					<Add library="pthread" />
+					<Add library="Xrandr" />
+					<Add library="libXpm.a" />
+				</Linker>
+			</Target>
+			<Target title="LINUX_gcc_DEBUG">
+				<Option output="../bin/$(TARGET_NAME)/StCore" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-std=c++0x" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-fPIC" />
+					<Add option="-mmmx" />
+					<Add option="-msse" />
+					<Add option="`pkg-config gtk+-2.0 --cflags`" />
+					<Add option="-D__ST_DEBUG__" />
+				</Compiler>
+				<Linker>
+					<Add option="`pkg-config gtk+-2.0 --libs`" />
+					<Add library="GL" />
+					<Add library="pthread" />
+					<Add library="Xrandr" />
+					<Add library="libXpm.a" />
+				</Linker>
+			</Target>
+			<Target title="MAC_gcc">
+				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/StCore" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-Wall" />
+					<Add option="-fPIC" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-framework Appkit" />
+					<Add option="-framework OpenGL" />
+					<Add option="-framework IOKit" />
+					<Add library="objc" />
+				</Linker>
+			</Target>
+			<Target title="MAC_gcc_DEBUG">
+				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/StCore" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-fPIC" />
+					<Add option="-D__ST_DEBUG__" />
+				</Compiler>
+				<Linker>
+					<Add option="-framework Appkit" />
+					<Add option="-framework OpenGL" />
+					<Add option="-framework IOKit" />
+					<Add library="objc" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add directory="../3rdparty/include" />
+			<Add directory="../include" />
+		</Compiler>
+		<ResourceCompiler>
+			<Add directory="../include" />
+		</ResourceCompiler>
+		<Linker>
+			<Add library="libStShared" />
+			<Add directory="../3rdparty/lib/$(TARGET_NAME)" />
+			<Add directory="../lib/$(TARGET_NAME)" />
+		</Linker>
+		<Unit filename="StADLsdk.cpp">
+			<Option target="WIN_gcc_x86" />
+			<Option target="WIN_vc_x86" />
+			<Option target="WIN_vc_x86_DEBUG" />
+			<Option target="WIN_vc_AMD64" />
+			<Option target="LINUX_gcc" />
+			<Option target="LINUX_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="StADLsdk.h" />
+		<Unit filename="StApplicationImpl.cpp" />
+		<Unit filename="StApplicationImpl.h" />
+		<Unit filename="StCocoaView.h">
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="StCocoaView.mm">
+			<Option compile="1" />
+			<Option link="1" />
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="StCocoaWin.h">
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="StCocoaWin.mm">
+			<Option compile="1" />
+			<Option link="1" />
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="StCore.rc">
+			<Option compilerVar="WINDRES" />
+			<Option target="WIN_vc_x86" />
+			<Option target="WIN_vc_AMD64" />
+			<Option target="WIN_gcc_x86" />
+			<Option target="WIN_vc_x86_DEBUG" />
+		</Unit>
+		<Unit filename="StCoreImpl.cpp" />
+		<Unit filename="StCoreImpl.h" />
+		<Unit filename="StMouseClickQueue.h" />
+		<Unit filename="StSearchMonitors.ObjC.mm">
+			<Option compile="1" />
+			<Option link="1" />
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="StSearchMonitors.cpp" />
+		<Unit filename="StSearchMonitors.h" />
+		<Unit filename="StWinHandles.ObjC.mm">
+			<Option compile="1" />
+			<Option link="1" />
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="StWinHandles.cpp">
+			<Option target="WIN_gcc_x86" />
+			<Option target="WIN_vc_x86" />
+			<Option target="WIN_vc_x86_DEBUG" />
+			<Option target="WIN_vc_AMD64" />
+			<Option target="LINUX_gcc" />
+			<Option target="LINUX_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="StWinHandles.h" />
+		<Unit filename="StWindowImpl.cpp" />
+		<Unit filename="StWindowImpl.h" />
+		<Unit filename="StWindowImplLin.cpp">
+			<Option target="LINUX_gcc" />
+			<Option target="LINUX_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="StWindowImplMac.mm">
+			<Option compile="1" />
+			<Option link="1" />
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="StWindowImplWin.cpp">
+			<Option target="WIN_gcc_x86" />
+			<Option target="WIN_vc_x86" />
+			<Option target="WIN_vc_x86_DEBUG" />
+			<Option target="WIN_vc_AMD64" />
+		</Unit>
+		<Unit filename="StXDisplay.cpp">
+			<Option target="LINUX_gcc" />
+			<Option target="LINUX_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="StXDisplay.h" />
+		<Unit filename="stvkeyscarbon.h">
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="stvkeysxarray.h" />
+		<Unit filename="zerosarray256.h" />
+		<Unit filename="zerosarray4096.h" />
+		<Unit filename="../include/StCore/StApplication.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../include/StCore/StApplicationInterface.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../include/StCore/StCore.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../include/StCore/StDrawer.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../include/StCore/StDrawerInfo.h" />
+		<Unit filename="../include/StCore/StDrawerInterface.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../include/StCore/StEDIDParser.h" />
+		<Unit filename="../include/StCore/StMessageList.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../include/StCore/StMonitor.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../include/StCore/StNativeWin_t.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../include/StCore/StOpenInfo.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../include/StCore/StRendererInfo.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../include/StCore/StRendererInterface.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../include/StCore/StRendererPlugin.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../include/StCore/StStereoDeviceInfo.h" />
+		<Unit filename="../include/StCore/StStereoDeviceInfoList.h" />
+		<Unit filename="../include/StCore/StStereoDeviceInfo_t.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../include/StCore/StVirtualKeys.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../include/StCore/StWinErrorCodes.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../include/StCore/StWindow.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="../include/StCore/StWindowInterface.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

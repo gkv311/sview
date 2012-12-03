@@ -1,0 +1,26 @@
+Russian translation file for StCADViewer plugin
+@author Kirill Gavrilov
+
+--------
+1200="Вид"
+1201="Тип проекции"
+1202="Полный экран"
+1203="Отображать нормали"
+1204="Show trihedron"
+1205="Two sides lighting"
+1206="Проекция"
+1207="Fill Mode"
+1208="Вписать модель"
+1240="Ортогональная"
+1241="Перспективная"
+1242="Стерео"
+1250="Mesh"
+1251="Shaded"
+1252="Shaded + Mesh"
+1500="Помощь"
+1501="О программе..."
+1503="Открыть лицензию"
+1504="Language"
+3000="sView 2011 - плагин для просмотра CAD моделей"
+3001="версия"
+3002="Программа открывает CAD модели в форматах IGES, STEP, BREP с помощью OpenCASCADE Technology.\n © 2011 Гаврилов Кирилл (kirill@sview.ru).\nОфициальный сайт: www.sview.ru"

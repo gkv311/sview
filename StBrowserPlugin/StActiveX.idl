@@ -1,0 +1,47 @@
+/**
+ * Type library source for ActiveX Control project.
+ * This file will be processed by the MIDL compiler tool to produce the type library (*.tlb)
+ */
+
+#include <olectl.h>
+#include <idispids.h>
+
+[ uuid(f6ae5619-dcdc-4d32-9b3d-d1518e98e0eb), version(1.0),
+  helpfile("StActiveX.hlp"),
+  helpstring("StActiveX Control module"),
+  control ]
+library StActiveXLib
+{
+    importlib(STDOLE_TLB);
+
+    // Primary dispatch interface for StActiveXCtrl
+    [ uuid(7138d6a9-b899-4dc3-b39c-dfd09c5dd5a8),
+      helpstring("Dispatch interface for StActiveX Control")]
+    dispinterface _DStActiveX
+    {
+        properties:
+        methods:
+
+        [id(DISPID_ABOUTBOX)] void AboutBox();
+        [id(311)]             void Dispose(); // ST_DISPID_DISPOSE
+    };
+
+    // Event dispatch interface for StActiveXCtrl
+    [ uuid(bcc7f80a-c5b8-431e-be41-40d15b89469e),
+      helpstring("Event interface for StActiveX Control") ]
+    dispinterface _DStActiveXEvents
+    {
+        properties:
+        methods:
+    };
+
+    // Class information for StActiveXCtrl
+    [ uuid(027792d0-5136-4ea3-9bec-34276dfe4362),
+      helpstring("StActiveX Control"), control ]
+    coclass StActiveX
+    {
+        [default]         dispinterface _DStActiveX;
+        [default, source] dispinterface _DStActiveXEvents;
+    };
+
+};

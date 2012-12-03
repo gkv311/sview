@@ -1,0 +1,21 @@
+LIBRARY FreeImage
+
+EXPORTS
+    FreeImage_GetVersion          @1
+    FreeImage_GetFileTypeU        @2
+    FreeImage_GetFIFFromFilenameU @3
+    FreeImage_LoadU               @4
+    FreeImage_SaveU               @5
+    FreeImage_Unload              @6
+    FreeImage_FIFSupportsReading  @7
+    FreeImage_AllocateT           @8
+    FreeImage_GetBits             @9
+    FreeImage_GetBPP             @10
+    FreeImage_GetWidth           @11
+    FreeImage_GetHeight          @12
+    FreeImage_GetPitch           @13
+    FreeImage_GetImageType       @14
+    FreeImage_GetColorType       @15
+    FreeImage_OpenMemory         @16
+    FreeImage_CloseMemory        @17
+    FreeImage_LoadFromMemory     @18

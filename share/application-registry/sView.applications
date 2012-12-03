@@ -1,0 +1,6 @@
+sView
+	requires_terminal=false
+	expects_uris=false
+	command=/usr/bin/sView
+	can_open_multiple_files=true
+	name=sView (stereocopic viewer)

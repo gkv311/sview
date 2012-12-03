@@ -1,0 +1,49 @@
+/**
+ * Optimized Anaglyphs (StereoVision) fragment shader.
+ * Copyright © 2007-2010 Kirill Gavrilov <kirill@sview.ru>
+ *
+ * StOutAnaglyph library is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * StOutAnaglyph library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library.
+ * If not, see <http://www.gnu.org/licenses/>.
+ */
+
+// http://research.csc.ncsu.edu/stereographics/LS.pdf
+mat4 multL = mat4(     0.4154,    -0.0458, -0.0547,      0,
+                       0.4710,    -0.0484, -0.0615,      0,
+                   0.16666667,    -0.0257,  0.0128,      0,
+                            0,          0,       0,      0);
+mat4 multR = mat4(-0.01090909,     0.3756, -0.0651,      0,
+                  -0.03636364, 0.73333333, -0.1287,      0,
+                  -0.00606061, 0.01111111,  1.2971,      0,
+                            0,          0,       0,      0);
+
+// normalize multipliers
+vec4 multUp = vec4(2.2, 2.2, 2.2, 1.0);
+vec4 multDw = 1.0 / multUp;
+
+uniform sampler2D texL, texR;
+varying vec2 fTexCoord;
+void main(void) {
+    vec4 colorL = texture2D(texL, fTexCoord);
+    vec4 colorR = texture2D(texR, fTexCoord);
+
+    // normalize
+    colorL = pow(colorL, multUp);
+    colorR = pow(colorR, multUp);
+
+    // summ
+    vec4 color = multR * colorR + multL * colorL;
+
+    // return to normal
+    gl_FragColor = pow(color, multDw);
+}

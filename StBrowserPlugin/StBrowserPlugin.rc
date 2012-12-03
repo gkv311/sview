@@ -1,0 +1,53 @@
+#define ST_RESOURCE_COMPILER
+
+#include <windows.h>
+#include <StVersion.h>   // header for version
+#include "StBrPluginInfo.h"
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     SVIEW_SDK_VERSION
+PRODUCTVERSION  SVIEW_SDK_VERSION
+FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+ST_WIN32_FILEFLAGS
+FILEOS          VOS_NT
+FILETYPE        VFT_DLL
+FILESUBTYPE     VFT2_UNKNOWN
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904E4" // Language type = U.S English(0x0409) and Character Set = Windows, Multilingual(0x04E4)
+    BEGIN
+      VALUE "Comments",         "\000"
+      VALUE "CompanyName",      "sVision - stereoscoping software\000"
+      VALUE "FileDescription",  ST_BROWSER_PLUGIN_DESC "\000"
+      VALUE "FileExtents",      ST_NPAPI_MIME_EXT
+      VALUE "FileOpenName",     ST_NPAPI_MIME_DESC
+      VALUE "FileVersion",      SVIEW_SDK_VER_STRING "\000"
+      VALUE "InternalName",     "StBrowserPlugin\000"
+      VALUE "LegalCopyright",   "\251 2009-2011 Kirill Gavrilov\000"
+      VALUE "LegalTrademarks",  "\000"
+      VALUE "MIMEType",         ST_NPAPI_MIME_LIST
+      VALUE "OriginalFilename", "npStBrowserPlugin.dll\000"
+      VALUE "PrivateBuild",     "\000"
+      VALUE "ProductName",      ST_BROWSER_PLUGIN_NAME "\000"
+      VALUE "ProductVersion",   SVIEW_SDK_VER_STRING "\000"
+      VALUE "SpecialBuild",     "\000"
+      VALUE "OfficialSite",     "www.sview.ru\000"
+      VALUE "Contacts",         "kirill@sview.ru\000"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x0409, 0x04E4
+  END
+END
+
+ST_OCX_RESBMP_ICON BITMAP "sview.bmp"
+
+STRINGTABLE
+BEGIN
+    ST_OCX_RESTXT_NAME "StActiveX Control"
+END
+
+// This temporary file generated from IDL
+1 TYPELIB ST_OCX_TLB_PATH

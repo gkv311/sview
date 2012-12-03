@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="StShared" />
+		<Option pch_mode="2" />
+		<Option compiler="windows_sdk_x86" />
+		<Build>
+			<Target title="WIN_gcc_x86">
+				<Option output="../lib/$(TARGET_NAME)/libStShared" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-std=c++0x" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-mmmx" />
+					<Add option="-msse" />
+					<Add option="-DUNICODE" />
+					<Add option="-D__ST_DEBUG__" />
+					<Add option="-D__MSVCRT_VERSION__=0x0601" />
+				</Compiler>
+			</Target>
+			<Target title="WIN_vc_x86">
+				<Option output="../lib/$(TARGET_NAME)/libStShared" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="2" />
+				<Option compiler="windows_sdk_x86" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="/MD" />
+					<Add option="/Ox" />
+					<Add option="/W4" />
+					<Add option="/EHsc" />
+					<Add option="/MP" />
+					<Add option="/DUNICODE" />
+					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
+				</Compiler>
+			</Target>
+			<Target title="WIN_vc_x86_DEBUG">
+				<Option output="../lib/$(TARGET_NAME)/libStShared" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="2" />
+				<Option compiler="windows_sdk_x86" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="/MDd" />
+					<Add option="/Od" />
+					<Add option="/W4" />
+					<Add option="/EHsc" />
+					<Add option="/MP" />
+					<Add option="/DUNICODE" />
+					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
+					<Add option="/D__ST_DEBUG__" />
+				</Compiler>
+			</Target>
+			<Target title="WIN_vc_AMD64">
+				<Option output="../lib/$(TARGET_NAME)/libStShared" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="2" />
+				<Option compiler="windows_sdk_x86_64" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="/MD" />
+					<Add option="/Ox" />
+					<Add option="/W4" />
+					<Add option="/EHsc" />
+					<Add option="/MP" />
+					<Add option="/DUNICODE" />
+					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
+				</Compiler>
+			</Target>
+			<Target title="LINUX_gcc">
+				<Option output="../lib/$(TARGET_NAME)/libStShared" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-std=c++0x" />
+					<Add option="-Wall" />
+					<Add option="-fPIC" />
+					<Add option="-mmmx" />
+					<Add option="-msse" />
+					<Add option="`pkg-config gtk+-2.0 --cflags`" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="LINUX_gcc_DEBUG">
+				<Option output="../lib/$(TARGET_NAME)/libStShared" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-std=c++0x" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-fPIC" />
+					<Add option="-mmmx" />
+					<Add option="-msse" />
+					<Add option="`pkg-config gtk+-2.0 --cflags`" />
+					<Add option="-D__ST_DEBUG__" />
+				</Compiler>
+			</Target>
+			<Target title="MAC_gcc">
+				<Option output="../lib/$(TARGET_NAME)/libStShared" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-Wall" />
+					<Add option="-fPIC" />
+				</Compiler>
+			</Target>
+			<Target title="MAC_gcc_DEBUG">
+				<Option output="../lib/$(TARGET_NAME)/libStShared" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-fPIC" />
+					<Add option="-D__ST_DEBUG__" />
+				</Compiler>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add directory="../3rdparty/include" />
+			<Add directory="../include" />
+		</Compiler>
+		<ResourceCompiler>
+			<Add directory="../include" />
+		</ResourceCompiler>
+		<Linker>
+			<Add directory="../3rdparty/lib/$(TARGET_NAME)" />
+			<Add directory="../lib/$(TARGET_NAME)" />
+		</Linker>
+		<Unit filename="StAVPacket.cpp" />
+		<Unit filename="StApplication.cpp" />
+		<Unit filename="StBndBox.cpp" />
+		<Unit filename="StBndCameraBox.cpp" />
+		<Unit filename="StBndSphere.cpp" />
+		<Unit filename="StCocoaCoords.mm">
+			<Option compile="1" />
+			<Option link="1" />
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="StCocoaLocalPool.mm">
+			<Option compile="1" />
+			<Option link="1" />
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="StConfig.cpp" />
+		<Unit filename="StConfigInterface.cpp" />
+		<Unit filename="StCore.cpp" />
+		<Unit filename="StDevILImage.cpp" />
+		<Unit filename="StDrawer.cpp" />
+		<Unit filename="StDrawerInfo.cpp" />
+		<Unit filename="StEDIDParser.cpp" />
+		<Unit filename="StExifDir.cpp" />
+		<Unit filename="StFTFont.cpp" />
+		<Unit filename="StFTLibrary.cpp" />
+		<Unit filename="StFileNode.cpp" />
+		<Unit filename="StFileNode2.cpp">
+			<Option target="WIN_gcc_x86" />
+			<Option target="WIN_vc_x86" />
+			<Option target="WIN_vc_x86_DEBUG" />
+			<Option target="WIN_vc_AMD64" />
+			<Option target="LINUX_gcc" />
+			<Option target="LINUX_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="StFileNode2.mm">
+			<Option compile="1" />
+			<Option link="1" />
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="StFolder.cpp" />
+		<Unit filename="StFormatEnum.cpp" />
+		<Unit filename="StFreeImage.cpp" />
+		<Unit filename="StGLCircle.cpp" />
+		<Unit filename="StGLContext.cpp" />
+		<Unit filename="StGLFont.cpp" />
+		<Unit filename="StGLFrameBuffer.cpp" />
+		<Unit filename="StGLMatrix.cpp" />
+		<Unit filename="StGLMesh.cpp" />
+		<Unit filename="StGLPrism.cpp" />
+		<Unit filename="StGLProgram.cpp" />
+		<Unit filename="StGLProjCamera.cpp" />
+		<Unit filename="StGLQuads.cpp" />
+		<Unit filename="StGLQuadTexture.cpp" />
+		<Unit filename="StGLResource.cpp" />
+		<Unit filename="StGLShader.cpp" />
+		<Unit filename="StGLStereoFrameBuffer.cpp" />
+		<Unit filename="StGLTextFormatter.cpp" />
+		<Unit filename="StGLTexture.cpp" />
+		<Unit filename="StGLTextureData.cpp" />
+		<Unit filename="StGLTextureQueue.cpp" />
+		<Unit filename="StGLUVSphere.cpp" />
+		<Unit filename="StGLVertexBuffer.cpp" />
+		<Unit filename="StImage.cpp" />
+		<Unit filename="StImageFile.cpp" />
+		<Unit filename="StImagePlane.cpp" />
+		<Unit filename="StJpegParser.cpp" />
+		<Unit filename="StLangMap.cpp" />
+		<Unit filename="StLibAV.cpp" />
+		<Unit filename="StLibAVImage.cpp" />
+		<Unit filename="StLogger.ObjC.mm">
+			<Option compile="1" />
+			<Option link="1" />
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="StLogger.cpp" />
+		<Unit filename="StMinGen.cpp" />
+		<Unit filename="StMonitor.cpp" />
+		<Unit filename="StParamDevOptOnOff.cpp" />
+		<Unit filename="StParamDevOptSwitch.cpp" />
+		<Unit filename="StParamRendDevice.cpp" />
+		<Unit filename="StPlayList.cpp" />
+		<Unit filename="StProcess.cpp" />
+		<Unit filename="StProcess2.cpp" />
+		<Unit filename="StRawFile.cpp" />
+		<Unit filename="StRendererInfo.cpp" />
+		<Unit filename="StRendererPlugin.cpp" />
+		<Unit filename="StSocket.ObjC.mm">
+			<Option compile="1" />
+			<Option link="1" />
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="StSocket.cpp" />
+		<Unit filename="StStringUnicode.ObjC.mm">
+			<Option compile="1" />
+			<Option link="1" />
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="StTranslations.cpp" />
+		<Unit filename="StWebPImage.cpp" />
+		<Unit filename="StWindow.cpp" />
+		<Unit filename="stConsole.cpp" />
+		<Unit filename="stUtfTools.cpp" />
+		<Unit filename="../include/StAVPacket.h" />
+		<Unit filename="../include/StAlienData.h" />
+		<Unit filename="../include/StCocoa/StCocoaCoords.h">
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="../include/StCocoa/StCocoaLocalPool.h">
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="../include/StCocoa/StCocoaString.h">
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
+		<Unit filename="../include/StFT/StFTFont.h" />
+		<Unit filename="../include/StFT/StFTLibrary.h" />
+		<Unit filename="../include/StFile/StFileNode.h" />
+		<Unit filename="../include/StFile/StFolder.h" />
+		<Unit filename="../include/StFile/StMIME.h" />
+		<Unit filename="../include/StFile/StMIMEList.h" />
+		<Unit filename="../include/StFile/StNode.h" />
+		<Unit filename="../include/StFile/StRawFile.h" />
+		<Unit filename="../include/StGL/StGLBrightnessMatrix.h" />
+		<Unit filename="../include/StGL/StGLContext.h" />
+		<Unit filename="../include/StGL/StGLEnums.h" />
+		<Unit filename="../include/StGL/StGLFont.h" />
+		<Unit filename="../include/StGL/StGLFrameBuffer.h" />
+		<Unit filename="../include/StGL/StGLMatrix.h" />
+		<Unit filename="../include/StGL/StGLProgram.h" />
+		<Unit filename="../include/StGL/StGLResource.h" />
+		<Unit filename="../include/StGL/StGLResources.h" />
+		<Unit filename="../include/StGL/StGLSaturationMatrix.h" />
+		<Unit filename="../include/StGL/StGLShader.h" />
+		<Unit filename="../include/StGL/StGLTextFormatter.h" />
+		<Unit filename="../include/StGL/StGLTexture.h" />
+		<Unit filename="../include/StGL/StGLVarLocation.h" />
+		<Unit filename="../include/StGL/StGLVec.h" />
+		<Unit filename="../include/StGL/StGLVertexBuffer.h" />
+		<Unit filename="../include/StGL/StParams.h" />
+		<Unit filename="../include/StGL/StPlayList.h" />
+		<Unit filename="../include/StGLCore/StGLCore11.h" />
+		<Unit filename="../include/StGLCore/StGLCore11Fwd.h" />
+		<Unit filename="../include/StGLCore/StGLCore12.h" />
+		<Unit filename="../include/StGLCore/StGLCore13.h" />
+		<Unit filename="../include/StGLCore/StGLCore14.h" />
+		<Unit filename="../include/StGLCore/StGLCore15.h" />
+		<Unit filename="../include/StGLCore/StGLCore20.h" />
+		<Unit filename="../include/StGLCore/StGLCore21.h" />
+		<Unit filename="../include/StGLCore/StGLCore30.h" />
+		<Unit filename="../include/StGLCore/StGLCore31.h" />
+		<Unit filename="../include/StGLCore/StGLCore32.h" />
+		<Unit filename="../include/StGLCore/StGLCore33.h" />
+		<Unit filename="../include/StGLCore/StGLCore40.h" />
+		<Unit filename="../include/StGLCore/StGLCore41.h" />
+		<Unit filename="../include/StGLCore/StGLCore42.h" />
+		<Unit filename="../include/StGLMesh/StBndBox.h" />
+		<Unit filename="../include/StGLMesh/StBndCameraBox.h" />
+		<Unit filename="../include/StGLMesh/StBndContainer.h" />
+		<Unit filename="../include/StGLMesh/StBndSphere.h" />
+		<Unit filename="../include/StGLMesh/StGLCircle.h" />
+		<Unit filename="../include/StGLMesh/StGLMesh.h" />
+		<Unit filename="../include/StGLMesh/StGLPrism.h" />
+		<Unit filename="../include/StGLMesh/StGLQuads.h" />
+		<Unit filename="../include/StGLMesh/StGLUVSphere.h" />
+		<Unit filename="../include/StGLStereo/StFormatEnum.h" />
+		<Unit filename="../include/StGLStereo/StGLProjCamera.h" />
+		<Unit filename="../include/StGLStereo/StGLQuadTexture.h" />
+		<Unit filename="../include/StGLStereo/StGLStereoFrameBuffer.h" />
+		<Unit filename="../include/StGLStereo/StGLStereoTexture.h" />
+		<Unit filename="../include/StGLStereo/StGLTextureData.h" />
+		<Unit filename="../include/StGLStereo/StGLTextureQueue.h" />
+		<Unit filename="../include/StImage/StDevILImage.h" />
+		<Unit filename="../include/StImage/StExifDir.h" />
+		<Unit filename="../include/StImage/StExifEntry.h" />
+		<Unit filename="../include/StImage/StFreeImage.h" />
+		<Unit filename="../include/StImage/StImage.h" />
+		<Unit filename="../include/StImage/StImageFile.h" />
+		<Unit filename="../include/StImage/StImagePlane.h" />
+		<Unit filename="../include/StImage/StJpegParser.h" />
+		<Unit filename="../include/StImage/StLibAVImage.h" />
+		<Unit filename="../include/StImage/StPixelRGB.h" />
+		<Unit filename="../include/StImage/StWebPImage.h" />
+		<Unit filename="../include/StLibAV.h" />
+		<Unit filename="../include/StLibrary.h" />
+		<Unit filename="../include/StSlots/StSignal.h" />
+		<Unit filename="../include/StSlots/StSlot.h" />
+		<Unit filename="../include/StSlots/StSlotFunction.h" />
+		<Unit filename="../include/StSlots/StSlotMethod.h" />
+		<Unit filename="../include/StSlots/StSlotMethodUnsafe.h" />
+		<Unit filename="../include/StSlots/StSlotTypes.h" />
+		<Unit filename="../include/StSocket/StCheckUpdates.h" />
+		<Unit filename="../include/StSocket/StSocket.h" />
+		<Unit filename="../include/StStrings/StFormatTime.h" />
+		<Unit filename="../include/StStrings/StLangMap.h" />
+		<Unit filename="../include/StStrings/StLogger.h" />
+		<Unit filename="../include/StStrings/StString.h" />
+		<Unit filename="../include/StStrings/StStringStream.h" />
+		<Unit filename="../include/StStrings/StStringUnicode.h" />
+		<Unit filename="../include/StStrings/StStringUnicode.inl">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="../include/StStrings/StUtfIterator.h" />
+		<Unit filename="../include/StStrings/StUtfIterator.inl">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
+		<Unit filename="../include/StStrings/stConsole.h" />
+		<Unit filename="../include/StStrings/stUtfTools.h" />
+		<Unit filename="../include/StSys/StSys.h" />
+		<Unit filename="../include/StTemplates/StArray.h" />
+		<Unit filename="../include/StTemplates/StArrayList.h" />
+		<Unit filename="../include/StTemplates/StAtomic.h" />
+		<Unit filename="../include/StTemplates/StHandle.h" />
+		<Unit filename="../include/StTemplates/StQuickPointersSort.h" />
+		<Unit filename="../include/StTemplates/StQuickSort.h" />
+		<Unit filename="../include/StTemplates/StRect.h" />
+		<Unit filename="../include/StTemplates/StTemplates.h" />
+		<Unit filename="../include/StTemplates/StVec2.h" />
+		<Unit filename="../include/StTemplates/StVec3.h" />
+		<Unit filename="../include/StTemplates/StVec4.h" />
+		<Unit filename="../include/StThreads/StAtomicOp.h" />
+		<Unit filename="../include/StThreads/StEvent.h" />
+		<Unit filename="../include/StThreads/StFPSControl.h" />
+		<Unit filename="../include/StThreads/StFPSMeter.h" />
+		<Unit filename="../include/StThreads/StMinGen.h" />
+		<Unit filename="../include/StThreads/StMutex.h" />
+		<Unit filename="../include/StThreads/StMutexSlim.h" />
+		<Unit filename="../include/StThreads/StProcess.h" />
+		<Unit filename="../include/StThreads/StThreads.h" />
+		<Unit filename="../include/StThreads/StTimer.h" />
+		<Unit filename="../include/StVersion.h" />
+		<Unit filename="../include/stAssert.h" />
+		<Unit filename="../include/stTypes.h" />
+		<Unit filename="../include/stconfig.conf" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

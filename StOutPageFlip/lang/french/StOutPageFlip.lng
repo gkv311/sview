@@ -1,0 +1,27 @@
+French translation file for StOutPageFlip library
+@author gramoun for Kirill Gavrilov
+
+--------
+1000="Lunettes Actives"
+1001="Lunettes Actives"
+1002="Vuzix HMD"
+1003="Vuzix HMD"
+1100="Synchro Vert"
+1101="Affiche I/S"
+1102="Quad Buffer type"
+1103="Codes de controle des lunettes"
+1120="OpenGL Emulé"
+1122="OpenGL Matériel"
+1123="Direct3D (Fullscreen)"
+1124="Direct3D (Unavailable)"
+1125="Direct3D AMD (Fullscreen)"
+1126="Direct3D AMD (Unavailable)"
+1127="Direct3D NVIDIA (Fullscreen)"
+1128="Direct3D NVIDIA (Disabled)"
+1130="Sans"
+1131="Synchro ligne bleue"
+1132="Synchro ligne blanche"
+1134="eDimensional auto Marche/Arrêt"
+2000="sView - PageFlip Output module"
+2001="version"
+2002="© 2007-2012 Kirill Gavrilov <kirill@sview.ru>\nOfficiel site: www.sview.ru\n\nThis library distributed under LGPL3.0"

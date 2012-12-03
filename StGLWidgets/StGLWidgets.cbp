@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="StGLWidgets" />
+		<Option pch_mode="2" />
+		<Option compiler="windows_sdk_x86" />
+		<Build>
+			<Target title="WIN_gcc_x86">
+				<Option output="../lib/$(TARGET_NAME)/libStGLWidgets" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-std=c++0x" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-mmmx" />
+					<Add option="-msse" />
+					<Add option="-DUNICODE" />
+					<Add option="-D__ST_DEBUG__" />
+				</Compiler>
+				<ExtraCommands>
+					<Add before='cmd /c IF NOT EXIST &quot;..\bin\$(TARGET_NAME)\shaders\$(PROJECT_NAME)&quot; MKDIR &quot;..\bin\$(TARGET_NAME)\shaders\$(PROJECT_NAME)&quot;' />
+					<Add before='cmd /c COPY /Y shaders\* &quot;..\bin\$(TARGET_NAME)\shaders\$(PROJECT_NAME)\&quot;' />
+				</ExtraCommands>
+			</Target>
+			<Target title="WIN_vc_x86">
+				<Option output="../lib/$(TARGET_NAME)/libStGLWidgets" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="2" />
+				<Option compiler="windows_sdk_x86" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="/MD" />
+					<Add option="/Ox" />
+					<Add option="/W4" />
+					<Add option="/EHsc" />
+					<Add option="/MP" />
+					<Add option="/DUNICODE" />
+					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
+				</Compiler>
+				<ExtraCommands>
+					<Add before='cmd /c IF NOT EXIST &quot;..\bin\$(TARGET_NAME)\shaders\$(PROJECT_NAME)&quot; MKDIR &quot;..\bin\$(TARGET_NAME)\shaders\$(PROJECT_NAME)&quot;' />
+					<Add before='cmd /c COPY /Y shaders\* &quot;..\bin\$(TARGET_NAME)\shaders\$(PROJECT_NAME)\&quot;' />
+				</ExtraCommands>
+			</Target>
+			<Target title="WIN_vc_x86_DEBUG">
+				<Option output="../lib/$(TARGET_NAME)/libStGLWidgets" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="2" />
+				<Option compiler="windows_sdk_x86" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="/MDd" />
+					<Add option="/Od" />
+					<Add option="/W4" />
+					<Add option="/EHsc" />
+					<Add option="/MP" />
+					<Add option="/DUNICODE" />
+					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
+					<Add option="/D__ST_DEBUG__" />
+				</Compiler>
+				<ExtraCommands>
+					<Add before='cmd /c IF NOT EXIST &quot;..\bin\$(TARGET_NAME)\shaders\$(PROJECT_NAME)&quot; MKDIR &quot;..\bin\$(TARGET_NAME)\shaders\$(PROJECT_NAME)&quot;' />
+					<Add before='cmd /c COPY /Y shaders\* &quot;..\bin\$(TARGET_NAME)\shaders\$(PROJECT_NAME)\&quot;' />
+				</ExtraCommands>
+			</Target>
+			<Target title="WIN_vc_AMD64">
+				<Option output="../lib/$(TARGET_NAME)/libStGLWidgets" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="2" />
+				<Option compiler="windows_sdk_x86_64" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="/MD" />
+					<Add option="/Ox" />
+					<Add option="/W4" />
+					<Add option="/EHsc" />
+					<Add option="/MP" />
+					<Add option="/DUNICODE" />
+					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
+				</Compiler>
+				<ExtraCommands>
+					<Add before='cmd /c IF NOT EXIST &quot;..\bin\$(TARGET_NAME)\shaders\$(PROJECT_NAME)&quot; MKDIR &quot;..\bin\$(TARGET_NAME)\shaders\$(PROJECT_NAME)&quot;' />
+					<Add before='cmd /c COPY /Y shaders\* &quot;..\bin\$(TARGET_NAME)\shaders\$(PROJECT_NAME)\&quot;' />
+				</ExtraCommands>
+			</Target>
+			<Target title="LINUX_gcc">
+				<Option output="../lib/$(TARGET_NAME)/libStGLWidgets" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-std=c++0x" />
+					<Add option="-Wall" />
+					<Add option="-fPIC" />
+					<Add option="-mmmx" />
+					<Add option="-msse" />
+					<Add option="`pkg-config gtk+-2.0 --cflags`" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+				<ExtraCommands>
+					<Add before='mkdir -p &quot;../bin/$(TARGET_NAME)/shaders/$(PROJECT_NAME)/&quot;' />
+					<Add before='cp -f -r shaders/* &quot;../bin/$(TARGET_NAME)/shaders/$(PROJECT_NAME)/&quot;' />
+					<Mode after="always" />
+				</ExtraCommands>
+			</Target>
+			<Target title="LINUX_gcc_DEBUG">
+				<Option output="../lib/$(TARGET_NAME)/libStGLWidgets" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-std=c++0x" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-fPIC" />
+					<Add option="-mmmx" />
+					<Add option="-msse" />
+					<Add option="`pkg-config gtk+-2.0 --cflags`" />
+					<Add option="-D__ST_DEBUG__" />
+				</Compiler>
+				<ExtraCommands>
+					<Add before='mkdir -p &quot;../bin/$(TARGET_NAME)/shaders/$(PROJECT_NAME)/&quot;' />
+					<Add before='cp -f -r shaders/* &quot;../bin/$(TARGET_NAME)/shaders/$(PROJECT_NAME)/&quot;' />
+					<Mode after="always" />
+				</ExtraCommands>
+			</Target>
+			<Target title="MAC_gcc">
+				<Option output="../lib/$(TARGET_NAME)/libStGLWidgets" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-Wall" />
+					<Add option="-fPIC" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+				<ExtraCommands>
+					<Add before='mkdir -p &quot;../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/shaders/$(PROJECT_NAME)/&quot;' />
+					<Add before='cp -f -r shaders/* &quot;../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/shaders/$(PROJECT_NAME)/&quot;' />
+					<Mode after="always" />
+				</ExtraCommands>
+			</Target>
+			<Target title="MAC_gcc_DEBUG">
+				<Option output="../lib/$(TARGET_NAME)/libStGLWidgets" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-fPIC" />
+					<Add option="-D__ST_DEBUG__" />
+				</Compiler>
+				<ExtraCommands>
+					<Add before='mkdir -p &quot;../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/shaders/$(PROJECT_NAME)/&quot;' />
+					<Add before='cp -f -r shaders/* &quot;../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/shaders/$(PROJECT_NAME)/&quot;' />
+					<Mode after="always" />
+				</ExtraCommands>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add directory="../3rdparty/include" />
+			<Add directory="../include" />
+		</Compiler>
+		<ResourceCompiler>
+			<Add directory="../include" />
+		</ResourceCompiler>
+		<Linker>
+			<Add directory="../3rdparty/lib/$(TARGET_NAME)" />
+			<Add directory="../lib/$(TARGET_NAME)" />
+		</Linker>
+		<Unit filename="StGLCheckbox.cpp" />
+		<Unit filename="StGLCheckboxTextured.cpp" />
+		<Unit filename="StGLDevicesMenu.cpp" />
+		<Unit filename="StGLImageFlatProgram.cpp" />
+		<Unit filename="StGLImageProgram.cpp" />
+		<Unit filename="StGLImageRegion.cpp" />
+		<Unit filename="StGLImageSphereProgram.cpp" />
+		<Unit filename="StGLMenu.cpp" />
+		<Unit filename="StGLMenuCheckbox.cpp" />
+		<Unit filename="StGLMenuItem.cpp" />
+		<Unit filename="StGLMenuProgram.cpp" />
+		<Unit filename="StGLMenuRadioButton.cpp" />
+		<Unit filename="StGLMessageBox.cpp" />
+		<Unit filename="StGLMsgStack.cpp" />
+		<Unit filename="StGLRadioButton.cpp" />
+		<Unit filename="StGLRadioButtonFloat32.cpp" />
+		<Unit filename="StGLRadioButtonTextured.cpp" />
+		<Unit filename="StGLRootWidget.cpp" />
+		<Unit filename="StGLSubtitles.cpp" />
+		<Unit filename="StGLSwitchTextured.cpp" />
+		<Unit filename="StGLTextArea.cpp" />
+		<Unit filename="StGLTextureButton.cpp" />
+		<Unit filename="StGLWidget.cpp" />
+		<Unit filename="StGLWidgetList.cpp" />
+		<Unit filename="StSubQueue.cpp" />
+		<Unit filename="shaders/StGLTextureButton.shf" />
+		<Unit filename="shaders/StGLTextureButton.shv" />
+		<Unit filename="shaders/convertYUV2RGB.shf" />
+		<Unit filename="shaders/convertYUV2RGBjpeg.shf" />
+		<Unit filename="shaders/flatGetColorBlend.shf" />
+		<Unit filename="shaders/flatImage.shf" />
+		<Unit filename="shaders/flatImage.shv" />
+		<Unit filename="shaders/sphereGetColorLinear.shf" />
+		<Unit filename="shaders/sphereImage.shf" />
+		<Unit filename="shaders/sphereImage.shv" />
+		<Unit filename="../include/StGLWidgets/StGLCheckbox.h" />
+		<Unit filename="../include/StGLWidgets/StGLCheckboxTextured.h" />
+		<Unit filename="../include/StGLWidgets/StGLCorner.h" />
+		<Unit filename="../include/StGLWidgets/StGLDescription.h" />
+		<Unit filename="../include/StGLWidgets/StGLDevicesMenu.h" />
+		<Unit filename="../include/StGLWidgets/StGLImageFlatProgram.h" />
+		<Unit filename="../include/StGLWidgets/StGLImageProgram.h" />
+		<Unit filename="../include/StGLWidgets/StGLImageRegion.h" />
+		<Unit filename="../include/StGLWidgets/StGLImageSphereProgram.h" />
+		<Unit filename="../include/StGLWidgets/StGLMenu.h" />
+		<Unit filename="../include/StGLWidgets/StGLMenuCheckbox.h" />
+		<Unit filename="../include/StGLWidgets/StGLMenuItem.h" />
+		<Unit filename="../include/StGLWidgets/StGLMenuProgram.h" />
+		<Unit filename="../include/StGLWidgets/StGLMenuRadioButton.h" />
+		<Unit filename="../include/StGLWidgets/StGLMessageBox.h" />
+		<Unit filename="../include/StGLWidgets/StGLMsgStack.h" />
+		<Unit filename="../include/StGLWidgets/StGLRadioButton.h" />
+		<Unit filename="../include/StGLWidgets/StGLRadioButtonFloat32.h" />
+		<Unit filename="../include/StGLWidgets/StGLRadioButtonTextured.h" />
+		<Unit filename="../include/StGLWidgets/StGLRootWidget.h" />
+		<Unit filename="../include/StGLWidgets/StGLShare.h" />
+		<Unit filename="../include/StGLWidgets/StGLSubtitles.h" />
+		<Unit filename="../include/StGLWidgets/StGLSwitchTextured.h" />
+		<Unit filename="../include/StGLWidgets/StGLTextArea.h" />
+		<Unit filename="../include/StGLWidgets/StGLTextureButton.h" />
+		<Unit filename="../include/StGLWidgets/StGLWidget.h" />
+		<Unit filename="../include/StGLWidgets/StGLWidgetList.h" />
+		<Unit filename="../include/StGLWidgets/StSubQueue.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

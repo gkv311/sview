@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="StCADViewer" />
+		<Option pch_mode="2" />
+		<Option compiler="windows_sdk_x86" />
+		<Build>
+			<Target title="WIN_gcc_x86">
+				<Option output="../bin/$(TARGET_NAME)/StDrawers/StCADViewer" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option parameters="--in=StCADViewer" />
+				<Option host_application="../bin/$(TARGET_NAME)/sView" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-std=c++0x" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-shared" />
+					<Add option="-mmmx" />
+					<Add option="-msse" />
+					<Add option="-DUNICODE" />
+					<Add option="-D__ST_DEBUG__" />
+					<Add option="-DWNT" />
+				</Compiler>
+				<Linker>
+					<Add library="opengl32" />
+					<Add library="gdi32" />
+					<Add library="Comdlg32" />
+					<Add library="shell32" />
+					<Add library="Wsock32" />
+					<Add library="Version" />
+					<Add directory="../3rdparty/OCCT/lib/WIN_vc_x86" />
+				</Linker>
+				<ExtraCommands>
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\english&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\english&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\русский&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\русский&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\français&quot;' />
+					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)..\lang\english\&quot;' />
+					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)..\lang\русский\&quot;' />
+					<Add before='cmd /c COPY /Y lang\french\*  &quot;$(TARGET_OUTPUT_DIR)..\lang\français\&quot;' />
+				</ExtraCommands>
+			</Target>
+			<Target title="WIN_vc_x86">
+				<Option output="../bin/$(TARGET_NAME)/StDrawers/StCADViewer" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="windows_sdk_x86" />
+				<Option parameters="--in=StCADViewer" />
+				<Option host_application="../bin/$(TARGET_NAME)/sView" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="/MD" />
+					<Add option="/Ox" />
+					<Add option="/W4" />
+					<Add option="/EHsc" />
+					<Add option="/MP" />
+					<Add option="/DUNICODE" />
+					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
+					<Add option="/DNDEBUG" />
+					<Add option="-DWNT" />
+				</Compiler>
+				<Linker>
+					<Add option="/MANIFEST" />
+					<Add library="opengl32" />
+					<Add library="user32" />
+					<Add library="gdi32" />
+					<Add library="Advapi32" />
+					<Add library="Comdlg32" />
+					<Add library="shell32" />
+					<Add library="Wsock32" />
+				</Linker>
+				<ExtraCommands>
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\english&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\english&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\русский&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\русский&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\français&quot;' />
+					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)..\lang\english\&quot;' />
+					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)..\lang\русский\&quot;' />
+					<Add before='cmd /c COPY /Y lang\french\*  &quot;$(TARGET_OUTPUT_DIR)..\lang\français\&quot;' />
+					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;2' />
+				</ExtraCommands>
+			</Target>
+			<Target title="WIN_vc_x86_DEBUG">
+				<Option output="../bin/$(TARGET_NAME)/StDrawers/StCADViewer" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="windows_sdk_x86" />
+				<Option parameters="--in=StCADViewer" />
+				<Option host_application="../bin/$(TARGET_NAME)/sView" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="/MDd" />
+					<Add option="/Od" />
+					<Add option="/W4" />
+					<Add option="/Zi" />
+					<Add option="/Zi /D_DEBUG" />
+					<Add option="/EHsc" />
+					<Add option="/MP" />
+					<Add option="/DUNICODE" />
+					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
+					<Add option="/DNDEBUG" />
+					<Add option="/D__ST_DEBUG__" />
+					<Add option="-DWNT" />
+				</Compiler>
+				<Linker>
+					<Add option="/DEBUG" />
+					<Add option="/MANIFEST" />
+					<Add library="opengl32" />
+					<Add library="user32" />
+					<Add library="gdi32" />
+					<Add library="Advapi32" />
+					<Add library="Comdlg32" />
+					<Add library="shell32" />
+					<Add library="Wsock32" />
+					<Add library="Version" />
+					<Add directory="../3rdparty/OCCT/lib/WIN_vc_x86" />
+				</Linker>
+				<ExtraCommands>
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\english&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\english&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\русский&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\русский&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\français&quot;' />
+					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)..\lang\english\&quot;' />
+					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)..\lang\русский\&quot;' />
+					<Add before='cmd /c COPY /Y lang\french\*  &quot;$(TARGET_OUTPUT_DIR)..\lang\français\&quot;' />
+					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;2' />
+				</ExtraCommands>
+			</Target>
+			<Target title="WIN_vc_AMD64">
+				<Option output="../bin/$(TARGET_NAME)/StDrawers/StCADViewer" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="windows_sdk_x86_64" />
+				<Option parameters="--in=StCADViewer" />
+				<Option host_application="../bin/$(TARGET_NAME)/sView" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="/MD" />
+					<Add option="/Ox" />
+					<Add option="/W4" />
+					<Add option="/EHsc" />
+					<Add option="/MP" />
+					<Add option="/DUNICODE" />
+					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
+					<Add option="/DNDEBUG" />
+					<Add option="-DWNT" />
+				</Compiler>
+				<Linker>
+					<Add option="/MANIFEST" />
+					<Add library="opengl32" />
+					<Add library="user32" />
+					<Add library="gdi32" />
+					<Add library="Advapi32" />
+					<Add library="Comdlg32" />
+					<Add library="shell32" />
+					<Add library="Wsock32" />
+				</Linker>
+				<ExtraCommands>
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\english&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\english&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\русский&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\русский&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\français&quot;' />
+					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)..\lang\english\&quot;' />
+					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)..\lang\русский\&quot;' />
+					<Add before='cmd /c COPY /Y lang\french\*  &quot;$(TARGET_OUTPUT_DIR)..\lang\français\&quot;' />
+					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;2' />
+				</ExtraCommands>
+			</Target>
+			<Target title="LINUX_gcc">
+				<Option output="../bin/$(TARGET_NAME)/StDrawers/StCADViewer" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option parameters="--in=StCADViewer" />
+				<Option host_application="../bin/$(TARGET_NAME)/sView" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-std=c++0x" />
+					<Add option="-Wall" />
+					<Add option="-fPIC" />
+					<Add option="-mmmx" />
+					<Add option="-msse" />
+					<Add option="`freetype-config --cflags`" />
+					<Add directory="/usr/include/opencascade" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="`pkg-config gtk+-2.0 --libs`" />
+					<Add library="GL" />
+					<Add library="pthread" />
+				</Linker>
+				<ExtraCommands>
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/english/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/русский/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/français/&quot;' />
+					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)../lang/english/&quot;' />
+					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)../lang/русский/&quot;' />
+					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)../lang/français/&quot;' />
+				</ExtraCommands>
+			</Target>
+			<Target title="LINUX_gcc_DEBUG">
+				<Option output="../bin/$(TARGET_NAME)/StDrawers/StCADViewer" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option parameters="--in=StCADViewer" />
+				<Option host_application="../bin/$(TARGET_NAME)/sView" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-std=c++0x" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-fPIC" />
+					<Add option="-mmmx" />
+					<Add option="-msse" />
+					<Add option="`freetype-config --cflags`" />
+					<Add option="-D__ST_DEBUG__" />
+					<Add directory="/usr/include/opencascade" />
+				</Compiler>
+				<Linker>
+					<Add option="`pkg-config gtk+-2.0 --libs`" />
+					<Add library="GL" />
+					<Add library="pthread" />
+				</Linker>
+				<ExtraCommands>
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/english/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/русский/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/français/&quot;' />
+					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)../lang/english/&quot;' />
+					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)../lang/русский/&quot;' />
+					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)../lang/français/&quot;' />
+				</ExtraCommands>
+			</Target>
+			<Target title="MAC_gcc">
+				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/StDrawers/StCADViewer" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option parameters="--in=StCADViewer" />
+				<Option host_application="../bin/$(TARGET_NAME)/sView" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add option="-Wall" />
+					<Add option="-fPIC" />
+					<Add option="`freetype-config --cflags`" />
+					<Add directory="/usr/include/opencascade" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="-framework Appkit" />
+					<Add option="-framework OpenGL" />
+					<Add library="objc" />
+				</Linker>
+				<ExtraCommands>
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/english/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/русский/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/français/&quot;' />
+					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)../lang/english/&quot;' />
+					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)../lang/русский/&quot;' />
+					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)../lang/français/&quot;' />
+				</ExtraCommands>
+			</Target>
+			<Target title="MAC_gcc_DEBUG">
+				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/StDrawers/StCADViewer" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/$(TARGET_NAME)/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option parameters="--in=StCADViewer" />
+				<Option host_application="../bin/$(TARGET_NAME)/sView" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-fPIC" />
+					<Add option="`freetype-config --cflags`" />
+					<Add option="-D__ST_DEBUG__" />
+					<Add option="-DHAVE_CONFIG_H" />
+					<Add option="-DHAVE_WOK_CONFIG_H" />
+					<Add directory="/usr/include/opencascade" />
+				</Compiler>
+				<Linker>
+					<Add option="-framework Appkit" />
+					<Add option="-framework OpenGL" />
+					<Add library="objc" />
+				</Linker>
+				<ExtraCommands>
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/english/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/русский/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/français/&quot;' />
+					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)../lang/english/&quot;' />
+					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)../lang/русский/&quot;' />
+					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)../lang/français/&quot;' />
+				</ExtraCommands>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add directory="../3rdparty/include" />
+			<Add directory="../3rdparty/OCCT/inc" />
+			<Add directory="../include" />
+		</Compiler>
+		<ResourceCompiler>
+			<Add directory="../include" />
+		</ResourceCompiler>
+		<Linker>
+			<Add library="libStGLWidgets" />
+			<Add library="libStShared" />
+			<Add library="avutil" />
+			<Add library="avformat" />
+			<Add library="avcodec" />
+			<Add library="swscale" />
+			<Add library="TKBRep" />
+			<Add library="TKIGES" />
+			<Add library="TKSTEP" />
+			<Add library="TKMesh" />
+			<Add library="TKMath" />
+			<Add library="TKG3d" />
+			<Add library="TKTopAlgo" />
+			<Add library="TKShHealing" />
+			<Add library="TKXSBase" />
+			<Add library="TKernel" />
+			<Add directory="../3rdparty/lib/$(TARGET_NAME)" />
+			<Add directory="../3rdparty/OCCT/lib/$(TARGET_NAME)" />
+			<Add directory="../lib/$(TARGET_NAME)" />
+		</Linker>
+		<Unit filename="StCADLoader.cpp" />
+		<Unit filename="StCADLoader.h" />
+		<Unit filename="StCADModel.cpp" />
+		<Unit filename="StCADModel.h" />
+		<Unit filename="StCADPluginInfo.h" />
+		<Unit filename="StCADViewer.cpp" />
+		<Unit filename="StCADViewer.h" />
+		<Unit filename="StCADViewer.rc">
+			<Option compilerVar="WINDRES" />
+			<Option target="WIN_gcc_x86" />
+			<Option target="WIN_vc_x86" />
+			<Option target="WIN_vc_x86_DEBUG" />
+			<Option target="WIN_vc_AMD64" />
+		</Unit>
+		<Unit filename="StCADViewerGUI.cpp" />
+		<Unit filename="StCADViewerGUI.h" />
+		<Unit filename="StCADViewerStrings.h" />
+		<Unit filename="StMeshFileOBJ.cpp" />
+		<Unit filename="StMeshFileOBJ.h" />
+		<Unit filename="lang/english/StCADViewer.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/french/StCADViewer.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/russian/StCADViewer.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

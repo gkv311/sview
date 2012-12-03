@@ -1,0 +1,16 @@
+sView can use several image libraries for image processing.
+You can attach the FreeImage library to increase the list of supported image formats.
+To do that you need not recompile the sView itself - just install FreeImage in accessible path.
+
+For Linux library should be named as "libfreeimage.so" and available by ldd LD_LIBRARY_PATH.
+
+On Windows you may just copy the library to sView installation path (%StCore32% and %StCore64%).
+The library should be named as "FreeImage.dll". While FreeImage library has C interface
+all functions exported using __stdcall convension and has decorated names. This is not a problem
+when program linked against the library using prepared "FreeImage.lib". However this broke
+the dynamic functions import and default FreeImage build for Windows can not be loaded by sView.
+To fix it you should rebuild the FreeImage with undercorated exported functions names patch.
+
+The simplest way to do that - define the .def file and give it to the linker.
+Notice that the def file within this patch contains only part of exported functions - only used by sView.
+If you want to improve FreeImage library you probably should declare all its exported functions...
