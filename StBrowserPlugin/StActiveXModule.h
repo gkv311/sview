@@ -19,7 +19,7 @@
 #ifndef __StActiveXModule_H__
 #define __StActiveXModule_H__
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _MSC_VER
 
 #include <afxctl.h> // MFC support for ActiveX Controls
 
@@ -47,5 +47,5 @@ class StActiveXModule : public COleControlModule {
 
 };
 
-#endif // __WIN32__
+#endif // _MSC_VER
 #endif // __StActiveXModule_H__

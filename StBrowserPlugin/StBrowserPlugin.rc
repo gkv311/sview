@@ -50,4 +50,6 @@ BEGIN
 END
 
 // This temporary file generated from IDL
+#ifdef ST_OCX_TLB_PATH
 1 TYPELIB ST_OCX_TLB_PATH
+#endif

@@ -18,7 +18,7 @@
 
 #include "StActiveXModule.h"
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _MSC_VER
 
 #include <StCore/StCore.h>
 
@@ -92,4 +92,4 @@ int StActiveXModule::ExitInstance() {
     return COleControlModule::ExitInstance();
 }
 
-#endif // __WIN32__
+#endif // _MSC_VER

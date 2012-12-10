@@ -19,7 +19,7 @@
 #ifndef __StActiveXCtrl_H__
 #define __StActiveXCtrl_H__
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _MSC_VER
 
 #include <afxctl.h> // MFC support for ActiveX Controls
 #include <objsafe.h>
@@ -130,5 +130,5 @@ class StActiveXCtrl : public COleControl {
 
 };
 
-#endif // __WIN32__
+#endif // _MSC_VER
 #endif // __StActiveXCtrl_H__

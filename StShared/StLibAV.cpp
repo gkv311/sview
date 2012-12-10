@@ -240,11 +240,17 @@ StString stLibAV::getAVErrorDescription(int avErrCode) {
     char aBuff[4096];
     stMemSet(aBuff, 0, sizeof(aBuff));
     if(av_strerror(avErrCode, aBuff, 4096) == -1) {
-    #if(defined(_WIN32) || defined(__WIN32__))
+    #ifdef _MSC_VER
         wchar_t aBuffW[4096];
         stMemSet(aBuffW, 0, sizeof(aBuffW));
         if(_wcserror_s(aBuffW, 4096, AVUNERROR(avErrCode)) == 0) {
             return aBuffW;
+        }
+    #elif (defined(_WIN32) || defined(__WIN32__))
+        // MinGW has only thread-unsafe variant
+        char* anErrDesc = strerror(AVUNERROR(avErrCode));
+        if(anErrDesc != NULL) {
+            return StString(anErrDesc);
         }
     #endif
     }

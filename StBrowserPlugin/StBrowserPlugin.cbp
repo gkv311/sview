@@ -13,17 +13,18 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O3" />
+					<Add option="-std=c++0x" />
 					<Add option="-Wall" />
 					<Add option="-g" />
-					<Add option="-std=c++0x" />
 					<Add option="-shared" />
 					<Add option="-mmmx" />
 					<Add option="-msse" />
 					<Add option="-DUNICODE" />
 					<Add option="-D__ST_DEBUG__" />
+					<Add option="-D__MSVCRT_VERSION__=0x0601" />
 				</Compiler>
 				<Linker>
-					<Add option="--input-def StBrowserPlugin.def" />
+					<Add option="--input-def StBrowserPluginNPAPI.def" />
 					<Add library="user32" />
 					<Add library="advapi32" />
 					<Add library="shell32" />
@@ -250,6 +251,9 @@
 			<Option target="WIN_vc_x86" />
 			<Option target="WIN_vc_x86_DEBUG" />
 			<Option target="WIN_vc_AMD64" />
+		</Unit>
+		<Unit filename="StBrowserPluginNPAPI.def">
+			<Option target="WIN_gcc_x86" />
 		</Unit>
 		<Unit filename="npEntry.cpp" />
 		<Unit filename="npapi.h" />

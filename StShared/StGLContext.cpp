@@ -58,7 +58,7 @@ StGLContext::~StGLContext() {
 
 void* StGLContext::stglFindProc(const char* theName) const {
 #if (defined(_WIN32) || defined(__WIN32__))
-    return wglGetProcAddress(theName);
+    return (void* )wglGetProcAddress(theName);
 #elif defined(__APPLE__)
     return mySysLib.isOpened() ? mySysLib.find(theName) : NULL;
 #else

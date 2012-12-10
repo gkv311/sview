@@ -185,8 +185,8 @@ bool StGLStereoFrameBuffer::initLazy(StGLContext&  theCtx,
     && (theSizeX <= getSizeX() && getSizeX() < theCtx.getMaxTextureSize())
     && (theSizeY <= getSizeY() && getSizeY() < theCtx.getMaxTextureSize())) {
         if(!theToCompress
-        || ((getSizeX() - theSizeX) < 256)
-        && ((getSizeY() - theSizeY) < 256)) {
+        || (((getSizeX() - theSizeX) < 256)
+        &&  ((getSizeY() - theSizeY) < 256))) {
             setVPDimensions(theCtx, theSizeX, theSizeY);
             return true;
         }

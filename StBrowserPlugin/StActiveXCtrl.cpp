@@ -21,7 +21,7 @@
 
 #include "StBrPluginInfo.h"
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _MSC_VER
 
 #include <StCore/StApplication.h>
 #include <StGLStereo/StFormatEnum.h>
@@ -415,4 +415,4 @@ HRESULT StActiveXCtrl::XObjectSafety::SetInterfaceSafetyOptions(REFIID theRefIID
     return E_FAIL;
 }
 
-#endif // __WIN32__
+#endif // _MSC_VER
