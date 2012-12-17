@@ -347,7 +347,7 @@ void StGLTextureData::updateData(const StImage& srcDataL,
 
     reAllocate(newSizeBytes);
     myDataL.setColorModel(srcDataL.getColorModel());
-    myDataR.setColorModel(srcDataL.getColorModel());
+    myDataR.setColorModel(srcDataR.isNull() ? srcDataL.getColorModel() : srcDataR.getColorModel());
     myDataL.setPixelRatio(srcDataL.getPixelRatio());
     myDataR.setPixelRatio(srcDataL.getPixelRatio());
 
@@ -497,8 +497,12 @@ bool StGLTextureData::fillTexture(StGLContext&     theCtx,
         // TODO (Kirill Gavrilov#9) this value is meanfull only for PageFlip,
         //                          also rows number may be replaced with bytes count
         static const GLsizei UPDATED_ROWS_MAX = 1088; // we use optimal value to update 1080p video frame at-once
-        GLsizei maxRows = stMin(GLsizei(myDataL.getSizeY()), theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE).getSizeY());
-        GLsizei iterations = (maxRows / (myDataR.isNull() ? UPDATED_ROWS_MAX * 2 : UPDATED_ROWS_MAX)) + 1;
+        GLsizei maxRows    = stMin(GLsizei(myDataL.getSizeY()), theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE).getSizeY());
+        GLsizei iterations = (maxRows / (UPDATED_ROWS_MAX * 2)) + 1;
+        if(!myDataR.isNull()) {
+            maxRows    = stMax(maxRows, stMin(GLsizei(myDataR.getSizeY()), theQTexture.getBack(StGLQuadTexture::RIGHT_TEXTURE).getSizeY()));
+            iterations = maxRows / UPDATED_ROWS_MAX + 1;
+        }
         fillRows = maxRows / iterations;
         fillFromRow = 0;
     }
@@ -525,7 +529,8 @@ bool StGLTextureData::fillTexture(StGLContext&     theCtx,
     theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE).unbind(theCtx);
 
     fillFromRow += fillRows;
-    if(fillFromRow >= GLsizei(myDataL.getSizeY())) {
+    if(fillFromRow >= GLsizei(myDataL.getSizeY())
+    && (myDataR.isNull() || fillFromRow >= GLsizei(myDataR.getSizeY()))) {
         if(!myDataL.isNull() && theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE).isValid()) {
             setupAttributes(theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE), myDataL);
         }
