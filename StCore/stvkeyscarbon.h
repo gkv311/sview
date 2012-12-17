@@ -83,16 +83,16 @@ static const size_t ST_CARBON2ST_VK[ST_CARBON2ST_VK_SIZE] = {
     ST_VK_BACK,
     0, // 52
     ST_VK_ESCAPE,
-    0, // 54
-    0, // 55
-    0, // 56
+    0, // 54, right Command
+    0, // 55, left  Command
+    ST_VK_LSHIFT, // 56
     0, // 57
-    0, // 58
-    0, // 59
-    0, // 60
-    0, // 61
+    0, // 58, left alt/option
+    ST_VK_CONTROL, // 59
+    ST_VK_RSHIFT,  // 60
+    0, // 61, right alt/options
     0, // 62
-    0, // 63
+    0, // 63, fn
     0, // 64
     0, // 65
     0, // 66

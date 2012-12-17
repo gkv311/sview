@@ -166,6 +166,15 @@
     }*/
 
     /**
+     * Modifier key pressed.
+     */
+    - (void ) flagsChanged: (NSEvent* ) theEvent {
+        NSUInteger aFlags = [theEvent modifierFlags];
+        myStWin->myMessageList.getKeysMap()[ST_VK_CONTROL] = (aFlags & NSControlKeyMask);
+        myStWin->myMessageList.getKeysMap()[ST_VK_SHIFT]   = (aFlags & NSShiftKeyMask);
+    }
+
+    /**
      * Key down event.
      */
     - (void ) keyDown: (NSEvent* ) theEvent {
@@ -173,6 +182,11 @@
         if(aKeyCode >= ST_CARBON2ST_VK_SIZE) {
             ST_DEBUG_LOG("keyDown, keycode= " + aKeyCode + " ignored!\n");
             return;
+        }
+
+        NSUInteger aFlags = [theEvent modifierFlags];
+        if(aFlags & NSCommandKeyMask) {
+            return; // ignore Command + key combinations - key up event doesn't called!
         }
         myStWin->myMessageList.getKeysMap()[ST_CARBON2ST_VK[aKeyCode]] = true;
     }
