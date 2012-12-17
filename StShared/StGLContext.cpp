@@ -124,7 +124,8 @@ void StGLContext::stglReadVersion() {
     // available since OpenGL 3.0
     glGetIntegerv(GL_MAJOR_VERSION, &myVerMajor);
     glGetIntegerv(GL_MINOR_VERSION, &myVerMinor);
-    if(glGetError() == GL_NO_ERROR) {
+    if(glGetError() == GL_NO_ERROR
+    && myVerMajor >= 3) {
         return;
     }
     stglResetErrors();
@@ -154,16 +155,16 @@ void StGLContext::stglReadVersion() {
     aMajorStr[aMajIter] = '\0';
 
     // parse string for minor number
-    size_t aMinIter = aMajIter + 1;
+    aVerStr += aMajIter + 1;
+    size_t aMinIter = 0;
     while(aVerStr[aMinIter] >= '0' && aVerStr[aMinIter] <= '9') {
         ++aMinIter;
     }
-    size_t aMinLen = aMinIter - aMajIter - 1;
-    if(aMinLen == 0 || aMinLen >= sizeof(aMinorStr)) {
+    if(aMinIter == 0 || aMinIter >= sizeof(aMinorStr)) {
         return;
     }
-    stMemCpy(aMinorStr, aVerStr, aMinLen);
-    aMinorStr[aMinLen] = '\0';
+    stMemCpy(aMinorStr, aVerStr, aMinIter);
+    aMinorStr[aMinIter] = '\0';
 
     // read numbers
     myVerMajor = std::atoi(aMajorStr);
