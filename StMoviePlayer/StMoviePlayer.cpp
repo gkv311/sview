@@ -733,17 +733,40 @@ void StMoviePlayer::keysStereo(bool* keysMap) {
     }
 
     // ========= Separation factor ========
-    if(keysMap[ST_VK_MULTIPLY] && !keysMap[ST_VK_CONTROL]) {
-        aParams->incSeparationDx();
-    }
-    if(keysMap[ST_VK_DIVIDE] && !keysMap[ST_VK_CONTROL]) {
-        aParams->decSeparationDx();
-    }
-    if(keysMap[ST_VK_MULTIPLY] && keysMap[ST_VK_CONTROL]) {
-        aParams->incSeparationDy();
-    }
-    if(keysMap[ST_VK_DIVIDE] && keysMap[ST_VK_CONTROL]) {
-        aParams->decSeparationDy();
+    if(keysMap[ST_VK_CONTROL]) {
+        if(keysMap[ST_VK_DIVIDE]) {
+            aParams->decSeparationDy();
+            keysMap[ST_VK_DIVIDE] = false;
+        }
+        if(keysMap[ST_VK_COMMA]) {
+            aParams->decSeparationDy();
+            keysMap[ST_VK_COMMA] = false;
+        }
+        if(keysMap[ST_VK_MULTIPLY]) {
+            aParams->incSeparationDy();
+            keysMap[ST_VK_MULTIPLY] = false;
+        }
+        if(keysMap[ST_VK_PERIOD]) {
+            aParams->incSeparationDy();
+            keysMap[ST_VK_PERIOD] = false;
+        }
+    } else {
+        if(keysMap[ST_VK_DIVIDE]) {
+            aParams->decSeparationDx();
+            keysMap[ST_VK_DIVIDE] = false;
+        }
+        if(keysMap[ST_VK_COMMA]) {
+            aParams->decSeparationDx();
+            keysMap[ST_VK_COMMA] = false;
+        }
+        if(keysMap[ST_VK_MULTIPLY]) {
+            aParams->incSeparationDx();
+            keysMap[ST_VK_MULTIPLY] = false;
+        }
+        if(keysMap[ST_VK_PERIOD]) {
+            aParams->incSeparationDx();
+            keysMap[ST_VK_PERIOD] = false;
+        }
     }
 
     // ========= Rotation =======

@@ -45,9 +45,9 @@ static const size_t ST_XK2ST_VK[ST_XK2ST_VK_SIZE] = {
     0, // 0x29
     0, // 0x2A
     0, // 0x2B
-    0, // 0x2C
-    ST_VK_OEM_MINUS,  // 0x2D = XK_minus
-    0, // 0x2E
+    ST_VK_COMMA,     // 0x2C = XK_comma
+    ST_VK_OEM_MINUS, // 0x2D = XK_minus
+    ST_VK_PERIOD,    // 0x2E = XK_period
     0, // 0x2F
     ST_VK_0,      // 0x30 = XK_0
     ST_VK_1,      // 0x31 = XK_1

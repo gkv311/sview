@@ -72,11 +72,11 @@ static const size_t ST_CARBON2ST_VK[ST_CARBON2ST_VK_SIZE] = {
     ST_VK_K,
     ST_VK_SEMICOLON,
     ST_VK_BACKSLASH,
-    0, //ST_VK_OEM_COMMA, // 43, ',<'
+    ST_VK_COMMA, // 43, ',<'
     0, //ST_VK_OEM_2, // 44, '?/'
     ST_VK_N,
     ST_VK_M,
-    0, //ST_VK_OEM_PERIOD, // 47, '.>'
+    ST_VK_PERIOD, // 47, '.>'
     ST_VK_TAB,
     ST_VK_SPACE,
     0, //ST_VK_OEM_3, 50, '~`'
