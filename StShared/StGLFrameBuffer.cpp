@@ -79,8 +79,8 @@ bool StGLFrameBuffer::initLazy(StGLContext&  theCtx,
     }
     release(theCtx);
 
-    GLsizei aSizeX = (GLsizei )getAligned(theSizeX, 256);
-    GLsizei aSizeY = (GLsizei )getAligned(theSizeY, 256);
+    GLsizei aSizeX = stMax(32, (GLsizei )getAligned(theSizeX, 256));
+    GLsizei aSizeY = stMax(32, (GLsizei )getAligned(theSizeY, 256));
     if(!theCtx.stglIsRectangularFboSupported()) {
         StGLFrameBuffer::convertToPowerOfTwo(theCtx, aSizeX, aSizeY);
         ST_DEBUG_LOG("Ancient videocard detected (GLSL 1.1)!");
