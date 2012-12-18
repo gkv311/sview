@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2012 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -48,6 +48,11 @@
          * Recall to [super close].
          */
         - (void ) forceClose;
+
+        /**
+         * Process lost focus event.
+         */
+        - (void ) windowDidResignKey;
 
     @end
 #else

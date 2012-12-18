@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -83,7 +83,7 @@ class ST_LOCAL StMessageList {
       keyDelay(true) {
         //
         stMemSet(messageList, 0, sizeof(messageList));
-        stMemSet(keysMap, (int )false, sizeof(keysMap));
+        resetKeysMap();
     }
 
     ~StMessageList() {
@@ -93,6 +93,11 @@ class ST_LOCAL StMessageList {
     bool* getKeysMap() {
         // TODO (Kirill Gavrilov#3#) not thread-safe operation
         return keysMap;
+    }
+
+    void resetKeysMap() {
+        // TODO (Kirill Gavrilov#3#) not thread-safe operation
+        stMemSet(keysMap, (int )false, sizeof(keysMap));
     }
 
     bool append(const size_t& msgUIN, void* msgData = NULL) {
