@@ -49,11 +49,6 @@
          */
         - (void ) forceClose;
 
-        /**
-         * Process lost focus event.
-         */
-        - (void ) windowDidResignKey;
-
     @end
 #else
     class StCocoaWin;
