@@ -315,12 +315,16 @@ void StWindowImpl::updateChildRect() {
 LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch(uMsg) {                 // Check For Windows Messages
         case WM_ACTIVATE: {        // Watch For Window Activate Message
-            if(!HIWORD(wParam)) {
+            if(LOWORD(wParam) == WA_INACTIVE) {
+              // input focus loss - release pressed keys cached state
+              myMessageList.resetKeysMap();
+            }
+            /*if(!HIWORD(wParam)) {
                 //active = true;   // Check Minimization State
             } else {
                 //active = false;  // Program Is No Longer Active
                 //active = true;
-            }
+            }*/
             return 0;              // Return To The Message Loop
         }
 
