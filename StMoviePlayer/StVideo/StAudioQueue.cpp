@@ -591,6 +591,14 @@ bool StAudioQueue::stalQueue(const double thePts) {
         }
         alSourcePlayv(NUM_AL_SOURCES, myAlSources);
         ST_DEBUG_LOG("!!! OpenAL was in stopped state, now resume playback from " + (thePts - diffSecs));
+
+        // pause playback if not in playing state
+        myEventMutex.lock();
+        const bool toPause = !myIsPlaying;
+        myEventMutex.unlock();
+        if(toPause) {
+            alSourcePausev(NUM_AL_SOURCES, myAlSources);
+        }
     }
 
     return isQueued;
