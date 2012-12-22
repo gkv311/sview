@@ -18,70 +18,71 @@
 
 #include "StVideoQueue.h"
 
-/*
- * These are called whenever we allocate a frame
- * buffer. We use this to store the global_pts in
- * a frame at the time it is allocated.
- */
-static int ourGetBuffer(struct AVCodecContext* codecCtx, AVFrame* pic) {
-    StVideoQueue* stVideoQueue = (StVideoQueue* )codecCtx->opaque;
-    int ret = avcodec_default_get_buffer(codecCtx, pic);
-    int64_t* pts = new int64_t();
-    *pts = stVideoQueue->getVideoPktPts();
-    pic->opaque = pts;
-    return ret;
-}
+namespace {
 
-static void ourReleaseBuffer(struct AVCodecContext* codecCtx, AVFrame* pic) {
-    if(pic != NULL) {
-        delete (int64_t* )pic->opaque;
-        pic->opaque = NULL;
+    /*
+     * These are called whenever we allocate a frame
+     * buffer. We use this to store the global_pts in
+     * a frame at the time it is allocated.
+     */
+    static int ourGetBuffer(AVCodecContext* theCodecCtx,
+                            AVFrame*        theFrame) {
+        StVideoQueue* aVideoQueue = (StVideoQueue* )theCodecCtx->opaque;
+        const int aResult = avcodec_default_get_buffer(theCodecCtx, theFrame);
+        int64_t* aPts = new int64_t();
+        *aPts = aVideoQueue->getVideoPktPts();
+        theFrame->opaque = aPts;
+        return aResult;
     }
-    avcodec_default_release_buffer(codecCtx, pic);
-}
 
-/**
- * Thread function just call decodeLoop() function.
- */
-static SV_THREAD_FUNCTION threadFunction(void* videoQueue) {
-    StVideoQueue* stVideoQueue = (StVideoQueue* )videoQueue;
-    stVideoQueue->decodeLoop();
-    return SV_THREAD_RETURN 0;
-}
+    static void ourReleaseBuffer(AVCodecContext* theCodecCtx,
+                                 AVFrame*        theFrame) {
+        if(theFrame != NULL) {
+            delete (int64_t* )theFrame->opaque;
+            theFrame->opaque = NULL;
+        }
+        avcodec_default_release_buffer(theCodecCtx, theFrame);
+    }
+
+    /**
+     * Thread function just call decodeLoop() function.
+     */
+    static SV_THREAD_FUNCTION threadFunction(void* theVideoQueue) {
+        StVideoQueue* aVideoQueue = (StVideoQueue* )theVideoQueue;
+        aVideoQueue->decodeLoop();
+        return SV_THREAD_RETURN 0;
+    }
+
+};
 
 StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
                            const StHandle<StVideoQueue>&     theMaster)
 : StAVPacketQueue(512),
-  evDowntime(true),
+  myDowntimeState(true),
   myTextureQueue(theTextureQueue),
-  evHasData(false),
+  myHasDataState(false),
   myMaster(theMaster),
-  mySlave(),
   //
-  avDiscard(AVDISCARD_DEFAULT),
-  frame(NULL),
-  frameRGB(NULL),
-  bufferRGB(NULL),
-  dataAdp(),
-  pToRgbCtx(NULL),
+  myAvDiscard(AVDISCARD_DEFAULT),
+  myFrame(NULL),
+  myFrameRGB(NULL),
+  myBufferRGB(NULL),
+  myToRgbCtx(NULL),
   myFramePts(0.0),
-  pixelRatio(1.0f),
+  myPixelRatio(1.0f),
   //
-  videoClock(0.0),
+  myVideoClock(0.0),
   //
-  videoPktPts(stLibAV::NOPTS_VALUE),
+  myVideoPktPts(stLibAV::NOPTS_VALUE),
   //
-  aClockMutex(),
-  aClock(0.0),
+  myAudioClock(0.0),
   myFramesCounter(1),
-  myCachedFrame(),
   mySrcFormat(ST_V_SRC_AUTODETECT),
   mySrcFormatInfo(ST_V_SRC_AUTODETECT) {
-    //
     // allocate an AVFrame structure, avfreep() should be called to free memory
-    frame    = avcodec_alloc_frame();
-    frameRGB = avcodec_alloc_frame();
-    myThread = new StThread(threadFunction, (void* )this);
+    myFrame    = avcodec_alloc_frame();
+    myFrameRGB = avcodec_alloc_frame();
+    myThread   = new StThread(threadFunction, (void* )this);
 }
 
 StVideoQueue::~StVideoQueue() {
@@ -94,9 +95,9 @@ StVideoQueue::~StVideoQueue() {
     myThread.nullify();
 
     deinit();
-    stMemFreeAligned(bufferRGB);
-    av_free(frame);
-    av_free(frameRGB);
+    stMemFreeAligned(myBufferRGB);
+    av_free(myFrame);
+    av_free(myFrameRGB);
 }
 
 namespace {
@@ -134,7 +135,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
         return false;
     }
 
-    if(frame == NULL || frameRGB == NULL) {
+    if(myFrame == NULL || myFrameRGB == NULL) {
         // should never happens
         signals.onError("FFmpeg: Could not allocate an AVFrame");
         deinit();
@@ -179,29 +180,29 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
         return false;
     }
 
-    // determine required frameRGB size and allocate frameRGB
+    // determine required myFrameRGB size and allocate it
     if(sizeX() == 0 || sizeY() == 0) {
         signals.onError("FFmpeg: Codec return wrong frame size");
         deinit();
         return false;
     }
 
-    size_t numBytes = avpicture_get_size(stLibAV::PIX_FMT::RGB24, sizeX(), sizeY());
-    stMemFreeAligned(bufferRGB); bufferRGB = stMemAllocAligned<uint8_t*>(numBytes);
+    const size_t aBufferSize = avpicture_get_size(stLibAV::PIX_FMT::RGB24, sizeX(), sizeY());
+    stMemFreeAligned(myBufferRGB); myBufferRGB = stMemAllocAligned<uint8_t*>(aBufferSize);
 
-    // assign appropriate parts of frameRGB to image planes in frameRGB
-    avpicture_fill((AVPicture* )frameRGB, bufferRGB, stLibAV::PIX_FMT::RGB24,
+    // assign appropriate parts of myFrameRGB to image planes in myFrameRGB
+    avpicture_fill((AVPicture* )myFrameRGB, myBufferRGB, stLibAV::PIX_FMT::RGB24,
                    sizeX(), sizeY());
 
     // reset AVFrame structure
-    avcodec_get_frame_defaults(frame);
+    avcodec_get_frame_defaults(myFrame);
 
     if(myCodecCtx->pix_fmt != stLibAV::PIX_FMT::RGB24 && !stLibAV::isFormatYUVPlanar(myCodecCtx)) {
         // initialize software scaler/converter
-        pToRgbCtx = sws_getContext(sizeX(), sizeY(), myCodecCtx->pix_fmt,       // source
-                                   sizeX(), sizeY(), stLibAV::PIX_FMT::RGB24, // destination
-                                   SWS_BICUBIC, NULL, NULL, NULL);
-        if(pToRgbCtx == NULL) {
+        myToRgbCtx = sws_getContext(sizeX(), sizeY(), myCodecCtx->pix_fmt,       // source
+                                    sizeX(), sizeY(), stLibAV::PIX_FMT::RGB24, // destination
+                                    SWS_BICUBIC, NULL, NULL, NULL);
+        if(myToRgbCtx == NULL) {
             signals.onError("FFmpeg: Failed to create SWScaler context");
             deinit();
             return false;
@@ -210,13 +211,13 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
 
     // compute PAR
     if(myStream->sample_aspect_ratio.num && av_cmp_q(myStream->sample_aspect_ratio, myStream->codec->sample_aspect_ratio)) {
-        pixelRatio = GLfloat(myStream->sample_aspect_ratio.num) / GLfloat(myStream->sample_aspect_ratio.den);
+        myPixelRatio = GLfloat(myStream->sample_aspect_ratio.num) / GLfloat(myStream->sample_aspect_ratio.den);
     } else {
         if(myCodecCtx->sample_aspect_ratio.num == 0 ||
            myCodecCtx->sample_aspect_ratio.den == 0) {
-            pixelRatio = 1.0f;
+            myPixelRatio = 1.0f;
         } else {
-            pixelRatio = GLfloat(myCodecCtx->sample_aspect_ratio.num) / GLfloat(myCodecCtx->sample_aspect_ratio.den);
+            myPixelRatio = GLfloat(myCodecCtx->sample_aspect_ratio.num) / GLfloat(myCodecCtx->sample_aspect_ratio.den);
         }
     }
 
@@ -258,14 +259,14 @@ void StVideoQueue::deinit() {
         myTextureQueue->clear();
     }
     mySlave.nullify();
-    pixelRatio = 1.0f;
+    myPixelRatio = 1.0f;
 
-    stMemFreeAligned(bufferRGB); bufferRGB = NULL;
-    dataAdp.nullify();
+    stMemFreeAligned(myBufferRGB); myBufferRGB = NULL;
+    myDataAdp.nullify();
 
-    if(pToRgbCtx != NULL) {
+    if(myToRgbCtx != NULL) {
         // TODO (Kirill Gavrilov#5#) we got random crashes with this call
-        ///sws_freeContext(pToRgbCtx);
+        ///sws_freeContext(myToRgbCtx);
     }
     myFramesCounter = 1;
     myCachedFrame.nullify();
@@ -273,20 +274,21 @@ void StVideoQueue::deinit() {
     StAVPacketQueue::deinit();
 }
 
-void StVideoQueue::syncVideo(AVFrame* srcFrame, double* pts) {
-    if(*pts != 0.0) {
+void StVideoQueue::syncVideo(AVFrame* theSrcFrame,
+                             double*  thePts) {
+    if(*thePts != 0.0) {
         // if we have pts, set video clock to it
-        videoClock = *pts;
+        myVideoClock = *thePts;
     } else {
         // if we aren't given a pts, set it to the clock
-        *pts = videoClock;
+        *thePts = myVideoClock;
     }
 
     // update the video clock
-    double frameDelay = av_q2d(myCodecCtx->time_base);
+    double aFrameDelay = av_q2d(myCodecCtx->time_base);
     // if we are repeating a frame, adjust clock accordingly
-    frameDelay += srcFrame->repeat_pict * (frameDelay * 0.5);
-    videoClock += frameDelay;
+    aFrameDelay  += theSrcFrame->repeat_pict * (aFrameDelay * 0.5);
+    myVideoClock += aFrameDelay;
 }
 
 void StVideoQueue::pushFrame(const StImage&     theSrcDataLeft,
@@ -313,20 +315,22 @@ void StVideoQueue::pushFrame(const StImage&     theSrcDataLeft,
 
 void StVideoQueue::decodeLoop() {
     int isFrameFinished = 0;
-    double averDelaySec = 40.0;
-    double prevPts = 0.0;
-    double slavePts = 0.0;
+    double anAverageDelaySec = 40.0;
+    double aPrevPts  = 0.0;
+    double aSlavePts = 0.0;
     myFramePts = 0.0;
-    StImage* slaveData = NULL;
+    StImage* aSlaveData = NULL;
     StHandle<StAVPacket> aPacket;
     StImage anEmptyImg;
+    bool isFullScale = false;
+    size_t aWidthY, aHeightY, aWidthU, aHeightU, aWidthV, aHeightV;
     for(;;) {
         if(isEmpty()) {
-            evDowntime.set();
+            myDowntimeState.set();
             StThread::sleep(10);
             continue;
         }
-        evDowntime.reset();
+        myDowntimeState.reset();
 
         aPacket = pop();
         if(aPacket.isNull()) {
@@ -342,32 +346,32 @@ void StVideoQueue::decodeLoop() {
                 if(myMaster.isNull()) {
                     myTextureQueue->clear();
                 }
-                aClock       = 0.0;
-                videoClock   = 0.0;
+                myAudioClock = 0.0;
+                myVideoClock = 0.0;
                 myToFlush    = false;
                 myWasFlushed = true;
                 continue;
             }
             case StAVPacket::START_PACKET: {
-                aClock = 0.0;
-                videoClock = 0.0;
-                evHasData.reset();
+                myAudioClock = 0.0;
+                myVideoClock = 0.0;
+                myHasDataState.reset();
                 continue;
             }
             case StAVPacket::END_PACKET: {
                 if(!myMaster.isNull()) {
-                    while(evHasData.check() && !myMaster->isInDowntime()) {
+                    while(myHasDataState.check() && !myMaster->isInDowntime()) {
                         StThread::sleep(10);
                     }
                     // wake up Master
-                    dataAdp.nullify();
-                    evHasData.set();
+                    myDataAdp.nullify();
+                    myHasDataState.set();
                 } else {
                     if(!mySlave.isNull()) {
                         mySlave->unlockData();
                     }
                     StTimer stTimerWaitEmpty(true);
-                    double waitTime = averDelaySec * myTextureQueue->getSize() + 0.1;
+                    double waitTime = anAverageDelaySec * myTextureQueue->getSize() + 0.1;
                     while(!myTextureQueue->isEmpty() && stTimerWaitEmpty.getElapsedTimeInSec() < waitTime && !myToQuit) {
                         StThread::sleep(2);
                     }
@@ -383,16 +387,16 @@ void StVideoQueue::decodeLoop() {
         }
 
         // wait master retrieve previous data
-        while(!myMaster.isNull() && evHasData.check()) {
+        while(!myMaster.isNull() && myHasDataState.check()) {
             //
         }
 
         // Save global pts to be stored in pFrame in first call
-        videoPktPts = aPacket->getPts();
+        myVideoPktPts = aPacket->getPts();
 
         if(aPacket->getDts() == stLibAV::NOPTS_VALUE
-           && frame->opaque && *(int64_t* )frame->opaque != stLibAV::NOPTS_VALUE) {
-            myFramePts = double(*(int64_t* )frame->opaque);
+        && myFrame->opaque && *(int64_t* )myFrame->opaque != stLibAV::NOPTS_VALUE) {
+            myFramePts = double(*(int64_t* )myFrame->opaque);
         } else if(aPacket->getDts() != stLibAV::NOPTS_VALUE) {
             myFramePts = double(aPacket->getDts());
         } else {
@@ -401,39 +405,40 @@ void StVideoQueue::decodeLoop() {
         myFramePts *= av_q2d(myStream->time_base);
         myFramePts -= myPtsStartBase; // normalize PTS
 
-        syncVideo(frame, &myFramePts);
-        double delay = myFramePts - prevPts;
-        if(delay > 0.0 && delay < 1.0) {
-            averDelaySec = delay;
+        syncVideo(myFrame, &myFramePts);
+        const double aDelay = myFramePts - aPrevPts;
+        if(aDelay > 0.0 && aDelay < 1.0) {
+            anAverageDelaySec = aDelay;
         }
-        prevPts = myFramePts;
+        aPrevPts = myFramePts;
 
         // do we need to skip frames or not
         static const double OVERR_LIMIT = 0.2;
         static const double GREATER_LIMIT = 100.0;
         if(myMaster.isNull()) {
-            double diff = getAClock() - myFramePts;
+            const double anAudioClock = getAClock();
+            double diff = anAudioClock - myFramePts;
             if(diff > OVERR_LIMIT && diff < GREATER_LIMIT) {
-                if(avDiscard != AVDISCARD_NONREF) {
+                if(myAvDiscard != AVDISCARD_NONREF) {
                     ST_DEBUG_LOG("skip frames: AVDISCARD_NONREF (on)"
-                        + " (aClock " + getAClock()
-                        + " vClock " + myFramePts +
+                        + " (aClock " + anAudioClock
+                        + " vClock " + myFramePts
                         + " diff " + diff + ")"
                     );
-                    avDiscard = AVDISCARD_NONREF;
+                    myAvDiscard = AVDISCARD_NONREF;
                     ///myCodecCtx->skip_frame = AVDISCARD_NONKEY;
-                    myCodecCtx->skip_frame = avDiscard;
+                    myCodecCtx->skip_frame = myAvDiscard;
                     if(!mySlave.isNull()) {
-                        mySlave->myCodecCtx->skip_frame = avDiscard;
+                        mySlave->myCodecCtx->skip_frame = myAvDiscard;
                     }
                 }
             } else {
-                if(avDiscard != AVDISCARD_DEFAULT) {
+                if(myAvDiscard != AVDISCARD_DEFAULT) {
                     ST_DEBUG_LOG("skip frames: AVDISCARD_DEFAULT (off)");
-                    avDiscard = AVDISCARD_DEFAULT;
-                    myCodecCtx->skip_frame = avDiscard;
+                    myAvDiscard = AVDISCARD_DEFAULT;
+                    myCodecCtx->skip_frame = myAvDiscard;
                     if(!mySlave.isNull()) {
-                        mySlave->myCodecCtx->skip_frame = avDiscard;
+                        mySlave->myCodecCtx->skip_frame = myAvDiscard;
                     }
                 }
             }
@@ -441,121 +446,121 @@ void StVideoQueue::decodeLoop() {
 
         // decode video frame
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 23, 0))
-        avcodec_decode_video2(myCodecCtx, frame, &isFrameFinished, aPacket->getAVpkt());
+        avcodec_decode_video2(myCodecCtx, myFrame, &isFrameFinished, aPacket->getAVpkt());
     #else
-        avcodec_decode_video(myCodecCtx, frame, &isFrameFinished,
+        avcodec_decode_video(myCodecCtx, myFrame, &isFrameFinished,
                              aPacket->getData(), aPacket->getSize());
     #endif
 
         // did we get a video frame?
-        if(isFrameFinished != 0) {
-            if(aPacket->isKeyFrame()) {
-                myFramesCounter = 1;
+        if(isFrameFinished == 0) {
+            aPacket.nullify();
+            continue;
+        }
+
+        if(aPacket->isKeyFrame()) {
+            myFramesCounter = 1;
+        }
+
+        // we currently allow to override source format stored in metadata
+        const StFormatEnum aSrcFormat = (mySrcFormat == ST_V_SRC_AUTODETECT) ? mySrcFormatInfo : mySrcFormat;
+
+        if(myCodecCtx->pix_fmt == stLibAV::PIX_FMT::RGB24) {
+            myDataAdp.setColorModel(StImage::ImgColor_RGB);
+            myDataAdp.setPixelRatio(getPixelRatio());
+            myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgRGB, myFrame->data[0],
+                                                 sizeX(), sizeY(),
+                                                 myFrame->linesize[0]);
+        } else if(stLibAV::isFormatYUVPlanar(myCodecCtx,
+                                             aWidthY, aHeightY,
+                                             aWidthU, aHeightU,
+                                             aWidthV, aHeightV,
+                                             isFullScale)) {
+
+            /// TODO (Kirill Gavrilov#5) remove hack
+            // workaround for incorrect frame dimensions information in some files
+            // critical for tiled source format that should be 1080p
+            if(aSrcFormat == ST_V_SRC_TILED_4X
+            && myCodecCtx->pix_fmt == stLibAV::PIX_FMT::YUV420P
+            && myCodecCtx->width >= 1906 && myCodecCtx->width <= 1920
+            && myFrame->linesize[0] >= 1920
+            && myCodecCtx->height >= 1074) {
+                aWidthY  = 1920;
+                aHeightY = 1080;
+                aWidthU  = aWidthV  = aWidthY  / 2;
+                aHeightU = aHeightV = aHeightY / 2;
             }
 
-            size_t aWidthY, aHeightY, aWidthU, aHeightU, aWidthV, aHeightV;
-            bool isFullScale = false;
+            myDataAdp.setColorModel(isFullScale ? StImage::ImgColor_YUVjpeg : StImage::ImgColor_YUV);
+            myDataAdp.setPixelRatio(getPixelRatio());
+            myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgGray, myFrame->data[0],
+                                                 aWidthY, aHeightY, myFrame->linesize[0]);
+            myDataAdp.changePlane(1).initWrapper(StImagePlane::ImgGray, myFrame->data[1],
+                                                 aWidthU, aHeightU, myFrame->linesize[1]);
+            myDataAdp.changePlane(2).initWrapper(StImagePlane::ImgGray, myFrame->data[2],
+                                                 aWidthV, aHeightV, myFrame->linesize[2]);
+        } else {
+            sws_scale(myToRgbCtx,
+                      myFrame->data, myFrame->linesize,
+                      0, myCodecCtx->height,
+                      myFrameRGB->data, myFrameRGB->linesize);
 
-            // we currently allow to override source format stored in metadata
-            StFormatEnum aSrcFormat = (mySrcFormat == ST_V_SRC_AUTODETECT) ? mySrcFormatInfo : mySrcFormat;
+            myDataAdp.setColorModel(StImage::ImgColor_RGB);
+            myDataAdp.setPixelRatio(getPixelRatio());
+            myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgRGB, myBufferRGB,
+                                                 size_t(sizeX()), size_t(sizeY()));
+        }
 
-            if(myCodecCtx->pix_fmt == stLibAV::PIX_FMT::RGB24) {
-                dataAdp.setColorModel(StImage::ImgColor_RGB);
-                dataAdp.setPixelRatio(getPixelRatio());
-                dataAdp.changePlane(0).initWrapper(StImagePlane::ImgRGB, frame->data[0],
-                                                   sizeX(), sizeY(),
-                                                   frame->linesize[0]);
-            } else if(stLibAV::isFormatYUVPlanar(myCodecCtx,
-                                                 aWidthY, aHeightY,
-                                                 aWidthU, aHeightU,
-                                                 aWidthV, aHeightV,
-                                                 isFullScale)) {
-
-                /// TODO (Kirill Gavrilov#5) remove hack
-                // workaround for incorrect frame dimensions information in some files
-                // critical for tiled source format that should be 1080p
-                if(aSrcFormat == ST_V_SRC_TILED_4X
-                && myCodecCtx->pix_fmt == stLibAV::PIX_FMT::YUV420P
-                && myCodecCtx->width >= 1906 && myCodecCtx->width <= 1920
-                && frame->linesize[0] >= 1920
-                && myCodecCtx->height >= 1074) {
-                    aWidthY  = 1920;
-                    aHeightY = 1080;
-                    aWidthU  = aWidthV  = aWidthY  / 2;
-                    aHeightU = aHeightV = aHeightY / 2;
+        if(!mySlave.isNull()) {
+            for(;;) {
+                // wait data from Slave
+                if(aSlaveData == NULL) {
+                    aSlaveData = mySlave->waitData(aSlavePts);
                 }
-
-                dataAdp.setColorModel(isFullScale ? StImage::ImgColor_YUVjpeg : StImage::ImgColor_YUV);
-                dataAdp.setPixelRatio(getPixelRatio());
-                dataAdp.changePlane(0).initWrapper(StImagePlane::ImgGray, frame->data[0],
-                                                   aWidthY, aHeightY, frame->linesize[0]);
-                dataAdp.changePlane(1).initWrapper(StImagePlane::ImgGray, frame->data[1],
-                                                   aWidthU, aHeightU, frame->linesize[1]);
-                dataAdp.changePlane(2).initWrapper(StImagePlane::ImgGray, frame->data[2],
-                                                   aWidthV, aHeightV, frame->linesize[2]);
-            } else {
-                sws_scale(pToRgbCtx,
-                          frame->data, frame->linesize,
-                          0, myCodecCtx->height,
-                          frameRGB->data, frameRGB->linesize);
-
-                dataAdp.setColorModel(StImage::ImgColor_RGB);
-                dataAdp.setPixelRatio(getPixelRatio());
-                dataAdp.changePlane(0).initWrapper(StImagePlane::ImgRGB, bufferRGB,
-                                                   size_t(sizeX()), size_t(sizeY()));
-            }
-
-            if(!mySlave.isNull()) {
-                for(;;) {
-                    // wait data from Slave
-                    if(slaveData == NULL) {
-                        slaveData = mySlave->waitData(slavePts);
-                    }
-                    if(slaveData != NULL) {
-                        double ptsDiff = myFramePts - slavePts;
-                        if(ptsDiff > 0.5 * averDelaySec) {
-                            // wait for more recent frame from slave thread
-                            mySlave->unlockData();
-                            slaveData = NULL;
-                            StThread::sleep(10);
-                            continue;
-                        } else if(ptsDiff < -0.5 * averDelaySec) {
-                            // too far...
-                            if(ptsDiff < -6.0) {
-                                // result of seeking?
-                                mySlave->unlockData();
-                                slaveData = NULL;
-                            }
-                            //ST_DEBUG_LOG("ptsDiff= " + ptsDiff + "; averDelaySec= " + averDelaySec + "; framePts= " + myFramePts + "; slavePts= " + slavePts);
-                            break;
-                        }
-
-                        pushFrame(dataAdp, *slaveData, aPacket->getSource(), ST_V_SRC_SEPARATE_FRAMES, myFramePts);
-
-                        slaveData = NULL;
+                if(aSlaveData != NULL) {
+                    const double aPtsDiff = myFramePts - aSlavePts;
+                    if(aPtsDiff > 0.5 * anAverageDelaySec) {
+                        // wait for more recent frame from slave thread
                         mySlave->unlockData();
-                    } else {
-                        pushFrame(dataAdp, anEmptyImg, aPacket->getSource(), aSrcFormat, myFramePts);
+                        aSlaveData = NULL;
+                        StThread::sleep(10);
+                        continue;
+                    } else if(aPtsDiff < -0.5 * anAverageDelaySec) {
+                        // too far...
+                        if(aPtsDiff < -6.0) {
+                            // result of seeking?
+                            mySlave->unlockData();
+                            aSlaveData = NULL;
+                        }
+                        break;
                     }
-                    break;
-                }
-            } else if(!myMaster.isNull()) {
-                // push data to Master
-                evHasData.set();
-            } else {
-                // simple one-stream case
-                if(aSrcFormat == ST_V_SRC_PAGE_FLIP) {
-                    if(isOddNumber(myFramesCounter)) {
-                        myCachedFrame.fill(dataAdp);
-                    } else {
-                        pushFrame(myCachedFrame, dataAdp, aPacket->getSource(), ST_V_SRC_SEPARATE_FRAMES, myFramePts);
-                    }
-                    ++myFramesCounter;
+
+                    pushFrame(myDataAdp, *aSlaveData, aPacket->getSource(), ST_V_SRC_SEPARATE_FRAMES, myFramePts);
+
+                    aSlaveData = NULL;
+                    mySlave->unlockData();
                 } else {
-                    pushFrame(dataAdp, anEmptyImg, aPacket->getSource(), aSrcFormat, myFramePts);
+                    pushFrame(myDataAdp, anEmptyImg, aPacket->getSource(), aSrcFormat, myFramePts);
                 }
+                break;
+            }
+        } else if(!myMaster.isNull()) {
+            // push data to Master
+            myHasDataState.set();
+        } else {
+            // simple one-stream case
+            if(aSrcFormat == ST_V_SRC_PAGE_FLIP) {
+                if(isOddNumber(myFramesCounter)) {
+                    myCachedFrame.fill(myDataAdp);
+                } else {
+                    pushFrame(myCachedFrame, myDataAdp, aPacket->getSource(), ST_V_SRC_SEPARATE_FRAMES, myFramePts);
+                }
+                ++myFramesCounter;
+            } else {
+                pushFrame(myDataAdp, anEmptyImg, aPacket->getSource(), aSrcFormat, myFramePts);
             }
         }
+
         aPacket.nullify(); // and now packet finished
     }
 }

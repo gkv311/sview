@@ -36,45 +36,10 @@ ST_DEFINE_HANDLE(StVideoQueue, StAVPacketQueue);
  */
 class ST_LOCAL StVideoQueue : public StAVPacketQueue {
 
-        private:
-
-    StHandle<StThread> myThread; //!< decoding loop thread
-    StEvent evDowntime;
-
-    StHandle<StGLTextureQueue> myTextureQueue; // decoded frames queue
-
-    StEvent evHasData;
-    StHandle<StVideoQueue> myMaster; //!< handle to Master decoding thread
-    StHandle<StVideoQueue> mySlave;  //!< handle to Slave  decoding thread
-
-    AVDiscard          avDiscard; // discard parameter (to skip or not frames)
-
-    AVFrame*               frame; // original VIDEO frame
-    AVFrame*            frameRGB; // frame, converted to RGB (soft)
-    uint8_t*           bufferRGB; // buffer
-    StImage              dataAdp; // buffer data adaptor
-    SwsContext*        pToRgbCtx; // software scaler context
-    double            myFramePts;
-    GLfloat           pixelRatio; // pixel aspect ratio
-
-    double            videoClock; // synchronization variable
-
-    int64_t          videoPktPts;
-
-    StMutex          aClockMutex; // audio to video sync clock
-    double                aClock; // audio clock
-
-    int64_t      myFramesCounter;
-    StImage        myCachedFrame;
-    bool            myWasFlushed;
-
-    StFormatEnum     mySrcFormat; // source format
-    StFormatEnum mySrcFormatInfo; // source format information retrieved from stream
-
         public:
 
     bool isInDowntime() {
-        return evDowntime.check();
+        return myDowntimeState.check();
     }
 
     void setSlave(const StHandle<StVideoQueue>& theSlave) {
@@ -82,32 +47,32 @@ class ST_LOCAL StVideoQueue : public StAVPacketQueue {
     }
 
     StImage* waitData(double& thePts) {
-        evHasData.wait();
-        if(dataAdp.isNull()) {
+        myHasDataState.wait();
+        if(myDataAdp.isNull()) {
             return NULL;
         }
         thePts = myFramePts;
-        return &dataAdp;
+        return &myDataAdp;
     }
 
     void unlockData() {
-        evHasData.reset();
+        myHasDataState.reset();
     }
 
     int64_t getVideoPktPts() const {
-        return videoPktPts;
+        return myVideoPktPts;
     }
 
     void setAClock(const double thePts) {
-        aClockMutex.lock();
-            aClock = thePts;
-        aClockMutex.unlock();
+        myAudioClockMutex.lock();
+        myAudioClock = thePts;
+        myAudioClockMutex.unlock();
     }
 
     double getAClock() {
-        aClockMutex.lock();
-            double aPts = aClock;
-        aClockMutex.unlock();
+        myAudioClockMutex.lock();
+        const double aPts = myAudioClock;
+        myAudioClockMutex.unlock();
         return aPts;
     }
 
@@ -116,12 +81,10 @@ class ST_LOCAL StVideoQueue : public StAVPacketQueue {
     }
 
     StFormatEnum getSrcFormat() const {
-        // TODO (Kirill Gavrilov#4#) not thread safe
         return mySrcFormat;
     }
 
     void setSrcFormat(const StFormatEnum theSrcFormat) {
-        // TODO (Kirill Gavrilov#4#) not thread safe
         mySrcFormat = theSrcFormat;
     }
 
@@ -155,7 +118,7 @@ class ST_LOCAL StVideoQueue : public StAVPacketQueue {
      * @return PAR.
      */
     GLfloat getPixelRatio() const {
-        return pixelRatio;
+        return myPixelRatio;
     }
 
     /**
@@ -187,6 +150,40 @@ class ST_LOCAL StVideoQueue : public StAVPacketQueue {
                    const StHandle<StStereoParams>& theStParams,
                    const StFormatEnum theSrcFormat,
                    const double       theSrcPTS);
+
+        private:
+
+    StHandle<StThread>         myThread;          //!< decoding loop thread
+    StEvent                    myDowntimeState;   //!< event to indicate downtime state
+    StHandle<StGLTextureQueue> myTextureQueue;    //!< decoded frames queue
+
+    StEvent                    myHasDataState;
+    StHandle<StVideoQueue>     myMaster;          //!< handle to Master decoding thread
+    StHandle<StVideoQueue>     mySlave;           //!< handle to Slave  decoding thread
+
+    AVDiscard                  myAvDiscard;       //!< discard parameter (to skip or not frames)
+
+    AVFrame*                   myFrame;           //!< original decoded video frame
+    AVFrame*                   myFrameRGB;        //!< frame, converted to RGB (soft)
+    uint8_t*                   myBufferRGB;
+    StImage                    myDataAdp;         //!< buffer data adaptor
+    SwsContext*                myToRgbCtx;        //!< software scaler context
+    double                     myFramePts;
+    GLfloat                    myPixelRatio;      //!< pixel aspect ratio
+
+    double                     myVideoClock;      //!< synchronization variable
+
+    int64_t                    myVideoPktPts;
+
+    StMutex                    myAudioClockMutex; //!< audio to video sync clock
+    double                     myAudioClock;      //!< audio clock
+
+    int64_t                    myFramesCounter;
+    StImage                    myCachedFrame;
+    bool                       myWasFlushed;
+
+    StFormatEnum               mySrcFormat;       //!< source format
+    StFormatEnum               mySrcFormatInfo;   //!< source format information retrieved from stream
 
 };
 
