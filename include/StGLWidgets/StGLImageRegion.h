@@ -52,13 +52,6 @@ class ST_LOCAL StGLImageRegion : public StGLWidget {
         return myTextureQueue;
     }
 
-    /**
-     * Invalidate current video frame.
-     */
-    void resetVideoStream() {
-        myHasVideoStream = false;
-    }
-
     StHandle<StStereoParams> getSource();
 
     virtual ~StGLImageRegion();

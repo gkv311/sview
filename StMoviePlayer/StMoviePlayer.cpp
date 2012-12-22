@@ -488,8 +488,6 @@ void StMoviePlayer::doUpdateStateLoaded() {
     params.audioStream->setValue(myVideo->params.activeAudio->getValue());
     myGUI->updateSubtitlesStreamsMenu(myVideo->params.activeSubtitles->getList());
     params.subtitlesStream->setValue(myVideo->params.activeSubtitles->getValue());
-    // invalidate current video frames cache
-    //myGUI->stImageRegion->resetVideoStream();
     if(mySeekOnLoad > 0.0) {
         myVideo->pushPlayEvent(ST_PLAYEVENT_SEEK, mySeekOnLoad);
         mySeekOnLoad = -1.0;

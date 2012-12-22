@@ -262,6 +262,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
 void StVideoQueue::deinit() {
     if(myMaster.isNull()) {
         myTextureQueue->clear();
+        myTextureQueue->setConnectedStream(false);
     }
     mySlave.nullify();
     myPixelRatio = 1.0f;
@@ -311,8 +312,9 @@ void StVideoQueue::pushFrame(const StImage&     theSrcDataLeft,
     }
 
     myTextureQueue->push(theSrcDataLeft, theSrcDataRight, theStParams, theSrcFormat, theSrcPTS);
+    myTextureQueue->setConnectedStream(true);
     if(myWasFlushed) {
-        myTextureQueue->stglSwapFB(0);
+        // force frame update after seeking regardless playback timer
         myTextureQueue->stglSwapFB(0);
         myWasFlushed = false;
     }

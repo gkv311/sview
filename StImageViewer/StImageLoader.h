@@ -117,6 +117,11 @@ class ST_LOCAL StImageLoader {
         return myTextureQueue->getSnapshot(outDataLeft, outDataRight, isForce);
     }
 
+    /**
+     * Auxiliary method to process image load error.
+     */
+    void processLoadFail(const StString& theErrorDesc);
+
         private:
 
     const StMIMEList           myMimeList;

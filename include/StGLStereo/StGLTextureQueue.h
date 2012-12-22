@@ -46,6 +46,20 @@ class ST_LOCAL StGLTextureQueue {
     }
 
     /**
+     * @return input stream connection state.
+     */
+    bool hasConnectedStream() const {
+        return myHasStream || !isEmpty();
+    }
+
+    /**
+     * Setup input stream connection state.
+     */
+    void setConnectedStream(const bool theHasStream) {
+        myHasStream = theHasStream;
+    }
+
+    /**
      * Function push stereo frame into queue.
      * This function called ONLY from video thread.
      * @param theSrcDataLeft  - first  INPUT data (Both or Left);
@@ -82,7 +96,7 @@ class ST_LOCAL StGLTextureQueue {
      */
     bool stglUpdateStTextures(StGLContext& theCtx);
 
-    size_t getSize() {
+    size_t getSize() const {
         myMutexSize.lock();
             const size_t aResult = myQueueSize;
         myMutexSize.unlock();
@@ -92,7 +106,7 @@ class ST_LOCAL StGLTextureQueue {
     /**
      * @return true if queue is EMPTY.
      */
-    bool isEmpty() {
+    bool isEmpty() const {
         myMutexSize.lock();
             const bool aResult = (myQueueSize == 0);
         myMutexSize.unlock();
@@ -102,7 +116,7 @@ class ST_LOCAL StGLTextureQueue {
     /**
      * @return true if queue is FULL.
      */
-    bool isFull() {
+    bool isFull() const {
         myMutexSize.lock();
             const bool aResult = ((myQueueSize + 1) == myQueueSizeMax);
         myMutexSize.unlock();
@@ -232,6 +246,7 @@ class ST_LOCAL StGLTextureQueue {
     bool             myIsInUpdTexture; //!< private bools for plugin thread
     bool             myIsReadyToSwap;
     bool             myToCompress;     //!< release unused memory as fast as possible
+    volatile bool    myHasStream;      //!< flag indicates that some stream connected to this queue
 
 };
 

@@ -66,6 +66,12 @@ static StString formatError(const StString& theFilePath, const StString& theImgL
     return StString("Can not load image file:\n\"") + aFileName + "\"\n" + theImgLibDescr;
 }
 
+void StImageLoader::processLoadFail(const StString& theErrorDesc) {
+    signals.onError(theErrorDesc);
+    myTextureQueue->setConnectedStream(false);
+    myTextureQueue->clear();
+}
+
 bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
                               StHandle<StStereoParams>&   theParams) {
     StString fileToLoadPath = theSource->getPath();
@@ -74,7 +80,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     StHandle<StImageFile> stImageL = StImageFile::create(myImageLib, anImgType);
     StHandle<StImageFile> stImageR = StImageFile::create(myImageLib, anImgType);
     if(stImageL.isNull() || stImageR.isNull()) {
-        signals.onError("No any image library was found!");
+        processLoadFail("No any image library was found!");
         return false;
     }
 
@@ -85,7 +91,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         StJpegParser aJpegParser;
         double anHParallax = 0.0; // parallax in percents
         if(!aJpegParser.read(fileToLoadPath)) {
-            signals.onError(StString("Can not read the file \"") + fileToLoadPath + '\"');
+            processLoadFail(StString("Can not read the file \"") + fileToLoadPath + '\"');
             return false;
         }
 
@@ -97,7 +103,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         anImg1->getParallax(anHParallax);
         if(!stImageL->load(fileToLoadPath, StImageFile::ST_TYPE_JPEG,
                            (uint8_t* )anImg1->myData, (int )anImg1->myLength)) {
-            signals.onError(formatError(fileToLoadPath, stImageL->getState()));
+            processLoadFail(formatError(fileToLoadPath, stImageL->getState()));
             return false;
         }
 
@@ -107,7 +113,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             anImg2->getParallax(anHParallax); // in MPO parallax generally stored ONLY in second frame
             if(!stImageR->load(fileToLoadPath, StImageFile::ST_TYPE_JPEG,
                                (uint8_t* )anImg2->myData, (int )anImg2->myLength)) {
-                signals.onError(formatError(fileToLoadPath, stImageR->getState()));
+                processLoadFail(formatError(fileToLoadPath, stImageR->getState()));
                 stImageL->close();
                 stImageL->nullify();
                 return false;
@@ -124,11 +130,11 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
 
         // loading image with format autodetection
         if(!stImageL->load(fileToLoadPathLeft)) {
-            signals.onError(formatError(fileToLoadPathLeft, stImageL->getState()));
+            processLoadFail(formatError(fileToLoadPathLeft, stImageL->getState()));
             return false;
         }
         if(!stImageR->load(fileToLoadPathRight)) {
-            signals.onError(formatError(fileToLoadPathRight, stImageR->getState()));
+            processLoadFail(formatError(fileToLoadPathRight, stImageR->getState()));
             stImageL->close();
             stImageL->nullify();
             return false;
@@ -138,7 +144,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             aSrcFormatCurr = ST_V_SRC_SIDE_BY_SIDE;
         }
         if(!stImageL->load(fileToLoadPath, anImgType)) {
-            signals.onError(formatError(fileToLoadPath, stImageL->getState()));
+            processLoadFail(formatError(fileToLoadPath, stImageL->getState()));
             return false;
         }
     }
@@ -157,6 +163,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         StThread::sleep(10);
     }
 
+    myTextureQueue->setConnectedStream(true);
     if(!stImageR->isNull()) {
         myTextureQueue->push(*stImageL, *stImageR, theParams, ST_V_SRC_SEPARATE_FRAMES, 0.0);
     } else {

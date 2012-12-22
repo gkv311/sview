@@ -20,7 +20,8 @@ StGLTextureQueue::StGLTextureQueue(const size_t theQueueSizeMax)
   myNewShotEvent(false),
   myIsInUpdTexture(false),
   myIsReadyToSwap(false),
-  myToCompress(false) {
+  myToCompress(false),
+  myHasStream(false) {
     ST_DEBUG_ASSERT(myQueueSizeMax >= 2);
 
     // we create 'empty' queue
@@ -165,10 +166,11 @@ void StGLTextureQueue::clear() {
             anIterFront->resetStParams();
         }
         // reset queue
-        myQueueSize   = 0;
-        myDataBack    = myDataFront;
-        myDataSnap    = NULL;
-        mySwapFBCount = 0;
+        myQueueSize     = 0;
+        myDataBack      = myDataFront;
+        myDataSnap      = NULL;
+        mySwapFBCount   = 0;
+        myIsReadyToSwap = false; // invalidate currently uploaded image in back buffer
         // empty texture update sequence
         myIsInUpdTexture = false;
     mySwapFBMutex.unlock();

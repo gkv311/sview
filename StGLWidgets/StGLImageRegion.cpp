@@ -129,7 +129,7 @@ const StString& StGLImageRegion::getClassName() {
 void StGLImageRegion::stglUpdate(const StPointD_t& pointZo) {
     StGLWidget::stglUpdate(pointZo);
     if(myIsInitialized) {
-        myHasVideoStream = myTextureQueue->stglUpdateStTextures(getContext()) || myHasVideoStream;
+        myHasVideoStream = myTextureQueue->stglUpdateStTextures(getContext()) || myTextureQueue->hasConnectedStream();
         params.stereoFile = myTextureQueue->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE).getSource();
         ((StSwapLRParam* )params.swapLR.access())->setTrackedHandle(params.stereoFile);
     }
