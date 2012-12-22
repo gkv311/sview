@@ -187,17 +187,11 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
         return false;
     }
 
-    const size_t aBufferSize = avpicture_get_size(stLibAV::PIX_FMT::RGB24, sizeX(), sizeY());
-    stMemFreeAligned(myBufferRGB); myBufferRGB = stMemAllocAligned<uint8_t*>(aBufferSize);
-
-    // assign appropriate parts of myFrameRGB to image planes in myFrameRGB
-    avpicture_fill((AVPicture* )myFrameRGB, myBufferRGB, stLibAV::PIX_FMT::RGB24,
-                   sizeX(), sizeY());
-
     // reset AVFrame structure
     avcodec_get_frame_defaults(myFrame);
 
-    if(myCodecCtx->pix_fmt != stLibAV::PIX_FMT::RGB24 && !stLibAV::isFormatYUVPlanar(myCodecCtx)) {
+    if(myCodecCtx->pix_fmt != stLibAV::PIX_FMT::RGB24
+    && !stLibAV::isFormatYUVPlanar(myCodecCtx)) {
         // initialize software scaler/converter
         myToRgbCtx = sws_getContext(sizeX(), sizeY(), myCodecCtx->pix_fmt,       // source
                                     sizeX(), sizeY(), stLibAV::PIX_FMT::RGB24, // destination
@@ -207,6 +201,17 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
             deinit();
             return false;
         }
+
+        // assign appropriate parts of myFrameRGB to image planes in myFrameRGB
+        const size_t aBufferSize = avpicture_get_size(stLibAV::PIX_FMT::RGB24, sizeX(), sizeY());
+        stMemFreeAligned(myBufferRGB); myBufferRGB = stMemAllocAligned<uint8_t*>(aBufferSize);
+        if(myBufferRGB == NULL) {
+            signals.onError("FFmpeg: Failed allocation of RGB frame");
+            deinit();
+            return false;
+        }
+        avpicture_fill((AVPicture* )myFrameRGB, myBufferRGB, stLibAV::PIX_FMT::RGB24,
+                       sizeX(), sizeY());
     }
 
     // compute PAR
@@ -499,7 +504,7 @@ void StVideoQueue::decodeLoop() {
                                                  aWidthU, aHeightU, myFrame->linesize[1]);
             myDataAdp.changePlane(2).initWrapper(StImagePlane::ImgGray, myFrame->data[2],
                                                  aWidthV, aHeightV, myFrame->linesize[2]);
-        } else {
+        } else if(myToRgbCtx != NULL) {
             sws_scale(myToRgbCtx,
                       myFrame->data, myFrame->linesize,
                       0, myCodecCtx->height,
