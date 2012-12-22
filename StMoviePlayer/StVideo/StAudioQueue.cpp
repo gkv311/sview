@@ -143,7 +143,6 @@ void StAudioQueue::stalDeinit() {
 }
 
 void StAudioQueue::stalEmpty() {
-ST_DEBUG_LOG("   ___ stalEmpty()");
     alSourceStopv(NUM_AL_SOURCES, myAlSources);
 
     ALint aBufQueued = 0;
@@ -193,7 +192,6 @@ StAudioQueue::StAudioQueue(const StString& theAlDeviceName)
   myBufferOut(PCM16_SIGNED, AVCODEC_MAX_AUDIO_FRAME_SIZE),
   myIsAlValid(ST_AL_INIT_NA),
   myToSwitchDev(false),
-  myToQuit(false),
   myAlDeviceName(new StString(theAlDeviceName)),
   myAlCtx(),
   myAlFormat(AL_FORMAT_STEREO16),
@@ -472,8 +470,6 @@ bool StAudioQueue::parseEvents() {
             return false;
         }
         case ST_PLAYEVENT_SEEK: {
-            // TODO (Kirill Gavrilov#5#) current seeking technics is ugly
-            ST_DEBUG_LOG("StControlA::SEEK");
             stalEmpty();
             playTimerStart(aPtsSeek);
             playTimerPause();

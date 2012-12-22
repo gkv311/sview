@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,8 +76,7 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   myFramesCounter(1),
   myCachedFrame(),
   mySrcFormat(ST_V_SRC_AUTODETECT),
-  mySrcFormatInfo(ST_V_SRC_AUTODETECT),
-  toQuit(false) {
+  mySrcFormatInfo(ST_V_SRC_AUTODETECT) {
     //
     // allocate an AVFrame structure, avfreep() should be called to free memory
     frame    = avcodec_alloc_frame();
@@ -88,7 +87,7 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
 StVideoQueue::~StVideoQueue() {
     myTextureQueue->clear();
 
-    toQuit = true;
+    myToQuit = true;
     pushQuit();
 
     myThread->wait();
@@ -290,6 +289,28 @@ void StVideoQueue::syncVideo(AVFrame* srcFrame, double* pts) {
     videoClock += frameDelay;
 }
 
+void StVideoQueue::pushFrame(const StImage&     theSrcDataLeft,
+                             const StImage&     theSrcDataRight,
+                             const StHandle<StStereoParams>& theStParams,
+                             const StFormatEnum theSrcFormat,
+                             const double       theSrcPTS) {
+    while(!myToFlush && myTextureQueue->isFull()) {
+        StThread::sleep(10);
+    }
+
+    if(myToFlush) {
+        myToFlush = false;
+        return;
+    }
+
+    myTextureQueue->push(theSrcDataLeft, theSrcDataRight, theStParams, theSrcFormat, theSrcPTS);
+    if(myWasFlushed) {
+        myTextureQueue->stglSwapFB(0);
+        myTextureQueue->stglSwapFB(0);
+        myWasFlushed = false;
+    }
+}
+
 void StVideoQueue::decodeLoop() {
     int isFrameFinished = 0;
     double averDelaySec = 40.0;
@@ -321,8 +342,10 @@ void StVideoQueue::decodeLoop() {
                 if(myMaster.isNull()) {
                     myTextureQueue->clear();
                 }
-                aClock = 0.0;
-                videoClock = 0.0;
+                aClock       = 0.0;
+                videoClock   = 0.0;
+                myToFlush    = false;
+                myWasFlushed = true;
                 continue;
             }
             case StAVPacket::START_PACKET: {
@@ -345,11 +368,11 @@ void StVideoQueue::decodeLoop() {
                     }
                     StTimer stTimerWaitEmpty(true);
                     double waitTime = averDelaySec * myTextureQueue->getSize() + 0.1;
-                    while(!myTextureQueue->isEmpty() && stTimerWaitEmpty.getElapsedTimeInSec() < waitTime && !toQuit) {
+                    while(!myTextureQueue->isEmpty() && stTimerWaitEmpty.getElapsedTimeInSec() < waitTime && !myToQuit) {
                         StThread::sleep(2);
                     }
                 }
-                if(toQuit) {
+                if(myToQuit) {
                     return;
                 }
                 continue;
@@ -507,14 +530,12 @@ void StVideoQueue::decodeLoop() {
                             break;
                         }
 
-                        while(myTextureQueue->isFull()) { StThread::sleep(10); }
-                        myTextureQueue->push(dataAdp, *slaveData, aPacket->getSource(), ST_V_SRC_SEPARATE_FRAMES, myFramePts);
+                        pushFrame(dataAdp, *slaveData, aPacket->getSource(), ST_V_SRC_SEPARATE_FRAMES, myFramePts);
 
                         slaveData = NULL;
                         mySlave->unlockData();
                     } else {
-                        while(myTextureQueue->isFull()) { StThread::sleep(10); }
-                        myTextureQueue->push(dataAdp, anEmptyImg, aPacket->getSource(), aSrcFormat, myFramePts);
+                        pushFrame(dataAdp, anEmptyImg, aPacket->getSource(), aSrcFormat, myFramePts);
                     }
                     break;
                 }
@@ -527,13 +548,11 @@ void StVideoQueue::decodeLoop() {
                     if(isOddNumber(myFramesCounter)) {
                         myCachedFrame.fill(dataAdp);
                     } else {
-                        while(myTextureQueue->isFull()) { StThread::sleep(10); }
-                        myTextureQueue->push(myCachedFrame, dataAdp, aPacket->getSource(), ST_V_SRC_SEPARATE_FRAMES, myFramePts);
+                        pushFrame(myCachedFrame, dataAdp, aPacket->getSource(), ST_V_SRC_SEPARATE_FRAMES, myFramePts);
                     }
                     ++myFramesCounter;
                 } else {
-                    while(myTextureQueue->isFull()) { StThread::sleep(10); }
-                    myTextureQueue->push(dataAdp, anEmptyImg, aPacket->getSource(), aSrcFormat, myFramePts);
+                    pushFrame(dataAdp, anEmptyImg, aPacket->getSource(), aSrcFormat, myFramePts);
                 }
             }
         }

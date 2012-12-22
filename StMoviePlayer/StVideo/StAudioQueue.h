@@ -216,7 +216,6 @@ class ST_LOCAL StAudioQueue : public StAVPacketQueue {
     StTimer            myLimitTimer;
     volatile IState_t  myIsAlValid;     //!< OpenAL initialization state
     volatile bool      myToSwitchDev;   //!< switch audio device flag
-    volatile bool      myToQuit;        //!< quiting flag
 
         private: //! @name OpenAL items
 

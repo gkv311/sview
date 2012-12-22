@@ -42,34 +42,6 @@ typedef enum {
  */
 class ST_LOCAL StAVPacketQueue {
 
-        protected: //! @name Fields should be full-controlled by heirs
-
-    AVFormatContext* myFormatCtx; //!< pointer to video context
-    AVStream*           myStream; //!< pointer to stream in video context
-    AVCodecContext*   myCodecCtx; //!< codec context
-    AVCodec*             myCodec; //!< codec
-    double        myPtsStartBase; //!< starting PTS in context
-    double      myPtsStartStream; //!< starting PTS in the stream
-    signed int        myStreamId; //!< stream ID
-
-        protected: //! @name Playback control fields
-
-    mutable StMutex myEventMutex; //!< lock for thread-safety
-    double             myPtsSeek; //!< seeking targert in seconds
-    StPlayEvent_t    myPlayEvent; //!< playback control event
-    bool             myIsPlaying; //!< playback state
-
-        private: //! @name Private fields
-
-    struct ST_LOCAL QueueItem;
-
-    QueueItem*           myFront; //!< queue front packet (first to pop)
-    QueueItem*            myBack; //!< queue back  packet (last  to pop)
-    size_t                mySize; //!< packets number in queue
-    size_t           mySizeLimit; //!< packets limit
-    double         mySizeSeconds; //!< cumulative packets length in seconds
-    mutable StMutex      myMutex; //!< lock for thread-safety
-
         public: //! @name Public API
 
     static double detectPtsStartBase(const AVFormatContext* theFormatCtx);
@@ -219,6 +191,36 @@ class ST_LOCAL StAVPacketQueue {
          */
         StSignal<void (const StString& )> onError;
     } signals;
+
+        protected: //! @name Fields should be full-controlled by heirs
+
+    AVFormatContext* myFormatCtx;      //!< pointer to video context
+    AVStream*        myStream;         //!< pointer to stream in video context
+    AVCodecContext*  myCodecCtx;       //!< codec context
+    AVCodec*         myCodec;          //!< codec
+    double           myPtsStartBase;   //!< starting PTS in context
+    double           myPtsStartStream; //!< starting PTS in the stream
+    signed int       myStreamId;       //!< stream ID
+    volatile bool    myToFlush;        //!< flag indicates FLUSH event was pushed in packets queue
+    volatile bool    myToQuit;         //!< flag to terminate decoding loop
+
+        protected: //! @name Playback control fields
+
+    mutable StMutex  myEventMutex;     //!< lock for thread-safety
+    double           myPtsSeek;        //!< seeking targert in seconds
+    StPlayEvent_t    myPlayEvent;      //!< playback control event
+    bool             myIsPlaying;      //!< playback state
+
+        private: //! @name Private fields
+
+    struct ST_LOCAL QueueItem;
+
+    QueueItem*       myFront;          //!< queue front packet (first to pop)
+    QueueItem*       myBack;           //!< queue back  packet (last  to pop)
+    size_t           mySize;           //!< packets number in queue
+    size_t           mySizeLimit;      //!< packets limit
+    double           mySizeSeconds;    //!< cumulative packets length in seconds
+    mutable StMutex  myMutex;          //!< lock for thread-safety
 
 };
 

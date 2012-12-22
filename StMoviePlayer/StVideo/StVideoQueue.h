@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,11 +66,10 @@ class ST_LOCAL StVideoQueue : public StAVPacketQueue {
 
     int64_t      myFramesCounter;
     StImage        myCachedFrame;
+    bool            myWasFlushed;
 
     StFormatEnum     mySrcFormat; // source format
     StFormatEnum mySrcFormatInfo; // source format information retrieved from stream
-
-    volatile bool toQuit;
 
         public:
 
@@ -180,6 +179,14 @@ class ST_LOCAL StVideoQueue : public StAVPacketQueue {
     double getPts() const {
         return myTextureQueue->getPTSCurr();
     }
+
+        private:
+
+    void pushFrame(const StImage&     theSrcDataLeft,
+                   const StImage&     theSrcDataRight,
+                   const StHandle<StStereoParams>& theStParams,
+                   const StFormatEnum theSrcFormat,
+                   const double       theSrcPTS);
 
 };
 

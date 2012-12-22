@@ -48,11 +48,11 @@ class ST_LOCAL StGLTextureQueue {
     /**
      * Function push stereo frame into queue.
      * This function called ONLY from video thread.
-     * @param srcDataLeft  - first  INPUT data (Both or Left);
-     * @param srcDataRight - second INPUT data (NULL or Right);
-     * @param theStParams  - stereo parameters;
-     * @param srcFormat    - source data format;
-     * @param srcPTS       - PTS (presentation timestamp);
+     * @param theSrcDataLeft  - first  INPUT data (Both or Left);
+     * @param theSrcDataRight - second INPUT data (NULL or Right);
+     * @param theStParams     - stereo parameters;
+     * @param theSrcFormat    - source data format;
+     * @param theSrcPTS       - PTS (presentation timestamp);
      * @return true on success.
      */
     bool push(const StImage&     theSrcDataLeft,

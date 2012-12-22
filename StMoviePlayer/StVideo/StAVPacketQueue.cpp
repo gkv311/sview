@@ -47,6 +47,8 @@ StAVPacketQueue::StAVPacketQueue(const size_t theSizeLimit)
   myPtsStartBase(0.0),
   myPtsStartStream(0.0),
   myStreamId(-1),
+  myToFlush(false),
+  myToQuit(false),
   // playback control
   myEventMutex(),
   myPtsSeek(0.0),
@@ -161,6 +163,7 @@ void StAVPacketQueue::pushQuit() {
 
 void StAVPacketQueue::pushFlush() {
     StAVPacketQueue::push(ST_FLUSH_PACKET);
+    myToFlush = true;
 }
 
 void StAVPacketQueue::pushPlayEvent(const StPlayEvent_t theEventId,
