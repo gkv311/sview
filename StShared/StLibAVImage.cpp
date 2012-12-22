@@ -376,9 +376,7 @@ bool StLibAVImage::save(const StString& theFilePath,
                 return false;
             }
             if(aPFormatAV == stLibAV::PIX_FMT::RGB24  ||
-               aPFormatAV == stLibAV::PIX_FMT::BGR24  ||
                aPFormatAV == stLibAV::PIX_FMT::RGBA32 ||
-               aPFormatAV == stLibAV::PIX_FMT::BGRA32 ||
                aPFormatAV == stLibAV::PIX_FMT::GRAY8) {
                 anImage.initWrapper(*this);
             } else {
