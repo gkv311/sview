@@ -500,11 +500,18 @@ bool StAudioQueue::stalQueue(const double thePts) {
     myDbgPrevQueued = aQueued;
 #endif
 
+    if((aState == AL_PLAYING
+     || aState == AL_PAUSED)
+    && (myPrevFormat    != myAlFormat
+     || myPrevFrequency != myBufferOut.getFreq()))
+    {
+        return false; // wait until tail of previous stream played
+    }
+
     if(myPrevFormat    != myAlFormat
-    ///|| myPrevFrequency != myBufferOut.getFreq()
+    || myPrevFrequency != myBufferOut.getFreq()
     || (aState  == AL_STOPPED
-     && aQueued == NUM_AL_BUFFERS)
-    ) {
+     && aQueued == NUM_AL_BUFFERS)) {
         ST_DEBUG_LOG("AL, reinitialize buffers per source , size= " + myBufferOut.getDataSize(0)
                             + "; freq= " + myBufferOut.getFreq());
         stalEmpty();
