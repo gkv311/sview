@@ -506,18 +506,22 @@ void StVideo::packetsLoop() {
     if(myAudio->isInitialized())       myAudio->pushStart();
     if(mySubtitles->isInitialized())   mySubtitles->pushStart();
 
+    const bool toKeepPlaying = isPlaying();
+
     // reset seeking events for previous file
     myVideoMaster->pushPlayEvent(ST_PLAYEVENT_NONE);
     myAudio->pushPlayEvent(ST_PLAYEVENT_NONE);
     if(!myVideoMaster->isInitialized()) {
         myVideoMaster->pushPlayEvent(ST_PLAYEVENT_RESET);
+    } else if(toKeepPlaying && !myVideoMaster->isPlaying()) {
+        myVideoMaster->pushPlayEvent(ST_PLAYEVENT_PLAY);
     }
     if(!myAudio->isInitialized()) {
         myAudio->pushPlayEvent(ST_PLAYEVENT_RESET);
+    } else if(toKeepPlaying && !myAudio->isPlaying()) {
+        myAudio->pushPlayEvent(ST_PLAYEVENT_PLAY);
     }
-    if(!mySubtitles->isInitialized()) {
-        ///mySubtitles->pushPlayEvent(ST_PLAYEVENT_RESET);/// TODO
-    }
+
     // indicate new file opened
     signals.onLoaded();
 
