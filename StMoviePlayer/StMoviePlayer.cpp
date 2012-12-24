@@ -484,7 +484,8 @@ void StMoviePlayer::doUpdateStateLoaded() {
     } else {
         myWindow->setTitle(aFileToLoad + " - sView");
     }
-    myGUI->updateAudioStreamsMenu(myVideo->params.activeAudio->getList());
+    myGUI->updateAudioStreamsMenu(myVideo->params.activeAudio->getList(),
+                                  myVideo->hasVideoStream());
     params.audioStream->setValue(myVideo->params.activeAudio->getValue());
     myGUI->updateSubtitlesStreamsMenu(myVideo->params.activeSubtitles->getList());
     params.subtitlesStream->setValue(myVideo->params.activeSubtitles->getValue());

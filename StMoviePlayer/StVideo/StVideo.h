@@ -199,6 +199,13 @@ class ST_LOCAL StVideo {
     }
 
     /**
+     * @return true if video stream loaded.
+     */
+    bool hasVideoStream() const {
+        return myVideoMaster->isInitialized();
+    }
+
+    /**
      * Get default stereoscopic format.
      */
     StFormatEnum getSrcFormat() const {

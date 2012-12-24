@@ -612,6 +612,9 @@ void StVideo::packetsLoop() {
                 myAudio->deinit();
             }
             size_t anActiveStreamId = size_t(params.activeAudio->getValue());
+            if(!myVideoMaster->isInitialized() && anActiveStreamId == size_t(-1)) {
+                anActiveStreamId = 0; // just prevent crash - should be protected in GUI
+            }
             if(anActiveStreamId != size_t(-1)) {
                 size_t aCounter = 0;
                 for(aCtxId = 0; aCtxId < myCtxList.size() && !myAudio->isInitialized(); ++aCtxId) {

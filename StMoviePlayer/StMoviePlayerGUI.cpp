@@ -722,7 +722,8 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& cursorZo, bool isMouseAct
     }
 }
 
-void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StString> >& theStreamsList) {
+void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StString> >& theStreamsList,
+                                              const bool theHasVideo) {
     if(myMenuAudio == NULL) {
         return;
     }
@@ -732,7 +733,9 @@ void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StStri
         delete anItem;
     }
 
-    myMenuAudio->addItem("None", myPlugin->params.audioStream, -1);
+    if(theHasVideo || theStreamsList.isNull() || theStreamsList->isEmpty()) {
+        myMenuAudio->addItem("None", myPlugin->params.audioStream, -1);
+    }
     if(!theStreamsList.isNull()) {
         for(size_t aStreamId = 0; aStreamId < theStreamsList->size(); ++aStreamId) {
             myMenuAudio->addItem(theStreamsList->getValue(aStreamId), myPlugin->params.audioStream, int32_t(aStreamId));
@@ -740,8 +743,10 @@ void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StStri
     }
 
     //myMenuAudio->addSplitter();
-    myMenuAudio->addItem("Attach from file")
-               ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doAddAudioStream);
+    if(theHasVideo) {
+        myMenuAudio->addItem("Attach from file")
+                   ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doAddAudioStream);
+    }
 
     // update menu representation
     myMenuAudio->stglInit();
