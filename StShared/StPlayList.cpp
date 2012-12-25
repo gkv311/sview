@@ -265,8 +265,15 @@ bool StPlayList::walkToNext() {
         } else {
             if((myPlayedCount >= (myItemsCount - 1)) || (myPlayedCount == 0)) {
                 // reset the playback counter
-                /// TODO (Kirill Gavrilov#5) use external seed
-                ///myRandGen.setSeed();
+            #if (defined(_WIN32) || defined(__WIN32__))
+                FILETIME aTime;
+                GetSystemTimeAsFileTime(&aTime);
+                myRandGen.setSeed(aTime.dwLowDateTime);
+            #else
+                timeval aTime;
+                gettimeofday(&aTime, NULL);
+                myRandGen.setSeed(aTime.tv_usec);
+            #endif
                 myPlayedCount = 0;
                 myCurrent->setPlayedFlag(!myCurrent->getPlayedFlag());
                 ST_DEBUG_LOG("Restart the shuffle");
