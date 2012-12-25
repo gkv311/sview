@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -9,6 +9,10 @@
 #include <StGL/StPlayList.h>
 
 #include <StFile/StRawFile.h>
+
+namespace {
+    static size_t THE_UNDO_LIMIT = 1024;
+};
 
 StPlayItem::StPlayItem(StFileNode* theFileNode,
                        const StStereoParams& theDefParams)
@@ -109,6 +113,10 @@ void StPlayList::delPlayItem(StPlayItem* theRemItem) {
     } else if(theRemItem->hasNext()) {
         theRemItem->getNext()->setPrev(NULL);
     }
+
+    myStackPrev.clear();
+    myStackNext.clear();
+
     --myItemsCount;
 }
 
@@ -174,6 +182,8 @@ void StPlayList::clear() {
         anItem = anItem->getNext();
         delete anItemToDel;
     }
+    myStackPrev.clear();
+    myStackNext.clear();
     myFirst = myLast = myCurrent = NULL;
     myItemsCount = myPlayedCount = 0;
 }
@@ -188,6 +198,8 @@ bool StPlayList::walkToFirst() {
     bool wasntFirst = (myCurrent != myFirst);
     myCurrent = myFirst;
     if(wasntFirst) {
+        myStackPrev.clear();
+        myStackNext.clear();
         signals.onPositionChange();
     }
     return wasntFirst;
@@ -198,6 +210,8 @@ bool StPlayList::walkToLast() {
     bool wasntLast = (myCurrent != myLast);
     myCurrent = myLast;
     if(wasntLast) {
+        myStackPrev.clear();
+        myStackNext.clear();
         signals.onPositionChange();
     }
     return wasntLast;
@@ -205,11 +219,30 @@ bool StPlayList::walkToLast() {
 
 bool StPlayList::walkToPrev() {
     StMutexAuto anAutoLock(myMutex);
+    if(myCurrent == NULL) {
+        return false;
+    } else if(myIsShuffle && myItemsCount >= 3) {
+        StPlayItem* aNext = myCurrent;
+        if(!myStackPrev.empty()) {
+            myCurrent = myStackPrev.back();
+            myStackPrev.pop_back();
+        } else if(myCurrent != myFirst) {
+            myCurrent = myCurrent->getPrev();
+        } else {
+            aNext = NULL;
+        }
 
-    /// TODO (Kirill Gavrilov#5) walk in history stack
-    ///if(myIsShuffle) {
-
-    if((myCurrent != myFirst) && myCurrent != NULL) {
+        if(aNext != myCurrent
+        && aNext != NULL) {
+            myStackNext.push_front(aNext);
+            if(myStackNext.size() > THE_UNDO_LIMIT) {
+                myStackNext.pop_back();
+            }
+            signals.onPositionChange();
+            return true;
+        }
+        return false;
+    } else if(myCurrent != myFirst) {
         myCurrent = myCurrent->getPrev();
         signals.onPositionChange();
         return true;
@@ -225,51 +258,65 @@ bool StPlayList::walkToNext() {
         return false;
     } else if(myIsShuffle && myItemsCount >= 3) {
         /// TODO (Kirill Gavrilov#5) walk to the history front before next random
+        StPlayItem* aPrev = myCurrent;
+        if(!myStackNext.empty()) {
+            myCurrent = myStackNext.front();
+            myStackNext.pop_front();
+        } else {
+            if((myPlayedCount >= (myItemsCount - 1)) || (myPlayedCount == 0)) {
+                // reset the playback counter
+                /// TODO (Kirill Gavrilov#5) use external seed
+                ///myRandGen.setSeed();
+                myPlayedCount = 0;
+                myCurrent->setPlayedFlag(!myCurrent->getPlayedFlag());
+                ST_DEBUG_LOG("Restart the shuffle");
+            }
 
-        if((myPlayedCount >= (myItemsCount - 1)) || (myPlayedCount == 0)) {
-            // reset the playback counter
-            /// TODO (Kirill Gavrilov#5) use external seed
-            ///myRandGen.setSeed();
-            myPlayedCount = 0;
-            myCurrent->setPlayedFlag(!myCurrent->getPlayedFlag());
-            ST_DEBUG_LOG("Restart the shuffle");
-        }
+            const size_t aCurrPos = myCurrent->getPosition();
+            bool aCurrFlag  = myCurrent->getPlayedFlag();
 
-        const size_t aCurrPos = myCurrent->getPosition();
-        bool aCurrFlag  = myCurrent->getPlayedFlag();
-
-        StPlayItem* aNextItem;
-        size_t aNextPos;
-        size_t aNextDiff;
-        for(size_t anIter = 0;; ++anIter) {
-            aNextItem = myCurrent;
-            aNextPos = size_t(myRandGen.next() * myItemsCount);
-            if(aNextPos > aCurrPos) {
-                // forward direction
-                aNextDiff = aNextPos - aCurrPos;
-                for(; aNextItem != NULL && aNextDiff > 0; --aNextDiff) {
-                    aNextItem = aNextItem->getNext();
+            StPlayItem* aNextItem;
+            size_t aNextPos;
+            size_t aNextDiff;
+            for(size_t anIter = 0;; ++anIter) {
+                aNextItem = myCurrent;
+                aNextPos = size_t(myRandGen.next() * myItemsCount);
+                if(aNextPos > aCurrPos) {
+                    // forward direction
+                    aNextDiff = aNextPos - aCurrPos;
+                    for(; aNextItem != NULL && aNextDiff > 0; --aNextDiff) {
+                        aNextItem = aNextItem->getNext();
+                    }
+                } else {
+                    // backward direction
+                    aNextDiff = aCurrPos - aNextPos;
+                    for(; aNextItem != NULL && aNextDiff > 0; --aNextDiff) {
+                        aNextItem = aNextItem->getPrev();
+                    }
                 }
-            } else {
-                // backward direction
-                aNextDiff = aCurrPos - aNextPos;
-                for(; aNextItem != NULL && aNextDiff > 0; --aNextDiff) {
-                    aNextItem = aNextItem->getPrev();
+                if(aCurrFlag != aNextItem->getPlayedFlag()) {
+                    // found the item!
+                    break;
+                } else if(anIter >= 2 * myItemsCount) {
+                    // something wrong!
+                    ST_DEBUG_LOG("Next shuffle position not found within " + anIter + " iterations!");
+                    aCurrFlag = !aCurrFlag;
                 }
             }
-            if(aCurrFlag != aNextItem->getPlayedFlag()) {
-                // found the item!
-                break;
-            } else if(anIter >= 2 * myItemsCount) {
-                // something wrong!
-                ST_DEBUG_LOG("Next shuffle position not found within " + anIter + " iterations!");
-                aCurrFlag = !aCurrFlag;
+            ST_DEBUG_LOG(aCurrPos + " -> " + aNextPos);
+            ++myPlayedCount; ///
+
+            aNextItem->setPlayedFlag(aCurrFlag);
+            myCurrent = aNextItem;
+        }
+
+        if(aPrev != myCurrent
+        && aPrev != NULL) {
+            myStackPrev.push_back(aPrev);
+            if(myStackPrev.size() > THE_UNDO_LIMIT) {
+                myStackPrev.pop_front();
             }
         }
-        ST_DEBUG_LOG(aCurrPos + " -> " + aNextPos);
-        ++myPlayedCount; ///
-        aNextItem->setPlayedFlag(aCurrFlag);
-        myCurrent = aNextItem;
 
         signals.onPositionChange();
         return true;

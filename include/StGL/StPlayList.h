@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -15,6 +15,8 @@
 #include <StGLStereo/StGLTextureQueue.h>
 #include <StThreads/StMinGen.h>
 #include <StSlots/StSignal.h>
+
+#include <deque>
 
 /**
  * Playlist node.
@@ -101,42 +103,6 @@ class ST_LOCAL StPlayItem {
  * All public methods are thread-safe, thus returns the objects copies.
  */
 class ST_LOCAL StPlayList {
-
-        private:
-
-    mutable StMutex myMutex; //!< mutex for thread-safe access
-    StFolder  myFoldersRoot; //!< common root for all file nodes
-    StPlayItem*     myFirst; //!< double-linked list, start node
-    StPlayItem*      myLast; //!< double-linked list, last node
-    StPlayItem*   myCurrent; //!< current playback node
-    size_t     myItemsCount; //!< current playlist size
-    StArrayList<StString> myExtensions; //!< extensions list
-    StStereoParams       myDefStParams; //!< default stereo parameters
-    StMinGen      myRandGen; //!< random number generator for shuffle playback
-    size_t    myPlayedCount; //!< played items in current iteration (< myItemsCount)
-    int myRecursionDeep;
-    bool myIsShuffle;
-    bool myIsLoopFlag;
-
-    /**
-     * Add new item to double-linked list.
-     */
-    void addPlayItem(StPlayItem* theNewItem);
-
-    /**
-     * Remove the item from double-linked list but NOT destroy it.
-     */
-    void delPlayItem(StPlayItem* theRemItem);
-
-    /**
-     * Recursively add all file nodes to playlist.
-     */
-    void addToPlayList(StFileNode* theFileNode);
-
-    /**
-     * M3U parsing stuff.
-     */
-    char* parseM3UIter(char* theIter);
 
         public:
 
@@ -288,6 +254,46 @@ class ST_LOCAL StPlayList {
          */
         StSignal<void (void )> onPlaylistChange;
     } signals;
+
+        private:
+
+    /**
+     * Add new item to double-linked list.
+     */
+    void addPlayItem(StPlayItem* theNewItem);
+
+    /**
+     * Remove the item from double-linked list but NOT destroy it.
+     */
+    void delPlayItem(StPlayItem* theRemItem);
+
+    /**
+     * Recursively add all file nodes to playlist.
+     */
+    void addToPlayList(StFileNode* theFileNode);
+
+    /**
+     * M3U parsing stuff.
+     */
+    char* parseM3UIter(char* theIter);
+
+        private:
+
+    mutable StMutex         myMutex;         //!< mutex for thread-safe access
+    StFolder                myFoldersRoot;   //!< common root for all file nodes
+    StPlayItem*             myFirst;         //!< double-linked list, start node
+    StPlayItem*             myLast;          //!< double-linked list, last node
+    StPlayItem*             myCurrent;       //!< current playback node
+    std::deque<StPlayItem*> myStackPrev;     //!< stack of previous items (for shuffle playback)
+    std::deque<StPlayItem*> myStackNext;     //!< stack of next     items (for shuffle playback)
+    size_t                  myItemsCount;    //!< current playlist size
+    StArrayList<StString>   myExtensions;    //!< extensions list
+    StStereoParams          myDefStParams;   //!< default stereo parameters
+    StMinGen                myRandGen;       //!< random number generator for shuffle playback
+    size_t                  myPlayedCount;   //!< played items in current iteration (< myItemsCount)
+    int                     myRecursionDeep;
+    bool                    myIsShuffle;
+    bool                    myIsLoopFlag;
 
 };
 
