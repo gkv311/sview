@@ -220,10 +220,11 @@ class StWindowInterface {
     /**
      * Function create a GL window.
      * @param attr (const StWinAttributes_t* ) - attributes;
-     * @param nativeParent (const StNativeWin_t* ) - handle with native window information (to create embedded StWindow);
+     * @param nativeParent - handle with native window information (to create embedded StWindow);
      * @return true on success.
      */
-    virtual bool stglCreate(const StWinAttributes_t* inAttributes, const StNativeWin_t* nativeParent = NULL) = 0;
+    virtual bool stglCreate(const StWinAttributes_t* inAttributes,
+                            const StNativeWin_t      nativeParent = (StNativeWin_t) NULL) = 0;
 
     /**
      * Swap dualbuffered GL context for specified window;

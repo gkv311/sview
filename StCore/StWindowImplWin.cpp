@@ -46,10 +46,8 @@ static LRESULT CALLBACK stWndProcWrapper(HWND in_hWnd, UINT uMsg, WPARAM wParam,
 
 // function create GUI window
 bool StWindowImpl::stglCreate(const StWinAttributes_t* theAttributes,
-                              const StNativeWin_t*     theParentWindow) {
-    if(theParentWindow != NULL) {
-        stMemCpy(&myParentWin, theParentWindow, sizeof(StNativeWin_t));
-    }
+                              const StNativeWin_t      theParentWindow) {
+    myParentWin = theParentWindow;
 
     // parse attributes
     size_t aBytesToCopy = (theAttributes->nSize > sizeof(StWinAttributes_t)) ? sizeof(StWinAttributes_t) : theAttributes->nSize;
@@ -521,7 +519,6 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
     if(myWinAttribs.isFullScreen) {
         // embedded
         if(myParentWin != NULL) {
-            // TODO (Kirill Gavrilov#6) check safity
             SetParent(myMaster.hWindowGl, NULL);
             SetFocus (myMaster.hWindowGl);
         }
@@ -541,7 +538,7 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
     } else {
         // embedded
         if(myParentWin != NULL) {
-            SetParent(myMaster.hWindowGl, (HWND )myParentWin);
+            SetParent(myMaster.hWindowGl, myParentWin);
         }
 
         // generic

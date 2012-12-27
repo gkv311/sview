@@ -42,7 +42,7 @@ class ST_LOCAL StRendererPlugin : public StRendererInterface {
     typedef StRenderer_t (*StRenderer_new_t)();
     typedef void (*StRenderer_del_t)(StRenderer_t );
     typedef StWindowInterface* (*StRenderer_getStWindow_t)(StRenderer_t );
-    typedef stBool_t (*StRenderer_init_t)(StRenderer_t , const stUtf8_t* , const int& , const StNativeWin_t* );
+    typedef stBool_t (*StRenderer_init_t)(StRenderer_t , const stUtf8_t* , const int& , const StNativeWin_t );
     typedef stBool_t (*StRenderer_open_t)(StRenderer_t , const StOpenInfo_t* );
     typedef void (*StRenderer_callback_t)(StRenderer_t , StMessage_t* );
     typedef void (*StRenderer_stglDraw_t)(StRenderer_t , unsigned int );
@@ -94,8 +94,8 @@ class ST_LOCAL StRendererPlugin : public StRendererInterface {
         return stWindow;
     }
 
-    bool init(const int& deviceId, const StNativeWin_t* nativeParent = NULL);
-    bool init(const StString& rendererPath, const int& deviceId, const StNativeWin_t* nativeParent = NULL);
+    bool init(const int& deviceId, const StNativeWin_t nativeParent = (StNativeWin_t )NULL);
+    bool init(const StString& rendererPath, const int& deviceId, const StNativeWin_t nativeParent = (StNativeWin_t )NULL);
 
     bool open(const StOpenInfo& stOpenInfo = StOpenInfo()) {
         const StOpenInfo_t stOpenInfoStruct = stOpenInfo.getStruct();

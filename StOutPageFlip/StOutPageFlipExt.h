@@ -78,7 +78,7 @@ class ST_LOCAL StOutPageFlipExt : public StOutPageFlip {
 
     StOutPageFlipExt(const StHandle<StSettings>& theSettings);
     virtual ~StOutPageFlipExt();
-    virtual bool init(const StString& , const int& , const StNativeWin_t* );
+    virtual bool init(const StString& , const int& , const StNativeWin_t );
     virtual void callback(StMessage_t* theMessages);
 
 };

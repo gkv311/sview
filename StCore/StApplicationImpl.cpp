@@ -51,15 +51,13 @@ namespace {
 
 StApplicationImpl::StApplicationImpl()
 : myParamDeviceInt(StRendererInfo::DEVICE_AUTO),
+  myNativeWinParent((StNativeWin_t )NULL),
   myIsOpened(false),
   myIsFullscreen(false),
   myToQuit(false) {
-    //
     stMemSet(myMessages, 0, sizeof(myMessages));
-    stMemSet(&myNativeWinParent, 0, sizeof(myNativeWinParent));
 
     // add additional paths
-    // TODO (Kirill Gavrilov#1) linux library path
 #if(defined(_WIN32) || defined(__WIN32__))
     // requires Windows XP with SP1 or higher!
     StStringUtfWide aStCoreFolder = StProcess::getStCoreFolder().toUtfWide();
@@ -152,21 +150,17 @@ bool StApplicationImpl::chooseRendererPlugin() {
     return false;
 }
 
-bool StApplicationImpl::create(const StNativeWin_t* theNativeWinParent) {
+bool StApplicationImpl::create(const StNativeWin_t theNativeWinParent) {
     if(!chooseRendererPlugin()) {
         stError("StRenderer plugin (for stereo-device support) not available!");
         return false;
     }
 
-    if(theNativeWinParent != NULL) {
-        stMemCpy(&myNativeWinParent, theNativeWinParent, sizeof(myNativeWinParent));
-    } else {
-        stMemSet(&myNativeWinParent,                  0, sizeof(myNativeWinParent));
-    }
+    myNativeWinParent = theNativeWinParent;
 
     // TODO (Kirill Gavrilov#9) try open another renderer if initialization failes
     myRenderer.Instantiate();
-    bool aResult = myRenderer.init(myParamDeviceInt, &myNativeWinParent);
+    bool aResult = myRenderer.init(myParamDeviceInt, myNativeWinParent);
     ST_DEBUG_LOG(StGLContext::stglInfo());
     return aResult;
 }
@@ -272,7 +266,7 @@ void StApplicationImpl::callback(StMessage_t* theMessages) {
                 }
 
                 myRenderer.Instantiate();
-                if(myRenderer.init(myParamDeviceInt, &myNativeWinParent)) {
+                if(myRenderer.init(myParamDeviceInt, myNativeWinParent)) {
                     /// TODO (Kirill Gavrilov#5) get up-to-date opened file info
                     open(StOpenInfo());
                 }
@@ -439,7 +433,7 @@ ST_EXPORT stBool_t StApplication_isFullscreen(StApplicationInterface* theInst) {
     return ((StApplicationImpl* )theInst)->isFullscreen();
 }
 
-ST_EXPORT stBool_t StApplication_create(StApplicationInterface* theInst, const StNativeWin_t* theNativeWinParent) {
+ST_EXPORT stBool_t StApplication_create(StApplicationInterface* theInst, const StNativeWin_t theNativeWinParent) {
     return ((StApplicationImpl* )theInst)->create(theNativeWinParent);
 }
 

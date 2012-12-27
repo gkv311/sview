@@ -33,7 +33,7 @@ class ST_LOCAL StApplicationImpl : public StApplicationInterface {
     virtual ~StApplicationImpl();
     virtual bool isOpened() { return myIsOpened; }
     virtual bool isFullscreen() { return myIsFullscreen; }
-    virtual bool create(const StNativeWin_t* );
+    virtual bool create(const StNativeWin_t );
     virtual bool open(const StOpenInfo& );
     virtual void callback(StMessage_t* );
 

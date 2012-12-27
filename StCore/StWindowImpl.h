@@ -60,7 +60,7 @@ class ST_LOCAL StWindowImpl : public StWindowInterface {
     virtual int getMouseDown(StPointD_t* thePoint);
     virtual int getMouseUp(StPointD_t* thePoint);
     virtual int getDragNDropFile(const int& id, stUtf8_t* outFile, const size_t& buffSizeBytes);
-    virtual bool stglCreate(const StWinAttributes_t* theAttributes, const StNativeWin_t* theParentWindow);
+    virtual bool stglCreate(const StWinAttributes_t* theAttributes, const StNativeWin_t theParentWindow);
     virtual void stglSwap(const int& theWinId);
     virtual void stglMakeCurrent(const int& theWinId);
     virtual double stglGetTargetFps() { return myTargetFps; }

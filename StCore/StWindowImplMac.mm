@@ -207,12 +207,10 @@ void StWindowImpl::doCreateWindows(NSOpenGLContext* theGLContextMaster,
 }
 
 bool StWindowImpl::stglCreate(const StWinAttributes_t* theAttributes,
-                              const StNativeWin_t*     theParentWindow) {
+                              const StNativeWin_t      theParentWindow) {
     myInitState = STWIN_INITNOTSTART;
-    if(theParentWindow != NULL) {
-        ///stMemCpy(&myParentWin, theParentWindow, sizeof(StNativeWin_t));
-        ///myParentWin.stWinPtr = this;
-    }
+    myParentWin = theParentWindow;
+
     size_t bytesToCopy = (theAttributes->nSize > sizeof(StWinAttributes_t)) ? sizeof(StWinAttributes_t) : theAttributes->nSize;
     stMemCpy(&myWinAttribs, theAttributes, bytesToCopy); // copy as much as possible
     myWinAttribs.nSize = sizeof(StWinAttributes_t);     // restore own size

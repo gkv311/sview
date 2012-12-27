@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2010 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutDual library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -56,7 +56,7 @@ class ST_LOCAL StOutDual : public StRendererInterface {
     ~StOutDual();
     StRendererInterface* getLibImpl() { return this; }
     StWindowInterface* getStWindow() { return myStCore->getStWindow(); }
-    bool init(const StString& , const int& , const StNativeWin_t* );
+    bool init(const StString& , const int& , const StNativeWin_t );
     bool open(const StOpenInfo& stOpenInfo) { return myStCore->open(stOpenInfo); }
     void callback(StMessage_t* );
     void stglDraw(unsigned int );

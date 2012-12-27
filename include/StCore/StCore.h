@@ -97,7 +97,7 @@ class ST_LOCAL StCore : public StRendererInterface {
         return stWindow;
     }
 
-    bool init(const StString& theRendererPath, const int& theDeviceId, const StNativeWin_t* theNativeParent = NULL) {
+    bool init(const StString& theRendererPath, const int& theDeviceId, const StNativeWin_t theNativeParent = (StNativeWin_t )NULL) {
         return GetFunctions().StCore_init(instance, theRendererPath.toCString(), theDeviceId, theNativeParent);
     }
 

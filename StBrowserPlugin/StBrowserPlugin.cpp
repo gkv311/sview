@@ -138,13 +138,11 @@ NPError StBrowserPlugin::getValue(NPPVariable variable, void* value) {
 StBrowserPlugin::StBrowserPlugin(NSPluginCreateData* theCreateDataStruct)
 : NSPluginBase(),
   nppInstance(theCreateDataStruct->instance),
-  myParentWin(),
+  myParentWin((StNativeWin_t )NULL),
   myStApp(),
   myOpenInfo(),
   myToLoadFull(false),
   myToQuit(false) {
-    stMemSet(&myParentWin, 0, sizeof(StNativeWin_t));
-
     StArgumentsMap aDrawerArgs;
     for(int aParamId = 0; aParamId < theCreateDataStruct->argc; ++aParamId) {
         StString aParamName  = StString(theCreateDataStruct->argn[aParamId]);
@@ -198,7 +196,7 @@ StBrowserPlugin::~StBrowserPlugin() {
 void StBrowserPlugin::stWindowLoop() {
 
     myStApp = new StApplication();
-    if(!myStApp->create(&myParentWin)) {
+    if(!myStApp->create(myParentWin)) {
         myStApp.nullify();
         return;
     }
@@ -276,17 +274,9 @@ bool StBrowserPlugin::init(NPWindow* npWindow) {
     if(npWindow == NULL || npWindow->window == NULL) {
         return false;
     }
-#if(defined(_WIN32) || defined(__WIN32__))
-    myParentWin = (HWND )npWindow->window;
-#elif(defined(__APPLE__))
-    myParentWin = npWindow->window;
-#else
-    myParentWin.winHandle = npWindow->window;
-#endif
-    ///NPSetWindowCallbackStruct* ws_info = (NPSetWindowCallbackStruct* )npWindow->ws_info;
-    ///myParentWin.hDisplay = ws_info->display;
-    ///myParentWin.vi = ws_info->visual;
-    myThread = new StThread(stThreadFunction, (void* )this); // starts out plugin main loop in another thread
+
+    myParentWin = (StNativeWin_t )npWindow->window;
+    myThread = new StThread(stThreadFunction, this); // starts out plugin main loop in another thread
 
     if(!myPreviewUrl.isEmpty() && NPNFuncs.geturl != NULL) {
         NPNFuncs.geturl(nppInstance, myPreviewUrl.toCString(), NULL);

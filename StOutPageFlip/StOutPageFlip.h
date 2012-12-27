@@ -154,7 +154,7 @@ class ST_LOCAL StOutPageFlip : public StRendererInterface {
     virtual ~StOutPageFlip();
     virtual StRendererInterface* getLibImpl() { return this; }
     virtual StWindowInterface* getStWindow() { return myStCore->getStWindow(); }
-    virtual bool init(const StString& , const int& , const StNativeWin_t* );
+    virtual bool init(const StString& , const int& , const StNativeWin_t );
     virtual bool open(const StOpenInfo& theOpenInfo) { return myStCore->open(theOpenInfo); }
     virtual void callback(StMessage_t* );
     virtual void stglDraw(unsigned int );

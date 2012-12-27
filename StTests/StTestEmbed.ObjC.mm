@@ -42,7 +42,7 @@ bool StTestEmbed::createNative() {
     [aWin setTitle: @"DummyWindow"];
     [aWin makeKeyAndOrderFront: NSApp];
     ///[aWin release];
-    myParent = aWin;
+    myParent = [aWin contentView];
     return true;
 }
 

@@ -250,10 +250,10 @@ StOutInterlace::~StOutInterlace() {
     StCore::FREE();
 }
 
-bool StOutInterlace::init(const StString&      inRendererPath,
-                          const int&           theDeviceId,
-                          const StNativeWin_t* nativeParent) {
-    myToSavePlacement = nativeParent == NULL;
+bool StOutInterlace::init(const StString&     inRendererPath,
+                          const int&          theDeviceId,
+                          const StNativeWin_t theNativeParent) {
+    myToSavePlacement = (theNativeParent == (StNativeWin_t )NULL);
     myDeviceId   = theDeviceId;
     myPluginPath = inRendererPath;
     if(!StVersionInfo::checkTimeBomb("sView - Interlace Output plugin")) {
@@ -321,7 +321,7 @@ bool StOutInterlace::init(const StString&      inRendererPath,
     attribs.isSlave = true;
     attribs.isSlaveHLineTop = true;
     attribs.isSlaveHide = true;
-    getStWindow()->stglCreate(&attribs, nativeParent);
+    getStWindow()->stglCreate(&attribs, theNativeParent);
 
     // initialize GL context
     myContext = new StGLContext();
@@ -848,8 +848,11 @@ ST_EXPORT void StRenderer_del(StRendererInterface* inst) {
 ST_EXPORT StWindowInterface* StRenderer_getStWindow(StRendererInterface* inst) {
     // This is VERY important return libImpl pointer here!
     return ((StOutInterlace* )inst)->getStWindow()->getLibImpl(); }
-ST_EXPORT stBool_t StRenderer_init(StRendererInterface* inst, const stUtf8_t* rendererPath, const int& theDeviceId, const StNativeWin_t* nativeParent) {
-    return ((StOutInterlace* )inst)->init(StString(rendererPath), theDeviceId, nativeParent); }
+ST_EXPORT stBool_t StRenderer_init(StRendererInterface* inst,
+                                   const stUtf8_t*      theRendererPath,
+                                   const int&           theDeviceId,
+                                   const StNativeWin_t  theNativeParent) {
+    return ((StOutInterlace* )inst)->init(StString(theRendererPath), theDeviceId, theNativeParent); }
 ST_EXPORT stBool_t StRenderer_open(StRendererInterface* inst, const StOpenInfo_t* stOpenInfo) {
     return ((StOutInterlace* )inst)->open(StOpenInfo(stOpenInfo)); }
 ST_EXPORT void StRenderer_callback(StRendererInterface* inst, StMessage_t* stMessages) {

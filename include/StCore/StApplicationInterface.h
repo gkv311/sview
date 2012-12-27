@@ -21,8 +21,8 @@
 
 #include <stTypes.h>
 #include "StMessageList.h"
-#include "StNativeWin_t.h"
 #include "StOpenInfo.h"
+#include "StNativeWin_t.h"
 
 #ifdef __cplusplus
 
@@ -46,15 +46,10 @@ class StApplicationInterface {
 
     /**
      * Function load Output (rendering) plugin.
-     * @param nativeParent (const StNativeWin_t* ) - handle with native window information (to create embedded StWindow);
+     * @param nativeParent - handle with native window information (to create embedded StWindow);
      * @return false on any critical error.
      */
-    virtual bool create(const StNativeWin_t* nativeParent = NULL) = 0;
-
-    /**
-     * Force application to exit.
-     */
-    ///virtual void quit() = 0;
+    virtual bool create(const StNativeWin_t theNativeParent = (StNativeWin_t )NULL) = 0;
 
     /**
      * Function automatically load Drawer plugin and open file.

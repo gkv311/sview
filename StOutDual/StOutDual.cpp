@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2010 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutDual library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -240,10 +240,10 @@ StOutDual::~StOutDual() {
     StCore::FREE();
 }
 
-bool StOutDual::init(const StString&      theRendererPath,
-                     const int&           theDeviceId,
-                     const StNativeWin_t* theNativeParent) {
-    myToSavePlacement = (theNativeParent == NULL);
+bool StOutDual::init(const StString&     theRendererPath,
+                     const int&          theDeviceId,
+                     const StNativeWin_t theNativeParent) {
+    myToSavePlacement = (theNativeParent == (StNativeWin_t )NULL);
     myDevice = (DeviceEnum )theDeviceId;
     myPluginPath = theRendererPath;
     if(!StVersionInfo::checkTimeBomb("sView - Dual Output plugin")) {
@@ -617,7 +617,10 @@ ST_EXPORT void StRenderer_del(StRendererInterface* inst) {
 ST_EXPORT StWindowInterface* StRenderer_getStWindow(StRendererInterface* inst) {
     // This is VERY important return libImpl pointer here!
     return ((StOutDual* )inst)->getStWindow()->getLibImpl(); }
-ST_EXPORT stBool_t StRenderer_init(StRendererInterface* inst, const stUtf8_t* theRendererPath, const int& theDeviceId, const StNativeWin_t* theNativeParent) {
+ST_EXPORT stBool_t StRenderer_init(StRendererInterface* inst,
+                                   const stUtf8_t*      theRendererPath,
+                                   const int&           theDeviceId,
+                                   const StNativeWin_t  theNativeParent) {
     return ((StOutDual* )inst)->init(StString(theRendererPath), theDeviceId, theNativeParent); }
 ST_EXPORT stBool_t StRenderer_open(StRendererInterface* inst, const StOpenInfo_t* stOpenInfo) {
     return ((StOutDual* )inst)->open(StOpenInfo(stOpenInfo)); }

@@ -21,7 +21,7 @@
 
 #include "StTest.h"
 
-#include <StCore/StNativeWin_t.h>
+#include <StCore/StWindow.h>
 #include <StThreads/StThreads.h>
 
 /**

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2010 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutAnaglyph library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -259,10 +259,10 @@ namespace {
     }
 };
 
-bool StOutAnaglyph::init(const StString&      theRendererPath,
+bool StOutAnaglyph::init(const StString&     theRendererPath,
                          const int& ,
-                         const StNativeWin_t* theNativeParent) {
-    myToSavePlacement = (theNativeParent == NULL);
+                         const StNativeWin_t theNativeParent) {
+    myToSavePlacement = (theNativeParent == (StNativeWin_t )NULL);
     myPluginPath = theRendererPath;
     if(!StVersionInfo::checkTimeBomb("sView - Anaglyph Output plugin")) {
         return false;
@@ -543,7 +543,10 @@ ST_EXPORT void StRenderer_del(StRendererInterface* inst) {
 ST_EXPORT StWindowInterface* StRenderer_getStWindow(StRendererInterface* inst) {
     // This is VERY important return libImpl pointer here!
     return ((StOutAnaglyph* )inst)->getStWindow()->getLibImpl(); }
-ST_EXPORT stBool_t StRenderer_init(StRendererInterface* inst, const stUtf8_t* theRendererPath, const int& deviceId, const StNativeWin_t* theNativeParent) {
+ST_EXPORT stBool_t StRenderer_init(StRendererInterface* inst,
+                                   const stUtf8_t*      theRendererPath,
+                                   const int&           deviceId,
+                                   const StNativeWin_t  theNativeParent) {
     return ((StOutAnaglyph* )inst)->init(StString(theRendererPath), deviceId, theNativeParent); }
 ST_EXPORT stBool_t StRenderer_open(StRendererInterface* inst, const StOpenInfo_t* stOpenInfo) {
     return ((StOutAnaglyph* )inst)->open(StOpenInfo(stOpenInfo)); }

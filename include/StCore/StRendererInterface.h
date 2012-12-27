@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2010 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -21,8 +21,8 @@
 
 #include <stTypes.h>
 #include "StMessageList.h"
-#include "StNativeWin_t.h"
 #include "StOpenInfo.h"
+#include "StNativeWin_t.h"
 
 class StWindowInterface;
 
@@ -46,10 +46,12 @@ class StRendererInterface {
 
     /**
      * Function initialize current stereo-output mode.
-     * @param nativeParent (const StNativeWin_t* ) - handle with native window information (to create embedded StWindow);
+     * @param nativeParent - handle with native window information (to create embedded StWindow);
      * @return true if success.
      */
-    virtual bool init(const StString& rendererPath, const int& deviceId, const StNativeWin_t* nativeParent = NULL) = 0;
+    virtual bool init(const StString&     rendererPath,
+                      const int&          deviceId,
+                      const StNativeWin_t nativeParent = (StNativeWin_t )NULL) = 0;
 
     /**
      * Special commands:

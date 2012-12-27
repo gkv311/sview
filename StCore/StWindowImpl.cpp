@@ -28,7 +28,8 @@ namespace {
 StAtomic<int32_t> StWindowImpl::myFullScreenWinNb(0);
 
 StWindowImpl::StWindowImpl()
-: myWindowTitle(WINDOW_TITLE_DEFAULT),
+: myParentWin(StNativeWin_t(NULL)),
+  myWindowTitle(WINDOW_TITLE_DEFAULT),
   myInitState(STWIN_INITNOTSTART),
   myMousePt(0.5, 0.5),
   myRectNorm(128, 512, 128, 512),
@@ -53,7 +54,6 @@ StWindowImpl::StWindowImpl()
   myIsUpdated(false),
   myIsActive(false),
   myWinAttribs(stDefaultWinAttributes()) {
-    //
     myDndList = new StString[1];
     myMonSlave.idMaster = 0;
     myMonSlave.idSlave  = 1; // second by default
@@ -61,7 +61,6 @@ StWindowImpl::StWindowImpl()
     myMonSlave.xSub = 0;
     myMonSlave.yAdd = 1;
     myMonSlave.ySub = 0;
-    stMemSet(&myParentWin, 0, sizeof(StNativeWin_t));
 
 #if(defined(_WIN32) || defined(__WIN32__))
     // we create Win32 event directly (not StEvent) to use it with MsgWaitForMultipleObjects()
@@ -110,7 +109,7 @@ void StWindowImpl::close() {
     }
     myMsgThread.nullify();
 #endif
-    stMemSet(&myParentWin, 0, sizeof(StNativeWin_t));
+    myParentWin = (StNativeWin_t )NULL;
 
     if(myWinAttribs.isFullScreen) {
         myFullScreenWinNb.decrement();
@@ -539,7 +538,9 @@ ST_EXPORT void StWindow_stglMakeCurrent(StWindowInterface* inst, const int& valu
     ((StWindowImpl* )inst)->stglMakeCurrent(value);
 }
 
-ST_EXPORT stBool_t StWindow_stglCreate(StWindowInterface* inst, const StWinAttributes_t* theAttributes, const StNativeWin_t* theNativeParentWindow) {
+ST_EXPORT stBool_t StWindow_stglCreate(StWindowInterface*       inst,
+                                       const StWinAttributes_t* theAttributes,
+                                       const StNativeWin_t      theNativeParentWindow) {
     return ((StWindowImpl* )inst)->stglCreate(theAttributes, theNativeParentWindow);
 }
 

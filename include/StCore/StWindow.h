@@ -56,7 +56,7 @@ class ST_LOCAL StWindow : public StWindowInterface {
     typedef int (*StWindow_getMouseDown_t)(StWindow_t , StPointD_t* );
     typedef int (*StWindow_getMouseUp_t)(StWindow_t , StPointD_t* );
     typedef int (*StWindow_getDragNDropFile_t)(StWindow_t, const int& , stUtf8_t* , const size_t& );
-    typedef stBool_t (*StWindow_stglCreate_t)(StWindow_t , const StWinAttributes_t* , const StNativeWin_t* );
+    typedef stBool_t (*StWindow_stglCreate_t)(StWindow_t , const StWinAttributes_t* , const StNativeWin_t );
     typedef void (*StWindow_stglSwap_t)(StWindow_t , const int& );
     typedef void (*StWindow_stglMakeCurrent_t)(StWindow_t , const int& );
     typedef double (*StWindow_stglGetTargetFps_t)(StWindow_t );
@@ -220,7 +220,7 @@ class ST_LOCAL StWindow : public StWindowInterface {
         return GetFunctions().StWindow_getDragNDropFile(libInstance, id, outFile, buffSizeBytes);
     }
 
-    bool stglCreate(const StWinAttributes_t* inAttributes, const StNativeWin_t* nativeParentWindow = NULL) {
+    bool stglCreate(const StWinAttributes_t* inAttributes, const StNativeWin_t nativeParentWindow = (StNativeWin_t )NULL) {
         return GetFunctions().StWindow_stglCreate(libInstance, inAttributes, nativeParentWindow);
     }
 

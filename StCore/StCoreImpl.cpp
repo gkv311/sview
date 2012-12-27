@@ -65,7 +65,7 @@ StCoreImpl::~StCoreImpl() {
 #endif
 }
 
-bool StCoreImpl::init(const StString& , const int& , const StNativeWin_t* ) {
+bool StCoreImpl::init(const StString& , const int& , const StNativeWin_t ) {
     if(!StVersionInfo::checkTimeBomb("sView - Core library")) {
         return false;
     }
@@ -228,7 +228,10 @@ ST_EXPORT void StCore_del(StRendererInterface* theInst) {
     delete (StCoreImpl* )theInst; }
 ST_EXPORT StWindowInterface* StCore_getStWindow(StRendererInterface* theInst) {
     return ((StCoreImpl* )theInst)->getStWindow(); }
-ST_EXPORT stBool_t StCore_init(StRendererInterface* theInst, const stUtf8_t* theRendererPath, const int& theDeviceId, const StNativeWin_t* theNativeParent) {
+ST_EXPORT stBool_t StCore_init(StRendererInterface* theInst,
+                               const stUtf8_t*      theRendererPath,
+                               const int&           theDeviceId,
+                               const StNativeWin_t  theNativeParent) {
     return ((StCoreImpl* )theInst)->init(StString(theRendererPath), theDeviceId, theNativeParent); }
 ST_EXPORT stBool_t StCore_open(StRendererInterface* theInst, const StOpenInfo_t* theOpenInfo) {
     return ((StCoreImpl* )theInst)->open(StOpenInfo(theOpenInfo)); }

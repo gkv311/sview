@@ -38,7 +38,7 @@ class ST_LOCAL StApplication : public StApplicationInterface {
     typedef void (*StApplication_del_t)(StApplication_t );
     typedef stBool_t (*StApplication_isOpened_t)(StApplication_t );
     typedef stBool_t (*StApplication_isFullscreen_t)(StApplication_t );
-    typedef stBool_t (*StApplication_create_t)(StApplication_t , const StNativeWin_t* );
+    typedef stBool_t (*StApplication_create_t)(StApplication_t , const StNativeWin_t );
     typedef stBool_t (*StApplication_open_t)(StApplication_t , const StOpenInfo_t* );
     typedef void (*StApplication_callback_t)(StApplication_t , StMessage_t* );
 
@@ -103,7 +103,7 @@ class ST_LOCAL StApplication : public StApplicationInterface {
         return GetFunctions().StApplication_isFullscreen(libInstance);
     }
 
-    bool create(const StNativeWin_t* nativeParent = NULL) {
+    bool create(const StNativeWin_t nativeParent = (StNativeWin_t )NULL) {
         return GetFunctions().StApplication_create(libInstance, nativeParent);
     }
 

@@ -19,18 +19,18 @@
 #ifndef __StNativeWin_t_h_
 #define __StNativeWin_t_h_
 
-// TODO (Kirill Gavrilov#4)
 #if(defined(_WIN32) || defined(__WIN32__))
     #include <windows.h>
-    typedef HWND  StNativeWin_t;
+    typedef HWND    StNativeWin_t;
 #elif(defined(__APPLE__))
-    typedef void* StNativeWin_t;
+    #ifdef __OBJC__
+        @class NSView;
+    #else
+        struct NSView;
+    #endif
+    typedef NSView* StNativeWin_t;
 #else
-    typedef struct tagStNativeWin {
-        void* stWinPtr;
-        void* winHandle;
-        void* winProc;
-    } StNativeWin_t;
+    typedef void*   StNativeWin_t; // Window
 #endif
 
 #endif //__StNativeWin_t_h_

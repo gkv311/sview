@@ -113,7 +113,7 @@ class ST_LOCAL StOutInterlace : public StRendererInterface {
     ~StOutInterlace();
     StRendererInterface* getLibImpl() { return this; }
     StWindowInterface* getStWindow() { return myStCore->getStWindow(); }
-    bool init(const StString& , const int& , const StNativeWin_t* );
+    bool init(const StString& , const int& , const StNativeWin_t );
     bool open(const StOpenInfo& stOpenInfo) { return myStCore->open(stOpenInfo); }
     void callback(StMessage_t* );
     void stglDraw(unsigned int );

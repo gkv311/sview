@@ -104,9 +104,9 @@ StOutPageFlipExt::~StOutPageFlipExt() {
     }
 }
 
-bool StOutPageFlipExt::init(const StString&      theRendererPath,
-                            const int&           theDeviceId,
-                            const StNativeWin_t* theNativeParent) {
+bool StOutPageFlipExt::init(const StString&     theRendererPath,
+                            const int&          theDeviceId,
+                            const StNativeWin_t theNativeParent) {
     // load shutter glasses controller
     int32_t aDevCtrlInt = myDeviceCtrl;
     mySettings->loadInt32(ST_SETTING_DEV_CONTROL, aDevCtrlInt);

@@ -63,11 +63,14 @@ bool StRendererPlugin::InitLibrary(const StString& thePluginPath) {
     return true;
 }
 
-bool StRendererPlugin::init(const int& theDeviceId, const StNativeWin_t* theNativeParent) {
+bool StRendererPlugin::init(const int&          theDeviceId,
+                            const StNativeWin_t theNativeParent) {
     return init(stLib.getPath(), theDeviceId, theNativeParent);
 }
 
-bool StRendererPlugin::init(const StString& theRendererPath, const int& theDeviceId, const StNativeWin_t* theNativeParent) {
+bool StRendererPlugin::init(const StString&     theRendererPath,
+                            const int&          theDeviceId,
+                            const StNativeWin_t theNativeParent) {
     if(StRenderer_init(instance, theRendererPath.toCString(), theDeviceId, theNativeParent)) {
         stWindow = new StWindow(StRenderer_getStWindow(instance));
         return true;

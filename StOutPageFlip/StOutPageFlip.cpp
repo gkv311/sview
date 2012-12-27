@@ -314,10 +314,10 @@ void StOutPageFlip::dxDisactivate() {
 #endif
 }
 
-bool StOutPageFlip::init(const StString&      inRendererPath,
-                         const int&           theDeviceId,
-                         const StNativeWin_t* nativeParent) {
-    myToSavePlacement = nativeParent == NULL;
+bool StOutPageFlip::init(const StString&     inRendererPath,
+                         const int&          theDeviceId,
+                         const StNativeWin_t theNativeParent) {
+    myToSavePlacement = (theNativeParent == (StNativeWin_t )NULL);
     myDevice = DeviceEnum(theDeviceId);
     myPluginPath = inRendererPath;
     if(!StVersionInfo::checkTimeBomb("sView - PageFlip Output plugin")) {
@@ -390,7 +390,7 @@ bool StOutPageFlip::init(const StString&      inRendererPath,
 
     // create our window!
     myWinAttribs.isGlStereo = (myQuadBuffer == QUADBUFFER_HARD_OPENGL);
-    getStWindow()->stglCreate(&myWinAttribs, nativeParent);
+    getStWindow()->stglCreate(&myWinAttribs, theNativeParent);
 
     // initialize GL context
     myContext = new StGLContext();
@@ -831,8 +831,11 @@ ST_EXPORT void StRenderer_del(StRendererInterface* inst) {
 ST_EXPORT StWindowInterface* StRenderer_getStWindow(StRendererInterface* inst) {
     // This is VERY important return libImpl pointer here!
     return ((StOutPageFlip* )inst)->getStWindow()->getLibImpl(); }
-ST_EXPORT stBool_t StRenderer_init(StRendererInterface* inst, const stUtf8_t* rendererPath, const int& deviceId, const StNativeWin_t* nativeParent) {
-    return ((StOutPageFlip* )inst)->init(StString(rendererPath), deviceId, nativeParent); }
+ST_EXPORT stBool_t StRenderer_init(StRendererInterface* inst,
+                                   const stUtf8_t*      theRendererPath,
+                                   const int&           theDeviceId,
+                                   const StNativeWin_t  theNativeParent) {
+    return ((StOutPageFlip* )inst)->init(StString(theRendererPath), theDeviceId, theNativeParent); }
 ST_EXPORT stBool_t StRenderer_open(StRendererInterface* inst, const StOpenInfo_t* stOpenInfo) {
     return ((StOutPageFlip* )inst)->open(StOpenInfo(stOpenInfo)); }
 ST_EXPORT void StRenderer_callback(StRendererInterface* inst, StMessage_t* stMessages) {

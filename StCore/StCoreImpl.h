@@ -35,7 +35,7 @@ class ST_LOCAL StCoreImpl : public StRendererInterface {
     StCoreImpl();
     virtual ~StCoreImpl();
     virtual StWindowInterface* getStWindow() { return myWindow; }
-    virtual bool init(const StString& theRendererPath, const int& theDeviceId, const StNativeWin_t* );
+    virtual bool init(const StString& theRendererPath, const int& theDeviceId, const StNativeWin_t );
     virtual bool open(const StOpenInfo& stOpenInfo);
     virtual void callback(StMessage_t* theMessages) {
         myWindow->callback(theMessages);

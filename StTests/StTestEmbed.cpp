@@ -52,7 +52,7 @@ namespace {
 
 #ifndef __APPLE__
 bool StTestEmbed::createNative() {
-    stMemSet(&myParent, 0, sizeof(StNativeWin_t));
+    myParent = (StNativeWin_t )NULL;
     StRectI_t aRect;
     aRect.top()    = 128;
     aRect.bottom() = 128 + 400;
@@ -125,7 +125,7 @@ SV_THREAD_FUNCTION StTestEmbed::embedAppThread(void* thePtr) {
 
 void StTestEmbed::embedAppLoop() {
     StApplication* anApp = new StApplication();
-    if(!anApp->create(&myParent)) {
+    if(!anApp->create(myParent)) {
         delete anApp;
         return;
     }

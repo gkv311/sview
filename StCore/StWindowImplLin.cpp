@@ -73,11 +73,8 @@ Bool StWindowImpl::stXWaitMapped(Display* theDisplay,
 
 // function create GUI window
 bool StWindowImpl::stglCreate(const StWinAttributes_t* theAttributes,
-                              const StNativeWin_t*     theParentWindow) {
-    if(theParentWindow != NULL) {
-        stMemCpy(&myParentWin, theParentWindow, sizeof(StNativeWin_t));
-        myParentWin.stWinPtr = this;
-    }
+                              const StNativeWin_t      theParentWindow) {
+    myParentWin = theParentWindow;
 
     // initialize helper GDK
     static bool isGdkInitialized = false;
@@ -175,7 +172,7 @@ bool StWindowImpl::stglCreate(const StWinAttributes_t* theAttributes,
 
     updateChildRect();
 
-    Window aParentWin = (Window )myParentWin.winHandle;
+    Window aParentWin = (Window )myParentWin;
     if(aParentWin == 0 && !myWinAttribs.isNoDecor) {
         aWinAttribsX.override_redirect = False;
         myMaster.hWindow = XCreateWindow(hDisplay, stXDisplay->getRootWindow(),
@@ -306,7 +303,7 @@ bool StWindowImpl::stglCreate(const StWinAttributes_t* theAttributes,
     }
 
     // setup default icon
-    if((Window )myParentWin.winHandle == 0) {
+    if((Window )myParentWin == 0) {
         XpmCreatePixmapFromData(hDisplay, myMaster.hWindow, (char** )sview_xpm, &myMaster.iconImage, &myMaster.iconShape, NULL);
         XWMHints anIconHints;
         anIconHints.flags       = IconPixmapHint | IconMaskHint;
@@ -332,15 +329,15 @@ bool StWindowImpl::stglCreate(const StWinAttributes_t* theAttributes,
  * Update StWindow position according to native parent position.
  */
 void StWindowImpl::updateChildRect() {
-    if(!myWinAttribs.isFullScreen && (Window )myParentWin.winHandle != 0 && !myMaster.stXDisplay.isNull()) {
+    if(!myWinAttribs.isFullScreen && (Window )myParentWin != 0 && !myMaster.stXDisplay.isNull()) {
         Display* hDisplay = myMaster.stXDisplay->hDisplay;
         Window dummyWin;
         int xReturn, yReturn;
         unsigned int widthReturn, heightReturn, uDummy;
-        XGetGeometry(hDisplay, (Window )myParentWin.winHandle, &dummyWin,
+        XGetGeometry(hDisplay, (Window )myParentWin, &dummyWin,
                      &xReturn, &yReturn, &widthReturn, &heightReturn,
                      &uDummy, &uDummy);
-        XTranslateCoordinates(hDisplay, (Window )myParentWin.winHandle,
+        XTranslateCoordinates(hDisplay, (Window )myParentWin,
                               myMaster.stXDisplay->getRootWindow(),
                               0, 0, &myRectNorm.left(), &myRectNorm.top(), &dummyWin);
         myRectNorm.right()  = myRectNorm.left() + widthReturn;
@@ -356,7 +353,7 @@ void StWindowImpl::updateChildRect() {
             // call this to be sure master window showed well
             // this useful only when compiz on - seems to be bug in it!
             if(myReparentHackX && myMaster.hWindowGl != 0) {
-                XReparentWindow(hDisplay, myMaster.hWindowGl, (Window )myParentWin.winHandle, 0, 0);
+                XReparentWindow(hDisplay, myMaster.hWindowGl, (Window )myParentWin, 0, 0);
             }
         }
     }
@@ -386,7 +383,7 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
         myRectFull = stMon.getVRect();
         XUnmapWindow(hDisplay, myMaster.hWindowGl); // workaround for strange bugs
 
-        if((Window )myParentWin.winHandle != 0 || myMaster.hWindow != 0) {
+        if((Window )myParentWin != 0 || myMaster.hWindow != 0) {
             XReparentWindow(hDisplay, myMaster.hWindowGl, myMaster.stXDisplay->getRootWindow(), 0, 0);
             XMoveResizeWindow(hDisplay, myMaster.hWindowGl,
                               myRectFull.left(),  myRectFull.top(),
@@ -409,7 +406,7 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
                               getSlaveWidth(), getSlaveHeight());
         }
     } else {
-        Window aParent = ((Window )myParentWin.winHandle != 0) ? (Window )myParentWin.winHandle : myMaster.hWindow;
+        Window aParent = ((Window )myParentWin != 0) ? (Window )myParentWin : myMaster.hWindow;
         if(aParent != 0) {
             XReparentWindow(hDisplay, myMaster.hWindowGl, aParent, 0, 0);
             myIsUpdated = true;
@@ -633,7 +630,7 @@ void StWindowImpl::callback(StMessage_t* theMessages) {
     const StXDisplayH& aDisplay = myMaster.stXDisplay;
     if(!aDisplay.isNull()) {
         // detect embedded window was moved
-        if(!myWinAttribs.isFullScreen && (Window )myParentWin.winHandle != 0 && myMaster.hWindowGl != 0
+        if(!myWinAttribs.isFullScreen && (Window )myParentWin != 0 && myMaster.hWindowGl != 0
         //&&  myWinAttribs.isSlave
         //&& !myWinAttribs.isSlaveHLineTop && !myWinAttribs.isSlaveHTop2Px && !myWinAttribs.isSlaveHLineBottom
         && ++mySyncCounter > 4) {
