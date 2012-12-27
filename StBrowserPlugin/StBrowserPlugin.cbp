@@ -226,6 +226,7 @@
 			<Option target="WIN_vc_AMD64" />
 		</Unit>
 		<Unit filename="StActiveXCtrl.cpp">
+			<Option weight="40" />
 			<Option target="WIN_vc_x86" />
 			<Option target="WIN_vc_x86_DEBUG" />
 			<Option target="WIN_vc_AMD64" />
