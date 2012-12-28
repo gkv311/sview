@@ -46,12 +46,12 @@ namespace {
 };
 
 StActiveXCtrl::StActiveXCtrl()
-: myOpenEvent(false),
+: myParentWin((StNativeWin_t )NULL),
+  myOpenEvent(false),
   myHasPreview(false),
   myToBlockMsg(false),
   myToQuit(false) {
     InitializeIIDs(&IID_DStActiveXPlugin, &IID_DStActiveXPluginEvents);
-    stMemSet(&myParentWin, 0, sizeof(myParentWin));
 }
 
 StActiveXCtrl::~StActiveXCtrl() {
@@ -102,7 +102,7 @@ StString StActiveXCtrl::loadURL(const CString& theUrl) {
 
 void StActiveXCtrl::stWindowLoop() {
     myStApp = new StApplication();
-    if(!myStApp->create(&myParentWin)) {
+    if(!myStApp->create(myParentWin)) {
         myStApp.nullify();
         return;
     }
