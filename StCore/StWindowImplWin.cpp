@@ -336,7 +336,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 }
                 case SC_SCREENSAVE:     // Screensaver Trying To Start?
                 case SC_MONITORPOWER: { // Monitor Trying To Enter Powersave?
-                    if(myWinAttribs.toBlockSleep) {
+                    if(myWinAttribs.toBlockSleepDisplay) {
                         return 0; // Prevent From Happening
                     }
                     break;

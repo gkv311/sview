@@ -284,12 +284,16 @@ class ST_LOCAL StVideo {
     } signals;
 
     bool getPlaybackState(double& theDuration,
-                          double& thePts) const {
+                          double& thePts,
+                          bool&   theIsVideoPlayed,
+                          bool&   theIsAudioPlayed) const {
         myEventMutex.lock();
             theDuration = myDuration;
         myEventMutex.unlock();
         thePts = getPts();
-        return isPlaying();
+        theIsVideoPlayed = myVideoMaster->isPlaying();
+        theIsAudioPlayed = myAudio->isPlaying();
+        return theIsVideoPlayed || theIsAudioPlayed;
     }
 
     double getDuration() const {

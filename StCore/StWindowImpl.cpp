@@ -55,7 +55,7 @@ StWindowImpl::StWindowImpl()
   myDndList(NULL),
   myIsUpdated(false),
   myIsActive(false),
-  myIsSleepBlocked(false),
+  myBlockSleep(BlockSleep_OFF),
   myWinAttribs(stDefaultWinAttributes()) {
     myDndList = new StString[1];
     myMonSlave.idMaster = 0;
@@ -114,7 +114,8 @@ void StWindowImpl::close() {
 #endif
 
     // turn off display sleep blocking
-    myWinAttribs.toBlockSleep = false;
+    myWinAttribs.toBlockSleepSystem  = false;
+    myWinAttribs.toBlockSleepDisplay = false;
     updateBlockSleep();
 
     myParentWin = (StNativeWin_t )NULL;
@@ -165,9 +166,19 @@ namespace {
 
 void StWindowImpl::updateBlockSleep() {
 #if(defined(_WIN32) || defined(__WIN32__))
-    if(myWinAttribs.toBlockSleep) {
-        if(!myIsSleepBlocked
-        && ST_BLOCK_SLEEP_COUNTER.increment() == 1) {
+    if(myWinAttribs.toBlockSleepDisplay) {
+        // prevent display sleep - call this periodically
+        EXECUTION_STATE aState = ES_CONTINUOUS | ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED;
+        if(StSys::getSystemEnum() == StSys::ST_SYSTEM_WINDOWS_VISTA_PLUS) {
+            aState = aState | ES_AWAYMODE_REQUIRED;
+        }
+        SetThreadExecutionState(aState);
+
+        if(myBlockSleep == BlockSleep_DISPLAY) {
+            return;
+        }
+
+        if(ST_BLOCK_SLEEP_COUNTER.increment() == 1) {
             // block screensaver
             /*HKEY aKey = NULL;
             DWORD aDisp = 0, aData = 1;
@@ -178,8 +189,21 @@ void StWindowImpl::updateBlockSleep() {
             }
             RegCloseKey(aKey);*/
         }
-        myIsSleepBlocked = true;
-    } else if(myIsSleepBlocked) {
+        myBlockSleep = BlockSleep_DISPLAY;
+    } else if(myWinAttribs.toBlockSleepSystem) {
+        // prevent system sleep - call this periodically
+        EXECUTION_STATE aState = ES_CONTINUOUS | ES_SYSTEM_REQUIRED;
+        if(StSys::getSystemEnum() == StSys::ST_SYSTEM_WINDOWS_VISTA_PLUS) {
+            aState = aState | ES_AWAYMODE_REQUIRED;
+        }
+        SetThreadExecutionState(aState);
+
+        if(myBlockSleep == BlockSleep_SYSTEM) {
+            return;
+        }
+
+        myBlockSleep = BlockSleep_SYSTEM;
+    } else if(myBlockSleep != BlockSleep_OFF) {
         if(ST_BLOCK_SLEEP_COUNTER.decrement() == 0) {
             SetThreadExecutionState(ES_CONTINUOUS);
 
@@ -192,56 +216,70 @@ void StWindowImpl::updateBlockSleep() {
             }
             RegCloseKey(aKey);*/
         }
-        myIsSleepBlocked = false;
-    }
-
-    // prevent system sleep
-    if(myWinAttribs.toBlockSleep) {
-        EXECUTION_STATE aState = ES_CONTINUOUS | ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED;
-        if(StSys::getSystemEnum() == StSys::ST_SYSTEM_WINDOWS_VISTA_PLUS) {
-            aState = aState | ES_AWAYMODE_REQUIRED;
-        }
-        SetThreadExecutionState(aState);
+        myBlockSleep = BlockSleep_OFF;
     }
 #elif(defined(__APPLE__))
-    if(myWinAttribs.toBlockSleep) {
-        if(!myIsSleepBlocked
-        && IOPMAssertionCreateWithName(kIOPMAssertionTypeNoDisplaySleep, kIOPMAssertionLevelOn,
+    if(myWinAttribs.toBlockSleepDisplay) {
+        if(myBlockSleep == BlockSleep_DISPLAY) {
+            return;
+        } else if(mySleepAssert != 0) {
+            IOPMAssertionRelease(mySleepAssert);
+            mySleepAssert = 0;
+        }
+
+        if(IOPMAssertionCreateWithName(kIOPMAssertionTypeNoDisplaySleep, kIOPMAssertionLevelOn,
                                        CFSTR("sView media playback"), &mySleepAssert) != kIOReturnSuccess) {
             ST_DEBUG_LOG("IOPMAssertionCreateWithName() call FAILed");
         }
-        myIsSleepBlocked = true;
-    } else if(myIsSleepBlocked) {
+        myBlockSleep = BlockSleep_DISPLAY;
+    } else if(myWinAttribs.toBlockSleepSystem) {
+        if(myBlockSleep == BlockSleep_SYSTEM) {
+            return;
+        } else if(mySleepAssert != 0) {
+            IOPMAssertionRelease(mySleepAssert);
+            mySleepAssert = 0;
+        }
+
+        if(IOPMAssertionCreateWithName(kIOPMAssertionTypeNoIdleSleep, kIOPMAssertionLevelOn,
+                                       CFSTR("sView media playback"), &mySleepAssert) != kIOReturnSuccess) {
+            ST_DEBUG_LOG("IOPMAssertionCreateWithName() call FAILed");
+        }
+        myBlockSleep = BlockSleep_SYSTEM;
+    } else if(myBlockSleep != BlockSleep_OFF) {
         if(mySleepAssert != 0) {
             IOPMAssertionRelease(mySleepAssert);
             mySleepAssert = 0;
         }
-        myIsSleepBlocked = false;
+        myBlockSleep = BlockSleep_OFF;
     }
 #elif(defined(__linux__) || defined(__linux))
-    if(myWinAttribs.toBlockSleep) {
-        if(!myIsSleepBlocked
-        && !myMaster.stXDisplay.isNull()
-        &&  myMaster.hWindow != 0) {
-            StArrayList<StString> anArguments(2);
-            anArguments.add("suspend");
-            anArguments.add(StString(myMaster.hWindow));
-            if(!StProcess::execProcess("/usr/bin/xdg-screensaver", anArguments)) {
-                ST_DEBUG_LOG("/usr/bin/xdg-screensaver is not found!");
-            }
+    if(myWinAttribs.toBlockSleepDisplay) { // || myWinAttribs.toBlockSleepSystem
+        if(myBlockSleep == BlockSleep_DISPLAY
+        || myMaster.stXDisplay.isNull()
+        || myMaster.hWindow == 0) {
+            return;
         }
-        myIsSleepBlocked = true;
-    } else if(myIsSleepBlocked) {
-        if(!myMaster.stXDisplay.isNull()
-        &&  myMaster.hWindow != 0) {
-            StArrayList<StString> anArguments(2);
-            anArguments.add("resume");
-            anArguments.add(StString(myMaster.hWindow));
-            if(!StProcess::execProcess("/usr/bin/xdg-screensaver", anArguments)) {
-                //ST_DEBUG_LOG("/usr/bin/xdg-screensaver is not found!");
-            }
+
+        StArrayList<StString> anArguments(2);
+        anArguments.add("suspend");
+        anArguments.add(StString(myMaster.hWindow));
+        if(!StProcess::execProcess("/usr/bin/xdg-screensaver", anArguments)) {
+            ST_DEBUG_LOG("/usr/bin/xdg-screensaver is not found!");
         }
-        myIsSleepBlocked = false;
+        myBlockSleep = BlockSleep_DISPLAY;
+    } else if(myBlockSleep != BlockSleep_OFF) {
+        if(myMaster.stXDisplay.isNull()
+        || myMaster.hWindow == 0) {
+            return;
+        }
+
+        StArrayList<StString> anArguments(2);
+        anArguments.add("resume");
+        anArguments.add(StString(myMaster.hWindow));
+        if(!StProcess::execProcess("/usr/bin/xdg-screensaver", anArguments)) {
+            //ST_DEBUG_LOG("/usr/bin/xdg-screensaver is not found!");
+        }
+        myBlockSleep = BlockSleep_OFF;
     }
 #endif
 }

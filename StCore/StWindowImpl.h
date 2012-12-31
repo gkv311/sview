@@ -178,6 +178,12 @@ class ST_LOCAL StWindowImpl : public StWindowInterface {
 
         public: //! @name fields
 
+    enum BlockSleep {
+        BlockSleep_OFF,     //!< do not block sleeping
+        BlockSleep_SYSTEM,  //!< block system to sleep but not display
+        BlockSleep_DISPLAY, //!< block display to sleep
+    };
+
     static StAtomic<int32_t> myFullScreenWinNb; //!< shared counter for fullscreen windows to detect inactive state
 
     StWinHandles       myMaster;          //!< master window
@@ -227,7 +233,7 @@ class ST_LOCAL StWindowImpl : public StWindowInterface {
     StMessageList      myMessageList;     //!< callback list
     bool               myIsUpdated;       //!< helper flag on window movements updates
     bool               myIsActive;        //!< window visible state
-    bool               myIsSleepBlocked;  //!< indicates that display sleep was blocked
+    BlockSleep         myBlockSleep;      //!< indicates that display sleep was blocked or not
 
     StWinAttributes_t  myWinAttribs;
 

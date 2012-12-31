@@ -429,7 +429,8 @@ void StMoviePlayer::stglDraw(unsigned int view) {
     if(view == ST_DRAW_LEFT) {
         double aDuration = 0.0;
         double aPts      = 0.0;
-        bool isPlaying = myVideo->getPlaybackState(aDuration, aPts);
+        bool isVideoPlayed = false, isAudioPlayed = false;
+        bool isPlaying = myVideo->getPlaybackState(aDuration, aPts, isVideoPlayed, isAudioPlayed);
         double aPosition = (aDuration > 0.0) ? (aPts / aDuration) : 0.0;
         if(myGUI->btnPlay != NULL) {
             myGUI->btnPlay->setFaceId(isPlaying ? 1 : 0); // set play/pause
@@ -440,33 +441,41 @@ void StMoviePlayer::stglDraw(unsigned int view) {
         myGUI->stglUpdate(myWindow->getMousePos(), GLfloat(aPosition), aPts);
 
         // prevent display going to sleep
-        bool toBlockSleep = false;
+        bool toBlockSleepDisplay = false;
+        bool toBlockSleepSystem  = false;
         if(myIsBenchmark) {
-            toBlockSleep = true;
+            toBlockSleepDisplay = true;
+            toBlockSleepSystem  = true;
         } else {
             switch(params.blockSleeping->getValue()) {
                 case BLOCK_SLEEP_NEVER: {
-                    toBlockSleep = false;
+                    toBlockSleepDisplay = false;
+                    toBlockSleepSystem  = false;
                     break;
                 }
                 case BLOCK_SLEEP_ALWAYS: {
-                    toBlockSleep = true;
+                    toBlockSleepDisplay = true;
+                    toBlockSleepSystem  = true;
                     break;
                 }
                 case BLOCK_SLEEP_PLAYBACK: {
-                    toBlockSleep = isPlaying;
+                    toBlockSleepDisplay = isVideoPlayed;
+                    toBlockSleepSystem  = isPlaying;
                     break;
                 }
                 case BLOCK_SLEEP_FULLSCREEN: {
-                    toBlockSleep = myWindow->isFullScreen();
+                    toBlockSleepDisplay = myWindow->isFullScreen();;
+                    toBlockSleepSystem  = toBlockSleepDisplay;
                     break;
                 }
             }
         }
         StWinAttributes_t anAttribs = stDefaultWinAttributes();
         myWindow->getAttributes(&anAttribs);
-        if(anAttribs.toBlockSleep != toBlockSleep) {
-            anAttribs.toBlockSleep = toBlockSleep;
+        if(anAttribs.toBlockSleepSystem  != toBlockSleepSystem
+        || anAttribs.toBlockSleepDisplay != toBlockSleepDisplay) {
+            anAttribs.toBlockSleepSystem  = toBlockSleepSystem;
+            anAttribs.toBlockSleepDisplay = toBlockSleepDisplay;
             myWindow->setAttributes(&anAttribs);
         }
 
