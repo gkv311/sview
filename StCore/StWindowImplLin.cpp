@@ -88,7 +88,7 @@ bool StWindowImpl::stglCreate(const StWinAttributes_t* theAttributes,
         isGdkInitialized = true;
     }
 
-    size_t aBytesToCopy = (theAttributes->nSize > sizeof(StWinAttributes_t)) ? sizeof(StWinAttributes_t) : theAttributes->nSize;
+    size_t aBytesToCopy = stMin(theAttributes->nSize, sizeof(StWinAttributes_t));
     stMemCpy(&myWinAttribs, theAttributes, aBytesToCopy); // copy as much as possible
     myWinAttribs.nSize = sizeof(StWinAttributes_t);       // restore own size
     updateSlaveConfig();

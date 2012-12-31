@@ -325,24 +325,29 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
             }*/
             return 0;              // Return To The Message Loop
         }
-
-        case WM_SYSCOMMAND: {      // Intercept System Commands
-            switch(wParam) {       // Check System Calls
-            case 0xF032: // TODO (Kirill Gavrilov#7#) parse double click on title in 'right' way
-            case SC_MAXIMIZE:
-                setFullScreen(true);
-                myIsUpdated = true;
-                myMessageList.append(StMessageList::MSG_RESIZE);
-            case SC_SCREENSAVE:    // Screensaver Trying To Start?
-            case SC_MONITORPOWER:  // Monitor Trying To Enter Powersave?
-                return 0;          // Prevent From Happening
+        case WM_SYSCOMMAND: {
+            switch(wParam) {
+                case 0xF032: // double click on title
+                case SC_MAXIMIZE: {
+                    setFullScreen(true);
+                    myIsUpdated = true;
+                    myMessageList.append(StMessageList::MSG_RESIZE);
+                    return 0;
+                }
+                case SC_SCREENSAVE:     // Screensaver Trying To Start?
+                case SC_MONITORPOWER: { // Monitor Trying To Enter Powersave?
+                    if(myWinAttribs.toBlockSleep) {
+                        return 0; // Prevent From Happening
+                    }
+                    break;
+                }
             }
-            break;                 // Exit
+            break;
         }
 
-        case WM_CLOSE: {           // Did We Receive A Close Message?
+        case WM_CLOSE: {
             myMessageList.append(StMessageList::MSG_CLOSE);
-            return 0;              // Jump Back
+            return 0; // do nothing - window close action should be performed by application
         }
 
         case WM_DROPFILES: {

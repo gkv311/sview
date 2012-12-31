@@ -164,7 +164,11 @@ void StSocket::openURL(const StString& theUrl) {
 #elif(defined(__linux__) || defined(__linux))
     // we use nice script tool from Xdg-utils package
     // http://portland.freedesktop.org/wiki/
-    if(system((StString("xdg-open ") + theUrl).toCString()) == -1) {}
+    StArrayList<StString> anArguments(1);
+    anArguments.add(theUrl);
+    if(!StProcess::execProcess("xdg-open", anArguments)) {
+        ST_DEBUG_LOG("xdg-open is not found!");
+    }
     // also we could use GTK function
     //gtk_show_uri(NULL, uri, gtk_get_current_event_time(), &err);
 #endif

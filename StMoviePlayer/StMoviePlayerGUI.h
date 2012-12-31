@@ -116,6 +116,7 @@ class ST_LOCAL StMoviePlayerGUI : public StGLRootWidget {
     StGLMenu* createAudioGainMenu();    // Root -> Audio menu -> Volume
     StGLMenu* createSubtitlesMenu();    // Root -> Subtitles menu
     StGLMenu* createHelpMenu();         // Root -> Help menu
+    StGLMenu* createBlockSleepMenu();   // Root -> Help -> Block sleeping
     StGLMenu* createCheckUpdatesMenu(); // Root -> Help -> Check updates menu
     StGLMenu* createLanguageMenu();     // Root -> Help -> Language menu
 

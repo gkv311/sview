@@ -119,7 +119,7 @@ StMoviePlayer::StMoviePlayer()
   mySeekOnLoad(-1.0),
   //
   myLastUpdateDay(0),
-  isBenchmark(false),
+  myIsBenchmark(false),
   myToCheckUpdates(true),
   myToQuit(false) {
     //
@@ -142,6 +142,7 @@ StMoviePlayer::StMoviePlayer()
     params.audioStream->signals.onChanged.connect(this, &StMoviePlayer::doSwitchAudioStream);
     params.subtitlesStream = new StInt32Param(-1);
     params.subtitlesStream->signals.onChanged.connect(this, &StMoviePlayer::doSwitchSubtitlesStream);
+    params.blockSleeping = new StInt32Param(StMoviePlayer::BLOCK_SLEEP_PLAYBACK);
     params.fpsBound = 1;
 }
 
@@ -284,8 +285,8 @@ void StMoviePlayer::parseArguments(const StArgumentsMap& theArguments) {
         params.isShuffle->setValue(!argShuffle.isValueOff());
     }
     if(argBenchmark.isValid()) {
-        isBenchmark = !isBenchmark;
-        myVideo->setBenchmark(isBenchmark);
+        myIsBenchmark = !argShuffle.isValueOff();
+        myVideo->setBenchmark(myIsBenchmark);
     }
 }
 
@@ -397,7 +398,7 @@ void StMoviePlayer::parseCallback(StMessage_t* stMessages) {
         doUpdateStateLoaded();
     }
 
-    if(isBenchmark) {
+    if(myIsBenchmark) {
         // full unbounded
         myWindow->stglSetTargetFps(-1.0);
     } else if(params.fpsBound == 1) {
@@ -437,6 +438,37 @@ void StMoviePlayer::stglDraw(unsigned int view) {
             myGUI->stTimeBox->setTime(aPts, aDuration);
         }
         myGUI->stglUpdate(myWindow->getMousePos(), GLfloat(aPosition), aPts);
+
+        // prevent display going to sleep
+        bool toBlockSleep = false;
+        if(myIsBenchmark) {
+            toBlockSleep = true;
+        } else {
+            switch(params.blockSleeping->getValue()) {
+                case BLOCK_SLEEP_NEVER: {
+                    toBlockSleep = false;
+                    break;
+                }
+                case BLOCK_SLEEP_ALWAYS: {
+                    toBlockSleep = true;
+                    break;
+                }
+                case BLOCK_SLEEP_PLAYBACK: {
+                    toBlockSleep = isPlaying;
+                    break;
+                }
+                case BLOCK_SLEEP_FULLSCREEN: {
+                    toBlockSleep = myWindow->isFullScreen();
+                    break;
+                }
+            }
+        }
+        StWinAttributes_t anAttribs = stDefaultWinAttributes();
+        myWindow->getAttributes(&anAttribs);
+        if(anAttribs.toBlockSleep != toBlockSleep) {
+            anAttribs.toBlockSleep = toBlockSleep;
+            myWindow->setAttributes(&anAttribs);
+        }
 
         myWindow->showCursor(!myGUI->toHideCursor());
 
@@ -930,10 +962,10 @@ void StMoviePlayer::keysCommon(bool* keysMap) {
 
 #ifdef __ST_DEBUG__
     if(keysMap[ST_VK_B] && !keysMap[ST_VK_CONTROL] && !keysMap[ST_VK_SHIFT]) {
-        isBenchmark = !isBenchmark;
-        myVideo->setBenchmark(isBenchmark);
+        myIsBenchmark = !myIsBenchmark;
+        myVideo->setBenchmark(myIsBenchmark);
         keysMap[ST_VK_B] = false;
-ST_DEBUG_LOG("isBenchmark= " + int(isBenchmark)); ///
+ST_DEBUG_LOG("myIsBenchmark= " + int(myIsBenchmark)); ///
     }
 #endif
 

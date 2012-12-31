@@ -488,6 +488,7 @@ void StMoviePlayerGUI::doOpenLicense(const size_t ) {
  */
 StGLMenu* StMoviePlayerGUI::createHelpMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+    StGLMenu* aMenuBlockSleep   = createBlockSleepMenu();   // Root -> Help -> Block sleeping
     StGLMenu* aMenuCheckUpdates = createCheckUpdatesMenu(); // Root -> Help -> Check updates menu
     StGLMenu* aMenuLanguage     = createLanguageMenu();     // Root -> Help -> Language menu
 
@@ -497,8 +498,25 @@ StGLMenu* StMoviePlayerGUI::createHelpMenu() {
     aMenu->addItem(myLangMap->changeValueId(MENU_HELP_LICENSE, "License text"))
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doOpenLicense);
 
+    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_BLOCKSLP,"Block sleeping"),    aMenuBlockSleep);
     aMenu->addItem(myLangMap->changeValueId(MENU_HELP_UPDATES, "Check for updates"), aMenuCheckUpdates);
     aMenu->addItem(myLangMap->changeValueId(MENU_HELP_LANGS,   "Language"),          aMenuLanguage);
+    return aMenu;
+}
+
+/**
+ * Root -> Help -> Block sleeping
+ */
+StGLMenu* StMoviePlayerGUI::createBlockSleepMenu() {
+    StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_BLOCKSLP_NEVER,    "Never"),
+                   myPlugin->params.blockSleeping, StMoviePlayer::BLOCK_SLEEP_NEVER);
+    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_BLOCKSLP_PLAYBACK, "During Playback"),
+                   myPlugin->params.blockSleeping, StMoviePlayer::BLOCK_SLEEP_PLAYBACK);
+    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_BLOCKSLP_FULLSCR,  "When in fullscreen"),
+                   myPlugin->params.blockSleeping, StMoviePlayer::BLOCK_SLEEP_FULLSCREEN);
+    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_BLOCKSLP_ALWAYS,   "Always"),
+                   myPlugin->params.blockSleeping, StMoviePlayer::BLOCK_SLEEP_ALWAYS);
     return aMenu;
 }
 

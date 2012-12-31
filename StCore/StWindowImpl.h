@@ -26,6 +26,7 @@
 
 #if (defined(__APPLE__))
     #include <StCocoa/StCocoaCoords.h>
+    #include <IOKit/pwr_mgt/IOPMLib.h>
 #endif
 
 class NSOpenGLContext;
@@ -86,6 +87,7 @@ class ST_LOCAL StWindowImpl : public StWindowInterface {
 
     void updateWindowPos();
     void updateActiveState();
+    void updateBlockSleep();
 #if (defined(__linux__) || defined(__linux))
     void parseXDNDClientMsg();
     void parseXDNDSelectionMsg();
@@ -210,6 +212,7 @@ class ST_LOCAL StWindowImpl : public StWindowInterface {
     MSG                myEvent;           //!< message for windows' message loop
 #elif (defined(__APPLE__))
     StCocoaCoords      myCocoaCoords;
+    IOPMAssertionLevel mySleepAssert;     //!< prevent system going to sleep
 #elif (defined(__linux__) || defined(__linux))
     bool               myReparentHackX;   //!< hack variable ST_REPARENT_HACK
     XEvent             myXEvent;
@@ -224,6 +227,7 @@ class ST_LOCAL StWindowImpl : public StWindowInterface {
     StMessageList      myMessageList;     //!< callback list
     bool               myIsUpdated;       //!< helper flag on window movements updates
     bool               myIsActive;        //!< window visible state
+    bool               myIsSleepBlocked;  //!< indicates that display sleep was blocked
 
     StWinAttributes_t  myWinAttribs;
 

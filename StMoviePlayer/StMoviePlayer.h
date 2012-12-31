@@ -85,6 +85,13 @@ class ST_LOCAL StMoviePlayer : public StDrawerInterface {
         OPEN_STREAM_SUBTITLES = 3,
     };
 
+    enum {
+        BLOCK_SLEEP_NEVER      = 0,
+        BLOCK_SLEEP_ALWAYS     = 1,
+        BLOCK_SLEEP_PLAYBACK   = 2,
+        BLOCK_SLEEP_FULLSCREEN = 3,
+    };
+
         private:
 
     void parseArguments(const StArgumentsMap& theArguments);
@@ -147,6 +154,7 @@ class ST_LOCAL StMoviePlayer : public StDrawerInterface {
         StHandle<StInt32Param>    srcFormat;        //!< source format
         StHandle<StInt32Param>    audioStream;      //!< active Audio stream
         StHandle<StInt32Param>    subtitlesStream;  //!< active Subtitles stream
+        StHandle<StInt32Param>    blockSleeping;    //!< active Audio stream
         StString                  lastFolder;       //!< laster folder used to open / save file
         int                       fpsBound;         //!< limit or not rendering FPS
 
@@ -180,7 +188,7 @@ class ST_LOCAL StMoviePlayer : public StDrawerInterface {
     double                     mySeekOnLoad;      //!< seeking target
 
     int32_t                    myLastUpdateDay;
-    bool                       isBenchmark;
+    bool                       myIsBenchmark;
     bool                       myToCheckUpdates;
     bool                       myToQuit;
 

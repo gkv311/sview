@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2010 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,6 +97,7 @@ namespace StMoviePlayerStrings {
         MENU_HELP_UPDATES = 1502,
         MENU_HELP_LICENSE = 1503,
         MENU_HELP_LANGS   = 1504,
+        MENU_HELP_BLOCKSLP= 1505,
 
         // Root -> Help -> Check for updates menu
         MENU_HELP_UPDATES_NOW   = 1520,
@@ -104,6 +105,12 @@ namespace StMoviePlayerStrings {
         MENU_HELP_UPDATES_WEEK  = 1522,
         MENU_HELP_UPDATES_YEAR  = 1523,
         MENU_HELP_UPDATES_NEVER = 1524,
+
+        // Root -> Help -> Block sleeping
+        MENU_HELP_BLOCKSLP_NEVER    = 1550,
+        MENU_HELP_BLOCKSLP_ALWAYS   = 1551,
+        MENU_HELP_BLOCKSLP_PLAYBACK = 1552,
+        MENU_HELP_BLOCKSLP_FULLSCR  = 1553,
 
         // Open/Save dialogs
         DIALOG_OPEN_FILE       = 2000,

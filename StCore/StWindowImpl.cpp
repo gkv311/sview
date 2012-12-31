@@ -46,6 +46,8 @@ StWindowImpl::StWindowImpl()
   myEventQuit(NULL),
   myEventCursorShow(NULL),
   myEventCursorHide(NULL),
+#elif (defined(__APPLE__))
+  mySleepAssert(0),
 #elif (defined(__linux__) || defined(__linux))
   myReparentHackX(false),
 #endif
@@ -53,6 +55,7 @@ StWindowImpl::StWindowImpl()
   myDndList(NULL),
   myIsUpdated(false),
   myIsActive(false),
+  myIsSleepBlocked(false),
   myWinAttribs(stDefaultWinAttributes()) {
     myDndList = new StString[1];
     myMonSlave.idMaster = 0;
@@ -109,6 +112,11 @@ void StWindowImpl::close() {
     }
     myMsgThread.nullify();
 #endif
+
+    // turn off display sleep blocking
+    myWinAttribs.toBlockSleep = false;
+    updateBlockSleep();
+
     myParentWin = (StNativeWin_t )NULL;
 
     if(myWinAttribs.isFullScreen) {
@@ -135,22 +143,112 @@ void StWindowImpl::setTitle(const StString& theTitle) {
 }
 #endif // !__APPLE__
 
-void StWindowImpl::getAttributes(StWinAttributes_t* inOutAttributes) {
-    size_t bytesToCopy = (inOutAttributes->nSize > sizeof(StWinAttributes_t)) ? sizeof(StWinAttributes_t) : inOutAttributes->nSize;
-    stMemCpy(inOutAttributes, &myWinAttribs, bytesToCopy); // copy as much as possible
-    inOutAttributes->nSize = bytesToCopy;
+void StWindowImpl::getAttributes(StWinAttributes_t* theAttributes) {
+    size_t aBytesToCopy = stMin(theAttributes->nSize, sizeof(StWinAttributes_t));
+    stMemCpy(theAttributes, &myWinAttribs, aBytesToCopy); // copy as much as possible
+    theAttributes->nSize = aBytesToCopy;
 }
 
-void StWindowImpl::setAttributes(const StWinAttributes_t* inAttributes) {
-    // TODO (Kirill Gavrilov#5#)
-    size_t bytesToCopy = (inAttributes->nSize > sizeof(StWinAttributes_t)) ? sizeof(StWinAttributes_t) : inAttributes->nSize;
-    stMemCpy(&myWinAttribs, inAttributes, bytesToCopy); // copy as much as possible
-    myWinAttribs.nSize = sizeof(StWinAttributes_t);             // restore own size
+void StWindowImpl::setAttributes(const StWinAttributes_t* theAttributes) {
+    size_t aBytesToCopy = stMin(theAttributes->nSize, sizeof(StWinAttributes_t));
+    stMemCpy(&myWinAttribs, theAttributes, aBytesToCopy); // copy as much as possible
+    myWinAttribs.nSize = sizeof(StWinAttributes_t);       // restore own size
     updateSlaveConfig();
     updateWindowPos();
 }
 
+#if (defined(_WIN32) || defined(__WIN32__))
+namespace {
+    static StAtomic<int32_t> ST_BLOCK_SLEEP_COUNTER(0);
+};
+#endif
+
+void StWindowImpl::updateBlockSleep() {
+#if(defined(_WIN32) || defined(__WIN32__))
+    if(myWinAttribs.toBlockSleep) {
+        if(!myIsSleepBlocked
+        && ST_BLOCK_SLEEP_COUNTER.increment() == 1) {
+            // block screensaver
+            /*HKEY aKey = NULL;
+            DWORD aDisp = 0, aData = 1;
+            if(RegCreateKeyExW(HKEY_CURRENT_USER, L"Control Panel\Desktop\\", 0, NULL,
+                               REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &aKey, &aDisp) != 0
+            || RegSetValueExW(aKey, L"ScreenSaveActive", 0, REG_DWORD, (LPBYTE )&aData, sizeof(DWORD)) != 0) {
+                ST_DEBUG_LOG("Couldn't save ScreenSaveActive parameter into register");
+            }
+            RegCloseKey(aKey);*/
+        }
+        myIsSleepBlocked = true;
+    } else if(myIsSleepBlocked) {
+        if(ST_BLOCK_SLEEP_COUNTER.decrement() == 0) {
+            SetThreadExecutionState(ES_CONTINUOUS);
+
+            /*HKEY aKey = NULL;
+            DWORD aDisp = 0, aData = 0;
+            if(RegCreateKeyExW(HKEY_CURRENT_USER, L"Control Panel\Desktop\\", 0, NULL,
+                               REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &aKey, &aDisp) != 0
+            || RegSetValueExW(aKey, L"ScreenSaveActive", 0, REG_DWORD, (LPBYTE )&aData, sizeof(DWORD)) != 0) {
+                ST_DEBUG_LOG("Couldn't save ScreenSaveActive parameter into register");
+            }
+            RegCloseKey(aKey);*/
+        }
+        myIsSleepBlocked = false;
+    }
+
+    // prevent system sleep
+    if(myWinAttribs.toBlockSleep) {
+        EXECUTION_STATE aState = ES_CONTINUOUS | ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED;
+        if(StSys::getSystemEnum() == StSys::ST_SYSTEM_WINDOWS_VISTA_PLUS) {
+            aState = aState | ES_AWAYMODE_REQUIRED;
+        }
+        SetThreadExecutionState(aState);
+    }
+#elif(defined(__APPLE__))
+    if(myWinAttribs.toBlockSleep) {
+        if(!myIsSleepBlocked
+        && IOPMAssertionCreateWithName(kIOPMAssertionTypeNoDisplaySleep, kIOPMAssertionLevelOn,
+                                       CFSTR("sView media playback"), &mySleepAssert) != kIOReturnSuccess) {
+            ST_DEBUG_LOG("IOPMAssertionCreateWithName() call FAILed");
+        }
+        myIsSleepBlocked = true;
+    } else if(myIsSleepBlocked) {
+        if(mySleepAssert != 0) {
+            IOPMAssertionRelease(mySleepAssert);
+            mySleepAssert = 0;
+        }
+        myIsSleepBlocked = false;
+    }
+#elif(defined(__linux__) || defined(__linux))
+    if(myWinAttribs.toBlockSleep) {
+        if(!myIsSleepBlocked
+        && !myMaster.stXDisplay.isNull()
+        &&  myMaster.hWindow != 0) {
+            StArrayList<StString> anArguments(2);
+            anArguments.add("suspend");
+            anArguments.add(StString(myMaster.hWindow));
+            if(!StProcess::execProcess("xdg-screensaver", anArguments)) {
+                ST_DEBUG_LOG("xdg-screensaver is not found!");
+            }
+        }
+        myIsSleepBlocked = true;
+    } else if(myIsSleepBlocked) {
+        if(!myMaster.stXDisplay.isNull()
+        &&  myMaster.hWindow != 0) {
+            StArrayList<StString> anArguments(2);
+            anArguments.add("resume");
+            anArguments.add(StString(myMaster.hWindow));
+            if(!StProcess::execProcess("xdg-screensaver", anArguments)) {
+                //ST_DEBUG_LOG("xdg-screensaver is not found!");
+            }
+        }
+        myIsSleepBlocked = false;
+    }
+#endif
+}
+
 void StWindowImpl::updateActiveState() {
+    updateBlockSleep();
+
     if(myWinAttribs.isFullScreen) {
         myIsActive = true;
         return;

@@ -49,6 +49,7 @@ typedef struct tagStWinAttributes {
     stBool_t isFullScreen;       //!< to show in fullscreen mode
     stBool_t isHide;             //!< to hide the master window
     stBool_t isHideCursor;       //!< to hide cursor
+    stBool_t toBlockSleep;       //!< prevent display going to sleep
     // slave configuration
     stBool_t isSlave;            //!< create StWindow with slave window
     stBool_t isSlaveXMirrow;     //!< flip slave window position along X axis (horizontally)
@@ -75,27 +76,29 @@ inline StWinAttributes_t stDefaultWinAttributes() {
 /**
  * Compare two StWindow attributes structures.
  */
-inline stBool_t areSame(const StWinAttributes_t* stAttrib1, const StWinAttributes_t* stAttrib2) {
-    if(stAttrib1->nSize != sizeof(StWinAttributes_t) ||
-       stAttrib2->nSize != sizeof(StWinAttributes_t)) {
+inline stBool_t areSame(const StWinAttributes_t* theAttrib1,
+                        const StWinAttributes_t* theAttrib2) {
+    if(theAttrib1->nSize != sizeof(StWinAttributes_t) ||
+       theAttrib2->nSize != sizeof(StWinAttributes_t)) {
         // should be compared only structs
         return ST_FALSE;
     }
     // compare all known fields
-    return (stAttrib1->isNoDecor          == stAttrib2->isNoDecor &&
-            stAttrib1->isStereoOutput     == stAttrib2->isStereoOutput &&
-            stAttrib1->isGlStereo         == stAttrib2->isGlStereo &&
-            stAttrib1->isFullScreen       == stAttrib2->isFullScreen &&
-            stAttrib1->isHide             == stAttrib2->isHide &&
-            stAttrib1->isHideCursor       == stAttrib2->isHideCursor &&
-            stAttrib1->isSlave            == stAttrib2->isSlave &&
-            stAttrib1->isSlaveXMirrow     == stAttrib2->isSlaveXMirrow &&
-            stAttrib1->isSlaveYMirrow     == stAttrib2->isSlaveYMirrow &&
-            stAttrib1->isSlaveHLineTop    == stAttrib2->isSlaveHLineTop &&
-            stAttrib1->isSlaveHTop2Px     == stAttrib2->isSlaveHTop2Px &&
-            stAttrib1->isSlaveHLineBottom == stAttrib2->isSlaveHLineBottom &&
-            stAttrib1->isSlaveHide        == stAttrib2->isSlaveHide &&
-            stAttrib1->slaveMonId         == stAttrib2->slaveMonId);
+    return (theAttrib1->isNoDecor          == theAttrib2->isNoDecor &&
+            theAttrib1->isStereoOutput     == theAttrib2->isStereoOutput &&
+            theAttrib1->isGlStereo         == theAttrib2->isGlStereo &&
+            theAttrib1->isFullScreen       == theAttrib2->isFullScreen &&
+            theAttrib1->isHide             == theAttrib2->isHide &&
+            theAttrib1->isHideCursor       == theAttrib2->isHideCursor &&
+            theAttrib1->toBlockSleep       == theAttrib2->toBlockSleep &&
+            theAttrib1->isSlave            == theAttrib2->isSlave &&
+            theAttrib1->isSlaveXMirrow     == theAttrib2->isSlaveXMirrow &&
+            theAttrib1->isSlaveYMirrow     == theAttrib2->isSlaveYMirrow &&
+            theAttrib1->isSlaveHLineTop    == theAttrib2->isSlaveHLineTop &&
+            theAttrib1->isSlaveHTop2Px     == theAttrib2->isSlaveHTop2Px &&
+            theAttrib1->isSlaveHLineBottom == theAttrib2->isSlaveHLineBottom &&
+            theAttrib1->isSlaveHide        == theAttrib2->isSlaveHide &&
+            theAttrib1->slaveMonId         == theAttrib2->slaveMonId);
 }
 
 enum {
