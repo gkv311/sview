@@ -123,9 +123,13 @@ class ST_LOCAL StGLTextureQueue {
         return aResult;
     }
 
+    /**
+     * @return presentation timestamp of currently shown frame (or -1 if none).
+     */
     double getPTSCurr() const {
         myMutexSize.lock();
-            const double aPts = myCurrPts;
+            const double aPts = (myHasStream || myQueueSize != 0)
+                              ? myCurrPts : -1.0;
         myMutexSize.unlock();
         return aPts;
     }

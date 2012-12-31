@@ -73,14 +73,16 @@ inline Type stMax(const Type value1, const Type value2, const Type value3) {
     return stMax(stMax(value1, value2), value3);
 }
 
-/**template<typename Type>
-inline void stClamp(Type &x, Type min, Type max) {
-    if(x < min) {
-        x = min;
+template<typename Type>
+inline Type stClamp(const Type theValue,
+                    const Type theMin,
+                    const Type theMax) {
+    if(theValue < theMin) {
+        return theMin;
+    } else if(theValue > theMax) {
+        return theMax;
     }
-    if(x > max) {
-        x = max;
-    }
-}*/
+    return theValue;
+}
 
 #endif //__StTemplates_H__

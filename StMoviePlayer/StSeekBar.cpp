@@ -161,6 +161,7 @@ void StSeekBar::stglUpdateVertices() {
 
     // inner filled quad
     myProgressPx = int(myProgress * GLfloat(aRectPx.width()));
+    myProgressPx = stClamp(myProgressPx, 0, aRectPx.width());
     aRectPx.right() = aRectPx.left() + myProgressPx;
     getRoot()->getRectGl(aRectPx, aVertices, 8);
 
