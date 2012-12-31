@@ -107,7 +107,7 @@ bool StTestEmbed::createNative() {
 
     // flushes the output buffer
     XFlush(aDisplay);
-    myParent.winHandle = (void* )aWin;
+    myParent = (void* )aWin;
     myDisplay = aDisplay;
     return true;
 #else
@@ -164,8 +164,8 @@ void StTestEmbed::nativeLoop() {
     for(;;) {
         XNextEvent((Display* )myDisplay, &anEvent);
     }
-    XUnmapWindow((Display* )myDisplay, (Window )myParent.winHandle);
-    XDestroyWindow((Display* )myDisplay, (Window )myParent.winHandle);
+    XUnmapWindow  ((Display* )myDisplay, (Window )myParent);
+    XDestroyWindow((Display* )myDisplay, (Window )myParent);
 #else
     st::cout << stostream_text("StTestEmbed::nativeLoop() not implemented on this platform!\n");
 #endif

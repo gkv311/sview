@@ -226,8 +226,8 @@ void StWindowImpl::updateBlockSleep() {
             StArrayList<StString> anArguments(2);
             anArguments.add("suspend");
             anArguments.add(StString(myMaster.hWindow));
-            if(!StProcess::execProcess("xdg-screensaver", anArguments)) {
-                ST_DEBUG_LOG("xdg-screensaver is not found!");
+            if(!StProcess::execProcess("/usr/bin/xdg-screensaver", anArguments)) {
+                ST_DEBUG_LOG("/usr/bin/xdg-screensaver is not found!");
             }
         }
         myIsSleepBlocked = true;
@@ -237,8 +237,8 @@ void StWindowImpl::updateBlockSleep() {
             StArrayList<StString> anArguments(2);
             anArguments.add("resume");
             anArguments.add(StString(myMaster.hWindow));
-            if(!StProcess::execProcess("xdg-screensaver", anArguments)) {
-                //ST_DEBUG_LOG("xdg-screensaver is not found!");
+            if(!StProcess::execProcess("/usr/bin/xdg-screensaver", anArguments)) {
+                //ST_DEBUG_LOG("/usr/bin/xdg-screensaver is not found!");
             }
         }
         myIsSleepBlocked = false;

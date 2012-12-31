@@ -9,6 +9,7 @@
 #include <StSocket/StSocket.h>
 
 #include <StStrings/StLogger.h>
+#include <StThreads/StProcess.h>
 
 #if(defined(_WIN32) || defined(__WIN32__))
     #include <windows.h>
@@ -166,8 +167,8 @@ void StSocket::openURL(const StString& theUrl) {
     // http://portland.freedesktop.org/wiki/
     StArrayList<StString> anArguments(1);
     anArguments.add(theUrl);
-    if(!StProcess::execProcess("xdg-open", anArguments)) {
-        ST_DEBUG_LOG("xdg-open is not found!");
+    if(!StProcess::execProcess("/usr/bin/xdg-open", anArguments)) {
+        ST_DEBUG_LOG("/usr/bin/xdg-open is not found!");
     }
     // also we could use GTK function
     //gtk_show_uri(NULL, uri, gtk_get_current_event_time(), &err);
