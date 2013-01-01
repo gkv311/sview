@@ -216,6 +216,7 @@ class ST_LOCAL StWindowImpl : public StWindowInterface {
     HANDLE             myEventCursorShow;
     HANDLE             myEventCursorHide;
     MSG                myEvent;           //!< message for windows' message loop
+    bool               myIsVistaPlus;     //!< system is Vista+
 #elif (defined(__APPLE__))
     StCocoaCoords      myCocoaCoords;
     IOPMAssertionLevel mySleepAssert;     //!< prevent system going to sleep

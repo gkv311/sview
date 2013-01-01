@@ -19,6 +19,7 @@
 #include "StWindowImpl.h"
 
 #include <StStrings/StLogger.h>
+#include <StSys/StSys.h>
 
 namespace {
     static const stUtf8_t WINDOW_TITLE_DEFAULT[] = "StWindow";
@@ -46,6 +47,7 @@ StWindowImpl::StWindowImpl()
   myEventQuit(NULL),
   myEventCursorShow(NULL),
   myEventCursorHide(NULL),
+  myIsVistaPlus(StSys::getSystemEnum() == StSys::ST_SYSTEM_WINDOWS_VISTA_PLUS),
 #elif (defined(__APPLE__))
   mySleepAssert(0),
 #elif (defined(__linux__) || defined(__linux))
@@ -169,7 +171,7 @@ void StWindowImpl::updateBlockSleep() {
     if(myWinAttribs.toBlockSleepDisplay) {
         // prevent display sleep - call this periodically
         EXECUTION_STATE aState = ES_CONTINUOUS | ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED;
-        if(StSys::getSystemEnum() == StSys::ST_SYSTEM_WINDOWS_VISTA_PLUS) {
+        if(myIsVistaPlus) {
             aState = aState | ES_AWAYMODE_REQUIRED;
         }
         SetThreadExecutionState(aState);
@@ -193,7 +195,7 @@ void StWindowImpl::updateBlockSleep() {
     } else if(myWinAttribs.toBlockSleepSystem) {
         // prevent system sleep - call this periodically
         EXECUTION_STATE aState = ES_CONTINUOUS | ES_SYSTEM_REQUIRED;
-        if(StSys::getSystemEnum() == StSys::ST_SYSTEM_WINDOWS_VISTA_PLUS) {
+        if(myIsVistaPlus) {
             aState = aState | ES_AWAYMODE_REQUIRED;
         }
         SetThreadExecutionState(aState);
