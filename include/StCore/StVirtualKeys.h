@@ -28,7 +28,9 @@ enum StVirtualMouseKeys {
     ST_MOUSE_SCROLL_V_DOWN = 5,
     ST_MOUSE_X1, // win
     ST_MOUSE_X2,
-    ST_MOUSE_MAX_ID = ST_MOUSE_X2,
+    ST_MOUSE_SCROLL_LEFT,     // horizontal scroll
+    ST_MOUSE_SCROLL_RIGHT,
+    ST_MOUSE_MAX_ID = ST_MOUSE_SCROLL_RIGHT,
 };
 
 /**

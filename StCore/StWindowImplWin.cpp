@@ -462,6 +462,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 case WM_XBUTTONDOWN: mbtn = (HIWORD(wParam) == XBUTTON1) ? ST_MOUSE_X1 : ST_MOUSE_X2; break;
                 case WM_MOUSEWHEEL: {
                     int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+                    //if(GET_X_LPARAM(lParam) != 0)
                     mbtn = (zDelta > 0) ? ST_MOUSE_SCROLL_V_UP : ST_MOUSE_SCROLL_V_DOWN;
                     break;
                 }

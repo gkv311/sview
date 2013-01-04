@@ -383,12 +383,43 @@ void StMoviePlayer::parseCallback(StMessage_t* stMessages) {
                 break;
             }
             case StMessageList::MSG_MOUSE_UP: {
-                StPointD_t pt;
-                int mouseBtn = myWindow->getMouseUp(&pt);
-                if(mouseBtn == ST_MOUSE_MIDDLE) {
-                    params.isFullscreen->reverse();
+                StPointD_t aPoint;
+                int aMouseBtn = myWindow->getMouseUp(&aPoint);
+                switch(aMouseBtn) {
+                    case ST_MOUSE_MIDDLE: {
+                        params.isFullscreen->reverse();
+                        break;
+                    }
+                    case ST_MOUSE_SCROLL_LEFT:
+                    case ST_MOUSE_SCROLL_RIGHT: {
+                        // limit seeking by scroll to lower corner
+                        if(aPoint.y() > 0.75) {
+                            if(aMouseBtn == ST_MOUSE_SCROLL_RIGHT) {
+                                doSeekRight();
+                            } else {
+                                doSeekLeft();
+                            }
+                        }
+                    }
+                    case ST_MOUSE_SCROLL_V_UP:
+                    case ST_MOUSE_SCROLL_V_DOWN: {
+                        if(aPoint.y() > 0.75) {
+                            break;
+                        }
+                    }
+                    default: {
+                        myGUI->tryUnClick(aPoint, aMouseBtn);
+                        break;
+                    }
                 }
-                myGUI->tryUnClick(pt, mouseBtn);
+                break;
+            }
+            case StMessageList::MSG_GO_BACKWARD: {
+                doListPrev();
+                break;
+            }
+            case StMessageList::MSG_GO_FORWARD: {
+                doListNext();
                 break;
             }
         }
@@ -712,6 +743,22 @@ void StMoviePlayer::doOpenFileDialog(const size_t theOpenType) {
     myEventDialog.reset();
 }
 
+void StMoviePlayer::doSeekLeft(const size_t ) {
+    double aSeekPts = (myVideo->getPts() - 5.0);
+    if(aSeekPts < 0.0) {
+        aSeekPts = 0.0;
+    }
+    myVideo->pushPlayEvent(ST_PLAYEVENT_SEEK, aSeekPts);
+}
+
+void StMoviePlayer::doSeekRight(const size_t ) {
+    double aSeekPts = (myVideo->getPts() + 5.0);
+    if(aSeekPts < 0.0) {
+        aSeekPts = 0.0;
+    }
+    myVideo->pushPlayEvent(ST_PLAYEVENT_SEEK, aSeekPts);
+}
+
 void StMoviePlayer::doSeek(const int , const double theSeekX) {
     double aSeekPts = myVideo->getDuration() * theSeekX;
     if(aSeekPts < 0.0) {
@@ -948,19 +995,11 @@ void StMoviePlayer::keysCommon(bool* keysMap) {
         keysMap[ST_VK_SPACE] = false;
     }
     if(keysMap[ST_VK_LEFT]) {
-        double aSeekPts = (myVideo->getPts() - 5.0);
-        if(aSeekPts < 0.0) {
-            aSeekPts = 0.0;
-        }
-        myVideo->pushPlayEvent(ST_PLAYEVENT_SEEK, aSeekPts);
+        doSeekLeft();
         keysMap[ST_VK_LEFT] = false;
     }
     if(keysMap[ST_VK_RIGHT]) {
-        double aSeekPts = (myVideo->getPts() + 5.0);
-        if(aSeekPts < 0.0) {
-            aSeekPts = 0.0;
-        }
-        myVideo->pushPlayEvent(ST_PLAYEVENT_SEEK, aSeekPts);
+        doSeekRight();
         keysMap[ST_VK_RIGHT] = false;
     }
 

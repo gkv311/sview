@@ -63,6 +63,10 @@ class ST_LOCAL StMessageList {
         MSG_MOUSE_UP_APPEND = 41,
         MSG_KEY_DOWN_APPEND = 42,
         MSG_KEY_UP_APPEND = 43,
+        MSG_GO_TOP      = 44,
+        MSG_GO_BOTTOM   = 45,
+        MSG_GO_BACKWARD = 46,
+        MSG_GO_FORWARD  = 47,
     };
 
         private:

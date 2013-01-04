@@ -342,6 +342,14 @@ void StImageViewer::parseCallback(StMessage_t* stMessages) {
                 myGUI->tryUnClick(pt, mouseBtn);
                 break;
             }
+            case StMessageList::MSG_GO_BACKWARD: {
+                doListPrev();
+                break;
+            }
+            case StMessageList::MSG_GO_FORWARD: {
+                doListNext();
+                break;
+            }
         }
     }
 

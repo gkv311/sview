@@ -124,6 +124,8 @@ class ST_LOCAL StMoviePlayer : public StDrawerInterface {
     void doOpen2Files(const size_t dummy = 0);
     void doAddAudioStream(const size_t dummy = 0);
     void doAddSubtitleStream(const size_t dummy = 0);
+    void doSeekLeft(const size_t dummy = 0);
+    void doSeekRight(const size_t dummy = 0);
     void doSeek(const int mouseBtn, const double seekX);
     void doPlayPause(const size_t dummy = 0);
     void doStop(const size_t dummy = 0);
