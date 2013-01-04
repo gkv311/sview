@@ -798,10 +798,7 @@ void StWindowImpl::callback(StMessage_t* theMessages) {
                         int xrandrEventType = myXEvent.type - myMaster.xrandrEventBase;
                         if(xrandrEventType == RRNotify || xrandrEventType == RRScreenChangeNotify) {
                             ST_DEBUG_LOG("XRandr update event");
-                            myMonitors.init(); // reinitialize monitors list
-                            for(size_t aMonIter = 0; aMonIter < myMonitors.size(); ++aMonIter) {
-                                ST_DEBUG_LOG(myMonitors[aMonIter].toString()); // just debug output
-                            }
+                            updateMonitors();
                         }
                     }
                 }

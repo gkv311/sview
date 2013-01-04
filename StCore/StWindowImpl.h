@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -85,6 +85,7 @@ class ST_LOCAL StWindowImpl : public StWindowInterface {
 
         public:
 
+    void updateMonitors();
     void updateWindowPos();
     void updateActiveState();
     void updateBlockSleep();
@@ -234,6 +235,7 @@ class ST_LOCAL StWindowImpl : public StWindowInterface {
     bool               myIsUpdated;       //!< helper flag on window movements updates
     bool               myIsActive;        //!< window visible state
     BlockSleep         myBlockSleep;      //!< indicates that display sleep was blocked or not
+    volatile bool      myIsDispChanged;   //!< monitors reconfiguration event
 
     StWinAttributes_t  myWinAttribs;
 

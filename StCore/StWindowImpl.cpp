@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -23,6 +23,19 @@
 
 namespace {
     static const stUtf8_t WINDOW_TITLE_DEFAULT[] = "StWindow";
+#ifdef __APPLE__
+    static void stDisplayChangeCallBack(CGDirectDisplayID           theDisplay,
+                                        CGDisplayChangeSummaryFlags theFlags,
+                                        void*                       theStWin) {
+        if(theFlags & kCGDisplayBeginConfigurationFlag) {
+            return; // ingore 1st calls per changed display
+        }
+
+        // notice that this callback called twice per each reconfigured display!
+        StWindowImpl* aWin = (StWindowImpl* )theStWin;
+        aWin->myIsDispChanged = true;
+    }
+#endif
 };
 
 // shared counter for fullscreen windows to detect inactive state
@@ -56,6 +69,7 @@ StWindowImpl::StWindowImpl()
   myIsUpdated(false),
   myIsActive(false),
   myBlockSleep(BlockSleep_OFF),
+  myIsDispChanged(false),
   myWinAttribs(stDefaultWinAttributes()) {
     myDndList = new StString[1];
     myMonSlave.idMaster = 0;
@@ -77,6 +91,22 @@ StWindowImpl::StWindowImpl()
     for(size_t aMonIter = 0; aMonIter < myMonitors.size(); ++aMonIter) {
         ST_DEBUG_LOG(myMonitors[aMonIter].toString());
     }
+
+#ifdef __APPLE__
+    // register callback for display configuration changes
+    // alternatively we can add method applicationDidChangeScreenParameters to application delegate
+    CGDisplayRegisterReconfigurationCallback(stDisplayChangeCallBack, this);
+#endif
+}
+
+void StWindowImpl::updateMonitors() {
+    myMonitors.init();
+    // just debug output Monitors' configuration
+    for(size_t aMonIter = 0; aMonIter < myMonitors.size(); ++aMonIter) {
+        ST_DEBUG_LOG(myMonitors[aMonIter].toString());
+    }
+    myIsDispChanged = false;
+    // should we check window is not out-of-screen here or all systems will do this for us?
 }
 
 StWindowImpl::~StWindowImpl() {
@@ -86,6 +116,10 @@ StWindowImpl::~StWindowImpl() {
     CloseHandle(myEventQuit);
     CloseHandle(myEventCursorShow);
     CloseHandle(myEventCursorHide);
+#endif
+
+#ifdef __APPLE__
+    CGDisplayRemoveReconfigurationCallback(stDisplayChangeCallBack, this);
 #endif
 }
 

@@ -577,6 +577,7 @@ void StSearchMonitors::listEDID(StArrayList<StEDIDParser>& theEdids) {
 }
 
 void StSearchMonitors::init() {
+    clear();
     initFromConfig();
     if(isEmpty()) {
         initFromSystem();
@@ -584,6 +585,7 @@ void StSearchMonitors::init() {
 }
 
 void StSearchMonitors::initFromConfig() {
+    clear();
     const StString ST_GLOBAL_SETTINGS_GROUP("sview");
     const StString ST_GLOBAL_SETTINGS_MON_MASTER("monMaster");
     const StString ST_GLOBAL_SETTINGS_MON_SLAVE("monSlave");
@@ -629,6 +631,7 @@ void StSearchMonitors::initFromConfig() {
 }
 
 void StSearchMonitors::initFromSystem() {
+    clear();
 #if (defined(_WIN32) || defined(__WIN32__))
     findMonitorsWinAPI();
 #elif (defined(__APPLE__))

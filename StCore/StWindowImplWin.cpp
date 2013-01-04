@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -352,10 +352,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
 
         case WM_DISPLAYCHANGE: {
             ST_DEBUG_LOG("WM_DISPLAYCHANGE event");
-            myMonitors.init(); // reinitialize monitors list
-            for(size_t aMonIter = 0; aMonIter < myMonitors.size(); ++aMonIter) {
-                ST_DEBUG_LOG(myMonitors[aMonIter].toString()); // just debug output
-            }
+            myIsDispChanged = true;
             return 0;
         }
         case WM_DROPFILES: {
@@ -611,6 +608,10 @@ void StWindowImpl::updateWindowPos() {
 
 // Function set to argument-buffer given events and return events number
 void StWindowImpl::callback(StMessage_t* theMessages) {
+    if(myIsDispChanged) {
+        updateMonitors();
+    }
+
     // detect embedded window was moved
     if(myParentWin != NULL && myMaster.hWindowGl != NULL && !myWinAttribs.isFullScreen) {
         myPointTest.x = 0;

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -355,6 +355,10 @@ void StWindowImpl::updateWindowPos() {
 
 // Function set to argument-buffer given events
 void StWindowImpl::callback(StMessage_t* theMessages) {
+    if(myIsDispChanged) {
+        updateMonitors();
+    }
+
     // detect master window movements
     if(myWinAttribs.isFullScreen) {
         if(myRectNormPrev != myRectFull) {
