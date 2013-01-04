@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -71,6 +71,35 @@ Bool StWindowImpl::stXWaitMapped(Display* theDisplay,
         && (theEvent->xmap.window == (Window )theArg);
 }
 
+namespace {
+
+    static XSetWindowAttributes createDefaultAttribs(StXDisplayH theStDisplay) {
+        XSetWindowAttributes aWinAttribsX;
+        stMemSet(&aWinAttribsX, 0, sizeof(XSetWindowAttributes));
+
+        // create an X colormap since probably not using default visual
+        aWinAttribsX.colormap = XCreateColormap(theStDisplay->hDisplay,
+                                                RootWindow(theStDisplay->hDisplay, theStDisplay->getScreen()),
+                                                theStDisplay->getVisual(), AllocNone);
+        aWinAttribsX.border_pixel = 0;
+
+        // what events we want to recive:
+        aWinAttribsX.event_mask =  KeyPressMask   | KeyReleaseMask    // receive keyboard events
+                                | ButtonPressMask | ButtonReleaseMask // receive mouse events
+                                | StructureNotifyMask;                // receive ConfigureNotify event on resize and move
+                              //| ResizeRedirectMask                  // receive ResizeRequest event on resize (instead of common ConfigureNotify)
+                              //| ExposureMask
+                              //| EnterWindowMask|LeaveWindowMask
+                              //| PointerMotionMask|PointerMotionHintMask|Button1MotionMask|Button2MotionMask|Button3MotionMask|Button4MotionMask|Button5MotionMask|ButtonMotionMask
+                              //| KeymapStateMask|ExposureMask|VisibilityChangeMask
+                              //| SubstructureNotifyMask|SubstructureRedirectMask
+                              //| FocusChangeMask|PropertyChangeMask|ColormapChangeMask|OwnerGrabButtonMask
+        aWinAttribsX.override_redirect = False;
+        return aWinAttribsX;
+    }
+
+};
+
 // function create GUI window
 bool StWindowImpl::stglCreate(const StWinAttributes_t* theAttributes,
                               const StNativeWin_t      theParentWindow) {
@@ -100,8 +129,7 @@ bool StWindowImpl::stglCreate(const StWinAttributes_t* theAttributes,
     myInitState = STWIN_INITNOTSTART;
     // X-server implementation
     // create window on unix systems throw X-server
-    XSetWindowAttributes aWinAttribsX;
-    int                dummy;
+    int dummy;
 
     // open a connection to the X server
     StXDisplayH stXDisplay = new StXDisplay();
@@ -152,24 +180,7 @@ bool StWindowImpl::stglCreate(const StWinAttributes_t* theAttributes,
     }
 
     // create an X window with the selected visual
-    // create an X colormap since probably not using default visual
-    aWinAttribsX.colormap = XCreateColormap(hDisplay,
-                                            RootWindow(hDisplay, stXDisplay->getScreen()),
-                                            stXDisplay->getVisual(), AllocNone);
-    aWinAttribsX.border_pixel = 0;
-
-    // what events we want to recive:
-    aWinAttribsX.event_mask =  KeyPressMask   | KeyReleaseMask    // receive keyboard events
-                            | ButtonPressMask | ButtonReleaseMask // receive mouse events
-                            | StructureNotifyMask;                // receive ConfigureNotify event on resize and move
-                          //| ResizeRedirectMask                  // receive ResizeRequest event on resize (instead of common ConfigureNotify)
-                          //| ExposureMask
-                          //| EnterWindowMask|LeaveWindowMask
-                          //| PointerMotionMask|PointerMotionHintMask|Button1MotionMask|Button2MotionMask|Button3MotionMask|Button4MotionMask|Button5MotionMask|ButtonMotionMask
-                          //| KeymapStateMask|ExposureMask|VisibilityChangeMask
-                          //| SubstructureNotifyMask|SubstructureRedirectMask
-                          //| FocusChangeMask|PropertyChangeMask|ColormapChangeMask|OwnerGrabButtonMask
-
+    XSetWindowAttributes aWinAttribsX = createDefaultAttribs(stXDisplay);
     updateChildRect();
 
     Window aParentWin = (Window )myParentWin;
@@ -253,11 +264,7 @@ bool StWindowImpl::stglCreate(const StWinAttributes_t* theAttributes,
     }
 
     // Announce XDND support
-    Atom version = 5;
-    XChangeProperty(hDisplay, myMaster.hWindowGl, stXDisplay->xDNDAware, XA_ATOM, 32, PropModeReplace, (unsigned char* )&version, 1);
-    if(myMaster.hWindow != 0) {
-        XChangeProperty(hDisplay, myMaster.hWindow, stXDisplay->xDNDAware, XA_ATOM, 32, PropModeReplace, (unsigned char* )&version, 1);
-    }
+    myMaster.setupXDND();
 
     // Initialize XRandr events reception
     if(XRRQueryExtension(hDisplay, &myMaster.xrandrEventBase, &dummy)) {
@@ -348,13 +355,6 @@ void StWindowImpl::updateChildRect() {
             myRectNormPrev = myRectNorm;
             myIsUpdated    = true;
             myMessageList.append(StMessageList::MSG_RESIZE);
-
-            /// TODO (Kirill Gavrilov#4) remove this workaround!
-            // call this to be sure master window showed well
-            // this useful only when compiz on - seems to be bug in it!
-            if(myReparentHackX && myMaster.hWindowGl != 0) {
-                XReparentWindow(hDisplay, myMaster.hWindowGl, (Window )myParentWin, 0, 0);
-            }
         }
     }
 }
@@ -408,7 +408,29 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
     } else {
         Window aParent = ((Window )myParentWin != 0) ? (Window )myParentWin : myMaster.hWindow;
         if(aParent != 0) {
-            XReparentWindow(hDisplay, myMaster.hWindowGl, aParent, 0, 0);
+            // workaround bugs in some OpenGL drivers (Catalyst etc.) - entirely re-create window but not GL context
+            XSetWindowAttributes aWinAttribsX = createDefaultAttribs(myMaster.stXDisplay);
+            aWinAttribsX.override_redirect = True; // GL window always undecorated
+            Window aWin = XCreateWindow(hDisplay, aParent,
+                                        0, 0, myRectNorm.width(), myRectNorm.height(),
+                                        0, myMaster.stXDisplay->getDepth(),
+                                        InputOutput,
+                                        myMaster.stXDisplay->getVisual(),
+                                        CWBorderPixel | CWColormap | CWEventMask | CWOverrideRedirect, &aWinAttribsX);
+            if(!glXMakeCurrent(hDisplay, aWin, myMaster.hRC)) {
+                ST_ERROR_LOG("X, FAILED to bind rendering context to NEW master window");
+                XDestroyWindow(hDisplay, aWin);
+                XReparentWindow(hDisplay, myMaster.hWindowGl, aParent, 0, 0);
+            } else {
+                XUnmapWindow  (hDisplay, myMaster.hWindowGl);
+                XDestroyWindow(hDisplay, myMaster.hWindowGl);
+                myMaster.hWindowGl = aWin;
+                XSetStandardProperties(hDisplay, myMaster.hWindowGl,
+                                       "master window", "master window",
+                                       None, NULL, 0, NULL);
+                myMaster.setupXDND();
+                XMapWindow(hDisplay, myMaster.hWindowGl);
+            }
             myIsUpdated = true;
         } else {
             XUnmapWindow(hDisplay, myMaster.hWindowGl); // workaround for strange bugs
@@ -803,7 +825,6 @@ void StWindowImpl::callback(StMessage_t* theMessages) {
     }
     updateActiveState();
 
-    // TODO (Kirill Gavrilov#5#) parse multimedia keys
     myMessageList.popList(theMessages);
 }
 

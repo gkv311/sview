@@ -355,6 +355,15 @@ namespace {
 StStringUtfWide StWinHandles::getNewClassName() {
     return ST_WINDOW_CLASSNAME + StStringUtfWide(ST_CLASS_COUNTER.increment());
 }
+
+#else
+void StWinHandles::setupXDND() {
+    Atom aVersion = 5;
+    XChangeProperty(stXDisplay->hDisplay, hWindowGl, stXDisplay->xDNDAware, XA_ATOM, 32, PropModeReplace, (unsigned char* )&aVersion, 1);
+    if(hWindow != 0) {
+        XChangeProperty(stXDisplay->hDisplay, hWindow, stXDisplay->xDNDAware, XA_ATOM, 32, PropModeReplace, (unsigned char* )&aVersion, 1);
+    }
+}
 #endif
 
 #endif // !__APPLE__

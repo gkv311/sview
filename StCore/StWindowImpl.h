@@ -221,7 +221,6 @@ class ST_LOCAL StWindowImpl : public StWindowInterface {
     StCocoaCoords      myCocoaCoords;
     IOPMAssertionLevel mySleepAssert;     //!< prevent system going to sleep
 #elif (defined(__linux__) || defined(__linux))
-    bool               myReparentHackX;   //!< hack variable ST_REPARENT_HACK
     XEvent             myXEvent;
 #endif
 

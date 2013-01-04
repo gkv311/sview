@@ -50,8 +50,6 @@ StWindowImpl::StWindowImpl()
   myIsVistaPlus(StSys::getSystemEnum() == StSys::ST_SYSTEM_WINDOWS_VISTA_PLUS),
 #elif (defined(__APPLE__))
   mySleepAssert(0),
-#elif (defined(__linux__) || defined(__linux))
-  myReparentHackX(false),
 #endif
   myDndCount(0),
   myDndList(NULL),
@@ -72,8 +70,6 @@ StWindowImpl::StWindowImpl()
     myEventQuit       = CreateEvent(0, true, false, NULL);
     myEventCursorShow = CreateEvent(0, true, false, NULL);
     myEventCursorHide = CreateEvent(0, true, false, NULL);
-#elif(defined(__linux__) || defined(__linux))
-    myReparentHackX   = !StProcess::getEnv("ST_REPARENT_HACK").isEmpty();
 #endif
 
     // just debug output Monitors' configuration

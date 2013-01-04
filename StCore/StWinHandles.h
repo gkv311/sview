@@ -99,7 +99,7 @@ class ST_LOCAL StWinHandles {
      * Create 1 or 2 GL rendering contexts (and share them)
      * for opened windows handles.
      */
-    int glCreateContext(StWinHandles* slave, bool isQuadStereo);
+    int glCreateContext(StWinHandles* theSlave, bool theIsQuadStereo);
 
     /**
      * Close all handles.
@@ -119,6 +119,11 @@ class ST_LOCAL StWinHandles {
     Display* getDisplay() const {
         return stXDisplay.isNull() ? NULL : stXDisplay->hDisplay;
     }
+
+    /**
+     * Announce XDND support.
+     */
+    void setupXDND();
 #endif
 
 };
