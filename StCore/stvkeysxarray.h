@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2010 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -24,9 +24,7 @@
 #if(defined(__linux__) || defined(__linux))
 #include <X11/keysym.h>
 /**
- * This is FAT lookup array to convert X key codes to ST_VKEY codes,
- * with stupid perfomance reson.
- * switch/case is more shorter for this!
+ * This is FAT lookup array to convert X key codes to ST_VKEY codes.
  * Notice, this array useless for text input!
  */
 #define ST_XK2ST_VK_SIZE 0x10000
@@ -394,6 +392,67 @@ static const size_t ST_XK2ST_VK[ST_XK2ST_VK_SIZE] = {
     0, // 0xFFFD
     0, // 0xFFFE
     ST_VK_DELETE  // 0xFFFF = XK_Delete
+};
+
+//#include <X11/XF86keysym.h>
+#define ST_XKMEDIA_FIRST 0x1008FF00
+#define ST_XKMEDIA_LAST  0x1008FF36
+static const size_t ST_XKMEDIA2ST_VK[ST_XKMEDIA_LAST - ST_XKMEDIA_FIRST + 1] = {
+    0,                      // 0x1008FF00
+    0,                      // 0x1008FF01 = XF86ModeLock
+    0,                      // 0x1008FF02
+    0,                      // 0x1008FF03
+    0,                      // 0x1008FF04
+    0,                      // 0x1008FF05
+    0,                      // 0x1008FF06
+    0,                      // 0x1008FF07
+    0,                      // 0x1008FF08
+    0,                      // 0x1008FF09
+    0,                      // 0x1008FF0A
+    0,                      // 0x1008FF0B
+    0,                      // 0x1008FF0C
+    0,                      // 0x1008FF0D
+    0,                      // 0x1008FF0E
+    0,                      // 0x1008FF0F
+    0,                      // 0x1008FF10 = XF86Standby
+    ST_VK_VOLUME_DOWN,      // 0x1008FF11 = XF86AudioLowerVolume
+    ST_VK_VOLUME_MUTE,      // 0x1008FF12 = XF86AudioMute
+    ST_VK_VOLUME_UP,        // 0x1008FF13 = XF86AudioRaiseVolume
+    ST_VK_MEDIA_PLAY_PAUSE, // 0x1008FF14 = XF86AudioPlay
+    ST_VK_MEDIA_STOP,       // 0x1008FF15 = XF86AudioStop
+    ST_VK_MEDIA_PREV_TRACK, // 0x1008FF16 = XF86AudioPrev
+    ST_VK_MEDIA_NEXT_TRACK, // 0x1008FF17 = XF86AudioNext
+    ST_VK_BROWSER_HOME,     // 0x1008FF18 = XF86HomePage
+    ST_VK_LAUNCH_MAIL,      // 0x1008FF19 = XF86Mail
+    0,                      // 0x1008FF1A = XF86Start
+    0,                      // 0x1008FF1B = XF86Search
+    0,                      // 0x1008FF1C = XF86AudioRecord
+    0,                      // 0x1008FF1D = XF86Calculator
+    0,                      // 0x1008FF1E = XF86Memo
+    0,                      // 0x1008FF1F = XF86ToDoList
+    0,                      // 0x1008FF20 = XF86Calendar
+    0,                      // 0x1008FF21 = XF86PowerDown
+    0,                      // 0x1008FF22 = XF86ContrastAdjust
+    0,                      // 0x1008FF23 = XF86RockerUp
+    0,                      // 0x1008FF24 = XF86RockerDown
+    0,                      // 0x1008FF25 = XF86RockerEnter
+    ST_VK_BROWSER_BACK,     // 0x1008FF26 = XF86Back
+    ST_VK_BROWSER_FORWARD,  // 0x1008FF27 = XF86Forward
+    ST_VK_BROWSER_STOP,     // 0x1008FF28 = XF86Stop
+    ST_VK_BROWSER_REFRESH,  // 0x1008FF29 = XF86Refresh
+    0,                      // 0x1008FF2A
+    0,                      // 0x1008FF2B
+    0,                      // 0x1008FF2C
+    0,                      // 0x1008FF2D
+    0,                      // 0x1008FF2E
+    0,                      // 0x1008FF2F
+    0,                      // 0x1008FF30 = XF86Favorites
+    0,                      // 0x1008FF31 = XF86AudioPause
+    0,                      // 0x1008FF32 = XF86AudioMedia
+    0,                      // 0x1008FF33 = XF86MyComputer
+    0,                      // 0x1008FF34 = XF86VendorHome
+    0,                      // 0x1008FF35 = XF86LightBulb
+    0                       // 0x1008FF36 = XF86Shop
 };
 #endif
 

@@ -710,9 +710,25 @@ void StImageViewer::keysFileWalk(bool* keysMap) {
         doListPrev();
         keysMap[ST_VK_PRIOR] = false;
     }
+    if(keysMap[ST_VK_MEDIA_PREV_TRACK]) {
+        doListPrev();
+        keysMap[ST_VK_MEDIA_PREV_TRACK] = false;
+    }
+    if(keysMap[ST_VK_BROWSER_BACK]) {
+        doListPrev();
+        keysMap[ST_VK_BROWSER_BACK] = false;
+    }
     if(keysMap[ST_VK_NEXT]) {
         doListNext();
         keysMap[ST_VK_NEXT] = false;
+    }
+    if(keysMap[ST_VK_MEDIA_NEXT_TRACK]) {
+        doListNext();
+        keysMap[ST_VK_MEDIA_NEXT_TRACK] = false;
+    }
+    if(keysMap[ST_VK_BROWSER_FORWARD]) {
+        doListNext();
+        keysMap[ST_VK_BROWSER_FORWARD] = false;
     }
     if(keysMap[ST_VK_HOME]) {
         doListFirst();

@@ -261,27 +261,26 @@ enum StVirtualKeys {
     ST_VK_LMENU      = 0xA4, // 164 = VK_LMENU       | left 'menu'
     ST_VK_RMENU      = 0xA5, // 165 = VK_RMENU       | right 'menu'
 
-#ifndef VK_BROWSER_BACK
-    VK_BROWSER_BACK        = 0xA6,
-    VK_BROWSER_FORWARD     = 0xA7,
-    VK_BROWSER_REFRESH     = 0xA8,
-    VK_BROWSER_STOP        = 0xA9,
-    VK_BROWSER_SEARCH      = 0xAA,
-    VK_BROWSER_FAVORITES   = 0xAB,
-    VK_BROWSER_HOME        = 0xAC,
+    // Multimedia keys
+    ST_VK_BROWSER_BACK        = 0xA6, // VK_BROWSER_BACK
+    ST_VK_BROWSER_FORWARD     = 0xA7,
+    ST_VK_BROWSER_REFRESH     = 0xA8,
+    ST_VK_BROWSER_STOP        = 0xA9,
+    ST_VK_BROWSER_SEARCH      = 0xAA,
+    ST_VK_BROWSER_FAVORITES   = 0xAB,
+    ST_VK_BROWSER_HOME        = 0xAC,
 
-    VK_VOLUME_MUTE         = 0xAD,
-    VK_VOLUME_DOWN         = 0xAE,
-    VK_VOLUME_UP           = 0xAF,
-    VK_MEDIA_NEXT_TRACK    = 0xB0,
-    VK_MEDIA_PREV_TRACK    = 0xB1,
-    VK_MEDIA_STOP          = 0xB2,
-    VK_MEDIA_PLAY_PAUSE    = 0xB3,
-    VK_LAUNCH_MAIL         = 0xB4,
-    VK_LAUNCH_MEDIA_SELECT = 0xB5,
-    VK_LAUNCH_APP1         = 0xB6,
-    VK_LAUNCH_APP2         = 0xB7,
-#endif
+    ST_VK_VOLUME_MUTE         = 0xAD,
+    ST_VK_VOLUME_DOWN         = 0xAE,
+    ST_VK_VOLUME_UP           = 0xAF,
+    ST_VK_MEDIA_NEXT_TRACK    = 0xB0,
+    ST_VK_MEDIA_PREV_TRACK    = 0xB1,
+    ST_VK_MEDIA_STOP          = 0xB2,
+    ST_VK_MEDIA_PLAY_PAUSE    = 0xB3,
+    ST_VK_LAUNCH_MAIL         = 0xB4,
+    ST_VK_LAUNCH_MEDIA_SELECT = 0xB5,
+    ST_VK_LAUNCH_APP1         = 0xB6,
+    ST_VK_LAUNCH_APP2         = 0xB7,
 
     // reserved 0xB8-0xB9
     ST_VK_xB8        = 0xB8,   // 166 = VK unassigned  |

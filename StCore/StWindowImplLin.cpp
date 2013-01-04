@@ -673,30 +673,35 @@ void StWindowImpl::callback(StMessage_t* theMessages) {
                     break;
                 }
                 case KeyPress: {
-                    XKeyEvent* aKeyEvent = (XKeyEvent* )&myXEvent;
-                    // It is necessary to convert the keycode to a keysym
-                    KeySym aKeySym = XLookupKeysym(aKeyEvent, 0);
-                    /**ST_DEBUG_LOG("KeyPress,   keycode= " + aKeyEvent->keycode
-                             + "; KeySym = " + (unsigned int )aKeySym + "\n");*/
-                    if(aKeySym >= ST_XK2ST_VK_SIZE) {
-                        ST_DEBUG_LOG("KeyPress,   keycode= " + aKeyEvent->keycode
-                                 + "; KeySym = " + (unsigned int )aKeySym + " ignored!\n");
-                        break;
+                    XKeyEvent*   aKeyEvent = (XKeyEvent* )&myXEvent;
+                    const KeySym aKeySym   = XLookupKeysym(aKeyEvent, 0);
+                    //ST_DEBUG_LOG("KeyPress,   keycode= " + aKeyEvent->keycode
+                    //         + "; KeySym = " + (unsigned int )aKeySym + "\n");
+                    int aVKeySt = 0;
+                    if(aKeySym < ST_XK2ST_VK_SIZE) {
+                        aVKeySt = ST_XK2ST_VK[aKeySym];
+                    } else if(aKeySym >= ST_XKMEDIA_FIRST && aKeySym <= ST_XKMEDIA_LAST) {
+                        aVKeySt = ST_XKMEDIA2ST_VK[aKeySym - ST_XKMEDIA_FIRST];
                     }
-                    myMessageList.getKeysMap()[ST_XK2ST_VK[aKeySym]] = true;
+                    if(aVKeySt != 0) {
+                        myMessageList.getKeysMap()[aVKeySt] = true;
+                    }
                     break;
                 }
                 case KeyRelease: {
-                    XKeyEvent* aKeyEvent = (XKeyEvent* )&myXEvent;
-                    KeySym aKeySym = XLookupKeysym(aKeyEvent, 0);
-                    /**ST_DEBUG_LOG("KeyRelease, keycode= " + aKeyEvent->keycode
-                             + "; KeySym = " + (unsigned int )aKeySym + "\n");*/
-                    if(aKeySym >= ST_XK2ST_VK_SIZE) {
-                        ST_DEBUG_LOG("KeyRelease, keycode= " + aKeyEvent->keycode
-                                 + "; KeySym = " + (unsigned int )aKeySym + " ignored!\n");
-                        break;
+                    XKeyEvent*   aKeyEvent = (XKeyEvent* )&myXEvent;
+                    const KeySym aKeySym   = XLookupKeysym(aKeyEvent, 0);
+                    //ST_DEBUG_LOG("KeyRelease, keycode= " + aKeyEvent->keycode
+                    //         + "; KeySym = " + (unsigned int )aKeySym + "\n");
+                    int aVKeySt = 0;
+                    if(aKeySym < ST_XK2ST_VK_SIZE) {
+                        aVKeySt = ST_XK2ST_VK[aKeySym];
+                    } else if(aKeySym >= ST_XKMEDIA_FIRST && aKeySym <= ST_XKMEDIA_LAST) {
+                        aVKeySt = ST_XKMEDIA2ST_VK[aKeySym - ST_XKMEDIA_FIRST];
                     }
-                    myMessageList.getKeysMap()[ST_XK2ST_VK[aKeySym]] = false;
+                    if(aVKeySt != 0) {
+                        myMessageList.getKeysMap()[aVKeySt] = false;
+                    }
                     break;
                 }
                 case ButtonPress:

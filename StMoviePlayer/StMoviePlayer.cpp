@@ -768,11 +768,7 @@ void StMoviePlayer::doSeek(const int , const double theSeekX) {
 }
 
 void StMoviePlayer::doPlayPause(const size_t ) {
-    if(myVideo->isPlaying()) {
-        myVideo->pushPlayEvent(ST_PLAYEVENT_PAUSE);
-    } else {
-        myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
-    }
+    myVideo->pushPlayEvent(myVideo->isPlaying() ? ST_PLAYEVENT_PAUSE : ST_PLAYEVENT_RESUME);
 }
 
 void StMoviePlayer::doStop(const size_t ) {
@@ -930,7 +926,6 @@ void StMoviePlayer::keysSrcFormat(bool* keysMap) {
         myGUI->stImageRegion->params.brightness->increment();
         keysMap[ST_VK_B] = false;
     }
-
 }
 
 void StMoviePlayer::keysFileWalk(bool* keysMap) {
@@ -949,9 +944,25 @@ void StMoviePlayer::keysFileWalk(bool* keysMap) {
         doListPrev();
         keysMap[ST_VK_PRIOR] = false;
     }
+    if(keysMap[ST_VK_MEDIA_PREV_TRACK]) {
+        doListPrev();
+        keysMap[ST_VK_MEDIA_PREV_TRACK] = false;
+    }
+    if(keysMap[ST_VK_BROWSER_BACK]) {
+        doListPrev();
+        keysMap[ST_VK_BROWSER_BACK] = false;
+    }
     if(keysMap[ST_VK_NEXT]) {
-        doListNext() ;
+        doListNext();
         keysMap[ST_VK_NEXT] = false;
+    }
+    if(keysMap[ST_VK_MEDIA_NEXT_TRACK]) {
+        doListNext();
+        keysMap[ST_VK_MEDIA_NEXT_TRACK] = false;
+    }
+    if(keysMap[ST_VK_BROWSER_FORWARD]) {
+        doListNext();
+        keysMap[ST_VK_BROWSER_FORWARD] = false;
     }
     if(keysMap[ST_VK_HOME]) {
         doListFirst();
@@ -985,15 +996,18 @@ void StMoviePlayer::keysCommon(bool* keysMap) {
     }
 
     if(keysMap[ST_VK_SPACE]) {
-        static bool lastPPState = false;
-        if(lastPPState) {
-            myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
-        } else {
-            myVideo->pushPlayEvent(ST_PLAYEVENT_PAUSE);
-        }
-        lastPPState = !lastPPState;
+        doPlayPause();
         keysMap[ST_VK_SPACE] = false;
     }
+    if(keysMap[ST_VK_MEDIA_PLAY_PAUSE]) {
+        doPlayPause();
+        keysMap[ST_VK_MEDIA_PLAY_PAUSE] = false;
+    }
+    if(keysMap[ST_VK_MEDIA_STOP]) {
+        doStop();
+        keysMap[ST_VK_MEDIA_STOP] = false;
+    }
+
     if(keysMap[ST_VK_LEFT]) {
         doSeekLeft();
         keysMap[ST_VK_LEFT] = false;
