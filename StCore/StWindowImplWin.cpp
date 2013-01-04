@@ -350,6 +350,14 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
             return 0; // do nothing - window close action should be performed by application
         }
 
+        case WM_DISPLAYCHANGE: {
+            ST_DEBUG_LOG("WM_DISPLAYCHANGE event");
+            myMonitors.init(); // reinitialize monitors list
+            for(size_t aMonIter = 0; aMonIter < myMonitors.size(); ++aMonIter) {
+                ST_DEBUG_LOG(myMonitors[aMonIter].toString()); // just debug output
+            }
+            return 0;
+        }
         case WM_DROPFILES: {
             HDROP aDrops = (HDROP )wParam;
             UINT aFilesCount = DragQueryFileW(aDrops, 0xFFFFFFFF, NULL, 0);
