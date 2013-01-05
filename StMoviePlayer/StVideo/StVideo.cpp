@@ -267,6 +267,19 @@ bool StVideo::addFile(const StString& theFileToLoad,
     StFileNode::getFolderAndFile(theFileToLoad, aFolder, aTitleString);
     myFileInfoTmp->myInfo.add(StArgument("File name", aTitleString));
 
+    // collect metadata
+#if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
+    for(AVDictionaryEntry* aTag = av_dict_get(aFormatCtx->metadata, "", NULL, AV_DICT_IGNORE_SUFFIX);
+        aTag != NULL;
+        aTag = av_dict_get(aFormatCtx->metadata, "", aTag, AV_DICT_IGNORE_SUFFIX)) {
+#else
+    for(AVMetadataTag* aTag = av_metadata_get(aFormatCtx->metadata, "", NULL, AV_METADATA_IGNORE_SUFFIX);
+        aTag != NULL;
+        aTag = av_metadata_get(aFormatCtx->metadata, "", aTag, AV_METADATA_IGNORE_SUFFIX)) {
+#endif
+        myFileInfoTmp->myInfo.add(StArgument(aTag->key, aTag->value));
+    }
+
     theMaxDuration = stMax(theMaxDuration, stLibAV::unitsToSeconds(aFormatCtx->duration));
     for(unsigned int aStreamId = 0; aStreamId < aFormatCtx->nb_streams; ++aStreamId) {
         AVStream* aStream = aFormatCtx->streams[aStreamId];
