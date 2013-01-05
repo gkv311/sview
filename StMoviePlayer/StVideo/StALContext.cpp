@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,13 +19,18 @@
 #include "StALContext.h"
 #include <StStrings/StLogger.h>
 
+#ifndef ALC_CONNECTED
+    #define ALC_CONNECTED 0x313 // undefined on mac os
+#endif
+
 StALContext::StALContext()
 : hDevice(NULL),
   hContext(NULL),
   hasExtEAX2(false),
   hasExtFloat32(false),
   hasExtFloat64(false),
-  hasExtMultiChannel(false) {
+  hasExtMultiChannel(false),
+  hasExtDisconnect(false) {
     //
 }
 
@@ -46,6 +51,9 @@ StString StALContext::toStringExtensions() const {
     }
     if(hasExtMultiChannel) {
         extList += " - multi-channel formats;\n";
+    }
+    if(hasExtDisconnect) {
+        extList += " - ALC_EXT_disconnect;\n";
     }
     return extList;
 }
@@ -74,6 +82,7 @@ bool StALContext::create(const StString& theDeviceName) {
     hasExtFloat32      = alIsExtensionPresent("AL_EXT_float32")   == AL_TRUE;
     hasExtFloat64      = alIsExtensionPresent("AL_EXT_double")    == AL_TRUE;
     hasExtMultiChannel = alIsExtensionPresent("AL_EXT_MCFORMATS") == AL_TRUE;
+    hasExtDisconnect   = alcIsExtensionPresent(hDevice, "ALC_EXT_disconnect") == AL_TRUE;
 
     // debug info
     ST_DEBUG_LOG(toStringExtensions());
@@ -95,8 +104,21 @@ void StALContext::destroy() {
     hasExtFloat32 = false;
     hasExtFloat64 = false;
     hasExtMultiChannel = false;
+    hasExtDisconnect = false;
 }
 
 bool StALContext::makeCurrent() {
     return alcMakeContextCurrent(hContext) == AL_TRUE;
+}
+
+bool StALContext::isConnected() const {
+    if(hDevice == NULL) {
+        return false;
+    } else if(!hasExtDisconnect) {
+        return true;
+    }
+
+    ALint aConnected = AL_FALSE;
+    alcGetIntegerv(hDevice, ALC_CONNECTED, 1, &aConnected);
+    return aConnected == AL_TRUE;
 }

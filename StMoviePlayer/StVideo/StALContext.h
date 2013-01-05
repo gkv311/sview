@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,7 @@ class ST_LOCAL StALContext {
     bool hasExtFloat32;      //!< has 32bit float formats
     bool hasExtFloat64;      //!< has 64bit float formats
     bool hasExtMultiChannel; //!< has multichannel formats
+    bool hasExtDisconnect;   //!< ALC_EXT_disconnect
 
         public:
 
@@ -81,6 +82,12 @@ class ST_LOCAL StALContext {
      * Make AL device active in current thread.
      */
     bool makeCurrent();
+
+    /**
+     * Notice that this method will always return true if extensions ALC_EXT_disconnect is not available.
+     * @return true if device is in connected state.
+     */
+    bool isConnected() const;
 
 };
 
