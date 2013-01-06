@@ -278,6 +278,14 @@ StGLMenu* StMoviePlayerGUI::createOpenALDeviceMenu() {
 
 void StMoviePlayerGUI::fillOpenALDeviceMenu(StGLMenu* theMenu) {
     const StArrayList<StString>& aDevList = myPlugin->params.alDevice->getList();
+
+    theMenu->addItem("Refresh list...")
+           ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doUpdateOpenALDeviceList);
+    if(aDevList.isEmpty()) {
+        theMenu->addItem("None", StHandle<StInt32Param>::downcast(myPlugin->params.alDevice), -1);
+        return;
+    }
+
     // OpenAL devices names are often very long...
     size_t aLen = 10;
     for(size_t devId = 0; devId < aDevList.size(); ++devId) {
@@ -300,10 +308,10 @@ void StMoviePlayerGUI::updateOpenALDeviceMenu() {
         aChild = aChild->getNext();
         delete anItem;
     }
-    fillOpenALDeviceMenu(myMenuAudio);
+    fillOpenALDeviceMenu(myMenuOpenAL);
 
     // update menu representation
-    myMenuAudio->stglInit();
+    myMenuOpenAL->stglInit();
 }
 
 /**

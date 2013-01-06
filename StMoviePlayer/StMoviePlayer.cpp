@@ -100,15 +100,18 @@ void StALDeviceParam::initList() {
 
 StALDeviceParam::~StALDeviceParam() {}
 
-bool StALDeviceParam::init(const StString& theActive) {
+int32_t StALDeviceParam::getValueFromName(const StString& theName) {
     for(size_t anId = 0; anId < myDevicesList.size(); ++anId) {
-        if(myDevicesList[anId] == theActive) {
-            ///setValue(int32_t(anId));
-            myValue = int32_t(anId);
-            return true;
+        if(myDevicesList[anId] == theName) {
+            return int32_t(anId);
         }
     }
-    return false;
+    return -1;
+}
+
+bool StALDeviceParam::init(const StString& theActive) {
+    myValue = getValueFromName(theActive);
+    return myValue >= 0;
 }
 
 StString StALDeviceParam::getTitle() const {
@@ -125,6 +128,7 @@ StMoviePlayer::StMoviePlayer()
   mySeekOnLoad(-1.0),
   //
   myLastUpdateDay(0),
+  myToUpdateALList(false),
   myIsBenchmark(false),
   myToCheckUpdates(true),
   myToQuit(false) {
@@ -461,10 +465,22 @@ void StMoviePlayer::parseCallback(StMessage_t* stMessages) {
     myGUI->setVisibility(myWindow->getMousePos(), isMouseMove);
 }
 
+void StMoviePlayer::doUpdateOpenALDeviceList(const size_t ) {
+    myToUpdateALList = true;
+}
+
 void StMoviePlayer::stglDraw(unsigned int view) {
-    if(myVideo->isDisconnected()) {
+    if(myVideo->isDisconnected() || myToUpdateALList) {
+        const StString aPrevDev = params.alDevice->getTitle();
         params.alDevice->initList();
         myGUI->updateOpenALDeviceMenu();
+        // switch audio device
+        if(!params.alDevice->init(aPrevDev)) {
+            // select first existing device if any
+            params.alDevice->init(params.alDevice->getTitle());
+        }
+        myVideo->switchAudioDevice(params.alDevice->getTitle());
+        myToUpdateALList = false;
     }
 
     myGUI->getCamera()->setView(view);

@@ -595,7 +595,9 @@ bool StAudioQueue::stalQueue(const double thePts) {
             playTimerStart(0.0);
         }
         alSourcePlayv(NUM_AL_SOURCES, myAlSources);
-        ST_DEBUG_LOG("!!! OpenAL was in stopped state, now resume playback from " + (thePts - diffSecs));
+        if(stalCheckConnected()) {
+            ST_DEBUG_LOG("!!! OpenAL was in stopped state, now resume playback from " + (thePts - diffSecs));
+        }
 
         // pause playback if not in playing state
         myEventMutex.lock();
@@ -607,6 +609,19 @@ bool StAudioQueue::stalQueue(const double thePts) {
     }
 
     return isQueued;
+}
+
+bool StAudioQueue::stalCheckConnected() {
+    if(!myIsDisconnected && myAlCtx.isConnected()) {
+        return true;
+    }
+
+    myAlDeviceName = new StString();
+    stalDeinit(); // release OpenAL context
+    myIsAlValid = (stalInit() ? ST_AL_INIT_OK : ST_AL_INIT_KO);
+    myIsDisconnected = true;
+    ST_DEBUG_LOG("!!! OpenAL device was disconnected !!!");
+    return false;
 }
 
 void StAudioQueue::stalFillBuffers(const double thePts,
@@ -636,13 +651,7 @@ void StAudioQueue::stalFillBuffers(const double thePts,
                 playTimerStart(0.0);
             }
             alSourcePlayv(NUM_AL_SOURCES, myAlSources);
-            if(!myIsDisconnected && !myAlCtx.isConnected()) {
-                myAlDeviceName = new StString();
-                stalDeinit(); // release OpenAL context
-                myIsAlValid = (stalInit() ? ST_AL_INIT_OK : ST_AL_INIT_KO);
-                myIsDisconnected = true;
-                ST_DEBUG_LOG("!!! OpenAL device was disconnected !!!");
-            } else {
+            if(stalCheckConnected()) {
                 ST_DEBUG_LOG("!!! OpenAL was in stopped state, now resume playback from " + (thePts - diffSecs));
             }
         } else {

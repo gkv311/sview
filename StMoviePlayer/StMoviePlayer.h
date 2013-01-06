@@ -57,6 +57,8 @@ class ST_LOCAL StALDeviceParam : public StInt32Param {
 
     bool init(const StString& theActive);
 
+    int32_t getValueFromName(const StString& theName);
+
     /**
      * Returns title for active AL device.
      */
@@ -124,6 +126,7 @@ class ST_LOCAL StMoviePlayer : public StDrawerInterface {
 
     void doOpen1File(const size_t dummy = 0);
     void doOpen2Files(const size_t dummy = 0);
+    void doUpdateOpenALDeviceList(const size_t dummy = 0);
     void doAddAudioStream(const size_t dummy = 0);
     void doAddSubtitleStream(const size_t dummy = 0);
     void doSeekLeft(const size_t dummy = 0);
@@ -192,6 +195,7 @@ class ST_LOCAL StMoviePlayer : public StDrawerInterface {
     double                     mySeekOnLoad;      //!< seeking target
 
     int32_t                    myLastUpdateDay;
+    bool                       myToUpdateALList;
     bool                       myIsBenchmark;
     bool                       myToCheckUpdates;
     bool                       myToQuit;
