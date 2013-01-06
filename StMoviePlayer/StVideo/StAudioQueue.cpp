@@ -192,6 +192,7 @@ StAudioQueue::StAudioQueue(const StString& theAlDeviceName)
   myBufferOut(PCM16_SIGNED, AVCODEC_MAX_AUDIO_FRAME_SIZE),
   myIsAlValid(ST_AL_INIT_NA),
   myToSwitchDev(false),
+  myIsDisconnected(false),
   myAlDeviceName(new StString(theAlDeviceName)),
   myAlCtx(),
   myAlFormat(AL_FORMAT_STEREO16),
@@ -437,7 +438,8 @@ bool StAudioQueue::parseEvents() {
         stalDeinit(); // release OpenAL context
         myIsAlValid = (stalInit() ? ST_AL_INIT_OK : ST_AL_INIT_KO);
 
-        myToSwitchDev = false;
+        myIsDisconnected = false;
+        myToSwitchDev    = false;
         return true;
     }
 
@@ -634,7 +636,15 @@ void StAudioQueue::stalFillBuffers(const double thePts,
                 playTimerStart(0.0);
             }
             alSourcePlayv(NUM_AL_SOURCES, myAlSources);
-            ST_DEBUG_LOG("!!! OpenAL was in stopped state, now resume playback from " + (thePts - diffSecs));
+            if(!myIsDisconnected && !myAlCtx.isConnected()) {
+                myAlDeviceName = new StString();
+                stalDeinit(); // release OpenAL context
+                myIsAlValid = (stalInit() ? ST_AL_INIT_OK : ST_AL_INIT_KO);
+                myIsDisconnected = true;
+                ST_DEBUG_LOG("!!! OpenAL device was disconnected !!!");
+            } else {
+                ST_DEBUG_LOG("!!! OpenAL was in stopped state, now resume playback from " + (thePts - diffSecs));
+            }
         } else {
             // TODO (Kirill Gavrilov#3#) often updates may prevent normal video playback
             // on files with broken audio/video PTS

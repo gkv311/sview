@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -180,7 +180,7 @@ void StMoviePlayerGUI::createMainMenu() {
 StGLMenu* StMoviePlayerGUI::createMediaMenu() {
     StGLMenu* aMenuMedia = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     StGLMenu* aMenuSrcFormat = createSrcFormatMenu();    // Root -> Media -> Source format menu
-    StGLMenu* aMenuOpenAL    = createOpenALDeviceMenu(); // Root -> Media -> OpenAL Device
+    myMenuOpenAL             = createOpenALDeviceMenu(); // Root -> Media -> OpenAL Device
     StGLMenu* aMenuVolume    = createAudioGainMenu();
     StGLMenu* aMenuOpenImage = createOpenMovieMenu();    // Root -> Media -> Open movie menu
     StGLMenu* aMenuSaveImage = createSaveImageMenu();    // Root -> Media -> Save snapshot menu
@@ -199,7 +199,7 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
                         "Source stereo format"), aMenuSrcFormat);
 
     aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_AL_DEVICE,
-                        "Audio Device"), aMenuOpenAL);
+                        "Audio Device"), myMenuOpenAL);
 
     aMenuMedia->addItem("Audio Volume", aMenuVolume);
 
@@ -272,6 +272,11 @@ StGLMenu* StMoviePlayerGUI::createSrcFormatMenu() {
  */
 StGLMenu* StMoviePlayerGUI::createOpenALDeviceMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+    fillOpenALDeviceMenu(aMenu);
+    return aMenu;
+}
+
+void StMoviePlayerGUI::fillOpenALDeviceMenu(StGLMenu* theMenu) {
     const StArrayList<StString>& aDevList = myPlugin->params.alDevice->getList();
     // OpenAL devices names are often very long...
     size_t aLen = 10;
@@ -280,11 +285,25 @@ StGLMenu* StMoviePlayerGUI::createOpenALDeviceMenu() {
     }
     aLen += 2;
     for(size_t devId = 0; devId < aDevList.size(); ++devId) {
-        StGLMenuItem* anItem = aMenu->addItem(aDevList[devId],
-                                              StHandle<StInt32Param>::downcast(myPlugin->params.alDevice), int32_t(devId));
+        StGLMenuItem* anItem = theMenu->addItem(aDevList[devId],
+                                                StHandle<StInt32Param>::downcast(myPlugin->params.alDevice), int32_t(devId));
         anItem->changeRectPx().right() = anItem->getRectPx().left() + 10 * int(aLen);
     }
-    return aMenu;
+}
+
+void StMoviePlayerGUI::updateOpenALDeviceMenu() {
+    if(myMenuOpenAL == NULL) {
+        return;
+    }
+    for(StGLWidget* aChild = myMenuOpenAL->getChildren()->getStart(); aChild != NULL;) {
+        StGLWidget* anItem = aChild;
+        aChild = aChild->getNext();
+        delete anItem;
+    }
+    fillOpenALDeviceMenu(myMenuAudio);
+
+    // update menu representation
+    myMenuAudio->stglInit();
 }
 
 /**
@@ -434,7 +453,7 @@ void StMoviePlayerGUI::doAboutProgram(const size_t ) {
     StString& aVerString = myLangMap->changeValueId(ABOUT_VERSION, "version");
     StString& aDescr = myLangMap->changeValueId(ABOUT_DESCRIPTION, StString()
         + "Movie player allows you to play stereoscopic video.\n"
-        + "(C) 2007-2012 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis program distributed under GPL3.0");
+        + "(C) 2007-2013 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis program distributed under GPL3.0");
     StGLMessageBox* aboutDialog = new StGLMessageBox(this, aTitle + '\n'
         + aVerString + ": " + StVersionInfo::getSDKVersionString()
         + " "+ StThread::getArchString()
@@ -567,6 +586,7 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer* thePlugin,
   myMsgStack(NULL),
   // main menu
   menu0Root(NULL),
+  myMenuOpenAL(NULL),
   myMenuAudio(NULL),
   myMenuSubtitles(NULL),
   // upper toolbar

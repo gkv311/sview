@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,6 +75,7 @@ class ST_LOCAL StMoviePlayerGUI : public StGLRootWidget {
     StGLMsgStack*       myMsgStack; // messages stack
 
     StGLMenu*            menu0Root; // main menu
+    StGLMenu*         myMenuOpenAL;
     StGLMenu*          myMenuAudio;
     StGLMenu*      myMenuSubtitles;
 
@@ -120,6 +121,8 @@ class ST_LOCAL StMoviePlayerGUI : public StGLRootWidget {
     StGLMenu* createCheckUpdatesMenu(); // Root -> Help -> Check updates menu
     StGLMenu* createLanguageMenu();     // Root -> Help -> Language menu
 
+    void fillOpenALDeviceMenu(StGLMenu* theMenu);
+
         public: //!< StGLRootWidget overrides
 
     StMoviePlayerGUI(StMoviePlayer* thePlugin,
@@ -139,6 +142,7 @@ class ST_LOCAL StMoviePlayerGUI : public StGLRootWidget {
 
         public: //!< menu update routines
 
+    void updateOpenALDeviceMenu();
     void updateAudioStreamsMenu    (const StHandle< StArrayList<StString> >& theStreamsList,
                                     const bool theHasVideo);
     void updateSubtitlesStreamsMenu(const StHandle< StArrayList<StString> >& theStreamsList);

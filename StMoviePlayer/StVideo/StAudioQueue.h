@@ -107,6 +107,13 @@ class ST_LOCAL StAudioQueue : public StAVPacketQueue {
         myToSwitchDev  = true;
     }
 
+    /**
+     * @return true if device was disconnected and OpenAL should be re-initialized.
+     */
+    bool isDisconnected() const {
+        return myIsDisconnected;
+    }
+
         private: //! @name private methods
 
     bool stalInit();
@@ -216,6 +223,7 @@ class ST_LOCAL StAudioQueue : public StAVPacketQueue {
     StTimer            myLimitTimer;
     volatile IState_t  myIsAlValid;     //!< OpenAL initialization state
     volatile bool      myToSwitchDev;   //!< switch audio device flag
+    volatile bool      myIsDisconnected;//!< audio device disconnection flag
 
         private: //! @name OpenAL items
 

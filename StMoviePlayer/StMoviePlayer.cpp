@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,6 +68,12 @@ namespace {
 
 StALDeviceParam::StALDeviceParam()
 : StInt32Param(0) {
+    initList();
+}
+
+void StALDeviceParam::initList() {
+    myValue = 0;
+    myDevicesList.clear();
     const ALchar* aDevicesNames = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
     StString aName;
     while(aDevicesNames && *aDevicesNames) {
@@ -456,6 +462,11 @@ void StMoviePlayer::parseCallback(StMessage_t* stMessages) {
 }
 
 void StMoviePlayer::stglDraw(unsigned int view) {
+    if(myVideo->isDisconnected()) {
+        params.alDevice->initList();
+        myGUI->updateOpenALDeviceMenu();
+    }
+
     myGUI->getCamera()->setView(view);
     if(view == ST_DRAW_LEFT) {
         double aDuration = 0.0;

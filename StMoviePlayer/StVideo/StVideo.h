@@ -250,6 +250,13 @@ class ST_LOCAL StVideo {
     }
 
     /**
+     * @return true if device was disconnected and OpenAL should be re-initialized.
+     */
+    bool isDisconnected() const {
+        return myAudio->isDisconnected();
+    }
+
+    /**
      * Set audio gain.
      */
     void setAudioVolume(const float theGain) {
