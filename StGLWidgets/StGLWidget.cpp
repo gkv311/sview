@@ -161,17 +161,8 @@ StRectI_t StGLWidget::getAbsolute(const StRectI_t& theRectPx) const {
     return computeAbsolutePos(myParent->getRectPxAbsolute(), theRectPx, myCorner);
 }
 
-StRectI_t StGLWidget::stglViewPort() {
-    GLint glvp[4]; getContext().core20fwd->glGetIntegerv(GL_VIEWPORT, glvp);
-    StRectI_t viewPort = getRectPxAbsolute();
-    // we need to correct viewport values for frame-buffer rendering (render to texture)
-    GLdouble widthFactor  = GLdouble(glvp[2] - glvp[0]) / GLdouble(getRoot()->getRectPx().width());
-    GLdouble heightFactor = GLdouble(glvp[3] - glvp[1]) / GLdouble(getRoot()->getRectPx().height());
-    viewPort.top()    = glvp[3] - GLint(heightFactor * GLdouble(viewPort.bottom()));
-    viewPort.bottom() = viewPort.top() + GLint(heightFactor * GLdouble(getRectPx().height()));
-    viewPort.left()   = GLint(widthFactor * GLdouble(viewPort.left()));
-    viewPort.right()  = GLint(widthFactor * GLdouble(viewPort.right()));
-    return viewPort;
+void StGLWidget::stglScissorRect(GLint* theScissorRect) const {
+    myRoot->stglScissorRect(getRectPxAbsolute(), theScissorRect);
 }
 
 StPointD_t StGLWidget::getPointGl(const StPointD_t& thePointZo) const {

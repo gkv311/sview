@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -38,6 +38,12 @@ class ST_LOCAL StGLRootWidget : public StGLWidget {
      * @return true on success.
      */
     virtual bool stglInit();
+
+    /**
+     * Draw all children.
+     * Root widget caches OpenGL state (like viewport).
+     */
+    virtual void stglDraw(unsigned int theView);
 
     GLdouble getRootScaleX() const {
         return myScaleGlX;
@@ -111,6 +117,21 @@ class ST_LOCAL StGLRootWidget : public StGLWidget {
     virtual void stglUpdate(const StPointD_t& cursorZo);
     virtual void stglResize(const StRectI_t& winRectPx);
 
+    /**
+     * @return viewport dimensions from bound GL context (4-indices array).
+     */
+    const GLint* getViewport() const {
+        return myViewport;
+    }
+
+    /**
+     * Computes scissor rectangle in OpenGL viewport.
+     * @param theRect        Rectangle in window coordinates
+     * @param theScissorRect Scissor rectangle for glScissor() call
+     */
+    void stglScissorRect(const StRectI_t& theRect,
+                         GLint*           theScissorRect) const;
+
         private:
 
     /// TODO (Kirill Gavrilov#9) - replace with list to StHandle from some base class
@@ -124,6 +145,7 @@ class ST_LOCAL StGLRootWidget : public StGLWidget {
     GLdouble              myScaleGlX;   //!< scale factor to optimize convertion from Pixels -> GL coordinates
     GLdouble              myScaleGlY;   //!< scale factor to optimize convertion from Pixels -> GL coordinates
     StPointD_t            cursorZo;     //!< mouse cursor position
+    GLint                 myViewport[4];//!< cached GL viewport
 
 };
 

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -9,6 +9,7 @@
 #include <StGLWidgets/StGLRootWidget.h>
 
 #include <StGL/StGLContext.h>
+#include <StGLCore/StGLCore20.h>
 
 namespace {
     // we do not use StAtomic<> template here to avoid static classes initialization ambiguity
@@ -32,6 +33,10 @@ StGLRootWidget::StGLRootWidget()
   cursorZo(0.0, 0.0) {
     // unify access
     StGLWidget::myRoot = this;
+    myViewport[0] = 0;
+    myViewport[1] = 0;
+    myViewport[2] = 1;
+    myViewport[3] = 1;
 
     // allocate shared resources array
     for(size_t aResId = 0; aResId < myShareSize; ++aResId) {
@@ -72,6 +77,11 @@ bool StGLRootWidget::stglInit() {
     return StGLWidget::stglInit();
 }
 
+void StGLRootWidget::stglDraw(unsigned int theView) {
+    myGlCtx->core20fwd->glGetIntegerv(GL_VIEWPORT, myViewport); // cache viewport
+    StGLWidget::stglDraw(theView);
+}
+
 const StString& StGLRootWidget::getClassName() {
     return CLASS_NAME;
 }
@@ -94,6 +104,29 @@ StGLSharePointer* StGLRootWidget::getShare(const size_t theResId) {
 void StGLRootWidget::stglUpdate(const StPointD_t& theCursorZo) {
     cursorZo = theCursorZo;
     StGLWidget::stglUpdate(theCursorZo);
+}
+
+void StGLRootWidget::stglScissorRect(const StRectI_t& theRect,
+                                     GLint*           theScissorRect) const {
+    const GLint aVPortWidth  = myViewport[2];
+    const GLint aVPortHeight = myViewport[3];
+    const GLint aRootWidth   = getRectPx().width();
+    const GLint aRootHeight  = getRectPx().height();
+    if(aRootWidth <= 0 || aRootHeight <= 0) {
+        // just prevent division by zero - should never happen
+        stMemSet(theScissorRect, 0, sizeof(GLint) * 4);
+        return;
+    }
+
+    // viewport could have different size in case of rendering to FBO
+    const GLdouble aWidthFactor  = GLdouble(aVPortWidth)  / GLdouble(aRootWidth);
+    const GLdouble aHeightFactor = GLdouble(aVPortHeight) / GLdouble(aRootHeight);
+
+    theScissorRect[0] = myViewport[0] + GLint(aWidthFactor * GLdouble(theRect.left()));
+    theScissorRect[1] = myViewport[1] + GLint(aWidthFactor * GLdouble(aRootHeight - theRect.bottom()));
+
+    theScissorRect[2] = GLint(aWidthFactor  * GLdouble(theRect.width()));
+    theScissorRect[3] = GLint(aHeightFactor * GLdouble(theRect.height()));
 }
 
 void StGLRootWidget::stglResize(const StRectI_t& theWinRectPx) {

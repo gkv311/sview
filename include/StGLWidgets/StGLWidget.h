@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -189,7 +189,10 @@ class ST_LOCAL StGLWidget {
      */
     StRectI_t getAbsolute(const StRectI_t& theRectPx) const;
 
-    StRectI_t stglViewPort();
+    /**
+     * @param theScissorRect rectangle for OpenGL scissor test
+     */
+    void stglScissorRect(GLint* theScissorRect) const;
 
     /**
      * @param thePointZo (const StPointD_t& ) - point in Zero2One coordinates to convert;

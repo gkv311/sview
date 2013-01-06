@@ -113,7 +113,15 @@ void StGLMessageBox::stglDraw(unsigned int theView) {
 
     aCtx.core20fwd->glDisable(GL_BLEND);
 
+    GLint aScissorRect[4];
+    stglScissorRect(aScissorRect);
+    aCtx.core20fwd->glEnable(GL_SCISSOR_TEST);
+    aCtx.core20fwd->glScissor(aScissorRect[0], aScissorRect[1],
+                              aScissorRect[2], aScissorRect[3]);
+
     StGLWidget::stglDraw(theView); // draw children
+
+    aCtx.core20fwd->glDisable(GL_SCISSOR_TEST);
 }
 
 void StGLMessageBox::setVisibility(bool isVisible, bool isForce) {
