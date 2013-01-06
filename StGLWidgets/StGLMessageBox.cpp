@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -25,8 +25,7 @@ StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
     myTextArea = new StGLTextArea(this, anOffsetX, anOffsetY, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
                                   theWidth - 2 * anOffsetX, theHeight - 2 * anOffsetY, true);
     myTextArea->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
-                               StGLTextFormatter::ST_ALIGN_Y_CENTER);
-
+                               StGLTextFormatter::ST_ALIGN_Y_TOP);
     myTextArea->setText(theText);
     myTextArea->setBorder(false);
     myTextArea->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
@@ -52,6 +51,14 @@ bool StGLMessageBox::stglInit() {
     };
     myVertexBuf.init(aCtx, 4, 4, QUAD_VERTICES);
     stglResize();
+
+    const GLint aBoxHeight  = getRectPx().height();
+    const GLint aTextHeight = myTextArea->getTextHeight();
+    if(aTextHeight < aBoxHeight) {
+        // align to center
+        myTextArea->changeRectPx().top()    = (aBoxHeight - aTextHeight) / 2;
+        myTextArea->changeRectPx().bottom() = myTextArea->getRectPx().top() + aTextHeight;
+    }
 
     if(!myProgram.init(aCtx)) {
         return false;
@@ -156,9 +163,24 @@ void StGLMessageBox::doKillSelf(const size_t ) {
 }
 
 void StGLMessageBox::doMouseUnclick(const int theBtnId) {
-    if(theBtnId == ST_MOUSE_LEFT) {
-        signals.onClickLeft(getUserData());
-    } else if(theBtnId == ST_MOUSE_RIGHT) {
-        signals.onClickRight(getUserData());
+    switch(theBtnId) {
+        case ST_MOUSE_LEFT: {
+            signals.onClickLeft(getUserData());
+            break;
+        }
+        case ST_MOUSE_RIGHT: {
+            signals.onClickRight(getUserData());
+            break;
+        }
+        case ST_MOUSE_SCROLL_V_UP: {
+            myTextArea->changeRectPx().top()    += 10;
+            myTextArea->changeRectPx().bottom() += 10;
+            break;
+        }
+        case ST_MOUSE_SCROLL_V_DOWN: {
+            myTextArea->changeRectPx().top()    -= 10;
+            myTextArea->changeRectPx().bottom() -= 10;
+            break;
+        }
     }
 }

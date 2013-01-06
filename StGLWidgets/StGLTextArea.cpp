@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -370,6 +370,10 @@ bool StGLTextArea::stglInit() {
     myBorderIVertBuf.init(aCtx);
     myBorderOVertBuf.init(aCtx);
 
+    if(isVisible()) {
+        formatText(aCtx);
+    }
+
     return StGLWidget::stglInit();
 }
 
@@ -389,6 +393,20 @@ void StGLTextArea::recomputeBorder(StGLContext& theCtx) {
     };
     myBorderIVertBuf.init(theCtx, 4, 4, quadVerticesInner);
     myBorderOVertBuf.init(theCtx, 4, 4, quadVerticesOuter);
+}
+
+void StGLTextArea::formatText(StGLContext& theCtx) {
+    if(myToRecompute) {
+        myFormatter.reset();
+        myFormatter.append(theCtx, myText, *myFont);
+        myFormatter.format(myTextWidth, GLfloat(getRectPx().height()));
+        myFormatter.getResult(theCtx, myTexturesList, myTextVertBuf, myTextTCrdBuf);
+        myFormatter.getBndBox(myTextBndBox);
+        if(myToShowBorder) {
+            recomputeBorder(theCtx);
+        }
+        myToRecompute = false;
+    }
 }
 
 void StGLTextArea::drawText(StGLContext& theCtx) {
@@ -418,18 +436,7 @@ void StGLTextArea::stglDraw(unsigned int theView) {
 
     StGLContext& aCtx = getContext();
     myTextColor.a() = myShadowColor.a() = myBackColor.a() = myBorderColor.a() = (GLfloat )opacityValue;
-
-    if(myToRecompute) {
-        myFormatter.reset();
-        myFormatter.append(aCtx, myText, *myFont);
-        myFormatter.format(myTextWidth, GLfloat(getRectPx().height()));
-        myFormatter.getResult(aCtx, myTexturesList, myTextVertBuf, myTextTCrdBuf);
-        myFormatter.getBndBox(myTextBndBox);
-        if(myToShowBorder) {
-            recomputeBorder(aCtx);
-        }
-        myToRecompute = false;
-    }
+    formatText(aCtx);
 
     StRectI_t aTextRectPx = getRectPx();
     aTextRectPx.left()   += myMarginLeft;

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -116,9 +116,18 @@ class ST_LOCAL StGLTextArea : public StGLWidget {
     virtual bool stglInit();
     virtual void stglDraw(unsigned int theView);
 
+    GLint getTextHeight() const {
+        return std::abs(GLint(myTextBndBox.height()));
+    }
+
+    GLint getTextWidth() const {
+        return std::abs(GLint(myTextBndBox.width()));
+    }
+
         private:
 
-    void drawText(StGLContext& theCtx);
+    void formatText(StGLContext& theCtx);
+    void drawText  (StGLContext& theCtx);
 
     void recomputeBorder(StGLContext& theCtx);
 
