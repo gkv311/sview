@@ -299,7 +299,7 @@ void StImageViewerGUI::doAboutProgram(const size_t ) {
     StString& aVerString = myLangMap->changeValueId(ABOUT_VERSION, "version");
     StString& aDescr = myLangMap->changeValueId(ABOUT_DESCRIPTION, StString()
         + "Image viewer allows you to open stereoscopic images in formats JPEG, PNG, MPO and a lot of others.\n"
-        + "(C) 2007-2012 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis program distributed under GPL3.0");
+        + "(C) 2007-2013 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis program distributed under GPL3.0");
     StGLMessageBox* aboutDialog = new StGLMessageBox(this, aTitle + '\n'
         + aVerString + ": " + StVersionInfo::getSDKVersionString()
         + " "+ StThread::getArchString()

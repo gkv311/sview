@@ -329,17 +329,28 @@ void StImageViewer::parseCallback(StMessage_t* stMessages) {
             }
             case StMessageList::MSG_MOUSE_DOWN: {
                 StPointD_t pt;
-                int mouseBtn = myWindow->getMouseDown(&pt);
-                myGUI->tryClick(pt, mouseBtn);
+                int aMouseBtn = myWindow->getMouseDown(&pt);
+                if(myEscNoQuit
+                && !myWindow->isFullScreen()
+                && (aMouseBtn == ST_MOUSE_SCROLL_V_UP || aMouseBtn == ST_MOUSE_SCROLL_V_DOWN)) {
+                    // ignore scrolling as well
+                    break;
+                }
+                myGUI->tryClick(pt, aMouseBtn);
                 break;
             }
             case StMessageList::MSG_MOUSE_UP: {
                 StPointD_t pt;
-                int mouseBtn = myWindow->getMouseUp(&pt);
-                if(mouseBtn == ST_MOUSE_MIDDLE) {
+                int aMouseBtn = myWindow->getMouseUp(&pt);
+                if(aMouseBtn == ST_MOUSE_MIDDLE) {
                     params.isFullscreen->reverse();
+                } else if(myEscNoQuit
+                       && !myWindow->isFullScreen()
+                       && (aMouseBtn == ST_MOUSE_SCROLL_V_UP || aMouseBtn == ST_MOUSE_SCROLL_V_DOWN)) {
+                    // ignore scrolling as well
+                    break;
                 }
-                myGUI->tryUnClick(pt, mouseBtn);
+                myGUI->tryUnClick(pt, aMouseBtn);
                 break;
             }
             case StMessageList::MSG_GO_BACKWARD: {
