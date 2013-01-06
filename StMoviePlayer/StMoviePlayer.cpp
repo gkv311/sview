@@ -74,8 +74,20 @@ StALDeviceParam::StALDeviceParam()
 void StALDeviceParam::initList() {
     myValue = 0;
     myDevicesList.clear();
-    const ALchar* aDevicesNames = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
     StString aName;
+    if(alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT") != AL_TRUE) {
+        // ansient OpenAL implementations supports only single device (like from apples)
+        const ALchar* aDefDevice = alcGetString(NULL, ALC_DEFAULT_DEVICE_SPECIFIER);
+    #if(defined(_WIN32) || defined(__WIN32__))
+        aName.fromLocale(aDefDevice);
+    #else
+        aName.fromUnicode(aDefDevice);
+    #endif
+        myDevicesList.add(aName);
+        return;
+    }
+
+    const ALchar* aDevicesNames = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
     while(aDevicesNames && *aDevicesNames) {
     #if(defined(_WIN32) || defined(__WIN32__))
         aName.fromLocale(aDevicesNames);
@@ -85,16 +97,8 @@ void StALDeviceParam::initList() {
         myDevicesList.add(aName);
         aDevicesNames += strlen(aDevicesNames) + 1;
     }
-
-    // another try if list is empty (stupid OpenAL implementation, like from apples)
     if(myDevicesList.isEmpty()) {
-        const ALchar* aDefDevice = alcGetString(NULL, ALC_DEFAULT_DEVICE_SPECIFIER);
-    #if(defined(_WIN32) || defined(__WIN32__))
-        aName.fromLocale(aDefDevice);
-    #else
-        aName.fromUnicode(aDefDevice);
-    #endif
-        myDevicesList.add(aName);
+        myDevicesList.add("None"); // append dummy device
     }
 }
 

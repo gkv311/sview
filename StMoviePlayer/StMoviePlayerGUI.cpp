@@ -281,10 +281,6 @@ void StMoviePlayerGUI::fillOpenALDeviceMenu(StGLMenu* theMenu) {
 
     theMenu->addItem("Refresh list...")
            ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doUpdateOpenALDeviceList);
-    if(aDevList.isEmpty()) {
-        theMenu->addItem("None", StHandle<StInt32Param>::downcast(myPlugin->params.alDevice), -1);
-        return;
-    }
 
     // OpenAL devices names are often very long...
     size_t aLen = 10;
