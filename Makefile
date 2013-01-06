@@ -14,7 +14,8 @@ CXXFLAGS = -O3 -std=c++0x -Wall -fPIC -mmmx -msse `pkg-config gtk+-2.0 --cflags`
 LIBDIR =
 LIB =
 LDFLAGS = -s
-LIB_GLEW = -lGL -lGLEW -lX11 -lXext
+LIB_GLX = -lGL -lX11 -lXext
+LIB_GTK = `pkg-config gtk+-2.0 --libs` -lgthread-2.0 -ldl
 BUILD_ROOT = build
 USR_LIB = lib
 
@@ -82,7 +83,7 @@ clean_StGLWidgets:
 # StSetting shared library
 aStSettings_SRCS := $(wildcard StSettings/*.cpp)
 aStSettings_OBJS := ${aStSettings_SRCS:.cpp=.o}
-aStSettings_LIB  := $(LIB) $(aStShared) -lconfig++
+aStSettings_LIB  := $(LIB) $(aStShared) $(LIB_GTK) -lconfig++
 $(aStSettings) : $(aStSettings_OBJS)
 	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStSettings_OBJS) $(aStSettings_LIB) -o $(aStSettings)
 clean_StSettings:
@@ -92,9 +93,9 @@ clean_StSettings:
 # StCore library
 aStCore_SRCS := $(wildcard StCore/*.cpp)
 aStCore_OBJS := ${aStCore_SRCS:.cpp=.o}
-aStCore_LIB  := $(LIB) $(aStShared) $(LIB_GLEW) -lpthread -lXrandr -lXpm
+aStCore_LIB  := $(LIB) $(aStShared) $(LIB_GLX) $(LIB_GTK) -lpthread -lXrandr -lXpm
 $(aStCore) : $(aStCore_OBJS)
-	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStCore_OBJS) $(aStCore_LIB) -o $(aStCore)
+	$(LD) -shared -z defs $(LDFLAGS) $(LIBDIR) $(aStCore_OBJS) $(aStCore_LIB) -o $(aStCore)
 clean_StCore:
 	rm -f $(aStCore)
 	rm -rf StCore/*.o
@@ -102,7 +103,7 @@ clean_StCore:
 # StOutAnaglyph library (Anaglyph output)
 aStOutAnaglyph_SRCS := $(wildcard StOutAnaglyph/*.cpp)
 aStOutAnaglyph_OBJS := ${aStOutAnaglyph_SRCS:.cpp=.o}
-aStOutAnaglyph_LIB  := $(LIB) $(aStShared) $(LIB_GLEW) -lpthread
+aStOutAnaglyph_LIB  := $(LIB) $(aStShared) $(LIB_GLX) $(LIB_GTK) -lpthread
 $(aStOutAnaglyph) : pre_StOutAnaglyph $(aStOutAnaglyph_OBJS)
 	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStOutAnaglyph_OBJS) $(aStOutAnaglyph_LIB) -o $(aStOutAnaglyph)
 pre_StOutAnaglyph:
@@ -118,7 +119,7 @@ clean_StOutAnaglyph:
 # StOutDual library (Dual output)
 aStOutDual_SRCS := $(wildcard StOutDual/*.cpp)
 aStOutDual_OBJS := ${aStOutDual_SRCS:.cpp=.o}
-aStOutDual_LIB  := $(LIB) $(aStShared) $(LIB_GLEW) -lpthread
+aStOutDual_LIB  := $(LIB) $(aStShared) $(LIB_GLX) $(LIB_GTK) -lpthread
 $(aStOutDual) : pre_StOutDual $(aStOutDual_OBJS)
 	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStOutDual_OBJS) $(aStOutDual_LIB) -o $(aStOutDual)
 pre_StOutDual:
@@ -132,7 +133,7 @@ clean_StOutDual:
 # StOutInterlace library (Interlaced output)
 aStOutInterlace_SRCS := $(wildcard StOutInterlace/*.cpp)
 aStOutInterlace_OBJS := ${aStOutInterlace_SRCS:.cpp=.o}
-aStOutInterlace_LIB  := $(LIB) $(aStShared) $(LIB_GLEW) -lpthread
+aStOutInterlace_LIB  := $(LIB) $(aStShared) $(LIB_GLX) $(LIB_GTK) -lpthread
 $(aStOutInterlace) : pre_StOutInterlace $(aStOutInterlace_OBJS)
 	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStOutInterlace_OBJS) $(aStOutInterlace_LIB) -o $(aStOutInterlace)
 pre_StOutInterlace:
@@ -148,7 +149,7 @@ clean_StOutInterlace:
 # StOutPageFlip library (Shutter glasses output)
 aStOutPageFlip_SRCS := $(wildcard StOutPageFlip/*.cpp)
 aStOutPageFlip_OBJS := ${aStOutPageFlip_SRCS:.cpp=.o}
-aStOutPageFlip_LIB  := $(LIB) $(aStShared) $(LIB_GLEW) -lpthread
+aStOutPageFlip_LIB  := $(LIB) $(aStShared) $(LIB_GLX) $(LIB_GTK) -lpthread
 $(aStOutPageFlip) : pre_StOutPageFlip $(aStOutPageFlip_OBJS)
 	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStOutPageFlip_OBJS) $(aStOutPageFlip_LIB) -o $(aStOutPageFlip)
 pre_StOutPageFlip:
@@ -162,9 +163,9 @@ clean_StOutPageFlip:
 # StImageViewer library (Image Viewer)
 aStImageViewer_SRCS := $(wildcard StImageViewer/*.cpp)
 aStImageViewer_OBJS := ${aStImageViewer_SRCS:.cpp=.o}
-aStImageViewer_LIB  := $(LIB) $(aStGLWidgets) $(aStShared) $(LIB_GLEW) -lpthread -lavutil -lavformat -lavcodec -lswscale -lfreetype
+aStImageViewer_LIB  := $(LIB) $(aStGLWidgets) $(aStShared) $(LIB_GLX) $(LIB_GTK) -lpthread -lavutil -lavformat -lavcodec -lswscale -lfreetype
 $(aStImageViewer) : pre_StImageViewer $(aStImageViewer_OBJS)
-	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStImageViewer_OBJS) $(aStImageViewer_LIB) -o $(aStImageViewer)
+	$(LD) -shared -z defs $(LDFLAGS) $(LIBDIR) $(aStImageViewer_OBJS) $(aStImageViewer_LIB) -o $(aStImageViewer)
 pre_StImageViewer:
 	cp -f -r StImageViewer/lang/english/* $(BUILD_ROOT)/lang/english/
 	cp -f -r StImageViewer/lang/russian/* $(BUILD_ROOT)/lang/русский/
@@ -178,9 +179,9 @@ aStMoviePlayer_SRCS1 := $(wildcard StMoviePlayer/*.cpp)
 aStMoviePlayer_OBJS1 := ${aStMoviePlayer_SRCS1:.cpp=.o}
 aStMoviePlayer_SRCS2 := $(wildcard StMoviePlayer/StVideo/*.cpp)
 aStMoviePlayer_OBJS2 := ${aStMoviePlayer_SRCS2:.cpp=.o}
-aStMoviePlayer_LIB   := $(LIB) $(aStGLWidgets) $(aStShared) $(LIB_GLEW) -lpthread -lavutil -lavformat -lavcodec -lswscale -lopenal -lfreetype
+aStMoviePlayer_LIB   := $(LIB) $(aStGLWidgets) $(aStShared) $(LIB_GLX) $(LIB_GTK) -lpthread -lavutil -lavformat -lavcodec -lswscale -lopenal -lfreetype
 $(aStMoviePlayer) : pre_StMoviePlayer $(aStMoviePlayer_OBJS1) $(aStMoviePlayer_OBJS2)
-	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStMoviePlayer_OBJS1) $(aStMoviePlayer_OBJS2) $(aStMoviePlayer_LIB) -o $(aStMoviePlayer)
+	$(LD) -shared -z defs $(LDFLAGS) $(LIBDIR) $(aStMoviePlayer_OBJS1) $(aStMoviePlayer_OBJS2) $(aStMoviePlayer_LIB) -o $(aStMoviePlayer)
 pre_StMoviePlayer:
 	cp -f -r StMoviePlayer/lang/english/* $(BUILD_ROOT)/lang/english/
 	cp -f -r StMoviePlayer/lang/russian/* $(BUILD_ROOT)/lang/русский/
@@ -192,7 +193,7 @@ clean_StMoviePlayer:
 # sView executable
 sView_SRCS := $(wildcard sview/*.cpp)
 sView_OBJS := ${sView_SRCS:.cpp=.o}
-sView_LIB  := $(LIB) $(aStShared) `pkg-config gtk+-2.0 --libs` -lX11 -ldl -lgthread-2.0 -lpthread
+sView_LIB  := $(LIB) $(aStShared) $(LIB_GTK) -lX11 -ldl -lgthread-2.0 -lpthread
 $(sView) : $(sView_OBJS)
 	$(LD) $(LDFLAGS) $(LIBDIR) $(sView_OBJS) $(sView_LIB) -o $(sView)
 clean_sView:

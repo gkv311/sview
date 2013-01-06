@@ -1,5 +1,22 @@
 sview (unknown_version) unknown_distrib; urgency=low
 
+  + Adjust stereo separation within '<' and '>' keys to cover notebook keyboards.
+  + Use undo/redo buffer to keep played items order in shuffle mode.
+  + Detect display(s) reconfiguration during application work (to correctly launch full-screen mode).
+  + Movie Player - added new option to prevent system going to sleep during playback.
+  + Movie Player - handle Audio device disconnection during application work.
+  + Show dirty information about opened file by 'I' hot-key.
+  * Shuffle playback - generate random order rather than the same pseudo-random order.
+  * Movie Player - fixed seeking in paused state.
+  * Movie Player - fixed switching between audio streams with different frequency.
+  * Fixed saving of BMP image in PNG format.
+  * Fixed displaying of stereo images with different dimensions per view.
+  * Workaround bugs in some drivers (Catalyst) when window content doesn't redrawn after switching back from full-screen mode.
+
+ -- Kirill Gavrilov <kirill@sview.ru>  unknown_date
+
+sview (12.09-1~unknown_distrib) unknown_distrib; urgency=low
+
   + Added audio gain control.
   + Setup icon for sView window.
   + Interlace output - added option to disable binding to compatible monitor at application start.
@@ -12,7 +29,7 @@ sview (unknown_version) unknown_distrib; urgency=low
   * Removed dependency from patched FTGL.
   * Improved text layout.
 
- -- Kirill Gavrilov <kirill@sview.ru>  unknown_date
+ -- Kirill Gavrilov <kirill@sview.ru>  Sun, 16 Sep 2012 18:34:46 +0400
 
 sview (12.06-1~unknown_distrib) unknown_distrib; urgency=low
 

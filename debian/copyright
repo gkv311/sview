@@ -3,7 +3,7 @@ Upstream-Name: sview
 Source: <http://www.sview.ru>
 
 Files: *
-Copyright: 2008-2012 Kirill Gavrilov <kirill@sview.ru>
+Copyright: 2008-2013 Kirill Gavrilov <kirill@sview.ru>
 License: GPL-3.0+
 
 Files: debian/*
