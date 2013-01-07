@@ -14,6 +14,10 @@
 #include <sstream>
 #include <locale>
 
+#ifndef _MSC_VER
+    #include <xlocale.h>
+#endif
+
 /**
  * Wrapper over locale_t C structure which should be allocated within special functions.
  * Notice that there NO implicit convertion from/to std::locale class!
