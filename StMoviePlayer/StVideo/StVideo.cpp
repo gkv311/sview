@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -256,11 +256,12 @@ bool StVideo::addFile(const StString& theFileToLoad,
         return false;
     }
 
-    // TODO (Kirill Gavrilov) prevent this debug output for release?
+#ifdef __ST_DEBUG__
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 101, 0))
     av_dump_format(aFormatCtx, 0, theFileToLoad.toCString(), false);
 #else
-    dump_format(aFormatCtx, 0, theFileToLoad.toCString(), false);
+    dump_format   (aFormatCtx, 0, theFileToLoad.toCString(), false);
+#endif
 #endif
 
     StString aTitleString, aFolder;
@@ -268,15 +269,9 @@ bool StVideo::addFile(const StString& theFileToLoad,
     myFileInfoTmp->myInfo.add(StArgument("File name", aTitleString));
 
     // collect metadata
-#if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
-    for(AVDictionaryEntry* aTag = av_dict_get(aFormatCtx->metadata, "", NULL, AV_DICT_IGNORE_SUFFIX);
+    for(stLibAV::meta::Tag* aTag = stLibAV::meta::findTag(aFormatCtx->metadata, "", NULL, stLibAV::meta::SEARCH_IGNORE_SUFFIX);
         aTag != NULL;
-        aTag = av_dict_get(aFormatCtx->metadata, "", aTag, AV_DICT_IGNORE_SUFFIX)) {
-#else
-    for(AVMetadataTag* aTag = av_metadata_get(aFormatCtx->metadata, "", NULL, AV_METADATA_IGNORE_SUFFIX);
-        aTag != NULL;
-        aTag = av_metadata_get(aFormatCtx->metadata, "", aTag, AV_METADATA_IGNORE_SUFFIX)) {
-#endif
+        aTag = stLibAV::meta::findTag(aFormatCtx->metadata, "", aTag, stLibAV::meta::SEARCH_IGNORE_SUFFIX)) {
         myFileInfoTmp->myInfo.add(StArgument(aTag->key, aTag->value));
     }
 
@@ -325,10 +320,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
 
             StString aLanguage;
         #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
-            AVDictionaryEntry* anEntry = av_dict_get(aStream->metadata, "language", NULL, 0);
-            if(anEntry != NULL) {
-                aLanguage = anEntry->value;
-            }
+            stLibAV::meta::readTag(aStream, "language", aLanguage);
         #else
             aLanguage = aStream->language;
         #endif
@@ -360,10 +352,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
             } else {
                 StString aLanguage;
             #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
-                AVDictionaryEntry* anEntry = av_dict_get(aStream->metadata, "language", NULL, 0);
-                if(anEntry != NULL) {
-                    aLanguage = anEntry->value;
-                }
+                stLibAV::meta::readTag(aStream, "language", aLanguage);
             #else
                 aLanguage = aStream->language;
             #endif

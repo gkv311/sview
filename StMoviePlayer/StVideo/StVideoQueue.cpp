@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@
  */
 
 #include "StVideoQueue.h"
+
+#include <StStrings/StStringStream.h>
 
 namespace {
 
@@ -108,6 +110,7 @@ namespace {
     };
 
     static const StFFmpegStereoFormat STEREOFLAGS[] = {
+        // MKV stereoscopic mode decoded by FFmpeg into STEREO_MODE metadata tag
         {ST_V_SRC_MONO,               "mono"},
         {ST_V_SRC_SIDE_BY_SIDE,       "right_left"},
         {ST_V_SRC_PARALLEL_PAIR,      "left_right"},
@@ -121,6 +124,12 @@ namespace {
         {ST_V_SRC_PAGE_FLIP,          "block_rl"},
         {ST_V_SRC_ANAGLYPH_RED_CYAN,  "anaglyph_cyan_red"},
         {ST_V_SRC_ANAGLYPH_G_RB,      "anaglyph_green_magenta"},
+        // values in WMV StereoscopicLayout tag
+        {ST_V_SRC_SIDE_BY_SIDE,       "SideBySideRF"}, // Right First
+        {ST_V_SRC_PARALLEL_PAIR,      "SideBySideLF"},
+        {ST_V_SRC_OVER_UNDER_LR,      "OverUnderLT"},  // Left Top
+        {ST_V_SRC_OVER_UNDER_RL,      "OverUnderRT"},
+        // NULL-terminate array
         {ST_V_SRC_AUTODETECT, NULL}
     };
 
@@ -226,27 +235,40 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
         }
     }
 
-    // read stereoscopic tags if available
-    mySrcFormatInfo = ST_V_SRC_AUTODETECT;
-#if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
-    AVDictionaryEntry* aTag = av_dict_get(myStream->metadata, "STEREO_MODE", NULL, 0);
-#else
-    AVMetadataTag* aTag = av_metadata_get(myStream->metadata, "STEREO_MODE", NULL, 0);
-#endif
-    if(aTag == NULL) {
-    #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
-        aTag =     av_dict_get(myFormatCtx->metadata, "STEREO_MODE", NULL, 0);
-    #else
-        aTag = av_metadata_get(myFormatCtx->metadata, "STEREO_MODE", NULL, 0);
-    #endif
+    // special WMV tags
+    StString aValue;
+    const StString aHalfHeightKeyWMV  = "StereoscopicHalfHeight";
+    const StString aHalfWidthKeyWMV   = "StereoscopicHalfWidth";
+    const StString aHorParallaxKeyWMV = "StereoscopicHorizontalParallax";
+    if(stLibAV::meta::readTag(myFormatCtx, aHalfHeightKeyWMV, aValue)) {
+        if(aValue == "1") {
+            myPixelRatio *= 0.5;
+        }
+    } else if(stLibAV::meta::readTag(myFormatCtx, aHalfWidthKeyWMV, aValue)) {
+        if(aValue == "1") {
+            myPixelRatio *= 2.0;
+        }
     }
-    if(aTag != NULL) {
+    myHParallax = 0;
+    if(stLibAV::meta::readTag(myFormatCtx, aHorParallaxKeyWMV, aValue)) {
+        StCLocale aCLocale;
+        myHParallax = (int )stStringToLong(aValue.toCString(), 10, aCLocale);
+    }
+
+    // stereoscopic mode tags
+    mySrcFormatInfo = ST_V_SRC_AUTODETECT;
+    const StString aSrcModeKeyMKV = "STEREO_MODE";
+    const StString aSrcModeKeyWMV = "StereoscopicLayout";
+    if(stLibAV::meta::readTag(myFormatCtx, aSrcModeKeyMKV, aValue)
+    || stLibAV::meta::readTag(myStream,    aSrcModeKeyMKV, aValue)
+    || stLibAV::meta::readTag(myFormatCtx, aSrcModeKeyWMV, aValue)) {
         for(size_t aSrcId = 0;; ++aSrcId) {
             const StFFmpegStereoFormat& aFlag = STEREOFLAGS[aSrcId];
             if(aFlag.stID == ST_V_SRC_AUTODETECT || aFlag.name == NULL) {
                 break;
-            } else if(stAreEqual(aTag->value, aFlag.name, strlen(aFlag.name))) {
+            } else if(aValue == aFlag.name) {
                 mySrcFormatInfo = aFlag.stID;
+                //ST_DEBUG_LOG("  read srcFormat from tags= " + mySrcFormatInfo);
                 break;
             }
         }
@@ -330,6 +352,7 @@ void StVideoQueue::decodeLoop() {
     StHandle<StAVPacket> aPacket;
     StImage anEmptyImg;
     bool isFullScale = false;
+    bool isStarted   = false;
     size_t aWidthY, aHeightY, aWidthU, aHeightU, aWidthV, aHeightV;
     for(;;) {
         if(isEmpty()) {
@@ -363,6 +386,7 @@ void StVideoQueue::decodeLoop() {
                 myAudioClock = 0.0;
                 myVideoClock = 0.0;
                 myHasDataState.reset();
+                isStarted = true;
                 continue;
             }
             case StAVPacket::END_PACKET: {
@@ -519,6 +543,14 @@ void StVideoQueue::decodeLoop() {
         }
 
         if(!mySlave.isNull()) {
+            if(isStarted) {
+                StHandle<StStereoParams> aParams = aPacket->getSource();
+                if(!aParams.isNull()) {
+                    aParams->setSeparationNeutral(myHParallax);
+                }
+                isStarted = false;
+            }
+
             for(;;) {
                 // wait data from Slave
                 if(aSlaveData == NULL) {
@@ -555,6 +587,14 @@ void StVideoQueue::decodeLoop() {
             // push data to Master
             myHasDataState.set();
         } else {
+            if(isStarted) {
+                StHandle<StStereoParams> aParams = aPacket->getSource();
+                if(!aParams.isNull()) {
+                    aParams->setSeparationNeutral(myHParallax);
+                }
+                isStarted = false;
+            }
+
             // simple one-stream case
             if(aSrcFormat == ST_V_SRC_PAGE_FLIP) {
                 if(isOddNumber(myFramesCounter)) {

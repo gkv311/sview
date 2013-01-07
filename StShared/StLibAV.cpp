@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -363,6 +363,28 @@ StString stLibAV::audio::getChannelLayoutString(const AVCodecContext* theCtx) {
         case 10: return "7.1+downmix";
         default: return StString("unknown") + theCtx->channels;
     }
+}
+
+stLibAV::meta::Tag* stLibAV::meta::findTag(stLibAV::meta::Dict*      theDict,
+                                           const char*               theKey,
+                                           const stLibAV::meta::Tag* thePrevTag,
+                                           const int                 theFlags) {
+#if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
+    return av_dict_get    (theDict, theKey, thePrevTag, theFlags);
+#else
+    return av_metadata_get(theDict, theKey, thePrevTag, theFlags);
+#endif
+}
+
+bool stLibAV::meta::readTag(stLibAV::meta::Dict* theDict,
+                            const StString&      theKey,
+                            StString&            theValue) {
+    stLibAV::meta::Tag* aTag = stLibAV::meta::findTag(theDict, theKey.toCString(), NULL, 0);
+    if(aTag == NULL) {
+        return false;
+    }
+    theValue = aTag->value;
+    return true;
 }
 
 double stLibAV::unitsToSeconds(const AVRational& theTimeBase,

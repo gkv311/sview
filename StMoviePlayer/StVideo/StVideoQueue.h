@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -170,6 +170,7 @@ class ST_LOCAL StVideoQueue : public StAVPacketQueue {
     SwsContext*                myToRgbCtx;        //!< software scaler context
     double                     myFramePts;
     GLfloat                    myPixelRatio;      //!< pixel aspect ratio
+    int                        myHParallax;       //!< horizontal parallax in pixels stored in metadata
 
     double                     myVideoClock;      //!< synchronization variable
 

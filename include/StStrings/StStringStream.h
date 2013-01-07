@@ -9,8 +9,85 @@
 #ifndef __StStringStream_h__
 #define __StStringStream_h__
 
+#include <stTypes.h>
+
 #include <sstream>
 #include <locale>
+
+/**
+ * Wrapper over locale_t C structure which should be allocated within special functions.
+ * Notice that there NO implicit convertion from/to std::locale class!
+ */
+class ST_LOCAL StCLocale {
+
+        public:
+
+    /**
+     * Default constructor for C locale.
+     */
+    StCLocale()
+    #ifdef _MSC_VER
+    : myCLocale(_create_locale(LC_ALL, "C")) {}
+    #else
+    : myCLocale(newlocale(LC_ALL_MASK, "C", NULL)) {}
+    #endif
+
+    /**
+     * Destructor.
+     */
+    ~StCLocale() {
+    #ifdef _MSC_VER
+        _free_locale(myCLocale);
+    #else
+        freelocale(myCLocale);
+    #endif
+    }
+
+    operator locale_t() const {
+        return myCLocale;
+    }
+
+        private:
+
+#ifdef _MSC_VER
+    _locale_t myCLocale;
+#else
+     locale_t myCLocale;
+#endif
+
+};
+
+inline double stStringToDouble(const char*      theString,
+                               char**           theNextPtr,
+                               const StCLocale& theCLocale) {
+#ifdef _MSC_VER
+    return _strtod_l(theString, theNextPtr, theCLocale);
+#else
+    return  strtod_l(theString, theNextPtr, theCLocale);
+#endif
+}
+
+inline double stStringToDouble(const char*      theString,
+                               const StCLocale& theCLocale) {
+    return stStringToDouble(theString, NULL, theCLocale);
+}
+
+inline long stStringToLong(const char*      theString,
+                           char**           theNextPtr,
+                           const int        theBase,
+                           const StCLocale& theCLocale) {
+#ifdef _MSC_VER
+    return _strtol_l(theString, theNextPtr, theBase, theCLocale);
+#else
+    return  strtol_l(theString, theNextPtr, theBase, theCLocale);
+#endif
+}
+
+inline long stStringToLong(const char*      theString,
+                           const int        theBase,
+                           const StCLocale& theCLocale) {
+    return stStringToLong(theString, NULL, theBase, theCLocale);
+}
 
 /**
  * This class defines own std::stringstream template.

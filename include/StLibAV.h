@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -213,6 +213,60 @@ namespace stLibAV {
             extern const SampleFormat   DBL;
         #endif
         };
+
+    };
+
+    /**
+     * Metadata functions
+     */
+    namespace meta {
+
+    #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
+        typedef AVDictionaryEntry Tag;
+        typedef AVDictionary      Dict;
+        enum {
+            SEARCH_MATCH_CASE    = AV_DICT_MATCH_CASE,    // 1
+            SEARCH_IGNORE_SUFFIX = AV_DICT_IGNORE_SUFFIX, // 2
+        };
+    #else
+        typedef AVMetadataTag     Tag;
+        typedef AVMetadata        Dict;
+        enum {
+            SEARCH_MATCH_CASE    = AV_METADATA_MATCH_CASE,    // 1
+            SEARCH_IGNORE_SUFFIX = AV_METADATA_IGNORE_SUFFIX, // 2
+        };
+    #endif
+
+        /**
+         * Alias to av_dict_get.
+         */
+        Tag* findTag(Dict*       theDict,
+                     const char* theKey,
+                     const Tag*  thePrevTag,
+                     const int   theFlags);
+
+        /**
+         * Find unique tag in the dictionary and retrieve it's value.
+         * @param theDict  Dictionary
+         * @param theKey   Unique key within this dictionary
+         * @param theValue Read value (will be untouched if tag not found)
+         * @return true if tag was found
+         */
+        bool readTag(Dict*           theDict,
+                     const StString& theKey,
+                     StString&       theValue);
+
+        inline bool readTag(AVFormatContext* theFormatCtx,
+                            const StString&  theKey,
+                            StString&        theValue) {
+            return readTag(theFormatCtx->metadata, theKey, theValue);
+        }
+
+        inline bool readTag(AVStream*        theStream,
+                            const StString&  theKey,
+                            StString&        theValue) {
+            return readTag(theStream->metadata, theKey, theValue);
+        }
 
     };
 
