@@ -157,6 +157,7 @@ class ST_LOCAL StMoviePlayer : public StDrawerInterface {
         StHandle<StBoolParam>     isFullscreen;     //!< fullscreen state
         StHandle<StBoolParam>     toRestoreRatio;   //!< restore ratio on restart
         StHandle<StBoolParam>     isShuffle;        //!< shuffle playback order
+        StHandle<StBoolParam>     areGlobalMKeys;   //!< capture global multimedia keys
         StHandle<StInt32Param>    checkUpdatesDays; //!< days count between updates checks
         StHandle<StInt32Param>    srcFormat;        //!< source format
         StHandle<StInt32Param>    audioStream;      //!< active Audio stream

@@ -51,6 +51,7 @@ typedef struct tagStWinAttributes {
     stBool_t isHideCursor;       //!< to hide cursor
     stBool_t toBlockSleepSystem; //!< prevent system  going to sleep (display could be turned off)
     stBool_t toBlockSleepDisplay;//!< prevent display going to sleep
+    stBool_t areGlobalMediaKeys; //!< register system hot-key to capture multimedia even without window focus
     // slave configuration
     stBool_t isSlave;            //!< create StWindow with slave window
     stBool_t isSlaveXMirrow;     //!< flip slave window position along X axis (horizontally)
@@ -93,6 +94,7 @@ inline stBool_t areSame(const StWinAttributes_t* theAttrib1,
             theAttrib1->isHideCursor       == theAttrib2->isHideCursor &&
             theAttrib1->toBlockSleepSystem == theAttrib2->toBlockSleepSystem &&
             theAttrib1->toBlockSleepDisplay== theAttrib2->toBlockSleepDisplay &&
+            theAttrib1->areGlobalMediaKeys == theAttrib2->areGlobalMediaKeys &&
             theAttrib1->isSlave            == theAttrib2->isSlave &&
             theAttrib1->isSlaveXMirrow     == theAttrib2->isSlaveXMirrow &&
             theAttrib1->isSlaveYMirrow     == theAttrib2->isSlaveYMirrow &&

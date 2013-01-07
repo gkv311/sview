@@ -51,6 +51,10 @@ class ST_LOCAL StWinHandles {
     HWND          hWindowGl;
     StStringUtfWide   className; // WinAPI classes' names
     StStringUtfWide classNameGl;
+    ATOM        myMKeyStop;
+    ATOM        myMKeyPlay;
+    ATOM        myMKeyPrev;
+    ATOM        myMKeyNext;
         private:
     StMutex         stMutex;
     size_t      threadIdOgl; // id of the thread, in wich rendering context was created

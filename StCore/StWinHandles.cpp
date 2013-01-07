@@ -52,9 +52,10 @@ StWinHandles::StWinHandles()
   evMsgThread(true),
   hWindow(NULL),
   hWindowGl(NULL),
-  className(),
-  classNameGl(),
-  stMutex(),
+  myMKeyStop(GlobalAddAtom(MAKEINTATOM(VK_MEDIA_STOP))),
+  myMKeyPlay(GlobalAddAtom(MAKEINTATOM(VK_MEDIA_PLAY_PAUSE))),
+  myMKeyPrev(GlobalAddAtom(MAKEINTATOM(VK_MEDIA_PREV_TRACK))),
+  myMKeyNext(GlobalAddAtom(MAKEINTATOM(VK_MEDIA_NEXT_TRACK))),
   threadIdOgl(0),
   hDC(NULL),
   hRC(NULL) {

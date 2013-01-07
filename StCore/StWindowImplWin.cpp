@@ -65,6 +65,7 @@ bool StWindowImpl::stglCreate(const StWinAttributes_t* theAttributes,
     if(myInitState != STWIN_INIT_SUCCESS) {
         return false;
     }
+
     int isGlCtx = myMaster.glCreateContext(myWinAttribs.isSlave ? &mySlave : NULL, myWinAttribs.isGlStereo);
     myEventInitGl.set();
 
@@ -238,12 +239,23 @@ bool StWindowImpl::wndCreateWindows() {
         // TODO (Kirill Gavrilov#4) need we special StWindow function to make window on top?
         SetForegroundWindow(myMaster.hWindow); // make sure Master window on top and has input focus
     }
+
+    // flag to track registered global hot-keys
+    bool areGlobalHotKeys = false;
+
     HANDLE waitEvents[3] = {myEventQuit, myEventCursorShow, myEventCursorHide};
     for(;;) {
         switch(MsgWaitForMultipleObjects(3, waitEvents, FALSE, INFINITE, QS_ALLINPUT)) {
             case WAIT_OBJECT_0: {
                 // Event 1 (myEventQuit) has been set. If the event was created as autoreset, it has also been reset
                 ///ST_DEBUG_LOG("WinAPI, End of the message thread... (TID= " + StThread::getCurrentThreadId() + ")");
+                if(areGlobalHotKeys) {
+                    UnregisterHotKey(myMaster.hWindowGl, myMaster.myMKeyStop);
+                    UnregisterHotKey(myMaster.hWindowGl, myMaster.myMKeyPlay);
+                    UnregisterHotKey(myMaster.hWindowGl, myMaster.myMKeyPrev);
+                    UnregisterHotKey(myMaster.hWindowGl, myMaster.myMKeyNext);
+                }
+
                 mySlave.close();  // close window handles
                 myMaster.close();
 
@@ -278,6 +290,23 @@ bool StWindowImpl::wndCreateWindows() {
                 while(PeekMessage(&myEvent, NULL, 0U, 0U, PM_REMOVE)) {
                     TranslateMessage(&myEvent); // Translate The Message
                     DispatchMessage(&myEvent);  // Dispatch The Message
+                }
+
+                // well bad place for polling since it should be rarely changed
+                const bool areGlobalMKeysNew = myWinAttribs.areGlobalMediaKeys;
+                if(areGlobalHotKeys != areGlobalMKeysNew) {
+                    areGlobalHotKeys = areGlobalMKeysNew;
+                    if(areGlobalHotKeys) {
+                        RegisterHotKey(myMaster.hWindowGl, myMaster.myMKeyStop, 0, VK_MEDIA_STOP);
+                        RegisterHotKey(myMaster.hWindowGl, myMaster.myMKeyPlay, 0, VK_MEDIA_PLAY_PAUSE);
+                        RegisterHotKey(myMaster.hWindowGl, myMaster.myMKeyPrev, 0, VK_MEDIA_PREV_TRACK);
+                        RegisterHotKey(myMaster.hWindowGl, myMaster.myMKeyNext, 0, VK_MEDIA_NEXT_TRACK);
+                    } else {
+                        UnregisterHotKey(myMaster.hWindowGl, myMaster.myMKeyStop);
+                        UnregisterHotKey(myMaster.hWindowGl, myMaster.myMKeyPlay);
+                        UnregisterHotKey(myMaster.hWindowGl, myMaster.myMKeyPrev);
+                        UnregisterHotKey(myMaster.hWindowGl, myMaster.myMKeyNext);
+                    }
                 }
                 break; // break from switch
             }
@@ -351,7 +380,6 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
         }
 
         case WM_DISPLAYCHANGE: {
-            ST_DEBUG_LOG("WM_DISPLAYCHANGE event");
             myIsDispChanged = true;
             return 0;
         }
@@ -427,13 +455,28 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
         }
         // keys lookup
         case WM_KEYDOWN: {
-            myMessageList.getKeysMap()[wParam] = true; break;
+            myMessageList.getKeysMap()[wParam] = true;
+            break;
         }
-        case WM_KEYUP: {         // has a key been released?
-            myMessageList.getKeysMap()[wParam] = false; break;
+        case WM_KEYUP: {
+            myMessageList.getKeysMap()[wParam] = false;
+            break;
+        }
+        case WM_HOTKEY: {
+            // notice - unpress event will NOT be generated!
+            // we abuse current callbacks handler implementations which reset values themselves
+            if(wParam == myMaster.myMKeyStop) {
+                myMessageList.getKeysMap()[ST_VK_MEDIA_STOP] = true;
+            } else if(wParam == myMaster.myMKeyPlay) {
+                myMessageList.getKeysMap()[ST_VK_MEDIA_PLAY_PAUSE] = true;
+            } else if(wParam == myMaster.myMKeyPrev) {
+                myMessageList.getKeysMap()[ST_VK_MEDIA_PREV_TRACK] = true;
+            } else if(wParam == myMaster.myMKeyNext) {
+                myMessageList.getKeysMap()[ST_VK_MEDIA_NEXT_TRACK] = true;
+            }
+            break;
         }
         // mouse lookup
-        // TODO (Kirill Gavrilov#6#) parse double click mouse messages
         //case WM_LBUTTONDBLCLK: // left double click
         //case WM_MBUTTONDBLCLK: // right double click
         case WM_MOUSEWHEEL:    // vertical wheel

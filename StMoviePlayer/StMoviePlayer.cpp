@@ -56,6 +56,7 @@ namespace {
     static const char ST_SETTING_TEXFILTER[]     = "viewTexFilter";
     static const char ST_SETTING_GAMMA[]         = "viewGamma";
     static const char ST_SETTING_SHUFFLE[]       = "shuffle";
+    static const char ST_SETTING_GLOBAL_MKEYS[]  = "globalMediaKeys";
     static const char ST_SETTING_RATIO[]         = "ratio";
     static const char ST_SETTING_UPDATES_LAST_CHECK[] = "updatesLastCheck";
     static const char ST_SETTING_UPDATES_INTERVAL[]   = "updatesInterval";
@@ -149,6 +150,7 @@ StMoviePlayer::StMoviePlayer()
     params.isFullscreen->signals.onChanged.connect(this, &StMoviePlayer::doFullscreen);
     params.toRestoreRatio   = new StBoolParam(false);
     params.isShuffle        = new StBoolParam(false);
+    params.areGlobalMKeys   = new StBoolParam(true);
     params.checkUpdatesDays = new StInt32Param(7);
     params.srcFormat        = new StInt32Param(ST_V_SRC_AUTODETECT);
     params.srcFormat->signals.onChanged.connect(this, &StMoviePlayer::doSwitchSrcFormat);
@@ -177,6 +179,7 @@ StMoviePlayer::~StMoviePlayer() {
         mySettings->saveParam (ST_SETTING_UPDATES_INTERVAL,   params.checkUpdatesDays);
         mySettings->saveParam (ST_SETTING_SRCFORMAT,          params.srcFormat);
         mySettings->saveParam (ST_SETTING_SHUFFLE,            params.isShuffle);
+        mySettings->saveParam (ST_SETTING_GLOBAL_MKEYS,       params.areGlobalMKeys);
     }
     // release GUI data and GL resorces before closing the window
     myGUI.nullify();
@@ -234,10 +237,19 @@ bool StMoviePlayer::init(StWindowInterface* theWindow) {
     mySettings->loadParam (ST_SETTING_TEXFILTER,          myGUI->stImageRegion->params.textureFilter);
     mySettings->loadParam (ST_SETTING_RATIO,              myGUI->stImageRegion->params.displayRatio);
     mySettings->loadParam (ST_SETTING_SHUFFLE,            params.isShuffle);
+    mySettings->loadParam (ST_SETTING_GLOBAL_MKEYS,       params.areGlobalMKeys);
     params.toRestoreRatio->setValue(myGUI->stImageRegion->params.displayRatio->getValue() != StGLImageRegion::RATIO_AUTO);
     int32_t loadedGamma = 100; // 1.0f
         mySettings->loadInt32(ST_SETTING_GAMMA, loadedGamma);
         myGUI->stImageRegion->params.gamma->setValue(0.01f * loadedGamma);
+
+    // capture multimedia keys even without window focus
+    StWinAttributes_t anAttribs = stDefaultWinAttributes();
+    myWindow->getAttributes(&anAttribs);
+    if(anAttribs.areGlobalMediaKeys != params.areGlobalMKeys->getValue()) {
+        anAttribs.areGlobalMediaKeys = params.areGlobalMKeys->getValue();
+        myWindow->setAttributes(&anAttribs);
+    }
 
     // initialize frame region early to show dedicated error description
     if(!myGUI->stImageRegion->stglInit()) {
