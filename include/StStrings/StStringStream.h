@@ -43,10 +43,11 @@ class ST_LOCAL StCLocale {
     #endif
     }
 
-    operator locale_t() const {
-        return myCLocale;
-    }
-
+#ifdef _MSC_VER
+    operator _locale_t() const { return myCLocale; }
+#else
+    operator  locale_t() const { return myCLocale; }
+#endif
         private:
 
 #ifdef _MSC_VER
