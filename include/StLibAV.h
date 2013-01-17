@@ -175,6 +175,19 @@ namespace stLibAV {
     };
 
     /**
+     * Simple structure for planar YUV frame dimensions.
+     */
+    struct dimYUV {
+        int  widthY;
+        int  heightY;
+        int  widthU;
+        int  heightU;
+        int  widthV;
+        int  heightV;
+        bool isFullScale;
+    };
+
+    /**
      * Auxiliary function to check that frame is in one of the YUV planar pixel format.
      * @return true if PixelFormat is planar YUV.
      */
@@ -184,11 +197,32 @@ namespace stLibAV {
      * Same as above but provide width/height information per component's plane.
      * @return true if PixelFormat is planar YUV.
      */
-    bool isFormatYUVPlanar(const AVCodecContext* theCtx,
-                           size_t& theWidthY, size_t& theHeightY,
-                           size_t& theWidthU, size_t& theHeightU,
-                           size_t& theWidthV, size_t& theHeightV,
-                           bool& isFullScale);
+    bool isFormatYUVPlanar(const PixelFormat thePixFmt,
+                           const int         theWidth,
+                           const int         theHeight,
+                           dimYUV&           theDims);
+
+    /**
+     * @return true if PixelFormat is planar YUV.
+     */
+    inline bool isFormatYUVPlanar(const AVCodecContext* theCtx,
+                                  dimYUV&               theDims) {
+        return isFormatYUVPlanar(theCtx->pix_fmt,
+                                 theCtx->width,
+                                 theCtx->height,
+                                 theDims);
+    }
+
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 5, 0))
+    inline bool isFormatYUVPlanar(const AVFrame* theFrame,
+                                  dimYUV&        theDims) {
+        return isFormatYUVPlanar((PixelFormat )theFrame->format,
+                                 theFrame->width,
+                                 theFrame->height,
+                                 theDims);
+    }
+#endif
+
     /**
      * Audio functions
      */

@@ -273,8 +273,7 @@ bool StLibAVImage::load(const StString& theFilePath, ImageType theImageType,
         return false;
     }
 
-    size_t aWidthY, aHeightY, aWidthU, aHeightU, aWidthV, aHeightV;
-    bool isFullScale = false;
+    stLibAV::dimYUV aDimsYUV;
     if(codecCtx->pix_fmt == stLibAV::PIX_FMT::RGB24) {
         setColorModel(StImage::ImgColor_RGB);
         changePlane(0).initWrapper(StImagePlane::ImgRGB, frame->data[0],
@@ -300,18 +299,14 @@ bool StLibAVImage::load(const StString& theFilePath, ImageType theImageType,
         changePlane(0).initWrapper(StImagePlane::ImgGray, frame->data[0],
                                    codecCtx->width, codecCtx->height,
                                    frame->linesize[0]);
-    } else if(stLibAV::isFormatYUVPlanar(codecCtx,
-                                          aWidthY, aHeightY,
-                                          aWidthU, aHeightU,
-                                          aWidthV, aHeightV,
-                                          isFullScale)) {
-        setColorModel(isFullScale ? StImage::ImgColor_YUVjpeg : StImage::ImgColor_YUV);
+    } else if(stLibAV::isFormatYUVPlanar(codecCtx, aDimsYUV)) {
+        setColorModel(aDimsYUV.isFullScale ? StImage::ImgColor_YUVjpeg : StImage::ImgColor_YUV);
         changePlane(0).initWrapper(StImagePlane::ImgGray, frame->data[0],
-                                   aWidthY, aHeightY, frame->linesize[0]);
+                                   size_t(aDimsYUV.widthY), size_t(aDimsYUV.heightY), frame->linesize[0]);
         changePlane(1).initWrapper(StImagePlane::ImgGray, frame->data[1],
-                                   aWidthU, aHeightU, frame->linesize[1]);
+                                   size_t(aDimsYUV.widthU), size_t(aDimsYUV.heightU), frame->linesize[1]);
         changePlane(2).initWrapper(StImagePlane::ImgGray, frame->data[2],
-                                   aWidthV, aHeightV, frame->linesize[2]);
+                                   size_t(aDimsYUV.widthV), size_t(aDimsYUV.heightV), frame->linesize[2]);
     } else {
         ///ST_DEBUG_LOG("StLibAVImage, perform conversion from Pixel format '" + avcodec_get_pix_fmt_name(codecCtx->pix_fmt) + "' to RGB");
         // initialize software scaler/converter

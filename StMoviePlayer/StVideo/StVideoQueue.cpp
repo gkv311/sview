@@ -351,9 +351,8 @@ void StVideoQueue::decodeLoop() {
     StImage* aSlaveData = NULL;
     StHandle<StAVPacket> aPacket;
     StImage anEmptyImg;
-    bool isFullScale = false;
     bool isStarted   = false;
-    size_t aWidthY, aHeightY, aWidthU, aHeightU, aWidthV, aHeightV;
+    stLibAV::dimYUV aDimsYUV;
     for(;;) {
         if(isEmpty()) {
             myDowntimeState.set();
@@ -496,50 +495,64 @@ void StVideoQueue::decodeLoop() {
         // we currently allow to override source format stored in metadata
         const StFormatEnum aSrcFormat = (mySrcFormat == ST_V_SRC_AUTODETECT) ? mySrcFormatInfo : mySrcFormat;
 
-        if(myCodecCtx->pix_fmt == stLibAV::PIX_FMT::RGB24) {
+        int         aFrameSizeX = myCodecCtx->width;
+        int         aFrameSizeY = myCodecCtx->height;
+        PixelFormat aPixFmt     = myCodecCtx->pix_fmt;
+    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 5, 0))
+        aFrameSizeX = myFrame->width;
+        aFrameSizeY = myFrame->height;
+        aPixFmt     = (PixelFormat )myFrame->format;
+    #endif
+
+        if(aPixFmt == stLibAV::PIX_FMT::RGB24) {
             myDataAdp.setColorModel(StImage::ImgColor_RGB);
             myDataAdp.setPixelRatio(getPixelRatio());
             myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgRGB, myFrame->data[0],
-                                                 sizeX(), sizeY(),
+                                                 size_t(aFrameSizeX), size_t(aFrameSizeY),
                                                  myFrame->linesize[0]);
+    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 5, 0))
+        } else if(stLibAV::isFormatYUVPlanar(myFrame,
+    #else
         } else if(stLibAV::isFormatYUVPlanar(myCodecCtx,
-                                             aWidthY, aHeightY,
-                                             aWidthU, aHeightU,
-                                             aWidthV, aHeightV,
-                                             isFullScale)) {
+    #endif
+                                             aDimsYUV)) {
 
             /// TODO (Kirill Gavrilov#5) remove hack
             // workaround for incorrect frame dimensions information in some files
             // critical for tiled source format that should be 1080p
             if(aSrcFormat == ST_V_SRC_TILED_4X
-            && myCodecCtx->pix_fmt == stLibAV::PIX_FMT::YUV420P
-            && myCodecCtx->width >= 1906 && myCodecCtx->width <= 1920
+            && aPixFmt    == stLibAV::PIX_FMT::YUV420P
+            && aFrameSizeX >= 1906 && aFrameSizeX <= 1920
             && myFrame->linesize[0] >= 1920
-            && myCodecCtx->height >= 1074) {
-                aWidthY  = 1920;
-                aHeightY = 1080;
-                aWidthU  = aWidthV  = aWidthY  / 2;
-                aHeightU = aHeightV = aHeightY / 2;
+            && aFrameSizeY >= 1074) {
+                aDimsYUV.widthY  = 1920;
+                aDimsYUV.heightY = 1080;
+                aDimsYUV.widthU  = aDimsYUV.widthV  = aDimsYUV.widthY  / 2;
+                aDimsYUV.heightU = aDimsYUV.heightV = aDimsYUV.heightY / 2;
             }
 
-            myDataAdp.setColorModel(isFullScale ? StImage::ImgColor_YUVjpeg : StImage::ImgColor_YUV);
+            myDataAdp.setColorModel(aDimsYUV.isFullScale ? StImage::ImgColor_YUVjpeg : StImage::ImgColor_YUV);
             myDataAdp.setPixelRatio(getPixelRatio());
             myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgGray, myFrame->data[0],
-                                                 aWidthY, aHeightY, myFrame->linesize[0]);
+                                                 size_t(aDimsYUV.widthY), size_t(aDimsYUV.heightY), myFrame->linesize[0]);
             myDataAdp.changePlane(1).initWrapper(StImagePlane::ImgGray, myFrame->data[1],
-                                                 aWidthU, aHeightU, myFrame->linesize[1]);
+                                                 size_t(aDimsYUV.widthU), size_t(aDimsYUV.heightU), myFrame->linesize[1]);
             myDataAdp.changePlane(2).initWrapper(StImagePlane::ImgGray, myFrame->data[2],
-                                                 aWidthV, aHeightV, myFrame->linesize[2]);
+                                                 size_t(aDimsYUV.widthV), size_t(aDimsYUV.heightV), myFrame->linesize[2]);
         } else if(myToRgbCtx != NULL) {
-            sws_scale(myToRgbCtx,
-                      myFrame->data, myFrame->linesize,
-                      0, myCodecCtx->height,
-                      myFrameRGB->data, myFrameRGB->linesize);
+            if(aPixFmt     == myCodecCtx->pix_fmt
+            && aFrameSizeX == myCodecCtx->width
+            && aFrameSizeY == myCodecCtx->height) {
+                sws_scale(myToRgbCtx,
+                          myFrame->data, myFrame->linesize,
+                          0, aFrameSizeY,
+                          myFrameRGB->data, myFrameRGB->linesize);
 
-            myDataAdp.setColorModel(StImage::ImgColor_RGB);
-            myDataAdp.setPixelRatio(getPixelRatio());
-            myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgRGB, myBufferRGB,
-                                                 size_t(sizeX()), size_t(sizeY()));
+                myDataAdp.setColorModel(StImage::ImgColor_RGB);
+                myDataAdp.setPixelRatio(getPixelRatio());
+                myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgRGB, myBufferRGB,
+                                                     size_t(aFrameSizeX), size_t(aFrameSizeY));
+            }
         }
 
         if(!mySlave.isNull()) {

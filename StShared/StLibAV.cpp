@@ -153,6 +153,7 @@ namespace {
         ST_DEBUG_LOG("  libswscale\t"  + stLibAV::Version::libswscale().toString());
         return true;
     }
+
 };
 
 bool stLibAV::init() {
@@ -173,62 +174,61 @@ bool stLibAV::isFormatYUVPlanar(const AVCodecContext* theCtx) {
         || (theCtx->pix_fmt == stLibAV::PIX_FMT::YUV410P);
 }
 
-bool stLibAV::isFormatYUVPlanar(const AVCodecContext* theCtx,
-                                size_t& theWidthY, size_t& theHeightY,
-                                size_t& theWidthU, size_t& theHeightU,
-                                size_t& theWidthV, size_t& theHeightV,
-                                bool& isFullScale) {
-    if(theCtx->pix_fmt == stLibAV::PIX_FMT::YUV420P) {
-        theWidthY  = size_t(theCtx->width);
-        theHeightY = size_t(theCtx->height);
-        theWidthU  = theWidthV  = theWidthY  / 2;
-        theHeightU = theHeightV = theHeightY / 2;
-        isFullScale = false;
-    } else if(theCtx->pix_fmt == stLibAV::PIX_FMT::YUVJ420P) { // JPEG
-        theWidthY  = size_t(theCtx->width);
-        theHeightY = size_t(theCtx->height);
-        theWidthU  = theWidthV  = theWidthY  / 2;
-        theHeightU = theHeightV = theHeightY / 2;
-        isFullScale = true;
-    } else if(theCtx->pix_fmt == stLibAV::PIX_FMT::YUV422P) {
-        theWidthY  = size_t(theCtx->width);
-        theHeightY = theHeightU = theHeightV = size_t(theCtx->height);
-        theWidthU  = theWidthV  = theWidthY  / 2;
-        isFullScale = false;
-    } else if(theCtx->pix_fmt == stLibAV::PIX_FMT::YUVJ422P) { // JPEG
-        theWidthY  = size_t(theCtx->width);
-        theHeightY = theHeightU = theHeightV = size_t(theCtx->height);
-        theWidthU  = theWidthV  = theWidthY  / 2;
-        isFullScale = true;
-    } else if(theCtx->pix_fmt == stLibAV::PIX_FMT::YUV444P) {
-        theWidthY  = theWidthU  = theWidthV  = size_t(theCtx->width);
-        theHeightY = theHeightU = theHeightV = size_t(theCtx->height);
-        isFullScale = false;
-    } else if(theCtx->pix_fmt == stLibAV::PIX_FMT::YUVJ444P) { // JPEG
-        theWidthY  = theWidthU  = theWidthV  = size_t(theCtx->width);
-        theHeightY = theHeightU = theHeightV = size_t(theCtx->height);
-        isFullScale = true;
-    } else if(theCtx->pix_fmt == stLibAV::PIX_FMT::YUV440P) {
-        theWidthY  = theWidthU  = theWidthV  = size_t(theCtx->width);
-        theHeightY = size_t(theCtx->height);
-        theHeightU = theHeightV = theHeightY / 2;
-        isFullScale = false;
-    } else if(theCtx->pix_fmt == stLibAV::PIX_FMT::YUVJ440P) { // JPEG
-        theWidthY  = theWidthU  = theWidthV  = size_t(theCtx->width);
-        theHeightY = size_t(theCtx->height);
-        theHeightU = theHeightV = theHeightY / 2;
-        isFullScale = true;
-    } else if(theCtx->pix_fmt == stLibAV::PIX_FMT::YUV411P) {
-        theWidthY  = theWidthU  = theWidthV  = size_t(theCtx->width);
-        theHeightY = theHeightU = theHeightV = size_t(theCtx->height);
-        theWidthU  = theWidthV  = theWidthY  / 4;
-        isFullScale = false;
-    } else if(theCtx->pix_fmt == stLibAV::PIX_FMT::YUV410P) {
-        theWidthY  = theWidthU  = theWidthV  = size_t(theCtx->width);
-        theHeightY = size_t(theCtx->height);
-        theWidthU  = theWidthV  = theWidthY  / 4;
-        theHeightU = theHeightV = theHeightY / 4;
-        isFullScale = false;
+bool stLibAV::isFormatYUVPlanar(const PixelFormat thePixFmt,
+                                const int         theWidth,
+                                const int         theHeight,
+                                dimYUV&           theDims) {
+    if(thePixFmt == stLibAV::PIX_FMT::YUV420P) {
+        theDims.widthY  = theWidth;
+        theDims.heightY = theHeight;
+        theDims.widthU  = theDims.widthV  = theDims.widthY  / 2;
+        theDims.heightU = theDims.heightV = theDims.heightY / 2;
+        theDims.isFullScale = false;
+    } else if(thePixFmt == stLibAV::PIX_FMT::YUVJ420P) { // JPEG
+        theDims.widthY  = theWidth;
+        theDims.heightY = theHeight;
+        theDims.widthU  = theDims.widthV  = theDims.widthY  / 2;
+        theDims.heightU = theDims.heightV = theDims.heightY / 2;
+        theDims.isFullScale = true;
+    } else if(thePixFmt == stLibAV::PIX_FMT::YUV422P) {
+        theDims.widthY  = theWidth;
+        theDims.heightY = theDims.heightU = theDims.heightV = theHeight;
+        theDims.widthU  = theDims.widthV  = theDims.widthY  / 2;
+        theDims.isFullScale = false;
+    } else if(thePixFmt == stLibAV::PIX_FMT::YUVJ422P) { // JPEG
+        theDims.widthY  = theWidth;
+        theDims.heightY = theDims.heightU = theDims.heightV = theHeight;
+        theDims.widthU  = theDims.widthV  = theDims.widthY  / 2;
+        theDims.isFullScale = true;
+    } else if(thePixFmt == stLibAV::PIX_FMT::YUV444P) {
+        theDims.widthY  = theDims.widthU  = theDims.widthV  = theWidth;
+        theDims.heightY = theDims.heightU = theDims.heightV = theHeight;
+        theDims.isFullScale = false;
+    } else if(thePixFmt == stLibAV::PIX_FMT::YUVJ444P) { // JPEG
+        theDims.widthY  = theDims.widthU  = theDims.widthV  = theWidth;
+        theDims.heightY = theDims.heightU = theDims.heightV = theHeight;
+        theDims.isFullScale = true;
+    } else if(thePixFmt == stLibAV::PIX_FMT::YUV440P) {
+        theDims.widthY  = theDims.widthU  = theDims.widthV  = theWidth;
+        theDims.heightY = theHeight;
+        theDims.heightU = theDims.heightV = theDims.heightY / 2;
+        theDims.isFullScale = false;
+    } else if(thePixFmt == stLibAV::PIX_FMT::YUVJ440P) { // JPEG
+        theDims.widthY  = theDims.widthU  = theDims.widthV  = theWidth;
+        theDims.heightY = theHeight;
+        theDims.heightU = theDims.heightV = theDims.heightY / 2;
+        theDims.isFullScale = true;
+    } else if(thePixFmt == stLibAV::PIX_FMT::YUV411P) {
+        theDims.widthY  = theDims.widthU  = theDims.widthV  = theWidth;
+        theDims.heightY = theDims.heightU = theDims.heightV = theHeight;
+        theDims.widthU  = theDims.widthV  = theDims.widthY  / 4;
+        theDims.isFullScale = false;
+    } else if(thePixFmt == stLibAV::PIX_FMT::YUV410P) {
+        theDims.widthY  = theDims.widthU  = theDims.widthV  = theWidth;
+        theDims.heightY = theHeight;
+        theDims.widthU  = theDims.widthV  = theDims.widthY  / 4;
+        theDims.heightU = theDims.heightV = theDims.heightY / 4;
+        theDims.isFullScale = false;
     } else {
         return false;
     }
