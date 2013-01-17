@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutInterlace library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -92,7 +92,8 @@ class ST_LOCAL StOutInterlace : public StRendererInterface {
     bool                      myToBindToMonitor;
     bool                      myIsVSync;
     bool                      myToShowFPS;
-    bool                      myIsReversed;
+    bool                      myIsReversed;               //!< configurable flag to reverse rows order
+    bool                      myIsMonReversed;            //!< indicates (known) monitor model with reversed rows order
     bool                      myIsStereo;
     bool                      myIsEDactive;
     bool                      myIsEDCodeFinished;
@@ -107,7 +108,7 @@ class ST_LOCAL StOutInterlace : public StRendererInterface {
 
         public:
 
-    static StHandle<StMonitor> getHInterlaceMonitor();
+    static StHandle<StMonitor> getHInterlaceMonitor(bool& theIsReversed);
 
     StOutInterlace();
     ~StOutInterlace();

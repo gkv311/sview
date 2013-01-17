@@ -42,20 +42,26 @@ namespace {
     static const char ST_SETTING_VSYNC[]          = "vsync";
     static const char ST_SETTING_REVERSE[]        = "reverse";
 
-    // Zalman Trimon (horizontal interlace)
-    static const StString PNP_ID_ZALMAN_TRIMON_M190S = "ZMT1900";
-    static const StString PNP_ID_ZALMAN_TRIMON_M220W = "ZMT2200";
+    struct StMonInterlacedInfo_t {
+        const stUtf8_t pnpid[8];
+        bool           isReversed;
+    };
 
-    // Envision (row interlace)
-    static const StString PNP_ID_ENVISION_ENV2373 = "ENV2373";
-
-    //Hyundai 3D LCD display W220S 1680x1050 (horizontal interlace)
-    static const StString PNP_ID_HYUNDAI_W220S_DSUB = "HIT8002";
-    static const StString PNP_ID_HYUNDAI_W220S_DVID = "HIT8D02";
-
-    //Hyundai 3D LCD display W240S 1920x1200 (horizontal interlace)
-    static const StString PNP_ID_HYUNDAI_W240S_DSUB = "HIT7003";
-    static const StString PNP_ID_HYUNDAI_W240S_DVID = "HIT7D03";
+    /**
+     * Database of known interlaced monitors.
+     */
+    static const StMonInterlacedInfo_t THE_KNOWN_MONITORS[] = {
+        {"ZMT1900", false}, // Zalman Trimon M190S
+        {"ZMT2200", false}, // Zalman Trimon M220W
+        {"ENV2373", true }, // Envision
+        {"HIT8002", false}, // Hyundai W220S D-Sub
+        {"HIT8D02", false}, // Hyundai W220S DVID
+        {"HIT7003", false}, // Hyundai W240S D-Sub
+        {"HIT7D03", false}, // Hyundai W240S D-Sub
+      //{"ACI23C2", false}, // ASUS VG23AH
+        {"ACI27C2", false}, // ASUS VG27AH
+        {       "", false}  // NULL-terminate array
+    };
 
     // translation resources
     enum {
@@ -164,21 +170,27 @@ void StOutInterlace::optionsStructAlloc() {
     myOptionsStruct->options[DEVICE_OPTION_BINDMON]->title = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_PARAMETER_BIND_MON, "Bind To Supported Monitor"));
 }
 
-inline bool isInterlacedMonitor(const StMonitor& theMon) {
-    return theMon.getPnPId() == PNP_ID_ZALMAN_TRIMON_M190S
-        || theMon.getPnPId() == PNP_ID_ZALMAN_TRIMON_M220W
-        || theMon.getPnPId() == PNP_ID_ENVISION_ENV2373
-        || theMon.getPnPId() == PNP_ID_HYUNDAI_W220S_DSUB
-        || theMon.getPnPId() == PNP_ID_HYUNDAI_W220S_DVID
-        || theMon.getPnPId() == PNP_ID_HYUNDAI_W240S_DSUB
-        || theMon.getPnPId() == PNP_ID_HYUNDAI_W240S_DVID;
+inline bool isInterlacedMonitor(const StMonitor& theMon,
+                                bool&            theIsReversed) {
+    if(theMon.getPnPId().getSize() != 7) {
+        return false;
+    }
+    for(size_t anIter = 0;; ++anIter) {
+        const StMonInterlacedInfo_t& aMon = THE_KNOWN_MONITORS[anIter];
+        if(aMon.pnpid[0] == '\0') {
+            return false;
+        } else if(stAreEqual(aMon.pnpid, theMon.getPnPId().toCString(), 7)) {
+            theIsReversed = aMon.isReversed;
+            return true;
+        }
+    }
 }
 
-StHandle<StMonitor> StOutInterlace::getHInterlaceMonitor() {
+StHandle<StMonitor> StOutInterlace::getHInterlaceMonitor(bool& theIsReversed) {
     StArrayList<StMonitor> aMonitors = StCore::getStMonitors();
     for(size_t aMonIter = 0; aMonIter < aMonitors.size(); ++aMonIter) {
         const StMonitor& aMon = aMonitors[aMonIter];
-        if(isInterlacedMonitor(aMon)) {
+        if(isInterlacedMonitor(aMon, theIsReversed)) {
             return new StMonitor(aMon);
         }
     }
@@ -200,6 +212,7 @@ StOutInterlace::StOutInterlace()
   myIsVSync(true),
   myToShowFPS(false),
   myIsReversed(false),
+  myIsMonReversed(false),
   myIsStereo(false),
   myIsEDactive(false),
   myIsEDCodeFinished(false),
@@ -271,12 +284,12 @@ bool StOutInterlace::init(const StString&     inRendererPath,
     myStCore   = new StCore();
 
     // load window position
-    StHandle<StMonitor> anInterlacedMon = StOutInterlace::getHInterlaceMonitor();
+    StHandle<StMonitor> anInterlacedMon = StOutInterlace::getHInterlaceMonitor(myIsMonReversed);
     StRect<int32_t> loadedRect(256, 768, 256, 1024);
     bool isLoadedPosition = mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, loadedRect);
     mySettings->loadBool(ST_SETTING_BIND_MONITOR, myToBindToMonitor);
     StMonitor aMonitor = StCore::getMonitorFromPoint(loadedRect.center());
-    if(myToBindToMonitor && !anInterlacedMon.isNull() && !isInterlacedMonitor(aMonitor)) {
+    if(myToBindToMonitor && !anInterlacedMon.isNull() && !isInterlacedMonitor(aMonitor, myIsMonReversed)) {
         aMonitor = *anInterlacedMon;
     }
     if(isLoadedPosition) {
@@ -578,8 +591,8 @@ void StOutInterlace::callback(StMessage_t* stMessages) {
                 if(toMovePos && !getStWindow()->isFullScreen()) {
                     StRectI_t aRect = getStWindow()->getPlacement();
                     StMonitor aMon  = StCore::getMonitorFromPoint(aRect.center());
-                    StHandle<StMonitor> anInterlacedMon = StOutInterlace::getHInterlaceMonitor();
-                    if(!anInterlacedMon.isNull() && !isInterlacedMonitor(aMon)) {
+                    StHandle<StMonitor> anInterlacedMon = StOutInterlace::getHInterlaceMonitor(myIsMonReversed);
+                    if(!anInterlacedMon.isNull() && !isInterlacedMonitor(aMon, myIsMonReversed)) {
                         int aWidth  = aRect.width();
                         int aHeight = aRect.height();
                         aRect.left()   = anInterlacedMon->getVRect().left() + 256;
@@ -590,6 +603,13 @@ void StOutInterlace::callback(StMessage_t* stMessages) {
                     }
                 }
 
+                break;
+            }
+            case StMessageList::MSG_WIN_ON_NEW_MONITOR: {
+                const StRectI_t aRect = getStWindow()->getPlacement();
+                const StMonitor aMon  = StCore::getMonitorFromPoint(aRect.center());
+                myIsMonReversed = false;
+                isInterlacedMonitor(aMon, myIsMonReversed);
                 break;
             }
             case StMessageList::MSG_EXIT: {
@@ -717,6 +737,11 @@ void StOutInterlace::stglDraw(unsigned int ) {
         }
     }
 
+    // known monitor model with reversed rows order?
+    if(myIsMonReversed) {
+        isPixelReverse = !isPixelReverse;
+    }
+
     // reversed by user?
     if(myIsReversed) {
         isPixelReverse = !isPixelReverse;
@@ -802,7 +827,8 @@ ST_EXPORT const StRendererInfo_t* getDevicesInfo(const stBool_t theToDetectPrior
         if(StCore::INIT() != STERROR_LIBNOERROR) {
             ST_DEBUG_LOG(ST_OUT_PLUGIN_NAME + " Plugin, Core library not available!");
         } else {
-            StHandle<StMonitor> aMon = StOutInterlace::getHInterlaceMonitor();
+            bool dummy = false;
+            StHandle<StMonitor> aMon = StOutInterlace::getHInterlaceMonitor(dummy);
             if(!aMon.isNull()) {
                 aRowSupportLevel = ST_DEVICE_SUPPORT_HIGHT;
                 aMon.nullify();
@@ -834,7 +860,7 @@ ST_EXPORT const StRendererInfo_t* getDevicesInfo(const stBool_t theToDetectPrior
     StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - Interlaced Output library");
     StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
     StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
-        "(C) 2009-2012 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0");
+        "(C) 2009-2013 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0");
     static StString anAboutString = aTitle + '\n' + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr;
     ST_SELF_INFO.aboutString = (stUtf8_t* )anAboutString.toCString();
 
