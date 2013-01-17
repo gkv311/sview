@@ -1,7 +1,7 @@
 /**
  * This is a header for threads creating/manipulating.
  * (redefinition for WinAPI and POSIX threads)
- * Copyright © 2008-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2008-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -16,14 +16,13 @@
 #include "StEvent.h"
 #include "StProcess.h"
 
-#ifndef _WIN32
-    #ifndef __USE_GNU
-        #define __USE_GNU
-    #endif
+#if (defined(_WIN32) || defined(__WIN32__))
+    #include <process.h>
+#else
     #include <unistd.h>
     #include <sys/types.h>
 
-    #ifdef sun
+    #ifdef __sun
         #include <sys/processor.h>
         #include <sys/procset.h>
     #else
@@ -39,9 +38,9 @@ class ST_LOCAL StThread {
         public:
 
 #if (defined(_WIN32) || defined(__WIN32__))
-    #define SV_THREAD_FUNCTION DWORD WINAPI
+    #define SV_THREAD_FUNCTION unsigned int __stdcall
     #define SV_THREAD_RETURN
-    typedef LPTHREAD_START_ROUTINE threadFunction_t;
+    typedef unsigned int (__stdcall* threadFunction_t)(void* );
 #else
     #define SV_THREAD_FUNCTION void*
     #define SV_THREAD_RETURN (void*)
@@ -125,7 +124,7 @@ class ST_LOCAL StThread {
     }
 
     /**
-     * Returns unique identificator for current thread.
+     * Returns unique identifier for current thread.
      * @return unique id for current thread.
      */
     static size_t getCurrentThreadId() {
@@ -153,16 +152,20 @@ class ST_LOCAL StThread {
     StThread(threadFunction_t theThreadFunc,
              void*            theThreadParam) {
     #if (defined(_WIN32) || defined(__WIN32__))
-        myThread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE )theThreadFunc, theThreadParam, CREATE_SUSPENDED, &myThreadId);
-        if(myThread == NULL) {
-            myCreateStatus = false;
-        } else {
-            myCreateStatus = true;
-            SetThreadPriority(myThread, THREAD_PRIORITY_BELOW_NORMAL); // Set thread priority
-            ResumeThread(myThread); // Run thread
-        }
+        myThread = (HANDLE )_beginthreadex(NULL, 0, theThreadFunc, theThreadParam, 0, (unsigned int* )&myThreadId);
     #else
-        myCreateStatus = (pthread_create(&myThread, (pthread_attr_t* )NULL, theThreadFunc, theThreadParam) == 0);
+        myHasHandle = (pthread_create(&myThread, (pthread_attr_t* )NULL, theThreadFunc, theThreadParam) == 0);
+    #endif
+    }
+
+    /**
+     * Indicates valid thread handle.
+     */
+    bool isValid() const {
+    #if (defined(_WIN32) || defined(__WIN32__))
+        return myThread != NULL;
+    #else
+        return myHasHandle; // myThread != PTHREAD_NULL
     #endif
     }
 
@@ -171,9 +174,9 @@ class ST_LOCAL StThread {
      */
     bool wait() {
     #if (defined(_WIN32) || defined(__WIN32__))
-        return (WaitForSingleObject(myThread, INFINITE) != WAIT_FAILED);
+        return isValid() && (WaitForSingleObject(myThread, INFINITE) != WAIT_FAILED);
     #else
-        return (pthread_join(myThread, NULL) == 0);
+        return isValid() && (pthread_join(myThread, NULL) == 0);
     #endif
     }
 
@@ -181,11 +184,13 @@ class ST_LOCAL StThread {
      *  This is a dangerous function that should only be used in the most extreme case!
      */
     void kill() {
-    #if (defined(_WIN32) || defined(__WIN32__))
-        TerminateThread(myThread, 0);
-    #else
-        pthread_cancel(myThread);
-    #endif
+        if(isValid()) {
+        #if (defined(_WIN32) || defined(__WIN32__))
+            TerminateThread(myThread, 0);
+        #else
+            pthread_cancel(myThread);
+        #endif
+        }
     }
 
     /**
@@ -193,17 +198,20 @@ class ST_LOCAL StThread {
      * If thread has not terminated, this function shall not cause it to terminate.
      */
     void detach() {
-    #if (defined(_WIN32) || defined(__WIN32__))
-        if(myThread != NULL) {
+        if(isValid()) {
+        #if (defined(_WIN32) || defined(__WIN32__))
             CloseHandle(myThread);
             myThread = NULL;
+        #else
+            pthread_detach(myThread);
+            myHasHandle = false;
+        #endif
         }
-    #else
-        /// TODO (Kirill Gavrilov#1) check for PTHREAD_NULL ?
-        pthread_detach(myThread);
-    #endif
     }
 
+    /**
+     * Destructor. By default detaches from created thread.
+     */
     ~StThread() {
         detach();
     }
@@ -231,8 +239,8 @@ class ST_LOCAL StThread {
     DWORD     myThreadId;
 #else
     pthread_t myThread;
+    bool      myHasHandle;
 #endif
-    bool      myCreateStatus;
 
 };
 
