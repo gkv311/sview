@@ -43,8 +43,8 @@ namespace {
     static const char ST_SETTING_REVERSE[]        = "reverse";
 
     struct StMonInterlacedInfo_t {
-        const stUtf8_t pnpid[8];
-        bool           isReversed;
+        const stUtf8_t* pnpid;
+        bool            isReversed;
     };
 
     /**
