@@ -143,12 +143,19 @@
 					<Add option="-fPIC" />
 					<Add option="-mmmx" />
 					<Add option="-msse" />
-					<Add option="`pkg-config gtk+-2.0 --cflags`" />
 					<Add option="-DXP_UNIX" />
 					<Add option="-DMOZ_X11" />
+					<Add option="`pkg-config gtk+-2.0 --cflags`" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="gtk-x11-2.0" />
+					<Add library="gdk-x11-2.0" />
+					<Add library="glib-2.0" />
+					<Add library="gthread-2.0" />
+					<Add library="X11" />
+					<Add library="pthread" />
+					<Add library="dl" />
 				</Linker>
 			</Target>
 			<Target title="LINUX_gcc_DEBUG">
@@ -165,11 +172,20 @@
 					<Add option="-fPIC" />
 					<Add option="-mmmx" />
 					<Add option="-msse" />
-					<Add option="`pkg-config gtk+-2.0 --cflags`" />
 					<Add option="-DXP_UNIX" />
 					<Add option="-DMOZ_X11" />
 					<Add option="-D__ST_DEBUG__" />
+					<Add option="`pkg-config gtk+-2.0 --cflags`" />
 				</Compiler>
+				<Linker>
+					<Add library="gtk-x11-2.0" />
+					<Add library="gdk-x11-2.0" />
+					<Add library="glib-2.0" />
+					<Add library="gthread-2.0" />
+					<Add library="X11" />
+					<Add library="pthread" />
+					<Add library="dl" />
+				</Linker>
 			</Target>
 			<Target title="MAC_gcc">
 				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/StBrowserPlugins/npStBrowserPlugin" prefix_auto="1" extension_auto="1" />

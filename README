@@ -28,10 +28,10 @@ source formatter: JAVA
 sudo apt-get install
 libgtk2.0-dev
 libopenal-dev
-libglew1.5-dev
-libglu1-mesa-dev libgl1-mesa-dev xorg-driver-fglrx-dev;
+libgl1-mesa-dev
 libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev
-libconfig++8-dev libconfig8-dev
+libwebp-dev
+libconfig++-dev libconfig-dev
 libxpm-dev
 
  RPM-based distributive

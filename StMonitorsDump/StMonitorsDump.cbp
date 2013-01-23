@@ -142,9 +142,14 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add option="`pkg-config gtk+-2.0 --libs`" />
+					<Add library="gtk-x11-2.0" />
+					<Add library="gdk-x11-2.0" />
+					<Add library="glib-2.0" />
+					<Add library="gthread-2.0" />
 					<Add library="Xrandr" />
 					<Add library="X11" />
+					<Add library="pthread" />
+					<Add library="dl" />
 				</Linker>
 			</Target>
 			<Target title="LINUX_gcc_DEBUG">
@@ -163,9 +168,14 @@
 					<Add option="-D__ST_DEBUG__" />
 				</Compiler>
 				<Linker>
-					<Add option="`pkg-config gtk+-2.0 --libs`" />
+					<Add library="gtk-x11-2.0" />
+					<Add library="gdk-x11-2.0" />
+					<Add library="glib-2.0" />
+					<Add library="gthread-2.0" />
 					<Add library="Xrandr" />
 					<Add library="X11" />
+					<Add library="pthread" />
+					<Add library="dl" />
 				</Linker>
 			</Target>
 			<Target title="MAC_gcc">
