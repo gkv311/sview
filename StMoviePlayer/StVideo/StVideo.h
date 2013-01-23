@@ -321,8 +321,8 @@ class ST_LOCAL StVideo {
         return myVideoMaster->isPlaying() || myAudio->isPlaying();
     }
 
-    virtual void pushPlayEvent(const StPlayEvent_t theEventId,
-                               const double        theSeekParam = 0.0) {
+    void pushPlayEvent(const StPlayEvent_t theEventId,
+                       const double        theSeekParam = 0.0) {
         if(theEventId == ST_PLAYEVENT_NEXT) {
             myEventMutex.lock();
                 myPlayEvent = theEventId;
