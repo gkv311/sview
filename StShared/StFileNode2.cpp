@@ -26,10 +26,12 @@ namespace {
         typedef int (*xErrHandler_t)(Display* , XErrorEvent* );
         xErrHandler_t xErrHandlerOrig = XSetErrorHandler(dummyXErrorHandler);
 
+    #ifndef GLIB_VERSION_2_32
         if(!g_thread_get_initialized()) {
             g_thread_init(NULL); // Initialize GLIB thread support
             gdk_threads_init();  // Initialize GDK locks
         }
+    #endif
         int argc = 0;
         bool isOK = gtk_init_check(&argc, NULL);
 
