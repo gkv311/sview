@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -24,7 +24,7 @@
 
 #if (defined(_WIN32) || defined(__WIN32__))
 
-static PIXELFORMATDESCRIPTOR pfdDouble = {
+static PIXELFORMATDESCRIPTOR THE_PIXELFRMT_DOUBLE = {
     sizeof(PIXELFORMATDESCRIPTOR),   // Size Of This Pixel Format Descriptor
     1,                               // Version Number
     PFD_DRAW_TO_WINDOW |             // Format Must Support Window
@@ -105,94 +105,73 @@ bool StWinHandles::glMakeCurrent() {
     return false;
 }
 
+/**
+ * Auxiliary macros.
+ */
+#define ST_GL_ERROR_CHECK(theTrueCondition, theErrCode, theErrDesc) \
+    if(!(theTrueCondition)) { \
+        stError(theErrDesc); \
+        return theErrCode; \
+    }
+
 int StWinHandles::glCreateContext(StWinHandles* theSlave, bool isQuadStereo) {
 #if (defined(_WIN32) || defined(__WIN32__))
     threadIdOgl = StThread::getCurrentThreadId();
     ST_DEBUG_LOG("WinAPI, glCreateContext, threadIdOgl= " + threadIdOgl + ", threadIdWnd= " + threadIdWnd);
-    int pixelFormat; // Holds The Results After Searching For A Match
     hDC = GetDC(hWindowGl);
-    if(hDC == NULL) { // Did We Get A Device Context?
-        stError("WinAPI, Can't create Master GL Device Context");
-        return STWIN_ERROR_WIN32_GLDC;
-    }
-
+    ST_GL_ERROR_CHECK(hDC != NULL, STWIN_ERROR_WIN32_GLDC,
+                      "WinAPI, Can't create Master GL Device Context");
     if(theSlave != NULL) {
         theSlave->threadIdOgl = threadIdOgl;
         theSlave->hDC = GetDC(theSlave->hWindowGl);
-        if(theSlave->hDC == NULL) {
-            stError("WinAPI, Can't create Slave GL Device Context");
-            return STWIN_ERROR_WIN32_GLDC;
-        }
+        ST_GL_ERROR_CHECK(theSlave->hDC != NULL, STWIN_ERROR_WIN32_GLDC,
+                          "WinAPI, Can't create Slave GL Device Context");
     }
 
-    PIXELFORMATDESCRIPTOR pfd = pfdDouble;
-    memcpy(&pfd, &pfdDouble, sizeof(PIXELFORMATDESCRIPTOR));
+    PIXELFORMATDESCRIPTOR aPixelFormatDesc = THE_PIXELFRMT_DOUBLE;
     if(isQuadStereo) {
-        pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_GDI | PFD_SUPPORT_OPENGL |
-                PFD_DOUBLEBUFFER | PFD_STEREO;
+        aPixelFormatDesc.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_GDI | PFD_SUPPORT_OPENGL
+                                 | PFD_DOUBLEBUFFER | PFD_STEREO;
     }
-    pixelFormat = ChoosePixelFormat(hDC, &pfd);
-    if(pixelFormat == 0) {   // Did Windows Find A Matching Pixel Format?
-        stError("WinAPI, Can't find a suitable PixelFormat for Master");
-        return STWIN_ERROR_WIN32_PIXELFORMATF;
+    int aPixelFormatId = ChoosePixelFormat(hDC, &aPixelFormatDesc);
+    ST_GL_ERROR_CHECK(aPixelFormatId != 0, STWIN_ERROR_WIN32_PIXELFORMATF,
+                      "WinAPI, Can't find a suitable PixelFormat for Master");
+    if(theSlave != NULL
+    && ChoosePixelFormat(theSlave->hDC, &aPixelFormatDesc) != aPixelFormatId) {
+        ST_ERROR_LOG("Slave window returns another pixel format! Try to ignore...");
     }
 
-    if(theSlave != NULL) {
-        pixelFormat = ChoosePixelFormat(theSlave->hDC, &pfd);
-        if(pixelFormat == 0) {
-            stError("WinAPI, Can't find a suitable PixelFormat for Slave");
-            return STWIN_ERROR_WIN32_PIXELFORMATF;
+    if(isQuadStereo) {
+        DescribePixelFormat(hDC, aPixelFormatId, sizeof(PIXELFORMATDESCRIPTOR), &aPixelFormatDesc);
+        if((aPixelFormatDesc.dwFlags & PFD_STEREO) == 0) {
+            stError("WinAPI, Quad Buffered stereo not supported");
+        } else {
+            //bool isVistaPlus = StSys::isVistaPlus();
+            //bool isWin8Plus  = StSys::isWin8Plus();
+            ///myNeedsFullscr
         }
     }
 
-    if(!SetPixelFormat(hDC, pixelFormat, &pfd)) { // Are We Able To Set The Pixel Format?
-        stError("WinAPI, Can't set the PixelFormat for Master");
-        return STWIN_ERROR_WIN32_PIXELFORMATS;
-    }
-
-    if(theSlave != NULL) {
-        if(!SetPixelFormat(theSlave->hDC, pixelFormat, &pfd)) {
-            stError("WinAPI, Can't set the PixelFormat for Slave");
-            return STWIN_ERROR_WIN32_PIXELFORMATS;
-        }
-    }
+    ST_GL_ERROR_CHECK(SetPixelFormat(hDC, aPixelFormatId, &aPixelFormatDesc),
+                      STWIN_ERROR_WIN32_PIXELFORMATS, "WinAPI, Can't set the PixelFormat for Master");
+    ST_GL_ERROR_CHECK(theSlave == NULL || SetPixelFormat(theSlave->hDC, aPixelFormatId, &aPixelFormatDesc),
+                      STWIN_ERROR_WIN32_PIXELFORMATS, "WinAPI, Can't set the PixelFormat for Slave");
 
     hRC = wglCreateContext(hDC);
-    if(hRC == NULL) { // Are We Able To Get A Rendering Context?
-        stError("WinAPI, Can't create GL Rendering Context for Master");
-        return STWIN_ERROR_WIN32_GLRC_CREATE;
-    }
-
+    ST_GL_ERROR_CHECK(hRC != NULL,
+                      STWIN_ERROR_WIN32_GLRC_CREATE, "WinAPI, Can't create GL Rendering Context for Master");
     if(theSlave != NULL) {
         theSlave->hRC = wglCreateContext(theSlave->hDC);
-        if(theSlave->hRC == NULL) {
-            stError("WinAPI, Can't create GL Rendering Context for Slave");
-            return STWIN_ERROR_WIN32_GLRC_CREATE;
-        }
+        ST_GL_ERROR_CHECK(theSlave->hRC != NULL,
+                          STWIN_ERROR_WIN32_GLRC_CREATE, "WinAPI, Can't create GL Rendering Context for Slave");
     }
 
-    if(isQuadStereo) {
-        pixelFormat = GetPixelFormat(hDC);
-        DescribePixelFormat(hDC, pixelFormat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
-        if((pfd.dwFlags & PFD_STEREO) == 0) {
-            stError("WinAPI, Quad Buffered stereo not supported");
-        }
-    }
+    // share resources between GL contexts
+    ST_GL_ERROR_CHECK(theSlave == NULL || wglShareLists(theSlave->hRC, hRC),
+                      STWIN_ERROR_WIN32_GLRC_SHARE, "WinAPI, Can't share GL Rendering Contexts");
 
-    // ========= Now we share GL contexts =========
-    // TODO (Kirill Gavrilov) choose better
-    if(theSlave != NULL) {
-        if(!wglShareLists(theSlave->hRC, hRC)) {
-        //if(!wglShareLists(hRC, theSlave->hRC)) {
-            stError("WinAPI, Can't share GL Rendering Contexts");
-            return STWIN_ERROR_WIN32_GLRC_SHARE;
-        }
-    }
-
-    if(!wglMakeCurrent(hDC, hRC)) { // Try To Activate The Rendering Context
-        stError("WinAPI, Can't activate Master GL Rendering Context");
-        return STWIN_ERROR_WIN32_GLRC_ACTIVATE;
-    }
+    ST_GL_ERROR_CHECK(wglMakeCurrent(hDC, hRC),
+                      STWIN_ERROR_WIN32_GLRC_ACTIVATE, "WinAPI, Can't activate Master GL Rendering Context");
     return STWIN_INIT_SUCCESS;
 #elif (defined(__linux__) || defined(__linux))
     // create an OpenGL rendering context

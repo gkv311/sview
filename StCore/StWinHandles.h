@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -51,10 +51,10 @@ class ST_LOCAL StWinHandles {
     HWND          hWindowGl;
     StStringUtfWide   className; // WinAPI classes' names
     StStringUtfWide classNameGl;
-    ATOM        myMKeyStop;
-    ATOM        myMKeyPlay;
-    ATOM        myMKeyPrev;
-    ATOM        myMKeyNext;
+    ATOM         myMKeyStop;
+    ATOM         myMKeyPlay;
+    ATOM         myMKeyPrev;
+    ATOM         myMKeyNext;
         private:
     StMutex         stMutex;
     size_t      threadIdOgl; // id of the thread, in wich rendering context was created

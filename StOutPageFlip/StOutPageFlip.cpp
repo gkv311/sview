@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutPageFlip library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -30,6 +30,7 @@
 #include <StSettings/StSettings.h>
 #include <StSettings/StTranslations.h>
 #include <StImage/StLibAVImage.h>
+#include <StSys/StSys.h>
 
 namespace {
     static bool HAS_LOGGER_ID = StLogger::IdentifyModule("StOutPageFlip");
@@ -138,11 +139,19 @@ StOutPageFlip::StOutPageFlip(const StHandle<StSettings>& theSettings)
   myToSavePlacement(true),
   myToDrawStereo(false),
   myToShowFPS(false),
+#if(defined(_WIN32) || defined(__WIN32__))
+  myIsVistaPlus(StSys::isVistaPlus()),
+#endif
   myOutD3d() {
     //
 }
 
 StOutPageFlip::~StOutPageFlip() {
+    if(!myWarning.isNull()) {
+        myWarning->release(*myContext);
+        myWarning.nullify();
+    }
+
     dxRelease();
     if(!myStCore.isNull() && !mySettings.isNull()) {
         stMemFree(myOptions, StWindow::memFree);
@@ -205,21 +214,6 @@ bool StOutPageFlip::dxInit() {
 
     myOutD3d.myDxWindow = new StDXNVWindow(aFrBufferSizeX, aFrBufferSizeY, aNvMonitor, getStWindow());
     myOutD3d.myDxThread = new StThread(StOutDirect3D::dxThreadFunction, (void* )&myOutD3d);
-
-    StLibAVImage anImage;
-    const StString aTexturesFolder  = StProcess::getStCoreFolder() + "textures" + SYS_FS_SPLITTER;
-    const StString aWarnTexturePath = aTexturesFolder + "pageflip_fullscreen.std";
-    if(anImage.load(aWarnTexturePath, StImageFile::ST_TYPE_PNG)) {
-        myOutD3d.myWarning = new StGLTexture(GL_RGBA8);
-        if(!myOutD3d.myWarning->init(*myContext, anImage.getPlane())) {
-            ST_ERROR_LOG(ST_OUT_PLUGIN_NAME + " Plugin, Texture can not be initialized!");
-            myOutD3d.myWarning->release(*myContext);
-            myOutD3d.myWarning.nullify();
-        }
-    } else {
-        ST_ERROR_LOG(ST_OUT_PLUGIN_NAME + " Plugin, Texture missed: " + anImage.getState());
-    }
-
     return true;
 #else
     return false;
@@ -244,11 +238,6 @@ void StOutPageFlip::dxRelease() {
         myContext->core20fwd->glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
         myContext->core20fwd->glDeleteBuffers(1, &myOutD3d.myGLIoBuff);
         myOutD3d.myGLIoBuff = 0;
-    }
-
-    if(!myOutD3d.myWarning.isNull()) {
-        myOutD3d.myWarning->release(*myContext);
-        myOutD3d.myWarning.nullify();
     }
 #endif
 }
@@ -404,6 +393,21 @@ bool StOutPageFlip::init(const StString&     inRendererPath,
     if(!myContext->stglSetVSync(true)) {
         // TODO (Kirill Gavrilov#5#) could be optional for MONO output
         ST_DEBUG_LOG(ST_OUT_PLUGIN_NAME + " Plugin, VSync extension not available!");
+    }
+
+    // load fullscreen-only warning
+    StLibAVImage anImage;
+    const StString aTexturesFolder  = StProcess::getStCoreFolder() + "textures" + SYS_FS_SPLITTER;
+    const StString aWarnTexturePath = aTexturesFolder + "pageflip_fullscreen.std";
+    if(anImage.load(aWarnTexturePath, StImageFile::ST_TYPE_PNG)) {
+        myWarning = new StGLTexture(GL_RGBA8);
+        if(!myWarning->init(*myContext, anImage.getPlane())) {
+            ST_ERROR_LOG(ST_OUT_PLUGIN_NAME + " Plugin, Texture can not be initialized!");
+            myWarning->release(*myContext);
+            myWarning.nullify();
+        }
+    } else {
+        ST_ERROR_LOG(ST_OUT_PLUGIN_NAME + " Plugin, Texture missed: " + anImage.getState());
     }
 
     // initialize Direct3D output
@@ -566,6 +570,56 @@ void StOutPageFlip::dxDraw(unsigned int view) {
 #endif
 }
 
+void StOutPageFlip::stglDrawWarning() {
+    if(myWarning.isNull()) {
+        return;
+    }
+
+    myContext->core20fwd->glDisable(GL_DEPTH_TEST);
+    myContext->core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    myContext->core20fwd->glEnable(GL_BLEND);
+    myContext->core11->glEnable(GL_TEXTURE_2D);
+
+    myWarning->bind(*myContext);
+
+    const StRectI_t aRect = getStWindow()->getPlacement();
+    const int aWinSizeX = aRect.width();
+    const int aWinSizeY = aRect.height();
+    const GLfloat aWidth  = (aWinSizeX > 0) ?        GLfloat(myWarning->getSizeX()) / GLfloat(aWinSizeX) : 1.0f;
+    const GLfloat aBottom = (aWinSizeY > 0) ? 100.0f / GLfloat(aWinSizeY) : 0.0f;
+    const GLfloat aHeight = (aWinSizeY > 0) ? 2.0f * GLfloat(myWarning->getSizeY()) / GLfloat(aWinSizeY) : 1.0f;
+
+    const GLfloat aVerts[] = {
+         aWidth, -1.0f + aBottom + aHeight,
+         aWidth, -1.0f + aBottom,
+        -aWidth, -1.0f + aBottom + aHeight,
+        -aWidth, -1.0f + aBottom,
+    };
+
+    const GLfloat aTCrds[] = {
+        1.0f, 0.0f, // top-right
+        1.0f, 1.0f, // bottom-right
+        0.0f, 0.0f, // top-left
+        0.0f, 1.0f  // bottom-left
+    };
+
+    myContext->core11->glLoadIdentity();
+
+    myContext->core11->glEnableClientState(GL_VERTEX_ARRAY);
+    myContext->core11->glVertexPointer(2, GL_FLOAT, 0, aVerts);
+    myContext->core11->glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    myContext->core11->glTexCoordPointer(2, GL_FLOAT, 0, aTCrds);
+
+    myContext->core11fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    myContext->core11->glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    myContext->core11->glDisableClientState(GL_VERTEX_ARRAY);
+
+    myWarning->unbind(*myContext);
+    myContext->core11->glDisable(GL_TEXTURE_2D);
+    myContext->core20fwd->glDisable(GL_BLEND);
+}
+
 void StOutPageFlip::stglDraw(unsigned int ) {
     myFPSControl.setTargetFPS(getStWindow()->stglGetTargetFps());
     if(myToShowFPS && myFPSControl.isUpdated()) {
@@ -610,12 +664,30 @@ void StOutPageFlip::stglDraw(unsigned int ) {
 
     switch(myQuadBuffer) {
         case QUADBUFFER_HARD_OPENGL: {
-            myContext->core20fwd->glDrawBuffer(GL_BACK_LEFT);
+            // We check capabilities at runtime to ensure that OpenGL context was created with Quad-Buffer.
+            // Also we requires fullscreen for RadeOn cards on Windows 7.
+            myContext->stglResetErrors(); // reset errors stack
+            GLboolean isStereoOn = GL_FALSE;
+            myContext->core20fwd->glGetBooleanv(GL_STEREO, &isStereoOn);
+            if(isStereoOn) {
+                myContext->core20fwd->glDrawBuffer(GL_BACK_RIGHT);
+                isStereoOn = (myContext->core20fwd->glGetError() == GL_NO_ERROR);
+            }
+
+            if(!isStereoOn) {
+                myContext->core20fwd->glDrawBuffer(GL_BACK);
+                myStCore->stglDraw(ST_DRAW_RIGHT);
+                myStCore->stglDraw(ST_DRAW_LEFT);
+                stglDrawWarning();
+            } else {
+                myContext->core20fwd->glDrawBuffer(GL_BACK_LEFT);
                 myStCore->stglDraw(ST_DRAW_LEFT);
                 stglDrawExtra(ST_DRAW_LEFT, StGLDeviceControl::OUT_STEREO);
-            myContext->core20fwd->glDrawBuffer(GL_BACK_RIGHT);
+
+                myContext->core20fwd->glDrawBuffer(GL_BACK_RIGHT);
                 myStCore->stglDraw(ST_DRAW_RIGHT);
                 stglDrawExtra(ST_DRAW_RIGHT, StGLDeviceControl::OUT_STEREO);
+            }
             StThread::sleep(1);
             getStWindow()->stglSwap(ST_WIN_MASTER);
             ++myFPSControl;
@@ -654,51 +726,7 @@ void StOutPageFlip::stglDraw(unsigned int ) {
                 myStCore->stglDraw(ST_DRAW_RIGHT); // reverse order to avoid non-smooth mono->stereo transition
                 myStCore->stglDraw(ST_DRAW_LEFT);
 
-                if(!myOutD3d.myWarning.isNull()) {
-                    myContext->core20fwd->glDisable(GL_DEPTH_TEST);
-                    myContext->core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                    myContext->core20fwd->glEnable(GL_BLEND);
-                    myContext->core11->glEnable(GL_TEXTURE_2D);
-
-                    myOutD3d.myWarning->bind(*myContext);
-
-                    const StRectI_t aRect = getStWindow()->getPlacement();
-                    const int aWinSizeX = aRect.width();
-                    const int aWinSizeY = aRect.height();
-                    const GLfloat aWidth  = (aWinSizeX > 0) ?        GLfloat(myOutD3d.myWarning->getSizeX()) / GLfloat(aWinSizeX) : 1.0f;
-                    const GLfloat aBottom = (aWinSizeY > 0) ? 100.0f / GLfloat(aWinSizeY) : 0.0f;
-                    const GLfloat aHeight = (aWinSizeY > 0) ? 2.0f * GLfloat(myOutD3d.myWarning->getSizeY()) / GLfloat(aWinSizeY) : 1.0f;
-
-                    const GLfloat aVerts[] = {
-                         aWidth, -1.0f + aBottom + aHeight,
-                         aWidth, -1.0f + aBottom,
-                        -aWidth, -1.0f + aBottom + aHeight,
-                        -aWidth, -1.0f + aBottom,
-                    };
-
-                    const GLfloat aTCrds[] = {
-                        1.0f, 0.0f, // top-right
-                        1.0f, 1.0f, // bottom-right
-                        0.0f, 0.0f, // top-left
-                        0.0f, 1.0f  // bottom-left
-                    };
-
-                    myContext->core11->glLoadIdentity();
-
-                    myContext->core11->glEnableClientState(GL_VERTEX_ARRAY);
-                    myContext->core11->glVertexPointer(2, GL_FLOAT, 0, aVerts);
-                    myContext->core11->glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-                    myContext->core11->glTexCoordPointer(2, GL_FLOAT, 0, aTCrds);
-
-                    myContext->core11fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-                    myContext->core11->glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-                    myContext->core11->glDisableClientState(GL_VERTEX_ARRAY);
-
-                    myOutD3d.myWarning->unbind(*myContext);
-                    myContext->core11->glDisable(GL_TEXTURE_2D);
-                    myContext->core20fwd->glDisable(GL_BLEND);
-                }
+                stglDrawWarning();
 
                 myFPSControl.sleepToTarget();
                 getStWindow()->stglSwap(ST_WIN_MASTER);
@@ -807,7 +835,7 @@ ST_EXPORT const StRendererInfo_t* getDevicesInfo(const stBool_t theToDetectPrior
     StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - PageFlip Output module");
     StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
     StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
-        "(C) 2007-2012 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0");
+        "(C) 2007-2013 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0");
     static StString anAboutString = aTitle + '\n' + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr;
     ST_SELF_INFO.aboutString = (stUtf8_t* )anAboutString.toCString();
 

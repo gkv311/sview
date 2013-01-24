@@ -60,7 +60,7 @@ StWindowImpl::StWindowImpl()
   myEventQuit(NULL),
   myEventCursorShow(NULL),
   myEventCursorHide(NULL),
-  myIsVistaPlus(StSys::getSystemEnum() == StSys::ST_SYSTEM_WINDOWS_VISTA_PLUS),
+  myIsVistaPlus(StSys::isVistaPlus()),
 #elif (defined(__APPLE__))
   mySleepAssert(0),
 #endif

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutPageFlip library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -86,11 +86,15 @@ StOutPageFlipExt::StOutPageFlipExt(const StHandle<StSettings>& theSettings)
     //
     myDeviceOptionsNb = DEVICE_OPTION_CONTROL + 1;
     myQuadBufferMax = QUADBUFFER_SOFT;
-    if(StSys::getSystemEnum() != StSys::ST_SYSTEM_WINDOWS_XP_MINUS) {
+#if (defined(_WIN32) || defined(__WIN32__))
+    if(myIsVistaPlus) {
+#endif
         myWinAttribs.isSlave = true;
         myWinAttribs.isSlaveHLineTop = true;
         myWinAttribs.isSlaveHide = true;
+#if (defined(_WIN32) || defined(__WIN32__))
     }
+#endif
     setDeviceControl(DEVICE_CONTROL_NONE);
 }
 
@@ -128,7 +132,11 @@ bool StOutPageFlipExt::init(const StString&     theRendererPath,
 void StOutPageFlipExt::stglResize(const StRectI_t& theWinRect) {
     myVpSizeY = theWinRect.height();
     myVpSizeX = theWinRect.width();
-    if(!getStWindow()->isFullScreen() && (StSys::getSystemEnum() != StSys::ST_SYSTEM_WINDOWS_XP_MINUS)) {
+    if(!getStWindow()->isFullScreen()
+#if (defined(_WIN32) || defined(__WIN32__))
+    && myIsVistaPlus
+#endif
+    ) {
         if(myMonitor.isNull()) {
             myMonitor = new StMonitor(StCore::getMonitorFromPoint(theWinRect.center()));
         } else if(!myMonitor->getVRect().isPointIn(theWinRect.center())) {
@@ -230,7 +238,11 @@ void StOutPageFlipExt::stglDrawExtra(unsigned int theView,
         return;
     }
 
-    bool toDrawWindowed = !getStWindow()->isFullScreen() && (StSys::getSystemEnum() != StSys::ST_SYSTEM_WINDOWS_XP_MINUS);
+    const bool toDrawWindowed = !getStWindow()->isFullScreen()
+#if (defined(_WIN32) || defined(__WIN32__))
+        && myIsVistaPlus
+#endif
+    ;
     if(!toDrawWindowed) {
         getStWindow()->hide(ST_WIN_SLAVE);
     }

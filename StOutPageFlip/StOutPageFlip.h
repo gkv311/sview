@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutPageFlip library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -98,6 +98,7 @@ class ST_LOCAL StOutPageFlip : public StRendererInterface {
     StSDOptionsList_t*    myOptions;
     StHandle<StGLContext> myContext;
     StHandle<StVuzixSDK>  myVuzixSDK; // Vuzix HMD control
+    StHandle<StGLTexture> myWarning;
     DeviceEnum            myDevice;
     int                   myDeviceOptionsNb;
     QuadBufferEnum        myQuadBuffer;
@@ -107,13 +108,15 @@ class ST_LOCAL StOutPageFlip : public StRendererInterface {
     bool                  myToSavePlacement;
     bool                  myToDrawStereo;
     bool                  myToShowFPS;
+#if(defined(_WIN32) || defined(__WIN32__))
+    bool                  myIsVistaPlus;
+#endif
 
     struct StOutDirect3D {
         StHandle<StGLFrameBuffer> myGLBuffer;
     #if(defined(_WIN32) || defined(__WIN32__))
         StHandle<StDXNVWindow>    myDxWindow;
         StHandle<StThread>        myDxThread;
-        StHandle<StGLTexture>     myWarning;
     #endif
         GLuint myGLIoBuff;
         int    myActivateStep;
@@ -144,6 +147,7 @@ class ST_LOCAL StOutPageFlip : public StRendererInterface {
     virtual void optionsStructAlloc();
     virtual void updateOptions(const StSDOptionsList_t* theOptions,
                                StMessage_t&             theMsg);
+            void stglDrawWarning();
     virtual void stglDrawExtra(unsigned int theView, int theMode);
     virtual void stglResize(const StRectI_t& theWinRect);
     virtual void parseKeys(bool* theKeysMap);

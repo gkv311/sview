@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -39,6 +39,7 @@ StGLContext::StGLContext(const bool theToInitialize)
   core42back(NULL),
   arbFbo(NULL),
   myFuncs(new StGLFunctions()),
+  myGpuName(GPU_UNKNOWN),
   myVerMajor(0),
   myVerMinor(0),
   myIsRectFboSupported(false),
@@ -109,10 +110,25 @@ bool StGLContext::stglCheckExtension(const char* theStringList,
     return false;
 }
 
+StString StGLContext::stglErrorToString(const GLenum theError) {
+    switch(theError) {
+        case GL_NO_ERROR:          return "GL_NO_ERROR";
+        case GL_INVALID_ENUM:      return "GL_INVALID_ENUM";
+        case GL_INVALID_VALUE:     return "GL_INVALID_VALUE";
+        case GL_INVALID_OPERATION: return "GL_INVALID_OPERATION";
+        case GL_STACK_OVERFLOW:    return "GL_STACK_OVERFLOW";
+        case GL_STACK_UNDERFLOW:   return "GL_STACK_UNDERFLOW";
+        case GL_OUT_OF_MEMORY:     return "GL_OUT_OF_MEMORY";
+        default: {
+            return StString("Unknown GL error #") + int(theError);
+        }
+    }
+}
+
 void StGLContext::stglResetErrors() {
     GLenum anErr = glGetError();
     for(int aLimit = 1000; (anErr != GL_NO_ERROR) && (aLimit > 0); --aLimit, anErr = glGetError()) {
-        ST_DEBUG_LOG("Unhandled GL error #" + anErr + "!");
+        ST_DEBUG_LOG("Unhandled GL error (" + stglErrorToString(anErr) + ")");
     }
 }
 
@@ -950,6 +966,19 @@ bool StGLContext::stglInit() {
     const StString aGLSLVersion((const char* )core11fwd->glGetString(GL_SHADING_LANGUAGE_VERSION));
     const StString aGlRenderer ((const char* )core11fwd->glGetString(GL_RENDERER));
     myIsRectFboSupported = !aGLSLVersion.isContains(aGLSL_old) && !aGlRenderer.isContains(aGeForceFX);
+
+    if(aGlRenderer.isContains("GeForce")) {
+        myGpuName = GPU_GEFORCE;
+    } else if(aGlRenderer.isContains("Quadro")) {
+        myGpuName = GPU_QUADRO;
+    } else if(aGlRenderer.isContains("Radeon")
+           || aGlRenderer.isContains("RADEON")) {
+        myGpuName = GPU_RADEON;
+    } else if(aGlRenderer.isContains("FireGL")) {
+        myGpuName = GPU_FIREGL;
+    } else {
+        myGpuName = GPU_UNKNOWN;
+    }
 
     myWasInit = true;
 

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -81,6 +81,16 @@ typedef stglTmplCore42<StGLCore41>     StGLCore42;
  */
 class ST_LOCAL StGLContext {
 
+        public:
+
+    enum GPU_Name {
+        GPU_UNKNOWN,
+        GPU_GEFORCE,
+        GPU_QUADRO,
+        GPU_RADEON,
+        GPU_FIREGL,
+    };
+
         public:    //! @name OpenGL functions - core versions
 
     StGLCore11*     core11;     //!< OpenGL 1.1 core functionality
@@ -149,6 +159,10 @@ class ST_LOCAL StGLContext {
         return myVerMinor;
     }
 
+    inline GPU_Name getGPUName() const {
+        return myGpuName;
+    }
+
     /**
      * @return value for GL_MAX_TEXTURE_SIZE.
      */
@@ -183,6 +197,11 @@ class ST_LOCAL StGLContext {
      * Control VSync.
      */
     bool stglSetVSync(const bool theVSyncOn);
+
+    /**
+     * @return string representation for known GL error code.
+     */
+    static StString stglErrorToString(const GLenum theError);
 
     /**
      * Clean up errors stack for this GL context (glGetError() in loop).
@@ -226,6 +245,7 @@ class ST_LOCAL StGLContext {
     StLibrary               mySysLib;             //!< optional handle to system GL library (MacOS X specific)
 #endif
     StHandle<StGLFunctions> myFuncs;              //!< mega structure for all GL functions
+    GPU_Name                myGpuName;            //!< GPU name
     GLint                   myVerMajor;           //!< cached GL version major number
     GLint                   myVerMinor;           //!< cached GL version minor number
     GLint                   myMaxTexDim;          //!< maximum texture dimension

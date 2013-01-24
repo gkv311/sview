@@ -64,13 +64,10 @@ StDXNVSurface::StDXNVSurface(const size_t theSizeX,
     // those sizes only used for mono (stereo driver off / windowed;
     // otherwise NVIDIA driver will ignore them and will use header in surface itself)
     // we should used downsized values to prevent render fail
-    if(StSys::getSystemEnum() == StSys::ST_SYSTEM_WINDOWS_VISTA_PLUS) {
-        ///ST_DEBUG_LOG("Vista+");
+    if(StSys::isVistaPlus()) {
         // only one view showed if we set width/2 here as for WinXP way
         mySrcRect.left = 0; mySrcRect.right = (LONG )mySizeX;
     } else {
-        // TODO (Kirill Gavrilov#7#) look for this workaround
-        ///ST_DEBUG_LOG("XP-");
         // picture showed with wrong ratio (width/4) in other (like Vista+) way
         mySrcRect.left = 0; mySrcRect.right = (LONG )mySizeX / 2;
     }

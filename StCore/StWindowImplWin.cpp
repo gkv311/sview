@@ -691,10 +691,6 @@ void StWindowImpl::callback(StMessage_t* theMessages) {
     }
     myMousePt = aNewMousePt;
 
-    // TODO (Kirill Gavrilov#5#) parse multimedia keys
-    //if(GetAsyncKeyState(VK_MEDIA_NEXT_TRACK ) != 0) {
-    //
-    //}
     myMessageList.popList(theMessages);
 }
 
