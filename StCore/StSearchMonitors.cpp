@@ -216,24 +216,27 @@ bool StSearchMonitors::getXRootSize(int& sizeX, int& sizeY) {
 }
 
 namespace {
-    static StEDIDParser readXPropertyEDID(Display* hDisplay, RROutput theOutput, Atom atom) {
-        StEDIDParser anEDID;
-        unsigned char* propData = NULL;
-        int actualFormat;
-        unsigned long nItems = 0;
-        unsigned long bytesAfter = 0;
-        Atom actualType;
-
-        XRRGetOutputProperty(hDisplay, theOutput, atom,
+    static StEDIDParser readXPropertyEDID(Display* theDisplay,
+                                          RROutput theOutput,
+                                          Atom     theAtom) {
+        unsigned char* aPropData      = NULL;
+        int            anActualFormat = 0;
+        unsigned long  anItemsNb      = 0;
+        unsigned long  aBytesAfter    = 0;
+        Atom           anActualType;
+        XRRGetOutputProperty(theDisplay, theOutput, theAtom,
                              0, 100, False, False,
                              AnyPropertyType,
-                             &actualType, &actualFormat,
-                             &nItems, &bytesAfter, &propData);
+                             &anActualType, &anActualFormat,
+                             &anItemsNb, &aBytesAfter, &aPropData);
 
-        if(actualType == XA_INTEGER && actualFormat == 8 && nItems == 128) {
-            anEDID.init(propData);
+        StEDIDParser anEDID;
+        if(anActualType == XA_INTEGER
+        && anActualFormat == 8
+        && (anItemsNb != 0 && (anItemsNb % 128 == 0))) {
+            anEDID.init(aPropData);
         }
-        XFree(propData);
+        XFree(aPropData);
         return anEDID;
     }
 };
@@ -270,7 +273,16 @@ void StSearchMonitors::findMonitorsXRandr() {
         pScreenResources = XRRGetScreenResources(hDisplay, rootWindow);
     }
 
-    Atom anEDIDAtom = XInternAtom(hDisplay, "EDID_DATA", False);
+#ifndef RR_PROPERTY_RANDR_EDID
+    #define RR_PROPERTY_RANDR_EDID "EDID"
+#endif
+    Atom anAtomsEdid[] = {
+        XInternAtom(hDisplay, RR_PROPERTY_RANDR_EDID,      False), // should be returned by all new drivers
+        XInternAtom(hDisplay, "EDID_DATA",                 False), // returned by old and proprietary drivers
+        XInternAtom(hDisplay, "XFree86_DDC_EDID1_RAWDATA", False), // outdated atom?
+        0
+    };
+
     for(int crtcId = 0; crtcId < pScreenResources->ncrtc; ++crtcId) {
         StMonitor aMonitor;
         // CRTC is a CRT Controller (this is X terminology)
@@ -303,7 +315,13 @@ void StSearchMonitors::findMonitorsXRandr() {
         XRROutputInfo* anOutputInfo = XRRGetOutputInfo(hDisplay, pScreenResources, anOutput);
 
         // read EDID
-        aMonitor.changeEdid() = readXPropertyEDID(hDisplay, anOutput, anEDIDAtom);
+        for(size_t anIter = 0; anAtomsEdid[anIter] != 0; ++anIter) {
+            aMonitor.changeEdid() = readXPropertyEDID(hDisplay, anOutput, anAtomsEdid[anIter]);
+            if(aMonitor.getEdid().isValid()) {
+                break;
+            }
+        }
+
         if(aMonitor.getEdid().isValid()) {
             aMonitor.setPnPId(aMonitor.getEdid().getPnPId());
             aMonitor.setName(aMonitor.getEdid().getName());
