@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2010 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,11 +64,13 @@ namespace StImageViewerStrings {
         MENU_VIEW_TEXFILTER     = 1206,
         MENU_VIEW_GAMMA         = 1207,
 
-        MENU_VIEW_DISPLAY_MODE_STEREO   = 1210,
-        MENU_VIEW_DISPLAY_MODE_LEFT     = 1211,
-        MENU_VIEW_DISPLAY_MODE_RIGHT    = 1212,
-        MENU_VIEW_DISPLAY_MODE_PARALLEL = 1213,
-        MENU_VIEW_DISPLAY_MODE_CROSSYED = 1214,
+        MENU_VIEW_DISPLAY_MODE_STEREO       = 1210,
+        MENU_VIEW_DISPLAY_MODE_LEFT         = 1211,
+        MENU_VIEW_DISPLAY_MODE_RIGHT        = 1212,
+        MENU_VIEW_DISPLAY_MODE_PARALLEL     = 1213,
+        MENU_VIEW_DISPLAY_MODE_CROSSYED     = 1214,
+        MENU_VIEW_DISPLAY_MODE_OVERUNDER_LR = 1215,
+        MENU_VIEW_DISPLAY_MODE_OVERUNDER_RL = 1216,
 
         MENU_VIEW_TEXFILTER_NEAREST = 1260,
         MENU_VIEW_TEXFILTER_LINEAR  = 1261,

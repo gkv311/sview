@@ -205,6 +205,8 @@ void StGLImageRegion::stglDraw(unsigned int theView) {
     switch(params.displayMode->getValue()) {
         case MODE_PARALLEL:
         case MODE_CROSSYED:
+        case MODE_OVER_UNDER_LR:
+        case MODE_OVER_UNDER_RL:
             stglDrawView(ST_DRAW_LEFT);
             stglDrawView(ST_DRAW_RIGHT);
             break;
@@ -244,33 +246,59 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     StRectI_t rootRectPx = getRoot()->getRectPx();
     StGLVec2 vpScale(GLfloat(viewPort[2]) / GLfloat(rootRectPx.width()),
                      GLfloat(viewPort[3]) / GLfloat(rootRectPx.height()));
-    GLfloat frustrumL = 1.0f;
-    GLfloat frustrumR = 1.0f;
-    StRectI_t frameRectPx = getRectPx();
+    GLfloat aFrustrumL = 1.0f, aFrustrumR = 1.0f, aFrustrumT = 1.0f, aFrustrumB = 1.0f;
+    StRectI_t aFrameRectPx = getRectPx();
 
-    if(!aParams->isMono() && params.displayMode->getValue() == MODE_PARALLEL) {
-        if(theView == ST_DRAW_LEFT) {
-            frameRectPx.right() /= 2;
-            frustrumR = 3.0f;
-        } else {
-            frameRectPx.left() += frameRectPx.width() / 2;
-            frustrumL = 3.0f;
-        }
-    } else if(!aParams->isMono() && params.displayMode->getValue() == MODE_CROSSYED) {
-        if(theView == ST_DRAW_RIGHT) {
-            frameRectPx.right() /= 2;
-            frustrumR = 3.0f;
-        } else {
-            frameRectPx.left() += frameRectPx.width() / 2;
-            frustrumL = 3.0f;
+    if(!aParams->isMono()) {
+        switch(params.displayMode->getValue()) {
+            case MODE_PARALLEL: {
+                if(theView == ST_DRAW_LEFT) {
+                    aFrameRectPx.right() /= 2;
+                    aFrustrumR = 3.0f;
+                } else {
+                    aFrameRectPx.left() += aFrameRectPx.width() / 2;
+                    aFrustrumL = 3.0f;
+                }
+                break;
+            }
+            case MODE_CROSSYED: {
+                if(theView == ST_DRAW_RIGHT) {
+                    aFrameRectPx.right() /= 2;
+                    aFrustrumR = 3.0f;
+                } else {
+                    aFrameRectPx.left() += aFrameRectPx.width() / 2;
+                    aFrustrumL = 3.0f;
+                }
+                break;
+            }
+            case MODE_OVER_UNDER_LR: {
+                if(theView == ST_DRAW_LEFT) {
+                    aFrameRectPx.bottom() /= 2;
+                    aFrustrumB = 3.0f;
+                } else {
+                    aFrameRectPx.top() += aFrameRectPx.height() / 2;
+                    aFrustrumT = 3.0f;
+                }
+                break;
+            }
+            case MODE_OVER_UNDER_RL: {
+                if(theView == ST_DRAW_RIGHT) {
+                    aFrameRectPx.bottom() /= 2;
+                    aFrustrumB = 3.0f;
+                } else {
+                    aFrameRectPx.top() += aFrameRectPx.height() / 2;
+                    aFrustrumT = 3.0f;
+                }
+                break;
+            }
         }
     }
 
     aCtx.core20fwd->glEnable(GL_SCISSOR_TEST);
-    aCtx.core20fwd->glScissor(GLsizei(vpScale.x() * GLfloat(frameRectPx.left())),
-                              GLsizei(vpScale.y() * GLfloat(rootRectPx.height() - frameRectPx.bottom())),
-                              GLsizei(vpScale.x() * GLfloat(frameRectPx.width())),
-                              GLsizei(vpScale.y() * GLfloat(frameRectPx.height())));
+    aCtx.core20fwd->glScissor(GLsizei(vpScale.x() * GLfloat(aFrameRectPx.left())),
+                              GLsizei(vpScale.y() * GLfloat(rootRectPx.height() - aFrameRectPx.bottom())),
+                              GLsizei(vpScale.x() * GLfloat(aFrameRectPx.width())),
+                              GLsizei(vpScale.y() * GLfloat(aFrameRectPx.height())));
 
     aCtx.core20fwd->glDisable(GL_BLEND);
 
@@ -406,7 +434,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                 default: dispRatio = stFrameTexture.getPlane().getDisplayRatio(); break;
             }
 
-            rectRatio = GLfloat(frameRectPx.ratio());
+            rectRatio = GLfloat(aFrameRectPx.ratio());
             StGLVec2 ratioScale = aParams->getRatioScale(rectRatio, dispRatio);
             stModelMat.scale(ratioScale.x(), ratioScale.y(), 1.0f);
 
@@ -420,8 +448,8 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             }
 
             StGLMatrix stOrthoMat;
-            stOrthoMat.initOrtho(StGLVolume(-rectRatio * frustrumL, rectRatio * frustrumR,
-                                            -1.0f, 1.0f,
+            stOrthoMat.initOrtho(StGLVolume(-rectRatio * aFrustrumL, rectRatio * aFrustrumR,
+                                            -1.0f      * aFrustrumB, 1.0f      * aFrustrumT,
                                             -1.0f, 1.0f));
             myProgramFlat.setProjMat(aCtx, stOrthoMat);
             myProgramFlat.setModelMat(aCtx, stModelMat);

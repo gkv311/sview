@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -234,16 +234,20 @@ StGLMenu* StImageViewerGUI::createViewMenu() {
  */
 StGLMenu* StImageViewerGUI::createDisplayModeMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_DISPLAY_MODE_STEREO,   "Stereo"),
+    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_DISPLAY_MODE_STEREO,       "Stereo"),
                    stImageRegion->params.displayMode, StGLImageRegion::MODE_STEREO);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_DISPLAY_MODE_LEFT,     "Left view"),
+    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_DISPLAY_MODE_LEFT,         "Left view"),
                    stImageRegion->params.displayMode, StGLImageRegion::MODE_ONLY_LEFT);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_DISPLAY_MODE_RIGHT,    "Right view"),
+    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_DISPLAY_MODE_RIGHT,        "Right view"),
                    stImageRegion->params.displayMode, StGLImageRegion::MODE_ONLY_RIGHT);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_DISPLAY_MODE_PARALLEL, "Parallel pair"),
+    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_DISPLAY_MODE_PARALLEL,     "Parallel pair"),
                    stImageRegion->params.displayMode, StGLImageRegion::MODE_PARALLEL);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_DISPLAY_MODE_CROSSYED, "Cross-eyed pair"),
+    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_DISPLAY_MODE_CROSSYED,     "Cross-eyed pair"),
                    stImageRegion->params.displayMode, StGLImageRegion::MODE_CROSSYED);
+    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_DISPLAY_MODE_OVERUNDER_LR, "Over/Under (L/R)"),
+                   stImageRegion->params.displayMode, StGLImageRegion::MODE_OVER_UNDER_LR);
+    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_DISPLAY_MODE_OVERUNDER_RL, "Over/Under (R/L)"),
+                   stImageRegion->params.displayMode, StGLImageRegion::MODE_OVER_UNDER_RL);
     return aMenu;
 }
 

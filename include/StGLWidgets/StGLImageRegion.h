@@ -25,12 +25,13 @@ class ST_LOCAL StGLImageRegion : public StGLWidget {
         public:
 
     typedef enum tagDisplayMode {
-        MODE_STEREO,     //!< normal draw
-        MODE_ONLY_LEFT,  //!< draw only Left view
-        MODE_ONLY_RIGHT, //!< draw only Right view
-        MODE_PARALLEL,   //!< draw parallel pair
-        MODE_CROSSYED,   //!< draw cross-eyed pair
-        //MODE_OVER_UNDER, // draw Over/Under
+        MODE_STEREO,        //!< normal draw
+        MODE_ONLY_LEFT,     //!< draw only Left  view
+        MODE_ONLY_RIGHT,    //!< draw only Right view
+        MODE_PARALLEL,      //!< draw parallel   pair
+        MODE_CROSSYED,      //!< draw cross-eyed pair
+        MODE_OVER_UNDER_LR, //!< draw Over/Under
+        MODE_OVER_UNDER_RL, //!< draw Over/Under
     } DisplayMode;
 
     typedef enum tagDisplayRatio {
