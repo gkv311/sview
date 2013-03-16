@@ -284,7 +284,7 @@ static StString getAboutString(const StString& theProgramPath) {
     /// TODO (Kirill Gavrilov#9) call plugins for full help list
     StString anAboutString =
         StString("sView ") + StVersionInfo::getSDKVersionString() + '\n'
-        + "Copyright (C) 2007-2012 Kirill Gavrilov (kirill@sview.ru).\n"
+        + "Copyright (C) 2007-2013 Kirill Gavrilov (kirill@sview.ru).\n"
         + "Usage: " + theProgramPath + " [options] - file\n"
         + "Available options:\n"
           "  --fullscreen         Open fullscreen\n"

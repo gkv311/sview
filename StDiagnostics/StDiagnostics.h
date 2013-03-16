@@ -35,6 +35,10 @@ class ST_LOCAL StDiagnostics : public StDrawerInterface {
     StDiagnostics();
     ~StDiagnostics();
 
+    StHandle<StWindow>& getWindow() {
+        return myWindow;
+    }
+
     // interface methods' implementations
     StDrawerInterface* getLibImpl() {
         return this;
@@ -47,6 +51,7 @@ class ST_LOCAL StDiagnostics : public StDrawerInterface {
         public: //!< callback Slots
 
     void doSwitchFullscreen(const size_t dummy = 0);
+    void doFpsClick(const size_t dummy = 0);
 
         private:
 

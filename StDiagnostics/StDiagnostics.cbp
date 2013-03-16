@@ -280,7 +280,12 @@
 		<Linker>
 			<Add library="libStGLWidgets" />
 			<Add library="libStShared" />
+			<Add library="avutil" />
+			<Add library="avformat" />
+			<Add library="avcodec" />
+			<Add library="swscale" />
 			<Add library="freetype" />
+			<Add library="libwebp" />
 			<Add directory="../3rdparty/lib/$(TARGET_NAME)" />
 			<Add directory="../lib/$(TARGET_NAME)" />
 		</Linker>

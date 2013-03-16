@@ -173,6 +173,10 @@ void StDiagnostics::doSwitchFullscreen(const size_t ) {
     myWindow->setFullScreen(!myWindow->isFullScreen());
 }
 
+void StDiagnostics::doFpsClick(const size_t ) {
+    myWindow->stglSetTargetFps((myWindow->stglGetTargetFps() > 0.0) ? 0.0 : 50.0);
+}
+
 ST_EXPORT StDrawerInterface* StDrawer_new() {
     return new StDiagnostics(); }
 ST_EXPORT void StDrawer_del(StDrawerInterface* inst) {
