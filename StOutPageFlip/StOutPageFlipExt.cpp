@@ -142,15 +142,11 @@ void StOutPageFlipExt::stglResize(const StRectI_t& theWinRect) {
         } else if(!myMonitor->getVRect().isPointIn(theWinRect.center())) {
             *myMonitor = StCore::getMonitorFromPoint(theWinRect.center());
         }
-        getStWindow()->stglMakeCurrent(ST_WIN_SLAVE);
         myVpSizeX = myMonitor->getVRect().width();
         if(getDeviceControl() != NULL) {
             myVpSizeY = getDeviceControl()->getSizeY();
         }
-        myContext->core20fwd->glViewport(0, 0, myVpSizeX, myVpSizeY); // reset slave window Viewport
     }
-    getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-    myContext->core20fwd->glViewport(0, 0, theWinRect.width(), theWinRect.height()); // reset master window Viewport
 }
 
 void StOutPageFlipExt::parseKeys(bool* theKeysMap) {

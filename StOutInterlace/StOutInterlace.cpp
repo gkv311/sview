@@ -521,7 +521,7 @@ void StOutInterlace::callback(StMessage_t* stMessages) {
     for(size_t i = 0; stMessages[i].uin != StMessageList::MSG_NULL; ++i) {
         switch(stMessages[i].uin) {
             case StMessageList::MSG_RESIZE: {
-                StRectI_t aRect = getStWindow()->getPlacement();
+                const StRectI_t aRect = getStWindow()->getPlacement();
                 myVpSizeY = aRect.height();
                 if(!getStWindow()->isFullScreen()) {
                     if(myMonitor.isNull()) {
@@ -529,17 +529,12 @@ void StOutInterlace::callback(StMessage_t* stMessages) {
                     } else if(!myMonitor->getVRect().isPointIn(aRect.center())) {
                         *myMonitor = StCore::getMonitorFromPoint(aRect.center());
                     }
-                    getStWindow()->stglMakeCurrent(ST_WIN_SLAVE);
-                    StRectI_t edRect;
-                    edRect.left()   = 0;
-                    edRect.right()  = myMonitor->getVRect().width();
-                    edRect.top()    = 0;
-                    edRect.bottom() = 10;
-                    myContext->stglResize(edRect);
+                    myEDRect.left()   = 0;
+                    myEDRect.right()  = myMonitor->getVRect().width();
+                    myEDRect.top()    = 0;
+                    myEDRect.bottom() = 10;
                     myVpSizeY = 10;
                 }
-                getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-                myContext->stglResize(aRect);
                 break;
             }
             case StMessageList::MSG_KEYS: {
@@ -637,6 +632,7 @@ void StOutInterlace::stglDrawEDCodes() {
     if(!getStWindow()->isFullScreen()) {
         getStWindow()->show(ST_WIN_SLAVE);
         getStWindow()->stglMakeCurrent(ST_WIN_SLAVE);
+        myContext->stglResize(myEDRect);
         // clear the screen and the depth buffer
         myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
@@ -677,6 +673,7 @@ void StOutInterlace::stglDraw(unsigned int ) {
 
     // always draw LEFT view into real screen buffer
     getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
+    myContext->stglResize(getStWindow()->getPlacement());
     myStCore->stglDraw(ST_DRAW_LEFT);
 
     if(!getStWindow()->isStereoOutput() || myIsBroken) {

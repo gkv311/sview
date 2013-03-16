@@ -564,6 +564,11 @@ void StWindowImpl::stglSwap(const int& theWinId) {
     }
 
     switch(theWinId) {
+        case ST_WIN_ALL: {
+            myMaster.glSwap();
+            mySlave.glSwap();
+            break;
+        }
         case ST_WIN_MASTER: {
             myMaster.glSwap();
             break;

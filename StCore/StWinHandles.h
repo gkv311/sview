@@ -34,6 +34,48 @@
 #include <StThreads/StMutex.h>
 #include <StThreads/StEvent.h>
 
+#ifdef _WIN32
+/**
+ * Wrapper over WinAPI HGLRC.
+ */
+class ST_LOCAL StWinGlrc {
+
+        public:
+
+    /**
+     * Create OpenGL Rendering Context for specified Device Context.
+     */
+    StWinGlrc(HDC theDC);
+
+    /**
+     * Destructor.
+     */
+    ~StWinGlrc();
+
+    /**
+     * @return true if handle is not NULL.
+     */
+    bool isValid() const {
+        return myRC != NULL;
+    }
+
+    /**
+     * Activate this OpenGL context within specified Device Context.
+     * Device Context should have the one used on construction of this Rendering Context
+     * or have the same Pixel Format.
+     */
+    bool makeCurrent(HDC theDC);
+
+        private:
+
+    HGLRC myRC; //!< WinAPI Rendering Context handle
+};
+
+// just short typedef for handle
+typedef StHandle<StWinGlrc> StWinGlrcH;
+
+#endif
+
 /**
  * This class represent cumulative system-dependent
  * windows' and GL rendering contexts' handles.
@@ -59,7 +101,7 @@ class ST_LOCAL StWinHandles {
     StMutex         stMutex;
     size_t      threadIdOgl; // id of the thread, in wich rendering context was created
     HDC                 hDC; // WinAPI Device Descriptor handle
-    HGLRC               hRC; // WinAPI Rendering Context handle
+    StWinGlrcH          hRC; // WinAPI Rendering Context handle
 #elif (defined(__APPLE__))
     StCocoaWin*     hWindow;
     StCocoaView*    hViewGl;

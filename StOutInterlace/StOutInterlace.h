@@ -79,6 +79,7 @@ class ST_LOCAL StOutInterlace : public StRendererInterface {
     int                       myDeviceId;
     StHandle<StMonitor>       myMonitor;                  //!< current monitor
 
+    StRectI_t                 myEDRect;
     StTimer                   myEDTimer;                  //!< EDimensional activator/disactivator timer
     StHandle<StGLProgram>     myEDIntelaceOn;             //!< ED interlace activate program
     StHandle<StGLProgram>     myEDOff;                    //!< ED disactivate program

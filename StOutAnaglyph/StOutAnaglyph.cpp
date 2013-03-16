@@ -357,11 +357,6 @@ void StOutAnaglyph::callback(StMessage_t* stMessages) {
     myStCore->callback(stMessages);
     for(size_t i = 0; stMessages[i].uin != StMessageList::MSG_NULL; ++i) {
         switch(stMessages[i].uin) {
-            case StMessageList::MSG_RESIZE: {
-                getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-                myContext->stglResize(getStWindow()->getPlacement());
-                break;
-            }
             case StMessageList::MSG_KEYS: {
                 bool* keysMap = ((bool* )stMessages[i].data);
                 if(keysMap[ST_VK_F1]) {
@@ -451,6 +446,7 @@ void StOutAnaglyph::stglDraw(unsigned int ) {
 
     if(!getStWindow()->isStereoOutput() || myIsBroken) {
         getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
+        myContext->stglResize(getStWindow()->getPlacement());
         if(myToCompressMem) {
             myFrBuffer->release(*myContext);
         }
@@ -463,6 +459,7 @@ void StOutAnaglyph::stglDraw(unsigned int ) {
         return;
     }
     getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
+    myContext->stglResize(getStWindow()->getPlacement());
     const StRectI_t aWinRect = getStWindow()->getPlacement();
 
     // resize FBO

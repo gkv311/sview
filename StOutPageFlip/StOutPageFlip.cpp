@@ -426,9 +426,8 @@ bool StOutPageFlip::init(const StString&     inRendererPath,
     return true;
 }
 
-void StOutPageFlip::stglResize(const StRectI_t& theWinRect) {
-    getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-    myContext->core20fwd->glViewport(0, 0, theWinRect.width(), theWinRect.height()); // reset master window Viewport
+void StOutPageFlip::stglResize(const StRectI_t& ) {
+    //
 }
 
 void StOutPageFlip::parseKeys(bool* theKeysMap) {
@@ -627,6 +626,9 @@ void StOutPageFlip::stglDraw(unsigned int ) {
     }
 
     getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
+    const StRectI_t aRect = getStWindow()->getPlacement();
+    myContext->stglResize(aRect);
+
     if(!getStWindow()->isStereoOutput()) {
         // Vuzix driver control
         if(myToDrawStereo) {
@@ -684,6 +686,7 @@ void StOutPageFlip::stglDraw(unsigned int ) {
                 myStCore->stglDraw(ST_DRAW_LEFT);
                 stglDrawExtra(ST_DRAW_LEFT, StGLDeviceControl::OUT_STEREO);
 
+                myContext->stglResize(aRect);
                 myContext->core20fwd->glDrawBuffer(GL_BACK_RIGHT);
                 myStCore->stglDraw(ST_DRAW_RIGHT);
                 stglDrawExtra(ST_DRAW_RIGHT, StGLDeviceControl::OUT_STEREO);
@@ -748,6 +751,7 @@ void StOutPageFlip::stglDrawExtra(unsigned int , int ) {
 
 void StOutPageFlip::stglDrawAggressive(unsigned int theView) {
     getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
+    myContext->stglResize(getStWindow()->getPlacement());
     myStCore->stglDraw(theView);
 
     if(myDevice == DEVICE_VUZIX) {

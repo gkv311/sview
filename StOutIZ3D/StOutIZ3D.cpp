@@ -271,14 +271,6 @@ void StOutIZ3D::callback(StMessage_t* stMessages) {
     myStCore->callback(stMessages);
     for(size_t i = 0; stMessages[i].uin != StMessageList::MSG_NULL; ++i) {
         switch(stMessages[i].uin) {
-            case StMessageList::MSG_RESIZE: {
-                StRectI_t aRect = getStWindow()->getPlacement();
-                getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-                myContext->stglResize(aRect);
-                getStWindow()->stglMakeCurrent(ST_WIN_SLAVE);
-                myContext->stglResize(aRect);
-                break;
-            }
             case StMessageList::MSG_KEYS: {
                 bool* keysMap = ((bool* )stMessages[i].data);
                 if(keysMap[ST_VK_F1]) {
@@ -346,8 +338,10 @@ void StOutIZ3D::stglDraw(unsigned int ) {
         getStWindow()->setTitle(StString("iZ3D Rendering FPS= ") + myFPSControl.getAverage());
     }
 
+    const StRectI_t aRect = getStWindow()->getPlacement();
     if(!getStWindow()->isStereoOutput() || myIsBroken) {
         getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
+        myContext->stglResize(aRect);
         if(myToCompressMem) {
             myFrBuffer->release(*myContext);
         }
@@ -355,18 +349,19 @@ void StOutIZ3D::stglDraw(unsigned int ) {
         myStCore->stglDraw(ST_DRAW_LEFT);
 
         getStWindow()->stglMakeCurrent(ST_WIN_SLAVE);
+        myContext->stglResize(aRect);
         myContext->core20fwd->glClearColor(0.729740052840723f, 0.729740052840723f, 0.729740052840723f, 0.0f);
         // clear the screen and the depth buffer
         myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         myContext->core20fwd->glClearColor(0, 0, 0, 0);
 
         myFPSControl.sleepToTarget(); // decrease FPS to target by thread sleeps
-        getStWindow()->stglSwap(ST_WIN_MASTER);
-        getStWindow()->stglSwap(ST_WIN_SLAVE);
+        getStWindow()->stglSwap(ST_WIN_ALL);
         ++myFPSControl;
         return;
     }
     getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
+    myContext->stglResize(aRect);
 
     // resize FBO
     StRectI_t aWinRect = getStWindow()->getPlacement();
@@ -407,6 +402,7 @@ void StOutIZ3D::stglDraw(unsigned int ) {
     myShaders.master()->unuse(*myContext);
 
     getStWindow()->stglMakeCurrent(ST_WIN_SLAVE);
+    myContext->stglResize(aRect);
     myContext->core20fwd->glClearColor(0.729740052840723f, 0.729740052840723f, 0.729740052840723f, 0.0f);
     // clear the screen and the depth buffer
     myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -423,8 +419,7 @@ void StOutIZ3D::stglDraw(unsigned int ) {
     myShaders.slave()->unuse(*myContext);
 
     myFPSControl.sleepToTarget(); // decrease FPS to target by thread sleeps
-    getStWindow()->stglSwap(ST_WIN_MASTER);
-    getStWindow()->stglSwap(ST_WIN_SLAVE);
+    getStWindow()->stglSwap(ST_WIN_ALL);
     ++myFPSControl;
     // make sure all GL changes in callback (in StDrawer) will fine
     getStWindow()->stglMakeCurrent(ST_WIN_MASTER);

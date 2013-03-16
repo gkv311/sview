@@ -44,6 +44,31 @@ static PIXELFORMATDESCRIPTOR THE_PIXELFRMT_DOUBLE = {
     0,                               // Reserved
     0, 0, 0                          // Layer Masks Ignored
 };
+
+StWinGlrc::StWinGlrc(HDC theDC)
+: myRC(wglCreateContext(theDC)) {
+    //
+}
+
+StWinGlrc::~StWinGlrc() {
+    if(myRC != NULL) {
+        if(wglMakeCurrent(NULL, NULL) == FALSE) {
+            // this is not a problem in most cases;
+            // also this happens when wglMakeCurrent(NULL, NULL) called twice
+            //ST_DEBUG_LOG("WinAPI, FAILED to release DC and RC contexts");
+        }
+
+        //ST_ASSERT_SLIP(wglDeleteContext(myRC) != FALSE, "WinAPI, FAILED to delete RC", return);
+        if(wglDeleteContext(myRC) == FALSE) {
+            ST_ERROR_LOG("WinAPI, FAILED to delete RC");
+        }
+    }
+}
+
+bool StWinGlrc::makeCurrent(HDC theDC) {
+    return wglMakeCurrent(theDC, myRC) == TRUE;
+}
+
 #endif
 
 StWinHandles::StWinHandles()
@@ -57,8 +82,7 @@ StWinHandles::StWinHandles()
   myMKeyPrev(GlobalAddAtom(MAKEINTATOM(VK_MEDIA_PREV_TRACK))),
   myMKeyNext(GlobalAddAtom(MAKEINTATOM(VK_MEDIA_NEXT_TRACK))),
   threadIdOgl(0),
-  hDC(NULL),
-  hRC(NULL) {
+  hDC(NULL) {
     //
 #elif (defined(__linux__) || defined(__linux))
 : hWindow(0),
@@ -94,8 +118,8 @@ void StWinHandles::glSwap() {
 
 bool StWinHandles::glMakeCurrent() {
 #if (defined(_WIN32) || defined(__WIN32__))
-    if(hDC != NULL && hRC != NULL) {
-        return wglMakeCurrent(hDC, hRC) == TRUE;
+    if(hDC != NULL && !hRC.isNull()) {
+        return hRC->makeCurrent(hDC);
     }
 #elif (defined(__linux__) || defined(__linux))
     if(!stXDisplay.isNull()) {
@@ -157,20 +181,14 @@ int StWinHandles::glCreateContext(StWinHandles* theSlave, bool isQuadStereo) {
     ST_GL_ERROR_CHECK(theSlave == NULL || SetPixelFormat(theSlave->hDC, aPixelFormatId, &aPixelFormatDesc),
                       STWIN_ERROR_WIN32_PIXELFORMATS, "WinAPI, Can't set the PixelFormat for Slave");
 
-    hRC = wglCreateContext(hDC);
-    ST_GL_ERROR_CHECK(hRC != NULL,
-                      STWIN_ERROR_WIN32_GLRC_CREATE, "WinAPI, Can't create GL Rendering Context for Master");
+    hRC = new StWinGlrc(hDC);
+    ST_GL_ERROR_CHECK(hRC->isValid(),
+                      STWIN_ERROR_WIN32_GLRC_CREATE, "WinAPI, Can't create GL Rendering Context");
     if(theSlave != NULL) {
-        theSlave->hRC = wglCreateContext(theSlave->hDC);
-        ST_GL_ERROR_CHECK(theSlave->hRC != NULL,
-                          STWIN_ERROR_WIN32_GLRC_CREATE, "WinAPI, Can't create GL Rendering Context for Slave");
+        theSlave->hRC = hRC;
     }
 
-    // share resources between GL contexts
-    ST_GL_ERROR_CHECK(theSlave == NULL || wglShareLists(theSlave->hRC, hRC),
-                      STWIN_ERROR_WIN32_GLRC_SHARE, "WinAPI, Can't share GL Rendering Contexts");
-
-    ST_GL_ERROR_CHECK(wglMakeCurrent(hDC, hRC),
+    ST_GL_ERROR_CHECK(hRC->makeCurrent(hDC),
                       STWIN_ERROR_WIN32_GLRC_ACTIVATE, "WinAPI, Can't activate Master GL Rendering Context");
     return STWIN_INIT_SUCCESS;
 #elif (defined(__linux__) || defined(__linux))
@@ -206,28 +224,11 @@ bool StWinHandles::close() {
     if(currThreadId == threadIdOgl && hWindowGl != NULL) {
         ST_DEBUG_LOG("WinAPI, close, currThreadId= " + currThreadId + ", threadIdOgl= " + threadIdOgl + ", threadIdWnd= " + threadIdWnd);
 
-        // do we have a Rendering Context?
-        if(hRC != NULL) {
-            // are we able to release DC and RC Contexts?
-            if(wglMakeCurrent(NULL, NULL) == FALSE) {
-                // this is not a problem in most cases;
-                // also this happens when wglMakeCurrent(NULL, NULL) called twice
-                ///ST_DEBUG_LOG("WinAPI, FAILED to release DC and RC contexts");
-            }
+        // release Rendering Context
+        hRC.nullify();
 
-            // are We Able To Delete The RC?
-            if(wglDeleteContext(hRC) == FALSE) {
-                ST_DEBUG_LOG("WinAPI, FAILED to delete RC");
-                stMutex.unlock();
-                return false;
-            } else {
-                ST_DEBUG_LOG("WinAPI, Deleted RC");
-                hRC = NULL;
-            }
-        }
-
-        // are we able to Release DC
-        if(hRC == NULL && hDC != NULL && hWindowGl != NULL) {
+        // Release Device Context
+        if(hDC != NULL && hWindowGl != NULL) {
             if(ReleaseDC(hWindowGl, hDC) == 0) {
                 ST_DEBUG_LOG("WinAPI, FAILED to release DC");
                 stMutex.unlock();

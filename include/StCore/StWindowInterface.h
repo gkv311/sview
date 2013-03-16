@@ -32,8 +32,9 @@
 
 // StWindow enumeration
 enum {
-    ST_WIN_MASTER = 0,
-    ST_WIN_SLAVE  = 1,
+    ST_WIN_ALL    = -1, //!< special value for swap operation
+    ST_WIN_MASTER =  0,
+    ST_WIN_SLAVE  =  1,
 };
 
 /**
