@@ -345,7 +345,7 @@ bool StOutInterlace::init(const StString&     inRendererPath,
         stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, OpenGL2.0+ not available!");
         return false;
     }
-    if(!myContext->stglSetVSync(myIsVSync)) {
+    if(!myContext->stglSetVSync(myIsVSync ? StGLContext::VSync_ON : StGLContext::VSync_OFF)) {
         // enable/disable VSync by config
         ST_DEBUG_LOG(ST_OUT_PLUGIN_NAME + " Plugin, VSync extension not available!");
     }
@@ -575,7 +575,7 @@ void StOutInterlace::callback(StMessage_t* stMessages) {
                 if(newVSync != myIsVSync) {
                     myIsVSync = newVSync;
                     getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-                    myContext->stglSetVSync(myIsVSync);
+                    myContext->stglSetVSync(myIsVSync ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
                 }
                 myToShowFPS          = ((StSDOnOff_t* )myOptionsStruct->options[DEVICE_OPTION_SHOWFPS])->value;
                 myIsReversed         = ((StSDOnOff_t* )myOptionsStruct->options[DEVICE_OPTION_REVERSE])->value;

@@ -390,7 +390,7 @@ bool StOutPageFlip::init(const StString&     inRendererPath,
         stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, OpenGL2.0+ not available!");
         return false;
     }
-    if(!myContext->stglSetVSync(true)) {
+    if(!myContext->stglSetVSync(StGLContext::VSync_ON)) {
         // TODO (Kirill Gavrilov#5#) could be optional for MONO output
         ST_DEBUG_LOG(ST_OUT_PLUGIN_NAME + " Plugin, VSync extension not available!");
     }

@@ -319,7 +319,7 @@ bool StOutAnaglyph::init(const StString&     theRendererPath,
         stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, OpenGL2.0+ not available!");
         return false;
     }
-    if(!myContext->stglSetVSync(myIsVSyncOn)) {
+    if(!myContext->stglSetVSync(myIsVSyncOn ? StGLContext::VSync_ON : StGLContext::VSync_OFF)) {
         // enable/disable VSync by config
         ST_DEBUG_LOG(ST_OUT_PLUGIN_NAME + " Plugin, VSync extension not available!");
     }
@@ -425,7 +425,7 @@ void StOutAnaglyph::callback(StMessage_t* stMessages) {
                 if(newVSync != myIsVSyncOn) {
                     myIsVSyncOn = newVSync;
                     getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-                    myContext->stglSetVSync(myIsVSyncOn);
+                    myContext->stglSetVSync(myIsVSyncOn ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
                 }
 
                 myToShowFPS = ((StSDOnOff_t* )myOptions->options[DEVICE_OPTION_SHOWFPS])->value;

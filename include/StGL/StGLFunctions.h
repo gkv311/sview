@@ -714,6 +714,10 @@ struct ST_LOCAL StGLFunctions {
 #else
         public: //! @name glX extensions
 
+    // GLX_EXT_swap_control
+    typedef int         (*glXSwapIntervalEXT_t)(Display* theDisplay, GLXDrawable theDrawable, int theInterval);
+    glXSwapIntervalEXT_t glXSwapIntervalEXT;
+
     typedef int         (*glXSwapIntervalSGI_t)(int theInterval);
     glXSwapIntervalSGI_t glXSwapIntervalSGI;
 #endif

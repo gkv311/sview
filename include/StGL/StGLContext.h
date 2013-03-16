@@ -91,6 +91,12 @@ class ST_LOCAL StGLContext {
         GPU_FIREGL,
     };
 
+    enum VSync_Mode {
+        VSync_OFF   =  0, //!< turn OFF VSync
+        VSync_ON    =  1, //!< turn ON  VSync
+        VSync_MIXED = -1, //!< wait for sync only when FPS is higher than monitor refresh rate
+    };
+
         public:    //! @name OpenGL functions - core versions
 
     StGLCore11*     core11;     //!< OpenGL 1.1 core functionality
@@ -107,6 +113,8 @@ class ST_LOCAL StGLContext {
         public:    //! @name OpenGL functions - extensions
 
     StGLArbFbo*     arbFbo;     //!< GL_ARB_framebuffer_object
+    StGLFunctions*  extAll;     //!< access to ALL extensions for advanced users
+    bool            extSwapTear;//!< WGL_EXT_swap_control_tear/GLX_EXT_swap_control_tear
 
         public:    //! @name class interface
 
@@ -196,7 +204,7 @@ class ST_LOCAL StGLContext {
     /**
      * Control VSync.
      */
-    bool stglSetVSync(const bool theVSyncOn);
+    bool stglSetVSync(const VSync_Mode theVSyncMode);
 
     /**
      * @return string representation for known GL error code.

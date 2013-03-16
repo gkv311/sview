@@ -38,6 +38,8 @@ StGLContext::StGLContext(const bool theToInitialize)
   core42(NULL),
   core42back(NULL),
   arbFbo(NULL),
+  extAll(NULL),
+  extSwapTear(false),
   myFuncs(new StGLFunctions()),
   myGpuName(GPU_UNKNOWN),
   myVerMajor(0),
@@ -45,6 +47,7 @@ StGLContext::StGLContext(const bool theToInitialize)
   myIsRectFboSupported(false),
   myWasInit(false) {
     stMemZero(&(*myFuncs), sizeof(StGLFunctions));
+    extAll = &(*myFuncs);
 #ifdef __APPLE__
     mySysLib.loadSimple("/System/Library/Frameworks/OpenGL.framework/Versions/Current/OpenGL");
 #endif
@@ -232,8 +235,11 @@ void StGLContext::stglResizeViewport(GLsizei theSizeX,
     core11fwd->glViewport(0, 0, theSizeX, theSizeY);
 }
 
-bool StGLContext::stglSetVSync(const bool theVSyncOn) {
-    GLint aSyncInt = (theVSyncOn ? 1 : 0);
+bool StGLContext::stglSetVSync(const VSync_Mode theVSyncMode) {
+    GLint aSyncInt = (GLint )theVSyncMode;
+    if(theVSyncMode == VSync_MIXED && !extSwapTear) {
+        aSyncInt = 1;
+    }
 #if(defined(_WIN32) || defined(__WIN32__))
     if(myFuncs->wglSwapIntervalEXT != NULL) {
         myFuncs->wglSwapIntervalEXT(aSyncInt);
@@ -242,7 +248,10 @@ bool StGLContext::stglSetVSync(const bool theVSyncOn) {
 #elif(defined(__APPLE__))
     return CGLSetParameter(CGLGetCurrentContext(), kCGLCPSwapInterval, &aSyncInt) == kCGLNoError;
 #else
-    if(myFuncs->glXSwapIntervalSGI != NULL) {
+    if(aSyncInt == -1 && myFuncs->glXSwapIntervalEXT != NULL) {
+        myFuncs->glXSwapIntervalEXT(glXGetCurrentDisplay(), glXGetCurrentDrawable(), aSyncInt);
+        return true;
+    } else if(myFuncs->glXSwapIntervalSGI != NULL) {
         myFuncs->glXSwapIntervalSGI(aSyncInt);
         return true;
     }
@@ -287,15 +296,20 @@ bool StGLContext::stglInit() {
         if(stglCheckExtension(aWglExts, "WGL_EXT_swap_control")) {
             STGL_READ_FUNC(wglSwapIntervalEXT);
         }
+        extSwapTear = stglCheckExtension(aWglExts, "WGL_EXT_swap_control_tear");
     }
 #elif(defined(__APPLE__))
     //
 #else
     Display* aDisp = glXGetCurrentDisplay();
     const char* aGlxExts = glXQueryExtensionsString(aDisp, DefaultScreen(aDisp));
+    if(stglCheckExtension(aGlxExts, "GLX_EXT_swap_control")) {
+        STGL_READ_FUNC(glXSwapIntervalEXT);
+    }
     if(stglCheckExtension(aGlxExts, "GLX_SGI_swap_control")) {
         STGL_READ_FUNC(glXSwapIntervalSGI);
     }
+    extSwapTear = stglCheckExtension(aGlxExts, "GLX_EXT_swap_control_tear");
 #endif
 
     // load OpenGL 1.2 new functions

@@ -225,13 +225,10 @@ bool StOutIZ3D::init(const StString&     theRendererPath,
     }
 
     getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-    if(!myContext->stglSetVSync(myIsVSyncOn)) {
+    if(!myContext->stglSetVSync(myIsVSyncOn ? StGLContext::VSync_ON : StGLContext::VSync_OFF)) {
         // enable/disable VSync by config
         ST_DEBUG_LOG(ST_OUT_PLUGIN_NAME + " Plugin, VSync extension not available!");
     }
-    // TODO (Kirill Gavrilov#5) vsync
-    ///getStWindow()->stglMakeCurrent(ST_WIN_SLAVE);
-    ///stglSetVSync(myIsVSyncOn);
 
     // INIT iZ3D tables textures
     const StString texturesFolder = StProcess::getStCoreFolder() + "textures" + SYS_FS_SPLITTER;
@@ -318,10 +315,7 @@ void StOutIZ3D::callback(StMessage_t* stMessages) {
                 if(newVSync != myIsVSyncOn) {
                     myIsVSyncOn = newVSync;
                     getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-                    myContext->stglSetVSync(myIsVSyncOn);
-                    // TODO (Kirill Gavrilov#5) vsync
-                    ///getStWindow()->stglMakeCurrent(ST_WIN_SLAVE);
-                    ///stglSetVSync(myIsVSyncOn);
+                    myContext->stglSetVSync(myIsVSyncOn ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
                 }
 
                 myToShowFPS = ((StSDOnOff_t* )myOptions->options[DEVICE_OPTION_SHOWFPS])->value;
