@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StDiagnostics program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,19 +44,17 @@ class ST_LOCAL StDiagnostics : public StDrawerInterface {
     void parseCallback(StMessage_t* stMessages);
     void stglDraw(unsigned int view);
 
-    StWindow* getStWindow() { return stWin; }
-
         public: //!< callback Slots
 
     void doSwitchFullscreen(const size_t dummy = 0);
 
         private:
 
-    StHandle<StGLContext> myContext;
-    StWindow*             stWin;      //!< pointer to StWindow, created by Output plugin
-    StSettings*           stSettings; //!< current plugin local settings
-    StDiagnosticsGUI*     stGUI;      //!< GUI elements
-    bool                  bQuit;
+    StHandle<StGLContext>      myContext;
+    StHandle<StWindow>         myWindow;   //!< wrapper over Output plugin's StWindow instance
+    StHandle<StSettings>       mySettings; //!< settings manager for Diagnostics plugin
+    StHandle<StDiagnosticsGUI> myGUI;      //!< GUI root widget
+    bool                       myToQuit;
 
 };
 

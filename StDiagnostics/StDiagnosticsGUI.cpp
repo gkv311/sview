@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StDiagnostics program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,13 +20,13 @@
 #include "StDiagnostics.h"
 #include "StGeometryTest.h"
 
-StDiagnosticsGUI::StDiagnosticsGUI(StDiagnostics* stPlugin)
+StDiagnosticsGUI::StDiagnosticsGUI(StDiagnostics* thePlugin)
 : StGLRootWidget(),
-  stPlugin(stPlugin),
-  stLangMap(StDiagnostics::ST_DRAWER_PLUGIN_NAME),
-  stGeometry(NULL) {
+  myPlugin(thePlugin),
+  myLangMap(new StTranslations(StDiagnostics::ST_DRAWER_PLUGIN_NAME)),
+  myGeomWidget(NULL) {
     //
-    stGeometry = new StGeometryTest(this);
+    myGeomWidget = new StGeometryTest(this);
 }
 
 StDiagnosticsGUI::~StDiagnosticsGUI() {
@@ -36,13 +36,13 @@ StDiagnosticsGUI::~StDiagnosticsGUI() {
 void StDiagnosticsGUI::setVisibility(const StPointD_t& , bool ) {
     // always visible
     StGLRootWidget::setVisibility(true, true);
-    stGeometry->setVisibility(true, true);
+    myGeomWidget->setVisibility(true, true);
 }
 
-void StDiagnosticsGUI::stglUpdate(const StPointD_t& pointZo) {
-    StGLRootWidget::stglUpdate(pointZo);
+void StDiagnosticsGUI::stglUpdate(const StPointD_t& thePointZo) {
+    StGLRootWidget::stglUpdate(thePointZo);
 }
 
-void StDiagnosticsGUI::stglResize(const StRectI_t& winRectPx) {
-    StGLRootWidget::stglResize(winRectPx);
+void StDiagnosticsGUI::stglResize(const StRectI_t& theWinRectPx) {
+    StGLRootWidget::stglResize(theWinRectPx);
 }

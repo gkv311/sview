@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StDiagnostics program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,23 +25,25 @@
 
 class StDiagnostics;
 class StGeometryTest;
+
+/**
+ * Root GUI widget for Diagnostics application.
+ */
 class ST_LOCAL StDiagnosticsGUI : public StGLRootWidget {
 
         public:
 
-    StDiagnostics*    stPlugin; // link to the main class
-    StTranslations   stLangMap; // translated strings map
+    StDiagnostics*           myPlugin;     //!< back-link to the main class
+    StHandle<StTranslations> myLangMap;    //!< translated strings map
 
-    StGeometryTest* stGeometry;
+    StGeometryTest*          myGeomWidget;
 
-        public:
+        public: //!< StGLRootWidget overrides
 
-    StDiagnosticsGUI(StDiagnostics* stPlugin);
+    StDiagnosticsGUI(StDiagnostics* thePlugin);
     virtual ~StDiagnosticsGUI();
-
-    // StGLWidget overrides
-    virtual void stglUpdate(const StPointD_t& pointZo);
-    virtual void stglResize(const StRectI_t& winRectPx);
+    virtual void stglUpdate(const StPointD_t& thePointZo);
+    virtual void stglResize(const StRectI_t& theWinRectPx);
     virtual void setVisibility(const StPointD_t& , bool );
 
 };
