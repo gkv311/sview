@@ -78,6 +78,7 @@ bool StGLRootWidget::stglInit() {
 }
 
 void StGLRootWidget::stglDraw(unsigned int theView) {
+    myGlCtx->stglSyncState();
     myGlCtx->core20fwd->glGetIntegerv(GL_VIEWPORT, myViewport); // cache viewport
     StGLWidget::stglDraw(theView);
 }
@@ -107,14 +108,14 @@ void StGLRootWidget::stglUpdate(const StPointD_t& theCursorZo) {
 }
 
 void StGLRootWidget::stglScissorRect(const StRectI_t& theRect,
-                                     GLint*           theScissorRect) const {
+                                     StGLBoxPx&       theScissorRect) const {
     const GLint aVPortWidth  = myViewport[2];
     const GLint aVPortHeight = myViewport[3];
     const GLint aRootWidth   = getRectPx().width();
     const GLint aRootHeight  = getRectPx().height();
     if(aRootWidth <= 0 || aRootHeight <= 0) {
         // just prevent division by zero - should never happen
-        stMemSet(theScissorRect, 0, sizeof(GLint) * 4);
+        stMemZero(&theScissorRect, sizeof(StGLBoxPx));
         return;
     }
 
@@ -122,11 +123,11 @@ void StGLRootWidget::stglScissorRect(const StRectI_t& theRect,
     const GLdouble aWidthFactor  = GLdouble(aVPortWidth)  / GLdouble(aRootWidth);
     const GLdouble aHeightFactor = GLdouble(aVPortHeight) / GLdouble(aRootHeight);
 
-    theScissorRect[0] = myViewport[0] + GLint(aWidthFactor * GLdouble(theRect.left()));
-    theScissorRect[1] = myViewport[1] + GLint(aWidthFactor * GLdouble(aRootHeight - theRect.bottom()));
+    theScissorRect.x() = myViewport[0] + GLint(aWidthFactor * GLdouble(theRect.left()));
+    theScissorRect.y() = myViewport[1] + GLint(aWidthFactor * GLdouble(aRootHeight - theRect.bottom()));
 
-    theScissorRect[2] = GLint(aWidthFactor  * GLdouble(theRect.width()));
-    theScissorRect[3] = GLint(aHeightFactor * GLdouble(theRect.height()));
+    theScissorRect.width()  = GLint(aWidthFactor  * GLdouble(theRect.width()));
+    theScissorRect.height() = GLint(aHeightFactor * GLdouble(theRect.height()));
 }
 
 void StGLRootWidget::stglResize(const StRectI_t& theWinRectPx) {

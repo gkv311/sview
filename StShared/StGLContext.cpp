@@ -227,6 +227,45 @@ StString StGLContext::stglFullInfo() const {
     return anInfo;
 }
 
+void StGLContext::stglSyncState() {
+    while(!myScissorStack.empty()) {
+        myScissorStack.pop();
+    }
+
+    if(core11fwd->glIsEnabled(GL_SCISSOR_TEST)) {
+        StGLBoxPx aRect;
+        core11fwd->glGetIntegerv(GL_SCISSOR_BOX, aRect.v);
+        myScissorStack.push(aRect);
+    }
+}
+
+void StGLContext::stglSetScissorRect(const StGLBoxPx& theRect,
+                                     const bool       thePushStack) {
+    if(myScissorStack.empty()) {
+        core11fwd->glEnable(GL_SCISSOR_TEST);
+    }
+    if(thePushStack || myScissorStack.empty()) {
+        StGLBoxPx aDummyRect; // will be initialized right after
+        myScissorStack.push(aDummyRect);
+    }
+
+    StGLBoxPx& aRect = myScissorStack.top();
+    aRect = theRect;
+    core11fwd->glScissor(aRect.x(), aRect.y(), aRect.width(), aRect.height());
+}
+
+void StGLContext::stglResetScissorRect() {
+    myScissorStack.pop();
+    if(myScissorStack.empty()) {
+        core11fwd->glDisable(GL_SCISSOR_TEST);
+        return;
+    }
+
+    // setup previous value in stack
+    const StGLBoxPx& aRect = myScissorStack.top();
+    core11fwd->glScissor(aRect.x(), aRect.y(), aRect.width(), aRect.height());
+}
+
 void StGLContext::stglResizeViewport(GLsizei theSizeX,
                                      GLsizei theSizeY) {
     if(theSizeY == 0) {  // prevent a Divide by Zero by

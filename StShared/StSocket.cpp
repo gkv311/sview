@@ -22,10 +22,6 @@
     #include <netdb.h>
 #endif
 
-static void stZero(char* buffer, size_t bytes) {
-    memset(buffer, 0, bytes);
-}
-
 StSocket::Buffer::Buffer(const size_t& size)
     : data(new char[size]), size(size) {
     //
@@ -131,7 +127,7 @@ bool StSocket::connect(const char* host, const unsigned short int& port) {
         return false;
     }
 
-    struct sockaddr_in destination; stZero((char* )&destination, sizeof(destination));
+    struct sockaddr_in destination; stMemZero((char* )&destination, sizeof(destination));
     destination.sin_family = addressFamily;
     stMemCpy((void* )&destination.sin_addr.s_addr, (void* )server->h_addr, server->h_length);
     destination.sin_port = htons(port);
@@ -148,7 +144,7 @@ int StSocket::send(const char* buffer, const int& buffSize) {
 }
 
 int StSocket::recv(char* buffer, const int& buffSize) {
-    stZero(buffer, buffSize);
+    stMemZero(buffer, buffSize);
     int bytesRecv = ::recv(socket, buffer, buffSize, 0);
     if(bytesRecv < 0) {
         ST_DEBUG_LOG("StSocket ERROR, reading from socket");

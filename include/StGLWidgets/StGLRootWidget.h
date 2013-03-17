@@ -130,7 +130,7 @@ class ST_LOCAL StGLRootWidget : public StGLWidget {
      * @param theScissorRect Scissor rectangle for glScissor() call
      */
     void stglScissorRect(const StRectI_t& theRect,
-                         GLint*           theScissorRect) const;
+                         StGLBoxPx&       theScissorRect) const;
 
         private:
 

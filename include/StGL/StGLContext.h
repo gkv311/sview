@@ -12,11 +12,15 @@
 #include <StTemplates/StHandle.h>
 #include <StTemplates/StRect.h>
 
+#include <StGL/StGLVec.h>
+
 #include <StStrings/StString.h>
 
 #ifdef __APPLE__
     #include <StLibrary.h>
 #endif
+
+#include <stack>
 
 // forward declarations - you should include appropriate header to use required GL version
 struct StGLFunctions;
@@ -189,6 +193,24 @@ class ST_LOCAL StGLContext {
     StString stglFullInfo() const;
 
     /**
+     * This method intended to synchronize current OpenGL state and local cache.
+     */
+    void stglSyncState();
+
+    /**
+     * Enable scissor test for this context (glScissor).
+     * @param thePushStack If true than current rectangle will be pushed into stack
+     */
+    void stglSetScissorRect(const StGLBoxPx& theRect,
+                            const bool       thePushStack);
+
+    /**
+     * Disable scissor test for this context (glDisable(GL_SCISSOR_TEST)).
+     * If stack of scissor rectangles is not empty than previous value will be restored instead.
+     */
+    void stglResetScissorRect();
+
+    /**
      * Setup viewport.
      */
     void stglResizeViewport(GLsizei theSizeX,
@@ -259,6 +281,10 @@ class ST_LOCAL StGLContext {
     GLint                   myMaxTexDim;          //!< maximum texture dimension
     bool                    myIsRectFboSupported; //!< compatibility flag
     bool                    myWasInit;            //!< initialization state
+
+        protected: //! @name current state
+
+    std::stack<StGLBoxPx>   myScissorStack;       //!< cached stack of scissor rectangles
 
 };
 

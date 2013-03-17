@@ -242,10 +242,6 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     }
 
     // retrieve viewport size for correct scissor rectangle computation
-    GLint viewPort[4]; aCtx.core20fwd->glGetIntegerv(GL_VIEWPORT, viewPort);
-    StRectI_t rootRectPx = getRoot()->getRectPx();
-    StGLVec2 vpScale(GLfloat(viewPort[2]) / GLfloat(rootRectPx.width()),
-                     GLfloat(viewPort[3]) / GLfloat(rootRectPx.height()));
     GLfloat aFrustrumL = 1.0f, aFrustrumR = 1.0f, aFrustrumT = 1.0f, aFrustrumB = 1.0f;
     StRectI_t aFrameRectPx = getRectPx();
 
@@ -294,11 +290,11 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
         }
     }
 
-    aCtx.core20fwd->glEnable(GL_SCISSOR_TEST);
-    aCtx.core20fwd->glScissor(GLsizei(vpScale.x() * GLfloat(aFrameRectPx.left())),
-                              GLsizei(vpScale.y() * GLfloat(rootRectPx.height() - aFrameRectPx.bottom())),
-                              GLsizei(vpScale.x() * GLfloat(aFrameRectPx.width())),
-                              GLsizei(vpScale.y() * GLfloat(aFrameRectPx.height())));
+    // setup scissor box
+    StGLBoxPx aScissorBox;
+    const StRectI_t aFrameRectAbs = getAbsolute(aFrameRectPx);
+    getRoot()->stglScissorRect(aFrameRectAbs, aScissorBox);
+    aCtx.stglSetScissorRect(aScissorBox, true);
 
     aCtx.core20fwd->glDisable(GL_BLEND);
 
@@ -509,7 +505,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
 
     stFrameTexture.unbind(aCtx);
 
-    aCtx.core20fwd->glDisable(GL_SCISSOR_TEST);
+    aCtx.stglResetScissorRect();
 }
 
 bool StGLImageRegion::tryClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemClicked) {

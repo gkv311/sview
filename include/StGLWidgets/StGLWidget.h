@@ -192,7 +192,7 @@ class ST_LOCAL StGLWidget {
     /**
      * @param theScissorRect rectangle for OpenGL scissor test
      */
-    void stglScissorRect(GLint* theScissorRect) const;
+    void stglScissorRect(StGLBoxPx& theScissorRect) const;
 
     /**
      * @param thePointZo (const StPointD_t& ) - point in Zero2One coordinates to convert;

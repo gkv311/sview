@@ -20,6 +20,25 @@ typedef StVec3<GLfloat> StGLVec3;
 typedef StVec4<GLfloat> StGLVec4;
 
 /**
+ * POD structure for OpenGL rectangle in window coordinates (y coordinates is from bottom corner).
+ * Intended to be used for Viewport and Scissor box definition.
+ */
+struct StGLBoxPx {
+
+    GLint  x()      const { return v[0]; }
+    GLint  y()      const { return v[1]; }
+    GLint  width()  const { return v[2]; }
+    GLint  height() const { return v[3]; }
+
+    GLint& x()            { return v[0]; }
+    GLint& y()            { return v[1]; }
+    GLint& width()        { return v[2]; }
+    GLint& height()       { return v[3]; }
+
+    GLint v[4];
+};
+
+/**
  * Class defines the special vector with magnitude equal to 1.
  */
 class ST_LOCAL StGLDir3 : public StGLVec3 {
