@@ -126,6 +126,8 @@ class ST_LOCAL StMoviePlayer : public StDrawerInterface {
 
     void doOpen1File(const size_t dummy = 0);
     void doOpen2Files(const size_t dummy = 0);
+    void doOpenRecent(const size_t theItemId);
+    void doClearRecent(const size_t dummy = 0);
     void doUpdateOpenALDeviceList(const size_t dummy = 0);
     void doAddAudioStream(const size_t dummy = 0);
     void doAddSubtitleStream(const size_t dummy = 0);
@@ -149,6 +151,8 @@ class ST_LOCAL StMoviePlayer : public StDrawerInterface {
     bool getCurrentFile(StHandle<StFileNode>&     theFileNode,
                         StHandle<StStereoParams>& theParams,
                         StHandle<StMovieInfo>&    theInfo);
+
+    void getRecentList(StArrayList<StString>& theList);
 
     struct {
 

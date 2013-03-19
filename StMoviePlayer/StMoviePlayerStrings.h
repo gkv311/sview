@@ -40,6 +40,7 @@ namespace StMoviePlayerStrings {
         MENU_MEDIA_SRC_FORMAT = 1103,
         MENU_MEDIA_AL_DEVICE  = 1104,
         MENU_MEDIA_SHUFFLE    = 1105,
+        MENU_MEDIA_RECENT     = 1106,
         MENU_MEDIA_QUIT = 1109,
 
         // Root -> Media menu -> Open File menu
@@ -59,6 +60,9 @@ namespace StMoviePlayerStrings {
         MENU_SRC_FORMAT_ANA_YB = 1139,
         MENU_SRC_FORMAT_PAGEFLIP = 1140,
         MENU_SRC_FORMAT_TILED_4X = 1141,
+
+        // Root -> Media menu -> Recent files menu
+        MENU_MEDIA_RECENT_CLEAR = 1160,
 
         // Root -> View menu
         MENU_VIEW = 1200,

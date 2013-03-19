@@ -179,6 +179,7 @@ void StMoviePlayerGUI::createMainMenu() {
  */
 StGLMenu* StMoviePlayerGUI::createMediaMenu() {
     StGLMenu* aMenuMedia = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+    myMenuRecent             = createRecentMenu();       // Root -> Media -> Recent files menu
     StGLMenu* aMenuSrcFormat = createSrcFormatMenu();    // Root -> Media -> Source format menu
     myMenuOpenAL             = createOpenALDeviceMenu(); // Root -> Media -> OpenAL Device
     StGLMenu* aMenuVolume    = createAudioGainMenu();
@@ -205,6 +206,9 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
 
     aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_SHUFFLE,
                         "Shuffle"), myPlugin->params.isShuffle);
+
+    aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_RECENT,
+                        "Recent files"), myMenuRecent);
 
     aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_QUIT, "Quit"))
               ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doQuit);
@@ -308,6 +312,42 @@ void StMoviePlayerGUI::updateOpenALDeviceMenu() {
 
     // update menu representation
     myMenuOpenAL->stglInit();
+}
+
+/**
+ * Root -> Media -> Recent files menu
+ */
+StGLMenu* StMoviePlayerGUI::createRecentMenu() {
+    StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+    fillRecentMenu(aMenu);
+    return aMenu;
+}
+
+void StMoviePlayerGUI::fillRecentMenu(StGLMenu* theMenu) {
+    StArrayList<StString> aList;
+    myPlugin->getRecentList(aList);
+
+    theMenu->addItem(myLangMap->changeValueId(MENU_MEDIA_RECENT_CLEAR, "Clear history"))
+           ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doClearRecent);
+    for(size_t anIter = 0; anIter < aList.size(); ++anIter) {
+        theMenu->addItem(aList[anIter], int32_t(anIter))
+               ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doOpenRecent);
+    }
+}
+
+void StMoviePlayerGUI::updateRecentMenu() {
+    if(myMenuRecent == NULL) {
+        return;
+    }
+    for(StGLWidget* aChild = myMenuRecent->getChildren()->getStart(); aChild != NULL;) {
+        StGLWidget* anItem = aChild;
+        aChild = aChild->getNext();
+        delete anItem;
+    }
+    fillRecentMenu(myMenuRecent);
+
+    // update menu representation
+    myMenuRecent->stglInit();
 }
 
 /**
@@ -595,6 +635,7 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer* thePlugin,
   // main menu
   menu0Root(NULL),
   myMenuOpenAL(NULL),
+  myMenuRecent(NULL),
   myMenuAudio(NULL),
   myMenuSubtitles(NULL),
   // upper toolbar

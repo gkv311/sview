@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -241,6 +241,41 @@ class ST_LOCAL StPlayList {
      */
     void open(const StString& thePath);
 
+    /**
+     * Check and reset modification flag.
+     * @return true if recent files list was modified since last call
+     */
+    bool isRecentChanged() const;
+
+    /**
+     * Fill list with recently opened files (only titles).
+     * @param theList List to fill
+     */
+    void getRecentList(StArrayList<StString>& theList) const;
+
+    /**
+     * Restore list of recent files from the string serialized by dumpRecentList() method.
+     * @param theString String with list of files
+     */
+    void loadRecentList(const StString theString);
+
+    /**
+     * Dump list of recently opened files into string.
+     * @return String with special format
+     */
+    StString dumpRecentList() const;
+
+    /**
+     * Open recent file at specified position.
+     * @param theItemId Position in recent files list
+     */
+    void openRecent(const size_t theItemId);
+
+    /**
+     * Reset list of recently opened files.
+     */
+    void clearRecent();
+
         public: //!< Signals
 
     struct {
@@ -273,6 +308,11 @@ class ST_LOCAL StPlayList {
     void addToPlayList(StFileNode* theFileNode);
 
     /**
+     * Add file to list of recent files.
+     */
+    void addRecentFile(const StFileNode& theFile);
+
+    /**
      * M3U parsing stuff.
      */
     char* parseM3UIter(char* theIter);
@@ -294,6 +334,10 @@ class ST_LOCAL StPlayList {
     int                     myRecursionDeep;
     bool                    myIsShuffle;
     bool                    myIsLoopFlag;
+
+    std::deque< StHandle<StFileNode> > myRecent; //!< list of recently opened files
+    size_t                  myRecentLimit;   //!< the maximum size of list with recently opened files
+    mutable bool            myIsNewRecent;   //!< flag indicates modified state of recent files list
 
 };
 

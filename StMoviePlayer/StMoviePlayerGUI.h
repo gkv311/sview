@@ -76,6 +76,7 @@ class ST_LOCAL StMoviePlayerGUI : public StGLRootWidget {
 
     StGLMenu*            menu0Root; // main menu
     StGLMenu*         myMenuOpenAL;
+    StGLMenu*         myMenuRecent;
     StGLMenu*          myMenuAudio;
     StGLMenu*      myMenuSubtitles;
 
@@ -108,6 +109,7 @@ class ST_LOCAL StMoviePlayerGUI : public StGLRootWidget {
     StGLMenu* createSaveImageMenu();    // Root -> Media -> Save snapshot menu
     StGLMenu* createSrcFormatMenu();    // Root -> Media -> Source format menu
     StGLMenu* createOpenALDeviceMenu(); // Root -> Media -> OpenAL Device menu
+    StGLMenu* createRecentMenu();       // Root -> Media -> Recent files menu
     StGLMenu* createViewMenu();         // Root -> View menu
     StGLMenu* createDisplayModeMenu();  // Root -> View menu -> Output
     StGLMenu* createDisplayRatioMenu(); // Root -> View menu -> Display Ratio
@@ -122,6 +124,7 @@ class ST_LOCAL StMoviePlayerGUI : public StGLRootWidget {
     StGLMenu* createLanguageMenu();     // Root -> Help -> Language menu
 
     void fillOpenALDeviceMenu(StGLMenu* theMenu);
+    void fillRecentMenu(StGLMenu* theMenu);
 
         public: //!< StGLRootWidget overrides
 
@@ -146,6 +149,8 @@ class ST_LOCAL StMoviePlayerGUI : public StGLRootWidget {
     void updateAudioStreamsMenu    (const StHandle< StArrayList<StString> >& theStreamsList,
                                     const bool theHasVideo);
     void updateSubtitlesStreamsMenu(const StHandle< StArrayList<StString> >& theStreamsList);
+
+    void updateRecentMenu();
 
     void doAboutFile(const size_t );
 

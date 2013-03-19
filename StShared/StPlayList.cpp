@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -146,7 +146,9 @@ StPlayList::StPlayList(const StArrayList<StString>& theExtensions,
   myPlayedCount(0),
   myRecursionDeep(theRecursionDeep),
   myIsShuffle(false),
-  myIsLoopFlag(theIsLoop) {
+  myIsLoopFlag(theIsLoop),
+  myRecentLimit(10),
+  myIsNewRecent(false) {
     //
 }
 
@@ -430,7 +432,6 @@ void StPlayList::removePhysically(const StHandle<StFileNode>& theFileNode) {
     }
 }
 
-
 bool StPlayList::checkExtension(const StString& thePath) {
     if(StFolder::isFolder(thePath)) {
         // just folder
@@ -451,6 +452,8 @@ void StPlayList::addOneFile(const StString& theFilePath,
     StFileNode* aFileNode = new StFileNode(theFilePath, &myFoldersRoot);
     aFileNode->setMIME(theFileMIME);
     myFoldersRoot.add(aFileNode);
+
+    addRecentFile(*aFileNode); // append to recent files list
     addPlayItem(new StPlayItem(aFileNode, myDefStParams));
 }
 
@@ -461,6 +464,8 @@ void StPlayList::addOneFile(const StString& theFilePathLeft,
     aFileNode->add(new StFileNode(theFilePathLeft,  aFileNode));
     aFileNode->add(new StFileNode(theFilePathRight, aFileNode));
     myFoldersRoot.add(aFileNode);
+
+    addRecentFile(*aFileNode); // append to recent files list
     addPlayItem(new StPlayItem(aFileNode, myDefStParams));
 }
 
@@ -493,6 +498,114 @@ char* StPlayList::parseM3UIter(char* theIter) {
         addPlayItem(new StPlayItem(aFileNode, myDefStParams));
     }
     return aNextLine;
+}
+
+bool StPlayList::isRecentChanged() const {
+    const bool aValue = myIsNewRecent;
+    myIsNewRecent = false;
+    return aValue;
+}
+
+void StPlayList::openRecent(const size_t theItemId) {
+    StMutexAuto anAutoLock(myMutex);
+    if(theItemId >= myRecent.size()) {
+        return;
+    }
+
+    clear();
+    const StHandle<StFileNode>& aFile = myRecent[theItemId];
+    if(aFile->size() == 2) {
+        addOneFile(aFile->getValue(0)->getPath(),
+                   aFile->getValue(1)->getPath());
+    } else {
+        open(aFile->getPath());
+    }
+}
+
+void StPlayList::clearRecent() {
+    StMutexAuto anAutoLock(myMutex);
+    myRecent.clear();
+    myIsNewRecent = true;
+}
+
+void StPlayList::getRecentList(StArrayList<StString>& theList) const {
+    theList.clear();
+    StMutexAuto anAutoLock(myMutex);
+    for(size_t anIter = 0; anIter < myRecent.size(); ++anIter) {
+        const StHandle<StFileNode>& aFile = myRecent[anIter];
+        const StString aPath = aFile->isEmpty() ? aFile->getPath() : aFile->getValue(0)->getPath();
+        StString aTitleString;
+        StString aFolder;
+        StFileNode::getFolderAndFile(aPath, aFolder, aTitleString);
+        theList.add(aTitleString);
+    }
+}
+
+void StPlayList::addRecentFile(const StFileNode& theFile) {
+    // remove duplicates
+    for(size_t anIter = 0; anIter < myRecent.size(); ++anIter) {
+        const StHandle<StFileNode>& aFile = myRecent[anIter];
+        if(aFile->size() != theFile.size()) {
+            continue;
+        }
+        bool areSame = true;
+        for(size_t aChildIter = 0; aChildIter < aFile->size(); ++aChildIter) {
+            areSame = areSame && (aFile->getValue(aChildIter)->getPath() == theFile.getValue(aChildIter)->getPath());
+        }
+        if(aFile->isEmpty()) {
+            areSame = (aFile->getPath() == theFile.getPath());
+        }
+        if(areSame) {
+            myRecent.erase(myRecent.begin() + anIter);
+            break;
+        }
+    }
+
+    if(myRecent.size() > myRecentLimit) {
+        myRecent.pop_back();
+    }
+    myRecent.push_front(theFile.detach());
+    myIsNewRecent = true;
+}
+
+StString StPlayList::dumpRecentList() const {
+    StMutexAuto anAutoLock(myMutex);
+    StArgumentsMap aMap;
+    for(size_t anIter = 0; anIter < myRecent.size(); ++anIter) {
+        const StHandle<StFileNode>& aFile = myRecent[anIter];
+        if(aFile->isEmpty()) {
+            StArgument anArgFile (StString("file")  + anIter, aFile->getPath());
+            aMap.add(anArgFile);
+        } else if(aFile->size() == 2) {
+            StArgument anArgLeft (StString("left")  + anIter, aFile->getValue(0)->getPath());
+            StArgument anArgRight(StString("right") + anIter, aFile->getValue(1)->getPath());
+            aMap.add(anArgLeft);
+            aMap.add(anArgRight);
+        }
+    }
+    return aMap.toString();
+}
+
+void StPlayList::loadRecentList(const StString theString) {
+    StMutexAuto anAutoLock(myMutex);
+    StArgumentsMap aMap;
+    aMap.parseString(theString);
+    myRecent.clear();
+
+    for(size_t anIter = 0; anIter < myRecentLimit; ++anIter) {
+        StArgument anArgFile  = aMap[StString("file")  + anIter];
+        StArgument anArgLeft  = aMap[StString("left")  + anIter];
+        StArgument anArgRight = aMap[StString("right") + anIter];
+        if(anArgLeft.isValid() && anArgRight.isValid()) {
+            StHandle<StFileNode> aFileNode = new StFileNode(StString());
+            aFileNode->add(new StFileNode(anArgLeft.getValue(),  aFileNode.access()));
+            aFileNode->add(new StFileNode(anArgRight.getValue(), aFileNode.access()));
+            addRecentFile(*aFileNode);
+        } else if(anArgFile.isValid()) {
+            StFileNode aFileNode(anArgFile.getValue());
+            addRecentFile(aFileNode);
+        }
+    }
 }
 
 void StPlayList::open(const StString& thePath) {
@@ -542,6 +655,7 @@ void StPlayList::open(const StString& thePath) {
         // not a filesystem element - probably url or invalid path
         StFileNode* aFileNode = new StFileNode(thePath, &myFoldersRoot);
         myFoldersRoot.add(aFileNode);
+        addRecentFile(*aFileNode); // append to recent files list
         addPlayItem(new StPlayItem(aFileNode, myDefStParams));
         return;
     }
@@ -557,6 +671,7 @@ void StPlayList::open(const StString& thePath) {
         for(StPlayItem* anItem = myFirst; anItem != NULL; anItem = anItem->getNext()) {
             if(anItem->getPath() == thePath) {
                 myCurrent = anItem;
+                addRecentFile(*anItem->getFileNode()); // append to recent files list
                 break;
             }
         }

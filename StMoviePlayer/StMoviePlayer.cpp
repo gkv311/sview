@@ -49,6 +49,7 @@ namespace {
     static const char ST_SETTING_SRCFORMAT[]     = "srcFormat";
     static const char ST_SETTING_LAST_FOLDER[]   = "lastFolder";
     static const char ST_SETTING_OPENAL_DEVICE[] = "alDevice";
+    static const char ST_SETTING_RECENT_FILES[]  = "recent";
 
     static const char ST_SETTING_FULLSCREEN[]    = "fullscreen";
     static const char ST_SETTING_VIEWMODE[]      = "viewMode";
@@ -180,6 +181,10 @@ StMoviePlayer::~StMoviePlayer() {
         mySettings->saveParam (ST_SETTING_SRCFORMAT,          params.srcFormat);
         mySettings->saveParam (ST_SETTING_SHUFFLE,            params.isShuffle);
         mySettings->saveParam (ST_SETTING_GLOBAL_MKEYS,       params.areGlobalMKeys);
+
+        if(!myVideo.isNull()) {
+            mySettings->saveString(ST_SETTING_RECENT_FILES,   myVideo->getPlayList().dumpRecentList());
+        }
     }
     // release GUI data and GL resorces before closing the window
     myGUI.nullify();
@@ -271,6 +276,10 @@ bool StMoviePlayer::init(StWindowInterface* theWindow) {
     myVideo->getPlayList().setShuffle(params.isShuffle->getValue());
     params.isShuffle->signals.onChanged.connect(this, &StMoviePlayer::doSwitchShuffle);
     params.alDevice->signals.onChanged.connect(this, &StMoviePlayer::doSwitchAudioDevice);
+
+    StString aRecentList;
+    mySettings->loadString(ST_SETTING_RECENT_FILES, aRecentList);
+    myVideo->getPlayList().loadRecentList(aRecentList);
 
     // load this parameter AFTER video thread creation
     mySettings->loadParam(ST_SETTING_SRCFORMAT, params.srcFormat);
@@ -498,6 +507,9 @@ void StMoviePlayer::stglDraw(unsigned int view) {
         myVideo->switchAudioDevice(params.alDevice->getTitle());
         myToUpdateALList = false;
     }
+    if(myVideo->getPlayList().isRecentChanged()) {
+        myGUI->updateRecentMenu();
+    }
 
     myGUI->getCamera()->setView(view);
     if(view == ST_DRAW_LEFT) {
@@ -683,6 +695,23 @@ void StMoviePlayer::doOpen1File(const size_t ) {
 
 void StMoviePlayer::doOpen2Files(const size_t ) {
     doOpenFileThreaded(this, OPEN_FILE_2MOVIES);
+}
+
+void StMoviePlayer::doOpenRecent(const size_t theItemId) {
+    if(myVideo.isNull()) {
+        return;
+    }
+    myVideo->getPlayList().openRecent(theItemId);
+    doUpdateStateLoading();
+    myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
+    myVideo->doLoadNext();
+}
+
+void StMoviePlayer::doClearRecent(const size_t ) {
+    if(myVideo.isNull()) {
+        return;
+    }
+    myVideo->getPlayList().clearRecent();
 }
 
 void StMoviePlayer::doAddAudioStream(const size_t ) {
@@ -1026,6 +1055,13 @@ bool StMoviePlayer::getCurrentFile(StHandle<StFileNode>&     theFileNode,
     }
     theInfo = myVideo->getFileInfo(theParams);
     return true;
+}
+
+void StMoviePlayer::getRecentList(StArrayList<StString>& theList) {
+    if(myVideo.isNull()) {
+        return;
+    }
+    myVideo->getPlayList().getRecentList(theList);
 }
 
 void StMoviePlayer::keysCommon(bool* keysMap) {
