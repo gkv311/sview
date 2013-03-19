@@ -288,7 +288,9 @@ bool StGLContext::stglSetVSync(const VSync_Mode theVSyncMode) {
     return CGLSetParameter(CGLGetCurrentContext(), kCGLCPSwapInterval, &aSyncInt) == kCGLNoError;
 #else
     if(aSyncInt == -1 && myFuncs->glXSwapIntervalEXT != NULL) {
-        myFuncs->glXSwapIntervalEXT(glXGetCurrentDisplay(), glXGetCurrentDrawable(), aSyncInt);
+        typedef int (*glXSwapIntervalEXT_t_x)(Display* theDisplay, GLXDrawable theDrawable, int theInterval);
+        glXSwapIntervalEXT_t_x aFuncPtr = (glXSwapIntervalEXT_t_x )myFuncs->glXSwapIntervalEXT;
+        aFuncPtr(glXGetCurrentDisplay(), glXGetCurrentDrawable(), aSyncInt);
         return true;
     } else if(myFuncs->glXSwapIntervalSGI != NULL) {
         myFuncs->glXSwapIntervalSGI(aSyncInt);
