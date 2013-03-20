@@ -491,13 +491,32 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
         case WM_XBUTTONDOWN: {
             int mouseXPx = int(short(LOWORD(lParam)));
             int mouseYPx = int(short(HIWORD(lParam)));
+            const StRectI_t aWinRect = getPlacement();
             if(uMsg == WM_MOUSEWHEEL) {
                 // special case - WinAPI give us position relative to screen!
-                mouseXPx -= getPlacement().left();
-                mouseYPx -= getPlacement().top();
+                mouseXPx -= aWinRect.left();
+                mouseYPx -= aWinRect.top();
+            } else {
+                switch(myTiledCfg) {
+                    case TiledCfg_SlaveMasterX: {
+                        mouseXPx -= aWinRect.width();
+                        break;
+                    }
+                    case TiledCfg_SlaveMasterY: {
+                        mouseYPx -= aWinRect.height();
+                        break;
+                    }
+                    case TiledCfg_MasterSlaveX:
+                    case TiledCfg_MasterSlaveY:
+                    case TiledCfg_Separate:
+                    default: {
+                        break;
+                    }
+                }
             }
-            StPointD_t point(double(mouseXPx) / double(getPlacement().width()),
-                             double(mouseYPx) / double(getPlacement().height()));
+
+            StPointD_t point(double(mouseXPx) / double(aWinRect.width()),
+                             double(mouseYPx) / double(aWinRect.height()));
             int mbtn = ST_NOMOUSE;
             switch(uMsg) {
                 case WM_LBUTTONUP:
@@ -586,6 +605,30 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
                      myRectFull.left(),  myRectFull.top(),
                      myRectFull.width(), myRectFull.height(),
                      !myWinAttribs.isHide ? SWP_SHOWWINDOW : SWP_NOACTIVATE); // show window
+
+        // use tiled Master+Slave layout within single window if possible
+        if(myWinAttribs.isSlave && isSlaveIndependent()) {
+            StRectI_t aRectSlave;
+            aRectSlave.left()   = getSlaveLeft();
+            aRectSlave.top()    = getSlaveTop();
+            aRectSlave.right()  = aRectSlave.left() + myRectFull.width();
+            aRectSlave.bottom() = aRectSlave.top()  + myRectFull.height();
+            myTiledCfg = TiledCfg_Separate;
+            if(myRectFull.top()   == aRectSlave.top()) {
+                if(myRectFull.right() == aRectSlave.left()) {
+                    myTiledCfg = TiledCfg_MasterSlaveX;
+                } else if(myRectFull.left() == aRectSlave.right()) {
+                    myTiledCfg = TiledCfg_SlaveMasterX;
+                }
+            } else if(myRectFull.left() == aRectSlave.left()) {
+                if(myRectFull.bottom() == aRectSlave.top()) {
+                    myTiledCfg = TiledCfg_MasterSlaveY;
+                } else if(myRectFull.top() == aRectSlave.bottom()) {
+                    myTiledCfg = TiledCfg_SlaveMasterY;
+                }
+            }
+        }
+
         if(!myWinAttribs.isHide) {
             SetFocus(myMaster.hWindow);
         }
@@ -618,25 +661,54 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
 void StWindowImpl::updateWindowPos() {
     if(myWinAttribs.isSlave && !myWinAttribs.isSlaveHide && (!isSlaveIndependent() || myMonitors.size() > 1)) {
         HWND afterHWND = myMaster.hWindow;
+        UINT aFlags    = SWP_NOACTIVATE;
         if(myWinAttribs.isSlaveHLineBottom || myWinAttribs.isSlaveHTop2Px || myWinAttribs.isSlaveHLineTop) {
             afterHWND = HWND_TOPMOST;
         }
 
+        if(!myWinAttribs.isFullScreen
+        && myTiledCfg != TiledCfg_Separate) {
+            myTiledCfg = TiledCfg_Separate;
+            if(!myWinAttribs.isHide) {
+                aFlags = SWP_SHOWWINDOW;
+            }
+        }
+
         // resize Slave GL-window
-        SetWindowPos(mySlave.hWindowGl, afterHWND,
-                     getSlaveLeft(),  getSlaveTop(),
-                     getSlaveWidth(), getSlaveHeight(),
-                     SWP_NOACTIVATE);
+        if(!myWinAttribs.isFullScreen || myTiledCfg == TiledCfg_Separate) {
+            SetWindowPos(mySlave.hWindowGl, afterHWND,
+                         getSlaveLeft(),  getSlaveTop(),
+                         getSlaveWidth(), getSlaveHeight(),
+                         aFlags);
+        }
     }
 
     if(!myWinAttribs.isHide) {
-        // resize Master GL-subwindow
-        GLsizei sizeX = (myWinAttribs.isFullScreen) ? myRectFull.width()  : myRectNorm.width();
-        GLsizei sizeY = (myWinAttribs.isFullScreen) ? myRectFull.height() : myRectNorm.height();
-        SetWindowPos(myMaster.hWindowGl,
-                     (myParentWin != NULL && myWinAttribs.isFullScreen) ? HWND_TOPMOST : HWND_TOP,
-                     0, 0, sizeX, sizeY,
-                     SWP_NOACTIVATE);
+        if(myWinAttribs.isFullScreen && myTiledCfg != TiledCfg_Separate) {
+            ShowWindow(mySlave.hWindowGl, SW_HIDE);
+            StRectI_t aRect = myRectFull;
+            getTiledWinRect(aRect);
+
+            SetWindowPos(myMaster.hWindow,
+                         HWND_TOP,
+                         aRect.left(),  aRect.top(),
+                         aRect.width(), aRect.height(),
+                         SWP_NOACTIVATE);
+
+            // resize Master GL-subwindow
+            SetWindowPos(myMaster.hWindowGl,
+                         (myParentWin != NULL) ? HWND_TOPMOST : HWND_TOP,
+                         0, 0, aRect.width(), aRect.height(),
+                         SWP_NOACTIVATE);
+        } else {
+            // resize Master GL-subwindow
+            GLsizei sizeX = (myWinAttribs.isFullScreen) ? myRectFull.width()  : myRectNorm.width();
+            GLsizei sizeY = (myWinAttribs.isFullScreen) ? myRectFull.height() : myRectNorm.height();
+            SetWindowPos(myMaster.hWindowGl,
+                         (myParentWin != NULL && myWinAttribs.isFullScreen) ? HWND_TOPMOST : HWND_TOP,
+                         0, 0, sizeX, sizeY,
+                         SWP_NOACTIVATE);
+        }
     }
 
     // detect when window moved to another monitor

@@ -61,6 +61,7 @@ class ST_LOCAL StWindow : public StWindowInterface {
     typedef void (*StWindow_stglMakeCurrent_t)(StWindow_t , const int& );
     typedef double (*StWindow_stglGetTargetFps_t)(StWindow_t );
     typedef void (*StWindow_stglSetTargetFps_t)(StWindow_t , const double& );
+    typedef void (*StWindow_stglViewport_t)(StWindow_t , const int& , StGLBoxPx* );
     typedef void (*StWindow_callback_t)(StWindow_t , StMessage_t* );
     typedef stBool_t (*StWindow_appendMessage_t)(StWindow_t , const StMessage_t& );
     typedef stBool_t (*StWindow_getValue_t)(StWindow_t , const size_t& , size_t* );
@@ -97,6 +98,7 @@ class ST_LOCAL StWindow : public StWindowInterface {
         StWindow_stglMakeCurrent_t StWindow_stglMakeCurrent;
         StWindow_stglGetTargetFps_t StWindow_stglGetTargetFps;
         StWindow_stglSetTargetFps_t StWindow_stglSetTargetFps;
+        StWindow_stglViewport_t  StWindow_stglViewport;
         StWindow_callback_t StWindow_callback;
         StWindow_appendMessage_t StWindow_appendMessage;
         StWindow_getValue_t StWindow_getValue;
@@ -238,6 +240,12 @@ class ST_LOCAL StWindow : public StWindowInterface {
 
     void stglSetTargetFps(const double& fps) {
         GetFunctions().StWindow_stglSetTargetFps(libInstance, fps);
+    }
+
+    StGLBoxPx stglViewport(const int& theWinId) const {
+        StGLBoxPx aRect;
+        GetFunctions().StWindow_stglViewport(libInstance, theWinId, &aRect);
+        return aRect;
     }
 
     void callback(StMessage_t* stMessages) {

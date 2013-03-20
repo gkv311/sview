@@ -40,6 +40,7 @@ void StWindow::WindowFunctions::load(StLibrary& theLib) {
     ST_WIN_READ_FUNC(StWindow_stglMakeCurrent);
     ST_WIN_READ_FUNC(StWindow_stglGetTargetFps);
     ST_WIN_READ_FUNC(StWindow_stglSetTargetFps);
+    ST_WIN_READ_FUNC(StWindow_stglViewport);
     ST_WIN_READ_FUNC(StWindow_callback);
     ST_WIN_READ_FUNC(StWindow_appendMessage);
     ST_WIN_READ_FUNC(StWindow_getValue);
@@ -54,6 +55,7 @@ bool StWindow::WindowFunctions::isNull() const {
         || StWindow_appendMessage == NULL
         || StWindow_stglSwap == NULL         || StWindow_stglCreate == NULL || StWindow_stglMakeCurrent == NULL
         || StWindow_stglGetTargetFps == NULL || StWindow_stglSetTargetFps == NULL
+        || StWindow_stglViewport == NULL
         || StWindow_setTitle == NULL
         || StWindow_getAttributes == NULL    || StWindow_setAttributes == NULL
         || StWindow_isActive == NULL

@@ -332,22 +332,27 @@ void StOutIZ3D::stglDraw(unsigned int ) {
         getStWindow()->setTitle(StString("iZ3D Rendering FPS= ") + myFPSControl.getAverage());
     }
 
-    const StRectI_t aRect = getStWindow()->getPlacement();
+    const StGLBoxPx aVPMaster = getStWindow()->stglViewport(ST_WIN_MASTER);
+    const StGLBoxPx aVPSlave  = getStWindow()->stglViewport(ST_WIN_SLAVE);
     if(!getStWindow()->isStereoOutput() || myIsBroken) {
         getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-        myContext->stglResize(aRect);
         if(myToCompressMem) {
             myFrBuffer->release(*myContext);
         }
 
+        myContext->stglResizeViewport(aVPMaster);
+        myContext->stglSetScissorRect(aVPMaster, false);
         myStCore->stglDraw(ST_DRAW_LEFT);
+        myContext->stglResetScissorRect();
 
         getStWindow()->stglMakeCurrent(ST_WIN_SLAVE);
-        myContext->stglResize(aRect);
+        myContext->stglResizeViewport(aVPSlave);
+        myContext->stglSetScissorRect(aVPSlave, false);
         myContext->core20fwd->glClearColor(0.729740052840723f, 0.729740052840723f, 0.729740052840723f, 0.0f);
         // clear the screen and the depth buffer
         myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         myContext->core20fwd->glClearColor(0, 0, 0, 0);
+        myContext->stglResetScissorRect();
 
         myFPSControl.sleepToTarget(); // decrease FPS to target by thread sleeps
         getStWindow()->stglSwap(ST_WIN_ALL);
@@ -355,29 +360,26 @@ void StOutIZ3D::stglDraw(unsigned int ) {
         return;
     }
     getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-    myContext->stglResize(aRect);
 
     // resize FBO
-    StRectI_t aWinRect = getStWindow()->getPlacement();
-    if(!myFrBuffer->initLazy(*myContext, aWinRect.width(), aWinRect.height())) {
+    if(!myFrBuffer->initLazy(*myContext, aVPMaster.width(), aVPMaster.height())) {
         stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init Frame Buffer");
         myIsBroken = true;
         return;
     }
 
     // draw into virtual frame buffers (textures)
-    GLint aVPort[4]; // real window viewport
-    myContext->core20fwd->glGetIntegerv(GL_VIEWPORT, aVPort);
     myFrBuffer->setupViewPort(*myContext);    // we set TEXTURE sizes here
     myFrBuffer->bindBufferLeft(*myContext);
         myStCore->stglDraw(ST_DRAW_LEFT);
     myFrBuffer->bindBufferRight(*myContext);
         myStCore->stglDraw(ST_DRAW_RIGHT);
     myFrBuffer->unbindBufferRight(*myContext);
-    myContext->core20fwd->glViewport(aVPort[0], aVPort[1], aVPort[2], aVPort[3]);
 
     // now draw to real screen buffer
     // clear the screen and the depth buffer
+    myContext->stglResizeViewport(aVPMaster);
+    myContext->stglSetScissorRect(aVPMaster, false);
     myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     myContext->core20fwd->glDisable(GL_DEPTH_TEST);
@@ -394,9 +396,11 @@ void StOutIZ3D::stglDraw(unsigned int ) {
     stTexTable.unbind(*myContext);
     myFrBuffer->unbindMultiTexture(*myContext);
     myShaders.master()->unuse(*myContext);
+    myContext->stglResetScissorRect();
 
     getStWindow()->stglMakeCurrent(ST_WIN_SLAVE);
-    myContext->stglResize(aRect);
+    myContext->stglResizeViewport(aVPSlave);
+    myContext->stglSetScissorRect(aVPSlave, false);
     myContext->core20fwd->glClearColor(0.729740052840723f, 0.729740052840723f, 0.729740052840723f, 0.0f);
     // clear the screen and the depth buffer
     myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -411,6 +415,7 @@ void StOutIZ3D::stglDraw(unsigned int ) {
     stTexTable.unbind(*myContext);
     myFrBuffer->unbindMultiTexture(*myContext);
     myShaders.slave()->unuse(*myContext);
+    myContext->stglResetScissorRect();
 
     myFPSControl.sleepToTarget(); // decrease FPS to target by thread sleeps
     getStWindow()->stglSwap(ST_WIN_ALL);

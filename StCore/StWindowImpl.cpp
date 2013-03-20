@@ -52,6 +52,7 @@ StWindowImpl::StWindowImpl()
   myMonMasterFull(-1),
   mySyncCounter(0),
   myWinOnMonitorId(0),
+  myTiledCfg(TiledCfg_Separate),
   myUserDataMap(0),
   myTargetFps(0.0),
 #if (defined(_WIN32) || defined(__WIN32__))
@@ -477,6 +478,68 @@ StRectI_t StWindowImpl::getPlacement() {
     }
 }
 
+void StWindowImpl::getTiledWinRect(StRectI_t& theRect) const {
+    switch(myTiledCfg) {
+        case TiledCfg_MasterSlaveX: {
+            theRect.right()  += theRect.width();
+            return;
+        }
+        case TiledCfg_SlaveMasterX: {
+            theRect.left()   -= theRect.width();
+            return;
+        }
+        case TiledCfg_MasterSlaveY: {
+            theRect.bottom() += theRect.height();
+            return;
+        }
+        case TiledCfg_SlaveMasterY: {
+            theRect.top()    -= theRect.height();
+            return;
+        }
+        case TiledCfg_Separate:
+        default: {
+            return;
+        }
+    }
+}
+
+StGLBoxPx StWindowImpl::stglViewport(const int& theWinId) const {
+    const StRectI_t& aWinRect = myWinAttribs.isFullScreen ? myRectFull : myRectNorm;
+    const int aWidth  = aWinRect.width();
+    const int aHeight = aWinRect.height();
+    StGLBoxPx aRect = {{ 0, 0, aWidth, aHeight }};
+    switch(myTiledCfg) {
+        case TiledCfg_MasterSlaveX: {
+            if(theWinId == ST_WIN_SLAVE) {
+                aRect.x() += aWidth;
+            }
+            return aRect;
+        }
+        case TiledCfg_SlaveMasterX: {
+            if(theWinId == ST_WIN_MASTER) {
+                aRect.x() += aWidth;
+            }
+            return aRect;
+        }
+        case TiledCfg_MasterSlaveY: {
+            if(theWinId == ST_WIN_MASTER) {
+                aRect.y() += aHeight;
+            }
+            return aRect;
+        }
+        case TiledCfg_SlaveMasterY: {
+            if(theWinId == ST_WIN_SLAVE) {
+                aRect.y() += aHeight;
+            }
+            return aRect;
+        }
+        case TiledCfg_Separate:
+        default: {
+            return aRect;
+        }
+    }
+}
+
 int StWindowImpl::getMouseDown(StPointD_t* point) {
     return myMDownQueue.pop(*point);
 }
@@ -486,23 +549,22 @@ int StWindowImpl::getMouseUp(StPointD_t* point) {
 }
 
 StPointD_t StWindowImpl::getMousePos() {
-    StRectI_t aRectWindow = (myWinAttribs.isFullScreen) ? myRectFull : myRectNorm;
+    StRectI_t aWinRect = (myWinAttribs.isFullScreen) ? myRectFull : myRectNorm;
 #if (defined(_WIN32) || defined(__WIN32__))
     if(myMaster.hWindowGl != NULL) {
-        CURSORINFO aCursorInfo; //stMemSet(&aCursorInfo, 0, sizeof(aCursorInfo));
-        aCursorInfo.cbSize = sizeof(aCursorInfo);
-        if(GetCursorInfo(&aCursorInfo) != FALSE
-        && ScreenToClient(myMaster.hWindowGl, &aCursorInfo.ptScreenPos) != FALSE) {
-            return StPointD_t(double(aCursorInfo.ptScreenPos.x) / (double )aRectWindow.width(),
-                              double(aCursorInfo.ptScreenPos.y) / (double )aRectWindow.height());
+        CURSORINFO aCursor;
+        aCursor.cbSize = sizeof(aCursor);
+        if(GetCursorInfo(&aCursor) != FALSE) {
+            return StPointD_t((double(aCursor.ptScreenPos.x) - double(aWinRect.left())) / double(aWinRect.width()),
+                              (double(aCursor.ptScreenPos.y) - double(aWinRect.top()))  / double(aWinRect.height()));
         }
     }
 #elif (defined(__APPLE__))
     CGEventRef anEvent = CGEventCreate(NULL);
     CGPoint aCursor = CGEventGetLocation(anEvent);
     CFRelease(anEvent);
-    return StPointD_t((aCursor.x - double(aRectWindow.left())) / double(aRectWindow.width()),
-                      (aCursor.y - double(aRectWindow.top()))  / double(aRectWindow.height()));
+    return StPointD_t((aCursor.x - double(aWinRect.left())) / double(aWinRect.width()),
+                      (aCursor.y - double(aWinRect.top()))  / double(aWinRect.height()));
 #elif (defined(__linux__) || defined(__linux))
     if(myMaster.hWindowGl != 0) {
         Window childReturn;
@@ -515,8 +577,8 @@ StPointD_t StWindowImpl::getMousePos() {
         XQueryPointer(myMaster.getDisplay(), myMaster.hWindowGl,
                       &rootReturn, &childReturn,
                       &rootX, &rootY, &winX, &winY, &maskReturn);
-        return StPointD_t((double )winX / (double )aRectWindow.width(),
-                          (double )winY / (double )aRectWindow.height());
+        return StPointD_t((double )winX / (double )aWinRect.width(),
+                          (double )winY / (double )aWinRect.height());
     }
 #endif
     // undefined
@@ -551,7 +613,11 @@ void StWindowImpl::stglMakeCurrent(const int& winNum){
             myMaster.glMakeCurrent();
             break;
         } case ST_WIN_SLAVE: {
-            mySlave.glMakeCurrent();
+            if(myTiledCfg == TiledCfg_Separate) {
+                mySlave.glMakeCurrent();
+            } else {
+                myMaster.glMakeCurrent();
+            }
             break;
         }
     }
@@ -565,15 +631,23 @@ void StWindowImpl::stglSwap(const int& theWinId) {
 
     switch(theWinId) {
         case ST_WIN_ALL: {
-            myMaster.glSwap();
-            mySlave.glSwap();
+            if(myTiledCfg == TiledCfg_Separate) {
+                myMaster.glSwap();
+                mySlave.glSwap();
+            } else {
+                myMaster.glSwap();
+            }
             break;
         }
         case ST_WIN_MASTER: {
             myMaster.glSwap();
             break;
         } case ST_WIN_SLAVE: {
-            mySlave.glSwap();
+            if(myTiledCfg == TiledCfg_Separate) {
+                mySlave.glSwap();
+            } else {
+                myMaster.glSwap();
+            }
             break;
         }
     }
@@ -684,6 +758,10 @@ ST_EXPORT void StWindow_getPlacement(StWindowInterface* inst, StRectI_t* rect) {
 
 ST_EXPORT void StWindow_setPlacement(StWindowInterface* inst, const StRectI_t* rect) {
     ((StWindowImpl* )inst)->setPlacement(*rect);
+}
+
+ST_EXPORT void StWindow_stglViewport(StWindowInterface* inst, const int& theWinId, StGLBoxPx* theRect) {
+    *theRect = ((StWindowImpl* )inst)->stglViewport(theWinId);
 }
 
 ST_EXPORT void StWindow_getMousePos(StWindowInterface* inst, StPointD_t* point) {

@@ -266,12 +266,9 @@ void StGLContext::stglResetScissorRect() {
     core11fwd->glScissor(aRect.x(), aRect.y(), aRect.width(), aRect.height());
 }
 
-void StGLContext::stglResizeViewport(GLsizei theSizeX,
-                                     GLsizei theSizeY) {
-    if(theSizeY == 0) {  // prevent a Divide by Zero by
-        theSizeY = 1;    // making height equal one
-    }
-    core11fwd->glViewport(0, 0, theSizeX, theSizeY);
+void StGLContext::stglResizeViewport(const StGLBoxPx& theRect) {
+    const GLsizei aHeight = (theRect.height() == 0) ? 1 : theRect.height();
+    core11fwd->glViewport(theRect.x(), theRect.y(), theRect.width(), aHeight);
 }
 
 bool StGLContext::stglSetVSync(const VSync_Mode theVSyncMode) {

@@ -213,14 +213,23 @@ class ST_LOCAL StGLContext {
     /**
      * Setup viewport.
      */
-    void stglResizeViewport(GLsizei theSizeX,
-                            GLsizei theSizeY);
+    void stglResizeViewport(const StGLBoxPx& theRect);
+
+    /**
+     * Setup viewport.
+     */
+    void stglResizeViewport(const GLsizei theSizeX,
+                            const GLsizei theSizeY) {
+        const StGLBoxPx aRect = {{ 0, 0, theSizeX, theSizeY }};
+        stglResizeViewport(aRect);
+    }
 
     /**
      * Setup viewport.
      */
     inline void stglResize(const StRect<GLint>& theWinRect) {
-        stglResizeViewport(theWinRect.width(), theWinRect.height());
+        const StGLBoxPx aRect = {{ 0, 0, theWinRect.width(), theWinRect.height() }};
+        stglResizeViewport(aRect);
     }
 
     /**

@@ -66,6 +66,7 @@ class ST_LOCAL StWindowImpl : public StWindowInterface {
     virtual void stglMakeCurrent(const int& theWinId);
     virtual double stglGetTargetFps() { return myTargetFps; }
     virtual void stglSetTargetFps(const double& theFps) { myTargetFps = theFps; }
+    virtual StGLBoxPx stglViewport(const int& theWinId) const;
     virtual void callback(StMessage_t* theMessages);
     virtual stBool_t appendMessage(const StMessage_t& theMessage);
     virtual bool getValue(const size_t& theKey, size_t*       theValue);
@@ -97,6 +98,19 @@ class ST_LOCAL StWindowImpl : public StWindowInterface {
                               XEvent*  theEvent,
                               char*    theArg);
 #endif
+
+    /**
+     * Tiles configuration (multiple viewports within the same window).
+     */
+    enum TiledCfg {
+        TiledCfg_Separate,     //!< dedicated windows - default
+        TiledCfg_MasterSlaveX, //!< Master at left   / Slave at right
+        TiledCfg_SlaveMasterX, //!< Master at right  / Slave at left
+        TiledCfg_MasterSlaveY, //!< Master at top    / Slave at bottom
+        TiledCfg_SlaveMasterY, //!< Master at bottom / Slave at top
+    };
+
+    void getTiledWinRect(StRectI_t& theRect) const;
 
     void updateSlaveConfig() {
         myMonSlave.idSlave = int(myWinAttribs.slaveMonId);
@@ -204,6 +218,7 @@ class ST_LOCAL StWindowImpl : public StWindowInterface {
     StSlaveWindowCfg_t myMonSlave;        //!< slave window options
     size_t             mySyncCounter;
     int                myWinOnMonitorId;  //!< monitor id where window is placed
+    TiledCfg           myTiledCfg;        //!< tiles configuration (multiple viewports within the same window)
 
     size_t             myUserDataMap;     //!< user data
     double             myTargetFps;       //!< user data

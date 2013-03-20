@@ -25,6 +25,7 @@
 #include <stTypes.h>
 #include <StStrings/StString.h>
 #include <StTemplates/StRect.h>
+#include <StGL/StGLVec.h>
 
 #include "StWinErrorCodes.h" // Header with error codes
 #include "StMessageList.h"
@@ -248,6 +249,13 @@ class StWindowInterface {
 
     virtual double stglGetTargetFps() = 0;
     virtual void stglSetTargetFps(const double& ) = 0;
+
+    /**
+     * Get viewport for specified subwindow (to handle tiled presentation).
+     * @param theWinId Subwindow ID
+     * @return rectangle within window from bottom-left corner (ready for OpenGL calls)
+     */
+    virtual StGLBoxPx stglViewport(const int& theWinId) const = 0;
 
     /**
      * CallBack function.
