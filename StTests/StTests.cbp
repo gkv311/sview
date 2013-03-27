@@ -228,6 +228,13 @@
 		</ResourceCompiler>
 		<Linker>
 			<Add library="libStShared" />
+			<Add library="libStShared" />
+			<Add library="avutil" />
+			<Add library="avformat" />
+			<Add library="avcodec" />
+			<Add library="swscale" />
+			<Add library="freetype" />
+			<Add library="libwebp" />
 			<Add directory="../3rdparty/lib/$(TARGET_NAME)" />
 			<Add directory="../lib/$(TARGET_NAME)" />
 		</Linker>
@@ -243,6 +250,8 @@
 		<Unit filename="StTestEmbed.h" />
 		<Unit filename="StTestGlBand.cpp" />
 		<Unit filename="StTestGlBand.h" />
+		<Unit filename="StTestImageLib.cpp" />
+		<Unit filename="StTestImageLib.h" />
 		<Unit filename="StTestMutex.cpp" />
 		<Unit filename="StTestMutex.h" />
 		<Unit filename="StTestResponder.h">

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StTests program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 #include "StTestMutex.h"
 #include "StTestGlBand.h"
 #include "StTestEmbed.h"
+#include "StTestImageLib.h"
 
 namespace {
 
@@ -121,6 +122,7 @@ namespace {
         const StString ST_TEST_MUTICES = "mutex";
         const StString ST_TEST_GLBAND  = "glband";
         const StString ST_TEST_EMBED   = "embed";
+        const StString ST_TEST_IMAGE   = "image";
         const StString ST_TEST_ALL     = "all";
         size_t aFound = 0;
         for(size_t anArgId = 0; anArgId < anArgs.size(); ++anArgId) {
@@ -139,6 +141,16 @@ namespace {
                 // StWindow embed to native window
                 StTestEmbed anEmbed;
                 anEmbed.perform();
+                ++aFound;
+            } else if(aParam == ST_TEST_IMAGE) {
+                // image libraries performance tests
+                if(++anArgId >= anArgs.size()) {
+                    st::cout << stostream_text("Broken syntax - image file awaited!\n");
+                    break;
+                }
+
+                StTestImageLib anImage(anArgs[anArgId]);
+                anImage.perform();
                 ++aFound;
             } else if(aParam == ST_TEST_ALL) {
                 // mutex speed test
@@ -164,7 +176,8 @@ namespace {
                      << stostream_text("  all    - execute all available tests\n")
                      << stostream_text("  mutex  - mutex speed test\n")
                      << stostream_text("  glband - gl <-> cpu trasfer speed test\n")
-                     << stostream_text("  embed  - test window embedding\n");
+                     << stostream_text("  embed  - test window embedding\n")
+                     << stostream_text("  image fileName - test image libraries\n");
         }
     }
 

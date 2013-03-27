@@ -65,6 +65,9 @@ StImageFile::ImageType StImageFile::guessImageType(const StString& theFileName,
            || theMIMEType.getMIMEType() == StString("image/jpg")
            || theMIMEType.getMIMEType() == StString("image/jpeg")) {
         return StImageFile::ST_TYPE_JPEG;
+    } else if(anExt.isEqualsIgnoreCase("png")
+           || theMIMEType.getMIMEType() == StString("image/png")) {
+        return StImageFile::ST_TYPE_PNG;
     } else if(anExt.isEqualsIgnoreCase("exr")) {
         return StImageFile::ST_TYPE_EXR;
     } else if(anExt.isEqualsIgnoreCase("psd")) {
