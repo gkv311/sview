@@ -34,9 +34,9 @@
 #include <StThreads/StMutex.h>
 #include <StThreads/StEvent.h>
 
-#ifdef _WIN32
+#ifndef __APPLE__
 /**
- * Wrapper over WinAPI HGLRC.
+ * Wrapper over OpenGL rendering context.
  */
 class ST_LOCAL StWinGlrc {
 
@@ -45,7 +45,11 @@ class ST_LOCAL StWinGlrc {
     /**
      * Create OpenGL Rendering Context for specified Device Context.
      */
+#ifdef _WIN32
     StWinGlrc(HDC theDC);
+#else
+    StWinGlrc(StHandle<StXDisplay>& theDisplay);
+#endif
 
     /**
      * Destructor.
@@ -64,11 +68,20 @@ class ST_LOCAL StWinGlrc {
      * Device Context should have the one used on construction of this Rendering Context
      * or have the same Pixel Format.
      */
+#ifdef _WIN32
     bool makeCurrent(HDC theDC);
+#else
+    bool makeCurrent(GLXDrawable theDrawable);
+#endif
 
         private:
 
-    HGLRC myRC; //!< WinAPI Rendering Context handle
+#ifdef _WIN32
+    HGLRC      myRC;      //!< WinAPI Rendering Context handle
+#else
+    Display*   myDisplay; //!< display connection
+    GLXContext myRC;      //!< X-GLX rendering context
+#endif
 };
 
 // just short typedef for handle
@@ -109,7 +122,7 @@ class ST_LOCAL StWinHandles {
     Window          hWindow; // X-window handle
     Window        hWindowGl; // X-window handle for undecorated GL window
     StXDisplayH  stXDisplay; // X-server display connection
-    GLXContext          hRC; // X-GLX rendering context
+    StWinGlrcH          hRC; // X-GLX rendering context
 
     Pixmap        iconImage; // icon stuff
     Pixmap        iconShape;

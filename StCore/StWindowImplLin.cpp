@@ -417,7 +417,7 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
                                         InputOutput,
                                         myMaster.stXDisplay->getVisual(),
                                         CWBorderPixel | CWColormap | CWEventMask | CWOverrideRedirect, &aWinAttribsX);
-            if(!glXMakeCurrent(hDisplay, aWin, myMaster.hRC)) {
+            if(!myMaster.hRC->makeCurrent(aWin)) {
                 ST_ERROR_LOG("X, FAILED to bind rendering context to NEW master window");
                 XDestroyWindow(hDisplay, aWin);
                 XReparentWindow(hDisplay, myMaster.hWindowGl, aParent, 0, 0);

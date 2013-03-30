@@ -22,7 +22,7 @@
 #include <StThreads/StThreads.h>
 #include <StStrings/StLogger.h>
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
 
 static PIXELFORMATDESCRIPTOR THE_PIXELFRMT_DOUBLE = {
     sizeof(PIXELFORMATDESCRIPTOR),   // Size Of This Pixel Format Descriptor
@@ -50,23 +50,50 @@ StWinGlrc::StWinGlrc(HDC theDC)
     //
 }
 
-StWinGlrc::~StWinGlrc() {
-    if(myRC != NULL) {
-        if(wglMakeCurrent(NULL, NULL) == FALSE) {
-            // this is not a problem in most cases;
-            // also this happens when wglMakeCurrent(NULL, NULL) called twice
-            //ST_DEBUG_LOG("WinAPI, FAILED to release DC and RC contexts");
-        }
+bool StWinGlrc::makeCurrent(HDC theDC) {
+    return wglMakeCurrent(theDC, myRC) == TRUE;
+}
 
-        //ST_ASSERT_SLIP(wglDeleteContext(myRC) != FALSE, "WinAPI, FAILED to delete RC", return);
-        if(wglDeleteContext(myRC) == FALSE) {
-            ST_ERROR_LOG("WinAPI, FAILED to delete RC");
-        }
+StWinGlrc::~StWinGlrc() {
+    if(myRC == NULL) {
+        return;
+    }
+
+    if(wglMakeCurrent(NULL, NULL) == FALSE) {
+        // this is not a problem in most cases;
+        // also this happens when wglMakeCurrent(NULL, NULL) called twice
+        //ST_DEBUG_LOG("WinAPI, FAILED to release DC and RC contexts");
+    }
+
+    //ST_ASSERT_SLIP(wglDeleteContext(myRC) != FALSE, "WinAPI, FAILED to delete RC", return);
+    if(wglDeleteContext(myRC) == FALSE) {
+        ST_ERROR_LOG("WinAPI, FAILED to delete RC");
     }
 }
 
-bool StWinGlrc::makeCurrent(HDC theDC) {
-    return wglMakeCurrent(theDC, myRC) == TRUE;
+#else
+
+StWinGlrc::StWinGlrc(StHandle<StXDisplay>& theDisplay)
+: myDisplay(theDisplay->hDisplay),
+  myRC(glXCreateContext(theDisplay->hDisplay, theDisplay->hVisInfo, None, true)) {
+    //
+}
+
+StWinGlrc::~StWinGlrc() {
+    if(myRC == NULL) {
+        return;
+    }
+
+    // release active context
+    if(!glXMakeCurrent(myDisplay, None, NULL)) {
+        ST_DEBUG_LOG("X, FAILED to release OpenGL context");
+    }
+    glXDestroyContext(myDisplay, myRC);
+}
+
+bool StWinGlrc::makeCurrent(GLXDrawable theDrawable) {
+    return myRC != NULL
+        && glXMakeCurrent(myDisplay, theDrawable, myRC) == True;
 }
 
 #endif
@@ -88,7 +115,6 @@ StWinHandles::StWinHandles()
 : hWindow(0),
   hWindowGl(0),
   stXDisplay(),
-  hRC(NULL),
   iconImage(0),
   iconShape(0),
   xDNDRequestType(None),
@@ -110,7 +136,8 @@ void StWinHandles::glSwap() {
         SwapBuffers(hDC);
     }
 #elif (defined(__linux__) || defined(__linux))
-    if(!stXDisplay.isNull()) {
+    if(!stXDisplay.isNull()
+    && hRC->makeCurrent(hWindowGl)) { // if GL rendering context is bound to another drawable - we got BadMatch error
         glXSwapBuffers(stXDisplay->hDisplay, hWindowGl);
     }
 #endif
@@ -122,8 +149,8 @@ bool StWinHandles::glMakeCurrent() {
         return hRC->makeCurrent(hDC);
     }
 #elif (defined(__linux__) || defined(__linux))
-    if(!stXDisplay.isNull()) {
-        return glXMakeCurrent(stXDisplay->hDisplay, hWindowGl, hRC) == True;
+    if(!stXDisplay.isNull() && !hRC.isNull()) {
+        return hRC->makeCurrent(hWindowGl);
     }
 #endif
     return false;
@@ -193,24 +220,20 @@ int StWinHandles::glCreateContext(StWinHandles* theSlave, bool isQuadStereo) {
     return STWIN_INIT_SUCCESS;
 #elif (defined(__linux__) || defined(__linux))
     // create an OpenGL rendering context
-    hRC = glXCreateContext(stXDisplay->hDisplay, stXDisplay->hVisInfo,
-                           None, true); // direct rendering if possible
-    if(hRC == NULL) {
-        stError("X, could not create rendering context for Master");
-        return STWIN_ERROR_X_GLRC_CREATE;
-    }
-
+    hRC = new StWinGlrc(stXDisplay);
+    ST_GL_ERROR_CHECK(hRC->isValid(),
+                      STWIN_ERROR_X_GLRC_CREATE, "X, could not create rendering context for Master");
     if(theSlave != NULL) {
-        theSlave->hRC = glXCreateContext(theSlave->stXDisplay->hDisplay, stXDisplay->hVisInfo,
-                                         hRC, true); // shared GL contexts and direct rendering if possible
-        if(theSlave->hRC == NULL) {
-            stError("X, could not create rendering context for Slave");
-            return STWIN_ERROR_X_GLRC_CREATE;
-        }
+        theSlave->hRC = hRC;
+
+        // bind the rendering context to the window
+        ST_GL_ERROR_CHECK(hRC->makeCurrent(theSlave->hWindowGl),
+                          STWIN_ERROR_X_GLRC_CREATE, "X, Can't activate Slave GL Rendering Context");
     }
 
     // bind the rendering context to the window
-    glXMakeCurrent(stXDisplay->hDisplay, hWindowGl, hRC);
+    ST_GL_ERROR_CHECK(hRC->makeCurrent(hWindowGl),
+                      STWIN_ERROR_X_GLRC_CREATE, "X, Can't activate Master GL Rendering Context");
     return STWIN_INIT_SUCCESS;
 #endif
 }
@@ -291,15 +314,9 @@ bool StWinHandles::close() {
     }
     stMutex.unlock();
 #elif (defined(__linux__) || defined(__linux))
+    // release active context
+    hRC.nullify();
     if(!stXDisplay.isNull()) {
-        // release active context
-        if(!glXMakeCurrent(stXDisplay->hDisplay, None, NULL)) {
-            ST_DEBUG_LOG("X, FAILED to release OpenGL context");
-        }
-        if(hRC != NULL) {
-            glXDestroyContext(stXDisplay->hDisplay, hRC);
-            hRC = NULL;
-        }
         // close x-server windows
         if(hWindowGl != 0) {
             XUnmapWindow(stXDisplay->hDisplay, hWindowGl);
