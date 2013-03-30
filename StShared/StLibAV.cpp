@@ -19,37 +19,59 @@ extern "C" {
 };
 
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 30, 0))
-int stFFmpegLock(void** theMutexPtrPtr, enum AVLockOp theOperation) {
-    StMutex* stMutex = (StMutex* )*theMutexPtrPtr;
-    switch(theOperation) {
-        case AV_LOCK_CREATE: {
-            // create a mutex
-            stMutex = new StMutex();
-            *theMutexPtrPtr = (void* )stMutex;
-            return 0;
-        }
-        case AV_LOCK_OBTAIN: {
-            // lock the mutex
-            stMutex->lock();
-            return 0;
-        }
-        case AV_LOCK_RELEASE: {
-            // unlock the mutex
-            stMutex->unlock();
-            return 0;
-        }
-        case AV_LOCK_DESTROY: {
-            // free mutex resources
-            delete stMutex;
-            *theMutexPtrPtr = NULL;
-            return 0;
-        }
-        default: {
-            ST_DEBUG_LOG("FFmpeg, Unsupported lock operation " + theOperation);
-            return 1;
+class StFFMpegLocker {
+
+        public:
+
+    StFFMpegLocker() {
+        //
+    }
+
+    ~StFFMpegLocker() {
+        av_lockmgr_register(NULL); // unregister to avoid usage of dead function pointer
+    }
+
+    void init() {
+        if(av_lockmgr_register(stFFmpegLock) != 0) {
+            ST_DEBUG_LOG("FFmpeg, fail to register own mutex!");
         }
     }
-}
+
+        private:
+
+    static int stFFmpegLock(void** theMutexPtrPtr, enum AVLockOp theOperation) {
+        StMutex* stMutex = (StMutex* )*theMutexPtrPtr;
+        switch(theOperation) {
+            case AV_LOCK_CREATE: {
+                // create a mutex
+                stMutex = new StMutex();
+                *theMutexPtrPtr = (void* )stMutex;
+                return 0;
+            }
+            case AV_LOCK_OBTAIN: {
+                // lock the mutex
+                stMutex->lock();
+                return 0;
+            }
+            case AV_LOCK_RELEASE: {
+                // unlock the mutex
+                stMutex->unlock();
+                return 0;
+            }
+            case AV_LOCK_DESTROY: {
+                // free mutex resources
+                delete stMutex;
+                *theMutexPtrPtr = NULL;
+                return 0;
+            }
+            default: {
+                ST_DEBUG_LOG("FFmpeg, Unsupported lock operation " + theOperation);
+                return 1;
+            }
+        }
+    }
+
+} static stFFMpegLocker;
 #endif
 
 // this is just redeclaration AV_NOPTS_VALUE
@@ -130,9 +152,7 @@ namespace {
         // register own mutex to prevent multithreading errors
         // while using FFmpeg functions
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 30, 0))
-        if(av_lockmgr_register(stFFmpegLock) != 0) {
-            ST_DEBUG_LOG("FFmpeg, fail to register own mutex!");
-        }
+        stFFMpegLocker.init();
     #else
         #warning Ancient FFmpeg used, initialization performed in thread-unsafe manner!
     #endif
