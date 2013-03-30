@@ -503,6 +503,26 @@ void StWindowImpl::getTiledWinRect(StRectI_t& theRect) const {
     }
 }
 
+void StWindowImpl::correctTiledCursor(int& theLeft, int& theTop) const {
+    const StRectI_t& aWinRect = myWinAttribs.isFullScreen ? myRectFull : myRectNorm;
+    switch(myTiledCfg) {
+        case TiledCfg_SlaveMasterX: {
+            theLeft -= aWinRect.width();
+            return;
+        }
+        case TiledCfg_SlaveMasterY: {
+            theTop -= aWinRect.height();
+            return;
+        }
+        case TiledCfg_MasterSlaveX:
+        case TiledCfg_MasterSlaveY:
+        case TiledCfg_Separate:
+        default: {
+            return;
+        }
+    }
+}
+
 StGLBoxPx StWindowImpl::stglViewport(const int& theWinId) const {
     const StRectI_t& aWinRect = myWinAttribs.isFullScreen ? myRectFull : myRectNorm;
     const int aWidth  = aWinRect.width();
@@ -577,6 +597,8 @@ StPointD_t StWindowImpl::getMousePos() {
         XQueryPointer(myMaster.getDisplay(), myMaster.hWindowGl,
                       &rootReturn, &childReturn,
                       &rootX, &rootY, &winX, &winY, &maskReturn);
+
+        correctTiledCursor(winX, winY);
         return StPointD_t((double )winX / (double )aWinRect.width(),
                           (double )winY / (double )aWinRect.height());
     }

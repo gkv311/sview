@@ -111,6 +111,7 @@ class ST_LOCAL StWindowImpl : public StWindowInterface {
     };
 
     void getTiledWinRect(StRectI_t& theRect) const;
+    void correctTiledCursor(int& theLeft, int& theTop) const;
 
     void updateSlaveConfig() {
         myMonSlave.idSlave = int(myWinAttribs.slaveMonId);

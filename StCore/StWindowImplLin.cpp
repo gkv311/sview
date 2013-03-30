@@ -382,25 +382,56 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
         const StMonitor& stMon = (myMonMasterFull == -1) ? myMonitors[myRectNorm.center()] : myMonitors[myMonMasterFull];
         myRectFull = stMon.getVRect();
         XUnmapWindow(hDisplay, myMaster.hWindowGl); // workaround for strange bugs
+        StRectI_t aRect = myRectFull;
+
+        // use tiled Master+Slave layout within single window if possible
+        if(myWinAttribs.isSlave && isSlaveIndependent() && myMonitors.size() > 1) {
+            StRectI_t aRectSlave;
+            aRectSlave.left()   = getSlaveLeft();
+            aRectSlave.top()    = getSlaveTop();
+            aRectSlave.right()  = aRectSlave.left() + myRectFull.width();
+            aRectSlave.bottom() = aRectSlave.top()  + myRectFull.height();
+            myTiledCfg = TiledCfg_Separate;
+            if(myRectFull.top()   == aRectSlave.top()) {
+                if(myRectFull.right() == aRectSlave.left()) {
+                    myTiledCfg = TiledCfg_MasterSlaveX;
+                } else if(myRectFull.left() == aRectSlave.right()) {
+                    myTiledCfg = TiledCfg_SlaveMasterX;
+                }
+            } else if(myRectFull.left() == aRectSlave.left()) {
+                if(myRectFull.bottom() == aRectSlave.top()) {
+                    myTiledCfg = TiledCfg_MasterSlaveY;
+                } else if(myRectFull.top() == aRectSlave.bottom()) {
+                    myTiledCfg = TiledCfg_SlaveMasterY;
+                }
+            }
+        }
+
+        if(myTiledCfg != TiledCfg_Separate) {
+            XUnmapWindow(hDisplay, mySlave.hWindowGl);
+            getTiledWinRect(aRect);
+        }
 
         if((Window )myParentWin != 0 || myMaster.hWindow != 0) {
             XReparentWindow(hDisplay, myMaster.hWindowGl, myMaster.stXDisplay->getRootWindow(), 0, 0);
             XMoveResizeWindow(hDisplay, myMaster.hWindowGl,
-                              myRectFull.left(),  myRectFull.top(),
-                              myRectFull.width(), myRectFull.height());
+                              aRect.left(),  aRect.top(),
+                              aRect.width(), aRect.height());
             XFlush(hDisplay);
             XMapWindow(hDisplay, myMaster.hWindowGl);
             //XIfEvent(hDisplay, &myXEvent, stXWaitMapped, (char* )myMaster.hWindowGl);
         } else {
             XMoveResizeWindow(hDisplay, myMaster.hWindowGl,
-                              myRectFull.left(),  myRectFull.top(),
-                              myRectFull.width(), myRectFull.height());
+                              aRect.left(),  aRect.top(),
+                              aRect.width(), aRect.height());
             XFlush(hDisplay);
             XMapWindow(hDisplay, myMaster.hWindowGl);
             //XIfEvent(hDisplay, &myXEvent, stXWaitMapped, (char* )myMaster.hWindowGl);
         }
 
-        if(myWinAttribs.isSlave  && (!isSlaveIndependent() || myMonitors.size() > 1)) {
+        if(myWinAttribs.isSlave
+        && myTiledCfg == TiledCfg_Separate
+        && (!isSlaveIndependent() || myMonitors.size() > 1)) {
             XMoveResizeWindow(hDisplay, mySlave.hWindowGl,
                               getSlaveLeft(),  getSlaveTop(),
                               getSlaveWidth(), getSlaveHeight());
@@ -630,6 +661,13 @@ void StWindowImpl::updateWindowPos() {
                               getSlaveLeft(),  getSlaveTop(),
                               getSlaveWidth(), getSlaveHeight());
         }
+
+        if(myTiledCfg != TiledCfg_Separate) {
+            myTiledCfg = TiledCfg_Separate;
+            if(!myWinAttribs.isHide && myMonitors.size() > 1) {
+                XMapWindow(aDisplay->hDisplay, mySlave.hWindowGl);
+            }
+        }
     }
     myMessageList.append(StMessageList::MSG_RESIZE); // add event to update GL rendering scape
 
@@ -729,8 +767,12 @@ void StWindowImpl::callback(StMessage_t* theMessages) {
                 case ButtonPress:
                 case ButtonRelease: {
                     const XButtonEvent* aBtnEvent = &myXEvent.xbutton;
-                    StPointD_t point(double(aBtnEvent->x) / double(getPlacement().width()),
-                                     double(aBtnEvent->y) / double(getPlacement().height()));
+                    int aPosX = aBtnEvent->x;
+                    int aPosY = aBtnEvent->y;
+                    correctTiledCursor(aPosX, aPosY);
+                    const StRectI_t& aRect = myWinAttribs.isFullScreen ? myRectFull : myRectNorm;
+                    StPointD_t point(double(aPosX) / double(aRect.width()),
+                                     double(aPosY) / double(aRect.height()));
                     int aMouseBtn = ST_NOMOUSE;
                     // TODO (Kirill Gavrilov#6#) parse extra mouse buttons
                     switch(aBtnEvent->button) {
