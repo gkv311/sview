@@ -61,7 +61,6 @@ namespace {
 
         // parameters
         STTR_ANAGLYPH_VSYNC            = 1100,
-        STTR_ANAGLYPH_SHOW_FPS         = 1101,
         STTR_ANAGLYPH_REDCYAN_MENU     = 1102,
         STTR_ANAGLYPH_REDCYAN_SIMPLE   = 1120,
         STTR_ANAGLYPH_REDCYAN_OPTIM    = 1121,
@@ -126,7 +125,7 @@ void StOutAnaglyph::optionsStructAlloc() {
     myOptions->curRendererPath = StWindow::memAllocNCopy(myPluginPath);
     myOptions->curDeviceId = 0;
 
-    myOptions->optionsCount = 5;
+    myOptions->optionsCount = 4;
     myOptions->options = (StSDOption_t** )StWindow::memAlloc(sizeof(StSDOption_t*) * myOptions->optionsCount);
 
     // VSync option
@@ -134,12 +133,6 @@ void StOutAnaglyph::optionsStructAlloc() {
     myOptions->options[DEVICE_OPTION_VSYNC]->optionType = ST_DEVICE_OPTION_ON_OFF;
     ((StSDOnOff_t* )myOptions->options[DEVICE_OPTION_VSYNC])->value = myIsVSyncOn;
     myOptions->options[DEVICE_OPTION_VSYNC]->title = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_ANAGLYPH_VSYNC, "VSync"));
-
-    // Show FPS option
-    myOptions->options[DEVICE_OPTION_SHOWFPS] = (StSDOption_t* )StWindow::memAlloc(sizeof(StSDOnOff_t));
-    myOptions->options[DEVICE_OPTION_SHOWFPS]->optionType = ST_DEVICE_OPTION_ON_OFF;
-    ((StSDOnOff_t* )myOptions->options[DEVICE_OPTION_SHOWFPS])->value = myToShowFPS;
-    myOptions->options[DEVICE_OPTION_SHOWFPS]->title = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_ANAGLYPH_SHOW_FPS, "Show FPS"));
 
     // Glasses switch option
     myOptions->options[DEVICE_OPTION_GLASSES] = (StSDOption_t* )StWindow::memAlloc(sizeof(StSDSwitch_t));
@@ -193,7 +186,6 @@ StOutAnaglyph::StOutAnaglyph()
   myOptions(NULL),
   myToSavePlacement(true),
   myIsVSyncOn(true),
-  myToShowFPS(false),
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false) {
     myFrBuffer      = new StGLStereoFrameBuffer();
@@ -408,16 +400,6 @@ void StOutAnaglyph::callback(StMessage_t* stMessages) {
                     msg.data = (void* )option->valuesTitles[option->value];
                     getStWindow()->appendMessage(msg);
                 }
-                if(keysMap[ST_VK_F12]) {
-                    myToShowFPS = !myToShowFPS;
-                    keysMap[ST_VK_F12] = false;
-
-                    // send 'update' message to StDrawer
-                    StMessage_t msg; msg.uin = StMessageList::MSG_DEVICE_OPTION;
-                    StSDSwitch_t* option = ((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_SHOWFPS]);
-                    option->value = myToShowFPS; msg.data = (void* )option;
-                    getStWindow()->appendMessage(msg);
-                }
                 break;
             }
             case StMessageList::MSG_DEVICE_OPTION: {
@@ -428,7 +410,6 @@ void StOutAnaglyph::callback(StMessage_t* stMessages) {
                     myContext->stglSetVSync(myIsVSyncOn ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
                 }
 
-                myToShowFPS = ((StSDOnOff_t* )myOptions->options[DEVICE_OPTION_SHOWFPS])->value;
                 setShader ((int )((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_GLASSES])->value,
                            (int )((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_REDCYAN])->value,
                            (int )((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_YELLOW ])->value);
@@ -440,10 +421,6 @@ void StOutAnaglyph::callback(StMessage_t* stMessages) {
 
 void StOutAnaglyph::stglDraw(unsigned int ) {
     myFPSControl.setTargetFPS(getStWindow()->stglGetTargetFps());
-    if(myToShowFPS && myFPSControl.isUpdated()) {
-        getStWindow()->setTitle(StString("Anaglyph Rendering FPS= ") + myFPSControl.getAverage());
-    }
-
     if(!getStWindow()->isStereoOutput() || myIsBroken) {
         getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
         myContext->stglResize(getStWindow()->getPlacement());
@@ -526,7 +503,7 @@ ST_EXPORT const StRendererInfo_t* getDevicesInfo(const stBool_t /*theToDetectPri
     StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE, "sView - Anaglyph Output module");
     StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
     StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
-        "(C) 2007-2012 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0");
+        "(C) 2007-2013 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0");
     static StString anAboutString = aTitle + '\n' + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr;
     ST_SELF_INFO.aboutString = (stUtf8_t* )anAboutString.toCString();
 

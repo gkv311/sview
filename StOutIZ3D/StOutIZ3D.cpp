@@ -76,7 +76,6 @@ namespace {
 
         // parameters
         STTR_PARAMETER_VSYNC    = 1100,
-        STTR_PARAMETER_SHOW_FPS = 1101,
         STTR_PARAMETER_GLASSES  = 1102,
 
         STTR_PARAMETER_GLASSES_CLASSIC      = 1120,
@@ -99,7 +98,7 @@ void StOutIZ3D::optionsStructAlloc() {
     myOptions->curRendererPath = StWindow::memAllocNCopy(myPluginPath);
     myOptions->curDeviceId = 0;
 
-    myOptions->optionsCount = 3;
+    myOptions->optionsCount = 2;
     myOptions->options = (StSDOption_t** )StWindow::memAlloc(sizeof(StSDOption_t*) * myOptions->optionsCount);
 
     // VSync option
@@ -107,12 +106,6 @@ void StOutIZ3D::optionsStructAlloc() {
     myOptions->options[DEVICE_OPTION_VSYNC]->title = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_PARAMETER_VSYNC, "VSync"));
     myOptions->options[DEVICE_OPTION_VSYNC]->optionType = ST_DEVICE_OPTION_ON_OFF;
     ((StSDOnOff_t* )myOptions->options[DEVICE_OPTION_VSYNC])->value = myIsVSyncOn;
-
-    // Show FPS option
-    myOptions->options[DEVICE_OPTION_SHOWFPS] = (StSDOption_t* )StWindow::memAlloc(sizeof(StSDOnOff_t));
-    myOptions->options[DEVICE_OPTION_SHOWFPS]->title = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_PARAMETER_SHOW_FPS, "Show FPS"));
-    myOptions->options[DEVICE_OPTION_SHOWFPS]->optionType = ST_DEVICE_OPTION_ON_OFF;
-    ((StSDOnOff_t* )myOptions->options[DEVICE_OPTION_SHOWFPS])->value = myToShowFPS;
 
     // shader switch option
     myOptions->options[DEVICE_OPTION_SHADER] = (StSDOption_t* )StWindow::memAlloc(sizeof(StSDSwitch_t));
@@ -133,7 +126,6 @@ StOutIZ3D::StOutIZ3D()
 : myOptions(NULL),
   myToSavePlacement(true),
   myIsVSyncOn(true),
-  myToShowFPS(false),
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false) {
     myFrBuffer = new StGLStereoFrameBuffer();
@@ -298,16 +290,6 @@ void StOutIZ3D::callback(StMessage_t* stMessages) {
                     msg.data = (void* )option->valuesTitles[option->value];
                     getStWindow()->appendMessage(msg);
                 }
-                if(keysMap[ST_VK_F12]) {
-                    myToShowFPS = !myToShowFPS;
-                    keysMap[ST_VK_F12] = false;
-
-                    // send 'update' message to StDrawer
-                    StMessage_t msg; msg.uin = StMessageList::MSG_DEVICE_OPTION;
-                    StSDSwitch_t* option = ((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_SHOWFPS]);
-                    option->value = myToShowFPS; msg.data = (void* )option;
-                    getStWindow()->appendMessage(msg);
-                }
                 break;
             }
             case StMessageList::MSG_DEVICE_OPTION: {
@@ -318,7 +300,6 @@ void StOutIZ3D::callback(StMessage_t* stMessages) {
                     myContext->stglSetVSync(myIsVSyncOn ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
                 }
 
-                myToShowFPS = ((StSDOnOff_t* )myOptions->options[DEVICE_OPTION_SHOWFPS])->value;
                 myShaders.setMode((int )((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_SHADER])->value);
                 break;
             }
@@ -328,9 +309,6 @@ void StOutIZ3D::callback(StMessage_t* stMessages) {
 
 void StOutIZ3D::stglDraw(unsigned int ) {
     myFPSControl.setTargetFPS(getStWindow()->stglGetTargetFps());
-    if(myToShowFPS && myFPSControl.isUpdated()) {
-        getStWindow()->setTitle(StString("iZ3D Rendering FPS= ") + myFPSControl.getAverage());
-    }
 
     const StGLBoxPx aVPMaster = getStWindow()->stglViewport(ST_WIN_MASTER);
     const StGLBoxPx aVPSlave  = getStWindow()->stglViewport(ST_WIN_SLAVE);
@@ -476,7 +454,7 @@ ST_EXPORT const StRendererInfo_t* getDevicesInfo(const stBool_t theToDetectPrior
     StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE, "sView - iZ3D Output module");
     StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
     StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
-        "(C) 2009-2012 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0");
+        "(C) 2009-2013 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0");
     static StString anAboutString = aTitle + '\n' + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr;
     ST_SELF_INFO.aboutString = (stUtf8_t* )anAboutString.toCString();
 

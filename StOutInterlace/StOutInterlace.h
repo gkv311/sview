@@ -56,9 +56,8 @@ class ST_LOCAL StOutInterlace : public StRendererInterface {
 
     enum {
         DEVICE_OPTION_VSYNC   = 0,
-        DEVICE_OPTION_SHOWFPS = 1,
-        DEVICE_OPTION_REVERSE = 2,
-        DEVICE_OPTION_BINDMON = 3,
+        DEVICE_OPTION_REVERSE = 1,
+        DEVICE_OPTION_BINDMON = 2,
     };
 
         private:
@@ -92,7 +91,6 @@ class ST_LOCAL StOutInterlace : public StRendererInterface {
     bool                      myToSavePlacement;
     bool                      myToBindToMonitor;
     bool                      myIsVSync;
-    bool                      myToShowFPS;
     bool                      myIsReversed;               //!< configurable flag to reverse rows order
     bool                      myIsMonReversed;            //!< indicates (known) monitor model with reversed rows order
     bool                      myIsStereo;

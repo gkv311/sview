@@ -30,10 +30,9 @@ class ST_LOCAL StOutPageFlipExt : public StOutPageFlip {
         private:
 
     enum {
-        DEVICE_OPTION_SHOWFPS    = 0,
-        DEVICE_OPTION_EXTRA      = 1,
-        DEVICE_OPTION_QUADBUFFER = 2,
-        DEVICE_OPTION_CONTROL    = 3,
+        DEVICE_OPTION_EXTRA      = 0,
+        DEVICE_OPTION_QUADBUFFER = 1,
+        DEVICE_OPTION_CONTROL    = 2,
     } DeviceOption;
 
     typedef enum tagDeviceControlEnum {

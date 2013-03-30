@@ -76,7 +76,6 @@ namespace {
 
         // parameters
         STTR_PARAMETER_VSYNC    = 1100,
-        STTR_PARAMETER_SHOW_FPS = 1101,
         STTR_PARAMETER_REVERSE  = 1102,
         STTR_PARAMETER_BIND_MON = 1103,
 
@@ -142,7 +141,7 @@ void StOutInterlace::optionsStructAlloc() {
     myOptionsStruct->curRendererPath = StWindow::memAllocNCopy(myPluginPath);
     myOptionsStruct->curDeviceId = myDeviceId;
 
-    myOptionsStruct->optionsCount = 4;
+    myOptionsStruct->optionsCount = 3;
     myOptionsStruct->options = (StSDOption_t** )StWindow::memAlloc(sizeof(StSDOption_t*) * myOptionsStruct->optionsCount);
 
     // VSync option
@@ -150,12 +149,6 @@ void StOutInterlace::optionsStructAlloc() {
     myOptionsStruct->options[DEVICE_OPTION_VSYNC]->optionType = ST_DEVICE_OPTION_ON_OFF;
     ((StSDOnOff_t* )myOptionsStruct->options[DEVICE_OPTION_VSYNC])->value = myIsVSync;
     myOptionsStruct->options[DEVICE_OPTION_VSYNC]->title = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_PARAMETER_VSYNC, "VSync"));
-
-    // Show FPS option
-    myOptionsStruct->options[DEVICE_OPTION_SHOWFPS] = (StSDOption_t* )StWindow::memAlloc(sizeof(StSDOnOff_t));
-    myOptionsStruct->options[DEVICE_OPTION_SHOWFPS]->optionType = ST_DEVICE_OPTION_ON_OFF;
-    ((StSDOnOff_t* )myOptionsStruct->options[DEVICE_OPTION_SHOWFPS])->value = myToShowFPS;
-    myOptionsStruct->options[DEVICE_OPTION_SHOWFPS]->title = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_PARAMETER_SHOW_FPS, "Show FPS"));
 
     // Reverse Order option
     myOptionsStruct->options[DEVICE_OPTION_REVERSE] = (StSDOption_t* )StWindow::memAlloc(sizeof(StSDOnOff_t));
@@ -203,14 +196,10 @@ StOutInterlace::StOutInterlace()
   myEDIntelaceOn(new StGLProgram("ED Interlace On")),
   myEDOff(new StGLProgram("ED Interlace Off")),
   myVpSizeY(10),
-  myVpSizeYOnLoc(),
-  myVpSizeYOffLoc(),
   myOptionsStruct(NULL),
-  myFPSControl(),
   myToSavePlacement(true),
   myToBindToMonitor(true),
   myIsVSync(true),
-  myToShowFPS(false),
   myIsReversed(false),
   myIsMonReversed(false),
   myIsStereo(false),
@@ -548,16 +537,6 @@ void StOutInterlace::callback(StMessage_t* stMessages) {
                 } else if(keysMap[ST_VK_F4]) {
                     setDevice(DEVICE_HINTERLACE_ED); keysMap[ST_VK_F4] = false;
                 }
-                if(keysMap[ST_VK_F12]) {
-                    myToShowFPS = !myToShowFPS;
-                    keysMap[ST_VK_F12] = false;
-
-                    // send 'update' message to StDrawer
-                    StMessage_t msg; msg.uin = StMessageList::MSG_DEVICE_OPTION;
-                    StSDSwitch_t* option = ((StSDSwitch_t* )myOptionsStruct->options[DEVICE_OPTION_SHOWFPS]);
-                    option->value = myToShowFPS; msg.data = (void* )option;
-                    getStWindow()->appendMessage(msg);
-                }
                 break;
             }
             case StMessageList::MSG_DEVICE_INFO: {
@@ -577,7 +556,6 @@ void StOutInterlace::callback(StMessage_t* stMessages) {
                     getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
                     myContext->stglSetVSync(myIsVSync ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
                 }
-                myToShowFPS          = ((StSDOnOff_t* )myOptionsStruct->options[DEVICE_OPTION_SHOWFPS])->value;
                 myIsReversed         = ((StSDOnOff_t* )myOptionsStruct->options[DEVICE_OPTION_REVERSE])->value;
                 bool toBindToMonitor = ((StSDOnOff_t* )myOptionsStruct->options[DEVICE_OPTION_BINDMON])->value;
 
@@ -667,9 +645,6 @@ void StOutInterlace::stglDrawEDCodes() {
 
 void StOutInterlace::stglDraw(unsigned int ) {
     myFPSControl.setTargetFPS(getStWindow()->stglGetTargetFps());
-    if(myToShowFPS && myFPSControl.isUpdated()) {
-        getStWindow()->setTitle(StString("Interlace Rendering FPS= ") + myFPSControl.getAverage());
-    }
 
     // always draw LEFT view into real screen buffer
     getStWindow()->stglMakeCurrent(ST_WIN_MASTER);

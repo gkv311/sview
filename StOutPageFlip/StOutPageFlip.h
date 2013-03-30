@@ -42,7 +42,6 @@ enum {
     STTR_VUZIX_DESC    = 1003,
 
     // parameters
-    STTR_PARAMETER_SHOW_FPS     = 1101,
     STTR_PARAMETER_QBUFFER_TYPE = 1102,
     STTR_PARAMETER_CONTROL_CODE = 1103,
 
@@ -77,9 +76,8 @@ class ST_LOCAL StOutPageFlip : public StRendererInterface {
     } DeviceEnum;
 
     enum {
-        DEVICE_OPTION_SHOWFPS    = 0,
-        DEVICE_OPTION_EXTRA      = 1,
-        DEVICE_OPTION_QUADBUFFER = 2,
+        DEVICE_OPTION_EXTRA      = 0,
+        DEVICE_OPTION_QUADBUFFER = 1,
     } DeviceOption;
 
     typedef enum tagQuadBufferEnum {
@@ -107,7 +105,6 @@ class ST_LOCAL StOutPageFlip : public StRendererInterface {
     StFPSControl          myFPSControl;
     bool                  myToSavePlacement;
     bool                  myToDrawStereo;
-    bool                  myToShowFPS;
 #if(defined(_WIN32) || defined(__WIN32__))
     bool                  myIsVistaPlus;
 #endif

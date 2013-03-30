@@ -89,12 +89,6 @@ void StOutPageFlip::optionsStructAlloc() {
     myOptions->optionsCount = myDeviceOptionsNb;
     myOptions->options = (StSDOption_t** )StWindow::memAlloc(sizeof(StSDOption_t*) * myOptions->optionsCount);
 
-    // Show FPS option
-    myOptions->options[DEVICE_OPTION_SHOWFPS] = (StSDOption_t* )StWindow::memAlloc(sizeof(StSDOnOff_t));
-    myOptions->options[DEVICE_OPTION_SHOWFPS]->optionType = ST_DEVICE_OPTION_ON_OFF;
-    ((StSDOnOff_t* )myOptions->options[DEVICE_OPTION_SHOWFPS])->value = myToShowFPS;
-    myOptions->options[DEVICE_OPTION_SHOWFPS]->title = StWindow::memAllocNCopy(aLangMap.changeValueId(STTR_PARAMETER_SHOW_FPS, "Show FPS"));
-
     // Show Extra option
     myOptions->options[DEVICE_OPTION_EXTRA] = (StSDOption_t* )StWindow::memAlloc(sizeof(StSDOnOff_t));
     myOptions->options[DEVICE_OPTION_EXTRA]->optionType = ST_DEVICE_OPTION_ON_OFF;
@@ -138,7 +132,6 @@ StOutPageFlip::StOutPageFlip(const StHandle<StSettings>& theSettings)
   myFPSControl(),
   myToSavePlacement(true),
   myToDrawStereo(false),
-  myToShowFPS(false),
 #if(defined(_WIN32) || defined(__WIN32__))
   myIsVistaPlus(StSys::isVistaPlus()),
 #endif
@@ -435,21 +428,10 @@ void StOutPageFlip::parseKeys(bool* theKeysMap) {
         getStWindow()->stglSwap(ST_WIN_MASTER);
         theKeysMap[ST_VK_F11] = false;
     }
-    if(theKeysMap[ST_VK_F12]) {
-        myToShowFPS = !myToShowFPS;
-        theKeysMap[ST_VK_F12] = false;
-
-        // send 'update' message to StDrawer
-        StMessage_t aMsg; aMsg.uin = StMessageList::MSG_DEVICE_OPTION;
-        StSDSwitch_t* anOption = ((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_SHOWFPS]);
-        anOption->value = myToShowFPS; aMsg.data = (void* )anOption;
-        getStWindow()->appendMessage(aMsg);
-    }
 }
 
 void StOutPageFlip::updateOptions(const StSDOptionsList_t* theOptions,
                                   StMessage_t&             theMsg) {
-    myToShowFPS = ((StSDOnOff_t* )theOptions->options[DEVICE_OPTION_SHOWFPS])->value;
     QuadBufferEnum newQuadBuffer = QuadBufferEnum(((StSDSwitch_t* )theOptions->options[DEVICE_OPTION_QUADBUFFER])->value);
 
     bool toShowExtra = ((StSDOnOff_t* )myOptions->options[DEVICE_OPTION_EXTRA])->value;
@@ -621,9 +603,6 @@ void StOutPageFlip::stglDrawWarning() {
 
 void StOutPageFlip::stglDraw(unsigned int ) {
     myFPSControl.setTargetFPS(getStWindow()->stglGetTargetFps());
-    if(myToShowFPS && myFPSControl.isUpdated()) {
-        getStWindow()->setTitle(StString("PageFlip Rendering FPS= ") + myFPSControl.getAverage());
-    }
 
     getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
     const StRectI_t aRect = getStWindow()->getPlacement();

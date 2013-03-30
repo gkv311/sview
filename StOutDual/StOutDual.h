@@ -40,8 +40,7 @@ class ST_LOCAL StOutDual : public StRendererInterface {
 
     enum {
         DEVICE_OPTION_VSYNC   = 0,
-        DEVICE_OPTION_SHOWFPS = 1,
-        DEVICE_OPTION_SLAVEID = 2,
+        DEVICE_OPTION_SLAVEID = 1,
     };
 
         private:
@@ -86,10 +85,8 @@ class ST_LOCAL StOutDual : public StRendererInterface {
     int32_t                   mySlaveMonId;      //!< slave window placement
     bool                      myToSavePlacement; //!< to save window position on exit
     bool                      myIsVSyncOn;       //!< to turn VSync on
-    bool                      myToShowFPS;       //!< to show FPS
     bool                      myToCompressMem;   //!< reduce memory usage
     bool                      myIsBroken;        //!< special flag for broke state - when FBO can not be allocated
-
 
 };
 

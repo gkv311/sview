@@ -34,8 +34,7 @@ class ST_LOCAL StOutIZ3D : public StRendererInterface {
 
     enum {
         DEVICE_OPTION_VSYNC   = 0,
-        DEVICE_OPTION_SHOWFPS = 1,
-        DEVICE_OPTION_SHADER  = 2,
+        DEVICE_OPTION_SHADER  = 1,
     };
 
         private:
@@ -74,7 +73,6 @@ class ST_LOCAL StOutIZ3D : public StRendererInterface {
     StFPSControl                    myFPSControl;
     bool                            myToSavePlacement;
     bool                            myIsVSyncOn;
-    bool                            myToShowFPS;
     bool                            myToCompressMem;   //!< reduce memory usage
     bool                            myIsBroken;        //!< special flag for broke state - when FBO can not be allocated
 

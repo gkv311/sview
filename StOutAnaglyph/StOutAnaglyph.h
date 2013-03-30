@@ -55,10 +55,9 @@ class ST_LOCAL StOutAnaglyph : public StRendererInterface {
 
     enum {
         DEVICE_OPTION_VSYNC   = 0,
-        DEVICE_OPTION_SHOWFPS = 1,
-        DEVICE_OPTION_GLASSES = 2,
-        DEVICE_OPTION_REDCYAN = 3,
-        DEVICE_OPTION_YELLOW  = 4,
+        DEVICE_OPTION_GLASSES = 1,
+        DEVICE_OPTION_REDCYAN = 2,
+        DEVICE_OPTION_YELLOW  = 3,
     };
 
         private:
@@ -110,7 +109,6 @@ class ST_LOCAL StOutAnaglyph : public StRendererInterface {
     StFPSControl                    myFPSControl;
     bool                            myToSavePlacement;
     bool                            myIsVSyncOn;
-    bool                            myToShowFPS;
     bool                            myToCompressMem;        //!< reduce memory usage
     bool                            myIsBroken;             //!< special flag for broke state - when FBO can not be allocated
 

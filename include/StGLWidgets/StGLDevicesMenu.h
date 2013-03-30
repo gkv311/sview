@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -13,6 +13,7 @@
 
 // forward declarations
 class StWindow;
+class StGLFpsLabel;
 typedef struct tagStSDOptionsList StSDOptionsList_t;
 
 /**
@@ -35,6 +36,7 @@ class ST_LOCAL StGLDevicesMenu : public StGLMenu {
                     StWindow* theWindow,
                     const StString& theLabelChangeDevice,
                     const StString& theLabelAboutPlugin,
+                    const StString& theLabelShowFps,
                     const int theOrient = MENU_VERTICAL);
 
     /**
@@ -46,6 +48,11 @@ class ST_LOCAL StGLDevicesMenu : public StGLMenu {
      * Will automatically update tracked menu item text.
      */
     virtual void stglUpdate(const StPointD_t& theCursorZo);
+
+    /**
+     * Draw menu.
+     */
+    virtual void stglDraw(unsigned int theView);
 
     /**
      * You may assign the menu item to track active device changes
@@ -74,6 +81,11 @@ class ST_LOCAL StGLDevicesMenu : public StGLMenu {
      */
     void doAboutRenderer(const size_t );
 
+    /**
+     * Will show FPS meter.
+     */
+    void doShowFPS(const bool theToShowFps);
+
         private:
 
     /**
@@ -90,6 +102,8 @@ class ST_LOCAL StGLDevicesMenu : public StGLMenu {
 
     StGLMenuItem*          myParentItem;     //!< tracked menu item (optional)
     StWindow*              myWindow;         //!< link to the window instance
+    StGLFpsLabel*          myFpsWidget;      //!< FPS meter
+    StHandle<StBoolParam>  myToShowFps;      //!< FPS meter visability
     StHandle<StInt32Param> myActiveDevParam;
     StString               myActiveDevice;   //!< active device title
     int                    myActiveDeviceId; //!< active device id (in loaded Renderer plugin)

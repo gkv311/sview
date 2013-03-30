@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -9,6 +9,7 @@
 #include <StGLWidgets/StGLDevicesMenu.h>
 #include <StGLWidgets/StGLMenuItem.h>
 #include <StGLWidgets/StGLMessageBox.h>
+#include <StGLWidgets/StGLFpsLabel.h>
 
 #include <StCore/StCore.h>
 #include <StCore/StStereoDeviceInfo_t.h>
@@ -38,14 +39,20 @@ StGLDevicesMenu::StGLDevicesMenu(StGLWidget* theParent,
                                  StWindow* theWindow,
                                  const StString& theLabelChangeDevice,
                                  const StString& theLabelAboutPlugin,
+                                 const StString& theLabelShowFps,
                                  const int theOrient)
 : StGLMenu(theParent, 0, 0, theOrient, false),
   myWindow(theWindow),
+  myFpsWidget(NULL),
+  myToShowFps(new StBoolParam(false)),
   myActiveDevice("Output"),
   myActiveDeviceId(0) {
+    myToShowFps->signals.onChanged.connect(this, &StGLDevicesMenu::doShowFPS);
+
     StGLMenu* aMenuChangeDevice = createChangeDeviceMenu(theParent);
     addItem(theLabelChangeDevice, aMenuChangeDevice);
     addItem(theLabelAboutPlugin)->signals.onItemClick.connect(this, &StGLDevicesMenu::doAboutRenderer);
+    addItem(theLabelShowFps,      myToShowFps);
 
     // add renderer device options
     StSDOptionsList_t* anOptions = getSharedInfo();
@@ -128,6 +135,15 @@ void StGLDevicesMenu::stglUpdate(const StPointD_t& theCursorZo) {
     StGLWidget::stglUpdate(theCursorZo);
 }
 
+void StGLDevicesMenu::stglDraw(unsigned int theView) {
+    if(theView == ST_DRAW_LEFT
+    && myFpsWidget != NULL) {
+        myFpsWidget->update(myWindow->isStereoOutput(),
+                            myWindow->stglGetTargetFps());
+    }
+    StGLMenu::stglDraw(theView);
+}
+
 void StGLDevicesMenu::doAboutRenderer(const size_t ) {
     // read info from the active StRenderer plugin
     StSDOptionsList_t* anOptions = getSharedInfo();
@@ -159,4 +175,16 @@ void StGLDevicesMenu::doAboutRenderer(const size_t ) {
     aDialog->stglInit();
     aDialog->signals.onClickLeft.connect(aDialog,  &StGLMessageBox::doKillSelf);
     aDialog->signals.onClickRight.connect(aDialog, &StGLMessageBox::doKillSelf);
+}
+
+void StGLDevicesMenu::doShowFPS(const bool ) {
+    if(myFpsWidget != NULL) {
+        delete myFpsWidget;
+        myFpsWidget = NULL;
+        return;
+    }
+
+    myFpsWidget = new StGLFpsLabel(getParent());
+    myFpsWidget->setVisibility(true, true);
+    myFpsWidget->stglInit();
 }

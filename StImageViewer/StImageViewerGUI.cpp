@@ -105,7 +105,8 @@ void StImageViewerGUI::createMainMenu() {
     // Root -> Output menu
     StGLDevicesMenu* aDevicesMenu = new StGLDevicesMenu(this, myWindow,
         myLangMap->changeValueId(MENU_CHANGE_DEVICE,  "Change Device"),
-        myLangMap->changeValueId(MENU_ABOUT_RENDERER, "About Plugin..."));
+        myLangMap->changeValueId(MENU_ABOUT_RENDERER, "About Plugin..."),
+        myLangMap->changeValueId(MENU_SHOW_FPS,       "Show FPS"));
 
     StGLMenu* aMenuHelp   = createHelpMenu();    // Root -> Help menu
 

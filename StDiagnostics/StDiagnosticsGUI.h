@@ -26,42 +26,7 @@
 
 class StDiagnostics;
 class StGeometryTest;
-
-/**
- * FPS widget.
- */
-class ST_LOCAL StGLFpsLabel : public StGLTextArea {
-
-        public:  //!< StGLTextArea overrides
-
-    StGLFpsLabel(StGLWidget* theParent);
-    virtual ~StGLFpsLabel();
-
-        public:
-
-    void update(const bool   theIsStereo,
-                const double theTargetFps);
-
-        public:  //!< Signals
-
-    struct {
-        /**
-         * Emit callback Slot on button click.
-         * @param theUserData (const size_t ) - user predefined data.
-         */
-        StSignal<void (const size_t )> onBtnClick;
-    } signals;
-
-        private: //!< callback Slots (private overriders)
-
-    void doMouseUnclick(const int theBtnId);
-
-        private:
-
-    StTimer      myTimer;   //!< FPS timer
-    unsigned int myCounter; //!< frames counter
-
-};
+class StGLFpsLabel;
 
 /**
  * Root GUI widget for Diagnostics application.

@@ -195,6 +195,7 @@
 		<Unit filename="StGLCheckbox.cpp" />
 		<Unit filename="StGLCheckboxTextured.cpp" />
 		<Unit filename="StGLDevicesMenu.cpp" />
+		<Unit filename="StGLFpsLabel.cpp" />
 		<Unit filename="StGLImageFlatProgram.cpp" />
 		<Unit filename="StGLImageProgram.cpp" />
 		<Unit filename="StGLImageRegion.cpp" />
@@ -232,6 +233,7 @@
 		<Unit filename="../include/StGLWidgets/StGLCorner.h" />
 		<Unit filename="../include/StGLWidgets/StGLDescription.h" />
 		<Unit filename="../include/StGLWidgets/StGLDevicesMenu.h" />
+		<Unit filename="../include/StGLWidgets/StGLFpsLabel.h" />
 		<Unit filename="../include/StGLWidgets/StGLImageFlatProgram.h" />
 		<Unit filename="../include/StGLWidgets/StGLImageProgram.h" />
 		<Unit filename="../include/StGLWidgets/StGLImageRegion.h" />
