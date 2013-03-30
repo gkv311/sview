@@ -84,6 +84,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         return false;
     }
 
+    StTimer aLoadTimer(true);
     StFormatEnum aSrcFormatCurr = mySrcFormat;
     if(anImgType == StImageFile::ST_TYPE_MPO
     || anImgType == StImageFile::ST_TYPE_JPEG) {
@@ -148,6 +149,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             return false;
         }
     }
+    const double aLoadTimeMSec = aLoadTimer.getElapsedTimeInMilliSec();
 
 #ifdef __ST_DEBUG__
     if(!stImageL->isNull()) {
@@ -195,6 +197,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
                                                                + " x " + stImageL->getSizeY()));
         anImgInfo->myInfo.add(StArgument("Color Model",     stImageL->formatImgColorModel()));
     }
+    anImgInfo->myInfo.add(StArgument("Load time", StString(aLoadTimeMSec) + " msec"));
     myImgInfo = anImgInfo;
 
     // clean up - close opened files and reset memory
