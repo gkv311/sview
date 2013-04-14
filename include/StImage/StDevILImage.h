@@ -16,7 +16,7 @@ typedef unsigned int ILuint;
 /**
  * This class implements image load/save operations using DevIL library.
  */
-class ST_LOCAL StDevILImage : public StImageFile {
+class StDevILImage : public StImageFile {
 
         private:
 
@@ -24,7 +24,7 @@ class ST_LOCAL StDevILImage : public StImageFile {
 
         private:
 
-    bool isValid() const {
+    inline bool isValid() const {
         return myImageId != 0;
     }
 
@@ -33,20 +33,20 @@ class ST_LOCAL StDevILImage : public StImageFile {
     /**
      * Should be called at application start.
      */
-    static bool init();
+    ST_CPPEXPORT static bool init();
 
         public:
 
-    StDevILImage();
-    virtual ~StDevILImage();
+    ST_CPPEXPORT StDevILImage();
+    ST_CPPEXPORT virtual ~StDevILImage();
 
-    virtual void close();
-    virtual bool load(const StString& theFilePath,
-                      ImageType theImageType = ST_TYPE_NONE,
-                      uint8_t* theDataPtr = NULL, int theDataSize = 0);
-    virtual bool save(const StString& theFilePath,
-                      ImageType theImageType);
-    virtual bool resize(size_t theSizeX, size_t theSizeY);
+    ST_CPPEXPORT virtual void close();
+    ST_CPPEXPORT virtual bool load(const StString& theFilePath,
+                                   ImageType theImageType = ST_TYPE_NONE,
+                                   uint8_t* theDataPtr = NULL, int theDataSize = 0);
+    ST_CPPEXPORT virtual bool save(const StString& theFilePath,
+                                   ImageType theImageType);
+    ST_CPPEXPORT virtual bool resize(size_t theSizeX, size_t theSizeY);
 
 };
 

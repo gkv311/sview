@@ -14,7 +14,7 @@
 /**
  * Provide classic saturation matrix for color processing.
  */
-class ST_LOCAL StGLSaturationMatrix : public StGLMatrix {
+class StGLSaturationMatrix : public StGLMatrix {
 
         private:
 

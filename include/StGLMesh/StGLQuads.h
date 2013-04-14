@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -14,25 +14,25 @@
 /**
  * Class represents quads array.
  */
-class ST_LOCAL StGLQuads : public StGLMesh {
+class StGLQuads : public StGLMesh {
 
         public:
 
     /**
      * Empty constructor. Vertices will be drawn as GL_TRIANGLES.
      */
-    StGLQuads();
+    ST_CPPEXPORT StGLQuads();
 
     /**
      * Empty constructor.
      */
-    StGLQuads(const GLenum thePrimitives);
+    ST_CPPEXPORT StGLQuads(const GLenum thePrimitives);
 
     /**
      * Initialize the quad that cover the whole screen (for identity projection and model view matrices).
      * Notice that created single quad will be drawn as GL_TRIANGLE_STRIP.
      */
-    bool initScreen(StGLContext& theCtx);
+    ST_CPPEXPORT bool initScreen(StGLContext& theCtx);
 
 };
 

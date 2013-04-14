@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -17,36 +17,36 @@ class StBndSphere;
  * Class represents configurable UV sphere with computed vertices, noramles, texture coordinates
  * and indices to faster (and correct) draw using one glMultiDrawElements() call.
  */
-class ST_LOCAL StGLUVSphere : public StGLMesh {
+class StGLUVSphere : public StGLMesh {
 
         public:
 
     /**
      * Defines the UV sphere mesh with specified parameters.
      */
-    StGLUVSphere(const StGLVec3& theCenter,
-                 const GLfloat   theRadius,
-                 const size_t    theRings);
+    ST_CPPEXPORT StGLUVSphere(const StGLVec3& theCenter,
+                              const GLfloat   theRadius,
+                              const size_t    theRings);
 
     /**
      * Defines the UV sphere from boundary sphere.
      */
-    StGLUVSphere(const StBndSphere& theBndSphere,
-                 const size_t       theRings);
+    ST_CPPEXPORT StGLUVSphere(const StBndSphere& theBndSphere,
+                              const size_t       theRings);
 
-    virtual ~StGLUVSphere();
+    ST_CPPEXPORT virtual ~StGLUVSphere();
 
     /**
      * Compute the mesh using current configuration.
      */
-    virtual bool computeMesh();
+    ST_CPPEXPORT virtual bool computeMesh();
 
         protected:
 
     /**
      * Draw the primitives itself.
      */
-    virtual void drawKernel(StGLContext& theCtx) const;
+    ST_CPPEXPORT virtual void drawKernel(StGLContext& theCtx) const;
 
         private:
 

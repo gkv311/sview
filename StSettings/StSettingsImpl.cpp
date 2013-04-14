@@ -8,10 +8,6 @@
 
 #include <StVersion.h>
 
-namespace {
-    static bool HAS_LOGGER_ID = StLogger::IdentifyModule("StSettings");
-};
-
 // SDK version was used
 ST_EXPORT void getSDKVersion(StVersion* theVer) {
     *theVer = StVersionInfo::getSDKVersion();

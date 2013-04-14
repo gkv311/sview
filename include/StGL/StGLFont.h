@@ -42,36 +42,36 @@ template<> inline void StArray<StGLRect>::sort() {}
 /**
  * Texture font.
  */
-class ST_LOCAL StGLFont : public StGLResource {
+class StGLFont : public StGLResource {
 
         public:
 
     /**
      * Main constructor.
      */
-    StGLFont(StHandle<StFTFont>& theFont);
+    ST_CPPEXPORT StGLFont(StHandle<StFTFont>& theFont);
 
     /**
      * Destructor - should be called after release()!
      */
-    virtual ~StGLFont();
+    ST_CPPEXPORT virtual ~StGLFont();
 
     /**
      * Release GL resources.
      */
-    virtual void release(StGLContext& theCtx);
+    ST_CPPEXPORT virtual void release(StGLContext& theCtx);
 
     /**
      * @return FreeType font instance specified on construction.
      */
-    StHandle<StFTFont>& getFont() {
+    inline StHandle<StFTFont>& getFont() {
         return myFont;
     }
 
     /**
      * @return true if font was loaded successfully.
      */
-    bool isValid() const {
+    inline bool isValid() const {
         return !myTextures.isEmpty() && myTextures[0]->isValid();
     }
 
@@ -80,7 +80,7 @@ class ST_LOCAL StGLFont : public StGLResource {
      * Use isValid() instead.
      * @return true if initialization was already called.
      */
-    bool wasInitialized() const {
+    inline bool wasInitialized() const {
         return !myTextures.isEmpty();
     }
 
@@ -88,13 +88,13 @@ class ST_LOCAL StGLFont : public StGLResource {
      * Initialize GL resources.
      * FreeType font instance should be already initialized!
      */
-    bool stglInit(StGLContext& theCtx);
+    ST_CPPEXPORT bool stglInit(StGLContext& theCtx);
 
     /**
      * Compute advance to the next character with kerning applied when applicable.
      * Assuming text rendered horizontally.
      */
-    float getAdvanceX(const stUtf32_t theUChar,
+    inline float getAdvanceX(const stUtf32_t theUChar,
                       const stUtf32_t theUCharNext) {
         return myFont->getAdvanceX(theUChar, theUCharNext);
     }
@@ -102,44 +102,44 @@ class ST_LOCAL StGLFont : public StGLResource {
     /**
      * @return vertical distance from the horizontal baseline to the highest character coordinate.
      */
-    GLfloat getAscender() const {
+    inline GLfloat getAscender() const {
         return myAscender;
     }
 
     /**
      * @return default line spacing (the baseline-to-baseline distance).
      */
-    GLfloat getLineSpacing() const {
+    inline GLfloat getLineSpacing() const {
         return myLineSpacing;
     }
 
     /**
      * Compute glyph rectangle at specified pen position (on baseline)
      * and render it to texture if not already.
-     * @param theCtx       - active context
-     * @param theUChar     - unicode symbol to render
-     * @param theUCharNext - next symbol to compute advance with kerning when available
-     * @param theGlyph     - computed glyph position rectangle, texture ID and UV coordinates
-     * @param thePen       - pen position on baseline to place new glyph
+     * @param theCtx       active context
+     * @param theUChar     unicode symbol to render
+     * @param theUCharNext next symbol to compute advance with kerning when available
+     * @param theGlyph     computed glyph position rectangle, texture ID and UV coordinates
+     * @param thePen       pen position on baseline to place new glyph
      */
-    void renderGlyph(StGLContext&    theCtx,
-                     const stUtf32_t theUChar,
-                     const stUtf32_t theUCharNext,
-                     StGLTile&       theGlyph,
-                     StGLVec2&       thePen);
+    ST_CPPEXPORT void renderGlyph(StGLContext&    theCtx,
+                                  const stUtf32_t theUChar,
+                                  const stUtf32_t theUCharNext,
+                                  StGLTile&       theGlyph,
+                                  StGLVec2&       thePen);
 
         protected:
 
     /**
      * Render new glyph to the texture.
      */
-    bool renderGlyph(StGLContext&    theCtx,
-                     const stUtf32_t theChar);
+    ST_CPPEXPORT bool renderGlyph(StGLContext&    theCtx,
+                                  const stUtf32_t theChar);
 
     /**
      * Allocate new texture.
      */
-    bool createTexture(StGLContext& theCtx);
+    ST_CPPEXPORT bool createTexture(StGLContext& theCtx);
 
         protected:
 

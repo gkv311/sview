@@ -15,21 +15,7 @@
 /**
  * Class - wrapper to system-dependent socket libraries.
  */
-class ST_LOCAL StSocket {
-
-        private:
-
-#if(defined(_WIN64))
-    unsigned __int64 socket; // socket Descriptor -- typedef UINT_PTR SOCKET;
-    bool            wsaInit;
-#elif(defined(_WIN32) || defined(__WIN32__))
-    unsigned int     socket; // using trick to reduce global includes...
-    bool            wsaInit;
-#else
-    int              socket; // socket File Descriptor
-#endif
-    short int addressFamily; // AF_INET - IPv4, AF_INET6 - IPv6,...
-    int          socketType; // socket type: UDP (datagrams) / TCP (streams) / others
+class StSocket {
 
         public:
 
@@ -45,32 +31,32 @@ class ST_LOCAL StSocket {
 
             public:
 
-        Buffer(const size_t& size);
-        ~Buffer();
+        ST_CPPEXPORT Buffer(const size_t& size);
+        ST_CPPEXPORT ~Buffer();
 
-        const char* getData() const;
-        char* changeData();
-        const size_t& getSize() const;
-        char& operator[](const size_t& id) const;
-        void zero();
-        const Buffer& operator=(const char* srcData);
-        friend std::ostream& operator<<(std::ostream& stream, const Buffer& out);
+        ST_CPPEXPORT const char* getData() const;
+        ST_CPPEXPORT char* changeData();
+        ST_CPPEXPORT const size_t& getSize() const;
+        ST_CPPEXPORT char& operator[](const size_t& id) const;
+        ST_CPPEXPORT void zero();
+        ST_CPPEXPORT const Buffer& operator=(const char* srcData);
+        ST_CPPEXPORT friend std::ostream& operator<<(std::ostream& stream, const Buffer& out);
 
     };
 
-    StSocket();
-    ~StSocket();
+    ST_CPPEXPORT StSocket();
+    ST_CPPEXPORT ~StSocket();
 
     /**
      * Open socket.
      * @return true on success.
      */
-    bool open();
+    ST_CPPEXPORT bool open();
 
     /**
      * Close socket.
      */
-    void close();
+    ST_CPPEXPORT void close();
 
     /**
      * Create connection socket connection (TCP/IP).
@@ -78,7 +64,7 @@ class ST_LOCAL StSocket {
      * @param port (const unsigned short int& ) - host listening port;
      * @return true on success.
      */
-    bool connect(const char* host, const unsigned short int& port = 80);
+    ST_CPPEXPORT bool connect(const char* host, const unsigned short int& port = 80);
 
     /**
      * Send data to connected host.
@@ -86,9 +72,9 @@ class ST_LOCAL StSocket {
      * @param buffSize (const int& ) - buffer size (or data in it);
      * @return bytes (int ) - bytes sent.
      */
-    int send(const char* buffer, const int& buffSize);
+    ST_CPPEXPORT int send(const char* buffer, const int& buffSize);
 
-    int send(const Buffer& buffer) {
+    inline int send(const Buffer& buffer) {
         return send(buffer.getData(), (int )buffer.getSize());
     }
 
@@ -99,13 +85,27 @@ class ST_LOCAL StSocket {
      * @param buffSize (const int& ) - buffer size;
      * @return bytes (int ) - bytes received.
      */
-    int recv(char* buffer, const int& buffSize);
+    ST_CPPEXPORT int recv(char* buffer, const int& buffSize);
 
-    int recv(Buffer& buffer) {
+    inline int recv(Buffer& buffer) {
         return recv(buffer.changeData(), (int )buffer.getSize());
     }
 
-    static void openURL(const StString& theUrl);
+    ST_CPPEXPORT static void openURL(const StString& theUrl);
+
+        private:
+
+#if(defined(_WIN64))
+    unsigned __int64 socket; // socket Descriptor -- typedef UINT_PTR SOCKET;
+    bool            wsaInit;
+#elif(defined(_WIN32) || defined(__WIN32__))
+    unsigned int     socket; // using trick to reduce global includes...
+    bool            wsaInit;
+#else
+    int              socket; // socket File Descriptor
+#endif
+    short int addressFamily; // AF_INET - IPv4, AF_INET6 - IPv6,...
+    int          socketType; // socket type: UDP (datagrams) / TCP (streams) / others
 
 };
 

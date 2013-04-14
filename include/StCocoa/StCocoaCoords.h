@@ -17,33 +17,33 @@
 /**
  * Auxiliary class to perform conversions between different coordinate-systems used in Cocoa.
  */
-class ST_LOCAL StCocoaCoords {
+class StCocoaCoords {
 
         public:
 
     /**
      * Default constructor.
      */
-    StCocoaCoords();
+    ST_CPPEXPORT StCocoaCoords();
 
     /**
      * Reinitialize the class.
      */
-    bool init();
+    ST_CPPEXPORT bool init();
 
     /**
      * Perform conversion.
      * @param theRectSt (const StRectI_t& ) - rectangle in screen coordinates (from upper-left corner);
      * @return rectangle in cartesian coordinates system (Cocoa, from bottom-left corner).
      */
-    CGRect normalToCocoa(const StRectI_t& theRectSt) const;
+    ST_CPPEXPORT CGRect normalToCocoa(const StRectI_t& theRectSt) const;
 
     /**
      * Perform conversion.
      * @param rectangle in cartesian coordinates system (Cocoa, from bottom-left corner);
      * @return theRectSt (const StRectI_t& ) - rectangle in screen coordinates (from upper-left corner).
      */
-    StRectI_t cocoaToNormal(const CGRect& theRectNs) const;
+    ST_CPPEXPORT StRectI_t cocoaToNormal(const CGRect& theRectNs) const;
 
         private:
 

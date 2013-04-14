@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -16,9 +16,39 @@
 class StMutexSlim;
 
 /**
+ * Logging context identifier.
+ */
+class StLogContext {
+
+        public:
+
+    /**
+     * Default constructor.
+     */
+    ST_CPPEXPORT StLogContext(const char* theName);
+
+    /**
+     * Destructor.
+     */
+    ST_CPPEXPORT virtual ~StLogContext();
+
+    /**
+     * @return context identifier
+     */
+    inline const StString& getName() const {
+        return myName;
+    }
+
+        private:
+
+    StString myName; //!< context identifier
+
+};
+
+/**
  * This class provide logging (to console, to file) functionality.
  */
-class ST_LOCAL StLogger {
+class StLogger {
 
         public:
 
@@ -43,19 +73,6 @@ class ST_LOCAL StLogger {
         ST_OPT_LOCK = 0x02, //!< use mutex to ensure thread-safety
     };
 
-        private:
-
-    StHandle<StMutexSlim> myMutex; //!< mutex lock for thread-safety
-    StString           myModuleId; //!< module name
-#if(defined(_WIN32) || defined(__WIN32__))
-    StStringUtfWide    myFilePath; //!< file to write into
-#else
-    StString           myFilePath; //!< file to write into
-#endif
-    FILE*            myFileHandle; //!< file object
-    StLogger::Level      myFilter; //!< define messages filter
-    const bool        myToLogCout;
-
         public:
 
     /**
@@ -63,42 +80,51 @@ class ST_LOCAL StLogger {
      * @param theLogFile (const StString& ) - log file name (if empty string - no logging to file);
      * @param theFilter (const StLogger::Level ) - log level;
      */
-    StLogger(const StString&       theLogFile,
-             const StLogger::Level theFilter  = StLogger::ST_VERBOSE,
-             const int             theOptions = StLogger::ST_OPT_COUT | StLogger::ST_OPT_LOCK);
+    ST_CPPEXPORT StLogger(const StString&       theLogFile,
+                          const StLogger::Level theFilter  = StLogger::ST_VERBOSE,
+                          const int             theOptions = StLogger::ST_OPT_COUT | StLogger::ST_OPT_LOCK);
 
     /**
      * Destructor.
      */
-    virtual ~StLogger();
+    ST_CPPEXPORT virtual ~StLogger();
 
-    StLogger::Level getFilter() const {
+    inline StLogger::Level getFilter() const {
         return myFilter;
     }
 
-    void setFilter(const StLogger::Level theFilter) {
+    inline void setFilter(const StLogger::Level theFilter) {
         myFilter = theFilter;
     }
 
     /**
      * Main logging function.
-     * @param theMessage (const StString& ) - message text;
-     * @param theLevel (const StLogger::Level ) - message weight.
+     * @param theMessage message text
+     * @param theLevel   message weight
+     * @param theCtx     logging context
      */
-    virtual void write(const StString&       theMessage,
-                       const StLogger::Level theLevel);
+    ST_CPPEXPORT virtual void write(const StString&       theMessage,
+                                    const StLogger::Level theLevel,
+                                    const StLogContext*   theCtx = NULL);
 
         public:
 
     /**
      * Retrieve default (global!) instance.
      */
-    static StLogger& GetDefault();
+    ST_CPPEXPORT static StLogger& GetDefault();
 
-    /**
-     * Special method to identify the logger within module name.
-     */
-    static bool IdentifyModule(const StString& theModuleName);
+        private:
+
+    StHandle<StMutexSlim> myMutex;      //!< mutex lock for thread-safety
+#if(defined(_WIN32) || defined(__WIN32__))
+    StStringUtfWide       myFilePath;   //!< file to write into
+#else
+    StString              myFilePath;   //!< file to write into
+#endif
+    FILE*                 myFileHandle; //!< file object
+    StLogger::Level       myFilter;     //!< define messages filter
+    const bool            myToLogCout;
 
         private:
 
@@ -107,32 +133,41 @@ class ST_LOCAL StLogger {
 
 };
 
-/**
- * Show INFO popup window.
- */
-ST_LOCAL void stInfo(const StString& theMessage);
-ST_LOCAL void stInfoConsole(const StString& theMessage);
+class StMessageBox {
 
-/**
- * Show WARNING popup window.
- */
-ST_LOCAL void stWarn(const StString& theMessage);
-ST_LOCAL void stWarnConsole(const StString& theMessage);
+        public:
 
-/**
- * Show ERROR popup window.
- */
-ST_LOCAL void stError(const StString& theMessage);
-ST_LOCAL void stErrorConsole(const StString& theMessage);
+    /**
+     * Show INFO popup window.
+     */
+    ST_CPPEXPORT static void Info(const StString& theMessage);
+    ST_CPPEXPORT static void InfoConsole(const StString& theMessage);
 
-/**
- * Show SUCCESS popup window.
- */
-ST_LOCAL void stSuccess(const StString& theMessage);
-ST_LOCAL void stSuccessConsole(const StString& theMessage);
+    /**
+     * Show WARNING popup window.
+     */
+    ST_CPPEXPORT static void Warn(const StString& theMessage);
+    ST_CPPEXPORT static void WarnConsole(const StString& theMessage);
 
-ST_LOCAL bool stQuestion(const StString& theMessage);
-ST_LOCAL bool stQuestionConsole(const StString& theMessage);
+    /**
+     * Show ERROR popup window.
+     */
+    ST_CPPEXPORT static void Error(const StString& theMessage);
+    ST_CPPEXPORT static void ErrorConsole(const StString& theMessage);
+
+    ST_CPPEXPORT static bool Question(const StString& theMessage);
+    ST_CPPEXPORT static bool QuestionConsole(const StString& theMessage);
+
+};
+
+inline void stInfo           (const StString& theMsg) {        StMessageBox::Info           (theMsg); }
+inline void stInfoConsole    (const StString& theMsg) {        StMessageBox::InfoConsole    (theMsg); }
+inline void stWarn           (const StString& theMsg) {        StMessageBox::Warn           (theMsg); }
+inline void stWarnConsole    (const StString& theMsg) {        StMessageBox::WarnConsole    (theMsg); }
+inline void stError          (const StString& theMsg) {        StMessageBox::Error          (theMsg); }
+inline void stErrorConsole   (const StString& theMsg) {        StMessageBox::ErrorConsole   (theMsg); }
+inline bool stQuestion       (const StString& theMsg) { return StMessageBox::Question       (theMsg); }
+inline bool stQuestionConsole(const StString& theMsg) { return StMessageBox::QuestionConsole(theMsg); }
 
 /**
  * Debugging info output.

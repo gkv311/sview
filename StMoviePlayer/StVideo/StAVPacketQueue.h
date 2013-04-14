@@ -40,55 +40,55 @@ typedef enum {
  * This is a simple thread safe queue implementation
  * specialized for AVPacketClass
  */
-class ST_LOCAL StAVPacketQueue {
+class StAVPacketQueue {
 
         public: //! @name Public API
 
-    static double detectPtsStartBase(const AVFormatContext* theFormatCtx);
+    ST_LOCAL static double detectPtsStartBase(const AVFormatContext* theFormatCtx);
 
     /**
      * @param theSizeLimit (const size_t& ) - queue size limit.
      */
-    StAVPacketQueue(const size_t theSizeLimit);
+    ST_LOCAL StAVPacketQueue(const size_t theSizeLimit);
 
-    virtual ~StAVPacketQueue();
+    ST_LOCAL virtual ~StAVPacketQueue();
 
     /**
      * Clean up the queue.
      */
-    void clear();
+    ST_LOCAL void clear();
 
     /**
      * Open stream.
      */
-    virtual bool init(AVFormatContext*   theFormatCtx,
-                      const unsigned int theStreamId);
+    ST_LOCAL virtual bool init(AVFormatContext*   theFormatCtx,
+                               const unsigned int theStreamId);
 
     /**
      * Close stream.
      */
-    virtual void deinit();
+    ST_LOCAL virtual void deinit();
 
     /**
      * @return packet (StAVPacket* ) - first packet in queue.
      */
-    StHandle<StAVPacket> pop();
+    ST_LOCAL StHandle<StAVPacket> pop();
 
     /**
      * @param thePacket (StAVPacket& ) - packet to add (will be copied with content).
      * @return true on success.
      */
-    void push(const StAVPacket& thePacket);
+    ST_LOCAL void push(const StAVPacket& thePacket);
 
-    void pushStart();
-    void pushEnd();
-    void pushQuit();
-    void pushFlush();
+    ST_LOCAL void pushStart();
+    ST_LOCAL void pushEnd();
+    ST_LOCAL void pushQuit();
+    ST_LOCAL void pushFlush();
 
     /**
      * Returns true if queue is empty.
      */
-    bool isEmpty() const {
+    ST_LOCAL bool isEmpty() const {
         myMutex.lock();
             bool aResult = myFront == NULL;
         myMutex.unlock();
@@ -98,7 +98,7 @@ class ST_LOCAL StAVPacketQueue {
     /**
      * Returns true if queue is full.
      */
-    bool isFull() const {
+    ST_LOCAL bool isFull() const {
         myMutex.lock();
             bool aResult = (mySize >= mySizeLimit) || (mySizeSeconds >= 5.0);
             //if(mySize >= mySizeLimit) { ST_DEBUG_LOG("stream" + streamId + " sizeSeconds= " + sizeSeconds + "; mySize= " + mySize); }
@@ -106,14 +106,14 @@ class ST_LOCAL StAVPacketQueue {
         return aResult;
     }
 
-    size_t getSize() const {
+    ST_LOCAL size_t getSize() const {
         myMutex.lock();
             size_t aSize = mySize;
         myMutex.unlock();
         return aSize;
     }
 
-    size_t getSizeMax() const {
+    ST_LOCAL size_t getSizeMax() const {
         myMutex.lock();
             size_t aSize = mySizeLimit;
         myMutex.unlock();
@@ -123,33 +123,33 @@ class ST_LOCAL StAVPacketQueue {
     /**
      * @return true if queue initialized.
      */
-    bool isInitialized() const {
+    ST_LOCAL bool isInitialized() const {
         return myStreamId >= 0;
     }
 
-    bool isInContext(AVFormatContext* theFormatCtx) const {
+    ST_LOCAL bool isInContext(AVFormatContext* theFormatCtx) const {
         return myFormatCtx == theFormatCtx;
     }
 
-    bool isInContext(AVFormatContext* theFormatCtx, signed int theStreamId) const {
+    ST_LOCAL bool isInContext(AVFormatContext* theFormatCtx, signed int theStreamId) const {
         return (myFormatCtx == theFormatCtx) && (myStreamId == theStreamId);
     }
 
     /**
-     * @return streamId (signed int ) - stream id in videofile or -1 if none.
+     * @return stream id in videofile or -1 if none
      */
-    signed int getId() const {
+    ST_LOCAL signed int getId() const {
         return myStreamId;
     }
 
-    AVStream* getStream() {
+    ST_LOCAL AVStream* getStream() {
         return myStream;
     }
 
     /**
      * Convert time units into seconds.
      */
-    double unitsToSeconds(const int64_t theTimeUnits) const {
+    ST_LOCAL double unitsToSeconds(const int64_t theTimeUnits) const {
         return (myStream != NULL) ? stLibAV::unitsToSeconds(myStream, theTimeUnits) : 0.0;
     }
 
@@ -158,7 +158,7 @@ class ST_LOCAL StAVPacketQueue {
     /**
      * @return true if control in playback state.
      */
-    bool isPlaying() const {
+    ST_LOCAL bool isPlaying() const {
         myEventMutex.lock();
             bool aRes = myIsPlaying;
         myEventMutex.unlock();
@@ -169,13 +169,13 @@ class ST_LOCAL StAVPacketQueue {
      * @param theEventId (const StPlayEvent_t ) - event from enum;
      * @param theSeekParam (const double ) - additional parameter.
      */
-    virtual void pushPlayEvent(const StPlayEvent_t theEventId,
-                               const double        theSeekParam = 0.0);
+    ST_LOCAL virtual void pushPlayEvent(const StPlayEvent_t theEventId,
+                                        const double        theSeekParam = 0.0);
 
     /**
-     * @return event (StPlayEvent_t ) - event in wait state.
+     * @return event in wait state
      */
-    StPlayEvent_t popPlayEvent(double& theSeekPts) {
+    ST_LOCAL StPlayEvent_t popPlayEvent(double& theSeekPts) {
         myEventMutex.lock();
             StPlayEvent_t anEventId = myPlayEvent;
             theSeekPts = myPtsSeek;
@@ -213,7 +213,7 @@ class ST_LOCAL StAVPacketQueue {
 
         private: //! @name Private fields
 
-    struct ST_LOCAL QueueItem;
+    struct QueueItem;
 
     QueueItem*       myFront;          //!< queue front packet (first to pop)
     QueueItem*       myBack;           //!< queue back  packet (last  to pop)

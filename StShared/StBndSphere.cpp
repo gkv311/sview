@@ -23,6 +23,10 @@ StBndSphere::~StBndSphere() {
     //
 }
 
+void StBndSphere::init(const StArray<StGLVec3>& thePoints) {
+    initWelzl(thePoints);
+}
+
 void StBndSphere::reset() {
     StBndContainer::reset();
     myCenter = StGLVec3();

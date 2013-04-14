@@ -11,16 +11,16 @@
 
 #include <stTypes.h>
 
-class ST_LOCAL StCocoaLocalPool {
+class StCocoaLocalPool {
+
+        public:
+
+    ST_CPPEXPORT StCocoaLocalPool();
+    ST_CPPEXPORT ~StCocoaLocalPool();
 
         private:
 
     void* myPoolObj;
-
-        public:
-
-    StCocoaLocalPool();
-    ~StCocoaLocalPool();
 
 };
 

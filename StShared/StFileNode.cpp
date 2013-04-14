@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -21,8 +21,19 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+StFileNode::StFileNode(const StString& theSubPath,
+                       StNode*         theParentNode,
+                       int             theNodeType)
+: StNode(theSubPath, theParentNode, theNodeType) {
+    //
+}
+
 StFileNode::~StFileNode() {
     //
+}
+
+bool StFileNode::isFolder() const {
+    return false;
 }
 
 StHandle<StFileNode> StFileNode::detach() const {
@@ -133,4 +144,18 @@ void StFileNode::getFolderAndFile(const StString& theFilePath,
         theFolder   = StString();
         theFileName = theFilePath;
     }
+}
+
+bool StFileNode::isRemoteProtocolPath(const StString& thePath) {
+    StUtf8Iter anIter = thePath.iterator();
+    if(*anIter == stUtf32_t(':')) {
+        return false;
+    }
+    for(; *anIter != 0; ++anIter) {
+        if(*anIter == stUtf32_t(':')) {
+            return *(++anIter) == stUtf32_t('/')
+                && *(++anIter) == stUtf32_t('/');
+        }
+    }
+    return false;
 }

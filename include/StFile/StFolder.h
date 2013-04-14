@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,26 +11,24 @@
 
 #include <StFile/StFileNode.h>
 
-class ST_LOCAL StFolder : public StFileNode {
+class StFolder : public StFileNode {
 
         private:
 
-    void addItem(const StArrayList<StString>& theExtensions,
-                 int theDeep,
-                 const StString& theSearchFolderPath,
-                 const StString& theCurrentItemName);
+    ST_CPPEXPORT void addItem(const StArrayList<StString>& theExtensions,
+                              int theDeep,
+                              const StString& theSearchFolderPath,
+                              const StString& theCurrentItemName);
 
         public:
 
-    virtual bool isFolder() const {
-        return true;
-    }
+    ST_CPPEXPORT virtual bool isFolder() const;
 
-    static bool isFolder(const StString& thePath);
+    ST_CPPEXPORT static bool isFolder(const StString& thePath);
 
-    StFolder(const StString& theFolderPath = StString(), StNode* theParentNode = NULL);
-    virtual ~StFolder();
-    void init(const StArrayList<StString>& theExtensions, int theDeep = 1);
+    ST_CPPEXPORT StFolder(const StString& theFolderPath = StString(), StNode* theParentNode = NULL);
+    ST_CPPEXPORT virtual ~StFolder();
+    ST_CPPEXPORT void init(const StArrayList<StString>& theExtensions, int theDeep = 1);
 
 };
 

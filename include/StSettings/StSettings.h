@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov
+ * Copyright © 2007-2013 Kirill Gavrilov
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -13,7 +13,7 @@
 #include <StThreads/StMutex.h>
 #include <StLibrary.h>
 
-class ST_LOCAL StSettings : public StConfig {
+class StSettings : public StConfig {
 
         public:
 

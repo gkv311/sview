@@ -38,51 +38,51 @@ ST_DEFINE_HANDLE(StAudioQueue, StAVPacketQueue);
  * which feeded with packets (StAVPacket),
  * so it also implements StAVPacketQueue.
  */
-class ST_LOCAL StAudioQueue : public StAVPacketQueue {
+class StAudioQueue : public StAVPacketQueue {
 
         public: //! @name public API
 
-    StAudioQueue(const StString& theAlDeviceName);
-    virtual ~StAudioQueue();
+    ST_LOCAL StAudioQueue(const StString& theAlDeviceName);
+    ST_LOCAL virtual ~StAudioQueue();
 
-    bool isInDowntime() {
+    ST_LOCAL bool isInDowntime() {
         return myDowntimeEvent.check();
     }
 
     /**
      * Initialization function.
-     * @param theFormatCtx (AVFormatContext* )  - pointer to video format context;
-     * @param theStreamId (const unsigned int ) - stream id in video format context;
-     * @return true if no error.
+     * @param theFormatCtx pointer to video format context
+     * @param theStreamId  stream id in video format context
+     * @return true if no error
      */
-    virtual bool init(AVFormatContext*   theFormatCtx,
-                      const unsigned int theStreamId);
+    ST_LOCAL virtual bool init(AVFormatContext*   theFormatCtx,
+                               const unsigned int theStreamId);
 
     /**
      * Clean function.
      */
-    virtual void deinit();
+    ST_LOCAL virtual void deinit();
 
     /**
      * Main decoding and playback loop.
      * Give packets from queue, decode them and fill OpenAL buffers
      * for playback.
      */
-    void decodeLoop();
+    ST_LOCAL void decodeLoop();
 
     /**
      * @return true if audio is played.
      */
-    bool stalIsAudioPlaying() {
+    ST_LOCAL bool stalIsAudioPlaying() {
         return (stalGetSourceState() == AL_PLAYING);
     }
 
         public: //!< @name playback control methods
 
-    virtual void pushPlayEvent(const StPlayEvent_t theEventId,
-                               const double        theSeekParam = 0.0);
+    ST_LOCAL virtual void pushPlayEvent(const StPlayEvent_t theEventId,
+                                        const double        theSeekParam = 0.0);
 
-    double getPts() const {
+    ST_LOCAL double getPts() const {
         myEventMutex.lock();
             if(!isPlaying()) {
                 myPlaybackTimer.pause();
@@ -95,74 +95,74 @@ class ST_LOCAL StAudioQueue : public StAVPacketQueue {
     /**
      * Set audio gain.
      */
-    void setAudioVolume(const float theGain) {
+    ST_LOCAL void setAudioVolume(const float theGain) {
         myAlGain = theGain;
     }
 
     /**
      * Switch audio device.
      */
-    void switchAudioDevice(const StString& theAlDeviceName) {
+    ST_LOCAL void switchAudioDevice(const StString& theAlDeviceName) {
         myAlDeviceName = new StString(theAlDeviceName);
         myToSwitchDev  = true;
     }
 
     /**
-     * @return true if device was disconnected and OpenAL should be re-initialized.
+     * @return true if device was disconnected and OpenAL should be re-initialized
      */
-    bool isDisconnected() const {
+    ST_LOCAL bool isDisconnected() const {
         return myIsDisconnected;
     }
 
         private: //! @name private methods
 
-    bool stalInit();
-    void stalDeinit();
+    ST_LOCAL bool stalInit();
+    ST_LOCAL void stalDeinit();
 
-    void stalConfigureSources1();
-    void stalConfigureSources4_0();
-    void stalConfigureSources5_1();
+    ST_LOCAL void stalConfigureSources1();
+    ST_LOCAL void stalConfigureSources4_0();
+    ST_LOCAL void stalConfigureSources5_1();
 
-    bool stalQueue(const double thePts);
+    ST_LOCAL bool stalQueue(const double thePts);
 
     /**
      * This function do fill OpenAL buffers.
-     * @param pts (const double& ) - PTS for last decoded frame.
+     * @param thePts PTS for last decoded frame
      */
-    void stalFillBuffers(const double thePts,
-                         const bool   toIgnoreEvents);
+    ST_LOCAL void stalFillBuffers(const double thePts,
+                                  const bool   toIgnoreEvents);
 
-    void stalEmpty();
+    ST_LOCAL void stalEmpty();
 
-    ALenum stalGetSourceState();
+    ST_LOCAL ALenum stalGetSourceState();
 
-    bool parseEvents();
+    ST_LOCAL bool parseEvents();
 
-    void decodePacket(const StHandle<StAVPacket>& thePacket,
-                      double& thePts);
+    ST_LOCAL void decodePacket(const StHandle<StAVPacket>& thePacket,
+                               double& thePts);
 
         private:
 
-    void playTimerStart(const double thePts) {
+    ST_LOCAL void playTimerStart(const double thePts) {
         myEventMutex.lock();
             // timer operate within microseconds
             myPlaybackTimer.restart(thePts * 1000000.0);
         myEventMutex.unlock();
     }
 
-    void playTimerPause() {
+    ST_LOCAL void playTimerPause() {
         myEventMutex.lock();
             myPlaybackTimer.pause();
         myEventMutex.unlock();
     }
 
-    void playTimerResume() {
+    ST_LOCAL void playTimerResume() {
         myEventMutex.lock();
             myPlaybackTimer.resume();
         myEventMutex.unlock();
     }
 
-    bool stalCheckConnected();
+    ST_LOCAL bool stalCheckConnected();
 
         private: //! @name private fields
 
@@ -179,16 +179,16 @@ class ST_LOCAL StAudioQueue : public StAVPacketQueue {
 
             public:
 
-        DataLoop()
+        ST_LOCAL DataLoop()
         : myLast(NUM_AL_BUFFERS - 1) {
             stMemSet(myDataSizes, 0, sizeof(myDataSizes));
         }
 
-        void clear() {
+        ST_LOCAL void clear() {
             stMemSet(myDataSizes, 0, sizeof(myDataSizes));
         }
 
-        void push(const size_t theDataSize) {
+        ST_LOCAL void push(const size_t theDataSize) {
             ++myLast;
             if(myLast >= NUM_AL_BUFFERS) {
                myLast = 0;
@@ -196,7 +196,7 @@ class ST_LOCAL StAudioQueue : public StAVPacketQueue {
             myDataSizes[myLast] = theDataSize;
         }
 
-        size_t summ() const {
+        ST_LOCAL size_t summ() const {
             size_t aSumm = 0;
             for(size_t aBuffIter = 0; aBuffIter < NUM_AL_BUFFERS; ++aBuffIter) {
                 aSumm += myDataSizes[aBuffIter];

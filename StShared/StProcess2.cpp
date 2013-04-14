@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -12,6 +12,7 @@
     #include <crt_externs.h>
 #elif (defined(__linux__) || defined(__linux))
     #include <fstream>
+    #include <unistd.h>
 #endif
 
 // we move this function to another object file

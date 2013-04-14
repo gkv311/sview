@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -14,30 +14,30 @@ class StGLWidget;
 /**
  * Double-linked list.
  */
-class ST_LOCAL StGLWidgetList {
-
-        private:
-
-    StGLWidget* myFirst;
+class StGLWidgetList {
 
         public:
 
-    StGLWidgetList();
-    ~StGLWidgetList();
+    ST_CPPEXPORT StGLWidgetList();
+    ST_CPPEXPORT ~StGLWidgetList();
 
-    StGLWidget* getStart() {
+    inline StGLWidget* getStart() {
         return myFirst;
     }
 
-    StGLWidget* getLast();
+    ST_CPPEXPORT StGLWidget* getLast();
 
-    StGLWidgetList* add(StGLWidget* theAddItem);
-    StGLWidgetList* remove(StGLWidget* theRemItem);
+    ST_CPPEXPORT StGLWidgetList* add(StGLWidget* theAddItem);
+    ST_CPPEXPORT StGLWidgetList* remove(StGLWidget* theRemItem);
 
     /**
      * Move widget to the topmost (last) position.
      */
-    void moveToTop(StGLWidget* theTopmost);
+    ST_CPPEXPORT void moveToTop(StGLWidget* theTopmost);
+
+        private:
+
+    StGLWidget* myFirst;
 
 };
 

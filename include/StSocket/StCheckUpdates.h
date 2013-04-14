@@ -15,7 +15,7 @@
 /**
  * Helper class to check sView for updates.
  */
-class ST_LOCAL StCheckUpdates {
+class StCheckUpdates {
 
         private:
 

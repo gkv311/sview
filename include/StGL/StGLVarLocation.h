@@ -14,7 +14,7 @@
 /**
  * Simple class represents GLSL program variable location.
  */
-class ST_LOCAL StGLVarLocation {
+class StGLVarLocation {
 
         public:
 

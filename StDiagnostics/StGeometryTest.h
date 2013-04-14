@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StDiagnostics program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 /**
  * Geometry test widget.
  */
-class ST_LOCAL StGeometryTest : public StGLWidget {
+class StGeometryTest : public StGLWidget {
 
         private:
 
@@ -43,20 +43,20 @@ class ST_LOCAL StGeometryTest : public StGLWidget {
 
     StColorProgram stProgram;
 
-    void resizeGrid(const StRectI_t& winRectPx);
-    void resizeColor();
-    void resizeBrightness();
+    ST_LOCAL void resizeGrid(const StRectI_t& winRectPx);
+    ST_LOCAL void resizeColor();
+    ST_LOCAL void resizeBrightness();
 
         public:
 
-    StGeometryTest(StGLWidget* parent);
-    virtual ~StGeometryTest();
+    ST_LOCAL StGeometryTest(StGLWidget* parent);
+    ST_LOCAL virtual ~StGeometryTest();
 
-    virtual const StString& getClassName();
+    ST_LOCAL virtual const StString& getClassName();
 
-    virtual void stglResize(const StRectI_t& winRectPx);
-    virtual bool stglInit();
-    virtual void stglDraw(unsigned int view);
+    ST_LOCAL virtual void stglResize(const StRectI_t& winRectPx);
+    ST_LOCAL virtual bool stglInit();
+    ST_LOCAL virtual void stglDraw(unsigned int view);
 
 };
 

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -19,28 +19,28 @@ class StGLRadioButton;
 /**
  * Simple menu item widget with radio button item on it.
  */
-class ST_LOCAL StGLMenuRadioButton : public StGLMenuItem {
+class StGLMenuRadioButton : public StGLMenuItem {
+
+        public:
+
+    ST_CPPEXPORT StGLMenuRadioButton(StGLMenu* theParent,
+                                     const StHandle<StInt32Param>& theTrackedValue,
+                                     const int32_t theOnValue);
+
+    ST_CPPEXPORT StGLMenuRadioButton(StGLMenu* theParent,
+                                     const StHandle<StFloat32Param>& theTrackedValue,
+                                     const float theOnValue);
+
+    ST_CPPEXPORT virtual const StString& getClassName();
+    ST_CPPEXPORT virtual void setVisibility(bool isVisible, bool isForce);
+
+        private: //!< callback Slots (private overriders)
+
+    ST_LOCAL void doItemClick(const size_t );
 
         private:
 
     StGLRadioButton* myRadio; //!< fast-link to the child widget
-
-        public:
-
-    StGLMenuRadioButton(StGLMenu* theParent,
-                        const StHandle<StInt32Param>& theTrackedValue,
-                        const int32_t theOnValue);
-
-    StGLMenuRadioButton(StGLMenu* theParent,
-                        const StHandle<StFloat32Param>& theTrackedValue,
-                        const float theOnValue);
-
-    virtual const StString& getClassName();
-    virtual void setVisibility(bool isVisible, bool isForce);
-
-        private: //!< callback Slots (private overriders)
-
-    void doItemClick(const size_t );
 
 };
 

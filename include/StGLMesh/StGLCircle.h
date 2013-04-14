@@ -11,39 +11,39 @@
 
 #include "StGLMesh.h"
 
-class ST_LOCAL StGLCircle : public StGLMesh {
+class StGLCircle : public StGLMesh {
 
         public:
 
     /**
      * Initialize the invalid circle.
      */
-    StGLCircle();
+    ST_CPPEXPORT StGLCircle();
 
-    StGLCircle(const StGLVec3& theCenter,
-               const GLfloat   theRadius,
-               const GLsizei   thePointsCount);
+    ST_CPPEXPORT StGLCircle(const StGLVec3& theCenter,
+                            const GLfloat   theRadius,
+                            const GLsizei   thePointsCount);
 
-    void create(const StGLVec3& theCenter,
-                const GLfloat   theRadius,
-                const GLsizei   thePointsCount);
+    ST_CPPEXPORT void create(const StGLVec3& theCenter,
+                             const GLfloat   theRadius,
+                             const GLsizei   thePointsCount);
 
-    void create(const StGLVec3& theCenter,
-                const GLfloat   theRadiusX,
-                const GLfloat   theRadiusY,
-                const GLsizei   thePointsCount);
+    ST_CPPEXPORT void create(const StGLVec3& theCenter,
+                             const GLfloat   theRadiusX,
+                             const GLfloat   theRadiusY,
+                             const GLsizei   thePointsCount);
 
     /**
      * Compute the mesh using current configuration.
      */
-    virtual bool computeMesh();
+    ST_CPPEXPORT virtual bool computeMesh();
 
     /**
      * Initialize the colors array with one specified color.
      * Mesh should be already initialized before.
      * @param theColor (const StGLVec4& ) - the color to set.
      */
-    bool initColorsArray(const StGLVec4& theColor);
+    ST_CPPEXPORT bool initColorsArray(const StGLVec4& theColor);
 
         private:
 

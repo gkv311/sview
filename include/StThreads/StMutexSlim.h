@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -30,14 +30,14 @@
  * On Linux just general StMutex object is used that already work like described above.
  * It seem pthreads library or even Linux kernel already apply this optimization (according to tests).
  */
-class ST_LOCAL StMutexSlim {
+class StMutexSlim {
 
         public:
 
     /**
      * Create an unlocked mutex object.
      */
-    StMutexSlim()
+    inline StMutexSlim()
 #if (defined(_WIN32) || defined(__WIN32__))
     {
         // create the critical section with spin count 1024
@@ -52,7 +52,7 @@ class ST_LOCAL StMutexSlim {
     /**
      * Destructor.
      */
-    ~StMutexSlim() {
+    inline ~StMutexSlim() {
     #if (defined(_WIN32) || defined(__WIN32__))
         DeleteCriticalSection(&myCritSection);
     #endif
@@ -61,7 +61,7 @@ class ST_LOCAL StMutexSlim {
     /**
      * Lock the mutex.
      */
-    void lock() {
+    inline void lock() {
     #if (defined(_WIN32) || defined(__WIN32__))
         EnterCriticalSection(&myCritSection);
     #else
@@ -72,7 +72,7 @@ class ST_LOCAL StMutexSlim {
     /**
      * Unlock the mutex.
      */
-    void unlock() {
+    inline void unlock() {
     #if (defined(_WIN32) || defined(__WIN32__))
         LeaveCriticalSection(&myCritSection);
     #else

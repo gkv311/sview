@@ -82,6 +82,14 @@ StGLDevicesMenu::StGLDevicesMenu(StGLWidget* theParent,
     }
 }
 
+void StGLDevicesMenu::setTrackedItem(StGLMenuItem* theParentItem) {
+    myParentItem = theParentItem;
+}
+
+const StString& StGLDevicesMenu::getTitle() const {
+    return myActiveDevice;
+}
+
 StGLMenu* StGLDevicesMenu::createChangeDeviceMenu(StGLWidget* theParent) {
     StGLMenu* aMenu = new StGLMenu(theParent, 0, 0, StGLMenu::MENU_VERTICAL);
     size_t aDevGlobalId = 0;

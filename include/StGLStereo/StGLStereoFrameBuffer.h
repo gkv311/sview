@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -18,7 +18,7 @@
  * Simple class represents Virtual (texture) stereo Frame buffer object.
  * This allow render to texture.
  */
-class ST_LOCAL StGLStereoFrameBuffer : public StGLStereoTexture {
+class StGLStereoFrameBuffer : public StGLStereoTexture {
 
         public:
 
@@ -39,12 +39,7 @@ class ST_LOCAL StGLStereoFrameBuffer : public StGLStereoTexture {
 
             public:
 
-        StGLStereoProgram(const StString& title)
-        : StGLProgram(title),
-          atrVVertexLoc(),
-          atrVTexCoordLoc() {
-            //
-        }
+        ST_CPPEXPORT StGLStereoProgram(const StString& theTitle);
 
         StGLVarLocation getVVertexLoc() const {
             return atrVVertexLoc;
@@ -54,7 +49,7 @@ class ST_LOCAL StGLStereoFrameBuffer : public StGLStereoTexture {
             return atrVTexCoordLoc;
         }
 
-        virtual bool link(StGLContext& theCtx);
+        ST_CPPEXPORT virtual bool link(StGLContext& theCtx);
 
     };
 
@@ -63,142 +58,142 @@ class ST_LOCAL StGLStereoFrameBuffer : public StGLStereoTexture {
     /**
      * Empty constructor with GL_RGBA8 texture.
      */
-    StGLStereoFrameBuffer();
+    ST_CPPEXPORT StGLStereoFrameBuffer();
 
     /**
      * Empty constructor.
      */
-    StGLStereoFrameBuffer(const GLint theTextureFormat);
+    ST_CPPEXPORT StGLStereoFrameBuffer(const GLint theTextureFormat);
 
     /**
      * OpenGL objects will be automatically released.
      * Make sure it is called from thread with bound GL context
      * or release the object in advance.
      */
-    virtual ~StGLStereoFrameBuffer();
+    ST_CPPEXPORT virtual ~StGLStereoFrameBuffer();
 
     /**
      * Release OpenGL objects related to this FBO.
      */
-    virtual void release(StGLContext& theCtx);
+    ST_CPPEXPORT virtual void release(StGLContext& theCtx);
 
-    const StGLVertexBuffer& getQuadVertices() const {
+    inline const StGLVertexBuffer& getQuadVertices() const {
         return myVerticesBuf;
     }
 
-    const StGLVertexBuffer& getQuadTexCoords() const {
+    inline const StGLVertexBuffer& getQuadTexCoords() const {
         return myTexCoordBuf;
     }
 
     /**
      * Returns true if FBO was initialized.
      */
-    bool isValid() const {
+    inline bool isValid() const {
         return isValidFrameBuffer() && StGLStereoTexture::isValid();// && isValidDepthBuffer();
     }
 
     /**
      * Initialize the FBO with specified dimensions.
      */
-    bool init(StGLContext&  theCtx,
-              const GLsizei theTextureSizeX,
-              const GLsizei theTextureSizeY);
+    ST_CPPEXPORT bool init(StGLContext&  theCtx,
+                           const GLsizei theTextureSizeX,
+                           const GLsizei theTextureSizeY);
 
     /**
      * (Re)initialize the FBO with specified dimensions.
      * If FBO already initialized it will be reused when possible.
-     * @param theSizeX      - required width
-     * @param theSizeY      - required height
-     * @param theToCompress - if set to true then FBO will be re-initialized with lesser dimensions
+     * @param theSizeX      required width
+     * @param theSizeY      required height
+     * @param theToCompress if set to true then FBO will be re-initialized with lesser dimensions
      */
-    bool initLazy(StGLContext&  theCtx,
-                  const GLsizei theSizeX,
-                  const GLsizei theSizeY,
-                  const bool    theToCompress = true);
+    ST_CPPEXPORT bool initLazy(StGLContext&  theCtx,
+                               const GLsizei theSizeX,
+                               const GLsizei theSizeY,
+                               const bool    theToCompress = true);
 
     /**
      * FBO viewport width.
      */
-    GLsizei getVPSizeX() const {
+    inline GLsizei getVPSizeX() const {
         return myViewPortX;
     }
 
     /**
      * FBO viewport height.
      */
-    GLsizei getVPSizeY() const {
+    inline GLsizei getVPSizeY() const {
         return myViewPortY;
     }
 
     /**
      * Set new FBO viewport width x height. Should be <= texture dimensions.
      */
-    void setVPDimensions(StGLContext&  theCtx,
-                         const GLsizei theSizeX,
-                         const GLsizei theSizeY);
+    ST_CPPEXPORT void setVPDimensions(StGLContext&  theCtx,
+                                      const GLsizei theSizeX,
+                                      const GLsizei theSizeY);
 
     /**
      * Setup OpenGL viewport equal to FBO dimensions
      */
-    void setupViewPort(StGLContext& theCtx);
+    ST_CPPEXPORT void setupViewPort(StGLContext& theCtx);
 
-    void bindTextureLeft(StGLContext& theCtx,
-                         const GLenum theTextureUnit = GL_TEXTURE0) {
+    inline void bindTextureLeft(StGLContext& theCtx,
+                                const GLenum theTextureUnit = GL_TEXTURE0) {
         StGLStereoTexture::bindLeft(theCtx, theTextureUnit);
     }
 
-    void unbindTextureLeft(StGLContext& theCtx) {
+    inline void unbindTextureLeft(StGLContext& theCtx) {
         StGLStereoTexture::unbindLeft(theCtx);
     }
 
-    void bindTextureRight(StGLContext& theCtx,
-                          const GLenum theTextureUnit = GL_TEXTURE0) {
+    inline void bindTextureRight(StGLContext& theCtx,
+                                 const GLenum theTextureUnit = GL_TEXTURE0) {
         StGLStereoTexture::bindRight(theCtx, theTextureUnit);
     }
 
-    void unbindTextureRight(StGLContext& theCtx) {
+    inline void unbindTextureRight(StGLContext& theCtx) {
         StGLStereoTexture::unbindRight(theCtx);
     }
 
     /**
      * Bind left frame buffer (to render into the left texture).
      */
-    void bindBufferLeft(StGLContext& theCtx);
+    ST_CPPEXPORT void bindBufferLeft(StGLContext& theCtx);
 
-    void unbindBufferLeft(StGLContext& theCtx) {
+    inline void unbindBufferLeft(StGLContext& theCtx) {
         StGLFrameBuffer::unbindBufferGlobal(theCtx);
     }
 
     /**
      * Bind right frame buffer (to render into the right texture).
      */
-    void bindBufferRight(StGLContext& theCtx);
+    ST_CPPEXPORT void bindBufferRight(StGLContext& theCtx);
 
-    void unbindBufferRight(StGLContext& theCtx) {
+    inline void unbindBufferRight(StGLContext& theCtx) {
         StGLFrameBuffer::unbindBufferGlobal(theCtx);
     }
 
-    void bindMultiTexture(StGLContext& theCtx,
-                          const GLenum theTextureUnit0 = GL_TEXTURE0,
-                          const GLenum theTextureUnit1 = GL_TEXTURE1) {
+    inline void bindMultiTexture(StGLContext& theCtx,
+                                 const GLenum theTextureUnit0 = GL_TEXTURE0,
+                                 const GLenum theTextureUnit1 = GL_TEXTURE1) {
         bindTextureLeft (theCtx, theTextureUnit0);
         bindTextureRight(theCtx, theTextureUnit1);
     }
 
-    void unbindMultiTexture(StGLContext& theCtx) {
+    inline void unbindMultiTexture(StGLContext& theCtx) {
         unbindTextureLeft(theCtx);
         unbindTextureRight(theCtx);
     }
 
-    void drawQuad(StGLContext& theCtx,
-                  const StGLStereoFrameBuffer::StGLStereoProgram* theProgram) const;
+    ST_CPPEXPORT void drawQuad(StGLContext& theCtx,
+                               const StGLStereoFrameBuffer::StGLStereoProgram* theProgram) const;
 
         private:
 
     /**
      * Validate FrameBuffer ids.
      */
-    bool isValidFrameBuffer() const {
+    inline bool isValidFrameBuffer() const {
         return myGLFBufferIds[StGLStereoTexture::LEFT_TEXTURE ] != StGLFrameBuffer::NO_FRAMEBUFFER
             && myGLFBufferIds[StGLStereoTexture::RIGHT_TEXTURE] != StGLFrameBuffer::NO_FRAMEBUFFER;
     }
@@ -206,7 +201,7 @@ class ST_LOCAL StGLStereoFrameBuffer : public StGLStereoTexture {
     /**
      * Validate RenderBuffer ids.
      */
-    bool isValidDepthBuffer() const {
+    inline bool isValidDepthBuffer() const {
         return myGLDepthRBIds[StGLStereoTexture::LEFT_TEXTURE ] != StGLFrameBuffer::NO_RENDERBUFFER
             && myGLDepthRBIds[StGLStereoTexture::RIGHT_TEXTURE] != StGLFrameBuffer::NO_RENDERBUFFER;
     }

@@ -15,7 +15,7 @@
  * OpenGL 1.4 core based on 1.3 version.
  */
 template<typename theBaseClass_t>
-struct ST_LOCAL stglTmplCore14 : public theBaseClass_t {
+struct stglTmplCore14 : public theBaseClass_t {
 
         public: //! @name OpenGL 1.4 additives to 1.3
 

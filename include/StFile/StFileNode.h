@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -14,7 +14,7 @@
 #include <StTemplates/StHandle.h>
 
 class StMIMEList;
-class ST_LOCAL StFileNode : public StNode {
+class StFileNode : public StNode {
 
         private:
 
@@ -34,16 +34,14 @@ class ST_LOCAL StFileNode : public StNode {
     /**
      * Main constructor.
      */
-    StFileNode(const StString& subPath = StString(), StNode* parentNode = NULL, int nodeType = NODE_TYPE_FILE)
-    : StNode(subPath, parentNode, nodeType),
-      stMIMEType() {
-        //
-    }
+    ST_CPPEXPORT StFileNode(const StString& theSubPath = StString(),
+                            StNode*         theParentNode = NULL,
+                            int             theNodeType = NODE_TYPE_FILE);
 
     /**
      * Destructor.
      */
-    virtual ~StFileNode();
+    ST_CPPEXPORT virtual ~StFileNode();
 
     /**
      * Method to access child file node by index.
@@ -62,9 +60,7 @@ class ST_LOCAL StFileNode : public StNode {
     /**
      * Fast flag to determine StFolder instance.
      */
-    virtual bool isFolder() const {
-        return false;
-    }
+    ST_CPPEXPORT virtual bool isFolder() const;
 
     /**
      * Perform detach operation for this file node.
@@ -72,7 +68,7 @@ class ST_LOCAL StFileNode : public StNode {
      * but without back-referencies to top elementes in the tree (parent path).
      * @return new handle to detached file node copy.
      */
-    virtual StHandle<StFileNode> detach() const;
+    ST_CPPEXPORT virtual StHandle<StFileNode> detach() const;
 
     /**
      * Returns MIME information assigned to this file node.
@@ -159,19 +155,7 @@ class ST_LOCAL StFileNode : public StNode {
      *   http://domain/path/file
      * @return true if remote protocol path syntax detected.
      */
-    static bool isRemoteProtocolPath(const StString& thePath) {
-        StUtf8Iter anIter = thePath.iterator();
-        if(*anIter == stUtf32_t(':')) {
-            return false;
-        }
-        for(; *anIter != 0; ++anIter) {
-            if(*anIter == stUtf32_t(':')) {
-                return *(++anIter) == stUtf32_t('/')
-                    && *(++anIter) == stUtf32_t('/');
-            }
-        }
-        return false;
-    }
+    ST_CPPEXPORT static bool isRemoteProtocolPath(const StString& thePath);
 
     /**
      * Method to recognize path is absolute or not.
@@ -198,20 +182,20 @@ class ST_LOCAL StFileNode : public StNode {
      * @param path (const StString& ) - file path;
      * @return true if file/folder exists.
      */
-    static bool isFileExists(const StString& path);
+    ST_CPPEXPORT static bool isFileExists(const StString& path);
 
     /**
      * Tries to remove file from filesystem.
      * @return true on success.
      */
-    static bool removeFile(const StString& path);
+    ST_CPPEXPORT static bool removeFile(const StString& path);
 
     /**
      * Tries to move/rename file.
      * @return true on success.
      */
-    static bool moveFile(const StString& thePathFrom,
-                         const StString& thePathTo);
+    ST_CPPEXPORT static bool moveFile(const StString& thePathFrom,
+                                      const StString& thePathTo);
 
     /**
      * Extract the file extension using general rules.
@@ -219,55 +203,55 @@ class ST_LOCAL StFileNode : public StNode {
      * If filename has no extension than empty string will be returned.
      * @return file extension.
      */
-    static StString getExtension(const StString& theFileName);
+    ST_CPPEXPORT static StString getExtension(const StString& theFileName);
 
     /**
      * Split filename to extension and name.
      * Example: IN  theFileName  ='im.age.jps'
      *          OUT theName      ='im.age'
      *          OUT theExtension ='jps'
-     * @param theFileName (const StString& ) - IN file name
-     * @param theFolder    (StString& ) - OUT file name
-     * @param theExtension (StString& ) - OUT file extension
+     * @param theFileName  file path
+     * @param theName      file name
+     * @param theExtension file extension
      */
-    static void getNameAndExtension(const StString& theFileName,
-                                    StString& theName,
-                                    StString& theExtension);
+    ST_CPPEXPORT static void getNameAndExtension(const StString& theFileName,
+                                                 StString& theName,
+                                                 StString& theExtension);
 
     /**
      * Divide absolute filepath into folder path and file name.
      * Example: IN  theFilePath ='/media/cdrom/image.jps'
      *          OUT theFolder   ='/media/cdrom'
      *          OUT theFileName ='image.jps'
-     * @param theFilePath (const StString& ) - IN file path
-     * @param theFolder   (StString& ) - OUT folder path
-     * @param theFileName (StString& ) - OUT file name
+     * @param theFilePath file path
+     * @param theFolder   folder path
+     * @param theFileName file name
      */
-    static void getFolderAndFile(const StString& theFilePath,
-                                 StString& theFolder,
-                                 StString& theFileName);
+    ST_CPPEXPORT static void getFolderAndFile(const StString& theFilePath,
+                                              StString&       theFolder,
+                                              StString&       theFileName);
 
     /**
      * Open native system open file dialog.
-     * @param theFolder (const StString& ) - path to open;
-     * @param theTitle  (const StString& ) - dialog title;
-     * @param theFilter (const StMIMEList& ) - files filter;
-     * @param theOutFilePath (StString& ) - file selected by user;
-     * @param toSave (bool ) - flag this dialog to open or save file;
+     * @param theFolder      path to open
+     * @param theTitle       dialog title
+     * @param theFilter      files filter
+     * @param theOutFilePath file selected by user
+     * @param toSave         flag this dialog to open or save file
      * @return
      */
-    static bool openFileDialog(const StString& theFolder,
-                               const StString& theTitle,
-                               const StMIMEList& theFilter,
-                               StString& theOutFilePath,
-                               bool toSave);
+    ST_CPPEXPORT static bool openFileDialog(const StString&   theFolder,
+                                            const StString&   theTitle,
+                                            const StMIMEList& theFilter,
+                                            StString&         theOutFilePath,
+                                            bool              toSave);
 
     /**
      * Function used where not possible use native Unicode paths.
-     * @param fileName (const StString& ) - original filename;
-     * @return (StString ) - compatible filename.
+     * @param theFileName original filename
+     * @return compatible filename
      */
-    static StString getCompatibleName(const StString& fileName);
+    ST_CPPEXPORT static StString getCompatibleName(const StString& theFileName);
 
 };
 

@@ -22,7 +22,7 @@
  * Wrapper over locale_t C structure which should be allocated within special functions.
  * Notice that there NO implicit convertion from/to std::locale class!
  */
-class ST_LOCAL StCLocale {
+class StCLocale {
 
         public:
 
@@ -103,7 +103,7 @@ inline long stStringToLong(const char*      theString,
  * will be defined. Currently it defined just to read numbers from strings
  * using C locale.
  */
-class ST_LOCAL StStringStream : public std::basic_iostream< char, std::char_traits<char> > {
+class StStringStream : public std::basic_iostream< char, std::char_traits<char> > {
 
         private:
 

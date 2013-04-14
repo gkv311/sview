@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2010 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -22,20 +22,19 @@
 #include <stTypes.h>
 #include <StFile/StMIMEList.h>
 
-class ST_LOCAL StDrawerInfo {
-
-        private:
-
-    StString drawerPath;
-    StMIMEList    mimeList;
-    bool            bValid;
+class StDrawerInfo {
 
         public:
 
-    StDrawerInfo();
-    StDrawerInfo(const StDrawerInfo& toCopy);
-    StDrawerInfo(const StString& drawerPath);
-    ~StDrawerInfo();
+    ST_CPPEXPORT static const StMIME& DRAWER_MIME();
+    ST_CPPEXPORT static const StMIME& CLOSE_MIME();
+
+        public:
+
+    ST_CPPEXPORT StDrawerInfo();
+    ST_CPPEXPORT StDrawerInfo(const StDrawerInfo& toCopy);
+    ST_CPPEXPORT StDrawerInfo(const StString& drawerPath);
+    ST_CPPEXPORT ~StDrawerInfo();
 
     const StDrawerInfo& operator=(const StDrawerInfo& toCopy) {
         if(this != &toCopy) {
@@ -103,8 +102,11 @@ class ST_LOCAL StDrawerInfo {
         return StString("Drawer Path = '") + drawerPath + "'. Full MIME list:\n" + mimeList.toString();
     }
 
-    static const StMIME& DRAWER_MIME();
-    static const StMIME& CLOSE_MIME();
+        private:
+
+    StString drawerPath;
+    StMIMEList    mimeList;
+    bool            bValid;
 
 };
 

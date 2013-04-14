@@ -34,43 +34,43 @@ ST_DEFINE_HANDLE(StSubtitleQueue, StAVPacketQueue);
 /**
  * Subtitles decoding thread.
  */
-class ST_LOCAL StSubtitleQueue : public StAVPacketQueue {
-
-        private:
-
-    StHandle<StSubQueue> myOutQueue;
-    StThread*   myThread; //!< decoding loop thread
-    StSubtitlesASS myASS; //!< ASS subtitles parser
-    StEvent   evDowntime;
-    volatile bool toQuit;
+class StSubtitleQueue : public StAVPacketQueue {
 
         public:
 
-    bool isInDowntime() {
+    ST_LOCAL bool isInDowntime() {
         return evDowntime.check();
     }
 
-    StSubtitleQueue(const StHandle<StSubQueue>& theSubtitlesQueue);
-    virtual ~StSubtitleQueue();
+    ST_LOCAL StSubtitleQueue(const StHandle<StSubQueue>& theSubtitlesQueue);
+    ST_LOCAL virtual ~StSubtitleQueue();
 
     /**
      * Initialization function.
-     * @param theFormatCtx (AVFormatContext* ) - pointer to video format context;
-     * @param streamId (const unsigned int )   - stream id in video format context;
-     * @return true if no error.
+     * @param theFormatCtx pointer to video format context
+     * @param streamId     stream id in video format context
+     * @return true if no error
      */
-    bool init(AVFormatContext*   theFormatCtx,
-              const unsigned int theStreamId);
+    ST_LOCAL bool init(AVFormatContext*   theFormatCtx,
+                       const unsigned int theStreamId);
 
     /**
      * Clean function.
      */
-    void deinit();
+    ST_LOCAL void deinit();
 
     /**
      * Main decoding loop.
      */
-    void decodeLoop();
+    ST_LOCAL void decodeLoop();
+
+        private:
+
+    StHandle<StSubQueue> myOutQueue;
+    StThread*            myThread;   //!< decoding loop thread
+    StSubtitlesASS       myASS;      //!< ASS subtitles parser
+    StEvent              evDowntime;
+    volatile bool        toQuit;
 
 };
 

@@ -14,8 +14,6 @@
 
 namespace {
 
-    static bool HAS_LOGGER_ID = StLogger::IdentifyModule("sView");
-
     static StAppResponder* TheAppResponder = NULL;
     static StOpenInfo TheOpenInfo;
     static volatile bool TheToQuit = false;

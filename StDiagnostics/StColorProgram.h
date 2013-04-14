@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StDiagnostics program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,17 +25,17 @@
 /**
  * Very simple color program.
  */
-class ST_LOCAL StColorProgram : public StGLMeshProgram {
+class StColorProgram : public StGLMeshProgram {
 
         public:
 
-    StColorProgram();
+    ST_LOCAL StColorProgram();
 
-    virtual bool init(StGLContext& theCtx);
+    ST_LOCAL virtual bool init(StGLContext& theCtx);
 
-    void setScaleTranslate(StGLContext&    theCtx,
-                           const StGLVec4& theScaleVec4,
-                           const StGLVec4& theTranslateVec4);
+    ST_LOCAL void setScaleTranslate(StGLContext&    theCtx,
+                                    const StGLVec4& theScaleVec4,
+                                    const StGLVec4& theTranslateVec4);
 
         private:
 

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -15,7 +15,7 @@
 /**
  * This class represent OpenGL stereo multitexture (Left + Right).
  */
-class ST_LOCAL StGLStereoTexture : public StGLResource {
+class StGLStereoTexture : public StGLResource {
 
         protected:
 
@@ -24,7 +24,7 @@ class ST_LOCAL StGLStereoTexture : public StGLResource {
         RIGHT_TEXTURE = 1,
     };
 
-    void setTextureFormat(const GLint theTextureFormat) {
+    inline void setTextureFormat(const GLint theTextureFormat) {
         myTextures[LEFT_TEXTURE ].setTextureFormat(theTextureFormat);
         myTextures[RIGHT_TEXTURE].setTextureFormat(theTextureFormat);
     }

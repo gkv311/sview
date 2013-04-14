@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov
+ * Copyright © 2007-2013 Kirill Gavrilov
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -14,29 +14,29 @@
 
 class StLibrary;
 
-class ST_LOCAL StConfig : public StConfigInterface {
+class StConfig : public StConfigInterface {
 
         public:
 
-    StConfig(const StString& theSettingsSet);
+    ST_CPPEXPORT StConfig(const StString& theSettingsSet);
 
-    virtual ~StConfig();
+    ST_CPPEXPORT virtual ~StConfig();
 
     bool isValid() const {
         return myLibInstance != NULL;
     }
 
-    bool loadInt32(const StString& theParam,
-                   int32_t&        theOutValue);
+    ST_CPPEXPORT bool loadInt32(const StString& theParam,
+                                int32_t&        theOutValue);
 
-    bool saveInt32(const StString& theParam,
-                   const int32_t&  theValue);
+    ST_CPPEXPORT bool saveInt32(const StString& theParam,
+                                const int32_t&  theValue);
 
-    bool loadString(const StString& theParam,
-                    StString&       theOutValue);
+    ST_CPPEXPORT bool loadString(const StString& theParam,
+                                 StString&       theOutValue);
 
-    bool saveString(const StString& theParam,
-                    const StString& theValue);
+    ST_CPPEXPORT bool saveString(const StString& theParam,
+                                 const StString& theValue);
 
         private:
 

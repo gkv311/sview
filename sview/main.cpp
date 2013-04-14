@@ -1,17 +1,13 @@
 /**
  * This is source code for sView
  *
- * Copyright © Kirill Gavrilov, 2007-2012
+ * Copyright © Kirill Gavrilov, 2007-2013
  */
 
 #ifndef __APPLE__
 
 #include <StCore/StApplication.h>
 #include <StCore/StCore.h>
-
-namespace {
-    static bool HAS_LOGGER_ID = StLogger::IdentifyModule("sView");
-};
 
 #if(defined(_WIN32) || defined(__WIN32__))
 #ifdef __ST_DEBUG__

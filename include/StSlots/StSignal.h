@@ -99,7 +99,7 @@ void ReceiverClass::doCallback(int arg1, const double* arg2) {
  * If user will try to call another ::emit function it will give compilation-time error.
  */
 template<typename slotMethod_t>
-class ST_LOCAL StSignal {
+class StSignal {
 
         public:
 

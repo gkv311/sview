@@ -15,7 +15,7 @@
  * OpenGL 4.2 definition.
  */
 template<typename theBaseClass_t>
-struct ST_LOCAL stglTmplCore42 : public theBaseClass_t {
+struct stglTmplCore42 : public theBaseClass_t {
 
         public: //! @name GL_ARB_base_instance (added to OpenGL 4.2 core)
 

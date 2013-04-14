@@ -13,7 +13,7 @@
 
 #include "StString.h"
 
-class ST_LOCAL StLangMap {
+class StLangMap {
 
         public:
 

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -18,37 +18,37 @@
  *  - data size (represents data position and size in the texture);
  *  - data DAR (Display Aspect Ratio).
  */
-class ST_LOCAL StGLFrameTexture : public StGLTexture {
+class StGLFrameTexture : public StGLTexture {
 
         public:
 
-    StGLFrameTexture();
+    ST_CPPEXPORT StGLFrameTexture();
 
     /**
      * @return data size in the texture.
      */
-    const StGLVec2& getDataSize() {
+    inline const StGLVec2& getDataSize() {
         return myDataSize;
     }
 
     /**
      * @param theDataSize - setted data size in the texture.
      */
-    void setDataSize(const StGLVec2& theDataSize) {
+    inline void setDataSize(const StGLVec2& theDataSize) {
         myDataSize = theDataSize;
     }
 
     /**
      * @return display aspect ratio.
      */
-    GLfloat getDisplayRatio() const {
+    inline GLfloat getDisplayRatio() const {
         return myDisplayRatio;
     }
 
     /**
      * @param theValue - display aspect ratio.
      */
-    void setDisplayRatio(const GLfloat theValue) {
+    inline void setDisplayRatio(const GLfloat theValue) {
         myDisplayRatio = theValue;
     }
 
@@ -59,60 +59,60 @@ class ST_LOCAL StGLFrameTexture : public StGLTexture {
 
 };
 
-class ST_LOCAL StGLFrameTextures : public StGLResource {
+class StGLFrameTextures : public StGLResource {
 
         public:
 
-    StGLFrameTextures();
+    ST_CPPEXPORT StGLFrameTextures();
 
-    virtual ~StGLFrameTextures();
+    ST_CPPEXPORT virtual ~StGLFrameTextures();
 
     /**
      * Release OpenGL texture objects.
      */
-    virtual void release(StGLContext& theCtx);
+    ST_CPPEXPORT virtual void release(StGLContext& theCtx);
 
-    StHandle<StStereoParams> getSource() const {
+    inline StHandle<StStereoParams> getSource() const {
         return myParams;
     }
 
-    void setSource(const StHandle<StStereoParams>& theParams) {
+    inline void setSource(const StHandle<StStereoParams>& theParams) {
         myParams = theParams;
     }
 
-    StImage::ImgColorModel getColorModel() const {
+    inline StImage::ImgColorModel getColorModel() const {
         return myImgCM;
     }
 
-    void setColorModel(const StImage::ImgColorModel theColorModel) {
+    inline void setColorModel(const StImage::ImgColorModel theColorModel) {
         myImgCM = theColorModel;
     }
 
     /**
      * @return true if main data is valid.
      */
-    bool isValid() const {
+    inline bool isValid() const {
         return myTextures[0].isValid();
     }
 
     /**
      * @return sizeX (GLsizei ) - main texture width.
      */
-    GLsizei getSizeX() const {
+    inline GLsizei getSizeX() const {
         return myTextures[0].getSizeX();
     }
 
     /**
      * @return sizeY (GLsizei ) - main texture height.
      */
-    GLsizei getSizeY() const {
+    inline GLsizei getSizeY() const {
         return myTextures[0].getSizeY();
     }
 
     /**
      * Access to texture plane using id.
      */
-    StGLFrameTexture& getPlane(size_t thePlaneId = 0) {
+    inline StGLFrameTexture& getPlane(size_t thePlaneId = 0) {
         ST_DEBUG_ASSERT(thePlaneId < 4);
         return myTextures[thePlaneId];
     }
@@ -120,8 +120,8 @@ class ST_LOCAL StGLFrameTextures : public StGLResource {
     /**
      * Bind as multitexture.
      */
-    void bind(StGLContext& theCtx,
-              const GLenum theTextureUnit = GL_TEXTURE0) {
+    inline void bind(StGLContext& theCtx,
+                     const GLenum theTextureUnit = GL_TEXTURE0) {
         if(myTextures[0].isValid()) { myTextures[0].bind(theCtx, theTextureUnit);     }
         if(myTextures[1].isValid()) { myTextures[1].bind(theCtx, theTextureUnit + 1); }
         if(myTextures[2].isValid()) { myTextures[2].bind(theCtx, theTextureUnit + 2); }
@@ -131,30 +131,30 @@ class ST_LOCAL StGLFrameTextures : public StGLResource {
     /**
      * Unbind textures.
      */
-    void unbind(StGLContext& theCtx) {
+    inline void unbind(StGLContext& theCtx) {
         if(myTextures[3].isValid()) { myTextures[3].unbind(theCtx); }
         if(myTextures[2].isValid()) { myTextures[2].unbind(theCtx); }
         if(myTextures[1].isValid()) { myTextures[1].unbind(theCtx); }
         if(myTextures[0].isValid()) { myTextures[0].unbind(theCtx); }
     }
 
-    void increaseSize(StGLContext&      theCtx,
-                      StGLFrameTexture& theTexture,
-                      const GLsizei     theTextureSizeX,
-                      const GLsizei     theTextureSizeY);
+    ST_CPPEXPORT void increaseSize(StGLContext&      theCtx,
+                                   StGLFrameTexture& theTexture,
+                                   const GLsizei     theTextureSizeX,
+                                   const GLsizei     theTextureSizeY);
 
-    void preparePlane(StGLContext&  theCtx,
-                      const size_t  thePlaneId,
-                      const GLsizei theSizeX,
-                      const GLsizei theizeY,
-                      const GLint   theInternalFormat);
+    ST_CPPEXPORT void preparePlane(StGLContext&  theCtx,
+                                   const size_t  thePlaneId,
+                                   const GLsizei theSizeX,
+                                   const GLsizei theizeY,
+                                   const GLint   theInternalFormat);
 
     /**
      * Change Min and Mag filter.
      * After this call current bound texture will be undefined.
      */
-    void setMinMagFilter(StGLContext& theCtx,
-                         const GLenum theMinMagFilter);
+    ST_CPPEXPORT void setMinMagFilter(StGLContext& theCtx,
+                                      const GLenum theMinMagFilter);
 
         private:
 
@@ -170,7 +170,7 @@ class ST_LOCAL StGLFrameTextures : public StGLResource {
  *  - Back Left and Back Right (prepared);
  * Float means each list is independent.
  */
-class ST_LOCAL StGLQuadTexture : public StGLResource {
+class StGLQuadTexture : public StGLResource {
 
         public:
 
@@ -186,33 +186,33 @@ class ST_LOCAL StGLQuadTexture : public StGLResource {
 
         public:
 
-    StGLQuadTexture();
+    ST_CPPEXPORT StGLQuadTexture();
 
-    virtual ~StGLQuadTexture();
+    ST_CPPEXPORT virtual ~StGLQuadTexture();
 
     /**
      * Release OpenGL texture objects.
      */
-    virtual void release(StGLContext& theCtx);
+    ST_CPPEXPORT virtual void release(StGLContext& theCtx);
 
     /**
      * @return texture (StGLFrameTextures& ) - texture from front pair (for rendering).
      */
-    StGLFrameTextures& getFront(const LeftOrRight theLeftOrRight) {
+    inline StGLFrameTextures& getFront(const LeftOrRight theLeftOrRight) {
         return myTextures[getFrontId() + theLeftOrRight];
     }
 
     /**
      * @return texture (StGLFrameTextures& ) - texture from back pair (for filling).
      */
-    StGLFrameTextures& getBack(const LeftOrRight theLeftOrRight) {
+    inline StGLFrameTextures& getBack(const LeftOrRight theLeftOrRight) {
         return myTextures[getBackId() + theLeftOrRight];
     }
 
     /**
      * Swap FRONT / BACK.
      */
-    void swapFB() {
+    inline void swapFB() {
         myActive = !myActive; // process swap itself
     }
 
@@ -220,8 +220,8 @@ class ST_LOCAL StGLQuadTexture : public StGLResource {
      * Change Min and Mag filter.
      * After this call current bound texture will be undefined.
      */
-    void setMinMagFilter(StGLContext& theCtx,
-                         const GLenum theMinMagFilter);
+    ST_CPPEXPORT void setMinMagFilter(StGLContext& theCtx,
+                                      const GLenum theMinMagFilter);
 
         private:
 

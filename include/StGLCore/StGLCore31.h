@@ -15,7 +15,7 @@
  * OpenGL 3.1 definition.
  */
 template<typename theBaseClass_t>
-struct ST_LOCAL stglTmplCore31 : public theBaseClass_t {
+struct stglTmplCore31 : public theBaseClass_t {
 
         public: //! @name GL_ARB_uniform_buffer_object (added to OpenGL 3.1 core)
 

@@ -27,8 +27,6 @@
 #include <StSettings/StTranslations.h>
 
 namespace {
-    static bool HAS_LOGGER_ID = StLogger::IdentifyModule("StOutAnaglyph");
-
     // shaders data
     static const char VSHADER[]         = "vAnaglyph.shv";
     static const char FSHADER_SIMPLE[]  = "fAnaglyphSimple.shf";

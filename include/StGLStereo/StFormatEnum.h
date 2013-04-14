@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -36,12 +36,12 @@ namespace st {
     /**
      * Returns name for format.
      */
-    StString formatToString(StFormatEnum theFormatEnum);
+    ST_CPPEXPORT StString formatToString(StFormatEnum theFormatEnum);
 
     /**
      * Return enumeration value from the string.
      */
-    StFormatEnum formatFromString(const StString& theFormatString);
+    ST_CPPEXPORT StFormatEnum formatFromString(const StString& theFormatString);
 
 };
 

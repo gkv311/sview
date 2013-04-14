@@ -183,8 +183,9 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add option="`pkg-config gtk+-2.0 --libs`" />
+					<Add option="-z defs" />
 					<Add library="GL" />
+					<Add library="X11" />
 					<Add library="pthread" />
 				</Linker>
 				<ExtraCommands>
@@ -213,8 +214,9 @@
 					<Add option="-D__ST_DEBUG__" />
 				</Compiler>
 				<Linker>
-					<Add option="`pkg-config gtk+-2.0 --libs`" />
+					<Add option="-z defs" />
 					<Add library="GL" />
+					<Add library="X11" />
 					<Add library="pthread" />
 				</Linker>
 				<ExtraCommands>
@@ -296,6 +298,7 @@
 			<Add library="swscale" />
 			<Add directory="../3rdparty/lib/$(TARGET_NAME)" />
 			<Add directory="../lib/$(TARGET_NAME)" />
+			<Add directory="../bin/$(TARGET_NAME)" />
 		</Linker>
 		<Unit filename="StDXAqbsControl.cpp" />
 		<Unit filename="StDXAqbsControl.h" />

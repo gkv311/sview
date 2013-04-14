@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -16,47 +16,47 @@ class StBndBox;
 /**
  * Class represents the prism.
  */
-class ST_LOCAL StGLPrism : public StGLMesh {
+class StGLPrism : public StGLMesh {
 
         public:
 
-    StGLPrism();
+    ST_CPPEXPORT StGLPrism();
 
-    void setWireframe(size_t theNbIsosX = 0,
-                      size_t theNbIsosY = 0,
-                      size_t theNbIsosZ = 0);
+    ST_CPPEXPORT void setWireframe(size_t theNbIsosX = 0,
+                                   size_t theNbIsosY = 0,
+                                   size_t theNbIsosZ = 0);
 
-    void setVisibilityX(bool theToShowX0, bool theToShowX1);
-    void setVisibilityY(bool theToShowY0, bool theToShowY1);
-    void setVisibilityZ(bool theToShowZ0, bool theToShowZ1);
+    ST_CPPEXPORT void setVisibilityX(bool theToShowX0, bool theToShowX1);
+    ST_CPPEXPORT void setVisibilityY(bool theToShowY0, bool theToShowY1);
+    ST_CPPEXPORT void setVisibilityZ(bool theToShowZ0, bool theToShowZ1);
 
     /**
      * Define the box.
      */
-    bool init(StGLContext&    theCtx,
-              const StGLVec3& theCenter,
-              const GLfloat   theDX,
-              const GLfloat   theDY,
-              const GLfloat   theDZ);
+    ST_CPPEXPORT bool init(StGLContext&    theCtx,
+                           const StGLVec3& theCenter,
+                           const GLfloat   theDX,
+                           const GLfloat   theDY,
+                           const GLfloat   theDZ);
 
     /**
      * Define the box from boundary box.
      */
-    bool init(StGLContext&    theCtx,
-              const StBndBox& theBndBox);
+    ST_CPPEXPORT bool init(StGLContext&    theCtx,
+                           const StBndBox& theBndBox);
 
     /**
      * Define the prism by 6 points.
      */
-    bool init(StGLContext&    theCtx,
-              const StGLVec3& theX0Y0Z0, // rectangle in near Z plane
-              const StGLVec3& theX1Y0Z0,
-              const StGLVec3& theX1Y1Z0,
-              const StGLVec3& theX0Y1Z0,
-              const StGLVec3& theX0Y0Z1, // rectangle in far Z plane
-              const StGLVec3& theX1Y0Z1,
-              const StGLVec3& theX1Y1Z1,
-              const StGLVec3& theX0Y1Z1);
+    ST_CPPEXPORT bool init(StGLContext&    theCtx,
+                           const StGLVec3& theX0Y0Z0, // rectangle in near Z plane
+                           const StGLVec3& theX1Y0Z0,
+                           const StGLVec3& theX1Y1Z0,
+                           const StGLVec3& theX0Y1Z0,
+                           const StGLVec3& theX0Y0Z1, // rectangle in far Z plane
+                           const StGLVec3& theX1Y0Z1,
+                           const StGLVec3& theX1Y1Z1,
+                           const StGLVec3& theX0Y1Z1);
 
         private:
 

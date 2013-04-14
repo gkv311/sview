@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -17,7 +17,7 @@
 /**
  * This class represents an argument (to program for example) in style key+value.
  */
-class ST_LOCAL StArgument {
+class StArgument {
 
         private:
 
@@ -132,37 +132,37 @@ class ST_LOCAL StArgument {
  * Simple array-map for StArguments. Could be exported/imported into/from string
  * (default '\n' symbol will be used as delimiter).
  */
-class ST_LOCAL StArgumentsMap : public StArrayList<StArgument> {
+class StArgumentsMap : public StArrayList<StArgument> {
 
         public:
 
     /**
      * Empty constructor.
      */
-    StArgumentsMap();
-    virtual ~StArgumentsMap();
+    ST_CPPEXPORT StArgumentsMap();
+    ST_CPPEXPORT virtual ~StArgumentsMap();
 
     /**
      * Parse string and create arguments list.
      */
-    void parseList(const StArrayList<StString>& stringList);
+    ST_CPPEXPORT void parseList(const StArrayList<StString>& stringList);
 
     /**
      * Parse string and create arguments list.
      */
-    void parseString(const StString& string);
+    ST_CPPEXPORT void parseString(const StString& string);
 
     /**
      * Access to the argument throw the key.
      * Returns an empty argument if key not found.
      */
-    StArgument operator[](const StString& key) const;
+    ST_CPPEXPORT StArgument operator[](const StString& key) const;
 
     /**
      * Access to the arguments throw indexes.
      * Use parent ::size() method to retrieve map's size.
      */
-    const StArgument& getFromIndex(const size_t index) const {
+    inline const StArgument& getFromIndex(const size_t index) const {
         return StArrayList<StArgument>::getValue(index);
     }
 
@@ -175,69 +175,63 @@ class ST_LOCAL StArgumentsMap : public StArrayList<StArgument> {
 /**
  * Helper class to get process/system variables.
  */
-class ST_LOCAL StProcess {
+class StProcess {
 
         public:
 
     /**
      * @return (StString ) absolute process path WITH executable name.
      */
-    static StString getProcessFullPath();
+    ST_CPPEXPORT static StString getProcessFullPath();
 
     /**
      * @return (StString ) process name.
      */
-    static StString getProcessName();
+    ST_CPPEXPORT static StString getProcessName();
 
     /**
      * @return (StString ) absolute process path WITHOUT executable name (including trailing separator).
      */
-    static StString getProcessFolder();
+    ST_CPPEXPORT static StString getProcessFolder();
 
     /**
      * @return (StString ) current working folder (including trailing separator).
      */
-    static StString getWorkingFolder();
+    ST_CPPEXPORT static StString getWorkingFolder();
 
     /**
      * @return (StString ) folder for temporary files (including trailing separator).
      */
-    static StString getTempFolder();
+    ST_CPPEXPORT static StString getTempFolder();
 
     /**
      * Make absolute path (using current working folder as root) from relative.
      * @param path (const StString& ) - original path;
      * @return (StString ) - absolute path.
      */
-    static StString getAbsolutePath(const StString& thePath);
+    ST_CPPEXPORT static StString getAbsolutePath(const StString& thePath);
 
     /**
      * @return (size_t ) process ID.
      */
-    static size_t getPID() {
-    #if (defined(_WIN32) || defined(__WIN32__))
-        return (size_t )GetCurrentProcessId();
-    #else
-        return (size_t )getpid();
-    #endif
-    }
+    ST_CPPEXPORT static size_t getPID();
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     /**
      * @return (StString ) absolute Windows path.
      */
-    static StString getWindowsFolder();
+    ST_CPPEXPORT static StString getWindowsFolder();
 #endif
 
     /**
      * @return (StString ) absolute Fonts path.
      */
-    static StString getFontsRoot();
+    ST_CPPEXPORT static StString getFontsRoot();
 
     /**
      * @return (StArrayList<StString> ) - command line arguments flat list.
      */
-    static StArrayList<StString> getArguments();
+    ST_CPPEXPORT static StArrayList<StString> getArguments();
 
     /**
      * @return (StArgumentsMap ) - command line arguments list as map of key+value.
@@ -271,10 +265,10 @@ class ST_LOCAL StProcess {
     #endif
     }
 
-    static StString getStCoreFolder();
+    ST_CPPEXPORT static StString getStCoreFolder();
 
-    static bool execProcess(const StString&          theExecutablePath,
-                            const StArray<StString>& theArguments);
+    ST_CPPEXPORT static bool execProcess(const StString&          theExecutablePath,
+                                         const StArray<StString>& theArguments);
 
 };
 

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -14,6 +14,14 @@
 
 #include <StFile/StFileNode.h>
 #include <StFile/StMIME.h>
+
+StImageFile::StImageFile() {
+    //
+}
+
+StImageFile::~StImageFile() {
+    //
+}
 
 StImageFile::ImageClass StImageFile::imgLibFromString(const StString& thePreferred) {
     StImageFile::ImageClass aPreferred = ST_LIBAV;

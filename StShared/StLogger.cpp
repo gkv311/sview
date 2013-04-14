@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -39,19 +39,23 @@ StLogger& StLogger::GetDefault() {
     return THE_DEFAULT_LOGGER;
 }
 
-bool StLogger::IdentifyModule(const StString& theModuleName) {
-    GetDefault().myModuleId = theModuleName;
+StLogContext::StLogContext(const char* theName)
+: myName(theName) {
     ST_DEBUG_LOG("  ==  Process " + StProcess::getProcessName()
-               + " (" + StProcess::getPID() + "), module " + theModuleName
+               + " (" + StProcess::getPID() + "), module " + myName
                + " Loaded  ==");
-    return true;
+}
+
+StLogContext::~StLogContext() {
+    ST_DEBUG_LOG("  ==  Process " + StProcess::getProcessName()
+                   + " (" + StProcess::getPID() + "), module " + myName
+                   + " Unloaded  ==");
 }
 
 StLogger::StLogger(const StString&       theLogFile,
                    const StLogger::Level theFilter,
                    const int             theOptions)
 : myMutex((theOptions & StLogger::ST_OPT_LOCK) ? new StMutexSlim() : (StMutexSlim* )NULL),
-  myModuleId(),
 #if(defined(_WIN32) || defined(__WIN32__))
   myFilePath(theLogFile.toUtfWide()),
 #else
@@ -64,15 +68,12 @@ StLogger::StLogger(const StString&       theLogFile,
 }
 
 StLogger::~StLogger() {
-    if(!myModuleId.isEmpty()) {
-        ST_DEBUG_LOG("  ==  Process " + StProcess::getProcessName()
-                   + " (" + StProcess::getPID() + "), module " + myModuleId
-                   + " Unloaded  ==");
-    }
+    //
 }
 
 void StLogger::write(const StString&       theMessage,
-                     const StLogger::Level theLevel) {
+                     const StLogger::Level theLevel,
+                     const StLogContext*   ) {
     if(theLevel > myFilter || theMessage.isEmpty()) {
         // just ignore
         return;
@@ -232,7 +233,7 @@ namespace {
 // GUI dialogs are in Object-C for MacOS
 #ifndef __APPLE__
 
-void stInfo(const StString& theMessage) {
+void StMessageBox::Info(const StString& theMessage) {
     StLogger::GetDefault().write(theMessage, StLogger::ST_INFO);
 #if(defined(_WIN32) || defined(__WIN32__))
     MessageBoxW(NULL, theMessage.toUtfWide().toCString(), L"Info", MB_OK | MB_ICONINFORMATION | MB_SETFOREGROUND | MB_TOPMOST);
@@ -248,7 +249,7 @@ void stInfo(const StString& theMessage) {
 #endif
 }
 
-void stWarn(const StString& theMessage) {
+void StMessageBox::Warn(const StString& theMessage) {
     StLogger::GetDefault().write(theMessage, StLogger::ST_WARNING);
 #if(defined(_WIN32) || defined(__WIN32__))
     MessageBoxW(NULL, theMessage.toUtfWide().toCString(), L"Warning", MB_OK | MB_ICONWARNING | MB_SETFOREGROUND | MB_TOPMOST);
@@ -264,7 +265,7 @@ void stWarn(const StString& theMessage) {
 #endif
 }
 
-void stError(const StString& theMessage) {
+void StMessageBox::Error(const StString& theMessage) {
     StLogger::GetDefault().write(theMessage, StLogger::ST_ERROR);
 #if(defined(_WIN32) || defined(__WIN32__))
     MessageBoxW(NULL, theMessage.toUtfWide().toCString(), L"Error", MB_OK | MB_ICONERROR | MB_SETFOREGROUND | MB_TOPMOST);
@@ -280,23 +281,7 @@ void stError(const StString& theMessage) {
 #endif
 }
 
-void stSuccess(const StString& theMessage) {
-    StLogger::GetDefault().write(theMessage, StLogger::ST_INFO);
-#if(defined(_WIN32) || defined(__WIN32__))
-    MessageBoxW(NULL, theMessage.toUtfWide().toCString(), L"Success", MB_OK | MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_TOPMOST);
-#elif(defined(__linux__) || defined(__linux))
-    if(stGtkInit()) {
-        gdk_threads_enter();
-        GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "%s", theMessage.toCString());
-        gtk_dialog_run(GTK_DIALOG(dialog));
-        gtk_widget_destroy(dialog);
-        gdk_flush(); // we need this call!
-        gdk_threads_leave();
-    }
-#endif
-}
-
-bool stQuestion(const StString& theMessage) {
+bool StMessageBox::Question(const StString& theMessage) {
 #if(defined(_WIN32) || defined(__WIN32__))
     return MessageBoxW(NULL, theMessage.toUtfWide().toCString(), L"Question", MB_YESNO | MB_ICONQUESTION | MB_SETFOREGROUND | MB_TOPMOST) == IDYES;
 #elif(defined(__linux__) || defined(__linux))
@@ -315,27 +300,22 @@ bool stQuestion(const StString& theMessage) {
 
 #endif // __APPLE__
 
-void stInfoConsole(const StString& theMessage) {
+void StMessageBox::InfoConsole(const StString& theMessage) {
     StLogger::GetDefault().write(theMessage, StLogger::ST_INFO);
     st::cout << stostream_text("(Info) ") << theMessage << stostream_text('\n');
 }
 
-void stWarnConsole(const StString& theMessage) {
+void StMessageBox::WarnConsole(const StString& theMessage) {
     StLogger::GetDefault().write(theMessage, StLogger::ST_WARNING);
     st::cout << stostream_text("(Warning) ") << theMessage << stostream_text('\n');
 }
 
-void stErrorConsole(const StString& theMessage) {
+void StMessageBox::ErrorConsole(const StString& theMessage) {
     StLogger::GetDefault().write(theMessage, StLogger::ST_ERROR);
     st::cout << stostream_text("(Error) ") << theMessage << stostream_text('\n');
 }
 
-void stSuccessConsole(const StString& theMessage) {
-    StLogger::GetDefault().write(theMessage, StLogger::ST_INFO);
-    st::cout << stostream_text("(Success) ") << theMessage << stostream_text('\n');
-}
-
-bool stQuestionConsole(const StString& theMessage) {
+bool StMessageBox::QuestionConsole(const StString& theMessage) {
     st::cout << theMessage << stostream_text('\n');
     st::cout << stostream_text("Enter 'y' (yes) or 'n' (no)... ");
     st::cout << stostream_text('\n');

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ class StWindow;
 /**
  * Base Drawer class for Image Viewer plugin.
  */
-class ST_LOCAL StImageViewer : public StDrawerInterface {
+class StImageViewer : public StDrawerInterface {
 
     friend class StImageViewGUI;
 
@@ -44,18 +44,18 @@ class ST_LOCAL StImageViewer : public StDrawerInterface {
 
         public: //! @name interface methods' implementations
 
-    StImageViewer();
-    virtual ~StImageViewer();
-    virtual StDrawerInterface* getLibImpl() { return this; }
-    virtual bool init(StWindowInterface* theWindow);
-    virtual bool open(const StOpenInfo& stOpenInfo);
-    virtual void parseCallback(StMessage_t* stMessages);
-    virtual void stglDraw(unsigned int theView);
+    ST_CPPEXPORT StImageViewer();
+    ST_CPPEXPORT virtual ~StImageViewer();
+    ST_CPPEXPORT virtual StDrawerInterface* getLibImpl() { return this; }
+    ST_CPPEXPORT virtual bool init(StWindowInterface* theWindow);
+    ST_CPPEXPORT virtual bool open(const StOpenInfo& stOpenInfo);
+    ST_CPPEXPORT virtual void parseCallback(StMessage_t* stMessages);
+    ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
 
         public: //! @name callback Slots
 
     // TODO (Kirill Gavrilov#9) move to the StImageLoader thread
-    static SV_THREAD_FUNCTION doOpenFileDialogThread(void* theArg) {
+    ST_LOCAL static SV_THREAD_FUNCTION doOpenFileDialogThread(void* theArg) {
         struct ThreadArgs {
             StImageViewer* receiverPtr; size_t filesCount;
         };
@@ -64,7 +64,7 @@ class ST_LOCAL StImageViewer : public StDrawerInterface {
         delete threadArgs;
         return SV_THREAD_RETURN 0;
     }
-    static void doOpenFileDialog(void* receiverPtr, size_t filesCount) {
+    ST_LOCAL static void doOpenFileDialog(void* receiverPtr, size_t filesCount) {
         struct ThreadArgs {
             StImageViewer* receiverPtr; size_t filesCount;
         };
@@ -74,32 +74,32 @@ class ST_LOCAL StImageViewer : public StDrawerInterface {
         threadArgs->receiverPtr->params.isFullscreen->setValue(false); // workaround
         StThread(doOpenFileDialogThread, (void* )threadArgs);
     }
-    void doOpenFileDialog(const size_t filesCount = 1);
+    ST_LOCAL void doOpenFileDialog(const size_t filesCount = 1);
 
-    void doOpen2FilesDialog(const size_t dummy = 0);
-    void doSaveImageAs(const size_t theImgType) { myLoader->doSaveImageAs(theImgType); }
-    void doListFirst(const size_t dummy = 0);
-    void doListPrev(const size_t dummy = 0);
-    void doListNext(const size_t dummy = 0);
-    void doListLast(const size_t dummy = 0);
-    void doSlideShow(const size_t dummy = 0);
-    void doQuit(const size_t dummy = 0);
+    ST_LOCAL void doOpen2FilesDialog(const size_t dummy = 0);
+    ST_LOCAL void doSaveImageAs(const size_t theImgType) { myLoader->doSaveImageAs(theImgType); }
+    ST_LOCAL void doListFirst(const size_t dummy = 0);
+    ST_LOCAL void doListPrev(const size_t dummy = 0);
+    ST_LOCAL void doListNext(const size_t dummy = 0);
+    ST_LOCAL void doListLast(const size_t dummy = 0);
+    ST_LOCAL void doSlideShow(const size_t dummy = 0);
+    ST_LOCAL void doQuit(const size_t dummy = 0);
 
-    void doReset(const size_t dummy = 0);
+    ST_LOCAL void doReset(const size_t dummy = 0);
 
-    void doUpdateStateLoading();
-    void doUpdateStateLoaded();
+    ST_LOCAL void doUpdateStateLoading();
+    ST_LOCAL void doUpdateStateLoaded();
 
     /**
      * Handler for new file loaded event.
      */
-    void doLoaded();
+    ST_LOCAL void doLoaded();
 
     // callback keys
-    void keysStereo(bool* keysMap);
-    void keysSrcFormat(bool* keysMap);
-    void keysFileWalk(bool* keysMap);
-    void keysCommon(bool* keysMap);
+    ST_LOCAL void keysStereo(bool* keysMap);
+    ST_LOCAL void keysSrcFormat(bool* keysMap);
+    ST_LOCAL void keysFileWalk(bool* keysMap);
+    ST_LOCAL void keysCommon(bool* keysMap);
 
         public: //! @name Properties
 
@@ -118,18 +118,18 @@ class ST_LOCAL StImageViewer : public StDrawerInterface {
     /**
      * Retrieve current playlist item.
      */
-    bool getCurrentFile(StHandle<StFileNode>&     theFileNode,
-                        StHandle<StStereoParams>& theParams,
-                        StHandle<StImageInfo>&    theInfo);
+    ST_LOCAL bool getCurrentFile(StHandle<StFileNode>&     theFileNode,
+                                 StHandle<StStereoParams>& theParams,
+                                 StHandle<StImageInfo>&    theInfo);
 
         private: //! @name private callback Slots
 
-    void doFullscreen(const bool theIsFullscreen);
-    void doSwitchSrcFormat(const int32_t theSrcFormat);
+    ST_LOCAL void doFullscreen(const bool theIsFullscreen);
+    ST_LOCAL void doSwitchSrcFormat(const int32_t theSrcFormat);
 
         private:
 
-    void parseArguments(const StArgumentsMap& theArguments);
+    ST_LOCAL void parseArguments(const StArgumentsMap& theArguments);
 
         private: //! @name private fields
 

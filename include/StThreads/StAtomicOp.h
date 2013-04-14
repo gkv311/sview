@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -30,7 +30,7 @@ class StAtomicOp {
      * @param theValue (volatile int32_t& ) - input value;
      * @return incremented value.
      */
-    static int32_t Increment(volatile int32_t& theValue) {
+    static inline int32_t Increment(volatile int32_t& theValue) {
     #ifdef __GCC_HAVE_SYNC_COMPARE_AND_SWAP_4
         // g++ compiler
         return __sync_add_and_fetch(&theValue, 1);
@@ -52,7 +52,7 @@ class StAtomicOp {
      * @param theValue (volatile int32_t& ) - input value;
      * @return decremented value.
      */
-    static int32_t Decrement(volatile int32_t& theValue) {
+    static inline int32_t Decrement(volatile int32_t& theValue) {
     #ifdef __GCC_HAVE_SYNC_COMPARE_AND_SWAP_4
         // g++ compiler
         return __sync_sub_and_fetch(&theValue, 1);
@@ -74,7 +74,7 @@ class StAtomicOp {
      * @param theValue (volatile uint32_t& ) - input value;
      * @return incremented value.
      */
-    static uint32_t Increment(volatile uint32_t& theValue) {
+    static inline uint32_t Increment(volatile uint32_t& theValue) {
         return (uint32_t )Increment((volatile int32_t& )theValue);
     }
 
@@ -83,7 +83,7 @@ class StAtomicOp {
      * @param theValue (volatile uint32_t& ) - input value;
      * @return decremented value.
      */
-    static uint32_t Decrement(volatile uint32_t& theValue) {
+    static inline uint32_t Decrement(volatile uint32_t& theValue) {
         return (uint32_t )Decrement((volatile int32_t& )theValue);
     }
 
@@ -95,7 +95,7 @@ class StAtomicOp {
      * @param theValue (volatile int64_t& ) - pointer to the value;
      * @return incremented value.
      */
-    static int64_t Increment(volatile int64_t& theValue) {
+    static inline int64_t Increment(volatile int64_t& theValue) {
     #ifdef __GCC_HAVE_SYNC_COMPARE_AND_SWAP_8
         // g++ compiler
         return __sync_add_and_fetch(&theValue, 1);
@@ -117,7 +117,7 @@ class StAtomicOp {
      * @param theValue (volatile int64_t& ) - input value;
      * @return decremented value.
      */
-    static int64_t Decrement(volatile int64_t& theValue) {
+    static inline int64_t Decrement(volatile int64_t& theValue) {
     #ifdef __GCC_HAVE_SYNC_COMPARE_AND_SWAP_8
         // g++ compiler
         return __sync_sub_and_fetch(&theValue, 1);
@@ -139,7 +139,7 @@ class StAtomicOp {
      * @param theValue (volatile uint64_t& ) - input value;
      * @return incremented value.
      */
-    static uint64_t Increment(volatile uint64_t& theValue) {
+    static inline uint64_t Increment(volatile uint64_t& theValue) {
         return (uint64_t )Increment((volatile int64_t& )theValue);
     }
 
@@ -148,24 +148,24 @@ class StAtomicOp {
      * @param theValue (volatile uint64_t& ) - input value;
      * @return decremented value.
      */
-    static uint64_t Decrement(volatile uint64_t& theValue) {
+    static inline uint64_t Decrement(volatile uint64_t& theValue) {
         return (uint64_t )Decrement((volatile int64_t& )theValue);
     }
 
 #ifdef ST_HAS_INT64_EXT
-    static stInt64ext_t Increment(volatile stInt64ext_t& theValue) {
+    static inline stInt64ext_t Increment(volatile stInt64ext_t& theValue) {
         return (stInt64ext_t )Increment((volatile int64_t& )theValue);
     }
 
-    static stInt64ext_t Decrement(volatile stInt64ext_t& theValue) {
+    static inline stInt64ext_t Decrement(volatile stInt64ext_t& theValue) {
         return (stInt64ext_t )Decrement((volatile int64_t& )theValue);
     }
 
-    static stUInt64ext_t Increment(volatile stUInt64ext_t& theValue) {
+    static inline stUInt64ext_t Increment(volatile stUInt64ext_t& theValue) {
         return (stUInt64ext_t )Increment((volatile int64_t& )theValue);
     }
 
-    static stUInt64ext_t Decrement(volatile stUInt64ext_t& theValue) {
+    static inline stUInt64ext_t Decrement(volatile stUInt64ext_t& theValue) {
         return (stUInt64ext_t )Decrement((volatile int64_t& )theValue);
     }
 #endif

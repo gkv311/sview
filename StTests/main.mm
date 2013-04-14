@@ -33,7 +33,6 @@
 
 namespace {
 
-    static bool HAS_LOGGER_ID = StLogger::IdentifyModule("StTests");
     static StTestResponder* TheAppResponder = NULL;
 
 };

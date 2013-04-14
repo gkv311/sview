@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -21,7 +21,7 @@
 
 #include "StStereoDeviceInfoList.h"
 
-class ST_LOCAL StRendererInfo {
+class StRendererInfo {
 
         public:
 
@@ -29,67 +29,67 @@ class ST_LOCAL StRendererInfo {
         DEVICE_AUTO = -1,
     };
 
-    StRendererInfo();
-    StRendererInfo(const StRendererInfo&   theCopy);
-    StRendererInfo(const StRendererInfo_t& theCopy);
-    StRendererInfo(const StString& theRendererPath,
-                   const bool      theToDetectPriority);
+    ST_CPPEXPORT StRendererInfo();
+    ST_CPPEXPORT StRendererInfo(const StRendererInfo&   theCopy);
+    ST_CPPEXPORT StRendererInfo(const StRendererInfo_t& theCopy);
+    ST_CPPEXPORT StRendererInfo(const StString& theRendererPath,
+                                const bool      theToDetectPriority);
 
-    const StRendererInfo& operator=(const StRendererInfo& toCopy);
+    ST_CPPEXPORT const StRendererInfo& operator=(const StRendererInfo& toCopy);
 
-    StString getTitle() const;
+    ST_CPPEXPORT StString getTitle() const;
 
-    const StString& getPath() const {
+    inline const StString& getPath() const {
         return myRendererPath;
     }
 
-    const StString& getAboutString() const {
+    inline const StString& getAboutString() const {
         return myAboutString;
     }
 
-    const StStereoDeviceInfoList& getDeviceList() const {
+    inline const StStereoDeviceInfoList& getDeviceList() const {
         return myDeviceList;
     }
 
-    bool isValid() const {
+    inline bool isValid() const {
         return myIsValid;
     }
 
-    int getSupportLevel() const;
+    ST_CPPEXPORT int getSupportLevel() const;
 
-    bool operator==(const StRendererInfo& compare) const;
+    ST_CPPEXPORT bool operator==(const StRendererInfo& compare) const;
 
-    bool operator!=(const StRendererInfo& compare) const;
+    ST_CPPEXPORT bool operator!=(const StRendererInfo& compare) const;
 
-    bool operator>(const StRendererInfo& compare) const {
+    inline bool operator>(const StRendererInfo& compare) const {
         if(&compare == this) {
             return false;
         }
         return this->getSupportLevel() > compare.getSupportLevel();
     }
 
-    bool operator<(const StRendererInfo& compare) const {
+    inline bool operator<(const StRendererInfo& compare) const {
         if(&compare == this) {
             return false;
         }
         return this->getSupportLevel() < compare.getSupportLevel();
     }
 
-    bool operator>=(const StRendererInfo& compare) const {
+    inline bool operator>=(const StRendererInfo& compare) const {
         if(&compare == this) {
             return true;
         }
         return this->getSupportLevel() >= compare.getSupportLevel();
     }
 
-    bool operator<=(const StRendererInfo& compare) const {
+    inline bool operator<=(const StRendererInfo& compare) const {
         if(&compare == this) {
             return true;
         }
         return this->getSupportLevel() <= compare.getSupportLevel();
     }
 
-    StString toString() const;
+    ST_CPPEXPORT StString toString() const;
 
         private:
 

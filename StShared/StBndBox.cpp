@@ -28,6 +28,13 @@ StBndBox::StBndBox()
     //
 }
 
+StBndBox::StBndBox(const StGLVec3& theMin,
+                   const StGLVec3& theMax)
+: myMin(theMin),
+  myMax(theMax) {
+    setDefined();
+}
+
 StBndBox::~StBndBox() {
     //
 }

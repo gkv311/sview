@@ -41,7 +41,7 @@ typedef struct tagStRenderersArray {
 
 } StRenderersArray_t;
 
-class ST_LOCAL StStereoDeviceInfoList : public StArrayList<StStereoDeviceInfo> {
+class StStereoDeviceInfoList : public StArrayList<StStereoDeviceInfo> {
 
         public:
 

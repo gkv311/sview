@@ -17,110 +17,110 @@
 /**
  * Full OpenGL-window widget, must be ROOT for other widgets.
  */
-class ST_LOCAL StGLRootWidget : public StGLWidget {
+class StGLRootWidget : public StGLWidget {
 
         public:
 
     /**
      * Main constructor.
      */
-    StGLRootWidget();
+    ST_CPPEXPORT StGLRootWidget();
 
     /**
      * Destructor.
      */
-    virtual ~StGLRootWidget();
+    ST_CPPEXPORT virtual ~StGLRootWidget();
 
-    virtual const StString& getClassName();
+    ST_CPPEXPORT virtual const StString& getClassName();
 
     /**
      * Process initialization.
-     * @return true on success.
+     * @return true on success
      */
-    virtual bool stglInit();
+    ST_CPPEXPORT virtual bool stglInit();
 
     /**
      * Draw all children.
      * Root widget caches OpenGL state (like viewport).
      */
-    virtual void stglDraw(unsigned int theView);
+    ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
 
-    GLdouble getRootScaleX() const {
+    inline GLdouble getRootScaleX() const {
         return myScaleGlX;
     }
 
-    GLdouble getRootScaleY() const {
+    inline GLdouble getRootScaleY() const {
         return myScaleGlY;
     }
 
-    StRectD_t getRootRectGl() const {
+    inline StRectD_t getRootRectGl() const {
         return myRectGl;
     }
 
     /**
      * Convert pixel coordinates (absolute) into GL coordinates.
      */
-    StRectD_t getRectGl(const StRectI_t& theRectPx) const;
+    ST_CPPEXPORT StRectD_t getRectGl(const StRectI_t& theRectPx) const;
 
     /**
      * Convert pixel coordinates (absolute) into GL coordinates.
      * Array should be 4 items length or you will got an exception!
      */
-    void getRectGl(const StRectI_t& theRectPx,
-                   StArray<StGLVec2>& theVertices,
-                   const size_t theFromId = 0) const;
+    ST_CPPEXPORT void getRectGl(const StRectI_t&   theRectPx,
+                                StArray<StGLVec2>& theVertices,
+                                const size_t       theFromId = 0) const;
 
     /**
      * Access the shared resource by unique id.
      */
-    StGLSharePointer* getShare(const size_t theResId);
+    ST_CPPEXPORT StGLSharePointer* getShare(const size_t theResId);
 
     /**
      * Generate next unique id for shared resource.
      */
-    static size_t generateShareId();
+    ST_CPPEXPORT static size_t generateShareId();
 
-    StGLProjCamera* getCamera() {
+    inline StGLProjCamera* getCamera() {
         return &myProjCamera;
     }
 
     /**
      * @return OpenGL context.
      */
-    StGLContext& getContext();
+    ST_CPPEXPORT StGLContext& getContext();
 
     /**
      * @return OpenGL context.
      */
-    const StHandle<StGLContext>& getContextHandle();
+    ST_CPPEXPORT const StHandle<StGLContext>& getContextHandle();
 
     /**
      * Setup OpenGL context.
      */
-    void setContext(const StHandle<StGLContext>& theCtx);
+    ST_CPPEXPORT void setContext(const StHandle<StGLContext>& theCtx);
 
     /**
      * Returns camera projection matrix within to-screen displacement
      * thus it can be used for vertices given in only 2D-coordinates.
      */
-    const StGLMatrix& getScreenProjection() const {
+    inline const StGLMatrix& getScreenProjection() const {
         return myScrProjMat;
     }
 
     /**
      * Returns mouse cursor position in GL coordinates.
      */
-    StPointD_t getCursorZo() {
+    inline StPointD_t getCursorZo() {
         return cursorZo;
     }
 
-    virtual void stglUpdate(const StPointD_t& cursorZo);
-    virtual void stglResize(const StRectI_t& winRectPx);
+    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& cursorZo);
+    ST_CPPEXPORT virtual void stglResize(const StRectI_t& winRectPx);
 
     /**
-     * @return viewport dimensions from bound GL context (4-indices array).
+     * @return viewport dimensions from bound GL context (4-indices array)
      */
-    const GLint* getViewport() const {
+    inline const GLint* getViewport() const {
         return myViewport;
     }
 
@@ -129,8 +129,8 @@ class ST_LOCAL StGLRootWidget : public StGLWidget {
      * @param theRect        Rectangle in window coordinates
      * @param theScissorRect Scissor rectangle for glScissor() call
      */
-    void stglScissorRect(const StRectI_t& theRect,
-                         StGLBoxPx&       theScissorRect) const;
+    ST_CPPEXPORT void stglScissorRect(const StRectI_t& theRect,
+                                      StGLBoxPx&       theScissorRect) const;
 
         private:
 

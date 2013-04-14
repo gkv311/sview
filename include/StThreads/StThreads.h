@@ -33,7 +33,7 @@
 /**
  * Simple class to create/manipulate threads.
  */
-class ST_LOCAL StThread {
+class StThread {
 
         public:
 

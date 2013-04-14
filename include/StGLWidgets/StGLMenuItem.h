@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -19,51 +19,52 @@ class StGLMenuProgram;
 /**
  * Widget for item in the menu.
  */
-class ST_LOCAL StGLMenuItem : public StGLTextArea {
+class StGLMenuItem : public StGLTextArea {
 
         public:
 
     // recursively delete all submenus and that this item itself
     // should be used only for dynamic menu recreation
-    static void DeleteWithSubMenus(StGLMenuItem* theMenuItem);
+    ST_CPPEXPORT static void DeleteWithSubMenus(StGLMenuItem* theMenuItem);
 
-    StGLMenuItem(StGLMenu* theParent,
-                 const int theLeft = 32, const int theTop = 32,
-                 StGLMenu* theSubMenu = NULL);
+    ST_CPPEXPORT StGLMenuItem(StGLMenu* theParent,
+                              const int theLeft = 32,
+                              const int theTop = 32,
+                              StGLMenu* theSubMenu = NULL);
 
-    virtual ~StGLMenuItem();
+    ST_CPPEXPORT virtual ~StGLMenuItem();
 
-    virtual const StString& getClassName();
-    virtual void stglUpdate(const StPointD_t& theCursorZo);
-    virtual void stglResize(const StRectI_t& theWinRectPx);
-    virtual bool stglInit();
-    virtual void stglDraw(unsigned int view);
-    virtual bool tryClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& theIsItemClicked);
-    virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& theIsItemUnclicked);
+    ST_CPPEXPORT virtual const StString& getClassName();
+    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo);
+    ST_CPPEXPORT virtual void stglResize(const StRectI_t& theWinRectPx);
+    ST_CPPEXPORT virtual bool stglInit();
+    ST_CPPEXPORT virtual void stglDraw(unsigned int view);
+    ST_CPPEXPORT virtual bool tryClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& theIsItemClicked);
+    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& theIsItemUnclicked);
 
-    const int computeTextWidth();
+    ST_CPPEXPORT const int computeTextWidth();
 
-    StGLMenu* getParentMenu() {
+    inline StGLMenu* getParentMenu() {
         return (StGLMenu* )StGLWidget::getParent();
     }
 
-    StGLMenu* getSubMenu() {
+    inline StGLMenu* getSubMenu() {
         return mySubMenu;
     }
 
-    void setSubMenu(StGLMenu* theSubMenu) {
+    inline void setSubMenu(StGLMenu* theSubMenu) {
         mySubMenu = theSubMenu;
     }
 
-    bool hasSubMenu() {
+    inline bool hasSubMenu() {
        return mySubMenu != NULL;
     }
 
-    bool isSelected() const {
+    inline bool isSelected() const {
         return myIsItemSelected;
     }
 
-    void setSelected(bool theToSelect);
+    ST_CPPEXPORT void setSelected(bool theToSelect);
 
         public:  //! @name Signals
 
@@ -77,11 +78,11 @@ class ST_LOCAL StGLMenuItem : public StGLTextArea {
 
         private: //! @name callback Slots (private overriders)
 
-    void doMouseUnclick(const int btnId);
+    ST_LOCAL void doMouseUnclick(const int btnId);
 
         private: //! @name private methods
 
-    void stglResize();
+    ST_LOCAL void stglResize();
 
         private: //! @name private fields
 

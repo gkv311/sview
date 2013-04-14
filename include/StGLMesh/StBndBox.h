@@ -16,38 +16,29 @@
  * Edges of bounding box are parallel to the coordinate axes, and is thus defined by its maximum and minimum extents for all axes.
  * This is the computationally simplest of all linear bounding containers.
  */
-class ST_LOCAL StBndBox : public StBndContainer {
-
-        protected:
-
-    StGLVec3 myMin; //!< x/y/z minimal values
-    StGLVec3 myMax; //!< x/y/z maximal values
+class StBndBox : public StBndContainer {
 
         public: //!< inheritance methods
 
-    virtual ~StBndBox();
-    virtual void reset();
-    virtual bool isIn(const StGLVec3& thePnt) const;
-    virtual void enlarge(const GLfloat theTolerance);
-    virtual void enlarge(const StGLVec3& theNewPnt);
-    virtual void enlarge(const StArray<StGLVec3>& thePoints);
+    ST_CPPEXPORT virtual ~StBndBox();
+    ST_CPPEXPORT virtual void reset();
+    ST_CPPEXPORT virtual bool isIn(const StGLVec3& thePnt) const;
+    ST_CPPEXPORT virtual void enlarge(const GLfloat theTolerance);
+    ST_CPPEXPORT virtual void enlarge(const StGLVec3& theNewPnt);
+    ST_CPPEXPORT virtual void enlarge(const StArray<StGLVec3>& thePoints);
 
         public:
 
     /**
      * Create the empty (void) bounding box.
      */
-    StBndBox();
+    ST_CPPEXPORT StBndBox();
 
     /**
      * Define the bounding box with min / max vectors.
      */
-    StBndBox(const StGLVec3& theMin,
-             const StGLVec3& theMax)
-    : myMin(theMin),
-      myMax(theMax) {
-        setDefined();
-    }
+    ST_CPPEXPORT StBndBox(const StGLVec3& theMin,
+                          const StGLVec3& theMax);
 
     /**
      * Return the x/y/z minimal values.
@@ -96,7 +87,7 @@ class ST_LOCAL StBndBox : public StBndContainer {
      * @param theBndBox (const StBndBox& ) - another bounding box;
      * @return true if bounding boxes are disjoint.
      */
-    bool areDisjoint(const StBndBox& theBndBox) const;
+    ST_CPPEXPORT bool areDisjoint(const StBndBox& theBndBox) const;
 
     /**
      * Check that bounding boxes has intersection.
@@ -106,6 +97,11 @@ class ST_LOCAL StBndBox : public StBndContainer {
     bool areIntersect(const StBndBox& theBndBox) const {
         return !areDisjoint(theBndBox);
     }
+
+        protected:
+
+    StGLVec3 myMin; //!< x/y/z minimal values
+    StGLVec3 myMax; //!< x/y/z maximal values
 
 };
 

@@ -15,23 +15,23 @@
 class StBoolParam;
 class StGLCheckbox;
 
-class ST_LOCAL StGLMenuCheckbox : public StGLMenuItem {
+class StGLMenuCheckbox : public StGLMenuItem {
+
+        public:
+
+    ST_CPPEXPORT StGLMenuCheckbox(StGLMenu* theParent,
+                                  const StHandle<StBoolParam>& theTrackedValue);
+
+    ST_CPPEXPORT virtual const StString& getClassName();
+    ST_CPPEXPORT virtual void setVisibility(bool isVisible, bool isForce);
+
+        private: //!< callback Slots (private overriders)
+
+    ST_LOCAL void doItemClick(const size_t );
 
         private:
 
     StGLCheckbox* myCheckbox; //!< fast-link to the child widget
-
-        public:
-
-    StGLMenuCheckbox(StGLMenu* theParent,
-                     const StHandle<StBoolParam>& theTrackedValue);
-
-    virtual const StString& getClassName();
-    virtual void setVisibility(bool isVisible, bool isForce);
-
-        private: //!< callback Slots (private overriders)
-
-    void doItemClick(const size_t );
 
 };
 

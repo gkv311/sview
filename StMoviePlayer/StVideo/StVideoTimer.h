@@ -26,7 +26,55 @@
  * This class represents video refresher
  * and Audio 2 Video sync.
  */
-class ST_LOCAL StVideoTimer {
+class StVideoTimer {
+
+        public:
+
+    ST_LOCAL StVideoTimer(const StHandle<StVideoQueue>& theVideo,
+                          const StHandle<StAudioQueue>& theAudio,
+                          const double delayVVFixedMs = 40.0);
+
+    ST_LOCAL ~StVideoTimer();
+
+    /**
+     * Ignore sync rules and perform swap when ready.
+     */
+    ST_LOCAL void setBenchmark(bool toPerformBenchmark) {
+        isBenchmark = toPerformBenchmark;
+    }
+
+    ST_LOCAL double getSpeed() const {
+        // TODO (Kirill Gavrilov#5#) not thread-safe
+        return delayVVAver / delayTimer;
+    }
+
+    ST_LOCAL StString getSpeedText(const double& value) {
+        sprintf(speedDesc, "x%.2f", value);
+        return StString(speedDesc);
+    }
+
+    ST_LOCAL StString getSpeedText() {
+        return getSpeedText(getSpeed());
+    }
+
+    ST_LOCAL double getAverFps() const {
+        // TODO (Kirill Gavrilov#5#) not thread-safe
+        return 1000.0 / delayVVAver;
+    }
+
+    /**
+     * Main refresher loop function.
+     * Should be run on dedicated thread.
+     */
+    ST_LOCAL void mainLoop();
+
+        private:
+
+    ST_LOCAL static double getDelayMsec(const double& nextSec, const double& currSec) {
+        return (nextSec - currSec) * 1000.0;
+    }
+
+    ST_LOCAL bool isQuitMessage();
 
         private:
 
@@ -61,52 +109,6 @@ class ST_LOCAL StVideoTimer {
     char  speedDesc[256];
 
     bool     isBenchmark;
-
-    static double getDelayMsec(const double& nextSec, const double& currSec) {
-        return (nextSec - currSec) * 1000.0;
-    }
-
-    bool isQuitMessage();
-
-        public:
-
-    StVideoTimer(const StHandle<StVideoQueue>& theVideo,
-                 const StHandle<StAudioQueue>& theAudio,
-                 const double delayVVFixedMs = 40.0);
-
-    ~StVideoTimer();
-
-    /**
-     * Ignore sync rules and perform swap when ready.
-     */
-    void setBenchmark(bool toPerformBenchmark) {
-        isBenchmark = toPerformBenchmark;
-    }
-
-    double getSpeed() const {
-        // TODO (Kirill Gavrilov#5#) not thread-safe
-        return delayVVAver / delayTimer;
-    }
-
-    StString getSpeedText(const double& value) {
-        sprintf(speedDesc, "x%.2f", value);
-        return StString(speedDesc);
-    }
-
-    StString getSpeedText() {
-        return getSpeedText(getSpeed());
-    }
-
-    double getAverFps() const {
-        // TODO (Kirill Gavrilov#5#) not thread-safe
-        return 1000.0 / delayVVAver;
-    }
-
-    /**
-     * Main refresher loop function.
-     * Should be run on dedicated thread.
-     */
-    void mainLoop();
 
 };
 

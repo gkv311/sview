@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -29,11 +29,11 @@
  * This is simple Event class that helps to talk threads between themselfs.
  * Object is similar to WinAPI Event.
  */
-class ST_LOCAL StEvent {
+class StEvent {
 
         public:
 
-    StEvent(bool isSignalling = true) {
+    inline StEvent(bool isSignalling = true) {
     #if (defined(_WIN32) || defined(__WIN32__))
         myEvent = CreateEvent(0,            // default security attributes
                               true,         // manual-reset event
@@ -46,7 +46,7 @@ class ST_LOCAL StEvent {
     #endif
     }
 
-    ~StEvent() {
+    inline ~StEvent() {
     #if (defined(_WIN32) || defined(__WIN32__))
         CloseHandle(myEvent);
     #else
@@ -58,7 +58,7 @@ class ST_LOCAL StEvent {
     /**
      * Set event into signalling state.
      */
-    void set() {
+    inline void set() {
     #if (defined(_WIN32) || defined(__WIN32__))
         SetEvent(myEvent);
     #else
@@ -72,7 +72,7 @@ class ST_LOCAL StEvent {
     /**
      * Reset event (unset signalling state)
      */
-    void reset() {
+    inline void reset() {
     #if (defined(_WIN32) || defined(__WIN32__))
         ResetEvent(myEvent);
     #else
@@ -85,7 +85,7 @@ class ST_LOCAL StEvent {
     /**
      * Wait for Event (infinity).
      */
-    void wait() {
+    inline void wait() {
     #if (defined(_WIN32) || defined(__WIN32__))
         WaitForSingleObject(myEvent, INFINITE);
     #else
@@ -102,7 +102,7 @@ class ST_LOCAL StEvent {
      * @param theTimeMilliseconds (const size_t& ) - wait limit in millisecods;
      * @return true if get event.
      */
-    bool wait(const size_t& theTimeMilliseconds) {
+    inline bool wait(const size_t& theTimeMilliseconds) {
     #if (defined(_WIN32) || defined(__WIN32__))
         return (WaitForSingleObject(myEvent, (DWORD )theTimeMilliseconds) != WAIT_TIMEOUT);
     #else
@@ -127,7 +127,7 @@ class ST_LOCAL StEvent {
      * Do not wait for signal - just test it state.
      * @return true if get event.
      */
-    bool check() {
+    inline bool check() {
     #if (defined(_WIN32) || defined(__WIN32__))
         return (WaitForSingleObject(myEvent, (DWORD )0) != WAIT_TIMEOUT);
     #else
@@ -152,7 +152,7 @@ class ST_LOCAL StEvent {
      * and returns true if it was in signaling state.
      * @return true if event object was in signaling state.
      */
-    bool checkReset() {
+    inline bool checkReset() {
         bool wasSignalled = check();
         reset();
         return wasSignalled;

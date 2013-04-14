@@ -14,7 +14,7 @@
 /**
  * Simple class for FPS measurements, based on StTimer.
  */
-class ST_LOCAL StFPSMeter {
+class StFPSMeter {
 
         public:
 

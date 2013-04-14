@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -10,7 +10,7 @@
 #include <StFile/StFileNode.h>
 #include <StLibrary.h>
 
-#if (!defined(_WIN32) && !defined(__WIN32__))
+#ifndef _WIN32
     #include <unistd.h>
 #endif
 
@@ -28,7 +28,7 @@ namespace {
     static const StString ST_ENV_NAME_STCORE_PATH = "StCore32";
 #endif
 
-#if (!defined(_WIN32) && !defined(__WIN32__))
+#ifndef _WIN32
     static const StString ST_DEFAULT_PATH = "/usr/share/sView/";
 #endif
     static const StString STCORE_NAME = StString("StCore") + ST_DLIB_SUFFIX;
@@ -100,7 +100,7 @@ StArgument StArgumentsMap::operator[](const StString& theKey) const {
 }
 
 static StString GetFontsRoot() {
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     return StProcess::getWindowsFolder() + "fonts\\";
 #elif (defined(__APPLE__))
     //return "/System/Library/Fonts/";
@@ -128,7 +128,7 @@ StString StProcess::getFontsRoot() {
 }
 
 StString StProcess::getProcessFullPath() {
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     // TODO (Kirill Gavrilov#9) - implement correct method
     stUtfWide_t aBuff[MAX_PATH];
     if(GetModuleFileNameW(NULL, aBuff, MAX_PATH) == 0) {
@@ -217,7 +217,7 @@ StString StProcess::getProcessFolder() {
 
 StString StProcess::getWorkingFolder() {
     StString aWorkingFolder;
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     // determine buffer length (in characters, including NULL-terminated symbol)
     DWORD aBuffLen = GetCurrentDirectoryW(0, NULL);
     stUtfWide_t* aBuff = new stUtfWide_t[size_t(aBuffLen + 1)];
@@ -241,7 +241,7 @@ StString StProcess::getWorkingFolder() {
 
 StString StProcess::getTempFolder() {
     StString aTempFolder;
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     // determine buffer length (in characters, including NULL-terminated symbol)
     DWORD aBuffLen = GetTempPathW(0, NULL);
     stUtfWide_t* aBuff = new stUtfWide_t[size_t(aBuffLen + 1)];
@@ -263,7 +263,7 @@ StString StProcess::getAbsolutePath(const StString& thePath) {
     return StProcess::getWorkingFolder() + thePath; // do absolute path
 }
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
 StString StProcess::getWindowsFolder() {
     StString aWinFolder;
     stUtfWide_t aWndFldr[MAX_PATH];
@@ -297,7 +297,7 @@ bool isValidStCorePath(const StString& thePath) {
 
 StString StProcess::getStCoreFolder() {
     StString aCoreEnvValue = getEnv(ST_ENV_NAME_STCORE_PATH);
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     if(aCoreEnvValue.isEmpty()) {
         // read env. value directly from registry (before first log off / log in)
         const StString aRegisterPath = "Environment";
@@ -319,7 +319,7 @@ StString StProcess::getStCoreFolder() {
     if(isValidStCorePath(aProcessPath)) {
         return aProcessPath;
     }
-#if (!defined(_WIN32) && !defined(__WIN32__))
+#ifndef _WIN32
     if(isValidStCorePath(ST_DEFAULT_PATH)) {
         return ST_DEFAULT_PATH;
     }
@@ -332,7 +332,7 @@ bool StProcess::execProcess(const StString&          theExecutablePath,
     if(!StFileNode::isFileExists(theExecutablePath)) {
         return false;
     }
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     // convert to wide strings
     StStringUtfWide anExecutablePathW = theExecutablePath.toUtfWide();
     StArrayList<StStringUtfWide> anArgumentsW(theArguments.size());
@@ -388,5 +388,13 @@ bool StProcess::execProcess(const StString&          theExecutablePath,
     execv(theExecutablePath.toCString(), anArgList);
     // fail
     _exit(1);
+#endif
+}
+
+size_t StProcess::getPID() {
+#ifdef _WIN32
+    return (size_t )GetCurrentProcessId();
+#else
+    return (size_t )getpid();
 #endif
 }

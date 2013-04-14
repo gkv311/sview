@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -37,8 +37,52 @@ GLenum StGLVertexBuffer::getTarget() const {
     return GL_ARRAY_BUFFER;
 }
 
+StGLIndexBuffer::StGLIndexBuffer()
+: StGLVertexBuffer() {
+    //
+}
+
 GLenum StGLIndexBuffer::getTarget() const {
     return GL_ELEMENT_ARRAY_BUFFER;
+}
+
+bool StGLVertexBuffer::init(StGLContext&   theCtx,
+                            GLsizeiptr     theElemSize,
+                            GLsizeiptr     theElemsCount,
+                            const GLfloat* theData) {
+    if(!init(theCtx)) {
+        return false;
+    }
+    bind(theCtx);
+    setData(theCtx, theElemSize, theElemsCount, theData);
+    unbind(theCtx);
+    return true;
+}
+
+bool StGLVertexBuffer::init(StGLContext&   theCtx,
+                            GLsizeiptr     theElemSize,
+                            GLsizeiptr     theElemsCount,
+                            const GLuint*  theData) {
+    if(!init(theCtx)) {
+        return false;
+    }
+    bind(theCtx);
+    setData(theCtx, theElemSize, theElemsCount, theData);
+    unbind(theCtx);
+    return true;
+}
+
+bool StGLVertexBuffer::init(StGLContext&   theCtx,
+                            GLsizeiptr     theElemSize,
+                            GLsizeiptr     theElemsCount,
+                            const GLubyte* theData) {
+    if(!init(theCtx)) {
+        return false;
+    }
+    bind(theCtx);
+    setData(theCtx, theElemSize, theElemsCount, theData);
+    unbind(theCtx);
+    return true;
 }
 
 bool StGLVertexBuffer::init(StGLContext& theCtx) {

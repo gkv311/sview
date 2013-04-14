@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -15,7 +15,7 @@
 
 class StMIME;
 
-class ST_LOCAL StImageFile : public StImage {
+class StImageFile : public StImage {
 
         public:
 
@@ -47,39 +47,41 @@ class ST_LOCAL StImageFile : public StImage {
 
         public:
 
-    static ImageClass imgLibFromString(const StString& thePreferred);
-    static StString imgLibToString(const ImageClass thePreferred);
+    ST_CPPEXPORT static ImageClass imgLibFromString(const StString&  thePreferred);
+    ST_CPPEXPORT static StString   imgLibToString  (const ImageClass thePreferred);
 
     /**
      * Guess the image type for the file (file extension in simplest case).
      * If specified MIME type is not empty than it may override detection.
-     * @param theFileName (const StString& ) - path to the image;
-     * @param theMIMEType (const StMIME&   ) - image MIME type, may be empty.
+     * @param theFileName path to the image
+     * @param theMIMEType image MIME type, may be empty
      */
-    static ImageType guessImageType(const StString& theFileName,
-                                    const StMIME&   theMIMEType);
+    ST_CPPEXPORT static ImageType guessImageType(const StString& theFileName,
+                                                 const StMIME&   theMIMEType);
 
-    static StHandle<StImageFile> create(const StString& thePreferred, ImageType theImgType = ST_TYPE_NONE);
-    static StHandle<StImageFile> create(ImageClass thePreferred = ST_LIBAV, ImageType theImgType = ST_TYPE_NONE);
+    ST_CPPEXPORT static StHandle<StImageFile> create(const StString& thePreferred,
+                                                     ImageType       theImgType = ST_TYPE_NONE);
+    ST_CPPEXPORT static StHandle<StImageFile> create(ImageClass      thePreferred = ST_LIBAV,
+                                                     ImageType       theImgType = ST_TYPE_NONE);
 
     /**
      * Empty constructor.
      */
-    StImageFile() : StImage(), myStateDescr() {}
-    virtual ~StImageFile() {}
+    ST_CPPEXPORT StImageFile();
+    ST_CPPEXPORT virtual ~StImageFile();
 
     /**
      * @return the error description occured on load/save operations.
      */
-    const StString& getState() const {
+    inline const StString& getState() const {
         return myStateDescr;
     }
 
-    StString& changeState() {
+    inline StString& changeState() {
         return myStateDescr;
     }
 
-    void setState(const StString& theDescr = StString()) {
+    inline void setState(const StString& theDescr = StString()) {
         myStateDescr = theDescr;
     }
 

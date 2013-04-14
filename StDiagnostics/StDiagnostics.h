@@ -26,32 +26,32 @@ class StSettings;
 class StWindow;
 class StDiagnosticsGUI;
 
-class ST_LOCAL StDiagnostics : public StDrawerInterface {
+class StDiagnostics : public StDrawerInterface {
 
         public:
 
     static const StString ST_DRAWER_PLUGIN_NAME;
 
-    StDiagnostics();
-    ~StDiagnostics();
+    ST_LOCAL StDiagnostics();
+    ST_LOCAL ~StDiagnostics();
 
-    StHandle<StWindow>& getWindow() {
+    ST_LOCAL StHandle<StWindow>& getWindow() {
         return myWindow;
     }
 
     // interface methods' implementations
-    StDrawerInterface* getLibImpl() {
+    ST_LOCAL StDrawerInterface* getLibImpl() {
         return this;
     }
-    bool init(StWindowInterface* inStWin);
-    bool open(const StOpenInfo& stOpenInfo);
-    void parseCallback(StMessage_t* stMessages);
-    void stglDraw(unsigned int view);
+    ST_LOCAL bool init(StWindowInterface* inStWin);
+    ST_LOCAL bool open(const StOpenInfo& stOpenInfo);
+    ST_LOCAL void parseCallback(StMessage_t* stMessages);
+    ST_LOCAL void stglDraw(unsigned int view);
 
         public: //!< callback Slots
 
-    void doSwitchFullscreen(const size_t dummy = 0);
-    void doFpsClick(const size_t dummy = 0);
+    ST_LOCAL void doSwitchFullscreen(const size_t dummy = 0);
+    ST_LOCAL void doFpsClick(const size_t dummy = 0);
 
         private:
 

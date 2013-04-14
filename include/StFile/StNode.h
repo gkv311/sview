@@ -21,13 +21,7 @@ inline void StArray<StNode*>::sort() {
     }
 }
 
-class ST_LOCAL StNode : public StArrayList<StNode*> {
-
-        private:
-
-    StNode*   parent;
-    StString subPath;
-    int     nodeType;
+class StNode : public StArrayList<StNode*> {
 
         public:
 
@@ -141,6 +135,12 @@ class ST_LOCAL StNode : public StArrayList<StNode*> {
     }
 
     //virtual StString toString() const { return getPath(); }
+
+        private:
+
+    StNode*   parent;
+    StString subPath;
+    int     nodeType;
 
 };
 

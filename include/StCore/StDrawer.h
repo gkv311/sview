@@ -24,7 +24,7 @@
 #include <StStrings/StString.h>
 #include <StLibrary.h>
 
-class ST_LOCAL StDrawer : public StDrawerInterface {
+class StDrawer : public StDrawerInterface {
 
         protected:
 
@@ -62,12 +62,12 @@ class ST_LOCAL StDrawer : public StDrawerInterface {
     /**
      * Empty constructor. Doesn't create class instance!
      */
-    StDrawer();
+    ST_CPPEXPORT StDrawer();
 
     /**
      * Open the plugin and retrieve function pointers.
      */
-    bool InitLibrary(const StString& thePluginPath);
+    ST_CPPEXPORT bool InitLibrary(const StString& thePluginPath);
 
     void Instantiate() {
         instance = (StDrawerInterface* )StDrawer_new();
@@ -98,7 +98,7 @@ class ST_LOCAL StDrawer : public StDrawerInterface {
         Destruct();
     }
 
-    void Destruct();
+    ST_CPPEXPORT void Destruct();
 
     // auxiliary function
     const stUtf8_t* GetMIMEList() const {

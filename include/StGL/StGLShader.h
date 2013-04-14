@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -15,7 +15,7 @@
 /**
  * Virtual class represents GLSL shader.
  */
-class ST_LOCAL StGLShader : public StGLResource {
+class StGLShader : public StGLResource {
 
         public:
 
@@ -26,13 +26,13 @@ class ST_LOCAL StGLShader : public StGLResource {
     /**
      * Destructor - should be called after release()!
      */
-    virtual ~StGLShader();
+    ST_CPPEXPORT virtual ~StGLShader();
 
     /**
      * Delete shader object and invalidate its id.
      * You should detach this shader from all programs before deleting!
      */
-    virtual void release(StGLContext& theCtx);
+    ST_CPPEXPORT virtual void release(StGLContext& theCtx);
 
     /**
      * Implementations should define this method to return:
@@ -42,35 +42,35 @@ class ST_LOCAL StGLShader : public StGLResource {
         return myShaderType;
     }
 
-    StString getTypeString() const;
+    ST_CPPEXPORT StString getTypeString() const;
 
     /**
      * @return true if shader object is valid.
      */
-    bool isValid() const {
+    inline bool isValid() const {
         return myShaderId != NO_SHADER;
     }
 
     /**
      * @return user-specified title for this shader.
      */
-    virtual const StString& getTitle() const;
+    ST_CPPEXPORT virtual const StString& getTitle() const;
 
     /**
      * Vitual method could be overridden by classes contained
      * shader program text internally.
      */
-    virtual bool init();
+    ST_CPPEXPORT virtual bool init();
 
     /**
      * Initialize the shader program from text buffer.
      * @param theSrcLines0 (const char* ) - shader program source;
      * @return true on success.
      */
-    virtual bool init(StGLContext& theCtx,
-                      const char*  theSrcLines0,
-                      const char*  theSrcLines1 = NULL,
-                      const char*  theSrcLines2 = NULL);
+    ST_CPPEXPORT virtual bool init(StGLContext& theCtx,
+                                   const char*  theSrcLines0,
+                                   const char*  theSrcLines1 = NULL,
+                                   const char*  theSrcLines2 = NULL);
 
     /**virtual bool init(const StString& sourceUtfString) {
         std::string sourceString = sourceUtfString.ansiText();
@@ -82,28 +82,28 @@ class ST_LOCAL StGLShader : public StGLResource {
      * @param theFileName (const StString& ) - file to read;
      * @return true on success.
      */
-    bool initFile(StGLContext&    theCtx,
-                  const StString& theFileName);
+    ST_CPPEXPORT bool initFile(StGLContext&    theCtx,
+                               const StString& theFileName);
 
         protected:
 
     /**
      * Empty constructor.
      */
-    StGLShader(const StString& theTitle);
+    ST_CPPEXPORT StGLShader(const StString& theTitle);
 
     /**
      * Check compilation state.
      * @return true if shader object compiled successfully.
      */
-    bool isCompiled(StGLContext& theCtx) const;
+    ST_CPPEXPORT bool isCompiled(StGLContext& theCtx) const;
 
     /**
      * Returns compilation information, provided by driver.
      * This string is driver's and vendor's specific.
      * Usually it contains compilation errors and warnings.
      */
-    StString getCompileInfo(StGLContext& theCtx) const;
+    ST_CPPEXPORT StString getCompileInfo(StGLContext& theCtx) const;
 
         protected:
 
@@ -120,22 +120,22 @@ class ST_LOCAL StGLShader : public StGLResource {
 /**
  * Class represents GLSL Vertex Shader.
  */
-class ST_LOCAL StGLVertexShader : public StGLShader {
+class StGLVertexShader : public StGLShader {
 
         public:
 
-    StGLVertexShader(const StString& theTitle);
+    ST_CPPEXPORT StGLVertexShader(const StString& theTitle);
 
 };
 
 /**
  * Class represents GLSL Fragment Shader.
  */
-class ST_LOCAL StGLFragmentShader : public StGLShader {
+class StGLFragmentShader : public StGLShader {
 
         public:
 
-    StGLFragmentShader(const StString& theTitle);
+    ST_CPPEXPORT StGLFragmentShader(const StString& theTitle);
 
 };
 

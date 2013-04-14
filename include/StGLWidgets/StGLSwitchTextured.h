@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -16,49 +16,49 @@
  * This class represents a switch between values shown as image.
  * It behaves as clickable iterator - each click switch to the next value in cycle.
  */
-class ST_LOCAL StGLSwitchTextured : public StGLWidget {
-
-        private:
-
-    StHandle<StInt32Param> myTrackValue; //!< handle to tracked value
-    StArrayList<int32_t>   mySkipValues; //!< values to skip on click
+class StGLSwitchTextured : public StGLWidget {
 
         public:
 
     /**
      * Main constructor.
      */
-    StGLSwitchTextured(StGLWidget* theParent,
-                       const StHandle<StInt32Param>& theTrackedValue,
-                       const int theLeft, const int theTop,
-                       const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    ST_CPPEXPORT StGLSwitchTextured(StGLWidget* theParent,
+                                    const StHandle<StInt32Param>& theTrackedValue,
+                                    const int theLeft, const int theTop,
+                                    const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
 
     /**
      * Destructor.
      */
-    virtual ~StGLSwitchTextured();
+    ST_CPPEXPORT virtual ~StGLSwitchTextured();
 
-    virtual const StString& getClassName();
-    virtual void setVisibility(bool isVisible, bool isForce);
-    virtual bool stglInit();
+    ST_CPPEXPORT virtual const StString& getClassName();
+    ST_CPPEXPORT virtual void setVisibility(bool isVisible, bool isForce);
+    ST_CPPEXPORT virtual bool stglInit();
 
     /**
      * Overrider that shows only active value in the switch.
      */
-    virtual void stglDraw(unsigned int theView);
+    ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
 
     /**
      * Overrider that blocks children's clicking functionality and switch the values in cycle.
      */
-    virtual bool tryClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemClicked);
-    virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemUnclicked);
+    ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemClicked);
+    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemUnclicked);
 
     /**
      * Append available value.
      */
-    void addItem(const int32_t   theValueOn,
-                 const StString& theTexturePath,
-                 bool            theToSkip = false);
+    ST_CPPEXPORT void addItem(const int32_t   theValueOn,
+                              const StString& theTexturePath,
+                              bool            theToSkip = false);
+
+        private:
+
+    StHandle<StInt32Param> myTrackValue; //!< handle to tracked value
+    StArrayList<int32_t>   mySkipValues; //!< values to skip on click
 
 };
 

@@ -38,7 +38,6 @@
 const char* StImageViewer::ST_DRAWER_PLUGIN_NAME = "StImageViewer";
 
 namespace {
-    static bool HAS_LOGGER_ID = StLogger::IdentifyModule("StImageViewer");
 
     static const char ST_SETTING_SLIDESHOW_DELAY[] = "slideShowDelay";
     static const char ST_SETTING_FPSBOUND[]    = "fpsbound";

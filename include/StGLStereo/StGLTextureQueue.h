@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -24,58 +24,58 @@
  * Method push() should be used to fill in queue with new frames and stglSwapFB() to pop frame from queue
  * to display.
  */
-class ST_LOCAL StGLTextureQueue {
+class StGLTextureQueue {
 
         public:
 
     /**
      * Constructor.
      */
-    StGLTextureQueue(const size_t theQueueSizeMax);
+    ST_CPPEXPORT StGLTextureQueue(const size_t theQueueSizeMax);
 
     /**
      * Destructor.
      */
-    ~StGLTextureQueue();
+    ST_CPPEXPORT ~StGLTextureQueue();
 
     /**
-     * @return quad texture.
+     * @return quad texture
      */
-    StGLQuadTexture& getQTexture() {
+    inline StGLQuadTexture& getQTexture() {
         return myQTexture;
     }
 
     /**
-     * @return input stream connection state.
+     * @return input stream connection state
      */
-    bool hasConnectedStream() const {
+    inline bool hasConnectedStream() const {
         return myHasStream || !isEmpty();
     }
 
     /**
      * Setup input stream connection state.
      */
-    void setConnectedStream(const bool theHasStream) {
+    inline void setConnectedStream(const bool theHasStream) {
         myHasStream = theHasStream;
     }
 
     /**
      * Function push stereo frame into queue.
      * This function called ONLY from video thread.
-     * @param theSrcDataLeft  - first  INPUT data (Both or Left);
-     * @param theSrcDataRight - second INPUT data (NULL or Right);
-     * @param theStParams     - stereo parameters;
-     * @param theSrcFormat    - source data format;
-     * @param theSrcPTS       - PTS (presentation timestamp);
-     * @return true on success.
+     * @param theSrcDataLeft  first  INPUT data (Both or Left)
+     * @param theSrcDataRight second INPUT data (NULL or Right)
+     * @param theStParams     stereo parameters
+     * @param theSrcFormat    source data format
+     * @param theSrcPTS       PTS (presentation timestamp)
+     * @return true on success
      */
-    bool push(const StImage&     theSrcDataLeft,
-              const StImage&     theSrcDataRight,
-              const StHandle<StStereoParams>& theStParams,
-              const StFormatEnum theSrcFormat,
-              const double       theSrcPTS);
+    ST_CPPEXPORT bool push(const StImage&     theSrcDataLeft,
+                           const StImage&     theSrcDataRight,
+                           const StHandle<StStereoParams>& theStParams,
+                           const StFormatEnum theSrcFormat,
+                           const double       theSrcPTS);
 
-    double getPlaybackFPS() {
+    inline double getPlaybackFPS() {
         myMeterMutex.lock();
         const double fps     = myFPSMeter.getAverage();
         const bool isUpdated = myFPSMeter.isUpdated();
@@ -92,11 +92,11 @@ class ST_LOCAL StGLTextureQueue {
     /**
      * Function called in loop from general GL draw loop
      * and do update quad texture data / state (display frame).
-     * @return true on each full update.
+     * @return true on each full update
      */
-    bool stglUpdateStTextures(StGLContext& theCtx);
+    ST_CPPEXPORT bool stglUpdateStTextures(StGLContext& theCtx);
 
-    size_t getSize() const {
+    inline size_t getSize() const {
         myMutexSize.lock();
             const size_t aResult = myQueueSize;
         myMutexSize.unlock();
@@ -106,7 +106,7 @@ class ST_LOCAL StGLTextureQueue {
     /**
      * @return true if queue is EMPTY.
      */
-    bool isEmpty() const {
+    inline bool isEmpty() const {
         myMutexSize.lock();
             const bool aResult = (myQueueSize == 0);
         myMutexSize.unlock();
@@ -116,7 +116,7 @@ class ST_LOCAL StGLTextureQueue {
     /**
      * @return true if queue is FULL.
      */
-    bool isFull() const {
+    inline bool isFull() const {
         myMutexSize.lock();
             const bool aResult = ((myQueueSize + 1) == myQueueSizeMax);
         myMutexSize.unlock();
@@ -126,7 +126,7 @@ class ST_LOCAL StGLTextureQueue {
     /**
      * @return presentation timestamp of currently shown frame (or -1 if none).
      */
-    double getPTSCurr() const {
+    inline double getPTSCurr() const {
         myMutexSize.lock();
             const double aPts = (myHasStream || myQueueSize != 0)
                               ? myCurrPts : -1.0;
@@ -138,7 +138,7 @@ class ST_LOCAL StGLTextureQueue {
      * @param thePts - next (front) stereo frame PTS (presentation timestamp);
      * @return false if next PTS not available.
      */
-    bool popPTSNext(double& thePts) {
+    inline bool popPTSNext(double& thePts) {
         bool aRes = false;
         myMutexPop.lock();
         myMutexPush.lock();
@@ -161,7 +161,7 @@ class ST_LOCAL StGLTextureQueue {
      * @param theLimit - swap counter limit;
      * @return true if swap counter increased.
      */
-    bool stglSwapFB(const size_t theLimit) {
+    inline bool stglSwapFB(const size_t theLimit) {
         mySwapFBMutex.lock();
         if(theLimit == 0 || mySwapFBCount < theLimit) {
             ++mySwapFBCount;
@@ -175,24 +175,24 @@ class ST_LOCAL StGLTextureQueue {
     /**
      * Release unused memory as fast as possible.
      */
-    void setCompressMemory(const bool theToCompress);
+    ST_CPPEXPORT void setCompressMemory(const bool theToCompress);
 
     /**
      * Function process TOTAL queue clean up.
      */
-    void clear();
+    ST_CPPEXPORT void clear();
 
     /**
      * This function clean up only requested number of frames but prevents queue emptying.
      * At least one frame will remain in queue.
      */
-    void drop(const size_t theCount);
+    ST_CPPEXPORT void drop(const size_t theCount);
 
     /**
      * Function used to get current showed source format.
      * At this moment function used just for stereo/mono recognizing.
      */
-    int getSrcFormat() {
+    inline int getSrcFormat() {
         myMutexSrcFormat.lock();
             // TODO (Kirill Gavrilov#4#) source format should be defined like front PTS to prevent early changes
             const int aSrcFrmt = myCurrSrcFormat;
@@ -205,9 +205,9 @@ class ST_LOCAL StGLTextureQueue {
         SNAPSHOT_SUCCESS = 1,
     };
 
-    int getSnapshot(StImage* theOutDataLeft,
-                    StImage* theOutDataRight,
-                    bool     theToForce = false);
+    ST_CPPEXPORT int getSnapshot(StImage* theOutDataLeft,
+                                 StImage* theOutDataRight,
+                                 bool     theToForce = false);
 
         private:
 
@@ -219,7 +219,7 @@ class ST_LOCAL StGLTextureQueue {
 
         private:
 
-    int swapFBOnReady(StGLContext& theCtx);
+    ST_CPPEXPORT int swapFBOnReady(StGLContext& theCtx);
 
         private:
 

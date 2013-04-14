@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -24,7 +24,7 @@
 /**
  * EDID parser class, version 1.x.
  */
-class ST_LOCAL StEDIDParser {
+class StEDIDParser {
 
         public:
 
@@ -38,35 +38,31 @@ class ST_LOCAL StEDIDParser {
         STEREO_SIDEBYSIDE,         //!< SideBySide interleaved stereo
     } stEdid1Stereo_t;
 
-        private:
-
-    stUByte_t* myData;
-
         public:
 
     /**
      * Empty constructor.
      */
-    StEDIDParser();
+    ST_CPPEXPORT StEDIDParser();
 
     /**
      * Initialize the parser.
      * @param theData (const stUByte_t* ) - the data should be 128 bytes long.
      */
-    StEDIDParser(const stUByte_t* theData);
+    ST_CPPEXPORT StEDIDParser(const stUByte_t* theData);
 
     /**
      * Copy constructor.
      */
-    StEDIDParser(const StEDIDParser& theCopy);
-    const StEDIDParser& operator=(const StEDIDParser& theCopy);
+    ST_CPPEXPORT StEDIDParser(const StEDIDParser& theCopy);
+    ST_CPPEXPORT const StEDIDParser& operator=(const StEDIDParser& theCopy);
 
     /**
      * Remove current data.
      */
-    void clear();
+    ST_CPPEXPORT void clear();
 
-    ~StEDIDParser();
+    ST_CPPEXPORT ~StEDIDParser();
 
     const stUByte_t* getData() const {
         return myData;
@@ -76,19 +72,19 @@ class ST_LOCAL StEDIDParser {
      * Initialize the parser.
      * @param theData (const stUByte_t* ) - the data should be 128 bytes long.
      */
-    void init(const stUByte_t* theData);
+    ST_CPPEXPORT void init(const stUByte_t* theData);
 
-    bool isFirstVersion() const;
+    ST_CPPEXPORT bool isFirstVersion() const;
 
     /**
      * Returns true if checksum is valid.
      */
-    bool isValid() const;
+    ST_CPPEXPORT bool isValid() const;
 
     /**
      * Update checksum.
      */
-    void validate();
+    ST_CPPEXPORT void validate();
 
         public:
 
@@ -98,44 +94,44 @@ class ST_LOCAL StEDIDParser {
     /**
      * Returns EDID version number.
      */
-    unsigned int getVersion() const;
+    ST_CPPEXPORT unsigned int getVersion() const;
 
     /**
      * Returns EDID revision number.
      */
-    unsigned int getRevision() const;
+    ST_CPPEXPORT unsigned int getRevision() const;
 
     /**
      * Year of Manufacture.
      */
-    unsigned int getYear() const;
+    ST_CPPEXPORT unsigned int getYear() const;
 
     /**
      * Week of Manufacture. This varies by manufacturer.
      * One way is to count January 1–7 as week 1, January 8–15 as week 2 and so on.
      * Some count based on the week number (Sunday-Saturday). Valid range is 1-54.
      */
-    unsigned int getWeek() const;
+    ST_CPPEXPORT unsigned int getWeek() const;
 
-    double getGamma() const;
+    ST_CPPEXPORT double getGamma() const;
 
     /**
      * Returns the model name.
      */
-    StString getName() const;
+    ST_CPPEXPORT StString getName() const;
 
     /**
      * Parse the data and extract PnPID.
      */
-    StString getPnPId() const;
+    ST_CPPEXPORT StString getPnPId() const;
 
-    void setPnPId(const StString& thePnPIdString);
+    ST_CPPEXPORT void setPnPId(const StString& thePnPIdString);
 
     /**
      * Retrieve the stereo flag.
      */
-    stEdid1Stereo_t getStereoFlag() const;
-    StString getStereoString() const;
+    ST_CPPEXPORT stEdid1Stereo_t getStereoFlag() const;
+    ST_CPPEXPORT StString getStereoString() const;
 
     bool operator==(const StEDIDParser& theCompare) const {
         if(&theCompare == this) {
@@ -175,6 +171,10 @@ class ST_LOCAL StEDIDParser {
         }
         return getPnPId() <= theCompare.getPnPId();
     }
+
+        private:
+
+    stUByte_t* myData;
 
 };
 

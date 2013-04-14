@@ -15,17 +15,17 @@
 /**
  * FPS widget.
  */
-class ST_LOCAL StGLFpsLabel : public StGLTextArea {
+class StGLFpsLabel : public StGLTextArea {
 
         public:  //!< StGLTextArea overrides
 
-    StGLFpsLabel(StGLWidget* theParent);
-    virtual ~StGLFpsLabel();
+    ST_CPPEXPORT StGLFpsLabel(StGLWidget* theParent);
+    ST_CPPEXPORT virtual ~StGLFpsLabel();
 
         public:
 
-    void update(const bool   theIsStereo,
-                const double theTargetFps);
+    ST_CPPEXPORT void update(const bool   theIsStereo,
+                             const double theTargetFps);
 
         public:  //!< Signals
 
@@ -39,7 +39,7 @@ class ST_LOCAL StGLFpsLabel : public StGLTextArea {
 
         private: //!< callback Slots (private overriders)
 
-    void doMouseUnclick(const int theBtnId);
+    ST_LOCAL void doMouseUnclick(const int theBtnId);
 
         private:
 

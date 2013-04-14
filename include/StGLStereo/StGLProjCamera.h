@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -24,112 +24,112 @@ class StGLContext;
  *    (Z-screen position of zero parallax and intra-ocular distance);
  * To setup the camera position, direction and rotation you should use another matrix (model view)!
  */
-class ST_LOCAL StGLProjCamera {
+class StGLProjCamera {
 
         public:
 
     /**
      * Setup the default projection camera.
      */
-    StGLProjCamera(const GLfloat theFOVy    = 45.0f,
-                   const GLfloat theZNear   = 3.0f,
-                   const GLfloat theZFar    = 30.0f,
-                   const GLfloat theZScreen = 10.0f);
+    ST_CPPEXPORT StGLProjCamera(const GLfloat theFOVy    = 45.0f,
+                                const GLfloat theZNear   = 3.0f,
+                                const GLfloat theZFar    = 30.0f,
+                                const GLfloat theZScreen = 10.0f);
 
     /**
      * Get projection type.
      */
-    bool isPerspective() const {
+    inline bool isPerspective() const {
         return myIsPersp;
     }
 
     /**
      * Changes the projection type.
      */
-    void setPerspective(const bool theIsPerspective);
+    ST_CPPEXPORT void setPerspective(const bool theIsPerspective);
 
     /**
      * Returns the linear zoom factor.
-     * @return zoom factor.
+     * @return zoom factor
      */
-    GLfloat getZoom() const {
+    inline GLfloat getZoom() const {
         return myZoom;
     }
 
     /**
      * Changes the linear zoom factor.
-     * @param theZoom - zoom factor.
+     * @param theZoom zoom factor
      */
-    void setZoom(const GLfloat theZoom) {
+    inline void setZoom(const GLfloat theZoom) {
         myZoom = theZoom;
     }
 
     /**
      * Returns the intraocular distance (stereo separation).
-     * @return the intraocular distance.
+     * @return the intraocular distance
      */
-    GLfloat getIOD() const {
+    inline GLfloat getIOD() const {
         return myIOD;
     }
 
     /**
      * Sets the intraocular distance (stereo separation).
-     * @param theIOD - the intraocular distance.
+     * @param theIOD the intraocular distance
      */
-    void setIOD(const GLfloat theIOD) {
+    inline void setIOD(const GLfloat theIOD) {
         myIOD = theIOD;
     }
 
     /**
      * Return the current Field Of View in y-axis.
-     * @return FOVy - Field Of View in y-axis.
+     * @return Field Of View in y-axis
      */
-    GLfloat getFOVy() const {
+    inline GLfloat getFOVy() const {
         return myFOVy;
     }
 
     /**
      * Setup the Field Of View in y-axis (degrees). Should be in 0 < FOVy < 180.
-     * @param theFOVy - new Field Of View value.
+     * @param theFOVy new Field Of View value
      */
-    void setFOVy(const GLfloat theFOVy) {
+    inline void setFOVy(const GLfloat theFOVy) {
         myFOVy = theFOVy;
     }
 
     /**
      * Return the Field Of View in y-axis with linear zoom factor applied.
-     * @return FOVy - Field Of View in y-axis (zoomed).
+     * @return Field Of View in y-axis (zoomed)
      */
-    GLfloat getFOVyZoomed() const;
+    ST_CPPEXPORT GLfloat getFOVyZoomed() const;
 
     /**
      * Returns the Near Z-clipping plane position.
-     * @return Z-position.
+     * @return Z-position
      */
-    GLfloat getZNear() const {
+    inline GLfloat getZNear() const {
         return myFrustM.zNear;
     }
 
     /**
      * Get current Screen Z plane position. This is a stereoscopic focus (zero-parallax plane).
-     * @return Z-position.
+     * @return Z-position
      */
-    GLfloat getZScreen() const {
+    inline GLfloat getZScreen() const {
         return myZScreen;
     }
 
     /**
      * Setup the Screen Z plane position. This is a stereoscopic focus (zero-parallax plane).
      * Z-near and IOD will be proportionally changed!
-     * @param theZScreen (GLfloat ) - Z-position.
+     * @param theZScreen Z-position
      */
-    void setZScreen(const GLfloat theZScreen);
+    ST_CPPEXPORT void setZScreen(const GLfloat theZScreen);
 
     /**
      * Returns the Far Z-clipping plane position.
-     * @return Z-position.
+     * @return Z-position
      */
-    GLfloat getZFar() const {
+    inline GLfloat getZFar() const {
         return myFrustM.zFar;
     }
 
@@ -137,33 +137,33 @@ class ST_LOCAL StGLProjCamera {
      * Setup the Far Z-clipping plane. Does NOT affects the perspective distortions.
      * Should be larger than Near Z-clipping plane position and enough to fit whole scene.
      * Infinity values are OK but cause lower Z-buffer accuracy.
-     * @param theZFar - Z-position.
+     * @param theZFar Z-position
      */
-    void setZFar(const GLfloat theZFar) {
+    inline void setZFar(const GLfloat theZFar) {
         myFrustM.zFar = myFrustL.zFar = myFrustR.zFar = theZFar;
     }
 
     /**
      * Compute the frustum section (rectangle) at current Z-screen position.
      */
-    void getZParams(StRectD_t& theSectRect) const {
+    inline void getZParams(StRectD_t& theSectRect) const {
         getZParams(myZScreen, theSectRect);
     }
 
     /**
      * Compute the frustum section (rectangle) at specified Z-position
      * (perspective distortion).
-     * @param theZValue   - Z position;
-     * @param theSectRect - computed frustum section.
+     * @param theZValue   Z position
+     * @param theSectRect computed frustum section
      */
-    void getZParams(const GLdouble theZValue,
-                    StRectD_t&     theSectRect) const;
+    ST_CPPEXPORT void getZParams(const GLdouble theZValue,
+                                 StRectD_t&     theSectRect) const;
 
     /**
      * Returns the GL projection matrix. It generally should NOT be changed outside.
-     * @return the projection matrix.
+     * @return the projection matrix
      */
-    const StGLMatrix& getProjMatrix() const {
+    inline const StGLMatrix& getProjMatrix() const {
         return myMatrix;
     }
 
@@ -172,49 +172,49 @@ class ST_LOCAL StGLProjCamera {
      * It could be used if some object should be always rendered in mono even in stereoscopic mode.
      * For example - the stereo-pairs which are prerendered stereoscopic scenes and should not be modified.
      * Use this method only when you sure!
-     * @return the mono projection matrix.
+     * @return the mono projection matrix
      */
-    const StGLMatrix& getProjMatrixMono() const {
+    inline const StGLMatrix& getProjMatrixMono() const {
         return myMatrixMono;
     }
 
     /**
      * Returns the display aspect ratio.
      */
-    GLfloat getAspect() const {
+    inline GLfloat getAspect() const {
         return myAspect;
     }
 
     /**
      * Update GL viewport and recompute projection matrix.
      */
-    void resize(StGLContext&  theCtx,
-                const GLsizei theSizeX,
-                const GLsizei theSizeY);
+    ST_CPPEXPORT void resize(StGLContext&  theCtx,
+                             const GLsizei theSizeX,
+                             const GLsizei theSizeY);
 
     /**
      * Setup projection frustum.
      */
-    void updateFrustum();
+    ST_CPPEXPORT void updateFrustum();
 
     /**
      * Setup camera projection matrices according to specified view.
-     * @param theView (unsigned int ) - stereo flag (left eye / right eye / mono).
+     * @param theView stereo flag (left eye / right eye / mono)
      */
-    void setView(const unsigned int theView);
+    ST_CPPEXPORT void setView(const unsigned int theView);
 
     /**
      * Setup projection matrix according to computed frustum.
      */
-    void setupMatrix();
+    ST_CPPEXPORT void setupMatrix();
 
     /**
      * Setup current global OpenGL projection matrix (fixed pipeline!).
      * @deprecated This method uses deprecated OpenGL API!
      */
-    void setupFixed(StGLContext& theCtx);
+    ST_CPPEXPORT void setupFixed(StGLContext& theCtx);
 
-    const StGLVolume* getMonoFrustrum() const {
+    inline const StGLVolume* getMonoFrustrum() const {
         return &myFrustM;
     }
 
@@ -222,7 +222,7 @@ class ST_LOCAL StGLProjCamera {
      * Returns the string description for the camera.
      * For debug purposes...
      */
-    StString toString() const;
+    ST_CPPEXPORT StString toString() const;
 
         private:
 

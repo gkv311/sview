@@ -38,7 +38,7 @@ class StWindow;
 /**
  * Root GUI widget for Image Viewer plugin.
  */
-class ST_LOCAL StImageViewerGUI : public StGLRootWidget {
+class StImageViewerGUI : public StGLRootWidget {
 
         public:
 
@@ -80,46 +80,46 @@ class ST_LOCAL StImageViewerGUI : public StGLRootWidget {
 
         private:
 
-    void createUpperToolbar();
+    ST_LOCAL void createUpperToolbar();
 
         private: //!< menus creation routines
 
-    void      createMainMenu();         // Root (Main menu)
-    StGLMenu* createMediaMenu();        // Root -> Media menu
-    StGLMenu* createOpenImageMenu();    // Root -> Media -> Open image menu
-    StGLMenu* createSaveImageMenu();    // Root -> Media -> Save image menu
-    StGLMenu* createSrcFormatMenu();    // Root -> Media -> Source format menu
-    StGLMenu* createViewMenu();         // Root -> View menu
-    StGLMenu* createDisplayModeMenu();  // Root -> View menu -> Output
-    StGLMenu* createDisplayRatioMenu(); // Root -> View menu -> Display Ratio
-    StGLMenu* createSmoothFilterMenu(); // Root -> View menu -> Smooth Filter
-    StGLMenu* createGammaMenu();        // Root -> View menu -> Gamma Correction
-    StGLMenu* createHelpMenu();         // Root -> Help menu
-    StGLMenu* createCheckUpdatesMenu(); // Root -> Help -> Check updates menu
-    StGLMenu* createLanguageMenu();     // Root -> Help -> Language menu
+    ST_LOCAL void      createMainMenu();         // Root (Main menu)
+    ST_LOCAL StGLMenu* createMediaMenu();        // Root -> Media menu
+    ST_LOCAL StGLMenu* createOpenImageMenu();    // Root -> Media -> Open image menu
+    ST_LOCAL StGLMenu* createSaveImageMenu();    // Root -> Media -> Save image menu
+    ST_LOCAL StGLMenu* createSrcFormatMenu();    // Root -> Media -> Source format menu
+    ST_LOCAL StGLMenu* createViewMenu();         // Root -> View menu
+    ST_LOCAL StGLMenu* createDisplayModeMenu();  // Root -> View menu -> Output
+    ST_LOCAL StGLMenu* createDisplayRatioMenu(); // Root -> View menu -> Display Ratio
+    ST_LOCAL StGLMenu* createSmoothFilterMenu(); // Root -> View menu -> Smooth Filter
+    ST_LOCAL StGLMenu* createGammaMenu();        // Root -> View menu -> Gamma Correction
+    ST_LOCAL StGLMenu* createHelpMenu();         // Root -> Help menu
+    ST_LOCAL StGLMenu* createCheckUpdatesMenu(); // Root -> Help -> Check updates menu
+    ST_LOCAL StGLMenu* createLanguageMenu();     // Root -> Help -> Language menu
 
         public: //!< StGLRootWidget overrides
 
-    StImageViewerGUI(StImageViewer* thePlugin,
-                     StWindow*      theWindow);
-    virtual ~StImageViewerGUI();
-    virtual void stglUpdate(const StPointD_t& pointZo);
-    virtual void stglResize(const StRectI_t& winRectPx);
-    virtual void setVisibility(const StPointD_t& pointZo, bool isMouseActive = false);
+    ST_LOCAL StImageViewerGUI(StImageViewer* thePlugin,
+                              StWindow*      theWindow);
+    ST_LOCAL virtual ~StImageViewerGUI();
+    ST_LOCAL virtual void stglUpdate(const StPointD_t& pointZo);
+    ST_LOCAL virtual void stglResize(const StRectI_t& winRectPx);
+    ST_LOCAL virtual void setVisibility(const StPointD_t& pointZo, bool isMouseActive = false);
 
         public:
 
-    bool toHideCursor() const;
-    void showUpdatesNotify();
+    ST_LOCAL bool toHideCursor() const;
+    ST_LOCAL void showUpdatesNotify();
 
-    void doAboutImage(const size_t );
+    ST_LOCAL void doAboutImage(const size_t );
 
         private: //!< callback Slots
 
-    void doAboutProgram(const size_t );
-    void doAboutSystem (const size_t );
-    void doCheckUpdates(const size_t );
-    void doOpenLicense (const size_t );
+    ST_LOCAL void doAboutProgram(const size_t );
+    ST_LOCAL void doAboutSystem (const size_t );
+    ST_LOCAL void doCheckUpdates(const size_t );
+    ST_LOCAL void doOpenLicense (const size_t );
 
 };
 

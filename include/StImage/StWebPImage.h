@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -14,27 +14,27 @@
 /**
  * This class implements image load/save operations using WebP library.
  */
-class ST_LOCAL StWebPImage : public StImageFile {
+class StWebPImage : public StImageFile {
 
         public:
 
     /**
      * Should be called at application start.
      */
-    static bool init();
+    ST_CPPEXPORT static bool init();
 
         public:
 
-    StWebPImage();
-    virtual ~StWebPImage();
+    ST_CPPEXPORT StWebPImage();
+    ST_CPPEXPORT virtual ~StWebPImage();
 
-    virtual void close();
-    virtual bool load(const StString& theFilePath,
-                      ImageType theImageType = ST_TYPE_NONE,
-                      uint8_t* theDataPtr = NULL, int theDataSize = 0);
-    virtual bool save(const StString& theFilePath,
-                      ImageType theImageType);
-    virtual bool resize(size_t , size_t ) { return false; }
+    ST_CPPEXPORT virtual void close();
+    ST_CPPEXPORT virtual bool load(const StString& theFilePath,
+                                   ImageType theImageType = ST_TYPE_NONE,
+                                   uint8_t* theDataPtr = NULL, int theDataSize = 0);
+    ST_CPPEXPORT virtual bool save(const StString& theFilePath,
+                                   ImageType theImageType);
+    ST_CPPEXPORT virtual bool resize(size_t , size_t );
 
         public:
 
@@ -111,10 +111,10 @@ class ST_LOCAL StWebPImage : public StImageFile {
 
         private:
 
-    bool loadInternal(const StString& theFilePath,
-                      const uint8_t*  theDataPtr,
-                      const int       theDataSize,
-                      const bool      theIsRGB);
+    ST_LOCAL bool loadInternal(const StString& theFilePath,
+                               const uint8_t*  theDataPtr,
+                               const int       theDataSize,
+                               const bool      theIsRGB);
 
         private:
 

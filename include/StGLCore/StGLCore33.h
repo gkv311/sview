@@ -15,7 +15,7 @@
  * OpenGL 3.3 definition.
  */
 template<typename theBaseClass_t>
-struct ST_LOCAL stglTmplCore33 : public theBaseClass_t {
+struct stglTmplCore33 : public theBaseClass_t {
 
         public: //! @name GL_ARB_blend_func_extended (added to OpenGL 3.3 core)
 

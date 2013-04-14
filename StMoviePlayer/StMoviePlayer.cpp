@@ -43,7 +43,6 @@
 const StString StMoviePlayer::ST_DRAWER_PLUGIN_NAME = "StMoviePlayer";
 
 namespace {
-    static bool HAS_LOGGER_ID = StLogger::IdentifyModule("StMoviePlayer");
 
     static const char ST_SETTING_FPSBOUND[]      = "fpsbound";
     static const char ST_SETTING_SRCFORMAT[]     = "srcFormat";

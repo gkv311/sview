@@ -14,7 +14,7 @@
 /**
  * Provide simple brightness matrix for color processing.
  */
-class ST_LOCAL StGLBrightnessMatrix : public StGLMatrix {
+class StGLBrightnessMatrix : public StGLMatrix {
 
         private:
 

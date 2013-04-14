@@ -1,4 +1,4 @@
-/**GL_CONTEXT_PROFILE_MASK
+/**
  * Copyright © 2012 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
@@ -15,7 +15,7 @@
  * OpenGL 4.0 defintion.
  */
 template<typename theBaseClass_t>
-struct ST_LOCAL stglTmplCore40 : public theBaseClass_t {
+struct stglTmplCore40 : public theBaseClass_t {
 
         public: //! @name GL_ARB_draw_indirect (added to OpenGL 4.0 core)
 

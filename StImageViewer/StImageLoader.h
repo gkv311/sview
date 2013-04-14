@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 
 class StLangMap;
 
-struct ST_LOCAL StImageInfo {
+struct StImageInfo {
 
     StHandle<StStereoParams> myId;
     StArgumentsMap           myInfo;
@@ -38,57 +38,57 @@ struct ST_LOCAL StImageInfo {
 /**
  * Auxiliary class to load images from dedicated thread.
  */
-class ST_LOCAL StImageLoader {
+class StImageLoader {
 
         public:
 
     static const char* ST_IMAGES_MIME_STRING;
 
-    const StMIMEList& getMimeList() const {
+    ST_LOCAL const StMIMEList& getMimeList() const {
         return myMimeList;
     }
 
-    StImageLoader(const StImageFile::ImageClass     theImageLib,
-                  const StHandle<StLangMap>&        theLangMap,
-                  const StHandle<StGLTextureQueue>& theTextureQueue);
-    ~StImageLoader();
+    ST_LOCAL StImageLoader(const StImageFile::ImageClass     theImageLib,
+                           const StHandle<StLangMap>&        theLangMap,
+                           const StHandle<StGLTextureQueue>& theTextureQueue);
+    ST_LOCAL ~StImageLoader();
 
-    void mainLoop();
+    ST_LOCAL void mainLoop();
 
-    void doLoadNext() {
+    ST_LOCAL void doLoadNext() {
         myLoadNextEvent.set();
     }
 
-    void doSaveImageAs(const size_t theImgType) {
+    ST_LOCAL void doSaveImageAs(const size_t theImgType) {
         myToSave = StImageFile::ImageType(theImgType);
         myLoadNextEvent.set();
     }
 
-    StHandle<StImageInfo> getFileInfo(const StHandle<StStereoParams>& theParams) const {
+    ST_LOCAL StHandle<StImageInfo> getFileInfo(const StHandle<StStereoParams>& theParams) const {
         StHandle<StImageInfo> anInfo = myImgInfo;
         return (!anInfo.isNull() && anInfo->myId == theParams) ? anInfo : NULL;
     }
 
-    StPlayList& getPlayList() {
+    ST_LOCAL StPlayList& getPlayList() {
         return myPlayList;
     }
 
-    StFormatEnum getSrcFormat() const {
+    ST_LOCAL StFormatEnum getSrcFormat() const {
         return mySrcFormat;
     }
 
-    void setSrcFormat(const StFormatEnum theSrcFormat) {
+    ST_LOCAL void setSrcFormat(const StFormatEnum theSrcFormat) {
         mySrcFormat = theSrcFormat;
     }
 
-    void setImageLib(const StImageFile::ImageClass theImageLib) {
+    ST_LOCAL void setImageLib(const StImageFile::ImageClass theImageLib) {
         myImageLib = theImageLib;
     }
 
     /**
      * Release unused memory as fast as possible.
      */
-    void setCompressMemory(const bool theToCompress);
+    ST_LOCAL void setCompressMemory(const bool theToCompress);
 
         public:  //!< Signals
 
@@ -107,20 +107,20 @@ class ST_LOCAL StImageLoader {
 
         private:
 
-    bool loadImage(const StHandle<StFileNode>& theSource,
-                   StHandle<StStereoParams>&   theParams);
-    bool saveImage(const StHandle<StFileNode>& theSource,
-                   const StHandle<StStereoParams>& theParams,
-                   StImageFile::ImageType theImgType);
+    ST_LOCAL bool loadImage(const StHandle<StFileNode>& theSource,
+                            StHandle<StStereoParams>&   theParams);
+    ST_LOCAL bool saveImage(const StHandle<StFileNode>& theSource,
+                            const StHandle<StStereoParams>& theParams,
+                            StImageFile::ImageType theImgType);
 
-    int getSnapshot(StImage* outDataLeft, StImage* outDataRight, bool isForce = false) {
+    ST_LOCAL int getSnapshot(StImage* outDataLeft, StImage* outDataRight, bool isForce = false) {
         return myTextureQueue->getSnapshot(outDataLeft, outDataRight, isForce);
     }
 
     /**
      * Auxiliary method to process image load error.
      */
-    void processLoadFail(const StString& theErrorDesc);
+    ST_LOCAL void processLoadFail(const StString& theErrorDesc);
 
         private:
 
@@ -137,9 +137,8 @@ class ST_LOCAL StImageLoader {
     volatile StImageFile::ImageType  myToSave;
     volatile bool              myToQuit;
 
-        private:
+        private: //! @name no copies, please
 
-    // no copies, please
     StImageLoader(const StImageLoader& theCopy);
     const StImageLoader& operator=(const StImageLoader& theCopy);
 

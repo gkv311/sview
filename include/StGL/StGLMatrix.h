@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -62,30 +62,26 @@ struct StGLVolume {
  * Please use getValue(row, column) / changeValue(row, column) methods to avoid mistakes
  * when accessing to the matrix elements!
  */
-class ST_LOCAL StGLMatrix {
-
-        private:
-
-    GLfloat matrix[16];
+class StGLMatrix {
 
         public:
 
-    virtual ~StGLMatrix();
+    ST_CPPEXPORT virtual ~StGLMatrix();
 
     /**
      * Empty constructor, creates the identity matrix.
      */
-    StGLMatrix();
+    ST_CPPEXPORT StGLMatrix();
 
     /**
      * Copy constructor.
      */
-    StGLMatrix(const StGLMatrix& copyMat);
+    ST_CPPEXPORT StGLMatrix(const StGLMatrix& copyMat);
 
     /**
      * Assignment operator.
      */
-    const StGLMatrix& operator=(const StGLMatrix& copyMat);
+    ST_CPPEXPORT const StGLMatrix& operator=(const StGLMatrix& copyMat);
 
     GLfloat getValue(size_t theRow, size_t theCol) const {
         //ST_DEBUG_ASSERT(theRow < 4 && theCol < 4);
@@ -154,17 +150,17 @@ class ST_LOCAL StGLMatrix {
     /**
      * Initialize the identity matrix.
      */
-    void initIdentity();
+    ST_CPPEXPORT void initIdentity();
 
     /**
      * Initialize the perspective projection matrix.
      */
-    void initFrustum(const StGLVolume& theFrustum);
+    ST_CPPEXPORT void initFrustum(const StGLVolume& theFrustum);
 
     /**
      * Initialize the orthographic projection matrix.
      */
-    void initOrtho(const StGLVolume& theVolume);
+    ST_CPPEXPORT void initOrtho(const StGLVolume& theVolume);
 
     /**
      * Automatically return GLfloat* to be silently used as argument got OpenGL functions.
@@ -199,44 +195,44 @@ class ST_LOCAL StGLMatrix {
     /**
      * Return the multiply theMat0 * theMat1 result.
      */
-    static StGLMatrix multiply(const StGLMatrix& theMat0, const StGLMatrix& theMat1);
+    ST_CPPEXPORT static StGLMatrix multiply(const StGLMatrix& theMat0, const StGLMatrix& theMat1);
 
     /**
      * Scale the current matrix.
      */
-    void scale(const GLfloat theSX, const GLfloat theSY, const GLfloat theSZ);
+    ST_CPPEXPORT void scale(const GLfloat theSX, const GLfloat theSY, const GLfloat theSZ);
 
     /**
      * Translate the current matrix.
      */
-    void translate(const StGLVec3& theVec);
+    ST_CPPEXPORT void translate(const StGLVec3& theVec);
 
     /**
      * Rotate the current matrix around specified vector at specified angle.
      */
-    void rotate(const GLfloat theAngleDegrees,
-                const StGLDir3& theLine);
+    ST_CPPEXPORT void rotate(const GLfloat theAngleDegrees,
+                             const StGLDir3& theLine);
 
     /**
      * Multiply: theMat * theVec.
      */
-    StGLVec4 operator*(const StGLVec4& theVec) const;
+    ST_CPPEXPORT StGLVec4 operator*(const StGLVec4& theVec) const;
 
     /**
      * Compute the inverted matrix.
      * @return true if reversion success.
      */
-    bool inverted(StGLMatrix& theInvOut) const;
+    ST_CPPEXPORT bool inverted(StGLMatrix& theInvOut) const;
 
     /**
      * Define a viewing transformation for model view matrix.
-     * @param theEye    (const StGLVec3& ) - the eye position;
-     * @param theCenter (const StGLVec3& ) - the center position (look target);
-     * @param theUp     (const StGLDir3& ) - the direction of the up vector.
+     * @param theEye    the eye position
+     * @param theCenter the center position (look target)
+     * @param theUp     the direction of the up vector
      */
-    void lookAt(const StGLVec3& theEye,
-                const StGLVec3& theCenter,
-                const StGLDir3& theUp);
+    ST_CPPEXPORT void lookAt(const StGLVec3& theEye,
+                             const StGLVec3& theCenter,
+                             const StGLDir3& theUp);
 
     StString toString() const {
         return StString("{\n")
@@ -246,11 +242,15 @@ class ST_LOCAL StGLMatrix {
              + getRow(3).toString() + "\n}";
     }
 
+        private:
+
+    GLfloat matrix[16];
+
 };
 
 /**
  * Compute: theVec^T * theMat.
  */
-StGLVec4 operator*(const StGLVec4& theVec, const StGLMatrix& theMat);
+ST_CPPEXPORT StGLVec4 operator*(const StGLVec4& theVec, const StGLMatrix& theMat);
 
 #endif //__StGLMatrix_h_

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2008-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2008-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -23,7 +23,7 @@
  * This timer is able to measure the elapsed time with 1 micro-second accuracy
  * in both Windows, Linux and Unix systems.
  */
-class ST_LOCAL StTimer {
+class StTimer {
 
         public:
 

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -14,7 +14,7 @@
 /**
  * @class class to access to the small binary and text files.
  */
-class ST_LOCAL StRawFile : public StFileNode {
+class StRawFile : public StFileNode {
 
         public:
 
@@ -23,18 +23,12 @@ class ST_LOCAL StRawFile : public StFileNode {
         WRITE,
     } ReadWrite;
 
-        private:
-
-    FILE*  myFileHandle;
-    stUByte_t* myBuffer;
-    size_t   myBuffSize;
-
         public:
 
-    StRawFile(const StString& theFilePath = StString(),
-              StNode* theParentNode = NULL);
+    ST_CPPEXPORT StRawFile(const StString& theFilePath = StString(),
+                           StNode* theParentNode = NULL);
 
-    virtual ~StRawFile();
+    ST_CPPEXPORT virtual ~StRawFile();
 
     /**
      * Access to the raw buffer.
@@ -68,12 +62,12 @@ class ST_LOCAL StRawFile : public StFileNode {
      * (Re)initialize the buffer.
      * @param theDataSize (size_t ) - new buffer size in bytes.
      */
-    void initBuffer(size_t theDataSize);
+    ST_CPPEXPORT void initBuffer(size_t theDataSize);
 
     /**
      * Free current buffer.
      */
-    void freeBuffer();
+    ST_CPPEXPORT void freeBuffer();
 
     /**
      * Returns true if file is opened.
@@ -85,38 +79,44 @@ class ST_LOCAL StRawFile : public StFileNode {
     /**
      * Open the file handle for read or write operation.
      */
-    bool openFile(StRawFile::ReadWrite theFlags,
-                  const StString& theFilePath = StString());
+    ST_CPPEXPORT bool openFile(StRawFile::ReadWrite theFlags,
+                               const StString& theFilePath = StString());
 
     /**
      * Close file handle
      */
-    void closeFile();
+    ST_CPPEXPORT void closeFile();
 
     /**
      * Write current buffer content to the file.
      * If size not set - whole buffer will be saved.
      */
-    size_t writeFile(size_t theBytes = 0);
+    ST_CPPEXPORT size_t writeFile(size_t theBytes = 0);
 
     /**
      * Fill the buffer with file content.
      * @param theFilePath (const StString& ) - the file path;
      * @return true if file was read.
      */
-    bool readFile(const StString& theFilePath = StString());
+    ST_CPPEXPORT bool readFile(const StString& theFilePath = StString());
 
     /**
      * Write the buffer into the file.
      * @param theFilePath (const StString& ) - the file path;
      * @return true if file was stored.
      */
-    bool saveFile(const StString& theFilePath = StString());
+    ST_CPPEXPORT bool saveFile(const StString& theFilePath = StString());
 
     /**
      * Read the text file and return it as a string.
      */
-    static StString readTextFile(const StString& theFilePath);
+    ST_CPPEXPORT static StString readTextFile(const StString& theFilePath);
+
+        private:
+
+    FILE*      myFileHandle;
+    stUByte_t* myBuffer;
+    size_t     myBuffSize;
 
 };
 

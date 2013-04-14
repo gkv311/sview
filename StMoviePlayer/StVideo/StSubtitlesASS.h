@@ -28,7 +28,42 @@ class StSubItem;
 /**
  * ASS subtitles parser.
  */
-class ST_LOCAL StSubtitlesASS {
+class StSubtitlesASS {
+
+        public:
+
+    /**
+     * Main constructor.
+     */
+    ST_LOCAL StSubtitlesASS();
+
+    /**
+     * Destructor.
+     */
+    ST_LOCAL ~StSubtitlesASS();
+
+    /**
+     * @param theHeader header text
+     * @param theSize   header length
+     * @return true on success
+     */
+    ST_LOCAL bool init(const char* theHeader,
+                       const int   theSize);
+
+    /**
+     * Returns true if ASS header provide valid info.
+     */
+    ST_LOCAL bool isValid() const {
+        return myIdText     != -1
+            && myIdPtsStart != -1
+            && myIdPtsEnd   != -1;
+    }
+
+    /**
+     * Parse the dialog event and returns a subtitle item.
+     */
+    ST_LOCAL StHandle<StSubItem> parseEvent(const StString& theString,
+                                            const double    thePts);
 
         private:
 
@@ -38,6 +73,10 @@ class ST_LOCAL StSubtitlesASS {
         HEADER_ID_V4STYLES,
         HEADER_ID_EVENTS,
     };
+
+        private:
+
+    ST_LOCAL void parseStyle(StString& theText);
 
         private:
 
@@ -52,45 +91,6 @@ class ST_LOCAL StSubtitlesASS {
     int myIdMarginV;
     int myIdEffect;
     int myIdText;
-
-        private:
-
-    void parseStyle(StString& theText);
-
-        public:
-
-    /**
-     * Main constructor.
-     */
-    StSubtitlesASS();
-
-    /**
-     * Destructor.
-     */
-    ~StSubtitlesASS();
-
-    /**
-     * @param theHeader (const char* ) - header text;
-     * @param theSize   (const int   ) - header length;
-     * @return true on success.
-     */
-    bool init(const char* theHeader,
-              const int   theSize);
-
-    /**
-     * Returns true if ASS header provide valid info.
-     */
-    bool isValid() const {
-        return myIdText     != -1
-            && myIdPtsStart != -1
-            && myIdPtsEnd   != -1;
-    }
-
-    /**
-     * Parse the dialog event and returns a subtitle item.
-     */
-    StHandle<StSubItem> parseEvent(const StString& theString,
-                                   const double    thePts);
 
 };
 

@@ -33,7 +33,7 @@
 class StSubQueue;
 class StLangMap;
 
-struct ST_LOCAL StMovieInfo {
+struct StMovieInfo {
 
     StHandle<StStereoParams> myId;
     StArgumentsMap           myInfo;
@@ -43,7 +43,7 @@ struct ST_LOCAL StMovieInfo {
 /**
  * Special class for video playback.
  */
-class ST_LOCAL StVideo {
+class StVideo {
 
         private: //! @name private fields
 
@@ -85,50 +85,50 @@ class ST_LOCAL StVideo {
     /**
      * Just redirect callback slot.
      */
-    void doOnErrorRedirect(const StString& theMsgText) {
+    ST_LOCAL void doOnErrorRedirect(const StString& theMsgText) {
         signals.onError(theMsgText);
     }
 
     /**
      * Private method to append one format context (one file).
      */
-    bool addFile(const StString& theFileToLoad,
-                 StHandle< StArrayList<StString> >& theStreamsListA,
-                 StHandle< StArrayList<StString> >& theStreamsListS,
-                 double& theMaxDuration);
+    ST_LOCAL bool addFile(const StString& theFileToLoad,
+                          StHandle< StArrayList<StString> >& theStreamsListA,
+                          StHandle< StArrayList<StString> >& theStreamsListS,
+                          double& theMaxDuration);
 
-    bool openSource(const StHandle<StFileNode>&     theNewSource,
-                    const StHandle<StStereoParams>& theNewParams);
+    ST_LOCAL bool openSource(const StHandle<StFileNode>&     theNewSource,
+                             const StHandle<StStereoParams>& theNewParams);
 
     /**
      * Close active played file(s).
      */
-    void close();
+    ST_LOCAL void close();
 
-    void packetsLoop();
-    void doFlush();
-    void doSeek(const double theSeekPts,
-                const bool   toSeekBack);
-    void doSeekContext(AVFormatContext* theFormatCtx,
-                       const double     theSeekPts,
-                       const bool       toSeekBack);
-    bool doSeekStream (AVFormatContext* theFormatCtx,
-                       const signed int theStreamId,
-                       const double     theSeekPts,
-                       const bool       toSeekBack);
-    bool pushPacket(StHandle<StAVPacketQueue>& theAVPacketQueue,
-                    StAVPacket& thePacket);
+    ST_LOCAL void packetsLoop();
+    ST_LOCAL void doFlush();
+    ST_LOCAL void doSeek(const double theSeekPts,
+                         const bool   toSeekBack);
+    ST_LOCAL void doSeekContext(AVFormatContext* theFormatCtx,
+                                const double     theSeekPts,
+                                const bool       toSeekBack);
+    ST_LOCAL bool doSeekStream (AVFormatContext* theFormatCtx,
+                                const signed int theStreamId,
+                                const double     theSeekPts,
+                                const bool       toSeekBack);
+    ST_LOCAL bool pushPacket(StHandle<StAVPacketQueue>& theAVPacketQueue,
+                             StAVPacket& thePacket);
 
     /**
      * Save current frame to file.
      */
-    bool saveSnapshotAs(StImageFile::ImageType theImgType);
+    ST_LOCAL bool saveSnapshotAs(StImageFile::ImageType theImgType);
 
     /**
      * @return event (StPlayEvent_t ) - event in wait state.
      */
-    StPlayEvent_t popPlayEvent(double& theSeekPts,
-                               bool&   toSeekBack) {
+    ST_LOCAL StPlayEvent_t popPlayEvent(double& theSeekPts,
+                                        bool&   toSeekBack) {
         myEventMutex.lock();
             StPlayEvent_t anEventId = myPlayEvent;
             theSeekPts = myPtsSeek;
@@ -138,7 +138,7 @@ class ST_LOCAL StVideo {
         return anEventId;
     }
 
-    void waitEvent() {
+    ST_LOCAL void waitEvent() {
         double aSeekPts;
         bool toSeekBack;
         for(;;) {
@@ -155,60 +155,60 @@ class ST_LOCAL StVideo {
      * Video thread function that parse input messages
      * and controls decoding threads.
      */
-    void mainLoop();
+    ST_LOCAL void mainLoop();
 
         public: //! @name public methods
 
     static const char* ST_VIDEOS_MIME_STRING;
 
-    const StMIMEList& getMimeListVideo() const {
+    ST_LOCAL const StMIMEList& getMimeListVideo() const {
         return myMimesVideo;
     }
 
-    const StMIMEList& getMimeListAudio() const {
+    ST_LOCAL const StMIMEList& getMimeListAudio() const {
         return myMimesAudio;
     }
 
-    const StMIMEList& getMimeListSubtitles() const {
+    ST_LOCAL const StMIMEList& getMimeListSubtitles() const {
         return myMimesSubs;
     }
 
     /**
      * Main constructor.
      */
-    StVideo(const StString&                   theALDeviceName,
-            const StHandle<StLangMap>&        theLangMap,
-            const StHandle<StGLTextureQueue>& theTextureQueue,
-            const StHandle<StSubQueue>&       theSubtitlesQueue);
-    ~StVideo();
+    ST_LOCAL StVideo(const StString&                   theALDeviceName,
+                     const StHandle<StLangMap>&        theLangMap,
+                     const StHandle<StGLTextureQueue>& theTextureQueue,
+                     const StHandle<StSubQueue>&       theSubtitlesQueue);
+    ST_LOCAL ~StVideo();
 
     /**
      * Ignore sync rules and perform swap when ready.
      */
-    void setBenchmark(bool toPerformBenchmark);
+    ST_LOCAL void setBenchmark(bool toPerformBenchmark);
 
     /**
      * Access to the playlist.
      */
-    StPlayList& getPlayList() {
+    ST_LOCAL StPlayList& getPlayList() {
         return myPlayList;
     }
 
-    double getAverFps() const {
+    ST_LOCAL double getAverFps() const {
         return targetFps;
     }
 
     /**
-     * @return true if video stream loaded.
+     * @return true if video stream loaded
      */
-    bool hasVideoStream() const {
+    ST_LOCAL bool hasVideoStream() const {
         return myVideoMaster->isInitialized();
     }
 
     /**
      * Get default stereoscopic format.
      */
-    StFormatEnum getSrcFormat() const {
+    ST_LOCAL StFormatEnum getSrcFormat() const {
         return myVideoMaster->getSrcFormat();
     }
 
@@ -216,11 +216,11 @@ class ST_LOCAL StVideo {
      * Set the stereoscopic format to be used for video
      * with ambiguous format information.
      */
-    void setSrcFormat(const StFormatEnum theSrcFormat) {
+    ST_LOCAL void setSrcFormat(const StFormatEnum theSrcFormat) {
         myVideoMaster->setSrcFormat(theSrcFormat);
     }
 
-    StHandle<StMovieInfo> getFileInfo(const StHandle<StStereoParams>& theParams) const {
+    ST_LOCAL StHandle<StMovieInfo> getFileInfo(const StHandle<StStereoParams>& theParams) const {
         StHandle<StMovieInfo> anInfo = myFileInfo;
         return (!anInfo.isNull() && anInfo->myId == theParams) ? anInfo : NULL;
     }
@@ -230,14 +230,14 @@ class ST_LOCAL StVideo {
     /**
      * Interrupt the playback and load current position in playlist.
      */
-    void doLoadNext() {
+    ST_LOCAL void doLoadNext() {
         pushPlayEvent(ST_PLAYEVENT_NEXT);
     }
 
     /**
      * Save current displayed frame.
      */
-    void doSaveSnapshotAs(const size_t theImgType) {
+    ST_LOCAL void doSaveSnapshotAs(const size_t theImgType) {
         toSave = StImageFile::ImageType(theImgType);
         pushPlayEvent(ST_PLAYEVENT_NEXT);
     }
@@ -245,21 +245,21 @@ class ST_LOCAL StVideo {
     /**
      * Switch audio device.
      */
-    void switchAudioDevice(const StString& theAlDeviceName) {
+    ST_LOCAL void switchAudioDevice(const StString& theAlDeviceName) {
         myAudio->switchAudioDevice(theAlDeviceName);
     }
 
     /**
-     * @return true if device was disconnected and OpenAL should be re-initialized.
+     * @return true if device was disconnected and OpenAL should be re-initialized
      */
-    bool isDisconnected() const {
+    ST_LOCAL bool isDisconnected() const {
         return myAudio->isDisconnected();
     }
 
     /**
      * Set audio gain.
      */
-    void setAudioVolume(const float theGain) {
+    ST_LOCAL void setAudioVolume(const float theGain) {
         myAudio->setAudioVolume(theGain);
     }
 
@@ -290,10 +290,10 @@ class ST_LOCAL StVideo {
         StSignal<void (const StString& )> onError;
     } signals;
 
-    bool getPlaybackState(double& theDuration,
-                          double& thePts,
-                          bool&   theIsVideoPlayed,
-                          bool&   theIsAudioPlayed) const {
+    ST_LOCAL bool getPlaybackState(double& theDuration,
+                                   double& thePts,
+                                   bool&   theIsVideoPlayed,
+                                   bool&   theIsAudioPlayed) const {
         myEventMutex.lock();
             theDuration = myDuration;
         myEventMutex.unlock();
@@ -303,26 +303,26 @@ class ST_LOCAL StVideo {
         return theIsVideoPlayed || theIsAudioPlayed;
     }
 
-    double getDuration() const {
+    ST_LOCAL double getDuration() const {
         myEventMutex.lock();
             double aDuration = myDuration;
         myEventMutex.unlock();
         return aDuration;
     }
 
-    double getPts() const {
+    ST_LOCAL double getPts() const {
         double aPts = myAudio->getPts();
         if(aPts <= 0.0)
             aPts = myVideoMaster->getPts();
         return (aPts > 0.0) ? aPts : 0.0;
     }
 
-    bool isPlaying() const {
+    ST_LOCAL bool isPlaying() const {
         return myVideoMaster->isPlaying() || myAudio->isPlaying();
     }
 
-    void pushPlayEvent(const StPlayEvent_t theEventId,
-                       const double        theSeekParam = 0.0) {
+    ST_LOCAL void pushPlayEvent(const StPlayEvent_t theEventId,
+                                const double        theSeekParam = 0.0) {
         if(theEventId == ST_PLAYEVENT_NEXT) {
             myEventMutex.lock();
                 myPlayEvent = theEventId;

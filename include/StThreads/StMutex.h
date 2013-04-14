@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -9,45 +9,30 @@
 #ifndef __StMutex_h_
 #define __StMutex_h_
 
-#if (defined(_WIN32) || defined(__WIN32__))
-    #include <windows.h> // we used global header instead Winbase.h to prevent namespaces collisions
-#else
-    #include <pthread.h>
-    #include <unistd.h>
-    #include <errno.h>
-    #include <sys/time.h>
-#endif
-
 #include <stTypes.h> // common types and defines
+
+#ifndef _WIN32
+    #include <pthread.h>
+#endif
 
 /**
  * StMutex is a simple Mutex class-wrapper
  * with behaviour similar to WinAPI mutex object.
  * Class implemented as inline.
  */
-class ST_LOCAL StMutex {
+class StMutex {
 
         public:
 
     /**
      * Create unnamed mutex in system
      */
-    StMutex() {
-    #if (defined(_WIN32) || defined(__WIN32__))
-        myMutex = CreateMutex(NULL,  // means mutex can not be inherited by child processes
-                              false, // If this value is TRUE and the caller created the mutex,
-                                     // the calling thread obtains initial ownership of the mutex object.
-                                     // Otherwise, the calling thread does not obtain ownership of the mutex.
-                                     // To determine if the caller created the mutex, see the Return Values section.
-                              NULL); // the mutex object is created without a name.
-    #else
-        // We create recursive POSIX mutex to get behaviour like WinAPI mutex object
-        pthread_mutexattr_t anAttr;
-        pthread_mutexattr_init(&anAttr);
-        pthread_mutexattr_settype(&anAttr, PTHREAD_MUTEX_RECURSIVE);
-        pthread_mutex_init(&myMutex, &anAttr);
-    #endif
-    }
+    ST_CPPEXPORT StMutex();
+
+    /**
+     * Just remove mutex from system.
+     */
+    ST_CPPEXPORT ~StMutex();
 
     /**
      * WAIT (for release from other thread) and lock mutex.
@@ -56,55 +41,24 @@ class ST_LOCAL StMutex {
      * it must call unlock mutex SAME times to release.
      * @return true if success.
      */
-    bool lock() {
-    #if (defined(_WIN32) || defined(__WIN32__))
-        return (WaitForSingleObject(myMutex, INFINITE) != WAIT_FAILED);
-    #else
-        return (pthread_mutex_lock(&myMutex) == 0);
-    #endif
-    }
+    ST_CPPEXPORT bool lock();
 
     /**
      * TRY to lock mutex (WITHOUT waiting for release from other thread).
      * @return true if success.
      */
-    bool tryLock() {
-    #if (defined(_WIN32) || defined(__WIN32__))
-        return (WaitForSingleObject(myMutex, (DWORD )0) != WAIT_TIMEOUT);
-    #else
-        return (pthread_mutex_trylock(&myMutex) == 0);
-    #endif
-    }
+    ST_CPPEXPORT bool tryLock();
 
     /**
      * Release mutex.
      * @return true if success
      */
-    bool unlock() {
-    #if (defined(_WIN32) || defined(__WIN32__))
-        return (ReleaseMutex(myMutex) != 0);
-    #else
-        return (pthread_mutex_unlock(&myMutex) == 0);
-    #endif
-    }
-
-    /**
-     * Just remove mutex from system.
-     */
-    ~StMutex() {
-    #if (defined(_WIN32) || defined(__WIN32__))
-        if(lock()) {
-            CloseHandle(myMutex);
-        }
-    #else
-        pthread_mutex_destroy(&myMutex);
-    #endif
-    }
+    ST_CPPEXPORT bool unlock();
 
         private:
 
-#if (defined(_WIN32) || defined(__WIN32__))
-    HANDLE          myMutex;
+#ifdef _WIN32
+    void*           myMutex;
 #else
     pthread_mutex_t myMutex;
 #endif
@@ -120,21 +74,21 @@ class ST_LOCAL StMutex {
  * Do not use it for several relative mutexes - this will
  * be unsafe!
  */
-class ST_LOCAL StMutexAuto {
+class StMutexAuto {
 
         public:
 
-    StMutexAuto(StMutex* theMutex)
+    inline StMutexAuto(StMutex* theMutex)
     : myMutex(theMutex) {
         myMutex->lock();
     }
 
-    StMutexAuto(StMutex& theMutex)
+    inline StMutexAuto(StMutex& theMutex)
     : myMutex(&theMutex) {
         myMutex->lock();
     }
 
-    ~StMutexAuto() {
+    inline ~StMutexAuto() {
         myMutex->unlock();
     }
 

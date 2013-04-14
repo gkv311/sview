@@ -198,10 +198,12 @@ namespace {
         ST_DEBUG_LOG("DevIL library initialized");
 
         // show up information about dynamically linked libraries
+    #ifdef __ST_DEBUG__
         ILint aVersion = ilGetInteger(IL_VERSION_NUM);
         ST_DEBUG_LOG("  IL\t"  + getVerMajor(aVersion) + '.' + getVerMinor(aVersion) + '.' + getVerMicro(aVersion));
         aVersion = iluGetInteger(IL_VERSION_NUM);
         ST_DEBUG_LOG("  ILU\t" + getVerMajor(aVersion) + '.' + getVerMinor(aVersion) + '.' + getVerMicro(aVersion));
+    #endif
         return true;
     }
 

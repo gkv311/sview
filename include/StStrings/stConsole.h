@@ -30,18 +30,18 @@ namespace st {
     #define stostream_text(theQuote) theQuote
 #endif
 
-    int getch();
+    ST_CPPEXPORT int getch();
 
-    st::ostream& SYS_PAUSE_EMPTY   (st::ostream& theOStream);
-    st::ostream& SYS_PAUSE         (st::ostream& theOStream);
+    ST_CPPEXPORT st::ostream& SYS_PAUSE_EMPTY   (st::ostream& theOStream);
+    ST_CPPEXPORT st::ostream& SYS_PAUSE         (st::ostream& theOStream);
 
     // console output text-color functions
-    st::ostream& COLOR_FOR_RED     (st::ostream& theOStream);
-    st::ostream& COLOR_FOR_GREEN   (st::ostream& theOStream);
-    st::ostream& COLOR_FOR_YELLOW_L(st::ostream& theOStream);
-    st::ostream& COLOR_FOR_YELLOW  (st::ostream& theOStream);
-    st::ostream& COLOR_FOR_BLUE    (st::ostream& theOStream);
-    st::ostream& COLOR_FOR_WHITE   (st::ostream& theOStream);
+    ST_CPPEXPORT st::ostream& COLOR_FOR_RED     (st::ostream& theOStream);
+    ST_CPPEXPORT st::ostream& COLOR_FOR_GREEN   (st::ostream& theOStream);
+    ST_CPPEXPORT st::ostream& COLOR_FOR_YELLOW_L(st::ostream& theOStream);
+    ST_CPPEXPORT st::ostream& COLOR_FOR_YELLOW  (st::ostream& theOStream);
+    ST_CPPEXPORT st::ostream& COLOR_FOR_BLUE    (st::ostream& theOStream);
+    ST_CPPEXPORT st::ostream& COLOR_FOR_WHITE   (st::ostream& theOStream);
 
 };
 

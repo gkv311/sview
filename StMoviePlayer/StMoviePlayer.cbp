@@ -190,6 +190,7 @@
 				<Linker>
 					<Add option="-s" />
 					<Add option="`pkg-config gtk+-2.0 --libs`" />
+					<Add option="-z defs" />
 					<Add library="GL" />
 					<Add library="openal" />
 					<Add library="pthread" />
@@ -224,6 +225,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="`pkg-config gtk+-2.0 --libs`" />
+					<Add option="-z defs" />
 					<Add library="GL" />
 					<Add library="openal" />
 					<Add library="pthread" />
@@ -317,6 +319,7 @@
 			<Add library="libwebp" />
 			<Add directory="../3rdparty/lib/$(TARGET_NAME)" />
 			<Add directory="../lib/$(TARGET_NAME)" />
+			<Add directory="../bin/$(TARGET_NAME)" />
 		</Linker>
 		<Unit filename="StMoviePlayer.cpp" />
 		<Unit filename="StMoviePlayer.h" />

@@ -41,7 +41,7 @@ struct StGLBoxPx {
 /**
  * Class defines the special vector with magnitude equal to 1.
  */
-class ST_LOCAL StGLDir3 : public StGLVec3 {
+class StGLDir3 : public StGLVec3 {
 
         public:
 

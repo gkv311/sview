@@ -30,9 +30,15 @@
     //#include <sal.h>
     #define ST_ATTR_CHECK_RETURN _Check_return_
 #elif defined(__GNUC__)
-    #define ST_ATTR_CHECK_RETURN __attribute__ ((warn_unused_result))
+    #define ST_ATTR_CHECK_RETURN __attribute__((warn_unused_result))
 #else
     #define ST_ATTR_CHECK_RETURN
+#endif
+
+#if defined(__GNUC__) && (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1))
+    #define ST_ATTR_DEPRECATED __attribute__((deprecated))
+#else
+    #define ST_ATTR_DEPRECATED
 #endif
 
 #include <cmath>       // fabs
@@ -374,19 +380,48 @@ inline int stRound(const float theNumber) {
     #define EXTERN_C_PREFIX
 #endif
 
+/**
+ * Set of export macro definitions:
+ *  - ST_LOCAL     Do not export symbol
+ *  - ST_CEXPORT   Export symbol, C-style (prevent name decorations)
+ *  - ST_CIMPORT   Import symbol, C-style
+ *  - ST_CPPEXPORT Export symbol, C++-style (with name decorations)
+ *  - ST_CPPIMPORT Import symbol, C++-style
+ *  - ST_EXPORT    Depricated macro, alias to ST_CEXPORT
+ *  - ST_IMPORT    Depricated macro, alias to ST_CIXPORT
+ *
+ * Notice that function/class definition without extra specifiers
+ * leads to different behaviour on different platforms!
+ *  - On Windows, symbol considered for local usage (not exported)
+ *  - On Linux (and others), symbol considered for export
+ *
+ * On Windows exported and imported symbols should be marked with different specifiers
+ * which leads to extra comlications in library headers
+ * (library should be build with export specifier whilst
+ * application based on it should see import specifier).
+ * However C++ method could be marked as "exported" in both cases.
+ */
 #if(defined(_WIN32) || defined(__WIN32__))
-    #define ST_EXPORT EXTERN_C_PREFIX __declspec(dllexport)
-    #define ST_IMPORT EXTERN_C_PREFIX __declspec(dllimport)
     #define ST_LOCAL
+    #define ST_CPPEXPORT __declspec(dllexport)
+    #define ST_CPPIMPORT __declspec(dllimport)
+    #define ST_CEXPORT   EXTERN_C_PREFIX __declspec(dllexport)
+    #define ST_CIMPORT   EXTERN_C_PREFIX __declspec(dllimport)
 #elif(__GNUC__ >= 4)
-    #define ST_EXPORT EXTERN_C_PREFIX __attribute__ ((visibility("default")))
-    #define ST_IMPORT EXTERN_C_PREFIX __attribute__ ((visibility("default")))
-    #define ST_LOCAL __attribute__ ((visibility("hidden")))
+    #define ST_LOCAL     __attribute__ ((visibility("hidden")))
+    #define ST_CPPEXPORT __attribute__ ((visibility("default")))
+    #define ST_CPPIMPORT __attribute__ ((visibility("default")))
+    #define ST_CEXPORT   EXTERN_C_PREFIX __attribute__ ((visibility("default")))
+    #define ST_CIMPORT   EXTERN_C_PREFIX __attribute__ ((visibility("default")))
 #else
-    #define ST_EXPORT EXTERN_C_PREFIX
-    #define ST_IMPORT EXTERN_C_PREFIX
+    #define ST_CPPEXPORT
+    #define ST_CPPIMPORT
+    #define ST_CEXPORT EXTERN_C_PREFIX
+    #define ST_CIMPORT EXTERN_C_PREFIX
     #define ST_LOCAL
 #endif
+#define ST_EXPORT ST_CEXPORT
+#define ST_IMPORT ST_CIMPORT
 
 /**
  * Returns nearest (greater or equal) aligned number.

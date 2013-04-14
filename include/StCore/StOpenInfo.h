@@ -30,7 +30,7 @@ typedef struct tagStOpenInfo {
     stUtf8_t*   args;
 } StOpenInfo_t;
 
-class ST_LOCAL StOpenInfo {
+class StOpenInfo {
 
         private:
 

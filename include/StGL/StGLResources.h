@@ -12,7 +12,7 @@
 #include <StThreads/StProcess.h>
 #include <StStrings/StString.h>
 
-class ST_LOCAL StGLResources {
+class StGLResources {
 
         public:
 

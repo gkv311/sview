@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -40,7 +40,7 @@ namespace videoRatio {
  * Also structure store pointers for next and previous
  * StTextureData in queue.
  */
-class ST_LOCAL StGLTextureData {
+class StGLTextureData {
 
         public:
 
@@ -53,6 +53,114 @@ class ST_LOCAL StGLTextureData {
      * Return enumeration value from the string.
      */
     static StFormatEnum GET_FROM_STRING(const StString& formatString);
+
+        public:
+
+    ST_CPPEXPORT StGLTextureData();
+
+    ST_CPPEXPORT ~StGLTextureData();
+
+    /**
+     * @return stereo parameters for current data
+     */
+    inline const StHandle<StStereoParams>& getSource() const {
+        return myStParams;
+    }
+
+    inline void resetStParams() {
+        myStParams.nullify();
+    }
+
+    /**
+     * @return presentation timestamp
+     */
+    inline double getPTS() {
+        return srcPTS;
+    }
+
+    /**
+     * @return format of source data
+     */
+    inline StFormatEnum getSourceFormat() {
+        return srcFormat;
+    }
+
+    /**
+     * Iterator's function.
+     * @return previous item
+     */
+    inline StGLTextureData* getPrev() {
+        return prev;
+    }
+
+    /**
+     * Iterator's function, communicate queue.
+     * @param textureData setted previous item
+     */
+    inline void setPrev(StGLTextureData* textureData) {
+        prev = textureData;
+        if(textureData != NULL) {
+            textureData->next = this;
+        }
+    }
+
+    /**
+     * Iterator's function.
+     * @return next item
+     */
+    inline StGLTextureData* getNext() {
+        return next;
+    }
+
+    /**
+     * Iterator's function, communicate queue.
+     * @param textureData setted next item
+     */
+    inline void setNext(StGLTextureData* textureData) {
+        next = textureData;
+        if(textureData != NULL) {
+            textureData->prev = this;
+        }
+    }
+
+    /**
+     * Setup new data.
+     * @param srcPTS (double ) - presentation timestamp.
+     */
+    ST_CPPEXPORT void updateData(const StImage& srcDataLeft,
+                                 const StImage& srcDataRight,
+                                 const StHandle<StStereoParams>& theStParams,
+                                 StFormatEnum srcFormat,
+                                 double srcPTS);
+
+    /**
+     * Perform texture update with current data.
+     * @param stQTexture - texture to fill in.
+     * @return true if texture update (all iterations) finished.
+     */
+    ST_CPPEXPORT bool fillTexture(StGLContext&     theCtx,
+                                  StGLQuadTexture& theQTexture);
+
+    ST_CPPEXPORT void getCopy(StImage* outDataL, StImage* outDataR) const;
+
+    /**
+     * Release memory.
+     */
+    ST_CPPEXPORT void reset();
+
+        private:
+
+
+    ST_LOCAL bool reAllocate(size_t newSizeBytes);
+
+    /**
+     * Fill the texture plane.
+     */
+    ST_LOCAL void fillTexture(StGLContext&        theCtx,
+                              StGLFrameTexture&   theFrameTexture,
+                              const StImagePlane& theData);
+
+    ST_LOCAL void setupAttributes(StGLFrameTextures& stFrameTextures, const StImage& theImage);
 
         private:
 
@@ -70,110 +178,6 @@ class ST_LOCAL StGLTextureData {
 
     GLsizei      fillFromRow;
     GLsizei         fillRows;
-
-    bool reAllocate(size_t newSizeBytes);
-
-    /**
-     * Fill the texture plane.
-     */
-    void fillTexture(StGLContext&        theCtx,
-                     StGLFrameTexture&   theFrameTexture,
-                     const StImagePlane& theData);
-    void setupAttributes(StGLFrameTextures& stFrameTextures, const StImage& theImage);
-
-        public:
-
-    StGLTextureData();
-
-    ~StGLTextureData();
-
-    /**
-     * @return myStParams (const StHandle<StStereoParams>& ) - stereo parameters for current data.
-     */
-    const StHandle<StStereoParams>& getSource() const {
-        return myStParams;
-    }
-
-    void resetStParams() {
-        myStParams.nullify();
-    }
-
-    /**
-     * @return srcPTS (double ) presentation timestamp.
-     */
-    double getPTS() {
-        return srcPTS;
-    }
-
-    /**
-     * @return srcFormat (StFormatEnum ) format of source data.
-     */
-    StFormatEnum getSourceFormat() {
-        return srcFormat;
-    }
-
-    /**
-     * Iterator's function.
-     * @return (StGLTextureData* ) previous item.
-     */
-    StGLTextureData* getPrev() {
-        return prev;
-    }
-
-    /**
-     * Iterator's function, communicate queue.
-     * @param textureData (StGLTextureData* ) setted previous item.
-     */
-    void setPrev(StGLTextureData* textureData) {
-        prev = textureData;
-        if(textureData != NULL) {
-            textureData->next = this;
-        }
-    }
-
-    /**
-     * Iterator's function.
-     * @return (StGLTextureData* ) next item.
-     */
-    StGLTextureData* getNext() {
-        return next;
-    }
-
-    /**
-     * Iterator's function, communicate queue.
-     * @param textureData (StGLTextureData* ) setted next item.
-     */
-    void setNext(StGLTextureData* textureData) {
-        next = textureData;
-        if(textureData != NULL) {
-            textureData->prev = this;
-        }
-    }
-
-    /**
-     * Setup new data.
-     * @param srcPTS (double ) - presentation timestamp.
-     */
-    void updateData(const StImage& srcDataLeft,
-                    const StImage& srcDataRight,
-                    const StHandle<StStereoParams>& theStParams,
-                    StFormatEnum srcFormat,
-                    double srcPTS);
-
-    /**
-     * Perform texture update with current data.
-     * @param stQTexture - texture to fill in.
-     * @return true if texture update (all iterations) finished.
-     */
-    bool fillTexture(StGLContext&     theCtx,
-                     StGLQuadTexture& theQTexture);
-
-    void getCopy(StImage* outDataL, StImage* outDataR) const;
-
-    /**
-     * Release memory.
-     */
-    void reset();
 
 };
 

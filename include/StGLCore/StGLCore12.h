@@ -15,7 +15,7 @@
  * OpenGL 1.2 core based on 1.1 version.
  */
 template<typename theBaseClass_t>
-struct ST_LOCAL stglTmplCore12 : public theBaseClass_t {
+struct stglTmplCore12 : public theBaseClass_t {
 
         public: //! @name OpenGL 1.2 additives to 1.1
 

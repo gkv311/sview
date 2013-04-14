@@ -31,7 +31,7 @@ class StGLFpsLabel;
 /**
  * Root GUI widget for Diagnostics application.
  */
-class ST_LOCAL StDiagnosticsGUI : public StGLRootWidget {
+class StDiagnosticsGUI : public StGLRootWidget {
 
         public:
 
@@ -47,11 +47,11 @@ class ST_LOCAL StDiagnosticsGUI : public StGLRootWidget {
 
         public: //!< StGLRootWidget overrides
 
-    StDiagnosticsGUI(StDiagnostics* thePlugin);
-    virtual ~StDiagnosticsGUI();
-    virtual void stglUpdate(const StPointD_t& thePointZo);
-    virtual void stglResize(const StRectI_t& theWinRectPx);
-    virtual void setVisibility(const StPointD_t& , bool );
+    ST_LOCAL StDiagnosticsGUI(StDiagnostics* thePlugin);
+    ST_LOCAL virtual ~StDiagnosticsGUI();
+    ST_LOCAL virtual void stglUpdate(const StPointD_t& thePointZo);
+    ST_LOCAL virtual void stglResize(const StRectI_t& theWinRectPx);
+    ST_LOCAL virtual void setVisibility(const StPointD_t& , bool );
 
 };
 

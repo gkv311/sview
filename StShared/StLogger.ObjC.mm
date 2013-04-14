@@ -15,9 +15,9 @@
 
 #import <Cocoa/Cocoa.h>
 
-void stInfo(const StString& theMessage) {
+void StMessageBox::Info(const StString& theMessage) {
     if(NSApp == nil) {
-        return stInfoConsole(theMessage);
+        return StMessageBox::InfoConsole(theMessage);
     }
     StLogger::GetDefault().write(theMessage, StLogger::ST_INFO);
     StCocoaLocalPool aLocalPool;
@@ -25,9 +25,9 @@ void stInfo(const StString& theMessage) {
     NSRunAlertPanel(@"Info", aMessage, @"OK", nil, nil);
 }
 
-void stWarn(const StString& theMessage) {
+void StMessageBox::Warn(const StString& theMessage) {
     if(NSApp == nil) {
-        return stWarnConsole(theMessage);
+        return StMessageBox::WarnConsole(theMessage);
     }
     StLogger::GetDefault().write(theMessage, StLogger::ST_WARNING);
     StCocoaLocalPool aLocalPool;
@@ -35,9 +35,9 @@ void stWarn(const StString& theMessage) {
     NSRunAlertPanel(@"Warning", aMessage, @"OK", nil, nil);
 }
 
-void stError(const StString& theMessage) {
+void StMessageBox::Error(const StString& theMessage) {
     if(NSApp == nil) {
-        return stErrorConsole(theMessage);
+        return StMessageBox::ErrorConsole(theMessage);
     }
     StLogger::GetDefault().write(theMessage, StLogger::ST_ERROR);
     StCocoaLocalPool aLocalPool;
@@ -45,19 +45,9 @@ void stError(const StString& theMessage) {
     NSRunAlertPanel(@"Error", aMessage, @"OK", nil, nil);
 }
 
-void stSuccess(const StString& theMessage) {
+bool StMessageBox::Question(const StString& theMessage) {
     if(NSApp == nil) {
-        return stSuccessConsole(theMessage);
-    }
-    StLogger::GetDefault().write(theMessage, StLogger::ST_INFO);
-    StCocoaLocalPool aLocalPool;
-    NSString* aMessage = [NSString stringWithUTF8String: theMessage.toCString()];
-    NSRunAlertPanel(@"Success", aMessage, @"OK", nil, nil);
-}
-
-bool stQuestion(const StString& theMessage) {
-    if(NSApp == nil) {
-        return stQuestionConsole(theMessage);
+        return StMessageBox::QuestionConsole(theMessage);
     }
     StCocoaLocalPool aLocalPool;
     NSString* aMessage = [NSString stringWithUTF8String: theMessage.toCString()];

@@ -29,7 +29,6 @@
 #include <StSettings/StTranslations.h>
 
 namespace {
-    static bool HAS_LOGGER_ID = StLogger::IdentifyModule("StOutIZ3D");
 
     static const char ST_OUT_PLUGIN_NAME[] = "StOutIZ3D";
 

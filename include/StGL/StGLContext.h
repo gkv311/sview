@@ -83,7 +83,7 @@ typedef stglTmplCore42<StGLCore41>     StGLCore42;
 /**
  * Class provides access to OpenGL functions.
  */
-class ST_LOCAL StGLContext {
+class StGLContext {
 
         public:
 
@@ -125,22 +125,22 @@ class ST_LOCAL StGLContext {
     /**
      * Default constructor.
      */
-    StGLContext(const bool theToInitialize = false);
+    ST_CPPEXPORT StGLContext(const bool theToInitialize = false);
 
     /**
      * Destructor.
      */
-    virtual ~StGLContext();
+    ST_CPPEXPORT virtual ~StGLContext();
 
     /**
      * Initialize class with currently bound context.
      */
-    bool stglInit();
+    ST_CPPEXPORT bool stglInit();
 
     /**
      * Check string in GL extensions.
      */
-    bool stglCheckExtension(const char* theExtName) const;
+    ST_CPPEXPORT bool stglCheckExtension(const char* theExtName) const;
 
     /**
      * Auxiliary template to retrieve GL function pointer + cast it to specified prototype.
@@ -148,8 +148,8 @@ class ST_LOCAL StGLContext {
      * You should check extension availability before this!
      */
     template <typename Function_t>
-    bool stglFindProc(const char* theName,
-                      Function_t& theFunction) const {
+    inline bool stglFindProc(const char* theName,
+                             Function_t& theFunction) const {
         theFunction = (Function_t )stglFindProc(theName);
         return (theFunction != NULL);
     }
@@ -185,41 +185,41 @@ class ST_LOCAL StGLContext {
     /**
      * Retrieve info from OpenGL context and create info string.
      */
-    static StString stglInfo();
+    ST_CPPEXPORT static StString stglInfo();
 
     /**
      * Retrieve info from OpenGL context and create info string.
      */
-    StString stglFullInfo() const;
+    ST_CPPEXPORT StString stglFullInfo() const;
 
     /**
      * This method intended to synchronize current OpenGL state and local cache.
      */
-    void stglSyncState();
+    ST_CPPEXPORT void stglSyncState();
 
     /**
      * Enable scissor test for this context (glScissor).
      * @param thePushStack If true than current rectangle will be pushed into stack
      */
-    void stglSetScissorRect(const StGLBoxPx& theRect,
-                            const bool       thePushStack);
+    ST_CPPEXPORT void stglSetScissorRect(const StGLBoxPx& theRect,
+                                         const bool       thePushStack);
 
     /**
      * Disable scissor test for this context (glDisable(GL_SCISSOR_TEST)).
      * If stack of scissor rectangles is not empty than previous value will be restored instead.
      */
-    void stglResetScissorRect();
+    ST_CPPEXPORT void stglResetScissorRect();
 
     /**
      * Setup viewport.
      */
-    void stglResizeViewport(const StGLBoxPx& theRect);
+    ST_CPPEXPORT void stglResizeViewport(const StGLBoxPx& theRect);
 
     /**
      * Setup viewport.
      */
-    void stglResizeViewport(const GLsizei theSizeX,
-                            const GLsizei theSizeY) {
+    inline void stglResizeViewport(const GLsizei theSizeX,
+                                   const GLsizei theSizeY) {
         const StGLBoxPx aRect = {{ 0, 0, theSizeX, theSizeY }};
         stglResizeViewport(aRect);
     }
@@ -235,22 +235,22 @@ class ST_LOCAL StGLContext {
     /**
      * Control VSync.
      */
-    bool stglSetVSync(const VSync_Mode theVSyncMode);
+    ST_CPPEXPORT bool stglSetVSync(const VSync_Mode theVSyncMode);
 
     /**
      * @return string representation for known GL error code.
      */
-    static StString stglErrorToString(const GLenum theError);
+    ST_CPPEXPORT static StString stglErrorToString(const GLenum theError);
 
     /**
      * Clean up errors stack for this GL context (glGetError() in loop).
      */
-    void stglResetErrors();
+    ST_CPPEXPORT void stglResetErrors();
 
     /**
      * Method to detect obsolete hardware.
      */
-    bool stglIsRectangularFboSupported() const {
+    inline bool stglIsRectangularFboSupported() const {
         return myIsRectFboSupported;
     }
 
@@ -259,19 +259,19 @@ class ST_LOCAL StGLContext {
     /**
      * Calls system function to retrieve GL function pointer by name.
      */
-    void* stglFindProc(const char* theName) const;
+    ST_CPPEXPORT void* stglFindProc(const char* theName) const;
 
     /**
      * Check string in specified string
      * (old way with huge string for all extensions).
      */
-    bool stglCheckExtension(const char* theStringList,
-                            const char* theName) const;
+    ST_CPPEXPORT bool stglCheckExtension(const char* theStringList,
+                                         const char* theName) const;
 
     /**
      * Read OpenGL version information from active context.
      */
-    void stglReadVersion();
+    ST_CPPEXPORT void stglReadVersion();
 
         private:   //! @name copying is forbidden
 

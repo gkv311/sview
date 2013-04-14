@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -16,14 +16,14 @@ class StGLContext;
 /**
  * Interface with special method to release OpenGL resources.
  */
-class ST_LOCAL StGLResource {
+class StGLResource {
 
         public:
 
     /**
      * Destructor - should be called after release()!
      */
-    virtual ~StGLResource();
+    ST_CPPEXPORT virtual ~StGLResource();
 
     /**
      * Release GL resources.
@@ -39,8 +39,8 @@ class ST_LOCAL StGLAutoRelease {
     /**
      * Main constructor
      */
-    StGLAutoRelease(StGLContext&  theCtx,
-                    StGLResource& theEntity)
+    inline StGLAutoRelease(StGLContext&  theCtx,
+                           StGLResource& theEntity)
     : myCtx(theCtx),
       myEntity(theEntity) {
         //
@@ -49,7 +49,7 @@ class ST_LOCAL StGLAutoRelease {
     /**
      * Destructor
      */
-    ~StGLAutoRelease() {
+    inline ~StGLAutoRelease() {
         myEntity.release(myCtx);
     }
 

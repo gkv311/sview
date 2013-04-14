@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,7 +11,7 @@
 
 #include "StImagePlane.h"
 
-class ST_LOCAL StImage {
+class StImage {
 
         public:
 
@@ -26,8 +26,8 @@ class ST_LOCAL StImage {
         ImgColor_HSL,     //!< Hue, Saturation, Lightness/Luminance (also known as HLS or HSI - Hue, Saturation, Intensity))
     } ImgColorModel;
 
-    static StString formatImgColorModel(ImgColorModel theColorModel);
-    StString formatImgColorModel() const { return formatImgColorModel(myColorModel); }
+    ST_CPPEXPORT static StString formatImgColorModel(ImgColorModel theColorModel);
+    ST_LOCAL inline StString formatImgColorModel() const { return formatImgColorModel(myColorModel); }
 
         private:
 
@@ -37,7 +37,7 @@ class ST_LOCAL StImage {
 
         protected:
 
-    StString getDescription() const {
+    ST_LOCAL inline StString getDescription() const {
        return StString() + getSizeX() + " x " + getSizeY()
             + ", " + formatImgColorModel()
             + ", " + getPlane().formatImgFormat();
@@ -48,7 +48,7 @@ class ST_LOCAL StImage {
     /**
      * Decode yuv420p pixel into RGB pixel.
      */
-    StPixelRGB getRGBFromYUV(const size_t theRow, const size_t theCol) const;
+    ST_CPPEXPORT StPixelRGB getRGBFromYUV(const size_t theRow, const size_t theCol) const;
 
     inline float getScaleFactorX(const size_t thePlane) const {
         return float(getPlane(thePlane).getSizeX()) / float(getPlane(0).getSizeX());
@@ -83,62 +83,62 @@ class ST_LOCAL StImage {
     /**
      * Empty constructor.
      */
-    StImage();
-    virtual ~StImage();
+    ST_CPPEXPORT StImage();
+    ST_CPPEXPORT virtual ~StImage();
 
     /**
      * Initialize as copy (data will be copied!).
      */
-    bool initCopy(const StImage& theCopy);
+    ST_CPPEXPORT bool initCopy(const StImage& theCopy);
 
     /**
      * Initialize as wrapper (data will not be copied).
      */
-    bool initWrapper(const StImage& theCopy);
+    ST_CPPEXPORT bool initWrapper(const StImage& theCopy);
 
     /**
      * Initialize as wrapper of input data in RGB format
      * or tries to convert data to RGB.
      */
-    bool initRGB(const StImage& theCopy);
+    ST_CPPEXPORT bool initRGB(const StImage& theCopy);
 
     /**
      * Method initialize the cross-eyed stereoscopic image.
      */
-    bool initSideBySide(const StImage& theImageL,
-                        const StImage& theImageR,
-                        const int theSeparationDx,
-                        const int theSeparationDy);
+    ST_CPPEXPORT bool initSideBySide(const StImage& theImageL,
+                                     const StImage& theImageR,
+                                     const int theSeparationDx,
+                                     const int theSeparationDy);
 
-    bool fill(const StImage& theCopy);
+    ST_CPPEXPORT bool fill(const StImage& theCopy);
 
         public: //!< Image information
 
     /**
      * @return true if all color components are stored in one plane (thus - interleaved).
      */
-    bool isPacked() const {
+    inline bool isPacked() const {
         return myPlanes[1].isNull();
     }
 
     /**
      * @return true if color components are stored in separate image planes.
      */
-    bool isPlanar() const {
+    inline bool isPlanar() const {
         return !myPlanes[1].isNull();
     }
 
     /**
      * Return color model.
      */
-    ImgColorModel getColorModel() const {
+    inline ImgColorModel getColorModel() const {
         return myColorModel;
     }
 
     /**
      * Setup color model.
      */
-    void setColorModel(ImgColorModel theColorModel) {
+    inline void setColorModel(ImgColorModel theColorModel) {
         myColorModel = theColorModel;
     }
 
@@ -146,7 +146,7 @@ class ST_LOCAL StImage {
      * Determine the color model from image plane.
      * Valid only for packed image.
      */
-    void setColorModelPacked(StImagePlane::ImgFormat theImgFormat) {
+    inline void setColorModelPacked(StImagePlane::ImgFormat theImgFormat) {
         switch(theImgFormat) {
             case StImagePlane::ImgGray:
             case StImagePlane::ImgGrayF:
@@ -168,7 +168,7 @@ class ST_LOCAL StImage {
     /**
      * @return width / height.
      */
-    GLfloat getRatio() const {
+    inline GLfloat getRatio() const {
         size_t aSizeY = getSizeY();
         return (aSizeY > 0) ? (GLfloat(getSizeX()) / GLfloat(aSizeY)) : 1.0f;
     }
@@ -176,21 +176,21 @@ class ST_LOCAL StImage {
     /**
      * @return image width in pixels.
      */
-    size_t getSizeX() const {
+    inline size_t getSizeX() const {
         return myPlanes[0].getSizeX();
     }
 
     /**
      * @return image height in pixels.
      */
-    size_t getSizeY() const {
+    inline size_t getSizeY() const {
         return myPlanes[0].getSizeY();
     }
 
     /**
      * Access to the image plane by ID (from 0 to 3).
      */
-    const StImagePlane& getPlane(const size_t theId = 0) const {
+    inline const StImagePlane& getPlane(const size_t theId = 0) const {
         ST_DEBUG_ASSERT(theId < 4);
         return myPlanes[theId];
     }
@@ -198,7 +198,7 @@ class ST_LOCAL StImage {
     /**
      * Access to the image plane by ID (from 0 to 3).
      */
-    StImagePlane& changePlane(const size_t theId = 0) {
+    inline StImagePlane& changePlane(const size_t theId = 0) {
         ST_DEBUG_ASSERT(theId < 4);
         return myPlanes[theId];
     }
@@ -208,20 +208,20 @@ class ST_LOCAL StImage {
      * If pixels are quads than PAR = 1.0 (normal case).
      * PAR should be used to compute correct DAR (Display Aspect Ratio).
      */
-    GLfloat getPixelRatio() const {
+    inline GLfloat getPixelRatio() const {
         return myPAR;
     }
 
-    void setPixelRatio(GLfloat thePAR) {
+    inline void setPixelRatio(GLfloat thePAR) {
         myPAR = thePAR;
     }
 
     /**
      * @return true if data is NULL.
      */
-    bool isNull() const;
+    ST_CPPEXPORT bool isNull() const;
 
-    void nullify();
+    ST_CPPEXPORT void nullify();
 
 };
 

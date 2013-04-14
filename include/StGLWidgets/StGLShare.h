@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -18,7 +18,7 @@
  * shared GL objects should be destructed in GL context and that means
  * in ONE thread in most cases.
  */
-class ST_LOCAL StGLSharePointer {
+class StGLSharePointer {
 
         public:
 
@@ -49,7 +49,7 @@ class ST_LOCAL StGLSharePointer {
  * (to provide common virtual destructor).
  */
 template <class Type>
-class ST_LOCAL StGLShare {
+class StGLShare {
 
         public:
 

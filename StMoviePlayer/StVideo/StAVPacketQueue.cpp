@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,12 +28,12 @@ namespace {
 };
 
 // auxiliary structure
-struct ST_LOCAL StAVPacketQueue::QueueItem {
+struct StAVPacketQueue::QueueItem {
 
     StHandle<StAVPacket> myItem; //!< handle for packet
     QueueItem* myNext; //!< link to the next queue item
 
-    QueueItem(const StAVPacket& thePacket)
+    ST_LOCAL QueueItem(const StAVPacket& thePacket)
     : myItem(new StAVPacket(thePacket)), // copy with content
       myNext(NULL) {}
 

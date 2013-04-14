@@ -21,7 +21,70 @@
 /**
  * Playlist node.
  */
-class ST_LOCAL StPlayItem {
+class StPlayItem {
+
+        public:
+
+    /**
+     * Default constructor.
+     */
+    ST_CPPEXPORT StPlayItem(StFileNode* theFileNode,
+                            const StStereoParams& theDefParams);
+
+    /**
+     * Destructor.
+     */
+    ST_CPPEXPORT ~StPlayItem();
+
+    inline StPlayItem* getPrev() {
+        return myPrevItem;
+    }
+
+    ST_CPPEXPORT void setPrev(StPlayItem* thePrev);
+
+    inline StPlayItem* getNext() {
+        return myNextItem;
+    }
+
+    ST_CPPEXPORT void setNext(StPlayItem* theNext);
+
+    inline bool hasPrev() const {
+        return myPrevItem != NULL;
+    }
+
+    inline bool hasNext() const {
+        return myNextItem != NULL;
+    }
+
+    inline size_t getPosition() const {
+        return myPosition;
+    }
+
+    inline void setPosition(size_t thePosition) {
+        myPosition = thePosition;
+    }
+
+    inline StFileNode* getFileNode() {
+        return myFileNode;
+    }
+
+    ST_CPPEXPORT StString getPath() const;
+
+    ST_CPPEXPORT StString getFolderPath() const;
+
+    ST_CPPEXPORT StString getTitle() const;
+
+    inline StHandle<StStereoParams> getParams() {
+        return myStParams;
+    }
+
+    inline bool getPlayedFlag() const {
+        return myPlayFlag;
+    }
+
+    inline void setPlayedFlag(bool theFlag) {
+        myPlayFlag = theFlag;
+    }
 
         private:
 
@@ -32,69 +95,6 @@ class ST_LOCAL StPlayItem {
     StHandle<StStereoParams> myStParams; //!< stereo parameters
     bool        myPlayFlag; //!< flag for shuffle check
 
-        public:
-
-    /**
-     * Default constructor.
-     */
-    StPlayItem(StFileNode* theFileNode,
-               const StStereoParams& theDefParams);
-
-    /**
-     * Destructor.
-     */
-    ~StPlayItem();
-
-    StPlayItem* getPrev() {
-        return myPrevItem;
-    }
-
-    void setPrev(StPlayItem* thePrev);
-
-    StPlayItem* getNext() {
-        return myNextItem;
-    }
-
-    void setNext(StPlayItem* theNext);
-
-    bool hasPrev() const {
-        return myPrevItem != NULL;
-    }
-
-    bool hasNext() const {
-        return myNextItem != NULL;
-    }
-
-    size_t getPosition() const {
-        return myPosition;
-    }
-
-    void setPosition(size_t thePosition) {
-        myPosition = thePosition;
-    }
-
-    StFileNode* getFileNode() {
-        return myFileNode;
-    }
-
-    StString getPath() const;
-
-    StString getFolderPath() const;
-
-    StString getTitle() const;
-
-    StHandle<StStereoParams> getParams() {
-        return myStParams;
-    }
-
-    bool getPlayedFlag() const {
-        return myPlayFlag;
-    }
-
-    void setPlayedFlag(bool theFlag) {
-        myPlayFlag = theFlag;
-    }
-
 };
 
 /**
@@ -102,32 +102,32 @@ class ST_LOCAL StPlayItem {
  * and provides fast sequential (but not random) access.
  * All public methods are thread-safe, thus returns the objects copies.
  */
-class ST_LOCAL StPlayList {
+class StPlayList {
 
         public:
 
     /**
      * Main constructor.
      */
-    StPlayList(const StArrayList<StString>& theExtensions,
-               int theRecursionDeep,
-               bool theIsLoop = false);
+    ST_CPPEXPORT StPlayList(const StArrayList<StString>& theExtensions,
+                            int theRecursionDeep,
+                            bool theIsLoop = false);
 
     /**
      * Destructor.
      */
-    ~StPlayList();
+    ST_CPPEXPORT ~StPlayList();
 
     /**
      * Clear playlist.
      */
-    void clear();
+    ST_CPPEXPORT void clear();
 
     /**const StPlayItem* getCurrent() const {
         return myCurrent;
     }*/
 
-    StStereoParams& changeDefParams() {
+    inline StStereoParams& changeDefParams() {
         return myDefStParams;
     }
 
@@ -135,49 +135,49 @@ class ST_LOCAL StPlayList {
      * Return title for the current position in playlist.
      * Will be empty string if playlist is empty.
      */
-    StString getCurrentTitle() const;
+    ST_CPPEXPORT StString getCurrentTitle() const;
 
     /**
      * Returns file node for current playing position.
      */
-    StHandle<StFileNode> getCurrentFile();
+    ST_CPPEXPORT StHandle<StFileNode> getCurrentFile();
 
     /**
      * Returns file node and stereo parameters for current playing position.
      * @return true if playlist is not empty.
      */
-    bool getCurrentFile(StHandle<StFileNode>& theFileNode,
-                        StHandle<StStereoParams>& theParams);
+    ST_CPPEXPORT bool getCurrentFile(StHandle<StFileNode>& theFileNode,
+                                     StHandle<StStereoParams>& theParams);
 
-    void addToNode(const StHandle<StFileNode>& theFileNode,
-                   const StString&             thePathToAdd);
+    ST_CPPEXPORT void addToNode(const StHandle<StFileNode>& theFileNode,
+                                const StString&             thePathToAdd);
 
     /**
      * Remove file from playlist and delete it physically.
      */
-    void removePhysically(const StHandle<StFileNode>& theFileNode);
+    ST_CPPEXPORT void removePhysically(const StHandle<StFileNode>& theFileNode);
 
     /**
      * Returns loop flag.
      */
-    bool isLoop() const;
+    ST_CPPEXPORT bool isLoop() const;
 
     /**
      * Setup loop flag.
      */
-    void setLoop(bool theLoop);
+    ST_CPPEXPORT void setLoop(bool theLoop);
 
     /**
      * Returns shuffle flag.
      */
-    bool isShuffle() const;
+    ST_CPPEXPORT bool isShuffle() const;
 
     /**
      * Setup shuffle flag.
      */
-    void setShuffle(bool theShuffle);
+    ST_CPPEXPORT void setShuffle(bool theShuffle);
 
-    bool isEmpty() const {
+    inline bool isEmpty() const {
         StMutexAuto anAutoLock(myMutex);
         return myFirst == NULL;
     }
@@ -196,42 +196,42 @@ class ST_LOCAL StPlayList {
      * Change current position in playlist to the first item.
      * @return true if position was changed.
      */
-    bool walkToFirst();
+    ST_CPPEXPORT bool walkToFirst();
 
     /**
      * Change current position in playlist to the last item.
      * @return true if current position was changed.
      */
-    bool walkToLast();
+    ST_CPPEXPORT bool walkToLast();
 
     /**
      * Change current position in playlist to the previous item.
      * @return true if current position was changed.
      */
-    bool walkToPrev();
+    ST_CPPEXPORT bool walkToPrev();
 
     /**
      * Change current position in playlist to the next item.
      * @return true if current position was changed.
      */
-    bool walkToNext();
+    ST_CPPEXPORT bool walkToNext();
 
     /**
      * Verify the filename extension is in supported list.
      */
-    bool checkExtension(const StString& thePath);
+    ST_CPPEXPORT bool checkExtension(const StString& thePath);
 
     /**
      * Just add one file to the playlist.
      */
-    void addOneFile(const StString& theFilePath,
-                    const StMIME&   theFileMIME);
+    ST_CPPEXPORT void addOneFile(const StString& theFilePath,
+                                 const StMIME&   theFileMIME);
 
     /**
      * Add meta file to the playlist.
      */
-    void addOneFile(const StString& theFilePathLeft,
-                    const StString& theFilePathRight);
+    ST_CPPEXPORT void addOneFile(const StString& theFilePathLeft,
+                                 const StString& theFilePathRight);
 
     /**
      * Clean up current playlist and create new one.
@@ -239,42 +239,42 @@ class ST_LOCAL StPlayList {
      * If given path is a file than playlist will be fill with folder content
      * and playlist position will be set to this file.
      */
-    void open(const StString& thePath);
+    ST_CPPEXPORT void open(const StString& thePath);
 
     /**
      * Check and reset modification flag.
      * @return true if recent files list was modified since last call
      */
-    bool isRecentChanged() const;
+    ST_CPPEXPORT bool isRecentChanged() const;
 
     /**
      * Fill list with recently opened files (only titles).
      * @param theList List to fill
      */
-    void getRecentList(StArrayList<StString>& theList) const;
+    ST_CPPEXPORT void getRecentList(StArrayList<StString>& theList) const;
 
     /**
      * Restore list of recent files from the string serialized by dumpRecentList() method.
      * @param theString String with list of files
      */
-    void loadRecentList(const StString theString);
+    ST_CPPEXPORT void loadRecentList(const StString theString);
 
     /**
      * Dump list of recently opened files into string.
      * @return String with special format
      */
-    StString dumpRecentList() const;
+    ST_CPPEXPORT StString dumpRecentList() const;
 
     /**
      * Open recent file at specified position.
      * @param theItemId Position in recent files list
      */
-    void openRecent(const size_t theItemId);
+    ST_CPPEXPORT void openRecent(const size_t theItemId);
 
     /**
      * Reset list of recently opened files.
      */
-    void clearRecent();
+    ST_CPPEXPORT void clearRecent();
 
         public: //!< Signals
 
@@ -295,27 +295,27 @@ class ST_LOCAL StPlayList {
     /**
      * Add new item to double-linked list.
      */
-    void addPlayItem(StPlayItem* theNewItem);
+    ST_LOCAL void addPlayItem(StPlayItem* theNewItem);
 
     /**
      * Remove the item from double-linked list but NOT destroy it.
      */
-    void delPlayItem(StPlayItem* theRemItem);
+    ST_LOCAL void delPlayItem(StPlayItem* theRemItem);
 
     /**
      * Recursively add all file nodes to playlist.
      */
-    void addToPlayList(StFileNode* theFileNode);
+    ST_LOCAL void addToPlayList(StFileNode* theFileNode);
 
     /**
      * Add file to list of recent files.
      */
-    void addRecentFile(const StFileNode& theFile);
+    ST_LOCAL void addRecentFile(const StFileNode& theFile);
 
     /**
      * M3U parsing stuff.
      */
-    char* parseM3UIter(char* theIter);
+    ST_LOCAL char* parseM3UIter(char* theIter);
 
         private:
 

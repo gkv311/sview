@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -23,7 +23,48 @@ class StGLMenuProgram;
  * and value associated to this item.
  * Thus multiple widgets can control one property without complex sync routines.
  */
-class ST_LOCAL StGLRadioButton : public StGLWidget {
+class StGLRadioButton : public StGLWidget {
+
+        public: //!< overriders
+
+    /**
+     * Main constructor.
+     */
+    ST_CPPEXPORT StGLRadioButton(StGLWidget* theParent,
+                                 const StHandle<StInt32Param>& theTrackedValue,
+                                 const int32_t theOnValue,
+                                 const int theLeft = 32, const int theTop = 32,
+                                 const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    ST_CPPEXPORT virtual ~StGLRadioButton();
+    ST_CPPEXPORT virtual const StString& getClassName();
+    ST_CPPEXPORT virtual void stglResize(const StRectI_t& theWinRectPx);
+    ST_CPPEXPORT virtual bool stglInit();
+    ST_CPPEXPORT virtual void stglDraw(unsigned int view);
+    ST_CPPEXPORT virtual bool tryClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemClicked);
+    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemUnclicked);
+
+        public:
+
+    /**
+     * Return true if radio button is in active state.
+     */
+    ST_CPPEXPORT virtual bool isActiveState() const;
+
+    /**
+     * Set this radio button on.
+     */
+    ST_CPPEXPORT virtual void setValue();
+
+        private: //!< callback Slots (private overriders)
+
+    ST_LOCAL void doMouseUnclick(const int theBtnId);
+
+        private:
+
+    /**
+     * Auxiliary method.
+     */
+    ST_CPPEXPORT void stglResize();
 
         private:
 
@@ -31,47 +72,6 @@ class ST_LOCAL StGLRadioButton : public StGLWidget {
     StGLShare<StGLMenuProgram> myProgram;    //!< shared program
     StGLVertexBuffer           myVertBuf;    //!< vertices buffer
     int32_t                    myValueOn;    //!< value to turn radio button on
-
-        private:
-
-    /**
-     * Auxiliary method.
-     */
-    void stglResize();
-
-        public: //!< overriders
-
-    /**
-     * Main constructor.
-     */
-    StGLRadioButton(StGLWidget* theParent,
-                    const StHandle<StInt32Param>& theTrackedValue,
-                    const int32_t theOnValue,
-                    const int theLeft = 32, const int theTop = 32,
-                    const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
-    virtual ~StGLRadioButton();
-    virtual const StString& getClassName();
-    virtual void stglResize(const StRectI_t& theWinRectPx);
-    virtual bool stglInit();
-    virtual void stglDraw(unsigned int view);
-    virtual bool tryClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemClicked);
-    virtual bool tryUnClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemUnclicked);
-
-        public:
-
-    /**
-     * Return true if radio button is in active state.
-     */
-    virtual bool isActiveState() const;
-
-    /**
-     * Set this radio button on.
-     */
-    virtual void setValue();
-
-        private: //!< callback Slots (private overriders)
-
-    void doMouseUnclick(const int theBtnId);
 
 };
 

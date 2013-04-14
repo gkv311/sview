@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -22,46 +22,46 @@ class StGLMenuProgram;
  * Initialized with handle to tracked boolean property
  * thus multiple widgets can show one property without complex sync routines.
  */
-class ST_LOCAL StGLCheckbox : public StGLWidget {
+class StGLCheckbox : public StGLWidget {
 
         public: //! @name overriders
 
     /**
      * Main constructor.
-     * @param theParent (StGLWidget* ) - parent widget;
-     * @param theTrackedValue (const StHandle<StBoolParam>& ) - tracked boolean value.
+     * @param theParent       parent widget
+     * @param theTrackedValue tracked boolean value
      */
-    StGLCheckbox(StGLWidget* theParent,
-                 const StHandle<StBoolParam>& theTrackedValue,
-                 const int theLeft = 32, const int theTop = 32,
-                 const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    ST_CPPEXPORT StGLCheckbox(StGLWidget* theParent,
+                              const StHandle<StBoolParam>& theTrackedValue,
+                              const int theLeft = 32, const int theTop = 32,
+                              const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
 
-    virtual ~StGLCheckbox();
+    ST_CPPEXPORT virtual ~StGLCheckbox();
 
-    virtual const StString& getClassName();
-    virtual void stglResize(const StRectI_t& theWinRectPx);
-    virtual bool stglInit();
-    virtual void stglDraw(unsigned int view);
-    virtual bool tryClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemClicked);
-    virtual bool tryUnClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemUnclicked);
+    ST_CPPEXPORT virtual const StString& getClassName();
+    ST_CPPEXPORT virtual void stglResize(const StRectI_t& theWinRectPx);
+    ST_CPPEXPORT virtual bool stglInit();
+    ST_CPPEXPORT virtual void stglDraw(unsigned int view);
+    ST_CPPEXPORT virtual bool tryClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemClicked);
+    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemUnclicked);
 
         public:
 
     /**
      * Switch this checkbox.
      */
-    void reverseValue();
+    ST_CPPEXPORT void reverseValue();
 
         private: //! @name callback Slots (private overriders)
 
-    void doMouseUnclick(const int theBtnId);
+    ST_LOCAL void doMouseUnclick(const int theBtnId);
 
         private:
 
     /**
      * Auxiliary method.
      */
-    void stglResize();
+    ST_LOCAL void stglResize();
 
         private:
 

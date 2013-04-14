@@ -20,7 +20,7 @@
 /**
  * Class implements basic text rendering widget.
  */
-class ST_LOCAL StGLTextArea : public StGLWidget {
+class StGLTextArea : public StGLWidget {
 
         public:
 
@@ -32,47 +32,47 @@ class ST_LOCAL StGLTextArea : public StGLWidget {
 
         public:
 
-    StGLTextArea(StGLWidget* theParent,
-                 const int theLeft = 32, const int theTop = 32,
-                 const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
-                 const int theWidth = 256, const int theHeight = 32, bool theToCutView = false,
-                 const FontSize theSize = StGLTextArea::SIZE_NORMAL);
+    ST_CPPEXPORT StGLTextArea(StGLWidget* theParent,
+                              const int theLeft = 32, const int theTop = 32,
+                              const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                              const int theWidth = 256, const int theHeight = 32, bool theToCutView = false,
+                              const FontSize theSize = StGLTextArea::SIZE_NORMAL);
 
-    virtual ~StGLTextArea();
+    ST_CPPEXPORT virtual ~StGLTextArea();
 
-    virtual const StString& getClassName();
-
-    /**
-     * @return currently drawn text.
-     */
-    const StString& getText() const;
+    ST_CPPEXPORT virtual const StString& getClassName();
 
     /**
-     * @param theText - new text to draw
+     * @return currently drawn text
      */
-    void setText(const StString& theText);
+    ST_CPPEXPORT const StString& getText() const;
+
+    /**
+     * @param theText new text to draw
+     */
+    ST_CPPEXPORT void setText(const StString& theText);
 
     /**
      * Setup alignment style.
-     * @param theAlignX - horizontal alignment
-     * @param theAlignY - vertical   alignment
+     * @param theAlignX horizontal alignment
+     * @param theAlignY vertical   alignment
      */
-    void setupAlignment(const StGLTextFormatter::StAlignX theAlignX,
-                        const StGLTextFormatter::StAlignY theAlignY) {
+    inline void setupAlignment(const StGLTextFormatter::StAlignX theAlignX,
+                               const StGLTextFormatter::StAlignY theAlignY) {
         myFormatter.setupAlignment(theAlignX, theAlignY);
     }
 
     /**
      * @param theToShow - to show border with background or not
      */
-    void setBorder(const bool theToShow) {
+    inline void setBorder(const bool theToShow) {
         myToShowBorder = theToShow;
     }
 
     /**
      * @param theColor- border color
      */
-    void setBorderColor(const StGLVec3& theColor) {
+    inline void setBorderColor(const StGLVec3& theColor) {
         myBorderColor.r() = theColor.r();
         myBorderColor.g() = theColor.g();
         myBorderColor.b() = theColor.b();
@@ -81,7 +81,7 @@ class ST_LOCAL StGLTextArea : public StGLWidget {
     /**
      * @param theColor- background color
      */
-    void setBackColor(const StGLVec3& theColor) {
+    inline void setBackColor(const StGLVec3& theColor) {
         myBackColor.r() = theColor.r();
         myBackColor.g() = theColor.g();
         myBackColor.b() = theColor.b();
@@ -90,7 +90,7 @@ class ST_LOCAL StGLTextArea : public StGLWidget {
     /**
      * @param theColor- text color
      */
-    void setTextColor(const StGLVec3& theColor) {
+    inline void setTextColor(const StGLVec3& theColor) {
         myTextColor.r() = theColor.r();
         myTextColor.g() = theColor.g();
         myTextColor.b() = theColor.b();
@@ -99,9 +99,9 @@ class ST_LOCAL StGLTextArea : public StGLWidget {
     /**
      * @param theWidth - text width restriction to force newline (-1 means no restriction)
      */
-    void setTextWidth(const int theWidth);
+    ST_CPPEXPORT void setTextWidth(const int theWidth);
 
-    const int getFontSize() const {
+    inline const int getFontSize() const {
         switch(mySize) {
             case SIZE_SMALL:
                 return 12;
@@ -113,23 +113,23 @@ class ST_LOCAL StGLTextArea : public StGLWidget {
         }
     }
 
-    virtual bool stglInit();
-    virtual void stglDraw(unsigned int theView);
+    ST_CPPEXPORT virtual bool stglInit();
+    ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
 
-    GLint getTextHeight() const {
+    inline GLint getTextHeight() const {
         return std::abs(GLint(myTextBndBox.height()));
     }
 
-    GLint getTextWidth() const {
+    inline GLint getTextWidth() const {
         return std::abs(GLint(myTextBndBox.width()));
     }
 
         private:
 
-    void formatText(StGLContext& theCtx);
-    void drawText  (StGLContext& theCtx);
+    ST_LOCAL void formatText(StGLContext& theCtx);
+    ST_LOCAL void drawText  (StGLContext& theCtx);
 
-    void recomputeBorder(StGLContext& theCtx);
+    ST_LOCAL void recomputeBorder(StGLContext& theCtx);
 
         private:
 

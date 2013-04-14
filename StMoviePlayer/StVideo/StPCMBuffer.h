@@ -81,7 +81,7 @@ typedef enum tagStPCMfreq {
  * 17.Top Back Center - TBC
  * 18.Top Back Right - TBR
  **/
-class ST_LOCAL StChannelMap {
+class StChannelMap {
 
         public:
 
@@ -118,9 +118,9 @@ class ST_LOCAL StChannelMap {
 
         public:
 
-    StChannelMap(const Channels theChannels, const OrderRules theRules);
+    ST_LOCAL StChannelMap(const Channels theChannels, const OrderRules theRules);
 
-    bool operator==(const StChannelMap& theOther) const {
+    ST_LOCAL bool operator==(const StChannelMap& theOther) const {
         return channels == theOther.channels
             && FL  == theOther.FL
             && FR  == theOther.FR
@@ -130,7 +130,7 @@ class ST_LOCAL StChannelMap {
             && RR  == theOther.RR;
     }
 
-    bool operator!=(const StChannelMap& theOther) const {
+    ST_LOCAL bool operator!=(const StChannelMap& theOther) const {
         return (*this == theOther) == false;
     }
 
@@ -139,7 +139,7 @@ class ST_LOCAL StChannelMap {
 /**
  * This class represent Audio PCM buffer.
  */
-class ST_LOCAL StPCMBuffer {
+class StPCMBuffer {
 
         private:
 
@@ -155,93 +155,93 @@ class ST_LOCAL StPCMBuffer {
         public:
 
     /**
-     * @param pcmFormat (const StPCMformat ) - PCM format from PCMformat enum;
-     * @param theBufferSize (const size_t ) - buffer size in bytes.
+     * @param pcmFormat     PCM format from PCMformat enum
+     * @param theBufferSize buffer size in bytes
      */
-    StPCMBuffer(const StPCMformat thePCMFormat,
-                const size_t theBufferSize);
+    ST_LOCAL StPCMBuffer(const StPCMformat thePCMFormat,
+                         const size_t theBufferSize);
 
-    ~StPCMBuffer();
+    ST_LOCAL ~StPCMBuffer();
 
     /**
      * Clear data in buffer (nulling), set datasize to zero.
      */
-    void clear();
+    ST_LOCAL void clear();
 
     /**
      * Only clear data in buffer (nulling), datasize not changed.
      */
-    void mute();
+    ST_LOCAL void mute();
 
     /**
-     * @return one second size in bytes for current format.
+     * @return one second size in bytes for current format
      */
-    size_t getSecondSize() const {
+    ST_LOCAL size_t getSecondSize() const {
         return mySampleSize * myChMap.count * myPCMFreq;
     }
 
-    unsigned char* getData(size_t theSourceId = 0) const {
+    ST_LOCAL unsigned char* getData(size_t theSourceId = 0) const {
         return &myBuffer[theSourceId * (mySizeBytes / mySourcesNb)];
     }
 
-    size_t getBufferSizeWhole() const {
+    ST_LOCAL size_t getBufferSizeWhole() const {
         return mySizeBytes;
     }
 
-    size_t getBufferSize(size_t /*sourceId*/) const {
+    ST_LOCAL size_t getBufferSize(size_t /*sourceId*/) const {
         return mySizeBytes / mySourcesNb;
     }
 
-    size_t getDataSizeWhole() const {
+    ST_LOCAL size_t getDataSizeWhole() const {
         return myDataSizeBytes;
     }
 
-    size_t getDataSize(size_t /*sourceId*/) const {
+    ST_LOCAL size_t getDataSize(size_t /*sourceId*/) const {
         return myDataSizeBytes / mySourcesNb;
     }
 
-    bool hasDataSize(const size_t thePushDataSize) const {
+    ST_LOCAL bool hasDataSize(const size_t thePushDataSize) const {
         return ((mySizeBytes - myDataSizeBytes) >= thePushDataSize);
     }
 
     /**
-     * @param theDataSize (size_t ) - new data size;
-     * @return true if setted size correct.
+     * @param theDataSize new data size
+     * @return true if setted size correct
      */
-    bool setDataSize(const size_t theDataSize);
+    ST_LOCAL bool setDataSize(const size_t theDataSize);
 
     template<typename sampleSrc_t, typename sampleOut_t>
-    bool addSplitInterleaved(const StPCMBuffer& theBuffer);
+    ST_LOCAL bool addSplitInterleaved(const StPCMBuffer& theBuffer);
 
-    bool addData(const StPCMBuffer& theBuffer);
+    ST_LOCAL bool addData(const StPCMBuffer& theBuffer);
 
     /**
      * This parameter measures how many samples/channel are played each second.
      * Frequency is measured in samples/second (Hz).
-     * @return (int ) Frequency (Sample Rate).
+     * @return Frequency (Sample Rate)
      */
-    int getFreq() const {
+    ST_LOCAL int getFreq() const {
         return myPCMFreq;
     }
 
-    void setFreq(int theFreq) {
+    ST_LOCAL void setFreq(int theFreq) {
         //ST_DEBUG_ASSERT(theFreq > 0);
         myPCMFreq = theFreq;
     }
 
-    StPCMformat getFormat() const {
+    ST_LOCAL StPCMformat getFormat() const {
         return myPCMFormat;
     }
 
-    void setFormat(const StPCMformat thePCMFormat);
+    ST_LOCAL void setFormat(const StPCMformat thePCMFormat);
 
-    size_t getSourcesCount() const {
+    ST_LOCAL size_t getSourcesCount() const {
         return mySourcesNb;
     }
 
-    void setupChannels(const StChannelMap::Channels theChannels,
-                       const StChannelMap::OrderRules theRules,
-                       const size_t theSourcesNb) {
+    ST_LOCAL void setupChannels(const StChannelMap::Channels   theChannels,
+                                const StChannelMap::OrderRules theRules,
+                                const size_t                   theSourcesNb) {
         myChMap = StChannelMap(theChannels, theRules);
         mySourcesNb = (theSourcesNb > 0) ? theSourcesNb : 1;
     }

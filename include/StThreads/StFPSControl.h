@@ -16,7 +16,7 @@
  * Class extend FPS measurements features with possibility
  * to adjust FPS to target using thread sleeping.
  */
-class ST_LOCAL StFPSControl : public StFPSMeter {
+class StFPSControl : public StFPSMeter {
 
         public:
 

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -19,32 +19,32 @@
  * Class wrapper over FT_Library.
  * Provides access to FreeType library.
  */
-class ST_LOCAL StFTLibrary {
+class StFTLibrary {
 
         public:
 
     /**
      * Initialize new FT_Library instance.
      */
-    StFTLibrary();
+    ST_CPPEXPORT StFTLibrary();
 
     /**
      * Release FT_Library instance.
      */
-    ~StFTLibrary();
+    ST_CPPEXPORT ~StFTLibrary();
 
     /**
      * This method should always return true.
      * @return true if FT_Library instance is valid.
      */
-    bool isValid() const {
+    inline bool isValid() const {
         return myFTLib != NULL;
     }
 
     /**
      * Access FT_Library instance.
      */
-    FT_Library getInstance() const {
+    inline FT_Library getInstance() const {
         return myFTLib;
     }
 

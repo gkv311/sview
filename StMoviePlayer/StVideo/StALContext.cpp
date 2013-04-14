@@ -24,13 +24,13 @@
 #endif
 
 StALContext::StALContext()
-: hDevice(NULL),
-  hContext(NULL),
-  hasExtEAX2(false),
+: hasExtEAX2(false),
   hasExtFloat32(false),
   hasExtFloat64(false),
   hasExtMultiChannel(false),
-  hasExtDisconnect(false) {
+  hasExtDisconnect(false),
+  hDevice(NULL),
+  hContext(NULL) {
     //
 }
 

@@ -152,6 +152,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="-z defs" />
 					<Add library="gtk-x11-2.0" />
 					<Add library="gdk-x11-2.0" />
 					<Add library="glib-2.0" />
@@ -182,6 +183,7 @@
 					<Add option="-D__ST_DEBUG__" />
 				</Compiler>
 				<Linker>
+					<Add option="-z defs" />
 					<Add library="gtk-x11-2.0" />
 					<Add library="gdk-x11-2.0" />
 					<Add library="glib-2.0" />
@@ -246,6 +248,7 @@
 			<Add library="libStShared" />
 			<Add directory="../3rdparty/lib/$(TARGET_NAME)" />
 			<Add directory="../lib/$(TARGET_NAME)" />
+			<Add directory="../bin/$(TARGET_NAME)" />
 		</Linker>
 		<Unit filename="StADLsdk.cpp">
 			<Option target="WIN_gcc_x86" />

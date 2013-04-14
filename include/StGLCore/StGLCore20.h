@@ -15,7 +15,7 @@
  * OpenGL 2.0 core based on 1.5 version.
  */
 template<typename theBaseClass_t>
-struct ST_LOCAL stglTmplCore20 : public theBaseClass_t {
+struct stglTmplCore20 : public theBaseClass_t {
 
         public: //! @name OpenGL 2.0 additives to 1.5
 

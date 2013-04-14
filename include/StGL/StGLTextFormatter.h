@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -19,7 +19,7 @@ template<> inline void StArray< StHandle <StGLVertexBuffer> >::sort() {}
 /**
  * This class intended to prepare formatted text.
  */
-class ST_LOCAL StGLTextFormatter {
+class StGLTextFormatter {
 
         public:
 
@@ -47,66 +47,66 @@ class ST_LOCAL StGLTextFormatter {
     /**
      * Default constructor.
      */
-    StGLTextFormatter();
+    ST_CPPEXPORT StGLTextFormatter();
 
     /**
      * Setup alignment style.
      */
-    void setupAlignment(const StGLTextFormatter::StAlignX theAlignX,
-                        const StGLTextFormatter::StAlignY theAlignY);
+    ST_CPPEXPORT void setupAlignment(const StGLTextFormatter::StAlignX theAlignX,
+                                     const StGLTextFormatter::StAlignY theAlignY);
 
     /**
      * Reset current progress.
      */
-    void reset();
+    ST_CPPEXPORT void reset();
 
     /**
      * Render specified text to inner buffer.
      */
-    void append(StGLContext&    theCtx,
-                const StString& theString,
-                StGLFont&       theFont);
+    ST_CPPEXPORT void append(StGLContext&    theCtx,
+                             const StString& theString,
+                             StGLFont&       theFont);
 
     /**
      * Perform formatting on the buffered text.
      * Should not be called more than once after initialization!
      */
-    void format(const GLfloat theWidth,
-                const GLfloat theHeight);
+    ST_CPPEXPORT void format(const GLfloat theWidth,
+                             const GLfloat theHeight);
 
     /**
      * Retrieve formatting results.
      */
-    void getResult(StArrayList<GLuint>&                               theTextures,
-                   StArrayList< StHandle <StArrayList <StGLVec2> > >& theVertsPerTexture,
-                   StArrayList< StHandle <StArrayList <StGLVec2> > >& theTCrdsPerTexture) const;
+    ST_CPPEXPORT void getResult(StArrayList<GLuint>&                               theTextures,
+                                StArrayList< StHandle <StArrayList <StGLVec2> > >& theVertsPerTexture,
+                                StArrayList< StHandle <StArrayList <StGLVec2> > >& theTCrdsPerTexture) const;
 
     /**
      * Retrieve formatting results.
      */
-    void getResult(StGLContext&                                theCtx,
-                   StArrayList<GLuint>&                        theTextures,
-                   StArrayList< StHandle <StGLVertexBuffer> >& theVertsPerTexture,
-                   StArrayList< StHandle <StGLVertexBuffer> >& theTCrdsPerTexture) const;
+    ST_CPPEXPORT void getResult(StGLContext&                                theCtx,
+                                StArrayList<GLuint>&                        theTextures,
+                                StArrayList< StHandle <StGLVertexBuffer> >& theVertsPerTexture,
+                                StArrayList< StHandle <StGLVertexBuffer> >& theTCrdsPerTexture) const;
 
     /**
      * @return width of formatted text.
      */
-    GLfloat getResultWidth() const {
+    inline GLfloat getResultWidth() const {
         return myAlignWidth;
     }
 
     /**
      * @return height of formatted text.
      */
-    GLfloat getResultHeight() const {
+    inline GLfloat getResultHeight() const {
         return myLineSpacing * GLfloat(myLinesNb);
     }
 
     /**
      * @param bounding box.
      */
-    void getBndBox(StGLRect& theBndBox) const {
+    inline void getBndBox(StGLRect& theBndBox) const {
         theBndBox.left()   = 0.0f;
         theBndBox.right()  = theBndBox.left() + myAlignWidth;
         theBndBox.top()    = myBndTop;
@@ -118,7 +118,7 @@ class ST_LOCAL StGLTextFormatter {
     /**
      * Move glyphs on the current line to correct position.
      */
-    void newLine(const size_t theLastRect);
+    ST_CPPEXPORT void newLine(const size_t theLastRect);
 
         protected: //! @name configuration
 

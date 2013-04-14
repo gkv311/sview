@@ -33,7 +33,6 @@
 #include <StSys/StSys.h>
 
 namespace {
-    static bool HAS_LOGGER_ID = StLogger::IdentifyModule("StOutPageFlip");
 
     static const char ST_OUT_PLUGIN_NAME[] = "StOutPageFlip";
 

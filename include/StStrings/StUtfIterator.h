@@ -20,7 +20,7 @@
  * for internal or external distribution as long as this notice
  * remains attached.
  *
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -39,7 +39,7 @@
  * The current value of iterator returned as UTF-32 Unicode code.
  */
 template<typename Type>
-class ST_LOCAL StUtfIterator {
+class StUtfIterator {
 
         private:
 
@@ -54,7 +54,7 @@ class ST_LOCAL StUtfIterator {
      * Constructor.
      * @param theString (const Type* ) - buffer to iterate.
      */
-    StUtfIterator(const Type* theString)
+    inline StUtfIterator(const Type* theString)
     : myPosition(theString),
       myPosNext(theString),
       myCharIndex(0),
@@ -68,7 +68,7 @@ class ST_LOCAL StUtfIterator {
     /**
      * Initialize iterator within specified string.
      */
-    void init(const Type* theString) {
+    inline void init(const Type* theString) {
         myPosition  = theString;
         myPosNext   = theString;
         myCharUtf32 = 0;
@@ -82,7 +82,7 @@ class ST_LOCAL StUtfIterator {
      * Pre-increment operator. Reads the next unicode character.
      * Note - not protected against overruns.
      */
-    StUtfIterator& operator++() {
+    inline StUtfIterator& operator++() {
         myPosition = myPosNext;
         ++myCharIndex;
         switch(sizeof(Type)) {
@@ -99,7 +99,7 @@ class ST_LOCAL StUtfIterator {
      * Post-increment operator.
      * Note - not protected against overruns.
      */
-    StUtfIterator operator++(int ) {
+    inline StUtfIterator operator++(int ) {
         StUtfIterator aCopy = *this;
         ++*this;
         return aCopy;
@@ -108,7 +108,7 @@ class ST_LOCAL StUtfIterator {
     /**
      * Equality operator.
      */
-    bool operator==(const StUtfIterator& theRight) const {
+    inline bool operator==(const StUtfIterator& theRight) const {
         return myPosition == theRight.myPosition;
     }
 
@@ -116,29 +116,29 @@ class ST_LOCAL StUtfIterator {
      * Dereference operator.
      * @return the UTF-32 codepoint of the character currently pointed by iterator.
      */
-    stUtf32_t operator*() const {
+    inline stUtf32_t operator*() const {
         return myCharUtf32;
     }
 
     /**
      * Buffer-fetching getter.
      */
-    const Type* getBufferHere() const { return myPosition; }
+    inline const Type* getBufferHere() const { return myPosition; }
 
     /**
      * Buffer-fetching getter. Dangerous! Iterator should be reinitialized on buffer change.
      */
-    Type* changeBufferHere() { return (Type* )myPosition; }
+    inline Type* changeBufferHere() { return (Type* )myPosition; }
 
     /**
      * Buffer-fetching getter.
      */
-    const Type* getBufferNext() const { return myPosNext; }
+    inline const Type* getBufferNext() const { return myPosNext; }
 
     /**
      * Return the index displacement from iterator intialization.
      */
-    size_t getIndex() const {
+    inline size_t getIndex() const {
         return myCharIndex;
     }
 
@@ -161,7 +161,7 @@ class ST_LOCAL StUtfIterator {
      * @return the advance in bytes to store current symbol in UTF-32.
      * Always 4 bytes (method for consistency).
      */
-    size_t getAdvanceBytesUtf32() const {
+    inline size_t getAdvanceBytesUtf32() const {
         return sizeof(stUtf32_t);
     }
 

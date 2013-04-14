@@ -24,42 +24,42 @@ class StGLContext;
  * Notice that most operations like isIn() will work as is - thus assuming
  * point parameter is in local coordinates system.
  */
-class ST_LOCAL StBndCameraBox : public StBndBox {
-
-        protected:
-
-    StGLMatrix myTransf; //!< transformation matrix
+class StBndCameraBox : public StBndBox {
 
         public:
 
-    StBndCameraBox(const StGLMatrix& theTransf);
+    ST_CPPEXPORT StBndCameraBox(const StGLMatrix& theTransf);
 
         public: //!< inheritance methods
 
-    virtual ~StBndCameraBox();
+    ST_CPPEXPORT virtual ~StBndCameraBox();
 
     /**
      * Input point is in global coordinates and will be transformed.
      */
-    virtual void enlarge(const StGLVec3& theNewPnt);
+    ST_CPPEXPORT virtual void enlarge(const StGLVec3& theNewPnt);
 
     /**
      * Input points set is in global coordinates and will be transformed.
      */
-    virtual void enlarge(const StArray<StGLVec3>& thePoints);
+    ST_CPPEXPORT virtual void enlarge(const StArray<StGLVec3>& thePoints);
 
     /**
      * Returns the boundary box center in global coordinates
      * (computed with reversed transformation).
      */
-    StGLVec3 getCenterGlobal() const;
+    ST_CPPEXPORT StGLVec3 getCenterGlobal() const;
 
     /**
      * Creates the 3D prism (for debug rendering;
      * computed with reversed transformation).
      */
-    void getPrism(StGLContext& theCtx,
-                  StGLPrism&   thePrism) const;
+    ST_CPPEXPORT void getPrism(StGLContext& theCtx,
+                               StGLPrism&   thePrism) const;
+
+        protected:
+
+    StGLMatrix myTransf; //!< transformation matrix
 
 };
 

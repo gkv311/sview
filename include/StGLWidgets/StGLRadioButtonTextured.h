@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -12,38 +12,38 @@
 #include <StGLWidgets/StGLTextureButton.h>
 #include <StSettings/StParam.h>
 
-class ST_LOCAL StGLRadioButtonTextured : public StGLTextureButton {
-
-        private:
-
-    StHandle<StInt32Param> myTrackValue; //!< handle to tracked value
-    int32_t                   myValueOn; //!< value to turn radio button on
+class StGLRadioButtonTextured : public StGLTextureButton {
 
         public:
 
     /**
      * Main constructor.
      */
-    StGLRadioButtonTextured(StGLWidget* theParent,
-                            const StHandle<StInt32Param>& theTrackedValue, const int32_t theValueOn,
-                            const StString& theTexturePath,
-                            const int theLeft, const int theTop,
-                            const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    ST_CPPEXPORT StGLRadioButtonTextured(StGLWidget* theParent,
+                                         const StHandle<StInt32Param>& theTrackedValue, const int32_t theValueOn,
+                                         const StString& theTexturePath,
+                                         const int theLeft, const int theTop,
+                                         const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
 
     /**
      * Destructor.
      */
-    virtual ~StGLRadioButtonTextured();
+    ST_CPPEXPORT virtual ~StGLRadioButtonTextured();
 
-    virtual const StString& getClassName();
+    ST_CPPEXPORT virtual const StString& getClassName();
 
-    int32_t getValueOn() const {
+    inline int32_t getValueOn() const {
         return myValueOn;
     }
 
         private:   //!< callback Slots (private overriders)
 
-    void doClick(const size_t );
+    ST_LOCAL void doClick(const size_t );
+
+        private:
+
+    StHandle<StInt32Param> myTrackValue; //!< handle to tracked value
+    int32_t                   myValueOn; //!< value to turn radio button on
 
 };
 

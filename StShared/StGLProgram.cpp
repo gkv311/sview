@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -22,6 +22,10 @@ StGLProgram::StGLProgram(const StString& theTitle)
 
 StGLProgram::~StGLProgram() {
     ST_ASSERT(!isValid(), "~StGLProgram with unreleased GL resources");
+}
+
+const StString& StGLProgram::getTitle() const {
+    return myTitle;
 }
 
 void StGLProgram::release(StGLContext& theCtx) {

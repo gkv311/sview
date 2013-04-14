@@ -492,3 +492,7 @@ bool StLibAVImage::save(const StString& theFilePath,
 
     return true;
 }
+
+bool StLibAVImage::resize(size_t , size_t ) {
+    return false;
+}

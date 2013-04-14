@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -67,7 +67,7 @@
 /**
  * Mega structure defines the list of ALL OpenGL functions!
  */
-struct ST_LOCAL StGLFunctions {
+struct StGLFunctions {
 
         public: //! @name OpenGL 1.2
 

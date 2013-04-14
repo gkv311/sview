@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -24,7 +24,7 @@
 #include <StCore/StRendererInfo.h>
 #include <StCore/StMonitor.h>
 
-class ST_LOCAL StCore : public StRendererInterface {
+class StCore : public StRendererInterface {
 
         public:
 
@@ -47,36 +47,36 @@ class ST_LOCAL StCore : public StRendererInterface {
 
             public:
 
-        CoreFunctions();
-        ~CoreFunctions();
+        ST_CPPEXPORT CoreFunctions();
+        ST_CPPEXPORT ~CoreFunctions();
 
-        void load(StLibrary& theLib);
-        bool isNull() const;
-        void nullify();
+        ST_CPPEXPORT void load(StLibrary& theLib);
+        ST_CPPEXPORT bool isNull() const;
+        ST_CPPEXPORT void nullify();
 
     };
 
     // core exported functions' pointers
-    static CoreFunctions& GetFunctions();
-    static StLibrary& GetLibrary();
-    static StMutex&   GetMutex();      // private mutex to process multiple library INIT/FREE
-    static size_t&    GetUseCounter(); // private counter to process multiple library INIT/FREE
+    ST_CPPEXPORT static CoreFunctions& GetFunctions();
+    ST_CPPEXPORT static StLibrary& GetLibrary();
+    ST_CPPEXPORT static StMutex&   GetMutex();      // private mutex to process multiple library INIT/FREE
+    ST_CPPEXPORT static size_t&    GetUseCounter(); // private counter to process multiple library INIT/FREE
 
         public:
 
     // INIT library function - called by host application to use library classes
-    static int INIT();
-    static void FREE();
+    ST_CPPEXPORT static int INIT();
+    ST_CPPEXPORT static void FREE();
 
-    static StString getDrawersDir();
-    static StArrayList<StDrawerInfo> getDrawersList();
+    ST_CPPEXPORT static StString getDrawersDir();
+    ST_CPPEXPORT static StArrayList<StDrawerInfo> getDrawersList();
 
-    static StString getRenderersDir();
-    static void getRenderersList(StArrayList<StRendererInfo>& theList,
-                                 const bool                   theToDetectPriority);
+    ST_CPPEXPORT static StString getRenderersDir();
+    ST_CPPEXPORT static void getRenderersList(StArrayList<StRendererInfo>& theList,
+                                              const bool                   theToDetectPriority);
 
-    static StArrayList<StMonitor> getStMonitors();
-    static StMonitor getMonitorFromPoint(const StPointI_t& iPoint);
+    ST_CPPEXPORT static StArrayList<StMonitor> getStMonitors();
+    ST_CPPEXPORT static StMonitor getMonitorFromPoint(const StPointI_t& iPoint);
 
         private:
 
@@ -86,8 +86,8 @@ class ST_LOCAL StCore : public StRendererInterface {
 
         public:
 
-    StCore();
-    StCore(StRendererInterface* inst);
+    ST_CPPEXPORT StCore();
+    ST_CPPEXPORT StCore(StRendererInterface* inst);
 
     StRendererInterface* getLibImpl() {
         return instance;
@@ -121,7 +121,7 @@ class ST_LOCAL StCore : public StRendererInterface {
         GetFunctions().StCore_stglDraw(instance, views);
     }
 
-    ~StCore();
+    ST_CPPEXPORT ~StCore();
 
 };
 

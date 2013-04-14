@@ -28,7 +28,7 @@
 struct tagStRendererInfo;
 typedef tagStRendererInfo StRendererInfo_t;
 
-class ST_LOCAL StRendererPlugin : public StRendererInterface {
+class StRendererPlugin : public StRendererInterface {
 
         protected:
 
@@ -75,12 +75,12 @@ class ST_LOCAL StRendererPlugin : public StRendererInterface {
     /**
      * Empty constructor. Doesn't create class instance!
      */
-    StRendererPlugin();
+    ST_CPPEXPORT StRendererPlugin();
 
     /**
      * Open the plugin and retrieve function pointers.
      */
-    bool InitLibrary(const StString& thePluginPath);
+    ST_CPPEXPORT bool InitLibrary(const StString& thePluginPath);
 
     void Instantiate() {
         instance = (StRendererInterface* )StRenderer_new();
@@ -94,8 +94,8 @@ class ST_LOCAL StRendererPlugin : public StRendererInterface {
         return stWindow;
     }
 
-    bool init(const int& deviceId, const StNativeWin_t nativeParent = (StNativeWin_t )NULL);
-    bool init(const StString& rendererPath, const int& deviceId, const StNativeWin_t nativeParent = (StNativeWin_t )NULL);
+    ST_CPPEXPORT bool init(const int& deviceId, const StNativeWin_t nativeParent = (StNativeWin_t )NULL);
+    ST_CPPEXPORT bool init(const StString& rendererPath, const int& deviceId, const StNativeWin_t nativeParent = (StNativeWin_t )NULL);
 
     bool open(const StOpenInfo& stOpenInfo = StOpenInfo()) {
         const StOpenInfo_t stOpenInfoStruct = stOpenInfo.getStruct();
@@ -114,7 +114,7 @@ class ST_LOCAL StRendererPlugin : public StRendererInterface {
         Destruct();
     }
 
-    void Destruct();
+    ST_CPPEXPORT void Destruct();
 
     // auxiliary function
     const StRendererInfo_t* GetDevicesInfo(const bool theToDetectPriority) const {

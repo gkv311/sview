@@ -7,12 +7,13 @@
 		<Option compiler="windows_sdk_x86" />
 		<Build>
 			<Target title="WIN_gcc_x86">
-				<Option output="../lib/$(TARGET_NAME)/libStGLWidgets" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="" />
+				<Option output="../bin/$(TARGET_NAME)/libStGLWidgets" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../bin/$(TARGET_NAME)" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
-				<Option type="2" />
+				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-O3" />
 					<Add option="-std=c++0x" />
@@ -93,12 +94,13 @@
 				</ExtraCommands>
 			</Target>
 			<Target title="LINUX_gcc">
-				<Option output="../lib/$(TARGET_NAME)/libStGLWidgets" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="" />
+				<Option output="../bin/$(TARGET_NAME)/libStGLWidgets" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../bin/$(TARGET_NAME)" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
-				<Option type="2" />
+				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-O3" />
 					<Add option="-std=c++0x" />
@@ -110,6 +112,8 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="-z defs" />
+					<Add library="GL" />
 				</Linker>
 				<ExtraCommands>
 					<Add before='mkdir -p &quot;../bin/$(TARGET_NAME)/shaders/$(PROJECT_NAME)/&quot;' />
@@ -118,12 +122,13 @@
 				</ExtraCommands>
 			</Target>
 			<Target title="LINUX_gcc_DEBUG">
-				<Option output="../lib/$(TARGET_NAME)/libStGLWidgets" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="" />
+				<Option output="../bin/$(TARGET_NAME)/libStGLWidgets" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../bin/$(TARGET_NAME)" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
-				<Option type="2" />
+				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-std=c++0x" />
 					<Add option="-Wall" />
@@ -134,6 +139,10 @@
 					<Add option="`pkg-config gtk+-2.0 --cflags`" />
 					<Add option="-D__ST_DEBUG__" />
 				</Compiler>
+				<Linker>
+					<Add option="-z defs" />
+					<Add library="GL" />
+				</Linker>
 				<ExtraCommands>
 					<Add before='mkdir -p &quot;../bin/$(TARGET_NAME)/shaders/$(PROJECT_NAME)/&quot;' />
 					<Add before='cp -f -r shaders/* &quot;../bin/$(TARGET_NAME)/shaders/$(PROJECT_NAME)/&quot;' />
@@ -141,12 +150,13 @@
 				</ExtraCommands>
 			</Target>
 			<Target title="MAC_gcc">
-				<Option output="../lib/$(TARGET_NAME)/libStGLWidgets" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="" />
+				<Option output="../bin/$(TARGET_NAME)/libStGLWidgets" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../bin/$(TARGET_NAME)" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
-				<Option type="2" />
+				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-O3" />
 					<Add option="-Wall" />
@@ -162,12 +172,13 @@
 				</ExtraCommands>
 			</Target>
 			<Target title="MAC_gcc_DEBUG">
-				<Option output="../lib/$(TARGET_NAME)/libStGLWidgets" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="" />
+				<Option output="../bin/$(TARGET_NAME)/libStGLWidgets" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../bin/$(TARGET_NAME)" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
-				<Option type="2" />
+				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
@@ -189,11 +200,14 @@
 			<Add directory="../include" />
 		</ResourceCompiler>
 		<Linker>
+			<Add library="StShared" />
 			<Add directory="../3rdparty/lib/$(TARGET_NAME)" />
 			<Add directory="../lib/$(TARGET_NAME)" />
+			<Add directory="../bin/$(TARGET_NAME)" />
 		</Linker>
 		<Unit filename="StGLCheckbox.cpp" />
 		<Unit filename="StGLCheckboxTextured.cpp" />
+		<Unit filename="StGLDescription.cpp" />
 		<Unit filename="StGLDevicesMenu.cpp" />
 		<Unit filename="StGLFpsLabel.cpp" />
 		<Unit filename="StGLImageFlatProgram.cpp" />

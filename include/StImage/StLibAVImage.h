@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -20,7 +20,7 @@ struct AVFrame;
 /**
  * This class implements image load/save operation using libav* libraries.
  */
-class ST_LOCAL StLibAVImage : public StImageFile {
+class StLibAVImage : public StImageFile {
 
         private:
 
@@ -33,7 +33,7 @@ class ST_LOCAL StLibAVImage : public StImageFile {
 
         private:
 
-    int getAVPixelFormat();
+    ST_CPPEXPORT int getAVPixelFormat();
 
         public:
 
@@ -41,20 +41,20 @@ class ST_LOCAL StLibAVImage : public StImageFile {
      * Should be called at application start.
      * Short-link to the stLibAV::init().
      */
-    static bool init();
+    ST_CPPEXPORT static bool init();
 
         public:
 
-    StLibAVImage();
-    virtual ~StLibAVImage();
+    ST_CPPEXPORT StLibAVImage();
+    ST_CPPEXPORT virtual ~StLibAVImage();
 
-    virtual void close();
-    virtual bool load(const StString& theFilePath,
-                      ImageType theImageType = ST_TYPE_NONE,
-                      uint8_t* theDataPtr = NULL, int theDataSize = 0);
-    virtual bool save(const StString& theFilePath,
-                      ImageType theImageType);
-    virtual bool resize(size_t , size_t ) { return false; }
+    ST_CPPEXPORT virtual void close();
+    ST_CPPEXPORT virtual bool load(const StString& theFilePath,
+                                   ImageType theImageType = ST_TYPE_NONE,
+                                   uint8_t* theDataPtr = NULL, int theDataSize = 0);
+    ST_CPPEXPORT virtual bool save(const StString& theFilePath,
+                                   ImageType theImageType);
+    ST_CPPEXPORT virtual bool resize(size_t , size_t );
 };
 
 #endif //__StLibAVImage_h_

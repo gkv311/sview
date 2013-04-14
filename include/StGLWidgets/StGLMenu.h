@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -22,7 +22,7 @@ class StGLMenuProgram;
 /**
  * Widget represents classical menu object.
  */
-class ST_LOCAL StGLMenu : public StGLWidget {
+class StGLMenu : public StGLWidget {
 
         public:
 
@@ -33,82 +33,83 @@ class ST_LOCAL StGLMenu : public StGLWidget {
 
     // recursively delete all submenus and that this menu itself
     // should be used only for dynamic menu recreation
-    static void DeleteWithSubMenus(StGLMenu* theMenu);
+    ST_CPPEXPORT static void DeleteWithSubMenus(StGLMenu* theMenu);
 
-    StGLMenu(StGLWidget* theParent,
-             const int theLeft, const int theTop,
-             const int theOrient = MENU_VERTICAL,
-             const bool theIsRootMenu = false);
+    ST_CPPEXPORT StGLMenu(StGLWidget* theParent,
+                          const int   theLeft,
+                          const int   theTop,
+                          const int   theOrient = MENU_VERTICAL,
+                          const bool  theIsRootMenu = false);
 
-    virtual ~StGLMenu();
+    ST_CPPEXPORT virtual ~StGLMenu();
 
-    virtual const StString& getClassName();
-    virtual void setVisibility(bool isVisible, bool isForce);
-    virtual void stglResize(const StRectI_t& theWinRectPx);
-    virtual bool stglInit();
-    virtual void stglDraw(unsigned int theView);
-    virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& theIsItemUnclicked);
+    ST_CPPEXPORT virtual const StString& getClassName();
+    ST_CPPEXPORT virtual void setVisibility(bool isVisible, bool isForce);
+    ST_CPPEXPORT virtual void stglResize(const StRectI_t& theWinRectPx);
+    ST_CPPEXPORT virtual bool stglInit();
+    ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
+    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& theIsItemUnclicked);
 
-    bool isRootMenu() const {
+    inline bool isRootMenu() const {
         return myIsRootMenu;
     }
 
-    bool isActive() const {
+    inline bool isActive() const {
         return myIsActive;
     }
 
-    void setActive(const bool isActive) {
+    inline void setActive(const bool isActive) {
         myIsActive = isActive;
     }
 
-    int getOrient() const {
+    inline int getOrient() const {
         return myOrient;
     }
 
     /**
      * Update all children menus layout.
      */
-    void stglUpdateSubmenuLayout();
+    ST_CPPEXPORT void stglUpdateSubmenuLayout();
 
-    StGLMenuItem* addItem(const StString& theLabel,
-                          const size_t    theUserData = 0);
-    StGLMenuItem* addItem(const StString& theLabel,
-                          StGLMenu*       theSubMenu);
+    ST_CPPEXPORT StGLMenuItem* addItem(const StString& theLabel,
+                                       const size_t    theUserData = 0);
+    ST_CPPEXPORT StGLMenuItem* addItem(const StString& theLabel,
+                                       StGLMenu*       theSubMenu);
 
     /**
      * Append checkbox menu item.
-     * @param theLabel        - menu item text;
-     * @param theTrackedValue - tracked boolean value;
-     * @return created menu item widget.
+     * @param theLabel        menu item text
+     * @param theTrackedValue tracked boolean value
+     * @return created menu item widget
      */
-    StGLMenuItem* addItem(const StString&              theLabel,
-                          const StHandle<StBoolParam>& theTrackedValue);
+    ST_CPPEXPORT StGLMenuItem* addItem(const StString&              theLabel,
+                                       const StHandle<StBoolParam>& theTrackedValue);
 
     /**
      * Append radio button menu item.
-     * @param theLabel        - menu item text;
-     * @param theTrackedValue - tracked integer (enumeration) value;
-     * @param theOnValue      - associated integer (enumeration) value for this radio button;
-     * @return created menu item widget.
+     * @param theLabel        menu item text
+     * @param theTrackedValue tracked integer (enumeration) value
+     * @param theOnValue      associated integer (enumeration) value for this radio button
+     * @return created menu item widget
      */
-    StGLMenuItem* addItem(const StString&               theLabel,
-                          const StHandle<StInt32Param>& theTrackedValue,
-                          const int32_t                 theOnValue);
+    ST_CPPEXPORT StGLMenuItem* addItem(const StString&               theLabel,
+                                       const StHandle<StInt32Param>& theTrackedValue,
+                                       const int32_t                 theOnValue);
 
     /**
      * Append radio button menu item.
-     * @param theLabel        - menu item text;
-     * @param theTrackedValue - tracked float value;
-     * @param theOnValue      - associated float value for this radio button;
-     * @return created menu item widget.
+     * @param theLabel        menu item text
+     * @param theTrackedValue tracked float value
+     * @param theOnValue      associated float value for this radio button
+     * @return created menu item widget
      */
-    StGLMenuItem* addItem(const StString&                 theLabel,
-                          const StHandle<StFloat32Param>& theTrackedValue,
-                          const float                     theOnValue);
+    ST_CPPEXPORT StGLMenuItem* addItem(const StString&                 theLabel,
+                                       const StHandle<StFloat32Param>& theTrackedValue,
+                                       const float                     theOnValue);
 
         private:
 
-    void stglResize();
+    ST_LOCAL void stglResize();
 
         private: //! @name private fields
 

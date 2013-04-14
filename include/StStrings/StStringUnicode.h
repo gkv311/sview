@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -24,7 +24,7 @@
  * Class StText is more efficient for frequently modified string.
  */
 template<typename Type>
-class ST_LOCAL StStringUnicode {
+class StStringUnicode {
 
         private: //!< low-level methods
 
@@ -44,7 +44,7 @@ class ST_LOCAL StStringUnicode {
     /**
      * Allocate NULL-terminated string buffer.
      */
-    static Type* stStrAlloc(const size_t theSizeBytes) {
+    static inline Type* stStrAlloc(const size_t theSizeBytes) {
         Type* aPtr = stMemAlloc<Type*>(theSizeBytes + sizeof(Type));
         if(aPtr != NULL) {
             // always NULL-terminate the string
@@ -56,7 +56,7 @@ class ST_LOCAL StStringUnicode {
     /**
      * Release string buffer and nullify the pointer.
      */
-    static void stStrFree(Type*& thePtr) {
+    static inline void stStrFree(Type*& thePtr) {
         stMemFree(thePtr);
         thePtr = NULL;
     }
@@ -65,17 +65,19 @@ class ST_LOCAL StStringUnicode {
      * Optimized copy.
      * Provides bytes interface to avoid incorrect pointer arithmetics.
      */
-    static void stStrCopy(stUByte_t* theStrDst, const stUByte_t* theStrSrc, const size_t theSizeBytes) {
+    static inline void stStrCopy(stUByte_t*       theStrDst,
+                                 const stUByte_t* theStrSrc,
+                                 const size_t     theSizeBytes) {
         stMemCpy(theStrDst, theStrSrc, theSizeBytes);
     }
 
     /**
      * Compare two Unicode strings per-byte.
      */
-    static bool stStrAreEqual(const Type*  theString1,
-                              const size_t theSizeBytes1,
-                              const Type*  theString2,
-                              const size_t theSizeBytes2) {
+    static inline bool stStrAreEqual(const Type*  theString1,
+                                     const size_t theSizeBytes1,
+                                     const Type*  theString2,
+                                     const size_t theSizeBytes2) {
         return (theSizeBytes1 == theSizeBytes2)
             && stAreEqual(theString1, theString2, theSizeBytes1);
     }
@@ -102,21 +104,21 @@ class ST_LOCAL StStringUnicode {
 
         public:
 
-    StUtfIterator<Type> iterator() const {
+    inline StUtfIterator<Type> iterator() const {
         return StUtfIterator<Type>(myString);
     }
 
     /**
      * Returns the size of the buffer, excluding NULL-termination symbol
      */
-    size_t getSize() const {
+    inline size_t getSize() const {
         return mySize;
     }
 
     /**
      * Returns the length of the string in Unicode symbols.
      */
-    size_t getLength() const {
+    inline size_t getLength() const {
         return myLength;
     }
 
@@ -140,7 +142,7 @@ class ST_LOCAL StStringUnicode {
      * Retrieve Unicode symbol at specified position.
      * Warning! This is a slow access. Iterator should be used for consecutive parsing.
      */
-    stUtf32_t operator[](const size_t theCharIndex) const {
+    inline stUtf32_t operator[](const size_t theCharIndex) const {
         return getChar(theCharIndex);
     }
 
@@ -209,7 +211,7 @@ class ST_LOCAL StStringUnicode {
      * Convert URL string (with %38%20 codes) to normal Unicode string.
      * @param theUrl (const StStringUnicode& ) - URL.
      */
-    void fromUrl(const StStringUnicode& theUrl) {
+    inline void fromUrl(const StStringUnicode& theUrl) {
         size_t aSizeUtf8, aLengthUtf8;
         StStringUnicode<stUtf8_t>::strGetAdvance(theUrl.myString, theUrl.myLength, aSizeUtf8, aLengthUtf8);
         stUtf8_t* aBuffer = StStringUnicode<stUtf8_t>::stStrAlloc(aSizeUtf8);
@@ -294,7 +296,7 @@ class ST_LOCAL StStringUnicode {
      * Should not be modifed or deleted!
      * @return (const Type* ) pointer to string.
      */
-    const Type* toCString() const {
+    inline const Type* toCString() const {
         return myString;
     }
 
@@ -346,7 +348,7 @@ class ST_LOCAL StStringUnicode {
     /**
      * @return true if string is empty.
      */
-    bool isEmpty() const {
+    inline bool isEmpty() const {
         return myString[0] == Type(0);
     }
 
@@ -426,7 +428,7 @@ class ST_LOCAL StStringUnicode {
 
         public: //!< compare operators
 
-    bool operator==(const StStringUnicode& theCompare) const {
+    inline bool operator==(const StStringUnicode& theCompare) const {
         return isEquals(theCompare);
     }
     bool operator!=(const StStringUnicode& theCompare) const;

@@ -33,9 +33,9 @@ template<>
 inline void StArray< StHandle<StRendererPlugin> >::sort() {}
 
 namespace {
-    static bool HAS_LOGGER_ID = StLogger::IdentifyModule("StBrowserPlugin");
 
     static bool isStCoreInitSuccess = false; // we use global init flag to go around stupid Mozilla plugin load behaviour
+
 };
 
 /**

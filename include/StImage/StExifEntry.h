@@ -14,7 +14,7 @@
 /**
  * One entry in the Exif directory (StExifDir).
  */
-struct ST_LOCAL StExifEntry {
+struct StExifEntry {
 
         public:
 
@@ -54,7 +54,7 @@ struct ST_LOCAL StExifEntry {
     /**
      * Returns the bytes number for entry values data.
      */
-    size_t getBytes() const {
+    inline size_t getBytes() const {
         return size_t(myComponents) * BYTES_PER_FORMAT[myFormat];
     }
 

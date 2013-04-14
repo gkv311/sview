@@ -13,7 +13,7 @@
 
 namespace stUtfTools {
 
-    bool isInteger(const StString& theString);
+    ST_CPPEXPORT bool isInteger(const StString& theString);
 
 };
 

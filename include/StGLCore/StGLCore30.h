@@ -18,7 +18,7 @@
  * Notice that nothing were actually removed in this version (unless Forward context loaded)!
  */
 template<typename theBaseClass_t>
-struct ST_LOCAL stglTmplCore30 : public theBaseClass_t {
+struct stglTmplCore30 : public theBaseClass_t {
 
         public: //! @name GL_ARB_framebuffer_object (added to OpenGL 3.0 core)
 

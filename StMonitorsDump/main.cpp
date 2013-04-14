@@ -23,10 +23,8 @@
 #include <fstream>
 
 namespace {
-    static bool HAS_LOGGER_ID = StLogger::IdentifyModule("StMonitorsDump");
 
-
-    StString formatHex(const unsigned char* theData, size_t theSize) {
+    ST_LOCAL StString formatHex(const unsigned char* theData, size_t theSize) {
         StString anOut;
         stUtf8_t aByte[4];
         for(size_t aByteId = 0; aByteId < theSize; ++aByteId) {
@@ -46,7 +44,7 @@ namespace {
 
 };
 
-StString dump() {
+ST_LOCAL StString dump() {
     StSearchMonitors stMonitors;
     stMonitors.init();
     StString strDump;
@@ -57,8 +55,8 @@ StString dump() {
     return strDump;
 }
 
-void dumpEdid(const StEDIDParser& theEdid,
-              const StString&     theFileName) {
+ST_LOCAL void dumpEdid(const StEDIDParser& theEdid,
+                       const StString&     theFileName) {
     StRawFile aRawFile(theFileName);
     if(!aRawFile.openFile(StRawFile::WRITE)) {
         st::cout << stostream_text("Can not open the file '") << theFileName << stostream_text("' for writing!\n");
@@ -70,8 +68,8 @@ void dumpEdid(const StEDIDParser& theEdid,
     aRawFile.closeFile();
 }
 
-void genInf(const StEDIDParser& theEdid,
-            const StString&     theFileName) {
+ST_LOCAL void genInf(const StEDIDParser& theEdid,
+                     const StString&     theFileName) {
     st::ofstream aFileOut;
     aFileOut.open(theFileName.toCString());
     if(aFileOut.fail()) {

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov
+ * Copyright © 2007-2013 Kirill Gavrilov
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -21,7 +21,7 @@
  *      3) Return true/false to indicate load/save state;
  *      4) NOT ever broke output values if load failes (values must be unchanged).
  */
-class ST_LOCAL StConfigInterface {
+class StConfigInterface {
 
         public:
 
@@ -42,62 +42,62 @@ class ST_LOCAL StConfigInterface {
     /**
      * Save boolean value. Will use int32_t storage.
      */
-    bool loadBool(const StString& theLabel,
-                  bool&           theValue);
+    ST_CPPEXPORT bool loadBool(const StString& theLabel,
+                               bool&           theValue);
 
     /**
      * Load boolean value.
      */
-    bool saveBool(const StString& theLabel,
-                  const bool      theValue);
+    ST_CPPEXPORT bool saveBool(const StString& theLabel,
+                               const bool      theValue);
 
     /**
      * Load integer rectangle.
      */
-    bool loadInt32Rect(const StString&  theLabel,
-                       StRect<int32_t>& theValue);
+    ST_CPPEXPORT bool loadInt32Rect(const StString&  theLabel,
+                                    StRect<int32_t>& theValue);
 
     /**
      * Save integer rectangle.
      */
-    bool saveInt32Rect(const StString&        theLabel,
-                       const StRect<int32_t>& theValue);
+    ST_CPPEXPORT bool saveInt32Rect(const StString&        theLabel,
+                                    const StRect<int32_t>& theValue);
 
     /**
      * Method to load int32_t parameter.
-     * @param theLabel (const StString& ) - parameter label (should be unique);
-     * @param theInt32Param (StHandle<StInt32Param>& ) - handle to the parameter;
-     * @return true if parameter was loaded.
+     * @param theLabel      parameter label (should be unique)
+     * @param theInt32Param handle to the parameter
+     * @return true if parameter was loaded
      */
-    bool loadParam(const StString&         theLabel,
-                   StHandle<StInt32Param>& theInt32Param);
+    ST_CPPEXPORT bool loadParam(const StString&         theLabel,
+                                StHandle<StInt32Param>& theInt32Param);
 
     /**
      * Method to save int32_t parameter.
-     * @param theLabel (const StString& ) - parameter label (should be unique);
-     * @param theInt32Param (const StHandle<StInt32Param>& ) - handle to the parameter;
-     * @return true if parameter was saved.
+     * @param theLabel      parameter label (should be unique)
+     * @param theInt32Param handle to the parameter
+     * @return true if parameter was saved
      */
-    bool saveParam(const StString&               theLabel,
-                   const StHandle<StInt32Param>& theInt32Param);
+    ST_CPPEXPORT bool saveParam(const StString&               theLabel,
+                                const StHandle<StInt32Param>& theInt32Param);
 
     /**
      * Method to load boolean parameter.
-     * @param theLabel (const StString& ) - parameter label (should be unique);
-     * @param theBoolParam (StHandle<StBoolParam>& ) - handle to the parameter;
-     * @return true if parameter was loaded.
+     * @param theLabel     parameter label (should be unique)
+     * @param theBoolParam handle to the parameter
+     * @return true if parameter was loaded
      */
-    bool loadParam(const StString&        theLabel,
-                   StHandle<StBoolParam>& theBoolParam);
+    ST_CPPEXPORT bool loadParam(const StString&        theLabel,
+                                StHandle<StBoolParam>& theBoolParam);
 
     /**
      * Method to save boolean parameter.
-     * @param theLabel (const StString& ) - parameter label (should be unique);
-     * @param theBoolParam (const StHandle<StBoolParam>& ) - handle to the parameter;
-     * @return true if parameter was saved.
+     * @param theLabel     parameter label (should be unique)
+     * @param theBoolParam handle to the parameter
+     * @return true if parameter was saved
      */
-    bool saveParam(const StString&              theLabel,
-                   const StHandle<StBoolParam>& theBoolParam);
+    ST_CPPEXPORT bool saveParam(const StString&              theLabel,
+                                const StHandle<StBoolParam>& theBoolParam);
 
 };
 

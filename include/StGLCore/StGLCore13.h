@@ -14,7 +14,7 @@
 /**
  * OpenGL 1.3 without deprecated entry points.
  */
-struct ST_LOCAL StGLCore13Fwd : public StGLCore12Fwd {
+struct StGLCore13Fwd : public StGLCore12Fwd {
 
         public: //! @name OpenGL 1.3 additives to 1.2
 
@@ -33,7 +33,7 @@ struct ST_LOCAL StGLCore13Fwd : public StGLCore12Fwd {
 /**
  * OpenGL 1.3 core based on 1.2 version.
  */
-struct ST_LOCAL StGLCore13 : public StGLCore12 {
+struct StGLCore13 : public StGLCore12 {
 
         public: //! @name OpenGL 1.3 additives to 1.2
 

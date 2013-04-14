@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -14,24 +14,24 @@
 
 class StGLMatrix;
 
-class ST_LOCAL StGLMenuProgram : public StGLProgram {
+class StGLMenuProgram : public StGLProgram {
 
         public:
 
-    StGLMenuProgram();
+    ST_CPPEXPORT StGLMenuProgram();
 
-    StGLVarLocation getVVertexLoc() const {
+    inline StGLVarLocation getVVertexLoc() const {
         return atrVVertexLoc;
     }
 
-    void setProjMat(StGLContext&      theCtx,
-                    const StGLMatrix& theProjMat);
+    ST_CPPEXPORT void setProjMat(StGLContext&      theCtx,
+                                 const StGLMatrix& theProjMat);
 
-    void setColor(StGLContext&    theCtx,
-                  const StGLVec4& theColor,
-                  const GLfloat   theOpacityValue);
+    ST_CPPEXPORT void setColor(StGLContext&    theCtx,
+                               const StGLVec4& theColor,
+                               const GLfloat   theOpacityValue);
 
-    virtual bool init(StGLContext& theCtx);
+    ST_CPPEXPORT virtual bool init(StGLContext& theCtx);
 
         private:
 

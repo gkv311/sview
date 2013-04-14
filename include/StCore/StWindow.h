@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -26,7 +26,7 @@ class StLibrary;
 /**
  * StWindow - StWindowInterface implementation from StCore library.
  */
-class ST_LOCAL StWindow : public StWindowInterface {
+class StWindow : public StWindowInterface {
 
         public:
 
@@ -108,16 +108,16 @@ class ST_LOCAL StWindow : public StWindowInterface {
 
             public:
 
-        WindowFunctions();
+        ST_CPPEXPORT WindowFunctions();
 
-        void load(StLibrary& theLib);
-        bool isNull() const;
-        void nullify();
+        ST_CPPEXPORT void load(StLibrary& theLib);
+        ST_CPPEXPORT bool isNull() const;
+        ST_CPPEXPORT void nullify();
 
     };
 
     // core exported functions' pointers
-    static WindowFunctions& GetFunctions();
+    ST_CPPEXPORT static WindowFunctions& GetFunctions();
 
         private:
 

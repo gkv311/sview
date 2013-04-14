@@ -165,6 +165,7 @@
 				<Linker>
 					<Add option="-s" />
 					<Add option="`pkg-config gtk+-2.0 --libs`" />
+					<Add option="-z defs" />
 					<Add library="GL" />
 					<Add library="pthread" />
 				</Linker>
@@ -195,6 +196,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="`pkg-config gtk+-2.0 --libs`" />
+					<Add option="-z defs" />
 					<Add library="GL" />
 					<Add library="pthread" />
 				</Linker>
@@ -273,6 +275,7 @@
 			<Add library="libStShared" />
 			<Add directory="../3rdparty/lib/$(TARGET_NAME)" />
 			<Add directory="../lib/$(TARGET_NAME)" />
+			<Add directory="../bin/$(TARGET_NAME)" />
 		</Linker>
 		<Unit filename="StOutDual.cpp" />
 		<Unit filename="StOutDual.h" />

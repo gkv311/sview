@@ -25,7 +25,7 @@
 
 #include <StStrings/StString.h>
 
-class ST_LOCAL StStereoDeviceInfo {
+class StStereoDeviceInfo {
 
         public:
 

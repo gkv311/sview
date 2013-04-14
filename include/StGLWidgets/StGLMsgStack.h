@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -16,23 +16,23 @@
 /**
  * Widgets intended to display string messages.
  */
-class ST_LOCAL StGLMsgStack : public StGLWidget {
-
-        private:
-
-    StMutex              myMsgMutex; //!< mutex for thread-safe access
-    StArrayList<StString> myMsgList; //!< messages list
+class StGLMsgStack : public StGLWidget {
 
         public:
 
-    StGLMsgStack(StGLWidget* theParent);
-    virtual ~StGLMsgStack();
-    virtual void stglResize(const StRectI_t& theWinRectPx);
-    virtual void stglUpdate(const StPointD_t& thePointZo);
+    ST_CPPEXPORT StGLMsgStack(StGLWidget* theParent);
+    ST_CPPEXPORT virtual ~StGLMsgStack();
+    ST_CPPEXPORT virtual void stglResize(const StRectI_t& theWinRectPx);
+    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& thePointZo);
 
         public: //!< callback Slots
 
-    void doPushMessage(const StString& theMessageText);
+    ST_CPPEXPORT void doPushMessage(const StString& theMessageText);
+
+        private:
+
+    StMutex               myMsgMutex; //!< mutex for thread-safe access
+    StArrayList<StString> myMsgList;  //!< messages list
 
 };
 

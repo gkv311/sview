@@ -27,7 +27,7 @@ namespace {
     static const char PNP_ID_VUZIX_VR920[] = "IWR0002";
 };
 
-class ST_LOCAL StVuzixSDK {
+class StVuzixSDK {
 
         private:
 
@@ -103,12 +103,12 @@ class ST_LOCAL StVuzixSDK {
 
         public:
 
-    StVuzixSDK()
+    ST_LOCAL StVuzixSDK()
     : myVrStereoHandle(NULL) {
         stMemSet(&myFunctions, 0, sizeof(myFunctions));
     }
 
-    ~StVuzixSDK() {
+    ST_LOCAL ~StVuzixSDK() {
         setMonoOut();
         close();
         if(myVTrackerLib.isOpened() && myFunctions.IWRCloseTracker != NULL) {
@@ -118,57 +118,57 @@ class ST_LOCAL StVuzixSDK {
         myVStereoLib.close();
     }
 
-    void open() {
+    ST_LOCAL void open() {
         if(myFunctions.IWRSTEREO_Open != NULL && myVrStereoHandle == NULL) {
             myVrStereoHandle = myFunctions.IWRSTEREO_Open();
         }
     }
 
-    void close() {
+    ST_LOCAL void close() {
         if(myFunctions.IWRSTEREO_Close != NULL && myVrStereoHandle != NULL) {
             myFunctions.IWRSTEREO_Close(myVrStereoHandle);
             myVrStereoHandle = NULL;
         }
     }
 
-    void setStereoOut() {
+    ST_LOCAL void setStereoOut() {
         if(myVrStereoHandle != NULL && myFunctions.IWRSTEREO_SetStereo != NULL) {
             myFunctions.IWRSTEREO_SetStereo(myVrStereoHandle, IWR_STEREO_MODE);
         }
     }
 
-    void setMonoOut() {
+    ST_LOCAL void setMonoOut() {
         if(myVrStereoHandle != NULL && myFunctions.IWRSTEREO_SetStereo != NULL) {
             myFunctions.IWRSTEREO_SetStereo(myVrStereoHandle, IWR_MONO_MODE);
         }
     }
 
-    void waitAckLeft() {
+    ST_LOCAL void waitAckLeft() {
         if(myVrStereoHandle != NULL && myFunctions.IWRSTEREO_WaitForAck != NULL) {
             myFunctions.IWRSTEREO_WaitForAck(myVrStereoHandle, LEFT_EYE);
         }
     }
 
-    void waitAckRight() {
+    ST_LOCAL void waitAckRight() {
         if(myVrStereoHandle != NULL && myFunctions.IWRSTEREO_WaitForAck != NULL) {
             myFunctions.IWRSTEREO_WaitForAck(myVrStereoHandle, RIGHT_EYE);
         }
     }
 
-    void setLeft() {
+    ST_LOCAL void setLeft() {
         if(myVrStereoHandle != NULL && myFunctions.IWRSTEREO_SetLR != NULL) {
             myFunctions.IWRSTEREO_SetLR(myVrStereoHandle, LEFT_EYE);
         }
     }
 
-    void setRight() {
+    ST_LOCAL void setRight() {
         if(myVrStereoHandle != NULL && myFunctions.IWRSTEREO_SetLR != NULL) {
             myFunctions.IWRSTEREO_SetLR(myVrStereoHandle, RIGHT_EYE);
         }
     }
 
     // INIT library function - called by host application to use library classes
-    int init() {
+    ST_LOCAL int init() {
         if(!myVTrackerLib.load(LIB_TRACKER_NAME)) {
             return STERROR_LIBLOADFAILED;
         }
@@ -207,7 +207,7 @@ class ST_LOCAL StVuzixSDK {
         return STERROR_LIBNOERROR;
     }
 
-    static bool isConnected() {
+    ST_LOCAL static bool isConnected() {
         // be sure Core library loaded before!
         const StString aPnP920 = PNP_ID_VUZIX_VR920;
         StArrayList<StMonitor> aMonitors = StCore::getStMonitors();

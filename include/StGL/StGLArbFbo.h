@@ -14,7 +14,7 @@
 /**
  * GL_ARB_framebuffer_object extension.
  */
-struct ST_LOCAL StGLArbFbo : protected StGLFunctions {
+struct StGLArbFbo : protected StGLFunctions {
 
         public: //! @name GL_ARB_framebuffer_object (added to OpenGL 3.0 core)
 

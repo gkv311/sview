@@ -35,48 +35,48 @@ class StStereoParams;
 class StFileNode;
 struct StMovieInfo;
 
-class ST_LOCAL StALDeviceParam : public StInt32Param {
-
-        private:
-
-    StArrayList<StString> myDevicesList;
+class StALDeviceParam : public StInt32Param {
 
         public:
 
     /**
      * Main constructor.
      */
-    StALDeviceParam();
+    ST_LOCAL StALDeviceParam();
 
     /**
      * Desctructor.
      */
-    ~StALDeviceParam();
+    ST_LOCAL ~StALDeviceParam();
 
-    void initList();
+    ST_LOCAL void initList();
 
-    bool init(const StString& theActive);
+    ST_LOCAL bool init(const StString& theActive);
 
-    int32_t getValueFromName(const StString& theName);
+    ST_LOCAL int32_t getValueFromName(const StString& theName);
 
     /**
      * Returns title for active AL device.
      */
-    StString getTitle() const;
+    ST_LOCAL StString getTitle() const;
 
     /**
      * Return list of available translations.
      */
-    const StArrayList<StString>& getList() const {
+    ST_LOCAL const StArrayList<StString>& getList() const {
         return myDevicesList;
     }
+
+        private:
+
+    StArrayList<StString> myDevicesList;
 
 };
 
 /**
  * Base Drawer class for Movie Player plugin.
  */
-class ST_LOCAL StMoviePlayer : public StDrawerInterface {
+class StMoviePlayer : public StDrawerInterface {
 
         public:
 
@@ -98,61 +98,61 @@ class ST_LOCAL StMoviePlayer : public StDrawerInterface {
 
         private:
 
-    void parseArguments(const StArgumentsMap& theArguments);
+    ST_LOCAL void parseArguments(const StArgumentsMap& theArguments);
 
         public: //! @name interface methods' implementations
 
-    StMoviePlayer();
-    virtual ~StMoviePlayer();
-    virtual StDrawerInterface* getLibImpl() { return this; }
-    virtual bool init(StWindowInterface* theWindow);
-    virtual bool open(const StOpenInfo& stOpenInfo);
-    virtual void parseCallback(StMessage_t* stMessages);
-    virtual void stglDraw(unsigned int theView);
+    ST_CPPEXPORT StMoviePlayer();
+    ST_CPPEXPORT virtual ~StMoviePlayer();
+    ST_CPPEXPORT virtual StDrawerInterface* getLibImpl() { return this; }
+    ST_CPPEXPORT virtual bool init(StWindowInterface* theWindow);
+    ST_CPPEXPORT virtual bool open(const StOpenInfo& stOpenInfo);
+    ST_CPPEXPORT virtual void parseCallback(StMessage_t* stMessages);
+    ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
 
         public: //! @name callback Slots
 
     /**
      * Handler for new file loaded event.
      */
-    void doLoaded();
+    ST_LOCAL void doLoaded();
 
-    void doListFirst(const size_t dummy = 0);
-    void doListPrev(const size_t dummy = 0);
-    void doListNext(const size_t dummy = 0);
-    void doListLast(const size_t dummy = 0);
+    ST_LOCAL void doListFirst(const size_t dummy = 0);
+    ST_LOCAL void doListPrev(const size_t dummy = 0);
+    ST_LOCAL void doListNext(const size_t dummy = 0);
+    ST_LOCAL void doListLast(const size_t dummy = 0);
 
-    void doQuit(const size_t dummy = 0);
+    ST_LOCAL void doQuit(const size_t dummy = 0);
 
-    void doOpen1File(const size_t dummy = 0);
-    void doOpen2Files(const size_t dummy = 0);
-    void doOpenRecent(const size_t theItemId);
-    void doClearRecent(const size_t dummy = 0);
-    void doUpdateOpenALDeviceList(const size_t dummy = 0);
-    void doAddAudioStream(const size_t dummy = 0);
-    void doAddSubtitleStream(const size_t dummy = 0);
-    void doSeekLeft(const size_t dummy = 0);
-    void doSeekRight(const size_t dummy = 0);
-    void doSeek(const int mouseBtn, const double seekX);
-    void doPlayPause(const size_t dummy = 0);
-    void doStop(const size_t dummy = 0);
-    void doReset(const size_t dummy = 0);
+    ST_LOCAL void doOpen1File(const size_t dummy = 0);
+    ST_LOCAL void doOpen2Files(const size_t dummy = 0);
+    ST_LOCAL void doOpenRecent(const size_t theItemId);
+    ST_LOCAL void doClearRecent(const size_t dummy = 0);
+    ST_LOCAL void doUpdateOpenALDeviceList(const size_t dummy = 0);
+    ST_LOCAL void doAddAudioStream(const size_t dummy = 0);
+    ST_LOCAL void doAddSubtitleStream(const size_t dummy = 0);
+    ST_LOCAL void doSeekLeft(const size_t dummy = 0);
+    ST_LOCAL void doSeekRight(const size_t dummy = 0);
+    ST_LOCAL void doSeek(const int mouseBtn, const double seekX);
+    ST_LOCAL void doPlayPause(const size_t dummy = 0);
+    ST_LOCAL void doStop(const size_t dummy = 0);
+    ST_LOCAL void doReset(const size_t dummy = 0);
 
-    void doSnapshot(const size_t theImgType);
+    ST_LOCAL void doSnapshot(const size_t theImgType);
 
     // callback keys
-    void keysStereo(bool* keysMap);
-    void keysSrcFormat(bool* keysMap);
-    void keysFileWalk(bool* keysMap);
-    void keysCommon(bool* keysMap);
+    ST_LOCAL void keysStereo(bool* keysMap);
+    ST_LOCAL void keysSrcFormat(bool* keysMap);
+    ST_LOCAL void keysFileWalk(bool* keysMap);
+    ST_LOCAL void keysCommon(bool* keysMap);
 
         public: //! @name Properties
 
-    bool getCurrentFile(StHandle<StFileNode>&     theFileNode,
-                        StHandle<StStereoParams>& theParams,
-                        StHandle<StMovieInfo>&    theInfo);
+    ST_LOCAL bool getCurrentFile(StHandle<StFileNode>&     theFileNode,
+                                 StHandle<StStereoParams>& theParams,
+                                 StHandle<StMovieInfo>&    theInfo);
 
-    void getRecentList(StArrayList<StString>& theList);
+    ST_LOCAL void getRecentList(StArrayList<StString>& theList);
 
     struct {
 
@@ -174,17 +174,17 @@ class ST_LOCAL StMoviePlayer : public StDrawerInterface {
 
         private: //! @name private callback Slots
 
-    void doSwitchAudioDevice(const int32_t theDevId);
-    void doSetAudioVolume(const float theGain);
-    void doSwitchShuffle(const bool theShuffleOn);
-    void doFullscreen(const bool theIsFullscreen);
-    void doSwitchSrcFormat(const int32_t theSrcFormat);
-    void doSwitchAudioStream(const int32_t theStreamId);
-    void doSwitchSubtitlesStream(const int32_t theStreamId);
-    void doUpdateStateLoading();
-    void doUpdateStateLoaded();
-    friend SV_THREAD_FUNCTION openFileThread(void* theArg);
-    void doOpenFileDialog(const size_t theOpenType);
+    ST_LOCAL void doSwitchAudioDevice(const int32_t theDevId);
+    ST_LOCAL void doSetAudioVolume(const float theGain);
+    ST_LOCAL void doSwitchShuffle(const bool theShuffleOn);
+    ST_LOCAL void doFullscreen(const bool theIsFullscreen);
+    ST_LOCAL void doSwitchSrcFormat(const int32_t theSrcFormat);
+    ST_LOCAL void doSwitchAudioStream(const int32_t theStreamId);
+    ST_LOCAL void doSwitchSubtitlesStream(const int32_t theStreamId);
+    ST_LOCAL void doUpdateStateLoading();
+    ST_LOCAL void doUpdateStateLoaded();
+    ST_LOCAL friend SV_THREAD_FUNCTION openFileThread(void* theArg);
+    ST_LOCAL void doOpenFileDialog(const size_t theOpenType);
 
         private: //! @name private fields
 
@@ -204,7 +204,6 @@ class ST_LOCAL StMoviePlayer : public StDrawerInterface {
     bool                       myIsBenchmark;
     bool                       myToCheckUpdates;
     bool                       myToQuit;
-
 
 };
 

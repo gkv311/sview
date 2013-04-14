@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -19,37 +19,37 @@
 
 template<> inline void StArray<StGLTexture>::sort() {}
 
-class ST_LOCAL StGLTextureButton : public StGLWidget {
+class StGLTextureButton : public StGLWidget {
 
         public:
 
-    StGLTextureButton(StGLWidget*      theParent,
-                      const int        theLeft = 32,
-                      const int        theTop = 32,
-                      const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
-                      const size_t     theFacesCount = 1);
+    ST_CPPEXPORT StGLTextureButton(StGLWidget*      theParent,
+                                   const int        theLeft = 32,
+                                   const int        theTop = 32,
+                                   const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                                   const size_t     theFacesCount = 1);
 
-    virtual ~StGLTextureButton();
+    ST_CPPEXPORT virtual ~StGLTextureButton();
 
-    virtual const StString& getClassName();
+    ST_CPPEXPORT virtual const StString& getClassName();
 
-    size_t getFaceId() {
+    inline size_t getFaceId() {
         return myFaceId;
     }
 
-    void setFaceId(const size_t theId) {
+    inline void setFaceId(const size_t theId) {
         myFaceId = theId;
     }
 
-    void setTexturePath(const StString* theTexturesPaths,
-                        const size_t    theCount = 1);
+    ST_CPPEXPORT void setTexturePath(const StString* theTexturesPaths,
+                                     const size_t    theCount = 1);
 
-    virtual void stglResize(const StRectI_t& winRectPx);
-    virtual bool stglInit();
-    virtual void stglDraw(unsigned int view);
+    ST_CPPEXPORT virtual void stglResize(const StRectI_t& winRectPx);
+    ST_CPPEXPORT virtual bool stglInit();
+    ST_CPPEXPORT virtual void stglDraw(unsigned int view);
 
-    virtual bool tryClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemClicked);
-    virtual bool tryUnClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemUnclicked);
+    ST_CPPEXPORT virtual bool tryClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemClicked);
+    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemUnclicked);
 
         public:    //!< Signals
 
@@ -63,11 +63,11 @@ class ST_LOCAL StGLTextureButton : public StGLWidget {
 
         private:   //!< callback Slots (private overriders)
 
-    void doMouseUnclick(const int theBtnId);
+    ST_LOCAL void doMouseUnclick(const int theBtnId);
 
         private:
 
-    void glWaveTimerControl();
+    ST_LOCAL void glWaveTimerControl();
 
         private:
 

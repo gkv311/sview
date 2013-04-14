@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov
+ * Copyright © 2011-2013 Kirill Gavrilov
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -18,30 +18,30 @@ typedef struct tagStSDOnOff StSDOnOff_t;
 /**
  * Parameter to show/control on/off renderer device option.
  */
-class ST_LOCAL StParamDevOptOnOff : public StBoolParam {
-
-        private:
-
-    StWindow*     myWindow; //!< link to the StWindow instance
-    StSDOnOff_t*  myOption; //!< pointer to the option
+class StParamDevOptOnOff : public StBoolParam {
 
         public:
 
     /**
      * Main constructor.
      */
-    StParamDevOptOnOff(StWindow*    theWindow,
-                       StSDOnOff_t* theOptionPtr);
+    ST_CPPEXPORT StParamDevOptOnOff(StWindow*    theWindow,
+                                    StSDOnOff_t* theOptionPtr);
 
     /**
      * Retrieve value from shared options storage.
      */
-    virtual bool getValue() const;
+    ST_CPPEXPORT virtual bool getValue() const;
 
     /**
      * Change value, append update message to the window and emit connected slot.
      */
-    virtual bool setValue(const bool theValue);
+    ST_CPPEXPORT virtual bool setValue(const bool theValue);
+
+        private:
+
+    StWindow*     myWindow; //!< link to the StWindow instance
+    StSDOnOff_t*  myOption; //!< pointer to the option
 
 };
 

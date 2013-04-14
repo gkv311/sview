@@ -15,7 +15,7 @@
 /**
  * MIME description storage class.
  */
-class ST_LOCAL StMIME {
+class StMIME {
 
         private:
 

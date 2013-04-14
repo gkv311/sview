@@ -48,12 +48,12 @@ namespace stLibAV {
     /**
      * Should be called at application start.
      */
-    bool init();
+    ST_CPPEXPORT bool init();
 
     /**
      * Returns string description for AVError code.
      */
-    StString getAVErrorDescription(int avErrCode);
+    ST_CPPEXPORT StString getAVErrorDescription(int avErrCode);
 
     /**
      * Version-control. This version may be used to provide information to user
@@ -70,20 +70,20 @@ namespace stLibAV {
         /**
          * Initialize the version structure from integer, returned by libav* library.
          */
-        Version(const unsigned theVersionInt);
+        ST_CPPEXPORT Version(const unsigned theVersionInt);
 
         /**
          * Returns the string representation for version.
          */
-        StString toString() const;
+        ST_CPPEXPORT StString toString() const;
 
             public: //!< return the version for each library
 
-        static Version libavutil();
-        static Version libavcodec();
-        static Version libavformat();
-        static Version libavdevice();
-        static Version libswscale();
+        ST_CPPEXPORT static Version libavutil();
+        ST_CPPEXPORT static Version libavcodec();
+        ST_CPPEXPORT static Version libavformat();
+        ST_CPPEXPORT static Version libavdevice();
+        ST_CPPEXPORT static Version libswscale();
 
     };
 
@@ -92,21 +92,21 @@ namespace stLibAV {
 
     /**
      * Convert time units into seconds. Returns zero for invalid value.
-     * @param theTimeBase  (const AVRational& ) - the timebase;
-     * @param theTimeUnits (const int64_t     ) - value to convert;
-     * @return converted time units in seconds.
+     * @param theTimeBase  the timebase
+     * @param theTimeUnits value to convert
+     * @return converted time units in seconds
      */
-    double unitsToSeconds(const AVRational& theTimeBase,
-                          const int64_t     theTimeUnits);
+    ST_CPPEXPORT double unitsToSeconds(const AVRational& theTimeBase,
+                                       const int64_t     theTimeUnits);
 
     /**
      * Convert seconds into time units.
-     * @param theTimeBase    (const AVRational& ) - the timebase;
-     * @param theTimeSeconds (const double      ) - value to convert;
-     * @return time units.
+     * @param theTimeBase    the timebase
+     * @param theTimeSeconds value to convert
+     * @return time units
      */
-    int64_t secondsToUnits(const AVRational& theTimeBase,
-                           const double      theTimeSeconds);
+    ST_CPPEXPORT int64_t secondsToUnits(const AVRational& theTimeBase,
+                                        const double      theTimeSeconds);
 
     /**
      * Convert time units into seconds using stream base.
@@ -121,9 +121,9 @@ namespace stLibAV {
 
     /**
      * Convert seconds into time units for stream.
-     * @param theStream      (const AVStream* ) - the stream;
-     * @param theTimeSeconds (const double )    - value to convert;
-     * @return time units.
+     * @param theStream      the stream
+     * @param theTimeSeconds value to convert
+     * @return time units
      */
     inline int64_t secondsToUnits(const AVStream* theStream,
                                   const double    theTimeSeconds) {
@@ -132,17 +132,17 @@ namespace stLibAV {
 
     /**
      * Convert time units into seconds for context.
-     * @param theTimeUnits (const int64_t ) - value to convert;
-     * @return converted time units in seconds.
+     * @param theTimeUnits value to convert
+     * @return converted time units in seconds
      */
-    double unitsToSeconds(const int64_t theTimeUnits);
+    ST_CPPEXPORT double unitsToSeconds(const int64_t theTimeUnits);
 
     /**
      * Convert seconds into time units for context.
-     * @param theTimeSeconds (const double ) - value to convert;
-     * @return time units.
+     * @param theTimeSeconds value to convert
+     * @return time units
      */
-    int64_t secondsToUnits(const double theTimeSeconds);
+    ST_CPPEXPORT int64_t secondsToUnits(const double theTimeSeconds);
 
     /**
      * Image frame pixel formats. Originally defined as enumerations
@@ -171,7 +171,7 @@ namespace stLibAV {
         extern const PixelFormat RGBA32;
         extern const PixelFormat BGRA32;
 
-        StString getString(const PixelFormat theFrmt);
+        ST_CPPEXPORT StString getString(const PixelFormat theFrmt);
     };
 
     /**
@@ -189,21 +189,21 @@ namespace stLibAV {
 
     /**
      * Auxiliary function to check that frame is in one of the YUV planar pixel format.
-     * @return true if PixelFormat is planar YUV.
+     * @return true if PixelFormat is planar YUV
      */
-    bool isFormatYUVPlanar(const AVCodecContext* theCtx);
+    ST_CPPEXPORT bool isFormatYUVPlanar(const AVCodecContext* theCtx);
 
     /**
      * Same as above but provide width/height information per component's plane.
-     * @return true if PixelFormat is planar YUV.
+     * @return true if PixelFormat is planar YUV
      */
-    bool isFormatYUVPlanar(const PixelFormat thePixFmt,
-                           const int         theWidth,
-                           const int         theHeight,
-                           dimYUV&           theDims);
+    ST_CPPEXPORT bool isFormatYUVPlanar(const PixelFormat thePixFmt,
+                                        const int         theWidth,
+                                        const int         theHeight,
+                                        dimYUV&           theDims);
 
     /**
-     * @return true if PixelFormat is planar YUV.
+     * @return true if PixelFormat is planar YUV
      */
     inline bool isFormatYUVPlanar(const AVCodecContext* theCtx,
                                   dimYUV&               theDims) {
@@ -228,9 +228,9 @@ namespace stLibAV {
      */
     namespace audio {
 
-        StString getSampleFormatString (const AVCodecContext* theCtx);
-        StString getSampleRateString   (const AVCodecContext* theCtx);
-        StString getChannelLayoutString(const AVCodecContext* theCtx);
+        ST_CPPEXPORT StString getSampleFormatString (const AVCodecContext* theCtx);
+        ST_CPPEXPORT StString getSampleRateString   (const AVCodecContext* theCtx);
+        ST_CPPEXPORT StString getChannelLayoutString(const AVCodecContext* theCtx);
 
         namespace SAMPLE_FMT {
         #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 0, 0))
@@ -274,10 +274,10 @@ namespace stLibAV {
         /**
          * Alias to av_dict_get.
          */
-        Tag* findTag(Dict*       theDict,
-                     const char* theKey,
-                     const Tag*  thePrevTag,
-                     const int   theFlags);
+        ST_CPPEXPORT Tag* findTag(Dict*       theDict,
+                                  const char* theKey,
+                                  const Tag*  thePrevTag,
+                                  const int   theFlags);
 
         /**
          * Find unique tag in the dictionary and retrieve it's value.
@@ -286,9 +286,9 @@ namespace stLibAV {
          * @param theValue Read value (will be untouched if tag not found)
          * @return true if tag was found
          */
-        bool readTag(Dict*           theDict,
-                     const StString& theKey,
-                     StString&       theValue);
+        ST_CPPEXPORT bool readTag(Dict*           theDict,
+                                  const StString& theKey,
+                                  StString&       theValue);
 
         inline bool readTag(AVFormatContext* theFormatCtx,
                             const StString&  theKey,

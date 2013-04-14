@@ -28,7 +28,6 @@
 #include <StSettings/StTranslations.h>
 
 namespace {
-    static bool HAS_LOGGER_ID = StLogger::IdentifyModule("StOutDual");
 
     static const char ST_OUT_PLUGIN_NAME[]   = "StOutDual";
 
@@ -59,7 +58,7 @@ namespace {
 /**
  * Just dummy GLSL program.
  */
-class ST_LOCAL StProgramMM : public StGLProgram {
+class StProgramMM : public StGLProgram {
 
         private:
 

@@ -15,7 +15,7 @@
  * OpenGL 3.2 definition.
  */
 template<typename theBaseClass_t>
-struct ST_LOCAL stglTmplCore32 : public theBaseClass_t {
+struct stglTmplCore32 : public theBaseClass_t {
 
         public: //! @name GL_ARB_draw_elements_base_vertex (added to OpenGL 3.2 core)
 

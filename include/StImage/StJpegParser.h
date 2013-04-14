@@ -15,7 +15,7 @@
  * JPEG format parser (Joint Photographic Experts Group).
  * Notice this class doesn't decode the image!
  */
-class ST_LOCAL StJpegParser {
+class StJpegParser {
 
         public:
 
@@ -69,40 +69,22 @@ class ST_LOCAL StJpegParser {
         return 0;
     }
 
-        private:
-
-    StHandle<Image> myImages; //!< images list
-    unsigned char*  myData;   //!< pointer to the data
-    size_t          myLength; //!< data length
-
-        private:
-
-    /**
-     * Parse the structure.
-     */
-    bool parse();
-
-    /**
-     * Parse one image in data.
-     */
-    StHandle<StJpegParser::Image> parseImage(unsigned char* theDataStart);
-
         public:
 
     /**
      * Empty constructor.
      */
-    StJpegParser();
-    ~StJpegParser();
+    ST_CPPEXPORT StJpegParser();
+    ST_CPPEXPORT ~StJpegParser();
 
-    void reset();
+    ST_CPPEXPORT void reset();
 
     /**
      * Read the file content.
      */
-    bool read(const StString& theFileName);
+    ST_CPPEXPORT bool read(const StString& theFileName);
 
-    size_t getImageCount() const {
+    inline size_t getImageCount() const {
         size_t aCount = 0;
         for(StHandle<StJpegParser::Image> anImg = myImages;
             !anImg.isNull(); anImg = anImg->myNext) {
@@ -111,7 +93,7 @@ class ST_LOCAL StJpegParser {
         return aCount;
     }
 
-    StHandle<StJpegParser::Image> getImage(size_t theImgId) const {
+    inline StHandle<StJpegParser::Image> getImage(size_t theImgId) const {
         size_t aCount = 0;
         for(StHandle<StJpegParser::Image> anImg = myImages;
             !anImg.isNull(); anImg = anImg->myNext) {
@@ -122,6 +104,24 @@ class ST_LOCAL StJpegParser {
         }
         return StHandle<StJpegParser::Image>();
     }
+
+        private:
+
+    /**
+     * Parse the structure.
+     */
+    ST_CPPEXPORT bool parse();
+
+    /**
+     * Parse one image in data.
+     */
+    ST_CPPEXPORT StHandle<StJpegParser::Image> parseImage(unsigned char* theDataStart);
+
+        private:
+
+    StHandle<Image> myImages; //!< images list
+    unsigned char*  myData;   //!< pointer to the data
+    size_t          myLength; //!< data length
 
 };
 

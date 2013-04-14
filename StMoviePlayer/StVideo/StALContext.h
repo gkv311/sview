@@ -36,12 +36,7 @@
  * Wrapper over C-interface to OpenAL library.
  * Represent the device context.
  */
-class ST_LOCAL StALContext {
-
-        private: //!< private fields
-
-    ALCdevice*   hDevice;
-    ALCcontext* hContext;
+class StALContext {
 
         public:  //!< OpenAL extensions
 
@@ -56,38 +51,43 @@ class ST_LOCAL StALContext {
     /**
      * Empty constructor (doesn't initialize any AL device).
      */
-    StALContext();
+    ST_CPPEXPORT StALContext();
 
     /**
      * Destructor, will release the AL device if any.
      */
-    ~StALContext();
+    ST_CPPEXPORT ~StALContext();
 
     /**
      * @return human-readable list of available extensions.
      */
-    StString toStringExtensions() const;
+    ST_CPPEXPORT StString toStringExtensions() const;
 
     /**
      * Creates the AL device with specified name.
      */
-    bool create(const StString& theDeviceName = StString());
+    ST_CPPEXPORT bool create(const StString& theDeviceName = StString());
 
     /**
      * Release the AL device.
      */
-    void destroy();
+    ST_CPPEXPORT void destroy();
 
     /**
      * Make AL device active in current thread.
      */
-    bool makeCurrent();
+    ST_CPPEXPORT bool makeCurrent();
 
     /**
      * Notice that this method will always return true if extensions ALC_EXT_disconnect is not available.
      * @return true if device is in connected state.
      */
-    bool isConnected() const;
+    ST_CPPEXPORT bool isConnected() const;
+
+        private: //!< private fields
+
+    ALCdevice*  hDevice;
+    ALCcontext* hContext;
 
 };
 

@@ -26,10 +26,6 @@
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 
-namespace {
-    static bool HAS_LOGGER_ID = StLogger::IdentifyModule("StDiagnostics");
-};
-
 const StString StDiagnostics::ST_DRAWER_PLUGIN_NAME("StDiagnostics");
 
 StDiagnostics::StDiagnostics()

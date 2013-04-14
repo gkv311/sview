@@ -41,7 +41,7 @@ class StWindow;
 /**
  * Root GUI widget for Video Playback plugin.
  */
-class ST_LOCAL StMoviePlayerGUI : public StGLRootWidget {
+class StMoviePlayerGUI : public StGLRootWidget {
 
         public:
 
@@ -98,67 +98,67 @@ class ST_LOCAL StMoviePlayerGUI : public StGLRootWidget {
 
         private:
 
-    void createUpperToolbar();
-    void createBottomToolbar();
+    ST_LOCAL void createUpperToolbar();
+    ST_LOCAL void createBottomToolbar();
 
         private: //!< menus creation routines
 
-    void      createMainMenu();         // Root (Main menu)
-    StGLMenu* createMediaMenu();        // Root -> Media menu
-    StGLMenu* createOpenMovieMenu();    // Root -> Media -> Open movie menu
-    StGLMenu* createSaveImageMenu();    // Root -> Media -> Save snapshot menu
-    StGLMenu* createSrcFormatMenu();    // Root -> Media -> Source format menu
-    StGLMenu* createOpenALDeviceMenu(); // Root -> Media -> OpenAL Device menu
-    StGLMenu* createRecentMenu();       // Root -> Media -> Recent files menu
-    StGLMenu* createViewMenu();         // Root -> View menu
-    StGLMenu* createDisplayModeMenu();  // Root -> View menu -> Output
-    StGLMenu* createDisplayRatioMenu(); // Root -> View menu -> Display Ratio
-    StGLMenu* createSmoothFilterMenu(); // Root -> View menu -> Smooth Filter
-    StGLMenu* createGammaMenu();        // Root -> View menu -> Gamma Correction
-    StGLMenu* createAudioMenu();        // Root -> Audio menu
-    StGLMenu* createAudioGainMenu();    // Root -> Audio menu -> Volume
-    StGLMenu* createSubtitlesMenu();    // Root -> Subtitles menu
-    StGLMenu* createHelpMenu();         // Root -> Help menu
-    StGLMenu* createBlockSleepMenu();   // Root -> Help -> Block sleeping
-    StGLMenu* createCheckUpdatesMenu(); // Root -> Help -> Check updates menu
-    StGLMenu* createLanguageMenu();     // Root -> Help -> Language menu
+    ST_LOCAL void      createMainMenu();         // Root (Main menu)
+    ST_LOCAL StGLMenu* createMediaMenu();        // Root -> Media menu
+    ST_LOCAL StGLMenu* createOpenMovieMenu();    // Root -> Media -> Open movie menu
+    ST_LOCAL StGLMenu* createSaveImageMenu();    // Root -> Media -> Save snapshot menu
+    ST_LOCAL StGLMenu* createSrcFormatMenu();    // Root -> Media -> Source format menu
+    ST_LOCAL StGLMenu* createOpenALDeviceMenu(); // Root -> Media -> OpenAL Device menu
+    ST_LOCAL StGLMenu* createRecentMenu();       // Root -> Media -> Recent files menu
+    ST_LOCAL StGLMenu* createViewMenu();         // Root -> View menu
+    ST_LOCAL StGLMenu* createDisplayModeMenu();  // Root -> View menu -> Output
+    ST_LOCAL StGLMenu* createDisplayRatioMenu(); // Root -> View menu -> Display Ratio
+    ST_LOCAL StGLMenu* createSmoothFilterMenu(); // Root -> View menu -> Smooth Filter
+    ST_LOCAL StGLMenu* createGammaMenu();        // Root -> View menu -> Gamma Correction
+    ST_LOCAL StGLMenu* createAudioMenu();        // Root -> Audio menu
+    ST_LOCAL StGLMenu* createAudioGainMenu();    // Root -> Audio menu -> Volume
+    ST_LOCAL StGLMenu* createSubtitlesMenu();    // Root -> Subtitles menu
+    ST_LOCAL StGLMenu* createHelpMenu();         // Root -> Help menu
+    ST_LOCAL StGLMenu* createBlockSleepMenu();   // Root -> Help -> Block sleeping
+    ST_LOCAL StGLMenu* createCheckUpdatesMenu(); // Root -> Help -> Check updates menu
+    ST_LOCAL StGLMenu* createLanguageMenu();     // Root -> Help -> Language menu
 
-    void fillOpenALDeviceMenu(StGLMenu* theMenu);
-    void fillRecentMenu(StGLMenu* theMenu);
+    ST_LOCAL void fillOpenALDeviceMenu(StGLMenu* theMenu);
+    ST_LOCAL void fillRecentMenu(StGLMenu* theMenu);
 
         public: //!< StGLRootWidget overrides
 
-    StMoviePlayerGUI(StMoviePlayer* thePlugin,
-                     StWindow*      theWindow,
-                     size_t theTextureQueueSizeMax);
-    virtual ~StMoviePlayerGUI();
-    virtual void stglUpdate(const StPointD_t& thePointZo,
-                            const GLfloat theProgress,
-                            const double thePTS);
-    virtual void stglResize(const StRectI_t& winRectPx);
-    virtual void setVisibility(const StPointD_t& pointZo, bool isMouseActive = false);
+    ST_LOCAL StMoviePlayerGUI(StMoviePlayer* thePlugin,
+                              StWindow*      theWindow,
+                              size_t theTextureQueueSizeMax);
+    ST_LOCAL virtual ~StMoviePlayerGUI();
+    ST_LOCAL virtual void stglUpdate(const StPointD_t& thePointZo,
+                                     const GLfloat theProgress,
+                                     const double thePTS);
+    ST_LOCAL virtual void stglResize(const StRectI_t& winRectPx);
+    ST_LOCAL virtual void setVisibility(const StPointD_t& pointZo, bool isMouseActive = false);
 
         public:
 
-    bool toHideCursor();
-    void showUpdatesNotify();
+    ST_LOCAL bool toHideCursor();
+    ST_LOCAL void showUpdatesNotify();
 
         public: //!< menu update routines
 
-    void updateOpenALDeviceMenu();
-    void updateAudioStreamsMenu    (const StHandle< StArrayList<StString> >& theStreamsList,
-                                    const bool theHasVideo);
-    void updateSubtitlesStreamsMenu(const StHandle< StArrayList<StString> >& theStreamsList);
+    ST_LOCAL void updateOpenALDeviceMenu();
+    ST_LOCAL void updateAudioStreamsMenu    (const StHandle< StArrayList<StString> >& theStreamsList,
+                                             const bool theHasVideo);
+    ST_LOCAL void updateSubtitlesStreamsMenu(const StHandle< StArrayList<StString> >& theStreamsList);
 
-    void updateRecentMenu();
+    ST_LOCAL void updateRecentMenu();
 
-    void doAboutFile(const size_t );
+    ST_LOCAL void doAboutFile(const size_t );
 
         private: //!< callback Slots
 
-    void doAboutProgram (const size_t );
-    void doCheckUpdates (const size_t );
-    void doOpenLicense  (const size_t );
+    ST_LOCAL void doAboutProgram (const size_t );
+    ST_LOCAL void doCheckUpdates (const size_t );
+    ST_LOCAL void doOpenLicense  (const size_t );
 
 };
 

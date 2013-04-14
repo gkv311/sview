@@ -14,32 +14,33 @@
 /**
  * This class implements image load/save operations using FreeImage library.
  */
-class ST_LOCAL StFreeImage : public StImageFile {
-
-        private:
-
-    typedef struct FIBITMAP FIBITMAP;
-    FIBITMAP* myDIB;
+class StFreeImage : public StImageFile {
 
         public:
 
     /**
      * Should be called at application start.
      */
-    static bool init();
+    ST_CPPEXPORT static bool init();
 
         public:
 
-    StFreeImage();
-    virtual ~StFreeImage();
+    ST_CPPEXPORT StFreeImage();
+    ST_CPPEXPORT virtual ~StFreeImage();
 
-    virtual void close();
-    virtual bool load(const StString& theFilePath,
-                      ImageType theImageType = ST_TYPE_NONE,
-                      uint8_t* theDataPtr = NULL, int theDataSize = 0);
-    virtual bool save(const StString& theFilePath,
-                      ImageType theImageType);
-    virtual bool resize(size_t , size_t ) { return false; }
+    ST_CPPEXPORT virtual void close();
+    ST_CPPEXPORT virtual bool load(const StString& theFilePath,
+                                   ImageType theImageType = ST_TYPE_NONE,
+                                   uint8_t* theDataPtr = NULL, int theDataSize = 0);
+    ST_CPPEXPORT virtual bool save(const StString& theFilePath,
+                                   ImageType theImageType);
+    ST_CPPEXPORT virtual bool resize(size_t , size_t );
+
+        private:
+
+    typedef struct FIBITMAP FIBITMAP;
+    FIBITMAP* myDIB;
+
 };
 
 #endif //__StFreeImage_h_

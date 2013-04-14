@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov
+ * Copyright © 2011-2013 Kirill Gavrilov
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,7 +11,7 @@
 
 #include <StSettings/StParam.h>
 
-class ST_LOCAL StFloat32Param : public StParam<float> {
+class StFloat32Param : public StParam<float> {
 
         protected:
 

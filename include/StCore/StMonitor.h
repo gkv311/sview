@@ -37,42 +37,31 @@ typedef struct tagStMonitor {
 /**
  * Class represents monitor, connected to videocard.
  */
-class ST_LOCAL StMonitor {
-
-        private:
-
-    StString    myPnpId; //!< PnPId identificator assigned by Microsoft
-    StString     myName; //!< human-readable name for this display
-    StString  myGpuName; //!< attached to this GPU
-    StEDIDParser myEdid; //!< EDID data block if available
-    StRectI_t    myRect; //!< virtual space (rectangle)
-    int         mySysId; //!< monitor id
-    int          myFreq; //!< frequency in Herz
-    int       myFreqMax; //!< maximum frequency in Herz
+class StMonitor {
 
         public:
 
     /**
      * Empty constructor.
      */
-    StMonitor();
+    ST_CPPEXPORT StMonitor();
 
     /**
      * Copy constructor.
      */
-    StMonitor(const StMonitor& theCopy);
+    ST_CPPEXPORT StMonitor(const StMonitor& theCopy);
 
     /**
      * Copy constructor (from structure).
      */
-    StMonitor(const StMonitor_t& theMonStruct);
+    ST_CPPEXPORT StMonitor(const StMonitor_t& theMonStruct);
 
     /**
      * Create structure
      */
-    StMonitor_t getStruct();
+    ST_CPPEXPORT StMonitor_t getStruct();
 
-    bool isValid() const;
+    ST_CPPEXPORT bool isValid() const;
 
     int getId() const {
         return mySysId;
@@ -172,6 +161,17 @@ class ST_LOCAL StMonitor {
     bool operator<=(const StMonitor& compare) const {
         return mySysId <= compare.mySysId;
     }
+
+        private:
+
+    StString    myPnpId; //!< PnPId identificator assigned by Microsoft
+    StString     myName; //!< human-readable name for this display
+    StString  myGpuName; //!< attached to this GPU
+    StEDIDParser myEdid; //!< EDID data block if available
+    StRectI_t    myRect; //!< virtual space (rectangle)
+    int         mySysId; //!< monitor id
+    int          myFreq; //!< frequency in Herz
+    int       myFreqMax; //!< maximum frequency in Herz
 
 };
 

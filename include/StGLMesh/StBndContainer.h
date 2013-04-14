@@ -14,7 +14,7 @@
 /**
  * This is the common interface for bounding container object.
  */
-class ST_LOCAL StBndContainer {
+class StBndContainer {
 
         private:
 

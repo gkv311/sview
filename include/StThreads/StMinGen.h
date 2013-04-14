@@ -15,16 +15,12 @@
  */
 class StMinGen {
 
-        private:
-
-    uint32_t mySeed31; //!< the sole item of state - a 32 bit integer
-
         public:
 
     /**
      * Default constructor.
      */
-    StMinGen();
+    ST_CPPEXPORT StMinGen();
 
     /**
      * Set seed with a 31 bit unsigned integer between
@@ -37,11 +33,15 @@ class StMinGen {
     /**
      * Provides the next pseudorandom integer number (31 bits).
      */
-    uint32_t nextInt();
+    ST_CPPEXPORT uint32_t nextInt();
 
     /**
      * Return next pseudo-random value as a floating point value.
      */
-    double next();
+    ST_CPPEXPORT double next();
+
+        private:
+
+    uint32_t mySeed31; //!< the sole item of state - a 32 bit integer
 
 };

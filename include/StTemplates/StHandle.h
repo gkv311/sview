@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -21,7 +21,7 @@
  *   aVar->callMethod();
  */
 template <class Type>
-class ST_LOCAL StHandle {
+class StHandle {
 
         protected:
 
@@ -40,7 +40,7 @@ class ST_LOCAL StHandle {
         /**
          * Empty constructor
          */
-        StPointer()
+        inline StPointer()
         : myPointer(NULL),
           myCounter(0) {
             //
@@ -49,7 +49,7 @@ class ST_LOCAL StHandle {
         /**
          * Copy constructor does nothing
          */
-        StPointer(const StPointer& )
+        inline StPointer(const StPointer& )
         : myPointer(NULL),
           myCounter(0) {
             //
@@ -58,7 +58,7 @@ class ST_LOCAL StHandle {
         /**
          * Constructor stores pointer to the object
          */
-        StPointer(Type* theObj)
+        inline StPointer(Type* theObj)
         : myPointer(theObj),
           myCounter(0) {
             //
@@ -67,14 +67,14 @@ class ST_LOCAL StHandle {
         /**
          * Assignment operator, needed to avoid copying reference counter
          */
-        StPointer& operator=(const StPointer& ) {
+        inline StPointer& operator=(const StPointer& ) {
             return *this;
         }
 
         /**
          * Destructor
          */
-        ~StPointer() {
+        inline ~StPointer() {
             if(myPointer != NULL) {
                 delete myPointer;
                 myPointer = NULL;
@@ -92,7 +92,7 @@ class ST_LOCAL StHandle {
     /**
      * Assignment
      */
-    void assign(const StPointer* theItem) {
+    inline void assign(const StPointer* theItem) {
         if(theItem == myEntity) {
             return;
         }
@@ -104,7 +104,7 @@ class ST_LOCAL StHandle {
     /**
      * Increment reference counter of referred object
      */
-    void beginScope() {
+    inline void beginScope() {
         if(myEntity != NULL) {
             myEntity->myCounter.increment();
         }
@@ -113,7 +113,7 @@ class ST_LOCAL StHandle {
     /**
      * Decrement reference counter and if it become 0, destroy referred object
      */
-    void endScope() {
+    inline void endScope() {
         if(myEntity == NULL) {
             return;
         }
@@ -128,7 +128,7 @@ class ST_LOCAL StHandle {
     /**
      * Create null handle
      */
-    StHandle()
+    inline StHandle()
     : myEntity(NULL) {
         //
     }
@@ -136,7 +136,7 @@ class ST_LOCAL StHandle {
     /**
      * Constructor of handle from pointer on newly allocated object
      */
-    StHandle(Type* theObject)
+    inline StHandle(Type* theObject)
     : myEntity((theObject != NULL) ? new StPointer(theObject) : NULL) {
         beginScope();
     }
@@ -144,7 +144,7 @@ class ST_LOCAL StHandle {
     /**
      * Copy constructor
      */
-    StHandle(const StHandle& theHandle)
+    inline StHandle(const StHandle& theHandle)
     : myEntity(theHandle.myEntity) {
         beginScope();
     }
@@ -152,56 +152,56 @@ class ST_LOCAL StHandle {
     /**
      * Destructor
      */
-    ~StHandle() {
+    inline ~StHandle() {
         endScope();
     }
 
     /**
      * Cast handle to contained type
      */
-    Type* access() {
+    inline Type* access() {
         return myEntity->myPointer;
     }
 
     /**
      * Cast handle to contained type
      */
-    const Type* access() const {
+    inline const Type* access() const {
         return myEntity->myPointer;
     }
 
     /**
      * Cast handle to contained type
      */
-    Type* operator->() {
+    inline Type* operator->() {
         return myEntity->myPointer;
     }
 
     /**
      * Cast handle to contained type
      */
-    const Type* operator->() const {
+    inline const Type* operator->() const {
         return myEntity->myPointer;
     }
 
     /**
      * Cast handle to contained type
      */
-    Type& operator*() {
+    inline Type& operator*() {
         return *myEntity->myPointer;
     }
 
     /**
      * Cast handle to contained type
      */
-    const Type& operator*() const {
+    inline const Type& operator*() const {
         return *myEntity->myPointer;
     }
 
     /**
      * Assignment operator
      */
-    StHandle& operator=(const StHandle& theHandle) {
+    inline StHandle& operator=(const StHandle& theHandle) {
         assign(theHandle.myEntity);
         return *this;
     }
@@ -209,7 +209,7 @@ class ST_LOCAL StHandle {
     /**
      * Assignment operator
      */
-    StHandle& operator=(const StPointer* theItem) {
+    inline StHandle& operator=(const StPointer* theItem) {
         assign(theItem);
         return *this;
     }
@@ -217,63 +217,58 @@ class ST_LOCAL StHandle {
     /**
      * Nullify the handle
      */
-    void nullify() {
+    inline void nullify() {
         endScope();
     }
 
     /**
      * Check for being null
      */
-    bool isNull() const
-    {
+    inline bool isNull() const {
         return myEntity == NULL;
     }
 
     /**
      * Check for equality
      */
-    bool operator==(const StHandle& theRight) const
-    {
+    inline bool operator==(const StHandle& theRight) const {
         return myEntity == theRight.myEntity;
     }
 
     /**
      * Check for equality
      */
-    bool operator==(const StPointer* theRightItem) const
-    {
+    inline bool operator==(const StPointer* theRightItem) const {
         return myEntity == theRightItem;
     }
 
     /**
      * Check for equality
      */
-    friend bool operator==(const StPointer* theLeftItem, const StHandle& theRight)
-    {
+    friend inline bool operator==(const StPointer* theLeftItem,
+                                  const StHandle&  theRight) {
         return theLeftItem == theRight.myEntity;
     }
 
     /**
      * Check for inequality
      */
-    bool operator!=(const StHandle& theRight) const
-    {
+    inline bool operator!=(const StHandle& theRight) const {
         return myEntity != theRight.myEntity;
     }
 
     /**
      * Check for inequality
      */
-    bool operator!=(const StPointer* theRightItem) const
-    {
+    inline bool operator!=(const StPointer* theRightItem) const {
         return myEntity != theRightItem;
     }
 
     /**
      * Check for inequality
      */
-    friend bool operator!=(const StPointer* theLeftItem, const StHandle& theRight)
-    {
+    friend inline bool operator!=(const StPointer* theLeftItem,
+                                  const StHandle&  theRight) {
         return theLeftItem != theRight.myEntity;
     }
 
@@ -289,7 +284,7 @@ class ST_LOCAL StHandle {
      * @return true if downcast success.
      */
     template <class UpperType>
-    static StHandle downcast(const StHandle<UpperType>& theHandle) {
+    static inline StHandle downcast(const StHandle<UpperType>& theHandle) {
         StHandle aDownHandle;
         if(theHandle.isNull()) {
             return aDownHandle;
@@ -309,7 +304,7 @@ class ST_LOCAL StHandle {
      * @return true if downcast success.
      */
     template <class UpperType>
-    bool downcastFrom(const StHandle<UpperType>& theHandle) {
+    inline bool downcastFrom(const StHandle<UpperType>& theHandle) {
         *this = downcast(theHandle);
         return !isNull();
     }
@@ -347,7 +342,7 @@ template<> class StHandle<TheChildClass> : public StHandle<TheBaseClass> { \
  * @param TheBaseClass  - class name for the parent (thus should be class TheChildClass : public TheBaseClass).
  */
 #define ST_DEFINE_HANDLE_CLASS(TheChildClass, TheBaseClass) \
-class ST_LOCAL Handle : public TheBaseClass::Handle { \
+class Handle : public TheBaseClass::Handle { \
     typedef TheBaseClass::Handle TheBaseHandle; \
         public: \
     Handle()                         : TheBaseHandle() {} \

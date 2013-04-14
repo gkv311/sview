@@ -15,26 +15,26 @@
 /**
  * Simple widget to show message text.
  */
-class ST_LOCAL StGLMessageBox : public StGLWidget {
+class StGLMessageBox : public StGLWidget {
 
         public:
 
-    StGLMessageBox(StGLWidget*     theParent,
-                   const StString& theText,
-                   const int       theWidth  = 384,
-                   const int       theHeight = 128);
-    virtual ~StGLMessageBox();
-    virtual bool stglInit();
-    virtual void stglResize();
-    virtual void stglResize(const StRectI_t& theWinRectPx);
-    virtual void stglDraw(unsigned int theView);
-    virtual void setVisibility(bool isVisible, bool isForce);
-    virtual bool tryClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemClicked);
-    virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemUnclicked);
+    ST_CPPEXPORT StGLMessageBox(StGLWidget*     theParent,
+                                const StString& theText,
+                                const int       theWidth  = 384,
+                                const int       theHeight = 128);
+    ST_CPPEXPORT virtual ~StGLMessageBox();
+    ST_CPPEXPORT virtual bool stglInit();
+    ST_CPPEXPORT virtual void stglResize();
+    ST_CPPEXPORT virtual void stglResize(const StRectI_t& theWinRectPx);
+    ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
+    ST_CPPEXPORT virtual void setVisibility(bool isVisible, bool isForce);
+    ST_CPPEXPORT virtual bool tryClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemClicked);
+    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemUnclicked);
 
         private:   //! @name callback Slots (private overriders)
 
-    void doMouseUnclick(const int theBtnId);
+    ST_LOCAL void doMouseUnclick(const int theBtnId);
 
         public:    //! @name Signals
 
@@ -48,7 +48,7 @@ class ST_LOCAL StGLMessageBox : public StGLWidget {
 
         public:    //! @name callback Slots
 
-    void doKillSelf(const size_t );
+    ST_CPPEXPORT void doKillSelf(const size_t );
 
         private:   //! @name private fields
 

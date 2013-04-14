@@ -26,7 +26,7 @@
 /**
  * Parameter to control stream list.
  */
-class ST_LOCAL StParamActiveStream : public StInt32Param {
+class StParamActiveStream : public StInt32Param {
 
         private:
 
@@ -39,39 +39,39 @@ class ST_LOCAL StParamActiveStream : public StInt32Param {
     /**
      * Main constructor.
      */
-    StParamActiveStream();
+    ST_LOCAL StParamActiveStream();
 
     /**
      * Returns list of streams.
      */
-    StHandle< StArrayList<StString> > getList() const;
+    ST_LOCAL StHandle< StArrayList<StString> > getList() const;
 
     /**
      * Update configuration.
      */
-    void clearList();
+    ST_LOCAL void clearList();
 
     /**
      * Update configuration.
      */
-    void setList(const StHandle< StArrayList<StString> >& theList,
-                 const int32_t theValue);
+    ST_LOCAL void setList(const StHandle< StArrayList<StString> >& theList,
+                          const int32_t theValue);
 
     /**
      * Overridden thread-safe method.
      */
-    virtual int32_t getValue() const;
+    ST_LOCAL virtual int32_t getValue() const;
 
     /**
      * Overridden thread-safe method.
      */
-    virtual bool setValue(const int32_t theValue);
+    ST_LOCAL virtual bool setValue(const int32_t theValue);
 
     /**
      * Returns true if value was changed since last call
      * and automatically reset this state.
      */
-    bool wasChanged() const;
+    ST_LOCAL bool wasChanged() const;
 
 };
 

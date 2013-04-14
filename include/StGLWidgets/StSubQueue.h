@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -16,7 +16,7 @@
 /**
  * Subtitle primitive (Text that bound to one time interval).
  */
-class ST_LOCAL StSubItem {
+class StSubItem {
 
         public:
 
@@ -40,7 +40,7 @@ class ST_LOCAL StSubItem {
 /**
  * Thread-safe subtitles queue.
  */
-class ST_LOCAL StSubQueue {
+class StSubQueue {
 
         private:
 
@@ -66,36 +66,36 @@ class ST_LOCAL StSubQueue {
     /**
      * Default constructor.
      */
-    StSubQueue();
+    ST_CPPEXPORT StSubQueue();
 
     /**
      * Destructor.
      */
-    virtual ~StSubQueue();
+    ST_CPPEXPORT virtual ~StSubQueue();
 
     /**
      * Returns true if queue is empty.
      */
-    bool isEmpty();
+    ST_CPPEXPORT bool isEmpty();
 
     /**
      * Clean up the queue.
      */
-    void clear();
+    ST_CPPEXPORT void clear();
 
     /**
      * Return new subtitle item to show according to current presentation timestamp
      * and automatically remove outdated items.
-     * @param thePTS (const double ) - current presentation timestamp;
-     * @return new subtitle item to show or NULL handle.
+     * @param thePTS current presentation timestamp
+     * @return new subtitle item to show or NULL handle
      */
-    StHandle<StSubItem> pop(const double thePTS);
+    ST_CPPEXPORT StHandle<StSubItem> pop(const double thePTS);
 
     /**
      * Append subtitle item to the queue.
-     * @param theSubItem (const StHandle<StSubItem>& ) - item to add.
+     * @param theSubItem item to add
      */
-    void push(const StHandle<StSubItem>& theSubItem);
+    ST_CPPEXPORT void push(const StHandle<StSubItem>& theSubItem);
 
 };
 

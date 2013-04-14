@@ -15,7 +15,7 @@
  * OpenGL 4.1 definition.
  */
 template<typename theBaseClass_t>
-struct ST_LOCAL stglTmplCore41 : public theBaseClass_t {
+struct stglTmplCore41 : public theBaseClass_t {
 
         public: //! @name GL_ARB_ES2_compatibility (added to OpenGL 4.1 core)
 

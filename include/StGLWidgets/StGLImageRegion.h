@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -20,7 +20,7 @@
 
 #include <StSettings/StParam.h>
 
-class ST_LOCAL StGLImageRegion : public StGLWidget {
+class StGLImageRegion : public StGLWidget {
 
         public:
 
@@ -46,22 +46,22 @@ class ST_LOCAL StGLImageRegion : public StGLWidget {
 
         public: //!< public interface
 
-    StGLImageRegion(StGLWidget* theParent,
-                    size_t      theTextureQueueSizeMax);
+    ST_CPPEXPORT StGLImageRegion(StGLWidget* theParent,
+                                 size_t      theTextureQueueSizeMax);
 
-    StHandle<StGLTextureQueue>& getTextureQueue() {
+    ST_LOCAL inline StHandle<StGLTextureQueue>& getTextureQueue() {
         return myTextureQueue;
     }
 
-    StHandle<StStereoParams> getSource();
+    ST_CPPEXPORT StHandle<StStereoParams> getSource();
 
-    virtual ~StGLImageRegion();
-    virtual const StString& getClassName();
-    virtual void stglUpdate(const StPointD_t& pointZo);
-    virtual bool stglInit();
-    virtual void stglDraw(unsigned int theView);
-    virtual bool tryClick  (const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemClicked);
-    virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemUnclicked);
+    ST_CPPEXPORT virtual ~StGLImageRegion();
+    ST_CPPEXPORT virtual const StString& getClassName();
+    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& pointZo);
+    ST_CPPEXPORT virtual bool stglInit();
+    ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
+    ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemClicked);
+    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemUnclicked);
 
         public: //! @name Properties
 
@@ -82,18 +82,18 @@ class ST_LOCAL StGLImageRegion : public StGLWidget {
 
         private: //! @name private callback Slots
 
-    void doChangeTexFilter(const int32_t theTextureFilter);
+    ST_LOCAL void doChangeTexFilter(const int32_t theTextureFilter);
 
         private: //! @name private methods
 
-    StGLVec2 getMouseMoveFlat(const StPointD_t& theCursorZoFrom,
-                              const StPointD_t& theCursorZoTo);
-    StGLVec2 getMouseMoveFlat();
-    StGLVec2 getMouseMoveSphere(const StPointD_t& theCursorZoFrom,
-                                const StPointD_t& theCursorZoTo);
-    StGLVec2 getMouseMoveSphere();
+    ST_LOCAL StGLVec2 getMouseMoveFlat(const StPointD_t& theCursorZoFrom,
+                                       const StPointD_t& theCursorZoTo);
+    ST_LOCAL StGLVec2 getMouseMoveFlat();
+    ST_LOCAL StGLVec2 getMouseMoveSphere(const StPointD_t& theCursorZoFrom,
+                                         const StPointD_t& theCursorZoTo);
+    ST_LOCAL StGLVec2 getMouseMoveSphere();
 
-    void stglDrawView(unsigned int theView);
+    ST_LOCAL void stglDrawView(unsigned int theView);
 
         private: //! @name private fields
 

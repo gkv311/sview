@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -28,177 +28,153 @@ typedef enum tagStGLVBOType {
 /**
  * Vertex Buffer Object.
  */
-class ST_LOCAL StGLVertexBuffer : public StGLResource {
+class StGLVertexBuffer : public StGLResource {
 
         public:
 
     /**
      * Empty constructor.
      */
-    StGLVertexBuffer();
+    ST_CPPEXPORT StGLVertexBuffer();
 
     /**
      * Destructor - should be called after release()!
      */
-    virtual ~StGLVertexBuffer();
+    ST_CPPEXPORT virtual ~StGLVertexBuffer();
 
     /**
      * Release GL resource.
      */
-    virtual void release(StGLContext& theCtx);
+    ST_CPPEXPORT virtual void release(StGLContext& theCtx);
 
     /**
      * @return true if this VBO has valid ID (was created but not necessary initialized with valid data!).
      */
-    bool isValid() const {
+    inline bool isValid() const {
         return myBufferId != 0;
     }
 
     /**
      * Generate VBO name.
      */
-    bool init(StGLContext& theCtx);
+    ST_CPPEXPORT bool init(StGLContext& theCtx);
 
     /**
      * Bind this VBO.
      */
-    void bind(StGLContext& theCtx) const;
+    ST_CPPEXPORT void bind(StGLContext& theCtx) const;
 
     /**
      * Unbind any VBO.
      */
-    void unbind(StGLContext& theCtx) const;
+    ST_CPPEXPORT void unbind(StGLContext& theCtx) const;
 
     /**
      * VBO should be binded before call.
-     * @param theElemSize   - specifies the number of components per generic vertex attribute. Must be 1, 2, 3, or 4;
-     * @param theElemsCount - elements count;
-     * @param theData       - data pointer.
+     * @param theElemSize   specifies the number of components per generic vertex attribute. Must be 1, 2, 3, or 4
+     * @param theElemsCount elements count
+     * @param theData       data pointer
      */
-    void setData(StGLContext&   theCtx,
-                 GLsizeiptr     theElemSize,
-                 GLsizeiptr     theElemsCount,
-                 const GLfloat* theData);
+    ST_CPPEXPORT void setData(StGLContext&   theCtx,
+                              GLsizeiptr     theElemSize,
+                              GLsizeiptr     theElemsCount,
+                              const GLfloat* theData);
 
-    void setData(StGLContext&   theCtx,
-                 GLsizeiptr     theElemSize,
-                 GLsizeiptr     theElemsCount,
-                 const GLuint*  theData);
+    ST_CPPEXPORT void setData(StGLContext&   theCtx,
+                              GLsizeiptr     theElemSize,
+                              GLsizeiptr     theElemsCount,
+                              const GLuint*  theData);
 
-    void setData(StGLContext&   theCtx,
-                 GLsizeiptr     theElemSize,
-                 GLsizeiptr     theElemsCount,
-                 const GLubyte* theData);
+    ST_CPPEXPORT void setData(StGLContext&   theCtx,
+                              GLsizeiptr     theElemSize,
+                              GLsizeiptr     theElemsCount,
+                              const GLubyte* theData);
 
-    bool init(StGLContext&             theCtx,
-              const StArray<StGLVec2>& theArray) {
+    inline bool init(StGLContext&             theCtx,
+                     const StArray<StGLVec2>& theArray) {
         return init(theCtx, 2, GLsizeiptr(theArray.size()), theArray.getFirst().getData());
     }
 
-    bool init(StGLContext&             theCtx,
-              const StArray<StGLVec3>& theArray) {
+    inline bool init(StGLContext&             theCtx,
+                     const StArray<StGLVec3>& theArray) {
         return init(theCtx, 3, GLsizeiptr(theArray.size()), theArray.getFirst().getData());
     }
 
-    bool init(StGLContext&             theCtx,
-              const StArray<StGLVec4>& theArray) {
+    inline bool init(StGLContext&             theCtx,
+                     const StArray<StGLVec4>& theArray) {
         return init(theCtx, 4, GLsizeiptr(theArray.size()), theArray.getFirst().getData());
     }
 
-    bool init(StGLContext&   theCtx,
-              GLsizeiptr     theElemSize,
-              GLsizeiptr     theElemsCount,
-              const GLfloat* theData) {
-        if(!init(theCtx)) {
-            return false;
-        }
-        bind(theCtx);
-        setData(theCtx, theElemSize, theElemsCount, theData);
-        unbind(theCtx);
-        return true;
-    }
+    ST_CPPEXPORT bool init(StGLContext&   theCtx,
+                           GLsizeiptr     theElemSize,
+                           GLsizeiptr     theElemsCount,
+                           const GLfloat* theData);
 
-    bool init(StGLContext&   theCtx,
-              GLsizeiptr     theElemSize,
-              GLsizeiptr     theElemsCount,
-              const GLuint*  theData) {
-        if(!init(theCtx)) {
-            return false;
-        }
-        bind(theCtx);
-        setData(theCtx, theElemSize, theElemsCount, theData);
-        unbind(theCtx);
-        return true;
-    }
+    ST_CPPEXPORT bool init(StGLContext&   theCtx,
+                           GLsizeiptr     theElemSize,
+                           GLsizeiptr     theElemsCount,
+                           const GLuint*  theData);
 
-    bool init(StGLContext&   theCtx,
-              GLsizeiptr     theElemSize,
-              GLsizeiptr     theElemsCount,
-              const GLubyte* theData) {
-        if(!init(theCtx)) {
-            return false;
-        }
-        bind(theCtx);
-        setData(theCtx, theElemSize, theElemsCount, theData);
-        unbind(theCtx);
-        return true;
-    }
+    ST_CPPEXPORT bool init(StGLContext&   theCtx,
+                           GLsizeiptr     theElemSize,
+                           GLsizeiptr     theElemsCount,
+                           const GLubyte* theData);
 
     /**
      * @return elemSize (GLsizeiptr ) - specifies the number of components per generic vertex attribute. Must be 1, 2, 3, or 4;
      */
-    GLsizeiptr getElemSize() const {
+    inline GLsizeiptr getElemSize() const {
         return myElemSize;
     }
 
-    GLsizeiptr getElemsCount() const {
+    inline GLsizeiptr getElemsCount() const {
         return myElemsCount;
     }
 
     /**
      * @return the data type of each component in the array.
      */
-    GLenum getDataType() const {
+    inline GLenum getDataType() const {
         return myDataType;
     }
 
-    virtual GLenum getTarget() const;
+    ST_CPPEXPORT virtual GLenum getTarget() const;
 
-    void bindVertexAttrib(StGLContext&    theCtx,
-                          StGLVarLocation theAttribLoc) const;
+    ST_CPPEXPORT void bindVertexAttrib(StGLContext&    theCtx,
+                                       StGLVarLocation theAttribLoc) const;
 
-    void unBindVertexAttrib(StGLContext&    theCtx,
-                            StGLVarLocation theAttribLoc) const;
+    ST_CPPEXPORT void unBindVertexAttrib(StGLContext&    theCtx,
+                                         StGLVarLocation theAttribLoc) const;
 
-    StString toString() const {
+    inline StString toString() const {
         return StString("OpenGL buffer #") + myBufferId;
     }
 
         public:
 
-    bool operator==(const StGLVertexBuffer& compare) const {
+    inline bool operator==(const StGLVertexBuffer& compare) const {
         return myBufferId == compare.myBufferId &&
                getTarget() == compare.getTarget();
     }
 
-    bool operator!=(const StGLVertexBuffer& compare) const {
+    inline bool operator!=(const StGLVertexBuffer& compare) const {
         return myBufferId != compare.myBufferId ||
                getTarget() != compare.getTarget();
     }
 
-    bool operator>(const StGLVertexBuffer& compare) const {
+    inline bool operator>(const StGLVertexBuffer& compare) const {
         return myBufferId > compare.myBufferId;
     }
 
-    bool operator<(const StGLVertexBuffer& compare) const {
+    inline bool operator<(const StGLVertexBuffer& compare) const {
         return myBufferId < compare.myBufferId;
     }
 
-    bool operator>=(const StGLVertexBuffer& compare) const {
+    inline bool operator>=(const StGLVertexBuffer& compare) const {
         return myBufferId >= compare.myBufferId;
     }
 
-    bool operator<=(const StGLVertexBuffer& compare) const {
+    inline bool operator<=(const StGLVertexBuffer& compare) const {
         return myBufferId <= compare.myBufferId;
     }
 
@@ -213,17 +189,16 @@ class ST_LOCAL StGLVertexBuffer : public StGLResource {
 
 template<> inline void StArray<GLuint>::sort() {}
 
-class ST_LOCAL StGLIndexBuffer : public StGLVertexBuffer {
+class StGLIndexBuffer : public StGLVertexBuffer {
 
         public:
 
-    StGLIndexBuffer()
-    : StGLVertexBuffer() {}
+    ST_CPPEXPORT StGLIndexBuffer();
 
-    virtual GLenum getTarget() const;
+    ST_CPPEXPORT virtual GLenum getTarget() const;
 
-    bool init(StGLContext&           theCtx,
-              const StArray<GLuint>& theArray) {
+    inline bool init(StGLContext&           theCtx,
+                     const StArray<GLuint>& theArray) {
         return StGLVertexBuffer::init(theCtx, GLsizeiptr(1), GLsizeiptr(theArray.size()), &theArray.getFirst());
     }
 

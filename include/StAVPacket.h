@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -17,7 +17,7 @@
  * This is just a wrapper to AVPacket structure
  * with some useful copy functionality inside.
  */
-class ST_LOCAL StAVPacket {
+class StAVPacket {
 
         public:
 
@@ -34,7 +34,7 @@ class ST_LOCAL StAVPacket {
         #define AV_PKT_FLAG_CORRUPT 0x0002 ///< The packet content is corrupted
     #endif
 
-    static void avDestructPacket(AVPacket* thePkt);
+    ST_CPPEXPORT static void avDestructPacket(AVPacket* thePkt);
 
         private:
 
@@ -46,105 +46,105 @@ class ST_LOCAL StAVPacket {
     /**
      * Emulates av_init_packet().
      */
-    void avInitPacket();
+    ST_CPPEXPORT void avInitPacket();
 
         public:
 
     /**
      * Empty constructor
      */
-    StAVPacket();
+    ST_CPPEXPORT StAVPacket();
 
-    StAVPacket(const StHandle<StStereoParams>& theStParams,
-               const int theType = DATA_PACKET);
+    ST_CPPEXPORT StAVPacket(const StHandle<StStereoParams>& theStParams,
+                            const int theType = DATA_PACKET);
 
-    StAVPacket(const StAVPacket& theCopy);
+    ST_CPPEXPORT StAVPacket(const StAVPacket& theCopy);
 
-    ~StAVPacket();
+    ST_CPPEXPORT ~StAVPacket();
 
     /**
      * Emulates av_free_packet().
      */
-    void free();
+    ST_CPPEXPORT void free();
 
-    AVPacket* getAVpkt() {
+    inline AVPacket* getAVpkt() {
         return &myPacket;
     }
 
-    void setAVpkt(const AVPacket& theCopy);
+    ST_CPPEXPORT void setAVpkt(const AVPacket& theCopy);
 
-    const StHandle<StStereoParams>& getSource() const {
+    inline const StHandle<StStereoParams>& getSource() const {
         return myStParams;
     }
 
-    int getType() const {
+    inline int getType() const {
         return myType;
     }
 
-    const uint8_t* getData() const {
+    inline const uint8_t* getData() const {
         return myPacket.data;
     }
 
-    int getSize() const {
+    inline int getSize() const {
         return myPacket.size;
     }
 
-    int64_t getPts() const {
+    inline int64_t getPts() const {
         return myPacket.pts;
     }
 
-    int64_t getDts() const {
+    inline int64_t getDts() const {
         return myPacket.dts;
     }
 
-    int64_t getConvergenceDuration() const {
+    inline int64_t getConvergenceDuration() const {
         return myPacket.convergence_duration;
     }
 
-    int getDuration() const {
+    inline int getDuration() const {
         return myPacket.duration;
     }
 
-    double getDurationSeconds() const {
+    inline double getDurationSeconds() const {
         return myDurationSec;
     }
 
-    void setDurationSeconds(const double theDurationSec) {
+    inline void setDurationSeconds(const double theDurationSec) {
         myDurationSec = theDurationSec;
     }
 
-    int getStreamId() const {
+    inline int getStreamId() const {
         return myPacket.stream_index;
     }
 
-    bool isKeyFrame() const {
+    inline bool isKeyFrame() const {
         return myPacket.flags & AV_PKT_FLAG_KEY;
     }
 
-    void setKeyFrame() {
+    inline void setKeyFrame() {
         myPacket.flags |= AV_PKT_FLAG_KEY;
     }
 
     // dummy
-    bool operator==(const StAVPacket& compare) const {
+    inline bool operator==(const StAVPacket& compare) const {
         return this == &compare;
     }
-    bool operator!=(const StAVPacket& compare) const {
+    inline bool operator!=(const StAVPacket& compare) const {
         return this != &compare;
     }
-    bool operator>(const StAVPacket& compare) const {
+    inline bool operator>(const StAVPacket& compare) const {
         return this > &compare;
     }
-    bool operator<(const StAVPacket& compare) const {
+    inline bool operator<(const StAVPacket& compare) const {
         return this < &compare;
     }
-    bool operator>=(const StAVPacket& compare) const {
+    inline bool operator>=(const StAVPacket& compare) const {
         return this >= &compare;
     }
-    bool operator<=(const StAVPacket& compare) const {
+    inline bool operator<=(const StAVPacket& compare) const {
         return this <= &compare;
     }
-    StString toString() const {
+    inline StString toString() const {
         return StString();
     }
 

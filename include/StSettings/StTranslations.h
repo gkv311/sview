@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2011 Kirill Gavrilov
+ * Copyright © 2010-2013 Kirill Gavrilov
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -19,20 +19,7 @@
  * It is automatically uses StSettings library and global settings section
  * to store / restore global language settigns.
  */
-class ST_LOCAL StTranslations : public StLangMap {
-
-        private:
-
-    StString              myModuleName;  //!< module name like 'StImageViewer'
-    StArrayList<StString> myLangList;    //!< available (found) translations
-    bool                  myWasReloaded; //!< flag indicates that translation was reloaded
-
-        private: //!< private callback slots
-
-    /**
-     * Changes translation.
-     */
-    void setLanguage(const int32_t theNewLang);
+class StTranslations : public StLangMap {
 
         public:
 
@@ -40,17 +27,17 @@ class ST_LOCAL StTranslations : public StLangMap {
      * Main constructor.
      * @param theModuleName (const StString& ) - module name, the subfolder where translations files should be placed.
      */
-    StTranslations(const StString& theModuleName);
+    ST_CPPEXPORT StTranslations(const StString& theModuleName);
 
     /**
      * Desctructor.
      */
-    virtual ~StTranslations();
+    ST_CPPEXPORT virtual ~StTranslations();
 
     /**
      * Returns active translation.
      */
-    StString getLanguage() const;
+    ST_CPPEXPORT StString getLanguage() const;
 
     /**
      * Return list of available translations.
@@ -82,6 +69,19 @@ class ST_LOCAL StTranslations : public StLangMap {
         StHandle<StInt32Param> language; //!< language id in available translations list
 
     } params;
+
+        private: //!< private callback slots
+
+    /**
+     * Changes translation.
+     */
+    ST_LOCAL void setLanguage(const int32_t theNewLang);
+
+        private:
+
+    StString              myModuleName;  //!< module name like 'StImageViewer'
+    StArrayList<StString> myLangList;    //!< available (found) translations
+    bool                  myWasReloaded; //!< flag indicates that translation was reloaded
 
 };
 

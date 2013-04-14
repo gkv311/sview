@@ -34,19 +34,19 @@ ST_DEFINE_HANDLE(StVideoQueue, StAVPacketQueue);
  * which feeded with packets (StAVPacket),
  * so it also implements StAVPacketQueue.
  */
-class ST_LOCAL StVideoQueue : public StAVPacketQueue {
+class StVideoQueue : public StAVPacketQueue {
 
         public:
 
-    bool isInDowntime() {
+    ST_LOCAL bool isInDowntime() {
         return myDowntimeState.check();
     }
 
-    void setSlave(const StHandle<StVideoQueue>& theSlave) {
+    ST_LOCAL void setSlave(const StHandle<StVideoQueue>& theSlave) {
         mySlave = theSlave;
     }
 
-    StImage* waitData(double& thePts) {
+    ST_LOCAL StImage* waitData(double& thePts) {
         myHasDataState.wait();
         if(myDataAdp.isNull()) {
             return NULL;
@@ -55,101 +55,101 @@ class ST_LOCAL StVideoQueue : public StAVPacketQueue {
         return &myDataAdp;
     }
 
-    void unlockData() {
+    ST_LOCAL void unlockData() {
         myHasDataState.reset();
     }
 
-    int64_t getVideoPktPts() const {
+    ST_LOCAL int64_t getVideoPktPts() const {
         return myVideoPktPts;
     }
 
-    void setAClock(const double thePts) {
+    ST_LOCAL void setAClock(const double thePts) {
         myAudioClockMutex.lock();
         myAudioClock = thePts;
         myAudioClockMutex.unlock();
     }
 
-    double getAClock() {
+    ST_LOCAL double getAClock() {
         myAudioClockMutex.lock();
         const double aPts = myAudioClock;
         myAudioClockMutex.unlock();
         return aPts;
     }
 
-    StString getPixelFormatString() const {
+    ST_LOCAL StString getPixelFormatString() const {
         return stLibAV::PIX_FMT::getString(myCodecCtx->pix_fmt);
     }
 
-    StFormatEnum getSrcFormat() const {
+    ST_LOCAL StFormatEnum getSrcFormat() const {
         return mySrcFormat;
     }
 
-    void setSrcFormat(const StFormatEnum theSrcFormat) {
+    ST_LOCAL void setSrcFormat(const StFormatEnum theSrcFormat) {
         mySrcFormat = theSrcFormat;
     }
 
-    StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
-                 const StHandle<StVideoQueue>&     theMaster = StHandle<StVideoQueue>());
-    virtual ~StVideoQueue();
+    ST_LOCAL StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
+                          const StHandle<StVideoQueue>&     theMaster = StHandle<StVideoQueue>());
+    ST_LOCAL virtual ~StVideoQueue();
 
     /**
      * Initialization function.
-     * @param theFormatCtx (AVFormatContext* )  - pointer to video format context;
-     * @param theStreamId (const unsigned int ) - stream id in video format context;
-     * @return true if no error.
+     * @param theFormatCtx pointer to video format context
+     * @param theStreamId  stream id in video format context
+     * @return true if no error
      */
-    virtual bool init(AVFormatContext*   theFormatCtx,
-                      const unsigned int theStreamId);
+    ST_LOCAL virtual bool init(AVFormatContext*   theFormatCtx,
+                               const unsigned int theStreamId);
 
     /**
      * Clean function.
      */
-    virtual void deinit();
+    ST_LOCAL virtual void deinit();
 
-    void syncVideo(AVFrame* srcFrame, double* pts);
+    ST_LOCAL void syncVideo(AVFrame* srcFrame, double* pts);
 
     /**
      * Main decoding loop.
      * Give packets from queue, decode them and push to stereo textures queue for playback.
      */
-    void decodeLoop();
+    ST_LOCAL void decodeLoop();
 
     /**
-     * @return PAR.
+     * @return PAR
      */
-    GLfloat getPixelRatio() const {
+    ST_LOCAL GLfloat getPixelRatio() const {
         return myPixelRatio;
     }
 
     /**
-     * @return sizeX (int ) - source frame width.
+     * @return source frame width
      */
-    int sizeX() const {
+    ST_LOCAL int sizeX() const {
         return (myCodecCtx != NULL) ? myCodecCtx->width : 0;
     }
 
     /**
-     * @return sizeY (int ) - source frame height.
+     * @return source frame height
      */
-    int sizeY() const {
+    ST_LOCAL int sizeY() const {
         return (myCodecCtx != NULL) ? myCodecCtx->height : 0;
     }
 
-    StHandle<StGLTextureQueue>& getTextureQueue() {
+    ST_LOCAL StHandle<StGLTextureQueue>& getTextureQueue() {
         return myTextureQueue;
     }
 
-    double getPts() const {
+    ST_LOCAL double getPts() const {
         return myTextureQueue->getPTSCurr();
     }
 
         private:
 
-    void pushFrame(const StImage&     theSrcDataLeft,
-                   const StImage&     theSrcDataRight,
-                   const StHandle<StStereoParams>& theStParams,
-                   const StFormatEnum theSrcFormat,
-                   const double       theSrcPTS);
+    ST_LOCAL void pushFrame(const StImage&     theSrcDataLeft,
+                            const StImage&     theSrcDataRight,
+                            const StHandle<StStereoParams>& theStParams,
+                            const StFormatEnum theSrcFormat,
+                            const double       theSrcPTS);
 
         private:
 

@@ -15,7 +15,7 @@
  * OpenGL 2.1 core based on 2.0 version.
  */
 template<typename theBaseClass_t>
-struct ST_LOCAL stglTmplCore21 : public theBaseClass_t {
+struct stglTmplCore21 : public theBaseClass_t {
 
         public: //! @name OpenGL 2.1 additives to 2.0
 

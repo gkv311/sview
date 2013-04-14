@@ -15,7 +15,7 @@
 /**
  * Class represents rectangle image plain.
  */
-class ST_LOCAL StImagePlane {
+class StImagePlane {
 
         public:
 
@@ -38,8 +38,8 @@ class ST_LOCAL StImagePlane {
         ImgBGRAF,       //!< same as RGBAF but with different components order
     } ImgFormat;
 
-    static StString formatImgFormat(ImgFormat theImgFormat);
-    StString formatImgFormat() const { return formatImgFormat(myImgFormat); }
+    ST_CPPEXPORT static StString formatImgFormat(ImgFormat theImgFormat);
+    inline StString formatImgFormat() const { return formatImgFormat(myImgFormat); }
 
         protected:
 
@@ -54,11 +54,11 @@ class ST_LOCAL StImagePlane {
 
         private:
 
-    void setFormat(ImgFormat thePixelFormat);
+    ST_CPPEXPORT void setFormat(ImgFormat thePixelFormat);
 
         public:
 
-    ImgFormat getFormat() const {
+    inline ImgFormat getFormat() const {
         return myImgFormat;
     }
 
@@ -71,7 +71,7 @@ class ST_LOCAL StImagePlane {
      * IGNORES that flag and always assume data is in normal top-down format!
      * @return true if image data is top-down.
      */
-    bool isTopDown() const {
+    inline bool isTopDown() const {
         return myIsTopBottom;
     }
 
@@ -79,7 +79,7 @@ class ST_LOCAL StImagePlane {
      * Setup scanlines order in memory - top-down (default) or bottom-up.
      * @param theIsTopDown (bool ) - top-down flag.
      */
-    void setTopDown(bool theIsTopDown) {
+    inline void setTopDown(bool theIsTopDown) {
         myIsTopBottom = theIsTopDown;
     }
 
@@ -92,7 +92,7 @@ class ST_LOCAL StImagePlane {
      * @return data pointer to requested position.
      * Could be used as general method to copy data from one buffer to another.
      */
-    const GLubyte* getData(const size_t theRow = 0, const size_t theCol = 0) const {
+    inline const GLubyte* getData(const size_t theRow = 0, const size_t theCol = 0) const {
         ST_DEBUG_ASSERT((myDataPtr != NULL) && (theRow < mySizeY) && (theCol < mySizeX));
         return &myDataPtr[mySizeRowBytes * theRow + mySizeBPP * theCol];
     }
@@ -100,16 +100,16 @@ class ST_LOCAL StImagePlane {
     /**
      * @return data pointer to requested position.
      */
-    GLubyte* changeData(const size_t theRow = 0, const size_t theCol = 0) {
+    inline GLubyte* changeData(const size_t theRow = 0, const size_t theCol = 0) {
         ST_DEBUG_ASSERT((myDataPtr != NULL) && (theRow < mySizeY) && (theCol < mySizeX));
         return &myDataPtr[mySizeRowBytes * theRow + mySizeBPP * theCol];
     }
 
-    GLubyte getFirstByte(const size_t theRow, const size_t theCol) const {
+    inline GLubyte getFirstByte(const size_t theRow, const size_t theCol) const {
         return *getData(theRow, theCol);
     }
 
-    GLubyte& changeFirstByte(const size_t theRow, const size_t theCol) {
+    inline GLubyte& changeFirstByte(const size_t theRow, const size_t theCol) {
         return *changeData(theRow, theCol);
     }
 
@@ -118,11 +118,11 @@ class ST_LOCAL StImagePlane {
     /**
      * Access to RGB data.
      */
-    const StPixelRGB& getPixelRGB(const size_t theRow, const size_t theCol) const {
+    inline const StPixelRGB& getPixelRGB(const size_t theRow, const size_t theCol) const {
         return *((StPixelRGB* )getData(theRow, theCol));
     }
 
-    StPixelRGB& changePixelRGB(const size_t theRow, const size_t theCol) {
+    inline StPixelRGB& changePixelRGB(const size_t theRow, const size_t theCol) {
         return *((StPixelRGB* )changeData(theRow, theCol));
     }
 
@@ -131,28 +131,28 @@ class ST_LOCAL StImagePlane {
     /**
      * @return width / height.
      */
-    GLfloat getRatio() const {
+    inline GLfloat getRatio() const {
         return (mySizeY > 0) ? (GLfloat(mySizeX) / GLfloat(mySizeY)) : 1.0f;
     }
 
     /**
      * @return bytes reserved for one pixel.
      */
-    size_t getSizePixelBytes() const {
+    inline size_t getSizePixelBytes() const {
         return mySizeBPP;
     }
 
     /**
      * @return image plane width in pixels.
      */
-    size_t getSizeX() const {
+    inline size_t getSizeX() const {
         return mySizeX;
     }
 
     /**
      * @return image plane height in pixels.
      */
-    size_t getSizeY() const {
+    inline size_t getSizeY() const {
         return mySizeY;
     }
 
@@ -161,21 +161,21 @@ class ST_LOCAL StImagePlane {
      * In some case may be larger than needed to store packed row
      * (for alignment etc.).
      */
-    size_t getSizeRowBytes() const {
+    inline size_t getSizeRowBytes() const {
         return mySizeRowBytes;
     }
 
     /**
      * @return bytes allocated for the whole image plane.
      */
-    size_t getSizeBytes() const {
+    inline size_t getSizeBytes() const {
         return mySizeRowBytes * mySizeY;
     }
 
     /**
      * @return true if data is NULL.
      */
-    bool isNull() const {
+    inline bool isNull() const {
         return myDataPtr == NULL;
     }
 
@@ -183,7 +183,7 @@ class ST_LOCAL StImagePlane {
      * Compute the maximal row alignment for current row size.
      * @return maximal row alignment in bytes (up to 16 bytes).
      */
-    size_t getMaxRowAligment() const {
+    inline size_t getMaxRowAligment() const {
         size_t anAlignment = 2;
         for(; anAlignment <= 16; anAlignment <<= 1) {
             if((mySizeRowBytes % anAlignment) != 0 || (size_t(myDataPtr) % anAlignment) != 0) {
@@ -196,7 +196,7 @@ class ST_LOCAL StImagePlane {
     /**
      * @return the extra bytes in the row.
      */
-    size_t getRowExtraBytes() const {
+    inline size_t getRowExtraBytes() const {
         return mySizeRowBytes - mySizeX * mySizeBPP;
     }
 
@@ -205,62 +205,62 @@ class ST_LOCAL StImagePlane {
     /**
      * Empty constructor. Initialize the NULL image plane.
      */
-    StImagePlane();
-    virtual ~StImagePlane();
+    ST_CPPEXPORT StImagePlane();
+    ST_CPPEXPORT virtual ~StImagePlane();
 
     /**
      * Initialize image plane as wrapper over alien data.
      * Data will not be copied!
      */
-    bool initWrapper(ImgFormat thePixelFormat,
-                     GLubyte*      theDataPtr,
-                     const size_t  theSizeX,
-                     const size_t  theSizeY,
-                     const size_t  theSizeRowBytes = 0);
+    ST_CPPEXPORT bool initWrapper(ImgFormat thePixelFormat,
+                                  GLubyte*      theDataPtr,
+                                  const size_t  theSizeX,
+                                  const size_t  theSizeY,
+                                  const size_t  theSizeRowBytes = 0);
 
     /**
      * Initialize image plane with required dimensions.
      */
-    bool initTrash(ImgFormat thePixelFormat,
-                   const size_t theSizeX,
-                   const size_t theSizeY,
-                   const size_t theSizeRowBytes = 0);
+    ST_CPPEXPORT bool initTrash(ImgFormat thePixelFormat,
+                                const size_t theSizeX,
+                                const size_t theSizeY,
+                                const size_t theSizeRowBytes = 0);
 
     /**
      * Same as initTrash() but fill the buffer with zeros
      * (will be black for most formats).
      */
-    bool initZero(ImgFormat thePixelFormat,
-                  const size_t theSizeX,
-                  const size_t theSizeY,
-                  const size_t theSizeRowBytes = 0,
-                  const int theValue = 0);
+    ST_CPPEXPORT bool initZero(ImgFormat thePixelFormat,
+                               const size_t theSizeX,
+                               const size_t theSizeY,
+                               const size_t theSizeRowBytes = 0,
+                               const int theValue = 0);
 
     /**
      * Initialize as copy (data will be copied!).
      */
-    bool initCopy(const StImagePlane& theCopy);
+    ST_CPPEXPORT bool initCopy(const StImagePlane& theCopy);
 
     /**
      * Initialize as wrapper (data will not be copied).
      */
-    bool initWrapper(const StImagePlane& theCopy);
+    ST_CPPEXPORT bool initWrapper(const StImagePlane& theCopy);
 
     /**
      * Method initialize the cross-eyed stereoscopic image plane.
      */
-    bool initSideBySide(const StImagePlane& theImageL,
-                        const StImagePlane& theImageR,
-                        const int theSeparationDx = 0,
-                        const int theSeparationDy = 0,
-                        const int theValue = 0);
+    ST_CPPEXPORT bool initSideBySide(const StImagePlane& theImageL,
+                                     const StImagePlane& theImageR,
+                                     const int theSeparationDx = 0,
+                                     const int theSeparationDy = 0,
+                                     const int theValue = 0);
 
-    bool fill(const StImagePlane& theCopy);
+    ST_CPPEXPORT bool fill(const StImagePlane& theCopy);
 
     /**
      * Smart method to correctly deallocate image plane.
      */
-    void nullify(ImgFormat thePixelFormat = StImagePlane::ImgGray);
+    ST_CPPEXPORT void nullify(ImgFormat thePixelFormat = StImagePlane::ImgGray);
 
 };
 

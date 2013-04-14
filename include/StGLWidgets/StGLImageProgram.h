@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -15,7 +15,7 @@
 #include <StImage/StImage.h>
 #include <StSettings/StFloat32Param.h>
 
-class ST_LOCAL StGLImageProgram : public StGLMeshProgram {
+class StGLImageProgram : public StGLMeshProgram {
 
         public:
 
@@ -27,42 +27,42 @@ class ST_LOCAL StGLImageProgram : public StGLMeshProgram {
 
         public:
 
-    StGLImageProgram(const StString& theTitle);
+    ST_CPPEXPORT StGLImageProgram(const StString& theTitle);
 
-    virtual ~StGLImageProgram();
+    ST_CPPEXPORT virtual ~StGLImageProgram();
 
-    virtual void release(StGLContext& theCtx);
+    ST_CPPEXPORT virtual void release(StGLContext& theCtx);
 
     /**
      * Setup color model conversion
      */
-    void setupSrcColorShader(StGLContext&           theCtx,
-                             StImage::ImgColorModel theColorModel);
+    ST_CPPEXPORT void setupSrcColorShader(StGLContext&           theCtx,
+                                          StImage::ImgColorModel theColorModel);
 
-    void setTextureSizePx(StGLContext&    theCtx,
-                          const StGLVec2& theVec2);
+    ST_CPPEXPORT void setTextureSizePx(StGLContext&    theCtx,
+                                       const StGLVec2& theVec2);
 
-    void setTextureMainDataSize(StGLContext&    theCtx,
-                                const StGLVec4& theTexDataVec4);
+    ST_CPPEXPORT void setTextureMainDataSize(StGLContext&    theCtx,
+                                             const StGLVec4& theTexDataVec4);
 
-    void setTextureUVDataSize(StGLContext&    theCtx,
-                              const StGLVec4& theTexDataVec4);
+    ST_CPPEXPORT void setTextureUVDataSize(StGLContext&    theCtx,
+                                           const StGLVec4& theTexDataVec4);
 
-    void setColorScale(StGLContext&    theCtx,
-                       const StGLVec3& theScale);
-    void resetColorScale(StGLContext& theCtx);
+    ST_CPPEXPORT void setColorScale(StGLContext&    theCtx,
+                                    const StGLVec3& theScale);
+    ST_CPPEXPORT void resetColorScale(StGLContext& theCtx);
 
-    void setContext(const StHandle<StGLContext>& theCtx);
+    ST_CPPEXPORT void setContext(const StHandle<StGLContext>& theCtx);
 
     /**
      * Initialize default shaders, nothing more.
      */
-    virtual bool init(StGLContext& theCtx);
+    ST_CPPEXPORT virtual bool init(StGLContext& theCtx);
 
     /**
      * Perform (re)link and search variables locations.
      */
-    virtual bool link(StGLContext& theCtx);
+    ST_CPPEXPORT virtual bool link(StGLContext& theCtx);
 
         public: //!< Properties
 
@@ -76,15 +76,15 @@ class ST_LOCAL StGLImageProgram : public StGLMeshProgram {
 
         private: //!< callback Slots
 
-    void doGammaChanged(const float );
-    void doSetupCorrectionShader(const float );
+    ST_LOCAL void doGammaChanged(const float );
+    ST_LOCAL void doSetupCorrectionShader(const float );
 
         protected:
 
-    void setCorrectionUniform(StGLContext& theCtx);
-    void setGammaUniform(StGLContext& theCtx);
+    ST_CPPEXPORT void setCorrectionUniform(StGLContext& theCtx);
+    ST_CPPEXPORT void setGammaUniform(StGLContext& theCtx);
 
-    bool isNoColorScale() const;
+    ST_CPPEXPORT bool isNoColorScale() const;
 
         protected:
 

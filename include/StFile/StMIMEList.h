@@ -11,7 +11,7 @@
 
 #include "StMIME.h"
 
-class ST_LOCAL StMIMEList : public StArrayList<StMIME> {
+class StMIMEList : public StArrayList<StMIME> {
 
         public:
 

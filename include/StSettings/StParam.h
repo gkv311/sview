@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov
+ * Copyright © 2011-2013 Kirill Gavrilov
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -17,7 +17,7 @@
  * and on change signal onChanged() will be emitted.
  */
 template <typename Type>
-class ST_LOCAL StParam {
+class StParam {
 
         protected:
 
@@ -28,16 +28,16 @@ class ST_LOCAL StParam {
     /**
      * Main constructor.
      */
-    StParam(const Type theValue)
+    inline StParam(const Type theValue)
     : myValue(theValue) {}
 
-    virtual ~StParam() {}
+    inline virtual ~StParam() {}
 
     /**
      * Just retrieve the current value.
      * @return current value.
      */
-    virtual Type getValue() const {
+    inline virtual Type getValue() const {
         return myValue;
     }
 
@@ -46,7 +46,7 @@ class ST_LOCAL StParam {
      * @param theValue (const Type ) - new value;
      * @return true if value was changed.
      */
-    virtual bool setValue(const Type theValue) {
+    inline virtual bool setValue(const Type theValue) {
         if(getValue() != theValue) {
             myValue = theValue;
             signals.onChanged(theValue);
@@ -70,14 +70,14 @@ class ST_LOCAL StParam {
 /**
  * Integer (enumeration) parameter.
  */
-class ST_LOCAL StInt32Param : public StParam<int32_t> {
+class StInt32Param : public StParam<int32_t> {
 
         public:
 
     /**
      * Main constructor.
      */
-    StInt32Param(int32_t theValue)
+    inline StInt32Param(int32_t theValue)
     : StParam<int32_t>(theValue) {
         //
     }
@@ -87,14 +87,14 @@ class ST_LOCAL StInt32Param : public StParam<int32_t> {
 /**
  * Boolean parameter.
  */
-class ST_LOCAL StBoolParam : public StParam<bool> {
+class StBoolParam : public StParam<bool> {
 
         public:
 
     /**
      * Main constructor.
      */
-    StBoolParam(bool theValue)
+    inline StBoolParam(bool theValue)
     : StParam<bool>(theValue) {
         //
     }
@@ -103,7 +103,7 @@ class ST_LOCAL StBoolParam : public StParam<bool> {
      * Reverse current value.
      * @return new value.
      */
-    bool reverse() {
+    inline bool reverse() {
         bool aNewValue = !getValue();
         setValue(aNewValue);
         return aNewValue;
@@ -112,7 +112,7 @@ class ST_LOCAL StBoolParam : public StParam<bool> {
     /**
      * Slot method for compatibility with some widgets.
      */
-    void doReverse(const size_t ) {
+    inline void doReverse(const size_t ) {
         reverse();
     }
 
