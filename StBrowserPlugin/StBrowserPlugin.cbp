@@ -314,6 +314,7 @@
 		</Unit>
 		<Unit filename="../StShared/StWindow.cpp" />
 		<Unit filename="../StShared/stConsole.cpp" />
+		<Unit filename="../StShared/stUtfTools.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

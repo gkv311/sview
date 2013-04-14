@@ -419,6 +419,11 @@ class ST_LOCAL StStringUnicode {
         return aSumm;
     }
 
+    /**
+     * Set all template concretizations as friends to access private methods.
+     */
+    template <class OtherType> friend class StStringUnicode;
+
         public: //!< compare operators
 
     bool operator==(const StStringUnicode& theCompare) const {

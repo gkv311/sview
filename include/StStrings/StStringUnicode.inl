@@ -329,7 +329,7 @@ void StStringUnicode<Type>::fromLocale(const char*  theString,
         return;
     }
     wchar_t* aWideBuffer = new wchar_t[aMbLen + 1];
-    size_t mbstowcs(aWideBuffer, theString, aMbLen);
+    mbstowcs(aWideBuffer, theString, aMbLen);
     aWideBuffer[aMbLen] = L'\0';
     fromUnicode(aWideBuffer, theLength);
     delete[] aWideBuffer;
