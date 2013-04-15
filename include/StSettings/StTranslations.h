@@ -17,7 +17,7 @@
 /**
  * This class unify access to the translations for all modules.
  * It is automatically uses StSettings library and global settings section
- * to store / restore global language settigns.
+ * to store / restore global language settings.
  */
 class StTranslations : public StLangMap {
 
@@ -30,7 +30,7 @@ class StTranslations : public StLangMap {
     ST_CPPEXPORT StTranslations(const StString& theModuleName);
 
     /**
-     * Desctructor.
+     * Destructor.
      */
     ST_CPPEXPORT virtual ~StTranslations();
 

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -237,6 +237,18 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(unsigned char* theDataSta
         }
 
     }
+}
+
+StJpegParser::Image::Image()
+: myData(NULL),
+  myLength(0),
+  myExif(),
+  myNext() {
+    //
+}
+
+StJpegParser::Image::~Image() {
+    //
 }
 
 bool StJpegParser::Image::getParallax(double& theParallax) const {

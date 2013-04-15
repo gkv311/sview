@@ -38,6 +38,12 @@ extern "C" {
     extern "C" int stFFmpegLock(void** theMutexPtrPtr, enum AVLockOp theOperation);
 #endif
 
+#ifdef __ST_SHARED_DLL__
+    #define ST_SHARED_CPPEXPORT ST_CPPEXPORT extern const
+#else
+    #define ST_SHARED_CPPEXPORT ST_CPPIMPORT extern const
+#endif
+
 /**
  * This namespace to perform libav* initialization only once
  */
@@ -88,7 +94,7 @@ namespace stLibAV {
     };
 
     // this is just redeclaration AV_NOPTS_VALUE
-    extern const int64_t NOPTS_VALUE;
+    ST_SHARED_CPPEXPORT int64_t NOPTS_VALUE;
 
     /**
      * Convert time units into seconds. Returns zero for invalid value.
@@ -150,26 +156,26 @@ namespace stLibAV {
      * redefined as extern values.
      */
     namespace PIX_FMT {
-        extern const PixelFormat NONE;
-        extern const PixelFormat GRAY8;    ///< Y, 8bpp
+        ST_SHARED_CPPEXPORT PixelFormat NONE;
+        ST_SHARED_CPPEXPORT PixelFormat GRAY8;    ///< Y, 8bpp
         // planar YUV formats
-        extern const PixelFormat YUV420P;  ///< planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)
-        extern const PixelFormat YUV422P;  ///< planar YUV 4:2:2, 16bpp, (1 Cr & Cb sample per 2x1 Y samples)
-        extern const PixelFormat YUV444P;  ///< planar YUV 4:4:4, 24bpp, (1 Cr & Cb sample per 1x1 Y samples)
-        extern const PixelFormat YUV410P;  ///< planar YUV 4:1:0,  9bpp, (1 Cr & Cb sample per 4x4 Y samples)
-        extern const PixelFormat YUV411P;  ///< planar YUV 4:1:1, 12bpp, (1 Cr & Cb sample per 4x1 Y samples)
-        extern const PixelFormat YUV440P;  ///< planar YUV 4:4:0 (1 Cr & Cb sample per 1x2 Y samples)
+        ST_SHARED_CPPEXPORT PixelFormat YUV420P;  ///< planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)
+        ST_SHARED_CPPEXPORT PixelFormat YUV422P;  ///< planar YUV 4:2:2, 16bpp, (1 Cr & Cb sample per 2x1 Y samples)
+        ST_SHARED_CPPEXPORT PixelFormat YUV444P;  ///< planar YUV 4:4:4, 24bpp, (1 Cr & Cb sample per 1x1 Y samples)
+        ST_SHARED_CPPEXPORT PixelFormat YUV410P;  ///< planar YUV 4:1:0,  9bpp, (1 Cr & Cb sample per 4x4 Y samples)
+        ST_SHARED_CPPEXPORT PixelFormat YUV411P;  ///< planar YUV 4:1:1, 12bpp, (1 Cr & Cb sample per 4x1 Y samples)
+        ST_SHARED_CPPEXPORT PixelFormat YUV440P;  ///< planar YUV 4:4:0 (1 Cr & Cb sample per 1x2 Y samples)
         //extern const PixelFormat YUVA420P; ///< planar YUV 4:2:0, 20bpp, (1 Cr & Cb sample per 2x2 Y & A samples)
         // fullscale YUV formats (deprecated?)
-        extern const PixelFormat YUVJ420P; ///< planar YUV 4:2:0, 12bpp, full scale (JPEG)
-        extern const PixelFormat YUVJ422P; ///< planar YUV 4:2:2, 16bpp, full scale (JPEG)
-        extern const PixelFormat YUVJ444P; ///< planar YUV 4:4:4, 24bpp, full scale (JPEG)
-        extern const PixelFormat YUVJ440P; ///< planar YUV 4:4:0 full scale (JPEG)
+        ST_SHARED_CPPEXPORT PixelFormat YUVJ420P; ///< planar YUV 4:2:0, 12bpp, full scale (JPEG)
+        ST_SHARED_CPPEXPORT PixelFormat YUVJ422P; ///< planar YUV 4:2:2, 16bpp, full scale (JPEG)
+        ST_SHARED_CPPEXPORT PixelFormat YUVJ444P; ///< planar YUV 4:4:4, 24bpp, full scale (JPEG)
+        ST_SHARED_CPPEXPORT PixelFormat YUVJ440P; ///< planar YUV 4:4:0 full scale (JPEG)
         // RGB formats
-        extern const PixelFormat RGB24;    ///< packed RGB 8:8:8, 24bpp, RGBRGB...
-        extern const PixelFormat BGR24;    ///< packed RGB 8:8:8, 24bpp, BGRBGR...
-        extern const PixelFormat RGBA32;
-        extern const PixelFormat BGRA32;
+        ST_SHARED_CPPEXPORT PixelFormat RGB24;    ///< packed RGB 8:8:8, 24bpp, RGBRGB...
+        ST_SHARED_CPPEXPORT PixelFormat BGR24;    ///< packed RGB 8:8:8, 24bpp, BGRBGR...
+        ST_SHARED_CPPEXPORT PixelFormat RGBA32;
+        ST_SHARED_CPPEXPORT PixelFormat BGRA32;
 
         ST_CPPEXPORT StString getString(const PixelFormat theFrmt);
     };
@@ -234,17 +240,17 @@ namespace stLibAV {
 
         namespace SAMPLE_FMT {
         #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 0, 0))
-            extern const AVSampleFormat U8;
-            extern const AVSampleFormat S16;
-            extern const AVSampleFormat S32;
-            extern const AVSampleFormat FLT;
-            extern const AVSampleFormat DBL;
+            ST_SHARED_CPPEXPORT AVSampleFormat U8;
+            ST_SHARED_CPPEXPORT AVSampleFormat S16;
+            ST_SHARED_CPPEXPORT AVSampleFormat S32;
+            ST_SHARED_CPPEXPORT AVSampleFormat FLT;
+            ST_SHARED_CPPEXPORT AVSampleFormat DBL;
         #else
-            extern const SampleFormat   U8;
-            extern const SampleFormat   S16;
-            extern const SampleFormat   S32;
-            extern const SampleFormat   FLT;
-            extern const SampleFormat   DBL;
+            ST_SHARED_CPPEXPORT SampleFormat   U8;
+            ST_SHARED_CPPEXPORT SampleFormat   S16;
+            ST_SHARED_CPPEXPORT SampleFormat   S32;
+            ST_SHARED_CPPEXPORT SampleFormat   FLT;
+            ST_SHARED_CPPEXPORT SampleFormat   DBL;
         #endif
         };
 

@@ -9,14 +9,13 @@
 #include <StLibrary.h>
 
 #ifdef _WIN32
-StString StLibrary::DLibGetVersion(const stUtfWide_t* theLibPath) {
-#ifdef __ST_DEBUG__
-    DWORD aFVInfoSize = GetFileVersionInfoSizeW(theLibPath, NULL);
+StString StLibrary::DLibGetVersion(const StStringUtfWide& theLibPath) {
+    DWORD aFVInfoSize = GetFileVersionInfoSizeW(theLibPath.toCString(), NULL);
     if(aFVInfoSize == 0) {
         return StString();
     }
     LPVOID aBlock = stMemAlloc(aFVInfoSize);
-    GetFileVersionInfoW(theLibPath, NULL, aFVInfoSize, aBlock);
+    GetFileVersionInfoW(theLibPath.toCString(), NULL, aFVInfoSize, aBlock);
     VS_FIXEDFILEINFO* aFixedInfo;
     UINT aBufferSize;
     stUtfWide_t aPathToSubBlock[] = L"\\";
@@ -32,7 +31,6 @@ StString StLibrary::DLibGetVersion(const stUtfWide_t* theLibPath) {
         + LOWORD(aFixedInfo->dwFileVersionLS);
     stMemFree(aBlock);
     return aVersion;
-#endif
 }
 #endif
 
@@ -100,7 +98,7 @@ HMODULE StLibrary::DLibLoadFull(const StString& theLibName) {
         ST_DEBUG_LOG("Failed to load library: \"" + theLibName + "\" (" + (int )GetLastError() + ')');
     } else {
     #ifdef __ST_DEBUG_LIBS__
-        ST_DEBUG_LOG("Loaded library: \"" + theLibName + "\" " + DLibGetVersion(theLibName.toUtfWide().toCString()));
+        ST_DEBUG_LOG("Loaded library: \"" + theLibName + "\" " + DLibGetVersion(theLibName.toUtfWide()));
     #endif
     }
     return aModule;

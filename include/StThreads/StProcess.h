@@ -19,38 +19,23 @@
  */
 class StArgument {
 
-        private:
-
-    StString key; // key
-    StString val; // value
-
-        private:
-
-    static const StString ST_ARG_ON;
-    static const StString ST_ARG_TRUE;
-    static const StString ST_ARG_OFF;
-    static const StString ST_ARG_FALSE;
-
         public:
 
     /**
      * Empty constructor.
      */
-    StArgument()
-    : key(),
-      val() {
-        //
-    }
+    ST_CPPEXPORT StArgument();
 
-    StArgument(const StString& key, const StString& value)
-    : key(key),
-      val(value.unquoted()) {
-        //
-    }
+    /**
+     * Default constructor.
+     */
+    ST_CPPEXPORT StArgument(const StString& theKey,
+                            const StString& theValue);
 
-    ~StArgument() {
-        //
-    }
+    /**
+     * Destructor.
+     */
+    ST_CPPEXPORT ~StArgument();
 
     /**
      * Check key is not empty.
@@ -60,25 +45,21 @@ class StArgument {
     }
 
     /**
-     * Default values 'on' or 'true' are preffered for switch.
+     * Default values 'on' or 'true' are preferred for switch.
      */
-    bool isValueOn() const {
-        return val.isEqualsIgnoreCase(ST_ARG_ON) || val.isEqualsIgnoreCase(ST_ARG_TRUE);
-    }
+    ST_CPPEXPORT bool isValueOn() const;
 
     /**
-     * Default values 'off' or 'false' are preffered for switch.
+     * Default values 'off' or 'false' are preferred for switch.
      */
-    bool isValueOff() const {
-        return val.isEqualsIgnoreCase(ST_ARG_OFF) || val.isEqualsIgnoreCase(ST_ARG_FALSE);
-    }
+    ST_CPPEXPORT bool isValueOff() const;
 
     /**
      * Parse string and create key/value pair.
      * String should be in format 'KEY="VALUE"'.
      * Newline '\n' symbol is disallowed in the key string.
      */
-    void parseString(const StString& string);
+    ST_CPPEXPORT void parseString(const StString& theString);
 
     const StString& getKey() const {
         return key;
@@ -122,9 +103,19 @@ class StArgument {
     bool operator>=(const StArgument& theCompare) const { return this->key >= theCompare.key; }
     bool operator<=(const StArgument& theCompare) const { return this->key <= theCompare.key; }
 
-    StString toString() const {
-        return key + "=\"" + val + '\"';
-    }
+    ST_CPPEXPORT StString toString() const;
+
+        private:
+
+    static const StString ST_ARG_ON;
+    static const StString ST_ARG_TRUE;
+    static const StString ST_ARG_OFF;
+    static const StString ST_ARG_FALSE;
+
+        private:
+
+    StString key; // key
+    StString val; // value
 
 };
 

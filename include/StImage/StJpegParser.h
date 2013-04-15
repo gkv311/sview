@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -36,23 +36,20 @@ class StJpegParser {
         StArrayList< StHandle<StExifDir> > myExif; //!< EXIF sections
         StHandle<Image> myNext;   //!< link to the next image in file (if any)
 
-        Image()
-        : myData(NULL),
-          myLength(0),
-          myExif(),
-          myNext() {}
+        ST_CPPEXPORT Image();
+        ST_CPPEXPORT ~Image();
 
         /**
          * Reads the parallax information from EXIF (currently - only for Fujifilm MPO).
-         * @param theParallax (double& ) - the parallax in per cents;
-         * @return true if tag found.
+         * @param theParallax the parallax in per cents
+         * @return true if tag found
          */
-        bool getParallax(double& theParallax) const;
+        ST_CPPEXPORT bool getParallax(double& theParallax) const;
 
         /**
          * Reads the orientation info from EXIF.
          */
-        Orient getOrientation() const;
+        ST_CPPEXPORT Orient getOrientation() const;
     };
 
     static int getRotationAngle(const Orient theJpegOri) {

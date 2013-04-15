@@ -39,6 +39,35 @@ const StString StArgument::ST_ARG_TRUE ("true");
 const StString StArgument::ST_ARG_OFF  ("off");
 const StString StArgument::ST_ARG_FALSE("false");
 
+StArgument::StArgument()
+: key(),
+  val() {
+    //
+}
+
+StArgument::StArgument(const StString& theKey,
+                       const StString& theValue)
+: key(theKey),
+  val(theValue.unquoted()) {
+    //
+}
+
+StArgument::~StArgument() {
+    //
+}
+
+StString StArgument::toString() const {
+    return key + "=\"" + val + '\"';
+}
+
+bool StArgument::isValueOn() const {
+    return val.isEqualsIgnoreCase(ST_ARG_ON) || val.isEqualsIgnoreCase(ST_ARG_TRUE);
+}
+
+bool StArgument::isValueOff() const {
+    return val.isEqualsIgnoreCase(ST_ARG_OFF) || val.isEqualsIgnoreCase(ST_ARG_FALSE);
+}
+
 void StArgument::parseString(const StString& theString) {
     for(StUtf8Iter anIter = theString.iterator(); *anIter != 0; ++anIter) {
         if(*anIter == stUtf32_t('=')) {

@@ -174,7 +174,7 @@
 			<Add directory="../include" />
 		</ResourceCompiler>
 		<Linker>
-			<Add library="libStShared" />
+			<Add library="StShared" />
 			<Add directory="../3rdparty/lib/$(TARGET_NAME)" />
 			<Add directory="../lib/$(TARGET_NAME)" />
 		</Linker>

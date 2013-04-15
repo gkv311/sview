@@ -24,14 +24,14 @@
 #include <StCore/StEDIDParser.h>
 
 typedef struct tagStMonitor {
-    stUtf8_t      pnpid[8];  // model PnP identificator
+    stUtf8_t      pnpid[8];  // model PnP identifier
     stUtf8_t    name[1024];  // model name
     stUtf8_t gpuName[1024];
     stUByte_t    edid[256];  // EDID data
     StRectI_t        vRect;  // virtual space (rectangle)
     int           systemId;  // monitor id in system, 0 is primary display
-    int           freqCurr;  // frequency in Herz
-    int            freqMax;  // maximum frequency in Herz
+    int           freqCurr;  // frequency in Hertz
+    int            freqMax;  // maximum frequency in Hertz
 } StMonitor_t;
 
 /**
@@ -131,7 +131,7 @@ class StMonitor {
          return myEdid;
     }
 
-    StString toString() const;
+    ST_CPPEXPORT StString toString() const;
 
     bool operator==(const StMonitor& compare) const {
         if(&compare == this) {
@@ -164,14 +164,14 @@ class StMonitor {
 
         private:
 
-    StString    myPnpId; //!< PnPId identificator assigned by Microsoft
-    StString     myName; //!< human-readable name for this display
-    StString  myGpuName; //!< attached to this GPU
-    StEDIDParser myEdid; //!< EDID data block if available
-    StRectI_t    myRect; //!< virtual space (rectangle)
-    int         mySysId; //!< monitor id
-    int          myFreq; //!< frequency in Herz
-    int       myFreqMax; //!< maximum frequency in Herz
+    StString     myPnpId;   //!< PnPId identifier assigned by Microsoft
+    StString     myName;    //!< human-readable name for this display
+    StString     myGpuName; //!< attached to this GPU
+    StEDIDParser myEdid;    //!< EDID data block if available
+    StRectI_t    myRect;    //!< virtual space (rectangle)
+    int          mySysId;   //!< monitor id
+    int          myFreq;    //!< frequency in Hertz
+    int          myFreqMax; //!< maximum frequency in Hertz
 
 };
 

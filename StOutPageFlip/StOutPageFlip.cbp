@@ -291,7 +291,7 @@
 			<Add directory="../include" />
 		</ResourceCompiler>
 		<Linker>
-			<Add library="libStShared" />
+			<Add library="StShared" />
 			<Add library="avutil" />
 			<Add library="avformat" />
 			<Add library="avcodec" />

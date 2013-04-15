@@ -158,19 +158,19 @@ class StLibrary {
      */
     ST_CPPEXPORT static void suppressSystemErrors(bool toSuppress);
 
-        private:
+        private: //! @name C-interface
 
-    ST_CPPEXPORT static HMODULE DLibLoad(const StString& theLibNameText);
+    ST_LOCAL static HMODULE DLibLoad(const StString& theLibNameText);
 
-    ST_CPPEXPORT static HMODULE DLibLoadFull(const StString& theLibName);
+    ST_LOCAL static HMODULE DLibLoadFull(const StString& theLibName);
 
     ST_CPPEXPORT static void* DLibGetfunction(HMODULE     theLibHandle,
                                               const char* theFuncName);
 
-    ST_CPPEXPORT static void DLibFree(HMODULE theLibHandle);
+    ST_LOCAL static void DLibFree(HMODULE theLibHandle);
 
 #ifdef _WIN32
-    ST_CPPEXPORT StString DLibGetVersion(const stUtfWide_t* theLibPath);
+    ST_LOCAL static StString DLibGetVersion(const StStringUtfWide& theLibPath);
 #endif
 
         private:
