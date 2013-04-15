@@ -184,28 +184,33 @@
 				</Linker>
 			</Target>
 			<Target title="MAC_gcc">
-				<Option output="../bin/$(TARGET_NAME)/libStShared" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/libStShared" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="../bin/$(TARGET_NAME)" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
-				<Option createDefFile="1" />
-				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-O3" />
 					<Add option="-Wall" />
 					<Add option="-fPIC" />
 					<Add option="-D__ST_SHARED_DLL__" />
 				</Compiler>
+				<Linker>
+					<Add option="-framework Appkit" />
+					<Add option="-framework OpenGL" />
+					<Add library="objc" />
+				</Linker>
+				<ExtraCommands>
+					<Add after='install_name_tool -id @executable_path/$(TARGET_OUTPUT_BASENAME).dylib &quot;$(TARGET_OUTPUT_FILE)&quot;' />
+					<Add after='ln -f -s &quot;../$(TARGET_OUTPUT_FILE)&quot; ../lib/$(TARGET_NAME)' />
+				</ExtraCommands>
 			</Target>
 			<Target title="MAC_gcc_DEBUG">
-				<Option output="../bin/$(TARGET_NAME)/libStShared" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/libStShared" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="../bin/$(TARGET_NAME)" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
-				<Option createDefFile="1" />
-				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
@@ -213,6 +218,15 @@
 					<Add option="-D__ST_DEBUG__" />
 					<Add option="-D__ST_SHARED_DLL__" />
 				</Compiler>
+				<Linker>
+					<Add option="-framework Appkit" />
+					<Add option="-framework OpenGL" />
+					<Add library="objc" />
+				</Linker>
+				<ExtraCommands>
+					<Add after='install_name_tool -id @executable_path/$(TARGET_OUTPUT_BASENAME).dylib &quot;$(TARGET_OUTPUT_FILE)&quot;' />
+					<Add after='ln -f -s &quot;../$(TARGET_OUTPUT_FILE)&quot; ../lib/$(TARGET_NAME)' />
+				</ExtraCommands>
 			</Target>
 		</Build>
 		<Compiler>
