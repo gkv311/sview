@@ -191,14 +191,17 @@ void StWindowImpl::setAttributes(const StWinAttributes_t* theAttributes) {
     updateWindowPos();
 }
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
 namespace {
     static StAtomic<int32_t> ST_BLOCK_SLEEP_COUNTER(0);
 };
 #endif
 
 void StWindowImpl::updateBlockSleep() {
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
+    #ifndef ES_AWAYMODE_REQUIRED // for old MinGW
+        #define ES_AWAYMODE_REQUIRED ((DWORD)0x00000040)
+    #endif
     if(myWinAttribs.toBlockSleepDisplay) {
         // prevent display sleep - call this periodically
         EXECUTION_STATE aState = ES_CONTINUOUS | ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED;

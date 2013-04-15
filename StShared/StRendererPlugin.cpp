@@ -79,6 +79,10 @@ bool StRendererPlugin::init(const StString&     theRendererPath,
     }
 }
 
+StRendererPlugin::~StRendererPlugin() {
+    Destruct();
+}
+
 void StRendererPlugin::Destruct() {
     if(StRenderer_del != NULL && instance != NULL) {
         StRenderer_del(instance);

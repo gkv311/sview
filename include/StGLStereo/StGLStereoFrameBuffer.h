@@ -41,6 +41,8 @@ class StGLStereoFrameBuffer : public StGLStereoTexture {
 
         ST_CPPEXPORT StGLStereoProgram(const StString& theTitle);
 
+        ST_CPPEXPORT ~StGLStereoProgram();
+
         StGLVarLocation getVVertexLoc() const {
             return atrVVertexLoc;
         }

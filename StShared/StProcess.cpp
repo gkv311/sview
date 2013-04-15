@@ -88,6 +88,10 @@ StArgumentsMap::~StArgumentsMap() {
     //
 }
 
+StString StArgumentsMap::toString() const {
+    return StArrayList<StArgument>::toString();
+}
+
 void StArgumentsMap::parseList(const StArrayList<StString>& theStringList) {
     for(size_t id = 0; id < theStringList.size(); ++id) {
         StArgument newArgument;

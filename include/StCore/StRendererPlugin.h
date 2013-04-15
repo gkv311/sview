@@ -110,9 +110,7 @@ class StRendererPlugin : public StRendererInterface {
         StRenderer_stglDraw(instance, views);
     }
 
-    ~StRendererPlugin() {
-        Destruct();
-    }
+    ST_CPPEXPORT virtual ~StRendererPlugin();
 
     ST_CPPEXPORT void Destruct();
 

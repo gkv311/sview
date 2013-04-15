@@ -20,6 +20,10 @@ StGLStereoFrameBuffer::StGLStereoProgram::StGLStereoProgram(const StString& theT
     //
 }
 
+StGLStereoFrameBuffer::StGLStereoProgram::~StGLStereoProgram() {
+    //
+}
+
 bool StGLStereoFrameBuffer::StGLStereoProgram::link(StGLContext& theCtx) {
     if(!StGLProgram::link(theCtx)) {
         return false;

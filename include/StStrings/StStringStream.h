@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -15,12 +15,17 @@
 #include <locale>
 
 #ifndef _MSC_VER
-    #include <xlocale.h>
+    #if defined(_WIN32)
+        #define ST_NO_XLOCALE
+        #warning xlocale is not supported by compiler!
+    #else
+        #include <xlocale.h>
+    #endif
 #endif
 
 /**
  * Wrapper over locale_t C structure which should be allocated within special functions.
- * Notice that there NO implicit convertion from/to std::locale class!
+ * Notice that there NO implicit conversion from/to std::locale class!
  */
 class StCLocale {
 
@@ -32,6 +37,8 @@ class StCLocale {
     StCLocale()
     #ifdef _MSC_VER
     : myCLocale(_create_locale(LC_ALL, "C")) {}
+    #elif defined(ST_NO_XLOCALE)
+    : myCLocale(NULL) {}
     #else
     : myCLocale(newlocale(LC_ALL_MASK, "C", NULL)) {}
     #endif
@@ -42,6 +49,8 @@ class StCLocale {
     ~StCLocale() {
     #ifdef _MSC_VER
         _free_locale(myCLocale);
+    #elif defined(ST_NO_XLOCALE)
+        //
     #else
         freelocale(myCLocale);
     #endif
@@ -49,6 +58,8 @@ class StCLocale {
 
 #ifdef _MSC_VER
     operator _locale_t() const { return myCLocale; }
+#elif defined(ST_NO_XLOCALE)
+    //
 #else
     operator  locale_t() const { return myCLocale; }
 #endif
@@ -56,6 +67,8 @@ class StCLocale {
 
 #ifdef _MSC_VER
     _locale_t myCLocale;
+#elif defined(ST_NO_XLOCALE)
+        void* myCLocale;
 #else
      locale_t myCLocale;
 #endif
@@ -67,6 +80,8 @@ inline double stStringToDouble(const char*      theString,
                                const StCLocale& theCLocale) {
 #ifdef _MSC_VER
     return _strtod_l(theString, theNextPtr, theCLocale);
+#elif defined(ST_NO_XLOCALE)
+    return strtod(theString, theNextPtr);
 #else
     return  strtod_l(theString, theNextPtr, theCLocale);
 #endif
@@ -83,6 +98,8 @@ inline long stStringToLong(const char*      theString,
                            const StCLocale& theCLocale) {
 #ifdef _MSC_VER
     return _strtol_l(theString, theNextPtr, theBase, theCLocale);
+#elif defined(ST_NO_XLOCALE)
+    return  strtol(theString, theNextPtr, theBase);
 #else
     return  strtol_l(theString, theNextPtr, theBase, theCLocale);
 #endif

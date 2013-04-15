@@ -157,9 +157,7 @@ class StArgumentsMap : public StArrayList<StArgument> {
         return StArrayList<StArgument>::getValue(index);
     }
 
-    virtual StString toString() const {
-        return StArrayList<StArgument>::toString();
-    }
+    ST_CPPEXPORT virtual StString toString() const;
 
 };
 
