@@ -1,29 +1,29 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov
+ * Copyright © 2007-2013 Kirill Gavrilov
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
  * http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include "StRegisterImpl.h"
+#include <StSettings/StSettings.h>
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
 
 #include <windows.h>
 
-StRegisterImpl::StRegisterImpl(const StStringUtfWide& theSettingsSet)
-: mySettingsSet(theSettingsSet),
-  myRegisterPath(StStringUtfWide("SOFTWARE\\sView\\") + theSettingsSet) {
+StSettings::StSettings(const StString& theSettingsSet)
+: mySettingsSet(theSettingsSet.toUtfWide()),
+  myRegisterPath(StStringUtfWide("SOFTWARE\\sView\\") + theSettingsSet.toUtfWide()) {
     //
 }
 
-StRegisterImpl::~StRegisterImpl() {
+StSettings::~StSettings() {
     //
 }
 
-bool StRegisterImpl::loadInt32(const StString& theParam,
-                               int32_t&        theValue) {
+bool StSettings::loadInt32(const StString& theParam,
+                           int32_t&        theValue) {
     HKEY hKey = NULL;
     DWORD aValueSize = sizeof(DWORD);
     DWORD aData = 0;
@@ -37,8 +37,8 @@ bool StRegisterImpl::loadInt32(const StString& theParam,
     return false;
 }
 
-bool StRegisterImpl::saveInt32(const StString& theParam,
-                               const int32_t&  theValue) {
+bool StSettings::saveInt32(const StString& theParam,
+                           const int32_t&  theValue) {
     HKEY hKey = NULL;
     DWORD aData = theValue;
     DWORD aDisp = 0;
@@ -54,8 +54,8 @@ bool StRegisterImpl::saveInt32(const StString& theParam,
     return (anErr == 0);
 }
 
-bool StRegisterImpl::loadString(const StString& theParam,
-                                StString&       theValue) {
+bool StSettings::loadString(const StString& theParam,
+                            StString&       theValue) {
     // TODO (Kirill Gavrilov) parse ERROR_MORE_DATA error (increase buffer)
     stUtfWide_t aDataOut[MAX_STRING_LENGHT];
     HKEY hKey = NULL;
@@ -70,8 +70,8 @@ bool StRegisterImpl::loadString(const StString& theParam,
     return false;
 }
 
-bool StRegisterImpl::saveString(const StString& theParam,
-                                const StString& theValue) {
+bool StSettings::saveString(const StString& theParam,
+                            const StString& theValue) {
     HKEY hKey = NULL;
     DWORD aDisp = 0;
     int anErr = 0;
@@ -83,44 +83,6 @@ bool StRegisterImpl::saveString(const StString& theParam,
     }
     RegCloseKey(hKey);
     return (anErr == 0);
-}
-
-// Exported class-methods wpappers.
-ST_EXPORT StConfigInterface* StConfig_new(const stUtf8_t* theSettingsSet) {
-    return new StRegisterImpl(theSettingsSet);
-}
-
-ST_EXPORT void StConfig_del(StConfigInterface* theInst) {
-    delete (StRegisterImpl* )theInst;
-}
-
-ST_EXPORT stBool_t StConfig_loadInt32(StConfigInterface* theInst,
-                                      const stUtf8_t*    theParam,
-                                      int32_t&           theValue) {
-    return ((StRegisterImpl* )theInst)->loadInt32(StString(theParam), theValue);
-}
-
-ST_EXPORT stBool_t StConfig_saveInt32(StConfigInterface* theInst,
-                                      const stUtf8_t*    theParam,
-                                      const int32_t&     theValue) {
-    return ((StRegisterImpl* )theInst)->saveInt32(StString(theParam), theValue);
-}
-
-ST_EXPORT stBool_t StConfig_loadString(StConfigInterface* theInst,
-                                       const stUtf8_t*    theParam,
-                                       stUtf8_t*          theValue) {
-    StString aBuff;
-    if(!((StRegisterImpl* )theInst)->loadString(StString(theParam), aBuff)) {
-        return ST_FALSE;
-    }
-    size_t aSize = stMin(StConfigInterface::MAX_STRING_LENGHT - 1, aBuff.getSize());
-    stMemCpy(theValue, aBuff.toCString(), aSize);
-    theValue[aSize] = stUtf8_t('\0');
-    return ST_TRUE;
-}
-
-ST_EXPORT stBool_t StConfig_saveString(StConfigInterface* theInst, const stUtf8_t* theParam, const stUtf8_t* theValue) {
-    return ((StRegisterImpl* )theInst)->saveString(StString(theParam), StString(theValue));
 }
 
 #endif // defined(_WIN32)

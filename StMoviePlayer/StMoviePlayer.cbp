@@ -311,6 +311,7 @@
 		<Linker>
 			<Add library="StGLWidgets" />
 			<Add library="StShared" />
+			<Add library="StSettings" />
 			<Add library="avutil" />
 			<Add library="avformat" />
 			<Add library="avcodec" />

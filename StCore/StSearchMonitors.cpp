@@ -618,10 +618,6 @@ void StSearchMonitors::initFromConfig() {
     StMonitor stMonSlave;
 
     StSettings aGlobalSettings(ST_GLOBAL_SETTINGS_GROUP);
-    if(!aGlobalSettings.isValid()) {
-        ST_DEBUG_LOG("StSearchMonitors::initFromConfig(), Settings library not available!");
-        return;
-    }
     aGlobalSettings.loadInt32Rect(ST_GLOBAL_SETTINGS_MON_MASTER, stMonMaster.changeVRect());
     aGlobalSettings.loadInt32Rect(ST_GLOBAL_SETTINGS_MON_SLAVE,  stMonSlave.changeVRect());
 

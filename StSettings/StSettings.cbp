@@ -104,12 +104,10 @@
 				</ExtraCommands>
 			</Target>
 			<Target title="LINUX_gcc">
-				<Option output="../bin/$(TARGET_NAME)/StSettings" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/libStSettings" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
-				<Option createDefFile="1" />
-				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-O3" />
 					<Add option="-std=c++0x" />
@@ -132,12 +130,10 @@
 				</Linker>
 			</Target>
 			<Target title="LINUX_gcc_DEBUG">
-				<Option output="../bin/$(TARGET_NAME)/StSettings" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/libStSettings" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
-				<Option createDefFile="1" />
-				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-std=c++0x" />
 					<Add option="-Wall" />
@@ -160,12 +156,10 @@
 				</Linker>
 			</Target>
 			<Target title="MAC_gcc">
-				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/StSettings" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/libStSettings" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
-				<Option createDefFile="1" />
-				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-O3" />
 					<Add option="-Wall" />
@@ -178,12 +172,10 @@
 				</Linker>
 			</Target>
 			<Target title="MAC_gcc_DEBUG">
-				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/StSettings" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/libStSettings" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
-				<Option createDefFile="1" />
-				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
@@ -225,7 +217,7 @@
 			<Option target="WIN_vc_x86_DEBUG" />
 			<Option target="WIN_vc_AMD64" />
 		</Unit>
-		<Unit filename="StRegisterImpl.h" />
+		<Unit filename="StSettings.cpp" />
 		<Unit filename="StSettings.rc">
 			<Option compilerVar="WINDRES" />
 			<Option target="WIN_vc_x86" />
@@ -233,13 +225,7 @@
 			<Option target="WIN_gcc_x86" />
 			<Option target="WIN_vc_x86_DEBUG" />
 		</Unit>
-		<Unit filename="StSettingsImpl.cpp" />
-		<Unit filename="../include/StSettings/StConfig.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="../include/StSettings/StConfigInterface.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
+		<Unit filename="StTranslations.cpp" />
 		<Unit filename="../include/StSettings/StFloat32Param.h" />
 		<Unit filename="../include/StSettings/StParam.h">
 			<Option target="&lt;{~None~}&gt;" />

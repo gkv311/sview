@@ -263,8 +263,6 @@
 			<Option target="MAC_gcc" />
 			<Option target="MAC_gcc_DEBUG" />
 		</Unit>
-		<Unit filename="StConfig.cpp" />
-		<Unit filename="StConfigInterface.cpp" />
 		<Unit filename="StCore.cpp" />
 		<Unit filename="StDevILImage.cpp" />
 		<Unit filename="StDrawer.cpp" />
@@ -351,7 +349,6 @@
 			<Option target="MAC_gcc" />
 			<Option target="MAC_gcc_DEBUG" />
 		</Unit>
-		<Unit filename="StTranslations.cpp" />
 		<Unit filename="StWebPImage.cpp" />
 		<Unit filename="StWindow.cpp" />
 		<Unit filename="stConsole.cpp" />

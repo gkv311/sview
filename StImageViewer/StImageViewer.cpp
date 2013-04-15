@@ -172,9 +172,6 @@ bool StImageViewer::init(StWindowInterface* theWindow) {
         return false;
     }
     myGUI->stglInit();
-    if(!mySettings->isValid()) {
-        myGUI->myMsgStack->doPushMessage("Settings plugin is not available!\nAll changes will be lost after restart.");
-    }
 
     // create the image loader thread
     StString imageLibString;
