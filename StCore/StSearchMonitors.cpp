@@ -19,8 +19,9 @@
 #include "StSearchMonitors.h"
 
 #include <StSettings/StSettings.h>
+#include <StThreads/StMutex.h>
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     #include <wnt/nvapi.h> // NVIDIA API
 #elif (defined(__linux__) || defined(__linux))
     #include "StWinHandles.h"
@@ -75,7 +76,7 @@ void StSearchMonitors::findMonitorsBlind(const int rootX, const int rootY) {
     }
 }
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
 void StSearchMonitors::findMonitorsWinAPI() {
     int monCount = 0;
     // collect system and monitor information, and display it using a message box
@@ -550,7 +551,7 @@ void StSearchMonitors::listEDID(StArrayList<StEDIDParser>& theEdids) {
     }
 #endif // !__APPLE__
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     NvAPI_Status errState = NvAPI_Initialize();
     if(errState == NVAPI_OK) {
         ///ST_DEBUG_LOG_AT("NvAPI_Initialized");
@@ -646,7 +647,7 @@ void StSearchMonitors::initFromConfig() {
 
 void StSearchMonitors::initFromSystem() {
     clear();
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     findMonitorsWinAPI();
 #elif (defined(__APPLE__))
     findMonitorsCocoa();

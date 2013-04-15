@@ -170,6 +170,10 @@
 					<Add option="-framework Appkit" />
 					<Add library="objc" />
 				</Linker>
+				<ExtraCommands>
+					<Add after='install_name_tool -id @executable_path/$(TARGET_OUTPUT_BASENAME).dylib &quot;$(TARGET_OUTPUT_FILE)&quot;' />
+					<Add after='ln -f -s &quot;../$(TARGET_OUTPUT_FILE)&quot; ../lib/$(TARGET_NAME)' />
+				</ExtraCommands>
 			</Target>
 			<Target title="MAC_gcc_DEBUG">
 				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/libStSettings" prefix_auto="1" extension_auto="1" />
@@ -186,6 +190,10 @@
 					<Add option="-framework Appkit" />
 					<Add library="objc" />
 				</Linker>
+				<ExtraCommands>
+					<Add after='install_name_tool -id @executable_path/$(TARGET_OUTPUT_BASENAME).dylib &quot;$(TARGET_OUTPUT_FILE)&quot;' />
+					<Add after='ln -f -s &quot;../$(TARGET_OUTPUT_FILE)&quot; ../lib/$(TARGET_NAME)' />
+				</ExtraCommands>
 			</Target>
 		</Build>
 		<Compiler>
