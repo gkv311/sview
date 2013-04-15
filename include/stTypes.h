@@ -35,7 +35,9 @@
     #define ST_ATTR_CHECK_RETURN
 #endif
 
-#if defined(__GNUC__) && (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1))
+#if defined(_MSC_VER)
+    #define ST_ATTR_DEPRECATED __declspec(deprecated)
+#elif defined(__GNUC__) && (__GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1))
     #define ST_ATTR_DEPRECATED __attribute__((deprecated))
 #else
     #define ST_ATTR_DEPRECATED
