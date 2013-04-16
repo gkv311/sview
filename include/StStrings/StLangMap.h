@@ -17,11 +17,6 @@ class StLangMap {
 
         public:
 
-    static const StString DEFAULT_EXTENSION;
-    static const StString DEFAULT_SUFFIX;
-
-        public:
-
     ST_CPPEXPORT StLangMap();
     ST_CPPEXPORT StLangMap(const StString& theLngFilePath);
 

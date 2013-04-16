@@ -13,6 +13,9 @@ namespace {
     static const char ST_SETTING_LANGUAGE[]      = "language";
 };
 
+const StString StTranslations::DEFAULT_EXTENSION =  "lng";
+const StString StTranslations::DEFAULT_SUFFIX    = ".lng";
+
 StTranslations::StTranslations(const StString& theModuleName)
 : StLangMap(),
   myModuleName(theModuleName),
@@ -23,7 +26,7 @@ StTranslations::StTranslations(const StString& theModuleName)
     // detect available translations
     StFolder stFolder(StProcess::getStCoreFolder() + "lang" + SYS_FS_SPLITTER);
     StArrayList<StString> anExtensions(1);
-    anExtensions.add(StLangMap::DEFAULT_EXTENSION);
+    anExtensions.add(StTranslations::DEFAULT_EXTENSION);
     stFolder.init(anExtensions, 2);
     for(size_t nodeId = 0; nodeId < stFolder.size(); ++nodeId) {
         StFileNode* subFileNode = stFolder.changeValue(nodeId);
@@ -49,7 +52,7 @@ StTranslations::StTranslations(const StString& theModuleName)
     StLangMap::open(StProcess::getStCoreFolder()
                   + "lang"       + SYS_FS_SPLITTER
                   + aLang        + SYS_FS_SPLITTER
-                  + myModuleName + StLangMap::DEFAULT_SUFFIX);
+                  + myModuleName + StTranslations::DEFAULT_SUFFIX);
 
     // connect signal
     params.language->signals.onChanged.connect(this, &StTranslations::setLanguage);
@@ -77,6 +80,6 @@ void StTranslations::setLanguage(const int32_t theNewLang) {
     StLangMap::open(StProcess::getStCoreFolder()
                   + "lang"       + SYS_FS_SPLITTER
                   + aLang        + SYS_FS_SPLITTER
-                  + myModuleName + StLangMap::DEFAULT_SUFFIX);
+                  + myModuleName + StTranslations::DEFAULT_SUFFIX);
     myWasReloaded = true;
 }

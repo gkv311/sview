@@ -79,6 +79,11 @@ class StTranslations : public StLangMap {
 
         private:
 
+    ST_LOCAL static const StString DEFAULT_EXTENSION;
+    ST_LOCAL static const StString DEFAULT_SUFFIX;
+
+        private:
+
     StString              myModuleName;  //!< module name like 'StImageViewer'
     StArrayList<StString> myLangList;    //!< available (found) translations
     bool                  myWasReloaded; //!< flag indicates that translation was reloaded

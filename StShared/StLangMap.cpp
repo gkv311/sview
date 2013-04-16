@@ -15,9 +15,6 @@
     #include <windows.h>
 #endif
 
-const StString StLangMap::DEFAULT_EXTENSION =  "lng";
-const StString StLangMap::DEFAULT_SUFFIX    = ".lng";
-
 namespace {
     static const stUtf8_t HEADER_SECTION_DELIM[] = "--------";
     static const size_t READ_BUFFER_SIZE = 4096U;
