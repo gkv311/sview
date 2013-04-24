@@ -331,6 +331,19 @@ template<> class StHandle<TheChildClass> : public StHandle<TheBaseClass> { \
     const TheChildClass* operator->() const { return  (TheChildClass* )TheBaseHandle::access(); } \
           TheChildClass& operator*()        { return *(TheChildClass* )TheBaseHandle::access(); } \
     const TheChildClass& operator*()  const { return *(TheChildClass* )TheBaseHandle::access(); } \
+    template <class UpperType> \
+    static inline StHandle<TheChildClass> downcast(const StHandle<UpperType>& theHandle) { \
+        StHandle<TheChildClass> aDownHandle; \
+        if(theHandle.isNull()) { \
+            return aDownHandle; \
+        } \
+        TheChildClass* aTest = dynamic_cast<TheChildClass*>(theHandle.myEntity->myPointer); \
+        if(aTest == NULL) { \
+            return aDownHandle; \
+        } \
+        aDownHandle.assign((StPointer* )theHandle.myEntity); \
+        return aDownHandle; \
+    } \
 };
 
 /**
