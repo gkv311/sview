@@ -344,6 +344,11 @@ template<> class StHandle<TheChildClass> : public StHandle<TheBaseClass> { \
         aDownHandle.assign((StPointer* )theHandle.myEntity); \
         return aDownHandle; \
     } \
+    template <class UpperType> \
+    inline bool downcastFrom(const StHandle<UpperType>& theHandle) { \
+        *this = downcast(theHandle); \
+        return !isNull(); \
+    } \
 };
 
 /**
