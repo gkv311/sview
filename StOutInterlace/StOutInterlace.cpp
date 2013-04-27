@@ -378,8 +378,13 @@ void StOutInterlace::doResize() {
     }
 }
 
+void StOutInterlace::show() {
+    // slave window should be displayed only in special cases
+    StWindow::show(ST_WIN_MASTER);
+}
+
 bool StOutInterlace::create() {
-    StWindow::show();
+    show();
     if(!StWindow::create()) {
         return false;
     }

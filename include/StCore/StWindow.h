@@ -181,12 +181,12 @@ class StWindow {
     /**
      * Show up the window.
      */
-    ST_CPPEXPORT void show();
+    ST_CPPEXPORT virtual void show();
 
     /**
      * Hide the window.
      */
-    ST_CPPEXPORT void hide();
+    ST_CPPEXPORT virtual void hide();
 
     /**
      * Show/Hide mouse cursor.

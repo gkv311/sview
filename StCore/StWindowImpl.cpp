@@ -342,7 +342,7 @@ void StWindowImpl::updateActiveState() {
 #if (!defined(__APPLE__))
 void StWindowImpl::show(const int theWinNum) {
     if((theWinNum == ST_WIN_MASTER || theWinNum == ST_WIN_ALL)
-    && myWinAttribs.isHide) {
+     && myWinAttribs.isHide) {
     #ifdef _WIN32
         if(myMaster.hWindow != NULL) {
             ShowWindow(myMaster.hWindow, SW_SHOW);
@@ -362,8 +362,9 @@ void StWindowImpl::show(const int theWinNum) {
     #endif
         myWinAttribs.isHide = false;
         updateWindowPos();
-    } else if((theWinNum == ST_WIN_SLAVE || theWinNum == ST_WIN_ALL)
-           && myWinAttribs.isSlaveHide) {
+    }
+    if((theWinNum == ST_WIN_SLAVE || theWinNum == ST_WIN_ALL)
+     && myWinAttribs.isSlaveHide) {
     #ifdef _WIN32
         if(mySlave.hWindowGl != NULL) {
             ShowWindow(mySlave.hWindowGl, SW_SHOW);
@@ -400,8 +401,9 @@ void StWindowImpl::hide(const int theWinNum) {
         }
     #endif
         myWinAttribs.isHide = true;
-    } else if((theWinNum == ST_WIN_SLAVE || theWinNum == ST_WIN_ALL)
-           && !myWinAttribs.isSlaveHide) {
+    }
+    if((theWinNum == ST_WIN_SLAVE || theWinNum == ST_WIN_ALL)
+    && !myWinAttribs.isSlaveHide) {
     #ifdef _WIN32
         if(mySlave.hWindowGl != NULL) {
             ShowWindow(mySlave.hWindowGl, SW_HIDE);

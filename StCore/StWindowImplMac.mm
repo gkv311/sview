@@ -74,8 +74,9 @@ void StWindowImpl::show(const int theWinNum) {
         }
         myWinAttribs.isHide = false;
         updateWindowPos();
-    } else if((theWinNum == ST_WIN_SLAVE || theWinNum == ST_WIN_ALL)
-           && myWinAttribs.isSlaveHide) {
+    }
+    if((theWinNum == ST_WIN_SLAVE || theWinNum == ST_WIN_ALL)
+    && myWinAttribs.isSlaveHide) {
         if(mySlave.hWindow != NULL) {
             [mySlave.hWindow orderFront: NULL];
         }
@@ -92,8 +93,9 @@ void StWindowImpl::hide(const int theWinNum) {
             [myMaster.hWindow orderOut: NULL];
         }
         myWinAttribs.isHide = true;
-    } else if((theWinNum == ST_WIN_SLAVE || theWinNum == ST_WIN_ALL)
-           && !myWinAttribs.isSlaveHide) {
+    }
+    if((theWinNum == ST_WIN_SLAVE || theWinNum == ST_WIN_ALL)
+    && !myWinAttribs.isSlaveHide) {
         if(mySlave.hWindow != NULL) {
             [mySlave.hWindow orderOut: NULL];
         }

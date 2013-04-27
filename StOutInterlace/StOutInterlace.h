@@ -100,6 +100,11 @@ class StOutInterlace : public StWindow {
     ST_CPPEXPORT virtual void close();
 
     /**
+     * Show up the window.
+     */
+    ST_CPPEXPORT virtual void show();
+
+    /**
      * Process callback.
      */
     ST_CPPEXPORT virtual void processEvents(StMessage_t* theMessages);
