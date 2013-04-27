@@ -302,6 +302,7 @@ bool StMoviePlayer::init() {
         return false;
     }
     myGUI->stglInit();
+    myGUI->stglResize(myWindow->getPlacement());
 
     // create the video playback thread
     if(!isReset) {

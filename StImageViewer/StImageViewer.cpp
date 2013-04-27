@@ -203,6 +203,7 @@ bool StImageViewer::init() {
         return false;
     }
     myGUI->stglInit();
+    myGUI->stglResize(myWindow->getPlacement());
 
     // create the image loader thread
     if(!isReset) {

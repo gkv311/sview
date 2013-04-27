@@ -73,6 +73,7 @@ bool StDiagnostics::open() {
     if(!myGUI->stglInit()) {
         return false;
     }
+    myGUI->stglResize(myWindow->getPlacement());
     return true;
 }
 

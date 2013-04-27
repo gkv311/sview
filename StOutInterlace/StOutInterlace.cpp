@@ -360,6 +360,24 @@ void StOutInterlace::close() {
     StWindow::close();
 }
 
+void StOutInterlace::doResize() {
+    const StRectI_t aRect = StWindow::getPlacement();
+    myVpSizeY = aRect.height();
+    if(!StWindow::isFullScreen()) {
+        const StSearchMonitors& aMonitors = StWindow::getMonitors();
+        if(myMonitor.isNull()) {
+            myMonitor = new StMonitor(aMonitors[aRect.center()]);
+        } else if(!myMonitor->getVRect().isPointIn(aRect.center())) {
+            *myMonitor = aMonitors[aRect.center()];
+        }
+        myEDRect.left()   = 0;
+        myEDRect.right()  = myMonitor->getVRect().width();
+        myEDRect.top()    = 0;
+        myEDRect.bottom() = 10;
+        myVpSizeY = 10;
+    }
+}
+
 bool StOutInterlace::create() {
     StWindow::show();
     if(!StWindow::create()) {
@@ -560,21 +578,7 @@ void StOutInterlace::processEvents(StMessage_t* theMessages) {
     for(size_t anIter = 0; theMessages[anIter].uin != StMessageList::MSG_NULL; ++anIter) {
         switch(theMessages[anIter].uin) {
             case StMessageList::MSG_RESIZE: {
-                const StRectI_t aRect = StWindow::getPlacement();
-                myVpSizeY = aRect.height();
-                if(!StWindow::isFullScreen()) {
-                    const StSearchMonitors& aMonitors = StWindow::getMonitors();
-                    if(myMonitor.isNull()) {
-                        myMonitor = new StMonitor(aMonitors[aRect.center()]);
-                    } else if(!myMonitor->getVRect().isPointIn(aRect.center())) {
-                        *myMonitor = aMonitors[aRect.center()];
-                    }
-                    myEDRect.left()   = 0;
-                    myEDRect.right()  = myMonitor->getVRect().width();
-                    myEDRect.top()    = 0;
-                    myEDRect.bottom() = 10;
-                    myVpSizeY = 10;
-                }
+                doResize();
                 break;
             }
             case StMessageList::MSG_KEYS: {
