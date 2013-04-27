@@ -21,34 +21,34 @@
 
 #include "StGLDeviceControl.h"
 
-class ST_LOCAL StGLColoredLine : public StGLDeviceControl {
+class StGLColoredLine : public StGLDeviceControl {
 
         public:
 
-    virtual int getSizeY() const {
+    ST_LOCAL virtual int getSizeY() const {
         return 1;
     }
 
-    virtual int getSlaveId() const {
+    ST_LOCAL virtual int getSlaveId() const {
         return SLAVE_HLINE_BOTTOM;
     }
 
-    void setWhiteColor() {
+    ST_LOCAL void setWhiteColor() {
         myLineColor.r() = 1.0f; myLineColor.g() = 1.0f; myLineColor.b() = 1.0f; myLineColor.a() = 1.0f;
     }
 
-    void setBlueColor() {
+    ST_LOCAL void setBlueColor() {
         myLineColor.r() = 0.0f; myLineColor.g() = 0.0f; myLineColor.b() = 1.0f; myLineColor.a() = 1.0f;
     }
 
-    StGLColoredLine();
-    virtual ~StGLColoredLine();
-    virtual void release(StGLContext& theCtx);
-    virtual bool stglInit(StGLContext& theCtx);
-    virtual void stglDraw(StGLContext& theCtx,
-                          unsigned int theView,
-                          const int    theWinWidth,
-                          const int );
+    ST_LOCAL StGLColoredLine();
+    ST_LOCAL virtual ~StGLColoredLine();
+    ST_LOCAL virtual void release(StGLContext& theCtx);
+    ST_LOCAL virtual bool stglInit(StGLContext& theCtx);
+    ST_LOCAL virtual void stglDraw(StGLContext& theCtx,
+                                   unsigned int theView,
+                                   const int    theWinWidth,
+                                   const int );
 
         private:
 

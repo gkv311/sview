@@ -182,6 +182,14 @@ class StVideo {
                      const StHandle<StSubQueue>&       theSubtitlesQueue);
     ST_LOCAL ~StVideo();
 
+    ST_LOCAL inline const StHandle<StGLTextureQueue>& getTextureQueue() const {
+        return myTextureQueue;
+    }
+
+    ST_LOCAL inline const StHandle<StSubQueue>& getSubtitlesQueue() const {
+        return mySubtitles->getSubtitlesQueue();
+    }
+
     /**
      * Ignore sync rules and perform swap when ready.
      */
@@ -232,6 +240,10 @@ class StVideo {
      */
     ST_LOCAL void doLoadNext() {
         pushPlayEvent(ST_PLAYEVENT_NEXT);
+    }
+
+    ST_LOCAL void doRelease() {
+        signals.onError.disconnect();
     }
 
     /**

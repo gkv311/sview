@@ -19,268 +19,403 @@
 #ifndef __StWindow_h_
 #define __StWindow_h_
 
-#include "StWindowInterface.h"
+#include <stTypes.h>
+#include <StStrings/StString.h>
+#include <StSlots/StSignal.h>
+#include <StSettings/StParam.h>
+#include <StTemplates/StRect.h>
+#include <StGL/StGLEnums.h>
+#include <StGL/StGLVec.h>
 
-class StLibrary;
+#include "StWinErrorCodes.h" // Header with error codes
+#include "StMessageList.h"
+#include "StNativeWin_t.h"
+
+// StWindow enumeration
+enum {
+    ST_WIN_ALL    = -1, //!< special value for swap operation
+    ST_WIN_MASTER =  0,
+    ST_WIN_SLAVE  =  1,
+};
+
+enum {
+    ST_DEVICE_SUPPORT_IGNORE =-1,
+    ST_DEVICE_SUPPORT_NONE   = 0,
+    ST_DEVICE_SUPPORT_LOW    = 1,
+    ST_DEVICE_SUPPORT_MIDDLE = 2,
+    ST_DEVICE_SUPPORT_HIGHT  = 3,
+    ST_DEVICE_SUPPORT_FULL   = 4,
+    ST_DEVICE_SUPPORT_PREFER = 5,
+};
 
 /**
- * StWindow - StWindowInterface implementation from StCore library.
+ * Output device identification.
  */
-class StWindow : public StWindowInterface {
+struct StOutDevice {
 
-        public:
-
-    // allow use type definitions
-    friend class StCore;
-
-    // typedef pointer-to-class
-    typedef void* StWindow_t;
-
-    // types definitions - needed for each exported function
-    typedef StWindow_t (*StWindow_new_t)();
-    typedef void (*StWindow_del_t)(StWindow_t );
-    typedef void (*StWindow_close_t)(StWindow_t );
-    typedef void (*StWindow_setTitle_t)(StWindow_t , const stUtf8_t* );
-    typedef void (*StWindow_getAttributes_t)(StWindow_t , StWinAttributes_t* );
-    typedef void (*StWindow_setAttributes_t)(StWindow_t , const StWinAttributes_t* );
-    typedef stBool_t (*StWindow_isActive_t)(StWindow_t );
-    typedef stBool_t (*StWindow_isStereoOutput_t)(StWindow_t );
-    typedef void (*StWindow_setStereoOutput_t)(StWindow_t , stBool_t );
-    typedef void (*StWindow_show_t)(StWindow_t , const int& , const stBool_t& );
-    typedef void (*StWindow_showCursor_t)(StWindow_t , stBool_t );
-    typedef stBool_t (*StWindow_isFullScreen_t)(StWindow_t );
-    typedef void (*StWindow_setFullScreen_t)(StWindow_t , stBool_t );
-    typedef void (*StWindow_getPlacement_t)(StWindow_t , StRectI_t* );
-    typedef void (*StWindow_setPlacement_t)(StWindow_t , const StRectI_t* );
-    typedef void (*StWindow_getMousePos_t)(StWindow_t , StPointD_t* );
-    typedef int (*StWindow_getMouseDown_t)(StWindow_t , StPointD_t* );
-    typedef int (*StWindow_getMouseUp_t)(StWindow_t , StPointD_t* );
-    typedef int (*StWindow_getDragNDropFile_t)(StWindow_t, const int& , stUtf8_t* , const size_t& );
-    typedef stBool_t (*StWindow_stglCreate_t)(StWindow_t , const StWinAttributes_t* , const StNativeWin_t );
-    typedef void (*StWindow_stglSwap_t)(StWindow_t , const int& );
-    typedef void (*StWindow_stglMakeCurrent_t)(StWindow_t , const int& );
-    typedef double (*StWindow_stglGetTargetFps_t)(StWindow_t );
-    typedef void (*StWindow_stglSetTargetFps_t)(StWindow_t , const double& );
-    typedef void (*StWindow_stglViewport_t)(StWindow_t , const int& , StGLBoxPx* );
-    typedef void (*StWindow_callback_t)(StWindow_t , StMessage_t* );
-    typedef stBool_t (*StWindow_appendMessage_t)(StWindow_t , const StMessage_t& );
-    typedef stBool_t (*StWindow_getValue_t)(StWindow_t , const size_t& , size_t* );
-    typedef void (*StWindow_setValue_t)(StWindow_t , const size_t& , const size_t& );
-    typedef void* (*StWindow_memAlloc_t)(const size_t& );
-    typedef void (*StWindow_memFree_t)(void* );
-
-    // exported functions' pointers
-    class WindowFunctions {
-
-            public:
-
-        StWindow_new_t StWindow_new;
-        StWindow_del_t StWindow_del;
-        StWindow_close_t StWindow_close;
-        StWindow_setTitle_t StWindow_setTitle;
-        StWindow_getAttributes_t StWindow_getAttributes;
-        StWindow_setAttributes_t StWindow_setAttributes;
-        StWindow_isActive_t StWindow_isActive;
-        StWindow_isStereoOutput_t StWindow_isStereoOutput;
-        StWindow_setStereoOutput_t StWindow_setStereoOutput;
-        StWindow_show_t StWindow_show;
-        StWindow_showCursor_t StWindow_showCursor;
-        StWindow_isFullScreen_t StWindow_isFullScreen;
-        StWindow_setFullScreen_t StWindow_setFullScreen;
-        StWindow_getPlacement_t StWindow_getPlacement;
-        StWindow_setPlacement_t StWindow_setPlacement;
-        StWindow_getMousePos_t StWindow_getMousePos;
-        StWindow_getMouseDown_t StWindow_getMouseDown;
-        StWindow_getMouseUp_t StWindow_getMouseUp;
-        StWindow_getDragNDropFile_t StWindow_getDragNDropFile;
-        StWindow_stglCreate_t StWindow_stglCreate;
-        StWindow_stglSwap_t StWindow_stglSwap;
-        StWindow_stglMakeCurrent_t StWindow_stglMakeCurrent;
-        StWindow_stglGetTargetFps_t StWindow_stglGetTargetFps;
-        StWindow_stglSetTargetFps_t StWindow_stglSetTargetFps;
-        StWindow_stglViewport_t  StWindow_stglViewport;
-        StWindow_callback_t StWindow_callback;
-        StWindow_appendMessage_t StWindow_appendMessage;
-        StWindow_getValue_t StWindow_getValue;
-        StWindow_setValue_t StWindow_setValue;
-        StWindow_memAlloc_t StWindow_memAlloc;
-        StWindow_memFree_t StWindow_memFree;
-
-            public:
-
-        ST_CPPEXPORT WindowFunctions();
-
-        ST_CPPEXPORT void load(StLibrary& theLib);
-        ST_CPPEXPORT bool isNull() const;
-        ST_CPPEXPORT void nullify();
-
-    };
-
-    // core exported functions' pointers
-    ST_CPPEXPORT static WindowFunctions& GetFunctions();
-
-        private:
-
-    StWindowInterface* libInstance;
-    bool isPointer;
-
-        public:
-
-    StWindow() {
-        isPointer = false;
-        libInstance = (StWindowInterface* )GetFunctions().StWindow_new();
-    }
-
-    StWindow(StWindowInterface* inst) {
-        isPointer = true;
-        libInstance = inst;
-    }
-
-    StWindowInterface* getLibImpl() {
-        return libInstance;
-    }
-
-    ~StWindow() {
-        if(!isPointer) {
-            GetFunctions().StWindow_del(libInstance);
-        }
-    }
-
-    void close() {
-        GetFunctions().StWindow_close(libInstance);
-    }
-
-    void setTitle(const StString& theTitle) {
-        GetFunctions().StWindow_setTitle(libInstance, theTitle.toCString());
-    }
-
-    void getAttributes(StWinAttributes_t* inOutAttributes) {
-        GetFunctions().StWindow_getAttributes(libInstance, inOutAttributes);
-    }
-
-    void setAttributes(const StWinAttributes_t* inAttributes) {
-        GetFunctions().StWindow_setAttributes(libInstance, inAttributes);
-    }
-
-    bool isActive() const {
-        return GetFunctions().StWindow_isActive(libInstance);
-    }
-
-    bool isStereoOutput() {
-        return GetFunctions().StWindow_isStereoOutput(libInstance);
-    }
-
-    void setStereoOutput(bool stereoState) {
-        GetFunctions().StWindow_setStereoOutput(libInstance, stereoState);
-    }
-
-    void show(const int& winEnum) {
-        GetFunctions().StWindow_show(libInstance, winEnum, ST_TRUE);
-    }
-
-    void hide(const int& winEnum) {
-        GetFunctions().StWindow_show(libInstance, winEnum, ST_FALSE);
-    }
-
-    void showCursor(bool toShow) {
-        GetFunctions().StWindow_showCursor(libInstance, toShow);
-    }
-
-    bool isFullScreen() {
-        return GetFunctions().StWindow_isFullScreen(libInstance);
-    }
-
-    void setFullScreen(bool fullscreen) {
-        GetFunctions().StWindow_setFullScreen(libInstance, fullscreen);
-    }
-
-    StRectI_t getPlacement() {
-        StRectI_t rect;
-        GetFunctions().StWindow_getPlacement(libInstance, &rect);
-        return rect;
-    }
-
-    void setPlacement(const StRectI_t& rect) {
-        GetFunctions().StWindow_setPlacement(libInstance, &rect);
-    }
-
-    StPointD_t getMousePos() {
-        StPointD_t point;
-        GetFunctions().StWindow_getMousePos(libInstance, &point);
-        return point;
-    }
-
-    int getMouseDown(StPointD_t* point) {
-        return GetFunctions().StWindow_getMouseDown(libInstance, point);
-    }
-
-    int getMouseUp(StPointD_t* point) {
-        return GetFunctions().StWindow_getMouseUp(libInstance, point);
-    }
-
-    int getDragNDropFile(const int& id, stUtf8_t* outFile, const size_t& buffSizeBytes) {
-        return GetFunctions().StWindow_getDragNDropFile(libInstance, id, outFile, buffSizeBytes);
-    }
-
-    bool stglCreate(const StWinAttributes_t* inAttributes, const StNativeWin_t nativeParentWindow = (StNativeWin_t )NULL) {
-        return GetFunctions().StWindow_stglCreate(libInstance, inAttributes, nativeParentWindow);
-    }
-
-    void stglSwap(const int& value = ST_WIN_MASTER) {
-        GetFunctions().StWindow_stglSwap(libInstance, value);
-    }
-
-    void stglMakeCurrent(const int& value) {
-        GetFunctions().StWindow_stglMakeCurrent(libInstance, value);
-    }
-
-    double stglGetTargetFps() {
-        return GetFunctions().StWindow_stglGetTargetFps(libInstance);
-    }
-
-    void stglSetTargetFps(const double& fps) {
-        GetFunctions().StWindow_stglSetTargetFps(libInstance, fps);
-    }
-
-    StGLBoxPx stglViewport(const int& theWinId) const {
-        StGLBoxPx aRect;
-        GetFunctions().StWindow_stglViewport(libInstance, theWinId, &aRect);
-        return aRect;
-    }
-
-    void callback(StMessage_t* stMessages) {
-        GetFunctions().StWindow_callback(libInstance, stMessages);
-    }
-
-    stBool_t appendMessage(const StMessage_t& stMessage) {
-        return GetFunctions().StWindow_appendMessage(libInstance, stMessage);
-    }
-
-    bool getValue(const size_t& key, size_t* value) {
-        return GetFunctions().StWindow_getValue(libInstance, key, value);
-    }
-
-    void setValue(const size_t& key, const size_t& value) {
-        GetFunctions().StWindow_setValue(libInstance, key, value);
-    }
-
-    /**
-     * Special memory allocator, used to store/share data in StCore library scope.
-     */
-    static void* memAlloc(const size_t& theSize) {
-        return GetFunctions().StWindow_memAlloc(theSize);
-    }
-
-    static void memFree(void* thePtr) {
-        GetFunctions().StWindow_memFree(thePtr);
-    }
-
-    static stUtf8_t* memAllocNCopy(const StString& theString) {
-        stUtf8_t* aPtr = (stUtf8_t* )memAlloc(theString.getSize() + sizeof(stUtf8_t));
-        stMemCpy(aPtr, theString.toCString(), theString.getSize() + sizeof(stUtf8_t));
-        return aPtr;
-    }
+    StString PluginId; //!< renderer identifier StWindow::getRendererId()
+    StString DeviceId; //!< device   identifier (should be unique within renderer)
+    StString Name;     //!< device   name
+    StString Desc;     //!< device   description
+    int      Priority; //!< device   priority (ST_DEVICE_SUPPORT_ enumeration)
 
 };
+typedef StArrayList< StHandle<StOutDevice> > StOutDevicesList;
+template<> inline void StArray< StHandle<StOutDevice> >::sort() {}
+
+/**
+ * StWindow attributes structure.
+ * Notice that some options couln't be changed after window was created!
+ */
+typedef struct tagStWinAttributes {
+    size_t nSize;
+    // general attributes
+    stBool_t isNoDecor;          //!< to decorate master window or not (will be ignored in case of embedded and fullscreen)
+    stBool_t isStereoOutput;     //!< indicate stereoscopic output on / off (used for interconnection between modules)
+    stBool_t isGlStereo;         //!< request OpenGL hardware accelerated QuadBuffer
+    stBool_t isFullScreen;       //!< to show in fullscreen mode
+    stBool_t isHide;             //!< to hide the master window
+    stBool_t isHideCursor;       //!< to hide cursor
+    stBool_t toBlockSleepSystem; //!< prevent system  going to sleep (display could be turned off)
+    stBool_t toBlockSleepDisplay;//!< prevent display going to sleep
+    stBool_t areGlobalMediaKeys; //!< register system hot-key to capture multimedia even without window focus
+    // slave configuration
+    stBool_t isSlave;            //!< create StWindow with slave window
+    stBool_t isSlaveXMirrow;     //!< flip slave window position along X axis (horizontally)
+    stBool_t isSlaveYMirrow;     //!< flip slave window position along Y axis (vertically)
+    stBool_t isSlaveHLineTop;    //!< slave window - is a horizontal line at top of the display where master window shown
+    stBool_t isSlaveHTop2Px;     //!< slave window - is a horizontal line 2 pixels long at top of the display where master window shown
+    stBool_t isSlaveHLineBottom; //!< slave window - is a horizontal line at bottom of the display where master window shown
+    stBool_t isSlaveHide;        //!< do not show slave window
+    int8_t   slaveMonId;         //!< on which monitor show slave window (1 by default)
+} StWinAttributes_t;
+
+/**
+ * Initialize the default StWindow attributes.
+ * Use this function to avoid unused / forgotten parameters to be setted with invalid values.
+ */
+inline StWinAttributes_t stDefaultWinAttributes() {
+    StWinAttributes_t stWinAttribs;
+    stMemSet(&stWinAttribs, 0, sizeof(stWinAttribs));
+    stWinAttribs.nSize = sizeof(stWinAttribs);
+    stWinAttribs.slaveMonId = 1;
+    return stWinAttribs;
+}
+
+/**
+ * Compare two StWindow attributes structures.
+ */
+inline stBool_t areSame(const StWinAttributes_t* theAttrib1,
+                        const StWinAttributes_t* theAttrib2) {
+    if(theAttrib1->nSize != sizeof(StWinAttributes_t) ||
+       theAttrib2->nSize != sizeof(StWinAttributes_t)) {
+        // should be compared only structs
+        return ST_FALSE;
+    }
+    // compare all known fields
+    return (theAttrib1->isNoDecor          == theAttrib2->isNoDecor &&
+            theAttrib1->isStereoOutput     == theAttrib2->isStereoOutput &&
+            theAttrib1->isGlStereo         == theAttrib2->isGlStereo &&
+            theAttrib1->isFullScreen       == theAttrib2->isFullScreen &&
+            theAttrib1->isHide             == theAttrib2->isHide &&
+            theAttrib1->isHideCursor       == theAttrib2->isHideCursor &&
+            theAttrib1->toBlockSleepSystem == theAttrib2->toBlockSleepSystem &&
+            theAttrib1->toBlockSleepDisplay== theAttrib2->toBlockSleepDisplay &&
+            theAttrib1->areGlobalMediaKeys == theAttrib2->areGlobalMediaKeys &&
+            theAttrib1->isSlave            == theAttrib2->isSlave &&
+            theAttrib1->isSlaveXMirrow     == theAttrib2->isSlaveXMirrow &&
+            theAttrib1->isSlaveYMirrow     == theAttrib2->isSlaveYMirrow &&
+            theAttrib1->isSlaveHLineTop    == theAttrib2->isSlaveHLineTop &&
+            theAttrib1->isSlaveHTop2Px     == theAttrib2->isSlaveHTop2Px &&
+            theAttrib1->isSlaveHLineBottom == theAttrib2->isSlaveHLineBottom &&
+            theAttrib1->isSlaveHide        == theAttrib2->isSlaveHide &&
+            theAttrib1->slaveMonId         == theAttrib2->slaveMonId);
+}
+
+typedef struct tagStSlaveWindowCfg {
+    int idMaster;
+    int idSlave;      // slave window always should be assigned to monitor
+    int xAdd;         // coordinates computed with this algorithm:
+    int xSub;         // xAdd*(monLeft + left) + xSub*(monRight - right)
+    int yAdd;         // yAdd*(monTop + top) + ySub*(monBottom - bottom)
+    int ySub;
+} StSlaveWindowCfg_t;
+
+class StSearchMonitors;
+class StWindowImpl;
+
+/**
+ * This is an OpenGL Window implementation.
+ * Notice that StWindow doesn't support nesting since all nested rendering should be implemented using OpenGL.
+ * However it is possible to embed StWindow into another window.
+ */
+class StWindow {
+
+        public:
+
+    /**
+     * Default constructor. Window will not be displayed until create() call.
+     * @param theParentWindow Parent window
+     */
+    ST_CPPEXPORT StWindow(const StNativeWin_t theParentWindow = (StNativeWin_t )NULL);
+
+    /**
+     * Destructor.
+     */
+    ST_CPPEXPORT virtual ~StWindow();
+
+    /**
+     * @param theTitle window title
+     */
+    ST_CPPEXPORT void setTitle(const StString& theTitle);
+
+    ST_CPPEXPORT void getAttributes(StWinAttributes_t& thetAttributes) const;
+
+    ST_CPPEXPORT void setAttributes(const StWinAttributes_t& theAttributes);
+
+    /**
+     * @return true if window content is visible
+     */
+    ST_CPPEXPORT bool isActive() const;
+
+    /**
+     * Show up the window.
+     */
+    ST_CPPEXPORT void show();
+
+    /**
+     * Hide the window.
+     */
+    ST_CPPEXPORT void hide();
+
+    /**
+     * Show/Hide mouse cursor.
+     * @param theToShow true to show cursor
+     */
+    ST_CPPEXPORT void showCursor(const bool theToShow);
+
+    /**
+     * @return true if in fullscreen state
+     */
+    ST_CPPEXPORT bool isFullScreen() const;
+
+    /**
+     * @param theFullScreen fullscreen state
+     */
+    ST_CPPEXPORT void setFullScreen(const bool theFullScreen);
+
+    /**
+     * Get GUI GL window placement
+     * @return window placement on screen
+     */
+    ST_CPPEXPORT StRectI_t getPlacement() const;
+
+    /**
+     * Change GUI GL window placement
+     * @param theRect new window position
+     */
+    ST_CPPEXPORT void setPlacement(const StRectI_t& theRect,
+                                   const bool       theMoveToScreen = false);
+
+    /**
+     * @return point relative to window mouse position
+     * (0,0) - is top left of the window and (1,1) right buttom.
+     */
+    ST_CPPEXPORT StPointD_t getMousePos() const;
+
+    /**
+     * Returns mouse click position from stack.
+     * @param thePoint click point in relative coordinates
+     * @return mouse button id if any click in stack
+     */
+    ST_CPPEXPORT int getMouseDown(StPointD_t& thePoint);
+
+    ST_CPPEXPORT int getMouseUp(StPointD_t& thePoint);
+
+    /**
+     * Function to get Drag&Drop file list.
+     * @param theId   file if in list
+     * @param theFile buffer for file path;
+     * @return number of files in list if theId < 0 and -1 on error
+     */
+    ST_CPPEXPORT int getDragNDropFile(const int theId,
+                                      StString& theFile);
+
+    /**
+     * Function creates a GL window.
+     * @return true on success
+     */
+    ST_CPPEXPORT virtual bool create();
+
+    ST_CPPEXPORT virtual void close();
+
+    /**
+     * CallBack function.
+     * @param theMessages buffer to get new messages
+     */
+    ST_CPPEXPORT virtual void processEvents(StMessage_t* theMessages);
+
+    /**
+     * Append message into callback list.
+     * Message will be read on next callback() call.
+     * @param theMessage message to append
+     */
+    ST_CPPEXPORT bool appendMessage(const StMessage_t& theMessage);
+
+        public: //! @name OpenGL routines
+
+    /**
+     * Perform rendering of single frame.
+     * Notice that application should assing onRedraw callback to render something to the window.
+     * Stereoscopic renderers should override this method to perform stereo rendering.
+     */
+    ST_CPPEXPORT virtual void stglDraw();
+
+    /**
+     * Make GL context active in current thread.
+     */
+    ST_CPPEXPORT void stglMakeCurrent();
+
+    /**
+     * Swap dual-buffered GL context. Notice that stglDraw will automatically call it.
+     */
+    ST_CPPEXPORT void stglSwap();
+
+    /**
+     * Get viewport for specified subwindow (to handle tiled presentation).
+     * @param theWinEnum subwindow ID
+     * @return rectangle within window from bottom-left corner (ready for OpenGL calls)
+     */
+    ST_CPPEXPORT StGLBoxPx stglViewport(const int theWinEnum) const;
+
+        public: //! @name renderer properties
+
+    /**
+     * Renderer about string.
+     */
+    ST_CPPEXPORT virtual StString getRendererAbout() const;
+
+    /**
+     * This method returns renderer identifier.
+     * @return rendrer id
+     */
+    ST_CPPEXPORT virtual const char* getRendererId() const;
+
+    /**
+     * Active Device id.
+     */
+    ST_CPPEXPORT virtual const char* getDeviceId() const;
+
+    /**
+     * This methods returns device lost state.
+     * To reset device you should call close() -> open() sequence and re-initialize all GPU resources.
+     * @return true if rendering device requires reinitialization
+     */
+    ST_CPPEXPORT virtual bool isLostDevice() const;
+
+    /**
+     * Activate Device.
+     * @return true if renderer should be re-created to take effect.
+     */
+    ST_CPPEXPORT virtual bool setDevice(const StString& theDevice);
+
+    /**
+     * Devices list.
+     */
+    ST_CPPEXPORT virtual void getDevices(StOutDevicesList& theList) const;
+
+    /**
+     * @return true if stereo output enabled
+     */
+    ST_CPPEXPORT bool isStereoOutput() const;
+
+    /**
+     * @param theStereoState enable/disable stereooutput
+     */
+    ST_CPPEXPORT void setStereoOutput(bool theStereoState);
+
+    /**
+     * @return FPS control rule
+     */
+    ST_CPPEXPORT double getTargetFps() const;
+
+    /**
+     * Setup automatic FPS control rule:
+     *  - if theFPS >  0 then renderer will try to reach specified limit
+     *  - if theFPS =  0 then renderer will try to reduce CPU load with maximum FPS
+     *  - if theFPS = -1 then FPS control is turned off
+     */
+    ST_CPPEXPORT void setTargetFps(const double theFPS);
+
+    ST_CPPEXPORT virtual int getSupportLevel() const;
+
+    /**
+     * Retrieve options list.
+     */
+    ST_CPPEXPORT virtual void getOptions(StParamsList& theList) const;
+
+        public: //! @name signals
+
+    struct {
+        /**
+         * Emit callback Slot on redraw.
+         * @param theView view id to redraw
+         */
+        StSignal<void (const unsigned int )> onRedraw;
+    } signals;
+
+        protected: //! @name advanced methods
+
+    /**
+     * Show up window.
+     * @param theWinEnum subwindow
+     */
+    ST_CPPEXPORT void show(const int theWinEnum);
+
+    /**
+     * Hide window.
+     * @param theWinEnum subwindow
+     */
+    ST_CPPEXPORT void hide(const int theWinEnum);
+
+    /**
+     * Make GL context for specified window active in current thread.
+     * @param theWinEnum subwindow to activate GL context
+     */
+    ST_CPPEXPORT void stglMakeCurrent(const int theWinEnum);
+
+    /**
+     * Swap dual-buffered GL context for specified window.
+     * @param theWinEnum subwindow to swap
+     */
+    ST_CPPEXPORT void stglSwap(const int theWinEnum);
+
+    /**
+     * Access list of connected monitors.
+     */
+    ST_CPPEXPORT const StSearchMonitors& getMonitors() const;
+
+        private: //! @name private fields
+
+    StWindowImpl* myWin;       //!< window implementation class - we hide implementation details since them too platform-specific
+    double        myTargetFps; //!< user data
+
+};
+
+ST_LOCAL inline bool operator>(const StHandle<StWindow>& theA, const StHandle<StWindow>& theB) {
+    return theA != theB && theA->getSupportLevel() > theB->getSupportLevel();
+}
+
+ST_LOCAL inline bool operator<(const StHandle<StWindow>& theA, const StHandle<StWindow>& theB) {
+    return theA != theB && theA->getSupportLevel() < theB->getSupportLevel();
+}
+
+ST_LOCAL inline bool operator>=(const StHandle<StWindow>& theA, const StHandle<StWindow>& theB) {
+    return theA == theB || theA->getSupportLevel() >= theB->getSupportLevel();
+}
+
+ST_LOCAL inline bool operator<=(const StHandle<StWindow>& theA, const StHandle<StWindow>& theB) {
+    return theA == theB || theA->getSupportLevel() <= theB->getSupportLevel();
+}
 
 #endif //__StWindow_h_

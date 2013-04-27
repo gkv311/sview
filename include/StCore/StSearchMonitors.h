@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -23,74 +23,87 @@
 
 #include <StTemplates/StArrayList.h>
 
-class ST_LOCAL StSearchMonitors : public StArrayList<StMonitor> {
+/**
+ * This class provides:
+ *  - access to list of monitors
+ *  - methods to initialize list within current system configuration
+ *  - methods to find monitor within specified point
+ */
+class StSearchMonitors : public StArrayList<StMonitor> {
 
         public:
 
-    StSearchMonitors()
-    : StArrayList<StMonitor>(2) {
-        //
-    }
+    /**
+     * Empty constructor.
+     */
+    ST_CPPEXPORT StSearchMonitors();
 
-    virtual ~StSearchMonitors() {
-        //
-    }
+    /**
+     * Destructor.
+     */
+    ST_CPPEXPORT virtual ~StSearchMonitors();
 
     /**
      * Read user settings and if they are empty - search all connected displays
      */
-    void init();
+    ST_CPPEXPORT void init();
 
     /**
      * Read user settings
      */
-    void initFromConfig();
+    ST_CPPEXPORT void initFromConfig();
 
     /**
      * Search for connected displays
      */
-    void initFromSystem();
+    ST_CPPEXPORT void initFromSystem();
 
-    StMonitor& operator[](const size_t id) {
-        return (id < size()) ? changeValue(id) : changeValue(0);
+    ST_LOCAL inline StMonitor& operator[](const size_t theId) {
+        return changeValue((theId < size()) ? theId : 0);
+    }
+
+    ST_LOCAL inline const StMonitor& operator[](const size_t theId) const {
+        return getValue((theId < size()) ? theId : 0);
     }
 
     /**
      * Get monitor from point.
      */
-    StMonitor& operator[](const StPointI_t& iPoint) {
-        for(size_t id = 0; id < size(); ++id) {
-            if(getValue(id).getVRect().isPointIn(iPoint)) {
-                return changeValue(id);
-            }
-        }
-        return changeValue(0); // return first anyway...
-    }
+    ST_CPPEXPORT StMonitor& operator[](const StPointI_t& thePoint);
+
+    /**
+     * Get monitor from point.
+     */
+    ST_CPPEXPORT const StMonitor& operator[](const StPointI_t& thePoint) const;
+
+        private:
 
     /**
      * Just try to compute displays' configuration from known summary resolution
      */
-    void findMonitorsBlind(const int rootX, const int rootY);
+    ST_LOCAL void findMonitorsBlind(const int rootX, const int rootY);
 #if (defined(_WIN32) || defined(__WIN32__))
     /**
      * Function retrieves displays' configuration from WinAPI
      */
-    void findMonitorsWinAPI();
+    ST_LOCAL void findMonitorsWinAPI();
 #elif (defined(__APPLE__))
-    void findMonitorsCocoa();
+    ST_LOCAL void findMonitorsCocoa();
 #elif (defined(__linux__) || defined(__linux))
     /**
      * Function retrieves displays' configuration from XRandr extension
      */
-    void findMonitorsXRandr();
-    static bool getXRootSize(int& sizeX, int& sizeY);
+    ST_LOCAL void findMonitorsXRandr();
+    ST_LOCAL static bool getXRootSize(int& sizeX, int& sizeY);
     /**
      * Function retrieves displays' configuration from ADLsdk (AMD Catalyst)
      */
-    void findMonitorsADLsdk();
+    ST_LOCAL void findMonitorsADLsdk();
 #endif
 
-    static void listEDID(StArrayList<StEDIDParser>& theEdids);
+        public:
+
+    ST_CPPEXPORT static void listEDID(StArrayList<StEDIDParser>& theEdids);
 
 };
 

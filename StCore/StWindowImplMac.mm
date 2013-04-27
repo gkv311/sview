@@ -66,14 +66,16 @@ void StWindowImpl::setPlacement(const StRectI_t& theRect) {
     }
 }
 
-void StWindowImpl::show(const int& winNum) {
-    if(winNum == ST_WIN_MASTER && myWinAttribs.isHide) {
+void StWindowImpl::show(const int theWinNum) {
+    if((theWinNum == ST_WIN_MASTER || theWinNum == ST_WIN_ALL)
+    && myWinAttribs.isHide) {
         if(myMaster.hWindow != NULL) {
             [myMaster.hWindow orderFront: NULL];
         }
         myWinAttribs.isHide = false;
         updateWindowPos();
-    } else if(winNum == ST_WIN_SLAVE && myWinAttribs.isSlaveHide) {
+    } else if((theWinNum == ST_WIN_SLAVE || theWinNum == ST_WIN_ALL)
+           && myWinAttribs.isSlaveHide) {
         if(mySlave.hWindow != NULL) {
             [mySlave.hWindow orderFront: NULL];
         }
@@ -82,14 +84,16 @@ void StWindowImpl::show(const int& winNum) {
     }
 }
 
-void StWindowImpl::hide(const int& winNum) {
+void StWindowImpl::hide(const int theWinNum) {
     StCocoaLocalPool aLocalPool;
-    if(winNum == ST_WIN_MASTER && !myWinAttribs.isHide) {
+    if((theWinNum == ST_WIN_MASTER || theWinNum == ST_WIN_ALL)
+    && !myWinAttribs.isHide) {
         if(myMaster.hWindow != NULL) {
             [myMaster.hWindow orderOut: NULL];
         }
         myWinAttribs.isHide = true;
-    } else if(winNum == ST_WIN_SLAVE && !myWinAttribs.isSlaveHide) {
+    } else if((theWinNum == ST_WIN_SLAVE || theWinNum == ST_WIN_ALL)
+           && !myWinAttribs.isSlaveHide) {
         if(mySlave.hWindow != NULL) {
             [mySlave.hWindow orderOut: NULL];
         }
@@ -206,15 +210,9 @@ void StWindowImpl::doCreateWindows(NSOpenGLContext* theGLContextMaster,
     [myMaster.hWindow makeKeyAndOrderFront: NSApp];
 }
 
-bool StWindowImpl::stglCreate(const StWinAttributes_t* theAttributes,
-                              const StNativeWin_t      theParentWindow) {
+bool StWindowImpl::create() {
+    myMessageList.reset();
     myInitState = STWIN_INITNOTSTART;
-    myParentWin = theParentWindow;
-
-    size_t bytesToCopy = (theAttributes->nSize > sizeof(StWinAttributes_t)) ? sizeof(StWinAttributes_t) : theAttributes->nSize;
-    stMemCpy(&myWinAttribs, theAttributes, bytesToCopy); // copy as much as possible
-    myWinAttribs.nSize = sizeof(StWinAttributes_t);     // restore own size
-    updateSlaveConfig();
     updateChildRect();
 
     if(NSApp == NULL) {
@@ -334,6 +332,10 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
 }
 
 void StWindowImpl::updateWindowPos() {
+    if(myMaster.hViewGl == NULL) {
+        return;
+    }
+
     if(myWinAttribs.isSlave && !myWinAttribs.isSlaveHide
     && (!isSlaveIndependent() || myMonitors.size() > 1)
     && !myWinAttribs.isFullScreen) {
@@ -354,7 +356,7 @@ void StWindowImpl::updateWindowPos() {
 }
 
 // Function set to argument-buffer given events
-void StWindowImpl::callback(StMessage_t* theMessages) {
+void StWindowImpl::processEvents(StMessage_t* theMessages) {
     if(myIsDispChanged) {
         updateMonitors();
     }

@@ -84,17 +84,17 @@ namespace {
 
 };
 
-StGLImageRegion::StGLImageRegion(StGLWidget* theParent, size_t theTextureQueueSizeMax)
+StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
+                                 const StHandle<StGLTextureQueue>& theTextureQueue)
 : StGLWidget(theParent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT)),
   myQuad(),
   myUVSphere(StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 64),
   myProgramFlat(),
   myProgramSphere(),
-  myTextureQueue(new StGLTextureQueue(theTextureQueueSizeMax)),
+  myTextureQueue(theTextureQueue),
   myClickPntZo(0.0, 0.0),
   myIsInitialized(false),
   myHasVideoStream(false) {
-    //
     params.displayMode   = new StInt32Param(MODE_STEREO);
     params.displayRatio  = new StInt32Param(RATIO_AUTO);
     params.textureFilter = new StInt32Param(StGLImageProgram::FILTER_LINEAR);

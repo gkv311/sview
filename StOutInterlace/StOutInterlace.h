@@ -19,8 +19,9 @@
 #ifndef __StOutInterlace_h_
 #define __StOutInterlace_h_
 
-#include <StCore/StCore.h>       // header for Stereo Output Core
-#include <StThreads/StThreads.h> // threads header (mutexes, threads,...)
+#include <StCore/StWindow.h>
+#include <StCore/StMonitor.h>
+#include <StThreads/StThreads.h>
 #include <StThreads/StFPSControl.h>
 #include <StGL/StGLProgram.h>
 #include <StGL/StGLFrameBuffer.h>
@@ -29,18 +30,84 @@
 class StSettings;
 
 /**
- * Just simple GLSL program.
+ * Simple GLSL program.
  */
-class ST_LOCAL StProgramFB : public StGLProgram {
+class StProgramFB : public StGLProgram {
 
         public:
 
-    StProgramFB(const StString& theTitle);
-    virtual bool link(StGLContext& theCtx);
+    ST_LOCAL StProgramFB(const StString& theTitle);
+    ST_LOCAL virtual bool link(StGLContext& theCtx);
 
 };
 
-class ST_LOCAL StOutInterlace : public StRendererInterface {
+/**
+ * This class implements stereoscopic rendering on Interlaced monitors.
+ */
+class StOutInterlace : public StWindow {
+
+        public:
+
+    /**
+     * Main constructor.
+     */
+    ST_CPPEXPORT StOutInterlace(const StNativeWin_t theParentWindow);
+
+    /**
+     * Destructor.
+     */
+    ST_CPPEXPORT virtual ~StOutInterlace();
+
+    /**
+     * Renderer about string.
+     */
+    ST_CPPEXPORT virtual StString getRendererAbout() const;
+
+    /**
+     * Renderer id.
+     */
+    ST_CPPEXPORT virtual const char* getRendererId() const;
+
+    /**
+     * Active Device id.
+     */
+    ST_CPPEXPORT virtual const char* getDeviceId() const;
+
+    /**
+     * Activate Device.
+     */
+    ST_CPPEXPORT virtual bool setDevice(const StString& theDevice);
+
+    /**
+     * Devices list.
+     */
+    ST_CPPEXPORT virtual void getDevices(StOutDevicesList& theList) const;
+
+    /**
+     * Retrieve options list.
+     */
+    ST_CPPEXPORT virtual void getOptions(StParamsList& theList) const;
+
+    /**
+     * Create and show window.
+     * @return false if any critical error appeared
+     */
+    ST_CPPEXPORT virtual bool create();
+
+    /**
+     * Close the window.
+     */
+    ST_CPPEXPORT virtual void close();
+
+    /**
+     * Process callback.
+     */
+    ST_CPPEXPORT virtual void processEvents(StMessage_t* theMessages);
+
+    /**
+     * Stereo renderer.
+     */
+    ST_CPPEXPORT virtual void stglDraw();
 
         private:
 
@@ -54,11 +121,27 @@ class ST_LOCAL StOutInterlace : public StRendererInterface {
         DEVICE_NB,
     };
 
-    enum {
-        DEVICE_OPTION_VSYNC   = 0,
-        DEVICE_OPTION_REVERSE = 1,
-        DEVICE_OPTION_BINDMON = 2,
-    };
+        private:
+
+    ST_LOCAL static StHandle<StMonitor> getHInterlaceMonitor(const StArrayList<StMonitor>& theMonitors,
+                                                             bool& theIsReversed);
+
+    ST_LOCAL void stglDrawEDCodes();
+
+    /**
+     * Release GL resources before window closing.
+     */
+    ST_LOCAL void releaseResources();
+
+    /**
+     * On/off VSync callback.
+     */
+    ST_LOCAL void doVSync(const bool theValue);
+
+    /**
+     * Bind to monitor callback.
+     */
+    ST_LOCAL void doSetBindToMonitor(const bool theValue);
 
         private:
 
@@ -66,16 +149,26 @@ class ST_LOCAL StOutInterlace : public StRendererInterface {
 
         private:
 
-    StHandle<StCore>          myStCore;
+    struct {
+
+        StHandle<StBoolParam>  IsVSyncOn; //!< flag to use VSync
+        StHandle<StBoolParam>  ToReverse; //!< configurable flag to reverse rows order
+        StHandle<StBoolParam>  BindToMon; //!< flag to bind to monitor
+
+    } params;
+
+        private:
+
+    StOutDevicesList          myDevices;
     StHandle<StSettings>      mySettings;
-    StString                  myPluginPath;
+    StString                  myAbout;                    //!< about string
     StHandle<StGLContext>     myContext;
     StHandle<StGLFrameBuffer> myFrmBuffer;                //!< OpenGL frame buffer object
     StHandle<StProgramFB>     myGlPrograms[DEVICE_NB];    //!< GLSL programs
     StHandle<StProgramFB>     myGlProgramsRev[DEVICE_NB]; //!< GLSL programs with reversed left/right condition
     StGLVertexBuffer          myQuadVertBuf;
     StGLVertexBuffer          myQuadTexCoordBuf;
-    int                       myDeviceId;
+    int                       myDevice;
     StHandle<StMonitor>       myMonitor;                  //!< current monitor
 
     StRectI_t                 myEDRect;
@@ -86,37 +179,14 @@ class ST_LOCAL StOutInterlace : public StRendererInterface {
     StGLVarLocation           myVpSizeYOnLoc;             //!< helper shader variables
     StGLVarLocation           myVpSizeYOffLoc;
 
-    StSDOptionsList_t*        myOptionsStruct;
     StFPSControl              myFPSControl;
     bool                      myToSavePlacement;
-    bool                      myToBindToMonitor;
-    bool                      myIsVSync;
-    bool                      myIsReversed;               //!< configurable flag to reverse rows order
     bool                      myIsMonReversed;            //!< indicates (known) monitor model with reversed rows order
     bool                      myIsStereo;
     bool                      myIsEDactive;
     bool                      myIsEDCodeFinished;
     bool                      myToCompressMem;            //!< reduce memory usage
     bool                      myIsBroken;                 //!< special flag for broke state - when FBO can not be allocated
-
-        private:
-
-    void setDevice(const int theDeviceId);
-    void optionsStructAlloc();
-    void stglDrawEDCodes();
-
-        public:
-
-    static StHandle<StMonitor> getHInterlaceMonitor(bool& theIsReversed);
-
-    StOutInterlace();
-    ~StOutInterlace();
-    StRendererInterface* getLibImpl() { return this; }
-    StWindowInterface* getStWindow() { return myStCore->getStWindow(); }
-    bool init(const StString& , const int& , const StNativeWin_t );
-    bool open(const StOpenInfo& stOpenInfo) { return myStCore->open(stOpenInfo); }
-    void callback(StMessage_t* );
-    void stglDraw(unsigned int );
 
 };
 

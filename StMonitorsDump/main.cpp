@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMonitorsDump program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +16,12 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <StCore/StCore.h>  // header for Stereo Output Core
-#include "../StCore/StSearchMonitors.h"
+#include <StThreads/StProcess.h>
+#include <StCore/StSearchMonitors.h>
 #include <StStrings/stConsole.h>
 #include <StFile/StRawFile.h>
+#include <StVersion.h>
+
 #include <fstream>
 
 namespace {
@@ -299,7 +301,7 @@ int main(int , char** ) { // force console output
 
     st::cout << st::COLOR_FOR_GREEN << stostream_text("Dump stored to file \"stMonitorsDump.txt\"\n") << st::COLOR_FOR_WHITE;
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     system("notepad.exe stMonitorsDump.txt");
 #endif
 

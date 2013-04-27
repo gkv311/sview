@@ -19,9 +19,10 @@
 #ifndef __StWindowImpl_h_
 #define __StWindowImpl_h_
 
-#include <StCore/StWindowInterface.h> // interface declaration
-#include "StSearchMonitors.h"
-#include "StWinHandles.h"             // os-specific handles class for windows
+#include <StCore/StWindow.h>
+
+#include <StCore/StSearchMonitors.h>
+#include "StWinHandles.h"
 #include "StMouseClickQueue.h"
 
 #if (defined(__APPLE__))
@@ -36,67 +37,66 @@ class StThread;
  * This class represents implementation of
  * all main routines for GLwindow managment.
  */
-class ST_LOCAL StWindowImpl : public StWindowInterface {
+class StWindowImpl {
 
-        public: //! @name StWindowInterface interface implementation
+        public: //! @name main interface
 
-    virtual StWindowInterface* getLibImpl() { return this; }
-    StWindowImpl();
-    virtual ~StWindowImpl();
-    virtual void close();
-    virtual void setTitle(const StString& theTitle);
-    virtual void getAttributes(StWinAttributes_t* theAttributes);
-    virtual void setAttributes(const StWinAttributes_t* theAttributes);
-    virtual bool isActive() const { return myIsActive; }
-    virtual bool isStereoOutput() { return myWinAttribs.isStereoOutput; }
-    virtual void setStereoOutput(bool theStereoState) { myWinAttribs.isStereoOutput = theStereoState; }
-    virtual void show(const int& );
-    virtual void hide(const int& );
-    virtual void showCursor(bool toShow);
-    virtual bool isFullScreen() { return myWinAttribs.isFullScreen; }
-    virtual void setFullScreen(bool theFullscreen);
-    virtual StRectI_t getPlacement();
-    virtual void setPlacement(const StRectI_t& theRect);
-    virtual StPointD_t getMousePos();
-    virtual int getMouseDown(StPointD_t* thePoint);
-    virtual int getMouseUp(StPointD_t* thePoint);
-    virtual int getDragNDropFile(const int& id, stUtf8_t* outFile, const size_t& buffSizeBytes);
-    virtual bool stglCreate(const StWinAttributes_t* theAttributes, const StNativeWin_t theParentWindow);
-    virtual void stglSwap(const int& theWinId);
-    virtual void stglMakeCurrent(const int& theWinId);
-    virtual double stglGetTargetFps() { return myTargetFps; }
-    virtual void stglSetTargetFps(const double& theFps) { myTargetFps = theFps; }
-    virtual StGLBoxPx stglViewport(const int& theWinId) const;
-    virtual void callback(StMessage_t* theMessages);
-    virtual stBool_t appendMessage(const StMessage_t& theMessage);
-    virtual bool getValue(const size_t& theKey, size_t*       theValue);
-    virtual void setValue(const size_t& theKey, const size_t& theValue);
+    ST_LOCAL StWindowImpl(const StNativeWin_t theParentWindow);
+    ST_LOCAL ~StWindowImpl();
+    ST_LOCAL void close();
+    ST_LOCAL void setTitle(const StString& theTitle);
+    ST_LOCAL void getAttributes(StWinAttributes_t& theAttributes) const;
+    ST_LOCAL void setAttributes(const StWinAttributes_t& theAttributes);
+    ST_LOCAL bool isActive() const { return myIsActive; }
+    ST_LOCAL bool isStereoOutput() { return myWinAttribs.isStereoOutput; }
+    ST_LOCAL void setStereoOutput(bool theStereoState) { myWinAttribs.isStereoOutput = theStereoState; }
+    ST_LOCAL void show(const int );
+    ST_LOCAL void hide(const int );
+    ST_LOCAL void showCursor(bool toShow);
+    ST_LOCAL bool isFullScreen() { return myWinAttribs.isFullScreen; }
+    ST_LOCAL void setFullScreen(bool theFullscreen);
+    ST_LOCAL StRectI_t getPlacement() const { return myWinAttribs.isFullScreen ? myRectFull : myRectNorm; }
+    ST_LOCAL void setPlacement(const StRectI_t& theRect,
+                               const bool       theMoveToScreen);
+    ST_LOCAL StPointD_t getMousePos();
+    ST_LOCAL int getMouseDown(StPointD_t& thePoint);
+    ST_LOCAL int getMouseUp(StPointD_t& thePoint);
+    ST_LOCAL int getDragNDropFile(const int theId, StString& theFile);
+    ST_LOCAL bool create();
+    ST_LOCAL void stglSwap(const int& theWinId);
+    ST_LOCAL void stglMakeCurrent(const int& theWinId);
+    ST_LOCAL StGLBoxPx stglViewport(const int& theWinId) const;
+    ST_LOCAL void processEvents(StMessage_t* theMessages);
+    ST_LOCAL stBool_t appendMessage(const StMessage_t& theMessage);
+    ST_LOCAL const StSearchMonitors& getMonitors() const {
+        return myMonitors;
+    }
 
         public: //! @name additional
 
-    void updateChildRect();
-#if (defined(_WIN32) || defined(__WIN32__))
-    bool wndRegisterClass(const StStringUtfWide& theClassName);
-    bool wndCreateWindows(); // called from non-main thread
-    LRESULT stWndProc(HWND , UINT , WPARAM , LPARAM );
+    ST_LOCAL void updateChildRect();
+#ifdef _WIN32
+    ST_LOCAL bool wndRegisterClass(const StStringUtfWide& theClassName);
+    ST_LOCAL bool wndCreateWindows(); // called from non-main thread
+    ST_LOCAL LRESULT stWndProc(HWND , UINT , WPARAM , LPARAM );
 #elif (defined(__APPLE__))
-    void doCreateWindows(NSOpenGLContext* theGLContextMaster,
-                         NSOpenGLContext* theGLContextSlave);
+    ST_LOCAL void doCreateWindows(NSOpenGLContext* theGLContextMaster,
+                                  NSOpenGLContext* theGLContextSlave);
 #endif
 
         public:
 
-    void updateMonitors();
-    void updateWindowPos();
-    void updateActiveState();
-    void updateBlockSleep();
+    ST_LOCAL void updateMonitors();
+    ST_LOCAL void updateWindowPos();
+    ST_LOCAL void updateActiveState();
+    ST_LOCAL void updateBlockSleep();
 #if (defined(__linux__) || defined(__linux))
-    void parseXDNDClientMsg();
-    void parseXDNDSelectionMsg();
+    ST_LOCAL void parseXDNDClientMsg();
+    ST_LOCAL void parseXDNDSelectionMsg();
 
-    static Bool stXWaitMapped(Display* theDisplay,
-                              XEvent*  theEvent,
-                              char*    theArg);
+    ST_LOCAL static Bool stXWaitMapped(Display* theDisplay,
+                                       XEvent*  theEvent,
+                                       char*    theArg);
 #endif
 
     /**
@@ -110,10 +110,10 @@ class ST_LOCAL StWindowImpl : public StWindowInterface {
         TiledCfg_SlaveMasterY, //!< Master at bottom / Slave at top
     };
 
-    void getTiledWinRect(StRectI_t& theRect) const;
-    void correctTiledCursor(int& theLeft, int& theTop) const;
+    ST_LOCAL void getTiledWinRect(StRectI_t& theRect) const;
+    ST_LOCAL void correctTiledCursor(int& theLeft, int& theTop) const;
 
-    void updateSlaveConfig() {
+    ST_LOCAL void updateSlaveConfig() {
         myMonSlave.idSlave = int(myWinAttribs.slaveMonId);
         if(myWinAttribs.isSlaveXMirrow) {
             myMonSlave.xAdd = 0; myMonSlave.xSub = 1;
@@ -127,34 +127,34 @@ class ST_LOCAL StWindowImpl : public StWindowInterface {
         }
     }
 
-    int getMasterLeft() {
+    ST_LOCAL int getMasterLeft() const {
         return myMonitors[myMonSlave.idMaster].getVRect().left();
     }
 
-    int getMasterTop() {
+    ST_LOCAL int getMasterTop() const {
         return myMonitors[myMonSlave.idMaster].getVRect().top();
     }
 
     /**
      * @return true if slave window should be displayed on independent monitor.
      */
-    bool isSlaveIndependent() {
+    ST_LOCAL bool isSlaveIndependent() const {
         return !myWinAttribs.isSlaveHLineTop && !myWinAttribs.isSlaveHTop2Px && !myWinAttribs.isSlaveHLineBottom;
     }
 
-    int getSlaveLeft() {
+    ST_LOCAL int getSlaveLeft() const {
         if(!isSlaveIndependent()) {
             return myMonitors[getPlacement().center()].getVRect().left();
         } else if(myWinAttribs.isFullScreen) {
             return myMonitors[myMonSlave.idSlave].getVRect().left();
         } else {
-            StMonitor& aMonMaster = myMonitors[getPlacement().center()]; // detect from current location
+            const StMonitor& aMonMaster = myMonitors[getPlacement().center()]; // detect from current location
             return myMonSlave.xAdd * (myMonitors[myMonSlave.idSlave].getVRect().left()  + myRectNorm.left()  - aMonMaster.getVRect().left())
                  + myMonSlave.xSub * (myMonitors[myMonSlave.idSlave].getVRect().right() - myRectNorm.right() + aMonMaster.getVRect().left());
         }
     }
 
-    int getSlaveWidth() {
+    ST_LOCAL int getSlaveWidth() const {
         if(myWinAttribs.isSlaveHTop2Px) {
             return 2;
         } else if(myWinAttribs.isSlaveHLineTop || myWinAttribs.isSlaveHLineBottom) {
@@ -166,7 +166,7 @@ class ST_LOCAL StWindowImpl : public StWindowInterface {
         }
     }
 
-    int getSlaveTop() {
+    ST_LOCAL int getSlaveTop() const {
         if(myWinAttribs.isSlaveHLineBottom) {
             return myMonitors[getPlacement().center()].getVRect().bottom() - 1;
         } else if(myWinAttribs.isSlaveHLineTop || myWinAttribs.isSlaveHTop2Px) {
@@ -174,13 +174,13 @@ class ST_LOCAL StWindowImpl : public StWindowInterface {
         } else if(myWinAttribs.isFullScreen) {
             return myMonitors[myMonSlave.idSlave].getVRect().top();
         } else {
-            StMonitor& aMonMaster = myMonitors[getPlacement().center()]; // detect from current location
+            const StMonitor& aMonMaster = myMonitors[getPlacement().center()]; // detect from current location
             return myMonSlave.yAdd * (myMonitors[myMonSlave.idSlave].getVRect().top()    + myRectNorm.top()    - aMonMaster.getVRect().top())
                  + myMonSlave.ySub * (myMonitors[myMonSlave.idSlave].getVRect().bottom() - myRectNorm.bottom() + aMonMaster.getVRect().top());
         }
     }
 
-    int getSlaveHeight() {
+    ST_LOCAL int getSlaveHeight() const {
         if(myWinAttribs.isSlaveHLineBottom || myWinAttribs.isSlaveHTop2Px) {
             return 1;
         } else if(myWinAttribs.isSlaveHLineTop) {
@@ -221,10 +221,7 @@ class ST_LOCAL StWindowImpl : public StWindowInterface {
     int                myWinOnMonitorId;  //!< monitor id where window is placed
     TiledCfg           myTiledCfg;        //!< tiles configuration (multiple viewports within the same window)
 
-    size_t             myUserDataMap;     //!< user data
-    double             myTargetFps;       //!< user data
-
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     POINT              myPointTest;       //!< temporary point object to verify cached window position
     StHandle<StThread> myMsgThread;       //!< dedicated thread for window message loop
     StEvent            myEventInitWin;    //!< special event waited from createWindows() thread

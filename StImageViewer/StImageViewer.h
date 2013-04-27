@@ -19,7 +19,7 @@
 #ifndef __StImageViewer_h_
 #define __StImageViewer_h_
 
-#include <StCore/StDrawerInterface.h>
+#include <StCore/StApplication.h>
 
 #include <StSettings/StParam.h>
 
@@ -32,9 +32,9 @@ class StCheckUpdates;
 class StWindow;
 
 /**
- * Base Drawer class for Image Viewer plugin.
+ * Image Viewer application.
  */
-class StImageViewer : public StDrawerInterface {
+class StImageViewer : public StApplication {
 
     friend class StImageViewGUI;
 
@@ -44,13 +44,43 @@ class StImageViewer : public StDrawerInterface {
 
         public: //! @name interface methods' implementations
 
-    ST_CPPEXPORT StImageViewer();
+    /**
+     * Main constructor.
+     */
+    ST_CPPEXPORT StImageViewer(const StNativeWin_t         theParentWin = (StNativeWin_t )NULL,
+                               const StHandle<StOpenInfo>& theOpenInfo  = NULL);
+
+    /**
+     * Destructor.
+     */
     ST_CPPEXPORT virtual ~StImageViewer();
-    ST_CPPEXPORT virtual StDrawerInterface* getLibImpl() { return this; }
-    ST_CPPEXPORT virtual bool init(StWindowInterface* theWindow);
-    ST_CPPEXPORT virtual bool open(const StOpenInfo& stOpenInfo);
-    ST_CPPEXPORT virtual void parseCallback(StMessage_t* stMessages);
+
+    /**
+     * Open application.
+     */
+    ST_CPPEXPORT virtual bool open();
+
+    /**
+     * Process callback.
+     */
+    ST_CPPEXPORT virtual void processEvents(const StMessage_t* theEvents);
+
+    /**
+     * Draw frame for requested view.
+     */
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
+
+    /**
+     * Reset device - release GL resources in old window and re-create them in new window.
+     */
+    ST_CPPEXPORT virtual bool resetDevice();
+
+        private:
+
+    /**
+     * Process device change.
+     */
+    ST_LOCAL virtual void doChangeDevice(const int32_t theValue);
 
         public: //! @name callback Slots
 
@@ -109,6 +139,7 @@ class StImageViewer : public StDrawerInterface {
         StHandle<StBoolParam>   toRestoreRatio;   //!< restore ratio on restart
         StHandle<StInt32Param>  checkUpdatesDays; //!< days count between updates checks
         StHandle<StInt32Param>  srcFormat;        //!< source format
+        StHandle<StBoolParam>   ToShowFps;        //!< display FPS meter
         StString                lastFolder;       //!< laster folder used to open / save file
         StImageFile::ImageClass imageLib;         //!< preferred image library
         int                     fpsBound;         //!< limit or not rendering FPS
@@ -129,13 +160,27 @@ class StImageViewer : public StDrawerInterface {
 
         private:
 
+    /**
+     * Initialization routines.
+     */
+    ST_LOCAL bool init();
+
+    /**
+     * Parse arguments.
+     */
     ST_LOCAL void parseArguments(const StArgumentsMap& theArguments);
+
+    /**
+     * Release GL resources.
+     */
+    ST_LOCAL void releaseDevice();
 
         private: //! @name private fields
 
     StHandle<StGLContext>      myContext;
-    StHandle<StWindow>         myWindow;          //!< wrapper over Output plugin's StWindow instance
     StHandle<StSettings>       mySettings;        //!< settings manager for Image Viewer plugin
+    StHandle<StTranslations>   myLangMap;         //!< translated strings map
+
     StHandle<StImageViewerGUI> myGUI;             //!< GUI root widget
     StHandle<StImageLoader>    myLoader;          //!< main image loader class
     StHandle<StCheckUpdates>   myUpdates;         //!< check updates utility
@@ -150,7 +195,6 @@ class StImageViewer : public StDrawerInterface {
     bool                       myToCheckUpdates;
     bool                       myToSaveSrcFormat; //!< indicates that active source format should be saved or not
     bool                       myEscNoQuit;       //!< if true then Escape will not quit application
-    bool                       myToQuit;          //!< drawer quiting switcher
 
 };
 

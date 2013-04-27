@@ -19,102 +19,139 @@
 #ifndef __StApplication_h_
 #define __StApplication_h_
 
-#include "StApplicationInterface.h"
+#include <StCore/StWindow.h>
+#include <StCore/StOpenInfo.h>
+#include <StSettings/StEnumParam.h>
 
-class StLibrary;
+class StSettings;
 
-class StApplication : public StApplicationInterface {
+/**
+ * This class provides basic interface for interactive application.
+ */
+class StApplication {
 
-        public:
+         public:
 
-    // allow use type definitions
-    friend class StCore;
+    /**
+     * Parse process arguments.
+     */
+    ST_CPPEXPORT static StHandle<StOpenInfo> parseProcessArguments();
 
-    // typedef pointer-to-class
-    typedef void* StApplication_t;
+         public:
 
-    // types definitions - needed for each exported function
-    typedef StApplication_t (*StApplication_new_t)();
-    typedef void (*StApplication_del_t)(StApplication_t );
-    typedef stBool_t (*StApplication_isOpened_t)(StApplication_t );
-    typedef stBool_t (*StApplication_isFullscreen_t)(StApplication_t );
-    typedef stBool_t (*StApplication_create_t)(StApplication_t , const StNativeWin_t );
-    typedef stBool_t (*StApplication_open_t)(StApplication_t , const StOpenInfo_t* );
-    typedef void (*StApplication_callback_t)(StApplication_t , StMessage_t* );
+    /**
+     * Main constructor.
+     */
+    ST_CPPEXPORT StApplication(const StNativeWin_t         theParentWin = (StNativeWin_t )NULL,
+                               const StHandle<StOpenInfo>& theOpenInfo  = NULL);
 
-    class AppFunctions {
+    /**
+     * Destructor.
+     */
+    ST_CPPEXPORT virtual ~StApplication();
 
-            public:
+    /**
+     * Application may exit in 2 cases:
+     *  - user request (close window / hot key - should be handled by inheritors)
+     *  - exit() method is called
+     * @return true if application is in exit state
+     */
+    ST_CPPEXPORT bool closingDown() const;
 
-        StApplication_new_t StApplication_new;
-        StApplication_del_t StApplication_del;
-        StApplication_isOpened_t     StApplication_isOpened;
-        StApplication_isFullscreen_t StApplication_isFullscreen;
-        StApplication_create_t   StApplication_create;
-        StApplication_open_t     StApplication_open;
-        StApplication_callback_t StApplication_callback;
+    /**
+     * Ask application to exit.
+     * Notice that callee should call processEvents.
+     */
+    ST_CPPEXPORT void exit(const int theExitCode);
 
-            public:
+    /**
+     * Open specified file (override application arguments if any).
+     * @param theOpenInfo file information
+     * @return false on any critical error
+     */
+    ST_CPPEXPORT bool open(const StOpenInfo& theOpenInfo);
 
-        ST_CPPEXPORT AppFunctions();
-        ST_CPPEXPORT ~AppFunctions();
+    /**
+     * Create main application window and open file.
+     * If file was not set directly then it will be taken from application arguments.
+     * @return false on any critical error
+     */
+    ST_CPPEXPORT virtual bool open();
 
-        ST_CPPEXPORT void load(StLibrary& theLib);
-        ST_CPPEXPORT bool isNull() const;
-        ST_CPPEXPORT void nullify();
+    /**
+     * @return application description
+     */
+    ST_CPPEXPORT virtual StString getAboutString() const;
 
-    };
+    /**
+     * Process all pending events within this application.
+     * @param theMessages buffer to get new messages
+     */
+    ST_CPPEXPORT void processEvents();
 
-    // core exported functions' pointers
-    ST_CPPEXPORT static AppFunctions& GetFunctions();
+    /**
+     * Enters the main event loop and wait until exit
+     * (calls processEvents in loop).
+     */
+    ST_CPPEXPORT int exec();
 
-        private:
+    /**
+     * Return active renderer and main application window.
+     */
+    ST_CPPEXPORT const StHandle<StWindow>& getMainWindow() const;
 
-    StApplicationInterface* libInstance;
-    bool isPointer;
+        protected:
 
-        public:
+    /**
+     * Process all pending events within this application.
+     * @param theMessages buffer to get new messages
+     */
+    ST_CPPEXPORT virtual void processEvents(const StMessage_t* theEvents);
 
-    StApplication() {
-        isPointer = false;
-        libInstance = (StApplicationInterface* )GetFunctions().StApplication_new();
-    }
+    /**
+     * Rendering callback.
+     */
+    ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
 
-    StApplication(StApplicationInterface* inst) {
-        isPointer = true;
-        libInstance = inst;
-    }
+    /**
+     * Reset device - release GL resources in old window and re-create them in new window.
+     */
+    ST_CPPEXPORT virtual bool resetDevice();
 
-    StApplicationInterface* getLibImpl() {
-        return libInstance;
-    }
+    /**
+     * Register renderer.
+     */
+    ST_CPPEXPORT void addRenderer(const StHandle<StWindow>& theRenderer);
 
-    ~StApplication() {
-        if(!isPointer) {
-            GetFunctions().StApplication_del(libInstance);
-        }
-    }
+    /**
+     * Process device change.
+     */
+    ST_CPPEXPORT virtual void doChangeDevice(const int32_t theValue);
 
-    bool isOpened() {
-        return GetFunctions().StApplication_isOpened(libInstance);
-    }
+        public: //! @name public parameters
 
-    bool isFullscreen() {
-        return GetFunctions().StApplication_isFullscreen(libInstance);
-    }
+    struct {
 
-    bool create(const StNativeWin_t nativeParent = (StNativeWin_t )NULL) {
-        return GetFunctions().StApplication_create(libInstance, nativeParent);
-    }
+        StHandle<StEnumParam> ActiveDevice;        //!< enumerated devices
 
-    bool open(const StOpenInfo& stOpenInfo = StOpenInfo()) {
-        const StOpenInfo_t stOpenInfoStruct = stOpenInfo.getStruct();
-        return GetFunctions().StApplication_open(libInstance, &stOpenInfoStruct);
-    }
+    } params;
 
-    void callback(StMessage_t* stMessages = NULL) {
-        return GetFunctions().StApplication_callback(libInstance, stMessages);
-    }
+        protected: //! @name protected fields
+
+    StArrayList< StHandle<StWindow> > myRenderers; //!< list of registered renderers
+    StHandle<StSettings>  myGlobalSettings;        //!< global settings shared between all applications
+    StHandle<StWindow>    myWindow;                //!< active renderer and main application window
+    StHandle<StWindow>    mySwitchTo;              //!< new renderer to switch to
+    StHandle<StOpenInfo>  myOpenFileInfo;          //!< file to open
+    StNativeWin_t         myWinParent;
+    StString              myTitle;                 //!< application title
+    StOutDevicesList      myDevices;
+    StString              myRendId;                //!< renderer ID
+    StMessage_t           myMessages[StMessageList::BUFFER_SIZE + 1];
+    int                   myExitCode;
+    bool                  myIsOpened;              //!< application execution state
+    bool                  myToQuit;                //!< request for application termination
+
 
 };
 

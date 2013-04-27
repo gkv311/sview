@@ -29,13 +29,13 @@
 #include <StStrings/StString.h>
 #include <StTemplates/StHandle.h>
 
-struct ST_LOCAL Property {
+struct Property {
     unsigned char* data;
     int format, nitems;
     Atom type;
 };
 
-class ST_LOCAL StXDisplay {
+class StXDisplay {
 
         public:
 
@@ -65,17 +65,17 @@ class ST_LOCAL StXDisplay {
      * Open connection to the server.
      * @return true on success.
      */
-    bool open();
+    ST_LOCAL bool open();
 
     /**
      * Close the connection to the server.
      */
-    void close();
+    ST_LOCAL void close();
 
     /**
      * Initialize used atoms.
      */
-    void initAtoms();
+    ST_LOCAL void initAtoms();
 
         public:
 
@@ -83,47 +83,47 @@ class ST_LOCAL StXDisplay {
      * Open connection to the X-server using default parameters (DISPLAY variable)
      * and initialize the common stuff.
      */
-    StXDisplay();
+    ST_LOCAL StXDisplay();
 
     /**
      * X-server will be disconnected.
      */
-    ~StXDisplay();
+    ST_LOCAL ~StXDisplay();
 
     /**
      * @return true if X-server is connected.
      */
-    bool isOpened() const {
+    ST_LOCAL bool isOpened() const {
         return hDisplay != NULL;
     }
 
-    Window getRootWindow() const {
+    ST_LOCAL Window getRootWindow() const {
         return (hDisplay != NULL) ? RootWindow(hDisplay, getScreen()) : 0;
     }
 
-    int getScreen() const {
+    ST_LOCAL int getScreen() const {
         return (hVisInfo != NULL) ? hVisInfo->screen : 0;
     }
 
-    unsigned int getDepth() const {
+    ST_LOCAL unsigned int getDepth() const {
         return (hVisInfo != NULL) ? hVisInfo->depth : 0;
     }
 
-    Visual* getVisual() const {
+    ST_LOCAL Visual* getVisual() const {
         return (hVisInfo != NULL) ? hVisInfo->visual : NULL;
     }
 
     /**
      * Convert an atom name into StString
      */
-    StString getAtomName(Atom theAtom) const {
+    ST_LOCAL StString getAtomName(Atom theAtom) const {
         return (theAtom == None) ? StString("None") : StString(XGetAtomName(hDisplay, theAtom));
     }
 
     /**
      * This fetches all the data from a property
      */
-    Property readProperty(Window hWindow, Atom property) const;
+    ST_LOCAL Property readProperty(Window hWindow, Atom property) const;
 
 };
 

@@ -16,7 +16,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "StSearchMonitors.h"
+#include <StCore/StSearchMonitors.h>
 
 #include <StStrings/StLogger.h>
 #include <StCocoa/StCocoaLocalPool.h>

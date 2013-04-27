@@ -231,6 +231,7 @@
 		<Linker>
 			<Add library="StShared" />
 			<Add library="StSettings" />
+			<Add library="StCore" />
 			<Add library="avutil" />
 			<Add library="avformat" />
 			<Add library="avcodec" />
@@ -241,7 +242,6 @@
 			<Add directory="../lib/$(TARGET_NAME)" />
 			<Add directory="../bin/$(TARGET_NAME)" />
 		</Linker>
-		<Unit filename="StCoreInitializer.h" />
 		<Unit filename="StTest.h" />
 		<Unit filename="StTestEmbed.ObjC.mm">
 			<Option compile="1" />

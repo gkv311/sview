@@ -19,43 +19,42 @@
 #include "StDiagnostics.h"
 #include "StDiagnosticsGUI.h"
 
-#include <StCore/StCore.h>
-#include <StCore/StWindow.h>
 #include <StSettings/StSettings.h>
 
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 
+#include "../StOutAnaglyph/StOutAnaglyph.h"
+#include "../StOutDual/StOutDual.h"
+#include "../StOutIZ3D/StOutIZ3D.h"
+#include "../StOutInterlace/StOutInterlace.h"
+#include "../StOutPageFlip/StOutPageFlipExt.h"
+
 const StString StDiagnostics::ST_DRAWER_PLUGIN_NAME("StDiagnostics");
 
-StDiagnostics::StDiagnostics()
-: myToQuit(false) {
-    //
+StDiagnostics::StDiagnostics(const StNativeWin_t         theParentWin,
+                             const StHandle<StOpenInfo>& theOpenInfo)
+: StApplication(theParentWin, theOpenInfo),
+  myToQuit(false) {
+    myTitle = "sView - Stereoscopic Device Diagnostics";
     myGUI = new StDiagnosticsGUI(this);
+
+    /// TODO (Kirill Gavrilov#1) setup OpenGL requirements - no need in Depth buffer
+    addRenderer(new StOutAnaglyph(theParentWin));
+    addRenderer(new StOutDual(theParentWin));
+    addRenderer(new StOutIZ3D(theParentWin));
+    addRenderer(new StOutInterlace(theParentWin));
+    addRenderer(new StOutPageFlipExt(theParentWin));
 }
 
 StDiagnostics::~StDiagnostics() {
-    /**if(!mySettings.isNull()) {
-        mySettings->saveInt32(ST_SETTING_FPSBOUND, fpsBound);
-    }*/
-
     myGUI.nullify();
-    mySettings.nullify();
-    myWindow.nullify();
-    StCore::FREE();
 }
 
-bool StDiagnostics::init(StWindowInterface* theWindow) {
-    if(!StVersionInfo::checkTimeBomb("sView - Stereoscopic Device Diagnostics plugin")) {
+bool StDiagnostics::open() {
+    if(!StApplication::open()) {
         return false;
     }
-    // Firstly INIT core library!
-    if(StCore::INIT() != STERROR_LIBNOERROR) {
-        stError("StDiagnostics, Core library not available!");
-        return false;
-    }
-    myWindow = new StWindow(theWindow);
-    myWindow->setTitle("sView - Stereoscopic Device Diagnostics");
 
     // initialize GL context
     myContext = new StGLContext();
@@ -68,78 +67,60 @@ bool StDiagnostics::init(StWindowInterface* theWindow) {
     }
     myGUI->setContext(myContext);
 
-    // INIT settings library
-    mySettings = new StSettings(ST_DRAWER_PLUGIN_NAME);
-    myWindow->stglSetTargetFps(50.0);
+    myWindow->setTargetFps(50.0);
     myWindow->setStereoOutput(true);
 
     if(!myGUI->stglInit()) {
         return false;
     }
-
-    /*if(!mySettings->isValid()) {
-        myGUI->myMsgStack->doPushMessage("Settings plugin is not available!\nAll changes will be lost after restart.");
-    }*/
     return true;
 }
 
-bool StDiagnostics::open(const StOpenInfo& ) {
-    return true;
-}
-
-void StDiagnostics::parseCallback(StMessage_t* stMessages) {
-    if(myToQuit) {
-        stMessages[0].uin = StMessageList::MSG_EXIT;
-        stMessages[1].uin = StMessageList::MSG_NULL;
-    }
-    size_t evId(0);
-    for(; stMessages[evId].uin != StMessageList::MSG_NULL; ++evId) {
-        switch(stMessages[evId].uin) {
+void StDiagnostics::processEvents(const StMessage_t* theEvents) {
+    for(size_t anIter = 0; theEvents[anIter].uin != StMessageList::MSG_NULL; ++anIter) {
+        switch(theEvents[anIter].uin) {
             case StMessageList::MSG_RESIZE: {
                 myGUI->stglResize(myWindow->getPlacement());
                 break;
             }
             case StMessageList::MSG_CLOSE:
             case StMessageList::MSG_EXIT: {
-                stMessages[0].uin = StMessageList::MSG_EXIT;
-                stMessages[1].uin = StMessageList::MSG_NULL;
+                StApplication::exit(0);
                 break;
             }
             case StMessageList::MSG_KEYS: {
-                bool* keysMap = (bool* )stMessages[evId].data;
-                if(keysMap[ST_VK_ESCAPE]) {
-                    // we could parse Escape key in other way
-                    stMessages[0].uin = StMessageList::MSG_EXIT;
-                    stMessages[1].uin = StMessageList::MSG_NULL;
+                bool* aKeys = (bool* )theEvents[anIter].data;
+                if(aKeys[ST_VK_ESCAPE]) {
+                    StApplication::exit(0);
                     return;
                 }
-                if(keysMap[ST_VK_F]) {
+                if(aKeys[ST_VK_F]) {
                     doSwitchFullscreen();
-                    keysMap[ST_VK_F] = false;
+                    aKeys[ST_VK_F] = false;
                 }
-                if(keysMap[ST_VK_RETURN]) {
+                if(aKeys[ST_VK_RETURN]) {
                     doSwitchFullscreen();
-                    keysMap[ST_VK_RETURN] = false;
+                    aKeys[ST_VK_RETURN] = false;
                 }
-                if(keysMap[ST_VK_M]) {
+                if(aKeys[ST_VK_M]) {
                     myWindow->setStereoOutput(false);
-                    keysMap[ST_VK_M] = false;
+                    aKeys[ST_VK_M] = false;
                 }
-                if(keysMap[ST_VK_S]) {
+                if(aKeys[ST_VK_S]) {
                     myWindow->setStereoOutput(true);
-                    keysMap[ST_VK_S] = false;
+                    aKeys[ST_VK_S] = false;
                 }
                 break;
             }
             case StMessageList::MSG_MOUSE_DOWN: {
                 StPointD_t pt;
-                int mouseBtn = myWindow->getMouseDown(&pt);
+                int mouseBtn = myWindow->getMouseDown(pt);
                 myGUI->tryClick(pt, mouseBtn);
                 break;
             }
             case StMessageList::MSG_MOUSE_UP: {
                 StPointD_t pt;
-                int mouseBtn = myWindow->getMouseUp(&pt);
+                int mouseBtn = myWindow->getMouseUp(pt);
                 if(mouseBtn == ST_MOUSE_MIDDLE) {
                     doSwitchFullscreen();
                 }
@@ -152,9 +133,9 @@ void StDiagnostics::parseCallback(StMessage_t* stMessages) {
     myGUI->setVisibility(myWindow->getMousePos(), true);
 }
 
-void StDiagnostics::stglDraw(unsigned int view) {
-    myGUI->getCamera()->setView(view);
-    if(view == ST_DRAW_LEFT) {
+void StDiagnostics::stglDraw(unsigned int theView) {
+    myGUI->getCamera()->setView(theView);
+    if(theView == ST_DRAW_LEFT) {
         myGUI->stglUpdate(myWindow->getMousePos());
     }
 
@@ -162,7 +143,7 @@ void StDiagnostics::stglDraw(unsigned int view) {
     myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // draw GUI
-    myGUI->stglDraw(view);
+    myGUI->stglDraw(theView);
 }
 
 void StDiagnostics::doSwitchFullscreen(const size_t ) {
@@ -170,32 +151,5 @@ void StDiagnostics::doSwitchFullscreen(const size_t ) {
 }
 
 void StDiagnostics::doFpsClick(const size_t ) {
-    myWindow->stglSetTargetFps((myWindow->stglGetTargetFps() > 0.0) ? 0.0 : 50.0);
-}
-
-ST_EXPORT StDrawerInterface* StDrawer_new() {
-    return new StDiagnostics(); }
-ST_EXPORT void StDrawer_del(StDrawerInterface* inst) {
-    delete (StDiagnostics* )inst; }
-ST_EXPORT stBool_t StDrawer_init(StDrawerInterface* inst, StWindowInterface* theWindow) {
-    return ((StDiagnostics* )inst)->init(theWindow); }
-ST_EXPORT stBool_t StDrawer_open(StDrawerInterface* inst, const StOpenInfo_t* stOpenInfo) {
-    return ((StDiagnostics* )inst)->open(StOpenInfo(stOpenInfo)); }
-ST_EXPORT void StDrawer_parseCallback(StDrawerInterface* inst, StMessage_t* stMessages) {
-    ((StDiagnostics* )inst)->parseCallback(stMessages); }
-ST_EXPORT void StDrawer_stglDraw(StDrawerInterface* inst, unsigned int view) {
-    ((StDiagnostics* )inst)->stglDraw(view); }
-
-// SDK version was used
-ST_EXPORT void getSDKVersion(StVersion* ver) {
-    *ver = StVersionInfo::getSDKVersion();
-}
-
-// plugin version
-ST_EXPORT void getPluginVersion(StVersion* ver) {
-    *ver = StVersionInfo::getSDKVersion();
-}
-
-ST_EXPORT const stUtf8_t* getMIMEDescription() {
-    return NULL;
+    myWindow->setTargetFps((myWindow->getTargetFps() > 0.0) ? 0.0 : 50.0);
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,21 +17,24 @@
  */
 
 #include "StImageViewer.h"
-#include "StImagePluginInfo.h"
 
-#include <StThreads/StThreads.h> // threads header (mutexes, threads,...)
+#include "StImagePluginInfo.h"
+#include "StImageViewerStrings.h"
+
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 #include <StGLWidgets/StGLTextureButton.h>
 #include <StGLWidgets/StGLImageRegion.h>
 #include <StGLWidgets/StGLMsgStack.h>
 #include <StSocket/StCheckUpdates.h>
+#include <StThreads/StThreads.h>
 #include <StImage/StImageFile.h>
 
-#include <StCore/StCore.h>
-#include <StCore/StWindow.h>
-
-#include "StImageViewerStrings.h"
+#include "../StOutAnaglyph/StOutAnaglyph.h"
+#include "../StOutDual/StOutDual.h"
+#include "../StOutIZ3D/StOutIZ3D.h"
+#include "../StOutInterlace/StOutInterlace.h"
+#include "../StOutPageFlip/StOutPageFlipExt.h"
 
 #include <cstdlib> // std::abs(int)
 
@@ -62,8 +65,17 @@ namespace {
     static const char ST_ARGUMENT_FILE_RIGHT[] = "right";
 };
 
-StImageViewer::StImageViewer()
-: myEventDialog(false),
+void StImageViewer::doChangeDevice(const int32_t theValue) {
+    StApplication::doChangeDevice(theValue);
+    // update menu
+}
+
+StImageViewer::StImageViewer(const StNativeWin_t         theParentWin,
+                             const StHandle<StOpenInfo>& theOpenInfo)
+: StApplication(theParentWin, theOpenInfo),
+  mySettings(new StSettings(ST_DRAWER_PLUGIN_NAME)),
+  myLangMap(new StTranslations(StImageViewer::ST_DRAWER_PLUGIN_NAME)),
+  myEventDialog(false),
   myEventLoaded(false),
   //
   mySlideShowTimer(false),
@@ -72,8 +84,9 @@ StImageViewer::StImageViewer()
   myLastUpdateDay(0),
   myToCheckUpdates(true),
   myToSaveSrcFormat(false),
-  myEscNoQuit(false),
-  myToQuit(false) {
+  myEscNoQuit(false) {
+    //
+    myTitle = "sView - Image Viewer";
     //
     params.isFullscreen = new StBoolParam(false);
     params.isFullscreen->signals.onChanged.connect(this, &StImageViewer::doFullscreen);
@@ -81,13 +94,47 @@ StImageViewer::StImageViewer()
     params.checkUpdatesDays = new StInt32Param(7);
     params.srcFormat        = new StInt32Param(ST_V_SRC_AUTODETECT);
     params.srcFormat->signals.onChanged.connect(this, &StImageViewer::doSwitchSrcFormat);
+    params.ToShowFps = new StBoolParam(false);
     params.imageLib = StImageFile::ST_LIBAV,
     params.fpsBound = 0;
+
+    mySettings->loadInt32 (ST_SETTING_FPSBOUND,           params.fpsBound);
+    mySettings->loadString(ST_SETTING_LAST_FOLDER,        params.lastFolder);
+    mySettings->loadInt32 (ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
+    mySettings->loadParam (ST_SETTING_UPDATES_INTERVAL,   params.checkUpdatesDays);
+
+    int32_t aSlideShowDelayInt = int32_t(mySlideShowDelay);
+    mySettings->loadInt32 (ST_SETTING_SLIDESHOW_DELAY,    aSlideShowDelayInt);
+    mySlideShowDelay = double(aSlideShowDelayInt);
+
+    /// TODO (Kirill Gavrilov#1) setup OpenGL requirements - no need in Depth buffer
+    addRenderer(new StOutAnaglyph(theParentWin));
+    addRenderer(new StOutDual(theParentWin));
+    addRenderer(new StOutIZ3D(theParentWin));
+    addRenderer(new StOutInterlace(theParentWin));
+    addRenderer(new StOutPageFlipExt(theParentWin));
 }
 
-StImageViewer::~StImageViewer() {
-    myUpdates.nullify();
-    if(!mySettings.isNull() && !myGUI.isNull()) {
+bool StImageViewer::resetDevice() {
+    if(myGUI.isNull()
+    || myLoader.isNull()) {
+        return init();
+    }
+
+    // be sure Render plugin process quit correctly
+    myMessages[0].uin = StMessageList::MSG_EXIT;
+    myMessages[1].uin = StMessageList::MSG_NULL;
+    myWindow->processEvents(myMessages);
+
+    myLoader->doRelease();
+    releaseDevice();
+    myWindow->close();
+    myWindow.nullify();
+    return open();
+}
+
+void StImageViewer::releaseDevice() {
+    if(!myGUI.isNull()) {
         mySettings->saveParam(ST_SETTING_STEREO_MODE, myGUI->stImageRegion->params.displayMode);
         mySettings->saveInt32(ST_SETTING_GAMMA, stRound(100.0f * myGUI->stImageRegion->params.gamma->getValue()));
         if(params.toRestoreRatio->getValue()) {
@@ -106,33 +153,24 @@ StImageViewer::~StImageViewer() {
         }
     }
 
-    // release GUI data and GL resorces before closing the window
+    // release GUI data and GL resources before closing the window
     myGUI.nullify();
-    // wait image loading thread to quit and release resources
-    myLoader.nullify();
-    // destroy other objects
-    mySettings.nullify();
-    // now destroy the window
-    myWindow.nullify();
-    // release libraries
-    StCore::FREE();
+    myContext.nullify();
 }
 
-bool StImageViewer::init(StWindowInterface* theWindow) {
-    if(!StVersionInfo::checkTimeBomb("sView - Image Viewer plugin")) {
-        // timebomb for alpha versions
-        return false;
-    } else if(theWindow == NULL) {
-        stError("ImagePlugin, Invalid window from StRenderer plugin!");
-        return false;
-    } else if(StCore::INIT() != STERROR_LIBNOERROR) {
-        stError("ImagePlugin, Core library not available!");
-        return false;
-    }
+StImageViewer::~StImageViewer() {
+    myUpdates.nullify();
+    releaseDevice();
+    // wait image loading thread to quit and release resources
+    myLoader.nullify();
+}
 
-    // create window wrapper
-    myWindow = new StWindow(theWindow);
-    myWindow->setTitle("sView - Image Viewer");
+bool StImageViewer::init() {
+    const bool isReset = !myLoader.isNull();
+    if(!myContext.isNull()
+    && !myGUI.isNull()) {
+        return true;
+    }
 
     // initialize GL context
     myContext = new StGLContext();
@@ -145,26 +183,19 @@ bool StImageViewer::init(StWindowInterface* theWindow) {
     }
 
     // create the GUI with default values
-    myGUI = new StImageViewerGUI(this, myWindow.access());
+    myGUI = new StImageViewerGUI(this, myWindow.access(), myLangMap.access(),
+                                 myLoader.isNull() ? NULL : myLoader->getTextureQueue());
     myGUI->setContext(myContext);
 
     // load settings
-    mySettings = new StSettings(ST_DRAWER_PLUGIN_NAME);
-    mySettings->loadInt32 (ST_SETTING_FPSBOUND, params.fpsBound);
-    myWindow->stglSetTargetFps(double(params.fpsBound));
-    mySettings->loadString(ST_SETTING_LAST_FOLDER,        params.lastFolder);
+    myWindow->setTargetFps(double(params.fpsBound));
     mySettings->loadParam (ST_SETTING_STEREO_MODE,        myGUI->stImageRegion->params.displayMode);
     mySettings->loadParam (ST_SETTING_TEXFILTER,          myGUI->stImageRegion->params.textureFilter);
     mySettings->loadParam (ST_SETTING_RATIO,              myGUI->stImageRegion->params.displayRatio);
-    mySettings->loadInt32 (ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
-    mySettings->loadParam (ST_SETTING_UPDATES_INTERVAL,   params.checkUpdatesDays);
     params.toRestoreRatio->setValue(myGUI->stImageRegion->params.displayRatio->getValue() != StGLImageRegion::RATIO_AUTO);
     int32_t loadedGamma = 100; // 1.0f
         mySettings->loadInt32(ST_SETTING_GAMMA, loadedGamma);
         myGUI->stImageRegion->params.gamma->setValue(0.01f * loadedGamma);
-    int32_t aSlideShowDelayInt = int32_t(mySlideShowDelay);
-    mySettings->loadInt32 (ST_SETTING_SLIDESHOW_DELAY,    aSlideShowDelayInt);
-    mySlideShowDelay = double(aSlideShowDelayInt);
 
     // initialize frame region early to show dedicated error description
     if(!myGUI->stImageRegion->stglInit()) {
@@ -174,12 +205,18 @@ bool StImageViewer::init(StWindowInterface* theWindow) {
     myGUI->stglInit();
 
     // create the image loader thread
-    StString imageLibString;
-    mySettings->loadString(ST_SETTING_IMAGELIB, imageLibString);
-    params.imageLib = StImageFile::imgLibFromString(imageLibString);
-    myLoader = new StImageLoader(params.imageLib, myGUI->myLangMap, myGUI->stImageRegion->getTextureQueue());
+    if(!isReset) {
+        StString imageLibString;
+        mySettings->loadString(ST_SETTING_IMAGELIB, imageLibString);
+        params.imageLib = StImageFile::imgLibFromString(imageLibString);
+        myLoader = new StImageLoader(params.imageLib, myLangMap, myGUI->stImageRegion->getTextureQueue());
+        myLoader->signals.onLoaded.connect(this, &StImageViewer::doLoaded);
+    }
     myLoader->signals.onError.connect(myGUI->myMsgStack, &StGLMsgStack::doPushMessage);
-    myLoader->signals.onLoaded.connect(this, &StImageViewer::doLoaded);
+
+    if(isReset) {
+        return true;
+    }
 
     // load this parameter AFTER image thread creation
     mySettings->loadParam(ST_SETTING_SRCFORMAT, params.srcFormat);
@@ -233,10 +270,21 @@ void StImageViewer::parseArguments(const StArgumentsMap& theArguments) {
     }
 }
 
-bool StImageViewer::open(const StOpenInfo& theOpenInfo) {
-    parseArguments(theOpenInfo.getArgumentsMap());
-    StMIME anOpenMIME = theOpenInfo.getMIME();
-    if(anOpenMIME == StDrawerInfo::DRAWER_MIME() || theOpenInfo.getPath().isEmpty()) {
+bool StImageViewer::open() {
+    const bool isReset = !mySwitchTo.isNull();
+    if(!StApplication::open()
+    || !init()) {
+        return false;
+    }
+
+    if(isReset) {
+        myLoader->doLoadNext();
+        return true;
+    }
+
+    parseArguments(myOpenFileInfo->getArgumentsMap());
+    const StMIME anOpenMIME = myOpenFileInfo->getMIME();
+    if(myOpenFileInfo->getPath().isEmpty()) {
         // open drawer without files
         return true;
     }
@@ -244,19 +292,19 @@ bool StImageViewer::open(const StOpenInfo& theOpenInfo) {
     // clear playlist first
     myLoader->getPlayList().clear();
 
-    //StArgument argFile1     = theOpenInfo.getArgumentsMap()[ST_ARGUMENT_FILE + 1]; // playlist?
-    StArgument argFileLeft  = theOpenInfo.getArgumentsMap()[ST_ARGUMENT_FILE_LEFT];
-    StArgument argFileRight = theOpenInfo.getArgumentsMap()[ST_ARGUMENT_FILE_RIGHT];
+    //StArgument argFile1     = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE + 1]; // playlist?
+    StArgument argFileLeft  = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_LEFT];
+    StArgument argFileRight = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_RIGHT];
     if(argFileLeft.isValid() && argFileRight.isValid()) {
         // meta-file
         /// TODO (Kirill Gavrilov#4) we should use MIME type!
         myLoader->getPlayList().addOneFile(argFileLeft.getValue(), argFileRight.getValue());
     } else if(!anOpenMIME.isEmpty()) {
         // create just one-file playlist
-        myLoader->getPlayList().addOneFile(theOpenInfo.getPath(), anOpenMIME);
+        myLoader->getPlayList().addOneFile(myOpenFileInfo->getPath(), anOpenMIME);
     } else {
         // create playlist from file's folder
-        myLoader->getPlayList().open(theOpenInfo.getPath());
+        myLoader->getPlayList().open(myOpenFileInfo->getPath());
     }
 
     if(!myLoader->getPlayList().isEmpty()) {
@@ -266,15 +314,11 @@ bool StImageViewer::open(const StOpenInfo& theOpenInfo) {
     return true;
 }
 
-void StImageViewer::parseCallback(StMessage_t* stMessages) {
+void StImageViewer::processEvents(const StMessage_t* theEvents) {
     bool isMouseMove = false;
-    if(myToQuit) {
-        stMessages[0].uin = StMessageList::MSG_EXIT;
-        stMessages[1].uin = StMessageList::MSG_NULL;
-    }
     size_t evId(0);
-    for(; stMessages[evId].uin != StMessageList::MSG_NULL; ++evId) {
-        switch(stMessages[evId].uin) {
+    for(; theEvents[evId].uin != StMessageList::MSG_NULL; ++evId) {
+        switch(theEvents[evId].uin) {
             case StMessageList::MSG_RESIZE: {
                 myGUI->stglResize(myWindow->getPlacement());
                 break;
@@ -284,34 +328,29 @@ void StImageViewer::parseCallback(StMessage_t* stMessages) {
                 break;
             }
             case StMessageList::MSG_DRAGNDROP_IN: {
-                int filesCount = myWindow->getDragNDropFile(-1, NULL, 0);
-                if(filesCount > 0) {
-                    stUtf8_t buffFile[4096];
-                    stMemSet(buffFile, 0, sizeof(buffFile));
-                    if(myWindow->getDragNDropFile(0, buffFile, (4096 * sizeof(stUtf8_t))) == 0) {
-                        StString buffString(buffFile);
-                        if(myLoader->getPlayList().checkExtension(buffString)) {
-                            myLoader->getPlayList().open(buffString);
-                            doUpdateStateLoading();
-                            myLoader->doLoadNext();
-                        }
+                StString aFilePath;
+                int aFilesNb = myWindow->getDragNDropFile(-1, aFilePath);
+                if(aFilesNb > 0) {
+                    myWindow->getDragNDropFile(0, aFilePath);
+                    if(myLoader->getPlayList().checkExtension(aFilePath)) {
+                        myLoader->getPlayList().open(aFilePath);
+                        doUpdateStateLoading();
+                        myLoader->doLoadNext();
                     }
                 }
                 break;
             }
             case StMessageList::MSG_CLOSE:
             case StMessageList::MSG_EXIT: {
-                stMessages[0].uin = StMessageList::MSG_EXIT;
-                stMessages[1].uin = StMessageList::MSG_NULL;
+                StApplication::exit(0);
                 break;
             }
             case StMessageList::MSG_KEYS: {
-                bool* keysMap = (bool* )stMessages[evId].data;
+                bool* keysMap = (bool* )theEvents[evId].data;
                 if(keysMap[ST_VK_ESCAPE]) {
                     // we could parse Escape key in other way
                     if(!myEscNoQuit) {
-                        stMessages[0].uin = StMessageList::MSG_EXIT;
-                        stMessages[1].uin = StMessageList::MSG_NULL;
+                        StApplication::exit(0);
                         return;
                     }
                     if(myWindow->isFullScreen()) {
@@ -325,7 +364,7 @@ void StImageViewer::parseCallback(StMessage_t* stMessages) {
             }
             case StMessageList::MSG_MOUSE_DOWN: {
                 StPointD_t pt;
-                int aMouseBtn = myWindow->getMouseDown(&pt);
+                int aMouseBtn = myWindow->getMouseDown(pt);
                 if(myEscNoQuit
                 && !myWindow->isFullScreen()
                 && (aMouseBtn == ST_MOUSE_SCROLL_V_UP || aMouseBtn == ST_MOUSE_SCROLL_V_DOWN)) {
@@ -337,7 +376,7 @@ void StImageViewer::parseCallback(StMessage_t* stMessages) {
             }
             case StMessageList::MSG_MOUSE_UP: {
                 StPointD_t pt;
-                int aMouseBtn = myWindow->getMouseUp(&pt);
+                int aMouseBtn = myWindow->getMouseUp(pt);
                 if(aMouseBtn == ST_MOUSE_MIDDLE) {
                     params.isFullscreen->reverse();
                 } else if(myEscNoQuit
@@ -526,7 +565,7 @@ void StImageViewer::doListLast(const size_t ) {
 }
 
 void StImageViewer::doQuit(const size_t ) {
-    myToQuit = true;
+    StApplication::exit(0);
 }
 
 void StImageViewer::doFullscreen(const bool theIsFullscreen) {
@@ -781,6 +820,10 @@ void StImageViewer::keysCommon(bool* keysMap) {
         params.isFullscreen->reverse();
         keysMap[ST_VK_RETURN] = false;
     }
+    if(keysMap[ST_VK_F12]) {
+        params.ToShowFps->reverse();
+        keysMap[ST_VK_F12] = false;
+    }
 
     if(keysMap[ST_VK_S] && keysMap[ST_VK_CONTROL]) {
         myLoader->doSaveImageAs(StImageFile::ST_TYPE_PNG);
@@ -790,31 +833,4 @@ void StImageViewer::keysCommon(bool* keysMap) {
     keysStereo(keysMap);
     keysSrcFormat(keysMap);
     keysFileWalk(keysMap);
-}
-
-ST_EXPORT StDrawerInterface* StDrawer_new() {
-    return new StImageViewer(); }
-ST_EXPORT void StDrawer_del(StDrawerInterface* inst) {
-    delete (StImageViewer* )inst; }
-ST_EXPORT stBool_t StDrawer_init(StDrawerInterface* inst, StWindowInterface* stWin) {
-    return ((StImageViewer* )inst)->init(stWin); }
-ST_EXPORT stBool_t StDrawer_open(StDrawerInterface* inst, const StOpenInfo_t* stOpenInfo) {
-    return ((StImageViewer* )inst)->open(StOpenInfo(stOpenInfo)); }
-ST_EXPORT void StDrawer_parseCallback(StDrawerInterface* inst, StMessage_t* stMessages) {
-    ((StImageViewer* )inst)->parseCallback(stMessages); }
-ST_EXPORT void StDrawer_stglDraw(StDrawerInterface* inst, unsigned int view) {
-    ((StImageViewer* )inst)->stglDraw(view); }
-
-// SDK version was used
-ST_EXPORT void getSDKVersion(StVersion* ver) {
-    *ver = StVersionInfo::getSDKVersion();
-}
-
-// plugin version
-ST_EXPORT void getPluginVersion(StVersion* ver) {
-    *ver = StVersionInfo::getSDKVersion();
-}
-
-ST_EXPORT const stUtf8_t* getMIMEDescription() {
-    return StImageLoader::ST_IMAGES_MIME_STRING;
 }

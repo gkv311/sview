@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StTests program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@
 #include "StTestEmbed.h"
 
 #include <StCore/StApplication.h>
-#include <StCore/StCore.h>
 #include <StCore/StWindow.h>
 
 #include <StStrings/stConsole.h>
@@ -124,30 +123,12 @@ SV_THREAD_FUNCTION StTestEmbed::embedAppThread(void* thePtr) {
 }
 
 void StTestEmbed::embedAppLoop() {
-    StApplication* anApp = new StApplication();
-    if(!anApp->create(myParent)) {
-        delete anApp;
+    StHandle<StApplication> anApp = new StApplication(myParent);
+    if(!anApp->open()) {
         return;
     }
 
-    // Load image viewer plugin
-    StString anImgViewerPath(StProcess::getStCoreFolder() + StCore::getDrawersDir() + SYS_FS_SPLITTER
-        + "StImageViewer" + ST_DLIB_SUFFIX);
-    StOpenInfo aCreateInfo;
-    aCreateInfo.setMIME(StDrawerInfo::DRAWER_MIME().toString());
-    aCreateInfo.setPath(anImgViewerPath);
-    if(!anApp->open(aCreateInfo)) {
-        delete anApp;
-        return;
-    }
-
-    for(;;) {
-        if(!anApp->isOpened()) {
-            delete anApp;
-            return;
-        }
-        anApp->callback();
-    }
+    anApp->exec();
 }
 
 #ifndef __APPLE__

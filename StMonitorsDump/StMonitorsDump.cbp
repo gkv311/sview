@@ -234,16 +234,6 @@
 			<Add directory="../lib/$(TARGET_NAME)" />
 			<Add directory="../bin/$(TARGET_NAME)" />
 		</Linker>
-		<Unit filename="../StCore/StADLsdk.cpp" />
-		<Unit filename="../StCore/StADLsdk.h" />
-		<Unit filename="../StCore/StSearchMonitors.ObjC.mm">
-			<Option compile="1" />
-			<Option link="1" />
-			<Option target="MAC_gcc" />
-			<Option target="MAC_gcc_DEBUG" />
-		</Unit>
-		<Unit filename="../StCore/StSearchMonitors.cpp" />
-		<Unit filename="../StCore/StSearchMonitors.h" />
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />

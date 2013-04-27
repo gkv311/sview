@@ -33,23 +33,22 @@
 
 #include "StVideo/StVideo.h"
 
-#include <StCore/StCore.h>
-#include <StCore/StWindow.h>
-
 #include <StImage/StImageFile.h>
 #include <StSocket/StSocket.h>
+#include <StSettings/StEnumParam.h>
 
 #include <StGLWidgets/StGLCheckboxTextured.h>
 #include <StGLWidgets/StGLImageRegion.h>
 #include <StGLWidgets/StGLTextureButton.h>
 #include <StGLWidgets/StGLDescription.h>
-#include <StGLWidgets/StGLDevicesMenu.h>
 #include <StGLWidgets/StGLMenu.h>
 #include <StGLWidgets/StGLMenuItem.h>
 #include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLMsgStack.h>
 #include <StGLWidgets/StGLSubtitles.h>
 #include <StGLWidgets/StGLSwitchTextured.h>
+#include <StGLWidgets/StGLFpsLabel.h>
+#include <StVersion.h>
 
 #include "StMoviePlayerStrings.h"
 
@@ -150,16 +149,12 @@ void StMoviePlayerGUI::createBottomToolbar() {
 void StMoviePlayerGUI::createMainMenu() {
     menu0Root = new StGLMenu(this, 0, 0, StGLMenu::MENU_HORIZONTAL, true);
 
-    StGLMenu* aMenuMedia  = createMediaMenu();     // Root -> Media menu
-    StGLMenu* aMenuView   = createViewMenu();      // Root -> View menu
-              myMenuAudio = createAudioMenu();     // Root -> Audio menu
-          myMenuSubtitles = createSubtitlesMenu(); // Root -> Subtitles menu
-    // Root -> Output menu
-    StGLDevicesMenu* aDevicesMenu = new StGLDevicesMenu(this, myWindow,
-        myLangMap->changeValueId(MENU_CHANGE_DEVICE,  "Change Device"),
-        myLangMap->changeValueId(MENU_ABOUT_RENDERER, "About Plugin..."),
-        myLangMap->changeValueId(MENU_SHOW_FPS,       "Show FPS"));
-    StGLMenu* aMenuHelp   = createHelpMenu();    // Root -> Help menu
+    StGLMenu* aMenuMedia   = createMediaMenu();     // Root -> Media menu
+    StGLMenu* aMenuView    = createViewMenu();      // Root -> View menu
+              myMenuAudio  = createAudioMenu();     // Root -> Audio menu
+           myMenuSubtitles = createSubtitlesMenu(); // Root -> Subtitles menu
+    StGLMenu* aDevicesMenu = createOutputMenu();    // Root -> Output menu
+    StGLMenu* aMenuHelp    = createHelpMenu();      // Root -> Help menu
 
     // Attach sub menus to root
     menu0Root->addItem(myLangMap->changeValueId(MENU_MEDIA,
@@ -170,7 +165,7 @@ void StMoviePlayerGUI::createMainMenu() {
                        "Audio"), myMenuAudio);
     menu0Root->addItem(myLangMap->changeValueId(MENU_SUBTITLES,
                        "Subtitles"), myMenuSubtitles);
-    aDevicesMenu->setTrackedItem(menu0Root->addItem(aDevicesMenu->getTitle(), aDevicesMenu));
+    menu0Root->addItem(myPlugin->StApplication::params.ActiveDevice->getActiveValue(), aDevicesMenu);
     menu0Root->addItem(myLangMap->changeValueId(MENU_HELP,
                        "Help"),  aMenuHelp);
 }
@@ -496,6 +491,48 @@ StGLMenu* StMoviePlayerGUI::createSubtitlesMenu() {
     return aMenu;
 }
 
+/**
+ * Root -> Output menu
+ */
+StGLMenu* StMoviePlayerGUI::createOutputMenu() {
+    StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+
+    StGLMenu* aMenuChangeDevice = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+
+    const StHandle<StEnumParam>& aDevicesEnum = myPlugin->StApplication::params.ActiveDevice;
+    const StArrayList<StString>& aValuesList  = aDevicesEnum->getValues();
+    for(size_t aValIter = 0; aValIter < aValuesList.size(); ++aValIter) {
+        aMenuChangeDevice->addItem(aValuesList[aValIter], aDevicesEnum, int32_t(aValIter));
+    }
+
+    aMenu->addItem(myLangMap->changeValueId(MENU_CHANGE_DEVICE,  "Change Device"),
+                   aMenuChangeDevice);
+    aMenu->addItem(myLangMap->changeValueId(MENU_ABOUT_RENDERER, "About Plugin..."))
+         ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAboutRenderer);
+    aMenu->addItem(myLangMap->changeValueId(MENU_SHOW_FPS,       "Show FPS"),
+                   myPlugin->params.ToShowFps);
+
+    const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
+    StParamsList aParams;
+    aRend->getOptions(aParams);
+    StHandle<StBoolParamNamed> aBool;
+    StHandle<StEnumParam>      anEnum;
+    for(size_t anIter = 0; anIter < aParams.size(); ++anIter) {
+        const StHandle<StParamBase>& aParam = aParams[anIter];
+        if(aBool.downcastFrom(aParam)) {
+            aMenu->addItem(aBool->getName(), aBool);
+        } else if(anEnum.downcastFrom(aParam)) {
+            StGLMenu* aChildMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+            const StArrayList<StString>& aValues = anEnum->getValues();
+            for(size_t aValIter = 0; aValIter < aValues.size(); ++aValIter) {
+                aChildMenu->addItem(aValues[aValIter], anEnum, int32_t(aValIter));
+            }
+            aMenu->addItem(anEnum->getName(), aChildMenu);
+        }
+    }
+    return aMenu;
+}
+
 void StMoviePlayerGUI::doAboutProgram(const size_t ) {
     StString& aTitle = myLangMap->changeValueId(ABOUT_DPLUGIN_NAME,
         "sView - Movie Player");
@@ -619,13 +656,15 @@ StGLMenu* StMoviePlayerGUI::createLanguageMenu() {
     return aMenu;
 }
 
-StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer* thePlugin,
-                                   StWindow*      theWindow,
-                                   size_t theTextureQueueSizeMax)
+StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
+                                   StWindow*       theWindow,
+                                   StTranslations* theLangMap,
+                                   const StHandle<StGLTextureQueue>& theTextureQueue,
+                                   const StHandle<StSubQueue>&       theSubQueue)
 : StGLRootWidget(),
   myPlugin(thePlugin),
   myWindow(theWindow),
-  myLangMap(new StTranslations(StMoviePlayer::ST_DRAWER_PLUGIN_NAME)),
+  myLangMap(theLangMap),
   texturesPathRoot(StProcess::getStCoreFolder() + "textures" + SYS_FS_SPLITTER),
   stTimeVisibleLock(true),
   //
@@ -654,10 +693,13 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer* thePlugin,
   btnList(NULL),
   btnFullScr(NULL),
   //
+  myFpsWidget(NULL),
+  //
   isGUIVisible(true) {
     //
-    stImageRegion = new StGLImageRegion(this, theTextureQueueSizeMax);
-    stSubtitles = new StGLSubtitles(this);
+    myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StMoviePlayerGUI::doShowFPS);
+    stImageRegion = new StGLImageRegion(this, theTextureQueue);
+    stSubtitles   = new StGLSubtitles  (this, theSubQueue);
 
     createUpperToolbar();
 
@@ -863,6 +905,40 @@ void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<St
 
     // update menu representation
     myMenuSubtitles->stglInit();
+}
+
+void StMoviePlayerGUI::stglDraw(unsigned int theView) {
+    if(theView == ST_DRAW_LEFT
+    && myFpsWidget != NULL) {
+        myFpsWidget->update(myPlugin->getMainWindow()->isStereoOutput(),
+                            myPlugin->getMainWindow()->getTargetFps());
+    }
+    StGLRootWidget::stglDraw(theView);
+}
+
+void StMoviePlayerGUI::doShowFPS(const bool ) {
+    if(myFpsWidget != NULL) {
+        delete myFpsWidget;
+        myFpsWidget = NULL;
+        return;
+    }
+
+    myFpsWidget = new StGLFpsLabel(this);
+    myFpsWidget->setVisibility(true, true);
+    myFpsWidget->stglInit();
+}
+
+void StMoviePlayerGUI::doAboutRenderer(const size_t ) {
+    StString anAboutText = myPlugin->getMainWindow()->getRendererAbout();
+    if(anAboutText.isEmpty()) {
+        anAboutText = StString() + "Plugin '" + myPlugin->getMainWindow()->getRendererId() + "' doesn't provide description";
+    }
+
+    StGLMessageBox* aDialog = new StGLMessageBox(this, anAboutText, 512, 256);
+    aDialog->setVisibility(true, true);
+    aDialog->stglInit();
+    aDialog->signals.onClickLeft. connect(aDialog, &StGLMessageBox::doKillSelf);
+    aDialog->signals.onClickRight.connect(aDialog, &StGLMessageBox::doKillSelf);
 }
 
 void StMoviePlayerGUI::showUpdatesNotify() {

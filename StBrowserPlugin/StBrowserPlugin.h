@@ -21,36 +21,36 @@
 
 #include "NSPluginBase.h"
 
-#include <StCore/StCore.h>
+#include <StCore/StApplication.h>
 
 class StApplication;
 
 /**
  * Plugin implementation.
  */
-class ST_LOCAL StBrowserPlugin : public NSPluginBase {
+class StBrowserPlugin : public NSPluginBase {
 
         public:
 
     // exports
-    StBrowserPlugin(NSPluginCreateData* aCreateDataStruct);
-    virtual ~StBrowserPlugin();
-    virtual bool init(NPWindow* );
-    virtual bool isInitialized();
-    virtual NPError streamNew(NPMIMEType , NPStream* , NPBool , uint16_t* );
-    virtual void streamAsFile(NPStream* , const char* );
+    ST_LOCAL StBrowserPlugin(NSPluginCreateData* aCreateDataStruct);
+    ST_LOCAL virtual ~StBrowserPlugin();
+    ST_LOCAL virtual bool init(NPWindow* );
+    ST_LOCAL virtual bool isInitialized();
+    ST_LOCAL virtual NPError streamNew(NPMIMEType , NPStream* , NPBool , uint16_t* );
+    ST_LOCAL virtual void streamAsFile(NPStream* , const char* );
 #if(defined(__linux__) || defined(__linux))
-    virtual NPError getValue(NPPVariable , void* );
+    ST_LOCAL virtual NPError getValue(NPPVariable , void* );
 #endif
 
     // locals
-    const char* getVersion();
-    void stWindowLoop();
+    ST_LOCAL const char* getVersion();
+    ST_LOCAL void stWindowLoop();
 
         private:
 
-    static void doLoadFullSize(void* thePlugin);
-    void        doLoadFullSize();
+    ST_LOCAL static void doLoadFullSize(void* thePlugin);
+    ST_LOCAL void        doLoadFullSize();
 
         private:
 

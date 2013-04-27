@@ -247,7 +247,6 @@
 			<Add directory="../lib/$(TARGET_NAME)" />
 		</Linker>
 		<Unit filename="StAVPacket.cpp" />
-		<Unit filename="StApplication.cpp" />
 		<Unit filename="StBndBox.cpp" />
 		<Unit filename="StBndCameraBox.cpp" />
 		<Unit filename="StBndSphere.cpp" />
@@ -263,10 +262,7 @@
 			<Option target="MAC_gcc" />
 			<Option target="MAC_gcc_DEBUG" />
 		</Unit>
-		<Unit filename="StCore.cpp" />
 		<Unit filename="StDevILImage.cpp" />
-		<Unit filename="StDrawer.cpp" />
-		<Unit filename="StDrawerInfo.cpp" />
 		<Unit filename="StEDIDParser.cpp" />
 		<Unit filename="StExifDir.cpp" />
 		<Unit filename="StFTFont.cpp" />
@@ -327,15 +323,10 @@
 		<Unit filename="StMinGen.cpp" />
 		<Unit filename="StMonitor.cpp" />
 		<Unit filename="StMutex.cpp" />
-		<Unit filename="StParamDevOptOnOff.cpp" />
-		<Unit filename="StParamDevOptSwitch.cpp" />
-		<Unit filename="StParamRendDevice.cpp" />
 		<Unit filename="StPlayList.cpp" />
 		<Unit filename="StProcess.cpp" />
 		<Unit filename="StProcess2.cpp" />
 		<Unit filename="StRawFile.cpp" />
-		<Unit filename="StRendererInfo.cpp" />
-		<Unit filename="StRendererPlugin.cpp" />
 		<Unit filename="StSocket.ObjC.mm">
 			<Option compile="1" />
 			<Option link="1" />
@@ -350,7 +341,6 @@
 			<Option target="MAC_gcc_DEBUG" />
 		</Unit>
 		<Unit filename="StWebPImage.cpp" />
-		<Unit filename="StWindow.cpp" />
 		<Unit filename="stConsole.cpp" />
 		<Unit filename="stUtfTools.cpp" />
 		<Unit filename="../include/StAVPacket.h" />

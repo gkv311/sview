@@ -101,9 +101,8 @@ namespace {
 };
 
 // function create GUI window
-bool StWindowImpl::stglCreate(const StWinAttributes_t* theAttributes,
-                              const StNativeWin_t      theParentWindow) {
-    myParentWin = theParentWindow;
+bool StWindowImpl::create() {
+    myMessageList.reset();
 
     // initialize helper GDK
     static bool isGdkInitialized = false;
@@ -116,11 +115,6 @@ bool StWindowImpl::stglCreate(const StWinAttributes_t* theAttributes,
         gdk_rgb_init(); // only guess sets up the true colour colour map
         isGdkInitialized = true;
     }
-
-    size_t aBytesToCopy = stMin(theAttributes->nSize, sizeof(StWinAttributes_t));
-    stMemCpy(&myWinAttribs, theAttributes, aBytesToCopy); // copy as much as possible
-    myWinAttribs.nSize = sizeof(StWinAttributes_t);       // restore own size
-    updateSlaveConfig();
 
     // replace default XError handler to ignore some errors
     /// TODO (Kirill Gavrilov#1) - GTK+ (re)initialization seems to be override our error handler!
@@ -640,6 +634,7 @@ void StWindowImpl::updateWindowPos() {
     if(aDisplay.isNull() || myMaster.hWindowGl == 0) {
         return;
     }
+
     if(!myWinAttribs.isFullScreen) {
         if(myRectNorm.left() == 0 && myRectNorm.top() == 0 && myMaster.hWindow != 0) {
             int width  = myRectNorm.width();
@@ -685,7 +680,7 @@ void StWindowImpl::updateWindowPos() {
 }
 
 // Function set to argument-buffer given events
-void StWindowImpl::callback(StMessage_t* theMessages) {
+void StWindowImpl::processEvents(StMessage_t* theMessages) {
     // get callback from Master window
     const StXDisplayH& aDisplay = myMaster.stXDisplay;
     if(!aDisplay.isNull()) {

@@ -65,8 +65,8 @@ void StDiagnosticsGUI::setVisibility(const StPointD_t& , bool ) {
     myCntWidgetLT->setVisibility(true, true);
     myCntWidgetBR->setVisibility(true, true);
 
-    myFpsWidget->update(myPlugin->getWindow()->isStereoOutput(),
-                        myPlugin->getWindow()->stglGetTargetFps());
+    myFpsWidget->update(myPlugin->getMainWindow()->isStereoOutput(),
+                        myPlugin->getMainWindow()->getTargetFps());
 
     char aBuffer[128];
     stsprintf(aBuffer, 128, "%04u", myFrameCounter++);

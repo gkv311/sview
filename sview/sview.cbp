@@ -237,6 +237,17 @@
 		</ResourceCompiler>
 		<Linker>
 			<Add library="StShared" />
+			<Add library="StGLWidgets" />
+			<Add library="StCore" />
+			<Add library="StSettings" />
+			<Add library="StImageViewer" />
+			<Add library="StMoviePlayer" />
+			<Add library="StDiagnostics" />
+			<Add library="StOutAnaglyph" />
+			<Add library="StOutDual" />
+			<Add library="StOutIZ3D" />
+			<Add library="StOutInterlace" />
+			<Add library="StOutPageFlip" />
 			<Add directory="../3rdparty/lib/$(TARGET_NAME)" />
 			<Add directory="../lib/$(TARGET_NAME)" />
 			<Add directory="../bin/$(TARGET_NAME)" />
@@ -250,6 +261,8 @@
 			<Option target="MAC_gcc" />
 			<Option target="MAC_gcc_DEBUG" />
 		</Unit>
+		<Unit filename="StMultiApp.cpp" />
+		<Unit filename="StMultiApp.h" />
 		<Unit filename="main.cpp">
 			<Option target="WIN_gcc_x86" />
 			<Option target="WIN_vc_x86" />

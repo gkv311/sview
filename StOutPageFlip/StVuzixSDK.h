@@ -19,7 +19,8 @@
 #ifndef __StVuzixSDK_h_
 #define __StVuzixSDK_h_
 
-#include <StLibrary.h>  // header for dynamic library loading
+#include <StCore/StSearchMonitors.h>
+#include <StLibrary.h>
 
 namespace {
     static const char LIB_TRACKER_NAME[]   = "IWEARDRV";
@@ -31,7 +32,7 @@ class StVuzixSDK {
 
         private:
 
-#if (!defined(_WIN32) && !defined(__WIN32__))
+#ifndef _WIN32
     typedef unsigned long DWORD;
     typedef long          LONG;
     typedef void*         HANDLE;
@@ -207,12 +208,10 @@ class StVuzixSDK {
         return STERROR_LIBNOERROR;
     }
 
-    ST_LOCAL static bool isConnected() {
-        // be sure Core library loaded before!
+    ST_LOCAL static bool isConnected(const StSearchMonitors& theMonitors) {
         const StString aPnP920 = PNP_ID_VUZIX_VR920;
-        StArrayList<StMonitor> aMonitors = StCore::getStMonitors();
-        for(size_t aMonIter = 0; aMonIter < aMonitors.size(); ++aMonIter) {
-            if(aMonitors[aMonIter].getPnPId() == aPnP920) {
+        for(size_t aMonIter = 0; aMonIter < theMonitors.size(); ++aMonIter) {
+            if(theMonitors[aMonIter].getPnPId() == aPnP920) {
                 return true;
             }
         }

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutAnaglyph library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -21,10 +21,11 @@
 #include <StGL/StGLEnums.h>
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
-#include <StThreads/StThreads.h> // threads header (mutexes, threads,...)
-#include <StCore/StWindow.h>
+#include <StThreads/StThreads.h>
 #include <StSettings/StSettings.h>
 #include <StSettings/StTranslations.h>
+#include <StSettings/StEnumParam.h>
+#include <StVersion.h>
 
 namespace {
     // shaders data
@@ -39,11 +40,11 @@ namespace {
 
     static const char ST_OUT_PLUGIN_NAME[] = "StOutAnaglyph";
 
-    static const char ST_SETTING_GLASSES[]        = "glasses";
-    static const char ST_SETTING_REDCYAN[]        = "optionRedCyan";
-    static const char ST_SETTING_AMBERBLUE[]      = "optionAmberBlue";
-    static const char ST_SETTING_WINDOWPOS[]      = "windowPos";
-    static const char ST_SETTING_VSYNC[]          = "vsync";
+    static const char ST_SETTING_GLASSES[]   = "glasses";
+    static const char ST_SETTING_REDCYAN[]   = "optionRedCyan";
+    static const char ST_SETTING_AMBERBLUE[] = "optionAmberBlue";
+    static const char ST_SETTING_WINDOWPOS[] = "windowPos";
+    static const char ST_SETTING_VSYNC[]     = "vsync";
 
     // translation resources
     enum {
@@ -78,99 +79,36 @@ namespace {
 
 StAtomic<int32_t> StOutAnaglyph::myInstancesNb(0);
 
-void StOutAnaglyph::setShader(const int theGlasses,
-                              const int theOptionRedCyan,
-                              const int theOptionAmberBlue) {
-    myGlasses         = theGlasses;
-    myOptionRedCyan   = theOptionRedCyan;
-    myOptionAmberBlue = theOptionAmberBlue;
-    switch(theGlasses) {
-        case GLASSES_TYPE_REDCYAN: {
-            switch(myOptionRedCyan) {
-                case REDCYAN_MODE_OPTIM:  myStereoProgram = &myOptimAnaglyph; break;
-                case REDCYAN_MODE_GRAY:   myStereoProgram = &myGrayAnaglyph;  break;
-                case REDCYAN_MODE_DARK:   myStereoProgram = &myTrueAnaglyph;  break;
-                case REDCYAN_MODE_SIMPLE:
-                default: myStereoProgram = &mySimpleAnaglyph; break;
-            }
-            break;
-        }
-        case GLASSES_TYPE_YELLOW: {
-            switch(myOptionAmberBlue) {
-                case AMBERBLUE_MODE_DUBOIS: myStereoProgram = &myYellowDubiosAnaglyph; break;
-                case AMBERBLUE_MODE_SIMPLE:
-                default: myStereoProgram = &myYellowAnaglyph; break;
-            }
-            break;
-        }
-        case GLASSES_TYPE_GREEN: myStereoProgram = &myGreenAnaglyph; break;
-    }
-    if(myOptions != NULL) {
-        StSDSwitch_t* optionGlasses  = ((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_GLASSES]);
-        optionGlasses->value = myGlasses;
-        StSDSwitch_t* optionRCFilter = ((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_REDCYAN]);
-        optionRCFilter->value = myOptionRedCyan;
-        StSDSwitch_t* optionABFilter = ((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_YELLOW]);
-        optionABFilter->value = myOptionAmberBlue;
+StString StOutAnaglyph::getRendererAbout() const {
+    return myAbout;
+}
+
+const char* StOutAnaglyph::getRendererId() const {
+    return ST_OUT_PLUGIN_NAME;
+}
+
+const char* StOutAnaglyph::getDeviceId() const {
+    return "Anaglyph";
+}
+
+void StOutAnaglyph::getDevices(StOutDevicesList& theList) const {
+    for(size_t anIter = 0; anIter < myDevices.size(); ++anIter) {
+        theList.add(myDevices[anIter]);
     }
 }
 
-void StOutAnaglyph::optionsStructAlloc() {
-    StTranslations stLangMap(ST_OUT_PLUGIN_NAME);
-
-    // create device options structure
-    myOptions = (StSDOptionsList_t* )StWindow::memAlloc(sizeof(StSDOptionsList_t)); stMemSet(myOptions, 0, sizeof(StSDOptionsList_t));
-    myOptions->curRendererPath = StWindow::memAllocNCopy(myPluginPath);
-    myOptions->curDeviceId = 0;
-
-    myOptions->optionsCount = 4;
-    myOptions->options = (StSDOption_t** )StWindow::memAlloc(sizeof(StSDOption_t*) * myOptions->optionsCount);
-
-    // VSync option
-    myOptions->options[DEVICE_OPTION_VSYNC] = (StSDOption_t* )StWindow::memAlloc(sizeof(StSDOnOff_t));
-    myOptions->options[DEVICE_OPTION_VSYNC]->optionType = ST_DEVICE_OPTION_ON_OFF;
-    ((StSDOnOff_t* )myOptions->options[DEVICE_OPTION_VSYNC])->value = myIsVSyncOn;
-    myOptions->options[DEVICE_OPTION_VSYNC]->title = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_ANAGLYPH_VSYNC, "VSync"));
-
-    // Glasses switch option
-    myOptions->options[DEVICE_OPTION_GLASSES] = (StSDOption_t* )StWindow::memAlloc(sizeof(StSDSwitch_t));
-    myOptions->options[DEVICE_OPTION_GLASSES]->title = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_ANAGLYPH_GLASSES, "Glasses type"));
-    myOptions->options[DEVICE_OPTION_GLASSES]->optionType = ST_DEVICE_OPTION_SWITCH;
-    StSDSwitch_t* switchOptionGlasses = ((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_GLASSES]);
-    switchOptionGlasses->value = myGlasses;
-    switchOptionGlasses->valuesCount = 3;
-    switchOptionGlasses->valuesTitles = (stUtf8_t** )StWindow::memAlloc(switchOptionGlasses->valuesCount * sizeof(stUtf8_t*));
-    switchOptionGlasses->valuesTitles[GLASSES_TYPE_REDCYAN] = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN, "Red-cyan"));
-    switchOptionGlasses->valuesTitles[GLASSES_TYPE_YELLOW]  = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_ANAGLYPH_YELLOW,  "Yellow-Blue"));
-    switchOptionGlasses->valuesTitles[GLASSES_TYPE_GREEN]   = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_ANAGLYPH_GREEN,   "Green-Magenta"));
-
-    // Red-cyan filter switch option
-    myOptions->options[DEVICE_OPTION_REDCYAN] = (StSDOption_t* )StWindow::memAlloc(sizeof(StSDSwitch_t));
-    myOptions->options[DEVICE_OPTION_REDCYAN]->title = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_MENU, "Red-Cyan filter"));
-    myOptions->options[DEVICE_OPTION_REDCYAN]->optionType = ST_DEVICE_OPTION_SWITCH;
-    StSDSwitch_t* switchOptionRCFilter = ((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_REDCYAN]);
-    switchOptionRCFilter->value = myOptionRedCyan;
-    switchOptionRCFilter->valuesCount = 4;
-    switchOptionRCFilter->valuesTitles = (stUtf8_t** )StWindow::memAlloc(switchOptionRCFilter->valuesCount * sizeof(stUtf8_t*));
-    switchOptionRCFilter->valuesTitles[REDCYAN_MODE_SIMPLE] = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_SIMPLE, "Simple"));
-    switchOptionRCFilter->valuesTitles[REDCYAN_MODE_OPTIM]  = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_OPTIM,  "Optimized"));
-    switchOptionRCFilter->valuesTitles[REDCYAN_MODE_GRAY]   = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_GRAY,   "Grayed"));
-    switchOptionRCFilter->valuesTitles[REDCYAN_MODE_DARK]   = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_DARK,   "Dark"));
-
-    // Amber-Blue filter switch option
-    myOptions->options[DEVICE_OPTION_YELLOW] = (StSDOption_t* )StWindow::memAlloc(sizeof(StSDSwitch_t));
-    myOptions->options[DEVICE_OPTION_YELLOW]->title = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_ANAGLYPH_AMBERBLUE_MENU, "Yellow filter"));
-    myOptions->options[DEVICE_OPTION_YELLOW]->optionType = ST_DEVICE_OPTION_SWITCH;
-    StSDSwitch_t* switchOptionABFilter = ((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_YELLOW]);
-    switchOptionABFilter->value = myOptionAmberBlue;
-    switchOptionABFilter->valuesCount = 2;
-    switchOptionABFilter->valuesTitles = (stUtf8_t** )StWindow::memAlloc(switchOptionABFilter->valuesCount * sizeof(stUtf8_t*));
-    switchOptionABFilter->valuesTitles[AMBERBLUE_MODE_SIMPLE] = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_ANAGLYPH_AMBERBLUE_SIMPLE, "Simple"));
-    switchOptionABFilter->valuesTitles[AMBERBLUE_MODE_DUBOIS] = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_ANAGLYPH_AMBERBLUE_DUBIOS, "Dubios"));
+void StOutAnaglyph::getOptions(StParamsList& theList) const {
+    theList.add(params.IsVSyncOn);
+    theList.add(params.Glasses);
+    theList.add(params.RedCyan);
+    theList.add(params.AmberBlue);
 }
 
-StOutAnaglyph::StOutAnaglyph()
-: myStereoProgram(NULL),
+StOutAnaglyph::StOutAnaglyph(const StNativeWin_t theParentWindow)
+: StWindow(theParentWindow),
+  mySettings(new StSettings(ST_OUT_PLUGIN_NAME)),
+  myFrBuffer(new StGLStereoFrameBuffer()),
+  myStereoProgram(NULL),
   mySimpleAnaglyph("Anaglyph Simple"),
   myGrayAnaglyph("Anaglyph Gray"),
   myTrueAnaglyph("Anaglyph True"),
@@ -178,49 +116,104 @@ StOutAnaglyph::StOutAnaglyph()
   myYellowAnaglyph("Anaglyph Yellow"),
   myYellowDubiosAnaglyph("Anaglyph Yellow Dubios"),
   myGreenAnaglyph("Anaglyph Green"),
-  myGlasses(GLASSES_TYPE_REDCYAN),
-  myOptionRedCyan(REDCYAN_MODE_SIMPLE),
-  myOptionAmberBlue(AMBERBLUE_MODE_SIMPLE),
-  myOptions(NULL),
-  myToSavePlacement(true),
-  myIsVSyncOn(true),
+  myToSavePlacement(theParentWindow == (StNativeWin_t )NULL),
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false) {
-    myFrBuffer      = new StGLStereoFrameBuffer();
+    StTranslations aLangMap(ST_OUT_PLUGIN_NAME);
+
     myStereoProgram = &mySimpleAnaglyph;
+
+    // about string
+    StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - Anaglyph Output module");
+    StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
+    StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
+        "(C) 2007-2013 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0");
+    myAbout = aTitle + '\n' + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr;
+
+    // devices list
+    StHandle<StOutDevice> aDevice = new StOutDevice();
+    aDevice->PluginId = ST_OUT_PLUGIN_NAME;
+    aDevice->DeviceId = "Anaglyph";
+    aDevice->Priority = ST_DEVICE_SUPPORT_LOW; // anaglyph could be run on every display...
+    aDevice->Name     = aLangMap.changeValueId(STTR_ANAGLYPH_NAME, "Anaglyph glasses");
+    aDevice->Desc     = aLangMap.changeValueId(STTR_ANAGLYPH_DESC, "Simple glasses with color-filters");
+    myDevices.add(aDevice);
+
+    // VSync option
+    params.IsVSyncOn = new StBoolParamNamed(true, aLangMap.changeValueId(STTR_ANAGLYPH_VSYNC, "VSync"));
+    params.IsVSyncOn->signals.onChanged.connect(this, &StOutAnaglyph::doVSync);
+
+    // Glasses switch option
+    StHandle<StEnumParam> aGlasses = new StEnumParam(GLASSES_TYPE_REDCYAN,
+                                                     aLangMap.changeValueId(STTR_ANAGLYPH_GLASSES, "Glasses type"));
+    aGlasses->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN, "Red-cyan"));
+    aGlasses->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_YELLOW,  "Yellow-Blue"));
+    aGlasses->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_GREEN,   "Green-Magenta"));
+    aGlasses->signals.onChanged.connect(this, &StOutAnaglyph::doSetShader);
+    params.Glasses = aGlasses;
+
+    // Red-cyan filter switch option
+    StHandle<StEnumParam> aFilterRC = new StEnumParam(REDCYAN_MODE_SIMPLE,
+                                                      aLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_MENU, "Red-Cyan filter"));
+    aFilterRC->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_SIMPLE, "Simple"));
+    aFilterRC->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_OPTIM,  "Optimized"));
+    aFilterRC->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_GRAY,   "Grayed"));
+    aFilterRC->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_DARK,   "Dark"));
+    aFilterRC->signals.onChanged.connect(this, &StOutAnaglyph::doSetShader);
+    params.RedCyan = aFilterRC;
+
+    // Amber-Blue filter switch option
+    StHandle<StEnumParam> aFilterAB = new StEnumParam(AMBERBLUE_MODE_SIMPLE,
+                                                      aLangMap.changeValueId(STTR_ANAGLYPH_AMBERBLUE_MENU, "Yellow filter"));
+    aFilterAB->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_AMBERBLUE_SIMPLE, "Simple"));
+    aFilterAB->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_AMBERBLUE_DUBIOS, "Dubios"));
+    aFilterAB->signals.onChanged.connect(this, &StOutAnaglyph::doSetShader);
+    params.AmberBlue = aFilterAB;
+
+    // load window position
+    StRect<int32_t> aRect(256, 768, 256, 1024);
+    mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
+    StWindow::setPlacement(aRect, true);
+    StWindow::setTitle("sView - Anaglyph Renderer");
+
+    mySettings->loadParam(ST_SETTING_VSYNC,     params.IsVSyncOn);
+
+    // load glasses settings
+    mySettings->loadParam(ST_SETTING_GLASSES,   params.Glasses);
+    mySettings->loadParam(ST_SETTING_REDCYAN,   params.RedCyan);
+    mySettings->loadParam(ST_SETTING_AMBERBLUE, params.AmberBlue);
+}
+
+void StOutAnaglyph::releaseResources() {
+    if(!myContext.isNull()) {
+        StGLContext& aCtx = *myContext;
+        mySimpleAnaglyph.release(aCtx);
+        myGrayAnaglyph.release(aCtx);
+        myTrueAnaglyph.release(aCtx);
+        myOptimAnaglyph.release(aCtx);
+        myYellowAnaglyph.release(aCtx);
+        myYellowDubiosAnaglyph.release(aCtx);
+        myGreenAnaglyph.release(aCtx);
+        myFrBuffer->release(*myContext);
+    }
+    myContext.nullify();
+
+    // read windowed placement
+    StWindow::hide(ST_WIN_MASTER);
+    if(myToSavePlacement) {
+        StWindow::setFullScreen(false);
+        StRect<int32_t> savedRect = StWindow::getPlacement();
+        mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, savedRect);
+    }
+    mySettings->saveParam(ST_SETTING_VSYNC,     params.IsVSyncOn);
+    mySettings->saveParam(ST_SETTING_GLASSES,   params.Glasses);
+    mySettings->saveParam(ST_SETTING_REDCYAN,   params.RedCyan);
+    mySettings->saveParam(ST_SETTING_AMBERBLUE, params.AmberBlue);
 }
 
 StOutAnaglyph::~StOutAnaglyph() {
     myInstancesNb.decrement();
-    if(!myStCore.isNull() && !mySettings.isNull()) {
-        if(!myContext.isNull()) {
-            StGLContext& aCtx = *myContext;
-            mySimpleAnaglyph.release(aCtx);
-            myGrayAnaglyph.release(aCtx);
-            myTrueAnaglyph.release(aCtx);
-            myOptimAnaglyph.release(aCtx);
-            myYellowAnaglyph.release(aCtx);
-            myYellowDubiosAnaglyph.release(aCtx);
-            myGreenAnaglyph.release(aCtx);
-            myFrBuffer->release(*myContext);
-        }
-        stMemFree(myOptions, StWindow::memFree);
-
-        // read windowed placement
-        getStWindow()->hide(ST_WIN_MASTER);
-        if(myToSavePlacement) {
-            getStWindow()->setFullScreen(false);
-            StRect<int32_t> savedRect = getStWindow()->getPlacement();
-            mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, savedRect);
-        }
-        mySettings->saveBool (ST_SETTING_VSYNC,          myIsVSyncOn);
-        mySettings->saveInt32(ST_SETTING_GLASSES,        myGlasses);
-        mySettings->saveInt32(ST_SETTING_REDCYAN,        myOptionRedCyan);
-        mySettings->saveInt32(ST_SETTING_AMBERBLUE,      myOptionAmberBlue);
-    }
-    mySettings.nullify();
-    myStCore.nullify();
-    StCore::FREE();
+    releaseResources();
 }
 
 namespace {
@@ -249,56 +242,16 @@ namespace {
     }
 };
 
-bool StOutAnaglyph::init(const StString&     theRendererPath,
-                         const int& ,
-                         const StNativeWin_t theNativeParent) {
-    myToSavePlacement = (theNativeParent == (StNativeWin_t )NULL);
-    myPluginPath = theRendererPath;
-    if(!StVersionInfo::checkTimeBomb("sView - Anaglyph Output plugin")) {
+void StOutAnaglyph::close() {
+    releaseResources();
+    StWindow::close();
+}
+
+bool StOutAnaglyph::create() {
+    StWindow::show();
+    if(!StWindow::create()) {
         return false;
     }
-    ST_DEBUG_LOG_AT("INIT Anaglyph output plugin");
-    // Firstly INIT core library!
-    if(StCore::INIT() != STERROR_LIBNOERROR) {
-        stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Core library not available!");
-        return false;
-    }
-
-    // INIT settings library
-    mySettings = new StSettings(ST_OUT_PLUGIN_NAME);
-    myStCore   = new StCore();
-
-    // load window position
-    StRect<int32_t> loadedRect(256, 768, 256, 1024);
-    mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, loadedRect);
-    StMonitor stMonitor = StCore::getMonitorFromPoint(loadedRect.center());
-    if(!stMonitor.getVRect().isPointIn(loadedRect.center())) {
-        ST_DEBUG_LOG("Warning, stored window position is out of the monitor(" + stMonitor.getId() + ")!" + loadedRect.toString());
-        int w = loadedRect.width();
-        int h = loadedRect.height();
-        loadedRect.left()   = stMonitor.getVRect().left() + 256;
-        loadedRect.right()  = loadedRect.left() + w;
-        loadedRect.top()    = stMonitor.getVRect().top() + 256;
-        loadedRect.bottom() = loadedRect.top() + h;
-    }
-    getStWindow()->setPlacement(loadedRect);
-
-    mySettings->loadBool(ST_SETTING_VSYNC, myIsVSyncOn);
-
-    // load glasses settings
-    mySettings->loadInt32(ST_SETTING_GLASSES,   myGlasses);
-    mySettings->loadInt32(ST_SETTING_REDCYAN,   myOptionRedCyan);
-    mySettings->loadInt32(ST_SETTING_AMBERBLUE, myOptionAmberBlue);
-    setShader(myGlasses, myOptionRedCyan, myOptionAmberBlue);
-
-    // allocate and setup the structure pointer
-    optionsStructAlloc();
-    getStWindow()->setValue(ST_WIN_DATAKEYS_RENDERER, (size_t )myOptions);
-
-    // create our window!
-    getStWindow()->setTitle("sView - Anaglyph Renderer plugin");
-    StWinAttributes_t attribs = stDefaultWinAttributes();
-    getStWindow()->stglCreate(&attribs, theNativeParent);
 
     // initialize GL context
     myContext = new StGLContext();
@@ -309,10 +262,7 @@ bool StOutAnaglyph::init(const StString&     theRendererPath,
         stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, OpenGL2.0+ not available!");
         return false;
     }
-    if(!myContext->stglSetVSync(myIsVSyncOn ? StGLContext::VSync_ON : StGLContext::VSync_OFF)) {
-        // enable/disable VSync by config
-        ST_DEBUG_LOG(ST_OUT_PLUGIN_NAME + " Plugin, VSync extension not available!");
-    }
+    myContext->stglSetVSync(params.IsVSyncOn->getValue() ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
 
     // INIT shaders
     StString aShadersError = StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init Shaders";
@@ -343,99 +293,53 @@ bool StOutAnaglyph::init(const StString&     theRendererPath,
     return true;
 }
 
-void StOutAnaglyph::callback(StMessage_t* stMessages) {
-    myStCore->callback(stMessages);
-    for(size_t i = 0; stMessages[i].uin != StMessageList::MSG_NULL; ++i) {
-        switch(stMessages[i].uin) {
-            case StMessageList::MSG_KEYS: {
-                bool* keysMap = ((bool* )stMessages[i].data);
-                if(keysMap[ST_VK_F1]) {
-                    setShader(GLASSES_TYPE_REDCYAN, REDCYAN_MODE_SIMPLE, myOptionAmberBlue); keysMap[ST_VK_F1] = false;
+void StOutAnaglyph::processEvents(StMessage_t* theMessages) {
+    StWindow::processEvents(theMessages);
+    for(size_t anIter = 0; theMessages[anIter].uin != StMessageList::MSG_NULL; ++anIter) {
+        if(theMessages[anIter].uin != StMessageList::MSG_KEYS) {
+            continue;
+        }
 
-                    // send 'update' message to StDrawer
-                    StMessage_t msg; msg.uin = StMessageList::MSG_DEVICE_OPTION;
-                    StSDSwitch_t* option = ((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_REDCYAN]);
-                    msg.data = (void* )option->valuesTitles[option->value];
-                    getStWindow()->appendMessage(msg);
-                } else if(keysMap[ST_VK_F2]) {
-                    setShader(GLASSES_TYPE_REDCYAN, REDCYAN_MODE_OPTIM, myOptionAmberBlue);  keysMap[ST_VK_F2] = false;
-
-                    // send 'update' message to StDrawer
-                    StMessage_t msg; msg.uin = StMessageList::MSG_DEVICE_OPTION;
-                    StSDSwitch_t* option = ((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_REDCYAN]);
-                    msg.data = (void* )option->valuesTitles[option->value];
-                    getStWindow()->appendMessage(msg);
-                } else if(keysMap[ST_VK_F3]) {
-                    setShader(GLASSES_TYPE_REDCYAN, REDCYAN_MODE_GRAY, myOptionAmberBlue);   keysMap[ST_VK_F3] = false;
-
-                    // send 'update' message to StDrawer
-                    StMessage_t msg; msg.uin = StMessageList::MSG_DEVICE_OPTION;
-                    StSDSwitch_t* option = ((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_REDCYAN]);
-                    msg.data = (void* )option->valuesTitles[option->value];
-                    getStWindow()->appendMessage(msg);
-                } else if(keysMap[ST_VK_F4]) {
-                    setShader(GLASSES_TYPE_REDCYAN, REDCYAN_MODE_DARK, myOptionAmberBlue);   keysMap[ST_VK_F4] = false;
-
-                    // send 'update' message to StDrawer
-                    StMessage_t msg; msg.uin = StMessageList::MSG_DEVICE_OPTION;
-                    StSDSwitch_t* option = ((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_REDCYAN]);
-                    msg.data = (void* )option->valuesTitles[option->value];
-                    getStWindow()->appendMessage(msg);
-                } else if(keysMap[ST_VK_F5]) {
-                    setShader(GLASSES_TYPE_YELLOW, myOptionRedCyan, myOptionAmberBlue);      keysMap[ST_VK_F5] = false;
-
-                    // send 'update' message to StDrawer
-                    StMessage_t msg; msg.uin = StMessageList::MSG_DEVICE_OPTION;
-                    StSDSwitch_t* option = ((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_REDCYAN]);
-                    msg.data = (void* )option->valuesTitles[option->value];
-                    getStWindow()->appendMessage(msg);
-                } else if(keysMap[ST_VK_F6]) {
-                    setShader(GLASSES_TYPE_GREEN, myOptionRedCyan, myOptionAmberBlue);       keysMap[ST_VK_F6] = false;
-
-                    // send 'update' message to StDrawer
-                    StMessage_t msg; msg.uin = StMessageList::MSG_DEVICE_OPTION;
-                    StSDSwitch_t* option = ((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_REDCYAN]);
-                    msg.data = (void* )option->valuesTitles[option->value];
-                    getStWindow()->appendMessage(msg);
-                }
-                break;
-            }
-            case StMessageList::MSG_DEVICE_OPTION: {
-                bool newVSync = ((StSDOnOff_t* )myOptions->options[DEVICE_OPTION_VSYNC])->value;
-                if(newVSync != myIsVSyncOn) {
-                    myIsVSyncOn = newVSync;
-                    getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-                    myContext->stglSetVSync(myIsVSyncOn ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
-                }
-
-                setShader ((int )((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_GLASSES])->value,
-                           (int )((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_REDCYAN])->value,
-                           (int )((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_YELLOW ])->value);
-                break;
-            }
+        bool* aKeys = ((bool* )theMessages[anIter].data);
+        if(aKeys[ST_VK_F1]) {
+            params.Glasses->setValue(GLASSES_TYPE_REDCYAN);
+            params.RedCyan->setValue(REDCYAN_MODE_SIMPLE);
+        } else if(aKeys[ST_VK_F2]) {
+            params.Glasses->setValue(GLASSES_TYPE_REDCYAN);
+            params.RedCyan->setValue(REDCYAN_MODE_OPTIM);
+        } else if(aKeys[ST_VK_F3]) {
+            params.Glasses->setValue(GLASSES_TYPE_REDCYAN);
+            params.RedCyan->setValue(REDCYAN_MODE_GRAY);
+        } else if(aKeys[ST_VK_F4]) {
+            params.Glasses->setValue(GLASSES_TYPE_REDCYAN);
+            params.RedCyan->setValue(REDCYAN_MODE_DARK);
+        } else if(aKeys[ST_VK_F5]) {
+            params.Glasses->setValue(GLASSES_TYPE_YELLOW);
+        } else if(aKeys[ST_VK_F6]) {
+            params.Glasses->setValue(GLASSES_TYPE_GREEN);
         }
     }
 }
 
-void StOutAnaglyph::stglDraw(unsigned int ) {
-    myFPSControl.setTargetFPS(getStWindow()->stglGetTargetFps());
-    if(!getStWindow()->isStereoOutput() || myIsBroken) {
-        getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-        myContext->stglResize(getStWindow()->getPlacement());
+void StOutAnaglyph::stglDraw() {
+    myFPSControl.setTargetFPS(StWindow::getTargetFps());
+    if(!StWindow::isStereoOutput() || myIsBroken) {
+        StWindow::stglMakeCurrent(ST_WIN_MASTER);
+        myContext->stglResize(StWindow::getPlacement());
         if(myToCompressMem) {
             myFrBuffer->release(*myContext);
         }
 
-        myStCore->stglDraw(ST_DRAW_LEFT);
+        StWindow::signals.onRedraw(ST_DRAW_LEFT);
 
         myFPSControl.sleepToTarget(); // decrease FPS to target by thread sleeps
-        getStWindow()->stglSwap(ST_WIN_MASTER);
+        StWindow::stglSwap(ST_WIN_MASTER);
         ++myFPSControl;
         return;
     }
-    getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-    myContext->stglResize(getStWindow()->getPlacement());
-    const StRectI_t aWinRect = getStWindow()->getPlacement();
+    StWindow::stglMakeCurrent(ST_WIN_MASTER);
+    myContext->stglResize(StWindow::getPlacement());
+    const StRectI_t aWinRect = StWindow::getPlacement();
 
     // resize FBO
     if(!myFrBuffer->initLazy(*myContext, aWinRect.width(), aWinRect.height())) {
@@ -449,9 +353,9 @@ void StOutAnaglyph::stglDraw(unsigned int ) {
     myContext->core20fwd->glGetIntegerv(GL_VIEWPORT, aVPort);
     myFrBuffer->setupViewPort(*myContext);       // we set TEXTURE sizes here
     myFrBuffer->bindBufferLeft(*myContext);
-        myStCore->stglDraw(ST_DRAW_LEFT);
+        StWindow::signals.onRedraw(ST_DRAW_LEFT);
     myFrBuffer->bindBufferRight(*myContext);
-        myStCore->stglDraw(ST_DRAW_RIGHT);
+        StWindow::signals.onRedraw(ST_DRAW_RIGHT);
     myFrBuffer->unbindBufferRight(*myContext);
     myContext->core20fwd->glViewport(aVPort[0], aVPort[1], aVPort[2], aVPort[3]);
 
@@ -466,63 +370,39 @@ void StOutAnaglyph::stglDraw(unsigned int ) {
     myFrBuffer->unbindMultiTexture(*myContext);
 
     myFPSControl.sleepToTarget(); // decrease FPS to target by thread sleeps
-    getStWindow()->stglSwap(ST_WIN_MASTER);
+    StWindow::stglSwap(ST_WIN_MASTER);
     ++myFPSControl;
 }
 
-// SDK version was used
-ST_EXPORT void getSDKVersion(StVersion* ver) {
-    *ver = StVersionInfo::getSDKVersion();
+void StOutAnaglyph::doSetShader(const int32_t ) {
+    switch(params.Glasses->getValue()) {
+        case GLASSES_TYPE_REDCYAN: {
+            switch(params.RedCyan->getValue()) {
+                case REDCYAN_MODE_OPTIM:  myStereoProgram = &myOptimAnaglyph; break;
+                case REDCYAN_MODE_GRAY:   myStereoProgram = &myGrayAnaglyph;  break;
+                case REDCYAN_MODE_DARK:   myStereoProgram = &myTrueAnaglyph;  break;
+                case REDCYAN_MODE_SIMPLE:
+                default: myStereoProgram = &mySimpleAnaglyph; break;
+            }
+            break;
+        }
+        case GLASSES_TYPE_YELLOW: {
+            switch(params.AmberBlue->getValue()) {
+                case AMBERBLUE_MODE_DUBOIS: myStereoProgram = &myYellowDubiosAnaglyph; break;
+                case AMBERBLUE_MODE_SIMPLE:
+                default: myStereoProgram = &myYellowAnaglyph; break;
+            }
+            break;
+        }
+        case GLASSES_TYPE_GREEN: myStereoProgram = &myGreenAnaglyph; break;
+    }
 }
 
-// plugin version
-ST_EXPORT void getPluginVersion(StVersion* ver) {
-    *ver = StVersionInfo::getSDKVersion();
-}
-
-ST_EXPORT const StRendererInfo_t* getDevicesInfo(const stBool_t /*theToDetectPriority*/) {
-    static StRendererInfo_t ST_SELF_INFO = { NULL, NULL, NULL, 0 };
-    if(ST_SELF_INFO.devices != NULL) {
-        return &ST_SELF_INFO;
+void StOutAnaglyph::doVSync(const bool theValue) {
+    if(myContext.isNull()) {
+        return;
     }
 
-    StTranslations aLangMap(ST_OUT_PLUGIN_NAME);
-
-    // devices list
-    static StString aName = aLangMap.changeValueId(STTR_ANAGLYPH_NAME, "Anaglyph glasses");
-    static StString aDesc = aLangMap.changeValueId(STTR_ANAGLYPH_DESC, "Simple glasses with color-filters");
-    static StStereoDeviceInfo_t aDevicesArray[1] = {
-        { "Anaglyph", aName.toCString(), aDesc.toCString(), ST_DEVICE_SUPPORT_LOW } // anaglyph could be run on every display...
-    };
-    ST_SELF_INFO.devices = &aDevicesArray[0];
-    ST_SELF_INFO.count   = 1;
-
-    // about string
-    StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE, "sView - Anaglyph Output module");
-    StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
-    StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
-        "(C) 2007-2013 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0");
-    static StString anAboutString = aTitle + '\n' + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr;
-    ST_SELF_INFO.aboutString = (stUtf8_t* )anAboutString.toCString();
-
-    return &ST_SELF_INFO;
+    StWindow::stglMakeCurrent(ST_WIN_MASTER);
+    myContext->stglSetVSync(theValue ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
 }
-
-ST_EXPORT StRendererInterface* StRenderer_new() {
-    return new StOutAnaglyph(); }
-ST_EXPORT void StRenderer_del(StRendererInterface* inst) {
-    delete (StOutAnaglyph* )inst; }
-ST_EXPORT StWindowInterface* StRenderer_getStWindow(StRendererInterface* inst) {
-    // This is VERY important return libImpl pointer here!
-    return ((StOutAnaglyph* )inst)->getStWindow()->getLibImpl(); }
-ST_EXPORT stBool_t StRenderer_init(StRendererInterface* inst,
-                                   const stUtf8_t*      theRendererPath,
-                                   const int&           deviceId,
-                                   const StNativeWin_t  theNativeParent) {
-    return ((StOutAnaglyph* )inst)->init(StString(theRendererPath), deviceId, theNativeParent); }
-ST_EXPORT stBool_t StRenderer_open(StRendererInterface* inst, const StOpenInfo_t* stOpenInfo) {
-    return ((StOutAnaglyph* )inst)->open(StOpenInfo(stOpenInfo)); }
-ST_EXPORT void StRenderer_callback(StRendererInterface* inst, StMessage_t* stMessages) {
-    ((StOutAnaglyph* )inst)->callback(stMessages); }
-ST_EXPORT void StRenderer_stglDraw(StRendererInterface* inst, unsigned int views) {
-    ((StOutAnaglyph* )inst)->stglDraw(views); }

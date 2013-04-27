@@ -10,6 +10,21 @@
 #define __StParam_h_
 
 #include <StSlots/StSignal.h>
+#include <StTemplates/StArrayList.h>
+
+/**
+ * Base class for all parameters.
+ */
+class StParamBase {
+
+      public:
+
+    virtual ~StParamBase() {}
+
+};
+
+template<> inline void StArray< StHandle<StParamBase> >::sort() {}
+typedef StArrayList< StHandle<StParamBase> > StParamsList;
 
 /**
  * This is a special template class that represent wrapped primitive parameter.
@@ -17,7 +32,7 @@
  * and on change signal onChanged() will be emitted.
  */
 template <typename Type>
-class StParam {
+class StParam : public StParamBase {
 
         protected:
 
@@ -30,8 +45,6 @@ class StParam {
      */
     inline StParam(const Type theValue)
     : myValue(theValue) {}
-
-    inline virtual ~StParam() {}
 
     /**
      * Just retrieve the current value.
@@ -84,6 +97,10 @@ class StInt32Param : public StParam<int32_t> {
 
 };
 
+// define StHandle template specialization
+ST_DEFINE_HANDLE(StParam<int32_t>, StParamBase);
+ST_DEFINE_HANDLE(StInt32Param,     StParam<int32_t>);
+
 /**
  * Boolean parameter.
  */
@@ -117,5 +134,42 @@ class StBoolParam : public StParam<bool> {
     }
 
 };
+
+// define StHandle template specialization
+ST_DEFINE_HANDLE(StParam<bool>, StParamBase);
+ST_DEFINE_HANDLE(StBoolParam,   StParam<bool>);
+
+/**
+ * Named boolean parameter.
+ */
+class StBoolParamNamed : public StBoolParam {
+
+        public:
+
+    /**
+     * Main constructor.
+     */
+    inline StBoolParamNamed(const bool      theValue,
+                            const StString& theParamName = "")
+    : StBoolParam(theValue),
+      myParamName(theParamName) {
+        //
+    }
+
+    /**
+     * @return parameter label
+     */
+    ST_LOCAL inline StString getName() const {
+        return myParamName;
+    }
+
+        private:
+
+    StString myParamName;
+
+};
+
+// define StHandle template specialization
+ST_DEFINE_HANDLE(StBoolParamNamed, StBoolParam);
 
 #endif //__StParam_h_

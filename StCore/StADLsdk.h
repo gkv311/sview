@@ -18,7 +18,7 @@
 
 #ifndef __APPLE__
 
-#include "StSearchMonitors.h"
+#include <StCore/StSearchMonitors.h>
 
 #if(defined(__linux__) || defined(__linux))
     #ifndef LINUX

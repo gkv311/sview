@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutIZ3D library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -24,9 +24,11 @@
 
 #include <StImage/StImageFile.h>
 
-#include <StCore/StWindow.h>
 #include <StSettings/StSettings.h>
 #include <StSettings/StTranslations.h>
+#include <StSettings/StEnumParam.h>
+#include <StCore/StSearchMonitors.h>
+#include <StVersion.h>
 
 namespace {
 
@@ -89,121 +91,135 @@ namespace {
 
 };
 
-void StOutIZ3D::optionsStructAlloc() {
-    StTranslations stLangMap(ST_OUT_PLUGIN_NAME);
-
-    // create device options structure
-    myOptions = (StSDOptionsList_t* )StWindow::memAlloc(sizeof(StSDOptionsList_t)); stMemSet(myOptions, 0, sizeof(StSDOptionsList_t));
-    myOptions->curRendererPath = StWindow::memAllocNCopy(myPluginPath);
-    myOptions->curDeviceId = 0;
-
-    myOptions->optionsCount = 2;
-    myOptions->options = (StSDOption_t** )StWindow::memAlloc(sizeof(StSDOption_t*) * myOptions->optionsCount);
-
-    // VSync option
-    myOptions->options[DEVICE_OPTION_VSYNC] = (StSDOption_t* )StWindow::memAlloc(sizeof(StSDOnOff_t));
-    myOptions->options[DEVICE_OPTION_VSYNC]->title = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_PARAMETER_VSYNC, "VSync"));
-    myOptions->options[DEVICE_OPTION_VSYNC]->optionType = ST_DEVICE_OPTION_ON_OFF;
-    ((StSDOnOff_t* )myOptions->options[DEVICE_OPTION_VSYNC])->value = myIsVSyncOn;
-
-    // shader switch option
-    myOptions->options[DEVICE_OPTION_SHADER] = (StSDOption_t* )StWindow::memAlloc(sizeof(StSDSwitch_t));
-    myOptions->options[DEVICE_OPTION_SHADER]->title = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_PARAMETER_GLASSES, "iZ3D glasses"));
-    myOptions->options[DEVICE_OPTION_SHADER]->optionType = ST_DEVICE_OPTION_SWITCH;
-    StSDSwitch_t* switchOption = ((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_SHADER]);
-    switchOption->value = myShaders.getMode();
-    switchOption->valuesCount = 3;
-    switchOption->valuesTitles = (stUtf8_t** )StWindow::memAlloc(switchOption->valuesCount * sizeof(stUtf8_t*));
-    switchOption->valuesTitles[StOutIZ3DShaders::IZ3D_TABLE_OLD] = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_PARAMETER_GLASSES_CLASSIC,      "Classic"));
-    switchOption->valuesTitles[StOutIZ3DShaders::IZ3D_TABLE_NEW] = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_PARAMETER_GLASSES_MODERN,       "Modern"));
-    switchOption->valuesTitles[StOutIZ3DShaders::IZ3D_CLASSIC  ] = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_PARAMETER_GLASSES_CLASSIC_FAST, "Classic (fast)"));
-}
-
 StAtomic<int32_t> StOutIZ3D::myInstancesNb(0);
 
-StOutIZ3D::StOutIZ3D()
-: myOptions(NULL),
-  myToSavePlacement(true),
-  myIsVSyncOn(true),
-  myToCompressMem(myInstancesNb.increment() > 1),
-  myIsBroken(false) {
-    myFrBuffer = new StGLStereoFrameBuffer();
+StString StOutIZ3D::getRendererAbout() const {
+    return myAbout;
 }
 
-StOutIZ3D::~StOutIZ3D() {
-    myInstancesNb.decrement();
+const char* StOutIZ3D::getRendererId() const {
+    return ST_OUT_PLUGIN_NAME;
+}
+
+const char* StOutIZ3D::getDeviceId() const {
+    return "iZ3D";
+}
+
+void StOutIZ3D::getDevices(StOutDevicesList& theList) const {
+    for(size_t anIter = 0; anIter < myDevices.size(); ++anIter) {
+        theList.add(myDevices[anIter]);
+    }
+}
+
+void StOutIZ3D::getOptions(StParamsList& theList) const {
+    theList.add(params.IsVSyncOn);
+    theList.add(params.Glasses);
+}
+
+StOutIZ3D::StOutIZ3D(const StNativeWin_t theParentWindow)
+: StWindow(theParentWindow),
+  mySettings(new StSettings(ST_OUT_PLUGIN_NAME)),
+  myFrBuffer(new StGLStereoFrameBuffer()),
+  myToSavePlacement(theParentWindow == (StNativeWin_t )NULL),
+  myToCompressMem(myInstancesNb.increment() > 1),
+  myIsBroken(false) {
+    const StSearchMonitors& aMonitors = StWindow::getMonitors();
+    StTranslations aLangMap(ST_OUT_PLUGIN_NAME);
+
+    // about string
+    StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - iZ3D Output module");
+    StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
+    StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
+        "(C) 2009-2013 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0");
+    myAbout = aTitle + '\n' + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr;
+
+    // detect connected displays
+    int aSupportLevel = ST_DEVICE_SUPPORT_NONE;
+    for(size_t aMonIter = 0; aMonIter < aMonitors.size(); ++aMonIter) {
+        const StMonitor& aMon = aMonitors[aMonIter];
+        if(isFrontDisplay(aMon.getPnPId())
+        || isBackDisplay (aMon.getPnPId())) {
+            aSupportLevel = ST_DEVICE_SUPPORT_PREFER; // we sure that iZ3D connected
+            break;
+        } else if(aMon.getPnPId() == IZ3D_MODEL_MATROXTH2GO0
+               || aMon.getPnPId() == IZ3D_MODEL_MATROXTH2GO1) {
+            aSupportLevel = ST_DEVICE_SUPPORT_FULL; // is it possible
+        }
+    }
+
+    // devices list
+    StHandle<StOutDevice> aDevice = new StOutDevice();
+    aDevice->PluginId = ST_OUT_PLUGIN_NAME;
+    aDevice->DeviceId = "iZ3D";
+    aDevice->Priority = aSupportLevel;
+    aDevice->Name     = aLangMap.changeValueId(STTR_IZ3D_NAME, "IZ3D Display");
+    aDevice->Desc     = aLangMap.changeValueId(STTR_IZ3D_DESC, "IZ3D Display");
+    myDevices.add(aDevice);
+
+    // VSync option
+    params.IsVSyncOn = new StBoolParamNamed(true, aLangMap.changeValueId(STTR_PARAMETER_VSYNC, "VSync"));
+    params.IsVSyncOn->signals.onChanged.connect(this, &StOutIZ3D::doVSync);
+
+    // shader switch option
+    StHandle<StEnumParam> aGlasses = new StEnumParam(myShaders.getMode(),
+                                                     aLangMap.changeValueId(STTR_PARAMETER_GLASSES, "iZ3D glasses"));
+    aGlasses->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_GLASSES_CLASSIC,      "Classic"));
+    aGlasses->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_GLASSES_MODERN,       "Modern"));
+    aGlasses->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_GLASSES_CLASSIC_FAST, "Classic (fast)"));
+    aGlasses->signals.onChanged.connect(&myShaders, &StOutIZ3DShaders::doSetMode);
+    params.Glasses = aGlasses;
+
+    // load window position
+    StRect<int32_t> aRect(256, 768, 256, 1024);
+    mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
+    StWindow::setPlacement(aRect, true);
+    StWindow::setTitle("sView - iZ3D Renderer");
+
+    // load parameters
+    mySettings->loadParam(ST_SETTING_VSYNC, params.IsVSyncOn);
+    mySettings->loadParam(ST_SETTING_TABLE, params.Glasses);
+
+    // request slave window
+    StWinAttributes_t anAttribs = stDefaultWinAttributes();
+    StWindow::getAttributes(anAttribs);
+    anAttribs.isSlave = true;
+    StWindow::setAttributes(anAttribs);
+}
+
+void StOutIZ3D::releaseResources() {
     if(!myContext.isNull()) {
         myShaders.release(*myContext);
         myTexTableOld.release(*myContext);
         myTexTableNew.release(*myContext);
         myFrBuffer->release(*myContext);
     }
-    if(!myStCore.isNull() && !mySettings.isNull()) {
-        stMemFree(myOptions, StWindow::memFree);
+    myContext.nullify();
 
-        // read windowed placement
-        getStWindow()->hide(ST_WIN_MASTER);
-        getStWindow()->hide(ST_WIN_SLAVE);
-        if(myToSavePlacement) {
-            getStWindow()->setFullScreen(false);
-            mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, getStWindow()->getPlacement());
-        }
-        mySettings->saveBool (ST_SETTING_VSYNC,          myIsVSyncOn);
-        mySettings->saveInt32(ST_SETTING_TABLE,          myShaders.getMode());
+    // read windowed placement
+    StWindow::hide();
+    if(myToSavePlacement) {
+        StWindow::setFullScreen(false);
+        mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
     }
-    mySettings.nullify();
-    myStCore.nullify();
-    StCore::FREE();
+    mySettings->saveParam(ST_SETTING_VSYNC, params.IsVSyncOn);
+    mySettings->saveParam(ST_SETTING_TABLE, params.Glasses);
 }
 
-bool StOutIZ3D::init(const StString&     theRendererPath,
-                     const int& ,
-                     const StNativeWin_t theNativeParent) {
-    myToSavePlacement = (theNativeParent == (StNativeWin_t )NULL);
-    myPluginPath = theRendererPath;
-    if(!StVersionInfo::checkTimeBomb("sView - IZ3D Output plugin")) {
+StOutIZ3D::~StOutIZ3D() {
+    myInstancesNb.decrement();
+    releaseResources();
+}
+
+void StOutIZ3D::close() {
+    releaseResources();
+    StWindow::close();
+}
+
+bool StOutIZ3D::create() {
+    StWindow::show();
+    if(!StWindow::create()) {
         return false;
     }
-    ST_DEBUG_LOG_AT("INIT IZ3D output plugin");
-    // Firstly INIT core library!
-    if(StCore::INIT() != STERROR_LIBNOERROR) {
-        stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Core library not available!");
-        return false;
-    }
-
-    // INIT settings library
-    mySettings = new StSettings(ST_OUT_PLUGIN_NAME);
-    myStCore   = new StCore();
-
-    // load window position
-    StRect<int32_t> loadedRect(256, 768, 256, 1024);
-    mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, loadedRect);
-    StMonitor stMonitor = StCore::getMonitorFromPoint(loadedRect.center());
-    if(!stMonitor.getVRect().isPointIn(loadedRect.center())) {
-        ST_DEBUG_LOG("Warning, stored window position is out of the monitor(" + stMonitor.getId() + ")!" + loadedRect.toString());
-        int w = loadedRect.width();
-        int h = loadedRect.height();
-        loadedRect.left()   = stMonitor.getVRect().left() + 256;
-        loadedRect.right()  = loadedRect.left() + w;
-        loadedRect.top()    = stMonitor.getVRect().top() + 256;
-        loadedRect.bottom() = loadedRect.top() + h;
-    }
-    getStWindow()->setPlacement(loadedRect);
-
-    mySettings->loadBool(ST_SETTING_VSYNC, myIsVSyncOn);
-
-    int iZ3DMode = myShaders.getMode();
-    mySettings->loadInt32(ST_SETTING_TABLE, iZ3DMode);
-    myShaders.setMode(iZ3DMode);
-
-    // allocate and setup the structure pointer
-    optionsStructAlloc();
-    getStWindow()->setValue(ST_WIN_DATAKEYS_RENDERER, (size_t )myOptions);
-
-    // create our window!
-    StWinAttributes_t attribs = stDefaultWinAttributes();
-    attribs.isSlave = true;
-    getStWindow()->stglCreate(&attribs, theNativeParent);
 
     // initialize GL context
     myContext = new StGLContext();
@@ -215,114 +231,78 @@ bool StOutIZ3D::init(const StString&     theRendererPath,
         return false;
     }
 
-    getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-    if(!myContext->stglSetVSync(myIsVSyncOn ? StGLContext::VSync_ON : StGLContext::VSync_OFF)) {
-        // enable/disable VSync by config
-        ST_DEBUG_LOG(ST_OUT_PLUGIN_NAME + " Plugin, VSync extension not available!");
-    }
+    StWindow::stglMakeCurrent(ST_WIN_MASTER);
+    myContext->stglSetVSync(params.IsVSyncOn->getValue() ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
 
     // INIT iZ3D tables textures
-    const StString texturesFolder = StProcess::getStCoreFolder() + "textures" + SYS_FS_SPLITTER;
-    const StString tableTextureOldPath = texturesFolder + "iz3dTableOld.std";
-    const StString tableTextureNewPath = texturesFolder + "iz3dTableNew.std";
+    const StString aTexturesFolder = StProcess::getStCoreFolder() + "textures" + SYS_FS_SPLITTER;
+    const StString aTableOldPath   = aTexturesFolder + "iz3dTableOld.std";
+    const StString aTableNewPath   = aTexturesFolder + "iz3dTableNew.std";
 
-    StHandle<StImageFile> stImage = StImageFile::create();
-    if(stImage.isNull()) {
+    StHandle<StImageFile> aTableImg = StImageFile::create();
+    if(aTableImg.isNull()) {
         stError("IZ3D plugin should be linked with at least one image library!");
         return false;
     }
-    if(!stImage->load(tableTextureOldPath, StImageFile::ST_TYPE_PNG)) {
-        stError(stImage->getState());
+    if(!aTableImg->load(aTableOldPath, StImageFile::ST_TYPE_PNG)) {
+        stError(aTableImg->getState());
         return false;
     }
     myTexTableOld.setMinMagFilter(*myContext, GL_NEAREST); // we need not linear filtrating for lookup-table!
-    if(!myTexTableOld.init(*myContext, stImage->getPlane())) {
+    if(!myTexTableOld.init(*myContext, aTableImg->getPlane())) {
         stError("Fail to create lookup-table texture!");
         return false;
     }
-    if(!stImage->load(tableTextureNewPath, StImageFile::ST_TYPE_PNG)) {
-        stError(stImage->getState());
+    if(!aTableImg->load(aTableNewPath, StImageFile::ST_TYPE_PNG)) {
+        stError(aTableImg->getState());
         return false;
     }
     myTexTableNew.setMinMagFilter(*myContext, GL_NEAREST); // we need not linear filtrating for lookup-table!
-    if(!myTexTableNew.init(*myContext, stImage->getPlane())) {
+    if(!myTexTableNew.init(*myContext, aTableImg->getPlane())) {
         stError("Fail to create lookup-table texture!");
         return false;
     }
-    stImage.nullify();
+    aTableImg.nullify();
 
     // INIT shaders
     return myShaders.init(*myContext);
 }
 
-void StOutIZ3D::callback(StMessage_t* stMessages) {
-    myStCore->callback(stMessages);
-    for(size_t i = 0; stMessages[i].uin != StMessageList::MSG_NULL; ++i) {
-        switch(stMessages[i].uin) {
-            case StMessageList::MSG_KEYS: {
-                bool* keysMap = ((bool* )stMessages[i].data);
-                if(keysMap[ST_VK_F1]) {
-                    myShaders.setMode(StOutIZ3DShaders::IZ3D_TABLE_OLD); keysMap[ST_VK_F1] = false;
+void StOutIZ3D::processEvents(StMessage_t* theMessages) {
+    StWindow::processEvents(theMessages);
+    for(size_t anIter = 0; theMessages[anIter].uin != StMessageList::MSG_NULL; ++anIter) {
+        if(theMessages[anIter].uin != StMessageList::MSG_KEYS) {
+            continue;
+        }
 
-                    // send 'update' message to StDrawer
-                    StMessage_t msg; msg.uin = StMessageList::MSG_DEVICE_OPTION;
-                    StSDSwitch_t* option = ((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_SHADER]);
-                    option->value = StOutIZ3DShaders::IZ3D_TABLE_OLD;
-                    msg.data = (void* )option->valuesTitles[option->value];
-                    getStWindow()->appendMessage(msg);
-                } else if(keysMap[ST_VK_F2]) {
-                    myShaders.setMode(StOutIZ3DShaders::IZ3D_TABLE_NEW); keysMap[ST_VK_F2] = false;
-
-                    // send 'update' message to StDrawer
-                    StMessage_t msg; msg.uin = StMessageList::MSG_DEVICE_OPTION;
-                    StSDSwitch_t* option = ((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_SHADER]);
-                    option->value = StOutIZ3DShaders::IZ3D_TABLE_NEW;
-                    msg.data = (void* )option->valuesTitles[option->value];
-                    getStWindow()->appendMessage(msg);
-                } else if(keysMap[ST_VK_F3]) {
-                    myShaders.setMode(StOutIZ3DShaders::IZ3D_CLASSIC); keysMap[ST_VK_F3] = false;
-
-                    // send 'update' message to StDrawer
-                    StMessage_t msg; msg.uin = StMessageList::MSG_DEVICE_OPTION;
-                    StSDSwitch_t* option = ((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_SHADER]);
-                    option->value = StOutIZ3DShaders::IZ3D_CLASSIC;
-                    msg.data = (void* )option->valuesTitles[option->value];
-                    getStWindow()->appendMessage(msg);
-                }
-                break;
-            }
-            case StMessageList::MSG_DEVICE_OPTION: {
-                bool newVSync = ((StSDOnOff_t* )myOptions->options[DEVICE_OPTION_VSYNC])->value;
-                if(newVSync != myIsVSyncOn) {
-                    myIsVSyncOn = newVSync;
-                    getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-                    myContext->stglSetVSync(myIsVSyncOn ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
-                }
-
-                myShaders.setMode((int )((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_SHADER])->value);
-                break;
-            }
+        bool* aKeys = ((bool* )theMessages[anIter].data);
+        if(aKeys[ST_VK_F1]) {
+            params.Glasses->setValue(StOutIZ3DShaders::IZ3D_TABLE_OLD); aKeys[ST_VK_F1] = false;
+        } else if(aKeys[ST_VK_F2]) {
+            params.Glasses->setValue(StOutIZ3DShaders::IZ3D_TABLE_NEW); aKeys[ST_VK_F2] = false;
+        } else if(aKeys[ST_VK_F3]) {
+            params.Glasses->setValue(StOutIZ3DShaders::IZ3D_CLASSIC);   aKeys[ST_VK_F3] = false;
         }
     }
 }
 
-void StOutIZ3D::stglDraw(unsigned int ) {
-    myFPSControl.setTargetFPS(getStWindow()->stglGetTargetFps());
+void StOutIZ3D::stglDraw() {
+    myFPSControl.setTargetFPS(StWindow::getTargetFps());
 
-    const StGLBoxPx aVPMaster = getStWindow()->stglViewport(ST_WIN_MASTER);
-    const StGLBoxPx aVPSlave  = getStWindow()->stglViewport(ST_WIN_SLAVE);
-    if(!getStWindow()->isStereoOutput() || myIsBroken) {
-        getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
+    const StGLBoxPx aVPMaster = StWindow::stglViewport(ST_WIN_MASTER);
+    const StGLBoxPx aVPSlave  = StWindow::stglViewport(ST_WIN_SLAVE);
+    if(!StWindow::isStereoOutput() || myIsBroken) {
+        StWindow::stglMakeCurrent(ST_WIN_MASTER);
         if(myToCompressMem) {
             myFrBuffer->release(*myContext);
         }
 
         myContext->stglResizeViewport(aVPMaster);
         myContext->stglSetScissorRect(aVPMaster, false);
-        myStCore->stglDraw(ST_DRAW_LEFT);
+        StWindow::signals.onRedraw(ST_DRAW_LEFT);
         myContext->stglResetScissorRect();
 
-        getStWindow()->stglMakeCurrent(ST_WIN_SLAVE);
+        StWindow::stglMakeCurrent(ST_WIN_SLAVE);
         myContext->stglResizeViewport(aVPSlave);
         myContext->stglSetScissorRect(aVPSlave, false);
         myContext->core20fwd->glClearColor(0.729740052840723f, 0.729740052840723f, 0.729740052840723f, 0.0f);
@@ -332,11 +312,11 @@ void StOutIZ3D::stglDraw(unsigned int ) {
         myContext->stglResetScissorRect();
 
         myFPSControl.sleepToTarget(); // decrease FPS to target by thread sleeps
-        getStWindow()->stglSwap(ST_WIN_ALL);
+        StWindow::stglSwap(ST_WIN_ALL);
         ++myFPSControl;
         return;
     }
-    getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
+    StWindow::stglMakeCurrent(ST_WIN_MASTER);
 
     // resize FBO
     if(!myFrBuffer->initLazy(*myContext, aVPMaster.width(), aVPMaster.height())) {
@@ -348,9 +328,9 @@ void StOutIZ3D::stglDraw(unsigned int ) {
     // draw into virtual frame buffers (textures)
     myFrBuffer->setupViewPort(*myContext);    // we set TEXTURE sizes here
     myFrBuffer->bindBufferLeft(*myContext);
-        myStCore->stglDraw(ST_DRAW_LEFT);
+        StWindow::signals.onRedraw(ST_DRAW_LEFT);
     myFrBuffer->bindBufferRight(*myContext);
-        myStCore->stglDraw(ST_DRAW_RIGHT);
+        StWindow::signals.onRedraw(ST_DRAW_RIGHT);
     myFrBuffer->unbindBufferRight(*myContext);
 
     // now draw to real screen buffer
@@ -375,7 +355,7 @@ void StOutIZ3D::stglDraw(unsigned int ) {
     myShaders.master()->unuse(*myContext);
     myContext->stglResetScissorRect();
 
-    getStWindow()->stglMakeCurrent(ST_WIN_SLAVE);
+    StWindow::stglMakeCurrent(ST_WIN_SLAVE);
     myContext->stglResizeViewport(aVPSlave);
     myContext->stglSetScissorRect(aVPSlave, false);
     myContext->core20fwd->glClearColor(0.729740052840723f, 0.729740052840723f, 0.729740052840723f, 0.0f);
@@ -395,86 +375,17 @@ void StOutIZ3D::stglDraw(unsigned int ) {
     myContext->stglResetScissorRect();
 
     myFPSControl.sleepToTarget(); // decrease FPS to target by thread sleeps
-    getStWindow()->stglSwap(ST_WIN_ALL);
+    StWindow::stglSwap(ST_WIN_ALL);
     ++myFPSControl;
     // make sure all GL changes in callback (in StDrawer) will fine
-    getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
+    StWindow::stglMakeCurrent(ST_WIN_MASTER);
 }
 
-// SDK version was used
-ST_EXPORT void getSDKVersion(StVersion* ver) {
-    *ver = StVersionInfo::getSDKVersion();
-}
-
-// plugin version
-ST_EXPORT void getPluginVersion(StVersion* ver) {
-    *ver = StVersionInfo::getSDKVersion();
-}
-
-ST_EXPORT const StRendererInfo_t* getDevicesInfo(const stBool_t theToDetectPriority) {
-    static StRendererInfo_t ST_SELF_INFO = { NULL, NULL, NULL, 0 };
-    if(ST_SELF_INFO.devices != NULL) {
-        return &ST_SELF_INFO;
+void StOutIZ3D::doVSync(const bool theValue) {
+    if(myContext.isNull()) {
+        return;
     }
 
-    StTranslations aLangMap(ST_OUT_PLUGIN_NAME);
-
-    // detect connected displays
-    int aSupportLevel = ST_DEVICE_SUPPORT_NONE;
-    if(theToDetectPriority) {
-        if(StCore::INIT() != STERROR_LIBNOERROR) {
-            ST_DEBUG_LOG(ST_OUT_PLUGIN_NAME + " Plugin, Core library not available!");
-        } else {
-            StArrayList<StMonitor> stMonitors = StCore::getStMonitors();
-            for(size_t m = 0; m < stMonitors.size(); ++m) {
-                const StMonitor& mon = stMonitors[m];
-                if(isFrontDisplay(mon.getPnPId()) || isBackDisplay(mon.getPnPId())) {
-                    aSupportLevel = ST_DEVICE_SUPPORT_PREFER; // we sure that iZ3D connected
-                    break;
-                } else if(mon.getPnPId() == IZ3D_MODEL_MATROXTH2GO0 || mon.getPnPId() == IZ3D_MODEL_MATROXTH2GO1) {
-                    // TODO
-                    aSupportLevel = ST_DEVICE_SUPPORT_FULL; // is it possible
-                }
-            }
-            StCore::FREE();
-        }
-    }
-
-    // devices list
-    static StString aName = aLangMap.changeValueId(STTR_IZ3D_NAME, "IZ3D Display");
-    static StString aDesc = aLangMap.changeValueId(STTR_IZ3D_DESC, "IZ3D Display");
-    static StStereoDeviceInfo_t aDevicesArray[1] = {
-        { "IZ3D", aName.toCString(), aDesc.toCString(), aSupportLevel }
-    };
-    ST_SELF_INFO.devices = &aDevicesArray[0];
-    ST_SELF_INFO.count   = 1;
-
-    // about string
-    StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE, "sView - iZ3D Output module");
-    StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
-    StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
-        "(C) 2009-2013 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0");
-    static StString anAboutString = aTitle + '\n' + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr;
-    ST_SELF_INFO.aboutString = (stUtf8_t* )anAboutString.toCString();
-
-    return &ST_SELF_INFO;
+    StWindow::stglMakeCurrent(ST_WIN_MASTER);
+    myContext->stglSetVSync(theValue ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
 }
-
-ST_EXPORT StRendererInterface* StRenderer_new() {
-    return new StOutIZ3D(); }
-ST_EXPORT void StRenderer_del(StRendererInterface* inst) {
-    delete (StOutIZ3D* )inst; }
-ST_EXPORT StWindowInterface* StRenderer_getStWindow(StRendererInterface* inst) {
-    // This is VERY important return libImpl pointer here!
-    return ((StOutIZ3D* )inst)->getStWindow()->getLibImpl(); }
-ST_EXPORT stBool_t StRenderer_init(StRendererInterface* inst,
-                                   const stUtf8_t*      theRendererPath,
-                                   const int&           theDeviceId,
-                                   const StNativeWin_t  theNativeParent) {
-    return ((StOutIZ3D* )inst)->init(StString(theRendererPath), theDeviceId, theNativeParent); }
-ST_EXPORT stBool_t StRenderer_open(StRendererInterface* inst, const StOpenInfo_t* stOpenInfo) {
-    return ((StOutIZ3D* )inst)->open(StOpenInfo(stOpenInfo)); }
-ST_EXPORT void StRenderer_callback(StRendererInterface* inst, StMessage_t* stMessages) {
-    ((StOutIZ3D* )inst)->callback(stMessages); }
-ST_EXPORT void StRenderer_stglDraw(StRendererInterface* inst, unsigned int views) {
-    ((StOutIZ3D* )inst)->stglDraw(views); }

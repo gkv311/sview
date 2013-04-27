@@ -37,7 +37,7 @@ typedef struct tagStMouseMessage {
 /**
  * Special class for StWindow callback events list.
  */
-class ST_LOCAL StMessageList {
+class StMessageList {
 
         public:
 
@@ -81,30 +81,28 @@ class ST_LOCAL StMessageList {
 
         public:
 
-    StMessageList()
-    : stMutex(),
-      count(0),
+    ST_LOCAL StMessageList()
+    : count(0),
       keyDelay(true) {
-        //
+        reset();
+    }
+
+    ST_LOCAL void reset() {
         stMemSet(messageList, 0, sizeof(messageList));
         resetKeysMap();
     }
 
-    ~StMessageList() {
-        //
-    }
-
-    bool* getKeysMap() {
+    ST_LOCAL bool* getKeysMap() {
         // TODO (Kirill Gavrilov#3#) not thread-safe operation
         return keysMap;
     }
 
-    void resetKeysMap() {
+    ST_LOCAL void resetKeysMap() {
         // TODO (Kirill Gavrilov#3#) not thread-safe operation
         stMemSet(keysMap, (int )false, sizeof(keysMap));
     }
 
-    bool append(const size_t& msgUIN, void* msgData = NULL) {
+    ST_LOCAL bool append(const size_t& msgUIN, void* msgData = NULL) {
         stMutex.lock();
         if(msgUIN == MSG_EXIT) {
             count = 1;
@@ -121,18 +119,18 @@ class ST_LOCAL StMessageList {
         return true;
     }
 
-    bool append(const StMessage_t& stMessage) {
+    ST_LOCAL bool append(const StMessage_t& stMessage) {
         return append(stMessage.uin, stMessage.data);
     }
 
-    bool hasExitMessage() {
+    ST_LOCAL bool hasExitMessage() {
         stMutex.lock();
             bool res = messageList[0].uin == MSG_EXIT;
         stMutex.unlock();
         return res;
     }
 
-    void popList(StMessage_t outList[BUFFER_SIZE + 1]) {
+    ST_LOCAL void popList(StMessage_t outList[BUFFER_SIZE + 1]) {
         outList[0].uin = StMessageList::MSG_NULL; // at first - mark 'empty' callback
 
         // TODO (Kirill Gavrilov#4#) - this is not best place for keyMap

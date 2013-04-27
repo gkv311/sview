@@ -23,28 +23,28 @@
 
 #include <StThreads/StTimer.h>
 
-class ST_LOCAL StGLControlED : public StGLDeviceControl {
+class StGLControlED : public StGLDeviceControl {
 
         public:
 
-    virtual int getSizeY() const {
+    ST_LOCAL virtual int getSizeY() const {
         return 10;
     }
 
-    virtual int getSlaveId() const {
+    ST_LOCAL virtual int getSlaveId() const {
         return SLAVE_HLINE_TOP;
     }
 
-    StGLControlED();
-    virtual ~StGLControlED();
+    ST_LOCAL StGLControlED();
+    ST_LOCAL virtual ~StGLControlED();
 
-    virtual void release(StGLContext& theCtx);
+    ST_LOCAL virtual void release(StGLContext& theCtx);
 
-    virtual bool isActive() const {
+    ST_LOCAL virtual bool isActive() const {
         return myTimerCode.isOn() || myTimerBlack.isOn();
     }
 
-    virtual void setMode(int mode) {
+    ST_LOCAL virtual void setMode(int mode) {
         if(myTimerCode.isOn() && myTimerCode.getElapsedTimeInMilliSec() > DELAY_MS) {
             myTimerCode.stop();
             myTimerBlack.restart();
@@ -57,15 +57,15 @@ class ST_LOCAL StGLControlED : public StGLDeviceControl {
         }
     }
 
-    virtual double quitMS() {
+    ST_LOCAL virtual double quitMS() {
         return 4.0 * DELAY_MS;
     }
 
-    virtual bool stglInit(StGLContext& theCtx);
-    virtual void stglDraw(StGLContext& theCtx,
-                          unsigned int theView,
-                          const int    theWinWidth,
-                          const int    theWinHeight);
+    ST_LOCAL virtual bool stglInit(StGLContext& theCtx);
+    ST_LOCAL virtual void stglDraw(StGLContext& theCtx,
+                                   unsigned int theView,
+                                   const int    theWinWidth,
+                                   const int    theWinHeight);
 
         private:
 

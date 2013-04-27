@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutIZ3D library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -24,7 +24,7 @@
 /**
  * Helper class to access IZ3D shaders array.
  */
-class ST_LOCAL StOutIZ3DShaders : public StGLResource {
+class StOutIZ3DShaders : public StGLResource {
 
         public:
 
@@ -34,24 +34,28 @@ class ST_LOCAL StOutIZ3DShaders : public StGLResource {
         IZ3D_CLASSIC = 2,
     };
 
-    StOutIZ3DShaders();
+    ST_LOCAL StOutIZ3DShaders();
 
-    virtual ~StOutIZ3DShaders();
+    ST_LOCAL virtual ~StOutIZ3DShaders();
 
-    virtual void release(StGLContext& theCtx);
+    ST_LOCAL virtual void release(StGLContext& theCtx);
 
-    const int getMode() const {
+    ST_LOCAL const int getMode() const {
         return myMode;
     }
 
-    void setMode(const int theMode);
-    virtual bool init(StGLContext& theCtx);
+    ST_LOCAL void doSetMode(const int32_t theValue) {
+        setMode(theValue);
+    }
 
-    StGLStereoFrameBuffer::StGLStereoProgram* master() {
+    ST_LOCAL void setMode(const int theMode);
+    ST_LOCAL virtual bool init(StGLContext& theCtx);
+
+    ST_LOCAL StGLStereoFrameBuffer::StGLStereoProgram* master() {
         return myBack;
     }
 
-    StGLStereoFrameBuffer::StGLStereoProgram* slave() {
+    ST_LOCAL StGLStereoFrameBuffer::StGLStereoProgram* slave() {
         return myFront;
     }
 

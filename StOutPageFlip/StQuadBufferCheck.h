@@ -21,13 +21,13 @@
 
 #include <StThreads/StThreads.h>
 
-bool testQuadBufferSupport();
-SV_THREAD_FUNCTION testQBThreadFunction(void* outValue);
+ST_LOCAL bool testQuadBufferSupport();
+ST_LOCAL SV_THREAD_FUNCTION testQBThreadFunction(void* outValue);
 
 /**
  * Launch test in other thread to be safe for current thread GL contexts.
  */
-inline bool testQuadBufferSupportThreaded() {
+ST_LOCAL inline bool testQuadBufferSupportThreaded() {
     bool result = false;
     StThread testDeviceThreadP(testQBThreadFunction, (void* )&result);
     testDeviceThreadP.wait();

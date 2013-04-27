@@ -19,15 +19,14 @@
 #include "StImageViewerGUI.h"
 #include "StImageViewer.h"
 
-#include <StCore/StCore.h>
 #include <StCore/StWindow.h>
 
 #include <StSocket/StSocket.h>
+#include <StSettings/StEnumParam.h>
 
 #include <StGL/StParams.h>
 #include <StGLWidgets/StGLCheckboxTextured.h>
 #include <StGLWidgets/StGLDescription.h>
-#include <StGLWidgets/StGLDevicesMenu.h>
 #include <StGLWidgets/StGLImageRegion.h>
 #include <StGLWidgets/StGLMenu.h>
 #include <StGLWidgets/StGLMenuItem.h>
@@ -35,8 +34,10 @@
 #include <StGLWidgets/StGLMsgStack.h>
 #include <StGLWidgets/StGLSwitchTextured.h>
 #include <StGLWidgets/StGLTextureButton.h>
+#include <StGLWidgets/StGLFpsLabel.h>
 
 #include <StImage/StImageFile.h>
+#include <StVersion.h>
 
 #include "StImageViewerStrings.h"
 
@@ -100,22 +101,17 @@ void StImageViewerGUI::createUpperToolbar() {
 void StImageViewerGUI::createMainMenu() {
     menu0Root = new StGLMenu(this, 0, 0, StGLMenu::MENU_HORIZONTAL, true);
 
-    StGLMenu* aMenuMedia  = createMediaMenu();   // Root -> Media menu
-    StGLMenu* aMenuView   = createViewMenu();    // Root -> View menu
-    // Root -> Output menu
-    StGLDevicesMenu* aDevicesMenu = new StGLDevicesMenu(this, myWindow,
-        myLangMap->changeValueId(MENU_CHANGE_DEVICE,  "Change Device"),
-        myLangMap->changeValueId(MENU_ABOUT_RENDERER, "About Plugin..."),
-        myLangMap->changeValueId(MENU_SHOW_FPS,       "Show FPS"));
-
-    StGLMenu* aMenuHelp   = createHelpMenu();    // Root -> Help menu
+    StGLMenu* aMenuMedia   = createMediaMenu();  // Root -> Media  menu
+    StGLMenu* aMenuView    = createViewMenu();   // Root -> View   menu
+    StGLMenu* aDevicesMenu = createOutputMenu(); // Root -> Output menu
+    StGLMenu* aMenuHelp    = createHelpMenu();   // Root -> Help   menu
 
     // Attach sub menus to root
     menu0Root->addItem(myLangMap->changeValueId(MENU_MEDIA,
                        "Media"), aMenuMedia);
     menu0Root->addItem(myLangMap->changeValueId(MENU_VIEW,
                        "View"),  aMenuView);
-    aDevicesMenu->setTrackedItem(menu0Root->addItem(aDevicesMenu->getTitle(), aDevicesMenu));
+    menu0Root->addItem(myPlugin->StApplication::params.ActiveDevice->getActiveValue(), aDevicesMenu);
     menu0Root->addItem(myLangMap->changeValueId(MENU_HELP,
                        "Help"),  aMenuHelp);
 }
@@ -298,6 +294,48 @@ StGLMenu* StImageViewerGUI::createGammaMenu() {
     return aMenu;
 }
 
+/**
+ * Root -> Output menu
+ */
+StGLMenu* StImageViewerGUI::createOutputMenu() {
+    StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+
+    StGLMenu* aMenuChangeDevice = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+
+    const StHandle<StEnumParam>& aDevicesEnum = myPlugin->StApplication::params.ActiveDevice;
+    const StArrayList<StString>& aValuesList  = aDevicesEnum->getValues();
+    for(size_t aValIter = 0; aValIter < aValuesList.size(); ++aValIter) {
+        aMenuChangeDevice->addItem(aValuesList[aValIter], aDevicesEnum, int32_t(aValIter));
+    }
+
+    aMenu->addItem(myLangMap->changeValueId(MENU_CHANGE_DEVICE,  "Change Device"),
+                   aMenuChangeDevice);
+    aMenu->addItem(myLangMap->changeValueId(MENU_ABOUT_RENDERER, "About Plugin..."))
+         ->signals.onItemClick.connect(this, &StImageViewerGUI::doAboutRenderer);
+    aMenu->addItem(myLangMap->changeValueId(MENU_SHOW_FPS,       "Show FPS"),
+                   myPlugin->params.ToShowFps);
+
+    const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
+    StParamsList aParams;
+    aRend->getOptions(aParams);
+    StHandle<StBoolParamNamed> aBool;
+    StHandle<StEnumParam>      anEnum;
+    for(size_t anIter = 0; anIter < aParams.size(); ++anIter) {
+        const StHandle<StParamBase>& aParam = aParams[anIter];
+        if(aBool.downcastFrom(aParam)) {
+            aMenu->addItem(aBool->getName(), aBool);
+        } else if(anEnum.downcastFrom(aParam)) {
+            StGLMenu* aChildMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+            const StArrayList<StString>& aValues = anEnum->getValues();
+            for(size_t aValIter = 0; aValIter < aValues.size(); ++aValIter) {
+                aChildMenu->addItem(aValues[aValIter], anEnum, int32_t(aValIter));
+            }
+            aMenu->addItem(anEnum->getName(), aChildMenu);
+        }
+    }
+    return aMenu;
+}
+
 void StImageViewerGUI::doAboutProgram(const size_t ) {
     StString& aTitle = myLangMap->changeValueId(ABOUT_DPLUGIN_NAME,
         "sView - Image Viewer");
@@ -418,12 +456,14 @@ StGLMenu* StImageViewerGUI::createLanguageMenu() {
     return aMenu;
 }
 
-StImageViewerGUI::StImageViewerGUI(StImageViewer* thePlugin,
-                                   StWindow*      theWindow)
+StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
+                                   StWindow*       theWindow,
+                                   StTranslations* theLangMap,
+                                   const StHandle<StGLTextureQueue>& theTextureQueue)
 : StGLRootWidget(),
   myPlugin(thePlugin),
   myWindow(theWindow),
-  myLangMap(new StTranslations(StImageViewer::ST_DRAWER_PLUGIN_NAME)),
+  myLangMap(theLangMap),
   texturesPathRoot(StProcess::getStCoreFolder() + "textures" + SYS_FS_SPLITTER),
   stTimeVisibleLock(true),
   //
@@ -441,10 +481,18 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer* thePlugin,
   myBtnSrcFrmt(NULL),
   myBtnFull(NULL),
   //
+  myFpsWidget(NULL),
+  //
   isGUIVisible(true),
   isGUIMinimal(true) {
     //
-    stImageRegion = new StGLImageRegion(this, 2);
+    myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StImageViewerGUI::doShowFPS);
+
+    StHandle<StGLTextureQueue> aTextureQueue = theTextureQueue;
+    if(aTextureQueue.isNull()) {
+        aTextureQueue = new StGLTextureQueue(2);
+    }
+    stImageRegion = new StGLImageRegion(this, aTextureQueue);
 
     createUpperToolbar();
 
@@ -580,6 +628,40 @@ void StImageViewerGUI::stglResize(const StRectI_t& winRectPx) {
     }
 
     StGLRootWidget::stglResize(winRectPx);
+}
+
+void StImageViewerGUI::stglDraw(unsigned int theView) {
+    if(theView == ST_DRAW_LEFT
+    && myFpsWidget != NULL) {
+        myFpsWidget->update(myPlugin->getMainWindow()->isStereoOutput(),
+                            myPlugin->getMainWindow()->getTargetFps());
+    }
+    StGLRootWidget::stglDraw(theView);
+}
+
+void StImageViewerGUI::doShowFPS(const bool ) {
+    if(myFpsWidget != NULL) {
+        delete myFpsWidget;
+        myFpsWidget = NULL;
+        return;
+    }
+
+    myFpsWidget = new StGLFpsLabel(this);
+    myFpsWidget->setVisibility(true, true);
+    myFpsWidget->stglInit();
+}
+
+void StImageViewerGUI::doAboutRenderer(const size_t ) {
+    StString anAboutText = myPlugin->getMainWindow()->getRendererAbout();
+    if(anAboutText.isEmpty()) {
+        anAboutText = StString() + "Plugin '" + myPlugin->getMainWindow()->getRendererId() + "' doesn't provide description";
+    }
+
+    StGLMessageBox* aDialog = new StGLMessageBox(this, anAboutText, 512, 256);
+    aDialog->setVisibility(true, true);
+    aDialog->stglInit();
+    aDialog->signals.onClickLeft. connect(aDialog, &StGLMessageBox::doKillSelf);
+    aDialog->signals.onClickRight.connect(aDialog, &StGLMessageBox::doKillSelf);
 }
 
 void StImageViewerGUI::showUpdatesNotify() {

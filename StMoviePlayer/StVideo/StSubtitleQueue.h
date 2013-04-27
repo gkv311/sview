@@ -45,6 +45,10 @@ class StSubtitleQueue : public StAVPacketQueue {
     ST_LOCAL StSubtitleQueue(const StHandle<StSubQueue>& theSubtitlesQueue);
     ST_LOCAL virtual ~StSubtitleQueue();
 
+    ST_LOCAL inline const StHandle<StSubQueue>& getSubtitlesQueue() const {
+        return myOutQueue;
+    }
+
     /**
      * Initialization function.
      * @param theFormatCtx pointer to video format context

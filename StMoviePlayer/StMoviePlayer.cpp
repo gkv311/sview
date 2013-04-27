@@ -18,13 +18,12 @@
 
 #include "StMoviePlayer.h"
 
-#include <StSocket/StCheckUpdates.h>
-
-#include <StCore/StCore.h>
-#include <StCore/StWindow.h>
-
 #include "StMoviePlayerGUI.h"
+#include "StMoviePlayerStrings.h"
+#include "StVideo/StVideo.h"
+#include "StTimeBox.h"
 
+#include <StSocket/StCheckUpdates.h>
 #include <StImage/StImageFile.h>
 
 #include <StGL/StGLContext.h>
@@ -33,10 +32,12 @@
 #include <StGLWidgets/StGLMsgStack.h>
 #include <StGLWidgets/StGLSubtitles.h>
 #include <StGLWidgets/StGLTextureButton.h>
-#include "StTimeBox.h"
 
-#include "StVideo/StVideo.h"
-#include "StMoviePlayerStrings.h"
+#include "../StOutAnaglyph/StOutAnaglyph.h"
+#include "../StOutDual/StOutDual.h"
+#include "../StOutIZ3D/StOutIZ3D.h"
+#include "../StOutInterlace/StOutInterlace.h"
+#include "../StOutPageFlip/StOutPageFlipExt.h"
 
 #include <cstdlib> // std::abs(int)
 
@@ -127,16 +128,26 @@ StString StALDeviceParam::getTitle() const {
     return myDevicesList[(anActive >= 0 && size_t(anActive) < myDevicesList.size()) ? size_t(anActive) : 0];
 }
 
-StMoviePlayer::StMoviePlayer()
-: myEventDialog(false),
+void StMoviePlayer::doChangeDevice(const int32_t theValue) {
+    StApplication::doChangeDevice(theValue);
+    // update menu
+}
+
+StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
+                             const StHandle<StOpenInfo>& theOpenInfo)
+: StApplication(theParentWin, theOpenInfo),
+  mySettings(new StSettings(ST_DRAWER_PLUGIN_NAME)),
+  myLangMap(new StTranslations(StMoviePlayer::ST_DRAWER_PLUGIN_NAME)),
+  myEventDialog(false),
   myEventLoaded(false),
   mySeekOnLoad(-1.0),
   //
   myLastUpdateDay(0),
   myToUpdateALList(false),
   myIsBenchmark(false),
-  myToCheckUpdates(true),
-  myToQuit(false) {
+  myToCheckUpdates(true) {
+    //
+    myTitle = "sView - Media Player";
     //
     params.alDevice = new StALDeviceParam();
     params.audioGain = new StFloat32Param( 1.0f, // sound is unattenuated
@@ -154,17 +165,57 @@ StMoviePlayer::StMoviePlayer()
     params.checkUpdatesDays = new StInt32Param(7);
     params.srcFormat        = new StInt32Param(ST_V_SRC_AUTODETECT);
     params.srcFormat->signals.onChanged.connect(this, &StMoviePlayer::doSwitchSrcFormat);
+    params.ToShowFps   = new StBoolParam(false);
     params.audioStream = new StInt32Param(-1);
     params.audioStream->signals.onChanged.connect(this, &StMoviePlayer::doSwitchAudioStream);
     params.subtitlesStream = new StInt32Param(-1);
     params.subtitlesStream->signals.onChanged.connect(this, &StMoviePlayer::doSwitchSubtitlesStream);
     params.blockSleeping = new StInt32Param(StMoviePlayer::BLOCK_SLEEP_PLAYBACK);
     params.fpsBound = 1;
+
+    // load settings
+    mySettings->loadInt32 (ST_SETTING_FPSBOUND,           params.fpsBound);
+    mySettings->loadString(ST_SETTING_LAST_FOLDER,        params.lastFolder);
+    mySettings->loadInt32 (ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
+    mySettings->loadParam (ST_SETTING_UPDATES_INTERVAL,   params.checkUpdatesDays);
+    mySettings->loadParam (ST_SETTING_SHUFFLE,            params.isShuffle);
+    mySettings->loadParam (ST_SETTING_GLOBAL_MKEYS,       params.areGlobalMKeys);
+
+    StString aSavedALDevice;
+    mySettings->loadString(ST_SETTING_OPENAL_DEVICE,      aSavedALDevice);
+    params.alDevice->init(aSavedALDevice);
+
+    params.isShuffle->signals.onChanged.connect(this, &StMoviePlayer::doSwitchShuffle);
+    params.alDevice ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchAudioDevice);
+
+    /// TODO (Kirill Gavrilov#1) setup OpenGL requirements - no need in Depth buffer
+    addRenderer(new StOutAnaglyph(theParentWin));
+    addRenderer(new StOutDual(theParentWin));
+    addRenderer(new StOutIZ3D(theParentWin));
+    addRenderer(new StOutInterlace(theParentWin));
+    addRenderer(new StOutPageFlipExt(theParentWin));
 }
 
-StMoviePlayer::~StMoviePlayer() {
-    myUpdates.nullify();
-    if(!mySettings.isNull() && !myGUI.isNull()) {
+bool StMoviePlayer::resetDevice() {
+    if(myGUI.isNull()
+    || myVideo.isNull()) {
+        return init();
+    }
+
+    // be sure Render plugin process quit correctly
+    myMessages[0].uin = StMessageList::MSG_EXIT;
+    myMessages[1].uin = StMessageList::MSG_NULL;
+    myWindow->processEvents(myMessages);
+
+    myVideo->doRelease();
+    releaseDevice();
+    myWindow->close();
+    myWindow.nullify();
+    return open();
+}
+
+void StMoviePlayer::releaseDevice() {
+    if(!myGUI.isNull()) {
         mySettings->saveParam (ST_SETTING_STEREO_MODE,        myGUI->stImageRegion->params.displayMode);
         mySettings->saveInt32 (ST_SETTING_GAMMA,              stRound(100.0f * myGUI->stImageRegion->params.gamma->getValue()));
         if(params.toRestoreRatio->getValue()) {
@@ -185,34 +236,25 @@ StMoviePlayer::~StMoviePlayer() {
             mySettings->saveString(ST_SETTING_RECENT_FILES,   myVideo->getPlayList().dumpRecentList());
         }
     }
-    // release GUI data and GL resorces before closing the window
+
+    // release GUI data and GL resources before closing the window
     myGUI.nullify();
-    // wait video playback thread to quit and release resources
-    myVideo.nullify();
-    // destroy other objects
-    mySettings.nullify();
-    // now destroy the window
-    myWindow.nullify();
-    // release libraries
-    StCore::FREE();
+    myContext.nullify();
 }
 
-bool StMoviePlayer::init(StWindowInterface* theWindow) {
-    if(!StVersionInfo::checkTimeBomb("sView - Video playback plugin")) {
-        // timebomb for alpha versions
-        return false;
-    } else if(theWindow == NULL) {
-        stError("VideoPlugin, Invalid window from StRenderer plugin!");
-        return false;
-    } else if(StCore::INIT() != STERROR_LIBNOERROR) {
-        stError("VideoPlugin, Core library not available!");
-        return false;
-    }
+StMoviePlayer::~StMoviePlayer() {
+    myUpdates.nullify();
+    releaseDevice();
+    // wait video playback thread to quit and release resources
+    myVideo.nullify();
+}
 
-    // create window wrapper
-    myWindow = new StWindow(theWindow);
-    myWindow->setTitle("sView - Media Player");
-    myWindow->stglMakeCurrent(ST_WIN_MASTER);
+bool StMoviePlayer::init() {
+    const bool isReset = !myVideo.isNull();
+    if(!myContext.isNull()
+    && !myGUI.isNull()) {
+        return true;
+    }
 
     // initialize GL context
     myContext = new StGLContext();
@@ -225,23 +267,22 @@ bool StMoviePlayer::init(StWindowInterface* theWindow) {
     }
 
     // create the GUI with default values
-    myGUI = new StMoviePlayerGUI(this, myWindow.access(), 16);
+    StHandle<StGLTextureQueue> aTextureQueue;
+    StHandle<StSubQueue>       aSubQueue;
+    if(!myVideo.isNull()) {
+        aTextureQueue = myVideo->getTextureQueue();
+        aSubQueue     = myVideo->getSubtitlesQueue();
+    } else {
+        aTextureQueue = new StGLTextureQueue(16);
+        aSubQueue     = new StSubQueue();
+    }
+    myGUI = new StMoviePlayerGUI(this, myWindow.access(), myLangMap.access(), aTextureQueue, aSubQueue);
     myGUI->setContext(myContext);
 
     // load settings
-    mySettings = new StSettings(ST_DRAWER_PLUGIN_NAME);
-    mySettings->loadInt32 (ST_SETTING_FPSBOUND,           params.fpsBound);
-    mySettings->loadString(ST_SETTING_LAST_FOLDER,        params.lastFolder);
-    StString aSavedALDevice;
-    mySettings->loadString(ST_SETTING_OPENAL_DEVICE,      aSavedALDevice);
-    params.alDevice->init(aSavedALDevice);
-    mySettings->loadInt32 (ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
-    mySettings->loadParam (ST_SETTING_UPDATES_INTERVAL,   params.checkUpdatesDays);
-    mySettings->loadParam (ST_SETTING_STEREO_MODE,        myGUI->stImageRegion->params.displayMode);
-    mySettings->loadParam (ST_SETTING_TEXFILTER,          myGUI->stImageRegion->params.textureFilter);
-    mySettings->loadParam (ST_SETTING_RATIO,              myGUI->stImageRegion->params.displayRatio);
-    mySettings->loadParam (ST_SETTING_SHUFFLE,            params.isShuffle);
-    mySettings->loadParam (ST_SETTING_GLOBAL_MKEYS,       params.areGlobalMKeys);
+    mySettings->loadParam (ST_SETTING_STEREO_MODE, myGUI->stImageRegion->params.displayMode);
+    mySettings->loadParam (ST_SETTING_TEXFILTER,   myGUI->stImageRegion->params.textureFilter);
+    mySettings->loadParam (ST_SETTING_RATIO,       myGUI->stImageRegion->params.displayRatio);
     params.toRestoreRatio->setValue(myGUI->stImageRegion->params.displayRatio->getValue() != StGLImageRegion::RATIO_AUTO);
     int32_t loadedGamma = 100; // 1.0f
         mySettings->loadInt32(ST_SETTING_GAMMA, loadedGamma);
@@ -249,10 +290,10 @@ bool StMoviePlayer::init(StWindowInterface* theWindow) {
 
     // capture multimedia keys even without window focus
     StWinAttributes_t anAttribs = stDefaultWinAttributes();
-    myWindow->getAttributes(&anAttribs);
+    myWindow->getAttributes(anAttribs);
     if(anAttribs.areGlobalMediaKeys != params.areGlobalMKeys->getValue()) {
         anAttribs.areGlobalMediaKeys = params.areGlobalMKeys->getValue();
-        myWindow->setAttributes(&anAttribs);
+        myWindow->setAttributes(anAttribs);
     }
 
     // initialize frame region early to show dedicated error description
@@ -263,19 +304,20 @@ bool StMoviePlayer::init(StWindowInterface* theWindow) {
     myGUI->stglInit();
 
     // create the video playback thread
-    myVideo = new StVideo(params.alDevice->getTitle(),
-                          myGUI->myLangMap,
-                          myGUI->stImageRegion->getTextureQueue(),
-                          myGUI->stSubtitles->getQueue());
+    if(!isReset) {
+        myVideo = new StVideo(params.alDevice->getTitle(), myLangMap, aTextureQueue, aSubQueue);
+    }
     myVideo->signals.onError.connect(myGUI->myMsgStack, &StGLMsgStack::doPushMessage);
     myVideo->signals.onLoaded.connect(this, &StMoviePlayer::doLoaded);
     myVideo->getPlayList().setShuffle(params.isShuffle->getValue());
-    params.isShuffle->signals.onChanged.connect(this, &StMoviePlayer::doSwitchShuffle);
-    params.alDevice->signals.onChanged.connect(this, &StMoviePlayer::doSwitchAudioDevice);
 
     StString aRecentList;
     mySettings->loadString(ST_SETTING_RECENT_FILES, aRecentList);
     myVideo->getPlayList().loadRecentList(aRecentList);
+
+    if(isReset) {
+        return true;
+    }
 
     // load this parameter AFTER video thread creation
     mySettings->loadParam(ST_SETTING_SRCFORMAT, params.srcFormat);
@@ -321,10 +363,21 @@ void StMoviePlayer::parseArguments(const StArgumentsMap& theArguments) {
     }
 }
 
-bool StMoviePlayer::open(const StOpenInfo& stOpenInfo) {
-    parseArguments(stOpenInfo.getArgumentsMap());
-    StMIME stOpenMIME = stOpenInfo.getMIME();
-    if(stOpenMIME == StDrawerInfo::DRAWER_MIME() || stOpenInfo.getPath().isEmpty()) {
+bool StMoviePlayer::open() {
+    const bool isReset = !mySwitchTo.isNull();
+    if(!StApplication::open()
+    || !init()) {
+        return false;
+    }
+
+    if(isReset) {
+        //myVideo->doLoadNext();
+        return true;
+    }
+
+    parseArguments(myOpenFileInfo->getArgumentsMap());
+    const StMIME anOpenMIME = myOpenFileInfo->getMIME();
+    if(myOpenFileInfo->getPath().isEmpty()) {
         // open drawer without files
         return true;
     }
@@ -332,19 +385,19 @@ bool StMoviePlayer::open(const StOpenInfo& stOpenInfo) {
     // clear playlist first
     myVideo->getPlayList().clear();
 
-    //StArgument argFile1     = stOpenInfo.getArgumentsMap()[ST_ARGUMENT_FILE + 1]; // playlist?
-    StArgument argFileLeft  = stOpenInfo.getArgumentsMap()[ST_ARGUMENT_FILE_LEFT];
-    StArgument argFileRight = stOpenInfo.getArgumentsMap()[ST_ARGUMENT_FILE_RIGHT];
+    //StArgument argFile1     = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE + 1]; // playlist?
+    StArgument argFileLeft  = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_LEFT];
+    StArgument argFileRight = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_RIGHT];
     if(argFileLeft.isValid() && argFileRight.isValid()) {
         // meta-file
         /// TODO (Kirill Gavrilov#4) we should use MIME type!
         myVideo->getPlayList().addOneFile(argFileLeft.getValue(), argFileRight.getValue());
-    } else if(!stOpenMIME.isEmpty()) {
+    } else if(!anOpenMIME.isEmpty()) {
         // create just one-file playlist
-        myVideo->getPlayList().addOneFile(stOpenInfo.getPath(), stOpenMIME);
+        myVideo->getPlayList().addOneFile(myOpenFileInfo->getPath(), anOpenMIME);
     } else {
         // create playlist from file's folder
-        myVideo->getPlayList().open(stOpenInfo.getPath());
+        myVideo->getPlayList().open(myOpenFileInfo->getPath());
     }
 
     if(!myVideo->getPlayList().isEmpty()) {
@@ -355,14 +408,10 @@ bool StMoviePlayer::open(const StOpenInfo& stOpenInfo) {
     return true;
 }
 
-void StMoviePlayer::parseCallback(StMessage_t* stMessages) {
-    if(myToQuit) {
-        stMessages[0].uin = StMessageList::MSG_EXIT;
-        stMessages[1].uin = StMessageList::MSG_NULL;
-    }
+void StMoviePlayer::processEvents(const StMessage_t* theEvents) {
     bool isMouseMove = false;
-    for(size_t evId = 0; stMessages[evId].uin != StMessageList::MSG_NULL; ++evId) {
-        switch(stMessages[evId].uin) {
+    for(size_t evId = 0; theEvents[evId].uin != StMessageList::MSG_NULL; ++evId) {
+        switch(theEvents[evId].uin) {
             case StMessageList::MSG_RESIZE: {
                 myGUI->stglResize(myWindow->getPlacement());
                 break;
@@ -372,50 +421,44 @@ void StMoviePlayer::parseCallback(StMessage_t* stMessages) {
                 break;
             }
             case StMessageList::MSG_DRAGNDROP_IN: {
-                int filesCount = myWindow->getDragNDropFile(-1, NULL, 0);
-                if(filesCount > 0) {
-                    stUtf8_t aBuffFile[4096];
-                    stMemSet(aBuffFile, 0, sizeof(aBuffFile));
-                    if(myWindow->getDragNDropFile(0, aBuffFile, (4096 * sizeof(stUtf8_t))) == 0) {
-                        StString aBuffString(aBuffFile);
-                        if(myVideo->getPlayList().checkExtension(aBuffString)) {
-                            myVideo->getPlayList().open(aBuffString);
-                            doUpdateStateLoading();
-                            myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
-                            myVideo->doLoadNext();
-                        }
+                StString aFilePath;
+                int aFilesNb = myWindow->getDragNDropFile(-1, aFilePath);
+                if(aFilesNb > 0) {
+                    myWindow->getDragNDropFile(0, aFilePath);
+                    if(myVideo->getPlayList().checkExtension(aFilePath)) {
+                        myVideo->getPlayList().open(aFilePath);
+                        doUpdateStateLoading();
+                        myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
+                        myVideo->doLoadNext();
                     }
                 }
                 break;
             }
             case StMessageList::MSG_CLOSE:
             case StMessageList::MSG_EXIT: {
-                stMessages[0].uin = StMessageList::MSG_EXIT;
-                stMessages[1].uin = StMessageList::MSG_NULL;
+                StApplication::exit(0);
                 break;
             }
             case StMessageList::MSG_KEYS: {
-                bool* keysMap = (bool* )stMessages[evId].data;
+                bool* keysMap = (bool* )theEvents[evId].data;
                 if(keysMap[ST_VK_ESCAPE]) {
-                    // we could parse Escape key in other way
-                    stMessages[0].uin = StMessageList::MSG_EXIT;
-                    stMessages[1].uin = StMessageList::MSG_NULL;
+                    StApplication::exit(0);
                     return;
                 }
-                keysCommon((bool* )stMessages[evId].data); break;
+                keysCommon((bool* )theEvents[evId].data); break;
             }
             case StMessageList::MSG_MOUSE_MOVE: {
                 isMouseMove = true; break;
             }
             case StMessageList::MSG_MOUSE_DOWN: {
                 StPointD_t pt;
-                int mouseBtn = myWindow->getMouseDown(&pt);
+                int mouseBtn = myWindow->getMouseDown(pt);
                 myGUI->tryClick(pt, mouseBtn);
                 break;
             }
             case StMessageList::MSG_MOUSE_UP: {
                 StPointD_t aPoint;
-                int aMouseBtn = myWindow->getMouseUp(&aPoint);
+                int aMouseBtn = myWindow->getMouseUp(aPoint);
                 switch(aMouseBtn) {
                     case ST_MOUSE_MIDDLE: {
                         params.isFullscreen->reverse();
@@ -462,7 +505,7 @@ void StMoviePlayer::parseCallback(StMessage_t* stMessages) {
 
     if(myIsBenchmark) {
         // full unbounded
-        myWindow->stglSetTargetFps(-1.0);
+        myWindow->setTargetFps(-1.0);
     } else if(params.fpsBound == 1) {
         // set rendering FPS to 2x averageFPS
         double targetFps = myVideo->getAverFps();
@@ -471,10 +514,10 @@ void StMoviePlayer::parseCallback(StMessage_t* stMessages) {
         } else if(targetFps < 40.0) {
             targetFps *= 2.0;
         }
-        myWindow->stglSetTargetFps(targetFps);
+        myWindow->setTargetFps(targetFps);
     } else {
         // set rendering FPS to setted value in settings
-        myWindow->stglSetTargetFps(double(params.fpsBound));
+        myWindow->setTargetFps(double(params.fpsBound));
     }
 
     if(myToCheckUpdates && !myUpdates.isNull() && myUpdates->isInitialized()) {
@@ -553,12 +596,12 @@ void StMoviePlayer::stglDraw(unsigned int view) {
             }
         }
         StWinAttributes_t anAttribs = stDefaultWinAttributes();
-        myWindow->getAttributes(&anAttribs);
+        myWindow->getAttributes(anAttribs);
         if(anAttribs.toBlockSleepSystem  != toBlockSleepSystem
         || anAttribs.toBlockSleepDisplay != toBlockSleepDisplay) {
             anAttribs.toBlockSleepSystem  = toBlockSleepSystem;
             anAttribs.toBlockSleepDisplay = toBlockSleepDisplay;
-            myWindow->setAttributes(&anAttribs);
+            myWindow->setAttributes(anAttribs);
         }
 
         myWindow->showCursor(!myGUI->toHideCursor());
@@ -579,11 +622,15 @@ void StMoviePlayer::stglDraw(unsigned int view) {
 }
 
 void StMoviePlayer::doSwitchShuffle(const bool theShuffleOn) {
-    myVideo->getPlayList().setShuffle(theShuffleOn);
+    if(!myVideo.isNull()) {
+        myVideo->getPlayList().setShuffle(theShuffleOn);
+    }
 }
 
 void StMoviePlayer::doSwitchAudioDevice(const int32_t /*theDevId*/) {
-    myVideo->switchAudioDevice(params.alDevice->getTitle());
+    if(!myVideo.isNull()) {
+        myVideo->switchAudioDevice(params.alDevice->getTitle());
+    }
 }
 
 void StMoviePlayer::doSetAudioVolume(const float theGain) {
@@ -662,7 +709,7 @@ void StMoviePlayer::doListLast(const size_t ) {
 }
 
 void StMoviePlayer::doQuit(const size_t ) {
-    myToQuit = true;
+    StApplication::exit(0);
 }
 
 struct ST_LOCAL OpenFileArgs {
@@ -1069,6 +1116,10 @@ void StMoviePlayer::keysCommon(bool* keysMap) {
         params.isFullscreen->reverse();
         keysMap[ST_VK_RETURN] = false;
     }
+    if(keysMap[ST_VK_F12]) {
+        params.ToShowFps->reverse();
+        keysMap[ST_VK_F12] = false;
+    }
 
     if(keysMap[ST_VK_SPACE]) {
         doPlayPause();
@@ -1102,38 +1153,10 @@ void StMoviePlayer::keysCommon(bool* keysMap) {
         myIsBenchmark = !myIsBenchmark;
         myVideo->setBenchmark(myIsBenchmark);
         keysMap[ST_VK_B] = false;
-ST_DEBUG_LOG("myIsBenchmark= " + int(myIsBenchmark)); ///
     }
 #endif
 
     keysStereo(keysMap);
     keysSrcFormat(keysMap);
     keysFileWalk(keysMap);
-}
-
-ST_EXPORT StDrawerInterface* StDrawer_new() {
-    return new StMoviePlayer(); }
-ST_EXPORT void StDrawer_del(StDrawerInterface* inst) {
-    delete (StMoviePlayer* )inst; }
-ST_EXPORT stBool_t StDrawer_init(StDrawerInterface* inst, StWindowInterface* stWin) {
-    return ((StMoviePlayer* )inst)->init(stWin); }
-ST_EXPORT stBool_t StDrawer_open(StDrawerInterface* inst, const StOpenInfo_t* stOpenInfo) {
-    return ((StMoviePlayer* )inst)->open(StOpenInfo(stOpenInfo)); }
-ST_EXPORT void StDrawer_parseCallback(StDrawerInterface* inst, StMessage_t* stMessages) {
-    ((StMoviePlayer* )inst)->parseCallback(stMessages); }
-ST_EXPORT void StDrawer_stglDraw(StDrawerInterface* inst, unsigned int view) {
-    ((StMoviePlayer* )inst)->stglDraw(view); }
-
-// SDK version was used
-ST_EXPORT void getSDKVersion(StVersion* ver) {
-    *ver = StVersionInfo::getSDKVersion();
-}
-
-// plugin version
-ST_EXPORT void getPluginVersion(StVersion* ver) {
-    *ver = StVersionInfo::getSDKVersion();
-}
-
-ST_EXPORT const stUtf8_t* getMIMEDescription() {
-    return StVideo::ST_VIDEOS_MIME_STRING;
 }

@@ -234,17 +234,9 @@
 			<Option target="WIN_vc_x86_DEBUG" />
 		</Unit>
 		<Unit filename="StTranslations.cpp" />
+		<Unit filename="../include/StSettings/StEnumParam.h" />
 		<Unit filename="../include/StSettings/StFloat32Param.h" />
 		<Unit filename="../include/StSettings/StParam.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="../include/StSettings/StParamDevOptOnOff.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="../include/StSettings/StParamDevOptSwitch.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="../include/StSettings/StParamRendDevice.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="../include/StSettings/StSettings.h">

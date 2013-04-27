@@ -19,7 +19,6 @@
 #include <StStrings/stConsole.h>
 #include <StThreads/StProcess.h>
 
-#include "StCoreInitializer.h"
 #include "StTestMutex.h"
 #include "StTestGlBand.h"
 #include "StTestEmbed.h"
@@ -41,11 +40,6 @@ int main(int , char** ) { // force console output
     StProcess::setEnv(ST_ENV_NAME_STCORE_PATH, StProcess::getProcessFolder());
 #endif
 
-    StCoreInitializer stCoreInit;
-    if(!stCoreInit.init()) {
-        st::cout << stostream_text("StCore Library initialization FAILED!\n");
-        return 1;
-    }
     st::cout << stostream_text("This application performs some synthetic tests\n");
 
     StArrayList<StString> anArgs = StProcess::getArguments();

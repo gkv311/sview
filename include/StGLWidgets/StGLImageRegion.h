@@ -46,8 +46,11 @@ class StGLImageRegion : public StGLWidget {
 
         public: //!< public interface
 
+    /**
+     * Default constructor.
+     */
     ST_CPPEXPORT StGLImageRegion(StGLWidget* theParent,
-                                 size_t      theTextureQueueSizeMax);
+                                 const StHandle<StGLTextureQueue>& theTextureQueue);
 
     ST_LOCAL inline StHandle<StGLTextureQueue>& getTextureQueue() {
         return myTextureQueue;

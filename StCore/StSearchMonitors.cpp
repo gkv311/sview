@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -16,7 +16,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "StSearchMonitors.h"
+#include <StCore/StSearchMonitors.h>
 
 #include <StSettings/StSettings.h>
 #include <StThreads/StMutex.h>
@@ -29,6 +29,33 @@
 #endif
 
 #include "StADLsdk.h"
+
+StSearchMonitors::StSearchMonitors()
+: StArrayList<StMonitor>(2) {
+    //
+}
+
+StSearchMonitors::~StSearchMonitors() {
+    //
+}
+
+StMonitor& StSearchMonitors::operator[](const StPointI_t& thePoint) {
+    for(size_t id = 0; id < size(); ++id) {
+        if(getValue(id).getVRect().isPointIn(thePoint)) {
+            return changeValue(id);
+        }
+    }
+    return changeValue(0); // return first anyway...
+}
+
+const StMonitor& StSearchMonitors::operator[](const StPointI_t& thePoint) const {
+    for(size_t id = 0; id < size(); ++id) {
+        if(getValue(id).getVRect().isPointIn(thePoint)) {
+            return getValue(id);
+        }
+    }
+    return getValue(0); // return first anyway...
+}
 
 /**
  * Detect classic multimonitor configurations.
@@ -668,22 +695,4 @@ void StSearchMonitors::initFromSystem() {
         }
     }
 #endif
-}
-
-namespace {
-    static StSearchMonitors ST_MONITORS_CACHED;
-    static StMutex          ST_MONITORS_LOCK;
-};
-
-ST_EXPORT int StCore_getStMonitors(StMonitor_t* monList, const int& inSize, stBool_t toForceUpdate) {
-    StMutexAuto aLockAuto(ST_MONITORS_LOCK);
-    if(toForceUpdate || ST_MONITORS_CACHED.isEmpty()) {
-        ST_MONITORS_CACHED.init();
-    }
-    size_t minSize = (size_t(inSize) < ST_MONITORS_CACHED.size()) ? size_t(inSize) : ST_MONITORS_CACHED.size();
-    for(size_t m = 0; m < minSize; ++m) {
-        StMonitor_t mst = ST_MONITORS_CACHED[m].getStruct();
-        stMemCpy(&monList[m], &mst, sizeof(StMonitor_t));
-    }
-    return int(ST_MONITORS_CACHED.size());
 }

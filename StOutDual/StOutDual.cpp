@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutDual library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -23,9 +23,11 @@
 #include <StGL/StGLProgram.h>
 #include <StGL/StGLFrameBuffer.h>
 #include <StGLCore/StGLCore20.h>
-#include <StCore/StWindow.h>
 #include <StSettings/StSettings.h>
 #include <StSettings/StTranslations.h>
+#include <StSettings/StEnumParam.h>
+#include <StCore/StSearchMonitors.h>
+#include <StVersion.h>
 
 namespace {
 
@@ -123,7 +125,7 @@ class StProgramMM : public StGLProgram {
 void StOutDual::replaceDualAttribute(const DeviceEnum theFrom,
                                      const DeviceEnum theTo) {
     StWinAttributes_t anAttribs = stDefaultWinAttributes();
-    getStWindow()->getAttributes(&anAttribs);
+    StWindow::getAttributes(anAttribs);
     StWinAttributes_t anAttribsBefore = anAttribs;
     switch(theFrom) {
         case DUALMODE_XMIRROW:
@@ -143,153 +145,183 @@ void StOutDual::replaceDualAttribute(const DeviceEnum theFrom,
         default: break;
     }
     if(!areSame(&anAttribsBefore, &anAttribs)) {
-        getStWindow()->setAttributes(&anAttribs);
+        StWindow::setAttributes(anAttribs);
     }
     myDevice = theTo;
-    if(myOptions != NULL) {
-        myOptions->curDeviceId = myDevice;
+}
+
+StAtomic<int32_t> StOutDual::myInstancesNb(0);
+
+StString StOutDual::getRendererAbout() const {
+    return myAbout;
+}
+
+const char* StOutDual::getRendererId() const {
+    return ST_OUT_PLUGIN_NAME;
+}
+
+const char* StOutDual::getDeviceId() const {
+    switch(myDevice) {
+        case DUALMODE_XMIRROW:
+        case DUALMODE_YMIRROW: return "Mirror";
+        case DUALMODE_SIMPLE:
+        default:               return "Dual";
     }
 }
 
-void StOutDual::optionsStructAlloc() {
-    StTranslations stLangMap(ST_OUT_PLUGIN_NAME);
+bool StOutDual::setDevice(const StString& theDevice) {
+    if(theDevice == "Dual") {
+        replaceDualAttribute(myDevice, DUALMODE_SIMPLE);
+    } else if(theDevice == "Mirror"
+           && myDevice == DUALMODE_SIMPLE) {
+        replaceDualAttribute(myDevice, DUALMODE_XMIRROW);
+    }
+    return false;
+}
 
-    // create device options structure
-    myOptions = (StSDOptionsList_t* )StWindow::memAlloc(sizeof(StSDOptionsList_t)); stMemSet(myOptions, 0, sizeof(StSDOptionsList_t));
-    myOptions->curRendererPath = StWindow::memAllocNCopy(myPluginPath);
-    myOptions->curDeviceId = myDevice;
+void StOutDual::getDevices(StOutDevicesList& theList) const {
+    for(size_t anIter = 0; anIter < myDevices.size(); ++anIter) {
+        theList.add(myDevices[anIter]);
+    }
+}
 
-    myOptions->optionsCount = 2;
-    myOptions->options = (StSDOption_t** )StWindow::memAlloc(sizeof(StSDOption_t*) * myOptions->optionsCount);
+void StOutDual::getOptions(StParamsList& theList) const {
+    theList.add(params.IsVSyncOn);
+    theList.add(params.SlaveMonId);
+}
+
+StOutDual::StOutDual(const StNativeWin_t theParentWindow)
+: StWindow(theParentWindow),
+  mySettings(new StSettings(ST_OUT_PLUGIN_NAME)),
+  myFrBuffer(new StGLFrameBuffer()),
+  myProgram(new StProgramMM()),
+  myDevice(DEVICE_AUTO),
+  myToSavePlacement(theParentWindow == (StNativeWin_t )NULL),
+  myToCompressMem(myInstancesNb.increment() > 1),
+  myIsBroken(false) {
+    const StSearchMonitors& aMonitors = StWindow::getMonitors();
+    StTranslations aLangMap(ST_OUT_PLUGIN_NAME);
+
+    // about string
+    StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - Dual Output module");
+    StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
+    StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
+        "(C) 2007-2013 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0");
+    myAbout = aTitle + '\n' + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr;
+
+    // detect connected displays
+    int aSupportLevel = ST_DEVICE_SUPPORT_NONE;
+    if(aMonitors.size() >= 2) {
+        const StMonitor& aMon0 = aMonitors[0];
+        const StMonitor& aMon1 = aMonitors[1];
+        if(aMon0.getVRect().width()  == aMon1.getVRect().width()
+        && aMon0.getVRect().height() == aMon1.getVRect().height()
+        && aMon0.getFreq()           == aMon1.getFreq()) {
+            aSupportLevel = ST_DEVICE_SUPPORT_HIGHT;
+        }
+    }
+
+    // devices list
+    StHandle<StOutDevice> aDevDual = new StOutDevice();
+    aDevDual->PluginId = ST_OUT_PLUGIN_NAME;
+    aDevDual->DeviceId = "Dual";
+    aDevDual->Priority = aSupportLevel;
+    aDevDual->Name     = aLangMap.changeValueId(STTR_DUAL_NAME, "Dual Output");
+    aDevDual->Desc     = aLangMap.changeValueId(STTR_DUAL_DESC, "Stereo-device with dual input: some HMD, Mirrored Stereo monitors, Dual-Projectors");
+    myDevices.add(aDevDual);
+
+    StHandle<StOutDevice> aDevMirr = new StOutDevice();
+    aDevMirr->PluginId = ST_OUT_PLUGIN_NAME;
+    aDevMirr->DeviceId = "Mirror";
+    aDevMirr->Priority = aSupportLevel;
+    aDevMirr->Name     = aLangMap.changeValueId(STTR_MIRROR_NAME, "Mirror Output");
+    aDevMirr->Desc     = aLangMap.changeValueId(STTR_MIRROR_DESC, "Hand-make Mirrored Stereo monitors (mirror in X-direction)");
+    myDevices.add(aDevMirr);
 
     // VSync option
-    myOptions->options[DEVICE_OPTION_VSYNC] = (StSDOption_t* )StWindow::memAlloc(sizeof(StSDOnOff_t));
-    myOptions->options[DEVICE_OPTION_VSYNC]->optionType = ST_DEVICE_OPTION_ON_OFF;
-    ((StSDOnOff_t* )myOptions->options[DEVICE_OPTION_VSYNC])->value = myIsVSyncOn;
-    myOptions->options[DEVICE_OPTION_VSYNC]->title = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_PARAMETER_VSYNC, "VSync"));
+    params.IsVSyncOn = new StBoolParamNamed(true, aLangMap.changeValueId(STTR_PARAMETER_VSYNC, "VSync"));
+    params.IsVSyncOn->signals.onChanged.connect(this, &StOutDual::doVSync);
 
     // Slave Monitor option
-    StArrayList<StMonitor> aMonitors = StCore::getStMonitors();
-    myOptions->options[DEVICE_OPTION_SLAVEID] = (StSDOption_t* )StWindow::memAlloc(sizeof(StSDSwitch_t));
-    myOptions->options[DEVICE_OPTION_SLAVEID]->title = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_PARAMETER_SLAVE_ID, "Slave Monitor"));
-    myOptions->options[DEVICE_OPTION_SLAVEID]->optionType = ST_DEVICE_OPTION_SWITCH;
-    StSDSwitch_t* aSwitchSlaveID = ((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_SLAVEID]);
-    aSwitchSlaveID->value        = mySlaveMonId;
-    aSwitchSlaveID->valuesCount  = stMax(aMonitors.size(), size_t(2), size_t(mySlaveMonId + 1));
-    aSwitchSlaveID->valuesTitles = (stUtf8_t** )StWindow::memAlloc(aSwitchSlaveID->valuesCount * sizeof(stUtf8_t*));
-    for(size_t aMonId = 0; aMonId < aSwitchSlaveID->valuesCount; ++aMonId) {
+    StHandle<StEnumParam> aSlaveMon = new StEnumParam(1, aLangMap.changeValueId(STTR_PARAMETER_SLAVE_ID, "Slave Monitor"));
+    mySettings->loadParam(ST_SETTING_SLAVE_ID, aSlaveMon);
+    size_t aMonCount = stMax(aMonitors.size(), size_t(2), size_t(aSlaveMon->getValue() + 1));
+    for(size_t aMonId = 0; aMonId < aMonCount; ++aMonId) {
         StString aName = StString("Monitor #") + aMonId;
         if(aMonId < aMonitors.size()) {
             aName += " (" + aMonitors[aMonId].getName() + ")";
         } else {
             aName += " (disconnected)";
         }
-        aSwitchSlaveID->valuesTitles[aMonId] = StWindow::memAllocNCopy(aName);
+        aSlaveMon->changeValues().add(aName);
     }
+    aSlaveMon->signals.onChanged.connect(this, &StOutDual::doSlaveMon);
+    params.SlaveMonId = aSlaveMon;
+
+    // load window position
+    StRect<int32_t> aRect(256, 768, 256, 1024);
+    mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
+    StWindow::setPlacement(aRect, true);
+    StWindow::setTitle("sView - Dual Renderer");
+
+    // load VSync option
+    mySettings->loadParam(ST_SETTING_VSYNC, params.IsVSyncOn);
+
+    // load device settings
+    int32_t aDevice = myDevice;
+    mySettings->loadInt32(ST_SETTING_DEVICE_ID, aDevice);
+    myDevice = (DeviceEnum )aDevice;
+    if(myDevice == DEVICE_AUTO) {
+        myDevice = DUALMODE_SIMPLE;
+    }
+
+    // request slave window
+    StWinAttributes_t anAttribs = stDefaultWinAttributes();
+    StWindow::getAttributes(anAttribs);
+    anAttribs.isSlave    = true;
+    anAttribs.slaveMonId = int8_t(params.SlaveMonId->getValue());
+    StWindow::setAttributes(anAttribs);
+
+    replaceDualAttribute(DUALMODE_SIMPLE, myDevice);
 }
 
-StAtomic<int32_t> StOutDual::myInstancesNb(0);
+void StOutDual::releaseResources() {
+    if(!myContext.isNull()) {
+        myProgram->release(*myContext);
+        myVertFlatBuf.release(*myContext);
+        myVertXMirBuf.release(*myContext);
+        myVertYMirBuf.release(*myContext);
+        myTexCoordBuf.release(*myContext);
+        myFrBuffer->release(*myContext);
+    }
+    myContext.nullify();
 
-StOutDual::StOutDual()
-: myProgram(new StProgramMM()),
-  myOptions(NULL),
-  myDevice(DEVICE_AUTO),
-  mySlaveMonId(1),
-  myToSavePlacement(true),
-  myIsVSyncOn(true),
-  myToCompressMem(myInstancesNb.increment() > 1),
-  myIsBroken(false) {
-    myFrBuffer = new StGLFrameBuffer();
+    // read windowed placement
+    StWindow::hide();
+    if(myToSavePlacement) {
+        StWindow::setFullScreen(false);
+        mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
+    }
+    mySettings->saveParam(ST_SETTING_SLAVE_ID,  params.SlaveMonId);
+    mySettings->saveParam(ST_SETTING_VSYNC,     params.IsVSyncOn);
+    mySettings->saveInt32(ST_SETTING_DEVICE_ID, myDevice);
 }
 
 StOutDual::~StOutDual() {
     myInstancesNb.decrement();
-    if(!myStCore.isNull() && !mySettings.isNull()) {
-        if(!myContext.isNull()) {
-            myProgram->release(*myContext);
-            myVertFlatBuf.release(*myContext);
-            myVertXMirBuf.release(*myContext);
-            myVertYMirBuf.release(*myContext);
-            myTexCoordBuf.release(*myContext);
-            myFrBuffer->release(*myContext);
-        }
-        stMemFree(myOptions, StWindow::memFree);
-
-        // read windowed placement
-        getStWindow()->hide(ST_WIN_MASTER);
-        getStWindow()->hide(ST_WIN_SLAVE);
-        if(myToSavePlacement) {
-            getStWindow()->setFullScreen(false);
-            mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, getStWindow()->getPlacement());
-        }
-        mySettings->saveInt32(ST_SETTING_SLAVE_ID,       mySlaveMonId);
-        mySettings->saveBool (ST_SETTING_VSYNC,          myIsVSyncOn);
-        mySettings->saveInt32(ST_SETTING_DEVICE_ID,      myDevice);
-    }
-    mySettings.nullify();
-    myStCore.nullify();
-    StCore::FREE();
+    releaseResources();
 }
 
-bool StOutDual::init(const StString&     theRendererPath,
-                     const int&          theDeviceId,
-                     const StNativeWin_t theNativeParent) {
-    myToSavePlacement = (theNativeParent == (StNativeWin_t )NULL);
-    myDevice = (DeviceEnum )theDeviceId;
-    myPluginPath = theRendererPath;
-    if(!StVersionInfo::checkTimeBomb("sView - Dual Output plugin")) {
+void StOutDual::close() {
+    releaseResources();
+    StWindow::close();
+}
+
+bool StOutDual::create() {
+    StWindow::show();
+    if(!StWindow::create()) {
         return false;
     }
-    ST_DEBUG_LOG_AT("INIT Dual output plugin");
-    // Firstly INIT core library!
-    if(StCore::INIT() != STERROR_LIBNOERROR) {
-        stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Core library not available!");
-        return false;
-    }
-
-    // INIT settings library
-    mySettings = new StSettings(ST_OUT_PLUGIN_NAME);
-    myStCore   = new StCore();
-
-    // load window position
-    StRect<int32_t> loadedRect(256, 768, 256, 1024);
-    mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, loadedRect);
-    StMonitor stMonitor = StCore::getMonitorFromPoint(loadedRect.center());
-    if(!stMonitor.getVRect().isPointIn(loadedRect.center())) {
-        ST_DEBUG_LOG("Warning, stored window position is out of the monitor(" + stMonitor.getId() + ")!" + loadedRect.toString());
-        int w = loadedRect.width();
-        int h = loadedRect.height();
-        loadedRect.left() = stMonitor.getVRect().left() + 256;
-        loadedRect.right() = loadedRect.left() + w;
-        loadedRect.top() = stMonitor.getVRect().top() + 256;
-        loadedRect.bottom() = loadedRect.top() + h;
-    }
-    getStWindow()->setPlacement(loadedRect);
-
-    mySettings->loadBool(ST_SETTING_VSYNC, myIsVSyncOn);
-
-    // load device settings
-    if(myDevice == DEVICE_AUTO) {
-        int32_t aDevice = myDevice;
-        mySettings->loadInt32(ST_SETTING_DEVICE_ID, aDevice);
-        myDevice = (DeviceEnum )aDevice;
-        if(myDevice == DEVICE_AUTO) {
-            myDevice = DUALMODE_SIMPLE;
-        }
-    }
-    mySettings->loadInt32(ST_SETTING_SLAVE_ID, mySlaveMonId);
-
-    // allocate and setup the structure pointer
-    optionsStructAlloc();
-    getStWindow()->setValue(ST_WIN_DATAKEYS_RENDERER, (size_t )myOptions);
-
-    // create our window!
-    getStWindow()->setTitle("sView - Dual Renderer plugin");
-    StWinAttributes_t attribs = stDefaultWinAttributes();
-    attribs.isSlave = true;
-    attribs.slaveMonId = int8_t(mySlaveMonId);
-    getStWindow()->stglCreate(&attribs, theNativeParent);
-    replaceDualAttribute(DUALMODE_SIMPLE, myDevice);
 
     // initialize GL context
     myContext = new StGLContext();
@@ -301,11 +333,8 @@ bool StOutDual::init(const StString&     theRendererPath,
         return false;
     }
 
-    getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-    if(!myContext->stglSetVSync(myIsVSyncOn ? StGLContext::VSync_ON : StGLContext::VSync_OFF)) {
-        // enable/disable VSync by config
-        ST_DEBUG_LOG(ST_OUT_PLUGIN_NAME + " Plugin, VSync extension not available!");
-    }
+    StWindow::stglMakeCurrent(ST_WIN_MASTER);
+    myContext->stglSetVSync(params.IsVSyncOn->getValue() ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
 
     if(!myProgram->init(*myContext)) {
         stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init Shader");
@@ -346,65 +375,34 @@ bool StOutDual::init(const StString&     theRendererPath,
     return true;
 }
 
-void StOutDual::callback(StMessage_t* stMessages) {
-    myStCore->callback(stMessages);
-    for(size_t i = 0; stMessages[i].uin != StMessageList::MSG_NULL; ++i) {
-        switch(stMessages[i].uin) {
-            case StMessageList::MSG_KEYS: {
-                bool* keysMap = ((bool* )stMessages[i].data);
-                if(keysMap[ST_VK_F1]) {
-                    replaceDualAttribute(myDevice, DUALMODE_SIMPLE);
-                    keysMap[ST_VK_F1] = false;
-                } else if(keysMap[ST_VK_F2]) {
-                    replaceDualAttribute(myDevice, DUALMODE_XMIRROW);
-                    keysMap[ST_VK_F2] = false;
-                } else if(keysMap[ST_VK_F3]) {
-                    replaceDualAttribute(myDevice, DUALMODE_YMIRROW);
-                    keysMap[ST_VK_F3] = false;
-                }
-                break;
-            }
-            case StMessageList::MSG_DEVICE_INFO: {
-                if(myOptions->curDeviceId != myDevice) {
-                    StString newPluginPath(myOptions->curRendererPath);
-                    if(newPluginPath == myPluginPath) {
-                        replaceDualAttribute(myDevice, (DeviceEnum )myOptions->curDeviceId);
-                        stMessages[i].uin = StMessageList::MSG_NONE;
-                    } // else - another plugin
-                }
-                break;
-            }
-            case StMessageList::MSG_DEVICE_OPTION: {
-                bool newVSync = ((StSDOnOff_t* )myOptions->options[DEVICE_OPTION_VSYNC])->value;
-                if(newVSync != myIsVSyncOn) {
-                    myIsVSyncOn = newVSync;
-                    getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-                    myContext->stglSetVSync(myIsVSyncOn ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
-                }
+void StOutDual::processEvents(StMessage_t* theMessages) {
+    StWindow::processEvents(theMessages);
+    for(size_t anIter = 0; theMessages[anIter].uin != StMessageList::MSG_NULL; ++anIter) {
+        if(theMessages[anIter].uin != StMessageList::MSG_KEYS) {
+            continue;
+        }
 
-                mySlaveMonId = (int32_t )(((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_SLAVEID])->value);
-
-                StWinAttributes_t anAttribs = stDefaultWinAttributes();
-                getStWindow()->getAttributes(&anAttribs);
-                StWinAttributes_t anOrigAttribs = anAttribs;
-                anAttribs.slaveMonId = int8_t(mySlaveMonId);
-                if(!areSame(&anOrigAttribs, &anAttribs)) {
-                    getStWindow()->setAttributes(&anAttribs);
-                }
-
-                break;
-            }
+        bool* aKeys = ((bool* )theMessages[anIter].data);
+        if(aKeys[ST_VK_F1]) {
+            replaceDualAttribute(myDevice, DUALMODE_SIMPLE);
+            aKeys[ST_VK_F1] = false;
+        } else if(aKeys[ST_VK_F2]) {
+            replaceDualAttribute(myDevice, DUALMODE_XMIRROW);
+            aKeys[ST_VK_F2] = false;
+        } else if(aKeys[ST_VK_F3]) {
+            replaceDualAttribute(myDevice, DUALMODE_YMIRROW);
+            aKeys[ST_VK_F3] = false;
         }
     }
 }
 
-void StOutDual::stglDraw(unsigned int ) {
-    myFPSControl.setTargetFPS(getStWindow()->stglGetTargetFps());
+void StOutDual::stglDraw() {
+    myFPSControl.setTargetFPS(StWindow::getTargetFps());
 
-    const StGLBoxPx aVPMaster = getStWindow()->stglViewport(ST_WIN_MASTER);
-    const StGLBoxPx aVPSlave  = getStWindow()->stglViewport(ST_WIN_SLAVE);
-    if(!getStWindow()->isStereoOutput() || myIsBroken) {
-        getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
+    const StGLBoxPx aVPMaster = StWindow::stglViewport(ST_WIN_MASTER);
+    const StGLBoxPx aVPSlave  = StWindow::stglViewport(ST_WIN_SLAVE);
+    if(!StWindow::isStereoOutput() || myIsBroken) {
+        StWindow::stglMakeCurrent(ST_WIN_MASTER);
 
         if(myToCompressMem) {
             myFrBuffer->release(*myContext);
@@ -412,33 +410,33 @@ void StOutDual::stglDraw(unsigned int ) {
 
         myContext->stglResizeViewport(aVPMaster);
         myContext->stglSetScissorRect(aVPMaster, false);
-        myStCore->stglDraw(ST_DRAW_LEFT);
+        StWindow::signals.onRedraw(ST_DRAW_LEFT);
         myContext->stglResetScissorRect();
 
         // TODO (Kirill Gavrilov#4#) we could do this once
-        getStWindow()->stglMakeCurrent(ST_WIN_SLAVE);
+        StWindow::stglMakeCurrent(ST_WIN_SLAVE);
         myContext->stglResizeViewport(aVPSlave);
         myContext->stglSetScissorRect(aVPSlave, false);
         myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         myContext->stglResetScissorRect();
 
         myFPSControl.sleepToTarget(); // decrease FPS to target by thread sleeps
-        getStWindow()->stglSwap(ST_WIN_ALL);
+        StWindow::stglSwap(ST_WIN_ALL);
         ++myFPSControl;
         return;
     }
 
-    getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
+    StWindow::stglMakeCurrent(ST_WIN_MASTER);
     if(myDevice == DUALMODE_SIMPLE) {
         myContext->stglResizeViewport(aVPMaster);
         myContext->stglSetScissorRect(aVPMaster, false);
-        myStCore->stglDraw(ST_DRAW_LEFT);
+        StWindow::signals.onRedraw(ST_DRAW_LEFT);
         myContext->stglResetScissorRect();
 
-        getStWindow()->stglMakeCurrent(ST_WIN_SLAVE);
+        StWindow::stglMakeCurrent(ST_WIN_SLAVE);
         myContext->stglResizeViewport(aVPSlave);
         myContext->stglSetScissorRect(aVPSlave, false);
-        myStCore->stglDraw(ST_DRAW_RIGHT);
+        StWindow::signals.onRedraw(ST_DRAW_RIGHT);
         myContext->stglResetScissorRect();
     } else {
         // resize FBO
@@ -461,7 +459,7 @@ void StOutDual::stglDraw(unsigned int ) {
         // draw Left View into virtual frame buffer
         myFrBuffer->setupViewPort(*myContext); // we set TEXTURE sizes here
         myFrBuffer->bindBuffer(*myContext);
-            myStCore->stglDraw(ST_DRAW_LEFT);
+            StWindow::signals.onRedraw(ST_DRAW_LEFT);
         myFrBuffer->unbindBuffer(*myContext);
 
         // now draw to real screen buffer
@@ -486,11 +484,11 @@ void StOutDual::stglDraw(unsigned int ) {
         // draw Right View into virtual frame buffer
         myFrBuffer->setupViewPort(*myContext); // we set TEXTURE sizes here
         myFrBuffer->bindBuffer(*myContext);
-            myStCore->stglDraw(ST_DRAW_RIGHT);
+            StWindow::signals.onRedraw(ST_DRAW_RIGHT);
         myFrBuffer->unbindBuffer(*myContext);
 
         // clear the screen and the depth buffer
-        getStWindow()->stglMakeCurrent(ST_WIN_SLAVE);
+        StWindow::stglMakeCurrent(ST_WIN_SLAVE);
         myContext->stglResizeViewport(aVPSlave);
         myContext->stglSetScissorRect(aVPSlave, false);
         myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -521,88 +519,24 @@ void StOutDual::stglDraw(unsigned int ) {
         myContext->stglResetScissorRect();
     }
     myFPSControl.sleepToTarget(); // decrease FPS to target by thread sleeps
-    getStWindow()->stglSwap(ST_WIN_ALL);
+    StWindow::stglSwap(ST_WIN_ALL);
     ++myFPSControl;
     // make sure all GL changes in callback (in StDrawer) will fine
-    getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
+    StWindow::stglMakeCurrent(ST_WIN_MASTER);
 }
 
-// SDK version was used
-ST_EXPORT void getSDKVersion(StVersion* ver) {
-    *ver = StVersionInfo::getSDKVersion();
-}
-
-// plugin version
-ST_EXPORT void getPluginVersion(StVersion* ver) {
-    *ver = StVersionInfo::getSDKVersion();
-}
-
-ST_EXPORT const StRendererInfo_t* getDevicesInfo(const stBool_t theToDetectPriority) {
-    static StRendererInfo_t ST_SELF_INFO = { NULL, NULL, NULL, 0 };
-    if(ST_SELF_INFO.devices != NULL) {
-        return &ST_SELF_INFO;
+void StOutDual::doVSync(const bool theValue) {
+    if(myContext.isNull()) {
+        return;
     }
 
-    StTranslations aLangMap(ST_OUT_PLUGIN_NAME);
-
-    // detect connected displays
-    int supportLevel = ST_DEVICE_SUPPORT_NONE;
-    if(theToDetectPriority) {
-        if(StCore::INIT() != STERROR_LIBNOERROR) {
-            ST_DEBUG_LOG(ST_OUT_PLUGIN_NAME + " Plugin, Core library not available!");
-        } else {
-            StArrayList<StMonitor> stMonitors = StCore::getStMonitors();
-            if(stMonitors.size() >= 2) {
-                const StMonitor& mon0 = stMonitors[0];
-                const StMonitor& mon1 = stMonitors[1];
-                if(   mon0.getVRect().width()  == mon1.getVRect().width()
-                   && mon0.getVRect().height() == mon1.getVRect().height()
-                   && mon0.getFreq() == mon1.getFreq()) {
-                    supportLevel = ST_DEVICE_SUPPORT_HIGHT;
-                }
-            }
-            StCore::FREE();
-        }
-    }
-
-    // devices list
-    static StString aDualName   = aLangMap.changeValueId(STTR_DUAL_NAME,   "Dual Output");
-    static StString aDualDesc   = aLangMap.changeValueId(STTR_DUAL_DESC,   "Stereo-device with dual input: some HMD, Mirrored Stereo monitors, Dual-Projectors");
-    static StString aMirrorName = aLangMap.changeValueId(STTR_MIRROR_NAME, "Mirror Output");
-    static StString aMirrorDesc = aLangMap.changeValueId(STTR_MIRROR_DESC, "Hand-make Mirrored Stereo monitors (mirror in X-direction)");
-    static StStereoDeviceInfo_t aDevicesArray[2] = {
-        { "StOutDual",    aDualName.toCString(),   aDualDesc.toCString(),   supportLevel },
-        { "StOutMirrorX", aMirrorName.toCString(), aMirrorDesc.toCString(), supportLevel }
-    };
-    ST_SELF_INFO.devices = &aDevicesArray[0];
-    ST_SELF_INFO.count   = 2;
-
-    // about string
-    StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - Dual Output module");
-    StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
-    StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
-        "(C) 2007-2013 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0");
-    static StString anAboutString = aTitle + '\n' + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr;
-    ST_SELF_INFO.aboutString = (stUtf8_t* )anAboutString.toCString();
-
-    return &ST_SELF_INFO;
+    StWindow::stglMakeCurrent(ST_WIN_MASTER);
+    myContext->stglSetVSync(theValue ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
 }
 
-ST_EXPORT StRendererInterface* StRenderer_new() {
-    return new StOutDual(); }
-ST_EXPORT void StRenderer_del(StRendererInterface* inst) {
-    delete (StOutDual* )inst; }
-ST_EXPORT StWindowInterface* StRenderer_getStWindow(StRendererInterface* inst) {
-    // This is VERY important return libImpl pointer here!
-    return ((StOutDual* )inst)->getStWindow()->getLibImpl(); }
-ST_EXPORT stBool_t StRenderer_init(StRendererInterface* inst,
-                                   const stUtf8_t*      theRendererPath,
-                                   const int&           theDeviceId,
-                                   const StNativeWin_t  theNativeParent) {
-    return ((StOutDual* )inst)->init(StString(theRendererPath), theDeviceId, theNativeParent); }
-ST_EXPORT stBool_t StRenderer_open(StRendererInterface* inst, const StOpenInfo_t* stOpenInfo) {
-    return ((StOutDual* )inst)->open(StOpenInfo(stOpenInfo)); }
-ST_EXPORT void StRenderer_callback(StRendererInterface* inst, StMessage_t* stMessages) {
-    ((StOutDual* )inst)->callback(stMessages); }
-ST_EXPORT void StRenderer_stglDraw(StRendererInterface* inst, unsigned int views) {
-    ((StOutDual* )inst)->stglDraw(views); }
+void StOutDual::doSlaveMon(const int32_t theValue) {
+    StWinAttributes_t anAttribs = stDefaultWinAttributes();
+    StWindow::getAttributes(anAttribs);
+    anAttribs.slaveMonId = int8_t(theValue);
+    StWindow::setAttributes(anAttribs);
+}

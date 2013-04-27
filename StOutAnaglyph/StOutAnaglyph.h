@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutAnaglyph library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -19,14 +19,77 @@
 #ifndef __StOutAnaglyph_h_
 #define __StOutAnaglyph_h_
 
-#include <StCore/StCore.h>     // header for Stereo Output Core
+#include <StCore/StWindow.h>
 #include <StGLStereo/StGLStereoFrameBuffer.h>
 #include <StThreads/StFPSControl.h>
 
 class StSettings;
 class StGLContext;
 
-class ST_LOCAL StOutAnaglyph : public StRendererInterface {
+/**
+ * This class implements anaglyph stereoscopic rendering.
+ */
+class StOutAnaglyph : public StWindow {
+
+        public:
+
+    /**
+     * Main constructor.
+     */
+    ST_CPPEXPORT StOutAnaglyph(const StNativeWin_t theParentWindow);
+
+    /**
+     * Destructor.
+     */
+    ST_CPPEXPORT virtual ~StOutAnaglyph();
+
+    /**
+     * Renderer about string.
+     */
+    ST_CPPEXPORT virtual StString getRendererAbout() const;
+
+    /**
+     * Renderer id.
+     */
+    ST_CPPEXPORT virtual const char* getRendererId() const;
+
+    /**
+     * Active Device id.
+     */
+    ST_CPPEXPORT virtual const char* getDeviceId() const;
+
+    /**
+     * Devices list.
+     * This class supports only 1 device type - anaglyph glasses.
+     * Different glasses filters provided as device options.
+     */
+    ST_CPPEXPORT virtual void getDevices(StOutDevicesList& theList) const;
+
+    /**
+     * Retrieve options list.
+     */
+    ST_CPPEXPORT virtual void getOptions(StParamsList& theList) const;
+
+    /**
+     * Create and show window.
+     * @return false if any critical error appeared
+     */
+    ST_CPPEXPORT virtual bool create();
+
+    /**
+     * Close the window.
+     */
+    ST_CPPEXPORT virtual void close();
+
+    /**
+     * Process callback.
+     */
+    ST_CPPEXPORT virtual void processEvents(StMessage_t* theMessages);
+
+    /**
+     * Stereo renderer.
+     */
+    ST_CPPEXPORT virtual void stglDraw();
 
         private:
 
@@ -36,59 +99,62 @@ class ST_LOCAL StOutAnaglyph : public StRendererInterface {
     };
 
     enum {
-        GLASSES_TYPE_REDCYAN = 0, // Red-Cyan glasses (R + GB)
-        GLASSES_TYPE_YELLOW  = 1, // Yellow glasses (RG + B)
-        GLASSES_TYPE_GREEN   = 2, // Green-Magenta glasses (G + RB)
+        GLASSES_TYPE_REDCYAN  = 0, //!< Red-Cyan glasses (R + GB)
+        GLASSES_TYPE_YELLOW   = 1, //!< Yellow glasses (RG + B)
+        GLASSES_TYPE_GREEN    = 2, //!< Green-Magenta glasses (G + RB)
     };
 
     enum {
-        REDCYAN_MODE_SIMPLE = 0, // simple Red-Cyan anaglyph
-        REDCYAN_MODE_OPTIM  = 1, // optimized Red-Cyan anaglyph
-        REDCYAN_MODE_GRAY   = 2, // grayed Red-Cyan anaglyph
-        REDCYAN_MODE_DARK   = 3, // dark Red-Cyan anaglyph
+        REDCYAN_MODE_SIMPLE   = 0, //!< simple Red-Cyan anaglyph
+        REDCYAN_MODE_OPTIM    = 1, //!< optimized Red-Cyan anaglyph
+        REDCYAN_MODE_GRAY     = 2, //!< grayed Red-Cyan anaglyph
+        REDCYAN_MODE_DARK     = 3, //!< dark Red-Cyan anaglyph
     };
 
     enum {
-        AMBERBLUE_MODE_SIMPLE = 0, // simple Amber-Blue anaglyph
-        AMBERBLUE_MODE_DUBOIS = 1, // optimized Amber-Blue anaglyph
-    };
-
-    enum {
-        DEVICE_OPTION_VSYNC   = 0,
-        DEVICE_OPTION_GLASSES = 1,
-        DEVICE_OPTION_REDCYAN = 2,
-        DEVICE_OPTION_YELLOW  = 3,
+        AMBERBLUE_MODE_SIMPLE = 0, //!< simple Amber-Blue anaglyph
+        AMBERBLUE_MODE_DUBOIS = 1, //!< optimized Amber-Blue anaglyph
     };
 
         private:
 
-    void setShader(const int theGlasses,
-                   const int theOptionRedCyan,
-                   const int theOptionAmberBlue);
-    void optionsStructAlloc();
+    /**
+     * Switch anaglyph program.
+     */
+    ST_LOCAL void doSetShader(const int32_t );
 
-        public:
+    /**
+     * On/off VSync callback.
+     */
+    ST_LOCAL void doVSync(const bool theValue);
 
-    StOutAnaglyph();
-    ~StOutAnaglyph();
-    StRendererInterface* getLibImpl() { return this; }
-    StWindowInterface* getStWindow() { return myStCore->getStWindow(); }
-    bool init(const StString& , const int& , const StNativeWin_t );
-    bool open(const StOpenInfo& stOpenInfo) { return myStCore->open(stOpenInfo); }
-    void callback(StMessage_t* );
-    void stglDraw(unsigned int );
+    /**
+     * Release GL resources before window closing.
+     */
+    ST_LOCAL void releaseResources();
 
         private:
 
-    static StAtomic<int32_t>        myInstancesNb;          //!< shared counter for all instances
+    static StAtomic<int32_t> myInstancesNb; //!< shared counter for all instances
+
+        private:
+
+    struct {
+
+        StHandle<StBoolParam>  IsVSyncOn; //!< flag to use VSync
+        StHandle<StInt32Param> Glasses;   //!< glasses type
+        StHandle<StInt32Param> RedCyan;   //!< Red-Cyan   filter
+        StHandle<StInt32Param> AmberBlue; //!< Amber-Blue filter
+
+    } params;
 
         private:
 
     typedef StGLStereoFrameBuffer::StGLStereoProgram StStereoProgram_t;
 
-    StHandle<StCore>                myStCore;
+    StOutDevicesList                myDevices;
     StHandle<StSettings>            mySettings;
-    StString                        myPluginPath;
+    StString                        myAbout;                //!< about string
 
     StHandle<StGLContext>           myContext;
     StHandle<StGLStereoFrameBuffer> myFrBuffer;
@@ -100,15 +166,9 @@ class ST_LOCAL StOutAnaglyph : public StRendererInterface {
     StStereoProgram_t               myYellowAnaglyph;
     StStereoProgram_t               myYellowDubiosAnaglyph;
     StStereoProgram_t               myGreenAnaglyph;
-    int                             myGlasses;
-    int                             myOptionRedCyan;
-    int                             myOptionAmberBlue;
-
-    StSDOptionsList_t*              myOptions;
 
     StFPSControl                    myFPSControl;
     bool                            myToSavePlacement;
-    bool                            myIsVSyncOn;
     bool                            myToCompressMem;        //!< reduce memory usage
     bool                            myIsBroken;             //!< special flag for broke state - when FBO can not be allocated
 

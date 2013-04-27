@@ -24,12 +24,6 @@
 #include <StFile/StMIME.h>
 #include <StThreads/StProcess.h>
 
-typedef struct tagStOpenInfo {
-    stUtf8_t*   mime;
-    stUtf8_t*   path;
-    stUtf8_t*   args;
-} StOpenInfo_t;
-
 class StOpenInfo {
 
         private:
@@ -48,16 +42,6 @@ class StOpenInfo {
     : mime(),
       path(),
       args() {
-        //
-    }
-
-    /**
-     * Copy constructor from struct.
-     */
-    StOpenInfo(const StOpenInfo_t* openInfoStruct)
-    : mime(openInfoStruct->mime),
-      path(openInfoStruct->path),
-      args(openInfoStruct->args) {
         //
     }
 
@@ -120,26 +104,6 @@ class StOpenInfo {
 
     void setArgumentsMap(const StArgumentsMap& newArgsMap) {
         args = newArgsMap.toString();
-    }
-
-    /**
-     * Create a struct (to send open info from one to anothe module).
-     * Note - this struct is valid only while this class instance alive
-     * (struct stores just pointers).
-     */
-    const StOpenInfo_t getStruct() const {
-        const StOpenInfo_t openInfoStruct = {
-            (stUtf8_t* )mime.toCString(),
-            (stUtf8_t* )path.toCString(),
-            (stUtf8_t* )args.toCString(),
-        };
-        return openInfoStruct;
-    }
-
-    void set(const StOpenInfo_t* openInfoStruct) {
-        mime = StString(openInfoStruct->mime);
-        path = StString(openInfoStruct->path);
-        args = StString(openInfoStruct->args);
     }
 
 };

@@ -16,7 +16,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "StOutPageFlipExt.h"
+#include "StOutPageFlip.h"
 #include "StVuzixSDK.h"
 #include "StQuadBufferCheck.h"
 #include "StDXNVWindow.h"
@@ -26,7 +26,7 @@
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 #include <StGLStereo/StGLStereoFrameBuffer.h>
-#include <StCore/StWindow.h>
+#include <StCore/StSearchMonitors.h>
 #include <StSettings/StSettings.h>
 #include <StSettings/StTranslations.h>
 #include <StImage/StLibAVImage.h>
@@ -44,7 +44,7 @@ namespace {
 
 StOutPageFlip::StOutDirect3D::StOutDirect3D()
 : myGLBuffer(),
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
   myDxWindow(),
   myDxThread(),
 #endif
@@ -55,7 +55,7 @@ StOutPageFlip::StOutDirect3D::StOutDirect3D()
     //
 }
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
 SV_THREAD_FUNCTION StOutPageFlip::StOutDirect3D::dxThreadFunction(void* theStOutD3d) {
     StOutPageFlip::StOutDirect3D* aStOutD3d = (StOutPageFlip::StOutDirect3D* )theStOutD3d;
     aStOutD3d->myDxWindow->dxLoop();
@@ -63,109 +63,224 @@ SV_THREAD_FUNCTION StOutPageFlip::StOutDirect3D::dxThreadFunction(void* theStOut
 }
 #endif // _WIN32
 
-static StMonitor getHigestFreqMonitor() {
+static StMonitor getHigestFreqMonitor(const StSearchMonitors& theMonitors) {
     size_t hfreqMon = 0;
     int hfreqMax = 0;
-    StArrayList<StMonitor> aMonitors = StCore::getStMonitors();
-    for(size_t aMonIter = 0; aMonIter < aMonitors.size(); ++aMonIter) {
-        const StMonitor& aMon = aMonitors[aMonIter];
+    for(size_t aMonIter = 0; aMonIter < theMonitors.size(); ++aMonIter) {
+        const StMonitor& aMon = theMonitors[aMonIter];
         if(aMon.getFreqMax() > hfreqMax) {
             hfreqMax = aMon.getFreqMax();
             hfreqMon = aMonIter;
         }
     }
-    return !aMonitors.isEmpty() ? aMonitors[hfreqMon] : StMonitor();
+    return !theMonitors.isEmpty() ? theMonitors[hfreqMon] : StMonitor();
 }
 
-void StOutPageFlip::optionsStructAlloc() {
-    StTranslations aLangMap(ST_OUT_PLUGIN_NAME);
+StString StOutPageFlip::getRendererAbout() const {
+    return myAbout;
+}
 
-    // create device options structure
-    myOptions = (StSDOptionsList_t* )StWindow::memAlloc(sizeof(StSDOptionsList_t)); stMemSet(myOptions, 0, sizeof(StSDOptionsList_t));
-    myOptions->curRendererPath = StWindow::memAllocNCopy(myPluginPath);
-    myOptions->curDeviceId = myDevice;
+const char* StOutPageFlip::getRendererId() const {
+    return ST_OUT_PLUGIN_NAME;
+}
 
-    myOptions->optionsCount = myDeviceOptionsNb;
-    myOptions->options = (StSDOption_t** )StWindow::memAlloc(sizeof(StSDOption_t*) * myOptions->optionsCount);
-
-    // Show Extra option
-    myOptions->options[DEVICE_OPTION_EXTRA] = (StSDOption_t* )StWindow::memAlloc(sizeof(StSDOnOff_t));
-    myOptions->options[DEVICE_OPTION_EXTRA]->optionType = ST_DEVICE_OPTION_ON_OFF;
-    ((StSDOnOff_t* )myOptions->options[DEVICE_OPTION_EXTRA])->value = false;
-    myOptions->options[DEVICE_OPTION_EXTRA]->title = StWindow::memAllocNCopy("Show Extra Options");
-
-    // Quad Buffer type option
-    myOptions->options[DEVICE_OPTION_QUADBUFFER] = (StSDOption_t* )StWindow::memAlloc(sizeof(StSDSwitch_t));
-    myOptions->options[DEVICE_OPTION_QUADBUFFER]->title = StWindow::memAllocNCopy(aLangMap.changeValueId(STTR_PARAMETER_QBUFFER_TYPE, "Quad Buffer type"));
-    myOptions->options[DEVICE_OPTION_QUADBUFFER]->optionType = ST_DEVICE_OPTION_SWITCH;
-    StSDSwitch_t* aSwitchQB = ((StSDSwitch_t* )myOptions->options[DEVICE_OPTION_QUADBUFFER]);
-    aSwitchQB->value = myQuadBuffer;
-    aSwitchQB->valuesCount = myQuadBufferMax + 1;
-    aSwitchQB->valuesTitles = (stUtf8_t** )StWindow::memAlloc(aSwitchQB->valuesCount * sizeof(stUtf8_t*));
-    aSwitchQB->valuesTitles[QUADBUFFER_HARD_OPENGL] = StWindow::memAllocNCopy(aLangMap.changeValueId(STTR_PARAMETER_QB_HARDWARE, "OpenGL Hardware"));
-    StString aDxDesc;
-    if(myDxInfo.hasAqbsSupport && myDxInfo.hasNvStereoSupport) {
-        aDxDesc = aLangMap.changeValueId(STTR_PARAMETER_QB_D3D_ANY,     "Direct3D (Fullscreen)");
-    } else if(myDxInfo.hasAqbsSupport) {
-        aDxDesc = aLangMap.changeValueId(STTR_PARAMETER_QB_D3D_AMD,     "Direct3D AMD (Fullscreen)");
-    } else if(myDxInfo.hasNvStereoSupport) {
-        aDxDesc = aLangMap.changeValueId(STTR_PARAMETER_QB_D3D_NV,      "Direct3D NVIDIA (Fullscreen)");
-    } else if(myDxInfo.hasAmdAdapter) {
-        aDxDesc = aLangMap.changeValueId(STTR_PARAMETER_QB_D3D_AMD_OFF, "Direct3D AMD (Unavailable)");
-    } else if(myDxInfo.hasNvAdapter) {
-        aDxDesc = aLangMap.changeValueId(STTR_PARAMETER_QB_D3D_NV_OFF,  "Direct3D NVIDIA (Disabled)");
-    } else {
-        aDxDesc = aLangMap.changeValueId(STTR_PARAMETER_QB_D3D_OFF,     "Direct3D (Unavailable)");
+const char* StOutPageFlip::getDeviceId() const {
+    switch(myDevice) {
+        case DEVICE_VUZIX:    return "Vuzix";
+        case DEVICE_SHUTTERS:
+        default:              return "Shutters";
     }
-    aSwitchQB->valuesTitles[QUADBUFFER_HARD_D3D_ANY] = StWindow::memAllocNCopy(aDxDesc);
 }
 
-StOutPageFlip::StOutPageFlip(const StHandle<StSettings>& theSettings)
-: mySettings(theSettings),
-  myWinAttribs(stDefaultWinAttributes()),
-  myOptions(NULL),
+bool StOutPageFlip::isLostDevice() const {
+    return myToResetDevice;
+}
+
+bool StOutPageFlip::setDevice(const StString& theDevice) {
+    const int aPrevValue = myDevice;
+    if(theDevice == "Shutters") {
+        myDevice = DEVICE_SHUTTERS;
+    } else if(theDevice == "Vuzix") {
+        myDevice = DEVICE_VUZIX;
+    }
+    return myDevice != aPrevValue;
+}
+
+void StOutPageFlip::getDevices(StOutDevicesList& theList) const {
+    for(size_t anIter = 0; anIter < myDevices.size(); ++anIter) {
+        theList.add(myDevices[anIter]);
+    }
+}
+
+void StOutPageFlip::getOptions(StParamsList& theList) const {
+    theList.add(params.QuadBuffer);
+    theList.add(params.ToShowExtra);
+}
+
+StOutPageFlip::StOutPageFlip(const StNativeWin_t theParentWindow)
+: StWindow(theParentWindow),
+  mySettings(new StSettings(ST_OUT_PLUGIN_NAME)),
+  myLangMap(ST_OUT_PLUGIN_NAME),
   myDevice(DEVICE_AUTO),
-  myDeviceOptionsNb(DEVICE_OPTION_QUADBUFFER + 1),
-  myQuadBuffer(QUADBUFFER_AUTO),
-  myQuadBufferMax(QUADBUFFER_HARD_D3D_ANY),
-  myFPSControl(),
-  myToSavePlacement(true),
+  myToSavePlacement(theParentWindow == (StNativeWin_t )NULL),
   myToDrawStereo(false),
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
   myIsVistaPlus(StSys::isVistaPlus()),
 #endif
-  myOutD3d() {
-    //
+  myToResetDevice(false) {
+    const StSearchMonitors& aMonitors = StWindow::getMonitors();
+
+    // about string
+    StString& aTitle     = myLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - PageFlip Output module");
+    StString& aVerString = myLangMap.changeValueId(STTR_VERSION_STRING, "version");
+    StString& aDescr     = myLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
+        "(C) 2007-2013 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0");
+    myAbout = aTitle + '\n' + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr;
+
+    // detect connected displays
+    int aSupportLevelShutters = ST_DEVICE_SUPPORT_NONE;
+    int aSupportLevelVuzix    = StVuzixSDK::isConnected(aMonitors) ? ST_DEVICE_SUPPORT_PREFER : ST_DEVICE_SUPPORT_NONE;
+    const StMonitor aMon = getHigestFreqMonitor(aMonitors);
+    if(aMon.getFreqMax() >= 110) {
+        aSupportLevelShutters = ST_DEVICE_SUPPORT_HIGHT;
+    }
+#ifndef __APPLE__
+    // actually almost always available on mac but... is it useful?
+    if(testQuadBufferSupportThreaded()) {
+        aSupportLevelShutters = ST_DEVICE_SUPPORT_FULL;
+    }
+#endif
+
+#ifdef _WIN32
+    StDXInfo aDxInfo;
+    if(aSupportLevelShutters != ST_DEVICE_SUPPORT_FULL
+    && StDXManager::getInfoThreaded(aDxInfo)
+    && (aDxInfo.hasNvStereoSupport || aDxInfo.hasAqbsSupport)) {
+        // if user enable NVIDIA stereo driver - we prefer use it for shutters
+        aSupportLevelShutters = ST_DEVICE_SUPPORT_FULL;
+    }
+#endif
+
+    // devices list
+    StHandle<StOutDevice> aDevShutters = new StOutDevice();
+    aDevShutters->PluginId = ST_OUT_PLUGIN_NAME;
+    aDevShutters->DeviceId = "Shutters";
+    aDevShutters->Priority = aSupportLevelShutters;
+    aDevShutters->Name     = myLangMap.changeValueId(STTR_PAGEFLIP_NAME, "Shutter glasses");
+    aDevShutters->Desc     = myLangMap.changeValueId(STTR_PAGEFLIP_DESC, "Shutter glasses");
+    myDevices.add(aDevShutters);
+
+    StHandle<StOutDevice> aDevVuzix = new StOutDevice();
+    aDevVuzix->PluginId = ST_OUT_PLUGIN_NAME;
+    aDevVuzix->DeviceId = "Vuzix";
+    aDevVuzix->Priority = aSupportLevelVuzix;
+    aDevVuzix->Name     = myLangMap.changeValueId(STTR_VUZIX_NAME, "Vuzix HMD");
+    aDevVuzix->Desc     = myLangMap.changeValueId(STTR_VUZIX_DESC, "Vuzix HMD");
+    myDevices.add(aDevVuzix);
+
+    // load window position
+    StRect<int32_t> aRect(256, 768, 256, 1024);
+    if(mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect)) {
+        StMonitor aMonitor = aMonitors[aRect.center()];
+        if(!aMonitor.getVRect().isPointIn(aRect.center())) {
+            ST_DEBUG_LOG("Warning, stored window position is out of the monitor(" + aMonitor.getId() + ")!" + aRect.toString());
+            const int aWidth  = aRect.width();
+            const int aHeight = aRect.height();
+            aRect.left()   = aMonitor.getVRect().left() + 256;
+            aRect.right()  = aRect.left() + aWidth;
+            aRect.top()    = aMonitor.getVRect().top() + 256;
+            aRect.bottom() = aRect.top() + aHeight;
+        }
+    } else {
+        // try to open window on display with highest frequency
+        aRect = aMon.getVRect();
+        aRect.left()   = aRect.left() + 256;
+        aRect.right()  = aRect.left() + 1024;
+        aRect.top()    = aRect.top()  + 256;
+        aRect.bottom() = aRect.top()  + 512;
+    }
+    StWindow::setPlacement(aRect);
+
+    // load device settings
+    int aDeviceInt = int(myDevice);
+    mySettings->loadInt32(ST_SETTING_DEVICE_ID, aDeviceInt);
+    if(aDeviceInt == DEVICE_AUTO) {
+        myDevice = DEVICE_SHUTTERS;
+    } else {
+        myDevice = DeviceEnum(aDeviceInt);
+    }
+
+#ifdef _WIN32
+    StDXManager::getInfo(myDxInfo);
+#endif
+
+    // Quad Buffer type option
+    params.QuadBuffer = new StEnumParam(0, myLangMap.changeValueId(STTR_PARAMETER_QBUFFER_TYPE, "Quad Buffer type"));
+    params.QuadBuffer->signals.onChanged.connect(this, &StOutPageFlip::doSetQuadBuffer);
+    params.QuadBuffer->changeValues().add(myLangMap.changeValueId(STTR_PARAMETER_QB_HARDWARE, "OpenGL Hardware"));
+    StString aDxDesc;
+    if(myDxInfo.hasAqbsSupport && myDxInfo.hasNvStereoSupport) {
+        aDxDesc = myLangMap.changeValueId(STTR_PARAMETER_QB_D3D_ANY,     "Direct3D (Fullscreen)");
+    } else if(myDxInfo.hasAqbsSupport) {
+        aDxDesc = myLangMap.changeValueId(STTR_PARAMETER_QB_D3D_AMD,     "Direct3D AMD (Fullscreen)");
+    } else if(myDxInfo.hasNvStereoSupport) {
+        aDxDesc = myLangMap.changeValueId(STTR_PARAMETER_QB_D3D_NV,      "Direct3D NVIDIA (Fullscreen)");
+    } else if(myDxInfo.hasAmdAdapter) {
+        aDxDesc = myLangMap.changeValueId(STTR_PARAMETER_QB_D3D_AMD_OFF, "Direct3D AMD (Unavailable)");
+    } else if(myDxInfo.hasNvAdapter) {
+        aDxDesc = myLangMap.changeValueId(STTR_PARAMETER_QB_D3D_NV_OFF,  "Direct3D NVIDIA (Disabled)");
+    } else {
+        aDxDesc = myLangMap.changeValueId(STTR_PARAMETER_QB_D3D_OFF,     "Direct3D (Unavailable)");
+    }
+    params.QuadBuffer->changeValues().add(aDxDesc);
+
+    // Show Extra option
+    params.ToShowExtra = new StBoolParamNamed(false, "Show Extra Options");
+    params.ToShowExtra->signals.onChanged.connect(this, &StOutPageFlip::doShowExtra);
+    mySettings->loadParam(ST_SETTING_ADVANCED, params.ToShowExtra);
+
+    // load Quad Buffer type
+    if(!mySettings->loadParam(ST_SETTING_QUADBUFFER, params.QuadBuffer)) {
+        params.QuadBuffer->setValue((aSupportLevelShutters == ST_DEVICE_SUPPORT_FULL) ? QUADBUFFER_HARD_OPENGL : QUADBUFFER_HARD_D3D_ANY);
+    }
+    myToResetDevice = false;
 }
 
-StOutPageFlip::~StOutPageFlip() {
+void StOutPageFlip::releaseResources() {
     if(!myWarning.isNull()) {
         myWarning->release(*myContext);
         myWarning.nullify();
     }
 
     dxRelease();
-    if(!myStCore.isNull() && !mySettings.isNull()) {
-        stMemFree(myOptions, StWindow::memFree);
-
-        // read windowed placement
-        getStWindow()->hide(ST_WIN_MASTER);
-        if(myToSavePlacement) {
-            getStWindow()->setFullScreen(false);
-            mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, getStWindow()->getPlacement());
-        }
-        mySettings->saveInt32(ST_SETTING_DEVICE_ID,  myDevice);
-        mySettings->saveInt32(ST_SETTING_QUADBUFFER, myQuadBuffer);
-    }
+    myContext.nullify();
     myVuzixSDK.nullify();
-    myStCore.nullify();
-    StCore::FREE();
+
+    // read windowed placement
+    StWindow::hide();
+    if(myToSavePlacement) {
+        StWindow::setFullScreen(false);
+        mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
+    }
+    mySettings->saveInt32(ST_SETTING_DEVICE_ID,  myDevice);
+    mySettings->saveParam(ST_SETTING_QUADBUFFER, params.QuadBuffer);
+    mySettings->saveParam(ST_SETTING_ADVANCED,   params.ToShowExtra);
+}
+
+StOutPageFlip::~StOutPageFlip() {
+    releaseResources();
+}
+
+void StOutPageFlip::close() {
+    myToResetDevice = false;
+    releaseResources();
+    StWindow::close();
 }
 
 void StOutPageFlip::setupDevice() {
     switch(myDevice) {
         case DEVICE_VUZIX: {
-            if(!StVuzixSDK::isConnected()) {
+            if(!StVuzixSDK::isConnected(StWindow::getMonitors())) {
                 stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Vuzix HMD Not Found!");
                 break;
             } else if(myVuzixSDK.isNull()) {
@@ -183,17 +298,14 @@ void StOutPageFlip::setupDevice() {
             break;
         }
     }
-    if(myOptions != NULL) {
-        myOptions->curDeviceId = myDevice;
-    }
 }
 
 bool StOutPageFlip::dxInit() {
     dxRelease();
     myOutD3d.myIsActive = false;
     myOutD3d.myActivateStep = 0;
-#if(defined(_WIN32) || defined(__WIN32__))
-    StMonitor aNvMonitor = StCore::getMonitorFromPoint(getStWindow()->getPlacement().center());
+#ifdef _WIN32
+    StMonitor aNvMonitor = StCore::getMonitorFromPoint(StWindow::getPlacement().center());
     GLsizei aFrBufferSizeX = aNvMonitor.getVRect().width();
     GLsizei aFrBufferSizeY = aNvMonitor.getVRect().height();
 
@@ -204,7 +316,7 @@ bool StOutPageFlip::dxInit() {
         ST_DEBUG_LOG(ST_OUT_PLUGIN_NAME + " Plugin, old videocard detected (GLSL 1.1)!");
     }
 
-    myOutD3d.myDxWindow = new StDXNVWindow(aFrBufferSizeX, aFrBufferSizeY, aNvMonitor, getStWindow());
+    myOutD3d.myDxWindow = new StDXNVWindow(aFrBufferSizeX, aFrBufferSizeY, aNvMonitor, this);
     myOutD3d.myDxThread = new StThread(StOutDirect3D::dxThreadFunction, (void* )&myOutD3d);
     return true;
 #else
@@ -213,7 +325,7 @@ bool StOutPageFlip::dxInit() {
 }
 
 void StOutPageFlip::dxRelease() {
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     dxDisactivate();
     if(!myOutD3d.myDxThread.isNull()) {
         myOutD3d.myDxWindow->quit();
@@ -235,7 +347,7 @@ void StOutPageFlip::dxRelease() {
 }
 
 void StOutPageFlip::dxActivate() {
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     // activate Direct3D Fullscreen window
     if(!myOutD3d.myIsActive
     && !myOutD3d.myDxWindow.isNull()) {
@@ -243,7 +355,7 @@ void StOutPageFlip::dxActivate() {
             // Direct3D device will fail to Reset if GL fullscreen device is active
             // so we switch out main GL window into windowed state temporarily
             // (we need to wait some time to ensure system perform needed movements)
-            getStWindow()->setFullScreen(false);
+            StWindow::setFullScreen(false);
             ++myOutD3d.myActivateStep;
             return;
         }
@@ -254,7 +366,7 @@ void StOutPageFlip::dxActivate() {
         if(myOutD3d.myActivateStep == 1) {
             // at second step switch out main GL window back to fullscreen
             myOutD3d.myActivateStep = 0;
-            getStWindow()->setFullScreen(true);
+            StWindow::setFullScreen(true);
 
             if(myOutD3d.myGLBuffer.isNull()) {
                 myOutD3d.myGLBuffer = new StGLFrameBuffer();
@@ -270,14 +382,14 @@ void StOutPageFlip::dxActivate() {
 }
 
 void StOutPageFlip::dxDisactivate() {
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     if(myOutD3d.myIsActive) {
         // set this flag first to make recursive calls
         myOutD3d.myIsActive = false;
         if(!myOutD3d.myDxWindow.isNull()) {
             myOutD3d.myDxWindow->hide();
             if(myOutD3d.myDxWindow->hasOwnWindow()) {
-                getStWindow()->show(ST_WIN_MASTER);
+                StWindow::show(ST_WIN_MASTER);
             }
         }
 
@@ -295,83 +407,17 @@ void StOutPageFlip::dxDisactivate() {
 #endif
 }
 
-bool StOutPageFlip::init(const StString&     inRendererPath,
-                         const int&          theDeviceId,
-                         const StNativeWin_t theNativeParent) {
-    myToSavePlacement = (theNativeParent == (StNativeWin_t )NULL);
-    myDevice = DeviceEnum(theDeviceId);
-    myPluginPath = inRendererPath;
-    if(!StVersionInfo::checkTimeBomb("sView - PageFlip Output plugin")) {
-        return false;
-    } else if(mySettings.isNull()) {
-        return false;
-    }
-    ST_DEBUG_LOG_AT("INIT PageFlip output plugin");
-    // Firstly INIT core library!
-    if(StCore::INIT() != STERROR_LIBNOERROR) {
-        stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Core library not available!");
+bool StOutPageFlip::create() {
+    StWindow::show();
+
+    // request Quad Buffer
+    StWinAttributes_t anAttribs = stDefaultWinAttributes();
+    StWindow::getAttributes(anAttribs);
+    anAttribs.isGlStereo = (params.QuadBuffer->getValue() == QUADBUFFER_HARD_OPENGL);
+    StWindow::setAttributes(anAttribs);
+    if(!StWindow::create()) {
         return false;
     }
-    myStCore = new StCore();
-
-    // load window position
-    StRect<int32_t> loadedRect(256, 768, 256, 1024);
-    if(mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, loadedRect)) {
-        StMonitor aMonitor = StCore::getMonitorFromPoint(loadedRect.center());
-        if(!aMonitor.getVRect().isPointIn(loadedRect.center())) {
-            ST_DEBUG_LOG("Warning, stored window position is out of the monitor(" + aMonitor.getId() + ")!" + loadedRect.toString());
-            int w = loadedRect.width();
-            int h = loadedRect.height();
-            loadedRect.left()   = aMonitor.getVRect().left() + 256;
-            loadedRect.right()  = loadedRect.left() + w;
-            loadedRect.top()    = aMonitor.getVRect().top() + 256;
-            loadedRect.bottom() = loadedRect.top() + h;
-        }
-    } else {
-        // try to open window on display with highest frequency
-        loadedRect = getHigestFreqMonitor().getVRect();
-        loadedRect.left()   = loadedRect.left() + 256;
-        loadedRect.right()  = loadedRect.left() + 1024;
-        loadedRect.top()    = loadedRect.top()  + 256;
-        loadedRect.bottom() = loadedRect.top()  + 512;
-    }
-    getStWindow()->setPlacement(loadedRect);
-
-    // load device settings
-    int deviceInt = int(myDevice);
-    if(deviceInt == StRendererInfo::DEVICE_AUTO) {
-        mySettings->loadInt32(ST_SETTING_DEVICE_ID, deviceInt);
-        if(deviceInt == StRendererInfo::DEVICE_AUTO) {
-            myDevice = DEVICE_SHUTTERS;
-        } else {
-            myDevice = DeviceEnum(deviceInt);
-        }
-    }
-
-    // load Quad Buffer type
-    int32_t quadBufferTypeInt = myQuadBuffer;
-    mySettings->loadInt32(ST_SETTING_QUADBUFFER, quadBufferTypeInt);
-    myQuadBuffer = QuadBufferEnum(quadBufferTypeInt);
-    if(myQuadBuffer < 0 || myQuadBuffer > myQuadBufferMax) {
-        myQuadBuffer = QUADBUFFER_AUTO;
-    }
-
-#if(defined(_WIN32) || defined(__WIN32__))
-    StDXManager::getInfo(myDxInfo);
-#endif
-
-    if(myQuadBuffer == QUADBUFFER_AUTO) {
-        // first call - try to detect best
-        myQuadBuffer = testQuadBufferSupportThreaded() ? QUADBUFFER_HARD_OPENGL : QUADBUFFER_HARD_D3D_ANY;
-    }
-
-    // allocate and setup the structure pointer
-    optionsStructAlloc();
-    getStWindow()->setValue(ST_WIN_DATAKEYS_RENDERER, (size_t )myOptions);
-
-    // create our window!
-    myWinAttribs.isGlStereo = (myQuadBuffer == QUADBUFFER_HARD_OPENGL);
-    getStWindow()->stglCreate(&myWinAttribs, theNativeParent);
 
     // initialize GL context
     myContext = new StGLContext();
@@ -382,10 +428,7 @@ bool StOutPageFlip::init(const StString&     inRendererPath,
         stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, OpenGL2.0+ not available!");
         return false;
     }
-    if(!myContext->stglSetVSync(StGLContext::VSync_ON)) {
-        // TODO (Kirill Gavrilov#5#) could be optional for MONO output
-        ST_DEBUG_LOG(ST_OUT_PLUGIN_NAME + " Plugin, VSync extension not available!");
-    }
+    myContext->stglSetVSync(StGLContext::VSync_ON);
 
     // load fullscreen-only warning
     StLibAVImage anImage;
@@ -403,7 +446,7 @@ bool StOutPageFlip::init(const StString&     inRendererPath,
     }
 
     // initialize Direct3D output
-    if(myQuadBuffer == QUADBUFFER_HARD_D3D_ANY) {
+    if(params.QuadBuffer->getValue() == QUADBUFFER_HARD_D3D_ANY) {
         dxInit();
     }
 
@@ -422,67 +465,26 @@ void StOutPageFlip::stglResize(const StRectI_t& ) {
     //
 }
 
-void StOutPageFlip::parseKeys(bool* theKeysMap) {
-    if(theKeysMap[ST_VK_F11]) {
-        getStWindow()->stglSwap(ST_WIN_MASTER);
-        theKeysMap[ST_VK_F11] = false;
-    }
-}
-
-void StOutPageFlip::updateOptions(const StSDOptionsList_t* theOptions,
-                                  StMessage_t&             theMsg) {
-    QuadBufferEnum newQuadBuffer = QuadBufferEnum(((StSDSwitch_t* )theOptions->options[DEVICE_OPTION_QUADBUFFER])->value);
-
-    bool toShowExtra = ((StSDOnOff_t* )myOptions->options[DEVICE_OPTION_EXTRA])->value;
-    mySettings->saveBool(ST_SETTING_ADVANCED, toShowExtra);
-    bool isExtra = (dynamic_cast<StOutPageFlipExt*>(this) != NULL);
-    if(toShowExtra != isExtra) {
-        // force to restart plugin
-        theMsg.uin = StMessageList::MSG_DEVICE_INFO;
-    }
-
-    if((myQuadBuffer == QUADBUFFER_HARD_OPENGL && newQuadBuffer != QUADBUFFER_HARD_OPENGL) ||
-       (myQuadBuffer != QUADBUFFER_HARD_OPENGL && newQuadBuffer == QUADBUFFER_HARD_OPENGL)) {
-        // force to restart plugin
-        theMsg.uin = StMessageList::MSG_DEVICE_INFO;
-    } else if(myQuadBuffer == QUADBUFFER_HARD_D3D_ANY && newQuadBuffer != QUADBUFFER_HARD_D3D_ANY) {
-        dxRelease();
-    } else if(myQuadBuffer != QUADBUFFER_HARD_D3D_ANY && newQuadBuffer == QUADBUFFER_HARD_D3D_ANY) {
-        dxInit();
-    }
-    myQuadBuffer = newQuadBuffer;
-}
-
-void StOutPageFlip::callback(StMessage_t* stMessages) {
-    myStCore->callback(stMessages);
-    for(size_t i = 0; stMessages[i].uin != StMessageList::MSG_NULL; ++i) {
-        switch(stMessages[i].uin) {
+void StOutPageFlip::processEvents(StMessage_t* theMessages) {
+    StWindow::processEvents(theMessages);
+    for(size_t anIter = 0; theMessages[anIter].uin != StMessageList::MSG_NULL; ++anIter) {
+        switch(theMessages[anIter].uin) {
             case StMessageList::MSG_RESIZE: {
-                stglResize(getStWindow()->getPlacement());
+                stglResize(StWindow::getPlacement());
                 break;
             }
             case StMessageList::MSG_KEYS: {
-                parseKeys((bool* )stMessages[i].data);
-                break;
-            }
-            case StMessageList::MSG_DEVICE_INFO: {
-                if(myOptions->curDeviceId != int(myDevice)) {
-                    StString newPluginPath(myOptions->curRendererPath);
-                    if(newPluginPath == myPluginPath) {
-                        myDevice = DeviceEnum(myOptions->curDeviceId);
-                        setupDevice();
-                        stMessages[i].uin = StMessageList::MSG_NONE;
-                    } // else - another plugin
+                bool* aKeys = (bool* )theMessages[anIter].data;
+                if(aKeys[ST_VK_F11]) {
+                    StWindow::stglSwap(ST_WIN_MASTER);
+                    aKeys[ST_VK_F11] = false;
                 }
                 break;
             }
-            case StMessageList::MSG_DEVICE_OPTION: {
-                updateOptions(myOptions, stMessages[i]);
-                break;
-            }
-        #if(defined(_WIN32) || defined(__WIN32__))
+        #ifdef _WIN32
             case StMessageList::MSG_WIN_ON_NEW_MONITOR: {
-                if(myQuadBuffer != QUADBUFFER_HARD_D3D_ANY || myOutD3d.myIsActive) {
+                if(params.QuadBuffer->getValue() != QUADBUFFER_HARD_D3D_ANY
+                || myOutD3d.myIsActive) {
                     break;
                 }
                 dxRelease();
@@ -495,7 +497,7 @@ void StOutPageFlip::callback(StMessage_t* stMessages) {
 }
 
 void StOutPageFlip::dxDraw(unsigned int view) {
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     if(myOutD3d.myToUsePBO) {
         // use PBO to get some speed up
         // PBO macro (see spec for details)
@@ -562,7 +564,7 @@ void StOutPageFlip::stglDrawWarning() {
 
     myWarning->bind(*myContext);
 
-    const StRectI_t aRect = getStWindow()->getPlacement();
+    const StRectI_t aRect = StWindow::getPlacement();
     const int aWinSizeX = aRect.width();
     const int aWinSizeY = aRect.height();
     const GLfloat aWidth  = (aWinSizeX > 0) ?        GLfloat(myWarning->getSizeX()) / GLfloat(aWinSizeX) : 1.0f;
@@ -600,14 +602,14 @@ void StOutPageFlip::stglDrawWarning() {
     myContext->core20fwd->glDisable(GL_BLEND);
 }
 
-void StOutPageFlip::stglDraw(unsigned int ) {
-    myFPSControl.setTargetFPS(getStWindow()->stglGetTargetFps());
+void StOutPageFlip::stglDraw() {
+    myFPSControl.setTargetFPS(StWindow::getTargetFps());
 
-    getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-    const StRectI_t aRect = getStWindow()->getPlacement();
+    StWindow::stglMakeCurrent(ST_WIN_MASTER);
+    const StRectI_t aRect = StWindow::getPlacement();
     myContext->stglResize(aRect);
 
-    if(!getStWindow()->isStereoOutput()) {
+    if(!StWindow::isStereoOutput()) {
         // Vuzix driver control
         if(myToDrawStereo) {
             if(myDevice == DEVICE_VUZIX && !myVuzixSDK.isNull()) {
@@ -620,29 +622,30 @@ void StOutPageFlip::stglDraw(unsigned int ) {
         dxDisactivate();
 
         // setup whole back buffer (left+right) for hardware GL Quad Buffer
-        if(myQuadBuffer == QUADBUFFER_HARD_OPENGL) {
+        if(params.QuadBuffer->getValue() == QUADBUFFER_HARD_OPENGL) {
             myContext->core20fwd->glDrawBuffer(GL_BACK);
         }
 
         // draw new MONO frame
-        myStCore->stglDraw(ST_DRAW_LEFT);
+        StWindow::signals.onRedraw(ST_DRAW_LEFT);
         if(myDevice != DEVICE_VUZIX) {
             stglDrawExtra(ST_DRAW_LEFT, StGLDeviceControl::OUT_MONO);
         }
 
         // decrease FPS to target by thread sleeps
         myFPSControl.sleepToTarget();
-        getStWindow()->stglSwap(ST_WIN_MASTER);
+        StWindow::stglSwap(ST_WIN_MASTER);
         ++myFPSControl;
         return;
     } else if(!myToDrawStereo) {
-        if(myDevice == DEVICE_VUZIX && !myVuzixSDK.isNull() && myQuadBuffer != QUADBUFFER_HARD_OPENGL) {
+        if(myDevice == DEVICE_VUZIX && !myVuzixSDK.isNull()
+        && params.QuadBuffer->getValue() != QUADBUFFER_HARD_OPENGL) {
             myVuzixSDK->setStereoOut();
         }
         myToDrawStereo = true;
     }
 
-    switch(myQuadBuffer) {
+    switch(params.QuadBuffer->getValue()) {
         case QUADBUFFER_HARD_OPENGL: {
             // We check capabilities at runtime to ensure that OpenGL context was created with Quad-Buffer.
             // Also we requires fullscreen for RadeOn cards on Windows 7.
@@ -656,27 +659,27 @@ void StOutPageFlip::stglDraw(unsigned int ) {
 
             if(!isStereoOn) {
                 myContext->core20fwd->glDrawBuffer(GL_BACK);
-                myStCore->stglDraw(ST_DRAW_RIGHT);
-                myStCore->stglDraw(ST_DRAW_LEFT);
+                StWindow::signals.onRedraw(ST_DRAW_RIGHT);
+                StWindow::signals.onRedraw(ST_DRAW_LEFT);
                 stglDrawWarning();
             } else {
                 myContext->core20fwd->glDrawBuffer(GL_BACK_LEFT);
-                myStCore->stglDraw(ST_DRAW_LEFT);
+                StWindow::signals.onRedraw(ST_DRAW_LEFT);
                 stglDrawExtra(ST_DRAW_LEFT, StGLDeviceControl::OUT_STEREO);
 
                 myContext->stglResize(aRect);
                 myContext->core20fwd->glDrawBuffer(GL_BACK_RIGHT);
-                myStCore->stglDraw(ST_DRAW_RIGHT);
+                StWindow::signals.onRedraw(ST_DRAW_RIGHT);
                 stglDrawExtra(ST_DRAW_RIGHT, StGLDeviceControl::OUT_STEREO);
             }
             StThread::sleep(1);
-            getStWindow()->stglSwap(ST_WIN_MASTER);
+            StWindow::stglSwap(ST_WIN_MASTER);
             ++myFPSControl;
             return;
         }
-    #if(defined(_WIN32) || defined(__WIN32__))
+    #ifdef _WIN32
         case QUADBUFFER_HARD_D3D_ANY: {
-            if(myOutD3d.myActivateStep == 1 || getStWindow()->isFullScreen()) {
+            if(myOutD3d.myActivateStep == 1 || StWindow::isFullScreen()) {
                 dxActivate();
 
                 // draw into virtual frame buffers (textures)
@@ -685,14 +688,14 @@ void StOutPageFlip::stglDraw(unsigned int ) {
                     myContext->core20fwd->glGetIntegerv(GL_VIEWPORT, aVPort);
                         myOutD3d.myGLBuffer->setupViewPort(*myContext); // we set TEXTURE sizes here
                         myOutD3d.myGLBuffer->bindBuffer(*myContext);
-                            myStCore->stglDraw(ST_DRAW_LEFT);
+                            StWindow::signals.onRedraw(ST_DRAW_LEFT);
                             stglDrawExtra(ST_DRAW_LEFT, StGLDeviceControl::OUT_STEREO);
                             while(myOutD3d.myDxWindow->isInUpdate()) {
                                 StThread::sleep(2);
                             }
                             // read OpenGL buffers and write into Direct3D surface
                             dxDraw(ST_DRAW_LEFT);
-                            myStCore->stglDraw(ST_DRAW_RIGHT);
+                            StWindow::signals.onRedraw(ST_DRAW_RIGHT);
                             stglDrawExtra(ST_DRAW_RIGHT, StGLDeviceControl::OUT_STEREO);
                             dxDraw(ST_DRAW_RIGHT);
                         myOutD3d.myGLBuffer->unbindBuffer(*myContext);
@@ -703,14 +706,14 @@ void StOutPageFlip::stglDraw(unsigned int ) {
                 // disactivate Direct3D Fullscreen window
                 dxDisactivate();
 
-                getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-                myStCore->stglDraw(ST_DRAW_RIGHT); // reverse order to avoid non-smooth mono->stereo transition
-                myStCore->stglDraw(ST_DRAW_LEFT);
+                StWindow::stglMakeCurrent(ST_WIN_MASTER);
+                StWindow::signals.onRedraw(ST_DRAW_RIGHT); // reverse order to avoid non-smooth mono->stereo transition
+                StWindow::signals.onRedraw(ST_DRAW_LEFT);
 
                 stglDrawWarning();
 
                 myFPSControl.sleepToTarget();
-                getStWindow()->stglSwap(ST_WIN_MASTER);
+                StWindow::stglSwap(ST_WIN_MASTER);
                 ++myFPSControl;
                 break;
             }
@@ -728,9 +731,9 @@ void StOutPageFlip::stglDrawExtra(unsigned int , int ) {
 }
 
 void StOutPageFlip::stglDrawAggressive(unsigned int theView) {
-    getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-    myContext->stglResize(getStWindow()->getPlacement());
-    myStCore->stglDraw(theView);
+    StWindow::stglMakeCurrent(ST_WIN_MASTER);
+    myContext->stglResize(StWindow::getPlacement());
+    StWindow::signals.onRedraw(theView);
 
     if(myDevice == DEVICE_VUZIX) {
         if(!myVuzixSDK.isNull()) {
@@ -740,7 +743,7 @@ void StOutPageFlip::stglDrawAggressive(unsigned int theView) {
         stglDrawExtra(theView, StGLDeviceControl::OUT_STEREO);
     }
 
-    getStWindow()->stglSwap(ST_WIN_MASTER);
+    StWindow::stglSwap(ST_WIN_MASTER);
     ++myFPSControl;
 
     // Inform VR920 to begin scanning on next vSync, a new right eye frame.
@@ -749,106 +752,18 @@ void StOutPageFlip::stglDrawAggressive(unsigned int theView) {
     }
 }
 
-// SDK version was used
-ST_EXPORT void getSDKVersion(StVersion* ver) {
-    *ver = StVersionInfo::getSDKVersion();
+void StOutPageFlip::doSetQuadBuffer(const int32_t ) {
+    myToResetDevice = true;
 }
 
-// plugin version
-ST_EXPORT void getPluginVersion(StVersion* ver) {
-    *ver = StVersionInfo::getSDKVersion();
-}
-
-ST_EXPORT const StRendererInfo_t* getDevicesInfo(const stBool_t theToDetectPriority) {
-    static StRendererInfo_t ST_SELF_INFO = { NULL, NULL, NULL, 0 };
-    if(ST_SELF_INFO.devices != NULL) {
-        return &ST_SELF_INFO;
-    }
-
-    StTranslations aLangMap(ST_OUT_PLUGIN_NAME);
-
-    // detect connected displays
-    int supportLevelShutters = ST_DEVICE_SUPPORT_NONE;
-    int supportLevelVuzix    = ST_DEVICE_SUPPORT_NONE;
-    if(theToDetectPriority) {
-        if(StCore::INIT() != STERROR_LIBNOERROR) {
-            ST_DEBUG_LOG(ST_OUT_PLUGIN_NAME + " Plugin, Core library not available!");
-        } else {
-            if(StVuzixSDK::isConnected()) {
-                supportLevelVuzix = ST_DEVICE_SUPPORT_PREFER;
-            }
-            StMonitor aMon = getHigestFreqMonitor();
-            if(aMon.getFreqMax() >= 110) {
-                supportLevelShutters = ST_DEVICE_SUPPORT_HIGHT;
-            }
-        #if !(defined(__APPLE__))
-            // actually almost always available on mac but... is it useful?
-            if(testQuadBufferSupportThreaded()) {
-                supportLevelShutters = ST_DEVICE_SUPPORT_FULL;
-            }
-        #endif
-            StCore::FREE();
-        }
-
-    #if(defined(_WIN32) || defined(__WIN32__))
-        StDXInfo aDxInfo;
-        if(supportLevelShutters != ST_DEVICE_SUPPORT_FULL
-        && StDXManager::getInfoThreaded(aDxInfo)
-        && (aDxInfo.hasNvStereoSupport || aDxInfo.hasAqbsSupport)) {
-            // if user enable NVIDIA stereo driver - we prefer use it for shutters
-            supportLevelShutters = ST_DEVICE_SUPPORT_FULL;
-        }
-    #endif
-    }
-
-    static StString aPageFlipName = aLangMap.changeValueId(STTR_PAGEFLIP_NAME, "Shutter glasses");
-    static StString aPageFlipDesc = aLangMap.changeValueId(STTR_PAGEFLIP_DESC, "Shutter glasses");
-    static StString aVuzixName    = aLangMap.changeValueId(STTR_VUZIX_NAME,    "Vuzix HMD");
-    static StString aVuzixDesc    = aLangMap.changeValueId(STTR_VUZIX_DESC,    "Vuzix HMD");
-
-    static StStereoDeviceInfo_t aDevicesArray[2] = {
-        { "Pageflip", aPageFlipName.toCString(), aPageFlipDesc.toCString(), supportLevelShutters },
-        { "Vuzix",    aVuzixName.toCString(),    aVuzixDesc.toCString(),    supportLevelVuzix    }
-    };
-    ST_SELF_INFO.devices = &aDevicesArray[0];
-    ST_SELF_INFO.count   = 2;
-
-    // about string
-    StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - PageFlip Output module");
-    StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
-    StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
-        "(C) 2007-2013 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0");
-    static StString anAboutString = aTitle + '\n' + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr;
-    ST_SELF_INFO.aboutString = (stUtf8_t* )anAboutString.toCString();
-
-    return &ST_SELF_INFO;
-}
-
-ST_EXPORT StRendererInterface* StRenderer_new() {
-    // INIT settings library
-    StHandle<StSettings> aSettings = new StSettings(ST_OUT_PLUGIN_NAME);
-    bool isAdvanced = false;
-    aSettings->loadBool(ST_SETTING_ADVANCED, isAdvanced);
-    if(isAdvanced) {
-        return new StOutPageFlipExt(aSettings);
+void StOutPageFlip::doShowExtra(const bool theValue) {
+    myToResetDevice = true;
+    if(theValue) {
+        params.QuadBuffer->changeValues().add(myLangMap.changeValueId(STTR_PARAMETER_QB_EMULATED, "OpenGL Emulated"));
     } else {
-        return new StOutPageFlip(aSettings);
+        params.QuadBuffer->changeValues().remove(params.QuadBuffer->getValues().size() - 1);
+        if(params.QuadBuffer->getValue() == QUADBUFFER_SOFT) {
+            params.QuadBuffer->setValue(QUADBUFFER_HARD_OPENGL);
+        }
     }
 }
-ST_EXPORT void StRenderer_del(StRendererInterface* inst) {
-    delete (StOutPageFlip* )inst;
-}
-ST_EXPORT StWindowInterface* StRenderer_getStWindow(StRendererInterface* inst) {
-    // This is VERY important return libImpl pointer here!
-    return ((StOutPageFlip* )inst)->getStWindow()->getLibImpl(); }
-ST_EXPORT stBool_t StRenderer_init(StRendererInterface* inst,
-                                   const stUtf8_t*      theRendererPath,
-                                   const int&           theDeviceId,
-                                   const StNativeWin_t  theNativeParent) {
-    return ((StOutPageFlip* )inst)->init(StString(theRendererPath), theDeviceId, theNativeParent); }
-ST_EXPORT stBool_t StRenderer_open(StRendererInterface* inst, const StOpenInfo_t* stOpenInfo) {
-    return ((StOutPageFlip* )inst)->open(StOpenInfo(stOpenInfo)); }
-ST_EXPORT void StRenderer_callback(StRendererInterface* inst, StMessage_t* stMessages) {
-    ((StOutPageFlip* )inst)->callback(stMessages); }
-ST_EXPORT void StRenderer_stglDraw(StRendererInterface* inst, unsigned int views) {
-    ((StOutPageFlip* )inst)->stglDraw(views); }

@@ -118,6 +118,13 @@ class StSignal {
     virtual ~StSignal() {}
 
     /**
+     * Disconnect all slots.
+     */
+    void disconnect() {
+        mySlot.nullify();
+    }
+
+    /**
      * Major method to connect Slot - the receiver of this Signal.
      * @param theClassPtr (class_t* ) - pointer to the class instance;
      * @param theMethod - pointer to the class method;
@@ -158,31 +165,35 @@ class StSignal {
      * Emit callback Slot without arguments.
      */
     bool emit() const {
-        return !mySlot.isNull() ? mySlot->call() : false;
+        StHandle< StSlot<slotMethod_t> > aSlot = mySlot;
+        return !aSlot.isNull() ? aSlot->call() : false;
     }
 
     /**
      * Emit callback Slot with 1 argument.
      */
     bool emit(typename types::arg1_t arg1) const {
-        return !mySlot.isNull() ? mySlot->call(arg1) : false;
+        StHandle< StSlot<slotMethod_t> > aSlot = mySlot;
+        return !aSlot.isNull() ? aSlot->call(arg1) : false;
     }
 
     /**
      * Emit callback Slot with 2 arguments.
      */
     bool emit(typename types::arg1_t arg1,
-                typename types::arg2_t arg2) const {
-        return !mySlot.isNull() ? mySlot->call(arg1, arg2) : false;
+              typename types::arg2_t arg2) const {
+        StHandle< StSlot<slotMethod_t> > aSlot = mySlot;
+        return !aSlot.isNull() ? aSlot->call(arg1, arg2) : false;
     }
 
     /**
      * Emit callback Slot with 3 arguments.
      */
     bool emit(typename types::arg1_t arg1,
-                typename types::arg2_t arg2,
-                typename types::arg3_t arg3) const {
-        return !mySlot.isNull() ? mySlot->call(arg1, arg2, arg3) : false;
+              typename types::arg2_t arg2,
+              typename types::arg3_t arg3) const {
+        StHandle< StSlot<slotMethod_t> > aSlot = mySlot;
+        return !aSlot.isNull() ? aSlot->call(arg1, arg2, arg3) : false;
     }
 
     /**

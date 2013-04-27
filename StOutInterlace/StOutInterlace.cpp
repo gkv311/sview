@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutInterlace library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -22,24 +22,26 @@
 #include <StGL/StGLEnums.h>
 #include <StGL/StGLVec.h>
 #include <StGLCore/StGLCore20.h>
-#include <StCore/StWindow.h>
 #include <StSettings/StSettings.h>
 #include <StSettings/StTranslations.h>
+#include <StSettings/StEnumParam.h>
+#include <StCore/StSearchMonitors.h>
+#include <StVersion.h>
 
 namespace {
 
     static const char ST_OUT_PLUGIN_NAME[] = "StOutInterlace";
 
     // shaders data
-    static const char VSHADER_ED[]             = "vED.shv";
-    static const char FSHADER_EDINTERLACE_ON[] = "fEDinterlace.shf";
-    static const char FSHADER_ED_OFF[]         = "fEDoff.shf";
+    static const char VSHADER_ED[]              = "vED.shv";
+    static const char FSHADER_EDINTERLACE_ON[]  = "fEDinterlace.shf";
+    static const char FSHADER_ED_OFF[]          = "fEDoff.shf";
 
-    static const char ST_SETTING_DEVICE_ID[]      = "deviceId";
-    static const char ST_SETTING_WINDOWPOS[]      = "windowPos";
-    static const char ST_SETTING_BIND_MONITOR[]   = "bindMonitor";
-    static const char ST_SETTING_VSYNC[]          = "vsync";
-    static const char ST_SETTING_REVERSE[]        = "reverse";
+    static const char ST_SETTING_DEVICE_ID[]    = "deviceId";
+    static const char ST_SETTING_WINDOWPOS[]    = "windowPos";
+    static const char ST_SETTING_BIND_MONITOR[] = "bindMonitor";
+    static const char ST_SETTING_VSYNC[]        = "vsync";
+    static const char ST_SETTING_REVERSE[]      = "reverse";
 
     struct StMonInterlacedInfo_t {
         const stUtf8_t* pnpid;
@@ -121,47 +123,6 @@ bool StProgramFB::link(StGLContext& theCtx) {
 
 StAtomic<int32_t> StOutInterlace::myInstancesNb(0);
 
-void StOutInterlace::setDevice(const int theDeviceId) {
-    if(theDeviceId < 0 || theDeviceId >= DEVICE_NB) {
-        ST_DEBUG_LOG("Incorrect device ID!");
-        return;
-    }
-    myDeviceId = theDeviceId;
-    if(myOptionsStruct != NULL) {
-        myOptionsStruct->curDeviceId = myDeviceId;
-    }
-}
-
-void StOutInterlace::optionsStructAlloc() {
-    StTranslations stLangMap(ST_OUT_PLUGIN_NAME);
-
-    // create device options structure
-    myOptionsStruct = (StSDOptionsList_t* )StWindow::memAlloc(sizeof(StSDOptionsList_t)); stMemSet(myOptionsStruct, 0, sizeof(StSDOptionsList_t));
-    myOptionsStruct->curRendererPath = StWindow::memAllocNCopy(myPluginPath);
-    myOptionsStruct->curDeviceId = myDeviceId;
-
-    myOptionsStruct->optionsCount = 3;
-    myOptionsStruct->options = (StSDOption_t** )StWindow::memAlloc(sizeof(StSDOption_t*) * myOptionsStruct->optionsCount);
-
-    // VSync option
-    myOptionsStruct->options[DEVICE_OPTION_VSYNC] = (StSDOption_t* )StWindow::memAlloc(sizeof(StSDOnOff_t));
-    myOptionsStruct->options[DEVICE_OPTION_VSYNC]->optionType = ST_DEVICE_OPTION_ON_OFF;
-    ((StSDOnOff_t* )myOptionsStruct->options[DEVICE_OPTION_VSYNC])->value = myIsVSync;
-    myOptionsStruct->options[DEVICE_OPTION_VSYNC]->title = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_PARAMETER_VSYNC, "VSync"));
-
-    // Reverse Order option
-    myOptionsStruct->options[DEVICE_OPTION_REVERSE] = (StSDOption_t* )StWindow::memAlloc(sizeof(StSDOnOff_t));
-    myOptionsStruct->options[DEVICE_OPTION_REVERSE]->optionType = ST_DEVICE_OPTION_ON_OFF;
-    ((StSDOnOff_t* )myOptionsStruct->options[DEVICE_OPTION_REVERSE])->value = myIsReversed;
-    myOptionsStruct->options[DEVICE_OPTION_REVERSE]->title = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_PARAMETER_REVERSE, "Reverse Order"));
-
-    // Bind Monitor option
-    myOptionsStruct->options[DEVICE_OPTION_BINDMON] = (StSDOption_t* )StWindow::memAlloc(sizeof(StSDOnOff_t));
-    myOptionsStruct->options[DEVICE_OPTION_BINDMON]->optionType = ST_DEVICE_OPTION_ON_OFF;
-    ((StSDOnOff_t* )myOptionsStruct->options[DEVICE_OPTION_BINDMON])->value = myToBindToMonitor;
-    myOptionsStruct->options[DEVICE_OPTION_BINDMON]->title = StWindow::memAllocNCopy(stLangMap.changeValueId(STTR_PARAMETER_BIND_MON, "Bind To Supported Monitor"));
-}
-
 inline bool isInterlacedMonitor(const StMonitor& theMon,
                                 bool&            theIsReversed) {
     if(theMon.getPnPId().getSize() != 7) {
@@ -178,10 +139,10 @@ inline bool isInterlacedMonitor(const StMonitor& theMon,
     }
 }
 
-StHandle<StMonitor> StOutInterlace::getHInterlaceMonitor(bool& theIsReversed) {
-    StArrayList<StMonitor> aMonitors = StCore::getStMonitors();
-    for(size_t aMonIter = 0; aMonIter < aMonitors.size(); ++aMonIter) {
-        const StMonitor& aMon = aMonitors[aMonIter];
+StHandle<StMonitor> StOutInterlace::getHInterlaceMonitor(const StArrayList<StMonitor>& theMonitors,
+                                                         bool& theIsReversed) {
+    for(size_t aMonIter = 0; aMonIter < theMonitors.size(); ++aMonIter) {
+        const StMonitor& aMon = theMonitors[aMonIter];
         if(isInterlacedMonitor(aMon, theIsReversed)) {
             return new StMonitor(aMon);
         }
@@ -189,24 +150,68 @@ StHandle<StMonitor> StOutInterlace::getHInterlaceMonitor(bool& theIsReversed) {
     return NULL;
 }
 
-StOutInterlace::StOutInterlace()
-: myDeviceId(DEVICE_AUTO),
+StString StOutInterlace::getRendererAbout() const {
+    return myAbout;
+}
+
+const char* StOutInterlace::getRendererId() const {
+    return ST_OUT_PLUGIN_NAME;
+}
+
+const char* StOutInterlace::getDeviceId() const {
+    switch(myDevice) {
+        case DEVICE_VINTERLACE:    return "Col";
+        case DEVICE_CHESSBOARD:    return "Chess";
+        case DEVICE_HINTERLACE_ED: return "RowED";
+        case DEVICE_HINTERLACE:
+        default:                   return "Row";
+    }
+}
+
+bool StOutInterlace::setDevice(const StString& theDevice) {
+    if(theDevice == "Row") {
+        myDevice = DEVICE_HINTERLACE;
+    } else if(theDevice == "Col") {
+        myDevice = DEVICE_VINTERLACE;
+    } else if(theDevice == "Chess") {
+        myDevice = DEVICE_CHESSBOARD;
+    } else if(theDevice == "RowED") {
+        myDevice = DEVICE_HINTERLACE_ED;
+    }
+    return false;
+}
+
+void StOutInterlace::getDevices(StOutDevicesList& theList) const {
+    for(size_t anIter = 0; anIter < myDevices.size(); ++anIter) {
+        theList.add(myDevices[anIter]);
+    }
+}
+
+void StOutInterlace::getOptions(StParamsList& theList) const {
+    theList.add(params.IsVSyncOn);
+    theList.add(params.ToReverse);
+    theList.add(params.BindToMon);
+}
+
+StOutInterlace::StOutInterlace(const StNativeWin_t theParentWindow)
+: StWindow(theParentWindow),
+  mySettings(new StSettings(ST_OUT_PLUGIN_NAME)),
+  myFrmBuffer(new StGLFrameBuffer()),
+  myDevice(DEVICE_AUTO),
   myEDTimer(true),
   myEDIntelaceOn(new StGLProgram("ED Interlace On")),
   myEDOff(new StGLProgram("ED Interlace Off")),
   myVpSizeY(10),
-  myOptionsStruct(NULL),
-  myToSavePlacement(true),
-  myToBindToMonitor(true),
-  myIsVSync(true),
-  myIsReversed(false),
+  myToSavePlacement(theParentWindow == (StNativeWin_t )NULL),
   myIsMonReversed(false),
   myIsStereo(false),
   myIsEDactive(false),
   myIsEDCodeFinished(false),
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false) {
-    myFrmBuffer = new StGLFrameBuffer();
+    const StSearchMonitors& aMonitors = StWindow::getMonitors();
+    StTranslations aLangMap(ST_OUT_PLUGIN_NAME);
+
     myGlPrograms[DEVICE_HINTERLACE] = new StProgramFB("Row Interlace");
     myGlPrograms[DEVICE_VINTERLACE] = new StProgramFB("Column Interlace");
     myGlPrograms[DEVICE_CHESSBOARD] = new StProgramFB("Chessboard");
@@ -216,113 +221,150 @@ StOutInterlace::StOutInterlace()
     myGlProgramsRev[DEVICE_VINTERLACE] = new StProgramFB("Column Interlace Inversed");
     myGlProgramsRev[DEVICE_CHESSBOARD] = new StProgramFB("Chessboard Inversed");
     myGlProgramsRev[DEVICE_HINTERLACE_ED] = myGlProgramsRev[DEVICE_HINTERLACE];
+
+    // about string
+    StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - Interlaced Output library");
+    StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
+    StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
+        "(C) 2009-2013 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0");
+    myAbout = aTitle + '\n' + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr;
+
+    // devices list
+    StHandle<StOutDevice> aDevRow = new StOutDevice();
+    aDevRow->PluginId = ST_OUT_PLUGIN_NAME;
+    aDevRow->DeviceId = "Row";
+    aDevRow->Priority = ST_DEVICE_SUPPORT_NONE;
+    aDevRow->Name     = aLangMap.changeValueId(STTR_HINTERLACE_NAME, "Row Interlaced");
+    aDevRow->Desc     = aLangMap.changeValueId(STTR_HINTERLACE_DESC, "Row interlaced displays: Zalman, Hyundai,...");
+    myDevices.add(aDevRow);
+
+    StHandle<StOutDevice> aDevCol = new StOutDevice();
+    aDevCol->PluginId = ST_OUT_PLUGIN_NAME;
+    aDevCol->DeviceId = "Col";
+    aDevCol->Priority = ST_DEVICE_SUPPORT_NONE;
+    aDevCol->Name     = aLangMap.changeValueId(STTR_VINTERLACE_NAME, "Column Interlaced");
+    aDevCol->Desc     = aLangMap.changeValueId(STTR_VINTERLACE_DESC, "Column interlaced displays");
+    myDevices.add(aDevCol);
+
+    StHandle<StOutDevice> aDevChess = new StOutDevice();
+    aDevChess->PluginId = ST_OUT_PLUGIN_NAME;
+    aDevChess->DeviceId = "Chess";
+    aDevChess->Priority = ST_DEVICE_SUPPORT_NONE;
+    aDevChess->Name     = aLangMap.changeValueId(STTR_CHESSBOARD_NAME, "DLP TV (chessboard)");
+    aDevChess->Desc     = aLangMap.changeValueId(STTR_CHESSBOARD_DESC, "DLP TV (chessboard)");
+    myDevices.add(aDevChess);
+
+    StHandle<StOutDevice> aDevED = new StOutDevice();
+    aDevED->PluginId = ST_OUT_PLUGIN_NAME;
+    aDevED->DeviceId = "RowED";
+    aDevED->Priority = ST_DEVICE_SUPPORT_NONE;
+    aDevED->Name     = aLangMap.changeValueId(STTR_HINTERLACE_ED_NAME, "Interlaced ED");
+    aDevED->Desc     = aLangMap.changeValueId(STTR_HINTERLACE_ED_DESC, "EDimensional in interlaced mode");
+    myDevices.add(aDevED);
+
+    // detect connected displays
+    bool myIsMonReversed = false;
+    StHandle<StMonitor> aMon = StOutInterlace::getHInterlaceMonitor(aMonitors, myIsMonReversed);
+    if(!aMon.isNull()) {
+        aDevRow->Priority = ST_DEVICE_SUPPORT_HIGHT;
+    }
+
+    // options
+    params.IsVSyncOn = new StBoolParamNamed(true,  aLangMap.changeValueId(STTR_PARAMETER_VSYNC,    "VSync"));
+    params.ToReverse = new StBoolParamNamed(false, aLangMap.changeValueId(STTR_PARAMETER_REVERSE,  "Reverse Order"));
+    params.BindToMon = new StBoolParamNamed(true,  aLangMap.changeValueId(STTR_PARAMETER_BIND_MON, "Bind To Supported Monitor"));
+    mySettings->loadParam(ST_SETTING_VSYNC,        params.IsVSyncOn);
+    mySettings->loadParam(ST_SETTING_REVERSE,      params.ToReverse);
+    mySettings->loadParam(ST_SETTING_BIND_MONITOR, params.BindToMon);
+
+    params.IsVSyncOn->signals.onChanged.connect(this, &StOutInterlace::doVSync);
+    params.BindToMon->signals.onChanged.connect(this, &StOutInterlace::doSetBindToMonitor);
+
+    // load window position
+    StRect<int32_t> aRect(256, 768, 256, 1024);
+    bool isLoadedPosition = mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
+    StMonitor aMonitor = aMonitors[aRect.center()];
+    if(params.BindToMon->getValue()
+    && !aMon.isNull()
+    && !isInterlacedMonitor(aMonitor, myIsMonReversed)) {
+        aMonitor = *aMon;
+    }
+    if(isLoadedPosition) {
+        if(!aMonitor.getVRect().isPointIn(aRect.center())) {
+            ST_DEBUG_LOG("Warning, stored window position is out of the monitor(" + aMonitor.getId() + ")!" + aRect.toString());
+            const int aWidth  = aRect.width();
+            const int aHeight = aRect.height();
+            aRect.left()   = aMonitor.getVRect().left() + 256;
+            aRect.right()  = aRect.left() + aWidth;
+            aRect.top()    = aMonitor.getVRect().top() + 256;
+            aRect.bottom() = aRect.top() + aHeight;
+        }
+    } else {
+        // try to open window on correct display
+        aRect = aMonitor.getVRect();
+        aRect.left()   = aRect.left() + 256;
+        aRect.right()  = aRect.left() + 1024;
+        aRect.top()    = aRect.top()  + 256;
+        aRect.bottom() = aRect.top()  + 512;
+    }
+    StWindow::setPlacement(aRect);
+
+    // load device settings
+    mySettings->loadInt32(ST_SETTING_DEVICE_ID, myDevice);
+    if(myDevice == DEVICE_AUTO) {
+        myDevice = DEVICE_HINTERLACE;
+    }
+
+    // request slave window
+    StWinAttributes_t anAttribs = stDefaultWinAttributes();
+    StWindow::getAttributes(anAttribs);
+    anAttribs.isSlave = true;
+    anAttribs.isSlaveHLineTop = true;
+    anAttribs.isSlaveHide = true;
+    StWindow::setAttributes(anAttribs);
+}
+
+void StOutInterlace::releaseResources() {
+    if(!myContext.isNull()) {
+        for(size_t anIter = 0; anIter < DEVICE_NB; ++anIter) {
+            myGlPrograms   [anIter]->release(*myContext);
+            myGlProgramsRev[anIter]->release(*myContext);
+        }
+        myEDIntelaceOn->release(*myContext);
+        myEDOff->release(*myContext);
+        myQuadVertBuf.release(*myContext);
+        myQuadTexCoordBuf.release(*myContext);
+        myFrmBuffer->release(*myContext);
+    }
+    myContext.nullify();
+
+    // read windowed placement
+    StWindow::hide();
+    if(myToSavePlacement) {
+        StWindow::setFullScreen(false);
+        mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
+    }
+    mySettings->saveParam(ST_SETTING_BIND_MONITOR, params.BindToMon);
+    mySettings->saveParam(ST_SETTING_VSYNC,        params.IsVSyncOn);
+    mySettings->saveParam(ST_SETTING_REVERSE,      params.ToReverse);
+    mySettings->saveInt32(ST_SETTING_DEVICE_ID,    myDevice);
 }
 
 StOutInterlace::~StOutInterlace() {
     myInstancesNb.decrement();
-    if(!myStCore.isNull() && !mySettings.isNull()) {
-        if(!myContext.isNull()) {
-            for(size_t anIter = 0; anIter < DEVICE_NB; ++anIter) {
-                myGlPrograms[anIter]->release(*myContext);
-                myGlProgramsRev[anIter]->release(*myContext);
-            }
-            myEDIntelaceOn->release(*myContext);
-            myEDOff->release(*myContext);
-            myQuadVertBuf.release(*myContext);
-            myQuadTexCoordBuf.release(*myContext);
-            myFrmBuffer->release(*myContext);
-        }
-        stMemFree(myOptionsStruct, StWindow::memFree);
-
-        // read windowed placement
-        getStWindow()->hide(ST_WIN_MASTER);
-        getStWindow()->hide(ST_WIN_SLAVE);
-        if(myToSavePlacement) {
-            getStWindow()->setFullScreen(false);
-            mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, getStWindow()->getPlacement());
-        }
-        mySettings->saveBool (ST_SETTING_BIND_MONITOR, myToBindToMonitor);
-        mySettings->saveBool (ST_SETTING_VSYNC,        myIsVSync);
-        mySettings->saveBool (ST_SETTING_REVERSE,      myIsReversed);
-        mySettings->saveInt32(ST_SETTING_DEVICE_ID,    myDeviceId);
-    }
-    mySettings.nullify();
-    myStCore.nullify();
-    StCore::FREE();
+    releaseResources();
 }
 
-bool StOutInterlace::init(const StString&     inRendererPath,
-                          const int&          theDeviceId,
-                          const StNativeWin_t theNativeParent) {
-    myToSavePlacement = (theNativeParent == (StNativeWin_t )NULL);
-    myDeviceId   = theDeviceId;
-    myPluginPath = inRendererPath;
-    if(!StVersionInfo::checkTimeBomb("sView - Interlace Output plugin")) {
+void StOutInterlace::close() {
+    releaseResources();
+    StWindow::close();
+}
+
+bool StOutInterlace::create() {
+    StWindow::show();
+    if(!StWindow::create()) {
         return false;
     }
-    ST_DEBUG_LOG_AT("INIT Interlace output plugin");
-    // Firstly INIT core library!
-    if(StCore::INIT() != STERROR_LIBNOERROR) {
-        stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Core library not available!");
-        return false;
-    }
-
-    // INIT settings library
-    mySettings = new StSettings(ST_OUT_PLUGIN_NAME);
-    myStCore   = new StCore();
-
-    // load window position
-    StHandle<StMonitor> anInterlacedMon = StOutInterlace::getHInterlaceMonitor(myIsMonReversed);
-    StRect<int32_t> loadedRect(256, 768, 256, 1024);
-    bool isLoadedPosition = mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, loadedRect);
-    mySettings->loadBool(ST_SETTING_BIND_MONITOR, myToBindToMonitor);
-    StMonitor aMonitor = StCore::getMonitorFromPoint(loadedRect.center());
-    if(myToBindToMonitor && !anInterlacedMon.isNull() && !isInterlacedMonitor(aMonitor, myIsMonReversed)) {
-        aMonitor = *anInterlacedMon;
-    }
-    if(isLoadedPosition) {
-        if(!aMonitor.getVRect().isPointIn(loadedRect.center())) {
-            ST_DEBUG_LOG("Warning, stored window position is out of the monitor(" + aMonitor.getId() + ")!" + loadedRect.toString());
-            int w = loadedRect.width();
-            int h = loadedRect.height();
-            loadedRect.left()   = aMonitor.getVRect().left() + 256;
-            loadedRect.right()  = loadedRect.left() + w;
-            loadedRect.top()    = aMonitor.getVRect().top() + 256;
-            loadedRect.bottom() = loadedRect.top() + h;
-        }
-    } else {
-        // try to open window on correct display
-        loadedRect = aMonitor.getVRect();
-        loadedRect.left()   = loadedRect.left() + 256;
-        loadedRect.right()  = loadedRect.left() + 1024;
-        loadedRect.top()    = loadedRect.top()  + 256;
-        loadedRect.bottom() = loadedRect.top()  + 512;
-    }
-    getStWindow()->setPlacement(loadedRect);
-
-    mySettings->loadBool(ST_SETTING_VSYNC,   myIsVSync);
-    mySettings->loadBool(ST_SETTING_REVERSE, myIsReversed);
-
-    // load device settings
-    if(myDeviceId == StRendererInfo::DEVICE_AUTO) {
-        mySettings->loadInt32(ST_SETTING_DEVICE_ID, myDeviceId);
-        if(myDeviceId == StRendererInfo::DEVICE_AUTO) {
-            myDeviceId = DEVICE_HINTERLACE;
-        }
-    }
-
-    // allocate and setup the structure pointer
-    optionsStructAlloc();
-    getStWindow()->setValue(ST_WIN_DATAKEYS_RENDERER, (size_t )myOptionsStruct);
-
-    setDevice(myDeviceId);
-
-    // create our window!
-    StWinAttributes_t attribs = stDefaultWinAttributes();
-    attribs.isSlave = true;
-    attribs.isSlaveHLineTop = true;
-    attribs.isSlaveHide = true;
-    getStWindow()->stglCreate(&attribs, theNativeParent);
 
     // initialize GL context
     myContext = new StGLContext();
@@ -333,10 +375,7 @@ bool StOutInterlace::init(const StString&     inRendererPath,
         stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, OpenGL2.0+ not available!");
         return false;
     }
-    if(!myContext->stglSetVSync(myIsVSync ? StGLContext::VSync_ON : StGLContext::VSync_OFF)) {
-        // enable/disable VSync by config
-        ST_DEBUG_LOG(ST_OUT_PLUGIN_NAME + " Plugin, VSync extension not available!");
-    }
+    myContext->stglSetVSync(params.IsVSyncOn->getValue() ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
 
     // INIT shaders
     StString aShadersError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init Shaders");
@@ -478,7 +517,7 @@ bool StOutInterlace::init(const StString&     inRendererPath,
     myVpSizeYOnLoc  = myEDIntelaceOn->getUniformLocation(*myContext, "vpSizeY");
     myVpSizeYOffLoc = myEDOff       ->getUniformLocation(*myContext, "vpSizeY");
 
-    if(myDeviceId == DEVICE_HINTERLACE_ED) {
+    if(myDevice == DEVICE_HINTERLACE_ED) {
         // could be eDimensional shuttered glasses
         myEDTimer.restart(2000000.0);
     }
@@ -504,18 +543,31 @@ bool StOutInterlace::init(const StString&     inRendererPath,
     return true;
 }
 
-void StOutInterlace::callback(StMessage_t* stMessages) {
-    myStCore->callback(stMessages);
-    for(size_t i = 0; stMessages[i].uin != StMessageList::MSG_NULL; ++i) {
-        switch(stMessages[i].uin) {
+void StOutInterlace::processEvents(StMessage_t* theMessages) {
+    // process exit from StApplication
+    if(theMessages[0].uin == StMessageList::MSG_EXIT
+    && (myDevice == DEVICE_HINTERLACE_ED) && myIsEDactive) {
+        // disactivate eDimensional shuttered glasses
+        myEDTimer.restart();
+        myIsEDactive = false;
+        while(myEDTimer.getElapsedTime() <= 0.5) {
+            stglDraw();
+            StThread::sleep(10);
+        }
+    }
+
+    StWindow::processEvents(theMessages);
+    for(size_t anIter = 0; theMessages[anIter].uin != StMessageList::MSG_NULL; ++anIter) {
+        switch(theMessages[anIter].uin) {
             case StMessageList::MSG_RESIZE: {
-                const StRectI_t aRect = getStWindow()->getPlacement();
+                const StRectI_t aRect = StWindow::getPlacement();
                 myVpSizeY = aRect.height();
-                if(!getStWindow()->isFullScreen()) {
+                if(!StWindow::isFullScreen()) {
+                    const StSearchMonitors& aMonitors = StWindow::getMonitors();
                     if(myMonitor.isNull()) {
-                        myMonitor = new StMonitor(StCore::getMonitorFromPoint(aRect.center()));
+                        myMonitor = new StMonitor(aMonitors[aRect.center()]);
                     } else if(!myMonitor->getVRect().isPointIn(aRect.center())) {
-                        *myMonitor = StCore::getMonitorFromPoint(aRect.center());
+                        *myMonitor = aMonitors[aRect.center()];
                     }
                     myEDRect.left()   = 0;
                     myEDRect.right()  = myMonitor->getVRect().width();
@@ -526,74 +578,24 @@ void StOutInterlace::callback(StMessage_t* stMessages) {
                 break;
             }
             case StMessageList::MSG_KEYS: {
-                bool* keysMap = ((bool* )stMessages[i].data);
-                if(keysMap[ST_VK_F1]) {
-                    setDevice(DEVICE_HINTERLACE);    keysMap[ST_VK_F1] = false;
-                } else if(keysMap[ST_VK_F2]) {
-                    setDevice(DEVICE_VINTERLACE);    keysMap[ST_VK_F2] = false;
-                } else if(keysMap[ST_VK_F3]) {
-                    setDevice(DEVICE_CHESSBOARD);    keysMap[ST_VK_F3] = false;
-                } else if(keysMap[ST_VK_F4]) {
-                    setDevice(DEVICE_HINTERLACE_ED); keysMap[ST_VK_F4] = false;
+                bool* aKeys = ((bool* )theMessages[anIter].data);
+                if(aKeys[ST_VK_F1]) {
+                    myDevice = DEVICE_HINTERLACE;    aKeys[ST_VK_F1] = false;
+                } else if(aKeys[ST_VK_F2]) {
+                    myDevice = DEVICE_VINTERLACE;    aKeys[ST_VK_F2] = false;
+                } else if(aKeys[ST_VK_F3]) {
+                    myDevice = DEVICE_CHESSBOARD;    aKeys[ST_VK_F3] = false;
+                } else if(aKeys[ST_VK_F4]) {
+                    myDevice = DEVICE_HINTERLACE_ED; aKeys[ST_VK_F4] = false;
                 }
-                break;
-            }
-            case StMessageList::MSG_DEVICE_INFO: {
-                if(myOptionsStruct->curDeviceId != myDeviceId) {
-                    StString newPluginPath(myOptionsStruct->curRendererPath);
-                    if(newPluginPath == myPluginPath) {
-                        setDevice(myOptionsStruct->curDeviceId);
-                        stMessages[i].uin = StMessageList::MSG_NONE;
-                    } // else - another plugin
-                }
-                break;
-            }
-            case StMessageList::MSG_DEVICE_OPTION: {
-                bool newVSync = ((StSDOnOff_t* )myOptionsStruct->options[DEVICE_OPTION_VSYNC])->value;
-                if(newVSync != myIsVSync) {
-                    myIsVSync = newVSync;
-                    getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-                    myContext->stglSetVSync(myIsVSync ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
-                }
-                myIsReversed         = ((StSDOnOff_t* )myOptionsStruct->options[DEVICE_OPTION_REVERSE])->value;
-                bool toBindToMonitor = ((StSDOnOff_t* )myOptionsStruct->options[DEVICE_OPTION_BINDMON])->value;
-
-                bool toMovePos = !myToBindToMonitor && toBindToMonitor;
-                myToBindToMonitor = toBindToMonitor;
-                if(toMovePos && !getStWindow()->isFullScreen()) {
-                    StRectI_t aRect = getStWindow()->getPlacement();
-                    StMonitor aMon  = StCore::getMonitorFromPoint(aRect.center());
-                    StHandle<StMonitor> anInterlacedMon = StOutInterlace::getHInterlaceMonitor(myIsMonReversed);
-                    if(!anInterlacedMon.isNull() && !isInterlacedMonitor(aMon, myIsMonReversed)) {
-                        int aWidth  = aRect.width();
-                        int aHeight = aRect.height();
-                        aRect.left()   = anInterlacedMon->getVRect().left() + 256;
-                        aRect.right()  = aRect.left() + aWidth;
-                        aRect.top()    = anInterlacedMon->getVRect().top() + 256;
-                        aRect.bottom() = aRect.top() + aHeight;
-                        getStWindow()->setPlacement(aRect);
-                    }
-                }
-
                 break;
             }
             case StMessageList::MSG_WIN_ON_NEW_MONITOR: {
-                const StRectI_t aRect = getStWindow()->getPlacement();
-                const StMonitor aMon  = StCore::getMonitorFromPoint(aRect.center());
+                const StSearchMonitors& aMonitors = StWindow::getMonitors();
+                const StRectI_t  aRect = StWindow::getPlacement();
+                const StMonitor& aMon  = aMonitors[aRect.center()];
                 myIsMonReversed = false;
                 isInterlacedMonitor(aMon, myIsMonReversed);
-                break;
-            }
-            case StMessageList::MSG_EXIT: {
-                if((myDeviceId == DEVICE_HINTERLACE_ED) && myIsEDactive) {
-                    // disactivate eDimensional shuttered glasses
-                    myEDTimer.restart();
-                    myIsEDactive = false;
-                    while(myEDTimer.getElapsedTime() <= 0.5) {
-                        stglDraw(ST_DRAW_BOTH);
-                        StThread::sleep(10);
-                    }
-                }
                 break;
             }
         }
@@ -602,13 +604,13 @@ void StOutInterlace::callback(StMessage_t* stMessages) {
 
 void StOutInterlace::stglDrawEDCodes() {
     if(myEDTimer.getElapsedTime() > 0.5) {
-        getStWindow()->hide(ST_WIN_SLAVE);
+        StWindow::hide(ST_WIN_SLAVE);
         myIsEDCodeFinished = true;
         return;
     }
-    if(!getStWindow()->isFullScreen()) {
-        getStWindow()->show(ST_WIN_SLAVE);
-        getStWindow()->stglMakeCurrent(ST_WIN_SLAVE);
+    if(!StWindow::isFullScreen()) {
+        StWindow::show(ST_WIN_SLAVE);
+        StWindow::stglMakeCurrent(ST_WIN_SLAVE);
         myContext->stglResize(myEDRect);
         // clear the screen and the depth buffer
         myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -637,25 +639,25 @@ void StOutInterlace::stglDrawEDCodes() {
     myContext->core11->glEnd();
     myEDIntelaceOn->unuse(*myContext); // this is global unuse
     myContext->core20fwd->glDisable(GL_BLEND);
-    if(!getStWindow()->isFullScreen()) {
-        getStWindow()->stglSwap(ST_WIN_SLAVE);
+    if(!StWindow::isFullScreen()) {
+        StWindow::stglSwap(ST_WIN_SLAVE);
     }
 }
 
-void StOutInterlace::stglDraw(unsigned int ) {
-    myFPSControl.setTargetFPS(getStWindow()->stglGetTargetFps());
+void StOutInterlace::stglDraw() {
+    myFPSControl.setTargetFPS(StWindow::getTargetFps());
 
     // always draw LEFT view into real screen buffer
-    getStWindow()->stglMakeCurrent(ST_WIN_MASTER);
-    myContext->stglResize(getStWindow()->getPlacement());
-    myStCore->stglDraw(ST_DRAW_LEFT);
+    StWindow::stglMakeCurrent(ST_WIN_MASTER);
+    myContext->stglResize(StWindow::getPlacement());
+    StWindow::signals.onRedraw(ST_DRAW_LEFT);
 
-    if(!getStWindow()->isStereoOutput() || myIsBroken) {
+    if(!StWindow::isStereoOutput() || myIsBroken) {
         if(myToCompressMem) {
             myFrmBuffer->release(*myContext);
         }
 
-        if(myDeviceId == DEVICE_HINTERLACE_ED) {
+        if(myDevice == DEVICE_HINTERLACE_ED) {
             // EDimensional disactivation
             // TODO (Kirill Gavrilov#4#) implement logic to sync multiple sView instances
             if(myIsEDCodeFinished) {
@@ -673,14 +675,14 @@ void StOutInterlace::stglDraw(unsigned int ) {
 
         // decrease FPS to target by thread sleeps
         myFPSControl.sleepToTarget();
-        getStWindow()->stglSwap(ST_WIN_MASTER);
+        StWindow::stglSwap(ST_WIN_MASTER);
         ++myFPSControl;
         return;
     }
 
     // reverse L/R according to window position
     bool isPixelReverse = false;
-    const StRectI_t aWinRect = getStWindow()->getPlacement();
+    const StRectI_t aWinRect = StWindow::getPlacement();
 
     // resize FBO
     if(!myFrmBuffer->initLazy(*myContext, aWinRect.width(), aWinRect.height())) {
@@ -690,8 +692,8 @@ void StOutInterlace::stglDraw(unsigned int ) {
     }
 
     // odd vertically?
-    if(!getStWindow()->isFullScreen() && aWinRect.bottom() % 2 == 1) {
-        switch(myDeviceId) {
+    if(!StWindow::isFullScreen() && aWinRect.bottom() % 2 == 1) {
+        switch(myDevice) {
             case DEVICE_CHESSBOARD:
             case DEVICE_HINTERLACE:
             case DEVICE_HINTERLACE_ED:
@@ -700,8 +702,8 @@ void StOutInterlace::stglDraw(unsigned int ) {
     }
 
     // odd horizontally?
-    if(!getStWindow()->isFullScreen() && aWinRect.left() % 2 == 1) {
-        switch(myDeviceId) {
+    if(!StWindow::isFullScreen() && aWinRect.left() % 2 == 1) {
+        switch(myDevice) {
             case DEVICE_CHESSBOARD:
             case DEVICE_VINTERLACE:
                 isPixelReverse = !isPixelReverse; break;
@@ -714,7 +716,7 @@ void StOutInterlace::stglDraw(unsigned int ) {
     }
 
     // reversed by user?
-    if(myIsReversed) {
+    if(params.ToReverse->getValue()) {
         isPixelReverse = !isPixelReverse;
     }
 
@@ -733,7 +735,7 @@ void StOutInterlace::stglDraw(unsigned int ) {
     myContext->core20fwd->glGetIntegerv(GL_VIEWPORT, aVPort);
     myFrmBuffer->setupViewPort(*myContext); // we set TEXTURE sizes here
     myFrmBuffer->bindBuffer(*myContext);
-        myStCore->stglDraw(ST_DRAW_RIGHT);
+        StWindow::signals.onRedraw(ST_DRAW_RIGHT);
     myFrmBuffer->unbindBuffer(*myContext);
     myContext->core20fwd->glViewport(aVPort[0], aVPort[1], aVPort[2], aVPort[3]);
 
@@ -741,7 +743,7 @@ void StOutInterlace::stglDraw(unsigned int ) {
     myContext->core20fwd->glDisable(GL_BLEND);
 
     myFrmBuffer->bindTexture(*myContext);
-    const StHandle<StProgramFB>& aProgram = isPixelReverse ? myGlProgramsRev[myDeviceId] : myGlPrograms[myDeviceId];
+    const StHandle<StProgramFB>& aProgram = isPixelReverse ? myGlProgramsRev[myDevice] : myGlPrograms[myDevice];
     aProgram->use(*myContext);
     myQuadVertBuf.bindVertexAttrib(*myContext, ST_VATTRIB_VERTEX);
     myQuadTexCoordBuf.bindVertexAttrib(*myContext, ST_VATTRIB_TCOORD);
@@ -753,7 +755,7 @@ void StOutInterlace::stglDraw(unsigned int ) {
     aProgram->unuse(*myContext);
     myFrmBuffer->unbindTexture(*myContext);
 
-    if(myDeviceId == DEVICE_HINTERLACE_ED) {
+    if(myDevice == DEVICE_HINTERLACE_ED) {
         // EDimensional activation
         if(myIsEDCodeFinished) {
             if(!myIsStereo) {
@@ -770,89 +772,37 @@ void StOutInterlace::stglDraw(unsigned int ) {
 
     // decrease FPS to target by thread sleeps
     myFPSControl.sleepToTarget();
-    getStWindow()->stglSwap(ST_WIN_MASTER);
+    StWindow::stglSwap(ST_WIN_MASTER);
     ++myFPSControl;
 }
 
-// SDK version was used
-ST_EXPORT void getSDKVersion(StVersion* ver) {
-    *ver = StVersionInfo::getSDKVersion();
-}
-
-// plugin version
-ST_EXPORT void getPluginVersion(StVersion* ver) {
-    *ver = StVersionInfo::getSDKVersion();
-}
-
-ST_EXPORT const StRendererInfo_t* getDevicesInfo(const stBool_t theToDetectPriority) {
-    static StRendererInfo_t ST_SELF_INFO = { NULL, NULL, NULL, 0 };
-    if(ST_SELF_INFO.devices != NULL) {
-        return &ST_SELF_INFO;
+void StOutInterlace::doVSync(const bool theValue) {
+    if(myContext.isNull()) {
+        return;
     }
 
-    StTranslations aLangMap(ST_OUT_PLUGIN_NAME);
-
-    // detect connected displays
-    int aRowSupportLevel = ST_DEVICE_SUPPORT_NONE;
-    if(theToDetectPriority) {
-        if(StCore::INIT() != STERROR_LIBNOERROR) {
-            ST_DEBUG_LOG(ST_OUT_PLUGIN_NAME + " Plugin, Core library not available!");
-        } else {
-            bool dummy = false;
-            StHandle<StMonitor> aMon = StOutInterlace::getHInterlaceMonitor(dummy);
-            if(!aMon.isNull()) {
-                aRowSupportLevel = ST_DEVICE_SUPPORT_HIGHT;
-                aMon.nullify();
-            }
-            StCore::FREE();
-        }
-    }
-
-    // devices list
-    static StString aRowInterName = aLangMap.changeValueId(STTR_HINTERLACE_NAME,    "Row Interlaced");
-    static StString aRowInterDesc = aLangMap.changeValueId(STTR_HINTERLACE_DESC,    "Row interlaced displays: Zalman, Hyundai,...");
-    static StString aColInterName = aLangMap.changeValueId(STTR_VINTERLACE_NAME,    "Column Interlaced");
-    static StString aColInterDesc = aLangMap.changeValueId(STTR_VINTERLACE_DESC,    "Column interlaced displays");
-    static StString aChessName    = aLangMap.changeValueId(STTR_CHESSBOARD_NAME,    "DLP TV (chessboard)");
-    static StString aChessDesc    = aLangMap.changeValueId(STTR_CHESSBOARD_DESC,    "DLP TV (chessboard)");
-    static StString aRowEdName    = aLangMap.changeValueId(STTR_HINTERLACE_ED_NAME, "Interlaced ED");
-    static StString aRowEdDesc    = aLangMap.changeValueId(STTR_HINTERLACE_ED_DESC, "EDimensional in interlaced mode");
-    static StStereoDeviceInfo_t aDevicesArray[4] = {
-        { "StOutHInterlace",   aRowInterName.toCString(), aRowInterDesc.toCString(), aRowSupportLevel },
-        { "StOutVInterlace",   aColInterName.toCString(), aColInterDesc.toCString(), ST_DEVICE_SUPPORT_NONE },
-        { "StOutChessboard",   aChessName.toCString(),    aChessDesc.toCString(),    ST_DEVICE_SUPPORT_NONE },
-        { "StOutHInterlaceED", aRowEdName.toCString(),    aRowEdDesc.toCString(),    ST_DEVICE_SUPPORT_NONE }
-    };
-
-    ST_SELF_INFO.devices = &aDevicesArray[0];
-    ST_SELF_INFO.count   = 4;
-
-    // about string
-    StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - Interlaced Output library");
-    StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
-    StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
-        "(C) 2009-2013 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0");
-    static StString anAboutString = aTitle + '\n' + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr;
-    ST_SELF_INFO.aboutString = (stUtf8_t* )anAboutString.toCString();
-
-    return &ST_SELF_INFO;
+    StWindow::stglMakeCurrent(ST_WIN_MASTER);
+    myContext->stglSetVSync(theValue ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
 }
 
-ST_EXPORT StRendererInterface* StRenderer_new() {
-    return new StOutInterlace(); }
-ST_EXPORT void StRenderer_del(StRendererInterface* inst) {
-    delete (StOutInterlace* )inst; }
-ST_EXPORT StWindowInterface* StRenderer_getStWindow(StRendererInterface* inst) {
-    // This is VERY important return libImpl pointer here!
-    return ((StOutInterlace* )inst)->getStWindow()->getLibImpl(); }
-ST_EXPORT stBool_t StRenderer_init(StRendererInterface* inst,
-                                   const stUtf8_t*      theRendererPath,
-                                   const int&           theDeviceId,
-                                   const StNativeWin_t  theNativeParent) {
-    return ((StOutInterlace* )inst)->init(StString(theRendererPath), theDeviceId, theNativeParent); }
-ST_EXPORT stBool_t StRenderer_open(StRendererInterface* inst, const StOpenInfo_t* stOpenInfo) {
-    return ((StOutInterlace* )inst)->open(StOpenInfo(stOpenInfo)); }
-ST_EXPORT void StRenderer_callback(StRendererInterface* inst, StMessage_t* stMessages) {
-    ((StOutInterlace* )inst)->callback(stMessages); }
-ST_EXPORT void StRenderer_stglDraw(StRendererInterface* inst, unsigned int views) {
-    ((StOutInterlace* )inst)->stglDraw(views); }
+void StOutInterlace::doSetBindToMonitor(const bool theValue) {
+    if(!theValue
+    || StWindow::isFullScreen()) {
+        return;
+    }
+
+    const StSearchMonitors& aMonitors = StWindow::getMonitors();
+    StRectI_t aRect = StWindow::getPlacement();
+    StMonitor aMon  = aMonitors[aRect.center()];
+    StHandle<StMonitor> anInterlacedMon = StOutInterlace::getHInterlaceMonitor(aMonitors, myIsMonReversed);
+    if(!anInterlacedMon.isNull()
+    && !isInterlacedMonitor(aMon, myIsMonReversed)) {
+        int aWidth  = aRect.width();
+        int aHeight = aRect.height();
+        aRect.left()   = anInterlacedMon->getVRect().left() + 256;
+        aRect.right()  = aRect.left() + aWidth;
+        aRect.top()    = anInterlacedMon->getVRect().top() + 256;
+        aRect.bottom() = aRect.top() + aHeight;
+        StWindow::setPlacement(aRect);
+    }
+}

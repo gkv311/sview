@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutDual library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -19,7 +19,7 @@
 #ifndef __StOutDual_h_
 #define __StOutDual_h_
 
-#include <StCore/StCore.h> // header for Stereo Output Core
+#include <StCore/StWindow.h>
 #include <StGL/StGLVertexBuffer.h>
 #include <StThreads/StFPSControl.h>
 
@@ -27,7 +27,74 @@ class StSettings;
 class StProgramMM;
 class StGLFrameBuffer;
 
-class ST_LOCAL StOutDual : public StRendererInterface {
+/**
+ * This class implements stereoscopic rendering on displays
+ * with independent connection to each view.
+ */
+class StOutDual : public StWindow {
+
+        public:
+
+    /**
+     * Main constructor.
+     */
+    ST_CPPEXPORT StOutDual(const StNativeWin_t theParentWindow);
+
+    /**
+     * Destructor.
+     */
+    ST_CPPEXPORT virtual ~StOutDual();
+
+    /**
+     * Renderer about string.
+     */
+    ST_CPPEXPORT virtual StString getRendererAbout() const;
+
+    /**
+     * Renderer id.
+     */
+    ST_CPPEXPORT virtual const char* getRendererId() const;
+
+    /**
+     * Active Device id.
+     */
+    ST_CPPEXPORT virtual const char* getDeviceId() const;
+
+    /**
+     * Activate Device.
+     */
+    ST_CPPEXPORT virtual bool setDevice(const StString& theDevice);
+
+    /**
+     * Devices list.
+     */
+    ST_CPPEXPORT virtual void getDevices(StOutDevicesList& theList) const;
+
+    /**
+     * Retrieve options list.
+     */
+    ST_CPPEXPORT virtual void getOptions(StParamsList& theList) const;
+
+    /**
+     * Create and show window.
+     * @return false if any critical error appeared
+     */
+    ST_CPPEXPORT virtual bool create();
+
+    /**
+     * Close the window.
+     */
+    ST_CPPEXPORT virtual void close();
+
+    /**
+     * Process callback.
+     */
+    ST_CPPEXPORT virtual void processEvents(StMessage_t* theMessages);
+
+    /**
+     * Stereo renderer.
+     */
+    ST_CPPEXPORT virtual void stglDraw();
 
         private:
 
@@ -45,30 +112,42 @@ class ST_LOCAL StOutDual : public StRendererInterface {
 
         private:
 
-    void replaceDualAttribute(const DeviceEnum theFrom,
-                              const DeviceEnum theTo);
-    void optionsStructAlloc();
+    ST_LOCAL void replaceDualAttribute(const DeviceEnum theFrom,
+                                       const DeviceEnum theTo);
 
-        public:
+    /**
+     * Release GL resources before window closing.
+     */
+    ST_LOCAL void releaseResources();
 
-    StOutDual();
-    ~StOutDual();
-    StRendererInterface* getLibImpl() { return this; }
-    StWindowInterface* getStWindow() { return myStCore->getStWindow(); }
-    bool init(const StString& , const int& , const StNativeWin_t );
-    bool open(const StOpenInfo& stOpenInfo) { return myStCore->open(stOpenInfo); }
-    void callback(StMessage_t* );
-    void stglDraw(unsigned int );
+    /**
+     * On/off VSync callback.
+     */
+    ST_LOCAL void doVSync(const bool theValue);
+
+    /**
+     * Change slave window position callback.
+     */
+    ST_LOCAL void doSlaveMon(const int32_t theValue);
 
         private:
 
-    static StAtomic<int32_t>  myInstancesNb;     //!< shared counter for all instances
+    static StAtomic<int32_t> myInstancesNb; //!< shared counter for all instances
 
         private:
 
-    StHandle<StCore>          myStCore;
+    struct {
+
+        StHandle<StBoolParam>  IsVSyncOn;  //!< flag to use VSync
+        StHandle<StInt32Param> SlaveMonId; //!< slave window position
+
+    } params;
+
+        private:
+
+    StOutDevicesList          myDevices;
     StHandle<StSettings>      mySettings;
-    StString                  myPluginPath;
+    StString                  myAbout;           //!< about string
 
     StHandle<StGLContext>     myContext;
     StHandle<StGLFrameBuffer> myFrBuffer;        //!< OpenGL frame buffer object
@@ -79,12 +158,8 @@ class ST_LOCAL StOutDual : public StRendererInterface {
     StGLVertexBuffer          myVertYMirBuf;
     StGLVertexBuffer          myTexCoordBuf;
 
-    StSDOptionsList_t*        myOptions;         //!< options menu
-
     DeviceEnum                myDevice;
-    int32_t                   mySlaveMonId;      //!< slave window placement
     bool                      myToSavePlacement; //!< to save window position on exit
-    bool                      myIsVSyncOn;       //!< to turn VSync on
     bool                      myToCompressMem;   //!< reduce memory usage
     bool                      myIsBroken;        //!< special flag for broke state - when FBO can not be allocated
 

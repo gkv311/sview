@@ -44,17 +44,8 @@ static LRESULT CALLBACK stWndProcWrapper(HWND in_hWnd, UINT uMsg, WPARAM wParam,
     }
 }
 
-// function create GUI window
-bool StWindowImpl::stglCreate(const StWinAttributes_t* theAttributes,
-                              const StNativeWin_t      theParentWindow) {
-    myParentWin = theParentWindow;
-
-    // parse attributes
-    size_t aBytesToCopy = (theAttributes->nSize > sizeof(StWinAttributes_t)) ? sizeof(StWinAttributes_t) : theAttributes->nSize;
-    stMemCpy(&myWinAttribs, theAttributes, aBytesToCopy); // copy as much as possible
-    myWinAttribs.nSize = sizeof(StWinAttributes_t);       // restore own size
-    updateSlaveConfig();
-
+bool StWindowImpl::create() {
+    myMessageList.reset();
     myInitState = STWIN_INITNOTSTART;
 
     myEventInitWin.reset();
@@ -659,6 +650,10 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
 }
 
 void StWindowImpl::updateWindowPos() {
+    if(myMaster.hWindow == NULL) {
+        return;
+    }
+
     if(myWinAttribs.isSlave && !myWinAttribs.isSlaveHide && (!isSlaveIndependent() || myMonitors.size() > 1)) {
         HWND afterHWND = myMaster.hWindow;
         UINT aFlags    = SWP_NOACTIVATE;
@@ -722,7 +717,7 @@ void StWindowImpl::updateWindowPos() {
 }
 
 // Function set to argument-buffer given events and return events number
-void StWindowImpl::callback(StMessage_t* theMessages) {
+void StWindowImpl::processEvents(StMessage_t* theMessages) {
     if(myIsDispChanged) {
         updateMonitors();
     }

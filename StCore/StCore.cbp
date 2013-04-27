@@ -135,12 +135,11 @@
 				</ExtraCommands>
 			</Target>
 			<Target title="LINUX_gcc">
-				<Option output="../bin/$(TARGET_NAME)/StCore" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/libStCore" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
-				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-O3" />
 					<Add option="-std=c++0x" />
@@ -166,12 +165,11 @@
 				</Linker>
 			</Target>
 			<Target title="LINUX_gcc_DEBUG">
-				<Option output="../bin/$(TARGET_NAME)/StCore" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/libStCore" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
-				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-std=c++0x" />
 					<Add option="-Wall" />
@@ -260,8 +258,7 @@
 			<Option target="LINUX_gcc_DEBUG" />
 		</Unit>
 		<Unit filename="StADLsdk.h" />
-		<Unit filename="StApplicationImpl.cpp" />
-		<Unit filename="StApplicationImpl.h" />
+		<Unit filename="StApplication.cpp" />
 		<Unit filename="StCocoaView.h">
 			<Option target="MAC_gcc" />
 			<Option target="MAC_gcc_DEBUG" />
@@ -289,8 +286,6 @@
 			<Option target="WIN_gcc_x86" />
 			<Option target="WIN_vc_x86_DEBUG" />
 		</Unit>
-		<Unit filename="StCoreImpl.cpp" />
-		<Unit filename="StCoreImpl.h" />
 		<Unit filename="StMouseClickQueue.h" />
 		<Unit filename="StSearchMonitors.ObjC.mm">
 			<Option compile="1" />
@@ -299,7 +294,6 @@
 			<Option target="MAC_gcc_DEBUG" />
 		</Unit>
 		<Unit filename="StSearchMonitors.cpp" />
-		<Unit filename="StSearchMonitors.h" />
 		<Unit filename="StWinHandles.ObjC.mm">
 			<Option compile="1" />
 			<Option link="1" />
@@ -315,6 +309,7 @@
 			<Option target="LINUX_gcc_DEBUG" />
 		</Unit>
 		<Unit filename="StWinHandles.h" />
+		<Unit filename="StWindow.cpp" />
 		<Unit filename="StWindowImpl.cpp" />
 		<Unit filename="StWindowImpl.h" />
 		<Unit filename="StWindowImplLin.cpp">
@@ -348,19 +343,6 @@
 		<Unit filename="../include/StCore/StApplication.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
-		<Unit filename="../include/StCore/StApplicationInterface.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="../include/StCore/StCore.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="../include/StCore/StDrawer.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="../include/StCore/StDrawerInfo.h" />
-		<Unit filename="../include/StCore/StDrawerInterface.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
 		<Unit filename="../include/StCore/StEDIDParser.h" />
 		<Unit filename="../include/StCore/StMessageList.h">
 			<Option target="&lt;{~None~}&gt;" />
@@ -374,20 +356,7 @@
 		<Unit filename="../include/StCore/StOpenInfo.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
-		<Unit filename="../include/StCore/StRendererInfo.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="../include/StCore/StRendererInterface.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="../include/StCore/StRendererPlugin.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="../include/StCore/StStereoDeviceInfo.h" />
-		<Unit filename="../include/StCore/StStereoDeviceInfoList.h" />
-		<Unit filename="../include/StCore/StStereoDeviceInfo_t.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
+		<Unit filename="../include/StCore/StSearchMonitors.h" />
 		<Unit filename="../include/StCore/StVirtualKeys.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
@@ -395,9 +364,6 @@
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="../include/StCore/StWindow.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="../include/StCore/StWindowInterface.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Extensions>

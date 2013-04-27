@@ -24,7 +24,7 @@
 /**
  * Helper-class.
  */
-class ST_LOCAL StMouseClickQueue {
+class StMouseClickQueue {
 
         private:
 
@@ -40,15 +40,15 @@ class ST_LOCAL StMouseClickQueue {
         public:
 
 
-    StMouseClickQueue() : front(0), back(0), size(0), stMutex() {
+    ST_LOCAL StMouseClickQueue() : front(0), back(0), size(0), stMutex() {
         memset(arrayBt, 0, sizeof(arrayBt));
     }
 
-    ~StMouseClickQueue() {
+    ST_LOCAL ~StMouseClickQueue() {
         //
     }
 
-    void clear() {
+    ST_LOCAL void clear() {
         stMutex.lock();
         while(size != 0) {
             front++;
@@ -60,7 +60,7 @@ class ST_LOCAL StMouseClickQueue {
         stMutex.unlock();
     }
 
-    int pop(StPointD_t& point) {
+    ST_LOCAL int pop(StPointD_t& point) {
         stMutex.lock();
         if(size != 0) {
             point = arrayPt[front];
@@ -77,7 +77,7 @@ class ST_LOCAL StMouseClickQueue {
         return ST_NOMOUSE;
     }
 
-    void push(const StPointD_t& point, const int& buttonId) {
+    ST_LOCAL void push(const StPointD_t& point, const int& buttonId) {
         stMutex.lock();
         if(size != MOUSECLICK_BUFF_SIZE) {
             arrayPt[back] = point;

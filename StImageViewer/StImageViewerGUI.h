@@ -21,6 +21,7 @@
 
 #include <StGLWidgets/StGLWidget.h>
 #include <StGLWidgets/StGLRootWidget.h>
+#include <StGLStereo/StGLTextureQueue.h>
 #include <StGLStereo/StFormatEnum.h>
 #include <StSettings/StTranslations.h>
 #include <StThreads/StEvent.h>
@@ -33,6 +34,7 @@ class StGLMenu;
 class StGLMenuItem;
 class StGLImageRegion;
 class StGLMsgStack;
+class StGLFpsLabel;
 class StWindow;
 
 /**
@@ -55,9 +57,9 @@ class StImageViewerGUI : public StGLRootWidget {
         CLICKED_ICON_SRC2AUTODETECT,
     };
 
-    StImageViewer*           myPlugin; //!< link to the main Drawer class
-    StWindow*                myWindow; //!< link to the window instance
-    StHandle<StTranslations> myLangMap; //!< translated strings map
+    StImageViewer*           myPlugin;  //!< link to the main Drawer class
+    StWindow*                myWindow;  //!< link to the window instance
+    StTranslations*          myLangMap; //!< translated strings map
     StString      texturesPathRoot; // textures directory
     StTimer      stTimeVisibleLock; // minimum visible delay
 
@@ -74,6 +76,7 @@ class StImageViewerGUI : public StGLRootWidget {
     StGLTextureButton*   btnSwapLR;
     StGLWidget*       myBtnSrcFrmt;
     StGLTextureButton*   myBtnFull;
+    StGLFpsLabel*      myFpsWidget;
 
     bool isGUIVisible;
     bool isGUIMinimal;
@@ -94,17 +97,21 @@ class StImageViewerGUI : public StGLRootWidget {
     ST_LOCAL StGLMenu* createDisplayRatioMenu(); // Root -> View menu -> Display Ratio
     ST_LOCAL StGLMenu* createSmoothFilterMenu(); // Root -> View menu -> Smooth Filter
     ST_LOCAL StGLMenu* createGammaMenu();        // Root -> View menu -> Gamma Correction
+    ST_LOCAL StGLMenu* createOutputMenu();       // Root -> Output menu
     ST_LOCAL StGLMenu* createHelpMenu();         // Root -> Help menu
     ST_LOCAL StGLMenu* createCheckUpdatesMenu(); // Root -> Help -> Check updates menu
     ST_LOCAL StGLMenu* createLanguageMenu();     // Root -> Help -> Language menu
 
         public: //!< StGLRootWidget overrides
 
-    ST_LOCAL StImageViewerGUI(StImageViewer* thePlugin,
-                              StWindow*      theWindow);
+    ST_LOCAL StImageViewerGUI(StImageViewer*  thePlugin,
+                              StWindow*       theWindow,
+                              StTranslations* theLangMap,
+                              const StHandle<StGLTextureQueue>& theTextureQueue);
     ST_LOCAL virtual ~StImageViewerGUI();
     ST_LOCAL virtual void stglUpdate(const StPointD_t& pointZo);
     ST_LOCAL virtual void stglResize(const StRectI_t& winRectPx);
+    ST_LOCAL virtual void stglDraw(unsigned int theView);
     ST_LOCAL virtual void setVisibility(const StPointD_t& pointZo, bool isMouseActive = false);
 
         public:
@@ -120,6 +127,8 @@ class StImageViewerGUI : public StGLRootWidget {
     ST_LOCAL void doAboutSystem (const size_t );
     ST_LOCAL void doCheckUpdates(const size_t );
     ST_LOCAL void doOpenLicense (const size_t );
+    ST_LOCAL void doShowFPS(const bool );
+    ST_LOCAL void doAboutRenderer(const size_t );
 
 };
 

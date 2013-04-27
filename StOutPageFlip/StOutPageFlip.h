@@ -19,12 +19,13 @@
 #ifndef __StOutPageFlip_h_
 #define __StOutPageFlip_h_
 
-#include <StCore/StCore.h> // header for Stereo Output Core
-#include <StCore/StWindowInterface.h>
+#include <StCore/StWindow.h>
 #include <StGL/StGLVec.h>
 #include <StGL/StGLVertexBuffer.h>
 #include <StGL/StGLTexture.h>
 #include <StThreads/StFPSControl.h>
+#include <StSettings/StEnumParam.h>
+#include <StSettings/StTranslations.h>
 
 #include "StDXInfo.h"
 
@@ -65,7 +66,116 @@ enum {
     STTR_PLUGIN_DESCRIPTION = 2002,
 };
 
-class ST_LOCAL StOutPageFlip : public StRendererInterface {
+/**
+ * This class implements stereoscopic rendering on displays
+ * with shutter glasses.
+ */
+class StOutPageFlip : public StWindow {
+
+        public:
+
+    /**
+     * Main constructor.
+     */
+    ST_CPPEXPORT StOutPageFlip(const StNativeWin_t theParentWindow);
+
+    /**
+     * Destructor.
+     */
+    ST_CPPEXPORT virtual ~StOutPageFlip();
+
+    /**
+     * Renderer about string.
+     */
+    ST_CPPEXPORT virtual StString getRendererAbout() const;
+
+    /**
+     * Renderer id.
+     */
+    ST_CPPEXPORT virtual const char* getRendererId() const;
+
+    /**
+     * Active Device id.
+     */
+    ST_CPPEXPORT virtual const char* getDeviceId() const;
+
+    /**
+     * This methods returns device lost state.
+     * In addition pageflip output requires re-initialization
+     * when hardware Quad-Buffer is turned on/off.
+     * @return true if rendering device requires reinitialization
+     */
+    ST_CPPEXPORT virtual bool isLostDevice() const;
+
+    /**
+     * Activate Device.
+     */
+    ST_CPPEXPORT virtual bool setDevice(const StString& theDevice);
+
+    /**
+     * Devices list.
+     */
+    ST_CPPEXPORT virtual void getDevices(StOutDevicesList& theList) const;
+
+    /**
+     * Retrieve options list.
+     */
+    ST_CPPEXPORT virtual void getOptions(StParamsList& theList) const;
+
+    /**
+     * Create and show window.
+     * @return false if any critical error appeared
+     */
+    ST_CPPEXPORT virtual bool create();
+
+    /**
+     * Close the window.
+     */
+    ST_CPPEXPORT virtual void close();
+
+    /**
+     * Process callback.
+     */
+    ST_CPPEXPORT virtual void processEvents(StMessage_t* theMessages);
+
+    /**
+     * Stereo renderer.
+     */
+    ST_CPPEXPORT virtual void stglDraw();
+
+        protected:
+
+    ST_LOCAL void setupDevice();
+    ST_LOCAL void stglDrawAggressive(unsigned int theView);
+
+        protected:
+
+    ST_LOCAL bool dxInit();
+    ST_LOCAL void dxRelease();
+    ST_LOCAL void dxActivate();
+    ST_LOCAL void dxDisactivate();
+    ST_LOCAL void dxDraw(unsigned int theView);
+
+        protected:
+
+    /**
+     * Release GL resources before window closing.
+     */
+    ST_LOCAL virtual void releaseResources();
+
+    /**
+     * Switch quad buffer callback.
+     */
+    ST_LOCAL void doSetQuadBuffer(const int32_t );
+
+    /**
+     * Show/hide extra options callback.
+     */
+    ST_LOCAL void doShowExtra(const bool theValue);
+
+    ST_LOCAL         void stglDrawWarning();
+    ST_LOCAL virtual void stglDrawExtra(unsigned int theView, int theMode);
+    ST_LOCAL virtual void stglResize(const StRectI_t& theWinRect);
 
         protected:
 
@@ -74,11 +184,6 @@ class ST_LOCAL StOutPageFlip : public StRendererInterface {
         DEVICE_SHUTTERS = 0, // generic shutter glasses
         DEVICE_VUZIX    = 1, // Vuzix HMD
     } DeviceEnum;
-
-    enum {
-        DEVICE_OPTION_EXTRA      = 0,
-        DEVICE_OPTION_QUADBUFFER = 1,
-    } DeviceOption;
 
     typedef enum tagQuadBufferEnum {
         QUADBUFFER_AUTO            =-1, // autodetection
@@ -89,29 +194,35 @@ class ST_LOCAL StOutPageFlip : public StRendererInterface {
 
         protected:
 
-    StHandle<StCore>      myStCore;
+    struct {
+
+        StHandle<StBoolParam> ToShowExtra; //!< show extra options
+        StHandle<StEnumParam> QuadBuffer;  //!< quad buffer option
+
+    } params;
+
+        protected:
+
+    StOutDevicesList      myDevices;
     StHandle<StSettings>  mySettings;
-    StString              myPluginPath;
-    StWinAttributes_t     myWinAttribs;
-    StSDOptionsList_t*    myOptions;
+    StString              myAbout;      //!< about string
     StHandle<StGLContext> myContext;
-    StHandle<StVuzixSDK>  myVuzixSDK; // Vuzix HMD control
+    StHandle<StVuzixSDK>  myVuzixSDK;   //!< Vuzix HMD control
     StHandle<StGLTexture> myWarning;
+    StTranslations        myLangMap;
     DeviceEnum            myDevice;
-    int                   myDeviceOptionsNb;
-    QuadBufferEnum        myQuadBuffer;
-    QuadBufferEnum        myQuadBufferMax;
     StDXInfo              myDxInfo;
     StFPSControl          myFPSControl;
     bool                  myToSavePlacement;
     bool                  myToDrawStereo;
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     bool                  myIsVistaPlus;
 #endif
+    bool                  myToResetDevice;
 
     struct StOutDirect3D {
         StHandle<StGLFrameBuffer> myGLBuffer;
-    #if(defined(_WIN32) || defined(__WIN32__))
+    #ifdef _WIN32
         StHandle<StDXNVWindow>    myDxWindow;
         StHandle<StThread>        myDxThread;
     #endif
@@ -120,45 +231,13 @@ class ST_LOCAL StOutPageFlip : public StRendererInterface {
         bool   myIsActive;
         bool   myToUsePBO;
 
-        StOutDirect3D();
+        ST_LOCAL StOutDirect3D();
 
-    #if(defined(_WIN32) || defined(__WIN32__))
+    #ifdef _WIN32
         static SV_THREAD_FUNCTION dxThreadFunction(void* theStOutD3d);
     #endif // _WIN32
 
     } myOutD3d; //!< auxiliary Direct3D stuff
-
-        protected:
-
-    void setupDevice();
-    void stglDrawAggressive(unsigned int theView);
-
-    bool dxInit();
-    void dxRelease();
-    void dxActivate();
-    void dxDisactivate();
-    void dxDraw(unsigned int theView);
-
-        protected:
-
-    virtual void optionsStructAlloc();
-    virtual void updateOptions(const StSDOptionsList_t* theOptions,
-                               StMessage_t&             theMsg);
-            void stglDrawWarning();
-    virtual void stglDrawExtra(unsigned int theView, int theMode);
-    virtual void stglResize(const StRectI_t& theWinRect);
-    virtual void parseKeys(bool* theKeysMap);
-
-        public:
-
-    StOutPageFlip(const StHandle<StSettings>& theSettings);
-    virtual ~StOutPageFlip();
-    virtual StRendererInterface* getLibImpl() { return this; }
-    virtual StWindowInterface* getStWindow() { return myStCore->getStWindow(); }
-    virtual bool init(const StString& , const int& , const StNativeWin_t );
-    virtual bool open(const StOpenInfo& theOpenInfo) { return myStCore->open(theOpenInfo); }
-    virtual void callback(StMessage_t* );
-    virtual void stglDraw(unsigned int );
 
 };
 

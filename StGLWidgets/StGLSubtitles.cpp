@@ -56,16 +56,21 @@ const StString& StGLSubtitles::getClassName() {
     return CLASS_NAME;
 }
 
-StGLSubtitles::StGLSubtitles(StGLWidget* theParent)
+StGLSubtitles::StGLSubtitles(StGLWidget* theParent,
+                             const StHandle<StSubQueue>& theSubQueue)
 : StGLTextArea(theParent,
                0, -100,
                StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER),
                800, 160,
                false,
                StGLTextArea::SIZE_BIG),
-  myQueue(new StSubQueue()),
+  myQueue(theSubQueue),
   myShowItems(),
   myPTS(0.0) {
+    if(myQueue.isNull()) {
+        myQueue = new StSubQueue();
+    }
+
     myToDrawShadow = true;
     setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
     setBorder(false);

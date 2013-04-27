@@ -21,21 +21,24 @@
 
 #include <StGLWidgets/StGLWidget.h>
 #include <StGLWidgets/StGLRootWidget.h>
+#include <StGLWidgets/StSubQueue.h>
 #include <StGLStereo/StFormatEnum.h>
+#include <StGLStereo/StGLTextureQueue.h>
 #include <StSettings/StTranslations.h>
 
 // forward declarations
 class StMoviePlayer;
+class StGLFpsLabel;
 class StGLDescription;
 class StGLImageRegion;
 class StGLMenu;
 class StGLMenuItem;
+class StGLMsgStack;
 class StGLSubtitles;
 class StGLTextureButton;
 class StSeekBar;
 class StTimeBox;
 class StUtfLangMap;
-class StGLMsgStack;
 class StWindow;
 
 /**
@@ -65,7 +68,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
 
     StMoviePlayer*            myPlugin; //!< link to the main Drawer class
     StWindow*                 myWindow; //!< link to the window instance
-    StHandle<StTranslations> myLangMap; //!< translated strings map
+    StTranslations*          myLangMap; //!< translated strings map
     StString          texturesPathRoot; // textures directory
     StTimer          stTimeVisibleLock; // minimum visible delay
 
@@ -93,6 +96,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
     StGLTextureButton*     btnNext;
     StGLTextureButton*     btnList;
     StGLTextureButton*  btnFullScr;
+    StGLFpsLabel*      myFpsWidget;
 
     bool isGUIVisible;
 
@@ -118,6 +122,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL StGLMenu* createAudioMenu();        // Root -> Audio menu
     ST_LOCAL StGLMenu* createAudioGainMenu();    // Root -> Audio menu -> Volume
     ST_LOCAL StGLMenu* createSubtitlesMenu();    // Root -> Subtitles menu
+    ST_LOCAL StGLMenu* createOutputMenu();       // Root -> Output menu
     ST_LOCAL StGLMenu* createHelpMenu();         // Root -> Help menu
     ST_LOCAL StGLMenu* createBlockSleepMenu();   // Root -> Help -> Block sleeping
     ST_LOCAL StGLMenu* createCheckUpdatesMenu(); // Root -> Help -> Check updates menu
@@ -128,14 +133,17 @@ class StMoviePlayerGUI : public StGLRootWidget {
 
         public: //!< StGLRootWidget overrides
 
-    ST_LOCAL StMoviePlayerGUI(StMoviePlayer* thePlugin,
-                              StWindow*      theWindow,
-                              size_t theTextureQueueSizeMax);
+    ST_LOCAL StMoviePlayerGUI(StMoviePlayer*  thePlugin,
+                              StWindow*       theWindow,
+                              StTranslations* theLangMap,
+                              const StHandle<StGLTextureQueue>& theTextureQueue,
+                              const StHandle<StSubQueue>&       theSubQueue);
     ST_LOCAL virtual ~StMoviePlayerGUI();
     ST_LOCAL virtual void stglUpdate(const StPointD_t& thePointZo,
                                      const GLfloat theProgress,
                                      const double thePTS);
     ST_LOCAL virtual void stglResize(const StRectI_t& winRectPx);
+    ST_LOCAL virtual void stglDraw(unsigned int theView);
     ST_LOCAL virtual void setVisibility(const StPointD_t& pointZo, bool isMouseActive = false);
 
         public:
@@ -159,6 +167,8 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL void doAboutProgram (const size_t );
     ST_LOCAL void doCheckUpdates (const size_t );
     ST_LOCAL void doOpenLicense  (const size_t );
+    ST_LOCAL void doShowFPS(const bool );
+    ST_LOCAL void doAboutRenderer(const size_t );
 
 };
 

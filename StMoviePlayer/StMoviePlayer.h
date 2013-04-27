@@ -19,10 +19,11 @@
 #ifndef __StMoviePlayer_h_
 #define __StMoviePlayer_h_
 
-#include <StCore/StDrawerInterface.h>
+#include <StCore/StApplication.h>
 
 #include <StSettings/StFloat32Param.h>
 #include <StGLStereo/StFormatEnum.h>
+#include <StSettings/StTranslations.h>
 
 // forward declarations
 class StGLContext;
@@ -74,9 +75,9 @@ class StALDeviceParam : public StInt32Param {
 };
 
 /**
- * Base Drawer class for Movie Player plugin.
+ * Movie Player application.
  */
-class StMoviePlayer : public StDrawerInterface {
+class StMoviePlayer : public StApplication {
 
         public:
 
@@ -96,19 +97,38 @@ class StMoviePlayer : public StDrawerInterface {
         BLOCK_SLEEP_FULLSCREEN = 3,
     };
 
-        private:
-
-    ST_LOCAL void parseArguments(const StArgumentsMap& theArguments);
-
         public: //! @name interface methods' implementations
 
-    ST_CPPEXPORT StMoviePlayer();
+    /**
+     * Main constructor.
+     */
+    ST_CPPEXPORT StMoviePlayer(const StNativeWin_t         theParentWin = (StNativeWin_t )NULL,
+                               const StHandle<StOpenInfo>& theOpenInfo  = NULL);
+
+    /**
+     * Destructor.
+     */
     ST_CPPEXPORT virtual ~StMoviePlayer();
-    ST_CPPEXPORT virtual StDrawerInterface* getLibImpl() { return this; }
-    ST_CPPEXPORT virtual bool init(StWindowInterface* theWindow);
-    ST_CPPEXPORT virtual bool open(const StOpenInfo& stOpenInfo);
-    ST_CPPEXPORT virtual void parseCallback(StMessage_t* stMessages);
+
+    /**
+     * Open application.
+     */
+    ST_CPPEXPORT virtual bool open();
+
+    /**
+     * Process callback.
+     */
+    ST_CPPEXPORT virtual void processEvents(const StMessage_t* theEvents);
+
+    /**
+     * Draw frame for requested view.
+     */
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
+
+    /**
+     * Reset device - release GL resources in old window and re-create them in new window.
+     */
+    ST_CPPEXPORT virtual bool resetDevice();
 
         public: //! @name callback Slots
 
@@ -164,6 +184,7 @@ class StMoviePlayer : public StDrawerInterface {
         StHandle<StBoolParam>     areGlobalMKeys;   //!< capture global multimedia keys
         StHandle<StInt32Param>    checkUpdatesDays; //!< days count between updates checks
         StHandle<StInt32Param>    srcFormat;        //!< source format
+        StHandle<StBoolParam>     ToShowFps;        //!< display FPS meter
         StHandle<StInt32Param>    audioStream;      //!< active Audio stream
         StHandle<StInt32Param>    subtitlesStream;  //!< active Subtitles stream
         StHandle<StInt32Param>    blockSleeping;    //!< active Audio stream
@@ -171,6 +192,28 @@ class StMoviePlayer : public StDrawerInterface {
         int                       fpsBound;         //!< limit or not rendering FPS
 
     } params;
+
+        private:
+
+    /**
+     * Process device change.
+     */
+    ST_LOCAL virtual void doChangeDevice(const int32_t theValue);
+
+    /**
+     * Initialization routines.
+     */
+    ST_LOCAL bool init();
+
+    /**
+     * Parse arguments.
+     */
+    ST_LOCAL void parseArguments(const StArgumentsMap& theArguments);
+
+    /**
+     * Release GL resources.
+     */
+    ST_LOCAL void releaseDevice();
 
         private: //! @name private callback Slots
 
@@ -189,8 +232,8 @@ class StMoviePlayer : public StDrawerInterface {
         private: //! @name private fields
 
     StHandle<StGLContext>      myContext;
-    StHandle<StWindow>         myWindow;          //!< wrapper over Output plugin's StWindow instance
     StHandle<StSettings>       mySettings;        //!< settings manager for Image Viewer plugin
+    StHandle<StTranslations>   myLangMap;         //!< translated strings map
     StHandle<StMoviePlayerGUI> myGUI;             //!< GUI root widget
     StHandle<StVideo>          myVideo;           //!< main video playback class
     StHandle<StCheckUpdates>   myUpdates;         //!< check updates utility
@@ -203,7 +246,6 @@ class StMoviePlayer : public StDrawerInterface {
     bool                       myToUpdateALList;
     bool                       myIsBenchmark;
     bool                       myToCheckUpdates;
-    bool                       myToQuit;
 
 };
 

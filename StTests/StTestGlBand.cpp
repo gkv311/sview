@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StTests program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
 
 #include "StTestGlBand.h"
 
-#include <StCore/StCore.h>
 #include <StCore/StWindow.h>
 
 #include <StGL/StGLTexture.h>
@@ -130,15 +129,16 @@ void StTestGlBand::perform() {
     StHandle<StWindow> aWin = new StWindow();
     aWin->setPlacement(StRectI_t(256, 768, 256, 768));
     aWin->setTitle("sView - Tests");
-    StWinAttributes_t anAttribs = stDefaultWinAttributes();
-    aWin->stglCreate(&anAttribs, NULL);
+    aWin->create();
 
     // perform tests
-    aWin->stglMakeCurrent(ST_WIN_MASTER);
+    aWin->stglMakeCurrent();
     StGLContext aCtx(true);
 
+    const StGLBoxPx aVPort = aWin->stglViewport(ST_WIN_MASTER);
+    aCtx.stglResizeViewport(aVPort);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    aWin->stglSwap(ST_WIN_MASTER);
+    aWin->stglSwap();
 
     // 2x 1080p
     GLsizei aFrameSizeX = 1920;

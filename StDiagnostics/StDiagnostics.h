@@ -19,34 +19,26 @@
 #ifndef __StDiagnostics_h_
 #define __StDiagnostics_h_
 
-#include <StCore/StDrawerInterface.h>
+#include <StCore/StApplication.h>
 
 class StGLContext;
 class StSettings;
 class StWindow;
 class StDiagnosticsGUI;
 
-class StDiagnostics : public StDrawerInterface {
+class StDiagnostics : public StApplication {
 
         public:
 
     static const StString ST_DRAWER_PLUGIN_NAME;
 
-    ST_LOCAL StDiagnostics();
-    ST_LOCAL ~StDiagnostics();
+    ST_CPPEXPORT StDiagnostics(const StNativeWin_t         theParentWin = (StNativeWin_t )NULL,
+                               const StHandle<StOpenInfo>& theOpenInfo  = NULL);
+    ST_CPPEXPORT virtual ~StDiagnostics();
 
-    ST_LOCAL StHandle<StWindow>& getWindow() {
-        return myWindow;
-    }
-
-    // interface methods' implementations
-    ST_LOCAL StDrawerInterface* getLibImpl() {
-        return this;
-    }
-    ST_LOCAL bool init(StWindowInterface* inStWin);
-    ST_LOCAL bool open(const StOpenInfo& stOpenInfo);
-    ST_LOCAL void parseCallback(StMessage_t* stMessages);
-    ST_LOCAL void stglDraw(unsigned int view);
+    ST_CPPEXPORT virtual bool open();
+    ST_CPPEXPORT virtual void processEvents(const StMessage_t* theMessages);
+    ST_CPPEXPORT virtual void stglDraw(unsigned int view);
 
         public: //!< callback Slots
 
@@ -56,7 +48,6 @@ class StDiagnostics : public StDrawerInterface {
         private:
 
     StHandle<StGLContext>      myContext;
-    StHandle<StWindow>         myWindow;   //!< wrapper over Output plugin's StWindow instance
     StHandle<StSettings>       mySettings; //!< settings manager for Diagnostics plugin
     StHandle<StDiagnosticsGUI> myGUI;      //!< GUI root widget
     bool                       myToQuit;

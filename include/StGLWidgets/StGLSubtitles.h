@@ -56,7 +56,8 @@ class StGLSubtitles : public StGLTextArea {
 
         public:
 
-    ST_CPPEXPORT StGLSubtitles(StGLWidget* theParent);
+    ST_CPPEXPORT StGLSubtitles(StGLWidget*                 theParent,
+                               const StHandle<StSubQueue>& theSubQueue);
     ST_CPPEXPORT virtual ~StGLSubtitles();
     ST_CPPEXPORT virtual const StString& getClassName();
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& thePointZo);

@@ -38,7 +38,7 @@
 /**
  * Wrapper over OpenGL rendering context.
  */
-class ST_LOCAL StWinGlrc {
+class StWinGlrc {
 
         public:
 
@@ -46,20 +46,20 @@ class ST_LOCAL StWinGlrc {
      * Create OpenGL Rendering Context for specified Device Context.
      */
 #ifdef _WIN32
-    StWinGlrc(HDC theDC);
+    ST_LOCAL StWinGlrc(HDC theDC);
 #else
-    StWinGlrc(StHandle<StXDisplay>& theDisplay);
+    ST_LOCAL StWinGlrc(StHandle<StXDisplay>& theDisplay);
 #endif
 
     /**
      * Destructor.
      */
-    ~StWinGlrc();
+    ST_LOCAL ~StWinGlrc();
 
     /**
      * @return true if handle is not NULL.
      */
-    bool isValid() const {
+    ST_LOCAL bool isValid() const {
         return myRC != NULL;
     }
 
@@ -69,9 +69,9 @@ class ST_LOCAL StWinGlrc {
      * or have the same Pixel Format.
      */
 #ifdef _WIN32
-    bool makeCurrent(HDC theDC);
+    ST_LOCAL bool makeCurrent(HDC theDC);
 #else
-    bool makeCurrent(GLXDrawable theDrawable);
+    ST_LOCAL bool makeCurrent(GLXDrawable theDrawable);
 #endif
 
         private:
@@ -95,7 +95,7 @@ typedef StHandle<StWinGlrc> StWinGlrcH;
  * Class DO NOT represents methods for creating
  * those handles, but give full access for them.
  */
-class ST_LOCAL StWinHandles {
+class StWinHandles {
 
         public:
 
@@ -139,50 +139,50 @@ class ST_LOCAL StWinHandles {
     /**
      * Creates NULL-handles.
      */
-    StWinHandles();
+    ST_LOCAL StWinHandles();
 
-    ~StWinHandles();
+    ST_LOCAL ~StWinHandles();
 
     /**
      * Do swap GL frame buffers (quad-buffer / double-buffer).
      */
-    void glSwap();
+    ST_LOCAL void glSwap();
 
     /**
      * Make active this GL rendering context.
      * @return true on success.
      */
-    bool glMakeCurrent();
+    ST_LOCAL bool glMakeCurrent();
 
     /**
      * Create 1 or 2 GL rendering contexts (and share them)
      * for opened windows handles.
      */
-    int glCreateContext(StWinHandles* theSlave, bool theIsQuadStereo);
+    ST_LOCAL int glCreateContext(StWinHandles* theSlave, bool theIsQuadStereo);
 
     /**
      * Close all handles.
      */
-    bool close();
+    ST_LOCAL bool close();
 
 #if(defined(_WIN32) || defined(__WIN32__))
     /**
      * Got the unique class name.
      */
-    static StStringUtfWide getNewClassName();
+    ST_LOCAL static StStringUtfWide getNewClassName();
 
 #elif(defined(__linux__) || defined(__linux))
     /**
      * Fast link
      */
-    Display* getDisplay() const {
+    ST_LOCAL Display* getDisplay() const {
         return stXDisplay.isNull() ? NULL : stXDisplay->hDisplay;
     }
 
     /**
      * Announce XDND support.
      */
-    void setupXDND();
+    ST_LOCAL void setupXDND();
 #endif
 
 };

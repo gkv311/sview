@@ -7,7 +7,7 @@
 		<Option compiler="windows_sdk_x86" />
 		<Build>
 			<Target title="WIN_gcc_x86">
-				<Option output="../bin/$(TARGET_NAME)/StDrawers/StMoviePlayer" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/libStMoviePlayer" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
@@ -44,7 +44,7 @@
 				</ExtraCommands>
 			</Target>
 			<Target title="WIN_vc_x86">
-				<Option output="../bin/$(TARGET_NAME)/StDrawers/StMoviePlayer" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/StMoviePlayer" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="../bin/$(TARGET_NAME)/" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
@@ -84,7 +84,7 @@
 				</ExtraCommands>
 			</Target>
 			<Target title="WIN_vc_x86_DEBUG">
-				<Option output="../bin/$(TARGET_NAME)/StDrawers/StMoviePlayer" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/StMoviePlayer" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="../bin/$(TARGET_NAME)/" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
@@ -129,7 +129,7 @@
 				</ExtraCommands>
 			</Target>
 			<Target title="WIN_vc_AMD64">
-				<Option output="../bin/$(TARGET_NAME)/StDrawers/StMoviePlayer" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/StMoviePlayer" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="../bin/$(TARGET_NAME)/" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
@@ -169,7 +169,7 @@
 				</ExtraCommands>
 			</Target>
 			<Target title="LINUX_gcc">
-				<Option output="../bin/$(TARGET_NAME)/StDrawers/StMoviePlayer" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/libStMoviePlayer" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="../bin/$(TARGET_NAME)/" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
@@ -177,7 +177,6 @@
 				<Option parameters="--in=StMoviePlayer" />
 				<Option host_application="./sView" />
 				<Option createDefFile="1" />
-				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-O3" />
 					<Add option="-std=c++0x" />
@@ -205,14 +204,13 @@
 				</ExtraCommands>
 			</Target>
 			<Target title="LINUX_gcc_DEBUG">
-				<Option output="../bin/$(TARGET_NAME)/StDrawers/StMoviePlayer" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/libStMoviePlayer" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option parameters=" --in=StMoviePlayer" />
 				<Option host_application="../bin/$(TARGET_NAME)/sView" />
 				<Option createDefFile="1" />
-				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-std=c++0x" />
 					<Add option="-Wall" />
@@ -240,7 +238,7 @@
 				</ExtraCommands>
 			</Target>
 			<Target title="MAC_gcc">
-				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/StDrawers/StMoviePlayer" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/libStMoviePlayer" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="../bin/$(TARGET_NAME)/" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
@@ -248,7 +246,6 @@
 				<Option parameters="--in=StMoviePlayer" />
 				<Option host_application="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/sView" />
 				<Option createDefFile="1" />
-				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-O3" />
 					<Add option="-Wall" />
@@ -271,14 +268,13 @@
 				</ExtraCommands>
 			</Target>
 			<Target title="MAC_gcc_DEBUG">
-				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/StDrawers/StMoviePlayer" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/libStMoviePlayer" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option parameters=" --in=StMoviePlayer" />
 				<Option host_application="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/sView" />
 				<Option createDefFile="1" />
-				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
@@ -312,6 +308,12 @@
 			<Add library="StGLWidgets" />
 			<Add library="StShared" />
 			<Add library="StSettings" />
+			<Add library="StCore" />
+			<Add library="StOutAnaglyph" />
+			<Add library="StOutDual" />
+			<Add library="StOutIZ3D" />
+			<Add library="StOutInterlace" />
+			<Add library="StOutPageFlip" />
 			<Add library="avutil" />
 			<Add library="avformat" />
 			<Add library="avcodec" />

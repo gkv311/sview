@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutIZ3D library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -19,7 +19,7 @@
 #ifndef __StOutIZ3D_h_
 #define __StOutIZ3D_h_
 
-#include <StCore/StCore.h>       // header for Stereo Output Core
+#include <StCore/StWindow.h>
 #include <StThreads/StThreads.h> // threads header (mutexes, threads,...)
 #include <StThreads/StFPSControl.h>
 #include <StGL/StGLTexture.h>
@@ -28,39 +28,101 @@
 
 class StSettings;
 
-class ST_LOCAL StOutIZ3D : public StRendererInterface {
-
-        private:
-
-    enum {
-        DEVICE_OPTION_VSYNC   = 0,
-        DEVICE_OPTION_SHADER  = 1,
-    };
-
-        private:
-
-    void optionsStructAlloc();
+/**
+ * This class implements stereoscopic rendering on iZ3D monitors.
+ */
+class StOutIZ3D : public StWindow {
 
         public:
 
-    StOutIZ3D();
-    ~StOutIZ3D();
-    StRendererInterface* getLibImpl() { return this; }
-    StWindowInterface* getStWindow() { return myStCore->getStWindow(); }
-    bool init(const StString& , const int& , const StNativeWin_t );
-    bool open(const StOpenInfo& stOpenInfo) { return myStCore->open(stOpenInfo); }
-    void callback(StMessage_t* );
-    void stglDraw(unsigned int );
+    /**
+     * Main constructor.
+     */
+    ST_CPPEXPORT StOutIZ3D(const StNativeWin_t theParentWindow);
+
+    /**
+     * Destructor.
+     */
+    ST_CPPEXPORT virtual ~StOutIZ3D();
+
+    /**
+     * Renderer about string.
+     */
+    ST_CPPEXPORT virtual StString getRendererAbout() const;
+
+    /**
+     * Renderer id.
+     */
+    ST_CPPEXPORT virtual const char* getRendererId() const;
+
+    /**
+     * Active Device id.
+     */
+    ST_CPPEXPORT virtual const char* getDeviceId() const;
+
+    /**
+     * Devices list.
+     * This class supports only 1 device type - iZ3D monitor.
+     * Different glasses filters provided as device options.
+     */
+    ST_CPPEXPORT virtual void getDevices(StOutDevicesList& theList) const;
+
+    /**
+     * Retrieve options list.
+     */
+    ST_CPPEXPORT virtual void getOptions(StParamsList& theList) const;
+
+    /**
+     * Create and show window.
+     * @return false if any critical error appeared
+     */
+    ST_CPPEXPORT virtual bool create();
+
+    /**
+     * Close the window.
+     */
+    ST_CPPEXPORT virtual void close();
+
+    /**
+     * Process callback.
+     */
+    ST_CPPEXPORT virtual void processEvents(StMessage_t* theMessages);
+
+    /**
+     * Stereo renderer.
+     */
+    ST_CPPEXPORT virtual void stglDraw();
 
         private:
 
-    static StAtomic<int32_t>        myInstancesNb;     //!< shared counter for all instances
+    /**
+     * Release GL resources before window closing.
+     */
+    ST_LOCAL void releaseResources();
+
+    /**
+     * On/off VSync callback.
+     */
+    ST_LOCAL void doVSync(const bool theValue);
 
         private:
 
-    StHandle<StCore>                myStCore;
+    static StAtomic<int32_t> myInstancesNb; //!< shared counter for all instances
+
+        private:
+
+    struct {
+
+        StHandle<StBoolParam>  IsVSyncOn;  //!< flag to use VSync
+        StHandle<StInt32Param> Glasses;    //!< glasses filter
+
+    } params;
+
+        private:
+
+    StOutDevicesList                myDevices;
     StHandle<StSettings>            mySettings;
-    StString                        myPluginPath;
+    StString                        myAbout;           //!< about string
 
     StHandle<StGLContext>           myContext;
     StHandle<StGLStereoFrameBuffer> myFrBuffer;        //!< frame buffer to draw
@@ -68,11 +130,8 @@ class ST_LOCAL StOutIZ3D : public StRendererInterface {
     StGLTexture                     myTexTableOld;     //!< table textures
     StGLTexture                     myTexTableNew;
 
-    StSDOptionsList_t*              myOptions;
-
     StFPSControl                    myFPSControl;
     bool                            myToSavePlacement;
-    bool                            myIsVSyncOn;
     bool                            myToCompressMem;   //!< reduce memory usage
     bool                            myIsBroken;        //!< special flag for broke state - when FBO can not be allocated
 

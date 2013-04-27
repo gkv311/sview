@@ -41,8 +41,8 @@ namespace {
 // shared counter for fullscreen windows to detect inactive state
 StAtomic<int32_t> StWindowImpl::myFullScreenWinNb(0);
 
-StWindowImpl::StWindowImpl()
-: myParentWin(StNativeWin_t(NULL)),
+StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
+: myParentWin(theParentWindow),
   myWindowTitle(WINDOW_TITLE_DEFAULT),
   myInitState(STWIN_INITNOTSTART),
   myMousePt(0.5, 0.5),
@@ -53,9 +53,7 @@ StWindowImpl::StWindowImpl()
   mySyncCounter(0),
   myWinOnMonitorId(0),
   myTiledCfg(TiledCfg_Separate),
-  myUserDataMap(0),
-  myTargetFps(0.0),
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
   myEventInitWin(false),
   myEventInitGl(false),
   myEventQuit(NULL),
@@ -80,7 +78,7 @@ StWindowImpl::StWindowImpl()
     myMonSlave.yAdd = 1;
     myMonSlave.ySub = 0;
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     // we create Win32 event directly (not StEvent) to use it with MsgWaitForMultipleObjects()
     myEventQuit       = CreateEvent(0, true, false, NULL);
     myEventCursorShow = CreateEvent(0, true, false, NULL);
@@ -113,7 +111,7 @@ void StWindowImpl::updateMonitors() {
 StWindowImpl::~StWindowImpl() {
     close();
     delete[] myDndList;
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     CloseHandle(myEventQuit);
     CloseHandle(myEventCursorShow);
     CloseHandle(myEventCursorHide);
@@ -130,7 +128,7 @@ void StWindowImpl::close() {
 
     mySlave.close(); // close GL contexts
     myMaster.close();
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     SetEvent(myEventQuit);
     size_t TIME_LIMIT = 60000;
     size_t timeWait = 10000;
@@ -162,7 +160,7 @@ void StWindowImpl::close() {
 #if (!defined(__APPLE__))
 void StWindowImpl::setTitle(const StString& theTitle) {
     myWindowTitle = theTitle;
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     myIsUpdated = true;
 #elif(defined(__linux__) || defined(__linux))
     if(myMaster.hWindow != 0){
@@ -177,15 +175,15 @@ void StWindowImpl::setTitle(const StString& theTitle) {
 }
 #endif // !__APPLE__
 
-void StWindowImpl::getAttributes(StWinAttributes_t* theAttributes) {
-    size_t aBytesToCopy = stMin(theAttributes->nSize, sizeof(StWinAttributes_t));
-    stMemCpy(theAttributes, &myWinAttribs, aBytesToCopy); // copy as much as possible
-    theAttributes->nSize = aBytesToCopy;
+void StWindowImpl::getAttributes(StWinAttributes_t& theAttributes) const {
+    size_t aBytesToCopy = stMin(theAttributes.nSize, sizeof(StWinAttributes_t));
+    stMemCpy(&theAttributes, &myWinAttribs, aBytesToCopy); // copy as much as possible
+    theAttributes.nSize = aBytesToCopy;
 }
 
-void StWindowImpl::setAttributes(const StWinAttributes_t* theAttributes) {
-    size_t aBytesToCopy = stMin(theAttributes->nSize, sizeof(StWinAttributes_t));
-    stMemCpy(&myWinAttribs, theAttributes, aBytesToCopy); // copy as much as possible
+void StWindowImpl::setAttributes(const StWinAttributes_t& theAttributes) {
+    size_t aBytesToCopy = stMin(theAttributes.nSize, sizeof(StWinAttributes_t));
+    stMemCpy(&myWinAttribs, &theAttributes, aBytesToCopy); // copy as much as possible
     myWinAttribs.nSize = sizeof(StWinAttributes_t);       // restore own size
     updateSlaveConfig();
     updateWindowPos();
@@ -342,9 +340,10 @@ void StWindowImpl::updateActiveState() {
 }
 
 #if (!defined(__APPLE__))
-void StWindowImpl::show(const int& winNum) {
-    if(winNum == ST_WIN_MASTER && myWinAttribs.isHide) {
-    #if(defined(_WIN32) || defined(__WIN32__))
+void StWindowImpl::show(const int theWinNum) {
+    if((theWinNum == ST_WIN_MASTER || theWinNum == ST_WIN_ALL)
+    && myWinAttribs.isHide) {
+    #ifdef _WIN32
         if(myMaster.hWindow != NULL) {
             ShowWindow(myMaster.hWindow, SW_SHOW);
         } else if(myMaster.hWindowGl != NULL) {
@@ -363,8 +362,9 @@ void StWindowImpl::show(const int& winNum) {
     #endif
         myWinAttribs.isHide = false;
         updateWindowPos();
-    } else if(winNum == ST_WIN_SLAVE && myWinAttribs.isSlaveHide) {
-    #if(defined(_WIN32) || defined(__WIN32__))
+    } else if((theWinNum == ST_WIN_SLAVE || theWinNum == ST_WIN_ALL)
+           && myWinAttribs.isSlaveHide) {
+    #ifdef _WIN32
         if(mySlave.hWindowGl != NULL) {
             ShowWindow(mySlave.hWindowGl, SW_SHOW);
         }
@@ -379,9 +379,10 @@ void StWindowImpl::show(const int& winNum) {
     }
 }
 
-void StWindowImpl::hide(const int& winNum) {
-    if(winNum == ST_WIN_MASTER && !myWinAttribs.isHide) {
-    #if(defined(_WIN32) || defined(__WIN32__))
+void StWindowImpl::hide(const int theWinNum) {
+    if((theWinNum == ST_WIN_MASTER || theWinNum == ST_WIN_ALL)
+    && !myWinAttribs.isHide) {
+    #ifdef _WIN32
         if(myMaster.hWindow != NULL) {
             ShowWindow(myMaster.hWindow, SW_HIDE);
         } else if(myMaster.hWindowGl != NULL) {
@@ -399,8 +400,9 @@ void StWindowImpl::hide(const int& winNum) {
         }
     #endif
         myWinAttribs.isHide = true;
-    } else if(winNum == ST_WIN_SLAVE && !myWinAttribs.isSlaveHide) {
-    #if(defined(_WIN32) || defined(__WIN32__))
+    } else if((theWinNum == ST_WIN_SLAVE || theWinNum == ST_WIN_ALL)
+           && !myWinAttribs.isSlaveHide) {
+    #ifdef _WIN32
         if(mySlave.hWindowGl != NULL) {
             ShowWindow(mySlave.hWindowGl, SW_HIDE);
         }
@@ -419,7 +421,7 @@ void StWindowImpl::showCursor(bool toShow) {
     if(myWinAttribs.isHideCursor != toShow) {
         return; // nothing to update
     }
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     // native show / hide function should be called from
     // window-message thread -> we set events to do that
     if(toShow) {
@@ -449,10 +451,29 @@ void StWindowImpl::showCursor(bool toShow) {
 }
 
 #if (!defined(__APPLE__))
-void StWindowImpl::setPlacement(const StRectI_t& theRect) {
-    myRectNorm  = theRect;
+void StWindowImpl::setPlacement(const StRectI_t& theRect,
+                                const bool       theMoveToScreen) {
+    if(theMoveToScreen) {
+        const StPointI_t aCenter = theRect.center();
+        const StMonitor& aMon = myMonitors[aCenter];
+        if(!aMon.getVRect().isPointIn(aCenter)) {
+            ST_DEBUG_LOG("Warning, window position is out of the monitor(" + aMon.getId() + ")!" + theRect.toString());
+            const int aWidth  = theRect.width();
+            const int aHeight = theRect.height();
+            StRectI_t aRect;
+            aRect.left()   = aMon.getVRect().left() + 256;
+            aRect.right()  = aRect.left() + aWidth;
+            aRect.top()    = aMon.getVRect().top() + 256;
+            aRect.bottom() = aRect.top() + aHeight;
+            myRectNorm = aRect;
+        } else {
+            myRectNorm = theRect;
+        }
+    } else {
+        myRectNorm = theRect;
+    }
     myIsUpdated = true;
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     if(myMaster.hWindow != NULL && !myWinAttribs.isFullScreen) {
         int posLeft   = myRectNorm.left() - (!myWinAttribs.isNoDecor ?  GetSystemMetrics(SM_CXSIZEFRAME) : 0);
         int posTop    = myRectNorm.top()  - (!myWinAttribs.isNoDecor ? (GetSystemMetrics(SM_CYSIZEFRAME) + GetSystemMetrics(SM_CYCAPTION)) : 0);
@@ -472,14 +493,6 @@ void StWindowImpl::setPlacement(const StRectI_t& theRect) {
 #endif
 }
 #endif // !__APPLE__
-
-StRectI_t StWindowImpl::getPlacement() {
-    if(myWinAttribs.isFullScreen) {
-        return myRectFull;
-    } else {
-        return myRectNorm;
-    }
-}
 
 void StWindowImpl::getTiledWinRect(StRectI_t& theRect) const {
     switch(myTiledCfg) {
@@ -563,17 +576,17 @@ StGLBoxPx StWindowImpl::stglViewport(const int& theWinId) const {
     }
 }
 
-int StWindowImpl::getMouseDown(StPointD_t* point) {
-    return myMDownQueue.pop(*point);
+int StWindowImpl::getMouseDown(StPointD_t& thePoint) {
+    return myMDownQueue.pop(thePoint);
 }
 
-int StWindowImpl::getMouseUp(StPointD_t* point) {
-    return myMUpQueue.pop(*point);
+int StWindowImpl::getMouseUp(StPointD_t& thePoint) {
+    return myMUpQueue.pop(thePoint);
 }
 
 StPointD_t StWindowImpl::getMousePos() {
     StRectI_t aWinRect = (myWinAttribs.isFullScreen) ? myRectFull : myRectNorm;
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     if(myMaster.hWindowGl != NULL) {
         CURSORINFO aCursor;
         aCursor.cbSize = sizeof(aCursor);
@@ -610,9 +623,10 @@ StPointD_t StWindowImpl::getMousePos() {
     return StPointD_t(0.0, 0.0);
 }
 
-int StWindowImpl::getDragNDropFile(const int& theIndex, stUtf8_t* theOutFile, const size_t& theBuffSizeBytes) {
+int StWindowImpl::getDragNDropFile(const int theIndex,
+                                   StString& theFile) {
     myDndMutex.lock();
-    if(theIndex < 0 || theOutFile == NULL || theBuffSizeBytes == 0) {
+    if(theIndex < 0) {
         size_t aCount = myDndCount;
         myDndMutex.unlock();
         return (int )aCount; // returns files' count
@@ -621,12 +635,8 @@ int StWindowImpl::getDragNDropFile(const int& theIndex, stUtf8_t* theOutFile, co
         myDndMutex.unlock();
         return -1; // returns error
     }
-    size_t aSizeBytes = myDndList[theIndex].getSize() + 1;
-    if(aSizeBytes > theBuffSizeBytes) {
-        myDndMutex.unlock();
-        return (int )aSizeBytes; // returns needed buffer size
-    }
-    stMemCpy(theOutFile, myDndList[theIndex].toCString(), aSizeBytes);
+
+    theFile = myDndList[theIndex];
     myDndMutex.unlock();
     return 0; // returns success
 }
@@ -702,152 +712,4 @@ stBool_t StWindowImpl::appendMessage(const StMessage_t& stMessage) {
         }
         default: return myMessageList.append(stMessage);
     }
-}
-
-bool StWindowImpl::getValue(const size_t& key, size_t* value) {
-    if(key == ST_WIN_DATAKEYS_RENDERER && myUserDataMap != 0) {
-        *value = myUserDataMap;
-        return true;
-    }
-    return false;
-}
-
-void StWindowImpl::setValue(const size_t& key, const size_t& value) {
-    if(key == ST_WIN_DATAKEYS_RENDERER) {
-        myUserDataMap = value;
-    } else {
-        ST_DEBUG_LOG_AT("NOT IMPLEMENTED!");
-    }
-}
-
-// Exported class-methods wpappers.
-ST_EXPORT StWindowInterface* StWindow_new() {
-    return new StWindowImpl();
-}
-
-ST_EXPORT void StWindow_del(StWindowInterface* inst) {
-    delete (StWindowImpl* )inst;
-}
-
-ST_EXPORT void StWindow_close(StWindowInterface* inst) {
-    ((StWindowImpl* )inst)->close();
-}
-
-ST_EXPORT void StWindow_setTitle(StWindowInterface* inst, const stUtf8_t* theTitle) {
-    ((StWindowImpl* )inst)->setTitle(theTitle);
-}
-
-ST_EXPORT void StWindow_getAttributes(StWindowInterface* inst, StWinAttributes_t* inOutAttributes) {
-    ((StWindowImpl* )inst)->getAttributes(inOutAttributes);
-}
-
-ST_EXPORT void StWindow_setAttributes(StWindowInterface* inst, const StWinAttributes_t* inAttributes) {
-    ((StWindowImpl* )inst)->setAttributes(inAttributes);
-}
-
-ST_EXPORT stBool_t StWindow_isActive(StWindowInterface* inst) {
-    return ((StWindowImpl* )inst)->isActive();
-}
-
-ST_EXPORT stBool_t StWindow_isStereoOutput(StWindowInterface* inst) {
-    return ((StWindowImpl* )inst)->isStereoOutput();
-}
-
-ST_EXPORT void StWindow_setStereoOutput(StWindowInterface* inst, stBool_t stereoState) {
-    ((StWindowImpl* )inst)->setStereoOutput(stereoState);
-}
-
-ST_EXPORT void StWindow_show(StWindowInterface* inst, const int& win, const stBool_t& show) {
-    if(show) {
-        ((StWindowImpl* )inst)->show(win);
-    } else {
-        ((StWindowImpl* )inst)->hide(win);
-    }
-}
-
-ST_EXPORT void StWindow_showCursor(StWindowInterface* inst, stBool_t toShow) {
-    ((StWindowImpl* )inst)->showCursor(toShow);
-}
-
-ST_EXPORT stBool_t StWindow_isFullScreen(StWindowInterface* inst) {
-    return ((StWindowImpl* )inst)->isFullScreen();
-}
-
-ST_EXPORT void StWindow_setFullScreen(StWindowInterface* inst, stBool_t fullscreen) {
-    ((StWindowImpl* )inst)->setFullScreen(fullscreen);
-}
-
-ST_EXPORT void StWindow_getPlacement(StWindowInterface* inst, StRectI_t* rect) {
-    *rect = ((StWindowImpl* )inst)->getPlacement();
-}
-
-ST_EXPORT void StWindow_setPlacement(StWindowInterface* inst, const StRectI_t* rect) {
-    ((StWindowImpl* )inst)->setPlacement(*rect);
-}
-
-ST_EXPORT void StWindow_stglViewport(StWindowInterface* inst, const int& theWinId, StGLBoxPx* theRect) {
-    *theRect = ((StWindowImpl* )inst)->stglViewport(theWinId);
-}
-
-ST_EXPORT void StWindow_getMousePos(StWindowInterface* inst, StPointD_t* point) {
-    StPointD_t p = ((StWindowImpl* )inst)->getMousePos();
-    stMemCpy(point, &p, sizeof(StPointD_t));
-}
-
-ST_EXPORT int StWindow_getMouseDown(StWindowInterface* inst, StPointD_t* point) {
-    return ((StWindowImpl* )inst)->getMouseDown(point);
-}
-
-ST_EXPORT int StWindow_getMouseUp(StWindowInterface* inst, StPointD_t* point) {
-    return ((StWindowImpl* )inst)->getMouseUp(point);
-}
-
-ST_EXPORT int StWindow_getDragNDropFile(StWindowInterface* inst, const int& theIndex, stUtf8_t* theOutFile, const size_t& theBuffSizeBytes) {
-    return ((StWindowImpl* )inst)->getDragNDropFile(theIndex, theOutFile, theBuffSizeBytes);
-}
-
-ST_EXPORT void StWindow_stglSwap(StWindowInterface* inst, const int& value) {
-    ((StWindowImpl* )inst)->stglSwap(value);
-}
-
-ST_EXPORT void StWindow_stglMakeCurrent(StWindowInterface* inst, const int& value) {
-    ((StWindowImpl* )inst)->stglMakeCurrent(value);
-}
-
-ST_EXPORT stBool_t StWindow_stglCreate(StWindowInterface*       inst,
-                                       const StWinAttributes_t* theAttributes,
-                                       const StNativeWin_t      theNativeParentWindow) {
-    return ((StWindowImpl* )inst)->stglCreate(theAttributes, theNativeParentWindow);
-}
-
-ST_EXPORT double StWindow_stglGetTargetFps(StWindowInterface* inst) {
-    return ((StWindowImpl* )inst)->stglGetTargetFps();
-}
-
-ST_EXPORT void StWindow_stglSetTargetFps(StWindowInterface* inst, const double& fps) {
-    ((StWindowImpl* )inst)->stglSetTargetFps(fps);
-}
-
-ST_EXPORT void StWindow_callback(StWindowInterface* inst, StMessage_t* theMessages) {
-    ((StWindowImpl* )inst)->callback(theMessages);
-}
-
-ST_EXPORT stBool_t StWindow_appendMessage(StWindowInterface* inst, const StMessage_t& stMessage) {
-    return ((StWindowImpl* )inst)->appendMessage(stMessage);
-}
-
-ST_EXPORT stBool_t StWindow_getValue(StWindowInterface* inst, const size_t& key, size_t* value) {
-    return ((StWindowImpl* )inst)->getValue(key, value);
-}
-
-ST_EXPORT void StWindow_setValue(StWindowInterface* inst, const size_t& key, const size_t& value) {
-    ((StWindowImpl* )inst)->setValue(key, value);
-}
-
-ST_EXPORT void* StWindow_memAlloc(const size_t& bytes) {
-    return stMemAlloc(bytes);
-}
-
-ST_EXPORT void StWindow_memFree(void* ptr) {
-    stMemFree(ptr);
 }

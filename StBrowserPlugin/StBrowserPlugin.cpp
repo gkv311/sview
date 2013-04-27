@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StBrowserPlugin NPAPI plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,10 +27,9 @@
 #include <StTemplates/StHandle.h>
 #include <StTemplates/StArrayList.h>
 
-extern NPNetscapeFuncs NPNFuncs;
+#include "../StImageViewer/StImageViewer.h"
 
-template<>
-inline void StArray< StHandle<StRendererPlugin> >::sort() {}
+extern NPNetscapeFuncs NPNFuncs;
 
 namespace {
 
@@ -74,16 +73,6 @@ NPError NS_PluginInitialize() {
         return NPERR_NO_ERROR;
     }
 
-    // Firstly INIT core library!
-    if(StCore::INIT() != STERROR_LIBNOERROR) {
-        // TODO (Kirill Gavrilov#9) we got this error message 3 times (!) in Mozilla Firefox 3.5.4
-        // and 1 time (as expected) in Opera 10
-        stError("StCore library not available!\nMake sure you install sView correctly.");
-        // don't seduce yourself! Mozilla will continue to load and instaniate your plugin :|
-        isStCoreInitSuccess = false;
-        return NPERR_MODULE_LOAD_FAILED_ERROR;
-    }
-
     isStCoreInitSuccess = true;
     return NPERR_NO_ERROR;
 }
@@ -93,7 +82,7 @@ NPError NS_PluginInitialize() {
  * Called when the last plugin's instance were closed.
  */
 void NS_PluginShutdown() {
-    StCore::FREE();
+    //
 }
 
 /**
@@ -194,19 +183,9 @@ StBrowserPlugin::~StBrowserPlugin() {
 }
 
 void StBrowserPlugin::stWindowLoop() {
-
-    myStApp = new StApplication();
-    if(!myStApp->create(myParentWin)) {
-        myStApp.nullify();
-        return;
-    }
-
-    // Load image viewer plugin
-    StString imageViewerPath(StProcess::getStCoreFolder() + StCore::getDrawersDir() + SYS_FS_SPLITTER + "StImageViewer" + ST_DLIB_SUFFIX);
-    StOpenInfo aCreateInfo;
-    aCreateInfo.setMIME(StDrawerInfo::DRAWER_MIME().toString());
-    aCreateInfo.setPath(imageViewerPath);
-    if(!myStApp->open(aCreateInfo)) {
+    // Load image viewer
+    myStApp = new StImageViewer(myParentWin);
+    if(!myStApp->open()) {
         myStApp.nullify();
         return;
     }
@@ -215,15 +194,13 @@ void StBrowserPlugin::stWindowLoop() {
     bool isFullscreen = false;
     bool isFullLoaded = false;
     for(;;) {
-        if(!myStApp->isOpened()) {
+        if(myStApp->closingDown()) {
             myStApp.nullify();
             return;
         }
 
         if(myToQuit) {
-            StOpenInfo anOpenInfoClose;
-            anOpenInfoClose.setMIME(StDrawerInfo::CLOSE_MIME().toString());
-            myStApp->open(anOpenInfoClose);
+            myStApp->exit(0);
         } else if(!isFileOpened) {
             // load the image
             StHandle<StString> aPrvPath = myPreviewPath;
@@ -241,9 +218,10 @@ void StBrowserPlugin::stWindowLoop() {
             }
         }
 
-        myStApp->callback();
+        myStApp->processEvents();
 
-        if(myStApp->isFullscreen()) {
+        const StHandle<StWindow>& aWin = myStApp->getMainWindow();
+        if(!aWin.isNull() && aWin->isFullScreen()) {
             StHandle<StString> aFullPath = myFullPath;
             if(!isFullscreen && !aFullPath.isNull()) {
                 myOpenInfo.setPath(*aFullPath);

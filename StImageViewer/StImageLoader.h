@@ -53,7 +53,15 @@ class StImageLoader {
                            const StHandle<StGLTextureQueue>& theTextureQueue);
     ST_LOCAL ~StImageLoader();
 
+    ST_LOCAL inline const StHandle<StGLTextureQueue>& getTextureQueue() const {
+        return myTextureQueue;
+    }
+
     ST_LOCAL void mainLoop();
+
+    ST_LOCAL void doRelease() {
+        signals.onError.disconnect();
+    }
 
     ST_LOCAL void doLoadNext() {
         myLoadNextEvent.set();
