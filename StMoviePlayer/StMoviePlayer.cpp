@@ -147,7 +147,7 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
   myIsBenchmark(false),
   myToCheckUpdates(true) {
     //
-    myTitle = "sView - Media Player";
+    myTitle = "sView - Movie Player";
     //
     params.alDevice = new StALDeviceParam();
     params.audioGain = new StFloat32Param( 1.0f, // sound is unattenuated
@@ -373,6 +373,7 @@ bool StMoviePlayer::open() {
 
     if(isReset) {
         //myVideo->doLoadNext();
+        doUpdateStateLoaded();
         return true;
     }
 
