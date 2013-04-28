@@ -16,9 +16,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "StWindowImpl.h"
-
 #include <StGLCore/StGLCore11Fwd.h>
+
+#include "StWindowImpl.h"
 
 StWindow::StWindow(const StNativeWin_t theParentWindow)
 : myWin(new StWindowImpl(theParentWindow)),
