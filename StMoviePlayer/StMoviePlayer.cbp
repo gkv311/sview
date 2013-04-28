@@ -272,6 +272,8 @@
 					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)../lang/english/&quot;' />
 					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)../lang/русский/&quot;' />
 					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)../lang/français/&quot;' />
+					<Add after='install_name_tool -id @executable_path/$(TARGET_OUTPUT_BASENAME).dylib &quot;$(TARGET_OUTPUT_FILE)&quot;' />
+					<Add after='ln -f -s &quot;../$(TARGET_OUTPUT_FILE)&quot; ../lib/$(TARGET_NAME)' />
 				</ExtraCommands>
 			</Target>
 			<Target title="MAC_gcc_DEBUG">
@@ -302,6 +304,8 @@
 					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)../lang/english/&quot;' />
 					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)../lang/русский/&quot;' />
 					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)../lang/français/&quot;' />
+					<Add after='install_name_tool -id @executable_path/$(TARGET_OUTPUT_BASENAME).dylib &quot;$(TARGET_OUTPUT_FILE)&quot;' />
+					<Add after='ln -f -s &quot;../$(TARGET_OUTPUT_FILE)&quot; ../lib/$(TARGET_NAME)' />
 				</ExtraCommands>
 			</Target>
 		</Build>

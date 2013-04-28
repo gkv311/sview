@@ -1,7 +1,7 @@
 /**
  * This is source code for sView
  *
- * Copyright © Kirill Gavrilov, 2007-2011
+ * Copyright © Kirill Gavrilov, 2007-2013
  */
 
 #ifdef __APPLE__
@@ -25,7 +25,7 @@ class StApplication;
         StHandle<StThread> myThread; //!< handle to StApplication thread (if started)
 
         @private
-        StApplication*     myStApp;  //!< StApplication instance
+        StHandle<StApplication> myStApp; //!< StApplication instance
 
         @private
         NSTimer*           myTimer;  //!< timer may be used instead of dedicated thread

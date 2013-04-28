@@ -54,8 +54,28 @@ void StWindowImpl::setTitle(const StString& theTitle) {
     }
 }
 
-void StWindowImpl::setPlacement(const StRectI_t& theRect) {
-    myRectNorm  = theRect;
+void StWindowImpl::setPlacement(const StRectI_t& theRect,
+                                const bool       theMoveToScreen) {
+    if(theMoveToScreen) {
+        const StPointI_t aCenter = theRect.center();
+        const StMonitor& aMon = myMonitors[aCenter];
+        if(!aMon.getVRect().isPointIn(aCenter)) {
+            ST_DEBUG_LOG("Warning, window position is out of the monitor(" + aMon.getId() + ")!" + theRect.toString());
+            const int aWidth  = theRect.width();
+            const int aHeight = theRect.height();
+            StRectI_t aRect;
+            aRect.left()   = aMon.getVRect().left() + 256;
+            aRect.right()  = aRect.left() + aWidth;
+            aRect.top()    = aMon.getVRect().top() + 256;
+            aRect.bottom() = aRect.top() + aHeight;
+            myRectNorm = aRect;
+        } else {
+            myRectNorm = theRect;
+        }
+    } else {
+        myRectNorm = theRect;
+    }
+
     myIsUpdated = true;
 
     if(myMaster.hWindow != NULL

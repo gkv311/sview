@@ -95,6 +95,13 @@ class StOpenInfo {
     }
 
     /**
+     * Returns true if arguments not empty.
+     */
+    bool hasArgs() const {
+        return !args.isEmpty();
+    }
+
+    /**
      * Parse string and return arguments map.
      */
     StArgumentsMap getArgumentsMap() const {

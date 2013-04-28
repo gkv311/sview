@@ -21,7 +21,6 @@
 #include "StTestResponder.h"
 
 #include <StCore/StApplication.h>
-#include <StCore/StCore.h>
 #include <StCocoa/StCocoaLocalPool.h>
 #include <StStrings/stConsole.h>
 #include <StThreads/StProcess.h>
@@ -181,8 +180,7 @@ namespace {
     }
 
     - (void ) applicationWillTerminate: (NSNotification* ) theNotification {
-        ///
-        StCore::FREE();
+        //StCore::FREE();
     }
 
     + (void ) doDummyThread: (id ) theParam {}
@@ -227,10 +225,7 @@ int main(int , char** ) {
     // allow our application to steal input focus (when needed)
     [anAppNs activateIgnoringOtherApps: YES];
 
-    if(StCore::INIT() != STERROR_LIBNOERROR) {
-        stError("StCore Library initialization FAILED!");
-        return 1;
-    }
+    //StCore::INIT();
 
     // Cocoa event loop can be started ONLY in main thread
     [anAppNs run];

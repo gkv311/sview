@@ -1,22 +1,22 @@
 /**
  * This is source code for sView
  *
- * Copyright © Kirill Gavrilov, 2011
+ * Copyright © Kirill Gavrilov, 2011-2013
  */
 
 #if (defined(__APPLE__))
 
 #include "StAppResponder.h"
 
-#include <StCore/StApplication.h>
-#include <StCore/StCore.h>
+#include "StMultiApp.h"
 #include <StCocoa/StCocoaLocalPool.h>
+#include <StVersion.h>
 
 namespace {
 
-    static StAppResponder* TheAppResponder = NULL;
-    static StOpenInfo TheOpenInfo;
-    static volatile bool TheToQuit = false;
+    static StAppResponder*      TheAppResponder = NULL;
+    static StHandle<StOpenInfo> TheOpenInfo = new StOpenInfo();
+    static volatile bool        TheToQuit = false;
 
     static SV_THREAD_FUNCTION anAppThreadFunc(void* theResponder) {
         StCocoaLocalPool aPool;
@@ -47,7 +47,7 @@ namespace {
         if(self == NULL) {
             return NULL;
         }
-        myStApp = NULL;
+        myStApp.nullify();
         myTimer = NULL;
         myIsThreaded = true;
         myIsStarted = false;
@@ -116,12 +116,12 @@ namespace {
             return NO;
         } else if(!myIsStarted) {
             // application just started
-            TheOpenInfo.setPath(aFilePath);
+            TheOpenInfo->setPath(aFilePath);
             return YES;
         }
 
-        if(myStApp == NULL) {
-            TheOpenInfo.setPath(aFilePath);
+        if(myStApp.isNull()) {
+            TheOpenInfo->setPath(aFilePath);
             [self launchSelf: NULL];
             return YES;
         }
@@ -137,7 +137,7 @@ namespace {
         StArrayList<StString> anArgs = StProcess::getArguments();
         size_t anArgsNb = anArgs.size();
         // open path set by Cocoa mechanisms
-        const StString aCocoaOpenPath = TheOpenInfo.getPath();
+        const StString aCocoaOpenPath = TheOpenInfo->getPath();
         if(anArgsNb > 1) {
             // search for special flags
             const StString ST_COCOA_IS_THREADED = "--cocoa-threaded";
@@ -156,12 +156,12 @@ namespace {
                 } else if(aParam == aCocoaOpenPath) {
                     // Cocoa just duplicated normal command-line parameter.
                     // Ignore it and leave arguments parsing to sView itself.
-                    TheOpenInfo.setPath("");
+                    TheOpenInfo->setPath("");
                     break;
                 }
             }
         }
-        if(TheOpenInfo.hasPath()
+        if(TheOpenInfo->hasPath()
         || anArgsNb > 1) {
             // create StApplication instance only if we know which drawer plugin to launch
             [self launchSelf: NULL];
@@ -175,19 +175,15 @@ namespace {
             myThread->wait();
             myThread.nullify();
         } else {
-            StOpenInfo aCloseInfo;
-            aCloseInfo.setMIME(StDrawerInfo::CLOSE_MIME());
-            if(myStApp != NULL && myStApp->isOpened()) {
-                myStApp->open(aCloseInfo);
+            if(!myStApp.isNull() && !myStApp->closingDown()) {
+                myStApp->exit(0);
             }
-            delete myStApp;
-            myStApp = NULL;
+            myStApp.nullify();
         }
-        StCore::FREE();
     }
 
     - (void ) launchSelf: (id ) theSender {
-        if(myStApp != NULL
+        if(!myStApp.isNull()
         || !myThread.isNull()) {
             return; // already launched - invalid call
         }
@@ -211,54 +207,44 @@ namespace {
     }
 
     - (bool ) startStApp: (id ) theSender {
-        if(myStApp != NULL) {
+        if(!myStApp.isNull()) {
             return false;
         }
-        myStApp = new StApplication();
-        if(!myStApp->create()) {
-            delete myStApp;
-            myStApp = NULL;
-            return false;
-        }
-        if(!myStApp->open(TheOpenInfo)) {
-            delete myStApp;
-            myStApp = NULL;
+
+        myStApp = StMultiApp::getInstance(TheOpenInfo);
+        if(!myStApp->open()) {
+            myStApp.nullify();
             return false;
         }
         return true;
     }
 
     - (bool ) loopIter: (id ) theSender {
-        if(myStApp == NULL) {
+        if(myStApp.isNull()) {
             return false;
         }
 
         if(TheToQuit) {
-            StOpenInfo aCloseInfo;
-            aCloseInfo.setMIME(StDrawerInfo::CLOSE_MIME());
-            if(myStApp->isOpened()) {
-                myStApp->open(aCloseInfo);
-            }
+            myStApp->exit(0);
         }
 
-        if(!myStApp->isOpened()) {
-            delete myStApp;
-            myStApp = NULL;
+        if(myStApp->closingDown()) {
+            myStApp.nullify();
 
             // this will call exit(), so code below has no effect
             [NSApp terminate: nil];
             return false;
         }
-        myStApp->callback();
+        myStApp->processEvents();
         return true;
     }
 
     - (void ) launchImageViewer: (id ) theSender {
-        StString aDrawerPath(StProcess::getStCoreFolder() + StCore::getDrawersDir()
-                             + SYS_FS_SPLITTER + "StImageViewer" + ST_DLIB_SUFFIX);
-        if(myStApp == NULL) {
-            TheOpenInfo.setMIME(StDrawerInfo::DRAWER_MIME().toString());
-            TheOpenInfo.setPath(aDrawerPath);
+        if(myStApp.isNull()) {
+            StArgumentsMap anArgs;
+            anArgs.add(StArgument("in", "image"));
+            TheOpenInfo->setArgumentsMap(anArgs);
+            TheOpenInfo->setPath("");
             [self launchSelf: NULL];
             return;
         }
@@ -269,11 +255,11 @@ namespace {
     }
 
     - (void ) launchMoviePlayer: (id ) theSender {
-        StString aDrawerPath(StProcess::getStCoreFolder() + StCore::getDrawersDir()
-                             + SYS_FS_SPLITTER + "StMoviePlayer" + ST_DLIB_SUFFIX);
-        if(myStApp == NULL) {
-            TheOpenInfo.setMIME(StDrawerInfo::DRAWER_MIME().toString());
-            TheOpenInfo.setPath(aDrawerPath);
+        if(myStApp.isNull()) {
+            StArgumentsMap anArgs;
+            anArgs.add(StArgument("in", "video"));
+            TheOpenInfo->setArgumentsMap(anArgs);
+            TheOpenInfo->setPath("");
             [self launchSelf: NULL];
             return;
         }
@@ -284,11 +270,11 @@ namespace {
     }
 
     - (void ) launchDiagnostics: (id ) theSender {
-        StString aDrawerPath(StProcess::getStCoreFolder() + StCore::getDrawersDir()
-                             + SYS_FS_SPLITTER + "StDiagnostics" + ST_DLIB_SUFFIX);
-        if(myStApp == NULL) {
-            TheOpenInfo.setMIME(StDrawerInfo::DRAWER_MIME().toString());
-            TheOpenInfo.setPath(aDrawerPath);
+        if(myStApp.isNull()) {
+            StArgumentsMap anArgs;
+            anArgs.add(StArgument("in", "StDiagnostics"));
+            TheOpenInfo->setArgumentsMap(anArgs);
+            TheOpenInfo->setPath("");
             [self launchSelf: NULL];
             return;
         }
@@ -350,10 +336,7 @@ int main(int , char** ) {
     // allow our application to steal inout focus (when needed)
     [anAppNs activateIgnoringOtherApps: YES];
 
-    if(StCore::INIT() != STERROR_LIBNOERROR) {
-        stError("StCore Library initialization FAILED!");
-        return 1;
-    }
+    //StCore::INIT();
 
     // Cocoa event loop can be started ONLY in main thread
     [anAppNs run];

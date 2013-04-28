@@ -22,8 +22,6 @@
 
 #include <StCocoa/StCocoaLocalPool.h>
 #include <StCore/StApplication.h>
-#include <StCore/StCore.h>
-#include <StCore/StWindow.h>
 
 #include <StStrings/stConsole.h>
 #include <StTemplates/StHandle.h>

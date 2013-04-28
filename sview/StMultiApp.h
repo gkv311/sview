@@ -11,7 +11,7 @@
 
 namespace StMultiApp {
 
-    ST_LOCAL StHandle<StApplication> getInstance();
+    ST_LOCAL StHandle<StApplication> getInstance(const StHandle<StOpenInfo>& theInfo = NULL);
 
 };
 

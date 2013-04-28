@@ -40,8 +40,12 @@ static StString getAbout() {
     return anAboutString;
 }
 
-StHandle<StApplication> StMultiApp::getInstance() {
-    StHandle<StOpenInfo> anInfo = StApplication::parseProcessArguments();
+StHandle<StApplication> StMultiApp::getInstance(const StHandle<StOpenInfo>& theInfo) {
+    StHandle<StOpenInfo> anInfo = theInfo;
+    if(anInfo.isNull()
+    || (!anInfo->hasPath() && !anInfo->hasArgs())) {
+        anInfo = StApplication::parseProcessArguments();
+    }
     if(anInfo.isNull()) {
         // show help
         StString aShowHelpString = getAbout();
