@@ -20,7 +20,7 @@
 
 #ifdef _MSC_VER
 
-#include <StCore/StCore.h>
+#include <StCore/StApplication.h>
 
 StActiveXModule NEAR theApp;
 
@@ -79,11 +79,7 @@ BOOL StActiveXModule::InitInstance() {
     RegCloseKey(aKey);
 
     // Initialize core library
-    if(StCore::INIT() != STERROR_LIBNOERROR) {
-        stError("StCore library not available!\nMake sure you install sView correctly.");
-        return FALSE;
-    }
-
+    //StCore::INIT();
     return TRUE;
 }
 

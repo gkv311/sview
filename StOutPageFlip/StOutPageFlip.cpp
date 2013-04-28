@@ -305,7 +305,7 @@ bool StOutPageFlip::dxInit() {
     myOutD3d.myIsActive = false;
     myOutD3d.myActivateStep = 0;
 #ifdef _WIN32
-    StMonitor aNvMonitor = StCore::getMonitorFromPoint(StWindow::getPlacement().center());
+    StMonitor aNvMonitor = StWindow::getMonitors()[(StWindow::getPlacement().center())];
     GLsizei aFrBufferSizeX = aNvMonitor.getVRect().width();
     GLsizei aFrBufferSizeY = aNvMonitor.getVRect().height();
 

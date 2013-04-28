@@ -16,27 +16,25 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
 #include "StDXNVWindow.h"
-
-#include <StCore/StWindowInterface.h>
 
 #include <StThreads/StFPSMeter.h>
 
 namespace {
 
     /**
-     * This is absolutelly hacking function
+     * This is absolutely hacking function
      * that retrieves slave window handle for current StWindow instance.
      * Code may become broken in future!
      */
-    static bool getStNativeWin(StWindowInterface* theStWin,
-                               HWND&              theMaster,
-                               HWND&              theSlave) {
+    static bool getStNativeWin(StWindow* theStWin,
+                               HWND&     theMaster,
+                               HWND&     theSlave) {
         DWORD aPid = 0;
         DWORD aTid = 0;
         DWORD aMyPid = (DWORD )StProcess::getPID();
-        LONG_PTR aStWinPtr = (LONG_PTR )theStWin->getLibImpl();
+        LONG_PTR aStWinPtr = (LONG_PTR )theStWin;
 
         // at first iteration we search for master window (to detect StWindow message thread ID)
         for(HWND aGlWin = GetTopWindow(NULL); aGlWin != NULL; aGlWin = GetNextWindow(aGlWin, GW_HWNDNEXT)) {
@@ -67,10 +65,10 @@ namespace {
 
 };
 
-StDXNVWindow::StDXNVWindow(const size_t       theFboSizeX,
-                           const size_t       theFboSizeY,
-                           const StMonitor&   theMonitor,
-                           StWindowInterface* theStWin)
+StDXNVWindow::StDXNVWindow(const size_t     theFboSizeX,
+                           const size_t     theFboSizeY,
+                           const StMonitor& theMonitor,
+                           StWindow*        theStWin)
 : myBufferL(NULL),
   myBufferR(NULL),
   myFboSizeX(theFboSizeX),

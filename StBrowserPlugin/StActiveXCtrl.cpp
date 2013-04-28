@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StActiveX plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,8 @@
 #include <StStrings/StLogger.h>
 #include <StVersion.h>
 #include <StFile/StFolder.h>
+
+#include "../StImageViewer/StImageViewer.h"
 
 namespace {
     // Interface IDs
@@ -101,43 +103,31 @@ StString StActiveXCtrl::loadURL(const CString& theUrl) {
 }
 
 void StActiveXCtrl::stWindowLoop() {
-    myStApp = new StApplication();
-    if(!myStApp->create(myParentWin)) {
-        myStApp.nullify();
-        return;
-    }
-
-    // load image viewer plugin explicitly - we don't need plugin autodetection here
-    StString anImgViewerPath(StProcess::getStCoreFolder() + StCore::getDrawersDir() + SYS_FS_SPLITTER + "StImageViewer" + ST_DLIB_SUFFIX);
-    StOpenInfo aCreateInfo;
-    aCreateInfo.setMIME(StDrawerInfo::DRAWER_MIME().toString());
-    aCreateInfo.setPath(anImgViewerPath);
-    if(!myStApp->open(aCreateInfo)) {
-        myOpenEvent.reset();
+    myStApp = new StImageViewer(myParentWin);
+    if(!myStApp->open()) {
         myStApp.nullify();
         return;
     }
 
     bool isFullscreen = false;
     for(;;) {
-        if(!myStApp->isOpened()) {
+        if(myStApp->closingDown()) {
             myStApp.nullify();
             return;
         }
 
         if(myToQuit) {
-            StOpenInfo anOpenInfoClose;
-            anOpenInfoClose.setMIME(StDrawerInfo::CLOSE_MIME().toString());
-            myStApp->open(anOpenInfoClose);
+            myStApp->exit(0);
         } else if(myOpenEvent.check()) {
             // load the image
             myStApp->open(myOpenInfo);
             myOpenEvent.reset();
         }
 
-        myStApp->callback();
+        myStApp->processEvents();
 
-        if(myStApp->isFullscreen()) {
+        const StHandle<StWindow>& aWin = myStApp->getMainWindow();
+        if(!aWin.isNull() && aWin->isFullScreen()) {
             if(!isFullscreen) {
                 PostMessage(WM_TIMER, 1);
                 isFullscreen = true;

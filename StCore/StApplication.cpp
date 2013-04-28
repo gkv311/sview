@@ -166,7 +166,7 @@ bool StApplication::open() {
         const StHandle<StOutDevice>& aDev = myDevices[aDevIter];
         if(aPluginId == aDev->PluginId
         && aDeviceId == aDev->DeviceId) {
-            params.ActiveDevice->setValue(aDevIter);
+            params.ActiveDevice->setValue((int32_t )aDevIter);
             break;
         }
     }

@@ -16,14 +16,15 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
 #ifndef __StDXNVWindow_h_
 #define __StDXNVWindow_h_
 
 #include "StDXManager.h"
 #include "StDXNVSurface.h"
 
-#include <StCore/StCore.h>
+#include <StCore/StMonitor.h>
+#include <StCore/StWindow.h>
 #include <StThreads/StThreads.h>
 
 /**
@@ -36,10 +37,10 @@ class StDXNVWindow {
     /**
      * Default constructor.
      */
-    StDXNVWindow(const size_t       theFboSizeX,
-                 const size_t       theFboSizeY,
-                 const StMonitor&   theMonitor,
-                 StWindowInterface* theStWin);
+    StDXNVWindow(const size_t     theFboSizeX,
+                 const size_t     theFboSizeY,
+                 const StMonitor& theMonitor,
+                 StWindow*        theStWin);
 
     /**
      * Destructor.
@@ -72,7 +73,7 @@ class StDXNVWindow {
         return myIsOwnWin;
     }
 
-    StWindowInterface* getStWindow() {
+    StWindow* getStWindow() {
         return myStWin;
     }
 
@@ -196,7 +197,7 @@ class StDXNVWindow {
     StHandle<StDXNVSurface> myDxSurface;
 
     StMonitor               myMonitor;
-    StWindowInterface*      myStWin;
+    StWindow*               myStWin;
 
     StMutex                 myMutex;
 

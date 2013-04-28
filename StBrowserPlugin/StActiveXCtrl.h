@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StActiveX plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #include <afxctl.h> // MFC support for ActiveX Controls
 #include <objsafe.h>
 
-#include <StCore/StCore.h>
+#include <StCore/StApplication.h>
 
 class StApplication;
 

@@ -18,6 +18,8 @@
 
 #include "StWindowImpl.h"
 
+#include <StGLCore/StGLCore11Fwd.h>
+
 StWindow::StWindow(const StNativeWin_t theParentWindow)
 : myWin(new StWindowImpl(theParentWindow)),
   myTargetFps(0.0) {
@@ -64,11 +66,11 @@ StString StWindow::getRendererAbout() const {
     return "StWindow";
 }
 
-bool StWindow::setDevice(const StString& theDevice) {
+bool StWindow::setDevice(const StString& ) {
     return false;
 }
 
-void StWindow::getDevices(StOutDevicesList& theList) const {
+void StWindow::getDevices(StOutDevicesList& ) const {
     //
 }
 
@@ -76,7 +78,7 @@ int StWindow::getSupportLevel() const {
     return ST_DEVICE_SUPPORT_NONE;
 }
 
-void StWindow::getOptions(StParamsList& theList) const {
+void StWindow::getOptions(StParamsList& ) const {
     //
 }
 
