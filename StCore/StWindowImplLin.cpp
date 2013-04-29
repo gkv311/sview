@@ -144,7 +144,7 @@ bool StWindowImpl::create() {
         return false;
     }
 
-    if(myWinAttribs.isGlStereo) {
+    if(attribs.IsGlStereo) {
         // find an appropriate visual
         stXDisplay->hVisInfo = glXChooseVisual(hDisplay, DefaultScreen(hDisplay), quadBuff);
         if(stXDisplay->hVisInfo == NULL) {
@@ -168,7 +168,7 @@ bool StWindowImpl::create() {
             return false;
         }
     }
-    if(myWinAttribs.isSlave) {
+    if(attribs.Slave != StWinSlave_slaveOff) {
         // just copy handle
         mySlave.stXDisplay = stXDisplay;
     }
@@ -178,7 +178,7 @@ bool StWindowImpl::create() {
     updateChildRect();
 
     Window aParentWin = (Window )myParentWin;
-    if(aParentWin == 0 && !myWinAttribs.isNoDecor) {
+    if(aParentWin == 0 && !attribs.IsNoDecor) {
         aWinAttribsX.override_redirect = False;
         myMaster.hWindow = XCreateWindow(hDisplay, stXDisplay->getRootWindow(),
                                          myRectNorm.left(),  myRectNorm.top(),
@@ -220,7 +220,7 @@ bool StWindowImpl::create() {
                            "master window", "master window",
                            None, NULL, 0, NULL);
 
-    if(myWinAttribs.isSlave) {
+    if(attribs.Slave != StWinSlave_slaveOff) {
         aWinAttribsX.event_mask = NoEventMask; // we do not parse any events to slave window!
         aWinAttribsX.override_redirect = True; // slave window always undecorated
         mySlave.hWindowGl = XCreateWindow(hDisplay, stXDisplay->getRootWindow(),
@@ -244,7 +244,7 @@ bool StWindowImpl::create() {
                                None, NULL, 0, NULL);
     }
 
-    int isGlCtx = myMaster.glCreateContext(myWinAttribs.isSlave ? &mySlave : NULL, myWinAttribs.isGlStereo);
+    int isGlCtx = myMaster.glCreateContext(attribs.Slave != StWinSlave_slaveOff ? &mySlave : NULL, attribs.IsGlStereo);
     if(isGlCtx != STWIN_INIT_SUCCESS) {
         myMaster.close();
         mySlave.close();
@@ -273,10 +273,10 @@ bool StWindowImpl::create() {
     }
 
     // request the X window to be displayed on the screen
-    if(myWinAttribs.isSlave) {
+    if(attribs.Slave != StWinSlave_slaveOff) {
 
         // request the X window to be displayed on the screen
-        if(!myWinAttribs.isSlaveHide && (!isSlaveIndependent() || myMonitors.size() > 1)) {
+        if(!attribs.IsSlaveHidden && (!isSlaveIndependent() || myMonitors.size() > 1)) {
             XMapWindow(hDisplay, mySlave.hWindowGl);
             //XIfEvent(hDisplay, &myXEvent, stXWaitMapped, (char* )mySlave.hWindowGl);
         }
@@ -294,7 +294,7 @@ bool StWindowImpl::create() {
         }
         XFreeColors(hDisplay, cmap, &black.pixel, 1, 0);
     }
-    if(!myWinAttribs.isHide) {
+    if(!attribs.IsHidden) {
         if(myMaster.hWindow != 0) {
             XMapWindow(hDisplay, myMaster.hWindow);
             //XIfEvent(hDisplay, &myXEvent, stXWaitMapped, (char* )myMaster.hWindow);
@@ -314,7 +314,7 @@ bool StWindowImpl::create() {
     }
 
     // we need this call to go around bugs
-    if(!myWinAttribs.isFullScreen && myMaster.hWindow != 0) {
+    if(!attribs.IsFullScreen && myMaster.hWindow != 0) {
         XMoveResizeWindow(hDisplay, myMaster.hWindow,
                           myRectNorm.left(),  myRectNorm.top(),
                           myRectNorm.width(), myRectNorm.height());
@@ -330,7 +330,7 @@ bool StWindowImpl::create() {
  * Update StWindow position according to native parent position.
  */
 void StWindowImpl::updateChildRect() {
-    if(!myWinAttribs.isFullScreen && (Window )myParentWin != 0 && !myMaster.stXDisplay.isNull()) {
+    if(!attribs.IsFullScreen && (Window )myParentWin != 0 && !myMaster.stXDisplay.isNull()) {
         Display* hDisplay = myMaster.stXDisplay->hDisplay;
         Window dummyWin;
         int xReturn, yReturn;
@@ -354,16 +354,16 @@ void StWindowImpl::updateChildRect() {
 }
 
 void StWindowImpl::setFullScreen(bool theFullscreen) {
-    if(myWinAttribs.isFullScreen != theFullscreen) {
-        myWinAttribs.isFullScreen = theFullscreen;
-        if(myWinAttribs.isFullScreen) {
+    if(attribs.IsFullScreen != theFullscreen) {
+        attribs.IsFullScreen = theFullscreen;
+        if(attribs.IsFullScreen) {
             myFullScreenWinNb.increment();
         } else {
             myFullScreenWinNb.decrement();
         }
     }
 
-    if(myWinAttribs.isHide) {
+    if(attribs.IsHidden) {
         // TODO (Kirill Gavrilov#9) parse correctly
         // do nothing, just set the flag
         return;
@@ -372,14 +372,14 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
     }
 
     Display* hDisplay = myMaster.stXDisplay->hDisplay;
-    if(myWinAttribs.isFullScreen) {
+    if(attribs.IsFullScreen) {
         const StMonitor& stMon = (myMonMasterFull == -1) ? myMonitors[myRectNorm.center()] : myMonitors[myMonMasterFull];
         myRectFull = stMon.getVRect();
         XUnmapWindow(hDisplay, myMaster.hWindowGl); // workaround for strange bugs
         StRectI_t aRect = myRectFull;
 
         // use tiled Master+Slave layout within single window if possible
-        if(myWinAttribs.isSlave && isSlaveIndependent() && myMonitors.size() > 1) {
+        if(attribs.Slave != StWinSlave_slaveOff && isSlaveIndependent() && myMonitors.size() > 1) {
             StRectI_t aRectSlave;
             aRectSlave.left()   = getSlaveLeft();
             aRectSlave.top()    = getSlaveTop();
@@ -423,7 +423,7 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
             //XIfEvent(hDisplay, &myXEvent, stXWaitMapped, (char* )myMaster.hWindowGl);
         }
 
-        if(myWinAttribs.isSlave
+        if(attribs.Slave != StWinSlave_slaveOff
         && myTiledCfg == TiledCfg_Separate
         && (!isSlaveIndependent() || myMonitors.size() > 1)) {
             XMoveResizeWindow(hDisplay, mySlave.hWindowGl,
@@ -460,14 +460,14 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
         } else {
             XUnmapWindow(hDisplay, myMaster.hWindowGl); // workaround for strange bugs
             XResizeWindow(hDisplay, myMaster.hWindowGl, 256, 256);
-            if(myWinAttribs.isSlave && (!isSlaveIndependent() || myMonitors.size() > 1)) {
+            if(attribs.Slave != StWinSlave_slaveOff && (!isSlaveIndependent() || myMonitors.size() > 1)) {
                 XUnmapWindow (hDisplay, mySlave.hWindowGl);
                 XResizeWindow(hDisplay, mySlave.hWindowGl, 256, 256);
             }
             XFlush(hDisplay);
             XMapWindow(hDisplay, myMaster.hWindowGl);
             //XIfEvent(hDisplay, &myXEvent, stXWaitMapped, (char* )myMaster.hWindowGl);
-            if(myWinAttribs.isSlave && (!isSlaveIndependent() || myMonitors.size() > 1)) {
+            if(attribs.Slave != StWinSlave_slaveOff && (!isSlaveIndependent() || myMonitors.size() > 1)) {
                 XMapWindow(hDisplay, mySlave.hWindowGl);
                 //XIfEvent(hDisplay, &myXEvent, stXWaitMapped, (char* )mySlave.hWindowGl);
             }
@@ -635,7 +635,7 @@ void StWindowImpl::updateWindowPos() {
         return;
     }
 
-    if(!myWinAttribs.isFullScreen) {
+    if(!attribs.IsFullScreen) {
         if(myRectNorm.left() == 0 && myRectNorm.top() == 0 && myMaster.hWindow != 0) {
             int width  = myRectNorm.width();
             int height = myRectNorm.height();
@@ -651,7 +651,7 @@ void StWindowImpl::updateWindowPos() {
                               0, 0,
                               myRectNorm.width(), myRectNorm.height());
         }
-        if(myWinAttribs.isSlave && (!isSlaveIndependent() || myMonitors.size() > 1)) {
+        if(attribs.Slave != StWinSlave_slaveOff && (!isSlaveIndependent() || myMonitors.size() > 1)) {
             XMoveResizeWindow(aDisplay->hDisplay, mySlave.hWindowGl,
                               getSlaveLeft(),  getSlaveTop(),
                               getSlaveWidth(), getSlaveHeight());
@@ -659,7 +659,7 @@ void StWindowImpl::updateWindowPos() {
 
         if(myTiledCfg != TiledCfg_Separate) {
             myTiledCfg = TiledCfg_Separate;
-            if(!myWinAttribs.isHide && myMonitors.size() > 1) {
+            if(!attribs.IsHidden && myMonitors.size() > 1) {
                 XMapWindow(aDisplay->hDisplay, mySlave.hWindowGl);
             }
         }
@@ -670,7 +670,7 @@ void StWindowImpl::updateWindowPos() {
     XSetInputFocus(aDisplay->hDisplay, myMaster.hWindowGl, RevertToParent, CurrentTime);
 
     // detect when window moved to another monitor
-    if(!myWinAttribs.isFullScreen && myMonitors.size() > 1) {
+    if(!attribs.IsFullScreen && myMonitors.size() > 1) {
         int aNewMonId = myMonitors[myRectNorm.center()].getId();
         if(myWinOnMonitorId != aNewMonId) {
             myMessageList.append(StMessageList::MSG_WIN_ON_NEW_MONITOR);
@@ -681,162 +681,164 @@ void StWindowImpl::updateWindowPos() {
 
 // Function set to argument-buffer given events
 void StWindowImpl::processEvents(StMessage_t* theMessages) {
-    // get callback from Master window
     const StXDisplayH& aDisplay = myMaster.stXDisplay;
-    if(!aDisplay.isNull()) {
-        // detect embedded window was moved
-        if(!myWinAttribs.isFullScreen && (Window )myParentWin != 0 && myMaster.hWindowGl != 0
-        //&&  myWinAttribs.isSlave
-        //&& !myWinAttribs.isSlaveHLineTop && !myWinAttribs.isSlaveHTop2Px && !myWinAttribs.isSlaveHLineBottom
-        && ++mySyncCounter > 4) {
-            // sadly, this Xlib call takes a lot of time
-            // perform it rarely
-            Window aDummyWin;
-            int aCurrPosX, aCurrPosY;
-            if(XTranslateCoordinates(aDisplay->hDisplay, myMaster.hWindowGl,
-                                     aDisplay->getRootWindow(),
-                                     0, 0, &aCurrPosX, &aCurrPosY, &aDummyWin)
-            && (aCurrPosX != myRectNorm.left() || aCurrPosY != myRectNorm.top())) {
-                //ST_DEBUG_LOG("need updateChildRect= " + aCurrPosX + " x " + aCurrPosY);
-                updateChildRect();
-            }
-            mySyncCounter = 0;
-        }
+    if(aDisplay.isNull() || myMaster.hWindowGl == 0) {
+        // window is closed!
+        myMessageList.popList(theMessages);
+        return;
+    }
 
-        int anEventsNb = XPending(aDisplay->hDisplay);
-        for(int anIter = 0; anIter < anEventsNb && XPending(aDisplay->hDisplay) > 0; ++anIter) {
-            XNextEvent(aDisplay->hDisplay, &myXEvent);
-            switch(myXEvent.type) {
-                case ClientMessage: {
-                    /*ST_DEBUG_LOG("A ClientMessage has arrived:\n"
-                        + "Type = " + aDisplay->getAtomName(myXEvent.xclient.message_type)
-                        + " (" + myXEvent.xclient.format + ")\n"
-                        + " message_type " + myXEvent.xclient.message_type + "\n"
-                    );*/
-                    parseXDNDClientMsg();
-                    if(myXEvent.xclient.data.l[0] == (int )aDisplay->wndDestroyAtom) {
-                        myMessageList.append(StMessageList::MSG_CLOSE);
-                    }
-                    break;
+    // detect embedded window was moved
+    if(!attribs.IsFullScreen && (Window )myParentWin != 0 && myMaster.hWindowGl != 0
+    //&&  (attribs.Slave == StWinSlave_slaveSync || attribs.Slave == StWinSlave_slaveFlipX || attribs.Slave == StWinSlave_slaveFlipY)
+    && ++mySyncCounter > 4) {
+        // sadly, this Xlib call takes a lot of time
+        // perform it rarely
+        Window aDummyWin;
+        int aCurrPosX, aCurrPosY;
+        if(XTranslateCoordinates(aDisplay->hDisplay, myMaster.hWindowGl,
+                                 aDisplay->getRootWindow(),
+                                 0, 0, &aCurrPosX, &aCurrPosY, &aDummyWin)
+        && (aCurrPosX != myRectNorm.left() || aCurrPosY != myRectNorm.top())) {
+            //ST_DEBUG_LOG("need updateChildRect= " + aCurrPosX + " x " + aCurrPosY);
+            updateChildRect();
+        }
+        mySyncCounter = 0;
+    }
+
+    int anEventsNb = XPending(aDisplay->hDisplay);
+    for(int anIter = 0; anIter < anEventsNb && XPending(aDisplay->hDisplay) > 0; ++anIter) {
+        XNextEvent(aDisplay->hDisplay, &myXEvent);
+        switch(myXEvent.type) {
+            case ClientMessage: {
+                /*ST_DEBUG_LOG("A ClientMessage has arrived:\n"
+                    + "Type = " + aDisplay->getAtomName(myXEvent.xclient.message_type)
+                    + " (" + myXEvent.xclient.format + ")\n"
+                    + " message_type " + myXEvent.xclient.message_type + "\n"
+                );*/
+                parseXDNDClientMsg();
+                if(myXEvent.xclient.data.l[0] == (int )aDisplay->wndDestroyAtom) {
+                    myMessageList.append(StMessageList::MSG_CLOSE);
                 }
-                case SelectionNotify: {
-                    parseXDNDSelectionMsg();
-                    break;
+                break;
+            }
+            case SelectionNotify: {
+                parseXDNDSelectionMsg();
+                break;
+            }
+            case DestroyNotify: {
+                // something else...
+                break;
+            }
+            case KeyPress: {
+                XKeyEvent*   aKeyEvent = (XKeyEvent* )&myXEvent;
+                const KeySym aKeySym   = XLookupKeysym(aKeyEvent, 0);
+                //ST_DEBUG_LOG("KeyPress,   keycode= " + aKeyEvent->keycode
+                //         + "; KeySym = " + (unsigned int )aKeySym + "\n");
+                int aVKeySt = 0;
+                if(aKeySym < ST_XK2ST_VK_SIZE) {
+                    aVKeySt = ST_XK2ST_VK[aKeySym];
+                } else if(aKeySym >= ST_XKMEDIA_FIRST && aKeySym <= ST_XKMEDIA_LAST) {
+                    aVKeySt = ST_XKMEDIA2ST_VK[aKeySym - ST_XKMEDIA_FIRST];
                 }
-                case DestroyNotify: {
-                    // something else...
-                    break;
+                if(aVKeySt != 0) {
+                    myMessageList.getKeysMap()[aVKeySt] = true;
                 }
-                case KeyPress: {
-                    XKeyEvent*   aKeyEvent = (XKeyEvent* )&myXEvent;
-                    const KeySym aKeySym   = XLookupKeysym(aKeyEvent, 0);
-                    //ST_DEBUG_LOG("KeyPress,   keycode= " + aKeyEvent->keycode
-                    //         + "; KeySym = " + (unsigned int )aKeySym + "\n");
-                    int aVKeySt = 0;
-                    if(aKeySym < ST_XK2ST_VK_SIZE) {
-                        aVKeySt = ST_XK2ST_VK[aKeySym];
-                    } else if(aKeySym >= ST_XKMEDIA_FIRST && aKeySym <= ST_XKMEDIA_LAST) {
-                        aVKeySt = ST_XKMEDIA2ST_VK[aKeySym - ST_XKMEDIA_FIRST];
-                    }
-                    if(aVKeySt != 0) {
-                        myMessageList.getKeysMap()[aVKeySt] = true;
-                    }
-                    break;
+                break;
+            }
+            case KeyRelease: {
+                XKeyEvent*   aKeyEvent = (XKeyEvent* )&myXEvent;
+                const KeySym aKeySym   = XLookupKeysym(aKeyEvent, 0);
+                //ST_DEBUG_LOG("KeyRelease, keycode= " + aKeyEvent->keycode
+                //         + "; KeySym = " + (unsigned int )aKeySym + "\n");
+                int aVKeySt = 0;
+                if(aKeySym < ST_XK2ST_VK_SIZE) {
+                    aVKeySt = ST_XK2ST_VK[aKeySym];
+                } else if(aKeySym >= ST_XKMEDIA_FIRST && aKeySym <= ST_XKMEDIA_LAST) {
+                    aVKeySt = ST_XKMEDIA2ST_VK[aKeySym - ST_XKMEDIA_FIRST];
                 }
-                case KeyRelease: {
-                    XKeyEvent*   aKeyEvent = (XKeyEvent* )&myXEvent;
-                    const KeySym aKeySym   = XLookupKeysym(aKeyEvent, 0);
-                    //ST_DEBUG_LOG("KeyRelease, keycode= " + aKeyEvent->keycode
-                    //         + "; KeySym = " + (unsigned int )aKeySym + "\n");
-                    int aVKeySt = 0;
-                    if(aKeySym < ST_XK2ST_VK_SIZE) {
-                        aVKeySt = ST_XK2ST_VK[aKeySym];
-                    } else if(aKeySym >= ST_XKMEDIA_FIRST && aKeySym <= ST_XKMEDIA_LAST) {
-                        aVKeySt = ST_XKMEDIA2ST_VK[aKeySym - ST_XKMEDIA_FIRST];
-                    }
-                    if(aVKeySt != 0) {
-                        myMessageList.getKeysMap()[aVKeySt] = false;
-                    }
-                    break;
+                if(aVKeySt != 0) {
+                    myMessageList.getKeysMap()[aVKeySt] = false;
                 }
-                case ButtonPress:
-                case ButtonRelease: {
-                    const XButtonEvent* aBtnEvent = &myXEvent.xbutton;
-                    int aPosX = aBtnEvent->x;
-                    int aPosY = aBtnEvent->y;
-                    correctTiledCursor(aPosX, aPosY);
-                    const StRectI_t& aRect = myWinAttribs.isFullScreen ? myRectFull : myRectNorm;
-                    StPointD_t point(double(aPosX) / double(aRect.width()),
-                                     double(aPosY) / double(aRect.height()));
-                    int aMouseBtn = ST_NOMOUSE;
-                    // TODO (Kirill Gavrilov#6#) parse extra mouse buttons
-                    switch(aBtnEvent->button) {
-                        case 1:  aMouseBtn = ST_MOUSE_LEFT;     break;
-                        case 3:  aMouseBtn = ST_MOUSE_RIGHT;    break;
-                        case 2:  aMouseBtn = ST_MOUSE_MIDDLE;   break;
-                        default: aMouseBtn = aBtnEvent->button; break;
-                    }
-                    switch(myXEvent.type) {
-                        case ButtonRelease: {
-                            myMUpQueue.push(point, aMouseBtn);
-                            myMessageList.append(StMessageList::MSG_MOUSE_UP);
-                            break;
-                        }
-                        case ButtonPress: {
-                            myMDownQueue.push(point, aMouseBtn);
-                            myMessageList.append(StMessageList::MSG_MOUSE_DOWN);
-                            break;
-                        }
-                    }
-                    /*ST_DEBUG_LOG(((myXEvent.type == ButtonPress) ? "ButtonPress " : "Release ")
-                        + aMouseBtn + ", x= " + point.x + ", y= " + point.y
-                    );*/
-                    // force input focus to the master window
-                    XSetInputFocus(aDisplay->hDisplay, myMaster.hWindowGl, RevertToParent, CurrentTime);
-                    break;
+                break;
+            }
+            case ButtonPress:
+            case ButtonRelease: {
+                const XButtonEvent* aBtnEvent = &myXEvent.xbutton;
+                int aPosX = aBtnEvent->x;
+                int aPosY = aBtnEvent->y;
+                correctTiledCursor(aPosX, aPosY);
+                const StRectI_t& aRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
+                StPointD_t point(double(aPosX) / double(aRect.width()),
+                                 double(aPosY) / double(aRect.height()));
+                int aMouseBtn = ST_NOMOUSE;
+                // TODO (Kirill Gavrilov#6#) parse extra mouse buttons
+                switch(aBtnEvent->button) {
+                    case 1:  aMouseBtn = ST_MOUSE_LEFT;     break;
+                    case 3:  aMouseBtn = ST_MOUSE_RIGHT;    break;
+                    case 2:  aMouseBtn = ST_MOUSE_MIDDLE;   break;
+                    default: aMouseBtn = aBtnEvent->button; break;
                 }
-                //case ResizeRequest:
-                //case ConfigureRequest:
-                case ConfigureNotify: {
-                    //ST_DEBUG_LOG("ConfigureNotify");
-                    const XConfigureEvent* aCfgEvent = &myXEvent.xconfigure;
-                    if(!myWinAttribs.isFullScreen && aCfgEvent->window == myMaster.hWindow) {
-                        StRectI_t aNewRect;
-                        if(aCfgEvent->x > 64 && aCfgEvent->y > 64) {
-                            // we got real GLorigin position
-                            // worked when we in Compiz mode and on MoveWindow
-                            aNewRect.left()   = aCfgEvent->x;
-                            aNewRect.right()  = aCfgEvent->x + aCfgEvent->width;
-                            aNewRect.top()    = aCfgEvent->y;
-                            aNewRect.bottom() = aCfgEvent->y + aCfgEvent->height;
-                        } else {
-                            // we got psevdo x and y (~window decorations?)
-                            // on ResizeWindow without Compiz
-                            Window aChild;
-                            aNewRect.left() = 0;
-                            aNewRect.top()  = 0;
-                            XTranslateCoordinates(aDisplay->hDisplay, myMaster.hWindow,
-                                                  aDisplay->getRootWindow(),
-                                                  0, 0, &aNewRect.left(), &aNewRect.top(), &aChild);
-                            aNewRect.right()  = aNewRect.left() + aCfgEvent->width;
-                            aNewRect.bottom() = aNewRect.top()  + aCfgEvent->height;
-                        }
-                        if(myRectNorm != aNewRect) {
-                            // new compiz send messages when placement not really changed
-                            myRectNorm  = aNewRect;
-                            myIsUpdated = true; // call updateWindowPos() to update position
-                        }
+                switch(myXEvent.type) {
+                    case ButtonRelease: {
+                        myMUpQueue.push(point, aMouseBtn);
+                        myMessageList.append(StMessageList::MSG_MOUSE_UP);
+                        break;
                     }
-                    break;
+                    case ButtonPress: {
+                        myMDownQueue.push(point, aMouseBtn);
+                        myMessageList.append(StMessageList::MSG_MOUSE_DOWN);
+                        break;
+                    }
                 }
-                default: {
-                    // process XRandr events
-                    if(myMaster.isRecXRandrEvents) {
-                        int xrandrEventType = myXEvent.type - myMaster.xrandrEventBase;
-                        if(xrandrEventType == RRNotify || xrandrEventType == RRScreenChangeNotify) {
-                            ST_DEBUG_LOG("XRandr update event");
-                            updateMonitors();
-                        }
+                /*ST_DEBUG_LOG(((myXEvent.type == ButtonPress) ? "ButtonPress " : "Release ")
+                    + aMouseBtn + ", x= " + point.x + ", y= " + point.y
+                );*/
+                // force input focus to the master window
+                XSetInputFocus(aDisplay->hDisplay, myMaster.hWindowGl, RevertToParent, CurrentTime);
+                break;
+            }
+            //case ResizeRequest:
+            //case ConfigureRequest:
+            case ConfigureNotify: {
+                //ST_DEBUG_LOG("ConfigureNotify");
+                const XConfigureEvent* aCfgEvent = &myXEvent.xconfigure;
+                if(!attribs.IsFullScreen && aCfgEvent->window == myMaster.hWindow) {
+                    StRectI_t aNewRect;
+                    if(aCfgEvent->x > 64 && aCfgEvent->y > 64) {
+                        // we got real GLorigin position
+                        // worked when we in Compiz mode and on MoveWindow
+                        aNewRect.left()   = aCfgEvent->x;
+                        aNewRect.right()  = aCfgEvent->x + aCfgEvent->width;
+                        aNewRect.top()    = aCfgEvent->y;
+                        aNewRect.bottom() = aCfgEvent->y + aCfgEvent->height;
+                    } else {
+                        // we got psevdo x and y (~window decorations?)
+                        // on ResizeWindow without Compiz
+                        Window aChild;
+                        aNewRect.left() = 0;
+                        aNewRect.top()  = 0;
+                        XTranslateCoordinates(aDisplay->hDisplay, myMaster.hWindow,
+                                              aDisplay->getRootWindow(),
+                                              0, 0, &aNewRect.left(), &aNewRect.top(), &aChild);
+                        aNewRect.right()  = aNewRect.left() + aCfgEvent->width;
+                        aNewRect.bottom() = aNewRect.top()  + aCfgEvent->height;
+                    }
+                    if(myRectNorm != aNewRect) {
+                        // new compiz send messages when placement not really changed
+                        myRectNorm  = aNewRect;
+                        myIsUpdated = true; // call updateWindowPos() to update position
+                    }
+                }
+                break;
+            }
+            default: {
+                // process XRandr events
+                if(myMaster.isRecXRandrEvents) {
+                    int xrandrEventType = myXEvent.type - myMaster.xrandrEventBase;
+                    if(xrandrEventType == RRNotify || xrandrEventType == RRScreenChangeNotify) {
+                        ST_DEBUG_LOG("XRandr update event");
+                        updateMonitors();
                     }
                 }
             }

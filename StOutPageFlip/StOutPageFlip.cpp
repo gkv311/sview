@@ -411,10 +411,7 @@ bool StOutPageFlip::create() {
     StWindow::show();
 
     // request Quad Buffer
-    StWinAttributes_t anAttribs = stDefaultWinAttributes();
-    StWindow::getAttributes(anAttribs);
-    anAttribs.isGlStereo = (params.QuadBuffer->getValue() == QUADBUFFER_HARD_OPENGL);
-    StWindow::setAttributes(anAttribs);
+    StWindow::setAttribute(StWinAttr_GlQuadStereo, params.QuadBuffer->getValue() == QUADBUFFER_HARD_OPENGL);
     if(!StWindow::create()) {
         return false;
     }

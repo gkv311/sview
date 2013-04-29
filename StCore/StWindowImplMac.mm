@@ -79,7 +79,7 @@ void StWindowImpl::setPlacement(const StRectI_t& theRect,
     myIsUpdated = true;
 
     if(myMaster.hWindow != NULL
-    && !myWinAttribs.isFullScreen) {
+    && !attribs.IsFullScreen) {
         StCocoaLocalPool aLocalPool;
         NSRect aFrameRect = [myMaster.hWindow frameRectForContentRect: myCocoaCoords.normalToCocoa(myRectNorm)];
         [myMaster.hWindow setFrame: aFrameRect display: YES];
@@ -88,19 +88,19 @@ void StWindowImpl::setPlacement(const StRectI_t& theRect,
 
 void StWindowImpl::show(const int theWinNum) {
     if((theWinNum == ST_WIN_MASTER || theWinNum == ST_WIN_ALL)
-    && myWinAttribs.isHide) {
+    && attribs.IsHidden) {
         if(myMaster.hWindow != NULL) {
             [myMaster.hWindow orderFront: NULL];
         }
-        myWinAttribs.isHide = false;
+        attribs.IsHidden = false;
         updateWindowPos();
     }
     if((theWinNum == ST_WIN_SLAVE || theWinNum == ST_WIN_ALL)
-    && myWinAttribs.isSlaveHide) {
+    && attribs.IsSlaveHidden) {
         if(mySlave.hWindow != NULL) {
             [mySlave.hWindow orderFront: NULL];
         }
-        myWinAttribs.isSlaveHide = false;
+        attribs.IsSlaveHidden = false;
         updateWindowPos();
     }
 }
@@ -108,18 +108,18 @@ void StWindowImpl::show(const int theWinNum) {
 void StWindowImpl::hide(const int theWinNum) {
     StCocoaLocalPool aLocalPool;
     if((theWinNum == ST_WIN_MASTER || theWinNum == ST_WIN_ALL)
-    && !myWinAttribs.isHide) {
+    && !attribs.IsHidden) {
         if(myMaster.hWindow != NULL) {
             [myMaster.hWindow orderOut: NULL];
         }
-        myWinAttribs.isHide = true;
+        attribs.IsHidden = true;
     }
     if((theWinNum == ST_WIN_SLAVE || theWinNum == ST_WIN_ALL)
-    && !myWinAttribs.isSlaveHide) {
+    && !attribs.IsSlaveHidden) {
         if(mySlave.hWindow != NULL) {
             [mySlave.hWindow orderOut: NULL];
         }
-        myWinAttribs.isSlaveHide = true;
+        attribs.IsSlaveHidden = true;
     }
 }
 
@@ -163,7 +163,7 @@ void StWindowImpl::doCreateWindows(NSOpenGLContext* theGLContextMaster,
     StCocoaLocalPool aLocalPool;
 
     // create the Master window
-    NSUInteger aWinStyle = myWinAttribs.isNoDecor
+    NSUInteger aWinStyle = attribs.IsNoDecor
                          ? NSBorderlessWindowMask
                          : NSTitledWindowMask | NSClosableWindowMask | NSResizableWindowMask;
     myMaster.hWindow = [[StCocoaWin alloc] initWithStWin: this
@@ -191,7 +191,7 @@ void StWindowImpl::doCreateWindows(NSOpenGLContext* theGLContextMaster,
     [myMaster.hViewGl setOpenGLContext: theGLContextMaster];
     [theGLContextMaster setView: myMaster.hViewGl];
 
-    if(myWinAttribs.isSlave) {
+    if(attribs.Slave != StWinSlave_slaveOff) {
         // create the Slave window
         StRectI_t aRectSlave(getSlaveTop(),  getSlaveTop() + getSlaveHeight(),
                              getSlaveLeft(), getSlaveLeft() + getSlaveWidth());
@@ -224,7 +224,7 @@ void StWindowImpl::doCreateWindows(NSOpenGLContext* theGLContextMaster,
 
         // make slave window topmost
         [mySlave.hWindow setLevel: kCGMaximumWindowLevel];
-        if(!myWinAttribs.isSlaveHide && (!isSlaveIndependent() || myMonitors.size() > 1)) {
+        if(!attribs.IsSlaveHidden && (!isSlaveIndependent() || myMonitors.size() > 1)) {
             [mySlave.hWindow orderFront: NULL];
         }
     }
@@ -250,7 +250,7 @@ bool StWindowImpl::create() {
     NSOpenGLPixelFormat* aGLFormat    = NULL;
     NSOpenGLContext* aGLContextMaster = NULL;
     NSOpenGLContext* aGLContextSlave  = NULL;
-    if(myWinAttribs.isGlStereo) {
+    if(attribs.IsGlStereo) {
         aGLFormat = [[[NSOpenGLPixelFormat alloc] initWithAttributes: THE_QUAD_BUFF] autorelease];
         aGLContextMaster = [[[NSOpenGLContext alloc] initWithFormat: aGLFormat
                                                        shareContext: NULL] autorelease];
@@ -278,7 +278,7 @@ bool StWindowImpl::create() {
     }
 
     // create the Slave GL context
-    if(myWinAttribs.isSlave) {
+    if(attribs.Slave != StWinSlave_slaveOff) {
         aGLContextSlave = [[[NSOpenGLContext alloc] initWithFormat: aGLFormat
                                                       shareContext: aGLContextMaster] autorelease];
         if(aGLContextSlave == NULL) {
@@ -324,27 +324,27 @@ void StWindowImpl::updateChildRect() {
 }
 
 void StWindowImpl::setFullScreen(bool theFullscreen) {
-    if(myWinAttribs.isFullScreen != theFullscreen) {
-        myWinAttribs.isFullScreen = theFullscreen;
-        if(myWinAttribs.isFullScreen) {
+    if(attribs.IsFullScreen != theFullscreen) {
+        attribs.IsFullScreen = theFullscreen;
+        if(attribs.IsFullScreen) {
             myFullScreenWinNb.increment();
         } else {
             myFullScreenWinNb.decrement();
         }
     }
 
-    if(myWinAttribs.isFullScreen) {
+    if(attribs.IsFullScreen) {
         const StMonitor& aMon = (myMonMasterFull == -1) ? myMonitors[myRectNorm.center()] : myMonitors[myMonMasterFull];
         myRectFull = aMon.getVRect();
 
-        if(myWinAttribs.isSlave && mySlave.hViewGl != NULL) {
+        if(attribs.Slave != StWinSlave_slaveOff && mySlave.hViewGl != NULL) {
             [mySlave.hViewGl goToFullscreen];
         }
         if(myMaster.hViewGl != NULL) {
             [myMaster.hViewGl goToFullscreen];
         }
     } else {
-        if(myWinAttribs.isSlave && mySlave.hViewGl != NULL) {
+        if(attribs.Slave != StWinSlave_slaveOff && mySlave.hViewGl != NULL) {
             [mySlave.hViewGl goToWindowed];
         }
         if(myMaster.hViewGl != NULL) {
@@ -358,9 +358,9 @@ void StWindowImpl::updateWindowPos() {
         return;
     }
 
-    if(myWinAttribs.isSlave && !myWinAttribs.isSlaveHide
+    if(attribs.Slave != StWinSlave_slaveOff && !attribs.IsSlaveHidden
     && (!isSlaveIndependent() || myMonitors.size() > 1)
-    && !myWinAttribs.isFullScreen) {
+    && !attribs.IsFullScreen) {
         StRectI_t aRectSlave(getSlaveTop(),  getSlaveTop() + getSlaveHeight(),
                              getSlaveLeft(), getSlaveLeft() + getSlaveWidth());
         NSRect aFrameRect = [mySlave.hWindow frameRectForContentRect: myCocoaCoords.normalToCocoa(aRectSlave)];
@@ -368,7 +368,7 @@ void StWindowImpl::updateWindowPos() {
     }
 
     // detect when window moved to another monitor
-    if(!myWinAttribs.isFullScreen && myMonitors.size() > 1) {
+    if(!attribs.IsFullScreen && myMonitors.size() > 1) {
         int aNewMonId = myMonitors[myRectNorm.center()].getId();
         if(myWinOnMonitorId != aNewMonId) {
             myMessageList.append(StMessageList::MSG_WIN_ON_NEW_MONITOR);
@@ -383,8 +383,14 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
         updateMonitors();
     }
 
+    if(myMaster.hViewGl == NULL) {
+        // window is closed!
+        myMessageList.popList(theMessages);
+        return;
+    }
+
     // detect master window movements
-    if(myWinAttribs.isFullScreen) {
+    if(attribs.IsFullScreen) {
         if(myRectNormPrev != myRectFull) {
             myRectNormPrev = myRectFull;
             myIsUpdated    = true;

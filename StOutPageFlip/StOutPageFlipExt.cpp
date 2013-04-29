@@ -93,24 +93,16 @@ StOutPageFlipExt::~StOutPageFlipExt() {
 
 bool StOutPageFlipExt::create() {
     // request slave
-    StWinAttributes_t anAttribs = stDefaultWinAttributes();
-    StWindow::getAttributes(anAttribs);
     if(params.ControlCode->getValue() != DEVICE_CONTROL_NONE) {
 #ifdef _WIN32
     if(myIsVistaPlus) {
 #endif
-        anAttribs.isSlave         = true;
-        anAttribs.isSlaveHLineTop = true;
-        anAttribs.isSlaveHide     = true;
+        StWindow::setAttribute(StWinAttr_SlaveCfg, StWinSlave_slaveHLineTop);
+        StWindow::hide(ST_WIN_SLAVE);
 #ifdef _WIN32
     }
 #endif
-    } else {
-        anAttribs.isSlave         = false;
-        anAttribs.isSlaveHLineTop = false;
-        anAttribs.isSlaveHide     = false;
     }
-    StWindow::setAttributes(anAttribs);
     if(!StOutPageFlip::create()) {
         return false;
     }
@@ -226,25 +218,13 @@ void StOutPageFlipExt::stglDrawExtra(unsigned int theView,
 }
 
 void StOutPageFlipExt::setSlavePosition(int thePositionId) {
-    StWinAttributes_t aWinAttribs = stDefaultWinAttributes();
-    StWindow::getAttributes(aWinAttribs);
-    StWinAttributes_t anOrigAttribs = aWinAttribs;
-
-    // unset concurrent values
-    aWinAttribs.isSlaveHLineTop    = false;
-    aWinAttribs.isSlaveHTop2Px     = false;
-    aWinAttribs.isSlaveHLineBottom = false;
-
+    StWinSlave aCfg = StWinSlave_slaveOff;
     if(thePositionId == StGLDeviceControl::SLAVE_HLINE_TOP) {
-        aWinAttribs.isSlaveHLineTop = true;
+        aCfg = StWinSlave_slaveHLineTop;
     } else if(thePositionId == StGLDeviceControl::SLAVE_HTOP2PX) {
-        aWinAttribs.isSlaveHTop2Px = true;
+        aCfg = StWinSlave_slaveHTop2Px;
     } else if(thePositionId == StGLDeviceControl::SLAVE_HLINE_BOTTOM) {
-        aWinAttribs.isSlaveHLineBottom = true;
+        aCfg = StWinSlave_slaveHLineBottom;
     }
-
-    // update only if changed
-    if(!areSame(&anOrigAttribs, &aWinAttribs)) {
-        StWindow::setAttributes(aWinAttribs);
-    }
+    StWindow::setAttribute(StWinAttr_SlaveCfg, aCfg);
 }

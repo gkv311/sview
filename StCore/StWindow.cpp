@@ -38,11 +38,11 @@ void StWindow::setTitle(const StString& theTitle) {
     myWin->setTitle(theTitle);
 }
 
-void StWindow::getAttributes(StWinAttributes_t& theAttributes) const {
+void StWindow::getAttributes(StWinAttr* theAttributes) const {
     myWin->getAttributes(theAttributes);
 }
 
-void StWindow::setAttributes(const StWinAttributes_t& theAttributes) {
+void StWindow::setAttributes(const StWinAttr* theAttributes) {
     myWin->setAttributes(theAttributes);
 }
 

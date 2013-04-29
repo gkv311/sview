@@ -289,12 +289,7 @@ bool StMoviePlayer::init() {
         myGUI->stImageRegion->params.gamma->setValue(0.01f * loadedGamma);
 
     // capture multimedia keys even without window focus
-    StWinAttributes_t anAttribs = stDefaultWinAttributes();
-    myWindow->getAttributes(anAttribs);
-    if(anAttribs.areGlobalMediaKeys != params.areGlobalMKeys->getValue()) {
-        anAttribs.areGlobalMediaKeys = params.areGlobalMKeys->getValue();
-        myWindow->setAttributes(anAttribs);
-    }
+    myWindow->setAttribute(StWinAttr_GlobalMediaKeys, params.areGlobalMKeys->getValue());
 
     // initialize frame region early to show dedicated error description
     if(!myGUI->stImageRegion->stglInit()) {
@@ -597,14 +592,13 @@ void StMoviePlayer::stglDraw(unsigned int view) {
                 }
             }
         }
-        StWinAttributes_t anAttribs = stDefaultWinAttributes();
-        myWindow->getAttributes(anAttribs);
-        if(anAttribs.toBlockSleepSystem  != toBlockSleepSystem
-        || anAttribs.toBlockSleepDisplay != toBlockSleepDisplay) {
-            anAttribs.toBlockSleepSystem  = toBlockSleepSystem;
-            anAttribs.toBlockSleepDisplay = toBlockSleepDisplay;
-            myWindow->setAttributes(anAttribs);
-        }
+
+        const StWinAttr anAttribs[] = {
+            StWinAttr_ToBlockSleepSystem,  (StWinAttr )toBlockSleepSystem,
+            StWinAttr_ToBlockSleepDisplay, (StWinAttr )toBlockSleepDisplay,
+            StWinAttr_NULL
+        };
+        myWindow->setAttributes(anAttribs);
 
         myWindow->showCursor(!myGUI->toHideCursor());
 

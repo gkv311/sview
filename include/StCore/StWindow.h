@@ -64,73 +64,30 @@ typedef StArrayList< StHandle<StOutDevice> > StOutDevicesList;
 template<> inline void StArray< StHandle<StOutDevice> >::sort() {}
 
 /**
- * StWindow attributes structure.
- * Notice that some options couln't be changed after window was created!
+ * Slave configuration.
  */
-typedef struct tagStWinAttributes {
-    size_t nSize;
-    // general attributes
-    stBool_t isNoDecor;          //!< to decorate master window or not (will be ignored in case of embedded and fullscreen)
-    stBool_t isStereoOutput;     //!< indicate stereoscopic output on / off (used for interconnection between modules)
-    stBool_t isGlStereo;         //!< request OpenGL hardware accelerated QuadBuffer
-    stBool_t isFullScreen;       //!< to show in fullscreen mode
-    stBool_t isHide;             //!< to hide the master window
-    stBool_t isHideCursor;       //!< to hide cursor
-    stBool_t toBlockSleepSystem; //!< prevent system  going to sleep (display could be turned off)
-    stBool_t toBlockSleepDisplay;//!< prevent display going to sleep
-    stBool_t areGlobalMediaKeys; //!< register system hot-key to capture multimedia even without window focus
-    // slave configuration
-    stBool_t isSlave;            //!< create StWindow with slave window
-    stBool_t isSlaveXMirrow;     //!< flip slave window position along X axis (horizontally)
-    stBool_t isSlaveYMirrow;     //!< flip slave window position along Y axis (vertically)
-    stBool_t isSlaveHLineTop;    //!< slave window - is a horizontal line at top of the display where master window shown
-    stBool_t isSlaveHTop2Px;     //!< slave window - is a horizontal line 2 pixels long at top of the display where master window shown
-    stBool_t isSlaveHLineBottom; //!< slave window - is a horizontal line at bottom of the display where master window shown
-    stBool_t isSlaveHide;        //!< do not show slave window
-    int8_t   slaveMonId;         //!< on which monitor show slave window (1 by default)
-} StWinAttributes_t;
+enum StWinSlave {
+    StWinSlave_slaveOff,         //!< do not create slave window
+    StWinSlave_slaveSync,        //!< synchronize position and dimensions with master window
+    StWinSlave_slaveFlipX,       //!< flip slave window position along X axis (horizontally), keep dimensions equal to master window
+    StWinSlave_slaveFlipY,       //!< flip slave window position along Y axis (vertically),   keep dimensions equal to master window
+    StWinSlave_slaveHLineTop,    //!< slave is a horizontal line at top of the display where master window shown
+    StWinSlave_slaveHTop2Px,     //!< slave is a horizontal line 2 pixels long at top of the display where master window shown
+    StWinSlave_slaveHLineBottom, //!< slave is a horizontal line at bottom of the display where master window shown
+};
 
 /**
- * Initialize the default StWindow attributes.
- * Use this function to avoid unused / forgotten parameters to be setted with invalid values.
+ * Window attributes.
  */
-inline StWinAttributes_t stDefaultWinAttributes() {
-    StWinAttributes_t stWinAttribs;
-    stMemSet(&stWinAttribs, 0, sizeof(stWinAttribs));
-    stWinAttribs.nSize = sizeof(stWinAttribs);
-    stWinAttribs.slaveMonId = 1;
-    return stWinAttribs;
-}
-
-/**
- * Compare two StWindow attributes structures.
- */
-inline stBool_t areSame(const StWinAttributes_t* theAttrib1,
-                        const StWinAttributes_t* theAttrib2) {
-    if(theAttrib1->nSize != sizeof(StWinAttributes_t) ||
-       theAttrib2->nSize != sizeof(StWinAttributes_t)) {
-        // should be compared only structs
-        return ST_FALSE;
-    }
-    // compare all known fields
-    return (theAttrib1->isNoDecor          == theAttrib2->isNoDecor &&
-            theAttrib1->isStereoOutput     == theAttrib2->isStereoOutput &&
-            theAttrib1->isGlStereo         == theAttrib2->isGlStereo &&
-            theAttrib1->isFullScreen       == theAttrib2->isFullScreen &&
-            theAttrib1->isHide             == theAttrib2->isHide &&
-            theAttrib1->isHideCursor       == theAttrib2->isHideCursor &&
-            theAttrib1->toBlockSleepSystem == theAttrib2->toBlockSleepSystem &&
-            theAttrib1->toBlockSleepDisplay== theAttrib2->toBlockSleepDisplay &&
-            theAttrib1->areGlobalMediaKeys == theAttrib2->areGlobalMediaKeys &&
-            theAttrib1->isSlave            == theAttrib2->isSlave &&
-            theAttrib1->isSlaveXMirrow     == theAttrib2->isSlaveXMirrow &&
-            theAttrib1->isSlaveYMirrow     == theAttrib2->isSlaveYMirrow &&
-            theAttrib1->isSlaveHLineTop    == theAttrib2->isSlaveHLineTop &&
-            theAttrib1->isSlaveHTop2Px     == theAttrib2->isSlaveHTop2Px &&
-            theAttrib1->isSlaveHLineBottom == theAttrib2->isSlaveHLineBottom &&
-            theAttrib1->isSlaveHide        == theAttrib2->isSlaveHide &&
-            theAttrib1->slaveMonId         == theAttrib2->slaveMonId);
-}
+enum StWinAttr {
+    StWinAttr_NULL = 0,            //!< NULL-termination of array of the attributes
+    StWinAttr_GlQuadStereo,        //!< boolean, request OpenGL context with Quad Buffer
+    StWinAttr_ToBlockSleepSystem,  //!< boolean, prevent system  going to sleep (display could be turned off)
+    StWinAttr_ToBlockSleepDisplay, //!< boolean, prevent display going to sleep
+    StWinAttr_GlobalMediaKeys,     //!< boolean, register system hot-key to capture multimedia even without window focus
+    StWinAttr_SlaveCfg,            //!< StWinSlave, create StWindow with slave window and specify slave window position rules
+    StWinAttr_SlaveMon,            //!< integer, slave window monitor id
+};
 
 typedef struct tagStSlaveWindowCfg {
     int idMaster;
@@ -169,9 +126,34 @@ class StWindow {
      */
     ST_CPPEXPORT void setTitle(const StString& theTitle);
 
-    ST_CPPEXPORT void getAttributes(StWinAttributes_t& thetAttributes) const;
+    /**
+     * Request window attributes.
+     * @param theAttributes NULL-terminated list of key-value pairs, values will be set to current state
+     */
+    ST_CPPEXPORT void getAttributes(StWinAttr* theAttributes) const;
 
-    ST_CPPEXPORT void setAttributes(const StWinAttributes_t& theAttributes);
+    /**
+     * Setup window attributes.
+     * Notice that some attributes should be set BEFORE window creation:
+     *  - Slave window existance
+     *  - OpenGL context attributes (additional buffers)
+     * @param theAttributes NULL-terminated list of key-value pairs (values should be casted to StWinAttr)
+     */
+    ST_CPPEXPORT void setAttributes(const StWinAttr* theAttributes);
+
+    /**
+     * Setup window attribute.
+     * @param theAttribute Attribute to change
+     * @param theValue     Attribute value
+     */
+    ST_LOCAL void setAttribute(const StWinAttr theAttribute,
+                               const int       theValue) {
+        const StWinAttr anAttribs[] = {
+            theAttribute, (StWinAttr )theValue,
+            StWinAttr_NULL
+        };
+        setAttributes(anAttribs);
+    }
 
     /**
      * @return true if window content is visible

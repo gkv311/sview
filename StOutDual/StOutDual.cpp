@@ -122,32 +122,20 @@ class StProgramMM : public StGLProgram {
 
 };
 
-void StOutDual::replaceDualAttribute(const DeviceEnum theFrom,
-                                     const DeviceEnum theTo) {
-    StWinAttributes_t anAttribs = stDefaultWinAttributes();
-    StWindow::getAttributes(anAttribs);
-    StWinAttributes_t anAttribsBefore = anAttribs;
-    switch(theFrom) {
+void StOutDual::replaceDualAttribute(const DeviceEnum theValue) {
+    StWinSlave aCfg = StWinSlave_slaveSync;
+    switch(theValue) {
         case DUALMODE_XMIRROW:
-            anAttribs.isSlaveXMirrow = false;
+            aCfg = StWinSlave_slaveFlipX;
             break;
         case DUALMODE_YMIRROW:
-            anAttribs.isSlaveYMirrow = false;
-        default: break;
-    }
-    switch(theTo) {
-        case DUALMODE_XMIRROW:
-            anAttribs.isSlaveXMirrow = true;
-            break;
-        case DUALMODE_YMIRROW:
-            anAttribs.isSlaveYMirrow = true;
+            aCfg = StWinSlave_slaveFlipY;
             break;
         default: break;
     }
-    if(!areSame(&anAttribsBefore, &anAttribs)) {
-        StWindow::setAttributes(anAttribs);
-    }
-    myDevice = theTo;
+
+    StWindow::setAttribute(StWinAttr_SlaveCfg, aCfg);
+    myDevice = theValue;
 }
 
 StAtomic<int32_t> StOutDual::myInstancesNb(0);
@@ -171,10 +159,10 @@ const char* StOutDual::getDeviceId() const {
 
 bool StOutDual::setDevice(const StString& theDevice) {
     if(theDevice == "Dual") {
-        replaceDualAttribute(myDevice, DUALMODE_SIMPLE);
+        replaceDualAttribute(DUALMODE_SIMPLE);
     } else if(theDevice == "Mirror"
            && myDevice == DUALMODE_SIMPLE) {
-        replaceDualAttribute(myDevice, DUALMODE_XMIRROW);
+        replaceDualAttribute(DUALMODE_XMIRROW);
     }
     return false;
 }
@@ -276,13 +264,12 @@ StOutDual::StOutDual(const StNativeWin_t theParentWindow)
     }
 
     // request slave window
-    StWinAttributes_t anAttribs = stDefaultWinAttributes();
-    StWindow::getAttributes(anAttribs);
-    anAttribs.isSlave    = true;
-    anAttribs.slaveMonId = int8_t(params.SlaveMonId->getValue());
+    StWinAttr anAttribs[] = {
+        StWinAttr_SlaveMon, (StWinAttr )params.SlaveMonId->getValue(),
+        StWinAttr_NULL
+    };
     StWindow::setAttributes(anAttribs);
-
-    replaceDualAttribute(DUALMODE_SIMPLE, myDevice);
+    replaceDualAttribute(myDevice);
 }
 
 void StOutDual::releaseResources() {
@@ -384,13 +371,13 @@ void StOutDual::processEvents(StMessage_t* theMessages) {
 
         bool* aKeys = ((bool* )theMessages[anIter].data);
         if(aKeys[ST_VK_F1]) {
-            replaceDualAttribute(myDevice, DUALMODE_SIMPLE);
+            replaceDualAttribute(DUALMODE_SIMPLE);
             aKeys[ST_VK_F1] = false;
         } else if(aKeys[ST_VK_F2]) {
-            replaceDualAttribute(myDevice, DUALMODE_XMIRROW);
+            replaceDualAttribute(DUALMODE_XMIRROW);
             aKeys[ST_VK_F2] = false;
         } else if(aKeys[ST_VK_F3]) {
-            replaceDualAttribute(myDevice, DUALMODE_YMIRROW);
+            replaceDualAttribute(DUALMODE_YMIRROW);
             aKeys[ST_VK_F3] = false;
         }
     }
@@ -535,8 +522,5 @@ void StOutDual::doVSync(const bool theValue) {
 }
 
 void StOutDual::doSlaveMon(const int32_t theValue) {
-    StWinAttributes_t anAttribs = stDefaultWinAttributes();
-    StWindow::getAttributes(anAttribs);
-    anAttribs.slaveMonId = int8_t(theValue);
-    StWindow::setAttributes(anAttribs);
+    StWindow::setAttribute(StWinAttr_SlaveMon, theValue);
 }

@@ -112,8 +112,7 @@ class StOutDual : public StWindow {
 
         private:
 
-    ST_LOCAL void replaceDualAttribute(const DeviceEnum theFrom,
-                                       const DeviceEnum theTo);
+    ST_LOCAL void replaceDualAttribute(const DeviceEnum theValue);
 
     /**
      * Release GL resources before window closing.

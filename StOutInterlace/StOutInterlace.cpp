@@ -316,12 +316,12 @@ StOutInterlace::StOutInterlace(const StNativeWin_t theParentWindow)
     }
 
     // request slave window
-    StWinAttributes_t anAttribs = stDefaultWinAttributes();
-    StWindow::getAttributes(anAttribs);
-    anAttribs.isSlave = true;
-    anAttribs.isSlaveHLineTop = true;
-    anAttribs.isSlaveHide = true;
+    const StWinAttr anAttribs[] = {
+        StWinAttr_SlaveCfg, (StWinAttr )StWinSlave_slaveHLineTop,
+        StWinAttr_NULL
+    };
     StWindow::setAttributes(anAttribs);
+    StWindow::hide(ST_WIN_SLAVE); // slave is hidden by default
 }
 
 void StOutInterlace::releaseResources() {

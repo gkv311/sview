@@ -68,8 +68,20 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
   myIsUpdated(false),
   myIsActive(false),
   myBlockSleep(BlockSleep_OFF),
-  myIsDispChanged(false),
-  myWinAttribs(stDefaultWinAttributes()) {
+  myIsDispChanged(false) {
+    stMemZero(&attribs, sizeof(attribs));
+    attribs.IsNoDecor      = false;
+    attribs.IsStereoOutput = false;
+    attribs.IsGlStereo     = false;
+    attribs.IsFullScreen   = false;
+    attribs.IsHidden       = false;
+    attribs.ToHideCursor   = false;
+    attribs.ToBlockSleepSystem  = false;
+    attribs.ToBlockSleepDisplay = false;
+    attribs.AreGlobalMediaKeys  = false;
+    attribs.Slave      = StWinSlave_slaveOff;
+    attribs.SlaveMonId = 1;
+
     myDndList = new StString[1];
     myMonSlave.idMaster = 0;
     myMonSlave.idSlave  = 1; // second by default
@@ -145,16 +157,20 @@ void StWindowImpl::close() {
 #endif
 
     // turn off display sleep blocking
-    myWinAttribs.toBlockSleepSystem  = false;
-    myWinAttribs.toBlockSleepDisplay = false;
+    const bool toBlockSleepSystem  = attribs.ToBlockSleepSystem;
+    const bool toBlockSleepDisplay = attribs.ToBlockSleepDisplay;
+    attribs.ToBlockSleepSystem  = false;
+    attribs.ToBlockSleepDisplay = false;
     updateBlockSleep();
+    attribs.ToBlockSleepSystem  = toBlockSleepSystem;
+    attribs.ToBlockSleepDisplay = toBlockSleepDisplay;
 
     myParentWin = (StNativeWin_t )NULL;
 
-    if(myWinAttribs.isFullScreen) {
+    if(attribs.IsFullScreen) {
         myFullScreenWinNb.decrement();
     }
-    myWinAttribs.isFullScreen = false; // just hack to return window position after closing
+    attribs.IsFullScreen = false; // just hack to return window position after closing
 }
 
 #if (!defined(__APPLE__))
@@ -175,18 +191,76 @@ void StWindowImpl::setTitle(const StString& theTitle) {
 }
 #endif // !__APPLE__
 
-void StWindowImpl::getAttributes(StWinAttributes_t& theAttributes) const {
-    size_t aBytesToCopy = stMin(theAttributes.nSize, sizeof(StWinAttributes_t));
-    stMemCpy(&theAttributes, &myWinAttribs, aBytesToCopy); // copy as much as possible
-    theAttributes.nSize = aBytesToCopy;
+void StWindowImpl::getAttributes(StWinAttr* theAttributes) const {
+    if(theAttributes == NULL) {
+        return;
+    }
+
+    for(StWinAttr* anIter = theAttributes; *anIter != StWinAttr_NULL; anIter += 2) {
+        switch(anIter[0]) {
+            case StWinAttr_GlQuadStereo:
+                anIter[1] = (StWinAttr )attribs.IsGlStereo;
+                break;
+            case StWinAttr_ToBlockSleepSystem:
+                anIter[1] = (StWinAttr )attribs.ToBlockSleepSystem;
+                break;
+            case StWinAttr_ToBlockSleepDisplay:
+                anIter[1] = (StWinAttr )attribs.ToBlockSleepDisplay;
+                break;
+            case StWinAttr_GlobalMediaKeys:
+                anIter[1] = (StWinAttr )attribs.AreGlobalMediaKeys;
+                break;
+            case StWinAttr_SlaveCfg:
+                anIter[1] = (StWinAttr )attribs.Slave;
+                break;
+            case StWinAttr_SlaveMon:
+                anIter[1] = (StWinAttr )attribs.SlaveMonId;
+                break;
+            default:
+                ST_DEBUG_LOG("UNKNOWN window attribute #" + anIter[0] + " requested");
+                break;
+        }
+    }
 }
 
-void StWindowImpl::setAttributes(const StWinAttributes_t& theAttributes) {
-    size_t aBytesToCopy = stMin(theAttributes.nSize, sizeof(StWinAttributes_t));
-    stMemCpy(&myWinAttribs, &theAttributes, aBytesToCopy); // copy as much as possible
-    myWinAttribs.nSize = sizeof(StWinAttributes_t);       // restore own size
-    updateSlaveConfig();
-    updateWindowPos();
+void StWindowImpl::setAttributes(const StWinAttr* theAttributes) {
+    if(theAttributes == NULL) {
+        return;
+    }
+
+    bool hasSlaveChanges = false;
+    for(const StWinAttr* anIter = theAttributes; anIter[0] != StWinAttr_NULL; anIter += 2) {
+        switch(anIter[0]) {
+            case StWinAttr_GlQuadStereo:
+                attribs.IsGlStereo = (bool )anIter[1];
+                break;
+            case StWinAttr_ToBlockSleepSystem:
+                attribs.ToBlockSleepSystem = (anIter[1] == 1);
+                break;
+            case StWinAttr_ToBlockSleepDisplay:
+                attribs.ToBlockSleepDisplay = (anIter[1] == 1);
+                break;
+            case StWinAttr_GlobalMediaKeys:
+                attribs.AreGlobalMediaKeys = (anIter[1] == 1);
+                break;
+            case StWinAttr_SlaveCfg:
+                hasSlaveChanges = hasSlaveChanges || (attribs.Slave != (StWinSlave )anIter[1]);
+                attribs.Slave = (StWinSlave )anIter[1];
+                break;
+            case StWinAttr_SlaveMon:
+                hasSlaveChanges = hasSlaveChanges || (attribs.SlaveMonId != anIter[1]);
+                attribs.SlaveMonId = anIter[1];
+                break;
+            default:
+                ST_DEBUG_LOG("UNKNOWN window attribute #" + anIter[0] + " requested");
+                break;
+        }
+    }
+
+    if(hasSlaveChanges) {
+        updateSlaveConfig();
+        updateWindowPos();
+    }
 }
 
 #ifdef _WIN32
@@ -200,7 +274,7 @@ void StWindowImpl::updateBlockSleep() {
     #ifndef ES_AWAYMODE_REQUIRED // for old MinGW
         #define ES_AWAYMODE_REQUIRED ((DWORD)0x00000040)
     #endif
-    if(myWinAttribs.toBlockSleepDisplay) {
+    if(attribs.ToBlockSleepDisplay) {
         // prevent display sleep - call this periodically
         EXECUTION_STATE aState = ES_CONTINUOUS | ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED;
         if(myIsVistaPlus) {
@@ -224,7 +298,7 @@ void StWindowImpl::updateBlockSleep() {
             RegCloseKey(aKey);*/
         }
         myBlockSleep = BlockSleep_DISPLAY;
-    } else if(myWinAttribs.toBlockSleepSystem) {
+    } else if(attribs.ToBlockSleepSystem) {
         // prevent system sleep - call this periodically
         EXECUTION_STATE aState = ES_CONTINUOUS | ES_SYSTEM_REQUIRED;
         if(myIsVistaPlus) {
@@ -253,7 +327,7 @@ void StWindowImpl::updateBlockSleep() {
         myBlockSleep = BlockSleep_OFF;
     }
 #elif(defined(__APPLE__))
-    if(myWinAttribs.toBlockSleepDisplay) {
+    if(attribs.ToBlockSleepDisplay) {
         if(myBlockSleep == BlockSleep_DISPLAY) {
             return;
         } else if(mySleepAssert != 0) {
@@ -266,7 +340,7 @@ void StWindowImpl::updateBlockSleep() {
             ST_DEBUG_LOG("IOPMAssertionCreateWithName() call FAILed");
         }
         myBlockSleep = BlockSleep_DISPLAY;
-    } else if(myWinAttribs.toBlockSleepSystem) {
+    } else if(attribs.ToBlockSleepSystem) {
         if(myBlockSleep == BlockSleep_SYSTEM) {
             return;
         } else if(mySleepAssert != 0) {
@@ -287,7 +361,7 @@ void StWindowImpl::updateBlockSleep() {
         myBlockSleep = BlockSleep_OFF;
     }
 #elif(defined(__linux__) || defined(__linux))
-    if(myWinAttribs.toBlockSleepDisplay) { // || myWinAttribs.toBlockSleepSystem
+    if(attribs.ToBlockSleepDisplay) { // || attribs.ToBlockSleepSystem
         if(myBlockSleep == BlockSleep_DISPLAY
         || myMaster.stXDisplay.isNull()
         || myMaster.hWindow == 0) {
@@ -321,7 +395,7 @@ void StWindowImpl::updateBlockSleep() {
 void StWindowImpl::updateActiveState() {
     updateBlockSleep();
 
-    if(myWinAttribs.isFullScreen) {
+    if(attribs.IsFullScreen) {
         myIsActive = true;
         return;
     }
@@ -342,7 +416,7 @@ void StWindowImpl::updateActiveState() {
 #if (!defined(__APPLE__))
 void StWindowImpl::show(const int theWinNum) {
     if((theWinNum == ST_WIN_MASTER || theWinNum == ST_WIN_ALL)
-     && myWinAttribs.isHide) {
+     && attribs.IsHidden) {
     #ifdef _WIN32
         if(myMaster.hWindow != NULL) {
             ShowWindow(myMaster.hWindow, SW_SHOW);
@@ -360,11 +434,11 @@ void StWindowImpl::show(const int theWinNum) {
             }
         }
     #endif
-        myWinAttribs.isHide = false;
+        attribs.IsHidden = false;
         updateWindowPos();
     }
     if((theWinNum == ST_WIN_SLAVE || theWinNum == ST_WIN_ALL)
-     && myWinAttribs.isSlaveHide) {
+     && attribs.IsSlaveHidden) {
     #ifdef _WIN32
         if(mySlave.hWindowGl != NULL) {
             ShowWindow(mySlave.hWindowGl, SW_SHOW);
@@ -375,14 +449,14 @@ void StWindowImpl::show(const int theWinNum) {
             //XIfEvent(myMaster.getDisplay(), &myXEvent, stXWaitMapped, (char* )mySlave.hWindowGl);
         }
     #endif
-        myWinAttribs.isSlaveHide = false;
+        attribs.IsSlaveHidden = false;
         updateWindowPos();
     }
 }
 
 void StWindowImpl::hide(const int theWinNum) {
     if((theWinNum == ST_WIN_MASTER || theWinNum == ST_WIN_ALL)
-    && !myWinAttribs.isHide) {
+    && !attribs.IsHidden) {
     #ifdef _WIN32
         if(myMaster.hWindow != NULL) {
             ShowWindow(myMaster.hWindow, SW_HIDE);
@@ -400,10 +474,10 @@ void StWindowImpl::hide(const int theWinNum) {
             }
         }
     #endif
-        myWinAttribs.isHide = true;
+        attribs.IsHidden = true;
     }
     if((theWinNum == ST_WIN_SLAVE || theWinNum == ST_WIN_ALL)
-    && !myWinAttribs.isSlaveHide) {
+    && !attribs.IsSlaveHidden) {
     #ifdef _WIN32
         if(mySlave.hWindowGl != NULL) {
             ShowWindow(mySlave.hWindowGl, SW_HIDE);
@@ -414,13 +488,13 @@ void StWindowImpl::hide(const int theWinNum) {
             myIsUpdated = true; // ?
         }
     #endif
-        myWinAttribs.isSlaveHide = true;
+        attribs.IsSlaveHidden = true;
     }
 }
 #endif // !__APPLE__
 
 void StWindowImpl::showCursor(bool toShow) {
-    if(myWinAttribs.isHideCursor != toShow) {
+    if(attribs.ToHideCursor != toShow) {
         return; // nothing to update
     }
 #ifdef _WIN32
@@ -449,7 +523,7 @@ void StWindowImpl::showCursor(bool toShow) {
         XFreeColors(myMaster.getDisplay(), cmap, &black.pixel, 1, 0);
     }
 #endif
-    myWinAttribs.isHideCursor = !toShow;
+    attribs.ToHideCursor = !toShow;
 }
 
 #if (!defined(__APPLE__))
@@ -476,17 +550,17 @@ void StWindowImpl::setPlacement(const StRectI_t& theRect,
     }
     myIsUpdated = true;
 #ifdef _WIN32
-    if(myMaster.hWindow != NULL && !myWinAttribs.isFullScreen) {
-        int posLeft   = myRectNorm.left() - (!myWinAttribs.isNoDecor ?  GetSystemMetrics(SM_CXSIZEFRAME) : 0);
-        int posTop    = myRectNorm.top()  - (!myWinAttribs.isNoDecor ? (GetSystemMetrics(SM_CYSIZEFRAME) + GetSystemMetrics(SM_CYCAPTION)) : 0);
-        int winWidth  = (!myWinAttribs.isNoDecor ? 2 * GetSystemMetrics(SM_CXSIZEFRAME) : 0) + myRectNorm.width();
-        int winHeight = (!myWinAttribs.isNoDecor ? (GetSystemMetrics(SM_CYCAPTION) + 2 * GetSystemMetrics(SM_CYSIZEFRAME)) : 0) + myRectNorm.height();
+    if(myMaster.hWindow != NULL && !attribs.IsFullScreen) {
+        int posLeft   = myRectNorm.left() - (!attribs.IsNoDecor ?  GetSystemMetrics(SM_CXSIZEFRAME) : 0);
+        int posTop    = myRectNorm.top()  - (!attribs.IsNoDecor ? (GetSystemMetrics(SM_CYSIZEFRAME) + GetSystemMetrics(SM_CYCAPTION)) : 0);
+        int winWidth  = (!attribs.IsNoDecor ? 2 * GetSystemMetrics(SM_CXSIZEFRAME) : 0) + myRectNorm.width();
+        int winHeight = (!attribs.IsNoDecor ? (GetSystemMetrics(SM_CYCAPTION) + 2 * GetSystemMetrics(SM_CYSIZEFRAME)) : 0) + myRectNorm.height();
         SetWindowPos(myMaster.hWindow, HWND_NOTOPMOST,
                      posLeft, posTop, winWidth, winHeight,
                      SWP_NOACTIVATE);
     }
 #elif(defined(__linux__) || defined(__linux))
-    if(!myMaster.stXDisplay.isNull() && !myWinAttribs.isFullScreen && myMaster.hWindow != 0) {
+    if(!myMaster.stXDisplay.isNull() && !attribs.IsFullScreen && myMaster.hWindow != 0) {
         XMoveResizeWindow(myMaster.getDisplay(), myMaster.hWindow,
                           myRectNorm.left(),  myRectNorm.top(),
                           myRectNorm.width(), myRectNorm.height());
@@ -522,7 +596,7 @@ void StWindowImpl::getTiledWinRect(StRectI_t& theRect) const {
 }
 
 void StWindowImpl::correctTiledCursor(int& theLeft, int& theTop) const {
-    const StRectI_t& aWinRect = myWinAttribs.isFullScreen ? myRectFull : myRectNorm;
+    const StRectI_t& aWinRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
     switch(myTiledCfg) {
         case TiledCfg_SlaveMasterX: {
             theLeft -= aWinRect.width();
@@ -542,7 +616,7 @@ void StWindowImpl::correctTiledCursor(int& theLeft, int& theTop) const {
 }
 
 StGLBoxPx StWindowImpl::stglViewport(const int& theWinId) const {
-    const StRectI_t& aWinRect = myWinAttribs.isFullScreen ? myRectFull : myRectNorm;
+    const StRectI_t& aWinRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
     const int aWidth  = aWinRect.width();
     const int aHeight = aWinRect.height();
     StGLBoxPx aRect = {{ 0, 0, aWidth, aHeight }};
@@ -587,7 +661,7 @@ int StWindowImpl::getMouseUp(StPointD_t& thePoint) {
 }
 
 StPointD_t StWindowImpl::getMousePos() {
-    StRectI_t aWinRect = (myWinAttribs.isFullScreen) ? myRectFull : myRectNorm;
+    StRectI_t aWinRect = (attribs.IsFullScreen) ? myRectFull : myRectNorm;
 #ifdef _WIN32
     if(myMaster.hWindowGl != NULL) {
         CURSORINFO aCursor;

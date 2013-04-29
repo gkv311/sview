@@ -57,7 +57,7 @@ bool StWindowImpl::create() {
         return false;
     }
 
-    int isGlCtx = myMaster.glCreateContext(myWinAttribs.isSlave ? &mySlave : NULL, myWinAttribs.isGlStereo);
+    int isGlCtx = myMaster.glCreateContext(attribs.Slave != StWinSlave_slaveOff ? &mySlave : NULL, attribs.IsGlStereo);
     myEventInitGl.set();
 
     return (isGlCtx == STWIN_INIT_SUCCESS);
@@ -109,7 +109,7 @@ bool StWindowImpl::wndCreateWindows() {
     } else {
         myMaster.classNameGl = aNewClassName;
     }
-    if(myWinAttribs.isSlave) {
+    if(attribs.Slave != StWinSlave_slaveOff) {
         aNewClassName = StWinHandles::getNewClassName() + "Gl";
         if(!wndRegisterClass(aNewClassName)) {
             stError("WinAPI: Failed to register Slave window class");
@@ -123,10 +123,10 @@ bool StWindowImpl::wndCreateWindows() {
 
     // ========= At first - create windows' instances =========
     // parent Master window could be decorated - we parse this situation to get true coordinates
-    int posLeft   = myRectNorm.left() - (!myWinAttribs.isNoDecor ? GetSystemMetrics(SM_CXSIZEFRAME) : 0);
-    int posTop    = myRectNorm.top() - (!myWinAttribs.isNoDecor ? (GetSystemMetrics(SM_CYSIZEFRAME) + GetSystemMetrics(SM_CYCAPTION)) : 0);
-    int winWidth  = (!myWinAttribs.isNoDecor ? 2 * GetSystemMetrics(SM_CXSIZEFRAME) : 0) + myRectNorm.width();
-    int winHeight = (!myWinAttribs.isNoDecor ? (GetSystemMetrics(SM_CYCAPTION) + 2 * GetSystemMetrics(SM_CYSIZEFRAME)) : 0) + myRectNorm.height();
+    int posLeft   = myRectNorm.left() - (!attribs.IsNoDecor ? GetSystemMetrics(SM_CXSIZEFRAME) : 0);
+    int posTop    = myRectNorm.top() - (!attribs.IsNoDecor ? (GetSystemMetrics(SM_CYSIZEFRAME) + GetSystemMetrics(SM_CYCAPTION)) : 0);
+    int winWidth  = (!attribs.IsNoDecor ? 2 * GetSystemMetrics(SM_CXSIZEFRAME) : 0) + myRectNorm.width();
+    int winHeight = (!attribs.IsNoDecor ? (GetSystemMetrics(SM_CYCAPTION) + 2 * GetSystemMetrics(SM_CYSIZEFRAME)) : 0) + myRectNorm.height();
     HINSTANCE hInstance = GetModuleHandle(NULL); // Holds The Instance Of The Application
 
     if(myParentWin == NULL) {
@@ -134,7 +134,7 @@ bool StWindowImpl::wndCreateWindows() {
         myMaster.hWindow = CreateWindowExW(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE | WS_EX_ACCEPTFILES,
                                            myMaster.className.toCString(),
                                            myWindowTitle.toUtfWide().toCString(),
-                                           (!myWinAttribs.isNoDecor ? WS_OVERLAPPEDWINDOW : WS_POPUP) | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
+                                           (!attribs.IsNoDecor ? WS_OVERLAPPEDWINDOW : WS_POPUP) | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
                                            posLeft, posTop,
                                            winWidth, winHeight,
                                            NULL, NULL, hInstance, this); // put pointer to class, getted on WM_CREATE
@@ -146,7 +146,7 @@ bool StWindowImpl::wndCreateWindows() {
         }
     } else {
         // we have external native parent window
-        myWinAttribs.isNoDecor = true;
+        attribs.IsNoDecor = true;
 
         RECT aRect;
         GetWindowRect(myParentWin, &aRect);
@@ -179,7 +179,7 @@ bool StWindowImpl::wndCreateWindows() {
         return false;
     }
 
-    if(myWinAttribs.isSlave) {
+    if(attribs.Slave != StWinSlave_slaveOff) {
         mySlave.hWindowGl = CreateWindowExW(WS_EX_TOOLWINDOW | WS_EX_WINDOWEDGE | WS_EX_NOACTIVATE,
                                             mySlave.classNameGl.toCString(),
                                             L"Slave window",
@@ -202,7 +202,7 @@ bool StWindowImpl::wndCreateWindows() {
     myEventInitGl.wait();
 
     // ========= Now show up the windows =========
-    if(myWinAttribs.isSlave && !myWinAttribs.isSlaveHide && (!isSlaveIndependent() || myMonitors.size() > 1)) {
+    if(attribs.Slave != StWinSlave_slaveOff && !attribs.IsSlaveHidden && (!isSlaveIndependent() || myMonitors.size() > 1)) {
         SetWindowPos(mySlave.hWindowGl,
                      HWND_NOTOPMOST,
                      getSlaveLeft(),  getSlaveTop(),
@@ -210,7 +210,7 @@ bool StWindowImpl::wndCreateWindows() {
                      SWP_SHOWWINDOW);
     }
 
-    if(!myWinAttribs.isHide) {
+    if(!attribs.IsHidden) {
         SetWindowPos(myMaster.hWindow, HWND_NOTOPMOST,
                      posLeft, posTop, winWidth, winHeight,
                      SWP_SHOWWINDOW);
@@ -226,7 +226,7 @@ bool StWindowImpl::wndCreateWindows() {
     myMaster.evMsgThread.reset();
 
     // ========= Start callback procedure =========
-    if(!myWinAttribs.isHide && myParentWin == NULL) {
+    if(!attribs.IsHidden && myParentWin == NULL) {
         // TODO (Kirill Gavrilov#4) need we special StWindow function to make window on top?
         SetForegroundWindow(myMaster.hWindow); // make sure Master window on top and has input focus
     }
@@ -284,7 +284,7 @@ bool StWindowImpl::wndCreateWindows() {
                 }
 
                 // well bad place for polling since it should be rarely changed
-                const bool areGlobalMKeysNew = myWinAttribs.areGlobalMediaKeys;
+                const bool areGlobalMKeysNew = attribs.AreGlobalMediaKeys;
                 if(areGlobalHotKeys != areGlobalMKeysNew) {
                     areGlobalHotKeys = areGlobalMKeysNew;
                     if(areGlobalHotKeys) {
@@ -313,7 +313,7 @@ bool StWindowImpl::wndCreateWindows() {
  * Update StWindow position according to native parent position.
  */
 void StWindowImpl::updateChildRect() {
-    if(!myWinAttribs.isFullScreen && myParentWin != NULL) {
+    if(!attribs.IsFullScreen && myParentWin != NULL) {
         myIsUpdated = true;
         RECT aRect;
         GetClientRect(myParentWin, &aRect);
@@ -356,7 +356,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 }
                 case SC_SCREENSAVE:     // Screensaver Trying To Start?
                 case SC_MONITORPOWER: { // Monitor Trying To Enter Powersave?
-                    if(myWinAttribs.toBlockSleepDisplay) {
+                    if(attribs.ToBlockSleepDisplay) {
                         return 0; // Prevent From Happening
                     }
                     break;
@@ -397,7 +397,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
             break;
         }
         case WM_MOVE: {
-            if(myWinAttribs.isFullScreen || myParentWin != NULL) {
+            if(attribs.IsFullScreen || myParentWin != NULL) {
                 break;
             } else if(theWin == myMaster.hWindow) {
                 myIsUpdated = true;
@@ -412,7 +412,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
             break;
         }
         case WM_SIZE: {
-            if(myWinAttribs.isFullScreen || myParentWin != NULL) {
+            if(attribs.IsFullScreen || myParentWin != NULL) {
                 break;
             } else if(theWin == myMaster.hWindow) {
                 myIsUpdated = true;
@@ -429,7 +429,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
         }
         case WM_MOVING:
         case WM_SIZING: {
-            if(myWinAttribs.isFullScreen || myParentWin != NULL) {
+            if(attribs.IsFullScreen || myParentWin != NULL) {
                 break;
             } else if(theWin == myMaster.hWindow) {
                 RECT* aRect = (RECT* )(LPARAM )lParam;
@@ -570,9 +570,9 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
  * Slave window resized in update procedure.
  */
 void StWindowImpl::setFullScreen(bool theFullscreen) {
-    if(myWinAttribs.isFullScreen != theFullscreen) {
-        myWinAttribs.isFullScreen = theFullscreen;
-        if(myWinAttribs.isFullScreen) {
+    if(attribs.IsFullScreen != theFullscreen) {
+        attribs.IsFullScreen = theFullscreen;
+        if(attribs.IsFullScreen) {
             myFullScreenWinNb.increment();
         } else {
             myFullScreenWinNb.decrement();
@@ -580,7 +580,7 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
     }
 
     ShowWindow(myMaster.hWindow, SW_HIDE);
-    if(myWinAttribs.isFullScreen) {
+    if(attribs.IsFullScreen) {
         // embedded
         if(myParentWin != NULL) {
             SetParent(myMaster.hWindowGl, NULL);
@@ -595,10 +595,10 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
                      HWND_TOP,         // top status
                      myRectFull.left(),  myRectFull.top(),
                      myRectFull.width(), myRectFull.height(),
-                     !myWinAttribs.isHide ? SWP_SHOWWINDOW : SWP_NOACTIVATE); // show window
+                     !attribs.IsHidden ? SWP_SHOWWINDOW : SWP_NOACTIVATE); // show window
 
         // use tiled Master+Slave layout within single window if possible
-        if(myWinAttribs.isSlave && isSlaveIndependent()) {
+        if(attribs.Slave != StWinSlave_slaveOff && isSlaveIndependent()) {
             StRectI_t aRectSlave;
             aRectSlave.left()   = getSlaveLeft();
             aRectSlave.top()    = getSlaveTop();
@@ -620,7 +620,7 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
             }
         }
 
-        if(!myWinAttribs.isHide) {
+        if(!attribs.IsHidden) {
             SetFocus(myMaster.hWindow);
         }
     } else {
@@ -630,7 +630,7 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
         }
 
         // generic
-        if(!myWinAttribs.isNoDecor) {
+        if(!attribs.IsNoDecor) {
             SetWindowLongPtr(myMaster.hWindow, GWL_STYLE, WS_OVERLAPPEDWINDOW);
         }
         SetWindowPos(myMaster.hWindow, // window handle
@@ -639,8 +639,8 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
                      myRectNorm.top()  - GetSystemMetrics(SM_CYSIZEFRAME) - GetSystemMetrics(SM_CYCAPTION), // top position
                      2 * GetSystemMetrics(SM_CXSIZEFRAME) + myRectNorm.width(), // width
                      GetSystemMetrics(SM_CYCAPTION) + 2* GetSystemMetrics(SM_CYSIZEFRAME) + myRectNorm.height(), // height
-                     !myWinAttribs.isHide ? SWP_SHOWWINDOW : SWP_NOACTIVATE); // show window
-        if(!myWinAttribs.isHide) {
+                     !attribs.IsHidden ? SWP_SHOWWINDOW : SWP_NOACTIVATE); // show window
+        if(!attribs.IsHidden) {
             SetFocus(myMaster.hWindow);
         }
     }
@@ -654,23 +654,25 @@ void StWindowImpl::updateWindowPos() {
         return;
     }
 
-    if(myWinAttribs.isSlave && !myWinAttribs.isSlaveHide && (!isSlaveIndependent() || myMonitors.size() > 1)) {
+    if(attribs.Slave != StWinSlave_slaveOff && !attribs.IsSlaveHidden && (!isSlaveIndependent() || myMonitors.size() > 1)) {
         HWND afterHWND = myMaster.hWindow;
         UINT aFlags    = SWP_NOACTIVATE;
-        if(myWinAttribs.isSlaveHLineBottom || myWinAttribs.isSlaveHTop2Px || myWinAttribs.isSlaveHLineTop) {
+        if(attribs.Slave == StWinSlave_slaveHLineTop
+        || attribs.Slave == StWinSlave_slaveHTop2Px
+        || attribs.Slave == StWinSlave_slaveHLineBottom) {
             afterHWND = HWND_TOPMOST;
         }
 
-        if(!myWinAttribs.isFullScreen
+        if(!attribs.IsFullScreen
         && myTiledCfg != TiledCfg_Separate) {
             myTiledCfg = TiledCfg_Separate;
-            if(!myWinAttribs.isHide) {
+            if(!attribs.IsHidden) {
                 aFlags = SWP_SHOWWINDOW;
             }
         }
 
         // resize Slave GL-window
-        if(!myWinAttribs.isFullScreen || myTiledCfg == TiledCfg_Separate) {
+        if(!attribs.IsFullScreen || myTiledCfg == TiledCfg_Separate) {
             SetWindowPos(mySlave.hWindowGl, afterHWND,
                          getSlaveLeft(),  getSlaveTop(),
                          getSlaveWidth(), getSlaveHeight(),
@@ -678,8 +680,8 @@ void StWindowImpl::updateWindowPos() {
         }
     }
 
-    if(!myWinAttribs.isHide) {
-        if(myWinAttribs.isFullScreen && myTiledCfg != TiledCfg_Separate) {
+    if(!attribs.IsHidden) {
+        if(attribs.IsFullScreen && myTiledCfg != TiledCfg_Separate) {
             ShowWindow(mySlave.hWindowGl, SW_HIDE);
             StRectI_t aRect = myRectFull;
             getTiledWinRect(aRect);
@@ -697,17 +699,17 @@ void StWindowImpl::updateWindowPos() {
                          SWP_NOACTIVATE);
         } else {
             // resize Master GL-subwindow
-            GLsizei sizeX = (myWinAttribs.isFullScreen) ? myRectFull.width()  : myRectNorm.width();
-            GLsizei sizeY = (myWinAttribs.isFullScreen) ? myRectFull.height() : myRectNorm.height();
+            GLsizei sizeX = (attribs.IsFullScreen) ? myRectFull.width()  : myRectNorm.width();
+            GLsizei sizeY = (attribs.IsFullScreen) ? myRectFull.height() : myRectNorm.height();
             SetWindowPos(myMaster.hWindowGl,
-                         (myParentWin != NULL && myWinAttribs.isFullScreen) ? HWND_TOPMOST : HWND_TOP,
+                         (myParentWin != NULL && attribs.IsFullScreen) ? HWND_TOPMOST : HWND_TOP,
                          0, 0, sizeX, sizeY,
                          SWP_NOACTIVATE);
         }
     }
 
     // detect when window moved to another monitor
-    if(!myWinAttribs.isFullScreen && myMonitors.size() > 1) {
+    if(!attribs.IsFullScreen && myMonitors.size() > 1) {
         int aNewMonId = myMonitors[myRectNorm.center()].getId();
         if(myWinOnMonitorId != aNewMonId) {
             myMessageList.append(StMessageList::MSG_WIN_ON_NEW_MONITOR);
@@ -722,8 +724,14 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
         updateMonitors();
     }
 
+    if(myMaster.hWindowGl == NULL) {
+        // window is closed!
+        myMessageList.popList(theMessages);
+        return;
+    }
+
     // detect embedded window was moved
-    if(myParentWin != NULL && myMaster.hWindowGl != NULL && !myWinAttribs.isFullScreen) {
+    if(myParentWin != NULL && myMaster.hWindowGl != NULL && !attribs.IsFullScreen) {
         myPointTest.x = 0;
         myPointTest.y = 0;
         if(ClientToScreen(myMaster.hWindowGl, &myPointTest) != FALSE

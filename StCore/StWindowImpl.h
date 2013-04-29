@@ -45,17 +45,17 @@ class StWindowImpl {
     ST_LOCAL ~StWindowImpl();
     ST_LOCAL void close();
     ST_LOCAL void setTitle(const StString& theTitle);
-    ST_LOCAL void getAttributes(StWinAttributes_t& theAttributes) const;
-    ST_LOCAL void setAttributes(const StWinAttributes_t& theAttributes);
+    ST_LOCAL void getAttributes(StWinAttr* theAttributes) const;
+    ST_LOCAL void setAttributes(const StWinAttr* theAttributes);
     ST_LOCAL bool isActive() const { return myIsActive; }
-    ST_LOCAL bool isStereoOutput() { return myWinAttribs.isStereoOutput; }
-    ST_LOCAL void setStereoOutput(bool theStereoState) { myWinAttribs.isStereoOutput = theStereoState; }
+    ST_LOCAL bool isStereoOutput() { return attribs.IsStereoOutput; }
+    ST_LOCAL void setStereoOutput(bool theStereoState) { attribs.IsStereoOutput = theStereoState; }
     ST_LOCAL void show(const int );
     ST_LOCAL void hide(const int );
     ST_LOCAL void showCursor(bool toShow);
-    ST_LOCAL bool isFullScreen() { return myWinAttribs.isFullScreen; }
+    ST_LOCAL bool isFullScreen() { return attribs.IsFullScreen; }
     ST_LOCAL void setFullScreen(bool theFullscreen);
-    ST_LOCAL StRectI_t getPlacement() const { return myWinAttribs.isFullScreen ? myRectFull : myRectNorm; }
+    ST_LOCAL StRectI_t getPlacement() const { return attribs.IsFullScreen ? myRectFull : myRectNorm; }
     ST_LOCAL void setPlacement(const StRectI_t& theRect,
                                const bool       theMoveToScreen);
     ST_LOCAL StPointD_t getMousePos();
@@ -114,11 +114,11 @@ class StWindowImpl {
     ST_LOCAL void correctTiledCursor(int& theLeft, int& theTop) const;
 
     ST_LOCAL void updateSlaveConfig() {
-        myMonSlave.idSlave = int(myWinAttribs.slaveMonId);
-        if(myWinAttribs.isSlaveXMirrow) {
+        myMonSlave.idSlave = int(attribs.SlaveMonId);
+        if(attribs.Slave == StWinSlave_slaveFlipX) {
             myMonSlave.xAdd = 0; myMonSlave.xSub = 1;
             myMonSlave.yAdd = 1; myMonSlave.ySub = 0;
-        } else if(myWinAttribs.isSlaveYMirrow) {
+        } else if(attribs.Slave == StWinSlave_slaveFlipY) {
             myMonSlave.xAdd = 1; myMonSlave.xSub = 0;
             myMonSlave.yAdd = 0; myMonSlave.ySub = 1;
         } else {
@@ -139,13 +139,15 @@ class StWindowImpl {
      * @return true if slave window should be displayed on independent monitor.
      */
     ST_LOCAL bool isSlaveIndependent() const {
-        return !myWinAttribs.isSlaveHLineTop && !myWinAttribs.isSlaveHTop2Px && !myWinAttribs.isSlaveHLineBottom;
+        return attribs.Slave == StWinSlave_slaveSync
+            || attribs.Slave == StWinSlave_slaveFlipX
+            || attribs.Slave == StWinSlave_slaveFlipY;
     }
 
     ST_LOCAL int getSlaveLeft() const {
         if(!isSlaveIndependent()) {
             return myMonitors[getPlacement().center()].getVRect().left();
-        } else if(myWinAttribs.isFullScreen) {
+        } else if(attribs.IsFullScreen) {
             return myMonitors[myMonSlave.idSlave].getVRect().left();
         } else {
             const StMonitor& aMonMaster = myMonitors[getPlacement().center()]; // detect from current location
@@ -155,11 +157,12 @@ class StWindowImpl {
     }
 
     ST_LOCAL int getSlaveWidth() const {
-        if(myWinAttribs.isSlaveHTop2Px) {
+        if(attribs.Slave == StWinSlave_slaveHTop2Px) {
             return 2;
-        } else if(myWinAttribs.isSlaveHLineTop || myWinAttribs.isSlaveHLineBottom) {
+        } else if(attribs.Slave == StWinSlave_slaveHLineTop
+               || attribs.Slave == StWinSlave_slaveHLineBottom) {
             return myMonitors[getPlacement().center()].getVRect().width();
-        } else if(myWinAttribs.isFullScreen) {
+        } else if(attribs.IsFullScreen) {
             return myMonitors[myMonSlave.idSlave].getVRect().width();
         } else {
             return myRectNorm.width();
@@ -167,11 +170,12 @@ class StWindowImpl {
     }
 
     ST_LOCAL int getSlaveTop() const {
-        if(myWinAttribs.isSlaveHLineBottom) {
+        if(attribs.Slave == StWinSlave_slaveHLineBottom) {
             return myMonitors[getPlacement().center()].getVRect().bottom() - 1;
-        } else if(myWinAttribs.isSlaveHLineTop || myWinAttribs.isSlaveHTop2Px) {
+        } else if(attribs.Slave == StWinSlave_slaveHLineTop
+               || attribs.Slave == StWinSlave_slaveHTop2Px) {
             return myMonitors[getPlacement().center()].getVRect().top();
-        } else if(myWinAttribs.isFullScreen) {
+        } else if(attribs.IsFullScreen) {
             return myMonitors[myMonSlave.idSlave].getVRect().top();
         } else {
             const StMonitor& aMonMaster = myMonitors[getPlacement().center()]; // detect from current location
@@ -181,11 +185,12 @@ class StWindowImpl {
     }
 
     ST_LOCAL int getSlaveHeight() const {
-        if(myWinAttribs.isSlaveHLineBottom || myWinAttribs.isSlaveHTop2Px) {
+        if(attribs.Slave == StWinSlave_slaveHLineBottom
+        || attribs.Slave == StWinSlave_slaveHTop2Px) {
             return 1;
-        } else if(myWinAttribs.isSlaveHLineTop) {
+        } else if(attribs.Slave == StWinSlave_slaveHLineTop) {
             return 10;
-        } else if(myWinAttribs.isFullScreen) {
+        } else if(attribs.IsFullScreen) {
             return myMonitors[myMonSlave.idSlave].getVRect().height();
         } else {
             return myRectNorm.height();
@@ -250,7 +255,24 @@ class StWindowImpl {
     BlockSleep         myBlockSleep;      //!< indicates that display sleep was blocked or not
     volatile bool      myIsDispChanged;   //!< monitors reconfiguration event
 
-    StWinAttributes_t  myWinAttribs;
+    /**
+     * Window attributes structure for internal use.
+     * Notice that some options couln't be changed after window was created!
+     */
+    struct {
+        bool       IsNoDecor;          //!< to decorate master window or not (will be ignored in case of embedded and fullscreen)
+        bool       IsStereoOutput;     //!< indicate stereoscopic output on / off (used for interconnection between modules)
+        bool       IsGlStereo;         //!< request OpenGL hardware accelerated QuadBuffer
+        bool       IsFullScreen;       //!< to show in fullscreen mode
+        bool       IsHidden;           //!< to hide the window
+        bool       IsSlaveHidden;      //!< to hide the only slave window
+        bool       ToHideCursor;       //!< to hide cursor
+        bool       ToBlockSleepSystem; //!< prevent system  going to sleep (display could be turned off)
+        bool       ToBlockSleepDisplay;//!< prevent display going to sleep
+        bool       AreGlobalMediaKeys; //!< register system hot-key to capture multimedia even without window focus
+        StWinSlave Slave;              //!< slave configuration
+        int8_t     SlaveMonId;         //!< on which monitor show slave window (1 by default)
+    } attribs;
 
 };
 

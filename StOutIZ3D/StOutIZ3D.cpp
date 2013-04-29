@@ -180,10 +180,7 @@ StOutIZ3D::StOutIZ3D(const StNativeWin_t theParentWindow)
     mySettings->loadParam(ST_SETTING_TABLE, params.Glasses);
 
     // request slave window
-    StWinAttributes_t anAttribs = stDefaultWinAttributes();
-    StWindow::getAttributes(anAttribs);
-    anAttribs.isSlave = true;
-    StWindow::setAttributes(anAttribs);
+    StWindow::setAttribute(StWinAttr_SlaveCfg, StWinSlave_slaveSync);
 }
 
 void StOutIZ3D::releaseResources() {
