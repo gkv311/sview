@@ -694,7 +694,7 @@ void StOutInterlace::stglDraw() {
     const StRectI_t aWinRect = StWindow::getPlacement();
 
     // resize FBO
-    if(!myFrmBuffer->initLazy(*myContext, aWinRect.width(), aWinRect.height())) {
+    if(!myFrmBuffer->initLazy(*myContext, aWinRect.width(), aWinRect.height(), StWindow::hasDepthBuffer())) {
         stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init Frame Buffer");
         myIsBroken = true;
         return;

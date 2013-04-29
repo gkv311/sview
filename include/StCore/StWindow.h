@@ -134,6 +134,11 @@ class StWindow {
     ST_CPPEXPORT void getAttributes(StWinAttr* theAttributes) const;
 
     /**
+     * @return true if OpenGL context was created with Depth Buffer (see StWinAttr_GlDepthSize)
+     */
+    ST_CPPEXPORT bool hasDepthBuffer() const;
+
+    /**
      * Setup window attributes.
      * Notice that some attributes should be set BEFORE window creation:
      *  - Slave window existance

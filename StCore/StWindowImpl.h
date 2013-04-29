@@ -45,6 +45,7 @@ class StWindowImpl {
     ST_LOCAL ~StWindowImpl();
     ST_LOCAL void close();
     ST_LOCAL void setTitle(const StString& theTitle);
+    ST_LOCAL bool hasDepthBuffer() const { return attribs.GlDepthSize != 0; }
     ST_LOCAL void getAttributes(StWinAttr* theAttributes) const;
     ST_LOCAL void setAttributes(const StWinAttr* theAttributes);
     ST_LOCAL bool isActive() const { return myIsActive; }

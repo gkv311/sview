@@ -99,18 +99,21 @@ class StGLStereoFrameBuffer : public StGLStereoTexture {
      */
     ST_CPPEXPORT bool init(StGLContext&  theCtx,
                            const GLsizei theTextureSizeX,
-                           const GLsizei theTextureSizeY);
+                           const GLsizei theTextureSizeY,
+                           const bool    theNeedDepthBuffer);
 
     /**
      * (Re)initialize the FBO with specified dimensions.
      * If FBO already initialized it will be reused when possible.
-     * @param theSizeX      required width
-     * @param theSizeY      required height
-     * @param theToCompress if set to true then FBO will be re-initialized with lesser dimensions
+     * @param theSizeX           required width
+     * @param theSizeY           required height
+     * @param theNeedDepthBuffer request depth buffer
+     * @param theToCompress      if set to true then FBO will be re-initialized with lesser dimensions
      */
     ST_CPPEXPORT bool initLazy(StGLContext&  theCtx,
                                const GLsizei theSizeX,
                                const GLsizei theSizeY,
+                               const bool    theNeedDepthBuffer,
                                const bool    theToCompress = true);
 
     /**

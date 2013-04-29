@@ -38,6 +38,10 @@ void StWindow::setTitle(const StString& theTitle) {
     myWin->setTitle(theTitle);
 }
 
+bool StWindow::hasDepthBuffer() const {
+    return myWin->hasDepthBuffer();
+}
+
 void StWindow::getAttributes(StWinAttr* theAttributes) const {
     myWin->getAttributes(theAttributes);
 }

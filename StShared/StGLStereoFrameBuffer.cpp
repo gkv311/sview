@@ -105,7 +105,8 @@ void StGLStereoFrameBuffer::release(StGLContext& theCtx) {
 
 bool StGLStereoFrameBuffer::init(StGLContext&  theCtx,
                                  const GLsizei theTextureSizeX,
-                                 const GLsizei theTextureSizeY) {
+                                 const GLsizei theTextureSizeY,
+                                 const bool    theNeedDepthBuffer) {
     // release current objects
     release(theCtx);
 
@@ -119,12 +120,14 @@ bool StGLStereoFrameBuffer::init(StGLContext&  theCtx,
         return false;
     }
 
-    // generate RenderBuffers (will be used as depth buffer)
-    theCtx.arbFbo->glGenRenderbuffers(2, myGLDepthRBIds);
+    if(theNeedDepthBuffer) {
+        // generate RenderBuffers (will be used as depth buffer)
+        theCtx.arbFbo->glGenRenderbuffers(2, myGLDepthRBIds);
 
-    // create left RenderBuffer (will be used as depth buffer)
-    theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, myGLDepthRBIds[StGLStereoTexture::LEFT_TEXTURE]);
-    theCtx.arbFbo->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, theTextureSizeX, theTextureSizeY);
+        // create left RenderBuffer (will be used as depth buffer)
+        theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, myGLDepthRBIds[StGLStereoTexture::LEFT_TEXTURE]);
+        theCtx.arbFbo->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, theTextureSizeX, theTextureSizeY);
+    }
 
     // build FBOs
     theCtx.arbFbo->glGenFramebuffers(2, myGLFBufferIds);
@@ -134,9 +137,11 @@ bool StGLStereoFrameBuffer::init(StGLContext&  theCtx,
     StGLStereoTexture::bindLeft(theCtx);
     theCtx.arbFbo->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                                           StGLStereoTexture::myTextures[StGLStereoTexture::LEFT_TEXTURE].getTextureId(), 0);
-    // bind left render buffer to left FBO as depth buffer
-    theCtx.arbFbo->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
-                                             myGLFBufferIds[StGLStereoTexture::LEFT_TEXTURE]);
+    if(theNeedDepthBuffer) {
+        // bind left render buffer to left FBO as depth buffer
+        theCtx.arbFbo->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
+                                                 myGLFBufferIds[StGLStereoTexture::LEFT_TEXTURE]);
+    }
     if(theCtx.arbFbo->glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         release(theCtx);
         theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, StGLFrameBuffer::NO_RENDERBUFFER);
@@ -145,9 +150,11 @@ bool StGLStereoFrameBuffer::init(StGLContext&  theCtx,
     unbindBufferLeft(theCtx);
     StGLStereoTexture::unbindLeft(theCtx);
 
-    // create right RenderBuffer (will be used as depth buffer)
-    theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, myGLDepthRBIds[StGLStereoTexture::RIGHT_TEXTURE]);
-    theCtx.arbFbo->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, theTextureSizeX, theTextureSizeY);
+    if(theNeedDepthBuffer) {
+        // create right RenderBuffer (will be used as depth buffer)
+        theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, myGLDepthRBIds[StGLStereoTexture::RIGHT_TEXTURE]);
+        theCtx.arbFbo->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, theTextureSizeX, theTextureSizeY);
+    }
 
     theCtx.arbFbo->glBindFramebuffer(GL_FRAMEBUFFER, myGLFBufferIds[StGLStereoTexture::RIGHT_TEXTURE]);
 
@@ -156,9 +163,11 @@ bool StGLStereoFrameBuffer::init(StGLContext&  theCtx,
     theCtx.arbFbo->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                                           StGLStereoTexture::myTextures[StGLStereoTexture::RIGHT_TEXTURE].getTextureId(), 0);
 
-    // bind right render buffer to right FBO as depth buffer
-    theCtx.arbFbo->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
-                                             myGLFBufferIds[StGLStereoTexture::RIGHT_TEXTURE]);
+    if(theNeedDepthBuffer) {
+        // bind right render buffer to right FBO as depth buffer
+        theCtx.arbFbo->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
+                                                 myGLFBufferIds[StGLStereoTexture::RIGHT_TEXTURE]);
+    }
     if(theCtx.arbFbo->glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         release(theCtx);
         theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, StGLFrameBuffer::NO_RENDERBUFFER);
@@ -193,6 +202,7 @@ bool StGLStereoFrameBuffer::init(StGLContext&  theCtx,
 bool StGLStereoFrameBuffer::initLazy(StGLContext&  theCtx,
                                      const GLsizei theSizeX,
                                      const GLsizei theSizeY,
+                                     const bool    theNeedDepthBuffer,
                                      const bool    theToCompress) {
     if(isValid()
     && (theSizeX <= getSizeX() && getSizeX() < theCtx.getMaxTextureSize())
@@ -213,7 +223,7 @@ bool StGLStereoFrameBuffer::initLazy(StGLContext&  theCtx,
         ST_DEBUG_LOG("Ancient videocard detected (GLSL 1.1)!");
     }
 
-    if(!init(theCtx, aSizeX, aSizeY)) {
+    if(!init(theCtx, aSizeX, aSizeY, theNeedDepthBuffer)) {
         return false;
     }
 

@@ -65,6 +65,7 @@ void StGLFrameBuffer::unbindBufferGlobal(StGLContext& theCtx) {
 bool StGLFrameBuffer::initLazy(StGLContext&  theCtx,
                                const GLsizei theSizeX,
                                const GLsizei theSizeY,
+                               const bool    theNeedDepthBuffer,
                                const bool    theToCompress) {
     if(isValid()
     && (theSizeX <= getSizeX() && getSizeX() < theCtx.getMaxTextureSize())
@@ -86,7 +87,7 @@ bool StGLFrameBuffer::initLazy(StGLContext&  theCtx,
         ST_DEBUG_LOG("Ancient videocard detected (GLSL 1.1)!");
     }
 
-    if(!init(theCtx, aSizeX, aSizeY)) {
+    if(!init(theCtx, aSizeX, aSizeY, theNeedDepthBuffer)) {
         return false;
     }
 
@@ -99,7 +100,8 @@ bool StGLFrameBuffer::initLazy(StGLContext&  theCtx,
 
 bool StGLFrameBuffer::init(StGLContext&  theCtx,
                            const GLsizei theSizeX,
-                           const GLsizei theSizeY) {
+                           const GLsizei theSizeY,
+                           const bool    theNeedDepthBuffer) {
     // release current object
     release(theCtx);
 
@@ -109,10 +111,12 @@ bool StGLFrameBuffer::init(StGLContext&  theCtx,
         return false;
     }
 
-    // create RenderBuffer (will be used as depth buffer)
-    theCtx.arbFbo->glGenRenderbuffers(1, &myGLDepthRBId);
-    theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, myGLDepthRBId);
-    theCtx.arbFbo->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, theSizeX, theSizeY);
+    if(theNeedDepthBuffer) {
+        // create RenderBuffer (will be used as depth buffer)
+        theCtx.arbFbo->glGenRenderbuffers(1, &myGLDepthRBId);
+        theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, myGLDepthRBId);
+        theCtx.arbFbo->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, theSizeX, theSizeY);
+    }
 
     // build FBO and setup it as texture
     theCtx.arbFbo->glGenFramebuffers(1, &myGLFBufferId);
@@ -121,9 +125,11 @@ bool StGLFrameBuffer::init(StGLContext&  theCtx,
     StGLTexture::bind(theCtx);
     theCtx.arbFbo->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                                           StGLTexture::getTextureId(), 0);
-    // bind render buffer to the FBO as depth buffer
-    theCtx.arbFbo->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
-                                             myGLFBufferId);
+    if(theNeedDepthBuffer) {
+        // bind render buffer to the FBO as depth buffer
+        theCtx.arbFbo->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
+                                                 myGLFBufferId);
+    }
     if(theCtx.arbFbo->glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         release(theCtx);
         theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, NO_RENDERBUFFER);

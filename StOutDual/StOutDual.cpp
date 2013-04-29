@@ -427,7 +427,7 @@ void StOutDual::stglDraw() {
         myContext->stglResetScissorRect();
     } else {
         // resize FBO
-        if(!myFrBuffer->initLazy(*myContext, aVPMaster.width(), aVPMaster.height())) {
+        if(!myFrBuffer->initLazy(*myContext, aVPMaster.width(), aVPMaster.height(), StWindow::hasDepthBuffer())) {
             stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init Frame Buffer");
             myIsBroken = true;
             return;
