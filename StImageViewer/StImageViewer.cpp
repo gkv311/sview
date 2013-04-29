@@ -107,12 +107,21 @@ StImageViewer::StImageViewer(const StNativeWin_t         theParentWin,
     mySettings->loadInt32 (ST_SETTING_SLIDESHOW_DELAY,    aSlideShowDelayInt);
     mySlideShowDelay = double(aSlideShowDelayInt);
 
-    /// TODO (Kirill Gavrilov#1) setup OpenGL requirements - no need in Depth buffer
     addRenderer(new StOutAnaglyph(theParentWin));
     addRenderer(new StOutDual(theParentWin));
     addRenderer(new StOutIZ3D(theParentWin));
     addRenderer(new StOutInterlace(theParentWin));
     addRenderer(new StOutPageFlipExt(theParentWin));
+
+    // no need in Depth buffer
+    const StWinAttr anAttribs[] = {
+        StWinAttr_GlDepthSize, (StWinAttr )0,
+        StWinAttr_NULL
+    };
+    for(size_t aRendIter = 0; aRendIter < myRenderers.size(); ++aRendIter) {
+        StHandle<StWindow>& aRend = myRenderers[aRendIter];
+        aRend->setAttributes(anAttribs);
+    }
 }
 
 bool StImageViewer::resetDevice() {

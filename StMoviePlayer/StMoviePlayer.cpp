@@ -80,7 +80,7 @@ void StALDeviceParam::initList() {
     if(alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT") != AL_TRUE) {
         // ansient OpenAL implementations supports only single device (like from apples)
         const ALchar* aDefDevice = alcGetString(NULL, ALC_DEFAULT_DEVICE_SPECIFIER);
-    #if(defined(_WIN32) || defined(__WIN32__))
+    #ifdef _WIN32
         aName.fromLocale(aDefDevice);
     #else
         aName.fromUnicode(aDefDevice);
@@ -91,7 +91,7 @@ void StALDeviceParam::initList() {
 
     const ALchar* aDevicesNames = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
     while(aDevicesNames && *aDevicesNames) {
-    #if(defined(_WIN32) || defined(__WIN32__))
+    #ifdef _WIN32
         aName.fromLocale(aDevicesNames);
     #else
         aName.fromUnicode(aDevicesNames);
@@ -188,12 +188,21 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     params.isShuffle->signals.onChanged.connect(this, &StMoviePlayer::doSwitchShuffle);
     params.alDevice ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchAudioDevice);
 
-    /// TODO (Kirill Gavrilov#1) setup OpenGL requirements - no need in Depth buffer
     addRenderer(new StOutAnaglyph(theParentWin));
     addRenderer(new StOutDual(theParentWin));
     addRenderer(new StOutIZ3D(theParentWin));
     addRenderer(new StOutInterlace(theParentWin));
     addRenderer(new StOutPageFlipExt(theParentWin));
+
+    // no need in Depth buffer
+    const StWinAttr anAttribs[] = {
+        StWinAttr_GlDepthSize, (StWinAttr )0,
+        StWinAttr_NULL
+    };
+    for(size_t aRendIter = 0; aRendIter < myRenderers.size(); ++aRendIter) {
+        StHandle<StWindow>& aRend = myRenderers[aRendIter];
+        aRend->setAttributes(anAttribs);
+    }
 }
 
 bool StMoviePlayer::resetDevice() {

@@ -30,21 +30,6 @@
 
 #include "../share/sView/icons/menu.xpm"
 
-static int dblBuff[] = {
-    GLX_RGBA,
-    GLX_DEPTH_SIZE, 16,
-    GLX_DOUBLEBUFFER,
-    None
-};
-
-static int quadBuff[] = {
-    GLX_RGBA,
-    GLX_DEPTH_SIZE, 16,
-    GLX_DOUBLEBUFFER,
-    GLX_STEREO,
-    None
-};
-
 /**
  * Our own XError handle function.
  * Default handlers just show the error and exit application immediately.
@@ -144,12 +129,30 @@ bool StWindowImpl::create() {
         return false;
     }
 
+    int aDblBuff[] = {
+        GLX_RGBA,
+        GLX_DEPTH_SIZE, attribs.GlDepthSize,
+        GLX_DOUBLEBUFFER,
+        None
+    };
+
     if(attribs.IsGlStereo) {
         // find an appropriate visual
-        stXDisplay->hVisInfo = glXChooseVisual(hDisplay, DefaultScreen(hDisplay), quadBuff);
+        int aQuadBuff[] = {
+            GLX_RGBA,
+            GLX_DEPTH_SIZE, attribs.GlDepthSize,
+            GLX_DOUBLEBUFFER,
+            GLX_STEREO,
+            None
+        };
+
+        stXDisplay->hVisInfo = glXChooseVisual(hDisplay, DefaultScreen(hDisplay), aQuadBuff);
         if(stXDisplay->hVisInfo == NULL) {
             stError("X, no Quad Buffered visual");
-            stXDisplay->hVisInfo = glXChooseVisual(hDisplay, DefaultScreen(hDisplay), dblBuff);
+
+
+
+            stXDisplay->hVisInfo = glXChooseVisual(hDisplay, DefaultScreen(hDisplay), aDblBuff);
             if(stXDisplay->hVisInfo == NULL) {
                 myMaster.close();
                 stError("X, no RGB visual with depth buffer");
@@ -160,7 +163,7 @@ bool StWindowImpl::create() {
     } else {
         // find an appropriate visual
         // find an OpenGL-capable RGB visual with depth buffer
-        stXDisplay->hVisInfo = glXChooseVisual(hDisplay, DefaultScreen(hDisplay), dblBuff);
+        stXDisplay->hVisInfo = glXChooseVisual(hDisplay, DefaultScreen(hDisplay), aDblBuff);
         if(stXDisplay->hVisInfo == NULL) {
             myMaster.close();
             stError("X, no RGB visual with depth buffer");

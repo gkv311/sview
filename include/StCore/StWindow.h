@@ -81,12 +81,13 @@ enum StWinSlave {
  */
 enum StWinAttr {
     StWinAttr_NULL = 0,            //!< NULL-termination of array of the attributes
-    StWinAttr_GlQuadStereo,        //!< boolean, request OpenGL context with Quad Buffer
-    StWinAttr_ToBlockSleepSystem,  //!< boolean, prevent system  going to sleep (display could be turned off)
-    StWinAttr_ToBlockSleepDisplay, //!< boolean, prevent display going to sleep
-    StWinAttr_GlobalMediaKeys,     //!< boolean, register system hot-key to capture multimedia even without window focus
-    StWinAttr_SlaveCfg,            //!< StWinSlave, create StWindow with slave window and specify slave window position rules
-    StWinAttr_SlaveMon,            //!< integer, slave window monitor id
+    StWinAttr_GlQuadStereo,        //!< boolean, request OpenGL context with Quad Buffer, turned OFF by default
+    StWinAttr_GlDepthSize,         //!< integer, minimum size of Depth Buffer (in bits) or 0 if not needed, 16 bit by default
+    StWinAttr_ToBlockSleepSystem,  //!< boolean, prevent system  going to sleep (display could be turned off), FALSE by default
+    StWinAttr_ToBlockSleepDisplay, //!< boolean, prevent display going to sleep, FALSE by default
+    StWinAttr_GlobalMediaKeys,     //!< boolean, register system hot-key to capture multimedia even without window focus, FALSE by default
+    StWinAttr_SlaveCfg,            //!< StWinSlave, create StWindow with slave window and specify slave window position rules, StWinSlave_slaveOff by default
+    StWinAttr_SlaveMon,            //!< integer, slave window monitor id, 1 by default
 };
 
 typedef struct tagStSlaveWindowCfg {

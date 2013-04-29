@@ -73,6 +73,7 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
     attribs.IsNoDecor      = false;
     attribs.IsStereoOutput = false;
     attribs.IsGlStereo     = false;
+    attribs.GlDepthSize    = 16;
     attribs.IsFullScreen   = false;
     attribs.IsHidden       = false;
     attribs.ToHideCursor   = false;
@@ -201,6 +202,9 @@ void StWindowImpl::getAttributes(StWinAttr* theAttributes) const {
             case StWinAttr_GlQuadStereo:
                 anIter[1] = (StWinAttr )attribs.IsGlStereo;
                 break;
+            case StWinAttr_GlDepthSize:
+                anIter[1] = (StWinAttr )attribs.GlDepthSize;
+                break;
             case StWinAttr_ToBlockSleepSystem:
                 anIter[1] = (StWinAttr )attribs.ToBlockSleepSystem;
                 break;
@@ -233,6 +237,9 @@ void StWindowImpl::setAttributes(const StWinAttr* theAttributes) {
         switch(anIter[0]) {
             case StWinAttr_GlQuadStereo:
                 attribs.IsGlStereo = (bool )anIter[1];
+                break;
+            case StWinAttr_GlDepthSize:
+                attribs.GlDepthSize = anIter[1];
                 break;
             case StWinAttr_ToBlockSleepSystem:
                 attribs.ToBlockSleepSystem = (anIter[1] == 1);
