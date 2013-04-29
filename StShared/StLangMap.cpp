@@ -173,7 +173,8 @@ StString& StLangMap::operator[](const size_t theId) {
     return myMap[theId];
 }
 
-StString& StLangMap::changeValueId(const size_t theId, const StString& theDefaultValue) {
+StString& StLangMap::changeValueId(const size_t theId,
+                                   const char*  theDefaultValue) {
     StString& aValue = myMap[theId];
     if(aValue.isEmpty()) {
         if(myToShowId) {
@@ -185,7 +186,8 @@ StString& StLangMap::changeValueId(const size_t theId, const StString& theDefaul
     return aValue;
 }
 
-StString& StLangMap::operator()(const size_t theId, const StString& theDefaultValue) {
+StString& StLangMap::operator()(const size_t theId,
+                                const char*  theDefaultValue) {
     return changeValueId(theId, theDefaultValue);
 }
 

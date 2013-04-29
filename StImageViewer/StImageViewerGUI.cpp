@@ -340,9 +340,9 @@ void StImageViewerGUI::doAboutProgram(const size_t ) {
     StString& aTitle = myLangMap->changeValueId(ABOUT_DPLUGIN_NAME,
         "sView - Image Viewer");
     StString& aVerString = myLangMap->changeValueId(ABOUT_VERSION, "version");
-    StString& aDescr = myLangMap->changeValueId(ABOUT_DESCRIPTION, StString()
-        + "Image viewer allows you to open stereoscopic images in formats JPEG, PNG, MPO and a lot of others.\n"
-        + "(C) 2007-2013 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis program distributed under GPL3.0");
+    StString& aDescr = myLangMap->changeValueId(ABOUT_DESCRIPTION,
+        "Image viewer allows you to open stereoscopic images in formats JPEG, PNG, MPO and a lot of others.\n"
+        "(C) 2007-2013 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis program distributed under GPL3.0");
     StGLMessageBox* aboutDialog = new StGLMessageBox(this, aTitle + '\n'
         + aVerString + ": " + StVersionInfo::getSDKVersionString()
         + " "+ StThread::getArchString()
@@ -573,7 +573,7 @@ void StImageViewerGUI::setVisibility(const StPointD_t& cursorZo, bool isMouseAct
                                  "Next image"));
         } else if(::isPointIn(btnSwapLR, cursorZo)) {
             size_t aLngId = stImageRegion->params.swapLR->getValue() ? SWAP_LR_ON : SWAP_LR_OFF;
-            stTextDescr->setText(myLangMap->changeValueId(aLngId, StString()));
+            stTextDescr->setText(myLangMap->changeValueId(aLngId, ""));
         } else if(::isPointIn(myBtnFull, cursorZo)) {
             stTextDescr->setText(myLangMap->changeValueId(FULLSCREEN,
                                  "Switch\nfullscreen/windowed"));
@@ -594,7 +594,7 @@ void StImageViewerGUI::setVisibility(const StPointD_t& cursorZo, bool isMouseAct
                 case ST_V_SRC_AUTODETECT:           aLngId = MENU_SRC_FORMAT_AUTO;         break;
             }
             StString text = myLangMap->changeValueId(BTN_SRC_FORMAT, "Source format:\n")
-                          + myLangMap->changeValueId(aLngId, StString());
+                          + myLangMap->changeValueId(aLngId, "");
             stTextDescr->setText(text);
         } else {
             stTextDescr->setVisibility(false, true);

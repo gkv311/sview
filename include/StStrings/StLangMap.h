@@ -36,8 +36,8 @@ class StLangMap {
     /**
      * If value not exists - default value is used.
      */
-    ST_CPPEXPORT StString& changeValueId(const size_t theId, const StString& theDefaultValue);
-    ST_CPPEXPORT StString& operator()   (const size_t theId, const StString& theDefaultValue);
+    ST_CPPEXPORT StString& changeValueId(const size_t theId, const char* theDefaultValue);
+    ST_CPPEXPORT StString& operator()   (const size_t theId, const char* theDefaultValue);
 
     ST_CPPEXPORT size_t size() const;
     ST_CPPEXPORT void clear();
