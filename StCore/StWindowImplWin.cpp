@@ -583,8 +583,10 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
 
     ShowWindow(myMaster.hWindow, SW_HIDE);
     if(attribs.IsFullScreen) {
-        // embedded
+        HWND aWin = myMaster.hWindow;
         if(myParentWin != NULL) {
+            // embedded
+            aWin = myMaster.hWindowGl;
             SetParent(myMaster.hWindowGl, NULL);
             SetFocus (myMaster.hWindowGl);
         }
@@ -592,9 +594,8 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
         // generic
         const StMonitor& stMon = (myMonMasterFull == -1) ? myMonitors[myRectNorm.center()] : myMonitors[myMonMasterFull];
         myRectFull = stMon.getVRect();
-        SetWindowLongPtr(myMaster.hWindow, GWL_STYLE, WS_POPUP);
-        SetWindowPos(myMaster.hWindow, // window handle
-                     HWND_TOP,         // top status
+        SetWindowLongPtr(aWin, GWL_STYLE, WS_POPUP);
+        SetWindowPos(aWin, HWND_TOP,
                      myRectFull.left(),  myRectFull.top(),
                      myRectFull.width(), myRectFull.height(),
                      !attribs.IsHidden ? SWP_SHOWWINDOW : SWP_NOACTIVATE); // show window
@@ -622,27 +623,26 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
             }
         }
 
-        if(!attribs.IsHidden) {
+        if(!attribs.IsHidden
+        && myParentWin == NULL) {
             SetFocus(myMaster.hWindow);
         }
     } else {
-        // embedded
         if(myParentWin != NULL) {
+            // embedded
             SetParent(myMaster.hWindowGl, myParentWin);
-        }
-
-        // generic
-        if(!attribs.IsNoDecor) {
+        } else if(!attribs.IsNoDecor) {
             SetWindowLongPtr(myMaster.hWindow, GWL_STYLE, WS_OVERLAPPEDWINDOW);
         }
-        SetWindowPos(myMaster.hWindow, // window handle
-                     HWND_NOTOPMOST,   // top status
-                     myRectNorm.left() - GetSystemMetrics(SM_CXSIZEFRAME), // left position
-                     myRectNorm.top()  - GetSystemMetrics(SM_CYSIZEFRAME) - GetSystemMetrics(SM_CYCAPTION), // top position
-                     2 * GetSystemMetrics(SM_CXSIZEFRAME) + myRectNorm.width(), // width
-                     GetSystemMetrics(SM_CYCAPTION) + 2* GetSystemMetrics(SM_CYSIZEFRAME) + myRectNorm.height(), // height
-                     !attribs.IsHidden ? SWP_SHOWWINDOW : SWP_NOACTIVATE); // show window
-        if(!attribs.IsHidden) {
+
+        SetWindowPos(myMaster.hWindow, HWND_NOTOPMOST,
+                     myRectNorm.left() - GetSystemMetrics(SM_CXSIZEFRAME),
+                     myRectNorm.top()  - GetSystemMetrics(SM_CYSIZEFRAME) - GetSystemMetrics(SM_CYCAPTION),
+                     2 * GetSystemMetrics(SM_CXSIZEFRAME) + myRectNorm.width(),
+                     GetSystemMetrics(SM_CYCAPTION) + 2* GetSystemMetrics(SM_CYSIZEFRAME) + myRectNorm.height(),
+                     !attribs.IsHidden ? SWP_SHOWWINDOW : SWP_NOACTIVATE);
+        if(!attribs.IsHidden
+        && myParentWin == NULL) {
             SetFocus(myMaster.hWindow);
         }
     }
@@ -652,7 +652,7 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
 }
 
 void StWindowImpl::updateWindowPos() {
-    if(myMaster.hWindow == NULL) {
+    if(myMaster.hWindowGl == NULL) {
         return;
     }
 
@@ -688,25 +688,40 @@ void StWindowImpl::updateWindowPos() {
             StRectI_t aRect = myRectFull;
             getTiledWinRect(aRect);
 
-            SetWindowPos(myMaster.hWindow,
-                         HWND_TOP,
-                         aRect.left(),  aRect.top(),
-                         aRect.width(), aRect.height(),
-                         SWP_NOACTIVATE);
+            if(myMaster.hWindow != NULL) {
+                SetWindowPos(myMaster.hWindow,
+                             HWND_TOP,
+                             aRect.left(),  aRect.top(),
+                             aRect.width(), aRect.height(),
+                             SWP_NOACTIVATE);
 
-            // resize Master GL-subwindow
-            SetWindowPos(myMaster.hWindowGl,
-                         (myParentWin != NULL) ? HWND_TOPMOST : HWND_TOP,
-                         0, 0, aRect.width(), aRect.height(),
-                         SWP_NOACTIVATE);
+                // resize Master GL-subwindow
+                SetWindowPos(myMaster.hWindowGl, HWND_TOP,
+                             0, 0, aRect.width(), aRect.height(),
+                             SWP_NOACTIVATE);
+            } else {
+                // embedded
+                SetWindowPos(myMaster.hWindowGl, HWND_TOPMOST,
+                             aRect.left(),  aRect.top(),
+                             aRect.width(), aRect.height(),
+                             SWP_NOACTIVATE);
+            }
         } else {
             // resize Master GL-subwindow
-            GLsizei sizeX = (attribs.IsFullScreen) ? myRectFull.width()  : myRectNorm.width();
-            GLsizei sizeY = (attribs.IsFullScreen) ? myRectFull.height() : myRectNorm.height();
-            SetWindowPos(myMaster.hWindowGl,
-                         (myParentWin != NULL && attribs.IsFullScreen) ? HWND_TOPMOST : HWND_TOP,
-                         0, 0, sizeX, sizeY,
-                         SWP_NOACTIVATE);
+            if(attribs.IsFullScreen
+            && myParentWin != NULL) {
+                // embedded
+                SetWindowPos(myMaster.hWindowGl, HWND_TOPMOST,
+                             myRectFull.left(),  myRectFull.top(),
+                             myRectFull.width(), myRectFull.height(),
+                             SWP_NOACTIVATE);
+            } else {
+                GLsizei sizeX = (attribs.IsFullScreen) ? myRectFull.width()  : myRectNorm.width();
+                GLsizei sizeY = (attribs.IsFullScreen) ? myRectFull.height() : myRectNorm.height();
+                SetWindowPos(myMaster.hWindowGl, HWND_TOP,
+                             0, 0, sizeX, sizeY,
+                             SWP_NOACTIVATE);
+            }
         }
     }
 
