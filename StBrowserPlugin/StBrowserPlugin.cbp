@@ -37,7 +37,7 @@
 				<Option type="3" />
 				<Option compiler="windows_sdk_x86" />
 				<Compiler>
-					<Add option="/MT" />
+					<Add option="/MD" />
 					<Add option="/Ox" />
 					<Add option="/W4" />
 					<Add option="/EHsc" />
@@ -45,6 +45,7 @@
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
 					<Add option="/D_USRDLL" />
 					<Add option="/D_ATL_CSTRING_EXPLICIT_CONSTRUCTORS" />
+					<Add option="/D_AFXDLL" />
 					<Add directory="../3rdparty/atlmfc/include" />
 				</Compiler>
 				<ResourceCompiler>
@@ -104,7 +105,7 @@
 				<Option type="3" />
 				<Option compiler="windows_sdk_x86_64" />
 				<Compiler>
-					<Add option="/MT" />
+					<Add option="/MD" />
 					<Add option="/Ox" />
 					<Add option="/W4" />
 					<Add option="/EHsc" />
@@ -112,6 +113,7 @@
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
 					<Add option="/D_USRDLL" />
 					<Add option="/D_ATL_CSTRING_EXPLICIT_CONSTRUCTORS" />
+					<Add option="/D_AFXDLL" />
 					<Add directory="../3rdparty/atlmfc/include" />
 				</Compiler>
 				<ResourceCompiler>

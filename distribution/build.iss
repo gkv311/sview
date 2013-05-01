@@ -164,6 +164,8 @@ Source: {#SVIEW_DISTR_PATH_AMD64}\swscale*.dll;   DestDir: {app}\amd64;  Flags: 
 ; Browser plugin
 Source: {#SVIEW_DISTR_PATH_x86}\npStBrowserPlugin.dll;   DestDir: {app};       Flags: 32bit ignoreversion; Components: StBrowserPlugins or StActiveXPlugin
 Source: {#SVIEW_DISTR_PATH_AMD64}\npStBrowserPlugin.dll; DestDir: {app}\amd64; Flags: 64bit ignoreversion; Components: StBrowserPlugins or StActiveXPlugin; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_x86}\mfc*.dll;                DestDir: {app};       Flags: 32bit ignoreversion; Components: StBrowserPlugins or StActiveXPlugin
+Source: {#SVIEW_DISTR_PATH_AMD64}\mfc*.dll;              DestDir: {app}\amd64; Flags: 64bit ignoreversion; Components: StBrowserPlugins or StActiveXPlugin; Check: IsWin64
 
 ; StRenderers -> StOutAnaglyph
 Source: {#SVIEW_DISTR_PATH_x86}\StOutAnaglyph.dll;                DestDir: {app};                              Flags: 32bit ignoreversion;                Components: StRenderers\StOutAnaglyph
