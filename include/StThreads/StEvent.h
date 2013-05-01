@@ -9,7 +9,7 @@
 #ifndef __StEvent_h_
 #define __StEvent_h_
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     #include <windows.h> // we used global header instead Winbase.h to prevent namespaces collisions
 #else
     #include <pthread.h>
@@ -34,7 +34,7 @@ class StEvent {
         public:
 
     inline StEvent(bool isSignalling = true) {
-    #if (defined(_WIN32) || defined(__WIN32__))
+    #ifdef _WIN32
         myEvent = CreateEvent(0,            // default security attributes
                               true,         // manual-reset event
                               isSignalling, // initial state is signaled
@@ -47,7 +47,7 @@ class StEvent {
     }
 
     inline ~StEvent() {
-    #if (defined(_WIN32) || defined(__WIN32__))
+    #ifdef _WIN32
         CloseHandle(myEvent);
     #else
         pthread_mutex_destroy(&myMutex);
@@ -59,7 +59,7 @@ class StEvent {
      * Set event into signalling state.
      */
     inline void set() {
-    #if (defined(_WIN32) || defined(__WIN32__))
+    #ifdef _WIN32
         SetEvent(myEvent);
     #else
         pthread_mutex_lock(&myMutex);
@@ -73,7 +73,7 @@ class StEvent {
      * Reset event (unset signalling state)
      */
     inline void reset() {
-    #if (defined(_WIN32) || defined(__WIN32__))
+    #ifdef _WIN32
         ResetEvent(myEvent);
     #else
         pthread_mutex_lock(&myMutex);
@@ -86,7 +86,7 @@ class StEvent {
      * Wait for Event (infinity).
      */
     inline void wait() {
-    #if (defined(_WIN32) || defined(__WIN32__))
+    #ifdef _WIN32
         WaitForSingleObject(myEvent, INFINITE);
     #else
         pthread_mutex_lock(&myMutex);
@@ -103,7 +103,7 @@ class StEvent {
      * @return true if get event.
      */
     inline bool wait(const size_t& theTimeMilliseconds) {
-    #if (defined(_WIN32) || defined(__WIN32__))
+    #ifdef _WIN32
         return (WaitForSingleObject(myEvent, (DWORD )theTimeMilliseconds) != WAIT_TIMEOUT);
     #else
         bool isSignalled = true;
@@ -128,7 +128,7 @@ class StEvent {
      * @return true if get event.
      */
     inline bool check() {
-    #if (defined(_WIN32) || defined(__WIN32__))
+    #ifdef _WIN32
         return (WaitForSingleObject(myEvent, (DWORD )0) != WAIT_TIMEOUT);
     #else
         bool isSignalled = true;
@@ -160,7 +160,7 @@ class StEvent {
 
         private:
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     HANDLE          myEvent;
 #else
     pthread_mutex_t myMutex;

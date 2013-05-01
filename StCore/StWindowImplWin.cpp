@@ -50,6 +50,7 @@ bool StWindowImpl::create() {
 
     myEventInitWin.reset();
     myEventInitGl.reset();
+    ResetEvent(myEventQuit);
     myMsgThread = new StThread(threadCreateWindows, (void* )this);
     // wait for thread to create window
     myEventInitWin.wait();
@@ -255,6 +256,7 @@ bool StWindowImpl::wndCreateWindows() {
                 mySlave.threadIdWnd  = 0;
                 myMaster.threadIdWnd = 0;
 
+                ResetEvent(myEventQuit);
                 myMaster.evMsgThread.set(); // thread now exit, nothing should be after!
                 return true;
             }

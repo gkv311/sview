@@ -194,7 +194,7 @@ void StOutAnaglyph::releaseResources() {
         myYellowAnaglyph.release(aCtx);
         myYellowDubiosAnaglyph.release(aCtx);
         myGreenAnaglyph.release(aCtx);
-        myFrBuffer->release(*myContext);
+        myFrBuffer->release(aCtx);
     }
     myContext.nullify();
 
