@@ -19,7 +19,7 @@
 #ifndef __StWinHandles_h_
 #define __StWinHandles_h_
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     #include <windows.h>   // header file for Windows
 #elif (defined(__APPLE__))
     #include "StCocoaView.h"
@@ -99,7 +99,7 @@ class StWinHandles {
 
         public:
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     size_t      threadIdWnd; // id of the thread, in wich window was created
     StEvent     evMsgThread; // special event to check message thread active state
     HWND            hWindow; // WinAPI windows' handles
@@ -158,14 +158,16 @@ class StWinHandles {
      * Create 1 or 2 GL rendering contexts (and share them)
      * for opened windows handles.
      */
-    ST_LOCAL int glCreateContext(StWinHandles* theSlave, bool theIsQuadStereo);
+    ST_LOCAL int glCreateContext(StWinHandles* theSlave,
+                                 const int     theDepthSize,
+                                 const bool    theIsQuadStereo);
 
     /**
      * Close all handles.
      */
     ST_LOCAL bool close();
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     /**
      * Got the unique class name.
      */

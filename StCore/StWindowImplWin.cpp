@@ -16,13 +16,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
 
 #include "StWindowImpl.h"
 
 #include <StStrings/StLogger.h>
 
-#include <math.h>
+#include <cmath>
 
 static SV_THREAD_FUNCTION threadCreateWindows(void* inStWin);
 
@@ -40,7 +40,7 @@ static LRESULT CALLBACK stWndProcWrapper(HWND in_hWnd, UINT uMsg, WPARAM wParam,
     if(pThis != NULL) {
         return pThis->stWndProc(in_hWnd, uMsg, wParam, lParam);
     } else {
-        return DefWindowProc(in_hWnd, uMsg, wParam, lParam);
+        return DefWindowProcW(in_hWnd, uMsg, wParam, lParam);
     }
 }
 
@@ -57,14 +57,16 @@ bool StWindowImpl::create() {
         return false;
     }
 
-    int isGlCtx = myMaster.glCreateContext(attribs.Slave != StWinSlave_slaveOff ? &mySlave : NULL, attribs.IsGlStereo);
+    int isGlCtx = myMaster.glCreateContext(attribs.Slave != StWinSlave_slaveOff ? &mySlave : NULL,
+                                           attribs.GlDepthSize,
+                                           attribs.IsGlStereo);
     myEventInitGl.set();
 
     return (isGlCtx == STWIN_INIT_SUCCESS);
 }
 
 bool StWindowImpl::wndRegisterClass(const StStringUtfWide& theClassName) {
-    HINSTANCE hInstance = GetModuleHandle(NULL); // Holds The Instance Of The Application
+    HINSTANCE hInstance = GetModuleHandleW(NULL);
     WNDCLASSW wndClass;                                           // Windows Class Structure
     wndClass.style         = CS_HREDRAW | CS_VREDRAW | CS_OWNDC; // Redraw On Size, And Own DC For Window.
     wndClass.lpfnWndProc   = (WNDPROC )stWndProcWrapper;         // WndProc Handles Messages
@@ -127,7 +129,7 @@ bool StWindowImpl::wndCreateWindows() {
     int posTop    = myRectNorm.top() - (!attribs.IsNoDecor ? (GetSystemMetrics(SM_CYSIZEFRAME) + GetSystemMetrics(SM_CYCAPTION)) : 0);
     int winWidth  = (!attribs.IsNoDecor ? 2 * GetSystemMetrics(SM_CXSIZEFRAME) : 0) + myRectNorm.width();
     int winHeight = (!attribs.IsNoDecor ? (GetSystemMetrics(SM_CYCAPTION) + 2 * GetSystemMetrics(SM_CYSIZEFRAME)) : 0) + myRectNorm.height();
-    HINSTANCE hInstance = GetModuleHandle(NULL); // Holds The Instance Of The Application
+    HINSTANCE hInstance = GetModuleHandleW(NULL);
 
     if(myParentWin == NULL) {
         // WS_EX_ACCEPTFILES - Drag&Drop support
@@ -260,7 +262,6 @@ bool StWindowImpl::wndCreateWindows() {
                 // Event 2 (myEventCursorShow) has been set. If the event was created as autoreset, it has also been reset
                 // show / hide cursor - SHOULD be called from window thread...
                 ShowCursor(TRUE);
-                ///ST_DEBUG_LOG("ShowCursor(TRUE)");
                 ResetEvent(myEventCursorShow);
                 break;
             }
@@ -269,7 +270,6 @@ bool StWindowImpl::wndCreateWindows() {
                 // warning - this is NOT force hide / show function;
                 // this call decrease or increase show counter
                 ShowCursor(FALSE);
-                ///ST_DEBUG_LOG("ShowCursor(FALSE)");
                 ResetEvent(myEventCursorHide);
                 break;
             }
@@ -279,8 +279,8 @@ bool StWindowImpl::wndCreateWindows() {
                 // will NOT triggered for new messages already in stack!!!
                 // Means - do not replace 'while' with 'if(PeekMessage(...))'.
                 while(PeekMessage(&myEvent, NULL, 0U, 0U, PM_REMOVE)) {
-                    TranslateMessage(&myEvent); // Translate The Message
-                    DispatchMessage(&myEvent);  // Dispatch The Message
+                    TranslateMessage(&myEvent);
+                    DispatchMessageW(&myEvent);
                 }
 
                 // well bad place for polling since it should be rarely changed
@@ -562,7 +562,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
         }
     }
     // Pass All Unhandled Messages To DefWindowProc
-    return DefWindowProc(theWin, uMsg, wParam, lParam);
+    return DefWindowProcW(theWin, uMsg, wParam, lParam);
 }
 
 /**
@@ -753,7 +753,7 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
             //isOut = true;
         } else {
             TranslateMessage(&myEvent);
-            DispatchMessage (&myEvent);
+            DispatchMessageW(&myEvent);
         }
     }
 

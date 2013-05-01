@@ -99,7 +99,7 @@ bool StWinGlrc::makeCurrent(GLXDrawable theDrawable) {
 #endif
 
 StWinHandles::StWinHandles()
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
 : threadIdWnd(0),
   evMsgThread(true),
   hWindow(NULL),
@@ -131,7 +131,7 @@ StWinHandles::~StWinHandles() {
 }
 
 void StWinHandles::glSwap() {
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     if(hDC != NULL) {
         SwapBuffers(hDC);
     }
@@ -144,7 +144,7 @@ void StWinHandles::glSwap() {
 }
 
 bool StWinHandles::glMakeCurrent() {
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     if(hDC != NULL && !hRC.isNull()) {
         return hRC->makeCurrent(hDC);
     }
@@ -165,8 +165,10 @@ bool StWinHandles::glMakeCurrent() {
         return theErrCode; \
     }
 
-int StWinHandles::glCreateContext(StWinHandles* theSlave, bool isQuadStereo) {
-#if (defined(_WIN32) || defined(__WIN32__))
+int StWinHandles::glCreateContext(StWinHandles* theSlave,
+                                  const int     theDepthSize,
+                                  const bool    theIsQuadStereo) {
+#ifdef _WIN32
     threadIdOgl = StThread::getCurrentThreadId();
     ST_DEBUG_LOG("WinAPI, glCreateContext, threadIdOgl= " + threadIdOgl + ", threadIdWnd= " + threadIdWnd);
     hDC = GetDC(hWindowGl);
@@ -180,7 +182,8 @@ int StWinHandles::glCreateContext(StWinHandles* theSlave, bool isQuadStereo) {
     }
 
     PIXELFORMATDESCRIPTOR aPixelFormatDesc = THE_PIXELFRMT_DOUBLE;
-    if(isQuadStereo) {
+    aPixelFormatDesc.cDepthBits = (BYTE )theDepthSize;
+    if(theIsQuadStereo) {
         aPixelFormatDesc.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_GDI | PFD_SUPPORT_OPENGL
                                  | PFD_DOUBLEBUFFER | PFD_STEREO;
     }
@@ -192,7 +195,7 @@ int StWinHandles::glCreateContext(StWinHandles* theSlave, bool isQuadStereo) {
         ST_ERROR_LOG("Slave window returns another pixel format! Try to ignore...");
     }
 
-    if(isQuadStereo) {
+    if(theIsQuadStereo) {
         DescribePixelFormat(hDC, aPixelFormatId, sizeof(PIXELFORMATDESCRIPTOR), &aPixelFormatDesc);
         if((aPixelFormatDesc.dwFlags & PFD_STEREO) == 0) {
             stError("WinAPI, Quad Buffered stereo not supported");
@@ -222,24 +225,24 @@ int StWinHandles::glCreateContext(StWinHandles* theSlave, bool isQuadStereo) {
     // create an OpenGL rendering context
     hRC = new StWinGlrc(stXDisplay);
     ST_GL_ERROR_CHECK(hRC->isValid(),
-                      STWIN_ERROR_X_GLRC_CREATE, "X, could not create rendering context for Master");
+                      STWIN_ERROR_X_GLRC_CREATE, "GLX, could not create rendering context for Master");
     if(theSlave != NULL) {
         theSlave->hRC = hRC;
 
         // bind the rendering context to the window
         ST_GL_ERROR_CHECK(hRC->makeCurrent(theSlave->hWindowGl),
-                          STWIN_ERROR_X_GLRC_CREATE, "X, Can't activate Slave GL Rendering Context");
+                          STWIN_ERROR_X_GLRC_CREATE, "GLX, Can't activate Slave GL Rendering Context");
     }
 
     // bind the rendering context to the window
     ST_GL_ERROR_CHECK(hRC->makeCurrent(hWindowGl),
-                      STWIN_ERROR_X_GLRC_CREATE, "X, Can't activate Master GL Rendering Context");
+                      STWIN_ERROR_X_GLRC_CREATE, "GLX, Can't activate Master GL Rendering Context");
     return STWIN_INIT_SUCCESS;
 #endif
 }
 
 bool StWinHandles::close() {
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     // NOTE - destroy functions will fail if called from another thread than created
     size_t currThreadId = StThread::getCurrentThreadId();
     stMutex.lock();
@@ -344,14 +347,13 @@ bool StWinHandles::close() {
     return true;
 }
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
 namespace {
-    static const StStringUtfWide ST_WINDOW_CLASSNAME = L"StWindowClass";
     static StAtomic<int32_t> ST_CLASS_COUNTER(0);
 };
 
 StStringUtfWide StWinHandles::getNewClassName() {
-    return ST_WINDOW_CLASSNAME + StStringUtfWide(ST_CLASS_COUNTER.increment());
+    return StStringUtfWide(L"StWindowClass") + StStringUtfWide(ST_CLASS_COUNTER.increment());
 }
 
 #else

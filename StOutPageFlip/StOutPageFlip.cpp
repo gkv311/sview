@@ -370,7 +370,8 @@ void StOutPageFlip::dxActivate() {
 
             if(myOutD3d.myGLBuffer.isNull()) {
                 myOutD3d.myGLBuffer = new StGLFrameBuffer();
-                if(!myOutD3d.myGLBuffer->init(*myContext, (GLsizei )myOutD3d.myDxWindow->getFboSizeX(), (GLsizei )myOutD3d.myDxWindow->getFboSizeY())) {
+                if(!myOutD3d.myGLBuffer->init(*myContext, (GLsizei )myOutD3d.myDxWindow->getFboSizeX(), (GLsizei )myOutD3d.myDxWindow->getFboSizeY(),
+                                              StWindow::hasDepthBuffer())) {
                     stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init OpenGL Frame Buffer");
                     myOutD3d.myGLBuffer->release(*myContext);
                     myOutD3d.myGLBuffer.nullify();

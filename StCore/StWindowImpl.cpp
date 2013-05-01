@@ -236,10 +236,10 @@ void StWindowImpl::setAttributes(const StWinAttr* theAttributes) {
     for(const StWinAttr* anIter = theAttributes; anIter[0] != StWinAttr_NULL; anIter += 2) {
         switch(anIter[0]) {
             case StWinAttr_GlQuadStereo:
-                attribs.IsGlStereo = (bool )anIter[1];
+                attribs.IsGlStereo = (anIter[1] == 1);
                 break;
             case StWinAttr_GlDepthSize:
-                attribs.GlDepthSize = anIter[1];
+                attribs.GlDepthSize = (int8_t )anIter[1];
                 break;
             case StWinAttr_ToBlockSleepSystem:
                 attribs.ToBlockSleepSystem = (anIter[1] == 1);
@@ -256,7 +256,7 @@ void StWindowImpl::setAttributes(const StWinAttr* theAttributes) {
                 break;
             case StWinAttr_SlaveMon:
                 hasSlaveChanges = hasSlaveChanges || (attribs.SlaveMonId != anIter[1]);
-                attribs.SlaveMonId = anIter[1];
+                attribs.SlaveMonId = (int8_t )anIter[1];
                 break;
             default:
                 ST_DEBUG_LOG("UNKNOWN window attribute #" + anIter[0] + " requested");
