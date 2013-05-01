@@ -103,7 +103,7 @@ StString StActiveXCtrl::loadURL(const CString& theUrl) {
 }
 
 void StActiveXCtrl::stWindowLoop() {
-    myStApp = new StImageViewer(myParentWin);
+    myStApp = new StImageViewer(myParentWin, new StOpenInfo());
     if(!myStApp->open()) {
         myStApp.nullify();
         return;

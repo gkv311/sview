@@ -184,7 +184,7 @@ StBrowserPlugin::~StBrowserPlugin() {
 
 void StBrowserPlugin::stWindowLoop() {
     // Load image viewer
-    myStApp = new StImageViewer(myParentWin);
+    myStApp = new StImageViewer(myParentWin, new StOpenInfo());
     if(!myStApp->open()) {
         myStApp.nullify();
         return;
