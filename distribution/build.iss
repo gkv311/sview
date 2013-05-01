@@ -9,7 +9,7 @@
 ;#define SVIEW_DISTR_PATH_AMD64 "sView_AMD64"
 
 #define SVIEW_NAME "sView"
-#define SVIEW_PUBLISHER "Gavrilov K.V."
+#define SVIEW_PUBLISHER "Kirill Gavrilov"
 #define SVIEW_URL "http://www.sview.ru"
 #define SVIEW_EXE_NAME "sView.exe"
 
@@ -26,7 +26,7 @@ DefaultDirName={pf}\{#SVIEW_NAME}
 DefaultGroupName={#SVIEW_NAME}
 VersionInfoVersion={#SVIEW_VER}
 VersionInfoTextVersion={#SVIEW_VER_NAME}
-VersionInfoDescription=sView - MediaPlayer
+VersionInfoDescription=sView - Media Player
 ArchitecturesInstallIn64BitMode=x64
 ; Output package options
 OutputDir=repository\win
@@ -116,11 +116,11 @@ Name: StDrawers;                  Description: "{cm:StDrawers}";        Types: c
 Name: StDrawers\StImageViewer;    Description: "{cm:StImageViewer}";    Types: custom full
 Name: StDrawers\StMoviePlayer;    Description: "{cm:StMoviePlayer}";    Types: custom full
 Name: StRenderers;                Description: "{cm:StRenderers}";      Types: custom full; Flags: fixed
-Name: StRenderers\StOutAnaglyph;  Description: "{cm:StOutAnaglyph}";    Types: custom full
-Name: StRenderers\StOutDual;      Description: "{cm:StOutDual}";        Types: custom full
-Name: StRenderers\StOutInterlace; Description: "{cm:StOutInterlace}";   Types: custom full
-Name: StRenderers\StOutIZ3D;      Description: "{cm:StOutIZ3D}";        Types: custom full
-Name: StRenderers\StOutPageFlip;  Description: "{cm:StOutPageFlip}";    Types: custom full
+Name: StRenderers\StOutAnaglyph;  Description: "{cm:StOutAnaglyph}";    Types: custom full; Flags: fixed
+Name: StRenderers\StOutDual;      Description: "{cm:StOutDual}";        Types: custom full; Flags: fixed
+Name: StRenderers\StOutInterlace; Description: "{cm:StOutInterlace}";   Types: custom full; Flags: fixed
+Name: StRenderers\StOutIZ3D;      Description: "{cm:StOutIZ3D}";        Types: custom full; Flags: fixed
+Name: StRenderers\StOutPageFlip;  Description: "{cm:StOutPageFlip}";    Types: custom full; Flags: fixed
 
 [Tasks]
 Name: desktopicon;           Description: "{cm:CreateDesktopIcon}";     GroupDescription: "{cm:AdditionalIcons}";  Flags: unchecked
@@ -137,12 +137,16 @@ Source: {#SVIEW_DISTR_PATH_x86}\*.exe;            DestDir: {app};        Flags: 
 Source: {#SVIEW_DISTR_PATH_x86}\info\*;           DestDir: {app}\info;   Flags: 32bit ignoreversion; Components: StCore
 Source: {#SVIEW_DISTR_PATH_AMD64}\*.exe;          DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 Source: {#SVIEW_DISTR_PATH_AMD64}\info\*;         DestDir: {app}\amd64\info;   Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_x86}\StShared.dll;     DestDir: {app};        Flags: 32bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH_x86}\StGLWidgets.dll;  DestDir: {app};        Flags: 32bit ignoreversion; Components: StCore
 Source: {#SVIEW_DISTR_PATH_x86}\StCore.dll;       DestDir: {app};        Flags: 32bit ignoreversion; Components: StCore
 Source: {#SVIEW_DISTR_PATH_x86}\StSettings.dll;   DestDir: {app};        Flags: 32bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH_AMD64}\StShared.dll;   DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_AMD64}\StGLWidgets.dll;DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 Source: {#SVIEW_DISTR_PATH_AMD64}\StCore.dll;     DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 Source: {#SVIEW_DISTR_PATH_AMD64}\StSettings.dll; DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
-Source: {#SVIEW_DISTR_PATH_x86}\StDrawers\StDiagnostics.dll;   DestDir: {app}\StDrawers;       Flags: 32bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH_AMD64}\StDrawers\StDiagnostics.dll; DestDir: {app}\amd64\StDrawers; Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_x86}\StDiagnostics.dll;   DestDir: {app};       Flags: 32bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH_AMD64}\StDiagnostics.dll; DestDir: {app}\amd64; Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 Source: {#SVIEW_DISTR_PATH_x86}\shaders\StGLWidgets\*;         DestDir: {app}\shaders\StGLWidgets;       Flags: 32bit ignoreversion; Components: StCore
 Source: {#SVIEW_DISTR_PATH_AMD64}\shaders\StGLWidgets\*;       DestDir: {app}\amd64\shaders\StGLWidgets; Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 ; MSVC C-Runtime libraries (mask compatible for vc100)
@@ -158,53 +162,53 @@ Source: {#SVIEW_DISTR_PATH_AMD64}\av*.dll;        DestDir: {app}\amd64;  Flags: 
 Source: {#SVIEW_DISTR_PATH_AMD64}\swscale*.dll;   DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 
 ; Browser plugin
-Source: {#SVIEW_DISTR_PATH_x86}\StBrowserPlugins\npStBrowserPlugin.dll;   DestDir: {app}\StBrowserPlugins;       Flags: 32bit ignoreversion; Components: StBrowserPlugins or StActiveXPlugin
-Source: {#SVIEW_DISTR_PATH_AMD64}\StBrowserPlugins\npStBrowserPlugin.dll; DestDir: {app}\amd64\StBrowserPlugins; Flags: 64bit ignoreversion; Components: StBrowserPlugins or StActiveXPlugin; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_x86}\npStBrowserPlugin.dll;   DestDir: {app};       Flags: 32bit ignoreversion; Components: StBrowserPlugins or StActiveXPlugin
+Source: {#SVIEW_DISTR_PATH_AMD64}\npStBrowserPlugin.dll; DestDir: {app}\amd64; Flags: 64bit ignoreversion; Components: StBrowserPlugins or StActiveXPlugin; Check: IsWin64
 
 ; StRenderers -> StOutAnaglyph
-Source: {#SVIEW_DISTR_PATH_x86}\StRenderers\StOutAnaglyph.dll;    DestDir: {app}\StRenderers;       Flags: 32bit ignoreversion;                Components: StRenderers\StOutAnaglyph
-Source: {#SVIEW_DISTR_PATH_x86}\lang\*StOutAnaglyph.lng;          DestDir: {app}\lang;              Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutAnaglyph
+Source: {#SVIEW_DISTR_PATH_x86}\StOutAnaglyph.dll;                DestDir: {app};                              Flags: 32bit ignoreversion;                Components: StRenderers\StOutAnaglyph
+Source: {#SVIEW_DISTR_PATH_x86}\lang\*StOutAnaglyph.lng;          DestDir: {app}\lang;                         Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutAnaglyph
 Source: {#SVIEW_DISTR_PATH_x86}\shaders\StOutAnaglyph\*;          DestDir: {app}\shaders\StOutAnaglyph;        Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutAnaglyph
-Source: {#SVIEW_DISTR_PATH_AMD64}\StRenderers\StOutAnaglyph.dll;  DestDir: {app}\amd64\StRenderers; Flags: 64bit ignoreversion;                Components: StRenderers\StOutAnaglyph; Check: IsWin64
-Source: {#SVIEW_DISTR_PATH_AMD64}\lang\*StOutAnaglyph.lng;        DestDir: {app}\amd64\lang;        Flags: 64bit ignoreversion recursesubdirs; Components: StRenderers\StOutAnaglyph; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_AMD64}\StOutAnaglyph.dll;              DestDir: {app}\amd64;                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutAnaglyph; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_AMD64}\lang\*StOutAnaglyph.lng;        DestDir: {app}\amd64\lang;                   Flags: 64bit ignoreversion recursesubdirs; Components: StRenderers\StOutAnaglyph; Check: IsWin64
 Source: {#SVIEW_DISTR_PATH_AMD64}\shaders\StOutAnaglyph\*;        DestDir: {app}\amd64\shaders\StOutAnaglyph;  Flags: 64bit ignoreversion recursesubdirs; Components: StRenderers\StOutAnaglyph; Check: IsWin64
 ; StRenderers -> StOutDual
-Source: {#SVIEW_DISTR_PATH_x86}\StRenderers\StOutDual.dll;        DestDir: {app}\StRenderers;       Flags: 32bit ignoreversion;                Components: StRenderers\StOutDual
-Source: {#SVIEW_DISTR_PATH_x86}\lang\*StOutDual.lng;              DestDir: {app}\lang;              Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutDual
-Source: {#SVIEW_DISTR_PATH_AMD64}\StRenderers\StOutDual.dll;      DestDir: {app}\amd64\StRenderers; Flags: 64bit ignoreversion;                Components: StRenderers\StOutDual; Check: IsWin64
-Source: {#SVIEW_DISTR_PATH_AMD64}\lang\*StOutDual.lng;            DestDir: {app}\amd64\lang;        Flags: 64bit ignoreversion recursesubdirs; Components: StRenderers\StOutDual; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_x86}\StOutDual.dll;                    DestDir: {app};                              Flags: 32bit ignoreversion;                Components: StRenderers\StOutDual
+Source: {#SVIEW_DISTR_PATH_x86}\lang\*StOutDual.lng;              DestDir: {app}\lang;                         Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutDual
+Source: {#SVIEW_DISTR_PATH_AMD64}\StOutDual.dll;                  DestDir: {app}\amd64;                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutDual; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_AMD64}\lang\*StOutDual.lng;            DestDir: {app}\amd64\lang;                   Flags: 64bit ignoreversion recursesubdirs; Components: StRenderers\StOutDual; Check: IsWin64
 ; StRenderers -> StOutInterlace
-Source: {#SVIEW_DISTR_PATH_x86}\StRenderers\StOutInterlace.dll;   DestDir: {app}\StRenderers;       Flags: 32bit ignoreversion;                Components: StRenderers\StOutInterlace
-Source: {#SVIEW_DISTR_PATH_x86}\lang\*StOutInterlace.lng;         DestDir: {app}\lang;              Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutInterlace
+Source: {#SVIEW_DISTR_PATH_x86}\StOutInterlace.dll;               DestDir: {app};                              Flags: 32bit ignoreversion;                Components: StRenderers\StOutInterlace
+Source: {#SVIEW_DISTR_PATH_x86}\lang\*StOutInterlace.lng;         DestDir: {app}\lang;                         Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutInterlace
 Source: {#SVIEW_DISTR_PATH_x86}\shaders\StOutInterlace\*;         DestDir: {app}\shaders\StOutInterlace;       Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutInterlace
-Source: {#SVIEW_DISTR_PATH_AMD64}\StRenderers\StOutInterlace.dll; DestDir: {app}\amd64\StRenderers; Flags: 64bit ignoreversion;                Components: StRenderers\StOutInterlace; Check: IsWin64
-Source: {#SVIEW_DISTR_PATH_AMD64}\lang\*StOutInterlace.lng;       DestDir: {app}\amd64\lang;        Flags: 64bit ignoreversion recursesubdirs; Components: StRenderers\StOutInterlace; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_AMD64}\StOutInterlace.dll;             DestDir: {app}\amd64;                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutInterlace; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_AMD64}\lang\*StOutInterlace.lng;       DestDir: {app}\amd64\lang;                   Flags: 64bit ignoreversion recursesubdirs; Components: StRenderers\StOutInterlace; Check: IsWin64
 Source: {#SVIEW_DISTR_PATH_AMD64}\shaders\StOutInterlace\*;       DestDir: {app}\amd64\shaders\StOutInterlace; Flags: 64bit ignoreversion recursesubdirs; Components: StRenderers\StOutInterlace; Check: IsWin64
 ; StRenderers -> StOutIZ3D
-Source: {#SVIEW_DISTR_PATH_x86}\StRenderers\StOutIZ3D.dll;        DestDir: {app}\StRenderers;       Flags: 32bit ignoreversion;                Components: StRenderers\StOutIZ3D
-Source: {#SVIEW_DISTR_PATH_x86}\lang\*StOutIZ3D.lng;              DestDir: {app}\lang;              Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutIZ3D
-Source: {#SVIEW_DISTR_PATH_x86}\shaders\StOutIZ3D\*;              DestDir: {app}\shaders\StOutIZ3D; Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutIZ3D
-Source: {#SVIEW_DISTR_PATH_AMD64}\StRenderers\StOutIZ3D.dll;      DestDir: {app}\amd64\StRenderers; Flags: 64bit ignoreversion;                Components: StRenderers\StOutIZ3D; Check: IsWin64
-Source: {#SVIEW_DISTR_PATH_AMD64}\lang\*StOutIZ3D.lng;            DestDir: {app}\amd64\lang;        Flags: 64bit ignoreversion recursesubdirs; Components: StRenderers\StOutIZ3D; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_x86}\StOutIZ3D.dll;                    DestDir: {app};                              Flags: 32bit ignoreversion;                Components: StRenderers\StOutIZ3D
+Source: {#SVIEW_DISTR_PATH_x86}\lang\*StOutIZ3D.lng;              DestDir: {app}\lang;                         Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutIZ3D
+Source: {#SVIEW_DISTR_PATH_x86}\shaders\StOutIZ3D\*;              DestDir: {app}\shaders\StOutIZ3D;            Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutIZ3D
+Source: {#SVIEW_DISTR_PATH_AMD64}\StOutIZ3D.dll;                  DestDir: {app}\amd64;                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutIZ3D; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_AMD64}\lang\*StOutIZ3D.lng;            DestDir: {app}\amd64\lang;                   Flags: 64bit ignoreversion recursesubdirs; Components: StRenderers\StOutIZ3D; Check: IsWin64
 Source: {#SVIEW_DISTR_PATH_AMD64}\shaders\StOutIZ3D\*;            DestDir: {app}\amd64\shaders\StOutIZ3D;      Flags: 64bit ignoreversion recursesubdirs; Components: StRenderers\StOutIZ3D; Check: IsWin64
 ; StRenderers -> StOutPageFlip
-Source: {#SVIEW_DISTR_PATH_x86}\StRenderers\StOutPageFlip.dll;    DestDir: {app}\StRenderers;       Flags: 32bit ignoreversion;                Components: StRenderers\StOutPageFlip
-Source: {#SVIEW_DISTR_PATH_x86}\lang\*StOutPageFlip.lng;          DestDir: {app}\lang;              Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutPageFlip
-Source: {#SVIEW_DISTR_PATH_AMD64}\StRenderers\StOutPageFlip.dll;  DestDir: {app}\amd64\StRenderers; Flags: 64bit ignoreversion;                Components: StRenderers\StOutPageFlip; Check: IsWin64
-Source: {#SVIEW_DISTR_PATH_AMD64}\lang\*StOutPageFlip.lng;        DestDir: {app}\amd64\lang;        Flags: 64bit ignoreversion recursesubdirs; Components: StRenderers\StOutPageFlip; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_x86}\StOutPageFlip.dll;                DestDir: {app};                              Flags: 32bit ignoreversion;                Components: StRenderers\StOutPageFlip
+Source: {#SVIEW_DISTR_PATH_x86}\lang\*StOutPageFlip.lng;          DestDir: {app}\lang;                         Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutPageFlip
+Source: {#SVIEW_DISTR_PATH_AMD64}\StOutPageFlip.dll;              DestDir: {app}\amd64;                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutPageFlip; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_AMD64}\lang\*StOutPageFlip.lng;        DestDir: {app}\amd64\lang;                   Flags: 64bit ignoreversion recursesubdirs; Components: StRenderers\StOutPageFlip; Check: IsWin64
 
 ; StDrawers
 Source: {#SVIEW_DISTR_PATH_x86}\textures\*;                    DestDir: {app}\textures;        Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer or StDrawers\StMoviePlayer or StBrowserPlugins or StActiveXPlugin
 Source: {#SVIEW_DISTR_PATH_AMD64}\textures\*;                  DestDir: {app}\amd64\textures;  Flags: 64bit ignoreversion; Components: StDrawers\StImageViewer or StDrawers\StMoviePlayer or StBrowserPlugins or StActiveXPlugin; Check: IsWin64
 Source: {#SVIEW_DISTR_PATH_x86}\icons\sView_Media.ico;         DestDir: {app}\icons;           Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer or StDrawers\StMoviePlayer
 ; StDrawers -> Image Viewer
-Source: {#SVIEW_DISTR_PATH_x86}\StDrawers\StImageViewer.dll;   DestDir: {app}\StDrawers;       Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer or StBrowserPlugins or StActiveXPlugin
-Source: {#SVIEW_DISTR_PATH_x86}\lang\*StImageViewer.lng;       DestDir: {app}\lang;            Flags: 32bit ignoreversion recursesubdirs; Components: StDrawers\StImageViewer or StBrowserPlugins or StActiveXPlugin
+Source: {#SVIEW_DISTR_PATH_x86}\StImageViewer.dll;             DestDir: {app};                 Flags: 32bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH_x86}\lang\*StImageViewer.lng;       DestDir: {app}\lang;            Flags: 32bit ignoreversion recursesubdirs; Components: StCore
 Source: {#SVIEW_DISTR_PATH_x86}\icons\sView_JPS.ico;           DestDir: {app}\icons;           Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer
 Source: {#SVIEW_DISTR_PATH_x86}\icons\sView_PNS.ico;           DestDir: {app}\icons;           Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer
 Source: {#SVIEW_DISTR_PATH_x86}\demo.jps;                      DestDir: {app};                 Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer
-Source: {#SVIEW_DISTR_PATH_AMD64}\StDrawers\StImageViewer.dll; DestDir: {app}\amd64\StDrawers; Flags: 64bit ignoreversion; Components: StDrawers\StImageViewer or StBrowserPlugins or StActiveXPlugin; Check: IsWin64
-Source: {#SVIEW_DISTR_PATH_AMD64}\lang\*StImageViewer.lng;     DestDir: {app}\amd64\lang;      Flags: 64bit ignoreversion recursesubdirs; Components: StDrawers\StImageViewer or StBrowserPlugins or StActiveXPlugin; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_AMD64}\StImageViewer.dll;           DestDir: {app}\amd64;           Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_AMD64}\lang\*StImageViewer.lng;     DestDir: {app}\amd64\lang;      Flags: 64bit ignoreversion recursesubdirs; Components: StCore; Check: IsWin64
 ; FreeImage library (should be optional)
 Source: {#SVIEW_DISTR_PATH_x86}\FreeImage.dll;                 DestDir: {app};                 Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer
 Source: {#SVIEW_DISTR_PATH_AMD64}\FreeImage.dll;               DestDir: {app}\amd64;           Flags: 64bit ignoreversion; Components: StDrawers\StImageViewer; Check: IsWin64
@@ -215,13 +219,13 @@ Source: {#SVIEW_DISTR_PATH_AMD64}\DevIL.dll;                   DestDir: {app}\am
 Source: {#SVIEW_DISTR_PATH_AMD64}\ILU.dll;                     DestDir: {app}\amd64;           Flags: 64bit ignoreversion; Components: StDrawers\StImageViewer; Check: IsWin64
 
 ; StDrawers -> Movie Player
-Source: {#SVIEW_DISTR_PATH_x86}\StDrawers\StMoviePlayer.dll;   DestDir: {app}\StDrawers;       Flags: 32bit ignoreversion; Components: StDrawers\StMoviePlayer
-Source: {#SVIEW_DISTR_PATH_x86}\lang\*StMoviePlayer.lng;       DestDir: {app}\lang;            Flags: 32bit ignoreversion recursesubdirs; Components: StDrawers\StMoviePlayer
-Source: {#SVIEW_DISTR_PATH_x86}\OpenAL32.dll;                  DestDir: {app};                 Flags: 32bit ignoreversion; Components: StDrawers\StMoviePlayer
-Source: alsoft51.ini;                                          DestDir: {userappdata};   DestName: "alsoft.ini";     Tasks: flagOpenAL51; Components: StDrawers\StMoviePlayer
-Source: {#SVIEW_DISTR_PATH_AMD64}\StDrawers\StMoviePlayer.dll; DestDir: {app}\amd64\StDrawers; Flags: 64bit ignoreversion; Components: StDrawers\StMoviePlayer; Check: IsWin64
-Source: {#SVIEW_DISTR_PATH_AMD64}\lang\*StMoviePlayer.lng;     DestDir: {app}\amd64\lang;      Flags: 64bit ignoreversion recursesubdirs; Components: StDrawers\StMoviePlayer; Check: IsWin64
-Source: {#SVIEW_DISTR_PATH_AMD64}\OpenAL32.dll;                DestDir: {app}\amd64;           Flags: 64bit ignoreversion; Components: StDrawers\StMoviePlayer; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_x86}\StMoviePlayer.dll;             DestDir: {app};                 Flags: 32bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH_x86}\lang\*StMoviePlayer.lng;       DestDir: {app}\lang;            Flags: 32bit ignoreversion recursesubdirs; Components: StCore
+Source: {#SVIEW_DISTR_PATH_x86}\OpenAL32.dll;                  DestDir: {app};                 Flags: 32bit ignoreversion; Components: StCore
+Source: alsoft51.ini;                                          DestDir: {userappdata};   DestName: "alsoft.ini";     Tasks: flagOpenAL51; Components: StCore
+Source: {#SVIEW_DISTR_PATH_AMD64}\StMoviePlayer.dll;           DestDir: {app}\amd64;           Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_AMD64}\lang\*StMoviePlayer.lng;     DestDir: {app}\amd64\lang;      Flags: 64bit ignoreversion recursesubdirs; Components: StCore; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_AMD64}\OpenAL32.dll;                DestDir: {app}\amd64;           Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 
 [Icons]
 Name: {group}\sView - Image Viewer; Filename: {app}\{#SVIEW_EXE_NAME};       Components: StDrawers\StImageViewer; IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: "{cm:StImageViewer}";  IconIndex: 0; Parameters: "--in=image - ""{app}\demo.jps"""; Check: not IsWin64
@@ -243,8 +247,8 @@ Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\{#SVIEW_NAME}; File
 [Run]
 ;Filename: {app}\{#SVIEW_EXE_NAME}; WorkingDir: {app}; Components: StDrawers\StImageViewer; Description: {cm:LaunchProgram,{#SVIEW_NAME}}; Parameters: --in=image - demo.jps; Flags: nowait postinstall skipifsilent
 ; ActiveX Control registration
-Filename: regsvr32; Parameters: "/s ""{app}\StBrowserPlugins\npStBrowserPlugin.dll""";       Components: StActiveXPlugin; Flags: 32bit
-Filename: regsvr32; Parameters: "/s ""{app}\amd64\StBrowserPlugins\npStBrowserPlugin.dll"""; Components: StActiveXPlugin; Flags: 64bit; Check: IsWin64
+Filename: regsvr32; Parameters: "/s ""{app}\npStBrowserPlugin.dll""";       Components: StActiveXPlugin; Flags: 32bit
+Filename: regsvr32; Parameters: "/s ""{app}\amd64\npStBrowserPlugin.dll"""; Components: StActiveXPlugin; Flags: 64bit; Check: IsWin64
 
 [Registry]
 ; Install/Uninstall info
@@ -317,12 +321,12 @@ Root: HKCU32; SubKey: Environment;                                              
 Root: HKLM64; SubKey: SYSTEM\CurrentControlSet\Control\Session Manager\Environment; ValueType: string; ValueName: StCore64; ValueData: {app}\amd64\; Flags: uninsdeletevalue; Check: IsWin64
 Root: HKCU64; SubKey: Environment;                                                  ValueType: string; ValueName: StCore64; ValueData: {app}\amd64\; Flags: uninsdeletevalue; Check: IsWin64
 ; x86 NPAPI Browser plugin registration
-Root: HKLM32; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView;   ValueType: string; ValueName: Path;        ValueData: {app}\StBrowserPlugins\npStBrowserPlugin.dll; Components: StBrowserPlugins; Flags: uninsdeletekey
+Root: HKLM32; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView;   ValueType: string; ValueName: Path;        ValueData: {app}\npStBrowserPlugin.dll; Components: StBrowserPlugins; Flags: uninsdeletekey
 Root: HKLM32; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView;   ValueType: string; ValueName: ProductName; ValueData: sView;                  Components: StBrowserPlugins; Flags: uninsdeletekey
 Root: HKLM32; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView;   ValueType: string; ValueName: Vendor;      ValueData: sView;                  Components: StBrowserPlugins; Flags: uninsdeletekey
 Root: HKLM32; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView;   ValueType: string; ValueName: Description; ValueData: sView - Browser Plugin; Components: StBrowserPlugins; Flags: uninsdeletekey
 ; AMD64 NPAPI Browser plugin registration
-Root: HKLM64; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView;   ValueType: string; ValueName: Path;        ValueData: {app}\amd64\StBrowserPlugins\npStBrowserPlugin.dll; Components: StBrowserPlugins; Flags: uninsdeletekey; Check: IsWin64
+Root: HKLM64; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView;   ValueType: string; ValueName: Path;        ValueData: {app}\amd64\npStBrowserPlugin.dll; Components: StBrowserPlugins; Flags: uninsdeletekey; Check: IsWin64
 Root: HKLM64; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView;   ValueType: string; ValueName: ProductName; ValueData: sView;                  Components: StBrowserPlugins; Flags: uninsdeletekey; Check: IsWin64
 Root: HKLM64; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView;   ValueType: string; ValueName: Vendor;      ValueData: sView;                  Components: StBrowserPlugins; Flags: uninsdeletekey; Check: IsWin64
 Root: HKLM64; SubKey: SOFTWARE\MozillaPlugins\@sview.ru/sView;   ValueType: string; ValueName: Description; ValueData: sView - Browser Plugin; Components: StBrowserPlugins; Flags: uninsdeletekey; Check: IsWin64
@@ -364,8 +368,8 @@ Type: files; Name: {app}\sview.ru.url
 
 [UninstallRun]
 ; ActiveX Control de-registration
-Filename: regsvr32; Parameters: "/u /s ""{app}\StBrowserPlugins\npStBrowserPlugin.dll""";       Components: StActiveXPlugin; Flags: 32bit
-Filename: regsvr32; Parameters: "/u /s ""{app}\amd64\StBrowserPlugins\npStBrowserPlugin.dll"""; Components: StActiveXPlugin; Flags: 64bit; Check: IsWin64
+Filename: regsvr32; Parameters: "/u /s ""{app}\npStBrowserPlugin.dll""";       Components: StActiveXPlugin; Flags: 32bit
+Filename: regsvr32; Parameters: "/u /s ""{app}\amd64\npStBrowserPlugin.dll"""; Components: StActiveXPlugin; Flags: 64bit; Check: IsWin64
 
 [Dirs]
 

@@ -68,7 +68,7 @@ echo #define __stConfig_conf_>> "%SVIEW_BUILD_CONF%"
 if not "%releaseStatus%"=="RELEASE" (
   echo     Timebomb=ON
   echo #ifndef __ST_TIMEBOMB__>> "%SVIEW_BUILD_CONF%"
-  echo     #define __ST_TIMEBOMB__>> "%SVIEW_BUILD_CONF%"
+  echo   #define __ST_TIMEBOMB__>> "%SVIEW_BUILD_CONF%"
   echo #endif>> "%SVIEW_BUILD_CONF%"
 ) else (
   echo     Timebomb=OFF
@@ -76,12 +76,12 @@ if not "%releaseStatus%"=="RELEASE" (
 
 echo     Version=^%YEAR%^, ^%MONTH%^, ^%SVIEW_VER_TYPE_NUM%^, ^%DAY%
 echo #ifndef SVIEW_SDK_VERSION>> "%SVIEW_BUILD_CONF%"
-echo     #define SVIEW_SDK_VERSION ^%YEAR%^, ^%MONTH%^, ^%SVIEW_VER_TYPE_NUM%^, ^%DAY%>> "%SVIEW_BUILD_CONF%"
+echo   #define SVIEW_SDK_VERSION ^%YEAR%^, ^%MONTH%^, ^%SVIEW_VER_TYPE_NUM%^, ^%DAY%>> "%SVIEW_BUILD_CONF%"
 echo #endif>> "%SVIEW_BUILD_CONF%"
 
 echo     Version String="%YEAR%.%MONTH%%SVIEW_VER_TYPE%%DAY%"
 echo #ifndef SVIEW_SDK_VER_STRING>> "%SVIEW_BUILD_CONF%"
-echo     #define SVIEW_SDK_VER_STRING "%YEAR%.%MONTH%%SVIEW_VER_TYPE%%DAY%">> "%SVIEW_BUILD_CONF%"
+echo   #define SVIEW_SDK_VER_STRING "%YEAR%.%MONTH%%SVIEW_VER_TYPE%%DAY%">> "%SVIEW_BUILD_CONF%"
 echo #endif>> "%SVIEW_BUILD_CONF%"
 
 rem Activate experimental WebP support
@@ -95,7 +95,7 @@ echo #define SVIEW_DISTR_PATH_x86   "%SVIEW_DISTR_PATH_X86%">> config.iss
 echo #define SVIEW_DISTR_PATH_AMD64 "%SVIEW_DISTR_PATH_AMD64%">> config.iss
 
 echo #ifndef SVIEW_SDK_VER_STATUS>> "%SVIEW_BUILD_CONF%"
-echo     #define SVIEW_SDK_VER_STATUS "%releaseStatus%">> "%SVIEW_BUILD_CONF%"
+echo   #define SVIEW_SDK_VER_STATUS "%releaseStatus%">> "%SVIEW_BUILD_CONF%"
 echo #endif>> "%SVIEW_BUILD_CONF%"
 
 echo #define ST_HAVE_WEBP>> "%SVIEW_BUILD_CONF%"
@@ -116,36 +116,28 @@ move /Y ..\include\stconfig.conf.buildbak ..\include\stconfig.conf
 echo Copy files into intermidiate directory:
 echo "%SVIEW_DISTR_PATH_X86%"
 rmdir /S /Q "%SVIEW_DISTR_PATH_X86%
-xcopy /S /Y ..\bin\WIN_vc_x86\lang\*                %SVIEW_DISTR_PATH_X86%\lang\
-xcopy /S /Y ..\bin\WIN_vc_x86\shaders\*             %SVIEW_DISTR_PATH_X86%\shaders\
-xcopy /Y ..\bin\WIN_vc_x86\StBrowserPlugins\*.dll   %SVIEW_DISTR_PATH_X86%\StBrowserPlugins\
-xcopy /Y ..\bin\WIN_vc_x86\StBrowserPlugins\*.ocx   %SVIEW_DISTR_PATH_X86%\StBrowserPlugins\
-xcopy /Y ..\bin\WIN_vc_x86\StDrawers\*.dll          %SVIEW_DISTR_PATH_X86%\StDrawers\
-xcopy /Y ..\bin\WIN_vc_x86\StRenderers\*.dll        %SVIEW_DISTR_PATH_X86%\StRenderers\
-xcopy /Y ..\bin\WIN_vc_x86\textures\*.std           %SVIEW_DISTR_PATH_X86%\textures\
-xcopy /Y ..\bin\WIN_vc_x86\*.dll                    %SVIEW_DISTR_PATH_X86%\
-xcopy /Y ..\bin\WIN_vc_x86\*.exe                    %SVIEW_DISTR_PATH_X86%\
+xcopy /S /Y ..\bin\WIN_vc_x86\lang\*        %SVIEW_DISTR_PATH_X86%\lang\
+xcopy /S /Y ..\bin\WIN_vc_x86\shaders\*     %SVIEW_DISTR_PATH_X86%\shaders\
+xcopy /Y ..\bin\WIN_vc_x86\textures\*.std   %SVIEW_DISTR_PATH_X86%\textures\
+xcopy /Y ..\bin\WIN_vc_x86\*.dll            %SVIEW_DISTR_PATH_X86%\
+xcopy /Y ..\bin\WIN_vc_x86\*.exe            %SVIEW_DISTR_PATH_X86%\
 
 echo "%SVIEW_DISTR_PATH_AMD64%"
 rmdir /S /Q "%SVIEW_DISTR_PATH_AMD64%
-xcopy /S /Y ..\bin\WIN_vc_AMD64\lang\*              %SVIEW_DISTR_PATH_AMD64%\lang\
-xcopy /S /Y ..\bin\WIN_vc_AMD64\shaders\*           %SVIEW_DISTR_PATH_AMD64%\shaders\
-xcopy /Y ..\bin\WIN_vc_AMD64\StBrowserPlugins\*.dll %SVIEW_DISTR_PATH_AMD64%\StBrowserPlugins\
-xcopy /Y ..\bin\WIN_vc_AMD64\StBrowserPlugins\*.ocx %SVIEW_DISTR_PATH_AMD64%\StBrowserPlugins\
-xcopy /Y ..\bin\WIN_vc_AMD64\StDrawers\*.dll        %SVIEW_DISTR_PATH_AMD64%\StDrawers\
-xcopy /Y ..\bin\WIN_vc_AMD64\StRenderers\*.dll      %SVIEW_DISTR_PATH_AMD64%\StRenderers\
-xcopy /Y ..\bin\WIN_vc_AMD64\textures\*.std         %SVIEW_DISTR_PATH_AMD64%\textures\
-xcopy /Y ..\bin\WIN_vc_AMD64\*.dll                  %SVIEW_DISTR_PATH_AMD64%\
-xcopy /Y ..\bin\WIN_vc_AMD64\*.exe                  %SVIEW_DISTR_PATH_AMD64%\
+xcopy /S /Y ..\bin\WIN_vc_AMD64\lang\*      %SVIEW_DISTR_PATH_AMD64%\lang\
+xcopy /S /Y ..\bin\WIN_vc_AMD64\shaders\*   %SVIEW_DISTR_PATH_AMD64%\shaders\
+xcopy /Y ..\bin\WIN_vc_AMD64\textures\*.std %SVIEW_DISTR_PATH_AMD64%\textures\
+xcopy /Y ..\bin\WIN_vc_AMD64\*.dll          %SVIEW_DISTR_PATH_AMD64%\
+xcopy /Y ..\bin\WIN_vc_AMD64\*.exe          %SVIEW_DISTR_PATH_AMD64%\
 
-xcopy /Y ..\share\sView\demo\demo.jps %SVIEW_DISTR_PATH_X86%\
-xcopy /Y media\sView_JPS.ico          %SVIEW_DISTR_PATH_X86%\icons\
-xcopy /Y media\sView_PNS.ico          %SVIEW_DISTR_PATH_X86%\icons\
-xcopy /Y media\sView_Media.ico        %SVIEW_DISTR_PATH_X86%\icons\
-xcopy /S /Y info\* %SVIEW_DISTR_PATH_X86%\info\
-xcopy /S /Y info\* %SVIEW_DISTR_PATH_AMD64%\info\
-copy  /Y ..\license-gpl-3.0.txt %SVIEW_DISTR_PATH_X86%\info\license.txt
-copy  /Y ..\license-gpl-3.0.txt %SVIEW_DISTR_PATH_AMD64%\info\license.txt
+xcopy /Y ..\share\sView\demo\demo.jps       %SVIEW_DISTR_PATH_X86%\
+xcopy /Y media\sView_JPS.ico                %SVIEW_DISTR_PATH_X86%\icons\
+xcopy /Y media\sView_PNS.ico                %SVIEW_DISTR_PATH_X86%\icons\
+xcopy /Y media\sView_Media.ico              %SVIEW_DISTR_PATH_X86%\icons\
+xcopy /S /Y info\*                          %SVIEW_DISTR_PATH_X86%\info\
+xcopy /S /Y info\*                          %SVIEW_DISTR_PATH_AMD64%\info\
+copy  /Y ..\license-gpl-3.0.txt             %SVIEW_DISTR_PATH_X86%\info\license.txt
+copy  /Y ..\license-gpl-3.0.txt             %SVIEW_DISTR_PATH_AMD64%\info\license.txt
 
 echo Compile distribution package
 rem www.jrsoftware.org
