@@ -340,8 +340,6 @@ class StWindow {
      */
     ST_CPPEXPORT void setTargetFps(const double theFPS);
 
-    ST_CPPEXPORT virtual int getSupportLevel() const;
-
     /**
      * Retrieve options list.
      */
@@ -399,21 +397,6 @@ class StWindow {
     ST_LOCAL const StWindow& operator=(const StWindow& );
 
 };
-
-ST_LOCAL inline bool operator>(const StHandle<StWindow>& theA, const StHandle<StWindow>& theB) {
-    return theA != theB && theA->getSupportLevel() > theB->getSupportLevel();
-}
-
-ST_LOCAL inline bool operator<(const StHandle<StWindow>& theA, const StHandle<StWindow>& theB) {
-    return theA != theB && theA->getSupportLevel() < theB->getSupportLevel();
-}
-
-ST_LOCAL inline bool operator>=(const StHandle<StWindow>& theA, const StHandle<StWindow>& theB) {
-    return theA == theB || theA->getSupportLevel() >= theB->getSupportLevel();
-}
-
-ST_LOCAL inline bool operator<=(const StHandle<StWindow>& theA, const StHandle<StWindow>& theB) {
-    return theA == theB || theA->getSupportLevel() <= theB->getSupportLevel();
-}
+template<> inline void StArray< StHandle<StWindow> >::sort() {}
 
 #endif //__StWindow_h_

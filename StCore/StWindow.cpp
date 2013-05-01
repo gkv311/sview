@@ -84,10 +84,6 @@ void StWindow::getDevices(StOutDevicesList& ) const {
     //
 }
 
-int StWindow::getSupportLevel() const {
-    return ST_DEVICE_SUPPORT_NONE;
-}
-
 void StWindow::getOptions(StParamsList& ) const {
     //
 }

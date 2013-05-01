@@ -266,7 +266,7 @@ StOutInterlace::StOutInterlace(const StNativeWin_t theParentWindow)
     bool myIsMonReversed = false;
     StHandle<StMonitor> aMon = StOutInterlace::getHInterlaceMonitor(aMonitors, myIsMonReversed);
     if(!aMon.isNull()) {
-        aDevRow->Priority = ST_DEVICE_SUPPORT_HIGHT;
+        aDevRow->Priority = ST_DEVICE_SUPPORT_PREFER;
     }
 
     // options

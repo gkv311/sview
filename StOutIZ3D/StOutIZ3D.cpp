@@ -141,10 +141,10 @@ StOutIZ3D::StOutIZ3D(const StNativeWin_t theParentWindow)
         || isBackDisplay (aMon.getPnPId())) {
             aSupportLevel = ST_DEVICE_SUPPORT_PREFER; // we sure that iZ3D connected
             break;
-        } else if(aMon.getPnPId() == IZ3D_MODEL_MATROXTH2GO0
+        }/* else if(aMon.getPnPId() == IZ3D_MODEL_MATROXTH2GO0
                || aMon.getPnPId() == IZ3D_MODEL_MATROXTH2GO1) {
             aSupportLevel = ST_DEVICE_SUPPORT_FULL; // is it possible
-        }
+        }*/
     }
 
     // devices list

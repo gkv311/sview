@@ -163,10 +163,27 @@ bool StApplication::open() {
             }
 
             if(isAuto) {
+                // autodetection
                 myGlobalSettings->saveString(ST_SETTING_RENDERER,      ST_SETTING_AUTO_VALUE);
                 myGlobalSettings->saveBool  (ST_SETTING_RENDERER_AUTO, isAuto);
-                myRenderers.sort(); // sort by priority
                 myWindow = myRenderers[0];
+                if(!myDevices.isEmpty()) {
+                    StHandle<StOutDevice> aBestDev = myDevices[0];
+                    for(size_t aDevIter = 0; aDevIter < myDevices.size(); ++aDevIter) {
+                        const StHandle<StOutDevice>& aDev = myDevices[aDevIter];
+                        if(aDev->Priority > aBestDev->Priority) {
+                            aBestDev = aDev;
+                        }
+                    }
+                    for(size_t anIter = 0; anIter < myRenderers.size(); ++anIter) {
+                        const StHandle<StWindow>& aWin = myRenderers[anIter];
+                        if(aBestDev->PluginId == aWin->getRendererId()) {
+                            myWindow = aWin;
+                            myWindow->setDevice(aBestDev->DeviceId);
+                            break;
+                        }
+                    }
+                }
             }
         }
         myWindow->setTitle(myTitle);
