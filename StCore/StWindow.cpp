@@ -20,6 +20,12 @@
 
 #include "StWindowImpl.h"
 
+StWindow::StWindow()
+: myWin(new StWindowImpl((StNativeWin_t )NULL)),
+  myTargetFps(0.0) {
+    //
+}
+
 StWindow::StWindow(const StNativeWin_t theParentWindow)
 : myWin(new StWindowImpl(theParentWindow)),
   myTargetFps(0.0) {

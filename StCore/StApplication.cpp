@@ -53,6 +53,15 @@ void StApplication::doChangeDevice(const int32_t theValue) {
     }
 }
 
+StApplication::StApplication()
+: myWinParent((StNativeWin_t )NULL),
+  myRendId(ST_SETTING_AUTO_VALUE),
+  myExitCode(0),
+  myIsOpened(false),
+  myToQuit(false) {
+    stApplicationInit(NULL);
+}
+
 StApplication::StApplication(const StNativeWin_t         theParentWin,
                              const StHandle<StOpenInfo>& theOpenInfo)
 : myWinParent(theParentWin),
@@ -60,6 +69,10 @@ StApplication::StApplication(const StNativeWin_t         theParentWin,
   myExitCode(0),
   myIsOpened(false),
   myToQuit(false) {
+    stApplicationInit(theOpenInfo);
+}
+
+void StApplication::stApplicationInit(const StHandle<StOpenInfo>& theOpenInfo) {
     myGlobalSettings = new StSettings("sview");
     params.ActiveDevice = new StEnumParam(0, "Change device");
     params.ActiveDevice->signals.onChanged.connect(this, &StApplication::doChangeDevice);

@@ -42,8 +42,13 @@ class StApplication {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StApplication(const StNativeWin_t         theParentWin = (StNativeWin_t )NULL,
+    ST_CPPEXPORT StApplication(const StNativeWin_t         theParentWin,
                                const StHandle<StOpenInfo>& theOpenInfo  = NULL);
+
+    /**
+     * Empty constructor.
+     */
+    ST_CPPEXPORT StApplication();
 
     /**
      * Destructor.
@@ -136,6 +141,10 @@ class StApplication {
 
     } params;
 
+        private:
+
+    ST_LOCAL void stApplicationInit(const StHandle<StOpenInfo>& theOpenInfo);
+
         protected: //! @name protected fields
 
     StArrayList< StHandle<StWindow> > myRenderers; //!< list of registered renderers
@@ -152,6 +161,10 @@ class StApplication {
     bool                  myIsOpened;              //!< application execution state
     bool                  myToQuit;                //!< request for application termination
 
+        private: //! @name no copies, please
+
+    ST_LOCAL StApplication(const StApplication& );
+    ST_LOCAL const StApplication& operator=(const StApplication& );
 
 };
 

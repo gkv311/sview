@@ -113,9 +113,14 @@ class StWindow {
 
     /**
      * Default constructor. Window will not be displayed until create() call.
+     */
+    ST_CPPEXPORT StWindow();
+
+    /**
+     * Default constructor. Window will not be displayed until create() call.
      * @param theParentWindow Parent window
      */
-    ST_CPPEXPORT StWindow(const StNativeWin_t theParentWindow = (StNativeWin_t )NULL);
+    ST_CPPEXPORT StWindow(const StNativeWin_t theParentWindow);
 
     /**
      * Destructor.
@@ -387,6 +392,11 @@ class StWindow {
 
     StWindowImpl* myWin;       //!< window implementation class - we hide implementation details since them too platform-specific
     double        myTargetFps; //!< user data
+
+        private: //! @name no copies, please
+
+    ST_LOCAL StWindow(const StWindow& );
+    ST_LOCAL const StWindow& operator=(const StWindow& );
 
 };
 

@@ -13,22 +13,44 @@
 
 class StFolder : public StFileNode {
 
-        private:
-
-    ST_CPPEXPORT void addItem(const StArrayList<StString>& theExtensions,
-                              int theDeep,
-                              const StString& theSearchFolderPath,
-                              const StString& theCurrentItemName);
-
         public:
 
+    /**
+     * Override implementation to return TRUE.
+     */
     ST_CPPEXPORT virtual bool isFolder() const;
 
     ST_CPPEXPORT static bool isFolder(const StString& thePath);
 
-    ST_CPPEXPORT StFolder(const StString& theFolderPath = StString(), StNode* theParentNode = NULL);
+    /**
+     * Empty constructor.
+     */
+    ST_CPPEXPORT StFolder();
+
+    /**
+     * Main constructor.
+     */
+    ST_CPPEXPORT StFolder(const StString& theFolderPath, StNode* theParentNode = NULL);
+
+    /**
+     * Destructor.
+     */
     ST_CPPEXPORT virtual ~StFolder();
-    ST_CPPEXPORT void init(const StArrayList<StString>& theExtensions, int theDeep = 1);
+
+    /**
+     * Read files list in this folder.
+     * @param theExtensions Extensions filter
+     * @param theDeep       Recursion level to read subfolders
+     */
+    ST_CPPEXPORT void init(const StArrayList<StString>& theExtensions,
+                           int theDeep = 1);
+
+        private:
+
+    ST_LOCAL void addItem(const StArrayList<StString>& theExtensions,
+                          int theDeep,
+                          const StString& theSearchFolderPath,
+                          const StString& theCurrentItemName);
 
 };
 

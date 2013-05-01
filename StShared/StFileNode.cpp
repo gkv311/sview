@@ -14,12 +14,17 @@
 #include <StFile/StFileNode.h>
 #include <StFile/StMIMEList.h>
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     #include <windows.h>
 #endif
 
 #include <sys/types.h>
 #include <sys/stat.h>
+
+StFileNode::StFileNode()
+: StNode("", NULL, NODE_TYPE_FILE) {
+    //
+}
 
 StFileNode::StFileNode(const StString& theSubPath,
                        StNode*         theParentNode,

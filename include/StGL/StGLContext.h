@@ -123,9 +123,14 @@ class StGLContext {
         public:    //! @name class interface
 
     /**
+     * Empty constructor.
+     */
+    ST_CPPEXPORT StGLContext();
+
+    /**
      * Default constructor.
      */
-    ST_CPPEXPORT StGLContext(const bool theToInitialize = false);
+    ST_CPPEXPORT StGLContext(const bool theToInitialize);
 
     /**
      * Destructor.

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -14,6 +14,26 @@
 namespace {
     static const GLfloat ST_DTR_HALF = 0.5f * 0.0174532925f; // (degrees -> radians) * 0.5
 };
+
+StGLProjCamera::StGLProjCamera()
+: myMatrix(),
+  myMatrixMono(),
+  myFOVy(45.0f),
+  myZoom(1.0f),
+  myAspect(1.0f),
+  myZScreen(10.0f),
+  myIOD(0.5f),
+  myFrustL(),
+  myFrustR(),
+  myFrustM(),
+  myFrust(NULL),
+  myIsPersp(true) {
+    //
+    myFrust = &myFrustM;
+    myFrustM.zNear = myFrustL.zNear = myFrustR.zNear = 3.0f;
+    myFrustM.zFar  = myFrustL.zFar  = myFrustR.zFar  = 30.0f;
+    updateFrustum();
+}
 
 StGLProjCamera::StGLProjCamera(const GLfloat theFOVy,
                                const GLfloat theZNear,

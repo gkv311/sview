@@ -6,7 +6,7 @@
  * http://www.boost.org/LICENSE_1_0.txt
  */
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     #include <windows.h>
 #endif
 
@@ -22,9 +22,36 @@
 #if(defined(__APPLE__))
     #include <dlfcn.h>
     #include <OpenGL/OpenGL.h>
-#elif(!defined(_WIN32) && !defined(__WIN32__))
+#elif(!defined(_WIN32))
     #include <GL/glx.h> // glXGetProcAddress()
 #endif
+
+StGLContext::StGLContext()
+: core11(NULL),
+  core11fwd(NULL),
+  core20(NULL),
+  core20fwd(NULL),
+  core32(NULL),
+  core32back(NULL),
+  core41(NULL),
+  core41back(NULL),
+  core42(NULL),
+  core42back(NULL),
+  arbFbo(NULL),
+  extAll(NULL),
+  extSwapTear(false),
+  myFuncs(new StGLFunctions()),
+  myGpuName(GPU_UNKNOWN),
+  myVerMajor(0),
+  myVerMinor(0),
+  myIsRectFboSupported(false),
+  myWasInit(false) {
+    stMemZero(&(*myFuncs), sizeof(StGLFunctions));
+    extAll = &(*myFuncs);
+#ifdef __APPLE__
+    mySysLib.loadSimple("/System/Library/Frameworks/OpenGL.framework/Versions/Current/OpenGL");
+#endif
+}
 
 StGLContext::StGLContext(const bool theToInitialize)
 : core11(NULL),
@@ -61,7 +88,7 @@ StGLContext::~StGLContext() {
 }
 
 void* StGLContext::stglFindProc(const char* theName) const {
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     return (void* )wglGetProcAddress(theName);
 #elif defined(__APPLE__)
     return mySysLib.isOpened() ? mySysLib.find(theName) : NULL;
@@ -276,7 +303,7 @@ bool StGLContext::stglSetVSync(const VSync_Mode theVSyncMode) {
     if(theVSyncMode == VSync_MIXED && !extSwapTear) {
         aSyncInt = 1;
     }
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     if(myFuncs->wglSwapIntervalEXT != NULL) {
         myFuncs->wglSwapIntervalEXT(aSyncInt);
         return true;
@@ -328,7 +355,7 @@ bool StGLContext::stglInit() {
     #define STGL_READ_FUNC(theFunc) stglFindProc(#theFunc, myFuncs->theFunc)
 
     // retrieve platform-dependent extensions
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     if(STGL_READ_FUNC(wglGetExtensionsStringARB)) {
         const char* aWglExts = myFuncs->wglGetExtensionsStringARB(wglGetCurrentDC());
         if(stglCheckExtension(aWglExts, "WGL_EXT_swap_control")) {

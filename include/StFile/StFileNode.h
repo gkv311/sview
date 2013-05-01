@@ -32,11 +32,16 @@ class StFileNode : public StNode {
     };
 
     /**
+     * Empty constructor.
+     */
+    ST_CPPEXPORT StFileNode();
+
+    /**
      * Main constructor.
      */
-    ST_CPPEXPORT StFileNode(const StString& theSubPath = StString(),
+    ST_CPPEXPORT StFileNode(const StString& theSubPath,
                             StNode*         theParentNode = NULL,
-                            int             theNodeType = NODE_TYPE_FILE);
+                            int             theNodeType   = NODE_TYPE_FILE);
 
     /**
      * Destructor.

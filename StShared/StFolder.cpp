@@ -9,7 +9,7 @@
 #include <StFile/StFolder.h>
 #include <StStrings/StLogger.h>
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     #include <windows.h>
 #else
     #include <sys/types.h>
@@ -20,6 +20,11 @@ namespace {
     static const StString IGNORE_DIR_CURR_NAME('.');
     static const StString IGNORE_DIR_UP_NAME("..");
 };
+
+StFolder::StFolder()
+: StFileNode("", NULL, NODE_TYPE_FOLDER) {
+    //
+}
 
 StFolder::StFolder(const StString& theFolderPath, StNode* theParentNode)
 : StFileNode(theFolderPath, theParentNode, NODE_TYPE_FOLDER) {
@@ -35,7 +40,7 @@ bool StFolder::isFolder() const {
 }
 
 bool StFolder::isFolder(const StString& thePath) {
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     DWORD aFileAttributes = GetFileAttributesW(thePath.toUtfWide().toCString());
     if(aFileAttributes == INVALID_FILE_ATTRIBUTES) {
         return false;
@@ -89,7 +94,7 @@ void StFolder::init(const StArrayList<StString>& theExtensions, int theDeep) {
     // clean up old list...
     clear();
     StString aSearchFolderPath = getPath();
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     WIN32_FIND_DATAW aFindFile;
     StString aStrSearchMask = getPath() + StString(SYS_FS_SPLITTER) + '*';
 

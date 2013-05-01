@@ -29,12 +29,21 @@ class StGLProjCamera {
         public:
 
     /**
-     * Setup the default projection camera.
+     * Default projection camera:
+     *  FOVy    = 45
+     *  ZNear   =  3
+     *  ZFar    = 30
+     *  ZScreen = 10
      */
-    ST_CPPEXPORT StGLProjCamera(const GLfloat theFOVy    = 45.0f,
-                                const GLfloat theZNear   = 3.0f,
-                                const GLfloat theZFar    = 30.0f,
-                                const GLfloat theZScreen = 10.0f);
+    ST_CPPEXPORT StGLProjCamera();
+
+    /**
+     * Custom projection camera.
+     */
+    ST_CPPEXPORT StGLProjCamera(const GLfloat theFOVy,
+                                const GLfloat theZNear,
+                                const GLfloat theZFar,
+                                const GLfloat theZScreen);
 
     /**
      * Get projection type.
