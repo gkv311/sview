@@ -66,6 +66,7 @@
 					<Add option="/MDd" />
 					<Add option="/Od" />
 					<Add option="/W4" />
+					<Add option="/Zi" />
 					<Add option="/EHsc" />
 					<Add option="/MP" />
 					<Add option="/DUNICODE" />
@@ -73,6 +74,7 @@
 					<Add option="/D__ST_DEBUG__" />
 				</Compiler>
 				<Linker>
+					<Add option="/DEBUG" />
 					<Add library="opengl32" />
 				</Linker>
 				<ExtraCommands>
