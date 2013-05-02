@@ -24,6 +24,7 @@
 					<Add option="-D__ST_DEBUG__" />
 					<Add option="-D__ST_SHARED_DLL__" />
 					<Add option="-D__MSVCRT_VERSION__=0x0601" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add library="opengl32" />
@@ -52,6 +53,7 @@
 					<Add option="/DUNICODE" />
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
 					<Add option="/D__ST_SHARED_DLL__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add library="opengl32" />
@@ -82,6 +84,7 @@
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
 					<Add option="/D__ST_DEBUG__" />
 					<Add option="/D__ST_SHARED_DLL__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="/DEBUG" />
@@ -111,6 +114,7 @@
 					<Add option="/DUNICODE" />
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
 					<Add option="/D__ST_SHARED_DLL__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add library="opengl32" />
@@ -140,6 +144,7 @@
 					<Add option="-msse" />
 					<Add option="`pkg-config gtk+-2.0 --cflags`" />
 					<Add option="-D__ST_SHARED_DLL__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -172,6 +177,7 @@
 					<Add option="`pkg-config gtk+-2.0 --cflags`" />
 					<Add option="-D__ST_DEBUG__" />
 					<Add option="-D__ST_SHARED_DLL__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="-z defs" />
@@ -196,6 +202,7 @@
 					<Add option="-Wall" />
 					<Add option="-fPIC" />
 					<Add option="-D__ST_SHARED_DLL__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="-framework Appkit" />
@@ -219,6 +226,7 @@
 					<Add option="-fPIC" />
 					<Add option="-D__ST_DEBUG__" />
 					<Add option="-D__ST_SHARED_DLL__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="-framework Appkit" />

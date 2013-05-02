@@ -22,6 +22,7 @@
 					<Add option="-DUNICODE" />
 					<Add option="-D_WIN32_WINNT=0x0500" />
 					<Add option="-D__ST_DEBUG__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add library="gdi32" />
@@ -46,6 +47,7 @@
 					<Add option="/DUNICODE" />
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
 					<Add option="/DNDEBUG" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="/NODEFAULTLIB:libcmt.lib" />
@@ -79,6 +81,7 @@
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
 					<Add option="/DNDEBUG" />
 					<Add option="/D__ST_DEBUG__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="/DEBUG" />
@@ -111,6 +114,7 @@
 					<Add option="/DUNICODE" />
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
 					<Add option="/DNDEBUG" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="/NODEFAULTLIB:libcmt.lib" />
@@ -139,6 +143,7 @@
 					<Add option="-mmmx" />
 					<Add option="-msse" />
 					<Add option="`pkg-config gtk+-2.0 --cflags`" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -167,6 +172,7 @@
 					<Add option="-msse" />
 					<Add option="`pkg-config gtk+-2.0 --cflags`" />
 					<Add option="-D__ST_DEBUG__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="-z defs" />
@@ -189,6 +195,7 @@
 				<Compiler>
 					<Add option="-O3" />
 					<Add option="-Wall" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -207,6 +214,7 @@
 					<Add option="-Wall" />
 					<Add option="-g" />
 					<Add option="-D__ST_DEBUG__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="-framework Appkit" />

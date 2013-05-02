@@ -22,6 +22,7 @@
 					<Add option="-msse" />
 					<Add option="-DUNICODE" />
 					<Add option="-D__ST_DEBUG__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add library="opengl32" />
@@ -46,6 +47,7 @@
 					<Add option="/MP" />
 					<Add option="/DUNICODE" />
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add library="opengl32" />
@@ -72,6 +74,7 @@
 					<Add option="/DUNICODE" />
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
 					<Add option="/D__ST_DEBUG__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="/DEBUG" />
@@ -97,6 +100,7 @@
 					<Add option="/MP" />
 					<Add option="/DUNICODE" />
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add library="opengl32" />
@@ -122,6 +126,7 @@
 					<Add option="-mmmx" />
 					<Add option="-msse" />
 					<Add option="`pkg-config gtk+-2.0 --cflags`" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -151,6 +156,7 @@
 					<Add option="-msse" />
 					<Add option="`pkg-config gtk+-2.0 --cflags`" />
 					<Add option="-D__ST_DEBUG__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="-z defs" />
@@ -172,6 +178,7 @@
 					<Add option="-O3" />
 					<Add option="-Wall" />
 					<Add option="-fPIC" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -197,6 +204,7 @@
 					<Add option="-g" />
 					<Add option="-fPIC" />
 					<Add option="-D__ST_DEBUG__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="-framework OpenGL" />

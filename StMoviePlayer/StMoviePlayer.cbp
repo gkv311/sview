@@ -25,6 +25,7 @@
 					<Add option="-msse" />
 					<Add option="-DUNICODE" />
 					<Add option="-D__ST_DEBUG__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add library="opengl32" />
@@ -63,6 +64,7 @@
 					<Add option="/DUNICODE" />
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
 					<Add option="/DNDEBUG" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="/MANIFEST" />
@@ -107,6 +109,7 @@
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
 					<Add option="/DNDEBUG" />
 					<Add option="/D__ST_DEBUG__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="/DEBUG" />
@@ -150,6 +153,7 @@
 					<Add option="/DUNICODE" />
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
 					<Add option="/DNDEBUG" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="/MANIFEST" />
@@ -190,6 +194,7 @@
 					<Add option="-mmmx" />
 					<Add option="-msse" />
 					<Add option="`freetype-config --cflags`" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -226,6 +231,7 @@
 					<Add option="-msse" />
 					<Add option="`freetype-config --cflags`" />
 					<Add option="-D__ST_DEBUG__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="`pkg-config gtk+-2.0 --libs`" />
@@ -257,6 +263,7 @@
 					<Add option="-O3" />
 					<Add option="-Wall" />
 					<Add option="-fPIC" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -290,6 +297,7 @@
 					<Add option="-g" />
 					<Add option="-fPIC" />
 					<Add option="-D__ST_DEBUG__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="-framework Appkit" />

@@ -22,6 +22,7 @@
 					<Add option="-msse" />
 					<Add option="-DUNICODE" />
 					<Add option="-D__ST_DEBUG__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add library="opengl32" />
@@ -54,6 +55,7 @@
 					<Add option="/DUNICODE" />
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
 					<Add option="/DNDEBUG" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="/MANIFEST" />
@@ -94,6 +96,7 @@
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
 					<Add option="/DNDEBUG" />
 					<Add option="/D__ST_DEBUG__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="/DEBUG" />
@@ -133,6 +136,7 @@
 					<Add option="/DUNICODE" />
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
 					<Add option="/DNDEBUG" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="/MANIFEST" />
@@ -168,6 +172,7 @@
 					<Add option="-fPIC" />
 					<Add option="-mmmx" />
 					<Add option="-msse" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -183,8 +188,8 @@
 					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
 					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
 					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)shaders/$(TARGET_OUTPUT_BASENAME)/&quot;' />
-					<Add before='cp -f -r shaders/* &quot;$(TARGET_OUTPUT_DIR)shaders/$(TARGET_OUTPUT_BASENAME)/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)shaders/$(PROJECT_NAME)/&quot;' />
+					<Add before='cp -f -r shaders/* &quot;$(TARGET_OUTPUT_DIR)shaders/$(PROJECT_NAME)/&quot;' />
 				</ExtraCommands>
 			</Target>
 			<Target title="LINUX_gcc_DEBUG">
@@ -201,6 +206,7 @@
 					<Add option="-mmmx" />
 					<Add option="-msse" />
 					<Add option="-D__ST_DEBUG__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="`pkg-config gtk+-2.0 --libs`" />
@@ -215,8 +221,8 @@
 					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
 					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
 					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)shaders/$(TARGET_OUTPUT_BASENAME)/&quot;' />
-					<Add before='cp -f -r shaders/* &quot;$(TARGET_OUTPUT_DIR)shaders/$(TARGET_OUTPUT_BASENAME)/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)shaders/$(PROJECT_NAME)/&quot;' />
+					<Add before='cp -f -r shaders/* &quot;$(TARGET_OUTPUT_DIR)shaders/$(PROJECT_NAME)/&quot;' />
 				</ExtraCommands>
 			</Target>
 			<Target title="MAC_gcc">
@@ -230,6 +236,7 @@
 					<Add option="-O3" />
 					<Add option="-Wall" />
 					<Add option="-fPIC" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -244,8 +251,8 @@
 					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
 					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
 					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)shaders/$(TARGET_OUTPUT_BASENAME)/&quot;' />
-					<Add before='cp -f -r shaders/* &quot;$(TARGET_OUTPUT_DIR)shaders/$(TARGET_OUTPUT_BASENAME)/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)shaders/$(PROJECT_NAME)/&quot;' />
+					<Add before='cp -f -r shaders/* &quot;$(TARGET_OUTPUT_DIR)shaders/$(PROJECT_NAME)/&quot;' />
 					<Add after='install_name_tool -id @executable_path/$(TARGET_OUTPUT_BASENAME).dylib &quot;$(TARGET_OUTPUT_FILE)&quot;' />
 					<Add after='ln -f -s &quot;../$(TARGET_OUTPUT_FILE)&quot; ../lib/$(TARGET_NAME)' />
 				</ExtraCommands>
@@ -262,6 +269,7 @@
 					<Add option="-g" />
 					<Add option="-fPIC" />
 					<Add option="-D__ST_DEBUG__" />
+					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
 					<Add option="-framework Appkit" />
@@ -275,8 +283,8 @@
 					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
 					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
 					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)shaders/$(TARGET_OUTPUT_BASENAME)/&quot;' />
-					<Add before='cp -f -r shaders/* &quot;$(TARGET_OUTPUT_DIR)shaders/$(TARGET_OUTPUT_BASENAME)/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)shaders/$(PROJECT_NAME)/&quot;' />
+					<Add before='cp -f -r shaders/* &quot;$(TARGET_OUTPUT_DIR)shaders/$(PROJECT_NAME)/&quot;' />
 					<Add after='install_name_tool -id @executable_path/$(TARGET_OUTPUT_BASENAME).dylib &quot;$(TARGET_OUTPUT_FILE)&quot;' />
 					<Add after='ln -f -s &quot;../$(TARGET_OUTPUT_FILE)&quot; ../lib/$(TARGET_NAME)' />
 				</ExtraCommands>
