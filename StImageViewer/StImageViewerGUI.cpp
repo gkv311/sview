@@ -355,6 +355,10 @@ void StImageViewerGUI::doAboutProgram(const size_t ) {
     aboutDialog->signals.onClickRight.connect(aboutDialog, &StGLMessageBox::doKillSelf);
 }
 
+void StImageViewerGUI::doUserTips(const size_t ) {
+    StSocket::openURL("http://sview.ru/sview2009/usertips");
+}
+
 void StImageViewerGUI::doAboutSystem(const size_t ) {
     StString aTitle = "System Info";
     StString anInfo = getContext().stglFullInfo();
@@ -413,6 +417,9 @@ StGLMenu* StImageViewerGUI::createHelpMenu() {
 
     aMenu->addItem(myLangMap->changeValueId(MENU_HELP_ABOUT,   "About..."))
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doAboutProgram);
+
+    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_USERTIPS,"User Tips"))
+         ->signals.onItemClick.connect(this, &StImageViewerGUI::doUserTips);
 
     aMenu->addItem(myLangMap->changeValueId(MENU_HELP_LICENSE, "License text"))
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doOpenLicense);

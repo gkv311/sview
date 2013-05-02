@@ -552,6 +552,10 @@ void StMoviePlayerGUI::doAboutProgram(const size_t ) {
     aboutDialog->signals.onClickRight.connect(aboutDialog, &StGLMessageBox::doKillSelf);
 }
 
+void StMoviePlayerGUI::doUserTips(const size_t ) {
+    StSocket::openURL("http://sview.ru/sview2009/usertips");
+}
+
 void StMoviePlayerGUI::doAboutFile(const size_t ) {
     StHandle<StFileNode>     aFileNode;
     StHandle<StStereoParams> aParams;
@@ -599,6 +603,9 @@ StGLMenu* StMoviePlayerGUI::createHelpMenu() {
 
     aMenu->addItem(myLangMap->changeValueId(MENU_HELP_ABOUT,   "About..."))
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAboutProgram);
+
+    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_USERTIPS,"User Tips"))
+         ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doUserTips);
 
     aMenu->addItem(myLangMap->changeValueId(MENU_HELP_LICENSE, "License text"))
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doOpenLicense);
