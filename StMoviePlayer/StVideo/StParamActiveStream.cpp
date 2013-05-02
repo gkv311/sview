@@ -71,6 +71,26 @@ bool StParamActiveStream::setValue(const int32_t theValue) {
     return false;
 }
 
+int32_t StParamActiveStream::nextValue(const int32_t theIncrement) {
+    myMutex.lock();
+    if(myList->isEmpty()) {
+        myMutex.unlock();
+        return -1;
+    }
+
+    myValue += theIncrement;
+    if(myValue >= int32_t(myList->size())) {
+        myValue = -1;
+    } else if(myValue < -1) {
+        myValue = int32_t(myList->size()) - 1;
+    }
+    myIsChanged = true;
+    const int32_t aNewValue = myValue;
+    myMutex.unlock();
+    signals.onChanged(aNewValue);
+    return aNewValue;
+}
+
 bool StParamActiveStream::wasChanged() const {
     myMutex.lock();
     bool aChanged = myIsChanged;

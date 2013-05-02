@@ -28,12 +28,6 @@
  */
 class StParamActiveStream : public StInt32Param {
 
-        private:
-
-    StHandle< StArrayList<StString> > myList;
-    mutable StMutex  myMutex;
-    mutable bool myIsChanged;
-
         public:
 
     /**
@@ -68,10 +62,23 @@ class StParamActiveStream : public StInt32Param {
     ST_LOCAL virtual bool setValue(const int32_t theValue);
 
     /**
+     * Switch to next value in list.
+     * @param theIncrement Increment to current value
+     * @return new value
+     */
+    ST_LOCAL int32_t nextValue(const int32_t theIncrement);
+
+    /**
      * Returns true if value was changed since last call
      * and automatically reset this state.
      */
     ST_LOCAL bool wasChanged() const;
+
+        private:
+
+    StHandle< StArrayList<StString> > myList;
+    mutable StMutex  myMutex;
+    mutable bool     myIsChanged;
 
 };
 

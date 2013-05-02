@@ -1126,6 +1126,21 @@ void StMoviePlayer::keysCommon(bool* keysMap) {
         keysMap[ST_VK_F12] = false;
     }
 
+    if(keysMap[ST_VK_H]
+    || keysMap[ST_VK_L]) {
+        const int32_t aValue = myVideo->params.activeAudio->nextValue(keysMap[ST_VK_SHIFT] ? -1 : 1);
+        params.audioStream->setValue(aValue);
+        keysMap[ST_VK_H] = false;
+        keysMap[ST_VK_L] = false;
+    }
+    if(keysMap[ST_VK_U]
+    || keysMap[ST_VK_T]) {
+        const int32_t aValue = myVideo->params.activeSubtitles->nextValue(keysMap[ST_VK_SHIFT] ? -1 : 1);
+        params.subtitlesStream->setValue(aValue);
+        keysMap[ST_VK_U] = false;
+        keysMap[ST_VK_T] = false;
+    }
+
     if(keysMap[ST_VK_SPACE]) {
         doPlayPause();
         keysMap[ST_VK_SPACE] = false;
