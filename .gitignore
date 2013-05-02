@@ -26,6 +26,7 @@ distribution/temp/
 3rdparty/include/freetype
 3rdparty/include/lib*
 3rdparty/include/ft2build.h
+build/
 bin/
 lib/
 StActiveXPlugin/obj/

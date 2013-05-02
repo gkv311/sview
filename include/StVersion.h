@@ -25,7 +25,7 @@
 
 #define __DAY__ ((__DATE__ [4]==' ' ? 0 : __DATE__ [4]-'0')*10+(__DATE__[5]-'0'))
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     //FILEFLAGS VS_DEBUG | VS_PRIVATEBUILD | VS_SPECIALBUILD | VS_PRERELEASE | VS_PATCHED
     #ifndef __ST_DEBUG__
         #define ST_WIN32_FILEFLAGS FILEFLAGS VS_FF_DEBUG
@@ -34,7 +34,16 @@
     #endif
 #endif
 
-#include <stconfig.conf>
+#ifdef ST_HAVE_STCONFIG
+    #include <stconfig.conf>
+#else
+    #ifndef SVIEW_SDK_VER_STATUS
+        #define SVIEW_SDK_VER_STATUS RELEASE
+    #endif
+    #ifndef SVIEW_SDK_VERSION_AUTO
+        #define SVIEW_SDK_VERSION_AUTO
+    #endif
+#endif
 
 enum {
     DEV = 0,

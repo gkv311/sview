@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -9,7 +9,9 @@
 #ifndef __stTypes_h_
 #define __stTypes_h_
 
-#include <stconfig.conf>
+#ifdef ST_HAVE_STCONFIG
+    #include <stconfig.conf>
+#endif
 
 /**
  * Below are compiler-dependent useful macros to warn
