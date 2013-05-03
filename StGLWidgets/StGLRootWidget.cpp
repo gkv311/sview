@@ -123,8 +123,8 @@ void StGLRootWidget::stglScissorRect(const StRectI_t& theRect,
     const GLdouble aWidthFactor  = GLdouble(aVPortWidth)  / GLdouble(aRootWidth);
     const GLdouble aHeightFactor = GLdouble(aVPortHeight) / GLdouble(aRootHeight);
 
-    theScissorRect.x() = myViewport[0] + GLint(aWidthFactor * GLdouble(theRect.left()));
-    theScissorRect.y() = myViewport[1] + GLint(aWidthFactor * GLdouble(aRootHeight - theRect.bottom()));
+    theScissorRect.x() = myViewport[0] + GLint(aWidthFactor  * GLdouble(theRect.left()));
+    theScissorRect.y() = myViewport[1] + GLint(aHeightFactor * GLdouble(aRootHeight - theRect.bottom()));
 
     theScissorRect.width()  = GLint(aWidthFactor  * GLdouble(theRect.width()));
     theScissorRect.height() = GLint(aHeightFactor * GLdouble(theRect.height()));

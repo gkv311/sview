@@ -303,8 +303,13 @@ void StOutDistorted::stglDraw() {
         return;
     }
 
+    StGLBoxPx aViewPortL = aViewPort;
+    aViewPortL.width() /= 2;
+    StGLBoxPx aViewPortR = aViewPortL;
+    aViewPortR.x() += aViewPortL.width();
+
     // resize FBO
-    if(!myFrBuffer->initLazy(*myContext, aViewPort.width(), aViewPort.height(), StWindow::hasDepthBuffer())) {
+    if(!myFrBuffer->initLazy(*myContext, aViewPortL.width(), aViewPortL.height(), StWindow::hasDepthBuffer())) {
         stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init Frame Buffer");
         myIsBroken = true;
         return;
@@ -328,8 +333,8 @@ void StOutDistorted::stglDraw() {
 
     // now draw to real screen buffer
     // clear the screen and the depth buffer
-    myContext->stglResizeViewport(aViewPort);
-    myContext->stglSetScissorRect(aViewPort, false);
+    myContext->stglResizeViewport(aViewPortL);
+    myContext->stglSetScissorRect(aViewPortL, false);
     myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     myFrBuffer->bindTexture(*myContext);
@@ -352,10 +357,9 @@ void StOutDistorted::stglDraw() {
     myFrBuffer->unbindBuffer(*myContext);
 
     // clear the screen and the depth buffer
-    ///StWindow::stglMakeCurrent(ST_WIN_SLAVE);
-    ///myContext->stglResizeViewport(aVPSlave);
-    ///myContext->stglSetScissorRect(aVPSlave, false);
-    ///myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    myContext->stglResizeViewport(aViewPortR);
+    myContext->stglSetScissorRect(aViewPortR, false);
+    myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     myFrBuffer->bindTexture(*myContext);
     myProgram->use(*myContext);
