@@ -500,7 +500,13 @@ void StOutDistorted::stglDraw() {
     }
 
     // resize FBO
-    if(!myFrBuffer->initLazy(*myContext, aViewPortL.width(), aViewPortL.height(), StWindow::hasDepthBuffer())) {
+    GLint aFrSizeX = aViewPortL.width();
+    GLint aFrSizeY = aViewPortL.height();
+    if(params.Distortion->getValue() == DISTORTION_BARREL) {
+        aFrSizeX = int(std::ceil(double(aFrSizeX) * 1.25) + 0.5);
+        aFrSizeY = int(std::ceil(double(aFrSizeY) * 1.25) + 0.5);
+    }
+    if(!myFrBuffer->initLazy(*myContext, aFrSizeX, aFrSizeY, StWindow::hasDepthBuffer())) {
         stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init Frame Buffer");
         myIsBroken = true;
         return;
@@ -521,8 +527,8 @@ void StOutDistorted::stglDraw() {
         StArray<StGLVec4> aVerts(4);
         const GLfloat aCurLeft   = -1.0f + aCursorPos.x() * 2.0f;
         const GLfloat aCurTop    =  1.0f - aCursorPos.y() * 2.0f;
-        const GLfloat aCurWidth  = GLfloat(myCursor->getSizeX()) / GLfloat(aViewPortL.width());
-        const GLfloat aCurHeight = 2.0f * GLfloat(myCursor->getSizeY()) / GLfloat(aViewPortL.height());
+        const GLfloat aCurWidth  =        GLfloat(myCursor->getSizeX()) / GLfloat(myFrBuffer->getVPSizeX());
+        const GLfloat aCurHeight = 2.0f * GLfloat(myCursor->getSizeY()) / GLfloat(myFrBuffer->getVPSizeY());
         aVerts[0] = StGLVec4(aCurLeft + aCurWidth, aCurTop - aCurHeight, 0.0f, 1.0f);
         aVerts[1] = StGLVec4(aCurLeft + aCurWidth, aCurTop,              0.0f, 1.0f);
         aVerts[2] = StGLVec4(aCurLeft,             aCurTop - aCurHeight, 0.0f, 1.0f);
@@ -554,9 +560,9 @@ void StOutDistorted::stglDraw() {
         aProgram   = myProgramBarrel.access();
         aVertexLoc = myProgramBarrel->getVVertexLoc();
         aTexCrdLoc = myProgramBarrel->getVTexCoordLoc();
+        myProgramBarrel->setScaleIn(*myContext, StGLVec2(2.0f / aDX, 2.0f / aDY));
+        myProgramBarrel->setScale  (*myContext, StGLVec2(0.4f * aDX, 0.4f * aDY));
     }
-    myProgramBarrel->setScaleIn(*myContext, StGLVec2(2.0f / aDX, 2.0f / aDY));
-    myProgramBarrel->setScale  (*myContext, StGLVec2(0.4f * aDX, 0.4f * aDY));
 
     myFrBuffer->bindTexture(*myContext);
     const GLfloat aLensDisp = 0.1453 * 0.5;
