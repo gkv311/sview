@@ -37,6 +37,8 @@ namespace {
     static const char ST_SETTING_DEVICE_ID[] = "deviceId";
     static const char ST_SETTING_WINDOWPOS[] = "windowPos";
     static const char ST_SETTING_VSYNC[]     = "vsync";
+    static const char ST_SETTING_LAYOUT[]    = "layout";
+    static const char ST_SETTING_DISTORTION[]= "distortion";
 
     // translation resources
     enum {
@@ -44,8 +46,13 @@ namespace {
         STTR_DISTORTED_DESC     = 1001,
 
         // parameters
-        STTR_PARAMETER_VSYNC    = 1100,
-        STTR_PARAMETER_SLAVE_ID = 1102,
+        STTR_PARAMETER_VSYNC      = 1100,
+        STTR_PARAMETER_LAYOUT     = 1110,
+        STTR_PARAMETER_LAYOUT_SBS        = 1111,
+        STTR_PARAMETER_LAYOUT_OVERUNDER  = 1112,
+        STTR_PARAMETER_DISTORTION = 1120,
+        STTR_PARAMETER_DISTORTION_OFF    = 1121,
+        STTR_PARAMETER_DISTORTION_BARREL = 1122,
 
         // about info
         STTR_PLUGIN_TITLE       = 2000,
@@ -53,12 +60,21 @@ namespace {
         STTR_PLUGIN_DESCRIPTION = 2002,
     };
 
+    static const char VERTEX_SHADER[] =
+       "attribute vec4 vVertex;"
+       "attribute vec2 vTexCoord;"
+       "varying vec2 fTexCoord;"
+       "void main(void) {"
+       "    fTexCoord = vTexCoord;"
+       "    gl_Position = vVertex;"
+       "}";
+
 };
 
 /**
- * Distortion GLSL program.
+ * Flat GLSL program.
  */
-class StProgramBarrel : public StGLProgram {
+class StProgramFlat : public StGLProgram {
 
         private:
 
@@ -67,37 +83,17 @@ class StProgramBarrel : public StGLProgram {
 
         public:
 
-    StProgramBarrel()
-    : StGLProgram("StProgramBarrel"),
-      atrVVertexLoc(),
-      atrVTexCoordLoc() {
-        //
-    }
+    ST_LOCAL StProgramFlat() : StGLProgram("StProgramFlat") {}
+    ST_LOCAL StGLVarLocation getVVertexLoc()   const { return atrVVertexLoc; }
+    ST_LOCAL StGLVarLocation getVTexCoordLoc() const { return atrVTexCoordLoc; }
 
-    StGLVarLocation getVVertexLoc() const {
-        return atrVVertexLoc;
-    }
-
-    StGLVarLocation getVTexCoordLoc() const {
-        return atrVTexCoordLoc;
-    }
-
-    virtual bool init(StGLContext& theCtx) {
-        const char VERTEX_SHADER[] =
-           "attribute vec4 vVertex; \
-            attribute vec2 vTexCoord; \
-            varying vec2 fTexCoord; \
-            void main(void) { \
-                fTexCoord = vTexCoord; \
-                gl_Position = vVertex; \
-            }";
-
+    ST_LOCAL virtual bool init(StGLContext& theCtx) {
         const char FRAGMENT_SHADER[] =
-           "uniform sampler2D texR, texL; \
-            varying vec2 fTexCoord; \
-            void main(void) { \
-                gl_FragColor = texture2D(texR, fTexCoord); \
-            }";
+           "uniform sampler2D texR, texL;"
+           "varying vec2 fTexCoord;"
+           "void main(void) {"
+           "    gl_FragColor = texture2D(texR, fTexCoord);"
+           "}";
 
         StGLVertexShader aVertexShader(StGLProgram::getTitle());
         StGLAutoRelease aTmp1(theCtx, aVertexShader);
@@ -117,6 +113,68 @@ class StProgramBarrel : public StGLProgram {
         atrVTexCoordLoc = StGLProgram::getAttribLocation(theCtx, "vTexCoord");
         return atrVVertexLoc.isValid() && atrVTexCoordLoc.isValid();
     }
+
+};
+
+/**
+ * Distortion GLSL program.
+ */
+class StProgramBarrel : public StGLProgram {
+
+        public:
+
+    ST_LOCAL StProgramBarrel() : StGLProgram("StProgramBarrel") {}
+    ST_LOCAL StGLVarLocation getVVertexLoc()   const { return atrVVertexLoc; }
+    ST_LOCAL StGLVarLocation getVTexCoordLoc() const { return atrVTexCoordLoc; }
+
+    ST_LOCAL virtual bool init(StGLContext& theCtx) {
+        const char FRAGMENT_SHADER[] =
+           "uniform sampler2D texR, texL;"
+           "varying vec2 fTexCoord;"
+
+           "vec4 uWarpCoef   = vec4(0.2, 0.0, 0.0, 1.0 - (0.2 + 0.0 + 0.0));"
+           "vec2 uScale      = vec2(0.5, 0.5);"
+           "vec2 uScaleIn    = vec2(2.0, 2.0);"
+           "vec2 uLensCenter = vec2(0.5, 0.5);"
+
+           // function scales input texture coordinates for distortion
+           "vec2 riftWarp(vec2 theTexCoord) {"
+           "    vec2 aTheta = (theTexCoord - uLensCenter) * uScaleIn;" // scales to [-1, 1]
+           "    float rSq = aTheta.x * aTheta.x + aTheta.y * aTheta.y;"
+           "    vec2 rvector = aTheta * (uWarpCoef.x + uWarpCoef.y * rSq +"
+           "                             uWarpCoef.z * rSq * rSq +"
+           "                             uWarpCoef.w * rSq * rSq * rSq);"
+           "    return uLensCenter + uScale * rvector;"
+           "}"
+
+           "void main(void) {"
+           "    vec2 aTexCoord = riftWarp(fTexCoord);"
+           "    gl_FragColor = texture2D(texR, aTexCoord);"
+           "}";
+
+        StGLVertexShader aVertexShader(StGLProgram::getTitle());
+        StGLAutoRelease aTmp1(theCtx, aVertexShader);
+        aVertexShader.init(theCtx, VERTEX_SHADER);
+
+        StGLFragmentShader aFragmentShader(StGLProgram::getTitle());
+        StGLAutoRelease aTmp2(theCtx, aFragmentShader);
+        aFragmentShader.init(theCtx, FRAGMENT_SHADER);
+        if(!StGLProgram::create(theCtx)
+           .attachShader(theCtx, aVertexShader)
+           .attachShader(theCtx, aFragmentShader)
+           .link(theCtx)) {
+            return false;
+        }
+
+        atrVVertexLoc   = StGLProgram::getAttribLocation(theCtx, "vVertex");
+        atrVTexCoordLoc = StGLProgram::getAttribLocation(theCtx, "vTexCoord");
+        return atrVVertexLoc.isValid() && atrVTexCoordLoc.isValid();
+    }
+
+        private:
+
+    StGLVarLocation atrVVertexLoc;
+    StGLVarLocation atrVTexCoordLoc;
 
 };
 
@@ -146,6 +204,8 @@ void StOutDistorted::getDevices(StOutDevicesList& theList) const {
 
 void StOutDistorted::getOptions(StParamsList& theList) const {
     theList.add(params.IsVSyncOn);
+    theList.add(params.Layout);
+    theList.add(params.Distortion);
 }
 
 StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
@@ -153,7 +213,8 @@ StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
   mySettings(new StSettings(ST_OUT_PLUGIN_NAME)),
   myFrBuffer(new StGLFrameBuffer()),
   myCursor(new StGLTexture(GL_RGBA8)),
-  myProgram(new StProgramBarrel()),
+  myProgramFlat(new StProgramFlat()),
+  myProgramBarrel(new StProgramBarrel()),
   myToShowCursor(true),
   myToSavePlacement(theParentWindow == (StNativeWin_t )NULL),
   myToCompressMem(myInstancesNb.increment() > 1),
@@ -192,6 +253,22 @@ StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
     params.IsVSyncOn = new StBoolParamNamed(true, aLangMap.changeValueId(STTR_PARAMETER_VSYNC, "VSync"));
     params.IsVSyncOn->signals.onChanged.connect(this, &StOutDistorted::doVSync);
 
+    // Layout option
+    StHandle<StEnumParam> aLayoutParam = new StEnumParam(LAYOUT_SIDE_BY_SIDE,
+                                                         aLangMap.changeValueId(STTR_PARAMETER_LAYOUT, "Layout"));
+    aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_SBS,       "Side-by-Side"));
+    aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_OVERUNDER, "Top-and-Bottom"));
+    params.Layout = aLayoutParam;
+    mySettings->loadParam(ST_SETTING_LAYOUT, params.Layout);
+
+    // Distortion parameter
+    StHandle<StEnumParam> aDistParam = new StEnumParam(aSupportLevel == ST_DEVICE_SUPPORT_NONE ? DISTORTION_OFF : DISTORTION_BARREL,
+                                                       aLangMap.changeValueId(STTR_PARAMETER_DISTORTION, "Distortion"));
+    aDistParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_DISTORTION_OFF,    "None"));
+    aDistParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_DISTORTION_BARREL, "Barrel Side-by-Side"));
+    params.Distortion = aDistParam;
+    mySettings->loadParam(ST_SETTING_DISTORTION, params.Distortion);
+
     // load window position
     StRect<int32_t> aRect(256, 768, 256, 1024);
     mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
@@ -204,11 +281,12 @@ StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
 
 void StOutDistorted::releaseResources() {
     if(!myContext.isNull()) {
-        myProgram->release(*myContext);
-        myFrVertsBuf  .release(*myContext);
-        myFrTCoordBuf .release(*myContext);
-        myCurVertsBuf .release(*myContext);
-        myCurTCoordBuf.release(*myContext);
+        myProgramFlat->release(*myContext);
+        myProgramBarrel->release(*myContext);
+        myFrVertsBuf .release(*myContext);
+        myFrTCrdsBuf .release(*myContext);
+        myCurVertsBuf.release(*myContext);
+        myCurTCrdsBuf.release(*myContext);
         myFrBuffer->release(*myContext);
         myCursor->release(*myContext);
     }
@@ -220,7 +298,9 @@ void StOutDistorted::releaseResources() {
         StWindow::setFullScreen(false);
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
     }
-    mySettings->saveParam(ST_SETTING_VSYNC, params.IsVSyncOn);
+    mySettings->saveParam(ST_SETTING_VSYNC,      params.IsVSyncOn);
+    mySettings->saveParam(ST_SETTING_LAYOUT,     params.Layout);
+    mySettings->saveParam(ST_SETTING_DISTORTION, params.Distortion);
 }
 
 StOutDistorted::~StOutDistorted() {
@@ -252,7 +332,8 @@ bool StOutDistorted::create() {
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
     myContext->stglSetVSync(params.IsVSyncOn->getValue() ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
 
-    if(!myProgram->init(*myContext)) {
+    if(!myProgramFlat  ->init(*myContext)
+    || !myProgramBarrel->init(*myContext)) {
         stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init Shader");
         return false;
     }
@@ -271,10 +352,10 @@ bool StOutDistorted::create() {
         0.0f, 0.0f
     };
 
-    myFrVertsBuf  .init(*myContext, 4, 4, QUAD_VERTICES);
-    myFrTCoordBuf .init(*myContext, 2, 4, QUAD_TEXCOORD);
-    myCurVertsBuf .init(*myContext, 4, 4, QUAD_VERTICES);
-    myCurTCoordBuf.init(*myContext, 2, 4, QUAD_TEXCOORD);
+    myFrVertsBuf .init(*myContext, 4, 4, QUAD_VERTICES);
+    myFrTCrdsBuf .init(*myContext, 2, 4, QUAD_TEXCOORD);
+    myCurVertsBuf.init(*myContext, 4, 4, QUAD_VERTICES);
+    myCurTCrdsBuf.init(*myContext, 2, 4, QUAD_TEXCOORD);
 
     // cursor texture
     const StString aTexturesFolder = StProcess::getStCoreFolder() + "textures" + SYS_FS_SPLITTER;
@@ -315,15 +396,15 @@ void StOutDistorted::stglDrawCursor() {
     myContext->core20fwd->glEnable(GL_BLEND);
 
     myCursor->bind(*myContext);
-    myProgram->use(*myContext);
-        myCurVertsBuf .bindVertexAttrib(*myContext, myProgram->getVVertexLoc());
-        myCurTCoordBuf.bindVertexAttrib(*myContext, myProgram->getVTexCoordLoc());
+    myProgramFlat->use(*myContext);
+        myCurVertsBuf.bindVertexAttrib(*myContext, myProgramFlat->getVVertexLoc());
+        myCurTCrdsBuf.bindVertexAttrib(*myContext, myProgramFlat->getVTexCoordLoc());
 
         myContext->core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-        myCurTCoordBuf.unBindVertexAttrib(*myContext, myProgram->getVTexCoordLoc());
-        myCurVertsBuf .unBindVertexAttrib(*myContext, myProgram->getVVertexLoc());
-    myProgram->unuse(*myContext);
+        myCurTCrdsBuf.unBindVertexAttrib(*myContext, myProgramFlat->getVTexCoordLoc());
+        myCurVertsBuf.unBindVertexAttrib(*myContext, myProgramFlat->getVVertexLoc());
+    myProgramFlat->unuse(*myContext);
     myCursor->unbind(*myContext);
 
     myContext->core20fwd->glDisable(GL_BLEND);
@@ -354,9 +435,22 @@ void StOutDistorted::stglDraw() {
     const StPointD_t aCursorPos = StWindow::getMousePos();
 
     StGLBoxPx aViewPortL = aViewPort;
-    aViewPortL.width() /= 2;
-    StGLBoxPx aViewPortR = aViewPortL;
-    aViewPortR.x() += aViewPortL.width();
+    StGLBoxPx aViewPortR = aViewPort;
+    switch(params.Layout->getValue()) {
+        case LAYOUT_OVER_UNDER: {
+            aViewPortL.height() /= 2;
+            aViewPortR.height() = aViewPortL.height();
+            aViewPortR.y() += aViewPortL.height();
+            break;
+        }
+        default:
+        case LAYOUT_SIDE_BY_SIDE: {
+            aViewPortL.width() /= 2;
+            aViewPortR.width() = aViewPortL.width();
+            aViewPortR.x() += aViewPortL.width();
+            break;
+        }
+    }
 
     // resize FBO
     if(!myFrBuffer->initLazy(*myContext, aViewPortL.width(), aViewPortL.height(), StWindow::hasDepthBuffer())) {
@@ -373,7 +467,7 @@ void StOutDistorted::stglDraw() {
     aTCoords[1] = StGLVec2(aDX,  aDY);
     aTCoords[2] = StGLVec2(0.0f, 0.0f);
     aTCoords[3] = StGLVec2(0.0f, aDY);
-    myFrTCoordBuf.init(*myContext, aTCoords);
+    myFrTCrdsBuf.init(*myContext, aTCoords);
 
     if(myCursor->isValid()) {
         // compute cursor position
@@ -406,16 +500,25 @@ void StOutDistorted::stglDraw() {
     myContext->stglResizeViewport(aViewPortL);
     myContext->stglSetScissorRect(aViewPortL, false);
 
+    StGLProgram*    aProgram   = myProgramFlat.access();
+    StGLVarLocation aVertexLoc = myProgramFlat->getVVertexLoc();
+    StGLVarLocation aTexCrdLoc = myProgramFlat->getVTexCoordLoc();
+    if(params.Distortion->getValue() == DISTORTION_BARREL) {
+        aProgram   = myProgramBarrel.access();
+        aVertexLoc = myProgramBarrel->getVVertexLoc();
+        aTexCrdLoc = myProgramBarrel->getVTexCoordLoc();
+    }
+
     myFrBuffer->bindTexture(*myContext);
-    myProgram->use(*myContext);
-        myFrVertsBuf .bindVertexAttrib(*myContext, myProgram->getVVertexLoc());
-        myFrTCoordBuf.bindVertexAttrib(*myContext, myProgram->getVTexCoordLoc());
+    aProgram->use(*myContext);
+        myFrVertsBuf.bindVertexAttrib(*myContext, aVertexLoc);
+        myFrTCrdsBuf.bindVertexAttrib(*myContext, aTexCrdLoc);
 
         myContext->core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-        myFrTCoordBuf.unBindVertexAttrib(*myContext, myProgram->getVTexCoordLoc());
-        myFrVertsBuf .unBindVertexAttrib(*myContext, myProgram->getVVertexLoc());
-    myProgram->unuse(*myContext);
+        myFrTCrdsBuf.unBindVertexAttrib(*myContext, aTexCrdLoc);
+        myFrVertsBuf.unBindVertexAttrib(*myContext, aVertexLoc);
+    aProgram->unuse(*myContext);
     myFrBuffer->unbindTexture(*myContext);
     myContext->stglResetScissorRect();
 
@@ -431,16 +534,16 @@ void StOutDistorted::stglDraw() {
     myContext->stglSetScissorRect(aViewPortR, false);
 
     myFrBuffer->bindTexture(*myContext);
-    myProgram->use(*myContext);
-    myFrVertsBuf .bindVertexAttrib(*myContext, myProgram->getVVertexLoc());
-    myFrTCoordBuf.bindVertexAttrib(*myContext, myProgram->getVTexCoordLoc());
+    aProgram->use(*myContext);
+    myFrVertsBuf.bindVertexAttrib(*myContext, aVertexLoc);
+    myFrTCrdsBuf.bindVertexAttrib(*myContext, aTexCrdLoc);
 
     myContext->core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-    myFrTCoordBuf.unBindVertexAttrib(*myContext, myProgram->getVTexCoordLoc());
-    myFrVertsBuf .unBindVertexAttrib(*myContext, myProgram->getVVertexLoc());
+    myFrTCrdsBuf.unBindVertexAttrib(*myContext, aTexCrdLoc);
+    myFrVertsBuf.unBindVertexAttrib(*myContext, aVertexLoc);
 
-    myProgram->unuse(*myContext);
+    aProgram->unuse(*myContext);
     myFrBuffer->unbindTexture(*myContext);
     myContext->stglResetScissorRect();
 

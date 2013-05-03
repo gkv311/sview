@@ -105,11 +105,6 @@ class StOutDual : public StWindow {
         DUALMODE_YMIRROW  = 2, //!< mirror on Y SLAVE  window
     } DeviceEnum;
 
-    enum {
-        DEVICE_OPTION_VSYNC   = 0,
-        DEVICE_OPTION_SLAVEID = 1,
-    };
-
         private:
 
     ST_LOCAL void replaceDualAttribute(const DeviceEnum theValue);

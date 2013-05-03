@@ -25,6 +25,7 @@
 
 class StSettings;
 class StProgramBarrel;
+class StProgramFlat;
 class StGLFrameBuffer;
 class StGLTexture;
 
@@ -123,9 +124,21 @@ class StOutDistorted : public StWindow {
 
         private:
 
+    enum Layout {
+        LAYOUT_SIDE_BY_SIDE = 0, //!< anamorph side by side
+        LAYOUT_OVER_UNDER   = 1, //!< anamorph over under
+    };
+
+    enum Distortion {
+        DISTORTION_OFF    = 0, //!< no extra distortion
+        DISTORTION_BARREL = 1, //!< Barrel distortion for Oculus Rift
+    };
+
     struct {
 
-        StHandle<StBoolParam>  IsVSyncOn; //!< flag to use VSync
+        StHandle<StBoolParam>  IsVSyncOn;  //!< flag to use VSync
+        StHandle<StInt32Param> Layout;     //!< pair layout
+        StHandle<StInt32Param> Distortion; //!< distortion shader
 
     } params;
 
@@ -138,12 +151,13 @@ class StOutDistorted : public StWindow {
     StHandle<StGLContext>     myContext;
     StHandle<StGLFrameBuffer> myFrBuffer;        //!< OpenGL frame buffer object
     StHandle<StGLTexture>     myCursor;          //!< cursor texture - we can not use normal cursor due to distortions
-    StHandle<StProgramBarrel> myProgram;
+    StHandle<StProgramFlat>   myProgramFlat;
+    StHandle<StProgramBarrel> myProgramBarrel;
     StFPSControl              myFPSControl;
     StGLVertexBuffer          myFrVertsBuf;      //!< buffers to draw simple fullsreen quad
-    StGLVertexBuffer          myFrTCoordBuf;
+    StGLVertexBuffer          myFrTCrdsBuf;
     StGLVertexBuffer          myCurVertsBuf;
-    StGLVertexBuffer          myCurTCoordBuf;
+    StGLVertexBuffer          myCurTCrdsBuf;
 
     bool                      myToShowCursor;    //!< cursor visibility flag
     bool                      myToSavePlacement; //!< to save window position on exit
