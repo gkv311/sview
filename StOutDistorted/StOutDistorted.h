@@ -26,6 +26,7 @@
 class StSettings;
 class StProgramBarrel;
 class StGLFrameBuffer;
+class StGLTexture;
 
 /**
  * This class implements stereoscopic rendering on displays
@@ -96,6 +97,12 @@ class StOutDistorted : public StWindow {
      */
     ST_CPPEXPORT virtual void stglDraw();
 
+    /**
+     * Show/Hide mouse cursor.
+     * @param theToShow true to show cursor
+     */
+    ST_CPPEXPORT virtual void showCursor(const bool theToShow);
+
         private:
 
     /**
@@ -107,6 +114,8 @@ class StOutDistorted : public StWindow {
      * On/off VSync callback.
      */
     ST_LOCAL void doVSync(const bool theValue);
+
+    ST_LOCAL void stglDrawCursor();
 
         private:
 
@@ -128,11 +137,15 @@ class StOutDistorted : public StWindow {
 
     StHandle<StGLContext>     myContext;
     StHandle<StGLFrameBuffer> myFrBuffer;        //!< OpenGL frame buffer object
+    StHandle<StGLTexture>     myCursor;          //!< cursor texture - we can not use normal cursor due to distortions
     StHandle<StProgramBarrel> myProgram;
     StFPSControl              myFPSControl;
-    StGLVertexBuffer          myVertFlatBuf;     //!< buffers to draw simple fullsreen quad
-    StGLVertexBuffer          myTexCoordBuf;
+    StGLVertexBuffer          myFrVertsBuf;      //!< buffers to draw simple fullsreen quad
+    StGLVertexBuffer          myFrTCoordBuf;
+    StGLVertexBuffer          myCurVertsBuf;
+    StGLVertexBuffer          myCurTCoordBuf;
 
+    bool                      myToShowCursor;    //!< cursor visibility flag
     bool                      myToSavePlacement; //!< to save window position on exit
     bool                      myToCompressMem;   //!< reduce memory usage
     bool                      myIsBroken;        //!< special flag for broke state - when FBO can not be allocated

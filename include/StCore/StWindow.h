@@ -185,7 +185,7 @@ class StWindow {
      * Show/Hide mouse cursor.
      * @param theToShow true to show cursor
      */
-    ST_CPPEXPORT void showCursor(const bool theToShow);
+    ST_CPPEXPORT virtual void showCursor(const bool theToShow);
 
     /**
      * @return true if in fullscreen state

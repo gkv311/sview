@@ -28,6 +28,7 @@
 #include <StSettings/StEnumParam.h>
 #include <StCore/StSearchMonitors.h>
 #include <StVersion.h>
+#include <StImage/StImageFile.h>
 
 namespace {
 
@@ -151,7 +152,9 @@ StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
 : StWindow(theParentWindow),
   mySettings(new StSettings(ST_OUT_PLUGIN_NAME)),
   myFrBuffer(new StGLFrameBuffer()),
+  myCursor(new StGLTexture(GL_RGBA8)),
   myProgram(new StProgramBarrel()),
+  myToShowCursor(true),
   myToSavePlacement(theParentWindow == (StNativeWin_t )NULL),
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false) {
@@ -202,9 +205,12 @@ StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
 void StOutDistorted::releaseResources() {
     if(!myContext.isNull()) {
         myProgram->release(*myContext);
-        myVertFlatBuf.release(*myContext);
-        myTexCoordBuf.release(*myContext);
+        myFrVertsBuf  .release(*myContext);
+        myFrTCoordBuf .release(*myContext);
+        myCurVertsBuf .release(*myContext);
+        myCurTCoordBuf.release(*myContext);
         myFrBuffer->release(*myContext);
+        myCursor->release(*myContext);
     }
     myContext.nullify();
 
@@ -259,15 +265,27 @@ bool StOutDistorted::create() {
     };
 
     const GLfloat QUAD_TEXCOORD[2 * 4] = {
-        1.0f, 0.0f,
         1.0f, 1.0f,
-        0.0f, 0.0f,
-        0.0f, 1.0f
+        1.0f, 0.0f,
+        0.0f, 1.0f,
+        0.0f, 0.0f
     };
 
-    myVertFlatBuf.init(*myContext, 4, 4, QUAD_VERTICES);
-    myTexCoordBuf.init(*myContext, 2, 4, QUAD_TEXCOORD);
+    myFrVertsBuf  .init(*myContext, 4, 4, QUAD_VERTICES);
+    myFrTCoordBuf .init(*myContext, 2, 4, QUAD_TEXCOORD);
+    myCurVertsBuf .init(*myContext, 4, 4, QUAD_VERTICES);
+    myCurTCoordBuf.init(*myContext, 2, 4, QUAD_TEXCOORD);
 
+    // cursor texture
+    const StString aTexturesFolder = StProcess::getStCoreFolder() + "textures" + SYS_FS_SPLITTER;
+    const StString aCursorPath     = aTexturesFolder + "cursor.std";
+    StHandle<StImageFile> aCursorImg = StImageFile::create();
+    if(!aCursorImg.isNull()
+    && aCursorImg->load(aCursorPath, StImageFile::ST_TYPE_PNG)) {
+        //myCursor->setMinMagFilter(*myContext, GL_NEAREST);
+        myCursor->init(*myContext, aCursorImg->getPlane());
+    }
+    aCursorImg.nullify();
     return true;
 }
 
@@ -282,6 +300,35 @@ void StOutDistorted::processEvents(StMessage_t* theMessages) {
     }
 }
 
+void StOutDistorted::showCursor(const bool theToShow) {
+    myToShowCursor = theToShow;
+}
+
+void StOutDistorted::stglDrawCursor() {
+    StWindow::showCursor(false);
+    if(!myToShowCursor
+    || !myCursor->isValid()) {
+        return;
+    }
+
+    myContext->core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    myContext->core20fwd->glEnable(GL_BLEND);
+
+    myCursor->bind(*myContext);
+    myProgram->use(*myContext);
+        myCurVertsBuf .bindVertexAttrib(*myContext, myProgram->getVVertexLoc());
+        myCurTCoordBuf.bindVertexAttrib(*myContext, myProgram->getVTexCoordLoc());
+
+        myContext->core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+        myCurTCoordBuf.unBindVertexAttrib(*myContext, myProgram->getVTexCoordLoc());
+        myCurVertsBuf .unBindVertexAttrib(*myContext, myProgram->getVVertexLoc());
+    myProgram->unuse(*myContext);
+    myCursor->unbind(*myContext);
+
+    myContext->core20fwd->glDisable(GL_BLEND);
+}
+
 void StOutDistorted::stglDraw() {
     myFPSControl.setTargetFPS(StWindow::getTargetFps());
 
@@ -294,6 +341,7 @@ void StOutDistorted::stglDraw() {
 
         myContext->stglResizeViewport(aViewPort);
         myContext->stglSetScissorRect(aViewPort, false);
+        StWindow::showCursor(myToShowCursor);
         StWindow::signals.onRedraw(ST_DRAW_LEFT);
         myContext->stglResetScissorRect();
 
@@ -302,6 +350,8 @@ void StOutDistorted::stglDraw() {
         ++myFPSControl;
         return;
     }
+
+    const StPointD_t aCursorPos = StWindow::getMousePos();
 
     StGLBoxPx aViewPortL = aViewPort;
     aViewPortL.width() /= 2;
@@ -316,36 +366,55 @@ void StOutDistorted::stglDraw() {
     }
 
     // reduce viewport to avoid additional aliasing of narrow lines
-    GLfloat aDX = GLfloat(myFrBuffer->getVPSizeX()) / GLfloat(myFrBuffer->getSizeX());
-    GLfloat aDY = GLfloat(myFrBuffer->getVPSizeY()) / GLfloat(myFrBuffer->getSizeY());
+    const GLfloat aDX = GLfloat(myFrBuffer->getVPSizeX()) / GLfloat(myFrBuffer->getSizeX());
+    const GLfloat aDY = GLfloat(myFrBuffer->getVPSizeY()) / GLfloat(myFrBuffer->getSizeY());
     StArray<StGLVec2> aTCoords(4);
     aTCoords[0] = StGLVec2(aDX,  0.0f);
     aTCoords[1] = StGLVec2(aDX,  aDY);
     aTCoords[2] = StGLVec2(0.0f, 0.0f);
     aTCoords[3] = StGLVec2(0.0f, aDY);
-    myTexCoordBuf.init(*myContext, aTCoords);
+    myFrTCoordBuf.init(*myContext, aTCoords);
+
+    if(myCursor->isValid()) {
+        // compute cursor position
+        StArray<StGLVec4> aVerts(4);
+        const GLfloat aCurLeft   = -1.0f + aCursorPos.x() * 2.0f;
+        const GLfloat aCurTop    =  1.0f - aCursorPos.y() * 2.0f;
+        const GLfloat aCurWidth  = GLfloat(myCursor->getSizeX()) / GLfloat(aViewPortL.width());
+        const GLfloat aCurHeight = 2.0f * GLfloat(myCursor->getSizeY()) / GLfloat(aViewPortL.height());
+        aVerts[0] = StGLVec4(aCurLeft + aCurWidth, aCurTop - aCurHeight, 0.0f, 1.0f);
+        aVerts[1] = StGLVec4(aCurLeft + aCurWidth, aCurTop,              0.0f, 1.0f);
+        aVerts[2] = StGLVec4(aCurLeft,             aCurTop - aCurHeight, 0.0f, 1.0f);
+        aVerts[3] = StGLVec4(aCurLeft,             aCurTop,              0.0f, 1.0f);
+        myCurVertsBuf.init(*myContext, aVerts);
+    }
 
     // draw Left View into virtual frame buffer
     myFrBuffer->setupViewPort(*myContext); // we set TEXTURE sizes here
     myFrBuffer->bindBuffer(*myContext);
         StWindow::signals.onRedraw(ST_DRAW_LEFT);
+        stglDrawCursor();
     myFrBuffer->unbindBuffer(*myContext);
 
     // now draw to real screen buffer
     // clear the screen and the depth buffer
+    myContext->stglResizeViewport(aViewPort);
+    myContext->stglSetScissorRect(aViewPort, false);
+    myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // draw Left view
     myContext->stglResizeViewport(aViewPortL);
     myContext->stglSetScissorRect(aViewPortL, false);
-    myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     myFrBuffer->bindTexture(*myContext);
     myProgram->use(*myContext);
-        myVertFlatBuf.bindVertexAttrib(*myContext, myProgram->getVVertexLoc());
-        myTexCoordBuf.bindVertexAttrib(*myContext, myProgram->getVTexCoordLoc());
+        myFrVertsBuf .bindVertexAttrib(*myContext, myProgram->getVVertexLoc());
+        myFrTCoordBuf.bindVertexAttrib(*myContext, myProgram->getVTexCoordLoc());
 
         myContext->core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-        myTexCoordBuf.unBindVertexAttrib(*myContext, myProgram->getVTexCoordLoc());
-        myVertFlatBuf.unBindVertexAttrib(*myContext, myProgram->getVVertexLoc());
+        myFrTCoordBuf.unBindVertexAttrib(*myContext, myProgram->getVTexCoordLoc());
+        myFrVertsBuf .unBindVertexAttrib(*myContext, myProgram->getVVertexLoc());
     myProgram->unuse(*myContext);
     myFrBuffer->unbindTexture(*myContext);
     myContext->stglResetScissorRect();
@@ -354,22 +423,22 @@ void StOutDistorted::stglDraw() {
     myFrBuffer->setupViewPort(*myContext); // we set TEXTURE sizes here
     myFrBuffer->bindBuffer(*myContext);
         StWindow::signals.onRedraw(ST_DRAW_RIGHT);
+        stglDrawCursor();
     myFrBuffer->unbindBuffer(*myContext);
 
-    // clear the screen and the depth buffer
+    // draw Right view
     myContext->stglResizeViewport(aViewPortR);
     myContext->stglSetScissorRect(aViewPortR, false);
-    myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     myFrBuffer->bindTexture(*myContext);
     myProgram->use(*myContext);
-    myVertFlatBuf.bindVertexAttrib(*myContext, myProgram->getVVertexLoc());
-    myTexCoordBuf.bindVertexAttrib(*myContext, myProgram->getVTexCoordLoc());
+    myFrVertsBuf .bindVertexAttrib(*myContext, myProgram->getVVertexLoc());
+    myFrTCoordBuf.bindVertexAttrib(*myContext, myProgram->getVTexCoordLoc());
 
     myContext->core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-    myTexCoordBuf.unBindVertexAttrib(*myContext, myProgram->getVTexCoordLoc());
-    myVertFlatBuf.unBindVertexAttrib(*myContext, myProgram->getVVertexLoc());
+    myFrTCoordBuf.unBindVertexAttrib(*myContext, myProgram->getVTexCoordLoc());
+    myFrVertsBuf .unBindVertexAttrib(*myContext, myProgram->getVVertexLoc());
 
     myProgram->unuse(*myContext);
     myFrBuffer->unbindTexture(*myContext);
