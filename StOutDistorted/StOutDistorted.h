@@ -158,6 +158,7 @@ class StOutDistorted : public StWindow {
     StGLVertexBuffer          myFrTCrdsBuf;
     StGLVertexBuffer          myCurVertsBuf;
     StGLVertexBuffer          myCurTCrdsBuf;
+    StGLVec4                  myBarrelCoef;      //!< Barrel distortion coefficients
 
     bool                      myToShowCursor;    //!< cursor visibility flag
     bool                      myToSavePlacement; //!< to save window position on exit

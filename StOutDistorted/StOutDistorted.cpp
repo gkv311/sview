@@ -132,10 +132,10 @@ class StProgramBarrel : public StGLProgram {
            "uniform sampler2D texR, texL;"
            "varying vec2 fTexCoord;"
 
-           "vec4 uWarpCoef   = vec4(0.2, 0.0, 0.0, 1.0 - (0.2 + 0.0 + 0.0));"
-           "vec2 uScale      = vec2(0.5, 0.5);"
-           "vec2 uScaleIn    = vec2(2.0, 2.0);"
-           "vec2 uLensCenter = vec2(0.5, 0.5);"
+           "uniform vec4 uWarpCoef;"
+           "uniform vec2 uLensCenter;"
+           "uniform vec2 uScale;"
+           "uniform vec2 uScaleIn;"
 
            // function scales input texture coordinates for distortion
            "vec2 riftWarp(vec2 theTexCoord) {"
@@ -149,6 +149,10 @@ class StProgramBarrel : public StGLProgram {
 
            "void main(void) {"
            "    vec2 aTexCoord = riftWarp(fTexCoord);"
+           "    if(any(bvec2(clamp(aTexCoord, vec2(0.0, 0.0), vec2(1.0, 1.0)) - aTexCoord))) {"
+           "        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);"
+           "        return;"
+           "    }"
            "    gl_FragColor = texture2D(texR, aTexCoord);"
            "}";
 
@@ -166,15 +170,54 @@ class StProgramBarrel : public StGLProgram {
             return false;
         }
 
-        atrVVertexLoc   = StGLProgram::getAttribLocation(theCtx, "vVertex");
-        atrVTexCoordLoc = StGLProgram::getAttribLocation(theCtx, "vTexCoord");
+        atrVVertexLoc    = StGLProgram::getAttribLocation (theCtx, "vVertex");
+        atrVTexCoordLoc  = StGLProgram::getAttribLocation (theCtx, "vTexCoord");
+        uniWarpCoeffLoc  = StGLProgram::getUniformLocation(theCtx, "uWarpCoef");
+        uniLensCenterLoc = StGLProgram::getUniformLocation(theCtx, "uLensCenter");
+        uniScaleLoc      = StGLProgram::getUniformLocation(theCtx, "uScale");
+        uniScaleInLoc    = StGLProgram::getUniformLocation(theCtx, "uScaleIn");
         return atrVVertexLoc.isValid() && atrVTexCoordLoc.isValid();
+    }
+
+    /**
+     * Setup distortion coefficients.
+     */
+    ST_LOCAL void setupCoeff(StGLContext&    theCtx,
+                             const StGLVec4& theVec) {
+        use(theCtx);
+        theCtx.core20fwd->glUniform4fv(uniWarpCoeffLoc, 1, theVec);
+        unuse(theCtx);
+    }
+
+    ST_LOCAL void setLensCenter(StGLContext&    theCtx,
+                                const StGLVec2& theVec) {
+        use(theCtx);
+        theCtx.core20fwd->glUniform2fv(uniLensCenterLoc, 1, theVec);
+        unuse(theCtx);
+    }
+
+    ST_LOCAL void setScale(StGLContext&    theCtx,
+                           const StGLVec2& theVec) {
+        use(theCtx);
+        theCtx.core20fwd->glUniform2fv(uniScaleLoc, 1, theVec);
+        unuse(theCtx);
+    }
+
+    ST_LOCAL void setScaleIn(StGLContext&    theCtx,
+                             const StGLVec2& theVec) {
+        use(theCtx);
+        theCtx.core20fwd->glUniform2fv(uniScaleInLoc, 1, theVec);
+        unuse(theCtx);
     }
 
         private:
 
     StGLVarLocation atrVVertexLoc;
     StGLVarLocation atrVTexCoordLoc;
+    StGLVarLocation uniWarpCoeffLoc;
+    StGLVarLocation uniLensCenterLoc;
+    StGLVarLocation uniScaleLoc;
+    StGLVarLocation uniScaleInLoc;
 
 };
 
@@ -215,6 +258,8 @@ StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
   myCursor(new StGLTexture(GL_RGBA8)),
   myProgramFlat(new StProgramFlat()),
   myProgramBarrel(new StProgramBarrel()),
+  myBarrelCoef(1.0f, 0.22f, 0.24f, 0.041f), // 7 inches
+  //myBarrelCoef(1.0f, 0.18f, 0.115f, 0.0387f),
   myToShowCursor(true),
   myToSavePlacement(theParentWindow == (StNativeWin_t )NULL),
   myToCompressMem(myInstancesNb.increment() > 1),
@@ -337,6 +382,8 @@ bool StOutDistorted::create() {
         stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init Shader");
         return false;
     }
+    myProgramBarrel->setupCoeff(*myContext, myBarrelCoef);
+
     // create vertices buffers to draw simple textured quad
     const GLfloat QUAD_VERTICES[4 * 4] = {
          1.0f, -1.0f, 0.0f, 1.0f, // top-right
@@ -508,8 +555,12 @@ void StOutDistorted::stglDraw() {
         aVertexLoc = myProgramBarrel->getVVertexLoc();
         aTexCrdLoc = myProgramBarrel->getVTexCoordLoc();
     }
+    myProgramBarrel->setScaleIn(*myContext, StGLVec2(2.0f / aDX, 2.0f / aDY));
+    myProgramBarrel->setScale  (*myContext, StGLVec2(0.4f * aDX, 0.4f * aDY));
 
     myFrBuffer->bindTexture(*myContext);
+    const GLfloat aLensDisp = 0.1453 * 0.5;
+    myProgramBarrel->setLensCenter(*myContext, StGLVec2((0.5f + aLensDisp) * aDX, 0.5f * aDY));
     aProgram->use(*myContext);
         myFrVertsBuf.bindVertexAttrib(*myContext, aVertexLoc);
         myFrTCrdsBuf.bindVertexAttrib(*myContext, aTexCrdLoc);
@@ -534,6 +585,7 @@ void StOutDistorted::stglDraw() {
     myContext->stglSetScissorRect(aViewPortR, false);
 
     myFrBuffer->bindTexture(*myContext);
+    myProgramBarrel->setLensCenter(*myContext, StGLVec2((0.5f - aLensDisp) * aDX, 0.5f * aDY));
     aProgram->use(*myContext);
     myFrVertsBuf.bindVertexAttrib(*myContext, aVertexLoc);
     myFrTCrdsBuf.bindVertexAttrib(*myContext, aTexCrdLoc);
