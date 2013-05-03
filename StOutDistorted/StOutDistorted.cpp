@@ -525,8 +525,8 @@ void StOutDistorted::stglDraw() {
     if(myCursor->isValid()) {
         // compute cursor position
         StArray<StGLVec4> aVerts(4);
-        const GLfloat aCurLeft   = -1.0f + aCursorPos.x() * 2.0f;
-        const GLfloat aCurTop    =  1.0f - aCursorPos.y() * 2.0f;
+        const GLfloat aCurLeft   = GLfloat(-1.0 + aCursorPos.x() * 2.0);
+        const GLfloat aCurTop    = GLfloat( 1.0 - aCursorPos.y() * 2.0);
         const GLfloat aCurWidth  =        GLfloat(myCursor->getSizeX()) / GLfloat(myFrBuffer->getVPSizeX());
         const GLfloat aCurHeight = 2.0f * GLfloat(myCursor->getSizeY()) / GLfloat(myFrBuffer->getVPSizeY());
         aVerts[0] = StGLVec4(aCurLeft + aCurWidth, aCurTop - aCurHeight, 0.0f, 1.0f);
@@ -563,9 +563,9 @@ void StOutDistorted::stglDraw() {
         myProgramBarrel->setScaleIn(*myContext, StGLVec2(2.0f / aDX, 2.0f / aDY));
         myProgramBarrel->setScale  (*myContext, StGLVec2(0.4f * aDX, 0.4f * aDY));
     }
+    const GLfloat aLensDisp = 0.1453f * 0.5f;
 
     myFrBuffer->bindTexture(*myContext);
-    const GLfloat aLensDisp = 0.1453 * 0.5;
     myProgramBarrel->setLensCenter(*myContext, StGLVec2((0.5f + aLensDisp) * aDX, 0.5f * aDY));
     aProgram->use(*myContext);
         myFrVertsBuf.bindVertexAttrib(*myContext, aVertexLoc);

@@ -89,6 +89,8 @@ english.StOutIZ3D=IZ3D Display
 russian.StOutIZ3D=Монитор IZ3D
 english.StOutPageFlip=Shutter glasses
 russian.StOutPageFlip=Затворные очки
+english.StOutDistorted=Distorted output
+russian.StOutDistorted=Искажённый вывод
 ; File associations
 english.FileAssociations=File associations
 russian.FileAssociations=Файловые ассоциации
@@ -121,6 +123,7 @@ Name: StRenderers\StOutDual;      Description: "{cm:StOutDual}";        Types: c
 Name: StRenderers\StOutInterlace; Description: "{cm:StOutInterlace}";   Types: custom full; Flags: fixed
 Name: StRenderers\StOutIZ3D;      Description: "{cm:StOutIZ3D}";        Types: custom full; Flags: fixed
 Name: StRenderers\StOutPageFlip;  Description: "{cm:StOutPageFlip}";    Types: custom full; Flags: fixed
+Name: StRenderers\StOutDistorted; Description: "{cm:StOutDistorted}";   Types: custom full; Flags: fixed
 
 [Tasks]
 Name: desktopicon;           Description: "{cm:CreateDesktopIcon}";     GroupDescription: "{cm:AdditionalIcons}";  Flags: unchecked
@@ -198,6 +201,11 @@ Source: {#SVIEW_DISTR_PATH_x86}\StOutPageFlip.dll;                DestDir: {app}
 Source: {#SVIEW_DISTR_PATH_x86}\lang\*StOutPageFlip.lng;          DestDir: {app}\lang;                         Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutPageFlip
 Source: {#SVIEW_DISTR_PATH_AMD64}\StOutPageFlip.dll;              DestDir: {app}\amd64;                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutPageFlip; Check: IsWin64
 Source: {#SVIEW_DISTR_PATH_AMD64}\lang\*StOutPageFlip.lng;        DestDir: {app}\amd64\lang;                   Flags: 64bit ignoreversion recursesubdirs; Components: StRenderers\StOutPageFlip; Check: IsWin64
+; StRenderers -> StOutDistorted
+Source: {#SVIEW_DISTR_PATH_x86}\StOutDistorted.dll;               DestDir: {app};                              Flags: 32bit ignoreversion;                Components: StRenderers\StOutDistorted
+Source: {#SVIEW_DISTR_PATH_x86}\lang\*StOutDistorted.lng;         DestDir: {app}\lang;                         Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutDistorted
+Source: {#SVIEW_DISTR_PATH_AMD64}\StOutDistorted.dll;             DestDir: {app}\amd64;                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutDistorted; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_AMD64}\lang\*StOutDistorted.lng;       DestDir: {app}\amd64\lang;                   Flags: 64bit ignoreversion recursesubdirs; Components: StRenderers\StOutDistorted; Check: IsWin64
 
 ; StDrawers
 Source: {#SVIEW_DISTR_PATH_x86}\textures\*;                    DestDir: {app}\textures;        Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer or StDrawers\StMoviePlayer or StBrowserPlugins or StActiveXPlugin
