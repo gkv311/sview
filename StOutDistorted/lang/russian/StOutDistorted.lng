@@ -1,0 +1,11 @@
+Russian translation file for StOutDistorted library
+@author Kirill Gavrilov
+
+--------
+1000="Искажённый вывод"
+1001="Oculur Rift"
+1100="Верт. синхронизация"
+1102="Slave Monitor"
+2000="sView - Distorted Output module"
+2001="версия"
+2002="© 2013 Гаврилов Кирилл <kirill@sview.ru>\nОфициальный сайт: www.sview.ru\n\nБиблиотека распространяется на условиях LGPL3.0"

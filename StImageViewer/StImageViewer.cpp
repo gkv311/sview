@@ -35,6 +35,7 @@
 #include "../StOutIZ3D/StOutIZ3D.h"
 #include "../StOutInterlace/StOutInterlace.h"
 #include "../StOutPageFlip/StOutPageFlipExt.h"
+#include "../StOutDistorted/StOutDistorted.h"
 
 #include <cstdlib> // std::abs(int)
 
@@ -112,6 +113,7 @@ StImageViewer::StImageViewer(const StNativeWin_t         theParentWin,
     addRenderer(new StOutIZ3D(theParentWin));
     addRenderer(new StOutInterlace(theParentWin));
     addRenderer(new StOutPageFlipExt(theParentWin));
+    addRenderer(new StOutDistorted(theParentWin));
 
     // no need in Depth buffer
     const StWinAttr anAttribs[] = {

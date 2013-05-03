@@ -29,6 +29,7 @@
 #include "../StOutIZ3D/StOutIZ3D.h"
 #include "../StOutInterlace/StOutInterlace.h"
 #include "../StOutPageFlip/StOutPageFlipExt.h"
+#include "../StOutDistorted/StOutDistorted.h"
 
 const StString StDiagnostics::ST_DRAWER_PLUGIN_NAME("StDiagnostics");
 
@@ -39,12 +40,12 @@ StDiagnostics::StDiagnostics(const StNativeWin_t         theParentWin,
     myTitle = "sView - Stereoscopic Device Diagnostics";
     myGUI = new StDiagnosticsGUI(this);
 
-    /// TODO (Kirill Gavrilov#1) setup OpenGL requirements - no need in Depth buffer
     addRenderer(new StOutAnaglyph(theParentWin));
     addRenderer(new StOutDual(theParentWin));
     addRenderer(new StOutIZ3D(theParentWin));
     addRenderer(new StOutInterlace(theParentWin));
     addRenderer(new StOutPageFlipExt(theParentWin));
+    addRenderer(new StOutDistorted(theParentWin));
 }
 
 StDiagnostics::~StDiagnostics() {

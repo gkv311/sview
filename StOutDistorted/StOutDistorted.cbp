@@ -2,12 +2,12 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="StImageViewer" />
+		<Option title="StOutDistorted" />
 		<Option pch_mode="2" />
 		<Option compiler="windows_sdk_x86" />
 		<Build>
 			<Target title="WIN_gcc_x86">
-				<Option output="../bin/$(TARGET_NAME)/libStImageViewer" imp_lib="../lib/$(TARGET_NAME)/$(TARGET_OUTPUT_BASENAME)" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME)" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/libStOutDistorted" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
@@ -27,9 +27,6 @@
 				<Linker>
 					<Add library="opengl32" />
 					<Add library="gdi32" />
-					<Add library="Comdlg32" />
-					<Add library="shell32" />
-					<Add library="Wsock32" />
 					<Add library="Version" />
 				</Linker>
 				<ExtraCommands>
@@ -38,11 +35,11 @@
 					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\français&quot;' />
 					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)lang\english\&quot;' />
 					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)lang\русский\&quot;' />
-					<Add before='cmd /c COPY /Y lang\french\*  &quot;$(TARGET_OUTPUT_DIR)lang\français\&quot;' />
+					<Add before='cmd /c COPY /Y lang\french\* &quot;$(TARGET_OUTPUT_DIR)lang\français\&quot;' />
 				</ExtraCommands>
 			</Target>
 			<Target title="WIN_vc_x86">
-				<Option output="../bin/$(TARGET_NAME)/StImageViewer" imp_lib="../lib/$(TARGET_NAME)/$(TARGET_OUTPUT_BASENAME)" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME)" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/StOutDistorted" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="windows_sdk_x86" />
@@ -65,8 +62,7 @@
 					<Add library="gdi32" />
 					<Add library="Advapi32" />
 					<Add library="Comdlg32" />
-					<Add library="shell32" />
-					<Add library="Wsock32" />
+					<Add library="Shell32" />
 				</Linker>
 				<ExtraCommands>
 					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\english&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\english&quot;' />
@@ -74,12 +70,12 @@
 					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\français&quot;' />
 					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)lang\english\&quot;' />
 					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)lang\русский\&quot;' />
-					<Add before='cmd /c COPY /Y lang\french\*  &quot;$(TARGET_OUTPUT_DIR)lang\français\&quot;' />
+					<Add before='cmd /c COPY /Y lang\french\* &quot;$(TARGET_OUTPUT_DIR)lang\français\&quot;' />
 					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;2' />
 				</ExtraCommands>
 			</Target>
 			<Target title="WIN_vc_x86_DEBUG">
-				<Option output="../bin/$(TARGET_NAME)/StImageViewer" imp_lib="../lib/$(TARGET_NAME)/$(TARGET_OUTPUT_BASENAME)" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME)" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/StOutDistorted" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="windows_sdk_x86" />
@@ -106,8 +102,7 @@
 					<Add library="gdi32" />
 					<Add library="Advapi32" />
 					<Add library="Comdlg32" />
-					<Add library="shell32" />
-					<Add library="Wsock32" />
+					<Add library="Shell32" />
 					<Add library="Version" />
 				</Linker>
 				<ExtraCommands>
@@ -116,12 +111,12 @@
 					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\français&quot;' />
 					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)lang\english\&quot;' />
 					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)lang\русский\&quot;' />
-					<Add before='cmd /c COPY /Y lang\french\*  &quot;$(TARGET_OUTPUT_DIR)lang\français\&quot;' />
+					<Add before='cmd /c COPY /Y lang\french\* &quot;$(TARGET_OUTPUT_DIR)lang\français\&quot;' />
 					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;2' />
 				</ExtraCommands>
 			</Target>
 			<Target title="WIN_vc_AMD64">
-				<Option output="../bin/$(TARGET_NAME)/StImageViewer" imp_lib="../lib/$(TARGET_NAME)/$(TARGET_OUTPUT_BASENAME)" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME)" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/StOutDistorted" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="windows_sdk_x86_64" />
@@ -144,8 +139,7 @@
 					<Add library="gdi32" />
 					<Add library="Advapi32" />
 					<Add library="Comdlg32" />
-					<Add library="shell32" />
-					<Add library="Wsock32" />
+					<Add library="Shell32" />
 				</Linker>
 				<ExtraCommands>
 					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\english&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\english&quot;' />
@@ -153,12 +147,12 @@
 					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\français&quot;' />
 					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)lang\english\&quot;' />
 					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)lang\русский\&quot;' />
-					<Add before='cmd /c COPY /Y lang\french\*  &quot;$(TARGET_OUTPUT_DIR)lang\français\&quot;' />
+					<Add before='cmd /c COPY /Y lang\french\* &quot;$(TARGET_OUTPUT_DIR)lang\français\&quot;' />
 					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;2' />
 				</ExtraCommands>
 			</Target>
 			<Target title="LINUX_gcc">
-				<Option output="../bin/$(TARGET_NAME)/libStImageViewer" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/libStOutDistorted" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
@@ -170,7 +164,6 @@
 					<Add option="-fPIC" />
 					<Add option="-mmmx" />
 					<Add option="-msse" />
-					<Add option="`freetype-config --cflags`" />
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
@@ -190,7 +183,7 @@
 				</ExtraCommands>
 			</Target>
 			<Target title="LINUX_gcc_DEBUG">
-				<Option output="../bin/$(TARGET_NAME)/libStImageViewer" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/libStOutDistorted" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
@@ -202,7 +195,6 @@
 					<Add option="-fPIC" />
 					<Add option="-mmmx" />
 					<Add option="-msse" />
-					<Add option="`freetype-config --cflags`" />
 					<Add option="-D__ST_DEBUG__" />
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
@@ -222,7 +214,7 @@
 				</ExtraCommands>
 			</Target>
 			<Target title="MAC_gcc">
-				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/libStImageViewer" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/libStOutDistorted" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
@@ -231,7 +223,6 @@
 					<Add option="-O3" />
 					<Add option="-Wall" />
 					<Add option="-fPIC" />
-					<Add option="`freetype-config --cflags`" />
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
@@ -252,7 +243,7 @@
 				</ExtraCommands>
 			</Target>
 			<Target title="MAC_gcc_DEBUG">
-				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/libStImageViewer" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/libStOutDistorted" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
@@ -261,7 +252,6 @@
 					<Add option="-Wall" />
 					<Add option="-g" />
 					<Add option="-fPIC" />
-					<Add option="`freetype-config --cflags`" />
 					<Add option="-D__ST_DEBUG__" />
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
@@ -290,48 +280,28 @@
 			<Add directory="../include" />
 		</ResourceCompiler>
 		<Linker>
-			<Add library="StGLWidgets" />
 			<Add library="StShared" />
 			<Add library="StSettings" />
 			<Add library="StCore" />
-			<Add library="StOutAnaglyph" />
-			<Add library="StOutDual" />
-			<Add library="StOutIZ3D" />
-			<Add library="StOutInterlace" />
-			<Add library="StOutPageFlip" />
-			<Add library="StOutDistorted" />
-			<Add library="avutil" />
-			<Add library="avformat" />
-			<Add library="avcodec" />
-			<Add library="swscale" />
-			<Add library="freetype" />
-			<Add library="libwebp" />
 			<Add directory="../3rdparty/lib/$(TARGET_NAME)" />
 			<Add directory="../lib/$(TARGET_NAME)" />
 			<Add directory="../bin/$(TARGET_NAME)" />
 		</Linker>
-		<Unit filename="StImageLoader.cpp" />
-		<Unit filename="StImageLoader.h" />
-		<Unit filename="StImagePluginInfo.h" />
-		<Unit filename="StImageViewer.cpp" />
-		<Unit filename="StImageViewer.h" />
-		<Unit filename="StImageViewer.rc">
-			<Option compilerVar="WINDRES" />
+		<Unit filename="StOutDistorted.cpp" />
+		<Unit filename="StOutDistorted.h" />
+		<Unit filename="StOutDistorted.rc">
 			<Option target="WIN_gcc_x86" />
 			<Option target="WIN_vc_x86" />
 			<Option target="WIN_vc_x86_DEBUG" />
 			<Option target="WIN_vc_AMD64" />
 		</Unit>
-		<Unit filename="StImageViewerGUI.cpp" />
-		<Unit filename="StImageViewerGUI.h" />
-		<Unit filename="StImageViewerStrings.h" />
-		<Unit filename="lang/english/StImageViewer.lng">
+		<Unit filename="lang/english/StOutDistorted.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
-		<Unit filename="lang/french/StImageViewer.lng">
+		<Unit filename="lang/french/StOutDistorted.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
-		<Unit filename="lang/russian/StImageViewer.lng">
+		<Unit filename="lang/russian/StOutDistorted.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Extensions>

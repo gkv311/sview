@@ -297,6 +297,7 @@
 			<Add library="StOutInterlace" />
 			<Add library="StOutIZ3D" />
 			<Add library="StOutPageFlip" />
+			<Add library="StOutDistorted" />
 			<Add library="avutil" />
 			<Add library="avformat" />
 			<Add library="avcodec" />
