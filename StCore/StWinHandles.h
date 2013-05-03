@@ -185,6 +185,12 @@ class StWinHandles {
      * Announce XDND support.
      */
     ST_LOCAL void setupXDND();
+
+    /**
+     * Setup empty cursor (hide cursor).
+     * Call XUndefineCursor to revert changes.
+     */
+    ST_LOCAL void setupNoCursor();
 #endif
 
 };

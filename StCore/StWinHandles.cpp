@@ -348,6 +348,7 @@ bool StWinHandles::close() {
 }
 
 #ifdef _WIN32
+
 namespace {
     static StAtomic<int32_t> ST_CLASS_COUNTER(0);
 };
@@ -357,6 +358,7 @@ StStringUtfWide StWinHandles::getNewClassName() {
 }
 
 #else
+
 void StWinHandles::setupXDND() {
     Atom aVersion = 5;
     XChangeProperty(stXDisplay->hDisplay, hWindowGl, stXDisplay->xDNDAware, XA_ATOM, 32, PropModeReplace, (unsigned char* )&aVersion, 1);
@@ -364,6 +366,31 @@ void StWinHandles::setupXDND() {
         XChangeProperty(stXDisplay->hDisplay, hWindow, stXDisplay->xDNDAware, XA_ATOM, 32, PropModeReplace, (unsigned char* )&aVersion, 1);
     }
 }
+
+namespace {
+    static const char noPixData[] = {0, 0, 0, 0, 0, 0, 0, 0};
+};
+
+void StWinHandles::setupNoCursor() {
+    Display* aDisp = getDisplay();
+    if(aDisp == NULL
+    || hWindowGl == 0) {
+        return;
+    }
+
+    XColor black, dummy;
+    Colormap aColorMap = DefaultColormap(aDisp, DefaultScreen(aDisp));
+    XAllocNamedColor(aDisp, aColorMap, "black", &black, &dummy);
+    Pixmap noPix = XCreateBitmapFromData(aDisp, hWindowGl, noPixData, 8, 8);
+    Cursor noPtr = XCreatePixmapCursor(aDisp, noPix, noPix, &black, &black, 0, 0);
+    XDefineCursor(aDisp, hWindowGl, noPtr);
+    XFreeCursor(aDisp, noPtr);
+    if(noPix != None) {
+        XFreePixmap(aDisp, noPix);
+    }
+    XFreeColors(aDisp, aColorMap, &black.pixel, 1, 0);
+}
+
 #endif
 
 #endif // !__APPLE__

@@ -516,18 +516,7 @@ void StWindowImpl::showCursor(bool toShow) {
     if(toShow) {
         XUndefineCursor(myMaster.getDisplay(), myMaster.hWindowGl);
     } else {
-        static const char noPixData[] = {0, 0, 0, 0, 0, 0, 0, 0};
-        XColor black, dummy;
-        Colormap cmap = DefaultColormap(myMaster.getDisplay(), DefaultScreen(myMaster.getDisplay()));
-        XAllocNamedColor(myMaster.getDisplay(), cmap, "black", &black, &dummy);
-        Pixmap noPix = XCreateBitmapFromData(myMaster.getDisplay(), myMaster.hWindowGl, noPixData, 8, 8);
-        Cursor noPtr = XCreatePixmapCursor(myMaster.getDisplay(), noPix, noPix, &black, &black, 0, 0);
-        XDefineCursor(myMaster.getDisplay(), myMaster.hWindowGl, noPtr);
-        XFreeCursor(myMaster.getDisplay(), noPtr);
-        if(noPix != None) {
-            XFreePixmap(myMaster.getDisplay(), noPix);
-        }
-        XFreeColors(myMaster.getDisplay(), cmap, &black.pixel, 1, 0);
+        myMaster.setupNoCursor();
     }
 #endif
     attribs.ToHideCursor = !toShow;

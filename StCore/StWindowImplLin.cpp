@@ -286,18 +286,7 @@ bool StWindowImpl::create() {
             //XIfEvent(hDisplay, &myXEvent, stXWaitMapped, (char* )mySlave.hWindowGl);
         }
         // always hise mouse cursor on slave window
-        const char noPixData[] = {0, 0, 0, 0, 0, 0, 0, 0};
-        XColor black, dummy;
-        Colormap cmap = DefaultColormap(hDisplay, DefaultScreen(hDisplay));
-        XAllocNamedColor(hDisplay, cmap, "black", &black, &dummy);
-        Pixmap noPix = XCreateBitmapFromData(hDisplay, mySlave.hWindowGl, noPixData, 8, 8);
-        Cursor noPtr = XCreatePixmapCursor(hDisplay, noPix, noPix, &black, &black, 0, 0);
-        XDefineCursor(hDisplay, mySlave.hWindowGl, noPtr);
-        XFreeCursor(hDisplay, noPtr);
-        if(noPix != None) {
-            XFreePixmap(hDisplay, noPix);
-        }
-        XFreeColors(hDisplay, cmap, &black.pixel, 1, 0);
+        mySlave.setupNoCursor();
     }
     if(!attribs.IsHidden) {
         if(myMaster.hWindow != 0) {
@@ -459,6 +448,9 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
                                        "master window", "master window",
                                        None, NULL, 0, NULL);
                 myMaster.setupXDND();
+                if(attribs.ToHideCursor) {
+                    myMaster.setupNoCursor();
+                }
                 XMapWindow(hDisplay, myMaster.hWindowGl);
             }
             myIsUpdated = true;
