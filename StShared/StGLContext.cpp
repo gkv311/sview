@@ -282,7 +282,9 @@ void StGLContext::stglSetScissorRect(const StGLBoxPx& theRect,
 }
 
 void StGLContext::stglResetScissorRect() {
-    myScissorStack.pop();
+    if(!myScissorStack.empty()) {
+        myScissorStack.pop();
+    }
     if(myScissorStack.empty()) {
         core11fwd->glDisable(GL_SCISSOR_TEST);
         return;
