@@ -1,7 +1,7 @@
 /**
  * This source is a part of sView program.
  *
- * Copyright © Kirill Gavrilov, 2011
+ * Copyright © Kirill Gavrilov, 2011-2013
  */
 
 #include "StCADViewerGUI.h"
@@ -14,6 +14,7 @@
 #include <StGLWidgets/StGLTextureButton.h>
 #include <StGLWidgets/StGLMsgStack.h>
 #include <StSocket/StSocket.h>
+#include <StVersion.h>
 
 #include "StCADViewerStrings.h"
 using namespace StCADViewerStrings;
@@ -137,7 +138,7 @@ StCADViewerGUI::~StCADViewerGUI() {
     //
 }
 
-void StCADViewerGUI::setVisibility(const StPointD_t& theCursorZo, bool ) {
+void StCADViewerGUI::setVisibility(const StPointD_t& , bool ) {
     // always visible
     StGLRootWidget::setVisibility(true, true);
     if(myMenu0Root != NULL) {
@@ -167,18 +168,18 @@ void StCADViewerGUI::stglResize(const StRectI_t& winRectPx) {
 }
 
 void StCADViewerGUI::doAboutProgram(const size_t ) {
-    StString& aTitle = myLangMap->changeValueId(ABOUT_DPLUGIN_NAME, "sView 2011 - CAD Viewer plugin");
-    StString& aVerString =  myLangMap->changeValueId(ABOUT_VERSION, "version");
-    StString& aDescr =  myLangMap->changeValueId(ABOUT_DESCRIPTION, StString()
-        + "CAD viewer allows you to view CAD files in formats IGES, STEP, BREP using OCCT.\n"
-        + "(C) 2011 Kirill Gavrilov (kirill@sview.ru).\nOfficial site: www.sview.ru");
+    const StString& aTitle     = myLangMap->changeValueId(ABOUT_DPLUGIN_NAME, "sView - Tiny CAD Viewer");
+    const StString& aVerString = myLangMap->changeValueId(ABOUT_VERSION,      "version");
+    const StString& aDescr     = myLangMap->changeValueId(ABOUT_DESCRIPTION,
+        "CAD viewer allows you to view CAD files in formats IGES, STEP, BREP using OCCT.\n"
+        "(C) 2011-2013 Kirill Gavrilov (kirill@sview.ru).\nOfficial site: www.sview.ru");
     StGLMessageBox* anAboutDialog = new StGLMessageBox(this, aTitle + '\n'
         + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr,
         512, 256);
 
     anAboutDialog->setVisibility(true, true);
     anAboutDialog->stglInit();
-    anAboutDialog->signals.onClickLeft.connect(anAboutDialog,  &StGLMessageBox::doKillSelf);
+    anAboutDialog->signals.onClickLeft .connect(anAboutDialog, &StGLMessageBox::doKillSelf);
     anAboutDialog->signals.onClickRight.connect(anAboutDialog, &StGLMessageBox::doKillSelf);
 }
 

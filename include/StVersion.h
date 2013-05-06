@@ -135,31 +135,33 @@ class ST_LOCAL StVersionInfo {
     /**
      * @return true if no errors.
      */
-    static bool checkTimeBomb(const StString& productTitle) {
-    #if(defined(__ST_TIMEBOMB__))
-        StVersionInfo stVersion = getSDKVersionInfo();
-        if(stVersion.getReleaseStatus() == DEVELOPMENT_RELEASE) {
+#if(defined(__ST_TIMEBOMB__))
+    static bool checkTimeBomb(const StString& ) {
+        return true;
+    }
+#else
+    static bool checkTimeBomb(const StString& theTitle) {
+        StVersionInfo aVer = getSDKVersionInfo();
+        if(aVer.getReleaseStatus() == DEVELOPMENT_RELEASE) {
             time_t rawtime;
             struct tm* timeinfo;
             time(&rawtime);
             timeinfo = localtime(&rawtime);
             StVersionInfo test = StVersionInfo(1900 + timeinfo->tm_year, timeinfo->tm_mon + 1, DEVELOPMENT_RELEASE, 0);
-            stVersion++; stVersion++;
-            if(test > stVersion) {
+            aVer++; aVer++;
+            if(test > aVer) {
                 stError(StString()
                     + "You running alpha version of the '"
-                    + productTitle + "'.\n"
+                    + theTitle + "'.\n"
                     + "Sorry but time for testing this build is expired.\n"
                     + "You should update program from official site (www.sview.ru)"
                 );
                 return false;
             }
-            ST_DEBUG_LOG("stVersion= " + stVersion.toString());
-            ST_DEBUG_LOG("test= " + test.toString());
         }
-    #endif // __ST_TIMEBOMB__
         return true;
     }
+#endif // __ST_TIMEBOMB__
 
     /**
      * Simple version constructor.

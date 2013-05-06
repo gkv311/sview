@@ -1,13 +1,14 @@
 /**
  * This source is a part of sView program.
  *
- * Copyright © Kirill Gavrilov, 2011
+ * Copyright © Kirill Gavrilov, 2011-2013
  */
 
 #include "StMeshFileOBJ.h"
 
 #include <StStrings/StStringStream.h>
 #include <StFile/StRawFile.h>
+#include <StGLCore/StGLCore20.h>
 
 StMeshFileOBJ::StMeshFileOBJ()
 : myMesh() {

@@ -1,7 +1,7 @@
 /**
  * This source is a part of sView program.
  *
- * Copyright © Kirill Gavrilov, 2011
+ * Copyright © Kirill Gavrilov, 2011-2013
  */
 
 #ifndef __StCADLoader_h_
@@ -15,26 +15,7 @@
 
 class StLangMap;
 
-class ST_LOCAL StCADLoader {
-
-        private:
-
-    StHandle<StThread>   myThread; // main loop thread
-    StHandle<StLangMap> myLangMap;
-    StPlayList         myPlayList; // play list
-    StEvent          myEvLoadNext;
-    StHandle<StGLMesh>     myMesh;
-    StMutex           myShapeLock;
-    volatile bool      myIsLoaded;
-    volatile bool        myToQuit;
-
-        private:
-
-    TopoDS_Shape loadIGES(const StString& theFileToLoadPath);
-    TopoDS_Shape loadSTEP(const StString& theFileToLoadPath);
-    StHandle<StGLMesh> loadOBJ(const StString& theFileToLoadPath);
-    bool loadModel(const StHandle<StFileNode>& theSource);
-    bool computeMesh();
+class StCADLoader {
 
         public:
 
@@ -42,18 +23,22 @@ class ST_LOCAL StCADLoader {
     static const StMIMEList ST_CAD_MIME_LIST;
     static const StArrayList<StString> ST_CAD_EXTENSIONS_LIST;
 
-    StCADLoader(const StHandle<StLangMap>& theLangMap);
-    ~StCADLoader();
+    ST_LOCAL StCADLoader(const StHandle<StLangMap>& theLangMap);
+    ST_LOCAL ~StCADLoader();
 
-    void mainLoop();
+    ST_LOCAL void mainLoop();
 
-    void doLoadNext() {
+    ST_LOCAL void doRelease() {
+        signals.onError.disconnect();
+    }
+
+    ST_LOCAL void doLoadNext() {
         myEvLoadNext.set();
     }
 
-    bool getNextShape(StHandle<StGLMesh>& theMesh);
+    ST_LOCAL bool getNextShape(StHandle<StGLMesh>& theMesh);
 
-    StPlayList& getPlayList() {
+    ST_LOCAL StPlayList& getPlayList() {
         return myPlayList;
     }
 
@@ -66,6 +51,25 @@ class ST_LOCAL StCADLoader {
          */
         StSignal<void (const StString& )> onError;
     } signals;
+
+        private:
+
+    ST_LOCAL TopoDS_Shape loadIGES(const StString& theFileToLoadPath);
+    ST_LOCAL TopoDS_Shape loadSTEP(const StString& theFileToLoadPath);
+    ST_LOCAL StHandle<StGLMesh> loadOBJ(const StString& theFileToLoadPath);
+    ST_LOCAL bool loadModel(const StHandle<StFileNode>& theSource);
+    ST_LOCAL bool computeMesh();
+
+        private:
+
+    StHandle<StThread>  myThread;
+    StHandle<StLangMap> myLangMap;
+    StPlayList          myPlayList;
+    StEvent             myEvLoadNext;
+    StHandle<StGLMesh>  myMesh;
+    StMutex             myShapeLock;
+    volatile bool       myIsLoaded;
+    volatile bool       myToQuit;
 
 };
 

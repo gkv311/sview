@@ -1,7 +1,7 @@
 /**
  * This source is a part of sView program.
  *
- * Copyright © Kirill Gavrilov, 2011
+ * Copyright © Kirill Gavrilov, 2011-2013
  */
 
 // OCCT stuff
@@ -25,6 +25,7 @@
 #include <Geom_Surface.hxx>
 #include <GeomLProp_SLProps.hxx>
 
+#include <StGLCore/StGLCore20.h>
 #include "StCADModel.h"
 #include <StGLMesh/StBndBox.h>
 #include <StThreads/StTimer.h>

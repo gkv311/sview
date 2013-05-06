@@ -1,7 +1,7 @@
 /**
  * This source is a part of sView program.
  *
- * Copyright © Kirill Gavrilov, 2011
+ * Copyright © Kirill Gavrilov, 2011-2013
  */
 
 #include "StCADModel.h"
@@ -9,19 +9,20 @@
 #include "StCADViewerGUI.h"
 #include "StCADLoader.h"
 
-#include <StCore/StCore.h>
-#include <StCore/StWindow.h>
-#include <StSettings/StSettings.h>
-
-#include <StGLEW.h>
-#include <StGL/StGLMemInfo.h>
-
 #include <StGLMesh/StGLMesh.h>
 #include <StGLMesh/StGLPrism.h>
 #include <StGLMesh/StGLUVSphere.h>
 #include <StGLMesh/StBndCameraBox.h>
 
+#include <StGLCore/StGLCore20.h>
 #include <StGLWidgets/StGLMsgStack.h>
+
+#include "../StOutAnaglyph/StOutAnaglyph.h"
+#include "../StOutDual/StOutDual.h"
+#include "../StOutIZ3D/StOutIZ3D.h"
+#include "../StOutInterlace/StOutInterlace.h"
+#include "../StOutPageFlip/StOutPageFlipExt.h"
+#include "../StOutDistorted/StOutDistorted.h"
 
 namespace {
     static const StString ST_PARAM_NORMALS   = "showNormals";
@@ -155,10 +156,11 @@ class ST_LOCAL StGLNormalsMesh : public StGLMesh {
     /**
      * Will extract vertices and normals from the mesh.
      */
-    bool init(const StGLMesh& theMesh) {
+    bool init(StGLContext&    theCtx,
+              const StGLMesh& theMesh) {
         // reset current state
         clearRAM();
-        clearVRAM();
+        clearVRAM(theCtx);
 
         // verify input mesh
         const StArrayList<StGLVec3>& aVertices = theMesh.getVertices();
@@ -180,7 +182,7 @@ class ST_LOCAL StGLNormalsMesh : public StGLMesh {
             myVertices.add(aNode);
             myVertices.add(aNode + aNormal * aScaleFactor);
         }
-        myVertexBuf.init(myVertices);
+        myVertexBuf.init(theCtx, myVertices);
 
         // no need to store this list in RAM
         //clearRAM();
@@ -195,19 +197,17 @@ static StGLNormalsMesh* myNormalsMesh = NULL; /// TODO move to...
 
 const StString StCADViewer::ST_DRAWER_PLUGIN_NAME = "StCADViewer";
 
-StCADViewer::StCADViewer()
-: myWin(),
-  mySettings(),
-  myGUI(),
-  myCADLoader(),
-  myModel(),
-  myProjection(),
+StCADViewer::StCADViewer(const StNativeWin_t         theParentWin,
+                         const StHandle<StOpenInfo>& theOpenInfo)
+: StApplication(theParentWin, theOpenInfo),
+  mySettings(new StSettings(ST_DRAWER_PLUGIN_NAME)),
   myIsLeftHold(false),
   myIsRightHold(false),
   myIsMiddleHold(false),
   myIsCtrlPressed(false),
-  myIsCamIterative(false),
-  myToQuit(false) {
+  myIsCamIterative(false) {
+    //
+    myTitle = "sView - CAD Viewer";
     //
     params.isFullscreen = new StBoolParam(false);
     params.isFullscreen->signals.onChanged.connect(this, &StCADViewer::doFullscreen);
@@ -221,12 +221,43 @@ StCADViewer::StCADViewer()
 
     myGUI = new StCADViewerGUI(this);
 
-    /// force thread-safe OCCT memory management
+    // load settings
+    mySettings->loadParam(ST_PARAM_NORMALS,   params.toShowNormals);
+    mySettings->loadParam(ST_PARAM_TRIHEDRON, params.toShowTrihedron);
+    mySettings->loadParam(ST_PARAM_PROJMODE,  params.projectMode);
+    mySettings->loadParam(ST_PARAM_FILLMODE,  params.fillMode);
+
+    // force thread-safe OCCT memory management
     Standard::SetReentrant(Standard_True);
+
+    addRenderer(new StOutAnaglyph(theParentWin));
+    addRenderer(new StOutDual(theParentWin));
+    addRenderer(new StOutIZ3D(theParentWin));
+    addRenderer(new StOutInterlace(theParentWin));
+    addRenderer(new StOutPageFlipExt(theParentWin));
+    addRenderer(new StOutDistorted(theParentWin));
 }
 
-StCADViewer::~StCADViewer() {
-    if(!myGUI.isNull() && !mySettings.isNull()) {
+bool StCADViewer::resetDevice() {
+    if(myGUI.isNull()
+    || myCADLoader.isNull()) {
+        return init();
+    }
+
+    // be sure Render plugin process quit correctly
+    myMessages[0].uin = StMessageList::MSG_EXIT;
+    myMessages[1].uin = StMessageList::MSG_NULL;
+    myWindow->processEvents(myMessages);
+
+    myCADLoader->doRelease();
+    releaseDevice();
+    myWindow->close();
+    myWindow.nullify();
+    return open();
+}
+
+void StCADViewer::releaseDevice() {
+    if(!myGUI.isNull()) {
         mySettings->saveParam(ST_PARAM_NORMALS,   params.toShowNormals);
         mySettings->saveParam(ST_PARAM_TRIHEDRON, params.toShowTrihedron);
         mySettings->saveParam(ST_PARAM_PROJMODE,  params.projectMode);
@@ -235,62 +266,65 @@ StCADViewer::~StCADViewer() {
 
     // release GUI data and GL resources before closing the window
     myGUI.nullify();
+    myContext.nullify();
+}
+
+StCADViewer::~StCADViewer() {
+    releaseDevice();
     // wait working threads to quit and release resources
     myCADLoader.nullify();
-    // destroy other objects
-    mySettings.nullify();
-    // now destroy the window
-    myWin.nullify();
-    // release libraries
-    StCore::FREE();
-    StSettings::FREE();
 }
 
-bool StCADViewer::init(StWindowInterface* theWindow) {
-    if(!StVersionInfo::checkTimeBomb("sView - CAD Viewer plugin")) {
-        // timebomb for alpha versions
+bool StCADViewer::init() {
+    const bool isReset = !myCADLoader.isNull();
+    if(!myContext.isNull()
+    && !myGUI.isNull()) {
+        return true;
+    }
+
+    // initialize GL context
+    myContext = new StGLContext();
+    if(!myContext->stglInit()) {
+        stError("CADViewer, OpenGL context is broken!\n(OpenGL library internal error?)");
         return false;
-    } else if(theWindow == NULL) {
-        stError("StCADViewer, Invalid window from StRenderer plugin!");
-        return false;
-    } else if(StCore::INIT() != STERROR_LIBNOERROR) {
-        stError("StCADViewer, Core library not available!");
-        return false;
-    } else if(StSettings::INIT() != STERROR_LIBNOERROR) {
-        stError("StCADViewer, Settings plugin not available!");
+    } else if(!myContext->isGlGreaterEqual(2, 0)) {
+        stError("CADViewer, OpenGL2.0+ not available!");
         return false;
     }
 
-    // create window wrapper
-    myWin = new StWindow(theWindow);
-    myWin->setTitle("sView - CAD Viewer");
-    if(!StGLEW::init()) {
-        stError("StCADViewer, OpenGL context is probably broken");
+    myWindow->setTargetFps(50.0);
+    myWindow->setStereoOutput(params.projectMode->getValue() == ST_PROJ_STEREO);
+
+    myGUI->setContext(myContext);
+    if(!myGUI->stglInit()) {
+        stError("CADViewer, GUI initialization failed!");
         return false;
     }
-
-    // load settings
-    mySettings = new StSettings(ST_DRAWER_PLUGIN_NAME);
-    mySettings->loadParam(ST_PARAM_NORMALS,   params.toShowNormals);
-    mySettings->loadParam(ST_PARAM_TRIHEDRON, params.toShowTrihedron);
-    mySettings->loadParam(ST_PARAM_PROJMODE,  params.projectMode);
-    mySettings->loadParam(ST_PARAM_FILLMODE,  params.fillMode);
-
-    myWin->stglSetTargetFps(50.0);
-    myWin->setStereoOutput(params.projectMode->getValue() == ST_PROJ_STEREO);
+    myGUI->stglResize(myWindow->getPlacement());
 
     // create working threads
-    myCADLoader = new StCADLoader(StHandle<StLangMap>::downcast(myGUI->myLangMap));
-    // connect show messages slot
+    if(!isReset) {
+        myCADLoader = new StCADLoader(StHandle<StLangMap>::downcast(myGUI->myLangMap));
+    }
     myCADLoader->signals.onError.connect(myGUI->myMsgStack, &StGLMsgStack::doPushMessage);
-
-    return myGUI->stglInit();
+    return true;
 }
 
-bool StCADViewer::open(const StOpenInfo& stOpenInfo) {
-    //parseArguments(stOpenInfo.getArgumentsMap());
-    StMIME stOpenMIME = stOpenInfo.getMIME();
-    if(stOpenMIME == StDrawerInfo::DRAWER_MIME() || stOpenInfo.getPath().isEmpty()) {
+bool StCADViewer::open() {
+    const bool isReset = !mySwitchTo.isNull();
+    if(!StApplication::open()
+    || !init()) {
+        return false;
+    }
+
+    if(isReset) {
+        myCADLoader->doLoadNext();
+        return true;
+    }
+
+    //parseArguments(myOpenFileInfo.getArgumentsMap());
+    const StMIME anOpenMIME = myOpenFileInfo->getMIME();
+    if(myOpenFileInfo->getPath().isEmpty()) {
         // open drawer without files
         return true;
     }
@@ -298,12 +332,12 @@ bool StCADViewer::open(const StOpenInfo& stOpenInfo) {
     // clear playlist first
     myCADLoader->getPlayList().clear();
 
-    if(!stOpenMIME.isEmpty()) {
+    if(!anOpenMIME.isEmpty()) {
         // create just one-file playlist
-        myCADLoader->getPlayList().addOneFile(stOpenInfo.getPath(), stOpenMIME);
+        myCADLoader->getPlayList().addOneFile(myOpenFileInfo->getPath(), anOpenMIME);
     } else {
         // create playlist from file's folder
-        myCADLoader->getPlayList().open(stOpenInfo.getPath());
+        myCADLoader->getPlayList().open(myOpenFileInfo->getPath());
     }
 
     if(!myCADLoader->getPlayList().isEmpty()) {
@@ -314,52 +348,41 @@ bool StCADViewer::open(const StOpenInfo& stOpenInfo) {
     return true;
 }
 
-void StCADViewer::parseCallback(StMessage_t* stMessages) {
-    if(myToQuit) {
-        stMessages[0].uin = StMessageList::MSG_EXIT;
-        stMessages[1].uin = StMessageList::MSG_NULL;
-    }
-
+void StCADViewer::processEvents(const StMessage_t* theEvents) {
     size_t evId(0);
-    for(; stMessages[evId].uin != StMessageList::MSG_NULL; ++evId) {
-        switch(stMessages[evId].uin) {
+    for(; theEvents[evId].uin != StMessageList::MSG_NULL; ++evId) {
+        switch(theEvents[evId].uin) {
             case StMessageList::MSG_RESIZE: {
-                StRectI_t aWinRect = myWin->getPlacement();
+                const StRectI_t aWinRect = myWindow->getPlacement();
                 myGUI->stglResize(aWinRect);
-                myProjection.resize(aWinRect.width(), aWinRect.height());
+                myProjection.resize(*myContext, aWinRect.width(), aWinRect.height());
                 break;
             }
             case StMessageList::MSG_DRAGNDROP_IN: {
-                int aFilesCount = myWin->getDragNDropFile(-1, NULL, 0);
+                StString aFilePath;
+                int aFilesCount = myWindow->getDragNDropFile(-1, aFilePath);
                 if(aFilesCount > 0) {
-                    stUtf8_t aBuffFile[4096];
-                    stMemSet(aBuffFile, 0, sizeof(aBuffFile));
-                    if(myWin->getDragNDropFile(0, aBuffFile, (4096 * sizeof(stUtf8_t))) == 0) {
-                        StString aBuffString(aBuffFile);
-                        if(myCADLoader->getPlayList().checkExtension(aBuffString)) {
-                            myCADLoader->getPlayList().open(aBuffString);
-                            doUpdateStateLoading();
-                            myCADLoader->doLoadNext();
-                        }
+                    myWindow->getDragNDropFile(0, aFilePath);
+                    if(myCADLoader->getPlayList().checkExtension(aFilePath)) {
+                        myCADLoader->getPlayList().open(aFilePath);
+                        doUpdateStateLoading();
+                        myCADLoader->doLoadNext();
                     }
                 }
                 break;
             }
             case StMessageList::MSG_CLOSE:
             case StMessageList::MSG_EXIT: {
-                stMessages[0].uin = StMessageList::MSG_EXIT;
-                stMessages[1].uin = StMessageList::MSG_NULL;
+                StApplication::exit(0);
                 break;
             }
             case StMessageList::MSG_KEYS: {
-                bool* keysMap = (bool* )stMessages[evId].data;
+                bool* keysMap = (bool* )theEvents[evId].data;
 
                 myIsCtrlPressed = keysMap[ST_VK_CONTROL];
 
                 if(keysMap[ST_VK_ESCAPE]) {
-                    // we could parse Escape key in other way
-                    stMessages[0].uin = StMessageList::MSG_EXIT;
-                    stMessages[1].uin = StMessageList::MSG_NULL;
+                    StApplication::exit(0);
                     return;
                 }
                 if(keysMap[ST_VK_RETURN]) {
@@ -474,7 +497,7 @@ void StCADViewer::parseCallback(StMessage_t* stMessages) {
             }
             case StMessageList::MSG_MOUSE_DOWN: {
                 StPointD_t pt;
-                int mouseBtn = myWin->getMouseDown(&pt);
+                int mouseBtn = myWindow->getMouseDown(pt);
                 myGUI->tryClick(pt, mouseBtn);
 
                 if(mouseBtn == ST_MOUSE_LEFT) {
@@ -492,7 +515,7 @@ void StCADViewer::parseCallback(StMessage_t* stMessages) {
             }
             case StMessageList::MSG_MOUSE_UP: {
                 StPointD_t pt;
-                int mouseBtn = myWin->getMouseUp(&pt);
+                int mouseBtn = myWindow->getMouseUp(pt);
                 switch(mouseBtn) {
                     case ST_MOUSE_LEFT: {
                         myIsLeftHold = false;
@@ -501,7 +524,7 @@ void StCADViewer::parseCallback(StMessage_t* stMessages) {
                     case ST_MOUSE_RIGHT: {
                         if(myIsRightHold && myIsCtrlPressed) {
                             // rotate
-                            StPointD_t aPt = myWin->getMousePos();
+                            StPointD_t aPt = myWindow->getMousePos();
                             StGLVec2 aFlatMove( 2.0f * GLfloat(aPt.x() - myPrevMouse.x()),
                                                -2.0f * GLfloat(aPt.y() - myPrevMouse.y()));
 
@@ -543,7 +566,7 @@ void StCADViewer::parseCallback(StMessage_t* stMessages) {
 
     if(myIsMiddleHold && myIsCtrlPressed) {
         // move
-        StPointD_t aPt = myWin->getMousePos();
+        StPointD_t aPt = myWindow->getMousePos();
         StGLVec2 aFlatMove( 2.0f * GLfloat(aPt.x() - myPrevMouse.x()),
                            -2.0f * GLfloat(aPt.y() - myPrevMouse.y()));
 
@@ -570,16 +593,17 @@ void StCADViewer::parseCallback(StMessage_t* stMessages) {
     if(myCADLoader->getNextShape(aNewMesh)) {
         if(!aNewMesh.isNull()) {
             myModel = aNewMesh;
-            ST_DEBUG_LOG("GL memory Before\n" + StGLMemInfo().toString()); ///
-            myModel->initVBOs();
-            ST_DEBUG_LOG("GL memory After\n" + StGLMemInfo().toString()); ///
+
+            ST_DEBUG_LOG(myContext->stglFullInfo()); ///
+            myModel->initVBOs(*myContext);
+            ST_DEBUG_LOG(myContext->stglFullInfo()); ///
 
             // update normals representation
             if(params.toShowNormals->getValue()) {
                 if(myNormalsMesh == NULL) {
                     myNormalsMesh = new StGLNormalsMesh();
                 }
-                myNormalsMesh->init(*myModel);
+                myNormalsMesh->init(*myContext, *myModel);
             }
             // call fit all
             doFitALL();
@@ -587,22 +611,22 @@ void StCADViewer::parseCallback(StMessage_t* stMessages) {
         doUpdateStateLoaded(!aNewMesh.isNull());
     }
 
-    myGUI->setVisibility(myWin->getMousePos(), true);
+    myGUI->setVisibility(myWindow->getMousePos(), true);
 }
 
-void StCADViewer::stglDraw(unsigned int view) {
-    myGUI->getCamera()->setView(view);
-    myProjection.setView(myWin->isStereoOutput() ? view : ST_DRAW_MONO);
-    if(view == ST_DRAW_LEFT) {
-        myGUI->stglUpdate(myWin->getMousePos());
+void StCADViewer::stglDraw(unsigned int theView) {
+    myGUI->getCamera()->setView(theView);
+    myProjection.setView(myWindow->isStereoOutput() ? theView : ST_DRAW_MONO);
+    if(theView == ST_DRAW_LEFT) {
+        myGUI->stglUpdate(myWindow->getMousePos());
     }
 
     // clear the screen and the depth buffer
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    myContext->core11fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 /// setup the projection matrix
     myProjection.updateFrustum(); ///
-    myProjection.setupFixed();
+    myProjection.setupFixed(*myContext);
 
 /// draw tunnel
     /*glMatrixMode(GL_MODELVIEW);
@@ -635,7 +659,7 @@ void StCADViewer::stglDraw(unsigned int view) {
     StGLCamera aCam = myCam;
     if(myIsRightHold && myIsCtrlPressed) {
         // rotation preview
-        StPointD_t aPt = myWin->getMousePos();
+        const StPointD_t aPt = myWindow->getMousePos();
         StGLVec2 aFlatMove( 2.0f * GLfloat(aPt.x() - myPrevMouse.x()),
                            -2.0f * GLfloat(aPt.y() - myPrevMouse.y()));
 
@@ -647,9 +671,9 @@ void StCADViewer::stglDraw(unsigned int view) {
             myPrevMouse = aPt;
         }
     }
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glMultMatrixf(aCam);
+    myContext->core11->glMatrixMode(GL_MODELVIEW);
+    myContext->core11->glLoadIdentity();
+    myContext->core11->glMultMatrixf(aCam);
 
     /// draw boxes
     /*StGLPrism aBox111, aBox011, aBox211, aBox001, aBox112, aBox110;
@@ -677,12 +701,12 @@ void StCADViewer::stglDraw(unsigned int view) {
         if(params.fillMode->getValue() == ST_FILL_SHADING
         || params.fillMode->getValue() == ST_FILL_SHADED_MESH) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            myModel->drawFixed();
+            myModel->drawFixed(*myContext);
         }
         if(params.fillMode->getValue() == ST_FILL_MESH
         || params.fillMode->getValue() == ST_FILL_WIREFRAME) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            myModel->drawFixed();
+            myModel->drawFixed(*myContext);
         }
         glDisable(GL_LIGHT0);
         glDisable(GL_LIGHTING);
@@ -690,13 +714,13 @@ void StCADViewer::stglDraw(unsigned int view) {
         if(params.fillMode->getValue() == ST_FILL_SHADED_MESH) {
             glColor3f(1.0f, 1.0f, 1.0f); // white
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            myModel->drawFixed();
+            myModel->drawFixed(*myContext);
         }
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         if(myNormalsMesh != NULL) {
             glColor3f(1.0f, 1.0f, 1.0f); // white
-            myNormalsMesh->drawFixed();
+            myNormalsMesh->drawFixed(*myContext);
         }
 
 /// draw bnd box+
@@ -717,13 +741,13 @@ void StCADViewer::stglDraw(unsigned int view) {
     }
 
     /// draw trihedron
-    glDisable(GL_DEPTH_TEST);
+    myContext->core11fwd->glDisable(GL_DEPTH_TEST);
     if(params.toShowTrihedron->getValue()) {
         StRectD_t aCurrSect; myProjection.getZParams(myProjection.getZScreen(), aCurrSect);
-        GLfloat aLineLen = std::abs(aCurrSect.top()) * 0.2f;
+        GLfloat aLineLen = GLfloat(std::abs(aCurrSect.top()) * 0.2);
         StGLVec3 aTrihCenter = aCam.getCenter();
-        aTrihCenter -= aCam.getSide() * (std::abs(aCurrSect.left()) * 1.0f - aLineLen); // move to left
-        aTrihCenter -= aCam.getUp()   * (std::abs(aCurrSect.top())  * 1.0f - aLineLen); // move to bottom
+        aTrihCenter -= aCam.getSide() * ((GLfloat )std::abs(aCurrSect.left()) * 1.0f - aLineLen); // move to left
+        aTrihCenter -= aCam.getUp()   * ((GLfloat )std::abs(aCurrSect.top())  * 1.0f - aLineLen); // move to bottom
         glBegin(GL_LINES);
             // DX
             glColor3f(1.0f, 0.0f, 0.0f);
@@ -741,31 +765,31 @@ void StCADViewer::stglDraw(unsigned int view) {
     }
 
     // draw GUI
-    glDisable(GL_DEPTH_TEST);
-    myGUI->stglDraw(view);
+    myContext->core11fwd->glDisable(GL_DEPTH_TEST);
+    myGUI->stglDraw(theView);
 }
 
 void StCADViewer::doUpdateStateLoading() {
     const StString aFileToLoad = myCADLoader->getPlayList().getCurrentTitle();
     if(aFileToLoad.isEmpty()) {
-        myWin->setTitle("sView - CAD Viewer");
+        myWindow->setTitle("sView - CAD Viewer");
     } else {
-        myWin->setTitle(aFileToLoad + " Loading... - sView");
+        myWindow->setTitle(aFileToLoad + " Loading... - sView");
     }
 }
 
 void StCADViewer::doUpdateStateLoaded(bool isSuccess) {
     const StString aFileLoaded = myCADLoader->getPlayList().getCurrentTitle();
     if(aFileLoaded.isEmpty()) {
-        myWin->setTitle("sView - CAD Viewer");
+        myWindow->setTitle("sView - CAD Viewer");
     } else {
-        myWin->setTitle(aFileLoaded + (isSuccess ? StString() : StString(" FAIL to open")) + " - sView");
+        myWindow->setTitle(aFileLoaded + (isSuccess ? StString() : StString(" FAIL to open")) + " - sView");
     }
 }
 
 void StCADViewer::doFullscreen(const bool theIsFullscreen) {
-    if(!myWin.isNull()) {
-        myWin->setFullScreen(theIsFullscreen);
+    if(!myWindow.isNull()) {
+        myWindow->setFullScreen(theIsFullscreen);
     }
 }
 
@@ -824,7 +848,7 @@ void StCADViewer::doFitALL(const size_t ) {
 
     StBndCameraBox aCamBox(myCam);
     aCamBox.enlarge(myModel->getVertices());
-    aCamBox.getPrism(myPrism);
+    aCamBox.getPrism(*myContext, myPrism);
 
     GLdouble aZScr = anEyeDir.modulus() - aCamBox.getDZ() * 0.5f;
     StRectD_t aCurrSect; myProjection.getZParams(aZScr, aCurrSect);
@@ -852,7 +876,7 @@ void StCADViewer::doFitALL(const size_t ) {
 void StCADViewer::doShowNormals(const bool toShow) {
     if(toShow && myNormalsMesh == NULL && !myModel.isNull()) {
         myNormalsMesh = new StGLNormalsMesh();
-        myNormalsMesh->init(*myModel);
+        myNormalsMesh->init(*myContext, *myModel);
     } else if(!toShow && myNormalsMesh != NULL) {
         delete myNormalsMesh;
         myNormalsMesh = NULL;
@@ -862,47 +886,19 @@ void StCADViewer::doShowNormals(const bool toShow) {
 void StCADViewer::doChangeProjection(const int32_t theProj) {
     switch(theProj) {
         case ST_PROJ_ORTHO: {
-            myWin->setStereoOutput(false);
+            myWindow->setStereoOutput(false);
             myProjection.setPerspective(false);
             break;
         }
         case ST_PROJ_PERSP: {
-            myWin->setStereoOutput(false);
+            myWindow->setStereoOutput(false);
             myProjection.setPerspective(true);
             break;
         }
         case ST_PROJ_STEREO: {
-            myWin->setStereoOutput(true);
+            myWindow->setStereoOutput(true);
             myProjection.setPerspective(true);
             break;
         }
     }
-}
-
-// exports
-ST_EXPORT StDrawerInterface* StDrawer_new() {
-    return new StCADViewer(); }
-ST_EXPORT void StDrawer_del(StDrawerInterface* inst) {
-    delete (StCADViewer* )inst; }
-ST_EXPORT stBool_t StDrawer_init(StDrawerInterface* inst, StWindowInterface* stWin) {
-    return ((StCADViewer* )inst)->init(stWin); }
-ST_EXPORT stBool_t StDrawer_open(StDrawerInterface* inst, const StOpenInfo_t* stOpenInfo) {
-    return ((StCADViewer* )inst)->open(StOpenInfo(stOpenInfo)); }
-ST_EXPORT void StDrawer_parseCallback(StDrawerInterface* inst, StMessage_t* stMessages) {
-    ((StCADViewer* )inst)->parseCallback(stMessages); }
-ST_EXPORT void StDrawer_stglDraw(StDrawerInterface* inst, unsigned int view) {
-    ((StCADViewer* )inst)->stglDraw(view); }
-
-// SDK version was used
-ST_EXPORT void getSDKVersion(StVersion* ver) {
-    *ver = StVersionInfo::getSDKVersion();
-}
-
-// plugin version
-ST_EXPORT void getPluginVersion(StVersion* ver) {
-    *ver = StVersionInfo::getSDKVersion();
-}
-
-ST_EXPORT const stUtf8_t* getMIMEDescription() {
-    return StCADLoader::ST_CAD_MIME_STRING.toCString();
 }

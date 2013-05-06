@@ -1,15 +1,14 @@
 /**
  * This source is a part of sView program.
  *
- * Copyright © Kirill Gavrilov, 2011
+ * Copyright © Kirill Gavrilov, 2011-2013
  */
 
 #ifndef __StCADViewer_h_
 #define __StCADViewer_h_
 
 #include <StTemplates/StHandle.h>
-#include <StCore/StDrawerInterface.h>
-#include <StCore/StWindow.h>
+#include <StCore/StApplication.h>
 #include <StGLMesh/StGLMesh.h>
 #include <StGLStereo/StGLProjCamera.h>
 #include <StSettings/StParam.h>
@@ -26,78 +25,84 @@ class StCADViewerGUI;
 class StCADLoader;
 
 /**
- * Base Drawer class for CAD Viewer plugin.
+ * CAD Viewer application.
  */
-class ST_LOCAL StCADViewer : public StDrawerInterface {
-
-        private:
-
-    StHandle<StWindow>       myWin;           //!< pointer to StWindow, created by Output plugin
-    StHandle<StSettings>     mySettings;      //!< current plugin local settings
-    StHandle<StCADViewerGUI> myGUI;           //!< GUI elements
-    StHandle<StCADLoader>    myCADLoader;     //!< dedicated threaded class for load/save operations
-    StHandle<StGLMesh>       myModel;         //!< current drawn CAD model
-    StGLProjCamera           myProjection;    //!< projection setup
-    StPointD_t               myPrevMouse;     //!< previous mouse click
-    bool                     myIsLeftHold;
-    bool                     myIsRightHold;
-    bool                     myIsMiddleHold;
-    bool                     myIsCtrlPressed;
-    bool                     myIsCamIterative;
-    bool                     myToQuit;        //!< application quit flag
+class StCADViewer : public StApplication {
 
         public:
 
     static const StString ST_DRAWER_PLUGIN_NAME;
 
-    StWindow* getStWindow() { return myWin.operator->(); }
-
         public: //!< interface methods' implementations
 
-    StCADViewer();
-    virtual ~StCADViewer();
-    virtual StDrawerInterface* getLibImpl() { return this; }
-    virtual bool init(StWindowInterface* inStWin);
-    virtual bool open(const StOpenInfo& stOpenInfo);
-    virtual void parseCallback(StMessage_t* stMessages);
-    virtual void stglDraw(unsigned int view);
+    /**
+     * Constructor.
+     */
+    ST_CPPEXPORT StCADViewer(const StNativeWin_t         theParentWin,
+                             const StHandle<StOpenInfo>& theOpenInfo);
+
+    /**
+     * Destructor.
+     */
+    ST_CPPEXPORT virtual ~StCADViewer();
+
+
+    /**
+     * Open application.
+     */
+    ST_CPPEXPORT virtual bool open();
+
+    /**
+     * Process callback.
+     */
+    ST_CPPEXPORT virtual void processEvents(const StMessage_t* theEvents);
+
+    /**
+     * Draw frame for requested view.
+     */
+    ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
+
+    /**
+     * Reset device - release GL resources in old window and re-create them in new window.
+     */
+    ST_CPPEXPORT virtual bool resetDevice();
 
         public: //!< callback Slots
 
     /**
      * Should be called when file in loading state.
      */
-    void doUpdateStateLoading();
+    ST_LOCAL void doUpdateStateLoading();
 
     /**
      * Should be called when file was loaded.
      */
-    void doUpdateStateLoaded(bool isSuccess);
+    ST_LOCAL void doUpdateStateLoaded(bool isSuccess);
 
     /**
      * Load FIRST file in the playlist.
      */
-    void doListFirst(const size_t dummy = 0);
+    ST_LOCAL void doListFirst(const size_t dummy = 0);
 
     /**
      * Load PREVIOUS file in the playlist.
      */
-    void doListPrev(const size_t dummy = 0);
+    ST_LOCAL void doListPrev(const size_t dummy = 0);
 
     /**
      * Load NEXT file in the playlist.
      */
-    void doListNext(const size_t dummy = 0);
+    ST_LOCAL void doListNext(const size_t dummy = 0);
 
     /**
      * Load LAST file in the playlist.
      */
-    void doListLast(const size_t dummy = 0);
+    ST_LOCAL void doListLast(const size_t dummy = 0);
 
     /**
      * Fit ALL.
      */
-    void doFitALL(const size_t dummy = 0);
+    ST_LOCAL void doFitALL(const size_t dummy = 0);
 
         public: //!< Properties
 
@@ -112,11 +117,35 @@ class ST_LOCAL StCADViewer : public StDrawerInterface {
 
     } params;
 
+        private:
+
+    ST_LOCAL bool init();
+
+    /**
+     * Release GL resources.
+     */
+    ST_LOCAL void releaseDevice();
+
         private: //!< private callback Slots
 
-    void doFullscreen(const bool theIsFullscreen);
-    void doShowNormals(const bool toShow);
-    void doChangeProjection(const int32_t theProj);
+    ST_LOCAL void doFullscreen(const bool theIsFullscreen);
+    ST_LOCAL void doShowNormals(const bool toShow);
+    ST_LOCAL void doChangeProjection(const int32_t theProj);
+
+        private:
+
+    StHandle<StGLContext>    myContext;
+    StHandle<StSettings>     mySettings;      //!< current plugin local settings
+    StHandle<StCADViewerGUI> myGUI;           //!< GUI elements
+    StHandle<StCADLoader>    myCADLoader;     //!< dedicated threaded class for load/save operations
+    StHandle<StGLMesh>       myModel;         //!< current drawn CAD model
+    StGLProjCamera           myProjection;    //!< projection setup
+    StPointD_t               myPrevMouse;     //!< previous mouse click
+    bool                     myIsLeftHold;
+    bool                     myIsRightHold;
+    bool                     myIsMiddleHold;
+    bool                     myIsCtrlPressed;
+    bool                     myIsCamIterative;
 
 };
 

@@ -7,13 +7,14 @@
 		<Option compiler="windows_sdk_x86" />
 		<Build>
 			<Target title="WIN_gcc_x86">
-				<Option output="../bin/$(TARGET_NAME)/StDrawers/StCADViewer" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/libStCADViewer" imp_lib="../lib/$(TARGET_NAME)/$(TARGET_OUTPUT_BASENAME)" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME)" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option parameters="--in=StCADViewer" />
 				<Option host_application="../bin/$(TARGET_NAME)/sView" />
-				<Option createDefFile="1" />
+				<Option run_host_application_in_terminal="0" />
+				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-O3" />
 					<Add option="-std=c++0x" />
@@ -36,32 +37,33 @@
 					<Add directory="../3rdparty/OCCT/lib/WIN_vc_x86" />
 				</Linker>
 				<ExtraCommands>
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\english&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\english&quot;' />
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\русский&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\русский&quot;' />
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\français&quot;' />
-					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)..\lang\english\&quot;' />
-					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)..\lang\русский\&quot;' />
-					<Add before='cmd /c COPY /Y lang\french\*  &quot;$(TARGET_OUTPUT_DIR)..\lang\français\&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\english&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\english&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\français&quot;' />
+					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)lang\english\&quot;' />
+					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)lang\русский\&quot;' />
+					<Add before='cmd /c COPY /Y lang\french\*  &quot;$(TARGET_OUTPUT_DIR)lang\français\&quot;' />
 				</ExtraCommands>
 			</Target>
 			<Target title="WIN_vc_x86">
-				<Option output="../bin/$(TARGET_NAME)/StDrawers/StCADViewer" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/StCADViewer" imp_lib="../lib/$(TARGET_NAME)/$(TARGET_OUTPUT_BASENAME)" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME)" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="windows_sdk_x86" />
 				<Option parameters="--in=StCADViewer" />
 				<Option host_application="../bin/$(TARGET_NAME)/sView" />
-				<Option createDefFile="1" />
+				<Option run_host_application_in_terminal="0" />
+				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="/MD" />
 					<Add option="/Ox" />
 					<Add option="/W4" />
 					<Add option="/EHsc" />
 					<Add option="/MP" />
+					<Add option="-DWNT" />
 					<Add option="/DUNICODE" />
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
 					<Add option="/DNDEBUG" />
-					<Add option="-DWNT" />
 				</Compiler>
 				<Linker>
 					<Add option="/MANIFEST" />
@@ -74,23 +76,24 @@
 					<Add library="Wsock32" />
 				</Linker>
 				<ExtraCommands>
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\english&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\english&quot;' />
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\русский&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\русский&quot;' />
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\français&quot;' />
-					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)..\lang\english\&quot;' />
-					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)..\lang\русский\&quot;' />
-					<Add before='cmd /c COPY /Y lang\french\*  &quot;$(TARGET_OUTPUT_DIR)..\lang\français\&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\english&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\english&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\français&quot;' />
+					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)lang\english\&quot;' />
+					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)lang\русский\&quot;' />
+					<Add before='cmd /c COPY /Y lang\french\*  &quot;$(TARGET_OUTPUT_DIR)lang\français\&quot;' />
 					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;2' />
 				</ExtraCommands>
 			</Target>
 			<Target title="WIN_vc_x86_DEBUG">
-				<Option output="../bin/$(TARGET_NAME)/StDrawers/StCADViewer" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/StCADViewer" imp_lib="../lib/$(TARGET_NAME)/$(TARGET_OUTPUT_BASENAME)" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME)" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="windows_sdk_x86" />
 				<Option parameters="--in=StCADViewer" />
 				<Option host_application="../bin/$(TARGET_NAME)/sView" />
-				<Option createDefFile="1" />
+				<Option run_host_application_in_terminal="0" />
+				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="/MDd" />
 					<Add option="/Od" />
@@ -99,11 +102,11 @@
 					<Add option="/Zi /D_DEBUG" />
 					<Add option="/EHsc" />
 					<Add option="/MP" />
+					<Add option="-DWNT" />
 					<Add option="/DUNICODE" />
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
 					<Add option="/DNDEBUG" />
 					<Add option="/D__ST_DEBUG__" />
-					<Add option="-DWNT" />
 				</Compiler>
 				<Linker>
 					<Add option="/DEBUG" />
@@ -119,33 +122,34 @@
 					<Add directory="../3rdparty/OCCT/lib/WIN_vc_x86" />
 				</Linker>
 				<ExtraCommands>
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\english&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\english&quot;' />
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\русский&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\русский&quot;' />
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\français&quot;' />
-					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)..\lang\english\&quot;' />
-					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)..\lang\русский\&quot;' />
-					<Add before='cmd /c COPY /Y lang\french\*  &quot;$(TARGET_OUTPUT_DIR)..\lang\français\&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\english&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\english&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\français&quot;' />
+					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)lang\english\&quot;' />
+					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)lang\русский\&quot;' />
+					<Add before='cmd /c COPY /Y lang\french\*  &quot;$(TARGET_OUTPUT_DIR)lang\français\&quot;' />
 					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;2' />
 				</ExtraCommands>
 			</Target>
 			<Target title="WIN_vc_AMD64">
-				<Option output="../bin/$(TARGET_NAME)/StDrawers/StCADViewer" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/StCADViewer" imp_lib="../lib/$(TARGET_NAME)/$(TARGET_OUTPUT_BASENAME)" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME)" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="windows_sdk_x86_64" />
 				<Option parameters="--in=StCADViewer" />
 				<Option host_application="../bin/$(TARGET_NAME)/sView" />
-				<Option createDefFile="1" />
+				<Option run_host_application_in_terminal="0" />
+				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="/MD" />
 					<Add option="/Ox" />
 					<Add option="/W4" />
 					<Add option="/EHsc" />
 					<Add option="/MP" />
+					<Add option="-DWNT" />
 					<Add option="/DUNICODE" />
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
 					<Add option="/DNDEBUG" />
-					<Add option="-DWNT" />
 				</Compiler>
 				<Linker>
 					<Add option="/MANIFEST" />
@@ -158,24 +162,23 @@
 					<Add library="Wsock32" />
 				</Linker>
 				<ExtraCommands>
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\english&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\english&quot;' />
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\русский&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\русский&quot;' />
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)..\lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)..\lang\français&quot;' />
-					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)..\lang\english\&quot;' />
-					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)..\lang\русский\&quot;' />
-					<Add before='cmd /c COPY /Y lang\french\*  &quot;$(TARGET_OUTPUT_DIR)..\lang\français\&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\english&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\english&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\français&quot;' />
+					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)lang\english\&quot;' />
+					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)lang\русский\&quot;' />
+					<Add before='cmd /c COPY /Y lang\french\*  &quot;$(TARGET_OUTPUT_DIR)lang\français\&quot;' />
 					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;2' />
 				</ExtraCommands>
 			</Target>
 			<Target title="LINUX_gcc">
-				<Option output="../bin/$(TARGET_NAME)/StDrawers/StCADViewer" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/libStCADViewer" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option parameters="--in=StCADViewer" />
 				<Option host_application="../bin/$(TARGET_NAME)/sView" />
-				<Option createDefFile="1" />
-				<Option createStaticLib="1" />
+				<Option run_host_application_in_terminal="0" />
 				<Compiler>
 					<Add option="-O3" />
 					<Add option="-std=c++0x" />
@@ -193,23 +196,22 @@
 					<Add library="pthread" />
 				</Linker>
 				<ExtraCommands>
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/english/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/русский/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/français/&quot;' />
-					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)../lang/english/&quot;' />
-					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)../lang/русский/&quot;' />
-					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)../lang/français/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
+					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
+					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
+					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
 				</ExtraCommands>
 			</Target>
 			<Target title="LINUX_gcc_DEBUG">
-				<Option output="../bin/$(TARGET_NAME)/StDrawers/StCADViewer" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/libStCADViewer" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option parameters="--in=StCADViewer" />
 				<Option host_application="../bin/$(TARGET_NAME)/sView" />
-				<Option createDefFile="1" />
-				<Option createStaticLib="1" />
+				<Option run_host_application_in_terminal="0" />
 				<Compiler>
 					<Add option="-std=c++0x" />
 					<Add option="-Wall" />
@@ -227,23 +229,22 @@
 					<Add library="pthread" />
 				</Linker>
 				<ExtraCommands>
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/english/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/русский/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/français/&quot;' />
-					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)../lang/english/&quot;' />
-					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)../lang/русский/&quot;' />
-					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)../lang/français/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
+					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
+					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
+					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
 				</ExtraCommands>
 			</Target>
 			<Target title="MAC_gcc">
-				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/StDrawers/StCADViewer" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/libStCADViewer" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option parameters="--in=StCADViewer" />
 				<Option host_application="../bin/$(TARGET_NAME)/sView" />
-				<Option createDefFile="1" />
-				<Option createStaticLib="1" />
+				<Option run_host_application_in_terminal="0" />
 				<Compiler>
 					<Add option="-O3" />
 					<Add option="-Wall" />
@@ -258,23 +259,22 @@
 					<Add library="objc" />
 				</Linker>
 				<ExtraCommands>
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/english/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/русский/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/français/&quot;' />
-					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)../lang/english/&quot;' />
-					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)../lang/русский/&quot;' />
-					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)../lang/français/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
+					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
+					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
+					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
 				</ExtraCommands>
 			</Target>
 			<Target title="MAC_gcc_DEBUG">
-				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/StDrawers/StCADViewer" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/libStCADViewer" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option parameters="--in=StCADViewer" />
 				<Option host_application="../bin/$(TARGET_NAME)/sView" />
-				<Option createDefFile="1" />
-				<Option createStaticLib="1" />
+				<Option run_host_application_in_terminal="0" />
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
@@ -291,12 +291,12 @@
 					<Add library="objc" />
 				</Linker>
 				<ExtraCommands>
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/english/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/русский/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)../lang/français/&quot;' />
-					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)../lang/english/&quot;' />
-					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)../lang/русский/&quot;' />
-					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)../lang/français/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
+					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
+					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
+					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
 				</ExtraCommands>
 			</Target>
 		</Build>
@@ -311,6 +311,14 @@
 		<Linker>
 			<Add library="StGLWidgets" />
 			<Add library="StShared" />
+			<Add library="StSettings" />
+			<Add library="StCore" />
+			<Add library="StOutAnaglyph" />
+			<Add library="StOutDual" />
+			<Add library="StOutIZ3D" />
+			<Add library="StOutInterlace" />
+			<Add library="StOutPageFlip" />
+			<Add library="StOutDistorted" />
 			<Add library="avutil" />
 			<Add library="avformat" />
 			<Add library="avcodec" />
@@ -328,6 +336,7 @@
 			<Add directory="../3rdparty/lib/$(TARGET_NAME)" />
 			<Add directory="../3rdparty/OCCT/lib/$(TARGET_NAME)" />
 			<Add directory="../lib/$(TARGET_NAME)" />
+			<Add directory="../bin/$(TARGET_NAME)" />
 		</Linker>
 		<Unit filename="StCADLoader.cpp" />
 		<Unit filename="StCADLoader.h" />

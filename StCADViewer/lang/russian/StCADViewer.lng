@@ -1,4 +1,4 @@
-Russian translation file for StCADViewer plugin
+Russian translation file for StCADViewer
 @author Kirill Gavrilov
 
 --------
@@ -21,6 +21,6 @@ Russian translation file for StCADViewer plugin
 1501="О программе..."
 1503="Открыть лицензию"
 1504="Language"
-3000="sView 2011 - плагин для просмотра CAD моделей"
+3000="sView - приложение для просмотра CAD моделей"
 3001="версия"
-3002="Программа открывает CAD модели в форматах IGES, STEP, BREP с помощью OpenCASCADE Technology.\n © 2011 Гаврилов Кирилл (kirill@sview.ru).\nОфициальный сайт: www.sview.ru"
+3002="Программа открывает CAD модели в форматах IGES, STEP, BREP с помощью OpenCASCADE Technology.\n © 2011-2013 Гаврилов Кирилл (kirill@sview.ru).\nОфициальный сайт: www.sview.ru"

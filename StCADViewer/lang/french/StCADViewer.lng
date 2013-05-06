@@ -1,4 +1,4 @@
-French translation file for StCADViewer plugin
+French translation file for StCADViewer
 @author Kirill Gavrilov
 
 --------
@@ -21,6 +21,6 @@ French translation file for StCADViewer plugin
 1501="A Propos..."
 1503="Texte de la Licence"
 1504="Language"
-3000="sView 2011 - CAD Viewer plugin"
+3000="sView - Tiny CAD Viewer"
 3001="version"
-3002="CAD viewer allows you to view CAD files in formats IGES, STEP, BREP using OpenCASCADE Technology.\n © 2011 Kirill Gavrilov (kirill@sview.ru).\nOfficial site: www.sview.ru"
+3002="CAD viewer allows you to view CAD files in formats IGES, STEP, BREP using OpenCASCADE Technology.\n © 2011-2013 Kirill Gavrilov (kirill@sview.ru).\nOfficial site: www.sview.ru"
