@@ -221,15 +221,6 @@ StCADViewer::StCADViewer(const StNativeWin_t         theParentWin,
 
     myGUI = new StCADViewerGUI(this);
 
-    // load settings
-    mySettings->loadParam(ST_PARAM_NORMALS,   params.toShowNormals);
-    mySettings->loadParam(ST_PARAM_TRIHEDRON, params.toShowTrihedron);
-    mySettings->loadParam(ST_PARAM_PROJMODE,  params.projectMode);
-    mySettings->loadParam(ST_PARAM_FILLMODE,  params.fillMode);
-
-    // force thread-safe OCCT memory management
-    Standard::SetReentrant(Standard_True);
-
     addRenderer(new StOutAnaglyph(theParentWin));
     addRenderer(new StOutDual(theParentWin));
     addRenderer(new StOutIZ3D(theParentWin));
@@ -262,6 +253,18 @@ void StCADViewer::releaseDevice() {
         mySettings->saveParam(ST_PARAM_TRIHEDRON, params.toShowTrihedron);
         mySettings->saveParam(ST_PARAM_PROJMODE,  params.projectMode);
         mySettings->saveParam(ST_PARAM_FILLMODE,  params.fillMode);
+    }
+
+    if(!myContext.isNull()) {
+        if(myNormalsMesh != NULL) {
+            myNormalsMesh->release(*myContext);
+            delete myNormalsMesh;
+            myNormalsMesh = NULL;
+        }
+        if(!myModel.isNull()) {
+            myModel->release(*myContext);
+        }
+        myPrism.release(*myContext);
     }
 
     // release GUI data and GL resources before closing the window
@@ -307,6 +310,12 @@ bool StCADViewer::init() {
         myCADLoader = new StCADLoader(StHandle<StLangMap>::downcast(myGUI->myLangMap));
     }
     myCADLoader->signals.onError.connect(myGUI->myMsgStack, &StGLMsgStack::doPushMessage);
+
+    // load settings
+    mySettings->loadParam(ST_PARAM_NORMALS,   params.toShowNormals);
+    mySettings->loadParam(ST_PARAM_TRIHEDRON, params.toShowTrihedron);
+    mySettings->loadParam(ST_PARAM_PROJMODE,  params.projectMode);
+    mySettings->loadParam(ST_PARAM_FILLMODE,  params.fillMode);
     return true;
 }
 
@@ -592,6 +601,9 @@ void StCADViewer::processEvents(const StMessage_t* theEvents) {
     StHandle<StGLMesh> aNewMesh;
     if(myCADLoader->getNextShape(aNewMesh)) {
         if(!aNewMesh.isNull()) {
+            if(!myModel.isNull()) {
+                myModel->release(*myContext);
+            }
             myModel = aNewMesh;
 
             ST_DEBUG_LOG(myContext->stglFullInfo()); ///
@@ -878,12 +890,17 @@ void StCADViewer::doShowNormals(const bool toShow) {
         myNormalsMesh = new StGLNormalsMesh();
         myNormalsMesh->init(*myContext, *myModel);
     } else if(!toShow && myNormalsMesh != NULL) {
+        myNormalsMesh->release(*myContext);
         delete myNormalsMesh;
         myNormalsMesh = NULL;
     }
 }
 
 void StCADViewer::doChangeProjection(const int32_t theProj) {
+    if(myWindow.isNull()) {
+        return;
+    }
+
     switch(theProj) {
         case ST_PROJ_ORTHO: {
             myWindow->setStereoOutput(false);

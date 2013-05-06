@@ -10,6 +10,8 @@
 #include "../StImageViewer/StImagePluginInfo.h"
 #include "../StMoviePlayer/StMoviePlayer.h"
 #include "../StDiagnostics/StDiagnostics.h"
+#include "../StCADViewer/StCADViewer.h"
+#include "../StCADViewer/StCADPluginInfo.h"
 
 #include <StStrings/stConsole.h>
 #include <StVersion.h>
@@ -22,8 +24,8 @@ static StString getAbout() {
         + "Available options:\n"
           "  --fullscreen         Open fullscreen\n"
           "  --slideshow          Start slideshow\n"
-          "  --in=DRAWER_PATH     Open StDrawer plugin (predefined values: image, video)\n"
-          "  --out=RENDERER_PATH  Open StRenderer plugin (auto, StOutAnaglyph, StOutDual,...)\n"
+          "  --in=image,video,cad Application to open (predefined values: image, video, diag, cad)\n"
+          "  --out=RENDERER_PATH  Stereoscopic output module (auto, StOutAnaglyph, StOutDual,...)\n"
           "  --imageLib=IMGLIB    Setup 3rd-party library for image processing (FFmpeg, FreeImage, DevIL)\n"
           "  --viewMode=MODE      View mode (flat, sphere)\n"
           "  --srcFormat=FORMAT   Setup source format:\n"
@@ -67,6 +69,9 @@ StHandle<StApplication> StMultiApp::getInstance(const StHandle<StOpenInfo>& theI
         } else if(anArgDrawer.getValue() == "diag"
                || anArgDrawer.getValue() == "StDiagnostics") {
             return new StDiagnostics(NULL, anInfo);
+        } else if(anArgDrawer.getValue() == "cad"
+               || anArgDrawer.getValue() == "StCADViewer") {
+            return new StCADViewer(NULL, anInfo);
         } else {
             // show help
             StString aShowHelpString = getAbout();
@@ -85,5 +90,12 @@ StHandle<StApplication> StMultiApp::getInstance(const StHandle<StOpenInfo>& theI
             return new StImageViewer(NULL, anInfo);
         }
     }
+    const StMIMEList aMimeCad(ST_CAD_PLUGIN_MIME_CHAR);
+    for(size_t aMimeIter = 0; aMimeIter < aMimeCad.size(); ++aMimeIter) {
+        if(aFileExtension.isEqualsIgnoreCase(aMimeCad[aMimeIter].getExtension())) {
+            return new StCADViewer(NULL, anInfo);
+        }
+    }
+
     return new StMoviePlayer(NULL, anInfo);
 }

@@ -7,7 +7,6 @@
 #ifndef __StCADViewer_h_
 #define __StCADViewer_h_
 
-#include <StTemplates/StHandle.h>
 #include <StCore/StApplication.h>
 #include <StGLMesh/StGLMesh.h>
 #include <StGLStereo/StGLProjCamera.h>
@@ -45,7 +44,6 @@ class StCADViewer : public StApplication {
      * Destructor.
      */
     ST_CPPEXPORT virtual ~StCADViewer();
-
 
     /**
      * Open application.

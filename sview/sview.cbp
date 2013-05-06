@@ -251,6 +251,7 @@
 			<Add library="StImageViewer" />
 			<Add library="StMoviePlayer" />
 			<Add library="StDiagnostics" />
+			<Add library="StCADViewer" />
 			<Add library="StOutAnaglyph" />
 			<Add library="StOutDual" />
 			<Add library="StOutIZ3D" />

@@ -4,7 +4,12 @@
  * Copyright © Kirill Gavrilov, 2011-2013
  */
 
-// OCCT stuff
+#ifdef ST_HAVE_STCONFIG
+    #include <stconfig.conf>
+#endif
+
+#ifdef ST_HAVE_OCCT
+
 #include <BRep_Tool.hxx>
 #include <BRepAdaptor_Surface.hxx>
 #include <Bnd_Box.hxx>
@@ -250,3 +255,5 @@ bool StCADModel::computeMesh() {
     myBndSphere.enlarge(myVertices);
     return myVertices.size() >= 3;
 }
+
+#endif // ST_HAVE_OCCT
