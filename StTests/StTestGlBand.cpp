@@ -41,6 +41,7 @@ void StTestGlBand::testTextureFill(StGLContext&  theCtx,
                                    const GLsizei theFrameSizeY) {
     StImagePlane anImgPlane;
     if(!anImgPlane.initZero(StImagePlane::ImgRGB, theFrameSizeX, theFrameSizeY)) {
+    //if(!anImgPlane.initZero(StImagePlane::ImgRGB, theFrameSizeX, theFrameSizeY, 3 * theFrameSizeX + 512)) {
         st::cout << stostream_text("Fail to initialize RGB image plane...\n");
     }
 

@@ -351,7 +351,11 @@ bool StGLTexture::fill(StGLContext&        theCtx,
     size_t anAligment = stMin(theData.getMaxRowAligment(), size_t(8)); // limit to 8 bytes for OpenGL
     theCtx.core20fwd->glPixelStorei(GL_UNPACK_ALIGNMENT, GLint(anAligment));
 
-    if(theData.getSizeX() <= size_t(getSizeX()) && anExtraBytes < anAligment && theBatchRows > 1) {
+    const GLsizei aPixelsWidth = GLsizei(theData.getSizeRowBytes() / theData.getSizePixelBytes());
+    if(theData.getSizeX() <= size_t(getSizeX()) && theBatchRows > 1) {
+        // notice that GL_UNPACK_ROW_LENGTH is not available on OpenGL ES 2.0 without GL_EXT_unpack_subimage extension!
+        theCtx.core20fwd->glPixelStorei(GL_UNPACK_ROW_LENGTH, (anExtraBytes >= anAligment) ? aPixelsWidth : 0);
+
         // do batch copy (more effective)
         GLsizei aPatchWidth = GLsizei(theData.getSizeX());
         GLsizei aBatchRows = theBatchRows;
@@ -368,8 +372,12 @@ bool StGLTexture::fill(StGLContext&        theCtx,
                                               aDataType,        // data type of the pixel data
                                               theData.getData(aRow, 0));
         }
+
+        theCtx.core20fwd->glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     } else {
         // copy row by row copy (the image plane greater than texture or batch copy is impossible)
+        theCtx.core20fwd->glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+
         GLsizei aPatchWidth = stMin(GLsizei(theData.getSizeX()), getSizeX());
         for(GLsizei aRow = theRowFrom; aRow < aRowTo; ++aRow) {
             theCtx.core20fwd->glTexSubImage2D(GL_TEXTURE_2D, 0, // 0 = LOD number
@@ -382,7 +390,7 @@ bool StGLTexture::fill(StGLContext&        theCtx,
     }
 
     // turn back safe alignment...
-    theCtx.core20fwd->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    theCtx.core20fwd->glPixelStorei(GL_UNPACK_ALIGNMENT,  1);
 
     unbind(theCtx);
     return true;
