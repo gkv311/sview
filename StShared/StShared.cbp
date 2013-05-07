@@ -272,6 +272,7 @@
 			<Option target="MAC_gcc" />
 			<Option target="MAC_gcc_DEBUG" />
 		</Unit>
+		<Unit filename="StCondition.cpp" />
 		<Unit filename="StDevILImage.cpp" />
 		<Unit filename="StEDIDParser.cpp" />
 		<Unit filename="StExifDir.cpp" />
