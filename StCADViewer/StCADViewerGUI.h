@@ -18,7 +18,7 @@ class StGLMenuItem;
 class StGLTextureButton;
 class StGLMsgStack;
 
-class ST_LOCAL StCADViewerGUI : public StGLRootWidget {
+class StCADViewerGUI : public StGLRootWidget {
 
         public:
 
@@ -34,25 +34,25 @@ class ST_LOCAL StCADViewerGUI : public StGLRootWidget {
 
         private: //!< menus creation routines
 
-    void      createMainMenu();         //!< Root (Main menu)
-    StGLMenu* createViewMenu();         //!< Root -> View menu
-    StGLMenu* createProjMenu();         //!< Root -> View menu -> Projection
-    StGLMenu* createFillMenu();         //!< Root -> View menu -> Fill Mode
-    StGLMenu* createHelpMenu();         //!< Root -> Help menu
-    StGLMenu* createLanguageMenu();     //!< Root -> Help -> Language menu
+    ST_LOCAL void      createMainMenu();         //!< Root (Main menu)
+    ST_LOCAL StGLMenu* createViewMenu();         //!< Root -> View menu
+    ST_LOCAL StGLMenu* createProjMenu();         //!< Root -> View menu -> Projection
+    ST_LOCAL StGLMenu* createFillMenu();         //!< Root -> View menu -> Fill Mode
+    ST_LOCAL StGLMenu* createHelpMenu();         //!< Root -> Help menu
+    ST_LOCAL StGLMenu* createLanguageMenu();     //!< Root -> Help -> Language menu
 
         public: //!< StGLWidget overrides
 
-    StCADViewerGUI(StCADViewer* thePlugin);
-    virtual ~StCADViewerGUI();
-    virtual void stglUpdate(const StPointD_t& theCursorZo);
-    virtual void stglResize(const StRectI_t& winRectPx);
-    virtual void setVisibility(const StPointD_t& theCursorZo, bool );
+    ST_LOCAL StCADViewerGUI(StCADViewer* thePlugin);
+    ST_LOCAL virtual ~StCADViewerGUI();
+    ST_LOCAL virtual void stglUpdate(const StPointD_t& theCursorZo);
+    ST_LOCAL virtual void stglResize(const StRectI_t& winRectPx);
+    ST_LOCAL virtual void setVisibility(const StPointD_t& theCursorZo, bool );
 
         public: //!< callback Slots
 
-    void doAboutProgram(const size_t );
-    void doOpenLicense(const size_t );
+    ST_LOCAL void doAboutProgram(const size_t );
+    ST_LOCAL void doOpenLicense(const size_t );
 
 };
 

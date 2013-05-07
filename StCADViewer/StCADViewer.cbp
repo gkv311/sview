@@ -288,8 +288,6 @@
 					<Add option="-fPIC" />
 					<Add option="`freetype-config --cflags`" />
 					<Add option="-D__ST_DEBUG__" />
-					<Add option="-DHAVE_CONFIG_H" />
-					<Add option="-DHAVE_WOK_CONFIG_H" />
 					<Add option="-DST_HAVE_STCONFIG" />
 					<Add directory="/usr/include/opencascade" />
 				</Compiler>
