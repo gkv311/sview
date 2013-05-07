@@ -469,7 +469,7 @@ void StImageViewer::doOpen2FilesDialog(const size_t ) {
 
 namespace {
     // TODO (Kirill Gavrilov#9) move to the StImageLoader thread
-    ST_LOCAL static SV_THREAD_FUNCTION doOpenFileDialogThread(void* theArg) {
+    static SV_THREAD_FUNCTION doOpenFileDialogThread(void* theArg) {
         struct ThreadArgs {
             StImageViewer* receiverPtr; size_t filesCount;
         };

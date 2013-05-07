@@ -351,6 +351,7 @@
 			<Option target="MAC_gcc" />
 			<Option target="MAC_gcc_DEBUG" />
 		</Unit>
+		<Unit filename="StThread.cpp" />
 		<Unit filename="StWebPImage.cpp" />
 		<Unit filename="stConsole.cpp" />
 		<Unit filename="stUtfTools.cpp" />
