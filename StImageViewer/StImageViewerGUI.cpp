@@ -23,6 +23,7 @@
 
 #include <StSocket/StSocket.h>
 #include <StSettings/StEnumParam.h>
+#include <StThreads/StThread.h>
 
 #include <StGL/StParams.h>
 #include <StGLWidgets/StGLCheckboxTextured.h>

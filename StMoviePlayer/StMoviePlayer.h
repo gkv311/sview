@@ -25,6 +25,7 @@
 #include <StSettings/StFloat32Param.h>
 #include <StGLStereo/StFormatEnum.h>
 #include <StThreads/StCondition.h>
+#include <StThreads/StThread.h>
 
 // forward declarations
 class StGLContext;

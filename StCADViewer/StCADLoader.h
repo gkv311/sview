@@ -14,6 +14,7 @@
 #include <StSlots/StSignal.h>
 
 class StLangMap;
+class StThread;
 
 class StCADLoader {
 

@@ -11,9 +11,7 @@
 #ifndef __StTheads_h_
 #define __StTheads_h_
 
-#include "StTimer.h"
-#include "StMutex.h"
-#include "StProcess.h"
+#include <stTypes.h>
 
 #ifdef _WIN32
     #include <windows.h> // we used global header instead Winbase.h to prevent namespaces collisions
@@ -109,12 +107,12 @@ class StThread {
     /**
      * Returns the CPU architecture used to build the program (may not match the system).
      */
-    static StString getArchString() {
+    static const char* getArchString() {
     #if (defined(_WIN64) || defined(__WIN64__))\
      || (defined(_LP64)  || defined(__LP64__))
-        return StString("x86_64");
+        return "x86_64";
     #else
-        return StString("x86");
+        return "x86";
     #endif
     }
 

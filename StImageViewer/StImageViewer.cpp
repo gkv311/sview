@@ -27,7 +27,7 @@
 #include <StGLWidgets/StGLImageRegion.h>
 #include <StGLWidgets/StGLMsgStack.h>
 #include <StSocket/StCheckUpdates.h>
-#include <StThreads/StThreads.h>
+#include <StThreads/StThread.h>
 #include <StImage/StImageFile.h>
 
 #include "../StOutAnaglyph/StOutAnaglyph.h"
@@ -465,6 +465,31 @@ void StImageViewer::doSwitchSrcFormat(const int32_t theSrcFormat) {
 
 void StImageViewer::doOpen2FilesDialog(const size_t ) {
     doOpenFileDialog(this, 2);
+}
+
+namespace {
+    // TODO (Kirill Gavrilov#9) move to the StImageLoader thread
+    ST_LOCAL static SV_THREAD_FUNCTION doOpenFileDialogThread(void* theArg) {
+        struct ThreadArgs {
+            StImageViewer* receiverPtr; size_t filesCount;
+        };
+        ThreadArgs* aThreadArgs = (ThreadArgs* )theArg;
+        aThreadArgs->receiverPtr->doOpenFileDialog(aThreadArgs->filesCount);
+        delete aThreadArgs;
+        return SV_THREAD_RETURN 0;
+    }
+}
+
+void StImageViewer::doOpenFileDialog(void*  theReceiverPtr,
+                                     size_t theFilesCount) {
+    struct ThreadArgs {
+        StImageViewer* receiverPtr; size_t filesCount;
+    };
+    ThreadArgs* aThreadArgs = new ThreadArgs();
+    aThreadArgs->receiverPtr = (StImageViewer* )theReceiverPtr;
+    aThreadArgs->filesCount  = theFilesCount;
+    aThreadArgs->receiverPtr->params.isFullscreen->setValue(false); // workaround
+    StThread(doOpenFileDialogThread, (void* )aThreadArgs);
 }
 
 void StImageViewer::doOpenFileDialog(const size_t filesCount) {

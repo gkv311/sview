@@ -10,7 +10,7 @@
 #define __StFPSControl_h_
 
 #include "StFPSMeter.h"
-#include "StThreads.h"
+#include "StThread.h"
 
 /**
  * Class extend FPS measurements features with possibility

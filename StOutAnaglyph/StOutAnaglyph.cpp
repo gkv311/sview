@@ -21,7 +21,6 @@
 #include <StGL/StGLEnums.h>
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
-#include <StThreads/StThreads.h>
 #include <StSettings/StSettings.h>
 #include <StSettings/StTranslations.h>
 #include <StSettings/StEnumParam.h>

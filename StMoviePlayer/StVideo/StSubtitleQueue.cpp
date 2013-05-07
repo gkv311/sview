@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #include "StSubtitleQueue.h"
 
 #include <StGLWidgets/StSubQueue.h>
+#include <StThreads/StThread.h>
 
 namespace {
     static const StString ST_CRLF_REDUNDANT   = "\x0D\x0A";

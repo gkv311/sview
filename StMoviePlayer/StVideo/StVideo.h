@@ -26,6 +26,8 @@
 #include "StParamActiveStream.h"
 
 #include <StFile/StMIMEList.h>
+#include <StThreads/StProcess.h>
+#include <StThreads/StThread.h>
 #include <StGL/StPlayList.h>
 #include <StImage/StImageFile.h>
 

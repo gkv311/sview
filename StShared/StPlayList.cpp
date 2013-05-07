@@ -9,6 +9,7 @@
 #include <StGL/StPlayList.h>
 
 #include <StFile/StRawFile.h>
+#include <StThreads/StProcess.h>
 
 namespace {
     static size_t THE_UNDO_LIMIT = 1024;

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 // forward declarations
 class StSubQueue;
 class StSubtitleQueue;
+class StThread;
 
 // define StHandle template specialization
 ST_DEFINE_HANDLE(StSubtitleQueue, StAVPacketQueue);

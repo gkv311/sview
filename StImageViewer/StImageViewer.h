@@ -84,26 +84,7 @@ class StImageViewer : public StApplication {
 
         public: //! @name callback Slots
 
-    // TODO (Kirill Gavrilov#9) move to the StImageLoader thread
-    ST_LOCAL static SV_THREAD_FUNCTION doOpenFileDialogThread(void* theArg) {
-        struct ThreadArgs {
-            StImageViewer* receiverPtr; size_t filesCount;
-        };
-        ThreadArgs* threadArgs = (ThreadArgs* )theArg;
-        threadArgs->receiverPtr->doOpenFileDialog(threadArgs->filesCount);
-        delete threadArgs;
-        return SV_THREAD_RETURN 0;
-    }
-    ST_LOCAL static void doOpenFileDialog(void* receiverPtr, size_t filesCount) {
-        struct ThreadArgs {
-            StImageViewer* receiverPtr; size_t filesCount;
-        };
-        ThreadArgs* threadArgs = new ThreadArgs();
-        threadArgs->receiverPtr = (StImageViewer* )receiverPtr;
-        threadArgs->filesCount  = filesCount;
-        threadArgs->receiverPtr->params.isFullscreen->setValue(false); // workaround
-        StThread(doOpenFileDialogThread, (void* )threadArgs);
-    }
+    ST_LOCAL static void doOpenFileDialog(void* theReceiverPtr, size_t theFilesCount);
     ST_LOCAL void doOpenFileDialog(const size_t filesCount = 1);
 
     ST_LOCAL void doOpen2FilesDialog(const size_t dummy = 0);

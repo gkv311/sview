@@ -18,6 +18,8 @@
 
 #include "StVideoTimer.h"
 
+#include <StThreads/StThread.h>
+
 /**
  * Thread just call mainLoop() function.
  */

@@ -19,7 +19,7 @@
 #ifndef __APPLE__
 
 #include "StWinHandles.h"
-#include <StThreads/StThreads.h>
+#include <StThreads/StThread.h>
 #include <StStrings/StLogger.h>
 
 #ifdef _WIN32

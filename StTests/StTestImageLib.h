@@ -20,7 +20,6 @@
 #define __StTestImageLib_h_
 
 #include "StTest.h"
-#include <StThreads/StThreads.h>
 #include <StImage/StImageFile.h>
 
 /**

@@ -19,7 +19,7 @@
 #ifndef __StQuadBufferCheck_h_
 #define __StQuadBufferCheck_h_
 
-#include <StThreads/StThreads.h>
+#include <StThreads/StThread.h>
 
 ST_LOCAL bool testQuadBufferSupport();
 ST_LOCAL SV_THREAD_FUNCTION testQBThreadFunction(void* outValue);

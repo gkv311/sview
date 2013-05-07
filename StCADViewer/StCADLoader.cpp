@@ -30,6 +30,7 @@
 #include "StMeshFileOBJ.h" // OBJ reader
 
 #include <StStrings/StLangMap.h>
+#include <StThreads/StThread.h>
 
 const StString StCADLoader::ST_CAD_MIME_STRING(ST_CAD_PLUGIN_MIME_CHAR);
 const StMIMEList StCADLoader::ST_CAD_MIME_LIST(StCADLoader::ST_CAD_MIME_STRING);

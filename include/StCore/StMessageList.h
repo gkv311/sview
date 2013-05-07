@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -20,8 +20,9 @@
 #define __StEventsList_h_
 
 #include <StTemplates/StVec2.h>
-#include <StThreads/StThreads.h> // threads header (mutexes, threads,...)
-#include "StVirtualKeys.h"       // VIRTUAL keyboard codes
+#include <StThreads/StMutex.h>
+#include <StThreads/StTimer.h>
+#include "StVirtualKeys.h"
 
 typedef struct tagStMessage {
     size_t uin; // unique identification number

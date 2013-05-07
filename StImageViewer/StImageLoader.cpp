@@ -22,6 +22,7 @@
 
 #include <StStrings/StLangMap.h>
 #include <StImage/StJpegParser.h>
+#include <StThreads/StThread.h>
 
 const char* StImageLoader::ST_IMAGES_MIME_STRING = ST_IMAGE_PLUGIN_MIME_CHAR;
 

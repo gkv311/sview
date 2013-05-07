@@ -10,6 +10,8 @@
 #define __StCheckUpdates_h_
 
 #include <StSocket/StSocket.h>
+#include <StThreads/StMutex.h>
+#include <StThreads/StThread.h>
 #include <StVersion.h>
 
 /**

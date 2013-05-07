@@ -21,8 +21,8 @@
 
 #include <StStrings/StString.h>
 #include <StSettings/StFloat32Param.h>
-#include <StThreads/StThreads.h>
 #include <StThreads/StCondition.h>
+#include <StThreads/StTimer.h>
 
 #include "StAVPacketQueue.h"// StAVPacketQueue class
 #include "StPCMBuffer.h"    // audio PCM buffer class
@@ -30,6 +30,7 @@
 
 // forward declarations
 class StAudioQueue;
+class StThread;
 
 // define StHandle template specialization
 ST_DEFINE_HANDLE(StAudioQueue, StAVPacketQueue);

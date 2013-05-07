@@ -25,8 +25,10 @@
 #include <StGLStereo/StGLTextureQueue.h>
 #include <StImage/StImageFile.h>
 #include <StSlots/StSignal.h>
+#include <StThreads/StProcess.h>
 
 class StLangMap;
+class StThread;
 
 struct StImageInfo {
 

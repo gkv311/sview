@@ -20,6 +20,7 @@
 
 #include <StStrings/StLogger.h>
 #include <StSys/StSys.h>
+#include <StThreads/StProcess.h>
 
 namespace {
     static const stUtf8_t WINDOW_TITLE_DEFAULT[] = "StWindow";

@@ -25,6 +25,7 @@
 
 // forward declarations
 class StVideoQueue;
+class StThread;
 
 // define StHandle template specialization
 ST_DEFINE_HANDLE(StVideoQueue, StAVPacketQueue);

@@ -1,12 +1,13 @@
 /**
  * This source is a part of sView program.
  *
- * Copyright © Kirill Gavrilov, 2009-2012
+ * Copyright © Kirill Gavrilov, 2009-2013
  */
 
 #include "StAudioQueue.h"
 
 #include <StGL/StGLVec.h>
+#include <StThreads/StThread.h>
 
 /**
  * Check OpenAL state.

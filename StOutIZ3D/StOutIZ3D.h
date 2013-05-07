@@ -20,7 +20,6 @@
 #define __StOutIZ3D_h_
 
 #include <StCore/StWindow.h>
-#include <StThreads/StThreads.h> // threads header (mutexes, threads,...)
 #include <StThreads/StFPSControl.h>
 #include <StGL/StGLTexture.h>
 

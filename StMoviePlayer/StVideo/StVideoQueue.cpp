@@ -19,6 +19,7 @@
 #include "StVideoQueue.h"
 
 #include <StStrings/StStringStream.h>
+#include <StThreads/StThread.h>
 
 namespace {
 

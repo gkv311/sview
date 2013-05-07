@@ -22,7 +22,7 @@
 #include "StTest.h"
 
 #include <StCore/StWindow.h>
-#include <StThreads/StThreads.h>
+#include <StThreads/StThread.h>
 
 /**
  * Tests StWindow embedding functionality.

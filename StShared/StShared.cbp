@@ -483,7 +483,7 @@
 		<Unit filename="../include/StThreads/StMutex.h" />
 		<Unit filename="../include/StThreads/StMutexSlim.h" />
 		<Unit filename="../include/StThreads/StProcess.h" />
-		<Unit filename="../include/StThreads/StThreads.h" />
+		<Unit filename="../include/StThreads/StThread.h" />
 		<Unit filename="../include/StThreads/StTimer.h" />
 		<Unit filename="../include/StVersion.h" />
 		<Unit filename="../include/stAssert.h" />

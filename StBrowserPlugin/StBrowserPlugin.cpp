@@ -27,6 +27,8 @@
 #include <StTemplates/StHandle.h>
 #include <StTemplates/StArrayList.h>
 
+#include <StThreads/StThread.h>
+
 #include "../StImageViewer/StImageViewer.h"
 
 extern NPNetscapeFuncs NPNFuncs;

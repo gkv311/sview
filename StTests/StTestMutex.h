@@ -20,7 +20,7 @@
 #define __StTestMutex_h_
 
 #include "StTest.h"
-#include <StThreads/StThreads.h>
+#include <StThreads/StThread.h>
 
 /**
  * Tests mutex object performance.

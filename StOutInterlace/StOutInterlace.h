@@ -21,7 +21,6 @@
 
 #include <StCore/StWindow.h>
 #include <StCore/StMonitor.h>
-#include <StThreads/StThreads.h>
 #include <StThreads/StFPSControl.h>
 #include <StGL/StGLProgram.h>
 #include <StGL/StGLFrameBuffer.h>
