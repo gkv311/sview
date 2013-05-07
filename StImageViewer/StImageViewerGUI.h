@@ -24,7 +24,7 @@
 #include <StGLStereo/StGLTextureQueue.h>
 #include <StGLStereo/StFormatEnum.h>
 #include <StSettings/StTranslations.h>
-#include <StThreads/StEvent.h>
+#include <StThreads/StCondition.h>
 
 // forward declarations
 class StGLDescription;

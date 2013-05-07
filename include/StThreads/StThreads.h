@@ -13,13 +13,20 @@
 
 #include "StTimer.h"
 #include "StMutex.h"
-#include "StEvent.h"
 #include "StProcess.h"
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
+    #include <windows.h> // we used global header instead Winbase.h to prevent namespaces collisions
+#else
+    #include <pthread.h>
+    #include <unistd.h>
+    #include <errno.h>
+    #include <sys/time.h>
+#endif
+
+#ifdef _WIN32
     #include <process.h>
 #else
-    #include <unistd.h>
     #include <sys/types.h>
 
     #ifdef __sun
@@ -37,7 +44,7 @@ class StThread {
 
         public:
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     #define SV_THREAD_FUNCTION unsigned int __stdcall
     #define SV_THREAD_RETURN
     typedef unsigned int (__stdcall* threadFunction_t)(void* );
@@ -54,7 +61,7 @@ class StThread {
      * @param theMilliseconds - time to sleep in milliseconds.
      */
     static void sleep(const int theMilliseconds) {
-        #if (defined(_WIN32) || defined(__WIN32__))
+        #ifdef _WIN32
             Sleep(theMilliseconds);
         #else
             usleep(theMilliseconds * 1000);
@@ -128,7 +135,7 @@ class StThread {
      * @return unique id for current thread.
      */
     static size_t getCurrentThreadId() {
-    #if (defined(_WIN32) || defined(__WIN32__))
+    #ifdef _WIN32
         return (size_t )GetCurrentThreadId();
     #else
         return (size_t )pthread_self(); // NOT the same as 'gettid()'!
@@ -151,7 +158,7 @@ class StThread {
      */
     StThread(threadFunction_t theThreadFunc,
              void*            theThreadParam) {
-    #if (defined(_WIN32) || defined(__WIN32__))
+    #ifdef _WIN32
         myThread = (HANDLE )_beginthreadex(NULL, 0, theThreadFunc, theThreadParam, 0, (unsigned int* )&myThreadId);
     #else
         myHasHandle = (pthread_create(&myThread, (pthread_attr_t* )NULL, theThreadFunc, theThreadParam) == 0);
@@ -162,7 +169,7 @@ class StThread {
      * Indicates valid thread handle.
      */
     bool isValid() const {
-    #if (defined(_WIN32) || defined(__WIN32__))
+    #ifdef _WIN32
         return myThread != NULL;
     #else
         return myHasHandle; // myThread != PTHREAD_NULL
@@ -173,7 +180,7 @@ class StThread {
      * Wait for thread return (infinity).
      */
     bool wait() {
-    #if (defined(_WIN32) || defined(__WIN32__))
+    #ifdef _WIN32
         return isValid() && (WaitForSingleObject(myThread, INFINITE) != WAIT_FAILED);
     #else
         return isValid() && (pthread_join(myThread, NULL) == 0);
@@ -185,7 +192,7 @@ class StThread {
      */
     void kill() {
         if(isValid()) {
-        #if (defined(_WIN32) || defined(__WIN32__))
+        #ifdef _WIN32
             TerminateThread(myThread, 0);
         #else
             pthread_cancel(myThread);
@@ -199,7 +206,7 @@ class StThread {
      */
     void detach() {
         if(isValid()) {
-        #if (defined(_WIN32) || defined(__WIN32__))
+        #ifdef _WIN32
             CloseHandle(myThread);
             myThread = NULL;
         #else
@@ -234,7 +241,7 @@ class StThread {
 
         private:
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     HANDLE    myThread;
     DWORD     myThreadId;
 #else

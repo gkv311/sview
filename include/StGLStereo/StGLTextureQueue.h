@@ -9,8 +9,9 @@
 #ifndef __StGLTextureQueue_h_
 #define __StGLTextureQueue_h_
 
-#include <StThreads/StThreads.h> // threads header (mutexes, threads,...)
+#include <StThreads/StThreads.h>
 #include <StThreads/StFPSMeter.h>
+#include <StThreads/StCondition.h>
 
 #include "StGLQuadTexture.h"
 #include "StGLTextureData.h"

@@ -21,9 +21,10 @@
 
 #include <StCore/StApplication.h>
 
+#include <StSettings/StTranslations.h>
 #include <StSettings/StFloat32Param.h>
 #include <StGLStereo/StFormatEnum.h>
-#include <StSettings/StTranslations.h>
+#include <StThreads/StCondition.h>
 
 // forward declarations
 class StGLContext;

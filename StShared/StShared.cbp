@@ -475,7 +475,7 @@
 		<Unit filename="../include/StTemplates/StVec3.h" />
 		<Unit filename="../include/StTemplates/StVec4.h" />
 		<Unit filename="../include/StThreads/StAtomicOp.h" />
-		<Unit filename="../include/StThreads/StEvent.h" />
+		<Unit filename="../include/StThreads/StCondition.h" />
 		<Unit filename="../include/StThreads/StFPSControl.h" />
 		<Unit filename="../include/StThreads/StFPSMeter.h" />
 		<Unit filename="../include/StThreads/StMinGen.h" />

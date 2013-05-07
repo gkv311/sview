@@ -32,7 +32,7 @@
 #include <StStrings/StString.h>
 #include <StCore/StWinErrorCodes.h>
 #include <StThreads/StMutex.h>
-#include <StThreads/StEvent.h>
+#include <StThreads/StCondition.h>
 
 #ifndef __APPLE__
 /**
