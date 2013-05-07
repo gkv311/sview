@@ -82,7 +82,7 @@ class StVideoTimer {
     StHandle<StVideoQueue> myVideo; //!< video queue to sync
     StHandle<StAudioQueue> myAudio; //!< audio queue to sync from
 
-    StEvent  evDoEndLoop; // thread exit event
+    StCondition evDoEndLoop; // thread exit event
     StTimer refreshTimer; // timer to refresh frames
 
     double  timerThrCurr; // current timer threshold (timer expired) (in milliseconds)

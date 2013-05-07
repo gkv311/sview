@@ -136,7 +136,7 @@ class StImageLoader {
     StHandle<StThread>         myThread;        //!< main loop thread
     StHandle<StLangMap>        myLangMap;       //!< translations dictionary
     StPlayList                 myPlayList;      //!< play list
-    StEvent                    myLoadNextEvent;
+    StCondition                myLoadNextEvent;
     StFormatEnum               mySrcFormat;     //!< target source format (auto-detect by default)
     StHandle<StGLTextureQueue> myTextureQueue;  //!< decoded frames queue
     StHandle<StImageInfo>      myImgInfo;       //!< info about currently loaded image

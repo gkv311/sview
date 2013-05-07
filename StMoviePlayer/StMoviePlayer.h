@@ -238,8 +238,8 @@ class StMoviePlayer : public StApplication {
     StHandle<StVideo>          myVideo;           //!< main video playback class
     StHandle<StCheckUpdates>   myUpdates;         //!< check updates utility
 
-    StEvent                    myEventDialog;     //!< event to prevent showing multiple open/save file dialogs
-    StEvent                    myEventLoaded;     //!< indicate that new file was open
+    StCondition                myEventDialog;     //!< event to prevent showing multiple open/save file dialogs
+    StCondition                myEventLoaded;     //!< indicate that new file was open
     double                     mySeekOnLoad;      //!< seeking target
 
     int32_t                    myLastUpdateDay;

@@ -246,7 +246,7 @@ class StGLTextureQueue {
 
     double           myCurrPts;
 
-    StEvent          myNewShotEvent;
+    StCondition      myNewShotEvent;
     bool             myIsInUpdTexture; //!< private bools for plugin thread
     bool             myIsReadyToSwap;
     bool             myToCompress;     //!< release unused memory as fast as possible

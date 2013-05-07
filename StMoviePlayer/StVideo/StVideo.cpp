@@ -89,7 +89,7 @@ class ST_LOCAL StHangKiller {
     StHandle<StThread> myThread;
     StHandle<StString> myState;
     const double       myLimitSec;
-    StEvent            myDoneEvent;
+    StCondition        myDoneEvent;
 
         private:
 

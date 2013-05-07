@@ -120,7 +120,7 @@ class StActiveXCtrl : public COleControl {
     StHandle<StThread>      myThread;         //!< dedicated thread for this plugin instance
     StHandle<StApplication> myStApp;          //!< StCore application instance worked in dedicated thread
     StOpenInfo              myOpenInfo;       //!< info for file to load
-    StEvent                 myOpenEvent;      //!< event to be emitted when myOpenInfo configured with new file
+    StCondition             myOpenEvent;      //!< event to be emitted when myOpenInfo configured with new file
     CString                 myUrlFull;        //!< url to full-size image
     CString                 myUrlPreview;     //!< url to preview   image
     CString                 myMimeType;       //!< MIME type

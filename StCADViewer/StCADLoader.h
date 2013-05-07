@@ -67,7 +67,7 @@ class StCADLoader {
     StHandle<StThread>  myThread;
     StHandle<StLangMap> myLangMap;
     StPlayList          myPlayList;
-    StEvent             myEvLoadNext;
+    StCondition         myEvLoadNext;
     StHandle<StGLMesh>  myMesh;
     StMutex             myShapeLock;
     volatile bool       myIsLoaded;

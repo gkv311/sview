@@ -154,10 +154,10 @@ class StVideoQueue : public StAVPacketQueue {
         private:
 
     StHandle<StThread>         myThread;          //!< decoding loop thread
-    StEvent                    myDowntimeState;   //!< event to indicate downtime state
+    StCondition                myDowntimeState;   //!< event to indicate downtime state
     StHandle<StGLTextureQueue> myTextureQueue;    //!< decoded frames queue
 
-    StEvent                    myHasDataState;
+    StCondition                myHasDataState;
     StHandle<StVideoQueue>     myMaster;          //!< handle to Master decoding thread
     StHandle<StVideoQueue>     mySlave;           //!< handle to Slave  decoding thread
 

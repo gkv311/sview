@@ -219,7 +219,7 @@ class StAudioQueue : public StAVPacketQueue {
 
     StHandle<StThread> myThread;        //!< decoding loop thread
     mutable StTimer    myPlaybackTimer; //!< timer used for current PTS calculation
-    StEvent            myDowntimeEvent;
+    StCondition        myDowntimeEvent;
     StPCMBuffer        myBufferSrc;     //!< decoded PCM audio buffer
     StPCMBuffer        myBufferOut;     //!< output  PCM audio buffer
     StTimer            myLimitTimer;

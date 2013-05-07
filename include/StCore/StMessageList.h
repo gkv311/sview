@@ -33,7 +33,6 @@ typedef struct tagStMouseMessage {
     int       button; // mouse button
 } StMouseMessage_t;
 
-// TODO (Kirill Gavrilov#5#) name of the class is ambiguous, may tangle as StEvent list
 /**
  * Special class for StWindow callback events list.
  */

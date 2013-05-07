@@ -89,7 +89,7 @@ StDXNVWindow::StDXNVWindow(const size_t     theFboSizeX,
     //
     stMemSet(myMouseState, 0, sizeof(myMouseState));
     stMemSet(myVKeyState,  0, sizeof(myVKeyState));
-    // we create Win32 event directly (not StEvent) to use it with MsgWaitForMultipleObjects()
+    // we create Win32 event directly (not StCondition) to use it with MsgWaitForMultipleObjects()
     hEventReady  = CreateEvent(0, true, false, NULL);
     hEventQuit   = CreateEvent(0, true, false, NULL);
     hEventShow   = CreateEvent(0, true, false, NULL);

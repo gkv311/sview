@@ -230,8 +230,8 @@ class StWindowImpl {
 #ifdef _WIN32
     POINT              myPointTest;       //!< temporary point object to verify cached window position
     StHandle<StThread> myMsgThread;       //!< dedicated thread for window message loop
-    StEvent            myEventInitWin;    //!< special event waited from createWindows() thread
-    StEvent            myEventInitGl;
+    StCondition        myEventInitWin;    //!< special event waited from createWindows() thread
+    StCondition        myEventInitGl;
     HANDLE             myEventQuit;       //!< quit message thread event
     HANDLE             myEventCursorShow;
     HANDLE             myEventCursorHide;

@@ -92,7 +92,7 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
     myMonSlave.ySub = 0;
 
 #ifdef _WIN32
-    // we create Win32 event directly (not StEvent) to use it with MsgWaitForMultipleObjects()
+    // we create Win32 event directly (not StCondition) to use it with MsgWaitForMultipleObjects()
     myEventQuit       = CreateEvent(0, true, false, NULL);
     myEventCursorShow = CreateEvent(0, true, false, NULL);
     myEventCursorHide = CreateEvent(0, true, false, NULL);

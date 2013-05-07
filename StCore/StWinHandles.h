@@ -101,7 +101,7 @@ class StWinHandles {
 
 #ifdef _WIN32
     size_t      threadIdWnd; // id of the thread, in wich window was created
-    StEvent     evMsgThread; // special event to check message thread active state
+    StCondition evMsgThread; // special event to check message thread active state
     HWND            hWindow; // WinAPI windows' handles
     HWND          hWindowGl;
     StStringUtfWide   className; // WinAPI classes' names

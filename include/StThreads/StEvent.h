@@ -6,8 +6,8 @@
  * http://www.boost.org/LICENSE_1_0.txt
  */
 
-#ifndef __StEvent_h_
-#define __StEvent_h_
+#ifndef __StCondition_h_
+#define __StCondition_h_
 
 #ifdef _WIN32
     #include <windows.h> // we used global header instead Winbase.h to prevent namespaces collisions
@@ -26,14 +26,18 @@
 #endif
 
 /**
- * This is simple Event class that helps to talk threads between themselfs.
- * Object is similar to WinAPI Event.
+ * This is boolean flag intended for communication between threads.
+ * One thread sets this flag to TRUE to indicate some event happened
+ * and another thread either waits this event or checks periodically its state
+ * to perform job.
+ *
+ * This class provides interface similar to WinAPI Event objects.
  */
-class StEvent {
+class StCondition {
 
         public:
 
-    inline StEvent(bool isSignalling = true) {
+    inline StCondition(bool isSignalling = true) {
     #ifdef _WIN32
         myEvent = CreateEvent(0,            // default security attributes
                               true,         // manual-reset event
@@ -46,7 +50,7 @@ class StEvent {
     #endif
     }
 
-    inline ~StEvent() {
+    inline ~StCondition() {
     #ifdef _WIN32
         CloseHandle(myEvent);
     #else
@@ -170,4 +174,4 @@ class StEvent {
 
 };
 
-#endif //__StEvent_h_
+#endif //__StCondition_h_

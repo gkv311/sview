@@ -185,8 +185,8 @@ class StImageViewer : public StApplication {
     StHandle<StImageLoader>    myLoader;          //!< main image loader class
     StHandle<StCheckUpdates>   myUpdates;         //!< check updates utility
 
-    StEvent                    myEventDialog;     //!< event to prevent showing multiple open/save file dialogs
-    StEvent                    myEventLoaded;     //!< indicate that new file was open
+    StCondition                myEventDialog;     //!< event to prevent showing multiple open/save file dialogs
+    StCondition                myEventLoaded;     //!< indicate that new file was open
 
     StTimer                    mySlideShowTimer;  //!< slideshow stuff
     double                     mySlideShowDelay;
