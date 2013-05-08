@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -96,5 +96,27 @@ class StSlotMethod : public StSlot<slotMethod_t> {
     }
 
 };
+
+/**
+ * Structure to make single argument from class pointer and method pointer.
+ */
+template<typename class_t, typename method_t>
+struct stSlotPair_t {
+
+    class_t* ClassPtr;  //!< pointer to the class instance
+    method_t MethodPtr; //!< pointer to the method within the class
+
+};
+
+/**
+ * This template function do the magic - instantiate
+ * class pointer + method pointer pair without explicit template arguments.
+ */
+template<typename class_t, typename method_t>
+inline stSlotPair_t<class_t, method_t> stSlot(class_t* theInstance,
+                                              method_t theMethod) {
+    stSlotPair_t<class_t, method_t> aPair = { theInstance, theMethod };
+    return aPair;
+}
 
 #endif //__StSlotMethod_h_

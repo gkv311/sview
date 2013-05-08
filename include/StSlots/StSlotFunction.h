@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -64,7 +64,7 @@ class StSlotFunction : public StSlot<slotMethod_t> {
     }
 
     bool call() const {
-        if(isValidInline()()) {
+        if(isValidInline()) {
             myFunctionPtr();
             return true;
         }
@@ -72,7 +72,7 @@ class StSlotFunction : public StSlot<slotMethod_t> {
     }
 
     bool call(typename types::arg1_t arg1) const {
-        if(isValidInline()()) {
+        if(isValidInline()) {
             myFunctionPtr(arg1);
             return true;
         }
@@ -81,7 +81,7 @@ class StSlotFunction : public StSlot<slotMethod_t> {
 
     bool call(typename types::arg1_t arg1,
               typename types::arg2_t arg2) const {
-        if(isValidInline()()) {
+        if(isValidInline()) {
             myFunctionPtr(arg1, arg2);
             return true;
         }
@@ -91,7 +91,7 @@ class StSlotFunction : public StSlot<slotMethod_t> {
     bool call(typename types::arg1_t arg1,
               typename types::arg2_t arg2,
               typename types::arg3_t arg3) const {
-        if(isValidInline()()) {
+        if(isValidInline()) {
             myFunctionPtr(arg1, arg2, arg3);
             return true;
         }

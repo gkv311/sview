@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -80,7 +80,7 @@ class ReceiverClass {
 // ReceiverClass.cpp
 ReceiverClass::ReceiverClass()
 : myPrivateInt(4), mySender() {
-   mySender.onSignal.connect(this, &ReceiverClass::doCallback);
+   mySender.onSignal = stSlot(this, &ReceiverClass::doCallback);
    mySender.loopIter();
 }
 
@@ -105,10 +105,6 @@ class StSignal {
 
     typedef StSlotTypes<stNoType, slotMethod_t> types; //!< fast link to all useful types
 
-        private:
-
-    StHandle< StSlot<slotMethod_t> > mySlot;           //!< connected Slot (stored as handle)
-
         public:
 
     /**
@@ -118,45 +114,82 @@ class StSignal {
     virtual ~StSignal() {}
 
     /**
-     * Disconnect all slots.
+     * Disconnect all connected slots.
      */
     void disconnect() {
         mySlot.nullify();
     }
 
     /**
-     * Major method to connect Slot - the receiver of this Signal.
-     * @param theClassPtr (class_t* ) - pointer to the class instance;
-     * @param theMethod - pointer to the class method;
-     * @return true if parameters are valid.
+     * Connect class method to this signal (analog for connect() method).
+     * It is supposed to use stSlot() template to create argument from class pointer + method pointer pair.
+     */
+    template<typename class_t>
+    StSignal& operator=(const stSlotPair_t<class_t, typename StSlotMethod<class_t, slotMethod_t>::method_t>& theMethod) {
+        mySlot.nullify();
+        if(theMethod.ClassPtr  != NULL
+        && theMethod.MethodPtr != NULL) {
+            mySlot = new StSlotMethod<class_t, slotMethod_t>(theMethod.ClassPtr, theMethod.MethodPtr);
+        }
+        return *this;
+    }
+
+    /**
+     * Connect function to this signal. Analog for connectStatic() method.
+     */
+    StSignal& operator=(slotMethod_t theFunction) {
+        mySlot.nullify();
+        if(theFunction != NULL) {
+            mySlot = new StSlotFunction<slotMethod_t>(theFunction);
+        }
+        return *this;
+    }
+
+    /**
+     * Connect Slot - the receiver of this Signal.
+     * Previously connected slot(s) will be disconnected in result.
+     * @param theClassPtr pointer to the class instance
+     * @param theMethod   pointer to the class method
+     * @return true if parameters are valid
      */
     template<typename class_t>
     bool connect(class_t* theClassPtr,
                  typename StSlotMethod<class_t, slotMethod_t>::method_t theMethod) {
+        mySlot.nullify();
+        if(theClassPtr == NULL
+        || theMethod   == NULL) {
+            return false;
+        }
+
         mySlot = new StSlotMethod<class_t, slotMethod_t> (theClassPtr, theMethod);
-        return !mySlot.isNull() && mySlot->isValid();
+        return mySlot->isValid();
     }
 
     /**
      * Method to connect Slot, doesn't provide compiler-time types check.
-     * @param theClassPtr (void* ) - pointer to the class instance;
-     * @param theMethod - pointer to the static class method which retrieves the class pointer as first argument;
-     * @return true if parameters are valid.
+     * @param theClassPtr pointer to the class instance
+     * @param theMethod   pointer to the static class method which retrieves the class pointer as first argument
+     * @return true if parameters are valid
      */
     bool connectUnsafe(void* theClassPtr,
                        typename StSlotMethodUnsafe<slotMethod_t>::method_t theMethod) {
         mySlot = new StSlotMethodUnsafe<slotMethod_t> (theClassPtr, theMethod);
-        return !mySlot.isNull() && mySlot->isValid();
+        return mySlot->isValid();
     }
 
     /**
      * Method to connect Slot.
-     * @param theFunction - pointer to the static function;
-     * @return true if parameters are valid.
+     * @param theFunction pointer to the static function
+     * @return true if parameters are valid
      */
     bool connectStatic(slotMethod_t theFunction) {
-        mySlot = new StSlotFunction<slotMethod_t> (theFunction);
-        return !mySlot.isNull() && mySlot->isValid();
+        mySlot.nullify();
+        if(theFunction == NULL) {
+            return false;
+        }
+
+        mySlot = new StSlotFunction<slotMethod_t>(theFunction);
+        return mySlot->isValid();
     }
 
         public:
@@ -206,6 +239,10 @@ class StSignal {
     bool operator()(typename types::arg1_t arg1,
                     typename types::arg2_t arg2,
                     typename types::arg3_t arg3) const { return emit(arg1, arg2, arg3); }
+
+        private:
+
+    StHandle< StSlot<slotMethod_t> > mySlot; //!< handle to connected Slot
 
 };
 
