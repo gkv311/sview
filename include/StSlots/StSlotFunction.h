@@ -63,6 +63,15 @@ class StSlotFunction : public StSlot<slotMethod_t> {
         return isValidInline();
     }
 
+    /**
+     * Compare two slots.
+     */
+    virtual bool isEqual(const StSlot<slotMethod_t>& theOther) const {
+        const StSlotFunction* anOther = dynamic_cast<const StSlotFunction*>(&theOther);
+        return anOther       != NULL
+            && myFunctionPtr == anOther->myFunctionPtr;
+    }
+
     bool call() const {
         if(isValidInline()) {
             myFunctionPtr();

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -38,6 +38,11 @@ class StSlot<void ()> {
      */
     virtual bool call() const = 0;
 
+    /**
+     * Virtual method to compare slots.
+     */
+    virtual bool isEqual(const StSlot& theOther) const = 0;
+
 };
 
 /**
@@ -60,6 +65,11 @@ class StSlot<void (arg1_t )> {
      * Virtual method to trigger the callback function.
      */
     virtual bool call(arg1_t arg1) const = 0;
+
+    /**
+     * Virtual method to compare slots.
+     */
+    virtual bool isEqual(const StSlot& theOther) const = 0;
 
 };
 
@@ -84,6 +94,11 @@ class StSlot<void (arg1_t , arg2_t )> {
      */
     virtual bool call(arg1_t arg1, arg2_t arg2) const = 0;
 
+    /**
+     * Virtual method to compare slots.
+     */
+    virtual bool isEqual(const StSlot& theOther) const = 0;
+
 };
 
 /**
@@ -106,6 +121,11 @@ class StSlot<void (arg1_t , arg2_t , arg3_t )> {
      * Virtual method to trigger the callback function.
      */
     virtual bool call(arg1_t arg1, arg2_t arg2, arg3_t arg3) const = 0;
+
+    /**
+     * Virtual method to compare slots.
+     */
+    virtual bool isEqual(const StSlot& theOther) const = 0;
 
 };
 

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -63,6 +63,16 @@ class StSlotMethodUnsafe : public StSlot<slotMethod_t> {
      */
     virtual bool isValid() const {
         return isValidInline();
+    }
+
+    /**
+     * Compare two slots.
+     */
+    virtual bool isEqual(const StSlot<slotMethod_t>& theOther) const {
+        const StSlotMethodUnsafe* anOther = dynamic_cast<const StSlotMethodUnsafe*>(&theOther);
+        return anOther     != NULL
+            && myClassPtr  == anOther->myClassPtr
+            && myMethodPtr == anOther->myMethodPtr;
     }
 
     bool call() const {
