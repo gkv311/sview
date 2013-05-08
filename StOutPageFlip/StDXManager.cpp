@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutPageFlip library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -16,13 +16,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
 
 #include "StDXManager.h"
 #include "StDXAqbsControl.h"
 
 #include <StCore/StMonitor.h>
-#include <StThreads/StThreads.h>
+#include <StThreads/StThread.h>
 
 #include <wnt/nvapi.h> // NVIDIA API supported only under Windows at this moment
 

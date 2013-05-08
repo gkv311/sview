@@ -14,7 +14,7 @@
 #include <stTypes.h>
 
 #ifdef _WIN32
-    void __stdcall Sleep(unsigned long theMilliseconds);
+    extern "C" __declspec(dllimport) void __stdcall Sleep(unsigned long theMilliseconds);
 #else
     #include <pthread.h>
     #include <unistd.h>

@@ -21,6 +21,7 @@
 #include "StWindowImpl.h"
 
 #include <StStrings/StLogger.h>
+#include <StThreads/StThread.h>
 
 #include <cmath>
 

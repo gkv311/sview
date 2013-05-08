@@ -7,7 +7,7 @@
  */
 
 #ifdef _WIN32
-    #include <windows.h> // we used global header instead Winbase.h to prevent namespaces collisions
+    #include <windows.h>
 #else
     #include <pthread.h>
     #include <unistd.h>
@@ -19,7 +19,7 @@
 
 StCondition::StCondition()
 #ifdef _WIN32
-: myEvent((void* )CreateEvent(0, true, theIsSet, NULL))
+: myEvent((void* )CreateEvent(0, true, true, NULL))
 #else
 : myFlag(true)
 #endif

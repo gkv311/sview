@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutPageFlip library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -25,7 +25,8 @@
 
 #include <StCore/StMonitor.h>
 #include <StCore/StWindow.h>
-#include <StThreads/StThreads.h>
+#include <StThreads/StMutex.h>
+#include <StThreads/StThread.h>
 
 /**
  * Direct3D window.

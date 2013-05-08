@@ -25,8 +25,10 @@
 #include <objsafe.h>
 
 #include <StCore/StApplication.h>
+#include <StThreads/StCondition.h>
 
 class StApplication;
+class StThread;
 
 /**
  * ActiveX Control.

@@ -28,6 +28,7 @@
 #include <StStrings/StLogger.h>
 #include <StVersion.h>
 #include <StFile/StFolder.h>
+#include <StThreads/StThread.h>
 
 #include "../StImageViewer/StImageViewer.h"
 
