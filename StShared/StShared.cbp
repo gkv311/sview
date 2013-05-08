@@ -444,6 +444,7 @@
 		<Unit filename="../include/StSlots/StSlotFunction.h" />
 		<Unit filename="../include/StSlots/StSlotMethod.h" />
 		<Unit filename="../include/StSlots/StSlotMethodUnsafe.h" />
+		<Unit filename="../include/StSlots/StSlotProxy.h" />
 		<Unit filename="../include/StSlots/StSlotTypes.h" />
 		<Unit filename="../include/StSocket/StCheckUpdates.h" />
 		<Unit filename="../include/StSocket/StSocket.h" />

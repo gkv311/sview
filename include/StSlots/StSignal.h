@@ -14,6 +14,7 @@
 #include "StSlotFunction.h"
 #include "StSlotMethod.h"
 #include "StSlotMethodUnsafe.h"
+#include "StSlotProxy.h"
 
 /** @page signals_and_slots Signals and Slots
 
@@ -143,6 +144,114 @@ class StSignal {
             mySlot = new StSlotFunction<slotMethod_t>(theFunction);
         }
         return *this;
+    }
+
+    /**
+     * Connect more slots to this signal.
+     */
+    void connectExtra(const StHandle< StSlot<slotMethod_t> >& theSlot) {
+        if(theSlot.isNull()) {
+            return;
+        } else if(mySlot.isNull()) {
+            mySlot = theSlot;
+            return;
+        }
+
+        // check there no duplicates
+        StHandle< StSlotProxy<slotMethod_t> > aProxy;
+        for(StHandle< StSlot<slotMethod_t> > aSlotIter = mySlot; aProxy.downcastFrom(aSlotIter); aSlotIter = aProxy->mySlot) {
+            if(!aProxy->mySlot.isNull()
+             && aProxy->mySlot->isEqual(*theSlot)) {
+                return;
+            } else if(!aProxy->myNext.isNull()
+                    && aProxy->myNext->isEqual(*theSlot)) {
+                return;
+            }
+        }
+
+        StHandle< StSlot<slotMethod_t> > aNewSlot = new StSlotProxy<slotMethod_t>(mySlot, theSlot);
+        mySlot = aNewSlot;
+    }
+
+    /**
+     * Connect one more class method to this signal.
+     */
+    template<typename class_t>
+    void operator+=(const stSlotPair_t<class_t, typename StSlotMethod<class_t, slotMethod_t>::method_t>& theMethod) {
+        if(theMethod.ClassPtr  != NULL
+        && theMethod.MethodPtr != NULL) {
+            connectExtra(new StSlotMethod<class_t, slotMethod_t>(theMethod.ClassPtr, theMethod.MethodPtr));
+        }
+    }
+
+    /**
+     * Connect one more function to this signal.
+     */
+    void operator+=(slotMethod_t theFunction) {
+        if(theFunction != NULL) {
+            connectExtra(new StSlotFunction<slotMethod_t>(theFunction));
+        }
+    }
+
+    /**
+     * Disconnect slot from this signal.
+     */
+    void disconnect(const StSlot<slotMethod_t>& theSlot) {
+        if(mySlot->isEqual(theSlot)) {
+            mySlot.nullify();
+            return;
+        }
+
+        StHandle< StSlotProxy<slotMethod_t> > aProxy;
+        StHandle< StSlotProxy<slotMethod_t> > aProxyPrev;
+        for(StHandle< StSlot<slotMethod_t> > aSlotIter = mySlot; aProxy.downcastFrom(aSlotIter); aSlotIter = aProxy->mySlot) {
+            if(!aProxy->mySlot.isNull()
+             && aProxy->mySlot->isEqual(theSlot)) {
+                if(aProxyPrev.isNull()) {
+                    mySlot = aProxy->myNext;
+                } else {
+                    aProxyPrev->mySlot = aProxy->myNext;
+                }
+                break;
+            } else if(!aProxy->myNext.isNull()
+                    && aProxy->myNext->isEqual(theSlot)) {
+                if(aProxyPrev.isNull()) {
+                    mySlot = aProxy->mySlot;
+                } else {
+                    aProxyPrev->mySlot = aProxy->mySlot;
+                }
+                break;
+            }
+            aProxyPrev = aProxy;
+        }
+    }
+
+    /**
+     * Disconnect class method from this signal.
+     */
+    template<typename class_t>
+    void operator-=(const stSlotPair_t<class_t, typename StSlotMethod<class_t, slotMethod_t>::method_t>& theMethod) {
+        if(theMethod.ClassPtr  == NULL
+        || theMethod.MethodPtr == NULL
+        || mySlot.isNull()) {
+            return;
+        }
+
+        const StSlotMethod<class_t, slotMethod_t> aSlot(theMethod.ClassPtr, theMethod.MethodPtr);
+        disconnect(aSlot);
+    }
+
+    /**
+     * Disconnect function from this signal.
+     */
+    void operator-=(slotMethod_t theFunction) {
+        if(theFunction == NULL
+        || mySlot.isNull()) {
+            return;
+        }
+
+        const StSlot<slotMethod_t> aSlot(theFunction);
+        disconnect(aSlot);
     }
 
     /**
