@@ -115,7 +115,7 @@ class StThread {
      */
     ST_LOCAL inline bool isValid() const {
     #ifdef _WIN32
-        return myThread != NULL;
+        return myThread != 0U;
     #else
         return myHasHandle; // myThread != PTHREAD_NULL
     #endif
