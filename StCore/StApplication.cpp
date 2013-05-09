@@ -210,6 +210,7 @@ bool StApplication::open() {
         myWindow->signals.onKeyUp     = stSlot(this, &StApplication::doKeyUp);
         myWindow->signals.onMouseDown = stSlot(this, &StApplication::doMouseDown);
         myWindow->signals.onMouseUp   = stSlot(this, &StApplication::doMouseUp);
+        myWindow->signals.onFileDrop  = stSlot(this, &StApplication::doFileDrop);
     }
 
     return myIsOpened;
@@ -260,11 +261,12 @@ bool StApplication::resetDevice() {
     return false;
 }
 
-void StApplication::doResize   (const StSizeEvent&  ) {}
-void StApplication::doKeyDown  (const StKeyEvent&   ) {}
-void StApplication::doKeyUp    (const StKeyEvent&   ) {}
-void StApplication::doMouseDown(const StClickEvent& ) {}
-void StApplication::doMouseUp  (const StClickEvent& ) {}
+void StApplication::doResize   (const StSizeEvent&   ) {}
+void StApplication::doKeyDown  (const StKeyEvent&    ) {}
+void StApplication::doKeyUp    (const StKeyEvent&    ) {}
+void StApplication::doMouseDown(const StClickEvent&  ) {}
+void StApplication::doMouseUp  (const StClickEvent&  ) {}
+void StApplication::doFileDrop (const StDNDropEvent& ) {}
 
 void StApplication::processEvents() {
     if(myWindow.isNull() || !myIsOpened) {

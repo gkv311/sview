@@ -160,6 +160,11 @@ class StApplication {
      */
     ST_CPPEXPORT virtual void doMouseUp(const StClickEvent& theEvent);
 
+    /**
+     * Process file Drag & Drop event.
+     */
+    ST_CPPEXPORT virtual void doFileDrop(const StDNDropEvent& theEvent);
+
         public: //! @name public parameters
 
     struct {

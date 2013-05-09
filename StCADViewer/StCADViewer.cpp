@@ -543,23 +543,19 @@ void StCADViewer::doKeyDown(const StKeyEvent& theEvent) {
     }
 }
 
+void StCADViewer::doFileDrop(const StDNDropEvent& theEvent) {
+    const StString aFilePath = theEvent.File;
+    if(myCADLoader->getPlayList().checkExtension(aFilePath)) {
+        myCADLoader->getPlayList().open(aFilePath);
+        doUpdateStateLoading();
+        myCADLoader->doLoadNext();
+    }
+}
+
 void StCADViewer::processEvents(const StMessage_t* theEvents) {
     size_t evId(0);
     for(; theEvents[evId].uin != StMessageList::MSG_NULL; ++evId) {
         switch(theEvents[evId].uin) {
-            case StMessageList::MSG_DRAGNDROP_IN: {
-                StString aFilePath;
-                int aFilesCount = myWindow->getDragNDropFile(-1, aFilePath);
-                if(aFilesCount > 0) {
-                    myWindow->getDragNDropFile(0, aFilePath);
-                    if(myCADLoader->getPlayList().checkExtension(aFilePath)) {
-                        myCADLoader->getPlayList().open(aFilePath);
-                        doUpdateStateLoading();
-                        myCADLoader->doLoadNext();
-                    }
-                }
-                break;
-            }
             case StMessageList::MSG_CLOSE:
             case StMessageList::MSG_EXIT: {
                 StApplication::exit(0);

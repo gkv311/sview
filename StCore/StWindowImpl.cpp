@@ -69,8 +69,6 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
 #elif (defined(__APPLE__))
   mySleepAssert(0),
 #endif
-  myDndCount(0),
-  myDndList(NULL),
   myIsUpdated(false),
   myIsActive(false),
   myBlockSleep(BlockSleep_OFF),
@@ -91,7 +89,6 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
     attribs.Slave      = StWinSlave_slaveOff;
     attribs.SlaveMonId = 1;
 
-    myDndList = new StString[1];
     myMonSlave.idMaster = 0;
     myMonSlave.idSlave  = 1; // second by default
     myMonSlave.xAdd = 1;
@@ -138,7 +135,6 @@ void StWindowImpl::updateMonitors() {
 
 StWindowImpl::~StWindowImpl() {
     close();
-    delete[] myDndList;
 #ifdef _WIN32
     CloseHandle(myEventQuit);
     CloseHandle(myEventCursorShow);
@@ -718,24 +714,6 @@ StPointD_t StWindowImpl::getMousePos() {
     return StPointD_t(0.0, 0.0);
 }
 
-int StWindowImpl::getDragNDropFile(const int theIndex,
-                                   StString& theFile) {
-    myDndMutex.lock();
-    if(theIndex < 0) {
-        size_t aCount = myDndCount;
-        myDndMutex.unlock();
-        return (int )aCount; // returns files' count
-    }
-    if(theIndex >= (int )myDndCount) {
-        myDndMutex.unlock();
-        return -1; // returns error
-    }
-
-    theFile = myDndList[theIndex];
-    myDndMutex.unlock();
-    return 0; // returns success
-}
-
 // Change active GL context in current thread
 void StWindowImpl::stglMakeCurrent(const int& winNum){
     switch(winNum) {
@@ -807,12 +785,14 @@ stBool_t StWindowImpl::appendMessage(const StMessage_t& stMessage) {
             //myMDownQueue.clear();
             //StMouseMessage_t* mouseData = (StMouseMessage_t* )stMessage.data;
             //myMDownQueue.push(mouseData->point, mouseData->button);
-            return myMessageList.append(StMessageList::MSG_MOUSE_DOWN);
+            //return myMessageList.append(StMessageList::MSG_MOUSE_DOWN);
+            return false;
         }
         case StMessageList::MSG_MOUSE_UP_APPEND: {
             //StMouseMessage_t* mouseData = (StMouseMessage_t* )stMessage.data;
             //myMUpQueue.push(mouseData->point, mouseData->button);
-            return myMessageList.append(StMessageList::MSG_MOUSE_UP);
+            //return myMessageList.append(StMessageList::MSG_MOUSE_UP);
+            return false;
         }
         case StMessageList::MSG_KEY_DOWN_APPEND: {
             myMessageList.getKeysMap()[(size_t )stMessage.data] = true;

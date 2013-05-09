@@ -60,6 +60,7 @@ class StXDisplay {
     Atom        xDNDProxy;
     Atom        xDNDAware;
     Atom    xDNDPlainText;
+    Atom      xDNDPrimary;
     Atom       XA_TARGETS;
 
         private:

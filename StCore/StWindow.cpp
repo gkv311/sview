@@ -26,6 +26,7 @@ void StWindow::copySignals() {
     myWin->signals.onKeyDown   = &signals.onKeyDown;
     myWin->signals.onMouseUp   = &signals.onMouseUp;
     myWin->signals.onMouseDown = &signals.onMouseDown;
+    myWin->signals.onFileDrop  = &signals.onFileDrop;
 }
 
 StWindow::StWindow()
@@ -151,11 +152,6 @@ void StWindow::setPlacement(const StRectI_t& theRect,
 
 StPointD_t StWindow::getMousePos() const {
     return myWin->getMousePos();
-}
-
-int StWindow::getDragNDropFile(const int theId,
-                               StString& theFile) {
-    return myWin->getDragNDropFile(theId, theFile);
 }
 
 bool StWindow::create() {

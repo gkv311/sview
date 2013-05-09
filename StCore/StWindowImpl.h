@@ -60,7 +60,6 @@ class StWindowImpl {
     ST_LOCAL void setPlacement(const StRectI_t& theRect,
                                const bool       theMoveToScreen);
     ST_LOCAL StPointD_t getMousePos();
-    ST_LOCAL int getDragNDropFile(const int theId, StString& theFile);
     ST_LOCAL bool create();
     ST_LOCAL void stglSwap(const int& theWinId);
     ST_LOCAL void stglMakeCurrent(const int& theWinId);
@@ -259,10 +258,6 @@ class StWindowImpl {
     char               myXInputBuff[32];
 #endif
 
-    StMutex            myDndMutex;        //!< access mustex for Drag&Drop file list
-    size_t             myDndCount;        //!< files' count
-    StString*          myDndList;         //!< Drag&Drop list
-
     StMessageList      myMessageList;     //!< callback list
     bool               myIsUpdated;       //!< helper flag on window movements updates
     bool               myIsActive;        //!< window visible state
@@ -290,11 +285,12 @@ class StWindowImpl {
     } attribs;
 
     struct {
-        StSignal<void (const StSizeEvent&  )>* onResize;
-        StSignal<void (const StKeyEvent&   )>* onKeyUp;
-        StSignal<void (const StKeyEvent&   )>* onKeyDown;
-        StSignal<void (const StClickEvent& )>* onMouseUp;
-        StSignal<void (const StClickEvent& )>* onMouseDown;
+        StSignal<void (const StSizeEvent&   )>* onResize;
+        StSignal<void (const StKeyEvent&    )>* onKeyUp;
+        StSignal<void (const StKeyEvent&    )>* onKeyDown;
+        StSignal<void (const StClickEvent&  )>* onMouseUp;
+        StSignal<void (const StClickEvent&  )>* onMouseDown;
+        StSignal<void (const StDNDropEvent& )>* onFileDrop;
     } signals;
 
     StTimer        myEventsTimer;

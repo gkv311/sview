@@ -637,26 +637,22 @@ void StMoviePlayer::doMouseUp(const StClickEvent& theEvent) {
     }
 }
 
+void StMoviePlayer::doFileDrop(const StDNDropEvent& theEvent) {
+    const StString aFilePath = theEvent.File;
+    if(myVideo->getPlayList().checkExtension(aFilePath)) {
+        myVideo->getPlayList().open(aFilePath);
+        doUpdateStateLoading();
+        myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
+        myVideo->doLoadNext();
+    }
+}
+
 void StMoviePlayer::processEvents(const StMessage_t* theEvents) {
     bool isMouseMove = false;
     for(size_t evId = 0; theEvents[evId].uin != StMessageList::MSG_NULL; ++evId) {
         switch(theEvents[evId].uin) {
             case StMessageList::MSG_FULLSCREEN_SWITCH: {
                 params.isFullscreen->setValue(myWindow->isFullScreen());
-                break;
-            }
-            case StMessageList::MSG_DRAGNDROP_IN: {
-                StString aFilePath;
-                int aFilesNb = myWindow->getDragNDropFile(-1, aFilePath);
-                if(aFilesNb > 0) {
-                    myWindow->getDragNDropFile(0, aFilePath);
-                    if(myVideo->getPlayList().checkExtension(aFilePath)) {
-                        myVideo->getPlayList().open(aFilePath);
-                        doUpdateStateLoading();
-                        myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
-                        myVideo->doLoadNext();
-                    }
-                }
                 break;
             }
             case StMessageList::MSG_CLOSE:

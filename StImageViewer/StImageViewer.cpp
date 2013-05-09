@@ -527,6 +527,15 @@ void StImageViewer::doMouseUp(const StClickEvent& theEvent) {
     myGUI->tryUnClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
 }
 
+void StImageViewer::doFileDrop(const StDNDropEvent& theEvent) {
+    const StString aFilePath = theEvent.File;
+    if(myLoader->getPlayList().checkExtension(aFilePath)) {
+        myLoader->getPlayList().open(aFilePath);
+        doUpdateStateLoading();
+        myLoader->doLoadNext();
+    }
+}
+
 void StImageViewer::processEvents(const StMessage_t* theEvents) {
     bool isMouseMove = false;
     size_t evId(0);
@@ -534,19 +543,6 @@ void StImageViewer::processEvents(const StMessage_t* theEvents) {
         switch(theEvents[evId].uin) {
             case StMessageList::MSG_FULLSCREEN_SWITCH: {
                 params.isFullscreen->setValue(myWindow->isFullScreen());
-                break;
-            }
-            case StMessageList::MSG_DRAGNDROP_IN: {
-                StString aFilePath;
-                int aFilesNb = myWindow->getDragNDropFile(-1, aFilePath);
-                if(aFilesNb > 0) {
-                    myWindow->getDragNDropFile(0, aFilePath);
-                    if(myLoader->getPlayList().checkExtension(aFilePath)) {
-                        myLoader->getPlayList().open(aFilePath);
-                        doUpdateStateLoading();
-                        myLoader->doLoadNext();
-                    }
-                }
                 break;
             }
             case StMessageList::MSG_CLOSE:

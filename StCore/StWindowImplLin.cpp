@@ -556,7 +556,7 @@ void StWindowImpl::parseXDNDClientMsg() {
         //
     } else if(myXEvent.xclient.message_type == aDisplay->xDNDDrop) {
         myMaster.xDNDSrcWindow = myXEvent.xclient.data.l[0];
-        Atom aSelection = XInternAtom(aDisplay->hDisplay, "PRIMARY", 0);
+        Atom aSelection = aDisplay->xDNDPrimary;
         if(myMaster.xDNDVersion >= 1) {
             XConvertSelection(aDisplay->hDisplay, aDisplay->xDNDSelection, myMaster.xDNDRequestType,
                               aSelection, aWinReciever, myXEvent.xclient.data.l[2]);
@@ -582,18 +582,13 @@ void StWindowImpl::parseXDNDSelectionMsg() {
     if(myXEvent.xselection.property == None) {
         return;
     } else {
-        Atom aSelection = XInternAtom(aDisplay->hDisplay, "PRIMARY", 0);
+        Atom aSelection = aDisplay->xDNDPrimary;
         Property aProperty = aDisplay->readProperty(aWinReciever, aSelection);
         //If we're being given a list of targets (possible conversions)
         if(aTarget == aDisplay->XA_TARGETS) {
             XConvertSelection(aDisplay->hDisplay, aSelection, XA_STRING, aSelection, aWinReciever, CurrentTime);
         } else if(aTarget == myMaster.xDNDRequestType) {
             StString aData = StString((char* )aProperty.data);
-
-            myDndMutex.lock();
-            myDndCount = 1;
-            delete[] myDndList;
-            myDndList = new StString[1];
 
             size_t anEndChar = aData.getLength();
             for(StUtf8Iter anIter = aData.iterator(); *anIter != 0; ++anIter) {
@@ -604,20 +599,20 @@ void StWindowImpl::parseXDNDSelectionMsg() {
                 }
             }
 
-            // TODO (Kirill Gavrilov#5#) improve functionality
-            // notes:
-            // 1) dragndrop can move not only strings
-            // 2) filename converted to links (maybe non-local!)
             const StString ST_FILE_PROTOCOL("file://");
             size_t aCutFrom = aData.isStartsWith(ST_FILE_PROTOCOL) ? ST_FILE_PROTOCOL.getLength() : 0;
             aData = aData.subString(aCutFrom, anEndChar);
+            StString aFile;
             if(myMaster.xDNDRequestType != XA_STRING) {
-                myDndList[0].fromUrl(aData);
+                aFile.fromUrl(aData);
             } else {
-                myDndList[0] = aData;
+                aFile = aData;
             }
-            myDndMutex.unlock();
-            myMessageList.append(StMessageList::MSG_DRAGNDROP_IN);
+            myStEvent.Type = stEvent_FileDrop;
+            myStEvent.DNDrop.Time = getEventTime(myXEvent.xselection.time);
+            myStEvent.DNDrop.File = aFile.toCString();
+            signals.onFileDrop->emit(myStEvent.DNDrop);
+
             //ST_DEBUG_LOG(data);
 
             // Reply OK

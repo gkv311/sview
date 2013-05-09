@@ -50,9 +50,6 @@ class StMessageList {
         MSG_INIT = 4,   // reserved
         MSG_KEYS = 5,
         MSG_RESIZE = 6,
-        MSG_DRAGNDROP_IN = 7,
-        MSG_MOUSE_DOWN = 8,
-        MSG_MOUSE_UP = 9,
         MSG_MOUSE_MOVE = 10,
         MSG_OPEN_FILE = 11,
         MSG_DEVICE_INFO = 12,

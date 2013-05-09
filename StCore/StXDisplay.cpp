@@ -40,6 +40,7 @@ StXDisplay::StXDisplay()
   xDNDProxy(None),
   xDNDAware(None),
   xDNDPlainText(None),
+  xDNDPrimary(None),
   XA_TARGETS(None) {
     open();
 }
@@ -118,6 +119,7 @@ void StXDisplay::initAtoms() {
     xDNDProxy      = XInternAtom(hDisplay, "XdndProxy",        False);
     xDNDAware      = XInternAtom(hDisplay, "XdndAware",        False);
     xDNDPlainText  = XInternAtom(hDisplay, "text/plain",       False); //"UTF8_STRING", "COMPOUND_TEXT"
+    xDNDPrimary    = XInternAtom(hDisplay, "PRIMARY",          False);
     // This is a meta-format for data to be "pasted" in to.
     // Requesting this format acquires a list of possible
     // formats from the application which copied the data.

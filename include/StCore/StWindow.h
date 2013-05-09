@@ -218,15 +218,6 @@ class StWindow {
     ST_CPPEXPORT StPointD_t getMousePos() const;
 
     /**
-     * Function to get Drag&Drop file list.
-     * @param theId   file if in list
-     * @param theFile buffer for file path;
-     * @return number of files in list if theId < 0 and -1 on error
-     */
-    ST_CPPEXPORT int getDragNDropFile(const int theId,
-                                      StString& theFile);
-
-    /**
      * Function creates a GL window.
      * @return true on success
      */
@@ -344,13 +335,14 @@ class StWindow {
          * Emit callback Slot on redraw.
          * @param theView view id to redraw
          */
-        StSignal<void (const unsigned int )>  onRedraw;
+        StSignal<void (const unsigned int   )> onRedraw;
 
-        StSignal<void (const StSizeEvent&  )> onResize;
-        StSignal<void (const StKeyEvent&   )> onKeyUp;
-        StSignal<void (const StKeyEvent&   )> onKeyDown;
-        StSignal<void (const StClickEvent& )> onMouseUp;
-        StSignal<void (const StClickEvent& )> onMouseDown;
+        StSignal<void (const StSizeEvent&   )> onResize;
+        StSignal<void (const StKeyEvent&    )> onKeyUp;
+        StSignal<void (const StKeyEvent&    )> onKeyDown;
+        StSignal<void (const StClickEvent&  )> onMouseUp;
+        StSignal<void (const StClickEvent&  )> onMouseDown;
+        StSignal<void (const StDNDropEvent& )> onFileDrop;
 
     } signals;
 
