@@ -206,6 +206,8 @@ bool StApplication::open() {
         // connect slots
         myWindow->signals.onRedraw    = stSlot(this, &StApplication::stglDraw);
         myWindow->signals.onResize    = stSlot(this, &StApplication::doResize);
+        myWindow->signals.onKeyDown   = stSlot(this, &StApplication::doKeyDown);
+        myWindow->signals.onKeyUp     = stSlot(this, &StApplication::doKeyUp);
         myWindow->signals.onMouseDown = stSlot(this, &StApplication::doMouseDown);
         myWindow->signals.onMouseUp   = stSlot(this, &StApplication::doMouseUp);
     }
@@ -259,6 +261,8 @@ bool StApplication::resetDevice() {
 }
 
 void StApplication::doResize   (const StSizeEvent&  ) {}
+void StApplication::doKeyDown  (const StKeyEvent&   ) {}
+void StApplication::doKeyUp    (const StKeyEvent&   ) {}
 void StApplication::doMouseDown(const StClickEvent& ) {}
 void StApplication::doMouseUp  (const StClickEvent& ) {}
 

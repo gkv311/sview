@@ -105,36 +105,36 @@ void StDiagnostics::doMouseUp(const StClickEvent& theEvent) {
     myGUI->tryUnClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
 }
 
+void StDiagnostics::doKeyDown(const StKeyEvent& theEvent) {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    switch(theEvent.VKey) {
+        case ST_VK_ESCAPE:
+            StApplication::exit(0);
+            return;
+        case ST_VK_F:
+        case ST_VK_RETURN:
+            doSwitchFullscreen();
+            return;
+        case ST_VK_M:
+            myWindow->setStereoOutput(false);
+            return;
+        case ST_VK_S:
+            myWindow->setStereoOutput(true);
+            return;
+        default:
+            break;
+    }
+}
+
 void StDiagnostics::processEvents(const StMessage_t* theEvents) {
     for(size_t anIter = 0; theEvents[anIter].uin != StMessageList::MSG_NULL; ++anIter) {
         switch(theEvents[anIter].uin) {
             case StMessageList::MSG_CLOSE:
             case StMessageList::MSG_EXIT: {
                 StApplication::exit(0);
-                break;
-            }
-            case StMessageList::MSG_KEYS: {
-                bool* aKeys = (bool* )theEvents[anIter].data;
-                if(aKeys[ST_VK_ESCAPE]) {
-                    StApplication::exit(0);
-                    return;
-                }
-                if(aKeys[ST_VK_F]) {
-                    doSwitchFullscreen();
-                    aKeys[ST_VK_F] = false;
-                }
-                if(aKeys[ST_VK_RETURN]) {
-                    doSwitchFullscreen();
-                    aKeys[ST_VK_RETURN] = false;
-                }
-                if(aKeys[ST_VK_M]) {
-                    myWindow->setStereoOutput(false);
-                    aKeys[ST_VK_M] = false;
-                }
-                if(aKeys[ST_VK_S]) {
-                    myWindow->setStereoOutput(true);
-                    aKeys[ST_VK_S] = false;
-                }
                 break;
             }
         }

@@ -33,6 +33,12 @@ enum StVirtButton {
     ST_MOUSE_MAX_ID = ST_MOUSE_SCROLL_RIGHT,
 };
 
+enum StVirtFlags {
+    ST_VF_NONE    = 0x00000000,
+    ST_VF_SHIFT   = 0x02000000, // ST_VK_SHIFT
+    ST_VF_CONTROL = 0x04000000, // ST_VK_CONTROL
+};
+
 /**
  * This is VIRTUAL keys' codes definitions in 8-255 range.
  * This map useful for 'game-style' or short-cuts keyboard events lookup:

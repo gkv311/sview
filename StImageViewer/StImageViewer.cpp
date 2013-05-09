@@ -334,6 +334,170 @@ void StImageViewer::doResize(const StSizeEvent& theEvent) {
     myGUI->stglResize(myWindow->getPlacement());
 }
 
+void StImageViewer::doKeyDown(const StKeyEvent& theEvent) {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    switch(theEvent.VKey) {
+        case ST_VK_ESCAPE: {
+            if(!myEscNoQuit) {
+                StApplication::exit(0);
+            } else if(myWindow->isFullScreen()) {
+                params.isFullscreen->setValue(false);
+            }
+            return;
+        }
+        case ST_VK_F:
+        case ST_VK_RETURN:
+            params.isFullscreen->reverse();
+            return;
+        case ST_VK_F12:
+            params.ToShowFps->reverse();
+            return;
+        case ST_VK_W:
+            myGUI->stImageRegion->params.swapLR->reverse();
+            return;
+
+        // file walk
+        case ST_VK_I:
+            myGUI->doAboutImage(0);
+            return;
+        case ST_VK_SPACE:
+            doSlideShow();
+            return;
+        case ST_VK_HOME:
+            doListFirst();
+            return;
+        case ST_VK_PRIOR:
+        case ST_VK_MEDIA_PREV_TRACK:
+        case ST_VK_BROWSER_BACK:
+            doListPrev();
+            return;
+        case ST_VK_END:
+            doListLast();
+            return;
+        case ST_VK_NEXT:
+        case ST_VK_MEDIA_NEXT_TRACK:
+        case ST_VK_BROWSER_FORWARD:
+            doListNext();
+            return;
+        case ST_VK_O: {
+            if(theEvent.Flags == ST_VF_CONTROL) {
+                doOpenFileDialog(this, 1);
+            } else {
+                params.srcFormat->setValue(ST_V_SRC_OVER_UNDER_RL);
+            }
+            return;
+        }
+        case ST_VK_DELETE: {
+            if(theEvent.Flags == ST_VF_SHIFT) {
+                StHandle<StFileNode> aCurrFile = myLoader->getPlayList().getCurrentFile();
+                if(!aCurrFile.isNull() && aCurrFile->size() == 0) {
+                    if(stQuestion(StString("Are you sure you want to completely remove the file\n'") + aCurrFile->getPath() + "'?")) {
+                        myLoader->getPlayList().removePhysically(aCurrFile);
+                        if(!myLoader->getPlayList().isEmpty()) {
+                            doUpdateStateLoading();
+                            myLoader->doLoadNext();
+                        }
+                    }
+                }
+            }
+            return;
+        }
+
+        // source format
+        case ST_VK_A:
+            params.srcFormat->setValue(ST_V_SRC_AUTODETECT);
+            return;
+        case ST_VK_M:
+            params.srcFormat->setValue(ST_V_SRC_MONO);
+            return;
+        case ST_VK_S: {
+            if(theEvent.Flags == ST_VF_NONE) {
+                params.srcFormat->setValue(ST_V_SRC_SIDE_BY_SIDE);
+            } else if(theEvent.Flags == ST_VF_CONTROL) {
+                myLoader->doSaveImageAs(StImageFile::ST_TYPE_PNG);
+            }
+            return;
+        }
+
+        // reset stereo attributes
+        case ST_VK_BACK:
+            doReset();
+            return;
+        // post process keys
+        case ST_VK_G: {
+            if(theEvent.Flags == ST_VF_SHIFT) {
+                myGUI->stImageRegion->params.gamma->increment();
+            } else if(theEvent.Flags == ST_VF_CONTROL) {
+                myGUI->stImageRegion->params.gamma->decrement();
+            }
+            return;
+        }
+        case ST_VK_B: {
+            if(theEvent.Flags == ST_VF_SHIFT) {
+                myGUI->stImageRegion->params.brightness->increment();
+            } else if(theEvent.Flags == ST_VF_CONTROL) {
+                myGUI->stImageRegion->params.brightness->decrement();
+            }
+            return;
+        }
+        case ST_VK_T: {
+            /// TODO (Kirill Gavrilov#9) remove this hot key
+            if(theEvent.Flags == ST_VF_SHIFT) {
+                myGUI->stImageRegion->params.saturation->increment();
+            } else if(theEvent.Flags == ST_VF_CONTROL) {
+                myGUI->stImageRegion->params.saturation->decrement();
+            }
+            return;
+        }
+        default: break;
+    }
+
+    StHandle<StStereoParams> aParams = myGUI->stImageRegion->getSource();
+    if(aParams.isNull()) {
+        return;
+    }
+
+    switch(theEvent.VKey) {
+        case ST_VK_COMMA:
+        case ST_VK_DIVIDE: {
+            if(theEvent.Flags == ST_VF_CONTROL) {
+                aParams->decSeparationDy();
+            } else {
+                aParams->decSeparationDx();
+            }
+            return;
+        }
+        case ST_VK_PERIOD:
+        case ST_VK_MULTIPLY: {
+            if(theEvent.Flags == ST_VF_CONTROL) {
+                aParams->incSeparationDy();
+            } else {
+                aParams->incSeparationDx();
+            }
+            return;
+        }
+        case ST_VK_P:
+            aParams->nextViewMode();
+            return;
+        case ST_VK_BRACKETLEFT: {
+            if(theEvent.Flags == ST_VF_NONE) {
+                aParams->decZRotate();
+            }
+            return;
+        }
+        case ST_VK_BRACKETRIGHT: {
+            if(theEvent.Flags == ST_VF_NONE) {
+                aParams->incZRotate();
+            }
+            return;
+        }
+        default: break;
+    }
+}
+
 void StImageViewer::doMouseDown(const StClickEvent& theEvent) {
     if(myGUI.isNull()) {
         return;
@@ -392,17 +556,7 @@ void StImageViewer::processEvents(const StMessage_t* theEvents) {
             }
             case StMessageList::MSG_KEYS: {
                 bool* keysMap = (bool* )theEvents[evId].data;
-                if(keysMap[ST_VK_ESCAPE]) {
-                    // we could parse Escape key in other way
-                    if(!myEscNoQuit) {
-                        StApplication::exit(0);
-                        return;
-                    }
-                    if(myWindow->isFullScreen()) {
-                        params.isFullscreen->setValue(false);
-                    }
-                }
-                keysCommon(keysMap); break;
+                keysStereo(keysMap); break;
             }
             case StMessageList::MSG_MOUSE_MOVE: {
                 isMouseMove = true; break;
@@ -629,218 +783,46 @@ void StImageViewer::doLoaded() {
     myEventLoaded.set();
 }
 
-void StImageViewer::keysStereo(bool* keysMap) {
+void StImageViewer::keysStereo(const bool* theKeys) {
     StHandle<StStereoParams> aParams = myGUI->stImageRegion->getSource();
     if(aParams.isNull()) {
         return;
     }
 
-    if(keysMap['W']) {
-        myGUI->stImageRegion->params.swapLR->reverse();
-        keysMap['W'] = false;
-    }
-
     // ========= ZOOM factor: + - =========
-    if(keysMap[ST_VK_ADD] || keysMap[ST_VK_OEM_PLUS]) {
+    if(theKeys[ST_VK_ADD] || theKeys[ST_VK_OEM_PLUS]) {
         aParams->scaleIn();
     }
-    if(keysMap[ST_VK_SUBTRACT] || keysMap[ST_VK_OEM_MINUS]) {
+    if(theKeys[ST_VK_SUBTRACT] || theKeys[ST_VK_OEM_MINUS]) {
         aParams->scaleOut();
-    }
-    // ========= Separation factor ========
-    if(keysMap[ST_VK_CONTROL]) {
-        if(keysMap[ST_VK_DIVIDE]) {
-            aParams->decSeparationDy();
-            keysMap[ST_VK_DIVIDE] = false;
-        }
-        if(keysMap[ST_VK_COMMA]) {
-            aParams->decSeparationDy();
-            keysMap[ST_VK_COMMA] = false;
-        }
-        if(keysMap[ST_VK_MULTIPLY]) {
-            aParams->incSeparationDy();
-            keysMap[ST_VK_MULTIPLY] = false;
-        }
-        if(keysMap[ST_VK_PERIOD]) {
-            aParams->incSeparationDy();
-            keysMap[ST_VK_PERIOD] = false;
-        }
-    } else {
-        if(keysMap[ST_VK_DIVIDE]) {
-            aParams->decSeparationDx();
-            keysMap[ST_VK_DIVIDE] = false;
-        }
-        if(keysMap[ST_VK_COMMA]) {
-            aParams->decSeparationDx();
-            keysMap[ST_VK_COMMA] = false;
-        }
-        if(keysMap[ST_VK_MULTIPLY]) {
-            aParams->incSeparationDx();
-            keysMap[ST_VK_MULTIPLY] = false;
-        }
-        if(keysMap[ST_VK_PERIOD]) {
-            aParams->incSeparationDx();
-            keysMap[ST_VK_PERIOD] = false;
-        }
     }
 
     // ========= Positioning factor =======
-    if(keysMap[ST_VK_LEFT]) {
+    if(theKeys[ST_VK_LEFT]) {
         aParams->moveToRight();
     }
-    if(keysMap[ST_VK_RIGHT]) {
+    if(theKeys[ST_VK_RIGHT]) {
         aParams->moveToLeft();
     }
-    if(keysMap[ST_VK_UP]) {
+    if(theKeys[ST_VK_UP]) {
         aParams->moveToDown();
     }
-    if(keysMap[ST_VK_DOWN]) {
+    if(theKeys[ST_VK_DOWN]) {
         aParams->moveToUp();
     }
     // ========= Rotation =======
-    if(keysMap[ST_VK_BRACKETLEFT] && keysMap[ST_VK_CONTROL]) { // [
+    if(theKeys[ST_VK_BRACKETLEFT] && theKeys[ST_VK_CONTROL]) { // [
         aParams->decZRotateL();
     }
-    if(keysMap[ST_VK_BRACKETRIGHT] && keysMap[ST_VK_CONTROL]) { // ]
+    if(theKeys[ST_VK_BRACKETRIGHT] && theKeys[ST_VK_CONTROL]) { // ]
         aParams->incZRotateL();
     }
-    if(keysMap[ST_VK_BRACKETLEFT] && !keysMap[ST_VK_CONTROL]) { // [
-        aParams->decZRotate();
-        keysMap[ST_VK_BRACKETLEFT] = false;
-    }
-    if(keysMap[ST_VK_BRACKETRIGHT] && !keysMap[ST_VK_CONTROL]) { // ]
-        aParams->incZRotate();
-        keysMap[ST_VK_BRACKETRIGHT] = false;
-    }
-    if(keysMap[ST_VK_SEMICOLON] && keysMap[ST_VK_CONTROL]) { // ;
+
+    if(theKeys[ST_VK_SEMICOLON] && theKeys[ST_VK_CONTROL]) { // ;
         aParams->incSepRotation();
     }
-    if(keysMap[ST_VK_APOSTROPHE] && keysMap[ST_VK_CONTROL]) { // '
+    if(theKeys[ST_VK_APOSTROPHE] && theKeys[ST_VK_CONTROL]) { // '
         aParams->decSepRotation();
-    }
-    // reset stereo attributes
-    if(keysMap[ST_VK_BACK]) {
-        doReset();
-    }
-
-    if(keysMap[ST_VK_P]) {
-        aParams->nextViewMode();
-        keysMap[ST_VK_P] = false;
-    }
-
-    // Post process keys
-    if(keysMap[ST_VK_G] && keysMap[ST_VK_CONTROL]) {
-        myGUI->stImageRegion->params.gamma->decrement();
-        keysMap[ST_VK_G] = false;
-    }
-    if(keysMap[ST_VK_G] && keysMap[ST_VK_SHIFT]) {
-        myGUI->stImageRegion->params.gamma->increment();
-        keysMap[ST_VK_G] = false;
-    }
-
-    if(keysMap[ST_VK_B] && keysMap[ST_VK_CONTROL]) {
-        myGUI->stImageRegion->params.brightness->decrement();
-        keysMap[ST_VK_B] = false;
-    }
-    if(keysMap[ST_VK_B] && keysMap[ST_VK_SHIFT]) {
-        myGUI->stImageRegion->params.brightness->increment();
-        keysMap[ST_VK_B] = false;
-    }
-
-    /// TODO (Kirill Gavrilov#9) remove this hot key
-    if(keysMap[ST_VK_T] && keysMap[ST_VK_CONTROL]) {
-        myGUI->stImageRegion->params.saturation->decrement();
-        keysMap[ST_VK_T] = false;
-    }
-    if(keysMap[ST_VK_T] && keysMap[ST_VK_SHIFT]) {
-        myGUI->stImageRegion->params.saturation->increment();
-        keysMap[ST_VK_T] = false;
-    }
-
-}
-
-void StImageViewer::keysSrcFormat(bool* keysMap) {
-    // A (auto)/M (mono)/S (side by side)/O (over under)/I (horizontal interlace)
-    if(keysMap[ST_VK_A]) {
-        params.srcFormat->setValue(ST_V_SRC_AUTODETECT);
-        keysMap[ST_VK_A] = false;
-    }
-    if(keysMap[ST_VK_M]) {
-        params.srcFormat->setValue(ST_V_SRC_MONO);
-        keysMap[ST_VK_M] = false;
-    }
-    if(keysMap[ST_VK_S] && !keysMap[ST_VK_CONTROL] && !keysMap[ST_VK_SHIFT]) {
-        params.srcFormat->setValue(ST_V_SRC_SIDE_BY_SIDE);
-        keysMap[ST_VK_S] = false;
-    }
-    if(keysMap[ST_VK_O] && !keysMap[ST_VK_CONTROL]) {
-        params.srcFormat->setValue(ST_V_SRC_OVER_UNDER_RL);
-        keysMap[ST_VK_O] = false;
-    }
-}
-
-void StImageViewer::keysFileWalk(bool* keysMap) {
-    if(keysMap[ST_VK_I]) {
-        myGUI->doAboutImage(0);
-        keysMap[ST_VK_I] = false;
-    }
-
-    if(keysMap[ST_VK_O] && keysMap[ST_VK_CONTROL]) {
-        doOpenFileDialog(this, 1);
-        keysMap[ST_VK_O] = false;
-    }
-
-    if(keysMap[ST_VK_SPACE]) {
-        doSlideShow();
-        keysMap[ST_VK_SPACE] = false;
-    }
-
-    // PgDown/PgUp/Home/End
-    if(keysMap[ST_VK_PRIOR]) {
-        doListPrev();
-        keysMap[ST_VK_PRIOR] = false;
-    }
-    if(keysMap[ST_VK_MEDIA_PREV_TRACK]) {
-        doListPrev();
-        keysMap[ST_VK_MEDIA_PREV_TRACK] = false;
-    }
-    if(keysMap[ST_VK_BROWSER_BACK]) {
-        doListPrev();
-        keysMap[ST_VK_BROWSER_BACK] = false;
-    }
-    if(keysMap[ST_VK_NEXT]) {
-        doListNext();
-        keysMap[ST_VK_NEXT] = false;
-    }
-    if(keysMap[ST_VK_MEDIA_NEXT_TRACK]) {
-        doListNext();
-        keysMap[ST_VK_MEDIA_NEXT_TRACK] = false;
-    }
-    if(keysMap[ST_VK_BROWSER_FORWARD]) {
-        doListNext();
-        keysMap[ST_VK_BROWSER_FORWARD] = false;
-    }
-    if(keysMap[ST_VK_HOME]) {
-        doListFirst();
-        keysMap[ST_VK_HOME] = false;
-    }
-    if(keysMap[ST_VK_END]) {
-        doListLast();
-        keysMap[ST_VK_END] = false;
-    }
-
-    if(keysMap[ST_VK_SHIFT] && keysMap[ST_VK_DELETE]) {
-        StHandle<StFileNode> aCurrFile = myLoader->getPlayList().getCurrentFile();
-        if(!aCurrFile.isNull() && aCurrFile->size() == 0) {
-            if(stQuestion(StString("Are you sure you want to completely remove the file\n'") + aCurrFile->getPath() + "'?")) {
-                myLoader->getPlayList().removePhysically(aCurrFile);
-                if(!myLoader->getPlayList().isEmpty()) {
-                    doUpdateStateLoading();
-                    myLoader->doLoadNext();
-                }
-            }
-        }
-        keysMap[ST_VK_DELETE] = false;
     }
 }
 
@@ -853,28 +835,4 @@ bool StImageViewer::getCurrentFile(StHandle<StFileNode>&     theFileNode,
     }
     theInfo = myLoader->getFileInfo(theParams);
     return true;
-}
-
-void StImageViewer::keysCommon(bool* keysMap) {
-    if(keysMap[ST_VK_F]) {
-        params.isFullscreen->reverse();
-        keysMap[ST_VK_F] = false;
-    }
-    if(keysMap[ST_VK_RETURN]) {
-        params.isFullscreen->reverse();
-        keysMap[ST_VK_RETURN] = false;
-    }
-    if(keysMap[ST_VK_F12]) {
-        params.ToShowFps->reverse();
-        keysMap[ST_VK_F12] = false;
-    }
-
-    if(keysMap[ST_VK_S] && keysMap[ST_VK_CONTROL]) {
-        myLoader->doSaveImageAs(StImageFile::ST_TYPE_PNG);
-        keysMap[ST_VK_S] = false;
-    }
-
-    keysStereo(keysMap);
-    keysSrcFormat(keysMap);
-    keysFileWalk(keysMap);
 }

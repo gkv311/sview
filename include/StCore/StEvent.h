@@ -82,7 +82,7 @@ struct StKeyEvent {
     StEventType   Type;   //!< event type
     double        Time;   //!< time in seconds when event was registered
     StVirtKey     VKey;   //!< virtual key code (language independent and case insensitive)
-    unsigned int  Flags;  //!< modifier keys pressed in the moment of event
+    StVirtFlags   Flags;  //!< modifier keys pressed in the moment of event
     stUtf32_t     Char;   //!< associated UTF-32 character code
 
 };

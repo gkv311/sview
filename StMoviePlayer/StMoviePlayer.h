@@ -163,10 +163,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doSnapshot(const size_t theImgType);
 
     // callback keys
-    ST_LOCAL void keysStereo(bool* keysMap);
-    ST_LOCAL void keysSrcFormat(bool* keysMap);
-    ST_LOCAL void keysFileWalk(bool* keysMap);
-    ST_LOCAL void keysCommon(bool* keysMap);
+    ST_LOCAL void keysStereo(const bool* theKeys);
 
         public: //! @name Properties
 
@@ -199,6 +196,7 @@ class StMoviePlayer : public StApplication {
 
     ST_LOCAL virtual void doChangeDevice(const int32_t theValue);
     ST_LOCAL virtual void doResize   (const StSizeEvent&  theEvent);
+    ST_LOCAL virtual void doKeyDown  (const StKeyEvent&   theEvent);
     ST_LOCAL virtual void doMouseDown(const StClickEvent& theEvent);
     ST_LOCAL virtual void doMouseUp  (const StClickEvent& theEvent);
 

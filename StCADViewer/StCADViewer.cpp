@@ -440,6 +440,109 @@ void StCADViewer::doMouseUp(const StClickEvent& theEvent) {
     myGUI->tryUnClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
 }
 
+void StCADViewer::doKeyDown(const StKeyEvent& theEvent) {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    switch(theEvent.VKey) {
+        case ST_VK_ESCAPE:
+            StApplication::exit(0);
+            return;
+        case ST_VK_RETURN:
+            params.isFullscreen->reverse();
+            return;
+
+        // switch projection matrix
+        case ST_VK_M:
+            params.projectMode->setValue(ST_PROJ_PERSP);
+            return;
+        case ST_VK_S:
+            params.projectMode->setValue(ST_PROJ_STEREO);
+            return;
+        case ST_VK_O:
+            params.projectMode->setValue(ST_PROJ_ORTHO);
+            return;
+
+        // separation
+        case ST_VK_MULTIPLY: {
+            if(theEvent.Flags == ST_VF_NONE) {
+                myProjection.setIOD(myProjection.getIOD() + 0.1f);
+                ST_DEBUG_LOG("Sep. inc, " + myProjection.toString());
+            }
+            return;
+        }
+        case ST_VK_DIVIDE:
+            if(theEvent.Flags == ST_VF_NONE) {
+                myProjection.setIOD(myProjection.getIOD() - 0.1f);
+                ST_DEBUG_LOG("Sep. dec, " + myProjection.toString());
+            }
+            return;
+
+        case ST_VK_C:
+            myIsCamIterative = !myIsCamIterative;
+            ST_DEBUG_LOG("Iterative camera " + (myIsCamIterative ? "ON" : "OFF"));
+            return;
+
+        case ST_VK_LEFT:
+            myCam.rotateX(-1.0f);
+            return;
+        case ST_VK_RIGHT:
+            myCam.rotateX(1.0f);
+            return;
+        case ST_VK_UP:
+            myCam.rotateY(-1.0f);
+            return;
+        case ST_VK_DOWN:
+            myCam.rotateY(1.0f);
+            return;
+        case ST_VK_Q:
+            myCam.rotateZ(-1.0f);
+            return;
+        case ST_VK_W:
+            myCam.rotateZ(1.0f);
+            return;
+
+        // call fit all
+        case ST_VK_F:
+            doFitALL();
+            return;
+
+        // show normals
+        case ST_VK_N:
+            params.toShowNormals->reverse();
+            return;
+
+        // playlist navigation
+        case ST_VK_PRIOR:
+            doListPrev();
+            return;
+        case ST_VK_NEXT:
+            doListNext();
+            return;
+        case ST_VK_HOME:
+            doListFirst();
+            return;
+        case ST_VK_END:
+            doListLast();
+            return;
+
+        // shading mode
+        case ST_VK_1:
+            params.fillMode->setValue(ST_FILL_MESH);
+            return;
+        case ST_VK_2:
+            params.fillMode->setValue(ST_FILL_SHADING);
+            return;
+        case ST_VK_3:
+            params.fillMode->setValue(ST_FILL_SHADED_MESH);
+            return;
+
+        default:
+            break;
+    }
+}
+
 void StCADViewer::processEvents(const StMessage_t* theEvents) {
     size_t evId(0);
     for(; theEvents[evId].uin != StMessageList::MSG_NULL; ++evId) {
@@ -463,122 +566,8 @@ void StCADViewer::processEvents(const StMessage_t* theEvents) {
                 break;
             }
             case StMessageList::MSG_KEYS: {
-                bool* keysMap = (bool* )theEvents[evId].data;
-
-                myIsCtrlPressed = keysMap[ST_VK_CONTROL];
-
-                if(keysMap[ST_VK_ESCAPE]) {
-                    StApplication::exit(0);
-                    return;
-                }
-                if(keysMap[ST_VK_RETURN]) {
-                    params.isFullscreen->reverse();
-                    keysMap[ST_VK_RETURN] = false;
-                }
-
-                // switch projection matrix
-                if(keysMap[ST_VK_M]) {
-                    params.projectMode->setValue(ST_PROJ_PERSP);
-                    keysMap[ST_VK_M] = false;
-                }
-                if(keysMap[ST_VK_S]) {
-                    params.projectMode->setValue(ST_PROJ_STEREO);
-                    keysMap[ST_VK_S] = false;
-                }
-                if(keysMap[ST_VK_O]) {
-                    params.projectMode->setValue(ST_PROJ_ORTHO);
-                    keysMap[ST_VK_O] = false;
-                }
-
-                // separation
-                if(keysMap[ST_VK_MULTIPLY] && !keysMap[ST_VK_CONTROL]) {
-                    myProjection.setIOD(myProjection.getIOD() + 0.1f);
-                    ST_DEBUG_LOG("Sep. inc, " + myProjection.toString());
-                    keysMap[ST_VK_MULTIPLY] = false;
-                }
-                if(keysMap[ST_VK_DIVIDE] && !keysMap[ST_VK_CONTROL]) {
-                    myProjection.setIOD(myProjection.getIOD() - 0.1f);
-                    ST_DEBUG_LOG("Sep. dec, " + myProjection.toString());
-                    keysMap[ST_VK_DIVIDE] = false;
-                }
-
-                ///
-                if(keysMap[ST_VK_C]) {
-                    myIsCamIterative = !myIsCamIterative;
-                    ST_DEBUG_LOG("Iterative camera " + (myIsCamIterative ? "ON" : "OFF"));
-                    keysMap[ST_VK_C] = false;
-                }
-
-                if(keysMap[ST_VK_LEFT]) {
-                    myCam.rotateX(-1.0f);
-                    keysMap[ST_VK_LEFT] = false;
-                }
-                if(keysMap[ST_VK_RIGHT]) {
-                    myCam.rotateX(1.0f);
-                    keysMap[ST_VK_RIGHT] = false;
-                }
-                if(keysMap[ST_VK_UP]) {
-                    myCam.rotateY(-1.0f);
-                    keysMap[ST_VK_UP] = false;
-                }
-                if(keysMap[ST_VK_DOWN]) {
-                    myCam.rotateY(1.0f);
-                    keysMap[ST_VK_DOWN] = false;
-                }
-
-                if(keysMap[ST_VK_Q]) {
-                    myCam.rotateZ(-1.0f);
-                    keysMap[ST_VK_Q] = false;
-                }
-                if(keysMap[ST_VK_W]) {
-                    myCam.rotateZ(1.0f);
-                    keysMap[ST_VK_W] = false;
-                }
-
-                // call fit all
-                if(keysMap[ST_VK_F]) {
-                    doFitALL();
-                    keysMap[ST_VK_F] = false;
-                }
-
-                // show normals
-                if(keysMap[ST_VK_N]) {
-                    params.toShowNormals->reverse();
-                    keysMap[ST_VK_N] = false;
-                }
-
-                // playlist navigation
-                if(keysMap[ST_VK_PRIOR]) {
-                    doListPrev();
-                    keysMap[ST_VK_PRIOR] = false;
-                }
-                if(keysMap[ST_VK_NEXT]) {
-                    doListNext();
-                    keysMap[ST_VK_NEXT] = false;
-                }
-                if(keysMap[ST_VK_HOME]) {
-                    doListFirst();
-                    keysMap[ST_VK_HOME] = false;
-                }
-                if(keysMap[ST_VK_END]) {
-                    doListLast();
-                    keysMap[ST_VK_END] = false;
-                }
-
-                // shading mode
-                if(keysMap[ST_VK_1]) {
-                    params.fillMode->setValue(ST_FILL_MESH);
-                    keysMap[ST_VK_1] = false;
-                }
-                if(keysMap[ST_VK_2]) {
-                    params.fillMode->setValue(ST_FILL_SHADING);
-                    keysMap[ST_VK_2] = false;
-                }
-                if(keysMap[ST_VK_3]) {
-                    params.fillMode->setValue(ST_FILL_SHADED_MESH);
-                    keysMap[ST_VK_3] = false;
-                }
-
+                const bool* aKeys = (bool* )theEvents[evId].data;
+                myIsCtrlPressed = aKeys[ST_VK_CONTROL];
                 break;
             }
         }

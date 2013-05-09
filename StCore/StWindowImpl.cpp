@@ -763,8 +763,8 @@ void StWindowImpl::swapEventsBuffers() {
         switch(anEvent.Type) {
             //case stEvent_Close:
             case stEvent_Size:      signals.onResize   ->emit(anEvent.Size);   break;
-            //case stEvent_KeyDown:
-            //case stEvent_KeyUp:
+            case stEvent_KeyDown:   signals.onKeyDown  ->emit(anEvent.Key);    break;
+            case stEvent_KeyUp:     signals.onKeyUp    ->emit(anEvent.Key);    break;
             case stEvent_MouseDown: signals.onMouseDown->emit(anEvent.Button); break;
             case stEvent_MouseUp:   signals.onMouseUp  ->emit(anEvent.Button); break;
             //case stEvent_FileDrop:

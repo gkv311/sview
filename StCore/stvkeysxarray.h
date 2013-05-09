@@ -28,7 +28,7 @@
  * Notice, this array useless for text input!
  */
 #define ST_XK2ST_VK_SIZE 0x10000
-static const size_t ST_XK2ST_VK[ST_XK2ST_VK_SIZE] = {
+static const unsigned int ST_XK2ST_VK[ST_XK2ST_VK_SIZE] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0x0000-0x000F
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 0x0010-0x001F
     ST_VK_SPACE,  // 0x20 = XK_space
@@ -397,7 +397,7 @@ static const size_t ST_XK2ST_VK[ST_XK2ST_VK_SIZE] = {
 //#include <X11/XF86keysym.h>
 #define ST_XKMEDIA_FIRST 0x1008FF00
 #define ST_XKMEDIA_LAST  0x1008FF36
-static const size_t ST_XKMEDIA2ST_VK[ST_XKMEDIA_LAST - ST_XKMEDIA_FIRST + 1] = {
+static const unsigned int ST_XKMEDIA2ST_VK[ST_XKMEDIA_LAST - ST_XKMEDIA_FIRST + 1] = {
     0,                      // 0x1008FF00
     0,                      // 0x1008FF01 = XF86ModeLock
     0,                      // 0x1008FF02

@@ -141,6 +141,16 @@ class StApplication {
     ST_CPPEXPORT virtual void doResize(const StSizeEvent&  theEvent);
 
     /**
+     * Process keyboard key press.
+     */
+    ST_CPPEXPORT virtual void doKeyDown(const StKeyEvent& theEvent);
+
+    /**
+     * Process  keyboard key release.
+     */
+    ST_CPPEXPORT virtual void doKeyUp(const StKeyEvent& theEvent);
+
+    /**
      * Process mouse button press.
      */
     ST_CPPEXPORT virtual void doMouseDown(const StClickEvent& theEvent);
