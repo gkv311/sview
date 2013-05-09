@@ -282,7 +282,61 @@ bool StWindowImpl::wndCreateWindows() {
                 // will NOT triggered for new messages already in stack!!!
                 // Means - do not replace 'while' with 'if(PeekMessage(...))'.
                 while(PeekMessage(&myEvent, NULL, 0U, 0U, PM_REMOVE)) {
-                    TranslateMessage(&myEvent);
+                    // we process WM_KEYDOWN/WM_KEYUP manually - TranslateMessage is redundant
+                    //TranslateMessage(&myEvent);
+                    switch(myEvent.message) {
+                        // keys lookup
+                        case WM_KEYDOWN: {
+                            myMessageList.getKeysMap()[myEvent.wParam] = true;
+
+                            // ToUnicode needs high-order bit of a byte to be set for pressed keys...
+                            BYTE aKeyState[256]; //GetKeyboardState(aKeyState);
+                            const bool* aKeyBool = myMessageList.getKeysMap();
+                            for(int anIter = 0; anIter < 256; ++anIter) {
+                                aKeyState[anIter] = aKeyBool[anIter] ? 0xFF : 0;
+                            }
+
+                            wchar_t aCharBuff[4];
+                            if(::ToUnicode(myEvent.wParam, HIWORD(myEvent.lParam) & 0xFF,
+                                           aKeyState, aCharBuff, 4, 0) > 0) {
+                                StUtfWideIter aUIter(aCharBuff);
+                                myStEvent.Key.Char = *aUIter;
+                            } else {
+                                myStEvent.Key.Char = 0;
+                            }
+
+                            myStEvent.Type = stEvent_KeyDown;
+                            myStEvent.Key.VKey  = (StVirtKey )myEvent.wParam;
+                            myStEvent.Key.Time  = getEventTime(myEvent.time);
+                            myStEvent.Key.Flags = ST_VF_NONE;
+                            if(myMessageList.getKeysMap()[ST_VK_SHIFT]) {
+                                myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_SHIFT);
+                            }
+                            if(myMessageList.getKeysMap()[ST_VK_CONTROL]) {
+                                myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_CONTROL);
+                            }
+                            myEventsBuffer.append(myStEvent);
+                            break;
+                        }
+                        case WM_KEYUP: {
+                            myMessageList.getKeysMap()[myEvent.wParam] = false;
+
+                            myStEvent.Type      = stEvent_KeyUp;
+                            myStEvent.Key.VKey  = (StVirtKey )myEvent.wParam;
+                            myStEvent.Key.Time  = getEventTime(myEvent.time);
+                            myStEvent.Key.Flags = ST_VF_NONE;
+                            if(myMessageList.getKeysMap()[ST_VK_SHIFT]) {
+                                myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_SHIFT);
+                            }
+                            if(myMessageList.getKeysMap()[ST_VK_CONTROL]) {
+                                myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_CONTROL);
+                            }
+                            myEventsBuffer.append(myStEvent);
+                            break;
+                        }
+                        default: break;
+                    }
+
                     DispatchMessageW(&myEvent);
                 }
 
@@ -396,7 +450,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 if(DragQueryFileW(aDrops, aFileId, aFileBuff, MAX_PATH) > 0) {
                     const StString aFile(aFileBuff);
                     myStEvent.Type = stEvent_FileDrop;
-                    myStEvent.DNDrop.Time = getEventTime();
+                    myStEvent.DNDrop.Time = getEventTime(myEvent.time);
                     myStEvent.DNDrop.File = aFile.toCString();
                     myEventsBuffer.append(myStEvent);
                 }
@@ -432,7 +486,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 myMessageList.append(StMessageList::MSG_RESIZE);
 
                 myStEvent.Type       = stEvent_Size;
-                myStEvent.Size.Time  = getEventTime();
+                myStEvent.Size.Time  = getEventTime(myEvent.time);
                 myStEvent.Size.SizeX = myRectNorm.width();
                 myStEvent.Size.SizeY = myRectNorm.height();
                 myEventsBuffer.append(myStEvent);
@@ -455,60 +509,12 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 myMessageList.append(StMessageList::MSG_RESIZE);
 
                 myStEvent.Type       = stEvent_Size;
-                myStEvent.Size.Time  = getEventTime();
+                myStEvent.Size.Time  = getEventTime(myEvent.time);
                 myStEvent.Size.SizeX = myRectNorm.width();
                 myStEvent.Size.SizeY = myRectNorm.height();
                 myEventsBuffer.append(myStEvent);
                 break;
             }
-            break;
-        }
-        // keys lookup
-        case WM_KEYDOWN: {
-            myMessageList.getKeysMap()[wParam] = true;
-
-            // ToUnicode needs high-order bit of a byte to be set for pressed keys...
-            BYTE aKeyState[256]; //GetKeyboardState(aKeyState);
-            const bool* aKeyBool = myMessageList.getKeysMap();
-            for(int anIter = 0; anIter < 256; ++anIter) {
-                aKeyState[anIter] = aKeyBool[anIter] ? 0xFF : 0;
-            }
-
-            wchar_t aCharBuff[4];
-            if(::ToUnicode(wParam, HIWORD(lParam) & 0xFF, aKeyState, aCharBuff, 4, 0) > 0) {
-                StUtfWideIter aUIter(aCharBuff);
-                myStEvent.Key.Char = *aUIter;
-            } else {
-                myStEvent.Key.Char = 0;
-            }
-
-            myStEvent.Type = stEvent_KeyDown;
-            myStEvent.Key.VKey  = (StVirtKey )wParam;
-            myStEvent.Key.Time  = getEventTime();
-            myStEvent.Key.Flags = ST_VF_NONE;
-            if(myMessageList.getKeysMap()[ST_VK_SHIFT]) {
-                myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_SHIFT);
-            }
-            if(myMessageList.getKeysMap()[ST_VK_CONTROL]) {
-                myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_CONTROL);
-            }
-            myEventsBuffer.append(myStEvent);
-            break;
-        }
-        case WM_KEYUP: {
-            myMessageList.getKeysMap()[wParam] = false;
-
-            myStEvent.Type = stEvent_KeyUp;
-            myStEvent.Key.VKey  = (StVirtKey )wParam;
-            myStEvent.Key.Time  = getEventTime();
-            myStEvent.Key.Flags = ST_VF_NONE;
-            if(myMessageList.getKeysMap()[ST_VK_SHIFT]) {
-                myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_SHIFT);
-            }
-            if(myMessageList.getKeysMap()[ST_VK_CONTROL]) {
-                myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_CONTROL);
-            }
-            myEventsBuffer.append(myStEvent);
             break;
         }
         case WM_HOTKEY: {
@@ -584,7 +590,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 }
             }
 
-            myStEvent.Button.Time    = getEventTime();
+            myStEvent.Button.Time    = getEventTime(myEvent.time);
             myStEvent.Button.Button  = aBtnId;
             myStEvent.Button.Buttons = 0;
             myStEvent.Button.PointX  = aPnt.x();
@@ -615,6 +621,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 }
                 case WM_MOUSEWHEEL: {
                     // TODO (Kirill Gavrilov#9#) delta ignored
+                    //GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
                     myStEvent.Type = stEvent_MouseDown;
                     myEventsBuffer.append(myStEvent);
                     myStEvent.Type = stEvent_MouseUp;
