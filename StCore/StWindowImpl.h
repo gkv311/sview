@@ -295,7 +295,8 @@ class StWindowImpl {
 
     StTimer        myEventsTimer;
     StEventsBuffer myEventsBuffer; //!< window events double buffer
-    StEvent myStEvent;
+    StEvent        myStEvent;
+    bool           myEventsThreaded;
 };
 
 #endif //__StWindowImpl_h_

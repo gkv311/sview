@@ -233,6 +233,7 @@ void StWindowImpl::doCreateWindows(NSOpenGLContext* theGLContextMaster,
 }
 
 bool StWindowImpl::create() {
+    myEventsThreaded = ![NSThread isMainThread];
     myMessageList.reset();
     myInitState = STWIN_INITNOTSTART;
     updateChildRect();
@@ -296,6 +297,7 @@ bool StWindowImpl::create() {
         myInitState = STWIN_ERROR_COCOA_CREATEWIN;
         return false;
     }
+
     if([NSThread isMainThread]) {
         [aWinInit doCreateWindows: NULL];
     } else {

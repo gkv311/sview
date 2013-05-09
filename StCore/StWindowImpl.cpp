@@ -75,7 +75,8 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
   myIsActive(false),
   myBlockSleep(BlockSleep_OFF),
   myIsDispChanged(false),
-  myEventsTimer(true) {
+  myEventsTimer(true),
+  myEventsThreaded(false) {
     stMemZero(&attribs, sizeof(attribs));
     stMemZero(&signals, sizeof(signals));
     attribs.IsNoDecor      = false;
@@ -99,6 +100,8 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
     myMonSlave.ySub = 0;
 
 #ifdef _WIN32
+    myEventsThreaded  = true; // events loop is always performed in dedicated thread
+
     // we create Win32 event directly (not StCondition) to use it with MsgWaitForMultipleObjects()
     myEventQuit       = CreateEvent(0, true, false, NULL);
     myEventCursorShow = CreateEvent(0, true, false, NULL);

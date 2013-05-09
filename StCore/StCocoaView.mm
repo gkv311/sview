@@ -86,10 +86,10 @@
         myStEvent.Button.Buttons = 0;
         myStEvent.Button.PointX  = aPnt.x();
         myStEvent.Button.PointY  = aPnt.y();
-        if([NSThread isMainThread]) {
-            myStWin->signals.onMouseDown->emit(myStEvent.Button);
-        } else {
+        if(myStWin->myEventsThreaded) {
             myStWin->myEventsBuffer.append(myStEvent);
+        } else {
+            myStWin->signals.onMouseDown->emit(myStEvent.Button);
         }
     }
 
@@ -104,10 +104,10 @@
         myStEvent.Button.Buttons = 0;
         myStEvent.Button.PointX  = aPnt.x();
         myStEvent.Button.PointY  = aPnt.y();
-        if([NSThread isMainThread]) {
-            myStWin->signals.onMouseUp->emit(myStEvent.Button);
-        } else {
+        if(myStWin->myEventsThreaded) {
             myStWin->myEventsBuffer.append(myStEvent);
+        } else {
+            myStWin->signals.onMouseUp->emit(myStEvent.Button);
         }
     }
 
@@ -122,10 +122,10 @@
         myStEvent.Button.Buttons = 0;
         myStEvent.Button.PointX  = aPnt.x();
         myStEvent.Button.PointY  = aPnt.y();
-        if([NSThread isMainThread]) {
-            myStWin->signals.onMouseDown->emit(myStEvent.Button);
-        } else {
+        if(myStWin->myEventsThreaded) {
             myStWin->myEventsBuffer.append(myStEvent);
+        } else {
+            myStWin->signals.onMouseDown->emit(myStEvent.Button);
         }
     }
 
@@ -140,10 +140,10 @@
         myStEvent.Button.Buttons = 0;
         myStEvent.Button.PointX  = aPnt.x();
         myStEvent.Button.PointY  = aPnt.y();
-        if([NSThread isMainThread]) {
-            myStWin->signals.onMouseUp->emit(myStEvent.Button);
-        } else {
+        if(myStWin->myEventsThreaded) {
             myStWin->myEventsBuffer.append(myStEvent);
+        } else {
+            myStWin->signals.onMouseUp->emit(myStEvent.Button);
         }
     }
 
@@ -163,10 +163,10 @@
             myStEvent.Button.Buttons = 0;
             myStEvent.Button.PointX  = aPnt.x();
             myStEvent.Button.PointY  = aPnt.y();
-            if([NSThread isMainThread]) {
-                myStWin->signals.onMouseDown->emit(myStEvent.Button);
-            } else {
+            if(myStWin->myEventsThreaded) {
                 myStWin->myEventsBuffer.append(myStEvent);
+            } else {
+                myStWin->signals.onMouseDown->emit(myStEvent.Button);
             }
         }
     }
@@ -187,10 +187,10 @@
             myStEvent.Button.Buttons = 0;
             myStEvent.Button.PointX  = aPnt.x();
             myStEvent.Button.PointY  = aPnt.y();
-            if([NSThread isMainThread]) {
-                myStWin->signals.onMouseUp->emit(myStEvent.Button);
-            } else {
+            if(myStWin->myEventsThreaded) {
                 myStWin->myEventsBuffer.append(myStEvent);
+            } else {
+                myStWin->signals.onMouseUp->emit(myStEvent.Button);
             }
         }
     }
@@ -220,14 +220,14 @@
         myStEvent.Button.Buttons = 0;
         myStEvent.Button.PointX  = aPnt.x();
         myStEvent.Button.PointY  = aPnt.y();
-        if([NSThread isMainThread]) {
+        if(myStWin->myEventsThreaded) {
+            myStWin->myEventsBuffer.append(myStEvent);
+            myStEvent.Type = stEvent_MouseUp;
+            myStWin->myEventsBuffer.append(myStEvent);
+        } else {
             myStWin->signals.onMouseDown->emit(myStEvent.Button);
             myStEvent.Type = stEvent_MouseUp;
             myStWin->signals.onMouseUp  ->emit(myStEvent.Button);
-        } else {
-            myStWin->myEventsBuffer.append(myStEvent);
-            myStEvent.Type = stEvent_MouseUp;
-            myStWin->myEventsBuffer.append(myStEvent);
         }
         //}
     }
@@ -303,10 +303,10 @@
             myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_CONTROL);
         }
 
-        if([NSThread isMainThread]) {
-            myStWin->signals.onKeyDown->emit(myStEvent.Key);
-        } else {
+        if(myStWin->myEventsThreaded) {
             myStWin->myEventsBuffer.append(myStEvent);
+        } else {
+            myStWin->signals.onKeyDown->emit(myStEvent.Key);
         }
     }
 
@@ -334,10 +334,10 @@
             myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_CONTROL);
         }
 
-        if([NSThread isMainThread]) {
-            myStWin->signals.onKeyUp->emit(myStEvent.Key);
-        } else {
+        if(myStWin->myEventsThreaded) {
             myStWin->myEventsBuffer.append(myStEvent);
+        } else {
+            myStWin->signals.onKeyUp->emit(myStEvent.Key);
         }
     }
 
@@ -391,10 +391,10 @@
                 myStEvent.Type = stEvent_FileDrop;
                 myStEvent.DNDrop.Time = myStWin->getEventTime();
                 myStEvent.DNDrop.File = aFile.toCString();
-                if([NSThread isMainThread]) {
-                    myStWin->signals.onFileDrop->emit(myStEvent.DNDrop);
-                } else {
+                if(myStWin->myEventsThreaded) {
                     myStWin->myEventsBuffer.append(myStEvent);
+                } else {
+                    myStWin->signals.onFileDrop->emit(myStEvent.DNDrop);
                 }
             }
         }
