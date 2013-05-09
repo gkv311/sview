@@ -234,9 +234,9 @@ class StWindow {
     /**
      * Append message into callback list.
      * Message will be read on next callback() call.
-     * @param theMessage message to append
+     * @param theEvent message to append
      */
-    ST_CPPEXPORT bool appendMessage(const StMessage_t& theMessage);
+    ST_CPPEXPORT void post(const StEvent& theEvent);
 
         public: //! @name OpenGL routines
 

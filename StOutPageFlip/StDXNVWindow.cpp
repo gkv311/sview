@@ -176,23 +176,35 @@ LRESULT StDXNVWindow::wndProcFunction(HWND   theWnd,
 void StDXNVWindow::updateMouseBtn(const int theBtnId, bool theNewState) {
     if(myMouseState[theBtnId] != theNewState) {
         myMouseState[theBtnId] = theNewState;
-        StMessage_t stMsg;
-        StMouseMessage_t mouseMsg;
-        stMsg.data = (void* )&mouseMsg;
-        mouseMsg.point  = myStWin->getMousePos();
-        mouseMsg.button = theBtnId;
-        stMsg.uin = theNewState ? StMessageList::MSG_MOUSE_DOWN_APPEND : StMessageList::MSG_MOUSE_UP_APPEND;
-        myStWin->appendMessage(stMsg);
+
+        const StPointD_t aPnt = myStWin->getMousePos();
+        StEvent anEvent;
+        anEvent.Type = theNewState ? stEvent_MouseDown : stEvent_MouseUp;
+        anEvent.Button.Time    = 0.0; //getEventTime(myEvent.time);
+        anEvent.Button.Button  = (StVirtButton )theBtnId;
+        anEvent.Button.Buttons = 0;
+        anEvent.Button.PointX  = aPnt.x();
+        anEvent.Button.PointY  = aPnt.y();
+        myStWin->post(anEvent);
     }
 }
 
 void StDXNVWindow::updateKeyState(const int theVKeyId, bool theNewState) {
     if(myVKeyState[theVKeyId] != theNewState) {
         myVKeyState[theVKeyId] = theNewState;
-        StMessage_t stMsg;
-        stMsg.data = (void* )theVKeyId;
-        stMsg.uin  = theNewState ? StMessageList::MSG_KEY_DOWN_APPEND : StMessageList::MSG_KEY_UP_APPEND;
-        myStWin->appendMessage(stMsg);
+
+        StEvent anEvent;
+        anEvent.Type = theNewState ? stEvent_KeyDown : stEvent_KeyUp;
+        anEvent.Key.Time  = 0.0; //getEventTime(myEvent.time);
+        anEvent.Key.VKey  = (StVirtKey )theVKeyId;
+        anEvent.Key.Flags = ST_VF_NONE;
+        if(myVKeyState[ST_VK_SHIFT]) {
+            anEvent.Key.Flags = StVirtFlags(anEvent.Key.Flags | ST_VF_SHIFT);
+        }
+        if(myVKeyState[ST_VK_CONTROL]) {
+            anEvent.Key.Flags = StVirtFlags(anEvent.Key.Flags | ST_VF_CONTROL);
+        }
+        myStWin->post(anEvent);
     }
 }
 

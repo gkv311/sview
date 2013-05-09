@@ -190,8 +190,8 @@ void StWindow::processEvents(StMessage_t* theMessages) {
     myWin->processEvents(theMessages);
 }
 
-bool StWindow::appendMessage(const StMessage_t& theMessage) {
-    return myWin->appendMessage(theMessage);
+void StWindow::post(const StEvent& theEvent) {
+    myWin->post(theEvent);
 }
 
 const StSearchMonitors& StWindow::getMonitors() const {

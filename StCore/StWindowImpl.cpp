@@ -801,30 +801,17 @@ void StWindowImpl::swapEventsBuffers() {
     }
 }
 
-stBool_t StWindowImpl::appendMessage(const StMessage_t& stMessage) {
-    switch(stMessage.uin) {
-        case StMessageList::MSG_MOUSE_DOWN_APPEND: {
-            //myMUpQueue.clear();
-            //myMDownQueue.clear();
-            //StMouseMessage_t* mouseData = (StMouseMessage_t* )stMessage.data;
-            //myMDownQueue.push(mouseData->point, mouseData->button);
-            //return myMessageList.append(StMessageList::MSG_MOUSE_DOWN);
-            return false;
+void StWindowImpl::post(const StEvent& theEvent) {
+    switch(theEvent.Type) {
+        case stEvent_KeyDown: {
+            myMessageList.getKeysMap()[theEvent.Key.VKey] = true;
+            break;
         }
-        case StMessageList::MSG_MOUSE_UP_APPEND: {
-            //StMouseMessage_t* mouseData = (StMouseMessage_t* )stMessage.data;
-            //myMUpQueue.push(mouseData->point, mouseData->button);
-            //return myMessageList.append(StMessageList::MSG_MOUSE_UP);
-            return false;
+        case stEvent_KeyUp: {
+            myMessageList.getKeysMap()[theEvent.Key.VKey] = false;
+            break;
         }
-        case StMessageList::MSG_KEY_DOWN_APPEND: {
-            myMessageList.getKeysMap()[(size_t )stMessage.data] = true;
-            return true;
-        }
-        case StMessageList::MSG_KEY_UP_APPEND: {
-            myMessageList.getKeysMap()[(size_t )stMessage.data] = false;
-            return true;
-        }
-        default: return myMessageList.append(stMessage);
+        default: break;
     }
+    myEventsBuffer.append(theEvent);
 }
