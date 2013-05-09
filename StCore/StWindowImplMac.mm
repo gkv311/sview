@@ -436,6 +436,7 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
     updateActiveState();
 
     myMessageList.popList(theMessages);
+    swapEventsBuffers();
 }
 
 #endif // __APPLE__

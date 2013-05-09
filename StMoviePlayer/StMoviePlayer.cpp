@@ -416,7 +416,7 @@ bool StMoviePlayer::open() {
     return true;
 }
 
-void StMoviePlayer::doResize(const StSizeEvent& theEvent) {
+void StMoviePlayer::doResize(const StSizeEvent& ) {
     if(myGUI.isNull()) {
         return;
     }

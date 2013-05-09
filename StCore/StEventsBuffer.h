@@ -94,6 +94,7 @@ class StEventsBuffer {
         }
 
         StEvent& anEvent = myEventsWrite[mySizeWrite++];
+        anEvent = theEvent;
         if(theEvent.Type == stEvent_FileDrop) {
             // copy buffer
             const size_t aSize = std::strlen(theEvent.DNDrop.File);
@@ -102,7 +103,6 @@ class StEventsBuffer {
             aBuffer[aSize] = '\0';
             anEvent.DNDrop.File = aBuffer;
         }
-        anEvent = theEvent;
     }
 
     /**

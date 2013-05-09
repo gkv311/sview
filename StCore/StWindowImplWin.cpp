@@ -330,6 +330,12 @@ void StWindowImpl::updateChildRect() {
         myRectNorm.bottom() = aRect.bottom;
 
         myMessageList.append(StMessageList::MSG_RESIZE);
+
+        myStEvent.Type       = stEvent_Size;
+        myStEvent.Size.Time  = getEventTime();
+        myStEvent.Size.SizeX = myRectNorm.width();
+        myStEvent.Size.SizeY = myRectNorm.height();
+        signals.onResize->emit(myStEvent.Size);
     }
 }
 
@@ -350,13 +356,13 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
         }
         case WM_SYSCOMMAND: {
             switch(wParam) {
-                case 0xF032: // double click on title
+                /*case 0xF032: // double click on title
                 case SC_MAXIMIZE: {
                     setFullScreen(true);
                     myIsUpdated = true;
                     myMessageList.append(StMessageList::MSG_RESIZE);
                     return 0;
-                }
+                }*/
                 case SC_SCREENSAVE:     // Screensaver Trying To Start?
                 case SC_MONITORPOWER: { // Monitor Trying To Enter Powersave?
                     if(attribs.ToBlockSleepDisplay) {
@@ -379,24 +385,23 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
         }
         case WM_DROPFILES: {
             HDROP aDrops = (HDROP )wParam;
-            UINT aFilesCount = DragQueryFileW(aDrops, 0xFFFFFFFF, NULL, 0);
+            const UINT aFilesCount = DragQueryFileW(aDrops, 0xFFFFFFFF, NULL, 0);
             stUtfWide_t aFileBuff[MAX_PATH];
-            myDndMutex.lock();
             if(aFilesCount < 1) {
                 DragFinish(aDrops);
                 break;
             }
-            myDndCount = aFilesCount;
-            delete[] myDndList;
-            myDndList = new StString[myDndCount];
+
             for(UINT aFileId = 0; aFileId < aFilesCount; ++aFileId) {
                 if(DragQueryFileW(aDrops, aFileId, aFileBuff, MAX_PATH) > 0) {
-                    myDndList[aFileId] = StString(aFileBuff);
+                    const StString aFile(aFileBuff);
+                    myStEvent.Type = stEvent_FileDrop;
+                    myStEvent.DNDrop.Time = getEventTime();
+                    myStEvent.DNDrop.File = aFile.toCString();
+                    myEventsBuffer.append(myStEvent);
                 }
             }
-            myDndMutex.unlock();
             DragFinish(aDrops); // do not forget
-            myMessageList.append(StMessageList::MSG_DRAGNDROP_IN);
             break;
         }
         case WM_MOVE: {
@@ -425,7 +430,12 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 myRectNorm.right()  = myRectNorm.left() + w;
                 myRectNorm.bottom() = myRectNorm.top()  + h;
                 myMessageList.append(StMessageList::MSG_RESIZE);
-                //ST_DEBUG_LOG("WM_SIZE, WxH= " + w + "x" + h);
+
+                myStEvent.Type       = stEvent_Size;
+                myStEvent.Size.Time  = getEventTime();
+                myStEvent.Size.SizeX = myRectNorm.width();
+                myStEvent.Size.SizeY = myRectNorm.height();
+                myEventsBuffer.append(myStEvent);
                 break;
             }
             break;
@@ -443,6 +453,12 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 myRectNorm.bottom() = aRect->bottom - GetSystemMetrics(SM_CYSIZEFRAME);
                 myIsUpdated = true;
                 myMessageList.append(StMessageList::MSG_RESIZE);
+
+                myStEvent.Type       = stEvent_Size;
+                myStEvent.Size.Time  = getEventTime();
+                myStEvent.Size.SizeX = myRectNorm.width();
+                myStEvent.Size.SizeY = myRectNorm.height();
+                myEventsBuffer.append(myStEvent);
                 break;
             }
             break;
@@ -450,10 +466,49 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
         // keys lookup
         case WM_KEYDOWN: {
             myMessageList.getKeysMap()[wParam] = true;
+
+            // ToUnicode needs high-order bit of a byte to be set for pressed keys...
+            BYTE aKeyState[256]; //GetKeyboardState(aKeyState);
+            const bool* aKeyBool = myMessageList.getKeysMap();
+            for(int anIter = 0; anIter < 256; ++anIter) {
+                aKeyState[anIter] = aKeyBool[anIter] ? 0xFF : 0;
+            }
+
+            wchar_t aCharBuff[4];
+            if(::ToUnicode(wParam, HIWORD(lParam) & 0xFF, aKeyState, aCharBuff, 4, 0) > 0) {
+                StUtfWideIter aUIter(aCharBuff);
+                myStEvent.Key.Char = *aUIter;
+            } else {
+                myStEvent.Key.Char = 0;
+            }
+
+            myStEvent.Type = stEvent_KeyDown;
+            myStEvent.Key.VKey  = (StVirtKey )wParam;
+            myStEvent.Key.Time  = getEventTime();
+            myStEvent.Key.Flags = ST_VF_NONE;
+            if(myMessageList.getKeysMap()[ST_VK_SHIFT]) {
+                myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_SHIFT);
+            }
+            if(myMessageList.getKeysMap()[ST_VK_CONTROL]) {
+                myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_CONTROL);
+            }
+            myEventsBuffer.append(myStEvent);
             break;
         }
         case WM_KEYUP: {
             myMessageList.getKeysMap()[wParam] = false;
+
+            myStEvent.Type = stEvent_KeyUp;
+            myStEvent.Key.VKey  = (StVirtKey )wParam;
+            myStEvent.Key.Time  = getEventTime();
+            myStEvent.Key.Flags = ST_VF_NONE;
+            if(myMessageList.getKeysMap()[ST_VK_SHIFT]) {
+                myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_SHIFT);
+            }
+            if(myMessageList.getKeysMap()[ST_VK_CONTROL]) {
+                myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_CONTROL);
+            }
+            myEventsBuffer.append(myStEvent);
             break;
         }
         case WM_HOTKEY: {
@@ -509,25 +564,32 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 }
             }
 
-            StPointD_t point(double(mouseXPx) / double(aWinRect.width()),
-                             double(mouseYPx) / double(aWinRect.height()));
-            int mbtn = ST_NOMOUSE;
+            StPointD_t aPnt(double(mouseXPx) / double(aWinRect.width()),
+                            double(mouseYPx) / double(aWinRect.height()));
+            StVirtButton aBtnId = ST_NOMOUSE;
             switch(uMsg) {
                 case WM_LBUTTONUP:
-                case WM_LBUTTONDOWN: mbtn = ST_MOUSE_LEFT; break;
+                case WM_LBUTTONDOWN: aBtnId = ST_MOUSE_LEFT; break;
                 case WM_RBUTTONUP:
-                case WM_RBUTTONDOWN: mbtn = ST_MOUSE_RIGHT; break;
+                case WM_RBUTTONDOWN: aBtnId = ST_MOUSE_RIGHT; break;
                 case WM_MBUTTONUP:
-                case WM_MBUTTONDOWN: mbtn = ST_MOUSE_MIDDLE; break;
+                case WM_MBUTTONDOWN: aBtnId = ST_MOUSE_MIDDLE; break;
                 case WM_XBUTTONUP:
-                case WM_XBUTTONDOWN: mbtn = (HIWORD(wParam) == XBUTTON1) ? ST_MOUSE_X1 : ST_MOUSE_X2; break;
+                case WM_XBUTTONDOWN: aBtnId = (HIWORD(wParam) == XBUTTON1) ? ST_MOUSE_X1 : ST_MOUSE_X2; break;
                 case WM_MOUSEWHEEL: {
                     int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
                     //if(GET_X_LPARAM(lParam) != 0)
-                    mbtn = (zDelta > 0) ? ST_MOUSE_SCROLL_V_UP : ST_MOUSE_SCROLL_V_DOWN;
+                    aBtnId = (zDelta > 0) ? ST_MOUSE_SCROLL_V_UP : ST_MOUSE_SCROLL_V_DOWN;
                     break;
                 }
             }
+
+            myStEvent.Button.Time    = getEventTime();
+            myStEvent.Button.Button  = aBtnId;
+            myStEvent.Button.Buttons = 0;
+            myStEvent.Button.PointX  = aPnt.x();
+            myStEvent.Button.PointY  = aPnt.y();
+
             switch(uMsg) {
                 case WM_LBUTTONUP:
                 case WM_RBUTTONUP:
@@ -535,9 +597,8 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 case WM_XBUTTONUP: {
                     // TODO (Kirill Gavrilov#9) what if we have some another not unclicked mouse button?
                     ReleaseCapture();
-
-                    myMUpQueue.push(point, mbtn);
-                    myMessageList.append(StMessageList::MSG_MOUSE_UP);
+                    myStEvent.Type = stEvent_MouseUp;
+                    myEventsBuffer.append(myStEvent);
                     break;
                 }
                 case WM_LBUTTONDOWN:
@@ -548,16 +609,16 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                     SetFocus  (theWin);
                     SetCapture(theWin);
 
-                    myMDownQueue.push(point, mbtn);
-                    myMessageList.append(StMessageList::MSG_MOUSE_DOWN);
+                    myStEvent.Type = stEvent_MouseDown;
+                    myEventsBuffer.append(myStEvent);
                     break;
                 }
                 case WM_MOUSEWHEEL: {
                     // TODO (Kirill Gavrilov#9#) delta ignored
-                    myMDownQueue.push(point, mbtn);
-                    myMessageList.append(StMessageList::MSG_MOUSE_DOWN);
-                    myMUpQueue.push(point, mbtn);
-                    myMessageList.append(StMessageList::MSG_MOUSE_UP);
+                    myStEvent.Type = stEvent_MouseDown;
+                    myEventsBuffer.append(myStEvent);
+                    myStEvent.Type = stEvent_MouseUp;
+                    myEventsBuffer.append(myStEvent);
                     break;
                 }
             }
@@ -650,6 +711,13 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
     myIsUpdated = true;
     myMessageList.append(StMessageList::MSG_RESIZE);
     myMessageList.append(StMessageList::MSG_FULLSCREEN_SWITCH);
+
+    const StRectI_t& aRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
+    myStEvent.Type       = stEvent_Size;
+    myStEvent.Size.Time  = getEventTime();
+    myStEvent.Size.SizeX = aRect.width();
+    myStEvent.Size.SizeY = aRect.height();
+    signals.onResize->emit(myStEvent.Size);
 }
 
 void StWindowImpl::updateWindowPos() {
@@ -785,6 +853,7 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
     myMousePt = aNewMousePt;
 
     myMessageList.popList(theMessages);
+    swapEventsBuffers();
 }
 
 #endif

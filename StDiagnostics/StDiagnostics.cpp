@@ -78,7 +78,7 @@ bool StDiagnostics::open() {
     return true;
 }
 
-void StDiagnostics::doResize(const StSizeEvent& theEvent) {
+void StDiagnostics::doResize(const StSizeEvent& ) {
     if(myGUI.isNull()) {
         return;
     }

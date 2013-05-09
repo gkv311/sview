@@ -103,6 +103,10 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
     myEventQuit       = CreateEvent(0, true, false, NULL);
     myEventCursorShow = CreateEvent(0, true, false, NULL);
     myEventCursorHide = CreateEvent(0, true, false, NULL);
+
+    // read system uptime (in milliseconds)
+    const uint64_t anUptime = GetTickCount64();
+    myEventsTimer.restart(double(anUptime) * 1000.0); // convert to microseconds
 #endif
 
     // just debug output Monitors' configuration

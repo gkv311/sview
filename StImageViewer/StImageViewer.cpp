@@ -326,7 +326,7 @@ void StImageViewer::doChangeDevice(const int32_t theValue) {
     // update menu
 }
 
-void StImageViewer::doResize(const StSizeEvent& theEvent) {
+void StImageViewer::doResize(const StSizeEvent& ) {
     if(myGUI.isNull()) {
         return;
     }

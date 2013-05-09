@@ -357,7 +357,7 @@ bool StCADViewer::open() {
     return true;
 }
 
-void StCADViewer::doResize(const StSizeEvent& theEvent) {
+void StCADViewer::doResize(const StSizeEvent& ) {
     if(myGUI.isNull()) {
         return;
     }
