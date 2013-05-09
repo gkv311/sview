@@ -66,11 +66,6 @@ namespace {
     static const char ST_ARGUMENT_FILE_RIGHT[] = "right";
 };
 
-void StImageViewer::doChangeDevice(const int32_t theValue) {
-    StApplication::doChangeDevice(theValue);
-    // update menu
-}
-
 StImageViewer::StImageViewer(const StNativeWin_t         theParentWin,
                              const StHandle<StOpenInfo>& theOpenInfo)
 : StApplication(theParentWin, theOpenInfo),
@@ -326,6 +321,40 @@ bool StImageViewer::open() {
     return true;
 }
 
+void StImageViewer::doChangeDevice(const int32_t theValue) {
+    StApplication::doChangeDevice(theValue);
+    // update menu
+}
+
+void StImageViewer::doMouseDown(const StClickEvent& theEvent) {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    if(myEscNoQuit
+    && !myWindow->isFullScreen()
+    && (theEvent.Button == ST_MOUSE_SCROLL_V_UP || theEvent.Button == ST_MOUSE_SCROLL_V_DOWN)) {
+        return; // ignore scrolling
+    }
+
+    myGUI->tryClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
+}
+
+void StImageViewer::doMouseUp(const StClickEvent& theEvent) {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    if(theEvent.Button == ST_MOUSE_MIDDLE) {
+        params.isFullscreen->reverse();
+    } else if(myEscNoQuit
+           && !myWindow->isFullScreen()
+           && (theEvent.Button == ST_MOUSE_SCROLL_V_UP || theEvent.Button == ST_MOUSE_SCROLL_V_DOWN)) {
+        return; // ignore scrolling
+    }
+    myGUI->tryUnClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
+}
+
 void StImageViewer::processEvents(const StMessage_t* theEvents) {
     bool isMouseMove = false;
     size_t evId(0);
@@ -373,32 +402,6 @@ void StImageViewer::processEvents(const StMessage_t* theEvents) {
             }
             case StMessageList::MSG_MOUSE_MOVE: {
                 isMouseMove = true; break;
-            }
-            case StMessageList::MSG_MOUSE_DOWN: {
-                StPointD_t pt;
-                int aMouseBtn = myWindow->getMouseDown(pt);
-                if(myEscNoQuit
-                && !myWindow->isFullScreen()
-                && (aMouseBtn == ST_MOUSE_SCROLL_V_UP || aMouseBtn == ST_MOUSE_SCROLL_V_DOWN)) {
-                    // ignore scrolling as well
-                    break;
-                }
-                myGUI->tryClick(pt, aMouseBtn);
-                break;
-            }
-            case StMessageList::MSG_MOUSE_UP: {
-                StPointD_t pt;
-                int aMouseBtn = myWindow->getMouseUp(pt);
-                if(aMouseBtn == ST_MOUSE_MIDDLE) {
-                    params.isFullscreen->reverse();
-                } else if(myEscNoQuit
-                       && !myWindow->isFullScreen()
-                       && (aMouseBtn == ST_MOUSE_SCROLL_V_UP || aMouseBtn == ST_MOUSE_SCROLL_V_DOWN)) {
-                    // ignore scrolling as well
-                    break;
-                }
-                myGUI->tryUnClick(pt, aMouseBtn);
-                break;
             }
             case StMessageList::MSG_GO_BACKWARD: {
                 doListPrev();

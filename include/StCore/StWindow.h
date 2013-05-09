@@ -30,6 +30,7 @@
 #include "StWinErrorCodes.h" // Header with error codes
 #include "StMessageList.h"
 #include "StNativeWin_t.h"
+#include "StEvent.h"
 
 // StWindow enumeration
 enum {
@@ -217,15 +218,6 @@ class StWindow {
     ST_CPPEXPORT StPointD_t getMousePos() const;
 
     /**
-     * Returns mouse click position from stack.
-     * @param thePoint click point in relative coordinates
-     * @return mouse button id if any click in stack
-     */
-    ST_CPPEXPORT int getMouseDown(StPointD_t& thePoint);
-
-    ST_CPPEXPORT int getMouseUp(StPointD_t& thePoint);
-
-    /**
      * Function to get Drag&Drop file list.
      * @param theId   file if in list
      * @param theFile buffer for file path;
@@ -352,7 +344,12 @@ class StWindow {
          * Emit callback Slot on redraw.
          * @param theView view id to redraw
          */
-        StSignal<void (const unsigned int )> onRedraw;
+        StSignal<void (const unsigned int )>  onRedraw;
+
+        StSignal<void (const StClickEvent& )> onMouseUp;
+        StSignal<void (const StClickEvent& )> onMouseDown;
+
+
     } signals;
 
         protected: //! @name advanced methods
@@ -392,6 +389,8 @@ class StWindow {
     double        myTargetFps; //!< user data
 
         private: //! @name no copies, please
+
+    ST_LOCAL void copySignals();
 
     ST_LOCAL StWindow(const StWindow& );
     ST_LOCAL const StWindow& operator=(const StWindow& );

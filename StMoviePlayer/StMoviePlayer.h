@@ -195,12 +195,13 @@ class StMoviePlayer : public StApplication {
 
     } params;
 
-        private:
+        private: //! @name window events slots
 
-    /**
-     * Process device change.
-     */
     ST_LOCAL virtual void doChangeDevice(const int32_t theValue);
+    ST_LOCAL virtual void doMouseDown(const StClickEvent& theEvent);
+    ST_LOCAL virtual void doMouseUp  (const StClickEvent& theEvent);
+
+        private:
 
     /**
      * Initialization routines.

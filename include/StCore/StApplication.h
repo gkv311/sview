@@ -128,10 +128,22 @@ class StApplication {
      */
     ST_CPPEXPORT void addRenderer(const StHandle<StWindow>& theRenderer);
 
+        protected: //! @name window events slots
+
     /**
      * Process device change.
      */
     ST_CPPEXPORT virtual void doChangeDevice(const int32_t theValue);
+
+    /**
+     * Process mouse button press.
+     */
+    ST_CPPEXPORT virtual void doMouseDown(const StClickEvent& theEvent);
+
+    /**
+     * Process mouse button release.
+     */
+    ST_CPPEXPORT virtual void doMouseUp(const StClickEvent& theEvent);
 
         public: //! @name public parameters
 

@@ -40,6 +40,11 @@ class StDiagnostics : public StApplication {
     ST_CPPEXPORT virtual void processEvents(const StMessage_t* theMessages);
     ST_CPPEXPORT virtual void stglDraw(unsigned int view);
 
+        private: //! @name window events slots
+
+    ST_LOCAL virtual void doMouseDown(const StClickEvent& theEvent);
+    ST_LOCAL virtual void doMouseUp  (const StClickEvent& theEvent);
+
         public: //!< callback Slots
 
     ST_LOCAL void doSwitchFullscreen(const size_t dummy = 0);

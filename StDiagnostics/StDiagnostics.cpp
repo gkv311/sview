@@ -78,6 +78,25 @@ bool StDiagnostics::open() {
     return true;
 }
 
+void StDiagnostics::doMouseDown(const StClickEvent& theEvent) {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    myGUI->tryClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
+}
+
+void StDiagnostics::doMouseUp(const StClickEvent& theEvent) {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    if(theEvent.Button == ST_MOUSE_MIDDLE) {
+        doSwitchFullscreen();
+    }
+    myGUI->tryUnClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
+}
+
 void StDiagnostics::processEvents(const StMessage_t* theEvents) {
     for(size_t anIter = 0; theEvents[anIter].uin != StMessageList::MSG_NULL; ++anIter) {
         switch(theEvents[anIter].uin) {
@@ -112,21 +131,6 @@ void StDiagnostics::processEvents(const StMessage_t* theEvents) {
                     myWindow->setStereoOutput(true);
                     aKeys[ST_VK_S] = false;
                 }
-                break;
-            }
-            case StMessageList::MSG_MOUSE_DOWN: {
-                StPointD_t pt;
-                int mouseBtn = myWindow->getMouseDown(pt);
-                myGUI->tryClick(pt, mouseBtn);
-                break;
-            }
-            case StMessageList::MSG_MOUSE_UP: {
-                StPointD_t pt;
-                int mouseBtn = myWindow->getMouseUp(pt);
-                if(mouseBtn == ST_MOUSE_MIDDLE) {
-                    doSwitchFullscreen();
-                }
-                myGUI->tryUnClick(pt, mouseBtn);
                 break;
             }
         }

@@ -70,8 +70,10 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
   myIsUpdated(false),
   myIsActive(false),
   myBlockSleep(BlockSleep_OFF),
-  myIsDispChanged(false) {
+  myIsDispChanged(false),
+  myEventsTimer(true) {
     stMemZero(&attribs, sizeof(attribs));
+    stMemZero(&signals, sizeof(signals));
     attribs.IsNoDecor      = false;
     attribs.IsStereoOutput = false;
     attribs.IsGlStereo     = false;
@@ -650,14 +652,6 @@ StGLBoxPx StWindowImpl::stglViewport(const int& theWinId) const {
     }
 }
 
-int StWindowImpl::getMouseDown(StPointD_t& thePoint) {
-    return myMDownQueue.pop(thePoint);
-}
-
-int StWindowImpl::getMouseUp(StPointD_t& thePoint) {
-    return myMUpQueue.pop(thePoint);
-}
-
 StPointD_t StWindowImpl::getMousePos() {
     StRectI_t aWinRect = (attribs.IsFullScreen) ? myRectFull : myRectNorm;
 #ifdef _WIN32
@@ -762,18 +756,35 @@ void StWindowImpl::stglSwap(const int& theWinId) {
     }
 }
 
+void StWindowImpl::swapEventsBuffers() {
+    myEventsBuffer.swapBuffers();
+    for(size_t anEventIter = 0; anEventIter < myEventsBuffer.getSize(); ++anEventIter) {
+        const StEvent& anEvent = myEventsBuffer.getEvent(anEventIter);
+        switch(anEvent.Type) {
+            //case stEvent_Close:
+            //case stEvent_Size:
+            //case stEvent_KeyDown:
+            //case stEvent_KeyUp:
+            case stEvent_MouseDown: signals.onMouseDown->emit(anEvent.Button); break;
+            case stEvent_MouseUp:   signals.onMouseUp  ->emit(anEvent.Button); break;
+            //case stEvent_FileDrop:
+            default: break;
+        }
+    }
+}
+
 stBool_t StWindowImpl::appendMessage(const StMessage_t& stMessage) {
     switch(stMessage.uin) {
         case StMessageList::MSG_MOUSE_DOWN_APPEND: {
-            myMUpQueue.clear();
-            myMDownQueue.clear();
-            StMouseMessage_t* mouseData = (StMouseMessage_t* )stMessage.data;
-            myMDownQueue.push(mouseData->point, mouseData->button);
+            //myMUpQueue.clear();
+            //myMDownQueue.clear();
+            //StMouseMessage_t* mouseData = (StMouseMessage_t* )stMessage.data;
+            //myMDownQueue.push(mouseData->point, mouseData->button);
             return myMessageList.append(StMessageList::MSG_MOUSE_DOWN);
         }
         case StMessageList::MSG_MOUSE_UP_APPEND: {
-            StMouseMessage_t* mouseData = (StMouseMessage_t* )stMessage.data;
-            myMUpQueue.push(mouseData->point, mouseData->button);
+            //StMouseMessage_t* mouseData = (StMouseMessage_t* )stMessage.data;
+            //myMUpQueue.push(mouseData->point, mouseData->button);
             return myMessageList.append(StMessageList::MSG_MOUSE_UP);
         }
         case StMessageList::MSG_KEY_DOWN_APPEND: {

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2010 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -16,10 +16,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __StVirtualKeys_h_
-#define __StVirtualKeys_h_
+#ifndef __StVirtualKey_h_
+#define __StVirtualKey_h_
 
-enum StVirtualMouseKeys {
+enum StVirtButton {
     ST_NOMOUSE = 0,
     ST_MOUSE_LEFT = 1,
     ST_MOUSE_RIGHT = 2,
@@ -39,7 +39,7 @@ enum StVirtualMouseKeys {
  * language independent, modifiers independent (SHIFT, CAPS, etc).
  * Do NOT use this for TEXT input!
  */
-enum StVirtualKeys {
+enum StVirtKey {
 
     ST_VK_NULL       = 0x00, // 000 = VK unassigned  | ASCII 'NUL'
 
@@ -302,4 +302,4 @@ enum StVirtualKeys {
     ST_VK_APOSTROPHE   = 0xDE, // 222 = VK_OEM_7       | ''"' for US
 
 };
-#endif // StVirtualKeys
+#endif // StVirtualKey

@@ -65,6 +65,11 @@ class StCADViewer : public StApplication {
      */
     ST_CPPEXPORT virtual bool resetDevice();
 
+        private: //! @name window events slots
+
+    ST_LOCAL virtual void doMouseDown(const StClickEvent& theEvent);
+    ST_LOCAL virtual void doMouseUp  (const StClickEvent& theEvent);
+
         public: //!< callback Slots
 
     /**

@@ -203,7 +203,10 @@ bool StApplication::open() {
 
     myIsOpened = myWindow->create();
     if(myIsOpened) {
-        myWindow->signals.onRedraw.connect(this, &StApplication::stglDraw);
+        // connect slots
+        myWindow->signals.onRedraw    = stSlot(this, &StApplication::stglDraw);
+        myWindow->signals.onMouseDown = stSlot(this, &StApplication::doMouseDown);
+        myWindow->signals.onMouseUp   = stSlot(this, &StApplication::doMouseUp);
     }
 
     return myIsOpened;
@@ -253,6 +256,9 @@ void StApplication::processEvents(const StMessage_t* ) {
 bool StApplication::resetDevice() {
     return false;
 }
+
+void StApplication::doMouseDown(const StClickEvent& theEvent) {}
+void StApplication::doMouseUp  (const StClickEvent& theEvent) {}
 
 void StApplication::processEvents() {
     if(myWindow.isNull() || !myIsOpened) {

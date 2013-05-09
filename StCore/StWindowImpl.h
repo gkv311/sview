@@ -20,10 +20,10 @@
 #define __StWindowImpl_h_
 
 #include <StCore/StWindow.h>
-
 #include <StCore/StSearchMonitors.h>
+
 #include "StWinHandles.h"
-#include "StMouseClickQueue.h"
+#include "StEventsBuffer.h"
 
 #if (defined(__APPLE__))
     #include <StCocoa/StCocoaCoords.h>
@@ -60,8 +60,6 @@ class StWindowImpl {
     ST_LOCAL void setPlacement(const StRectI_t& theRect,
                                const bool       theMoveToScreen);
     ST_LOCAL StPointD_t getMousePos();
-    ST_LOCAL int getMouseDown(StPointD_t& thePoint);
-    ST_LOCAL int getMouseUp(StPointD_t& thePoint);
     ST_LOCAL int getDragNDropFile(const int theId, StString& theFile);
     ST_LOCAL bool create();
     ST_LOCAL void stglSwap(const int& theWinId);
@@ -99,6 +97,12 @@ class StWindowImpl {
                                        XEvent*  theEvent,
                                        char*    theArg);
 #endif
+
+    /**
+     * Swap events read/write buffers
+     * and pop cached events from read buffer.
+     */
+    ST_LOCAL void swapEventsBuffers();
 
     /**
      * Tiles configuration (multiple viewports within the same window).
@@ -248,8 +252,6 @@ class StWindowImpl {
     size_t             myDndCount;        //!< files' count
     StString*          myDndList;         //!< Drag&Drop list
 
-    StMouseClickQueue  myMDownQueue;
-    StMouseClickQueue  myMUpQueue;
     StMessageList      myMessageList;     //!< callback list
     bool               myIsUpdated;       //!< helper flag on window movements updates
     bool               myIsActive;        //!< window visible state
@@ -276,6 +278,14 @@ class StWindowImpl {
         int8_t     SlaveMonId;         //!< on which monitor show slave window (1 by default)
     } attribs;
 
+    struct {
+        StSignal<void (const StClickEvent& )>* onMouseUp;
+        StSignal<void (const StClickEvent& )>* onMouseDown;
+    } signals;
+
+    StTimer        myEventsTimer;
+    StEventsBuffer myEventsBuffer; //!< window events double buffer
+    StEvent myStEvent;
 };
 
 #endif //__StWindowImpl_h_

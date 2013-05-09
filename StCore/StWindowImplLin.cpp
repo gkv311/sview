@@ -766,33 +766,27 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
                 int aPosY = aBtnEvent->y;
                 correctTiledCursor(aPosX, aPosY);
                 const StRectI_t& aRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
-                StPointD_t point(double(aPosX) / double(aRect.width()),
-                                 double(aPosY) / double(aRect.height()));
-                int aMouseBtn = ST_NOMOUSE;
-                // TODO (Kirill Gavrilov#6#) parse extra mouse buttons
+                StVirtButton aMouseBtn = ST_NOMOUSE;
                 switch(aBtnEvent->button) {
                     case 1:  aMouseBtn = ST_MOUSE_LEFT;     break;
                     case 3:  aMouseBtn = ST_MOUSE_RIGHT;    break;
                     case 2:  aMouseBtn = ST_MOUSE_MIDDLE;   break;
-                    default: aMouseBtn = aBtnEvent->button; break;
+                    default: aMouseBtn = (StVirtButton )aBtnEvent->button; break;
                 }
-                switch(myXEvent.type) {
-                    case ButtonRelease: {
-                        myMUpQueue.push(point, aMouseBtn);
-                        myMessageList.append(StMessageList::MSG_MOUSE_UP);
-                        break;
-                    }
-                    case ButtonPress: {
-                        myMDownQueue.push(point, aMouseBtn);
-                        myMessageList.append(StMessageList::MSG_MOUSE_DOWN);
-                        break;
-                    }
-                }
-                /*ST_DEBUG_LOG(((myXEvent.type == ButtonPress) ? "ButtonPress " : "Release ")
-                    + aMouseBtn + ", x= " + point.x + ", y= " + point.y
-                );*/
                 // force input focus to the master window
                 XSetInputFocus(aDisplay->hDisplay, myMaster.hWindowGl, RevertToParent, CurrentTime);
+
+                myStEvent.Button.Button  = aMouseBtn;
+                myStEvent.Button.Buttons = 0;
+                myStEvent.Button.PointX  = double(aPosX) / double(aRect.width());
+                myStEvent.Button.PointY  = double(aPosY) / double(aRect.height());
+                if(myXEvent.type == ButtonPress) {
+                    myStEvent.Type = stEvent_MouseDown;
+                    signals.onMouseDown->emit(myStEvent.Button);
+                } else {
+                    myStEvent.Type = stEvent_MouseUp;
+                    signals.onMouseUp->emit(myStEvent.Button);
+                }
                 break;
             }
             //case ResizeRequest:
@@ -859,6 +853,11 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
     updateActiveState();
 
     myMessageList.popList(theMessages);
+
+    // StWindow XLib implementation process events in the same thread
+    // thus this double buffer is not in use
+    // however user events may be posted to it
+    swapEventsBuffers();
 }
 
 #endif

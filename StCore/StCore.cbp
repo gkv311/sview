@@ -302,7 +302,7 @@
 			<Option target="WIN_gcc_x86" />
 			<Option target="WIN_vc_x86_DEBUG" />
 		</Unit>
-		<Unit filename="StMouseClickQueue.h" />
+		<Unit filename="StEventsBuffer.h" />
 		<Unit filename="StSearchMonitors.ObjC.mm">
 			<Option compile="1" />
 			<Option link="1" />
@@ -360,6 +360,7 @@
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="../include/StCore/StEDIDParser.h" />
+		<Unit filename="../include/StCore/StEvent.h" />
 		<Unit filename="../include/StCore/StMessageList.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>

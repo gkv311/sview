@@ -20,16 +20,21 @@
 
 #include "StWindowImpl.h"
 
+void StWindow::copySignals() {
+    myWin->signals.onMouseUp   = &signals.onMouseUp;
+    myWin->signals.onMouseDown = &signals.onMouseDown;
+}
+
 StWindow::StWindow()
 : myWin(new StWindowImpl((StNativeWin_t )NULL)),
   myTargetFps(0.0) {
-    //
+    copySignals();
 }
 
 StWindow::StWindow(const StNativeWin_t theParentWindow)
 : myWin(new StWindowImpl(theParentWindow)),
   myTargetFps(0.0) {
-    //
+    copySignals();
 }
 
 StWindow::~StWindow() {
@@ -143,14 +148,6 @@ void StWindow::setPlacement(const StRectI_t& theRect,
 
 StPointD_t StWindow::getMousePos() const {
     return myWin->getMousePos();
-}
-
-int StWindow::getMouseDown(StPointD_t& thePoint) {
-    return myWin->getMouseDown(thePoint);
-}
-
-int StWindow::getMouseUp(StPointD_t& thePoint) {
-    return myWin->getMouseUp(thePoint);
 }
 
 int StWindow::getDragNDropFile(const int theId,

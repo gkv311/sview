@@ -357,6 +357,79 @@ bool StCADViewer::open() {
     return true;
 }
 
+void StCADViewer::doMouseDown(const StClickEvent& theEvent) {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    myGUI->tryClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
+
+    if(theEvent.Button == ST_MOUSE_LEFT) {
+        myIsLeftHold = true; ///
+        myPrevMouse.x() = theEvent.PointX;
+        myPrevMouse.y() = theEvent.PointY;
+    } else if(theEvent.Button == ST_MOUSE_RIGHT) {
+        myIsRightHold = true; ///
+        myPrevMouse.x() = theEvent.PointX;
+        myPrevMouse.y() = theEvent.PointY;
+    } else if(theEvent.Button == ST_MOUSE_MIDDLE) {
+        myIsMiddleHold = true; ///
+        myPrevMouse.x() = theEvent.PointX;
+        myPrevMouse.y() = theEvent.PointY;
+    }
+}
+
+void StCADViewer::doMouseUp(const StClickEvent& theEvent) {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    switch(theEvent.Button) {
+        case ST_MOUSE_LEFT: {
+            myIsLeftHold = false;
+            break;
+        }
+        case ST_MOUSE_RIGHT: {
+            if(myIsRightHold && myIsCtrlPressed) {
+                // rotate
+                StPointD_t aPt = myWindow->getMousePos();
+                StGLVec2 aFlatMove( 2.0f * GLfloat(aPt.x() - myPrevMouse.x()),
+                                   -2.0f * GLfloat(aPt.y() - myPrevMouse.y()));
+
+                myCam.rotateX(-aFlatMove.x() * 90.0f);
+                myCam.rotateY(-aFlatMove.y() * 90.0f);
+            }
+            myIsRightHold = false;
+            break;
+        }
+        case ST_MOUSE_MIDDLE: {
+            if(!myIsCtrlPressed) {
+                params.isFullscreen->reverse();
+            }
+            myIsMiddleHold = false;
+            break;
+        }
+        case ST_MOUSE_SCROLL_V_UP: {
+            if(myIsCtrlPressed) {
+                myProjection.setZScreen(myProjection.getZScreen() + 1.1f);
+            } else {
+                myProjection.setZoom(myProjection.getZoom() * 0.9f);
+            }
+            break;
+        }
+        case ST_MOUSE_SCROLL_V_DOWN: {
+            if(myIsCtrlPressed) {
+                myProjection.setZScreen(myProjection.getZScreen() - 1.1f);
+            } else {
+                myProjection.setZoom(myProjection.getZoom() * 1.1f);
+            }
+            break;
+        }
+        default: break;
+    }
+    myGUI->tryUnClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
+}
+
 void StCADViewer::processEvents(const StMessage_t* theEvents) {
     size_t evId(0);
     for(; theEvents[evId].uin != StMessageList::MSG_NULL; ++evId) {
@@ -502,72 +575,6 @@ void StCADViewer::processEvents(const StMessage_t* theEvents) {
                     keysMap[ST_VK_3] = false;
                 }
 
-                break;
-            }
-            case StMessageList::MSG_MOUSE_DOWN: {
-                StPointD_t pt;
-                int mouseBtn = myWindow->getMouseDown(pt);
-                myGUI->tryClick(pt, mouseBtn);
-
-                if(mouseBtn == ST_MOUSE_LEFT) {
-                    myIsLeftHold = true; ///
-                    myPrevMouse = pt;
-                } else if(mouseBtn == ST_MOUSE_RIGHT) {
-                    myIsRightHold = true; ///
-                    myPrevMouse = pt;
-                } else if(mouseBtn == ST_MOUSE_MIDDLE) {
-                    myIsMiddleHold = true; ///
-                    myPrevMouse = pt;
-                }
-
-                break;
-            }
-            case StMessageList::MSG_MOUSE_UP: {
-                StPointD_t pt;
-                int mouseBtn = myWindow->getMouseUp(pt);
-                switch(mouseBtn) {
-                    case ST_MOUSE_LEFT: {
-                        myIsLeftHold = false;
-                        break;
-                    }
-                    case ST_MOUSE_RIGHT: {
-                        if(myIsRightHold && myIsCtrlPressed) {
-                            // rotate
-                            StPointD_t aPt = myWindow->getMousePos();
-                            StGLVec2 aFlatMove( 2.0f * GLfloat(aPt.x() - myPrevMouse.x()),
-                                               -2.0f * GLfloat(aPt.y() - myPrevMouse.y()));
-
-                            myCam.rotateX(-aFlatMove.x() * 90.0f);
-                            myCam.rotateY(-aFlatMove.y() * 90.0f);
-                        }
-                        myIsRightHold = false;
-                        break;
-                    }
-                    case ST_MOUSE_MIDDLE: {
-                        if(!myIsCtrlPressed) {
-                            params.isFullscreen->reverse();
-                        }
-                        myIsMiddleHold = false;
-                        break;
-                    }
-                    case ST_MOUSE_SCROLL_V_UP: {
-                        if(myIsCtrlPressed) {
-                            myProjection.setZScreen(myProjection.getZScreen() + 1.1f);
-                        } else {
-                            myProjection.setZoom(myProjection.getZoom() * 0.9f);
-                        }
-                        break;
-                    }
-                    case ST_MOUSE_SCROLL_V_DOWN: {
-                        if(myIsCtrlPressed) {
-                            myProjection.setZScreen(myProjection.getZScreen() - 1.1f);
-                        } else {
-                            myProjection.setZoom(myProjection.getZoom() * 1.1f);
-                        }
-                        break;
-                    }
-                }
-                myGUI->tryUnClick(pt, mouseBtn);
                 break;
             }
         }

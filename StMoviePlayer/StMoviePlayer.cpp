@@ -416,6 +416,48 @@ bool StMoviePlayer::open() {
     return true;
 }
 
+void StMoviePlayer::doMouseDown(const StClickEvent& theEvent) {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    myGUI->tryClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
+}
+
+void StMoviePlayer::doMouseUp(const StClickEvent& theEvent) {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    switch(theEvent.Button) {
+        case ST_MOUSE_MIDDLE: {
+            params.isFullscreen->reverse();
+            break;
+        }
+        case ST_MOUSE_SCROLL_LEFT:
+        case ST_MOUSE_SCROLL_RIGHT: {
+            // limit seeking by scroll to lower corner
+            if(theEvent.PointY > 0.75) {
+                if(theEvent.Button == ST_MOUSE_SCROLL_RIGHT) {
+                    doSeekRight();
+                } else {
+                    doSeekLeft();
+                }
+            }
+        }
+        case ST_MOUSE_SCROLL_V_UP:
+        case ST_MOUSE_SCROLL_V_DOWN: {
+            if(theEvent.PointY > 0.75) {
+                break;
+            }
+        }
+        default: {
+            myGUI->tryUnClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
+            break;
+        }
+    }
+}
+
 void StMoviePlayer::processEvents(const StMessage_t* theEvents) {
     bool isMouseMove = false;
     for(size_t evId = 0; theEvents[evId].uin != StMessageList::MSG_NULL; ++evId) {
@@ -457,44 +499,6 @@ void StMoviePlayer::processEvents(const StMessage_t* theEvents) {
             }
             case StMessageList::MSG_MOUSE_MOVE: {
                 isMouseMove = true; break;
-            }
-            case StMessageList::MSG_MOUSE_DOWN: {
-                StPointD_t pt;
-                int mouseBtn = myWindow->getMouseDown(pt);
-                myGUI->tryClick(pt, mouseBtn);
-                break;
-            }
-            case StMessageList::MSG_MOUSE_UP: {
-                StPointD_t aPoint;
-                int aMouseBtn = myWindow->getMouseUp(aPoint);
-                switch(aMouseBtn) {
-                    case ST_MOUSE_MIDDLE: {
-                        params.isFullscreen->reverse();
-                        break;
-                    }
-                    case ST_MOUSE_SCROLL_LEFT:
-                    case ST_MOUSE_SCROLL_RIGHT: {
-                        // limit seeking by scroll to lower corner
-                        if(aPoint.y() > 0.75) {
-                            if(aMouseBtn == ST_MOUSE_SCROLL_RIGHT) {
-                                doSeekRight();
-                            } else {
-                                doSeekLeft();
-                            }
-                        }
-                    }
-                    case ST_MOUSE_SCROLL_V_UP:
-                    case ST_MOUSE_SCROLL_V_DOWN: {
-                        if(aPoint.y() > 0.75) {
-                            break;
-                        }
-                    }
-                    default: {
-                        myGUI->tryUnClick(aPoint, aMouseBtn);
-                        break;
-                    }
-                }
-                break;
             }
             case StMessageList::MSG_GO_BACKWARD: {
                 doListPrev();
