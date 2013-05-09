@@ -105,8 +105,16 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
     myEventCursorHide = CreateEvent(0, true, false, NULL);
 
     // read system uptime (in milliseconds)
-    const uint64_t anUptime = GetTickCount64();
-    myEventsTimer.restart(double(anUptime) * 1000.0); // convert to microseconds
+    if(StSys::isVistaPlus()) {
+        typedef ULONGLONG (WINAPI *GetTickCount64_t)();
+        HMODULE aKern32 = GetModuleHandleW(L"kernel32");
+        GetTickCount64_t aFunc = (GetTickCount64_t )GetProcAddress(aKern32, "GetTickCount64");
+        const uint64_t anUptime = (aFunc != NULL) ? aFunc() : (uint64_t )GetTickCount();
+        myEventsTimer.restart(double(anUptime) * 1000.0); // convert to microseconds
+    } else {
+        const uint32_t anUptime = GetTickCount();
+        myEventsTimer.restart(double(anUptime) * 1000.0); // convert to microseconds
+    }
 #endif
 
     // just debug output Monitors' configuration

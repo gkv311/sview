@@ -99,11 +99,10 @@ int StThread::countLogicalProcessors() {
     SYSTEM_INFO aSysInfo;
     if(isWow64()) {
         typedef BOOL (WINAPI *LPFN_GSI)(LPSYSTEM_INFO );
-        HMODULE aKern32Module = GetModuleHandleW(L"kernel32");
-        LPFN_GSI aFuncSysInfo = (aKern32Module != NULL)
-            ? (LPFN_GSI )GetProcAddress(aKern32Module, "GetNativeSystemInfo") : NULL;
+        HMODULE aKern32 = GetModuleHandleW(L"kernel32");
+        LPFN_GSI aFuncSysInfo = (LPFN_GSI )GetProcAddress(aKern32, "GetNativeSystemInfo");
         // So, they suggest 32-bit apps should call this instead of the other in WOW64
-        if(aFuncSysInfo) {
+        if(aFuncSysInfo != NULL) {
             aFuncSysInfo(&aSysInfo);
         } else {
             GetSystemInfo(&aSysInfo);
