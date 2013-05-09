@@ -762,7 +762,7 @@ void StWindowImpl::swapEventsBuffers() {
         const StEvent& anEvent = myEventsBuffer.getEvent(anEventIter);
         switch(anEvent.Type) {
             //case stEvent_Close:
-            //case stEvent_Size:
+            case stEvent_Size:      signals.onResize   ->emit(anEvent.Size);   break;
             //case stEvent_KeyDown:
             //case stEvent_KeyUp:
             case stEvent_MouseDown: signals.onMouseDown->emit(anEvent.Button); break;

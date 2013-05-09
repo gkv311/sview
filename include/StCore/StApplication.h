@@ -136,6 +136,11 @@ class StApplication {
     ST_CPPEXPORT virtual void doChangeDevice(const int32_t theValue);
 
     /**
+     * Process window resize.
+     */
+    ST_CPPEXPORT virtual void doResize(const StSizeEvent&  theEvent);
+
+    /**
      * Process mouse button press.
      */
     ST_CPPEXPORT virtual void doMouseDown(const StClickEvent& theEvent);

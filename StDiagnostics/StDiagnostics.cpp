@@ -78,6 +78,14 @@ bool StDiagnostics::open() {
     return true;
 }
 
+void StDiagnostics::doResize(const StSizeEvent& theEvent) {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    myGUI->stglResize(myWindow->getPlacement());
+}
+
 void StDiagnostics::doMouseDown(const StClickEvent& theEvent) {
     if(myGUI.isNull()) {
         return;
@@ -100,10 +108,6 @@ void StDiagnostics::doMouseUp(const StClickEvent& theEvent) {
 void StDiagnostics::processEvents(const StMessage_t* theEvents) {
     for(size_t anIter = 0; theEvents[anIter].uin != StMessageList::MSG_NULL; ++anIter) {
         switch(theEvents[anIter].uin) {
-            case StMessageList::MSG_RESIZE: {
-                myGUI->stglResize(myWindow->getPlacement());
-                break;
-            }
             case StMessageList::MSG_CLOSE:
             case StMessageList::MSG_EXIT: {
                 StApplication::exit(0);

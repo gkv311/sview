@@ -205,6 +205,7 @@ bool StApplication::open() {
     if(myIsOpened) {
         // connect slots
         myWindow->signals.onRedraw    = stSlot(this, &StApplication::stglDraw);
+        myWindow->signals.onResize    = stSlot(this, &StApplication::doResize);
         myWindow->signals.onMouseDown = stSlot(this, &StApplication::doMouseDown);
         myWindow->signals.onMouseUp   = stSlot(this, &StApplication::doMouseUp);
     }
@@ -257,8 +258,9 @@ bool StApplication::resetDevice() {
     return false;
 }
 
-void StApplication::doMouseDown(const StClickEvent& theEvent) {}
-void StApplication::doMouseUp  (const StClickEvent& theEvent) {}
+void StApplication::doResize   (const StSizeEvent&  ) {}
+void StApplication::doMouseDown(const StClickEvent& ) {}
+void StApplication::doMouseUp  (const StClickEvent& ) {}
 
 void StApplication::processEvents() {
     if(myWindow.isNull() || !myIsOpened) {

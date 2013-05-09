@@ -85,6 +85,14 @@ namespace {
 
 };
 
+double getEventTime() {
+    return 0.0;
+}
+
+double getEventTime(const Time& theTime) {
+    return 0.0;
+}
+
 // function create GUI window
 bool StWindowImpl::create() {
     myMessageList.reset();
@@ -343,6 +351,13 @@ void StWindowImpl::updateChildRect() {
             myRectNormPrev = myRectNorm;
             myIsUpdated    = true;
             myMessageList.append(StMessageList::MSG_RESIZE);
+
+            const StRectI_t& aRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
+            myStEvent.Type       = stEvent_Size;
+            myStEvent.Size.Time  = getEventTime();
+            myStEvent.Size.SizeX = aRect.width();
+            myStEvent.Size.SizeY = aRect.height();
+            signals.onResize->emit(myStEvent.Size);
         }
     }
 }
@@ -475,6 +490,13 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
         }
     }
     XSetInputFocus(hDisplay, myMaster.hWindowGl, RevertToParent, CurrentTime);
+
+    const StRectI_t& aRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
+    myStEvent.Type       = stEvent_Size;
+    myStEvent.Size.Time  = getEventTime();
+    myStEvent.Size.SizeX = aRect.width();
+    myStEvent.Size.SizeY = aRect.height();
+    signals.onResize->emit(myStEvent.Size);
 
     myMessageList.append(StMessageList::MSG_RESIZE); // add event to update GL rendering scape
     myMessageList.append(StMessageList::MSG_FULLSCREEN_SWITCH);
@@ -663,6 +685,13 @@ void StWindowImpl::updateWindowPos() {
     }
     myMessageList.append(StMessageList::MSG_RESIZE); // add event to update GL rendering scape
 
+    const StRectI_t& aRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
+    myStEvent.Type       = stEvent_Size;
+    myStEvent.Size.Time  = getEventTime();
+    myStEvent.Size.SizeX = aRect.width();
+    myStEvent.Size.SizeY = aRect.height();
+    signals.onResize->emit(myStEvent.Size);
+
     // force input focus to Master
     XSetInputFocus(aDisplay->hDisplay, myMaster.hWindowGl, RevertToParent, CurrentTime);
 
@@ -776,6 +805,7 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
                 // force input focus to the master window
                 XSetInputFocus(aDisplay->hDisplay, myMaster.hWindowGl, RevertToParent, CurrentTime);
 
+                myStEvent.Button.Time    = getEventTime(aBtnEvent->time);
                 myStEvent.Button.Button  = aMouseBtn;
                 myStEvent.Button.Buttons = 0;
                 myStEvent.Button.PointX  = double(aPosX) / double(aRect.width());

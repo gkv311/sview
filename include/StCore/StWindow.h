@@ -346,9 +346,11 @@ class StWindow {
          */
         StSignal<void (const unsigned int )>  onRedraw;
 
+        StSignal<void (const StSizeEvent&  )> onResize;
+        StSignal<void (const StKeyEvent&   )> onKeyUp;
+        StSignal<void (const StKeyEvent&   )> onKeyDown;
         StSignal<void (const StClickEvent& )> onMouseUp;
         StSignal<void (const StClickEvent& )> onMouseDown;
-
 
     } signals;
 

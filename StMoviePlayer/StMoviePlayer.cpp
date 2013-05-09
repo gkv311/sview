@@ -416,6 +416,14 @@ bool StMoviePlayer::open() {
     return true;
 }
 
+void StMoviePlayer::doResize(const StSizeEvent& theEvent) {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    myGUI->stglResize(myWindow->getPlacement());
+}
+
 void StMoviePlayer::doMouseDown(const StClickEvent& theEvent) {
     if(myGUI.isNull()) {
         return;
@@ -462,10 +470,6 @@ void StMoviePlayer::processEvents(const StMessage_t* theEvents) {
     bool isMouseMove = false;
     for(size_t evId = 0; theEvents[evId].uin != StMessageList::MSG_NULL; ++evId) {
         switch(theEvents[evId].uin) {
-            case StMessageList::MSG_RESIZE: {
-                myGUI->stglResize(myWindow->getPlacement());
-                break;
-            }
             case StMessageList::MSG_FULLSCREEN_SWITCH: {
                 params.isFullscreen->setValue(myWindow->isFullScreen());
                 break;

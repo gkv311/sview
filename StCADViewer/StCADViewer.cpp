@@ -357,6 +357,16 @@ bool StCADViewer::open() {
     return true;
 }
 
+void StCADViewer::doResize(const StSizeEvent& theEvent) {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    const StRectI_t aWinRect = myWindow->getPlacement();
+    myGUI->stglResize(aWinRect);
+    myProjection.resize(*myContext, aWinRect.width(), aWinRect.height());
+}
+
 void StCADViewer::doMouseDown(const StClickEvent& theEvent) {
     if(myGUI.isNull()) {
         return;
@@ -434,12 +444,6 @@ void StCADViewer::processEvents(const StMessage_t* theEvents) {
     size_t evId(0);
     for(; theEvents[evId].uin != StMessageList::MSG_NULL; ++evId) {
         switch(theEvents[evId].uin) {
-            case StMessageList::MSG_RESIZE: {
-                const StRectI_t aWinRect = myWindow->getPlacement();
-                myGUI->stglResize(aWinRect);
-                myProjection.resize(*myContext, aWinRect.width(), aWinRect.height());
-                break;
-            }
             case StMessageList::MSG_DRAGNDROP_IN: {
                 StString aFilePath;
                 int aFilesCount = myWindow->getDragNDropFile(-1, aFilePath);
