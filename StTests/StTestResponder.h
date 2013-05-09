@@ -21,7 +21,7 @@
 #ifndef __StTestResponder_h_
 #define __StTestResponder_h_
 
-#include <StThreads/StThreads.h>
+#include <StThreads/StThread.h>
 
 #import <Cocoa/Cocoa.h>
 

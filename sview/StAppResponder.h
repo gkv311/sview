@@ -9,7 +9,8 @@
 #ifndef __StAppResponder_h_
 #define __StAppResponder_h_
 
-#include <StThreads/StThreads.h>
+#include <StTemplates/StHandle.h>
+#include <StThreads/StThread.h>
 
 #import <Cocoa/Cocoa.h>
 

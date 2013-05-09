@@ -23,7 +23,9 @@
 #include <StThreads/StProcess.h>
 #include <StThreads/StThread.h>
 
-#if (defined(__linux__) || defined(__linux))
+#ifdef __APPLE__
+    #include <sys/sysctl.h>
+#elif (defined(__linux__) || defined(__linux))
     #include <sys/sysinfo.h>
 #endif
 
@@ -113,9 +115,18 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
     // register callback for display configuration changes
     // alternatively we can add method applicationDidChangeScreenParameters to application delegate
     CGDisplayRegisterReconfigurationCallback(stDisplayChangeCallBack, this);
-#endif
 
-#if (defined(__linux__) || defined(__linux))
+    // read system uptime
+    struct timeval aBootTime;
+    size_t aBTimeSize = sizeof(aBootTime);
+    int anItems[2] = { CTL_KERN, KERN_BOOTTIME };
+    if(sysctl(anItems, 2, &aBootTime, &aBTimeSize, NULL, 0) >= 0) {
+        const time_t aTimeBoot = aBootTime.tv_sec;
+        const time_t aTimeCurr = time(NULL);
+        const time_t aTimeDiff = aTimeCurr - aTimeBoot;
+        myEventsTimer.restart(double(aTimeDiff) * 1000000.0); // convert to microseconds
+    }
+#elif (defined(__linux__) || defined(__linux))
     // read system uptime (in seconds)
     struct sysinfo aSysInfo;
     ::sysinfo(&aSysInfo);
@@ -772,7 +783,7 @@ void StWindowImpl::swapEventsBuffers() {
             case stEvent_KeyUp:     signals.onKeyUp    ->emit(anEvent.Key);    break;
             case stEvent_MouseDown: signals.onMouseDown->emit(anEvent.Button); break;
             case stEvent_MouseUp:   signals.onMouseUp  ->emit(anEvent.Button); break;
-            //case stEvent_FileDrop:
+            case stEvent_FileDrop:  signals.onFileDrop ->emit(anEvent.DNDrop); break;
             default: break;
         }
     }

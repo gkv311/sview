@@ -53,6 +53,8 @@ class StEventsBuffer {
      * Destructor.
      */
     ST_LOCAL ~StEventsBuffer() {
+        // release dynamically allocated resources
+        swapBuffers();
         delete[] myEventsRead;
         delete[] myEventsWrite;
     }
@@ -62,6 +64,7 @@ class StEventsBuffer {
      */
     ST_LOCAL void reset() {
         StMutexAuto aLock(myMutex);
+        swapBuffers();
         mySizeRead  = 0;
         mySizeWrite = 0;
     }
@@ -90,13 +93,31 @@ class StEventsBuffer {
             return;
         }
 
-        myEventsWrite[mySizeWrite++] = theEvent;
+        StEvent& anEvent = myEventsWrite[mySizeWrite++];
+        if(theEvent.Type == stEvent_FileDrop) {
+            // copy buffer
+            const size_t aSize = std::strlen(theEvent.DNDrop.File);
+            char* aBuffer = new char[aSize + 1];
+            stMemCpy(aBuffer, theEvent.DNDrop.File, aSize);
+            aBuffer[aSize] = '\0';
+            anEvent.DNDrop.File = aBuffer;
+        }
+        anEvent = theEvent;
     }
 
     /**
      * Swap read/write buffers. Write buffer become empty as result.
      */
     ST_LOCAL void swapBuffers() {
+        // release dynamically allocated resources
+        for(size_t anIter = 0; anIter < mySizeRead; ++anIter) {
+            StEvent& anEvent = myEventsRead[anIter];
+            if(anEvent.Type == stEvent_FileDrop) {
+                delete[] anEvent.DNDrop.File;
+                anEvent.DNDrop.File = NULL;
+            }
+        }
+
         StMutexAuto aLock(myMutex);
         std::swap(myEventsRead, myEventsWrite);
         mySizeRead  = mySizeWrite;

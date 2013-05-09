@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -28,7 +28,7 @@
  * Notice, this array useless for text input!
  */
 #define ST_CARBON2ST_VK_SIZE 128
-static const size_t ST_CARBON2ST_VK[ST_CARBON2ST_VK_SIZE] = {
+static const unsigned int ST_CARBON2ST_VK[ST_CARBON2ST_VK_SIZE] = {
     ST_VK_A,
     ST_VK_S,
     ST_VK_D,

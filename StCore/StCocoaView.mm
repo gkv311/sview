@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -79,45 +79,95 @@
      * Left mouse button - down.
      */
     - (void ) mouseDown: (NSEvent* ) theEvent {
-        myStWin->myMDownQueue.push(myStWin->getMousePos(), ST_MOUSE_LEFT);
-        myStWin->myMessageList.append(StMessageList::MSG_MOUSE_DOWN);
+        const StPointD_t aPnt    = myStWin->getMousePos();
+        myStEvent.Type           = stEvent_MouseDown;
+        myStEvent.Button.Time    = [theEvent timestamp];
+        myStEvent.Button.Button  = ST_MOUSE_LEFT;
+        myStEvent.Button.Buttons = 0;
+        myStEvent.Button.PointX  = aPnt.x();
+        myStEvent.Button.PointY  = aPnt.y();
+        if([NSThread isMainThread]) {
+            myStWin->signals.onMouseDown->emit(myStEvent.Button);
+        } else {
+            myStWin->myEventsBuffer.append(myStEvent);
+        }
     }
 
     /**
      * Left mouse button - up.
      */
     - (void ) mouseUp: (NSEvent* ) theEvent {
-        myStWin->myMUpQueue.push(myStWin->getMousePos(), ST_MOUSE_LEFT);
-        myStWin->myMessageList.append(StMessageList::MSG_MOUSE_UP);
+        const StPointD_t aPnt    = myStWin->getMousePos();
+        myStEvent.Type           = stEvent_MouseUp;
+        myStEvent.Button.Time    = [theEvent timestamp];
+        myStEvent.Button.Button  = ST_MOUSE_LEFT;
+        myStEvent.Button.Buttons = 0;
+        myStEvent.Button.PointX  = aPnt.x();
+        myStEvent.Button.PointY  = aPnt.y();
+        if([NSThread isMainThread]) {
+            myStWin->signals.onMouseUp->emit(myStEvent.Button);
+        } else {
+            myStWin->myEventsBuffer.append(myStEvent);
+        }
     }
 
     /**
      * Right mouse button - down.
      */
     - (void ) rightMouseDown: (NSEvent* ) theEvent {
-        myStWin->myMDownQueue.push(myStWin->getMousePos(), ST_MOUSE_RIGHT);
-        myStWin->myMessageList.append(StMessageList::MSG_MOUSE_DOWN);
+        const StPointD_t aPnt    = myStWin->getMousePos();
+        myStEvent.Type           = stEvent_MouseDown;
+        myStEvent.Button.Time    = [theEvent timestamp];
+        myStEvent.Button.Button  = ST_MOUSE_RIGHT;
+        myStEvent.Button.Buttons = 0;
+        myStEvent.Button.PointX  = aPnt.x();
+        myStEvent.Button.PointY  = aPnt.y();
+        if([NSThread isMainThread]) {
+            myStWin->signals.onMouseDown->emit(myStEvent.Button);
+        } else {
+            myStWin->myEventsBuffer.append(myStEvent);
+        }
     }
 
     /**
      * Right mouse button - up.
      */
     - (void ) rightMouseUp: (NSEvent* ) theEvent {
-        myStWin->myMUpQueue.push(myStWin->getMousePos(), ST_MOUSE_RIGHT);
-        myStWin->myMessageList.append(StMessageList::MSG_MOUSE_UP);
+        const StPointD_t aPnt    = myStWin->getMousePos();
+        myStEvent.Type           = stEvent_MouseUp;
+        myStEvent.Button.Time    = [theEvent timestamp];
+        myStEvent.Button.Button  = ST_MOUSE_RIGHT;
+        myStEvent.Button.Buttons = 0;
+        myStEvent.Button.PointX  = aPnt.x();
+        myStEvent.Button.PointY  = aPnt.y();
+        if([NSThread isMainThread]) {
+            myStWin->signals.onMouseUp->emit(myStEvent.Button);
+        } else {
+            myStWin->myEventsBuffer.append(myStEvent);
+        }
     }
 
     /**
      * Another (nor left nor right) mouse button - down.
      */
     - (void ) otherMouseDown: (NSEvent* ) theEvent {
-        int aBtnId = ST_NOMOUSE;
+        StVirtButton aBtnId = ST_NOMOUSE;
         if([theEvent buttonNumber] == 2) {
             aBtnId = ST_MOUSE_MIDDLE;
         }
         if(aBtnId != ST_NOMOUSE) {
-            myStWin->myMDownQueue.push(myStWin->getMousePos(), aBtnId);
-            myStWin->myMessageList.append(StMessageList::MSG_MOUSE_DOWN);
+            const StPointD_t aPnt    = myStWin->getMousePos();
+            myStEvent.Type           = stEvent_MouseDown;
+            myStEvent.Button.Time    = [theEvent timestamp];
+            myStEvent.Button.Button  = aBtnId;
+            myStEvent.Button.Buttons = 0;
+            myStEvent.Button.PointX  = aPnt.x();
+            myStEvent.Button.PointY  = aPnt.y();
+            if([NSThread isMainThread]) {
+                myStWin->signals.onMouseDown->emit(myStEvent.Button);
+            } else {
+                myStWin->myEventsBuffer.append(myStEvent);
+            }
         }
     }
 
@@ -125,13 +175,23 @@
      * Another (nor left nor right) mouse button - up.
      */
     - (void ) otherMouseUp: (NSEvent* ) theEvent {
-        int aBtnId = ST_NOMOUSE;
+        StVirtButton aBtnId = ST_NOMOUSE;
         if([theEvent buttonNumber] == 2) {
             aBtnId = ST_MOUSE_MIDDLE;
         }
         if(aBtnId != ST_NOMOUSE) {
-            myStWin->myMUpQueue.push(myStWin->getMousePos(), aBtnId);
-            myStWin->myMessageList.append(StMessageList::MSG_MOUSE_UP);
+            const StPointD_t aPnt    = myStWin->getMousePos();
+            myStEvent.Type           = stEvent_MouseUp;
+            myStEvent.Button.Time    = [theEvent timestamp];
+            myStEvent.Button.Button  = aBtnId;
+            myStEvent.Button.Buttons = 0;
+            myStEvent.Button.PointX  = aPnt.x();
+            myStEvent.Button.PointY  = aPnt.y();
+            if([NSThread isMainThread]) {
+                myStWin->signals.onMouseUp->emit(myStEvent.Button);
+            } else {
+                myStWin->myEventsBuffer.append(myStEvent);
+            }
         }
     }
 
@@ -141,8 +201,8 @@
     - (void ) scrollWheel: (NSEvent* ) theEvent {
         const CGFloat    aDeltaY = [theEvent deltaY];
         const CGFloat    aDeltaX = [theEvent deltaX];
-        const StPointD_t aPoint  = myStWin->getMousePos();
-        int aBtnId = 0;
+        const StPointD_t aPnt    = myStWin->getMousePos();
+        StVirtButton aBtnId = ST_NOMOUSE;
         if(stAreEqual(aDeltaX, 0.0, 0.01)) {
             if(stAreEqual(aDeltaY, 0.0, 0.01)) {
                 // a lot of values near zero can be generated by touchpad
@@ -154,10 +214,21 @@
         }
 
         //if([theEvent subtype] == NSMouseEventSubtype) {
-        myStWin->myMDownQueue.push(aPoint, aBtnId);
-        myStWin->myMessageList.append(StMessageList::MSG_MOUSE_DOWN);
-        myStWin->myMUpQueue.push(aPoint, aBtnId);
-        myStWin->myMessageList.append(StMessageList::MSG_MOUSE_UP);
+        myStEvent.Type           = stEvent_MouseDown;
+        myStEvent.Button.Time    = [theEvent timestamp];
+        myStEvent.Button.Button  = aBtnId;
+        myStEvent.Button.Buttons = 0;
+        myStEvent.Button.PointX  = aPnt.x();
+        myStEvent.Button.PointY  = aPnt.y();
+        if([NSThread isMainThread]) {
+            myStWin->signals.onMouseDown->emit(myStEvent.Button);
+            myStEvent.Type = stEvent_MouseUp;
+            myStWin->signals.onMouseUp  ->emit(myStEvent.Button);
+        } else {
+            myStWin->myEventsBuffer.append(myStEvent);
+            myStEvent.Type = stEvent_MouseUp;
+            myStWin->myEventsBuffer.append(myStEvent);
+        }
         //}
     }
 
@@ -216,7 +287,27 @@
         if(aFlags & NSCommandKeyMask) {
             return; // ignore Command + key combinations - key up event doesn't called!
         }
-        myStWin->myMessageList.getKeysMap()[ST_CARBON2ST_VK[aKeyCode]] = true;
+
+        StUtf8Iter aUIter([[theEvent characters] UTF8String]);
+        myStEvent.Key.Char = *aUIter;
+        myStEvent.Key.VKey = (StVirtKey )ST_CARBON2ST_VK[aKeyCode];
+        myStWin->myMessageList.getKeysMap()[myStEvent.Key.VKey] = true;
+
+        myStEvent.Type = stEvent_KeyDown;
+        myStEvent.Key.Time  = [theEvent timestamp];
+        myStEvent.Key.Flags = ST_VF_NONE;
+        if(aFlags & NSShiftKeyMask) {
+            myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_SHIFT);
+        }
+        if(aFlags & NSControlKeyMask) {
+            myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_CONTROL);
+        }
+
+        if([NSThread isMainThread]) {
+            myStWin->signals.onKeyDown->emit(myStEvent.Key);
+        } else {
+            myStWin->myEventsBuffer.append(myStEvent);
+        }
     }
 
     /**
@@ -228,7 +319,26 @@
             ST_DEBUG_LOG("keyUp,   keycode= " + aKeyCode + " ignored!\n");
             return;
         }
-        myStWin->myMessageList.getKeysMap()[ST_CARBON2ST_VK[aKeyCode]] = false;
+
+        NSUInteger aFlags = [theEvent modifierFlags];
+        myStEvent.Key.VKey = (StVirtKey )ST_CARBON2ST_VK[aKeyCode];
+        myStWin->myMessageList.getKeysMap()[myStEvent.Key.VKey] = false;
+
+        myStEvent.Type = stEvent_KeyUp;
+        myStEvent.Key.Time  = [theEvent timestamp];
+        myStEvent.Key.Flags = ST_VF_NONE;
+        if(aFlags & NSShiftKeyMask) {
+            myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_SHIFT);
+        }
+        if(aFlags & NSControlKeyMask) {
+            myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_CONTROL);
+        }
+
+        if([NSThread isMainThread]) {
+            myStWin->signals.onKeyUp->emit(myStEvent.Key);
+        } else {
+            myStWin->myEventsBuffer.append(myStEvent);
+        }
     }
 
     - (void ) goToFullscreen {
@@ -269,21 +379,24 @@
                 return NO;
             }
 
-            myStWin->myDndMutex.lock();
-            myStWin->myDndCount = aFilesCount;
-            delete[] myStWin->myDndList;
-            myStWin->myDndList = new StString[myStWin->myDndCount];
             for(NSUInteger aFileId = 0; aFileId < [aFiles count]; ++aFileId) {
                 NSString* aFilePathNs = (NSString* )[aFiles objectAtIndex: aFileId];
                 if(aFilePathNs == NULL
                 || [aFilePathNs isKindOfClass: [NSString class]] == NO) {
                     continue;
                 }
+
                 // automatically convert filenames from decomposed form used by Mac OS X file systems
-                myStWin->myDndList[aFileId] = StString([[aFilePathNs precomposedStringWithCanonicalMapping] UTF8String]);
+                const StString aFile = [[aFilePathNs precomposedStringWithCanonicalMapping] UTF8String];
+                myStEvent.Type = stEvent_FileDrop;
+                myStEvent.DNDrop.Time = myStWin->getEventTime();
+                myStEvent.DNDrop.File = aFile.toCString();
+                if([NSThread isMainThread]) {
+                    myStWin->signals.onFileDrop->emit(myStEvent.DNDrop);
+                } else {
+                    myStWin->myEventsBuffer.append(myStEvent);
+                }
             }
-            myStWin->myDndMutex.unlock();
-            myStWin->myMessageList.append(StMessageList::MSG_DRAGNDROP_IN);
         }
         return YES;
     }

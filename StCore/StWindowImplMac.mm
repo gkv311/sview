@@ -395,6 +395,12 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
             myRectNormPrev = myRectFull;
             myIsUpdated    = true;
             myMessageList.append(StMessageList::MSG_RESIZE);
+
+            myStEvent.Type       = stEvent_Size;
+            myStEvent.Size.Time  = getEventTime();
+            myStEvent.Size.SizeX = myRectFull.width();
+            myStEvent.Size.SizeY = myRectFull.height();
+            signals.onResize->emit(myStEvent.Size);
         }
     } else {
         StRectI_t aWinRectNew = myCocoaCoords.cocoaToNormal([myMaster.hWindow contentRectForFrameRect: [myMaster.hWindow frame]]);
@@ -403,6 +409,12 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
             myRectNormPrev = aWinRectNew;
             myIsUpdated    = true;
             myMessageList.append(StMessageList::MSG_RESIZE);
+
+            myStEvent.Type       = stEvent_Size;
+            myStEvent.Size.Time  = getEventTime();
+            myStEvent.Size.SizeX = myRectNorm.width();
+            myStEvent.Size.SizeY = myRectNorm.height();
+            signals.onResize->emit(myStEvent.Size);
         }
     }
 
