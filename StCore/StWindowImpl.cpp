@@ -23,6 +23,10 @@
 #include <StThreads/StProcess.h>
 #include <StThreads/StThread.h>
 
+#if (defined(__linux__) || defined(__linux))
+    #include <sys/sysinfo.h>
+#endif
+
 namespace {
     static const stUtf8_t WINDOW_TITLE_DEFAULT[] = "StWindow";
 #ifdef __APPLE__
@@ -113,6 +117,13 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
     // alternatively we can add method applicationDidChangeScreenParameters to application delegate
     CGDisplayRegisterReconfigurationCallback(stDisplayChangeCallBack, this);
 #endif
+
+#if (defined(__linux__) || defined(__linux))
+    // read system uptime (in seconds)
+    struct sysinfo aSysInfo;
+    ::sysinfo(&aSysInfo);
+    myEventsTimer.restart(double(aSysInfo.uptime) * 1000000.0); // convert to microseconds
+#endif
 }
 
 void StWindowImpl::updateMonitors() {
@@ -176,6 +187,22 @@ void StWindowImpl::close() {
         myFullScreenWinNb.decrement();
     }
     attribs.IsFullScreen = false; // just hack to return window position after closing
+}
+
+double StWindowImpl::getEventTime() const {
+    return myEventsTimer.getElapsedTime();
+}
+
+double StWindowImpl::getEventTime(const uint32_t theTime) const {
+    double aTime = double(theTime) * 0.001; // system upload time in milliseconds
+
+    // workaround integer overflows each 49 days
+    const double aTimeSys = myEventsTimer.getElapsedTime() - 7200.0; // current time - 2 hours
+    for(; aTime < aTimeSys; ) {
+        aTime += double(uint32_t(-1)) * 0.001;
+    }
+
+    return aTime;
 }
 
 #if (!defined(__APPLE__))

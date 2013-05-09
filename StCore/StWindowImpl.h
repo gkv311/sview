@@ -105,6 +105,16 @@ class StWindowImpl {
     ST_LOCAL void swapEventsBuffers();
 
     /**
+     * @return upload time in seconds
+     */
+    ST_LOCAL double getEventTime() const;
+
+    /**
+     * @return upload time in seconds
+     */
+    ST_LOCAL double getEventTime(const uint32_t theTime) const;
+
+    /**
      * Tiles configuration (multiple viewports within the same window).
      */
     enum TiledCfg {

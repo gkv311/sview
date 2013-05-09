@@ -11,7 +11,7 @@
 
 #include <stTypes.h>
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     #include <windows.h>
 #else
     #include <sys/time.h>
@@ -28,7 +28,7 @@ class StTimer {
         public:
 
     /**
-     * @param isStart (bool ) - start timer on create flag.
+     * @param isStart Flag to start timer
      */
     StTimer(bool isStart = false)
     : myTimeInMicroSec(0.0),
@@ -53,7 +53,7 @@ class StTimer {
 
     /**
      * Clean start.
-     * @param startTime (double ) - initial time in micro second.
+     * @param theStartFromMicroSec Initial time in micro second
      */
     void restart(double theStartFromMicroSec = 0.0) {
         reset();
@@ -86,45 +86,45 @@ class StTimer {
     }
 
     /**
-     * @return seconds (double ) - timer in seconds.
+     * @return Timer value in seconds
      */
-    double getElapsedTime() {
+    double getElapsedTime() const {
         return this->getElapsedTimeInSec();
     }
 
     /**
-     * @return seconds (double ) - timer in seconds.
+     * @return Timer value in seconds
      */
-    double getElapsedTimeInSec() {
+    double getElapsedTimeInSec() const {
         return this->getElapsedTimeInMicroSec() * 0.000001;
     }
 
     /**
-     * @return milliSeconds (double ) - timer in milli-seconds.
+     * @return Timer value in milli-seconds
      */
-    double getElapsedTimeInMilliSec() {
+    double getElapsedTimeInMilliSec() const {
         return this->getElapsedTimeInMicroSec() * 0.001;
     }
 
     /**
      * Main function.
-     * @return microSeconds (double ) - timer in micro-seconds.
+     * @return Timer value in micro-seconds
      */
-    double getElapsedTimeInMicroSec() {
+    double getElapsedTimeInMicroSec() const {
         return myTimeInMicroSec + getElapsedTimeFromLastStartInMicroSec();
     }
 
     /**
      * Main function - return time, elapsed from last start.
-     * @return microSeconds (double ) - micro-seconds from start.
+     * @return micro-seconds from start
      */
-    double getElapsedTimeFromLastStartInMicroSec() {
+    double getElapsedTimeFromLastStartInMicroSec() const {
         return myIsPaused ? 0.0 : timeFromStart();
     }
 
         private:
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     typedef LARGE_INTEGER stTimeCounter_t;
 #else
     typedef timeval       stTimeCounter_t;
@@ -132,15 +132,15 @@ class StTimer {
 
         private:
 
-    void fillCounter(stTimeCounter_t& theCounter) {
-    #if (defined(_WIN32) || defined(__WIN32__))
+    static void fillCounter(stTimeCounter_t& theCounter) {
+    #ifdef _WIN32
         QueryPerformanceCounter(&theCounter);
     #else
         gettimeofday(&theCounter, NULL);
     #endif
     }
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     static double winInvFrequency() {
         // according to MSDN frequency cannot change while the system is running
         LARGE_INTEGER aFrequency; // ticks per second
@@ -149,9 +149,9 @@ class StTimer {
     }
 #endif
 
-    double timeFromStart() {
+    double timeFromStart() const {
         fillCounter(myCounterEnd);
-    #if (defined(_WIN32) || defined(__WIN32__))
+    #ifdef _WIN32
         static const double INV_FREQ = winInvFrequency();
         return double(myCounterEnd.QuadPart - myCounterStart.QuadPart) * INV_FREQ;
     #else
@@ -173,7 +173,8 @@ class StTimer {
 
     double          myTimeInMicroSec; //!< cumulative elapsed time
     stTimeCounter_t myCounterStart;
-    stTimeCounter_t myCounterEnd;
+    mutable stTimeCounter_t
+                    myCounterEnd;
     bool            myIsPaused;       //!< pause flag
 
 };

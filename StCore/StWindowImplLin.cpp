@@ -85,14 +85,6 @@ namespace {
 
 };
 
-double getEventTime() {
-    return 0.0;
-}
-
-double getEventTime(const Time& theTime) {
-    return 0.0;
-}
-
 // function create GUI window
 bool StWindowImpl::create() {
     myMessageList.reset();
