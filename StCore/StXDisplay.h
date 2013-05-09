@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -41,6 +41,9 @@ class StXDisplay {
 
     Display*     hDisplay; // connection to the X-server
     XVisualInfo* hVisInfo; // visual info
+
+    XIM      hInputMethod;
+    XIC         hInputCtx;
 
     Atom     wndProtocols;
     Atom   wndDestroyAtom; // Atom for close message

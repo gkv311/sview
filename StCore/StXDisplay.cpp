@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -24,6 +24,8 @@
 StXDisplay::StXDisplay()
 : hDisplay(NULL),
   hVisInfo(NULL),
+  hInputMethod(None),
+  hInputCtx(None),
   wndProtocols(None),
   wndDestroyAtom(None),
   xDNDEnter(None),
@@ -53,12 +55,42 @@ bool StXDisplay::open() {
     //hDisplay = XOpenDisplay("192.168.1.10:0.0");
     if(isOpened()) {
         initAtoms();
+
+        hInputMethod = XOpenIM(hDisplay, NULL, NULL, NULL);
+        if(hInputMethod == NULL) {
+            return true;
+        }
+
+        XIMStyles* anIMStyles = NULL;
+        char* anIMValues = XGetIMValues(hInputMethod, XNQueryInputStyle, &anIMStyles, NULL);
+        if(anIMValues != NULL
+        || anIMStyles == NULL
+        || anIMStyles->count_styles <= 0) {
+            // input method doesn't support any styles
+            if(anIMStyles != NULL) {
+                XFree(anIMStyles);
+            }
+            return true;
+        }
+        const XIMStyle anIMStyle = anIMStyles->supported_styles[0];
+        XFree(anIMStyles);
+
+        hInputCtx = XCreateIC(hInputMethod, XNInputStyle, anIMStyle, NULL);
+
         return true;
     }
     return false;
 }
 
 void StXDisplay::close() {
+    if(hInputCtx != None) {
+        XDestroyIC(hInputCtx);
+        hInputCtx = None;
+    }
+    if(hInputMethod != None) {
+        XCloseIM(hInputMethod);
+        hInputMethod = None;
+    }
     if(hDisplay != NULL) {
         XCloseDisplay(hDisplay);
         hDisplay = NULL;

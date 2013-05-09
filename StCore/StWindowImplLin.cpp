@@ -759,8 +759,26 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
             case KeyPress: {
                 XKeyEvent*   aKeyEvent = (XKeyEvent* )&myXEvent;
                 const KeySym aKeySym   = XLookupKeysym(aKeyEvent, 0);
-                //ST_DEBUG_LOG("KeyPress,   keycode= " + aKeyEvent->keycode
-                //         + "; KeySym = " + (unsigned int )aKeySym + "\n");
+                myStEvent.Key.Char = 0;
+
+                Status aStatus;
+                KeySym aKeySymLoc;
+                int aByteNb = Xutf8LookupString(aDisplay->hInputCtx, &myXEvent.xkey, myXInputBuff, sizeof(myXInputBuff), &aKeySymLoc, &aStatus);
+                switch(aStatus) {
+                    case XLookupChars:
+                    case XLookupBoth: {
+                        if(aByteNb > 0) {
+                            StUtf8Iter aCharIter(myXInputBuff);
+                            myStEvent.Key.Char = *aCharIter;
+                        }
+                        break;
+                    }
+                    case XBufferOverflow: ST_DEBUG_LOG("XBufferOverflow"); break;
+                    //case XLookupNone:     ST_DEBUG_LOG("XLookupNone");     break;
+                    //case XLookupKeySym:   ST_DEBUG_LOG("XLookupKeySym");   break;
+                    default: break;
+                }
+
                 StVirtKey aVKeySt = ST_VK_NULL;
                 if(aKeySym < ST_XK2ST_VK_SIZE) {
                     aVKeySt = (StVirtKey )ST_XK2ST_VK[aKeySym];
@@ -774,13 +792,13 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
                     myStEvent.Key.Time  = getEventTime(aKeyEvent->time);
                     myStEvent.Key.VKey  = aVKeySt;
                     myStEvent.Key.Flags = ST_VF_NONE;
-                    myStEvent.Key.Char  = 0;
                     if(myMessageList.getKeysMap()[ST_VK_SHIFT]) {
                         myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_SHIFT);
                     }
                     if(myMessageList.getKeysMap()[ST_VK_CONTROL]) {
                         myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_CONTROL);
                     }
+
                     signals.onKeyDown->emit(myStEvent.Key);
                 }
                 break;

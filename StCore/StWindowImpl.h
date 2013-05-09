@@ -244,8 +244,9 @@ class StWindowImpl {
 #elif (defined(__APPLE__))
     StCocoaCoords      myCocoaCoords;
     IOPMAssertionLevel mySleepAssert;     //!< prevent system going to sleep
-#elif (defined(__linux__) || defined(__linux))
+#else
     XEvent             myXEvent;
+    char               myXInputBuff[32];
 #endif
 
     StMutex            myDndMutex;        //!< access mustex for Drag&Drop file list
