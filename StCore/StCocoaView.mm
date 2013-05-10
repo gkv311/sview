@@ -67,14 +67,6 @@
         [super dealloc];
     }
 
-    /*- (void ) reshape {
-        // wait until view is redrawn in another thread
-        ///myStWin->TheEvent.reset();
-        ///myStWin->TheEvent.wait(1000);
-        [super reshape];
-        myStWin->myMessageList.append(StMessageList::MSG_RESIZE);
-    }*/
-
     /**
      * Left mouse button - down.
      */

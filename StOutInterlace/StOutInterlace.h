@@ -147,11 +147,6 @@ class StOutInterlace : public StWindow {
      */
     ST_LOCAL void doSetBindToMonitor(const bool theValue);
 
-    /**
-     * Process resize event
-     */
-    ST_LOCAL void doResize();
-
         private:
 
     static StAtomic<int32_t>  myInstancesNb;              //!< shared counter for all instances
@@ -180,6 +175,7 @@ class StOutInterlace : public StWindow {
     int                       myDevice;
     StHandle<StMonitor>       myMonitor;                  //!< current monitor
 
+    StRectI_t                 myWinRect;
     StRectI_t                 myEDRect;
     StTimer                   myEDTimer;                  //!< EDimensional activator/disactivator timer
     StHandle<StGLProgram>     myEDIntelaceOn;             //!< ED interlace activate program

@@ -225,8 +225,6 @@ bool StWindowImpl::wndCreateWindows() {
                      SWP_SHOWWINDOW);
     }
 
-    myMessageList.append(StMessageList::MSG_RESIZE);
-
     // always wait for message thread exit before quit
     myMaster.evMsgThread.reset();
 
@@ -367,8 +365,6 @@ void StWindowImpl::updateChildRect() {
         myRectNorm.right()  = aRect.right;
         myRectNorm.bottom() = aRect.bottom;
 
-        myMessageList.append(StMessageList::MSG_RESIZE);
-
         myStEvent.Type       = stEvent_Size;
         myStEvent.Size.Time  = getEventTime();
         myStEvent.Size.SizeX = myRectNorm.width();
@@ -398,7 +394,6 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 case SC_MAXIMIZE: {
                     setFullScreen(true);
                     myIsUpdated = true;
-                    myMessageList.append(StMessageList::MSG_RESIZE);
                     return 0;
                 }*/
                 case SC_SCREENSAVE:     // Screensaver Trying To Start?
@@ -447,11 +442,8 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 break;
             } else if(theWin == myMaster.hWindow) {
                 myIsUpdated = true;
-                // TODO (Kirill GAvrilov#2) not thread safe assignment!
                 myRectNorm.left() = (int )(short )LOWORD(lParam);
                 myRectNorm.top()  = (int )(short )HIWORD(lParam);
-                myMessageList.append(StMessageList::MSG_RESIZE);
-                //ST_DEBUG_LOG("WM_MOVE, XxY= " + x + "x" + y);
                 break;
             }
             // ignore GL subwindow resize messages!
@@ -464,10 +456,8 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 myIsUpdated = true;
                 int w = LOWORD(lParam);
                 int h = HIWORD(lParam);
-                // TODO (Kirill GAvrilov#2) not thread safe assignment!
                 myRectNorm.right()  = myRectNorm.left() + w;
                 myRectNorm.bottom() = myRectNorm.top()  + h;
-                myMessageList.append(StMessageList::MSG_RESIZE);
 
                 myStEvent.Type       = stEvent_Size;
                 myStEvent.Size.Time  = getEventTime(myEvent.time);
@@ -484,13 +474,11 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 break;
             } else if(theWin == myMaster.hWindow) {
                 RECT* aRect = (RECT* )(LPARAM )lParam;
-                // TODO (Kirill GAvrilov#2) not thread safe assignment!
                 myRectNorm.left()   = aRect->left   + GetSystemMetrics(SM_CXSIZEFRAME);
                 myRectNorm.right()  = aRect->right  - GetSystemMetrics(SM_CXSIZEFRAME);
                 myRectNorm.top()    = aRect->top    + GetSystemMetrics(SM_CYSIZEFRAME) + GetSystemMetrics(SM_CYCAPTION);
                 myRectNorm.bottom() = aRect->bottom - GetSystemMetrics(SM_CYSIZEFRAME);
                 myIsUpdated = true;
-                myMessageList.append(StMessageList::MSG_RESIZE);
 
                 myStEvent.Type       = stEvent_Size;
                 myStEvent.Size.Time  = getEventTime(myEvent.time);
@@ -710,7 +698,6 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
         }
     }
     myIsUpdated = true;
-    myMessageList.append(StMessageList::MSG_RESIZE);
     myMessageList.append(StMessageList::MSG_FULLSCREEN_SWITCH);
 
     const StRectI_t& aRect = attribs.IsFullScreen ? myRectFull : myRectNorm;

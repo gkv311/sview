@@ -397,7 +397,6 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
         if(myRectNormPrev != myRectFull) {
             myRectNormPrev = myRectFull;
             myIsUpdated    = true;
-            myMessageList.append(StMessageList::MSG_RESIZE);
 
             myStEvent.Type       = stEvent_Size;
             myStEvent.Size.Time  = getEventTime();
@@ -411,7 +410,6 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
             myRectNorm     = aWinRectNew;
             myRectNormPrev = aWinRectNew;
             myIsUpdated    = true;
-            myMessageList.append(StMessageList::MSG_RESIZE);
 
             myStEvent.Type       = stEvent_Size;
             myStEvent.Size.Time  = getEventTime();

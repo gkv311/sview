@@ -85,6 +85,7 @@ class StOutPageFlipExt : public StOutPageFlip {
         private:
 
     StHandle<StMonitor> myMonitor;      //!< current monitor
+    StRectI_t           myWinRect;
     StGLColoredLine     myCodesLine;
     StGLControlED       myCodesEDOnOff;
     GLsizei             myVpSizeY;      //!< VIewPort Y size
@@ -108,7 +109,6 @@ class StOutPageFlipExt : public StOutPageFlip {
     ST_LOCAL void setSlavePosition(int thePositionId);
 
     ST_LOCAL virtual void stglDrawExtra(unsigned int theView, int theMode);
-    ST_LOCAL virtual void stglResize(const StRectI_t& theWinRect);
 
 };
 

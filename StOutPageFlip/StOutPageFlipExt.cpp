@@ -64,6 +64,10 @@ StOutPageFlipExt::StOutPageFlipExt(const StNativeWin_t theParentWindow)
   myVpSizeY(0),
   myVpSizeX(0),
   myIsQuiting(false) {
+    myWinRect.left()   = 0;
+    myWinRect.right()  = 0;
+    myWinRect.top()    = 0;
+    myWinRect.bottom() = 0;
 
     // Control Code option
     params.ControlCode = new StEnumParam(DEVICE_CONTROL_NONE, myLangMap.changeValueId(STTR_PARAMETER_CONTROL_CODE, "Glasses control codes"));
@@ -117,35 +121,38 @@ bool StOutPageFlipExt::create() {
     return true;
 }
 
-void StOutPageFlipExt::stglResize(const StRectI_t& theWinRect) {
-    myVpSizeY = theWinRect.height();
-    myVpSizeX = theWinRect.width();
-    if(!StOutPageFlip::params.ToShowExtra->getValue()) {
-        return;
-    }
-
-    if(!StWindow::isFullScreen()
-#ifdef _WIN32
-    && myIsVistaPlus
-#endif
-    ) {
-        const StSearchMonitors& aMonitors = StWindow::getMonitors();
-        if(myMonitor.isNull()) {
-            myMonitor = new StMonitor(aMonitors[theWinRect.center()]);
-        } else if(!myMonitor->getVRect().isPointIn(theWinRect.center())) {
-            *myMonitor = aMonitors[theWinRect.center()];
-        }
-        myVpSizeX = myMonitor->getVRect().width();
-        if(getDeviceControl() != NULL) {
-            myVpSizeY = getDeviceControl()->getSizeY();
-        }
-    }
-}
-
 void StOutPageFlipExt::processEvents(StMessage_t* theMessages) {
     StOutPageFlip::processEvents(theMessages);
     if(!StOutPageFlip::params.ToShowExtra->getValue()) {
         return;
+    }
+
+    // resize extra stuff
+    const StRectI_t aRect = StWindow::getPlacement();
+    if(aRect != myWinRect) {
+        myWinRect = aRect;
+        myVpSizeY = aRect.height();
+        myVpSizeX = aRect.width();
+        if(!StOutPageFlip::params.ToShowExtra->getValue()) {
+            return;
+        }
+
+        if(!StWindow::isFullScreen()
+    #ifdef _WIN32
+        && myIsVistaPlus
+    #endif
+        ) {
+            const StSearchMonitors& aMonitors = StWindow::getMonitors();
+            if(myMonitor.isNull()) {
+                myMonitor = new StMonitor(aMonitors[aRect.center()]);
+            } else if(!myMonitor->getVRect().isPointIn(aRect.center())) {
+                *myMonitor = aMonitors[aRect.center()];
+            }
+            myVpSizeX = myMonitor->getVRect().width();
+            if(getDeviceControl() != NULL) {
+                myVpSizeY = getDeviceControl()->getSizeY();
+            }
+        }
     }
 
     for(size_t anIter = 0; theMessages[anIter].uin != StMessageList::MSG_NULL; ++anIter) {

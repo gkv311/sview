@@ -343,7 +343,6 @@ void StWindowImpl::updateChildRect() {
         if(myRectNorm != myRectNormPrev) {
             myRectNormPrev = myRectNorm;
             myIsUpdated    = true;
-            myMessageList.append(StMessageList::MSG_RESIZE);
 
             const StRectI_t& aRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
             myStEvent.Type       = stEvent_Size;
@@ -491,7 +490,6 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
     myStEvent.Size.SizeY = aRect.height();
     signals.onResize->emit(myStEvent.Size);
 
-    myMessageList.append(StMessageList::MSG_RESIZE); // add event to update GL rendering scape
     myMessageList.append(StMessageList::MSG_FULLSCREEN_SWITCH);
     // flushes the output buffer, most client apps needn't use this cause buffer is automatically flushed as needed by calls to XNextEvent()...
     XFlush(hDisplay);
@@ -671,7 +669,6 @@ void StWindowImpl::updateWindowPos() {
             }
         }
     }
-    myMessageList.append(StMessageList::MSG_RESIZE); // add event to update GL rendering scape
 
     const StRectI_t& aRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
     myStEvent.Type       = stEvent_Size;

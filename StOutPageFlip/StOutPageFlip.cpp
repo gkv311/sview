@@ -457,10 +457,6 @@ bool StOutPageFlip::create() {
     return true;
 }
 
-void StOutPageFlip::stglResize(const StRectI_t& ) {
-    //
-}
-
 void StOutPageFlip::processEvents(StMessage_t* theMessages) {
     StWindow::processEvents(theMessages);
 
@@ -472,10 +468,6 @@ void StOutPageFlip::processEvents(StMessage_t* theMessages) {
 
     for(size_t anIter = 0; theMessages[anIter].uin != StMessageList::MSG_NULL; ++anIter) {
         switch(theMessages[anIter].uin) {
-            case StMessageList::MSG_RESIZE: {
-                stglResize(StWindow::getPlacement());
-                break;
-            }
         #ifdef _WIN32
             case StMessageList::MSG_WIN_ON_NEW_MONITOR: {
                 if(params.QuadBuffer->getValue() != QUADBUFFER_HARD_D3D_ANY

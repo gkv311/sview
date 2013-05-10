@@ -175,7 +175,6 @@ class StOutPageFlip : public StWindow {
 
     ST_LOCAL         void stglDrawWarning();
     ST_LOCAL virtual void stglDrawExtra(unsigned int theView, int theMode);
-    ST_LOCAL virtual void stglResize(const StRectI_t& theWinRect);
 
         protected:
 
