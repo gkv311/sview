@@ -95,6 +95,24 @@ StOutPageFlipExt::~StOutPageFlipExt() {
     releaseResources();
 }
 
+void StOutPageFlipExt::close() {
+    beforeClose();
+    StOutPageFlip::close();
+}
+
+void StOutPageFlipExt::beforeClose() {
+    if(isControlOn() && StWindow::isStereoOutput()) {
+        myIsQuiting = true;
+        const double aTime = getDeviceControl()->quitMS();
+        StTimer aQuitTimer(true);
+        while(aQuitTimer.getElapsedTimeInMilliSec() <= aTime) {
+            stglDraw();
+            StThread::sleep(10);
+        }
+        dxRelease();
+    }
+}
+
 bool StOutPageFlipExt::create() {
     // request slave
     if(params.ControlCode->getValue() != DEVICE_CONTROL_NONE) {
@@ -152,22 +170,6 @@ void StOutPageFlipExt::processEvents(StMessage_t* theMessages) {
             if(getDeviceControl() != NULL) {
                 myVpSizeY = getDeviceControl()->getSizeY();
             }
-        }
-    }
-
-    for(size_t anIter = 0; theMessages[anIter].uin != StMessageList::MSG_NULL; ++anIter) {
-        if(theMessages[anIter].uin == StMessageList::MSG_EXIT) {
-            if(isControlOn() && StWindow::isStereoOutput()) {
-                myIsQuiting = true;
-                const double aTime = getDeviceControl()->quitMS();
-                StTimer aQuitTimer(true);
-                while(aQuitTimer.getElapsedTimeInMilliSec() <= aTime) {
-                    stglDraw();
-                    StThread::sleep(10);
-                }
-                dxRelease();
-            }
-            break;
         }
     }
 }

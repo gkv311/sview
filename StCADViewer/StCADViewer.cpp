@@ -236,9 +236,7 @@ bool StCADViewer::resetDevice() {
     }
 
     // be sure Render plugin process quit correctly
-    myMessages[0].uin = StMessageList::MSG_EXIT;
-    myMessages[1].uin = StMessageList::MSG_NULL;
-    myWindow->processEvents(myMessages);
+    myWindow->beforeClose();
 
     myCADLoader->doRelease();
     releaseDevice();
@@ -555,8 +553,7 @@ void StCADViewer::doFileDrop(const StDNDropEvent& theEvent) {
 void StCADViewer::processEvents(const StMessage_t* theEvents) {
     for(size_t evId(0); theEvents[evId].uin != StMessageList::MSG_NULL; ++evId) {
         switch(theEvents[evId].uin) {
-            case StMessageList::MSG_CLOSE:
-            case StMessageList::MSG_EXIT: {
+            case StMessageList::MSG_CLOSE: {
                 StApplication::exit(0);
                 break;
             }
@@ -618,14 +615,20 @@ void StCADViewer::processEvents(const StMessage_t* theEvents) {
 }
 
 void StCADViewer::stglDraw(unsigned int theView) {
+    if(!myContext.isNull()) {
+        // clear the screen and the depth buffer
+        myContext->core11fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    if(myGUI.isNull()) {
+        return;
+    }
+
     myGUI->getCamera()->setView(theView);
     myProjection.setView(myWindow->isStereoOutput() ? theView : ST_DRAW_MONO);
     if(theView == ST_DRAW_LEFT) {
         myGUI->stglUpdate(myWindow->getMousePos());
     }
-
-    // clear the screen and the depth buffer
-    myContext->core11fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 /// setup the projection matrix
     myProjection.updateFrustum(); ///

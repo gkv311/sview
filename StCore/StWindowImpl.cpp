@@ -174,8 +174,8 @@ StWindowImpl::~StWindowImpl() {
 }
 
 void StWindowImpl::close() {
-    hide(ST_WIN_MASTER); hide(ST_WIN_SLAVE);
-    myMessageList.append(StMessageList::MSG_EXIT);
+    hide(ST_WIN_MASTER);
+    hide(ST_WIN_SLAVE);
 
     mySlave.close(); // close GL contexts
     myMaster.close();

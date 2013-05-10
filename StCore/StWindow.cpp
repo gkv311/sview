@@ -51,6 +51,10 @@ void StWindow::close() {
     myWin->close();
 }
 
+void StWindow::beforeClose() {
+    //
+}
+
 void StWindow::setTitle(const StString& theTitle) {
     myWin->setTitle(theTitle);
 }

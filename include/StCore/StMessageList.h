@@ -45,7 +45,6 @@ class StMessageList {
     enum {
         MSG_NULL = 0,   // last 'NULL' event in query
         MSG_NONE = 1,   // just ignored event
-        MSG_EXIT = 2,
         MSG_CLOSE = 3,
         MSG_MOUSE_MOVE = 10,
         MSG_GO_TOP      = 44,
@@ -75,10 +74,7 @@ class StMessageList {
 
     ST_LOCAL bool append(const size_t& msgUIN, void* msgData = NULL) {
         stMutex.lock();
-        if(msgUIN == MSG_EXIT) {
-            count = 1;
-            messageList[0].uin = MSG_EXIT;
-        } else if(count < BUFFER_SIZE) {
+        if(count < BUFFER_SIZE) {
             messageList[count].uin = msgUIN;
             messageList[count].data = msgData;
             messageList[++count].uin = MSG_NULL;
@@ -92,13 +88,6 @@ class StMessageList {
 
     ST_LOCAL bool append(const StMessage_t& stMessage) {
         return append(stMessage.uin, stMessage.data);
-    }
-
-    ST_LOCAL bool hasExitMessage() {
-        stMutex.lock();
-            bool res = messageList[0].uin == MSG_EXIT;
-        stMutex.unlock();
-        return res;
     }
 
     ST_LOCAL void popList(StMessage_t outList[BUFFER_SIZE + 1]) {

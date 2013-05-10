@@ -214,9 +214,7 @@ bool StMoviePlayer::resetDevice() {
     }
 
     // be sure Render plugin process quit correctly
-    myMessages[0].uin = StMessageList::MSG_EXIT;
-    myMessages[1].uin = StMessageList::MSG_NULL;
-    myWindow->processEvents(myMessages);
+    myWindow->beforeClose();
 
     myVideo->doRelease();
     releaseDevice();
@@ -702,8 +700,7 @@ void StMoviePlayer::processEvents(const StMessage_t* theEvents) {
 
     for(size_t evId = 0; theEvents[evId].uin != StMessageList::MSG_NULL; ++evId) {
         switch(theEvents[evId].uin) {
-            case StMessageList::MSG_CLOSE:
-            case StMessageList::MSG_EXIT: {
+            case StMessageList::MSG_CLOSE: {
                 StApplication::exit(0);
                 break;
             }
@@ -756,6 +753,15 @@ void StMoviePlayer::doUpdateOpenALDeviceList(const size_t ) {
 }
 
 void StMoviePlayer::stglDraw(unsigned int view) {
+    if(!myContext.isNull()) {
+        // clear the screen and the depth buffer
+        myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    if(myGUI.isNull()) {
+        return;
+    }
+
     if(myVideo->isDisconnected() || myToUpdateALList) {
         const StString aPrevDev = params.alDevice->getTitle();
         params.alDevice->initList();
@@ -834,9 +840,6 @@ void StMoviePlayer::stglDraw(unsigned int view) {
                                 && (myGUI->stImageRegion->params.displayMode->getValue() == StGLImageRegion::MODE_STEREO));
         }
     }
-
-    // clear the screen and the depth buffer
-    myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // draw GUI
     myGUI->stglDraw(view);

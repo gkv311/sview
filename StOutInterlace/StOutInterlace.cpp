@@ -366,8 +366,22 @@ StOutInterlace::~StOutInterlace() {
 }
 
 void StOutInterlace::close() {
+    beforeClose();
     releaseResources();
     StWindow::close();
+}
+
+void StOutInterlace::beforeClose() {
+    // process exit from StApplication
+    if((myDevice == DEVICE_HINTERLACE_ED) && myIsEDactive) {
+        // disactivate eDimensional shuttered glasses
+        myEDTimer.restart();
+        myIsEDactive = false;
+        while(myEDTimer.getElapsedTime() <= 0.5) {
+            stglDraw();
+            StThread::sleep(10);
+        }
+    }
 }
 
 void StOutInterlace::show() {
@@ -567,18 +581,6 @@ void StOutInterlace::doNewMonitor(const StSizeEvent& ) {
 }
 
 void StOutInterlace::processEvents(StMessage_t* theMessages) {
-    // process exit from StApplication
-    if(theMessages[0].uin == StMessageList::MSG_EXIT
-    && (myDevice == DEVICE_HINTERLACE_ED) && myIsEDactive) {
-        // disactivate eDimensional shuttered glasses
-        myEDTimer.restart();
-        myIsEDactive = false;
-        while(myEDTimer.getElapsedTime() <= 0.5) {
-            stglDraw();
-            StThread::sleep(10);
-        }
-    }
-
     StWindow::processEvents(theMessages);
 
     const StKeysState& aKeys = StWindow::getKeysState();

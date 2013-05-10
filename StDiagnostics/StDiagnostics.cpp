@@ -132,8 +132,7 @@ void StDiagnostics::doKeyDown(const StKeyEvent& theEvent) {
 void StDiagnostics::processEvents(const StMessage_t* theEvents) {
     for(size_t anIter = 0; theEvents[anIter].uin != StMessageList::MSG_NULL; ++anIter) {
         switch(theEvents[anIter].uin) {
-            case StMessageList::MSG_CLOSE:
-            case StMessageList::MSG_EXIT: {
+            case StMessageList::MSG_CLOSE: {
                 StApplication::exit(0);
                 break;
             }
@@ -144,13 +143,19 @@ void StDiagnostics::processEvents(const StMessage_t* theEvents) {
 }
 
 void StDiagnostics::stglDraw(unsigned int theView) {
+    if(!myContext.isNull()) {
+        // clear the screen and the depth buffer
+        myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    if(myGUI.isNull()) {
+        return;
+    }
+
     myGUI->getCamera()->setView(theView);
     if(theView == ST_DRAW_LEFT) {
         myGUI->stglUpdate(myWindow->getMousePos());
     }
-
-    // clear the screen and the depth buffer
-    myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // draw GUI
     myGUI->stglDraw(theView);

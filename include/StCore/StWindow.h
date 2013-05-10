@@ -224,7 +224,15 @@ class StWindow {
      */
     ST_CPPEXPORT virtual bool create();
 
+    /**
+     * Close window and all destroy associated resources.
+     */
     ST_CPPEXPORT virtual void close();
+
+    /**
+     * Extra routines to be processed before window close.
+     */
+    ST_CPPEXPORT virtual void beforeClose();
 
     /**
      * CallBack function.

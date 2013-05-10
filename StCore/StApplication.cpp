@@ -277,10 +277,7 @@ void StApplication::processEvents() {
 
     if(myToQuit) {
         // force Render to quit
-        myMessages[0].uin = StMessageList::MSG_EXIT;
-        myMessages[1].uin = StMessageList::MSG_NULL;
-        // be sure Render plugin process quit correctly
-        myWindow->processEvents(myMessages);
+        myWindow->beforeClose();
         myWindow->close();
         myIsOpened = false;
         myToQuit   = false;

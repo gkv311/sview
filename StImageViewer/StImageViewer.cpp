@@ -128,9 +128,7 @@ bool StImageViewer::resetDevice() {
     }
 
     // be sure Render plugin process quit correctly
-    myMessages[0].uin = StMessageList::MSG_EXIT;
-    myMessages[1].uin = StMessageList::MSG_NULL;
-    myWindow->processEvents(myMessages);
+    myWindow->beforeClose();
 
     myLoader->doRelease();
     releaseDevice();
@@ -605,8 +603,7 @@ void StImageViewer::processEvents(const StMessage_t* theEvents) {
 
     for(; theEvents[evId].uin != StMessageList::MSG_NULL; ++evId) {
         switch(theEvents[evId].uin) {
-            case StMessageList::MSG_CLOSE:
-            case StMessageList::MSG_EXIT: {
+            case StMessageList::MSG_CLOSE: {
                 StApplication::exit(0);
                 break;
             }
@@ -646,6 +643,15 @@ void StImageViewer::processEvents(const StMessage_t* theEvents) {
 }
 
 void StImageViewer::stglDraw(unsigned int theView) {
+    if(!myContext.isNull()) {
+        // clear the screen and the depth buffer
+        myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    if(myGUI.isNull()) {
+        return;
+    }
+
     myGUI->getCamera()->setView(theView);
     if(theView == ST_DRAW_LEFT) {
         if(!myWindow->isActive()) {
@@ -662,9 +668,6 @@ void StImageViewer::stglDraw(unsigned int theView) {
                                    && (myGUI->stImageRegion->params.displayMode->getValue() == StGLImageRegion::MODE_STEREO));
         }
     }
-
-    // clear the screen and the depth buffer
-    myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // draw GUI
     myGUI->stglDraw(theView);
