@@ -66,7 +66,7 @@ class StWindowImpl {
     ST_LOCAL void stglMakeCurrent(const int& theWinId);
     ST_LOCAL StGLBoxPx stglViewport(const int& theWinId) const;
     ST_LOCAL void processEvents(StMessage_t* theMessages);
-    ST_LOCAL void post(const StEvent& theEvent);
+    ST_LOCAL void post(StEvent& theEvent);
     ST_LOCAL const StSearchMonitors& getMonitors() const {
         return myMonitors;
     }

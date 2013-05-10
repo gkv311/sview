@@ -28,6 +28,8 @@
 #include <StThreads/StMutex.h>
 #include <StThreads/StThread.h>
 
+class StOutPageFlip;
+
 /**
  * Direct3D window.
  */
@@ -41,7 +43,7 @@ class StDXNVWindow {
     StDXNVWindow(const size_t     theFboSizeX,
                  const size_t     theFboSizeY,
                  const StMonitor& theMonitor,
-                 StWindow*        theStWin);
+                 StOutPageFlip*   theStWin);
 
     /**
      * Destructor.
@@ -68,14 +70,6 @@ class StDXNVWindow {
      */
     size_t getFboSizeY() const {
         return myFboSizeY;
-    }
-
-    bool hasOwnWindow() const {
-        return myIsOwnWin;
-    }
-
-    StWindow* getStWindow() {
-        return myStWin;
     }
 
     /**
@@ -181,7 +175,6 @@ class StDXNVWindow {
                             LPARAM theParamL);
 
     void updateMouseBtn(const int btnId, bool newState);
-    void updateKeyState(const int vkeyId, bool newState);
 
         private:
 
@@ -198,7 +191,7 @@ class StDXNVWindow {
     StHandle<StDXNVSurface> myDxSurface;
 
     StMonitor               myMonitor;
-    StWindow*               myStWin;
+    StOutPageFlip*          myStWin;
 
     StMutex                 myMutex;
 
@@ -207,7 +200,6 @@ class StDXNVWindow {
     HANDLE                  hEventShow;
     HANDLE                  hEventHide;
     HANDLE                  hEventUpdate;
-    bool                    myIsOwnWin;
 
     bool myMouseState[ST_MOUSE_MAX_ID + 1];
     bool myVKeyState[255];

@@ -18,6 +18,7 @@
 
 #ifdef _WIN32
 #include "StDXNVWindow.h"
+#include "StOutPageFlip.h"
 
 #include <StThreads/StFPSMeter.h>
 #include <StThreads/StProcess.h>
@@ -29,9 +30,8 @@ namespace {
      * that retrieves slave window handle for current StWindow instance.
      * Code may become broken in future!
      */
-    static bool getStNativeWin(StWindow* theStWin,
-                               HWND&     theMaster,
-                               HWND&     theSlave) {
+    static void getStNativeWin(StWindow* theStWin,
+                               HWND&     theMaster) {
         DWORD aPid = 0;
         DWORD aTid = 0;
         DWORD aMyPid = (DWORD )StProcess::getPID();
@@ -47,18 +47,8 @@ namespace {
             }
         }
         if(aPid != aMyPid) {
-            return false;
+            return;
         }
-
-        // at second iteration we detect the slave window (the only window in thread with 0 user data)
-        for(HWND aGlWin = GetTopWindow(NULL); aGlWin != NULL; aGlWin = GetNextWindow(aGlWin, GW_HWNDNEXT)) {
-            if(aTid == GetWindowThreadProcessId(aGlWin, NULL)
-            && GetWindowLongPtr(aGlWin, int(GWLP_USERDATA)) == 0) {
-                theSlave = aGlWin;
-                return true;
-            }
-        }
-        return false;
     }
 
     static const wchar_t ST_D3DWIN_CLASSNAME[] = L"StDirect3D";
@@ -69,7 +59,7 @@ namespace {
 StDXNVWindow::StDXNVWindow(const size_t     theFboSizeX,
                            const size_t     theFboSizeY,
                            const StMonitor& theMonitor,
-                           StWindow*        theStWin)
+                           StOutPageFlip*   theStWin)
 : myBufferL(NULL),
   myBufferR(NULL),
   myFboSizeX(theFboSizeX),
@@ -85,8 +75,7 @@ StDXNVWindow::StDXNVWindow(const size_t     theFboSizeX,
   hEventQuit(NULL),
   hEventShow(NULL),
   hEventHide(NULL),
-  hEventUpdate(NULL),
-  myIsOwnWin(false) {
+  hEventUpdate(NULL) {
     //
     stMemSet(myMouseState, 0, sizeof(myMouseState));
     stMemSet(myVKeyState,  0, sizeof(myVKeyState));
@@ -97,8 +86,7 @@ StDXNVWindow::StDXNVWindow(const size_t     theFboSizeX,
     hEventHide   = CreateEvent(0, true, false, NULL);
     hEventUpdate = CreateEvent(0, true, false, NULL);
 
-    getStNativeWin(myStWin, myWinMaster, myWinD3d);
-    myIsOwnWin  = (myWinD3d == NULL);
+    getStNativeWin(myStWin, myWinMaster);
 }
 
 bool StDXNVWindow::allocateBuffers() {
@@ -126,7 +114,7 @@ StDXNVWindow::~StDXNVWindow() {
     CloseHandle(hEventUpdate);
     releaseBuffers();
 
-    if(!myWinClass.isEmpty() && UnregisterClassW(myWinClass.toCString(), GetModuleHandle(NULL)) == 0) {
+    if(!myWinClass.isEmpty() && UnregisterClassW(myWinClass.toCString(), GetModuleHandleW(NULL)) == 0) {
         ST_DEBUG_LOG("StDXNVWindow, FAILED to unregister Class= '" + myWinClass.toUtf8() + "'");
     }
 }
@@ -166,11 +154,8 @@ LRESULT StDXNVWindow::wndProcFunction(HWND   theWnd,
         updateMouseBtn(ST_MOUSE_LEFT,   GetAsyncKeyState(GetSystemMetrics(SM_SWAPBUTTON) == 0 ? VK_LBUTTON : VK_RBUTTON) != 0);
         updateMouseBtn(ST_MOUSE_RIGHT,  GetAsyncKeyState(GetSystemMetrics(SM_SWAPBUTTON) != 0 ? VK_LBUTTON : VK_RBUTTON) != 0);
         updateMouseBtn(ST_MOUSE_MIDDLE, GetAsyncKeyState(VK_MBUTTON) != 0);
-        for(int vkeyId = 0; vkeyId < 255; ++vkeyId) {
-            updateKeyState(vkeyId, GetAsyncKeyState(vkeyId) != 0);
-        }
     }
-    return DefWindowProc(theWnd, theMsg, theParamW, theParamL);
+    return DefWindowProcW(theWnd, theMsg, theParamW, theParamL);
 }
 
 void StDXNVWindow::updateMouseBtn(const int theBtnId, bool theNewState) {
@@ -185,25 +170,6 @@ void StDXNVWindow::updateMouseBtn(const int theBtnId, bool theNewState) {
         anEvent.Button.Buttons = 0;
         anEvent.Button.PointX  = aPnt.x();
         anEvent.Button.PointY  = aPnt.y();
-        myStWin->post(anEvent);
-    }
-}
-
-void StDXNVWindow::updateKeyState(const int theVKeyId, bool theNewState) {
-    if(myVKeyState[theVKeyId] != theNewState) {
-        myVKeyState[theVKeyId] = theNewState;
-
-        StEvent anEvent;
-        anEvent.Type = theNewState ? stEvent_KeyDown : stEvent_KeyUp;
-        anEvent.Key.Time  = 0.0; //getEventTime(myEvent.time);
-        anEvent.Key.VKey  = (StVirtKey )theVKeyId;
-        anEvent.Key.Flags = ST_VF_NONE;
-        if(myVKeyState[ST_VK_SHIFT]) {
-            anEvent.Key.Flags = StVirtFlags(anEvent.Key.Flags | ST_VF_SHIFT);
-        }
-        if(myVKeyState[ST_VK_CONTROL]) {
-            anEvent.Key.Flags = StVirtFlags(anEvent.Key.Flags | ST_VF_CONTROL);
-        }
         myStWin->post(anEvent);
     }
 }
@@ -225,7 +191,7 @@ static StString stLastError() {
 }
 
 bool StDXNVWindow::initWinAPIWindow() {
-    HINSTANCE anAppInstance = GetModuleHandle(NULL);
+    HINSTANCE anAppInstance = GetModuleHandleW(NULL);
     if(myWinClass.isEmpty()) {
         myWinClass = StStringUtfWide(ST_D3DWIN_CLASSNAME) + StStringUtfWide(ST_D3DWIN_CLASSCOUNTER.increment());
         WNDCLASSW aWinClass;  // Windows Class Structure
@@ -262,7 +228,6 @@ bool StDXNVWindow::initWinAPIWindow() {
         return false;
     }
     ST_DEBUG_LOG_AT("StDXWindow, Created help window");
-    myIsOwnWin = true;
     return true;
 }
 
@@ -284,6 +249,10 @@ void StDXNVWindow::dxLoop() {
     MSG aMsg;
     stMemSet(&aMsg, 0, sizeof(aMsg));
     SetEvent(hEventReady);
+    StKeysState& aKeysState = myStWin->changeKeysState();
+    StEvent aKeyEvent;
+    BYTE aKeysMap[256];
+    wchar_t aCharBuff[4];
     for(;;) {
         switch(MsgWaitForMultipleObjects(4, waitEvents, FALSE, INFINITE, QS_ALLINPUT)) {
             case WAIT_OBJECT_0: {
@@ -293,10 +262,9 @@ void StDXNVWindow::dxLoop() {
                 /// TODO (Kirill Gavrilov#9) do we need this call here?
                 myDxManager->reset(myWinD3d, int(2), int(2), false);
                 myDxManager.nullify();
-                if(myIsOwnWin) {
-                    PostQuitMessage(0);
-                    DestroyWindow(myWinD3d);
-                }
+
+                PostQuitMessage(0);
+                DestroyWindow(myWinD3d);
                 return;
             }
             case WAIT_OBJECT_0 + 1: {
@@ -319,13 +287,9 @@ void StDXNVWindow::dxLoop() {
                     aShowState = false;
                     ST_ERROR_LOG("StDXNVWindow, Failed to reset Direct3D device into FULLSCREEN state");
                 }
-                if(myIsOwnWin) {
-                    ShowWindow(myWinD3d, SW_SHOWMAXIMIZED);
-                    UpdateWindow(myWinD3d); // debug staff
-                } else {
-                    // set keyboard focus
-                    SetForegroundWindow(myWinMaster);
-                }
+                ShowWindow(myWinD3d, SW_SHOWMAXIMIZED);
+                UpdateWindow(myWinD3d); // debug staff
+
                 ResetEvent(hEventShow);
                 SetCursorPos(aCursorPos.x, aCursorPos.y); // restore cursor position
                 break;
@@ -344,10 +308,10 @@ void StDXNVWindow::dxLoop() {
                 if(!myDxManager->reset(myWinD3d, int(getD3dSizeX()), int(getD3dSizeY()), aShowState)) {
                     ST_ERROR_LOG("StDXNVWindow, Failed to reset Direct3D device into WINDOWED state");
                 }
-                if(myIsOwnWin) {
-                    ShowWindow(myWinD3d, SW_HIDE);
-                    UpdateWindow(myWinD3d);
-                }
+
+                ShowWindow(myWinD3d, SW_HIDE);
+                UpdateWindow(myWinD3d);
+
                 ResetEvent(hEventHide);
                 SetCursorPos(aCursorPos.x, aCursorPos.y); // restore cursor position
                 break;
@@ -381,8 +345,46 @@ void StDXNVWindow::dxLoop() {
             case WAIT_OBJECT_0 + 4: {
                 // a windows message has arrived
                 while(PeekMessage(&aMsg, NULL, 0U, 0U, PM_REMOVE)) {
-                    TranslateMessage(&aMsg); // Translate The Message
-                    DispatchMessage(&aMsg);  // Dispatch The Message
+                    // we process WM_KEYDOWN/WM_KEYUP manually - TranslateMessage is redundant
+                    //TranslateMessage(&aMsg);
+
+                    switch(aMsg.message) {
+                        // keys lookup
+                        case WM_KEYDOWN: {
+                            aKeyEvent.Key.Time = myStWin->getEventTime(aMsg.time);
+                            aKeyEvent.Key.VKey = (StVirtKey )aMsg.wParam;
+
+                            // ToUnicode needs high-order bit of a byte to be set for pressed keys...
+                            //GetKeyboardState(aKeysMap);
+                            for(int anIter = 0; anIter < 256; ++anIter) {
+                                aKeysMap[anIter] = aKeysState.isKeyDown((StVirtKey )anIter) ? 0xFF : 0;
+                            }
+
+                            if(::ToUnicode(aMsg.wParam, HIWORD(aMsg.lParam) & 0xFF,
+                                           aKeysMap, aCharBuff, 4, 0) > 0) {
+                                StUtfWideIter aUIter(aCharBuff);
+                                aKeyEvent.Key.Char = *aUIter;
+                            } else {
+                                aKeyEvent.Key.Char = 0;
+                            }
+
+                            aKeyEvent.Key.Flags = ST_VF_NONE;
+                            aKeyEvent.Type = stEvent_KeyDown;
+                            myStWin->post(aKeyEvent);
+                            break;
+                        }
+                        case WM_KEYUP: {
+                            aKeyEvent.Type      = stEvent_KeyUp;
+                            aKeyEvent.Key.VKey  = (StVirtKey )aMsg.wParam;
+                            aKeyEvent.Key.Time  = myStWin->getEventTime(aMsg.time);
+                            aKeyEvent.Key.Flags = ST_VF_NONE;
+                            myStWin->post(aKeyEvent);
+                            break;
+                        }
+                        default: break;
+                    }
+
+                    DispatchMessageW(&aMsg);
                 }
                 break; // break from switch
             }

@@ -239,6 +239,8 @@ class StOutPageFlip : public StWindow {
 
     } myOutD3d; //!< auxiliary Direct3D stuff
 
+    friend class StDXNVWindow;
+
 };
 
 #endif //__StOutPageFlip_h_

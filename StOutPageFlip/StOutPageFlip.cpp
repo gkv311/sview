@@ -389,9 +389,7 @@ void StOutPageFlip::dxDisactivate() {
         myOutD3d.myIsActive = false;
         if(!myOutD3d.myDxWindow.isNull()) {
             myOutD3d.myDxWindow->hide();
-            if(myOutD3d.myDxWindow->hasOwnWindow()) {
-                StWindow::show(ST_WIN_MASTER);
-            }
+            StWindow::show(ST_WIN_MASTER);
         }
 
         // release unused resources

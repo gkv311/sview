@@ -894,16 +894,10 @@ void StWindowImpl::postKeyUp(StKeyEvent& theEvent) {
     }
 }
 
-void StWindowImpl::post(const StEvent& theEvent) {
+void StWindowImpl::post(StEvent& theEvent) {
     switch(theEvent.Type) {
-        case stEvent_KeyDown: {
-            myKeysState.keyDown(theEvent.Key.VKey, theEvent.Key.Time);
-            break;
-        }
-        case stEvent_KeyUp: {
-            myKeysState.keyUp(theEvent.Key.VKey, theEvent.Key.Time);
-            break;
-        }
+        case stEvent_KeyDown: postKeyDown(theEvent.Key); break;
+        case stEvent_KeyUp:   postKeyUp  (theEvent.Key); break;
         default: break;
     }
     myEventsBuffer.append(theEvent);

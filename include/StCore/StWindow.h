@@ -237,7 +237,7 @@ class StWindow {
      * Message will be read on next callback() call.
      * @param theEvent message to append
      */
-    ST_CPPEXPORT void post(const StEvent& theEvent);
+    ST_CPPEXPORT void post(StEvent& theEvent);
 
     /**
      * @return cached keyboard keys state for this window
@@ -390,6 +390,11 @@ class StWindow {
      * @return cached keyboard keys state for this window
      */
     ST_CPPEXPORT StKeysState& changeKeysState();
+
+    /**
+     * @return upload time in seconds
+     */
+    ST_CPPEXPORT double getEventTime(const uint32_t theTime) const;
 
         private: //! @name private fields
 

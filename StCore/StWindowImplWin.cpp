@@ -239,7 +239,9 @@ bool StWindowImpl::wndCreateWindows() {
     // flag to track registered global hot-keys
     bool areGlobalHotKeys = false;
 
-    HANDLE waitEvents[3] = {myEventQuit, myEventCursorShow, myEventCursorHide};
+    wchar_t aCharBuff[4];
+    BYTE    aKeysMap[256];
+    HANDLE  waitEvents[3] = {myEventQuit, myEventCursorShow, myEventCursorHide};
     for(;;) {
         switch(MsgWaitForMultipleObjects(3, waitEvents, FALSE, INFINITE, QS_ALLINPUT)) {
             case WAIT_OBJECT_0: {
@@ -292,14 +294,13 @@ bool StWindowImpl::wndCreateWindows() {
                             myStEvent.Key.VKey = (StVirtKey )myEvent.wParam;
 
                             // ToUnicode needs high-order bit of a byte to be set for pressed keys...
-                            BYTE aKeyState[256]; //GetKeyboardState(aKeyState);
+                            //GetKeyboardState(aKeysMap);
                             for(int anIter = 0; anIter < 256; ++anIter) {
-                                aKeyState[anIter] = myKeysState.isKeyDown((StVirtKey )anIter) ? 0xFF : 0;
+                                aKeysMap[anIter] = myKeysState.isKeyDown((StVirtKey )anIter) ? 0xFF : 0;
                             }
 
-                            wchar_t aCharBuff[4];
                             if(::ToUnicode(myEvent.wParam, HIWORD(myEvent.lParam) & 0xFF,
-                                           aKeyState, aCharBuff, 4, 0) > 0) {
+                                           aKeysMap, aCharBuff, 4, 0) > 0) {
                                 StUtfWideIter aUIter(aCharBuff);
                                 myStEvent.Key.Char = *aUIter;
                             } else {

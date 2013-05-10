@@ -191,7 +191,7 @@ void StWindow::processEvents(StMessage_t* theMessages) {
     myWin->processEvents(theMessages);
 }
 
-void StWindow::post(const StEvent& theEvent) {
+void StWindow::post(StEvent& theEvent) {
     myWin->post(theEvent);
 }
 
@@ -201,6 +201,10 @@ const StKeysState& StWindow::getKeysState() const {
 
 StKeysState& StWindow::changeKeysState() {
     return myWin->myKeysState;
+}
+
+double StWindow::getEventTime(const uint32_t theTime) const {
+    return myWin->getEventTime(theTime);
 }
 
 const StSearchMonitors& StWindow::getMonitors() const {
