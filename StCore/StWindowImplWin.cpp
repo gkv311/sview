@@ -365,11 +365,11 @@ void StWindowImpl::updateChildRect() {
         myRectNorm.right()  = aRect.right;
         myRectNorm.bottom() = aRect.bottom;
 
-        myStEvent.Type       = stEvent_Size;
-        myStEvent.Size.Time  = getEventTime();
-        myStEvent.Size.SizeX = myRectNorm.width();
-        myStEvent.Size.SizeY = myRectNorm.height();
-        signals.onResize->emit(myStEvent.Size);
+        myStEventAux.Type       = stEvent_Size;
+        myStEventAux.Size.Time  = getEventTime();
+        myStEventAux.Size.SizeX = myRectNorm.width();
+        myStEventAux.Size.SizeY = myRectNorm.height();
+        signals.onResize->emit(myStEventAux.Size);
     }
 }
 
@@ -785,8 +785,12 @@ void StWindowImpl::updateWindowPos() {
     if(!attribs.IsFullScreen && myMonitors.size() > 1) {
         int aNewMonId = myMonitors[myRectNorm.center()].getId();
         if(myWinOnMonitorId != aNewMonId) {
-            myMessageList.append(StMessageList::MSG_WIN_ON_NEW_MONITOR);
+            myStEventAux.Type  = stEvent_NewMonitor;
+            myStEventAux.Size.Time  = getEventTime();
+            myStEventAux.Size.SizeX = myRectNorm.width();
+            myStEventAux.Size.SizeY = myRectNorm.height();
             myWinOnMonitorId = aNewMonId;
+            signals.onAnotherMonitor->emit(myStEventAux.Size);
         }
     }
 }

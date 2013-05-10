@@ -794,8 +794,15 @@ void StWindowImpl::swapEventsBuffers() {
         StEvent& anEvent = myEventsBuffer.changeEvent(anEventIter);
         switch(anEvent.Type) {
             //case stEvent_Close:
-            case stEvent_Size:      signals.onResize   ->emit(anEvent.Size);   break;
-            case stEvent_KeyDown:   signals.onKeyDown  ->emit(anEvent.Key);    break;
+            case stEvent_Size:
+                signals.onResize->emit(anEvent.Size);
+                break;
+            case stEvent_NewMonitor:
+                signals.onAnotherMonitor->emit(anEvent.Size);
+                break;
+            case stEvent_KeyDown:
+                signals.onKeyDown->emit(anEvent.Key);
+                break;
             case stEvent_KeyUp: {
                 // reconstruct duration event
                 anEvent.Key.Progress = stMin(anEvent.Key.Time - myLastEventsTime, anEvent.Key.Duration);
@@ -808,9 +815,15 @@ void StWindowImpl::swapEventsBuffers() {
                 signals.onKeyUp->emit(anEvent.Key);
                 break;
             }
-            case stEvent_MouseDown: signals.onMouseDown->emit(anEvent.Button); break;
-            case stEvent_MouseUp:   signals.onMouseUp  ->emit(anEvent.Button); break;
-            case stEvent_FileDrop:  signals.onFileDrop ->emit(anEvent.DNDrop); break;
+            case stEvent_MouseDown:
+                signals.onMouseDown->emit(anEvent.Button);
+                break;
+            case stEvent_MouseUp:
+               signals.onMouseUp->emit(anEvent.Button);
+               break;
+            case stEvent_FileDrop:
+                signals.onFileDrop->emit(anEvent.DNDrop);
+                break;
             default: break;
         }
     }

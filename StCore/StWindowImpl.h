@@ -299,6 +299,7 @@ class StWindowImpl {
 
     struct {
         StSignal<void (const StSizeEvent&   )>* onResize;
+        StSignal<void (const StSizeEvent&   )>* onAnotherMonitor;
         StSignal<void (const StKeyEvent&    )>* onKeyUp;
         StSignal<void (const StKeyEvent&    )>* onKeyDown;
         StSignal<void (const StKeyEvent&    )>* onKeyHold;
@@ -310,7 +311,8 @@ class StWindowImpl {
     StKeysState    myKeysState;        //!< cached keyboard state
     StTimer        myEventsTimer;
     StEventsBuffer myEventsBuffer;     //!< window events double buffer
-    StEvent        myStEvent;
+    StEvent        myStEvent;          //!< temporary event object (to be used in message loop thread)
+    StEvent        myStEventAux;       //!< extra temporary event object (to be used in StWindow cretation thread)
     double         myLastEventsTime;   //!< time when processEvents() was last called
     bool           myEventsThreaded;
 };

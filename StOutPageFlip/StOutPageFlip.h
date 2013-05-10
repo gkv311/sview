@@ -173,6 +173,11 @@ class StOutPageFlip : public StWindow {
      */
     ST_LOCAL void doShowExtra(const bool theValue);
 
+    /**
+     * Process monitor change event.
+     */
+    ST_LOCAL void doNewMonitor(const StSizeEvent& theEvent);
+
     ST_LOCAL         void stglDrawWarning();
     ST_LOCAL virtual void stglDrawExtra(unsigned int theView, int theMode);
 

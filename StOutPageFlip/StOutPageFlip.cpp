@@ -128,6 +128,7 @@ StOutPageFlip::StOutPageFlip(const StNativeWin_t theParentWindow)
   myIsVistaPlus(StSys::isVistaPlus()),
 #endif
   myToResetDevice(false) {
+    StWindow::signals.onAnotherMonitor = stSlot(this, &StOutPageFlip::doNewMonitor);
     const StSearchMonitors& aMonitors = StWindow::getMonitors();
 
     // about string
@@ -457,6 +458,18 @@ bool StOutPageFlip::create() {
     return true;
 }
 
+void StOutPageFlip::doNewMonitor(const StSizeEvent& ) {
+#ifdef _WIN32
+    if(params.QuadBuffer->getValue() != QUADBUFFER_HARD_D3D_ANY
+    || myOutD3d.myIsActive) {
+        return;
+    }
+
+    dxRelease();
+    dxInit();
+#endif
+}
+
 void StOutPageFlip::processEvents(StMessage_t* theMessages) {
     StWindow::processEvents(theMessages);
 
@@ -464,22 +477,6 @@ void StOutPageFlip::processEvents(StMessage_t* theMessages) {
     if(aKeys.isKeyDown(ST_VK_F11)) {
         StWindow::stglSwap(ST_WIN_MASTER);
         aKeys.keyUp(ST_VK_F11, aKeys.getKeyTime(ST_VK_F11));
-    }
-
-    for(size_t anIter = 0; theMessages[anIter].uin != StMessageList::MSG_NULL; ++anIter) {
-        switch(theMessages[anIter].uin) {
-        #ifdef _WIN32
-            case StMessageList::MSG_WIN_ON_NEW_MONITOR: {
-                if(params.QuadBuffer->getValue() != QUADBUFFER_HARD_D3D_ANY
-                || myOutD3d.myIsActive) {
-                    break;
-                }
-                dxRelease();
-                dxInit();
-                break;
-            }
-        #endif
-        }
     }
 }
 

@@ -28,6 +28,7 @@ enum StEventType {
     stEvent_None,       //!< StAnyEvent,    undefined event
     stEvent_Close,      //!< StCloseEvent,  window close requested
     stEvent_Size,       //!< StSizeEvent,   window resized
+    stEvent_NewMonitor, //!< StSizeEvent,   window moved to another monitor
     stEvent_KeyDown,    //!< StKeyEvent,    keyboard key pressed
     stEvent_KeyUp,      //!< StKeyEvent,    keyboard key released
     stEvent_KeyHold,    //!< StKeyEvent,    keyboard key holded
@@ -35,7 +36,6 @@ enum StEventType {
     stEvent_MouseUp,    //!< StClickEvent,  mouse button released
     stEvent_FileDrop,   //!< StDNDropEvent, file Drag & Drop
     ///MSG_MOUSE_MOVE,
-    ///MSG_WIN_ON_NEW_MONITOR,
     ///MSG_GO_TOP,
     ///MSG_GO_BOTTOM,
     ///MSG_GO_BACKWARD,

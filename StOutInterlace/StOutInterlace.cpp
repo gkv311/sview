@@ -217,6 +217,7 @@ StOutInterlace::StOutInterlace(const StNativeWin_t theParentWindow)
     myEDRect.right()   = 1;
     myEDRect.top()     = 0;
     myEDRect.bottom()  = 10;
+    StWindow::signals.onAnotherMonitor = stSlot(this, &StOutInterlace::doNewMonitor);
 
     const StSearchMonitors& aMonitors = StWindow::getMonitors();
     StTranslations aLangMap(ST_OUT_PLUGIN_NAME);
@@ -557,6 +558,14 @@ bool StOutInterlace::create() {
     return true;
 }
 
+void StOutInterlace::doNewMonitor(const StSizeEvent& ) {
+    const StSearchMonitors& aMonitors = StWindow::getMonitors();
+    const StRectI_t  aRect = StWindow::getPlacement();
+    const StMonitor& aMon  = aMonitors[aRect.center()];
+    myIsMonReversed = false;
+    isInterlacedMonitor(aMon, myIsMonReversed);
+}
+
 void StOutInterlace::processEvents(StMessage_t* theMessages) {
     // process exit from StApplication
     if(theMessages[0].uin == StMessageList::MSG_EXIT
@@ -600,19 +609,6 @@ void StOutInterlace::processEvents(StMessage_t* theMessages) {
             myEDRect.top()    = 0;
             myEDRect.bottom() = 10;
             myVpSizeY = 10;
-        }
-    }
-
-    for(size_t anIter = 0; theMessages[anIter].uin != StMessageList::MSG_NULL; ++anIter) {
-        switch(theMessages[anIter].uin) {
-            case StMessageList::MSG_WIN_ON_NEW_MONITOR: {
-                const StSearchMonitors& aMonitors = StWindow::getMonitors();
-                const StRectI_t  aRect = StWindow::getPlacement();
-                const StMonitor& aMon  = aMonitors[aRect.center()];
-                myIsMonReversed = false;
-                isInterlacedMonitor(aMon, myIsMonReversed);
-                break;
-            }
         }
     }
 }

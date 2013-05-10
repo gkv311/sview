@@ -22,6 +22,7 @@
 
 void StWindow::copySignals() {
     myWin->signals.onResize    = &signals.onResize;
+    myWin->signals.onAnotherMonitor = &signals.onAnotherMonitor;
     myWin->signals.onKeyUp     = &signals.onKeyUp;
     myWin->signals.onKeyDown   = &signals.onKeyDown;
     myWin->signals.onKeyHold   = &signals.onKeyHold;

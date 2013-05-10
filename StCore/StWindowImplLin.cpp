@@ -683,8 +683,12 @@ void StWindowImpl::updateWindowPos() {
     if(!attribs.IsFullScreen && myMonitors.size() > 1) {
         int aNewMonId = myMonitors[myRectNorm.center()].getId();
         if(myWinOnMonitorId != aNewMonId) {
-            myMessageList.append(StMessageList::MSG_WIN_ON_NEW_MONITOR);
+            myStEventAux.Type  = stEvent_NewMonitor;
+            myStEventAux.Size.Time  = getEventTime();
+            myStEventAux.Size.SizeX = myRectNorm.width();
+            myStEventAux.Size.SizeY = myRectNorm.height();
             myWinOnMonitorId = aNewMonId;
+            signals.onAnotherMonitor->emit(myStEventAux.Size);
         }
     }
 }

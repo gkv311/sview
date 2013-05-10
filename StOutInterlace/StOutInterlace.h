@@ -147,6 +147,11 @@ class StOutInterlace : public StWindow {
      */
     ST_LOCAL void doSetBindToMonitor(const bool theValue);
 
+    /**
+     * Process monitor change event.
+     */
+    ST_LOCAL void doNewMonitor(const StSizeEvent& theEvent);
+
         private:
 
     static StAtomic<int32_t>  myInstancesNb;              //!< shared counter for all instances
