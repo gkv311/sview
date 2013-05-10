@@ -88,6 +88,7 @@ namespace {
 // function create GUI window
 bool StWindowImpl::create() {
     myMessageList.reset();
+    myKeysState.reset();
 
     // initialize helper GDK
     static bool isGdkInitialized = false;
@@ -773,16 +774,16 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
                     aVKeySt = (StVirtKey )ST_XKMEDIA2ST_VK[aKeySym - ST_XKMEDIA_FIRST];
                 }
                 if(aVKeySt != ST_VK_NULL) {
-                    myMessageList.getKeysMap()[aVKeySt] = true;
-
                     myStEvent.Type = stEvent_KeyDown;
                     myStEvent.Key.Time  = getEventTime(aKeyEvent->time);
                     myStEvent.Key.VKey  = aVKeySt;
                     myStEvent.Key.Flags = ST_VF_NONE;
-                    if(myMessageList.getKeysMap()[ST_VK_SHIFT]) {
+
+                    myKeysState.keyDown(myStEvent.Key.VKey, myStEvent.Key.Time);
+                    if(myKeysState.isKeyDown(ST_VK_SHIFT)) {
                         myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_SHIFT);
                     }
-                    if(myMessageList.getKeysMap()[ST_VK_CONTROL]) {
+                    if(myKeysState.isKeyDown(ST_VK_CONTROL)) {
                         myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_CONTROL);
                     }
 
@@ -802,17 +803,16 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
                     aVKeySt = (StVirtKey )ST_XKMEDIA2ST_VK[aKeySym - ST_XKMEDIA_FIRST];
                 }
                 if(aVKeySt != ST_VK_NULL) {
-                    myMessageList.getKeysMap()[aVKeySt] = false;
-
                     myStEvent.Type = stEvent_KeyUp;
                     myStEvent.Key.Time  = getEventTime(aKeyEvent->time);
                     myStEvent.Key.VKey  = aVKeySt;
                     myStEvent.Key.Flags = ST_VF_NONE;
                     myStEvent.Key.Char  = 0;
-                    if(myMessageList.getKeysMap()[ST_VK_SHIFT]) {
+                    myKeysState.keyUp(myStEvent.Key.VKey, myStEvent.Key.Time);
+                    if(myKeysState.isKeyDown(ST_VK_SHIFT)) {
                         myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_SHIFT);
                     }
-                    if(myMessageList.getKeysMap()[ST_VK_CONTROL]) {
+                    if(myKeysState.isKeyDown(ST_VK_CONTROL)) {
                         myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_CONTROL);
                     }
                     signals.onKeyUp->emit(myStEvent.Key);

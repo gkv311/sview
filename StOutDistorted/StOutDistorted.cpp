@@ -419,13 +419,6 @@ bool StOutDistorted::create() {
 
 void StOutDistorted::processEvents(StMessage_t* theMessages) {
     StWindow::processEvents(theMessages);
-    for(size_t anIter = 0; theMessages[anIter].uin != StMessageList::MSG_NULL; ++anIter) {
-        if(theMessages[anIter].uin != StMessageList::MSG_KEYS) {
-            continue;
-        }
-
-        //bool* aKeys = ((bool* )theMessages[anIter].data);
-    }
 }
 
 void StOutDistorted::showCursor(const bool theToShow) {

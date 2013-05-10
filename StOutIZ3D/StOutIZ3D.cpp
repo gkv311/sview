@@ -267,19 +267,15 @@ bool StOutIZ3D::create() {
 
 void StOutIZ3D::processEvents(StMessage_t* theMessages) {
     StWindow::processEvents(theMessages);
-    for(size_t anIter = 0; theMessages[anIter].uin != StMessageList::MSG_NULL; ++anIter) {
-        if(theMessages[anIter].uin != StMessageList::MSG_KEYS) {
-            continue;
-        }
 
-        bool* aKeys = ((bool* )theMessages[anIter].data);
-        if(aKeys[ST_VK_F1]) {
-            params.Glasses->setValue(StOutIZ3DShaders::IZ3D_TABLE_OLD); aKeys[ST_VK_F1] = false;
-        } else if(aKeys[ST_VK_F2]) {
-            params.Glasses->setValue(StOutIZ3DShaders::IZ3D_TABLE_NEW); aKeys[ST_VK_F2] = false;
-        } else if(aKeys[ST_VK_F3]) {
-            params.Glasses->setValue(StOutIZ3DShaders::IZ3D_CLASSIC);   aKeys[ST_VK_F3] = false;
-        }
+    // don't care about holded key - StParam calls it's callbacks only on value change
+    const StKeysState& aKeys = StWindow::getKeysState();
+    if(aKeys.isKeyDown(ST_VK_F1)) {
+        params.Glasses->setValue(StOutIZ3DShaders::IZ3D_TABLE_OLD);
+    } else if(aKeys.isKeyDown(ST_VK_F2)) {
+        params.Glasses->setValue(StOutIZ3DShaders::IZ3D_TABLE_NEW);
+    } else if(aKeys.isKeyDown(ST_VK_F3)) {
+        params.Glasses->setValue(StOutIZ3DShaders::IZ3D_CLASSIC);
     }
 }
 

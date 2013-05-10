@@ -649,6 +649,9 @@ void StMoviePlayer::doFileDrop(const StDNDropEvent& theEvent) {
 
 void StMoviePlayer::processEvents(const StMessage_t* theEvents) {
     bool isMouseMove = false;
+
+    keysStereo(myWindow->getKeysState().getMap());
+
     for(size_t evId = 0; theEvents[evId].uin != StMessageList::MSG_NULL; ++evId) {
         switch(theEvents[evId].uin) {
             case StMessageList::MSG_FULLSCREEN_SWITCH: {
@@ -659,10 +662,6 @@ void StMoviePlayer::processEvents(const StMessage_t* theEvents) {
             case StMessageList::MSG_EXIT: {
                 StApplication::exit(0);
                 break;
-            }
-            case StMessageList::MSG_KEYS: {
-                const bool* aKeys = (bool* )theEvents[evId].data;
-                keysStereo(aKeys); break;
             }
             case StMessageList::MSG_MOUSE_MOVE: {
                 isMouseMove = true; break;

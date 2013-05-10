@@ -364,22 +364,15 @@ bool StOutDual::create() {
 
 void StOutDual::processEvents(StMessage_t* theMessages) {
     StWindow::processEvents(theMessages);
-    for(size_t anIter = 0; theMessages[anIter].uin != StMessageList::MSG_NULL; ++anIter) {
-        if(theMessages[anIter].uin != StMessageList::MSG_KEYS) {
-            continue;
-        }
 
-        bool* aKeys = ((bool* )theMessages[anIter].data);
-        if(aKeys[ST_VK_F1]) {
-            replaceDualAttribute(DUALMODE_SIMPLE);
-            aKeys[ST_VK_F1] = false;
-        } else if(aKeys[ST_VK_F2]) {
-            replaceDualAttribute(DUALMODE_XMIRROW);
-            aKeys[ST_VK_F2] = false;
-        } else if(aKeys[ST_VK_F3]) {
-            replaceDualAttribute(DUALMODE_YMIRROW);
-            aKeys[ST_VK_F3] = false;
-        }
+    // don't care about holded key - StWindow::setAttributes do not emit slave update if no change
+    const StKeysState& aKeys = StWindow::getKeysState();
+    if(aKeys.isKeyDown(ST_VK_F1)) {
+        replaceDualAttribute(DUALMODE_SIMPLE);
+    } else if(aKeys.isKeyDown(ST_VK_F2)) {
+        replaceDualAttribute(DUALMODE_XMIRROW);
+    } else if(aKeys.isKeyDown(ST_VK_F3)) {
+        replaceDualAttribute(DUALMODE_YMIRROW);
     }
 }
 

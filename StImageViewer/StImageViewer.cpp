@@ -539,6 +539,9 @@ void StImageViewer::doFileDrop(const StDNDropEvent& theEvent) {
 void StImageViewer::processEvents(const StMessage_t* theEvents) {
     bool isMouseMove = false;
     size_t evId(0);
+
+    keysStereo(myWindow->getKeysState().getMap());
+
     for(; theEvents[evId].uin != StMessageList::MSG_NULL; ++evId) {
         switch(theEvents[evId].uin) {
             case StMessageList::MSG_FULLSCREEN_SWITCH: {
@@ -549,10 +552,6 @@ void StImageViewer::processEvents(const StMessage_t* theEvents) {
             case StMessageList::MSG_EXIT: {
                 StApplication::exit(0);
                 break;
-            }
-            case StMessageList::MSG_KEYS: {
-                bool* keysMap = (bool* )theEvents[evId].data;
-                keysStereo(keysMap); break;
             }
             case StMessageList::MSG_MOUSE_MOVE: {
                 isMouseMove = true; break;

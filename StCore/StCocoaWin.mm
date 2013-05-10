@@ -52,7 +52,7 @@
      */
     - (void ) resignKeyWindow {
         // reset any pressed keys
-        myStWin->myMessageList.resetKeysMap();
+        myStWin->myKeysState.reset();
         [super resignKeyWindow];
     }
 

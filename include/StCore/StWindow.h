@@ -31,6 +31,7 @@
 #include "StMessageList.h"
 #include "StNativeWin_t.h"
 #include "StEvent.h"
+#include "StKeysState.h"
 
 // StWindow enumeration
 enum {
@@ -238,6 +239,11 @@ class StWindow {
      */
     ST_CPPEXPORT void post(const StEvent& theEvent);
 
+    /**
+     * @return cached keyboard keys state for this window
+     */
+    ST_CPPEXPORT const StKeysState& getKeysState() const;
+
         public: //! @name OpenGL routines
 
     /**
@@ -376,6 +382,13 @@ class StWindow {
      * Access list of connected monitors.
      */
     ST_CPPEXPORT const StSearchMonitors& getMonitors() const;
+
+    /**
+     * This method should be called only by inheritors
+     * to override keyboard input logic.
+     * @return cached keyboard keys state for this window
+     */
+    ST_CPPEXPORT StKeysState& changeKeysState();
 
         private: //! @name private fields
 

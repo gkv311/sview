@@ -553,22 +553,17 @@ void StCADViewer::doFileDrop(const StDNDropEvent& theEvent) {
 }
 
 void StCADViewer::processEvents(const StMessage_t* theEvents) {
-    size_t evId(0);
-    for(; theEvents[evId].uin != StMessageList::MSG_NULL; ++evId) {
+    for(size_t evId(0); theEvents[evId].uin != StMessageList::MSG_NULL; ++evId) {
         switch(theEvents[evId].uin) {
             case StMessageList::MSG_CLOSE:
             case StMessageList::MSG_EXIT: {
                 StApplication::exit(0);
                 break;
             }
-            case StMessageList::MSG_KEYS: {
-                const bool* aKeys = (bool* )theEvents[evId].data;
-                myIsCtrlPressed = aKeys[ST_VK_CONTROL];
-                break;
-            }
         }
     }
 
+    myIsCtrlPressed = myWindow->getKeysState().isKeyDown(ST_VK_CONTROL);
     if(myIsMiddleHold && myIsCtrlPressed) {
         // move
         StPointD_t aPt = myWindow->getMousePos();

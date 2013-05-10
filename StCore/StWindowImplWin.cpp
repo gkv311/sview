@@ -47,6 +47,7 @@ static LRESULT CALLBACK stWndProcWrapper(HWND in_hWnd, UINT uMsg, WPARAM wParam,
 
 bool StWindowImpl::create() {
     myMessageList.reset();
+    myKeysState.reset();
     myInitState = STWIN_INITNOTSTART;
 
     myEventInitWin.reset();
@@ -287,13 +288,14 @@ bool StWindowImpl::wndCreateWindows() {
                     switch(myEvent.message) {
                         // keys lookup
                         case WM_KEYDOWN: {
-                            myMessageList.getKeysMap()[myEvent.wParam] = true;
+                            myStEvent.Key.Time = getEventTime(myEvent.time);
+                            myStEvent.Key.VKey = (StVirtKey )myEvent.wParam;
+                            myKeysState.keyDown(myStEvent.Key.VKey, myStEvent.Key.Time);
 
                             // ToUnicode needs high-order bit of a byte to be set for pressed keys...
                             BYTE aKeyState[256]; //GetKeyboardState(aKeyState);
-                            const bool* aKeyBool = myMessageList.getKeysMap();
                             for(int anIter = 0; anIter < 256; ++anIter) {
-                                aKeyState[anIter] = aKeyBool[anIter] ? 0xFF : 0;
+                                aKeyState[anIter] = myKeysState.isKeyDown((StVirtKey )anIter) ? 0xFF : 0;
                             }
 
                             wchar_t aCharBuff[4];
@@ -306,29 +308,27 @@ bool StWindowImpl::wndCreateWindows() {
                             }
 
                             myStEvent.Type = stEvent_KeyDown;
-                            myStEvent.Key.VKey  = (StVirtKey )myEvent.wParam;
-                            myStEvent.Key.Time  = getEventTime(myEvent.time);
                             myStEvent.Key.Flags = ST_VF_NONE;
-                            if(myMessageList.getKeysMap()[ST_VK_SHIFT]) {
+                            if(myKeysState.isKeyDown(ST_VK_SHIFT)) {
                                 myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_SHIFT);
                             }
-                            if(myMessageList.getKeysMap()[ST_VK_CONTROL]) {
+                            if(myKeysState.isKeyDown(ST_VK_CONTROL)) {
                                 myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_CONTROL);
                             }
                             myEventsBuffer.append(myStEvent);
                             break;
                         }
                         case WM_KEYUP: {
-                            myMessageList.getKeysMap()[myEvent.wParam] = false;
-
                             myStEvent.Type      = stEvent_KeyUp;
                             myStEvent.Key.VKey  = (StVirtKey )myEvent.wParam;
                             myStEvent.Key.Time  = getEventTime(myEvent.time);
                             myStEvent.Key.Flags = ST_VF_NONE;
-                            if(myMessageList.getKeysMap()[ST_VK_SHIFT]) {
+
+                            myKeysState.keyUp(myStEvent.Key.VKey, myStEvent.Key.Time);
+                            if(myKeysState.isKeyDown(ST_VK_SHIFT)) {
                                 myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_SHIFT);
                             }
-                            if(myMessageList.getKeysMap()[ST_VK_CONTROL]) {
+                            if(myKeysState.isKeyDown(ST_VK_CONTROL)) {
                                 myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_CONTROL);
                             }
                             myEventsBuffer.append(myStEvent);
@@ -398,7 +398,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
         case WM_ACTIVATE: {        // Watch For Window Activate Message
             if(LOWORD(wParam) == WA_INACTIVE) {
               // input focus loss - release pressed keys cached state
-              myMessageList.resetKeysMap();
+              myKeysState.reset();
             }
             /*if(!HIWORD(wParam)) {
                 //active = true;   // Check Minimization State
@@ -519,15 +519,25 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
         }
         case WM_HOTKEY: {
             // notice - unpress event will NOT be generated!
-            // we abuse current callbacks handler implementations which reset values themselves
+            myStEvent.Type      = stEvent_KeyDown;
+            myStEvent.Key.Time  = getEventTime(myEvent.time);
+            myStEvent.Key.Flags = ST_VF_NONE;
             if(wParam == myMaster.myMKeyStop) {
-                myMessageList.getKeysMap()[ST_VK_MEDIA_STOP] = true;
+                //myKeysState.keyDown(ST_VK_MEDIA_STOP, aTime);
+                myStEvent.Key.VKey = ST_VK_MEDIA_STOP;
+                myEventsBuffer.append(myStEvent);
             } else if(wParam == myMaster.myMKeyPlay) {
-                myMessageList.getKeysMap()[ST_VK_MEDIA_PLAY_PAUSE] = true;
+                //myKeysState.keyDown(ST_VK_MEDIA_PLAY_PAUSE, aTime);
+                myStEvent.Key.VKey = ST_VK_MEDIA_PLAY_PAUSE;
+                myEventsBuffer.append(myStEvent);
             } else if(wParam == myMaster.myMKeyPrev) {
-                myMessageList.getKeysMap()[ST_VK_MEDIA_PREV_TRACK] = true;
+                //myKeysState.keyDown(ST_VK_MEDIA_PREV_TRACK, aTime);
+                myStEvent.Key.VKey = ST_VK_MEDIA_PREV_TRACK;
+                myEventsBuffer.append(myStEvent);
             } else if(wParam == myMaster.myMKeyNext) {
-                myMessageList.getKeysMap()[ST_VK_MEDIA_NEXT_TRACK] = true;
+                //myKeysState.keyDown(ST_VK_MEDIA_NEXT_TRACK, aTime);
+                myStEvent.Key.VKey = ST_VK_MEDIA_NEXT_TRACK;
+                myEventsBuffer.append(myStEvent);
             }
             break;
         }

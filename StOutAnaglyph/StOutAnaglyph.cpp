@@ -294,29 +294,25 @@ bool StOutAnaglyph::create() {
 
 void StOutAnaglyph::processEvents(StMessage_t* theMessages) {
     StWindow::processEvents(theMessages);
-    for(size_t anIter = 0; theMessages[anIter].uin != StMessageList::MSG_NULL; ++anIter) {
-        if(theMessages[anIter].uin != StMessageList::MSG_KEYS) {
-            continue;
-        }
 
-        bool* aKeys = ((bool* )theMessages[anIter].data);
-        if(aKeys[ST_VK_F1]) {
-            params.Glasses->setValue(GLASSES_TYPE_REDCYAN);
-            params.RedCyan->setValue(REDCYAN_MODE_SIMPLE);
-        } else if(aKeys[ST_VK_F2]) {
-            params.Glasses->setValue(GLASSES_TYPE_REDCYAN);
-            params.RedCyan->setValue(REDCYAN_MODE_OPTIM);
-        } else if(aKeys[ST_VK_F3]) {
-            params.Glasses->setValue(GLASSES_TYPE_REDCYAN);
-            params.RedCyan->setValue(REDCYAN_MODE_GRAY);
-        } else if(aKeys[ST_VK_F4]) {
-            params.Glasses->setValue(GLASSES_TYPE_REDCYAN);
-            params.RedCyan->setValue(REDCYAN_MODE_DARK);
-        } else if(aKeys[ST_VK_F5]) {
-            params.Glasses->setValue(GLASSES_TYPE_YELLOW);
-        } else if(aKeys[ST_VK_F6]) {
-            params.Glasses->setValue(GLASSES_TYPE_GREEN);
-        }
+    // don't care about holded key - StParam calls it's callbacks only on value change
+    const StKeysState& aKeys = StWindow::getKeysState();
+    if(aKeys.isKeyDown(ST_VK_F1)) {
+        params.Glasses->setValue(GLASSES_TYPE_REDCYAN);
+        params.RedCyan->setValue(REDCYAN_MODE_SIMPLE);
+    } else if(aKeys.isKeyDown(ST_VK_F2)) {
+        params.Glasses->setValue(GLASSES_TYPE_REDCYAN);
+        params.RedCyan->setValue(REDCYAN_MODE_OPTIM);
+    } else if(aKeys.isKeyDown(ST_VK_F3)) {
+        params.Glasses->setValue(GLASSES_TYPE_REDCYAN);
+        params.RedCyan->setValue(REDCYAN_MODE_GRAY);
+    } else if(aKeys.isKeyDown(ST_VK_F4)) {
+        params.Glasses->setValue(GLASSES_TYPE_REDCYAN);
+        params.RedCyan->setValue(REDCYAN_MODE_DARK);
+    } else if(aKeys.isKeyDown(ST_VK_F5)) {
+        params.Glasses->setValue(GLASSES_TYPE_YELLOW);
+    } else if(aKeys.isKeyDown(ST_VK_F6)) {
+        params.Glasses->setValue(GLASSES_TYPE_GREEN);
     }
 }
 

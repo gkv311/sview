@@ -48,7 +48,6 @@ class StMessageList {
         MSG_EXIT = 2,
         MSG_CLOSE = 3,
         MSG_INIT = 4,   // reserved
-        MSG_KEYS = 5,
         MSG_RESIZE = 6,
         MSG_MOUSE_MOVE = 10,
         MSG_OPEN_FILE = 11,
@@ -56,10 +55,6 @@ class StMessageList {
         MSG_DEVICE_OPTION = 13,
         MSG_WIN_ON_NEW_MONITOR = 14,
         MSG_FULLSCREEN_SWITCH = 15,
-        MSG_MOUSE_DOWN_APPEND = 40,
-        MSG_MOUSE_UP_APPEND = 41,
-        MSG_KEY_DOWN_APPEND = 42,
-        MSG_KEY_UP_APPEND = 43,
         MSG_GO_TOP      = 44,
         MSG_GO_BOTTOM   = 45,
         MSG_GO_BACKWARD = 46,
@@ -73,30 +68,16 @@ class StMessageList {
 
     StMutex      stMutex; // thread-safe
     size_t         count; // events counter
-    StTimer     keyDelay; // special key-delay timer
-    bool    keysMap[256]; // VKEYS map
 
         public:
 
     ST_LOCAL StMessageList()
-    : count(0),
-      keyDelay(true) {
+    : count(0) {
         reset();
     }
 
     ST_LOCAL void reset() {
         stMemSet(messageList, 0, sizeof(messageList));
-        resetKeysMap();
-    }
-
-    ST_LOCAL bool* getKeysMap() {
-        // TODO (Kirill Gavrilov#3#) not thread-safe operation
-        return keysMap;
-    }
-
-    ST_LOCAL void resetKeysMap() {
-        // TODO (Kirill Gavrilov#3#) not thread-safe operation
-        stMemSet(keysMap, (int )false, sizeof(keysMap));
     }
 
     ST_LOCAL bool append(const size_t& msgUIN, void* msgData = NULL) {
@@ -129,14 +110,6 @@ class StMessageList {
 
     ST_LOCAL void popList(StMessage_t outList[BUFFER_SIZE + 1]) {
         outList[0].uin = StMessageList::MSG_NULL; // at first - mark 'empty' callback
-
-        // TODO (Kirill Gavrilov#4#) - this is not best place for keyMap
-        // prevent too offten ST_CALLBACK_KEYS events
-        // 60Hz is max for this
-        if(keyDelay.getElapsedTimeInMilliSec() >= 16.6) {
-            keyDelay.restart();
-            append(MSG_KEYS, keysMap);
-        }
 
         if(stMutex.tryLock()) {
             for(size_t i = 0; i <= count; ++i) {

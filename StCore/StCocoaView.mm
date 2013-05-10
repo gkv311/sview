@@ -269,8 +269,24 @@
      */
     - (void ) flagsChanged: (NSEvent* ) theEvent {
         NSUInteger aFlags = [theEvent modifierFlags];
-        myStWin->myMessageList.getKeysMap()[ST_VK_CONTROL] = (aFlags & NSControlKeyMask);
-        myStWin->myMessageList.getKeysMap()[ST_VK_SHIFT]   = (aFlags & NSShiftKeyMask);
+        if(aFlags & NSControlKeyMask) {
+            if(!myStWin->myKeysState.isKeyDown(ST_VK_CONTROL)) {
+                myStWin->myKeysState.keyDown(ST_VK_CONTROL, [theEvent timestamp]);
+            }
+        } else {
+            if(myStWin->myKeysState.isKeyDown(ST_VK_CONTROL)) {
+                myStWin->myKeysState.keyUp(ST_VK_CONTROL, [theEvent timestamp]);
+            }
+        }
+        if(aFlags & NSShiftKeyMask) {
+            if(!myStWin->myKeysState.isKeyDown(ST_VK_SHIFT)) {
+                myStWin->myKeysState.keyDown(ST_VK_SHIFT, [theEvent timestamp]);
+            }
+        } else {
+            if(myStWin->myKeysState.isKeyDown(ST_VK_SHIFT)) {
+                myStWin->myKeysState.keyUp(ST_VK_SHIFT, [theEvent timestamp]);
+            }
+        }
     }
 
     /**
@@ -291,10 +307,10 @@
         StUtf8Iter aUIter([[theEvent characters] UTF8String]);
         myStEvent.Key.Char = *aUIter;
         myStEvent.Key.VKey = (StVirtKey )ST_CARBON2ST_VK[aKeyCode];
-        myStWin->myMessageList.getKeysMap()[myStEvent.Key.VKey] = true;
+        myStEvent.Key.Time = [theEvent timestamp];
+        myStWin->myKeysState.keyDown(myStEvent.Key.VKey, myStEvent.Key.Time);
 
         myStEvent.Type = stEvent_KeyDown;
-        myStEvent.Key.Time  = [theEvent timestamp];
         myStEvent.Key.Flags = ST_VF_NONE;
         if(aFlags & NSShiftKeyMask) {
             myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_SHIFT);
@@ -322,10 +338,10 @@
 
         NSUInteger aFlags = [theEvent modifierFlags];
         myStEvent.Key.VKey = (StVirtKey )ST_CARBON2ST_VK[aKeyCode];
-        myStWin->myMessageList.getKeysMap()[myStEvent.Key.VKey] = false;
+        myStEvent.Key.Time = [theEvent timestamp];
+        myStWin->myKeysState.keyUp(myStEvent.Key.VKey, myStEvent.Key.Time);
 
         myStEvent.Type = stEvent_KeyUp;
-        myStEvent.Key.Time  = [theEvent timestamp];
         myStEvent.Key.Flags = ST_VF_NONE;
         if(aFlags & NSShiftKeyMask) {
             myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_SHIFT);

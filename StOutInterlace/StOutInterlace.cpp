@@ -580,23 +580,22 @@ void StOutInterlace::processEvents(StMessage_t* theMessages) {
     }
 
     StWindow::processEvents(theMessages);
+
+    const StKeysState& aKeys = StWindow::getKeysState();
+    if(aKeys.isKeyDown(ST_VK_F1)) {
+        myDevice = DEVICE_HINTERLACE;
+    } else if(aKeys.isKeyDown(ST_VK_F2)) {
+        myDevice = DEVICE_VINTERLACE;
+    } else if(aKeys.isKeyDown(ST_VK_F3)) {
+        myDevice = DEVICE_CHESSBOARD;
+    } else if(aKeys.isKeyDown(ST_VK_F4)) {
+        myDevice = DEVICE_HINTERLACE_ED;
+    }
+
     for(size_t anIter = 0; theMessages[anIter].uin != StMessageList::MSG_NULL; ++anIter) {
         switch(theMessages[anIter].uin) {
             case StMessageList::MSG_RESIZE: {
                 doResize();
-                break;
-            }
-            case StMessageList::MSG_KEYS: {
-                bool* aKeys = ((bool* )theMessages[anIter].data);
-                if(aKeys[ST_VK_F1]) {
-                    myDevice = DEVICE_HINTERLACE;    aKeys[ST_VK_F1] = false;
-                } else if(aKeys[ST_VK_F2]) {
-                    myDevice = DEVICE_VINTERLACE;    aKeys[ST_VK_F2] = false;
-                } else if(aKeys[ST_VK_F3]) {
-                    myDevice = DEVICE_CHESSBOARD;    aKeys[ST_VK_F3] = false;
-                } else if(aKeys[ST_VK_F4]) {
-                    myDevice = DEVICE_HINTERLACE_ED; aKeys[ST_VK_F4] = false;
-                }
                 break;
             }
             case StMessageList::MSG_WIN_ON_NEW_MONITOR: {

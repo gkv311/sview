@@ -21,6 +21,7 @@
 
 #include <StCore/StWindow.h>
 #include <StCore/StSearchMonitors.h>
+#include <StCore/StKeysState.h>
 
 #include "StWinHandles.h"
 #include "StEventsBuffer.h"
@@ -293,8 +294,9 @@ class StWindowImpl {
         StSignal<void (const StDNDropEvent& )>* onFileDrop;
     } signals;
 
+    StKeysState    myKeysState;        //!< cached keyboard state
     StTimer        myEventsTimer;
-    StEventsBuffer myEventsBuffer; //!< window events double buffer
+    StEventsBuffer myEventsBuffer;     //!< window events double buffer
     StEvent        myStEvent;
     bool           myEventsThreaded;
 };

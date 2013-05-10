@@ -194,6 +194,14 @@ void StWindow::post(const StEvent& theEvent) {
     myWin->post(theEvent);
 }
 
+const StKeysState& StWindow::getKeysState() const {
+    return myWin->myKeysState;
+}
+
+StKeysState& StWindow::changeKeysState() {
+    return myWin->myKeysState;
+}
+
 const StSearchMonitors& StWindow::getMonitors() const {
     return myWin->getMonitors();
 }

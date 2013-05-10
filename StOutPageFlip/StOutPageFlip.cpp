@@ -465,18 +465,17 @@ void StOutPageFlip::stglResize(const StRectI_t& ) {
 
 void StOutPageFlip::processEvents(StMessage_t* theMessages) {
     StWindow::processEvents(theMessages);
+
+    StKeysState& aKeys = StWindow::changeKeysState();
+    if(aKeys.isKeyDown(ST_VK_F11)) {
+        StWindow::stglSwap(ST_WIN_MASTER);
+        aKeys.keyUp(ST_VK_F11, aKeys.getKeyTime(ST_VK_F11));
+    }
+
     for(size_t anIter = 0; theMessages[anIter].uin != StMessageList::MSG_NULL; ++anIter) {
         switch(theMessages[anIter].uin) {
             case StMessageList::MSG_RESIZE: {
                 stglResize(StWindow::getPlacement());
-                break;
-            }
-            case StMessageList::MSG_KEYS: {
-                bool* aKeys = (bool* )theMessages[anIter].data;
-                if(aKeys[ST_VK_F11]) {
-                    StWindow::stglSwap(ST_WIN_MASTER);
-                    aKeys[ST_VK_F11] = false;
-                }
                 break;
             }
         #ifdef _WIN32

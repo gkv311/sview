@@ -807,11 +807,11 @@ void StWindowImpl::swapEventsBuffers() {
 void StWindowImpl::post(const StEvent& theEvent) {
     switch(theEvent.Type) {
         case stEvent_KeyDown: {
-            myMessageList.getKeysMap()[theEvent.Key.VKey] = true;
+            myKeysState.keyDown(theEvent.Key.VKey, theEvent.Key.Time);
             break;
         }
         case stEvent_KeyUp: {
-            myMessageList.getKeysMap()[theEvent.Key.VKey] = false;
+            myKeysState.keyUp(theEvent.Key.VKey, theEvent.Key.Time);
             break;
         }
         default: break;
