@@ -184,7 +184,6 @@ class StDXNVWindow {
     size_t                  myFboSizeY;
 
     HWND                    myWinD3d;
-    HWND                    myWinMaster;
     StStringUtfWide         myWinClass;
 
     StHandle<StDXManager>   myDxManager;
@@ -202,7 +201,6 @@ class StDXNVWindow {
     HANDLE                  hEventUpdate;
 
     bool myMouseState[ST_MOUSE_MAX_ID + 1];
-    bool myVKeyState[255];
 
 };
 

@@ -25,32 +25,6 @@
 
 namespace {
 
-    /**
-     * This is absolutely hacking function
-     * that retrieves slave window handle for current StWindow instance.
-     * Code may become broken in future!
-     */
-    static void getStNativeWin(StWindow* theStWin,
-                               HWND&     theMaster) {
-        DWORD aPid = 0;
-        DWORD aTid = 0;
-        DWORD aMyPid = (DWORD )StProcess::getPID();
-        LONG_PTR aStWinPtr = (LONG_PTR )theStWin;
-
-        // at first iteration we search for master window (to detect StWindow message thread ID)
-        for(HWND aGlWin = GetTopWindow(NULL); aGlWin != NULL; aGlWin = GetNextWindow(aGlWin, GW_HWNDNEXT)) {
-            aTid = GetWindowThreadProcessId(aGlWin, &aPid);
-            if(aPid == aMyPid
-            && GetWindowLongPtr(aGlWin, int(GWLP_USERDATA)) == aStWinPtr) {
-                theMaster = aGlWin;
-                break;
-            }
-        }
-        if(aPid != aMyPid) {
-            return;
-        }
-    }
-
     static const wchar_t ST_D3DWIN_CLASSNAME[] = L"StDirect3D";
     static StAtomic<int32_t> ST_D3DWIN_CLASSCOUNTER(0);
 
@@ -65,7 +39,6 @@ StDXNVWindow::StDXNVWindow(const size_t     theFboSizeX,
   myFboSizeX(theFboSizeX),
   myFboSizeY(theFboSizeY),
   myWinD3d(NULL),
-  myWinMaster(NULL),
   myDxManager(),
   myDxSurface(),
   myMonitor(theMonitor),
@@ -76,17 +49,12 @@ StDXNVWindow::StDXNVWindow(const size_t     theFboSizeX,
   hEventShow(NULL),
   hEventHide(NULL),
   hEventUpdate(NULL) {
-    //
     stMemSet(myMouseState, 0, sizeof(myMouseState));
-    stMemSet(myVKeyState,  0, sizeof(myVKeyState));
-    // we create Win32 event directly (not StCondition) to use it with MsgWaitForMultipleObjects()
     hEventReady  = CreateEvent(0, true, false, NULL);
     hEventQuit   = CreateEvent(0, true, false, NULL);
     hEventShow   = CreateEvent(0, true, false, NULL);
     hEventHide   = CreateEvent(0, true, false, NULL);
     hEventUpdate = CreateEvent(0, true, false, NULL);
-
-    getStNativeWin(myStWin, myWinMaster);
 }
 
 bool StDXNVWindow::allocateBuffers() {
@@ -212,17 +180,10 @@ bool StDXNVWindow::initWinAPIWindow() {
         }
     }
     StRectI_t aMonRect = myMonitor.getVRect();
-    myWinD3d = CreateWindowExW(
-        WS_EX_APPWINDOW | WS_EX_WINDOWEDGE,
-        myWinClass.toCString(),             // Class Name
-        L"sView Direct3D output",           // Window Title
-        WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
-        aMonRect.left(), aMonRect.top(), aMonRect.width(), aMonRect.height(),
-        NULL,                               // Parent Window
-        NULL,                               // No Menu
-        anAppInstance,
-        this                                // Put pointer to class, getted on WM_CREATE (to use class-member function)
-    );
+    myWinD3d = CreateWindowExW(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE, myWinClass.toCString(),
+                               L"sView Direct3D output", WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
+                               aMonRect.left(), aMonRect.top(), aMonRect.width(), aMonRect.height(),
+                               NULL, NULL, anAppInstance, this);
     if(myWinD3d == NULL) {
         stError("StDXWindow, Failed to CreateWindow (" + stLastError() + ")");
         return false;
