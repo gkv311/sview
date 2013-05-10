@@ -101,6 +101,10 @@ void StOutPageFlipExt::close() {
 }
 
 void StOutPageFlipExt::beforeClose() {
+    if(!StOutPageFlip::params.ToShowExtra->getValue()) {
+        return;
+    }
+
     if(isControlOn() && StWindow::isStereoOutput()) {
         myIsQuiting = true;
         const double aTime = getDeviceControl()->quitMS();
@@ -110,6 +114,7 @@ void StOutPageFlipExt::beforeClose() {
             StThread::sleep(10);
         }
         dxRelease();
+        StWindow::setStereoOutput(false);
     }
 }
 
