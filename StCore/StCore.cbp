@@ -363,9 +363,6 @@
 		<Unit filename="../include/StCore/StEDIDParser.h" />
 		<Unit filename="../include/StCore/StEvent.h" />
 		<Unit filename="../include/StCore/StKeysState.h" />
-		<Unit filename="../include/StCore/StMessageList.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
 		<Unit filename="../include/StCore/StMonitor.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>

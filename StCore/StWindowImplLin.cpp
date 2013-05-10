@@ -87,7 +87,6 @@ namespace {
 
 // function create GUI window
 bool StWindowImpl::create() {
-    myMessageList.reset();
     myKeysState.reset();
 
     // initialize helper GDK
@@ -694,11 +693,10 @@ void StWindowImpl::updateWindowPos() {
 }
 
 // Function set to argument-buffer given events
-void StWindowImpl::processEvents(StMessage_t* theMessages) {
+void StWindowImpl::processEvents() {
     const StXDisplayH& aDisplay = myMaster.stXDisplay;
     if(aDisplay.isNull() || myMaster.hWindowGl == 0) {
         // window is closed!
-        myMessageList.popList(theMessages);
         return;
     }
 
@@ -880,10 +878,11 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
     }
 
     StPointD_t aNewMousePt = getMousePos();
+    myIsMouseMoved = false;
     if(aNewMousePt.x() >= 0.0 && aNewMousePt.x() <= 1.0 && aNewMousePt.y() >= 0.0 && aNewMousePt.y() <= 1.0) {
         StPointD_t aDspl = aNewMousePt - myMousePt;
         if(std::abs(aDspl.x()) >= 0.0008 || std::abs(aDspl.y()) >= 0.0008) {
-            myMessageList.append(StMessageList::MSG_MOUSE_MOVE);
+            myIsMouseMoved = true;
         }
     }
     myMousePt = aNewMousePt;
@@ -894,8 +893,6 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
         myIsUpdated = false;
     }
     updateActiveState();
-
-    myMessageList.popList(theMessages);
 
     // StWindow XLib implementation process events in the same thread
     // thus this double buffer is not in use

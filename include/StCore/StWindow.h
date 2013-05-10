@@ -28,7 +28,6 @@
 #include <StGL/StGLVec.h>
 
 #include "StWinErrorCodes.h" // Header with error codes
-#include "StMessageList.h"
 #include "StNativeWin_t.h"
 #include "StEvent.h"
 #include "StKeysState.h"
@@ -238,7 +237,7 @@ class StWindow {
      * CallBack function.
      * @param theMessages buffer to get new messages
      */
-    ST_CPPEXPORT virtual void processEvents(StMessage_t* theMessages);
+    ST_CPPEXPORT virtual void processEvents();
 
     /**
      * Append message into callback list.
@@ -251,6 +250,11 @@ class StWindow {
      * @return cached keyboard keys state for this window
      */
     ST_CPPEXPORT const StKeysState& getKeysState() const;
+
+    /**
+     * @return true if cursor position has been changed since previous processEvents().
+     */
+    ST_CPPEXPORT bool isMouseMoved() const;
 
         public: //! @name OpenGL routines
 

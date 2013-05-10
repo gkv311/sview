@@ -417,8 +417,8 @@ bool StOutDistorted::create() {
     return true;
 }
 
-void StOutDistorted::processEvents(StMessage_t* theMessages) {
-    StWindow::processEvents(theMessages);
+void StOutDistorted::processEvents() {
+    StWindow::processEvents();
 }
 
 void StOutDistorted::showCursor(const bool theToShow) {

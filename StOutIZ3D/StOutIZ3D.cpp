@@ -265,8 +265,8 @@ bool StOutIZ3D::create() {
     return myShaders.init(*myContext);
 }
 
-void StOutIZ3D::processEvents(StMessage_t* theMessages) {
-    StWindow::processEvents(theMessages);
+void StOutIZ3D::processEvents() {
+    StWindow::processEvents();
 
     // don't care about holded key - StParam calls it's callbacks only on value change
     const StKeysState& aKeys = StWindow::getKeysState();

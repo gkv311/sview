@@ -83,8 +83,6 @@ void StApplication::stApplicationInit(const StHandle<StOpenInfo>& theOpenInfo) {
         myGlobalSettings->loadString(ST_SETTING_RENDERER, myRendId);
     }
 
-    stMemSet(myMessages, 0, sizeof(myMessages));
-
     // add additional paths
 #ifdef _WIN32
     // requires Windows XP with SP1 or higher
@@ -232,6 +230,10 @@ void StApplication::addRenderer(const StHandle<StWindow>& theRenderer) {
     }
 }
 
+void StApplication::beforeDraw() {
+    //
+}
+
 void StApplication::stglDraw(unsigned int ) {
     //
 }
@@ -254,10 +256,6 @@ int StApplication::exec() {
 void StApplication::exit(const int theExitCode) {
     myExitCode = theExitCode;
     myToQuit   = true;
-}
-
-void StApplication::processEvents(const StMessage_t* ) {
-    //
 }
 
 bool StApplication::resetDevice() {
@@ -292,9 +290,8 @@ void StApplication::processEvents() {
     }
 
     // common callback call
-    myMessages[0].uin = StMessageList::MSG_NULL;
-    myWindow->processEvents(myMessages);
-    processEvents(myMessages);
+    myWindow->processEvents();
+    beforeDraw();
 
     // draw iteration
     myWindow->stglDraw();

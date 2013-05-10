@@ -37,7 +37,7 @@ class StDiagnostics : public StApplication {
     ST_CPPEXPORT virtual ~StDiagnostics();
 
     ST_CPPEXPORT virtual bool open();
-    ST_CPPEXPORT virtual void processEvents(const StMessage_t* theMessages);
+    ST_CPPEXPORT virtual void beforeDraw();
     ST_CPPEXPORT virtual void stglDraw(unsigned int view);
 
         private: //! @name window events slots

@@ -89,7 +89,7 @@ class StOutDual : public StWindow {
     /**
      * Process callback.
      */
-    ST_CPPEXPORT virtual void processEvents(StMessage_t* theMessages);
+    ST_CPPEXPORT virtual void processEvents();
 
     /**
      * Stereo renderer.

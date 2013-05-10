@@ -139,8 +139,8 @@ bool StOutPageFlipExt::create() {
     return true;
 }
 
-void StOutPageFlipExt::processEvents(StMessage_t* theMessages) {
-    StOutPageFlip::processEvents(theMessages);
+void StOutPageFlipExt::processEvents() {
+    StOutPageFlip::processEvents();
     if(!StOutPageFlip::params.ToShowExtra->getValue()) {
         return;
     }

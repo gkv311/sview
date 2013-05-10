@@ -46,7 +46,6 @@ static LRESULT CALLBACK stWndProcWrapper(HWND in_hWnd, UINT uMsg, WPARAM wParam,
 }
 
 bool StWindowImpl::create() {
-    myMessageList.reset();
     myKeysState.reset();
     myInitState = STWIN_INITNOTSTART;
 
@@ -798,14 +797,13 @@ void StWindowImpl::updateWindowPos() {
 }
 
 // Function set to argument-buffer given events and return events number
-void StWindowImpl::processEvents(StMessage_t* theMessages) {
+void StWindowImpl::processEvents() {
     if(myIsDispChanged) {
         updateMonitors();
     }
 
     if(myMaster.hWindowGl == NULL) {
         // window is closed!
-        myMessageList.popList(theMessages);
         return;
     }
 
@@ -837,15 +835,15 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
     }
 
     StPointD_t aNewMousePt = getMousePos();
+    myIsMouseMoved = false;
     if(aNewMousePt.x() >= 0.0 && aNewMousePt.x() <= 1.0 && aNewMousePt.y() >= 0.0 && aNewMousePt.y() <= 1.0) {
         StPointD_t aDspl = aNewMousePt - myMousePt;
         if(std::abs(aDspl.x()) >= 0.0008 || std::abs(aDspl.y()) >= 0.0008) {
-            myMessageList.append(StMessageList::MSG_MOUSE_MOVE);
+            myIsMouseMoved = true;
         }
     }
     myMousePt = aNewMousePt;
 
-    myMessageList.popList(theMessages);
     swapEventsBuffers();
 }
 

@@ -703,17 +703,8 @@ void StMoviePlayer::doNavigate(const StNavigEvent& theEvent) {
     }
 }
 
-void StMoviePlayer::processEvents(const StMessage_t* theEvents) {
-    bool isMouseMove = false;
-
-    for(size_t evId = 0; theEvents[evId].uin != StMessageList::MSG_NULL; ++evId) {
-        switch(theEvents[evId].uin) {
-            case StMessageList::MSG_MOUSE_MOVE: {
-                isMouseMove = true; break;
-            }
-        }
-    }
-
+void StMoviePlayer::beforeDraw() {
+    const bool isMouseMove = myWindow->isMouseMoved();
     if(myEventLoaded.checkReset()) {
         doUpdateStateLoaded();
     }

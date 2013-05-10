@@ -558,7 +558,7 @@ void StCADViewer::doNavigate(const StNavigEvent& theEvent) {
     }
 }
 
-void StCADViewer::processEvents(const StMessage_t* ) {
+void StCADViewer::beforeDraw() {
     myIsCtrlPressed = myWindow->getKeysState().isKeyDown(ST_VK_CONTROL);
     if(myIsMiddleHold && myIsCtrlPressed) {
         // move

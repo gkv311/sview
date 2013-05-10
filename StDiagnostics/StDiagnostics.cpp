@@ -129,7 +129,7 @@ void StDiagnostics::doKeyDown(const StKeyEvent& theEvent) {
     }
 }
 
-void StDiagnostics::processEvents(const StMessage_t* ) {
+void StDiagnostics::beforeDraw() {
     myGUI->setVisibility(myWindow->getMousePos(), true);
 }
 

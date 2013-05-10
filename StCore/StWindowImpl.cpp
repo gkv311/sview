@@ -77,7 +77,8 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
   myIsDispChanged(false),
   myEventsTimer(true),
   myLastEventsTime(0.0),
-  myEventsThreaded(false) {
+  myEventsThreaded(false),
+  myIsMouseMoved(false) {
     stMemZero(&attribs, sizeof(attribs));
     stMemZero(&signals, sizeof(signals));
     attribs.IsNoDecor      = false;

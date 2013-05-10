@@ -65,7 +65,7 @@ class StWindowImpl {
     ST_LOCAL void stglSwap(const int& theWinId);
     ST_LOCAL void stglMakeCurrent(const int& theWinId);
     ST_LOCAL StGLBoxPx stglViewport(const int& theWinId) const;
-    ST_LOCAL void processEvents(StMessage_t* theMessages);
+    ST_LOCAL void processEvents();
     ST_LOCAL void post(StEvent& theEvent);
     ST_LOCAL const StSearchMonitors& getMonitors() const {
         return myMonitors;
@@ -271,7 +271,6 @@ class StWindowImpl {
     char               myXInputBuff[32];
 #endif
 
-    StMessageList      myMessageList;     //!< callback list
     bool               myIsUpdated;       //!< helper flag on window movements updates
     bool               myIsActive;        //!< window visible state
     BlockSleep         myBlockSleep;      //!< indicates that display sleep was blocked or not
@@ -317,6 +316,7 @@ class StWindowImpl {
     StEvent        myStEventAux;       //!< extra temporary event object (to be used in StWindow cretation thread)
     double         myLastEventsTime;   //!< time when processEvents() was last called
     bool           myEventsThreaded;
+    bool           myIsMouseMoved;
 };
 
 #endif //__StWindowImpl_h_

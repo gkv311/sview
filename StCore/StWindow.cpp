@@ -194,12 +194,16 @@ StGLBoxPx StWindow::stglViewport(const int theWinEnum) const {
     return myWin->stglViewport(theWinEnum);
 }
 
-void StWindow::processEvents(StMessage_t* theMessages) {
-    myWin->processEvents(theMessages);
+void StWindow::processEvents() {
+    myWin->processEvents();
 }
 
 void StWindow::post(StEvent& theEvent) {
     myWin->post(theEvent);
+}
+
+bool StWindow::isMouseMoved() const {
+    return myWin->myIsMouseMoved;
 }
 
 const StKeysState& StWindow::getKeysState() const {

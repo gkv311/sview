@@ -108,10 +108,9 @@ class StApplication {
         protected:
 
     /**
-     * Process all pending events within this application.
-     * @param theMessages buffer to get new messages
+     * Idle before next redraw call.
      */
-    ST_CPPEXPORT virtual void processEvents(const StMessage_t* theEvents);
+    ST_CPPEXPORT virtual void beforeDraw();
 
     /**
      * Rendering callback.
@@ -209,7 +208,6 @@ class StApplication {
     StString              myTitle;                 //!< application title
     StOutDevicesList      myDevices;
     StString              myRendId;                //!< renderer ID
-    StMessage_t           myMessages[StMessageList::BUFFER_SIZE + 1];
     int                   myExitCode;
     bool                  myIsOpened;              //!< application execution state
     bool                  myToQuit;                //!< request for application termination

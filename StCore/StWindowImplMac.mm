@@ -234,7 +234,6 @@ void StWindowImpl::doCreateWindows(NSOpenGLContext* theGLContextMaster,
 
 bool StWindowImpl::create() {
     myEventsThreaded = ![NSThread isMainThread];
-    myMessageList.reset();
     myKeysState.reset();
     myInitState = STWIN_INITNOTSTART;
     updateChildRect();
@@ -385,14 +384,13 @@ void StWindowImpl::updateWindowPos() {
 }
 
 // Function set to argument-buffer given events
-void StWindowImpl::processEvents(StMessage_t* theMessages) {
+void StWindowImpl::processEvents() {
     if(myIsDispChanged) {
         updateMonitors();
     }
 
     if(myMaster.hViewGl == NULL) {
         // window is closed!
-        myMessageList.popList(theMessages);
         return;
     }
 
@@ -425,10 +423,11 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
 
     // detect mouse movements
     StPointD_t aNewMousePt = getMousePos();
+    myIsMouseMoved = false;
     if(aNewMousePt.x() >= 0.0 && aNewMousePt.x() <= 1.0 && aNewMousePt.y() >= 0.0 && aNewMousePt.y() <= 1.0) {
         StPointD_t aDspl = aNewMousePt - myMousePt;
         if(std::abs(aDspl.x()) >= 0.0008 || std::abs(aDspl.y()) >= 0.0008) {
-            myMessageList.append(StMessageList::MSG_MOUSE_MOVE);
+            myIsMouseMoved = true;
         }
     }
     myMousePt = aNewMousePt;
@@ -440,7 +439,6 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
     }
     updateActiveState();
 
-    myMessageList.popList(theMessages);
     swapEventsBuffers();
 }
 

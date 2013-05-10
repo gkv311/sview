@@ -362,8 +362,8 @@ bool StOutDual::create() {
     return true;
 }
 
-void StOutDual::processEvents(StMessage_t* theMessages) {
-    StWindow::processEvents(theMessages);
+void StOutDual::processEvents() {
+    StWindow::processEvents();
 
     // don't care about holded key - StWindow::setAttributes do not emit slave update if no change
     const StKeysState& aKeys = StWindow::getKeysState();

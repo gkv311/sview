@@ -292,8 +292,8 @@ bool StOutAnaglyph::create() {
     return true;
 }
 
-void StOutAnaglyph::processEvents(StMessage_t* theMessages) {
-    StWindow::processEvents(theMessages);
+void StOutAnaglyph::processEvents() {
+    StWindow::processEvents();
 
     // don't care about holded key - StParam calls it's callbacks only on value change
     const StKeysState& aKeys = StWindow::getKeysState();

@@ -53,7 +53,7 @@ class StCADViewer : public StApplication {
     /**
      * Process callback.
      */
-    ST_CPPEXPORT virtual void processEvents(const StMessage_t* theEvents);
+    ST_CPPEXPORT virtual void beforeDraw();
 
     /**
      * Draw frame for requested view.

@@ -580,8 +580,8 @@ void StOutInterlace::doNewMonitor(const StSizeEvent& ) {
     isInterlacedMonitor(aMon, myIsMonReversed);
 }
 
-void StOutInterlace::processEvents(StMessage_t* theMessages) {
-    StWindow::processEvents(theMessages);
+void StOutInterlace::processEvents() {
+    StWindow::processEvents();
 
     const StKeysState& aKeys = StWindow::getKeysState();
     if(aKeys.isKeyDown(ST_VK_F1)) {

@@ -605,18 +605,8 @@ void StImageViewer::doNavigate(const StNavigEvent& theEvent) {
     }
 }
 
-void StImageViewer::processEvents(const StMessage_t* theEvents) {
-    bool isMouseMove = false;
-    size_t evId(0);
-
-    for(; theEvents[evId].uin != StMessageList::MSG_NULL; ++evId) {
-        switch(theEvents[evId].uin) {
-            case StMessageList::MSG_MOUSE_MOVE: {
-                isMouseMove = true; break;
-            }
-        }
-    }
-
+void StImageViewer::beforeDraw() {
+    const bool isMouseMove = myWindow->isMouseMoved();
     if(mySlideShowTimer.getElapsedTimeInSec() > mySlideShowDelay) {
         mySlideShowTimer.restart();
         doListNext();

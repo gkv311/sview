@@ -470,8 +470,8 @@ void StOutPageFlip::doNewMonitor(const StSizeEvent& ) {
 #endif
 }
 
-void StOutPageFlip::processEvents(StMessage_t* theMessages) {
-    StWindow::processEvents(theMessages);
+void StOutPageFlip::processEvents() {
+    StWindow::processEvents();
 
     StKeysState& aKeys = StWindow::changeKeysState();
     if(aKeys.isKeyDown(ST_VK_F11)) {
