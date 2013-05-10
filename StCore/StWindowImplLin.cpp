@@ -778,7 +778,7 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
                 if(aVKeySt != ST_VK_NULL) {
                     myStEvent.Key.Time  = getEventTime(aKeyEvent->time);
                     myStEvent.Key.VKey  = aVKeySt;
-                    postKeyDown(myStEvent.Key);
+                    postKeyDown(myStEvent);
                 }
                 break;
             }
@@ -797,7 +797,7 @@ void StWindowImpl::processEvents(StMessage_t* theMessages) {
                     myStEvent.Key.Time  = getEventTime(aKeyEvent->time);
                     myStEvent.Key.VKey  = aVKeySt;
                     myStEvent.Key.Char  = 0;
-                    postKeyUp(myStEvent.Key);
+                    postKeyUp(myStEvent);
                 }
                 break;
             }

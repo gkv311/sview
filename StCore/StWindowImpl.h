@@ -118,13 +118,13 @@ class StWindowImpl {
      * Setup common fields of event structure (Type, Flags)
      * and post key down event and perform post-processing.
      */
-    ST_LOCAL void postKeyDown(StKeyEvent& theEvent);
+    ST_LOCAL void postKeyDown(StEvent& theEvent);
 
     /**
      * Setup common fields of event structure (Type, Flags)
      * and post key up event and perform post-processing.
      */
-    ST_LOCAL void postKeyUp(StKeyEvent& theEvent);
+    ST_LOCAL void postKeyUp(StEvent& theEvent);
 
     /**
      * Tiles configuration (multiple viewports within the same window).

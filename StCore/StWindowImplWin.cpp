@@ -306,14 +306,14 @@ bool StWindowImpl::wndCreateWindows() {
                             }
 
                             myStEvent.Key.Flags = ST_VF_NONE;
-                            postKeyDown(myStEvent.Key);
+                            postKeyDown(myStEvent);
                             break;
                         }
                         case WM_KEYUP: {
                             myStEvent.Key.VKey  = (StVirtKey )myEvent.wParam;
                             myStEvent.Key.Time  = getEventTime(myEvent.time);
                             myStEvent.Key.Flags = ST_VF_NONE;
-                            postKeyUp(myStEvent.Key);
+                            postKeyUp(myStEvent);
                             break;
                         }
                         default: break;

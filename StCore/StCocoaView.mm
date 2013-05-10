@@ -308,7 +308,7 @@
             myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_CONTROL);
         }*/
 
-        postKeyDown(myStEvent.Key);
+        myStWin->postKeyDown(myStEvent);
     }
 
     /**
@@ -321,10 +321,10 @@
             return;
         }
 
-        NSUInteger aFlags = [theEvent modifierFlags];
         myStEvent.Key.VKey  = (StVirtKey )ST_CARBON2ST_VK[aKeyCode];
         myStEvent.Key.Time  = [theEvent timestamp];
-        /*myStEvent.Key.Flags = ST_VF_NONE;
+        /*NSUInteger aFlags = [theEvent modifierFlags];
+        myStEvent.Key.Flags = ST_VF_NONE;
         if(aFlags & NSShiftKeyMask) {
             myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_SHIFT);
         }
@@ -332,7 +332,7 @@
             myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_CONTROL);
         }*/
 
-        postKeyUp(myStEvent.Key);
+        myStWin->postKeyUp(myStEvent);
     }
 
     - (void ) goToFullscreen {
