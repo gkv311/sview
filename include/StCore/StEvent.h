@@ -36,7 +36,6 @@ enum StEventType {
     stEvent_FileDrop,   //!< StDNDropEvent, file Drag & Drop
     ///MSG_MOUSE_MOVE,
     ///MSG_WIN_ON_NEW_MONITOR,
-    ///MSG_FULLSCREEN_SWITCH,
     ///MSG_GO_TOP,
     ///MSG_GO_BOTTOM,
     ///MSG_GO_BACKWARD,

@@ -698,7 +698,6 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
         }
     }
     myIsUpdated = true;
-    myMessageList.append(StMessageList::MSG_FULLSCREEN_SWITCH);
 
     const StRectI_t& aRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
     myStEvent.Type       = stEvent_Size;

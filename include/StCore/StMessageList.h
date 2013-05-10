@@ -49,7 +49,6 @@ class StMessageList {
         MSG_CLOSE = 3,
         MSG_MOUSE_MOVE = 10,
         MSG_WIN_ON_NEW_MONITOR = 14,
-        MSG_FULLSCREEN_SWITCH = 15,
         MSG_GO_TOP      = 44,
         MSG_GO_BOTTOM   = 45,
         MSG_GO_BACKWARD = 46,

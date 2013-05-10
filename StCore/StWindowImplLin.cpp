@@ -490,7 +490,6 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
     myStEvent.Size.SizeY = aRect.height();
     signals.onResize->emit(myStEvent.Size);
 
-    myMessageList.append(StMessageList::MSG_FULLSCREEN_SWITCH);
     // flushes the output buffer, most client apps needn't use this cause buffer is automatically flushed as needed by calls to XNextEvent()...
     XFlush(hDisplay);
 }

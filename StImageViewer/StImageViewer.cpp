@@ -605,10 +605,6 @@ void StImageViewer::processEvents(const StMessage_t* theEvents) {
 
     for(; theEvents[evId].uin != StMessageList::MSG_NULL; ++evId) {
         switch(theEvents[evId].uin) {
-            case StMessageList::MSG_FULLSCREEN_SWITCH: {
-                params.isFullscreen->setValue(myWindow->isFullScreen());
-                break;
-            }
             case StMessageList::MSG_CLOSE:
             case StMessageList::MSG_EXIT: {
                 StApplication::exit(0);
