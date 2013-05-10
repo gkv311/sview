@@ -321,7 +321,7 @@ void StDXNVWindow::dxLoop() {
                                 aKeysMap[anIter] = aKeysState.isKeyDown((StVirtKey )anIter) ? 0xFF : 0;
                             }
 
-                            if(::ToUnicode(aMsg.wParam, HIWORD(aMsg.lParam) & 0xFF,
+                            if(::ToUnicode(aKeyEvent.Key.VKey, HIWORD(aMsg.lParam) & 0xFF,
                                            aKeysMap, aCharBuff, 4, 0) > 0) {
                                 StUtfWideIter aUIter(aCharBuff);
                                 aKeyEvent.Key.Char = *aUIter;

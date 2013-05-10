@@ -296,7 +296,7 @@ bool StWindowImpl::wndCreateWindows() {
                                 aKeysMap[anIter] = myKeysState.isKeyDown((StVirtKey )anIter) ? 0xFF : 0;
                             }
 
-                            if(::ToUnicode(myEvent.wParam, HIWORD(myEvent.lParam) & 0xFF,
+                            if(::ToUnicode(myStEvent.Key.VKey, HIWORD(myEvent.lParam) & 0xFF,
                                            aKeysMap, aCharBuff, 4, 0) > 0) {
                                 StUtfWideIter aUIter(aCharBuff);
                                 myStEvent.Key.Char = *aUIter;
