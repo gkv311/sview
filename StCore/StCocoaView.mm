@@ -305,25 +305,18 @@
         }
 
         StUtf8Iter aUIter([[theEvent characters] UTF8String]);
-        myStEvent.Key.Char = *aUIter;
-        myStEvent.Key.VKey = (StVirtKey )ST_CARBON2ST_VK[aKeyCode];
-        myStEvent.Key.Time = [theEvent timestamp];
-        myStWin->myKeysState.keyDown(myStEvent.Key.VKey, myStEvent.Key.Time);
-
-        myStEvent.Type = stEvent_KeyDown;
-        myStEvent.Key.Flags = ST_VF_NONE;
+        myStEvent.Key.Char  = *aUIter;
+        myStEvent.Key.VKey  = (StVirtKey )ST_CARBON2ST_VK[aKeyCode];
+        myStEvent.Key.Time  = [theEvent timestamp];
+        /*myStEvent.Key.Flags = ST_VF_NONE;
         if(aFlags & NSShiftKeyMask) {
             myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_SHIFT);
         }
         if(aFlags & NSControlKeyMask) {
             myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_CONTROL);
-        }
+        }*/
 
-        if(myStWin->myEventsThreaded) {
-            myStWin->myEventsBuffer.append(myStEvent);
-        } else {
-            myStWin->signals.onKeyDown->emit(myStEvent.Key);
-        }
+        postKeyDown(myStEvent.Key);
     }
 
     /**
@@ -337,24 +330,17 @@
         }
 
         NSUInteger aFlags = [theEvent modifierFlags];
-        myStEvent.Key.VKey = (StVirtKey )ST_CARBON2ST_VK[aKeyCode];
-        myStEvent.Key.Time = [theEvent timestamp];
-        myStWin->myKeysState.keyUp(myStEvent.Key.VKey, myStEvent.Key.Time);
-
-        myStEvent.Type = stEvent_KeyUp;
-        myStEvent.Key.Flags = ST_VF_NONE;
+        myStEvent.Key.VKey  = (StVirtKey )ST_CARBON2ST_VK[aKeyCode];
+        myStEvent.Key.Time  = [theEvent timestamp];
+        /*myStEvent.Key.Flags = ST_VF_NONE;
         if(aFlags & NSShiftKeyMask) {
             myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_SHIFT);
         }
         if(aFlags & NSControlKeyMask) {
             myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_CONTROL);
-        }
+        }*/
 
-        if(myStWin->myEventsThreaded) {
-            myStWin->myEventsBuffer.append(myStEvent);
-        } else {
-            myStWin->signals.onKeyUp->emit(myStEvent.Key);
-        }
+        postKeyUp(myStEvent.Key);
     }
 
     - (void ) goToFullscreen {

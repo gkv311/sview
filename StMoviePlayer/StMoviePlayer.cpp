@@ -595,6 +595,56 @@ void StMoviePlayer::doKeyDown(const StKeyEvent& theEvent) {
     }
 }
 
+void StMoviePlayer::doKeyHold(const StKeyEvent& theEvent) {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    StHandle<StStereoParams> aParams = myGUI->stImageRegion->getSource();
+    if(aParams.isNull()) {
+        return;
+    }
+
+    const GLfloat aDuration = (GLfloat )theEvent.Progress;
+    switch(theEvent.VKey) {
+        // zooming
+        case ST_VK_ADD:
+        case ST_VK_OEM_PLUS:
+            aParams->scaleIn(aDuration);
+            break;
+        case ST_VK_SUBTRACT:
+        case ST_VK_OEM_MINUS:
+            aParams->scaleOut(aDuration);
+            break;
+        // rotation
+        case ST_VK_BRACKETLEFT: {
+            if(theEvent.Flags == ST_VF_CONTROL) {
+                aParams->decZRotateL(aDuration);
+            }
+            break;
+        }
+        case ST_VK_BRACKETRIGHT: {
+            if(theEvent.Flags == ST_VF_CONTROL) {
+                aParams->incZRotateL(aDuration);
+            }
+            break;
+        }
+        case ST_VK_SEMICOLON: {
+            if(theEvent.Flags == ST_VF_CONTROL) {
+                aParams->incSepRotation(aDuration);
+            }
+            break;
+        }
+        case ST_VK_APOSTROPHE: {
+            if(theEvent.Flags == ST_VF_CONTROL) {
+                aParams->decSepRotation(aDuration);
+            }
+            break;
+        }
+        default: break;
+    }
+}
+
 void StMoviePlayer::doMouseDown(const StClickEvent& theEvent) {
     if(myGUI.isNull()) {
         return;
@@ -649,8 +699,6 @@ void StMoviePlayer::doFileDrop(const StDNDropEvent& theEvent) {
 
 void StMoviePlayer::processEvents(const StMessage_t* theEvents) {
     bool isMouseMove = false;
-
-    keysStereo(myWindow->getKeysState().getMap());
 
     for(size_t evId = 0; theEvents[evId].uin != StMessageList::MSG_NULL; ++evId) {
         switch(theEvents[evId].uin) {
@@ -1086,35 +1134,6 @@ void StMoviePlayer::doFullscreen(const bool theIsFullscreen) {
 
 void StMoviePlayer::doSnapshot(const size_t theImgType) {
     myVideo->doSaveSnapshotAs(theImgType);
-}
-
-void StMoviePlayer::keysStereo(const bool* theKeys) {
-    StHandle<StStereoParams> aParams = myGUI->stImageRegion->getSource();
-    if(aParams.isNull()) {
-        return;
-    }
-
-    // ========= ZOOM factor: + - =========
-    if(theKeys[ST_VK_ADD] || theKeys[ST_VK_OEM_PLUS]) {
-        aParams->scaleIn();
-    }
-    if(theKeys[ST_VK_SUBTRACT] || theKeys[ST_VK_OEM_MINUS]) {
-        aParams->scaleOut();
-    }
-
-    // ========= Rotation =======
-    if(theKeys[ST_VK_BRACKETLEFT] && theKeys[ST_VK_CONTROL]) { // [
-        aParams->decZRotateL();
-    }
-    if(theKeys[ST_VK_BRACKETRIGHT] && theKeys[ST_VK_CONTROL]) { // ]
-        aParams->incZRotateL();
-    }
-    if(theKeys[ST_VK_SEMICOLON] && theKeys[ST_VK_CONTROL]) { // ;
-        aParams->incSepRotation();
-    }
-    if(theKeys[ST_VK_APOSTROPHE] && theKeys[ST_VK_CONTROL]) { // '
-        aParams->decSepRotation();
-    }
 }
 
 bool StMoviePlayer::getCurrentFile(StHandle<StFileNode>&     theFileNode,

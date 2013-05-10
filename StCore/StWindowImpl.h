@@ -115,6 +115,18 @@ class StWindowImpl {
     ST_LOCAL double getEventTime(const uint32_t theTime) const;
 
     /**
+     * Setup common fields of event structure (Type, Flags)
+     * and post key down event and perform post-processing.
+     */
+    ST_LOCAL void postKeyDown(StKeyEvent& theEvent);
+
+    /**
+     * Setup common fields of event structure (Type, Flags)
+     * and post key up event and perform post-processing.
+     */
+    ST_LOCAL void postKeyUp(StKeyEvent& theEvent);
+
+    /**
      * Tiles configuration (multiple viewports within the same window).
      */
     enum TiledCfg {
@@ -289,6 +301,7 @@ class StWindowImpl {
         StSignal<void (const StSizeEvent&   )>* onResize;
         StSignal<void (const StKeyEvent&    )>* onKeyUp;
         StSignal<void (const StKeyEvent&    )>* onKeyDown;
+        StSignal<void (const StKeyEvent&    )>* onKeyHold;
         StSignal<void (const StClickEvent&  )>* onMouseUp;
         StSignal<void (const StClickEvent&  )>* onMouseDown;
         StSignal<void (const StDNDropEvent& )>* onFileDrop;
@@ -298,6 +311,7 @@ class StWindowImpl {
     StTimer        myEventsTimer;
     StEventsBuffer myEventsBuffer;     //!< window events double buffer
     StEvent        myStEvent;
+    double         myLastEventsTime;   //!< time when processEvents() was last called
     bool           myEventsThreaded;
 };
 

@@ -76,6 +76,7 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
   myBlockSleep(BlockSleep_OFF),
   myIsDispChanged(false),
   myEventsTimer(true),
+  myLastEventsTime(0.0),
   myEventsThreaded(false) {
     stMemZero(&attribs, sizeof(attribs));
     stMemZero(&signals, sizeof(signals));
@@ -790,17 +791,106 @@ void StWindowImpl::stglSwap(const int& theWinId) {
 void StWindowImpl::swapEventsBuffers() {
     myEventsBuffer.swapBuffers();
     for(size_t anEventIter = 0; anEventIter < myEventsBuffer.getSize(); ++anEventIter) {
-        const StEvent& anEvent = myEventsBuffer.getEvent(anEventIter);
+        StEvent& anEvent = myEventsBuffer.changeEvent(anEventIter);
         switch(anEvent.Type) {
             //case stEvent_Close:
             case stEvent_Size:      signals.onResize   ->emit(anEvent.Size);   break;
             case stEvent_KeyDown:   signals.onKeyDown  ->emit(anEvent.Key);    break;
-            case stEvent_KeyUp:     signals.onKeyUp    ->emit(anEvent.Key);    break;
+            case stEvent_KeyUp: {
+                // reconstruct duration event
+                anEvent.Key.Progress = stMin(anEvent.Key.Time - myLastEventsTime, anEvent.Key.Duration);
+                if(anEvent.Key.Progress > 1.e-7) {
+                    anEvent.Type = stEvent_KeyHold;
+                    signals.onKeyHold->emit(anEvent.Key);
+                }
+                anEvent.Type = stEvent_KeyUp;
+                anEvent.Key.Progress = 0.0;
+                signals.onKeyUp->emit(anEvent.Key);
+                break;
+            }
             case stEvent_MouseDown: signals.onMouseDown->emit(anEvent.Button); break;
             case stEvent_MouseUp:   signals.onMouseUp  ->emit(anEvent.Button); break;
             case stEvent_FileDrop:  signals.onFileDrop ->emit(anEvent.DNDrop); break;
             default: break;
         }
+    }
+
+    // post key hold events
+    const double aCurrTime = getEventTime();
+    StKeyEvent aHoldEvent;
+    aHoldEvent.Type = stEvent_KeyHold;
+    aHoldEvent.Time = aCurrTime;
+    aHoldEvent.Char = 0;
+    double aKeyTime = 0.0;
+    for(int aKeyIter = 0; aKeyIter < 256; ++aKeyIter) {
+        if(myKeysState.isKeyDown((StVirtKey )aKeyIter, aKeyTime)) {
+            aHoldEvent.VKey     = (StVirtKey )aKeyIter;
+            aHoldEvent.Duration = aHoldEvent.Time - aKeyTime;
+            aHoldEvent.Progress = stMin(aHoldEvent.Time - myLastEventsTime, aHoldEvent.Duration);
+            aHoldEvent.Flags = ST_VF_NONE;
+            if(myKeysState.isKeyDown(ST_VK_SHIFT)) {
+                aHoldEvent.Flags = StVirtFlags(aHoldEvent.Flags | ST_VF_SHIFT);
+            }
+            if(myKeysState.isKeyDown(ST_VK_CONTROL)) {
+                aHoldEvent.Flags = StVirtFlags(aHoldEvent.Flags | ST_VF_CONTROL);
+            }
+            if(aHoldEvent.Progress > 1.e-7) {
+                signals.onKeyHold->emit(aHoldEvent);
+            }
+        }
+    }
+    myLastEventsTime = aCurrTime;
+}
+
+void StWindowImpl::postKeyDown(StKeyEvent& theEvent) {
+    theEvent.Type     = stEvent_KeyDown;
+    theEvent.Duration = 0.0;
+    theEvent.Progress = 0.0;
+    myKeysState.keyDown(theEvent.VKey, theEvent.Time);
+    theEvent.Flags = ST_VF_NONE;
+    if(myKeysState.isKeyDown(ST_VK_SHIFT)) {
+        theEvent.Flags = StVirtFlags(theEvent.Flags | ST_VF_SHIFT);
+    }
+    if(myKeysState.isKeyDown(ST_VK_CONTROL)) {
+        theEvent.Flags = StVirtFlags(theEvent.Flags | ST_VF_CONTROL);
+    }
+
+    if(myEventsThreaded) {
+        myEventsBuffer.append(myStEvent);
+    } else {
+        signals.onKeyDown->emit(theEvent);
+    }
+}
+
+void StWindowImpl::postKeyUp(StKeyEvent& theEvent) {
+    double aKeyTime = 0.0;
+    if(!myKeysState.isKeyDown(theEvent.VKey, aKeyTime)) {
+        return; // should never happen
+    }
+    myKeysState.keyUp(theEvent.VKey, theEvent.Time);
+
+    theEvent.Duration = theEvent.Time - aKeyTime;
+    theEvent.Flags = ST_VF_NONE;
+    if(myKeysState.isKeyDown(ST_VK_SHIFT)) {
+        theEvent.Flags = StVirtFlags(theEvent.Flags | ST_VF_SHIFT);
+    }
+    if(myKeysState.isKeyDown(ST_VK_CONTROL)) {
+        theEvent.Flags = StVirtFlags(theEvent.Flags | ST_VF_CONTROL);
+    }
+
+    if(myEventsThreaded) {
+        theEvent.Type     = stEvent_KeyUp; // hold event will be reconstructed by swapEventsBuffers()
+        theEvent.Progress = 0.0;
+        myEventsBuffer.append(myStEvent);
+    } else {
+        theEvent.Progress = stMin(theEvent.Time - myLastEventsTime, theEvent.Duration);
+        if(theEvent.Progress > 1.e-7) {
+            theEvent.Type = stEvent_KeyHold;
+            signals.onKeyHold->emit(theEvent);
+        }
+        theEvent.Type     = stEvent_KeyUp;
+        theEvent.Progress = 0.0;
+        signals.onKeyUp->emit(theEvent);
     }
 }
 

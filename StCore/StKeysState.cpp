@@ -27,12 +27,14 @@ StKeysState::~StKeysState() {
 }
 
 void StKeysState::reset() {
+    StMutexAuto aLock(myLock);
     stMemZero(myKeys, sizeof(myKeys));
 }
 
 void StKeysState::keyDown(const StVirtKey theKey,
                           const double    theTime) {
     if(!myKeys[theKey]) {
+        StMutexAuto aLock(myLock);
         myKeys[theKey]  = true;
         myTimes[theKey] = theTime;
     }
@@ -41,7 +43,22 @@ void StKeysState::keyDown(const StVirtKey theKey,
 void StKeysState::keyUp(const StVirtKey theKey,
                         const double    theTime) {
     if(myKeys[theKey]) {
+        StMutexAuto aLock(myLock);
         myKeys[theKey]  = false;
         myTimes[theKey] = theTime;
     }
+}
+
+bool StKeysState::isKeyDown(const StVirtKey theKey,
+                            double&         theTime) const {
+    StMutexAuto aLock(myLock);
+    theTime = myTimes[theKey];
+    const bool isPressed = myKeys[theKey];
+    return isPressed;
+}
+
+double StKeysState::getKeyTime(const StVirtKey theKey) const {
+    StMutexAuto aLock(myLock);
+    const double aResult = myTimes[theKey];
+    return aResult;
 }

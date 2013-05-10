@@ -47,12 +47,8 @@ class StMessageList {
         MSG_NONE = 1,   // just ignored event
         MSG_EXIT = 2,
         MSG_CLOSE = 3,
-        MSG_INIT = 4,   // reserved
         MSG_RESIZE = 6,
         MSG_MOUSE_MOVE = 10,
-        MSG_OPEN_FILE = 11,
-        MSG_DEVICE_INFO = 12,
-        MSG_DEVICE_OPTION = 13,
         MSG_WIN_ON_NEW_MONITOR = 14,
         MSG_FULLSCREEN_SWITCH = 15,
         MSG_GO_TOP      = 44,

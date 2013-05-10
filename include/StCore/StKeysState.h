@@ -19,7 +19,8 @@
 #ifndef __StKeysState_h_
 #define __StKeysState_h_
 
-#include <stTypes.h>
+#include <StThreads/StMutex.h>
+
 #include "StVirtualKeys.h"
 
 /**
@@ -69,12 +70,18 @@ class StKeysState {
     }
 
     /**
+     * @param theKey  Virtual key code to check
+     * @param theTime Time when key was pressed or released
+     * @return true if key is pressed
+     */
+    ST_CPPEXPORT bool isKeyDown(const StVirtKey theKey,
+                                double&         theTime) const;
+
+    /**
      * @param theKey Virtual key code to check
      * @return timestamp of last change
      */
-    ST_LOCAL double getKeyTime(const StVirtKey theKey) const {
-        return myTimes[theKey];
-    }
+    ST_CPPEXPORT double getKeyTime(const StVirtKey theKey) const;
 
     /**
      * @return array of boolean flags
@@ -85,8 +92,9 @@ class StKeysState {
 
         private:
 
-    bool   myKeys[256];  //!< virtual keys pressed state
-    double myTimes[256];
+    mutable StMutex myLock; //!< mutex for thread-safe access
+    bool    myKeys[256];    //!< virtual keys pressed state
+    double  myTimes[256];   //!< time when key was pressed or released
 
 };
 

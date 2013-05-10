@@ -541,7 +541,7 @@ bool StGLImageRegion::tryUnClick(const StPointD_t& theCursorZo, const int& theMo
         return true;
     }
     if(StGLWidget::tryUnClick(theCursorZo, theMouseBtn, isItemUnclicked)) {
-        const GLfloat SCALE_STEPS = 8.0f;
+        const GLfloat SCALE_STEPS = 0.16f;
         StPointD_t centerCursor(0.5, 0.5);
         if(theMouseBtn == ST_MOUSE_SCROLL_V_UP) {
             switch(aParams->getViewMode()) {

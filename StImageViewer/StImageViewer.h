@@ -80,6 +80,7 @@ class StImageViewer : public StApplication {
     ST_LOCAL virtual void doChangeDevice(const int32_t theValue);
     ST_LOCAL virtual void doResize   (const StSizeEvent&   theEvent);
     ST_LOCAL virtual void doKeyDown  (const StKeyEvent&    theEvent);
+    ST_LOCAL virtual void doKeyHold  (const StKeyEvent&    theEvent);
     ST_LOCAL virtual void doMouseDown(const StClickEvent&  theEvent);
     ST_LOCAL virtual void doMouseUp  (const StClickEvent&  theEvent);
     ST_LOCAL virtual void doFileDrop (const StDNDropEvent& theEvent);
@@ -107,9 +108,6 @@ class StImageViewer : public StApplication {
      * Handler for new file loaded event.
      */
     ST_LOCAL void doLoaded();
-
-    // callback keys
-    ST_LOCAL void keysStereo(const bool* theKeys);
 
         public: //! @name Properties
 

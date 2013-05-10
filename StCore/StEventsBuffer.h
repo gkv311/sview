@@ -85,6 +85,14 @@ class StEventsBuffer {
     }
 
     /**
+     * @param theId Index of event to retrieve
+     * @return event from read-only buffer
+     */
+    ST_LOCAL StEvent& changeEvent(const size_t theId) {
+        return myEventsRead[theId];
+    }
+
+    /**
      * Append one more event to the write buffer.
      */
     ST_LOCAL void append(const StEvent& theEvent) {

@@ -142,13 +142,23 @@ class StApplication {
 
     /**
      * Process keyboard key press.
+     * Should be processed by text input fields (Char field contains Unicode code point)
+     * or to control on/off state with emphasis on event happens time.
      */
     ST_CPPEXPORT virtual void doKeyDown(const StKeyEvent& theEvent);
 
     /**
-     * Process  keyboard key release.
+     * Process keyboard key release.
+     * In most cases should not be processed at all.
      */
     ST_CPPEXPORT virtual void doKeyUp(const StKeyEvent& theEvent);
+
+    /**
+     * Process holded keyboard key.
+     * Should be processed to alter continuous properties
+     * with emphasis on duration not on time when event happend.
+     */
+    ST_CPPEXPORT virtual void doKeyHold(const StKeyEvent& theEvent);
 
     /**
      * Process mouse button press.

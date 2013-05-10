@@ -290,7 +290,6 @@ bool StWindowImpl::wndCreateWindows() {
                         case WM_KEYDOWN: {
                             myStEvent.Key.Time = getEventTime(myEvent.time);
                             myStEvent.Key.VKey = (StVirtKey )myEvent.wParam;
-                            myKeysState.keyDown(myStEvent.Key.VKey, myStEvent.Key.Time);
 
                             // ToUnicode needs high-order bit of a byte to be set for pressed keys...
                             BYTE aKeyState[256]; //GetKeyboardState(aKeyState);
@@ -307,31 +306,15 @@ bool StWindowImpl::wndCreateWindows() {
                                 myStEvent.Key.Char = 0;
                             }
 
-                            myStEvent.Type = stEvent_KeyDown;
                             myStEvent.Key.Flags = ST_VF_NONE;
-                            if(myKeysState.isKeyDown(ST_VK_SHIFT)) {
-                                myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_SHIFT);
-                            }
-                            if(myKeysState.isKeyDown(ST_VK_CONTROL)) {
-                                myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_CONTROL);
-                            }
-                            myEventsBuffer.append(myStEvent);
+                            postKeyDown(myStEvent.Key);
                             break;
                         }
                         case WM_KEYUP: {
-                            myStEvent.Type      = stEvent_KeyUp;
                             myStEvent.Key.VKey  = (StVirtKey )myEvent.wParam;
                             myStEvent.Key.Time  = getEventTime(myEvent.time);
                             myStEvent.Key.Flags = ST_VF_NONE;
-
-                            myKeysState.keyUp(myStEvent.Key.VKey, myStEvent.Key.Time);
-                            if(myKeysState.isKeyDown(ST_VK_SHIFT)) {
-                                myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_SHIFT);
-                            }
-                            if(myKeysState.isKeyDown(ST_VK_CONTROL)) {
-                                myStEvent.Key.Flags = StVirtFlags(myStEvent.Key.Flags | ST_VF_CONTROL);
-                            }
-                            myEventsBuffer.append(myStEvent);
+                            postKeyUp(myStEvent.Key);
                             break;
                         }
                         default: break;

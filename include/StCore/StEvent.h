@@ -30,6 +30,7 @@ enum StEventType {
     stEvent_Size,       //!< StSizeEvent,   window resized
     stEvent_KeyDown,    //!< StKeyEvent,    keyboard key pressed
     stEvent_KeyUp,      //!< StKeyEvent,    keyboard key released
+    stEvent_KeyHold,    //!< StKeyEvent,    keyboard key holded
     stEvent_MouseDown,  //!< StClickEvent,  mouse button pressed
     stEvent_MouseUp,    //!< StClickEvent,  mouse button released
     stEvent_FileDrop,   //!< StDNDropEvent, file Drag & Drop
@@ -79,11 +80,13 @@ struct StSizeEvent {
  */
 struct StKeyEvent {
 
-    StEventType   Type;   //!< event type
-    double        Time;   //!< time in seconds when event was registered
-    StVirtKey     VKey;   //!< virtual key code (language independent and case insensitive)
-    StVirtFlags   Flags;  //!< modifier keys pressed in the moment of event
-    stUtf32_t     Char;   //!< associated UTF-32 character code
+    StEventType   Type;     //!< event type
+    double        Time;     //!< time in seconds when event was registered
+    double        Duration; //!< time in seconds, how long key is/was holded
+    double        Progress; //!< time in seconds, how long key is/was holded since last callback (stEvent_KeyHold)
+    StVirtKey     VKey;     //!< virtual key code (language independent and case insensitive)
+    StVirtFlags   Flags;    //!< modifier keys pressed in the moment of event
+    stUtf32_t     Char;     //!< associated UTF-32 character code
 
 };
 

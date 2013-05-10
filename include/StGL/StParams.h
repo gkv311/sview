@@ -58,9 +58,8 @@ class StStereoParams {
       myZRotateDegrees(0.0f),
       myZRotateZero(0.0f),
       myCenter(0.0f, 0.0f),
-      myMovStep(0.01f),
       myScaleFactor(1.0f),
-      myScaleStep(0.02f),
+      myScaleStep(1.0f),
       myPanoTheta(0.0f),
       myPanoPhi(0.0f),
       myViewMode(theViewMode),
@@ -218,15 +217,15 @@ class StStereoParams {
     /**
      * Zoom in.
      */
-    void scaleIn(const GLfloat theSteps = 1.0f) {
-        myScaleFactor *= (1.0f + theSteps * myScaleStep);
+    void scaleIn(const GLfloat theDuration = 0.02f) {
+        myScaleFactor *= (1.0f + theDuration * myScaleStep);
     }
 
     /**
      * Zoom out.
      */
-    void scaleOut(const GLfloat theSteps = 1.0f) {
-        myScaleFactor /= (1.0f + theSteps * myScaleStep);
+    void scaleOut(const GLfloat theDuration = 0.02f) {
+        myScaleFactor /= (1.0f + theDuration * myScaleStep);
     }
 
     void incSeparationDx() {
@@ -245,12 +244,12 @@ class StStereoParams {
         mySepDyPx -= mySepStepPx;
     }
 
-    void incSepRotation() {
-        mySepRotDegrees += 0.1f;
+    void incSepRotation(const GLfloat theDuration = 0.02f) {
+        mySepRotDegrees += 5.0f * theDuration;
     }
 
-    void decSepRotation() {
-        mySepRotDegrees -= 0.1f;
+    void decSepRotation(const GLfloat theDuration = 0.02f) {
+        mySepRotDegrees -= 5.0f * theDuration;
     }
 
     /**
@@ -280,39 +279,39 @@ class StStereoParams {
         myPanoTheta += theMoveVec.y();
     }
 
-    void moveToRight() {
+    void moveToRight(const GLfloat theDuration = 0.02f) {
         switch(myViewMode) {
             case PANORAMA_SPHERE:
-            case PANORAMA_CYLINDER: myPanoPhi += 2.0f; break;
+            case PANORAMA_CYLINDER: myPanoPhi += 100.0f * theDuration; break;
             case FLAT_IMAGE:
-            default: myCenter.x() += myMovStep / myScaleFactor;
+            default: myCenter.x() += 0.5f * theDuration / myScaleFactor;
         }
     }
 
-    void moveToLeft() {
+    void moveToLeft(const GLfloat theDuration = 0.02f) {
         switch(myViewMode) {
             case PANORAMA_SPHERE:
-            case PANORAMA_CYLINDER: myPanoPhi -= 2.0f; break;
+            case PANORAMA_CYLINDER: myPanoPhi -= 100.0f * theDuration; break;
             case FLAT_IMAGE:
-            default: myCenter.x() -= myMovStep / myScaleFactor;
+            default: myCenter.x() -= 0.5f * theDuration / myScaleFactor;
         }
     }
 
-    void moveToDown() {
+    void moveToDown(const GLfloat theDuration = 0.02f) {
         switch(myViewMode) {
             case PANORAMA_SPHERE:
-            case PANORAMA_CYLINDER: myPanoTheta -= 2.0f; break;
+            case PANORAMA_CYLINDER: myPanoTheta -= 100.0f * theDuration; break;
             case FLAT_IMAGE:
-            default: myCenter.y() -= myMovStep / myScaleFactor;
+            default: myCenter.y() -= 0.5f * theDuration / myScaleFactor;
         }
     }
 
-    void moveToUp() {
+    void moveToUp(const GLfloat theDuration = 0.02f) {
         switch(myViewMode) {
             case PANORAMA_SPHERE:
-            case PANORAMA_CYLINDER: myPanoTheta += 2.0f; break;
+            case PANORAMA_CYLINDER: myPanoTheta += 100.0f * theDuration; break;
             case FLAT_IMAGE:
-            default: myCenter.y() += myMovStep / myScaleFactor;
+            default: myCenter.y() += 0.5f * theDuration / myScaleFactor;
         }
     }
 
@@ -324,12 +323,12 @@ class StStereoParams {
         myZRotateDegrees += 90.0f;
     }
 
-    void incZRotateL() {
-        myZRotateDegrees -= 0.1f;
+    void incZRotateL(const GLfloat theDuration = 0.02f) {
+        myZRotateDegrees -= 5.0f * theDuration;
     }
 
-    void decZRotateL() {
-        myZRotateDegrees += 0.1f;
+    void decZRotateL(const GLfloat theDuration = 0.02f) {
+        myZRotateDegrees += 5.0f * theDuration;
     }
 
     /**
@@ -358,7 +357,6 @@ class StStereoParams {
     GLfloat      myZRotateDegrees; //!< rotation angle in degrees
     GLfloat      myZRotateZero;    //!< zero-rotation angle in degrees
     StGLVec2     myCenter;         //!< relative position
-    GLfloat      myMovStep;        //!< flat movement step
     GLfloat      myScaleFactor;    //!< scaling factor
     GLfloat      myScaleStep;      //!< scaling factor inc/dec step
     GLfloat      myPanoTheta;      //!< angle for panorama view
