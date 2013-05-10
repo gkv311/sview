@@ -110,7 +110,7 @@ class StWinHandles {
     ATOM         myMKeyPlay;
     ATOM         myMKeyPrev;
     ATOM         myMKeyNext;
-        private:
+
     StMutex         stMutex;
     size_t      threadIdOgl; // id of the thread, in wich rendering context was created
     HDC                 hDC; // WinAPI Device Descriptor handle

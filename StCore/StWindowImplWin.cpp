@@ -701,11 +701,17 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
     myIsUpdated = true;
 
     const StRectI_t& aRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
-    myStEvent.Type       = stEvent_Size;
-    myStEvent.Size.Time  = getEventTime();
-    myStEvent.Size.SizeX = aRect.width();
-    myStEvent.Size.SizeY = aRect.height();
-    signals.onResize->emit(myStEvent.Size);
+    StEvent anEvent;
+    anEvent.Type       = stEvent_Size;
+    anEvent.Size.Time  = getEventTime();
+    anEvent.Size.SizeX = aRect.width();
+    anEvent.Size.SizeY = aRect.height();
+    if(StThread::getCurrentThreadId() == myMaster.threadIdOgl) {
+        signals.onResize->emit(anEvent.Size);
+    } else {
+        // in general setFullScreen should be called only within StWindow thread
+        myEventsBuffer.append(anEvent);
+    }
 }
 
 void StWindowImpl::updateWindowPos() {
