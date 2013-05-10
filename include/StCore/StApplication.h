@@ -181,6 +181,11 @@ class StApplication {
      */
     ST_CPPEXPORT virtual void doFileDrop(const StDNDropEvent& theEvent);
 
+    /**
+     * Navigation event.
+     */
+    ST_CPPEXPORT virtual void doNavigate(const StNavigEvent& theEvent);
+
         public: //! @name public parameters
 
     struct {

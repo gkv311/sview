@@ -695,6 +695,14 @@ void StMoviePlayer::doFileDrop(const StDNDropEvent& theEvent) {
     }
 }
 
+void StMoviePlayer::doNavigate(const StNavigEvent& theEvent) {
+    switch(theEvent.Target) {
+        case stNavigate_Backward: doListPrev(); break;
+        case stNavigate_Forward:  doListNext(); break;
+        default: break;
+    }
+}
+
 void StMoviePlayer::processEvents(const StMessage_t* theEvents) {
     bool isMouseMove = false;
 
@@ -702,14 +710,6 @@ void StMoviePlayer::processEvents(const StMessage_t* theEvents) {
         switch(theEvents[evId].uin) {
             case StMessageList::MSG_MOUSE_MOVE: {
                 isMouseMove = true; break;
-            }
-            case StMessageList::MSG_GO_BACKWARD: {
-                doListPrev();
-                break;
-            }
-            case StMessageList::MSG_GO_FORWARD: {
-                doListNext();
-                break;
             }
         }
     }

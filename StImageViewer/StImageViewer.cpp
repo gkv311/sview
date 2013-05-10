@@ -597,6 +597,14 @@ void StImageViewer::doFileDrop(const StDNDropEvent& theEvent) {
     }
 }
 
+void StImageViewer::doNavigate(const StNavigEvent& theEvent) {
+    switch(theEvent.Target) {
+        case stNavigate_Backward: doListPrev(); break;
+        case stNavigate_Forward:  doListNext(); break;
+        default: break;
+    }
+}
+
 void StImageViewer::processEvents(const StMessage_t* theEvents) {
     bool isMouseMove = false;
     size_t evId(0);
@@ -605,14 +613,6 @@ void StImageViewer::processEvents(const StMessage_t* theEvents) {
         switch(theEvents[evId].uin) {
             case StMessageList::MSG_MOUSE_MOVE: {
                 isMouseMove = true; break;
-            }
-            case StMessageList::MSG_GO_BACKWARD: {
-                doListPrev();
-                break;
-            }
-            case StMessageList::MSG_GO_FORWARD: {
-                doListNext();
-                break;
             }
         }
     }

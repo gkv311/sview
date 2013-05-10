@@ -35,11 +35,7 @@ enum StEventType {
     stEvent_MouseDown,  //!< StClickEvent,  mouse button pressed
     stEvent_MouseUp,    //!< StClickEvent,  mouse button released
     stEvent_FileDrop,   //!< StDNDropEvent, file Drag & Drop
-    ///MSG_MOUSE_MOVE,
-    ///MSG_GO_TOP,
-    ///MSG_GO_BOTTOM,
-    ///MSG_GO_BACKWARD,
-    ///MSG_GO_FORWARD,
+    stEvent_Navigate,   //!< StNavigEvent,  navigation event
 };
 
 /**
@@ -114,19 +110,38 @@ struct StDNDropEvent {
 
 };
 
+enum StNavigValues {
+    stNavigate_Top,
+    stNavigate_Bottom,
+    stNavigate_Backward,
+    stNavigate_Forward,
+};
+
+/**
+ * Navigation event.
+ */
+struct StNavigEvent {
+
+    StEventType   Type;   //!< event type
+    double        Time;   //!< time in seconds when event was registered
+    StNavigValues Target; //!< navigation target
+
+};
+
 /**
  * Window event structure.
  * Defined as union to avoid memory fragmentation.
  */
 union StEvent {
 
-    StEventType   Type;    //!< event type
-    StAnyEvent    Base;    //!< fields shared between all event
-    StCloseEvent  Close;   //!< window close  event
-    StSizeEvent   Size;    //!< window resize event
-    StKeyEvent    Key;     //!< keyboard key down/up event
-    StClickEvent  Button;  //!< mouse button down/up event
-    StDNDropEvent DNDrop;  //!< file Drag & Drop event
+    StEventType   Type;     //!< event type
+    StAnyEvent    Base;     //!< fields shared between all event
+    StCloseEvent  Close;    //!< window close  event
+    StSizeEvent   Size;     //!< window resize event
+    StKeyEvent    Key;      //!< keyboard key down/up event
+    StClickEvent  Button;   //!< mouse button down/up event
+    StDNDropEvent DNDrop;   //!< file Drag & Drop event
+    StNavigEvent  Navigate; //!< navigation event
 
 };
 

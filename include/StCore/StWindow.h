@@ -360,6 +360,7 @@ class StWindow {
         StSignal<void (const StClickEvent&  )> onMouseUp;
         StSignal<void (const StClickEvent&  )> onMouseDown;
         StSignal<void (const StDNDropEvent& )> onFileDrop;
+        StSignal<void (const StNavigEvent&  )> onNavigate;
 
     } signals;
 

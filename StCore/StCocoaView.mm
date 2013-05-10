@@ -230,16 +230,28 @@
     - (void ) swipeWithEvent: (NSEvent* ) theEvent {
         const CGFloat aDeltaX = [theEvent deltaX];
         const CGFloat aDeltaY = [theEvent deltaY];
+        myStEvent.Type = stEvent_Navigate;
+        myStEvent.Navigate.Time = [theEvent timestamp];
         if(stAreEqual(aDeltaX, 0.0, 0.001)) {
             if(!stAreEqual(aDeltaY, 0.0, 0.001)) {
-                myStWin->myMessageList.append((aDeltaY > 0.0)
-                                            ? StMessageList::MSG_GO_TOP
-                                            : StMessageList::MSG_GO_BOTTOM);
+                myStEvent.Navigate.Target = (aDeltaY > 0.0)
+                                          ? stNavigate_Top
+                                          : stNavigate_Bottom;
+                if(myStWin->myEventsThreaded) {
+                    myStWin->myEventsBuffer.append(myStEvent);
+                } else {
+                    myStWin->signals.onNavigate->emit(myStEvent.Navigate);
+                }
             }
         } else {
-            myStWin->myMessageList.append((aDeltaX > 0.0)
-                                        ? StMessageList::MSG_GO_BACKWARD
-                                        : StMessageList::MSG_GO_FORWARD);
+            myStEvent.Navigate.Target = (aDeltaX > 0.0)
+                                      ? stNavigate_Backward
+                                      : stNavigate_Forward;
+            if(myStWin->myEventsThreaded) {
+                myStWin->myEventsBuffer.append(myStEvent);
+            } else {
+                myStWin->signals.onNavigate->emit(myStEvent.Navigate);
+            }
         }
     }
 

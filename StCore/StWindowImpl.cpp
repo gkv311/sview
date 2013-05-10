@@ -826,6 +826,9 @@ void StWindowImpl::swapEventsBuffers() {
             case stEvent_FileDrop:
                 signals.onFileDrop->emit(anEvent.DNDrop);
                 break;
+            case stEvent_Navigate:
+                signals.onNavigate->emit(anEvent.Navigate);
+                break;
             default: break;
         }
     }

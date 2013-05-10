@@ -198,6 +198,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL virtual void doMouseDown(const StClickEvent&  theEvent);
     ST_LOCAL virtual void doMouseUp  (const StClickEvent&  theEvent);
     ST_LOCAL virtual void doFileDrop (const StDNDropEvent& theEvent);
+    ST_LOCAL virtual void doNavigate (const StNavigEvent&  theEvent);
 
         private:
 

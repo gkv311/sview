@@ -213,6 +213,7 @@ bool StApplication::open() {
         myWindow->signals.onMouseDown = stSlot(this, &StApplication::doMouseDown);
         myWindow->signals.onMouseUp   = stSlot(this, &StApplication::doMouseUp);
         myWindow->signals.onFileDrop  = stSlot(this, &StApplication::doFileDrop);
+        myWindow->signals.onNavigate  = stSlot(this, &StApplication::doNavigate);
     }
 
     return myIsOpened;
@@ -274,6 +275,7 @@ void StApplication::doKeyHold  (const StKeyEvent&    ) {}
 void StApplication::doMouseDown(const StClickEvent&  ) {}
 void StApplication::doMouseUp  (const StClickEvent&  ) {}
 void StApplication::doFileDrop (const StDNDropEvent& ) {}
+void StApplication::doNavigate (const StNavigEvent&  ) {}
 
 void StApplication::processEvents() {
     if(myWindow.isNull() || !myIsOpened) {

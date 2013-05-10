@@ -550,6 +550,14 @@ void StCADViewer::doFileDrop(const StDNDropEvent& theEvent) {
     }
 }
 
+void StCADViewer::doNavigate(const StNavigEvent& theEvent) {
+    switch(theEvent.Target) {
+        case stNavigate_Backward: doListPrev(); break;
+        case stNavigate_Forward:  doListNext(); break;
+        default: break;
+    }
+}
+
 void StCADViewer::processEvents(const StMessage_t* ) {
     myIsCtrlPressed = myWindow->getKeysState().isKeyDown(ST_VK_CONTROL);
     if(myIsMiddleHold && myIsCtrlPressed) {
