@@ -40,7 +40,14 @@
     }
 
     - (void ) close {
-        myStWin->myMessageList.append(StMessageList::MSG_CLOSE);
+        StEvent anEvent;
+        anEvent.Type = stEvent_Close;
+        anEvent.Close.Time = myStWin->getEventTime();
+        if(myStWin->myEventsThreaded) {
+            myStWin->myEventsBuffer.append(anEvent);
+        } else {
+            myStWin->signals.onClose->emit(anEvent.Close);
+        }
     }
 
     - (void ) forceClose {

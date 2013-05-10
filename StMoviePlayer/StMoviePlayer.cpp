@@ -700,10 +700,6 @@ void StMoviePlayer::processEvents(const StMessage_t* theEvents) {
 
     for(size_t evId = 0; theEvents[evId].uin != StMessageList::MSG_NULL; ++evId) {
         switch(theEvents[evId].uin) {
-            case StMessageList::MSG_CLOSE: {
-                StApplication::exit(0);
-                break;
-            }
             case StMessageList::MSG_MOUSE_MOVE: {
                 isMouseMove = true; break;
             }

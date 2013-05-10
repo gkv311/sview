@@ -136,9 +136,15 @@ class StApplication {
     ST_CPPEXPORT virtual void doChangeDevice(const int32_t theValue);
 
     /**
+     * Process window close event.
+     * Default implementation just redirect to StApplication::exit(0);
+     */
+    ST_CPPEXPORT virtual void doClose(const StCloseEvent& theEvent);
+
+    /**
      * Process window resize.
      */
-    ST_CPPEXPORT virtual void doResize(const StSizeEvent&  theEvent);
+    ST_CPPEXPORT virtual void doResize(const StSizeEvent& theEvent);
 
     /**
      * Process keyboard key press.

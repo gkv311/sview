@@ -408,7 +408,9 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
         }
 
         case WM_CLOSE: {
-            myMessageList.append(StMessageList::MSG_CLOSE);
+            myStEvent.Type       = stEvent_Close;
+            myStEvent.Close.Time = getEventTime(myEvent.time);
+            myEventsBuffer.append(myStEvent);
             return 0; // do nothing - window close action should be performed by application
         }
 

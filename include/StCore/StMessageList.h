@@ -45,7 +45,6 @@ class StMessageList {
     enum {
         MSG_NULL = 0,   // last 'NULL' event in query
         MSG_NONE = 1,   // just ignored event
-        MSG_CLOSE = 3,
         MSG_MOUSE_MOVE = 10,
         MSG_GO_TOP      = 44,
         MSG_GO_BOTTOM   = 45,

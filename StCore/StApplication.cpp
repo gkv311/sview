@@ -205,6 +205,7 @@ bool StApplication::open() {
     if(myIsOpened) {
         // connect slots
         myWindow->signals.onRedraw    = stSlot(this, &StApplication::stglDraw);
+        myWindow->signals.onClose     = stSlot(this, &StApplication::doClose);
         myWindow->signals.onResize    = stSlot(this, &StApplication::doResize);
         myWindow->signals.onKeyDown   = stSlot(this, &StApplication::doKeyDown);
         myWindow->signals.onKeyUp     = stSlot(this, &StApplication::doKeyUp);
@@ -260,6 +261,10 @@ void StApplication::processEvents(const StMessage_t* ) {
 
 bool StApplication::resetDevice() {
     return false;
+}
+
+void StApplication::doClose(const StCloseEvent& ) {
+    exit(0);
 }
 
 void StApplication::doResize   (const StSizeEvent&   ) {}

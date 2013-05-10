@@ -793,7 +793,9 @@ void StWindowImpl::swapEventsBuffers() {
     for(size_t anEventIter = 0; anEventIter < myEventsBuffer.getSize(); ++anEventIter) {
         StEvent& anEvent = myEventsBuffer.changeEvent(anEventIter);
         switch(anEvent.Type) {
-            //case stEvent_Close:
+            case stEvent_Close:
+                signals.onClose->emit(anEvent.Close);
+                break;
             case stEvent_Size:
                 signals.onResize->emit(anEvent.Size);
                 break;

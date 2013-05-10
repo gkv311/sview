@@ -298,6 +298,7 @@ class StWindowImpl {
     } attribs;
 
     struct {
+        StSignal<void (const StCloseEvent&  )>* onClose;
         StSignal<void (const StSizeEvent&   )>* onResize;
         StSignal<void (const StSizeEvent&   )>* onAnotherMonitor;
         StSignal<void (const StKeyEvent&    )>* onKeyUp;

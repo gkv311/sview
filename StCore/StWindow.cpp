@@ -21,6 +21,7 @@
 #include "StWindowImpl.h"
 
 void StWindow::copySignals() {
+    myWin->signals.onClose     = &signals.onClose;
     myWin->signals.onResize    = &signals.onResize;
     myWin->signals.onAnotherMonitor = &signals.onAnotherMonitor;
     myWin->signals.onKeyUp     = &signals.onKeyUp;

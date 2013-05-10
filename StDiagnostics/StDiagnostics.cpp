@@ -129,16 +129,7 @@ void StDiagnostics::doKeyDown(const StKeyEvent& theEvent) {
     }
 }
 
-void StDiagnostics::processEvents(const StMessage_t* theEvents) {
-    for(size_t anIter = 0; theEvents[anIter].uin != StMessageList::MSG_NULL; ++anIter) {
-        switch(theEvents[anIter].uin) {
-            case StMessageList::MSG_CLOSE: {
-                StApplication::exit(0);
-                break;
-            }
-        }
-    }
-
+void StDiagnostics::processEvents(const StMessage_t* ) {
     myGUI->setVisibility(myWindow->getMousePos(), true);
 }
 
