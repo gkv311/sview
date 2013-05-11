@@ -698,7 +698,6 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
             SetFocus(myMaster.hWindow);
         }
     }
-    myIsUpdated = true;
 
     const StRectI_t& aRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
     StEvent anEvent;
@@ -707,9 +706,12 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
     anEvent.Size.SizeX = aRect.width();
     anEvent.Size.SizeY = aRect.height();
     if(StThread::getCurrentThreadId() == myMaster.threadIdOgl) {
+        updateWindowPos();
         signals.onResize->emit(anEvent.Size);
     } else {
         // in general setFullScreen should be called only within StWindow thread
+        // but if not - prevent access to OpenGL context from wrong thread
+        myIsUpdated = true;
         myEventsBuffer.append(anEvent);
     }
 }

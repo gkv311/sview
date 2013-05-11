@@ -357,6 +357,7 @@ void StOutPageFlip::dxActivate() {
             // so we switch out main GL window into windowed state temporarily
             // (we need to wait some time to ensure system perform needed movements)
             StWindow::setFullScreen(false);
+            StWindow::hide();
             ++myOutD3d.myActivateStep;
             return;
         }
@@ -368,6 +369,7 @@ void StOutPageFlip::dxActivate() {
             // at second step switch out main GL window back to fullscreen
             myOutD3d.myActivateStep = 0;
             StWindow::setFullScreen(true);
+            StWindow::hide();
 
             if(myOutD3d.myGLBuffer.isNull()) {
                 myOutD3d.myGLBuffer = new StGLFrameBuffer();
