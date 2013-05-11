@@ -731,8 +731,8 @@ void StWindowImpl::processEvents() {
                 parseXDNDClientMsg();
                 if(myXEvent.xclient.data.l[0] == (int )aDisplay->wndDestroyAtom) {
                     myStEvent.Type       = stEvent_Close;
-                    myStEvent.Close.Time = getEventTime(myEvent.time);
-                    myStWin->signals.onClose->emit(myStEvent.Close);
+                    myStEvent.Close.Time = getEventTime();
+                    signals.onClose->emit(myStEvent.Close);
                 }
                 break;
             }
