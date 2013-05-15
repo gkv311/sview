@@ -11,7 +11,7 @@
 
 #include <stTypes.h>
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     static const stUtf8_t SYS_FS_SPLITTER = '\\';
 #else
     static const stUtf8_t SYS_FS_SPLITTER = '/';
@@ -30,7 +30,8 @@ template<typename Element_Type>
 class StArrayList;
 
 #include <StStrings/StStringUnicode.h>
-typedef StStringUtf8 StString;
+typedef StStringUtf8  StString;  // dynamically allocated string class
+typedef StCStringUtf8 StCString; // POD structure for constant string
 
 #if (defined(__APPLE__))
 /**

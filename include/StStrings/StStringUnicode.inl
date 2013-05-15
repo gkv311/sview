@@ -95,6 +95,14 @@ StStringUnicode<Type>::StStringUnicode(const StStringUnicode& theCopy)
 }
 
 template<typename Type> inline
+StStringUnicode<Type>::StStringUnicode(const StConstStringUnicode<Type>& theCopy)
+: myString(stStrAlloc(theCopy.Size)),
+  mySize(theCopy.Size),
+  myLength(theCopy.Length) {
+    stStrCopy((stUByte_t* )myString, (const stUByte_t* )theCopy.String, mySize);
+}
+
+template<typename Type> inline
 StStringUnicode<Type>::StStringUnicode(const char*  theCopyUtf8,
                                        const size_t theLength)
 : myString(NULL),

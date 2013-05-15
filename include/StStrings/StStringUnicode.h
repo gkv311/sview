@@ -15,7 +15,46 @@
 #include <iostream>
 
 /**
- * This template class represent constant UTF-* string.
+ * This template of POD structure for constant UTF-* string.
+ */
+template<typename Type>
+struct StConstStringUnicode {
+
+    const Type* String; //!< string buffer
+    size_t      Size;   //!< buffer size in bytes, excluding NULL-termination symbol
+    size_t      Length; //!< length of the string in Unicode symbols (cached value, excluding NULL-termination symbol)
+
+};
+
+typedef StConstStringUnicode<stUtf8_t>    StCStringUtf8;
+typedef StConstStringUnicode<stUtf16_t>   StCStringUtf16;
+typedef StConstStringUnicode<stUtf32_t>   StCStringUtf32;
+typedef StConstStringUnicode<stUtfWide_t> StCStringUtfWide;
+
+/**
+ * External constructor for StConstStringUnicode POD structure.
+ */
+template<typename Type>
+inline const StConstStringUnicode<Type> stStringExtConstr(const Type*  theString,
+                                                          const size_t theSize,
+                                                          const size_t theLength) {
+    const StConstStringUnicode<Type> aStr = {theString, theSize, theLength};
+    return aStr;
+}
+
+/**
+ * Initialize constant string without Unicode symbols (only ASCII).
+ */
+#define stCString(theString) stStringExtConstr(theString, sizeof(theString) - sizeof(*theString), sizeof(theString) / sizeof(*theString) - 1)
+//#define stCString(theString) {theString, sizeof(theString) - sizeof(*theString), sizeof(theString) / sizeof(*theString) - 1}
+
+const StCStringUtf8 TheTest = stCString("my test");
+
+static_assert(std::is_pod<StCStringUtf8>::value,
+              "StCStringUtf8 is not POD structure!");
+
+/**
+ * This template class represents constant UTF-* string.
  * String stored in memory continuously, always NULL-terminated
  * and can be used as standard C-string using toCString() method.
  *
@@ -25,82 +64,6 @@
  */
 template<typename Type>
 class StStringUnicode {
-
-        private: //!< low-level methods
-
-    /**
-     * Compute advance for specified string.
-     * @param theStringUtf (const TypeFrom* ) - pointer to the NULL-terminated Unicode string;
-     * @param theLengthMax (const size_t ) - length limit (to cut the string), set to -1 to compute up to NULL-termination symbol;
-     * @param theSizeBytes (size_t& ) - advance in bytes (out);
-     * @param theLength    (size_t& ) - string length (out).
-     */
-    template<typename TypeFrom>
-    static void strGetAdvance(const TypeFrom* theStringUtf,
-                              const size_t    theLengthMax,
-                              size_t&         theSizeBytes,
-                              size_t&         theLength);
-
-    /**
-     * Allocate NULL-terminated string buffer.
-     */
-    static inline Type* stStrAlloc(const size_t theSizeBytes) {
-        Type* aPtr = stMemAlloc<Type*>(theSizeBytes + sizeof(Type));
-        if(aPtr != NULL) {
-            // always NULL-terminate the string
-            aPtr[theSizeBytes / sizeof(Type)] = Type(0);
-        }
-        return aPtr;
-    }
-
-    /**
-     * Release string buffer and nullify the pointer.
-     */
-    static inline void stStrFree(Type*& thePtr) {
-        stMemFree(thePtr);
-        thePtr = NULL;
-    }
-
-    /**
-     * Optimized copy.
-     * Provides bytes interface to avoid incorrect pointer arithmetics.
-     */
-    static inline void stStrCopy(stUByte_t*       theStrDst,
-                                 const stUByte_t* theStrSrc,
-                                 const size_t     theSizeBytes) {
-        stMemCpy(theStrDst, theStrSrc, theSizeBytes);
-    }
-
-    /**
-     * Compare two Unicode strings per-byte.
-     */
-    static inline bool stStrAreEqual(const Type*  theString1,
-                                     const size_t theSizeBytes1,
-                                     const Type*  theString2,
-                                     const size_t theSizeBytes2) {
-        return (theSizeBytes1 == theSizeBytes2)
-            && stAreEqual(theString1, theString2, theSizeBytes1);
-    }
-
-    /**
-     * Simple parser for '%XX' encoded character.
-     */
-    static int hexPairValue(const Type* theCode);
-
-    /**
-     * Function process conversion URL to UTF-8 string.
-     * @param srcUrl (const Type* ) - source URL (INPUT);
-     * @param dstUtf8 (stUtf8_t* ) - buffer for decoded string (OUTPUT);
-     * @return (size_t ) - converted string length.
-     */
-    static size_t urlDecode(const Type* theSrcUrl,
-                            stUtf8_t*   theOut);
-
-        private: //!< private fields
-
-    Type*  myString; //!< string buffer
-    size_t mySize;   //!< buffer size in bytes, excluding NULL-termination symbol
-    size_t myLength; //!< length of the string in Unicode symbols (cached value, excluding NULL-termination symbol)
 
         public:
 
@@ -125,16 +88,16 @@ class StStringUnicode {
     /**
      * Retrieve Unicode symbol at specified position.
      * Warning! This is a slow access. Iterator should be used for consecutive parsing.
-     * @param theCharIndex (const size_t ) - the index of the symbol, should be lesser then getLength();
-     * @return the Unicode symbol value.
+     * @param theCharIndex the index of the symbol, should be lesser then getLength()
+     * @return the Unicode symbol value
      */
     stUtf32_t getChar(const size_t theCharIndex) const;
 
     /**
      * Retrieve string buffer at specified position.
      * Warning! This is a slow access. Iterator should be used for consecutive parsing.
-     * @param theCharIndex (const size_t ) - the index of the symbol, should be lesser then getLength();
-     * @return the pointer to the symbol.
+     * @param theCharIndex the index of the symbol, should be lesser then getLength()
+     * @return the pointer to the symbol (position in the string)
      */
     const Type* getCharBuffer(const size_t theCharIndex) const;
 
@@ -153,46 +116,51 @@ class StStringUnicode {
 
     /**
      * Copy constructor.
-     * @param theCopy (const StStringUnicode& ) - string to copy.
+     * @param theCopy string to copy
      */
     StStringUnicode(const StStringUnicode& theCopy);
 
     /**
+     * Copy constructor.
+     */
+    StStringUnicode(const StConstStringUnicode<Type>& theCopy);
+
+    /**
      * Copy constructor from NULL-terminated UTF-8 string.
-     * @param theCopy (const char* ) - NULL-terminated UTF-8 string to copy;
-     * @param theLength (const size_t ) - the length limit in Unicode symbols (NOT bytes!).
+     * @param theCopy   NULL-terminated UTF-8 string to copy
+     * @param theLength the length limit in Unicode symbols (NOT bytes!)
      */
     StStringUnicode(const char*  theCopyUtf8,
                     const size_t theLength = size_t(-1));
 
     /**
      * Copy constructor from NULL-terminated UTF-16 string.
-     * @param theCopy (const stUtf16_t* ) - NULL-terminated UTF-16 string to copy;
-     * @param theLength (const size_t ) - the length limit in Unicode symbols (NOT bytes!).
+     * @param theCopy   NULL-terminated UTF-16 string to copy
+     * @param theLength the length limit in Unicode symbols (NOT bytes!)
      */
     StStringUnicode(const stUtf16_t* theCopyUtf16,
                     const size_t     theLength = size_t(-1));
 
     /**
      * Copy constructor from NULL-terminated UTF-32 string.
-     * @param theCopy (const stUtf32_t* ) - NULL-terminated UTF-32 string to copy;
-     * @param theLength (const size_t ) - the length limit in Unicode symbols (NOT bytes!).
+     * @param theCopy   NULL-terminated UTF-32 string to copy
+     * @param theLength the length limit in Unicode symbols (NOT bytes!)
      */
     StStringUnicode(const stUtf32_t* theCopyUtf32,
                     const size_t     theLength = size_t(-1));
 
     /**
      * Copy constructor from NULL-terminated wide UTF string.
-     * @param theCopy (const stUtfWide_t* ) - NULL-terminated wide UTF string to copy;
-     * @param theLength (const size_t ) - the length limit in Unicode symbols (NOT bytes!).
+     * @param theCopy   NULL-terminated wide UTF string to copy
+     * @param theLength the length limit in Unicode symbols (NOT bytes!)
      */
     StStringUnicode(const stUtfWide_t* theCopyUtfWide,
                     const size_t       theLength = size_t(-1));
 
     /**
      * Copy from NULL-terminated Unicode string.
-     * @param theStringUtf (const TypeFrom* ) - NULL-terminated Unicode string;
-     * @param theLength (const size_t ) - the length limit in Unicode symbols.
+     * @param theStringUtf NULL-terminated Unicode string
+     * @param theLength    the length limit in Unicode symbols
      */
     template <typename TypeFrom>
     void fromUnicode(const TypeFrom* theStringUtf,
@@ -201,15 +169,15 @@ class StStringUnicode {
     /**
      * Copy from NULL-terminated multibyte string in system locale.
      * You should avoid this function unless extreme necessity.
-     * @param theStringUtf (const TypeFrom* ) - NULL-terminated multibyte string;
-     * @param theLength (const size_t ) - the length limit in Unicode symbols.
+     * @param theStringUtf NULL-terminated multibyte string
+     * @param theLength    the length limit in Unicode symbols
      */
     void fromLocale(const char*  theString,
                     const size_t theLength = size_t(-1));
 
     /**
      * Convert URL string (with %38%20 codes) to normal Unicode string.
-     * @param theUrl (const StStringUnicode& ) - URL.
+     * @param theUrl the URL
      */
     inline void fromUrl(const StStringUnicode& theUrl) {
         size_t aSizeUtf8, aLengthUtf8;
@@ -222,37 +190,37 @@ class StStringUnicode {
 
     /**
      * Constructor from one symbol.
-     * @param theChar (const char ) - char to copy.
+     * @param theChar character to copy
      */
     StStringUnicode(const char theChar);
 
     /**
      * Create string from integer.
-     * @param (const int32_t ) theInt32.
+     * @param theInt32 integer value
      */
     StStringUnicode(const int32_t  theInt32);
 
     /**
      * Create string from integer.
-     * @param (const uint32_t ) theUInt32.
+     * @param theUInt32 integer value
      */
     StStringUnicode(const uint32_t theUInt32);
 
     /**
      * Create string from integer.
-     * @param (const int64_t ) theInt64.
+     * @param theInt64 integer value
      */
     StStringUnicode(const int64_t  theInt64);
 
     /**
      * Create string from integer.
-     * @param (const uint64_t ) theUInt64.
+     * @param theUInt64 integer value
      */
     StStringUnicode(const uint64_t theUInt64);
 
     /**
      * Create string from double.
-     * @param (const double ) theFloat.
+     * @param theFloat float number
      */
     StStringUnicode(const double   theFloat);
 
@@ -278,9 +246,9 @@ class StStringUnicode {
 
     /**
      * Returns the substring.
-     * @param theStart (const size_t ) - start index (inclusive) of subString;
-     * @param theEnd   (size_t )       - end index (exclusive) of subString;
-     * @return the substring.
+     * @param theStart start index (inclusive) of subString
+     * @param theEnd   end index (exclusive) of subString
+     * @return the substring
      */
     StStringUnicode subString(const size_t theStart,
                               const size_t theEnd) const;
@@ -292,12 +260,20 @@ class StStringUnicode {
     bool isEndsWithIgnoreCase(const StStringUnicode& theEndString) const;
 
     /**
-     * Return NULL-terminated Unicode string.
+     * Returns NULL-terminated Unicode string.
      * Should not be modifed or deleted!
-     * @return (const Type* ) pointer to string.
+     * @return pointer to the string
      */
     inline const Type* toCString() const {
         return myString;
+    }
+
+    /**
+     * Cast this string to constant string structure
+     * for interconnection with methods taking .
+     */
+    const StConstStringUnicode<Type>& toConstString() const {
+        return *static_cast< StConstStringUnicode<Type>* >(this);
     }
 
     /**
@@ -323,9 +299,9 @@ class StStringUnicode {
     /**
      * Converts the string into multibyte string.
      * You should avoid this function unless extreme necessity.
-     * @param theBuffer (char* ) - output buffer;
-     * @param theSizeBytes (const int ) - buffer size in bytes;
-     * @return true on success.
+     * @param theBuffer    output buffer
+     * @param theSizeBytes buffer size in bytes
+     * @return true on success
      */
     bool toLocale(char*     theBuffer,
                   const int theSizeBytes) const;
@@ -437,12 +413,92 @@ class StStringUnicode {
     bool operator>=(const StStringUnicode& theCompare) const;
     bool operator<=(const StStringUnicode& theCompare) const;
 
+        private: //!< low-level methods
+
+    /**
+     * Compute advance for specified string.
+     * @param theStringUtf  [in] pointer to the NULL-terminated Unicode string
+     * @param theLengthMax  [in] length limit (to cut the string), set to -1 to compute up to NULL-termination symbol
+     * @param theSizeBytes [out] advance in bytes
+     * @param theLength    [out] string length
+     */
+    template<typename TypeFrom>
+    static void strGetAdvance(const TypeFrom* theStringUtf,
+                              const size_t    theLengthMax,
+                              size_t&         theSizeBytes,
+                              size_t&         theLength);
+
+    /**
+     * Allocate NULL-terminated string buffer.
+     */
+    static inline Type* stStrAlloc(const size_t theSizeBytes) {
+        Type* aPtr = stMemAlloc<Type*>(theSizeBytes + sizeof(Type));
+        if(aPtr != NULL) {
+            // always NULL-terminate the string
+            aPtr[theSizeBytes / sizeof(Type)] = Type(0);
+        }
+        return aPtr;
+    }
+
+    /**
+     * Release string buffer and nullify the pointer.
+     */
+    static inline void stStrFree(Type*& thePtr) {
+        stMemFree(thePtr);
+        thePtr = NULL;
+    }
+
+    /**
+     * Optimized copy.
+     * Provides bytes interface to avoid incorrect pointer arithmetics.
+     */
+    static inline void stStrCopy(stUByte_t*       theStrDst,
+                                 const stUByte_t* theStrSrc,
+                                 const size_t     theSizeBytes) {
+        stMemCpy(theStrDst, theStrSrc, theSizeBytes);
+    }
+
+    /**
+     * Compare two Unicode strings per-byte.
+     */
+    static inline bool stStrAreEqual(const Type*  theString1,
+                                     const size_t theSizeBytes1,
+                                     const Type*  theString2,
+                                     const size_t theSizeBytes2) {
+        return (theSizeBytes1 == theSizeBytes2)
+            && stAreEqual(theString1, theString2, theSizeBytes1);
+    }
+
+    /**
+     * Simple parser for '%XX' encoded character.
+     */
+    static int hexPairValue(const Type* theCode);
+
+    /**
+     * Function process conversion URL to UTF-8 string.
+     * @param theSrcUrl [IN]  source URL
+     * @param theOut    [OUT] buffer for decoded string
+     * @return converted string length
+     */
+    static size_t urlDecode(const Type* theSrcUrl,
+                            stUtf8_t*   theOut);
+
+        private: //!< private fields, should start from StConstStringUnicode fields!
+
+    Type*  myString; //!< string buffer
+    size_t mySize;   //!< buffer size in bytes, excluding NULL-termination symbol
+    size_t myLength; //!< length of the string in Unicode symbols (cached value, excluding NULL-termination symbol)
+
 };
 
 typedef StStringUnicode<stUtf8_t>    StStringUtf8;
 typedef StStringUnicode<stUtf16_t>   StStringUtf16;
 typedef StStringUnicode<stUtf32_t>   StStringUtf32;
 typedef StStringUnicode<stUtfWide_t> StStringUtfWide;
+
+// make sure StStringUnicode could be casted to StConstStringUnicode
+//static_assert(std::is_standard_layout<StStringUtf8>::value,
+//              "StStringUtf8 is not standard layout class!");
 
 // template implementation (inline methods)
 #include <StStrings/StStringUnicode.inl>
