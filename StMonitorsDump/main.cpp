@@ -257,7 +257,9 @@ int main(int , char** ) { // force console output
         return 0;
     }
 
-    StString welcomeMessage = StString("StMonitorsDump ") + StVersionInfo::getSDKVersionString() + " by Kirill Gavrilov (kirill@sview.ru)\n\n";
+    StString welcomeMessage = StString("StMonitorsDump ")
+                            + StVersionInfo::getSDKVersionString()
+                            + " by Kirill Gavrilov (kirill@sview.ru)\n\n";
     st::cout << st::COLOR_FOR_GREEN << welcomeMessage << st::COLOR_FOR_WHITE;
     StString dumpStr = dump();
     dumpStr += '\n';
@@ -266,7 +268,13 @@ int main(int , char** ) { // force console output
     StSearchMonitors::listEDID(anEdids);
     for(size_t anIter = 0; anIter < anEdids.size(); ++anIter) {
         StEDIDParser& anEdid = anEdids[anIter];
-        dumpStr += StString("== EDID data for Monitor with PnPId='") + anEdid.getPnPId() + "'==\n";
+        dumpStr += StString("== Monitor ") + anEdid.getPnPId() + " ============================\n";
+        dumpStr += StString("== Name:       ") + anEdid.getName() + "\n";
+        dumpStr += StString("== Year/Week:  ") + anEdid.getYear() + "/" + anEdid.getWeek() + "\n";
+        dumpStr += StString("== Gamma:      ") + anEdid.getGamma() + "\n";
+        dumpStr += StString("== Stereo:     ") + anEdid.getStereoString() + "\n";
+        dumpStr += StString("== Dimensions: ") + anEdid.getWidthMM() + " X " + anEdid.getHeightMM() + " mm\n";
+        dumpStr += StString("================= EDID data ===================\n");
         dumpStr += formatHex(anEdid.getData(), 128);
         dumpStr += StString("===============================================\n");
 

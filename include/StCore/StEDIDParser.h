@@ -22,7 +22,7 @@
 #include <StStrings/StString.h>
 
 /**
- * EDID parser class, version 1.x.
+ * EDID parser class, for EDID version 1.x.
  */
 class StEDIDParser {
 
@@ -47,7 +47,7 @@ class StEDIDParser {
 
     /**
      * Initialize the parser.
-     * @param theData (const stUByte_t* ) - the data should be 128 bytes long.
+     * @param theData pointer to EDID data (should be 128 bytes long)
      */
     ST_CPPEXPORT StEDIDParser(const stUByte_t* theData);
 
@@ -55,6 +55,10 @@ class StEDIDParser {
      * Copy constructor.
      */
     ST_CPPEXPORT StEDIDParser(const StEDIDParser& theCopy);
+
+    /**
+     * Copy operator.
+     */
     ST_CPPEXPORT const StEDIDParser& operator=(const StEDIDParser& theCopy);
 
     /**
@@ -62,18 +66,27 @@ class StEDIDParser {
      */
     ST_CPPEXPORT void clear();
 
+    /**
+     * Destructor
+     */
     ST_CPPEXPORT ~StEDIDParser();
 
-    const stUByte_t* getData() const {
+    /**
+     * @return pointer to EDID data
+     */
+    ST_LOCAL const stUByte_t* getData() const {
         return myData;
     }
 
     /**
      * Initialize the parser.
-     * @param theData (const stUByte_t* ) - the data should be 128 bytes long.
+     * @param theData pointer to EDID data (should be 128 bytes long)
      */
     ST_CPPEXPORT void init(const stUByte_t* theData);
 
+    /**
+     * @return true if given EDID data has valid header of EDID 1.x.
+     */
     ST_CPPEXPORT bool isFirstVersion() const;
 
     /**
@@ -86,10 +99,7 @@ class StEDIDParser {
      */
     ST_CPPEXPORT void validate();
 
-        public:
-
-    // retrieve information from EDID
-    // you should check isValid() before!!!
+        public: //! @name method to retrieve information from EDID (isValid() should be called before!)
 
     /**
      * Returns EDID version number.
@@ -113,10 +123,13 @@ class StEDIDParser {
      */
     ST_CPPEXPORT unsigned int getWeek() const;
 
+    /**
+     * @return display gamma
+     */
     ST_CPPEXPORT double getGamma() const;
 
     /**
-     * Returns the model name.
+     * @return the model name
      */
     ST_CPPEXPORT StString getName() const;
 
@@ -125,6 +138,9 @@ class StEDIDParser {
      */
     ST_CPPEXPORT StString getPnPId() const;
 
+    /**
+     * Setup new PnPID in EDID data.
+     */
     ST_CPPEXPORT void setPnPId(const StString& thePnPIdString);
 
     /**
@@ -132,6 +148,18 @@ class StEDIDParser {
      */
     ST_CPPEXPORT stEdid1Stereo_t getStereoFlag() const;
     ST_CPPEXPORT StString getStereoString() const;
+
+    /**
+     * @return display width in MM
+     */
+    ST_CPPEXPORT double getWidthMM() const;
+
+    /**
+     * @return display height in MM
+     */
+    ST_CPPEXPORT double getHeightMM() const;
+
+        public:
 
     bool operator==(const StEDIDParser& theCompare) const {
         if(&theCompare == this) {
@@ -172,9 +200,9 @@ class StEDIDParser {
         return getPnPId() <= theCompare.getPnPId();
     }
 
-        private:
+        private: //! @name private fields
 
-    stUByte_t* myData;
+    stUByte_t* myData; //!< EDID data (dynamically allocated)
 
 };
 

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -13,13 +13,22 @@
     #include <stdio.h>
 #endif
 
-enum {
-    ST_EDID1_DESC1 = 54,
-    ST_EDID1_DESC2 = 72,
-    ST_EDID1_DESC3 = 90,
-    ST_EDID1_DESC4 = 108,
-    ST_EDID1_DESC1_PIXEL_CLOCK      = ST_EDID1_DESC1 + 0,
-    ST_EDID1_DESC1_SIGNAL_INTERFACE = ST_EDID1_DESC1 + 17,
+namespace {
+
+    enum {
+        ST_EDID1_DESC1 = 54,
+        ST_EDID1_DESC2 = 72,
+        ST_EDID1_DESC3 = 90,
+        ST_EDID1_DESC4 = 108,
+        ST_EDID1_DESC1_PIXEL_CLOCK      = ST_EDID1_DESC1 + 0,
+        ST_EDID1_DESC1_WIDTH_MM         = ST_EDID1_DESC1 + 12,
+        ST_EDID1_DESC1_HEIGHT_MM        = ST_EDID1_DESC1 + 13,
+        ST_EDID1_DESC1_SIZE_MM          = ST_EDID1_DESC1 + 14,
+        ST_EDID1_DESC1_SIGNAL_INTERFACE = ST_EDID1_DESC1 + 17,
+    };
+
+    static const stUByte_t EDID_V1_HEADER[] = {0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00};
+
 };
 
 StEDIDParser::StEDIDParser()
@@ -62,7 +71,6 @@ void StEDIDParser::init(const stUByte_t* theData) {
 }
 
 bool StEDIDParser::isFirstVersion() const {
-    static const stUByte_t EDID_V1_HEADER[] = {0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00};
     return stAreEqual(myData, EDID_V1_HEADER, sizeof(EDID_V1_HEADER));
 }
 
@@ -219,4 +227,20 @@ StString StEDIDParser::getStereoString() const {
         default:
             return "No stereo";
     }
+}
+
+double StEDIDParser::getWidthMM() const {
+    if(myData == NULL) {
+        return 0.0;
+    }
+
+    return double(((myData[ST_EDID1_DESC1_SIZE_MM] & 0xF0) << 4) + myData[ST_EDID1_DESC1_WIDTH_MM]);
+}
+
+double StEDIDParser::getHeightMM() const {
+    if(myData == NULL) {
+        return 0.0;
+    }
+
+    return double(((myData[ST_EDID1_DESC1_SIZE_MM] & 0x0F) << 8) + myData[ST_EDID1_DESC1_HEIGHT_MM]);
 }
