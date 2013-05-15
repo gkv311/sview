@@ -147,9 +147,9 @@ namespace {
                 if(aParam.isStartsWith(ST_COCOA_IS_THREADED)) {
                     StString aVal = aParam.subString(ST_COCOA_IS_THREADED.getLength() + 1,
                                                      aParam.getLength());
-                    myIsThreaded = !aVal.isEqualsIgnoreCase("no")
-                                && !aVal.isEqualsIgnoreCase("off")
-                                && !aVal.isEqualsIgnoreCase("false");
+                    myIsThreaded = !aVal.isEqualsIgnoreCase(stCString("no"))
+                                && !aVal.isEqualsIgnoreCase(stCString("off"))
+                                && !aVal.isEqualsIgnoreCase(stCString("false"));
                     --anArgsNb;
                 } else if(aParam.isStartsWith(ST_COCOA_PSN)) {
                     --anArgsNb;
