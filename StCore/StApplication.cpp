@@ -27,9 +27,9 @@
 #include <StVersion.h>
 
 namespace {
-    const char ST_SETTING_RENDERER_AUTO[] = "rendererPluginAuto";
-    const char ST_SETTING_RENDERER[]      = "rendererPlugin";
-    const char ST_SETTING_AUTO_VALUE[]    = "Auto";
+    static const StCString ST_SETTING_RENDERER_AUTO = stCString("rendererPluginAuto");
+    static const StCString ST_SETTING_RENDERER      = stCString("rendererPlugin");
+    static const StCString ST_SETTING_AUTO_VALUE    = stCString("Auto");
 };
 
 void StApplication::doChangeDevice(const int32_t theValue) {

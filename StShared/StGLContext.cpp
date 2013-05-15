@@ -1040,22 +1040,22 @@ bool StGLContext::stglInit() {
     // (FrameBuffer with non-power-of-two size corrupted / slowdown)
     // are GLSL 1.1 limited (and OpenGL2.0).
     // SURE - this is NOT rootcouse of the problem, but just some detection mechanism
-    const StString aGLSL_old("1.10");
+    const StCString aGLSL_old  = stCString("1.10");
     // latest drivers for GeForce FX return GLSL1.2 vc OpenGL2.1 support level
     // but slowdown rendering - so we detect them here.
-    const StString aGeForceFX("GeForce FX");
-    const StString aGLSLVersion((const char* )core11fwd->glGetString(GL_SHADING_LANGUAGE_VERSION));
-    const StString aGlRenderer ((const char* )core11fwd->glGetString(GL_RENDERER));
+    const StCString aGeForceFX = stCString("GeForce FX");
+    const StString  aGLSLVersion((const char* )core11fwd->glGetString(GL_SHADING_LANGUAGE_VERSION));
+    const StString  aGlRenderer ((const char* )core11fwd->glGetString(GL_RENDERER));
     myIsRectFboSupported = !aGLSLVersion.isContains(aGLSL_old) && !aGlRenderer.isContains(aGeForceFX);
 
-    if(aGlRenderer.isContains("GeForce")) {
+    if(aGlRenderer.isContains(stCString("GeForce"))) {
         myGpuName = GPU_GEFORCE;
-    } else if(aGlRenderer.isContains("Quadro")) {
+    } else if(aGlRenderer.isContains(stCString("Quadro"))) {
         myGpuName = GPU_QUADRO;
-    } else if(aGlRenderer.isContains("Radeon")
-           || aGlRenderer.isContains("RADEON")) {
+    } else if(aGlRenderer.isContains(stCString("Radeon"))
+           || aGlRenderer.isContains(stCString("RADEON"))) {
         myGpuName = GPU_RADEON;
-    } else if(aGlRenderer.isContains("FireGL")) {
+    } else if(aGlRenderer.isContains(stCString("FireGL"))) {
         myGpuName = GPU_FIREGL;
     } else {
         myGpuName = GPU_UNKNOWN;

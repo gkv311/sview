@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -9,14 +9,14 @@
 #include <StGLStereo/StFormatEnum.h>
 
 namespace {
-    static const char ST_V_SRC_AUTODETECT_STRING[]    = "auto";
-    static const char ST_V_SRC_SIDE_BY_SIDE_STRING[]  = "crossEyed";
-    static const char ST_V_SRC_PARALLEL_PAIR_STRING[] = "parallelPair";
-    static const char ST_V_SRC_OVER_UNDER_RL_STRING[] = "overUnderRL";
-    static const char ST_V_SRC_OVER_UNDER_LR_STRING[] = "overUnderLR";
-    static const char ST_V_SRC_ROW_INTERLACE_STRING[] = "interlaceRow";
-    static const char ST_V_SRC_PAGE_FLIP_STRING[]     = "frameSequential";
-    static const char ST_V_SRC_MONO_STRING[]          = "mono";
+    static const StCString ST_V_SRC_AUTODETECT_STRING    = stCString("auto");
+    static const StCString ST_V_SRC_SIDE_BY_SIDE_STRING  = stCString("crossEyed");
+    static const StCString ST_V_SRC_PARALLEL_PAIR_STRING = stCString("parallelPair");
+    static const StCString ST_V_SRC_OVER_UNDER_RL_STRING = stCString("overUnderRL");
+    static const StCString ST_V_SRC_OVER_UNDER_LR_STRING = stCString("overUnderLR");
+    static const StCString ST_V_SRC_ROW_INTERLACE_STRING = stCString("interlaceRow");
+    static const StCString ST_V_SRC_PAGE_FLIP_STRING     = stCString("frameSequential");
+    static const StCString ST_V_SRC_MONO_STRING          = stCString("mono");
 };
 
 StString st::formatToString(StFormatEnum theFormatEnum) {

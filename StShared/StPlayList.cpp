@@ -631,7 +631,7 @@ void StPlayList::open(const StString& thePath) {
         }
 
         // parse m3u playlist
-        if(anExt.isEqualsIgnoreCase("m3u")) {
+        if(anExt.isEqualsIgnoreCase(stCString("m3u"))) {
             StRawFile aRawFile(thePath);
             if(aRawFile.readFile()) {
                 char* anIter = (char* )aRawFile.getBuffer();

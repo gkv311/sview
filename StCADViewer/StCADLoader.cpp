@@ -167,18 +167,18 @@ StHandle<StGLMesh> StCADLoader::loadOBJ(const StString& theFileToLoadPath) {
 }
 
 bool StCADLoader::loadModel(const StHandle<StFileNode>& theSource) {
-    StMIME stMIMEType = theSource->getMIME();
-    StString aFileToLoadPath = theSource->getPath();
-    StString anExt = !stMIMEType.isEmpty() ? stMIMEType.getExtension() : StFileNode::getExtension(aFileToLoadPath);
+    const StMIME stMIMEType = theSource->getMIME();
+    const StString aFileToLoadPath = theSource->getPath();
+    const StString anExt = !stMIMEType.isEmpty() ? stMIMEType.getExtension() : StFileNode::getExtension(aFileToLoadPath);
 
     StHandle<StGLMesh> aMesh;
 #ifdef ST_HAVE_OCCT
     TopoDS_Shape aShape;
-    if(anExt.isEqualsIgnoreCase(ST_IGS_EXT) || anExt.isEqualsIgnoreCase(ST_IGES_EXT)) {
+    if(anExt.isEqualsIgnoreCase(stCString(ST_IGS_EXT)) || anExt.isEqualsIgnoreCase(stCString(ST_IGES_EXT))) {
         aShape = loadIGES(aFileToLoadPath);
-    } else if(anExt.isEqualsIgnoreCase(ST_STP_EXT) || anExt.isEqualsIgnoreCase(ST_STEP_EXT)) {
+    } else if(anExt.isEqualsIgnoreCase(stCString(ST_STP_EXT)) || anExt.isEqualsIgnoreCase(stCString(ST_STEP_EXT))) {
         aShape = loadSTEP(aFileToLoadPath);
-    } else if(anExt.isEqualsIgnoreCase(ST_BREP_EXT) || anExt.isEqualsIgnoreCase(ST_RLE_EXT)) {
+    } else if(anExt.isEqualsIgnoreCase(stCString(ST_BREP_EXT)) || anExt.isEqualsIgnoreCase(stCString(ST_RLE_EXT))) {
         StString aFilePath = StFileNode::getCompatibleName(aFileToLoadPath);
         BRep_Builder aBuilder;
         if(!BRepTools::Read(aShape, aFilePath.toCString(), aBuilder)) {
@@ -188,7 +188,7 @@ bool StCADLoader::loadModel(const StHandle<StFileNode>& theSource) {
         }
     } else
 #endif
-    if(anExt.isEqualsIgnoreCase(ST_OBJ_EXT)) {
+    if(anExt.isEqualsIgnoreCase(stCString(ST_OBJ_EXT))) {
         ///signals.onError(formatError(aFileToLoadPath, "OBJ import not yet implemented!"));
         aMesh = StCADLoader::loadOBJ(aFileToLoadPath);
     } else {

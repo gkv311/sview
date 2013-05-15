@@ -142,7 +142,7 @@ StBrowserPlugin::StBrowserPlugin(NSPluginCreateData* theCreateDataStruct)
         StArgument stArg(aParamName, aParamValue);
         aDrawerArgs.add(stArg);
 
-        if(aParamName.isEqualsIgnoreCase("data-prv-url")) {
+        if(aParamName.isEqualsIgnoreCase(stCString("data-prv-url"))) {
             myPreviewUrl = aParamValue;
             myPreviewUrlUtf8.fromUrl(aParamValue);
         }
@@ -151,9 +151,9 @@ StBrowserPlugin::StBrowserPlugin(NSPluginCreateData* theCreateDataStruct)
     StMIME stMIME(StString(theCreateDataStruct->type), ST_ASTERIX, ST_ASTERIX);
     myOpenInfo.setMIME(stMIME);
 
-    const StString ST_SETTING_SRCFORMAT    = "srcFormat";
-    const StString ST_SETTING_COMPRESS     = "toCompress";
-    const StString ST_SETTING_ESCAPENOQUIT = "escNoQuit";
+    const StString ST_SETTING_SRCFORMAT    = stCString("srcFormat");
+    const StString ST_SETTING_COMPRESS     = stCString("toCompress");
+    const StString ST_SETTING_ESCAPENOQUIT = stCString("escNoQuit");
     const StMIME ST_MIME_X_JPS("image/x-jps", ST_ASTERIX, ST_ASTERIX);
     const StMIME ST_MIME_JPS  ("image/jps",   ST_ASTERIX, ST_ASTERIX);
     const StMIME ST_MIME_X_PNS("image/x-pns", ST_ASTERIX, ST_ASTERIX);

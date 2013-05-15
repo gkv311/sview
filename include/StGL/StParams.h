@@ -36,7 +36,7 @@ class StStereoParams {
     }
 
     static ViewMode GET_VIEW_MODE_FROM_STRING(const StString& theViewModeStr) {
-        if(theViewModeStr.isStartsWithIgnoreCase("sphere")) {
+        if(theViewModeStr.isStartsWithIgnoreCase(stCString("sphere"))) {
             return PANORAMA_SPHERE;
         } else {
             return FLAT_IMAGE;

@@ -208,7 +208,7 @@ bool StExifDir::readDirectory(unsigned char* theDirStart, unsigned char* theOffs
                 unsigned char* anOffsetBase = theOffsetBase;
                 size_t anOffsetLimit = theExifLength;
                 StHandle<StExifDir> aSubDir;
-                if(myCameraMaker == StString("FUJIFILM")) {
+                if(myCameraMaker.isEquals(stCString("FUJIFILM"))) {
                     // the Fujifilm maker note appears to be in little endian byte order regardless of the rest of the file
                     aSubDir = new StExifDir(false, true);
                     // it seems that Fujifilm maker notes start with an ID string,
@@ -220,14 +220,14 @@ bool StExifDir::readDirectory(unsigned char* theDirStart, unsigned char* theOffs
                         anOffsetBase  = anEntry.myValuePtr;
                         anOffsetLimit = theOffsetBase + theExifLength - anOffsetBase;
                     }
-                } else if(myCameraMaker.isStartsWith(StString("OLYMP"))) {
+                } else if(myCameraMaker.isStartsWith(stCString("OLYMP"))) {
                     aSubDir = new StExifDir(isFileBE(), true);
                     // it seems that Olympus maker notes start with an ID string
                     if(stAreEqual(anEntry.myValuePtr, "OLYMP", 5)) {
                         //ST_DEBUG_LOG("OLYMP string ID found");
                         aSubdirStart += 8; // here is really 8 bytes offset!
                     }
-                } else if(myCameraMaker.isStartsWith(StString("Canon"))) {
+                } else if(myCameraMaker.isStartsWith(stCString("Canon"))) {
                     // it seems that Canon maker notes is always little endian
                     aSubDir = new StExifDir(false, true);
                 }
@@ -253,7 +253,7 @@ bool StExifDir::readDirectory(unsigned char* theDirStart, unsigned char* theOffs
     // there's also a potential link to another directory at the end of each
     // directory.  this has got to be the result of a committee!
     if(getEntryAddress(anEntriesNb) + 4 <= theOffsetBase + theExifLength) {
-        size_t anOffset = size_t(get32u(myStartPtr + 2 + anEntriesNb * 12));
+        const size_t anOffset = size_t(get32u(myStartPtr + 2 + anEntriesNb * 12));
         if(anOffset > 0) {
             unsigned char* aSubdirStart = theOffsetBase + anOffset;
             if(aSubdirStart > theOffsetBase + theExifLength || aSubdirStart < theOffsetBase) {

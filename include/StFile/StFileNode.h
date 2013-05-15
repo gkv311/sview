@@ -120,7 +120,7 @@ class StFileNode : public StNode {
      * @return true if extended-length NT path syntax detected.
      */
     static bool isNtExtendedPath(const StString& thePath) {
-        return thePath.isStartsWith("\\\\?\\");
+        return thePath.isStartsWith(stCString("\\\\?\\"));
     }
 
     /**
@@ -130,7 +130,7 @@ class StFileNode : public StNode {
      * @return true if UNC path syntax detected.
      */
     static bool isUncPath(const StString& thePath) {
-        return thePath.isStartsWith("\\\\");
+        return thePath.isStartsWith(stCString("\\\\"));
     }
 
     /**
@@ -140,7 +140,7 @@ class StFileNode : public StNode {
      * @return true if extended-length UNC path syntax detected.
      */
     static bool isUncExtendedPath(const StString& thePath) {
-        return thePath.isStartsWith("\\\\?\\UNC\\");
+        return thePath.isStartsWith(stCString("\\\\?\\UNC\\"));
     }
 
     /**

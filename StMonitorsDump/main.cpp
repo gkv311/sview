@@ -242,14 +242,14 @@ int main(int , char** ) { // force console output
         }
 
         if(!anOutEdidFilename.isEmpty()) {
-            if(anOutEdidFilename.isEndsWithIgnoreCase(".bin")) {
+            if(anOutEdidFilename.isEndsWithIgnoreCase(stCString(".bin"))) {
                 anOutEdidFilename = anOutEdidFilename.subString(0, anOutEdidFilename.getLength() - 4);
             }
             dumpEdid(anInputEdid, anOutEdidFilename + ".bin");
         }
 
         if(!anOutInfFilename.isEmpty()) {
-            if(anOutInfFilename.isEndsWithIgnoreCase(".inf")) {
+            if(anOutInfFilename.isEndsWithIgnoreCase(stCString(".inf"))) {
                 anOutInfFilename = anOutInfFilename.subString(0, anOutInfFilename.getLength() - 4);
             }
             genInf(anInputEdid, anOutInfFilename + ".inf");
@@ -283,13 +283,13 @@ int main(int , char** ) { // force console output
             anEdid.setPnPId(aPnPIdReplace);
         }
         if(!anOutEdidFilename.isEmpty()) {
-            if(anOutEdidFilename.isEndsWithIgnoreCase(".bin")) {
+            if(anOutEdidFilename.isEndsWithIgnoreCase(stCString(".bin"))) {
                 anOutEdidFilename = anOutEdidFilename.subString(0, anOutEdidFilename.getLength() - 4);
             }
             dumpEdid(anEdid, anOutEdidFilename + aSuffix + ".bin");
         }
         if(!anOutInfFilename.isEmpty()) {
-            if(anOutInfFilename.isEndsWithIgnoreCase(".inf")) {
+            if(anOutInfFilename.isEndsWithIgnoreCase(stCString(".inf"))) {
                 anOutInfFilename = anOutInfFilename.subString(0, anOutInfFilename.getLength() - 4);
             }
             genInf(anEdid, anOutInfFilename + aSuffix + ".inf");

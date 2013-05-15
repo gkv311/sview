@@ -278,7 +278,7 @@ StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
     int aSupportLevel = ST_DEVICE_SUPPORT_NONE;
     for(size_t aMonIter = 0; aMonIter < aMonitors.size(); ++aMonIter) {
         const StMonitor& aMon = aMonitors[aMonIter];
-        if(aMon.getPnPId().isStartsWith("OVR")) {
+        if(aMon.getPnPId().isStartsWith(stCString("OVR"))) {
             // Oculus Rift
             aSupportLevel = ST_DEVICE_SUPPORT_HIGHT;
             break;

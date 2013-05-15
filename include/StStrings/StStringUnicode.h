@@ -20,6 +20,99 @@
 template<typename Type>
 struct StConstStringUnicode {
 
+        public:
+
+    inline StUtfIterator<Type> iterator() const {
+        return StUtfIterator<Type>(this->String);
+    }
+
+    /**
+     * Returns the size of the buffer, excluding NULL-termination symbol
+     */
+    inline size_t getSize() const {
+        return this->Size;
+    }
+
+    /**
+     * Returns the length of the string in Unicode symbols.
+     */
+    inline size_t getLength() const {
+        return this->Length;
+    }
+
+    /**
+     * Retrieve Unicode symbol at specified position.
+     * Warning! This is a slow access. Iterator should be used for consecutive parsing.
+     * @param theCharIndex the index of the symbol, should be lesser then getLength()
+     * @return the Unicode symbol value
+     */
+    stUtf32_t getChar(const size_t theCharIndex) const;
+
+    /**
+     * Retrieve Unicode symbol at specified position.
+     * Warning! This is a slow access. Iterator should be used for consecutive parsing.
+     */
+    inline stUtf32_t operator[](const size_t theCharIndex) const {
+        return getChar(theCharIndex);
+    }
+
+    /**
+     * Returns NULL-terminated Unicode string.
+     * Should not be modifed or deleted!
+     * @return pointer to the string
+     */
+    inline const Type* toCString() const {
+        return this->String;
+    }
+
+    /**
+     * @return true if string is empty
+     */
+    inline bool isEmpty() const {
+        return this->String[0] == Type(0);
+    }
+
+    /**
+     * Compares this string with another one.
+     */
+    bool isEquals(const StConstStringUnicode& theCompare) const;
+
+    /**
+     * Compares this String to another String, ignoring case considerations.
+     */
+    bool isEqualsIgnoreCase(const StConstStringUnicode& theCompare) const;
+
+    bool isStartsWith(const StConstStringUnicode& theStartString) const;
+    bool isEndsWith  (const StConstStringUnicode& theEndString)   const;
+
+    bool isStartsWith(const Type theStartChar) const;
+    bool isEndsWith  (const Type theEndChar)   const;
+
+    /**
+     * Returns true if string contains requested Unicode symbol.
+     */
+    bool isContains(const stUtf32_t theSubChar) const;
+
+    /**
+     * Returns true if string contains requested substring.
+     */
+    bool isContains(const StConstStringUnicode& theSubString) const;
+
+        protected:
+
+    /**
+     * Compare two Unicode strings per-byte.
+     */
+    static inline bool stStrAreEqual(const Type*  theString1,
+                                     const size_t theSizeBytes1,
+                                     const Type*  theString2,
+                                     const size_t theSizeBytes2) {
+        return (theSizeBytes1 == theSizeBytes2)
+            && stAreEqual(theString1, theString2, theSizeBytes1);
+    }
+
+        public:
+
     const Type* String; //!< string buffer
     size_t      Size;   //!< buffer size in bytes, excluding NULL-termination symbol
     size_t      Length; //!< length of the string in Unicode symbols (cached value, excluding NULL-termination symbol)
@@ -65,32 +158,6 @@ class StStringUnicode : public StConstStringUnicode<Type> {
 
         public:
 
-    inline StUtfIterator<Type> iterator() const {
-        return StUtfIterator<Type>(this->String);
-    }
-
-    /**
-     * Returns the size of the buffer, excluding NULL-termination symbol
-     */
-    inline size_t getSize() const {
-        return this->Size;
-    }
-
-    /**
-     * Returns the length of the string in Unicode symbols.
-     */
-    inline size_t getLength() const {
-        return this->Length;
-    }
-
-    /**
-     * Retrieve Unicode symbol at specified position.
-     * Warning! This is a slow access. Iterator should be used for consecutive parsing.
-     * @param theCharIndex the index of the symbol, should be lesser then getLength()
-     * @return the Unicode symbol value
-     */
-    stUtf32_t getChar(const size_t theCharIndex) const;
-
     /**
      * Retrieve string buffer at specified position.
      * Warning! This is a slow access. Iterator should be used for consecutive parsing.
@@ -98,14 +165,6 @@ class StStringUnicode : public StConstStringUnicode<Type> {
      * @return the pointer to the symbol (position in the string)
      */
     const Type* getCharBuffer(const size_t theCharIndex) const;
-
-    /**
-     * Retrieve Unicode symbol at specified position.
-     * Warning! This is a slow access. Iterator should be used for consecutive parsing.
-     */
-    inline stUtf32_t operator[](const size_t theCharIndex) const {
-        return getChar(theCharIndex);
-    }
 
     /**
      * Initialize empty string.
@@ -233,16 +292,6 @@ class StStringUnicode : public StConstStringUnicode<Type> {
     ~StStringUnicode();
 
     /**
-     * Compares this string with another one.
-     */
-    bool isEquals(const StStringUnicode& theCompare) const;
-
-    /**
-     * Compares this String to another String, ignoring case considerations.
-     */
-    bool isEqualsIgnoreCase(const StStringUnicode& theCompare) const;
-
-    /**
      * Returns the substring.
      * @param theStart start index (inclusive) of subString
      * @param theEnd   end index (exclusive) of subString
@@ -250,21 +299,6 @@ class StStringUnicode : public StConstStringUnicode<Type> {
      */
     StStringUnicode subString(const size_t theStart,
                               const size_t theEnd) const;
-
-    bool isStartsWith(const StStringUnicode& theStartString) const;
-    bool isStartsWithIgnoreCase(const StStringUnicode& theStartString) const;
-
-    bool isEndsWith(const StStringUnicode& theEndString) const;
-    bool isEndsWithIgnoreCase(const StStringUnicode& theEndString) const;
-
-    /**
-     * Returns NULL-terminated Unicode string.
-     * Should not be modifed or deleted!
-     * @return pointer to the string
-     */
-    inline const Type* toCString() const {
-        return this->String;
-    }
 
     /**
      * Returns copy in UTF-8 format.
@@ -302,23 +336,6 @@ class StStringUnicode : public StConstStringUnicode<Type> {
     const StStringUnicode<stUtf8_t> toDump() const;
 
     /**
-     * Returns true if string contains requested Unicode symbol.
-     */
-    bool isContains(const stUtf32_t theSubChar) const;
-
-    /**
-     * Returns true if string contains requested substring.
-     */
-    bool isContains(const StStringUnicode& theSubString) const;
-
-    /**
-     * @return true if string is empty.
-     */
-    inline bool isEmpty() const {
-        return this->String[0] == Type(0);
-    }
-
-    /**
      * Zero string.
      */
     void clear();
@@ -330,9 +347,9 @@ class StStringUnicode : public StConstStringUnicode<Type> {
 
     /**
      * Split the string using delimiter char.
-     * @param theDelimeter (const stUtf32_t ) - delimiter char;
-     * @param theLimitNb   (const size_t )  - maximum split sections (when reached - trailing part will be in one string without parsing);
-     * @return the list of split strings.
+     * @param theDelimeter delimiter char
+     * @param theLimitNb   maximum split sections (when reached - trailing part will be in one string without parsing)
+     * @return the list of split strings
      */
     StHandle <StArrayList<StStringUnicode> > split(const stUtf32_t theDelimeter,
                                                    const size_t    theLimitNb = size_t(-1)) const;
@@ -347,6 +364,9 @@ class StStringUnicode : public StConstStringUnicode<Type> {
      */
     void replaceFast(const StStringUnicode<Type>& theSubString,
                      const StStringUnicode<Type>& theReplacer);
+
+    bool isStartsWithIgnoreCase(const StConstStringUnicode<Type>& theStartString) const;
+    bool isEndsWithIgnoreCase  (const StConstStringUnicode<Type>& theEndString)   const;
 
         public: //!< assign operators
 
@@ -395,7 +415,7 @@ class StStringUnicode : public StConstStringUnicode<Type> {
         public: //!< compare operators
 
     inline bool operator==(const StStringUnicode& theCompare) const {
-        return isEquals(theCompare);
+        return this->isEquals(theCompare);
     }
     bool operator!=(const StStringUnicode& theCompare) const;
     bool operator> (const StStringUnicode& theCompare) const;
@@ -454,17 +474,6 @@ class StStringUnicode : public StConstStringUnicode<Type> {
                                  const stUByte_t* theStrSrc,
                                  const size_t     theSizeBytes) {
         stMemCpy(theStrDst, theStrSrc, theSizeBytes);
-    }
-
-    /**
-     * Compare two Unicode strings per-byte.
-     */
-    static inline bool stStrAreEqual(const Type*  theString1,
-                                     const size_t theSizeBytes1,
-                                     const Type*  theString2,
-                                     const size_t theSizeBytes2) {
-        return (theSizeBytes1 == theSizeBytes2)
-            && stAreEqual(theString1, theString2, theSizeBytes1);
     }
 
     /**

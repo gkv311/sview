@@ -25,18 +25,18 @@ StImageFile::~StImageFile() {
 
 StImageFile::ImageClass StImageFile::imgLibFromString(const StString& thePreferred) {
     StImageFile::ImageClass aPreferred = ST_LIBAV;
-    if(thePreferred.isEqualsIgnoreCase("LibAV") ||
-       thePreferred.isEqualsIgnoreCase("FFmpeg") ||
-       thePreferred.isEqualsIgnoreCase("StLibAVImage")) {
+    if(thePreferred.isEqualsIgnoreCase(stCString("LibAV")) ||
+       thePreferred.isEqualsIgnoreCase(stCString("FFmpeg")) ||
+       thePreferred.isEqualsIgnoreCase(stCString("StLibAVImage"))) {
         aPreferred = ST_LIBAV;
-    } else if(thePreferred.isEqualsIgnoreCase("FreeImage") ||
-              thePreferred.isEqualsIgnoreCase("StFreeImage")) {
+    } else if(thePreferred.isEqualsIgnoreCase(stCString("FreeImage")) ||
+              thePreferred.isEqualsIgnoreCase(stCString("StFreeImage"))) {
         aPreferred = ST_FREEIMAGE;
-    } else if(thePreferred.isEqualsIgnoreCase("DevIL") ||
-              thePreferred.isEqualsIgnoreCase("StDevILImage")) {
+    } else if(thePreferred.isEqualsIgnoreCase(stCString("DevIL")) ||
+              thePreferred.isEqualsIgnoreCase(stCString("StDevILImage"))) {
         aPreferred = ST_DEVIL;
-    } else if(thePreferred.isEqualsIgnoreCase("WebP") ||
-              thePreferred.isEqualsIgnoreCase("StWebPImage")) {
+    } else if(thePreferred.isEqualsIgnoreCase(stCString("WebP")) ||
+              thePreferred.isEqualsIgnoreCase(stCString("StWebPImage"))) {
         aPreferred = ST_WEBP;
     }
     return aPreferred;
@@ -55,40 +55,40 @@ StString StImageFile::imgLibToString(const ImageClass thePreferred) {
 StImageFile::ImageType StImageFile::guessImageType(const StString& theFileName,
                                                    const StMIME&   theMIMEType) {
     StString anExt = !theMIMEType.isEmpty() ? theMIMEType.getExtension() : StFileNode::getExtension(theFileName);
-    if(anExt.isEqualsIgnoreCase("mpo")
-    || theMIMEType.getMIMEType() == StString("image/mpo")
-    || theMIMEType.getMIMEType() == StString("image/x-mpo")) {
+    if(anExt.isEqualsIgnoreCase(stCString("mpo"))
+    || theMIMEType.getMIMEType().isEquals(stCString("image/mpo"))
+    || theMIMEType.getMIMEType().isEquals(stCString("image/x-mpo"))) {
         return StImageFile::ST_TYPE_MPO;
-    } else if(anExt.isEqualsIgnoreCase("jps")
-           || theMIMEType.getMIMEType() == StString("image/jps")
-           || theMIMEType.getMIMEType() == StString("image/x-jps")) {
+    } else if(anExt.isEqualsIgnoreCase(stCString("jps"))
+           || theMIMEType.getMIMEType().isEquals(stCString("image/jps"))
+           || theMIMEType.getMIMEType().isEquals(stCString("image/x-jps"))) {
         return StImageFile::ST_TYPE_JPS;
-    } else if(anExt.isEqualsIgnoreCase("pns")
-           || theMIMEType.getMIMEType() == StString("image/pns")
-           || theMIMEType.getMIMEType() == StString("image/x-pns")) {
+    } else if(anExt.isEqualsIgnoreCase(stCString("pns"))
+           || theMIMEType.getMIMEType().isEquals(stCString("image/pns"))
+           || theMIMEType.getMIMEType().isEquals(stCString("image/x-pns"))) {
         return StImageFile::ST_TYPE_PNS;
-    } else if(anExt.isEqualsIgnoreCase("jpg")
-           || anExt.isEqualsIgnoreCase("jpeg")
-           || anExt.isEqualsIgnoreCase("jpe")
-           || theMIMEType.getMIMEType() == StString("image/jpg")
-           || theMIMEType.getMIMEType() == StString("image/jpeg")) {
+    } else if(anExt.isEqualsIgnoreCase(stCString("jpg"))
+           || anExt.isEqualsIgnoreCase(stCString("jpeg"))
+           || anExt.isEqualsIgnoreCase(stCString("jpe"))
+           || theMIMEType.getMIMEType().isEquals(stCString("image/jpg"))
+           || theMIMEType.getMIMEType().isEquals(stCString("image/jpeg"))) {
         return StImageFile::ST_TYPE_JPEG;
-    } else if(anExt.isEqualsIgnoreCase("png")
-           || theMIMEType.getMIMEType() == StString("image/png")) {
+    } else if(anExt.isEqualsIgnoreCase(stCString("png"))
+           || theMIMEType.getMIMEType().isEquals(stCString("image/png"))) {
         return StImageFile::ST_TYPE_PNG;
-    } else if(anExt.isEqualsIgnoreCase("exr")) {
+    } else if(anExt.isEqualsIgnoreCase(stCString("exr"))) {
         return StImageFile::ST_TYPE_EXR;
-    } else if(anExt.isEqualsIgnoreCase("psd")) {
+    } else if(anExt.isEqualsIgnoreCase(stCString("psd"))) {
         return StImageFile::ST_TYPE_PSD;
-    } else if(anExt.isEqualsIgnoreCase("ico")) {
+    } else if(anExt.isEqualsIgnoreCase(stCString("ico"))) {
         return StImageFile::ST_TYPE_ICO;
-    } else if(anExt.isEqualsIgnoreCase("hdr")) {
+    } else if(anExt.isEqualsIgnoreCase(stCString("hdr"))) {
         return StImageFile::ST_TYPE_HDR;
-    } else if(anExt.isEqualsIgnoreCase("webp")
-           || theMIMEType.getMIMEType() == StString("image/webp")) {
+    } else if(anExt.isEqualsIgnoreCase(stCString("webp"))
+           || theMIMEType.getMIMEType().isEquals(stCString("image/webp"))) {
         return StImageFile::ST_TYPE_WEBP;
-    } else if(anExt.isEqualsIgnoreCase("webpll")
-           || theMIMEType.getMIMEType() == StString("image/webpll")) {
+    } else if(anExt.isEqualsIgnoreCase(stCString("webpll"))
+           || theMIMEType.getMIMEType().isEquals(stCString("image/webpll"))) {
         return StImageFile::ST_TYPE_WEBPLL;
     }
     return StImageFile::ST_TYPE_NONE;

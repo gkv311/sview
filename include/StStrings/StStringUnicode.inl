@@ -47,7 +47,7 @@ void StStringUnicode<TypeTo>::strGetAdvance(const TypeFrom* theStringUtf,
 }
 
 template<typename Type>
-stUtf32_t StStringUnicode<Type>::getChar(const size_t theCharIndex) const {
+stUtf32_t StConstStringUnicode<Type>::getChar(const size_t theCharIndex) const {
     ST_DEBUG_ASSERT(theCharIndex < this->Length);
     StUtfIterator<Type> anIter(this->String);
     for(; *anIter != 0; ++anIter) {
@@ -372,21 +372,23 @@ const StStringUnicode<Type>& StStringUnicode<Type>::operator=(const stUtfWide_t*
 }
 
 template<typename Type> inline
-bool StStringUnicode<Type>::isEquals(const StStringUnicode& theCompare) const {
+bool StConstStringUnicode<Type>::isEquals(const StConstStringUnicode& theCompare) const {
     return this == &theCompare
         || stStrAreEqual(this->String, this->Size, theCompare.String, theCompare.Size);
 }
 
+namespace {
 // TODO (Kirill Gavrilov#9) case ignored only for ANSI symbols
 template<typename Type> inline
-bool StStringUnicode<Type>::isEqualsIgnoreCase(const StStringUnicode& theCompare) const {
-    if(this == &theCompare) {
+bool isEqualsIgnoreCase(const StConstStringUnicode<Type>& theStr1,
+                        const StConstStringUnicode<Type>& theStr2) {
+    if(&theStr1 == &theStr2) {
         return true;
-    } else if(this->Size != theCompare.Size) {
+    } else if(theStr1.Size != theStr2.Size) {
         return false;
     }
-    StUtfIterator<Type> anIter1(this->String);
-    StUtfIterator<Type> anIter2(theCompare.String);
+    StUtfIterator<Type> anIter1(theStr1.String);
+    StUtfIterator<Type> anIter2(theStr2.String);
     for(;; ++anIter1, ++anIter2) {
         if( *anIter2 > 64 && *anIter2 < 91         // ANSI big case
         && (*anIter2 == *anIter1 || (*anIter2 + 32) == *anIter1)) {
@@ -400,6 +402,12 @@ bool StStringUnicode<Type>::isEqualsIgnoreCase(const StStringUnicode& theCompare
             return true;
         }
     }
+}
+};
+
+template<typename Type> inline
+bool StConstStringUnicode<Type>::isEqualsIgnoreCase(const StConstStringUnicode& theCompare) const {
+    return ::isEqualsIgnoreCase(*this, theCompare);
 }
 
 template<typename Type> inline
@@ -575,28 +583,48 @@ const StStringUnicode<stUtf8_t> StStringUnicode<Type>::toDump() const {
 }
 
 template<typename Type> inline
-bool StStringUnicode<Type>::isStartsWith(const StStringUnicode<Type>& theStartString) const {
-    return (this == &theStartString)
-        || subString(0, theStartString.getLength()).isEquals(theStartString);
+bool StConstStringUnicode<Type>::isStartsWith(const Type theStartChar) const {
+    return this->Length != 0
+        && this->String[0] == theStartChar;
 }
 
 template<typename Type> inline
-bool StStringUnicode<Type>::isStartsWithIgnoreCase(const StStringUnicode<Type>& theStartString) const {
+bool StConstStringUnicode<Type>::isEndsWith(const Type theEndChar) const {
+    return this->Length != 0
+        && *(Type* )((stUByte_t* )this->String + this->Size - sizeof(Type)) == theEndChar;
+}
+
+template<typename Type> inline
+bool StConstStringUnicode<Type>::isStartsWith(const StConstStringUnicode<Type>& theStartString) const {
+    if(this->Size < theStartString.Size) {
+        return false;
+    } else if(this == &theStartString) {
+        return true;
+    }
+    return stStrAreEqual((const char* )this->String,          theStartString.Size,
+                         (const char* )theStartString.String, theStartString.Size);
+}
+
+template<typename Type> inline
+bool StStringUnicode<Type>::isStartsWithIgnoreCase(const StConstStringUnicode<Type>& theStartString) const {
     return (this == &theStartString)
         || subString(0, theStartString.getLength()).isEqualsIgnoreCase(theStartString);
 }
 
 template<typename Type> inline
-bool StStringUnicode<Type>::isEndsWith(const StStringUnicode<Type>& theEndString) const {
-    if(this == &theEndString) {
+bool StConstStringUnicode<Type>::isEndsWith(const StConstStringUnicode<Type>& theEndString) const {
+    if(this->Size < theEndString.Size) {
+        return false;
+    } else if(this == &theEndString) {
         return true;
     }
-    return (this->Length >= theEndString.Length)
-        && subString(this->Length - theEndString.Length, this->Length).isEquals(theEndString);
+
+    return stStrAreEqual((const char* )this->String + this->Size - theEndString.Size, theEndString.Size,
+                         (const char* )theEndString.String, theEndString.Size);
 }
 
 template<typename Type> inline
-bool StStringUnicode<Type>::isEndsWithIgnoreCase(const StStringUnicode<Type>& theEndString) const {
+bool StStringUnicode<Type>::isEndsWithIgnoreCase(const StConstStringUnicode<Type>& theEndString) const {
     if(this == &theEndString) {
         return true;
     }
@@ -634,7 +662,7 @@ StHandle <StArrayList< StStringUnicode<Type> > > StStringUnicode<Type>::split(co
 }
 
 template<typename Type> inline
-bool StStringUnicode<Type>::isContains(const stUtf32_t theSubChar) const {
+bool StConstStringUnicode<Type>::isContains(const stUtf32_t theSubChar) const {
     for(StUtfIterator<Type> anIter(this->String); *anIter != 0; ++anIter) {
         if(stUtf32_t(*anIter) == theSubChar) {
             return true;
@@ -644,7 +672,7 @@ bool StStringUnicode<Type>::isContains(const stUtf32_t theSubChar) const {
 }
 
 template<typename Type> inline
-bool StStringUnicode<Type>::isContains(const StStringUnicode<Type>& theSubString) const {
+bool StConstStringUnicode<Type>::isContains(const StConstStringUnicode<Type>& theSubString) const {
     if(theSubString.isEmpty()) {
         return true;
     }
@@ -680,7 +708,7 @@ StStringUnicode<Type> StStringUnicode<Type>::unquoted() const {
 template<typename Type> inline
 StStringUnicode<Type> StStringUnicode<Type>::replace(const StStringUnicode<Type>& theSubString,
                                                      const StStringUnicode<Type>& theReplacer) const {
-    if(theSubString.isEmpty() || isEmpty() || theSubString.Size >= this->Size) {
+    if(theSubString.isEmpty() || this->isEmpty() || theSubString.Size >= this->Size) {
         // just make a copy
         return *this;
     }
@@ -708,7 +736,7 @@ StStringUnicode<Type> StStringUnicode<Type>::replace(const StStringUnicode<Type>
 template<typename Type> inline
 void StStringUnicode<Type>::replaceFast(const StStringUnicode<Type>& theSubString,
                                         const StStringUnicode<Type>& theReplacer) {
-    if(theSubString.isEmpty() || isEmpty() || theSubString.Size >= this->Size) {
+    if(theSubString.isEmpty() || this->isEmpty() || theSubString.Size >= this->Size) {
         // just make a copy
         return;
     } else if(theSubString.Size != theReplacer.Size) {
