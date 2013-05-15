@@ -48,8 +48,8 @@ void StStringUnicode<TypeTo>::strGetAdvance(const TypeFrom* theStringUtf,
 
 template<typename Type>
 stUtf32_t StStringUnicode<Type>::getChar(const size_t theCharIndex) const {
-    ST_DEBUG_ASSERT(theCharIndex < myLength);
-    StUtfIterator<Type> anIter(myString);
+    ST_DEBUG_ASSERT(theCharIndex < this->Length);
+    StUtfIterator<Type> anIter(this->String);
     for(; *anIter != 0; ++anIter) {
         if(anIter.getIndex() == theCharIndex) {
             return *anIter;
@@ -60,8 +60,8 @@ stUtf32_t StStringUnicode<Type>::getChar(const size_t theCharIndex) const {
 
 template<typename Type>
 const Type* StStringUnicode<Type>::getCharBuffer(const size_t theCharIndex) const {
-    ST_DEBUG_ASSERT(theCharIndex < myLength);
-    StUtfIterator<Type> anIter(myString);
+    ST_DEBUG_ASSERT(theCharIndex < this->Length);
+    StUtfIterator<Type> anIter(this->String);
     for(; *anIter != 0; ++anIter) {
         if(anIter.getIndex() == theCharIndex) {
             return anIter.getBufferHere();
@@ -72,115 +72,114 @@ const Type* StStringUnicode<Type>::getCharBuffer(const size_t theCharIndex) cons
 
 template<typename Type> inline
 void StStringUnicode<Type>::clear() {
-    stStrFree(myString);
-    mySize   = 0;
-    myLength = 0;
-    myString = stStrAlloc(mySize);
+    stStrFree(this->String);
+    this->Size   = 0;
+    this->Length = 0;
+    this->String = stStrAlloc(this->Size);
 }
 
 template<typename Type> inline
-StStringUnicode<Type>::StStringUnicode()
-: myString(stStrAlloc(0)),
-  mySize(0),
-  myLength(0) {
-    //
+StStringUnicode<Type>::StStringUnicode() {
+    this->String = stStrAlloc(0);
+    this->Size   = 0;
+    this->Length = 0;
 }
 
 template<typename Type> inline
-StStringUnicode<Type>::StStringUnicode(const StStringUnicode& theCopy)
-: myString(stStrAlloc(theCopy.mySize)),
-  mySize(theCopy.mySize),
-  myLength(theCopy.myLength) {
-    stStrCopy((stUByte_t* )myString, (const stUByte_t* )theCopy.myString, mySize);
+StStringUnicode<Type>::StStringUnicode(const StStringUnicode& theCopy) {
+    this->String = stStrAlloc(theCopy.Size);
+    this->Size   = theCopy.Size;
+    this->Length = theCopy.Length;
+    stStrCopy((stUByte_t* )this->String, (const stUByte_t* )theCopy.String, this->Size);
 }
 
 template<typename Type> inline
-StStringUnicode<Type>::StStringUnicode(const StConstStringUnicode<Type>& theCopy)
-: myString(stStrAlloc(theCopy.Size)),
-  mySize(theCopy.Size),
-  myLength(theCopy.Length) {
-    stStrCopy((stUByte_t* )myString, (const stUByte_t* )theCopy.String, mySize);
+StStringUnicode<Type>::StStringUnicode(const StConstStringUnicode<Type>& theCopy) {
+    this->String = stStrAlloc(theCopy.Size);
+    this->Size   = theCopy.Size;
+    this->Length = theCopy.Length;
+    stStrCopy((stUByte_t* )this->String, (const stUByte_t* )theCopy.String, this->Size);
 }
 
 template<typename Type> inline
 StStringUnicode<Type>::StStringUnicode(const char*  theCopyUtf8,
-                                       const size_t theLength)
-: myString(NULL),
-  mySize(0),
-  myLength(0) {
+                                       const size_t theLength) {
+    this->String = NULL;
+    this->Size   = 0;
+    this->Length = 0;
     fromUnicode(theCopyUtf8, theLength);
 }
 
 template<typename Type> inline
 StStringUnicode<Type>::StStringUnicode(const stUtf16_t* theCopyUtf16,
-                                       const size_t     theLength)
-: myString(NULL),
-  mySize(0),
-  myLength(0) {
+                                       const size_t     theLength) {
+    this->String = NULL;
+    this->Size   = 0;
+    this->Length = 0;
     fromUnicode(theCopyUtf16, theLength);
 }
 
 template<typename Type> inline
 StStringUnicode<Type>::StStringUnicode(const stUtf32_t* theCopyUtf32,
-                                       const size_t     theLength)
-: myString(NULL),
-  mySize(0),
-  myLength(0) {
+                                       const size_t     theLength) {
+    this->String = NULL;
+    this->Size   = 0;
+    this->Length = 0;
     fromUnicode(theCopyUtf32, theLength);
 }
 
 template<typename Type> inline
 StStringUnicode<Type>::StStringUnicode(const stUtfWide_t* theCopyUtfWide,
-                                       const size_t       theLength)
-: myString(NULL),
-  mySize(0),
-  myLength(0) {
+                                       const size_t       theLength) {
+    this->String = NULL;
+    this->Size   = 0;
+    this->Length = 0;
     fromUnicode(theCopyUtfWide, theLength);
 }
 
 template<typename Type> inline
-StStringUnicode<Type>::StStringUnicode(const char theChar)
-: myString(NULL),
-  mySize(0),
-  myLength(0) {
+StStringUnicode<Type>::StStringUnicode(const char theChar) {
+    this->String = NULL;
+    this->Size   = 0;
+    this->Length = 0;
     if(theChar == '\0') {
         // empty string
-        mySize   = 0;
-        myLength = 0;
-        myString = stStrAlloc(mySize);
+        this->Size   = 0;
+        this->Length = 0;
+        this->String = stStrAlloc(this->Size);
         return;
     }
-    mySize   = sizeof(Type);
-    myLength = 1;
-    myString = stStrAlloc(mySize);
-    myString[0] = Type(theChar);
+    this->Size   = sizeof(Type);
+    this->Length = 1;
+    this->String = stStrAlloc(this->Size);
+    ((Type* )this->String)[0] = Type(theChar);
 }
 
 template<typename Type> inline
-StStringUnicode<Type>::StStringUnicode(const int32_t theInt32)
-: myString(NULL),
-  mySize(0),
-  myLength(0) {
+StStringUnicode<Type>::StStringUnicode(const int32_t theInt32) {
+    this->String = NULL;
+    this->Size   = 0;
+    this->Length = 0;
     char aBuff[16];
     stsprintf(aBuff, 16, "%d", theInt32);
     fromUnicode(aBuff);
 }
 
 template<typename Type> inline
-StStringUnicode<Type>::StStringUnicode(const uint32_t theUInt32)
-: myString(NULL),
-  mySize(0),
-  myLength(0) {
+StStringUnicode<Type>::StStringUnicode(const uint32_t theUInt32) {
+    this->String = NULL;
+    this->Size   = 0;
+    this->Length = 0;
     char aBuff[16];
     stsprintf(aBuff, 16, "%u", theUInt32);
     fromUnicode(aBuff);
 }
 
 template<typename Type> inline
-StStringUnicode<Type>::StStringUnicode(const int64_t theInt64)
-: myString(NULL),
-  mySize(0),
-  myLength(0) {
+StStringUnicode<Type>::StStringUnicode(const int64_t theInt64) {
+    this->String = NULL;
+    this->Size   = 0;
+    this->Length = 0;
     char aBuff[32];
 #if defined(_MSC_VER)
     stsprintf(aBuff, 32, "%I64i", theInt64);
@@ -194,10 +193,10 @@ StStringUnicode<Type>::StStringUnicode(const int64_t theInt64)
 }
 
 template<typename Type> inline
-StStringUnicode<Type>::StStringUnicode(const uint64_t theUInt64)
-: myString(NULL),
-  mySize(0),
-  myLength(0) {
+StStringUnicode<Type>::StStringUnicode(const uint64_t theUInt64) {
+    this->String = NULL;
+    this->Size   = 0;
+    this->Length = 0;
     char aBuff[32];
 #if defined(_MSC_VER)
     stsprintf(aBuff, 32, "%I64u", theUInt64);
@@ -212,10 +211,10 @@ StStringUnicode<Type>::StStringUnicode(const uint64_t theUInt64)
 
 #ifdef ST_HAS_INT64_EXT
 template<typename Type> inline
-StStringUnicode<Type>::StStringUnicode(const stInt64ext_t theInt64)
-: myString(NULL),
-  mySize(0),
-  myLength(0) {
+StStringUnicode<Type>::StStringUnicode(const stInt64ext_t theInt64) {
+    this->String = NULL;
+    this->Size   = 0;
+    this->Length = 0;
     char aBuff[32];
 #if defined(_MSC_VER)
     stsprintf(aBuff, 32, "%I64i", theInt64);
@@ -229,10 +228,10 @@ StStringUnicode<Type>::StStringUnicode(const stInt64ext_t theInt64)
 }
 
 template<typename Type> inline
-StStringUnicode<Type>::StStringUnicode(const stUInt64ext_t theUInt64)
-: myString(NULL),
-  mySize(0),
-  myLength(0) {
+StStringUnicode<Type>::StStringUnicode(const stUInt64ext_t theUInt64) {
+    this->String = NULL;
+    this->Size   = 0;
+    this->Length = 0;
     char aBuff[32];
 #if defined(_MSC_VER)
     stsprintf(aBuff, 32, "%I64u", theUInt64);
@@ -247,10 +246,10 @@ StStringUnicode<Type>::StStringUnicode(const stUInt64ext_t theUInt64)
 #endif
 
 template<typename Type> inline
-StStringUnicode<Type>::StStringUnicode(const double theFloat)
-: myString(NULL),
-  mySize(0),
-  myLength(0) {
+StStringUnicode<Type>::StStringUnicode(const double theFloat) {
+    this->String = NULL;
+    this->Size   = 0;
+    this->Length = 0;
     char aBuff[256];
     stsprintf(aBuff, 256, "%f", theFloat);
     fromUnicode(aBuff);
@@ -258,7 +257,7 @@ StStringUnicode<Type>::StStringUnicode(const double theFloat)
 
 template<typename Type> inline
 StStringUnicode<Type>::~StStringUnicode() {
-    stStrFree(myString);
+    stStrFree(this->String);
 }
 
 template<typename Type> inline
@@ -266,18 +265,18 @@ const StStringUnicode<Type>& StStringUnicode<Type>::operator=(const StStringUnic
     if(this == &theOther) {
         return (*this);
     }
-    stStrFree(myString);
-    mySize   = theOther.mySize;
-    myLength = theOther.myLength;
-    myString = stStrAlloc(mySize);
-    stStrCopy((stUByte_t* )myString, (const stUByte_t* )theOther.myString, mySize);
+    stStrFree(this->String);
+    this->Size   = theOther.Size;
+    this->Length = theOther.Length;
+    this->String = stStrAlloc(this->Size);
+    stStrCopy((stUByte_t* )this->String, (const stUByte_t* )theOther.String, this->Size);
     return (*this);
 }
 
 template<typename Type> template<typename TypeFrom>
 void StStringUnicode<Type>::fromUnicode(const TypeFrom* theStringUtf,
                                         const size_t    theLength) {
-    Type* anOldBuffer = myString; // necessary in case of self-copying
+    const Type* anOldBuffer = this->String; // necessary in case of self-copying
     StUtfIterator<TypeFrom> anIterRead(theStringUtf);
     if(*anIterRead == 0) {
         // special case
@@ -291,10 +290,10 @@ void StStringUnicode<Type>::fromUnicode(const TypeFrom* theStringUtf,
                 // optimized copy
                 for(; *anIterRead != 0 && anIterRead.getIndex() < theLength; ++anIterRead) {}
 
-                mySize   = size_t((stUByte_t* )anIterRead.getBufferHere() - (stUByte_t* )theStringUtf);
-                myLength = anIterRead.getIndex();
-                myString = stStrAlloc(mySize);
-                stStrCopy((stUByte_t* )myString, (const stUByte_t* )theStringUtf, mySize);
+                this->Size   = size_t((stUByte_t* )anIterRead.getBufferHere() - (stUByte_t* )theStringUtf);
+                this->Length = anIterRead.getIndex();
+                this->String = stStrAlloc(this->Size);
+                stStrCopy((stUByte_t* )this->String, (const stUByte_t* )theStringUtf, this->Size);
                 stStrFree(anOldBuffer);
                 return;
             }
@@ -302,11 +301,11 @@ void StStringUnicode<Type>::fromUnicode(const TypeFrom* theStringUtf,
         default: break;
     }
 
-    strGetAdvance(theStringUtf, theLength, mySize, myLength);
-    myString = stStrAlloc(mySize);
+    strGetAdvance(theStringUtf, theLength, this->Size, this->Length);
+    this->String = stStrAlloc(this->Size);
     // reset iterator
     anIterRead.init(theStringUtf);
-    Type* anIterWrite = myString;
+    const Type* anIterWrite = this->String;
     for(; *anIterRead != 0 && anIterRead.getIndex() < theLength; ++anIterRead) {
         anIterWrite = anIterRead.getUtf(anIterWrite);
     }
@@ -316,7 +315,7 @@ void StStringUnicode<Type>::fromUnicode(const TypeFrom* theStringUtf,
 template<typename Type> inline
 void StStringUnicode<Type>::fromLocale(const char*  theString,
                                        const size_t theLength) {
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     // use WinAPI
     int aWideSize = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, theString, -1, NULL, 0);
     if(aWideSize <= 0) {
@@ -347,8 +346,8 @@ void StStringUnicode<Type>::fromLocale(const char*  theString,
 template<typename Type> inline
 bool StStringUnicode<Type>::toLocale(char*     theBuffer,
                                      const int theSizeBytes) const {
-    StStringUnicode<wchar_t> aWideCopy(myString, myLength);
-#if(defined(_WIN32) || defined(__WIN32__))
+    StStringUnicode<wchar_t> aWideCopy(this->String, this->Length);
+#ifdef _WIN32
     int aMbBytes = WideCharToMultiByte(CP_ACP, 0, aWideCopy.toCString(), -1, theBuffer, theSizeBytes, NULL, NULL);
 #else
     int aMbBytes = wcstombs(theBuffer, aWideCopy.toCString(), theSizeBytes);
@@ -375,7 +374,7 @@ const StStringUnicode<Type>& StStringUnicode<Type>::operator=(const stUtfWide_t*
 template<typename Type> inline
 bool StStringUnicode<Type>::isEquals(const StStringUnicode& theCompare) const {
     return this == &theCompare
-        || stStrAreEqual(myString, mySize, theCompare.myString, theCompare.mySize);
+        || stStrAreEqual(this->String, this->Size, theCompare.String, theCompare.Size);
 }
 
 // TODO (Kirill Gavrilov#9) case ignored only for ANSI symbols
@@ -383,11 +382,11 @@ template<typename Type> inline
 bool StStringUnicode<Type>::isEqualsIgnoreCase(const StStringUnicode& theCompare) const {
     if(this == &theCompare) {
         return true;
-    } else if(mySize != theCompare.mySize) {
+    } else if(this->Size != theCompare.Size) {
         return false;
     }
-    StUtfIterator<Type> anIter1(myString);
-    StUtfIterator<Type> anIter2(theCompare.myString);
+    StUtfIterator<Type> anIter1(this->String);
+    StUtfIterator<Type> anIter2(theCompare.String);
     for(;; ++anIter1, ++anIter2) {
         if( *anIter2 > 64 && *anIter2 < 91         // ANSI big case
         && (*anIter2 == *anIter1 || (*anIter2 + 32) == *anIter1)) {
@@ -413,8 +412,8 @@ bool StStringUnicode<Type>::operator>(const StStringUnicode& theCompare) const {
     if(&theCompare == this) {
         return false;
     }
-    StUtfIterator<Type> anIterMe(myString);
-    StUtfIterator<Type> anIterOther(theCompare.myString);
+    StUtfIterator<Type> anIterMe(this->String);
+    StUtfIterator<Type> anIterOther(theCompare.String);
     for(;; ++anIterMe, ++anIterOther) {
         if(*anIterMe == 0) {
             return false;
@@ -433,8 +432,8 @@ bool StStringUnicode<Type>::operator<(const StStringUnicode& theCompare) const {
     if(&theCompare == this) {
         return false;
     }
-    StUtfIterator<Type> anIterMe(myString);
-    StUtfIterator<Type> anIterOther(theCompare.myString);
+    StUtfIterator<Type> anIterMe(this->String);
+    StUtfIterator<Type> anIterOther(theCompare.String);
     for(;; ++anIterMe, ++anIterOther) {
         if(*anIterMe == 0) {
             return true;
@@ -453,8 +452,8 @@ bool StStringUnicode<Type>::operator>=(const StStringUnicode& theCompare) const 
     if(&theCompare == this) {
         return true;
     }
-    StUtfIterator<Type> anIterMe(myString);
-    StUtfIterator<Type> anIterOther(theCompare.myString);
+    StUtfIterator<Type> anIterMe(this->String);
+    StUtfIterator<Type> anIterOther(theCompare.String);
     bool isLastMe, isLastOther;
     for(;; ++anIterMe, ++anIterOther) {
         isLastMe    = (*anIterMe    == 0);
@@ -478,8 +477,8 @@ bool StStringUnicode<Type>::operator<=(const StStringUnicode& theCompare) const 
     if(&theCompare == this) {
         return true;
     }
-    StUtfIterator<Type> anIterMe(myString);
-    StUtfIterator<Type> anIterOther(theCompare.myString);
+    StUtfIterator<Type> anIterMe(this->String);
+    StUtfIterator<Type> anIterOther(theCompare.String);
     bool isLastMe, isLastOther;
     for(;; ++anIterMe, ++anIterOther) {
         isLastMe    = (*anIterMe    == 0);
@@ -487,7 +486,6 @@ bool StStringUnicode<Type>::operator<=(const StStringUnicode& theCompare) const 
         if(isLastMe && isLastOther) {
             return true;
         } else if(isLastMe) {
-///TODO (Kirill Gavrilov#1) check conditions
             return false;
         } else if(isLastOther) {
             return true;
@@ -505,15 +503,15 @@ StStringUnicode<Type>& StStringUnicode<Type>::operator+=(const StStringUnicode<T
         return (*this);
     }
     // create new string
-    size_t aSize = mySize + theAppend.mySize;
+    const size_t aSize = this->Size + theAppend.Size;
     Type* aString = stStrAlloc(aSize);
-    stStrCopy((stUByte_t* )aString,          (const stUByte_t* )myString,           mySize);
-    stStrCopy((stUByte_t* )aString + mySize, (const stUByte_t* )theAppend.myString, theAppend.mySize);
+    stStrCopy((stUByte_t* )aString,              (const stUByte_t* )this->String,     this->Size);
+    stStrCopy((stUByte_t* )aString + this->Size, (const stUByte_t* )theAppend.String, theAppend.Size);
 
-    stStrFree(myString);
-    mySize   = aSize;
-    myString = aString;
-    myLength += theAppend.myLength;
+    stStrFree(this->String);
+    this->Size   = aSize;
+    this->String = aString;
+    this->Length += theAppend.Length;
     return (*this);
 }
 
@@ -523,7 +521,7 @@ StStringUnicode<Type> StStringUnicode<Type>::subString(const size_t theStart,
     if(theStart >= theEnd) {
         return StStringUnicode<Type>();
     }
-    for(StUtfIterator<Type> anIter(myString); *anIter != 0; ++anIter) {
+    for(StUtfIterator<Type> anIter(this->String); *anIter != 0; ++anIter) {
         if(anIter.getIndex() >= theStart) {
             return StStringUnicode<Type>(anIter.getBufferHere(), theEnd - theStart);
         }
@@ -534,38 +532,38 @@ StStringUnicode<Type> StStringUnicode<Type>::subString(const size_t theStart,
 template<typename Type> inline
 const StStringUnicode<stUtf8_t> StStringUnicode<Type>::toUtf8() const {
     StStringUnicode<stUtf8_t> aCopy;
-    aCopy.fromUnicode(myString);
+    aCopy.fromUnicode(this->String);
     return aCopy;
 }
 
 template<typename Type> inline
 const StStringUnicode<stUtf16_t> StStringUnicode<Type>::toUtf16() const {
     StStringUnicode<stUtf16_t> aCopy;
-    aCopy.fromUnicode(myString);
+    aCopy.fromUnicode(this->String);
     return aCopy;
 }
 
 template<typename Type> inline
 const StStringUnicode<stUtf32_t> StStringUnicode<Type>::toUtf32() const {
     StStringUnicode<stUtf32_t> aCopy;
-    aCopy.fromUnicode(myString);
+    aCopy.fromUnicode(this->String);
     return aCopy;
 }
 
 template<typename Type> inline
 const StStringUnicode<stUtfWide_t> StStringUnicode<Type>::toUtfWide() const {
     StStringUnicode<stUtfWide_t> aCopy;
-    aCopy.fromUnicode(myString);
+    aCopy.fromUnicode(this->String);
     return aCopy;
 }
 
 template<typename Type> inline
 const StStringUnicode<stUtf8_t> StStringUnicode<Type>::toDump() const {
     StStringUnicode<stUtf8_t> aDump;
-    aDump += StStringUnicode<stUtf8_t>("StStringUnicode<") + sizeof(Type) + ">, size= " + mySize + ", length= " + myLength + ", text= '";
+    aDump += StStringUnicode<stUtf8_t>("StStringUnicode<") + sizeof(Type) + ">, size= " + this->Size + ", length= " + this->Length + ", text= '";
     switch(sizeof(Type)) {
         case sizeof(stUtf8_t): {
-            aDump += (const stUtf8_t* )myString;
+            aDump += (const stUtf8_t* )this->String;
             break;
         }
         default: {
@@ -593,8 +591,8 @@ bool StStringUnicode<Type>::isEndsWith(const StStringUnicode<Type>& theEndString
     if(this == &theEndString) {
         return true;
     }
-    return (myLength >= theEndString.myLength)
-        && subString(myLength - theEndString.myLength, myLength).isEquals(theEndString);
+    return (this->Length >= theEndString.Length)
+        && subString(this->Length - theEndString.Length, this->Length).isEquals(theEndString);
 }
 
 template<typename Type> inline
@@ -602,8 +600,8 @@ bool StStringUnicode<Type>::isEndsWithIgnoreCase(const StStringUnicode<Type>& th
     if(this == &theEndString) {
         return true;
     }
-    return (myLength >= theEndString.myLength)
-        && subString(myLength - theEndString.myLength, myLength).isEqualsIgnoreCase(theEndString);
+    return (this->Length >= theEndString.Length)
+        && subString(this->Length - theEndString.Length, this->Length).isEqualsIgnoreCase(theEndString);
 }
 
 template<typename Type> inline
@@ -614,7 +612,7 @@ StHandle <StArrayList< StStringUnicode<Type> > > StStringUnicode<Type>::split(co
 
     size_t aStart = 0;
     size_t aSplitCount = 1; // set to 1, that is
-    for(StUtfIterator<Type> anIter(myString);; ++anIter) {
+    for(StUtfIterator<Type> anIter(this->String);; ++anIter) {
         if(*anIter == 0) {
             StStringUnicode<Type> aSplit = subString(aStart, anIter.getIndex());
             if(!aSplit.isEmpty()) {
@@ -625,8 +623,8 @@ StHandle <StArrayList< StStringUnicode<Type> > > StStringUnicode<Type>::split(co
             aSplitList->add(subString(aStart, anIter.getIndex()));
             aStart = anIter.getIndex() + 1;
             if(++aSplitCount >= theLimitNb) {
-                if(myLength > aStart) {
-                    aSplitList->add(subString(aStart, myLength));
+                if(this->Length > aStart) {
+                    aSplitList->add(subString(aStart, this->Length));
                 }
                 break;
             }
@@ -637,7 +635,7 @@ StHandle <StArrayList< StStringUnicode<Type> > > StStringUnicode<Type>::split(co
 
 template<typename Type> inline
 bool StStringUnicode<Type>::isContains(const stUtf32_t theSubChar) const {
-    for(StUtfIterator<Type> anIter(myString); *anIter != 0; ++anIter) {
+    for(StUtfIterator<Type> anIter(this->String); *anIter != 0; ++anIter) {
         if(stUtf32_t(*anIter) == theSubChar) {
             return true;
         }
@@ -650,8 +648,8 @@ bool StStringUnicode<Type>::isContains(const StStringUnicode<Type>& theSubString
     if(theSubString.isEmpty()) {
         return true;
     }
-    StUtfIterator<Type> anIterMe(myString);
-    StUtfIterator<Type> anIterSub(theSubString.myString);
+    StUtfIterator<Type> anIterMe(this->String);
+    StUtfIterator<Type> anIterSub(theSubString.String);
     for(;; ++anIterMe) {
         if(*anIterMe == 0) {
             return *anIterSub == 0;
@@ -660,21 +658,21 @@ bool StStringUnicode<Type>::isContains(const StStringUnicode<Type>& theSubString
         } else if(*anIterMe == *anIterSub) {
             ++anIterSub;
         } else {
-            anIterSub.init(theSubString.myString);
+            anIterSub.init(theSubString.String);
         }
     }
 }
 
 template<typename Type> inline
 StStringUnicode<Type> StStringUnicode<Type>::unquoted() const {
-    if(myLength < 2) {
+    if(this->Length < 2) {
         return *this;
     }
-    const Type* aLastSymbol = getCharBuffer(myLength - 1);
-    if((aLastSymbol != myString)
-    && ((*myString == Type('\"') && *aLastSymbol == Type('\"'))
-     || (*myString == Type('\'') && *aLastSymbol == Type('\'')))) {
-        return subString(1, myLength - 1);
+    const Type* aLastSymbol = getCharBuffer(this->Length - 1);
+    if((aLastSymbol != this->String)
+    && ((*this->String == Type('\"') && *aLastSymbol == Type('\"'))
+     || (*this->String == Type('\'') && *aLastSymbol == Type('\'')))) {
+        return subString(1, this->Length - 1);
     }
     return *this;
 }
@@ -682,27 +680,27 @@ StStringUnicode<Type> StStringUnicode<Type>::unquoted() const {
 template<typename Type> inline
 StStringUnicode<Type> StStringUnicode<Type>::replace(const StStringUnicode<Type>& theSubString,
                                                      const StStringUnicode<Type>& theReplacer) const {
-    if(theSubString.isEmpty() || isEmpty() || theSubString.mySize >= mySize) {
+    if(theSubString.isEmpty() || isEmpty() || theSubString.Size >= this->Size) {
         // just make a copy
         return *this;
     }
-    StUtfIterator<Type> anIter(myString);
+    StUtfIterator<Type> anIter(this->String);
     StStringUnicode<Type> aResult;
     size_t aStart = 0;
     for(size_t aCharId = 0; *anIter != 0;) {
-        if(stAreEqual(anIter.getBufferHere(), theSubString.myString, theSubString.mySize)) {
+        if(stAreEqual(anIter.getBufferHere(), theSubString.String, theSubString.Size)) {
             aResult += subString(aStart, aCharId);
             aResult += theReplacer;
-            aStart  = aCharId + theSubString.myLength;
+            aStart  = aCharId + theSubString.Length;
             aCharId = aStart;
-            anIter.init(anIter.getBufferHere() + theSubString.mySize);
+            anIter.init(anIter.getBufferHere() + theSubString.Size);
             continue;
         }
         ++anIter;
         ++aCharId;
     }
-    if(aStart < myLength) {
-        aResult += subString(aStart, myLength);
+    if(aStart < this->Length) {
+        aResult += subString(aStart, this->Length);
     }
     return aResult;
 }
@@ -710,19 +708,19 @@ StStringUnicode<Type> StStringUnicode<Type>::replace(const StStringUnicode<Type>
 template<typename Type> inline
 void StStringUnicode<Type>::replaceFast(const StStringUnicode<Type>& theSubString,
                                         const StStringUnicode<Type>& theReplacer) {
-    if(theSubString.isEmpty() || isEmpty() || theSubString.mySize >= mySize) {
+    if(theSubString.isEmpty() || isEmpty() || theSubString.Size >= this->Size) {
         // just make a copy
         return;
-    } else if(theSubString.mySize != theReplacer.mySize) {
+    } else if(theSubString.Size != theReplacer.Size) {
         // invalid method usage
-        ST_DEBUG_ASSERT(theSubString.mySize == theReplacer.mySize);
+        ST_DEBUG_ASSERT(theSubString.Size == theReplacer.Size);
         ///*this = replace(theSubString, theReplacer);
         return;
     }
-    for(StUtfIterator<Type> anIter(myString); *anIter != 0;) {
-        if(stAreEqual(anIter.getBufferHere(), theSubString.myString, theSubString.mySize)) {
-            stStrCopy((stUByte_t* )anIter.changeBufferHere(), (const stUByte_t* )theReplacer.myString, theReplacer.mySize);
-            anIter.init(anIter.getBufferHere() + theSubString.mySize);
+    for(StUtfIterator<Type> anIter(this->String); *anIter != 0;) {
+        if(stAreEqual(anIter.getBufferHere(), theSubString.String, theSubString.Size)) {
+            stStrCopy((stUByte_t* )anIter.changeBufferHere(), (const stUByte_t* )theReplacer.String, theReplacer.Size);
+            anIter.init(anIter.getBufferHere() + theSubString.Size);
             continue;
         }
         ++anIter;
@@ -816,7 +814,7 @@ inline std::ostream& operator<<(std::ostream& theStream,
     return theStream;
 }
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
 /**
  * Define function for wide standard output.
  */

@@ -48,10 +48,8 @@ inline const StConstStringUnicode<Type> stStringExtConstr(const Type*  theString
 #define stCString(theString) stStringExtConstr(theString, sizeof(theString) - sizeof(*theString), sizeof(theString) / sizeof(*theString) - 1)
 //#define stCString(theString) {theString, sizeof(theString) - sizeof(*theString), sizeof(theString) / sizeof(*theString) - 1}
 
-const StCStringUtf8 TheTest = stCString("my test");
-
-static_assert(std::is_pod<StCStringUtf8>::value,
-              "StCStringUtf8 is not POD structure!");
+//static_assert(std::is_pod<StCStringUtf8>::value,
+//              "StCStringUtf8 is not POD structure!");
 
 /**
  * This template class represents constant UTF-* string.
@@ -63,26 +61,26 @@ static_assert(std::is_pod<StCStringUtf8>::value,
  * Class StText is more efficient for frequently modified string.
  */
 template<typename Type>
-class StStringUnicode {
+class StStringUnicode : public StConstStringUnicode<Type> {
 
         public:
 
     inline StUtfIterator<Type> iterator() const {
-        return StUtfIterator<Type>(myString);
+        return StUtfIterator<Type>(this->String);
     }
 
     /**
      * Returns the size of the buffer, excluding NULL-termination symbol
      */
     inline size_t getSize() const {
-        return mySize;
+        return this->Size;
     }
 
     /**
      * Returns the length of the string in Unicode symbols.
      */
     inline size_t getLength() const {
-        return myLength;
+        return this->Length;
     }
 
     /**
@@ -181,9 +179,9 @@ class StStringUnicode {
      */
     inline void fromUrl(const StStringUnicode& theUrl) {
         size_t aSizeUtf8, aLengthUtf8;
-        StStringUnicode<stUtf8_t>::strGetAdvance(theUrl.myString, theUrl.myLength, aSizeUtf8, aLengthUtf8);
+        StStringUnicode<stUtf8_t>::strGetAdvance(theUrl.String, theUrl.Length, aSizeUtf8, aLengthUtf8);
         stUtf8_t* aBuffer = StStringUnicode<stUtf8_t>::stStrAlloc(aSizeUtf8);
-        urlDecode(theUrl.myString, aBuffer);
+        urlDecode(theUrl.String, aBuffer);
         fromUnicode(aBuffer, size_t(-1));
         StStringUnicode<stUtf8_t>::stStrFree(aBuffer);
     }
@@ -265,15 +263,7 @@ class StStringUnicode {
      * @return pointer to the string
      */
     inline const Type* toCString() const {
-        return myString;
-    }
-
-    /**
-     * Cast this string to constant string structure
-     * for interconnection with methods taking .
-     */
-    const StConstStringUnicode<Type>& toConstString() const {
-        return *static_cast< StConstStringUnicode<Type>* >(this);
+        return this->String;
     }
 
     /**
@@ -325,7 +315,7 @@ class StStringUnicode {
      * @return true if string is empty.
      */
     inline bool isEmpty() const {
-        return myString[0] == Type(0);
+        return this->String[0] == Type(0);
     }
 
     /**
@@ -386,14 +376,14 @@ class StStringUnicode {
     friend StStringUnicode operator+(const StStringUnicode& theLeft,
                                      const StStringUnicode& theRight) {
         StStringUnicode aSumm;
-        stStrFree(aSumm.myString);
-        aSumm.mySize   = theLeft.mySize   + theRight.mySize;
-        aSumm.myLength = theLeft.myLength + theRight.myLength;
-        aSumm.myString = stStrAlloc(aSumm.mySize);
+        stStrFree(aSumm.String);
+        aSumm.Size   = theLeft.Size   + theRight.Size;
+        aSumm.Length = theLeft.Length + theRight.Length;
+        aSumm.String = stStrAlloc(aSumm.Size);
 
         // copy bytes
-        stStrCopy((stUByte_t* )aSumm.myString,                  (const stUByte_t* )theLeft.myString,  theLeft.mySize);
-        stStrCopy((stUByte_t* )aSumm.myString + theLeft.mySize, (const stUByte_t* )theRight.myString, theRight.mySize);
+        stStrCopy((stUByte_t* )aSumm.String,                (const stUByte_t* )theLeft.String,  theLeft.Size);
+        stStrCopy((stUByte_t* )aSumm.String + theLeft.Size, (const stUByte_t* )theRight.String, theRight.Size);
         return aSumm;
     }
 
@@ -443,6 +433,14 @@ class StStringUnicode {
     /**
      * Release string buffer and nullify the pointer.
      */
+    static inline void stStrFree(const Type*& thePtr) {
+        stMemFree((void* )thePtr);
+        thePtr = NULL;
+    }
+
+    /**
+     * Release string buffer and nullify the pointer.
+     */
     static inline void stStrFree(Type*& thePtr) {
         stMemFree(thePtr);
         thePtr = NULL;
@@ -482,12 +480,6 @@ class StStringUnicode {
      */
     static size_t urlDecode(const Type* theSrcUrl,
                             stUtf8_t*   theOut);
-
-        private: //!< private fields, should start from StConstStringUnicode fields!
-
-    Type*  myString; //!< string buffer
-    size_t mySize;   //!< buffer size in bytes, excluding NULL-termination symbol
-    size_t myLength; //!< length of the string in Unicode symbols (cached value, excluding NULL-termination symbol)
 
 };
 
