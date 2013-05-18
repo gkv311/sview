@@ -56,6 +56,24 @@ bool StGLMessageBox::doKeyDown(const StKeyEvent& theEvent) {
             destroyWithDelay(this);
             return true;
         }
+        case ST_VK_TAB:
+            if(myButtonsNb > 1) {
+                bool isNext = false;
+                for(StGLWidget* aChild = myBtnPanel->getChildren()->getStart(); aChild != NULL; aChild = aChild->getNext()) {
+                    if(myDefaultBtn == aChild) {
+                        isNext = true;
+                        myDefaultBtn->setFocus(false);
+                    } else if(isNext) {
+                        myDefaultBtn = dynamic_cast<StGLButton*>(aChild);
+                        isNext = false;
+                    }
+                }
+                if(isNext) {
+                    myDefaultBtn = dynamic_cast<StGLButton*>(myBtnPanel->getChildren()->getStart());
+                }
+                myDefaultBtn->setFocus(true);
+            }
+            return true;
         case ST_VK_SPACE:
         case ST_VK_RETURN:
             if(myDefaultBtn != NULL) {
@@ -76,6 +94,7 @@ bool StGLMessageBox::doKeyDown(const StKeyEvent& theEvent) {
 }
 
 StGLButton* StGLMessageBox::addButton(const StString& theTitle,
+                                      const bool      theIsDefault,
                                       const int       theWidth) {
     int aRight = myBtnPanel->getRectPx().right();
     if(aRight > 0) {
@@ -97,7 +116,13 @@ StGLButton* StGLMessageBox::addButton(const StString& theTitle,
     }
 
     aButton->signals.onBtnClick += stSlot(this, &StGLMessageBox::doKillSelf);
-    myDefaultBtn = aButton;
+    if(myDefaultBtn != NULL) {
+        myDefaultBtn->setFocus(false);
+    }
+    if(theIsDefault || myDefaultBtn == NULL) {
+        myDefaultBtn = aButton;
+    }
+    myDefaultBtn->setFocus(true);
 
     return aButton;
 }

@@ -423,12 +423,12 @@ void StImageViewer::doKeyDown(const StKeyEvent& theEvent) {
                     return;
                 }
 
-                const StString aText = StString("Are you sure you want to completely remove the file\n'")
-                                     + myFileToDelete->getPath() + "'?";
+                const StString aText = StString("Do you really want to completely remove this file?\n")
+                                     + myFileToDelete->getPath() + "";
 
                 StGLMessageBox* aDialog = new StGLMessageBox(myGUI.access(), aText, 512, 256);
-                aDialog->addButton("Delete", 96)->signals.onBtnClick += stSlot(this, &StImageViewer::doDeleteFile);
-                aDialog->addButton("Cancel", 96);
+                aDialog->addButton("Delete", true,  96)->signals.onBtnClick += stSlot(this, &StImageViewer::doDeleteFile);
+                aDialog->addButton("Cancel", false, 96);
                 aDialog->setVisibility(true, true);
                 aDialog->stglInit();
             }

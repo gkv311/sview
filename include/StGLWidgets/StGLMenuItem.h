@@ -66,6 +66,8 @@ class StGLMenuItem : public StGLTextArea {
 
     ST_CPPEXPORT void setSelected(bool theToSelect);
 
+    ST_CPPEXPORT void setFocus(const bool theValue);
+
         public:  //! @name Signals
 
     struct {

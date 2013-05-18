@@ -219,6 +219,10 @@ void StGLMenuItem::setSelected(bool theToSelect) {
     myIsItemSelected = theToSelect;
 }
 
+void StGLMenuItem::setFocus(const bool theValue) {
+    myHasFocus = theValue;
+}
+
 bool StGLMenuItem::tryClick(const StPointD_t& theCursorZo,
                             const int&        theMouseBtn,
                             bool&             theIsItemClicked) {

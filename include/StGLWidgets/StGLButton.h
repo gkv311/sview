@@ -44,6 +44,8 @@ class StGLButton : public StGLMenu {
 
     ST_CPPEXPORT int getHeight(const int theHeight);
 
+    ST_CPPEXPORT void setFocus(const bool theValue);
+
         public:  //!< @name Signals
 
     struct {

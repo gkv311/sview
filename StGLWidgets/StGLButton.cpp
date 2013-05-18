@@ -29,6 +29,13 @@ StGLButton::~StGLButton() {
     //
 }
 
+void StGLButton::setFocus(const bool theValue) {
+    StGLMenuItem* anItem = (StGLMenuItem* )getChildren()->getStart();
+    if(anItem != NULL) {
+        anItem->setFocus(theValue);
+    }
+}
+
 int StGLButton::getWidth() const {
     return myWidth;
 }

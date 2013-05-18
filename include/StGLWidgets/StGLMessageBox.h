@@ -40,6 +40,7 @@ class StGLMessageBox : public StGLWidget {
      * Append button to this message box.
      */
     ST_CPPEXPORT StGLButton* addButton(const StString& theTitle,
+                                       const bool      theIsDefault = false,
                                        const int       theWidth = 0);
 
     ST_CPPEXPORT virtual bool doKeyDown(const StKeyEvent& theEvent);
