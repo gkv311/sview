@@ -155,7 +155,21 @@ void StGLMenuItem::stglDraw(unsigned int theView) {
     }
 
     StGLContext& aCtx = getContext();
-    myMarginLeft = (getParentMenu()->getOrient() == StGLMenu::MENU_VERTICAL) ? 32 : 2;
+    switch(getParentMenu()->getOrient()) {
+        case StGLMenu::MENU_VERTICAL: {
+            myMarginLeft = 32;
+            break;
+        }
+        case StGLMenu::MENU_HORIZONTAL: {
+            myMarginLeft = 2;
+            break;
+        }
+        default:
+        case StGLMenu::MENU_ZERO: {
+            myMarginLeft = 0;
+            break;
+        }
+    }
 
     StGLMenuItem::State aState = StGLMenuItem::PASSIVE;
     if(isClicked(ST_MOUSE_LEFT) || (isSelected() && hasSubMenu())) {

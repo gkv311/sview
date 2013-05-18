@@ -45,6 +45,21 @@ class StGLRootWidget : public StGLWidget {
      */
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
 
+    /**
+     * Function iterate children and self for unclicking state.
+     * @param theCursorZo point in Zero2One coordinates
+     * @param theMouseBtn mouse button id
+     */
+    inline bool tryUnClick(const StPointD_t& theCursorZo,
+                           const int&        theMouseBtn) {
+        bool isItemUnclicked = false;
+        return tryUnClick(theCursorZo, theMouseBtn, isItemUnclicked);
+    }
+
+    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo,
+                                         const int&        theMouseBtn,
+                                         bool&             theIsItemUnclicked);
+
     inline GLdouble getRootScaleX() const {
         return myScaleGlX;
     }
@@ -132,9 +147,23 @@ class StGLRootWidget : public StGLWidget {
     ST_CPPEXPORT void stglScissorRect(const StRectI_t& theRect,
                                       StGLBoxPx&       theScissorRect) const;
 
+    /**
+     * Append widget to destroy list.
+     * This method should be used to destroy widget within callback processing
+     * to prevent corruption during widgets iteration.
+     * @param theWidget the widget to destroy
+     */
+    ST_CPPEXPORT virtual void destroyWithDelay(StGLWidget* theWidget);
+
         private:
 
-    /// TODO (Kirill Gavrilov#9) - replace with list to StHandle from some base class
+    /**
+     * Perform pending destroy requests.
+     */
+    ST_CPPEXPORT void clearDestroyList();
+
+        private:
+
     StGLSharePointer**    myShareArray; //!< resources shared within GL context (commonly used)
     size_t                myShareSize;
     StGLProjCamera        myProjCamera; //!< projection camera
@@ -146,6 +175,8 @@ class StGLRootWidget : public StGLWidget {
     GLdouble              myScaleGlY;   //!< scale factor to optimize convertion from Pixels -> GL coordinates
     StPointD_t            cursorZo;     //!< mouse cursor position
     GLint                 myViewport[4];//!< cached GL viewport
+
+    StArrayList<StGLWidget*> myDestroyList; //!< list of widgets to be destroyed
 
 };
 

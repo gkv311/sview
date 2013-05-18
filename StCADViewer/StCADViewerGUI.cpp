@@ -175,12 +175,11 @@ void StCADViewerGUI::doAboutProgram(const size_t ) {
         "(C) 2011-2013 Kirill Gavrilov (kirill@sview.ru).\nOfficial site: www.sview.ru");
     StGLMessageBox* anAboutDialog = new StGLMessageBox(this, aTitle + '\n'
         + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr,
-        512, 256);
+        512, 300);
+    anAboutDialog->addCloseButton("Close");
 
     anAboutDialog->setVisibility(true, true);
     anAboutDialog->stglInit();
-    anAboutDialog->signals.onClickLeft .connect(anAboutDialog, &StGLMessageBox::doKillSelf);
-    anAboutDialog->signals.onClickRight.connect(anAboutDialog, &StGLMessageBox::doKillSelf);
 }
 
 void StCADViewerGUI::doOpenLicense(const size_t ) {

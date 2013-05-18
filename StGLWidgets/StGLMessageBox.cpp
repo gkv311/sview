@@ -7,6 +7,7 @@
  */
 
 #include <StGLWidgets/StGLMessageBox.h>
+#include <StGLWidgets/StGLButton.h>
 
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
@@ -16,7 +17,8 @@ StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
                                const int       theWidth,
                                const int       theHeight)
 : StGLWidget(theParent, 32, 32, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), theWidth, theHeight),
-  myTextArea(NULL) {
+  myTextArea(NULL),
+  myHasButtons(false) {
     StGLWidget::signals.onMouseUnclick.connect(this, &StGLMessageBox::doMouseUnclick);
 
     const int OFFSET_PIXELS = 32;
@@ -35,6 +37,14 @@ StGLMessageBox::~StGLMessageBox() {
     StGLContext& aCtx = getContext();
     myVertexBuf.release(aCtx);
     myProgram.release(aCtx);
+}
+
+void StGLMessageBox::addCloseButton(const StString& theTitle) {
+    myHasButtons = true;
+    StGLButton* aButton = new StGLButton(this, 0, -24, theTitle.isEmpty() ? "Close" : theTitle);
+    aButton->signals.onBtnClick.connect(this, &StGLMessageBox::doKillSelf);
+    aButton->setCorner(StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER));
+    aButton->setHeight(24);
 }
 
 bool StGLMessageBox::stglInit() {
@@ -90,8 +100,8 @@ void StGLMessageBox::stglResize() {
 }
 
 void StGLMessageBox::stglResize(const StRectI_t& theWinRectPx) {
-    StGLWidget::stglResize(theWinRectPx);
     stglResize();
+    StGLWidget::stglResize(theWinRectPx);
 }
 
 void StGLMessageBox::stglDraw(unsigned int theView) {
@@ -157,7 +167,7 @@ bool StGLMessageBox::tryUnClick(const StPointD_t& theCursorZo,
 }
 
 void StGLMessageBox::doKillSelf(const size_t ) {
-    delete this; /// TODO (Kirill Gavrilov#2) danger call!!!
+    destroyWithDelay(this);
 }
 
 void StGLMessageBox::doMouseUnclick(const int theBtnId) {

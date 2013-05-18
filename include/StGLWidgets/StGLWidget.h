@@ -101,6 +101,17 @@ class StGLWidget {
         return myNext != NULL;
     }
 
+    /**
+     * @return position relative to parent widget
+     */
+    ST_CPPEXPORT StGLCorner getCorner() const;
+
+    /**
+     * Setup widget layout.
+     * @param theCorner position relative to parent widget
+     */
+    ST_CPPEXPORT void setCorner(const StGLCorner theCorner);
+
         public:
 
     /**
@@ -197,11 +208,6 @@ class StGLWidget {
      * @param theCursorZo point in Zero2One coordinates
      * @param theMouseBtn mouse button id
      */
-    inline bool tryUnClick(const StPointD_t& theCursorZo,
-                           const int&        theMouseBtn) {
-        bool isItemUnclicked = false;
-        return tryUnClick(theCursorZo, theMouseBtn, isItemUnclicked);
-    }
     ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo,
                                          const int&        theMouseBtn,
                                          bool&             isItemUnclicked);
@@ -248,6 +254,14 @@ class StGLWidget {
     inline void setUserData(const size_t userData) {
         this->userData = userData;
     }
+
+    /**
+     * Append widget to destroy list.
+     * This method should be used to destroy widget within callback processing
+     * to prevent corruption during widgets iteration.
+     * @param theWidget the widget to destroy
+     */
+    ST_CPPEXPORT virtual void destroyWithDelay(StGLWidget* theWidget);
 
         protected: //!< Signals
 

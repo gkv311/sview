@@ -165,3 +165,28 @@ void StGLRootWidget::getRectGl(const StRectI_t& theRectPx,
     theVertices[theFromId + 2] = StGLVec2(GLfloat(aRectGl.left()),  GLfloat(aRectGl.top()));
     theVertices[theFromId + 3] = StGLVec2(GLfloat(aRectGl.left()),  GLfloat(aRectGl.bottom()));
 }
+
+bool StGLRootWidget::tryUnClick(const StPointD_t& theCursorZo,
+                                const int&        theMouseBtn,
+                                bool&             theIsItemUnclicked) {
+    const bool aResult = StGLWidget::tryUnClick(theCursorZo, theMouseBtn, theIsItemUnclicked);
+    clearDestroyList();
+    return aResult;
+}
+
+void StGLRootWidget::destroyWithDelay(StGLWidget* theWidget) {
+    for(size_t anIter = 0; anIter < myDestroyList.size(); ++anIter) {
+        if(theWidget == myDestroyList[anIter]) {
+            return; // already appended
+        }
+    }
+    myDestroyList.add(theWidget);
+}
+
+void StGLRootWidget::clearDestroyList() {
+    for(size_t anIter = 0; anIter < myDestroyList.size(); ++anIter) {
+        StGLWidget* aWidget = myDestroyList[anIter];
+        delete aWidget;
+    }
+    myDestroyList.clear();
+}

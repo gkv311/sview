@@ -120,7 +120,7 @@ bool StGLMenu::stglInit() {
         if(anItem->getSubMenu() != NULL) {
             if(myOrient == MENU_HORIZONTAL) {
                 anItem->getSubMenu()->changeRectPx().moveTopLeftTo(anItem->getRectPxAbsolute().left(), anItem->getRectPxAbsolute().bottom());
-            } else {
+            } else if(myOrient == MENU_VERTICAL) {
                 anItem->getSubMenu()->changeRectPx().moveTopLeftTo(anItem->getRectPxAbsolute().right() - 10, anItem->getRectPxAbsolute().top());
             }
         }

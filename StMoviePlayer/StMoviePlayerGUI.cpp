@@ -544,12 +544,11 @@ void StMoviePlayerGUI::doAboutProgram(const size_t ) {
         + aVerString + ": " + StVersionInfo::getSDKVersionString()
         + " "+ StThread::getArchString()
         + "\n \n" + aDescr,
-        512, 256);
+        512, 300);
+    aboutDialog->addCloseButton("Close");
 
     aboutDialog->setVisibility(true, true);
     aboutDialog->stglInit();
-    aboutDialog->signals.onClickLeft.connect(aboutDialog,  &StGLMessageBox::doKillSelf);
-    aboutDialog->signals.onClickRight.connect(aboutDialog, &StGLMessageBox::doKillSelf);
 }
 
 void StMoviePlayerGUI::doUserTips(const size_t ) {
@@ -574,12 +573,11 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
         anInfo += anInfoList[anIter];
     }
     StString aString = aTitle + "\n\n \n" + anInfo;
-    StGLMessageBox* anInfoDialog = new StGLMessageBox(this, aString, 512, 256);
+    StGLMessageBox* anInfoDialog = new StGLMessageBox(this, aString, 512, 300);
+    anInfoDialog->addCloseButton("Close");
 
     anInfoDialog->setVisibility(true, true);
     anInfoDialog->stglInit();
-    anInfoDialog->signals.onClickLeft.connect(anInfoDialog,  &StGLMessageBox::doKillSelf);
-    anInfoDialog->signals.onClickRight.connect(anInfoDialog, &StGLMessageBox::doKillSelf);
 }
 
 void StMoviePlayerGUI::doCheckUpdates(const size_t ) {
@@ -941,18 +939,16 @@ void StMoviePlayerGUI::doAboutRenderer(const size_t ) {
         anAboutText = StString() + "Plugin '" + myPlugin->getMainWindow()->getRendererId() + "' doesn't provide description";
     }
 
-    StGLMessageBox* aDialog = new StGLMessageBox(this, anAboutText, 512, 256);
+    StGLMessageBox* aDialog = new StGLMessageBox(this, anAboutText, 512, 300);
+    aDialog->addCloseButton("Close");
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
-    aDialog->signals.onClickLeft. connect(aDialog, &StGLMessageBox::doKillSelf);
-    aDialog->signals.onClickRight.connect(aDialog, &StGLMessageBox::doKillSelf);
 }
 
 void StMoviePlayerGUI::showUpdatesNotify() {
     StGLMessageBox* notifyMsg = new StGLMessageBox(this, myLangMap->changeValueId(UPDATES_NOTIFY,
         "A new version of sView is available on the official site www.sview.ru.\nPlease update your program."));
+    notifyMsg->addCloseButton("Close");
     notifyMsg->setVisibility(true, true);
     notifyMsg->stglInit();
-    notifyMsg->signals.onClickLeft.connect(notifyMsg,  &StGLMessageBox::doKillSelf);
-    notifyMsg->signals.onClickRight.connect(notifyMsg, &StGLMessageBox::doKillSelf);
 }

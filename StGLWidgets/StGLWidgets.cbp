@@ -232,6 +232,7 @@
 			<Add directory="../lib/$(TARGET_NAME)" />
 			<Add directory="../bin/$(TARGET_NAME)" />
 		</Linker>
+		<Unit filename="StGLButton.cpp" />
 		<Unit filename="StGLCheckbox.cpp" />
 		<Unit filename="StGLCheckboxTextured.cpp" />
 		<Unit filename="StGLDescription.cpp" />
@@ -268,6 +269,7 @@
 		<Unit filename="shaders/sphereGetColorLinear.shf" />
 		<Unit filename="shaders/sphereImage.shf" />
 		<Unit filename="shaders/sphereImage.shv" />
+		<Unit filename="../include/StGLWidgets/StGLButton.h" />
 		<Unit filename="../include/StGLWidgets/StGLCheckbox.h" />
 		<Unit filename="../include/StGLWidgets/StGLCheckboxTextured.h" />
 		<Unit filename="../include/StGLWidgets/StGLCorner.h" />

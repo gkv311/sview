@@ -32,6 +32,13 @@ class StGLMessageBox : public StGLWidget {
     ST_CPPEXPORT virtual bool tryClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemClicked);
     ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemUnclicked);
 
+        public:
+
+    /**
+     * Append button to this message box.
+     */
+    ST_CPPEXPORT void addCloseButton(const StString& theTitle);
+
         private:   //! @name callback Slots (private overriders)
 
     ST_LOCAL void doMouseUnclick(const int theBtnId);
@@ -52,9 +59,10 @@ class StGLMessageBox : public StGLWidget {
 
         private:   //! @name private fields
 
-    StGLTextArea*     myTextArea;  //!< text widget
-    StGLMenuProgram   myProgram;   //!< GLSL program
-    StGLVertexBuffer  myVertexBuf; //!< vertices VBO
+    StGLTextArea*     myTextArea;   //!< text widget
+    StGLMenuProgram   myProgram;    //!< GLSL program
+    StGLVertexBuffer  myVertexBuf;  //!< vertices VBO
+    bool              myHasButtons; //!< buttons were added to this message box
 
 };
 

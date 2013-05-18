@@ -348,12 +348,11 @@ void StImageViewerGUI::doAboutProgram(const size_t ) {
         + aVerString + ": " + StVersionInfo::getSDKVersionString()
         + " "+ StThread::getArchString()
         + "\n \n" + aDescr,
-        512, 256);
+        512, 300);
+    aboutDialog->addCloseButton("Close");
 
     aboutDialog->setVisibility(true, true);
     aboutDialog->stglInit();
-    aboutDialog->signals.onClickLeft.connect(aboutDialog,  &StGLMessageBox::doKillSelf);
-    aboutDialog->signals.onClickRight.connect(aboutDialog, &StGLMessageBox::doKillSelf);
 }
 
 void StImageViewerGUI::doUserTips(const size_t ) {
@@ -365,11 +364,10 @@ void StImageViewerGUI::doAboutSystem(const size_t ) {
     StString anInfo = getContext().stglFullInfo();
     StString aString = aTitle + "\n\n \n" + anInfo;
     StGLMessageBox* aSysInfoDialog = new StGLMessageBox(this, aString, 512, 256);
+    aSysInfoDialog->addCloseButton("Close");
 
     aSysInfoDialog->setVisibility(true, true);
     aSysInfoDialog->stglInit();
-    aSysInfoDialog->signals.onClickLeft.connect(aSysInfoDialog,  &StGLMessageBox::doKillSelf);
-    aSysInfoDialog->signals.onClickRight.connect(aSysInfoDialog, &StGLMessageBox::doKillSelf);
 }
 
 void StImageViewerGUI::doAboutImage(const size_t ) {
@@ -390,12 +388,12 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
         anInfo += anInfoList[anIter];
     }
     StString aString = aTitle + "\n\n \n" + anInfo;
-    StGLMessageBox* anInfoDialog = new StGLMessageBox(this, aString, 512, 256);
+    StGLMessageBox* anInfoDialog = new StGLMessageBox(this, aString, 512, 300);
+    anInfoDialog->addCloseButton("Close");
 
     anInfoDialog->setVisibility(true, true);
     anInfoDialog->stglInit();
-    anInfoDialog->signals.onClickLeft.connect(anInfoDialog,  &StGLMessageBox::doKillSelf);
-    anInfoDialog->signals.onClickRight.connect(anInfoDialog, &StGLMessageBox::doKillSelf);
+
 }
 
 void StImageViewerGUI::doCheckUpdates(const size_t ) {
@@ -665,18 +663,16 @@ void StImageViewerGUI::doAboutRenderer(const size_t ) {
         anAboutText = StString() + "Plugin '" + myPlugin->getMainWindow()->getRendererId() + "' doesn't provide description";
     }
 
-    StGLMessageBox* aDialog = new StGLMessageBox(this, anAboutText, 512, 256);
+    StGLMessageBox* aDialog = new StGLMessageBox(this, anAboutText, 512, 300);
+    aDialog->addCloseButton("Close");
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
-    aDialog->signals.onClickLeft. connect(aDialog, &StGLMessageBox::doKillSelf);
-    aDialog->signals.onClickRight.connect(aDialog, &StGLMessageBox::doKillSelf);
 }
 
 void StImageViewerGUI::showUpdatesNotify() {
     StGLMessageBox* notifyMsg = new StGLMessageBox(this, myLangMap->changeValueId(UPDATES_NOTIFY,
         "A new version of sView is available on the official site www.sview.ru.\nPlease update your program."));
+    notifyMsg->addCloseButton("Close");
     notifyMsg->setVisibility(true, true);
     notifyMsg->stglInit();
-    notifyMsg->signals.onClickLeft.connect(notifyMsg,  &StGLMessageBox::doKillSelf);
-    notifyMsg->signals.onClickRight.connect(notifyMsg, &StGLMessageBox::doKillSelf);
 }

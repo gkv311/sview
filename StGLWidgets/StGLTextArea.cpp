@@ -214,7 +214,7 @@ namespace {
     };
 
     static StString getFont(const int theFontType) {
-    #if (defined(_WIN32) || defined(__WIN32__))
+    #ifdef _WIN32
         switch(theFontType) {
             case ST_FONT_SERIF:
                 return "times.ttf";

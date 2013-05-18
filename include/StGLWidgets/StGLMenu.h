@@ -27,8 +27,9 @@ class StGLMenu : public StGLWidget {
         public:
 
     enum {
-        MENU_VERTICAL = 0,
+        MENU_VERTICAL   = 0,
         MENU_HORIZONTAL = 1,
+        MENU_ZERO       = 2,
     };
 
     // recursively delete all submenus and that this menu itself
@@ -111,7 +112,7 @@ class StGLMenu : public StGLWidget {
 
     ST_LOCAL void stglResize();
 
-        private: //! @name private fields
+        protected: //! @name protected fields
 
     StGLShare<StGLMenuProgram> myProgram;
     StGLVertexBuffer           myVertexBuf;

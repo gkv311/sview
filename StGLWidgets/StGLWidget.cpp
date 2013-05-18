@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -60,6 +60,14 @@ void StGLWidget::destroyChildren() {
         child = child->getNext();
         delete deleteChild;
     }
+}
+
+StGLCorner StGLWidget::getCorner() const {
+    return myCorner;
+}
+
+void StGLWidget::setCorner(const StGLCorner theCorner) {
+    myCorner = theCorner;
 }
 
 void StGLWidget::setPrev(StGLWidget* thePrev) {
@@ -311,4 +319,8 @@ StGLProjCamera* StGLWidget::getCamera() {
 
 StGLContext& StGLWidget::getContext() {
     return myRoot->StGLRootWidget::getContext();
+}
+
+void StGLWidget::destroyWithDelay(StGLWidget* theWidget) {
+    myRoot->destroyWithDelay(theWidget);
 }
