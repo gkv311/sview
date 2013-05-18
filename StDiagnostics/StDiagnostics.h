@@ -44,6 +44,8 @@ class StDiagnostics : public StApplication {
 
     ST_LOCAL virtual void doResize   (const StSizeEvent&  theEvent);
     ST_LOCAL virtual void doKeyDown  (const StKeyEvent&   theEvent);
+    ST_LOCAL virtual void doKeyHold  (const StKeyEvent&   theEvent);
+    ST_LOCAL virtual void doKeyUp    (const StKeyEvent&   theEvent);
     ST_LOCAL virtual void doMouseDown(const StClickEvent& theEvent);
     ST_LOCAL virtual void doMouseUp  (const StClickEvent& theEvent);
 

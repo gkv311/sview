@@ -36,8 +36,9 @@ StGLWidget::StGLWidget(StGLWidget* theParent,
   opacityOffMs(5000.0),
   opacityOnTimer(false),
   opacityOffTimer(true),
-  isResized(true) {
-    //
+  isResized(true),
+  myHasFocus(false),
+  myIsTopWidget(false) {
     if(myParent != NULL) {
         myParent->getChildren()->add(this);
     }
@@ -45,6 +46,10 @@ StGLWidget::StGLWidget(StGLWidget* theParent,
 }
 
 StGLWidget::~StGLWidget() {
+    if(myRoot != NULL
+    && myRoot->getFocus() == this) {
+        myRoot->setFocus(NULL);
+    }
     if(myParent != NULL) {
         // remove self from parent
         myParent->getChildren()->remove(this);
@@ -68,6 +73,19 @@ StGLCorner StGLWidget::getCorner() const {
 
 void StGLWidget::setCorner(const StGLCorner theCorner) {
     myCorner = theCorner;
+}
+
+bool StGLWidget::isChild(StGLWidget* theWidget,
+                         const bool  theIsRecursive) {
+    for(StGLWidget* aChild = myChildren.getStart(); aChild != NULL; aChild = aChild->getNext()) {
+        if(aChild == theWidget) {
+            return true;
+        } else if(theIsRecursive
+               && aChild->isChild(theWidget, true)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void StGLWidget::setPrev(StGLWidget* thePrev) {
@@ -310,6 +328,18 @@ bool StGLWidget::tryUnClick(const StPointD_t& cursorZo, const int& mouseBtn, boo
         isItemUnclicked = signals.onMouseUnclick(mouseBtn);
         return true;
     }
+    return false;
+}
+
+bool StGLWidget::doKeyDown(const StKeyEvent& ) {
+    return false;
+}
+
+bool StGLWidget::doKeyHold(const StKeyEvent& ) {
+    return false;
+}
+
+bool StGLWidget::doKeyUp(const StKeyEvent& ) {
     return false;
 }
 

@@ -30,7 +30,8 @@ StGLRootWidget::StGLRootWidget()
   myRectGl(),
   myScaleGlX(1.0),
   myScaleGlY(1.0),
-  cursorZo(0.0, 0.0) {
+  cursorZo(0.0, 0.0),
+  myFocusWidget(NULL) {
     // unify access
     StGLWidget::myRoot = this;
     myViewport[0] = 0;
@@ -174,6 +175,33 @@ bool StGLRootWidget::tryUnClick(const StPointD_t& theCursorZo,
     return aResult;
 }
 
+bool StGLRootWidget::doKeyDown(const StKeyEvent& theEvent) {
+    bool isProcessed = false;
+    if(myFocusWidget != NULL) {
+        isProcessed = myFocusWidget->doKeyDown(theEvent);
+        clearDestroyList();
+    }
+    return isProcessed;
+}
+
+bool StGLRootWidget::doKeyHold(const StKeyEvent& theEvent) {
+    bool isProcessed = false;
+    if(myFocusWidget != NULL) {
+        isProcessed = myFocusWidget->doKeyHold(theEvent);
+        clearDestroyList();
+    }
+    return isProcessed;
+}
+
+bool StGLRootWidget::doKeyUp(const StKeyEvent& theEvent) {
+    bool isProcessed = false;
+    if(myFocusWidget != NULL) {
+        isProcessed = myFocusWidget->doKeyUp(theEvent);
+        clearDestroyList();
+    }
+    return isProcessed;
+}
+
 void StGLRootWidget::destroyWithDelay(StGLWidget* theWidget) {
     for(size_t anIter = 0; anIter < myDestroyList.size(); ++anIter) {
         if(theWidget == myDestroyList[anIter]) {
@@ -189,4 +217,33 @@ void StGLRootWidget::clearDestroyList() {
         delete aWidget;
     }
     myDestroyList.clear();
+}
+
+StGLWidget* StGLRootWidget::setFocus(StGLWidget* theWidget) {
+    if(myFocusWidget == theWidget) {
+        return myFocusWidget;
+    }
+
+    StGLWidget* aPrevWidget = myFocusWidget;
+    if(aPrevWidget != NULL) {
+        aPrevWidget->myHasFocus = false;
+    }
+
+    myFocusWidget = theWidget;
+    if(theWidget == NULL) {
+        // search for another top widget (prefer widget with greater visibility layer)
+        for(StGLWidget* aChild = myChildren.getLast(); aChild != NULL; aChild = aChild->getPrev()) {
+            if(aChild->isTopWidget()
+            && aPrevWidget != aChild
+            && aChild->isVisible()) {
+                myFocusWidget = aChild;
+                break;
+            }
+        }
+    }
+
+    if(myFocusWidget != NULL) {
+        myFocusWidget->myHasFocus = true;
+    }
+    return aPrevWidget;
 }

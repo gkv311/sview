@@ -8,9 +8,12 @@
 
 #include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLButton.h>
+#include <StGLWidgets/StGLRootWidget.h>
 
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
+
+#include <StCore/StEvent.h>
 
 StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
                                const StString& theText,
@@ -18,6 +21,7 @@ StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
                                const int       theHeight)
 : StGLWidget(theParent, 32, 32, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), theWidth, theHeight),
   myTextArea(NULL),
+  myDefaultBtn(NULL),
   myHasButtons(false) {
     StGLWidget::signals.onMouseUnclick.connect(this, &StGLMessageBox::doMouseUnclick);
 
@@ -31,6 +35,9 @@ StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
     myTextArea->setText(theText);
     myTextArea->setBorder(false);
     myTextArea->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
+
+    myIsTopWidget = true;
+    getRoot()->setFocus(this); // take input focus
 }
 
 StGLMessageBox::~StGLMessageBox() {
@@ -39,12 +46,38 @@ StGLMessageBox::~StGLMessageBox() {
     myProgram.release(aCtx);
 }
 
+bool StGLMessageBox::doKeyDown(const StKeyEvent& theEvent) {
+    switch(theEvent.VKey) {
+        case ST_VK_ESCAPE: {
+            destroyWithDelay(this);
+            return true;
+        }
+        case ST_VK_SPACE:
+        case ST_VK_RETURN:
+            if(myDefaultBtn != NULL) {
+                myDefaultBtn->signals.onBtnClick(myDefaultBtn->getUserData());
+            }
+            return true;
+        case ST_VK_UP:
+            myTextArea->changeRectPx().top()    += 10;
+            myTextArea->changeRectPx().bottom() += 10;
+            return true;
+        case ST_VK_DOWN:
+            myTextArea->changeRectPx().top()    -= 10;
+            myTextArea->changeRectPx().bottom() -= 10;
+            return true;
+        default:
+            return false;
+    }
+}
+
 void StGLMessageBox::addCloseButton(const StString& theTitle) {
     myHasButtons = true;
     StGLButton* aButton = new StGLButton(this, 0, -24, theTitle.isEmpty() ? "Close" : theTitle);
     aButton->signals.onBtnClick.connect(this, &StGLMessageBox::doKillSelf);
     aButton->setCorner(StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER));
     aButton->setHeight(24);
+    myDefaultBtn = aButton;
 }
 
 bool StGLMessageBox::stglInit() {

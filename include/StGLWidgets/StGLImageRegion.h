@@ -66,6 +66,9 @@ class StGLImageRegion : public StGLWidget {
     ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemClicked);
     ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemUnclicked);
 
+    ST_CPPEXPORT virtual bool doKeyDown(const StKeyEvent& theEvent);
+    ST_CPPEXPORT virtual bool doKeyHold(const StKeyEvent& theEvent);
+
         public: //! @name Properties
 
     struct {

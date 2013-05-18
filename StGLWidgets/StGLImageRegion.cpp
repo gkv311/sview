@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -13,6 +13,8 @@
 
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
+
+#include <StCore/StEvent.h>
 
 namespace {
 
@@ -589,4 +591,120 @@ void StGLImageRegion::doChangeTexFilter(const int32_t theTextureFilter) {
     StGLContext& aCtx = getContext();
     myProgramFlat  .setSmoothFilter(aCtx, StGLImageProgram::TextureFilter(theTextureFilter));
     myProgramSphere.setSmoothFilter(aCtx, StGLImageProgram::TextureFilter(theTextureFilter));
+}
+
+bool StGLImageRegion::doKeyDown(const StKeyEvent& theEvent) {
+    StHandle<StStereoParams> aParams = params.stereoFile;
+    if(aParams.isNull()) {
+        return false;
+    }
+
+    switch(theEvent.VKey) {
+        case ST_VK_BACK:
+            aParams->reset();
+            return true;
+        case ST_VK_COMMA:
+        case ST_VK_DIVIDE: {
+            if(theEvent.Flags == ST_VF_CONTROL) {
+                aParams->decSeparationDy();
+            } else {
+                aParams->decSeparationDx();
+            }
+            return true;
+        }
+        case ST_VK_PERIOD:
+        case ST_VK_MULTIPLY: {
+            if(theEvent.Flags == ST_VF_CONTROL) {
+                aParams->incSeparationDy();
+            } else {
+                aParams->incSeparationDx();
+            }
+            return true;
+        }
+        case ST_VK_P:
+            aParams->nextViewMode();
+            return true;
+        case ST_VK_BRACKETLEFT: {
+            if(theEvent.Flags == ST_VF_NONE) {
+                aParams->decZRotate();
+            }
+            return true;
+        }
+        case ST_VK_BRACKETRIGHT: {
+            if(theEvent.Flags == ST_VF_NONE) {
+                aParams->incZRotate();
+            }
+            return true;
+        }
+        case ST_VK_G: {
+            if(theEvent.Flags == ST_VF_SHIFT) {
+                params.gamma->increment();
+            } else if(theEvent.Flags == ST_VF_CONTROL) {
+                params.gamma->decrement();
+            }
+            return true;
+        }
+        default:
+            return false;
+    }
+}
+
+bool StGLImageRegion::doKeyHold(const StKeyEvent& theEvent) {
+    StHandle<StStereoParams> aParams = params.stereoFile;
+    if(aParams.isNull()) {
+        return false;
+    }
+
+    const GLfloat aDuration = (GLfloat )theEvent.Progress;
+    switch(theEvent.VKey) {
+        // positioning
+        case ST_VK_LEFT:
+            aParams->moveToRight(aDuration);
+            return true;
+        case ST_VK_RIGHT:
+            aParams->moveToLeft(aDuration);
+            return true;
+        case ST_VK_UP:
+            aParams->moveToDown(aDuration);
+            return true;
+        case ST_VK_DOWN:
+            aParams->moveToUp(aDuration);
+            return true;
+        // zooming
+        case ST_VK_ADD:
+        case ST_VK_OEM_PLUS:
+            aParams->scaleIn(aDuration);
+            return true;
+        case ST_VK_SUBTRACT:
+        case ST_VK_OEM_MINUS:
+            aParams->scaleOut(aDuration);
+            return true;
+        // rotation
+        case ST_VK_BRACKETLEFT: { // [
+            if(theEvent.Flags == ST_VF_CONTROL) {
+                aParams->decZRotateL(aDuration);
+            }
+            return true;
+        }
+        case ST_VK_BRACKETRIGHT: { // ]
+            if(theEvent.Flags == ST_VF_CONTROL) {
+                aParams->incZRotateL(aDuration);
+            }
+            return true;
+        }
+        case ST_VK_SEMICOLON: { // ;
+            if(theEvent.Flags == ST_VF_CONTROL) {
+                aParams->incSepRotation(aDuration);
+            }
+            return true;
+        }
+        case ST_VK_APOSTROPHE: { // '
+            if(theEvent.Flags == ST_VF_CONTROL) {
+                aParams->decSepRotation(aDuration);
+            }
+            return true;
+        }
+        default:
+            return false;
+    }
 }

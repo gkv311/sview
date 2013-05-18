@@ -110,6 +110,11 @@ void StDiagnostics::doKeyDown(const StKeyEvent& theEvent) {
         return;
     }
 
+    if(myGUI->getFocus() != NULL) {
+        myGUI->doKeyDown(theEvent);
+        return;
+    }
+
     switch(theEvent.VKey) {
         case ST_VK_ESCAPE:
             StApplication::exit(0);
@@ -126,6 +131,20 @@ void StDiagnostics::doKeyDown(const StKeyEvent& theEvent) {
             return;
         default:
             break;
+    }
+}
+
+void StDiagnostics::doKeyHold(const StKeyEvent& theEvent) {
+    if(!myGUI.isNull()
+    && myGUI->getFocus() != NULL) {
+        myGUI->doKeyHold(theEvent);
+    }
+}
+
+void StDiagnostics::doKeyUp(const StKeyEvent& theEvent) {
+    if(!myGUI.isNull()
+    && myGUI->getFocus() != NULL) {
+        myGUI->doKeyUp(theEvent);
     }
 }
 

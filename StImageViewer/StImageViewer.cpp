@@ -337,6 +337,12 @@ void StImageViewer::doKeyDown(const StKeyEvent& theEvent) {
         return;
     }
 
+    if(myGUI->getFocus() != NULL) {
+        myGUI->doKeyDown(theEvent);
+        return;
+    }
+
+    myGUI->stImageRegion->doKeyDown(theEvent);
     switch(theEvent.VKey) {
         case ST_VK_ESCAPE: {
             if(!myEscNoQuit) {
@@ -420,19 +426,7 @@ void StImageViewer::doKeyDown(const StKeyEvent& theEvent) {
             return;
         }
 
-        // reset stereo attributes
-        case ST_VK_BACK:
-            doReset();
-            return;
         // post process keys
-        case ST_VK_G: {
-            if(theEvent.Flags == ST_VF_SHIFT) {
-                myGUI->stImageRegion->params.gamma->increment();
-            } else if(theEvent.Flags == ST_VF_CONTROL) {
-                myGUI->stImageRegion->params.gamma->decrement();
-            }
-            return;
-        }
         case ST_VK_B: {
             if(theEvent.Flags == ST_VF_SHIFT) {
                 myGUI->stImageRegion->params.brightness->increment();
@@ -452,48 +446,6 @@ void StImageViewer::doKeyDown(const StKeyEvent& theEvent) {
         }
         default: break;
     }
-
-    StHandle<StStereoParams> aParams = myGUI->stImageRegion->getSource();
-    if(aParams.isNull()) {
-        return;
-    }
-
-    switch(theEvent.VKey) {
-        case ST_VK_COMMA:
-        case ST_VK_DIVIDE: {
-            if(theEvent.Flags == ST_VF_CONTROL) {
-                aParams->decSeparationDy();
-            } else {
-                aParams->decSeparationDx();
-            }
-            return;
-        }
-        case ST_VK_PERIOD:
-        case ST_VK_MULTIPLY: {
-            if(theEvent.Flags == ST_VF_CONTROL) {
-                aParams->incSeparationDy();
-            } else {
-                aParams->incSeparationDx();
-            }
-            return;
-        }
-        case ST_VK_P:
-            aParams->nextViewMode();
-            return;
-        case ST_VK_BRACKETLEFT: {
-            if(theEvent.Flags == ST_VF_NONE) {
-                aParams->decZRotate();
-            }
-            return;
-        }
-        case ST_VK_BRACKETRIGHT: {
-            if(theEvent.Flags == ST_VF_NONE) {
-                aParams->incZRotate();
-            }
-            return;
-        }
-        default: break;
-    }
 }
 
 void StImageViewer::doKeyHold(const StKeyEvent& theEvent) {
@@ -501,61 +453,22 @@ void StImageViewer::doKeyHold(const StKeyEvent& theEvent) {
         return;
     }
 
-    StHandle<StStereoParams> aParams = myGUI->stImageRegion->getSource();
-    if(aParams.isNull()) {
+    if(myGUI->getFocus() != NULL) {
+        myGUI->doKeyHold(theEvent);
+    } else {
+        myGUI->stImageRegion->doKeyHold(theEvent);
+    }
+}
+
+void StImageViewer::doKeyUp(const StKeyEvent& theEvent) {
+    if(myGUI.isNull()) {
         return;
     }
 
-    const GLfloat aDuration = (GLfloat )theEvent.Progress;
-    switch(theEvent.VKey) {
-        // positioning
-        case ST_VK_LEFT:
-            aParams->moveToRight(aDuration);
-            break;
-        case ST_VK_RIGHT:
-            aParams->moveToLeft(aDuration);
-            break;
-        case ST_VK_UP:
-            aParams->moveToDown(aDuration);
-            break;
-        case ST_VK_DOWN:
-            aParams->moveToUp(aDuration);
-            break;
-        // zooming
-        case ST_VK_ADD:
-        case ST_VK_OEM_PLUS:
-            aParams->scaleIn(aDuration);
-            break;
-        case ST_VK_SUBTRACT:
-        case ST_VK_OEM_MINUS:
-            aParams->scaleOut(aDuration);
-            break;
-        // rotation
-        case ST_VK_BRACKETLEFT: { // [
-            if(theEvent.Flags == ST_VF_CONTROL) {
-                aParams->decZRotateL(aDuration);
-            }
-            break;
-        }
-        case ST_VK_BRACKETRIGHT: { // ]
-            if(theEvent.Flags == ST_VF_CONTROL) {
-                aParams->incZRotateL(aDuration);
-            }
-            break;
-        }
-        case ST_VK_SEMICOLON: { // ;
-            if(theEvent.Flags == ST_VF_CONTROL) {
-                aParams->incSepRotation(aDuration);
-            }
-            break;
-        }
-        case ST_VK_APOSTROPHE: { // '
-            if(theEvent.Flags == ST_VF_CONTROL) {
-                aParams->decSepRotation(aDuration);
-            }
-            break;
-        }
-        default: break;
+    if(myGUI->getFocus() != NULL) {
+        myGUI->doKeyUp(theEvent);
+    } else {
+        myGUI->stImageRegion->doKeyUp(theEvent);
     }
 }
 

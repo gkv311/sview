@@ -12,6 +12,8 @@
 #include <StGLWidgets/StGLTextArea.h>
 #include <StGLWidgets/StGLMenuProgram.h>
 
+class StGLButton;
+
 /**
  * Simple widget to show message text.
  */
@@ -39,6 +41,8 @@ class StGLMessageBox : public StGLWidget {
      */
     ST_CPPEXPORT void addCloseButton(const StString& theTitle);
 
+    ST_CPPEXPORT virtual bool doKeyDown(const StKeyEvent& theEvent);
+
         private:   //! @name callback Slots (private overriders)
 
     ST_LOCAL void doMouseUnclick(const int theBtnId);
@@ -60,6 +64,7 @@ class StGLMessageBox : public StGLWidget {
         private:   //! @name private fields
 
     StGLTextArea*     myTextArea;   //!< text widget
+    StGLButton*       myDefaultBtn; //!< default button to redirect Enter
     StGLMenuProgram   myProgram;    //!< GLSL program
     StGLVertexBuffer  myVertexBuf;  //!< vertices VBO
     bool              myHasButtons; //!< buttons were added to this message box

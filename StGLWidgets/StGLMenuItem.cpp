@@ -174,7 +174,7 @@ void StGLMenuItem::stglDraw(unsigned int theView) {
     StGLMenuItem::State aState = StGLMenuItem::PASSIVE;
     if(isClicked(ST_MOUSE_LEFT) || (isSelected() && hasSubMenu())) {
         aState = StGLMenuItem::CLICKED;
-    } else if(isPointIn(getRoot()->getCursorZo())) {
+    } else if(isPointIn(getRoot()->getCursorZo()) || myHasFocus) {
         aState = StGLMenuItem::HIGHLIGHT;
     }
 

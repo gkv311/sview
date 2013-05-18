@@ -19,8 +19,9 @@
 
 #include <StCore/StVirtualKeys.h> // mouse keys
 
-class StGLRootWidget;
-class StGLContext;
+class  StGLRootWidget;
+class  StGLContext;
+struct StKeyEvent;
 
 /**
  * This is abstract class for active 2D elements (buttons, menues, bars...) representation
@@ -62,6 +63,14 @@ class StGLWidget {
     inline StGLWidgetList* getChildren() {
         return &myChildren;
     }
+
+    /**
+     * @param theWidget      widget to search
+     * @param theIsRecursive flag to search through children of children
+     * @return true if wpecified widget is child of this object
+     */
+    ST_CPPEXPORT bool isChild(StGLWidget* theWidget,
+                              const bool  theIsRecursive);
 
     /**
      * @return link to previous item in the list
@@ -169,6 +178,13 @@ class StGLWidget {
     }
 
     /**
+     * @return true if widget can process input events
+     */
+    inline bool isTopWidget() const {
+        return myIsTopWidget;
+    }
+
+    /**
      * Modify opacity due to visibility flag and opacity timers.
      * @param isVisible opacity UP/DOWN
      * @param isForce   change opacity to 0 or 1 instantly
@@ -211,6 +227,27 @@ class StGLWidget {
     ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo,
                                          const int&        theMouseBtn,
                                          bool&             isItemUnclicked);
+
+    /**
+     * Process key down event. Default implementation do nothing.
+     * @param theEvent key event
+     * @return true if event has been processed
+     */
+    ST_CPPEXPORT virtual bool doKeyDown(const StKeyEvent& theEvent);
+
+    /**
+     * Process key hold event. Default implementation do nothing.
+     * @param theEvent key event
+     * @return true if event has been processed
+     */
+    ST_CPPEXPORT virtual bool doKeyHold(const StKeyEvent& theEvent);
+
+    /**
+     * Process key up event. Default implementation do nothing.
+     * @param theEvent key event
+     * @return true if event has been processed
+     */
+    ST_CPPEXPORT virtual bool doKeyUp  (const StKeyEvent& theEvent);
 
     /**
      * @param pointZo point in Zero2One coordinates
@@ -334,6 +371,8 @@ class StGLWidget {
     StTimer         opacityOnTimer;  // timer
     StTimer         opacityOffTimer; // timer
     bool            isResized;
+    bool            myHasFocus;
+    bool            myIsTopWidget;
 
 };
 

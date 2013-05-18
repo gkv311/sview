@@ -60,6 +60,27 @@ class StGLRootWidget : public StGLWidget {
                                          const int&        theMouseBtn,
                                          bool&             theIsItemUnclicked);
 
+    /**
+     * Process key down event. Default implementation redirect event to widget in focus.
+     * @param theEvent key event
+     * @return true if event has been processed
+     */
+    ST_CPPEXPORT virtual bool doKeyDown(const StKeyEvent& theEvent);
+
+    /**
+     * Process key hold event. Default implementation redirect event to widget in focus.
+     * @param theEvent key event
+     * @return true if event has been processed
+     */
+    ST_CPPEXPORT virtual bool doKeyHold(const StKeyEvent& theEvent);
+
+    /**
+     * Process key up event. Default implementation redirect event to widget in focus.
+     * @param theEvent key event
+     * @return true if event has been processed
+     */
+    ST_CPPEXPORT virtual bool doKeyUp  (const StKeyEvent& theEvent);
+
     inline GLdouble getRootScaleX() const {
         return myScaleGlX;
     }
@@ -98,6 +119,19 @@ class StGLRootWidget : public StGLWidget {
     inline StGLProjCamera* getCamera() {
         return &myProjCamera;
     }
+
+    /**
+     * @return widget in focus
+     */
+    inline StGLWidget* getFocus() {
+        return myFocusWidget;
+    }
+
+    /**
+     * @param theWidget new widget to set focus
+     * @return previous widget focus
+     */
+    ST_CPPEXPORT StGLWidget* setFocus(StGLWidget* theWidget);
 
     /**
      * @return OpenGL context.
@@ -164,19 +198,20 @@ class StGLRootWidget : public StGLWidget {
 
         private:
 
-    StGLSharePointer**    myShareArray; //!< resources shared within GL context (commonly used)
-    size_t                myShareSize;
-    StGLProjCamera        myProjCamera; //!< projection camera
-    StGLMatrix            myScrProjMat; //!< projection matrix within translation to the screen
-    StHandle<StGLContext> myGlCtx;      //!< OpenGL context
+    StGLSharePointer**       myShareArray;  //!< resources shared within GL context (commonly used)
+    size_t                   myShareSize;
+    StGLProjCamera           myProjCamera;  //!< projection camera
+    StGLMatrix               myScrProjMat;  //!< projection matrix within translation to the screen
+    StHandle<StGLContext>    myGlCtx;       //!< OpenGL context
 
-    StRectD_t             myRectGl;     //!< rectangle in GL coordinates
-    GLdouble              myScaleGlX;   //!< scale factor to optimize convertion from Pixels -> GL coordinates
-    GLdouble              myScaleGlY;   //!< scale factor to optimize convertion from Pixels -> GL coordinates
-    StPointD_t            cursorZo;     //!< mouse cursor position
-    GLint                 myViewport[4];//!< cached GL viewport
+    StRectD_t                myRectGl;      //!< rectangle in GL coordinates
+    GLdouble                 myScaleGlX;    //!< scale factor to optimize convertion from Pixels -> GL coordinates
+    GLdouble                 myScaleGlY;    //!< scale factor to optimize convertion from Pixels -> GL coordinates
+    StPointD_t               cursorZo;      //!< mouse cursor position
+    GLint                    myViewport[4]; //!< cached GL viewport
 
     StArrayList<StGLWidget*> myDestroyList; //!< list of widgets to be destroyed
+    StGLWidget*              myFocusWidget; //!< widget currently in focus
 
 };
 

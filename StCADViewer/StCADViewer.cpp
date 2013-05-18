@@ -443,6 +443,11 @@ void StCADViewer::doKeyDown(const StKeyEvent& theEvent) {
         return;
     }
 
+    if(myGUI->getFocus() != NULL) {
+        myGUI->doKeyDown(theEvent);
+        return;
+    }
+
     switch(theEvent.VKey) {
         case ST_VK_ESCAPE:
             StApplication::exit(0);
@@ -538,6 +543,20 @@ void StCADViewer::doKeyDown(const StKeyEvent& theEvent) {
 
         default:
             break;
+    }
+}
+
+void StCADViewer::doKeyHold(const StKeyEvent& theEvent) {
+    if(!myGUI.isNull()
+    && myGUI->getFocus() != NULL) {
+        myGUI->doKeyHold(theEvent);
+    }
+}
+
+void StCADViewer::doKeyUp(const StKeyEvent& theEvent) {
+    if(!myGUI.isNull()
+    && myGUI->getFocus() != NULL) {
+        myGUI->doKeyUp(theEvent);
     }
 }
 
