@@ -28,6 +28,11 @@ class StGLButton : public StGLMenu {
     ST_CPPEXPORT virtual bool stglInit();
 
     /**
+     * @return button width
+     */
+    ST_CPPEXPORT int getWidth() const;
+
+    /**
      * Setup button width.
      */
     ST_CPPEXPORT void setWidth(const int theWidth);
@@ -36,6 +41,8 @@ class StGLButton : public StGLMenu {
      * Setup button height.
      */
     ST_CPPEXPORT void setHeight(const int theHeight);
+
+    ST_CPPEXPORT int getHeight(const int theHeight);
 
         public:  //!< @name Signals
 

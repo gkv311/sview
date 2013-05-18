@@ -21,10 +21,16 @@ StGLButton::StGLButton(StGLWidget*     theParent,
     aBtn->signals.onItemClick.connect(this, &StGLButton::doItemClick);
     aBtn->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
                          StGLTextFormatter::ST_ALIGN_Y_CENTER);
+
+    myWidth = aBtn->computeTextWidth() + 16;
 }
 
 StGLButton::~StGLButton() {
     //
+}
+
+int StGLButton::getWidth() const {
+    return myWidth;
 }
 
 void StGLButton::setWidth(const int theWidth) {
@@ -49,10 +55,6 @@ bool StGLButton::stglInit() {
     StGLMenuItem* anItem = (StGLMenuItem* )getChildren()->getStart();
     if(anItem == NULL) {
         return true;
-    }
-
-    if(myWidth == 0) {
-        myWidth = anItem->computeTextWidth() + 16;
     }
 
     anItem->changeRectPx().left()   = 0;

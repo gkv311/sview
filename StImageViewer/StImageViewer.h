@@ -98,6 +98,7 @@ class StImageViewer : public StApplication {
     ST_LOCAL void doListPrev(const size_t dummy = 0);
     ST_LOCAL void doListNext(const size_t dummy = 0);
     ST_LOCAL void doListLast(const size_t dummy = 0);
+    ST_LOCAL void doDeleteFile(const size_t dummy = 0);
     ST_LOCAL void doSlideShow(const size_t dummy = 0);
     ST_LOCAL void doQuit(const size_t dummy = 0);
 
@@ -164,6 +165,7 @@ class StImageViewer : public StApplication {
     StHandle<StImageViewerGUI> myGUI;             //!< GUI root widget
     StHandle<StImageLoader>    myLoader;          //!< main image loader class
     StHandle<StCheckUpdates>   myUpdates;         //!< check updates utility
+    StHandle<StFileNode>       myFileToDelete;    //!< file node for removal
 
     StCondition                myEventDialog;     //!< event to prevent showing multiple open/save file dialogs
     StCondition                myEventLoaded;     //!< indicate that new file was open

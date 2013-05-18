@@ -23,8 +23,10 @@
 
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
+#include <StGLWidgets/StGLButton.h>
 #include <StGLWidgets/StGLTextureButton.h>
 #include <StGLWidgets/StGLImageRegion.h>
+#include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLMsgStack.h>
 #include <StSocket/StCheckUpdates.h>
 #include <StThreads/StThread.h>
@@ -332,6 +334,20 @@ void StImageViewer::doResize(const StSizeEvent& ) {
     myGUI->stglResize(myWindow->getPlacement());
 }
 
+void StImageViewer::doDeleteFile(const size_t ) {
+    if(myFileToDelete.isNull()
+    || myLoader.isNull()) {
+        return;
+    }
+
+    myLoader->getPlayList().removePhysically(myFileToDelete);
+    if(!myLoader->getPlayList().isEmpty()) {
+        doUpdateStateLoading();
+        myLoader->doLoadNext();
+    }
+    myFileToDelete.nullify();
+}
+
 void StImageViewer::doKeyDown(const StKeyEvent& theEvent) {
     if(myGUI.isNull()) {
         return;
@@ -396,16 +412,25 @@ void StImageViewer::doKeyDown(const StKeyEvent& theEvent) {
         }
         case ST_VK_DELETE: {
             if(theEvent.Flags == ST_VF_SHIFT) {
-                StHandle<StFileNode> aCurrFile = myLoader->getPlayList().getCurrentFile();
-                if(!aCurrFile.isNull() && aCurrFile->size() == 0) {
-                    if(stQuestion(StString("Are you sure you want to completely remove the file\n'") + aCurrFile->getPath() + "'?")) {
-                        myLoader->getPlayList().removePhysically(aCurrFile);
-                        if(!myLoader->getPlayList().isEmpty()) {
-                            doUpdateStateLoading();
-                            myLoader->doLoadNext();
-                        }
-                    }
+                //if(!myFileToDelete.isNull()) {
+                //    return;
+                //}
+
+                myFileToDelete = myLoader->getPlayList().getCurrentFile();
+                if(myFileToDelete.isNull()
+                || myFileToDelete->size() != 0) {
+                    myFileToDelete.nullify();
+                    return;
                 }
+
+                const StString aText = StString("Are you sure you want to completely remove the file\n'")
+                                     + myFileToDelete->getPath() + "'?";
+
+                StGLMessageBox* aDialog = new StGLMessageBox(myGUI.access(), aText, 512, 256);
+                aDialog->addButton("Delete", 96)->signals.onBtnClick += stSlot(this, &StImageViewer::doDeleteFile);
+                aDialog->addButton("Cancel", 96);
+                aDialog->setVisibility(true, true);
+                aDialog->stglInit();
             }
             return;
         }

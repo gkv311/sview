@@ -349,8 +349,7 @@ void StImageViewerGUI::doAboutProgram(const size_t ) {
         + " "+ StThread::getArchString()
         + "\n \n" + aDescr,
         512, 300);
-    aboutDialog->addCloseButton("Close");
-
+    aboutDialog->addButton("Close");
     aboutDialog->setVisibility(true, true);
     aboutDialog->stglInit();
 }
@@ -364,8 +363,7 @@ void StImageViewerGUI::doAboutSystem(const size_t ) {
     StString anInfo = getContext().stglFullInfo();
     StString aString = aTitle + "\n\n \n" + anInfo;
     StGLMessageBox* aSysInfoDialog = new StGLMessageBox(this, aString, 512, 256);
-    aSysInfoDialog->addCloseButton("Close");
-
+    aSysInfoDialog->addButton("Close");
     aSysInfoDialog->setVisibility(true, true);
     aSysInfoDialog->stglInit();
 }
@@ -389,8 +387,7 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
     }
     StString aString = aTitle + "\n\n \n" + anInfo;
     StGLMessageBox* anInfoDialog = new StGLMessageBox(this, aString, 512, 300);
-    anInfoDialog->addCloseButton("Close");
-
+    anInfoDialog->addButton("Close");
     anInfoDialog->setVisibility(true, true);
     anInfoDialog->stglInit();
 
@@ -664,7 +661,7 @@ void StImageViewerGUI::doAboutRenderer(const size_t ) {
     }
 
     StGLMessageBox* aDialog = new StGLMessageBox(this, anAboutText, 512, 300);
-    aDialog->addCloseButton("Close");
+    aDialog->addButton("Close");
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
@@ -672,7 +669,7 @@ void StImageViewerGUI::doAboutRenderer(const size_t ) {
 void StImageViewerGUI::showUpdatesNotify() {
     StGLMessageBox* notifyMsg = new StGLMessageBox(this, myLangMap->changeValueId(UPDATES_NOTIFY,
         "A new version of sView is available on the official site www.sview.ru.\nPlease update your program."));
-    notifyMsg->addCloseButton("Close");
+    notifyMsg->addButton("Close");
     notifyMsg->setVisibility(true, true);
     notifyMsg->stglInit();
 }

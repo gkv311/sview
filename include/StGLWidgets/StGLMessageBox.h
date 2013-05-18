@@ -39,7 +39,8 @@ class StGLMessageBox : public StGLWidget {
     /**
      * Append button to this message box.
      */
-    ST_CPPEXPORT void addCloseButton(const StString& theTitle);
+    ST_CPPEXPORT StGLButton* addButton(const StString& theTitle,
+                                       const int       theWidth = 0);
 
     ST_CPPEXPORT virtual bool doKeyDown(const StKeyEvent& theEvent);
 
@@ -64,10 +65,11 @@ class StGLMessageBox : public StGLWidget {
         private:   //! @name private fields
 
     StGLTextArea*     myTextArea;   //!< text widget
+    StGLWidget*       myBtnPanel;   //!< panel for buttons
     StGLButton*       myDefaultBtn; //!< default button to redirect Enter
     StGLMenuProgram   myProgram;    //!< GLSL program
     StGLVertexBuffer  myVertexBuf;  //!< vertices VBO
-    bool              myHasButtons; //!< buttons were added to this message box
+    int               myButtonsNb;  //!< number of buttons added to this message box
 
 };
 

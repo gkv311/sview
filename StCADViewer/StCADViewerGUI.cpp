@@ -176,8 +176,7 @@ void StCADViewerGUI::doAboutProgram(const size_t ) {
     StGLMessageBox* anAboutDialog = new StGLMessageBox(this, aTitle + '\n'
         + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr,
         512, 300);
-    anAboutDialog->addCloseButton("Close");
-
+    anAboutDialog->addButton("Close");
     anAboutDialog->setVisibility(true, true);
     anAboutDialog->stglInit();
 }

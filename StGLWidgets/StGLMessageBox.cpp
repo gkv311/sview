@@ -21,8 +21,9 @@ StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
                                const int       theHeight)
 : StGLWidget(theParent, 32, 32, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), theWidth, theHeight),
   myTextArea(NULL),
+  myBtnPanel(NULL),
   myDefaultBtn(NULL),
-  myHasButtons(false) {
+  myButtonsNb(0) {
     StGLWidget::signals.onMouseUnclick.connect(this, &StGLMessageBox::doMouseUnclick);
 
     const int OFFSET_PIXELS = 32;
@@ -38,6 +39,9 @@ StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
 
     myIsTopWidget = true;
     getRoot()->setFocus(this); // take input focus
+
+    myBtnPanel = new StGLWidget(this, 0, -24, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER), 0, 24);
+    myBtnPanel->setVisibility(true);
 }
 
 StGLMessageBox::~StGLMessageBox() {
@@ -71,13 +75,31 @@ bool StGLMessageBox::doKeyDown(const StKeyEvent& theEvent) {
     }
 }
 
-void StGLMessageBox::addCloseButton(const StString& theTitle) {
-    myHasButtons = true;
-    StGLButton* aButton = new StGLButton(this, 0, -24, theTitle.isEmpty() ? "Close" : theTitle);
-    aButton->signals.onBtnClick.connect(this, &StGLMessageBox::doKillSelf);
-    aButton->setCorner(StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER));
+StGLButton* StGLMessageBox::addButton(const StString& theTitle,
+                                      const int       theWidth) {
+    int aRight = myBtnPanel->getRectPx().right();
+    if(aRight > 0) {
+        aRight += 24;
+    }
+
+    StGLButton* aButton = new StGLButton(myBtnPanel, aRight, 0, theTitle);
+    aButton->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
     aButton->setHeight(24);
+    aButton->setVisibility(true, true);
+
+    if(theWidth > 0) {
+        aButton->setWidth(theWidth);
+    }
+
+    myBtnPanel->changeRectPx().right() += aButton->getWidth();
+    if(++myButtonsNb > 1) {
+        //
+    }
+
+    aButton->signals.onBtnClick += stSlot(this, &StGLMessageBox::doKillSelf);
     myDefaultBtn = aButton;
+
+    return aButton;
 }
 
 bool StGLMessageBox::stglInit() {
