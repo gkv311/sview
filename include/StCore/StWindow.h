@@ -346,6 +346,11 @@ class StWindow {
      */
     ST_CPPEXPORT virtual void getOptions(StParamsList& theList) const;
 
+    /**
+     * Access list of connected monitors.
+     */
+    ST_CPPEXPORT const StSearchMonitors& getMonitors() const;
+
         public: //! @name signals
 
     struct {
@@ -393,11 +398,6 @@ class StWindow {
      * @param theWinEnum subwindow to swap
      */
     ST_CPPEXPORT void stglSwap(const int theWinEnum);
-
-    /**
-     * Access list of connected monitors.
-     */
-    ST_CPPEXPORT const StSearchMonitors& getMonitors() const;
 
     /**
      * This method should be called only by inheritors

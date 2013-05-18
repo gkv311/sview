@@ -122,12 +122,7 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
     }
 #endif
 
-    // just debug output Monitors' configuration
     myMonitors.init();
-    for(size_t aMonIter = 0; aMonIter < myMonitors.size(); ++aMonIter) {
-        ST_DEBUG_LOG(myMonitors[aMonIter].toString());
-    }
-
 #ifdef __APPLE__
     // register callback for display configuration changes
     // alternatively we can add method applicationDidChangeScreenParameters to application delegate

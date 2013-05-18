@@ -19,6 +19,7 @@
 #include <StCore/StApplication.h>
 
 #include <StCore/StWindow.h>
+#include <StCore/StSearchMonitors.h>
 #include <StSettings/StSettings.h>
 #include <StGL/StGLEnums.h>
 #include <StGL/StGLContext.h>
@@ -245,6 +246,14 @@ const StHandle<StWindow>& StApplication::getMainWindow() const {
 int StApplication::exec() {
     if(!myIsOpened) {
         open();
+    }
+
+    if(!myWindow.isNull()) {
+        // just debug output Monitors' configuration
+        const StSearchMonitors& aMonitors = myWindow->getMonitors();
+        for(size_t aMonIter = 0; aMonIter < aMonitors.size(); ++aMonIter) {
+            ST_DEBUG_LOG(aMonitors[aMonIter].toString());
+        }
     }
 
     for(; !myWindow.isNull() && myIsOpened;) {
