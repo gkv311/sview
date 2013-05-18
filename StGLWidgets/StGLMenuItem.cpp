@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -39,7 +39,6 @@ StGLMenuItem::StGLMenuItem(StGLMenu* theParent,
   mySubMenu(theSubMenu),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
   myIsItemSelected(false) {
-    //
     StGLWidget::signals.onMouseUnclick.connect(this, &StGLMenuItem::doMouseUnclick);
 
     myFormatter.setupAlignment(StGLTextFormatter::ST_ALIGN_X_LEFT,
@@ -233,13 +232,22 @@ bool StGLMenuItem::tryClick(const StPointD_t& theCursorZo,
 bool StGLMenuItem::tryUnClick(const StPointD_t& theCursorZo,
                               const int&        theMouseBtn,
                               bool&             theIsItemUnclicked) {
+    const bool wasUnclicked = theIsItemUnclicked;
     if(StGLWidget::tryUnClick(theCursorZo, theMouseBtn, theIsItemUnclicked)) {
         theIsItemUnclicked = true; // always clickable widget
+
+
         if(getParentMenu()->isRootMenu()) {
             getParentMenu()->setActive(true); // activate root menu
         }
         return true;
     }
+
+    if(!wasUnclicked && theIsItemUnclicked) {
+        // keep menu active if some control has been clicked inside this menu item
+        getParentMenu()->setKeepActive();
+    }
+
     return false;
 }
 

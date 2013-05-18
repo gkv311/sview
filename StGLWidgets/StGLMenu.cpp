@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -50,6 +50,7 @@ StGLMenu::StGLMenu(StGLWidget* theParent,
   myWidth(0),
   myIsRootMenu(theIsRootMenu),
   myIsActive(!theIsRootMenu),
+  myKeepActive(false),
   myIsInitialized(false) {
     //
 }
@@ -198,16 +199,28 @@ void StGLMenu::stglDraw(unsigned int theView) {
 bool StGLMenu::tryUnClick(const StPointD_t& theCursorZo,
                           const int&        theMouseBtn,
                           bool&             theIsItemUnclicked) {
+    myKeepActive = false;
     bool wasSomeClickedBefore = theIsItemUnclicked;
     bool isSelfClicked = StGLWidget::tryUnClick(theCursorZo, theMouseBtn, theIsItemUnclicked);
     bool isSelfItemClicked = !wasSomeClickedBefore && theIsItemUnclicked;
+    if(myKeepActive) {
+        return isSelfClicked;
+    }
+
+    for(StGLWidget* aChild = getChildren()->getStart(); aChild != NULL; aChild = aChild->getNext()) {
+        StGLMenuItem* anItem = (StGLMenuItem* )aChild;
+        if(anItem->hasSubMenu()
+        && anItem->getSubMenu()->myKeepActive) {
+            myKeepActive = true;
+            return isSelfClicked;
+        }
+        anItem->setSelected(false);
+    }
+
     if(isRootMenu() && !isSelfItemClicked) {
         setActive(false); // disactivate root menu
     }
-    for(StGLWidget* aChild = getChildren()->getStart(); aChild != NULL; aChild = aChild->getNext()) {
-        StGLMenuItem* anItem = (StGLMenuItem* )aChild;
-        anItem->setSelected(false);
-    }
+
     return isSelfClicked;
 }
 

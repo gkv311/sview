@@ -63,6 +63,13 @@ class StGLMenu : public StGLWidget {
         myIsActive = isActive;
     }
 
+    /**
+     * Skip mouse unclick event - keep menu in active state.
+     */
+    inline void setKeepActive() {
+        myKeepActive = true;
+    }
+
     inline int getOrient() const {
         return myOrient;
     }
@@ -122,6 +129,7 @@ class StGLMenu : public StGLWidget {
     int                        myWidth;
     bool                       myIsRootMenu;
     bool                       myIsActive;
+    bool                       myKeepActive;
     bool                       myIsInitialized;
 
 };
