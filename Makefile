@@ -28,13 +28,15 @@ aStOutDual      := $(BUILD_ROOT)/libStOutDual.so
 aStOutInterlace := $(BUILD_ROOT)/libStOutInterlace.so
 aStOutPageFlip  := $(BUILD_ROOT)/libStOutPageFlip.so
 aStOutIZ3D      := $(BUILD_ROOT)/libStOutIZ3D.so
+aStOutDistorted := $(BUILD_ROOT)/libStOutDistorted.so
 aStImageViewer  := $(BUILD_ROOT)/libStImageViewer.so
 aStMoviePlayer  := $(BUILD_ROOT)/libStMoviePlayer.so
 aStDiagnostics  := $(BUILD_ROOT)/libStDiagnostics.so
+aStCADViewer    := $(BUILD_ROOT)/libStCADViewer.so
 sView           := $(BUILD_ROOT)/sView
 
-all:   pre_all $(aStShared) $(aStGLWidgets) $(aStSettings) $(aStCore) $(aStOutAnaglyph) $(aStOutDual) $(aStOutInterlace) $(aStOutPageFlip) $(aStOutIZ3D) $(aStImageViewer) $(aStMoviePlayer) $(aStDiagnostics) $(sView)
-clean: clean_StShared clean_StGLWidgets clean_StSettings clean_StCore clean_sView clean_StOutAnaglyph clean_StOutDual clean_StOutInterlace clean_StOutPageFlip clean_StOutIZ3D clean_StImageViewer clean_StMoviePlayer clean_StDiagnostics
+all:   pre_all $(aStShared) $(aStGLWidgets) $(aStSettings) $(aStCore) $(aStOutAnaglyph) $(aStOutDual) $(aStOutInterlace) $(aStOutPageFlip) $(aStOutIZ3D) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(aStDiagnostics) $(aStCADViewer) $(sView)
+clean: clean_StShared clean_StGLWidgets clean_StSettings clean_StCore clean_sView clean_StOutAnaglyph clean_StOutDual clean_StOutInterlace clean_StOutPageFlip clean_StOutIZ3D clean_StOutDistorted clean_StImageViewer clean_StMoviePlayer clean_StDiagnostics clean_StCADViewer
 distclean: clean
 
 install:
@@ -176,10 +178,24 @@ clean_StOutPageFlip:
 	rm -f $(aStOutPageFlip)
 	rm -rf StOutPageFlip/*.o
 
+# StOutDistorted library
+aStOutDistorted_SRCS := $(wildcard StOutDistorted/*.cpp)
+aStOutDistorted_OBJS := ${aStOutDistorted_SRCS:.cpp=.o}
+aStOutDistorted_LIB  := $(LIB) -lStShared -lStSettings -lStCore $(LIB_GLX) $(LIB_GTK) -lpthread
+$(aStOutDistorted) : pre_StOutDistorted $(aStOutDistorted_OBJS)
+	$(LD) -shared -z defs $(LDFLAGS) $(LIBDIR) $(aStOutDistorted_OBJS) $(aStOutDistorted_LIB) -o $(aStOutDistorted)
+pre_StOutDistorted:
+	cp -f -r StOutDistorted/lang/english/* $(BUILD_ROOT)/lang/english/
+	cp -f -r StOutDistorted/lang/russian/* $(BUILD_ROOT)/lang/русский/
+	cp -f -r StOutDistorted/lang/french/*  $(BUILD_ROOT)/lang/français/
+clean_StOutDistorted:
+	rm -f $(aStOutDistorted)
+	rm -rf StOutDistorted/*.o
+
 # StImageViewer library (Image Viewer)
 aStImageViewer_SRCS := $(wildcard StImageViewer/*.cpp)
 aStImageViewer_OBJS := ${aStImageViewer_SRCS:.cpp=.o}
-aStImageViewer_LIB  := $(LIB) -lStGLWidgets -lStShared -lStSettings -lStCore -lStOutAnaglyph -lStOutDual -lStOutInterlace -lStOutPageFlip -lStOutIZ3D $(LIB_GLX) $(LIB_GTK) -lpthread
+aStImageViewer_LIB  := $(LIB) -lStGLWidgets -lStShared -lStSettings -lStCore -lStOutAnaglyph -lStOutDual -lStOutInterlace -lStOutPageFlip -lStOutIZ3D -lStOutDistorted $(LIB_GLX) $(LIB_GTK) -lpthread
 $(aStImageViewer) : pre_StImageViewer $(aStImageViewer_OBJS)
 	$(LD) -shared -z defs $(LDFLAGS) $(LIBDIR) $(aStImageViewer_OBJS) $(aStImageViewer_LIB) -o $(aStImageViewer)
 pre_StImageViewer:
@@ -195,7 +211,7 @@ aStMoviePlayer_SRCS1 := $(wildcard StMoviePlayer/*.cpp)
 aStMoviePlayer_OBJS1 := ${aStMoviePlayer_SRCS1:.cpp=.o}
 aStMoviePlayer_SRCS2 := $(wildcard StMoviePlayer/StVideo/*.cpp)
 aStMoviePlayer_OBJS2 := ${aStMoviePlayer_SRCS2:.cpp=.o}
-aStMoviePlayer_LIB   := $(LIB) -lStGLWidgets -lStShared -lStSettings -lStCore -lStOutAnaglyph -lStOutDual -lStOutInterlace -lStOutPageFlip -lStOutIZ3D $(LIB_GLX) $(LIB_GTK) -lavutil -lavformat -lavcodec -lswscale -lopenal -lpthread
+aStMoviePlayer_LIB   := $(LIB) -lStGLWidgets -lStShared -lStSettings -lStCore -lStOutAnaglyph -lStOutDual -lStOutInterlace -lStOutPageFlip -lStOutIZ3D -lStOutDistorted $(LIB_GLX) $(LIB_GTK) -lavutil -lavformat -lavcodec -lswscale -lopenal -lpthread
 $(aStMoviePlayer) : pre_StMoviePlayer $(aStMoviePlayer_OBJS1) $(aStMoviePlayer_OBJS2)
 	$(LD) -shared -z defs $(LDFLAGS) $(LIBDIR) $(aStMoviePlayer_OBJS1) $(aStMoviePlayer_OBJS2) $(aStMoviePlayer_LIB) -o $(aStMoviePlayer)
 pre_StMoviePlayer:
@@ -209,7 +225,7 @@ clean_StMoviePlayer:
 # StDiagnostics library
 aStDiagnostics_SRCS := $(wildcard StDiagnostics/*.cpp)
 aStDiagnostics_OBJS := ${aStDiagnostics_SRCS:.cpp=.o}
-aStDiagnostics_LIB  := $(LIB) -lStGLWidgets -lStShared -lStSettings -lStCore -lStOutAnaglyph -lStOutDual -lStOutInterlace -lStOutPageFlip -lStOutIZ3D $(LIB_GLX) $(LIB_GTK) -lpthread
+aStDiagnostics_LIB  := $(LIB) -lStGLWidgets -lStShared -lStSettings -lStCore -lStOutAnaglyph -lStOutDual -lStOutInterlace -lStOutPageFlip -lStOutIZ3D -lStOutDistorted $(LIB_GLX) $(LIB_GTK) -lpthread
 $(aStDiagnostics) : pre_StDiagnostics $(aStDiagnostics_OBJS)
 	$(LD) -shared -z defs $(LDFLAGS) $(LIBDIR) $(aStDiagnostics_OBJS) $(aStDiagnostics_LIB) -o $(aStDiagnostics)
 pre_StDiagnostics:
@@ -220,10 +236,24 @@ clean_StDiagnostics:
 	rm -f $(aStDiagnostics)
 	rm -rf StDiagnostics/*.o
 
+# StCADViewer library
+aStCADViewer_SRCS := $(wildcard StCADViewer/*.cpp)
+aStCADViewer_OBJS := ${aStCADViewer_SRCS:.cpp=.o}
+aStCADViewer_LIB  := $(LIB) -lStGLWidgets -lStShared -lStSettings -lStCore -lStOutAnaglyph -lStOutDual -lStOutInterlace -lStOutPageFlip -lStOutIZ3D -lStOutDistorted $(LIB_GLX) $(LIB_GTK) -lpthread
+$(aStCADViewer) : pre_StCADViewer $(aStCADViewer_OBJS)
+	$(LD) -shared -z defs $(LDFLAGS) $(LIBDIR) $(aStCADViewer_OBJS) $(aStCADViewer_LIB) -o $(aStCADViewer)
+pre_StCADViewer:
+	cp -f -r StCADViewer/lang/english/* $(BUILD_ROOT)/lang/english/
+	cp -f -r StCADViewer/lang/russian/* $(BUILD_ROOT)/lang/русский/
+	cp -f -r StCADViewer/lang/french/*  $(BUILD_ROOT)/lang/français/
+clean_StCADViewer:
+	rm -f $(aStCADViewer)
+	rm -rf StCADViewer/*.o
+
 # sView executable
 sView_SRCS := $(wildcard sview/*.cpp)
 sView_OBJS := ${sView_SRCS:.cpp=.o}
-sView_LIB  := $(LIB) -lStGLWidgets -lStShared -lStSettings -lStCore -lStImageViewer -lStMoviePlayer -lStDiagnostics -lStOutAnaglyph -lStOutDual -lStOutInterlace -lStOutPageFlip -lStOutIZ3D $(LIB_GTK) -lX11 -ldl -lgthread-2.0 -lpthread
+sView_LIB  := $(LIB) -lStGLWidgets -lStShared -lStSettings -lStCore -lStImageViewer -lStMoviePlayer -lStDiagnostics -lStCADViewer -lStOutAnaglyph -lStOutDual -lStOutInterlace -lStOutPageFlip -lStOutIZ3D -lStOutDistorted $(LIB_GTK) -lX11 -ldl -lgthread-2.0 -lpthread
 $(sView) : $(sView_OBJS)
 	$(LD) $(LDFLAGS) $(LIBDIR) $(sView_OBJS) $(sView_LIB) -o $(sView)
 clean_sView:
