@@ -150,7 +150,12 @@ StPlayList::StPlayList(const StArrayList<StString>& theExtensions,
   myIsLoopFlag(theIsLoop),
   myRecentLimit(10),
   myIsNewRecent(false) {
-    //
+    for(size_t anExtId = 0; anExtId < myExtensions.size(); ++anExtId) {
+        if(myExtensions[anExtId].isEqualsIgnoreCase(stCString("m3u"))) {
+            myExtensions.remove(anExtId); // playlist files are treated in special way
+            --anExtId;
+        }
+    }
 }
 
 StPlayList::~StPlayList() {
@@ -268,7 +273,7 @@ bool StPlayList::walkToNext() {
         } else {
             if((myPlayedCount >= (myItemsCount - 1)) || (myPlayedCount == 0)) {
                 // reset the playback counter
-            #if (defined(_WIN32) || defined(__WIN32__))
+            #ifdef _WIN32
                 FILETIME aTime;
                 GetSystemTimeAsFileTime(&aTime);
                 myRandGen.setSeed(aTime.dwLowDateTime);
@@ -443,6 +448,9 @@ bool StPlayList::checkExtension(const StString& thePath) {
         if(anExtension.isEqualsIgnoreCase(myExtensions[anExtId])) {
             return true;
         }
+    }
+    if(anExtension.isEqualsIgnoreCase(stCString("m3u"))) {
+        return true;
     }
     return false;
 }
