@@ -3,6 +3,8 @@
 # save active directory
 pushd .
 
+#sudo apt-get install build-essential devscripts
+
 # go to the script directory
 aScriptPath=${BASH_SOURCE%/*}
 if [ -d "$aScriptPath" ]; then
