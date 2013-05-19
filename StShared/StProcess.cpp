@@ -28,10 +28,12 @@ namespace {
     static const StString ST_ENV_NAME_STCORE_PATH = "StCore32";
 #endif
 
-#ifndef _WIN32
+#ifdef _WIN32
+    static const StString STCORE_NAME = StString("StCore")    + ST_DLIB_SUFFIX;
+#else
+    static const StString STCORE_NAME = StString("libStCore") + ST_DLIB_SUFFIX;
     static const StString ST_DEFAULT_PATH = "/usr/share/sView/";
 #endif
-    static const StString STCORE_NAME = StString("StCore") + ST_DLIB_SUFFIX;
 }
 
 const StString StArgument::ST_ARG_ON   ("on");
@@ -325,7 +327,8 @@ bool loadStringFromRegister(const StString& theRegisterPath, const StString& the
 #endif
 
 bool isValidStCorePath(const StString& thePath) {
-    return StFileNode::isFileExists(thePath + STCORE_NAME);
+    return !thePath.isEmpty()
+        && StFileNode::isFileExists(thePath + STCORE_NAME);
 }
 
 StString StProcess::getStCoreFolder() {
@@ -348,7 +351,7 @@ StString StProcess::getStCoreFolder() {
         return aCoreEnvValue;
     }
 
-    StString aProcessPath = getProcessFolder();
+    const StString aProcessPath = getProcessFolder();
     if(isValidStCorePath(aProcessPath)) {
         return aProcessPath;
     }
