@@ -47,7 +47,7 @@ class StSlotProxy : public StSlot<slotMethod_t> {
     /**
      * Only real slots should be compared!
      */
-    virtual bool isEqual(const StSlot<slotMethod_t>& theOther) const {
+    virtual bool isEqual(const StSlot<slotMethod_t>& ) const {
         return false;
     }
 

@@ -53,7 +53,7 @@ void StGLButton::doItemClick(const size_t ) {
 }
 
 bool StGLButton::stglInit() {
-    const size_t aWidth = myWidth;
+    const int aWidth = myWidth;
     if(!StGLMenu::stglInit()) {
         return false;
     }
