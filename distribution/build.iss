@@ -237,6 +237,10 @@ Source: {#SVIEW_DISTR_PATH_AMD64}\StMoviePlayer.dll;           DestDir: {app}\am
 Source: {#SVIEW_DISTR_PATH_AMD64}\lang\*StMoviePlayer.lng;     DestDir: {app}\amd64\lang;      Flags: 64bit ignoreversion recursesubdirs; Components: StCore; Check: IsWin64
 Source: {#SVIEW_DISTR_PATH_AMD64}\OpenAL32.dll;                DestDir: {app}\amd64;           Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 
+; StDrawers -> Tiny CAD viewer
+Source: {#SVIEW_DISTR_PATH_x86}\StCADViewer.dll;               DestDir: {app};                 Flags: 32bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH_AMD64}\StCADViewer.dll;             DestDir: {app}\amd64;           Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
+
 [Icons]
 Name: {group}\sView - Image Viewer; Filename: {app}\{#SVIEW_EXE_NAME};       Components: StDrawers\StImageViewer; IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: "{cm:StImageViewer}";  IconIndex: 0; Parameters: "--in=image - ""{app}\demo.jps"""; Check: not IsWin64
 Name: {group}\sView - Image Viewer; Filename: {app}\amd64\{#SVIEW_EXE_NAME}; Components: StDrawers\StImageViewer; IconFilename: {app}\amd64\{#SVIEW_EXE_NAME}; Comment: "{cm:StImageViewer}";  IconIndex: 0; Parameters: "--in=image - ""{app}\demo.jps"""; Check: IsWin64
