@@ -632,7 +632,7 @@
 	<key>CFBundleExecutable</key>
 	<string>sView</string>
 	<key>CFBundleGetInfoString</key>
-	<string>Copyright © Kirill Gavrilov, 2007-2012</string>
+	<string>Copyright © Kirill Gavrilov, 2007-2013</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.sView</string>
 	<key>CFBundleInfoDictionaryVersion</key>
