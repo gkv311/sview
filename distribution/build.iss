@@ -251,6 +251,9 @@ Name: {group}\Extras\sView - Autodetection;               Filename: {app}\{#SVIE
 Name: {group}\Extras\sView - Movie Player 32bit;          Filename: {app}\{#SVIEW_EXE_NAME};       Components: StDrawers\StMoviePlayer; IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: "{cm:StMoviePlayer}";  IconIndex: 0; Parameters: "--in=video";         Check: IsWin64
 Name: {group}\Extras\sView - Diagnostics;                 Filename: {app}\{#SVIEW_EXE_NAME};       Components: StCore;                  IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: sView Diagnostics;     IconIndex: 0; Parameters: "--in=StDiagnostics"; Check: not IsWin64
 Name: {group}\Extras\sView - Diagnostics;                 Filename: {app}\amd64\{#SVIEW_EXE_NAME}; Components: StCore;                  IconFilename: {app}\amd64\{#SVIEW_EXE_NAME}; Comment: sView Diagnostics;     IconIndex: 0; Parameters: "--in=StDiagnostics"; Check: IsWin64
+Name: {group}\Extras\Monitors Dump;                       Filename: {app}\StMonitorsDump.exe;       Components: StCore;                 Comment: Information about connected displays; Check: not IsWin64
+Name: {group}\Extras\Monitors Dump;                       Filename: {app}\amd64\StMonitorsDump.exe; Components: StCore;                 Comment: Information about connected displays; Check: IsWin64
+
 ;Name: {group}\user manual;          Filename: {app}\info\manual.pdf;         Comment: User manual; Tasks: ; Languages:
 Name: {group}\{cm:UninstallProgram,{#SVIEW_NAME}}; Filename: {uninstallexe}
 Name: {commondesktop}\{#SVIEW_NAME};Filename: {app}\{#SVIEW_EXE_NAME};       Tasks: desktopicon; Components: StDrawers\StImageViewer; IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: "{cm:StImageViewer}"; IconIndex: 0; Parameters: "--in=image - ""{app}\demo.jps"""; Check: not IsWin64

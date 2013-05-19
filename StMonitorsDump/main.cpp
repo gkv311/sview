@@ -160,7 +160,7 @@ ST_LOCAL void genInf(const StEDIDParser& theEdid,
 }
 
 int main(int , char** ) { // force console output
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     setlocale(LC_ALL, ".OCP"); // we set default locale for console output (useful only for debug)
 #endif
 
@@ -254,6 +254,7 @@ int main(int , char** ) { // force console output
             }
             genInf(anInputEdid, anOutInfFilename + ".inf");
         }
+        st::cout << stostream_text("Press any key to exit...") << st::SYS_PAUSE_EMPTY;
         return 0;
     }
 
@@ -302,6 +303,7 @@ int main(int , char** ) { // force console output
     fout.open("stMonitorsDump.txt");
     if(fout.fail()) {
         st::cout << st::COLOR_FOR_RED << stostream_text("Couldn't open file \"stMonitorsDump.txt\"!\n") << st::COLOR_FOR_WHITE;
+        st::cout << stostream_text("Press any key to exit...") << st::SYS_PAUSE_EMPTY;
         return -1;
     }
     fout << dumpStr;
