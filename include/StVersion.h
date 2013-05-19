@@ -10,6 +10,27 @@
 #ifndef __StVersion_h_
 #define __StVersion_h_
 
+#ifdef ST_HAVE_STCONFIG
+    #include <stconfig.conf>
+#else
+    #ifndef SVIEW_SDK_VER_STATUS
+        #define SVIEW_SDK_VER_STATUS RELEASE
+    #endif
+    #ifndef SVIEW_SDK_VERSION_AUTO
+        #define SVIEW_SDK_VERSION_AUTO
+    #endif
+#endif
+
+enum {
+    DEV = 0,
+    DEVELOPMENT_RELEASE = 0,
+    ALPHA = 1,
+    BETA = 2,
+    RC = 3,
+    RELEASE_CANDIDATE = 3,
+    RELEASE = 4,
+};
+
 #define __YEAR__ ((((__DATE__ [7]-'0')*10+(__DATE__ [8]-'0'))*10+(__DATE__ [9]-'0'))*10+(__DATE__ [10]-'0'))
 
 // Month: 0 - 11
@@ -33,27 +54,6 @@
         #define ST_WIN32_FILEFLAGS
     #endif
 #endif
-
-#ifdef ST_HAVE_STCONFIG
-    #include <stconfig.conf>
-#else
-    #ifndef SVIEW_SDK_VER_STATUS
-        #define SVIEW_SDK_VER_STATUS RELEASE
-    #endif
-    #ifndef SVIEW_SDK_VERSION_AUTO
-        #define SVIEW_SDK_VERSION_AUTO
-    #endif
-#endif
-
-enum {
-    DEV = 0,
-    DEVELOPMENT_RELEASE = 0,
-    ALPHA = 1,
-    BETA = 2,
-    RC = 3,
-    RELEASE_CANDIDATE = 3,
-    RELEASE = 4,
-};
 
 // just empty version here
 // should be redefined in stconfig.conf

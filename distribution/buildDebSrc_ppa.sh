@@ -24,7 +24,8 @@ aCurrentDate=`date --rfc-2822`
 # Ubuntu 12.04 LTS (Precise Pangolin)
 # Ubuntu 12.10     (Quantal Quetzal)
 # Ubuntu 13.04     (Raring Ringtail)
-aDistribs=("lucid" "natty" "oneiric" "precise" "quantal")
+# Ubuntu 13.10     (Saucy Salamander)
+aDistribs=("lucid" "natty" "oneiric" "precise" "quantal" "raring")
 
 # Debian
 #aDistribs=("stable" "unstable" "testing-proposed-updates" "experimental")

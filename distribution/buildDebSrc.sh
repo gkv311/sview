@@ -2,7 +2,7 @@
 
 # This script generates the DEB source package.
 #
-# Copyright © Kirill Gavrilov, 2012
+# Copyright © Kirill Gavrilov, 2012-2013
 
 # go to the script directory
 aScriptPath=${BASH_SOURCE%/*}
@@ -24,15 +24,18 @@ mkdir -p $aDebSrcRoot
 cp -f -r ../debian         $aDebSrcRoot/
 cp -f -r ../share          $aDebSrcRoot/
 cp -f -r ../include        $aDebSrcRoot/
+rm --force $aDebSrcRoot/include/stconfig.conf
 cp -f -r ../StCore         $aDebSrcRoot/
 cp -f -r ../StGLWidgets    $aDebSrcRoot/
 cp -f -r ../StImageViewer  $aDebSrcRoot/
 cp -f -r ../StMoviePlayer  $aDebSrcRoot/
+cp -f -r ../StCADViewer    $aDebSrcRoot/
 cp -f -r ../StOutAnaglyph  $aDebSrcRoot/
 cp -f -r ../StOutDual      $aDebSrcRoot/
 cp -f -r ../StOutInterlace $aDebSrcRoot/
 cp -f -r ../StOutIZ3D      $aDebSrcRoot/
 cp -f -r ../StOutPageFlip  $aDebSrcRoot/
+cp -f -r ../StOutDistorted $aDebSrcRoot/
 cp -f -r ../StSettings     $aDebSrcRoot/
 cp -f -r ../StShared       $aDebSrcRoot/
 cp -f -r ../sview          $aDebSrcRoot/
@@ -60,24 +63,6 @@ sed "s/unknown_version/${aVersion}/g"  "sView.rpm.spec" > "$aDebSrcRoot/sView.rp
 sed "s/unknown_release/${aRelease}/g"  "$aDebSrcRoot/sView.rpm.spectmp1" > "$aDebSrcRoot/sView.rpm.spec"
 #sed "s/unknown_date/${aCurrentDate}/g" "$aDebSrcRoot/sView.rpm.spectmp2"  > "$aDebSrcRoot/sView.rpm.spec"
 rm -f $aDebSrcRoot/sView.rpm.spectmp*
-
-# START creating config file
-cat > $aDebSrcRoot/include/stconfig.conf << EOF
-#ifndef __stConfig_conf_
-#define __stConfig_conf_
-
-#ifndef SVIEW_SDK_VER_STATUS
-    #define SVIEW_SDK_VER_STATUS RELEASE
-#endif
-
-#ifndef SVIEW_SDK_VERSION_AUTO
-    #define SVIEW_SDK_VERSION_AUTO
-#endif
-
-#endif //__stConfig_conf_
-
-EOF
-# END creating config file
 
 pushd .
 cd temp
