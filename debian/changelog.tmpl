@@ -1,5 +1,24 @@
 sview (unknown_version) unknown_distrib; urgency=low
 
+  + Movie Player - added menu with recently played files.
+  + Movie Player - added hot keys to switch subtitles ('T') and audio treks ('L').
+  + Movie Player - read stereoscopic tags from WMV files.
+  + Added Distorted output for anamorphic side-by-side, over/under outputs.
+  + Added Over / Under output mode.
+  * Fixed XRandr compatibility issues.
+  * Display FPS meter widget inside window instead of window title.
+  * Dual Output - extend single window in fullscreen mode when possible to improve synchronization.
+  * Improved libraries packaging.
+  * Keep file playback during output device change.
+  * Do not create depth buffer when there is no need in it (slightly reduce GPU memory usage).
+  * Keyboard input handling improvements.
+  * Improved message box widget - added Close button.
+  * Do not append m3u files to playlist.
+
+ -- Kirill Gavrilov <kirill@sview.ru>  unknown_date
+
+sview (13.01-1~unknown_distrib) unknown_distrib; urgency=low
+
   + Adjust stereo separation within '<' and '>' keys to cover notebook keyboards.
   + Use undo/redo buffer to keep played items order in shuffle mode.
   + Detect display(s) reconfiguration during application work (to correctly launch full-screen mode).
@@ -13,7 +32,7 @@ sview (unknown_version) unknown_distrib; urgency=low
   * Fixed displaying of stereo images with different dimensions per view.
   * Workaround bugs in some drivers (Catalyst) when window content doesn't redrawn after switching back from full-screen mode.
 
- -- Kirill Gavrilov <kirill@sview.ru>  unknown_date
+ -- Kirill Gavrilov <kirill@sview.ru>  Tue, 15 Jan 2013 22:13:51 +0400
 
 sview (12.09-1~unknown_distrib) unknown_distrib; urgency=low
 

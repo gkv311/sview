@@ -47,8 +47,12 @@ install:
 	mkdir -p $(DESTDIR)/usr/share
 	cp -f -r share/*                     $(DESTDIR)/usr/share/
 	cp -f    license-gpl-3.0.txt         $(DESTDIR)/usr/$(USR_LIB)/sView/info/license.txt
-	cp -f -r $(BUILD_ROOT)/*             $(DESTDIR)/usr/$(USR_LIB)/sView/
-	ln --force --symbolic ../$(USR_LIB)/sView/sView      $(DESTDIR)/usr/bin/sView
+	cp -f -r $(BUILD_ROOT)/*.so          $(DESTDIR)/usr/$(USR_LIB)/
+	cp -f    $(BUILD_ROOT)/sView         $(DESTDIR)/usr/$(USR_LIB)/sView/sView
+	cp -f -r $(BUILD_ROOT)/lang/*        $(DESTDIR)/usr/$(USR_LIB)/sView/lang/
+	cp -f -r $(BUILD_ROOT)/shaders/*     $(DESTDIR)/usr/$(USR_LIB)/sView/shaders/
+	cp -f -r $(BUILD_ROOT)/textures/*    $(DESTDIR)/usr/$(USR_LIB)/sView/textures/
+	ln --force --symbolic ../$(USR_LIB)/sView/sView       $(DESTDIR)/usr/bin/sView
 	ln --force --symbolic ../../share/sView/demo/demo.jps $(DESTDIR)/usr/$(USR_LIB)/sView/demo.jps
 	rm -f    $(DESTDIR)/usr/$(USR_LIB)/sView/*.a
 
