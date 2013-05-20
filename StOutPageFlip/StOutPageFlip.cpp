@@ -139,6 +139,8 @@ StOutPageFlip::StOutPageFlip(const StNativeWin_t theParentWindow)
     myAbout = aTitle + '\n' + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr;
 
     // detect connected displays
+    bool hasQuadBufferGl  = false;
+    bool hasQuadBufferD3D = false;
     int aSupportLevelShutters = ST_DEVICE_SUPPORT_NONE;
     int aSupportLevelVuzix    = StVuzixSDK::isConnected(aMonitors) ? ST_DEVICE_SUPPORT_PREFER : ST_DEVICE_SUPPORT_NONE;
     const StMonitor aMon = getHigestFreqMonitor(aMonitors);
@@ -148,19 +150,21 @@ StOutPageFlip::StOutPageFlip(const StNativeWin_t theParentWindow)
 #ifndef __APPLE__
     // actually almost always available on mac but... is it useful?
     if(testQuadBufferSupportThreaded()) {
-        aSupportLevelShutters = ST_DEVICE_SUPPORT_FULL;
+        hasQuadBufferGl = true;
     }
 #endif
 
 #ifdef _WIN32
     StDXInfo aDxInfo;
-    if(aSupportLevelShutters != ST_DEVICE_SUPPORT_FULL
+    if(!hasQuadBufferGl
     && StDXManager::getInfoThreaded(aDxInfo)
     && (aDxInfo.hasNvStereoSupport || aDxInfo.hasAqbsSupport)) {
-        // if user enable NVIDIA stereo driver - we prefer use it for shutters
-        aSupportLevelShutters = ST_DEVICE_SUPPORT_FULL;
+        hasQuadBufferD3D = true;
     }
 #endif
+    if(hasQuadBufferGl || hasQuadBufferD3D) {
+        aSupportLevelShutters = ST_DEVICE_SUPPORT_FULL;
+    }
 
     // devices list
     StHandle<StOutDevice> aDevShutters = new StOutDevice();
@@ -242,7 +246,11 @@ StOutPageFlip::StOutPageFlip(const StNativeWin_t theParentWindow)
 
     // load Quad Buffer type
     if(!mySettings->loadParam(ST_SETTING_QUADBUFFER, params.QuadBuffer)) {
-        params.QuadBuffer->setValue((aSupportLevelShutters == ST_DEVICE_SUPPORT_FULL) ? QUADBUFFER_HARD_OPENGL : QUADBUFFER_HARD_D3D_ANY);
+        if(hasQuadBufferGl || !hasQuadBufferD3D) {
+            params.QuadBuffer->setValue(QUADBUFFER_HARD_OPENGL);
+        } else {
+            params.QuadBuffer->setValue(QUADBUFFER_HARD_D3D_ANY);
+        }
     }
     myToResetDevice = false;
 }
