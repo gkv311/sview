@@ -99,7 +99,7 @@
 #define ST_WMV_MIME_STRING ST_WMV_MIME ":" ST_WMV_EXT ":" ST_WMV_DESC
 
 /**
- *.mp4;*.m4v;*.mpg;*.mp2;*.m2v;*.mpa;*.mpe;*.mpeg;*.mpv2 - MPEG Video family
+ *.mp4;*.m4v;*.m4a;*.mpg;*.mp2;*.m2v;*.mpa;*.mpe;*.mpeg;*.mpv2 - MPEG Video family
  */
 #define ST_MPEG_MIME "video/mpeg"
 #define ST_MPEG_DESC "MPEG Video"
@@ -111,7 +111,6 @@
 #define ST_MPG_MIME_STRING ST_MPEG_MIME ":" ST_MPG_EXT ":" ST_MPEG_DESC
 #define ST_MPEG_EXT  "mpeg"
 #define ST_MPEG_MIME_STRING ST_MPEG_MIME ":" ST_MPEG_EXT ":" ST_MPEG_DESC
-
 
 #define ST_MPEG2_MIME "video/mpeg"
 #define ST_MPEG2_DESC "MPEG2 Video"
@@ -130,6 +129,11 @@
 #define ST_M4V_MIME   "video/x-m4v"
 #define ST_M4V_EXT    "m4v"
 #define ST_M4V_MIME_STRING ST_M4V_MIME ":" ST_M4V_EXT ":" ST_MPEG4_DESC
+
+#define ST_M4A_MIME   "video/x-m4a"
+#define ST_M4A_DESC   "MPEG4 Audio"
+#define ST_M4A_EXT    "m4a"
+#define ST_M4A_MIME_STRING ST_M4A_MIME ":" ST_M4A_EXT ":" ST_M4A_DESC
 
 /**
  *.mov;*.qt  - QuickTime Video (Apple)
@@ -266,6 +270,7 @@ ST_MP2_MIME_STRING ";" \
 ST_M2V_MIME_STRING ";" \
 ST_MP4_MIME_STRING ";" \
 ST_M4V_MIME_STRING ";" \
+ST_M4A_MIME_STRING ";" \
 ST_MOV_MIME_STRING ";" \
 ST_QT_MIME_STRING ";" \
 ST_FLV_MIME_STRING ";" \
