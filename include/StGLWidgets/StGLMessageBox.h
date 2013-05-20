@@ -24,7 +24,7 @@ class StGLMessageBox : public StGLWidget {
     ST_CPPEXPORT StGLMessageBox(StGLWidget*     theParent,
                                 const StString& theText,
                                 const int       theWidth  = 384,
-                                const int       theHeight = 128);
+                                const int       theHeight = 200);
     ST_CPPEXPORT virtual ~StGLMessageBox();
     ST_CPPEXPORT virtual bool stglInit();
     ST_CPPEXPORT virtual void stglResize();

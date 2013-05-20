@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -31,10 +31,9 @@ void StGLMsgStack::stglUpdate(const StPointD_t& thePointZo) {
     if(myMsgMutex.tryLock()) {
         for(size_t aMsgId = 0; aMsgId < myMsgList.size(); ++aMsgId) {
             StGLMessageBox* aMsgBox = new StGLMessageBox(this, myMsgList[aMsgId]);
+            aMsgBox->addButton("Close");
             aMsgBox->setVisibility(true, true);
             aMsgBox->stglInit();
-            aMsgBox->signals.onClickLeft.connect(aMsgBox,  &StGLMessageBox::doKillSelf);
-            aMsgBox->signals.onClickRight.connect(aMsgBox, &StGLMessageBox::doKillSelf);
         }
         myMsgList.clear();
         myMsgMutex.unlock();
