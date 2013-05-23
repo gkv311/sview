@@ -39,7 +39,7 @@ StGLMenuItem::StGLMenuItem(StGLMenu* theParent,
   mySubMenu(theSubMenu),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
   myIsItemSelected(false) {
-    StGLWidget::signals.onMouseUnclick.connect(this, &StGLMenuItem::doMouseUnclick);
+    StGLWidget::signals.onMouseUnclick = stSlot(this, &StGLMenuItem::doMouseUnclick);
 
     myFormatter.setupAlignment(StGLTextFormatter::ST_ALIGN_X_LEFT,
                                StGLTextFormatter::ST_ALIGN_Y_CENTER);
@@ -259,4 +259,12 @@ void StGLMenuItem::doMouseUnclick(const int theBtnId) {
     if(theBtnId == ST_MOUSE_LEFT) {
         signals.onItemClick(getUserData());
     }
+}
+
+void StGLMenuItem::setHilightColor(const StGLVec4& theValue) {
+    myBackColor[StGLMenuItem::HIGHLIGHT] = theValue;
+}
+
+void StGLMenuItem::resetHilightColor() {
+    myBackColor[StGLMenuItem::HIGHLIGHT] = StGLVec4(0.765f, 0.765f, 0.765f, 1.0f);
 }

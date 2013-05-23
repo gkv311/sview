@@ -45,6 +45,7 @@
 #include <StGLWidgets/StGLMenuItem.h>
 #include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLMsgStack.h>
+#include <StGLWidgets/StGLPlayList.h>
 #include <StGLWidgets/StGLSubtitles.h>
 #include <StGLWidgets/StGLSwitchTextured.h>
 #include <StGLWidgets/StGLFpsLabel.h>
@@ -120,7 +121,7 @@ void StMoviePlayerGUI::createBottomToolbar() {
 
     btnList      = new StGLTextureButton(bottomRegion, -DISPL_X_REGION_BOTTOM - ICON_WIDTH, DISPL_Y_REGION_BOTTOM,
                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
-    //btnList->signals.onBtnClick
+    btnList->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doPlayListReverse);
 
     btnFullScr   = new StGLTextureButton(bottomRegion, -DISPL_X_REGION_BOTTOM, DISPL_Y_REGION_BOTTOM,
                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
@@ -662,6 +663,7 @@ StGLMenu* StMoviePlayerGUI::createLanguageMenu() {
 StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
                                    StWindow*       theWindow,
                                    StTranslations* theLangMap,
+                                   const StHandle<StPlayList>&       thePlayList,
                                    const StHandle<StGLTextureQueue>& theTextureQueue,
                                    const StHandle<StSubQueue>&       theSubQueue)
 : StGLRootWidget(),
@@ -675,6 +677,7 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
   stSubtitles(NULL),
   stDescr(NULL),
   myMsgStack(NULL),
+  myPlayList(NULL),
   // main menu
   menu0Root(NULL),
   myMenuOpenAL(NULL),
@@ -712,6 +715,11 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
     createBottomToolbar();
 
     stDescr = new StGLDescription(this);
+
+    myPlayList = new StGLPlayList(this, thePlayList);
+    myPlayList->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+    myPlayList->setVisibility(myPlugin->params.ToShowPlayList->getValue(), true);
+    myPlayList->signals.onOpenItem = stSlot(myPlugin, &StMoviePlayer::doFileNext);
 
     // create main menu
     createMainMenu();

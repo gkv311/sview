@@ -28,14 +28,15 @@
 #include <StThreads/StThread.h>
 
 // forward declarations
-class StGLContext;
-class StSettings;
-class StWindow;
-class StVideo;
-class StMoviePlayerGUI;
 class StCheckUpdates;
-class StStereoParams;
 class StFileNode;
+class StGLContext;
+class StMoviePlayerGUI;
+class StPlayList;
+class StSettings;
+class StStereoParams;
+class StVideo;
+class StWindow;
 struct StMovieInfo;
 
 class StALDeviceParam : public StInt32Param {
@@ -139,6 +140,7 @@ class StMoviePlayer : public StApplication {
      */
     ST_LOCAL void doLoaded();
 
+    ST_LOCAL void doPlayListReverse(const size_t dummy = 0);
     ST_LOCAL void doListFirst(const size_t dummy = 0);
     ST_LOCAL void doListPrev(const size_t dummy = 0);
     ST_LOCAL void doListNext(const size_t dummy = 0);
@@ -146,6 +148,7 @@ class StMoviePlayer : public StApplication {
 
     ST_LOCAL void doQuit(const size_t dummy = 0);
 
+    ST_LOCAL void doFileNext();
     ST_LOCAL void doOpen1File(const size_t dummy = 0);
     ST_LOCAL void doOpen2Files(const size_t dummy = 0);
     ST_LOCAL void doOpenRecent(const size_t theItemId);
@@ -180,6 +183,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StBoolParam>     areGlobalMKeys;   //!< capture global multimedia keys
         StHandle<StInt32Param>    checkUpdatesDays; //!< days count between updates checks
         StHandle<StInt32Param>    srcFormat;        //!< source format
+        StHandle<StBoolParam>     ToShowPlayList;   //!< display playlist
         StHandle<StBoolParam>     ToShowFps;        //!< display FPS meter
         StHandle<StInt32Param>    audioStream;      //!< active Audio stream
         StHandle<StInt32Param>    subtitlesStream;  //!< active Subtitles stream
@@ -227,6 +231,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doSwitchSrcFormat(const int32_t theSrcFormat);
     ST_LOCAL void doSwitchAudioStream(const int32_t theStreamId);
     ST_LOCAL void doSwitchSubtitlesStream(const int32_t theStreamId);
+    ST_LOCAL void doShowPlayList(const bool theToShow);
     ST_LOCAL void doUpdateStateLoading();
     ST_LOCAL void doUpdateStateLoaded();
     ST_LOCAL friend SV_THREAD_FUNCTION openFileThread(void* theArg);
@@ -237,6 +242,7 @@ class StMoviePlayer : public StApplication {
     StHandle<StGLContext>      myContext;
     StHandle<StSettings>       mySettings;        //!< settings manager for Image Viewer plugin
     StHandle<StTranslations>   myLangMap;         //!< translated strings map
+    StHandle<StPlayList>       myPlayList;        //!< play list
     StHandle<StMoviePlayerGUI> myGUI;             //!< GUI root widget
     StHandle<StVideo>          myVideo;           //!< main video playback class
     StHandle<StCheckUpdates>   myUpdates;         //!< check updates utility

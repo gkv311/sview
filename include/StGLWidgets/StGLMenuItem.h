@@ -68,6 +68,10 @@ class StGLMenuItem : public StGLTextArea {
 
     ST_CPPEXPORT void setFocus(const bool theValue);
 
+    ST_CPPEXPORT void setHilightColor(const StGLVec4& theValue);
+
+    ST_CPPEXPORT void resetHilightColor();
+
         public:  //! @name Signals
 
     struct {

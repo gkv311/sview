@@ -30,6 +30,7 @@
 #include <StGLCore/StGLCore20.h>
 #include <StGLWidgets/StGLImageRegion.h>
 #include <StGLWidgets/StGLMsgStack.h>
+#include <StGLWidgets/StGLPlayList.h>
 #include <StGLWidgets/StGLSubtitles.h>
 #include <StGLWidgets/StGLTextureButton.h>
 
@@ -51,6 +52,7 @@ namespace {
     static const char ST_SETTING_LAST_FOLDER[]   = "lastFolder";
     static const char ST_SETTING_OPENAL_DEVICE[] = "alDevice";
     static const char ST_SETTING_RECENT_FILES[]  = "recent";
+    static const char ST_SETTING_SHOW_LIST[]     = "showPlaylist";
 
     static const char ST_SETTING_FULLSCREEN[]    = "fullscreen";
     static const char ST_SETTING_VIEWMODE[]      = "viewMode";
@@ -139,6 +141,7 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
 : StApplication(theParentWin, theOpenInfo),
   mySettings(new StSettings(ST_DRAWER_PLUGIN_NAME)),
   myLangMap(new StTranslations(StMoviePlayer::ST_DRAWER_PLUGIN_NAME)),
+  myPlayList(new StPlayList(4, true)),
   myEventDialog(false),
   myEventLoaded(false),
   mySeekOnLoad(-1.0),
@@ -147,9 +150,8 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
   myToUpdateALList(false),
   myIsBenchmark(false),
   myToCheckUpdates(true) {
-    //
     myTitle = "sView - Movie Player";
-    //
+
     params.alDevice = new StALDeviceParam();
     params.audioGain = new StFloat32Param( 1.0f, // sound is unattenuated
                                            0.0f, // mute
@@ -157,20 +159,22 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
                                            1.0f, // default
                                          0.001f, // step
                                          1.e-7f);
-    params.audioGain->signals.onChanged.connect(this, &StMoviePlayer::doSetAudioVolume);
+    params.audioGain->signals.onChanged = stSlot(this, &StMoviePlayer::doSetAudioVolume);
     params.isFullscreen = new StBoolParam(false);
-    params.isFullscreen->signals.onChanged.connect(this, &StMoviePlayer::doFullscreen);
+    params.isFullscreen->signals.onChanged = stSlot(this, &StMoviePlayer::doFullscreen);
     params.toRestoreRatio   = new StBoolParam(false);
     params.isShuffle        = new StBoolParam(false);
     params.areGlobalMKeys   = new StBoolParam(true);
     params.checkUpdatesDays = new StInt32Param(7);
     params.srcFormat        = new StInt32Param(ST_V_SRC_AUTODETECT);
-    params.srcFormat->signals.onChanged.connect(this, &StMoviePlayer::doSwitchSrcFormat);
+    params.srcFormat->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchSrcFormat);
+    params.ToShowPlayList   = new StBoolParam(false);
+    params.ToShowPlayList->signals.onChanged = stSlot(this, &StMoviePlayer::doShowPlayList);
     params.ToShowFps   = new StBoolParam(false);
     params.audioStream = new StInt32Param(-1);
-    params.audioStream->signals.onChanged.connect(this, &StMoviePlayer::doSwitchAudioStream);
+    params.audioStream->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchAudioStream);
     params.subtitlesStream = new StInt32Param(-1);
-    params.subtitlesStream->signals.onChanged.connect(this, &StMoviePlayer::doSwitchSubtitlesStream);
+    params.subtitlesStream->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchSubtitlesStream);
     params.blockSleeping = new StInt32Param(StMoviePlayer::BLOCK_SLEEP_PLAYBACK);
     params.fpsBound = 1;
 
@@ -181,6 +185,7 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     mySettings->loadParam (ST_SETTING_UPDATES_INTERVAL,   params.checkUpdatesDays);
     mySettings->loadParam (ST_SETTING_SHUFFLE,            params.isShuffle);
     mySettings->loadParam (ST_SETTING_GLOBAL_MKEYS,       params.areGlobalMKeys);
+    mySettings->loadParam (ST_SETTING_SHOW_LIST,          params.ToShowPlayList);
 
     StString aSavedALDevice;
     mySettings->loadString(ST_SETTING_OPENAL_DEVICE,      aSavedALDevice);
@@ -240,9 +245,10 @@ void StMoviePlayer::releaseDevice() {
         mySettings->saveParam (ST_SETTING_SRCFORMAT,          params.srcFormat);
         mySettings->saveParam (ST_SETTING_SHUFFLE,            params.isShuffle);
         mySettings->saveParam (ST_SETTING_GLOBAL_MKEYS,       params.areGlobalMKeys);
+        mySettings->saveParam (ST_SETTING_SHOW_LIST,          params.ToShowPlayList);
 
         if(!myVideo.isNull()) {
-            mySettings->saveString(ST_SETTING_RECENT_FILES,   myVideo->getPlayList().dumpRecentList());
+            mySettings->saveString(ST_SETTING_RECENT_FILES,   myPlayList->dumpRecentList());
         }
     }
 
@@ -285,7 +291,7 @@ bool StMoviePlayer::init() {
         aTextureQueue = new StGLTextureQueue(16);
         aSubQueue     = new StSubQueue();
     }
-    myGUI = new StMoviePlayerGUI(this, myWindow.access(), myLangMap.access(), aTextureQueue, aSubQueue);
+    myGUI = new StMoviePlayerGUI(this, myWindow.access(), myLangMap.access(), myPlayList, aTextureQueue, aSubQueue);
     myGUI->setContext(myContext);
 
     // load settings
@@ -310,15 +316,15 @@ bool StMoviePlayer::init() {
 
     // create the video playback thread
     if(!isReset) {
-        myVideo = new StVideo(params.alDevice->getTitle(), myLangMap, aTextureQueue, aSubQueue);
+        myVideo = new StVideo(params.alDevice->getTitle(), myLangMap, myPlayList, aTextureQueue, aSubQueue);
     }
     myVideo->signals.onError.connect(myGUI->myMsgStack, &StGLMsgStack::doPushMessage);
     myVideo->signals.onLoaded.connect(this, &StMoviePlayer::doLoaded);
-    myVideo->getPlayList().setShuffle(params.isShuffle->getValue());
+    myPlayList->setShuffle(params.isShuffle->getValue());
 
     StString aRecentList;
     mySettings->loadString(ST_SETTING_RECENT_FILES, aRecentList);
-    myVideo->getPlayList().loadRecentList(aRecentList);
+    myPlayList->loadRecentList(aRecentList);
 
     if(isReset) {
         return true;
@@ -354,7 +360,7 @@ void StMoviePlayer::parseArguments(const StArgumentsMap& theArguments) {
         params.isFullscreen->setValue(!argFullscreen.isValueOff());
     }
     if(argViewMode.isValid()) {
-        myVideo->getPlayList().changeDefParams().setViewMode(StStereoParams::GET_VIEW_MODE_FROM_STRING(argViewMode.getValue()));
+        myPlayList->changeDefParams().setViewMode(StStereoParams::GET_VIEW_MODE_FROM_STRING(argViewMode.getValue()));
     }
     if(argSrcFormat.isValid()) {
         params.srcFormat->setValue(st::formatFromString(argSrcFormat.getValue()));
@@ -389,7 +395,7 @@ bool StMoviePlayer::open() {
     }
 
     // clear playlist first
-    myVideo->getPlayList().clear();
+    myPlayList->clear();
 
     //StArgument argFile1     = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE + 1]; // playlist?
     StArgument argFileLeft  = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_LEFT];
@@ -397,16 +403,16 @@ bool StMoviePlayer::open() {
     if(argFileLeft.isValid() && argFileRight.isValid()) {
         // meta-file
         /// TODO (Kirill Gavrilov#4) we should use MIME type!
-        myVideo->getPlayList().addOneFile(argFileLeft.getValue(), argFileRight.getValue());
+        myPlayList->addOneFile(argFileLeft.getValue(), argFileRight.getValue());
     } else if(!anOpenMIME.isEmpty()) {
         // create just one-file playlist
-        myVideo->getPlayList().addOneFile(myOpenFileInfo->getPath(), anOpenMIME);
+        myPlayList->addOneFile(myOpenFileInfo->getPath(), anOpenMIME);
     } else {
         // create playlist from file's folder
-        myVideo->getPlayList().open(myOpenFileInfo->getPath());
+        myPlayList->open(myOpenFileInfo->getPath());
     }
 
-    if(!myVideo->getPlayList().isEmpty()) {
+    if(!myPlayList->isEmpty()) {
         doUpdateStateLoading();
         myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
         myVideo->doLoadNext();
@@ -619,10 +625,20 @@ void StMoviePlayer::doMouseUp(const StClickEvent& theEvent) {
     }
 }
 
+void StMoviePlayer::doFileNext() {
+    if(myVideo.isNull()) {
+        return;
+    }
+
+    doUpdateStateLoading();
+    myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
+    myVideo->doLoadNext();
+}
+
 void StMoviePlayer::doFileDrop(const StDNDropEvent& theEvent) {
     const StString aFilePath = theEvent.File;
-    if(myVideo->getPlayList().checkExtension(aFilePath)) {
-        myVideo->getPlayList().open(aFilePath);
+    if(myPlayList->checkExtension(aFilePath)) {
+        myPlayList->open(aFilePath);
         doUpdateStateLoading();
         myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
         myVideo->doLoadNext();
@@ -695,7 +711,7 @@ void StMoviePlayer::stglDraw(unsigned int view) {
         myVideo->switchAudioDevice(params.alDevice->getTitle());
         myToUpdateALList = false;
     }
-    if(myVideo->getPlayList().isRecentChanged()) {
+    if(myPlayList->isRecentChanged()) {
         myGUI->updateRecentMenu();
     }
 
@@ -766,10 +782,24 @@ void StMoviePlayer::stglDraw(unsigned int view) {
     myGUI->stglDraw(view);
 }
 
-void StMoviePlayer::doSwitchShuffle(const bool theShuffleOn) {
-    if(!myVideo.isNull()) {
-        myVideo->getPlayList().setShuffle(theShuffleOn);
+void StMoviePlayer::doShowPlayList(const bool theToShow) {
+    if(myGUI.isNull()) {
+        return;
     }
+
+    myGUI->myPlayList->setVisibility(theToShow, true);
+}
+
+void StMoviePlayer::doPlayListReverse(const size_t ) {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    params.ToShowPlayList->reverse();
+}
+
+void StMoviePlayer::doSwitchShuffle(const bool theShuffleOn) {
+    myPlayList->setShuffle(theShuffleOn);
 }
 
 void StMoviePlayer::doSwitchAudioDevice(const int32_t /*theDevId*/) {
@@ -783,7 +813,7 @@ void StMoviePlayer::doSetAudioVolume(const float theGain) {
 }
 
 void StMoviePlayer::doUpdateStateLoading() {
-    const StString aFileToLoad = myVideo->getPlayList().getCurrentTitle();
+    const StString aFileToLoad = myPlayList->getCurrentTitle();
     if(aFileToLoad.isEmpty()) {
         myWindow->setTitle("sView - Movie Player");
     } else {
@@ -793,7 +823,7 @@ void StMoviePlayer::doUpdateStateLoading() {
 }
 
 void StMoviePlayer::doUpdateStateLoaded() {
-    const StString aFileToLoad = myVideo->getPlayList().getCurrentTitle();
+    const StString aFileToLoad = myPlayList->getCurrentTitle();
     if(aFileToLoad.isEmpty()) {
         myWindow->setTitle("sView - Movie Player");
     } else {
@@ -826,28 +856,28 @@ void StMoviePlayer::doLoaded() {
 }
 
 void StMoviePlayer::doListFirst(const size_t ) {
-    if(myVideo->getPlayList().walkToFirst()) {
+    if(myPlayList->walkToFirst()) {
         myVideo->doLoadNext();
         doUpdateStateLoading();
     }
 }
 
 void StMoviePlayer::doListPrev(const size_t ) {
-    if(myVideo->getPlayList().walkToPrev()) {
+    if(myPlayList->walkToPrev()) {
         myVideo->doLoadNext();
         doUpdateStateLoading();
     }
 }
 
 void StMoviePlayer::doListNext(const size_t ) {
-    if(myVideo->getPlayList().walkToNext()) {
+    if(myPlayList->walkToNext()) {
         myVideo->doLoadNext();
         doUpdateStateLoading();
     }
 }
 
 void StMoviePlayer::doListLast(const size_t ) {
-    if(myVideo->getPlayList().walkToLast()) {
+    if(myPlayList->walkToLast()) {
         myVideo->doLoadNext();
         doUpdateStateLoading();
     }
@@ -889,17 +919,14 @@ void StMoviePlayer::doOpenRecent(const size_t theItemId) {
     if(myVideo.isNull()) {
         return;
     }
-    myVideo->getPlayList().openRecent(theItemId);
+    myPlayList->openRecent(theItemId);
     doUpdateStateLoading();
     myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
     myVideo->doLoadNext();
 }
 
 void StMoviePlayer::doClearRecent(const size_t ) {
-    if(myVideo.isNull()) {
-        return;
-    }
-    myVideo->getPlayList().clearRecent();
+    myPlayList->clearRecent();
 }
 
 void StMoviePlayer::doAddAudioStream(const size_t ) {
@@ -916,7 +943,7 @@ void StMoviePlayer::doOpenFileDialog(const size_t theOpenType) {
     }
     myEventDialog.set();
 
-    StHandle<StFileNode> aCurrFile = myVideo->getPlayList().getCurrentFile();
+    StHandle<StFileNode> aCurrFile = myPlayList->getCurrentFile();
     if(params.lastFolder.isEmpty()) {
         if(!aCurrFile.isNull()) {
             params.lastFolder = aCurrFile->isEmpty() ? aCurrFile->getFolderPath() : aCurrFile->getValue(0)->getFolderPath();
@@ -973,20 +1000,20 @@ void StMoviePlayer::doOpenFileDialog(const size_t theOpenType) {
             StString aFilePathR;
             if(StFileNode::openFileDialog(params.lastFolder, aTitle, myVideo->getMimeListVideo(), aFilePathR, false)) {
                 // meta-file
-                myVideo->getPlayList().clear();
-                myVideo->getPlayList().addOneFile(aFilePath, aFilePathR);
+                myPlayList->clear();
+                myPlayList->addOneFile(aFilePath, aFilePathR);
             }
             break;
         }
         case OPEN_STREAM_AUDIO:
         case OPEN_STREAM_SUBTITLES: {
-            myVideo->getPlayList().addToNode(aCurrFile, aFilePath);
+            myPlayList->addToNode(aCurrFile, aFilePath);
             mySeekOnLoad = myVideo->getPts();
             break;
         }
         case OPEN_FILE_MOVIE:
         default: {
-            myVideo->getPlayList().open(aFilePath);
+            myPlayList->open(aFilePath);
         }
     }
 
@@ -1060,7 +1087,7 @@ bool StMoviePlayer::getCurrentFile(StHandle<StFileNode>&     theFileNode,
                                    StHandle<StStereoParams>& theParams,
                                    StHandle<StMovieInfo>&    theInfo) {
     theInfo.nullify();
-    if(!myVideo->getPlayList().getCurrentFile(theFileNode, theParams)) {
+    if(!myPlayList->getCurrentFile(theFileNode, theParams)) {
         return false;
     }
     theInfo = myVideo->getFileInfo(theParams);
@@ -1068,8 +1095,5 @@ bool StMoviePlayer::getCurrentFile(StHandle<StFileNode>&     theFileNode,
 }
 
 void StMoviePlayer::getRecentList(StArrayList<StString>& theList) {
-    if(myVideo.isNull()) {
-        return;
-    }
-    myVideo->getPlayList().getRecentList(theList);
+    myPlayList->getRecentList(theList);
 }

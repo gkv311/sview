@@ -248,6 +248,7 @@
 		<Unit filename="StGLMenuRadioButton.cpp" />
 		<Unit filename="StGLMessageBox.cpp" />
 		<Unit filename="StGLMsgStack.cpp" />
+		<Unit filename="StGLPlayList.cpp" />
 		<Unit filename="StGLRadioButton.cpp" />
 		<Unit filename="StGLRadioButtonFloat32.cpp" />
 		<Unit filename="StGLRadioButtonTextured.cpp" />
@@ -286,6 +287,7 @@
 		<Unit filename="../include/StGLWidgets/StGLMenuRadioButton.h" />
 		<Unit filename="../include/StGLWidgets/StGLMessageBox.h" />
 		<Unit filename="../include/StGLWidgets/StGLMsgStack.h" />
+		<Unit filename="../include/StGLWidgets/StGLPlayList.h" />
 		<Unit filename="../include/StGLWidgets/StGLRadioButton.h" />
 		<Unit filename="../include/StGLWidgets/StGLRadioButtonFloat32.h" />
 		<Unit filename="../include/StGLWidgets/StGLRadioButtonTextured.h" />

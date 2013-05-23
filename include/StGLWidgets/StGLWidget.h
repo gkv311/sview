@@ -300,7 +300,7 @@ class StGLWidget {
      */
     ST_CPPEXPORT virtual void destroyWithDelay(StGLWidget* theWidget);
 
-        protected: //!< Signals
+        public: //! @name signals
 
     struct {
         /**
@@ -316,7 +316,7 @@ class StGLWidget {
         StSignal<void (const int )> onMouseUnclick;
     } signals;
 
-        protected: //!< methods available to inheritors
+        protected: //! @name methods available to inheritors
 
     friend class StGLRootWidget;
 
@@ -349,7 +349,7 @@ class StGLWidget {
      */
     ST_CPPEXPORT StGLContext& getContext();
 
-        private:   //!< private fields
+        private:   //! @name private fields
 
     StGLRootWidget* myRoot;          //!< root widget - GL context
     StGLWidget*     myParent;        //!< all elements must have parent widget, NULL only for root
@@ -362,7 +362,7 @@ class StGLWidget {
     StRectI_t       rectPx;          //!< area coordinates in pixels
     bool mouseClicked[ST_MOUSE_MAX_ID + 1]; // mouse clicking state
 
-        protected: //!< fields available to inheritors
+        protected: //! @name fields available to inheritors
 
     StGLCorner      myCorner;        //!< corner (left / top / right / bottom) - relative to the parent widget
     GLdouble        opacityValue;    // 1.0 means 100% visible

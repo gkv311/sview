@@ -132,24 +132,24 @@ void StPlayList::addToPlayList(StFileNode* theFileNode) {
     }
 }
 
-StPlayList::StPlayList(const StArrayList<StString>& theExtensions,
-                       int theRecursionDeep,
-                       bool theIsLoop)
-: myMutex(),
-  myFoldersRoot(),
-  myFirst(NULL),
+StPlayList::StPlayList(const int  theRecursionDeep,
+                       const bool theIsLoop)
+: myFirst(NULL),
   myLast(NULL),
   myCurrent(NULL),
   myItemsCount(0),
-  myExtensions(theExtensions),
   myDefStParams(StStereoParams::FLAT_IMAGE),
-  myRandGen(),
   myPlayedCount(0),
   myRecursionDeep(theRecursionDeep),
   myIsShuffle(false),
   myIsLoopFlag(theIsLoop),
   myRecentLimit(10),
   myIsNewRecent(false) {
+    //
+}
+
+void StPlayList::setExtensions(const StArrayList<StString>& theExtensions) {
+    myExtensions = theExtensions;
     for(size_t anExtId = 0; anExtId < myExtensions.size(); ++anExtId) {
         if(myExtensions[anExtId].isEqualsIgnoreCase(stCString("m3u"))) {
             myExtensions.remove(anExtId); // playlist files are treated in special way
@@ -159,6 +159,8 @@ StPlayList::StPlayList(const StArrayList<StString>& theExtensions,
 }
 
 StPlayList::~StPlayList() {
+    signals.onPositionChange.disconnect();
+    signals.onPlaylistChange.disconnect();
     clear();
 }
 
@@ -194,11 +196,47 @@ void StPlayList::clear() {
     myStackNext.clear();
     myFirst = myLast = myCurrent = NULL;
     myItemsCount = myPlayedCount = 0;
+
+    anAutoLock.unlock();
+    signals.onPlaylistChange();
+}
+
+size_t StPlayList::getCurrentId() const {
+    StMutexAuto anAutoLock(myMutex);
+    return (myCurrent != NULL) ? myCurrent->getPosition() : 0;
 }
 
 StString StPlayList::getCurrentTitle() const {
     StMutexAuto anAutoLock(myMutex);
     return (myCurrent != NULL) ? myCurrent->getTitle() : StString();
+}
+
+bool StPlayList::walkToPosition(const size_t theId) {
+    StMutexAuto anAutoLock(myMutex);
+
+    size_t anIter = 0;
+    for(StPlayItem* anItem = myFirst; anItem != NULL; anItem = anItem->getNext(), ++anIter) {
+        if(anIter == theId) {
+            if(myCurrent == anItem) {
+                return false;
+            }
+
+            StPlayItem* aPrev = myCurrent;
+            if(aPrev != NULL) {
+                myStackPrev.push_back(aPrev);
+                if(myStackPrev.size() > THE_UNDO_LIMIT) {
+                    myStackPrev.pop_front();
+                }
+            }
+
+            myCurrent = anItem;
+            anAutoLock.unlock();
+            signals.onPositionChange(theId);
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool StPlayList::walkToFirst() {
@@ -208,7 +246,8 @@ bool StPlayList::walkToFirst() {
     if(wasntFirst) {
         myStackPrev.clear();
         myStackNext.clear();
-        signals.onPositionChange();
+        anAutoLock.unlock();
+        signals.onPositionChange(0);
     }
     return wasntFirst;
 }
@@ -220,7 +259,9 @@ bool StPlayList::walkToLast() {
     if(wasntLast) {
         myStackPrev.clear();
         myStackNext.clear();
-        signals.onPositionChange();
+        const size_t anItemId = myCurrent != NULL ? myCurrent->getPosition() : 0;
+        anAutoLock.unlock();
+        signals.onPositionChange(anItemId);
     }
     return wasntLast;
 }
@@ -246,13 +287,17 @@ bool StPlayList::walkToPrev() {
             if(myStackNext.size() > THE_UNDO_LIMIT) {
                 myStackNext.pop_back();
             }
-            signals.onPositionChange();
+            const size_t anItemId = myCurrent->getPosition();
+            anAutoLock.unlock();
+            signals.onPositionChange(anItemId);
             return true;
         }
         return false;
     } else if(myCurrent != myFirst) {
         myCurrent = myCurrent->getPrev();
-        signals.onPositionChange();
+        const size_t anItemId = myCurrent->getPosition();
+        anAutoLock.unlock();
+        signals.onPositionChange(anItemId);
         return true;
     } else if(myIsLoopFlag) {
         return walkToLast();
@@ -333,11 +378,15 @@ bool StPlayList::walkToNext() {
             }
         }
 
-        signals.onPositionChange();
+        const size_t anItemId = myCurrent->getPosition();
+        anAutoLock.unlock();
+        signals.onPositionChange(anItemId);
         return true;
     } else if(myCurrent != myLast) {
         myCurrent = myCurrent->getNext();
-        signals.onPositionChange();
+        const size_t anItemId = myCurrent->getPosition();
+        anAutoLock.unlock();
+        signals.onPositionChange(anItemId);
         return true;
     } else if(myIsLoopFlag) {
         return walkToFirst();
@@ -436,6 +485,9 @@ void StPlayList::removePhysically(const StHandle<StFileNode>& theFileNode) {
         delPlayItem(aRemItem);
         delete aRemItem;
     }
+
+    anAutoLock.unlock();
+    signals.onPlaylistChange();
 }
 
 bool StPlayList::checkExtension(const StString& thePath) {
@@ -464,6 +516,9 @@ void StPlayList::addOneFile(const StString& theFilePath,
 
     addRecentFile(*aFileNode); // append to recent files list
     addPlayItem(new StPlayItem(aFileNode, myDefStParams));
+
+    anAutoLock.unlock();
+    signals.onPlaylistChange();
 }
 
 void StPlayList::addOneFile(const StString& theFilePathLeft,
@@ -476,6 +531,9 @@ void StPlayList::addOneFile(const StString& theFilePathLeft,
 
     addRecentFile(*aFileNode); // append to recent files list
     addPlayItem(new StPlayItem(aFileNode, myDefStParams));
+
+    anAutoLock.unlock();
+    signals.onPlaylistChange();
 }
 
 static char* nextLine(char* theLine) {
@@ -509,6 +567,33 @@ char* StPlayList::parseM3UIter(char* theIter) {
     return aNextLine;
 }
 
+void StPlayList::getSubList(StArrayList<StString>& theList,
+                            const size_t           theStart,
+                            const size_t           theEnd) const {
+    theList.clear();
+    StMutexAuto anAutoLock(myMutex);
+
+    size_t anIter = 0;
+    StPlayItem* anItem = myFirst;
+    for(; anItem != NULL; anItem = anItem->getNext(), ++anIter) {
+        if(anIter == theStart) {
+            break;
+        }
+    }
+
+    if(anIter != theStart) {
+        return;
+    }
+
+    for(; anItem != NULL; anItem = anItem->getNext(), ++anIter) {
+        if(anIter == theEnd) {
+            break;
+        }
+
+        theList.add(anItem->getTitle());
+    }
+}
+
 bool StPlayList::isRecentChanged() const {
     const bool aValue = myIsNewRecent;
     myIsNewRecent = false;
@@ -521,9 +606,9 @@ void StPlayList::openRecent(const size_t theItemId) {
         return;
     }
 
-    clear();
     const StHandle<StFileNode>& aFile = myRecent[theItemId];
     if(aFile->size() == 2) {
+        clear();
         addOneFile(aFile->getValue(0)->getPath(),
                    aFile->getValue(1)->getPath());
     } else {
@@ -650,6 +735,9 @@ void StPlayList::open(const StString& thePath) {
                 while(anIter != NULL) {
                     anIter = parseM3UIter(anIter);
                 }
+
+                anAutoLock.unlock();
+                signals.onPlaylistChange();
                 return;
             }
         }
@@ -666,6 +754,9 @@ void StPlayList::open(const StString& thePath) {
         myFoldersRoot.add(aFileNode);
         addRecentFile(*aFileNode); // append to recent files list
         addPlayItem(new StPlayItem(aFileNode, myDefStParams));
+
+        anAutoLock.unlock();
+        signals.onPlaylistChange();
         return;
     }
     StFolder* aSubFolder = new StFolder(aFolderPath, &myFoldersRoot);
@@ -685,4 +776,7 @@ void StPlayList::open(const StString& thePath) {
             }
         }
     }
+
+    anAutoLock.unlock();
+    signals.onPlaylistChange();
 }

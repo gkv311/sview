@@ -109,14 +109,18 @@ class StPlayList {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StPlayList(const StArrayList<StString>& theExtensions,
-                            int theRecursionDeep,
-                            bool theIsLoop = false);
+    ST_CPPEXPORT StPlayList(const int  theRecursionDeep,
+                            const bool theIsLoop = false);
 
     /**
      * Destructor.
      */
     ST_CPPEXPORT ~StPlayList();
+
+    /**
+     * Set extensions list.
+     */
+    ST_CPPEXPORT void setExtensions(const StArrayList<StString>& theExtensions);
 
     /**
      * Clear playlist.
@@ -130,6 +134,11 @@ class StPlayList {
     inline StStereoParams& changeDefParams() {
         return myDefStParams;
     }
+
+    /**
+     * @return item index for the current position in playlist (starting from 0)
+     */
+    ST_CPPEXPORT size_t getCurrentId() const;
 
     /**
      * Return title for the current position in playlist.
@@ -177,20 +186,24 @@ class StPlayList {
      */
     ST_CPPEXPORT void setShuffle(bool theShuffle);
 
+    /**
+     * @return current playlist size
+     */
+    ST_LOCAL inline size_t getItemsCount() const {
+        return myItemsCount;
+    }
+
     inline bool isEmpty() const {
         StMutexAuto anAutoLock(myMutex);
         return myFirst == NULL;
     }
 
-    /**bool isFirst() const {
-        StMutexAuto anAutoLock(myMutex);
-        return myCurrent == myFirst;
-    }
-
-    bool isLast() const {
-        StMutexAuto anAutoLock(myMutex);
-        return myCurrent == myLast;
-    }*/
+    /**
+     * Change current position in playlist to specified index.
+     * @param theId new position (starting from 0)
+     * @return true if position has been changed
+     */
+    ST_CPPEXPORT bool walkToPosition(const size_t theId);
 
     /**
      * Change current position in playlist to the first item.
@@ -242,6 +255,18 @@ class StPlayList {
     ST_CPPEXPORT void open(const StString& thePath);
 
     /**
+     * Fill list with playlist items (only titles).
+     * @param theList  the list to fill
+     * @param theStart start index (inclusive) in playlist
+     * @param theEnd   end   index (exclusive) in playlist
+     */
+    ST_CPPEXPORT void getSubList(StArrayList<StString>& theList,
+                                 const size_t           theStart,
+                                 const size_t           theEnd) const;
+
+        public: //! @name recently opened files list
+
+    /**
      * Check and reset modification flag.
      * @return true if recent files list was modified since last call
      */
@@ -281,8 +306,9 @@ class StPlayList {
     struct {
         /**
          * Emit callback Slot when current position in playlist is changed.
+         * @param theItem new position in playlist
          */
-        StSignal<void (void )> onPositionChange;
+        StSignal<void (const size_t )> onPositionChange;
 
         /**
          * Emit callback Slot when playlist content is changed.

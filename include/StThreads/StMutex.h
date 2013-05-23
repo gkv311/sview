@@ -78,18 +78,30 @@ class StMutexAuto {
 
         public:
 
-    inline StMutexAuto(StMutex* theMutex)
+    ST_LOCAL inline StMutexAuto(StMutex* theMutex)
     : myMutex(theMutex) {
         myMutex->lock();
     }
 
-    inline StMutexAuto(StMutex& theMutex)
+    ST_LOCAL inline StMutexAuto(StMutex& theMutex)
     : myMutex(&theMutex) {
         myMutex->lock();
     }
 
-    inline ~StMutexAuto() {
-        myMutex->unlock();
+    ST_LOCAL inline ~StMutexAuto() {
+        if(myMutex != NULL) {
+            myMutex->unlock();
+        }
+    }
+
+    /**
+     * Unlock mutex before destruction.
+     */
+    ST_LOCAL inline void unlock() {
+        if(myMutex != NULL) {
+            myMutex->unlock();
+            myMutex = NULL;
+        }
     }
 
         private:

@@ -47,110 +47,6 @@ struct StMovieInfo {
  */
 class StVideo {
 
-        private: //! @name private fields
-
-    StMIMEList                    myMimesVideo;
-    StMIMEList                    myMimesAudio;
-    StMIMEList                    myMimesSubs;
-    StHandle<StThread>            myThread;      //!< main loop thread
-    StHandle<StLangMap>           myLangMap;     //!< translations dictionary
-
-    StArrayList<AVFormatContext*> myCtxList;     //!< format context for each file
-    StArrayList<AVFormatContext*> myPlayCtxList; //!< currently played contexts
-
-    StHandle<StVideoQueue>        myVideoMaster;  //!< Master video decoding thread
-    StHandle<StVideoQueue>        myVideoSlave;   //!< Slave  video decoding thread
-    StHandle<StAudioQueue>        myAudio;        //!< audio decoding thread
-    StHandle<StSubtitleQueue>     mySubtitles;    //!< subtitles decoding thread
-
-    StPlayList                    myPlayList;     //!< play list
-    StHandle<StMovieInfo>         myFileInfo;     //!< info about currently loaded file
-    StHandle<StMovieInfo>         myFileInfoTmp;
-    StHandle<StFileNode>          myCurrNode;     //!< active (played) file node
-    StHandle<StStereoParams>      myCurrParams;   //!< paramters for active file node
-    StHandle<StGLTextureQueue>    myTextureQueue; //!< decoded frames queue
-
-    StHandle<StVideoTimer>        myVideoTimer;   //!< video refresh timer (Audio -> Video sync)
-    mutable StMutex               myEventMutex;   //!< lock for thread-safety
-    double                        myDuration;     //!< active file duration in seconds
-    double                        myPtsSeek;      //!< seeking target
-    bool                          myToSeekBack;   //!< seeking direction
-    StPlayEvent_t                 myPlayEvent;    //!< playback event
-    double                        targetFps;
-
-    bool                          isBenchmark;
-    volatile StImageFile::ImageType toSave;
-    volatile bool                 toQuit;
-
-        private: //! @name auxiliary methods
-
-    /**
-     * Just redirect callback slot.
-     */
-    ST_LOCAL void doOnErrorRedirect(const StString& theMsgText) {
-        signals.onError(theMsgText);
-    }
-
-    /**
-     * Private method to append one format context (one file).
-     */
-    ST_LOCAL bool addFile(const StString& theFileToLoad,
-                          StHandle< StArrayList<StString> >& theStreamsListA,
-                          StHandle< StArrayList<StString> >& theStreamsListS,
-                          double& theMaxDuration);
-
-    ST_LOCAL bool openSource(const StHandle<StFileNode>&     theNewSource,
-                             const StHandle<StStereoParams>& theNewParams);
-
-    /**
-     * Close active played file(s).
-     */
-    ST_LOCAL void close();
-
-    ST_LOCAL void packetsLoop();
-    ST_LOCAL void doFlush();
-    ST_LOCAL void doSeek(const double theSeekPts,
-                         const bool   toSeekBack);
-    ST_LOCAL void doSeekContext(AVFormatContext* theFormatCtx,
-                                const double     theSeekPts,
-                                const bool       toSeekBack);
-    ST_LOCAL bool doSeekStream (AVFormatContext* theFormatCtx,
-                                const signed int theStreamId,
-                                const double     theSeekPts,
-                                const bool       toSeekBack);
-    ST_LOCAL bool pushPacket(StHandle<StAVPacketQueue>& theAVPacketQueue,
-                             StAVPacket& thePacket);
-
-    /**
-     * Save current frame to file.
-     */
-    ST_LOCAL bool saveSnapshotAs(StImageFile::ImageType theImgType);
-
-    /**
-     * @return event (StPlayEvent_t ) - event in wait state.
-     */
-    ST_LOCAL StPlayEvent_t popPlayEvent(double& theSeekPts,
-                                        bool&   toSeekBack) {
-        myEventMutex.lock();
-            StPlayEvent_t anEventId = myPlayEvent;
-            theSeekPts = myPtsSeek;
-            toSeekBack = myToSeekBack;
-            myPlayEvent = ST_PLAYEVENT_NONE;
-        myEventMutex.unlock();
-        return anEventId;
-    }
-
-    ST_LOCAL void waitEvent() {
-        double aSeekPts;
-        bool toSeekBack;
-        for(;;) {
-            if(popPlayEvent(aSeekPts, toSeekBack) != ST_PLAYEVENT_NONE) {
-                return;
-            }
-            StThread::sleep(10);
-        }
-    }
-
         public:
 
     /**
@@ -180,6 +76,7 @@ class StVideo {
      */
     ST_LOCAL StVideo(const StString&                   theALDeviceName,
                      const StHandle<StLangMap>&        theLangMap,
+                     const StHandle<StPlayList>&       thePlayList,
                      const StHandle<StGLTextureQueue>& theTextureQueue,
                      const StHandle<StSubQueue>&       theSubtitlesQueue);
     ST_LOCAL ~StVideo();
@@ -201,7 +98,7 @@ class StVideo {
      * Access to the playlist.
      */
     ST_LOCAL StPlayList& getPlayList() {
-        return myPlayList;
+        return *myPlayList;
     }
 
     ST_LOCAL double getAverFps() const {
@@ -354,6 +251,110 @@ class StVideo {
             myEventMutex.unlock();
         }
     }
+
+        private: //! @name auxiliary methods
+
+    /**
+     * Just redirect callback slot.
+     */
+    ST_LOCAL void doOnErrorRedirect(const StString& theMsgText) {
+        signals.onError(theMsgText);
+    }
+
+    /**
+     * Private method to append one format context (one file).
+     */
+    ST_LOCAL bool addFile(const StString& theFileToLoad,
+                          StHandle< StArrayList<StString> >& theStreamsListA,
+                          StHandle< StArrayList<StString> >& theStreamsListS,
+                          double& theMaxDuration);
+
+    ST_LOCAL bool openSource(const StHandle<StFileNode>&     theNewSource,
+                             const StHandle<StStereoParams>& theNewParams);
+
+    /**
+     * Close active played file(s).
+     */
+    ST_LOCAL void close();
+
+    ST_LOCAL void packetsLoop();
+    ST_LOCAL void doFlush();
+    ST_LOCAL void doSeek(const double theSeekPts,
+                         const bool   toSeekBack);
+    ST_LOCAL void doSeekContext(AVFormatContext* theFormatCtx,
+                                const double     theSeekPts,
+                                const bool       toSeekBack);
+    ST_LOCAL bool doSeekStream (AVFormatContext* theFormatCtx,
+                                const signed int theStreamId,
+                                const double     theSeekPts,
+                                const bool       toSeekBack);
+    ST_LOCAL bool pushPacket(StHandle<StAVPacketQueue>& theAVPacketQueue,
+                             StAVPacket& thePacket);
+
+    /**
+     * Save current frame to file.
+     */
+    ST_LOCAL bool saveSnapshotAs(StImageFile::ImageType theImgType);
+
+    /**
+     * @return event (StPlayEvent_t ) - event in wait state.
+     */
+    ST_LOCAL StPlayEvent_t popPlayEvent(double& theSeekPts,
+                                        bool&   toSeekBack) {
+        myEventMutex.lock();
+            StPlayEvent_t anEventId = myPlayEvent;
+            theSeekPts = myPtsSeek;
+            toSeekBack = myToSeekBack;
+            myPlayEvent = ST_PLAYEVENT_NONE;
+        myEventMutex.unlock();
+        return anEventId;
+    }
+
+    ST_LOCAL void waitEvent() {
+        double aSeekPts;
+        bool toSeekBack;
+        for(;;) {
+            if(popPlayEvent(aSeekPts, toSeekBack) != ST_PLAYEVENT_NONE) {
+                return;
+            }
+            StThread::sleep(10);
+        }
+    }
+
+        private: //! @name private fields
+
+    StMIMEList                    myMimesVideo;
+    StMIMEList                    myMimesAudio;
+    StMIMEList                    myMimesSubs;
+    StHandle<StThread>            myThread;      //!< main loop thread
+    StHandle<StLangMap>           myLangMap;     //!< translations dictionary
+
+    StArrayList<AVFormatContext*> myCtxList;     //!< format context for each file
+    StArrayList<AVFormatContext*> myPlayCtxList; //!< currently played contexts
+
+    StHandle<StVideoQueue>        myVideoMaster;  //!< Master video decoding thread
+    StHandle<StVideoQueue>        myVideoSlave;   //!< Slave  video decoding thread
+    StHandle<StAudioQueue>        myAudio;        //!< audio decoding thread
+    StHandle<StSubtitleQueue>     mySubtitles;    //!< subtitles decoding thread
+
+    StHandle<StPlayList>          myPlayList;     //!< play list
+    StHandle<StMovieInfo>         myFileInfo;     //!< info about currently loaded file
+    StHandle<StMovieInfo>         myFileInfoTmp;
+    StHandle<StFileNode>          myCurrNode;     //!< active (played) file node
+    StHandle<StStereoParams>      myCurrParams;   //!< paramters for active file node
+    StHandle<StGLTextureQueue>    myTextureQueue; //!< decoded frames queue
+
+    StHandle<StVideoTimer>        myVideoTimer;   //!< video refresh timer (Audio -> Video sync)
+    mutable StMutex               myEventMutex;   //!< lock for thread-safety
+    double                        myDuration;     //!< active file duration in seconds
+    double                        myPtsSeek;      //!< seeking target
+    bool                          myToSeekBack;   //!< seeking direction
+    StPlayEvent_t                 myPlayEvent;    //!< playback event
+    double                        targetFps;
+
+    bool                          isBenchmark;
+    volatile StImageFile::ImageType toSave;
+    volatile bool                 toQuit;
 
 };
 

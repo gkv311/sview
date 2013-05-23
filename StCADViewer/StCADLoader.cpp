@@ -44,11 +44,11 @@ static SV_THREAD_FUNCTION threadFunction(void* theLoader) {
 
 StCADLoader::StCADLoader(const StHandle<StLangMap>& theLangMap)
 : myLangMap(theLangMap),
-  myPlayList(ST_CAD_EXTENSIONS_LIST, 1),
+  myPlayList(1),
   myEvLoadNext(false),
   myIsLoaded(false),
   myToQuit(false) {
-    //
+    myPlayList.setExtensions(ST_CAD_EXTENSIONS_LIST);
     /// force thread-safe OCCT memory management
 #ifdef ST_HAVE_OCCT
     Standard::SetReentrant(Standard_True);

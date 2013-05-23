@@ -35,7 +35,9 @@ class StGLMenu;
 class StGLMenuItem;
 class StGLMsgStack;
 class StGLSubtitles;
+class StGLPlayList;
 class StGLTextureButton;
+class StPlayList;
 class StSeekBar;
 class StTimeBox;
 class StUtfLangMap;
@@ -76,6 +78,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
     StGLSubtitles*     stSubtitles; // the main subtitles
     StGLDescription*       stDescr; // description text shown near mouse cursor
     StGLMsgStack*       myMsgStack; // messages stack
+    StGLPlayList*       myPlayList;
 
     StGLMenu*            menu0Root; // main menu
     StGLMenu*         myMenuOpenAL;
@@ -136,6 +139,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL StMoviePlayerGUI(StMoviePlayer*  thePlugin,
                               StWindow*       theWindow,
                               StTranslations* theLangMap,
+                              const StHandle<StPlayList>&       thePlayList,
                               const StHandle<StGLTextureQueue>& theTextureQueue,
                               const StHandle<StSubQueue>&       theSubQueue);
     ST_LOCAL virtual ~StMoviePlayerGUI();

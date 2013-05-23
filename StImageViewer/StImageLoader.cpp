@@ -37,14 +37,14 @@ StImageLoader::StImageLoader(const StImageFile::ImageClass     theImageLib,
                              const StHandle<StGLTextureQueue>& theTextureQueue)
 : myMimeList(ST_IMAGES_MIME_STRING),
   myLangMap(theLangMap),
-  myPlayList(myMimeList.getExtensionsList(), 1),
+  myPlayList(1),
   myLoadNextEvent(false),
   mySrcFormat(ST_V_SRC_AUTODETECT),
   myTextureQueue(theTextureQueue),
   myImageLib(theImageLib),
   myToSave(StImageFile::ST_TYPE_NONE),
   myToQuit(false) {
-      //
+      myPlayList.setExtensions(myMimeList.getExtensionsList());
       myThread = new StThread(threadFunction, (void* )this);
 }
 

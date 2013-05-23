@@ -38,6 +38,7 @@ const char* StVideo::ST_VIDEOS_MIME_STRING = ST_VIDEO_PLUGIN_MIME_CHAR;
 
 StVideo::StVideo(const StString&                   theALDeviceName,
                  const StHandle<StLangMap>&        theLangMap,
+                 const StHandle<StPlayList>&       thePlayList,
                  const StHandle<StGLTextureQueue>& theTextureQueue,
                  const StHandle<StSubQueue>&       theSubtitlesQueue)
 : myMimesVideo(ST_VIDEOS_MIME_STRING),
@@ -46,7 +47,7 @@ StVideo::StVideo(const StString&                   theALDeviceName,
   myLangMap(theLangMap),
   myCtxList(),
   myPlayCtxList(),
-  myPlayList(myMimesVideo.getExtensionsList(), 4, true),
+  myPlayList(thePlayList),
   myCurrNode(),
   myCurrParams(),
   myTextureQueue(theTextureQueue),
@@ -61,6 +62,8 @@ StVideo::StVideo(const StString&                   theALDeviceName,
   toQuit(false) {
     // initialize FFmpeg library if not yet performed
     stLibAV::init();
+
+    myPlayList->setExtensions(myMimesVideo.getExtensionsList());
 
     params.activeAudio     = new StParamActiveStream();
     params.activeSubtitles = new StParamActiveStream();
@@ -878,7 +881,7 @@ void StVideo::mainLoop() {
             return;
         }
 
-        if(!myPlayList.getCurrentFile(aFileToLoad, aFileParams)) {
+        if(!myPlayList->getCurrentFile(aFileToLoad, aFileParams)) {
             continue;
         }
         isOpenSuccess = openSource(aFileToLoad, aFileParams);
@@ -915,10 +918,10 @@ void StVideo::mainLoop() {
                     return;
                 }
             } else {
-                myPlayList.walkToNext();
+                myPlayList->walkToNext();
             }
             isOpenSuccess = false;
-            if(myPlayList.getCurrentFile(aFileToLoad, aFileParams)) {
+            if(myPlayList->getCurrentFile(aFileToLoad, aFileParams)) {
                 isOpenSuccess = openSource(aFileToLoad, aFileParams);
             }
             if(!isOpenSuccess) {
