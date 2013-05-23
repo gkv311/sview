@@ -155,6 +155,12 @@ class StPlayList {
     ST_CPPEXPORT StHandle<StFileNode> getCurrentFile();
 
     /**
+     * Set title for specified item.
+     */
+    ST_CPPEXPORT void setTitle(const StHandle<StStereoParams>& theKey,
+                               const StString&                 theTitle);
+
+    /**
      * Returns file node and stereo parameters for current playing position.
      * @return true if playlist is not empty.
      */
@@ -317,6 +323,12 @@ class StPlayList {
          * Emit callback Slot when playlist content is changed.
          */
         StSignal<void (void )> onPlaylistChange;
+
+        /**
+         * Emit callback Slot when title of some item changed.
+         * @param theItem index of changed item
+         */
+        StSignal<void (const size_t )> onTitleChange;
     } signals;
 
         private:

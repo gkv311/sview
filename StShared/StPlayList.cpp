@@ -167,6 +167,7 @@ void StPlayList::setExtensions(const StArrayList<StString>& theExtensions) {
 }
 
 StPlayList::~StPlayList() {
+    signals.onTitleChange.disconnect();
     signals.onPositionChange.disconnect();
     signals.onPlaylistChange.disconnect();
     clear();
@@ -414,6 +415,23 @@ StHandle<StFileNode> StPlayList::getCurrentFile() {
         return StHandle<StFileNode>();
     }
     return new StFileNode(aFileNode->getPath());
+}
+
+void StPlayList::setTitle(const StHandle<StStereoParams>& theKey,
+                          const StString&                 theTitle) {
+    StMutexAuto anAutoLock(myMutex);
+    if(myCurrent == NULL) {
+        return;
+    }
+
+    if(theKey != myCurrent->getParams()) {
+        return;
+    }
+
+    const size_t anItemId = myCurrent->getPosition();
+    myCurrent->setTitle(theTitle);
+    anAutoLock.unlock();
+    signals.onTitleChange(anItemId);
 }
 
 bool StPlayList::getCurrentFile(StHandle<StFileNode>& theFileNode,

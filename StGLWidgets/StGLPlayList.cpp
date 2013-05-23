@@ -18,10 +18,12 @@ StGLPlayList::StGLPlayList(StGLWidget*                 theParent,
   myList(theList),
   myFromId(0),
   myItemsNb(0),
+  myToResetList(false),
   myToUpdateList(false) {
     myWidth = 250;
     StGLWidget::signals.onMouseUnclick = stSlot(this, &StGLPlayList::doMouseUnclick);
     myList->signals.onPlaylistChange  += stSlot(this, &StGLPlayList::doResetList);
+    myList->signals.onTitleChange     += stSlot(this, &StGLPlayList::doChangeItem);
 
     myColorVec = StGLVec4(0.855f, 0.855f, 0.855f, 0.5f);
 }
@@ -61,6 +63,10 @@ void StGLPlayList::updateList() {
 }
 
 void StGLPlayList::doResetList() {
+    myToResetList = true;
+}
+
+void StGLPlayList::doChangeItem(const size_t ) {
     myToUpdateList = true;
 }
 
@@ -154,10 +160,13 @@ void StGLPlayList::stglDraw(unsigned int theView) {
         return;
     }
 
-    if(myToUpdateList
+    if((myToUpdateList || myToResetList)
     && theView != ST_DRAW_RIGHT) {
+        if(myToResetList) {
+            myFromId = 0;
+        }
         myToUpdateList = false;
-        myFromId = 0;
+        myToResetList  = false;
         updateList();
     }
 

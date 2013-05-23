@@ -400,10 +400,40 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
         return false;
     }
 
+    StArgument aTitle = myFileInfoTmp->myInfo["TITLE"];
+    if(!aTitle.isValid()) {
+        aTitle = myFileInfoTmp->myInfo["title"];
+    }
+    StArgument anArtist = myFileInfoTmp->myInfo["ARTIST"];
+    if(!anArtist.isValid()) {
+        anArtist = myFileInfoTmp->myInfo["artist"];
+    }
+
+    if(anArtist.isValid() && aTitle.isValid()) {
+        myPlayList->setTitle(theNewParams, anArtist.getValue() + " - " + aTitle.getValue());
+    } else if(aTitle.isValid()) {
+        if(aTitle.getValue().getLength() < 20) {
+            // protection against messed title
+            StString aFileName;
+            StString aFolder;
+            StString aPath;
+            if(!theNewSource->isEmpty()) {
+                aPath = theNewSource->getValue(0)->getPath();
+            } else {
+                aPath = theNewSource->getPath();
+            }
+            StFileNode::getFolderAndFile(aPath, aFolder, aFileName);
+            myPlayList->setTitle(theNewParams, aTitle.getValue() + " (" + aFileName + ")");
+        } else {
+            myPlayList->setTitle(theNewParams, aTitle.getValue());
+        }
+    }
+
     myCurrNode   = theNewSource;
     myCurrParams = theNewParams;
     myFileInfoTmp->myId = myCurrParams;
     myFileInfo   = myFileInfoTmp;
+
     params.activeAudio->setList(aStreamsListA, aStreamsListA->isEmpty() ? -1 : 0);
     params.activeSubtitles->setList(aStreamsListS, -1); // do not show subtitles by default
 

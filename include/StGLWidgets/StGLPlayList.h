@@ -44,6 +44,7 @@ class StGLPlayList : public StGLMenu {
 
     ST_LOCAL void updateList();
     ST_LOCAL void doResetList();
+    ST_LOCAL void doChangeItem(const size_t );
     ST_LOCAL void doItemClick(const size_t );
     ST_LOCAL void doMouseUnclick(const int theBtnId);
     ST_LOCAL void resizeWidth();
@@ -53,6 +54,7 @@ class StGLPlayList : public StGLMenu {
     StHandle<StPlayList> myList;         //!< handle to playlist
     size_t               myFromId;       //!< id in playlist of first item displayed on screen
     int                  myItemsNb;      //!< number of items displayed on screen
+    volatile bool        myToResetList;  //!< playlist has been reseted
     volatile bool        myToUpdateList; //!< playlist has been changed
 
 };
