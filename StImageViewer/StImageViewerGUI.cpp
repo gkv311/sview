@@ -488,7 +488,6 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
   //
   isGUIVisible(true),
   isGUIMinimal(true) {
-    //
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StImageViewerGUI::doShowFPS);
 
     StHandle<StGLTextureQueue> aTextureQueue = theTextureQueue;
@@ -512,6 +511,11 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
 
     myMsgStack = new StGLMsgStack(this);
     myMsgStack->setVisibility(true, true);
+
+    if(myPlugin->params.ToShowFps->getValue()) {
+        myFpsWidget = new StGLFpsLabel(this);
+        myFpsWidget->setVisibility(true, true);
+    }
 }
 
 StImageViewerGUI::~StImageViewerGUI() {

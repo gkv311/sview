@@ -53,6 +53,7 @@ namespace {
     static const char ST_SETTING_OPENAL_DEVICE[] = "alDevice";
     static const char ST_SETTING_RECENT_FILES[]  = "recent";
     static const char ST_SETTING_SHOW_LIST[]     = "showPlaylist";
+    static const char ST_SETTING_SHOW_FPS[]      = "showFPS";
 
     static const char ST_SETTING_FULLSCREEN[]    = "fullscreen";
     static const char ST_SETTING_VIEWMODE[]      = "viewMode";
@@ -186,6 +187,7 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     mySettings->loadParam (ST_SETTING_SHUFFLE,            params.isShuffle);
     mySettings->loadParam (ST_SETTING_GLOBAL_MKEYS,       params.areGlobalMKeys);
     mySettings->loadParam (ST_SETTING_SHOW_LIST,          params.ToShowPlayList);
+    mySettings->loadParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
 
     StString aSavedALDevice;
     mySettings->loadString(ST_SETTING_OPENAL_DEVICE,      aSavedALDevice);
@@ -246,6 +248,7 @@ void StMoviePlayer::releaseDevice() {
         mySettings->saveParam (ST_SETTING_SHUFFLE,            params.isShuffle);
         mySettings->saveParam (ST_SETTING_GLOBAL_MKEYS,       params.areGlobalMKeys);
         mySettings->saveParam (ST_SETTING_SHOW_LIST,          params.ToShowPlayList);
+        mySettings->saveParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
 
         if(!myVideo.isNull()) {
             mySettings->saveString(ST_SETTING_RECENT_FILES,   myPlayList->dumpRecentList());

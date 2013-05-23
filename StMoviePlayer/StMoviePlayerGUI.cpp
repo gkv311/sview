@@ -702,7 +702,6 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
   myFpsWidget(NULL),
   //
   isGUIVisible(true) {
-    //
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StMoviePlayerGUI::doShowFPS);
     stImageRegion = new StGLImageRegion(this, theTextureQueue);
     stSubtitles   = new StGLSubtitles  (this, theSubQueue);
@@ -726,6 +725,11 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
 
     myMsgStack = new StGLMsgStack(this);
     myMsgStack->setVisibility(true, true);
+
+    if(myPlugin->params.ToShowFps->getValue()) {
+        myFpsWidget = new StGLFpsLabel(this);
+        myFpsWidget->setVisibility(true, true);
+    }
 }
 
 StMoviePlayerGUI::~StMoviePlayerGUI() {

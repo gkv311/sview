@@ -54,6 +54,7 @@ namespace {
 
     static const char ST_SETTING_FULLSCREEN[]  = "fullscreen";
     static const char ST_SETTING_SLIDESHOW[]   = "slideshow";
+    static const char ST_SETTING_SHOW_FPS[]    = "showFPS";
     static const char ST_SETTING_VIEWMODE[]    = "viewMode";
     static const char ST_SETTING_STEREO_MODE[] = "viewStereoMode";
     static const char ST_SETTING_TEXFILTER[]   = "viewTexFilter";
@@ -100,6 +101,7 @@ StImageViewer::StImageViewer(const StNativeWin_t         theParentWin,
     mySettings->loadString(ST_SETTING_LAST_FOLDER,        params.lastFolder);
     mySettings->loadInt32 (ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
     mySettings->loadParam (ST_SETTING_UPDATES_INTERVAL,   params.checkUpdatesDays);
+    mySettings->loadParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
 
     int32_t aSlideShowDelayInt = int32_t(mySlideShowDelay);
     mySettings->loadInt32 (ST_SETTING_SLIDESHOW_DELAY,    aSlideShowDelayInt);
@@ -154,6 +156,7 @@ void StImageViewer::releaseDevice() {
         mySettings->saveInt32(ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
         mySettings->saveParam(ST_SETTING_UPDATES_INTERVAL, params.checkUpdatesDays);
         mySettings->saveString(ST_SETTING_IMAGELIB, StImageFile::imgLibToString(params.imageLib));
+        mySettings->saveParam (ST_SETTING_SHOW_FPS, params.ToShowFps);
         if(myToSaveSrcFormat) {
             mySettings->saveParam(ST_SETTING_SRCFORMAT, params.srcFormat);
         }
