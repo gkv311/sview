@@ -669,7 +669,8 @@ void StPlayList::getRecentList(StArrayList<StString>& theList) const {
     }
 }
 
-void StPlayList::addRecentFile(const StFileNode& theFile) {
+void StPlayList::addRecentFile(const StFileNode& theFile,
+                               const bool        theToFront) {
     // remove duplicates
     for(size_t anIter = 0; anIter < myRecent.size(); ++anIter) {
         const StHandle<StFileNode>& aFile = myRecent[anIter];
@@ -692,7 +693,11 @@ void StPlayList::addRecentFile(const StFileNode& theFile) {
     if(myRecent.size() > myRecentLimit) {
         myRecent.pop_back();
     }
-    myRecent.push_front(theFile.detach());
+    if(theToFront) {
+        myRecent.push_front(theFile.detach());
+    } else {
+        myRecent.push_back(theFile.detach());
+    }
     myIsNewRecent = true;
 }
 
@@ -728,10 +733,10 @@ void StPlayList::loadRecentList(const StString theString) {
             StHandle<StFileNode> aFileNode = new StFileNode(StString());
             aFileNode->add(new StFileNode(anArgLeft.getValue(),  aFileNode.access()));
             aFileNode->add(new StFileNode(anArgRight.getValue(), aFileNode.access()));
-            addRecentFile(*aFileNode);
+            addRecentFile(*aFileNode, false);
         } else if(anArgFile.isValid()) {
             StFileNode aFileNode(anArgFile.getValue());
-            addRecentFile(aFileNode);
+            addRecentFile(aFileNode, false);
         }
     }
 }

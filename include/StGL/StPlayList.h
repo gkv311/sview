@@ -351,7 +351,8 @@ class StPlayList {
     /**
      * Add file to list of recent files.
      */
-    ST_LOCAL void addRecentFile(const StFileNode& theFile);
+    ST_LOCAL void addRecentFile(const StFileNode& theFile,
+                                const bool        theToFront = true);
 
     /**
      * M3U parsing stuff.
