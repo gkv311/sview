@@ -28,7 +28,7 @@ class StPlayItem {
     /**
      * Default constructor.
      */
-    ST_CPPEXPORT StPlayItem(StFileNode* theFileNode,
+    ST_CPPEXPORT StPlayItem(StFileNode*           theFileNode,
                             const StStereoParams& theDefParams);
 
     /**
@@ -74,6 +74,8 @@ class StPlayItem {
 
     ST_CPPEXPORT StString getTitle() const;
 
+    ST_CPPEXPORT void setTitle(const StString& theTitle);
+
     inline StHandle<StStereoParams> getParams() {
         return myStParams;
     }
@@ -93,6 +95,7 @@ class StPlayItem {
     size_t      myPosition; //!< position in list
     StFileNode* myFileNode; //!< link to file node
     StHandle<StStereoParams> myStParams; //!< stereo parameters
+    StString    myTitle;    //!< item title
     bool        myPlayFlag; //!< flag for shuffle check
 
 };
@@ -341,7 +344,8 @@ class StPlayList {
     /**
      * M3U parsing stuff.
      */
-    ST_LOCAL char* parseM3UIter(char* theIter);
+    ST_LOCAL char* parseM3UIter(char*     theIter,
+                                StString& theTitle);
 
         private:
 

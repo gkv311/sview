@@ -83,10 +83,18 @@ StString StPlayItem::getFolderPath() const {
 }
 
 StString StPlayItem::getTitle() const {
+    if(!myTitle.isEmpty()) {
+        return myTitle;
+    }
+
     StString aTitleString;
     StString aFolder;
     StFileNode::getFolderAndFile(getPath(), aFolder, aTitleString);
     return aTitleString;
+}
+
+void StPlayItem::setTitle(const StString& theTitle) {
+    myTitle = theTitle;
 }
 
 void StPlayList::addPlayItem(StPlayItem* theNewItem) {
@@ -546,10 +554,12 @@ static char* nextLine(char* theLine) {
     }
 }
 
-char* StPlayList::parseM3UIter(char* theIter) {
+char* StPlayList::parseM3UIter(char*     theIter,
+                               StString& theTitle) {
     if(*theIter == '\0') {
         return NULL;
     }
+
 
     char* aNextLine = nextLine(theIter);
     if(*aNextLine != '\0') {
@@ -562,7 +572,13 @@ char* StPlayList::parseM3UIter(char* theIter) {
     if(*theIter != '#') {
         StFileNode* aFileNode = new StFileNode(theIter, &myFoldersRoot);
         myFoldersRoot.add(aFileNode);
-        addPlayItem(new StPlayItem(aFileNode, myDefStParams));
+
+        StPlayItem* anItem = new StPlayItem(aFileNode, myDefStParams);
+        anItem->setTitle(theTitle);
+        addPlayItem(anItem);
+        theTitle = "";
+    } else if(stAreEqual(theIter, "#EXTINF:-1,", 11)) {
+        theTitle = theIter + 11;
     }
     return aNextLine;
 }
@@ -727,14 +743,17 @@ void StPlayList::open(const StString& thePath) {
         if(anExt.isEqualsIgnoreCase(stCString("m3u"))) {
             StRawFile aRawFile(thePath);
             if(aRawFile.readFile()) {
+                StString aTitle;
                 char* anIter = (char* )aRawFile.getBuffer();
                 if(anIter[0] == '\xEF' && anIter[1] == '\xBB' && anIter[2] == '\xBF') {
                     // skip BOM for UTF8 written by some stupid programs
                     anIter += 3;
                 }
                 while(anIter != NULL) {
-                    anIter = parseM3UIter(anIter);
+                    anIter = parseM3UIter(anIter, aTitle);
                 }
+
+                addRecentFile(StFileNode(thePath)); // append to recent files list
 
                 anAutoLock.unlock();
                 signals.onPlaylistChange();
