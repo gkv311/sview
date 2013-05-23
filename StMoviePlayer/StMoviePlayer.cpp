@@ -515,6 +515,12 @@ void StMoviePlayer::doKeyDown(const StKeyEvent& theEvent) {
 
         case ST_VK_H:
         case ST_VK_L: {
+            if(theEvent.VKey  == ST_VK_L
+            && theEvent.Flags == ST_VF_CONTROL) {
+                doPlayListReverse();
+                return;
+            }
+
             const int32_t aValue = myVideo->params.activeAudio->nextValue(theEvent.Flags == ST_VF_SHIFT ? -1 : 1);
             params.audioStream->setValue(aValue);
             return;
