@@ -780,11 +780,13 @@ bool StMoviePlayerGUI::toHideCursor() {
 }
 
 void StMoviePlayerGUI::setVisibility(const StPointD_t& cursorZo, bool isMouseActive) {
+    const bool toShowPlayList = myPlugin->params.ToShowPlayList->getValue();
     isGUIVisible = isMouseActive
         || stTimeVisibleLock.getElapsedTime() < 2.0
         || (upperRegion  != NULL && upperRegion->isPointIn(cursorZo))
         || (bottomRegion != NULL && bottomRegion->isPointIn(cursorZo))
         || (seekBar   != NULL && seekBar->isPointIn(cursorZo))
+        || (toShowPlayList    && myPlayList->isPointIn(cursorZo))
         || (menu0Root != NULL && menu0Root->isActive());
     if(isMouseActive) {
         stTimeVisibleLock.restart();
@@ -815,6 +817,10 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& cursorZo, bool isMouseAct
         for(StGLWidget* child = bottomRegion->getChildren()->getStart(); child != NULL; child = child->getNext()) {
             child->setVisibility(isGUIVisible);
         }
+    }
+
+    if(toShowPlayList) {
+        myPlayList->setVisibility(isGUIVisible, false);
     }
 
     if(stDescr != NULL) {

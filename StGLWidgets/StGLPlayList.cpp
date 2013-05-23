@@ -22,6 +22,8 @@ StGLPlayList::StGLPlayList(StGLWidget*                 theParent,
     myWidth = 250;
     StGLWidget::signals.onMouseUnclick = stSlot(this, &StGLPlayList::doMouseUnclick);
     myList->signals.onPlaylistChange  += stSlot(this, &StGLPlayList::doResetList);
+
+    myColorVec = StGLVec4(0.855f, 0.855f, 0.855f, 0.5f);
 }
 
 StGLPlayList::~StGLPlayList() {
@@ -48,8 +50,11 @@ void StGLPlayList::updateList() {
             anItem->setText(aList.getValue(anIter));
             anItem->setVisibility(true, true);
             anItem->setFocus(size_t(anIter) == aCurrent);
+            anItem->changeRectPx().right() = anItem->getRectPx().left() + myWidth;
         } else {
+            anItem->setText("");
             anItem->setVisibility(false, true);
+            //anItem->changeRectPx().right() = anItem->getRectPx().left();
         }
     }
     stglInit();
@@ -116,9 +121,21 @@ void StGLPlayList::stglResize(const StRectI_t& theWinRectPx) {
     myWidth = theWinRectPx.width() / 4;
     myWidth = stMin(myWidth, 400);
     myWidth = stMax(myWidth, 250);
+    resizeWidth();
+
+    StGLMenu::stglResize(theWinRectPx);
+}
+
+void StGLPlayList::resizeWidth() {
+    for(StGLWidget* aChild = getChildren()->getStart(); aChild != NULL; aChild = aChild->getNext()) {
+        StGLMenuItem* anItem = dynamic_cast<StGLMenuItem*>(aChild);
+        if(anItem != NULL) {
+            anItem->setTextWidth(-1);
+            anItem->changeRectPx().right() = anItem->getRectPx().left() + myWidth;
+        }
+    }
 
     changeRectPx().right() = getRectPx().left() + myWidth;
-    StGLMenu::stglResize(theWinRectPx);
 }
 
 bool StGLPlayList::stglInit() {
@@ -128,15 +145,7 @@ bool StGLPlayList::stglInit() {
     }
 
     myWidth = aWidth;
-    for(StGLWidget* aChild = getChildren()->getStart(); aChild != NULL; aChild = aChild->getNext()) {
-        StGLMenuItem* anItem = dynamic_cast<StGLMenuItem*>(aChild);
-        if(anItem != NULL) {
-            anItem->setTextWidth(-1);
-        }
-    }
-
-    changeRectPx().right() = getRectPx().left() + myWidth;
-
+    resizeWidth();
     return true;
 }
 

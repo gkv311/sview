@@ -46,6 +46,7 @@ class StGLPlayList : public StGLMenu {
     ST_LOCAL void doResetList();
     ST_LOCAL void doItemClick(const size_t );
     ST_LOCAL void doMouseUnclick(const int theBtnId);
+    ST_LOCAL void resizeWidth();
 
         private:
 
