@@ -25,7 +25,7 @@ StGLPlayList::StGLPlayList(StGLWidget*                 theParent,
     myList->signals.onPlaylistChange  += stSlot(this, &StGLPlayList::doResetList);
     myList->signals.onTitleChange     += stSlot(this, &StGLPlayList::doChangeItem);
 
-    myColorVec = StGLVec4(0.855f, 0.855f, 0.855f, 0.5f);
+    myColorVec = StGLVec4(0.2f, 0.2f, 0.2f, 0.5f);
 }
 
 StGLPlayList::~StGLPlayList() {
@@ -114,6 +114,10 @@ void StGLPlayList::stglResize(const StRectI_t& theWinRectPx) {
         anItem->setUserData(anIter);
         anItem->signals.onItemClick = stSlot(this, &StGLPlayList::doItemClick);
         anItem->StGLWidget::signals.onMouseUnclick += stSlot(this, &StGLPlayList::doMouseUnclick);
+
+        anItem->setHilightText();
+        anItem->setHilightColor(StGLVec4(0.5f, 0.5f, 0.5f, 1.0f));
+
         if(size_t(anIter) < anUpperLimit) {
             anItem->setText(aList.getValue(anIter));
             anItem->setVisibility(true, true);

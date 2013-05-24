@@ -72,6 +72,8 @@ class StGLMenuItem : public StGLTextArea {
 
     ST_CPPEXPORT void resetHilightColor();
 
+    ST_CPPEXPORT void setHilightText();
+
         public:  //! @name Signals
 
     struct {
@@ -88,21 +90,23 @@ class StGLMenuItem : public StGLTextArea {
 
         private: //! @name private methods
 
-    ST_LOCAL void stglResize();
-
-        private: //! @name private fields
-
     typedef enum tagState {
         PASSIVE,
         HIGHLIGHT,
         CLICKED,
     } State;
 
+    ST_LOCAL void stglResize();
+    ST_LOCAL void stglDrawArea(const StGLMenuItem::State theState);
+
+        private: //! @name private fields
+
     StGLMenu*                  mySubMenu;        //!< child menu
     StGLShare<StGLMenuProgram> myProgram;        //!< GLSL program
     StGLVertexBuffer           myBackVertexBuf;  //!< background vertices
     StGLVec4                   myBackColor[3];   //!< background color per state
     bool                       myIsItemSelected; //!< navigation selection flag
+    bool                       myToHilightText;  //!< hilight text instead of time box
 
 };
 

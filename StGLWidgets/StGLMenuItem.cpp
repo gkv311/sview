@@ -38,7 +38,8 @@ StGLMenuItem::StGLMenuItem(StGLMenu* theParent,
                StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT)),
   mySubMenu(theSubMenu),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
-  myIsItemSelected(false) {
+  myIsItemSelected(false),
+  myToHilightText(false) {
     StGLWidget::signals.onMouseUnclick = stSlot(this, &StGLMenuItem::doMouseUnclick);
 
     myFormatter.setupAlignment(StGLTextFormatter::ST_ALIGN_X_LEFT,
@@ -55,6 +56,10 @@ StGLMenuItem::~StGLMenuItem() {
 
 const StString& StGLMenuItem::getClassName() {
     return CLASS_NAME;
+}
+
+void StGLMenuItem::setHilightText() {
+    myToHilightText = true;
 }
 
 const int StGLMenuItem::computeTextWidth() {
@@ -148,12 +153,26 @@ bool StGLMenuItem::stglInit() {
     return myIsInitialized;
 }
 
+void StGLMenuItem::stglDrawArea(const StGLMenuItem::State theState) {
+    StGLContext& aCtx = getContext();
+    aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    aCtx.core20fwd->glEnable(GL_BLEND);
+    myProgram->use(aCtx);
+
+    myProgram->setColor(aCtx, myBackColor[theState], GLfloat(opacityValue));
+    myBackVertexBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
+    aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    myBackVertexBuf.unBindVertexAttrib(aCtx, myProgram->getVVertexLoc());
+
+    myProgram->unuse(aCtx);
+    aCtx.core20fwd->glDisable(GL_BLEND);
+}
+
 void StGLMenuItem::stglDraw(unsigned int theView) {
     if(!myIsInitialized || !isVisible()) {
         return;
     }
 
-    StGLContext& aCtx = getContext();
     switch(getParentMenu()->getOrient()) {
         case StGLMenu::MENU_VERTICAL: {
             myMarginLeft = 32;
@@ -182,20 +201,17 @@ void StGLMenuItem::stglDraw(unsigned int theView) {
         isResized = false;
     }
 
-    if(aState != StGLMenuItem::PASSIVE) {
-        aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        aCtx.core20fwd->glEnable(GL_BLEND);
-        myProgram->use(aCtx);
-
-        if(aState != StGLMenuItem::PASSIVE) {
-            myProgram->setColor(aCtx, myBackColor[aState], GLfloat(opacityValue));
-            myBackVertexBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
-            aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-            myBackVertexBuf.unBindVertexAttrib(aCtx, myProgram->getVVertexLoc());
+    if(myToHilightText) {
+        if(myHasFocus) {
+            stglDrawArea(StGLMenuItem::HIGHLIGHT);
         }
-
-        myProgram->unuse(aCtx);
-        aCtx.core20fwd->glDisable(GL_BLEND);
+        if(aState == StGLMenuItem::HIGHLIGHT) {
+            setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
+        } else {
+            setTextColor(StGLVec3(0.8f, 0.8f, 0.8f));
+        }
+    } else if(aState != StGLMenuItem::PASSIVE) {
+        stglDrawArea(aState);
     }
 
     StGLTextArea::stglDraw(theView);
