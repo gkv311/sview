@@ -605,8 +605,8 @@ char* StPlayList::parseM3UIter(char*     theIter,
         anItem->setTitle(theTitle);
         addPlayItem(anItem);
         theTitle = "";
-    } else if(stAreEqual(theIter, "#EXTINF:-1", 10)) {
-        theIter += 10;
+    } else if(stAreEqual(theIter, "#EXTINF:", 8)) {
+        theIter += 8;
         for(; *theIter != '\0'; ++theIter) {
             if(*theIter == ',') {
                 for(; *theIter == ' '; ++theIter) {
