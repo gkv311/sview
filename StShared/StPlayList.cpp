@@ -578,15 +578,25 @@ char* StPlayList::parseM3UIter(char*     theIter,
         return NULL;
     }
 
-
     char* aNextLine = nextLine(theIter);
     if(*aNextLine != '\0') {
-        // replace CRLF with '\0'
+        // replace LF or CRLF with '\0'
         *(aNextLine - 1) = '\0';
+        char* aTail = aNextLine - 2;
         if(*(aNextLine - 2) == '\x0D') {
             *(aNextLine - 2) = '\0';
+            --aTail;
+        }
+
+        // skip trailing spaces
+        for(; *aTail == ' ' && aTail >= theIter; --aTail) {
+            *aTail = '\0';
         }
     }
+    if(*theIter == '\0') {
+        return aNextLine; // skip empty lines
+    }
+
     if(*theIter != '#') {
         StFileNode* aFileNode = new StFileNode(theIter, &myFoldersRoot);
         myFoldersRoot.add(aFileNode);
@@ -595,8 +605,18 @@ char* StPlayList::parseM3UIter(char*     theIter,
         anItem->setTitle(theTitle);
         addPlayItem(anItem);
         theTitle = "";
-    } else if(stAreEqual(theIter, "#EXTINF:-1,", 11)) {
-        theTitle = theIter + 11;
+    } else if(stAreEqual(theIter, "#EXTINF:-1", 10)) {
+        theIter += 10;
+        for(; *theIter != '\0'; ++theIter) {
+            if(*theIter == ',') {
+                for(; *theIter == ' '; ++theIter) {
+                    // skip spaces in the beginning
+                }
+
+                theTitle = ++theIter;
+                break;
+            }
+        }
     }
     return aNextLine;
 }
