@@ -133,6 +133,7 @@ void StActiveXCtrl::stWindowLoop() {
             return;
         }
 
+        myIsActive = myStApp->isActive();
         if(myToQuit) {
             myStApp->exit(0);
         } else if(myOpenEvent.check()
@@ -142,10 +143,15 @@ void StActiveXCtrl::stWindowLoop() {
             myOpenEvent.reset();
         }
 
+        StHandle<StWindow> aWin = myStApp->getMainWindow();
+        if(myIsActive) {
+            aWin->show();
+        } else {
+            aWin->hide();
+        }
         myStApp->processEvents();
 
-        const StHandle<StWindow>& aWin = myStApp->getMainWindow();
-        if(!aWin.isNull() && aWin->isFullScreen()) {
+        if(aWin->isFullScreen()) {
             if(!isFullscreen) {
                 PostMessage(WM_TIMER, 1);
                 isFullscreen = true;

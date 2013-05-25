@@ -274,10 +274,11 @@ void StBrowserPlugin::stWindowLoop() {
             return;
         }
 
+        myIsActive = myStApp->isActive();
         if(myToQuit) {
             myStApp->exit(0);
         } else if(!isFileOpened
-               && myStApp->isActive()) {
+               && myIsActive) {
             // load the image
             StMutexAuto aLock(myMutex);
             if(myPreviewUrl.isEmpty()) {
@@ -295,10 +296,15 @@ void StBrowserPlugin::stWindowLoop() {
             }
         }
 
+        StHandle<StWindow> aWin = myStApp->getMainWindow();
+        if(myIsActive) {
+            aWin->show();
+        } else {
+            aWin->hide();
+        }
         myStApp->processEvents();
 
-        const StHandle<StWindow>& aWin = myStApp->getMainWindow();
-        if(!aWin.isNull() && aWin->isFullScreen()) {
+        if(aWin->isFullScreen()) {
             StMutexAuto aLock(myMutex);
             if(!isFullscreen && !myFullPath.isEmpty()) {
                 myOpenInfo.setPath(myFullPath);
