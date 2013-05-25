@@ -59,12 +59,13 @@ class StBrowserPlugin : public NSPluginBase {
     StNativeWin_t           myParentWin;      //!< handle to native window for this ActiveX component
     StHandle<StThread>      myThread;         //!< dedicated thread for this plugin instance
     StHandle<StApplication> myStApp;          //!< StCore application instance worked in dedicated thread
+    StMutex                 myMutex;          //!< mutex for thread-safety
     StOpenInfo              myOpenInfo;       //!< info for file to load
     StString                myPreviewUrl;     //!< url  to preview   image
     StString                myPreviewUrlUtf8; //!< url  to preview   image (with decoded Unicode symbols)
     StString                myFullUrl;        //!< url  to full-size image
-    StHandle<StString>      myPreviewPath;    //!< path to preview   image in local cache
-    StHandle<StString>      myFullPath;       //!< path to full-size image in local cache
+    StString                myPreviewPath;    //!< path to preview   image in local cache
+    StString                myFullPath;       //!< path to full-size image in local cache
     StArrayList<StString>   myTmpFiles;
     bool                    myToLoadFull;     //!< flag indicates that plugin was switched into fullscreen and full-size image required
     volatile bool           myToQuit;         //!< flag to perform termination

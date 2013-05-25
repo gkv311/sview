@@ -71,6 +71,8 @@ class StWindowImpl {
         return myMonitors;
     }
 
+    ST_LOCAL bool isParentOnScreen() const;
+
         public: //! @name additional
 
     ST_LOCAL void updateChildRect();

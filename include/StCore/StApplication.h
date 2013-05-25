@@ -105,6 +105,11 @@ class StApplication {
      */
     ST_CPPEXPORT const StHandle<StWindow>& getMainWindow() const;
 
+    /**
+     * @return true if main application window is in active state
+     */
+    ST_CPPEXPORT bool isActive() const;
+
         protected:
 
     /**

@@ -449,6 +449,16 @@ void StWindowImpl::updateBlockSleep() {
 #endif
 }
 
+#ifndef _WIN32
+bool StWindowImpl::isParentOnScreen() const {
+    if(myParentWin == (StNativeWin_t )NULL) {
+        return false;
+    }
+
+    return true; // not implemented
+}
+#endif
+
 void StWindowImpl::updateActiveState() {
     updateBlockSleep();
 

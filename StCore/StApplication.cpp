@@ -250,6 +250,11 @@ const StHandle<StWindow>& StApplication::getMainWindow() const {
     return myWindow;
 }
 
+bool StApplication::isActive() const {
+    return !myWindow.isNull()
+        && myWindow->isActive();
+}
+
 int StApplication::exec() {
     if(!myIsOpened) {
         open();

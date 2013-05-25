@@ -226,3 +226,7 @@ double StWindow::getEventTime(const uint32_t theTime) const {
 const StSearchMonitors& StWindow::getMonitors() const {
     return myWin->getMonitors();
 }
+
+bool StWindow::isParentOnScreen() const {
+    return myWin->isParentOnScreen();
+}

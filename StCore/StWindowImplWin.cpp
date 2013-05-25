@@ -347,6 +347,30 @@ bool StWindowImpl::wndCreateWindows() {
     }
 }
 
+bool StWindowImpl::isParentOnScreen() const {
+    if(myParentWin == NULL) {
+        return false;
+    }
+
+    RECT aRect;
+    StRectI_t aRectSt;
+    GetClientRect (myParentWin, &aRect);
+    ClientToScreen(myParentWin,  (POINT* )&aRect);
+    ClientToScreen(myParentWin, ((POINT* )&aRect) + 1);
+
+    aRectSt.left()   = aRect.left;
+    aRectSt.top()    = aRect.top;
+    aRectSt.right()  = aRect.right;
+    aRectSt.bottom() = aRect.bottom;
+
+    for(size_t aMonIter = 0; aMonIter < myMonitors.size(); ++aMonIter) {
+        if(!myMonitors[aMonIter].getVRect().isOut(aRectSt)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 /**
  * Update StWindow position according to native parent position.
  */

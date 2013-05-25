@@ -127,11 +127,8 @@ NPError StBrowserPlugin::getValue(NPPVariable variable, void* value) {
 #endif
 
 StBrowserPlugin::StBrowserPlugin(NSPluginCreateData* theCreateDataStruct)
-: NSPluginBase(),
-  nppInstance(theCreateDataStruct->instance),
+: nppInstance(theCreateDataStruct->instance),
   myParentWin((StNativeWin_t )NULL),
-  myStApp(),
-  myOpenInfo(),
   myToLoadFull(false),
   myToQuit(false) {
     StArgumentsMap aDrawerArgs;
@@ -184,13 +181,44 @@ StBrowserPlugin::~StBrowserPlugin() {
     }
 }
 
+namespace {
+    static StAtomic<int32_t> ST_PLUGIN_QUEUE(0);
+};
+
 void StBrowserPlugin::stWindowLoop() {
+    // do not load plugin until it is placed on screen
+    StWindow aParentWin(myParentWin);
+    for(;;) {
+    #ifndef _WIN32
+        const int32_t anActiveNb =
+    #endif
+            ST_PLUGIN_QUEUE.increment();
+
+        if(aParentWin.isParentOnScreen()
+    #ifndef _WIN32
+        //|| anActiveNb <= 1
+    #endif
+        ) {
+            break;
+        }
+
+        ST_PLUGIN_QUEUE.decrement();
+        StThread::sleep(10);
+        if(myToQuit) {
+            return;
+        }
+    }
+
     // Load image viewer
     myStApp = new StImageViewer(myParentWin, new StOpenInfo());
+
     if(!myStApp->open()) {
+        ST_PLUGIN_QUEUE.decrement();
         myStApp.nullify();
         return;
     }
+
+    ST_PLUGIN_QUEUE.decrement();
 
     bool isFileOpened = false;
     bool isFullscreen = false;
@@ -203,18 +231,20 @@ void StBrowserPlugin::stWindowLoop() {
 
         if(myToQuit) {
             myStApp->exit(0);
-        } else if(!isFileOpened) {
+        } else if(!isFileOpened
+               && myStApp->isActive()) {
             // load the image
-            StHandle<StString> aPrvPath = myPreviewPath;
+            StMutexAuto aLock(myMutex);
             if(myPreviewUrl.isEmpty()) {
-                StHandle<StString> aFullPath = myFullPath;
-                if(!aFullPath.isNull()) {
-                    myOpenInfo.setPath(*aFullPath);
+                if(!myFullPath.isEmpty()) {
+                    myOpenInfo.setPath(myFullPath);
+                    aLock.unlock();
                     myStApp->open(myOpenInfo);
                     isFileOpened = true;
                 }
-            } else if(!aPrvPath.isNull()) {
-                myOpenInfo.setPath(*aPrvPath);
+            } else if(!myPreviewPath.isEmpty()) {
+                myOpenInfo.setPath(myPreviewPath);
+                aLock.unlock();
                 myStApp->open(myOpenInfo);
                 isFileOpened = true;
             }
@@ -224,19 +254,22 @@ void StBrowserPlugin::stWindowLoop() {
 
         const StHandle<StWindow>& aWin = myStApp->getMainWindow();
         if(!aWin.isNull() && aWin->isFullScreen()) {
-            StHandle<StString> aFullPath = myFullPath;
-            if(!isFullscreen && !aFullPath.isNull()) {
-                myOpenInfo.setPath(*aFullPath);
+            StMutexAuto aLock(myMutex);
+            if(!isFullscreen && !myFullPath.isEmpty()) {
+                myOpenInfo.setPath(myFullPath);
+                aLock.unlock();
                 myStApp->open(myOpenInfo);
                 isFullscreen = true;
             } else if(!isFullLoaded && NPNFuncs.pluginthreadasynccall != NULL) {
+                aLock.unlock();
                 NPNFuncs.pluginthreadasynccall(nppInstance, StBrowserPlugin::doLoadFullSize, this);
                 isFullLoaded = true;
             }
         } else if(isFullscreen) {
-            StHandle<StString> aPrvPath = myPreviewPath;
-            if(!aPrvPath.isNull()) {
-                myOpenInfo.setPath(*aPrvPath);
+            StMutexAuto aLock(myMutex);
+            if(!myPreviewPath.isEmpty()) {
+                myOpenInfo.setPath(myPreviewPath);
+                aLock.unlock();
                 myStApp->open(myOpenInfo);
                 isFullscreen = false;
             }
@@ -341,9 +374,10 @@ void StBrowserPlugin::streamAsFile(NPStream*   theStream,
         }
     }
 
+    StMutexAuto aLock(myMutex);
     if(isPreview) {
-        myPreviewPath = new StString(aFileName);
+        myPreviewPath = aFileName;
     } else {
-        myFullPath    = new StString(aFileName);
+        myFullPath    = aFileName;
     }
 }

@@ -351,6 +351,11 @@ class StWindow {
      */
     ST_CPPEXPORT const StSearchMonitors& getMonitors() const;
 
+    /**
+     * Check placement of the parent window.
+     */
+    ST_CPPEXPORT bool isParentOnScreen() const;
+
         public: //! @name signals
 
     struct {
