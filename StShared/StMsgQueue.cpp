@@ -81,7 +81,7 @@ void StMsgQueue::pushError(const StHandle<StString>& theMessage) {
     doPush(aMsg);
 }
 
-void StMsgQueue::doPushInfo(const StString& theMessage) {
+void StMsgQueue::doPushInfo(const StCString& theMessage) {
     StMsg aMsg;
     aMsg.Type = StLogger::ST_INFO;
     aMsg.Text = new StString(theMessage);
@@ -89,7 +89,7 @@ void StMsgQueue::doPushInfo(const StString& theMessage) {
     doPush(aMsg);
 }
 
-void StMsgQueue::doPushError(const StString& theMessage) {
+void StMsgQueue::doPushError(const StCString& theMessage) {
     StMsg aMsg;
     aMsg.Type = StLogger::ST_ERROR;
     aMsg.Text = new StString(theMessage);

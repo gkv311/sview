@@ -140,14 +140,14 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
                         const unsigned int theStreamId) {
     if(!StAVPacketQueue::init(theFormatCtx, theStreamId)
     || myCodecCtx->codec_type != AVMEDIA_TYPE_VIDEO) {
-        signals.onError("FFmpeg: invalid stream");
+        signals.onError(stCString("FFmpeg: invalid stream"));
         deinit();
         return false;
     }
 
     if(myFrame == NULL || myFrameRGB == NULL) {
         // should never happens
-        signals.onError("FFmpeg: Could not allocate an AVFrame");
+        signals.onError(stCString("FFmpeg: Could not allocate an AVFrame"));
         deinit();
         return false;
     }
@@ -155,7 +155,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     // find the decoder for the video stream
     myCodec = avcodec_find_decoder(myCodecCtx->codec_id);
     if(myCodec == NULL) {
-        signals.onError("FFmpeg: Video codec not found");
+        signals.onError(stCString("FFmpeg: Video codec not found"));
         deinit();
         return false;
     }
@@ -185,14 +185,14 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
 #else
     if(avcodec_open(myCodecCtx, myCodec) < 0) {
 #endif
-        signals.onError("FFmpeg: Could not open video codec");
+        signals.onError(stCString("FFmpeg: Could not open video codec"));
         deinit();
         return false;
     }
 
     // determine required myFrameRGB size and allocate it
     if(sizeX() == 0 || sizeY() == 0) {
-        signals.onError("FFmpeg: Codec return wrong frame size");
+        signals.onError(stCString("FFmpeg: Codec return wrong frame size"));
         deinit();
         return false;
     }
@@ -207,7 +207,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
                                     sizeX(), sizeY(), stLibAV::PIX_FMT::RGB24, // destination
                                     SWS_BICUBIC, NULL, NULL, NULL);
         if(myToRgbCtx == NULL) {
-            signals.onError("FFmpeg: Failed to create SWScaler context");
+            signals.onError(stCString("FFmpeg: Failed to create SWScaler context"));
             deinit();
             return false;
         }
@@ -216,7 +216,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
         const size_t aBufferSize = avpicture_get_size(stLibAV::PIX_FMT::RGB24, sizeX(), sizeY());
         stMemFreeAligned(myBufferRGB); myBufferRGB = stMemAllocAligned<uint8_t*>(aBufferSize);
         if(myBufferRGB == NULL) {
-            signals.onError("FFmpeg: Failed allocation of RGB frame");
+            signals.onError(stCString("FFmpeg: Failed allocation of RGB frame"));
             deinit();
             return false;
         }

@@ -241,7 +241,7 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
     }
     StHandle<StImageFile> dataResult = StImageFile::create(myImageLib);
     if(dataResult.isNull()) {
-        myMsgQueue->pushError("No any image library was found!");
+        myMsgQueue->pushError(stCString("No any image library was found!"));
         return false;
     }
 
@@ -298,7 +298,7 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
             if(stQuestion("File already exists!\nOverride the file?")) {
                 toSave = StFileNode::removeFile(fileToSave);
                 if(!toSave) {
-                    myMsgQueue->pushError("Could not remove the file!");
+                    myMsgQueue->pushError(stCString("Could not remove the file!"));
                     return false;
                 }
             }

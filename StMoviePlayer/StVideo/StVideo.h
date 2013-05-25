@@ -194,7 +194,7 @@ class StVideo {
          * Emit callback Slot on error.
          * @param theUserData (const StString& ) - error description.
          */
-        StSignal<void (const StString& )> onError;
+        StSignal<void (const StCString& )> onError;
     } signals;
 
     ST_LOCAL bool getPlaybackState(double& theDuration,
@@ -253,7 +253,7 @@ class StVideo {
     /**
      * Just redirect callback slot.
      */
-    ST_LOCAL void doOnErrorRedirect(const StString& theMsgText) {
+    ST_LOCAL void doOnErrorRedirect(const StCString& theMsgText) {
         signals.onError(theMsgText);
     }
 

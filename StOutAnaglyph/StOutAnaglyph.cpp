@@ -249,7 +249,7 @@ bool StOutAnaglyph::create() {
         myMsgQueue->pushError(stCString("Anaglyph output - critical error:\nOpenGL context is broken!\n(OpenGL library internal error?)"));
         return false;
     } else if(!myContext->isGlGreaterEqual(2, 0)) {
-        myMsgQueue->pushError("OpenGL 2.0 is required by Anaglyph Output");
+        myMsgQueue->pushError(stCString("OpenGL 2.0 is required by Anaglyph Output"));
         myIsBroken = true;
         return true;
     }

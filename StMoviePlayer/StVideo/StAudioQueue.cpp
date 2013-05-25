@@ -227,14 +227,14 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
     }
 
     if(myIsAlValid != ST_AL_INIT_OK) {
-        signals.onError("OpenAL: no playback device available");
+        signals.onError(stCString("OpenAL: no playback device available"));
         deinit();
         return false;
     }
 
     if(!StAVPacketQueue::init(theFormatCtx, theStreamId)
     || myCodecCtx->codec_type != AVMEDIA_TYPE_AUDIO) {
-        signals.onError("FFmpeg: invalid stream");
+        signals.onError(stCString("FFmpeg: invalid stream"));
         deinit();
         return false;
     }
@@ -242,7 +242,7 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
     // get AUDIO codec
     myCodec = avcodec_find_decoder(myCodecCtx->codec_id);
     if(myCodec == NULL) {
-        signals.onError("FFmpeg: audio codec not found");
+        signals.onError(stCString("FFmpeg: audio codec not found"));
         deinit();
         return false;
     }
@@ -251,7 +251,7 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
 #else
     if(avcodec_open(myCodecCtx, myCodec) < 0) {
 #endif
-        signals.onError("FFmpeg: could not open audio codec");
+        signals.onError(stCString("FFmpeg: could not open audio codec"));
         deinit();
         return false;
     }
@@ -350,7 +350,7 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
             myBufferOut.setupChannels(StChannelMap::CH40, StChannelMap::PCM, 1);
             stalConfigureSources1();
         } else {
-            signals.onError("OpenAL: multichannel extension (AL_FORMAT_QUAD16) not available");
+            signals.onError(stCString("OpenAL: multichannel extension (AL_FORMAT_QUAD16) not available"));
             deinit();
             return false;
         }

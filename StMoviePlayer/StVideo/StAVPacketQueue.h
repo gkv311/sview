@@ -189,7 +189,7 @@ class StAVPacketQueue {
          * Emit callback Slot on error.
          * @param theUserData (const StString& ) - error description.
          */
-        StSignal<void (const StString& )> onError;
+        StSignal<void (const StCString& )> onError;
     } signals;
 
         protected: //! @name Fields should be full-controlled by heirs

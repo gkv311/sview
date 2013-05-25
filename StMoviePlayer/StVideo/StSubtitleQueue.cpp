@@ -60,7 +60,7 @@ bool StSubtitleQueue::init(AVFormatContext*   theFormatCtx,
                            const unsigned int theStreamId) {
     if(!StAVPacketQueue::init(theFormatCtx, theStreamId)
     || myCodecCtx->codec_type != AVMEDIA_TYPE_SUBTITLE) {
-        signals.onError("FFmpeg: invalid stream");
+        signals.onError(stCString("FFmpeg: invalid stream"));
         deinit();
         return false;
     }
@@ -69,7 +69,7 @@ bool StSubtitleQueue::init(AVFormatContext*   theFormatCtx,
         // find the decoder for the subtitles stream
         myCodec = avcodec_find_decoder(myCodecCtx->codec_id);
         if(myCodec == NULL) {
-            stError("FFmpeg: Subtitle decoder not found");
+            signals.onError(stCString("FFmpeg: Subtitle decoder not found"));
             deinit();
             return false;
         }
@@ -80,7 +80,7 @@ bool StSubtitleQueue::init(AVFormatContext*   theFormatCtx,
     #else
         if(avcodec_open(myCodecCtx, myCodec) < 0) {
     #endif
-            stError("FFmpeg: Could not open subtitle codec");
+            signals.onError(stCString("FFmpeg: Could not open subtitle codec"));
             deinit();
             return false;
         }

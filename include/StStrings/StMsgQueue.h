@@ -56,7 +56,7 @@ class StMsgQueue {
     /**
      * Push info message to the queue.
      */
-    ST_LOCAL void pushInfo(const StString& theMessage) {
+    ST_LOCAL void pushInfo(const StCString& theMessage) {
         pushInfo(new StString(theMessage));
     }
 
@@ -68,7 +68,7 @@ class StMsgQueue {
     /**
      * Push error message to the queue.
      */
-    ST_LOCAL void pushError(const StString& theMessage) {
+    ST_LOCAL void pushError(const StCString& theMessage) {
         pushError(new StString(theMessage));
     }
 
@@ -82,12 +82,12 @@ class StMsgQueue {
     /**
      * Push info message to the queue.
      */
-    ST_CPPEXPORT void doPushInfo(const StString& theMessage);
+    ST_CPPEXPORT void doPushInfo(const StCString& theMessage);
 
     /**
      * Push error message to the queue.
      */
-    ST_CPPEXPORT void doPushError(const StString& theMessage);
+    ST_CPPEXPORT void doPushError(const StCString& theMessage);
 
         private:
 

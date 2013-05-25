@@ -396,7 +396,7 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
     }
 
     if(!myVideoMaster->isInitialized() && !myAudio->isInitialized()) {
-        signals.onError("FFmpeg: Didn't found any video or audio streams");
+        signals.onError(stCString("FFmpeg: Didn't found any video or audio streams"));
         return false;
     }
 
@@ -830,7 +830,7 @@ bool StVideo::saveSnapshotAs(StImageFile::ImageType theImgType) {
     }
     StHandle<StImageFile> dataResult = StImageFile::create();
     if(dataResult.isNull()) {
-        signals.onError("No any image library was found!");
+        signals.onError(stCString("No any image library was found!"));
         return false;
     }
 

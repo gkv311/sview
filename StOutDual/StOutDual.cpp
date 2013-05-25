@@ -303,11 +303,12 @@ bool StOutDual::create() {
     // initialize GL context
     myContext = new StGLContext();
     if(!myContext->stglInit()) {
-        stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, OpenGL context is broken!\n(OpenGL library internal error?)");
+        myMsgQueue->pushError(stCString("Dual output - critical error:\nOpenGL context is broken!\n(OpenGL library internal error?)"));
         return false;
     } else if(!myContext->isGlGreaterEqual(2, 0)) {
-        stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, OpenGL2.0+ not available!");
-        return false;
+        myMsgQueue->pushError(stCString("OpenGL 2.0 is required by Dual Output"));
+        myIsBroken = true;
+        return true;
     }
 
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
@@ -315,8 +316,9 @@ bool StOutDual::create() {
     StWindow::params.VSyncMode->signals.onChanged += stSlot(this, &StOutDual::doSwitchVSync);
 
     if(!myProgram->init(*myContext)) {
-        stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init Shader");
-        return false;
+        myMsgQueue->pushError(stCString("Dual output - critical error:\nShader initialization failed!"));
+        myIsBroken = true;
+        return true;
     }
     // create vertices buffers to draw simple textured quad
     const GLfloat QUAD_VERTICES[4 * 4] = {
@@ -349,6 +351,7 @@ bool StOutDual::create() {
     myVertXMirBuf.init(*myContext, 4, 4, QUAD_VERTICES_XMIR);
     myVertYMirBuf.init(*myContext, 4, 4, QUAD_VERTICES_YMIR);
     myTexCoordBuf.init(*myContext, 2, 4, QUAD_TEXCOORD);
+    myIsBroken = false;
 
     return true;
 }

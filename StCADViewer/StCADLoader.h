@@ -44,9 +44,9 @@ class StCADLoader {
     struct {
         /**
          * Emit callback Slot on model load error.
-         * @param theUserData (const StString& ) - error description.
+         * @param theUserData error description
          */
-        StSignal<void (const StString& )> onError;
+        StSignal<void (const StCString& )> onError;
     } signals;
 
         private:
