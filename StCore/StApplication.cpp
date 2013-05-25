@@ -266,7 +266,9 @@ const StHandle<StMsgQueue>& StApplication::getMessagesQueue() const {
 
 int StApplication::exec() {
     if(!myIsOpened) {
-        open();
+        if(!open()) {
+            return 1;
+        }
     }
 
     if(!myWindow.isNull()) {

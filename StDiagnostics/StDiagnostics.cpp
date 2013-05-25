@@ -54,16 +54,19 @@ StDiagnostics::~StDiagnostics() {
 
 bool StDiagnostics::open() {
     if(!StApplication::open()) {
+        myMsgQueue->popAll();
         return false;
     }
 
     // initialize GL context
     myContext = new StGLContext();
     if(!myContext->stglInit()) {
-        stError("VideoPlugin, OpenGL context is broken!\n(OpenGL library internal error?)");
+        myMsgQueue->pushError(stCString("StDiagnostics - critical error:\nOpenGL context is broken!\n(OpenGL library internal error?)"));
+        myMsgQueue->popAll();
         return false;
     } else if(!myContext->isGlGreaterEqual(2, 0)) {
-        stError("VideoPlugin, OpenGL2.0+ not available!");
+        myMsgQueue->pushError(stCString("OpenGL 2.0 is required by StDiagnostics!"));
+        myMsgQueue->popAll();
         return false;
     }
     myGUI->setContext(myContext);
@@ -72,6 +75,8 @@ bool StDiagnostics::open() {
     myWindow->setStereoOutput(true);
 
     if(!myGUI->stglInit()) {
+        myMsgQueue->pushError(stCString("StDiagnostics - critical error:\nGUI initialization failed!"));
+        myMsgQueue->popAll();
         return false;
     }
     myGUI->stglResize(myWindow->getPlacement());

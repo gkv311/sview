@@ -286,10 +286,12 @@ bool StMoviePlayer::init() {
     // initialize GL context
     myContext = new StGLContext();
     if(!myContext->stglInit()) {
-        stError("VideoPlugin, OpenGL context is broken!\n(OpenGL library internal error?)");
+        myMsgQueue->pushError(stCString("Movie Player - critical error:\nOpenGL context is broken!\n(OpenGL library internal error?)"));
+        myMsgQueue->popAll();
         return false;
     } else if(!myContext->isGlGreaterEqual(2, 0)) {
-        stError("VideoPlugin, OpenGL2.0+ not available!");
+        myMsgQueue->pushError(stCString("OpenGL 2.0 is required by Movie Player!"));
+        myMsgQueue->popAll();
         return false;
     }
 
@@ -320,7 +322,8 @@ bool StMoviePlayer::init() {
 
     // initialize frame region early to show dedicated error description
     if(!myGUI->stImageRegion->stglInit()) {
-        stError("VideoPlugin, frame region initialization failed!");
+        myMsgQueue->pushError(stCString("Movie Player - critical error:\nFrame region initialization failed!"));
+        myMsgQueue->popAll();
         return false;
     }
     myGUI->stglInit();
@@ -390,6 +393,7 @@ bool StMoviePlayer::open() {
     const bool isReset = !mySwitchTo.isNull();
     if(!StApplication::open()
     || !init()) {
+        myMsgQueue->popAll();
         return false;
     }
 

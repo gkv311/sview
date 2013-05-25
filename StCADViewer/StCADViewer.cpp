@@ -285,10 +285,12 @@ bool StCADViewer::init() {
     // initialize GL context
     myContext = new StGLContext();
     if(!myContext->stglInit()) {
-        stError("CADViewer, OpenGL context is broken!\n(OpenGL library internal error?)");
+        myMsgQueue->pushError(stCString("CAD Viewer - critical error:\nOpenGL context is broken!\n(OpenGL library internal error?)"));
+        myMsgQueue->popAll();
         return false;
     } else if(!myContext->isGlGreaterEqual(2, 0)) {
-        stError("CADViewer, OpenGL2.0+ not available!");
+        myMsgQueue->pushError(stCString("OpenGL 2.0 is required by CAD Viewer!"));
+        myMsgQueue->popAll();
         return false;
     }
 
@@ -297,7 +299,8 @@ bool StCADViewer::init() {
 
     myGUI->setContext(myContext);
     if(!myGUI->stglInit()) {
-        stError("CADViewer, GUI initialization failed!");
+        myMsgQueue->pushError(stCString("CAD Viewer - GUI initialization failed!"));
+        myMsgQueue->popAll();
         return false;
     }
     myGUI->stglResize(myWindow->getPlacement());
@@ -320,6 +323,7 @@ bool StCADViewer::open() {
     const bool isReset = !mySwitchTo.isNull();
     if(!StApplication::open()
     || !init()) {
+        myMsgQueue->popAll();
         return false;
     }
 

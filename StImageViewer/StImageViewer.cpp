@@ -188,10 +188,12 @@ bool StImageViewer::init() {
     // initialize GL context
     myContext = new StGLContext();
     if(!myContext->stglInit()) {
-        stError("ImagePlugin, OpenGL context is broken!\n(OpenGL library internal error?)");
+        myMsgQueue->pushError(stCString("Image Viewer - critical error:\nOpenGL context is broken!\n(OpenGL library internal error?)"));
+        myMsgQueue->popAll();
         return false;
     } else if(!myContext->isGlGreaterEqual(2, 0)) {
-        stError("ImagePlugin, OpenGL2.0+ not available!");
+        myMsgQueue->pushError(stCString("OpenGL 2.0 is required by Image Viewer!"));
+        myMsgQueue->popAll();
         return false;
     }
 
@@ -212,7 +214,8 @@ bool StImageViewer::init() {
 
     // initialize frame region early to show dedicated error description
     if(!myGUI->stImageRegion->stglInit()) {
-        stError("ImagePlugin, frame region initialization failed!");
+        myMsgQueue->pushError(stCString("Image Viewer - critical error:\nFrame region initialization failed!"));
+        myMsgQueue->popAll();
         return false;
     }
     myGUI->stglInit();
@@ -287,6 +290,7 @@ bool StImageViewer::open() {
     const bool isReset = !mySwitchTo.isNull();
     if(!StApplication::open()
     || !init()) {
+        myMsgQueue->popAll();
         return false;
     }
 

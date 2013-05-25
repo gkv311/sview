@@ -22,13 +22,7 @@ class StGLTextureButton::StButtonProgram : public StGLProgram {
         public:
 
     StButtonProgram()
-    : StGLProgram("StGLTextureButton"),
-      uniProjMatLoc(),
-      atrVVertexLoc(),
-      atrVTexCoordLoc(),
-      uniTimeLoc(),
-      uniClickedLoc(),
-      uniParamsLoc() {
+    : StGLProgram("StGLTextureButton") {
         //
     }
 

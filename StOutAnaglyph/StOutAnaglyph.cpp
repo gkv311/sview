@@ -246,18 +246,18 @@ bool StOutAnaglyph::create() {
     // initialize GL context
     myContext = new StGLContext();
     if(!myContext->stglInit()) {
-        stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, OpenGL context is broken!\n(OpenGL library internal error?)");
+        myMsgQueue->pushError(stCString("Anaglyph output - critical error:\nOpenGL context is broken!\n(OpenGL library internal error?)"));
         return false;
     } else if(!myContext->isGlGreaterEqual(2, 0)) {
-        stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, OpenGL2.0+ not available!");
-        return false;
+        myMsgQueue->pushError("OpenGL 2.0 is required by Anaglyph Output");
+        myIsBroken = true;
+        return true;
     }
 
     myContext->stglSetVSync((StGLContext::VSync_Mode )StWindow::params.VSyncMode->getValue());
     StWindow::params.VSyncMode->signals.onChanged += stSlot(this, &StOutAnaglyph::doSwitchVSync);
 
     // INIT shaders
-    StString aShadersError = StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init Shaders";
     const StString aShadersRoot = StProcess::getStCoreFolder() + "shaders" + SYS_FS_SPLITTER
                                 + ST_OUT_PLUGIN_NAME + SYS_FS_SPLITTER;
     StGLVertexShader aVertShader("Anaglyph"); // common vertex shader
@@ -277,11 +277,13 @@ bool StOutAnaglyph::create() {
     || !initProgram(*myContext, myGreenAnaglyph, aVertShader,
                     aShadersRoot + FSHADER_GREEN)) {
         aVertShader.release(*myContext);
-        stError(aShadersError);
-        return false;
+        myMsgQueue->pushError(stCString("Anaglyph output - critical error:\nShaders initialization failed!"));
+        myIsBroken = true;
+        return true;
     }
 
     aVertShader.release(*myContext);
+    myIsBroken = false;
     return true;
 }
 
