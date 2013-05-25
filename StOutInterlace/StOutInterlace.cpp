@@ -392,17 +392,18 @@ bool StOutInterlace::create() {
     // initialize GL context
     myContext = new StGLContext();
     if(!myContext->stglInit()) {
-        stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, OpenGL context is broken!\n(OpenGL library internal error?)");
+        myMsgQueue->pushError(stCString("Interlace output - critical error:\nOpenGL context is broken!\n(OpenGL library internal error?)"));
         return false;
     } else if(!myContext->isGlGreaterEqual(2, 0)) {
-        stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, OpenGL2.0+ not available!");
-        return false;
+        myMsgQueue->pushError(stCString("OpenGL 2.0 is required by Interlace Output"));
+        myIsBroken = true;
+        return true;
     }
     myContext->stglSetVSync((StGLContext::VSync_Mode )StWindow::params.VSyncMode->getValue());
     StWindow::params.VSyncMode->signals.onChanged += stSlot(this, &StOutInterlace::doSwitchVSync);
 
     // INIT shaders
-    StString aShadersError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init Shaders");
+    StCString aShadersError = stCString("Interlace output - critical error:\nShaders initialization failed!");
     StGLVertexShader aVertexShader("Interlace"); // common vertex shader
     StGLAutoRelease aTmp1(*myContext, aVertexShader);
     if(!aVertexShader.init(*myContext,
@@ -413,8 +414,9 @@ bool StOutInterlace::create() {
                            "  fTexCoord = vTexCoord;\n"
                            "  gl_Position = vVertex;\n"
                            "}\n")) {
-        stError(aShadersError);
-        return false;
+        myMsgQueue->pushError(aShadersError);
+        myIsBroken = true;
+        return true;
     }
 
     // row interlaced
@@ -427,15 +429,17 @@ bool StOutInterlace::create() {
                         // drop odd horizontal line (starts from bottom)
                         "if(int(mod(gl_FragCoord.y + 1.5, 2.0)) == 1) { discard; }\n",
                         ST_SHADER_TEMPLATE[2])) {
-        stError(aShadersError);
-        return false;
+        myMsgQueue->pushError(aShadersError);
+        myIsBroken = true;
+        return true;
     } else if(!aShaderRowRev.init(*myContext,
                                   ST_SHADER_TEMPLATE[0],
               // drop even horizontal line (starts from bottom)
               "if(int(mod(gl_FragCoord.y + 1.5, 2.0)) != 1) { discard; }\n",
               ST_SHADER_TEMPLATE[2])) {
-        stError(aShadersError);
-        return false;
+        myMsgQueue->pushError(aShadersError);
+        myIsBroken = true;
+        return true;
     }
     myGlPrograms   [DEVICE_HINTERLACE]->create(*myContext)
                                        .attachShader(*myContext, aVertexShader)
@@ -456,15 +460,17 @@ bool StOutInterlace::create() {
                         // drop odd column (starts from left)
                         "if(int(mod(gl_FragCoord.x + 1.5, 2.0)) != 1) { discard; }\n",
                         ST_SHADER_TEMPLATE[2])) {
-        stError(aShadersError);
-        return false;
+        myMsgQueue->pushError(aShadersError);
+        myIsBroken = true;
+        return true;
     } else if(!aShaderColRev.init(*myContext,
                                   ST_SHADER_TEMPLATE[0],
               // drop even column (starts from left)
               "if(int(mod(gl_FragCoord.x + 1.5, 2.0)) == 1) { discard; }\n",
               ST_SHADER_TEMPLATE[2])) {
-        stError(aShadersError);
-        return false;
+        myMsgQueue->pushError(aShadersError);
+        myIsBroken = true;
+        return true;
     }
     myGlPrograms   [DEVICE_VINTERLACE]->create(*myContext)
                                        .attachShader(*myContext, aVertexShader)
@@ -486,16 +492,18 @@ bool StOutInterlace::create() {
                           "bool isEvenY = int(mod(floor(gl_FragCoord.y + 1.5), 2.0)) != 1;\n"
                           "if((isEvenX && isEvenY) || (!isEvenX && !isEvenY)) { discard; }\n",
                            ST_SHADER_TEMPLATE[2])) {
-        stError(aShadersError);
-        return false;
+        myMsgQueue->pushError(aShadersError);
+        myIsBroken = true;
+        return true;
     } else if(!aShaderChessRev.init(*myContext,
                                     ST_SHADER_TEMPLATE[0],
               "bool isEvenX = int(mod(floor(gl_FragCoord.x + 1.5), 2.0)) == 1;\n"
               "bool isEvenY = int(mod(floor(gl_FragCoord.y + 1.5), 2.0)) != 1;\n"
               "if(!((isEvenX && isEvenY) || (!isEvenX && !isEvenY))) { discard; }\n",
               ST_SHADER_TEMPLATE[2])) {
-        stError(aShadersError);
-        return false;
+        myMsgQueue->pushError(aShadersError);
+        myIsBroken = true;
+        return true;
     }
     myGlPrograms   [DEVICE_CHESSBOARD]->create(*myContext)
                                        .attachShader(*myContext, aVertexShader)
@@ -512,15 +520,17 @@ bool StOutInterlace::create() {
     StGLVertexShader stVShaderED("ED control");
     StGLAutoRelease aTmp8(*myContext, stVShaderED);
     if(!stVShaderED.initFile(*myContext, aShadersRoot + VSHADER_ED)) {
-        stError(aShadersError);
-        return false;
+        myMsgQueue->pushError(aShadersError);
+        myIsBroken = true;
+        return true;
     }
 
     StGLFragmentShader stFInterlaceOn(myEDIntelaceOn->getTitle());
     StGLAutoRelease aTmp9(*myContext, stFInterlaceOn);
     if(!stFInterlaceOn.initFile(*myContext, aShadersRoot + FSHADER_EDINTERLACE_ON)) {
-        stError(aShadersError);
-        return false;
+        myMsgQueue->pushError(aShadersError);
+        myIsBroken = true;
+        return true;
     }
     myEDIntelaceOn->create(*myContext)
                    .attachShader(*myContext, stVShaderED)
@@ -530,8 +540,9 @@ bool StOutInterlace::create() {
     StGLFragmentShader stFShaderEDOff(myEDOff->getTitle());
     StGLAutoRelease aTmp10(*myContext, stFShaderEDOff);
     if(!stFShaderEDOff.initFile(*myContext, aShadersRoot + FSHADER_ED_OFF)) {
-        stError(aShadersError);
-        return false;
+        myMsgQueue->pushError(aShadersError);
+        myIsBroken = true;
+        return true;
     }
     myEDOff->create(*myContext)
             .attachShader(*myContext, stVShaderED)
@@ -563,6 +574,7 @@ bool StOutInterlace::create() {
 
     myQuadVertBuf    .init(*myContext, 4, 4, QUAD_VERTICES);
     myQuadTexCoordBuf.init(*myContext, 2, 4, QUAD_TEXCOORD);
+    myIsBroken = false;
 
     return true;
 }
