@@ -94,6 +94,19 @@ class StRawFile : public StFileNode {
     ST_CPPEXPORT size_t writeFile(size_t theBytes = 0);
 
     /**
+     * Write buffer to the file.
+     */
+    ST_LOCAL inline size_t write(const StCString& theString) {
+        return write(theString.toCString(), theString.getSize());
+    }
+
+    /**
+     * Write buffer to the file.
+     */
+    ST_CPPEXPORT size_t write(const char*  theBuffer,
+                              const size_t theBytes);
+
+    /**
      * Fill the buffer with file content.
      * @param theFilePath the file path
      * @return true if file was read

@@ -76,6 +76,10 @@ class StPlayItem {
 
     ST_CPPEXPORT void setTitle(const StString& theTitle);
 
+    ST_LOCAL inline bool hasCustomTitle() const {
+        return !myTitle.isEmpty();
+    }
+
     inline StHandle<StStereoParams> getParams() {
         return myStParams;
     }
@@ -360,6 +364,11 @@ class StPlayList {
      */
     ST_LOCAL char* parseM3UIter(char*     theIter,
                                 StString& theTitle);
+
+    /**
+     * Save current playlist in m3u format.
+     */
+    ST_LOCAL bool saveM3U(const StCString& thePath);
 
         private:
 

@@ -106,11 +106,20 @@ bool StRawFile::saveFile(const StCString& theFilePath) {
     return isSuccess;
 }
 
-size_t StRawFile::writeFile(size_t theBytes) {
-    if(!isOpen() || myBuffSize == 0) {
+size_t StRawFile::write(const char*  theBuffer,
+                        const size_t theBytes) {
+    if(!isOpen()) {
         return 0;
     }
-    return fwrite(myBuffer, 1, (theBytes == 0 && theBytes < myBuffSize) ? myBuffSize : theBytes, myFileHandle);
+
+    return fwrite(theBuffer, 1, theBytes, myFileHandle);
+}
+
+size_t StRawFile::writeFile(size_t theBytes) {
+    if(myBuffSize == 0) {
+        return 0;
+    }
+    return write((const char* )myBuffer, (theBytes == 0 && theBytes < myBuffSize) ? myBuffSize : theBytes);
 }
 
 StString StRawFile::readTextFile(const StCString& theFilePath) {
