@@ -468,7 +468,9 @@ void StWindowImpl::updateActiveState() {
     }
 
     myIsActive = false;
-    if(myFullScreenWinNb.getValue() > 0) {
+    if(myFullScreenWinNb.getValue() > 0
+    || myRectNorm.width()  < 10
+    || myRectNorm.height() < 10) {
         return;
     }
 

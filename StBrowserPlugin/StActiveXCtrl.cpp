@@ -104,6 +104,19 @@ StString StActiveXCtrl::loadURL(const CString& theUrl) {
 }
 
 void StActiveXCtrl::stWindowLoop() {
+    // do not load plugin until it is placed on screen
+    StWindow aParentWin(myParentWin);
+    for(;;) {
+        if(aParentWin.isParentOnScreen()) {
+            break;
+        }
+
+        StThread::sleep(10);
+        if(myToQuit) {
+            return;
+        }
+    }
+
     myStApp = new StImageViewer(myParentWin, new StOpenInfo());
     if(!myStApp->open()) {
         myStApp.nullify();
@@ -119,7 +132,8 @@ void StActiveXCtrl::stWindowLoop() {
 
         if(myToQuit) {
             myStApp->exit(0);
-        } else if(myOpenEvent.check()) {
+        } else if(myOpenEvent.check()
+               && myStApp->isActive()) {
             // load the image
             myStApp->open(myOpenInfo);
             myOpenEvent.reset();

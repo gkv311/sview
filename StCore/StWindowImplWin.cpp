@@ -357,6 +357,10 @@ bool StWindowImpl::isParentOnScreen() const {
     GetClientRect (myParentWin, &aRect);
     ClientToScreen(myParentWin,  (POINT* )&aRect);
     ClientToScreen(myParentWin, ((POINT* )&aRect) + 1);
+    if(aRect.right  - aRect.left < 10
+    || aRect.bottom - aRect.top  < 10) {
+        return false; // window is not yet positioned on the screen
+    }
 
     aRectSt.left()   = aRect.left;
     aRectSt.top()    = aRect.top;
