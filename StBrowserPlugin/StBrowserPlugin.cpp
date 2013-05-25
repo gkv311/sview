@@ -239,7 +239,7 @@ void StBrowserPlugin::stWindowLoop() {
 
         if(aParentWin.isParentOnScreen()
     #ifndef _WIN32
-        //|| anActiveNb <= 1
+        || anActiveNb <= 1
     #endif
         ) {
             break;
@@ -336,14 +336,14 @@ static SV_THREAD_FUNCTION stThreadFunction(void* theParam) {
 
 bool StBrowserPlugin::init(NPWindow* theWindow) {
     if(theWindow == NULL || theWindow->window == NULL) {
+    #ifdef _WIN32
         if(myProcOrig  != NULL
         && myParentWin != NULL) {
-        #ifdef _WIN32
             SetWindowLongPtr(myParentWin, GWLP_WNDPROC,  (LONG_PTR )myProcOrig);
             SetWindowLongPtr(myParentWin, GWLP_USERDATA, NULL);
             myProcOrig = NULL;
-        #endif
         }
+    #endif
         return false;
     }
 
