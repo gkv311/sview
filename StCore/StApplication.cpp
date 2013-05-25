@@ -78,6 +78,11 @@ void StApplication::stApplicationInit(const StHandle<StOpenInfo>& theOpenInfo) {
     params.ActiveDevice = new StEnumParam(0, "Change device");
     params.ActiveDevice->signals.onChanged.connect(this, &StApplication::doChangeDevice);
 
+    params.VSyncMode = new StEnumParam(0, "VSync mode");
+    params.VSyncMode->changeValues().add("Off");
+    params.VSyncMode->changeValues().add("On");
+    params.VSyncMode->changeValues().add("Mixed");
+
     bool isOutModeAuto = true; // AUTO by default
     myGlobalSettings->loadBool(ST_SETTING_RENDERER_AUTO, isOutModeAuto);
     if(!isOutModeAuto) {
@@ -223,9 +228,11 @@ void StApplication::addRenderer(const StHandle<StWindow>& theRenderer) {
         return;
     }
 
-    myRenderers.add(theRenderer);
+    StHandle<StWindow> aRenderer = theRenderer;
+    aRenderer->params.VSyncMode = params.VSyncMode; // share VSync mode between renderers
+    myRenderers.add(aRenderer);
     size_t aDevIter = myDevices.size();
-    theRenderer->getDevices(myDevices);
+    aRenderer->getDevices(myDevices);
     for(; aDevIter < myDevices.size(); ++aDevIter) {
         params.ActiveDevice->changeValues().add(myDevices[aDevIter]->Name);
     }

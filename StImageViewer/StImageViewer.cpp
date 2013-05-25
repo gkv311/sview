@@ -46,7 +46,7 @@ const char* StImageViewer::ST_DRAWER_PLUGIN_NAME = "StImageViewer";
 namespace {
 
     static const char ST_SETTING_SLIDESHOW_DELAY[] = "slideShowDelay";
-    static const char ST_SETTING_FPSBOUND[]    = "fpsbound";
+    static const char ST_SETTING_FPSTARGET[]   = "fpsTarget";
     static const char ST_SETTING_SRCFORMAT[]   = "srcFormat";
     static const char ST_SETTING_LAST_FOLDER[] = "lastFolder";
     static const char ST_SETTING_COMPRESS[]    = "toCompress";
@@ -54,7 +54,8 @@ namespace {
 
     static const char ST_SETTING_FULLSCREEN[]  = "fullscreen";
     static const char ST_SETTING_SLIDESHOW[]   = "slideshow";
-    static const char ST_SETTING_SHOW_FPS[]    = "showFPS";
+    static const char ST_SETTING_SHOW_FPS[]    = "toShowFps";
+    static const char ST_SETTING_VSYNC[]       = "vsync";
     static const char ST_SETTING_VIEWMODE[]    = "viewMode";
     static const char ST_SETTING_STEREO_MODE[] = "viewStereoMode";
     static const char ST_SETTING_TEXFILTER[]   = "viewTexFilter";
@@ -84,7 +85,6 @@ StImageViewer::StImageViewer(const StNativeWin_t         theParentWin,
   myToCheckUpdates(true),
   myToSaveSrcFormat(false),
   myEscNoQuit(false) {
-    //
     myTitle = "sView - Image Viewer";
     //
     params.isFullscreen = new StBoolParam(false);
@@ -94,14 +94,18 @@ StImageViewer::StImageViewer(const StNativeWin_t         theParentWin,
     params.srcFormat        = new StInt32Param(ST_V_SRC_AUTODETECT);
     params.srcFormat->signals.onChanged.connect(this, &StImageViewer::doSwitchSrcFormat);
     params.ToShowFps = new StBoolParam(false);
+    params.IsVSyncOn = new StBoolParam(true);
+    params.IsVSyncOn->signals.onChanged = stSlot(this, &StImageViewer::doSwitchVSync);
+    StApplication::params.VSyncMode->setValue(StGLContext::VSync_ON);
     params.imageLib = StImageFile::ST_LIBAV,
-    params.fpsBound = 0;
+    params.TargetFps = 0;
 
-    mySettings->loadInt32 (ST_SETTING_FPSBOUND,           params.fpsBound);
+    mySettings->loadInt32 (ST_SETTING_FPSTARGET,          params.TargetFps);
     mySettings->loadString(ST_SETTING_LAST_FOLDER,        params.lastFolder);
     mySettings->loadInt32 (ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
     mySettings->loadParam (ST_SETTING_UPDATES_INTERVAL,   params.checkUpdatesDays);
     mySettings->loadParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
+    mySettings->loadParam (ST_SETTING_VSYNC,              params.IsVSyncOn);
 
     int32_t aSlideShowDelayInt = int32_t(mySlideShowDelay);
     mySettings->loadInt32 (ST_SETTING_SLIDESHOW_DELAY,    aSlideShowDelayInt);
@@ -151,12 +155,13 @@ void StImageViewer::releaseDevice() {
             mySettings->saveInt32(ST_SETTING_RATIO, StGLImageRegion::RATIO_AUTO);
         }
         mySettings->saveParam(ST_SETTING_TEXFILTER, myGUI->stImageRegion->params.textureFilter);
-        mySettings->saveInt32(ST_SETTING_FPSBOUND, params.fpsBound);
+        mySettings->saveInt32(ST_SETTING_FPSTARGET, params.TargetFps);
         mySettings->saveInt32(ST_SETTING_SLIDESHOW_DELAY, int(mySlideShowDelay));
         mySettings->saveInt32(ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
         mySettings->saveParam(ST_SETTING_UPDATES_INTERVAL, params.checkUpdatesDays);
         mySettings->saveString(ST_SETTING_IMAGELIB, StImageFile::imgLibToString(params.imageLib));
         mySettings->saveParam (ST_SETTING_SHOW_FPS, params.ToShowFps);
+        mySettings->saveParam (ST_SETTING_VSYNC,    params.IsVSyncOn);
         if(myToSaveSrcFormat) {
             mySettings->saveParam(ST_SETTING_SRCFORMAT, params.srcFormat);
         }
@@ -197,7 +202,7 @@ bool StImageViewer::init() {
     myGUI->setContext(myContext);
 
     // load settings
-    myWindow->setTargetFps(double(params.fpsBound));
+    myWindow->setTargetFps(double(params.TargetFps));
     mySettings->loadParam (ST_SETTING_STEREO_MODE,        myGUI->stImageRegion->params.displayMode);
     mySettings->loadParam (ST_SETTING_TEXFILTER,          myGUI->stImageRegion->params.textureFilter);
     mySettings->loadParam (ST_SETTING_RATIO,              myGUI->stImageRegion->params.displayRatio);
@@ -746,6 +751,10 @@ void StImageViewer::doListLast(const size_t ) {
 
 void StImageViewer::doQuit(const size_t ) {
     StApplication::exit(0);
+}
+
+void StImageViewer::doSwitchVSync(const bool theValue) {
+    StApplication::params.VSyncMode->setValue(theValue ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
 }
 
 void StImageViewer::doFullscreen(const bool theIsFullscreen) {

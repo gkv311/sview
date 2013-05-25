@@ -36,7 +36,6 @@ namespace {
     static const char ST_SETTING_DEVICE_ID[] = "deviceId";
     static const char ST_SETTING_WINDOWPOS[] = "windowPos";
     static const char ST_SETTING_SLAVE_ID[]  = "slaveId";
-    static const char ST_SETTING_VSYNC[]     = "vsync";
 
     // translation resources
     enum {
@@ -46,7 +45,6 @@ namespace {
         STTR_MIRROR_DESC = 1003,
 
         // parameters
-        STTR_PARAMETER_VSYNC    = 1100,
         STTR_PARAMETER_SLAVE_ID = 1102,
 
         // about info
@@ -174,7 +172,6 @@ void StOutDual::getDevices(StOutDevicesList& theList) const {
 }
 
 void StOutDual::getOptions(StParamsList& theList) const {
-    theList.add(params.IsVSyncOn);
     theList.add(params.SlaveMonId);
 }
 
@@ -226,10 +223,6 @@ StOutDual::StOutDual(const StNativeWin_t theParentWindow)
     aDevMirr->Desc     = aLangMap.changeValueId(STTR_MIRROR_DESC, "Hand-make Mirrored Stereo monitors (mirror in X-direction)");
     myDevices.add(aDevMirr);
 
-    // VSync option
-    params.IsVSyncOn = new StBoolParamNamed(true, aLangMap.changeValueId(STTR_PARAMETER_VSYNC, "VSync"));
-    params.IsVSyncOn->signals.onChanged.connect(this, &StOutDual::doVSync);
-
     // Slave Monitor option
     StHandle<StEnumParam> aSlaveMon = new StEnumParam(1, aLangMap.changeValueId(STTR_PARAMETER_SLAVE_ID, "Slave Monitor"));
     mySettings->loadParam(ST_SETTING_SLAVE_ID, aSlaveMon);
@@ -251,9 +244,6 @@ StOutDual::StOutDual(const StNativeWin_t theParentWindow)
     mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
     StWindow::setPlacement(aRect, true);
     StWindow::setTitle("sView - Dual Renderer");
-
-    // load VSync option
-    mySettings->loadParam(ST_SETTING_VSYNC, params.IsVSyncOn);
 
     // load device settings
     int32_t aDevice = myDevice;
@@ -290,7 +280,6 @@ void StOutDual::releaseResources() {
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
     }
     mySettings->saveParam(ST_SETTING_SLAVE_ID,  params.SlaveMonId);
-    mySettings->saveParam(ST_SETTING_VSYNC,     params.IsVSyncOn);
     mySettings->saveInt32(ST_SETTING_DEVICE_ID, myDevice);
 }
 
@@ -300,6 +289,7 @@ StOutDual::~StOutDual() {
 }
 
 void StOutDual::close() {
+    StWindow::params.VSyncMode->signals.onChanged -= stSlot(this, &StOutDual::doSwitchVSync);
     releaseResources();
     StWindow::close();
 }
@@ -321,7 +311,8 @@ bool StOutDual::create() {
     }
 
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
-    myContext->stglSetVSync(params.IsVSyncOn->getValue() ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
+    myContext->stglSetVSync((StGLContext::VSync_Mode )StWindow::params.VSyncMode->getValue());
+    StWindow::params.VSyncMode->signals.onChanged += stSlot(this, &StOutDual::doSwitchVSync);
 
     if(!myProgram->init(*myContext)) {
         stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init Shader");
@@ -505,13 +496,13 @@ void StOutDual::stglDraw() {
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
 }
 
-void StOutDual::doVSync(const bool theValue) {
+void StOutDual::doSwitchVSync(const int32_t theValue) {
     if(myContext.isNull()) {
         return;
     }
 
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
-    myContext->stglSetVSync(theValue ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
+    myContext->stglSetVSync((StGLContext::VSync_Mode )theValue);
 }
 
 void StOutDual::doSlaveMon(const int32_t theValue) {

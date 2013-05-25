@@ -47,13 +47,15 @@ const StString StMoviePlayer::ST_DRAWER_PLUGIN_NAME = "StMoviePlayer";
 
 namespace {
 
-    static const char ST_SETTING_FPSBOUND[]      = "fpsbound";
+    static const char ST_SETTING_FPSTARGET[]     = "fpsTarget";
     static const char ST_SETTING_SRCFORMAT[]     = "srcFormat";
     static const char ST_SETTING_LAST_FOLDER[]   = "lastFolder";
     static const char ST_SETTING_OPENAL_DEVICE[] = "alDevice";
     static const char ST_SETTING_RECENT_FILES[]  = "recent";
     static const char ST_SETTING_SHOW_LIST[]     = "showPlaylist";
-    static const char ST_SETTING_SHOW_FPS[]      = "showFPS";
+    static const char ST_SETTING_SHOW_FPS[]      = "toShowFps";
+    static const char ST_SETTING_LIMIT_FPS[]     = "toLimitFps";
+    static const char ST_SETTING_VSYNC[]         = "vsync";
 
     static const char ST_SETTING_FULLSCREEN[]    = "fullscreen";
     static const char ST_SETTING_VIEWMODE[]      = "viewMode";
@@ -172,15 +174,19 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     params.ToShowPlayList   = new StBoolParam(false);
     params.ToShowPlayList->signals.onChanged = stSlot(this, &StMoviePlayer::doShowPlayList);
     params.ToShowFps   = new StBoolParam(false);
+    params.IsVSyncOn   = new StBoolParam(true);
+    params.IsVSyncOn->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchVSync);
+    StApplication::params.VSyncMode->setValue(StGLContext::VSync_ON);
+    params.ToLimitFps  = new StBoolParam(true);
     params.audioStream = new StInt32Param(-1);
     params.audioStream->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchAudioStream);
     params.subtitlesStream = new StInt32Param(-1);
     params.subtitlesStream->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchSubtitlesStream);
     params.blockSleeping = new StInt32Param(StMoviePlayer::BLOCK_SLEEP_PLAYBACK);
-    params.fpsBound = 1;
+    params.TargetFps = 2; // set rendering FPS as twice as average video FPS
 
     // load settings
-    mySettings->loadInt32 (ST_SETTING_FPSBOUND,           params.fpsBound);
+    mySettings->loadInt32 (ST_SETTING_FPSTARGET,          params.TargetFps);
     mySettings->loadString(ST_SETTING_LAST_FOLDER,        params.lastFolder);
     mySettings->loadInt32 (ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
     mySettings->loadParam (ST_SETTING_UPDATES_INTERVAL,   params.checkUpdatesDays);
@@ -188,6 +194,8 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     mySettings->loadParam (ST_SETTING_GLOBAL_MKEYS,       params.areGlobalMKeys);
     mySettings->loadParam (ST_SETTING_SHOW_LIST,          params.ToShowPlayList);
     mySettings->loadParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
+    mySettings->loadParam (ST_SETTING_VSYNC,              params.IsVSyncOn);
+    mySettings->loadParam (ST_SETTING_LIMIT_FPS,          params.ToLimitFps);
 
     StString aSavedALDevice;
     mySettings->loadString(ST_SETTING_OPENAL_DEVICE,      aSavedALDevice);
@@ -240,7 +248,7 @@ void StMoviePlayer::releaseDevice() {
             mySettings->saveInt32(ST_SETTING_RATIO,           StGLImageRegion::RATIO_AUTO);
         }
         mySettings->saveParam (ST_SETTING_TEXFILTER,          myGUI->stImageRegion->params.textureFilter);
-        mySettings->saveInt32 (ST_SETTING_FPSBOUND,           params.fpsBound);
+        mySettings->saveInt32 (ST_SETTING_FPSTARGET,          params.TargetFps);
         mySettings->saveString(ST_SETTING_OPENAL_DEVICE,      params.alDevice->getTitle());
         mySettings->saveInt32 (ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
         mySettings->saveParam (ST_SETTING_UPDATES_INTERVAL,   params.checkUpdatesDays);
@@ -249,6 +257,8 @@ void StMoviePlayer::releaseDevice() {
         mySettings->saveParam (ST_SETTING_GLOBAL_MKEYS,       params.areGlobalMKeys);
         mySettings->saveParam (ST_SETTING_SHOW_LIST,          params.ToShowPlayList);
         mySettings->saveParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
+        mySettings->saveParam (ST_SETTING_VSYNC,              params.IsVSyncOn);
+        mySettings->saveParam (ST_SETTING_LIMIT_FPS,          params.ToLimitFps);
 
         if(!myVideo.isNull()) {
             mySettings->saveString(ST_SETTING_RECENT_FILES,   myPlayList->dumpRecentList());
@@ -372,7 +382,7 @@ void StMoviePlayer::parseArguments(const StArgumentsMap& theArguments) {
         params.isShuffle->setValue(!argShuffle.isValueOff());
     }
     if(argBenchmark.isValid()) {
-        myIsBenchmark = !argShuffle.isValueOff();
+        myIsBenchmark = !argBenchmark.isValueOff();
         myVideo->setBenchmark(myIsBenchmark);
     }
 }
@@ -668,21 +678,23 @@ void StMoviePlayer::beforeDraw() {
         doUpdateStateLoaded();
     }
 
-    if(myIsBenchmark) {
-        // full unbounded
+    if(myIsBenchmark
+    || !params.ToLimitFps->getValue()) {
+        // do not limit FPS
         myWindow->setTargetFps(-1.0);
-    } else if(params.fpsBound == 1) {
+    } else if(params.TargetFps >= 1
+           && params.TargetFps <= 3) {
         // set rendering FPS to 2x averageFPS
-        double targetFps = myVideo->getAverFps();
-        if(targetFps < 18.0) {
-            targetFps = 0.0;
-        } else if(targetFps < 40.0) {
-            targetFps *= 2.0;
+        double aTargetFps = myVideo->getAverFps();
+        if(aTargetFps < 18.0) {
+            aTargetFps = 0.0;
+        } else if(aTargetFps < 40.0) {
+            aTargetFps *= double(params.TargetFps);
         }
-        myWindow->setTargetFps(targetFps);
+        myWindow->setTargetFps(aTargetFps);
     } else {
         // set rendering FPS to setted value in settings
-        myWindow->setTargetFps(double(params.fpsBound));
+        myWindow->setTargetFps(double(params.TargetFps));
     }
 
     if(myToCheckUpdates && !myUpdates.isNull() && myUpdates->isInitialized()) {
@@ -809,6 +821,10 @@ void StMoviePlayer::doPlayListReverse(const size_t ) {
 
 void StMoviePlayer::doSwitchShuffle(const bool theShuffleOn) {
     myPlayList->setShuffle(theShuffleOn);
+}
+
+void StMoviePlayer::doSwitchVSync(const bool theValue) {
+    StApplication::params.VSyncMode->setValue(theValue ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
 }
 
 void StMoviePlayer::doSwitchAudioDevice(const int32_t /*theDevId*/) {

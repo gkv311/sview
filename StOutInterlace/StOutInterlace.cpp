@@ -40,7 +40,6 @@ namespace {
     static const char ST_SETTING_DEVICE_ID[]    = "deviceId";
     static const char ST_SETTING_WINDOWPOS[]    = "windowPos";
     static const char ST_SETTING_BIND_MONITOR[] = "bindMonitor";
-    static const char ST_SETTING_VSYNC[]        = "vsync";
     static const char ST_SETTING_REVERSE[]      = "reverse";
 
     struct StMonInterlacedInfo_t {
@@ -76,7 +75,6 @@ namespace {
         STTR_HINTERLACE_ED_DESC = 1009,
 
         // parameters
-        STTR_PARAMETER_VSYNC    = 1100,
         STTR_PARAMETER_REVERSE  = 1102,
         STTR_PARAMETER_BIND_MON = 1103,
 
@@ -188,7 +186,6 @@ void StOutInterlace::getDevices(StOutDevicesList& theList) const {
 }
 
 void StOutInterlace::getOptions(StParamsList& theList) const {
-    theList.add(params.IsVSyncOn);
     theList.add(params.ToReverse);
     theList.add(params.BindToMon);
 }
@@ -280,14 +277,11 @@ StOutInterlace::StOutInterlace(const StNativeWin_t theParentWindow)
     }
 
     // options
-    params.IsVSyncOn = new StBoolParamNamed(true,  aLangMap.changeValueId(STTR_PARAMETER_VSYNC,    "VSync"));
     params.ToReverse = new StBoolParamNamed(false, aLangMap.changeValueId(STTR_PARAMETER_REVERSE,  "Reverse Order"));
     params.BindToMon = new StBoolParamNamed(true,  aLangMap.changeValueId(STTR_PARAMETER_BIND_MON, "Bind To Supported Monitor"));
-    mySettings->loadParam(ST_SETTING_VSYNC,        params.IsVSyncOn);
     mySettings->loadParam(ST_SETTING_REVERSE,      params.ToReverse);
     mySettings->loadParam(ST_SETTING_BIND_MONITOR, params.BindToMon);
 
-    params.IsVSyncOn->signals.onChanged.connect(this, &StOutInterlace::doVSync);
     params.BindToMon->signals.onChanged.connect(this, &StOutInterlace::doSetBindToMonitor);
 
     // load window position
@@ -355,7 +349,6 @@ void StOutInterlace::releaseResources() {
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
     }
     mySettings->saveParam(ST_SETTING_BIND_MONITOR, params.BindToMon);
-    mySettings->saveParam(ST_SETTING_VSYNC,        params.IsVSyncOn);
     mySettings->saveParam(ST_SETTING_REVERSE,      params.ToReverse);
     mySettings->saveInt32(ST_SETTING_DEVICE_ID,    myDevice);
 }
@@ -366,6 +359,7 @@ StOutInterlace::~StOutInterlace() {
 }
 
 void StOutInterlace::close() {
+    StWindow::params.VSyncMode->signals.onChanged -= stSlot(this, &StOutInterlace::doSwitchVSync);
     beforeClose();
     releaseResources();
     StWindow::close();
@@ -404,7 +398,8 @@ bool StOutInterlace::create() {
         stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, OpenGL2.0+ not available!");
         return false;
     }
-    myContext->stglSetVSync(params.IsVSyncOn->getValue() ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
+    myContext->stglSetVSync((StGLContext::VSync_Mode )StWindow::params.VSyncMode->getValue());
+    StWindow::params.VSyncMode->signals.onChanged += stSlot(this, &StOutInterlace::doSwitchVSync);
 
     // INIT shaders
     StString aShadersError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init Shaders");
@@ -789,13 +784,13 @@ void StOutInterlace::stglDraw() {
     ++myFPSControl;
 }
 
-void StOutInterlace::doVSync(const bool theValue) {
+void StOutInterlace::doSwitchVSync(const int32_t theValue) {
     if(myContext.isNull()) {
         return;
     }
 
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
-    myContext->stglSetVSync(theValue ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
+    myContext->stglSetVSync((StGLContext::VSync_Mode )theValue);
 }
 
 void StOutInterlace::doSetBindToMonitor(const bool theValue) {

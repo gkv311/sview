@@ -21,6 +21,11 @@
 #include "StWindowImpl.h"
 
 void StWindow::copySignals() {
+    params.VSyncMode = new StEnumParam(0, "VSync mode");
+    params.VSyncMode->changeValues().add("Off");
+    params.VSyncMode->changeValues().add("On");
+    params.VSyncMode->changeValues().add("Mixed");
+
     myWin->signals.onClose     = &signals.onClose;
     myWin->signals.onResize    = &signals.onResize;
     myWin->signals.onAnotherMonitor = &signals.onAnotherMonitor;

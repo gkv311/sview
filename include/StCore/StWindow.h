@@ -22,7 +22,7 @@
 #include <stTypes.h>
 #include <StStrings/StString.h>
 #include <StSlots/StSignal.h>
-#include <StSettings/StParam.h>
+#include <StSettings/StEnumParam.h>
 #include <StTemplates/StRect.h>
 #include <StGL/StGLEnums.h>
 #include <StGL/StGLVec.h>
@@ -372,6 +372,14 @@ class StWindow {
         StSignal<void (const StNavigEvent&  )> onNavigate;
 
     } signals;
+
+        public: //! @name Properties
+
+    struct {
+
+        StHandle<StEnumParam> VSyncMode; //!< VSync mode from StGLContext::VSync_Mode enumeration (shared between renderers)
+
+    } params;
 
         protected: //! @name advanced methods
 

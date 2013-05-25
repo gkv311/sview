@@ -315,6 +315,8 @@ StGLMenu* StImageViewerGUI::createOutputMenu() {
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doAboutRenderer);
     aMenu->addItem(myLangMap->changeValueId(MENU_SHOW_FPS,       "Show FPS"),
                    myPlugin->params.ToShowFps);
+    aMenu->addItem(myLangMap->changeValueId(MENU_VSYNC,          "VSync"),
+                   myPlugin->params.IsVSyncOn);
 
     const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
     StParamsList aParams;

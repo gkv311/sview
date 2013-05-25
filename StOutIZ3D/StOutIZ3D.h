@@ -102,7 +102,7 @@ class StOutIZ3D : public StWindow {
     /**
      * On/off VSync callback.
      */
-    ST_LOCAL void doVSync(const bool theValue);
+    ST_LOCAL void doSwitchVSync(const int32_t theValue);
 
         private:
 
@@ -112,8 +112,7 @@ class StOutIZ3D : public StWindow {
 
     struct {
 
-        StHandle<StBoolParam>  IsVSyncOn;  //!< flag to use VSync
-        StHandle<StInt32Param> Glasses;    //!< glasses filter
+        StHandle<StInt32Param> Glasses; //!< glasses filter
 
     } params;
 

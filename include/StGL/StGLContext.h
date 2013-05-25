@@ -98,7 +98,7 @@ class StGLContext {
     enum VSync_Mode {
         VSync_OFF   =  0, //!< turn OFF VSync
         VSync_ON    =  1, //!< turn ON  VSync
-        VSync_MIXED = -1, //!< wait for sync only when FPS is higher than monitor refresh rate
+        VSync_MIXED =  2, //!< wait for sync only when FPS is higher than monitor refresh rate
     };
 
         public:    //! @name OpenGL functions - core versions

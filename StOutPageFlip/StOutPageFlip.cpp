@@ -281,6 +281,7 @@ StOutPageFlip::~StOutPageFlip() {
 }
 
 void StOutPageFlip::close() {
+    StWindow::params.VSyncMode->signals.onChanged -= stSlot(this, &StOutPageFlip::doSwitchVSync);
     myToResetDevice = false;
     releaseResources();
     StWindow::close();
@@ -435,7 +436,13 @@ bool StOutPageFlip::create() {
         stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, OpenGL2.0+ not available!");
         return false;
     }
-    myContext->stglSetVSync(StGLContext::VSync_ON);
+
+    if(params.QuadBuffer->getValue() == QUADBUFFER_SOFT) {
+        myContext->stglSetVSync(StGLContext::VSync_ON);
+    } else {
+        myContext->stglSetVSync((StGLContext::VSync_Mode )StWindow::params.VSyncMode->getValue());
+    }
+    StWindow::params.VSyncMode->signals.onChanged += stSlot(this, &StOutPageFlip::doSwitchVSync);
 
     // load fullscreen-only warning
     StLibAVImage anImage;
@@ -609,6 +616,11 @@ void StOutPageFlip::stglDraw() {
             if(myDevice == DEVICE_VUZIX && !myVuzixSDK.isNull()) {
                 myVuzixSDK->setMonoOut();
             }
+
+            if(params.QuadBuffer->getValue() == QUADBUFFER_SOFT) {
+                myContext->stglSetVSync((StGLContext::VSync_Mode )StWindow::params.VSyncMode->getValue());
+            }
+
             myToDrawStereo = false;
         }
 
@@ -635,6 +647,9 @@ void StOutPageFlip::stglDraw() {
         if(myDevice == DEVICE_VUZIX && !myVuzixSDK.isNull()
         && params.QuadBuffer->getValue() != QUADBUFFER_HARD_OPENGL) {
             myVuzixSDK->setStereoOut();
+        }
+        if(params.QuadBuffer->getValue() == QUADBUFFER_SOFT) {
+            myContext->stglSetVSync(StGLContext::VSync_ON);
         }
         myToDrawStereo = true;
     }
@@ -759,5 +774,18 @@ void StOutPageFlip::doShowExtra(const bool theValue) {
         if(params.QuadBuffer->getValue() == QUADBUFFER_SOFT) {
             params.QuadBuffer->setValue(QUADBUFFER_HARD_OPENGL);
         }
+    }
+}
+
+void StOutPageFlip::doSwitchVSync(const int32_t theValue) {
+    if(myContext.isNull()) {
+        return;
+    }
+
+    StWindow::stglMakeCurrent(ST_WIN_MASTER);
+    if(params.QuadBuffer->getValue() == QUADBUFFER_SOFT) {
+        //myContext->stglSetVSync(StGLContext::VSync_ON);
+    } else {
+        myContext->stglSetVSync((StGLContext::VSync_Mode )theValue);
     }
 }

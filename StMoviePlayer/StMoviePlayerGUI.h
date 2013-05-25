@@ -112,24 +112,25 @@ class StMoviePlayerGUI : public StGLRootWidget {
 
     ST_LOCAL void      createMainMenu();         // Root (Main menu)
     ST_LOCAL StGLMenu* createMediaMenu();        // Root -> Media menu
-    ST_LOCAL StGLMenu* createOpenMovieMenu();    // Root -> Media -> Open movie menu
-    ST_LOCAL StGLMenu* createSaveImageMenu();    // Root -> Media -> Save snapshot menu
-    ST_LOCAL StGLMenu* createSrcFormatMenu();    // Root -> Media -> Source format menu
-    ST_LOCAL StGLMenu* createOpenALDeviceMenu(); // Root -> Media -> OpenAL Device menu
-    ST_LOCAL StGLMenu* createRecentMenu();       // Root -> Media -> Recent files menu
+    ST_LOCAL StGLMenu* createOpenMovieMenu();    // Root -> Media  -> Open movie menu
+    ST_LOCAL StGLMenu* createSaveImageMenu();    // Root -> Media  -> Save snapshot menu
+    ST_LOCAL StGLMenu* createSrcFormatMenu();    // Root -> Media  -> Source format menu
+    ST_LOCAL StGLMenu* createOpenALDeviceMenu(); // Root -> Media  -> OpenAL Device menu
+    ST_LOCAL StGLMenu* createRecentMenu();       // Root -> Media  -> Recent files menu
     ST_LOCAL StGLMenu* createViewMenu();         // Root -> View menu
-    ST_LOCAL StGLMenu* createDisplayModeMenu();  // Root -> View menu -> Output
-    ST_LOCAL StGLMenu* createDisplayRatioMenu(); // Root -> View menu -> Display Ratio
-    ST_LOCAL StGLMenu* createSmoothFilterMenu(); // Root -> View menu -> Smooth Filter
-    ST_LOCAL StGLMenu* createGammaMenu();        // Root -> View menu -> Gamma Correction
+    ST_LOCAL StGLMenu* createDisplayModeMenu();  // Root -> View   -> Output
+    ST_LOCAL StGLMenu* createDisplayRatioMenu(); // Root -> View   -> Display Ratio
+    ST_LOCAL StGLMenu* createSmoothFilterMenu(); // Root -> View   -> Smooth Filter
+    ST_LOCAL StGLMenu* createGammaMenu();        // Root -> View   -> Gamma Correction
     ST_LOCAL StGLMenu* createAudioMenu();        // Root -> Audio menu
     ST_LOCAL StGLMenu* createAudioGainMenu();    // Root -> Audio menu -> Volume
     ST_LOCAL StGLMenu* createSubtitlesMenu();    // Root -> Subtitles menu
     ST_LOCAL StGLMenu* createOutputMenu();       // Root -> Output menu
+    ST_LOCAL StGLMenu* createFpsMenu();          // Root -> Output -> FPS Control
     ST_LOCAL StGLMenu* createHelpMenu();         // Root -> Help menu
-    ST_LOCAL StGLMenu* createBlockSleepMenu();   // Root -> Help -> Block sleeping
-    ST_LOCAL StGLMenu* createCheckUpdatesMenu(); // Root -> Help -> Check updates menu
-    ST_LOCAL StGLMenu* createLanguageMenu();     // Root -> Help -> Language menu
+    ST_LOCAL StGLMenu* createBlockSleepMenu();   // Root -> Help   -> Block sleeping
+    ST_LOCAL StGLMenu* createCheckUpdatesMenu(); // Root -> Help   -> Check updates menu
+    ST_LOCAL StGLMenu* createLanguageMenu();     // Root -> Help   -> Language menu
 
     ST_LOCAL void fillOpenALDeviceMenu(StGLMenu* theMenu);
     ST_LOCAL void fillRecentMenu(StGLMenu* theMenu);

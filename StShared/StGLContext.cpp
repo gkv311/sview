@@ -301,10 +301,22 @@ void StGLContext::stglResizeViewport(const StGLBoxPx& theRect) {
 }
 
 bool StGLContext::stglSetVSync(const VSync_Mode theVSyncMode) {
-    GLint aSyncInt = (GLint )theVSyncMode;
-    if(theVSyncMode == VSync_MIXED && !extSwapTear) {
-        aSyncInt = 1;
+    GLint aSyncInt = 0;
+    switch(theVSyncMode) {
+        case VSync_MIXED:
+            if(extSwapTear) {
+                aSyncInt = -1;
+                break;
+            }
+        case VSync_ON:
+            aSyncInt = 1;
+            break;
+        case VSync_OFF:
+        default:
+            aSyncInt = 0;
+            break;
     }
+
 #ifdef _WIN32
     if(myFuncs->wglSwapIntervalEXT != NULL) {
         myFuncs->wglSwapIntervalEXT(aSyncInt);

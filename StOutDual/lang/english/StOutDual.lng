@@ -6,7 +6,6 @@ English translation file for StOutDual library
 1001="Stereo-device with dual input: some HMD, Mirrored Stereo monitors, Dual-Projectors"
 1002="Mirror Output"
 1003="Hand-make Mirrored Stereo monitors (mirror in X-direction)"
-1100="VSync"
 1102="Slave Monitor"
 2000="sView - Dual Output module"
 2001="version"

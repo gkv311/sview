@@ -189,7 +189,8 @@ class StApplication {
 
     struct {
 
-        StHandle<StEnumParam> ActiveDevice;        //!< enumerated devices
+        StHandle<StEnumParam> ActiveDevice; //!< enumerated devices
+        StHandle<StEnumParam> VSyncMode;    //!< VSync mode from StGLContext::VSync_Mode enumeration (shared between renderers)
 
     } params;
 

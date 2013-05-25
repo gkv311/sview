@@ -178,6 +178,11 @@ class StOutPageFlip : public StWindow {
      */
     ST_LOCAL void doNewMonitor(const StSizeEvent& theEvent);
 
+    /**
+     * On/off VSync callback.
+     */
+    ST_LOCAL void doSwitchVSync(const int32_t theValue);
+
     ST_LOCAL         void stglDrawWarning();
     ST_LOCAL virtual void stglDrawExtra(unsigned int theView, int theMode);
 

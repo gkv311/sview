@@ -36,7 +36,6 @@ namespace {
 
     // settings
     static const char ST_SETTING_WINDOWPOS[]      = "windowPos";
-    static const char ST_SETTING_VSYNC[]          = "vsync";
     static const char ST_SETTING_FRBUFF_X[]       = "frbufferX";
     static const char ST_SETTING_FRBUFF_Y[]       = "frbufferY";
     static const char ST_SETTING_USER_FRMB_SIZE[] = "useUserFrmbSize";
@@ -76,7 +75,6 @@ namespace {
         STTR_IZ3D_DESC = 1001,
 
         // parameters
-        STTR_PARAMETER_VSYNC    = 1100,
         STTR_PARAMETER_GLASSES  = 1102,
 
         STTR_PARAMETER_GLASSES_CLASSIC      = 1120,
@@ -112,7 +110,6 @@ void StOutIZ3D::getDevices(StOutDevicesList& theList) const {
 }
 
 void StOutIZ3D::getOptions(StParamsList& theList) const {
-    theList.add(params.IsVSyncOn);
     theList.add(params.Glasses);
 }
 
@@ -156,10 +153,6 @@ StOutIZ3D::StOutIZ3D(const StNativeWin_t theParentWindow)
     aDevice->Desc     = aLangMap.changeValueId(STTR_IZ3D_DESC, "IZ3D Display");
     myDevices.add(aDevice);
 
-    // VSync option
-    params.IsVSyncOn = new StBoolParamNamed(true, aLangMap.changeValueId(STTR_PARAMETER_VSYNC, "VSync"));
-    params.IsVSyncOn->signals.onChanged.connect(this, &StOutIZ3D::doVSync);
-
     // shader switch option
     StHandle<StEnumParam> aGlasses = new StEnumParam(myShaders.getMode(),
                                                      aLangMap.changeValueId(STTR_PARAMETER_GLASSES, "iZ3D glasses"));
@@ -176,7 +169,6 @@ StOutIZ3D::StOutIZ3D(const StNativeWin_t theParentWindow)
     StWindow::setTitle("sView - iZ3D Renderer");
 
     // load parameters
-    mySettings->loadParam(ST_SETTING_VSYNC, params.IsVSyncOn);
     mySettings->loadParam(ST_SETTING_TABLE, params.Glasses);
 
     // request slave window
@@ -198,7 +190,6 @@ void StOutIZ3D::releaseResources() {
         StWindow::setFullScreen(false);
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
     }
-    mySettings->saveParam(ST_SETTING_VSYNC, params.IsVSyncOn);
     mySettings->saveParam(ST_SETTING_TABLE, params.Glasses);
 }
 
@@ -208,6 +199,7 @@ StOutIZ3D::~StOutIZ3D() {
 }
 
 void StOutIZ3D::close() {
+    StWindow::params.VSyncMode->signals.onChanged -= stSlot(this, &StOutIZ3D::doSwitchVSync);
     releaseResources();
     StWindow::close();
 }
@@ -229,7 +221,8 @@ bool StOutIZ3D::create() {
     }
 
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
-    myContext->stglSetVSync(params.IsVSyncOn->getValue() ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
+    myContext->stglSetVSync((StGLContext::VSync_Mode )StWindow::params.VSyncMode->getValue());
+    StWindow::params.VSyncMode->signals.onChanged += stSlot(this, &StOutIZ3D::doSwitchVSync);
 
     // INIT iZ3D tables textures
     const StString aTexturesFolder = StProcess::getStCoreFolder() + "textures" + SYS_FS_SPLITTER;
@@ -374,11 +367,11 @@ void StOutIZ3D::stglDraw() {
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
 }
 
-void StOutIZ3D::doVSync(const bool theValue) {
+void StOutIZ3D::doSwitchVSync(const int32_t theValue) {
     if(myContext.isNull()) {
         return;
     }
 
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
-    myContext->stglSetVSync(theValue ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
+    myContext->stglSetVSync((StGLContext::VSync_Mode )theValue);
 }

@@ -121,9 +121,10 @@ class StImageViewer : public StApplication {
         StHandle<StInt32Param>  checkUpdatesDays; //!< days count between updates checks
         StHandle<StInt32Param>  srcFormat;        //!< source format
         StHandle<StBoolParam>   ToShowFps;        //!< display FPS meter
+        StHandle<StBoolParam>   IsVSyncOn;        //!< flag to use VSync
         StString                lastFolder;       //!< laster folder used to open / save file
         StImageFile::ImageClass imageLib;         //!< preferred image library
-        int                     fpsBound;         //!< limit or not rendering FPS
+        int                     TargetFps;        //!< limit or not rendering FPS
 
     } params;
 
@@ -136,6 +137,7 @@ class StImageViewer : public StApplication {
 
         private: //! @name private callback Slots
 
+    ST_LOCAL void doSwitchVSync(const bool theValue);
     ST_LOCAL void doFullscreen(const bool theIsFullscreen);
     ST_LOCAL void doSwitchSrcFormat(const int32_t theSrcFormat);
 

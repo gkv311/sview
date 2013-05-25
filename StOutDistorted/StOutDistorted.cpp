@@ -36,7 +36,6 @@ namespace {
 
     static const char ST_SETTING_DEVICE_ID[] = "deviceId";
     static const char ST_SETTING_WINDOWPOS[] = "windowPos";
-    static const char ST_SETTING_VSYNC[]     = "vsync";
     static const char ST_SETTING_LAYOUT[]    = "layout";
     static const char ST_SETTING_DISTORTION[]= "distortion";
 
@@ -46,7 +45,6 @@ namespace {
         STTR_DISTORTED_DESC     = 1001,
 
         // parameters
-        STTR_PARAMETER_VSYNC      = 1100,
         STTR_PARAMETER_LAYOUT     = 1110,
         STTR_PARAMETER_LAYOUT_SBS        = 1111,
         STTR_PARAMETER_LAYOUT_OVERUNDER  = 1112,
@@ -246,7 +244,6 @@ void StOutDistorted::getDevices(StOutDevicesList& theList) const {
 }
 
 void StOutDistorted::getOptions(StParamsList& theList) const {
-    theList.add(params.IsVSyncOn);
     theList.add(params.Layout);
     theList.add(params.Distortion);
 }
@@ -294,10 +291,6 @@ StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
     aDevDistorted->Desc     = aLangMap.changeValueId(STTR_DISTORTED_DESC, "Oculus Rift");
     myDevices.add(aDevDistorted);
 
-    // VSync option
-    params.IsVSyncOn = new StBoolParamNamed(true, aLangMap.changeValueId(STTR_PARAMETER_VSYNC, "VSync"));
-    params.IsVSyncOn->signals.onChanged.connect(this, &StOutDistorted::doVSync);
-
     // Layout option
     StHandle<StEnumParam> aLayoutParam = new StEnumParam(LAYOUT_SIDE_BY_SIDE,
                                                          aLangMap.changeValueId(STTR_PARAMETER_LAYOUT, "Layout"));
@@ -319,9 +312,6 @@ StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
     mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
     StWindow::setPlacement(aRect, true);
     StWindow::setTitle("sView - Distorted Renderer");
-
-    // load VSync option
-    mySettings->loadParam(ST_SETTING_VSYNC, params.IsVSyncOn);
 }
 
 void StOutDistorted::releaseResources() {
@@ -343,7 +333,6 @@ void StOutDistorted::releaseResources() {
         StWindow::setFullScreen(false);
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
     }
-    mySettings->saveParam(ST_SETTING_VSYNC,      params.IsVSyncOn);
     mySettings->saveParam(ST_SETTING_LAYOUT,     params.Layout);
     mySettings->saveParam(ST_SETTING_DISTORTION, params.Distortion);
 }
@@ -354,6 +343,7 @@ StOutDistorted::~StOutDistorted() {
 }
 
 void StOutDistorted::close() {
+    StWindow::params.VSyncMode->signals.onChanged -= stSlot(this, &StOutDistorted::doSwitchVSync);
     releaseResources();
     StWindow::close();
 }
@@ -375,7 +365,8 @@ bool StOutDistorted::create() {
     }
 
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
-    myContext->stglSetVSync(params.IsVSyncOn->getValue() ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
+    myContext->stglSetVSync((StGLContext::VSync_Mode )StWindow::params.VSyncMode->getValue());
+    StWindow::params.VSyncMode->signals.onChanged += stSlot(this, &StOutDistorted::doSwitchVSync);
 
     if(!myProgramFlat  ->init(*myContext)
     || !myProgramBarrel->init(*myContext)) {
@@ -603,11 +594,11 @@ void StOutDistorted::stglDraw() {
     ++myFPSControl;
 }
 
-void StOutDistorted::doVSync(const bool theValue) {
+void StOutDistorted::doSwitchVSync(const int32_t theValue) {
     if(myContext.isNull()) {
         return;
     }
 
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
-    myContext->stglSetVSync(theValue ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
+    myContext->stglSetVSync((StGLContext::VSync_Mode )theValue);
 }

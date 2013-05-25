@@ -114,7 +114,7 @@ class StOutDistorted : public StWindow {
     /**
      * On/off VSync callback.
      */
-    ST_LOCAL void doVSync(const bool theValue);
+    ST_LOCAL void doSwitchVSync(const int32_t theValue);
 
     ST_LOCAL void stglDrawCursor();
 
@@ -136,7 +136,6 @@ class StOutDistorted : public StWindow {
 
     struct {
 
-        StHandle<StBoolParam>  IsVSyncOn;  //!< flag to use VSync
         StHandle<StInt32Param> Layout;     //!< pair layout
         StHandle<StInt32Param> Distortion; //!< distortion shader
 

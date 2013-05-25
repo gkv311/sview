@@ -93,10 +93,15 @@ namespace StMoviePlayerStrings {
         // Root -> Subtitles menu
         MENU_SUBTITLES = 1350,
 
-        // Root -> Output -> Change Device menu
-        MENU_CHANGE_DEVICE  = 1400,
+        // Root -> Output menu
+        MENU_CHANGE_DEVICE  = 1400, // Root -> Output -> Change Device menu
         MENU_ABOUT_RENDERER = 1401,
-        MENU_SHOW_FPS       = 1402,
+        MENU_FPS            = 1402,
+
+        // Root -> Output -> FPS Control menu
+        MENU_FPS_VSYNC      = 1420,
+        MENU_FPS_METER      = 1421,
+        MENU_FPS_BOUND      = 1422,
 
         // Root -> Help menu
         MENU_HELP = 1500,

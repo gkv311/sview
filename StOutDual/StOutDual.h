@@ -117,7 +117,7 @@ class StOutDual : public StWindow {
     /**
      * On/off VSync callback.
      */
-    ST_LOCAL void doVSync(const bool theValue);
+    ST_LOCAL void doSwitchVSync(const int32_t theValue);
 
     /**
      * Change slave window position callback.
@@ -132,7 +132,6 @@ class StOutDual : public StWindow {
 
     struct {
 
-        StHandle<StBoolParam>  IsVSyncOn;  //!< flag to use VSync
         StHandle<StInt32Param> SlaveMonId; //!< slave window position
 
     } params;

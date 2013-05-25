@@ -145,7 +145,7 @@ class StOutInterlace : public StWindow {
     /**
      * On/off VSync callback.
      */
-    ST_LOCAL void doVSync(const bool theValue);
+    ST_LOCAL void doSwitchVSync(const int32_t theValue);
 
     /**
      * Bind to monitor callback.
@@ -165,9 +165,8 @@ class StOutInterlace : public StWindow {
 
     struct {
 
-        StHandle<StBoolParam>  IsVSyncOn; //!< flag to use VSync
-        StHandle<StBoolParam>  ToReverse; //!< configurable flag to reverse rows order
-        StHandle<StBoolParam>  BindToMon; //!< flag to bind to monitor
+        StHandle<StBoolParam> ToReverse; //!< configurable flag to reverse rows order
+        StHandle<StBoolParam> BindToMon; //!< flag to bind to monitor
 
     } params;
 

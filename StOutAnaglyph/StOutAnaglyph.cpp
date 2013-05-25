@@ -43,7 +43,6 @@ namespace {
     static const char ST_SETTING_REDCYAN[]   = "optionRedCyan";
     static const char ST_SETTING_AMBERBLUE[] = "optionAmberBlue";
     static const char ST_SETTING_WINDOWPOS[] = "windowPos";
-    static const char ST_SETTING_VSYNC[]     = "vsync";
 
     // translation resources
     enum {
@@ -58,7 +57,6 @@ namespace {
         STTR_ANAGLYPH_GREEN    = 1013,
 
         // parameters
-        STTR_ANAGLYPH_VSYNC            = 1100,
         STTR_ANAGLYPH_REDCYAN_MENU     = 1102,
         STTR_ANAGLYPH_REDCYAN_SIMPLE   = 1120,
         STTR_ANAGLYPH_REDCYAN_OPTIM    = 1121,
@@ -97,7 +95,6 @@ void StOutAnaglyph::getDevices(StOutDevicesList& theList) const {
 }
 
 void StOutAnaglyph::getOptions(StParamsList& theList) const {
-    theList.add(params.IsVSyncOn);
     theList.add(params.Glasses);
     theList.add(params.RedCyan);
     theList.add(params.AmberBlue);
@@ -138,10 +135,6 @@ StOutAnaglyph::StOutAnaglyph(const StNativeWin_t theParentWindow)
     aDevice->Desc     = aLangMap.changeValueId(STTR_ANAGLYPH_DESC, "Simple glasses with color-filters");
     myDevices.add(aDevice);
 
-    // VSync option
-    params.IsVSyncOn = new StBoolParamNamed(true, aLangMap.changeValueId(STTR_ANAGLYPH_VSYNC, "VSync"));
-    params.IsVSyncOn->signals.onChanged.connect(this, &StOutAnaglyph::doVSync);
-
     // Glasses switch option
     StHandle<StEnumParam> aGlasses = new StEnumParam(GLASSES_TYPE_REDCYAN,
                                                      aLangMap.changeValueId(STTR_ANAGLYPH_GLASSES, "Glasses type"));
@@ -175,8 +168,6 @@ StOutAnaglyph::StOutAnaglyph(const StNativeWin_t theParentWindow)
     StWindow::setPlacement(aRect, true);
     StWindow::setTitle("sView - Anaglyph Renderer");
 
-    mySettings->loadParam(ST_SETTING_VSYNC,     params.IsVSyncOn);
-
     // load glasses settings
     mySettings->loadParam(ST_SETTING_GLASSES,   params.Glasses);
     mySettings->loadParam(ST_SETTING_REDCYAN,   params.RedCyan);
@@ -204,7 +195,6 @@ void StOutAnaglyph::releaseResources() {
         StRect<int32_t> savedRect = StWindow::getPlacement();
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, savedRect);
     }
-    mySettings->saveParam(ST_SETTING_VSYNC,     params.IsVSyncOn);
     mySettings->saveParam(ST_SETTING_GLASSES,   params.Glasses);
     mySettings->saveParam(ST_SETTING_REDCYAN,   params.RedCyan);
     mySettings->saveParam(ST_SETTING_AMBERBLUE, params.AmberBlue);
@@ -242,6 +232,7 @@ namespace {
 };
 
 void StOutAnaglyph::close() {
+    StWindow::params.VSyncMode->signals.onChanged -= stSlot(this, &StOutAnaglyph::doSwitchVSync);
     releaseResources();
     StWindow::close();
 }
@@ -261,7 +252,9 @@ bool StOutAnaglyph::create() {
         stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, OpenGL2.0+ not available!");
         return false;
     }
-    myContext->stglSetVSync(params.IsVSyncOn->getValue() ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
+
+    myContext->stglSetVSync((StGLContext::VSync_Mode )StWindow::params.VSyncMode->getValue());
+    StWindow::params.VSyncMode->signals.onChanged += stSlot(this, &StOutAnaglyph::doSwitchVSync);
 
     // INIT shaders
     StString aShadersError = StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init Shaders";
@@ -393,11 +386,11 @@ void StOutAnaglyph::doSetShader(const int32_t ) {
     }
 }
 
-void StOutAnaglyph::doVSync(const bool theValue) {
+void StOutAnaglyph::doSwitchVSync(const int32_t theValue) {
     if(myContext.isNull()) {
         return;
     }
 
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
-    myContext->stglSetVSync(theValue ? StGLContext::VSync_ON : StGLContext::VSync_OFF);
+    myContext->stglSetVSync((StGLContext::VSync_Mode )theValue);
 }

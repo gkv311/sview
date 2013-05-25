@@ -185,11 +185,13 @@ class StMoviePlayer : public StApplication {
         StHandle<StInt32Param>    srcFormat;        //!< source format
         StHandle<StBoolParam>     ToShowPlayList;   //!< display playlist
         StHandle<StBoolParam>     ToShowFps;        //!< display FPS meter
+        StHandle<StBoolParam>     ToLimitFps;       //!< limit CPU usage or not
+        StHandle<StBoolParam>     IsVSyncOn;        //!< flag to use VSync
         StHandle<StInt32Param>    audioStream;      //!< active Audio stream
         StHandle<StInt32Param>    subtitlesStream;  //!< active Subtitles stream
         StHandle<StInt32Param>    blockSleeping;    //!< active Audio stream
         StString                  lastFolder;       //!< laster folder used to open / save file
-        int                       fpsBound;         //!< limit or not rendering FPS
+        int                       TargetFps;        //!< rendering FPS limit (0 - max FPS with less CPU, 1,2,3 - adjust to video FPS)
 
     } params;
 
@@ -224,6 +226,7 @@ class StMoviePlayer : public StApplication {
 
         private: //! @name private callback Slots
 
+    ST_LOCAL void doSwitchVSync(const bool theValue);
     ST_LOCAL void doSwitchAudioDevice(const int32_t theDevId);
     ST_LOCAL void doSetAudioVolume(const float theGain);
     ST_LOCAL void doSwitchShuffle(const bool theShuffleOn);

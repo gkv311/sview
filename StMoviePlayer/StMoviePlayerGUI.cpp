@@ -499,6 +499,7 @@ StGLMenu* StMoviePlayerGUI::createOutputMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
 
     StGLMenu* aMenuChangeDevice = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+    StGLMenu* aMenuFpsControl   = createFpsMenu();
 
     const StHandle<StEnumParam>& aDevicesEnum = myPlugin->StApplication::params.ActiveDevice;
     const StArrayList<StString>& aValuesList  = aDevicesEnum->getValues();
@@ -510,8 +511,8 @@ StGLMenu* StMoviePlayerGUI::createOutputMenu() {
                    aMenuChangeDevice);
     aMenu->addItem(myLangMap->changeValueId(MENU_ABOUT_RENDERER, "About Plugin..."))
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAboutRenderer);
-    aMenu->addItem(myLangMap->changeValueId(MENU_SHOW_FPS,       "Show FPS"),
-                   myPlugin->params.ToShowFps);
+    aMenu->addItem(myLangMap->changeValueId(MENU_FPS, "FPS Control"),
+                   aMenuFpsControl);
 
     const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
     StParamsList aParams;
@@ -531,6 +532,20 @@ StGLMenu* StMoviePlayerGUI::createOutputMenu() {
             aMenu->addItem(anEnum->getName(), aChildMenu);
         }
     }
+    return aMenu;
+}
+
+/**
+ * Root -> Output -> FPS Control
+ */
+StGLMenu* StMoviePlayerGUI::createFpsMenu() {
+    StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+    aMenu->addItem(myLangMap->changeValueId(MENU_FPS_VSYNC,  "VSync"),
+                   myPlugin->params.IsVSyncOn);
+    aMenu->addItem(myLangMap->changeValueId(MENU_FPS_METER, "Show FPS"),
+                   myPlugin->params.ToShowFps);
+    aMenu->addItem(myLangMap->changeValueId(MENU_FPS_BOUND, "Reduce CPU usage"),
+                   myPlugin->params.ToLimitFps);
     return aMenu;
 }
 

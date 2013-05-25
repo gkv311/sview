@@ -126,7 +126,7 @@ class StOutAnaglyph : public StWindow {
     /**
      * On/off VSync callback.
      */
-    ST_LOCAL void doVSync(const bool theValue);
+    ST_LOCAL void doSwitchVSync(const int32_t theValue);
 
     /**
      * Release GL resources before window closing.
@@ -141,7 +141,6 @@ class StOutAnaglyph : public StWindow {
 
     struct {
 
-        StHandle<StBoolParam>  IsVSyncOn; //!< flag to use VSync
         StHandle<StInt32Param> Glasses;   //!< glasses type
         StHandle<StInt32Param> RedCyan;   //!< Red-Cyan   filter
         StHandle<StInt32Param> AmberBlue; //!< Amber-Blue filter
