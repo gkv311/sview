@@ -415,7 +415,7 @@ void StOutDual::stglDraw() {
     } else {
         // resize FBO
         if(!myFrBuffer->initLazy(*myContext, aVPMaster.width(), aVPMaster.height(), StWindow::hasDepthBuffer())) {
-            stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init Frame Buffer");
+            myMsgQueue->pushError(stCString("Dual output - critical error:\nFrame Buffer Object resize failed!"));
             myIsBroken = true;
             return;
         }

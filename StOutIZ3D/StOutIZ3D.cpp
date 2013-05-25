@@ -213,11 +213,12 @@ bool StOutIZ3D::create() {
     // initialize GL context
     myContext = new StGLContext();
     if(!myContext->stglInit()) {
-        stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, OpenGL context is broken!\n(OpenGL library internal error?)");
+        myMsgQueue->pushError(stCString("iZ3D output - critical error:\nOpenGL context is broken!\n(OpenGL library internal error?)"));
         return false;
     } else if(!myContext->isGlGreaterEqual(2, 0)) {
-        stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, OpenGL2.0+ not available!");
-        return false;
+        myMsgQueue->pushError(stCString("OpenGL 2.0 is required by iZ3D Output"));
+        myIsBroken = true;
+        return true;
     }
 
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
@@ -231,31 +232,43 @@ bool StOutIZ3D::create() {
 
     StHandle<StImageFile> aTableImg = StImageFile::create();
     if(aTableImg.isNull()) {
-        stError("IZ3D plugin should be linked with at least one image library!");
-        return false;
+        myMsgQueue->pushError(stCString("iZ3D output - internal error!"));
+        myIsBroken = true;
+        return true;
     }
     if(!aTableImg->load(aTableOldPath, StImageFile::ST_TYPE_PNG)) {
-        stError(aTableImg->getState());
-        return false;
+        myMsgQueue->pushError(StString("iZ3D output - critical error:\n") + aTableImg->getState());
+        myIsBroken = true;
+        return true;
     }
     myTexTableOld.setMinMagFilter(*myContext, GL_NEAREST); // we need not linear filtrating for lookup-table!
     if(!myTexTableOld.init(*myContext, aTableImg->getPlane())) {
-        stError("Fail to create lookup-table texture!");
-        return false;
+        myMsgQueue->pushError(stCString("iZ3D output - critical error:\nLookup-table initalization failed!"));
+        myIsBroken = true;
+        return true;
     }
     if(!aTableImg->load(aTableNewPath, StImageFile::ST_TYPE_PNG)) {
-        stError(aTableImg->getState());
-        return false;
+        myMsgQueue->pushError(StString("iZ3D output - critical error:\n") + aTableImg->getState());
+        myIsBroken = true;
+        return true;
     }
     myTexTableNew.setMinMagFilter(*myContext, GL_NEAREST); // we need not linear filtrating for lookup-table!
     if(!myTexTableNew.init(*myContext, aTableImg->getPlane())) {
-        stError("Fail to create lookup-table texture!");
-        return false;
+        myMsgQueue->pushError(stCString("iZ3D output - critical error:\nLookup-table initalization failed!"));
+        myIsBroken = true;
+        return true;
     }
     aTableImg.nullify();
 
     // INIT shaders
-    return myShaders.init(*myContext);
+    if(!myShaders.init(*myContext)) {
+        myMsgQueue->pushError(stCString("iZ3D output - critical error:\nShaders initialization failed!"));
+        myIsBroken = true;
+        return true;
+    }
+
+    myIsBroken = false;
+    return true;
 }
 
 void StOutIZ3D::processEvents() {
@@ -306,7 +319,7 @@ void StOutIZ3D::stglDraw() {
 
     // resize FBO
     if(!myFrBuffer->initLazy(*myContext, aVPMaster.width(), aVPMaster.height(), StWindow::hasDepthBuffer())) {
-        stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init Frame Buffer");
+        myMsgQueue->pushError(stCString("iZ3D output - critical error:\nFrame Buffer Object resize failed!"));
         myIsBroken = true;
         return;
     }

@@ -333,7 +333,7 @@ void StOutAnaglyph::stglDraw() {
 
     // resize FBO
     if(!myFrBuffer->initLazy(*myContext, aWinRect.width(), aWinRect.height(), StWindow::hasDepthBuffer())) {
-        stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init Frame Buffer");
+        myMsgQueue->pushError(stCString("Anaglyph output - critical error:\nFrame Buffer Object resize failed!"));
         myIsBroken = true;
         return;
     }
