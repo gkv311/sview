@@ -357,11 +357,12 @@ bool StOutDistorted::create() {
     // initialize GL context
     myContext = new StGLContext();
     if(!myContext->stglInit()) {
-        stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, OpenGL context is broken!\n(OpenGL library internal error?)");
+        myMsgQueue->pushError(stCString("Distorted output - critical error:\nOpenGL context is broken!\n(OpenGL library internal error?)"));
         return false;
     } else if(!myContext->isGlGreaterEqual(2, 0)) {
-        stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, OpenGL2.0+ not available!");
-        return false;
+        myMsgQueue->pushError(stCString("OpenGL 2.0 is required by Distorted Output"));
+        myIsBroken = true;
+        return true;
     }
 
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
@@ -370,8 +371,9 @@ bool StOutDistorted::create() {
 
     if(!myProgramFlat  ->init(*myContext)
     || !myProgramBarrel->init(*myContext)) {
-        stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init Shader");
-        return false;
+        myMsgQueue->pushError(stCString("Distorted output - critical error:\nShaders initialization failed!"));
+        myIsBroken = true;
+        return true;
     }
     myProgramBarrel->setupCoeff(*myContext, myBarrelCoef);
 
@@ -405,6 +407,7 @@ bool StOutDistorted::create() {
         myCursor->init(*myContext, aCursorImg->getPlane());
     }
     aCursorImg.nullify();
+    myIsBroken = false;
     return true;
 }
 
@@ -491,7 +494,7 @@ void StOutDistorted::stglDraw() {
         aFrSizeY = int(std::ceil(double(aFrSizeY) * 1.25) + 0.5);
     }
     if(!myFrBuffer->initLazy(*myContext, aFrSizeX, aFrSizeY, StWindow::hasDepthBuffer())) {
-        stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init Frame Buffer");
+        myMsgQueue->pushError(stCString("Distorted output - critical error:\nFrame Buffer Object resize failed!"));
         myIsBroken = true;
         return;
     }
