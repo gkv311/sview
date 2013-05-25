@@ -20,7 +20,7 @@
 #define __StWindow_h_
 
 #include <stTypes.h>
-#include <StStrings/StString.h>
+#include <StStrings/StMsgQueue.h>
 #include <StSlots/StSignal.h>
 #include <StSettings/StEnumParam.h>
 #include <StTemplates/StRect.h>
@@ -256,6 +256,10 @@ class StWindow {
      */
     ST_CPPEXPORT bool isMouseMoved() const;
 
+    ST_CPPEXPORT const StHandle<StMsgQueue>& getMessagesQueue() const;
+
+    ST_CPPEXPORT void setMessagesQueue(const StHandle<StMsgQueue>& theQueue);
+
         public: //! @name OpenGL routines
 
     /**
@@ -426,8 +430,12 @@ class StWindow {
 
         private: //! @name private fields
 
-    StWindowImpl* myWin;       //!< window implementation class - we hide implementation details since them too platform-specific
-    double        myTargetFps; //!< user data
+    StWindowImpl*        myWin;       //!< window implementation class - we hide implementation details since them too platform-specific
+    double               myTargetFps; //!< user data
+
+        protected:
+
+    StHandle<StMsgQueue> myMsgQueue;  //!< messages queue
 
         private: //! @name no copies, please
 

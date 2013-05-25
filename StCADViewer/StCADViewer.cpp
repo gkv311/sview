@@ -238,7 +238,6 @@ bool StCADViewer::resetDevice() {
     // be sure Render plugin process quit correctly
     myWindow->beforeClose();
 
-    myCADLoader->doRelease();
     releaseDevice();
     myWindow->close();
     myWindow.nullify();
@@ -306,8 +305,8 @@ bool StCADViewer::init() {
     // create working threads
     if(!isReset) {
         myCADLoader = new StCADLoader(StHandle<StLangMap>::downcast(myGUI->myLangMap));
+        myCADLoader->signals.onError = stSlot(myMsgQueue.access(), &StMsgQueue::doPushError);
     }
-    myCADLoader->signals.onError.connect(myGUI->myMsgStack, &StGLMsgStack::doPushMessage);
 
     // load settings
     mySettings->loadParam(ST_PARAM_NORMALS,   params.toShowNormals);

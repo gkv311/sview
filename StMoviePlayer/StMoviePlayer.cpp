@@ -231,7 +231,6 @@ bool StMoviePlayer::resetDevice() {
     // be sure Render plugin process quit correctly
     myWindow->beforeClose();
 
-    myVideo->doRelease();
     releaseDevice();
     myWindow->close();
     myWindow.nullify();
@@ -330,9 +329,9 @@ bool StMoviePlayer::init() {
     // create the video playback thread
     if(!isReset) {
         myVideo = new StVideo(params.alDevice->getTitle(), myLangMap, myPlayList, aTextureQueue, aSubQueue);
+        myVideo->signals.onError  = stSlot(myMsgQueue.access(), &StMsgQueue::doPushError);
+        myVideo->signals.onLoaded = stSlot(this,                &StMoviePlayer::doLoaded);
     }
-    myVideo->signals.onError.connect(myGUI->myMsgStack, &StGLMsgStack::doPushMessage);
-    myVideo->signals.onLoaded.connect(this, &StMoviePlayer::doLoaded);
     myPlayList->setShuffle(params.isShuffle->getValue());
 
     StString aRecentList;

@@ -110,6 +110,11 @@ class StApplication {
      */
     ST_CPPEXPORT bool isActive() const;
 
+    /**
+     * @return default messages queue
+     */
+    ST_CPPEXPORT const StHandle<StMsgQueue>& getMessagesQueue() const;
+
         protected:
 
     /**
@@ -206,6 +211,7 @@ class StApplication {
         protected: //! @name protected fields
 
     StArrayList< StHandle<StWindow> > myRenderers; //!< list of registered renderers
+    StHandle<StMsgQueue>  myMsgQueue;              //!< messages queue
     StHandle<StSettings>  myGlobalSettings;        //!< global settings shared between all applications
     StHandle<StWindow>    myWindow;                //!< active renderer and main application window
     StHandle<StWindow>    mySwitchTo;              //!< new renderer to switch to

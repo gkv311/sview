@@ -29,10 +29,6 @@ class StCADLoader {
 
     ST_LOCAL void mainLoop();
 
-    ST_LOCAL void doRelease() {
-        signals.onError.disconnect();
-    }
-
     ST_LOCAL void doLoadNext() {
         myEvLoadNext.set();
     }

@@ -141,10 +141,6 @@ class StVideo {
         pushPlayEvent(ST_PLAYEVENT_NEXT);
     }
 
-    ST_LOCAL void doRelease() {
-        signals.onError.disconnect();
-    }
-
     /**
      * Save current displayed frame.
      */

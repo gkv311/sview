@@ -9,9 +9,11 @@
 #include <StGLWidgets/StGLMsgStack.h>
 #include <StGLWidgets/StGLMessageBox.h>
 
-StGLMsgStack::StGLMsgStack(StGLWidget* theParent)
-: StGLWidget(theParent, 0, 0) {
-
+StGLMsgStack::StGLMsgStack(StGLWidget*                 theParent,
+                           const StHandle<StMsgQueue>& theMsgQueue)
+: StGLWidget(theParent, 0, 0),
+  myMsgQueue(theMsgQueue) {
+    //
 }
 
 StGLMsgStack::~StGLMsgStack() {
@@ -28,20 +30,10 @@ void StGLMsgStack::stglUpdate(const StPointD_t& thePointZo) {
     StGLWidget::stglUpdate(thePointZo);
 
     // check messages stack
-    if(myMsgMutex.tryLock()) {
-        for(size_t aMsgId = 0; aMsgId < myMsgList.size(); ++aMsgId) {
-            StGLMessageBox* aMsgBox = new StGLMessageBox(this, myMsgList[aMsgId]);
-            aMsgBox->addButton("Close");
-            aMsgBox->setVisibility(true, true);
-            aMsgBox->stglInit();
-        }
-        myMsgList.clear();
-        myMsgMutex.unlock();
+    while(myMsgQueue->pop(myMsgTmp)) {
+        StGLMessageBox* aMsgBox = new StGLMessageBox(this, *myMsgTmp.Text);
+        aMsgBox->addButton("Close");
+        aMsgBox->setVisibility(true, true);
+        aMsgBox->stglInit();
     }
-}
-
-void StGLMsgStack::doPushMessage(const StString& theMessageText) {
-    myMsgMutex.lock();
-    myMsgList.add(theMessageText);
-    myMsgMutex.unlock();
 }

@@ -33,6 +33,7 @@ static SV_THREAD_FUNCTION threadFunction(void* inStImageLoader) {
 }
 
 StImageLoader::StImageLoader(const StImageFile::ImageClass     theImageLib,
+                             const StHandle<StMsgQueue>&       theMsgQueue,
                              const StHandle<StLangMap>&        theLangMap,
                              const StHandle<StGLTextureQueue>& theTextureQueue)
 : myMimeList(ST_IMAGES_MIME_STRING),
@@ -41,6 +42,7 @@ StImageLoader::StImageLoader(const StImageFile::ImageClass     theImageLib,
   myLoadNextEvent(false),
   mySrcFormat(ST_V_SRC_AUTODETECT),
   myTextureQueue(theTextureQueue),
+  myMsgQueue(theMsgQueue),
   myImageLib(theImageLib),
   myToSave(StImageFile::ST_TYPE_NONE),
   myToQuit(false) {
@@ -68,7 +70,7 @@ static StString formatError(const StString& theFilePath, const StString& theImgL
 }
 
 void StImageLoader::processLoadFail(const StString& theErrorDesc) {
-    signals.onError(theErrorDesc);
+    myMsgQueue->pushError(theErrorDesc);
     myTextureQueue->setConnectedStream(false);
     myTextureQueue->clear();
 }
@@ -239,7 +241,7 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
     }
     StHandle<StImageFile> dataResult = StImageFile::create(myImageLib);
     if(dataResult.isNull()) {
-        signals.onError("No any image library was found!");
+        myMsgQueue->pushError("No any image library was found!");
         return false;
     }
 
@@ -296,7 +298,7 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
             if(stQuestion("File already exists!\nOverride the file?")) {
                 toSave = StFileNode::removeFile(fileToSave);
                 if(!toSave) {
-                    signals.onError("Could not remove the file!");
+                    myMsgQueue->pushError("Could not remove the file!");
                     return false;
                 }
             }
@@ -307,7 +309,7 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
             StString strSaveState;
             if(!dataResult->save(fileToSave, theImgType)) {
                 // TODO (Kirill Gavrilov#7)
-                signals.onError(dataResult->getState());
+                myMsgQueue->pushError(dataResult->getState());
                 return false;
             }
             if(!dataResult->getState().isEmpty()) {

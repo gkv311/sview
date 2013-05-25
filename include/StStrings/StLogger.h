@@ -117,7 +117,7 @@ class StLogger {
         private:
 
     StHandle<StMutexSlim> myMutex;      //!< mutex lock for thread-safety
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     StStringUtfWide       myFilePath;   //!< file to write into
 #else
     StString              myFilePath;   //!< file to write into

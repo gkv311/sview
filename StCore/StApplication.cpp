@@ -55,7 +55,8 @@ void StApplication::doChangeDevice(const int32_t theValue) {
 }
 
 StApplication::StApplication()
-: myWinParent((StNativeWin_t )NULL),
+: myMsgQueue(new StMsgQueue()),
+  myWinParent((StNativeWin_t )NULL),
   myRendId(ST_SETTING_AUTO_VALUE),
   myExitCode(0),
   myIsOpened(false),
@@ -65,7 +66,8 @@ StApplication::StApplication()
 
 StApplication::StApplication(const StNativeWin_t         theParentWin,
                              const StHandle<StOpenInfo>& theOpenInfo)
-: myWinParent(theParentWin),
+: myMsgQueue(new StMsgQueue()),
+  myWinParent(theParentWin),
   myRendId(ST_SETTING_AUTO_VALUE),
   myExitCode(0),
   myIsOpened(false),
@@ -147,6 +149,8 @@ bool StApplication::open() {
     } else {
         if(myRenderers.isEmpty()) {
             myWindow = new StWindow(myWinParent);
+            myWindow->setMessagesQueue(myMsgQueue);
+            myWindow->params.VSyncMode = params.VSyncMode;
         } else {
             bool isAuto = myRendId.isEqualsIgnoreCase(ST_SETTING_AUTO_VALUE);
             if(!isAuto) {
@@ -230,6 +234,7 @@ void StApplication::addRenderer(const StHandle<StWindow>& theRenderer) {
 
     StHandle<StWindow> aRenderer = theRenderer;
     aRenderer->params.VSyncMode = params.VSyncMode; // share VSync mode between renderers
+    aRenderer->setMessagesQueue(myMsgQueue);
     myRenderers.add(aRenderer);
     size_t aDevIter = myDevices.size();
     aRenderer->getDevices(myDevices);
@@ -253,6 +258,10 @@ const StHandle<StWindow>& StApplication::getMainWindow() const {
 bool StApplication::isActive() const {
     return !myWindow.isNull()
         && myWindow->isActive();
+}
+
+const StHandle<StMsgQueue>& StApplication::getMessagesQueue() const {
+    return myMsgQueue;
 }
 
 int StApplication::exec() {

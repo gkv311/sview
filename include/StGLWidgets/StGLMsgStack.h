@@ -9,30 +9,26 @@
 #ifndef __StGLMsgStack_h_
 #define __StGLMsgStack_h_
 
-#include <StThreads/StMutex.h>
-#include <StStrings/StString.h>
 #include <StGLWidgets/StGLWidget.h>
+#include <StStrings/StMsgQueue.h>
 
 /**
- * Widgets intended to display string messages.
+ * Widget intended to display text messages.
  */
 class StGLMsgStack : public StGLWidget {
 
         public:
 
-    ST_CPPEXPORT StGLMsgStack(StGLWidget* theParent);
+    ST_CPPEXPORT StGLMsgStack(StGLWidget*                 theParent,
+                              const StHandle<StMsgQueue>& theMsgQueue);
     ST_CPPEXPORT virtual ~StGLMsgStack();
     ST_CPPEXPORT virtual void stglResize(const StRectI_t& theWinRectPx);
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& thePointZo);
 
-        public: //!< callback Slots
-
-    ST_CPPEXPORT void doPushMessage(const StString& theMessageText);
-
         private:
 
-    StMutex               myMsgMutex; //!< mutex for thread-safe access
-    StArrayList<StString> myMsgList;  //!< messages list
+    StHandle<StMsgQueue> myMsgQueue; //!< messages queue
+    StMsg                myMsgTmp;   //!< temporary message object
 
 };
 

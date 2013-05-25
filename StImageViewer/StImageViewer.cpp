@@ -138,7 +138,6 @@ bool StImageViewer::resetDevice() {
     // be sure Render plugin process quit correctly
     myWindow->beforeClose();
 
-    myLoader->doRelease();
     releaseDevice();
     myWindow->close();
     myWindow.nullify();
@@ -224,10 +223,9 @@ bool StImageViewer::init() {
         StString imageLibString;
         mySettings->loadString(ST_SETTING_IMAGELIB, imageLibString);
         params.imageLib = StImageFile::imgLibFromString(imageLibString);
-        myLoader = new StImageLoader(params.imageLib, myLangMap, myGUI->stImageRegion->getTextureQueue());
+        myLoader = new StImageLoader(params.imageLib, myMsgQueue, myLangMap, myGUI->stImageRegion->getTextureQueue());
         myLoader->signals.onLoaded.connect(this, &StImageViewer::doLoaded);
     }
-    myLoader->signals.onError.connect(myGUI->myMsgStack, &StGLMsgStack::doPushMessage);
 
     if(isReset) {
         return true;

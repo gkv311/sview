@@ -211,6 +211,14 @@ bool StWindow::isMouseMoved() const {
     return myWin->myIsMouseMoved;
 }
 
+const StHandle<StMsgQueue>& StWindow::getMessagesQueue() const {
+    return myMsgQueue;
+}
+
+void StWindow::setMessagesQueue(const StHandle<StMsgQueue>& theQueue) {
+    myMsgQueue = theQueue;
+}
+
 const StKeysState& StWindow::getKeysState() const {
     return myWin->myKeysState;
 }

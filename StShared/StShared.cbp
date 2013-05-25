@@ -333,6 +333,7 @@
 		<Unit filename="StLogger.cpp" />
 		<Unit filename="StMinGen.cpp" />
 		<Unit filename="StMonitor.cpp" />
+		<Unit filename="StMsgQueue.cpp" />
 		<Unit filename="StMutex.cpp" />
 		<Unit filename="StPlayList.cpp" />
 		<Unit filename="StProcess.cpp" />
@@ -451,6 +452,7 @@
 		<Unit filename="../include/StStrings/StFormatTime.h" />
 		<Unit filename="../include/StStrings/StLangMap.h" />
 		<Unit filename="../include/StStrings/StLogger.h" />
+		<Unit filename="../include/StStrings/StMsgQueue.h" />
 		<Unit filename="../include/StStrings/StString.h" />
 		<Unit filename="../include/StStrings/StStringStream.h" />
 		<Unit filename="../include/StStrings/StStringUnicode.h" />

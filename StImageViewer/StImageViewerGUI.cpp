@@ -511,7 +511,7 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
     // create Main menu
     createMainMenu();
 
-    myMsgStack = new StGLMsgStack(this);
+    myMsgStack = new StGLMsgStack(this, myPlugin->getMessagesQueue());
     myMsgStack->setVisibility(true, true);
 
     if(myPlugin->params.ToShowFps->getValue()) {

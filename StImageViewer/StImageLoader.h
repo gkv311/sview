@@ -19,7 +19,7 @@
 #ifndef __StImageLoader_h_
 #define __StImageLoader_h_
 
-#include <StStrings/StString.h>
+#include <StStrings/StMsgQueue.h>
 #include <StFile/StMIMEList.h>
 #include <StGL/StPlayList.h>
 #include <StGLStereo/StGLTextureQueue.h>
@@ -51,6 +51,7 @@ class StImageLoader {
     }
 
     ST_LOCAL StImageLoader(const StImageFile::ImageClass     theImageLib,
+                           const StHandle<StMsgQueue>&       theMsgQueue,
                            const StHandle<StLangMap>&        theLangMap,
                            const StHandle<StGLTextureQueue>& theTextureQueue);
     ST_LOCAL ~StImageLoader();
@@ -60,10 +61,6 @@ class StImageLoader {
     }
 
     ST_LOCAL void mainLoop();
-
-    ST_LOCAL void doRelease() {
-        signals.onError.disconnect();
-    }
 
     ST_LOCAL void doLoadNext() {
         myLoadNextEvent.set();
@@ -108,11 +105,6 @@ class StImageLoader {
          */
         StSignal<void ()> onLoaded;
 
-        /**
-         * Emit callback Slot on image load error.
-         * @param theUserData (const StString& ) - error description.
-         */
-        StSignal<void (const StString& )> onError;
     } signals;
 
         private:
@@ -142,6 +134,7 @@ class StImageLoader {
     StFormatEnum               mySrcFormat;     //!< target source format (auto-detect by default)
     StHandle<StGLTextureQueue> myTextureQueue;  //!< decoded frames queue
     StHandle<StImageInfo>      myImgInfo;       //!< info about currently loaded image
+    StHandle<StMsgQueue>       myMsgQueue;      //!< messages queue
 
     volatile StImageFile::ImageClass myImageLib;
     volatile StImageFile::ImageType  myToSave;

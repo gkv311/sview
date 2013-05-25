@@ -130,7 +130,7 @@ StCADViewerGUI::StCADViewerGUI(StCADViewer* thePlugin)
     // create Main menu
     createMainMenu();
 
-    myMsgStack = new StGLMsgStack(this);
+    myMsgStack = new StGLMsgStack(this, myPlugin->getMessagesQueue());
     myMsgStack->setVisibility(true, true);
 }
 
