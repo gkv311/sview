@@ -53,7 +53,8 @@ StHandle<StFileNode> StFileNode::detach() const {
 
 bool StFileNode::isFileExists(const StCString& thePath) {
 #ifdef _WIN32
-    const StStringUtfWide aPath(thePath);
+    StStringUtfWide aPath;
+    aPath.fromUnicode(thePath);
     struct __stat64 aStatBuffer;
     return _wstat64(aPath.toCString(), &aStatBuffer) == 0;
 #elif (defined(__APPLE__))
@@ -67,7 +68,8 @@ bool StFileNode::isFileExists(const StCString& thePath) {
 
 bool StFileNode::removeFile(const StCString& thePath) {
 #ifdef _WIN32
-    const StStringUtfWide aPath(thePath);
+    StStringUtfWide aPath;
+    aPath.fromUnicode(thePath);
     return DeleteFileW(aPath.toCString()) != 0;
 #else
     return ::remove(thePath.toCString()) == 0;
@@ -87,8 +89,8 @@ bool StFileNode::removeFile(const StCString& thePath) {
 bool StFileNode::moveFile(const StCString& thePathFrom,
                           const StCString& thePathTo) {
 #ifdef _WIN32
-    const StStringUtfWide aPathFrom(thePathFrom);
-    const StStringUtfWide aPathTo  (thePathTo);
+    StStringUtfWide aPathFrom; aPathFrom.fromUnicode(thePathFrom);
+    StStringUtfWide aPathTo;   aPathTo  .fromUnicode(thePathTo);
     return MoveFileW(aPathFrom.toCString(),
                      aPathTo.toCString()) != 0;
 #else

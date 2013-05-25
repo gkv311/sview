@@ -38,7 +38,8 @@ bool StRawFile::openFile(StRawFile::ReadWrite theFlags,
 
     StString aFilePath = getPath();
 #ifdef _WIN32
-    const StStringUtfWide aPathWide(aFilePath);
+    StStringUtfWide aPathWide;
+    aPathWide.fromUnicode(aFilePath);
     myFileHandle = _wfopen(aPathWide.toCString(), (theFlags == StRawFile::WRITE) ? L"wb" : L"rb");
 #else
     myFileHandle =   fopen(aFilePath.toCString(), (theFlags == StRawFile::WRITE) ?  "wb" :  "rb");

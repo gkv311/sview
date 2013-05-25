@@ -42,7 +42,8 @@ bool StFolder::isFolder() const {
 
 bool StFolder::isFolder(const StCString& thePath) {
 #ifdef _WIN32
-    const StStringUtfWide aPath(thePath);
+    StStringUtfWide aPath;
+    aPath.fromUnicode(thePath);
     DWORD aFileAttributes = GetFileAttributesW(aPath.toCString());
     if(aFileAttributes == INVALID_FILE_ATTRIBUTES) {
         return false;

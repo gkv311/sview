@@ -274,6 +274,11 @@ const StStringUnicode<Type>& StStringUnicode<Type>::operator=(const StStringUnic
 }
 
 template<typename Type> template<typename TypeFrom>
+void StStringUnicode<Type>::fromUnicode(const StConstStringUnicode<TypeFrom>& theString) {
+    fromUnicode(theString.toCString());
+}
+
+template<typename Type> template<typename TypeFrom>
 void StStringUnicode<Type>::fromUnicode(const TypeFrom* theStringUtf,
                                         const size_t    theLength) {
     const Type* anOldBuffer = this->String; // necessary in case of self-copying

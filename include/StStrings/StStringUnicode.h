@@ -224,6 +224,13 @@ class StStringUnicode : public StConstStringUnicode<Type> {
                      const size_t    theLength = size_t(-1));
 
     /**
+     * Copy from NULL-terminated Unicode string.
+     * @param theString NULL-terminated Unicode string
+     */
+    template <typename TypeFrom>
+    void fromUnicode(const StConstStringUnicode<TypeFrom>& theString);
+
+    /**
      * Copy from NULL-terminated multibyte string in system locale.
      * You should avoid this function unless extreme necessity.
      * @param theStringUtf NULL-terminated multibyte string
