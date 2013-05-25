@@ -126,8 +126,10 @@ class StActiveXCtrl : public COleControl {
     CString                 myUrlFull;        //!< url to full-size image
     CString                 myUrlPreview;     //!< url to preview   image
     CString                 myMimeType;       //!< MIME type
+    CBrush                  myBackBrush;      //!< brush to fill background
     bool                    myHasPreview;     //!< has dedicated URL for smaller preview image
     bool                    myToBlockMsg;     //!< MFC stuff
+    volatile bool           myIsActive;       //!< flag to indicate that StImageViewer is active
     volatile bool           myToQuit;         //!< flag to perform termination
 
 };

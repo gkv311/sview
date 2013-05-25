@@ -43,10 +43,18 @@ class StBrowserPlugin : public NSPluginBase {
 #if(defined(__linux__) || defined(__linux))
     ST_LOCAL virtual NPError getValue(NPPVariable , void* );
 #endif
+    //ST_LOCAL virtual uint16_t handleEvent(void* theEvent);
 
     // locals
     ST_LOCAL const char* getVersion();
     ST_LOCAL void stWindowLoop();
+
+#ifdef _WIN32
+    LRESULT stWndProc(HWND   theWnd,
+                      UINT   theMsg,
+                      WPARAM theParamW,
+                      LPARAM theParamL);
+#endif
 
         private:
 
@@ -57,6 +65,10 @@ class StBrowserPlugin : public NSPluginBase {
 
     NPP                     nppInstance;
     StNativeWin_t           myParentWin;      //!< handle to native window for this ActiveX component
+#ifdef _WIN32
+    WNDPROC                 myProcOrig;       //!< original window procedure
+    HBRUSH                  myBackBrush;      //!< brush to clear background
+#endif
     StHandle<StThread>      myThread;         //!< dedicated thread for this plugin instance
     StHandle<StApplication> myStApp;          //!< StCore application instance worked in dedicated thread
     StMutex                 myMutex;          //!< mutex for thread-safety
@@ -68,6 +80,7 @@ class StBrowserPlugin : public NSPluginBase {
     StString                myFullPath;       //!< path to full-size image in local cache
     StArrayList<StString>   myTmpFiles;
     bool                    myToLoadFull;     //!< flag indicates that plugin was switched into fullscreen and full-size image required
+    volatile bool           myIsActive;       //!< flag to indicate that StImageViewer is active
     volatile bool           myToQuit;         //!< flag to perform termination
 
 };

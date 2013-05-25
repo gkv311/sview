@@ -53,6 +53,7 @@ StActiveXCtrl::StActiveXCtrl()
   myOpenEvent(false),
   myHasPreview(false),
   myToBlockMsg(false),
+  myIsActive(false),
   myToQuit(false) {
     InitializeIIDs(&IID_DStActiveXPlugin, &IID_DStActiveXPluginEvents);
 }
@@ -124,9 +125,11 @@ void StActiveXCtrl::stWindowLoop() {
     }
 
     bool isFullscreen = false;
+    myIsActive = true;
     for(;;) {
         if(myStApp->closingDown()) {
             myStApp.nullify();
+            myIsActive = false;
             return;
         }
 
@@ -161,6 +164,7 @@ static SV_THREAD_FUNCTION stThreadFunction(void* theParam) {
 }
 
 int StActiveXCtrl::OnCreate(LPCREATESTRUCT theCreateStruct) {
+    myBackBrush.CreateSolidBrush(RGB(0, 0, 0));
     if(COleControl::OnCreate(theCreateStruct) == -1) {
         return -1;
     }
@@ -249,6 +253,16 @@ LRESULT StActiveXCtrl::WindowProc(UINT theMsg, WPARAM theParamW, LPARAM theParam
     // Standard implementation of COleControl::WindowProc does not find handlers for popup menu items created
     // by plugin and disables them
     if(theMsg == WM_INITMENUPOPUP) {
+        return 0;
+    } else if(theMsg == WM_ERASEBKGND) {
+        return 1;
+    } else if(theMsg == WM_PAINT) {
+        if(!myIsActive) {
+            PAINTSTRUCT aPaintStruct;
+            CDC* aDevCtx = BeginPaint(&aPaintStruct);
+            FillRect(aDevCtx->GetSafeHdc(), &aPaintStruct.rcPaint, myBackBrush);
+            EndPaint(&aPaintStruct);
+        }
         return 0;
     }
 

@@ -129,7 +129,12 @@ NPError StBrowserPlugin::getValue(NPPVariable variable, void* value) {
 StBrowserPlugin::StBrowserPlugin(NSPluginCreateData* theCreateDataStruct)
 : nppInstance(theCreateDataStruct->instance),
   myParentWin((StNativeWin_t )NULL),
+#ifdef _WIN32
+  myProcOrig(NULL),
+  myBackBrush(CreateSolidBrush(RGB(0, 0, 0))),
+#endif
   myToLoadFull(false),
+  myIsActive(false),
   myToQuit(false) {
     StArgumentsMap aDrawerArgs;
     for(int aParamId = 0; aParamId < theCreateDataStruct->argc; ++aParamId) {
@@ -179,11 +184,49 @@ StBrowserPlugin::~StBrowserPlugin() {
     for(size_t anIter = 0; anIter < myTmpFiles.size(); ++anIter) {
         StFileNode::removeFile(myTmpFiles.getValue(anIter));
     }
+
+#ifdef _WIN32
+    DeleteObject(myBackBrush);
+    myBackBrush = NULL;
+#endif
 }
 
 namespace {
     static StAtomic<int32_t> ST_PLUGIN_QUEUE(0);
 };
+
+#ifdef _WIN32
+static LRESULT CALLBACK stWndProcWrapper(HWND   theWnd,
+                                         UINT   theMsg,
+                                         WPARAM theParamW,
+                                         LPARAM theParamL) {
+    StBrowserPlugin* aThis = (StBrowserPlugin* )GetWindowLongPtr(theWnd, GWLP_USERDATA);
+    if(aThis != NULL) {
+        return aThis->stWndProc(theWnd, theMsg, theParamW, theParamL);
+    } else {
+        return DefWindowProcW(theWnd, theMsg, theParamW, theParamL);
+    }
+}
+
+LRESULT StBrowserPlugin::stWndProc(HWND   theWnd,
+                                   UINT   theMsg,
+                                   WPARAM theParamW,
+                                   LPARAM theParamL) {
+    if(theMsg == WM_ERASEBKGND) {
+        return 1;
+    } else if(theMsg == WM_PAINT
+           && !myIsActive) {
+        RECT aRect;
+        GetClientRect(theWnd, &aRect);
+        HDC aDevCtx = GetDC(theWnd);
+        FillRect(aDevCtx, &aRect, myBackBrush);
+        ReleaseDC(theWnd, aDevCtx);
+        return 0;
+    }
+
+    return CallWindowProcW(myProcOrig, theWnd, theMsg, theParamW, theParamL);
+}
+#endif
 
 void StBrowserPlugin::stWindowLoop() {
     // do not load plugin until it is placed on screen
@@ -223,9 +266,11 @@ void StBrowserPlugin::stWindowLoop() {
     bool isFileOpened = false;
     bool isFullscreen = false;
     bool isFullLoaded = false;
+    myIsActive = true;
     for(;;) {
         if(myStApp->closingDown()) {
             myStApp.nullify();
+            myIsActive = false;
             return;
         }
 
@@ -283,12 +328,27 @@ static SV_THREAD_FUNCTION stThreadFunction(void* theParam) {
     return SV_THREAD_RETURN 0;
 }
 
-bool StBrowserPlugin::init(NPWindow* npWindow) {
-    if(npWindow == NULL || npWindow->window == NULL) {
+bool StBrowserPlugin::init(NPWindow* theWindow) {
+    if(theWindow == NULL || theWindow->window == NULL) {
+        if(myProcOrig  != NULL
+        && myParentWin != NULL) {
+        #ifdef _WIN32
+            SetWindowLongPtr(myParentWin, GWLP_WNDPROC,  (LONG_PTR )myProcOrig);
+            SetWindowLongPtr(myParentWin, GWLP_USERDATA, NULL);
+            myProcOrig = NULL;
+        #endif
+        }
         return false;
     }
 
-    myParentWin = (StNativeWin_t )npWindow->window;
+    myParentWin = (StNativeWin_t )theWindow->window;
+#ifdef _WIN32
+    if(GetWindowLongPtr(myParentWin, GWLP_USERDATA) == NULL) {
+        myProcOrig = (WNDPROC )GetWindowLongPtr(myParentWin, GWLP_WNDPROC);
+        SetWindowLongPtr(myParentWin, GWLP_WNDPROC,  (LONG_PTR )stWndProcWrapper);
+        SetWindowLongPtr(myParentWin, GWLP_USERDATA, (LONG_PTR )this);
+    }
+#endif
     myThread = new StThread(stThreadFunction, this); // starts out plugin main loop in another thread
 
     if(!myPreviewUrl.isEmpty() && NPNFuncs.geturl != NULL) {
