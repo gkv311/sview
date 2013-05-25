@@ -18,16 +18,32 @@ StMsgQueue::~StMsgQueue() {
 
 void StMsgQueue::popAll() {
     myMutex.lock();
+    StString aText;
+    bool hasErrors = false;
+    bool isFirst   = true;
     while(!myQueue.empty()) {
         const StMsg& aMsg = myQueue.front();
-        myQueue.pop_front();
-        if(aMsg.Type == StLogger::ST_ERROR) {
-            stError(*aMsg.Text);
-        } else {
-            stInfo(*aMsg.Text);
+        if(!isFirst) {
+            aText += "\n\n";
         }
+        aText += *aMsg.Text;
+        isFirst = false;
+
+        if(aMsg.Type == StLogger::ST_ERROR) {
+            hasErrors = true;
+        }
+        myQueue.pop_front();
     }
     myMutex.unlock();
+    if(aText.isEmpty()) {
+        return;
+    }
+
+    if(hasErrors) {
+        stError(aText);
+    } else {
+        stInfo(aText);
+    }
 }
 
 bool StMsgQueue::pop(StMsg& theMessage) {
