@@ -29,7 +29,8 @@ StGLPlayList::StGLPlayList(StGLWidget*                 theParent,
 }
 
 StGLPlayList::~StGLPlayList() {
-    //
+    myList->signals.onPlaylistChange  -= stSlot(this, &StGLPlayList::doResetList);
+    myList->signals.onTitleChange     -= stSlot(this, &StGLPlayList::doChangeItem);
 }
 
 void StGLPlayList::doItemClick(const size_t theItem) {
