@@ -430,10 +430,10 @@ bool StOutPageFlip::create() {
     // initialize GL context
     myContext = new StGLContext();
     if(!myContext->stglInit()) {
-        stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, OpenGL context is broken!\n(OpenGL library internal error?)");
+        myMsgQueue->pushError(stCString("PageFlip output - critical error:\nOpenGL context is broken!\n(OpenGL library internal error?)"));
         return false;
     } else if(!myContext->isGlGreaterEqual(2, 0)) {
-        stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, OpenGL2.0+ not available!");
+        myMsgQueue->pushError(stCString("OpenGL 2.0 is required by PageFlip Output"));
         return false;
     }
 
