@@ -67,8 +67,12 @@ class StGLShare {
     ~StGLShare() {
         if(myEntity->myCounter.decrement() == 0) {
             Type* aPtr = (Type* )myEntity->myPointer;
-            aPtr->release(*myEntity->myCtx);
-            delete aPtr;
+            if(aPtr != NULL) {
+                if(!myEntity->myCtx.isNull()) {
+                    aPtr->release(*myEntity->myCtx);
+                }
+                delete aPtr;
+            }
             myEntity->myPointer = NULL;
             myEntity->myCtx.nullify();
         }
