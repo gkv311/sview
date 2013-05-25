@@ -20,7 +20,7 @@ class StFolder : public StFileNode {
      */
     ST_CPPEXPORT virtual bool isFolder() const;
 
-    ST_CPPEXPORT static bool isFolder(const StString& thePath);
+    ST_CPPEXPORT static bool isFolder(const StCString& thePath);
 
     /**
      * Empty constructor.
@@ -30,7 +30,8 @@ class StFolder : public StFileNode {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StFolder(const StString& theFolderPath, StNode* theParentNode = NULL);
+    ST_CPPEXPORT StFolder(const StCString& theFolderPath,
+                          StNode*          theParentNode = NULL);
 
     /**
      * Destructor.

@@ -22,13 +22,13 @@
 #include <sys/stat.h>
 
 StFileNode::StFileNode()
-: StNode("", NULL, NODE_TYPE_FILE) {
+: StNode(stCString(""), NULL, NODE_TYPE_FILE) {
     //
 }
 
-StFileNode::StFileNode(const StString& theSubPath,
-                       StNode*         theParentNode,
-                       int             theNodeType)
+StFileNode::StFileNode(const StCString& theSubPath,
+                       StNode*          theParentNode,
+                       int              theNodeType)
 : StNode(theSubPath, theParentNode, theNodeType) {
     //
 }
@@ -51,10 +51,11 @@ StHandle<StFileNode> StFileNode::detach() const {
     return aCopy;
 }
 
-bool StFileNode::isFileExists(const StString& thePath) {
-#if(defined(_WIN32) || defined(__WIN32__))
+bool StFileNode::isFileExists(const StCString& thePath) {
+#ifdef _WIN32
+    const StStringUtfWide aPath(thePath);
     struct __stat64 aStatBuffer;
-    return _wstat64(thePath.toUtfWide().toCString(), &aStatBuffer) == 0;
+    return _wstat64(aPath.toCString(), &aStatBuffer) == 0;
 #elif (defined(__APPLE__))
     struct stat aStatBuffer;
     return stat(thePath.toCString(), &aStatBuffer) == 0;
@@ -64,9 +65,10 @@ bool StFileNode::isFileExists(const StString& thePath) {
 #endif
 }
 
-bool StFileNode::removeFile(const StString& thePath) {
-#if(defined(_WIN32) || defined(__WIN32__))
-    return DeleteFileW(thePath.toUtfWide().toCString()) != 0;
+bool StFileNode::removeFile(const StCString& thePath) {
+#ifdef _WIN32
+    const StStringUtfWide aPath(thePath);
+    return DeleteFileW(aPath.toCString()) != 0;
 #else
     return ::remove(thePath.toCString()) == 0;
 #endif
@@ -82,11 +84,13 @@ bool StFileNode::removeFile(const StString& thePath) {
 #endif
 }*/
 
-bool StFileNode::moveFile(const StString& thePathFrom,
-                          const StString& thePathTo) {
-#if(defined(_WIN32) || defined(__WIN32__))
-    return MoveFileW(thePathFrom.toUtfWide().toCString(),
-                     thePathTo.toUtfWide().toCString()) != 0;
+bool StFileNode::moveFile(const StCString& thePathFrom,
+                          const StCString& thePathTo) {
+#ifdef _WIN32
+    const StStringUtfWide aPathFrom(thePathFrom);
+    const StStringUtfWide aPathTo  (thePathTo);
+    return MoveFileW(aPathFrom.toCString(),
+                     aPathTo.toCString()) != 0;
 #else
     return ::rename(thePathFrom.toCString(),
                     thePathTo.toCString()) == 0;
@@ -94,7 +98,7 @@ bool StFileNode::moveFile(const StString& thePathFrom,
 }
 
 StString StFileNode::getCompatibleName(const StString& theFileName) {
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     /// TODO (Kirill Gavrilov#1) if result is empty - not a filesystem element or no DOS-names enabled
     stUtfWide_t aShortNameWide[MAX_PATH];
     GetShortPathName(theFileName.toUtfWide().toCString(), aShortNameWide, MAX_PATH);
@@ -151,7 +155,7 @@ void StFileNode::getFolderAndFile(const StString& theFilePath,
     }
 }
 
-bool StFileNode::isRemoteProtocolPath(const StString& thePath) {
+bool StFileNode::isRemoteProtocolPath(const StCString& thePath) {
     StUtf8Iter anIter = thePath.iterator();
     if(*anIter == stUtf32_t(':')) {
         return false;

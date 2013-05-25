@@ -25,8 +25,10 @@ class StNode : public StArrayList<StNode*> {
 
         public:
 
-    StNode(const StString& subPath = StString(), StNode* parentNode = NULL, int nodeType = 0)
-        : StArrayList<StNode*>(size_t(1)), parent(parentNode), subPath(subPath), nodeType(nodeType) {
+    StNode(const StCString& theSubPath  = stCString(""),
+           StNode*          theParent   = NULL,
+           int              theNodeType = 0)
+    : StArrayList<StNode*>(size_t(1)), parent(theParent), subPath(theSubPath), nodeType(theNodeType) {
         //
     }
 

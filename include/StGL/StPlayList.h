@@ -261,7 +261,8 @@ class StPlayList {
      * If given path is a file than playlist will be fill with folder content
      * and playlist position will be set to this file.
      */
-    ST_CPPEXPORT void open(const StString& thePath);
+    ST_CPPEXPORT void open(const StCString& thePath,
+                           const StCString& theItem = stCString(""));
 
     /**
      * Fill list with playlist items (only titles).
@@ -351,8 +352,8 @@ class StPlayList {
     /**
      * Add file to list of recent files.
      */
-    ST_LOCAL void addRecentFile(const StFileNode& theFile,
-                                const bool        theToFront = true);
+    ST_LOCAL const StHandle<StFileNode>& addRecentFile(const StFileNode& theFile,
+                                                       const bool        theToFront = true);
 
     /**
      * M3U parsing stuff.
@@ -378,6 +379,7 @@ class StPlayList {
     bool                    myIsShuffle;
     bool                    myIsLoopFlag;
 
+    StHandle<StFileNode>    myPlsFile;       //!< current playlist file (if any)
     std::deque< StHandle<StFileNode> > myRecent; //!< list of recently opened files
     size_t                  myRecentLimit;   //!< the maximum size of list with recently opened files
     mutable bool            myIsNewRecent;   //!< flag indicates modified state of recent files list

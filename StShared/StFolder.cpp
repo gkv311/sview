@@ -22,11 +22,12 @@ namespace {
 };
 
 StFolder::StFolder()
-: StFileNode("", NULL, NODE_TYPE_FOLDER) {
+: StFileNode(stCString(""), NULL, NODE_TYPE_FOLDER) {
     //
 }
 
-StFolder::StFolder(const StString& theFolderPath, StNode* theParentNode)
+StFolder::StFolder(const StCString& theFolderPath,
+                   StNode*          theParentNode)
 : StFileNode(theFolderPath, theParentNode, NODE_TYPE_FOLDER) {
     //
 }
@@ -39,9 +40,10 @@ bool StFolder::isFolder() const {
     return true;
 }
 
-bool StFolder::isFolder(const StString& thePath) {
+bool StFolder::isFolder(const StCString& thePath) {
 #ifdef _WIN32
-    DWORD aFileAttributes = GetFileAttributesW(thePath.toUtfWide().toCString());
+    const StStringUtfWide aPath(thePath);
+    DWORD aFileAttributes = GetFileAttributesW(aPath.toCString());
     if(aFileAttributes == INVALID_FILE_ATTRIBUTES) {
         return false;
     }

@@ -13,9 +13,9 @@
 #include <iostream>
 #include <fstream>
 
-StRawFile::StRawFile(const StString& theFilePath,
-                     StNode* theParentNode)
-: StFileNode(theFilePath, theParentNode),
+StRawFile::StRawFile(const StCString& theFilePath,
+                     StNode*          theParent)
+: StFileNode(theFilePath, theParent),
   myFileHandle(NULL),
   myBuffer(NULL),
   myBuffSize(0) {
@@ -28,7 +28,7 @@ StRawFile::~StRawFile() {
 }
 
 bool StRawFile::openFile(StRawFile::ReadWrite theFlags,
-                         const StString& theFilePath) {
+                         const StCString&     theFilePath) {
     // close previously opened file handle if any
     closeFile();
 
@@ -37,10 +37,11 @@ bool StRawFile::openFile(StRawFile::ReadWrite theFlags,
     }
 
     StString aFilePath = getPath();
-#if (defined(_WIN32) || defined(__WIN32__))
-    myFileHandle = _wfopen(aFilePath.toUtfWide().toCString(), (theFlags == StRawFile::WRITE) ? L"wb" : L"rb");
+#ifdef _WIN32
+    const StStringUtfWide aPathWide(aFilePath);
+    myFileHandle = _wfopen(aPathWide.toCString(), (theFlags == StRawFile::WRITE) ? L"wb" : L"rb");
 #else
-    myFileHandle =   fopen(aFilePath.toCString(),             (theFlags == StRawFile::WRITE) ?  "wb" :  "rb");
+    myFileHandle =   fopen(aFilePath.toCString(), (theFlags == StRawFile::WRITE) ?  "wb" :  "rb");
 #endif
     return myFileHandle != NULL;
 }
@@ -69,7 +70,7 @@ void StRawFile::freeBuffer() {
     myBuffSize = 0;
 }
 
-bool StRawFile::readFile(const StString& theFilePath) {
+bool StRawFile::readFile(const StCString& theFilePath) {
     freeBuffer();
 
     if(!openFile(StRawFile::READ, theFilePath)) {
@@ -96,7 +97,7 @@ bool StRawFile::readFile(const StString& theFilePath) {
     return true;
 }
 
-bool StRawFile::saveFile(const StString& theFilePath) {
+bool StRawFile::saveFile(const StCString& theFilePath) {
     if(!openFile(StRawFile::WRITE, theFilePath)) {
         return false;
     }
@@ -112,7 +113,7 @@ size_t StRawFile::writeFile(size_t theBytes) {
     return fwrite(myBuffer, 1, (theBytes == 0 && theBytes < myBuffSize) ? myBuffSize : theBytes, myFileHandle);
 }
 
-StString StRawFile::readTextFile(const StString& theFilePath) {
+StString StRawFile::readTextFile(const StCString& theFilePath) {
     StRawFile stTextFile(theFilePath);
     if(stTextFile.readFile()) {
         return stTextFile.getAsANSIText();

@@ -138,22 +138,22 @@ static StString GetFontsRoot() {
 #ifdef _WIN32
     return StProcess::getWindowsFolder() + "fonts\\";
 #elif (defined(__APPLE__))
-    //return "/System/Library/Fonts/";
-    return "/Library/Fonts/";
-    //return "/usr/X11/lib/X11/fonts/TTF/";
+    //return stCString("/System/Library/Fonts/");
+    return stCString("/Library/Fonts/");
+    //return stCString("/usr/X11/lib/X11/fonts/TTF/");
 #elif (defined(__linux__) || defined(__linux))
-    if(StFileNode::isFileExists("/usr/share/fonts/truetype/ttf-dejavu")) {
+    if(StFileNode::isFileExists(stCString("/usr/share/fonts/truetype/ttf-dejavu"))) {
         // Ubuntu
-        return "/usr/share/fonts/truetype/ttf-dejavu/";
-    } else if(StFileNode::isFileExists("/usr/share/fonts/dejavu")) {
+        return stCString("/usr/share/fonts/truetype/ttf-dejavu/");
+    } else if(StFileNode::isFileExists(stCString("/usr/share/fonts/dejavu"))) {
         // Gentoo
-        return "/usr/share/fonts/dejavu/";
-    } else if(StFileNode::isFileExists("/usr/share/fonts/TTF/dejavu")) {
+        return stCString("/usr/share/fonts/dejavu/");
+    } else if(StFileNode::isFileExists(stCString("/usr/share/fonts/TTF/dejavu"))) {
         // Mandriva
-        return "/usr/share/fonts/TTF/dejavu/";
+        return stCString("/usr/share/fonts/TTF/dejavu/");
     }
     // unknown
-    return "/usr/share/fonts/";
+    return stCString("/usr/share/fonts/");
 #endif
 }
 

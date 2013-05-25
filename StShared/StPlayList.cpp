@@ -195,6 +195,16 @@ void StPlayList::setShuffle(bool theShuffle) {
 
 void StPlayList::clear() {
     StMutexAuto anAutoLock(myMutex);
+    if(!myPlsFile.isNull()
+    && myCurrent != NULL) {
+        if(myPlsFile->isEmpty()) {
+            myPlsFile->add(new StFileNode(myCurrent->getPath(), myPlsFile.access()));
+        } else {
+            myPlsFile->changeValue(0)->setSubPath(myCurrent->getPath());
+        }
+    }
+    myPlsFile.nullify();
+
     // destroy double-linked list content
     for(StPlayItem *anItem(myFirst), *anItemToDel(NULL); anItem != NULL;) {
         anItemToDel = anItem;
@@ -598,7 +608,7 @@ char* StPlayList::parseM3UIter(char*     theIter,
     }
 
     if(*theIter != '#') {
-        StFileNode* aFileNode = new StFileNode(theIter, &myFoldersRoot);
+        StFileNode* aFileNode = new StFileNode(StString(theIter), &myFoldersRoot);
         myFoldersRoot.add(aFileNode);
 
         StPlayItem* anItem = new StPlayItem(aFileNode, myDefStParams);
@@ -660,12 +670,17 @@ void StPlayList::openRecent(const size_t theItemId) {
         return;
     }
 
-    const StHandle<StFileNode>& aFile = myRecent[theItemId];
+    const StHandle<StFileNode> aFile = myRecent[theItemId];
     if(aFile->size() == 2) {
+        // stereo pair from two files
         clear();
         addOneFile(aFile->getValue(0)->getPath(),
                    aFile->getValue(1)->getPath());
+    } else if(aFile->size() == 1) {
+        // playlist
+        open(aFile->getPath(), aFile->getValue(0)->getSubPath());
     } else {
+        // single file
         open(aFile->getPath());
     }
 }
@@ -681,7 +696,7 @@ void StPlayList::getRecentList(StArrayList<StString>& theList) const {
     StMutexAuto anAutoLock(myMutex);
     for(size_t anIter = 0; anIter < myRecent.size(); ++anIter) {
         const StHandle<StFileNode>& aFile = myRecent[anIter];
-        const StString aPath = aFile->isEmpty() ? aFile->getPath() : aFile->getValue(0)->getPath();
+        const StString aPath = aFile->size() == 2 ? aFile->getValue(0)->getPath() : aFile->getPath();
         StString aTitleString;
         StString aFolder;
         StFileNode::getFolderAndFile(aPath, aFolder, aTitleString);
@@ -689,20 +704,21 @@ void StPlayList::getRecentList(StArrayList<StString>& theList) const {
     }
 }
 
-void StPlayList::addRecentFile(const StFileNode& theFile,
-                               const bool        theToFront) {
+const StHandle<StFileNode>& StPlayList::addRecentFile(const StFileNode& theFile,
+                                                      const bool        theToFront) {
     // remove duplicates
     for(size_t anIter = 0; anIter < myRecent.size(); ++anIter) {
         const StHandle<StFileNode>& aFile = myRecent[anIter];
-        if(aFile->size() != theFile.size()) {
-            continue;
-        }
         bool areSame = true;
-        for(size_t aChildIter = 0; aChildIter < aFile->size(); ++aChildIter) {
-            areSame = areSame && (aFile->getValue(aChildIter)->getPath() == theFile.getValue(aChildIter)->getPath());
-        }
-        if(aFile->isEmpty()) {
+        if(aFile->size() < 2) {
             areSame = (aFile->getPath() == theFile.getPath());
+        } else {
+            if(aFile->size() != theFile.size()) {
+                continue;
+            }
+            for(size_t aChildIter = 0; aChildIter < aFile->size(); ++aChildIter) {
+                areSame = areSame && (aFile->getValue(aChildIter)->getPath() == theFile.getValue(aChildIter)->getPath());
+            }
         }
         if(areSame) {
             myRecent.erase(myRecent.begin() + anIter);
@@ -719,6 +735,7 @@ void StPlayList::addRecentFile(const StFileNode& theFile,
         myRecent.push_back(theFile.detach());
     }
     myIsNewRecent = true;
+    return theToFront ? myRecent.front() : myRecent.back();
 }
 
 StString StPlayList::dumpRecentList() const {
@@ -726,9 +743,20 @@ StString StPlayList::dumpRecentList() const {
     StArgumentsMap aMap;
     for(size_t anIter = 0; anIter < myRecent.size(); ++anIter) {
         const StHandle<StFileNode>& aFile = myRecent[anIter];
-        if(aFile->isEmpty()) {
-            StArgument anArgFile (StString("file")  + anIter, aFile->getPath());
+        if(aFile == myPlsFile
+        && myCurrent != NULL) {
+            StArgument anArgFile(StString("file")  + anIter, aFile->getPath());
+            StArgument anArgPos (StString("pos")   + anIter, myCurrent->getPath());
             aMap.add(anArgFile);
+            aMap.add(anArgPos);
+        } else if(aFile->isEmpty()) {
+            StArgument anArgFile(StString("file")  + anIter, aFile->getPath());
+            aMap.add(anArgFile);
+        } else if(aFile->size() == 1) {
+            StArgument anArgFile(StString("file")  + anIter, aFile->getPath());
+            StArgument anArgPos (StString("pos")   + anIter, aFile->getValue(0)->getSubPath());
+            aMap.add(anArgFile);
+            aMap.add(anArgPos);
         } else if(aFile->size() == 2) {
             StArgument anArgLeft (StString("left")  + anIter, aFile->getValue(0)->getPath());
             StArgument anArgRight(StString("right") + anIter, aFile->getValue(1)->getPath());
@@ -746,22 +774,27 @@ void StPlayList::loadRecentList(const StString theString) {
     myRecent.clear();
 
     for(size_t anIter = 0; anIter < myRecentLimit; ++anIter) {
-        StArgument anArgFile  = aMap[StString("file")  + anIter];
-        StArgument anArgLeft  = aMap[StString("left")  + anIter];
-        StArgument anArgRight = aMap[StString("right") + anIter];
+        const StArgument anArgFile  = aMap[StString("file")  + anIter];
+        const StArgument anArgLeft  = aMap[StString("left")  + anIter];
+        const StArgument anArgRight = aMap[StString("right") + anIter];
         if(anArgLeft.isValid() && anArgRight.isValid()) {
             StHandle<StFileNode> aFileNode = new StFileNode(StString());
             aFileNode->add(new StFileNode(anArgLeft.getValue(),  aFileNode.access()));
             aFileNode->add(new StFileNode(anArgRight.getValue(), aFileNode.access()));
             addRecentFile(*aFileNode, false);
         } else if(anArgFile.isValid()) {
-            StFileNode aFileNode(anArgFile.getValue());
-            addRecentFile(aFileNode, false);
+            StHandle<StFileNode> aFileNode = new StFileNode(anArgFile.getValue());
+            const StArgument anArgPos = aMap[StString("pos") + anIter];
+            if(anArgPos.isValid()) {
+                aFileNode->add(new StFileNode(anArgPos.getValue(), aFileNode.access()));
+            }
+            addRecentFile(*aFileNode, false);
         }
     }
 }
 
-void StPlayList::open(const StString& thePath) {
+void StPlayList::open(const StCString& thePath,
+                      const StCString& theItem) {
     StMutexAuto anAutoLock(myMutex);
     /// TODO (Kirill Gavrilov#2) do not scan folders again
     clear();
@@ -796,7 +829,16 @@ void StPlayList::open(const StString& thePath) {
                     anIter = parseM3UIter(anIter, aTitle);
                 }
 
-                addRecentFile(StFileNode(thePath)); // append to recent files list
+                myPlsFile = addRecentFile(StFileNode(thePath)); // append to recent files list
+                if(!theItem.isEmpty()) {
+                    // set current item
+                    for(StPlayItem* anItem = myFirst; anItem != NULL; anItem = anItem->getNext()) {
+                        if(anItem->getPath() == theItem) {
+                            myCurrent = anItem;
+                            break;
+                        }
+                    }
+                }
 
                 anAutoLock.unlock();
                 signals.onPlaylistChange();

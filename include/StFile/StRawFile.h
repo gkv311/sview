@@ -25,8 +25,8 @@ class StRawFile : public StFileNode {
 
         public:
 
-    ST_CPPEXPORT StRawFile(const StString& theFilePath = StString(),
-                           StNode* theParentNode = NULL);
+    ST_CPPEXPORT StRawFile(const StCString& theFilePath = stCString(""),
+                           StNode*          theParent   = NULL);
 
     ST_CPPEXPORT virtual ~StRawFile();
 
@@ -80,7 +80,7 @@ class StRawFile : public StFileNode {
      * Open the file handle for read or write operation.
      */
     ST_CPPEXPORT bool openFile(StRawFile::ReadWrite theFlags,
-                               const StString& theFilePath = StString());
+                               const StCString&     theFilePath = stCString(""));
 
     /**
      * Close file handle
@@ -95,22 +95,22 @@ class StRawFile : public StFileNode {
 
     /**
      * Fill the buffer with file content.
-     * @param theFilePath (const StString& ) - the file path;
-     * @return true if file was read.
+     * @param theFilePath the file path
+     * @return true if file was read
      */
-    ST_CPPEXPORT bool readFile(const StString& theFilePath = StString());
+    ST_CPPEXPORT bool readFile(const StCString& theFilePath = stCString(""));
 
     /**
      * Write the buffer into the file.
-     * @param theFilePath (const StString& ) - the file path;
-     * @return true if file was stored.
+     * @param theFilePath the file path
+     * @return true if file was stored
      */
-    ST_CPPEXPORT bool saveFile(const StString& theFilePath = StString());
+    ST_CPPEXPORT bool saveFile(const StCString& theFilePath = stCString(""));
 
     /**
      * Read the text file and return it as a string.
      */
-    ST_CPPEXPORT static StString readTextFile(const StString& theFilePath);
+    ST_CPPEXPORT static StString readTextFile(const StCString& theFilePath);
 
         private:
 

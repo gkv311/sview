@@ -39,9 +39,9 @@ class StFileNode : public StNode {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StFileNode(const StString& theSubPath,
-                            StNode*         theParentNode = NULL,
-                            int             theNodeType   = NODE_TYPE_FILE);
+    ST_CPPEXPORT StFileNode(const StCString& theSubPath,
+                            StNode*          theParentNode = NULL,
+                            int              theNodeType   = NODE_TYPE_FILE);
 
     /**
      * Destructor.
@@ -108,7 +108,7 @@ class StFileNode : public StNode {
      *   C:\folder\file
      * @return true if DOS path syntax detected.
      */
-    static bool isDosPath(const StString& thePath) {
+    static bool isDosPath(const StCString& thePath) {
         return thePath[0] != stUtf32_t('\0') && thePath[1] == stUtf32_t(':');
     }
 
@@ -119,7 +119,7 @@ class StFileNode : public StNode {
      *   \\?\D:\very long path
      * @return true if extended-length NT path syntax detected.
      */
-    static bool isNtExtendedPath(const StString& thePath) {
+    static bool isNtExtendedPath(const StCString& thePath) {
         return thePath.isStartsWith(stCString("\\\\?\\"));
     }
 
@@ -129,7 +129,7 @@ class StFileNode : public StNode {
      *   \\sever\share\file
      * @return true if UNC path syntax detected.
      */
-    static bool isUncPath(const StString& thePath) {
+    static bool isUncPath(const StCString& thePath) {
         return thePath.isStartsWith(stCString("\\\\"));
     }
 
@@ -139,7 +139,7 @@ class StFileNode : public StNode {
      *   \\?\UNC\server\share
      * @return true if extended-length UNC path syntax detected.
      */
-    static bool isUncExtendedPath(const StString& thePath) {
+    static bool isUncExtendedPath(const StCString& thePath) {
         return thePath.isStartsWith(stCString("\\\\?\\UNC\\"));
     }
 
@@ -149,7 +149,7 @@ class StFileNode : public StNode {
      *   /media/cdrom/file
      * @return true if UNIX path syntax detected.
      */
-    static bool isUnixPath(const StString& thePath) {
+    static bool isUnixPath(const StCString& thePath) {
         return thePath[0] == stUtf32_t('/') && thePath[1] != stUtf32_t('/');
     }
 
@@ -160,14 +160,14 @@ class StFileNode : public StNode {
      *   http://domain/path/file
      * @return true if remote protocol path syntax detected.
      */
-    ST_CPPEXPORT static bool isRemoteProtocolPath(const StString& thePath);
+    ST_CPPEXPORT static bool isRemoteProtocolPath(const StCString& thePath);
 
     /**
      * Method to recognize path is absolute or not.
      * Detection is based on path syntax - no any filesystem / network access performed.
      * @return true if path is incomplete (relative).
      */
-    static bool isRelativePath(const StString& thePath) {
+    static bool isRelativePath(const StCString& thePath) {
         return !isUncPath(thePath)
             && !isDosPath(thePath)
             && !isUnixPath(thePath)
@@ -177,30 +177,30 @@ class StFileNode : public StNode {
     /**
      * Method to recognize path is absolute or not.
      * Detection is based on path syntax - no any filesystem / network access performed.
-     * @return true if path is complete (absolute).
+     * @return true if path is complete (absolute)
      */
-    static bool isAbsolutePath(const StString& thePath) {
+    static bool isAbsolutePath(const StCString& thePath) {
         return !isRelativePath(thePath);
     }
 
     /**
-     * @param path (const StString& ) - file path;
-     * @return true if file/folder exists.
+     * @param thePath file path
+     * @return true if file/folder exists
      */
-    ST_CPPEXPORT static bool isFileExists(const StString& path);
+    ST_CPPEXPORT static bool isFileExists(const StCString& thePath);
 
     /**
      * Tries to remove file from filesystem.
      * @return true on success.
      */
-    ST_CPPEXPORT static bool removeFile(const StString& path);
+    ST_CPPEXPORT static bool removeFile(const StCString& thePath);
 
     /**
      * Tries to move/rename file.
      * @return true on success.
      */
-    ST_CPPEXPORT static bool moveFile(const StString& thePathFrom,
-                                      const StString& thePathTo);
+    ST_CPPEXPORT static bool moveFile(const StCString& thePathFrom,
+                                      const StCString& thePathTo);
 
     /**
      * Extract the file extension using general rules.
