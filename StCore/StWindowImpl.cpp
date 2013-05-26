@@ -147,7 +147,7 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
 }
 
 void StWindowImpl::updateMonitors() {
-    myMonitors.init();
+    myMonitors.init(true); // force update of cached state
     // just debug output Monitors' configuration
     for(size_t aMonIter = 0; aMonIter < myMonitors.size(); ++aMonIter) {
         ST_DEBUG_LOG(myMonitors[aMonIter].toString());
