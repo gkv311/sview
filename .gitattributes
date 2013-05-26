@@ -28,3 +28,5 @@
 *.icns      binary
 *.std       binary
 *.gz        binary
+.gitignore     eol=lf
+.gitattributes eol=lf
