@@ -20,6 +20,7 @@
 
 #include <StSettings/StSettings.h>
 #include <StThreads/StMutex.h>
+#include <StThreads/StTimer.h>
 
 #ifdef _WIN32
     #include <wnt/nvapi.h> // NVIDIA API
@@ -622,11 +623,33 @@ void StSearchMonitors::listEDID(StArrayList<StEDIDParser>& theEdids) {
 #endif // _WIN32
 }
 
-void StSearchMonitors::init() {
+namespace {
+
+    static StMutex          THE_MON_MUTEX;
+    static StTimer          THE_MON_INIT_TIMER(false);
+    static StSearchMonitors THE_MONS_CACHED;
+
+};
+
+void StSearchMonitors::initGlobal() {
     clear();
     initFromConfig();
     if(isEmpty()) {
         initFromSystem();
+    }
+}
+
+void StSearchMonitors::init(const bool theForced) {
+    clear();
+    StMutexAuto aLock(THE_MON_MUTEX);
+    if(!THE_MON_INIT_TIMER.isOn()
+    || (theForced && THE_MON_INIT_TIMER.getElapsedTime() > 30.0)) {
+        THE_MONS_CACHED.initGlobal();
+        THE_MON_INIT_TIMER.restart(0);
+    }
+
+    for(size_t aMonIter = 0; aMonIter < THE_MONS_CACHED.size(); ++aMonIter) {
+        add(THE_MONS_CACHED.getValue(aMonIter));
     }
 }
 

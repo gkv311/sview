@@ -44,9 +44,10 @@ class StSearchMonitors : public StArrayList<StMonitor> {
     ST_CPPEXPORT virtual ~StSearchMonitors();
 
     /**
-     * Read user settings and if they are empty - search all connected displays
+     * Read user settings and if they are empty - search all connected displays.
+     * @param theForced re-initialize cached monitors state if true (notice - calls with delay less than 30 seconds will be ignored)
      */
-    ST_CPPEXPORT void init();
+    ST_CPPEXPORT void init(const bool theForced = false);
 
     /**
      * Read user settings
@@ -82,7 +83,7 @@ class StSearchMonitors : public StArrayList<StMonitor> {
      * Just try to compute displays' configuration from known summary resolution
      */
     ST_LOCAL void findMonitorsBlind(const int rootX, const int rootY);
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     /**
      * Function retrieves displays' configuration from WinAPI
      */
@@ -100,6 +101,11 @@ class StSearchMonitors : public StArrayList<StMonitor> {
      */
     ST_LOCAL void findMonitorsADLsdk();
 #endif
+
+    /**
+     * Initialize global instance.
+     */
+    ST_LOCAL void initGlobal();
 
         public:
 
