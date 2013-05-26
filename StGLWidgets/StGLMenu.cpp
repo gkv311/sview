@@ -80,9 +80,11 @@ void StGLMenu::stglResize() {
     getRectGl(aVertices);
     myVertexBuf.init(aCtx, aVertices);
 
-    myProgram->use(aCtx);
-    myProgram->setProjMat(aCtx, getRoot()->getScreenProjection());
-    myProgram->unuse(aCtx);
+    if(!myProgram.isNull()) {
+        myProgram->use(aCtx);
+        myProgram->setProjMat(aCtx, getRoot()->getScreenProjection());
+        myProgram->unuse(aCtx);
+    }
 }
 
 void StGLMenu::stglResize(const StRectI_t& winRectPx) {

@@ -216,6 +216,7 @@ bool StImageViewer::init() {
     if(!myGUI->stImageRegion->stglInit()) {
         myMsgQueue->pushError(stCString("Image Viewer - critical error:\nFrame region initialization failed!"));
         myMsgQueue->popAll();
+        myGUI.nullify();
         return false;
     }
     myGUI->stglInit();
@@ -554,6 +555,10 @@ void StImageViewer::doNavigate(const StNavigEvent& theEvent) {
 }
 
 void StImageViewer::beforeDraw() {
+    if(myGUI.isNull()) {
+        return;
+    }
+
     const bool isMouseMove = myWindow->isMouseMoved();
     if(mySlideShowTimer.getElapsedTimeInSec() > mySlideShowDelay) {
         mySlideShowTimer.restart();

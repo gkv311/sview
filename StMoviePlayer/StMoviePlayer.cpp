@@ -324,6 +324,7 @@ bool StMoviePlayer::init() {
     if(!myGUI->stImageRegion->stglInit()) {
         myMsgQueue->pushError(stCString("Movie Player - critical error:\nFrame region initialization failed!"));
         myMsgQueue->popAll();
+        myGUI.nullify();
         return false;
     }
     myGUI->stglInit();
@@ -676,6 +677,10 @@ void StMoviePlayer::doNavigate(const StNavigEvent& theEvent) {
 }
 
 void StMoviePlayer::beforeDraw() {
+    if(myGUI.isNull()) {
+        return;
+    }
+
     const bool isMouseMove = myWindow->isMouseMoved();
     if(myEventLoaded.checkReset()) {
         doUpdateStateLoaded();

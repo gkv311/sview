@@ -301,6 +301,7 @@ bool StCADViewer::init() {
     if(!myGUI->stglInit()) {
         myMsgQueue->pushError(stCString("CAD Viewer - GUI initialization failed!"));
         myMsgQueue->popAll();
+        myGUI.nullify();
         return false;
     }
     myGUI->stglResize(myWindow->getPlacement());
@@ -581,6 +582,10 @@ void StCADViewer::doNavigate(const StNavigEvent& theEvent) {
 }
 
 void StCADViewer::beforeDraw() {
+    if(myGUI.isNull()) {
+        return;
+    }
+
     myIsCtrlPressed = myWindow->getKeysState().isKeyDown(ST_VK_CONTROL);
     if(myIsMiddleHold && myIsCtrlPressed) {
         // move

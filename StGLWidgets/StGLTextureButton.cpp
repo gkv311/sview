@@ -174,9 +174,11 @@ void StGLTextureButton::stglResize(const StRectI_t& winRectPx) {
     myVertBuf.init(aCtx, aVertices);
 
     // update projection matrix
-    myProgram->useTemp(aCtx);
-    myProgram->setProjMat(aCtx, getRoot()->getScreenProjection());
-    myProgram->unuse(aCtx);
+    if(!myProgram.isNull()) {
+        myProgram->useTemp(aCtx);
+        myProgram->setProjMat(aCtx, getRoot()->getScreenProjection());
+        myProgram->unuse(aCtx);
+    }
 }
 
 bool StGLTextureButton::stglInit() {

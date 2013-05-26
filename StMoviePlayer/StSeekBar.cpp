@@ -140,9 +140,11 @@ void StSeekBar::stglResize(const StRectI_t& winRectPx) {
     stglUpdateVertices();
 
     // update projection matrix
-    myProgram->use(aCtx);
-    myProgram->setProjMat(aCtx, getRoot()->getScreenProjection());
-    myProgram->unuse(aCtx);
+    if(!myProgram.isNull()) {
+        myProgram->use(aCtx);
+        myProgram->setProjMat(aCtx, getRoot()->getScreenProjection());
+        myProgram->unuse(aCtx);
+    }
 }
 
 void StSeekBar::stglUpdateVertices() {

@@ -77,6 +77,7 @@ bool StDiagnostics::open() {
     if(!myGUI->stglInit()) {
         myMsgQueue->pushError(stCString("StDiagnostics - critical error:\nGUI initialization failed!"));
         myMsgQueue->popAll();
+        myGUI.nullify();
         return false;
     }
     myGUI->stglResize(myWindow->getPlacement());
@@ -154,6 +155,10 @@ void StDiagnostics::doKeyUp(const StKeyEvent& theEvent) {
 }
 
 void StDiagnostics::beforeDraw() {
+    if(myGUI.isNull()) {
+        return;
+    }
+
     myGUI->setVisibility(myWindow->getMousePos(), true);
 }
 

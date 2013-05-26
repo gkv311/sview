@@ -100,9 +100,11 @@ void StGLMenuItem::stglResize() {
     myBackVertexBuf.init(aCtx, aVertices);
 
     // update projection matrix
-    myProgram->use(aCtx);
-    myProgram->setProjMat(aCtx, getRoot()->getScreenProjection());
-    myProgram->unuse(aCtx);
+    if(!myProgram.isNull()) {
+        myProgram->use(aCtx);
+        myProgram->setProjMat(aCtx, getRoot()->getScreenProjection());
+        myProgram->unuse(aCtx);
+    }
 }
 
 void StGLMenuItem::stglResize(const StRectI_t& theWinRectPx) {

@@ -71,9 +71,11 @@ void StGLRadioButton::stglResize() {
     myVertBuf.init(aCtx, aVertices);
 
     // update projection matrix
-    myProgram->use(aCtx);
-    myProgram->setProjMat(aCtx, getRoot()->getScreenProjection());
-    myProgram->unuse(aCtx);
+    if(!myProgram.isNull()) {
+        myProgram->use(aCtx);
+        myProgram->setProjMat(aCtx, getRoot()->getScreenProjection());
+        myProgram->unuse(aCtx);
+    }
 }
 
 void StGLRadioButton::stglResize(const StRectI_t& ST_UNUSED(theWinRectPx)) {
