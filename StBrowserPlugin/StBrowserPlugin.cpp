@@ -20,6 +20,7 @@
 #include "StBrPluginInfo.h"
 
 #include <StCore/StApplication.h>
+#include <StCore/StSearchMonitors.h>
 #include <StFile/StFileNode.h>
 #include <StFile/StFolder.h>
 #include <StGLStereo/StFormatEnum.h>
@@ -36,7 +37,10 @@ extern NPNetscapeFuncs NPNFuncs;
 
 namespace {
 
-    static bool isStCoreInitSuccess = false; // we use global init flag to go around stupid Mozilla plugin load behaviour
+    static bool isStCoreInitSuccess = false;         // we use global init flag to go around stupid Mozilla plugin load behaviour
+
+    static StAtomic<int32_t> ST_PLUGIN_QUEUE(0);     // queue plugin instances initialization
+    static StAtomic<int32_t> ST_PLUGIN_INSTANCES(0); // number of created instances
 
 };
 
@@ -138,6 +142,11 @@ StBrowserPlugin::StBrowserPlugin(NSPluginCreateData* theCreateDataStruct)
   myToLoadFull(false),
   myIsActive(false),
   myToQuit(false) {
+    if(ST_PLUGIN_INSTANCES.increment() == 1) {
+        StSearchMonitors aMonitors;
+        aMonitors.init(true); // force update of cached state
+    }
+
     StArgumentsMap aDrawerArgs;
     for(int aParamId = 0; aParamId < theCreateDataStruct->argc; ++aParamId) {
         StString aParamName  = StString(theCreateDataStruct->argn[aParamId]);
@@ -191,11 +200,9 @@ StBrowserPlugin::~StBrowserPlugin() {
     DeleteObject(myBackBrush);
     myBackBrush = NULL;
 #endif
-}
 
-namespace {
-    static StAtomic<int32_t> ST_PLUGIN_QUEUE(0);
-};
+    ST_PLUGIN_INSTANCES.decrement();
+}
 
 #ifdef _WIN32
 static LRESULT CALLBACK stWndProcWrapper(HWND   theWnd,
