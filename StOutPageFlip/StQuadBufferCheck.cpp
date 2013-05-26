@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutPageFlip library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -19,8 +19,10 @@
 #include "StQuadBufferCheck.h"
 
 #include <StStrings/StLogger.h>
+#include <StThreads/StCondition.h>
+#include <StThreads/StThread.h>
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
 
 #include <windows.h>
 
@@ -54,9 +56,9 @@ static bool wndRegisterClass(const StStringUtfWide& theClassName) {
 
 #if !(defined(__APPLE__))
 
-bool testQuadBufferSupport() {
+bool StQuadBufferCheck::testQuadBufferSupport() {
     // Firstly INIT core library!
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     const StStringUtfWide QUAD_TEST_CLASS = L"StTESTQuadBufferWin";
     if(!wndRegisterClass(QUAD_TEST_CLASS)) {
         ST_DEBUG_LOG_AT("Fail to register class");
@@ -143,8 +145,30 @@ bool testQuadBufferSupport() {
 
 #endif // !__APPLE__
 
-SV_THREAD_FUNCTION testQBThreadFunction(void* outValue) {
-    bool* outValueBool = (bool* )outValue;
-    *outValueBool = testQuadBufferSupport();
-    return SV_THREAD_RETURN 0;
+namespace {
+
+    static StCondition   THE_QB_INIT_EVENT(true);
+    static volatile bool IS_QB_SUPPORTED = false;
+
+    SV_THREAD_FUNCTION testQBThreadFunction(void* ) {
+        IS_QB_SUPPORTED = StQuadBufferCheck::testQuadBufferSupport();
+        THE_QB_INIT_EVENT.set();
+        return SV_THREAD_RETURN 0;
+    }
+
+};
+
+bool StQuadBufferCheck::isSupported() {
+    THE_QB_INIT_EVENT.wait();
+    return IS_QB_SUPPORTED;
+}
+
+void StQuadBufferCheck::initAsync() {
+    if(!THE_QB_INIT_EVENT.check()) {
+        return; // already called
+    }
+
+    // start and detach thread
+    THE_QB_INIT_EVENT.reset();
+    StThread aTestThread(testQBThreadFunction, NULL);
 }

@@ -44,8 +44,8 @@ StDiagnostics::StDiagnostics(const StNativeWin_t         theParentWin,
     addRenderer(new StOutDual(theParentWin));
     addRenderer(new StOutIZ3D(theParentWin));
     addRenderer(new StOutInterlace(theParentWin));
-    addRenderer(new StOutPageFlipExt(theParentWin));
     addRenderer(new StOutDistorted(theParentWin));
+    addRenderer(new StOutPageFlipExt(theParentWin));
 }
 
 StDiagnostics::~StDiagnostics() {

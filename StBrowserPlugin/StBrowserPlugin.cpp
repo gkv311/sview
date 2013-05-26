@@ -30,6 +30,7 @@
 #include <StThreads/StThread.h>
 
 #include "../StImageViewer/StImageViewer.h"
+#include "../StOutPageFlip/StOutPageFlip.h"
 
 extern NPNetscapeFuncs NPNFuncs;
 
@@ -76,6 +77,7 @@ NPError NS_PluginInitialize() {
     }
 
     isStCoreInitSuccess = true;
+    StOutPageFlip::initGlobalsAsync();
     return NPERR_NO_ERROR;
 }
 

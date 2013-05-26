@@ -22,6 +22,7 @@
 #include "StDXAqbsControl.h"
 
 #include <StCore/StMonitor.h>
+#include <StThreads/StCondition.h>
 #include <StThreads/StThread.h>
 
 #include <wnt/nvapi.h> // NVIDIA API supported only under Windows at this moment
@@ -442,28 +443,40 @@ bool StDXManager::swap() {
 
 namespace {
     static LRESULT CALLBACK aDummyWinProc(HWND in_hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-        return DefWindowProc(in_hWnd, uMsg, wParam, lParam);
+        return DefWindowProcW(in_hWnd, uMsg, wParam, lParam);
     }
-    static volatile bool ST_DX_HAS_CACHED_INFO = false;
-    static StDXInfo ST_DX_CACHED_INFO;
 
-    SV_THREAD_FUNCTION getInfoThreadFunction(void* theInfo) {
-        StDXManager::getInfo(*(StDXInfo* )theInfo);
+    static StCondition   THE_DX_INIT_EVENT(true);
+    static volatile bool ST_DX_HAS_CACHED_INFO = false;
+    static StDXInfo      ST_DX_CACHED_INFO;
+
+    SV_THREAD_FUNCTION getInfoThreadFunction(void* ) {
+        StDXInfo anInfo;
+        StDXManager::getInfo(anInfo, true);
+        THE_DX_INIT_EVENT.set();
         return SV_THREAD_RETURN 0;
     }
 
 };
 
-bool StDXManager::getInfoThreaded(StDXInfo& theInfo) {
-    StThread aReadInfoThread(getInfoThreadFunction, (void* )&theInfo);
-    aReadInfoThread.wait();
-    return ST_DX_HAS_CACHED_INFO;
+void StDXManager::initInfoAsync() {
+    if(!THE_DX_INIT_EVENT.check()) {
+        return; // already called
+    }
+
+    // start and detach thread
+    THE_DX_INIT_EVENT.reset();
+    StThread aTestThread(getInfoThreadFunction, NULL);
 }
 
-bool StDXManager::getInfo(StDXInfo& theInfo) {
-    if(ST_DX_HAS_CACHED_INFO) {
-        theInfo = ST_DX_CACHED_INFO;
-        return true;
+bool StDXManager::getInfo(StDXInfo&  theInfo,
+                          const bool theForced) {
+    if(!theForced) {
+        THE_DX_INIT_EVENT.wait();
+        if(ST_DX_HAS_CACHED_INFO) {
+            theInfo = ST_DX_CACHED_INFO;
+            return true;
+        }
     }
 
     const StStringUtfWide AQBS_TEST_CLASS = L"StTESTAqbsWin";
@@ -489,7 +502,7 @@ bool StDXManager::getInfo(StDXInfo& theInfo) {
                                       32, 32, 32, 32, NULL, NULL, anAppInst, NULL);
     if(aWinHandle == NULL) {
         ST_DEBUG_LOG("Failed to create 'StTESTAqbsWin' window (" + int(GetLastError()) + ")");
-        UnregisterClass(AQBS_TEST_CLASS.toCString(), anAppInst);
+        UnregisterClassW(AQBS_TEST_CLASS.toCString(), anAppInst);
         return false;
     }
 

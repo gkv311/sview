@@ -208,8 +208,8 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     addRenderer(new StOutDual(theParentWin));
     addRenderer(new StOutIZ3D(theParentWin));
     addRenderer(new StOutInterlace(theParentWin));
-    addRenderer(new StOutPageFlipExt(theParentWin));
     addRenderer(new StOutDistorted(theParentWin));
+    addRenderer(new StOutPageFlipExt(theParentWin));
 
     // no need in Depth buffer
     const StWinAttr anAttribs[] = {

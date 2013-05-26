@@ -8,6 +8,7 @@
 
 #include "StMultiApp.h"
 #include <StVersion.h>
+#include "../StOutPageFlip/StOutPageFlip.h"
 
 #ifdef _WIN32
 #ifdef __ST_DEBUG__
@@ -24,6 +25,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) { // prevent console output
 #else
 int main(int , char** ) {
 #endif
+    StOutPageFlip::initGlobalsAsync();
     if(!StVersionInfo::checkTimeBomb("sView")) {
         return 1;
     }

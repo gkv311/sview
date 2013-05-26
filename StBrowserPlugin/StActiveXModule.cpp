@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StActiveX plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 #ifdef _MSC_VER
 
 #include <StCore/StApplication.h>
+#include "../StOutPageFlip/StOutPageFlip.h"
 
 StActiveXModule NEAR theApp;
 
@@ -78,8 +79,8 @@ BOOL StActiveXModule::InitInstance() {
     }
     RegCloseKey(aKey);
 
-    // Initialize core library
-    //StCore::INIT();
+    // Initialize globals
+    StOutPageFlip::initGlobalsAsync();
     return TRUE;
 }
 

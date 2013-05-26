@@ -42,9 +42,10 @@ class StDXManager {
     /**
      * Launch test in other thread.
      */
-    static bool getInfoThreaded(StDXInfo& theInfo);
+    static void initInfoAsync();
 
-    static bool getInfo(StDXInfo& theInfo);
+    static bool getInfo(StDXInfo&  theInfo,
+                        const bool theForced = false);
 
     enum {
         ST_DX_VENDOR_AMD    = 4098,

@@ -24,7 +24,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-bool testQuadBufferSupport() {
+bool StQuadBufferCheck::testQuadBufferSupport() {
     StCocoaLocalPool aLocalPool;
 
     const NSOpenGLPixelFormatAttribute THE_QUAD_BUFF[] = {

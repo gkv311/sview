@@ -75,6 +75,16 @@ class StOutPageFlip : public StWindow {
         public:
 
     /**
+     * Initialize global Quad Buffer support state.
+     * Notice that this check performed asynchronously in dedicated thread.
+     * You should call this function as soon as possible at process start
+     * to reduce initialization delay.
+     */
+    ST_CPPEXPORT static void initGlobalsAsync();
+
+        public:
+
+    /**
      * Main constructor.
      */
     ST_CPPEXPORT StOutPageFlip(const StNativeWin_t theParentWindow);

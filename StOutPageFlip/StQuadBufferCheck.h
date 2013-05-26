@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutPageFlip library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -19,19 +19,28 @@
 #ifndef __StQuadBufferCheck_h_
 #define __StQuadBufferCheck_h_
 
-#include <StThreads/StThread.h>
+#include <stTypes.h>
 
-ST_LOCAL bool testQuadBufferSupport();
-ST_LOCAL SV_THREAD_FUNCTION testQBThreadFunction(void* outValue);
+class StQuadBufferCheck {
 
-/**
- * Launch test in other thread to be safe for current thread GL contexts.
- */
-ST_LOCAL inline bool testQuadBufferSupportThreaded() {
-    bool result = false;
-    StThread testDeviceThreadP(testQBThreadFunction, (void* )&result);
-    testDeviceThreadP.wait();
-    return result;
-}
+        public:
+
+    /**
+     * Global flag should be initialized before!
+     * @return true if OpenGL Quad Buffer is supported.
+     */
+    ST_LOCAL static bool isSupported();
+
+    /**
+     * Initialize global flag.
+     */
+    ST_LOCAL static void initAsync();
+
+    /**
+     * Test QB support within thin thread.
+     */
+    ST_LOCAL static bool testQuadBufferSupport();
+
+};
 
 #endif //__StQuadBufferCheck_h_

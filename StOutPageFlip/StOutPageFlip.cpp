@@ -117,6 +117,13 @@ void StOutPageFlip::getOptions(StParamsList& theList) const {
     theList.add(params.ToShowExtra);
 }
 
+void StOutPageFlip::initGlobalsAsync() {
+    StQuadBufferCheck::initAsync();
+#ifdef _WIN32
+    StDXManager::initInfoAsync();
+#endif
+}
+
 StOutPageFlip::StOutPageFlip(const StNativeWin_t theParentWindow)
 : StWindow(theParentWindow),
   mySettings(new StSettings(ST_OUT_PLUGIN_NAME)),
@@ -149,7 +156,7 @@ StOutPageFlip::StOutPageFlip(const StNativeWin_t theParentWindow)
     }
 #ifndef __APPLE__
     // actually almost always available on mac but... is it useful?
-    if(testQuadBufferSupportThreaded()) {
+    if(StQuadBufferCheck::isSupported()) {
         hasQuadBufferGl = true;
     }
 #endif
@@ -157,7 +164,7 @@ StOutPageFlip::StOutPageFlip(const StNativeWin_t theParentWindow)
 #ifdef _WIN32
     StDXInfo aDxInfo;
     if(!hasQuadBufferGl
-    && StDXManager::getInfoThreaded(aDxInfo)
+    && StDXManager::getInfo(aDxInfo)
     && (aDxInfo.hasNvStereoSupport || aDxInfo.hasAqbsSupport)) {
         hasQuadBufferD3D = true;
     }
