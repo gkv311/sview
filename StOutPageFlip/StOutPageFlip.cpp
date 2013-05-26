@@ -162,10 +162,9 @@ StOutPageFlip::StOutPageFlip(const StNativeWin_t theParentWindow)
 #endif
 
 #ifdef _WIN32
-    StDXInfo aDxInfo;
     if(!hasQuadBufferGl
-    && StDXManager::getInfo(aDxInfo)
-    && (aDxInfo.hasNvStereoSupport || aDxInfo.hasAqbsSupport)) {
+    && StDXManager::getInfo(myDxInfo)
+    && (myDxInfo.hasNvStereoSupport || myDxInfo.hasAqbsSupport)) {
         hasQuadBufferD3D = true;
     }
 #endif
@@ -221,10 +220,6 @@ StOutPageFlip::StOutPageFlip(const StNativeWin_t theParentWindow)
     } else {
         myDevice = DeviceEnum(aDeviceInt);
     }
-
-#ifdef _WIN32
-    StDXManager::getInfo(myDxInfo);
-#endif
 
     // Quad Buffer type option
     params.QuadBuffer = new StEnumParam(0, myLangMap.changeValueId(STTR_PARAMETER_QBUFFER_TYPE, "Quad Buffer type"));
