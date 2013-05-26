@@ -26,29 +26,24 @@
 
 #include <windows.h>
 
-static LRESULT CALLBACK wndProcWrapper
-        (HWND   in_hWnd,      // Handle For This Window
-         UINT      uMsg,      // Message For This Window
-         WPARAM  wParam,      // Additional Message Information
-         LPARAM  lParam)      // Additional Message Information
-{
-    return DefWindowProc(in_hWnd, uMsg, wParam, lParam);
+static LRESULT CALLBACK wndProcWrapper(HWND theWnd, UINT theMsg, WPARAM theParamW, LPARAM theParamL) {
+    return DefWindowProcW(theWnd, theMsg, theParamW, theParamL);
 }
 
-static bool wndRegisterClass(const StStringUtfWide& theClassName) {
-    HINSTANCE hInstance = GetModuleHandle(NULL); // Holds The Instance Of The Application
-    WNDCLASSW wndClass;  // Windows Class Structure
-    wndClass.style         = CS_HREDRAW | CS_VREDRAW | CS_OWNDC; // Redraw On Size, And Own DC For Window.
-    wndClass.lpfnWndProc   = (WNDPROC )wndProcWrapper;           // WndProc Handles Messages
-    wndClass.cbClsExtra    = 0;                                  // No Extra Window Data
-    wndClass.cbWndExtra    = 0;                                  // No Extra Window Data
-    wndClass.hInstance     = hInstance;                          // Set The Instance
-    wndClass.hIcon         = LoadIcon(hInstance, L"A");          // Load The Icon A
-    wndClass.hCursor       = LoadCursor(NULL, IDC_ARROW);        // Load The Arrow Pointer
-    wndClass.hbrBackground = NULL;                               // No Background Required For GL
-    wndClass.lpszMenuName  = NULL;                               // No menu
-    wndClass.lpszClassName = theClassName.toCString();           // Set The Class Name
-    return (RegisterClassW(&wndClass) != 0);
+static bool wndRegisterClass(HINSTANCE              theInstance,
+                             const StStringUtfWide& theClassName) {
+    WNDCLASSW aClass;
+    aClass.style         = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+    aClass.lpfnWndProc   = (WNDPROC )wndProcWrapper;
+    aClass.cbClsExtra    = 0;
+    aClass.cbWndExtra    = 0;
+    aClass.hInstance     = theInstance;
+    aClass.hIcon         = LoadIconW(theInstance, L"A");
+    aClass.hCursor       = LoadCursor(NULL, IDC_ARROW);
+    aClass.hbrBackground = NULL;
+    aClass.lpszMenuName  = NULL;
+    aClass.lpszClassName = theClassName.toCString();
+    return (RegisterClassW(&aClass) != 0);
 }
 #elif !(defined(__APPLE__))
     #include <GL/glx.h>
@@ -59,62 +54,47 @@ static bool wndRegisterClass(const StStringUtfWide& theClassName) {
 bool StQuadBufferCheck::testQuadBufferSupport() {
     // Firstly INIT core library!
 #ifdef _WIN32
+    HINSTANCE anAppInst = GetModuleHandleW(NULL); // Holds The Instance Of The Application
     const StStringUtfWide QUAD_TEST_CLASS = L"StTESTQuadBufferWin";
-    if(!wndRegisterClass(QUAD_TEST_CLASS)) {
+    if(!wndRegisterClass(anAppInst, QUAD_TEST_CLASS)) {
         ST_DEBUG_LOG_AT("Fail to register class");
         return false;
     }
-    HINSTANCE hInstance = GetModuleHandle(NULL); // Holds The Instance Of The Application
-    HWND hTestWindowhMaster = CreateWindowExW(
-            WS_EX_TOOLWINDOW | WS_EX_WINDOWEDGE | WS_EX_NOACTIVATE, // Extended Style For The Window
-            QUAD_TEST_CLASS.toCString(),        // Class Name
-            L"OpenGL Hardware Quad Buffer test",// Window Title
-            WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, // Window Style
-            32, 32,                             // Left-Top position
-            32, 32,                             // Width x Height
-            NULL,                               // No Parent Window
-            NULL,                               // No Menu
-            hInstance,                          // Instance
-            NULL);
-    if(hTestWindowhMaster == NULL) {
-        UnregisterClassW(QUAD_TEST_CLASS.toCString(), hInstance);
+    HWND aWindow = CreateWindowExW(WS_EX_TOOLWINDOW | WS_EX_WINDOWEDGE | WS_EX_NOACTIVATE,
+                                   QUAD_TEST_CLASS.toCString(),
+                                   L"GL Quad Buffer test",
+                                   WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
+                                   32, 32, 32, 32,
+                                   NULL, NULL, anAppInst, NULL);
+    if(aWindow == NULL) {
+        UnregisterClassW(QUAD_TEST_CLASS.toCString(), anAppInst);
         return false;
     }
 
-    HDC hDC = GetDC(hTestWindowhMaster);
-    if(hDC == NULL) { // Did We Get A Device Context?
+    HDC aDevCtx = GetDC(aWindow);
+    if(aDevCtx == NULL) { // Did We Get A Device Context?
         ST_DEBUG_LOG_AT(L"WinAPI, Can't create Device Context for the entire screen");
-        DestroyWindow(hTestWindowhMaster);
-        UnregisterClassW(QUAD_TEST_CLASS.toCString(), hInstance);
+        DestroyWindow(aWindow);
+        UnregisterClassW(QUAD_TEST_CLASS.toCString(), anAppInst);
         return false;
     }
-    PIXELFORMATDESCRIPTOR pfd;
-    memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR)); // zero out all fields
-    pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-    pfd.nVersion = 1;
-    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_GDI | PFD_SUPPORT_OPENGL |
-            PFD_DOUBLEBUFFER | PFD_STEREO;
-    int pixelFormat = ChoosePixelFormat(hDC, &pfd);
-    BOOL bSuccess = SetPixelFormat(hDC, pixelFormat, &pfd);
-    HGLRC hRC = wglCreateContext(hDC);
-    bSuccess = wglMakeCurrent(hDC, hRC);
-
-    pixelFormat = GetPixelFormat(hDC);
-    DescribePixelFormat(hDC, pixelFormat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
-    bool isSupported = (pfd.dwFlags & PFD_STEREO) != 0;
+    PIXELFORMATDESCRIPTOR aPixelFormat;
+    memset(&aPixelFormat, 0, sizeof(PIXELFORMATDESCRIPTOR)); // zero out all fields
+    aPixelFormat.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+    aPixelFormat.nVersion = 1;
+    aPixelFormat.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_GDI | PFD_SUPPORT_OPENGL
+                         | PFD_DOUBLEBUFFER   | PFD_STEREO;
+    const int aPixelFormatId = ChoosePixelFormat(aDevCtx, &aPixelFormat);
+    DescribePixelFormat(aDevCtx, aPixelFormatId, sizeof(PIXELFORMATDESCRIPTOR), &aPixelFormat);
 
     // clean up
-    wglMakeCurrent(NULL, NULL);
-    wglDeleteContext(hRC);
-    if(hDC != NULL) {
-        if(ReleaseDC(hTestWindowhMaster, hDC) == 0) {
-            ST_DEBUG_LOG_AT(L"WinAPI, ReleaseDC(hTestWindowhMaster, hDC) FAILED");
-        }
+    if(ReleaseDC(aWindow, aDevCtx) == 0) {
+        ST_DEBUG_LOG_AT(L"WinAPI, ReleaseDC(aWindow, aDevCtx) FAILED");
     }
-    DestroyWindow(hTestWindowhMaster);
-    UnregisterClassW(QUAD_TEST_CLASS.toCString(), hInstance);
+    DestroyWindow(aWindow);
+    UnregisterClassW(QUAD_TEST_CLASS.toCString(), anAppInst);
 
-    return isSupported;
+    return (aPixelFormat.dwFlags & PFD_STEREO) != 0;
 #elif(defined(__linux__) || defined(__linux))
     Display* hDisplay = XOpenDisplay(NULL); // get first display on server from DISPLAY in env
     if(hDisplay == NULL) {
