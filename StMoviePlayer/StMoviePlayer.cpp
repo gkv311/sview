@@ -285,6 +285,7 @@ bool StMoviePlayer::init() {
 
     // initialize GL context
     myContext = new StGLContext();
+    myContext->setMessagesQueue(myMsgQueue);
     if(!myContext->stglInit()) {
         myMsgQueue->pushError(stCString("Movie Player - critical error:\nOpenGL context is broken!\n(OpenGL library internal error?)"));
         myMsgQueue->popAll();

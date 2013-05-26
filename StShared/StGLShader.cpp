@@ -68,23 +68,24 @@ bool StGLShader::init(StGLContext& theCtx,
     // compile shaders
     theCtx.core20fwd->glCompileShader(myShaderId);
 
-    StString aCompileInfo = getCompileInfo(theCtx);
-#ifndef __ST_DEBUG_SHADERS__
-    if(!isCompiled(theCtx)) {
-#endif
-    ST_DEBUG_LOG("Compiling " + getTypeString()
-                 + " '" + myTitle + "' "
-                 + (isCompiled(theCtx) ? StString("done") : StString("FAILED"))
-                 + (!aCompileInfo.isEmpty() ? (StString(". Log:\n") + aCompileInfo) : (StString())));
-#ifndef __ST_DEBUG_SHADERS__
-    }
-#endif
-
     // check compile success
     if(!isCompiled(theCtx)) {
+        theCtx.pushError(StString("Compilation of the ") + getTypeString() + " '" + myTitle
+                       + "' failed!\n" + getCompileInfo(theCtx)
+                       /*+ "\n=== Source code ===\n"
+                       + (theSrcLines0 != NULL ? theSrcLines0 : "")
+                       + (theSrcLines1 != NULL ? theSrcLines1 : "")
+                       + (theSrcLines2 != NULL ? theSrcLines2 : "")
+                       + "==================="*/
+        );
         release(theCtx);
         return false;
     }
+#ifdef __ST_DEBUG_SHADERS__
+    const StString anInfo = getCompileInfo(theCtx);
+    ST_DEBUG_LOG(getTypeString() + " '" + myTitle + "' has been compiled"
+              + (!anInfo.isEmpty() ? (StString(". Log:\n") + anInfo) : (StString())));
+#endif
     return true;
 }
 
@@ -92,7 +93,7 @@ bool StGLShader::initFile(StGLContext&    theCtx,
                           const StString& theFileName) {
     StRawFile aTextFile(theFileName);
     if(!aTextFile.readFile()) {
-        ST_DEBUG_LOG("Shader file '" + theFileName + "' can not be read");
+        theCtx.pushError(StString("Shader file '") + theFileName + "' is not found!");
         return false;
     }
     return init(theCtx, (const char* )aTextFile.getBuffer());

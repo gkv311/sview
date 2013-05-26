@@ -87,6 +87,18 @@ StGLContext::~StGLContext() {
     //
 }
 
+void StGLContext::setMessagesQueue(const StHandle<StMsgQueue>& theQueue) {
+    myMsgQueue = theQueue;
+}
+
+void StGLContext::pushError(const StCString& theMessage) {
+    if(!myMsgQueue.isNull()) {
+        myMsgQueue->pushError(theMessage);
+    } else {
+        ST_ERROR_LOG(theMessage);
+    }
+}
+
 void* StGLContext::stglFindProc(const char* theName) const {
 #ifdef _WIN32
     return (void* )wglGetProcAddress(theName);

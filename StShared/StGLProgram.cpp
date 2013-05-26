@@ -72,16 +72,17 @@ bool StGLProgram::link(StGLContext& theCtx) {
     }
     theCtx.core20fwd->glLinkProgram(myProgramId);
 
-    const StString aLinkageInfo = getLinkageInfo(theCtx);
-    ST_DEBUG_LOG("Linking Program Object '" + myTitle + "' "
-                 + (isLinked(theCtx) ? StString("done") : StString("FAILED"))
-                 + (!aLinkageInfo.isEmpty() ? (StString(". Log:\n") + aLinkageInfo) : (StString())));
-
     // if linkage failed - automatically remove the program!
     if(!isLinked(theCtx)) {
+        theCtx.pushError(StString("Linking of the program '") + myTitle + "' failed!\n" + getLinkageInfo(theCtx));
         release(theCtx);
         return false;
     }
+#ifdef __ST_DEBUG_SHADERS__
+    const StString anInfo = getLinkageInfo(theCtx);
+    ST_DEBUG_LOG("Program '" + myTitle + "' has been linked"
+              + (!anInfo.isEmpty() ? (StString(". Log:\n") + anInfo) : (StString())));
+#endif
     return true;
 }
 

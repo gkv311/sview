@@ -302,6 +302,7 @@ bool StOutDual::create() {
 
     // initialize GL context
     myContext = new StGLContext();
+    myContext->setMessagesQueue(myMsgQueue);
     if(!myContext->stglInit()) {
         myMsgQueue->pushError(stCString("Dual output - critical error:\nOpenGL context is broken!\n(OpenGL library internal error?)"));
         return false;

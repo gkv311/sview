@@ -429,6 +429,7 @@ bool StOutPageFlip::create() {
 
     // initialize GL context
     myContext = new StGLContext();
+    myContext->setMessagesQueue(myMsgQueue);
     if(!myContext->stglInit()) {
         myMsgQueue->pushError(stCString("PageFlip output - critical error:\nOpenGL context is broken!\n(OpenGL library internal error?)"));
         return false;

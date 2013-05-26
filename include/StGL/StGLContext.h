@@ -14,7 +14,7 @@
 
 #include <StGL/StGLVec.h>
 
-#include <StStrings/StString.h>
+#include <StStrings/StMsgQueue.h>
 
 #ifdef __APPLE__
     #include <StLibrary.h>
@@ -136,6 +136,16 @@ class StGLContext {
      * Destructor.
      */
     ST_CPPEXPORT virtual ~StGLContext();
+
+    /**
+     * Setup messages queue.
+     */
+    ST_CPPEXPORT void setMessagesQueue(const StHandle<StMsgQueue>& theQueue);
+
+    /**
+     * Push error message to the messages queue.
+     */
+    ST_CPPEXPORT void pushError(const StCString& theMessage);
 
     /**
      * Initialize class with currently bound context.
@@ -289,6 +299,7 @@ class StGLContext {
     StLibrary               mySysLib;             //!< optional handle to system GL library (MacOS X specific)
 #endif
     StHandle<StGLFunctions> myFuncs;              //!< mega structure for all GL functions
+    StHandle<StMsgQueue>    myMsgQueue;           //!< messages queue
     GPU_Name                myGpuName;            //!< GPU name
     GLint                   myVerMajor;           //!< cached GL version major number
     GLint                   myVerMinor;           //!< cached GL version minor number
