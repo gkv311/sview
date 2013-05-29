@@ -156,17 +156,12 @@ StOutPageFlip::StOutPageFlip(const StNativeWin_t theParentWindow)
     }
 #ifndef __APPLE__
     // actually almost always available on mac but... is it useful?
-    if(StQuadBufferCheck::isSupported()) {
-        hasQuadBufferGl = true;
-    }
+    hasQuadBufferGl = StQuadBufferCheck::isSupported();
 #endif
 
 #ifdef _WIN32
-    if(!hasQuadBufferGl
-    && StDXManager::getInfo(myDxInfo)
-    && (myDxInfo.hasNvStereoSupport || myDxInfo.hasAqbsSupport)) {
-        hasQuadBufferD3D = true;
-    }
+    hasQuadBufferD3D = StDXManager::getInfo(myDxInfo) // && !hasQuadBufferGl
+                    && (myDxInfo.hasNvStereoSupport || myDxInfo.hasAqbsSupport);
 #endif
     if(hasQuadBufferGl || hasQuadBufferD3D) {
         aSupportLevelShutters = ST_DEVICE_SUPPORT_FULL;
@@ -222,9 +217,10 @@ StOutPageFlip::StOutPageFlip(const StNativeWin_t theParentWindow)
     }
 
     // Quad Buffer type option
-    params.QuadBuffer = new StEnumParam(0, myLangMap.changeValueId(STTR_PARAMETER_QBUFFER_TYPE, "Quad Buffer type"));
+    params.QuadBuffer = new StEnumParam(QUADBUFFER_HARD_OPENGL, myLangMap.changeValueId(STTR_PARAMETER_QBUFFER_TYPE, "Quad Buffer type"));
     params.QuadBuffer->signals.onChanged.connect(this, &StOutPageFlip::doSetQuadBuffer);
     params.QuadBuffer->changeValues().add(myLangMap.changeValueId(STTR_PARAMETER_QB_HARDWARE, "OpenGL Hardware"));
+#ifdef _WIN32
     StString aDxDesc;
     if(myDxInfo.hasAqbsSupport && myDxInfo.hasNvStereoSupport) {
         aDxDesc = myLangMap.changeValueId(STTR_PARAMETER_QB_D3D_ANY,     "Direct3D (Fullscreen)");
@@ -240,6 +236,7 @@ StOutPageFlip::StOutPageFlip(const StNativeWin_t theParentWindow)
         aDxDesc = myLangMap.changeValueId(STTR_PARAMETER_QB_D3D_OFF,     "Direct3D (Unavailable)");
     }
     params.QuadBuffer->changeValues().add(aDxDesc);
+#endif
 
     // Show Extra option
     params.ToShowExtra = new StBoolParamNamed(false, "Show Extra Options");
@@ -248,11 +245,12 @@ StOutPageFlip::StOutPageFlip(const StNativeWin_t theParentWindow)
 
     // load Quad Buffer type
     if(!mySettings->loadParam(ST_SETTING_QUADBUFFER, params.QuadBuffer)) {
-        if(hasQuadBufferGl || !hasQuadBufferD3D) {
-            params.QuadBuffer->setValue(QUADBUFFER_HARD_OPENGL);
-        } else {
+    #ifdef _WIN32
+        if(!hasQuadBufferGl
+         && hasQuadBufferD3D) {
             params.QuadBuffer->setValue(QUADBUFFER_HARD_D3D_ANY);
         }
+    #endif
     }
     myToResetDevice = false;
 }
@@ -462,10 +460,12 @@ bool StOutPageFlip::create() {
         ST_ERROR_LOG(ST_OUT_PLUGIN_NAME + " Plugin, Texture missed: " + anImage.getState());
     }
 
+#ifdef _WIN32
     // initialize Direct3D output
     if(params.QuadBuffer->getValue() == QUADBUFFER_HARD_D3D_ANY) {
         dxInit();
     }
+#endif
 
     // initialize Vuzix library
     myVuzixSDK = new StVuzixSDK();

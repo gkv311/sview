@@ -205,10 +205,11 @@ class StOutPageFlip : public StWindow {
     } DeviceEnum;
 
     typedef enum tagQuadBufferEnum {
-        QUADBUFFER_AUTO            =-1, // autodetection
-        QUADBUFFER_HARD_OPENGL     = 0, // OpenGL hardware Quad Buffer
-        QUADBUFFER_HARD_D3D_ANY    = 1, // NVIDIA or AMD
-        QUADBUFFER_SOFT            = 2, // OpenGL emulated Quad Buffer
+        QUADBUFFER_HARD_OPENGL = 0, //!< OpenGL hardware Quad Buffer
+    #ifdef _WIN32
+        QUADBUFFER_HARD_D3D_ANY,    //!< NVIDIA or AMD extension for D3D
+    #endif
+        QUADBUFFER_SOFT,            //!< OpenGL emulated Page Flip
     } QuadBufferEnum;
 
         protected:
