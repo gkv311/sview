@@ -71,6 +71,7 @@ namespace {
     static const char ST_ARGUMENT_FILE[]       = "file";
     static const char ST_ARGUMENT_FILE_LEFT[]  = "left";
     static const char ST_ARGUMENT_FILE_RIGHT[] = "right";
+    static const char ST_ARGUMENT_FILE_LAST[]  = "last";
     static const char ST_ARGUMENT_BENCHMARK[]  = "benchmark";
 };
 
@@ -409,6 +410,10 @@ bool StMoviePlayer::open() {
     const StMIME anOpenMIME = myOpenFileInfo->getMIME();
     if(myOpenFileInfo->getPath().isEmpty()) {
         // open drawer without files
+        const StArgument anArgLast = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_LAST];
+        if(anArgLast.isValid() && !anArgLast.isValueOff()) {
+            doOpenRecent(0); // open last opened file
+        }
         return true;
     }
 
