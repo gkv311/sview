@@ -832,7 +832,7 @@ void StPlayList::open(const StCString& thePath,
         // add all files from the folder and subfolders
         aFolderPath = thePath;
         aSearchDeep = myRecursionDeep;
-        addRecentFile(StFileNode(thePath)); // append to recent files list
+        myPlsFile = addRecentFile(StFileNode(thePath)); // append to recent files list
     } else if(StFileNode::isFileExists(thePath)) {
         // search only current folder
         StFileNode::getFolderAndFile(thePath, aFolderPath, aFileName);
@@ -898,12 +898,15 @@ void StPlayList::open(const StCString& thePath,
     addToPlayList(aSubFolder);
 
     myCurrent = myFirst;
-    if(!aFileName.isEmpty()) {
+    const StString aTarget = !theItem.isEmpty() ? theItem : thePath;
+    if(!theItem.isEmpty() || !aFileName.isEmpty()) {
         // set current item
         for(StPlayItem* anItem = myFirst; anItem != NULL; anItem = anItem->getNext()) {
-            if(anItem->getPath() == thePath) {
+            if(anItem->getPath() == aTarget) {
                 myCurrent = anItem;
-                addRecentFile(*anItem->getFileNode()); // append to recent files list
+                if(myPlsFile.isNull()) {
+                    addRecentFile(*anItem->getFileNode()); // append to recent files list
+                }
                 break;
             }
         }
