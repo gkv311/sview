@@ -335,6 +335,7 @@
 		</Unit>
 		<Unit filename="StOutPageFlipExt.cpp" />
 		<Unit filename="StOutPageFlipExt.h" />
+		<Unit filename="StOutPageFlipStrings.h" />
 		<Unit filename="StQuadBufferCheck.ObjC.mm">
 			<Option compile="1" />
 			<Option link="1" />

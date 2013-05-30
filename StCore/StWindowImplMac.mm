@@ -264,7 +264,7 @@ bool StWindowImpl::create() {
                 myInitState = STWIN_ERROR_COCOA_NO_GL;
                 return false;
             } else {
-                stError("Cocoa, fail to create Quad Buffered OpenGL context");
+                ST_ERROR_LOG("Cocoa, fail to create Quad Buffered OpenGL context");
             }
         }
     } else {

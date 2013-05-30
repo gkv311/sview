@@ -17,6 +17,7 @@
  */
 
 #include "StOutPageFlip.h"
+#include "StOutPageFlipStrings.h"
 #include "StVuzixSDK.h"
 #include "StQuadBufferCheck.h"
 #include "StDXNVWindow.h"
@@ -438,11 +439,23 @@ bool StOutPageFlip::create() {
         return false;
     }
 
-    if(params.QuadBuffer->getValue() == QUADBUFFER_SOFT) {
-        myContext->stglSetVSync(StGLContext::VSync_ON);
-    } else {
-        myContext->stglSetVSync((StGLContext::VSync_Mode )StWindow::params.VSyncMode->getValue());
+    switch(params.QuadBuffer->getValue()) {
+        case QUADBUFFER_SOFT:
+            myContext->stglSetVSync(StGLContext::VSync_ON);
+            break; // VSync always on
+        case QUADBUFFER_HARD_OPENGL: {
+            GLboolean isStereoOn = GL_FALSE;
+            myContext->core20fwd->glGetBooleanv(GL_STEREO, &isStereoOn);
+            if(!isStereoOn) {
+                myMsgQueue->pushError(myLangMap.changeValueId(STTR_NO_GL_QUADBUFFER,
+                                                              "OpenGL Hardware QuadBuffer is unavailable!"));
+            }
+        }
+        default:
+            myContext->stglSetVSync((StGLContext::VSync_Mode )StWindow::params.VSyncMode->getValue());
+            break;
     }
+
     StWindow::params.VSyncMode->signals.onChanged += stSlot(this, &StOutPageFlip::doSwitchVSync);
 
     // load fullscreen-only warning

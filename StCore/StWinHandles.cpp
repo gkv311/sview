@@ -198,7 +198,7 @@ int StWinHandles::glCreateContext(StWinHandles* theSlave,
     if(theIsQuadStereo) {
         DescribePixelFormat(hDC, aPixelFormatId, sizeof(PIXELFORMATDESCRIPTOR), &aPixelFormatDesc);
         if((aPixelFormatDesc.dwFlags & PFD_STEREO) == 0) {
-            stError("WinAPI, Quad Buffered stereo not supported");
+            ST_ERROR_LOG("WinAPI, Quad Buffered stereo not supported");
         } else {
             //bool isVistaPlus = StSys::isVistaPlus();
             //bool isWin8Plus  = StSys::isWin8Plus();

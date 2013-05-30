@@ -23,3 +23,4 @@ French translation file for StOutPageFlip library
 2000="sView - PageFlip Output module"
 2001="version"
 2002="© 2007-2013 Kirill Gavrilov <kirill@sview.ru>\nOfficiel site: www.sview.ru\n\nThis library distributed under LGPL3.0"
+3001="OpenGL Hardware QuadBuffer is unavailable!"

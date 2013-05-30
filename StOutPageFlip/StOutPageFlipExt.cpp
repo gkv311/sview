@@ -17,6 +17,7 @@
  */
 
 #include "StOutPageFlipExt.h"
+#include "StOutPageFlipStrings.h"
 
 #include <StSys/StSys.h>
 #include <StGL/StGLEnums.h>

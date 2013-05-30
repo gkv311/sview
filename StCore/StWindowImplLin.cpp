@@ -148,10 +148,7 @@ bool StWindowImpl::create() {
 
         stXDisplay->hVisInfo = glXChooseVisual(hDisplay, DefaultScreen(hDisplay), aQuadBuff);
         if(stXDisplay->hVisInfo == NULL) {
-            stError("X, no Quad Buffered visual");
-
-
-
+            ST_ERROR_LOG("X, no Quad Buffered visual");
             stXDisplay->hVisInfo = glXChooseVisual(hDisplay, DefaultScreen(hDisplay), aDblBuff);
             if(stXDisplay->hVisInfo == NULL) {
                 myMaster.close();
