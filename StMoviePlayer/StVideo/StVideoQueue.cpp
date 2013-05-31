@@ -21,6 +21,11 @@
 #include <StStrings/StStringStream.h>
 #include <StThreads/StThread.h>
 
+#if (defined(_WIN64) || defined(__WIN64__))\
+ || (defined(_LP64)  || defined(__LP64__))
+    #define ST_USE64PTR
+#endif
+
 namespace {
 
     /*
@@ -32,17 +37,25 @@ namespace {
                             AVFrame*        theFrame) {
         StVideoQueue* aVideoQueue = (StVideoQueue* )theCodecCtx->opaque;
         const int aResult = avcodec_default_get_buffer(theCodecCtx, theFrame);
+    #ifdef ST_USE64PTR
+        theFrame->opaque = (void* )aVideoQueue->getVideoPktPts();
+    #else
         int64_t* aPts = new int64_t();
         *aPts = aVideoQueue->getVideoPktPts();
         theFrame->opaque = aPts;
+    #endif
         return aResult;
     }
 
     static void ourReleaseBuffer(AVCodecContext* theCodecCtx,
                                  AVFrame*        theFrame) {
         if(theFrame != NULL) {
+        #ifdef ST_USE64PTR
+            theFrame->opaque = (void* )stLibAV::NOPTS_VALUE;
+        #else
             delete (int64_t* )theFrame->opaque;
             theFrame->opaque = NULL;
+        #endif
         }
         avcodec_default_release_buffer(theCodecCtx, theFrame);
     }
@@ -80,11 +93,17 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   //
   myAudioClock(0.0),
   myFramesCounter(1),
+  myWasFlushed(false),
   mySrcFormat(ST_V_SRC_AUTODETECT),
   mySrcFormatInfo(ST_V_SRC_AUTODETECT) {
     // allocate an AVFrame structure, avfreep() should be called to free memory
     myFrame    = avcodec_alloc_frame();
     myFrameRGB = avcodec_alloc_frame();
+#ifdef ST_USE64PTR
+    myFrame->opaque = (void* )stLibAV::NOPTS_VALUE;
+#else
+    myFrame->opaque = NULL;
+#endif
     myThread   = new StThread(threadFunction, (void* )this);
 }
 
@@ -425,9 +444,16 @@ void StVideoQueue::decodeLoop() {
         // Save global pts to be stored in pFrame in first call
         myVideoPktPts = aPacket->getPts();
 
+    #ifdef ST_USE64PTR
         if(aPacket->getDts() == stLibAV::NOPTS_VALUE
-        && myFrame->opaque && *(int64_t* )myFrame->opaque != stLibAV::NOPTS_VALUE) {
+        && (int64_t )myFrame->opaque != stLibAV::NOPTS_VALUE) {
+            myFramePts = double((int64_t )myFrame->opaque);
+    #else
+        if(aPacket->getDts() == stLibAV::NOPTS_VALUE
+        && myFrame->opaque != NULL
+        && *(int64_t* )myFrame->opaque != stLibAV::NOPTS_VALUE) {
             myFramePts = double(*(int64_t* )myFrame->opaque);
+    #endif
         } else if(aPacket->getDts() != stLibAV::NOPTS_VALUE) {
             myFramePts = double(aPacket->getDts());
         } else {

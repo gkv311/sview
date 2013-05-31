@@ -71,7 +71,7 @@
 #endif
 
 // int16_t/int32_t and so on
-#if((defined(_WIN32) || defined(__WIN32__)) && (_MSC_VER > 0 && _MSC_VER < 1600))
+#if(defined(_WIN32) && (_MSC_VER > 0 && _MSC_VER < 1600))
     // old MSVC - hasn't stdint header
     #include <sysForVC/stdint.h>
 #else
@@ -153,7 +153,7 @@ typedef uint64_t stUInt64_t;
 typedef char          stUtf8_t;     //!< signed   UTF-8 char is just a byte
 typedef unsigned char stUtf8u_t;    //!< unsigned UTF-8 char is just a byte
 #if (!defined(__GNUC__) || ((__GNUC__ == 4) && (__GNUC_MINOR__ > 2)) || (__GNUC__ > 4)) \
- || ((defined(_WIN32) || defined(__WIN32__)) && (_MSC_VER >= 1600))
+ || (defined(_WIN32) && (_MSC_VER >= 1600))
     typedef char16_t  stUtf16_t;    //!< UTF-16 char (always unsigned)
     typedef char32_t  stUtf32_t;    //!< UTF-32 char (always unsigned)
 #else // obsolete compilers compatibility
@@ -173,7 +173,7 @@ typedef wchar_t       stUtfWide_t;  //!< wide char (unsigned UTF-16 on Windows p
  * @param ... - arguments to format;
  * @return len (int ).
  */
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     #define stsprintf(argBuffer, argCount, argFormat, ...); _snprintf(argBuffer, argCount, argFormat, __VA_ARGS__);
 #else
     #define stsprintf(argBuffer, argCount, argFormat, ...);  snprintf(argBuffer, argCount, argFormat, __VA_ARGS__);
@@ -405,7 +405,7 @@ inline int stRound(const float theNumber) {
  * application based on it should see import specifier).
  * However C++ method could be marked as "exported" in both cases.
  */
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     #define ST_LOCAL
     #define ST_CPPEXPORT __declspec(dllexport)
     #define ST_CPPIMPORT __declspec(dllimport)
