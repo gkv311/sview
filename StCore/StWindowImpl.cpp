@@ -231,12 +231,13 @@ void StWindowImpl::setTitle(const StString& theTitle) {
     myIsUpdated = true;
 #elif(defined(__linux__) || defined(__linux))
     if(myMaster.hWindow != 0){
-        XTextProperty aTitleProperty;
+        XTextProperty aTitleProperty = {NULL, 0, 0, 0};
         aTitleProperty.encoding = None;
         char* aTitle = (char* )myWindowTitle.toCString();
         Xutf8TextListToTextProperty(myMaster.getDisplay(), &aTitle, 1, XUTF8StringStyle,  &aTitleProperty);
         XSetWMName(myMaster.getDisplay(), myMaster.hWindow, &aTitleProperty);
         XSetWMProperties(myMaster.getDisplay(), myMaster.hWindow, &aTitleProperty, &aTitleProperty, NULL, 0, NULL, NULL, NULL);
+        XFree(aTitleProperty.value);
     }
 #endif
 }
