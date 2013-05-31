@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -10,41 +10,15 @@
 
 #include <StFile/StFileNode.h>
 #include <StFile/StMIMEList.h>
+#include <StStrings/StLogger.h>
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     #include <windows.h>
-#elif(defined(__linux__) || defined(__linux))
+#elif defined(__linux__)
     #include <sys/types.h>
     #include <sys/stat.h>
     #include <dirent.h>
     #include <gtk/gtk.h>
-    #include <X11/Xlib.h>
-namespace {
-    static int dummyXErrorHandler(Display* , XErrorEvent* ) { return 0; }
-    static bool stGtkInitForce() {
-        // remember current error handler
-        typedef int (*xErrHandler_t)(Display* , XErrorEvent* );
-        xErrHandler_t xErrHandlerOrig = XSetErrorHandler(dummyXErrorHandler);
-
-    #ifndef GLIB_VERSION_2_32
-        if(!g_thread_get_initialized()) {
-            g_thread_init(NULL); // Initialize GLIB thread support
-            gdk_threads_init();  // Initialize GDK locks
-        }
-    #endif
-        int argc = 0;
-        bool isOK = gtk_init_check(&argc, NULL);
-
-        // turn back original error handler
-        XSetErrorHandler(xErrHandlerOrig);
-        return isOK;
-    }
-
-    static bool stGtkInit() {
-        static const bool isInitOK = stGtkInitForce();
-        return isInitOK;
-    }
-};
 #endif
 
 /**
@@ -58,7 +32,7 @@ bool StFileNode::openFileDialog(const StString& theFolder,
                                 const StMIMEList& theFilter,
                                 StString& theFilePath,
                                 bool toSave) {
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     const StStringUtfWide aFolder = theFolder.toUtfWide();
     const StStringUtfWide aTitle  = theTitle.toUtfWide();
 
@@ -135,8 +109,8 @@ bool StFileNode::openFileDialog(const StString& theFolder,
         return true;
     }
     return false;
-#elif(defined(__linux__) || defined(__linux))
-    if(!stGtkInit()) {
+#elif defined(__linux__)
+    if(!StMessageBox::initGlobals()) {
         return false;
     }
     gdk_threads_enter();

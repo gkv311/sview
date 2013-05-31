@@ -25,7 +25,7 @@
 
 #include <X11/extensions/Xrandr.h>
 #include <X11/xpm.h>
-#include <gdk/gdkx.h>
+
 #include <cmath>
 
 #include "../share/sView/icons/menu.xpm"
@@ -89,20 +89,7 @@ namespace {
 bool StWindowImpl::create() {
     myKeysState.reset();
 
-    // initialize helper GDK
-    static bool isGdkInitialized = false;
-    if(!isGdkInitialized) {
-        if(!gdk_init_check(NULL, NULL)) {
-            stError("GDK, init failed");
-            //myInitState =
-            return false;
-        }
-        gdk_rgb_init(); // only guess sets up the true colour colour map
-        isGdkInitialized = true;
-    }
-
     // replace default XError handler to ignore some errors
-    /// TODO (Kirill Gavrilov#1) - GTK+ (re)initialization seems to be override our error handler!
     XSetErrorHandler(stXErrorHandler);
 
     myInitState = STWIN_INITNOTSTART;

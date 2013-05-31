@@ -14,7 +14,7 @@
 
 // we do not use st::cerr here to avoid
 // global static variables initialization ambiguity
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     // Unicode version
     #define ST_LOG_CERR std::wcerr
 #else
@@ -56,7 +56,7 @@ StLogger::StLogger(const StString&       theLogFile,
                    const StLogger::Level theFilter,
                    const int             theOptions)
 : myMutex((theOptions & StLogger::ST_OPT_LOCK) ? new StMutexSlim() : (StMutexSlim* )NULL),
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
   myFilePath(theLogFile.toUtfWide()),
 #else
   myFilePath(theLogFile),
@@ -86,9 +86,9 @@ void StLogger::write(const StString&       theMessage,
 
     // log to the file
     if(!myFilePath.isEmpty()) {
-    #if(defined(_WIN32) || defined(__WIN32__))
+    #ifdef _WIN32
         myFileHandle = _wfopen(myFilePath.toCString(), L"ab");
-    #elif(defined(__linux__) || defined(__linux))
+    #elif defined(__linux__)
         myFileHandle =   fopen(myFilePath.toCString(),  "ab");
     #endif
         if(myFileHandle != NULL) {
@@ -157,7 +157,7 @@ void StLogger::write(const StString&       theMessage,
     }
 
     // log to the system journal(s)
-/*#if(defined(_WIN32) || defined(__WIN32__))
+/*#ifdef _WIN32
     // get a handle to the event log
     HANDLE anEventLog = RegisterEventSource(NULL,      // local computer
                                             L"sView"); // event source name
@@ -197,9 +197,9 @@ void StLogger::write(const StString&       theMessage,
     }
 }
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     #include <windows.h>
-#elif(defined(__linux__) || defined(__linux))
+#elif defined(__linux__)
     #include <gtk/gtk.h>
     #include <X11/Xlib.h>
 namespace {
@@ -223,22 +223,25 @@ namespace {
         return isOK;
     }
 
-    static bool stGtkInit() {
-        static const bool isInitOK = stGtkInitForce();
-        return isInitOK;
-    }
 };
 #endif
 
 // GUI dialogs are in Object-C for MacOS
 #ifndef __APPLE__
 
+#ifdef __linux__
+bool StMessageBox::initGlobals() {
+    static const bool isInitOK = stGtkInitForce();
+    return isInitOK;
+}
+#endif
+
 void StMessageBox::Info(const StString& theMessage) {
     StLogger::GetDefault().write(theMessage, StLogger::ST_INFO);
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     MessageBoxW(NULL, theMessage.toUtfWide().toCString(), L"Info", MB_OK | MB_ICONINFORMATION | MB_SETFOREGROUND | MB_TOPMOST);
-#elif(defined(__linux__) || defined(__linux))
-    if(stGtkInit()) {
+#elif defined(__linux__)
+    if(initGlobals()) {
         gdk_threads_enter();
         GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_INFO, GTK_BUTTONS_OK, "%s", theMessage.toCString());
         gtk_dialog_run(GTK_DIALOG(dialog));
@@ -251,10 +254,10 @@ void StMessageBox::Info(const StString& theMessage) {
 
 void StMessageBox::Warn(const StString& theMessage) {
     StLogger::GetDefault().write(theMessage, StLogger::ST_WARNING);
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     MessageBoxW(NULL, theMessage.toUtfWide().toCString(), L"Warning", MB_OK | MB_ICONWARNING | MB_SETFOREGROUND | MB_TOPMOST);
-#elif(defined(__linux__) || defined(__linux))
-    if(stGtkInit()) {
+#elif defined(__linux__)
+    if(initGlobals()) {
         gdk_threads_enter();
         GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, "%s", theMessage.toCString());
         gtk_dialog_run(GTK_DIALOG(dialog));
@@ -267,10 +270,10 @@ void StMessageBox::Warn(const StString& theMessage) {
 
 void StMessageBox::Error(const StString& theMessage) {
     StLogger::GetDefault().write(theMessage, StLogger::ST_ERROR);
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     MessageBoxW(NULL, theMessage.toUtfWide().toCString(), L"Error", MB_OK | MB_ICONERROR | MB_SETFOREGROUND | MB_TOPMOST);
-#elif(defined(__linux__) || defined(__linux))
-    if(stGtkInit()) {
+#elif defined(__linux__)
+    if(initGlobals()) {
         gdk_threads_enter();
         GtkWidget* dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "%s", theMessage.toCString());
         gtk_dialog_run(GTK_DIALOG(dialog));
@@ -282,10 +285,10 @@ void StMessageBox::Error(const StString& theMessage) {
 }
 
 bool StMessageBox::Question(const StString& theMessage) {
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     return MessageBoxW(NULL, theMessage.toUtfWide().toCString(), L"Question", MB_YESNO | MB_ICONQUESTION | MB_SETFOREGROUND | MB_TOPMOST) == IDYES;
-#elif(defined(__linux__) || defined(__linux))
-    if(stGtkInit()) {
+#elif defined(__linux__)
+    if(initGlobals()) {
         gdk_threads_enter();
         GtkWidget* aDialog = gtk_message_dialog_new(NULL, GTK_DIALOG_DESTROY_WITH_PARENT, GTK_MESSAGE_QUESTION, GTK_BUTTONS_YES_NO, "%s", theMessage.toCString());
         gint anAnswer = gtk_dialog_run(GTK_DIALOG(aDialog));

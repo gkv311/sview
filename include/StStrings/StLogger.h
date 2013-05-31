@@ -158,6 +158,12 @@ class StMessageBox {
     ST_CPPEXPORT static bool Question(const StString& theMessage);
     ST_CPPEXPORT static bool QuestionConsole(const StString& theMessage);
 
+        public:
+
+#ifdef __linux__
+    ST_LOCAL static bool initGlobals();
+#endif
+
 };
 
 inline void stInfo           (const StString& theMsg) {        StMessageBox::Info           (theMsg); }
