@@ -71,11 +71,10 @@ StLangMap::~StLangMap() {
 bool StLangMap::open(const StString& theLngFilePath) {
     myLngFile = theLngFilePath;
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     // it is possible to use std::ifstream, but only for ANSI filenames
     HANDLE inFile = CreateFileW(myLngFile.toUtfWide().toCString(), GENERIC_READ, FILE_SHARE_READ, NULL,
                                 OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-    DWORD dwBytesRead = 0;
     if(inFile == INVALID_HANDLE_VALUE) {
         ST_DEBUG_LOG("StLangMap, Failed to open language file \"" + myLngFile + '\"');
         return false;
@@ -89,27 +88,30 @@ bool StLangMap::open(const StString& theLngFilePath) {
     }
 #endif
     char bufferOrig[READ_BUFFER_SIZE]; bufferOrig[0] = '\0';
-    char* bufferLineOrig;
-    bufferLineOrig = new char[1];
+    char* bufferLineOrig = new char[1];
     bufferLineOrig[0] = '\0';
-    size_t lineStart, c = 0;
     size_t aLineSize = 0;
 
     StString bufferLineUTF;
     bool isCont = false;
     size_t oldLen = 0;
 
-#if (defined(_WIN32) || defined(__WIN32__))
-    while(ReadFile(inFile, bufferOrig, READ_BUFFER_SIZE, &dwBytesRead, NULL)) {
-        if(dwBytesRead < 1) {
+#ifdef _WIN32
+    DWORD aBytesRead = 0;
+    while(ReadFile(inFile, bufferOrig, READ_BUFFER_SIZE, &aBytesRead, NULL)) {
+        if(aBytesRead < 1) {
             break;
         }
 #else
     while(!inFile.eof()) {
         inFile.read(bufferOrig, READ_BUFFER_SIZE);
+        const size_t aBytesRead = inFile.gcount();
+        if(aBytesRead < 1) {
+            break;
+        }
 #endif
-        lineStart = 0;
-        for(c = 0; c < READ_BUFFER_SIZE && bufferOrig[c] != '\0'; ++c) {
+        size_t lineStart = 0;
+        for(size_t c = 0; c < (size_t )aBytesRead; ++c) {
             if(bufferOrig[c] == '\n') {
                 if(isCont) {
                     char* aCopy = new char[oldLen + c - lineStart + 1];
@@ -138,13 +140,13 @@ bool StLangMap::open(const StString& theLngFilePath) {
                 isCont = false;
 
             } else if(c == (READ_BUFFER_SIZE - 1)) {
-                char* copy = new char[oldLen + READ_BUFFER_SIZE - lineStart];
+                char* aCopy = new char[oldLen + READ_BUFFER_SIZE - lineStart];
                 if(oldLen > 0) {
-                    stMemCpy(copy, bufferLineOrig, oldLen);
+                    stMemCpy(aCopy, bufferLineOrig, oldLen);
                 }
-                stMemCpy(&copy[oldLen], &bufferOrig[lineStart], (READ_BUFFER_SIZE - lineStart));
+                stMemCpy(&aCopy[oldLen], &bufferOrig[lineStart], (READ_BUFFER_SIZE - lineStart));
                 delete[] bufferLineOrig;
-                bufferLineOrig = copy;
+                bufferLineOrig = aCopy;
                 oldLen += (READ_BUFFER_SIZE - lineStart);
                 isCont = true;
             }
@@ -156,7 +158,8 @@ bool StLangMap::open(const StString& theLngFilePath) {
             }
         }
     }
-#if (defined(_WIN32) || defined(__WIN32__))
+    delete[] bufferLineOrig;
+#ifdef _WIN32
     CloseHandle(inFile);
 #else
     inFile.close();
