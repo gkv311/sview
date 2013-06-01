@@ -211,6 +211,9 @@ class StArray {
 template<typename Type> inline
 StString StArray<Type>::toString(const StString& theSplitter) const {
     StString aString;
+    if(mySize == 0) {
+        return aString;
+    }
     for(size_t anElem = 0;;) {
         aString += myArray[anElem++].toString();
         if(anElem < mySize) {

@@ -203,6 +203,7 @@
 					<Add library="GL" />
 					<Add library="openal" />
 					<Add library="pthread" />
+					<Add library="dl" />
 				</Linker>
 				<ExtraCommands>
 					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
@@ -239,6 +240,7 @@
 					<Add library="GL" />
 					<Add library="openal" />
 					<Add library="pthread" />
+					<Add library="dl" />
 				</Linker>
 				<ExtraCommands>
 					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
@@ -389,6 +391,9 @@
 		</Unit>
 		<Unit filename="lang/russian/StMoviePlayer.lng">
 			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="stMongoose.c">
+			<Option compilerVar="CC" />
 		</Unit>
 		<Extensions>
 			<code_completion />

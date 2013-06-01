@@ -39,6 +39,10 @@ class StVideo;
 class StWindow;
 struct StMovieInfo;
 
+struct mg_context;
+struct mg_connection;
+struct mg_request_info;
+
 class StALDeviceParam : public StInt32Param {
 
         public:
@@ -240,6 +244,13 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL friend SV_THREAD_FUNCTION openFileThread(void* theArg);
     ST_LOCAL void doOpenFileDialog(const size_t theOpenType);
 
+        private: //! @name Web UI methods
+
+    ST_LOCAL static int beginRequestHandler(mg_connection* theConnection);
+
+    ST_LOCAL int beginRequest(mg_connection*         theConnection,
+                              const mg_request_info& theRequestInfo);
+
         private: //! @name private fields
 
     StHandle<StGLContext>      myContext;
@@ -253,6 +264,9 @@ class StMoviePlayer : public StApplication {
     StCondition                myEventDialog;     //!< event to prevent showing multiple open/save file dialogs
     StCondition                myEventLoaded;     //!< indicate that new file was open
     double                     mySeekOnLoad;      //!< seeking target
+
+    mg_context*                myWebCtx;          //!< web UI context
+    volatile bool              myToSwitchFull;    //!< command from web UI
 
     int32_t                    myLastUpdateDay;
     bool                       myToUpdateALList;

@@ -25,6 +25,7 @@
 
 #include <StSocket/StCheckUpdates.h>
 #include <StImage/StImageFile.h>
+#include <StStrings/StStringStream.h>
 
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
@@ -42,6 +43,10 @@
 #include "../StOutDistorted/StOutDistorted.h"
 
 #include <cstdlib> // std::abs(int)
+
+#ifdef ST_HAVE_MONGOOSE
+    #include "mongoose.h"
+#endif
 
 const StString StMoviePlayer::ST_DRAWER_PLUGIN_NAME = "StMoviePlayer";
 
@@ -149,6 +154,9 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
   myEventDialog(false),
   myEventLoaded(false),
   mySeekOnLoad(-1.0),
+  //
+  myWebCtx(NULL),
+  myToSwitchFull(false),
   //
   myLastUpdateDay(0),
   myToUpdateALList(false),
@@ -271,6 +279,13 @@ void StMoviePlayer::releaseDevice() {
 }
 
 StMoviePlayer::~StMoviePlayer() {
+#ifdef ST_HAVE_MONGOOSE
+    if(myWebCtx != NULL) {
+        mg_stop(myWebCtx);
+        myWebCtx = NULL;
+    }
+#endif
+
     myUpdates.nullify();
     releaseDevice();
     // wait video playback thread to quit and release resources
@@ -337,6 +352,14 @@ bool StMoviePlayer::init() {
         myVideo = new StVideo(params.alDevice->getTitle(), myLangMap, myPlayList, aTextureQueue, aSubQueue);
         myVideo->signals.onError  = stSlot(myMsgQueue.access(), &StMsgQueue::doPushError);
         myVideo->signals.onLoaded = stSlot(this,                &StMoviePlayer::doLoaded);
+
+    #ifdef ST_HAVE_MONGOOSE
+        mg_callbacks aCallbacks;
+        stMemZero(&aCallbacks, sizeof(aCallbacks));
+        aCallbacks.begin_request = StMoviePlayer::beginRequestHandler;
+        const char* anOptions[] = { "listening_ports", "8080", NULL };
+        myWebCtx = mg_start(&aCallbacks, this, anOptions);
+    #endif
     }
     myPlayList->setShuffle(params.isShuffle->getValue());
 
@@ -685,6 +708,11 @@ void StMoviePlayer::doNavigate(const StNavigEvent& theEvent) {
 void StMoviePlayer::beforeDraw() {
     if(myGUI.isNull()) {
         return;
+    }
+
+    if(myToSwitchFull) {
+        params.isFullscreen->reverse();
+        myToSwitchFull = false;
     }
 
     const bool isMouseMove = myWindow->isMouseMoved();
@@ -1135,4 +1163,103 @@ bool StMoviePlayer::getCurrentFile(StHandle<StFileNode>&     theFileNode,
 
 void StMoviePlayer::getRecentList(StArrayList<StString>& theList) {
     myPlayList->getRecentList(theList);
+}
+
+int StMoviePlayer::beginRequest(mg_connection*         theConnection,
+                                const mg_request_info& theRequestInfo) {
+#ifdef ST_HAVE_MONGOOSE
+    const StString anURI  = theRequestInfo.uri;
+    const StString aQuery = theRequestInfo.query_string != NULL ? theRequestInfo.query_string : "";
+    StString aContent;
+    if(anURI.isEquals(stCString("/"))) {
+        // return index page
+        const StString aPath = StProcess::getStCoreFolder() + "web" + SYS_FS_SPLITTER + "index.htm";
+        mg_send_file(theConnection, aPath.toCString());
+        return 1;
+    } else if(anURI.isStartsWith(stCString("/web"))) {
+        // return Web UI files
+        const StString aSubPath = anURI.subString(5, size_t(-1));
+        const StString aPath    = StProcess::getStCoreFolder() + "web" + SYS_FS_SPLITTER + aSubPath;
+        mg_send_file(theConnection, aPath.toCString());
+        return 1;
+    } else if(anURI.isStartsWith(stCString("/textures"))) {
+        // return textures images
+        const StString aSubPath = anURI.subString(10, size_t(-1));
+        const StString aPath    = StProcess::getStCoreFolder() + "textures" + SYS_FS_SPLITTER + aSubPath;
+        mg_send_file(theConnection, aPath.toCString());
+        return 1;
+    } else if(anURI.isEquals(stCString("/prev"))) {
+        if(myPlayList->walkToPrev()) {
+            myVideo->doLoadNext();
+        }
+        aContent = "open previous item in playlist...";
+    } else if(anURI.isEquals(stCString("/next"))) {
+        if(myPlayList->walkToNext()) {
+            myVideo->doLoadNext();
+        }
+        aContent = "open next item in playlist...";
+    } else if(anURI.isEquals(stCString("/play_pause"))) {
+        doPlayPause();
+        aContent = "play/pause playback...";
+    } else if(anURI.isEquals(stCString("/stop"))) {
+        doStop();
+        aContent = "stop playback...";
+    } else if(anURI.isEquals(stCString("/fullscr_win"))) {
+        myToSwitchFull = true;
+        aContent = "switch fullscreen/windowed...";
+    } else if(anURI.isEquals(stCString("/current"))) {
+        if(aQuery.isEquals(stCString("id"))) {
+            aContent = myPlayList->getCurrentId();
+        } else if(aQuery.isEquals(stCString("title"))) {
+            aContent = myPlayList->getCurrentTitle();
+        }
+    } else if(anURI.isEquals(stCString("/item"))) {
+        StCLocale aCLocale;
+        const long anItem = stStringToLong(aQuery.toCString(), 10, aCLocale);
+        myPlayList->walkToPosition(anItem);
+        myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
+        myVideo->doLoadNext();
+        aContent = "open item...";
+    } else if(anURI.isEquals(stCString("/version"))) {
+        aContent = StVersionInfo::getSDKVersionString();
+    } else if(anURI.isEquals(stCString("/playlist"))) {
+        // return current playlist
+        StArrayList<StString> aList;
+        myPlayList->getSubList(aList, 0, size_t(-1));
+        if(!aList.isEmpty()) {
+            for(size_t anIter = 0;;) {
+                aContent += aList[anIter++];
+                if(anIter < aList.size()) {
+                    aContent += "\n";
+                } else {
+                    break;
+                }
+            }
+        }
+    } else {
+        aContent = StString("query_string: '") + aQuery + "'\n"
+                 + StString("uri: '") + anURI + "'";
+        //return 0;
+    }
+
+    const StString anAnswer = StString("HTTP/1.1 200 OK\r\n"
+                                       //"Content-Type: text/html; charset=utf-8\r\n"
+                                       "Content-Type: text/plain; charset=utf-8\r\n"
+                                       "Content-Length: ") + aContent.getSize() + "\r\n"
+                                        "\r\n" + aContent;
+
+    // send HTTP reply to the client
+    mg_write(theConnection, anAnswer.toCString(), anAnswer.getSize());
+#endif
+    // returning non-zero tells mongoose that our function has replied to
+    // the client, and mongoose should not send client any more data.
+    return 1;
+}
+
+int StMoviePlayer::beginRequestHandler(mg_connection* theConnection) {
+#ifdef ST_HAVE_MONGOOSE
+    const mg_request_info* aRequestInfo = mg_get_request_info(theConnection);
+    StMoviePlayer* aPlugin = (StMoviePlayer* )aRequestInfo->user_data;
+    return aPlugin->beginRequest(theConnection, *aRequestInfo);
+#endif
 }
