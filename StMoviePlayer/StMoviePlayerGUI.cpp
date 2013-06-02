@@ -477,20 +477,20 @@ StGLMenu* StMoviePlayerGUI::createAudioGainMenu() {
     //aGain    = std::pow(2.0, aGainFactor);
     //aGain_dB = 6.0 * aGainFactor;
     stsprintf(aBuff, 256, "%01.2f", 1.0);
-    aMenu->addItem(aBuff, myPlugin->params.audioGain, 1.0f);
+    aMenu->addItem(aBuff, myPlugin->params.AudioGain, 1.0f);
     stsprintf(aBuff, 256, "%01.2f (-3 dB)", 0.71);
-    aMenu->addItem(aBuff, myPlugin->params.audioGain, std::pow(2.0f, -0.5f));
+    aMenu->addItem(aBuff, myPlugin->params.AudioGain, std::pow(2.0f, -0.5f));
     stsprintf(aBuff, 256, "%01.2f (-6 dB)", 0.5);
-    aMenu->addItem(aBuff, myPlugin->params.audioGain, 0.5f);
+    aMenu->addItem(aBuff, myPlugin->params.AudioGain, 0.5f);
     stsprintf(aBuff, 256, "%01.2f (-9 dB)", 0.35);
-    aMenu->addItem(aBuff, myPlugin->params.audioGain, std::pow(2.0f, -1.5f));
+    aMenu->addItem(aBuff, myPlugin->params.AudioGain, std::pow(2.0f, -1.5f));
     stsprintf(aBuff, 256, "%01.2f (-12 dB)", 0.25);
-    aMenu->addItem(aBuff, myPlugin->params.audioGain, 0.25f);
+    aMenu->addItem(aBuff, myPlugin->params.AudioGain, 0.25f);
     stsprintf(aBuff, 256, "%01.2f (-15 dB)", 0.18);
-    aMenu->addItem(aBuff, myPlugin->params.audioGain, std::pow(2.0f, -2.5f));
+    aMenu->addItem(aBuff, myPlugin->params.AudioGain, std::pow(2.0f, -2.5f));
     stsprintf(aBuff, 256, "%01.2f (-18 dB)", 0.125);
-    aMenu->addItem(aBuff, myPlugin->params.audioGain, 0.125f);
-    aMenu->addItem("Mute", myPlugin->params.audioGain, 0.0f);
+    aMenu->addItem(aBuff, myPlugin->params.AudioGain, 0.125f);
+    aMenu->addItem("Mute", myPlugin->params.AudioMute);
     return aMenu;
 }
 

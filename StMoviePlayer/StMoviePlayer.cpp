@@ -169,13 +169,15 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     myTitle = "sView - Movie Player";
 
     params.alDevice = new StALDeviceParam();
-    params.audioGain = new StFloat32Param( 1.0f, // sound is unattenuated
+    params.AudioGain = new StFloat32Param( 1.0f, // sound is unattenuated
                                            0.0f, // mute
                                           10.0f, // max amplification
                                            1.0f, // default
                                          0.001f, // step
                                          1.e-7f);
-    params.audioGain->signals.onChanged = stSlot(this, &StMoviePlayer::doSetAudioVolume);
+    params.AudioGain->signals.onChanged = stSlot(this, &StMoviePlayer::doSetAudioVolume);
+    params.AudioMute    = new StBoolParam(false);
+    params.AudioMute->signals.onChanged = stSlot(this, &StMoviePlayer::doSetAudioMute);
     params.isFullscreen = new StBoolParam(false);
     params.isFullscreen->signals.onChanged = stSlot(this, &StMoviePlayer::doFullscreen);
     params.toRestoreRatio   = new StBoolParam(false);
@@ -937,7 +939,16 @@ void StMoviePlayer::doSwitchAudioDevice(const int32_t /*theDevId*/) {
 }
 
 void StMoviePlayer::doSetAudioVolume(const float theGain) {
-    myVideo->setAudioVolume(theGain);
+    if(!myVideo.isNull()
+    && !params.AudioMute->getValue()) {
+        myVideo->setAudioVolume(theGain);
+    }
+}
+
+void StMoviePlayer::doSetAudioMute(const bool theToMute) {
+    if(!myVideo.isNull()) {
+        myVideo->setAudioVolume(theToMute ? 0.0f : params.AudioGain->getValue());
+    }
 }
 
 void StMoviePlayer::doUpdateStateLoading() {
@@ -1270,6 +1281,9 @@ int StMoviePlayer::beginRequest(mg_connection*         theConnection,
     } else if(anURI.isEquals(stCString("/stop"))) {
         doStop();
         aContent = "stop playback...";
+    } else if(anURI.isEquals(stCString("/mute"))) {
+        params.AudioMute->reverse();
+        aContent = "audio mute/unmute...";
     } else if(anURI.isEquals(stCString("/fullscr_win"))) {
         myToSwitchFull = true;
         aContent = "switch fullscreen/windowed...";

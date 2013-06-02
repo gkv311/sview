@@ -20,6 +20,7 @@ function doStop()      { postRequest('stop',        function() {}, true); }
 function doListPrev()  { postRequest('prev',        function() {}, true); }
 function doListNext()  { postRequest('next',        function() {}, true); }
 function doFullWin()   { postRequest('fullscr_win', function() {}, true); }
+function doAudioMute() { postRequest('mute',        function() {}, true); }
 function doListItem()  { postRequest('item?' + this.myPos, function() {}, true); }
 
 function doUpdateTitle() {
@@ -175,6 +176,7 @@ window.setInterval(function() { doRefresh() }, 2000);
 <td><a href="javascript:void(0)" onclick="doListPrev();return false;">Previous</a></td>
 <td><a href="javascript:void(0)" onclick="doListNext();return false;">Next</a></td>
 <td><a href="javascript:void(0)" onclick="doStop();return false;">Stop</a></td>
+<td><a href="javascript:void(0)" onclick="doAudioMute();return false;">Mute</a></td>
 <td><a href="javascript:void(0)" onclick="doFullWin();return false;">Fullscreen/Windowed</a></td>
 </tr></table>
 
