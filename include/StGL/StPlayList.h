@@ -134,9 +134,10 @@ class StPlayList {
      */
     ST_CPPEXPORT void clear();
 
-    /**const StPlayItem* getCurrent() const {
-        return myCurrent;
-    }*/
+    /**
+     * @return serial number of playlist content (how many times playlist has been cleared)
+     */
+    ST_CPPEXPORT int32_t getSerial();
 
     inline StStereoParams& changeDefParams() {
         return myDefStParams;
@@ -392,6 +393,9 @@ class StPlayList {
     std::deque< StHandle<StFileNode> > myRecent; //!< list of recently opened files
     size_t                  myRecentLimit;   //!< the maximum size of list with recently opened files
     mutable bool            myIsNewRecent;   //!< flag indicates modified state of recent files list
+
+    StAtomic<int32_t>       mySerial;        //!< serial number of playlist content
+    bool                    myWasCleared;    //!< flag to indicate that playlist was cleared recently
 
 };
 

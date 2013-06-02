@@ -152,7 +152,8 @@ StPlayList::StPlayList(const int  theRecursionDeep,
   myIsShuffle(false),
   myIsLoopFlag(theIsLoop),
   myRecentLimit(10),
-  myIsNewRecent(false) {
+  myIsNewRecent(false),
+  myWasCleared(false) {
     //
 }
 
@@ -193,8 +194,23 @@ void StPlayList::setShuffle(bool theShuffle) {
     myIsShuffle = theShuffle;
 }
 
+int32_t StPlayList::getSerial() {
+    StMutexAuto anAutoLock(myMutex);
+    if(myWasCleared
+    && myFirst != NULL) {
+        myWasCleared = false;
+        mySerial.increment();
+    }
+    return mySerial.getValue();
+}
+
 void StPlayList::clear() {
     StMutexAuto anAutoLock(myMutex);
+    if(myFirst != NULL) {
+        myWasCleared = true;
+        mySerial.increment();
+    }
+
     if(!myPlsFile.isNull()
     && myCurrent != NULL) {
         if(myPlsFile->isEmpty()) {

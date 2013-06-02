@@ -4,8 +4,9 @@
 
 <script>
 
-var myCurrentId = -1;
-var myList;
+var myPlayItem   = -1; // currently played item id within playlist
+var myListSerial = -1; // playlist serail number
+var myList;            // playlist content
 
 function postRequest(theUrl, theFunc, theASync) {
   var aReq = new XMLHttpRequest();
@@ -20,6 +21,24 @@ function doListPrev()  { postRequest('prev',        function() {}, true); }
 function doListNext()  { postRequest('next',        function() {}, true); }
 function doFullWin()   { postRequest('fullscr_win', function() {}, true); }
 function doListItem()  { postRequest('item?' + this.myPos, function() {}, true); }
+
+function doUpdateTitle() {
+  postRequest('current?title', function() {
+    if(this.readyState == 4 && this.status == 200) {
+      var aCurrTitle = this.responseText;
+      document.getElementById('stTitle').innerHTML = aCurrTitle;
+      if(aCurrTitle.length === 0) {
+        document.title = 'sView Web UI';
+      } else {
+        document.title = aCurrTitle + ' - sView Web UI';
+      }
+
+      if(myList && myList.rows.length == 0) {
+        myListSerial = -1;
+      }
+    }
+  }, true);
+}
 
 function doMakePlaylist(theList) {
   myList = document.createElement('table');
@@ -49,7 +68,7 @@ function doMakePlaylist(theList) {
       this.style.backgroundColor = this.myOldColor;
     };
 
-    if(anIter == myCurrentId) {
+    if(anIter == myPlayItem) {
       aRow.style.backgroundColor = 'silver';
       aRow.myOldColor = 'silver';
     }
@@ -71,6 +90,8 @@ function doMakePlaylist(theList) {
   var aRoot = document.getElementById('stPlaylist');
   aRoot.innerHTML = "";
   aRoot.appendChild(myList);
+
+  doUpdateTitle();
 }
 
 function refreshPlaylist() {
@@ -88,39 +109,49 @@ function doRefresh() {
       return;
     }
 
-    var aCurrId = this.responseText;
-    if(aCurrId == myCurrentId) {
+    var aCurrArr = this.responseText.split(":");
+    var aCurrListId = aCurrArr[0];
+    var aCurrItemId = aCurrArr[1];
+    if(aCurrListId == myListSerial
+    && aCurrItemId == myPlayItem) {
       return;
     }
 
+    // update entire playlist
+    if(aCurrListId != myListSerial) {
+      myListSerial = aCurrListId;
+      myPlayItem   = aCurrItemId;
+      postRequest('playlist', function() {
+        if(this.readyState == 4 && this.status == 200) {
+          var aListStr = this.responseText;
+          doMakePlaylist(aListStr.split("\n"));
+        }
+      }, true);
+      return;
+    }
+
+    if(aCurrItemId == myPlayItem) {
+      return;
+    }
+
+    // hi-light currently played item
     if(myList) {
-      if(myCurrentId >= 0 && myCurrentId < myList.rows.length) {
-        var aRowPrev = myList.rows[myCurrentId];
+      if(myPlayItem >= 0 && myPlayItem < myList.rows.length) {
+        var aRowPrev = myList.rows[myPlayItem];
         aRowPrev.style.backgroundColor = aRowPrev.myColorPassive;
       }
-      if(aCurrId >= 0 && aCurrId < myList.rows.length) {
-        var aRow = myList.rows[aCurrId];
+      if(aCurrItemId >= 0 && aCurrItemId < myList.rows.length) {
+        var aRow = myList.rows[aCurrItemId];
         aRow.style.backgroundColor = 'silver';
         aRow.myOldColor = 'silver';
       }
     }
-    myCurrentId = aCurrId;
-
-    postRequest('current?title', function() {
-      if(this.readyState == 4 && this.status == 200) {
-        var aCurrTitle = this.responseText;
-        document.getElementById('stTitle').innerHTML = aCurrTitle;
-        if(aCurrTitle.length === 0) {
-          document.title = 'sView Web UI';
-        } else {
-          document.title = aCurrTitle + ' - sView Web UI';
-        }
-      }
-    }, true);
+    myPlayItem = aCurrItemId;
+    doUpdateTitle();
   }, true);
 }
 
-window.setInterval(function() { doRefresh() }, 5000);
+window.setInterval(function() { doRefresh() }, 2000);
 
 </script>
 
@@ -147,10 +178,9 @@ window.setInterval(function() { doRefresh() }, 5000);
 <td><a href="javascript:void(0)" onclick="doFullWin();return false;">Fullscreen/Windowed</a></td>
 </tr></table>
 
-<button onclick="refreshPlaylist()">Refresh playlist</button>
+<button onclick="doRefresh()">Refresh</button>
 <div id="stPlaylist"></div>
 <script>
-  refreshPlaylist();
   doRefresh();
 </script>
 

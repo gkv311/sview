@@ -1275,7 +1275,7 @@ int StMoviePlayer::beginRequest(mg_connection*         theConnection,
         aContent = "switch fullscreen/windowed...";
     } else if(anURI.isEquals(stCString("/current"))) {
         if(aQuery.isEquals(stCString("id"))) {
-            aContent = myPlayList->getCurrentId();
+            aContent = StString(myPlayList->getSerial()) + ":" + myPlayList->getCurrentId();
         } else if(aQuery.isEquals(stCString("title"))) {
             aContent = myPlayList->getCurrentTitle();
         }
