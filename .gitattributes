@@ -4,6 +4,8 @@
 *.mm        text
 *.c         text
 *.js        eol=lf
+*.htm       eol=lf
+*.html      eol=lf
 *.sh        eol=lf
 *.workspace eol=lf
 *.cbp       eol=lf

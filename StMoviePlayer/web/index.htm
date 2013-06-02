@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<script>
+
+var myCurrentId = -1;
+var myList;
+
+function postRequest(theUrl, theFunc, theASync) {
+  var aReq = new XMLHttpRequest();
+  aReq.onreadystatechange = theFunc;
+  aReq.open("GET", theUrl, theASync);
+  aReq.send();
+}
+
+function doPlayPause() { postRequest('play_pause',  function() {}, true); }
+function doStop()      { postRequest('stop',        function() {}, true); }
+function doListPrev()  { postRequest('prev',        function() {}, true); }
+function doListNext()  { postRequest('next',        function() {}, true); }
+function doFullWin()   { postRequest('fullscr_win', function() {}, true); }
+function doListItem()  { postRequest('item?' + this.myPos, function() {}, true); }
+
+function doMakePlaylist(theList) {
+  myList = document.createElement('table');
+  myList.border = '1';
+  myList.width  = '100%';
+  myList.height = '100%';
+  myList.style.borderCollapse = 'collapse';
+
+  for(var anIter = 0; anIter < theList.length; ++anIter) {
+    var anItem = theList[anIter];
+
+    var aLink = document.createElement('a');
+    aLink.href = 'javascript:void(0)';
+    aLink.innerHTML = anItem;
+
+    var aRow = myList.insertRow(-1);
+    aRow.myPos = anIter;
+    aRow.onclick = doListItem;
+    aRow.myColorPassive = (anIter % 2) ? 'aliceblue' : 'white';
+    aRow.style.backgroundColor = aRow.myColorPassive;
+    aRow.onmouseover = function() {
+      this.myOldColor = this.style.backgroundColor;
+      this.style.backgroundColor = 'lightsteelblue';
+    };
+
+    aRow.onmouseout = function() {
+      this.style.backgroundColor = this.myOldColor;
+    };
+
+    if(anIter == myCurrentId) {
+      aRow.style.backgroundColor = 'silver';
+      aRow.myOldColor = 'silver';
+    }
+
+    var aCellId = aRow.insertCell(-1);
+    aCellId.width  = '50';
+    aCellId.height = '30';
+    aCellId.style.verticalAlign = 'middle';
+    aCellId.style.textAlign     = 'center';
+    aCellId.innerHTML = anIter;
+
+    var aCellText = aRow.insertCell(-1);
+    aCellText.height = '30';
+    aCellText.style.verticalAlign = 'middle';
+    aCellText.style.textAlign     = 'left';
+    aCellText.appendChild(aLink);
+  }
+
+  var aRoot = document.getElementById('stPlaylist');
+  aRoot.innerHTML = "";
+  aRoot.appendChild(myList);
+}
+
+function refreshPlaylist() {
+  postRequest('playlist', function() {
+    if(this.readyState == 4 && this.status == 200) {
+      var aListStr = this.responseText;
+      doMakePlaylist(aListStr.split("\n"));
+    }
+  }, true);
+}
+
+function doRefresh() {
+  postRequest('current?id', function() {
+    if(this.readyState != 4 || this.status != 200) {
+      return;
+    }
+
+    var aCurrId = this.responseText;
+    if(aCurrId == myCurrentId) {
+      return;
+    }
+
+    if(myList) {
+      if(myCurrentId >= 0 && myCurrentId < myList.rows.length) {
+        var aRowPrev = myList.rows[myCurrentId];
+        aRowPrev.style.backgroundColor = aRowPrev.myColorPassive;
+      }
+      if(aCurrId >= 0 && aCurrId < myList.rows.length) {
+        var aRow = myList.rows[aCurrId];
+        aRow.style.backgroundColor = 'silver';
+        aRow.myOldColor = 'silver';
+      }
+    }
+    myCurrentId = aCurrId;
+
+    postRequest('current?title', function() {
+      if(this.readyState == 4 && this.status == 200) {
+        var aCurrTitle = this.responseText;
+        document.getElementById('stTitle').innerHTML = aCurrTitle;
+        if(aCurrTitle.length === 0) {
+          document.title = 'sView Web UI';
+        } else {
+          document.title = aCurrTitle + ' - sView Web UI';
+        }
+      }
+    }, true);
+  }, true);
+}
+
+window.setInterval(function() { doRefresh() }, 5000);
+
+</script>
+
+</head>
+<body>
+
+<h2>sView - Remote Control (<span id="stVer"></span>)</h2>
+<script>
+  postRequest('version', function() {
+    if(this.readyState == 4 && this.status == 200) {
+      document.getElementById('stVer').innerHTML = this.responseText;
+    }
+  }, false);
+</script>
+
+
+<div id="stTitle"></div>
+
+<table><tr>
+<td><a href="javascript:void(0)" onclick="doPlayPause();return false;">Play/Pause</a></td>
+<td><a href="javascript:void(0)" onclick="doListPrev();return false;">Previous</a></td>
+<td><a href="javascript:void(0)" onclick="doListNext();return false;">Next</a></td>
+<td><a href="javascript:void(0)" onclick="doStop();return false;">Stop</a></td>
+<td><a href="javascript:void(0)" onclick="doFullWin();return false;">Fullscreen/Windowed</a></td>
+</tr></table>
+
+<button onclick="refreshPlaylist()">Refresh playlist</button>
+<div id="stPlaylist"></div>
+<script>
+  refreshPlaylist();
+  doRefresh();
+</script>
+
+</body>
+</html>
