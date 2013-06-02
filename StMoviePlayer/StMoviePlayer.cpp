@@ -73,6 +73,10 @@ namespace {
     static const char ST_SETTING_UPDATES_LAST_CHECK[] = "updatesLastCheck";
     static const char ST_SETTING_UPDATES_INTERVAL[]   = "updatesInterval";
 
+    static const char ST_SETTING_WEBUI_ON[]      = "webuiOn";
+    static const char ST_SETTING_WEBUI_PORT[]    = "webuiPort";
+    static const char ST_SETTING_WEBUI_ERRORS[]  = "webuiShowErrors";
+
     static const char ST_ARGUMENT_FILE[]       = "file";
     static const char ST_ARGUMENT_FILE_LEFT[]  = "left";
     static const char ST_ARGUMENT_FILE_RIGHT[] = "right";
@@ -186,7 +190,13 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     params.IsVSyncOn   = new StBoolParam(true);
     params.IsVSyncOn->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchVSync);
     StApplication::params.VSyncMode->setValue(StGLContext::VSync_ON);
-    params.ToLimitFps  = new StBoolParam(true);
+    params.ToLimitFps       = new StBoolParam(true);
+    params.StartWebUI       = new StEnumParam(WEBUI_OFF, "Web UI start option");
+    params.StartWebUI->changeValues().add("Off");
+    params.StartWebUI->changeValues().add("Launch once");
+    params.StartWebUI->changeValues().add("Launch every time");
+    params.ToPrintWebErrors = new StBoolParam(true);
+    params.WebUIPort        = new StInt32Param(8080);
     params.audioStream = new StInt32Param(-1);
     params.audioStream->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchAudioStream);
     params.subtitlesStream = new StInt32Param(-1);
@@ -202,9 +212,18 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     mySettings->loadParam (ST_SETTING_SHUFFLE,            params.isShuffle);
     mySettings->loadParam (ST_SETTING_GLOBAL_MKEYS,       params.areGlobalMKeys);
     mySettings->loadParam (ST_SETTING_SHOW_LIST,          params.ToShowPlayList);
+
     mySettings->loadParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
     mySettings->loadParam (ST_SETTING_VSYNC,              params.IsVSyncOn);
     mySettings->loadParam (ST_SETTING_LIMIT_FPS,          params.ToLimitFps);
+
+    mySettings->loadParam (ST_SETTING_WEBUI_ON,           params.StartWebUI);
+    mySettings->loadParam (ST_SETTING_WEBUI_PORT,         params.WebUIPort);
+    mySettings->loadParam (ST_SETTING_WEBUI_ERRORS,       params.ToPrintWebErrors);
+    if(params.StartWebUI->getValue() == WEBUI_ONCE) {
+        params.StartWebUI->setValue(WEBUI_OFF);
+    }
+    params.StartWebUI->signals.onChanged += stSlot(this, &StMoviePlayer::doSwitchWebUI);
 
     StString aSavedALDevice;
     mySettings->loadString(ST_SETTING_OPENAL_DEVICE,      aSavedALDevice);
@@ -264,9 +283,14 @@ void StMoviePlayer::releaseDevice() {
         mySettings->saveParam (ST_SETTING_SHUFFLE,            params.isShuffle);
         mySettings->saveParam (ST_SETTING_GLOBAL_MKEYS,       params.areGlobalMKeys);
         mySettings->saveParam (ST_SETTING_SHOW_LIST,          params.ToShowPlayList);
+
         mySettings->saveParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
         mySettings->saveParam (ST_SETTING_VSYNC,              params.IsVSyncOn);
         mySettings->saveParam (ST_SETTING_LIMIT_FPS,          params.ToLimitFps);
+
+        mySettings->saveParam (ST_SETTING_WEBUI_ON,           params.StartWebUI);
+        mySettings->saveParam (ST_SETTING_WEBUI_PORT,         params.WebUIPort);
+        mySettings->saveParam (ST_SETTING_WEBUI_ERRORS,       params.ToPrintWebErrors);
 
         if(!myVideo.isNull()) {
             mySettings->saveString(ST_SETTING_RECENT_FILES,   myPlayList->dumpRecentList());
@@ -279,17 +303,58 @@ void StMoviePlayer::releaseDevice() {
 }
 
 StMoviePlayer::~StMoviePlayer() {
+    doStopWebUI();
+
+    myUpdates.nullify();
+    releaseDevice();
+    // wait video playback thread to quit and release resources
+    myVideo.nullify();
+}
+
+void StMoviePlayer::doStopWebUI() {
 #ifdef ST_HAVE_MONGOOSE
     if(myWebCtx != NULL) {
         mg_stop(myWebCtx);
         myWebCtx = NULL;
     }
 #endif
+}
 
-    myUpdates.nullify();
-    releaseDevice();
-    // wait video playback thread to quit and release resources
-    myVideo.nullify();
+void StMoviePlayer::doStartWebUI() {
+#ifdef ST_HAVE_MONGOOSE
+    if(params.StartWebUI->getValue() == WEBUI_OFF
+    || myWebCtx != NULL) {
+        return;
+    }
+
+    mg_callbacks aCallbacks;
+    stMemZero(&aCallbacks, sizeof(aCallbacks));
+    aCallbacks.begin_request = StMoviePlayer::beginRequestHandler;
+    const StString aPort = params.WebUIPort->getValue();
+    const char* anOptions[] = { "listening_ports", aPort.toCString(), NULL };
+    myWebCtx = mg_start(&aCallbacks, this, anOptions);
+    if(myWebCtx == NULL
+    && params.ToPrintWebErrors->getValue()) {
+        myMsgQueue->pushError(StString("Web UI can not be started on ") + aPort + " port!");
+    }
+#endif
+}
+
+void StMoviePlayer::doSwitchWebUI(const int32_t theValue) {
+#ifdef ST_HAVE_MONGOOSE
+    switch(theValue) {
+        case WEBUI_ONCE:
+        case WEBUI_AUTO: {
+            doStartWebUI();
+            break;
+        }
+        case WEBUI_OFF:
+        default: {
+            doStopWebUI();
+            break;
+        }
+    }
+#endif
 }
 
 bool StMoviePlayer::init() {
@@ -354,11 +419,7 @@ bool StMoviePlayer::init() {
         myVideo->signals.onLoaded = stSlot(this,                &StMoviePlayer::doLoaded);
 
     #ifdef ST_HAVE_MONGOOSE
-        mg_callbacks aCallbacks;
-        stMemZero(&aCallbacks, sizeof(aCallbacks));
-        aCallbacks.begin_request = StMoviePlayer::beginRequestHandler;
-        const char* anOptions[] = { "listening_ports", "8080", NULL };
-        myWebCtx = mg_start(&aCallbacks, this, anOptions);
+        doStartWebUI();
     #endif
     }
     myPlayList->setShuffle(params.isShuffle->getValue());
@@ -1170,7 +1231,8 @@ int StMoviePlayer::beginRequest(mg_connection*         theConnection,
 #ifdef ST_HAVE_MONGOOSE
     const StString anURI  = theRequestInfo.uri;
     const StString aQuery = theRequestInfo.query_string != NULL ? theRequestInfo.query_string : "";
-    StString aContent;
+
+    // process general requests
     if(anURI.isEquals(stCString("/"))) {
         // return index page
         const StString aPath = StProcess::getStCoreFolder() + "web" + SYS_FS_SPLITTER + "index.htm";
@@ -1188,7 +1250,11 @@ int StMoviePlayer::beginRequest(mg_connection*         theConnection,
         const StString aPath    = StProcess::getStCoreFolder() + "textures" + SYS_FS_SPLITTER + aSubPath;
         mg_send_file(theConnection, aPath.toCString());
         return 1;
-    } else if(anURI.isEquals(stCString("/prev"))) {
+    }
+
+    // process AJAX requests
+    StString aContent;
+    if(anURI.isEquals(stCString("/prev"))) {
         if(myPlayList->walkToPrev()) {
             myVideo->doLoadNext();
         }

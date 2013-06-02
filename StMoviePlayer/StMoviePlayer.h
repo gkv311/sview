@@ -104,6 +104,12 @@ class StMoviePlayer : public StApplication {
         BLOCK_SLEEP_FULLSCREEN = 3,
     };
 
+    enum {
+        WEBUI_OFF  = 0, //!< do not launch Web UI
+        WEBUI_ONCE = 1, //!< launch Web UI once
+        WEBUI_AUTO = 2, //!< launch Web UI each time
+    };
+
         public: //! @name interface methods' implementations
 
     /**
@@ -191,6 +197,9 @@ class StMoviePlayer : public StApplication {
         StHandle<StBoolParam>     ToShowFps;        //!< display FPS meter
         StHandle<StBoolParam>     ToLimitFps;       //!< limit CPU usage or not
         StHandle<StBoolParam>     IsVSyncOn;        //!< flag to use VSync
+        StHandle<StEnumParam>     StartWebUI;       //!< to start Web UI or not
+        StHandle<StBoolParam>     ToPrintWebErrors; //!< print Web UI starting errors
+        StHandle<StInt32Param>    WebUIPort;        //!< port to start Web UI
         StHandle<StInt32Param>    audioStream;      //!< active Audio stream
         StHandle<StInt32Param>    subtitlesStream;  //!< active Subtitles stream
         StHandle<StInt32Param>    blockSleeping;    //!< active Audio stream
@@ -250,6 +259,10 @@ class StMoviePlayer : public StApplication {
 
     ST_LOCAL int beginRequest(mg_connection*         theConnection,
                               const mg_request_info& theRequestInfo);
+
+    ST_LOCAL void doStopWebUI();
+    ST_LOCAL void doStartWebUI();
+    ST_LOCAL void doSwitchWebUI(const int32_t theValue);
 
         private: //! @name private fields
 

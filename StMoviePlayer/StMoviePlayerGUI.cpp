@@ -177,6 +177,9 @@ void StMoviePlayerGUI::createMainMenu() {
 StGLMenu* StMoviePlayerGUI::createMediaMenu() {
     StGLMenu* aMenuMedia = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     myMenuRecent             = createRecentMenu();       // Root -> Media -> Recent files menu
+#ifdef ST_HAVE_MONGOOSE
+    StGLMenu* aMenuWebUI     = createWebUIMenu();        // Root -> Media -> Web UI menu
+#endif
     StGLMenu* aMenuSrcFormat = createSrcFormatMenu();    // Root -> Media -> Source format menu
     myMenuOpenAL             = createOpenALDeviceMenu(); // Root -> Media -> OpenAL Device
     StGLMenu* aMenuVolume    = createAudioGainMenu();
@@ -187,11 +190,6 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
                         "Open Movie..."), aMenuOpenImage);
     aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_SAVE_SNAPSHOT_AS,
                         "Save Snapshot As..."), aMenuSaveImage);
-
-    //aMenuMedia->addItem("First File in folder", myPlugin, StMoviePlayer::doListFirst);
-    //aMenuMedia->addItem("Prev File in folder",  myPlugin, StMoviePlayer::doListPrev);
-    //aMenuMedia->addItem("Next File in folder",  myPlugin, StMoviePlayer::doListNext);
-    //aMenuMedia->addItem("Last File in folder",  myPlugin, StMoviePlayer::doListLast);
 
     aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_SRC_FORMAT,
                         "Source stereo format"), aMenuSrcFormat);
@@ -206,7 +204,9 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
 
     aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_RECENT,
                         "Recent files"), myMenuRecent);
-
+#ifdef ST_HAVE_MONGOOSE
+    aMenuMedia->addItem(StString("Web UI:") + myPlugin->params.WebUIPort->getValue(), aMenuWebUI);
+#endif
     aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_QUIT, "Quit"))
               ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doQuit);
     return aMenuMedia;
@@ -330,6 +330,18 @@ void StMoviePlayerGUI::fillRecentMenu(StGLMenu* theMenu) {
         theMenu->addItem(aList[anIter], int32_t(anIter))
                ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doOpenRecent);
     }
+}
+
+/**
+ * Root -> Media  -> Web UI menu
+ */
+StGLMenu* StMoviePlayerGUI::createWebUIMenu() {
+    StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+    aMenu->addItem("Turn Off",         myPlugin->params.StartWebUI, StMoviePlayer::WEBUI_OFF);
+    aMenu->addItem("Launch once",      myPlugin->params.StartWebUI, StMoviePlayer::WEBUI_ONCE);
+    aMenu->addItem("Launch each time", myPlugin->params.StartWebUI, StMoviePlayer::WEBUI_AUTO);
+    aMenu->addItem("Show errors",      myPlugin->params.ToPrintWebErrors);
+    return aMenu;
 }
 
 void StMoviePlayerGUI::updateRecentMenu() {
