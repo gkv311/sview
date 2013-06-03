@@ -76,7 +76,7 @@ StApplication::StApplication(const StNativeWin_t         theParentWin,
 }
 
 void StApplication::stApplicationInit(const StHandle<StOpenInfo>& theOpenInfo) {
-    myGlobalSettings = new StSettings("sview");
+    StSettings aGlobalSettings("sview");
     params.ActiveDevice = new StEnumParam(0, "Change device");
     params.ActiveDevice->signals.onChanged.connect(this, &StApplication::doChangeDevice);
 
@@ -86,9 +86,9 @@ void StApplication::stApplicationInit(const StHandle<StOpenInfo>& theOpenInfo) {
     params.VSyncMode->changeValues().add("Mixed");
 
     bool isOutModeAuto = true; // AUTO by default
-    myGlobalSettings->loadBool(ST_SETTING_RENDERER_AUTO, isOutModeAuto);
+    aGlobalSettings.loadBool(ST_SETTING_RENDERER_AUTO, isOutModeAuto);
     if(!isOutModeAuto) {
-        myGlobalSettings->loadString(ST_SETTING_RENDERER, myRendId);
+        aGlobalSettings.loadString(ST_SETTING_RENDERER, myRendId);
     }
 
     // add additional paths
@@ -140,12 +140,13 @@ bool StApplication::open() {
         return true;
     }
 
+    StSettings aGlobalSettings("sview");
     if(!mySwitchTo.isNull()) {
         myRendId = mySwitchTo->getRendererId();
         myWindow = mySwitchTo;
         mySwitchTo.nullify();
-        myGlobalSettings->saveString(ST_SETTING_RENDERER,      myRendId);
-        myGlobalSettings->saveBool  (ST_SETTING_RENDERER_AUTO, false);
+        aGlobalSettings.saveString(ST_SETTING_RENDERER,      myRendId);
+        aGlobalSettings.saveBool  (ST_SETTING_RENDERER_AUTO, false);
     } else {
         if(myRenderers.isEmpty()) {
             myWindow = new StWindow(myWinParent);
@@ -158,8 +159,8 @@ bool StApplication::open() {
                     StHandle<StWindow> aWin = myRenderers[anIter];
                     if(myRendId == aWin->getRendererId()) {
                         myWindow = aWin;
-                        myGlobalSettings->saveString(ST_SETTING_RENDERER,      myRendId);
-                        myGlobalSettings->saveBool  (ST_SETTING_RENDERER_AUTO, isAuto);
+                        aGlobalSettings.saveString(ST_SETTING_RENDERER,      myRendId);
+                        aGlobalSettings.saveBool  (ST_SETTING_RENDERER_AUTO, isAuto);
                         break;
                     }
                 }
@@ -172,8 +173,8 @@ bool StApplication::open() {
 
             if(isAuto) {
                 // autodetection
-                myGlobalSettings->saveString(ST_SETTING_RENDERER,      ST_SETTING_AUTO_VALUE);
-                myGlobalSettings->saveBool  (ST_SETTING_RENDERER_AUTO, isAuto);
+                aGlobalSettings.saveString(ST_SETTING_RENDERER,      ST_SETTING_AUTO_VALUE);
+                aGlobalSettings.saveBool  (ST_SETTING_RENDERER_AUTO, isAuto);
                 myWindow = myRenderers[0];
                 if(!myDevices.isEmpty()) {
                     StHandle<StOutDevice> aBestDev = myDevices[0];
