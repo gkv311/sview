@@ -19,7 +19,10 @@
 // THE SOFTWARE.
 
 #if defined(_WIN32)
-#define _CRT_SECURE_NO_WARNINGS // Disable deprecation warning in VS2005
+  // Disable deprecation warning in VS2005
+  #ifndef _CRT_SECURE_NO_WARNINGS
+    #define _CRT_SECURE_NO_WARNINGS
+  #endif
 #else
 #ifdef __linux__
 #define _XOPEN_SOURCE 600     // For flockfile() on Linux
@@ -2855,9 +2858,9 @@ static int parse_http_message(char *buf, int len, struct mg_request_info *ri) {
     ri->request_method = skip(&buf, " ");
     ri->uri = skip(&buf, " ");
     ri->http_version = skip(&buf, "\r\n");
-    if (((is_request = is_valid_http_method(ri->request_method)) &&
-         memcmp(ri->http_version, "HTTP/", 5) != 0) ||
-        (!is_request && memcmp(ri->request_method, "HTTP/", 5)) != 0) {
+    is_request = is_valid_http_method(ri->request_method);
+    if ((is_request && memcmp(ri->http_version,   "HTTP/", 5) != 0)
+    || (!is_request && memcmp(ri->request_method, "HTTP/", 5) != 0)) {
       request_length = -1;
     } else {
       if (is_request) {
