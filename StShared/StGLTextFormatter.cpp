@@ -213,7 +213,8 @@ void StGLTextFormatter::append(StGLContext&    theCtx,
 }
 
 void StGLTextFormatter::newLine(const size_t theLastRect) {
-    if(myRectLineStart >= myRectsNb) {
+    if(myRectLineStart >= myRectsNb
+    || theLastRect == size_t(-1)) {
         ++myLinesNb;
         myPenCurrLine -= myLineSpacing;
         return;
