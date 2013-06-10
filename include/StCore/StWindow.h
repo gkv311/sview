@@ -78,6 +78,15 @@ enum StWinSlave {
 };
 
 /**
+ * Splitting configuration.
+ */
+enum StWinSplit {
+    StWinSlave_splitOff,         //!< do not split the window
+    StWinSlave_splitHorizontal,  //!< split window horizontally
+    StWinSlave_splitVertical,    //!< split window vertically
+};
+
+/**
  * Window attributes.
  */
 enum StWinAttr {
@@ -89,6 +98,7 @@ enum StWinAttr {
     StWinAttr_GlobalMediaKeys,     //!< boolean, register system hot-key to capture multimedia even without window focus, FALSE by default
     StWinAttr_SlaveCfg,            //!< StWinSlave, create StWindow with slave window and specify slave window position rules, StWinSlave_slaveOff by default
     StWinAttr_SlaveMon,            //!< integer, slave window monitor id, 1 by default
+    StWinAttr_SplitCfg,            //!< StWinSplit, split master window
 };
 
 typedef struct tagStSlaveWindowCfg {

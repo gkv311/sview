@@ -296,6 +296,7 @@ class StWindowImpl {
         bool       AreGlobalMediaKeys; //!< register system hot-key to capture multimedia even without window focus
         StWinSlave Slave;              //!< slave configuration
         int8_t     SlaveMonId;         //!< on which monitor show slave window (1 by default)
+        StWinSplit Split;              //!< split window configuration
     } attribs;
 
     struct {
@@ -319,6 +320,7 @@ class StWindowImpl {
     double         myLastEventsTime;   //!< time when processEvents() was last called
     bool           myEventsThreaded;
     bool           myIsMouseMoved;
+
 };
 
 #endif //__StWindowImpl_h_

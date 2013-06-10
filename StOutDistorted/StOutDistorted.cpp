@@ -37,7 +37,8 @@ namespace {
     static const char ST_SETTING_DEVICE_ID[] = "deviceId";
     static const char ST_SETTING_WINDOWPOS[] = "windowPos";
     static const char ST_SETTING_LAYOUT[]    = "layout";
-    static const char ST_SETTING_DISTORTION[]= "distortion";
+    static const char ST_SETTING_BARREL[]    = "barrel";
+    static const char ST_SETTING_ANAMORPH[]  = "anamorph";
 
     // translation resources
     enum {
@@ -245,7 +246,8 @@ void StOutDistorted::getDevices(StOutDevicesList& theList) const {
 
 void StOutDistorted::getOptions(StParamsList& theList) const {
     theList.add(params.Layout);
-    theList.add(params.Distortion);
+    theList.add(params.Barrel);
+    theList.add(params.Anamorph);
 }
 
 StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
@@ -291,21 +293,22 @@ StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
     aDevDistorted->Desc     = aLangMap.changeValueId(STTR_DISTORTED_DESC, "Oculus Rift");
     myDevices.add(aDevDistorted);
 
+    // Distortion parameters
+    params.Barrel = new StBoolParamNamed(aSupportLevel != ST_DEVICE_SUPPORT_NONE,
+                                         aLangMap.changeValueId(STTR_PARAMETER_DISTORTION_BARREL,  "Barrel Side-by-Side"));
+    mySettings->loadParam(ST_SETTING_BARREL, params.Barrel);
+    params.Anamorph = new StBoolParamNamed(false, "Anamorph");
+    mySettings->loadParam(ST_SETTING_ANAMORPH, params.Anamorph);
+    params.Anamorph->signals.onChanged = stSlot(this, &StOutDistorted::doSwitchAnamorph);
+
     // Layout option
     StHandle<StEnumParam> aLayoutParam = new StEnumParam(LAYOUT_SIDE_BY_SIDE,
                                                          aLangMap.changeValueId(STTR_PARAMETER_LAYOUT, "Layout"));
     aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_SBS,       "Side-by-Side"));
     aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_OVERUNDER, "Top-and-Bottom"));
     params.Layout = aLayoutParam;
+    params.Layout->signals.onChanged = stSlot(this, &StOutDistorted::doSwitchLayout);
     mySettings->loadParam(ST_SETTING_LAYOUT, params.Layout);
-
-    // Distortion parameter
-    StHandle<StEnumParam> aDistParam = new StEnumParam(aSupportLevel == ST_DEVICE_SUPPORT_NONE ? DISTORTION_OFF : DISTORTION_BARREL,
-                                                       aLangMap.changeValueId(STTR_PARAMETER_DISTORTION, "Distortion"));
-    aDistParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_DISTORTION_OFF,    "None"));
-    aDistParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_DISTORTION_BARREL, "Barrel Side-by-Side"));
-    params.Distortion = aDistParam;
-    mySettings->loadParam(ST_SETTING_DISTORTION, params.Distortion);
 
     // load window position
     StRect<int32_t> aRect(256, 768, 256, 1024);
@@ -334,7 +337,8 @@ void StOutDistorted::releaseResources() {
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
     }
     mySettings->saveParam(ST_SETTING_LAYOUT,     params.Layout);
-    mySettings->saveParam(ST_SETTING_DISTORTION, params.Distortion);
+    mySettings->saveParam(ST_SETTING_BARREL,     params.Barrel);
+    mySettings->saveParam(ST_SETTING_ANAMORPH,   params.Anamorph);
 }
 
 StOutDistorted::~StOutDistorted() {
@@ -448,7 +452,7 @@ void StOutDistorted::stglDrawCursor() {
 void StOutDistorted::stglDraw() {
     myFPSControl.setTargetFPS(StWindow::getTargetFps());
 
-    const StGLBoxPx aViewPort = StWindow::stglViewport(ST_WIN_MASTER);
+    const StGLBoxPx aVPMaster = StWindow::stglViewport(ST_WIN_MASTER);
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
     if(!StWindow::isStereoOutput()
     || !StWindow::isFullScreen()
@@ -457,8 +461,8 @@ void StOutDistorted::stglDraw() {
             myFrBuffer->release(*myContext);
         }
 
-        myContext->stglResizeViewport(aViewPort);
-        myContext->stglSetScissorRect(aViewPort, false);
+        myContext->stglResizeViewport(aVPMaster);
+        myContext->stglSetScissorRect(aVPMaster, false);
         StWindow::showCursor(myToShowCursor);
         StWindow::signals.onRedraw(ST_DRAW_LEFT);
         myContext->stglResetScissorRect();
@@ -469,30 +473,34 @@ void StOutDistorted::stglDraw() {
         return;
     }
 
+    const StGLBoxPx  aVPSlave   = StWindow::stglViewport(ST_WIN_SLAVE);
+    const StGLBoxPx  aVPBoth    = StWindow::stglViewport(ST_WIN_ALL);
     const StPointD_t aCursorPos = StWindow::getMousePos();
 
-    StGLBoxPx aViewPortL = aViewPort;
-    StGLBoxPx aViewPortR = aViewPort;
-    switch(params.Layout->getValue()) {
-        case LAYOUT_OVER_UNDER: {
-            aViewPortL.height() /= 2;
-            aViewPortR.height() = aViewPortL.height();
-            aViewPortR.y() += aViewPortL.height();
-            break;
-        }
-        default:
-        case LAYOUT_SIDE_BY_SIDE: {
-            aViewPortL.width() /= 2;
-            aViewPortR.width() = aViewPortL.width();
-            aViewPortR.x() += aViewPortL.width();
-            break;
+    StGLBoxPx aViewPortL = aVPMaster;
+    StGLBoxPx aViewPortR = aVPSlave;
+    if(params.Anamorph->getValue()) {
+        switch(params.Layout->getValue()) {
+            case LAYOUT_OVER_UNDER: {
+                aViewPortL.height() /= 2;
+                aViewPortR.height() = aViewPortL.height();
+                aViewPortR.y() += aViewPortL.height();
+                break;
+            }
+            default:
+            case LAYOUT_SIDE_BY_SIDE: {
+                aViewPortL.width() /= 2;
+                aViewPortR.width() = aViewPortL.width();
+                aViewPortR.x() += aViewPortL.width();
+                break;
+            }
         }
     }
 
     // resize FBO
     GLint aFrSizeX = aViewPortL.width();
     GLint aFrSizeY = aViewPortL.height();
-    if(params.Distortion->getValue() == DISTORTION_BARREL) {
+    if(params.Barrel->getValue()) {
         aFrSizeX = int(std::ceil(double(aFrSizeX) * 1.25) + 0.5);
         aFrSizeY = int(std::ceil(double(aFrSizeY) * 1.25) + 0.5);
     }
@@ -515,10 +523,17 @@ void StOutDistorted::stglDraw() {
     if(myCursor->isValid()) {
         // compute cursor position
         StArray<StGLVec4> aVerts(4);
-        const GLfloat aCurLeft   = GLfloat(-1.0 + aCursorPos.x() * 2.0);
-        const GLfloat aCurTop    = GLfloat( 1.0 - aCursorPos.y() * 2.0);
-        const GLfloat aCurWidth  =        GLfloat(myCursor->getSizeX()) / GLfloat(myFrBuffer->getVPSizeX());
-        const GLfloat aCurHeight = 2.0f * GLfloat(myCursor->getSizeY()) / GLfloat(myFrBuffer->getVPSizeY());
+        const GLfloat aCurLeft = GLfloat(-1.0 + aCursorPos.x() * 2.0);
+        const GLfloat aCurTop  = GLfloat( 1.0 - aCursorPos.y() * 2.0);
+        GLfloat aCurWidth  = 2.0f * GLfloat(myCursor->getSizeX()) / GLfloat(myFrBuffer->getVPSizeX());
+        GLfloat aCurHeight = 2.0f * GLfloat(myCursor->getSizeY()) / GLfloat(myFrBuffer->getVPSizeY());
+        if(params.Anamorph->getValue()) {
+            if(params.Layout->getValue() == LAYOUT_OVER_UNDER) {
+                aCurHeight *= 0.5;
+            } else {
+                aCurWidth  *= 0.5;
+            }
+        }
         aVerts[0] = StGLVec4(aCurLeft + aCurWidth, aCurTop - aCurHeight, 0.0f, 1.0f);
         aVerts[1] = StGLVec4(aCurLeft + aCurWidth, aCurTop,              0.0f, 1.0f);
         aVerts[2] = StGLVec4(aCurLeft,             aCurTop - aCurHeight, 0.0f, 1.0f);
@@ -535,8 +550,8 @@ void StOutDistorted::stglDraw() {
 
     // now draw to real screen buffer
     // clear the screen and the depth buffer
-    myContext->stglResizeViewport(aViewPort);
-    myContext->stglSetScissorRect(aViewPort, false);
+    myContext->stglResizeViewport(aVPBoth);
+    myContext->stglSetScissorRect(aVPBoth, false);
     myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // draw Left view
@@ -546,7 +561,7 @@ void StOutDistorted::stglDraw() {
     StGLProgram*    aProgram   = myProgramFlat.access();
     StGLVarLocation aVertexLoc = myProgramFlat->getVVertexLoc();
     StGLVarLocation aTexCrdLoc = myProgramFlat->getVTexCoordLoc();
-    if(params.Distortion->getValue() == DISTORTION_BARREL) {
+    if(params.Barrel->getValue()) {
         aProgram   = myProgramBarrel.access();
         aVertexLoc = myProgramBarrel->getVVertexLoc();
         aTexCrdLoc = myProgramBarrel->getVTexCoordLoc();
@@ -607,4 +622,23 @@ void StOutDistorted::doSwitchVSync(const int32_t theValue) {
 
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
     myContext->stglSetVSync((StGLContext::VSync_Mode )theValue);
+}
+
+void StOutDistorted::doSwitchLayout(const int32_t theValue) {
+    if(params.Anamorph->getValue()) {
+        return;
+    }
+
+    StWindow::setAttribute(StWinAttr_SplitCfg, theValue == LAYOUT_OVER_UNDER
+                                             ? StWinSlave_splitVertical : StWinSlave_splitHorizontal);
+}
+
+void StOutDistorted::doSwitchAnamorph(const bool theValue) {
+    if(theValue) {
+        StWindow::setAttribute(StWinAttr_SplitCfg, StWinSlave_splitOff);
+        return;
+    }
+
+    StWindow::setAttribute(StWinAttr_SplitCfg, params.Layout->getValue() == LAYOUT_OVER_UNDER
+                                             ? StWinSlave_splitVertical : StWinSlave_splitHorizontal);
 }

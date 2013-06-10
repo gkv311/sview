@@ -388,6 +388,12 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
         if(myTiledCfg != TiledCfg_Separate) {
             XUnmapWindow(hDisplay, mySlave.hWindowGl);
             getTiledWinRect(aRect);
+        } else if(attribs.Split == StWinSlave_splitHorizontal) {
+            myTiledCfg = TiledCfg_MasterSlaveX;
+            myRectFull.right() -= myRectFull.width() / 2;
+        } else if(attribs.Split == StWinSlave_splitVertical) {
+            myTiledCfg = TiledCfg_MasterSlaveY;
+            myRectFull.bottom() -= myRectFull.height() / 2;
         }
 
         if((Window )myParentWin != 0 || myMaster.hWindow != 0) {
@@ -646,7 +652,9 @@ void StWindowImpl::updateWindowPos() {
 
         if(myTiledCfg != TiledCfg_Separate) {
             myTiledCfg = TiledCfg_Separate;
-            if(!attribs.IsHidden && myMonitors.size() > 1) {
+            if(!attribs.IsHidden
+            && myMonitors.size() > 1
+            && mySlave.hWindowGl != 0) {
                 XMapWindow(aDisplay->hDisplay, mySlave.hWindowGl);
             }
         }

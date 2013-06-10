@@ -116,6 +116,9 @@ class StOutDistorted : public StWindow {
      */
     ST_LOCAL void doSwitchVSync(const int32_t theValue);
 
+    ST_LOCAL void doSwitchLayout(const int32_t theValue);
+    ST_LOCAL void doSwitchAnamorph(const bool theValue);
+
     ST_LOCAL void stglDrawCursor();
 
         private:
@@ -129,15 +132,11 @@ class StOutDistorted : public StWindow {
         LAYOUT_OVER_UNDER   = 1, //!< anamorph over under
     };
 
-    enum Distortion {
-        DISTORTION_OFF    = 0, //!< no extra distortion
-        DISTORTION_BARREL = 1, //!< Barrel distortion for Oculus Rift
-    };
-
     struct {
 
-        StHandle<StInt32Param> Layout;     //!< pair layout
-        StHandle<StInt32Param> Distortion; //!< distortion shader
+        StHandle<StInt32Param> Layout;   //!< pair layout
+        StHandle<StBoolParam>  Anamorph; //!< anamorph filter
+        StHandle<StBoolParam>  Barrel;   //!< Barrel filter
 
     } params;
 

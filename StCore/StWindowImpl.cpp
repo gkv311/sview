@@ -93,6 +93,7 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
     attribs.AreGlobalMediaKeys  = false;
     attribs.Slave      = StWinSlave_slaveOff;
     attribs.SlaveMonId = 1;
+    attribs.Split      = StWinSlave_splitOff;
 
     myMonSlave.idMaster = 0;
     myMonSlave.idSlave  = 1; // second by default
@@ -271,6 +272,9 @@ void StWindowImpl::getAttributes(StWinAttr* theAttributes) const {
             case StWinAttr_SlaveMon:
                 anIter[1] = (StWinAttr )attribs.SlaveMonId;
                 break;
+            case StWinAttr_SplitCfg:
+                anIter[1] = (StWinAttr )attribs.Split;
+                break;
             default:
                 ST_DEBUG_LOG("UNKNOWN window attribute #" + anIter[0] + " requested");
                 break;
@@ -308,6 +312,9 @@ void StWindowImpl::setAttributes(const StWinAttr* theAttributes) {
             case StWinAttr_SlaveMon:
                 hasSlaveChanges = hasSlaveChanges || (attribs.SlaveMonId != anIter[1]);
                 attribs.SlaveMonId = (int8_t )anIter[1];
+                break;
+            case StWinAttr_SplitCfg:
+                attribs.Split = (StWinSplit )anIter[1];
                 break;
             default:
                 ST_DEBUG_LOG("UNKNOWN window attribute #" + anIter[0] + " requested");
@@ -683,24 +690,32 @@ StGLBoxPx StWindowImpl::stglViewport(const int& theWinId) const {
         case TiledCfg_MasterSlaveX: {
             if(theWinId == ST_WIN_SLAVE) {
                 aRect.x() += aWidth;
+            } else if(theWinId == ST_WIN_ALL) {
+                aRect.width() += aWidth;
             }
             return aRect;
         }
         case TiledCfg_SlaveMasterX: {
             if(theWinId == ST_WIN_MASTER) {
                 aRect.x() += aWidth;
+            } else if(theWinId == ST_WIN_ALL) {
+                aRect.width() += aWidth;
             }
             return aRect;
         }
         case TiledCfg_MasterSlaveY: {
             if(theWinId == ST_WIN_MASTER) {
                 aRect.y() += aHeight;
+            } else if(theWinId == ST_WIN_ALL) {
+                aRect.height() += aHeight;
             }
             return aRect;
         }
         case TiledCfg_SlaveMasterY: {
             if(theWinId == ST_WIN_SLAVE) {
                 aRect.y() += aHeight;
+            } else if(theWinId == ST_WIN_ALL) {
+                aRect.height() += aHeight;
             }
             return aRect;
         }
