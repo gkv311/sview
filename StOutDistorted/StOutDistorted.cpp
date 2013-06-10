@@ -450,7 +450,9 @@ void StOutDistorted::stglDraw() {
 
     const StGLBoxPx aViewPort = StWindow::stglViewport(ST_WIN_MASTER);
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
-    if(!StWindow::isStereoOutput() || myIsBroken) {
+    if(!StWindow::isStereoOutput()
+    || !StWindow::isFullScreen()
+    || myIsBroken) {
         if(myToCompressMem) {
             myFrBuffer->release(*myContext);
         }
