@@ -93,6 +93,10 @@ class StGLRootWidget : public StGLWidget {
         return myRectGl;
     }
 
+    inline const StRectI_t& getRootMarginsPx() const {
+        return myMarginsPx;
+    }
+
     /**
      * Convert pixel coordinates (absolute) into GL coordinates.
      */
@@ -204,6 +208,7 @@ class StGLRootWidget : public StGLWidget {
     StGLMatrix               myScrProjMat;  //!< projection matrix within translation to the screen
     StHandle<StGLContext>    myGlCtx;       //!< OpenGL context
 
+    StRectI_t                myMarginsPx;   //!< active area margins in pixels
     StRectD_t                myRectGl;      //!< rectangle in GL coordinates
     GLdouble                 myScaleGlX;    //!< scale factor to optimize convertion from Pixels -> GL coordinates
     GLdouble                 myScaleGlY;    //!< scale factor to optimize convertion from Pixels -> GL coordinates

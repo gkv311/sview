@@ -25,9 +25,6 @@ StGLRootWidget::StGLRootWidget()
 : StGLWidget(NULL, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT)),
   myShareArray(new StGLSharePointer*[10]),
   myShareSize(10),
-  myProjCamera(),
-  myScrProjMat(),
-  myRectGl(),
   myScaleGlX(1.0),
   myScaleGlY(1.0),
   cursorZo(0.0, 0.0),
@@ -38,6 +35,11 @@ StGLRootWidget::StGLRootWidget()
     myViewport[1] = 0;
     myViewport[2] = 1;
     myViewport[3] = 1;
+
+    myMarginsPx.left()   = 0;
+    myMarginsPx.top()    = 0;
+    myMarginsPx.right()  = 0;
+    myMarginsPx.bottom() = 0;
 
     // allocate shared resources array
     for(size_t aResId = 0; aResId < myShareSize; ++aResId) {

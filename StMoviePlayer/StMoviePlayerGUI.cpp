@@ -69,7 +69,8 @@ namespace {
 void StMoviePlayerGUI::createUpperToolbar() {
     int i = 0;
 
-    upperRegion = new StGLWidget(this, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), 4096, 128);
+    const StRectI_t& aMargins = getRootMarginsPx();
+    upperRegion = new StGLWidget(this, aMargins.left(), aMargins.top(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), 4096, 128);
 
     // append the textured buttons
     btnOpen     = new StGLTextureButton(upperRegion, DISPL_X_REGION_UPPER + (i++) * ICON_WIDTH, DISPL_Y_REGION_UPPER);
@@ -103,7 +104,8 @@ void StMoviePlayerGUI::createUpperToolbar() {
  * Create bottom toolbar
  */
 void StMoviePlayerGUI::createBottomToolbar() {
-    bottomRegion = new StGLWidget(this, 0, 0, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), 4096, 128);
+    const StRectI_t& aMargins = getRootMarginsPx();
+    bottomRegion = new StGLWidget(this, aMargins.left(), -aMargins.bottom(), StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), 4096, 128);
 
     // append the textured buttons
     btnPlay      = new StGLTextureButton(bottomRegion, DISPL_X_REGION_BOTTOM, DISPL_Y_REGION_BOTTOM,
@@ -148,7 +150,8 @@ void StMoviePlayerGUI::createBottomToolbar() {
  * Main menu
  */
 void StMoviePlayerGUI::createMainMenu() {
-    menu0Root = new StGLMenu(this, 0, 0, StGLMenu::MENU_HORIZONTAL, true);
+    const StRectI_t& aMargins = getRootMarginsPx();
+    menu0Root = new StGLMenu(this, aMargins.left(), aMargins.top(), StGLMenu::MENU_HORIZONTAL, true);
 
     StGLMenu* aMenuMedia   = createMediaMenu();     // Root -> Media menu
     StGLMenu* aMenuView    = createViewMenu();      // Root -> View menu
@@ -729,13 +732,14 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
   myFpsWidget(NULL),
   //
   isGUIVisible(true) {
+    const StRectI_t& aMargins = getRootMarginsPx();
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StMoviePlayerGUI::doShowFPS);
     stImageRegion = new StGLImageRegion(this, theTextureQueue);
     stSubtitles   = new StGLSubtitles  (this, theSubQueue);
 
     createUpperToolbar();
 
-    seekBar = new StSeekBar(this, -78);
+    seekBar = new StSeekBar(this, -aMargins.bottom() - 78);
     seekBar->signals.onSeekClick.connect(myPlugin, &StMoviePlayer::doSeek);
 
     createBottomToolbar();
@@ -787,13 +791,14 @@ void StMoviePlayerGUI::stglUpdate(const StPointD_t& thePointZo,
 }
 
 void StMoviePlayerGUI::stglResize(const StRectI_t& winRectPx) {
+    const StRectI_t& aMargins = getRootMarginsPx();
     stImageRegion->changeRectPx().bottom() = winRectPx.height();
     stImageRegion->changeRectPx().right()  = winRectPx.width();
     if(upperRegion != NULL) {
-        upperRegion->changeRectPx().right() = winRectPx.width();
+        upperRegion->changeRectPx().right()  = stMax(winRectPx.width() - aMargins.right(), 2);
     }
     if(bottomRegion != NULL) {
-        bottomRegion->changeRectPx().right() = winRectPx.width();
+        bottomRegion->changeRectPx().right() = stMax(winRectPx.width() - aMargins.right(), 2);
     }
     StGLRootWidget::stglResize(winRectPx);
 }

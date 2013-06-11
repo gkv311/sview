@@ -56,7 +56,8 @@ namespace {
 void StImageViewerGUI::createUpperToolbar() {
     int i = 0;
 
-    upperRegion = new StGLWidget(this, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), 4096, 128);
+    const StRectI_t& aMargins = getRootMarginsPx();
+    upperRegion = new StGLWidget(this, aMargins.left(), aMargins.top(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), 4096, 128);
 
     // append textured buttons
     btnOpen     = new StGLTextureButton(upperRegion, DISPL_X_REGION_UPPER + (i++) * ICON_WIDTH, DISPL_Y_REGION_UPPER);
@@ -100,7 +101,8 @@ void StImageViewerGUI::createUpperToolbar() {
  * Main menu
  */
 void StImageViewerGUI::createMainMenu() {
-    menu0Root = new StGLMenu(this, 0, 0, StGLMenu::MENU_HORIZONTAL, true);
+    const StRectI_t& aMargins = getRootMarginsPx();
+    menu0Root = new StGLMenu(this, aMargins.left(), aMargins.top(), StGLMenu::MENU_HORIZONTAL, true);
 
     StGLMenu* aMenuMedia   = createMediaMenu();  // Root -> Media  menu
     StGLMenu* aMenuView    = createViewMenu();   // Root -> View   menu
@@ -490,6 +492,7 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
   //
   isGUIVisible(true),
   isGUIMinimal(true) {
+    const StRectI_t& aMargins = getRootMarginsPx();
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StImageViewerGUI::doShowFPS);
 
     StHandle<StGLTextureQueue> aTextureQueue = theTextureQueue;
@@ -501,7 +504,8 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
     createUpperToolbar();
 
     // fullscreen button
-    myBtnFull = new StGLTextureButton(this, -8, -8, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_RIGHT));
+    myBtnFull = new StGLTextureButton(this, -aMargins.right() - 8, -aMargins.bottom() - 8,
+                                      StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_RIGHT));
     myBtnFull->signals.onBtnClick.connect(myPlugin->params.isFullscreen.operator->(), &StBoolParam::doReverse);
     StString aTextPath = texturesPathRoot + "fullscr.std";
     myBtnFull->setTexturePath(&aTextPath);
