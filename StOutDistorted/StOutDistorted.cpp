@@ -132,28 +132,31 @@ class StProgramBarrel : public StGLProgram {
            "uniform sampler2D texR, texL;"
            "varying vec2 fTexCoord;"
 
+           "uniform vec4 uChromAb;"
            "uniform vec4 uWarpCoef;"
            "uniform vec2 uLensCenter;"
            "uniform vec2 uScale;"
            "uniform vec2 uScaleIn;"
 
-           // function scales input texture coordinates for distortion
-           "vec2 riftWarp(vec2 theTexCoord) {"
-           "    vec2 aTheta = (theTexCoord - uLensCenter) * uScaleIn;" // scales to [-1, 1]
+           "void main(void) {"
+           "    vec2 aTheta = (fTexCoord - uLensCenter) * uScaleIn;" // scales to [-1, 1]
            "    float rSq = aTheta.x * aTheta.x + aTheta.y * aTheta.y;"
-           "    vec2 rvector = aTheta * (uWarpCoef.x + uWarpCoef.y * rSq +"
+           "    vec2 aTheta1 = aTheta * (uWarpCoef.x + uWarpCoef.y * rSq +"
            "                             uWarpCoef.z * rSq * rSq +"
            "                             uWarpCoef.w * rSq * rSq * rSq);"
-           "    return uLensCenter + uScale * rvector;"
-           "}"
-
-           "void main(void) {"
-           "    vec2 aTexCoord = riftWarp(fTexCoord);"
-           "    if(any(bvec2(clamp(aTexCoord, vec2(0.0, 0.0), vec2(1.0, 1.0)) - aTexCoord))) {"
+           "    vec2 aThetaBlue = aTheta1 * (uChromAb.z + uChromAb.w * rSq);"
+           "    vec2 aTCrdsBlue = uLensCenter + uScale * aThetaBlue;"
+           "    if(any(bvec2(clamp(aTCrdsBlue, vec2(0.0, 0.0), vec2(1.0, 1.0)) - aTCrdsBlue))) {"
            "        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);"
            "        return;"
            "    }"
-           "    gl_FragColor = texture2D(texR, aTexCoord);"
+
+           "    vec2 aTCrdsGreen = uLensCenter + uScale * aTheta1;"
+           "    vec2 aThetaRed = aTheta1 * (uChromAb.x + uChromAb.y * rSq);"
+           "    vec2 aTCrdsRed = uLensCenter + uScale * aThetaRed;"
+           "    gl_FragColor = vec4(texture2D(texR, aTCrdsRed  ).r,"
+           "                        texture2D(texR, aTCrdsGreen).g,"
+           "                        texture2D(texR, aTCrdsBlue ).b, 1.0);"
            "}";
 
         StGLVertexShader aVertexShader(StGLProgram::getTitle());
@@ -172,6 +175,7 @@ class StProgramBarrel : public StGLProgram {
 
         atrVVertexLoc    = StGLProgram::getAttribLocation (theCtx, "vVertex");
         atrVTexCoordLoc  = StGLProgram::getAttribLocation (theCtx, "vTexCoord");
+        uniChromAbLoc    = StGLProgram::getUniformLocation(theCtx, "uChromAb");
         uniWarpCoeffLoc  = StGLProgram::getUniformLocation(theCtx, "uWarpCoef");
         uniLensCenterLoc = StGLProgram::getUniformLocation(theCtx, "uLensCenter");
         uniScaleLoc      = StGLProgram::getUniformLocation(theCtx, "uScale");
@@ -186,6 +190,16 @@ class StProgramBarrel : public StGLProgram {
                              const StGLVec4& theVec) {
         use(theCtx);
         theCtx.core20fwd->glUniform4fv(uniWarpCoeffLoc, 1, theVec);
+        unuse(theCtx);
+    }
+
+    /**
+     * Setup Chrome coefficients.
+     */
+    ST_LOCAL void setupChrome(StGLContext&    theCtx,
+                              const StGLVec4& theVec) {
+        use(theCtx);
+        theCtx.core20fwd->glUniform4fv(uniChromAbLoc, 1, theVec);
         unuse(theCtx);
     }
 
@@ -214,6 +228,7 @@ class StProgramBarrel : public StGLProgram {
 
     StGLVarLocation atrVVertexLoc;
     StGLVarLocation atrVTexCoordLoc;
+    StGLVarLocation uniChromAbLoc;
     StGLVarLocation uniWarpCoeffLoc;
     StGLVarLocation uniLensCenterLoc;
     StGLVarLocation uniScaleLoc;
@@ -260,6 +275,8 @@ StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
   myProgramBarrel(new StProgramBarrel()),
   myBarrelCoef(1.0f, 0.22f, 0.24f, 0.041f), // 7 inches
   //myBarrelCoef(1.0f, 0.18f, 0.115f, 0.0387f),
+  myChromAb(0.996f, -0.004f, 1.014f, 0.0f),
+  //myChromAb(1.0f, 0.0f, 1.0f, 0.0f),
   myToShowCursor(true),
   myToSavePlacement(theParentWindow == (StNativeWin_t )NULL),
   myToCompressMem(myInstancesNb.increment() > 1),
@@ -386,7 +403,8 @@ bool StOutDistorted::create() {
         myIsBroken = true;
         return true;
     }
-    myProgramBarrel->setupCoeff(*myContext, myBarrelCoef);
+    myProgramBarrel->setupCoeff (*myContext, myBarrelCoef);
+    myProgramBarrel->setupChrome(*myContext, myChromAb);
 
     // create vertices buffers to draw simple textured quad
     const GLfloat QUAD_VERTICES[4 * 4] = {
