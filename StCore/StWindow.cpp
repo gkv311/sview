@@ -46,7 +46,8 @@ StWindow::StWindow()
 
 StWindow::StWindow(const StNativeWin_t theParentWindow)
 : myWin(new StWindowImpl(theParentWindow)),
-  myTargetFps(0.0) {
+  myTargetFps(0.0),
+  myMargins(0, 0, 0, 0) {
     copySignals();
 }
 
@@ -161,6 +162,10 @@ StRectI_t StWindow::getPlacement() const {
 void StWindow::setPlacement(const StRectI_t& theRect,
                             const bool       theMoveToScreen) {
     myWin->setPlacement(theRect, theMoveToScreen);
+}
+
+const StRectI_t& StWindow::getMargins() const {
+    return myMargins;
 }
 
 StPointD_t StWindow::getMousePos() const {

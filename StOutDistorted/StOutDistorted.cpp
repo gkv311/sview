@@ -39,6 +39,7 @@ namespace {
     static const char ST_SETTING_LAYOUT[]    = "layout";
     static const char ST_SETTING_BARREL[]    = "barrel";
     static const char ST_SETTING_ANAMORPH[]  = "anamorph";
+    static const char ST_SETTING_MARGINS[]   = "margins";
 
     // translation resources
     enum {
@@ -313,6 +314,12 @@ StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
     mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
     StWindow::setPlacement(aRect, true);
     StWindow::setTitle("sView - Distorted Renderer");
+
+    myMargins.left()   = 64;
+    myMargins.right()  = 64;
+    myMargins.top()    = 160;
+    myMargins.bottom() = 160;
+    mySettings->loadInt32Rect(ST_SETTING_MARGINS, myMargins);
 }
 
 void StOutDistorted::releaseResources() {
@@ -337,6 +344,7 @@ void StOutDistorted::releaseResources() {
     mySettings->saveParam(ST_SETTING_LAYOUT,     params.Layout);
     mySettings->saveParam(ST_SETTING_BARREL,     params.Barrel);
     mySettings->saveParam(ST_SETTING_ANAMORPH,   params.Anamorph);
+    mySettings->saveInt32Rect(ST_SETTING_MARGINS, myMargins);
 }
 
 StOutDistorted::~StOutDistorted() {

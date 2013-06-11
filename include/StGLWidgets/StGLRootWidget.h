@@ -97,6 +97,10 @@ class StGLRootWidget : public StGLWidget {
         return myMarginsPx;
     }
 
+    inline void setRootMarginsPx(const StRectI_t& theMargins) {
+        myMarginsPx = theMargins;
+    }
+
     /**
      * Convert pixel coordinates (absolute) into GL coordinates.
      */

@@ -222,6 +222,11 @@ class StWindow {
                                    const bool       theMoveToScreen = false);
 
     /**
+     * @return GUI margins
+     */
+    ST_CPPEXPORT const StRectI_t& getMargins() const;
+
+    /**
      * @return point relative to window mouse position
      * (0,0) - is top left of the window and (1,1) right buttom.
      */
@@ -446,6 +451,7 @@ class StWindow {
         protected:
 
     StHandle<StMsgQueue> myMsgQueue;  //!< messages queue
+    StRectI_t            myMargins;   //!< GUI margins
 
         private: //! @name no copies, please
 

@@ -492,6 +492,7 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
   //
   isGUIVisible(true),
   isGUIMinimal(true) {
+    setRootMarginsPx(myWindow->getMargins());
     const StRectI_t& aMargins = getRootMarginsPx();
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StImageViewerGUI::doShowFPS);
 

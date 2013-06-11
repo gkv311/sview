@@ -732,6 +732,7 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
   myFpsWidget(NULL),
   //
   isGUIVisible(true) {
+    setRootMarginsPx(myWindow->getMargins());
     const StRectI_t& aMargins = getRootMarginsPx();
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StMoviePlayerGUI::doShowFPS);
     stImageRegion = new StGLImageRegion(this, theTextureQueue);
