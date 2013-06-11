@@ -701,6 +701,12 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
                     myTiledCfg = TiledCfg_SlaveMasterY;
                 }
             }
+        } else if(attribs.Split == StWinSlave_splitHorizontal) {
+            myTiledCfg = TiledCfg_MasterSlaveX;
+            myRectFull.right() -= myRectFull.width() / 2;
+        } else if(attribs.Split == StWinSlave_splitVertical) {
+            myTiledCfg = TiledCfg_MasterSlaveY;
+            myRectFull.bottom() -= myRectFull.height() / 2;
         }
 
         if(!attribs.IsHidden
@@ -799,22 +805,21 @@ void StWindowImpl::updateWindowPos() {
                              aRect.width(), aRect.height(),
                              SWP_NOACTIVATE);
             }
+        } else if(attribs.IsFullScreen
+               && myParentWin != NULL) {
+            // embedded
+            SetWindowPos(myMaster.hWindowGl, HWND_TOPMOST,
+                         myRectFull.left(),  myRectFull.top(),
+                         myRectFull.width(), myRectFull.height(),
+                         SWP_NOACTIVATE);
         } else {
             // resize Master GL-subwindow
-            if(attribs.IsFullScreen
-            && myParentWin != NULL) {
-                // embedded
-                SetWindowPos(myMaster.hWindowGl, HWND_TOPMOST,
-                             myRectFull.left(),  myRectFull.top(),
-                             myRectFull.width(), myRectFull.height(),
-                             SWP_NOACTIVATE);
-            } else {
-                GLsizei sizeX = (attribs.IsFullScreen) ? myRectFull.width()  : myRectNorm.width();
-                GLsizei sizeY = (attribs.IsFullScreen) ? myRectFull.height() : myRectNorm.height();
-                SetWindowPos(myMaster.hWindowGl, HWND_TOP,
-                             0, 0, sizeX, sizeY,
-                             SWP_NOACTIVATE);
-            }
+            myTiledCfg = TiledCfg_Separate;
+            const GLsizei aSizeX = (attribs.IsFullScreen) ? myRectFull.width()  : myRectNorm.width();
+            const GLsizei aSizeY = (attribs.IsFullScreen) ? myRectFull.height() : myRectNorm.height();
+            SetWindowPos(myMaster.hWindowGl, HWND_TOP,
+                         0, 0, aSizeX, aSizeY,
+                         SWP_NOACTIVATE);
         }
     }
 
