@@ -299,7 +299,6 @@ StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
     mySettings->loadParam(ST_SETTING_BARREL, params.Barrel);
     params.Anamorph = new StBoolParamNamed(false, "Anamorph");
     mySettings->loadParam(ST_SETTING_ANAMORPH, params.Anamorph);
-    params.Anamorph->signals.onChanged = stSlot(this, &StOutDistorted::doSwitchAnamorph);
 
     // Layout option
     StHandle<StEnumParam> aLayoutParam = new StEnumParam(LAYOUT_SIDE_BY_SIDE,
@@ -308,8 +307,6 @@ StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
     aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_OVERUNDER, "Top-and-Bottom"));
     params.Layout = aLayoutParam;
     mySettings->loadParam(ST_SETTING_LAYOUT, params.Layout);
-    doSwitchLayout(params.Layout->getValue());
-    params.Layout->signals.onChanged = stSlot(this, &StOutDistorted::doSwitchLayout);
 
     // load window position
     StRect<int32_t> aRect(256, 768, 256, 1024);
@@ -453,11 +450,20 @@ void StOutDistorted::stglDrawCursor() {
 void StOutDistorted::stglDraw() {
     myFPSControl.setTargetFPS(StWindow::getTargetFps());
 
+    const bool isStereo = StWindow::isStereoOutput()
+                       && StWindow::isFullScreen()
+                       && !myIsBroken;
+    if(isStereo
+    && !params.Anamorph->getValue()) {
+        StWindow::setAttribute(StWinAttr_SplitCfg, params.Layout->getValue() == LAYOUT_OVER_UNDER
+                                                 ? StWinSlave_splitVertical : StWinSlave_splitHorizontal);
+    } else {
+        StWindow::setAttribute(StWinAttr_SplitCfg, StWinSlave_splitOff);
+    }
+
     const StGLBoxPx aVPMaster = StWindow::stglViewport(ST_WIN_MASTER);
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
-    if(!StWindow::isStereoOutput()
-    || !StWindow::isFullScreen()
-    || myIsBroken) {
+    if(!isStereo) {
         if(myToCompressMem) {
             myFrBuffer->release(*myContext);
         }
@@ -623,23 +629,4 @@ void StOutDistorted::doSwitchVSync(const int32_t theValue) {
 
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
     myContext->stglSetVSync((StGLContext::VSync_Mode )theValue);
-}
-
-void StOutDistorted::doSwitchLayout(const int32_t theValue) {
-    if(params.Anamorph->getValue()) {
-        return;
-    }
-
-    StWindow::setAttribute(StWinAttr_SplitCfg, theValue == LAYOUT_OVER_UNDER
-                                             ? StWinSlave_splitVertical : StWinSlave_splitHorizontal);
-}
-
-void StOutDistorted::doSwitchAnamorph(const bool theValue) {
-    if(theValue) {
-        StWindow::setAttribute(StWinAttr_SplitCfg, StWinSlave_splitOff);
-        return;
-    }
-
-    StWindow::setAttribute(StWinAttr_SplitCfg, params.Layout->getValue() == LAYOUT_OVER_UNDER
-                                             ? StWinSlave_splitVertical : StWinSlave_splitHorizontal);
 }

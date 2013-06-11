@@ -116,9 +116,6 @@ class StOutDistorted : public StWindow {
      */
     ST_LOCAL void doSwitchVSync(const int32_t theValue);
 
-    ST_LOCAL void doSwitchLayout(const int32_t theValue);
-    ST_LOCAL void doSwitchAnamorph(const bool theValue);
-
     ST_LOCAL void stglDrawCursor();
 
         private:

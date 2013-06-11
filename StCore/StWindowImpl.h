@@ -316,7 +316,7 @@ class StWindowImpl {
     StTimer        myEventsTimer;
     StEventsBuffer myEventsBuffer;     //!< window events double buffer
     StEvent        myStEvent;          //!< temporary event object (to be used in message loop thread)
-    StEvent        myStEventAux;       //!< extra temporary event object (to be used in StWindow cretation thread)
+    StEvent        myStEventAux;       //!< extra temporary event object (to be used in StWindow creation thread)
     double         myLastEventsTime;   //!< time when processEvents() was last called
     bool           myEventsThreaded;
     bool           myIsMouseMoved;

@@ -314,6 +314,28 @@ void StWindowImpl::setAttributes(const StWinAttr* theAttributes) {
                 attribs.SlaveMonId = (int8_t )anIter[1];
                 break;
             case StWinAttr_SplitCfg:
+                if(attribs.Split != (StWinSplit )anIter[1]
+                && attribs.IsFullScreen) {
+                    if(attribs.Split == StWinSlave_splitHorizontal) {
+                        myRectFull.right() += myRectFull.width();
+                    } else if(attribs.Split == StWinSlave_splitVertical) {
+                        myRectFull.bottom() += myRectFull.height();
+                    }
+                    if((StWinSplit )anIter[1] == StWinSlave_splitHorizontal) {
+                        myTiledCfg = TiledCfg_MasterSlaveX;
+                        myRectFull.right() -= myRectFull.width() / 2;
+                    } else if((StWinSplit )anIter[1] == StWinSlave_splitVertical) {
+                        myTiledCfg = TiledCfg_MasterSlaveY;
+                        myRectFull.bottom() -= myRectFull.height() / 2;
+                    } else {
+                        myTiledCfg = TiledCfg_Separate;
+                    }
+                    myStEventAux.Type       = stEvent_Size;
+                    myStEventAux.Size.Time  = getEventTime();
+                    myStEventAux.Size.SizeX = myRectFull.width();
+                    myStEventAux.Size.SizeY = myRectFull.height();
+                    signals.onResize->emit(myStEventAux.Size);
+                }
                 attribs.Split = (StWinSplit )anIter[1];
                 break;
             default:
