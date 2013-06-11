@@ -162,7 +162,7 @@ bool StSettings::saveString(const StString& theParamPath,
             if(groupName(theParamPath, aParamGroup, aParamName)) {
                 if(!myConfig->exists(aParamGroup.toCString())) {
                     Setting& rootGrp = aRoot.add(aParamGroup.toCString(), Setting::TypeGroup);
-                    rootGrp.add(aParamName.toCString(), Setting::TypeInt);
+                    rootGrp.add(aParamName.toCString(), Setting::TypeString);
                 } else {
                     myConfig->lookup(aParamGroup.toCString()).add(aParamName.toCString(), Setting::TypeString);
                 }

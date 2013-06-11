@@ -8,6 +8,8 @@
 
 #include <StSettings/StSettings.h>
 
+#include <sstream>
+
 bool StSettings::loadBool(const StString& theLabel,
                           bool&           theValue) {
     int32_t anIntValue = theValue ? 1 : 0;
@@ -25,6 +27,29 @@ bool StSettings::saveBool(const StString& theLabel,
         return false;
     }
     return true;
+}
+
+bool StSettings::loadFloat(const StString& theLabel,
+                           double&         theValue) {
+    StString aStrValue;
+    if(!loadString(theLabel, aStrValue)) {
+        return false;
+    }
+
+    std::stringstream aStream;
+    aStream.imbue(std::locale("C"));
+    aStream << aStrValue.toCString();
+    aStream >> theValue;
+    return true;
+}
+
+bool StSettings::saveFloat(const StString& theLabel,
+                           const double    theValue) {
+    std::stringstream aStream;
+    aStream.imbue(std::locale("C"));
+    aStream << theValue;
+    const StString aStrValue = aStream.str().c_str();
+    return saveString(theLabel, aStrValue);
 }
 
 bool StSettings::loadInt32Rect(const StString&  theLabel,
@@ -49,6 +74,30 @@ bool StSettings::saveInt32Rect(const StString&        theLabel,
         && saveInt32(theLabel + ".right",  (int32_t )theValue.right())
         && saveInt32(theLabel + ".top",    (int32_t )theValue.top())
         && saveInt32(theLabel + ".bottom", (int32_t )theValue.bottom());
+}
+
+bool StSettings::loadFloatVec4(const StString& theLabel,
+                               StVec4<float>&  theValue) {
+    StVec4<double> aVec(0.0, 0.0, 0.0, 0.0);
+    if(!loadFloat(theLabel + ".x", aVec.x())
+    || !loadFloat(theLabel + ".y", aVec.y())
+    || !loadFloat(theLabel + ".z", aVec.z())
+    || !loadFloat(theLabel + ".w", aVec.w())) {
+        return false;
+    }
+    theValue.x() = float(aVec.x());
+    theValue.y() = float(aVec.y());
+    theValue.z() = float(aVec.z());
+    theValue.w() = float(aVec.w());
+    return true;
+}
+
+bool StSettings::saveFloatVec4(const StString&      theLabel,
+                               const StVec4<float>& theValue) {
+    return saveFloat(theLabel + ".x", theValue.x())
+        && saveFloat(theLabel + ".y", theValue.y())
+        && saveFloat(theLabel + ".z", theValue.z())
+        && saveFloat(theLabel + ".w", theValue.w());
 }
 
 bool StSettings::loadParam(const StString&         theLabel,

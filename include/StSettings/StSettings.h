@@ -11,6 +11,7 @@
 
 #include <StStrings/StString.h>
 #include <StTemplates/StRect.h>
+#include <StTemplates/StVec4.h>
 #include <StSettings/StParam.h>
 
 #ifdef __OBJC__
@@ -86,6 +87,39 @@ class StSettings {
                                const bool      theValue);
 
     /**
+     * Load float value.
+     */
+    ST_CPPEXPORT bool loadFloat(const StString& theLabel,
+                                double&         theValue);
+
+    /**
+     * Save float value.
+     */
+    ST_CPPEXPORT bool saveFloat(const StString& theLabel,
+                                const double    theValue);
+
+    /**
+     * Load float value.
+     */
+    ST_LOCAL inline bool loadFloat(const StString& theLabel,
+                                   float&          theValue) {
+        double aValue = double(theValue);
+        if(!loadFloat(theLabel, aValue)) {
+            return false;
+        }
+        theValue = float(aValue);
+        return true;
+    }
+
+    /**
+     * Load float value.
+     */
+    ST_LOCAL inline bool saveFloat(const StString& theLabel,
+                                   const float     theValue) {
+        return saveFloat(theLabel, double(theValue));
+    }
+
+    /**
      * Load integer rectangle.
      */
     ST_CPPEXPORT bool loadInt32Rect(const StString&  theLabel,
@@ -96,6 +130,18 @@ class StSettings {
      */
     ST_CPPEXPORT bool saveInt32Rect(const StString&        theLabel,
                                     const StRect<int32_t>& theValue);
+
+    /**
+     * Load float vector.
+     */
+    ST_CPPEXPORT bool loadFloatVec4(const StString& theLabel,
+                                    StVec4<float>&  theValue);
+
+    /**
+     * Save float vector.
+     */
+    ST_CPPEXPORT bool saveFloatVec4(const StString&      theLabel,
+                                    const StVec4<float>& theValue);
 
     /**
      * Method to load int32_t parameter.

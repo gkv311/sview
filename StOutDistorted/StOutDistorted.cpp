@@ -40,6 +40,8 @@ namespace {
     static const char ST_SETTING_BARREL[]    = "barrel";
     static const char ST_SETTING_ANAMORPH[]  = "anamorph";
     static const char ST_SETTING_MARGINS[]   = "margins";
+    static const char ST_SETTING_WARP_COEF[] = "warpCoef";
+    static const char ST_SETTING_CHROME_AB[] = "chromeAb";
 
     // translation resources
     enum {
@@ -337,6 +339,9 @@ StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
     myMargins.top()    = 160;
     myMargins.bottom() = 160;
     mySettings->loadInt32Rect(ST_SETTING_MARGINS, myMargins);
+
+    mySettings->loadFloatVec4(ST_SETTING_WARP_COEF, myBarrelCoef);
+    mySettings->loadFloatVec4(ST_SETTING_CHROME_AB, myChromAb);
 }
 
 void StOutDistorted::releaseResources() {
@@ -361,7 +366,9 @@ void StOutDistorted::releaseResources() {
     mySettings->saveParam(ST_SETTING_LAYOUT,     params.Layout);
     mySettings->saveParam(ST_SETTING_BARREL,     params.Barrel);
     mySettings->saveParam(ST_SETTING_ANAMORPH,   params.Anamorph);
-    mySettings->saveInt32Rect(ST_SETTING_MARGINS, myMargins);
+    mySettings->saveInt32Rect(ST_SETTING_MARGINS,   myMargins);
+    mySettings->saveFloatVec4(ST_SETTING_WARP_COEF, myBarrelCoef);
+    mySettings->saveFloatVec4(ST_SETTING_CHROME_AB, myChromAb);
 }
 
 StOutDistorted::~StOutDistorted() {
