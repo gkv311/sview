@@ -341,11 +341,19 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
 
         if(attribs.Slave != StWinSlave_slaveOff && mySlave.hViewGl != NULL) {
             [mySlave.hViewGl goToFullscreen];
+        } else if(attribs.Split == StWinSlave_splitHorizontal) {
+            myTiledCfg = TiledCfg_MasterSlaveX;
+            myRectFull.right() -= myRectFull.width() / 2;
+        } else if(attribs.Split == StWinSlave_splitVertical) {
+            myTiledCfg = TiledCfg_MasterSlaveY;
+            myRectFull.bottom() -= myRectFull.height() / 2;
         }
+
         if(myMaster.hViewGl != NULL) {
             [myMaster.hViewGl goToFullscreen];
         }
     } else {
+        myTiledCfg = TiledCfg_Separate;
         if(attribs.Slave != StWinSlave_slaveOff && mySlave.hViewGl != NULL) {
             [mySlave.hViewGl goToWindowed];
         }

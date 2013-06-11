@@ -307,8 +307,9 @@ StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
     aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_SBS,       "Side-by-Side"));
     aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_OVERUNDER, "Top-and-Bottom"));
     params.Layout = aLayoutParam;
-    params.Layout->signals.onChanged = stSlot(this, &StOutDistorted::doSwitchLayout);
     mySettings->loadParam(ST_SETTING_LAYOUT, params.Layout);
+    doSwitchLayout(params.Layout->getValue());
+    params.Layout->signals.onChanged = stSlot(this, &StOutDistorted::doSwitchLayout);
 
     // load window position
     StRect<int32_t> aRect(256, 768, 256, 1024);
