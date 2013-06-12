@@ -40,9 +40,11 @@
 					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\english&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\english&quot;' />
 					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot;' />
 					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\français&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)web&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)web&quot;' />
 					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)lang\english\&quot;' />
 					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)lang\русский\&quot;' />
 					<Add before='cmd /c COPY /Y lang\french\*  &quot;$(TARGET_OUTPUT_DIR)lang\français\&quot;' />
+					<Add before='cmd /c COPY /Yweb\* &quot;$(TARGET_OUTPUT_DIR)web\&quot;' />
 				</ExtraCommands>
 			</Target>
 			<Target title="WIN_vc_x86">
@@ -81,9 +83,11 @@
 					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\english&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\english&quot;' />
 					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot;' />
 					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\français&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)web&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)web&quot;' />
 					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)lang\english\&quot;' />
 					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)lang\русский\&quot;' />
 					<Add before='cmd /c COPY /Y lang\french\*  &quot;$(TARGET_OUTPUT_DIR)lang\français\&quot;' />
+					<Add before='cmd /c COPY /Yweb\* &quot;$(TARGET_OUTPUT_DIR)web\&quot;' />
 					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;2' />
 				</ExtraCommands>
 			</Target>
@@ -128,9 +132,11 @@
 					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\english&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\english&quot;' />
 					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot;' />
 					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\français&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)web&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)web&quot;' />
 					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)lang\english\&quot;' />
 					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)lang\русский\&quot;' />
 					<Add before='cmd /c COPY /Y lang\french\*  &quot;$(TARGET_OUTPUT_DIR)lang\français\&quot;' />
+					<Add before='cmd /c COPY /Yweb\* &quot;$(TARGET_OUTPUT_DIR)web\&quot;' />
 					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;2' />
 				</ExtraCommands>
 			</Target>
@@ -170,9 +176,11 @@
 					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\english&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\english&quot;' />
 					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot;' />
 					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\français&quot;' />
+					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)web&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)web&quot;' />
 					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)lang\english\&quot;' />
 					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)lang\русский\&quot;' />
 					<Add before='cmd /c COPY /Y lang\french\*  &quot;$(TARGET_OUTPUT_DIR)lang\français\&quot;' />
+					<Add before='cmd /c COPY /Yweb\* &quot;$(TARGET_OUTPUT_DIR)web\&quot;' />
 					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;2' />
 				</ExtraCommands>
 			</Target>
@@ -209,9 +217,11 @@
 					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
 					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
 					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)web/&quot;' />
 					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
 					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
 					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
+					<Add before='cp -f -r web/* &quot;$(TARGET_OUTPUT_DIR)web/&quot;' />
 				</ExtraCommands>
 			</Target>
 			<Target title="LINUX_gcc_DEBUG">
@@ -246,9 +256,11 @@
 					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
 					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
 					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)web/&quot;' />
 					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
 					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
 					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
+					<Add before='cp -f -r web/* &quot;$(TARGET_OUTPUT_DIR)web/&quot;' />
 				</ExtraCommands>
 			</Target>
 			<Target title="MAC_gcc">
@@ -278,9 +290,11 @@
 					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
 					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
 					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)web/&quot;' />
 					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
 					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
 					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
+					<Add before='cp -f -r web/* &quot;$(TARGET_OUTPUT_DIR)web/&quot;' />
 					<Add after='install_name_tool -id @executable_path/$(TARGET_OUTPUT_BASENAME).dylib &quot;$(TARGET_OUTPUT_FILE)&quot;' />
 					<Add after='ln -f -s &quot;../$(TARGET_OUTPUT_FILE)&quot; ../lib/$(TARGET_NAME)' />
 				</ExtraCommands>
@@ -311,9 +325,11 @@
 					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
 					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
 					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
+					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)web/&quot;' />
 					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
 					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
 					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
+					<Add before='cp -f -r web/* &quot;$(TARGET_OUTPUT_DIR)web/&quot;' />
 					<Add after='install_name_tool -id @executable_path/$(TARGET_OUTPUT_BASENAME).dylib &quot;$(TARGET_OUTPUT_FILE)&quot;' />
 					<Add after='ln -f -s &quot;../$(TARGET_OUTPUT_FILE)&quot; ../lib/$(TARGET_NAME)' />
 				</ExtraCommands>
