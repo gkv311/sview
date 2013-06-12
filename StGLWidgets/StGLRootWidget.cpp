@@ -88,10 +88,10 @@ void StGLRootWidget::stglDraw(unsigned int theView) {
 
     switch(theView) {
         case ST_DRAW_LEFT:
-            myScrDispX =  myLensDist * 0.5f * myRectGl.width();
+            myScrDispX =  myLensDist * GLfloat(0.5 * myRectGl.width());
             break;
         case ST_DRAW_RIGHT:
-            myScrDispX = -myLensDist * 0.5f * myRectGl.width();
+            myScrDispX = -myLensDist * GLfloat(0.5 * myRectGl.width());
             break;
         case ST_DRAW_MONO:
         default:

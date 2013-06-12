@@ -97,8 +97,7 @@ class StGLMenuItem : public StGLTextArea {
     } State;
 
     ST_LOCAL void stglResize();
-    ST_LOCAL void stglDrawArea(unsigned int              theView,
-                               const StGLMenuItem::State theState);
+    ST_LOCAL void stglDrawArea(const StGLMenuItem::State theState);
 
         private: //! @name private fields
 

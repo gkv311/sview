@@ -1342,4 +1342,5 @@ int StMoviePlayer::beginRequestHandler(mg_connection* theConnection) {
     StMoviePlayer* aPlugin = (StMoviePlayer* )aRequestInfo->user_data;
     return aPlugin->beginRequest(theConnection, *aRequestInfo);
 #endif
+    return 0;
 }

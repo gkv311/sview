@@ -155,8 +155,7 @@ bool StGLMenuItem::stglInit() {
     return myIsInitialized;
 }
 
-void StGLMenuItem::stglDrawArea(unsigned int              theView,
-                                const StGLMenuItem::State theState) {
+void StGLMenuItem::stglDrawArea(const StGLMenuItem::State theState) {
     StGLContext& aCtx = getContext();
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     aCtx.core20fwd->glEnable(GL_BLEND);
@@ -205,7 +204,7 @@ void StGLMenuItem::stglDraw(unsigned int theView) {
 
     if(myToHilightText) {
         if(myHasFocus) {
-            stglDrawArea(theView, StGLMenuItem::HIGHLIGHT);
+            stglDrawArea(StGLMenuItem::HIGHLIGHT);
         }
         if(aState == StGLMenuItem::HIGHLIGHT) {
             setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
@@ -213,7 +212,7 @@ void StGLMenuItem::stglDraw(unsigned int theView) {
             setTextColor(StGLVec3(0.8f, 0.8f, 0.8f));
         }
     } else if(aState != StGLMenuItem::PASSIVE) {
-        stglDrawArea(theView, aState);
+        stglDrawArea(aState);
     }
 
     StGLTextArea::stglDraw(theView);
