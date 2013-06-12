@@ -99,6 +99,7 @@ echo   #define SVIEW_SDK_VER_STATUS "%releaseStatus%">> "%SVIEW_BUILD_CONF%"
 echo #endif>> "%SVIEW_BUILD_CONF%"
 
 echo #define ST_HAVE_WEBP>> "%SVIEW_BUILD_CONF%"
+echo #define ST_HAVE_MONGOOSE>> "%SVIEW_BUILD_CONF%"
 
 echo #endif //__stConfig_conf_>> "%SVIEW_BUILD_CONF%"
 rem END creating config file
@@ -119,6 +120,7 @@ rmdir /S /Q "%SVIEW_DISTR_PATH_X86%
 xcopy /S /Y ..\bin\WIN_vc_x86\lang\*        %SVIEW_DISTR_PATH_X86%\lang\
 xcopy /S /Y ..\bin\WIN_vc_x86\shaders\*     %SVIEW_DISTR_PATH_X86%\shaders\
 xcopy /Y ..\bin\WIN_vc_x86\textures\*.std   %SVIEW_DISTR_PATH_X86%\textures\
+xcopy /Y ..\bin\WIN_vc_x86\web\*.htm        %SVIEW_DISTR_PATH_X86%\web\
 xcopy /Y ..\bin\WIN_vc_x86\*.dll            %SVIEW_DISTR_PATH_X86%\
 xcopy /Y ..\bin\WIN_vc_x86\*.exe            %SVIEW_DISTR_PATH_X86%\
 
@@ -127,6 +129,7 @@ rmdir /S /Q "%SVIEW_DISTR_PATH_AMD64%
 xcopy /S /Y ..\bin\WIN_vc_AMD64\lang\*      %SVIEW_DISTR_PATH_AMD64%\lang\
 xcopy /S /Y ..\bin\WIN_vc_AMD64\shaders\*   %SVIEW_DISTR_PATH_AMD64%\shaders\
 xcopy /Y ..\bin\WIN_vc_AMD64\textures\*.std %SVIEW_DISTR_PATH_AMD64%\textures\
+xcopy /Y ..\bin\WIN_vc_AMD64\web\*.htm      %SVIEW_DISTR_PATH_AMD64%\web\
 xcopy /Y ..\bin\WIN_vc_AMD64\*.dll          %SVIEW_DISTR_PATH_AMD64%\
 xcopy /Y ..\bin\WIN_vc_AMD64\*.exe          %SVIEW_DISTR_PATH_AMD64%\
 

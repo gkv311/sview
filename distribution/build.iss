@@ -231,10 +231,12 @@ Source: {#SVIEW_DISTR_PATH_AMD64}\ILU.dll;                     DestDir: {app}\am
 ; StDrawers -> Movie Player
 Source: {#SVIEW_DISTR_PATH_x86}\StMoviePlayer.dll;             DestDir: {app};                 Flags: 32bit ignoreversion; Components: StCore
 Source: {#SVIEW_DISTR_PATH_x86}\lang\*StMoviePlayer.lng;       DestDir: {app}\lang;            Flags: 32bit ignoreversion recursesubdirs; Components: StCore
+Source: {#SVIEW_DISTR_PATH_x86}\web\*.htm;                     DestDir: {app}\web;             Flags: 32bit ignoreversion recursesubdirs; Components: StDrawers\StMoviePlayer
 Source: {#SVIEW_DISTR_PATH_x86}\OpenAL32.dll;                  DestDir: {app};                 Flags: 32bit ignoreversion; Components: StCore
 Source: alsoft51.ini;                                          DestDir: {userappdata};   DestName: "alsoft.ini";     Tasks: flagOpenAL51; Components: StCore
 Source: {#SVIEW_DISTR_PATH_AMD64}\StMoviePlayer.dll;           DestDir: {app}\amd64;           Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 Source: {#SVIEW_DISTR_PATH_AMD64}\lang\*StMoviePlayer.lng;     DestDir: {app}\amd64\lang;      Flags: 64bit ignoreversion recursesubdirs; Components: StCore; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_AMD64}\web\*.htm;                   DestDir: {app}\amd64\web;       Flags: 64bit ignoreversion recursesubdirs; Components: StDrawers\StMoviePlayer; Check: IsWin64
 Source: {#SVIEW_DISTR_PATH_AMD64}\OpenAL32.dll;                DestDir: {app}\amd64;           Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 
 ; StDrawers -> Tiny CAD viewer
