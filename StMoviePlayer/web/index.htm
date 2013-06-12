@@ -27,7 +27,7 @@ function doUpdateTitle() {
   postRequest('current?title', function() {
     if(this.readyState == 4 && this.status == 200) {
       var aCurrTitle = this.responseText;
-      document.getElementById('stTitle').innerHTML = aCurrTitle;
+      document.getElementById('stTitle').innerHTML = "Current: " + aCurrTitle;
       if(aCurrTitle.length === 0) {
         document.title = 'sView Web UI';
       } else {
@@ -168,20 +168,21 @@ window.setInterval(function() { doRefresh() }, 2000);
   }, false);
 </script>
 
+<table border='0' style='position: fixed; margin-top: 0px; right: 0px; opacity: 0.6' bgcolor="#AAAAAA">
+<tr align='right'><td>
+  <table>
+  <tr align='center'><td colspan='6'><div id='stTitle'></div></td></tr>
+  <tr align='center'>
+    <td><a href="javascript:void(0)" onclick="doPlayPause();return false;"><img src='textures/moviePlay.std'    width='64' height='64' alt='Play/Pause' /></a></td>
+    <td><a href="javascript:void(0)" onclick="doListPrev();return false;"> <img src='textures/moviePrior.std'   width='64' height='64' alt='Previous'   /></a></td>
+    <td><a href="javascript:void(0)" onclick="doListNext();return false;"> <img src='textures/movieNext.std'    width='64' height='64' alt='Next'       /></a></td>
+    <td><a href="javascript:void(0)" onclick="doFullWin();return false;">  <img src='textures/movieFullScr.std' width='64' height='64' alt='Fullscreen/Windowed' /></a></td>
+    <td><button onclick="doAudioMute()">Mute</button></td>
+    <td><button onclick="doRefresh()">Refresh</button></td>
+  </tr></table>
+</td></tr></table>
 
-<div id="stTitle"></div>
-
-<table><tr>
-<td><a href="javascript:void(0)" onclick="doPlayPause();return false;">Play/Pause</a></td>
-<td><a href="javascript:void(0)" onclick="doListPrev();return false;">Previous</a></td>
-<td><a href="javascript:void(0)" onclick="doListNext();return false;">Next</a></td>
-<td><a href="javascript:void(0)" onclick="doStop();return false;">Stop</a></td>
-<td><a href="javascript:void(0)" onclick="doAudioMute();return false;">Mute</a></td>
-<td><a href="javascript:void(0)" onclick="doFullWin();return false;">Fullscreen/Windowed</a></td>
-</tr></table>
-
-<button onclick="doRefresh()">Refresh</button>
-<div id="stPlaylist"></div>
+<div id='stPlaylist'></div>
 <script>
   doRefresh();
 </script>
