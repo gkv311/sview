@@ -19,7 +19,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) { // prevent console output
 
 #ifdef _MSC_VER
     // turn ON thread-safe locale management (MSVCRT-specific)
-    _configthreadlocale(-1);
+    //_configthreadlocale(-1); // conflicts with C++ locales...
 #endif
     setlocale(LC_ALL, ".OCP"); // we set default locale for console output (useful only for debug)
 #else
