@@ -103,13 +103,13 @@ class StGLProgram : public StGLResource {
     ST_CPPEXPORT virtual bool link(StGLContext& theCtx);
 
     /**
-     * @return uniform variable location in the whole shader (like projection/model matrix).
+     * @return uniform variable location in the whole shader
      */
     ST_CPPEXPORT StGLVarLocation getUniformLocation(StGLContext& theCtx,
                                                     const char*  theVarName) const;
 
     /**
-     * @return per-vertex attribute location (in the vertex shader, like vertex, normal, color and so on).
+     * @return per-vertex attribute location (in the vertex shader, like vertex, normal, color and so on)
      */
     ST_CPPEXPORT StGLVarLocation getAttribLocation(StGLContext& theCtx,
                                                    const char*  theVarName) const;
@@ -118,9 +118,9 @@ class StGLProgram : public StGLResource {
      * Associates a generic vertex attribute index with a named attribute variable.
      * Should be called before linkage!
      */
-    ST_CPPEXPORT void bindAttribLocation(StGLContext&    theCtx,
-                                         const char*     theVarName,
-                                         StGLVarLocation theLocation);
+    ST_CPPEXPORT StGLProgram& bindAttribLocation(StGLContext&    theCtx,
+                                                 const char*     theVarName,
+                                                 StGLVarLocation theLocation);
 
     /**
      * Use this program.

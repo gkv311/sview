@@ -14,31 +14,55 @@
 
 class StGLMatrix;
 
+/**
+ * Simple GLSL program for GUI elements.
+ */
 class StGLMenuProgram : public StGLProgram {
 
         public:
 
+    /**
+     * Empty constructor.
+     */
     ST_CPPEXPORT StGLMenuProgram();
 
-    inline StGLVarLocation getVVertexLoc() const {
-        return atrVVertexLoc;
+    /**
+     * @return vertex attribute location
+     */
+    ST_LOCAL inline StGLVarLocation getVVertexLoc() const {
+        return StGLVarLocation(0);
     }
 
+    /**
+     * Setup projection matrix.
+     * @param theCtx     active GL context
+     * @param theProjMat projection matrix
+     */
     ST_CPPEXPORT void setProjMat(StGLContext&      theCtx,
                                  const StGLMatrix& theProjMat);
 
+    /**
+     * Setup color.
+     * @param theCtx          active GL context
+     * @param theColor        color
+     * @param theOpacityValue opacity coefficient
+     */
     ST_CPPEXPORT void setColor(StGLContext&    theCtx,
                                const StGLVec4& theColor,
                                const GLfloat   theOpacityValue);
 
+    /**
+     * Initialize program.
+     * @param theCtx active GL context
+     * @return true if no error
+     */
     ST_CPPEXPORT virtual bool init(StGLContext& theCtx);
 
         private:
 
-    StGLVarLocation uniProjMatLoc;
-    StGLVarLocation uniColorLoc;
-    StGLVarLocation atrVVertexLoc;
+    StGLVarLocation uniProjMatLoc; //!< location of uniform variable of projection matrix
+    StGLVarLocation uniColorLoc;   //!< location of uniform variable of color value
 
 };
 
-#endif //__StGLMenuProgram_h_
+#endif // __StGLMenuProgram_h_

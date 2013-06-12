@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -13,10 +13,7 @@
 #include <StGL/StGLMatrix.h>
 
 StGLMenuProgram::StGLMenuProgram()
-: StGLProgram("StGLMenuProgram"),
-  uniProjMatLoc(),
-  uniColorLoc(),
-  atrVVertexLoc() {
+: StGLProgram("StGLMenuProgram") {
     //
 }
 
@@ -55,15 +52,13 @@ bool StGLMenuProgram::init(StGLContext& theCtx) {
     if(!StGLProgram::create(theCtx)
        .attachShader(theCtx, aVertexShader)
        .attachShader(theCtx, aFragmentShader)
+       .bindAttribLocation(theCtx, "vVertex", getVVertexLoc())
        .link(theCtx)) {
         return false;
     }
 
     uniProjMatLoc = StGLProgram::getUniformLocation(theCtx, "uProjMat");
     uniColorLoc   = StGLProgram::getUniformLocation(theCtx, "uColor");
-    atrVVertexLoc = StGLProgram::getAttribLocation(theCtx, "vVertex");
-
     return uniProjMatLoc.isValid()
-        && uniColorLoc.isValid()
-        && atrVVertexLoc.isValid();
+        && uniColorLoc.isValid();
 }

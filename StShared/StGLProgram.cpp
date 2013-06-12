@@ -114,13 +114,14 @@ StGLVarLocation StGLProgram::getAttribLocation(StGLContext& theCtx,
     return aLocation;
 }
 
-void StGLProgram::bindAttribLocation(StGLContext&    theCtx,
-                                     const char*     theVarName,
-                                     StGLVarLocation theLocation) {
+StGLProgram& StGLProgram::bindAttribLocation(StGLContext&    theCtx,
+                                             const char*     theVarName,
+                                             StGLVarLocation theLocation) {
     if(!isValid()) {
-        return;
+        return *this;
     }
     theCtx.core20fwd->glBindAttribLocation(myProgramId, theLocation, theVarName);
+    return *this;
 }
 
 void StGLProgram::use(StGLContext& theCtx) const {
