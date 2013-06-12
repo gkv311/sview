@@ -962,6 +962,7 @@ void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<St
 }
 
 void StMoviePlayerGUI::stglDraw(unsigned int theView) {
+    setLensDist(myPlugin->getMainWindow()->getLensDist());
     if(theView == ST_DRAW_LEFT
     && myFpsWidget != NULL) {
         myFpsWidget->update(myPlugin->getMainWindow()->isStereoOutput(),

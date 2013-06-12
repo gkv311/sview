@@ -25,6 +25,8 @@ StGLRootWidget::StGLRootWidget()
 : StGLWidget(NULL, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT)),
   myShareArray(new StGLSharePointer*[10]),
   myShareSize(10),
+  myScrDispX(0.0f),
+  myLensDist(0.0f),
   myScaleGlX(1.0),
   myScaleGlY(1.0),
   cursorZo(0.0, 0.0),
@@ -83,6 +85,20 @@ bool StGLRootWidget::stglInit() {
 void StGLRootWidget::stglDraw(unsigned int theView) {
     myGlCtx->stglSyncState();
     myGlCtx->core20fwd->glGetIntegerv(GL_VIEWPORT, myViewport); // cache viewport
+
+    switch(theView) {
+        case ST_DRAW_LEFT:
+            myScrDispX =  myLensDist * 0.5f * myRectGl.width();
+            break;
+        case ST_DRAW_RIGHT:
+            myScrDispX = -myLensDist * 0.5f * myRectGl.width();
+            break;
+        case ST_DRAW_MONO:
+        default:
+            myScrDispX = 0.0f;
+            break;
+    }
+
     StGLWidget::stglDraw(theView);
 }
 

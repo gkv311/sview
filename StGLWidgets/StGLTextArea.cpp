@@ -450,7 +450,7 @@ void StGLTextArea::stglDraw(unsigned int theView) {
     GLfloat aSizeOut = 2.0f * GLfloat(zparams.top()) / GLfloat(getRoot()->getRectPx().height());
 
     StGLMatrix aModelMat;
-    aModelMat.translate(StGLVec3(0.0f, 0.0f, -getCamera()->getZScreen()));
+    aModelMat.translate(StGLVec3(getRoot()->getScreenDispX(), 0.0f, -getCamera()->getZScreen()));
     aModelMat.translate(StGLVec3(GLfloat(aTextRectGl.left()),
                                  GLfloat(aTextRectGl.top()),
                                  0.0f));

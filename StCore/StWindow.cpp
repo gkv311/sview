@@ -243,3 +243,7 @@ const StSearchMonitors& StWindow::getMonitors() const {
 bool StWindow::isParentOnScreen() const {
     return myWin->isParentOnScreen();
 }
+
+GLfloat StWindow::getLensDist() const {
+    return 0.0f;
+}

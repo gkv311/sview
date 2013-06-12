@@ -86,3 +86,8 @@ void StDiagnosticsGUI::stglUpdate(const StPointD_t& thePointZo) {
 void StDiagnosticsGUI::stglResize(const StRectI_t& theWinRectPx) {
     StGLRootWidget::stglResize(theWinRectPx);
 }
+
+void StDiagnosticsGUI::stglDraw(unsigned int theView) {
+    setLensDist(myPlugin->getMainWindow()->getLensDist());
+    StGLRootWidget::stglDraw(theView);
+}

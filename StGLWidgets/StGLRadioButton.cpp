@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -42,8 +42,7 @@ StGLRadioButton::StGLRadioButton(StGLWidget* theParent,
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
   myVertBuf(),
   myValueOn(theOnValue) {
-    //
-    StGLWidget::signals.onMouseUnclick.connect(this, &StGLRadioButton::doMouseUnclick);
+    StGLWidget::signals.onMouseUnclick = stSlot(this, &StGLRadioButton::doMouseUnclick);
 }
 
 StGLRadioButton::~StGLRadioButton() {
@@ -121,7 +120,7 @@ void StGLRadioButton::stglDraw(unsigned int ST_UNUSED(theView)) {
 
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     aCtx.core20fwd->glEnable(GL_BLEND);
-    myProgram->use(aCtx);
+    myProgram->use(aCtx, getRoot()->getScreenDispX());
     myVertBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
 
         bool isChecked = isActiveState();

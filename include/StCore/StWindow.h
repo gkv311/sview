@@ -375,6 +375,8 @@ class StWindow {
      */
     ST_CPPEXPORT bool isParentOnScreen() const;
 
+    ST_CPPEXPORT virtual GLfloat getLensDist() const;
+
         public: //! @name signals
 
     struct {

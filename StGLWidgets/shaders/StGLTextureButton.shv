@@ -1,16 +1,17 @@
 /**
  * Shader generate simple wave on Z axis.
  *
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
  * http://www.boost.org/LICENSE_1_0.txt
  */
 
-uniform mat4 uProjMat;
+uniform mat4  uProjMat;
+uniform vec4  uDisp;
 uniform float uTime;
-uniform int uClicked;
+uniform int   uClicked;
 
 // per-vertex input
 attribute vec4 vVertex;
@@ -21,7 +22,7 @@ varying vec2 fTexCoord;
 
 void main(void) {
     fTexCoord = vTexCoord;
-    vec4 v = vVertex;
+    vec4 v = vVertex + uDisp;
     if(uClicked > 10) {
         v.z = v.z - 0.25;
     } else {

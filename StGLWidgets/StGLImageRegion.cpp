@@ -398,6 +398,14 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             myProgramFlat.setTextureMainDataSize(aCtx, dataClampVec);
             myProgramFlat.setTextureUVDataSize(aCtx, dataUVClampVec);
 
+            // lenses center correction
+            const GLfloat aLestDisp = getRoot()->getLensDist() * GLfloat(getRoot()->getRectPx().ratio());
+            if(theView == ST_DRAW_LEFT) {
+                stModelMat.translate(StGLVec3( aLestDisp, 0.0f, 0.0f));
+            } else {
+                stModelMat.translate(StGLVec3(-aLestDisp, 0.0f, 0.0f));
+            }
+
             // apply scale
             stModelMat.scale(aParams->getScale(), aParams->getScale(), 1.0f);
 

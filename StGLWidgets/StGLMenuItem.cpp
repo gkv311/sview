@@ -155,13 +155,13 @@ bool StGLMenuItem::stglInit() {
     return myIsInitialized;
 }
 
-void StGLMenuItem::stglDrawArea(const StGLMenuItem::State theState) {
+void StGLMenuItem::stglDrawArea(unsigned int              theView,
+                                const StGLMenuItem::State theState) {
     StGLContext& aCtx = getContext();
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     aCtx.core20fwd->glEnable(GL_BLEND);
-    myProgram->use(aCtx);
 
-    myProgram->setColor(aCtx, myBackColor[theState], GLfloat(opacityValue));
+    myProgram->use(aCtx, myBackColor[theState], GLfloat(opacityValue), getRoot()->getScreenDispX());
     myBackVertexBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
     aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     myBackVertexBuf.unBindVertexAttrib(aCtx, myProgram->getVVertexLoc());
@@ -205,7 +205,7 @@ void StGLMenuItem::stglDraw(unsigned int theView) {
 
     if(myToHilightText) {
         if(myHasFocus) {
-            stglDrawArea(StGLMenuItem::HIGHLIGHT);
+            stglDrawArea(theView, StGLMenuItem::HIGHLIGHT);
         }
         if(aState == StGLMenuItem::HIGHLIGHT) {
             setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
@@ -213,7 +213,7 @@ void StGLMenuItem::stglDraw(unsigned int theView) {
             setTextColor(StGLVec3(0.8f, 0.8f, 0.8f));
         }
     } else if(aState != StGLMenuItem::PASSIVE) {
-        stglDrawArea(aState);
+        stglDrawArea(theView, aState);
     }
 
     StGLTextArea::stglDraw(theView);

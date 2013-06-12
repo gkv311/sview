@@ -31,50 +31,49 @@ class StSeekBar::StProgramSB : public StGLProgram {
 
         public:
 
-    StProgramSB()
-    : StGLProgram("StSeekBar"),
-      uniProjMatLoc(),
-      uniOpacityLoc(),
-      atrVVertexLoc(),
-      atrVColorLoc() {
-        //
-    }
+    StProgramSB() : StGLProgram("StSeekBar") {}
 
-    StGLVarLocation getVVertexLoc() const {
-        return atrVVertexLoc;
-    }
-
-    StGLVarLocation getVColorLoc() const {
-        return atrVColorLoc;
-    }
+    StGLVarLocation getVVertexLoc() const { return StGLVarLocation(0); }
+    StGLVarLocation getVColorLoc()  const { return StGLVarLocation(1); }
 
     void setProjMat(StGLContext&      theCtx,
                     const StGLMatrix& theProjMat) {
         theCtx.core20fwd->glUniformMatrix4fv(uniProjMatLoc, 1, GL_FALSE, theProjMat);
     }
 
-    void setOpacity(StGLContext&  theCtx,
-                    const GLfloat theOpacityValue) {
+    void use(StGLContext& theCtx) {
+        StGLProgram::use(theCtx);
+    }
+
+    void use(StGLContext&  theCtx,
+             const GLfloat theOpacityValue,
+             const GLfloat theDispX) {
+        StGLProgram::use(theCtx);
         theCtx.core20fwd->glUniform1f(uniOpacityLoc, theOpacityValue);
+        if(!stAreEqual(myDispX, theDispX, 0.0001f)) {
+            myDispX = theDispX;
+            theCtx.core20fwd->glUniform4fv(uniDispLoc,  1, StGLVec4(theDispX, 0.0f, 0.0f, 0.0f));
+        }
     }
 
     virtual bool init(StGLContext& theCtx) {
         const char VERTEX_SHADER[] =
-           "uniform mat4 uProjMatrix; \
-            uniform float uOpacity; \
-            attribute vec4 vVertex; \
-            attribute vec4 vColor; \
-            varying vec4 fColor; \
-            void main(void) { \
-                fColor = vec4(vColor.rgb, vColor.a * uOpacity); \
-                gl_Position = uProjMatrix * vVertex; \
-            }";
+           "uniform mat4  uProjMatrix;\n"
+           "uniform vec4  uDisp;\n"
+           "uniform float uOpacity;\n"
+           "attribute vec4 vVertex;\n"
+           "attribute vec4 vColor;\n"
+           "varying vec4 fColor;\n"
+           "void main(void) {\n"
+           "    fColor = vec4(vColor.rgb, vColor.a * uOpacity);\n"
+           "    gl_Position = uProjMatrix * (vVertex + uDisp);\n"
+           "}\n";
 
         const char FRAGMENT_SHADER[] =
-           "varying vec4 fColor; \
-            void main(void) { \
-                gl_FragColor = fColor; \
-            }";
+           "varying vec4 fColor;\n"
+           "void main(void) {\n"
+           "    gl_FragColor = fColor;\n"
+           "}\n";
 
         StGLVertexShader aVertexShader(StGLProgram::getTitle());
         StGLAutoRelease aTmp1(theCtx, aVertexShader);
@@ -86,24 +85,24 @@ class StSeekBar::StProgramSB : public StGLProgram {
         if(!StGLProgram::create(theCtx)
            .attachShader(theCtx, aVertexShader)
            .attachShader(theCtx, aFragmentShader)
+           .bindAttribLocation(theCtx, "vVertex", getVVertexLoc())
+           .bindAttribLocation(theCtx, "vColor",  getVColorLoc())
            .link(theCtx)) {
             return false;
         }
 
         uniProjMatLoc = StGLProgram::getUniformLocation(theCtx, "uProjMatrix");
+        uniDispLoc    = StGLProgram::getUniformLocation(theCtx, "uDisp");
         uniOpacityLoc = StGLProgram::getUniformLocation(theCtx, "uOpacity");
-        atrVVertexLoc = StGLProgram::getAttribLocation(theCtx, "vVertex");
-        atrVColorLoc  = StGLProgram::getAttribLocation(theCtx, "vColor");
-        return uniProjMatLoc.isValid() && uniOpacityLoc.isValid() && atrVVertexLoc.isValid() && atrVColorLoc.isValid();
+        return uniProjMatLoc.isValid() && uniOpacityLoc.isValid();
     }
 
         private:
 
+    GLfloat         myDispX;
     StGLVarLocation uniProjMatLoc;
+    StGLVarLocation uniDispLoc;
     StGLVarLocation uniOpacityLoc;
-
-    StGLVarLocation atrVVertexLoc;
-    StGLVarLocation atrVColorLoc;
 
 };
 
@@ -208,9 +207,7 @@ void StSeekBar::stglDraw(unsigned int ) {
 
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     aCtx.core20fwd->glEnable(GL_BLEND);
-    myProgram->use(aCtx);
-
-    myProgram->setOpacity(aCtx, GLfloat(opacityValue));
+    myProgram->use(aCtx, GLfloat(opacityValue), getRoot()->getScreenDispX());
 
     myVertices.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
     myColors  .bindVertexAttrib(aCtx, myProgram->getVColorLoc());

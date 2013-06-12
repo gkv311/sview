@@ -28,19 +28,41 @@ void StGLMenuProgram::setColor(StGLContext&    theCtx,
     theCtx.core20fwd->glUniform4fv(uniColorLoc, 1, StGLVec4(theColor.rgb(), theColor.a() * theOpacityValue));
 }
 
+void StGLMenuProgram::use(StGLContext&  theCtx,
+                          const GLfloat theDispX) {
+    StGLProgram::use(theCtx);
+    if(!stAreEqual(myDispX, theDispX, 0.0001f)) {
+        myDispX = theDispX;
+        theCtx.core20fwd->glUniform4fv(uniDispLoc,  1, StGLVec4(theDispX, 0.0f, 0.0f, 0.0f));
+    }
+}
+
+void StGLMenuProgram::use(StGLContext&    theCtx,
+                          const StGLVec4& theColor,
+                          const GLfloat   theOpacityValue,
+                          const GLfloat   theDispX) {
+    StGLProgram::use(theCtx);
+    theCtx.core20fwd->glUniform4fv(uniColorLoc, 1, StGLVec4(theColor.rgb(), theColor.a() * theOpacityValue));
+    if(!stAreEqual(myDispX, theDispX, 0.0001f)) {
+        myDispX = theDispX;
+        theCtx.core20fwd->glUniform4fv(uniDispLoc,  1, StGLVec4(theDispX, 0.0f, 0.0f, 0.0f));
+    }
+}
+
 bool StGLMenuProgram::init(StGLContext& theCtx) {
     const char VERTEX_SHADER[] =
-       "uniform mat4 uProjMat; \
-        attribute vec4 vVertex; \
-        void main(void) { \
-            gl_Position = uProjMat * vVertex; \
-        }";
+       "uniform mat4 uProjMat;\n"
+       "uniform vec4 uDisp;\n"
+       "attribute vec4 vVertex;\n"
+       "void main(void) {\n"
+       "    gl_Position = uProjMat * (vVertex + uDisp);\n"
+       "}\n";
 
     const char FRAGMENT_SHADER[] =
-       "uniform vec4 uColor; \
-        void main(void) { \
-            gl_FragColor = uColor; \
-        }";
+       "uniform vec4 uColor;\n"
+       "void main(void) {\n"
+       "    gl_FragColor = uColor;\n"
+       "}\n";
 
     StGLVertexShader aVertexShader(StGLProgram::getTitle());
     aVertexShader.init(theCtx, VERTEX_SHADER);
@@ -58,6 +80,7 @@ bool StGLMenuProgram::init(StGLContext& theCtx) {
     }
 
     uniProjMatLoc = StGLProgram::getUniformLocation(theCtx, "uProjMat");
+    uniDispLoc    = StGLProgram::getUniformLocation(theCtx, "uDisp");
     uniColorLoc   = StGLProgram::getUniformLocation(theCtx, "uColor");
     return uniProjMatLoc.isValid()
         && uniColorLoc.isValid();

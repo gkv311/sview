@@ -282,7 +282,8 @@ StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
   myToShowCursor(true),
   myToSavePlacement(theParentWindow == (StNativeWin_t )NULL),
   myToCompressMem(myInstancesNb.increment() > 1),
-  myIsBroken(false) {
+  myIsBroken(false),
+  myIsStereoOn(false) {
     const StSearchMonitors& aMonitors = StWindow::getMonitors();
     StTranslations aLangMap(ST_OUT_PLUGIN_NAME);
 
@@ -480,13 +481,17 @@ void StOutDistorted::stglDrawCursor() {
     myContext->core20fwd->glDisable(GL_BLEND);
 }
 
+GLfloat StOutDistorted::getLensDist() const {
+    return (myIsStereoOn && params.Barrel->getValue()) ? 0.1453f : 0.0f;
+}
+
 void StOutDistorted::stglDraw() {
     myFPSControl.setTargetFPS(StWindow::getTargetFps());
 
-    const bool isStereo = StWindow::isStereoOutput()
-                       && StWindow::isFullScreen()
-                       && !myIsBroken;
-    if(isStereo
+    myIsStereoOn = StWindow::isStereoOutput()
+                && StWindow::isFullScreen()
+                && !myIsBroken;
+    if(myIsStereoOn
     && !params.Anamorph->getValue()) {
         StWindow::setAttribute(StWinAttr_SplitCfg, params.Layout->getValue() == LAYOUT_OVER_UNDER
                                                  ? StWinSlave_splitVertical : StWinSlave_splitHorizontal);
@@ -496,7 +501,7 @@ void StOutDistorted::stglDraw() {
 
     const StGLBoxPx aVPMaster = StWindow::stglViewport(ST_WIN_MASTER);
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
-    if(!isStereo) {
+    if(!myIsStereoOn) {
         if(myToCompressMem) {
             myFrBuffer->release(*myContext);
         }
@@ -560,26 +565,26 @@ void StOutDistorted::stglDraw() {
     aTCoords[3] = StGLVec2(0.0f, aDY);
     myFrTCrdsBuf.init(*myContext, aTCoords);
 
-    if(myCursor->isValid()) {
-        // compute cursor position
-        StArray<StGLVec4> aVerts(4);
-        const GLfloat aCurLeft = GLfloat(-1.0 + aCursorPos.x() * 2.0);
-        const GLfloat aCurTop  = GLfloat( 1.0 - aCursorPos.y() * 2.0);
-        GLfloat aCurWidth  = 2.0f * GLfloat(myCursor->getSizeX()) / GLfloat(myFrBuffer->getVPSizeX());
-        GLfloat aCurHeight = 2.0f * GLfloat(myCursor->getSizeY()) / GLfloat(myFrBuffer->getVPSizeY());
-        if(params.Anamorph->getValue()) {
-            if(params.Layout->getValue() == LAYOUT_OVER_UNDER) {
-                aCurHeight *= 0.5;
-            } else {
-                aCurWidth  *= 0.5;
-            }
+    const GLfloat aLensDisp = getLensDist() * 0.5f;
+
+    // compute cursor position
+    StArray<StGLVec4> aVerts(4);
+    const GLfloat aCurLeft = GLfloat(-1.0 + aCursorPos.x() * 2.0);
+    const GLfloat aCurTop  = GLfloat( 1.0 - aCursorPos.y() * 2.0);
+    GLfloat aCurWidth  = 2.0f * GLfloat(myCursor->getSizeX()) / GLfloat(myFrBuffer->getVPSizeX());
+    GLfloat aCurHeight = 2.0f * GLfloat(myCursor->getSizeY()) / GLfloat(myFrBuffer->getVPSizeY());
+    if(params.Anamorph->getValue()) {
+        if(params.Layout->getValue() == LAYOUT_OVER_UNDER) {
+            aCurHeight *= 0.5;
+        } else {
+            aCurWidth  *= 0.5;
         }
-        aVerts[0] = StGLVec4(aCurLeft + aCurWidth, aCurTop - aCurHeight, 0.0f, 1.0f);
-        aVerts[1] = StGLVec4(aCurLeft + aCurWidth, aCurTop,              0.0f, 1.0f);
-        aVerts[2] = StGLVec4(aCurLeft,             aCurTop - aCurHeight, 0.0f, 1.0f);
-        aVerts[3] = StGLVec4(aCurLeft,             aCurTop,              0.0f, 1.0f);
-        myCurVertsBuf.init(*myContext, aVerts);
     }
+    aVerts[0] = StGLVec4(2.0f * aLensDisp + aCurLeft + aCurWidth, aCurTop - aCurHeight, 0.0f, 1.0f);
+    aVerts[1] = StGLVec4(2.0f * aLensDisp + aCurLeft + aCurWidth, aCurTop,              0.0f, 1.0f);
+    aVerts[2] = StGLVec4(2.0f * aLensDisp + aCurLeft,             aCurTop - aCurHeight, 0.0f, 1.0f);
+    aVerts[3] = StGLVec4(2.0f * aLensDisp + aCurLeft,             aCurTop,              0.0f, 1.0f);
+    myCurVertsBuf.init(*myContext, aVerts);
 
     // draw Left View into virtual frame buffer
     myFrBuffer->setupViewPort(*myContext); // we set TEXTURE sizes here
@@ -608,10 +613,11 @@ void StOutDistorted::stglDraw() {
         myProgramBarrel->setScaleIn(*myContext, StGLVec2(2.0f / aDX, 2.0f / aDY));
         myProgramBarrel->setScale  (*myContext, StGLVec2(0.4f * aDX, 0.4f * aDY));
     }
-    const GLfloat aLensDisp = 0.1453f * 0.5f;
 
     myFrBuffer->bindTexture(*myContext);
-    myProgramBarrel->setLensCenter(*myContext, StGLVec2((0.5f + aLensDisp) * aDX, 0.5f * aDY));
+    if(aProgram == myProgramBarrel.access()) {
+        myProgramBarrel->setLensCenter(*myContext, StGLVec2((0.5f + aLensDisp) * aDX, 0.5f * aDY));
+    }
     aProgram->use(*myContext);
         myFrVertsBuf.bindVertexAttrib(*myContext, aVertexLoc);
         myFrTCrdsBuf.bindVertexAttrib(*myContext, aTexCrdLoc);
@@ -625,6 +631,12 @@ void StOutDistorted::stglDraw() {
     myContext->stglResetScissorRect();
 
     // draw Right View into virtual frame buffer
+    aVerts[0] = StGLVec4(-2.0f * aLensDisp + aCurLeft + aCurWidth, aCurTop - aCurHeight, 0.0f, 1.0f);
+    aVerts[1] = StGLVec4(-2.0f * aLensDisp + aCurLeft + aCurWidth, aCurTop,              0.0f, 1.0f);
+    aVerts[2] = StGLVec4(-2.0f * aLensDisp + aCurLeft,             aCurTop - aCurHeight, 0.0f, 1.0f);
+    aVerts[3] = StGLVec4(-2.0f * aLensDisp + aCurLeft,             aCurTop,              0.0f, 1.0f);
+    myCurVertsBuf.init(*myContext, aVerts);
+
     myFrBuffer->setupViewPort(*myContext); // we set TEXTURE sizes here
     myFrBuffer->bindBuffer(*myContext);
         StWindow::signals.onRedraw(ST_DRAW_RIGHT);
@@ -636,7 +648,9 @@ void StOutDistorted::stglDraw() {
     myContext->stglSetScissorRect(aViewPortR, false);
 
     myFrBuffer->bindTexture(*myContext);
-    myProgramBarrel->setLensCenter(*myContext, StGLVec2((0.5f - aLensDisp) * aDX, 0.5f * aDY));
+    if(aProgram == myProgramBarrel.access()) {
+        myProgramBarrel->setLensCenter(*myContext, StGLVec2((0.5f - aLensDisp) * aDX, 0.5f * aDY));
+    }
     aProgram->use(*myContext);
     myFrVertsBuf.bindVertexAttrib(*myContext, aVertexLoc);
     myFrTCrdsBuf.bindVertexAttrib(*myContext, aTexCrdLoc);

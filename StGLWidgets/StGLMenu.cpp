@@ -185,8 +185,7 @@ void StGLMenu::stglDraw(unsigned int theView) {
     StGLContext& aCtx = getContext();
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     aCtx.core20fwd->glEnable(GL_BLEND);
-    myProgram->use(aCtx);
-    myProgram->setColor(aCtx, myColorVec, GLfloat(opacityValue));
+    myProgram->use(aCtx, myColorVec, GLfloat(opacityValue), getRoot()->getScreenDispX());
 
     myVertexBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
     aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);

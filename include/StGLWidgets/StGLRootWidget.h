@@ -164,6 +164,18 @@ class StGLRootWidget : public StGLWidget {
         return myScrProjMat;
     }
 
+    inline GLfloat getScreenDispX() const {
+        return myScrDispX;
+    }
+
+    inline GLfloat getLensDist() const {
+        return myLensDist;
+    }
+
+    inline void setLensDist(const GLfloat theLensDist) {
+        myLensDist = theLensDist;
+    }
+
     /**
      * Returns mouse cursor position in GL coordinates.
      */
@@ -211,6 +223,8 @@ class StGLRootWidget : public StGLWidget {
     StGLProjCamera           myProjCamera;  //!< projection camera
     StGLMatrix               myScrProjMat;  //!< projection matrix within translation to the screen
     StHandle<StGLContext>    myGlCtx;       //!< OpenGL context
+    GLfloat                  myScrDispX;
+    GLfloat                  myLensDist;
 
     StRectI_t                myMarginsPx;   //!< active area margins in pixels
     StRectD_t                myRectGl;      //!< rectangle in GL coordinates

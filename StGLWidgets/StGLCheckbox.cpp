@@ -39,8 +39,7 @@ StGLCheckbox::StGLCheckbox(StGLWidget* theParent,
              16, 16), // default dimensions = 16 x 16
   myTrackValue(theTrackedValue),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)) {
-    //
-    StGLWidget::signals.onMouseUnclick.connect(this, &StGLCheckbox::doMouseUnclick);
+    StGLWidget::signals.onMouseUnclick = stSlot(this, &StGLCheckbox::doMouseUnclick);
 }
 
 StGLCheckbox::~StGLCheckbox() {
@@ -113,7 +112,7 @@ void StGLCheckbox::stglDraw(unsigned int ST_UNUSED(theView)) {
 
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     aCtx.core20fwd->glEnable(GL_BLEND);
-    myProgram->use(aCtx);
+    myProgram->use(aCtx, getRoot()->getScreenDispX());
     myVertBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
 
     myProgram->setColor(aCtx, OUTER_COLORS[myTrackValue->getValue() ? 1 : 0], GLfloat(opacityValue));

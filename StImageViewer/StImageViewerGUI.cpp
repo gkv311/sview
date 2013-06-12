@@ -645,6 +645,7 @@ void StImageViewerGUI::stglResize(const StRectI_t& winRectPx) {
 }
 
 void StImageViewerGUI::stglDraw(unsigned int theView) {
+    setLensDist(myPlugin->getMainWindow()->getLensDist());
     if(theView == ST_DRAW_LEFT
     && myFpsWidget != NULL) {
         myFpsWidget->update(myPlugin->getMainWindow()->isStereoOutput(),

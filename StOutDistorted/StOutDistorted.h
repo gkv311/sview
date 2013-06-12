@@ -104,6 +104,8 @@ class StOutDistorted : public StWindow {
      */
     ST_CPPEXPORT virtual void showCursor(const bool theToShow);
 
+    ST_CPPEXPORT virtual GLfloat getLensDist() const;
+
         private:
 
     /**
@@ -160,6 +162,7 @@ class StOutDistorted : public StWindow {
     bool                      myToSavePlacement; //!< to save window position on exit
     bool                      myToCompressMem;   //!< reduce memory usage
     bool                      myIsBroken;        //!< special flag for broke state - when FBO can not be allocated
+    bool                      myIsStereoOn;
 
 };
 

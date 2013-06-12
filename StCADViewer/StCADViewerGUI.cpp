@@ -167,6 +167,11 @@ void StCADViewerGUI::stglResize(const StRectI_t& winRectPx) {
     StGLRootWidget::stglResize(winRectPx);
 }
 
+void StCADViewerGUI::stglDraw(unsigned int theView) {
+    setLensDist(myPlugin->getMainWindow()->getLensDist());
+    StGLRootWidget::stglDraw(theView);
+}
+
 void StCADViewerGUI::doAboutProgram(const size_t ) {
     const StString& aTitle     = myLangMap->changeValueId(ABOUT_DPLUGIN_NAME, "sView - Tiny CAD Viewer");
     const StString& aVerString = myLangMap->changeValueId(ABOUT_VERSION,      "version");

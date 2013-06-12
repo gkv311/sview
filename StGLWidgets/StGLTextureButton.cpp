@@ -22,17 +22,11 @@ class StGLTextureButton::StButtonProgram : public StGLProgram {
         public:
 
     StButtonProgram()
-    : StGLProgram("StGLTextureButton") {
-        //
-    }
+    : StGLProgram("StGLTextureButton"),
+      myDispX(0.0f) {}
 
-    StGLVarLocation getVVertexLoc() const {
-        return atrVVertexLoc;
-    }
-
-    StGLVarLocation getVTexCoordLoc() const {
-        return atrVTexCoordLoc;
-    }
+    StGLVarLocation getVVertexLoc()   const { return StGLVarLocation(0); }
+    StGLVarLocation getVTexCoordLoc() const { return StGLVarLocation(1); }
 
     void setProjMat(StGLContext&      theCtx,
                     const StGLMatrix& theProjMat) {
@@ -51,13 +45,14 @@ class StGLTextureButton::StButtonProgram : public StGLProgram {
         if(!StGLProgram::create(theCtx)
            .attachShader(theCtx, aVertexShader)
            .attachShader(theCtx, aFragmentShader)
+           .bindAttribLocation(theCtx, "vVertex",   getVVertexLoc())
+           .bindAttribLocation(theCtx, "vTexCoord", getVTexCoordLoc())
            .link(theCtx)) {
             return false;
         }
 
         uniProjMatLoc   = StGLProgram::getUniformLocation(theCtx, "uProjMat");
-        atrVVertexLoc   = StGLProgram::getAttribLocation (theCtx, "vVertex");
-        atrVTexCoordLoc = StGLProgram::getAttribLocation (theCtx, "vTexCoord");
+        uniDispLoc      = StGLProgram::getUniformLocation(theCtx, "uDisp");
         uniTimeLoc      = StGLProgram::getUniformLocation(theCtx, "uTime");
         uniClickedLoc   = StGLProgram::getUniformLocation(theCtx, "uClicked");
         uniParamsLoc    = StGLProgram::getUniformLocation(theCtx, "uParams");
@@ -70,8 +65,6 @@ class StGLTextureButton::StButtonProgram : public StGLProgram {
         }
 
         return uniProjMatLoc.isValid()
-            && atrVVertexLoc.isValid()
-            && atrVTexCoordLoc.isValid()
             && uniTimeLoc.isValid()
             && uniClickedLoc.isValid()
             && uniParamsLoc.isValid()
@@ -82,24 +75,29 @@ class StGLTextureButton::StButtonProgram : public StGLProgram {
         StGLProgram::use(theCtx);
     }
 
-    void use(StGLContext& theCtx,
-             const double theTime,
-             const double theLightX,
-             const double theLightY,
-             const double theOpacity,
-             const bool   theIsClicked) {
+    void use(StGLContext&  theCtx,
+             const double  theTime,
+             const double  theLightX,
+             const double  theLightY,
+             const double  theOpacity,
+             const bool    theIsClicked,
+             const GLfloat theDispX) {
         StGLProgram::use(theCtx);
         theCtx.core20fwd->glUniform1f(uniTimeLoc, GLfloat(theTime));
         theCtx.core20fwd->glUniform1i(uniClickedLoc, (theIsClicked ? 20 : 2));
         theCtx.core20fwd->glUniform3f(uniParamsLoc, GLfloat(theLightX), GLfloat(theLightY), GLfloat(theOpacity));
+        if(!stAreEqual(myDispX, theDispX, 0.0001f)) {
+            myDispX = theDispX;
+            theCtx.core20fwd->glUniform4fv(uniDispLoc,  1, StGLVec4(theDispX, 0.0f, 0.0f, 0.0f));
+        }
     }
 
         private:
 
-    StGLVarLocation uniProjMatLoc;
+    GLfloat         myDispX;
 
-    StGLVarLocation atrVVertexLoc;
-    StGLVarLocation atrVTexCoordLoc;
+    StGLVarLocation uniProjMatLoc;
+    StGLVarLocation uniDispLoc;
 
     StGLVarLocation uniTimeLoc;
     StGLVarLocation uniClickedLoc;
@@ -124,8 +122,7 @@ StGLTextureButton::StGLTextureButton(StGLWidget*      theParent,
   myTexturesPaths(theFacesCount),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
   myWaveTimer(false) {
-    //
-    StGLWidget::signals.onMouseUnclick.connect(this, &StGLTextureButton::doMouseUnclick);
+    StGLWidget::signals.onMouseUnclick = stSlot(this, &StGLTextureButton::doMouseUnclick);
 }
 
 StGLTextureButton::~StGLTextureButton() {
@@ -245,7 +242,8 @@ void StGLTextureButton::stglDraw(unsigned int ) {
                   (mouseGl.x() - butRectGl.left()) / butWGl,
                   (butRectGl.top()  - mouseGl.y()) / butHGl,
                    opacityValue,
-                   isClicked(ST_MOUSE_LEFT));
+                   isClicked(ST_MOUSE_LEFT),
+                   getRoot()->getScreenDispX());
 
     myVertBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
     myTCrdBuf.bindVertexAttrib(aCtx, myProgram->getVTexCoordLoc());
