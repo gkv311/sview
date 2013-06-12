@@ -10,7 +10,8 @@ AR = ar
 LD = g++
 
 INC =  -I3rdparty/include -Iinclude
-CXXFLAGS = -O3 -std=c++0x -Wall -fPIC -mmmx -msse `pkg-config gtk+-2.0 --cflags` $(INC)
+CFLAGS   = -fPIC -mmmx -msse -DST_HAVE_MONGOOSE $(INC)
+CXXFLAGS = -O3 -std=c++0x -Wall -fPIC -mmmx -msse `pkg-config gtk+-2.0 --cflags` -DST_HAVE_MONGOOSE $(INC)
 LIBDIR = -L$(BUILD_ROOT)
 LIB =
 LDFLAGS = -s
@@ -42,6 +43,7 @@ distclean: clean
 install:
 	mkdir -p $(DESTDIR)/usr/bin
 	mkdir -p $(DESTDIR)/usr/$(USR_LIB)/sView/info
+	mkdir -p $(DESTDIR)/usr/$(USR_LIB)/sView/web
 	mkdir -p $(DESTDIR)/usr/$(USR_LIB)/firefox/plugins
 	mkdir -p $(DESTDIR)/usr/$(USR_LIB)/mozilla/plugins
 	mkdir -p $(DESTDIR)/usr/share
@@ -52,8 +54,23 @@ install:
 	cp -f -r $(BUILD_ROOT)/lang/*        $(DESTDIR)/usr/$(USR_LIB)/sView/lang/
 	cp -f -r $(BUILD_ROOT)/shaders/*     $(DESTDIR)/usr/$(USR_LIB)/sView/shaders/
 	cp -f -r $(BUILD_ROOT)/textures/*    $(DESTDIR)/usr/$(USR_LIB)/sView/textures/
-	ln --force --symbolic ../$(USR_LIB)/sView/sView       $(DESTDIR)/usr/bin/sView
-	ln --force --symbolic ../../share/sView/demo/demo.jps $(DESTDIR)/usr/$(USR_LIB)/sView/demo.jps
+	cp -f -r $(BUILD_ROOT)/web/*         $(DESTDIR)/usr/$(USR_LIB)/sView/web/
+	ln --force --symbolic ../$(USR_LIB)/sView/sView                 $(DESTDIR)/usr/bin/sView
+	ln --force --symbolic ../$(USR_LIB)/sView/libStShared.so        $(DESTDIR)/usr/$(USR_LIB)/libStShared.so
+	ln --force --symbolic ../$(USR_LIB)/sView/libStSettings.so      $(DESTDIR)/usr/$(USR_LIB)/libStSettings.so
+	ln --force --symbolic ../$(USR_LIB)/sView/libStGLWidgets.so     $(DESTDIR)/usr/$(USR_LIB)/libStGLWidgets.so
+	ln --force --symbolic ../$(USR_LIB)/sView/libStCore.so          $(DESTDIR)/usr/$(USR_LIB)/libStCore.so
+	ln --force --symbolic ../$(USR_LIB)/sView/libStOutAnaglyph.so   $(DESTDIR)/usr/$(USR_LIB)/libStOutAnaglyph.so
+	ln --force --symbolic ../$(USR_LIB)/sView/libStOutDistorted.so  $(DESTDIR)/usr/$(USR_LIB)/libStOutDistorted.so
+	ln --force --symbolic ../$(USR_LIB)/sView/libStOutDual.so       $(DESTDIR)/usr/$(USR_LIB)/libStOutDual.so
+	ln --force --symbolic ../$(USR_LIB)/sView/libStOutInterlace.so  $(DESTDIR)/usr/$(USR_LIB)/libStOutInterlace.so
+	ln --force --symbolic ../$(USR_LIB)/sView/libStOutIZ3D.so       $(DESTDIR)/usr/$(USR_LIB)/libStOutIZ3D.so
+	ln --force --symbolic ../$(USR_LIB)/sView/libStOutPageFlip.so   $(DESTDIR)/usr/$(USR_LIB)/libStOutPageFlip.so
+	ln --force --symbolic ../$(USR_LIB)/sView/libStDiagnostics.so   $(DESTDIR)/usr/$(USR_LIB)/libStDiagnostics.so
+	ln --force --symbolic ../$(USR_LIB)/sView/libStImageViewer.so   $(DESTDIR)/usr/$(USR_LIB)/libStImageViewer.so
+	ln --force --symbolic ../$(USR_LIB)/sView/libStMoviePlayer.so   $(DESTDIR)/usr/$(USR_LIB)/libStMoviePlayer.so
+	ln --force --symbolic ../$(USR_LIB)/sView/libStCADViewer.so     $(DESTDIR)/usr/$(USR_LIB)/libStCADViewer.so
+	ln --force --symbolic ../../share/sView/demo/demo.jps           $(DESTDIR)/usr/$(USR_LIB)/sView/demo.jps
 	rm -f    $(DESTDIR)/usr/$(USR_LIB)/sView/*.a
 
 pre_all:
@@ -61,6 +78,7 @@ pre_all:
 	mkdir -p $(BUILD_ROOT)/lang/русский
 	mkdir -p $(BUILD_ROOT)/lang/français
 	mkdir -p $(BUILD_ROOT)/textures
+	mkdir -p $(BUILD_ROOT)/web
 	cp -f -r textures/*.std $(BUILD_ROOT)/textures/
 
 # StShared static shared library
@@ -215,13 +233,16 @@ aStMoviePlayer_SRCS1 := $(wildcard StMoviePlayer/*.cpp)
 aStMoviePlayer_OBJS1 := ${aStMoviePlayer_SRCS1:.cpp=.o}
 aStMoviePlayer_SRCS2 := $(wildcard StMoviePlayer/StVideo/*.cpp)
 aStMoviePlayer_OBJS2 := ${aStMoviePlayer_SRCS2:.cpp=.o}
+aStMoviePlayer_SRCS3 := $(wildcard StMoviePlayer/*.c)
+aStMoviePlayer_OBJS3 := ${aStMoviePlayer_SRCS3:.c=.o}
 aStMoviePlayer_LIB   := $(LIB) -lStGLWidgets -lStShared -lStSettings -lStCore -lStOutAnaglyph -lStOutDual -lStOutInterlace -lStOutPageFlip -lStOutIZ3D -lStOutDistorted $(LIB_GLX) $(LIB_GTK) -lavutil -lavformat -lavcodec -lswscale -lopenal -lpthread
-$(aStMoviePlayer) : pre_StMoviePlayer $(aStMoviePlayer_OBJS1) $(aStMoviePlayer_OBJS2)
-	$(LD) -shared -z defs $(LDFLAGS) $(LIBDIR) $(aStMoviePlayer_OBJS1) $(aStMoviePlayer_OBJS2) $(aStMoviePlayer_LIB) -o $(aStMoviePlayer)
+$(aStMoviePlayer) : pre_StMoviePlayer $(aStMoviePlayer_OBJS1) $(aStMoviePlayer_OBJS2) $(aStMoviePlayer_OBJS3)
+	$(LD) -shared -z defs $(LDFLAGS) $(LIBDIR) $(aStMoviePlayer_OBJS1) $(aStMoviePlayer_OBJS2) $(aStMoviePlayer_OBJS3) $(aStMoviePlayer_LIB) -o $(aStMoviePlayer)
 pre_StMoviePlayer:
 	cp -f -r StMoviePlayer/lang/english/* $(BUILD_ROOT)/lang/english/
 	cp -f -r StMoviePlayer/lang/russian/* $(BUILD_ROOT)/lang/русский/
 	cp -f -r StMoviePlayer/lang/french/*  $(BUILD_ROOT)/lang/français/
+	cp -f -r StMoviePlayer/web/*          $(BUILD_ROOT)/web/
 clean_StMoviePlayer:
 	rm -f $(aStMoviePlayer)
 	rm -rf StMoviePlayer/*.o
