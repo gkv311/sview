@@ -259,7 +259,7 @@ bool StOutAnaglyph::create() {
     StWindow::params.VSyncMode->signals.onChanged += stSlot(this, &StOutAnaglyph::doSwitchVSync);
 
     // INIT shaders
-    const StString aShadersRoot = StProcess::getStCoreFolder() + "shaders" + SYS_FS_SPLITTER
+    const StString aShadersRoot = StProcess::getStShareFolder() + "shaders" + SYS_FS_SPLITTER
                                 + ST_OUT_PLUGIN_NAME + SYS_FS_SPLITTER;
     StGLVertexShader aVertShader("Anaglyph"); // common vertex shader
     if(!aVertShader.initFile(*myContext, aShadersRoot + VSHADER)

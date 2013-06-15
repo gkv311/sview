@@ -614,7 +614,7 @@ void StMoviePlayerGUI::doCheckUpdates(const size_t ) {
 }
 
 void StMoviePlayerGUI::doOpenLicense(const size_t ) {
-    StSocket::openURL(StProcess::getStCoreFolder()
+    StSocket::openURL(StProcess::getStShareFolder()
                       + "info" + SYS_FS_SPLITTER
                       + "license.txt");
 }
@@ -700,7 +700,7 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
   myPlugin(thePlugin),
   myWindow(theWindow),
   myLangMap(theLangMap),
-  texturesPathRoot(StProcess::getStCoreFolder() + "textures" + SYS_FS_SPLITTER),
+  texturesPathRoot(StProcess::getStShareFolder() + "textures" + SYS_FS_SPLITTER),
   stTimeVisibleLock(true),
   //
   stImageRegion(NULL),

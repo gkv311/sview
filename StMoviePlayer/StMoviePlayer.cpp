@@ -1246,19 +1246,19 @@ int StMoviePlayer::beginRequest(mg_connection*         theConnection,
     // process general requests
     if(anURI.isEquals(stCString("/"))) {
         // return index page
-        const StString aPath = StProcess::getStCoreFolder() + "web" + SYS_FS_SPLITTER + "index.htm";
+        const StString aPath = StProcess::getStShareFolder() + "web" + SYS_FS_SPLITTER + "index.htm";
         mg_send_file(theConnection, aPath.toCString());
         return 1;
     } else if(anURI.isStartsWith(stCString("/web"))) {
         // return Web UI files
         const StString aSubPath = anURI.subString(5, size_t(-1));
-        const StString aPath    = StProcess::getStCoreFolder() + "web" + SYS_FS_SPLITTER + aSubPath;
+        const StString aPath    = StProcess::getStShareFolder() + "web" + SYS_FS_SPLITTER + aSubPath;
         mg_send_file(theConnection, aPath.toCString());
         return 1;
     } else if(anURI.isStartsWith(stCString("/textures"))) {
         // return textures images
         const StString aSubPath = anURI.subString(10, size_t(-1));
-        const StString aPath    = StProcess::getStCoreFolder() + "textures" + SYS_FS_SPLITTER + aSubPath;
+        const StString aPath    = StProcess::getStShareFolder() + "textures" + SYS_FS_SPLITTER + aSubPath;
         mg_send_file(theConnection, aPath.toCString());
         return 1;
     }

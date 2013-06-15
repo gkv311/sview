@@ -69,7 +69,7 @@ bool StOutIZ3DShaders::init(StGLContext& theCtx) {
     const StString FSHADER_IZ3D_FRONT_TABLE   = "fIZ3DFrontTable.shf";
 
     StString aShadersError("StOutIZ3D Plugin, Failed to init Shaders");
-    const StString aShadersRoot = StProcess::getStCoreFolder() + "shaders" + SYS_FS_SPLITTER
+    const StString aShadersRoot = StProcess::getStShareFolder() + "shaders" + SYS_FS_SPLITTER
                                    + "StOutIZ3D" + SYS_FS_SPLITTER;
 
     // initialize shaders

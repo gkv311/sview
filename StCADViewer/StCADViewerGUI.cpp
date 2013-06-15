@@ -119,7 +119,7 @@ StCADViewerGUI::StCADViewerGUI(StCADViewer* thePlugin)
 : StGLRootWidget(),
   myPlugin(thePlugin),
   myLangMap(new StTranslations(StCADViewer::ST_DRAWER_PLUGIN_NAME)),
-  myTexturesRoot(StProcess::getStCoreFolder() + "textures" + SYS_FS_SPLITTER),
+  myTexturesRoot(StProcess::getStShareFolder() + "textures" + SYS_FS_SPLITTER),
   myMouseDescr(NULL),
   myMsgStack(NULL),
   myMenu0Root(NULL),
@@ -187,5 +187,5 @@ void StCADViewerGUI::doAboutProgram(const size_t ) {
 }
 
 void StCADViewerGUI::doOpenLicense(const size_t ) {
-    StSocket::openURL(StProcess::getStCoreFolder() + "info" + SYS_FS_SPLITTER + "license.txt");
+    StSocket::openURL(StProcess::getStShareFolder() + "info" + SYS_FS_SPLITTER + "license.txt");
 }

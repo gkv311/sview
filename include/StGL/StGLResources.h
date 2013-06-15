@@ -17,7 +17,7 @@ class StGLResources {
         public:
 
     static StString getShadersRoot(const StString& theProjectName) {
-        return StProcess::getStCoreFolder() + "shaders" + SYS_FS_SPLITTER + theProjectName + SYS_FS_SPLITTER;
+        return StProcess::getStShareFolder() + "shaders" + SYS_FS_SPLITTER + theProjectName + SYS_FS_SPLITTER;
     }
 
     static StString getShaderFile(const StString& theProjectName,
@@ -25,10 +25,6 @@ class StGLResources {
         StGLResources stResources(theProjectName);
         return stResources.getShadersRoot(theShaderName);
     }
-
-        private:
-
-    StString myShadersRoot;
 
         public:
 
@@ -39,6 +35,10 @@ class StGLResources {
         return myShadersRoot + theShaderName;
     }
 
+        private:
+
+    StString myShadersRoot;
+
 };
 
-#endif //__StGLResources_h_
+#endif // __StGLResources_h_

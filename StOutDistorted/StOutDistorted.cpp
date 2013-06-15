@@ -435,7 +435,7 @@ bool StOutDistorted::create() {
     myCurTCrdsBuf.init(*myContext, 2, 4, QUAD_TEXCOORD);
 
     // cursor texture
-    const StString aTexturesFolder = StProcess::getStCoreFolder() + "textures" + SYS_FS_SPLITTER;
+    const StString aTexturesFolder = StProcess::getStShareFolder() + "textures" + SYS_FS_SPLITTER;
     const StString aCursorPath     = aTexturesFolder + "cursor.std";
     StHandle<StImageFile> aCursorImg = StImageFile::create();
     if(!aCursorImg.isNull()

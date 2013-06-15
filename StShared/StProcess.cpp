@@ -14,15 +14,16 @@
     #include <unistd.h>
 #endif
 
-#if (defined(__APPLE__))
+#if defined(__APPLE__)
     #include <mach-o/dyld.h>
-#elif (defined(__linux__) || defined(__linux))
+#elif defined(__linux__)
     #include <fstream>
 #endif
 
 namespace {
-#if (defined(_WIN64) || defined(__WIN64__))\
- || (defined(_LP64)  || defined(__LP64__))
+
+    static const StString ST_ENV_NAME_STSHARE     = "StShare";
+#if defined(_WIN64) || defined(_LP64) || defined(__LP64__)
     static const StString ST_ENV_NAME_STCORE_PATH = "StCore64";
 #else
     static const StString ST_ENV_NAME_STCORE_PATH = "StCore32";
@@ -34,18 +35,25 @@ namespace {
     static const StString STCORE_NAME = StString("libStCore") + ST_DLIB_SUFFIX;
     static const StString ST_DEFAULT_PATH = "/usr/share/sView/";
 #endif
-}
+
+    inline bool isValidStSharePath(const StString& thePath) {
+        return !thePath.isEmpty()
+            && StFileNode::isFileExists(thePath + "shaders");
+    }
+
+    inline bool isValidStCorePath(const StString& thePath) {
+        return !thePath.isEmpty()
+            && StFileNode::isFileExists(thePath + STCORE_NAME);
+    }
+
+};
 
 const StString StArgument::ST_ARG_ON   ("on");
 const StString StArgument::ST_ARG_TRUE ("true");
 const StString StArgument::ST_ARG_OFF  ("off");
 const StString StArgument::ST_ARG_FALSE("false");
 
-StArgument::StArgument()
-: key(),
-  val() {
-    //
-}
+StArgument::StArgument() {}
 
 StArgument::StArgument(const StString& theKey,
                        const StString& theValue)
@@ -137,11 +145,11 @@ StArgument StArgumentsMap::operator[](const StString& theKey) const {
 static StString GetFontsRoot() {
 #ifdef _WIN32
     return StProcess::getWindowsFolder() + "fonts\\";
-#elif (defined(__APPLE__))
+#elif defined(__APPLE__)
     //return stCString("/System/Library/Fonts/");
     return stCString("/Library/Fonts/");
     //return stCString("/usr/X11/lib/X11/fonts/TTF/");
-#elif (defined(__linux__) || defined(__linux))
+#elif defined(__linux__)
     if(StFileNode::isFileExists(stCString("/usr/share/fonts/truetype/ttf-dejavu"))) {
         // Ubuntu
         return stCString("/usr/share/fonts/truetype/ttf-dejavu/");
@@ -179,7 +187,7 @@ StString StProcess::getProcessFullPath() {
         aProcessPath = StString(aBuffExt);
     }
     return aProcessPath;
-#elif (defined(__APPLE__))
+#elif defined(__APPLE__)
     // determine buffer size
     uint32_t aBytes = 0;
     _NSGetExecutablePath(NULL, &aBytes);
@@ -203,7 +211,7 @@ StString StProcess::getProcessFullPath() {
     free(aResultBuf); // according to man for realpath()
     delete[] aBuff;
     return aProcessPath;
-#elif (defined(__linux__) || defined(__linux))
+#elif defined(__linux__)
     // get info from /proc/PID/exe
     stUtf8_t aBuff[ST_MAX_PATH];
     stUtf8_t aSimLink[ST_MAX_PATH];
@@ -326,9 +334,36 @@ bool loadStringFromRegister(const StString& theRegisterPath, const StString& the
 }
 #endif
 
-bool isValidStCorePath(const StString& thePath) {
-    return !thePath.isEmpty()
-        && StFileNode::isFileExists(thePath + STCORE_NAME);
+StString StProcess::getStShareFolder() {
+    StString aShareEnvValue = getEnv(ST_ENV_NAME_STSHARE);
+#ifdef _WIN32
+    if(aShareEnvValue.isEmpty()) {
+        // read env. value directly from registry (before first log off / log in)
+        const StString aRegisterPath = "Environment";
+        loadStringFromRegister(aRegisterPath, ST_ENV_NAME_STSHARE, aShareEnvValue);
+    }
+#endif
+
+    // repair filesystem splitter
+    if(!aShareEnvValue.isEmpty() && !aShareEnvValue.isEndsWith(SYS_FS_SPLITTER)) {
+        aShareEnvValue += StString(SYS_FS_SPLITTER);
+    }
+
+    if(isValidStSharePath(aShareEnvValue)) {
+        // environment variable is correctly set
+        return aShareEnvValue;
+    }
+
+    const StString aProcessPath = getProcessFolder();
+    if(isValidStSharePath(aProcessPath)) {
+        return aProcessPath;
+    }
+#ifndef _WIN32
+    if(isValidStSharePath(ST_DEFAULT_PATH)) {
+        return ST_DEFAULT_PATH;
+    }
+#endif
+    return StString();
 }
 
 StString StProcess::getStCoreFolder() {
@@ -355,11 +390,6 @@ StString StProcess::getStCoreFolder() {
     if(isValidStCorePath(aProcessPath)) {
         return aProcessPath;
     }
-#ifndef _WIN32
-    if(isValidStCorePath(ST_DEFAULT_PATH)) {
-        return ST_DEFAULT_PATH;
-    }
-#endif
     return StString();
 }
 

@@ -24,7 +24,7 @@ StTranslations::StTranslations(const StString& theModuleName)
     params.language = new StInt32Param(0);
 
     // detect available translations
-    StFolder stFolder(StProcess::getStCoreFolder() + "lang" + SYS_FS_SPLITTER);
+    StFolder stFolder(StProcess::getStShareFolder() + "lang" + SYS_FS_SPLITTER);
     StArrayList<StString> anExtensions(1);
     anExtensions.add(StTranslations::DEFAULT_EXTENSION);
     stFolder.init(anExtensions, 2);
@@ -49,7 +49,7 @@ StTranslations::StTranslations(const StString& theModuleName)
         params.language->setValue(int32_t(anIdInList));
     }
 
-    StLangMap::open(StProcess::getStCoreFolder()
+    StLangMap::open(StProcess::getStShareFolder()
                   + "lang"       + SYS_FS_SPLITTER
                   + aLang        + SYS_FS_SPLITTER
                   + myModuleName + StTranslations::DEFAULT_SUFFIX);
@@ -77,7 +77,7 @@ void StTranslations::setLanguage(const int32_t theNewLang) {
 
     // reload translation file
     StLangMap::clear();
-    StLangMap::open(StProcess::getStCoreFolder()
+    StLangMap::open(StProcess::getStShareFolder()
                   + "lang"       + SYS_FS_SPLITTER
                   + aLang        + SYS_FS_SPLITTER
                   + myModuleName + StTranslations::DEFAULT_SUFFIX);

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -13,11 +13,11 @@
 #include <StThreads/StMutex.h>
 #include <StFile/StFileNode.h>
 
-#if (defined(__APPLE__))
+#if defined(__APPLE__)
     #include <StThreads/StProcess.h>
 #endif
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     #define FIAPIENTRY __stdcall
     typedef stUtfWide_t fiUtfChar_t;
 #else
@@ -143,11 +143,11 @@ namespace {
 
     static bool initOnce() {
         // load the libraries
-    #if (defined(_WIN32) || defined(__WIN32__))
+    #if defined(_WIN32)
         if(!stLibFI.loadSimple("FreeImage.dll")) {
             return false;
         }
-    #elif (defined(__APPLE__))
+    #elif defined(__APPLE__)
         StString aPath = StProcess::getStCoreFolder() + "../Frameworks/libfreeimage.dylib";
         if(!stLibFI.loadSimple(aPath)
         && !stLibFI.loadSimple("libfreeimage.dylib")) {
@@ -162,7 +162,7 @@ namespace {
 
         // find functions
         if(!stLibFI("FreeImage_GetVersion",          FreeImage_GetVersion)
-        #if(defined(_WIN32) || defined(__WIN32__))   // retrieve Unicode versions
+        #if defined(_WIN32)                          // retrieve Unicode versions
         || !stLibFI("FreeImage_GetFileTypeU",        FreeImage_GetFileType)
         || !stLibFI("FreeImage_GetFIFFromFilenameU", FreeImage_GetFIFFromFilename)
         || !stLibFI("FreeImage_LoadU",               FreeImage_Load)
@@ -329,7 +329,7 @@ bool StFreeImage::load(const StString& theFilePath, ImageType theImageType,
         FreeImage_CloseMemory(aFIMemory);
     } else {
         // check the file signature and deduce its format
-    #if(defined(_WIN32) || defined(__WIN32__))
+    #if defined(_WIN32)
         StStringUtfWide aFilePathWide = theFilePath.toUtfWide();
         aFIF = FreeImage_GetFileType(aFilePathWide.toCString(), 0);
     #else
@@ -337,7 +337,7 @@ bool StFreeImage::load(const StString& theFilePath, ImageType theImageType,
     #endif
         if(aFIF == FIF_UNKNOWN) {
             // no signature? try to guess the file format from the file extension
-        #if(defined(_WIN32) || defined(__WIN32__))
+        #if defined(_WIN32)
             aFIF = FreeImage_GetFIFFromFilename(aFilePathWide.toCString());
         #else
             aFIF = FreeImage_GetFIFFromFilename(theFilePath.toCString());
@@ -356,7 +356,7 @@ bool StFreeImage::load(const StString& theFilePath, ImageType theImageType,
             // ICO_MAKEALPHA - convert to 32bpp and create an alpha channel from the AND-mask when loading
             loadFlags = 1;
         }
-    #if(defined(_WIN32) || defined(__WIN32__))
+    #if defined(_WIN32)
         myDIB = FreeImage_Load(aFIF, aFilePathWide.toCString(), loadFlags);
     #else
         myDIB = FreeImage_Load(aFIF, theFilePath.toCString(),   loadFlags);
@@ -457,7 +457,7 @@ bool StFreeImage::save(const StString& theFilePath,
     }
 
     // now save the image file!
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     if(!FreeImage_Save(aFIF, aSaveDIB, theFilePath.toUtfWide().toCString(), 0)) {
 #else
     if(!FreeImage_Save(aFIF, aSaveDIB, theFilePath.toCString(), 0)) {

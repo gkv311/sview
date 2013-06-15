@@ -13,7 +13,7 @@
 #include <StThreads/StMutex.h>
 #include <StFile/StFileNode.h>
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     #define ILAPIENTRY __stdcall
     typedef stUtfWide_t ilUtfChar_t;
 #else
@@ -136,7 +136,7 @@ namespace {
     static bool initOnce() {
         StMutexAuto stTempLock(stDevILMutex);
         // load the libraries
-    #if(defined(_WIN32) || defined(__WIN32__))
+    #if defined(_WIN32)
         if(!stLibIL.loadSimple("DevIL.dll")) {
             return false;
         }
@@ -332,14 +332,14 @@ bool StDevILImage::load(const StString& theFilePath, ImageType theImageType,
     if(theDataPtr != NULL && theDataSize != 0 && anImageTypeIl != IL_TYPE_UNKNOWN) {
         ilLoadL(anImageTypeIl, theDataPtr, (ILuint )theDataSize);
     } else if(anImageTypeIl != IL_TYPE_UNKNOWN) {
-    #if(defined(_WIN32) || defined(__WIN32__))
+    #if defined(_WIN32)
         ilLoad(anImageTypeIl, theFilePath.toUtfWide().toCString());
     #else
         ilLoad(anImageTypeIl, theFilePath.toCString());
     #endif
     } else {
         // loading image with format auto-detection
-    #if(defined(_WIN32) || defined(__WIN32__))
+    #if defined(_WIN32)
         ilLoadImage(theFilePath.toUtfWide().toCString());
     #else
         ilLoadImage(theFilePath.toCString());
@@ -436,7 +436,7 @@ bool StDevILImage::save(const StString& theFilePath,
         }
         iluFlipImage(); // what a hell are we doing???
 
-    #if(defined(_WIN32) || defined(__WIN32__))
+    #if defined(_WIN32)
         ilSave(anImageTypeIl, theFilePath.toUtfWide().toCString());
     #else
         ilSave(anImageTypeIl, theFilePath.toCString());

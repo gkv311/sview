@@ -31,14 +31,15 @@ int main(int , char** ) {
     }
 
 #ifdef __ST_DEBUG__
-    // TODO (Kirill Gavrilov#9) debug environment
-    #if (defined(_WIN64) || defined(__WIN64__))\
-     || (defined(_LP64)  || defined(__LP64__))
+    // override environment variable if sView is installed in the system
+    #if defined(_WIN64) || defined(_LP64) || defined(__LP64__)
         const StString ST_ENV_NAME_STCORE_PATH = "StCore64";
     #else
         const StString ST_ENV_NAME_STCORE_PATH = "StCore32";
     #endif
-    StProcess::setEnv(ST_ENV_NAME_STCORE_PATH, StProcess::getProcessFolder());
+    const StString aProcessPath = StProcess::getProcessFolder();
+    StProcess::setEnv(ST_ENV_NAME_STCORE_PATH, aProcessPath);
+    StProcess::setEnv("StShare",               aProcessPath);
 #endif
 
     StHandle<StApplication> anApp = StMultiApp::getInstance();

@@ -227,7 +227,7 @@ bool StOutIZ3D::create() {
     StWindow::params.VSyncMode->signals.onChanged += stSlot(this, &StOutIZ3D::doSwitchVSync);
 
     // INIT iZ3D tables textures
-    const StString aTexturesFolder = StProcess::getStCoreFolder() + "textures" + SYS_FS_SPLITTER;
+    const StString aTexturesFolder = StProcess::getStShareFolder() + "textures" + SYS_FS_SPLITTER;
     const StString aTableOldPath   = aTexturesFolder + "iz3dTableOld.std";
     const StString aTableNewPath   = aTexturesFolder + "iz3dTableNew.std";
 
