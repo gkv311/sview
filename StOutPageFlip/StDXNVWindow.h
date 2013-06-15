@@ -40,7 +40,8 @@ class StDXNVWindow {
     /**
      * Default constructor.
      */
-    StDXNVWindow(const size_t     theFboSizeX,
+    StDXNVWindow(const StHandle<StMsgQueue>& theMsgQueue,
+                 const size_t     theFboSizeX,
                  const size_t     theFboSizeY,
                  const StMonitor& theMonitor,
                  StOutPageFlip*   theStWin);
@@ -178,6 +179,7 @@ class StDXNVWindow {
 
         private:
 
+    StHandle<StMsgQueue>    myMsgQueue; //!< messages queue
     unsigned char*          myBufferL;
     unsigned char*          myBufferR;
     size_t                  myFboSizeX;

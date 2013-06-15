@@ -292,10 +292,10 @@ void StOutPageFlip::setupDevice() {
     switch(myDevice) {
         case DEVICE_VUZIX: {
             if(!StVuzixSDK::isConnected(StWindow::getMonitors())) {
-                stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Vuzix HMD Not Found!");
+                myMsgQueue->pushError(stCString("PageFlip output - Vuzix HMD Not Found!"));
                 break;
             } else if(myVuzixSDK.isNull()) {
-                stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to Load Vuzix VR920 Driver!");
+                myMsgQueue->pushError(stCString("PageFlip output - Failed to Load Vuzix VR920 Driver!"));
                 break;
             }
             myVuzixSDK->open();
@@ -327,7 +327,7 @@ bool StOutPageFlip::dxInit() {
         ST_DEBUG_LOG(ST_OUT_PLUGIN_NAME + " Plugin, old videocard detected (GLSL 1.1)!");
     }
 
-    myOutD3d.myDxWindow = new StDXNVWindow(aFrBufferSizeX, aFrBufferSizeY, aNvMonitor, this);
+    myOutD3d.myDxWindow = new StDXNVWindow(myMsgQueue, aFrBufferSizeX, aFrBufferSizeY, aNvMonitor, this);
     myOutD3d.myDxThread = new StThread(StOutDirect3D::dxThreadFunction, (void* )&myOutD3d);
     return true;
 #else
@@ -385,7 +385,7 @@ void StOutPageFlip::dxActivate() {
                 myOutD3d.myGLBuffer = new StGLFrameBuffer();
                 if(!myOutD3d.myGLBuffer->init(*myContext, (GLsizei )myOutD3d.myDxWindow->getFboSizeX(), (GLsizei )myOutD3d.myDxWindow->getFboSizeY(),
                                               StWindow::hasDepthBuffer())) {
-                    stError(StString(ST_OUT_PLUGIN_NAME) + " Plugin, Failed to init OpenGL Frame Buffer");
+                    myMsgQueue->pushError(stCString("PageFlip output - Failed to init OpenGL Frame Buffer!"));
                     myOutD3d.myGLBuffer->release(*myContext);
                     myOutD3d.myGLBuffer.nullify();
                 }

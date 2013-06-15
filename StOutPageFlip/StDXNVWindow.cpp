@@ -30,20 +30,19 @@ namespace {
 
 };
 
-StDXNVWindow::StDXNVWindow(const size_t     theFboSizeX,
+StDXNVWindow::StDXNVWindow(const StHandle<StMsgQueue>& theMsgQueue,
+                           const size_t     theFboSizeX,
                            const size_t     theFboSizeY,
                            const StMonitor& theMonitor,
                            StOutPageFlip*   theStWin)
-: myBufferL(NULL),
+: myMsgQueue(theMsgQueue),
+  myBufferL(NULL),
   myBufferR(NULL),
   myFboSizeX(theFboSizeX),
   myFboSizeY(theFboSizeY),
   myWinD3d(NULL),
-  myDxManager(),
-  myDxSurface(),
   myMonitor(theMonitor),
   myStWin(theStWin),
-  myMutex(),
   hEventReady(NULL),
   hEventQuit(NULL),
   hEventShow(NULL),
@@ -174,7 +173,7 @@ bool StDXNVWindow::initWinAPIWindow() {
         aWinClass.lpszMenuName  = NULL;
         aWinClass.lpszClassName = myWinClass.toCString();
         if(RegisterClassW(&aWinClass) == 0) {
-            stError("StDXWindow, Failed to RegisterClass '" + myWinClass.toUtf8() + "' (" + stLastError() + ")");
+            myMsgQueue->pushError(StString("PageFlip output - Class registration '") + myWinClass.toUtf8() + "' has failed\n(" + stLastError() + ")");
             myWinClass.clear();
             return false;
         }
@@ -185,7 +184,7 @@ bool StDXNVWindow::initWinAPIWindow() {
                                aMonRect.left(), aMonRect.top(), aMonRect.width(), aMonRect.height(),
                                NULL, NULL, anAppInstance, this);
     if(myWinD3d == NULL) {
-        stError("StDXWindow, Failed to CreateWindow (" + stLastError() + ")");
+        myMsgQueue->pushError(StString("PageFlip output - Failed to CreateWindow\n(") + stLastError() + ")");
         return false;
     }
     ST_DEBUG_LOG_AT("StDXWindow, Created help window");
@@ -198,7 +197,7 @@ void StDXNVWindow::dxLoop() {
     }
     myDxManager = new StDXManager(); //create our direct Manager
     if(!myDxManager->init(myWinD3d, int(getD3dSizeX()), int(getD3dSizeY()), false, myMonitor)) {
-        ST_ERROR_LOG_AT("Failed to INIT StDXManager");
+        myMsgQueue->pushError(stCString("PageFlip output - Direct3D manager initialization has failed!"));
         return;
     }
 
@@ -239,6 +238,7 @@ void StDXNVWindow::dxLoop() {
                     if(!myDxSurface->create(myDxManager->getD3DDevice())) {
                         //stError(ST_TEXT("Output plugin, Failed to create Direct3D surface"));
                         ST_ERROR_LOG("StDXNVWindow, Failed to create Direct3D surface");
+                        myMsgQueue->pushError(StString("PageFlip output - Failed to create Direct3D surface"));
                         ///return;
                     }
                 } else {
