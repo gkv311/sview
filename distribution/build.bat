@@ -115,32 +115,29 @@ rem move default config file back
 move /Y ..\include\stconfig.conf.buildbak ..\include\stconfig.conf
 
 echo Copy files into intermidiate directory:
+rem x86 binaries
 echo "%SVIEW_DISTR_PATH_X86%"
 rmdir /S /Q "%SVIEW_DISTR_PATH_X86%
+xcopy /Y ..\bin\WIN_vc_x86\*.dll            %SVIEW_DISTR_PATH_X86%\
+xcopy /Y ..\bin\WIN_vc_x86\*.exe            %SVIEW_DISTR_PATH_X86%\
+
+rem x86_64 binaries
+echo "%SVIEW_DISTR_PATH_AMD64%"
+rmdir /S /Q "%SVIEW_DISTR_PATH_AMD64%
+xcopy /Y ..\bin\WIN_vc_AMD64\*.dll          %SVIEW_DISTR_PATH_AMD64%\
+xcopy /Y ..\bin\WIN_vc_AMD64\*.exe          %SVIEW_DISTR_PATH_AMD64%\
+
+rem shared resources
+xcopy /Y ..\share\sView\demo\demo.jps       %SVIEW_DISTR_PATH_X86%\
 xcopy /S /Y ..\bin\WIN_vc_x86\lang\*        %SVIEW_DISTR_PATH_X86%\lang\
 xcopy /S /Y ..\bin\WIN_vc_x86\shaders\*     %SVIEW_DISTR_PATH_X86%\shaders\
 xcopy /Y ..\bin\WIN_vc_x86\textures\*.std   %SVIEW_DISTR_PATH_X86%\textures\
 xcopy /Y ..\bin\WIN_vc_x86\web\*.htm        %SVIEW_DISTR_PATH_X86%\web\
-xcopy /Y ..\bin\WIN_vc_x86\*.dll            %SVIEW_DISTR_PATH_X86%\
-xcopy /Y ..\bin\WIN_vc_x86\*.exe            %SVIEW_DISTR_PATH_X86%\
-
-echo "%SVIEW_DISTR_PATH_AMD64%"
-rmdir /S /Q "%SVIEW_DISTR_PATH_AMD64%
-xcopy /S /Y ..\bin\WIN_vc_AMD64\lang\*      %SVIEW_DISTR_PATH_AMD64%\lang\
-xcopy /S /Y ..\bin\WIN_vc_AMD64\shaders\*   %SVIEW_DISTR_PATH_AMD64%\shaders\
-xcopy /Y ..\bin\WIN_vc_AMD64\textures\*.std %SVIEW_DISTR_PATH_AMD64%\textures\
-xcopy /Y ..\bin\WIN_vc_AMD64\web\*.htm      %SVIEW_DISTR_PATH_AMD64%\web\
-xcopy /Y ..\bin\WIN_vc_AMD64\*.dll          %SVIEW_DISTR_PATH_AMD64%\
-xcopy /Y ..\bin\WIN_vc_AMD64\*.exe          %SVIEW_DISTR_PATH_AMD64%\
-
-xcopy /Y ..\share\sView\demo\demo.jps       %SVIEW_DISTR_PATH_X86%\
 xcopy /Y media\sView_JPS.ico                %SVIEW_DISTR_PATH_X86%\icons\
 xcopy /Y media\sView_PNS.ico                %SVIEW_DISTR_PATH_X86%\icons\
 xcopy /Y media\sView_Media.ico              %SVIEW_DISTR_PATH_X86%\icons\
 xcopy /S /Y info\*                          %SVIEW_DISTR_PATH_X86%\info\
-xcopy /S /Y info\*                          %SVIEW_DISTR_PATH_AMD64%\info\
 copy  /Y ..\license-gpl-3.0.txt             %SVIEW_DISTR_PATH_X86%\info\license.txt
-copy  /Y ..\license-gpl-3.0.txt             %SVIEW_DISTR_PATH_AMD64%\info\license.txt
 
 echo Compile distribution package
 rem www.jrsoftware.org
