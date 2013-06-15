@@ -94,6 +94,11 @@ class StOutDistorted : public StWindow {
     ST_CPPEXPORT virtual void processEvents();
 
     /**
+     * @param theFullScreen fullscreen state
+     */
+    ST_CPPEXPORT virtual void setFullScreen(const bool theFullScreen);
+
+    /**
      * Stereo renderer.
      */
     ST_CPPEXPORT virtual void stglDraw();
@@ -157,6 +162,8 @@ class StOutDistorted : public StWindow {
     StGLVertexBuffer          myCurTCrdsBuf;
     StGLVec4                  myBarrelCoef;      //!< Barrel distortion coefficients
     StGLVec4                  myChromAb;         //!< chrome coefficients
+
+    StRectI_t                 myBarMargins;      //!< GUI margins
 
     bool                      myToShowCursor;    //!< cursor visibility flag
     bool                      myToSavePlacement; //!< to save window position on exit

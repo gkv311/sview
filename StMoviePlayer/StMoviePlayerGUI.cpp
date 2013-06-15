@@ -792,15 +792,41 @@ void StMoviePlayerGUI::stglUpdate(const StPointD_t& thePointZo,
 }
 
 void StMoviePlayerGUI::stglResize(const StRectI_t& winRectPx) {
-    const StRectI_t& aMargins = getRootMarginsPx();
     stImageRegion->changeRectPx().bottom() = winRectPx.height();
     stImageRegion->changeRectPx().right()  = winRectPx.width();
+
+    const StRectI_t& aMargins = myWindow->getMargins();
+    const bool areNewMargins = aMargins != getRootMarginsPx();
+    if(areNewMargins) {
+        setRootMarginsPx(aMargins);
+    }
+
     if(upperRegion != NULL) {
         upperRegion->changeRectPx().right()  = stMax(winRectPx.width() - aMargins.right(), 2);
     }
     if(bottomRegion != NULL) {
         bottomRegion->changeRectPx().right() = stMax(winRectPx.width() - aMargins.right(), 2);
     }
+
+    if(areNewMargins) {
+        if(upperRegion != NULL) {
+            upperRegion->changeRectPx().left() = aMargins.left();
+            upperRegion->changeRectPx().moveTopTo(aMargins.top());
+        }
+        if(bottomRegion != NULL) {
+            bottomRegion->changeRectPx().left() =  aMargins.left();
+            bottomRegion->changeRectPx().moveTopTo(-aMargins.bottom());
+        }
+        if(seekBar != NULL) {
+            seekBar->changeRectPx().moveTopTo(-aMargins.bottom() - 78);
+        }
+        if(menu0Root != NULL) {
+            menu0Root->changeRectPx().left() = aMargins.left();
+            menu0Root->changeRectPx().top()  = aMargins.top();
+            menu0Root->stglUpdateSubmenuLayout();
+        }
+    }
+
     StGLRootWidget::stglResize(winRectPx);
 }
 

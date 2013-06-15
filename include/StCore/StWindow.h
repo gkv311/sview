@@ -206,7 +206,7 @@ class StWindow {
     /**
      * @param theFullScreen fullscreen state
      */
-    ST_CPPEXPORT void setFullScreen(const bool theFullScreen);
+    ST_CPPEXPORT virtual void setFullScreen(const bool theFullScreen);
 
     /**
      * Get GUI GL window placement

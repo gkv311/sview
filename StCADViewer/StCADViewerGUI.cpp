@@ -164,6 +164,20 @@ void StCADViewerGUI::stglUpdate(const StPointD_t& theCursorZo) {
 }
 
 void StCADViewerGUI::stglResize(const StRectI_t& winRectPx) {
+    const StRectI_t& aMargins = myPlugin->getMainWindow()->getMargins();
+    const bool areNewMargins = aMargins != getRootMarginsPx();
+    if(areNewMargins) {
+        setRootMarginsPx(aMargins);
+    }
+
+    if(areNewMargins) {
+        if(myMenu0Root != NULL) {
+            myMenu0Root->changeRectPx().left() = aMargins.left();
+            myMenu0Root->changeRectPx().top()  = aMargins.top();
+            myMenu0Root->stglUpdateSubmenuLayout();
+        }
+    }
+
     StGLRootWidget::stglResize(winRectPx);
 }
 

@@ -335,12 +335,11 @@ StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
     StWindow::setPlacement(aRect, true);
     StWindow::setTitle("sView - Distorted Renderer");
 
-    myMargins.left()   = 64;
-    myMargins.right()  = 64;
-    myMargins.top()    = 160;
-    myMargins.bottom() = 160;
-    mySettings->loadInt32Rect(ST_SETTING_MARGINS, myMargins);
-
+    myBarMargins.left()   = 64;
+    myBarMargins.right()  = 64;
+    myBarMargins.top()    = 160;
+    myBarMargins.bottom() = 160;
+    mySettings->loadInt32Rect(ST_SETTING_MARGINS,   myBarMargins);
     mySettings->loadFloatVec4(ST_SETTING_WARP_COEF, myBarrelCoef);
     mySettings->loadFloatVec4(ST_SETTING_CHROME_AB, myChromAb);
 }
@@ -367,7 +366,7 @@ void StOutDistorted::releaseResources() {
     mySettings->saveParam(ST_SETTING_LAYOUT,     params.Layout);
     mySettings->saveParam(ST_SETTING_BARREL,     params.Barrel);
     mySettings->saveParam(ST_SETTING_ANAMORPH,   params.Anamorph);
-    mySettings->saveInt32Rect(ST_SETTING_MARGINS,   myMargins);
+    mySettings->saveInt32Rect(ST_SETTING_MARGINS,   myBarMargins);
     mySettings->saveFloatVec4(ST_SETTING_WARP_COEF, myBarrelCoef);
     mySettings->saveFloatVec4(ST_SETTING_CHROME_AB, myChromAb);
 }
@@ -485,12 +484,26 @@ GLfloat StOutDistorted::getLensDist() const {
     return (myIsStereoOn && params.Barrel->getValue()) ? 0.1453f : 0.0f;
 }
 
+void StOutDistorted::setFullScreen(const bool theFullScreen) {
+    if(!theFullScreen) {
+        myMargins = StRectI_t();
+    }
+    StWindow::setFullScreen(theFullScreen);
+}
+
 void StOutDistorted::stglDraw() {
     myFPSControl.setTargetFPS(StWindow::getTargetFps());
 
     myIsStereoOn = StWindow::isStereoOutput()
                 && StWindow::isFullScreen()
                 && !myIsBroken;
+    if(myIsStereoOn
+    && params.Barrel->getValue()) {
+        myMargins = myBarMargins;
+    } else {
+        myMargins = StRectI_t();
+    }
+
     if(myIsStereoOn
     && !params.Anamorph->getValue()) {
         StWindow::setAttribute(StWinAttr_SplitCfg, params.Layout->getValue() == LAYOUT_OVER_UNDER

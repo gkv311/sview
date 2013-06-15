@@ -636,9 +636,27 @@ void StImageViewerGUI::stglResize(const StRectI_t& winRectPx) {
     const int aSizeY = winRectPx.height();
     stImageRegion->changeRectPx().bottom() = aSizeY;
     stImageRegion->changeRectPx().right()  = aSizeX;
+
+    const StRectI_t& aMargins = myWindow->getMargins();
+    const bool areNewMargins = aMargins != getRootMarginsPx();
+    if(areNewMargins) {
+        setRootMarginsPx(aMargins);
+    }
+
     if(upperRegion != NULL) {
         upperRegion->changeRectPx().right() = aSizeX;
         isGUIMinimal = (aSizeY < 400 || aSizeX < 400);
+    }
+    if(areNewMargins) {
+        if(upperRegion != NULL) {
+            upperRegion->changeRectPx().left() = aMargins.left();
+            upperRegion->changeRectPx().top()  = aMargins.top();
+        }
+        if(menu0Root != NULL) {
+            menu0Root->changeRectPx().left() = aMargins.left();
+            menu0Root->changeRectPx().top()  = aMargins.top();
+            menu0Root->stglUpdateSubmenuLayout();
+        }
     }
 
     StGLRootWidget::stglResize(winRectPx);
