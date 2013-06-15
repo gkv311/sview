@@ -42,6 +42,7 @@ distclean: clean
 
 install:
 	mkdir -p $(DESTDIR)/usr/bin
+	mkdir -p $(DESTDIR)/usr/$(USR_LIB)/sView
 	mkdir -p $(DESTDIR)/usr/$(USR_LIB)/firefox/plugins
 	mkdir -p $(DESTDIR)/usr/$(USR_LIB)/mozilla/plugins
 	mkdir -p $(DESTDIR)/usr/share
