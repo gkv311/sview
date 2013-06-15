@@ -210,38 +210,43 @@ bool StDXManager::checkAqbsSupport(const HWND theWinHandle) {
     D3DADAPTER_IDENTIFIER9 anAdapterInfo;
     for(UINT anAdapterIter = 0; anAdapterIter < aD3dAdaptersNb; ++anAdapterIter) {
         myD3dLib->GetAdapterIdentifier(anAdapterIter, 0, &anAdapterInfo);
-        if(anAdapterInfo.VendorId == ST_DX_VENDOR_AMD) {
-            // setup the present parameters
-            if(myD3dLib->GetAdapterDisplayMode(anAdapterIter, &myCurrMode) == D3D_OK) {
-                myD3dParams.BackBufferFormat = myCurrMode.Format;
-                myRefreshRate = myCurrMode.RefreshRate;
-            }
+        if(anAdapterInfo.VendorId != ST_DX_VENDOR_AMD) {
+            continue;
+        }
 
-            // create temporary video device
-            myD3dParams.hDeviceWindow = theWinHandle;
-            myD3dDevice = createAqbsTmpDevice(anAdapterIter, theWinHandle, myD3dParams);
+        // setup the present parameters
+        if(myD3dLib->GetAdapterDisplayMode(anAdapterIter, &myCurrMode) == D3D_OK) {
+            myD3dParams.BackBufferFormat = myCurrMode.Format;
+            myRefreshRate = myCurrMode.RefreshRate;
+        }
 
-            // create a surface to be used to communicate with the driver
-            StHandle<StDXAqbsControl> anAqbsControl = new StDXAqbsControl(myD3dDevice);
-            if(!anAqbsControl->isValid()) {
-                myD3dDevice->Release();
-                myD3dDevice = NULL;
-                return false;
-            }
+        // create temporary video device
+        myD3dParams.hDeviceWindow = theWinHandle;
+        myD3dDevice = createAqbsTmpDevice(anAdapterIter, theWinHandle, myD3dParams);
+        if(myD3dDevice == NULL) {
+            continue;
+        }
 
-            // send the command to the driver using the temporary surface
-            if(!anAqbsControl->enableStereo()) {
-                anAqbsControl.nullify();
-                myD3dDevice->Release();
-                myD3dDevice = NULL;
-                return false;
-            }
-            myWithAqbs = true;
+        // create a surface to be used to communicate with the driver
+        StHandle<StDXAqbsControl> anAqbsControl = new StDXAqbsControl(myD3dDevice);
+        if(!anAqbsControl->isValid()) {
+            myD3dDevice->Release();
+            myD3dDevice = NULL;
+            return false;
+        }
+
+        // send the command to the driver using the temporary surface
+        if(!anAqbsControl->enableStereo()) {
             anAqbsControl.nullify();
             myD3dDevice->Release();
             myD3dDevice = NULL;
-            return true;
+            return false;
         }
+        myWithAqbs = true;
+        anAqbsControl.nullify();
+        myD3dDevice->Release();
+        myD3dDevice = NULL;
+        return true;
     }
     return false;
 }
