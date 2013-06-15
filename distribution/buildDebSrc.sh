@@ -29,6 +29,7 @@ cp -f -r ../StCore         $aDebSrcRoot/
 cp -f -r ../StGLWidgets    $aDebSrcRoot/
 cp -f -r ../StImageViewer  $aDebSrcRoot/
 cp -f -r ../StMoviePlayer  $aDebSrcRoot/
+cp -f -r ../StDiagnostics  $aDebSrcRoot/
 cp -f -r ../StCADViewer    $aDebSrcRoot/
 cp -f -r ../StOutAnaglyph  $aDebSrcRoot/
 cp -f -r ../StOutDual      $aDebSrcRoot/
@@ -46,8 +47,9 @@ cp -f    ../LICENSE        $aDebSrcRoot/
 cp -f    ../license*.txt   $aDebSrcRoot/
 
 mkdir -p $aDebSrcRoot/3rdparty/include
-cp -f -r ../3rdparty/include/adlsdk $aDebSrcRoot/3rdparty/include/
-cp -f -r ../3rdparty/include/gl     $aDebSrcRoot/3rdparty/include/
+cp -f -r ../3rdparty/include/adlsdk     $aDebSrcRoot/3rdparty/include/
+cp -f -r ../3rdparty/include/gl         $aDebSrcRoot/3rdparty/include/
+cp -f    ../3rdparty/include/mongoose.* $aDebSrcRoot/3rdparty/include/
 
 find $aDebSrcRoot -name  "obj"      -exec rm -f -r {} \; 2>/dev/null
 find $aDebSrcRoot -iname "*.tmp"    -exec rm {} \;
