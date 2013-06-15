@@ -43,6 +43,9 @@ distclean: clean
 install:
 	mkdir -p $(DESTDIR)/usr/bin
 	mkdir -p $(DESTDIR)/usr/$(USR_LIB)/sView/info
+	mkdir -p $(DESTDIR)/usr/$(USR_LIB)/sView/lang
+	mkdir -p $(DESTDIR)/usr/$(USR_LIB)/sView/shaders
+	mkdir -p $(DESTDIR)/usr/$(USR_LIB)/sView/textures
 	mkdir -p $(DESTDIR)/usr/$(USR_LIB)/sView/web
 	mkdir -p $(DESTDIR)/usr/$(USR_LIB)/firefox/plugins
 	mkdir -p $(DESTDIR)/usr/$(USR_LIB)/mozilla/plugins
@@ -55,22 +58,8 @@ install:
 	cp -f -r $(BUILD_ROOT)/shaders/*     $(DESTDIR)/usr/$(USR_LIB)/sView/shaders/
 	cp -f -r $(BUILD_ROOT)/textures/*    $(DESTDIR)/usr/$(USR_LIB)/sView/textures/
 	cp -f -r $(BUILD_ROOT)/web/*         $(DESTDIR)/usr/$(USR_LIB)/sView/web/
-	ln --force --symbolic ../$(USR_LIB)/sView/sView                 $(DESTDIR)/usr/bin/sView
-	ln --force --symbolic ../$(USR_LIB)/sView/libStShared.so        $(DESTDIR)/usr/$(USR_LIB)/libStShared.so
-	ln --force --symbolic ../$(USR_LIB)/sView/libStSettings.so      $(DESTDIR)/usr/$(USR_LIB)/libStSettings.so
-	ln --force --symbolic ../$(USR_LIB)/sView/libStGLWidgets.so     $(DESTDIR)/usr/$(USR_LIB)/libStGLWidgets.so
-	ln --force --symbolic ../$(USR_LIB)/sView/libStCore.so          $(DESTDIR)/usr/$(USR_LIB)/libStCore.so
-	ln --force --symbolic ../$(USR_LIB)/sView/libStOutAnaglyph.so   $(DESTDIR)/usr/$(USR_LIB)/libStOutAnaglyph.so
-	ln --force --symbolic ../$(USR_LIB)/sView/libStOutDistorted.so  $(DESTDIR)/usr/$(USR_LIB)/libStOutDistorted.so
-	ln --force --symbolic ../$(USR_LIB)/sView/libStOutDual.so       $(DESTDIR)/usr/$(USR_LIB)/libStOutDual.so
-	ln --force --symbolic ../$(USR_LIB)/sView/libStOutInterlace.so  $(DESTDIR)/usr/$(USR_LIB)/libStOutInterlace.so
-	ln --force --symbolic ../$(USR_LIB)/sView/libStOutIZ3D.so       $(DESTDIR)/usr/$(USR_LIB)/libStOutIZ3D.so
-	ln --force --symbolic ../$(USR_LIB)/sView/libStOutPageFlip.so   $(DESTDIR)/usr/$(USR_LIB)/libStOutPageFlip.so
-	ln --force --symbolic ../$(USR_LIB)/sView/libStDiagnostics.so   $(DESTDIR)/usr/$(USR_LIB)/libStDiagnostics.so
-	ln --force --symbolic ../$(USR_LIB)/sView/libStImageViewer.so   $(DESTDIR)/usr/$(USR_LIB)/libStImageViewer.so
-	ln --force --symbolic ../$(USR_LIB)/sView/libStMoviePlayer.so   $(DESTDIR)/usr/$(USR_LIB)/libStMoviePlayer.so
-	ln --force --symbolic ../$(USR_LIB)/sView/libStCADViewer.so     $(DESTDIR)/usr/$(USR_LIB)/libStCADViewer.so
-	ln --force --symbolic ../../share/sView/demo/demo.jps           $(DESTDIR)/usr/$(USR_LIB)/sView/demo.jps
+	ln --force --symbolic ../$(USR_LIB)/sView/sView       $(DESTDIR)/usr/bin/sView
+	ln --force --symbolic ../../share/sView/demo/demo.jps $(DESTDIR)/usr/$(USR_LIB)/sView/demo.jps
 	rm -f    $(DESTDIR)/usr/$(USR_LIB)/sView/*.a
 
 pre_all:
