@@ -839,7 +839,25 @@ void StPlayList::loadRecentList(const StString theString) {
 void StPlayList::open(const StCString& thePath,
                       const StCString& theItem) {
     StMutexAuto anAutoLock(myMutex);
-    /// TODO (Kirill Gavrilov#2) do not scan folders again
+
+    // check if it is recently played playlist
+    bool hasTarget = !theItem.isEmpty();
+    StString aTarget = hasTarget ? theItem : thePath;
+    if(!hasTarget) {
+        for(size_t anIter = 0; anIter < myRecent.size(); ++anIter) {
+            const StHandle<StFileNode>& aFile = myRecent[anIter];
+            if(aFile->size() != 1) {
+                continue;
+            }
+
+            if(thePath.isEquals(aFile->getPath())) {
+                hasTarget = true;
+                aTarget = aFile->getValue(0)->getSubPath();
+                break;
+            }
+        }
+    }
+
     clear();
     int aSearchDeep = myRecursionDeep;
     StString aFolderPath;
@@ -874,10 +892,10 @@ void StPlayList::open(const StCString& thePath,
                 }
 
                 myPlsFile = addRecentFile(StFileNode(thePath)); // append to recent files list
-                if(!theItem.isEmpty()) {
+                if(hasTarget) {
                     // set current item
                     for(StPlayItem* anItem = myFirst; anItem != NULL; anItem = anItem->getNext()) {
-                        if(anItem->getPath() == theItem) {
+                        if(anItem->getPath() == aTarget) {
                             myCurrent = anItem;
                             break;
                         }
@@ -914,8 +932,7 @@ void StPlayList::open(const StCString& thePath,
     addToPlayList(aSubFolder);
 
     myCurrent = myFirst;
-    const StString aTarget = !theItem.isEmpty() ? theItem : thePath;
-    if(!theItem.isEmpty() || !aFileName.isEmpty()) {
+    if(hasTarget || !aFileName.isEmpty()) {
         // set current item
         for(StPlayItem* anItem = myFirst; anItem != NULL; anItem = anItem->getNext()) {
             if(anItem->getPath() == aTarget) {
