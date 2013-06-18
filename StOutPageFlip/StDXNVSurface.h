@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutPageFlip library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -30,18 +30,6 @@ class StDXAqbsControl;
  */
 class StDXNVSurface {
 
-        private:
-
-    IDirect3DSurface9* mySurface;     //!< surface
-    StDXAqbsControl*   myAqbsControl; //!< AQBS control surface if available
-
-    RECT    mySrcRect;  //!< rectangle in surface to render in mono output
-    RECT    myDstRect;  //!< rectangle in backbuffer
-    RECT    mySrcRectL; //!< rectangle in surface corresponding to LEFT  view
-    RECT    mySrcRectR; //!< rectangle in surface corresponding to RIGHT view
-    size_t  mySizeX;    //!< surface width (double-sized)
-    size_t  mySizeY;    //!< surface height
-
         public:
 
     StDXNVSurface(const size_t theSizeX,
@@ -71,6 +59,18 @@ class StDXNVSurface {
      */
     void render(IDirect3DDevice9* theD3dDevice);
 
+        private:
+
+    IDirect3DSurface9* mySurface;     //!< surface
+    StDXAqbsControl*   myAqbsControl; //!< AQBS control surface if available
+
+    RECT    mySrcRect;  //!< rectangle in surface to render in mono output
+    RECT    myDstRect;  //!< rectangle in backbuffer
+    RECT    mySrcRectL; //!< rectangle in surface corresponding to LEFT  view
+    RECT    mySrcRectR; //!< rectangle in surface corresponding to RIGHT view
+    size_t  mySizeX;    //!< surface width (double-sized)
+    size_t  mySizeY;    //!< surface height
+
 };
 
-#endif //__StDXNVSurface_h_
+#endif // __StDXNVSurface_h_

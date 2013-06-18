@@ -67,8 +67,32 @@ class StDXManager {
     /**
      * Access Direct3D device instance.
      */
-    IDirect3DDevice9* getD3DDevice() {
+    IDirect3DDevice9* getDevice() {
         return myD3dDevice;
+    }
+
+    /**
+     * @return adapters count
+     */
+    inline UINT getAdapterCount() const {
+        return myD3dLib->GetAdapterCount();
+    }
+
+    /**
+     * Fill adapter info structure.
+     */
+    inline HRESULT getAdapterIdentifier(UINT                    theAdapter,
+                                        DWORD                   theFlags,
+                                        D3DADAPTER_IDENTIFIER9* theIdentifier) const {
+        return myD3dLib->GetAdapterIdentifier(theAdapter, theFlags, theIdentifier);
+    }
+
+    /**
+     * Retrieves the current display mode of the adapter.
+     */
+    inline HRESULT getAdapterDisplayMode(UINT            theAdapter,
+                                         D3DDISPLAYMODE* theMode) const {
+        return myD3dLib->GetAdapterDisplayMode(theAdapter, theMode);
     }
 
     bool withAqbs() const {
@@ -130,6 +154,7 @@ class StDXManager {
     D3DPRESENT_PARAMETERS myD3dParams;   //!< parameters for created Direct3D device
     D3DDISPLAYMODE        myCurrMode;    //!< temporary variable
     UINT                  myRefreshRate;
+    bool                  myIsD3dEx;
     bool                  myWithAqbs;    //!< indicates that device was created with AQBS flags
 
 };

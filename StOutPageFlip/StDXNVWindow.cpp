@@ -235,7 +235,7 @@ void StDXNVWindow::dxLoop() {
 
                 if(myDxManager->reset(myWinD3d, int(getD3dSizeX()), int(getD3dSizeY()), aShowState)) {
                     myDxSurface = new StDXNVSurface(getD3dSizeX() * 2, getD3dSizeY());
-                    if(!myDxSurface->create(myDxManager->getD3DDevice())) {
+                    if(!myDxSurface->create(myDxManager->getDevice())) {
                         //stError(ST_TEXT("Output plugin, Failed to create Direct3D surface"));
                         ST_ERROR_LOG("StDXNVWindow, Failed to create Direct3D surface");
                         myMsgQueue->pushError(StString("PageFlip output - Failed to create Direct3D surface"));
@@ -291,7 +291,7 @@ void StDXNVWindow::dxLoop() {
                 }
                 myMutex.unlock();
                 myDxManager->beginRender();
-                myDxSurface->render(myDxManager->getD3DDevice());
+                myDxSurface->render(myDxManager->getDevice());
                 ResetEvent(hEventUpdate);
                 myDxManager->endRender();
 

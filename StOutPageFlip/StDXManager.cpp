@@ -84,8 +84,8 @@ StDXManager::StDXManager()
 : myD3dLib(NULL),
   myD3dDevice(NULL),
   myRefreshRate(D3DPRESENT_RATE_DEFAULT),
+  myIsD3dEx(false),
   myWithAqbs(false) {
-    //
     stMemSet(&myD3dParams, 0, sizeof(myD3dParams));
     stMemSet(&myCurrMode,  0, sizeof(myCurrMode));
     myD3dParams.Windowed         = FALSE;
@@ -113,7 +113,22 @@ StDXManager::~StDXManager() {
 
 bool StDXManager::initDxLib() {
     if(myD3dLib == NULL) {
-        myD3dLib = Direct3DCreate9(D3D_SDK_VERSION);
+        IDirect3D9Ex* aD3dLibEx = NULL;
+        // we link against d3d (using Direct3DCreate9 symbol), thus it should be already loaded
+        HMODULE aLib = GetModuleHandleW(L"d3d9");
+        if(aLib != NULL) {
+            // retrieve D3D9Ex function dynamically (available only since Vista+)
+            typedef HRESULT (WINAPI* Direct3DCreate9Ex_t)(UINT , IDirect3D9Ex** );
+            Direct3DCreate9Ex_t Direct3DCreate9ExProc = (Direct3DCreate9Ex_t )GetProcAddress(aLib, "Direct3DCreate9Ex");
+            if(Direct3DCreate9ExProc != NULL) {
+                Direct3DCreate9ExProc(D3D_SDK_VERSION, &aD3dLibEx);
+            }
+        }
+        myD3dLib  = aD3dLibEx;
+        myIsD3dEx = aD3dLibEx != NULL;
+        if(myD3dLib == NULL) {
+            myD3dLib = Direct3DCreate9(D3D_SDK_VERSION);
+        }
     }
     return myD3dLib != NULL;
 }
@@ -130,12 +145,12 @@ bool StDXManager::init(const HWND       theWinHandle,
         return false;
     }
 
-    UINT aD3dAdaptersNb = myD3dLib->GetAdapterCount();
+    const UINT aD3dAdaptersNb = getAdapterCount();
     UINT anAdapterId     = UINT(-1);
     UINT anAdapterVendor = UINT(-1);
     D3DADAPTER_IDENTIFIER9 anAdapterInfo;
     for(UINT anAdapterIter = 0; anAdapterIter < aD3dAdaptersNb; ++anAdapterIter) {
-        myD3dLib->GetAdapterIdentifier(anAdapterIter, 0, &anAdapterInfo);
+        getAdapterIdentifier(anAdapterIter, 0, &anAdapterInfo);
         switch(theAdapter) {
             case ST_DX_ADAPTER_AMD: {
                 if(anAdapterInfo.VendorId != ST_DX_VENDOR_AMD) {
@@ -175,7 +190,7 @@ bool StDXManager::init(const HWND       theWinHandle,
     }
 
     // setup the present parameters
-    if(myD3dLib->GetAdapterDisplayMode(anAdapterId, &myCurrMode) == D3D_OK) {
+    if(getAdapterDisplayMode(anAdapterId, &myCurrMode) == D3D_OK) {
         myD3dParams.BackBufferFormat = myCurrMode.Format;
         myRefreshRate = myCurrMode.RefreshRate;
     }
@@ -206,16 +221,16 @@ bool StDXManager::checkAqbsSupport(const HWND theWinHandle) {
         return false;
     }
 
-    UINT aD3dAdaptersNb  = myD3dLib->GetAdapterCount();
+    const UINT aD3dAdaptersNb = getAdapterCount();
     D3DADAPTER_IDENTIFIER9 anAdapterInfo;
     for(UINT anAdapterIter = 0; anAdapterIter < aD3dAdaptersNb; ++anAdapterIter) {
-        myD3dLib->GetAdapterIdentifier(anAdapterIter, 0, &anAdapterInfo);
+        getAdapterIdentifier(anAdapterIter, 0, &anAdapterInfo);
         if(anAdapterInfo.VendorId != ST_DX_VENDOR_AMD) {
             continue;
         }
 
         // setup the present parameters
-        if(myD3dLib->GetAdapterDisplayMode(anAdapterIter, &myCurrMode) == D3D_OK) {
+        if(getAdapterDisplayMode(anAdapterIter, &myCurrMode) == D3D_OK) {
             myD3dParams.BackBufferFormat = myCurrMode.Format;
             myRefreshRate = myCurrMode.RefreshRate;
         }
@@ -518,10 +533,10 @@ bool StDXManager::getInfo(StDXInfo&  theInfo,
 
     // enumerate available adapters
     if(aDXManager->myD3dLib != NULL) {
-        UINT aD3dAdaptersNb = aDXManager->myD3dLib->GetAdapterCount();
+        const UINT aD3dAdaptersNb = aDXManager->getAdapterCount();
         D3DADAPTER_IDENTIFIER9 anAdapterInfo;
         for(UINT anAdapterIter = 0; anAdapterIter < aD3dAdaptersNb; ++anAdapterIter) {
-            aDXManager->myD3dLib->GetAdapterIdentifier(anAdapterIter, 0, &anAdapterInfo);
+            aDXManager->getAdapterIdentifier(anAdapterIter, 0, &anAdapterInfo);
             if(anAdapterInfo.VendorId == ST_DX_VENDOR_AMD) {
                 theInfo.hasAmdAdapter = true;
             } else if(anAdapterInfo.VendorId == ST_DX_VENDOR_NVIDIA) {
