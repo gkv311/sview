@@ -388,6 +388,16 @@ bool StGLContext::stglInit() {
             STGL_READ_FUNC(wglSwapIntervalEXT);
         }
         extSwapTear = stglCheckExtension(aWglExts, "WGL_EXT_swap_control_tear");
+        if(stglCheckExtension(aWglExts, "WGL_NV_DX_interop")) {
+            STGL_READ_FUNC(wglDXSetResourceShareHandleNV);
+            STGL_READ_FUNC(wglDXOpenDeviceNV);
+            STGL_READ_FUNC(wglDXCloseDeviceNV);
+            STGL_READ_FUNC(wglDXRegisterObjectNV);
+            STGL_READ_FUNC(wglDXUnregisterObjectNV);
+            STGL_READ_FUNC(wglDXObjectAccessNV);
+            STGL_READ_FUNC(wglDXLockObjectsNV);
+            STGL_READ_FUNC(wglDXUnlockObjectsNV);
+        }
     }
 #elif(defined(__APPLE__))
     //

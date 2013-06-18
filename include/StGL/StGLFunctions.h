@@ -700,7 +700,7 @@ struct StGLFunctions {
 
         public: //! @name OpenGL 4.3
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
         public: //! @name wgl extensions
 
     typedef const char* (WINAPI *wglGetExtensionsStringARB_t)(HDC theDeviceContext);
@@ -708,7 +708,38 @@ struct StGLFunctions {
 
     typedef BOOL        (WINAPI *wglSwapIntervalEXT_t)(int theInterval);
     wglSwapIntervalEXT_t wglSwapIntervalEXT;
-#elif(defined(__APPLE__))
+
+        // WGL_NV_DX_interop
+
+    typedef BOOL   (WINAPI *wglDXSetResourceShareHandleNV_t)(void* theObjectD3d, HANDLE theShareHandle);
+    typedef HANDLE (WINAPI *wglDXOpenDeviceNV_t      )(void*   theDeviceD3d);
+    typedef BOOL   (WINAPI *wglDXCloseDeviceNV_t     )(HANDLE  theDeviceIOP);
+    typedef HANDLE (WINAPI *wglDXRegisterObjectNV_t  )(HANDLE  theDeviceIOP,
+                                                       void*   theObjectD3d,
+                                                       GLuint  theName,
+                                                       GLenum  theType,
+                                                       GLenum  theAccess);
+    typedef BOOL   (WINAPI *wglDXUnregisterObjectNV_t)(HANDLE  theDeviceIOP,
+                                                       HANDLE  theObject);
+    typedef BOOL   (WINAPI *wglDXObjectAccessNV_t    )(HANDLE  theObject,
+                                                       GLenum  theAccess);
+    typedef BOOL   (WINAPI *wglDXLockObjectsNV_t     )(HANDLE  theDeviceIOP,
+                                                       GLint   theCount,
+                                                       HANDLE* theObjects);
+    typedef BOOL   (WINAPI *wglDXUnlockObjectsNV_t   )(HANDLE  theDeviceIOP,
+                                                       GLint   theCount,
+                                                       HANDLE* theObjects);
+
+    wglDXSetResourceShareHandleNV_t wglDXSetResourceShareHandleNV;
+    wglDXOpenDeviceNV_t       wglDXOpenDeviceNV;
+    wglDXCloseDeviceNV_t      wglDXCloseDeviceNV;
+    wglDXRegisterObjectNV_t   wglDXRegisterObjectNV;
+    wglDXUnregisterObjectNV_t wglDXUnregisterObjectNV;
+    wglDXObjectAccessNV_t     wglDXObjectAccessNV;
+    wglDXLockObjectsNV_t      wglDXLockObjectsNV;
+    wglDXUnlockObjectsNV_t    wglDXUnlockObjectsNV;
+
+#elif defined(__APPLE__)
         public: //! @name CGL extensions
 
 #else
