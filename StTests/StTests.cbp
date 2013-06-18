@@ -261,6 +261,8 @@
 		<Unit filename="StTestEmbed.h" />
 		<Unit filename="StTestGlBand.cpp" />
 		<Unit filename="StTestGlBand.h" />
+		<Unit filename="StTestGlStress.cpp" />
+		<Unit filename="StTestGlStress.h" />
 		<Unit filename="StTestImageLib.cpp" />
 		<Unit filename="StTestImageLib.h" />
 		<Unit filename="StTestMutex.cpp" />

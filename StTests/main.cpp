@@ -23,16 +23,16 @@
 #include "StTestGlBand.h"
 #include "StTestEmbed.h"
 #include "StTestImageLib.h"
+#include "StTestGlStress.h"
 
 int main(int , char** ) { // force console output
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     setlocale(LC_ALL, ".OCP"); // we set default locale for console output
 #endif
 
 #ifdef __ST_DEBUG__
     // Setup debug environment
-    #if (defined(WIN64) || defined(_WIN64) || defined(__WIN64__))\
-     || (( defined(__linux__) || defined(__linux) ) && (defined(_LP64) || defined(__LP64__)))
+    #if defined(_WIN64) || defined(_LP64) || defined(__LP64__)
         const StString ST_ENV_NAME_STCORE_PATH = "StCore64";
     #else
         const StString ST_ENV_NAME_STCORE_PATH = "StCore32";
@@ -45,6 +45,7 @@ int main(int , char** ) { // force console output
     StArrayList<StString> anArgs = StProcess::getArguments();
     const StString ST_TEST_MUTICES = "mutex";
     const StString ST_TEST_GLBAND  = "glband";
+    const StString ST_TEST_GLHANG  = "glhang";
     const StString ST_TEST_EMBED   = "embed";
     const StString ST_TEST_IMAGE   = "image";
     const StString ST_TEST_ALL     = "all";
@@ -60,6 +61,11 @@ int main(int , char** ) { // force console output
             // gl <-> cpu trasfer speed test
             StTestGlBand aGlBand;
             aGlBand.perform();
+            ++aFound;
+        } else if(aParam == ST_TEST_GLHANG) {
+            // gl stress test
+            StTestGlStress aGlHang;
+            aGlHang.perform();
             ++aFound;
         } else if(aParam == ST_TEST_EMBED) {
             // StWindow embed to native window
@@ -100,6 +106,7 @@ int main(int , char** ) { // force console output
                  << stostream_text("  all    - execute all available tests\n")
                  << stostream_text("  mutex  - mutex speed test\n")
                  << stostream_text("  glband - gl <-> cpu trasfer speed test\n")
+                 << stostream_text("  glhang - gl stress test\n")
                  << stostream_text("  embed  - test window embedding\n")
                  << stostream_text("  image fileName - test image libraries\n");
     }
