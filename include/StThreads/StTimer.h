@@ -45,7 +45,6 @@ class StTimer {
      */
     void resume() {
         stMemSet(&myCounterStart, 0, sizeof(myCounterStart));
-        stMemSet(&myCounterEnd,   0, sizeof(myCounterEnd));
         myIsPaused = false;
 
         fillCounter(myCounterStart);
@@ -150,13 +149,14 @@ class StTimer {
 #endif
 
     double timeFromStart() const {
-        fillCounter(myCounterEnd);
+        stTimeCounter_t aCounterEnd;
+        fillCounter(aCounterEnd);
     #ifdef _WIN32
         static const double INV_FREQ = winInvFrequency();
-        return double(myCounterEnd.QuadPart - myCounterStart.QuadPart) * INV_FREQ;
+        return double(aCounterEnd.QuadPart - myCounterStart.QuadPart) * INV_FREQ;
     #else
-        return (double(myCounterEnd.tv_sec  - myCounterStart.tv_sec) * 1000000.0)
-              + double(myCounterEnd.tv_usec - myCounterStart.tv_usec);
+        return (double(aCounterEnd.tv_sec  - myCounterStart.tv_sec) * 1000000.0)
+              + double(aCounterEnd.tv_usec - myCounterStart.tv_usec);
     #endif
     }
 
@@ -165,7 +165,6 @@ class StTimer {
      */
     void reset() {
         stMemSet(&myCounterStart, 0, sizeof(myCounterStart));
-        stMemSet(&myCounterEnd,   0, sizeof(myCounterEnd));
         myTimeInMicroSec = 0.0;
     }
 
@@ -173,8 +172,6 @@ class StTimer {
 
     double          myTimeInMicroSec; //!< cumulative elapsed time
     stTimeCounter_t myCounterStart;
-    mutable stTimeCounter_t
-                    myCounterEnd;
     bool            myIsPaused;       //!< pause flag
 
 };
