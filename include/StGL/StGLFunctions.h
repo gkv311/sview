@@ -739,6 +739,12 @@ struct StGLFunctions {
     wglDXLockObjectsNV_t      wglDXLockObjectsNV;
     wglDXUnlockObjectsNV_t    wglDXUnlockObjectsNV;
 
+#ifndef WGL_ACCESS_READ_WRITE_NV
+    #define WGL_ACCESS_READ_ONLY_NV     0x0000
+    #define WGL_ACCESS_READ_WRITE_NV    0x0001
+    #define WGL_ACCESS_WRITE_DISCARD_NV 0x0002
+#endif
+
 #elif defined(__APPLE__)
         public: //! @name CGL extensions
 
