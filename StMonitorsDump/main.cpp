@@ -64,9 +64,9 @@ ST_LOCAL void dumpEdid(const StEDIDParser& theEdid,
         st::cout << stostream_text("Can not open the file '") << theFileName << stostream_text("' for writing!\n");
         return;
     }
-    aRawFile.initBuffer(128);
-    stMemCpy(aRawFile.changeBuffer(), theEdid.getData(), 128);
-    aRawFile.writeFile(128);
+    aRawFile.initBuffer(theEdid.getSize());
+    stMemCpy(aRawFile.changeBuffer(), theEdid.getData(), theEdid.getSize());
+    aRawFile.writeFile(theEdid.getSize());
     aRawFile.closeFile();
 }
 
@@ -125,7 +125,7 @@ ST_LOCAL void genInf(const StEDIDParser& theEdid,
     aFileOut << ";Base EDID\n";
     aFileOut << "HKR,EDID_OVERRIDE,\"0\",0x01";
     stUtf8_t aByte[4];
-    for(size_t aByteId = 0; aByteId < 128; ++aByteId) {
+    for(size_t aByteId = 0; aByteId < theEdid.getSize(); ++aByteId) {
         unsigned char aChar = theEdid.getData()[aByteId];
         stsprintf(aByte, 4, "%02X", (unsigned int )aChar);
         aFileOut << ",0x" << aByte;
@@ -203,7 +203,7 @@ int main(int , char** ) { // force console output
                 st::cout << stostream_text("To small EDID data read from file ')") << anArg.getValue() << stostream_text("'\n");
                 return -1;
             }
-            anInputEdid.init(aRawFile.getBuffer());
+            anInputEdid.init(aRawFile.getBuffer(), (unsigned int )aRawFile.getSize());
         } else if(anArg.getKey().isEqualsIgnoreCase(ARGUMENT_OUT_EDID)) {
             if(!anOutEdidFilename.isEmpty()) {
                 st::cout << stostream_text("Invalid number of arguments!\n");
@@ -231,13 +231,13 @@ int main(int , char** ) { // force console output
     if(anInputEdid.isValid()) {
         StString aPnPId = anInputEdid.getPnPId();
         st::cout << stostream_text("== EDID data for Monitor with PnPId='") << aPnPId << stostream_text("'==\n");
-        st::cout << formatHex(anInputEdid.getData(), 128);
+        st::cout << formatHex(anInputEdid.getData(), anInputEdid.getSize());
         st::cout << stostream_text("===============================================\n");
 
         if(!aPnPIdReplace.isEmpty() && !aPnPId.isEquals(aPnPIdReplace)) {
             anInputEdid.setPnPId(aPnPIdReplace);
             st::cout << stostream_text("== EDID data for Monitor with PnPId='") << aPnPId << stostream_text("'->'") << anInputEdid.getPnPId() << stostream_text("'==\n");
-            st::cout << formatHex(anInputEdid.getData(), 128);
+            st::cout << formatHex(anInputEdid.getData(), anInputEdid.getSize());
             st::cout << stostream_text("===============================================\n");
         }
 
@@ -269,6 +269,10 @@ int main(int , char** ) { // force console output
     StSearchMonitors::listEDID(anEdids);
     for(size_t anIter = 0; anIter < anEdids.size(); ++anIter) {
         StEDIDParser& anEdid = anEdids[anIter];
+        if(!anEdid.isValid()) {
+            dumpStr += StString("== INVALID EDID ==\n");
+            continue;
+        }
         dumpStr += StString("== Monitor ") + anEdid.getPnPId() + " ============================\n";
         dumpStr += StString("== Name:       ") + anEdid.getName() + "\n";
         dumpStr += StString("== Year/Week:  ") + anEdid.getYear() + "/" + anEdid.getWeek() + "\n";
@@ -276,7 +280,7 @@ int main(int , char** ) { // force console output
         dumpStr += StString("== Stereo:     ") + anEdid.getStereoString() + "\n";
         dumpStr += StString("== Dimensions: ") + anEdid.getWidthMM() + " X " + anEdid.getHeightMM() + " mm\n";
         dumpStr += StString("================= EDID data ===================\n");
-        dumpStr += formatHex(anEdid.getData(), 128);
+        dumpStr += formatHex(anEdid.getData(), anEdid.getSize());
         dumpStr += StString("===============================================\n");
 
         StString aSuffix = (anEdids.size() > 1) ? StString(anIter) : StString();

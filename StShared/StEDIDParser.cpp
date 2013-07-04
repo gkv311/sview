@@ -32,22 +32,26 @@ namespace {
 };
 
 StEDIDParser::StEDIDParser()
-: myData(NULL) {
+: myData(NULL),
+  mySize(0) {
     //
 }
 
-StEDIDParser::StEDIDParser(const stUByte_t* theData)
-: myData(NULL) {
-    init(theData);
+StEDIDParser::StEDIDParser(const stUByte_t*   theData,
+                           const unsigned int theSize)
+: myData(NULL),
+  mySize(0) {
+    init(theData, theSize);
 }
 
 StEDIDParser::StEDIDParser(const StEDIDParser& theCopy)
-: myData(NULL) {
-    init(theCopy.myData);
+: myData(NULL),
+  mySize(0) {
+    init(theCopy.myData, theCopy.mySize);
 }
 
 const StEDIDParser& StEDIDParser::operator=(const StEDIDParser& theCopy) {
-    init(theCopy.myData);
+    init(theCopy.myData, theCopy.mySize);
     return *this;
 }
 
@@ -55,6 +59,7 @@ void StEDIDParser::clear() {
     if(myData != NULL) {
         delete[] myData;
         myData = NULL;
+        mySize = 0;
     }
 }
 
@@ -62,35 +67,68 @@ StEDIDParser::~StEDIDParser() {
     clear();
 }
 
-void StEDIDParser::init(const stUByte_t* theData) {
+void StEDIDParser::init(const stUByte_t*   theData,
+                        const unsigned int theSize) {
     clear();
-    if(theData != NULL) {
-        myData = new stUByte_t[128];
-        stMemCpy(myData, theData, 128);
+    if(theSize < 128) {
+        return;
     }
+    if(theData != NULL) {
+        myData = new stUByte_t[theSize];
+        mySize = theSize;
+        stMemCpy(myData, theData, theSize);
+    }
+}
+
+void StEDIDParser::add(const stUByte_t*   theData,
+                       const unsigned int theSize) {
+    if( myData == NULL
+    || theData == NULL
+    || theSize <  128) {
+        return;
+    }
+
+    stUByte_t* anOldData = myData;
+    myData = new stUByte_t[mySize + theSize];
+    stMemCpy(myData,          anOldData, mySize);
+    stMemCpy(myData + mySize, theData,   theSize);
+    mySize += theSize;
+    delete[] anOldData;
 }
 
 bool StEDIDParser::isFirstVersion() const {
     return stAreEqual(myData, EDID_V1_HEADER, sizeof(EDID_V1_HEADER));
 }
 
-bool StEDIDParser::isValid() const {
-    if(myData == NULL) {
+inline bool isValidBlock(const stUByte_t* theBlock) {
+    if(theBlock == NULL) {
         return false;
     }
     stUByte_t aCheckSumm = 0;
     for(size_t aByteId = 0; aByteId < 128; ++aByteId) {
-        aCheckSumm += myData[aByteId];
+        aCheckSumm += theBlock[aByteId];
     }
-    return (aCheckSumm == 0) && isFirstVersion();
+    return aCheckSumm == 0;
+}
+
+inline void validateBlock(stUByte_t* theBlock) {
+    if(theBlock == NULL) {
+        return;
+    }
+
+    stUByte_t aCheckSumm = 0;
+    for(size_t aByteId = 0; aByteId < 127; ++aByteId) {
+        aCheckSumm += theBlock[aByteId];
+    }
+    theBlock[127] = -aCheckSumm;
+}
+
+bool StEDIDParser::isValid() const {
+    return isValidBlock(myData) && isFirstVersion();
 }
 
 void StEDIDParser::validate() {
-    stUByte_t aCheckSumm = 0;
-    for(size_t aByteId = 0; aByteId < 127; ++aByteId) {
-        aCheckSumm += myData[aByteId];
-    }
-    myData[127] = -aCheckSumm;
+    validateBlock(myData);
 }
 
 unsigned int StEDIDParser::getVersion() const {

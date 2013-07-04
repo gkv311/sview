@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -23,19 +23,8 @@
 #include <StTemplates/StRect.h>
 #include <StCore/StEDIDParser.h>
 
-typedef struct tagStMonitor {
-    stUtf8_t      pnpid[8];  // model PnP identifier
-    stUtf8_t    name[1024];  // model name
-    stUtf8_t gpuName[1024];
-    stUByte_t    edid[256];  // EDID data
-    StRectI_t        vRect;  // virtual space (rectangle)
-    int           systemId;  // monitor id in system, 0 is primary display
-    int           freqCurr;  // frequency in Hertz
-    int            freqMax;  // maximum frequency in Hertz
-} StMonitor_t;
-
 /**
- * Class represents monitor, connected to videocard.
+ * Class represents monitor connected to videocard.
  */
 class StMonitor {
 
@@ -51,89 +40,128 @@ class StMonitor {
      */
     ST_CPPEXPORT StMonitor(const StMonitor& theCopy);
 
-    /**
-     * Copy constructor (from structure).
-     */
-    ST_CPPEXPORT StMonitor(const StMonitor_t& theMonStruct);
-
-    /**
-     * Create structure
-     */
-    ST_CPPEXPORT StMonitor_t getStruct();
-
     ST_CPPEXPORT bool isValid() const;
 
-    int getId() const {
+    ST_LOCAL int getId() const {
         return mySysId;
     }
 
-    void setId(const int theMonId) {
+    ST_LOCAL void setId(const int theMonId) {
         mySysId = theMonId;
     }
 
-    const StString& getPnPId() const {
+    /**
+     * @return model PnP identifier assigned by Microsoft
+     */
+    ST_LOCAL const StString& getPnPId() const {
         return myPnpId;
     }
 
-    void setPnPId(const StString& thePnpId) {
+    /**
+     * @param thePnpId model PnP identifier
+     * Notice that this method do not affect EDID data.
+     */
+    ST_LOCAL void setPnPId(const StString& thePnpId) {
         myPnpId = thePnpId;
     }
 
-    const StString& getName() const {
+    /**
+     * @return model name
+     */
+    ST_LOCAL const StString& getName() const {
         return myName;
     }
 
-    void setName(const StString& theName) {
+    /**
+     * @param theName model name
+     */
+    ST_LOCAL void setName(const StString& theName) {
         myName = theName;
     }
 
-    void setVRect(const StRectI_t& theRect) {
+    /**
+     * @return virtual space (rectangle), how this monitor is arranged with another displays
+     */
+    ST_LOCAL const StRectI_t& getVRect() const {
+        return myRect;
+    }
+
+    /**
+     * @return virtual space (rectangle)
+     */
+    ST_LOCAL StRectI_t& changeVRect() {
+        return myRect;
+    }
+
+    /**
+     * @param theRect virtual space (rectangle)
+     */
+    ST_LOCAL void setVRect(const StRectI_t& theRect) {
         myRect = theRect;
     }
 
-    const StRectI_t& getVRect() const {
-        return myRect;
-    }
-
-    StRectI_t& changeVRect() {
-        return myRect;
-    }
-
-    int getFreq() const {
+    /**
+     * @return current vertical refresh rate
+     */
+    ST_LOCAL int getFreq() const {
         return myFreq;
     }
 
-    void setFreq(const int theFrequency) {
+    /**
+     * @param theFrequency current vertical refresh rate
+     */
+    ST_LOCAL void setFreq(const int theFrequency) {
         myFreq = theFrequency;
     }
 
-    int getFreqMax() const {
+    /**
+     * @return maximal vertical refresh rate
+     */
+    ST_LOCAL int getFreqMax() const {
         return myFreqMax;
     }
 
-    void setFreqMax(const int theFrequencyMax) {
+    /**
+     * @param theFrequencyMax maximal vertical refresh rate
+     */
+    ST_LOCAL void setFreqMax(const int theFrequencyMax) {
         myFreqMax = theFrequencyMax;
     }
 
-    const StString& getGpuName() const {
+    /**
+     * @return GPU to which monitor is connected to
+     */
+    ST_LOCAL const StString& getGpuName() const {
         return myGpuName;
     }
 
-    void setGpuName(const StString& theGpuName) {
+    /**
+     * @param theGpuName GPU to which monitor is connected to
+     */
+    ST_LOCAL void setGpuName(const StString& theGpuName) {
         myGpuName = theGpuName;
     }
 
-    const StEDIDParser& getEdid() const {
+    /**
+     * @return associated EDID data
+     */
+    ST_LOCAL const StEDIDParser& getEdid() const {
          return myEdid;
     }
 
-    StEDIDParser& changeEdid() {
+    /**
+     * @return associated EDID data
+     */
+    ST_LOCAL StEDIDParser& changeEdid() {
          return myEdid;
     }
 
+    /**
+     * @return human-readable string with monitor description
+     */
     ST_CPPEXPORT StString toString() const;
 
-    bool operator==(const StMonitor& compare) const {
+    ST_LOCAL bool operator==(const StMonitor& compare) const {
         if(&compare == this) {
             return true;
         }
@@ -142,23 +170,23 @@ class StMonitor {
             && compare.myRect  == myRect;
     }
 
-    bool operator!=(const StMonitor& compare) const {
+    ST_LOCAL bool operator!=(const StMonitor& compare) const {
         return !this->operator==(compare);
     }
 
-    bool operator>(const StMonitor& compare) const {
+    ST_LOCAL bool operator>(const StMonitor& compare) const {
         return mySysId > compare.mySysId;
     }
 
-    bool operator<(const StMonitor& compare) const {
+    ST_LOCAL bool operator<(const StMonitor& compare) const {
         return mySysId < compare.mySysId;
     }
 
-    bool operator>=(const StMonitor& compare) const {
+    ST_LOCAL bool operator>=(const StMonitor& compare) const {
         return mySysId >= compare.mySysId;
     }
 
-    bool operator<=(const StMonitor& compare) const {
+    ST_LOCAL bool operator<=(const StMonitor& compare) const {
         return mySysId <= compare.mySysId;
     }
 
@@ -175,4 +203,4 @@ class StMonitor {
 
 };
 
-#endif //__StMonitor_h_
+#endif // __StMonitor_h_

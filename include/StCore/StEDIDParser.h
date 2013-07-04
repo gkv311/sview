@@ -47,9 +47,11 @@ class StEDIDParser {
 
     /**
      * Initialize the parser.
-     * @param theData pointer to EDID data (should be 128 bytes long)
+     * @param theData pointer to EDID data
+     * @param theSize size of data (should be at least 128 bytes long)
      */
-    ST_CPPEXPORT StEDIDParser(const stUByte_t* theData);
+    ST_CPPEXPORT StEDIDParser(const stUByte_t*   theData,
+                              const unsigned int theSize = 128);
 
     /**
      * Copy constructor.
@@ -79,10 +81,34 @@ class StEDIDParser {
     }
 
     /**
-     * Initialize the parser.
-     * @param theData pointer to EDID data (should be 128 bytes long)
+     * @return size of EDID data in bytes
      */
-    ST_CPPEXPORT void init(const stUByte_t* theData);
+    ST_LOCAL unsigned int getSize() const {
+        return mySize;
+    }
+
+    /**
+     * @return number of extensions blocks (as encoded in first 128 block)
+     */
+    ST_LOCAL unsigned int getExtensionsNb() const {
+        return myData != NULL ? myData[126] : 0;
+    }
+
+    /**
+     * Initialize the parser.
+     * @param theData pointer to EDID data
+     * @param theSize size of data (should be at least 128 bytes long)
+     */
+    ST_CPPEXPORT void init(const stUByte_t*   theData,
+                           const unsigned int theSize = 128);
+
+    /**
+     * Append extension blocks.
+     * @param theData pointer to extension block(s)
+     * @param theSize size of added data
+     */
+    ST_CPPEXPORT void add(const stUByte_t*   theData,
+                          const unsigned int theSize);
 
     /**
      * @return true if given EDID data has valid header of EDID 1.x.
@@ -202,7 +228,8 @@ class StEDIDParser {
 
         private: //! @name private fields
 
-    stUByte_t* myData; //!< EDID data (dynamically allocated)
+    stUByte_t*   myData; //!< EDID data
+    unsigned int mySize; //!< data size in bytes
 
 };
 

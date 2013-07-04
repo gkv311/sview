@@ -552,7 +552,15 @@ void StSearchMonitors::listEDID(StArrayList<StEDIDParser>& theEdids) {
                     flist->ADL_Display_EdidData_Get(aDispInfo.displayID.iDisplayLogicalAdapterIndex,
                                                     iDisplayIndex, &anEdidData);
                 }
-                StEDIDParser aParser((unsigned char* )anEdidData.cEDIDData);
+
+                // notice that this API reads 256 bytes pages from EDID, not 128 blocks
+                StEDIDParser aParser((unsigned char* )anEdidData.cEDIDData, anEdidData.iEDIDSize);
+                if(aParser.getExtensionsNb() >= 2) {
+                    anEdidData.iBlockIndex = 2; // read extra blocks
+                    flist->ADL_Display_EdidData_Get(aDispInfo.displayID.iDisplayLogicalAdapterIndex,
+                                                    iDisplayIndex, &anEdidData);
+                    aParser.add((unsigned char* )anEdidData.cEDIDData, anEdidData.iEDIDSize);
+                }
 
                 // filter duplicated entities
                 bool isAlreadyShown = false;
@@ -580,41 +588,46 @@ void StSearchMonitors::listEDID(StArrayList<StEDIDParser>& theEdids) {
 #endif // !__APPLE__
 
 #ifdef _WIN32
-    NvAPI_Status errState = NvAPI_Initialize();
-    if(errState == NVAPI_OK) {
-        ///ST_DEBUG_LOG_AT("NvAPI_Initialized");
+    NvAPI_Status anErrStateNv = NvAPI_Initialize();
+    if(anErrStateNv == NVAPI_OK) {
         NvPhysicalGpuHandle nvGPUHandles[NVAPI_MAX_PHYSICAL_GPUS];
         stMemSet(nvGPUHandles, 0, sizeof(NvPhysicalGpuHandle));
         NvU32 nvGpuCount = 0;
-        errState = NvAPI_EnumPhysicalGPUs(nvGPUHandles, &nvGpuCount);
-        if(errState == NVAPI_OK && nvGpuCount > 0) {
+        anErrStateNv = NvAPI_EnumPhysicalGPUs(nvGPUHandles, &nvGpuCount);
+        if(anErrStateNv == NVAPI_OK && nvGpuCount > 0) {
             // we got some NVIDIA GPUs...
-            NV_EDID nv_edid;
-            stMemSet(&nv_edid, 0 ,sizeof(NV_EDID));
-            nv_edid.version = NV_EDID_VER;
-            ///ST_DEBUG_LOG_AT("nvGpuCount= " + (size_t )nvGpuCount);
+            NV_EDID anEdidNv;
+            stMemSet(&anEdidNv, 0 ,sizeof(NV_EDID));
+            anEdidNv.version = NV_EDID_VER;
             for(size_t h = 0; h < nvGpuCount; h++) {
                 NvU32 outputsMask = 0;
-                errState = NvAPI_GPU_GetAllOutputs(nvGPUHandles[h], &outputsMask);
-                if(errState != NVAPI_OK) {
-                    ///ST_DEBUG_LOG_AT("NvAPI_GPU_GetAllOutputs FAILED");
+                anErrStateNv = NvAPI_GPU_GetAllOutputs(nvGPUHandles[h], &outputsMask);
+                if(anErrStateNv != NVAPI_OK) {
                     continue;
                 }
                 int maxOutputsNum = sizeof(NvU32) * 8;
                 for(int i = 0; i < maxOutputsNum; ++i) {
                     NvU32 dispOutId = 1 << i;
                     if(dispOutId & outputsMask) {
-                        ///ST_DEBUG_LOG_AT("got the " + (size_t )dispOutId + " vs outputsMask= " + (size_t )outputsMask);
                         // got some desplay id...
-                        errState = NvAPI_GPU_GetEDID(nvGPUHandles[h], dispOutId, &nv_edid);
-                        if(errState == NVAPI_OK) {
-                            StEDIDParser aParser((unsigned char* )nv_edid.EDID_Data);
-                            theEdids.add(aParser);
-                        } else {
-                            NvAPI_ShortString shortString;
-                            NvAPI_GetErrorMessage(errState, shortString);
-                            ///ST_DEBUG_LOG_AT("Fail to get EDID data, err= " + (char* )shortString);
+                        anErrStateNv = NvAPI_GPU_GetEDID(nvGPUHandles[h], dispOutId, &anEdidNv);
+                        if(anErrStateNv != NVAPI_OK) {
+                            NvAPI_ShortString aShortStr;
+                            NvAPI_GetErrorMessage(anErrStateNv, aShortStr);
+                            continue;
                         }
+
+                        // notice that this API reads 256 bytes pages from EDID, not 128 blocks
+                        NvU32 aTotalSize = anEdidNv.sizeofEDID;
+                        StEDIDParser aParser((unsigned char* )anEdidNv.EDID_Data, stMin(aTotalSize, NvU32(256)));
+                        for(NvU32 anOffset = 256; (aTotalSize - anOffset) < aTotalSize; anOffset += 256) {
+                            anEdidNv.offset = anOffset;
+                            NvAPI_GPU_GetEDID(nvGPUHandles[h], dispOutId, &anEdidNv);
+                            if(anErrStateNv == NVAPI_OK) {
+                                aParser.add((unsigned char* )anEdidNv.EDID_Data, stMin(aTotalSize - anOffset, NvU32(256)));
+                            }
+                        }
+                        theEdids.add(aParser);
                     }
                 }
             }
