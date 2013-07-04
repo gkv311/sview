@@ -26,39 +26,53 @@
 
 namespace {
 
-    ST_LOCAL StString formatHex(const unsigned char* theData, size_t theSize) {
-        StString anOut;
-        stUtf8_t aByte[4];
-        for(size_t aByteId = 0; aByteId < theSize; ++aByteId) {
-            unsigned char aChar = theData[aByteId];
-            char anEsc = ' ';
-            if(       (aByteId + 1) % 16 == 0 && aByteId != 0) {
-                anEsc = '\n';
-            } else if((aByteId + 1) % 8  == 0) {
-                anEsc = '|';
-            }
-            // TODO (Kirill Gavrilov#3#) got the strange crash on Win64 with setted buffer size to 3...
-            stsprintf(aByte, 4, "%02X%c", (unsigned int )aChar, anEsc);
-            anOut += StString(aByte);
+static StString formatHex(const unsigned char* theData, size_t theSize) {
+    StString anOut;
+    stUtf8_t aByte[4];
+    for(size_t aByteId = 0; aByteId < theSize; ++aByteId) {
+        unsigned char aChar = theData[aByteId];
+        char anEsc = ' ';
+        if(       (aByteId + 1) % 16 == 0 && aByteId != 0) {
+            anEsc = '\n';
+        } else if((aByteId + 1) % 8  == 0) {
+            anEsc = '|';
         }
-        return anOut;
+        // TODO (Kirill Gavrilov#3#) got the strange crash on Win64 with setted buffer size to 3...
+        stsprintf(aByte, 4, "%02X%c", (unsigned int )aChar, anEsc);
+        anOut += StString(aByte);
     }
-
-};
-
-ST_LOCAL StString dump() {
-    StSearchMonitors stMonitors;
-    stMonitors.init();
-    StString strDump;
-    for(size_t m = 0; m < stMonitors.size(); ++m) {
-        strDump += stMonitors[m].toString();
-        strDump += '\n';
-    }
-    return strDump;
+    return anOut;
 }
 
-ST_LOCAL void dumpEdid(const StEDIDParser& theEdid,
-                       const StString&     theFileName) {
+static StString dump(const StSearchMonitors& theMonitors) {
+    StString aStrDump;
+    for(size_t aMonIter = 0; aMonIter < theMonitors.size(); ++aMonIter) {
+        aStrDump += theMonitors[aMonIter].toString();
+        aStrDump += '\n';
+    }
+    return aStrDump;
+}
+
+static StString dumpEdid(const StEDIDParser& theEdid) {
+    if(!theEdid.isValid()) {
+        return StString("== INVALID EDID ==\n");
+    }
+
+    StString aDumpStr;
+    aDumpStr += StString("== Monitor ") + theEdid.getPnPId() + " ============================\n";
+    aDumpStr += StString("== Name:       ") + theEdid.getName() + "\n";
+    aDumpStr += StString("== Year/Week:  ") + theEdid.getYear() + "/" + theEdid.getWeek() + "\n";
+    aDumpStr += StString("== Gamma:      ") + theEdid.getGamma() + "\n";
+    aDumpStr += StString("== Stereo:     ") + theEdid.getStereoString() + "\n";
+    aDumpStr += StString("== Dimensions: ") + theEdid.getWidthMM() + " X " + theEdid.getHeightMM() + " mm\n";
+    aDumpStr += StString("================= EDID data ===================\n");
+    aDumpStr += formatHex(theEdid.getData(), theEdid.getSize());
+    aDumpStr += StString("===============================================\n");
+    return aDumpStr;
+}
+
+static void dumpEdidToFile(const StEDIDParser& theEdid,
+                           const StString&     theFileName) {
     StRawFile aRawFile(theFileName);
     if(!aRawFile.openFile(StRawFile::WRITE)) {
         st::cout << stostream_text("Can not open the file '") << theFileName << stostream_text("' for writing!\n");
@@ -70,8 +84,8 @@ ST_LOCAL void dumpEdid(const StEDIDParser& theEdid,
     aRawFile.closeFile();
 }
 
-ST_LOCAL void genInf(const StEDIDParser& theEdid,
-                     const StString&     theFileName) {
+static void genInf(const StEDIDParser& theEdid,
+                   const StString&     theFileName) {
     st::ofstream aFileOut;
     aFileOut.open(theFileName.toCString());
     if(aFileOut.fail()) {
@@ -159,6 +173,8 @@ ST_LOCAL void genInf(const StEDIDParser& theEdid,
     aFileOut.close();
 }
 
+};
+
 int main(int , char** ) { // force console output
 #ifdef _WIN32
     setlocale(LC_ALL, ".OCP"); // we set default locale for console output (useful only for debug)
@@ -245,7 +261,7 @@ int main(int , char** ) { // force console output
             if(anOutEdidFilename.isEndsWithIgnoreCase(stCString(".bin"))) {
                 anOutEdidFilename = anOutEdidFilename.subString(0, anOutEdidFilename.getLength() - 4);
             }
-            dumpEdid(anInputEdid, anOutEdidFilename + ".bin");
+            dumpEdidToFile(anInputEdid, anOutEdidFilename + ".bin");
         }
 
         if(!anOutInfFilename.isEmpty()) {
@@ -258,30 +274,32 @@ int main(int , char** ) { // force console output
         return 0;
     }
 
-    StString welcomeMessage = StString("StMonitorsDump ")
-                            + StVersionInfo::getSDKVersionString()
-                            + " by Kirill Gavrilov (kirill@sview.ru)\n\n";
-    st::cout << st::COLOR_FOR_GREEN << welcomeMessage << st::COLOR_FOR_WHITE;
-    StString dumpStr = dump();
-    dumpStr += '\n';
+    StString aWelcomeMsg = StString("StMonitorsDump ")
+                         + StVersionInfo::getSDKVersionString()
+                         + " by Kirill Gavrilov (kirill@sview.ru)\n\n";
+    st::cout << st::COLOR_FOR_GREEN << aWelcomeMsg << st::COLOR_FOR_WHITE;
+
+    StSearchMonitors aMonitors;
+    aMonitors.init();
+    StString aDumpStr = dump(aMonitors);
+    aDumpStr += '\n';
 
     StArrayList<StEDIDParser> anEdids;
-    StSearchMonitors::listEDID(anEdids);
+    for(size_t aMonIter = 0; aMonIter < aMonitors.size(); ++aMonIter) {
+        if(aMonitors[aMonIter].getEdid().isValid()) {
+            anEdids.add(aMonitors[aMonIter].getEdid());
+        }
+    }
+    if(anEdids.isEmpty()) {
+        StSearchMonitors::listEDID(anEdids);
+    }
+
     for(size_t anIter = 0; anIter < anEdids.size(); ++anIter) {
         StEDIDParser& anEdid = anEdids[anIter];
+        aDumpStr += dumpEdid(anEdid);
         if(!anEdid.isValid()) {
-            dumpStr += StString("== INVALID EDID ==\n");
             continue;
         }
-        dumpStr += StString("== Monitor ") + anEdid.getPnPId() + " ============================\n";
-        dumpStr += StString("== Name:       ") + anEdid.getName() + "\n";
-        dumpStr += StString("== Year/Week:  ") + anEdid.getYear() + "/" + anEdid.getWeek() + "\n";
-        dumpStr += StString("== Gamma:      ") + anEdid.getGamma() + "\n";
-        dumpStr += StString("== Stereo:     ") + anEdid.getStereoString() + "\n";
-        dumpStr += StString("== Dimensions: ") + anEdid.getWidthMM() + " X " + anEdid.getHeightMM() + " mm\n";
-        dumpStr += StString("================= EDID data ===================\n");
-        dumpStr += formatHex(anEdid.getData(), anEdid.getSize());
-        dumpStr += StString("===============================================\n");
 
         StString aSuffix = (anEdids.size() > 1) ? StString(anIter) : StString();
         if(!aPnPIdReplace.isEmpty()) {
@@ -291,7 +309,7 @@ int main(int , char** ) { // force console output
             if(anOutEdidFilename.isEndsWithIgnoreCase(stCString(".bin"))) {
                 anOutEdidFilename = anOutEdidFilename.subString(0, anOutEdidFilename.getLength() - 4);
             }
-            dumpEdid(anEdid, anOutEdidFilename + aSuffix + ".bin");
+            dumpEdidToFile(anEdid, anOutEdidFilename + aSuffix + ".bin");
         }
         if(!anOutInfFilename.isEmpty()) {
             if(anOutInfFilename.isEndsWithIgnoreCase(stCString(".inf"))) {
@@ -300,18 +318,18 @@ int main(int , char** ) { // force console output
             genInf(anEdid, anOutInfFilename + aSuffix + ".inf");
         }
     }
-    st::cout << dumpStr;
+    st::cout << aDumpStr;
     st::cout << stostream_text("\n\n");
 
-    st::ofstream fout;
-    fout.open("stMonitorsDump.txt");
-    if(fout.fail()) {
+    st::ofstream aFileOut;
+    aFileOut.open("stMonitorsDump.txt");
+    if(aFileOut.fail()) {
         st::cout << st::COLOR_FOR_RED << stostream_text("Couldn't open file \"stMonitorsDump.txt\"!\n") << st::COLOR_FOR_WHITE;
         st::cout << stostream_text("Press any key to exit...") << st::SYS_PAUSE_EMPTY;
         return -1;
     }
-    fout << dumpStr;
-    fout.close();
+    aFileOut << aDumpStr;
+    aFileOut.close();
 
     st::cout << st::COLOR_FOR_GREEN << stostream_text("Dump stored to file \"stMonitorsDump.txt\"\n") << st::COLOR_FOR_WHITE;
 
