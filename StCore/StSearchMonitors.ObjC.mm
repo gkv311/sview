@@ -76,7 +76,7 @@ void StSearchMonitors::findMonitorsCocoa() {
         if(anEDID != NULL
         && [anEDID isKindOfClass: [NSData class]]
         && [anEDID length] != 0) {
-            aStMon.changeEdid().init((unsigned char* )[anEDID bytes]);
+            aStMon.changeEdid().init((unsigned char* )[anEDID bytes], [anEDID length]);
             if(aStMon.getEdid().isValid()) {
                 aStMon.setPnPId(aStMon.getEdid().getPnPId());
             }
