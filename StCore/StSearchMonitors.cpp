@@ -263,7 +263,7 @@ namespace {
         if(anActualType == XA_INTEGER
         && anActualFormat == 8
         && (anItemsNb != 0 && (anItemsNb % 128 == 0))) {
-            anEDID.init(aPropData);
+            anEDID.init(aPropData, anItemsNb);
         }
         XFree(aPropData);
         return anEDID;
