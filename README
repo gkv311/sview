@@ -1,57 +1,24 @@
-This is a root of sView repository.
+sView - stereoscopic media player
+=================================
 
-In this file will be useful information about sView development and repository access.
+0) Updates
+----------
 
-#############################################################
-#   Prepare development enviroment
-#############################################################
+* To get up-to-date sources please clone official git repository:
+  git clone https://github.com/gkv311/sview.git
 
- Ubuntu
+1) Documentation
+----------------
 
-1.1) Install main IDE CodeBlocks:
-sudo apt-get install codeblocks;
+* Read the documentation in the doc/ directory in git.
+  Online help is available on official site http://www.sview.ru/en/sview2009/usertips
 
-1.2) Install main compiler g++:
-sudo apt-get install g++;
+2) Licensing
+------------
 
-1.3) Configure CodeBlocks - add empty (gcc-clones) compilers with names:
-windows_sdk_x86
-windows_sdk_x86_64
+* See the LICENSE file.
 
-1.4) Configure CodeBlocks Editor:
-end-of-line mode: CR LF
-default encoding: UTF-8
-source formatter: JAVA
+3) Build and Install
+--------------------
 
-2) External dependences:
-
-sudo apt-get install
-libgtk2.0-dev
-libopenal-dev
-libgl1-mesa-dev
-libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev
-libwebp-dev
-libconfig++-dev libconfig-dev
-libxpm-dev
-
- RPM-based distributive
-
-yum install gcc gcc-c++
-yum install gtk+-devel gtk2-devel
-yum install mesa-libGLU-devel glew-devel
-yum install openal-devel
-yum install libconfig-devel
-
-rpm -Uvh http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-stable.noarch.rpm
-yum install ffmpeg-devel
-#yum install libavcodec-devel libavdevice-devel libavformat-devel libavutil-devel libswscale-devel
-
-su
-yum install rpm-build
-
-mkdir -p ${HOME}/workspace/redhat/{RPMS,SRPMS,SPECS,SOURCES,BUILD}
-echo "%_topdir ${HOME}/workspace/redhat" > ${HOME}/.rpmmacros
-
-wget https://launchpad.net/~sview/+archive/stable/+files/sview_12.05-1%7Eprecise.tar.gz
-mv sview_12.05-1~precise.tar.gz $HOME/workspace/redhat/SOURCES/sview_12.05-1.tar.gz
-rpmbuild -ba distribution/sView.rpm.spec
+* See the docs/INSTALL file.
