@@ -313,6 +313,13 @@ enum StVirtKey {
 };
 
 /**
+ * Encode single Virtual Key.
+ * @param theKey Virtual Key code within 0-255 range
+ * @return string representation for specified Virtual Key
+ */
+const char* encodeVirtKey(const StVirtKey theKey);
+
+/**
  * Encode keys combination.
  * @param theKey StVirtKey within StVirtFlags combination
  * @return string representation for specified keys combination
@@ -320,10 +327,10 @@ enum StVirtKey {
 StString encodeHotKey(const unsigned int theKey);
 
 /**
- * Encode single Virtual Key.
- * @param theKey Virtual Key code within 0-255 range
- * @return string representation for specified Virtual Key
+ * Decode keys combination from string representation.
+ * @param string representation of keys combination
+ * @return decoded keys combination
  */
-const char* encodeVirtKey(const StVirtKey theKey);
+unsigned int decodeHotKey(const StString& theString);
 
 #endif // StVirtualKey
