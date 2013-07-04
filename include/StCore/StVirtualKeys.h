@@ -19,6 +19,8 @@
 #ifndef __StVirtualKey_h_
 #define __StVirtualKey_h_
 
+#include <StStrings/StString.h>
+
 enum StVirtButton {
     ST_NOMOUSE = 0,
     ST_MOUSE_LEFT = 1,
@@ -34,9 +36,10 @@ enum StVirtButton {
 };
 
 enum StVirtFlags {
-    ST_VF_NONE    = 0x00000000,
-    ST_VF_SHIFT   = 0x02000000, // ST_VK_SHIFT
-    ST_VF_CONTROL = 0x04000000, // ST_VK_CONTROL
+    ST_VF_NONE    = 0,
+    // we reserve first 8 bits to combine value with StVirtKey
+    ST_VF_SHIFT   = 1 << 8, // ST_VK_SHIFT
+    ST_VF_CONTROL = 1 << 9, // ST_VK_CONTROL
 };
 
 /**
@@ -289,10 +292,10 @@ enum StVirtKey {
     ST_VK_LAUNCH_APP2         = 0xB7,
 
     // reserved 0xB8-0xB9
-    ST_VK_xB8        = 0xB8,   // 166 = VK unassigned  |
-    ST_VK_xB9        = 0xB9,   // 167 = VK unassigned  |
+    ST_VK_xB8        = 0xB8,   // 184 = VK unassigned  |
+    ST_VK_xB9        = 0xB9,   // 185 = VK unassigned  |
 
-    ST_VK_SEMICOLON  = 0xBA,   // 168 = VK_OEM_1       | ';:' for US
+    ST_VK_SEMICOLON  = 0xBA,   // 186 = VK_OEM_1       | ';:' for US
 
     ST_VK_OEM_PLUS   = 0xBB,   // 187 = VK_OEM_PLUS    | '+' any country
     // TODO (Kirill Gavrilov#9#)
@@ -308,4 +311,19 @@ enum StVirtKey {
     ST_VK_APOSTROPHE   = 0xDE, // 222 = VK_OEM_7       | ''"' for US
 
 };
+
+/**
+ * Encode keys combination.
+ * @param theKey StVirtKey within StVirtFlags combination
+ * @return string representation for specified keys combination
+ */
+StString encodeHotKey(const unsigned int theKey);
+
+/**
+ * Encode single Virtual Key.
+ * @param theKey Virtual Key code within 0-255 range
+ * @return string representation for specified Virtual Key
+ */
+const char* encodeVirtKey(const StVirtKey theKey);
+
 #endif // StVirtualKey

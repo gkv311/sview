@@ -353,6 +353,7 @@
 			<Option target="MAC_gcc_DEBUG" />
 		</Unit>
 		<Unit filename="StThread.cpp" />
+		<Unit filename="StVirtualKeys.cpp" />
 		<Unit filename="StWebPImage.cpp" />
 		<Unit filename="stConsole.cpp" />
 		<Unit filename="stUtfTools.cpp" />
