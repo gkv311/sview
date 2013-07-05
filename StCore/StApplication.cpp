@@ -299,10 +299,17 @@ void StApplication::doClose(const StCloseEvent& ) {
     exit(0);
 }
 
-void StApplication::doResize   (const StSizeEvent&   ) {}
-void StApplication::doKeyDown  (const StKeyEvent&    ) {}
+void StApplication::doKeyDown(const StKeyEvent& theEvent) {
+    std::map< unsigned int, StHandle<StAction> >::iterator anAction = myKeyActions.find(theEvent.VKey | theEvent.Flags);
+    if(anAction != myKeyActions.end()) {
+        anAction->second->doTrigger((const StEvent* )&theEvent);
+    }
+}
+
 void StApplication::doKeyUp    (const StKeyEvent&    ) {}
 void StApplication::doKeyHold  (const StKeyEvent&    ) {}
+
+void StApplication::doResize   (const StSizeEvent&   ) {}
 void StApplication::doMouseDown(const StClickEvent&  ) {}
 void StApplication::doMouseUp  (const StClickEvent&  ) {}
 void StApplication::doFileDrop (const StDNDropEvent& ) {}

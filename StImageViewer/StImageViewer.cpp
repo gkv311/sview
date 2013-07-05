@@ -127,6 +127,76 @@ StImageViewer::StImageViewer(const StNativeWin_t         theParentWin,
         StHandle<StWindow>& aRend = myRenderers[aRendIter];
         aRend->setAttributes(anAttribs);
     }
+
+    // create actions
+    StHandle<StAction> anAction;
+    anAction = new StActionBool(stCString("DoFullscreen"), params.isFullscreen);
+    anAction->setHotKey1(ST_VK_F);
+    anAction->setHotKey2(ST_VK_RETURN);
+    myActions.add(anAction);
+
+    anAction = new StActionBool(stCString("DoShowFPS"), params.ToShowFps);
+    anAction->setHotKey1(ST_VK_F12);
+    myActions.add(anAction);
+
+    anAction = new StActionIntValue(stCString("DoSrcAuto"), params.srcFormat, ST_V_SRC_AUTODETECT);
+    anAction->setHotKey1(ST_VK_A);
+    myActions.add(anAction);
+
+    anAction = new StActionIntValue(stCString("DoSrcMono"), params.srcFormat, ST_V_SRC_MONO);
+    anAction->setHotKey1(ST_VK_M);
+    myActions.add(anAction);
+
+    anAction = new StActionIntValue(stCString("DoSrcOverUnder"), params.srcFormat, ST_V_SRC_OVER_UNDER_LR);
+    anAction->setHotKey1(ST_VK_O);
+    myActions.add(anAction);
+
+    anAction = new StActionIntValue(stCString("DoSrcSideBySide"), params.srcFormat, ST_V_SRC_SIDE_BY_SIDE);
+    anAction->setHotKey1(ST_VK_S);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoSlideShow"), stSlot(this, &StImageViewer::doSlideShow), 0);
+    anAction->setHotKey1(ST_VK_SPACE);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoListFirst"), stSlot(this, &StImageViewer::doListFirst), 0);
+    anAction->setHotKey1(ST_VK_HOME);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoListLast"), stSlot(this, &StImageViewer::doListLast), 0);
+    anAction->setHotKey1(ST_VK_END);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoListPrev"), stSlot(this, &StImageViewer::doListPrev), 0);
+    anAction->setHotKey1(ST_VK_PRIOR);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoListNext"), stSlot(this, &StImageViewer::doListNext), 0);
+    anAction->setHotKey1(ST_VK_NEXT);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoSaveImageAsPNG"), stSlot(this, &StImageViewer::doSaveImageAs), StImageFile::ST_TYPE_PNG);
+    anAction->setHotKey1(ST_VK_S | ST_VF_CONTROL);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoDeleteFile"), stSlot(this, &StImageViewer::doDeleteFileBegin), 0);
+    anAction->setHotKey1(ST_VK_DELETE | ST_VF_SHIFT);
+    myActions.add(anAction);
+
+    setupHotKeys();
+}
+
+void StImageViewer::setupHotKeys() {
+    myKeyActions.clear();
+    for(size_t anIter = 0; anIter < myActions.size(); ++anIter) {
+        const StHandle<StAction>& anAction = myActions[anIter];
+        if(anAction->getHotKey1() != 0) {
+            myKeyActions[anAction->getHotKey1()] = anAction;
+        }
+        if(anAction->getHotKey2() != 0) {
+            myKeyActions[anAction->getHotKey2()] = anAction;
+        }
+    }
 }
 
 bool StImageViewer::resetDevice() {
@@ -163,6 +233,12 @@ void StImageViewer::releaseDevice() {
         mySettings->saveParam (ST_SETTING_VSYNC,    params.IsVSyncOn);
         if(myToSaveSrcFormat) {
             mySettings->saveParam(ST_SETTING_SRCFORMAT, params.srcFormat);
+        }
+
+        // store hot-keys
+        for(size_t anIter = 0; anIter < myActions.size(); ++anIter) {
+            const StHandle<StAction>& anAction = myActions[anIter];
+            mySettings->saveHotKey(anAction);
         }
     }
 
@@ -346,7 +422,29 @@ void StImageViewer::doResize(const StSizeEvent& ) {
     myGUI->stglResize(myWindow->getPlacement());
 }
 
-void StImageViewer::doDeleteFile(const size_t ) {
+void StImageViewer::doDeleteFileBegin(const size_t ) {
+    //if(!myFileToDelete.isNull()) {
+    //    return;
+    //}
+
+    myFileToDelete = myLoader->getPlayList().getCurrentFile();
+    if(myFileToDelete.isNull()
+    || myFileToDelete->size() != 0) {
+        myFileToDelete.nullify();
+        return;
+    }
+
+    const StString aText = StString("Do you really want to completely remove this file?\n")
+                         + myFileToDelete->getPath() + "";
+
+    StGLMessageBox* aDialog = new StGLMessageBox(myGUI.access(), aText, 512, 256);
+    aDialog->addButton("Delete", true,  96)->signals.onBtnClick += stSlot(this, &StImageViewer::doDeleteFileEnd);
+    aDialog->addButton("Cancel", false, 96);
+    aDialog->setVisibility(true, true);
+    aDialog->stglInit();
+}
+
+void StImageViewer::doDeleteFileEnd(const size_t ) {
     if(myFileToDelete.isNull()
     || myLoader.isNull()) {
         return;
@@ -370,6 +468,8 @@ void StImageViewer::doKeyDown(const StKeyEvent& theEvent) {
         return;
     }
 
+    StApplication::doKeyDown(theEvent);
+
     myGUI->stImageRegion->doKeyDown(theEvent);
     switch(theEvent.VKey) {
         case ST_VK_ESCAPE: {
@@ -380,13 +480,6 @@ void StImageViewer::doKeyDown(const StKeyEvent& theEvent) {
             }
             return;
         }
-        case ST_VK_F:
-        case ST_VK_RETURN:
-            params.isFullscreen->reverse();
-            return;
-        case ST_VK_F12:
-            params.ToShowFps->reverse();
-            return;
         case ST_VK_W:
             myGUI->stImageRegion->params.swapLR->reverse();
             return;
@@ -395,21 +488,10 @@ void StImageViewer::doKeyDown(const StKeyEvent& theEvent) {
         case ST_VK_I:
             myGUI->doAboutImage(0);
             return;
-        case ST_VK_SPACE:
-            doSlideShow();
-            return;
-        case ST_VK_HOME:
-            doListFirst();
-            return;
-        case ST_VK_PRIOR:
         case ST_VK_MEDIA_PREV_TRACK:
         case ST_VK_BROWSER_BACK:
             doListPrev();
             return;
-        case ST_VK_END:
-            doListLast();
-            return;
-        case ST_VK_NEXT:
         case ST_VK_MEDIA_NEXT_TRACK:
         case ST_VK_BROWSER_FORWARD:
             doListNext();
@@ -417,48 +499,6 @@ void StImageViewer::doKeyDown(const StKeyEvent& theEvent) {
         case ST_VK_O: {
             if(theEvent.Flags == ST_VF_CONTROL) {
                 doOpenFileDialog(this, 1);
-            } else {
-                params.srcFormat->setValue(ST_V_SRC_OVER_UNDER_RL);
-            }
-            return;
-        }
-        case ST_VK_DELETE: {
-            if(theEvent.Flags == ST_VF_SHIFT) {
-                //if(!myFileToDelete.isNull()) {
-                //    return;
-                //}
-
-                myFileToDelete = myLoader->getPlayList().getCurrentFile();
-                if(myFileToDelete.isNull()
-                || myFileToDelete->size() != 0) {
-                    myFileToDelete.nullify();
-                    return;
-                }
-
-                const StString aText = StString("Do you really want to completely remove this file?\n")
-                                     + myFileToDelete->getPath() + "";
-
-                StGLMessageBox* aDialog = new StGLMessageBox(myGUI.access(), aText, 512, 256);
-                aDialog->addButton("Delete", true,  96)->signals.onBtnClick += stSlot(this, &StImageViewer::doDeleteFile);
-                aDialog->addButton("Cancel", false, 96);
-                aDialog->setVisibility(true, true);
-                aDialog->stglInit();
-            }
-            return;
-        }
-
-        // source format
-        case ST_VK_A:
-            params.srcFormat->setValue(ST_V_SRC_AUTODETECT);
-            return;
-        case ST_VK_M:
-            params.srcFormat->setValue(ST_V_SRC_MONO);
-            return;
-        case ST_VK_S: {
-            if(theEvent.Flags == ST_VF_NONE) {
-                params.srcFormat->setValue(ST_V_SRC_SIDE_BY_SIDE);
-            } else if(theEvent.Flags == ST_VF_CONTROL) {
-                myLoader->doSaveImageAs(StImageFile::ST_TYPE_PNG);
             }
             return;
         }

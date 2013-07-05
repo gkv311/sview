@@ -75,6 +75,11 @@ class StImageViewer : public StApplication {
      */
     ST_CPPEXPORT virtual bool resetDevice();
 
+    /**
+     * Setup hot keys for available actions.
+     */
+    ST_CPPEXPORT void setupHotKeys();
+
         private: //! @name window events slots
 
     ST_LOCAL virtual void doChangeDevice(const int32_t theValue);
@@ -98,7 +103,8 @@ class StImageViewer : public StApplication {
     ST_LOCAL void doListPrev(const size_t dummy = 0);
     ST_LOCAL void doListNext(const size_t dummy = 0);
     ST_LOCAL void doListLast(const size_t dummy = 0);
-    ST_LOCAL void doDeleteFile(const size_t dummy = 0);
+    ST_LOCAL void doDeleteFileBegin(const size_t dummy = 0);
+    ST_LOCAL void doDeleteFileEnd(const size_t dummy = 0);
     ST_LOCAL void doSlideShow(const size_t dummy = 0);
     ST_LOCAL void doQuit(const size_t dummy = 0);
 
@@ -163,7 +169,6 @@ class StImageViewer : public StApplication {
     StHandle<StGLContext>      myContext;
     StHandle<StSettings>       mySettings;        //!< settings manager for Image Viewer plugin
     StHandle<StTranslations>   myLangMap;         //!< translated strings map
-
     StHandle<StImageViewerGUI> myGUI;             //!< GUI root widget
     StHandle<StImageLoader>    myLoader;          //!< main image loader class
     StHandle<StCheckUpdates>   myUpdates;         //!< check updates utility

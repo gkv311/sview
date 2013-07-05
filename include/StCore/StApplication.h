@@ -22,6 +22,11 @@
 #include <StCore/StWindow.h>
 #include <StCore/StOpenInfo.h>
 #include <StSettings/StEnumParam.h>
+#include <StSlots/StAction.h>
+
+#include <map>
+
+template<> inline void StArray< StHandle<StAction> >::sort() {}
 
 class StSettings;
 
@@ -215,6 +220,11 @@ class StApplication {
     StHandle<StWindow>    myWindow;                //!< active renderer and main application window
     StHandle<StWindow>    mySwitchTo;              //!< new renderer to switch to
     StHandle<StOpenInfo>  myOpenFileInfo;          //!< file to open
+    StArrayList< StHandle<StAction> >
+                          myActions;
+    std::map< unsigned int, StHandle<StAction> >
+                          myKeyActions;
+
     StNativeWin_t         myWinParent;
     StString              myTitle;                 //!< application title
     StOutDevicesList      myDevices;

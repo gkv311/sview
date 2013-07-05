@@ -257,6 +257,7 @@
 			<Add directory="../lib/$(TARGET_NAME)" />
 		</Linker>
 		<Unit filename="StAVPacket.cpp" />
+		<Unit filename="StAction.cpp" />
 		<Unit filename="StBndBox.cpp" />
 		<Unit filename="StBndCameraBox.cpp" />
 		<Unit filename="StBndSphere.cpp" />
@@ -441,6 +442,7 @@
 		<Unit filename="../include/StImage/StWebPImage.h" />
 		<Unit filename="../include/StLibAV.h" />
 		<Unit filename="../include/StLibrary.h" />
+		<Unit filename="../include/StSlots/StAction.h" />
 		<Unit filename="../include/StSlots/StSignal.h" />
 		<Unit filename="../include/StSlots/StSlot.h" />
 		<Unit filename="../include/StSlots/StSlotFunction.h" />

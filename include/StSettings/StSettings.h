@@ -24,6 +24,8 @@
     };
 #endif
 
+class StAction;
+
 /**
  * This is class implements properties persistence.
  * All methods:
@@ -178,6 +180,20 @@ class StSettings {
      */
     ST_CPPEXPORT bool saveParam(const StString&              theLabel,
                                 const StHandle<StBoolParam>& theBoolParam);
+
+    /**
+     * Method to load hot key for action triggering.
+     * @param theAction handle to the action
+     * @return true if parameter was loaded
+     */
+    ST_CPPEXPORT bool loadHotKey(StHandle<StAction>& theAction);
+
+    /**
+     * Method to save hot keys for action triggering.
+     * @param theAction handle to the action
+     * @return true if parameter was saved
+     */
+    ST_CPPEXPORT bool saveHotKey(const StHandle<StAction>& theAction);
 
         private:
 

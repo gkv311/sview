@@ -7,6 +7,8 @@
  */
 
 #include <StSettings/StSettings.h>
+#include <StSlots/StAction.h>
+#include <StCore/StVirtualKeys.h>
 
 #include <sstream>
 
@@ -128,4 +130,34 @@ bool StSettings::loadParam(const StString&        theLabel,
 bool StSettings::saveParam(const StString&              theLabel,
                            const StHandle<StBoolParam>& theBoolParam) {
     return saveBool(theLabel, theBoolParam->getValue());
+}
+
+bool StSettings::loadHotKey(StHandle<StAction>& theAction) {
+    if(theAction->getName().isEmpty()) {
+        return false;
+    }
+
+    bool isOK = true;
+    StString aKeyStr;
+    if(loadString(StString("key") + theAction->getName() + StString("1"), aKeyStr)) {
+        theAction->setHotKey1(decodeHotKey(aKeyStr));
+    } else {
+        isOK = false;
+    }
+
+    if(loadString(StString("key") + theAction->getName() + StString("2"), aKeyStr)) {
+        theAction->setHotKey2(decodeHotKey(aKeyStr));
+    } else {
+        isOK = false;
+    }
+
+    return isOK;
+}
+
+bool StSettings::saveHotKey(const StHandle<StAction>& theAction) {
+    return !theAction->getName().isEmpty()
+        && saveString(StString("key") + theAction->getName() + StString("1"),
+                      encodeHotKey(theAction->getHotKey1()))
+        && saveString(StString("key") + theAction->getName() + StString("2"),
+                      encodeHotKey(theAction->getHotKey2()));
 }
