@@ -20,6 +20,8 @@
 
 #include <StSettings/StParam.h>
 
+class StAction;
+
 class StGLImageRegion : public StGLWidget {
 
         public:
@@ -58,6 +60,10 @@ class StGLImageRegion : public StGLWidget {
 
     ST_CPPEXPORT StHandle<StStereoParams> getSource();
 
+    const StArrayList< StHandle<StAction> >& getActions() const {
+        return myActions;
+    }
+
     ST_CPPEXPORT virtual ~StGLImageRegion();
     ST_CPPEXPORT virtual const StString& getClassName();
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& pointZo);
@@ -66,7 +72,6 @@ class StGLImageRegion : public StGLWidget {
     ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemClicked);
     ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemUnclicked);
 
-    ST_CPPEXPORT virtual bool doKeyDown(const StKeyEvent& theEvent);
     ST_CPPEXPORT virtual bool doKeyHold(const StKeyEvent& theEvent);
 
         public: //! @name Properties
@@ -86,6 +91,40 @@ class StGLImageRegion : public StGLWidget {
 
     } params;
 
+        private:
+
+    ST_LOCAL void doParamsReset(const size_t ) {
+        if(!params.stereoFile.isNull()) { params.stereoFile->reset(); }
+    }
+
+    ST_LOCAL void doParamsGamma(const size_t theDir) {
+        if(!params.stereoFile.isNull()) {
+            theDir == 1 ? params.gamma->increment() : params.gamma->decrement();
+        }
+    }
+
+    ST_LOCAL void doParamsSepX(const size_t theDir) {
+        if(!params.stereoFile.isNull()) {
+            theDir == 1 ? params.stereoFile->incSeparationDx() : params.stereoFile->decSeparationDx();
+        }
+    }
+
+    ST_LOCAL void doParamsSepY(const size_t theDir) {
+        if(!params.stereoFile.isNull()) {
+            theDir == 1 ? params.stereoFile->incSeparationDy() : params.stereoFile->decSeparationDy();
+        }
+    }
+
+    ST_LOCAL void doParamsRotZ(const size_t theDir) {
+        if(!params.stereoFile.isNull()) {
+            theDir == 1 ? params.stereoFile->incZRotate() : params.stereoFile->decZRotate();
+        }
+    }
+
+    ST_LOCAL void doParamsModeNext(const size_t ) {
+        if(!params.stereoFile.isNull()) { params.stereoFile->nextViewMode(); }
+    }
+
         private: //! @name private callback Slots
 
     ST_LOCAL void doChangeTexFilter(const int32_t theTextureFilter);
@@ -102,6 +141,9 @@ class StGLImageRegion : public StGLWidget {
     ST_LOCAL void stglDrawView(unsigned int theView);
 
         private: //! @name private fields
+
+    StArrayList< StHandle<StAction> >
+                               myActions;        //!< actions list
 
     StGLQuads                  myQuad;           //!< flat quad
     StGLUVSphere               myUVSphere;       //!< sphere output helper class

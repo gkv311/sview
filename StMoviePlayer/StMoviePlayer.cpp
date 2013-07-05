@@ -356,17 +356,12 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     anAction = new StActionIntSlot(stCString("DoQuit"), stSlot(this, &StMoviePlayer::doQuit), 0);
     anAction->setHotKey1(ST_VK_ESCAPE);
     myActions.add(anAction);
+}
 
+void StMoviePlayer::setupHotKeys() {
     myKeyActions.clear();
-    for(size_t anIter = 0; anIter < myActions.size(); ++anIter) {
-        const StHandle<StAction>& anAction = myActions[anIter];
-        if(anAction->getHotKey1() != 0) {
-            myKeyActions[anAction->getHotKey1()] = anAction;
-        }
-        if(anAction->getHotKey2() != 0) {
-            myKeyActions[anAction->getHotKey2()] = anAction;
-        }
-    }
+    registerHotKeys(myActions);
+    registerHotKeys(myGUI->stImageRegion->getActions());
 }
 
 bool StMoviePlayer::resetDevice() {
@@ -423,6 +418,7 @@ void StMoviePlayer::releaseDevice() {
     }
 
     // release GUI data and GL resources before closing the window
+    myKeyActions.clear();
     myGUI.nullify();
     myContext.nullify();
 }
@@ -553,6 +549,7 @@ bool StMoviePlayer::init() {
     mySettings->loadString(ST_SETTING_RECENT_FILES, aRecentList);
     myPlayList->loadRecentList(aRecentList);
 
+    setupHotKeys();
     if(isReset) {
         return true;
     }
@@ -671,8 +668,6 @@ void StMoviePlayer::doKeyDown(const StKeyEvent& theEvent) {
     }
 
     StApplication::doKeyDown(theEvent);
-
-    myGUI->stImageRegion->doKeyDown(theEvent);
     switch(theEvent.VKey) {
         case ST_VK_W:
             myGUI->stImageRegion->params.swapLR->reverse();

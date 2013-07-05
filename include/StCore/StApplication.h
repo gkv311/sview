@@ -26,8 +26,6 @@
 
 #include <map>
 
-template<> inline void StArray< StHandle<StAction> >::sort() {}
-
 class StSettings;
 
 /**
@@ -141,6 +139,11 @@ class StApplication {
      * Register renderer.
      */
     ST_CPPEXPORT void addRenderer(const StHandle<StWindow>& theRenderer);
+
+    /**
+     * Register hot keys for specified actions.
+     */
+    ST_CPPEXPORT void registerHotKeys(const StArrayList< StHandle<StAction> >& theActions);
 
         protected: //! @name window events slots
 

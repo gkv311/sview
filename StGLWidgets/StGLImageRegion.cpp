@@ -15,6 +15,7 @@
 #include <StGLCore/StGLCore20.h>
 
 #include <StCore/StEvent.h>
+#include <StSlots/StAction.h>
 
 namespace {
 
@@ -108,6 +109,56 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
     params.saturation = new StTrackedFloatParam(myProgramFlat.params.saturation,
                                                 myProgramSphere.params.saturation);
     params.swapLR = new StSwapLRParam();
+
+    // create actions
+    StHandle<StAction> anAction;
+    anAction = new StActionBool(stCString("DoParamsSwapLR"), params.swapLR);
+    anAction->setHotKey1(ST_VK_W);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoParamsReset"), stSlot(this, &StGLImageRegion::doParamsReset), 0);
+    anAction->setHotKey1(ST_VK_BACK);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoParamsGamma-"), stSlot(this, &StGLImageRegion::doParamsGamma), (size_t )-1);
+    anAction->setHotKey1(ST_VK_G | ST_VF_CONTROL);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoParamsGamma+"), stSlot(this, &StGLImageRegion::doParamsGamma), 1);
+    anAction->setHotKey1(ST_VK_G | ST_VF_SHIFT);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoParamsSepX-"), stSlot(this, &StGLImageRegion::doParamsSepX), (size_t )-1);
+    anAction->setHotKey1(ST_VK_COMMA);
+    anAction->setHotKey1(ST_VK_DIVIDE);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoParamsSepX+"), stSlot(this, &StGLImageRegion::doParamsSepX), 1);
+    anAction->setHotKey1(ST_VK_PERIOD);
+    anAction->setHotKey2(ST_VK_MULTIPLY);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoParamsSepY-"), stSlot(this, &StGLImageRegion::doParamsSepY), (size_t )-1);
+    anAction->setHotKey1(ST_VK_COMMA  | ST_VF_CONTROL);
+    anAction->setHotKey1(ST_VK_DIVIDE | ST_VF_CONTROL);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoParamsSepY+"), stSlot(this, &StGLImageRegion::doParamsSepY), 1);
+    anAction->setHotKey1(ST_VK_PERIOD   | ST_VF_CONTROL);
+    anAction->setHotKey2(ST_VK_MULTIPLY | ST_VF_CONTROL);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoParamsRotZ-"), stSlot(this, &StGLImageRegion::doParamsRotZ), (size_t )-1);
+    anAction->setHotKey1(ST_VK_BRACKETLEFT);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoParamsRotZ+"), stSlot(this, &StGLImageRegion::doParamsRotZ), 1);
+    anAction->setHotKey1(ST_VK_BRACKETRIGHT);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoParamsModeNext"), stSlot(this, &StGLImageRegion::doParamsModeNext), 0);
+    anAction->setHotKey1(ST_VK_P);
+    myActions.add(anAction);
 }
 
 StGLImageRegion::~StGLImageRegion() {
@@ -599,62 +650,6 @@ void StGLImageRegion::doChangeTexFilter(const int32_t theTextureFilter) {
     StGLContext& aCtx = getContext();
     myProgramFlat  .setSmoothFilter(aCtx, StGLImageProgram::TextureFilter(theTextureFilter));
     myProgramSphere.setSmoothFilter(aCtx, StGLImageProgram::TextureFilter(theTextureFilter));
-}
-
-bool StGLImageRegion::doKeyDown(const StKeyEvent& theEvent) {
-    StHandle<StStereoParams> aParams = params.stereoFile;
-    if(aParams.isNull()) {
-        return false;
-    }
-
-    switch(theEvent.VKey) {
-        case ST_VK_BACK:
-            aParams->reset();
-            return true;
-        case ST_VK_COMMA:
-        case ST_VK_DIVIDE: {
-            if(theEvent.Flags == ST_VF_CONTROL) {
-                aParams->decSeparationDy();
-            } else {
-                aParams->decSeparationDx();
-            }
-            return true;
-        }
-        case ST_VK_PERIOD:
-        case ST_VK_MULTIPLY: {
-            if(theEvent.Flags == ST_VF_CONTROL) {
-                aParams->incSeparationDy();
-            } else {
-                aParams->incSeparationDx();
-            }
-            return true;
-        }
-        case ST_VK_P:
-            aParams->nextViewMode();
-            return true;
-        case ST_VK_BRACKETLEFT: {
-            if(theEvent.Flags == ST_VF_NONE) {
-                aParams->decZRotate();
-            }
-            return true;
-        }
-        case ST_VK_BRACKETRIGHT: {
-            if(theEvent.Flags == ST_VF_NONE) {
-                aParams->incZRotate();
-            }
-            return true;
-        }
-        case ST_VK_G: {
-            if(theEvent.Flags == ST_VF_SHIFT) {
-                params.gamma->increment();
-            } else if(theEvent.Flags == ST_VF_CONTROL) {
-                params.gamma->decrement();
-            }
-            return true;
-        }
-        default:
-            return false;
-    }
 }
 
 bool StGLImageRegion::doKeyHold(const StKeyEvent& theEvent) {

@@ -143,6 +143,8 @@ class StMoviePlayer : public StApplication {
      */
     ST_CPPEXPORT virtual bool resetDevice();
 
+    ST_CPPEXPORT void setupHotKeys();
+
         public: //! @name callback Slots
 
     /**

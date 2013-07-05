@@ -182,21 +182,12 @@ StImageViewer::StImageViewer(const StNativeWin_t         theParentWin,
     anAction = new StActionIntSlot(stCString("DoDeleteFile"), stSlot(this, &StImageViewer::doDeleteFileBegin), 0);
     anAction->setHotKey1(ST_VK_DELETE | ST_VF_SHIFT);
     myActions.add(anAction);
-
-    setupHotKeys();
 }
 
 void StImageViewer::setupHotKeys() {
     myKeyActions.clear();
-    for(size_t anIter = 0; anIter < myActions.size(); ++anIter) {
-        const StHandle<StAction>& anAction = myActions[anIter];
-        if(anAction->getHotKey1() != 0) {
-            myKeyActions[anAction->getHotKey1()] = anAction;
-        }
-        if(anAction->getHotKey2() != 0) {
-            myKeyActions[anAction->getHotKey2()] = anAction;
-        }
-    }
+    registerHotKeys(myActions);
+    registerHotKeys(myGUI->stImageRegion->getActions());
 }
 
 bool StImageViewer::resetDevice() {
@@ -243,6 +234,7 @@ void StImageViewer::releaseDevice() {
     }
 
     // release GUI data and GL resources before closing the window
+    myKeyActions.clear();
     myGUI.nullify();
     myContext.nullify();
 }
@@ -307,6 +299,7 @@ bool StImageViewer::init() {
         myLoader = new StImageLoader(params.imageLib, myMsgQueue, myLangMap, myGUI->stImageRegion->getTextureQueue());
         myLoader->signals.onLoaded.connect(this, &StImageViewer::doLoaded);
     }
+    setupHotKeys();
 
     if(isReset) {
         return true;
@@ -469,8 +462,6 @@ void StImageViewer::doKeyDown(const StKeyEvent& theEvent) {
     }
 
     StApplication::doKeyDown(theEvent);
-
-    myGUI->stImageRegion->doKeyDown(theEvent);
     switch(theEvent.VKey) {
         case ST_VK_ESCAPE: {
             if(!myEscNoQuit) {
@@ -480,9 +471,6 @@ void StImageViewer::doKeyDown(const StKeyEvent& theEvent) {
             }
             return;
         }
-        case ST_VK_W:
-            myGUI->stImageRegion->params.swapLR->reverse();
-            return;
 
         // file walk
         case ST_VK_I:
