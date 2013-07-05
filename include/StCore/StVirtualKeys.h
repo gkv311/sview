@@ -317,20 +317,20 @@ enum StVirtKey {
  * @param theKey Virtual Key code within 0-255 range
  * @return string representation for specified Virtual Key
  */
-const char* encodeVirtKey(const StVirtKey theKey);
+ST_CPPEXPORT const char* encodeVirtKey(const StVirtKey theKey);
 
 /**
  * Encode keys combination.
  * @param theKey StVirtKey within StVirtFlags combination
  * @return string representation for specified keys combination
  */
-StString encodeHotKey(const unsigned int theKey);
+ST_CPPEXPORT StString encodeHotKey(const unsigned int theKey);
 
 /**
  * Decode keys combination from string representation.
  * @param string representation of keys combination
  * @return decoded keys combination
  */
-unsigned int decodeHotKey(const StString& theString);
+ST_CPPEXPORT unsigned int decodeHotKey(const StString& theString);
 
 #endif // StVirtualKey
