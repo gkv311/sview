@@ -160,7 +160,6 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
   mySeekOnLoad(-1.0),
   //
   myWebCtx(NULL),
-  myToSwitchFull(false),
   //
   myLastUpdateDay(0),
   myToUpdateALList(false),
@@ -310,6 +309,9 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
 
     anAction = new StActionIntSlot(stCString("DoSnapshot"), stSlot(this, &StMoviePlayer::doSnapshot), StImageFile::ST_TYPE_JPEG);
     addAction(Action_SaveSnapshot, anAction, ST_VK_S | ST_VF_CONTROL);
+
+    anAction = new StActionBool(stCString("DoAudioMute"), params.AudioMute);
+    addAction(Action_AudioMute, anAction);
 
     anAction = new StActionIntSlot(stCString("DoAudioNext"), stSlot(this, &StMoviePlayer::doAudioNext), 1);
     addAction(Action_AudioNext, anAction, ST_VK_H, ST_VK_L);
@@ -785,11 +787,6 @@ void StMoviePlayer::doNavigate(const StNavigEvent& theEvent) {
 void StMoviePlayer::beforeDraw() {
     if(myGUI.isNull()) {
         return;
-    }
-
-    if(myToSwitchFull) {
-        params.isFullscreen->reverse();
-        myToSwitchFull = false;
     }
 
     const bool isMouseMove = myWindow->isMouseMoved();
@@ -1280,26 +1277,22 @@ int StMoviePlayer::beginRequest(mg_connection*         theConnection,
     // process AJAX requests
     StString aContent;
     if(anURI.isEquals(stCString("/prev"))) {
-        if(myPlayList->walkToPrev()) {
-            myVideo->doLoadNext();
-        }
+        invokeAction(Action_ListPrev);
         aContent = "open previous item in playlist...";
     } else if(anURI.isEquals(stCString("/next"))) {
-        if(myPlayList->walkToNext()) {
-            myVideo->doLoadNext();
-        }
+        invokeAction(Action_ListNext);
         aContent = "open next item in playlist...";
     } else if(anURI.isEquals(stCString("/play_pause"))) {
-        doPlayPause();
+        invokeAction(Action_PlayPause);
         aContent = "play/pause playback...";
     } else if(anURI.isEquals(stCString("/stop"))) {
-        doStop();
+        invokeAction(Action_Stop);
         aContent = "stop playback...";
     } else if(anURI.isEquals(stCString("/mute"))) {
-        params.AudioMute->reverse();
+        invokeAction(Action_AudioMute);
         aContent = "audio mute/unmute...";
     } else if(anURI.isEquals(stCString("/fullscr_win"))) {
-        myToSwitchFull = true;
+        invokeAction(Action_Fullscreen);
         aContent = "switch fullscreen/windowed...";
     } else if(anURI.isEquals(stCString("/current"))) {
         if(aQuery.isEquals(stCString("id"))) {

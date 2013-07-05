@@ -54,8 +54,15 @@ void StActionIntSlot::doTrigger(const StEvent* ) {
 StActionIntSlot::~StActionIntSlot() {}
 
 void StActionHoldSlot::doTrigger(const StEvent* theEvent) {
-    mySlot->call(theEvent != NULL && theEvent->Type == stEvent_KeyHold
-               ? theEvent->Key.Progress : 0.0);
+    double aValue = 0.0;
+    if(theEvent != NULL) {
+        if(theEvent->Type == stEvent_KeyHold) {
+            aValue = theEvent->Key.Progress;
+        } else if(theEvent->Type == stEvent_Action) {
+            aValue = theEvent->Action.Progress;
+        }
+    }
+    mySlot->call(aValue);
 }
 
 StActionHoldSlot::~StActionHoldSlot() {}

@@ -284,6 +284,7 @@ class StMoviePlayer : public StApplication {
         Action_SeekRight5,
         Action_Open1File,
         Action_SaveSnapshot,
+        Action_AudioMute,
         Action_AudioPrev,
         Action_AudioNext,
         Action_SubsPrev,
@@ -319,7 +320,6 @@ class StMoviePlayer : public StApplication {
     double                     mySeekOnLoad;      //!< seeking target
 
     mg_context*                myWebCtx;          //!< web UI context
-    volatile bool              myToSwitchFull;    //!< command from web UI
 
     int32_t                    myLastUpdateDay;
     bool                       myToUpdateALList;

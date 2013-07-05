@@ -26,6 +26,7 @@
 
 #include <map>
 
+class StEventsBuffer;
 class StSettings;
 
 /**
@@ -146,6 +147,11 @@ class StApplication {
     ST_CPPEXPORT void registerHotKeys();
 
     /**
+     * @return action for specified ID
+     */
+    ST_CPPEXPORT const StHandle<StAction>& getAction(const int theActionId);
+
+    /**
      * Register the action.
      */
     ST_CPPEXPORT void addAction(const int                 theActionId,
@@ -158,6 +164,12 @@ class StApplication {
                                 StHandle<StAction>& theAction,
                                 const unsigned int  theHotKey1,
                                 const unsigned int  theHotKey2 = 0);
+
+    /**
+     * Invoke action from another thread.
+     */
+    ST_CPPEXPORT void invokeAction(const int    theActionId,
+                                   const double theProgress = 0.0);
 
         protected: //! @name window events slots
 
@@ -176,6 +188,11 @@ class StApplication {
      * Process window resize.
      */
     ST_CPPEXPORT virtual void doResize(const StSizeEvent& theEvent);
+
+    /**
+     * Process queued application event.
+     */
+    ST_CPPEXPORT virtual void doAction(const StActionEvent& theEvent);
 
     /**
      * Process keyboard key press.
@@ -241,6 +258,8 @@ class StApplication {
                           myActions;               //!< ID -> Action map
     std::map< unsigned int, StHandle<StAction> >
                           myKeyActions;            //!< Hot Key -> Action map
+    StHandle<StEventsBuffer>
+                          myEventsBuffer;          //!< extra buffer for application-specific queued events
 
     StNativeWin_t         myWinParent;
     StString              myTitle;                 //!< application title

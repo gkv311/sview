@@ -875,6 +875,9 @@ void StWindowImpl::swapEventsBuffers() {
             case stEvent_Navigate:
                 signals.onNavigate->emit(anEvent.Navigate);
                 break;
+            case stEvent_Action:
+                signals.onAction->emit(anEvent.Action);
+                break;
             default: break;
         }
     }

@@ -27,6 +27,8 @@
 #include <StFile/StFileNode.h>
 #include <StVersion.h>
 
+#include "StEventsBuffer.h"
+
 namespace {
     static const StCString ST_SETTING_RENDERER_AUTO = stCString("rendererPluginAuto");
     static const StCString ST_SETTING_RENDERER      = stCString("rendererPlugin");
@@ -56,6 +58,7 @@ void StApplication::doChangeDevice(const int32_t theValue) {
 
 StApplication::StApplication()
 : myMsgQueue(new StMsgQueue()),
+  myEventsBuffer(new StEventsBuffer()),
   myWinParent((StNativeWin_t )NULL),
   myRendId(ST_SETTING_AUTO_VALUE),
   myExitCode(0),
@@ -67,6 +70,7 @@ StApplication::StApplication()
 StApplication::StApplication(const StNativeWin_t         theParentWin,
                              const StHandle<StOpenInfo>& theOpenInfo)
 : myMsgQueue(new StMsgQueue()),
+  myEventsBuffer(new StEventsBuffer()),
   myWinParent(theParentWin),
   myRendId(ST_SETTING_AUTO_VALUE),
   myExitCode(0),
@@ -216,6 +220,7 @@ bool StApplication::open() {
         myWindow->signals.onRedraw    = stSlot(this, &StApplication::stglDraw);
         myWindow->signals.onClose     = stSlot(this, &StApplication::doClose);
         myWindow->signals.onResize    = stSlot(this, &StApplication::doResize);
+        myWindow->signals.onAction    = stSlot(this, &StApplication::doAction);
         myWindow->signals.onKeyDown   = stSlot(this, &StApplication::doKeyDown);
         myWindow->signals.onKeyUp     = stSlot(this, &StApplication::doKeyUp);
         myWindow->signals.onKeyHold   = stSlot(this, &StApplication::doKeyHold);
@@ -299,6 +304,11 @@ void StApplication::doClose(const StCloseEvent& ) {
     exit(0);
 }
 
+const StHandle<StAction>& StApplication::getAction(const int theActionId) {
+    return myActions[theActionId];
+    //return myActions.at(theActionId);
+}
+
 void StApplication::addAction(const int                 theActionId,
                               const StHandle<StAction>& theAction) {
     myActions[theActionId] = theAction;
@@ -324,6 +334,22 @@ void StApplication::registerHotKeys() {
         if(anAction->getHotKey2() != 0) {
             myKeyActions[anAction->getHotKey2()] = anAction;
         }
+    }
+}
+
+void StApplication::invokeAction(const int    theActionId,
+                                 const double theProgress) {
+    StEvent anEvent;
+    anEvent.Type            = stEvent_Action;
+    anEvent.Action.ActionId = theActionId;
+    anEvent.Action.Progress = theProgress;
+    myEventsBuffer->append(anEvent);
+}
+
+void StApplication::doAction(const StActionEvent& theEvent) {
+    std::map< int, StHandle<StAction> >::iterator anAction = myActions.find(theEvent.ActionId);
+    if(anAction != myActions.end()) {
+        anAction->second->doTrigger((const StEvent* )&theEvent);
     }
 }
 
@@ -367,9 +393,18 @@ void StApplication::processEvents() {
 
     // common callback call
     myWindow->processEvents();
-    beforeDraw();
+
+    // application-specific queued events
+    myEventsBuffer->swapBuffers();
+    for(size_t anEventIter = 0; anEventIter < myEventsBuffer->getSize(); ++anEventIter) {
+        StEvent& anEvent = myEventsBuffer->changeEvent(anEventIter);
+        if(anEvent.Type == stEvent_Action) {
+            doAction(anEvent.Action);
+        }
+    }
 
     // draw iteration
+    beforeDraw();
     myWindow->stglDraw();
 
     const StString aDevice = myWindow->getDeviceId();

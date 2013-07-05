@@ -36,6 +36,7 @@ enum StEventType {
     stEvent_MouseUp,    //!< StClickEvent,  mouse button released
     stEvent_FileDrop,   //!< StDNDropEvent, file Drag & Drop
     stEvent_Navigate,   //!< StNavigEvent,  navigation event
+    stEvent_Action,     //!< StActionEvent, queued application event
 };
 
 /**
@@ -129,6 +130,18 @@ struct StNavigEvent {
 };
 
 /**
+ * Queued application action event.
+ */
+struct StActionEvent {
+
+    StEventType   Type;     //!< event type
+    double        Time;     //!< time in seconds when event was registered
+    int           ActionId; //!< action unique identifier
+    double        Progress; //!< time in seconds, optional
+
+};
+
+/**
  * Window event structure.
  * Defined as union to avoid memory fragmentation.
  */
@@ -142,6 +155,7 @@ union StEvent {
     StClickEvent  Button;   //!< mouse button down/up event
     StDNDropEvent DNDrop;   //!< file Drag & Drop event
     StNavigEvent  Navigate; //!< navigation event
+    StActionEvent Action;   //!< queued application action event
 
 };
 

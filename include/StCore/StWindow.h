@@ -396,6 +396,7 @@ class StWindow {
         StSignal<void (const StClickEvent&  )> onMouseDown;
         StSignal<void (const StDNDropEvent& )> onFileDrop;
         StSignal<void (const StNavigEvent&  )> onNavigate;
+        StSignal<void (const StActionEvent& )> onAction;
 
     } signals;
 
