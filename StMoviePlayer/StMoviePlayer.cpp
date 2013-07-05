@@ -250,6 +250,123 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
         StHandle<StWindow>& aRend = myRenderers[aRendIter];
         aRend->setAttributes(anAttribs);
     }
+
+    // create actions
+    StHandle<StAction> anAction;
+    anAction = new StActionBool(stCString("DoFullscreen"), params.isFullscreen);
+    anAction->setHotKey1(ST_VK_F);
+    anAction->setHotKey2(ST_VK_RETURN);
+    myActions.add(anAction);
+
+    anAction = new StActionBool(stCString("DoShowFPS"), params.ToShowFps);
+    anAction->setHotKey1(ST_VK_F12);
+    myActions.add(anAction);
+
+    anAction = new StActionIntValue(stCString("DoSrcAuto"), params.srcFormat, ST_V_SRC_AUTODETECT);
+    anAction->setHotKey1(ST_VK_A);
+    myActions.add(anAction);
+
+    anAction = new StActionIntValue(stCString("DoSrcMono"), params.srcFormat, ST_V_SRC_MONO);
+    anAction->setHotKey1(ST_VK_M);
+    myActions.add(anAction);
+
+    anAction = new StActionIntValue(stCString("DoSrcOverUnder"), params.srcFormat, ST_V_SRC_OVER_UNDER_LR);
+    anAction->setHotKey1(ST_VK_O);
+    myActions.add(anAction);
+
+    anAction = new StActionIntValue(stCString("DoSrcSideBySide"), params.srcFormat, ST_V_SRC_SIDE_BY_SIDE);
+    anAction->setHotKey1(ST_VK_S);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoPlayPause"), stSlot(this, &StMoviePlayer::doPlayPause), 0);
+    anAction->setHotKey1(ST_VK_SPACE);
+    anAction->setHotKey2(ST_VK_MEDIA_PLAY_PAUSE);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoStop"), stSlot(this, &StMoviePlayer::doStop), 0);
+    anAction->setHotKey1(ST_VK_MEDIA_STOP);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoSeekLeft"), stSlot(this, &StMoviePlayer::doSeekLeft), 0);
+    anAction->setHotKey1(ST_VK_LEFT);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoSeekRight"), stSlot(this, &StMoviePlayer::doSeekRight), 0);
+    anAction->setHotKey1(ST_VK_RIGHT);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoOpen1File"), stSlot(this, &StMoviePlayer::doOpen1File), 0);
+    anAction->setHotKey1(ST_VK_O | ST_VF_CONTROL);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoSnapshot"), stSlot(this, &StMoviePlayer::doSnapshot), StImageFile::ST_TYPE_JPEG);
+    anAction->setHotKey1(ST_VK_S | ST_VF_CONTROL);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoAudioNext"), stSlot(this, &StMoviePlayer::doAudioNext), 1);
+    anAction->setHotKey1(ST_VK_H);
+    anAction->setHotKey1(ST_VK_L);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoAudioPrev"), stSlot(this, &StMoviePlayer::doAudioNext), (size_t )-1);
+    anAction->setHotKey1(ST_VK_H | ST_VF_SHIFT);
+    anAction->setHotKey1(ST_VK_L | ST_VF_SHIFT);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoSubtitlesNext"), stSlot(this, &StMoviePlayer::doSubtitlesNext), 1);
+    anAction->setHotKey1(ST_VK_U);
+    anAction->setHotKey1(ST_VK_T);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoSubtitlesPrev"), stSlot(this, &StMoviePlayer::doSubtitlesNext), (size_t )-1);
+    anAction->setHotKey1(ST_VK_U | ST_VF_SHIFT);
+    anAction->setHotKey1(ST_VK_T | ST_VF_SHIFT);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoPlayListReverse"), stSlot(this, &StMoviePlayer::doPlayListReverse), 0);
+    anAction->setHotKey1(ST_VK_L | ST_VF_CONTROL);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoListFirst"), stSlot(this, &StMoviePlayer::doListFirst), 0);
+    anAction->setHotKey1(ST_VK_HOME);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoListLast"), stSlot(this, &StMoviePlayer::doListLast), 0);
+    anAction->setHotKey1(ST_VK_END);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoListPrev"), stSlot(this, &StMoviePlayer::doListPrev), 0);
+    anAction->setHotKey1(ST_VK_PRIOR);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoListNext"), stSlot(this, &StMoviePlayer::doListNext), 0);
+    anAction->setHotKey1(ST_VK_NEXT);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoListPrevExt"), stSlot(this, &StMoviePlayer::doListPrev), 0);
+    anAction->setHotKey1(ST_VK_MEDIA_PREV_TRACK);
+    anAction->setHotKey2(ST_VK_BROWSER_BACK);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoListNextExt"), stSlot(this, &StMoviePlayer::doListNext), 0);
+    anAction->setHotKey1(ST_VK_MEDIA_NEXT_TRACK);
+    anAction->setHotKey2(ST_VK_BROWSER_FORWARD);
+    myActions.add(anAction);
+
+    anAction = new StActionIntSlot(stCString("DoQuit"), stSlot(this, &StMoviePlayer::doQuit), 0);
+    anAction->setHotKey1(ST_VK_ESCAPE);
+    myActions.add(anAction);
+
+    myKeyActions.clear();
+    for(size_t anIter = 0; anIter < myActions.size(); ++anIter) {
+        const StHandle<StAction>& anAction = myActions[anIter];
+        if(anAction->getHotKey1() != 0) {
+            myKeyActions[anAction->getHotKey1()] = anAction;
+        }
+        if(anAction->getHotKey2() != 0) {
+            myKeyActions[anAction->getHotKey2()] = anAction;
+        }
+    }
 }
 
 bool StMoviePlayer::resetDevice() {
@@ -296,6 +413,12 @@ void StMoviePlayer::releaseDevice() {
 
         if(!myVideo.isNull()) {
             mySettings->saveString(ST_SETTING_RECENT_FILES,   myPlayList->dumpRecentList());
+        }
+
+        // store hot-keys
+        for(size_t anIter = 0; anIter < myActions.size(); ++anIter) {
+            const StHandle<StAction>& anAction = myActions[anIter];
+            mySettings->saveHotKey(anAction);
         }
     }
 
@@ -547,19 +670,10 @@ void StMoviePlayer::doKeyDown(const StKeyEvent& theEvent) {
         return;
     }
 
+    StApplication::doKeyDown(theEvent);
+
     myGUI->stImageRegion->doKeyDown(theEvent);
     switch(theEvent.VKey) {
-        case ST_VK_ESCAPE: {
-            StApplication::exit(0);
-            return;
-        }
-        case ST_VK_F:
-        case ST_VK_RETURN:
-            params.isFullscreen->reverse();
-            return;
-        case ST_VK_F12:
-            params.ToShowFps->reverse();
-            return;
         case ST_VK_W:
             myGUI->stImageRegion->params.swapLR->reverse();
             return;
@@ -568,84 +682,6 @@ void StMoviePlayer::doKeyDown(const StKeyEvent& theEvent) {
         case ST_VK_I:
             myGUI->doAboutFile(0);
             return;
-        case ST_VK_HOME:
-            doListFirst();
-            return;
-        case ST_VK_PRIOR:
-        case ST_VK_MEDIA_PREV_TRACK:
-        case ST_VK_BROWSER_BACK:
-            doListPrev();
-            return;
-        case ST_VK_END:
-            doListLast();
-            return;
-        case ST_VK_NEXT:
-        case ST_VK_MEDIA_NEXT_TRACK:
-        case ST_VK_BROWSER_FORWARD:
-            doListNext();
-            return;
-        case ST_VK_O: {
-            if(theEvent.Flags == ST_VF_CONTROL) {
-                doOpen1File();
-            } else if(theEvent.Flags == ST_VF_NONE) {
-                params.srcFormat->setValue(ST_V_SRC_OVER_UNDER_RL);
-            }
-            return;
-        }
-
-        // source format
-        case ST_VK_A:
-            params.srcFormat->setValue(ST_V_SRC_AUTODETECT);
-            return;
-        case ST_VK_M:
-            params.srcFormat->setValue(ST_V_SRC_MONO);
-            return;
-        case ST_VK_R:
-            params.srcFormat->setValue(ST_V_SRC_ANAGLYPH_RED_CYAN);
-            return;
-
-        // playback control
-        case ST_VK_SPACE:
-        case ST_VK_MEDIA_PLAY_PAUSE:
-            doPlayPause();
-            return;
-        case ST_VK_MEDIA_STOP:
-            doStop();
-            return;
-        case ST_VK_LEFT:
-            doSeekLeft();
-            return;
-        case ST_VK_RIGHT:
-            doSeekRight();
-            return;
-
-        case ST_VK_H:
-        case ST_VK_L: {
-            if(theEvent.VKey  == ST_VK_L
-            && theEvent.Flags == ST_VF_CONTROL) {
-                doPlayListReverse();
-                return;
-            }
-
-            const int32_t aValue = myVideo->params.activeAudio->nextValue(theEvent.Flags == ST_VF_SHIFT ? -1 : 1);
-            params.audioStream->setValue(aValue);
-            return;
-        }
-        case ST_VK_U:
-        case ST_VK_T: {
-            const int32_t aValue = myVideo->params.activeSubtitles->nextValue(theEvent.Flags == ST_VF_SHIFT ? -1 : 1);
-            params.subtitlesStream->setValue(aValue);
-            return;
-        }
-
-        case ST_VK_S: {
-            if(theEvent.Flags == ST_VF_CONTROL) {
-                doSnapshot(StImageFile::ST_TYPE_JPEG);
-            } else if(theEvent.Flags == ST_VF_NONE) {
-                params.srcFormat->setValue(ST_V_SRC_SIDE_BY_SIDE);
-            }
-            return;
-        }
 
         // post process keys
         case ST_VK_B: {
@@ -738,6 +774,24 @@ void StMoviePlayer::doMouseUp(const StClickEvent& theEvent) {
             break;
         }
     }
+}
+
+void StMoviePlayer::doAudioNext(size_t theDirection) {
+    if(myVideo.isNull()) {
+        return;
+    }
+
+    const int32_t aValue = myVideo->params.activeAudio->nextValue(theDirection == 1 ? 1 : -1);
+    params.audioStream->setValue(aValue);
+}
+
+void StMoviePlayer::doSubtitlesNext(size_t theDirection) {
+    if(myVideo.isNull()) {
+        return;
+    }
+
+    const int32_t aValue = myVideo->params.activeSubtitles->nextValue(theDirection == 1 ? 1 : -1);
+    params.subtitlesStream->setValue(aValue);
 }
 
 void StMoviePlayer::doFileNext() {

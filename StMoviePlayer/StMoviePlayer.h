@@ -155,6 +155,8 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doListPrev(const size_t dummy = 0);
     ST_LOCAL void doListNext(const size_t dummy = 0);
     ST_LOCAL void doListLast(const size_t dummy = 0);
+    ST_LOCAL void doAudioNext(size_t theDirection);
+    ST_LOCAL void doSubtitlesNext(size_t theDirection);
 
     ST_LOCAL void doQuit(const size_t dummy = 0);
 
