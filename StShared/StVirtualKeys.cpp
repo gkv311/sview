@@ -118,7 +118,7 @@ namespace {
         stCString("Num8"),  // ST_VK_NUMPAD8
         stCString("Num9"),  // ST_VK_NUMPAD9
         stCString("Num*"),  // ST_VK_MULTIPLY
-        stCString("Num+"),  // ST_VK_ADD
+        stCString("NumAdd"),// ST_VK_ADD
         stCString(""),      // ST_VK_SEPARATOR
         stCString("Num-"),  // ST_VK_SUBTRACT
         stCString(""),      // ST_VK_DECIMAL
