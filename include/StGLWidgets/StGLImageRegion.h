@@ -65,6 +65,10 @@ class StGLImageRegion : public StGLWidget {
         return myActions;
     }
 
+    StArrayList< StHandle<StAction> >& changeActions() {
+        return myActions;
+    }
+
     ST_CPPEXPORT virtual ~StGLImageRegion();
     ST_CPPEXPORT virtual const StString& getClassName();
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& pointZo);

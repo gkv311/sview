@@ -228,8 +228,10 @@ void StImageViewer::releaseDevice() {
 
         // store hot-keys
         for(size_t anIter = 0; anIter < myActions.size(); ++anIter) {
-            const StHandle<StAction>& anAction = myActions[anIter];
-            mySettings->saveHotKey(anAction);
+            mySettings->saveHotKey(myActions[anIter]);
+        }
+        for(size_t anIter = 0; anIter < myGUI->stImageRegion->getActions().size(); ++anIter) {
+            mySettings->saveHotKey(myGUI->stImageRegion->getActions()[anIter]);
         }
     }
 
@@ -298,6 +300,14 @@ bool StImageViewer::init() {
         params.imageLib = StImageFile::imgLibFromString(imageLibString);
         myLoader = new StImageLoader(params.imageLib, myMsgQueue, myLangMap, myGUI->stImageRegion->getTextureQueue());
         myLoader->signals.onLoaded.connect(this, &StImageViewer::doLoaded);
+
+        // load hot-keys
+        for(size_t anIter = 0; anIter < myActions.size(); ++anIter) {
+            mySettings->loadHotKey(myActions[anIter]);
+        }
+        for(size_t anIter = 0; anIter < myGUI->stImageRegion->getActions().size(); ++anIter) {
+            mySettings->loadHotKey(myGUI->stImageRegion->changeActions()[anIter]);
+        }
     }
     setupHotKeys();
 

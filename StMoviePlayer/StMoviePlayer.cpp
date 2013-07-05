@@ -412,8 +412,10 @@ void StMoviePlayer::releaseDevice() {
 
         // store hot-keys
         for(size_t anIter = 0; anIter < myActions.size(); ++anIter) {
-            const StHandle<StAction>& anAction = myActions[anIter];
-            mySettings->saveHotKey(anAction);
+            mySettings->saveHotKey(myActions[anIter]);
+        }
+        for(size_t anIter = 0; anIter < myGUI->stImageRegion->getActions().size(); ++anIter) {
+            mySettings->saveHotKey(myGUI->stImageRegion->getActions()[anIter]);
         }
     }
 
@@ -538,6 +540,14 @@ bool StMoviePlayer::init() {
         myVideo = new StVideo(params.alDevice->getTitle(), myLangMap, myPlayList, aTextureQueue, aSubQueue);
         myVideo->signals.onError  = stSlot(myMsgQueue.access(), &StMsgQueue::doPushError);
         myVideo->signals.onLoaded = stSlot(this,                &StMoviePlayer::doLoaded);
+
+        // load hot-keys
+        for(size_t anIter = 0; anIter < myActions.size(); ++anIter) {
+            mySettings->loadHotKey(myActions[anIter]);
+        }
+        for(size_t anIter = 0; anIter < myGUI->stImageRegion->getActions().size(); ++anIter) {
+            mySettings->loadHotKey(myGUI->stImageRegion->changeActions()[anIter]);
+        }
 
     #ifdef ST_HAVE_MONGOOSE
         doStartWebUI();
