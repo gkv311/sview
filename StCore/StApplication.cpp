@@ -299,9 +299,25 @@ void StApplication::doClose(const StCloseEvent& ) {
     exit(0);
 }
 
-void StApplication::registerHotKeys(const StArrayList< StHandle<StAction> >& theActions) {
-    for(size_t anIter = 0; anIter < theActions.size(); ++anIter) {
-        const StHandle<StAction>& anAction = theActions[anIter];
+void StApplication::addAction(const int                 theActionId,
+                              const StHandle<StAction>& theAction) {
+    myActions[theActionId] = theAction;
+}
+
+void StApplication::addAction(const int           theActionId,
+                              StHandle<StAction>& theAction,
+                              const unsigned int  theHotKey1,
+                              const unsigned int  theHotKey2) {
+    theAction->setHotKey1(theHotKey1);
+    theAction->setHotKey2(theHotKey2);
+    addAction(theActionId, theAction);
+}
+
+void StApplication::registerHotKeys() {
+    myKeyActions.clear();
+    for(std::map< int, StHandle<StAction> >::iterator anIter = myActions.begin();
+        anIter != myActions.end(); ++anIter) {
+        const StHandle<StAction>& anAction = anIter->second;
         if(anAction->getHotKey1() != 0) {
             myKeyActions[anAction->getHotKey1()] = anAction;
         }

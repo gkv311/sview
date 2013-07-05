@@ -27,6 +27,8 @@
 #include <StThreads/StCondition.h>
 #include <StThreads/StThread.h>
 
+#include <StGLWidgets/StGLImageRegion.h>
+
 // forward declarations
 class StCheckUpdates;
 class StFileNode;
@@ -143,8 +145,6 @@ class StMoviePlayer : public StApplication {
      */
     ST_CPPEXPORT virtual bool resetDevice();
 
-    ST_CPPEXPORT void setupHotKeys();
-
         public: //! @name callback Slots
 
     /**
@@ -258,6 +258,40 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doUpdateStateLoaded();
     ST_LOCAL friend SV_THREAD_FUNCTION openFileThread(void* theArg);
     ST_LOCAL void doOpenFileDialog(const size_t theOpenType);
+
+        private:
+
+    /**
+     * Actions identifiers.
+     */
+    enum ActionId {
+        Action_Quit,
+        Action_Fullscreen,
+        Action_ShowFps,
+        Action_SrcAuto,
+        Action_SrcMono,
+        Action_SrcOverUnderLR,
+        Action_SrcSideBySideRL,
+        Action_ListFirst,
+        Action_ListLast,
+        Action_ListPrev,
+        Action_ListNext,
+        Action_ListPrevExt,
+        Action_ListNextExt,
+        Action_PlayPause,
+        Action_Stop,
+        Action_SeekLeft5,
+        Action_SeekRight5,
+        Action_Open1File,
+        Action_SaveSnapshot,
+        Action_AudioPrev,
+        Action_AudioNext,
+        Action_SubsPrev,
+        Action_SubsNext,
+        Action_ShowList,
+        Action_StereoParamsBegin,
+        Action_StereoParamsEnd = Action_StereoParamsBegin + StGLImageRegion::ActionsNb,
+    };
 
         private: //! @name Web UI methods
 

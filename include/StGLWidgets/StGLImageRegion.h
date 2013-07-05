@@ -46,6 +46,34 @@ class StGLImageRegion : public StGLWidget {
         RATIO_5_4,   //!< 5:4
     } DisplayRatio;
 
+    /**
+     * Actions identifiers.
+     */
+    enum ActionId {
+        Action_Reset = 0,
+        Action_SwapLR,
+        Action_GammaDec,
+        Action_GammaInc,
+        Action_SepXDec,
+        Action_SepXInc,
+        Action_SepYDec,
+        Action_SepYInc,
+        Action_SepRotDec,
+        Action_SepRotInc,
+        Action_Rot90Counter,
+        Action_Rot90Clockwise,
+        Action_RotCounter,
+        Action_RotClockwise,
+        Action_ModeNext,
+        Action_PanLeft,
+        Action_PanRight,
+        Action_PanUp,
+        Action_PanDown,
+        Action_ScaleIn,
+        Action_ScaleOut,
+        ActionsNb,
+    };
+
         public: //!< public interface
 
     /**

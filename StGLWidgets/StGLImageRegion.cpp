@@ -113,12 +113,12 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
 
     // create actions
     StHandle<StAction> anAction;
-    anAction = new StActionBool(stCString("DoParamsSwapLR"), params.swapLR);
-    anAction->setHotKey1(ST_VK_W);
-    myActions.add(anAction);
-
     anAction = new StActionIntSlot(stCString("DoParamsReset"), stSlot(this, &StGLImageRegion::doParamsReset), 0);
     anAction->setHotKey1(ST_VK_BACK);
+    myActions.add(anAction);
+
+    anAction = new StActionBool(stCString("DoParamsSwapLR"), params.swapLR);
+    anAction->setHotKey1(ST_VK_W);
     myActions.add(anAction);
 
     anAction = new StActionIntSlot(stCString("DoParamsGamma-"), stSlot(this, &StGLImageRegion::doParamsGamma), (size_t )-1);
@@ -149,6 +149,14 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
     anAction->setHotKey2(ST_VK_MULTIPLY | ST_VF_CONTROL);
     myActions.add(anAction);
 
+    anAction = new StActionHoldSlot(stCString("DoParamsSepRot-"), stSlot(this, &StGLImageRegion::doParamsSepZDec));
+    anAction->setHotKey1(ST_VK_APOSTROPHE | ST_VF_CONTROL);
+    myActions.add(anAction);
+
+    anAction = new StActionHoldSlot(stCString("DoParamsSepRot+"), stSlot(this, &StGLImageRegion::doParamsSepZInc));
+    anAction->setHotKey1(ST_VK_SEMICOLON | ST_VF_CONTROL);
+    myActions.add(anAction);
+
     anAction = new StActionIntSlot(stCString("DoParamsRotZ90-"), stSlot(this, &StGLImageRegion::doParamsRotZ90), (size_t )-1);
     anAction->setHotKey1(ST_VK_BRACKETLEFT);
     myActions.add(anAction);
@@ -163,14 +171,6 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
 
     anAction = new StActionHoldSlot(stCString("DoParamsRotZ+"), stSlot(this, &StGLImageRegion::doParamsRotZRight));
     anAction->setHotKey1(ST_VK_BRACKETRIGHT | ST_VF_CONTROL);
-    myActions.add(anAction);
-
-    anAction = new StActionHoldSlot(stCString("DoParamsSepZ-"), stSlot(this, &StGLImageRegion::doParamsSepZDec));
-    anAction->setHotKey1(ST_VK_APOSTROPHE | ST_VF_CONTROL);
-    myActions.add(anAction);
-
-    anAction = new StActionHoldSlot(stCString("DoParamsSepZ+"), stSlot(this, &StGLImageRegion::doParamsSepZInc));
-    anAction->setHotKey1(ST_VK_SEMICOLON | ST_VF_CONTROL);
     myActions.add(anAction);
 
     anAction = new StActionIntSlot(stCString("DoParamsModeNext"), stSlot(this, &StGLImageRegion::doParamsModeNext), 0);

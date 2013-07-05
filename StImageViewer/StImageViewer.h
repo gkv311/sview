@@ -20,8 +20,7 @@
 #define __StImageViewer_h_
 
 #include <StCore/StApplication.h>
-
-#include <StSettings/StParam.h>
+#include <StGLWidgets/StGLImageRegion.h>
 
 #include "StImageLoader.h"
 #include "StImageViewerGUI.h"
@@ -74,11 +73,6 @@ class StImageViewer : public StApplication {
      * Reset device - release GL resources in old window and re-create them in new window.
      */
     ST_CPPEXPORT virtual bool resetDevice();
-
-    /**
-     * Setup hot keys for available actions.
-     */
-    ST_CPPEXPORT void setupHotKeys();
 
         private: //! @name window events slots
 
@@ -146,6 +140,29 @@ class StImageViewer : public StApplication {
     ST_LOCAL void doSwitchVSync(const bool theValue);
     ST_LOCAL void doFullscreen(const bool theIsFullscreen);
     ST_LOCAL void doSwitchSrcFormat(const int32_t theSrcFormat);
+
+        private:
+
+    /**
+     * Actions identifiers.
+     */
+    enum ActionId {
+        Action_Fullscreen,
+        Action_ShowFps,
+        Action_SrcAuto,
+        Action_SrcMono,
+        Action_SrcOverUnderLR,
+        Action_SrcSideBySideRL,
+        Action_ListFirst,
+        Action_ListLast,
+        Action_ListPrev,
+        Action_ListNext,
+        Action_SlideShow,
+        Action_SavePng,
+        Action_DeleteFile,
+        Action_StereoParamsBegin,
+        Action_StereoParamsEnd = Action_StereoParamsBegin + StGLImageRegion::ActionsNb,
+    };
 
         private:
 

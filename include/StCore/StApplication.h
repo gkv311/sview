@@ -143,7 +143,21 @@ class StApplication {
     /**
      * Register hot keys for specified actions.
      */
-    ST_CPPEXPORT void registerHotKeys(const StArrayList< StHandle<StAction> >& theActions);
+    ST_CPPEXPORT void registerHotKeys();
+
+    /**
+     * Register the action.
+     */
+    ST_CPPEXPORT void addAction(const int                 theActionId,
+                                const StHandle<StAction>& theAction);
+
+    /**
+     * Register the action.
+     */
+    ST_CPPEXPORT void addAction(const int           theActionId,
+                                StHandle<StAction>& theAction,
+                                const unsigned int  theHotKey1,
+                                const unsigned int  theHotKey2 = 0);
 
         protected: //! @name window events slots
 
@@ -223,10 +237,10 @@ class StApplication {
     StHandle<StWindow>    myWindow;                //!< active renderer and main application window
     StHandle<StWindow>    mySwitchTo;              //!< new renderer to switch to
     StHandle<StOpenInfo>  myOpenFileInfo;          //!< file to open
-    StArrayList< StHandle<StAction> >
-                          myActions;
+    std::map< int, StHandle<StAction> >
+                          myActions;               //!< ID -> Action map
     std::map< unsigned int, StHandle<StAction> >
-                          myKeyActions;
+                          myKeyActions;            //!< Hot Key -> Action map
 
     StNativeWin_t         myWinParent;
     StString              myTitle;                 //!< application title

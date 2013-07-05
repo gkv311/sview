@@ -131,63 +131,43 @@ StImageViewer::StImageViewer(const StNativeWin_t         theParentWin,
     // create actions
     StHandle<StAction> anAction;
     anAction = new StActionBool(stCString("DoFullscreen"), params.isFullscreen);
-    anAction->setHotKey1(ST_VK_F);
-    anAction->setHotKey2(ST_VK_RETURN);
-    myActions.add(anAction);
+    addAction(Action_Fullscreen, anAction, ST_VK_F, ST_VK_RETURN);
 
     anAction = new StActionBool(stCString("DoShowFPS"), params.ToShowFps);
-    anAction->setHotKey1(ST_VK_F12);
-    myActions.add(anAction);
+    addAction(Action_ShowFps, anAction, ST_VK_F12);
 
     anAction = new StActionIntValue(stCString("DoSrcAuto"), params.srcFormat, ST_V_SRC_AUTODETECT);
-    anAction->setHotKey1(ST_VK_A);
-    myActions.add(anAction);
+    addAction(Action_SrcAuto, anAction, ST_VK_A);
 
     anAction = new StActionIntValue(stCString("DoSrcMono"), params.srcFormat, ST_V_SRC_MONO);
-    anAction->setHotKey1(ST_VK_M);
-    myActions.add(anAction);
+    addAction(Action_SrcMono, anAction, ST_VK_M);
 
     anAction = new StActionIntValue(stCString("DoSrcOverUnder"), params.srcFormat, ST_V_SRC_OVER_UNDER_LR);
-    anAction->setHotKey1(ST_VK_O);
-    myActions.add(anAction);
+    addAction(Action_SrcOverUnderLR, anAction, ST_VK_O);
 
     anAction = new StActionIntValue(stCString("DoSrcSideBySide"), params.srcFormat, ST_V_SRC_SIDE_BY_SIDE);
-    anAction->setHotKey1(ST_VK_S);
-    myActions.add(anAction);
-
-    anAction = new StActionIntSlot(stCString("DoSlideShow"), stSlot(this, &StImageViewer::doSlideShow), 0);
-    anAction->setHotKey1(ST_VK_SPACE);
-    myActions.add(anAction);
+    addAction(Action_SrcSideBySideRL, anAction, ST_VK_S);
 
     anAction = new StActionIntSlot(stCString("DoListFirst"), stSlot(this, &StImageViewer::doListFirst), 0);
-    anAction->setHotKey1(ST_VK_HOME);
-    myActions.add(anAction);
+    addAction(Action_ListFirst, anAction, ST_VK_HOME);
 
     anAction = new StActionIntSlot(stCString("DoListLast"), stSlot(this, &StImageViewer::doListLast), 0);
-    anAction->setHotKey1(ST_VK_END);
-    myActions.add(anAction);
+    addAction(Action_ListLast, anAction, ST_VK_END);
 
     anAction = new StActionIntSlot(stCString("DoListPrev"), stSlot(this, &StImageViewer::doListPrev), 0);
-    anAction->setHotKey1(ST_VK_PRIOR);
-    myActions.add(anAction);
+    addAction(Action_ListPrev, anAction, ST_VK_PRIOR);
 
     anAction = new StActionIntSlot(stCString("DoListNext"), stSlot(this, &StImageViewer::doListNext), 0);
-    anAction->setHotKey1(ST_VK_NEXT);
-    myActions.add(anAction);
+    addAction(Action_ListNext, anAction, ST_VK_NEXT);
+
+    anAction = new StActionIntSlot(stCString("DoSlideShow"), stSlot(this, &StImageViewer::doSlideShow), 0);
+    addAction(Action_SlideShow, anAction, ST_VK_SPACE);
 
     anAction = new StActionIntSlot(stCString("DoSaveImageAsPNG"), stSlot(this, &StImageViewer::doSaveImageAs), StImageFile::ST_TYPE_PNG);
-    anAction->setHotKey1(ST_VK_S | ST_VF_CONTROL);
-    myActions.add(anAction);
+    addAction(Action_SavePng, anAction, ST_VK_S | ST_VF_CONTROL);
 
     anAction = new StActionIntSlot(stCString("DoDeleteFile"), stSlot(this, &StImageViewer::doDeleteFileBegin), 0);
-    anAction->setHotKey1(ST_VK_DELETE | ST_VF_SHIFT);
-    myActions.add(anAction);
-}
-
-void StImageViewer::setupHotKeys() {
-    myKeyActions.clear();
-    registerHotKeys(myActions);
-    registerHotKeys(myGUI->stImageRegion->getActions());
+    addAction(Action_DeleteFile, anAction, ST_VK_DELETE | ST_VF_SHIFT);
 }
 
 bool StImageViewer::resetDevice() {
@@ -227,11 +207,9 @@ void StImageViewer::releaseDevice() {
         }
 
         // store hot-keys
-        for(size_t anIter = 0; anIter < myActions.size(); ++anIter) {
-            mySettings->saveHotKey(myActions[anIter]);
-        }
-        for(size_t anIter = 0; anIter < myGUI->stImageRegion->getActions().size(); ++anIter) {
-            mySettings->saveHotKey(myGUI->stImageRegion->getActions()[anIter]);
+        for(std::map< int, StHandle<StAction> >::iterator anIter = myActions.begin();
+            anIter != myActions.end(); ++anIter) {
+            mySettings->saveHotKey(anIter->second);
         }
     }
 
@@ -302,14 +280,17 @@ bool StImageViewer::init() {
         myLoader->signals.onLoaded.connect(this, &StImageViewer::doLoaded);
 
         // load hot-keys
-        for(size_t anIter = 0; anIter < myActions.size(); ++anIter) {
-            mySettings->loadHotKey(myActions[anIter]);
-        }
-        for(size_t anIter = 0; anIter < myGUI->stImageRegion->getActions().size(); ++anIter) {
-            mySettings->loadHotKey(myGUI->stImageRegion->changeActions()[anIter]);
+        for(std::map< int, StHandle<StAction> >::iterator anIter = myActions.begin();
+            anIter != myActions.end(); ++anIter) {
+            mySettings->loadHotKey(anIter->second);
         }
     }
-    setupHotKeys();
+    for(size_t anIter = 0; anIter < myGUI->stImageRegion->getActions().size(); ++anIter) {
+        StHandle<StAction>& anAction = myGUI->stImageRegion->changeActions()[anIter];
+        mySettings->loadHotKey(anAction);
+        addAction(Action_StereoParamsBegin + int(anIter), anAction);
+    }
+    registerHotKeys();
 
     if(isReset) {
         return true;
