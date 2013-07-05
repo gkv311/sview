@@ -7,6 +7,7 @@
  */
 
 #include <StSlots/StAction.h>
+#include <StCore/StEvent.h>
 
 StAction::StAction(const StCString& theName)
 : myName(theName),
@@ -51,3 +52,10 @@ void StActionIntSlot::doTrigger(const StEvent* ) {
 }
 
 StActionIntSlot::~StActionIntSlot() {}
+
+void StActionHoldSlot::doTrigger(const StEvent* theEvent) {
+    mySlot->call(theEvent != NULL && theEvent->Type == stEvent_KeyHold
+               ? theEvent->Key.Progress : 0.0);
+}
+
+StActionHoldSlot::~StActionHoldSlot() {}

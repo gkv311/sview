@@ -81,6 +81,20 @@ class StAction {
     }
 
     /**
+     * @return true if this action process duration value
+     */
+    ST_LOCAL bool isHoldKey() const {
+        return myToHoldKey;
+    }
+
+    /**
+     * @param theValue if true this action process duration value
+     */
+    ST_LOCAL void setHoldKey(const bool theValue) {
+        myToHoldKey = theValue;
+    }
+
+    /**
      * @return name of this action
      */
     ST_LOCAL const StString& getName() const {
@@ -205,5 +219,47 @@ class StActionIntSlot : public StAction {
 
 // define StHandle template specialization
 ST_DEFINE_HANDLE(StActionIntSlot, StAction);
+
+
+/**
+ * Call slot with double value (event duration) when triggered.
+ */
+class StActionHoldSlot : public StAction {
+
+        public:
+
+    /**
+     * Constructor.
+     */
+    template<typename class_t>
+    StActionHoldSlot(const StCString& theName,
+                     const stSlotPair_t<class_t, typename StSlotMethod<class_t, void (const double )>::method_t>& theMethod)
+    : StAction(theName) {
+        if(theMethod.ClassPtr  != NULL
+        && theMethod.MethodPtr != NULL) {
+            mySlot = new StSlotMethod<class_t, void (const double )>(theMethod.ClassPtr, theMethod.MethodPtr);
+        }
+        myToHoldKey = true;
+    }
+
+    /**
+     * Destructor.
+     */
+    ST_CPPEXPORT virtual ~StActionHoldSlot();
+
+    /**
+     * Execute action.
+     */
+    ST_CPPEXPORT virtual void doTrigger(const StEvent* );
+
+        protected:
+
+    StHandle< StSlot<void (const double )> > mySlot; //!< slot
+
+};
+
+// define StHandle template specialization
+ST_DEFINE_HANDLE(StActionHoldSlot, StAction);
+
 
 #endif // __StAction_h_

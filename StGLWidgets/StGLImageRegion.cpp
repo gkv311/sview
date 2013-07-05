@@ -88,7 +88,8 @@ namespace {
 };
 
 StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
-                                 const StHandle<StGLTextureQueue>& theTextureQueue)
+                                 const StHandle<StGLTextureQueue>& theTextureQueue,
+                                 const bool  theUsePanningKeys)
 : StGLWidget(theParent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT)),
   myQuad(),
   myUVSphere(StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 64),
@@ -148,16 +149,58 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
     anAction->setHotKey2(ST_VK_MULTIPLY | ST_VF_CONTROL);
     myActions.add(anAction);
 
-    anAction = new StActionIntSlot(stCString("DoParamsRotZ-"), stSlot(this, &StGLImageRegion::doParamsRotZ), (size_t )-1);
+    anAction = new StActionIntSlot(stCString("DoParamsRotZ90-"), stSlot(this, &StGLImageRegion::doParamsRotZ90), (size_t )-1);
     anAction->setHotKey1(ST_VK_BRACKETLEFT);
     myActions.add(anAction);
 
-    anAction = new StActionIntSlot(stCString("DoParamsRotZ+"), stSlot(this, &StGLImageRegion::doParamsRotZ), 1);
+    anAction = new StActionIntSlot(stCString("DoParamsRotZ90+"), stSlot(this, &StGLImageRegion::doParamsRotZ90), 1);
     anAction->setHotKey1(ST_VK_BRACKETRIGHT);
+    myActions.add(anAction);
+
+    anAction = new StActionHoldSlot(stCString("DoParamsRotZ-"), stSlot(this, &StGLImageRegion::doParamsRotZLeft));
+    anAction->setHotKey1(ST_VK_BRACKETLEFT | ST_VF_CONTROL);
+    myActions.add(anAction);
+
+    anAction = new StActionHoldSlot(stCString("DoParamsRotZ+"), stSlot(this, &StGLImageRegion::doParamsRotZRight));
+    anAction->setHotKey1(ST_VK_BRACKETRIGHT | ST_VF_CONTROL);
+    myActions.add(anAction);
+
+    anAction = new StActionHoldSlot(stCString("DoParamsSepZ-"), stSlot(this, &StGLImageRegion::doParamsSepZDec));
+    anAction->setHotKey1(ST_VK_APOSTROPHE | ST_VF_CONTROL);
+    myActions.add(anAction);
+
+    anAction = new StActionHoldSlot(stCString("DoParamsSepZ+"), stSlot(this, &StGLImageRegion::doParamsSepZInc));
+    anAction->setHotKey1(ST_VK_SEMICOLON | ST_VF_CONTROL);
     myActions.add(anAction);
 
     anAction = new StActionIntSlot(stCString("DoParamsModeNext"), stSlot(this, &StGLImageRegion::doParamsModeNext), 0);
     anAction->setHotKey1(ST_VK_P);
+    myActions.add(anAction);
+
+    anAction = new StActionHoldSlot(stCString("DoParamsPanLeft"), stSlot(this, &StGLImageRegion::doParamsPanLeft));
+    anAction->setHotKey1(theUsePanningKeys ? ST_VK_LEFT : 0);
+    myActions.add(anAction);
+
+    anAction = new StActionHoldSlot(stCString("DoParamsPanRight"), stSlot(this, &StGLImageRegion::doParamsPanRight));
+    anAction->setHotKey1(theUsePanningKeys ? ST_VK_RIGHT : 0);
+    myActions.add(anAction);
+
+    anAction = new StActionHoldSlot(stCString("DoParamsPanUp"), stSlot(this, &StGLImageRegion::doParamsPanUp));
+    anAction->setHotKey1(theUsePanningKeys ? ST_VK_UP : 0);
+    myActions.add(anAction);
+
+    anAction = new StActionHoldSlot(stCString("DoParamsPanDown"), stSlot(this, &StGLImageRegion::doParamsPanDown));
+    anAction->setHotKey1(theUsePanningKeys ? ST_VK_DOWN : 0);
+    myActions.add(anAction);
+
+    anAction = new StActionHoldSlot(stCString("DoParamsScaleIn"), stSlot(this, &StGLImageRegion::doParamsScaleIn));
+    anAction->setHotKey1(ST_VK_ADD);
+    anAction->setHotKey2(ST_VK_OEM_PLUS);
+    myActions.add(anAction);
+
+    anAction = new StActionHoldSlot(stCString("DoParamsScaleOut"), stSlot(this, &StGLImageRegion::doParamsScaleOut));
+    anAction->setHotKey1(ST_VK_SUBTRACT);
+    anAction->setHotKey2(ST_VK_OEM_MINUS);
     myActions.add(anAction);
 }
 
@@ -650,64 +693,4 @@ void StGLImageRegion::doChangeTexFilter(const int32_t theTextureFilter) {
     StGLContext& aCtx = getContext();
     myProgramFlat  .setSmoothFilter(aCtx, StGLImageProgram::TextureFilter(theTextureFilter));
     myProgramSphere.setSmoothFilter(aCtx, StGLImageProgram::TextureFilter(theTextureFilter));
-}
-
-bool StGLImageRegion::doKeyHold(const StKeyEvent& theEvent) {
-    StHandle<StStereoParams> aParams = params.stereoFile;
-    if(aParams.isNull()) {
-        return false;
-    }
-
-    const GLfloat aDuration = (GLfloat )theEvent.Progress;
-    switch(theEvent.VKey) {
-        // positioning
-        case ST_VK_LEFT:
-            aParams->moveToRight(aDuration);
-            return true;
-        case ST_VK_RIGHT:
-            aParams->moveToLeft(aDuration);
-            return true;
-        case ST_VK_UP:
-            aParams->moveToDown(aDuration);
-            return true;
-        case ST_VK_DOWN:
-            aParams->moveToUp(aDuration);
-            return true;
-        // zooming
-        case ST_VK_ADD:
-        case ST_VK_OEM_PLUS:
-            aParams->scaleIn(aDuration);
-            return true;
-        case ST_VK_SUBTRACT:
-        case ST_VK_OEM_MINUS:
-            aParams->scaleOut(aDuration);
-            return true;
-        // rotation
-        case ST_VK_BRACKETLEFT: { // [
-            if(theEvent.Flags == ST_VF_CONTROL) {
-                aParams->decZRotateL(aDuration);
-            }
-            return true;
-        }
-        case ST_VK_BRACKETRIGHT: { // ]
-            if(theEvent.Flags == ST_VF_CONTROL) {
-                aParams->incZRotateL(aDuration);
-            }
-            return true;
-        }
-        case ST_VK_SEMICOLON: { // ;
-            if(theEvent.Flags == ST_VF_CONTROL) {
-                aParams->incSepRotation(aDuration);
-            }
-            return true;
-        }
-        case ST_VK_APOSTROPHE: { // '
-            if(theEvent.Flags == ST_VF_CONTROL) {
-                aParams->decSepRotation(aDuration);
-            }
-            return true;
-        }
-        default:
-            return false;
-    }
 }

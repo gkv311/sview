@@ -313,13 +313,21 @@ void StApplication::registerHotKeys(const StArrayList< StHandle<StAction> >& the
 
 void StApplication::doKeyDown(const StKeyEvent& theEvent) {
     std::map< unsigned int, StHandle<StAction> >::iterator anAction = myKeyActions.find(theEvent.VKey | theEvent.Flags);
-    if(anAction != myKeyActions.end()) {
+    if(anAction != myKeyActions.end()
+    && !anAction->second->isHoldKey()) {
+        anAction->second->doTrigger((const StEvent* )&theEvent);
+    }
+}
+
+void StApplication::doKeyHold(const StKeyEvent& theEvent) {
+    std::map< unsigned int, StHandle<StAction> >::iterator anAction = myKeyActions.find(theEvent.VKey | theEvent.Flags);
+    if(anAction != myKeyActions.end()
+    && anAction->second->isHoldKey()) {
         anAction->second->doTrigger((const StEvent* )&theEvent);
     }
 }
 
 void StApplication::doKeyUp    (const StKeyEvent&    ) {}
-void StApplication::doKeyHold  (const StKeyEvent&    ) {}
 
 void StApplication::doResize   (const StSizeEvent&   ) {}
 void StApplication::doMouseDown(const StClickEvent&  ) {}

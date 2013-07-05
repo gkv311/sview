@@ -500,7 +500,7 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
     if(aTextureQueue.isNull()) {
         aTextureQueue = new StGLTextureQueue(2);
     }
-    stImageRegion = new StGLImageRegion(this, aTextureQueue);
+    stImageRegion = new StGLImageRegion(this, aTextureQueue, true);
 
     createUpperToolbar();
 

@@ -52,7 +52,8 @@ class StGLImageRegion : public StGLWidget {
      * Default constructor.
      */
     ST_CPPEXPORT StGLImageRegion(StGLWidget* theParent,
-                                 const StHandle<StGLTextureQueue>& theTextureQueue);
+                                 const StHandle<StGLTextureQueue>& theTextureQueue,
+                                 const bool  theUsePanningKeys);
 
     ST_LOCAL inline StHandle<StGLTextureQueue>& getTextureQueue() {
         return myTextureQueue;
@@ -71,8 +72,6 @@ class StGLImageRegion : public StGLWidget {
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
     ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemClicked);
     ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemUnclicked);
-
-    ST_CPPEXPORT virtual bool doKeyHold(const StKeyEvent& theEvent);
 
         public: //! @name Properties
 
@@ -115,14 +114,62 @@ class StGLImageRegion : public StGLWidget {
         }
     }
 
-    ST_LOCAL void doParamsRotZ(const size_t theDir) {
+    ST_LOCAL void doParamsRotZ90(const size_t theDir) {
         if(!params.stereoFile.isNull()) {
             theDir == 1 ? params.stereoFile->incZRotate() : params.stereoFile->decZRotate();
         }
     }
 
+    ST_LOCAL void doParamsRotZLeft(const double theValue) {
+        if(!params.stereoFile.isNull()) {
+            params.stereoFile->decZRotateL(theValue);
+        }
+    }
+
+    ST_LOCAL void doParamsRotZRight(const double theValue) {
+        if(!params.stereoFile.isNull()) {
+            params.stereoFile->incZRotateL(theValue);
+        }
+    }
+
+    ST_LOCAL void doParamsSepZDec(const double theValue) {
+        if(!params.stereoFile.isNull()) {
+            params.stereoFile->decSepRotation(theValue);
+        }
+    }
+
+    ST_LOCAL void doParamsSepZInc(const double theValue) {
+        if(!params.stereoFile.isNull()) {
+            params.stereoFile->incSepRotation(theValue);
+        }
+    }
+
     ST_LOCAL void doParamsModeNext(const size_t ) {
         if(!params.stereoFile.isNull()) { params.stereoFile->nextViewMode(); }
+    }
+
+    ST_LOCAL void doParamsPanLeft(const double theValue) {
+        if(!params.stereoFile.isNull()) { params.stereoFile->moveToRight(theValue); }
+    }
+
+    ST_LOCAL void doParamsPanRight(const double theValue) {
+        if(!params.stereoFile.isNull()) { params.stereoFile->moveToLeft(theValue); }
+    }
+
+    ST_LOCAL void doParamsPanUp(const double theValue) {
+        if(!params.stereoFile.isNull()) { params.stereoFile->moveToDown(theValue); }
+    }
+
+    ST_LOCAL void doParamsPanDown(const double theValue) {
+        if(!params.stereoFile.isNull()) { params.stereoFile->moveToUp(theValue); }
+    }
+
+    ST_LOCAL void doParamsScaleIn(const double theValue) {
+        if(!params.stereoFile.isNull()) { params.stereoFile->scaleIn(theValue); }
+    }
+
+    ST_LOCAL void doParamsScaleOut(const double theValue) {
+        if(!params.stereoFile.isNull()) { params.stereoFile->scaleOut(theValue); }
     }
 
         private: //! @name private callback Slots

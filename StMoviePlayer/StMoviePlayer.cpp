@@ -702,16 +702,7 @@ void StMoviePlayer::doKeyHold(const StKeyEvent& theEvent) {
     }
 
     if(myGUI->getFocus() == NULL) {
-        switch(theEvent.VKey) {
-            case ST_VK_LEFT:
-            case ST_VK_RIGHT:
-            case ST_VK_UP:
-            case ST_VK_DOWN:
-                return;
-            default:
-                break;
-        }
-        myGUI->stImageRegion->doKeyHold(theEvent);
+        StApplication::doKeyHold(theEvent);
     } else {
         myGUI->doKeyHold(theEvent);
     }

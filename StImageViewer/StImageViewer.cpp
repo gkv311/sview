@@ -521,7 +521,7 @@ void StImageViewer::doKeyHold(const StKeyEvent& theEvent) {
     if(myGUI->getFocus() != NULL) {
         myGUI->doKeyHold(theEvent);
     } else {
-        myGUI->stImageRegion->doKeyHold(theEvent);
+        StApplication::doKeyHold(theEvent);
     }
 }
 
