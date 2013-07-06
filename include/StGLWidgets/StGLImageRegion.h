@@ -154,25 +154,25 @@ class StGLImageRegion : public StGLWidget {
 
     ST_LOCAL void doParamsRotZLeft(const double theValue) {
         if(!params.stereoFile.isNull()) {
-            params.stereoFile->decZRotateL(theValue);
+            params.stereoFile->decZRotateL((GLfloat )theValue);
         }
     }
 
     ST_LOCAL void doParamsRotZRight(const double theValue) {
         if(!params.stereoFile.isNull()) {
-            params.stereoFile->incZRotateL(theValue);
+            params.stereoFile->incZRotateL((GLfloat )theValue);
         }
     }
 
     ST_LOCAL void doParamsSepZDec(const double theValue) {
         if(!params.stereoFile.isNull()) {
-            params.stereoFile->decSepRotation(theValue);
+            params.stereoFile->decSepRotation((GLfloat )theValue);
         }
     }
 
     ST_LOCAL void doParamsSepZInc(const double theValue) {
         if(!params.stereoFile.isNull()) {
-            params.stereoFile->incSepRotation(theValue);
+            params.stereoFile->incSepRotation((GLfloat )theValue);
         }
     }
 
@@ -181,27 +181,27 @@ class StGLImageRegion : public StGLWidget {
     }
 
     ST_LOCAL void doParamsPanLeft(const double theValue) {
-        if(!params.stereoFile.isNull()) { params.stereoFile->moveToRight(theValue); }
+        if(!params.stereoFile.isNull()) { params.stereoFile->moveToRight((GLfloat )theValue); }
     }
 
     ST_LOCAL void doParamsPanRight(const double theValue) {
-        if(!params.stereoFile.isNull()) { params.stereoFile->moveToLeft(theValue); }
+        if(!params.stereoFile.isNull()) { params.stereoFile->moveToLeft((GLfloat )theValue); }
     }
 
     ST_LOCAL void doParamsPanUp(const double theValue) {
-        if(!params.stereoFile.isNull()) { params.stereoFile->moveToDown(theValue); }
+        if(!params.stereoFile.isNull()) { params.stereoFile->moveToDown((GLfloat )theValue); }
     }
 
     ST_LOCAL void doParamsPanDown(const double theValue) {
-        if(!params.stereoFile.isNull()) { params.stereoFile->moveToUp(theValue); }
+        if(!params.stereoFile.isNull()) { params.stereoFile->moveToUp((GLfloat )theValue); }
     }
 
     ST_LOCAL void doParamsScaleIn(const double theValue) {
-        if(!params.stereoFile.isNull()) { params.stereoFile->scaleIn(theValue); }
+        if(!params.stereoFile.isNull()) { params.stereoFile->scaleIn((GLfloat )theValue); }
     }
 
     ST_LOCAL void doParamsScaleOut(const double theValue) {
-        if(!params.stereoFile.isNull()) { params.stereoFile->scaleOut(theValue); }
+        if(!params.stereoFile.isNull()) { params.stereoFile->scaleOut((GLfloat )theValue); }
     }
 
         private: //! @name private callback Slots
