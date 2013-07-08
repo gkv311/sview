@@ -236,6 +236,8 @@ Name: {group}\sView - Movie Player; Filename: {app}\amd64\{#SVIEW_EXE_NAME}; Com
 Name: {group}\Extras\sView - Failsafe;                    Filename: {app}\{#SVIEW_EXE_NAME};       Components: StDrawers\StImageViewer and StRenderers\StOutAnaglyph; IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: Failsafe sView launch; IconIndex: 0; Parameters: --out=StOutAnaglyph --in=image
 Name: {group}\Extras\sView - Autodetection;               Filename: {app}\{#SVIEW_EXE_NAME};       Components: StDrawers\StImageViewer; IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: Failsafe sView launch; IconIndex: 0; Parameters: --out=Auto --in=image
 Name: {group}\Extras\sView - Movie Player 32bit;          Filename: {app}\{#SVIEW_EXE_NAME};       Components: StDrawers\StMoviePlayer; IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: "{cm:StMoviePlayer}";  IconIndex: 0; Parameters: "--in=video";         Check: IsWin64
+Name: {group}\Extras\sView - Movie Player (Last File);    Filename: {app}\{#SVIEW_EXE_NAME};       Components: StDrawers\StMoviePlayer; IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: "{cm:StMoviePlayer}";  IconIndex: 0; Parameters: "--last";             Check: not IsWin64
+Name: {group}\Extras\sView - Movie Player (Last File);    Filename: {app}\amd64\{#SVIEW_EXE_NAME}; Components: StDrawers\StMoviePlayer; IconFilename: {app}\amd64\{#SVIEW_EXE_NAME}; Comment: "{cm:StMoviePlayer}";  IconIndex: 0; Parameters: "--last";             Check: IsWin64
 Name: {group}\Extras\sView - Diagnostics;                 Filename: {app}\{#SVIEW_EXE_NAME};       Components: StCore;                  IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: sView Diagnostics;     IconIndex: 0; Parameters: "--in=StDiagnostics"; Check: not IsWin64
 Name: {group}\Extras\sView - Diagnostics;                 Filename: {app}\amd64\{#SVIEW_EXE_NAME}; Components: StCore;                  IconFilename: {app}\amd64\{#SVIEW_EXE_NAME}; Comment: sView Diagnostics;     IconIndex: 0; Parameters: "--in=StDiagnostics"; Check: IsWin64
 Name: {group}\Extras\Monitors Dump;                       Filename: {app}\StMonitorsDump.exe;       Components: StCore;                 Comment: Information about connected displays; Check: not IsWin64
@@ -314,6 +316,7 @@ Root: HKCR; SubKey: sView Audio\Shell\Open\Command;            ValueType: string
 Root: HKCR; Subkey: sView Audio\DefaultIcon;                   ValueType: string; ValueData: {app}\icons\sView_Media.ico;   Tasks: flagAssocMusic; Flags: uninsdeletevalue
 
 Root: HKCR; SubKey: .mp3;                                      ValueType: string; ValueData: sView Audio;                   Tasks: flagAssocMusic;  Flags: uninsdeletekey
+Root: HKCR; SubKey: .m4a;                                      ValueType: string; ValueData: sView Audio;                   Tasks: flagAssocMusic;  Flags: uninsdeletekey
 Root: HKCR; SubKey: .ogg;                                      ValueType: string; ValueData: sView Audio;                   Tasks: flagAssocMusic;  Flags: uninsdeletekey
 Root: HKCR; SubKey: .wav;                                      ValueType: string; ValueData: sView Audio;                   Tasks: flagAssocMusic;  Flags: uninsdeletekey
 Root: HKCR; SubKey: .flac;                                     ValueType: string; ValueData: sView Audio;                   Tasks: flagAssocMusic;  Flags: uninsdeletekey
