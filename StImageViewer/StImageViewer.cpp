@@ -163,8 +163,11 @@ StImageViewer::StImageViewer(const StNativeWin_t         theParentWin,
     anAction = new StActionIntSlot(stCString("DoSlideShow"), stSlot(this, &StImageViewer::doSlideShow), 0);
     addAction(Action_SlideShow, anAction, ST_VK_SPACE);
 
-    anAction = new StActionIntSlot(stCString("DoSaveImageAsPNG"), stSlot(this, &StImageViewer::doSaveImageAs), StImageFile::ST_TYPE_PNG);
+    anAction = new StActionIntSlot(stCString("DoSaveImageAsPng"), stSlot(this, &StImageViewer::doSaveImageAs), StImageFile::ST_TYPE_PNG);
     addAction(Action_SavePng, anAction, ST_VK_S | ST_VF_CONTROL);
+
+    anAction = new StActionIntSlot(stCString("DoSaveImageAsJpeg"), stSlot(this, &StImageViewer::doSaveImageAs), StImageFile::ST_TYPE_JPEG);
+    addAction(Action_SaveJpeg, anAction);
 
     anAction = new StActionIntSlot(stCString("DoDeleteFile"), stSlot(this, &StImageViewer::doDeleteFileBegin), 0);
     addAction(Action_DeleteFile, anAction, ST_VK_DELETE | ST_VF_SHIFT);

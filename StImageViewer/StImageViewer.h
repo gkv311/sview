@@ -159,6 +159,7 @@ class StImageViewer : public StApplication {
         Action_ListNext,
         Action_SlideShow,
         Action_SavePng,
+        Action_SaveJpeg,
         Action_DeleteFile,
         Action_StereoParamsBegin,
         Action_StereoParamsEnd = Action_StereoParamsBegin + StGLImageRegion::ActionsNb,
