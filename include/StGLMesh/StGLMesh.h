@@ -15,6 +15,11 @@
 
 #include "StBndSphere.h"
 
+// MacOS headers currently by default define "check" macro for assertions
+#ifdef check
+    #undef check
+#endif
+
 /**
  * Define the standard GLSL program interface to render the mesh.
  * This program contains:
