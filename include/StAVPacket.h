@@ -36,18 +36,6 @@ class StAVPacket {
 
     ST_CPPEXPORT static void avDestructPacket(AVPacket* thePkt);
 
-        private:
-
-    AVPacket myPacket;
-    StHandle<StStereoParams> myStParams;
-    double myDurationSec;
-    int myType;
-
-    /**
-     * Emulates av_init_packet().
-     */
-    ST_CPPEXPORT void avInitPacket();
-
         public:
 
     /**
@@ -147,6 +135,21 @@ class StAVPacket {
     inline StString toString() const {
         return StString();
     }
+
+        private:
+
+    /**
+     * Emulates av_init_packet().
+     */
+    ST_CPPEXPORT void avInitPacket();
+
+        private:
+
+    AVPacket                 myPacket;
+    StHandle<StStereoParams> myStParams;
+    double                   myDurationSec;
+    int                      myType;
+    bool                     myIsOwn;
 
 };
 

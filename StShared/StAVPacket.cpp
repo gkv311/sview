@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -25,7 +25,7 @@ void StAVPacket::avDestructPacket(AVPacket* thePkt) {
 }
 
 void StAVPacket::avInitPacket() {
-    stMemSet(&myPacket, 0, sizeof(AVPacket));
+    stMemZero(&myPacket, sizeof(AVPacket));
     myPacket.pts = stLibAV::NOPTS_VALUE;
     myPacket.dts = stLibAV::NOPTS_VALUE;
     myPacket.pos = -1;
@@ -43,7 +43,8 @@ void StAVPacket::avInitPacket() {
 StAVPacket::StAVPacket()
 : myStParams(),
   myDurationSec(0.0),
-  myType(DATA_PACKET) {
+  myType(DATA_PACKET),
+  myIsOwn(false) {
     avInitPacket();
 }
 
@@ -51,14 +52,16 @@ StAVPacket::StAVPacket(const StHandle<StStereoParams>& theStParams,
                        const int theType)
 : myStParams(theStParams),
   myDurationSec(0.0),
-  myType(theType) {
+  myType(theType),
+  myIsOwn(false) {
     avInitPacket();
 }
 
 StAVPacket::StAVPacket(const StAVPacket& theCopy)
 : myStParams(theCopy.myStParams),
   myDurationSec(theCopy.myDurationSec),
-  myType(theCopy.myType) {
+  myType(theCopy.myType),
+  myIsOwn(false) {
     avInitPacket();
     if(myType == DATA_PACKET) {
         setAVpkt(theCopy.myPacket);
@@ -70,29 +73,40 @@ StAVPacket::~StAVPacket() {
 }
 
 void StAVPacket::free() {
-    if(myPacket.destruct != NULL) {
-        myPacket.destruct(&myPacket);
+    if(myIsOwn) {
+        avDestructPacket(&myPacket);
+    } else {
+    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
+        av_free_packet(&myPacket);
+    #else
+        if(myPacket.destruct != NULL) {
+            myPacket.destruct(&myPacket);
+            myPacket.destruct = NULL;
+        }
+    #endif
     }
-    myPacket.data = NULL;
-    myPacket.size = 0;
+    avInitPacket();
+    myIsOwn = false;
 }
 
 void StAVPacket::setAVpkt(const AVPacket& theCopy) {
     // free old data
     free();
+    if(theCopy.data == NULL) {
+        return;
+    }
 
     // copy values
+    myIsOwn  = true;
     myPacket = theCopy;
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
+    myPacket.buf = NULL;
+#endif
 
-    if(theCopy.data != NULL) {
-        // now copy data with special padding space
-        myPacket.data = stMemAllocAligned<uint8_t*>((theCopy.size + FF_INPUT_BUFFER_PADDING_SIZE), 16); // data must be aligned to 16 bytes for SSE!
-        stMemCpy(myPacket.data, theCopy.data, theCopy.size);
-        stMemSet(myPacket.data + (ptrdiff_t )theCopy.size, 0, FF_INPUT_BUFFER_PADDING_SIZE);
-
-        // set our own deallocate function
-        myPacket.destruct = avDestructPacket;
-    }
+    // now copy data with special padding space
+    myPacket.data = stMemAllocAligned<uint8_t*>((theCopy.size + FF_INPUT_BUFFER_PADDING_SIZE), 16); // data must be aligned to 16 bytes for SSE!
+    stMemCpy (myPacket.data, theCopy.data, theCopy.size);
+    stMemZero(myPacket.data + (ptrdiff_t )theCopy.size, FF_INPUT_BUFFER_PADDING_SIZE);
 
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 118, 0))
     if(myPacket.side_data_elems > 0) {
@@ -102,9 +116,10 @@ void StAVPacket::setAVpkt(const AVPacket& theCopy) {
         *aPtr = stMemAllocZeroAligned<uint8_t*>(aSize, 16);
         for(int anIter = 0; anIter < theCopy.side_data_elems; ++anIter) {
             aSize = theCopy.side_data[anIter].size;
+            myPacket.side_data[anIter] = theCopy.side_data[anIter];
             myPacket.side_data[anIter].data = stMemAllocAligned<uint8_t*>(aSize + FF_INPUT_BUFFER_PADDING_SIZE, 16);
-            stMemCpy(myPacket.side_data[anIter].data, theCopy.side_data[anIter].data, aSize);
-            stMemSet(myPacket.side_data[anIter].data + (ptrdiff_t )aSize, 0, FF_INPUT_BUFFER_PADDING_SIZE);
+            stMemCpy (myPacket.side_data[anIter].data, theCopy.side_data[anIter].data, aSize);
+            stMemZero(myPacket.side_data[anIter].data + (ptrdiff_t )aSize, FF_INPUT_BUFFER_PADDING_SIZE);
         }
     }
 #endif

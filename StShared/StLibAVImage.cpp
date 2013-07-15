@@ -263,38 +263,32 @@ bool StLibAVImage::load(const StString& theFilePath, ImageType theImageType,
 
     // read one packet or file
     StRawFile aRawFile(theFilePath);
-    AVPacket avPacket;
-    avPacket.destruct = NULL;
-    if(theDataPtr == NULL || theDataSize == 0) {
+    StAVPacket anAvPkt;
+    if(theDataPtr != NULL && theDataSize != 0) {
+        anAvPkt.getAVpkt()->data = theDataPtr;
+        anAvPkt.getAVpkt()->size = theDataSize;
+    } else {
         if(formatCtx != NULL) {
-            avPacket.data = NULL;
-            avPacket.size = 0;
-            if(av_read_frame(formatCtx, &avPacket) < 0) {
+            if(av_read_frame(formatCtx, anAvPkt.getAVpkt()) < 0) {
                 setState("AVFormat library, could not read first packet");
                 close();
                 return false;
             }
-            theDataPtr  = avPacket.data;
-            theDataSize = avPacket.size;
         } else {
             if(!aRawFile.readFile()) {
                 setState("StLibAVImage, could not read the file");
                 close();
                 return false;
             }
-            theDataPtr  = (uint8_t* )aRawFile.getBuffer();
-            theDataSize = (int )aRawFile.getSize();
+            anAvPkt.getAVpkt()->data = (uint8_t* )aRawFile.getBuffer();
+            anAvPkt.getAVpkt()->size = (int )aRawFile.getSize();
         }
     }
+    anAvPkt.setKeyFrame();
 
     // decode one frame
     int isFrameFinished = 0;
-
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 23, 0))
-    StAVPacket anAvPkt;
-    anAvPkt.getAVpkt()->data = theDataPtr;
-    anAvPkt.getAVpkt()->size = theDataSize;
-    anAvPkt.setKeyFrame();
     avcodec_decode_video2(codecCtx, frame, &isFrameFinished, anAvPkt.getAVpkt());
 #else
     avcodec_decode_video(codecCtx, frame, &isFrameFinished,
@@ -399,11 +393,6 @@ bool StLibAVImage::load(const StString& theFilePath, ImageType theImageType,
                   rgbData, rgbLinesize);
 
         sws_freeContext(pToRgbCtx);
-    }
-
-    // destruct the package if needed
-    if(avPacket.destruct != NULL) {
-        avPacket.destruct(&avPacket);
     }
 
     // set debug information
