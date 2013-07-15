@@ -351,22 +351,22 @@ bool StGLImageProgram::init(StGLContext& theCtx) {
         && fGray2RGB.init (theCtx, F_SHADER_GRAY2RGB)
         && fGetColorBlend.initFile(theCtx, aShaders.getShaderFile("flatGetColorBlend.shf"))
         && fYUVtoRGB_full.init   (theCtx,
-                                  "float TheRangeBits = 1.0;",
+                                  "const float TheRangeBits = 1.0;",
                                   F_SHADER_YUV2RGB_FULL)
         && fYUVtoRGB_mpeg.init   (theCtx,
-                                 "float TheRangeBits = 1.0;",
+                                 "const float TheRangeBits = 1.0;",
                                   F_SHADER_YUV2RGB_MPEG)
         && fYUV9toRGB_full.init  (theCtx,
-                                  "float TheRangeBits = 65535.0 / 511.0;",
+                                  "const float TheRangeBits = 65535.0 / 511.0;",
                                   F_SHADER_YUV2RGB_FULL)
         && fYUV10toRGB_full.init (theCtx,
-                                  "float TheRangeBits = 65535.0 / 1023.0;",
+                                  "const float TheRangeBits = 65535.0 / 1023.0;",
                                   F_SHADER_YUV2RGB_FULL)
         && fYUV9toRGB_mpeg.init  (theCtx,
-                                  "float TheRangeBits = 65535.0 / 511.0;",
+                                  "const float TheRangeBits = 65535.0 / 511.0;",
                                   F_SHADER_YUV2RGB_MPEG)
         && fYUV10toRGB_mpeg.init (theCtx,
-                                  "float TheRangeBits = 65535.0 / 1023.0;",
+                                  "const float TheRangeBits = 65535.0 / 1023.0;",
                                   F_SHADER_YUV2RGB_MPEG);
 }
 
