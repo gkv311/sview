@@ -49,6 +49,7 @@ StImage::~StImage() {
 bool StImage::initCopy(const StImage& theCopy) {
     nullify();
     setColorModel(theCopy.getColorModel());
+    setColorScale(theCopy.getColorScale());
     for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
         const StImagePlane& aFromPlane = theCopy.getPlane(aPlaneId);
         if(aFromPlane.isNull()) {
@@ -64,6 +65,7 @@ bool StImage::initCopy(const StImage& theCopy) {
 bool StImage::initWrapper(const StImage& theCopy) {
     nullify();
     setColorModel(theCopy.getColorModel());
+    setColorScale(theCopy.getColorScale());
     for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
         const StImagePlane& aFromPlane = theCopy.getPlane(aPlaneId);
         if(aFromPlane.isNull()) {
@@ -149,6 +151,7 @@ bool StImage::initSideBySide(const StImage& theImageL,
         }
     }
     setColorModel(theImageL.getColorModel());
+    setColorScale(theImageL.getColorScale());
     return true;
 }
 

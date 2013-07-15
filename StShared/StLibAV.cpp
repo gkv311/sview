@@ -124,57 +124,57 @@ namespace {
 const PixelFormat stLibAV::PIX_FMT::RGBA32 = (AvPixFmtRGBA != stLibAV::PIX_FMT::NONE) ? AvPixFmtRGBA : AvPixFmtBGR32;
 const PixelFormat stLibAV::PIX_FMT::BGRA32 = (AvPixFmtBGRA != stLibAV::PIX_FMT::NONE) ? AvPixFmtBGRA : AvPixFmtRGB32;
 
-StString stLibAV::PIX_FMT::getString(const PixelFormat theFrmt) {
+StCString stLibAV::PIX_FMT::getString(const PixelFormat theFrmt) {
     if(theFrmt == stLibAV::PIX_FMT::NONE) {
-        return "none";
+        return stCString("none");
     } else if(theFrmt == stLibAV::PIX_FMT::YUV420P) {
-        return "yuv420p";
+        return stCString("yuv420p");
     } else if(theFrmt == stLibAV::PIX_FMT::GRAY8) {
-        return "gray8";
+        return stCString("gray8");
     } else if(theFrmt == stLibAV::PIX_FMT::GRAY16) {
-        return "gray16";
+        return stCString("gray16");
     } else if(theFrmt == stLibAV::PIX_FMT::YUV422P) {
-        return "yuv422p";
+        return stCString("yuv422p");
     } else if(theFrmt == stLibAV::PIX_FMT::YUV444P) {
-        return "yuv444p";
+        return stCString("yuv444p");
     } else if(theFrmt == stLibAV::PIX_FMT::YUV410P) {
-        return "yuv410p";
+        return stCString("yuv410p");
     } else if(theFrmt == stLibAV::PIX_FMT::YUV411P) {
-        return "yuv411p";
+        return stCString("yuv411p");
     } else if(theFrmt == stLibAV::PIX_FMT::YUV440P) {
-        return "yuv440p";
+        return stCString("yuv440p");
     } else if(theFrmt == stLibAV::PIX_FMT::YUV420P9) {
-        return "yuv420p9";
+        return stCString("yuv420p9");
     } else if(theFrmt == stLibAV::PIX_FMT::YUV422P9) {
-        return "yuv422p9";
+        return stCString("yuv422p9");
     } else if(theFrmt == stLibAV::PIX_FMT::YUV444P9) {
-        return "yuv444p9";
+        return stCString("yuv444p9");
     } else if(theFrmt == stLibAV::PIX_FMT::YUV420P10) {
-        return "yuv420p10";
+        return stCString("yuv420p10");
     } else if(theFrmt == stLibAV::PIX_FMT::YUV422P10) {
-        return "yuv422p10";
+        return stCString("yuv422p10");
     } else if(theFrmt == stLibAV::PIX_FMT::YUV444P10) {
-        return "yuv444p10";
+        return stCString("yuv444p10");
     } else if(theFrmt == stLibAV::PIX_FMT::YUV420P16) {
-        return "yuv420p16";
+        return stCString("yuv420p16");
     } else if(theFrmt == stLibAV::PIX_FMT::YUV422P16) {
-        return "yuv422p16";
+        return stCString("yuv422p16");
     } else if(theFrmt == stLibAV::PIX_FMT::YUV444P16) {
-        return "yuv444p16";
+        return stCString("yuv444p16");
     } else if(theFrmt == stLibAV::PIX_FMT::YUVJ420P) {
-        return "yuvj420p";
+        return stCString("yuvj420p");
     } else if(theFrmt == stLibAV::PIX_FMT::YUVJ422P) {
-        return "yuvj422p";
+        return stCString("yuvj422p");
     } else if(theFrmt == stLibAV::PIX_FMT::YUVJ444P) {
-        return "yuvj444p";
+        return stCString("yuvj444p");
     } else if(theFrmt == stLibAV::PIX_FMT::YUVJ440P) {
-        return "yuvj440p";
+        return stCString("yuvj440p");
     } else if(theFrmt == stLibAV::PIX_FMT::RGB24) {
-        return "rgb24";
+        return stCString("rgb24");
     } else if(theFrmt == stLibAV::PIX_FMT::BGR24) {
-        return "bgr24";
+        return stCString("bgr24");
     } else {
-        return "unknown";
+        return stCString("unknown");
     }
 }
 

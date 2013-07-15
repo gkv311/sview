@@ -126,7 +126,8 @@ static void fillPointersAV(const StImage& theImage,
  */
 static bool convert(const StImage& theImageFrom, PixelFormat theFormatFrom,
                           StImage& theImageTo,   PixelFormat theFormatTo) {
-    ST_DEBUG_LOG("StLibAVImage, convert from " + theFormatFrom + " to " + theFormatTo + " using swscale");
+    ST_DEBUG_LOG("StLibAVImage, convert from " + stLibAV::PIX_FMT::getString(theFormatFrom)
+               + " to " + stLibAV::PIX_FMT::getString(theFormatTo) + " using swscale");
     SwsContext* pToRgbCtx = sws_getContext((int )theImageFrom.getSizeX(), (int )theImageFrom.getSizeY(), theFormatFrom, // source
                                            (int )theImageTo.getSizeX(),   (int )theImageTo.getSizeY(),   theFormatTo,   // destination
                                            SWS_BICUBIC, NULL, NULL, NULL);

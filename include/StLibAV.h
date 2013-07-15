@@ -198,7 +198,7 @@ namespace stLibAV {
         ST_SHARED_CPPEXPORT PixelFormat RGBA32;
         ST_SHARED_CPPEXPORT PixelFormat BGRA32;
 
-        ST_CPPEXPORT StString getString(const PixelFormat theFrmt);
+        ST_CPPEXPORT StCString getString(const PixelFormat theFrmt);
     };
 
     /**
