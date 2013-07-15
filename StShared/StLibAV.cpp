@@ -409,6 +409,19 @@ StString stLibAV::audio::getSampleRateString(const AVCodecContext* theCtx) {
 
 // copied from avcodec_get_channel_layout_string()
 StString stLibAV::audio::getChannelLayoutString(const AVCodecContext* theCtx) {
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 0, 0))
+    if(theCtx->channel_layout == 0) {
+        if(theCtx->channels == 1) {
+            return "mono";
+        } else if(theCtx->channels == 2) {
+            return "stereo";
+        }
+    }
+    char aBuff[128]; aBuff[0] = '\0';
+    av_get_channel_layout_string(aBuff, sizeof(aBuff),
+                                 theCtx->channels, theCtx->channel_layout);
+    return aBuff;
+#else
     switch(theCtx->channels) {
         case 1: return "mono";
         case 2: return "stereo";
@@ -436,6 +449,7 @@ StString stLibAV::audio::getChannelLayoutString(const AVCodecContext* theCtx) {
         case 10: return "7.1+downmix";
         default: return StString("unknown") + theCtx->channels;
     }
+#endif
 }
 
 stLibAV::meta::Tag* stLibAV::meta::findTag(stLibAV::meta::Dict*      theDict,
