@@ -533,6 +533,7 @@ void StVideoQueue::decodeLoop() {
 
         if(aPixFmt == stLibAV::PIX_FMT::RGB24) {
             myDataAdp.setColorModel(StImage::ImgColor_RGB);
+            myDataAdp.setColorScale(StImage::ImgScale_Full);
             myDataAdp.setPixelRatio(getPixelRatio());
             myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgRGB, myFrame->data[0],
                                                  size_t(aFrameSizeX), size_t(aFrameSizeY),
@@ -558,13 +559,24 @@ void StVideoQueue::decodeLoop() {
                 aDimsYUV.heightU = aDimsYUV.heightV = aDimsYUV.heightY / 2;
             }
 
-            myDataAdp.setColorModel(aDimsYUV.isFullScale ? StImage::ImgColor_YUVjpeg : StImage::ImgColor_YUV);
+            StImagePlane::ImgFormat aPlaneFrmt = StImagePlane::ImgGray;
+            myDataAdp.setColorScale(aDimsYUV.isFullScale ? StImage::ImgScale_Full : StImage::ImgScale_Mpeg);
+            if(aDimsYUV.bitsPerComp == 9) {
+                aPlaneFrmt = StImagePlane::ImgGray16;
+                myDataAdp.setColorScale(aDimsYUV.isFullScale ? StImage::ImgScale_Jpeg9  : StImage::ImgScale_Mpeg9);
+            } else if(aDimsYUV.bitsPerComp == 10) {
+                aPlaneFrmt = StImagePlane::ImgGray16;
+                myDataAdp.setColorScale(aDimsYUV.isFullScale ? StImage::ImgScale_Jpeg10 : StImage::ImgScale_Mpeg10);
+            } else if(aDimsYUV.bitsPerComp == 16) {
+                aPlaneFrmt = StImagePlane::ImgGray16;
+            }
+            myDataAdp.setColorModel(StImage::ImgColor_YUV);
             myDataAdp.setPixelRatio(getPixelRatio());
-            myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgGray, myFrame->data[0],
+            myDataAdp.changePlane(0).initWrapper(aPlaneFrmt, myFrame->data[0],
                                                  size_t(aDimsYUV.widthY), size_t(aDimsYUV.heightY), myFrame->linesize[0]);
-            myDataAdp.changePlane(1).initWrapper(StImagePlane::ImgGray, myFrame->data[1],
+            myDataAdp.changePlane(1).initWrapper(aPlaneFrmt, myFrame->data[1],
                                                  size_t(aDimsYUV.widthU), size_t(aDimsYUV.heightU), myFrame->linesize[1]);
-            myDataAdp.changePlane(2).initWrapper(StImagePlane::ImgGray, myFrame->data[2],
+            myDataAdp.changePlane(2).initWrapper(aPlaneFrmt, myFrame->data[2],
                                                  size_t(aDimsYUV.widthV), size_t(aDimsYUV.heightV), myFrame->linesize[2]);
         } else if(myToRgbCtx != NULL) {
             if(aPixFmt     == myCodecCtx->pix_fmt
@@ -576,6 +588,7 @@ void StVideoQueue::decodeLoop() {
                           myFrameRGB->data, myFrameRGB->linesize);
 
                 myDataAdp.setColorModel(StImage::ImgColor_RGB);
+                myDataAdp.setColorScale(StImage::ImgScale_Full);
                 myDataAdp.setPixelRatio(getPixelRatio());
                 myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgRGB, myBufferRGB,
                                                      size_t(aFrameSizeX), size_t(aFrameSizeY));

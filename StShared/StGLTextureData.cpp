@@ -347,7 +347,9 @@ void StGLTextureData::updateData(const StImage& srcDataL,
 
     reAllocate(newSizeBytes);
     myDataL.setColorModel(srcDataL.getColorModel());
+    myDataL.setColorScale(srcDataL.getColorScale());
     myDataR.setColorModel(srcDataR.isNull() ? srcDataL.getColorModel() : srcDataR.getColorModel());
+    myDataR.setColorScale(srcDataR.isNull() ? srcDataL.getColorScale() : srcDataR.getColorScale());
     myDataL.setPixelRatio(srcDataL.getPixelRatio());
     myDataR.setPixelRatio(srcDataL.getPixelRatio());
 
@@ -461,7 +463,8 @@ static void prepareTextures(StGLContext&       theCtx,
                             const StImage&     theImage,
                             StGLFrameTextures& theTextureFrame) {
     GLint anInternalFormat = GL_RGB8;
-    theTextureFrame.setColorModel(theImage.getColorModel());
+    theTextureFrame.setColorModel(theImage.getColorModel(),
+                                  theImage.getColorScale());
     for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
         const StImagePlane& anImgPlane = theImage.getPlane(aPlaneId);
         if(anImgPlane.isNull()) {

@@ -13,72 +13,32 @@
 
 class StImage {
 
-        public:
+        public: //! @name enumerations
 
     typedef enum tagImgColorModel {
         ImgColor_RGB,     //!< Red, Green, Blue - generic color model on PC (native for GPU and Displays)
         ImgColor_RGBA,    //!< same as RGB but has Alpha channel to perform color blending with background
         ImgColor_GRAY,    //!< just gray scale
-        ImgColor_YUV,     //!< Y 16..235; U and V 16..240
-        ImgColor_YUVjpeg, //!< full-scale YUV 0..255
+        ImgColor_YUV,     //!< luma/brightness (Y) + chrominance (UV color plane) - widely used in cinema
         ImgColor_CMYK,    //!< Cyan, Magenta, Yellow and Black - generally used in printing process
         ImgColor_HSV,     //!< Hue, Saturation, Value (also known as HSB - Hue, Saturation, Brightness)
         ImgColor_HSL,     //!< Hue, Saturation, Lightness/Luminance (also known as HLS or HSI - Hue, Saturation, Intensity))
     } ImgColorModel;
 
+    typedef enum tagImgColorScale {
+        ImgScale_Full,    //!< full range (use all bits)
+        ImgScale_Mpeg,    //!< YUV  8 bits per component Y   16..235;   U and V   16..240
+                          //!< YUV 16 bits per component Y 4096..60160; U and V 4096..61440
+        ImgScale_Mpeg9,   //!< YUV  9 bits in 16 bits    Y   32..470;   U and V   32..480
+        ImgScale_Mpeg10,  //!< YUV 10 bits in 16 bits    Y   64..940;   U and V   64..960
+        ImgScale_Jpeg9,   //!< 9  bits in 16 bits 0...511
+        ImgScale_Jpeg10,  //!< 10 bits in 16 bits 0..1023
+    } ImgColorScale;
+
     ST_CPPEXPORT static StString formatImgColorModel(ImgColorModel theColorModel);
     ST_LOCAL inline StString formatImgColorModel() const { return formatImgColorModel(myColorModel); }
 
-        private:
-
-    StImagePlane   myPlanes[4];
-    GLfloat              myPAR; // pixel aspect ratio
-    ImgColorModel myColorModel;
-
-        protected:
-
-    ST_LOCAL inline StString getDescription() const {
-       return StString() + getSizeX() + " x " + getSizeY()
-            + ", " + formatImgColorModel()
-            + ", " + getPlane().formatImgFormat();
-    }
-
-        private:
-
-    /**
-     * Decode yuv420p pixel into RGB pixel.
-     */
-    ST_CPPEXPORT StPixelRGB getRGBFromYUV(const size_t theRow, const size_t theCol) const;
-
-    inline float getScaleFactorX(const size_t thePlane) const {
-        return float(getPlane(thePlane).getSizeX()) / float(getPlane(0).getSizeX());
-    }
-
-    inline float getScaleFactorY(const size_t thePlane) const {
-        return float(getPlane(thePlane).getSizeY()) / float(getPlane(0).getSizeY());
-    }
-
-    inline size_t getScaledCol(const size_t thePlane,
-                               const size_t theCol) const {
-        return size_t(getScaleFactorX(thePlane) * float(theCol));
-    }
-
-    inline size_t getScaledRow(const size_t thePlane,
-                               const size_t theRow) const {
-        return size_t(getScaleFactorY(thePlane) * float(theRow));
-    }
-
-    template<typename Type>
-    static inline uint8_t clamp(const Type x) {
-        return x < 0x00 ? 0x00 : (x > 0xff ? 0xff : uint8_t(x));
-    }
-
-    /**
-     * Avoid copy.
-     */
-    StImage(const StImage& theCopy);
-
-        public: //!< Initializers
+        public: //! @name initializers
 
     /**
      * Empty constructor.
@@ -112,7 +72,7 @@ class StImage {
 
     ST_CPPEXPORT bool fill(const StImage& theCopy);
 
-        public: //!< Image information
+        public: //! @name image information
 
     /**
      * @return true if all color components are stored in one plane (thus - interleaved).
@@ -129,7 +89,7 @@ class StImage {
     }
 
     /**
-     * Return color model.
+     * @return color model
      */
     inline ImgColorModel getColorModel() const {
         return myColorModel;
@@ -138,18 +98,33 @@ class StImage {
     /**
      * Setup color model.
      */
-    inline void setColorModel(ImgColorModel theColorModel) {
+    inline void setColorModel(const ImgColorModel theColorModel) {
         myColorModel = theColorModel;
+    }
+
+    /**
+     * @return color scale (range)
+     */
+    inline ImgColorScale getColorScale() const {
+        return myColorScale;
+    }
+
+    /**
+     * Setup color scale (range).
+     */
+    inline void setColorScale(const ImgColorScale theColorScale) {
+        myColorScale = theColorScale;
     }
 
     /**
      * Determine the color model from image plane.
      * Valid only for packed image.
      */
-    inline void setColorModelPacked(StImagePlane::ImgFormat theImgFormat) {
+    inline void setColorModelPacked(const StImagePlane::ImgFormat theImgFormat) {
         switch(theImgFormat) {
             case StImagePlane::ImgGray:
             case StImagePlane::ImgGrayF:
+            case StImagePlane::ImgGray16:
                 myColorModel = ImgColor_GRAY; return;
             case StImagePlane::ImgRGBA:
             case StImagePlane::ImgBGRA:
@@ -212,7 +187,7 @@ class StImage {
         return myPAR;
     }
 
-    inline void setPixelRatio(GLfloat thePAR) {
+    inline void setPixelRatio(const GLfloat thePAR) {
         myPAR = thePAR;
     }
 
@@ -223,6 +198,57 @@ class StImage {
 
     ST_CPPEXPORT void nullify();
 
+        protected:
+
+    ST_LOCAL inline StString getDescription() const {
+       return StString() + getSizeX() + " x " + getSizeY()
+            + ", " + formatImgColorModel()
+            + ", " + getPlane().formatImgFormat();
+    }
+
+        private:
+
+    /**
+     * Decode yuv420p pixel into RGB pixel.
+     */
+    ST_CPPEXPORT StPixelRGB getRGBFromYUV(const size_t theRow,
+                                          const size_t theCol) const;
+
+    inline float getScaleFactorX(const size_t thePlane) const {
+        return float(getPlane(thePlane).getSizeX()) / float(getPlane(0).getSizeX());
+    }
+
+    inline float getScaleFactorY(const size_t thePlane) const {
+        return float(getPlane(thePlane).getSizeY()) / float(getPlane(0).getSizeY());
+    }
+
+    inline size_t getScaledCol(const size_t thePlane,
+                               const size_t theCol) const {
+        return size_t(getScaleFactorX(thePlane) * float(theCol));
+    }
+
+    inline size_t getScaledRow(const size_t thePlane,
+                               const size_t theRow) const {
+        return size_t(getScaleFactorY(thePlane) * float(theRow));
+    }
+
+    template<typename Type>
+    static inline uint8_t clamp(const Type x) {
+        return x < 0x00 ? 0x00 : (x > 0xff ? 0xff : uint8_t(x));
+    }
+
+    /**
+     * Avoid copy.
+     */
+    StImage(const StImage& theCopy);
+
+        private:
+
+    StImagePlane  myPlanes[4];  //!< color planes (only 1 used for packed formats)
+    GLfloat       myPAR;        //!< pixel aspect ratio
+    ImgColorModel myColorModel; //!< color model (RGB/YUV...)
+    ImgColorScale myColorScale; //!< color scale (range)
+
 };
 
-#endif //__StImage_h_
+#endif // __StImage_h_

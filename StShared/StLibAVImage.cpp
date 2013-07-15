@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -35,31 +35,72 @@ StLibAVImage::~StLibAVImage() {
 }
 
 int StLibAVImage::getAVPixelFormat() {
-    bool isFullScale = false;
     if(isPacked()) {
         switch(getPlane(0).getFormat()) {
-            case StImagePlane::ImgRGB:  return stLibAV::PIX_FMT::RGB24;
-            case StImagePlane::ImgBGR:  return stLibAV::PIX_FMT::BGR24;
-            case StImagePlane::ImgRGBA: return stLibAV::PIX_FMT::RGBA32;
-            case StImagePlane::ImgBGRA: return stLibAV::PIX_FMT::BGRA32;
-            case StImagePlane::ImgGray: return stLibAV::PIX_FMT::GRAY8;
+            case StImagePlane::ImgRGB:    return stLibAV::PIX_FMT::RGB24;
+            case StImagePlane::ImgBGR:    return stLibAV::PIX_FMT::BGR24;
+            case StImagePlane::ImgRGBA:   return stLibAV::PIX_FMT::RGBA32;
+            case StImagePlane::ImgBGRA:   return stLibAV::PIX_FMT::BGRA32;
+            case StImagePlane::ImgGray:   return stLibAV::PIX_FMT::GRAY8;
+            case StImagePlane::ImgGray16: return stLibAV::PIX_FMT::GRAY16;
             default: return stLibAV::PIX_FMT::NONE;
         }
     }
     switch(getColorModel()) {
-        case StImage::ImgColor_YUVjpeg:
-            isFullScale = true;
         case StImage::ImgColor_YUV: {
             size_t aDelimX = (getPlane(1).getSizeX() > 0) ? (getPlane(0).getSizeX() / getPlane(1).getSizeX()) : 1;
             size_t aDelimY = (getPlane(1).getSizeY() > 0) ? (getPlane(0).getSizeY() / getPlane(1).getSizeY()) : 1;
             if(aDelimX == 1 && aDelimY == 1) {
-                return isFullScale ? stLibAV::PIX_FMT::YUVJ444P : stLibAV::PIX_FMT::YUV444P;
+                switch(getColorScale()) {
+                    case StImage::ImgScale_Mpeg:
+                        return getPlane(0).getFormat() == StImagePlane::ImgGray16
+                             ? stLibAV::PIX_FMT::YUV444P16
+                             : stLibAV::PIX_FMT::YUV444P;
+                    case StImage::ImgScale_Mpeg9:
+                    case StImage::ImgScale_Jpeg9:  return stLibAV::PIX_FMT::YUV444P9;
+                    case StImage::ImgScale_Mpeg10:
+                    case StImage::ImgScale_Jpeg10: return stLibAV::PIX_FMT::YUV444P10;
+                    case StImage::ImgScale_Full:
+                    default:
+                        return getPlane(0).getFormat() == StImagePlane::ImgGray16
+                             ? stLibAV::PIX_FMT::YUV444P16 //
+                             : stLibAV::PIX_FMT::YUVJ444P;
+                }
             } else if(aDelimX == 2 && aDelimY == 2) {
-                return isFullScale ? stLibAV::PIX_FMT::YUVJ420P : stLibAV::PIX_FMT::YUV420P;
+                switch(getColorScale()) {
+                    case StImage::ImgScale_Mpeg:
+                        return getPlane(0).getFormat() == StImagePlane::ImgGray16
+                             ? stLibAV::PIX_FMT::YUV420P16
+                             : stLibAV::PIX_FMT::YUV420P;
+                    case StImage::ImgScale_Mpeg9:
+                    case StImage::ImgScale_Jpeg9:  return stLibAV::PIX_FMT::YUV420P9;
+                    case StImage::ImgScale_Mpeg10:
+                    case StImage::ImgScale_Jpeg10: return stLibAV::PIX_FMT::YUV420P10;
+                    case StImage::ImgScale_Full:
+                    default:
+                        return getPlane(0).getFormat() == StImagePlane::ImgGray16
+                             ? stLibAV::PIX_FMT::YUV420P16 // jpeg color range ignored!
+                             : stLibAV::PIX_FMT::YUVJ420P;
+                }
             } else if(aDelimX == 2 && aDelimY == 1) {
-                return isFullScale ? stLibAV::PIX_FMT::YUVJ422P : stLibAV::PIX_FMT::YUV422P;
+                switch(getColorScale()) {
+                    case StImage::ImgScale_Mpeg:
+                        return getPlane(0).getFormat() == StImagePlane::ImgGray16
+                             ? stLibAV::PIX_FMT::YUV422P16 // jpeg color range ignored!
+                             : stLibAV::PIX_FMT::YUV422P;
+                    case StImage::ImgScale_Mpeg9:
+                    case StImage::ImgScale_Jpeg9:  return stLibAV::PIX_FMT::YUV422P9;
+                    case StImage::ImgScale_Mpeg10:
+                    case StImage::ImgScale_Jpeg10: return stLibAV::PIX_FMT::YUV422P10;
+                    case StImage::ImgScale_Full:
+                    default:
+                        return getPlane(0).getFormat() == StImagePlane::ImgGray16
+                             ? stLibAV::PIX_FMT::YUV422P16 // jpeg color range ignored!
+                             : stLibAV::PIX_FMT::YUVJ422P;
+                }
             } else if(aDelimX == 1 && aDelimY == 2) {
-                return isFullScale ? stLibAV::PIX_FMT::YUVJ440P : stLibAV::PIX_FMT::YUV440P;
+                return getColorScale() == StImage::ImgScale_Mpeg
+                     ? stLibAV::PIX_FMT::YUVJ440P : stLibAV::PIX_FMT::YUV440P;
             } else if(aDelimX == 4 && aDelimY == 1) {
                 return stLibAV::PIX_FMT::YUV411P;
             } else if(aDelimX == 4 && aDelimY == 4) {
@@ -299,13 +340,30 @@ bool StLibAVImage::load(const StString& theFilePath, ImageType theImageType,
         changePlane(0).initWrapper(StImagePlane::ImgGray, frame->data[0],
                                    codecCtx->width, codecCtx->height,
                                    frame->linesize[0]);
+    } else if(codecCtx->pix_fmt == stLibAV::PIX_FMT::GRAY16) {
+        setColorModel(StImage::ImgColor_GRAY);
+        changePlane(0).initWrapper(StImagePlane::ImgGray16, frame->data[0],
+                                   codecCtx->width, codecCtx->height,
+                                   frame->linesize[0]);
     } else if(stLibAV::isFormatYUVPlanar(codecCtx, aDimsYUV)) {
-        setColorModel(aDimsYUV.isFullScale ? StImage::ImgColor_YUVjpeg : StImage::ImgColor_YUV);
-        changePlane(0).initWrapper(StImagePlane::ImgGray, frame->data[0],
+        setColorModel(StImage::ImgColor_YUV);
+        setColorScale(aDimsYUV.isFullScale ? StImage::ImgScale_Full : StImage::ImgScale_Mpeg);
+        StImagePlane::ImgFormat aPlaneFrmt = StImagePlane::ImgGray;
+        if(aDimsYUV.bitsPerComp == 9) {
+            aPlaneFrmt = StImagePlane::ImgGray16;
+            setColorScale(aDimsYUV.isFullScale ? StImage::ImgScale_Jpeg9  : StImage::ImgScale_Mpeg9);
+        } else if(aDimsYUV.bitsPerComp == 10) {
+            aPlaneFrmt = StImagePlane::ImgGray16;
+            setColorScale(aDimsYUV.isFullScale ? StImage::ImgScale_Jpeg10 : StImage::ImgScale_Mpeg10);
+        } else if(aDimsYUV.bitsPerComp == 16) {
+            aPlaneFrmt = StImagePlane::ImgGray16;
+        }
+
+        changePlane(0).initWrapper(aPlaneFrmt, frame->data[0],
                                    size_t(aDimsYUV.widthY), size_t(aDimsYUV.heightY), frame->linesize[0]);
-        changePlane(1).initWrapper(StImagePlane::ImgGray, frame->data[1],
+        changePlane(1).initWrapper(aPlaneFrmt, frame->data[1],
                                    size_t(aDimsYUV.widthU), size_t(aDimsYUV.heightU), frame->linesize[1]);
-        changePlane(2).initWrapper(StImagePlane::ImgGray, frame->data[2],
+        changePlane(2).initWrapper(aPlaneFrmt, frame->data[2],
                                    size_t(aDimsYUV.widthV), size_t(aDimsYUV.heightV), frame->linesize[2]);
     } else {
         ///ST_DEBUG_LOG("StLibAVImage, perform conversion from Pixel format '" + avcodec_get_pix_fmt_name(codecCtx->pix_fmt) + "' to RGB");
@@ -324,8 +382,8 @@ bool StLibAVImage::load(const StString& theFilePath, ImageType theImageType,
         changePlane(0).initTrash(StImagePlane::ImgRGB,
                                  codecCtx->width, codecCtx->height);
 
-        uint8_t* rgbData[4]; stMemSet(rgbData,     0, sizeof(rgbData));
-        int  rgbLinesize[4]; stMemSet(rgbLinesize, 0, sizeof(rgbLinesize));
+        uint8_t* rgbData[4]; stMemZero(rgbData,     sizeof(rgbData));
+        int  rgbLinesize[4]; stMemZero(rgbLinesize, sizeof(rgbLinesize));
         rgbData[0]     = changePlane(0).changeData();
         rgbLinesize[0] = (int )changePlane(0).getSizeRowBytes();
 
@@ -352,7 +410,7 @@ bool StLibAVImage::load(const StString& theFilePath, ImageType theImageType,
 }
 
 bool StLibAVImage::save(const StString& theFilePath,
-                         ImageType theImageType) {
+                        ImageType       theImageType) {
     close();
     setState();
     if(isNull()) {
@@ -390,8 +448,8 @@ bool StLibAVImage::save(const StString& theFilePath,
 
             // setup encoder
             codecCtx->pix_fmt = aPFormatAV;
-            codecCtx->width  = (int )anImage.getSizeX();
-            codecCtx->height = (int )anImage.getSizeY();
+            codecCtx->width   = (int )anImage.getSizeX();
+            codecCtx->height  = (int )anImage.getSizeY();
             codecCtx->compression_level = 9; // 0..9
             break;
         }
@@ -414,7 +472,8 @@ bool StLibAVImage::save(const StString& theFilePath,
             } else {
                 // convert to compatible pixel format
                 PixelFormat aPFrmtTarget = stLibAV::PIX_FMT::YUVJ422P;
-                anImage.setColorModel(StImage::ImgColor_YUVjpeg);
+                anImage.setColorModel(StImage::ImgColor_YUV);
+                anImage.setColorScale(StImage::ImgScale_Mpeg);
                 anImage.changePlane(0).initTrash(StImagePlane::ImgGray, getSizeX(), getSizeY(), getAligned(getSizeX()));
                 stMemSet(anImage.changePlane(0).changeData(), '\0', anImage.getPlane(0).getSizeBytes());
                 anImage.changePlane(1).initTrash(StImagePlane::ImgGray, getSizeX(), getSizeY(), getAligned(getSizeX()));
@@ -432,8 +491,8 @@ bool StLibAVImage::save(const StString& theFilePath,
 
             codecCtx = avcodec_alloc_context();
             codecCtx->pix_fmt = aPFormatAV;
-            codecCtx->width  = (int )anImage.getSizeX();
-            codecCtx->height = (int )anImage.getSizeY();
+            codecCtx->width   = (int )anImage.getSizeX();
+            codecCtx->height  = (int )anImage.getSizeY();
             codecCtx->time_base.num = 1;
             codecCtx->time_base.den = 1;
             codecCtx->qmin = codecCtx->qmax = 10; // quality factor - lesser is better

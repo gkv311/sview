@@ -80,12 +80,18 @@ class StGLFrameTextures : public StGLResource {
         myParams = theParams;
     }
 
+    inline StImage::ImgColorScale getColorScale() const {
+        return myImgScale;
+    }
+
     inline StImage::ImgColorModel getColorModel() const {
         return myImgCM;
     }
 
-    inline void setColorModel(const StImage::ImgColorModel theColorModel) {
-        myImgCM = theColorModel;
+    inline void setColorModel(const StImage::ImgColorModel theColorModel,
+                              const StImage::ImgColorScale theColorScale) {
+        myImgCM    = theColorModel;
+        myImgScale = theColorScale;
     }
 
     /**
@@ -161,6 +167,7 @@ class StGLFrameTextures : public StGLResource {
     StHandle<StStereoParams> myParams;      //!< source pointer
     StGLFrameTexture         myTextures[4]; //!< texture planes
     StImage::ImgColorModel   myImgCM;       //!< color model
+    StImage::ImgColorScale   myImgScale;    //!< color scale
 
 };
 

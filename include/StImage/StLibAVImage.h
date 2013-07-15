@@ -22,19 +22,6 @@ struct AVFrame;
  */
 class StLibAVImage : public StImageFile {
 
-        private:
-
-    // FFmpeg staff
-    AVInputFormat* imageFormat; // image format
-    AVFormatContext* formatCtx; // file context
-    AVCodecContext*   codecCtx; // codec context
-    AVCodec*             codec; // codec
-    AVFrame*             frame;
-
-        private:
-
-    ST_CPPEXPORT int getAVPixelFormat();
-
         public:
 
     /**
@@ -55,6 +42,19 @@ class StLibAVImage : public StImageFile {
     ST_CPPEXPORT virtual bool save(const StString& theFilePath,
                                    ImageType theImageType);
     ST_CPPEXPORT virtual bool resize(size_t , size_t );
+
+        private:
+
+    ST_CPPEXPORT int getAVPixelFormat();
+
+        private:
+
+    AVInputFormat*   imageFormat; //!< image format
+    AVFormatContext* formatCtx;   //!< file context
+    AVCodecContext*  codecCtx;    //!< codec context
+    AVCodec*         codec;       //!< codec
+    AVFrame*         frame;
+
 };
 
 #endif //__StLibAVImage_h_

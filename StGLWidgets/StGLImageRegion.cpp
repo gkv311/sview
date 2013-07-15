@@ -484,7 +484,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                 myProgramFlat.resetColorScale(aCtx);
             }
 
-            myProgramFlat.setupSrcColorShader(aCtx, stFrameTexture.getColorModel());
+            myProgramFlat.setupSrcColorShader(aCtx, stFrameTexture.getColorModel(), stFrameTexture.getColorScale());
             myProgramFlat.use(aCtx);
 
             // setup data rectangle in the texture
@@ -589,7 +589,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             }
 
             // perform drawing
-            myProgramSphere.setupSrcColorShader(aCtx, stFrameTexture.getColorModel());
+            myProgramSphere.setupSrcColorShader(aCtx, stFrameTexture.getColorModel(), stFrameTexture.getColorScale());
             myProgramSphere.use(aCtx);
 
             // setup data rectangle in the texture

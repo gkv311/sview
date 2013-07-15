@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -42,6 +42,10 @@ bool StGLTexture::getInternalFormat(const StImagePlane& theData,
             //theInternalFormat = GL_ALPHA32F_ARB;
             theInternalFormat = GL_ALPHA16; // backward compatibility
             return true;
+        case StImagePlane::ImgGray16:
+            //theInternalFormat = GL_R16;   // OpenGL3+ hardware
+            theInternalFormat = GL_ALPHA16; // backward compatibility
+            return true;
         case StImagePlane::ImgGray:
             // this texture format is deprecated with OpenGL3+, use GL_R8 (GL_RED) instead
             //theInternalFormat = GL_R8;   // OpenGL3+ hardware
@@ -63,6 +67,13 @@ bool StGLTexture::getDataFormat(const StImagePlane& theData,
             //thePixelFormat = GL_RED;
             thePixelFormat = GL_ALPHA;
             theDataType = GL_UNSIGNED_BYTE;
+            return true;
+        }
+        case StImagePlane::ImgGray16: {
+            // we fill ALPHA channel in the texture!
+            //thePixelFormat = GL_RED;
+            thePixelFormat = GL_ALPHA;
+            theDataType = GL_UNSIGNED_SHORT;
             return true;
         }
         case StImagePlane::ImgRGB: {

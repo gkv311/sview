@@ -85,40 +85,54 @@ const int64_t stLibAV::NOPTS_VALUE = 0x8000000000000000LL;
 #else
     #define ST_AV_GETPIXFMT(theName) avcodec_get_pix_fmt(theName)
 #endif
-const PixelFormat stLibAV::PIX_FMT::NONE     = PixelFormat(-1);
-const PixelFormat stLibAV::PIX_FMT::YUV420P  = PixelFormat( 0);
-const PixelFormat stLibAV::PIX_FMT::GRAY8    = ST_AV_GETPIXFMT("gray");
-const PixelFormat stLibAV::PIX_FMT::YUV422P  = ST_AV_GETPIXFMT("yuv422p");
-const PixelFormat stLibAV::PIX_FMT::YUV444P  = ST_AV_GETPIXFMT("yuv444p");
-const PixelFormat stLibAV::PIX_FMT::YUV410P  = ST_AV_GETPIXFMT("yuv410p");
-const PixelFormat stLibAV::PIX_FMT::YUV411P  = ST_AV_GETPIXFMT("yuv411p");
-const PixelFormat stLibAV::PIX_FMT::YUV440P  = ST_AV_GETPIXFMT("yuv440p");
-const PixelFormat stLibAV::PIX_FMT::YUVJ420P = ST_AV_GETPIXFMT("yuvj420p");
-const PixelFormat stLibAV::PIX_FMT::YUVJ422P = ST_AV_GETPIXFMT("yuvj422p");
-const PixelFormat stLibAV::PIX_FMT::YUVJ444P = ST_AV_GETPIXFMT("yuvj444p");
-const PixelFormat stLibAV::PIX_FMT::YUVJ440P = ST_AV_GETPIXFMT("yuvj440p");
-const PixelFormat stLibAV::PIX_FMT::RGB24    = ST_AV_GETPIXFMT("rgb24");
-const PixelFormat stLibAV::PIX_FMT::BGR24    = ST_AV_GETPIXFMT("bgr24");
+const PixelFormat stLibAV::PIX_FMT::NONE       = PixelFormat(-1);
+const PixelFormat stLibAV::PIX_FMT::YUV420P    = PixelFormat( 0);
+const PixelFormat stLibAV::PIX_FMT::GRAY8      = ST_AV_GETPIXFMT("gray");
+const PixelFormat stLibAV::PIX_FMT::GRAY16     = ST_AV_GETPIXFMT("gray16");
+const PixelFormat stLibAV::PIX_FMT::YUV422P    = ST_AV_GETPIXFMT("yuv422p");
+const PixelFormat stLibAV::PIX_FMT::YUV444P    = ST_AV_GETPIXFMT("yuv444p");
+const PixelFormat stLibAV::PIX_FMT::YUV410P    = ST_AV_GETPIXFMT("yuv410p");
+const PixelFormat stLibAV::PIX_FMT::YUV411P    = ST_AV_GETPIXFMT("yuv411p");
+const PixelFormat stLibAV::PIX_FMT::YUV440P    = ST_AV_GETPIXFMT("yuv440p");
+const PixelFormat stLibAV::PIX_FMT::YUV420P9   = ST_AV_GETPIXFMT("yuv420p9");
+const PixelFormat stLibAV::PIX_FMT::YUV422P9   = ST_AV_GETPIXFMT("yuv422p9");
+const PixelFormat stLibAV::PIX_FMT::YUV444P9   = ST_AV_GETPIXFMT("yuv444p9");
+const PixelFormat stLibAV::PIX_FMT::YUV420P10  = ST_AV_GETPIXFMT("yuv420p10");
+const PixelFormat stLibAV::PIX_FMT::YUV422P10  = ST_AV_GETPIXFMT("yuv422p10");
+const PixelFormat stLibAV::PIX_FMT::YUV444P10  = ST_AV_GETPIXFMT("yuv444p10");
+const PixelFormat stLibAV::PIX_FMT::YUV420P16  = ST_AV_GETPIXFMT("yuv420p16");
+const PixelFormat stLibAV::PIX_FMT::YUV422P16  = ST_AV_GETPIXFMT("yuv422p16");
+const PixelFormat stLibAV::PIX_FMT::YUV444P16  = ST_AV_GETPIXFMT("yuv444p16");
+const PixelFormat stLibAV::PIX_FMT::YUVJ420P   = ST_AV_GETPIXFMT("yuvj420p");
+const PixelFormat stLibAV::PIX_FMT::YUVJ422P   = ST_AV_GETPIXFMT("yuvj422p");
+const PixelFormat stLibAV::PIX_FMT::YUVJ444P   = ST_AV_GETPIXFMT("yuvj444p");
+const PixelFormat stLibAV::PIX_FMT::YUVJ440P   = ST_AV_GETPIXFMT("yuvj440p");
+const PixelFormat stLibAV::PIX_FMT::RGB24      = ST_AV_GETPIXFMT("rgb24");
+const PixelFormat stLibAV::PIX_FMT::BGR24      = ST_AV_GETPIXFMT("bgr24");
 
 // TODO (Kirill Gavrilov#9) remove this stuff
 namespace {
-    static const PixelFormat AvPixFmtRGBA    = ST_AV_GETPIXFMT("rgba");
-    static const PixelFormat AvPixFmtBGRA    = ST_AV_GETPIXFMT("bgra");
-    static const PixelFormat AvPixFmtRGB32   = ST_AV_GETPIXFMT("rgb32"); // compatibility with old FFmpeg
-    static const PixelFormat AvPixFmtBGR32   = ST_AV_GETPIXFMT("bgr32"); // compatibility with old FFmpeg
+    static const PixelFormat AvPixFmtRGBA  = ST_AV_GETPIXFMT("rgba");
+    static const PixelFormat AvPixFmtBGRA  = ST_AV_GETPIXFMT("bgra");
+    static const PixelFormat AvPixFmtRGB32 = ST_AV_GETPIXFMT("rgb32"); // compatibility with old FFmpeg
+    static const PixelFormat AvPixFmtBGR32 = ST_AV_GETPIXFMT("bgr32"); // compatibility with old FFmpeg
 
     static const AVRational ST_AV_TIME_BASE_Q = {1, AV_TIME_BASE};
     static const double     ST_AV_TIME_BASE_D = av_q2d(ST_AV_TIME_BASE_Q);
 };
 
-const PixelFormat stLibAV::PIX_FMT::RGBA32   = (AvPixFmtRGBA != stLibAV::PIX_FMT::NONE) ? AvPixFmtRGBA : AvPixFmtBGR32;
-const PixelFormat stLibAV::PIX_FMT::BGRA32   = (AvPixFmtBGRA != stLibAV::PIX_FMT::NONE) ? AvPixFmtBGRA : AvPixFmtRGB32;
+const PixelFormat stLibAV::PIX_FMT::RGBA32 = (AvPixFmtRGBA != stLibAV::PIX_FMT::NONE) ? AvPixFmtRGBA : AvPixFmtBGR32;
+const PixelFormat stLibAV::PIX_FMT::BGRA32 = (AvPixFmtBGRA != stLibAV::PIX_FMT::NONE) ? AvPixFmtBGRA : AvPixFmtRGB32;
 
 StString stLibAV::PIX_FMT::getString(const PixelFormat theFrmt) {
-    if(theFrmt == stLibAV::PIX_FMT::YUV420P) {
+    if(theFrmt == stLibAV::PIX_FMT::NONE) {
+        return "none";
+    } else if(theFrmt == stLibAV::PIX_FMT::YUV420P) {
         return "yuv420p";
     } else if(theFrmt == stLibAV::PIX_FMT::GRAY8) {
-        return "gray";
+        return "gray8";
+    } else if(theFrmt == stLibAV::PIX_FMT::GRAY16) {
+        return "gray16";
     } else if(theFrmt == stLibAV::PIX_FMT::YUV422P) {
         return "yuv422p";
     } else if(theFrmt == stLibAV::PIX_FMT::YUV444P) {
@@ -129,6 +143,24 @@ StString stLibAV::PIX_FMT::getString(const PixelFormat theFrmt) {
         return "yuv411p";
     } else if(theFrmt == stLibAV::PIX_FMT::YUV440P) {
         return "yuv440p";
+    } else if(theFrmt == stLibAV::PIX_FMT::YUV420P9) {
+        return "yuv420p9";
+    } else if(theFrmt == stLibAV::PIX_FMT::YUV422P9) {
+        return "yuv422p9";
+    } else if(theFrmt == stLibAV::PIX_FMT::YUV444P9) {
+        return "yuv444p9";
+    } else if(theFrmt == stLibAV::PIX_FMT::YUV420P10) {
+        return "yuv420p10";
+    } else if(theFrmt == stLibAV::PIX_FMT::YUV422P10) {
+        return "yuv422p10";
+    } else if(theFrmt == stLibAV::PIX_FMT::YUV444P10) {
+        return "yuv444p10";
+    } else if(theFrmt == stLibAV::PIX_FMT::YUV420P16) {
+        return "yuv420p16";
+    } else if(theFrmt == stLibAV::PIX_FMT::YUV422P16) {
+        return "yuv422p16";
+    } else if(theFrmt == stLibAV::PIX_FMT::YUV444P16) {
+        return "yuv444p16";
     } else if(theFrmt == stLibAV::PIX_FMT::YUVJ420P) {
         return "yuvj420p";
     } else if(theFrmt == stLibAV::PIX_FMT::YUVJ422P) {
@@ -182,62 +214,66 @@ bool stLibAV::init() {
 }
 
 bool stLibAV::isFormatYUVPlanar(const AVCodecContext* theCtx) {
-    return (theCtx->pix_fmt == stLibAV::PIX_FMT::YUV420P)
-        || (theCtx->pix_fmt == stLibAV::PIX_FMT::YUVJ420P)
-        || (theCtx->pix_fmt == stLibAV::PIX_FMT::YUV422P)
-        || (theCtx->pix_fmt == stLibAV::PIX_FMT::YUVJ422P)
-        || (theCtx->pix_fmt == stLibAV::PIX_FMT::YUV444P)
-        || (theCtx->pix_fmt == stLibAV::PIX_FMT::YUVJ444P)
-        || (theCtx->pix_fmt == stLibAV::PIX_FMT::YUV440P)
-        || (theCtx->pix_fmt == stLibAV::PIX_FMT::YUVJ440P)
-        || (theCtx->pix_fmt == stLibAV::PIX_FMT::YUV411P)
-        || (theCtx->pix_fmt == stLibAV::PIX_FMT::YUV410P);
+    return theCtx->pix_fmt == stLibAV::PIX_FMT::YUV420P
+        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUVJ420P
+        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV422P
+        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUVJ422P
+        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV444P
+        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUVJ444P
+        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV440P
+        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUVJ440P
+        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV411P
+        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV410P
+        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV420P9
+        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV422P9
+        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV444P9
+        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV420P10
+        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV422P10
+        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV444P10
+        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV420P16
+        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV422P16
+        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV444P16;
 }
 
 bool stLibAV::isFormatYUVPlanar(const PixelFormat thePixFmt,
                                 const int         theWidth,
                                 const int         theHeight,
                                 dimYUV&           theDims) {
-    if(thePixFmt == stLibAV::PIX_FMT::YUV420P) {
+    if(thePixFmt == stLibAV::PIX_FMT::NONE) {
+        return false;
+    } else if(thePixFmt == stLibAV::PIX_FMT::YUV420P
+           || thePixFmt == stLibAV::PIX_FMT::YUVJ420P
+           || thePixFmt == stLibAV::PIX_FMT::YUV420P9
+           || thePixFmt == stLibAV::PIX_FMT::YUV420P10
+           || thePixFmt == stLibAV::PIX_FMT::YUV420P16) {
         theDims.widthY  = theWidth;
         theDims.heightY = theHeight;
         theDims.widthU  = theDims.widthV  = theDims.widthY  / 2;
         theDims.heightU = theDims.heightV = theDims.heightY / 2;
-        theDims.isFullScale = false;
-    } else if(thePixFmt == stLibAV::PIX_FMT::YUVJ420P) { // JPEG
-        theDims.widthY  = theWidth;
-        theDims.heightY = theHeight;
-        theDims.widthU  = theDims.widthV  = theDims.widthY  / 2;
-        theDims.heightU = theDims.heightV = theDims.heightY / 2;
-        theDims.isFullScale = true;
-    } else if(thePixFmt == stLibAV::PIX_FMT::YUV422P) {
+        theDims.isFullScale = (thePixFmt == stLibAV::PIX_FMT::YUVJ420P);
+    } else if(thePixFmt == stLibAV::PIX_FMT::YUV422P
+           || thePixFmt == stLibAV::PIX_FMT::YUVJ422P
+           || thePixFmt == stLibAV::PIX_FMT::YUV422P9
+           || thePixFmt == stLibAV::PIX_FMT::YUV422P10
+           || thePixFmt == stLibAV::PIX_FMT::YUV422P16) {
         theDims.widthY  = theWidth;
         theDims.heightY = theDims.heightU = theDims.heightV = theHeight;
         theDims.widthU  = theDims.widthV  = theDims.widthY  / 2;
-        theDims.isFullScale = false;
-    } else if(thePixFmt == stLibAV::PIX_FMT::YUVJ422P) { // JPEG
-        theDims.widthY  = theWidth;
-        theDims.heightY = theDims.heightU = theDims.heightV = theHeight;
-        theDims.widthU  = theDims.widthV  = theDims.widthY  / 2;
-        theDims.isFullScale = true;
-    } else if(thePixFmt == stLibAV::PIX_FMT::YUV444P) {
+        theDims.isFullScale = (thePixFmt == stLibAV::PIX_FMT::YUVJ422P);
+    } else if(thePixFmt == stLibAV::PIX_FMT::YUV444P
+           || thePixFmt == stLibAV::PIX_FMT::YUVJ444P
+           || thePixFmt == stLibAV::PIX_FMT::YUV444P9
+           || thePixFmt == stLibAV::PIX_FMT::YUV444P10
+           || thePixFmt == stLibAV::PIX_FMT::YUV444P16) {
         theDims.widthY  = theDims.widthU  = theDims.widthV  = theWidth;
         theDims.heightY = theDims.heightU = theDims.heightV = theHeight;
-        theDims.isFullScale = false;
-    } else if(thePixFmt == stLibAV::PIX_FMT::YUVJ444P) { // JPEG
-        theDims.widthY  = theDims.widthU  = theDims.widthV  = theWidth;
-        theDims.heightY = theDims.heightU = theDims.heightV = theHeight;
-        theDims.isFullScale = true;
-    } else if(thePixFmt == stLibAV::PIX_FMT::YUV440P) {
+        theDims.isFullScale = (thePixFmt == stLibAV::PIX_FMT::YUVJ444P);
+    } else if(thePixFmt == stLibAV::PIX_FMT::YUV440P
+           || thePixFmt == stLibAV::PIX_FMT::YUVJ440P) {
         theDims.widthY  = theDims.widthU  = theDims.widthV  = theWidth;
         theDims.heightY = theHeight;
         theDims.heightU = theDims.heightV = theDims.heightY / 2;
-        theDims.isFullScale = false;
-    } else if(thePixFmt == stLibAV::PIX_FMT::YUVJ440P) { // JPEG
-        theDims.widthY  = theDims.widthU  = theDims.widthV  = theWidth;
-        theDims.heightY = theHeight;
-        theDims.heightU = theDims.heightV = theDims.heightY / 2;
-        theDims.isFullScale = true;
+        theDims.isFullScale = (thePixFmt == stLibAV::PIX_FMT::YUVJ440P);
     } else if(thePixFmt == stLibAV::PIX_FMT::YUV411P) {
         theDims.widthY  = theDims.widthU  = theDims.widthV  = theWidth;
         theDims.heightY = theDims.heightU = theDims.heightV = theHeight;
@@ -252,6 +288,23 @@ bool stLibAV::isFormatYUVPlanar(const PixelFormat thePixFmt,
     } else {
         return false;
     }
+
+    if(thePixFmt == stLibAV::PIX_FMT::YUV420P9
+    || thePixFmt == stLibAV::PIX_FMT::YUV422P9
+    || thePixFmt == stLibAV::PIX_FMT::YUV444P9) {
+        theDims.bitsPerComp = 9;
+    } else if(thePixFmt == stLibAV::PIX_FMT::YUV420P10
+           || thePixFmt == stLibAV::PIX_FMT::YUV422P10
+           || thePixFmt == stLibAV::PIX_FMT::YUV444P10) {
+        theDims.bitsPerComp = 10;
+    } else if(thePixFmt == stLibAV::PIX_FMT::YUV420P16
+           || thePixFmt == stLibAV::PIX_FMT::YUV422P16
+           || thePixFmt == stLibAV::PIX_FMT::YUV444P16) {
+        theDims.bitsPerComp = 16;
+    } else {
+        theDims.bitsPerComp = 8;
+    }
+
     return true;
 }
 
@@ -266,7 +319,7 @@ StString stLibAV::getAVErrorDescription(int avErrCode) {
         if(_wcserror_s(aBuffW, 4096, AVUNERROR(avErrCode)) == 0) {
             return aBuffW;
         }
-    #elif (defined(_WIN32) || defined(__WIN32__))
+    #elif defined(_WIN32)
         // MinGW has only thread-unsafe variant
         char* anErrDesc = strerror(AVUNERROR(avErrCode));
         if(anErrDesc != NULL) {

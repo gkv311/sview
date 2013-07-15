@@ -262,8 +262,6 @@
 		<Unit filename="StSubQueue.cpp" />
 		<Unit filename="shaders/StGLTextureButton.shf" />
 		<Unit filename="shaders/StGLTextureButton.shv" />
-		<Unit filename="shaders/convertYUV2RGB.shf" />
-		<Unit filename="shaders/convertYUV2RGBjpeg.shf" />
 		<Unit filename="shaders/flatGetColorBlend.shf" />
 		<Unit filename="shaders/flatImage.shf" />
 		<Unit filename="shaders/flatImage.shv" />

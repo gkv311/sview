@@ -36,8 +36,9 @@ class StGLImageProgram : public StGLMeshProgram {
     /**
      * Setup color model conversion
      */
-    ST_CPPEXPORT void setupSrcColorShader(StGLContext&           theCtx,
-                                          StImage::ImgColorModel theColorModel);
+    ST_CPPEXPORT void setupSrcColorShader(StGLContext&                 theCtx,
+                                          const StImage::ImgColorModel theColorModel,
+                                          const StImage::ImgColorScale theColorScale);
 
     ST_CPPEXPORT void setTextureSizePx(StGLContext&    theCtx,
                                        const StGLVec2& theVec2);
@@ -105,8 +106,12 @@ class StGLImageProgram : public StGLMeshProgram {
     StGLFragmentShader  fRGB2RGB;
     StGLFragmentShader  fRGBA2RGB;
     StGLFragmentShader  fGray2RGB;
-    StGLFragmentShader  fYUV2RGB;
-    StGLFragmentShader  fYUV2RGBjpeg;
+    StGLFragmentShader  fYUVtoRGB_full;
+    StGLFragmentShader  fYUVtoRGB_mpeg;
+    StGLFragmentShader  fYUV9toRGB_full;
+    StGLFragmentShader  fYUV9toRGB_mpeg;
+    StGLFragmentShader  fYUV10toRGB_full;
+    StGLFragmentShader  fYUV10toRGB_mpeg;
     // color correction
     StGLFragmentShader* fCorrectPtr;
     StGLFragmentShader  fCorrectNO;

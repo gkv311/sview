@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -24,7 +24,8 @@ class StImagePlane {
      */
     typedef enum tagFormat {
         ImgUNKNOWN = 0, //!< not supported or unknown format
-        ImgGray    = 1, //!< 1 byte per pixel (1-component plane, could be part of multiple-plane image)
+        ImgGray    = 1, //!< 1 byte  per pixel (1-component plane, could be part of multiple-plane image)
+        ImgGray16,      //!< 2 bytes per pixel (1-component plane)
         ImgRGB,         //!< 3 bytes packed RGB image plane
         ImgBGR,         //!< same as RGB but with different components order
         ImgRGB32,       //!< 4 bytes packed RGB image plane (1 byte is dummy)

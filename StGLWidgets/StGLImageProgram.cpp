@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -26,8 +26,12 @@ StGLImageProgram::StGLImageProgram(const StString& theTitle)
   fRGB2RGB    (StString("StGLImageProgram::fRGB2RGB, ")  + theTitle),
   fRGBA2RGB   (StString("StGLImageProgram::fRGBA2RGB, ") + theTitle),
   fGray2RGB   (StString("StGLImageProgram::fGray2RGB, ") + theTitle),
-  fYUV2RGB    (StString("StGLImageProgram::fYUV2RGB, ")  + theTitle),
-  fYUV2RGBjpeg(StString("StGLImageProgram::fYUV2RGBjpeg, ") + theTitle),
+  fYUVtoRGB_full  (StString("StGLImageProgram::fYUVtoRGB_full, "  )  + theTitle),
+  fYUVtoRGB_mpeg  (StString("StGLImageProgram::fYUVtoRGB_mpeg, "  )  + theTitle),
+  fYUV9toRGB_full (StString("StGLImageProgram::fYUV9toRGB_full, " )  + theTitle),
+  fYUV9toRGB_mpeg (StString("StGLImageProgram::fYUV9toRGB_mpeg, " )  + theTitle),
+  fYUV10toRGB_full(StString("StGLImageProgram::fYUV10toRGB_full, ")  + theTitle),
+  fYUV10toRGB_mpeg(StString("StGLImageProgram::fYUV10toRGB_mpeg, ")  + theTitle),
   // color correction
   fCorrectPtr(NULL),
   fCorrectNO (StString("StGLImageProgram::fCorrectNO, ")  + theTitle),
@@ -74,8 +78,12 @@ void StGLImageProgram::release(StGLContext& theCtx) {
     fRGB2RGB.release(theCtx);
     fRGBA2RGB.release(theCtx);
     fGray2RGB.release(theCtx);
-    fYUV2RGB.release(theCtx);
-    fYUV2RGBjpeg.release(theCtx);
+    fYUVtoRGB_full.release(theCtx);
+    fYUVtoRGB_mpeg.release(theCtx);
+    fYUV9toRGB_full.release(theCtx);
+    fYUV9toRGB_mpeg.release(theCtx);
+    fYUV10toRGB_full.release(theCtx);
+    fYUV10toRGB_mpeg.release(theCtx);
     fCorrectNO.release(theCtx);
     fCorrectON.release(theCtx);
     fGammaNO.release(theCtx);
@@ -182,8 +190,9 @@ void StGLImageProgram::doGammaChanged(const float theGamma) {
     StGLProgram::unuse(aCtx);
 }
 
-void StGLImageProgram::setupSrcColorShader(StGLContext&           theCtx,
-                                           StImage::ImgColorModel theColorModel) {
+void StGLImageProgram::setupSrcColorShader(StGLContext&                 theCtx,
+                                           const StImage::ImgColorModel theColorModel,
+                                           const StImage::ImgColorScale theColorScale) {
     if(!isValid()) {
         return;
     }
@@ -204,13 +213,34 @@ void StGLImageProgram::setupSrcColorShader(StGLContext&           theCtx,
             break;
         }
         case StImage::ImgColor_YUV: {
-            StGLProgram::swapShader(theCtx, *f2RGBPtr, fYUV2RGB);
-            f2RGBPtr = &fYUV2RGB;
-            break;
-        }
-        case StImage::ImgColor_YUVjpeg: {
-            StGLProgram::swapShader(theCtx, *f2RGBPtr, fYUV2RGBjpeg);
-            f2RGBPtr = &fYUV2RGBjpeg;
+            switch(theColorScale) {
+                case StImage::ImgScale_Mpeg9:
+                    StGLProgram::swapShader(theCtx, *f2RGBPtr, fYUV9toRGB_mpeg);
+                    f2RGBPtr = &fYUV9toRGB_mpeg;
+                    break;
+                case StImage::ImgScale_Mpeg10:
+                    StGLProgram::swapShader(theCtx, *f2RGBPtr, fYUV10toRGB_mpeg);
+                    f2RGBPtr = &fYUV10toRGB_mpeg;
+                    break;
+                case StImage::ImgScale_Jpeg9:
+                    StGLProgram::swapShader(theCtx, *f2RGBPtr, fYUV9toRGB_full);
+                    f2RGBPtr = &fYUV9toRGB_full;
+                    break;
+                case StImage::ImgScale_Jpeg10:
+                    StGLProgram::swapShader(theCtx, *f2RGBPtr, fYUV10toRGB_full);
+                    f2RGBPtr = &fYUV10toRGB_full;
+                    break;
+                case StImage::ImgScale_Mpeg:
+                    StGLProgram::swapShader(theCtx, *f2RGBPtr, fYUVtoRGB_mpeg);
+                    f2RGBPtr = &fYUVtoRGB_mpeg;
+                    break;
+                case StImage::ImgScale_Full:
+                default: {
+                    StGLProgram::swapShader(theCtx, *f2RGBPtr, fYUVtoRGB_full);
+                    f2RGBPtr = &fYUVtoRGB_full;
+                    break;
+                }
+            }
             break;
         }
         default:
@@ -278,10 +308,37 @@ bool StGLImageProgram::init(StGLContext& theCtx) {
 
     const char F_SHADER_GRAY2RGB[] =
        "void convertToRGB(inout vec4 color, in vec2 texCoord) {"
-       "color.r = color.a;" // gray scale stored in alpha
-       "color.g = color.a;"
-       "color.b = color.a;"
-       //"color.a = 1.0;"
+       "    color.r = color.a;" // gray scale stored in alpha
+       "    color.g = color.a;"
+       "    color.b = color.a;"
+       "}";
+
+    const char F_SHADER_YUV2RGB_MPEG[] =
+       "uniform sampler2D uTextureU;"
+       "uniform sampler2D uTextureV;"
+       "void convertToRGB(inout vec4 color, in vec2 texCoordUV) {"
+       "    vec3 colorYUV = vec3(color.a, texture2D(uTextureU, texCoordUV).a, texture2D(uTextureV, texCoordUV).a);"
+       "    colorYUV   *= TheRangeBits;"
+       "    colorYUV.x  = 1.1643 * (colorYUV.x - 0.0625);"
+       "    colorYUV.y -= 0.5;"
+       "    colorYUV.z -= 0.5;"
+       "    color.r = colorYUV.x +  1.5958 * colorYUV.z;"
+       "    color.g = colorYUV.x - 0.39173 * colorYUV.y - 0.81290 * colorYUV.z;"
+       "    color.b = colorYUV.x +   2.017 * colorYUV.y;"
+       "}";
+
+    const char F_SHADER_YUV2RGB_FULL[] =
+       "uniform sampler2D uTextureU;"
+       "uniform sampler2D uTextureV;"
+       "void convertToRGB(inout vec4 color, in vec2 texCoordUV) {"
+       "    vec3 colorYUV = vec3(color.a, texture2D(uTextureU, texCoordUV).a, texture2D(uTextureV, texCoordUV).a);"
+       "    colorYUV   *= TheRangeBits;"
+       "    colorYUV.x  = colorYUV.x;"
+       "    colorYUV.y -= 0.5;"
+       "    colorYUV.z -= 0.5;"
+       "    color.r = colorYUV.x + 1.402 * colorYUV.z;"
+       "    color.g = colorYUV.x - 0.344 * colorYUV.y - 0.714 * colorYUV.z;"
+       "    color.b = colorYUV.x + 1.772 * colorYUV.y;"
        "}";
 
     return fGetColor.init (theCtx, F_SHADER_GET_COLOR)
@@ -293,8 +350,24 @@ bool StGLImageProgram::init(StGLContext& theCtx) {
         && fRGBA2RGB.init (theCtx, F_SHADER_RGBA2RGB)
         && fGray2RGB.init (theCtx, F_SHADER_GRAY2RGB)
         && fGetColorBlend.initFile(theCtx, aShaders.getShaderFile("flatGetColorBlend.shf"))
-        && fYUV2RGB.initFile      (theCtx, aShaders.getShaderFile("convertYUV2RGB.shf"))
-        && fYUV2RGBjpeg.initFile  (theCtx, aShaders.getShaderFile("convertYUV2RGBjpeg.shf"));
+        && fYUVtoRGB_full.init   (theCtx,
+                                  "float TheRangeBits = 1.0;",
+                                  F_SHADER_YUV2RGB_FULL)
+        && fYUVtoRGB_mpeg.init   (theCtx,
+                                 "float TheRangeBits = 1.0;",
+                                  F_SHADER_YUV2RGB_MPEG)
+        && fYUV9toRGB_full.init  (theCtx,
+                                  "float TheRangeBits = 65535.0 / 511.0;",
+                                  F_SHADER_YUV2RGB_FULL)
+        && fYUV10toRGB_full.init (theCtx,
+                                  "float TheRangeBits = 65535.0 / 1023.0;",
+                                  F_SHADER_YUV2RGB_FULL)
+        && fYUV9toRGB_mpeg.init  (theCtx,
+                                  "float TheRangeBits = 65535.0 / 511.0;",
+                                  F_SHADER_YUV2RGB_MPEG)
+        && fYUV10toRGB_mpeg.init (theCtx,
+                                  "float TheRangeBits = 65535.0 / 1023.0;",
+                                  F_SHADER_YUV2RGB_MPEG);
 }
 
 bool StGLImageProgram::link(StGLContext& theCtx) {

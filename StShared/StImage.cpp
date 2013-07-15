@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -15,7 +15,6 @@ StString StImage::formatImgColorModel(ImgColorModel theColorModel) {
         case ImgColor_RGBA:    return "ImgColor_RGBA";
         case ImgColor_GRAY:    return "ImgColor_GRAY";
         case ImgColor_YUV:     return "ImgColor_YUV";
-        case ImgColor_YUVjpeg: return "ImgColor_YUVjpeg";
         case ImgColor_CMYK:    return "ImgColor_CMYK";
         case ImgColor_HSV:     return "ImgColor_HSV";
         case ImgColor_HSL:     return "ImgColor_HSL";
@@ -38,7 +37,8 @@ StString StImage::formatImgColorModel(ImgColorModel theColorModel) {
 
 StImage::StImage()
 : myPAR(1.0f),
-  myColorModel(ImgColor_RGB) {
+  myColorModel(ImgColor_RGB),
+  myColorScale(ImgScale_Full) {
     //
 }
 
@@ -102,9 +102,10 @@ bool StImage::initRGB(const StImage& theCopy) {
         case StImage::ImgColor_RGBA: {
             return initWrapper(theCopy);
         }
-        case StImage::ImgColor_YUV:
-        case StImage::ImgColor_YUVjpeg: {
-            if(isPacked()) {
+        case StImage::ImgColor_YUV: {
+            if(isPacked()
+            || theCopy.getColorScale() != StImage::ImgScale_Mpeg
+            || theCopy.getPlane(0).getFormat() != StImagePlane::ImgGray16) {
                 // not supported
                 return false;
             }
@@ -131,8 +132,7 @@ bool StImage::initSideBySide(const StImage& theImageL,
                              const StImage& theImageR,
                              const int theSeparationDx,
                              const int theSeparationDy) {
-    bool isYUV = theImageL.getColorModel() == StImage::ImgColor_YUV
-              || theImageL.getColorModel() == StImage::ImgColor_YUVjpeg;
+    const bool isYUV = theImageL.getColorModel() == StImage::ImgColor_YUV;
     for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
         float aScaleX = (theImageL.getPlane(aPlaneId).getSizeX() > 0) ? theImageL.getScaleFactorX(aPlaneId) : 1.0f;
         float aScaleY = (theImageL.getPlane(aPlaneId).getSizeY() > 0) ? theImageL.getScaleFactorY(aPlaneId) : 1.0f;

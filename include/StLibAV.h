@@ -154,26 +154,47 @@ namespace stLibAV {
      * Image frame pixel formats. Originally defined as enumerations
      * but because them not maintained in future-compatible way (thus - changed between not major versions)
      * redefined as extern values.
+     *
+     * Colorscale values:
+     *  - full,  8 bits:               0..255
+     *  - MPEG,  8 bits:              16..235   for Y,   16..240   for U and V
+     *  - full,  9 bits in 16 bits:    0..511
+     *  - MPEG,  9 bits in 16 bits:   32..470   for Y,   32..480   for U and V
+     *  - full, 10 bits in 16 bits:    0..1023
+     *  - MPEG, 10 bits in 16 bits:   64..940   for Y,   64..960   for U and V
+     *  - full, 16 bits:               0..65535
+     *  - MPEG, 16 bits:            4096..60160 for Y, 4096..61440 for U and V
      */
     namespace PIX_FMT {
         ST_SHARED_CPPEXPORT PixelFormat NONE;
-        ST_SHARED_CPPEXPORT PixelFormat GRAY8;    ///< Y, 8bpp
+        ST_SHARED_CPPEXPORT PixelFormat GRAY8;     //!< Y,  8bpp
+        ST_SHARED_CPPEXPORT PixelFormat GRAY16;    //!< Y, 16bpp
         // planar YUV formats
-        ST_SHARED_CPPEXPORT PixelFormat YUV420P;  ///< planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)
-        ST_SHARED_CPPEXPORT PixelFormat YUV422P;  ///< planar YUV 4:2:2, 16bpp, (1 Cr & Cb sample per 2x1 Y samples)
-        ST_SHARED_CPPEXPORT PixelFormat YUV444P;  ///< planar YUV 4:4:4, 24bpp, (1 Cr & Cb sample per 1x1 Y samples)
-        ST_SHARED_CPPEXPORT PixelFormat YUV410P;  ///< planar YUV 4:1:0,  9bpp, (1 Cr & Cb sample per 4x4 Y samples)
-        ST_SHARED_CPPEXPORT PixelFormat YUV411P;  ///< planar YUV 4:1:1, 12bpp, (1 Cr & Cb sample per 4x1 Y samples)
-        ST_SHARED_CPPEXPORT PixelFormat YUV440P;  ///< planar YUV 4:4:0 (1 Cr & Cb sample per 1x2 Y samples)
+        ST_SHARED_CPPEXPORT PixelFormat YUV420P;   //!< planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)
+        ST_SHARED_CPPEXPORT PixelFormat YUV422P;   //!< planar YUV 4:2:2, 16bpp, (1 Cr & Cb sample per 2x1 Y samples)
+        ST_SHARED_CPPEXPORT PixelFormat YUV444P;   //!< planar YUV 4:4:4, 24bpp, (1 Cr & Cb sample per 1x1 Y samples)
+        ST_SHARED_CPPEXPORT PixelFormat YUV410P;   //!< planar YUV 4:1:0,  9bpp, (1 Cr & Cb sample per 4x4 Y samples)
+        ST_SHARED_CPPEXPORT PixelFormat YUV411P;   //!< planar YUV 4:1:1, 12bpp, (1 Cr & Cb sample per 4x1 Y samples)
+        ST_SHARED_CPPEXPORT PixelFormat YUV440P;   //!< planar YUV 4:4:0 (1 Cr & Cb sample per 1x2 Y samples)
+        // wide planar YUV formats (9,10,14,16 bits stored in 16 bits)
+        ST_SHARED_CPPEXPORT PixelFormat YUV420P9;
+        ST_SHARED_CPPEXPORT PixelFormat YUV422P9;
+        ST_SHARED_CPPEXPORT PixelFormat YUV444P9;
+        ST_SHARED_CPPEXPORT PixelFormat YUV420P10;
+        ST_SHARED_CPPEXPORT PixelFormat YUV422P10;
+        ST_SHARED_CPPEXPORT PixelFormat YUV444P10;
+        ST_SHARED_CPPEXPORT PixelFormat YUV420P16;
+        ST_SHARED_CPPEXPORT PixelFormat YUV422P16;
+        ST_SHARED_CPPEXPORT PixelFormat YUV444P16;
         //extern const PixelFormat YUVA420P; ///< planar YUV 4:2:0, 20bpp, (1 Cr & Cb sample per 2x2 Y & A samples)
         // fullscale YUV formats (deprecated?)
-        ST_SHARED_CPPEXPORT PixelFormat YUVJ420P; ///< planar YUV 4:2:0, 12bpp, full scale (JPEG)
-        ST_SHARED_CPPEXPORT PixelFormat YUVJ422P; ///< planar YUV 4:2:2, 16bpp, full scale (JPEG)
-        ST_SHARED_CPPEXPORT PixelFormat YUVJ444P; ///< planar YUV 4:4:4, 24bpp, full scale (JPEG)
-        ST_SHARED_CPPEXPORT PixelFormat YUVJ440P; ///< planar YUV 4:4:0 full scale (JPEG)
+        ST_SHARED_CPPEXPORT PixelFormat YUVJ420P;  //!< planar YUV 4:2:0, 12bpp, full scale (JPEG)
+        ST_SHARED_CPPEXPORT PixelFormat YUVJ422P;  //!< planar YUV 4:2:2, 16bpp, full scale (JPEG)
+        ST_SHARED_CPPEXPORT PixelFormat YUVJ444P;  //!< planar YUV 4:4:4, 24bpp, full scale (JPEG)
+        ST_SHARED_CPPEXPORT PixelFormat YUVJ440P;  //!< planar YUV 4:4:0 full scale (JPEG)
         // RGB formats
-        ST_SHARED_CPPEXPORT PixelFormat RGB24;    ///< packed RGB 8:8:8, 24bpp, RGBRGB...
-        ST_SHARED_CPPEXPORT PixelFormat BGR24;    ///< packed RGB 8:8:8, 24bpp, BGRBGR...
+        ST_SHARED_CPPEXPORT PixelFormat RGB24;     //!< packed RGB 8:8:8, 24bpp, RGBRGB...
+        ST_SHARED_CPPEXPORT PixelFormat BGR24;     //!< packed RGB 8:8:8, 24bpp, BGRBGR...
         ST_SHARED_CPPEXPORT PixelFormat RGBA32;
         ST_SHARED_CPPEXPORT PixelFormat BGRA32;
 
@@ -190,6 +211,7 @@ namespace stLibAV {
         int  heightU;
         int  widthV;
         int  heightV;
+        int  bitsPerComp;
         bool isFullScale;
     };
 
