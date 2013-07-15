@@ -184,13 +184,18 @@ static SV_THREAD_FUNCTION threadFunction(void* audioQueue) {
     return SV_THREAD_RETURN 0;
 }
 
+/**
+ * 1 second of 48khz 32bit audio (old AVCODEC_MAX_AUDIO_FRAME_SIZE).
+ */
+#define ST_MAX_AUDIO_FRAME_SIZE 192000
+
 StAudioQueue::StAudioQueue(const StString& theAlDeviceName)
 : StAVPacketQueue(512),
   myAlDataLoop(),
   myPlaybackTimer(false),
   myDowntimeEvent(true),
-  myBufferSrc(PCM16_SIGNED, AVCODEC_MAX_AUDIO_FRAME_SIZE),
-  myBufferOut(PCM16_SIGNED, AVCODEC_MAX_AUDIO_FRAME_SIZE),
+  myBufferSrc(PCM16_SIGNED, ST_MAX_AUDIO_FRAME_SIZE),
+  myBufferOut(PCM16_SIGNED, ST_MAX_AUDIO_FRAME_SIZE),
   myIsAlValid(ST_AL_INIT_NA),
   myToSwitchDev(false),
   myIsDisconnected(false),
