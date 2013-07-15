@@ -166,8 +166,7 @@ void StLibAVImage::close() {
         codecCtx = NULL;
     } else if(codecCtx != NULL) {
         // codec context allocated by ourself with avcodec_alloc_context() function
-        av_free(codecCtx);
-        codecCtx = NULL;
+        av_freep(&codecCtx);
     }
 }
 
@@ -209,16 +208,6 @@ bool StLibAVImage::load(const StString& theFilePath, ImageType theImageType,
 
         // find the decoder for the video stream
         codecCtx = formatCtx->streams[streamId]->codec;
-    } else {
-        // use given image type to load decoder
-        codecCtx = avcodec_alloc_context();
-    }
-
-    // stupid check
-    if(codecCtx == NULL) {
-        setState("AVCodec library, codec context is NULL");
-        close();
-        return false;
     }
 
     switch(theImageType) {
@@ -246,6 +235,20 @@ bool StLibAVImage::load(const StString& theFilePath, ImageType theImageType,
 
     if(codec == NULL) {
         setState("AVCodec library, video codec not found");
+        close();
+        return false;
+    } else if(formatCtx == NULL) {
+        // use given image type to load decoder
+    #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
+        codecCtx = avcodec_alloc_context3(codec);
+    #else
+        codecCtx = avcodec_alloc_context();
+    #endif
+    }
+
+    // stupid check
+    if(codecCtx == NULL) {
+        setState("AVCodec library, codec context is NULL");
         close();
         return false;
     }
@@ -439,7 +442,11 @@ bool StLibAVImage::save(const StString& theFilePath,
                 }
                 aPFormatAV = aPFrmtTarget;
             }
+        #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
+            codecCtx = avcodec_alloc_context3(codec);
+        #else
             codecCtx = avcodec_alloc_context();
+        #endif
 
             // setup encoder
             codecCtx->pix_fmt = aPFormatAV;
@@ -484,7 +491,11 @@ bool StLibAVImage::save(const StString& theFilePath,
                 aPFormatAV = aPFrmtTarget;
             }
 
+        #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
+            codecCtx = avcodec_alloc_context3(codec);
+        #else
             codecCtx = avcodec_alloc_context();
+        #endif
             codecCtx->pix_fmt = aPFormatAV;
             codecCtx->width   = (int )anImage.getSizeX();
             codecCtx->height  = (int )anImage.getSizeY();
