@@ -239,7 +239,7 @@ bool StLibAVImage::load(const StString& theFilePath, ImageType theImageType,
         return false;
     } else if(formatCtx == NULL) {
         // use given image type to load decoder
-    #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
+    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
         codecCtx = avcodec_alloc_context3(codec);
     #else
         codecCtx = avcodec_alloc_context();
@@ -442,7 +442,7 @@ bool StLibAVImage::save(const StString& theFilePath,
                 }
                 aPFormatAV = aPFrmtTarget;
             }
-        #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
+        #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
             codecCtx = avcodec_alloc_context3(codec);
         #else
             codecCtx = avcodec_alloc_context();
@@ -491,7 +491,7 @@ bool StLibAVImage::save(const StString& theFilePath,
                 aPFormatAV = aPFrmtTarget;
             }
 
-        #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
+        #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
             codecCtx = avcodec_alloc_context3(codec);
         #else
             codecCtx = avcodec_alloc_context();
