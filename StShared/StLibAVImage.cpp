@@ -347,6 +347,11 @@ bool StLibAVImage::load(const StString& theFilePath, ImageType theImageType,
                                    codecCtx->width, codecCtx->height,
                                    frame->linesize[0]);
     } else if(stLibAV::isFormatYUVPlanar(codecCtx, aDimsYUV)) {
+    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 29, 0))
+        if(codecCtx->color_range == AVCOL_RANGE_JPEG) {
+            aDimsYUV.isFullScale = true;
+        }
+    #endif
         setColorModel(StImage::ImgColor_YUV);
         setColorScale(aDimsYUV.isFullScale ? StImage::ImgScale_Full : StImage::ImgScale_Mpeg);
         StImagePlane::ImgFormat aPlaneFrmt = StImagePlane::ImgGray;

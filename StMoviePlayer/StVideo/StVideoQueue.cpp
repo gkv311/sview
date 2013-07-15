@@ -560,6 +560,12 @@ void StVideoQueue::decodeLoop() {
             }
 
             StImagePlane::ImgFormat aPlaneFrmt = StImagePlane::ImgGray;
+        #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 29, 0))
+            if(myCodecCtx->color_range == AVCOL_RANGE_JPEG) {
+                // there no color range information in the AVframe (yet)
+                aDimsYUV.isFullScale = true;
+            }
+        #endif
             myDataAdp.setColorScale(aDimsYUV.isFullScale ? StImage::ImgScale_Full : StImage::ImgScale_Mpeg);
             if(aDimsYUV.bitsPerComp == 9) {
                 aPlaneFrmt = StImagePlane::ImgGray16;
