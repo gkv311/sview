@@ -379,28 +379,40 @@ stLibAV::Version stLibAV::Version::libswscale() {
 
 /// TODO (Kirill Gavrilov#9) replace with av_get_sample_fmt() on next libavcodec major version
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 0, 0))
-    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::U8  = AV_SAMPLE_FMT_U8;  //= av_get_sample_fmt("u8");
-    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::S16 = AV_SAMPLE_FMT_S16; //= av_get_sample_fmt("s16");
-    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::S32 = AV_SAMPLE_FMT_S32; //= av_get_sample_fmt("s32");
-    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::FLT = AV_SAMPLE_FMT_FLT; //= av_get_sample_fmt("flt");
-    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::DBL = AV_SAMPLE_FMT_DBL; //= av_get_sample_fmt("dbl");
+    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::U8   = AV_SAMPLE_FMT_U8;  //= av_get_sample_fmt("u8");
+    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::S16  = AV_SAMPLE_FMT_S16; //= av_get_sample_fmt("s16");
+    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::S32  = AV_SAMPLE_FMT_S32; //= av_get_sample_fmt("s32");
+    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::FLT  = AV_SAMPLE_FMT_FLT; //= av_get_sample_fmt("flt");
+    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::DBL  = AV_SAMPLE_FMT_DBL; //= av_get_sample_fmt("dbl");
+    #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 17, 0))
+    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::U8P  = AV_SAMPLE_FMT_U8P;
+    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::S16P = AV_SAMPLE_FMT_S16P;
+    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::S32P = AV_SAMPLE_FMT_S32P;
+    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::FLTP = AV_SAMPLE_FMT_FLTP;
+    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::DBLP = AV_SAMPLE_FMT_DBLP;
+    #endif
 #else
-    const SampleFormat   stLibAV::audio::SAMPLE_FMT::U8  =    SAMPLE_FMT_U8;
-    const SampleFormat   stLibAV::audio::SAMPLE_FMT::S16 =    SAMPLE_FMT_S16;
-    const SampleFormat   stLibAV::audio::SAMPLE_FMT::S32 =    SAMPLE_FMT_S32;
-    const SampleFormat   stLibAV::audio::SAMPLE_FMT::FLT =    SAMPLE_FMT_FLT;
-    const SampleFormat   stLibAV::audio::SAMPLE_FMT::DBL =    SAMPLE_FMT_DBL;
+    const SampleFormat   stLibAV::audio::SAMPLE_FMT::U8   =    SAMPLE_FMT_U8;
+    const SampleFormat   stLibAV::audio::SAMPLE_FMT::S16  =    SAMPLE_FMT_S16;
+    const SampleFormat   stLibAV::audio::SAMPLE_FMT::S32  =    SAMPLE_FMT_S32;
+    const SampleFormat   stLibAV::audio::SAMPLE_FMT::FLT  =    SAMPLE_FMT_FLT;
+    const SampleFormat   stLibAV::audio::SAMPLE_FMT::DBL  =    SAMPLE_FMT_DBL;
 #endif
 
 StString stLibAV::audio::getSampleFormatString(const AVCodecContext* theCtx) {
+#if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 17, 0))
+    const char* aStr = av_get_sample_fmt_name(theCtx->sample_fmt);
+    return aStr != NULL ? StString(aStr) : StString("");
+#else
     switch(theCtx->sample_fmt) {
-        case stLibAV::audio::SAMPLE_FMT::U8:  return "u8";
-        case stLibAV::audio::SAMPLE_FMT::S16: return "s16";
-        case stLibAV::audio::SAMPLE_FMT::S32: return "s32";
-        case stLibAV::audio::SAMPLE_FMT::FLT: return "flt";
-        case stLibAV::audio::SAMPLE_FMT::DBL: return "dbl";
-        default: return StString();
+        case stLibAV::audio::SAMPLE_FMT::U8:  return stCString("u8");
+        case stLibAV::audio::SAMPLE_FMT::S16: return stCString("s16");
+        case stLibAV::audio::SAMPLE_FMT::S32: return stCString("s32");
+        case stLibAV::audio::SAMPLE_FMT::FLT: return stCString("flt");
+        case stLibAV::audio::SAMPLE_FMT::DBL: return stCString("dbl");
+        default: return stCString("??");
     }
+#endif
 }
 
 StString stLibAV::audio::getSampleRateString(const AVCodecContext* theCtx) {

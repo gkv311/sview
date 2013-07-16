@@ -267,6 +267,13 @@ namespace stLibAV {
             ST_SHARED_CPPEXPORT AVSampleFormat S32;
             ST_SHARED_CPPEXPORT AVSampleFormat FLT;
             ST_SHARED_CPPEXPORT AVSampleFormat DBL;
+            #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 17, 0))
+            ST_SHARED_CPPEXPORT AVSampleFormat U8P;
+            ST_SHARED_CPPEXPORT AVSampleFormat S16P;
+            ST_SHARED_CPPEXPORT AVSampleFormat S32P;
+            ST_SHARED_CPPEXPORT AVSampleFormat FLTP;
+            ST_SHARED_CPPEXPORT AVSampleFormat DBLP;
+            #endif
         #else
             ST_SHARED_CPPEXPORT SampleFormat   U8;
             ST_SHARED_CPPEXPORT SampleFormat   S16;
