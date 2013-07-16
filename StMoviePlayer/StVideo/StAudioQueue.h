@@ -86,10 +86,10 @@ class StAudioQueue : public StAVPacketQueue {
 
     ST_LOCAL double getPts() const {
         myEventMutex.lock();
-            if(!isPlaying()) {
-                myPlaybackTimer.pause();
-            }
-            double aPts = myPlaybackTimer.getElapsedTimeInSec();
+        if(!isPlaying()) {
+            myPlaybackTimer.pause();
+        }
+        const double aPts = isInitialized() ? myPlaybackTimer.getElapsedTimeInSec() : -1.0;
         myEventMutex.unlock();
         return aPts;
     }
