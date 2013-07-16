@@ -107,7 +107,9 @@ class StVideoQueue : public StAVPacketQueue {
      */
     ST_LOCAL virtual void deinit();
 
+#if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 18, 100))
     ST_LOCAL void syncVideo(AVFrame* srcFrame, double* pts);
+#endif
 
     /**
      * Main decoding loop.

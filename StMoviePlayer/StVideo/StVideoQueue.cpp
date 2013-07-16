@@ -28,6 +28,7 @@
 
 namespace {
 
+#if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 18, 100))
     /*
      * These are called whenever we allocate a frame
      * buffer. We use this to store the global_pts in
@@ -59,6 +60,7 @@ namespace {
         }
         avcodec_default_release_buffer(theCodecCtx, theFrame);
     }
+#endif
 
     /**
      * Thread function just call decodeLoop() function.
@@ -294,10 +296,12 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
         }
     }
 
+#if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 18, 100))
     // override buffers' functions for getting true PTS rootines
     myCodecCtx->opaque = this;
     myCodecCtx->get_buffer = ourGetBuffer;
     myCodecCtx->release_buffer = ourReleaseBuffer;
+#endif
     return true;
 }
 
@@ -322,6 +326,7 @@ void StVideoQueue::deinit() {
     StAVPacketQueue::deinit();
 }
 
+#if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 18, 100))
 void StVideoQueue::syncVideo(AVFrame* theSrcFrame,
                              double*  thePts) {
     if(*thePts != 0.0) {
@@ -338,6 +343,7 @@ void StVideoQueue::syncVideo(AVFrame* theSrcFrame,
     aFrameDelay  += theSrcFrame->repeat_pict * (aFrameDelay * 0.5);
     myVideoClock += aFrameDelay;
 }
+#endif
 
 void StVideoQueue::pushFrame(const StImage&     theSrcDataLeft,
                              const StImage&     theSrcDataRight,
@@ -441,6 +447,32 @@ void StVideoQueue::decodeLoop() {
             //
         }
 
+        // decode video frame
+    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 23, 0))
+        avcodec_decode_video2(myCodecCtx, myFrame, &isFrameFinished, aPacket->getAVpkt());
+    #else
+        avcodec_decode_video(myCodecCtx, myFrame, &isFrameFinished,
+                             aPacket->getData(), aPacket->getSize());
+    #endif
+        if(isFrameFinished == 0) {
+            // need more packets to decode whole frame
+            aPacket.nullify();
+            continue;
+        }
+
+        if(aPacket->isKeyFrame()) {
+            myFramesCounter = 1;
+        }
+
+    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 18, 100))
+        myVideoPktPts = av_frame_get_best_effort_timestamp(myFrame);
+        if(myVideoPktPts == stLibAV::NOPTS_VALUE) {
+            myVideoPktPts = 0;
+        }
+
+        myFramePts  = double(myVideoPktPts) * av_q2d(myStream->time_base);
+        myFramePts -= myPtsStartBase; // normalize PTS
+    #else
         // Save global pts to be stored in pFrame in first call
         myVideoPktPts = aPacket->getPts();
 
@@ -463,6 +495,8 @@ void StVideoQueue::decodeLoop() {
         myFramePts -= myPtsStartBase; // normalize PTS
 
         syncVideo(myFrame, &myFramePts);
+    #endif
+
         const double aDelay = myFramePts - aPrevPts;
         if(aDelay > 0.0 && aDelay < 1.0) {
             anAverageDelaySec = aDelay;
@@ -499,24 +533,6 @@ void StVideoQueue::decodeLoop() {
                     }
                 }
             }
-        }
-
-        // decode video frame
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 23, 0))
-        avcodec_decode_video2(myCodecCtx, myFrame, &isFrameFinished, aPacket->getAVpkt());
-    #else
-        avcodec_decode_video(myCodecCtx, myFrame, &isFrameFinished,
-                             aPacket->getData(), aPacket->getSize());
-    #endif
-
-        // did we get a video frame?
-        if(isFrameFinished == 0) {
-            aPacket.nullify();
-            continue;
-        }
-
-        if(aPacket->isKeyFrame()) {
-            myFramesCounter = 1;
         }
 
         // we currently allow to override source format stored in metadata
