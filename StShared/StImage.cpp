@@ -26,7 +26,6 @@ StString StImage::formatImgColorModel(ImgColorModel theColorModel) {
         case ImgColor_RGBA:    return "RGBA";
         case ImgColor_GRAY:    return "Grayscale";
         case ImgColor_YUV:     return "YUV";
-        case ImgColor_YUVjpeg: return "YUV fullscale";
         case ImgColor_CMYK:    return "CMYK";
         case ImgColor_HSV:     return "HSV";
         case ImgColor_HSL:     return "HSL";
