@@ -14,9 +14,18 @@
 // libav* libraries written on pure C,
 // and we must around includes manually
 extern "C" {
+#ifdef _MSC_VER
+    // suppress some common warnings in FFmpeg headers
+    #pragma warning(disable : 4244)
+#endif
+
     #include <libavcodec/avcodec.h>
     #include <libavformat/avformat.h>
     #include <libswscale/swscale.h>
+
+#ifdef _MSC_VER
+    #pragma warning(default : 4244)
+#endif
 };
 
 #if(LIBAVUTIL_VERSION_INT < AV_VERSION_INT(50, 13, 0))
