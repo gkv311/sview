@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #include <StTemplates/StHandle.h>
 #include <StSlots/StSignal.h>
 
-#include "StAVPacket.h" // wrapper for AVPacket structure
+#include <StAV/StAVPacket.h>
 
 typedef enum {
     ST_PLAYEVENT_NONE = 0,

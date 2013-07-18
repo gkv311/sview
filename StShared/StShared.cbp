@@ -257,6 +257,7 @@
 			<Add directory="../lib/$(TARGET_NAME)" />
 		</Linker>
 		<Unit filename="StAVFrame.cpp" />
+		<Unit filename="StAVImage.cpp" />
 		<Unit filename="StAVPacket.cpp" />
 		<Unit filename="StAction.cpp" />
 		<Unit filename="StBndBox.cpp" />
@@ -323,8 +324,6 @@
 		<Unit filename="StImagePlane.cpp" />
 		<Unit filename="StJpegParser.cpp" />
 		<Unit filename="StLangMap.cpp" />
-		<Unit filename="StLibAV.cpp" />
-		<Unit filename="StLibAVImage.cpp" />
 		<Unit filename="StLibrary.cpp" />
 		<Unit filename="StLogger.ObjC.mm">
 			<Option compile="1" />
@@ -357,10 +356,13 @@
 		<Unit filename="StThread.cpp" />
 		<Unit filename="StVirtualKeys.cpp" />
 		<Unit filename="StWebPImage.cpp" />
+		<Unit filename="stAV.cpp" />
 		<Unit filename="stConsole.cpp" />
 		<Unit filename="stUtfTools.cpp" />
-		<Unit filename="../include/StAVPacket.h" />
 		<Unit filename="../include/StAV/StAVFrame.h" />
+		<Unit filename="../include/StAV/StAVImage.h" />
+		<Unit filename="../include/StAV/StAVPacket.h" />
+		<Unit filename="../include/StAV/stAV.h" />
 		<Unit filename="../include/StAlienData.h" />
 		<Unit filename="../include/StCocoa/StCocoaCoords.h">
 			<Option target="MAC_gcc" />
@@ -439,7 +441,6 @@
 		<Unit filename="../include/StImage/StImageFile.h" />
 		<Unit filename="../include/StImage/StImagePlane.h" />
 		<Unit filename="../include/StImage/StJpegParser.h" />
-		<Unit filename="../include/StImage/StLibAVImage.h" />
 		<Unit filename="../include/StImage/StPixelRGB.h" />
 		<Unit filename="../include/StImage/StWebPImage.h" />
 		<Unit filename="../include/StLibAV.h" />

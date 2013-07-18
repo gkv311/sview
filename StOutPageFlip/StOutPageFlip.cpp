@@ -30,7 +30,7 @@
 #include <StCore/StSearchMonitors.h>
 #include <StSettings/StSettings.h>
 #include <StSettings/StTranslations.h>
-#include <StImage/StLibAVImage.h>
+#include <StAV/StAVImage.h>
 #include <StSys/StSys.h>
 
 namespace {

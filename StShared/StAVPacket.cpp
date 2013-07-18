@@ -6,7 +6,7 @@
  * http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include <StAVPacket.h>
+#include <StAV/StAVPacket.h>
 
 void StAVPacket::avDestructPacket(AVPacket* thePkt) {
     // use own deallocation

@@ -7,11 +7,11 @@
  */
 
 #include <StImage/StImageFile.h>
+
 #include <StImage/StDevILImage.h>
-#include <StImage/StLibAVImage.h>
 #include <StImage/StFreeImage.h>
 #include <StImage/StWebPImage.h>
-
+#include <StAV/StAVImage.h>
 #include <StFile/StFileNode.h>
 #include <StFile/StMIME.h>
 
@@ -27,7 +27,7 @@ StImageFile::ImageClass StImageFile::imgLibFromString(const StString& thePreferr
     StImageFile::ImageClass aPreferred = ST_LIBAV;
     if(thePreferred.isEqualsIgnoreCase(stCString("LibAV")) ||
        thePreferred.isEqualsIgnoreCase(stCString("FFmpeg")) ||
-       thePreferred.isEqualsIgnoreCase(stCString("StLibAVImage"))) {
+       thePreferred.isEqualsIgnoreCase(stCString("StAVImage"))) {
         aPreferred = ST_LIBAV;
     } else if(thePreferred.isEqualsIgnoreCase(stCString("FreeImage")) ||
               thePreferred.isEqualsIgnoreCase(stCString("StFreeImage"))) {

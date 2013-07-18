@@ -9,7 +9,7 @@
 #ifndef __StAVPacket_h_
 #define __StAVPacket_h_
 
-#include <StLibAV.h>
+#include <StAV/stAV.h>
 
 #include <StGL/StParams.h>
 

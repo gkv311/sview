@@ -9,7 +9,7 @@
 #ifndef __StAVFrame_h_
 #define __StAVFrame_h_
 
-#include <StLibAV.h>
+#include <StAV/stAV.h>
 
 /**
  * This is just a wrapper over AVFrame structure.

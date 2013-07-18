@@ -19,7 +19,7 @@
 #include "StTestImageLib.h"
 
 #include <StStrings/stConsole.h>
-#include <StImage/StLibAVImage.h>
+#include <StAV/StAVImage.h>
 #include <StImage/StDevILImage.h>
 #include <StImage/StFreeImage.h>
 #include <StImage/StWebPImage.h>

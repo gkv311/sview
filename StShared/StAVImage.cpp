@@ -6,9 +6,9 @@
  * http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include <StImage/StLibAVImage.h>
+#include <StAV/StAVImage.h>
 
-#include <StAVPacket.h>
+#include <StAV/StAVPacket.h>
 #include <StFile/StFileNode.h>
 #include <StFile/StRawFile.h>
 #include <StStrings/StLogger.h>

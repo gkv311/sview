@@ -9,7 +9,7 @@
 #ifndef __StLibAVImage_h_
 #define __StLibAVImage_h_
 
-#include "StImageFile.h"
+#include <StImage/StImageFile.h>
 
 struct AVInputFormat;
 struct AVFormatContext;
