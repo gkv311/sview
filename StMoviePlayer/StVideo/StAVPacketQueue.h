@@ -150,10 +150,10 @@ class StAVPacketQueue {
      * Convert time units into seconds.
      */
     ST_LOCAL double unitsToSeconds(const int64_t theTimeUnits) const {
-        return (myStream != NULL) ? stLibAV::unitsToSeconds(myStream, theTimeUnits) : 0.0;
+        return (myStream != NULL) ? stAV::unitsToSeconds(myStream, theTimeUnits) : 0.0;
     }
 
-        public: //!< playback control methods
+        public: //! @name playback control methods
 
     /**
      * @return true if control in playback state.

@@ -52,7 +52,7 @@ namespace {
                                  AVFrame*        theFrame) {
         if(theFrame != NULL) {
         #ifdef ST_USE64PTR
-            theFrame->opaque = (void* )stLibAV::NOPTS_VALUE;
+            theFrame->opaque = (void* )stAV::NOPTS_VALUE;
         #else
             delete (int64_t* )theFrame->opaque;
             theFrame->opaque = NULL;
@@ -89,7 +89,7 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   //
   myVideoClock(0.0),
   //
-  myVideoPktPts(stLibAV::NOPTS_VALUE),
+  myVideoPktPts(stAV::NOPTS_VALUE),
   //
   myAudioClock(0.0),
   myFramesCounter(1),
@@ -97,7 +97,7 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   mySrcFormat(ST_V_SRC_AUTODETECT),
   mySrcFormatInfo(ST_V_SRC_AUTODETECT) {
 #ifdef ST_USE64PTR
-    myFrame.Frame->opaque = (void* )stLibAV::NOPTS_VALUE;
+    myFrame.Frame->opaque = (void* )stAV::NOPTS_VALUE;
 #else
     myFrame.Frame->opaque = NULL;
 #endif
@@ -207,11 +207,11 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     // reset AVFrame structure
     myFrame.reset();
 
-    if(myCodecCtx->pix_fmt != stLibAV::PIX_FMT::RGB24
-    && !stLibAV::isFormatYUVPlanar(myCodecCtx)) {
+    if(myCodecCtx->pix_fmt != stAV::PIX_FMT::RGB24
+    && !stAV::isFormatYUVPlanar(myCodecCtx)) {
         // initialize software scaler/converter
-        myToRgbCtx = sws_getContext(sizeX(), sizeY(), myCodecCtx->pix_fmt,       // source
-                                    sizeX(), sizeY(), stLibAV::PIX_FMT::RGB24, // destination
+        myToRgbCtx = sws_getContext(sizeX(), sizeY(), myCodecCtx->pix_fmt,  // source
+                                    sizeX(), sizeY(), stAV::PIX_FMT::RGB24, // destination
                                     SWS_BICUBIC, NULL, NULL, NULL);
         if(myToRgbCtx == NULL) {
             signals.onError(stCString("FFmpeg: Failed to create SWScaler context"));
@@ -220,14 +220,14 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
         }
 
         // assign appropriate parts of myFrameRGB to image planes in myFrameRGB
-        const size_t aBufferSize = avpicture_get_size(stLibAV::PIX_FMT::RGB24, sizeX(), sizeY());
+        const size_t aBufferSize = avpicture_get_size(stAV::PIX_FMT::RGB24, sizeX(), sizeY());
         stMemFreeAligned(myBufferRGB); myBufferRGB = stMemAllocAligned<uint8_t*>(aBufferSize);
         if(myBufferRGB == NULL) {
             signals.onError(stCString("FFmpeg: Failed allocation of RGB frame"));
             deinit();
             return false;
         }
-        avpicture_fill((AVPicture* )myFrameRGB.Frame, myBufferRGB, stLibAV::PIX_FMT::RGB24,
+        avpicture_fill((AVPicture* )myFrameRGB.Frame, myBufferRGB, stAV::PIX_FMT::RGB24,
                        sizeX(), sizeY());
     }
 
@@ -248,17 +248,17 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     const StString aHalfHeightKeyWMV  = "StereoscopicHalfHeight";
     const StString aHalfWidthKeyWMV   = "StereoscopicHalfWidth";
     const StString aHorParallaxKeyWMV = "StereoscopicHorizontalParallax";
-    if(stLibAV::meta::readTag(myFormatCtx, aHalfHeightKeyWMV, aValue)) {
+    if(stAV::meta::readTag(myFormatCtx, aHalfHeightKeyWMV, aValue)) {
         if(aValue == "1") {
             myPixelRatio *= 0.5;
         }
-    } else if(stLibAV::meta::readTag(myFormatCtx, aHalfWidthKeyWMV, aValue)) {
+    } else if(stAV::meta::readTag(myFormatCtx, aHalfWidthKeyWMV, aValue)) {
         if(aValue == "1") {
             myPixelRatio *= 2.0;
         }
     }
     myHParallax = 0;
-    if(stLibAV::meta::readTag(myFormatCtx, aHorParallaxKeyWMV, aValue)) {
+    if(stAV::meta::readTag(myFormatCtx, aHorParallaxKeyWMV, aValue)) {
         StCLocale aCLocale;
         myHParallax = (int )stStringToLong(aValue.toCString(), 10, aCLocale);
     }
@@ -267,9 +267,9 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     mySrcFormatInfo = ST_V_SRC_AUTODETECT;
     const StString aSrcModeKeyMKV = "STEREO_MODE";
     const StString aSrcModeKeyWMV = "StereoscopicLayout";
-    if(stLibAV::meta::readTag(myFormatCtx, aSrcModeKeyMKV, aValue)
-    || stLibAV::meta::readTag(myStream,    aSrcModeKeyMKV, aValue)
-    || stLibAV::meta::readTag(myFormatCtx, aSrcModeKeyWMV, aValue)) {
+    if(stAV::meta::readTag(myFormatCtx, aSrcModeKeyMKV, aValue)
+    || stAV::meta::readTag(myStream,    aSrcModeKeyMKV, aValue)
+    || stAV::meta::readTag(myFormatCtx, aSrcModeKeyWMV, aValue)) {
         for(size_t aSrcId = 0;; ++aSrcId) {
             const StFFmpegStereoFormat& aFlag = STEREOFLAGS[aSrcId];
             if(aFlag.stID == ST_V_SRC_AUTODETECT || aFlag.name == NULL) {
@@ -364,7 +364,7 @@ void StVideoQueue::decodeLoop() {
     StHandle<StAVPacket> aPacket;
     StImage anEmptyImg;
     bool isStarted   = false;
-    stLibAV::dimYUV aDimsYUV;
+    stAV::dimYUV aDimsYUV;
     for(;;) {
         if(isEmpty()) {
             myDowntimeState.set();
@@ -452,7 +452,7 @@ void StVideoQueue::decodeLoop() {
 
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 18, 100))
         myVideoPktPts = av_frame_get_best_effort_timestamp(myFrame.Frame);
-        if(myVideoPktPts == stLibAV::NOPTS_VALUE) {
+        if(myVideoPktPts == stAV::NOPTS_VALUE) {
             myVideoPktPts = 0;
         }
 
@@ -463,16 +463,16 @@ void StVideoQueue::decodeLoop() {
         myVideoPktPts = aPacket->getPts();
 
     #ifdef ST_USE64PTR
-        if(aPacket->getDts() == stLibAV::NOPTS_VALUE
-        && (int64_t )myFrame.Frame->opaque != stLibAV::NOPTS_VALUE) {
+        if(aPacket->getDts() == stAV::NOPTS_VALUE
+        && (int64_t )myFrame.Frame->opaque != stAV::NOPTS_VALUE) {
             myFramePts = double((int64_t )myFrame.Frame->opaque);
     #else
-        if(aPacket->getDts() == stLibAV::NOPTS_VALUE
+        if(aPacket->getDts() == stAV::NOPTS_VALUE
         && myFrame.Frame->opaque != NULL
-        && *(int64_t* )myFrame.Frame->opaque != stLibAV::NOPTS_VALUE) {
+        && *(int64_t* )myFrame.Frame->opaque != stAV::NOPTS_VALUE) {
             myFramePts = double(*(int64_t* )myFrame.Frame->opaque);
     #endif
-        } else if(aPacket->getDts() != stLibAV::NOPTS_VALUE) {
+        } else if(aPacket->getDts() != stAV::NOPTS_VALUE) {
             myFramePts = double(aPacket->getDts());
         } else {
             myFramePts = 0.0;
@@ -526,9 +526,9 @@ void StVideoQueue::decodeLoop() {
 
         int aFrameSizeX = 0;
         int aFrameSizeY = 0;
-        PixelFormat aPixFmt = stLibAV::PIX_FMT::NONE;
+        PixelFormat aPixFmt = stAV::PIX_FMT::NONE;
         myFrame.getImageInfo(myCodecCtx, aFrameSizeX, aFrameSizeY, aPixFmt);
-        if(aPixFmt == stLibAV::PIX_FMT::RGB24) {
+        if(aPixFmt == stAV::PIX_FMT::RGB24) {
             myDataAdp.setColorModel(StImage::ImgColor_RGB);
             myDataAdp.setColorScale(StImage::ImgScale_Full);
             myDataAdp.setPixelRatio(getPixelRatio());
@@ -536,17 +536,17 @@ void StVideoQueue::decodeLoop() {
                                                  size_t(aFrameSizeX), size_t(aFrameSizeY),
                                                  myFrame.getLineSize(0));
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 5, 0))
-        } else if(stLibAV::isFormatYUVPlanar(myFrame.Frame,
+        } else if(stAV::isFormatYUVPlanar(myFrame.Frame,
     #else
-        } else if(stLibAV::isFormatYUVPlanar(myCodecCtx,
+        } else if(stAV::isFormatYUVPlanar(myCodecCtx,
     #endif
-                                             aDimsYUV)) {
+                                          aDimsYUV)) {
 
             /// TODO (Kirill Gavrilov#5) remove hack
             // workaround for incorrect frame dimensions information in some files
             // critical for tiled source format that should be 1080p
             if(aSrcFormat == ST_V_SRC_TILED_4X
-            && aPixFmt    == stLibAV::PIX_FMT::YUV420P
+            && aPixFmt    == stAV::PIX_FMT::YUV420P
             && aFrameSizeX >= 1906 && aFrameSizeX <= 1920
             && myFrame.getLineSize(0) >= 1920
             && aFrameSizeY >= 1074) {

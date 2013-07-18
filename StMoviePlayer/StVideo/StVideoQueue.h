@@ -79,7 +79,7 @@ class StVideoQueue : public StAVPacketQueue {
     }
 
     ST_LOCAL StCString getPixelFormatString() const {
-        return stLibAV::PIX_FMT::getString(myCodecCtx->pix_fmt);
+        return stAV::PIX_FMT::getString(myCodecCtx->pix_fmt);
     }
 
     ST_LOCAL StFormatEnum getSrcFormat() const {

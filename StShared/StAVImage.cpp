@@ -14,7 +14,7 @@
 #include <StStrings/StLogger.h>
 
 bool StAVImage::init() {
-    return stLibAV::init();
+    return stAV::init();
 }
 
 StAVImage::StAVImage()
@@ -37,13 +37,13 @@ StAVImage::~StAVImage() {
 int StAVImage::getAVPixelFormat() {
     if(isPacked()) {
         switch(getPlane(0).getFormat()) {
-            case StImagePlane::ImgRGB:    return stLibAV::PIX_FMT::RGB24;
-            case StImagePlane::ImgBGR:    return stLibAV::PIX_FMT::BGR24;
-            case StImagePlane::ImgRGBA:   return stLibAV::PIX_FMT::RGBA32;
-            case StImagePlane::ImgBGRA:   return stLibAV::PIX_FMT::BGRA32;
-            case StImagePlane::ImgGray:   return stLibAV::PIX_FMT::GRAY8;
-            case StImagePlane::ImgGray16: return stLibAV::PIX_FMT::GRAY16;
-            default: return stLibAV::PIX_FMT::NONE;
+            case StImagePlane::ImgRGB:    return stAV::PIX_FMT::RGB24;
+            case StImagePlane::ImgBGR:    return stAV::PIX_FMT::BGR24;
+            case StImagePlane::ImgRGBA:   return stAV::PIX_FMT::RGBA32;
+            case StImagePlane::ImgBGRA:   return stAV::PIX_FMT::BGRA32;
+            case StImagePlane::ImgGray:   return stAV::PIX_FMT::GRAY8;
+            case StImagePlane::ImgGray16: return stAV::PIX_FMT::GRAY16;
+            default:                      return stAV::PIX_FMT::NONE;
         }
     }
     switch(getColorModel()) {
@@ -54,61 +54,61 @@ int StAVImage::getAVPixelFormat() {
                 switch(getColorScale()) {
                     case StImage::ImgScale_Mpeg:
                         return getPlane(0).getFormat() == StImagePlane::ImgGray16
-                             ? stLibAV::PIX_FMT::YUV444P16
-                             : stLibAV::PIX_FMT::YUV444P;
+                             ? stAV::PIX_FMT::YUV444P16
+                             : stAV::PIX_FMT::YUV444P;
                     case StImage::ImgScale_Mpeg9:
-                    case StImage::ImgScale_Jpeg9:  return stLibAV::PIX_FMT::YUV444P9;
+                    case StImage::ImgScale_Jpeg9:  return stAV::PIX_FMT::YUV444P9;
                     case StImage::ImgScale_Mpeg10:
-                    case StImage::ImgScale_Jpeg10: return stLibAV::PIX_FMT::YUV444P10;
+                    case StImage::ImgScale_Jpeg10: return stAV::PIX_FMT::YUV444P10;
                     case StImage::ImgScale_Full:
                     default:
                         return getPlane(0).getFormat() == StImagePlane::ImgGray16
-                             ? stLibAV::PIX_FMT::YUV444P16 //
-                             : stLibAV::PIX_FMT::YUVJ444P;
+                             ? stAV::PIX_FMT::YUV444P16 //
+                             : stAV::PIX_FMT::YUVJ444P;
                 }
             } else if(aDelimX == 2 && aDelimY == 2) {
                 switch(getColorScale()) {
                     case StImage::ImgScale_Mpeg:
                         return getPlane(0).getFormat() == StImagePlane::ImgGray16
-                             ? stLibAV::PIX_FMT::YUV420P16
-                             : stLibAV::PIX_FMT::YUV420P;
+                             ? stAV::PIX_FMT::YUV420P16
+                             : stAV::PIX_FMT::YUV420P;
                     case StImage::ImgScale_Mpeg9:
-                    case StImage::ImgScale_Jpeg9:  return stLibAV::PIX_FMT::YUV420P9;
+                    case StImage::ImgScale_Jpeg9:  return stAV::PIX_FMT::YUV420P9;
                     case StImage::ImgScale_Mpeg10:
-                    case StImage::ImgScale_Jpeg10: return stLibAV::PIX_FMT::YUV420P10;
+                    case StImage::ImgScale_Jpeg10: return stAV::PIX_FMT::YUV420P10;
                     case StImage::ImgScale_Full:
                     default:
                         return getPlane(0).getFormat() == StImagePlane::ImgGray16
-                             ? stLibAV::PIX_FMT::YUV420P16 // jpeg color range ignored!
-                             : stLibAV::PIX_FMT::YUVJ420P;
+                             ? stAV::PIX_FMT::YUV420P16 // jpeg color range ignored!
+                             : stAV::PIX_FMT::YUVJ420P;
                 }
             } else if(aDelimX == 2 && aDelimY == 1) {
                 switch(getColorScale()) {
                     case StImage::ImgScale_Mpeg:
                         return getPlane(0).getFormat() == StImagePlane::ImgGray16
-                             ? stLibAV::PIX_FMT::YUV422P16 // jpeg color range ignored!
-                             : stLibAV::PIX_FMT::YUV422P;
+                             ? stAV::PIX_FMT::YUV422P16 // jpeg color range ignored!
+                             : stAV::PIX_FMT::YUV422P;
                     case StImage::ImgScale_Mpeg9:
-                    case StImage::ImgScale_Jpeg9:  return stLibAV::PIX_FMT::YUV422P9;
+                    case StImage::ImgScale_Jpeg9:  return stAV::PIX_FMT::YUV422P9;
                     case StImage::ImgScale_Mpeg10:
-                    case StImage::ImgScale_Jpeg10: return stLibAV::PIX_FMT::YUV422P10;
+                    case StImage::ImgScale_Jpeg10: return stAV::PIX_FMT::YUV422P10;
                     case StImage::ImgScale_Full:
                     default:
                         return getPlane(0).getFormat() == StImagePlane::ImgGray16
-                             ? stLibAV::PIX_FMT::YUV422P16 // jpeg color range ignored!
-                             : stLibAV::PIX_FMT::YUVJ422P;
+                             ? stAV::PIX_FMT::YUV422P16 // jpeg color range ignored!
+                             : stAV::PIX_FMT::YUVJ422P;
                 }
             } else if(aDelimX == 1 && aDelimY == 2) {
                 return getColorScale() == StImage::ImgScale_Mpeg
-                     ? stLibAV::PIX_FMT::YUVJ440P : stLibAV::PIX_FMT::YUV440P;
+                     ? stAV::PIX_FMT::YUVJ440P : stAV::PIX_FMT::YUV440P;
             } else if(aDelimX == 4 && aDelimY == 1) {
-                return stLibAV::PIX_FMT::YUV411P;
+                return stAV::PIX_FMT::YUV411P;
             } else if(aDelimX == 4 && aDelimY == 4) {
-                return stLibAV::PIX_FMT::YUV410P;
+                return stAV::PIX_FMT::YUV410P;
             }
-            return stLibAV::PIX_FMT::NONE;
+            return stAV::PIX_FMT::NONE;
         }
-        default: return stLibAV::PIX_FMT::NONE;
+        default: return stAV::PIX_FMT::NONE;
     }
 }
 
@@ -126,8 +126,8 @@ static void fillPointersAV(const StImage& theImage,
  */
 static bool convert(const StImage& theImageFrom, PixelFormat theFormatFrom,
                           StImage& theImageTo,   PixelFormat theFormatTo) {
-    ST_DEBUG_LOG("StAVImage, convert from " + stLibAV::PIX_FMT::getString(theFormatFrom)
-               + " to " + stLibAV::PIX_FMT::getString(theFormatTo) + " using swscale");
+    ST_DEBUG_LOG("StAVImage, convert from " + stAV::PIX_FMT::getString(theFormatFrom)
+               + " to " + stAV::PIX_FMT::getString(theFormatTo) + " using swscale");
     SwsContext* pToRgbCtx = sws_getContext((int )theImageFrom.getSizeX(), (int )theImageFrom.getSizeY(), theFormatFrom, // source
                                            (int )theImageTo.getSizeX(),   (int )theImageTo.getSizeY(),   theFormatTo,   // destination
                                            SWS_BICUBIC, NULL, NULL, NULL);
@@ -186,7 +186,7 @@ bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
         int avErrCode = av_open_input_file(&formatCtx, theFilePath.toCString(), imageFormat, 0, NULL);
     #endif
         if(avErrCode != 0) {
-            setState(StString("AVFormat library, couldn't open image file. Error: ") + stLibAV::getAVErrorDescription(avErrCode));
+            setState(StString("AVFormat library, couldn't open image file. Error: ") + stAV::getAVErrorDescription(avErrCode));
             close();
             return false;
         }
@@ -312,38 +312,38 @@ bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
         return false;
     }
 
-    stLibAV::dimYUV aDimsYUV;
-    if(codecCtx->pix_fmt == stLibAV::PIX_FMT::RGB24) {
+    stAV::dimYUV aDimsYUV;
+    if(codecCtx->pix_fmt == stAV::PIX_FMT::RGB24) {
         setColorModel(StImage::ImgColor_RGB);
         changePlane(0).initWrapper(StImagePlane::ImgRGB, frame->data[0],
                                    codecCtx->width, codecCtx->height,
                                    frame->linesize[0]);
-    } else if(codecCtx->pix_fmt == stLibAV::PIX_FMT::BGR24) {
+    } else if(codecCtx->pix_fmt == stAV::PIX_FMT::BGR24) {
         setColorModel(StImage::ImgColor_RGB);
         changePlane(0).initWrapper(StImagePlane::ImgBGR, frame->data[0],
                                    codecCtx->width, codecCtx->height,
                                    frame->linesize[0]);
-    } else if(codecCtx->pix_fmt == stLibAV::PIX_FMT::RGBA32) {
+    } else if(codecCtx->pix_fmt == stAV::PIX_FMT::RGBA32) {
         setColorModel(StImage::ImgColor_RGBA);
         changePlane(0).initWrapper(StImagePlane::ImgRGBA, frame->data[0],
                                    codecCtx->width, codecCtx->height,
                                    frame->linesize[0]);
-    } else if(codecCtx->pix_fmt == stLibAV::PIX_FMT::BGRA32) {
+    } else if(codecCtx->pix_fmt == stAV::PIX_FMT::BGRA32) {
         setColorModel(StImage::ImgColor_RGBA);
         changePlane(0).initWrapper(StImagePlane::ImgBGRA, frame->data[0],
                                    codecCtx->width, codecCtx->height,
                                    frame->linesize[0]);
-    } else if(codecCtx->pix_fmt == stLibAV::PIX_FMT::GRAY8) {
+    } else if(codecCtx->pix_fmt == stAV::PIX_FMT::GRAY8) {
         setColorModel(StImage::ImgColor_GRAY);
         changePlane(0).initWrapper(StImagePlane::ImgGray, frame->data[0],
                                    codecCtx->width, codecCtx->height,
                                    frame->linesize[0]);
-    } else if(codecCtx->pix_fmt == stLibAV::PIX_FMT::GRAY16) {
+    } else if(codecCtx->pix_fmt == stAV::PIX_FMT::GRAY16) {
         setColorModel(StImage::ImgColor_GRAY);
         changePlane(0).initWrapper(StImagePlane::ImgGray16, frame->data[0],
                                    codecCtx->width, codecCtx->height,
                                    frame->linesize[0]);
-    } else if(stLibAV::isFormatYUVPlanar(codecCtx, aDimsYUV)) {
+    } else if(stAV::isFormatYUVPlanar(codecCtx, aDimsYUV)) {
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 29, 0))
         if(codecCtx->color_range == AVCOL_RANGE_JPEG) {
             aDimsYUV.isFullScale = true;
@@ -371,8 +371,8 @@ bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
     } else {
         ///ST_DEBUG_LOG("StAVImage, perform conversion from Pixel format '" + avcodec_get_pix_fmt_name(codecCtx->pix_fmt) + "' to RGB");
         // initialize software scaler/converter
-        SwsContext* pToRgbCtx = sws_getContext(codecCtx->width, codecCtx->height, codecCtx->pix_fmt,       // source
-                                               codecCtx->width, codecCtx->height, stLibAV::PIX_FMT::RGB24, // destination
+        SwsContext* pToRgbCtx = sws_getContext(codecCtx->width, codecCtx->height, codecCtx->pix_fmt,    // source
+                                               codecCtx->width, codecCtx->height, stAV::PIX_FMT::RGB24, // destination
                                                SWS_BICUBIC, NULL, NULL, NULL);
         if(pToRgbCtx == NULL) {
             setState("SWScale library, failed to create SWScaler context");
@@ -426,14 +426,14 @@ bool StAVImage::save(const StString& theFilePath,
                 close();
                 return false;
             }
-            if(aPFormatAV == stLibAV::PIX_FMT::RGB24  ||
-               aPFormatAV == stLibAV::PIX_FMT::RGBA32 ||
-               aPFormatAV == stLibAV::PIX_FMT::GRAY8) {
+            if(aPFormatAV == stAV::PIX_FMT::RGB24
+            || aPFormatAV == stAV::PIX_FMT::RGBA32
+            || aPFormatAV == stAV::PIX_FMT::GRAY8) {
                 anImage.initWrapper(*this);
             } else {
                 // convert to compatible pixel format
                 anImage.changePlane().initTrash(StImagePlane::ImgRGB, getSizeX(), getSizeY(), getAligned(getSizeX() * 3));
-                PixelFormat aPFrmtTarget = stLibAV::PIX_FMT::RGB24;
+                PixelFormat aPFrmtTarget = stAV::PIX_FMT::RGB24;
                 if(!convert(*this,   aPFormatAV,
                             anImage, aPFrmtTarget)) {
                     setState("SWScale library, failed to create SWScaler context");
@@ -465,15 +465,15 @@ bool StAVImage::save(const StString& theFilePath,
                 return false;
             }
 
-            if(aPFormatAV == stLibAV::PIX_FMT::YUVJ420P
-            || aPFormatAV == stLibAV::PIX_FMT::YUVJ422P
-            //|| aPFormatAV == stLibAV::PIX_FMT::YUVJ444P not supported by FFmpeg... yet?
-            //|| aPFormatAV == stLibAV::PIX_FMT::YUVJ440P
+            if(aPFormatAV == stAV::PIX_FMT::YUVJ420P
+            || aPFormatAV == stAV::PIX_FMT::YUVJ422P
+            //|| aPFormatAV == stAV::PIX_FMT::YUVJ444P not supported by FFmpeg... yet?
+            //|| aPFormatAV == stAV::PIX_FMT::YUVJ440P
                ) {
                 anImage.initWrapper(*this);
             } else {
                 // convert to compatible pixel format
-                PixelFormat aPFrmtTarget = stLibAV::PIX_FMT::YUVJ422P;
+                PixelFormat aPFrmtTarget = stAV::PIX_FMT::YUVJ422P;
                 anImage.setColorModel(StImage::ImgColor_YUV);
                 anImage.setColorScale(StImage::ImgScale_Mpeg);
                 anImage.changePlane(0).initTrash(StImagePlane::ImgGray, getSizeX(), getSizeY(), getAligned(getSizeX()));

@@ -155,7 +155,7 @@ void StSubtitleQueue::decodeLoop() {
                                     aPacket->getData(), aPacket->getSize());
         #endif
 
-            if(isFrameFinished != 0 && aPacket->getPts() != stLibAV::NOPTS_VALUE) {
+            if(isFrameFinished != 0 && aPacket->getPts() != stAV::NOPTS_VALUE) {
                 for(unsigned aRectId = 0; aRectId < aSubtitle.num_rects; ++aRectId) {
                     AVSubtitleRect* aRect = aSubtitle.rects[aRectId];
                     if(aRect == NULL) {

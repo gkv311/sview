@@ -75,7 +75,7 @@ class StFFMpegLocker {
 #endif
 
 // this is just redeclaration AV_NOPTS_VALUE
-const int64_t stLibAV::NOPTS_VALUE = 0x8000000000000000LL;
+const int64_t stAV::NOPTS_VALUE = 0x8000000000000000LL;
 
 /**
  * Reproduced PixelFormat enumeration.
@@ -85,30 +85,30 @@ const int64_t stLibAV::NOPTS_VALUE = 0x8000000000000000LL;
 #else
     #define ST_AV_GETPIXFMT(theName) avcodec_get_pix_fmt(theName)
 #endif
-const PixelFormat stLibAV::PIX_FMT::NONE       = PixelFormat(-1);
-const PixelFormat stLibAV::PIX_FMT::YUV420P    = PixelFormat( 0);
-const PixelFormat stLibAV::PIX_FMT::GRAY8      = ST_AV_GETPIXFMT("gray");
-const PixelFormat stLibAV::PIX_FMT::GRAY16     = ST_AV_GETPIXFMT("gray16");
-const PixelFormat stLibAV::PIX_FMT::YUV422P    = ST_AV_GETPIXFMT("yuv422p");
-const PixelFormat stLibAV::PIX_FMT::YUV444P    = ST_AV_GETPIXFMT("yuv444p");
-const PixelFormat stLibAV::PIX_FMT::YUV410P    = ST_AV_GETPIXFMT("yuv410p");
-const PixelFormat stLibAV::PIX_FMT::YUV411P    = ST_AV_GETPIXFMT("yuv411p");
-const PixelFormat stLibAV::PIX_FMT::YUV440P    = ST_AV_GETPIXFMT("yuv440p");
-const PixelFormat stLibAV::PIX_FMT::YUV420P9   = ST_AV_GETPIXFMT("yuv420p9");
-const PixelFormat stLibAV::PIX_FMT::YUV422P9   = ST_AV_GETPIXFMT("yuv422p9");
-const PixelFormat stLibAV::PIX_FMT::YUV444P9   = ST_AV_GETPIXFMT("yuv444p9");
-const PixelFormat stLibAV::PIX_FMT::YUV420P10  = ST_AV_GETPIXFMT("yuv420p10");
-const PixelFormat stLibAV::PIX_FMT::YUV422P10  = ST_AV_GETPIXFMT("yuv422p10");
-const PixelFormat stLibAV::PIX_FMT::YUV444P10  = ST_AV_GETPIXFMT("yuv444p10");
-const PixelFormat stLibAV::PIX_FMT::YUV420P16  = ST_AV_GETPIXFMT("yuv420p16");
-const PixelFormat stLibAV::PIX_FMT::YUV422P16  = ST_AV_GETPIXFMT("yuv422p16");
-const PixelFormat stLibAV::PIX_FMT::YUV444P16  = ST_AV_GETPIXFMT("yuv444p16");
-const PixelFormat stLibAV::PIX_FMT::YUVJ420P   = ST_AV_GETPIXFMT("yuvj420p");
-const PixelFormat stLibAV::PIX_FMT::YUVJ422P   = ST_AV_GETPIXFMT("yuvj422p");
-const PixelFormat stLibAV::PIX_FMT::YUVJ444P   = ST_AV_GETPIXFMT("yuvj444p");
-const PixelFormat stLibAV::PIX_FMT::YUVJ440P   = ST_AV_GETPIXFMT("yuvj440p");
-const PixelFormat stLibAV::PIX_FMT::RGB24      = ST_AV_GETPIXFMT("rgb24");
-const PixelFormat stLibAV::PIX_FMT::BGR24      = ST_AV_GETPIXFMT("bgr24");
+const PixelFormat stAV::PIX_FMT::NONE       = PixelFormat(-1);
+const PixelFormat stAV::PIX_FMT::YUV420P    = PixelFormat( 0);
+const PixelFormat stAV::PIX_FMT::GRAY8      = ST_AV_GETPIXFMT("gray");
+const PixelFormat stAV::PIX_FMT::GRAY16     = ST_AV_GETPIXFMT("gray16");
+const PixelFormat stAV::PIX_FMT::YUV422P    = ST_AV_GETPIXFMT("yuv422p");
+const PixelFormat stAV::PIX_FMT::YUV444P    = ST_AV_GETPIXFMT("yuv444p");
+const PixelFormat stAV::PIX_FMT::YUV410P    = ST_AV_GETPIXFMT("yuv410p");
+const PixelFormat stAV::PIX_FMT::YUV411P    = ST_AV_GETPIXFMT("yuv411p");
+const PixelFormat stAV::PIX_FMT::YUV440P    = ST_AV_GETPIXFMT("yuv440p");
+const PixelFormat stAV::PIX_FMT::YUV420P9   = ST_AV_GETPIXFMT("yuv420p9");
+const PixelFormat stAV::PIX_FMT::YUV422P9   = ST_AV_GETPIXFMT("yuv422p9");
+const PixelFormat stAV::PIX_FMT::YUV444P9   = ST_AV_GETPIXFMT("yuv444p9");
+const PixelFormat stAV::PIX_FMT::YUV420P10  = ST_AV_GETPIXFMT("yuv420p10");
+const PixelFormat stAV::PIX_FMT::YUV422P10  = ST_AV_GETPIXFMT("yuv422p10");
+const PixelFormat stAV::PIX_FMT::YUV444P10  = ST_AV_GETPIXFMT("yuv444p10");
+const PixelFormat stAV::PIX_FMT::YUV420P16  = ST_AV_GETPIXFMT("yuv420p16");
+const PixelFormat stAV::PIX_FMT::YUV422P16  = ST_AV_GETPIXFMT("yuv422p16");
+const PixelFormat stAV::PIX_FMT::YUV444P16  = ST_AV_GETPIXFMT("yuv444p16");
+const PixelFormat stAV::PIX_FMT::YUVJ420P   = ST_AV_GETPIXFMT("yuvj420p");
+const PixelFormat stAV::PIX_FMT::YUVJ422P   = ST_AV_GETPIXFMT("yuvj422p");
+const PixelFormat stAV::PIX_FMT::YUVJ444P   = ST_AV_GETPIXFMT("yuvj444p");
+const PixelFormat stAV::PIX_FMT::YUVJ440P   = ST_AV_GETPIXFMT("yuvj440p");
+const PixelFormat stAV::PIX_FMT::RGB24      = ST_AV_GETPIXFMT("rgb24");
+const PixelFormat stAV::PIX_FMT::BGR24      = ST_AV_GETPIXFMT("bgr24");
 
 // TODO (Kirill Gavrilov#9) remove this stuff
 namespace {
@@ -121,57 +121,57 @@ namespace {
     static const double     ST_AV_TIME_BASE_D = av_q2d(ST_AV_TIME_BASE_Q);
 };
 
-const PixelFormat stLibAV::PIX_FMT::RGBA32 = (AvPixFmtRGBA != stLibAV::PIX_FMT::NONE) ? AvPixFmtRGBA : AvPixFmtBGR32;
-const PixelFormat stLibAV::PIX_FMT::BGRA32 = (AvPixFmtBGRA != stLibAV::PIX_FMT::NONE) ? AvPixFmtBGRA : AvPixFmtRGB32;
+const PixelFormat stAV::PIX_FMT::RGBA32 = (AvPixFmtRGBA != stAV::PIX_FMT::NONE) ? AvPixFmtRGBA : AvPixFmtBGR32;
+const PixelFormat stAV::PIX_FMT::BGRA32 = (AvPixFmtBGRA != stAV::PIX_FMT::NONE) ? AvPixFmtBGRA : AvPixFmtRGB32;
 
-StCString stLibAV::PIX_FMT::getString(const PixelFormat theFrmt) {
-    if(theFrmt == stLibAV::PIX_FMT::NONE) {
+StCString stAV::PIX_FMT::getString(const PixelFormat theFrmt) {
+    if(theFrmt == stAV::PIX_FMT::NONE) {
         return stCString("none");
-    } else if(theFrmt == stLibAV::PIX_FMT::YUV420P) {
+    } else if(theFrmt == stAV::PIX_FMT::YUV420P) {
         return stCString("yuv420p");
-    } else if(theFrmt == stLibAV::PIX_FMT::GRAY8) {
+    } else if(theFrmt == stAV::PIX_FMT::GRAY8) {
         return stCString("gray8");
-    } else if(theFrmt == stLibAV::PIX_FMT::GRAY16) {
+    } else if(theFrmt == stAV::PIX_FMT::GRAY16) {
         return stCString("gray16");
-    } else if(theFrmt == stLibAV::PIX_FMT::YUV422P) {
+    } else if(theFrmt == stAV::PIX_FMT::YUV422P) {
         return stCString("yuv422p");
-    } else if(theFrmt == stLibAV::PIX_FMT::YUV444P) {
+    } else if(theFrmt == stAV::PIX_FMT::YUV444P) {
         return stCString("yuv444p");
-    } else if(theFrmt == stLibAV::PIX_FMT::YUV410P) {
+    } else if(theFrmt == stAV::PIX_FMT::YUV410P) {
         return stCString("yuv410p");
-    } else if(theFrmt == stLibAV::PIX_FMT::YUV411P) {
+    } else if(theFrmt == stAV::PIX_FMT::YUV411P) {
         return stCString("yuv411p");
-    } else if(theFrmt == stLibAV::PIX_FMT::YUV440P) {
+    } else if(theFrmt == stAV::PIX_FMT::YUV440P) {
         return stCString("yuv440p");
-    } else if(theFrmt == stLibAV::PIX_FMT::YUV420P9) {
+    } else if(theFrmt == stAV::PIX_FMT::YUV420P9) {
         return stCString("yuv420p9");
-    } else if(theFrmt == stLibAV::PIX_FMT::YUV422P9) {
+    } else if(theFrmt == stAV::PIX_FMT::YUV422P9) {
         return stCString("yuv422p9");
-    } else if(theFrmt == stLibAV::PIX_FMT::YUV444P9) {
+    } else if(theFrmt == stAV::PIX_FMT::YUV444P9) {
         return stCString("yuv444p9");
-    } else if(theFrmt == stLibAV::PIX_FMT::YUV420P10) {
+    } else if(theFrmt == stAV::PIX_FMT::YUV420P10) {
         return stCString("yuv420p10");
-    } else if(theFrmt == stLibAV::PIX_FMT::YUV422P10) {
+    } else if(theFrmt == stAV::PIX_FMT::YUV422P10) {
         return stCString("yuv422p10");
-    } else if(theFrmt == stLibAV::PIX_FMT::YUV444P10) {
+    } else if(theFrmt == stAV::PIX_FMT::YUV444P10) {
         return stCString("yuv444p10");
-    } else if(theFrmt == stLibAV::PIX_FMT::YUV420P16) {
+    } else if(theFrmt == stAV::PIX_FMT::YUV420P16) {
         return stCString("yuv420p16");
-    } else if(theFrmt == stLibAV::PIX_FMT::YUV422P16) {
+    } else if(theFrmt == stAV::PIX_FMT::YUV422P16) {
         return stCString("yuv422p16");
-    } else if(theFrmt == stLibAV::PIX_FMT::YUV444P16) {
+    } else if(theFrmt == stAV::PIX_FMT::YUV444P16) {
         return stCString("yuv444p16");
-    } else if(theFrmt == stLibAV::PIX_FMT::YUVJ420P) {
+    } else if(theFrmt == stAV::PIX_FMT::YUVJ420P) {
         return stCString("yuvj420p");
-    } else if(theFrmt == stLibAV::PIX_FMT::YUVJ422P) {
+    } else if(theFrmt == stAV::PIX_FMT::YUVJ422P) {
         return stCString("yuvj422p");
-    } else if(theFrmt == stLibAV::PIX_FMT::YUVJ444P) {
+    } else if(theFrmt == stAV::PIX_FMT::YUVJ444P) {
         return stCString("yuvj444p");
-    } else if(theFrmt == stLibAV::PIX_FMT::YUVJ440P) {
+    } else if(theFrmt == stAV::PIX_FMT::YUVJ440P) {
         return stCString("yuvj440p");
-    } else if(theFrmt == stLibAV::PIX_FMT::RGB24) {
+    } else if(theFrmt == stAV::PIX_FMT::RGB24) {
         return stCString("rgb24");
-    } else if(theFrmt == stLibAV::PIX_FMT::BGR24) {
+    } else if(theFrmt == stAV::PIX_FMT::BGR24) {
         return stCString("bgr24");
     } else {
         return stCString("unknown");
@@ -198,88 +198,88 @@ namespace {
         ST_DEBUG_LOG("FFmpeg initialized:");
 
         // show up information about dynamically linked libraries
-        ST_DEBUG_LOG("  libavutil\t"   + stLibAV::Version::libavutil().toString());
-        ST_DEBUG_LOG("  libavcodec\t"  + stLibAV::Version::libavcodec().toString());
-        ST_DEBUG_LOG("  libavformat\t" + stLibAV::Version::libavformat().toString());
-        ST_DEBUG_LOG("  libavdevice\t" + stLibAV::Version::libavdevice().toString());
-        ST_DEBUG_LOG("  libswscale\t"  + stLibAV::Version::libswscale().toString());
+        ST_DEBUG_LOG("  libavutil\t"   + stAV::Version::libavutil().toString());
+        ST_DEBUG_LOG("  libavcodec\t"  + stAV::Version::libavcodec().toString());
+        ST_DEBUG_LOG("  libavformat\t" + stAV::Version::libavformat().toString());
+        ST_DEBUG_LOG("  libavdevice\t" + stAV::Version::libavdevice().toString());
+        ST_DEBUG_LOG("  libswscale\t"  + stAV::Version::libswscale().toString());
         return true;
     }
 
 };
 
-bool stLibAV::init() {
+bool stAV::init() {
     static const bool isFFmpegInitiailed = initOnce();
     return isFFmpegInitiailed;
 }
 
-bool stLibAV::isFormatYUVPlanar(const AVCodecContext* theCtx) {
-    return theCtx->pix_fmt == stLibAV::PIX_FMT::YUV420P
-        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUVJ420P
-        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV422P
-        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUVJ422P
-        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV444P
-        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUVJ444P
-        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV440P
-        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUVJ440P
-        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV411P
-        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV410P
-        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV420P9
-        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV422P9
-        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV444P9
-        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV420P10
-        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV422P10
-        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV444P10
-        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV420P16
-        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV422P16
-        || theCtx->pix_fmt == stLibAV::PIX_FMT::YUV444P16;
+bool stAV::isFormatYUVPlanar(const AVCodecContext* theCtx) {
+    return theCtx->pix_fmt == stAV::PIX_FMT::YUV420P
+        || theCtx->pix_fmt == stAV::PIX_FMT::YUVJ420P
+        || theCtx->pix_fmt == stAV::PIX_FMT::YUV422P
+        || theCtx->pix_fmt == stAV::PIX_FMT::YUVJ422P
+        || theCtx->pix_fmt == stAV::PIX_FMT::YUV444P
+        || theCtx->pix_fmt == stAV::PIX_FMT::YUVJ444P
+        || theCtx->pix_fmt == stAV::PIX_FMT::YUV440P
+        || theCtx->pix_fmt == stAV::PIX_FMT::YUVJ440P
+        || theCtx->pix_fmt == stAV::PIX_FMT::YUV411P
+        || theCtx->pix_fmt == stAV::PIX_FMT::YUV410P
+        || theCtx->pix_fmt == stAV::PIX_FMT::YUV420P9
+        || theCtx->pix_fmt == stAV::PIX_FMT::YUV422P9
+        || theCtx->pix_fmt == stAV::PIX_FMT::YUV444P9
+        || theCtx->pix_fmt == stAV::PIX_FMT::YUV420P10
+        || theCtx->pix_fmt == stAV::PIX_FMT::YUV422P10
+        || theCtx->pix_fmt == stAV::PIX_FMT::YUV444P10
+        || theCtx->pix_fmt == stAV::PIX_FMT::YUV420P16
+        || theCtx->pix_fmt == stAV::PIX_FMT::YUV422P16
+        || theCtx->pix_fmt == stAV::PIX_FMT::YUV444P16;
 }
 
-bool stLibAV::isFormatYUVPlanar(const PixelFormat thePixFmt,
-                                const int         theWidth,
-                                const int         theHeight,
-                                dimYUV&           theDims) {
-    if(thePixFmt == stLibAV::PIX_FMT::NONE) {
+bool stAV::isFormatYUVPlanar(const PixelFormat thePixFmt,
+                             const int         theWidth,
+                             const int         theHeight,
+                             dimYUV&           theDims) {
+    if(thePixFmt == stAV::PIX_FMT::NONE) {
         return false;
-    } else if(thePixFmt == stLibAV::PIX_FMT::YUV420P
-           || thePixFmt == stLibAV::PIX_FMT::YUVJ420P
-           || thePixFmt == stLibAV::PIX_FMT::YUV420P9
-           || thePixFmt == stLibAV::PIX_FMT::YUV420P10
-           || thePixFmt == stLibAV::PIX_FMT::YUV420P16) {
+    } else if(thePixFmt == stAV::PIX_FMT::YUV420P
+           || thePixFmt == stAV::PIX_FMT::YUVJ420P
+           || thePixFmt == stAV::PIX_FMT::YUV420P9
+           || thePixFmt == stAV::PIX_FMT::YUV420P10
+           || thePixFmt == stAV::PIX_FMT::YUV420P16) {
         theDims.widthY  = theWidth;
         theDims.heightY = theHeight;
         theDims.widthU  = theDims.widthV  = theDims.widthY  / 2;
         theDims.heightU = theDims.heightV = theDims.heightY / 2;
-        theDims.isFullScale = (thePixFmt == stLibAV::PIX_FMT::YUVJ420P);
-    } else if(thePixFmt == stLibAV::PIX_FMT::YUV422P
-           || thePixFmt == stLibAV::PIX_FMT::YUVJ422P
-           || thePixFmt == stLibAV::PIX_FMT::YUV422P9
-           || thePixFmt == stLibAV::PIX_FMT::YUV422P10
-           || thePixFmt == stLibAV::PIX_FMT::YUV422P16) {
+        theDims.isFullScale = (thePixFmt == stAV::PIX_FMT::YUVJ420P);
+    } else if(thePixFmt == stAV::PIX_FMT::YUV422P
+           || thePixFmt == stAV::PIX_FMT::YUVJ422P
+           || thePixFmt == stAV::PIX_FMT::YUV422P9
+           || thePixFmt == stAV::PIX_FMT::YUV422P10
+           || thePixFmt == stAV::PIX_FMT::YUV422P16) {
         theDims.widthY  = theWidth;
         theDims.heightY = theDims.heightU = theDims.heightV = theHeight;
         theDims.widthU  = theDims.widthV  = theDims.widthY  / 2;
-        theDims.isFullScale = (thePixFmt == stLibAV::PIX_FMT::YUVJ422P);
-    } else if(thePixFmt == stLibAV::PIX_FMT::YUV444P
-           || thePixFmt == stLibAV::PIX_FMT::YUVJ444P
-           || thePixFmt == stLibAV::PIX_FMT::YUV444P9
-           || thePixFmt == stLibAV::PIX_FMT::YUV444P10
-           || thePixFmt == stLibAV::PIX_FMT::YUV444P16) {
+        theDims.isFullScale = (thePixFmt == stAV::PIX_FMT::YUVJ422P);
+    } else if(thePixFmt == stAV::PIX_FMT::YUV444P
+           || thePixFmt == stAV::PIX_FMT::YUVJ444P
+           || thePixFmt == stAV::PIX_FMT::YUV444P9
+           || thePixFmt == stAV::PIX_FMT::YUV444P10
+           || thePixFmt == stAV::PIX_FMT::YUV444P16) {
         theDims.widthY  = theDims.widthU  = theDims.widthV  = theWidth;
         theDims.heightY = theDims.heightU = theDims.heightV = theHeight;
-        theDims.isFullScale = (thePixFmt == stLibAV::PIX_FMT::YUVJ444P);
-    } else if(thePixFmt == stLibAV::PIX_FMT::YUV440P
-           || thePixFmt == stLibAV::PIX_FMT::YUVJ440P) {
+        theDims.isFullScale = (thePixFmt == stAV::PIX_FMT::YUVJ444P);
+    } else if(thePixFmt == stAV::PIX_FMT::YUV440P
+           || thePixFmt == stAV::PIX_FMT::YUVJ440P) {
         theDims.widthY  = theDims.widthU  = theDims.widthV  = theWidth;
         theDims.heightY = theHeight;
         theDims.heightU = theDims.heightV = theDims.heightY / 2;
-        theDims.isFullScale = (thePixFmt == stLibAV::PIX_FMT::YUVJ440P);
-    } else if(thePixFmt == stLibAV::PIX_FMT::YUV411P) {
+        theDims.isFullScale = (thePixFmt == stAV::PIX_FMT::YUVJ440P);
+    } else if(thePixFmt == stAV::PIX_FMT::YUV411P) {
         theDims.widthY  = theDims.widthU  = theDims.widthV  = theWidth;
         theDims.heightY = theDims.heightU = theDims.heightV = theHeight;
         theDims.widthU  = theDims.widthV  = theDims.widthY  / 4;
         theDims.isFullScale = false;
-    } else if(thePixFmt == stLibAV::PIX_FMT::YUV410P) {
+    } else if(thePixFmt == stAV::PIX_FMT::YUV410P) {
         theDims.widthY  = theDims.widthU  = theDims.widthV  = theWidth;
         theDims.heightY = theHeight;
         theDims.widthU  = theDims.widthV  = theDims.widthY  / 4;
@@ -289,17 +289,17 @@ bool stLibAV::isFormatYUVPlanar(const PixelFormat thePixFmt,
         return false;
     }
 
-    if(thePixFmt == stLibAV::PIX_FMT::YUV420P9
-    || thePixFmt == stLibAV::PIX_FMT::YUV422P9
-    || thePixFmt == stLibAV::PIX_FMT::YUV444P9) {
+    if(thePixFmt == stAV::PIX_FMT::YUV420P9
+    || thePixFmt == stAV::PIX_FMT::YUV422P9
+    || thePixFmt == stAV::PIX_FMT::YUV444P9) {
         theDims.bitsPerComp = 9;
-    } else if(thePixFmt == stLibAV::PIX_FMT::YUV420P10
-           || thePixFmt == stLibAV::PIX_FMT::YUV422P10
-           || thePixFmt == stLibAV::PIX_FMT::YUV444P10) {
+    } else if(thePixFmt == stAV::PIX_FMT::YUV420P10
+           || thePixFmt == stAV::PIX_FMT::YUV422P10
+           || thePixFmt == stAV::PIX_FMT::YUV444P10) {
         theDims.bitsPerComp = 10;
-    } else if(thePixFmt == stLibAV::PIX_FMT::YUV420P16
-           || thePixFmt == stLibAV::PIX_FMT::YUV422P16
-           || thePixFmt == stLibAV::PIX_FMT::YUV444P16) {
+    } else if(thePixFmt == stAV::PIX_FMT::YUV420P16
+           || thePixFmt == stAV::PIX_FMT::YUV422P16
+           || thePixFmt == stAV::PIX_FMT::YUV444P16) {
         theDims.bitsPerComp = 16;
     } else {
         theDims.bitsPerComp = 8;
@@ -308,7 +308,7 @@ bool stLibAV::isFormatYUVPlanar(const PixelFormat thePixFmt,
     return true;
 }
 
-StString stLibAV::getAVErrorDescription(int avErrCode) {
+StString stAV::getAVErrorDescription(int avErrCode) {
 #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(50, 13, 0))
     char aBuff[4096];
     stMemSet(aBuff, 0, sizeof(aBuff));
@@ -333,7 +333,7 @@ StString stLibAV::getAVErrorDescription(int avErrCode) {
 #endif
 }
 
-stLibAV::Version::Version(const unsigned theVersionInt)
+stAV::Version::Version(const unsigned theVersionInt)
 : myMajor(theVersionInt >> 16 & 0xFF),
   myMinor(theVersionInt >>  8 & 0xFF),
   myMicro(theVersionInt       & 0xFF) {
@@ -344,7 +344,7 @@ inline StString formatVerSub(const unsigned theVerSub) {
     return (theVerSub > 10) ? StString(theVerSub) : (StString('0') + StString(theVerSub));
 }
 
-StString stLibAV::Version::toString() const {
+StString stAV::Version::toString() const {
     if(myMajor == 0 && myMinor == 0 && myMicro == 0) {
         return "N/A";
     }
@@ -353,80 +353,80 @@ StString stLibAV::Version::toString() const {
          + formatVerSub(myMicro);
 }
 
-stLibAV::Version stLibAV::Version::libavutil() {
-    return stLibAV::Version(::avutil_version());
+stAV::Version stAV::Version::libavutil() {
+    return stAV::Version(::avutil_version());
 }
 
-stLibAV::Version stLibAV::Version::libavcodec() {
-    return stLibAV::Version(::avcodec_version());
+stAV::Version stAV::Version::libavcodec() {
+    return stAV::Version(::avcodec_version());
 }
 
-stLibAV::Version stLibAV::Version::libavformat() {
+stAV::Version stAV::Version::libavformat() {
     // function available only from version 52.20.0!
-    //return stLibAV::Version(::avformat_version());
-    return stLibAV::Version(0);
+    //return stAV::Version(::avformat_version());
+    return stAV::Version(0);
 }
 
-stLibAV::Version stLibAV::Version::libavdevice() {
+stAV::Version stAV::Version::libavdevice() {
     // we didn't linked to this library, yet
-    //return stLibAV::Version(::avdevice_version());
-    return stLibAV::Version(0);
+    //return stAV::Version(::avdevice_version());
+    return stAV::Version(0);
 }
 
-stLibAV::Version stLibAV::Version::libswscale() {
-    return stLibAV::Version(::swscale_version());
+stAV::Version stAV::Version::libswscale() {
+    return stAV::Version(::swscale_version());
 }
 
 /// TODO (Kirill Gavrilov#9) replace with av_get_sample_fmt() on next libavcodec major version
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 0, 0))
-    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::U8   = AV_SAMPLE_FMT_U8;  //= av_get_sample_fmt("u8");
-    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::S16  = AV_SAMPLE_FMT_S16; //= av_get_sample_fmt("s16");
-    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::S32  = AV_SAMPLE_FMT_S32; //= av_get_sample_fmt("s32");
-    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::FLT  = AV_SAMPLE_FMT_FLT; //= av_get_sample_fmt("flt");
-    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::DBL  = AV_SAMPLE_FMT_DBL; //= av_get_sample_fmt("dbl");
+    const AVSampleFormat stAV::audio::SAMPLE_FMT::U8   = AV_SAMPLE_FMT_U8;  //= av_get_sample_fmt("u8");
+    const AVSampleFormat stAV::audio::SAMPLE_FMT::S16  = AV_SAMPLE_FMT_S16; //= av_get_sample_fmt("s16");
+    const AVSampleFormat stAV::audio::SAMPLE_FMT::S32  = AV_SAMPLE_FMT_S32; //= av_get_sample_fmt("s32");
+    const AVSampleFormat stAV::audio::SAMPLE_FMT::FLT  = AV_SAMPLE_FMT_FLT; //= av_get_sample_fmt("flt");
+    const AVSampleFormat stAV::audio::SAMPLE_FMT::DBL  = AV_SAMPLE_FMT_DBL; //= av_get_sample_fmt("dbl");
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 40, 0))
-    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::U8P  = AV_SAMPLE_FMT_U8P;
-    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::S16P = AV_SAMPLE_FMT_S16P;
-    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::S32P = AV_SAMPLE_FMT_S32P;
-    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::FLTP = AV_SAMPLE_FMT_FLTP;
-    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::DBLP = AV_SAMPLE_FMT_DBLP;
+    const AVSampleFormat stAV::audio::SAMPLE_FMT::U8P  = AV_SAMPLE_FMT_U8P;
+    const AVSampleFormat stAV::audio::SAMPLE_FMT::S16P = AV_SAMPLE_FMT_S16P;
+    const AVSampleFormat stAV::audio::SAMPLE_FMT::S32P = AV_SAMPLE_FMT_S32P;
+    const AVSampleFormat stAV::audio::SAMPLE_FMT::FLTP = AV_SAMPLE_FMT_FLTP;
+    const AVSampleFormat stAV::audio::SAMPLE_FMT::DBLP = AV_SAMPLE_FMT_DBLP;
     #else
-    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::U8P  = -1;
-    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::S16P = -1;
-    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::S32P = -1;
-    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::FLTP = -1;
-    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::DBLP = -1;
+    const AVSampleFormat stAV::audio::SAMPLE_FMT::U8P  = -1;
+    const AVSampleFormat stAV::audio::SAMPLE_FMT::S16P = -1;
+    const AVSampleFormat stAV::audio::SAMPLE_FMT::S32P = -1;
+    const AVSampleFormat stAV::audio::SAMPLE_FMT::FLTP = -1;
+    const AVSampleFormat stAV::audio::SAMPLE_FMT::DBLP = -1;
     #endif
 #else
-    const SampleFormat   stLibAV::audio::SAMPLE_FMT::U8   = SAMPLE_FMT_U8;
-    const SampleFormat   stLibAV::audio::SAMPLE_FMT::S16  = SAMPLE_FMT_S16;
-    const SampleFormat   stLibAV::audio::SAMPLE_FMT::S32  = SAMPLE_FMT_S32;
-    const SampleFormat   stLibAV::audio::SAMPLE_FMT::FLT  = SAMPLE_FMT_FLT;
-    const SampleFormat   stLibAV::audio::SAMPLE_FMT::DBL  = SAMPLE_FMT_DBL;
+    const SampleFormat   stAV::audio::SAMPLE_FMT::U8   = SAMPLE_FMT_U8;
+    const SampleFormat   stAV::audio::SAMPLE_FMT::S16  = SAMPLE_FMT_S16;
+    const SampleFormat   stAV::audio::SAMPLE_FMT::S32  = SAMPLE_FMT_S32;
+    const SampleFormat   stAV::audio::SAMPLE_FMT::FLT  = SAMPLE_FMT_FLT;
+    const SampleFormat   stAV::audio::SAMPLE_FMT::DBL  = SAMPLE_FMT_DBL;
 #endif
 
-StString stLibAV::audio::getSampleFormatString(const AVCodecContext* theCtx) {
+StString stAV::audio::getSampleFormatString(const AVCodecContext* theCtx) {
 #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 17, 0))
     const char* aStr = av_get_sample_fmt_name(theCtx->sample_fmt);
     return aStr != NULL ? StString(aStr) : StString("");
 #else
     switch(theCtx->sample_fmt) {
-        case stLibAV::audio::SAMPLE_FMT::U8:  return stCString("u8");
-        case stLibAV::audio::SAMPLE_FMT::S16: return stCString("s16");
-        case stLibAV::audio::SAMPLE_FMT::S32: return stCString("s32");
-        case stLibAV::audio::SAMPLE_FMT::FLT: return stCString("flt");
-        case stLibAV::audio::SAMPLE_FMT::DBL: return stCString("dbl");
+        case stAV::audio::SAMPLE_FMT::U8:  return stCString("u8");
+        case stAV::audio::SAMPLE_FMT::S16: return stCString("s16");
+        case stAV::audio::SAMPLE_FMT::S32: return stCString("s32");
+        case stAV::audio::SAMPLE_FMT::FLT: return stCString("flt");
+        case stAV::audio::SAMPLE_FMT::DBL: return stCString("dbl");
         default: return stCString("??");
     }
 #endif
 }
 
-StString stLibAV::audio::getSampleRateString(const AVCodecContext* theCtx) {
+StString stAV::audio::getSampleRateString(const AVCodecContext* theCtx) {
     return StString(theCtx->sample_rate) + " Hz";
 }
 
 // copied from avcodec_get_channel_layout_string()
-StString stLibAV::audio::getChannelLayoutString(const AVCodecContext* theCtx) {
+StString stAV::audio::getChannelLayoutString(const AVCodecContext* theCtx) {
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 0, 0))
     if(theCtx->channel_layout == 0) {
         if(theCtx->channels == 1) {
@@ -470,10 +470,10 @@ StString stLibAV::audio::getChannelLayoutString(const AVCodecContext* theCtx) {
 #endif
 }
 
-stLibAV::meta::Tag* stLibAV::meta::findTag(stLibAV::meta::Dict*      theDict,
-                                           const char*               theKey,
-                                           const stLibAV::meta::Tag* thePrevTag,
-                                           const int                 theFlags) {
+stAV::meta::Tag* stAV::meta::findTag(stAV::meta::Dict*      theDict,
+                                     const char*               theKey,
+                                     const stAV::meta::Tag* thePrevTag,
+                                     const int                 theFlags) {
 #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
     return av_dict_get    (theDict, theKey, thePrevTag, theFlags);
 #else
@@ -481,10 +481,10 @@ stLibAV::meta::Tag* stLibAV::meta::findTag(stLibAV::meta::Dict*      theDict,
 #endif
 }
 
-bool stLibAV::meta::readTag(stLibAV::meta::Dict* theDict,
-                            const StString&      theKey,
-                            StString&            theValue) {
-    stLibAV::meta::Tag* aTag = stLibAV::meta::findTag(theDict, theKey.toCString(), NULL, 0);
+bool stAV::meta::readTag(stAV::meta::Dict* theDict,
+                         const StString&      theKey,
+                         StString&            theValue) {
+    stAV::meta::Tag* aTag = stAV::meta::findTag(theDict, theKey.toCString(), NULL, 0);
     if(aTag == NULL) {
         return false;
     }
@@ -492,22 +492,22 @@ bool stLibAV::meta::readTag(stLibAV::meta::Dict* theDict,
     return true;
 }
 
-double stLibAV::unitsToSeconds(const AVRational& theTimeBase,
-                               const int64_t     theTimeUnits) {
-    return (theTimeUnits != stLibAV::NOPTS_VALUE)
+double stAV::unitsToSeconds(const AVRational& theTimeBase,
+                            const int64_t     theTimeUnits) {
+    return (theTimeUnits != stAV::NOPTS_VALUE)
          ? (av_q2d(theTimeBase) * theTimeUnits) : 0.0;
 }
 
-double stLibAV::unitsToSeconds(const int64_t theTimeUnits) {
-    return (theTimeUnits != stLibAV::NOPTS_VALUE)
+double stAV::unitsToSeconds(const int64_t theTimeUnits) {
+    return (theTimeUnits != stAV::NOPTS_VALUE)
          ? (ST_AV_TIME_BASE_D * theTimeUnits) : 0.0;
 }
 
-int64_t stLibAV::secondsToUnits(const AVRational& theTimeBase,
-                                const double      theTimeSeconds) {
+int64_t stAV::secondsToUnits(const AVRational& theTimeBase,
+                             const double      theTimeSeconds) {
     return int64_t(theTimeSeconds / av_q2d(theTimeBase));
 }
 
-int64_t stLibAV::secondsToUnits(const double theTimeSeconds) {
+int64_t stAV::secondsToUnits(const double theTimeSeconds) {
     return int64_t(theTimeSeconds / ST_AV_TIME_BASE_D);
 }

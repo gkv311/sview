@@ -6,8 +6,8 @@
  * http://www.boost.org/LICENSE_1_0.txt
  */
 
-#ifndef __StLibAV_h_
-#define __StLibAV_h_
+#ifndef __stAV_h_
+#define __stAV_h_
 
 #include <StStrings/StString.h>
 
@@ -56,7 +56,7 @@ extern "C" {
 /**
  * This namespace to perform libav* initialization only once
  */
-namespace stLibAV {
+namespace stAV {
 
 //!< entry functions
 
@@ -131,7 +131,7 @@ namespace stLibAV {
      */
     inline double unitsToSeconds(const AVStream* theStream,
                                  const int64_t   theTimeUnits) {
-        return stLibAV::unitsToSeconds(theStream->time_base, theTimeUnits);
+        return stAV::unitsToSeconds(theStream->time_base, theTimeUnits);
     }
 
     /**
@@ -142,7 +142,7 @@ namespace stLibAV {
      */
     inline int64_t secondsToUnits(const AVStream* theStream,
                                   const double    theTimeSeconds) {
-        return stLibAV::secondsToUnits(theStream->time_base, theTimeSeconds);
+        return stAV::secondsToUnits(theStream->time_base, theTimeSeconds);
     }
 
     /**
@@ -354,4 +354,4 @@ namespace stLibAV {
 
 };
 
-#endif //__StLibAV_h_
+#endif // __stAV_h_

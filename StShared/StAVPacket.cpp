@@ -26,8 +26,8 @@ void StAVPacket::avDestructPacket(AVPacket* thePkt) {
 
 void StAVPacket::avInitPacket() {
     stMemZero(&myPacket, sizeof(AVPacket));
-    myPacket.pts = stLibAV::NOPTS_VALUE;
-    myPacket.dts = stLibAV::NOPTS_VALUE;
+    myPacket.pts = stAV::NOPTS_VALUE;
+    myPacket.dts = stAV::NOPTS_VALUE;
     myPacket.pos = -1;
     /*myPacket.duration = 0;
     myPacket.convergence_duration = 0;

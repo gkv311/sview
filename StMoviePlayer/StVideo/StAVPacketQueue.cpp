@@ -87,7 +87,7 @@ double StAVPacketQueue::detectPtsStartBase(const AVFormatContext* theFormatCtx) 
     double aMinPts = 2.e+100;
     for(unsigned int aStreamId = 0; aStreamId < theFormatCtx->nb_streams; ++aStreamId) {
         AVStream* aStream = theFormatCtx->streams[aStreamId];
-        aMinPts = stMin(aMinPts, stLibAV::unitsToSeconds(aStream, aStream->start_time));
+        aMinPts = stMin(aMinPts, stAV::unitsToSeconds(aStream, aStream->start_time));
     }
     return aMinPts;
 }

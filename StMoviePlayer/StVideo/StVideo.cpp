@@ -61,7 +61,7 @@ StVideo::StVideo(const StString&                   theALDeviceName,
   toSave(StImageFile::ST_TYPE_NONE),
   toQuit(false) {
     // initialize FFmpeg library if not yet performed
-    stLibAV::init();
+    stAV::init();
 
     myPlayList->setExtensions(myMimesVideo.getExtensionsList());
 
@@ -231,7 +231,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
 #endif
     if(avErrCode != 0) {
         signals.onError(StString("FFmpeg: Couldn't open video file '") + theFileToLoad
-                      + "'\nError: " + stLibAV::getAVErrorDescription(avErrCode));
+                      + "'\nError: " + stAV::getAVErrorDescription(avErrCode));
         if(aFormatCtx != NULL) {
         #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 17, 0))
             avformat_close_input(&aFormatCtx);
@@ -272,16 +272,16 @@ bool StVideo::addFile(const StString& theFileToLoad,
     myFileInfoTmp->myInfo.add(StArgument("File name", aTitleString));
 
     // collect metadata
-    for(stLibAV::meta::Tag* aTag = stLibAV::meta::findTag(aFormatCtx->metadata, "", NULL, stLibAV::meta::SEARCH_IGNORE_SUFFIX);
+    for(stAV::meta::Tag* aTag = stAV::meta::findTag(aFormatCtx->metadata, "", NULL, stAV::meta::SEARCH_IGNORE_SUFFIX);
         aTag != NULL;
-        aTag = stLibAV::meta::findTag(aFormatCtx->metadata, "", aTag, stLibAV::meta::SEARCH_IGNORE_SUFFIX)) {
+        aTag = stAV::meta::findTag(aFormatCtx->metadata, "", aTag, stAV::meta::SEARCH_IGNORE_SUFFIX)) {
         myFileInfoTmp->myInfo.add(StArgument(aTag->key, aTag->value));
     }
 
-    theMaxDuration = stMax(theMaxDuration, stLibAV::unitsToSeconds(aFormatCtx->duration));
+    theMaxDuration = stMax(theMaxDuration, stAV::unitsToSeconds(aFormatCtx->duration));
     for(unsigned int aStreamId = 0; aStreamId < aFormatCtx->nb_streams; ++aStreamId) {
         AVStream* aStream = aFormatCtx->streams[aStreamId];
-        theMaxDuration = stMax(theMaxDuration, stLibAV::unitsToSeconds(aStream, aStream->duration));
+        theMaxDuration = stMax(theMaxDuration, stAV::unitsToSeconds(aStream, aStream->duration));
 
         if(aStream->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
             // video track
@@ -317,13 +317,13 @@ bool StVideo::addFile(const StString& theFileToLoad,
                 aCodecName = aCodec->name;
             }
 
-            StString aSampleFormat  = stLibAV::audio::getSampleFormatString (aCodecCtx);
-            StString aSampleRate    = stLibAV::audio::getSampleRateString   (aCodecCtx);
-            StString aChannelLayout = stLibAV::audio::getChannelLayoutString(aCodecCtx);
+            StString aSampleFormat  = stAV::audio::getSampleFormatString (aCodecCtx);
+            StString aSampleRate    = stAV::audio::getSampleRateString   (aCodecCtx);
+            StString aChannelLayout = stAV::audio::getChannelLayoutString(aCodecCtx);
 
             StString aLanguage;
         #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
-            stLibAV::meta::readTag(aStream, "language", aLanguage);
+            stAV::meta::readTag(aStream, "language", aLanguage);
         #else
             aLanguage = aStream->language;
         #endif
@@ -355,7 +355,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
             } else {
                 StString aLanguage;
             #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
-                stLibAV::meta::readTag(aStream, "language", aLanguage);
+                stAV::meta::readTag(aStream, "language", aLanguage);
             #else
                 aLanguage = aStream->language;
             #endif
@@ -484,7 +484,7 @@ void StVideo::doSeekContext(AVFormatContext* theFormatCtx,
     }
     if(!isSeekDone) {
         // at last - try to seek the format context itself...
-        int64_t aSeekTarget = stLibAV::secondsToUnits(theSeekPts);
+        int64_t aSeekTarget = stAV::secondsToUnits(theSeekPts);
         isSeekDone = av_seek_frame(theFormatCtx, -1, aSeekTarget, 0) >= 0;
         if(!isSeekDone) {
             ST_DEBUG_LOG("Seeking disaster!");
@@ -497,14 +497,14 @@ bool StVideo::doSeekStream(AVFormatContext* theFormatCtx,
                            const double     theSeekPts,
                            const bool       toSeekBack) {
     AVStream* aStream = theFormatCtx->streams[theStreamId];
-    int64_t aSeekTarget = stLibAV::secondsToUnits(aStream, theSeekPts + stLibAV::unitsToSeconds(aStream, aStream->start_time));
+    int64_t aSeekTarget = stAV::secondsToUnits(aStream, theSeekPts + stAV::unitsToSeconds(aStream, aStream->start_time));
 
     bool isSeekDone = av_seek_frame(theFormatCtx, theStreamId, aSeekTarget, 0) >= 0;
 
     // try 10 more times in backward direction to work-around huge duration between key frames
     // will not work for some streams with undefined cur_dts (AV_NOPTS_VALUE)!!!
     for(int aTries = 10; isSeekDone && toSeekBack && aTries > 0 && (aStream->cur_dts > aSeekTarget); --aTries) {
-        aSeekTarget -= stLibAV::secondsToUnits(aStream, 1.0);
+        aSeekTarget -= stAV::secondsToUnits(aStream, 1.0);
         isSeekDone = av_seek_frame(theFormatCtx, theStreamId, aSeekTarget, 0) >= 0;
     }
 
@@ -512,7 +512,7 @@ bool StVideo::doSeekStream(AVFormatContext* theFormatCtx,
         ST_DEBUG_LOG("Error while seeking"
                    + (aStream->codec->codec_type == AVMEDIA_TYPE_VIDEO ? " Video"
                    : (aStream->codec->codec_type == AVMEDIA_TYPE_AUDIO ? " Audio" : " "))
-                   +  "stream to " + theSeekPts + "sec(" + (theSeekPts + stLibAV::unitsToSeconds(aStream, aStream->start_time)) + "sec)");
+                   +  "stream to " + theSeekPts + "sec(" + (theSeekPts + stAV::unitsToSeconds(aStream, aStream->start_time)) + "sec)");
     }
     return isSeekDone;
 }

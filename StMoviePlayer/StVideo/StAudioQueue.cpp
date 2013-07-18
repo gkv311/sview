@@ -44,7 +44,7 @@ static const StGLVec3 POSITION_REAR_RIGHT   ( 1.0f, 0.0f,  1.0f);
  * is old or not.
  */
 inline bool isReoderingNeededInit() {
-    stLibAV::Version aVersion = stLibAV::Version::libavcodec();
+    stAV::Version aVersion = stAV::Version::libavcodec();
     // I have no idea which version introduce this feature for ac3 and ogg streams...
     // but experimentally detect that FFmpeg 0.5.1 is old and FFmpeg 0.6 include this
     // We check libavcodec version here and hopes this will true for most packages
@@ -270,27 +270,27 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
     }
 
     // setup source sample format (bitness)
-    if(myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::NONE) {
+    if(myCodecCtx->sample_fmt == stAV::audio::SAMPLE_FMT::NONE) {
         signals.onError(stCString("Invalid audio sample format!"));
         deinit();
         return false;
-    } else if(myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::U8
-           || myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::U8P) {
+    } else if(myCodecCtx->sample_fmt == stAV::audio::SAMPLE_FMT::U8
+           || myCodecCtx->sample_fmt == stAV::audio::SAMPLE_FMT::U8P) {
         myBufferSrc.setFormat(PCM8_UNSIGNED);
-    } else if(myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::S16
-           || myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::S16P) {
+    } else if(myCodecCtx->sample_fmt == stAV::audio::SAMPLE_FMT::S16
+           || myCodecCtx->sample_fmt == stAV::audio::SAMPLE_FMT::S16P) {
         myBufferSrc.setFormat(PCM16_SIGNED);
-    } else if(myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::S32
-           || myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::S32P) {
+    } else if(myCodecCtx->sample_fmt == stAV::audio::SAMPLE_FMT::S32
+           || myCodecCtx->sample_fmt == stAV::audio::SAMPLE_FMT::S32P) {
         myBufferSrc.setFormat(PCM32_SIGNED);
-    } else if(myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::FLT
-           || myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::FLTP) {
+    } else if(myCodecCtx->sample_fmt == stAV::audio::SAMPLE_FMT::FLT
+           || myCodecCtx->sample_fmt == stAV::audio::SAMPLE_FMT::FLTP) {
         myBufferSrc.setFormat(PCM32FLOAT);
-    } else if(myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::DBL
-           || myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::DBLP) {
+    } else if(myCodecCtx->sample_fmt == stAV::audio::SAMPLE_FMT::DBL
+           || myCodecCtx->sample_fmt == stAV::audio::SAMPLE_FMT::DBLP) {
         myBufferSrc.setFormat(PCM64FLOAT);
     } else {
-        signals.onError(StString("Audio sample format '") + stLibAV::audio::getSampleFormatString(myCodecCtx)
+        signals.onError(StString("Audio sample format '") + stAV::audio::getSampleFormatString(myCodecCtx)
                       + "' not supported");
         deinit();
         return false;
@@ -776,15 +776,15 @@ void StAudioQueue::decodePacket(const StHandle<StAVPacket>& thePacket,
                 break;
             }
 
-            int64_t aPtsU = stLibAV::NOPTS_VALUE;
+            int64_t aPtsU = stAV::NOPTS_VALUE;
         #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 40, 0))
             aPtsU = myFrame.Frame->pts;
         #endif
-            if(aPtsU == stLibAV::NOPTS_VALUE) {
+            if(aPtsU == stAV::NOPTS_VALUE) {
                 aPtsU = thePacket->getPts();
             }
 
-            if(aPtsU != stLibAV::NOPTS_VALUE) {
+            if(aPtsU != stAV::NOPTS_VALUE) {
                 const double aNewPts = unitsToSeconds(aPtsU) - myPtsStartBase;
                 if(aNewPts <= thePts) {
                     ST_DEBUG_LOG("Got the AUDIO packet with pts in past; "
