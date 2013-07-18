@@ -391,11 +391,11 @@ stAV::Version stAV::Version::libswscale() {
     const AVSampleFormat stAV::audio::SAMPLE_FMT::FLTP = AV_SAMPLE_FMT_FLTP;
     const AVSampleFormat stAV::audio::SAMPLE_FMT::DBLP = AV_SAMPLE_FMT_DBLP;
     #else
-    const AVSampleFormat stAV::audio::SAMPLE_FMT::U8P  = -1;
-    const AVSampleFormat stAV::audio::SAMPLE_FMT::S16P = -1;
-    const AVSampleFormat stAV::audio::SAMPLE_FMT::S32P = -1;
-    const AVSampleFormat stAV::audio::SAMPLE_FMT::FLTP = -1;
-    const AVSampleFormat stAV::audio::SAMPLE_FMT::DBLP = -1;
+    const AVSampleFormat stAV::audio::SAMPLE_FMT::U8P  = (AVSampleFormat )-1;
+    const AVSampleFormat stAV::audio::SAMPLE_FMT::S16P = (AVSampleFormat )-1;
+    const AVSampleFormat stAV::audio::SAMPLE_FMT::S32P = (AVSampleFormat )-1;
+    const AVSampleFormat stAV::audio::SAMPLE_FMT::FLTP = (AVSampleFormat )-1;
+    const AVSampleFormat stAV::audio::SAMPLE_FMT::DBLP = (AVSampleFormat )-1;
     #endif
 #else
     const SampleFormat   stAV::audio::SAMPLE_FMT::U8   = SAMPLE_FMT_U8;
