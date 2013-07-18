@@ -459,7 +459,7 @@ bool StOutPageFlip::create() {
     StWindow::params.VSyncMode->signals.onChanged += stSlot(this, &StOutPageFlip::doSwitchVSync);
 
     // load fullscreen-only warning
-    StLibAVImage anImage;
+    StAVImage anImage;
     const StString aTexturesFolder  = StProcess::getStShareFolder() + "textures" + SYS_FS_SPLITTER;
     const StString aWarnTexturePath = aTexturesFolder + "pageflip_fullscreen.std";
     if(anImage.load(aWarnTexturePath, StImageFile::ST_TYPE_PNG)) {

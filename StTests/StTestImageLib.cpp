@@ -69,8 +69,8 @@ void StTestImageLib::perform() {
     StHandle<StImageFile> aLoader;
 
     st::cout << stostream_text("FFmpeg:\n");
-    if(StLibAVImage::init()) {
-        aLoader = new StLibAVImage();
+    if(StAVImage::init()) {
+        aLoader = new StAVImage();
         testLoadSpeed(*aLoader);
     } else {
         st::cout << stostream_text("  library is unavailable! Skipped.\n");

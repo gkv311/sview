@@ -13,28 +13,28 @@
 #include <StFile/StRawFile.h>
 #include <StStrings/StLogger.h>
 
-bool StLibAVImage::init() {
+bool StAVImage::init() {
     return stLibAV::init();
 }
 
-StLibAVImage::StLibAVImage()
+StAVImage::StAVImage()
 : StImageFile(),
   imageFormat(NULL),
   formatCtx(NULL),
   codecCtx(NULL),
   codec(NULL),
   frame(NULL) {
-    StLibAVImage::init();
+    StAVImage::init();
     imageFormat = av_find_input_format("image2");
     frame = avcodec_alloc_frame();
 }
 
-StLibAVImage::~StLibAVImage() {
+StAVImage::~StAVImage() {
     close();
     av_free(frame);
 }
 
-int StLibAVImage::getAVPixelFormat() {
+int StAVImage::getAVPixelFormat() {
     if(isPacked()) {
         switch(getPlane(0).getFormat()) {
             case StImagePlane::ImgRGB:    return stLibAV::PIX_FMT::RGB24;
@@ -126,7 +126,7 @@ static void fillPointersAV(const StImage& theImage,
  */
 static bool convert(const StImage& theImageFrom, PixelFormat theFormatFrom,
                           StImage& theImageTo,   PixelFormat theFormatTo) {
-    ST_DEBUG_LOG("StLibAVImage, convert from " + stLibAV::PIX_FMT::getString(theFormatFrom)
+    ST_DEBUG_LOG("StAVImage, convert from " + stLibAV::PIX_FMT::getString(theFormatFrom)
                + " to " + stLibAV::PIX_FMT::getString(theFormatTo) + " using swscale");
     SwsContext* pToRgbCtx = sws_getContext((int )theImageFrom.getSizeX(), (int )theImageFrom.getSizeY(), theFormatFrom, // source
                                            (int )theImageTo.getSizeX(),   (int )theImageTo.getSizeY(),   theFormatTo,   // destination
@@ -150,7 +150,7 @@ static bool convert(const StImage& theImageFrom, PixelFormat theFormatFrom,
     return true;
 }
 
-void StLibAVImage::close() {
+void StAVImage::close() {
     if(codec != NULL && codecCtx != NULL) {
         avcodec_close(codecCtx); // close VIDEO codec
         codec = NULL;
@@ -170,8 +170,8 @@ void StLibAVImage::close() {
     }
 }
 
-bool StLibAVImage::load(const StString& theFilePath, ImageType theImageType,
-                        uint8_t* theDataPtr, int theDataSize) {
+bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
+                     uint8_t* theDataPtr, int theDataSize) {
 
     // reset current data
     StImage::nullify();
@@ -227,7 +227,7 @@ bool StLibAVImage::load(const StString& theFilePath, ImageType theImageType,
             break;
         }
         default: {
-            setState(StString("StLibAVImage, unsupported image type id #") + theImageType + '!');
+            setState(StString("StAVImage, unsupported image type id #") + theImageType + '!');
             close();
             return false;
         }
@@ -279,7 +279,7 @@ bool StLibAVImage::load(const StString& theFilePath, ImageType theImageType,
             }
         } else {
             if(!aRawFile.readFile()) {
-                setState("StLibAVImage, could not read the file");
+                setState("StAVImage, could not read the file");
                 close();
                 return false;
             }
@@ -369,7 +369,7 @@ bool StLibAVImage::load(const StString& theFilePath, ImageType theImageType,
         changePlane(2).initWrapper(aPlaneFrmt, frame->data[2],
                                    size_t(aDimsYUV.widthV), size_t(aDimsYUV.heightV), frame->linesize[2]);
     } else {
-        ///ST_DEBUG_LOG("StLibAVImage, perform conversion from Pixel format '" + avcodec_get_pix_fmt_name(codecCtx->pix_fmt) + "' to RGB");
+        ///ST_DEBUG_LOG("StAVImage, perform conversion from Pixel format '" + avcodec_get_pix_fmt_name(codecCtx->pix_fmt) + "' to RGB");
         // initialize software scaler/converter
         SwsContext* pToRgbCtx = sws_getContext(codecCtx->width, codecCtx->height, codecCtx->pix_fmt,       // source
                                                codecCtx->width, codecCtx->height, stLibAV::PIX_FMT::RGB24, // destination
@@ -407,8 +407,8 @@ bool StLibAVImage::load(const StString& theFilePath, ImageType theImageType,
     return true;
 }
 
-bool StLibAVImage::save(const StString& theFilePath,
-                        ImageType       theImageType) {
+bool StAVImage::save(const StString& theFilePath,
+                     ImageType       theImageType) {
     close();
     setState();
     if(isNull()) {
@@ -558,6 +558,6 @@ bool StLibAVImage::save(const StString& theFilePath,
     return true;
 }
 
-bool StLibAVImage::resize(size_t , size_t ) {
+bool StAVImage::resize(size_t , size_t ) {
     return false;
 }

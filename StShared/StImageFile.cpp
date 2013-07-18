@@ -163,16 +163,16 @@ StHandle<StImageFile> StImageFile::create(StImageFile::ImageClass thePreferred,
         }
         default:
         case ST_LIBAV: {
-            if(StLibAVImage::init()) {
-                return new StLibAVImage();
+            if(StAVImage::init()) {
+                return new StAVImage();
             }
             break;
         }
     }
 
     // use default library anyway (that currently always linked)
-    if(StLibAVImage::init()) {
-        return new StLibAVImage();
+    if(StAVImage::init()) {
+        return new StAVImage();
     }
     return StHandle<StImageFile>();
 }

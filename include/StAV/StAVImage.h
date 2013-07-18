@@ -6,8 +6,8 @@
  * http://www.boost.org/LICENSE_1_0.txt
  */
 
-#ifndef __StLibAVImage_h_
-#define __StLibAVImage_h_
+#ifndef __StAVImage_h_
+#define __StAVImage_h_
 
 #include <StImage/StImageFile.h>
 
@@ -20,7 +20,7 @@ struct AVFrame;
 /**
  * This class implements image load/save operation using libav* libraries.
  */
-class StLibAVImage : public StImageFile {
+class StAVImage : public StImageFile {
 
         public:
 
@@ -32,8 +32,8 @@ class StLibAVImage : public StImageFile {
 
         public:
 
-    ST_CPPEXPORT StLibAVImage();
-    ST_CPPEXPORT virtual ~StLibAVImage();
+    ST_CPPEXPORT StAVImage();
+    ST_CPPEXPORT virtual ~StAVImage();
 
     ST_CPPEXPORT virtual void close();
     ST_CPPEXPORT virtual bool load(const StString& theFilePath,
@@ -57,4 +57,4 @@ class StLibAVImage : public StImageFile {
 
 };
 
-#endif //__StLibAVImage_h_
+#endif // __StAVImage_h_
