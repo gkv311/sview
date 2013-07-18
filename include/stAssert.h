@@ -9,9 +9,7 @@
 #ifndef __stAssert_h__
 #define __stAssert_h__
 
-#include <stTypes.h>
-
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     #if defined(_MSC_VER)
         // VS-specific intrinsic
         #include <crtdbg.h>
@@ -27,6 +25,7 @@
     #define ST_DBGBREAK() raise(SIGTRAP)
 #endif
 
+#include <StStrings/StLogger.h>
 #include <assert.h>
 
 namespace st {
@@ -42,13 +41,13 @@ namespace st {
 
     /**
      * Function to ask developer interactively what to do (GUI part - do not call directly).
-     * @param theMessage (StString ) - the message to show;
-     * @return user decision as enumeration.
+     * @param theMessage the message to show
+     * @return user decision as enumeration
      */
-#if(defined(_WIN32) || defined(__WIN32__))
+#ifdef _WIN32
     inline stAssertAns_t stAssertQuestionGUI(const StString& theMessage) {
-        int aResult = MessageBoxW(NULL, theMessage.toUtfWide().toCString(), L"Debug Assertion Failed",
-                                  MB_ABORTRETRYIGNORE | MB_ICONSTOP | MB_SETFOREGROUND | MB_TOPMOST);
+        int aResult = ::MessageBoxW(NULL, theMessage.toUtfWide().toCString(), L"Debug Assertion Failed",
+                                    MB_ABORTRETRYIGNORE | MB_ICONSTOP | MB_SETFOREGROUND | MB_TOPMOST);
         return (aResult == IDABORT) ? ST_DBGASSERT_ABORT : ((aResult == IDIGNORE) ? ST_DBGASSERT_IGNORE : ST_DBGASSERT_DEBUG);
     }
 #else

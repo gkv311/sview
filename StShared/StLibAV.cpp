@@ -384,19 +384,25 @@ stLibAV::Version stLibAV::Version::libswscale() {
     const AVSampleFormat stLibAV::audio::SAMPLE_FMT::S32  = AV_SAMPLE_FMT_S32; //= av_get_sample_fmt("s32");
     const AVSampleFormat stLibAV::audio::SAMPLE_FMT::FLT  = AV_SAMPLE_FMT_FLT; //= av_get_sample_fmt("flt");
     const AVSampleFormat stLibAV::audio::SAMPLE_FMT::DBL  = AV_SAMPLE_FMT_DBL; //= av_get_sample_fmt("dbl");
-    #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 17, 0))
+    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 40, 0))
     const AVSampleFormat stLibAV::audio::SAMPLE_FMT::U8P  = AV_SAMPLE_FMT_U8P;
     const AVSampleFormat stLibAV::audio::SAMPLE_FMT::S16P = AV_SAMPLE_FMT_S16P;
     const AVSampleFormat stLibAV::audio::SAMPLE_FMT::S32P = AV_SAMPLE_FMT_S32P;
     const AVSampleFormat stLibAV::audio::SAMPLE_FMT::FLTP = AV_SAMPLE_FMT_FLTP;
     const AVSampleFormat stLibAV::audio::SAMPLE_FMT::DBLP = AV_SAMPLE_FMT_DBLP;
+    #else
+    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::U8P  = -1;
+    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::S16P = -1;
+    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::S32P = -1;
+    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::FLTP = -1;
+    const AVSampleFormat stLibAV::audio::SAMPLE_FMT::DBLP = -1;
     #endif
 #else
-    const SampleFormat   stLibAV::audio::SAMPLE_FMT::U8   =    SAMPLE_FMT_U8;
-    const SampleFormat   stLibAV::audio::SAMPLE_FMT::S16  =    SAMPLE_FMT_S16;
-    const SampleFormat   stLibAV::audio::SAMPLE_FMT::S32  =    SAMPLE_FMT_S32;
-    const SampleFormat   stLibAV::audio::SAMPLE_FMT::FLT  =    SAMPLE_FMT_FLT;
-    const SampleFormat   stLibAV::audio::SAMPLE_FMT::DBL  =    SAMPLE_FMT_DBL;
+    const SampleFormat   stLibAV::audio::SAMPLE_FMT::U8   = SAMPLE_FMT_U8;
+    const SampleFormat   stLibAV::audio::SAMPLE_FMT::S16  = SAMPLE_FMT_S16;
+    const SampleFormat   stLibAV::audio::SAMPLE_FMT::S32  = SAMPLE_FMT_S32;
+    const SampleFormat   stLibAV::audio::SAMPLE_FMT::FLT  = SAMPLE_FMT_FLT;
+    const SampleFormat   stLibAV::audio::SAMPLE_FMT::DBL  = SAMPLE_FMT_DBL;
 #endif
 
 StString stLibAV::audio::getSampleFormatString(const AVCodecContext* theCtx) {

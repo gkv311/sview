@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,12 +18,16 @@
 
 #include "StPCMBuffer.h"
 
+#include <stAssert.h>
 #include <StStrings/StLogger.h>
 
 StChannelMap::StChannelMap(const StChannelMap::Channels theChannels,
                            const StChannelMap::OrderRules theRules)
 : count(0),
   channels(theChannels) {
+    for(size_t aChIter = 0; aChIter < ST_AUDIO_CHANNELS_MAX; ++aChIter) {
+        Order[aChIter] = aChIter;
+    }
     switch(theChannels) {
         case StChannelMap::CH10:
             FL = FR = FC = LFE = RL = RR = 0;
@@ -37,8 +41,8 @@ StChannelMap::StChannelMap(const StChannelMap::Channels theChannels,
             count = 4;
             FL = 0;
             FR = 1;
-            RL = 4;
-            RR = 5;
+            RL = 2;
+            RR = 3;
             FC = LFE = 0;
             return;
         case StChannelMap::CH51:
@@ -61,6 +65,12 @@ StChannelMap::StChannelMap(const StChannelMap::Channels theChannels,
                     RL  = 3;
                     RR  = 4;
                     LFE = 5;
+                    Order[0] = FL;
+                    Order[1] = FR;
+                    Order[2] = FC;
+                    Order[3] = LFE;
+                    Order[4] = RL;
+                    Order[5] = RR;
                     return;
                 }
             }
@@ -80,16 +90,18 @@ void StPCMBuffer::setFormat(const StPCMformat thePCMFormat) {
 
 StPCMBuffer::StPCMBuffer(const StPCMformat thePCMFormat,
                          const size_t theBufferSize)
-: mySizeBytes(theBufferSize),
-  myDataSizeBytes(0),
-  myBuffer(NULL),
+: myBuffer(NULL),
+  mySizeBytes(theBufferSize),
+  myPlaneSize(0),
+  myPlanesNb(1),
   mySampleSize(0),
   myPCMFormat(thePCMFormat),
   myPCMFreq(FREQ_44100),
-  myChMap(StChannelMap::CH10, StChannelMap::PCM),
-  mySourcesNb(1) {
-    myBuffer = stMemAllocAligned<unsigned char*>(mySizeBytes, 16); // data must be aligned to 16 bytes for SSE!
-    stMemSet(myBuffer, 0, mySizeBytes);
+  myChMap(StChannelMap::CH10, StChannelMap::PCM) {
+    myBuffer = stMemAllocAligned<uint8_t*>(mySizeBytes, 16); // data must be aligned to 16 bytes for SSE!
+    stMemZero(myBuffer, mySizeBytes);
+    stMemZero(myPlanes, sizeof(myPlanes));
+    myPlanes[0] = myBuffer; // single plane for interleaved data
     setFormat(thePCMFormat);
 }
 
@@ -98,23 +110,22 @@ StPCMBuffer::~StPCMBuffer() {
 }
 
 void StPCMBuffer::clear() {
-    myDataSizeBytes = 0;
-    stMemSet(myBuffer, 0, mySizeBytes);
-}
-
-void StPCMBuffer::mute() {
-    if(myDataSizeBytes > 0) {
-        stMemSet(myBuffer, 0, myDataSizeBytes);
-    }
+    myPlaneSize = 0;
+    stMemZero(myBuffer, mySizeBytes);
 }
 
 bool StPCMBuffer::setDataSize(const size_t theDataSize) {
-    myDataSizeBytes = (theDataSize > mySizeBytes) ? 0 : theDataSize;
-    if(myDataSizeBytes < mySizeBytes) {
-        myBuffer[mySizeBytes - 1] = 0; // we set end to zero for avcodec_decode_audio2
-                                       // to prevent overflow on some broken streams...
+    const size_t aPlaneSize    = theDataSize / myPlanesNb;
+    const size_t aPlaneSizeMax = mySizeBytes / myPlanesNb;
+    myPlaneSize = (aPlaneSize > aPlaneSizeMax) ? 0 : aPlaneSize;
+    if(aPlaneSize < aPlaneSizeMax) {
+        // we set end to zero for avcodec_decode_audio2
+        // to prevent overflow on some broken streams...
+        for(size_t aPlaneIter = 0; aPlaneIter < myPlanesNb; ++aPlaneIter) {
+            myBuffer[aPlaneSizeMax - 1] = 0;
+        }
     }
-    return myDataSizeBytes != 0;
+    return myPlaneSize != 0;
 }
 
 // useful constants
@@ -255,79 +266,67 @@ inline void sampleConv(const double& theSrcSample, double& theOutSample) {
 }
 
 template<typename sampleSrc_t, typename sampleOut_t>
-bool StPCMBuffer::addSplitInterleaved(const StPCMBuffer& theBuffer) {
-    if(mySourcesNb > 1 && mySourcesNb != myChMap.count) {
+bool StPCMBuffer::addConvert(const StPCMBuffer& theBuffer) {
+    if(myPlanesNb > 1 && myPlanesNb != myChMap.count) {
         // currently only split into mono sources supported
         ST_DEBUG_ASSERT(false);
         return false;
-    } else if(theBuffer.myDataSizeBytes < theBuffer.mySampleSize * mySourcesNb) {
+    } else if(theBuffer.myPlaneSize * theBuffer.myPlanesNb < theBuffer.mySampleSize * myPlanesNb) {
         // just ignore
         return true;
     }
 
-    size_t aSamplesSrcCount = theBuffer.myDataSizeBytes / theBuffer.mySampleSize;
-    const sampleSrc_t* aBufferSrc = (const sampleSrc_t* )theBuffer.myBuffer;
+    const size_t aSamplesSrcCount = theBuffer.myPlaneSize / theBuffer.mySampleSize;
+    const size_t anAddedPlaneSize = mySampleSize * ((aSamplesSrcCount * theBuffer.myPlanesNb) / myPlanesNb);
+    const size_t aSmplSrcInc      = (theBuffer.myPlanesNb > 1) ? 1 : theBuffer.myChMap.count;
+    const size_t aSmplOutInc      = (myPlanesNb           > 1) ? 1 : myChMap.count;
 
-    size_t aSmplSrcInc = myChMap.count;
-    size_t aSmplOutInc = (mySourcesNb > 1) ? 1 : myChMap.count;
-
-    // capture the start pointer for each channel.
-    // we don't care here for invalid pointers (will not be used later)...
-    sampleOut_t* aBufferOutFL = (mySourcesNb > 1)
-        ? (sampleOut_t* )&getData(myChMap.FL )[getDataSize(myChMap.FL)]
-        : (sampleOut_t* )&myBuffer[myDataSizeBytes + sizeof(sampleOut_t) * myChMap.FL];
-    sampleOut_t* aBufferOutFC = (mySourcesNb > 1)
-        ? (sampleOut_t* )&getData(myChMap.FC )[getDataSize(myChMap.FC)]
-        : (sampleOut_t* )&myBuffer[myDataSizeBytes + sizeof(sampleOut_t) * myChMap.FC];
-    sampleOut_t* aBufferOutFR = (mySourcesNb > 1)
-        ? (sampleOut_t* )&getData(myChMap.FR )[getDataSize(myChMap.FR)]
-        : (sampleOut_t* )&myBuffer[myDataSizeBytes + sizeof(sampleOut_t) * myChMap.FR];
-    sampleOut_t* aBufferOutRL = (mySourcesNb > 1)
-        ? (sampleOut_t* )&getData(myChMap.RL )[getDataSize(myChMap.RL)]
-        : (sampleOut_t* )&myBuffer[myDataSizeBytes + sizeof(sampleOut_t) * myChMap.RL];
-    sampleOut_t* aBufferOutRR = (mySourcesNb > 1)
-        ? (sampleOut_t* )&getData(myChMap.RR )[getDataSize(myChMap.RR)]
-        : (sampleOut_t* )&myBuffer[myDataSizeBytes + sizeof(sampleOut_t) * myChMap.RR];
-    sampleOut_t* aBufferOutLFE= (mySourcesNb > 1)
-        ? (sampleOut_t* )&getData(myChMap.LFE)[getDataSize(myChMap.LFE)]
-        : (sampleOut_t* )&myBuffer[myDataSizeBytes + sizeof(sampleOut_t) * myChMap.LFE];
+    // capture the start pointer for each channel
+    sampleSrc_t* aBuffersSrc[ST_AUDIO_CHANNELS_MAX];
+    sampleOut_t* aBuffersOut[ST_AUDIO_CHANNELS_MAX];
+    for(size_t aChIter = 0; aChIter < theBuffer.myChMap.count; ++aChIter) {
+        theBuffer.getChannelDataStart(aChIter, aBuffersSrc[aChIter]);
+    }
+    for(size_t aChIter = 0; aChIter < myChMap.count; ++aChIter) {
+        getChannelDataEnd(aChIter, aBuffersOut[aChIter]);
+    }
 
     switch(myChMap.channels) {
         case StChannelMap::CH10: {
             for(size_t sampleSrcId(0), sampleOutId(0); sampleSrcId < aSamplesSrcCount; sampleSrcId += aSmplSrcInc, sampleOutId += aSmplOutInc) {
-                sampleConv(aBufferSrc[sampleSrcId + theBuffer.myChMap.FL], aBufferOutFL[sampleOutId]);
+                sampleConv(aBuffersSrc[0][sampleSrcId], aBuffersOut[0][sampleOutId]);
             }
-            myDataSizeBytes += mySampleSize * aSamplesSrcCount;
+            myPlaneSize += anAddedPlaneSize;
             return true;
         }
         case StChannelMap::CH20: {
             for(size_t sampleSrcId(0), sampleOutId(0); sampleSrcId < aSamplesSrcCount; sampleSrcId += aSmplSrcInc, sampleOutId += aSmplOutInc) {
-                sampleConv(aBufferSrc[sampleSrcId + theBuffer.myChMap.FL], aBufferOutFL[sampleOutId]);
-                sampleConv(aBufferSrc[sampleSrcId + theBuffer.myChMap.FR], aBufferOutFR[sampleOutId]);
+                sampleConv(aBuffersSrc[0][sampleSrcId], aBuffersOut[0][sampleOutId]);
+                sampleConv(aBuffersSrc[1][sampleSrcId], aBuffersOut[1][sampleOutId]);
             }
-            myDataSizeBytes += mySampleSize * aSamplesSrcCount;
+            myPlaneSize += anAddedPlaneSize;
             return true;
         }
         case StChannelMap::CH40: {
             for(size_t sampleSrcId(0), sampleOutId(0); sampleSrcId < aSamplesSrcCount; sampleSrcId += aSmplSrcInc, sampleOutId += aSmplOutInc) {
-                sampleConv(aBufferSrc[sampleSrcId + theBuffer.myChMap.FL], aBufferOutFL[sampleOutId]);
-                sampleConv(aBufferSrc[sampleSrcId + theBuffer.myChMap.FR], aBufferOutFR[sampleOutId]);
-                sampleConv(aBufferSrc[sampleSrcId + theBuffer.myChMap.RL], aBufferOutRL[sampleOutId]);
-                sampleConv(aBufferSrc[sampleSrcId + theBuffer.myChMap.RR], aBufferOutRR[sampleOutId]);
+                sampleConv(aBuffersSrc[0][sampleSrcId], aBuffersOut[0][sampleOutId]);
+                sampleConv(aBuffersSrc[1][sampleSrcId], aBuffersOut[1][sampleOutId]);
+                sampleConv(aBuffersSrc[2][sampleSrcId], aBuffersOut[2][sampleOutId]);
+                sampleConv(aBuffersSrc[3][sampleSrcId], aBuffersOut[3][sampleOutId]);
             }
-            myDataSizeBytes += mySampleSize * aSamplesSrcCount;
+            myPlaneSize += anAddedPlaneSize;
             return true;
         }
         case StChannelMap::CH51: {
             for(size_t sampleSrcId(0), sampleOutId(0); sampleSrcId < aSamplesSrcCount; sampleSrcId += aSmplSrcInc, sampleOutId += aSmplOutInc) {
-                sampleConv(aBufferSrc[sampleSrcId + theBuffer.myChMap.FL ], aBufferOutFL [sampleOutId]);
-                sampleConv(aBufferSrc[sampleSrcId + theBuffer.myChMap.FC ], aBufferOutFC [sampleOutId]);
-                sampleConv(aBufferSrc[sampleSrcId + theBuffer.myChMap.FR ], aBufferOutFR [sampleOutId]);
-                sampleConv(aBufferSrc[sampleSrcId + theBuffer.myChMap.RL ], aBufferOutRL [sampleOutId]);
-                sampleConv(aBufferSrc[sampleSrcId + theBuffer.myChMap.RR ], aBufferOutRR [sampleOutId]);
-                sampleConv(aBufferSrc[sampleSrcId + theBuffer.myChMap.LFE], aBufferOutLFE[sampleOutId]);
+                sampleConv(aBuffersSrc[0][sampleSrcId], aBuffersOut[0][sampleOutId]);
+                sampleConv(aBuffersSrc[1][sampleSrcId], aBuffersOut[1][sampleOutId]);
+                sampleConv(aBuffersSrc[2][sampleSrcId], aBuffersOut[2][sampleOutId]);
+                sampleConv(aBuffersSrc[3][sampleSrcId], aBuffersOut[3][sampleOutId]);
+                sampleConv(aBuffersSrc[4][sampleSrcId], aBuffersOut[4][sampleOutId]);
+                sampleConv(aBuffersSrc[5][sampleSrcId], aBuffersOut[5][sampleOutId]);
             }
-            myDataSizeBytes += mySampleSize * aSamplesSrcCount;
+            myPlaneSize += anAddedPlaneSize;
             return true;
         }
         default:
@@ -336,62 +335,69 @@ bool StPCMBuffer::addSplitInterleaved(const StPCMBuffer& theBuffer) {
 }
 
 bool StPCMBuffer::addData(const StPCMBuffer& theBuffer) {
-    if(theBuffer.myDataSizeBytes == 0 || !hasDataSize(theBuffer.myDataSizeBytes)) {
+    if(theBuffer.isEmpty() || !hasDataSize(theBuffer.myPlaneSize * theBuffer.myPlanesNb)) {
         return false;
-    }
-    if(myChMap.count != theBuffer.myChMap.count) {
+    } else if(myChMap.count != theBuffer.myChMap.count) {
         // currently not supported
         ST_DEBUG_ASSERT(false);
         return false;
     }
-    if(mySourcesNb > 1 || myChMap != theBuffer.myChMap || myPCMFormat != theBuffer.myPCMFormat) {
-        // split interleaved data or remap channel order
+
+    if(myPlanesNb  != theBuffer.myPlanesNb
+    || myChMap     != theBuffer.myChMap
+    || myPCMFormat != theBuffer.myPCMFormat) {
+        // split interleaved data or remap channel order or convert format
         switch(theBuffer.myPCMFormat) {
             case PCM8_UNSIGNED:
                 switch(myPCMFormat) {
-                    case PCM8_UNSIGNED: return addSplitInterleaved<uint8_t, uint8_t>(theBuffer);
-                    case PCM16_SIGNED:  return addSplitInterleaved<uint8_t, int16_t>(theBuffer);
-                    case PCM32_SIGNED:  return addSplitInterleaved<uint8_t, int32_t>(theBuffer);
-                    case PCM32FLOAT:    return addSplitInterleaved<uint8_t, float  >(theBuffer);
-                    case PCM64FLOAT:    return addSplitInterleaved<uint8_t, double >(theBuffer);
+                    case PCM8_UNSIGNED: return addConvert<uint8_t, uint8_t>(theBuffer);
+                    case PCM16_SIGNED:  return addConvert<uint8_t, int16_t>(theBuffer);
+                    case PCM32_SIGNED:  return addConvert<uint8_t, int32_t>(theBuffer);
+                    case PCM32FLOAT:    return addConvert<uint8_t, float  >(theBuffer);
+                    case PCM64FLOAT:    return addConvert<uint8_t, double >(theBuffer);
                 }
             case PCM16_SIGNED:
                 switch(myPCMFormat) {
-                    case PCM8_UNSIGNED: return addSplitInterleaved<int16_t, uint8_t>(theBuffer);
-                    case PCM16_SIGNED:  return addSplitInterleaved<int16_t, int16_t>(theBuffer);
-                    case PCM32_SIGNED:  return addSplitInterleaved<int16_t, int32_t>(theBuffer);
-                    case PCM32FLOAT:    return addSplitInterleaved<int16_t, float  >(theBuffer);
-                    case PCM64FLOAT:    return addSplitInterleaved<int16_t, double >(theBuffer);
+                    case PCM8_UNSIGNED: return addConvert<int16_t, uint8_t>(theBuffer);
+                    case PCM16_SIGNED:  return addConvert<int16_t, int16_t>(theBuffer);
+                    case PCM32_SIGNED:  return addConvert<int16_t, int32_t>(theBuffer);
+                    case PCM32FLOAT:    return addConvert<int16_t, float  >(theBuffer);
+                    case PCM64FLOAT:    return addConvert<int16_t, double >(theBuffer);
                 }
             case PCM32_SIGNED:
                 switch(myPCMFormat) {
-                    case PCM8_UNSIGNED: return addSplitInterleaved<int32_t, uint8_t>(theBuffer);
-                    case PCM16_SIGNED:  return addSplitInterleaved<int32_t, int16_t>(theBuffer);
-                    case PCM32_SIGNED:  return addSplitInterleaved<int32_t, int32_t>(theBuffer);
-                    case PCM32FLOAT:    return addSplitInterleaved<int32_t, float  >(theBuffer);
-                    case PCM64FLOAT:    return addSplitInterleaved<int32_t, double >(theBuffer);
+                    case PCM8_UNSIGNED: return addConvert<int32_t, uint8_t>(theBuffer);
+                    case PCM16_SIGNED:  return addConvert<int32_t, int16_t>(theBuffer);
+                    case PCM32_SIGNED:  return addConvert<int32_t, int32_t>(theBuffer);
+                    case PCM32FLOAT:    return addConvert<int32_t, float  >(theBuffer);
+                    case PCM64FLOAT:    return addConvert<int32_t, double >(theBuffer);
                 }
             case PCM32FLOAT:
                 switch(myPCMFormat) {
-                    case PCM8_UNSIGNED: return addSplitInterleaved<float, uint8_t>(theBuffer);
-                    case PCM16_SIGNED:  return addSplitInterleaved<float, int16_t>(theBuffer);
-                    case PCM32_SIGNED:  return addSplitInterleaved<float, int32_t>(theBuffer);
-                    case PCM32FLOAT:    return addSplitInterleaved<float, float  >(theBuffer);
-                    case PCM64FLOAT:    return addSplitInterleaved<float, double >(theBuffer);
+                    case PCM8_UNSIGNED: return addConvert<float, uint8_t>(theBuffer);
+                    case PCM16_SIGNED:  return addConvert<float, int16_t>(theBuffer);
+                    case PCM32_SIGNED:  return addConvert<float, int32_t>(theBuffer);
+                    case PCM32FLOAT:    return addConvert<float, float  >(theBuffer);
+                    case PCM64FLOAT:    return addConvert<float, double >(theBuffer);
                 }
             case PCM64FLOAT:
                 switch(myPCMFormat) {
-                    case PCM8_UNSIGNED: return addSplitInterleaved<double, uint8_t>(theBuffer);
-                    case PCM16_SIGNED:  return addSplitInterleaved<double, int16_t>(theBuffer);
-                    case PCM32_SIGNED:  return addSplitInterleaved<double, int32_t>(theBuffer);
-                    case PCM32FLOAT:    return addSplitInterleaved<double, float  >(theBuffer);
-                    case PCM64FLOAT:    return addSplitInterleaved<double, double >(theBuffer);
+                    case PCM8_UNSIGNED: return addConvert<double, uint8_t>(theBuffer);
+                    case PCM16_SIGNED:  return addConvert<double, int16_t>(theBuffer);
+                    case PCM32_SIGNED:  return addConvert<double, int32_t>(theBuffer);
+                    case PCM32FLOAT:    return addConvert<double, float  >(theBuffer);
+                    case PCM64FLOAT:    return addConvert<double, double >(theBuffer);
                 }
         }
         return false;
     } else if(myChMap == theBuffer.myChMap) {
-        stMemCpy(&myBuffer[myDataSizeBytes], theBuffer.myBuffer, theBuffer.myDataSizeBytes);
-        myDataSizeBytes += theBuffer.myDataSizeBytes;
+        // fast copy
+        for(size_t aPlaneIter = 0; aPlaneIter < myPlanesNb; ++aPlaneIter) {
+            stMemCpy(getPlane(aPlaneIter) + myPlaneSize,
+                     theBuffer.getPlane(aPlaneIter),
+                     theBuffer.getPlaneSize());
+        }
+        myPlaneSize += theBuffer.getPlaneSize();
         return true;
     } else {
         ST_DEBUG_ASSERT(false);

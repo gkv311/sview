@@ -22,6 +22,7 @@
 #include <StGLStereo/StGLTextureQueue.h>
 
 #include "StAVPacketQueue.h"
+#include <StAV/StAVFrame.h>
 
 // forward declarations
 class StVideoQueue;
@@ -166,8 +167,8 @@ class StVideoQueue : public StAVPacketQueue {
 
     AVDiscard                  myAvDiscard;       //!< discard parameter (to skip or not frames)
 
-    AVFrame*                   myFrame;           //!< original decoded video frame
-    AVFrame*                   myFrameRGB;        //!< frame, converted to RGB (soft)
+    StAVFrame                  myFrame;           //!< original decoded video frame
+    StAVFrame                  myFrameRGB;        //!< frame, converted to RGB (soft)
     uint8_t*                   myBufferRGB;
     StImage                    myDataAdp;         //!< buffer data adaptor
     SwsContext*                myToRgbCtx;        //!< software scaler context

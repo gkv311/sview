@@ -24,6 +24,8 @@
 #include <StThreads/StCondition.h>
 #include <StThreads/StTimer.h>
 
+#include <StAV/StAVFrame.h>
+
 #include "StAVPacketQueue.h"// StAVPacketQueue class
 #include "StPCMBuffer.h"    // audio PCM buffer class
 #include "StALContext.h"
@@ -122,6 +124,7 @@ class StAudioQueue : public StAVPacketQueue {
     ST_LOCAL void stalDeinit();
 
     ST_LOCAL void stalConfigureSources1();
+    ST_LOCAL void stalConfigureSources2_0();
     ST_LOCAL void stalConfigureSources4_0();
     ST_LOCAL void stalConfigureSources5_1();
 
@@ -222,6 +225,7 @@ class StAudioQueue : public StAVPacketQueue {
     StHandle<StThread> myThread;        //!< decoding loop thread
     mutable StTimer    myPlaybackTimer; //!< timer used for current PTS calculation
     StCondition        myDowntimeEvent;
+    StAVFrame          myFrame;         //!< decoded audio frame
     StPCMBuffer        myBufferSrc;     //!< decoded PCM audio buffer
     StPCMBuffer        myBufferOut;     //!< output  PCM audio buffer
     StTimer            myLimitTimer;

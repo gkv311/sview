@@ -30,6 +30,8 @@ void stalCheckErrors(const StString& ) {
 }
 
 static const StGLVec3 POSITION_CENTER       ( 0.0f, 0.0f,  0.0f);
+static const StGLVec3 POSITION_LEFT         (-1.0f, 0.0f,  0.0f);
+static const StGLVec3 POSITION_RIGHT        ( 1.0f, 0.0f,  0.0f);
 static const StGLVec3 POSITION_FRONT_LEFT   (-1.0f, 0.0f, -1.0f);
 static const StGLVec3 POSITION_FRONT_CENTER ( 0.0f, 0.0f, -1.0f);
 static const StGLVec3 POSITION_FRONT_RIGHT  ( 1.0f, 0.0f, -1.0f);
@@ -61,7 +63,13 @@ inline bool isReoderingNeeded() {
 
 void StAudioQueue::stalConfigureSources1() {
     alSourcefv(myAlSources[0], AL_POSITION, POSITION_CENTER);
-    stalCheckErrors("alSource*0");
+    stalCheckErrors("alSource*1.0");
+}
+
+void StAudioQueue::stalConfigureSources2_0() {
+    alSourcefv(myAlSources[0], AL_POSITION, POSITION_LEFT);
+    alSourcefv(myAlSources[1], AL_POSITION, POSITION_RIGHT);
+    stalCheckErrors("alSource*2.0");
 }
 
 void StAudioQueue::stalConfigureSources4_0() {
@@ -69,7 +77,7 @@ void StAudioQueue::stalConfigureSources4_0() {
     alSourcefv(myAlSources[1], AL_POSITION, POSITION_FRONT_RIGHT);
     alSourcefv(myAlSources[2], AL_POSITION, POSITION_REAR_LEFT);
     alSourcefv(myAlSources[3], AL_POSITION, POSITION_REAR_RIGHT);
-    stalCheckErrors("alSource*0123");
+    stalCheckErrors("alSource*4.0");
 }
 
 void StAudioQueue::stalConfigureSources5_1() {
@@ -79,7 +87,7 @@ void StAudioQueue::stalConfigureSources5_1() {
     alSourcefv(myAlSources[3], AL_POSITION, POSITION_LFE);
     alSourcefv(myAlSources[4], AL_POSITION, POSITION_REAR_LEFT);
     alSourcefv(myAlSources[5], AL_POSITION, POSITION_REAR_RIGHT);
-    stalCheckErrors("alSource*012345");
+    stalCheckErrors("alSource*5.1");
 }
 
 bool StAudioQueue::stalInit() {
@@ -262,15 +270,24 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
     }
 
     // setup source sample format (bitness)
-    if(myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::U8) {
+    if(myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::NONE) {
+        signals.onError(stCString("Invalid audio sample format!"));
+        deinit();
+        return false;
+    } else if(myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::U8
+           || myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::U8P) {
         myBufferSrc.setFormat(PCM8_UNSIGNED);
-    } else if(myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::S16) {
+    } else if(myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::S16
+           || myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::S16P) {
         myBufferSrc.setFormat(PCM16_SIGNED);
-    } else if(myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::S32) {
+    } else if(myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::S32
+           || myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::S32P) {
         myBufferSrc.setFormat(PCM32_SIGNED);
-    } else if(myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::FLT) {
+    } else if(myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::FLT
+           || myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::FLTP) {
         myBufferSrc.setFormat(PCM32FLOAT);
-    } else if(myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::DBL) {
+    } else if(myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::DBL
+           || myCodecCtx->sample_fmt == stLibAV::audio::SAMPLE_FMT::DBLP) {
         myBufferSrc.setFormat(PCM64FLOAT);
     } else {
         signals.onError(StString("Audio sample format '") + stLibAV::audio::getSampleFormatString(myCodecCtx)
@@ -278,6 +295,14 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
         deinit();
         return false;
     }
+
+    const bool isPlanar =
+    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 40, 0))
+        av_sample_fmt_is_planar(myCodecCtx->sample_fmt) != 0;
+    #else
+        false;
+    #endif
+
 
     // setup frequency
     myBufferSrc.setFreq(myCodecCtx->sample_rate);
@@ -331,7 +356,7 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
             myBufferOut.setFormat(PCM16_SIGNED);
         }
 
-        myBufferSrc.setupChannels(StChannelMap::CH20, StChannelMap::PCM, 1);
+        myBufferSrc.setupChannels(StChannelMap::CH20, StChannelMap::PCM, isPlanar ? myCodecCtx->channels : 1);
         myBufferOut.setupChannels(StChannelMap::CH20, StChannelMap::PCM, 1);
         stalConfigureSources1();
     } else if(myCodecCtx->channels == 4) {
@@ -351,7 +376,7 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
                 myBufferOut.setFormat(PCM16_SIGNED);
             }
 
-            myBufferSrc.setupChannels(StChannelMap::CH40, StChannelMap::PCM, 1);
+            myBufferSrc.setupChannels(StChannelMap::CH40, StChannelMap::PCM, isPlanar ? myCodecCtx->channels : 1);
             myBufferOut.setupChannels(StChannelMap::CH40, StChannelMap::PCM, 1);
             stalConfigureSources1();
         } else {
@@ -387,7 +412,7 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
                     myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, 1);
                 }
             } else {
-                myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, 1);
+                myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, isPlanar ? myCodecCtx->channels : 1);
             }
             stalConfigureSources1();
         } else {
@@ -422,7 +447,7 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
                     myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, 1);
                 }
             } else {
-                myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, 1);
+                myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, isPlanar ? myCodecCtx->channels : 1);
             }
             stalConfigureSources5_1();
             ST_DEBUG_LOG("OpenAL: multichannel extension (AL_FORMAT_51CHN16) not available");
@@ -520,7 +545,7 @@ bool StAudioQueue::stalQueue(const double thePts) {
     || myPrevFrequency != myBufferOut.getFreq()
     || (aState  == AL_STOPPED
      && aQueued == NUM_AL_BUFFERS)) {
-        ST_DEBUG_LOG("AL, reinitialize buffers per source , size= " + myBufferOut.getDataSize(0)
+        ST_DEBUG_LOG("AL, reinitialize buffers per source , plane size= " + myBufferOut.getPlaneSize()
                             + "; freq= " + myBufferOut.getFreq());
         stalEmpty();
         stalCheckErrors("reset state");
@@ -535,9 +560,9 @@ bool StAudioQueue::stalQueue(const double thePts) {
         ///ST_DEBUG_LOG("AL, queue more buffers " + aQueued + " / " + NUM_AL_BUFFERS);
         myPrevFormat    = myAlFormat;
         myPrevFrequency = myBufferOut.getFreq();
-        for(size_t aSrcId = 0; aSrcId < myBufferOut.getSourcesCount(); ++aSrcId) {
+        for(size_t aSrcId = 0; aSrcId < myBufferOut.getPlanesNb(); ++aSrcId) {
             alBufferData(myAlBuffers[aSrcId][aQueued], myAlFormat,
-                         myBufferOut.getData(aSrcId), (ALsizei )myBufferOut.getDataSize(aSrcId),
+                         myBufferOut.getPlane(aSrcId), (ALsizei )myBufferOut.getPlaneSize(),
                          myBufferOut.getFreq());
             stalCheckErrors("alBufferData");
             alSourceQueueBuffers(myAlSources[aSrcId], 1, &myAlBuffers[aSrcId][aQueued]);
@@ -550,14 +575,14 @@ bool StAudioQueue::stalQueue(const double thePts) {
             || aState == AL_PAUSED)) {
         ALuint alBuffIdToFill = 0;
         ///ST_DEBUG_LOG("queue buffer " + thePts + "; state= " + stalGetSourceState());
-        if(myBufferOut.getDataSize(0) == 0) {
+        if(myBufferOut.isEmpty()) {
             ST_DEBUG_LOG(" EMPTY BUFFER ");
             return true;
         }
 
         myPrevFormat    = myAlFormat;
         myPrevFrequency = myBufferOut.getFreq();
-        for(size_t aSrcId = 0; aSrcId < myBufferOut.getSourcesCount(); ++aSrcId) {
+        for(size_t aSrcId = 0; aSrcId < myBufferOut.getPlanesNb(); ++aSrcId) {
 
             // wait other sources for processed buffers
             if(aSrcId != 0) {
@@ -579,7 +604,7 @@ bool StAudioQueue::stalQueue(const double thePts) {
             stalCheckErrors("alSourceUnqueueBuffers");
             if(alBuffIdToFill != 0) {
                 alBufferData(alBuffIdToFill, myAlFormat,
-                             myBufferOut.getData(aSrcId), (ALsizei )myBufferOut.getDataSize(aSrcId),
+                             myBufferOut.getPlane(aSrcId), (ALsizei )myBufferOut.getPlaneSize(),
                              myBufferOut.getFreq());
                 stalCheckErrors("alBufferData");
                 alSourceQueueBuffers(myAlSources[aSrcId], 1, &alBuffIdToFill);
@@ -684,51 +709,83 @@ void StAudioQueue::stalFillBuffers(const double thePts,
     }
 }
 
-void StAudioQueue::decodePacket(const StHandle<StAVPacket>& thePacket, double& thePts) {
-
-    const uint8_t* audio_pkt_data = thePacket->getData();
-    int audio_pkt_size = thePacket->getSize();
-    int len1 = 0;
-    int dataSize = 0;
+void StAudioQueue::decodePacket(const StHandle<StAVPacket>& thePacket,
+                                double&                     thePts) {
+    const uint8_t* anAudioPktData = thePacket->getData();
+    int anAudioPktSize = thePacket->getSize();
     bool checkMoreFrames = false;
-    double aNewPts = 0.0;
+    int isGotFrame = 0;
     // packet could store multiple frames
     for(;;) {
-        while(audio_pkt_size > 0) {
-            dataSize = (int )myBufferSrc.getBufferSizeWhole();
+        while(anAudioPktSize > 0) {
+            int aDataSize = (int )myBufferSrc.getBufferSizeWhole();
 
         #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 23, 0))
             StAVPacket anAvPkt;
-            anAvPkt.getAVpkt()->data = (uint8_t* )audio_pkt_data;
-            anAvPkt.getAVpkt()->size = audio_pkt_size;
-            len1 = avcodec_decode_audio3(myCodecCtx, (int16_t* )myBufferSrc.getData(), &dataSize, anAvPkt.getAVpkt());
+            anAvPkt.getAVpkt()->data = (uint8_t* )anAudioPktData;
+            anAvPkt.getAVpkt()->size = anAudioPktSize;
+
+            #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 40, 0))
+            //av_frame_unref(myFrame.Frame);
+            myFrame.reset();
+            const int aLen1 = avcodec_decode_audio4(myCodecCtx, myFrame.Frame,
+                                                    &isGotFrame, anAvPkt.getAVpkt());
+            #else
+            const int aLen1 = avcodec_decode_audio3(myCodecCtx,
+                                                    (int16_t* )myBufferSrc.getPlane(0), &aDataSize,
+                                                    anAvPkt.getAVpkt());
+            #endif
         #else
-            len1 = avcodec_decode_audio2(myCodecCtx,
-                                         (int16_t* )myBufferSrc.getData(), &dataSize,
-                                         audio_pkt_data, audio_pkt_size);
+            const int aLen1 = avcodec_decode_audio2(myCodecCtx,
+                                                    (int16_t* )myBufferSrc.getPlane(0), &aDataSize,
+                                                    anAudioPktData, anAudioPktSize);
         #endif
-            if(len1 < 0) {
+            if(aLen1 < 0) {
                 // if error, we skip the frame
-                audio_pkt_size = 0;
+                anAudioPktSize = 0;
                 break;
             }
 
-            audio_pkt_data += len1;
-            audio_pkt_size -= len1;
-            if(dataSize <= 0) {
+            anAudioPktData += aLen1;
+            anAudioPktSize -= aLen1;
+
+        #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 40, 0))
+            if(isGotFrame == 0) {
                 continue;
             }
+            for(size_t aPlaneIter = 0; aPlaneIter < myBufferSrc.getPlanesNb(); ++aPlaneIter) {
+                myBufferSrc.wrapPlane(aPlaneIter, myFrame.getPlane(aPlaneIter));
+            }
+
+            int aPlaneSize = 0;
+            aDataSize = av_samples_get_buffer_size(&aPlaneSize, myCodecCtx->channels,
+                                                   myFrame.Frame->nb_samples,
+                                                   myCodecCtx->sample_fmt, 1);
+            myBufferSrc.setPlaneSize(aPlaneSize); // notice that myFrame.getLineSize(0) contains extra alignment
+        #else
+            (void )isGotFrame;
+            if(aDataSize <= 0) {
+                continue;
+            }
+            myBufferSrc.setDataSize(aDataSize);
+        #endif
 
             checkMoreFrames = true;
-            myBufferSrc.setDataSize(dataSize);
-
             if(myBufferOut.addData(myBufferSrc)) {
                 // 'big buffer' still not full
                 break;
             }
 
-            if(thePacket->getPts() != stLibAV::NOPTS_VALUE) {
-                aNewPts = unitsToSeconds(thePacket->getPts()) - myPtsStartBase;
+            int64_t aPtsU = stLibAV::NOPTS_VALUE;
+        #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 40, 0))
+            aPtsU = myFrame.Frame->pts;
+        #endif
+            if(aPtsU == stLibAV::NOPTS_VALUE) {
+                aPtsU = thePacket->getPts();
+            }
+
+            if(aPtsU != stLibAV::NOPTS_VALUE) {
+                const double aNewPts = unitsToSeconds(aPtsU) - myPtsStartBase;
                 if(aNewPts <= thePts) {
                     ST_DEBUG_LOG("Got the AUDIO packet with pts in past; "
                         + "new PTS= "   + aNewPts
@@ -759,7 +816,6 @@ void StAudioQueue::decodePacket(const StHandle<StAVPacket>& thePacket, double& t
         }
         break;
     }
-
 }
 
 void StAudioQueue::decodeLoop() {
@@ -802,7 +858,7 @@ void StAudioQueue::decodeLoop() {
             case StAVPacket::END_PACKET: {
                 pushPlayEvent(ST_PLAYEVENT_NONE);
                 // TODO (Kirill Gavrilov#3#) improve file-by-file playback
-                if(myBufferOut.getDataSize(0) != 0) {
+                if(!myBufferOut.isEmpty()) {
                     stalFillBuffers(aPts, true);
                 }
                 myBufferOut.setDataSize(0);

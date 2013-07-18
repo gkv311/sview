@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,8 @@
 #define __StPCMBuffer_h_
 
 #include <stTypes.h>
+
+#define ST_AUDIO_CHANNELS_MAX 8
 
 /**
  * All sample formats are in native-endian
@@ -109,6 +111,8 @@ class StChannelMap {
     size_t count; //!< channels number
     Channels channels;
 
+    size_t Order[ST_AUDIO_CHANNELS_MAX];
+
     size_t FL;  //!< Front Left
     size_t FR;  //!< Front Right
     size_t FC;  //!< Front Center
@@ -141,17 +145,6 @@ class StChannelMap {
  */
 class StPCMBuffer {
 
-        private:
-
-    size_t      mySizeBytes; //!< buffer size in bytes
-    size_t  myDataSizeBytes; //!< data (engaged part of buffer) size in bytes
-    unsigned char* myBuffer; //!< allocated buffer
-    size_t     mySampleSize; //!< sample size (for 1 channel)
-    StPCMformat myPCMFormat; //!< sample format
-    int           myPCMFreq; //!< frequency
-    StChannelMap    myChMap; //!< channel order rules
-    size_t      mySourcesNb; //!< ALSA source number
-
         public:
 
     /**
@@ -161,6 +154,9 @@ class StPCMBuffer {
     ST_LOCAL StPCMBuffer(const StPCMformat thePCMFormat,
                          const size_t theBufferSize);
 
+    /**
+     * Destructor.
+     */
     ST_LOCAL ~StPCMBuffer();
 
     /**
@@ -169,39 +165,64 @@ class StPCMBuffer {
     ST_LOCAL void clear();
 
     /**
-     * Only clear data in buffer (nulling), datasize not changed.
-     */
-    ST_LOCAL void mute();
-
-    /**
      * @return one second size in bytes for current format
      */
     ST_LOCAL size_t getSecondSize() const {
         return mySampleSize * myChMap.count * myPCMFreq;
     }
 
-    ST_LOCAL unsigned char* getData(size_t theSourceId = 0) const {
-        return &myBuffer[theSourceId * (mySizeBytes / mySourcesNb)];
+    /**
+     * @return data for specified plane
+     */
+    ST_LOCAL uint8_t* getPlane(const size_t thePlaneId) const {
+        return myPlanes[thePlaneId];
+    }
+
+    /**
+     * @return data size for single plane (should be same for all planes)
+     */
+    ST_LOCAL size_t getPlaneSize() const {
+        return myPlaneSize;
+    }
+
+    /**
+     * Wrap pointer to the alien plane.
+     * Caller should ensure that pointer will remain valid.
+     */
+    ST_LOCAL void wrapPlane(const size_t thePlaneId,
+                            uint8_t*     thePlane) {
+        myPlanes[thePlaneId] = thePlane;
+    }
+
+    /**
+     * @param thePlaneSize data size (should be same for all planes)
+     */
+    ST_LOCAL void setPlaneSize(const size_t thePlaneSize) {
+        myPlaneSize = thePlaneSize;
+    }
+
+    /**
+     * @return true if there no data in the buffer
+     */
+    ST_LOCAL bool isEmpty() const {
+        return myPlaneSize == 0;
     }
 
     ST_LOCAL size_t getBufferSizeWhole() const {
         return mySizeBytes;
     }
 
-    ST_LOCAL size_t getBufferSize(size_t /*sourceId*/) const {
-        return mySizeBytes / mySourcesNb;
-    }
-
     ST_LOCAL size_t getDataSizeWhole() const {
-        return myDataSizeBytes;
+        return myPlaneSize * myPlanesNb;
     }
 
-    ST_LOCAL size_t getDataSize(size_t /*sourceId*/) const {
-        return myDataSizeBytes / mySourcesNb;
-    }
-
+    /**
+     * This method always return false for wrapper over alien data.
+     * @return true if there is unused allocated space available in own buffer
+     */
     ST_LOCAL bool hasDataSize(const size_t thePushDataSize) const {
-        return ((mySizeBytes - myDataSizeBytes) >= thePushDataSize);
+        return (myPlanes[0] == myBuffer)
+            && ((mySizeBytes - myPlaneSize * myPlanesNb) >= thePushDataSize);
     }
 
     /**
@@ -210,9 +231,43 @@ class StPCMBuffer {
      */
     ST_LOCAL bool setDataSize(const size_t theDataSize);
 
-    template<typename sampleSrc_t, typename sampleOut_t>
-    ST_LOCAL bool addSplitInterleaved(const StPCMBuffer& theBuffer);
+    /**
+     * This method is for reading data from the beginning.
+     * @param theChannel channel id in PCM order
+     * @return pointer to the first sample in specified channel
+     */
+    template<typename sample_t>
+    ST_LOCAL inline void getChannelDataStart(const size_t theChannel,
+                                             sample_t*&   thePointer) const {
+        const size_t aChannel = myChMap.Order[theChannel];
+        thePointer = (myPlanesNb > 1)
+                   ? (sample_t* )getPlane(aChannel)
+                   : (sample_t* )&getPlane(0)[sizeof(sample_t) * aChannel];
+    }
 
+    /**
+     * This method is for appending data.
+     * @param theChannel channel id in PCM order
+     * @return pointer to the first unused sample in specified channel
+     */
+    template<typename sample_t>
+    ST_LOCAL inline void getChannelDataEnd(const size_t theChannel,
+                                           sample_t*&   thePointer) const {
+        const size_t aChannel = myChMap.Order[theChannel];
+        thePointer = (myPlanesNb > 1)
+                   ? (sample_t* )&getPlane(aChannel)[myPlaneSize]
+                   : (sample_t* )&getPlane(0)[myPlaneSize + sizeof(sample_t) * aChannel];
+    }
+
+    /**
+     * Add data with remapping and/or conversion.
+     */
+    template<typename sampleSrc_t, typename sampleOut_t>
+    ST_LOCAL bool addConvert(const StPCMBuffer& theBuffer);
+
+    /**
+     * Add data buffer.
+     */
     ST_LOCAL bool addData(const StPCMBuffer& theBuffer);
 
     /**
@@ -235,17 +290,48 @@ class StPCMBuffer {
 
     ST_LOCAL void setFormat(const StPCMformat thePCMFormat);
 
-    ST_LOCAL size_t getSourcesCount() const {
-        return mySourcesNb;
+    /**
+     * @return planes number (1 for interleaved data)
+     */
+    ST_LOCAL size_t getPlanesNb() const {
+        return myPlanesNb;
     }
 
+    /**
+     * Initialize buffer configuration.
+     * @param theChannels pre-defined channels configuration
+     * @param theRules    (re)ordering rules
+     * @param thePlanesNb planes number (1 for interleaved data, >=2 for planar data)
+     */
     ST_LOCAL void setupChannels(const StChannelMap::Channels   theChannels,
                                 const StChannelMap::OrderRules theRules,
-                                const size_t                   theSourcesNb) {
-        myChMap = StChannelMap(theChannels, theRules);
-        mySourcesNb = (theSourcesNb > 0) ? theSourcesNb : 1;
+                                const size_t                   thePlanesNb) {
+        myChMap     = StChannelMap(theChannels, theRules);
+        myPlanesNb  = (thePlanesNb > 0) ? thePlanesNb : 1;
+        myPlaneSize = 0;
+
+        const size_t aPlaneSizeMax = (mySizeBytes / myPlanesNb);
+        for(size_t aPlaneIter = 0; aPlaneIter < ST_AUDIO_CHANNELS_MAX; ++aPlaneIter) {
+            myPlanes[aPlaneIter] = (aPlaneIter < myPlanesNb)
+                                 ? &myBuffer[aPlaneIter * aPlaneSizeMax]
+                                 : NULL;
+        }
     }
+
+        private:
+
+    uint8_t*     myBuffer;         //!< allocated buffer
+    size_t       mySizeBytes;      //!< buffer size in bytes
+
+    uint8_t*     myPlanes[ST_AUDIO_CHANNELS_MAX]; //!< array of planes
+    size_t       myPlaneSize;      //!< (data) plane size in bytes, should be same for all planes
+    size_t       myPlanesNb;       //!< number of planes (either - 1 for interleaved data or >= 2 for array of mono sources)
+
+    size_t       mySampleSize;     //!< sample size (for 1 channel)
+    StPCMformat  myPCMFormat;      //!< sample format
+    int          myPCMFreq;        //!< frequency
+    StChannelMap myChMap;          //!< channel order rules
 
 };
 
-#endif //__StPCMBuffer_h_
+#endif // __StPCMBuffer_h_

@@ -82,8 +82,6 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   myMaster(theMaster),
   //
   myAvDiscard(AVDISCARD_DEFAULT),
-  myFrame(NULL),
-  myFrameRGB(NULL),
   myBufferRGB(NULL),
   myToRgbCtx(NULL),
   myFramePts(0.0),
@@ -98,15 +96,12 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   myWasFlushed(false),
   mySrcFormat(ST_V_SRC_AUTODETECT),
   mySrcFormatInfo(ST_V_SRC_AUTODETECT) {
-    // allocate an AVFrame structure, avfreep() should be called to free memory
-    myFrame    = avcodec_alloc_frame();
-    myFrameRGB = avcodec_alloc_frame();
 #ifdef ST_USE64PTR
-    myFrame->opaque = (void* )stLibAV::NOPTS_VALUE;
+    myFrame.Frame->opaque = (void* )stLibAV::NOPTS_VALUE;
 #else
-    myFrame->opaque = NULL;
+    myFrame.Frame->opaque = NULL;
 #endif
-    myThread   = new StThread(threadFunction, (void* )this);
+    myThread = new StThread(threadFunction, (void* )this);
 }
 
 StVideoQueue::~StVideoQueue() {
@@ -120,8 +115,6 @@ StVideoQueue::~StVideoQueue() {
 
     deinit();
     stMemFreeAligned(myBufferRGB);
-    av_free(myFrame);
-    av_free(myFrameRGB);
 }
 
 namespace {
@@ -162,13 +155,6 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     if(!StAVPacketQueue::init(theFormatCtx, theStreamId)
     || myCodecCtx->codec_type != AVMEDIA_TYPE_VIDEO) {
         signals.onError(stCString("FFmpeg: invalid stream"));
-        deinit();
-        return false;
-    }
-
-    if(myFrame == NULL || myFrameRGB == NULL) {
-        // should never happens
-        signals.onError(stCString("FFmpeg: Could not allocate an AVFrame"));
         deinit();
         return false;
     }
@@ -219,7 +205,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     }
 
     // reset AVFrame structure
-    avcodec_get_frame_defaults(myFrame);
+    myFrame.reset();
 
     if(myCodecCtx->pix_fmt != stLibAV::PIX_FMT::RGB24
     && !stLibAV::isFormatYUVPlanar(myCodecCtx)) {
@@ -241,7 +227,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
             deinit();
             return false;
         }
-        avpicture_fill((AVPicture* )myFrameRGB, myBufferRGB, stLibAV::PIX_FMT::RGB24,
+        avpicture_fill((AVPicture* )myFrameRGB.Frame, myBufferRGB, stLibAV::PIX_FMT::RGB24,
                        sizeX(), sizeY());
     }
 
@@ -449,9 +435,9 @@ void StVideoQueue::decodeLoop() {
 
         // decode video frame
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 23, 0))
-        avcodec_decode_video2(myCodecCtx, myFrame, &isFrameFinished, aPacket->getAVpkt());
+        avcodec_decode_video2(myCodecCtx, myFrame.Frame, &isFrameFinished, aPacket->getAVpkt());
     #else
-        avcodec_decode_video(myCodecCtx, myFrame, &isFrameFinished,
+        avcodec_decode_video(myCodecCtx, myFrame.Frame, &isFrameFinished,
                              aPacket->getData(), aPacket->getSize());
     #endif
         if(isFrameFinished == 0) {
@@ -465,7 +451,7 @@ void StVideoQueue::decodeLoop() {
         }
 
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 18, 100))
-        myVideoPktPts = av_frame_get_best_effort_timestamp(myFrame);
+        myVideoPktPts = av_frame_get_best_effort_timestamp(myFrame.Frame);
         if(myVideoPktPts == stLibAV::NOPTS_VALUE) {
             myVideoPktPts = 0;
         }
@@ -478,13 +464,13 @@ void StVideoQueue::decodeLoop() {
 
     #ifdef ST_USE64PTR
         if(aPacket->getDts() == stLibAV::NOPTS_VALUE
-        && (int64_t )myFrame->opaque != stLibAV::NOPTS_VALUE) {
-            myFramePts = double((int64_t )myFrame->opaque);
+        && (int64_t )myFrame.Frame->opaque != stLibAV::NOPTS_VALUE) {
+            myFramePts = double((int64_t )myFrame.Frame->opaque);
     #else
         if(aPacket->getDts() == stLibAV::NOPTS_VALUE
-        && myFrame->opaque != NULL
-        && *(int64_t* )myFrame->opaque != stLibAV::NOPTS_VALUE) {
-            myFramePts = double(*(int64_t* )myFrame->opaque);
+        && myFrame.Frame->opaque != NULL
+        && *(int64_t* )myFrame.Frame->opaque != stLibAV::NOPTS_VALUE) {
+            myFramePts = double(*(int64_t* )myFrame.Frame->opaque);
     #endif
         } else if(aPacket->getDts() != stLibAV::NOPTS_VALUE) {
             myFramePts = double(aPacket->getDts());
@@ -494,7 +480,7 @@ void StVideoQueue::decodeLoop() {
         myFramePts *= av_q2d(myStream->time_base);
         myFramePts -= myPtsStartBase; // normalize PTS
 
-        syncVideo(myFrame, &myFramePts);
+        syncVideo(myFrame.Frame, &myFramePts);
     #endif
 
         const double aDelay = myFramePts - aPrevPts;
@@ -538,24 +524,19 @@ void StVideoQueue::decodeLoop() {
         // we currently allow to override source format stored in metadata
         const StFormatEnum aSrcFormat = (mySrcFormat == ST_V_SRC_AUTODETECT) ? mySrcFormatInfo : mySrcFormat;
 
-        int         aFrameSizeX = myCodecCtx->width;
-        int         aFrameSizeY = myCodecCtx->height;
-        PixelFormat aPixFmt     = myCodecCtx->pix_fmt;
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 5, 0))
-        aFrameSizeX = myFrame->width;
-        aFrameSizeY = myFrame->height;
-        aPixFmt     = (PixelFormat )myFrame->format;
-    #endif
-
+        int aFrameSizeX = 0;
+        int aFrameSizeY = 0;
+        PixelFormat aPixFmt = stLibAV::PIX_FMT::NONE;
+        myFrame.getImageInfo(myCodecCtx, aFrameSizeX, aFrameSizeY, aPixFmt);
         if(aPixFmt == stLibAV::PIX_FMT::RGB24) {
             myDataAdp.setColorModel(StImage::ImgColor_RGB);
             myDataAdp.setColorScale(StImage::ImgScale_Full);
             myDataAdp.setPixelRatio(getPixelRatio());
-            myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgRGB, myFrame->data[0],
+            myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgRGB, myFrame.getPlane(0),
                                                  size_t(aFrameSizeX), size_t(aFrameSizeY),
-                                                 myFrame->linesize[0]);
+                                                 myFrame.getLineSize(0));
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 5, 0))
-        } else if(stLibAV::isFormatYUVPlanar(myFrame,
+        } else if(stLibAV::isFormatYUVPlanar(myFrame.Frame,
     #else
         } else if(stLibAV::isFormatYUVPlanar(myCodecCtx,
     #endif
@@ -567,7 +548,7 @@ void StVideoQueue::decodeLoop() {
             if(aSrcFormat == ST_V_SRC_TILED_4X
             && aPixFmt    == stLibAV::PIX_FMT::YUV420P
             && aFrameSizeX >= 1906 && aFrameSizeX <= 1920
-            && myFrame->linesize[0] >= 1920
+            && myFrame.getLineSize(0) >= 1920
             && aFrameSizeY >= 1074) {
                 aDimsYUV.widthY  = 1920;
                 aDimsYUV.heightY = 1080;
@@ -594,20 +575,20 @@ void StVideoQueue::decodeLoop() {
             }
             myDataAdp.setColorModel(StImage::ImgColor_YUV);
             myDataAdp.setPixelRatio(getPixelRatio());
-            myDataAdp.changePlane(0).initWrapper(aPlaneFrmt, myFrame->data[0],
-                                                 size_t(aDimsYUV.widthY), size_t(aDimsYUV.heightY), myFrame->linesize[0]);
-            myDataAdp.changePlane(1).initWrapper(aPlaneFrmt, myFrame->data[1],
-                                                 size_t(aDimsYUV.widthU), size_t(aDimsYUV.heightU), myFrame->linesize[1]);
-            myDataAdp.changePlane(2).initWrapper(aPlaneFrmt, myFrame->data[2],
-                                                 size_t(aDimsYUV.widthV), size_t(aDimsYUV.heightV), myFrame->linesize[2]);
+            myDataAdp.changePlane(0).initWrapper(aPlaneFrmt, myFrame.getPlane(0),
+                                                 size_t(aDimsYUV.widthY), size_t(aDimsYUV.heightY), myFrame.getLineSize(0));
+            myDataAdp.changePlane(1).initWrapper(aPlaneFrmt, myFrame.getPlane(1),
+                                                 size_t(aDimsYUV.widthU), size_t(aDimsYUV.heightU), myFrame.getLineSize(1));
+            myDataAdp.changePlane(2).initWrapper(aPlaneFrmt, myFrame.getPlane(2),
+                                                 size_t(aDimsYUV.widthV), size_t(aDimsYUV.heightV), myFrame.getLineSize(2));
         } else if(myToRgbCtx != NULL) {
             if(aPixFmt     == myCodecCtx->pix_fmt
             && aFrameSizeX == myCodecCtx->width
             && aFrameSizeY == myCodecCtx->height) {
                 sws_scale(myToRgbCtx,
-                          myFrame->data, myFrame->linesize,
+                          myFrame.Frame->data, myFrame.Frame->linesize,
                           0, aFrameSizeY,
-                          myFrameRGB->data, myFrameRGB->linesize);
+                          myFrameRGB.Frame->data, myFrameRGB.Frame->linesize);
 
                 myDataAdp.setColorModel(StImage::ImgColor_RGB);
                 myDataAdp.setColorScale(StImage::ImgScale_Full);
