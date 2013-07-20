@@ -28,8 +28,18 @@
 
 namespace {
 
+#ifdef  __APPLE__
+    /**
+     * Override pixel format.
+     */
+    AVPixelFormat stGetFormatYUV420P(AVCodecContext*      /*theCtx*/,
+                                     const AVPixelFormat* /*theFmt*/) {
+        return stAV::PIX_FMT::YUV420P;
+    }
+#endif
+
 #if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 18, 100))
-    /*
+    /**
      * These are called whenever we allocate a frame
      * buffer. We use this to store the global_pts in
      * a frame at the time it is allocated.
@@ -80,6 +90,10 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   myTextureQueue(theTextureQueue),
   myHasDataState(false),
   myMaster(theMaster),
+#ifdef  __APPLE__
+  myCodecVda(avcodec_find_decoder_by_name("h264_vda")),
+#endif
+  myUseGpu(false),
   //
   myAvDiscard(AVDISCARD_DEFAULT),
   myBufferRGB(NULL),
@@ -96,6 +110,7 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   myWasFlushed(false),
   mySrcFormat(ST_V_SRC_AUTODETECT),
   mySrcFormatInfo(ST_V_SRC_AUTODETECT) {
+
 #ifdef ST_USE64PTR
     myFrame.Frame->opaque = (void* )stAV::NOPTS_VALUE;
 #else
@@ -150,24 +165,9 @@ namespace {
 
 };
 
-bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
-                        const unsigned int theStreamId) {
-    if(!StAVPacketQueue::init(theFormatCtx, theStreamId)
-    || myCodecCtx->codec_type != AVMEDIA_TYPE_VIDEO) {
-        signals.onError(stCString("FFmpeg: invalid stream"));
-        deinit();
-        return false;
-    }
-
-    // find the decoder for the video stream
-    myCodec = avcodec_find_decoder(myCodecCtx->codec_id);
-    if(myCodec == NULL) {
-        signals.onError(stCString("FFmpeg: Video codec not found"));
-        deinit();
-        return false;
-    }
-
+bool StVideoQueue::initCodec(AVCodec* theCodec) {
     // configure the codec
+    myCodecCtx->codec_id = theCodec->id;
     //myCodecCtx->debug_mv = debug_mv;
     //myCodecCtx->debug = debug;
     //myCodecCtx->workaround_bugs = workaround_bugs;
@@ -184,14 +184,56 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
 #if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(52, 112, 0))
     avcodec_thread_init(myCodecCtx, threadsCount);
 #endif
+
+    // open codec
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
+    if(avcodec_open2(myCodecCtx, theCodec, NULL) < 0) {
+#else
+    if(avcodec_open(myCodecCtx, theCodec) < 0) {
+#endif
+        return false;
+    }
+
+    myCodec = theCodec;
     ST_DEBUG_LOG("FFmpeg: Setup AVcodec to use " + threadsCount + " threads");
+    return true;
+}
+
+bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
+                        const unsigned int theStreamId) {
+    if(!StAVPacketQueue::init(theFormatCtx, theStreamId)
+    || myCodecCtx->codec_type != AVMEDIA_TYPE_VIDEO) {
+        signals.onError(stCString("FFmpeg: invalid stream"));
+        deinit();
+        return false;
+    }
+
+    // find the decoder for the video stream
+    myCodecAuto = avcodec_find_decoder(myCodecCtx->codec_id);
+    if(myCodecAuto == NULL) {
+        signals.onError(stCString("FFmpeg: Video codec not found"));
+        deinit();
+        return false;
+    }
+
+    bool isCodecOverridden = false;
+#ifdef  __APPLE__
+    if(myUseGpu
+    && myCodecVda != NULL
+    && myCodecCtx->pix_fmt == stAV::PIX_FMT::YUV420P
+    && StString(myCodecAuto->name).isEquals(stCString("h264"))) {
+        typedef AVPixelFormat (*aGetFrmt_t)(AVCodecContext* , const AVPixelFormat* );
+        aGetFrmt_t aGetFormatPtr = myCodecCtx->get_format;
+        myCodecCtx->get_format = stGetFormatYUV420P;
+        isCodecOverridden = initCodec(myCodecVda);
+        if(!isCodecOverridden) {
+            myCodecCtx->get_format = aGetFormatPtr;
+        }
+    }
+#endif
 
     // open VIDEO codec
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
-    if(avcodec_open2(myCodecCtx, myCodec, NULL) < 0) {
-#else
-    if(avcodec_open(myCodecCtx, myCodec) < 0) {
-#endif
+    if(!isCodecOverridden && !initCodec(myCodecAuto)) {
         signals.onError(stCString("FFmpeg: Could not open video codec"));
         deinit();
         return false;
@@ -596,6 +638,8 @@ void StVideoQueue::decodeLoop() {
                 myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgRGB, myBufferRGB,
                                                      size_t(aFrameSizeX), size_t(aFrameSizeY));
             }
+        } else {
+            //ST_DEBUG_LOG("Frame skipped - unsupported pixel format!");
         }
 
         if(!mySlave.isNull()) {

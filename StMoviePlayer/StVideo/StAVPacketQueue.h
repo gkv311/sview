@@ -198,6 +198,7 @@ class StAVPacketQueue {
     AVStream*        myStream;         //!< pointer to stream in video context
     AVCodecContext*  myCodecCtx;       //!< codec context
     AVCodec*         myCodec;          //!< codec
+    AVCodec*         myCodecAuto;      //!< original codec (autodetected - before overriding)
     double           myPtsStartBase;   //!< starting PTS in context
     double           myPtsStartStream; //!< starting PTS in the stream
     signed int       myStreamId;       //!< stream ID

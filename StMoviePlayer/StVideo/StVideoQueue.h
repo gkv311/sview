@@ -40,6 +40,13 @@ class StVideoQueue : public StAVPacketQueue {
 
         public:
 
+    /**
+     * Setup GPU usage. Requires re-initialization to take effect!
+     */
+    ST_LOCAL void setUseGpu(const bool theToUseGpu) {
+        myUseGpu = theToUseGpu;
+    }
+
     ST_LOCAL bool isInDowntime() {
         return myDowntimeState.check();
     }
@@ -149,6 +156,11 @@ class StVideoQueue : public StAVPacketQueue {
 
         private:
 
+    /**
+     * Initialize codec context.
+     */
+    ST_LOCAL bool initCodec(AVCodec* theCodec);
+
     ST_LOCAL void pushFrame(const StImage&     theSrcDataLeft,
                             const StImage&     theSrcDataRight,
                             const StHandle<StStereoParams>& theStParams,
@@ -164,6 +176,11 @@ class StVideoQueue : public StAVPacketQueue {
     StCondition                myHasDataState;
     StHandle<StVideoQueue>     myMaster;          //!< handle to Master decoding thread
     StHandle<StVideoQueue>     mySlave;           //!< handle to Slave  decoding thread
+
+#ifdef  __APPLE__
+    AVCodec*                   myCodecVda;        //!< VDA codec (decoding on GPU in OS X)
+#endif
+    bool                       myUseGpu;          //!< activate decoding on GPU when possible
 
     AVDiscard                  myAvDiscard;       //!< discard parameter (to skip or not frames)
 

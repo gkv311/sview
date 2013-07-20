@@ -44,6 +44,7 @@ StAVPacketQueue::StAVPacketQueue(const size_t theSizeLimit)
   myStream(NULL),
   myCodecCtx(NULL),
   myCodec(NULL),
+  myCodecAuto(NULL),
   myPtsStartBase(0.0),
   myPtsStartStream(0.0),
   myStreamId(-1),
@@ -109,9 +110,10 @@ void StAVPacketQueue::deinit() {
     if(myCodec != NULL && myCodecCtx != NULL) {
         avcodec_close(myCodecCtx);
     }
-    myCodec = NULL;
-    myCodecCtx = NULL;
-    myStreamId = -1;
+    myCodec     = NULL;
+    myCodecAuto = NULL;
+    myCodecCtx  = NULL;
+    myStreamId  = -1;
 
     /// TODO (Kirill Gavrilov#3) analyze
     /**myEventMutex.lock();
