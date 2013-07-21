@@ -90,6 +90,7 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   myTextureQueue(theTextureQueue),
   myHasDataState(false),
   myMaster(theMaster),
+  myGetFrmtAuto(NULL),
 #ifdef  __APPLE__
   myCodecVda(avcodec_find_decoder_by_name("h264_vda")),
 #endif
@@ -218,17 +219,16 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     }
 
     bool isCodecOverridden = false;
+    myGetFrmtAuto = myCodecCtx->get_format;
 #ifdef  __APPLE__
     if(myUseGpu
     && myCodecVda != NULL
     && myCodecCtx->pix_fmt == stAV::PIX_FMT::YUV420P
     && StString(myCodecAuto->name).isEquals(stCString("h264"))) {
-        typedef AVPixelFormat (*aGetFrmt_t)(AVCodecContext* , const AVPixelFormat* );
-        aGetFrmt_t aGetFormatPtr = myCodecCtx->get_format;
         myCodecCtx->get_format = stGetFormatYUV420P;
         isCodecOverridden = initCodec(myCodecVda);
         if(!isCodecOverridden) {
-            myCodecCtx->get_format = aGetFormatPtr;
+            myCodecCtx->get_format = myGetFrmtAuto;
         }
     }
 #endif
@@ -351,6 +351,13 @@ void StVideoQueue::deinit() {
     }
     myFramesCounter = 1;
     myCachedFrame.nullify();
+
+    if(myCodecCtx  != NULL
+    && myCodecAuto != NULL) {
+        myCodecCtx->codec_id   = myCodecAuto->id;
+        myCodecCtx->get_format = myGetFrmtAuto;
+    }
+    myGetFrmtAuto = NULL;
 
     StAVPacketQueue::deinit();
 }
