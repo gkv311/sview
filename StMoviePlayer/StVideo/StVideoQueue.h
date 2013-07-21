@@ -41,6 +41,13 @@ class StVideoQueue : public StAVPacketQueue {
         public:
 
     /**
+     * @return true if GPU usage is enabled
+     */
+    ST_LOCAL bool toUseGpu() const {
+        return myUseGpu;
+    }
+
+    /**
      * Setup GPU usage. Requires re-initialization to take effect!
      */
     ST_LOCAL void setUseGpu(const bool theToUseGpu) {

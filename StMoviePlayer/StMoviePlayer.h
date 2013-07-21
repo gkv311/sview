@@ -210,6 +210,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StInt32Param>    blockSleeping;    //!< active Audio stream
         StString                  lastFolder;       //!< laster folder used to open / save file
         int                       TargetFps;        //!< rendering FPS limit (0 - max FPS with less CPU, 1,2,3 - adjust to video FPS)
+        StHandle<StBoolParam>     UseGpu;           //!< use video decoding on GPU when available
 
     } params;
 
@@ -325,6 +326,8 @@ class StMoviePlayer : public StApplication {
     bool                       myToUpdateALList;
     bool                       myIsBenchmark;
     bool                       myToCheckUpdates;
+
+    friend class StMoviePlayerGUI;
 
 };
 

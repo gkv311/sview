@@ -202,6 +202,17 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
 
     aMenuMedia->addItem("Audio Volume", aMenuVolume);
 
+#if defined(__APPLE__)
+    const StCString aGpuAcc = stCString(" (VDA)");
+#else
+    //const StCString aGpuAcc = stCString("");
+#endif
+
+#if defined(__APPLE__)
+    aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_GPU_DECODING,
+                        "Video decoding on GPU") + aGpuAcc, myPlugin->params.UseGpu);
+#endif
+
     aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_SHUFFLE,
                         "Shuffle"), myPlugin->params.isShuffle);
 

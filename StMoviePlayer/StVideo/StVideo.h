@@ -175,6 +175,7 @@ class StVideo {
 
     struct {
 
+        StHandle<StBoolParam>         UseGpu;          //!< use video decoding on GPU when available
         StHandle<StParamActiveStream> activeAudio;     //!< active Audio stream
         StHandle<StParamActiveStream> activeSubtitles; //!< active Subtitles stream
 

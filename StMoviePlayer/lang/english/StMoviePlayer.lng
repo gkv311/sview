@@ -18,6 +18,7 @@ English translation file for StMoviePlayer program
 1104="Audio Device"
 1105="Shuffle"
 1106="Recent files"
+1107="Video decoding on GPU"
 1109="Quit"
 1110="From One file"
 1111="Left+Right files"

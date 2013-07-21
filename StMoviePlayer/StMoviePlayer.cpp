@@ -60,6 +60,7 @@ namespace {
     static const char ST_SETTING_SHOW_LIST[]     = "showPlaylist";
     static const char ST_SETTING_SHOW_FPS[]      = "toShowFps";
     static const char ST_SETTING_LIMIT_FPS[]     = "toLimitFps";
+    static const char ST_SETTING_GPU_DECODING[]  = "gpuDecoding";
     static const char ST_SETTING_VSYNC[]         = "vsync";
 
     static const char ST_SETTING_FULLSCREEN[]    = "fullscreen";
@@ -204,6 +205,7 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     params.subtitlesStream->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchSubtitlesStream);
     params.blockSleeping = new StInt32Param(StMoviePlayer::BLOCK_SLEEP_PLAYBACK);
     params.TargetFps = 2; // set rendering FPS as twice as average video FPS
+    params.UseGpu = new StBoolParam(false);
 
     // load settings
     mySettings->loadInt32 (ST_SETTING_FPSTARGET,          params.TargetFps);
@@ -217,6 +219,7 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     mySettings->loadParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
     mySettings->loadParam (ST_SETTING_VSYNC,              params.IsVSyncOn);
     mySettings->loadParam (ST_SETTING_LIMIT_FPS,          params.ToLimitFps);
+    mySettings->loadParam (ST_SETTING_GPU_DECODING,       params.UseGpu);
 
     mySettings->loadParam (ST_SETTING_WEBUI_ON,           params.StartWebUI);
     mySettings->loadParam (ST_SETTING_WEBUI_PORT,         params.WebUIPort);
@@ -366,6 +369,7 @@ void StMoviePlayer::releaseDevice() {
         mySettings->saveParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
         mySettings->saveParam (ST_SETTING_VSYNC,              params.IsVSyncOn);
         mySettings->saveParam (ST_SETTING_LIMIT_FPS,          params.ToLimitFps);
+        mySettings->saveParam (ST_SETTING_GPU_DECODING,       params.UseGpu);
 
         mySettings->saveParam (ST_SETTING_WEBUI_ON,           params.StartWebUI);
         mySettings->saveParam (ST_SETTING_WEBUI_PORT,         params.WebUIPort);
@@ -503,6 +507,7 @@ bool StMoviePlayer::init() {
         myVideo = new StVideo(params.alDevice->getTitle(), myLangMap, myPlayList, aTextureQueue, aSubQueue);
         myVideo->signals.onError  = stSlot(myMsgQueue.access(), &StMsgQueue::doPushError);
         myVideo->signals.onLoaded = stSlot(this,                &StMoviePlayer::doLoaded);
+        myVideo->params.UseGpu = params.UseGpu;
 
         // load hot-keys
         for(std::map< int, StHandle<StAction> >::iterator anIter = myActions.begin();

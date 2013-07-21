@@ -65,6 +65,7 @@ StVideo::StVideo(const StString&                   theALDeviceName,
 
     myPlayList->setExtensions(myMimesVideo.getExtensionsList());
 
+    params.UseGpu          = new StBoolParam(false);
     params.activeAudio     = new StParamActiveStream();
     params.activeSubtitles = new StParamActiveStream();
 
@@ -374,6 +375,10 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
     // just for safe - close previously opened video
     close();
 
+    const bool toUseGpu = params.UseGpu->getValue();
+    myVideoMaster->setUseGpu(toUseGpu);
+    myVideoSlave ->setUseGpu(toUseGpu);
+
     myFileInfoTmp = new StMovieInfo();
 
     double aDuration = 0.0;
@@ -619,6 +624,36 @@ void StVideo::packetsLoop() {
         }
 
         // check events
+        const bool toUseGpu = params.UseGpu->getValue();
+        if(toUseGpu != myVideoMaster->toUseGpu()) {
+            myVideoMaster->setUseGpu(toUseGpu);
+            myVideoSlave ->setUseGpu(toUseGpu);
+            doFlush();
+            if(myVideoMaster->isInitialized()) {
+                AVFormatContext* aCtxMaster      = myVideoMaster->getContext();
+                AVFormatContext* aCtxSlave       = myVideoSlave ->getContext();
+                const signed int aStreamIdMaster = myVideoMaster->getId();
+                const signed int aStreamIdSlave  = myVideoSlave->getId();
+                const bool       hasSlave        = myVideoSlave->isInitialized();
+                myVideoMaster->pushEnd();
+                if(hasSlave) {
+                    myVideoSlave->pushEnd();
+                }
+                while(!myVideoMaster->isEmpty() || !myVideoMaster->isInDowntime()
+                   || !myVideoSlave->isEmpty()  || !myVideoSlave->isInDowntime()) {
+                    StThread::sleep(10);
+                }
+                myVideoMaster->deinit();
+                myVideoMaster->init(aCtxMaster, aStreamIdMaster);
+                myVideoMaster->pushStart();
+                if(hasSlave) {
+                    myVideoSlave->deinit();
+                    myVideoSlave->init(aCtxSlave, aStreamIdSlave);
+                    myVideoSlave->pushStart();
+                }
+            }
+        }
+
         aPlayEvent = popPlayEvent(aSeekPts, toSeekBack);
         if(aPlayEvent == ST_PLAYEVENT_NEXT || toQuit) {
             if(toSave != StImageFile::ST_TYPE_NONE) {

@@ -142,6 +142,13 @@ class StAVPacketQueue {
         return myStreamId;
     }
 
+    /**
+     * @return format context
+     */
+    ST_LOCAL AVFormatContext* getContext() const {
+        return myFormatCtx;
+    }
+
     ST_LOCAL AVStream* getStream() {
         return myStream;
     }

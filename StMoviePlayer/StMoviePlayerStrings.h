@@ -35,12 +35,13 @@ namespace StMoviePlayerStrings {
 
         // Root -> Media menu
         MENU_MEDIA = 1100,
-        MENU_MEDIA_OPEN_MOVIE = 1101,
+        MENU_MEDIA_OPEN_MOVIE   = 1101,
         MENU_MEDIA_SAVE_SNAPSHOT_AS = 1102,
-        MENU_MEDIA_SRC_FORMAT = 1103,
-        MENU_MEDIA_AL_DEVICE  = 1104,
-        MENU_MEDIA_SHUFFLE    = 1105,
-        MENU_MEDIA_RECENT     = 1106,
+        MENU_MEDIA_SRC_FORMAT   = 1103,
+        MENU_MEDIA_AL_DEVICE    = 1104,
+        MENU_MEDIA_SHUFFLE      = 1105,
+        MENU_MEDIA_RECENT       = 1106,
+        MENU_MEDIA_GPU_DECODING = 1107,
         MENU_MEDIA_QUIT = 1109,
 
         // Root -> Media menu -> Open File menu
