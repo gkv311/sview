@@ -195,6 +195,7 @@ bool StVideoQueue::initCodec(AVCodec* theCodec) {
     }
 
     myCodec = theCodec;
+    fillCodecInfo(theCodec);
     ST_DEBUG_LOG("FFmpeg: Setup AVcodec to use " + threadsCount + " threads");
     return true;
 }

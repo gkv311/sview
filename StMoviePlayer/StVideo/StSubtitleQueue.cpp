@@ -92,6 +92,7 @@ bool StSubtitleQueue::init(AVFormatContext*   theFormatCtx,
                    myCodecCtx->subtitle_header_size);
     #endif
     }
+    fillCodecInfo(myCodec);
     return true;
 }
 

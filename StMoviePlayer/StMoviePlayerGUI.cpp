@@ -589,11 +589,20 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
     StHandle<StFileNode>     aFileNode;
     StHandle<StStereoParams> aParams;
     StHandle<StMovieInfo>    anExtraInfo;
-    StArrayList<StString> anInfoList(10);
+    StString                 aCodecsInfo;
+    StArrayList<StString>    anInfoList(10);
     if(myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo) && !anExtraInfo.isNull()) {
         for(size_t aKeyIter = 0; aKeyIter < anExtraInfo->myInfo.size(); ++aKeyIter) {
             const StArgument& aPair = anExtraInfo->myInfo.getFromIndex(aKeyIter);
             anInfoList.add(aPair.getKey() + ": " + aPair.getValue() + "\n");
+        }
+
+        aCodecsInfo = "\nActive codecs\n \n";
+        for(size_t aKeyIter = 0; aKeyIter < anExtraInfo->myCodecs.size(); ++aKeyIter) {
+            const StArgument& aPair = anExtraInfo->myCodecs.getFromIndex(aKeyIter);
+            if(!aPair.getValue().isEmpty()) {
+                aCodecsInfo += aPair.getValue() + "\n";
+            }
         }
     }
 
@@ -602,7 +611,7 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
     for(size_t anIter = 0; anIter < anInfoList.size(); ++anIter) {
         anInfo += anInfoList[anIter];
     }
-    StString aString = aTitle + "\n\n \n" + anInfo;
+    StString aString = aTitle + "\n\n \n" + anInfo + aCodecsInfo;
     StGLMessageBox* anInfoDialog = new StGLMessageBox(this, aString, 512, 300);
     anInfoDialog->addButton("Close");
     anInfoDialog->setVisibility(true, true);

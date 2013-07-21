@@ -453,6 +453,7 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
             ST_DEBUG_LOG("OpenAL: multichannel extension (AL_FORMAT_51CHN16) not available");
         }
     }
+    fillCodecInfo(myCodec);
     return true;
 }
 

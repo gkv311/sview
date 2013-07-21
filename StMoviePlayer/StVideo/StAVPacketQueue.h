@@ -153,6 +153,22 @@ class StAVPacketQueue {
         return (myStream != NULL) ? stAV::unitsToSeconds(myStream, theTimeUnits) : 0.0;
     }
 
+    /**
+     * Update codec description.
+     */
+    ST_LOCAL void fillCodecInfo(AVCodec* theCodec);
+
+    /**
+     * Get codec description.
+     */
+    ST_LOCAL void getCodecInfo(StString& theName,
+                               StString& theDesc) const;
+
+    /**
+     * Get codec description.
+     */
+    ST_LOCAL StString getCodecInfo() const;
+
         public: //! @name playback control methods
 
     /**
@@ -222,6 +238,11 @@ class StAVPacketQueue {
     size_t           mySizeLimit;      //!< packets limit
     double           mySizeSeconds;    //!< cumulative packets length in seconds
     mutable StMutex  myMutex;          //!< lock for thread-safety
+
+    StString         myCodecName;      //!< active codec name
+    StString         myCodecDesc;      //!< active codec description
+    StString         myCodecStr;       //!< active codec description
+    mutable StMutex  myMutexInfo;      //!< lock for thread-safety
 
 };
 

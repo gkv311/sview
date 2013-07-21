@@ -39,6 +39,7 @@ struct StMovieInfo {
 
     StHandle<StStereoParams> myId;
     StArgumentsMap           myInfo;
+    StArgumentsMap           myCodecs;
 
 };
 
@@ -127,10 +128,10 @@ class StVideo {
         myVideoMaster->setSrcFormat(theSrcFormat);
     }
 
-    ST_LOCAL StHandle<StMovieInfo> getFileInfo(const StHandle<StStereoParams>& theParams) const {
-        StHandle<StMovieInfo> anInfo = myFileInfo;
-        return (!anInfo.isNull() && anInfo->myId == theParams) ? anInfo : NULL;
-    }
+    /**
+     * Retrieve information about currently played file.
+     */
+    ST_LOCAL StHandle<StMovieInfo> getFileInfo(const StHandle<StStereoParams>& theParams) const;
 
         public: //!< callback Slots
 

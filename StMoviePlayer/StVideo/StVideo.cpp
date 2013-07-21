@@ -432,13 +432,13 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
     myCurrNode   = theNewSource;
     myCurrParams = theNewParams;
     myFileInfoTmp->myId = myCurrParams;
-    myFileInfo   = myFileInfoTmp;
 
     params.activeAudio->setList(aStreamsListA, aStreamsListA->isEmpty() ? -1 : 0);
     params.activeSubtitles->setList(aStreamsListS, -1); // do not show subtitles by default
 
     myEventMutex.lock();
         myDuration = aDuration;
+        myFileInfo = myFileInfoTmp;
     myEventMutex.unlock();
 
     return true;
@@ -896,6 +896,23 @@ bool StVideo::saveSnapshotAs(StImageFile::ImageType theImgType) {
         // TODO (Kirill Gavrilov#8) - update playlist
     }
     return true;
+}
+
+StHandle<StMovieInfo> StVideo::getFileInfo(const StHandle<StStereoParams>& theParams) const {
+    myEventMutex.lock();
+    StHandle<StMovieInfo> anInfo = myFileInfo;
+    myEventMutex.unlock();
+    if(anInfo.isNull() || anInfo->myId != theParams) {
+        return NULL;
+    }
+
+    anInfo->myCodecs.clear();
+    anInfo->myCodecs.add(StArgument("vcodec1",   myVideoMaster->getCodecInfo()));
+    anInfo->myCodecs.add(StArgument("vcodec2",   myVideoSlave->getCodecInfo()));
+    anInfo->myCodecs.add(StArgument("audio",     myAudio->getCodecInfo()));
+    anInfo->myCodecs.add(StArgument("subtitles", mySubtitles->getCodecInfo()));
+
+    return anInfo;
 }
 
 void StVideo::mainLoop() {

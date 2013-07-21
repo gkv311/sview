@@ -106,9 +106,10 @@ bool StAVPacketQueue::init(AVFormatContext*   theFormatCtx,
 
 void StAVPacketQueue::deinit() {
     myFormatCtx = NULL;
-    myStream = NULL;
+    myStream    = NULL;
     if(myCodec != NULL && myCodecCtx != NULL) {
         avcodec_close(myCodecCtx);
+        fillCodecInfo(NULL);
     }
     myCodec     = NULL;
     myCodecAuto = NULL;
@@ -119,6 +120,32 @@ void StAVPacketQueue::deinit() {
     /**myEventMutex.lock();
         myIsPlaying = false;
     myEventMutex.unlock();*/
+}
+
+void StAVPacketQueue::fillCodecInfo(AVCodec* theCodec) {
+    StMutexAuto aLock(myMutexInfo);
+    if(theCodec == NULL) {
+        myCodecName.clear();
+        myCodecDesc.clear();
+        myCodecStr.clear();
+    } else {
+        myCodecName = theCodec->name;
+        myCodecDesc = theCodec->long_name;
+        myCodecStr  = StString("[") + myCodecName + stCString("] ") + myCodecDesc;
+    }
+}
+
+void StAVPacketQueue::getCodecInfo(StString& theName,
+                                   StString& theDesc) const {
+    StMutexAuto aLock(myMutexInfo);
+    theName = myCodecName;
+    theDesc = myCodecDesc;
+}
+
+StString StAVPacketQueue::getCodecInfo() const {
+    StMutexAuto aLock(myMutexInfo);
+    const StString anInfo = myCodecStr;
+    return anInfo;
 }
 
 StHandle<StAVPacket> StAVPacketQueue::pop() {
