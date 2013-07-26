@@ -184,7 +184,7 @@ class StVideoQueue : public StAVPacketQueue {
     StHandle<StVideoQueue>     myMaster;          //!< handle to Master decoding thread
     StHandle<StVideoQueue>     mySlave;           //!< handle to Slave  decoding thread
 
-    typedef AVPixelFormat (*aGetFrmt_t)(AVCodecContext* , const AVPixelFormat* );
+    typedef PixelFormat (*aGetFrmt_t)(AVCodecContext* , const PixelFormat* );
     aGetFrmt_t                 myGetFrmtAuto;
 #ifdef  __APPLE__
     AVCodec*                   myCodecVda;        //!< VDA codec (decoding on GPU in OS X)
