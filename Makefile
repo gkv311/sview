@@ -3,20 +3,28 @@
 WORKDIR = `pwd`
 
 LBITS := $(shell getconf LONG_BIT)
+#WITH_OCCT := yes
 
 CC = gcc
 CXX = g++
 AR = ar
 LD = g++
 
+EXTRA_CXXFLAGS =
+EXTRA_LDFLAGS =
+
 INC =  -I3rdparty/include -Iinclude
 CFLAGS   = -fPIC -mmmx -msse -DST_HAVE_MONGOOSE $(INC)
-CXXFLAGS = -O3 -std=c++0x -Wall -fPIC -mmmx -msse `pkg-config gtk+-2.0 --cflags` -DST_HAVE_MONGOOSE $(INC)
+CXXFLAGS = -O3 -std=c++0x -Wall -fPIC -mmmx -msse `pkg-config gtk+-2.0 --cflags` -DST_HAVE_MONGOOSE $(INC) $(EXTRA_CXXFLAGS)
+ifdef WITH_OCCT
+CXXFLAGS += -DST_HAVE_OCCT
+endif
 LIBDIR = -L$(BUILD_ROOT)
 LIB =
-LDFLAGS = -s
+LDFLAGS = -s $(EXTRA_LDFLAGS)
 LIB_GLX = -lGL -lX11 -lXext
 LIB_GTK = `pkg-config gtk+-2.0 --libs` -lgthread-2.0 -ldl
+LIB_OCCT = -lTKBRep -lTKIGES -lTKSTEP -lTKSTEP209 -lTKSTEPAttr -lTKSTEPBase -lTKMesh -lTKMath -lTKG3d -lTKTopAlgo -lTKShHealing -lTKXSBase -lTKBO -lTKBool -lTKPrim -lTKGeomBase -lTKGeomAlgo -lTKG2d -lTKG3d -lTKernel
 BUILD_ROOT = build
 USR_LIB = lib
 
@@ -255,6 +263,9 @@ clean_StDiagnostics:
 aStCADViewer_SRCS := $(wildcard StCADViewer/*.cpp)
 aStCADViewer_OBJS := ${aStCADViewer_SRCS:.cpp=.o}
 aStCADViewer_LIB  := $(LIB) -lStGLWidgets -lStShared -lStSettings -lStCore -lStOutAnaglyph -lStOutDual -lStOutInterlace -lStOutPageFlip -lStOutIZ3D -lStOutDistorted $(LIB_GLX) $(LIB_GTK) -lpthread
+ifdef WITH_OCCT
+aStCADViewer_LIB  += $(LIB_OCCT)
+endif
 $(aStCADViewer) : pre_StCADViewer $(aStCADViewer_OBJS)
 	$(LD) -shared -z defs $(LDFLAGS) $(LIBDIR) $(aStCADViewer_OBJS) $(aStCADViewer_LIB) -o $(aStCADViewer)
 pre_StCADViewer:
@@ -269,6 +280,9 @@ clean_StCADViewer:
 sView_SRCS := $(wildcard sview/*.cpp)
 sView_OBJS := ${sView_SRCS:.cpp=.o}
 sView_LIB  := $(LIB) -lStGLWidgets -lStShared -lStSettings -lStCore -lStImageViewer -lStMoviePlayer -lStDiagnostics -lStCADViewer -lStOutAnaglyph -lStOutDual -lStOutInterlace -lStOutPageFlip -lStOutIZ3D -lStOutDistorted $(LIB_GTK) -lX11 -ldl -lgthread-2.0 -lpthread
+ifdef WITH_OCCT
+sView_LIB += $(LIB_OCCT)
+endif
 $(sView) : $(sView_OBJS)
 	$(LD) $(LDFLAGS) $(LIBDIR) $(sView_OBJS) $(sView_LIB) -o $(sView)
 clean_sView:
