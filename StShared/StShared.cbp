@@ -443,7 +443,6 @@
 		<Unit filename="../include/StImage/StJpegParser.h" />
 		<Unit filename="../include/StImage/StPixelRGB.h" />
 		<Unit filename="../include/StImage/StWebPImage.h" />
-		<Unit filename="../include/StLibAV.h" />
 		<Unit filename="../include/StLibrary.h" />
 		<Unit filename="../include/StSlots/StAction.h" />
 		<Unit filename="../include/StSlots/StSignal.h" />
