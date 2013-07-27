@@ -215,6 +215,16 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
         return false;
     }
 
+    // detect 720in1080 streams with cropping information
+    const bool is720in1080 = (sizeX() == 1280) && (sizeY() == 720)
+                          && (getCodedSizeX() == 1920)
+                          && (getCodedSizeY() == 1080 || getCodedSizeY() == 1088);
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
+    if(is720in1080) {
+        myCodecCtx->flags2 |= CODEC_FLAG2_IGNORE_CROP;
+    }
+#endif
+
     // find the decoder for the video stream
     myCodecAuto = avcodec_find_decoder(myCodecCtx->codec_id);
     if(myCodecAuto == NULL) {
@@ -306,7 +316,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     }
 
     // stereoscopic mode tags
-    mySrcFormatInfo = ST_V_SRC_AUTODETECT;
+    mySrcFormatInfo = is720in1080 ? ST_V_SRC_TILED_4X : ST_V_SRC_AUTODETECT;
     const StString aSrcModeKeyMKV = "STEREO_MODE";
     const StString aSrcModeKeyWMV = "StereoscopicLayout";
     if(stAV::meta::readTag(myFormatCtx, aSrcModeKeyMKV, aValue)

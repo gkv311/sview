@@ -294,14 +294,12 @@ bool StVideo::addFile(const StString& theFileToLoad,
                     const int aSizeX      = myVideoMaster->sizeX();
                     const int aSizeY      = myVideoMaster->sizeY();
                     StString aDimsStr = StString() + aSizeX + " x " + aSizeY;
-                #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
                     const int aCodedSizeX = myVideoMaster->getCodedSizeX();
                     const int aCodedSizeY = myVideoMaster->getCodedSizeY();
                     if(aCodedSizeX != aSizeX
                     || aCodedSizeY != aSizeY) {
                         aDimsStr += StString(" (") + aCodedSizeX + " x " + aCodedSizeY + ")";
                     }
-                #endif
                     myFileInfoTmp->myInfo.add(StArgument("Video Dimensions", aDimsStr));
                     myFileInfoTmp->myInfo.add(StArgument("Pixel Format",
                         myVideoMaster->getPixelFormatString()));
@@ -318,14 +316,12 @@ bool StVideo::addFile(const StString& theFileToLoad,
                     const int aSizeX      = myVideoSlave->sizeX();
                     const int aSizeY      = myVideoSlave->sizeY();
                     StString aDimsStr = StString() + aSizeX + " x " + aSizeY;
-                #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
                     const int aCodedSizeX = myVideoSlave->getCodedSizeX();
                     const int aCodedSizeY = myVideoSlave->getCodedSizeY();
                     if(aCodedSizeX != aSizeX
                     || aCodedSizeY != aSizeY) {
                         aDimsStr += StString(" (") + aCodedSizeX + " x " + aCodedSizeY + ")";
                     }
-                #endif
                     myFileInfoTmp->myInfo.add(StArgument("Video Dimensions (slave)", aDimsStr));
                 }
             }
