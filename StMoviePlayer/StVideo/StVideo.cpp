@@ -291,8 +291,18 @@ bool StVideo::addFile(const StString& theFileToLoad,
                 myVideoMaster->setSlave(NULL);
 
                 if(myVideoMaster->isInitialized()) {
-                    myFileInfoTmp->myInfo.add(StArgument("Video Dimensions",
-                        StString() + myVideoMaster->sizeX() + " x " + myVideoMaster->sizeY()));
+                    const int aSizeX      = myVideoMaster->sizeX();
+                    const int aSizeY      = myVideoMaster->sizeY();
+                    StString aDimsStr = StString() + aSizeX + " x " + aSizeY;
+                #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
+                    const int aCodedSizeX = myVideoMaster->getCodedSizeX();
+                    const int aCodedSizeY = myVideoMaster->getCodedSizeY();
+                    if(aCodedSizeX != aSizeX
+                    || aCodedSizeY != aSizeY) {
+                        aDimsStr += StString(" (") + aCodedSizeX + " x " + aCodedSizeY + ")";
+                    }
+                #endif
+                    myFileInfoTmp->myInfo.add(StArgument("Video Dimensions", aDimsStr));
                     myFileInfoTmp->myInfo.add(StArgument("Pixel Format",
                         myVideoMaster->getPixelFormatString()));
                     myFileInfoTmp->myInfo.add(StArgument("Pixel Ratio",
@@ -305,8 +315,18 @@ bool StVideo::addFile(const StString& theFileToLoad,
                 myVideoMaster->setSlave(myVideoSlave);
 
                 if(myVideoSlave->isInitialized()) {
-                    myFileInfoTmp->myInfo.add(StArgument("Video Dimensions (slave)",
-                        StString() + myVideoSlave->sizeX() + " x " + myVideoSlave->sizeY()));
+                    const int aSizeX      = myVideoSlave->sizeX();
+                    const int aSizeY      = myVideoSlave->sizeY();
+                    StString aDimsStr = StString() + aSizeX + " x " + aSizeY;
+                #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
+                    const int aCodedSizeX = myVideoSlave->getCodedSizeX();
+                    const int aCodedSizeY = myVideoSlave->getCodedSizeY();
+                    if(aCodedSizeX != aSizeX
+                    || aCodedSizeY != aSizeY) {
+                        aDimsStr += StString(" (") + aCodedSizeX + " x " + aCodedSizeY + ")";
+                    }
+                #endif
+                    myFileInfoTmp->myInfo.add(StArgument("Video Dimensions (slave)", aDimsStr));
                 }
             }
         } else if(aStream->codec->codec_type == AVMEDIA_TYPE_AUDIO) {

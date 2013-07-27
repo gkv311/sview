@@ -153,6 +153,22 @@ class StVideoQueue : public StAVPacketQueue {
         return (myCodecCtx != NULL) ? myCodecCtx->height : 0;
     }
 
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
+    /**
+     * @return frame coded width (before cropping)
+     */
+    ST_LOCAL int getCodedSizeX() const {
+        return (myCodecCtx != NULL) ? myCodecCtx->coded_width : 0;
+    }
+
+    /**
+     * @return frame coded height (before cropping)
+     */
+    ST_LOCAL int getCodedSizeY() const {
+        return (myCodecCtx != NULL) ? myCodecCtx->coded_height : 0;
+    }
+#endif
+
     ST_LOCAL StHandle<StGLTextureQueue>& getTextureQueue() {
         return myTextureQueue;
     }
