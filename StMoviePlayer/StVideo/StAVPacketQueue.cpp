@@ -45,6 +45,8 @@ StAVPacketQueue::StAVPacketQueue(const size_t theSizeLimit)
   myCodecCtx(NULL),
   myCodec(NULL),
   myCodecAuto(NULL),
+  myGetFrmtInit(NULL),
+  myGetBuffInit(NULL),
   myPtsStartBase(0.0),
   myPtsStartStream(0.0),
   myStreamId(-1),
@@ -101,6 +103,10 @@ bool StAVPacketQueue::init(AVFormatContext*   theFormatCtx,
     myCodecCtx       = myStream->codec;
     myPtsStartBase   = detectPtsStartBase(theFormatCtx);
     myPtsStartStream = unitsToSeconds(myStream->start_time);
+    myGetFrmtInit    = myCodecCtx->get_format;
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
+    myGetBuffInit    = myCodecCtx->get_buffer2;
+#endif
     return true;
 }
 
@@ -109,17 +115,18 @@ void StAVPacketQueue::deinit() {
     myStream    = NULL;
     if(myCodec != NULL && myCodecCtx != NULL) {
         avcodec_close(myCodecCtx);
+        myCodecCtx->get_format  = myGetFrmtInit;
+    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
+        myCodecCtx->get_buffer2 = myGetBuffInit;
+    #endif
         fillCodecInfo(NULL);
     }
-    myCodec     = NULL;
-    myCodecAuto = NULL;
-    myCodecCtx  = NULL;
-    myStreamId  = -1;
-
-    /// TODO (Kirill Gavrilov#3) analyze
-    /**myEventMutex.lock();
-        myIsPlaying = false;
-    myEventMutex.unlock();*/
+    myCodec       = NULL;
+    myCodecAuto   = NULL;
+    myCodecCtx    = NULL;
+    myGetFrmtInit = NULL;
+    myGetBuffInit = NULL;
+    myStreamId    = -1;
 }
 
 void StAVPacketQueue::fillCodecInfo(AVCodec* theCodec) {

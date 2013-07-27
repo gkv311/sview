@@ -222,6 +222,10 @@ class StAVPacketQueue {
     AVCodecContext*  myCodecCtx;       //!< codec context
     AVCodec*         myCodec;          //!< codec
     AVCodec*         myCodecAuto;      //!< original codec (autodetected - before overriding)
+    typedef PixelFormat (*aGetFrmt_t)(AVCodecContext* , const PixelFormat* );
+    typedef int         (*aGetBuf2_t)(AVCodecContext* , AVFrame* frame, int );
+    aGetFrmt_t       myGetFrmtInit;
+    aGetBuf2_t       myGetBuffInit;
     double           myPtsStartBase;   //!< starting PTS in context
     double           myPtsStartStream; //!< starting PTS in the stream
     signed int       myStreamId;       //!< stream ID

@@ -206,8 +206,6 @@ class StVideoQueue : public StAVPacketQueue {
     StHandle<StVideoQueue>     myMaster;          //!< handle to Master decoding thread
     StHandle<StVideoQueue>     mySlave;           //!< handle to Slave  decoding thread
 
-    typedef PixelFormat (*aGetFrmt_t)(AVCodecContext* , const PixelFormat* );
-    aGetFrmt_t                 myGetFrmtAuto;
 #if defined(_WIN32)
     AVCodec*                   myCodecDxva264;    //!< DXVA2 codec (decoding on GPU in Windows)
     AVCodec*                   myCodecDxvaWmv;    //!< DXVA2 codec (decoding on GPU in Windows)

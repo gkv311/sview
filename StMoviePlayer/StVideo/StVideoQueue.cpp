@@ -90,7 +90,6 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   myTextureQueue(theTextureQueue),
   myHasDataState(false),
   myMaster(theMaster),
-  myGetFrmtAuto(NULL),
 #if defined(_WIN32)
   myCodecDxva264(avcodec_find_decoder_by_name("h264_dxva2")),
   myCodecDxvaWmv(avcodec_find_decoder_by_name("wmv3_dxva2")),
@@ -234,8 +233,6 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     }
 
     bool isCodecOverridden = false;
-    myGetFrmtAuto = myCodecCtx->get_format;
-
     AVCodec* aCodecGpu = NULL;
     if(myUseGpu) {
 #if defined(_WIN32)
@@ -261,7 +258,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
         isCodecOverridden = initCodec(aCodecGpu);
     #if defined(__APPLE__)
         if(!isCodecOverridden) {
-            myCodecCtx->get_format = myGetFrmtAuto;
+            myCodecCtx->get_format = myGetFrmtInit;
         }
     #endif
     }
@@ -363,11 +360,8 @@ void StVideoQueue::deinit() {
 
     if(myCodecCtx  != NULL
     && myCodecAuto != NULL) {
-        myCodecCtx->codec_id   = myCodecAuto->id;
-        myCodecCtx->get_format = myGetFrmtAuto;
+        myCodecCtx->codec_id = myCodecAuto->id;
     }
-    myGetFrmtAuto = NULL;
-
     StAVPacketQueue::deinit();
 }
 
