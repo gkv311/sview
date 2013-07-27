@@ -644,11 +644,17 @@ void StVideo::packetsLoop() {
                     StThread::sleep(10);
                 }
                 myVideoMaster->deinit();
-                myVideoMaster->init(aCtxMaster, aStreamIdMaster);
-                myVideoMaster->pushStart();
                 if(hasSlave) {
                     myVideoSlave->deinit();
+                }
+                myVideoMaster->init(aCtxMaster, aStreamIdMaster);
+                myVideoMaster->setSlave(NULL);
+                if(hasSlave) {
                     myVideoSlave->init(aCtxSlave, aStreamIdSlave);
+                    myVideoMaster->setSlave(myVideoSlave);
+                }
+                myVideoMaster->pushStart();
+                if(hasSlave) {
                     myVideoSlave->pushStart();
                 }
             }
