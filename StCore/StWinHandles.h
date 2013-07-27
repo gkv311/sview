@@ -70,6 +70,7 @@ class StWinGlrc {
      */
 #ifdef _WIN32
     ST_LOCAL bool makeCurrent(HDC theDC);
+    ST_LOCAL bool isCurrent  (HDC theDC) const;
 #else
     ST_LOCAL bool makeCurrent(GLXDrawable theDrawable);
 #endif

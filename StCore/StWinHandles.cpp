@@ -50,6 +50,11 @@ StWinGlrc::StWinGlrc(HDC theDC)
     //
 }
 
+bool StWinGlrc::isCurrent(HDC theDC) const {
+    return theDC == wglGetCurrentDC()
+        && myRC  == wglGetCurrentContext();
+}
+
 bool StWinGlrc::makeCurrent(HDC theDC) {
     return wglMakeCurrent(theDC, myRC) == TRUE;
 }
@@ -146,7 +151,8 @@ void StWinHandles::glSwap() {
 bool StWinHandles::glMakeCurrent() {
 #ifdef _WIN32
     if(hDC != NULL && !hRC.isNull()) {
-        return hRC->makeCurrent(hDC);
+        return hRC->isCurrent(hDC)
+            || hRC->makeCurrent(hDC);
     }
 #elif (defined(__linux__) || defined(__linux))
     if(!stXDisplay.isNull() && !hRC.isNull()) {
