@@ -102,6 +102,7 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   //
   myToRgbCtx(NULL),
   myToRgbPixFmt(stAV::PIX_FMT::NONE),
+  myToRgbIsBroken(false),
   //
   myAvDiscard(AVDISCARD_DEFAULT),
   myFramePts(0.0),
@@ -272,30 +273,6 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     // reset AVFrame structure
     myFrame.reset();
 
-    if(myCodecCtx->pix_fmt != stAV::PIX_FMT::RGB24
-    && !stAV::isFormatYUVPlanar(myCodecCtx))
-    {
-        // initialize software scaler/converter
-        myToRgbCtx = sws_getContext(sizeX(), sizeY(), myCodecCtx->pix_fmt,  // source
-                                    sizeX(), sizeY(), stAV::PIX_FMT::RGB24, // destination
-                                    SWS_BICUBIC, NULL, NULL, NULL);
-        if(myToRgbCtx == NULL) {
-            signals.onError(stCString("FFmpeg: Failed to create SWScaler context"));
-            deinit();
-            return false;
-        }
-
-        // assign appropriate parts of RGB buffer to image planes in myFrameRGB
-        const size_t aBufferSize = avpicture_get_size(stAV::PIX_FMT::RGB24, sizeX(), sizeY());
-        if(!myDataRGB.initTrash(StImagePlane::ImgRGB, sizeX(), sizeY(), aBufferSize / sizeY())) {
-            signals.onError(stCString("FFmpeg: Failed allocation of RGB frame"));
-            deinit();
-            return false;
-        }
-        avpicture_fill((AVPicture* )myFrameRGB.Frame, myDataRGB.changeData(), stAV::PIX_FMT::RGB24,
-                       sizeX(), sizeY());
-    }
-
     // compute PAR
     if(myStream->sample_aspect_ratio.num && av_cmp_q(myStream->sample_aspect_ratio, myStream->codec->sample_aspect_ratio)) {
         myPixelRatio = GLfloat(myStream->sample_aspect_ratio.num) / GLfloat(myStream->sample_aspect_ratio.den);
@@ -367,8 +344,9 @@ void StVideoQueue::deinit() {
 
     myDataRGB.nullify();
     sws_freeContext(myToRgbCtx);
-    myToRgbCtx    = NULL;
-    myToRgbPixFmt = stAV::PIX_FMT::NONE;
+    myToRgbCtx      = NULL;
+    myToRgbPixFmt   = stAV::PIX_FMT::NONE;
+    myToRgbIsBroken = false;
 
     myFramesCounter = 1;
     myCachedFrame.nullify();
@@ -652,10 +630,45 @@ void StVideoQueue::decodeLoop() {
                                                  size_t(aDimsYUV.widthU), size_t(aDimsYUV.heightU), myFrame.getLineSize(1));
             myDataAdp.changePlane(2).initWrapper(aPlaneFrmt, myFrame.getPlane(2),
                                                  size_t(aDimsYUV.widthV), size_t(aDimsYUV.heightV), myFrame.getLineSize(2));
-        } else if(myToRgbCtx != NULL) {
-            if(aPixFmt     == myCodecCtx->pix_fmt
-            && aFrameSizeX == myCodecCtx->width
-            && aFrameSizeY == myCodecCtx->height) {
+        } else if(!myToRgbIsBroken) {
+            if(myToRgbCtx    == NULL
+            || myToRgbPixFmt != aPixFmt
+            || size_t(aFrameSizeX) != myDataRGB.getSizeX()
+            || size_t(aFrameSizeY) != myDataRGB.getSizeY()) {
+                // initialize software scaler/converter
+            //#if LIBSWSCALE_VERSION_MAJOR >= 3
+                //myToRgbCtx = sws_getCachedContext(myToRgbCtx,
+                //                                  aFrameSizeX, aFrameSizeY, aPixFmt,
+                //                                  aFrameSizeX, aFrameSizeY, stAV::PIX_FMT::RGB24
+                //                                  SWS_BICUBIC, NULL, NULL, NULL);
+            //#else
+                sws_freeContext(myToRgbCtx);
+                myToRgbCtx = sws_getContext(aFrameSizeX, aFrameSizeY, aPixFmt,              // source
+                                            aFrameSizeX, aFrameSizeY, stAV::PIX_FMT::RGB24, // destination
+                                            SWS_BICUBIC, NULL, NULL, NULL);
+            //#endif
+                myToRgbPixFmt = aPixFmt;
+                if(myToRgbCtx == NULL
+                || aFrameSizeX <= 0
+                || aFrameSizeY <= 0) {
+                    signals.onError(stCString("FFmpeg: Failed to create SWScaler context"));
+                    myToRgbIsBroken = true;
+                } else {
+                    // assign appropriate parts of RGB buffer to image planes in myFrameRGB
+                    const size_t aBufferSize = avpicture_get_size(stAV::PIX_FMT::RGB24, aFrameSizeX, aFrameSizeY);
+                    if(aBufferSize == 0
+                    || !myDataRGB.initTrash(StImagePlane::ImgRGB, size_t(aFrameSizeX), size_t(aFrameSizeY),
+                                            aBufferSize / size_t(aFrameSizeY))) {
+                        signals.onError(stCString("FFmpeg: Failed allocation of RGB frame (out of memory)"));
+                        myToRgbIsBroken = true;
+                    } else {
+                        avpicture_fill((AVPicture* )myFrameRGB.Frame, myDataRGB.changeData(), stAV::PIX_FMT::RGB24,
+                                       aFrameSizeX, aFrameSizeY);
+                    }
+                }
+            }
+
+            if(!myToRgbIsBroken) {
                 sws_scale(myToRgbCtx,
                           myFrame.Frame->data, myFrame.Frame->linesize,
                           0, aFrameSizeY,

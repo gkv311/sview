@@ -199,6 +199,7 @@ class StVideoQueue : public StAVPacketQueue {
     StImagePlane               myDataRGB;         //!< RGB buffer data (for swscale)
     SwsContext*                myToRgbCtx;        //!< software scaler context
     PixelFormat                myToRgbPixFmt;     //!< current swscale context - from pixel format
+    bool                       myToRgbIsBroken;   //!< indicates broke swscale context - to RGB conversion is impossible
 
     StAVFrame                  myFrame;           //!< original decoded video frame
     StImage                    myDataAdp;         //!< buffer data adaptor
