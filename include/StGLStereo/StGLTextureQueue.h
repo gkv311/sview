@@ -76,18 +76,27 @@ class StGLTextureQueue {
                            const StFormatEnum theSrcFormat,
                            const double       theSrcPTS);
 
-    inline double getPlaybackFPS() {
+    /**
+     * Retrieve queue statistics.
+     */
+    ST_LOCAL inline void getQueueInfo(int&    theQueued,
+                                      int&    theQueueLen,
+                                      double& theFps) {
         myMeterMutex.lock();
-        const double fps     = myFPSMeter.getAverage();
+        if(myHasStream) {
+            theQueued   = int(myQueueSize + 1);
+            theQueueLen = int(myQueueSizeMax);
+            theFps      = myFPSMeter.getAverage();
+        } else {
+            theQueued   = 0;
+            theQueueLen = 0;
+            theFps      = -1.0;
+        }
         const bool isUpdated = myFPSMeter.isUpdated();
         myMeterMutex.unlock();
         if(isUpdated) {
-            ST_DEBUG_LOG(
-                + "Queue playback FPS " + fps
-                + ", buffers: " + (myQueueSize + 1) + "/" + myQueueSizeMax
-            );
+            ST_DEBUG_LOG("Queue playback FPS " + theFps + ", buffers: " + theQueued + "/" + theQueueLen);
         }
-        return fps;
     }
 
     /**

@@ -1013,6 +1013,9 @@ void StMoviePlayerGUI::stglDraw(unsigned int theView) {
     setLensDist(myPlugin->getMainWindow()->getLensDist());
     if(theView == ST_DRAW_LEFT
     && myFpsWidget != NULL) {
+        stImageRegion->getTextureQueue()->getQueueInfo(myFpsWidget->changePlayQueued(),
+                                                       myFpsWidget->changePlayQueueLength(),
+                                                       myFpsWidget->changePlayFps());
         myFpsWidget->update(myPlugin->getMainWindow()->isStereoOutput(),
                             myPlugin->getMainWindow()->getTargetFps());
     }

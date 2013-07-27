@@ -619,7 +619,12 @@ void StVideo::packetsLoop() {
                 if(aQueueIsFull[aCtxId]) {
                     continue;
                 }
-                targetFps = myVideoTimer->getAverFps();
+                const double aTagerFpsNew = myVideoTimer->getAverFps();
+                if(targetFps != aTagerFpsNew) {
+                    myEventMutex.lock();
+                    targetFps = aTagerFpsNew;
+                    myEventMutex.unlock();
+                }
             } else if(myVideoSlave->isInContext(aFormatCtx, aPacket.getStreamId())) {
                 aQueueIsFull[aCtxId] = !pushPacket(myVideoSlave, aPacket);
                 if(aQueueIsFull[aCtxId]) {

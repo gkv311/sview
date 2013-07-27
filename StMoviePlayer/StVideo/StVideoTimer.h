@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,8 +58,10 @@ class StVideoTimer {
     }
 
     ST_LOCAL double getAverFps() const {
-        // TODO (Kirill Gavrilov#5#) not thread-safe
-        return 1000.0 / delayVVAver;
+        myInfoLock.lock();
+        double anAver = delayVVAver;
+        myInfoLock.unlock();
+        return 1000.0 / anAver;
     }
 
     /**
@@ -78,10 +80,10 @@ class StVideoTimer {
 
         private:
 
-    StHandle<StThread>    myThread; //!< timer loop thread
-    StHandle<StVideoQueue> myVideo; //!< video queue to sync
-    StHandle<StAudioQueue> myAudio; //!< audio queue to sync from
-
+    StHandle<StThread>     myThread;   //!< timer loop thread
+    StHandle<StVideoQueue> myVideo;    //!< video queue to sync
+    StHandle<StAudioQueue> myAudio;    //!< audio queue to sync from
+    mutable StMutex        myInfoLock;
     StCondition evDoEndLoop; // thread exit event
     StTimer refreshTimer; // timer to refresh frames
 

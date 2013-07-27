@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -118,7 +118,9 @@ void StVideoTimer::mainLoop() {
 
             delayVV = getDelayMsec(vPtsNextSec, vPtsCurrSec);
             if(delayVV > 0.0 && delayVV < 201.0) {
+                myInfoLock.lock();
                 delayVVAver = delayVV;
+                myInfoLock.unlock();
             }
             if(vPtsNextSec >= 0.0) {
                 // try Audio to Video sync

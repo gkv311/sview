@@ -105,8 +105,6 @@ int StGLTextureQueue::swapFBOnReady(StGLContext& theCtx) {
 
 // this function called ONLY from plugin thread
 bool StGLTextureQueue::stglUpdateStTextures(StGLContext& theCtx) {
-    getPlaybackFPS(); // debug output
-
     int aSwapState = swapFBOnReady(theCtx);
     if(aSwapState == SWAPONREADY_WAITLIM) {
         return false;

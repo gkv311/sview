@@ -17,7 +17,7 @@
  */
 class StGLFpsLabel : public StGLTextArea {
 
-        public:  //!< StGLTextArea overrides
+        public:  //! @name StGLTextArea overrides
 
     ST_CPPEXPORT StGLFpsLabel(StGLWidget* theParent);
     ST_CPPEXPORT virtual ~StGLFpsLabel();
@@ -27,7 +27,19 @@ class StGLFpsLabel : public StGLTextArea {
     ST_CPPEXPORT void update(const bool   theIsStereo,
                              const double theTargetFps);
 
-        public:  //!< Signals
+    ST_LOCAL inline double& changePlayFps() {
+        return myPlayFps;
+    }
+
+    ST_LOCAL inline int& changePlayQueued() {
+        return myPlayQueued;
+    }
+
+    ST_LOCAL inline int& changePlayQueueLength() {
+        return myPlayQueueLen;
+    }
+
+        public:  //! @name Signals
 
     struct {
         /**
@@ -43,8 +55,11 @@ class StGLFpsLabel : public StGLTextArea {
 
         private:
 
-    StTimer      myTimer;   //!< FPS timer
-    unsigned int myCounter; //!< frames counter
+    double       myPlayFps;      //!< video decoding FPS
+    int          myPlayQueued;   //!< queued frames
+    int          myPlayQueueLen; //!< queue length
+    StTimer      myTimer;        //!< FPS timer
+    unsigned int myCounter;      //!< frames counter
 
 };
 

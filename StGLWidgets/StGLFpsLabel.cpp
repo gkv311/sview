@@ -13,6 +13,9 @@
 
 StGLFpsLabel::StGLFpsLabel(StGLWidget* theParent)
 : StGLTextArea(theParent, -32,  32, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT), 128, 32),
+  myPlayFps(-1.0),
+  myPlayQueued(0),
+  myPlayQueueLen(0),
   myTimer(true),
   myCounter(0) {
     StGLWidget::signals.onMouseUnclick.connect(this, &StGLFpsLabel::doMouseUnclick);
@@ -39,7 +42,14 @@ void StGLFpsLabel::update(const bool   theIsStereo,
     if(aTime >= 1.0) {
         myTimer.restart();
         const double aFpsCurrent = double(myCounter) / aTime;
-        stsprintf(aBuffer, 128, "%4.1f (%4.1f) %c", aFpsCurrent, theTargetFps, theIsStereo ? 'S' : 'M');
+        if(myPlayFps <= 0.0) {
+            stsprintf(aBuffer, 128, "%c %4.1f (%4.1f)",
+                      theIsStereo ? 'S' : 'M', aFpsCurrent, theTargetFps);
+        } else {
+            stsprintf(aBuffer, 128, "%c %4.1f (%4.1f)\n%d / %d [%4.1f]",
+                      theIsStereo ? 'S' : 'M', aFpsCurrent, theTargetFps,
+                      myPlayQueued, myPlayQueueLen, myPlayFps);
+        }
         setText(aBuffer);
         myCounter = 0;
     }
