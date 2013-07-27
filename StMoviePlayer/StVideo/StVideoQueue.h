@@ -195,13 +195,15 @@ class StVideoQueue : public StAVPacketQueue {
 #endif
     bool                       myUseGpu;          //!< activate decoding on GPU when possible
 
-    AVDiscard                  myAvDiscard;       //!< discard parameter (to skip or not frames)
+    StAVFrame                  myFrameRGB;        //!< frame, converted to RGB (soft)
+    StImagePlane               myDataRGB;         //!< RGB buffer data (for swscale)
+    SwsContext*                myToRgbCtx;        //!< software scaler context
+    PixelFormat                myToRgbPixFmt;     //!< current swscale context - from pixel format
 
     StAVFrame                  myFrame;           //!< original decoded video frame
-    StAVFrame                  myFrameRGB;        //!< frame, converted to RGB (soft)
-    uint8_t*                   myBufferRGB;
     StImage                    myDataAdp;         //!< buffer data adaptor
-    SwsContext*                myToRgbCtx;        //!< software scaler context
+    AVDiscard                  myAvDiscard;       //!< discard parameter (to skip or not frames)
+
     double                     myFramePts;
     GLfloat                    myPixelRatio;      //!< pixel aspect ratio
     int                        myHParallax;       //!< horizontal parallax in pixels stored in metadata

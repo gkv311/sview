@@ -100,9 +100,10 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
 #endif
   myUseGpu(false),
   //
-  myAvDiscard(AVDISCARD_DEFAULT),
-  myBufferRGB(NULL),
   myToRgbCtx(NULL),
+  myToRgbPixFmt(stAV::PIX_FMT::NONE),
+  //
+  myAvDiscard(AVDISCARD_DEFAULT),
   myFramePts(0.0),
   myPixelRatio(1.0f),
   //
@@ -134,7 +135,6 @@ StVideoQueue::~StVideoQueue() {
     myThread.nullify();
 
     deinit();
-    stMemFreeAligned(myBufferRGB);
 }
 
 namespace {
@@ -273,7 +273,8 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     myFrame.reset();
 
     if(myCodecCtx->pix_fmt != stAV::PIX_FMT::RGB24
-    && !stAV::isFormatYUVPlanar(myCodecCtx)) {
+    && !stAV::isFormatYUVPlanar(myCodecCtx))
+    {
         // initialize software scaler/converter
         myToRgbCtx = sws_getContext(sizeX(), sizeY(), myCodecCtx->pix_fmt,  // source
                                     sizeX(), sizeY(), stAV::PIX_FMT::RGB24, // destination
@@ -284,15 +285,14 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
             return false;
         }
 
-        // assign appropriate parts of myFrameRGB to image planes in myFrameRGB
+        // assign appropriate parts of RGB buffer to image planes in myFrameRGB
         const size_t aBufferSize = avpicture_get_size(stAV::PIX_FMT::RGB24, sizeX(), sizeY());
-        stMemFreeAligned(myBufferRGB); myBufferRGB = stMemAllocAligned<uint8_t*>(aBufferSize);
-        if(myBufferRGB == NULL) {
+        if(!myDataRGB.initTrash(StImagePlane::ImgRGB, sizeX(), sizeY(), aBufferSize / sizeY())) {
             signals.onError(stCString("FFmpeg: Failed allocation of RGB frame"));
             deinit();
             return false;
         }
-        avpicture_fill((AVPicture* )myFrameRGB.Frame, myBufferRGB, stAV::PIX_FMT::RGB24,
+        avpicture_fill((AVPicture* )myFrameRGB.Frame, myDataRGB.changeData(), stAV::PIX_FMT::RGB24,
                        sizeX(), sizeY());
     }
 
@@ -363,14 +363,13 @@ void StVideoQueue::deinit() {
     }
     mySlave.nullify();
     myPixelRatio = 1.0f;
-
-    stMemFreeAligned(myBufferRGB); myBufferRGB = NULL;
     myDataAdp.nullify();
 
-    if(myToRgbCtx != NULL) {
-        // TODO (Kirill Gavrilov#5#) we got random crashes with this call
-        ///sws_freeContext(myToRgbCtx);
-    }
+    myDataRGB.nullify();
+    sws_freeContext(myToRgbCtx);
+    myToRgbCtx    = NULL;
+    myToRgbPixFmt = stAV::PIX_FMT::NONE;
+
     myFramesCounter = 1;
     myCachedFrame.nullify();
 
@@ -665,7 +664,7 @@ void StVideoQueue::decodeLoop() {
                 myDataAdp.setColorModel(StImage::ImgColor_RGB);
                 myDataAdp.setColorScale(StImage::ImgScale_Full);
                 myDataAdp.setPixelRatio(getPixelRatio());
-                myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgRGB, myBufferRGB,
+                myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgRGB, myDataRGB.changeData(),
                                                      size_t(aFrameSizeX), size_t(aFrameSizeY));
             }
         } else {
