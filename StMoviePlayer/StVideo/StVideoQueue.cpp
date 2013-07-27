@@ -91,7 +91,11 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   myHasDataState(false),
   myMaster(theMaster),
   myGetFrmtAuto(NULL),
-#ifdef  __APPLE__
+#if defined(_WIN32)
+  myCodecDxva264(avcodec_find_decoder_by_name("h264_dxva2")),
+  myCodecDxvaWmv(avcodec_find_decoder_by_name("wmv3_dxva2")),
+  myCodecDxvaVc1(avcodec_find_decoder_by_name("vc1_dxva2")),
+#elif defined(__APPLE__)
   myCodecVda(avcodec_find_decoder_by_name("h264_vda")),
 #endif
   myUseGpu(false),
@@ -220,18 +224,36 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
 
     bool isCodecOverridden = false;
     myGetFrmtAuto = myCodecCtx->get_format;
-#ifdef  __APPLE__
-    if(myUseGpu
-    && myCodecVda != NULL
-    && myCodecCtx->pix_fmt == stAV::PIX_FMT::YUV420P
-    && StString(myCodecAuto->name).isEquals(stCString("h264"))) {
+
+    AVCodec* aCodecGpu = NULL;
+    if(myUseGpu) {
+#if defined(_WIN32)
+        if(StString(myCodecAuto->name).isEquals(stCString("h264"))) {
+            aCodecGpu = myCodecDxva264;
+        } else if(StString(myCodecAuto->name).isEquals(stCString("wmv3"))) {
+            aCodecGpu = myCodecDxvaWmv;
+        } else if(StString(myCodecAuto->name).isEquals(stCString("vc1"))) {
+            aCodecGpu = myCodecDxvaVc1;
+        }
+#elif defined(__APPLE__)
+        if(StString(myCodecAuto->name).isEquals(stCString("h264"))
+        && myCodecCtx->pix_fmt == stAV::PIX_FMT::YUV420P) {
+            aCodecGpu = myCodecVda;
+        }
+#endif
+    }
+
+    if(aCodecGpu != NULL) {
+    #if defined(__APPLE__)
         myCodecCtx->get_format = stGetFormatYUV420P;
-        isCodecOverridden = initCodec(myCodecVda);
+    #endif
+        isCodecOverridden = initCodec(aCodecGpu);
+    #if defined(__APPLE__)
         if(!isCodecOverridden) {
             myCodecCtx->get_format = myGetFrmtAuto;
         }
+    #endif
     }
-#endif
 
     // open VIDEO codec
     if(!isCodecOverridden && !initCodec(myCodecAuto)) {

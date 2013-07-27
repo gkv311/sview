@@ -186,7 +186,11 @@ class StVideoQueue : public StAVPacketQueue {
 
     typedef PixelFormat (*aGetFrmt_t)(AVCodecContext* , const PixelFormat* );
     aGetFrmt_t                 myGetFrmtAuto;
-#ifdef  __APPLE__
+#if defined(_WIN32)
+    AVCodec*                   myCodecDxva264;    //!< DXVA2 codec (decoding on GPU in Windows)
+    AVCodec*                   myCodecDxvaWmv;    //!< DXVA2 codec (decoding on GPU in Windows)
+    AVCodec*                   myCodecDxvaVc1;    //!< DXVA2 codec (decoding on GPU in Windows)
+#elif defined(__APPLE__)
     AVCodec*                   myCodecVda;        //!< VDA codec (decoding on GPU in OS X)
 #endif
     bool                       myUseGpu;          //!< activate decoding on GPU when possible
