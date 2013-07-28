@@ -69,10 +69,12 @@ namespace {
     static const char ST_SETTING_TEXFILTER[]     = "viewTexFilter";
     static const char ST_SETTING_GAMMA[]         = "viewGamma";
     static const char ST_SETTING_SHUFFLE[]       = "shuffle";
+    static const char ST_SETTING_LOOP_SINGLE[]   = "loopSingle";
     static const char ST_SETTING_GLOBAL_MKEYS[]  = "globalMediaKeys";
     static const char ST_SETTING_RATIO[]         = "ratio";
     static const char ST_SETTING_UPDATES_LAST_CHECK[] = "updatesLastCheck";
     static const char ST_SETTING_UPDATES_INTERVAL[]   = "updatesInterval";
+    static const char ST_SETTING_EXPERIMENTAL[]  = "experimental";
 
     static const char ST_SETTING_WEBUI_ON[]      = "webuiOn";
     static const char ST_SETTING_WEBUI_PORT[]    = "webuiPort";
@@ -182,6 +184,7 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     params.isFullscreen->signals.onChanged = stSlot(this, &StMoviePlayer::doFullscreen);
     params.toRestoreRatio   = new StBoolParam(false);
     params.isShuffle        = new StBoolParam(false);
+    params.ToLoopSingle     = new StBoolParam(false);
     params.areGlobalMKeys   = new StBoolParam(true);
     params.checkUpdatesDays = new StInt32Param(7);
     params.srcFormat        = new StInt32Param(ST_V_SRC_AUTODETECT);
@@ -204,6 +207,7 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     params.subtitlesStream = new StInt32Param(-1);
     params.subtitlesStream->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchSubtitlesStream);
     params.blockSleeping = new StInt32Param(StMoviePlayer::BLOCK_SLEEP_PLAYBACK);
+    params.ToShowExtra   = new StBoolParam(false);
     params.TargetFps = 2; // set rendering FPS as twice as average video FPS
     params.UseGpu = new StBoolParam(false);
 
@@ -213,6 +217,7 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     mySettings->loadInt32 (ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
     mySettings->loadParam (ST_SETTING_UPDATES_INTERVAL,   params.checkUpdatesDays);
     mySettings->loadParam (ST_SETTING_SHUFFLE,            params.isShuffle);
+    mySettings->loadParam (ST_SETTING_LOOP_SINGLE,        params.ToLoopSingle);
     mySettings->loadParam (ST_SETTING_GLOBAL_MKEYS,       params.areGlobalMKeys);
     mySettings->loadParam (ST_SETTING_SHOW_LIST,          params.ToShowPlayList);
 
@@ -224,6 +229,7 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     mySettings->loadParam (ST_SETTING_WEBUI_ON,           params.StartWebUI);
     mySettings->loadParam (ST_SETTING_WEBUI_PORT,         params.WebUIPort);
     mySettings->loadParam (ST_SETTING_WEBUI_ERRORS,       params.ToPrintWebErrors);
+    mySettings->loadParam (ST_SETTING_EXPERIMENTAL,       params.ToShowExtra);
     if(params.StartWebUI->getValue() == WEBUI_ONCE) {
         params.StartWebUI->setValue(WEBUI_OFF);
     }
@@ -233,8 +239,9 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     mySettings->loadString(ST_SETTING_OPENAL_DEVICE,      aSavedALDevice);
     params.alDevice->init(aSavedALDevice);
 
-    params.isShuffle->signals.onChanged.connect(this, &StMoviePlayer::doSwitchShuffle);
-    params.alDevice ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchAudioDevice);
+    params.isShuffle   ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchShuffle);
+    params.ToLoopSingle->signals.onChanged.connect(this, &StMoviePlayer::doSwitchLoopSingle);
+    params.alDevice    ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchAudioDevice);
 
     addRenderer(new StOutAnaglyph(theParentWin));
     addRenderer(new StOutDual(theParentWin));
@@ -363,6 +370,7 @@ void StMoviePlayer::releaseDevice() {
         mySettings->saveParam (ST_SETTING_UPDATES_INTERVAL,   params.checkUpdatesDays);
         mySettings->saveParam (ST_SETTING_SRCFORMAT,          params.srcFormat);
         mySettings->saveParam (ST_SETTING_SHUFFLE,            params.isShuffle);
+        mySettings->saveParam (ST_SETTING_LOOP_SINGLE,        params.ToLoopSingle);
         mySettings->saveParam (ST_SETTING_GLOBAL_MKEYS,       params.areGlobalMKeys);
         mySettings->saveParam (ST_SETTING_SHOW_LIST,          params.ToShowPlayList);
 
@@ -374,6 +382,7 @@ void StMoviePlayer::releaseDevice() {
         mySettings->saveParam (ST_SETTING_WEBUI_ON,           params.StartWebUI);
         mySettings->saveParam (ST_SETTING_WEBUI_PORT,         params.WebUIPort);
         mySettings->saveParam (ST_SETTING_WEBUI_ERRORS,       params.ToPrintWebErrors);
+        mySettings->saveParam (ST_SETTING_EXPERIMENTAL,       params.ToShowExtra);
 
         if(!myVideo.isNull()) {
             mySettings->saveString(ST_SETTING_RECENT_FILES,   myPlayList->dumpRecentList());
@@ -524,7 +533,8 @@ bool StMoviePlayer::init() {
         mySettings->loadHotKey(anAction);
         addAction(Action_StereoParamsBegin + int(anIter), anAction);
     }
-    myPlayList->setShuffle(params.isShuffle->getValue());
+    myPlayList->setShuffle   (params.isShuffle   ->getValue());
+    myPlayList->setLoopSingle(params.ToLoopSingle->getValue());
 
     StString aRecentList;
     mySettings->loadString(ST_SETTING_RECENT_FILES, aRecentList);
@@ -555,26 +565,30 @@ bool StMoviePlayer::init() {
 }
 
 void StMoviePlayer::parseArguments(const StArgumentsMap& theArguments) {
-    StArgument argFullscreen = theArguments[ST_SETTING_FULLSCREEN];
-    StArgument argViewMode   = theArguments[ST_SETTING_VIEWMODE];
-    StArgument argSrcFormat  = theArguments[ST_SETTING_SRCFORMAT];
-    StArgument argShuffle    = theArguments[ST_SETTING_SHUFFLE];
-    StArgument argBenchmark  = theArguments[ST_ARGUMENT_BENCHMARK];
+    StArgument anArgFullscr    = theArguments[ST_SETTING_FULLSCREEN];
+    StArgument anArgViewMode   = theArguments[ST_SETTING_VIEWMODE];
+    StArgument anArgSrcFormat  = theArguments[ST_SETTING_SRCFORMAT];
+    StArgument anArgShuffle    = theArguments[ST_SETTING_SHUFFLE];
+    StArgument anArgLoopSingle = theArguments[ST_SETTING_LOOP_SINGLE];
+    StArgument anArgBenchmark  = theArguments[ST_ARGUMENT_BENCHMARK];
 
-    if(argFullscreen.isValid()) {
-        params.isFullscreen->setValue(!argFullscreen.isValueOff());
+    if(anArgFullscr.isValid()) {
+        params.isFullscreen->setValue(!anArgFullscr.isValueOff());
     }
-    if(argViewMode.isValid()) {
-        myPlayList->changeDefParams().setViewMode(StStereoParams::GET_VIEW_MODE_FROM_STRING(argViewMode.getValue()));
+    if(anArgViewMode.isValid()) {
+        myPlayList->changeDefParams().setViewMode(StStereoParams::GET_VIEW_MODE_FROM_STRING(anArgViewMode.getValue()));
     }
-    if(argSrcFormat.isValid()) {
-        params.srcFormat->setValue(st::formatFromString(argSrcFormat.getValue()));
+    if(anArgSrcFormat.isValid()) {
+        params.srcFormat->setValue(st::formatFromString(anArgSrcFormat.getValue()));
     }
-    if(argShuffle.isValid()) {
-        params.isShuffle->setValue(!argShuffle.isValueOff());
+    if(anArgShuffle.isValid()) {
+        params.isShuffle->setValue(!anArgShuffle.isValueOff());
     }
-    if(argBenchmark.isValid()) {
-        myIsBenchmark = !argBenchmark.isValueOff();
+    if(anArgLoopSingle.isValid()) {
+        params.ToLoopSingle->setValue(!anArgLoopSingle.isValueOff());
+    }
+    if(anArgBenchmark.isValid()) {
+        myIsBenchmark = !anArgBenchmark.isValueOff();
         myVideo->setBenchmark(myIsBenchmark);
     }
 }
@@ -942,6 +956,10 @@ void StMoviePlayer::doPlayListReverse(const size_t ) {
 
 void StMoviePlayer::doSwitchShuffle(const bool theShuffleOn) {
     myPlayList->setShuffle(theShuffleOn);
+}
+
+void StMoviePlayer::doSwitchLoopSingle(const bool theValue) {
+    myPlayList->setLoopSingle(theValue);
 }
 
 void StMoviePlayer::doSwitchVSync(const bool theValue) {

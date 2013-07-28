@@ -150,6 +150,7 @@ StPlayList::StPlayList(const int  theRecursionDeep,
   myPlayedCount(0),
   myRecursionDeep(theRecursionDeep),
   myIsShuffle(false),
+  myToLoopSingle(false),
   myIsLoopFlag(theIsLoop),
   myRecentLimit(10),
   myIsNewRecent(false),
@@ -179,9 +180,14 @@ bool StPlayList::isLoop() const {
     return myIsLoopFlag;
 }
 
-void StPlayList::setLoop(bool theLoop) {
+void StPlayList::setLoop(const bool theLoop) {
     StMutexAuto anAutoLock(myMutex);
     myIsLoopFlag = theLoop;
+}
+
+void StPlayList::setLoopSingle(const bool theValue) {
+    StMutexAuto anAutoLock(myMutex);
+    myToLoopSingle = theValue;
 }
 
 bool StPlayList::isShuffle() const {
@@ -340,9 +346,10 @@ bool StPlayList::walkToPrev() {
     return false;
 }
 
-bool StPlayList::walkToNext() {
+bool StPlayList::walkToNext(const bool theToForce) {
     StMutexAuto anAutoLock(myMutex);
-    if(myCurrent == NULL) {
+    if(myCurrent == NULL
+    || (myToLoopSingle && !theToForce)) {
         return false;
     } else if(myIsShuffle && myItemsCount >= 3) {
         /// TODO (Kirill Gavrilov#5) walk to the history front before next random

@@ -195,6 +195,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StBoolParam>     isFullscreen;     //!< fullscreen state
         StHandle<StBoolParam>     toRestoreRatio;   //!< restore ratio on restart
         StHandle<StBoolParam>     isShuffle;        //!< shuffle playback order
+        StHandle<StBoolParam>     ToLoopSingle;     //!< play single playlist item in loop
         StHandle<StBoolParam>     areGlobalMKeys;   //!< capture global multimedia keys
         StHandle<StInt32Param>    checkUpdatesDays; //!< days count between updates checks
         StHandle<StInt32Param>    srcFormat;        //!< source format
@@ -208,6 +209,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StInt32Param>    audioStream;      //!< active Audio stream
         StHandle<StInt32Param>    subtitlesStream;  //!< active Subtitles stream
         StHandle<StInt32Param>    blockSleeping;    //!< active Audio stream
+        StHandle<StBoolParam>     ToShowExtra;      //!< show experimental menu items
         StString                  lastFolder;       //!< laster folder used to open / save file
         int                       TargetFps;        //!< rendering FPS limit (0 - max FPS with less CPU, 1,2,3 - adjust to video FPS)
         StHandle<StBoolParam>     UseGpu;           //!< use video decoding on GPU when available
@@ -250,6 +252,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doSetAudioVolume(const float theGain);
     ST_LOCAL void doSetAudioMute(const bool theToMute);
     ST_LOCAL void doSwitchShuffle(const bool theShuffleOn);
+    ST_LOCAL void doSwitchLoopSingle(const bool theValue);
     ST_LOCAL void doFullscreen(const bool theIsFullscreen);
     ST_LOCAL void doSwitchSrcFormat(const int32_t theSrcFormat);
     ST_LOCAL void doSwitchAudioStream(const int32_t theStreamId);

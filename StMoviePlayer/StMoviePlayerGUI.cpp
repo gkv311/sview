@@ -211,12 +211,21 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
 #endif
 
 #if defined(_WIN32) || defined(__APPLE__)
-    aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_GPU_DECODING,
-                        "Video decoding on GPU") + aGpuAcc, myPlugin->params.UseGpu);
+#if defined(_WIN32)
+    if(myPlugin->params.ToShowExtra->getValue()) {
+#endif
+        aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_GPU_DECODING,
+                            "Video decoding on GPU") + aGpuAcc, myPlugin->params.UseGpu);
+#if defined(_WIN32)
+    }
+#endif
 #endif
 
     aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_SHUFFLE,
                         "Shuffle"), myPlugin->params.isShuffle);
+    if(myPlugin->params.ToShowExtra->getValue()) {
+        aMenuMedia->addItem("Loop single item", myPlugin->params.ToLoopSingle);
+    }
 
     aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_RECENT,
                         "Recent files"), myMenuRecent);
@@ -659,6 +668,9 @@ StGLMenu* StMoviePlayerGUI::createHelpMenu() {
     aMenu->addItem(myLangMap->changeValueId(MENU_HELP_LICENSE, "License text"))
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doOpenLicense);
 
+    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_EXPERIMENTAL, "Experimental features"),
+                   myPlugin->params.ToShowExtra);
+
     aMenu->addItem(myLangMap->changeValueId(MENU_HELP_BLOCKSLP,"Block sleeping"),    aMenuBlockSleep);
     aMenu->addItem(myLangMap->changeValueId(MENU_HELP_UPDATES, "Check for updates"), aMenuCheckUpdates);
     aMenu->addItem(myLangMap->changeValueId(MENU_HELP_LANGS,   "Language"),          aMenuLanguage);
@@ -753,7 +765,8 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
   //
   myFpsWidget(NULL),
   //
-  isGUIVisible(true) {
+  isGUIVisible(true),
+  myIsExperimental(myPlugin->params.ToShowExtra->getValue()) {
     setRootMarginsPx(myWindow->getMargins());
     const StRectI_t& aMargins = getRootMarginsPx();
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StMoviePlayerGUI::doShowFPS);
@@ -803,11 +816,14 @@ void StMoviePlayerGUI::stglUpdate(const StPointD_t& thePointZo,
     if(stDescr != NULL) {
         stDescr->setPoint(thePointZo);
     }
-    if(myLangMap->wasReloaded()) {
+
+    if(myLangMap->wasReloaded()
+    || myIsExperimental != myPlugin->params.ToShowExtra->getValue()) {
         StGLMenu::DeleteWithSubMenus(menu0Root); menu0Root = NULL;
         createMainMenu();
         menu0Root->stglUpdateSubmenuLayout();
         myLangMap->resetReloaded();
+        myIsExperimental = myPlugin->params.ToShowExtra->getValue();
         // turn back topmost position
         getChildren()->moveToTop(myMsgStack);
     }

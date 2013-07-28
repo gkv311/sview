@@ -188,7 +188,12 @@ class StPlayList {
     /**
      * Setup loop flag.
      */
-    ST_CPPEXPORT void setLoop(bool theLoop);
+    ST_CPPEXPORT void setLoop(const bool theLoop);
+
+    /**
+     * Setup single item loop flag.
+     */
+    ST_CPPEXPORT void setLoopSingle(const bool theValue);
 
     /**
      * Returns shuffle flag.
@@ -239,9 +244,10 @@ class StPlayList {
 
     /**
      * Change current position in playlist to the next item.
-     * @return true if current position was changed.
+     * @param theToForce ignore single item loop flag
+     * @return true if current position was changed
      */
-    ST_CPPEXPORT bool walkToNext();
+    ST_CPPEXPORT bool walkToNext(const bool theToForce = true);
 
     /**
      * Verify the filename extension is in supported list.
@@ -387,6 +393,7 @@ class StPlayList {
     size_t                  myPlayedCount;   //!< played items in current iteration (< myItemsCount)
     int                     myRecursionDeep;
     bool                    myIsShuffle;
+    bool                    myToLoopSingle;  //!< play single item in loop
     bool                    myIsLoopFlag;
 
     StHandle<StFileNode>    myPlsFile;       //!< current playlist file (if any)

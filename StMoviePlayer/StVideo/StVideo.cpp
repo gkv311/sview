@@ -1027,7 +1027,7 @@ void StVideo::mainLoop() {
                     return;
                 }
             } else {
-                myPlayList->walkToNext();
+                myPlayList->walkToNext(false);
             }
             isOpenSuccess = false;
             if(myPlayList->getCurrentFile(aFileToLoad, aFileParams)) {

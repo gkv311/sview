@@ -177,6 +177,10 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL void doShowFPS(const bool );
     ST_LOCAL void doAboutRenderer(const size_t );
 
+        private:
+
+    bool myIsExperimental;
+
 };
 
 #endif //__StMoviePlayerGUI_h_
