@@ -192,23 +192,16 @@ static SV_THREAD_FUNCTION threadFunction(void* audioQueue) {
     return SV_THREAD_RETURN 0;
 }
 
-/**
- * 1 second of 48khz 32bit audio (old AVCODEC_MAX_AUDIO_FRAME_SIZE).
- */
-#define ST_MAX_AUDIO_FRAME_SIZE 192000
-
 StAudioQueue::StAudioQueue(const StString& theAlDeviceName)
 : StAVPacketQueue(512),
-  myAlDataLoop(),
   myPlaybackTimer(false),
   myDowntimeEvent(true),
-  myBufferSrc(PCM16_SIGNED, ST_MAX_AUDIO_FRAME_SIZE),
-  myBufferOut(PCM16_SIGNED, ST_MAX_AUDIO_FRAME_SIZE),
+  myBufferSrc(PCM16_SIGNED),
+  myBufferOut(PCM16_SIGNED),
   myIsAlValid(ST_AL_INIT_NA),
   myToSwitchDev(false),
   myIsDisconnected(false),
   myAlDeviceName(new StString(theAlDeviceName)),
-  myAlCtx(),
   myAlFormat(AL_FORMAT_STEREO16),
   myPrevFormat(AL_FORMAT_STEREO16),
   myPrevFrequency(0),
@@ -777,36 +770,39 @@ void StAudioQueue::decodePacket(const StHandle<StAVPacket>& thePacket,
                 break;
             }
 
-            int64_t aPtsU = stAV::NOPTS_VALUE;
-        #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 40, 0))
-            aPtsU = myFrame.Frame->pts;
-        #endif
-            if(aPtsU == stAV::NOPTS_VALUE) {
-                aPtsU = thePacket->getPts();
-            }
-
-            if(aPtsU != stAV::NOPTS_VALUE) {
-                const double aNewPts = unitsToSeconds(aPtsU) - myPtsStartBase;
-                if(aNewPts <= thePts) {
-                    ST_DEBUG_LOG("Got the AUDIO packet with pts in past; "
-                        + "new PTS= "   + aNewPts
-                        + "; old PTS= " + thePts
-                    );
+            if(!myBufferOut.isEmpty()) {
+                int64_t aPtsU = stAV::NOPTS_VALUE;
+            #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 40, 0))
+                aPtsU = myFrame.Frame->pts;
+            #endif
+                if(aPtsU == stAV::NOPTS_VALUE) {
+                    aPtsU = thePacket->getPts();
                 }
-                thePts = aNewPts;
+
+                if(aPtsU != stAV::NOPTS_VALUE) {
+                    const double aNewPts = unitsToSeconds(aPtsU) - myPtsStartBase;
+                    if(aNewPts <= thePts) {
+                        ST_DEBUG_LOG("Got the AUDIO packet with pts in past; "
+                            + "new PTS= "   + aNewPts
+                            + "; old PTS= " + thePts
+                        );
+                    }
+                    thePts = aNewPts;
+                }
+
+                // now fill OpenAL buffers
+                stalFillBuffers(thePts, false);
+                if(myToQuit) {
+                    return;
+                }
+
+                // save the history for filled AL buffers sizes
+                myAlDataLoop.push(myBufferOut.getDataSizeWhole());
             }
 
-            // now fill OpenAL buffers
-            stalFillBuffers(thePts, false);
-            if(myToQuit) {
-                return;
-            }
-
-            // save the history for filled AL buffers sizes
-            myAlDataLoop.push(myBufferOut.getDataSizeWhole());
-
-            // clear 'big' buffer
-            myBufferOut.setDataSize(0);
+            myBufferOut.setDataSize(0);                         // clear 'big' buffer
+            myBufferOut.resize(myBufferSrc.getDataSizeWhole(),  // make sure buffer is big enough
+                               false);
             myBufferOut.addData(myBufferSrc);
             break;
         }

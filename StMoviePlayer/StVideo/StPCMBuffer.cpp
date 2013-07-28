@@ -21,6 +21,11 @@
 #include <stAssert.h>
 #include <StStrings/StLogger.h>
 
+/**
+ * 1 second of 48khz 32bit audio (old AVCODEC_MAX_AUDIO_FRAME_SIZE).
+ */
+#define ST_MAX_AUDIO_FRAME_SIZE 192000
+
 StChannelMap::StChannelMap(const StChannelMap::Channels theChannels,
                            const StChannelMap::OrderRules theRules)
 : count(0),
@@ -88,10 +93,9 @@ void StPCMBuffer::setFormat(const StPCMformat thePCMFormat) {
     myPCMFormat = thePCMFormat;
 }
 
-StPCMBuffer::StPCMBuffer(const StPCMformat thePCMFormat,
-                         const size_t theBufferSize)
+StPCMBuffer::StPCMBuffer(const StPCMformat thePCMFormat)
 : myBuffer(NULL),
-  mySizeBytes(theBufferSize),
+  mySizeBytes(ST_MAX_AUDIO_FRAME_SIZE),
   myPlaneSize(0),
   myPlanesNb(1),
   mySampleSize(0),
@@ -112,6 +116,35 @@ StPCMBuffer::~StPCMBuffer() {
 void StPCMBuffer::clear() {
     myPlaneSize = 0;
     stMemZero(myBuffer, mySizeBytes);
+}
+
+void StPCMBuffer::setupChannels(const StChannelMap& theChMap,
+                                const size_t        thePlanesNb) {
+    myChMap     = theChMap;
+    myPlanesNb  = (thePlanesNb != 0) ? thePlanesNb : 1;
+    myPlaneSize = 0;
+
+    const size_t aPlaneSizeMax = (mySizeBytes / myPlanesNb);
+    for(size_t aPlaneIter = 0; aPlaneIter < ST_AUDIO_CHANNELS_MAX; ++aPlaneIter) {
+        myPlanes[aPlaneIter] = (aPlaneIter < myPlanesNb)
+                             ? &myBuffer[aPlaneIter * aPlaneSizeMax]
+                             : NULL;
+    }
+}
+
+void StPCMBuffer::resize(const size_t theSizeMin,
+                         const bool   theToReduce) {
+    if(mySizeBytes >= theSizeMin
+    && !theToReduce) {
+        return; // do not reduce buffer
+    }
+
+    mySizeBytes = theSizeMin;
+    stMemZero(myPlanes, sizeof(myPlanes));
+    stMemFreeAligned(myBuffer);
+    myBuffer = stMemAllocAligned<uint8_t*>(mySizeBytes, 16);
+    stMemZero(myBuffer, mySizeBytes);
+    setupChannels(myChMap, myPlanesNb);
 }
 
 bool StPCMBuffer::setDataSize(const size_t theDataSize) {
@@ -335,7 +368,7 @@ bool StPCMBuffer::addConvert(const StPCMBuffer& theBuffer) {
 }
 
 bool StPCMBuffer::addData(const StPCMBuffer& theBuffer) {
-    if(theBuffer.isEmpty() || !hasDataSize(theBuffer.myPlaneSize * theBuffer.myPlanesNb)) {
+    if(theBuffer.isEmpty() || !hasDataSize(theBuffer.getDataSizeWhole())) {
         return false;
     } else if(myChMap.count != theBuffer.myChMap.count) {
         // currently not supported

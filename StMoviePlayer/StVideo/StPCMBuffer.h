@@ -149,10 +149,8 @@ class StPCMBuffer {
 
     /**
      * @param pcmFormat     PCM format from PCMformat enum
-     * @param theBufferSize buffer size in bytes
      */
-    ST_LOCAL StPCMBuffer(const StPCMformat thePCMFormat,
-                         const size_t theBufferSize);
+    ST_LOCAL StPCMBuffer(const StPCMformat thePCMFormat);
 
     /**
      * Destructor.
@@ -163,6 +161,13 @@ class StPCMBuffer {
      * Clear data in buffer (nulling), set datasize to zero.
      */
     ST_LOCAL void clear();
+
+    /**
+     * Resize buffer to fit bigger packets.
+     * @param theSizeMin buffer size in bytes
+     */
+    ST_LOCAL void resize(const size_t theSizeMin,
+                         const bool   theToReduce);
 
     /**
      * @return one second size in bytes for current format
@@ -223,6 +228,16 @@ class StPCMBuffer {
     ST_LOCAL bool hasDataSize(const size_t thePushDataSize) const {
         return (myPlanes[0] == myBuffer)
             && ((mySizeBytes - myPlaneSize * myPlanesNb) >= thePushDataSize);
+    }
+
+    /**
+     * @return free memory available for appending data
+     */
+    ST_LOCAL size_t getFreeDataSize() const {
+        if(myPlanes[0] != myBuffer) {
+            return 0;
+        }
+        return mySizeBytes - myPlaneSize * myPlanesNb;
     }
 
     /**
@@ -306,17 +321,16 @@ class StPCMBuffer {
     ST_LOCAL void setupChannels(const StChannelMap::Channels   theChannels,
                                 const StChannelMap::OrderRules theRules,
                                 const size_t                   thePlanesNb) {
-        myChMap     = StChannelMap(theChannels, theRules);
-        myPlanesNb  = (thePlanesNb > 0) ? thePlanesNb : 1;
-        myPlaneSize = 0;
-
-        const size_t aPlaneSizeMax = (mySizeBytes / myPlanesNb);
-        for(size_t aPlaneIter = 0; aPlaneIter < ST_AUDIO_CHANNELS_MAX; ++aPlaneIter) {
-            myPlanes[aPlaneIter] = (aPlaneIter < myPlanesNb)
-                                 ? &myBuffer[aPlaneIter * aPlaneSizeMax]
-                                 : NULL;
-        }
+        setupChannels(StChannelMap(theChannels, theRules), thePlanesNb);
     }
+
+    /**
+     * Initialize buffer configuration.
+     * @param theChMap    channels configuration
+     * @param thePlanesNb planes number (1 for interleaved data, >=2 for planar data)
+     */
+    ST_LOCAL void setupChannels(const StChannelMap& theChMap,
+                                const size_t        thePlanesNb);
 
         private:
 
