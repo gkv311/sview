@@ -190,6 +190,11 @@ class StVideoQueue : public StAVPacketQueue {
      */
     ST_LOCAL bool initCodec(AVCodec* theCodec);
 
+    /**
+     * Initialize adapter over AVframe or perform to RGB conversion.
+     */
+    ST_LOCAL void prepareFrame(const StFormatEnum theSrcFormat);
+
     ST_LOCAL void pushFrame(const StImage&     theSrcDataLeft,
                             const StImage&     theSrcDataRight,
                             const StHandle<StStereoParams>& theStParams,

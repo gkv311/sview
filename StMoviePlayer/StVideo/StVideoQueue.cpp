@@ -384,6 +384,120 @@ void StVideoQueue::syncVideo(AVFrame* theSrcFrame,
 }
 #endif
 
+void StVideoQueue::prepareFrame(const StFormatEnum theSrcFormat) {
+    int          aFrameSizeX = 0;
+    int          aFrameSizeY = 0;
+    PixelFormat  aPixFmt     = stAV::PIX_FMT::NONE;
+    stAV::dimYUV aDimsYUV;
+    myFrame.getImageInfo(myCodecCtx, aFrameSizeX, aFrameSizeY, aPixFmt);
+    if(aPixFmt == stAV::PIX_FMT::RGB24) {
+        myDataAdp.setColorModel(StImage::ImgColor_RGB);
+        myDataAdp.setColorScale(StImage::ImgScale_Full);
+        myDataAdp.setPixelRatio(getPixelRatio());
+        myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgRGB, myFrame.getPlane(0),
+                                             size_t(aFrameSizeX), size_t(aFrameSizeY),
+                                             myFrame.getLineSize(0));
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 5, 0))
+    } else if(stAV::isFormatYUVPlanar(myFrame.Frame,
+#else
+    } else if(stAV::isFormatYUVPlanar(myCodecCtx,
+#endif
+                                      aDimsYUV)) {
+
+        /// TODO (Kirill Gavrilov#5) remove hack
+        // workaround for incorrect frame dimensions information in some files
+        // critical for tiled source format that should be 1080p
+        if(theSrcFormat == ST_V_SRC_TILED_4X
+        && aPixFmt      == stAV::PIX_FMT::YUV420P
+        && aFrameSizeX >= 1906 && aFrameSizeX <= 1920
+        && myFrame.getLineSize(0) >= 1920
+        && aFrameSizeY >= 1074) {
+            aDimsYUV.widthY  = 1920;
+            aDimsYUV.heightY = 1080;
+            aDimsYUV.widthU  = aDimsYUV.widthV  = aDimsYUV.widthY  / 2;
+            aDimsYUV.heightU = aDimsYUV.heightV = aDimsYUV.heightY / 2;
+        }
+
+        StImagePlane::ImgFormat aPlaneFrmt = StImagePlane::ImgGray;
+    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 29, 0))
+        if(myCodecCtx->color_range == AVCOL_RANGE_JPEG) {
+            // there no color range information in the AVframe (yet)
+            aDimsYUV.isFullScale = true;
+        }
+    #endif
+        myDataAdp.setColorScale(aDimsYUV.isFullScale ? StImage::ImgScale_Full : StImage::ImgScale_Mpeg);
+        if(aDimsYUV.bitsPerComp == 9) {
+            aPlaneFrmt = StImagePlane::ImgGray16;
+            myDataAdp.setColorScale(aDimsYUV.isFullScale ? StImage::ImgScale_Jpeg9  : StImage::ImgScale_Mpeg9);
+        } else if(aDimsYUV.bitsPerComp == 10) {
+            aPlaneFrmt = StImagePlane::ImgGray16;
+            myDataAdp.setColorScale(aDimsYUV.isFullScale ? StImage::ImgScale_Jpeg10 : StImage::ImgScale_Mpeg10);
+        } else if(aDimsYUV.bitsPerComp == 16) {
+            aPlaneFrmt = StImagePlane::ImgGray16;
+        }
+        myDataAdp.setColorModel(StImage::ImgColor_YUV);
+        myDataAdp.setPixelRatio(getPixelRatio());
+        myDataAdp.changePlane(0).initWrapper(aPlaneFrmt, myFrame.getPlane(0),
+                                             size_t(aDimsYUV.widthY), size_t(aDimsYUV.heightY), myFrame.getLineSize(0));
+        myDataAdp.changePlane(1).initWrapper(aPlaneFrmt, myFrame.getPlane(1),
+                                             size_t(aDimsYUV.widthU), size_t(aDimsYUV.heightU), myFrame.getLineSize(1));
+        myDataAdp.changePlane(2).initWrapper(aPlaneFrmt, myFrame.getPlane(2),
+                                             size_t(aDimsYUV.widthV), size_t(aDimsYUV.heightV), myFrame.getLineSize(2));
+    } else if(!myToRgbIsBroken) {
+        if(myToRgbCtx    == NULL
+        || myToRgbPixFmt != aPixFmt
+        || size_t(aFrameSizeX) != myDataRGB.getSizeX()
+        || size_t(aFrameSizeY) != myDataRGB.getSizeY()) {
+            // initialize software scaler/converter
+        //#if LIBSWSCALE_VERSION_MAJOR >= 3
+            //myToRgbCtx = sws_getCachedContext(myToRgbCtx,
+            //                                  aFrameSizeX, aFrameSizeY, aPixFmt,
+            //                                  aFrameSizeX, aFrameSizeY, stAV::PIX_FMT::RGB24
+            //                                  SWS_BICUBIC, NULL, NULL, NULL);
+        //#else
+            sws_freeContext(myToRgbCtx);
+            myToRgbCtx = sws_getContext(aFrameSizeX, aFrameSizeY, aPixFmt,              // source
+                                        aFrameSizeX, aFrameSizeY, stAV::PIX_FMT::RGB24, // destination
+                                        SWS_BICUBIC, NULL, NULL, NULL);
+        //#endif
+            myToRgbPixFmt = aPixFmt;
+            if(myToRgbCtx == NULL
+            || aFrameSizeX <= 0
+            || aFrameSizeY <= 0) {
+                signals.onError(stCString("FFmpeg: Failed to create SWScaler context"));
+                myToRgbIsBroken = true;
+            } else {
+                // assign appropriate parts of RGB buffer to image planes in myFrameRGB
+                const size_t aBufferSize = avpicture_get_size(stAV::PIX_FMT::RGB24, aFrameSizeX, aFrameSizeY);
+                if(aBufferSize == 0
+                || !myDataRGB.initTrash(StImagePlane::ImgRGB, size_t(aFrameSizeX), size_t(aFrameSizeY),
+                                        aBufferSize / size_t(aFrameSizeY))) {
+                    signals.onError(stCString("FFmpeg: Failed allocation of RGB frame (out of memory)"));
+                    myToRgbIsBroken = true;
+                } else {
+                    avpicture_fill((AVPicture* )myFrameRGB.Frame, myDataRGB.changeData(), stAV::PIX_FMT::RGB24,
+                                   aFrameSizeX, aFrameSizeY);
+                }
+            }
+        }
+
+        if(!myToRgbIsBroken) {
+            sws_scale(myToRgbCtx,
+                      myFrame.Frame->data, myFrame.Frame->linesize,
+                      0, aFrameSizeY,
+                      myFrameRGB.Frame->data, myFrameRGB.Frame->linesize);
+
+            myDataAdp.setColorModel(StImage::ImgColor_RGB);
+            myDataAdp.setColorScale(StImage::ImgScale_Full);
+            myDataAdp.setPixelRatio(getPixelRatio());
+            myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgRGB, myDataRGB.changeData(),
+                                                 size_t(aFrameSizeX), size_t(aFrameSizeY));
+        }
+    } else {
+        //ST_DEBUG_LOG("Frame skipped - unsupported pixel format!");
+    }
+}
+
 void StVideoQueue::pushFrame(const StImage&     theSrcDataLeft,
                              const StImage&     theSrcDataRight,
                              const StHandle<StStereoParams>& theStParams,
@@ -416,8 +530,7 @@ void StVideoQueue::decodeLoop() {
     StImage* aSlaveData = NULL;
     StHandle<StAVPacket> aPacket;
     StImage anEmptyImg;
-    bool isStarted   = false;
-    stAV::dimYUV aDimsYUV;
+    bool isStarted = false;
     for(;;) {
         if(isEmpty()) {
             myDowntimeState.set();
@@ -576,117 +689,7 @@ void StVideoQueue::decodeLoop() {
 
         // we currently allow to override source format stored in metadata
         const StFormatEnum aSrcFormat = (mySrcFormat == ST_V_SRC_AUTODETECT) ? mySrcFormatInfo : mySrcFormat;
-
-        int aFrameSizeX = 0;
-        int aFrameSizeY = 0;
-        PixelFormat aPixFmt = stAV::PIX_FMT::NONE;
-        myFrame.getImageInfo(myCodecCtx, aFrameSizeX, aFrameSizeY, aPixFmt);
-        if(aPixFmt == stAV::PIX_FMT::RGB24) {
-            myDataAdp.setColorModel(StImage::ImgColor_RGB);
-            myDataAdp.setColorScale(StImage::ImgScale_Full);
-            myDataAdp.setPixelRatio(getPixelRatio());
-            myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgRGB, myFrame.getPlane(0),
-                                                 size_t(aFrameSizeX), size_t(aFrameSizeY),
-                                                 myFrame.getLineSize(0));
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 5, 0))
-        } else if(stAV::isFormatYUVPlanar(myFrame.Frame,
-    #else
-        } else if(stAV::isFormatYUVPlanar(myCodecCtx,
-    #endif
-                                          aDimsYUV)) {
-
-            /// TODO (Kirill Gavrilov#5) remove hack
-            // workaround for incorrect frame dimensions information in some files
-            // critical for tiled source format that should be 1080p
-            if(aSrcFormat == ST_V_SRC_TILED_4X
-            && aPixFmt    == stAV::PIX_FMT::YUV420P
-            && aFrameSizeX >= 1906 && aFrameSizeX <= 1920
-            && myFrame.getLineSize(0) >= 1920
-            && aFrameSizeY >= 1074) {
-                aDimsYUV.widthY  = 1920;
-                aDimsYUV.heightY = 1080;
-                aDimsYUV.widthU  = aDimsYUV.widthV  = aDimsYUV.widthY  / 2;
-                aDimsYUV.heightU = aDimsYUV.heightV = aDimsYUV.heightY / 2;
-            }
-
-            StImagePlane::ImgFormat aPlaneFrmt = StImagePlane::ImgGray;
-        #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 29, 0))
-            if(myCodecCtx->color_range == AVCOL_RANGE_JPEG) {
-                // there no color range information in the AVframe (yet)
-                aDimsYUV.isFullScale = true;
-            }
-        #endif
-            myDataAdp.setColorScale(aDimsYUV.isFullScale ? StImage::ImgScale_Full : StImage::ImgScale_Mpeg);
-            if(aDimsYUV.bitsPerComp == 9) {
-                aPlaneFrmt = StImagePlane::ImgGray16;
-                myDataAdp.setColorScale(aDimsYUV.isFullScale ? StImage::ImgScale_Jpeg9  : StImage::ImgScale_Mpeg9);
-            } else if(aDimsYUV.bitsPerComp == 10) {
-                aPlaneFrmt = StImagePlane::ImgGray16;
-                myDataAdp.setColorScale(aDimsYUV.isFullScale ? StImage::ImgScale_Jpeg10 : StImage::ImgScale_Mpeg10);
-            } else if(aDimsYUV.bitsPerComp == 16) {
-                aPlaneFrmt = StImagePlane::ImgGray16;
-            }
-            myDataAdp.setColorModel(StImage::ImgColor_YUV);
-            myDataAdp.setPixelRatio(getPixelRatio());
-            myDataAdp.changePlane(0).initWrapper(aPlaneFrmt, myFrame.getPlane(0),
-                                                 size_t(aDimsYUV.widthY), size_t(aDimsYUV.heightY), myFrame.getLineSize(0));
-            myDataAdp.changePlane(1).initWrapper(aPlaneFrmt, myFrame.getPlane(1),
-                                                 size_t(aDimsYUV.widthU), size_t(aDimsYUV.heightU), myFrame.getLineSize(1));
-            myDataAdp.changePlane(2).initWrapper(aPlaneFrmt, myFrame.getPlane(2),
-                                                 size_t(aDimsYUV.widthV), size_t(aDimsYUV.heightV), myFrame.getLineSize(2));
-        } else if(!myToRgbIsBroken) {
-            if(myToRgbCtx    == NULL
-            || myToRgbPixFmt != aPixFmt
-            || size_t(aFrameSizeX) != myDataRGB.getSizeX()
-            || size_t(aFrameSizeY) != myDataRGB.getSizeY()) {
-                // initialize software scaler/converter
-            //#if LIBSWSCALE_VERSION_MAJOR >= 3
-                //myToRgbCtx = sws_getCachedContext(myToRgbCtx,
-                //                                  aFrameSizeX, aFrameSizeY, aPixFmt,
-                //                                  aFrameSizeX, aFrameSizeY, stAV::PIX_FMT::RGB24
-                //                                  SWS_BICUBIC, NULL, NULL, NULL);
-            //#else
-                sws_freeContext(myToRgbCtx);
-                myToRgbCtx = sws_getContext(aFrameSizeX, aFrameSizeY, aPixFmt,              // source
-                                            aFrameSizeX, aFrameSizeY, stAV::PIX_FMT::RGB24, // destination
-                                            SWS_BICUBIC, NULL, NULL, NULL);
-            //#endif
-                myToRgbPixFmt = aPixFmt;
-                if(myToRgbCtx == NULL
-                || aFrameSizeX <= 0
-                || aFrameSizeY <= 0) {
-                    signals.onError(stCString("FFmpeg: Failed to create SWScaler context"));
-                    myToRgbIsBroken = true;
-                } else {
-                    // assign appropriate parts of RGB buffer to image planes in myFrameRGB
-                    const size_t aBufferSize = avpicture_get_size(stAV::PIX_FMT::RGB24, aFrameSizeX, aFrameSizeY);
-                    if(aBufferSize == 0
-                    || !myDataRGB.initTrash(StImagePlane::ImgRGB, size_t(aFrameSizeX), size_t(aFrameSizeY),
-                                            aBufferSize / size_t(aFrameSizeY))) {
-                        signals.onError(stCString("FFmpeg: Failed allocation of RGB frame (out of memory)"));
-                        myToRgbIsBroken = true;
-                    } else {
-                        avpicture_fill((AVPicture* )myFrameRGB.Frame, myDataRGB.changeData(), stAV::PIX_FMT::RGB24,
-                                       aFrameSizeX, aFrameSizeY);
-                    }
-                }
-            }
-
-            if(!myToRgbIsBroken) {
-                sws_scale(myToRgbCtx,
-                          myFrame.Frame->data, myFrame.Frame->linesize,
-                          0, aFrameSizeY,
-                          myFrameRGB.Frame->data, myFrameRGB.Frame->linesize);
-
-                myDataAdp.setColorModel(StImage::ImgColor_RGB);
-                myDataAdp.setColorScale(StImage::ImgScale_Full);
-                myDataAdp.setPixelRatio(getPixelRatio());
-                myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgRGB, myDataRGB.changeData(),
-                                                     size_t(aFrameSizeX), size_t(aFrameSizeY));
-            }
-        } else {
-            //ST_DEBUG_LOG("Frame skipped - unsupported pixel format!");
-        }
+        prepareFrame(aSrcFormat);
 
         if(!mySlave.isNull()) {
             if(isStarted) {

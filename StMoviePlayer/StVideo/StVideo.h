@@ -290,6 +290,11 @@ class StVideo {
                              StAVPacket& thePacket);
 
     /**
+     * Re-initialize video streams if needed (source format change, GPU decoding).
+     */
+    ST_LOCAL void checkInitVideoStreams();
+
+    /**
      * Save current frame to file.
      */
     ST_LOCAL bool saveSnapshotAs(StImageFile::ImageType theImgType);
@@ -334,6 +339,8 @@ class StVideo {
     StHandle<StVideoQueue>        myVideoSlave;   //!< Slave  video decoding thread
     StHandle<StAudioQueue>        myAudio;        //!< audio decoding thread
     StHandle<StSubtitleQueue>     mySubtitles;    //!< subtitles decoding thread
+    AVFormatContext*              mySlaveCtx;     //!< Slave video format context
+    signed int                    mySlaveStream;  //!< Slave video stream id
 
     StHandle<StPlayList>          myPlayList;     //!< play list
     StHandle<StMovieInfo>         myFileInfo;     //!< info about currently loaded file

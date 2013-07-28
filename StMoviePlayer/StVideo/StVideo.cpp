@@ -45,11 +45,9 @@ StVideo::StVideo(const StString&                   theALDeviceName,
   myMimesAudio(ST_AUDIOS_MIME_STRING),
   myMimesSubs(ST_SUBTIT_MIME_STRING),
   myLangMap(theLangMap),
-  myCtxList(),
-  myPlayCtxList(),
+  mySlaveCtx(NULL),
+  mySlaveStream(-1),
   myPlayList(thePlayList),
-  myCurrNode(),
-  myCurrParams(),
   myTextureQueue(theTextureQueue),
   myDuration(0.0),
   myPtsSeek(0.0),
@@ -198,6 +196,8 @@ void StVideo::close() {
     }
     myCtxList.clear();
     myPlayCtxList.clear();
+    mySlaveCtx    = NULL;
+    mySlaveStream = -1;
 
     params.activeAudio->clearList();
     params.activeSubtitles->clearList();
@@ -310,9 +310,10 @@ bool StVideo::addFile(const StString& theFileToLoad,
                 }
             } else if(!myVideoSlave->isInitialized()) {
                 myVideoSlave->init(aFormatCtx, aStreamId);
-                myVideoMaster->setSlave(myVideoSlave);
-
                 if(myVideoSlave->isInitialized()) {
+                    mySlaveCtx    = aFormatCtx;
+                    mySlaveStream = aStreamId;
+
                     const int aSizeX      = myVideoSlave->sizeX();
                     const int aSizeY      = myVideoSlave->sizeY();
                     StString aDimsStr = StString() + aSizeX + " x " + aSizeY;
@@ -323,6 +324,12 @@ bool StVideo::addFile(const StString& theFileToLoad,
                         aDimsStr += StString(" (") + aCodedSizeX + " x " + aCodedSizeY + ")";
                     }
                     myFileInfoTmp->myInfo.add(StArgument("Video Dimensions (slave)", aDimsStr));
+
+                    if(myVideoMaster->getSrcFormat() == ST_V_SRC_AUTODETECT) {
+                        myVideoMaster->setSlave(myVideoSlave);
+                    } else {
+                        myVideoSlave->deinit();
+                    }
                 }
             }
         } else if(aStream->codec->codec_type == AVMEDIA_TYPE_AUDIO) {
@@ -548,6 +555,44 @@ bool StVideo::pushPacket(StHandle<StAVPacketQueue>& theAVPacketQueue,
     return true;
 }
 
+void StVideo::checkInitVideoStreams() {
+    const bool toUseGpu      = params.UseGpu->getValue();
+    const bool toDecodeSlave = myVideoMaster->getSrcFormat() == ST_V_SRC_AUTODETECT
+                            && mySlaveStream >= 0;
+    if(toUseGpu      != myVideoMaster->toUseGpu()
+    || toDecodeSlave != myVideoSlave->isInitialized()) {
+        myVideoMaster->setUseGpu(toUseGpu);
+        myVideoSlave ->setUseGpu(toUseGpu);
+        doFlush();
+        if(myVideoMaster->isInitialized()) {
+            AVFormatContext* aCtxMaster      = myVideoMaster->getContext();
+            const signed int aStreamIdMaster = myVideoMaster->getId();
+            myVideoMaster->pushEnd();
+            if(myVideoSlave->isInitialized()) {
+                myVideoSlave->pushEnd();
+            }
+            while(!myVideoMaster->isEmpty() || !myVideoMaster->isInDowntime()
+               || !myVideoSlave->isEmpty()  || !myVideoSlave->isInDowntime()) {
+                StThread::sleep(10);
+            }
+            myVideoMaster->deinit();
+            if(myVideoSlave->isInitialized()) {
+                myVideoSlave->deinit();
+            }
+            myVideoMaster->init(aCtxMaster, aStreamIdMaster);
+            myVideoMaster->setSlave(NULL);
+            if(toDecodeSlave) {
+                myVideoSlave->init(mySlaveCtx, mySlaveStream);
+                myVideoMaster->setSlave(myVideoSlave);
+            }
+            myVideoMaster->pushStart();
+            if(toDecodeSlave) {
+                myVideoSlave->pushStart();
+            }
+        }
+    }
+}
+
 void StVideo::packetsLoop() {
     double aPts     = 0.0;
     double aPtsbar  = 10.0; /// debug variable
@@ -645,41 +690,7 @@ void StVideo::packetsLoop() {
         }
 
         // check events
-        const bool toUseGpu = params.UseGpu->getValue();
-        if(toUseGpu != myVideoMaster->toUseGpu()) {
-            myVideoMaster->setUseGpu(toUseGpu);
-            myVideoSlave ->setUseGpu(toUseGpu);
-            doFlush();
-            if(myVideoMaster->isInitialized()) {
-                AVFormatContext* aCtxMaster      = myVideoMaster->getContext();
-                AVFormatContext* aCtxSlave       = myVideoSlave ->getContext();
-                const signed int aStreamIdMaster = myVideoMaster->getId();
-                const signed int aStreamIdSlave  = myVideoSlave->getId();
-                const bool       hasSlave        = myVideoSlave->isInitialized();
-                myVideoMaster->pushEnd();
-                if(hasSlave) {
-                    myVideoSlave->pushEnd();
-                }
-                while(!myVideoMaster->isEmpty() || !myVideoMaster->isInDowntime()
-                   || !myVideoSlave->isEmpty()  || !myVideoSlave->isInDowntime()) {
-                    StThread::sleep(10);
-                }
-                myVideoMaster->deinit();
-                if(hasSlave) {
-                    myVideoSlave->deinit();
-                }
-                myVideoMaster->init(aCtxMaster, aStreamIdMaster);
-                myVideoMaster->setSlave(NULL);
-                if(hasSlave) {
-                    myVideoSlave->init(aCtxSlave, aStreamIdSlave);
-                    myVideoMaster->setSlave(myVideoSlave);
-                }
-                myVideoMaster->pushStart();
-                if(hasSlave) {
-                    myVideoSlave->pushStart();
-                }
-            }
-        }
+        checkInitVideoStreams();
 
         aPlayEvent = popPlayEvent(aSeekPts, toSeekBack);
         if(aPlayEvent == ST_PLAYEVENT_NEXT || toQuit) {
