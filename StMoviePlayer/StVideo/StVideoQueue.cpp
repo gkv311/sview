@@ -144,6 +144,9 @@ namespace {
         const char*  name;
     };
 
+    static const StCString THE_SRC_MODE_KEY     = stCString("STEREO_MODE");
+    static const StCString THE_SRC_MODE_KEY_WMV = stCString("StereoscopicLayout");
+
     static const StFFmpegStereoFormat STEREOFLAGS[] = {
         // MKV stereoscopic mode decoded by FFmpeg into STEREO_MODE metadata tag
         {ST_V_SRC_MONO,               "mono"},
@@ -235,7 +238,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     bool isCodecOverridden = false;
     AVCodec* aCodecGpu = NULL;
     if(myUseGpu) {
-#if defined(_WIN32)
+    #if defined(_WIN32)
         if(StString(myCodecAuto->name).isEquals(stCString("h264"))) {
             aCodecGpu = myCodecDxva264;
         } else if(StString(myCodecAuto->name).isEquals(stCString("wmv3"))) {
@@ -243,12 +246,12 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
         } else if(StString(myCodecAuto->name).isEquals(stCString("vc1"))) {
             aCodecGpu = myCodecDxvaVc1;
         }
-#elif defined(__APPLE__)
+    #elif defined(__APPLE__)
         if(StString(myCodecAuto->name).isEquals(stCString("h264"))
         && myCodecCtx->pix_fmt == stAV::PIX_FMT::YUV420P) {
             aCodecGpu = myCodecVda;
         }
-#endif
+    #endif
     }
 
     if(aCodecGpu != NULL) {
@@ -314,11 +317,9 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
 
     // stereoscopic mode tags
     mySrcFormatInfo = is720in1080 ? ST_V_SRC_TILED_4X : ST_V_SRC_AUTODETECT;
-    const StString aSrcModeKeyMKV = "STEREO_MODE";
-    const StString aSrcModeKeyWMV = "StereoscopicLayout";
-    if(stAV::meta::readTag(myFormatCtx, aSrcModeKeyMKV, aValue)
-    || stAV::meta::readTag(myStream,    aSrcModeKeyMKV, aValue)
-    || stAV::meta::readTag(myFormatCtx, aSrcModeKeyWMV, aValue)) {
+    if(stAV::meta::readTag(myFormatCtx, THE_SRC_MODE_KEY,     aValue)
+    || stAV::meta::readTag(myStream,    THE_SRC_MODE_KEY,     aValue)
+    || stAV::meta::readTag(myFormatCtx, THE_SRC_MODE_KEY_WMV, aValue)) {
         for(size_t aSrcId = 0;; ++aSrcId) {
             const StFFmpegStereoFormat& aFlag = STEREOFLAGS[aSrcId];
             if(aFlag.stID == ST_V_SRC_AUTODETECT || aFlag.name == NULL) {
@@ -530,6 +531,7 @@ void StVideoQueue::decodeLoop() {
     StImage* aSlaveData = NULL;
     StHandle<StAVPacket> aPacket;
     StImage anEmptyImg;
+    StString aTagValue;
     bool isStarted = false;
     for(;;) {
         if(isEmpty()) {
@@ -688,6 +690,19 @@ void StVideoQueue::decodeLoop() {
         }
 
         // we currently allow to override source format stored in metadata
+        if(stAV::meta::readTag(myFrame.Frame, THE_SRC_MODE_KEY, aTagValue)) {
+            for(size_t aSrcId = 0;; ++aSrcId) {
+                const StFFmpegStereoFormat& aFlag = STEREOFLAGS[aSrcId];
+                if(aFlag.stID == ST_V_SRC_AUTODETECT || aFlag.name == NULL) {
+                    break;
+                } else if(aTagValue == aFlag.name) {
+                    mySrcFormatInfo = aFlag.stID;
+                    //ST_DEBUG_LOG("  read srcFormat from tags= " + mySrcFormatInfo);
+                    break;
+                }
+            }
+        }
+        // override source format stored in metadata
         const StFormatEnum aSrcFormat = (mySrcFormat == ST_V_SRC_AUTODETECT) ? mySrcFormatInfo : mySrcFormat;
         prepareFrame(aSrcFormat);
 

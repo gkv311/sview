@@ -471,9 +471,9 @@ StString stAV::audio::getChannelLayoutString(const AVCodecContext* theCtx) {
 }
 
 stAV::meta::Tag* stAV::meta::findTag(stAV::meta::Dict*      theDict,
-                                     const char*               theKey,
+                                     const char*            theKey,
                                      const stAV::meta::Tag* thePrevTag,
-                                     const int                 theFlags) {
+                                     const int              theFlags) {
 #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
     return av_dict_get    (theDict, theKey, thePrevTag, theFlags);
 #else
@@ -482,14 +482,28 @@ stAV::meta::Tag* stAV::meta::findTag(stAV::meta::Dict*      theDict,
 }
 
 bool stAV::meta::readTag(stAV::meta::Dict* theDict,
-                         const StString&      theKey,
-                         StString&            theValue) {
+                         const StCString&  theKey,
+                         StString&         theValue) {
+    if(theDict == NULL) {
+        return false;
+    }
+
     stAV::meta::Tag* aTag = stAV::meta::findTag(theDict, theKey.toCString(), NULL, 0);
     if(aTag == NULL) {
         return false;
     }
     theValue = aTag->value;
     return true;
+}
+
+bool stAV::meta::readTag(AVFrame*         theFrame,
+                         const StCString& theKey,
+                         StString&        theValue) {
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 38, 100))
+    return readTag(av_frame_get_metadata(theFrame), theKey, theValue);
+#else
+    return false;
+#endif
 }
 
 double stAV::unitsToSeconds(const AVRational& theTimeBase,

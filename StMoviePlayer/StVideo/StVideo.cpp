@@ -347,7 +347,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
 
             StString aLanguage;
         #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
-            stAV::meta::readTag(aStream, "language", aLanguage);
+            stAV::meta::readTag(aStream, stCString("language"), aLanguage);
         #else
             aLanguage = aStream->language;
         #endif
@@ -379,7 +379,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
             } else {
                 StString aLanguage;
             #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
-                stAV::meta::readTag(aStream, "language", aLanguage);
+                stAV::meta::readTag(aStream, stCString("language"), aLanguage);
             #else
                 aLanguage = aStream->language;
             #endif

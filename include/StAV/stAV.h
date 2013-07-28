@@ -334,21 +334,25 @@ namespace stAV {
          * @param theValue Read value (will be untouched if tag not found)
          * @return true if tag was found
          */
-        ST_CPPEXPORT bool readTag(Dict*           theDict,
-                                  const StString& theKey,
-                                  StString&       theValue);
+        ST_CPPEXPORT bool readTag(Dict*            theDict,
+                                  const StCString& theKey,
+                                  StString&        theValue);
 
         inline bool readTag(AVFormatContext* theFormatCtx,
-                            const StString&  theKey,
+                            const StCString& theKey,
                             StString&        theValue) {
             return readTag(theFormatCtx->metadata, theKey, theValue);
         }
 
         inline bool readTag(AVStream*        theStream,
-                            const StString&  theKey,
+                            const StCString& theKey,
                             StString&        theValue) {
             return readTag(theStream->metadata, theKey, theValue);
         }
+
+        ST_CPPEXPORT bool readTag(AVFrame*         theFrame,
+                                  const StCString& theKey,
+                                  StString&        theValue);
 
     };
 
