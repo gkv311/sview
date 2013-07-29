@@ -232,6 +232,22 @@
 #define ST_WMA_MIME_STRING ST_WMA_MIME ":" ST_WMA_EXT ":" ST_WMA_DESC
 
 /**
+ *.dts - DTS Audio
+ */
+#define ST_DTS_MIME "audio/vnd.dts"
+#define ST_DTS_EXT  "dts"
+#define ST_DTS_DESC "DTS Audio"
+#define ST_DTS_MIME_STRING ST_DTS_MIME ":" ST_DTS_EXT ":" ST_DTS_DESC
+#define ST_DTSHD_MIME "audio/vnd.dts.hd"
+#define ST_DTSHD_EXT  "dtshd"
+#define ST_DTSHD_DESC "DTS High Definition Audio"
+#define ST_DTSHD_MIME_STRING ST_DTSHD_MIME ":" ST_DTSHD_EXT ":" ST_DTSHD_DESC
+#define ST_DTSMA_MIME "audio/x-dts-ma"
+#define ST_DTSMA_EXT  "dtsma"
+#define ST_DTSMA_DESC "DTS HD Master Audio"
+#define ST_DTSMA_MIME_STRING ST_DTSMA_MIME ":" ST_DTSMA_EXT ":" ST_DTSMA_DESC
+
+/**
  *.wav - PCM Audio, uncompressed
  */
 #define ST_WAV_MIME "audio/x-wav"
@@ -284,6 +300,9 @@ ST_MP3_MIME_STRING ";" \
 ST_OGG_MIME_STRING ";" \
 ST_AC3_MIME_STRING ";" \
 ST_WMA_MIME_STRING ";" \
+ST_DTS_MIME_STRING ";" \
+ST_DTSHD_MIME_STRING ";" \
+ST_DTSMA_MIME_STRING ";" \
 ST_WAV_MIME_STRING ";" \
 ST_M3U_MIME_STRING ";" \
 "\000"
@@ -298,6 +317,9 @@ ST_MP3_MIME_STRING ";" \
 ST_OGG_MIME_STRING ";" \
 ST_AC3_MIME_STRING ";" \
 ST_WMA_MIME_STRING ";" \
+ST_DTS_MIME_STRING ";" \
+ST_DTSHD_MIME_STRING ";" \
+ST_DTSMA_MIME_STRING ";" \
 ST_WAV_MIME_STRING ";" \
 "\000"
 
