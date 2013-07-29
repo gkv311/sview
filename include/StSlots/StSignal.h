@@ -307,16 +307,14 @@ class StSignal {
      * Emit callback Slot without arguments.
      */
     bool emit() const {
-        StHandle< StSlot<slotMethod_t> > aSlot = mySlot;
-        return !aSlot.isNull() ? aSlot->call() : false;
+        return !mySlot.isNull() ? mySlot->call() : false;
     }
 
     /**
      * Emit callback Slot with 1 argument.
      */
     bool emit(typename types::arg1_t arg1) const {
-        StHandle< StSlot<slotMethod_t> > aSlot = mySlot;
-        return !aSlot.isNull() ? aSlot->call(arg1) : false;
+        return !mySlot.isNull() ? mySlot->call(arg1) : false;
     }
 
     /**
@@ -324,8 +322,7 @@ class StSignal {
      */
     bool emit(typename types::arg1_t arg1,
               typename types::arg2_t arg2) const {
-        StHandle< StSlot<slotMethod_t> > aSlot = mySlot;
-        return !aSlot.isNull() ? aSlot->call(arg1, arg2) : false;
+        return !mySlot.isNull() ? mySlot->call(arg1, arg2) : false;
     }
 
     /**
@@ -334,8 +331,7 @@ class StSignal {
     bool emit(typename types::arg1_t arg1,
               typename types::arg2_t arg2,
               typename types::arg3_t arg3) const {
-        StHandle< StSlot<slotMethod_t> > aSlot = mySlot;
-        return !aSlot.isNull() ? aSlot->call(arg1, arg2, arg3) : false;
+        return !mySlot.isNull() ? mySlot->call(arg1, arg2, arg3) : false;
     }
 
     /**

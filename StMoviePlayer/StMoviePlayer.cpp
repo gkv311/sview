@@ -821,14 +821,15 @@ void StMoviePlayer::beforeDraw() {
            && params.TargetFps <= 3) {
         // set rendering FPS to 2x averageFPS
         double aTargetFps = myVideo->getAverFps();
-        if(aTargetFps < 17.0) {
+        if(aTargetFps < 17.0
+        || aTargetFps > 120.0) {
             aTargetFps = 0.0;
         } else if(aTargetFps < 40.0) {
             aTargetFps *= double(params.TargetFps);
         }
         myWindow->setTargetFps(aTargetFps);
     } else {
-        // set rendering FPS to setted value in settings
+        // set rendering FPS to set value in settings
         myWindow->setTargetFps(double(params.TargetFps));
     }
 

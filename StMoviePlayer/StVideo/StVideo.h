@@ -103,7 +103,7 @@ class StVideo {
     }
 
     ST_LOCAL double getAverFps() const {
-        return targetFps;
+        return myTargetFps;
     }
 
     /**
@@ -355,7 +355,7 @@ class StVideo {
     double                        myPtsSeek;      //!< seeking target
     bool                          myToSeekBack;   //!< seeking direction
     StPlayEvent_t                 myPlayEvent;    //!< playback event
-    double                        targetFps;
+    double                        myTargetFps;
 
     bool                          isBenchmark;
     volatile StImageFile::ImageType toSave;

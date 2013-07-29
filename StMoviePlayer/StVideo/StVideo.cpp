@@ -53,7 +53,7 @@ StVideo::StVideo(const StString&                   theALDeviceName,
   myPtsSeek(0.0),
   myToSeekBack(false),
   myPlayEvent(ST_PLAYEVENT_NONE),
-  targetFps(0.0),
+  myTargetFps(0.0),
   //
   isBenchmark(false),
   toSave(StImageFile::ST_TYPE_NONE),
@@ -645,6 +645,11 @@ void StVideo::packetsLoop() {
         aQueueIsFull.add(false);
     }
 
+    // reset target FPS
+    myEventMutex.lock();
+    myTargetFps = 0.0;
+    myEventMutex.unlock();
+
     for(;;) {
         anEmptyQueues = 0;
         for(aCtxId = 0; aCtxId < myPlayCtxList.size(); ++aCtxId) {
@@ -665,9 +670,9 @@ void StVideo::packetsLoop() {
                     continue;
                 }
                 const double aTagerFpsNew = myVideoTimer->getAverFps();
-                if(targetFps != aTagerFpsNew) {
+                if(myTargetFps != aTagerFpsNew) {
                     myEventMutex.lock();
-                    targetFps = aTagerFpsNew;
+                    myTargetFps = aTagerFpsNew;
                     myEventMutex.unlock();
                 }
             } else if(myVideoSlave->isInContext(aFormatCtx, aPacket.getStreamId())) {
