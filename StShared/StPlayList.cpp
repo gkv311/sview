@@ -111,8 +111,13 @@ void StPlayList::delPlayItem(StPlayItem* theRemItem) {
     if(myFirst == NULL || theRemItem == NULL) {
         // item does not exists in the list
         return;
-    } else if(myFirst == theRemItem) {
-        // removed first item from the list
+    }
+
+    // update first/last items
+    if(theRemItem == myLast) {
+        myLast  = myLast->hasPrev()  ? myLast->getPrev()  : NULL;
+    }
+    if(myFirst == theRemItem) {
         myFirst = myFirst->hasNext() ? myFirst->getNext() : NULL;
     }
 
