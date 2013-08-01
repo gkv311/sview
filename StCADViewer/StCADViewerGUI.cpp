@@ -8,11 +8,13 @@
 #include "StCADViewer.h"
 
 #include <StGLWidgets/StGLDescription.h>
+#include <StGLWidgets/StGLFpsLabel.h>
 #include <StGLWidgets/StGLMenu.h>
 #include <StGLWidgets/StGLMenuItem.h>
 #include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLTextureButton.h>
 #include <StGLWidgets/StGLMsgStack.h>
+
 #include <StSocket/StSocket.h>
 #include <StVersion.h>
 
@@ -100,6 +102,8 @@ StGLMenu* StCADViewerGUI::createHelpMenu() {
     aMenu->addItem(myLangMap->changeValueId(MENU_HELP_LICENSE, "License text"))
          ->signals.onItemClick.connect(this, &StCADViewerGUI::doOpenLicense);
 
+    aMenu->addItem("Show FPS", myPlugin->params.ToShowFps);
+
     aMenu->addItem(myLangMap->changeValueId(MENU_HELP_LANGS,   "Language"), aLangMenu);
     return aMenu;
 }
@@ -123,8 +127,10 @@ StCADViewerGUI::StCADViewerGUI(StCADViewer* thePlugin)
   myMouseDescr(NULL),
   myMsgStack(NULL),
   myMenu0Root(NULL),
+  myFpsWidget(NULL),
   myIsGUIVisible(true) {
-    //
+    myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StCADViewerGUI::doShowFPS);
+
     myMouseDescr = new StGLDescription(this);
 
     // create Main menu
@@ -132,6 +138,11 @@ StCADViewerGUI::StCADViewerGUI(StCADViewer* thePlugin)
 
     myMsgStack = new StGLMsgStack(this, myPlugin->getMessagesQueue());
     myMsgStack->setVisibility(true, true);
+
+    if(myPlugin->params.ToShowFps->getValue()) {
+        myFpsWidget = new StGLFpsLabel(this);
+        myFpsWidget->setVisibility(true, true);
+    }
 }
 
 StCADViewerGUI::~StCADViewerGUI() {
@@ -183,6 +194,11 @@ void StCADViewerGUI::stglResize(const StRectI_t& winRectPx) {
 
 void StCADViewerGUI::stglDraw(unsigned int theView) {
     setLensDist(myPlugin->getMainWindow()->getLensDist());
+    if(theView == ST_DRAW_LEFT
+    && myFpsWidget != NULL) {
+        myFpsWidget->update(myPlugin->getMainWindow()->isStereoOutput(),
+                            myPlugin->getMainWindow()->getTargetFps());
+    }
     StGLRootWidget::stglDraw(theView);
 }
 
@@ -202,4 +218,16 @@ void StCADViewerGUI::doAboutProgram(const size_t ) {
 
 void StCADViewerGUI::doOpenLicense(const size_t ) {
     StSocket::openURL(StProcess::getStShareFolder() + "info" + SYS_FS_SPLITTER + "license.txt");
+}
+
+void StCADViewerGUI::doShowFPS(const bool ) {
+    if(myFpsWidget != NULL) {
+        delete myFpsWidget;
+        myFpsWidget = NULL;
+        return;
+    }
+
+    myFpsWidget = new StGLFpsLabel(this);
+    myFpsWidget->setVisibility(true, true);
+    myFpsWidget->stglInit();
 }

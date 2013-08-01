@@ -13,6 +13,7 @@
 
 class StCADViewer;
 class StGLDescription;
+class StGLFpsLabel;
 class StGLMenu;
 class StGLMenuItem;
 class StGLTextureButton;
@@ -29,6 +30,7 @@ class StCADViewerGUI : public StGLRootWidget {
     StGLDescription*      myMouseDescr; //!< description shown near mouse cursor
     StGLMsgStack*           myMsgStack; //!< messages stack
     StGLMenu*              myMenu0Root; //!< main menu
+    StGLFpsLabel*          myFpsWidget; //!< FPS meter
 
     bool                myIsGUIVisible;
 
@@ -54,6 +56,7 @@ class StCADViewerGUI : public StGLRootWidget {
 
     ST_LOCAL void doAboutProgram(const size_t );
     ST_LOCAL void doOpenLicense(const size_t );
+    ST_LOCAL void doShowFPS(const bool );
 
 };
 

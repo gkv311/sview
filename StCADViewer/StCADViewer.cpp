@@ -25,6 +25,8 @@
 #include "../StOutDistorted/StOutDistorted.h"
 
 namespace {
+    static const char ST_SETTING_FPSTARGET[] = "fpsTarget";
+    static const char ST_SETTING_SHOW_FPS[]  = "toShowFps";
     static const StString ST_PARAM_NORMALS   = "showNormals";
     static const StString ST_PARAM_TRIHEDRON = "showTrihedron";
     static const StString ST_PARAM_PROJMODE  = "projMode";
@@ -211,6 +213,7 @@ StCADViewer::StCADViewer(const StNativeWin_t         theParentWin,
     //
     params.isFullscreen = new StBoolParam(false);
     params.isFullscreen->signals.onChanged.connect(this, &StCADViewer::doFullscreen);
+    params.ToShowFps = new StBoolParam(false);
     params.toShowNormals = new StBoolParam(false);
     params.toShowNormals->signals.onChanged.connect(this, &StCADViewer::doShowNormals);
     params.toShowTrihedron = new StBoolParam(true);
@@ -218,6 +221,10 @@ StCADViewer::StCADViewer(const StNativeWin_t         theParentWin,
     params.projectMode = new StInt32Param(ST_PROJ_STEREO);
     params.projectMode->signals.onChanged.connect(this, &StCADViewer::doChangeProjection);
     params.fillMode = new StInt32Param(ST_FILL_MESH);
+    params.TargetFps = 0;
+
+    mySettings->loadInt32 (ST_SETTING_FPSTARGET, params.TargetFps);
+    mySettings->loadParam (ST_SETTING_SHOW_FPS,  params.ToShowFps);
 
     myGUI = new StCADViewerGUI(this);
 
@@ -246,10 +253,12 @@ bool StCADViewer::resetDevice() {
 
 void StCADViewer::releaseDevice() {
     if(!myGUI.isNull()) {
-        mySettings->saveParam(ST_PARAM_NORMALS,   params.toShowNormals);
-        mySettings->saveParam(ST_PARAM_TRIHEDRON, params.toShowTrihedron);
-        mySettings->saveParam(ST_PARAM_PROJMODE,  params.projectMode);
-        mySettings->saveParam(ST_PARAM_FILLMODE,  params.fillMode);
+        mySettings->saveParam(ST_PARAM_NORMALS,     params.toShowNormals);
+        mySettings->saveParam(ST_PARAM_TRIHEDRON,   params.toShowTrihedron);
+        mySettings->saveParam(ST_PARAM_PROJMODE,    params.projectMode);
+        mySettings->saveParam(ST_PARAM_FILLMODE,    params.fillMode);
+        mySettings->saveInt32(ST_SETTING_FPSTARGET, params.TargetFps);
+        mySettings->saveParam(ST_SETTING_SHOW_FPS,  params.ToShowFps);
     }
 
     if(!myContext.isNull()) {
@@ -295,7 +304,7 @@ bool StCADViewer::init() {
         return false;
     }
 
-    myWindow->setTargetFps(50.0);
+    myWindow->setTargetFps(double(params.TargetFps));
     myWindow->setStereoOutput(params.projectMode->getValue() == ST_PROJ_STEREO);
 
     myGUI->setContext(myContext);

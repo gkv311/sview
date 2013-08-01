@@ -118,11 +118,13 @@ class StCADViewer : public StApplication {
     struct {
 
         StHandle<StBoolParam>  isFullscreen;    //!< fullscreen state
+        StHandle<StBoolParam>  ToShowFps;       //!< display FPS meter
         StHandle<StBoolParam>  toShowNormals;   //!< show normals flag
         StHandle<StBoolParam>  toShowTrihedron; //!< show trihedron flag
         StHandle<StBoolParam>  isLightTwoSides; //!< if on both sides of the triangle will be enlighted
         StHandle<StInt32Param> projectMode;     //!< projection mode
         StHandle<StInt32Param> fillMode;        //!< fill mode
+        int                    TargetFps;       //!< limit or not rendering FPS
 
     } params;
 
