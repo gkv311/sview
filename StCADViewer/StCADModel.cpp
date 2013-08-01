@@ -163,32 +163,40 @@ bool StCADModel::computeMesh() {
     // 12.0 * Standard_PI / 180.0;
     // 20.0 * Standard_PI / 180.0;
     Standard_Real anAngular = 20.0 * M_PI / 180.0;
-    if(!BRepTools::Triangulation(myShape, myDeflection)) {
-        StTimer stTimer(true); ///
+    const bool toComputeMesh = !BRepTools::Triangulation(myShape, myDeflection);
+    StTimer aTimer(true);
+    if(toComputeMesh) {
         // perform incremental mesh
         BRepMesh_IncrementalMesh aMesher(myShape, aDeflection, Standard_False, anAngular);
+    }
 
-        // If computed triangulation has greater tolerance - get the maximal value
-        // to prevent unnecessary and useless recomputation of triangulation next time
-        for(TopExp_Explorer aFaceExp(myShape, TopAbs_FACE); aFaceExp.More(); aFaceExp.Next()) {
-            const TopoDS_Face& aFace = TopoDS::Face(aFaceExp.Current());
-            const Handle(Poly_Triangulation)& aTri = BRep_Tool::Triangulation(aFace, aLoc);
-            if(aTri.IsNull() || !aTri->HasUVNodes()) {
-                continue;
-            }
-            aDeflection = stMax(aTri->Deflection(), aDeflection); // find deflection maximum
-
-            // collect information
-            anIndCount += 3 * size_t(aTri->Triangles().Length());
-            aVertCount += size_t(aTri->Nodes().Length());
+    // If computed triangulation has greater tolerance - get the maximal value
+    // to prevent unnecessary and useless recomputation of triangulation next time
+    for(TopExp_Explorer aFaceExp(myShape, TopAbs_FACE); aFaceExp.More(); aFaceExp.Next()) {
+        const TopoDS_Face& aFace = TopoDS::Face(aFaceExp.Current());
+        const Handle(Poly_Triangulation)& aTri = BRep_Tool::Triangulation(aFace, aLoc);
+        if(aTri.IsNull() || !aTri->HasUVNodes()) {
+            continue;
         }
+        aDeflection = stMax(aTri->Deflection(), aDeflection); // find deflection maximum
 
+        // collect information
+        anIndCount += 3 * size_t(aTri->Triangles().Length());
+        aVertCount += size_t(aTri->Nodes().Length());
+    }
+    myDeflection = aDeflection;
+
+    if(toComputeMesh) {
         ST_DEBUG_LOG("Triangulation computed in "
-                   + stTimer.getElapsedTimeInMilliSec() + " msec\n"
-                   + " with deflection " + aDeflection + " (requsted " + myDeflection + ") "
+                   + aTimer.getElapsedTimeInMilliSec() + " msec\n"
+                   + " with deflection " + aDeflection + " (requested " + myDeflection + ") "
                    + " and angle " + (anAngular * 180.0 / M_PI) + " degrees "
                    + "; Indices= " + anIndCount + "; Vertices= " + aVertCount); ///
-        myDeflection = aDeflection;
+    } else {
+        ST_DEBUG_LOG("Triangulation reused\n"
+                   + " with deflection " + aDeflection + " (requested " + myDeflection + ") "
+                   + " and angle " + (anAngular * 180.0 / M_PI) + " degrees "
+                   + "; Indices= " + anIndCount + "; Vertices= " + aVertCount); ///
     }
 
     // initialize the whole memory block at once
