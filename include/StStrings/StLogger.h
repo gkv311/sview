@@ -180,10 +180,12 @@ inline bool stQuestionConsole(const StString& theMsg) { return StMessageBox::Que
  */
 #define ST_ERROR_LOG(msg);        StLogger::GetDefault().write(StString() + msg, StLogger::ST_ERROR);
 #ifndef __ST_DEBUG__
+    #define ST_DEBUG_VAR(theVariable)
     #define ST_DEBUG_LOG(msg);
     #define ST_DEBUG_LOG_AT(msg);
     #define ST_ERROR_LOG_AT(msg); StLogger::GetDefault().write(StString() + msg, StLogger::ST_ERROR);
 #else
+    #define ST_DEBUG_VAR(theVariable) theVariable
     #define ST_DEBUG_LOG(msg);    StLogger::GetDefault().write(StString() + msg, StLogger::ST_DEBUG);
     #define STRINGIFY(x) #x
     #define TOSTRING(x) STRINGIFY(x)

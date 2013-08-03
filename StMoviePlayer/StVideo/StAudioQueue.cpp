@@ -12,11 +12,7 @@
 /**
  * Check OpenAL state.
  */
-#ifdef __ST_DEBUG__
-void stalCheckErrors(const StString& theProcedure) {
-#else
-void stalCheckErrors(const StString& ) {
-#endif
+void stalCheckErrors(const StString& ST_DEBUG_VAR(theProcedure)) {
     ALenum error = alGetError();
     switch(error) {
         case AL_NO_ERROR: return; // alright

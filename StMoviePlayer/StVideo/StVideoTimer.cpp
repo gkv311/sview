@@ -31,49 +31,47 @@ static SV_THREAD_FUNCTION refreshThread(void* videoTimer) {
 
 StVideoTimer::StVideoTimer(const StHandle<StVideoQueue>& theVideo,
                            const StHandle<StAudioQueue>& theAudio,
-                           const double delayVVFixedMs)
+                           const double                  theDelayVVFixedMs)
 : myVideo(theVideo),
   myAudio(theAudio),
-  evDoEndLoop(false),
-  refreshTimer(false),
-  timerThrCurr(delayVVFixedMs),
-  timerThrNext(delayVVFixedMs),
-  aPtsCurrSec(-1.0),
-  vPtsCurrSec(myVideo->getPts()),
-  vPtsNextSec(-1.0),
-  delayToSwap(2.0),
-  delayTimer(0.0),
-  diffVA(0.0),
-  delayVAFixed(0.0),
-  delayVV(0.0),
-  delayVVAver(delayVVFixedMs),
-  delayVVFixed(delayVVFixedMs),
-  speedFastSkip(3.0),
-  speedFast(1.5),
-  speedFastRev(1.0 / speedFast),
-  speedSlow(0.4),
-  speedSlowRev(1.0 / speedSlow),
-  isBenchmark(false) {
-    //
-    stMemSet(speedDesc, 0, sizeof(speedDesc));
+  myToQuitEv(false),
+  myTimer(false),
+  myTimerThrCurr(theDelayVVFixedMs),
+  myTimerThrNext(theDelayVVFixedMs),
+  myAudioPtsCurrSec(-1.0),
+  myVideoPtsCurrSec(myVideo->getPts()),
+  myVideoPtsNextSec(-1.0),
+  myDelayTimer(0.0),
+  myDiffVA(0.0),
+  myDelayVAFixed(0.0),
+  myDelayVV(0.0),
+  myDelayVVAver(theDelayVVFixedMs),
+  myDelayVVFixed(theDelayVVFixedMs),
+  mySpeedFastSkip(3.0),
+  mySpeedFast(1.5),
+  mySpeedFastRev(1.0 / mySpeedFast),
+  mySpeedSlow(0.4),
+  mySpeedSlowRev(1.0 / mySpeedSlow),
+  myIsBenchmark(false) {
+    stMemZero(mySpeedDesc, sizeof(mySpeedDesc));
     myThread = new StThread(refreshThread, (void* )this);
 }
 
 StVideoTimer::~StVideoTimer() {
-    evDoEndLoop.set();
+    myToQuitEv.set();
     myThread->wait();
     myThread.nullify();
 }
 
 bool StVideoTimer::isQuitMessage() {
     for(;;) {
-        if(evDoEndLoop.check() && myVideo->isEmpty()) {
+        if(myToQuitEv.check() && myVideo->isEmpty()) {
             return true;
         } else if(!myVideo->isPlaying()) {
             StThread::sleep(10);
             ///ST_DEBUG_LOG_AT("Not played!");
-            refreshTimer.restart();
-            timerThrNext = 0.0;
+            myTimer.restart();
+            myTimerThrNext = 0.0;
         } else {
             return false;
         }
@@ -85,15 +83,13 @@ void StVideoTimer::mainLoop() {
         return; // nothing to refresh
     }
     myVideo->setAClock(0.0);
-    refreshTimer.restart();
+    myTimer.restart();
     for(;;) {
         if(isQuitMessage()) {
             return;
         }
-        // TODO (Kirill Gavrilov#3#) analize delayToSwap value
-        // we have parasite freezes if video FPS ~25 and display FPS ~60Hz
-        // video played good if video FPS ~30
-        if(refreshTimer.getElapsedTimeInMilliSec() >= timerThrNext) {
+
+        if(myTimer.getElapsedTimeInMilliSec() >= myTimerThrNext) {
             // this is time we should show the next frame, call swap Front/Back here
             while(!myVideo->getTextureQueue()->stglSwapFB(1)) {
                 if(isQuitMessage()) {
@@ -103,66 +99,61 @@ void StVideoTimer::mainLoop() {
             }
 
             // store old timer threshold value to check diff at the end
-            timerThrCurr = timerThrNext;
+            myTimerThrCurr = myTimerThrNext;
 
             // we got Video PTS for NEXT shown frame
             // so we need to compute time it will be shown
-            vPtsCurrSec = vPtsNextSec; // just store for some conditions checks
-            while(!myVideo->getTextureQueue()->popPTSNext(vPtsNextSec)) {
+            myVideoPtsCurrSec = myVideoPtsNextSec; // just store for some conditions checks
+            while(!myVideo->getTextureQueue()->popPTSNext(myVideoPtsNextSec)) {
                 if(isQuitMessage()) {
                     return;
                 }
                 StThread::sleep(1);
-                ///ST_DEBUG_LOG("waittt2");
             }
 
-            delayVV = getDelayMsec(vPtsNextSec, vPtsCurrSec);
-            if(delayVV > 0.0 && delayVV < 201.0) {
+            myDelayVV = getDelayMsec(myVideoPtsNextSec, myVideoPtsCurrSec);
+            if(myDelayVV > 0.0 && myDelayVV < 201.0) {
                 myInfoLock.lock();
-                delayVVAver = delayVV;
+                myDelayVVAver = myDelayVV;
                 myInfoLock.unlock();
             }
-            if(vPtsNextSec >= 0.0) {
+            if(myVideoPtsNextSec >= 0.0) {
                 // try Audio to Video sync
                 if(myAudio->getId() >= 0) {
                     // we got current Audio PTS value
-                    aPtsCurrSec = myAudio->getPts();
-                    if(aPtsCurrSec > 0.0) {
-                        myVideo->setAClock(aPtsCurrSec);
-                        diffVA = getDelayMsec(vPtsNextSec, aPtsCurrSec);
-                        delayTimer = diffVA + delayVAFixed;
+                    myAudioPtsCurrSec = myAudio->getPts();
+                    if(myAudioPtsCurrSec > 0.0) {
+                        myVideo->setAClock(myAudioPtsCurrSec);
+                        myDiffVA = getDelayMsec(myVideoPtsNextSec, myAudioPtsCurrSec);
+                        myDelayTimer = myDiffVA + myDelayVAFixed;
                     }
-                } else if(vPtsCurrSec < 0.0) {
+                } else if(myVideoPtsCurrSec < 0.0) {
                     // empty video queue or first frame
-                    delayTimer = delayVVFixed;
+                    myDelayTimer = myDelayVVFixed;
                 } else {
                     // increase timer threshold to delay between frames
-                    delayTimer = delayVV;
+                    myDelayTimer = myDelayVV;
                 }
 
                 // fix values out from range
-                if(speedSlow * delayTimer > delayVVAver) {
-                    ///ST_DEBUG_LOG(getSpeedText(speedSlow) + "| too SLOW |" + getSpeedText() + ", delayTimer= " + delayTimer + ", delayVV= " + delayVV);
-                    delayTimer = speedSlowRev * delayVVAver;
-                } else if(speedFastSkip * delayTimer < delayVVAver) {
-                    ///ST_DEBUG_LOG(getSpeedText(speedFast) + "|very FAST |" + getSpeedText() + ", delayTimer= " + delayTimer + ", delayVV= " + delayVV);
+                if(mySpeedSlow * myDelayTimer > myDelayVVAver) {
+                    myDelayTimer = mySpeedSlowRev * myDelayVVAver;
+                } else if(mySpeedFastSkip * myDelayTimer < myDelayVVAver) {
                     //myVideo->getTextureQueue()->drop(2);
                     myVideo->getTextureQueue()->drop(1);
-                    delayTimer = speedFastRev * delayVVAver;
-                } else if(speedFast * delayTimer < delayVVAver) {
-                    ///ST_DEBUG_LOG(getSpeedText(speedFast) + "| too FAST |" + getSpeedText() + ", delayTimer= " + delayTimer + ", delayVV= " + delayVV);
-                    delayTimer = speedFastRev * delayVVAver;
+                    myDelayTimer = mySpeedFastRev * myDelayVVAver;
+                } else if(mySpeedFast * myDelayTimer < myDelayVVAver) {
+                    myDelayTimer = mySpeedFastRev * myDelayVVAver;
                 } else {
-                    ///ST_DEBUG_LOG(getSpeedText() + "|  normal  |delayTimer= " + delayTimer + ", delayVV= " + delayVV);
+                    //ST_DEBUG_LOG(getSpeedText() + "|  normal  |myDelayTimer= " + myDelayTimer + ", myDelayVV= " + myDelayVV);
                 }
-                ///ST_DEBUG_LOG("aPTS= " + aPtsCurrSec + ", vPTS= " + vPtsNextSec + ", diffVA= " + diffVA);
             } else {
                 // fixed FPS
-                delayTimer = delayVVFixed;
+                myDelayTimer = myDelayVVFixed;
             }
-            timerThrNext = timerThrCurr + delayTimer;
-            if(isBenchmark) {
-                timerThrNext = 0.0;
+            myTimerThrNext = myTimerThrCurr + myDelayTimer;
+            if(myIsBenchmark) {
+                myTimerThrNext = 0.0;
             }
         }
         StThread::sleep(1);
