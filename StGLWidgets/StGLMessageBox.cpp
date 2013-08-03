@@ -19,7 +19,7 @@ StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
                                const StString& theText,
                                const int       theWidth,
                                const int       theHeight)
-: StGLWidget(theParent, 32, 32, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), theWidth, theHeight),
+: StGLWidget(theParent, 32, 32, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER), theWidth, theHeight),
   myTextArea(NULL),
   myBtnPanel(NULL),
   myDefaultBtn(NULL),
@@ -157,16 +157,6 @@ bool StGLMessageBox::stglInit() {
 }
 
 void StGLMessageBox::stglResize() {
-    // move to the center
-    const int aCurrW = getRectPx().width();
-    const int aCurrH = getRectPx().height();
-    const int aParentW = getParent()->getRectPx().width();
-    const int aParentH = getParent()->getRectPx().height();
-    changeRectPx().left()   = aParentW / 2 - aCurrW / 2;
-    changeRectPx().right()  = getRectPx().left() + aCurrW;
-    changeRectPx().top()    = aParentH / 2 - aCurrH / 2;
-    changeRectPx().bottom() = getRectPx().top() + aCurrH;
-
     GLfloat toZScreen = -getCamera()->getZScreen();
 
     StRectD_t aRectGl = getRectGl();
