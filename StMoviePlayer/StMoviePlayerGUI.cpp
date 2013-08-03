@@ -612,6 +612,16 @@ void StMoviePlayerGUI::doUserTips(const size_t ) {
     StSocket::openURL("http://sview.ru/sview2009/usertips");
 }
 
+void StMoviePlayerGUI::doAboutSystem(const size_t ) {
+    StString aTitle = "System Info";
+    StString anInfo = getContext().stglFullInfo();
+    StString aString = aTitle + "\n\n \n" + anInfo;
+    StGLMessageBox* aSysInfoDialog = new StGLMessageBox(this, aString, 512, 256);
+    aSysInfoDialog->addButton("Close");
+    aSysInfoDialog->setVisibility(true, true);
+    aSysInfoDialog->stglInit();
+}
+
 void StMoviePlayerGUI::doAboutFile(const size_t ) {
     StHandle<StFileNode>     aFileNode;
     StHandle<StStereoParams> aParams;
@@ -672,6 +682,9 @@ StGLMenu* StMoviePlayerGUI::createHelpMenu() {
 
     aMenu->addItem(myLangMap->changeValueId(MENU_HELP_LICENSE, "License text"))
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doOpenLicense);
+
+    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_SYSINFO, "System Info"))
+         ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAboutSystem);
 
     aMenu->addItem(myLangMap->changeValueId(MENU_HELP_EXPERIMENTAL, "Experimental features"),
                    myPlugin->params.ToShowExtra);

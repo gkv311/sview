@@ -87,6 +87,7 @@ namespace StImageViewerStrings {
         MENU_HELP_LICENSE = 1503,
         MENU_HELP_LANGS   = 1504,
         MENU_HELP_USERTIPS= 1506,
+        MENU_HELP_SYSINFO = 1508,
 
         // Root -> Help -> Check for updates menu
         MENU_HELP_UPDATES_NOW   = 1520,

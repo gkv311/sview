@@ -424,7 +424,7 @@ StGLMenu* StImageViewerGUI::createHelpMenu() {
     aMenu->addItem(myLangMap->changeValueId(MENU_HELP_LICENSE, "License text"))
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doOpenLicense);
 
-    aMenu->addItem("System Info")
+    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_SYSINFO, "System Info"))
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doAboutSystem);
 
     aMenu->addItem(myLangMap->changeValueId(MENU_HELP_UPDATES, "Check for updates"), aMenuCheckUpdates);

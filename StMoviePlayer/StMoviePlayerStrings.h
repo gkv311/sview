@@ -113,6 +113,7 @@ namespace StMoviePlayerStrings {
         MENU_HELP_BLOCKSLP= 1505,
         MENU_HELP_USERTIPS= 1506,
         MENU_HELP_EXPERIMENTAL= 1507,
+        MENU_HELP_SYSINFO = 1508,
 
         // Root -> Help -> Check for updates menu
         MENU_HELP_UPDATES_NOW   = 1520,
