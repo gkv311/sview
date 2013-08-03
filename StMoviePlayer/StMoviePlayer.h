@@ -210,6 +210,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StInt32Param>    subtitlesStream;  //!< active Subtitles stream
         StHandle<StInt32Param>    blockSleeping;    //!< active Audio stream
         StHandle<StBoolParam>     ToShowExtra;      //!< show experimental menu items
+        StHandle<StInt32Param>    SnapshotImgType;  //!< default snapshot image type
         StString                  lastFolder;       //!< laster folder used to open / save file
         int                       TargetFps;        //!< rendering FPS limit (0 - max FPS with less CPU, 1,2,3 - adjust to video FPS)
         StHandle<StBoolParam>     UseGpu;           //!< use video decoding on GPU when available

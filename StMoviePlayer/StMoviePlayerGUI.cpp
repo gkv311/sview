@@ -190,9 +190,11 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
     StGLMenu* aMenuSaveImage = createSaveImageMenu();    // Root -> Media -> Save snapshot menu
 
     aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_OPEN_MOVIE,
-                        "Open Movie..."), aMenuOpenImage);
+                        "Open Movie..."), aMenuOpenImage)
+              ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doOpen1File);
     aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_SAVE_SNAPSHOT_AS,
-                        "Save Snapshot As..."), aMenuSaveImage);
+                        "Save Snapshot As..."), aMenuSaveImage)
+              ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doSnapshot);
 
     aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_SRC_FORMAT,
                         "Source stereo format"), aMenuSrcFormat);
@@ -227,8 +229,11 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
         aMenuMedia->addItem("Loop single item", myPlugin->params.ToLoopSingle);
     }
 
-    aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_RECENT,
-                        "Recent files"), myMenuRecent);
+    StGLMenuItem* anItem = aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_RECENT,
+                                               "Recent files"), myMenuRecent);
+    anItem->setUserData(0);
+    anItem->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doOpenRecent);
+
 #ifdef ST_HAVE_MONGOOSE
     aMenuMedia->addItem(StString("Web UI:") + myPlugin->params.WebUIPort->getValue(), aMenuWebUI);
 #endif

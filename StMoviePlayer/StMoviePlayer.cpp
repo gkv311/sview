@@ -74,6 +74,7 @@ namespace {
     static const char ST_SETTING_RATIO[]         = "ratio";
     static const char ST_SETTING_UPDATES_LAST_CHECK[] = "updatesLastCheck";
     static const char ST_SETTING_UPDATES_INTERVAL[]   = "updatesInterval";
+    static const char ST_SETTING_SAVE_IMG_TYPE[] = "snapImgType";
     static const char ST_SETTING_EXPERIMENTAL[]  = "experimental";
 
     static const char ST_SETTING_WEBUI_ON[]      = "webuiOn";
@@ -210,6 +211,7 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     params.ToShowExtra   = new StBoolParam(false);
     params.TargetFps = 2; // set rendering FPS as twice as average video FPS
     params.UseGpu = new StBoolParam(false);
+    params.SnapshotImgType = new StInt32Param(StImageFile::ST_TYPE_JPEG);
 
     // load settings
     mySettings->loadInt32 (ST_SETTING_FPSTARGET,          params.TargetFps);
@@ -229,6 +231,7 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     mySettings->loadParam (ST_SETTING_WEBUI_ON,           params.StartWebUI);
     mySettings->loadParam (ST_SETTING_WEBUI_PORT,         params.WebUIPort);
     mySettings->loadParam (ST_SETTING_WEBUI_ERRORS,       params.ToPrintWebErrors);
+    mySettings->loadParam (ST_SETTING_SAVE_IMG_TYPE,      params.SnapshotImgType);
     mySettings->loadParam (ST_SETTING_EXPERIMENTAL,       params.ToShowExtra);
     if(params.StartWebUI->getValue() == WEBUI_ONCE) {
         params.StartWebUI->setValue(WEBUI_OFF);
@@ -317,7 +320,7 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     anAction = new StActionIntSlot(stCString("DoOpen1File"), stSlot(this, &StMoviePlayer::doOpen1File), 0);
     addAction(Action_Open1File, anAction, ST_VK_O | ST_VF_CONTROL);
 
-    anAction = new StActionIntSlot(stCString("DoSnapshot"), stSlot(this, &StMoviePlayer::doSnapshot), StImageFile::ST_TYPE_JPEG);
+    anAction = new StActionIntSlot(stCString("DoSnapshot"), stSlot(this, &StMoviePlayer::doSnapshot), StImageFile::ST_TYPE_NONE);
     addAction(Action_SaveSnapshot, anAction, ST_VK_S | ST_VF_CONTROL);
 
     anAction = new StActionBool(stCString("DoAudioMute"), params.AudioMute);
@@ -382,6 +385,7 @@ void StMoviePlayer::releaseDevice() {
         mySettings->saveParam (ST_SETTING_WEBUI_ON,           params.StartWebUI);
         mySettings->saveParam (ST_SETTING_WEBUI_PORT,         params.WebUIPort);
         mySettings->saveParam (ST_SETTING_WEBUI_ERRORS,       params.ToPrintWebErrors);
+        mySettings->saveParam (ST_SETTING_SAVE_IMG_TYPE,      params.SnapshotImgType);
         mySettings->saveParam (ST_SETTING_EXPERIMENTAL,       params.ToShowExtra);
 
         if(!myVideo.isNull()) {
@@ -1254,7 +1258,13 @@ void StMoviePlayer::doFullscreen(const bool theIsFullscreen) {
 }
 
 void StMoviePlayer::doSnapshot(const size_t theImgType) {
-    myVideo->doSaveSnapshotAs(theImgType);
+    size_t aType = theImgType;
+    if(theImgType == StImageFile::ST_TYPE_NONE) {
+        aType = params.SnapshotImgType->getValue();
+    } else {
+        params.SnapshotImgType->setValue(theImgType);
+    }
+    myVideo->doSaveSnapshotAs(aType);
 }
 
 bool StMoviePlayer::getCurrentFile(StHandle<StFileNode>&     theFileNode,
