@@ -1106,23 +1106,25 @@ void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StStri
     //myMenuAudio->addSplitter();
     StGLMenuItem* aDelayItem = NULL;
     if(theHasVideo) {
-        aDelayItem = myMenuAudio->addItem("Audio/Video delay");
-        aDelayItem->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAudioDelay);
+        if(!theStreamsList.isNull()
+        && !theStreamsList->isEmpty()) {
+            aDelayItem = myMenuAudio->addItem("Audio/Video delay");
+            aDelayItem->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAudioDelay);
+            myAudioDelay = new StGLTextArea(aDelayItem, 0, 0,
+                                            StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT), 100);
+            myAudioDelay->setupAlignment(StGLTextFormatter::ST_ALIGN_X_RIGHT,
+                                         StGLTextFormatter::ST_ALIGN_Y_CENTER);
+            myAudioDelay->setTextColor(StGLVec3(0.0f, 0.0f, 0.0f));
+            myAudioDelay->setVisibility(true, true);
+        }
         myMenuAudio->addItem("Attach from file")
                    ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doAddAudioStream);
-        myAudioDelay = new StGLTextArea(aDelayItem, 0, 0,
-                                        StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT), 100);
-        myAudioDelay->setupAlignment(StGLTextFormatter::ST_ALIGN_X_RIGHT,
-                                     StGLTextFormatter::ST_ALIGN_Y_CENTER);
-        myAudioDelay->setText(stCString("(0.0)"));
-        myAudioDelay->setTextColor(StGLVec3(0.0f, 0.0f, 0.0f));
-        myAudioDelay->setVisibility(true, true);
     }
 
     // update menu representation
     myMenuAudio->stglInit();
 
-    if(aDelayItem != NULL) {
+    if(myAudioDelay != NULL) {
         myAudioDelay->changeRectPx().bottom() = myAudioDelay->getRectPx().top()  + myMenuAudio->getItemHeight();
         myAudioDelay->changeRectPx().left()   = aDelayItem->getRectPx().width()  - 116;
         myAudioDelay->changeRectPx().right()  = myAudioDelay->getRectPx().left() + 100;
