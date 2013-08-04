@@ -33,13 +33,15 @@ class StGLRangeFieldFloat32 : public StGLWidget {
     ST_CPPEXPORT virtual bool stglInit();
     ST_CPPEXPORT virtual const StString& getClassName();
 
+        public:
+
     ST_CPPEXPORT void doResetValue(const size_t );
+    ST_CPPEXPORT void doDecrement(const size_t );
+    ST_CPPEXPORT void doIncrement(const size_t );
 
         private:
 
     ST_LOCAL void onValueChange(const float theValue);
-    ST_LOCAL void doDecrement(const size_t );
-    ST_LOCAL void doIncrement(const size_t );
 
         private:
 

@@ -527,55 +527,93 @@ StGLMenu* StMoviePlayerGUI::createAudioGainMenu() {
     return aMenu;
 }
 
+/**
+ * Dialog for Audio/Video synchronization control.
+ */
+class StDelayControl : public StGLMessageBox {
+
+        public:
+
+    StDelayControl(StMoviePlayerGUI*               theParent,
+                   const StHandle<StFloat32Param>& theTrackedValue)
+    : StGLMessageBox(theParent, "", 400, 240),
+      myRange(NULL) {
+        changeRectPx().moveX(  64);
+        changeRectPx().moveY(-128);
+        setCorner(StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT));
+        StGLButton* aResetBtn = addButton("Reset");
+        addButton("Close");
+        setVisibility(true, true);
+
+        StGLWidget* aContent = new StGLWidget(getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                                              getContent()->getRectPx().width(), getContent()->getRectPx().height());
+        aContent->setVisibility(true, true);
+
+        const StGLVec3 aWhite(1.0f, 1.0f, 1.0f);
+        StGLTextArea* aTitle = new StGLTextArea(aContent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                                                aContent->getRectPx().width(), 10);
+        aTitle->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER, StGLTextFormatter::ST_ALIGN_Y_TOP);
+        aTitle->setText(stCString("Audio/Video syncronization"));
+        aTitle->setTextColor(aWhite);
+        aTitle->setVisibility(true, true);
+        aTitle->stglInitAutoHeight();
+
+        StGLTextArea* aText = new StGLTextArea(aContent, 0, aTitle->getRectPx().bottom(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                                               aContent->getRectPx().width(), 10);
+        aText->setText(stCString("\n\nEnter positive value if audio appears earlier than video and negative otherwise.\n"));
+        aText->setTextColor(aWhite);
+        aText->setVisibility(true, true);
+        aText->stglInitAutoHeight();
+
+        StGLTextArea* aLabel = new StGLTextArea(aContent, 0, aText->getRectPx().bottom(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), -1, 10);
+        aLabel->setText(stCString("Audio delay:"));
+        aLabel->setTextColor(aWhite);
+        aLabel->setVisibility(true, true);
+        aLabel->stglInitAutoHeightWidth();
+
+        myRange = new StGLRangeFieldFloat32(aContent, theTrackedValue,
+                                            aLabel->getRectPx().right() + 10, aLabel->getRectPx().top());
+        myRange->setVisibility(true, true);
+        myRange->stglInit();
+
+        StGLTextArea* aLabUnits = new StGLTextArea(aContent, myRange->getRectPx().right() + 10, aLabel->getRectPx().top(),
+                                                   StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), -1, 10);
+        aLabUnits->setText(stCString("seconds"));
+        aLabUnits->setTextColor(aWhite);
+        aLabUnits->setVisibility(true, true);
+        aLabUnits->stglInitAutoHeightWidth();
+
+        aResetBtn->signals.onBtnClick = stSlot(myRange, &StGLRangeFieldFloat32::doResetValue);
+    }
+
+    virtual ~StDelayControl() {}
+
+    virtual bool doKeyDown(const StKeyEvent& theEvent) {
+        if(StGLMessageBox::doKeyDown(theEvent)) {
+            return true;
+        }
+        switch(theEvent.VKey) {
+            case ST_VK_ADD:
+            case ST_VK_OEM_PLUS:
+                myRange->doIncrement(0);
+                return true;
+            case ST_VK_SUBTRACT:
+            case ST_VK_OEM_MINUS:
+                myRange->doDecrement(0);
+                return true;
+            default:
+                return false;
+        }
+    }
+
+        private:
+
+    StGLRangeFieldFloat32* myRange;
+
+};
+
 void StMoviePlayerGUI::doAudioDelay(const size_t ) {
-    StGLMessageBox* aDialog = new StGLMessageBox(this, "", 400, 240);
-    aDialog->changeRectPx().moveX(  64);
-    aDialog->changeRectPx().moveY(-128);
-    aDialog->setCorner(StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT));
-    StGLButton* aResetBtn = aDialog->addButton("Reset");
-    aDialog->addButton("Close");
-    aDialog->setVisibility(true, true);
-
-    StGLWidget* aContent = new StGLWidget(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
-                                          aDialog->getContent()->getRectPx().width(), aDialog->getContent()->getRectPx().height());
-    aContent->setVisibility(true, true);
-
-    const StGLVec3 aWhite(1.0f, 1.0f, 1.0f);
-    StGLTextArea* aTitle = new StGLTextArea(aContent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
-                                            aContent->getRectPx().width(), 10);
-    aTitle->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER, StGLTextFormatter::ST_ALIGN_Y_TOP);
-    aTitle->setText(stCString("Audio/Video syncronization"));
-    aTitle->setTextColor(aWhite);
-    aTitle->setVisibility(true, true);
-    aTitle->stglInitAutoHeight();
-
-    StGLTextArea* aText = new StGLTextArea(aContent, 0, aTitle->getRectPx().bottom(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
-                                           aContent->getRectPx().width(), 10);
-    aText->setText(stCString("\n\nEnter positive value if audio appears earlier than video and negative otherwise.\n"));
-    aText->setTextColor(aWhite);
-    aText->setVisibility(true, true);
-    aText->stglInitAutoHeight();
-
-    StGLTextArea* aLabel = new StGLTextArea(aContent, 0, aText->getRectPx().bottom(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), -1, 10);
-    aLabel->setText(stCString("Audio delay:"));
-    aLabel->setTextColor(aWhite);
-    aLabel->setVisibility(true, true);
-    aLabel->stglInitAutoHeightWidth();
-
-    StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(aContent, myPlugin->params.AudioDelay,
-                                                              aLabel->getRectPx().right() + 10, aLabel->getRectPx().top());
-    aRange->setVisibility(true, true);
-    aRange->stglInit();
-
-    StGLTextArea* aLabUnits = new StGLTextArea(aContent, aRange->getRectPx().right() + 10, aLabel->getRectPx().top(),
-                                               StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), -1, 10);
-    aLabUnits->setText(stCString("seconds"));
-    aLabUnits->setTextColor(aWhite);
-    aLabUnits->setVisibility(true, true);
-    aLabUnits->stglInitAutoHeightWidth();
-
-    aResetBtn->signals.onBtnClick = stSlot(aRange, &StGLRangeFieldFloat32::doResetValue);
-
+    StGLMessageBox* aDialog = new StDelayControl(this, myPlugin->params.AudioDelay);
     aDialog->stglInit();
 }
 
