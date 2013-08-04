@@ -55,11 +55,10 @@ void StGLMessageBox::setText(const StString& theText) {
     }
 
     StGLTextArea* aText = new StGLTextArea(myContent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
-                                           myContent->getRectPx().width(), myContent->getRectPx().height(), true);
+                                           myContent->getRectPx().width(), myContent->getRectPx().height());
     aText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
                           StGLTextFormatter::ST_ALIGN_Y_TOP);
     aText->setText(theText);
-    aText->setBorder(false);
     aText->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
     aText->setVisibility(true, true);
 }

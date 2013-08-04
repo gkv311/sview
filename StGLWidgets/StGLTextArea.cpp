@@ -257,7 +257,7 @@ namespace {
 StGLTextArea::StGLTextArea(StGLWidget* theParent,
                            const int theLeft, const int theTop,
                            const StGLCorner theCorner,
-                           const int theWidth, const int theHeight, bool theToCutView,
+                           const int theWidth, const int theHeight,
                            const FontSize theSize)
 : StGLWidget(theParent, theLeft, theTop, theCorner, theWidth, theHeight),
   myTextProgram(getRoot()->getShare(SHARE_TEXT_PROGRAM_ID)),
@@ -275,7 +275,6 @@ StGLTextArea::StGLTextArea(StGLWidget* theParent,
   myMarginBottom(0),
   myTextWidth(-1.0f),
   myToRecompute(true),
-  myToCutView(theToCutView),
   myToShowBorder(false),
   myToDrawShadow(false),
   myIsInitialized(false) {

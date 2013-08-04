@@ -35,7 +35,7 @@ class StGLTextArea : public StGLWidget {
     ST_CPPEXPORT StGLTextArea(StGLWidget* theParent,
                               const int theLeft = 32, const int theTop = 32,
                               const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
-                              const int theWidth = 256, const int theHeight = 32, bool theToCutView = false,
+                              const int theWidth = 256, const int theHeight = 32,
                               const FontSize theSize = StGLTextArea::SIZE_NORMAL);
 
     ST_CPPEXPORT virtual ~StGLTextArea();
@@ -116,6 +116,17 @@ class StGLTextArea : public StGLWidget {
     ST_CPPEXPORT virtual bool stglInit();
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
 
+    /**
+     * This method initialize the widget and set it's height to computed formatted text height.
+     */
+    ST_LOCAL inline bool stglInitAutoHeight() {
+        if(!stglInit()) {
+            return false;
+        }
+        changeRectPx().bottom() = getRectPx().top() + getTextHeight();
+        return true;
+    }
+
     inline GLint getTextHeight() const {
         return std::abs(GLint(myTextBndBox.height()));
     }
@@ -165,7 +176,6 @@ class StGLTextArea : public StGLWidget {
     GLfloat              myTextWidth;     //!< text width limit
 
     bool                 myToRecompute;   //!< flag indicates that text VBOs should be recomputed
-    bool                 myToCutView;
     bool                 myToShowBorder;  //!< to show text area border
     bool                 myToDrawShadow;  //!< to render text shadow
     bool                 myIsInitialized;

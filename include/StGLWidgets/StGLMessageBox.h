@@ -38,7 +38,14 @@ class StGLMessageBox : public StGLWidget {
         public:
 
     /**
-     * Setup text.
+     * @return child widget which holds content of this message box
+     */
+    ST_LOCAL inline StGLScrollArea* getContent() const {
+        return myContent;
+    }
+
+    /**
+     * Set content to the plain text.
      */
     ST_CPPEXPORT void setText(const StString& theText);
 
