@@ -13,6 +13,7 @@
 #include <StGLWidgets/StGLMenuProgram.h>
 
 class StGLButton;
+class StGLScrollArea;
 
 /**
  * Simple widget to show message text.
@@ -35,6 +36,11 @@ class StGLMessageBox : public StGLWidget {
     ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemUnclicked);
 
         public:
+
+    /**
+     * Setup text.
+     */
+    ST_CPPEXPORT void setText(const StString& theText);
 
     /**
      * Append button to this message box.
@@ -65,7 +71,7 @@ class StGLMessageBox : public StGLWidget {
 
         private:   //! @name private fields
 
-    StGLTextArea*     myTextArea;   //!< text widget
+    StGLScrollArea*   myContent;    //!< content widget
     StGLWidget*       myBtnPanel;   //!< panel for buttons
     StGLButton*       myDefaultBtn; //!< default button to redirect Enter
     StGLMenuProgram   myProgram;    //!< GLSL program
@@ -74,4 +80,4 @@ class StGLMessageBox : public StGLWidget {
 
 };
 
-#endif //__StGLMessageBox_h_
+#endif // __StGLMessageBox_h_

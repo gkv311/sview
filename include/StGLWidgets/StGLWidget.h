@@ -300,6 +300,12 @@ class StGLWidget {
      */
     ST_CPPEXPORT virtual void destroyWithDelay(StGLWidget* theWidget);
 
+    /**
+     * Destroy all child widgets. Use carefully.
+     * Automatically called on widget destruction.
+     */
+    ST_CPPEXPORT void destroyChildren();
+
         public: //! @name signals
 
     struct {
@@ -319,12 +325,6 @@ class StGLWidget {
         protected: //! @name methods available to inheritors
 
     friend class StGLRootWidget;
-
-    /**
-     * Destroy all child widgets. Use carefully.
-     * Automatically called on widget destruction.
-     */
-    ST_CPPEXPORT void destroyChildren();
 
     /**
      * @return scale (const GLdouble& )
@@ -349,7 +349,7 @@ class StGLWidget {
      */
     ST_CPPEXPORT StGLContext& getContext();
 
-        private:   //! @name private fields
+        protected: //! @name protected fields
 
     StGLRootWidget* myRoot;          //!< root widget - GL context
     StGLWidget*     myParent;        //!< all elements must have parent widget, NULL only for root

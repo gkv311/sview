@@ -9,6 +9,7 @@
 #include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLButton.h>
 #include <StGLWidgets/StGLRootWidget.h>
+#include <StGLWidgets/StGLScrollArea.h>
 
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
@@ -19,8 +20,8 @@ StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
                                const StString& theText,
                                const int       theWidth,
                                const int       theHeight)
-: StGLWidget(theParent, 32, 32, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER), theWidth, theHeight),
-  myTextArea(NULL),
+: StGLWidget(theParent, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER), theWidth, theHeight),
+  myContent(NULL),
   myBtnPanel(NULL),
   myDefaultBtn(NULL),
   myButtonsNb(0) {
@@ -29,13 +30,10 @@ StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
     const int OFFSET_PIXELS = 32;
     int anOffsetX = theWidth  > 2 * OFFSET_PIXELS ? OFFSET_PIXELS : 0;
     int anOffsetY = theHeight > 2 * OFFSET_PIXELS ? OFFSET_PIXELS : 0;
-    myTextArea = new StGLTextArea(this, anOffsetX, anOffsetY, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
-                                  theWidth - 2 * anOffsetX, theHeight - 2 * anOffsetY, true);
-    myTextArea->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
-                               StGLTextFormatter::ST_ALIGN_Y_TOP);
-    myTextArea->setText(theText);
-    myTextArea->setBorder(false);
-    myTextArea->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
+    myContent = new StGLScrollArea(this, anOffsetX, anOffsetY,
+                                   StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                                   theWidth - 2 * anOffsetX, theHeight - 24 * 3 - anOffsetY);
+    setText(theText);
 
     myIsTopWidget = true;
     getRoot()->setFocus(this); // take input focus
@@ -48,6 +46,22 @@ StGLMessageBox::~StGLMessageBox() {
     StGLContext& aCtx = getContext();
     myVertexBuf.release(aCtx);
     myProgram.release(aCtx);
+}
+
+void StGLMessageBox::setText(const StString& theText) {
+    myContent->destroyChildren();
+    if(theText.isEmpty()) {
+        return;
+    }
+
+    StGLTextArea* aText = new StGLTextArea(myContent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                                           myContent->getRectPx().width(), myContent->getRectPx().height(), true);
+    aText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+                          StGLTextFormatter::ST_ALIGN_Y_TOP);
+    aText->setText(theText);
+    aText->setBorder(false);
+    aText->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
+    aText->setVisibility(true, true);
 }
 
 bool StGLMessageBox::doKeyDown(const StKeyEvent& theEvent) {
@@ -81,12 +95,10 @@ bool StGLMessageBox::doKeyDown(const StKeyEvent& theEvent) {
             }
             return true;
         case ST_VK_UP:
-            myTextArea->changeRectPx().top()    += 10;
-            myTextArea->changeRectPx().bottom() += 10;
+            myContent->doScroll(1);
             return true;
         case ST_VK_DOWN:
-            myTextArea->changeRectPx().top()    -= 10;
-            myTextArea->changeRectPx().bottom() -= 10;
+            myContent->doScroll(-1);
             return true;
         default:
             return false;
@@ -141,14 +153,6 @@ bool StGLMessageBox::stglInit() {
     };
     myVertexBuf.init(aCtx, 4, 4, QUAD_VERTICES);
     stglResize();
-
-    const GLint aBoxHeight  = getRectPx().height();
-    const GLint aTextHeight = myTextArea->getTextHeight();
-    if(aTextHeight < aBoxHeight) {
-        // align to center
-        myTextArea->changeRectPx().top()    = (aBoxHeight - aTextHeight) / 2;
-        myTextArea->changeRectPx().bottom() = myTextArea->getRectPx().top() + aTextHeight;
-    }
 
     if(!myProgram.init(aCtx)) {
         return false;
@@ -248,16 +252,6 @@ void StGLMessageBox::doMouseUnclick(const int theBtnId) {
         }
         case ST_MOUSE_RIGHT: {
             signals.onClickRight(getUserData());
-            break;
-        }
-        case ST_MOUSE_SCROLL_V_UP: {
-            myTextArea->changeRectPx().top()    += 10;
-            myTextArea->changeRectPx().bottom() += 10;
-            break;
-        }
-        case ST_MOUSE_SCROLL_V_DOWN: {
-            myTextArea->changeRectPx().top()    -= 10;
-            myTextArea->changeRectPx().bottom() -= 10;
             break;
         }
     }
