@@ -36,6 +36,7 @@ class StGLMenuItem;
 class StGLMsgStack;
 class StGLSubtitles;
 class StGLPlayList;
+class StGLTextArea;
 class StGLTextureButton;
 class StPlayList;
 class StSeekBar;
@@ -85,6 +86,8 @@ class StMoviePlayerGUI : public StGLRootWidget {
     StGLMenu*         myMenuRecent;
     StGLMenu*          myMenuAudio;
     StGLMenu*      myMenuSubtitles;
+
+    StGLTextArea*     myAudioDelay;
 
     StGLWidget*        upperRegion; // upper toolbar
     StGLTextureButton*     btnOpen;
