@@ -75,7 +75,7 @@ void StGLScrollArea::stglDraw(unsigned int theView) {
 void StGLScrollArea::doScroll(const int theDir) {
     StGLWidget* aContent = myChildren.getStart();
     if(aContent == NULL
-    || aContent->getRectPx().height() < getRectPx().height()) {
+    || aContent->getRectPx().height() <= getRectPx().height()) {
         return;
     }
 

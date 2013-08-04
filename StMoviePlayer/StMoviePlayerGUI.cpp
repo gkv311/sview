@@ -528,7 +528,7 @@ StGLMenu* StMoviePlayerGUI::createAudioGainMenu() {
 }
 
 void StMoviePlayerGUI::doAudioDelay(const size_t ) {
-    StGLMessageBox* aDialog = new StGLMessageBox(this, "", 400, 250);
+    StGLMessageBox* aDialog = new StGLMessageBox(this, "", 400, 240);
     aDialog->changeRectPx().moveX(  64);
     aDialog->changeRectPx().moveY(-128);
     aDialog->setCorner(StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT));
