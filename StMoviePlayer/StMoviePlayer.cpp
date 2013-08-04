@@ -181,6 +181,8 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     params.AudioGain->signals.onChanged = stSlot(this, &StMoviePlayer::doSetAudioVolume);
     params.AudioMute    = new StBoolParam(false);
     params.AudioMute->signals.onChanged = stSlot(this, &StMoviePlayer::doSetAudioMute);
+    params.AudioDelay   = new StFloat32Param(0.0f, -5.0f, 5.0f, 0.0f, 0.100f);
+    params.AudioDelay->signals.onChanged = stSlot(this, &StMoviePlayer::doSetAudioDelay);
     params.isFullscreen = new StBoolParam(false);
     params.isFullscreen->signals.onChanged = stSlot(this, &StMoviePlayer::doFullscreen);
     params.toRestoreRatio   = new StBoolParam(false);
@@ -987,6 +989,12 @@ void StMoviePlayer::doSetAudioVolume(const float theGain) {
 void StMoviePlayer::doSetAudioMute(const bool theToMute) {
     if(!myVideo.isNull()) {
         myVideo->setAudioVolume(theToMute ? 0.0f : params.AudioGain->getValue());
+    }
+}
+
+void StMoviePlayer::doSetAudioDelay(const float theDelaySec) {
+    if(!myVideo.isNull()) {
+        myVideo->setAudioDelay(theDelaySec);
     }
 }
 

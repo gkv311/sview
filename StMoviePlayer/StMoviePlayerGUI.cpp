@@ -37,18 +37,21 @@
 #include <StSocket/StSocket.h>
 #include <StSettings/StEnumParam.h>
 
+#include <StGLWidgets/StGLButton.h>
 #include <StGLWidgets/StGLCheckboxTextured.h>
-#include <StGLWidgets/StGLImageRegion.h>
-#include <StGLWidgets/StGLTextureButton.h>
 #include <StGLWidgets/StGLDescription.h>
+#include <StGLWidgets/StGLFpsLabel.h>
+#include <StGLWidgets/StGLImageRegion.h>
 #include <StGLWidgets/StGLMenu.h>
 #include <StGLWidgets/StGLMenuItem.h>
 #include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLMsgStack.h>
 #include <StGLWidgets/StGLPlayList.h>
+#include <StGLWidgets/StGLRangeFieldFloat32.h>
+#include <StGLWidgets/StGLScrollArea.h>
 #include <StGLWidgets/StGLSubtitles.h>
 #include <StGLWidgets/StGLSwitchTextured.h>
-#include <StGLWidgets/StGLFpsLabel.h>
+#include <StGLWidgets/StGLTextureButton.h>
 #include <StVersion.h>
 
 #include "StMoviePlayerStrings.h"
@@ -524,6 +527,58 @@ StGLMenu* StMoviePlayerGUI::createAudioGainMenu() {
     return aMenu;
 }
 
+void StMoviePlayerGUI::doAudioDelay(const size_t ) {
+    StGLMessageBox* aDialog = new StGLMessageBox(this, "", 400, 250);
+    aDialog->changeRectPx().moveX(  64);
+    aDialog->changeRectPx().moveY(-128);
+    aDialog->setCorner(StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT));
+    StGLButton* aResetBtn = aDialog->addButton("Reset");
+    aDialog->addButton("Close");
+    aDialog->setVisibility(true, true);
+
+    StGLWidget* aContent = new StGLWidget(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                                          aDialog->getContent()->getRectPx().width(), aDialog->getContent()->getRectPx().height());
+    aContent->setVisibility(true, true);
+
+    const StGLVec3 aWhite(1.0f, 1.0f, 1.0f);
+    StGLTextArea* aTitle = new StGLTextArea(aContent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                                            aContent->getRectPx().width(), 10);
+    aTitle->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER, StGLTextFormatter::ST_ALIGN_Y_TOP);
+    aTitle->setText(stCString("Audio/Video syncronization"));
+    aTitle->setTextColor(aWhite);
+    aTitle->setVisibility(true, true);
+    aTitle->stglInitAutoHeight();
+
+    StGLTextArea* aText = new StGLTextArea(aContent, 0, aTitle->getRectPx().bottom(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                                           aContent->getRectPx().width(), 10);
+    aText->setText(stCString("\n\nEnter positive value if audio appears earlier than video and negative otherwise.\n"));
+    aText->setTextColor(aWhite);
+    aText->setVisibility(true, true);
+    aText->stglInitAutoHeight();
+
+    StGLTextArea* aLabel = new StGLTextArea(aContent, 0, aText->getRectPx().bottom(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), -1, 10);
+    aLabel->setText(stCString("Audio delay:"));
+    aLabel->setTextColor(aWhite);
+    aLabel->setVisibility(true, true);
+    aLabel->stglInitAutoHeightWidth();
+
+    StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(aContent, myPlugin->params.AudioDelay,
+                                                              aLabel->getRectPx().right() + 10, aLabel->getRectPx().top());
+    aRange->setVisibility(true, true);
+    aRange->stglInit();
+
+    StGLTextArea* aLabUnits = new StGLTextArea(aContent, aRange->getRectPx().right() + 10, aLabel->getRectPx().top(),
+                                               StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), -1, 10);
+    aLabUnits->setText(stCString("seconds"));
+    aLabUnits->setTextColor(aWhite);
+    aLabUnits->setVisibility(true, true);
+    aLabUnits->stglInitAutoHeightWidth();
+
+    aResetBtn->signals.onBtnClick = stSlot(aRange, &StGLRangeFieldFloat32::doResetValue);
+
+    aDialog->stglInit();
+}
+
 /**
  * Root -> Subtitles menu
  */
@@ -582,7 +637,7 @@ StGLMenu* StMoviePlayerGUI::createOutputMenu() {
  */
 StGLMenu* StMoviePlayerGUI::createFpsMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(myLangMap->changeValueId(MENU_FPS_VSYNC,  "VSync"),
+    aMenu->addItem(myLangMap->changeValueId(MENU_FPS_VSYNC, "VSync"),
                    myPlugin->params.IsVSyncOn);
     aMenu->addItem(myLangMap->changeValueId(MENU_FPS_METER, "Show FPS"),
                    myPlugin->params.ToShowFps);
@@ -1010,6 +1065,8 @@ void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StStri
 
     //myMenuAudio->addSplitter();
     if(theHasVideo) {
+        myMenuAudio->addItem("Audio/Video delay")
+                   ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAudioDelay);
         myMenuAudio->addItem("Attach from file")
                    ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doAddAudioStream);
     }

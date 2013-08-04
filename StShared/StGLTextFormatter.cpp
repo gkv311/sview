@@ -300,6 +300,10 @@ void StGLTextFormatter::format(const GLfloat theWidth,
 
     // move last line
     newLine(myRectsNb - 1);
+    if(myRectsNb != 0
+    && myAlignWidth <= 0.0f) {
+        myAlignWidth = myRects[myRectsNb - 1].px.right();
+    }
 
     // apply vertical alignment style
     if(myAlignY == ST_ALIGN_Y_BOTTOM && theHeight > 0.0f) {

@@ -252,6 +252,7 @@
 		<Unit filename="StGLRadioButton.cpp" />
 		<Unit filename="StGLRadioButtonFloat32.cpp" />
 		<Unit filename="StGLRadioButtonTextured.cpp" />
+		<Unit filename="StGLRangeFieldFloat32.cpp" />
 		<Unit filename="StGLRootWidget.cpp" />
 		<Unit filename="StGLScrollArea.cpp" />
 		<Unit filename="StGLSubtitles.cpp" />
@@ -290,6 +291,7 @@
 		<Unit filename="../include/StGLWidgets/StGLRadioButton.h" />
 		<Unit filename="../include/StGLWidgets/StGLRadioButtonFloat32.h" />
 		<Unit filename="../include/StGLWidgets/StGLRadioButtonTextured.h" />
+		<Unit filename="../include/StGLWidgets/StGLRangeFieldFloat32.h" />
 		<Unit filename="../include/StGLWidgets/StGLRootWidget.h" />
 		<Unit filename="../include/StGLWidgets/StGLScrollArea.h" />
 		<Unit filename="../include/StGLWidgets/StGLShare.h" />

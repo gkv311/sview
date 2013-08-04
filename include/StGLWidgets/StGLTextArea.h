@@ -127,6 +127,19 @@ class StGLTextArea : public StGLWidget {
         return true;
     }
 
+    /**
+     * This method initialize the widget and set it's height to computed formatted text height/width.
+     */
+    ST_LOCAL inline bool stglInitAutoHeightWidth() {
+        changeRectPx().right() = getRectPx().left() - 1; // compute width from text
+        if(!stglInit()) {
+            return false;
+        }
+        changeRectPx().right()  = getRectPx().left() + getTextWidth();
+        changeRectPx().bottom() = getRectPx().top()  + getTextHeight();
+        return true;
+    }
+
     inline GLint getTextHeight() const {
         return std::abs(GLint(myTextBndBox.height()));
     }

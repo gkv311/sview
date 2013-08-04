@@ -43,7 +43,7 @@ StVideoTimer::StVideoTimer(const StHandle<StVideoQueue>& theVideo,
   myVideoPtsNextSec(-1.0),
   myDelayTimer(0.0),
   myDiffVA(0.0),
-  myDelayVAFixed(0.0),
+  myDelayVAFixed(0),
   myDelayVV(0.0),
   myDelayVVAver(theDelayVVFixedMs),
   myDelayVVFixed(theDelayVVFixedMs),
@@ -125,7 +125,7 @@ void StVideoTimer::mainLoop() {
                     if(myAudioPtsCurrSec > 0.0) {
                         myVideo->setAClock(myAudioPtsCurrSec);
                         myDiffVA = getDelayMsec(myVideoPtsNextSec, myAudioPtsCurrSec);
-                        myDelayTimer = myDiffVA + myDelayVAFixed;
+                        myDelayTimer = myDiffVA + double(myDelayVAFixed);
                     }
                 } else if(myVideoPtsCurrSec < 0.0) {
                     // empty video queue or first frame

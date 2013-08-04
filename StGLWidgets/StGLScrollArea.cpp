@@ -81,6 +81,7 @@ void StGLScrollArea::doScroll(const int theDir) {
 
     aContent->changeRectPx().top()    += 10 * theDir;
     aContent->changeRectPx().bottom() += 10 * theDir;
+    stglResize(myRoot->getRectPx());
 }
 
 void StGLScrollArea::doMouseUnclick(const int theBtnId) {

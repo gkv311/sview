@@ -192,6 +192,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StALDeviceParam> alDevice;         //!< active OpenAL device
         StHandle<StFloat32Param>  AudioGain;        //!< volume factor
         StHandle<StBoolParam>     AudioMute;        //!< volume mute flag
+        StHandle<StFloat32Param>  AudioDelay;       //!< audio/video synchronization delay
         StHandle<StBoolParam>     isFullscreen;     //!< fullscreen state
         StHandle<StBoolParam>     toRestoreRatio;   //!< restore ratio on restart
         StHandle<StBoolParam>     isShuffle;        //!< shuffle playback order
@@ -252,6 +253,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doSwitchAudioDevice(const int32_t theDevId);
     ST_LOCAL void doSetAudioVolume(const float theGain);
     ST_LOCAL void doSetAudioMute(const bool theToMute);
+    ST_LOCAL void doSetAudioDelay(const float theDelaySec);
     ST_LOCAL void doSwitchShuffle(const bool theShuffleOn);
     ST_LOCAL void doSwitchLoopSingle(const bool theValue);
     ST_LOCAL void doFullscreen(const bool theIsFullscreen);

@@ -55,7 +55,8 @@ StVideo::StVideo(const StString&                   theALDeviceName,
   myPlayEvent(ST_PLAYEVENT_NONE),
   myTargetFps(0.0),
   //
-  isBenchmark(false),
+  myAudioDelayMSec(0),
+  myIsBenchmark(false),
   toSave(StImageFile::ST_TYPE_NONE),
   toQuit(false) {
     // initialize FFmpeg library if not yet performed
@@ -210,10 +211,11 @@ void StVideo::close() {
 }
 
 void StVideo::setBenchmark(bool toPerformBenchmark) {
-    isBenchmark = toPerformBenchmark;
-    if(!myVideoTimer.isNull()) {
-        myVideoTimer->setBenchmark(isBenchmark);
-    }
+    myIsBenchmark = toPerformBenchmark;
+}
+
+void StVideo::setAudioDelay(const float theDelaySec) {
+    myAudioDelayMSec = int(theDelaySec * 1000.0f + (theDelaySec > 0.0f ? 0.5f : -0.5));
 }
 
 bool StVideo::addFile(const StString& theFileToLoad,
@@ -697,6 +699,11 @@ void StVideo::packetsLoop() {
         // check events
         checkInitVideoStreams();
 
+        if(!myVideoTimer.isNull()) {
+            myVideoTimer->setAudioDelay(myAudioDelayMSec);
+            myVideoTimer->setBenchmark(myIsBenchmark);
+        }
+
         aPlayEvent = popPlayEvent(aSeekPts, toSeekBack);
         if(aPlayEvent == ST_PLAYEVENT_NEXT || toQuit) {
             if(toSave != StImageFile::ST_TYPE_NONE) {
@@ -1021,11 +1028,13 @@ void StVideo::mainLoop() {
         if(myVideoMaster->isInContext(myCtxList[0])) {
             myVideoTimer = new StVideoTimer(myVideoMaster, myAudio,
                 1000.0 * av_q2d(myCtxList[0]->streams[myVideoMaster->getId()]->codec->time_base));
-            myVideoTimer->setBenchmark(isBenchmark);
+            myVideoTimer->setAudioDelay(myAudioDelayMSec);
+            myVideoTimer->setBenchmark(myIsBenchmark);
         } else if(myCtxList.size() > 1 && myVideoMaster->isInContext(myCtxList[1])) {
             myVideoTimer = new StVideoTimer(myVideoMaster, myAudio,
                 1000.0 * av_q2d(myCtxList[1]->streams[myVideoMaster->getId()]->codec->time_base));
-            myVideoTimer->setBenchmark(isBenchmark);
+            myVideoTimer->setAudioDelay(myAudioDelayMSec);
+            myVideoTimer->setBenchmark(myIsBenchmark);
         } else {
             myVideoTimer.nullify();
         }

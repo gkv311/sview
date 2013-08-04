@@ -52,6 +52,13 @@ class StVideoTimer {
         myIsBenchmark = theToPerformBenchmark;
     }
 
+    /**
+     * Setup video/audio delay.
+     */
+    ST_LOCAL void setAudioDelay(const int theDelayMSec) {
+        myDelayVAFixed = theDelayMSec;
+    }
+
     /*ST_LOCAL double getSpeed() const {
         // TODO (Kirill Gavrilov#5#) not thread-safe
         return myDelayVVAver / myDelayTimer;
@@ -84,8 +91,9 @@ class StVideoTimer {
 
         private:
 
-    ST_LOCAL static double getDelayMsec(const double& nextSec, const double& currSec) {
-        return (nextSec - currSec) * 1000.0;
+    ST_LOCAL static double getDelayMsec(const double& theNextSec,
+                                        const double& theCurrSec) {
+        return (theNextSec - theCurrSec) * 1000.0;
     }
 
     ST_LOCAL bool isQuitMessage();
@@ -108,7 +116,7 @@ class StVideoTimer {
 
     double                 myDelayTimer;      //!< timer delay (in milliseconds)
     double                 myDiffVA;          //!< Audio to Video PTS diff (in milliseconds)
-    double                 myDelayVAFixed;    //!< Video delayed from Audio on this value (in milliseconds)
+    volatile int           myDelayVAFixed;    //!< Video delayed from Audio on this value (in milliseconds)
     double                 myDelayVV;         //!< real frame's delay (in milliseconds)
     double                 myDelayVVAver;
     double                 myDelayVVFixed;    //!< fixed (for constant FPS) frame's delay (in milliseconds)

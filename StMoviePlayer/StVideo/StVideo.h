@@ -171,6 +171,8 @@ class StVideo {
         myAudio->setAudioVolume(theGain);
     }
 
+    ST_LOCAL void setAudioDelay(const float theDelaySec);
+
         public: //!< Properties
 
     struct {
@@ -356,8 +358,8 @@ class StVideo {
     bool                          myToSeekBack;   //!< seeking direction
     StPlayEvent_t                 myPlayEvent;    //!< playback event
     double                        myTargetFps;
-
-    bool                          isBenchmark;
+    volatile int                  myAudioDelayMSec;//!< audio/video sync delay
+    volatile bool                 myIsBenchmark;
     volatile StImageFile::ImageType toSave;
     volatile bool                 toQuit;
 

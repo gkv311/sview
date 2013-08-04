@@ -42,6 +42,7 @@ int StGLButton::getWidth() const {
 
 void StGLButton::setWidth(const int theWidth) {
     myWidth = theWidth;
+    changeRectPx().right() = changeRectPx().left() + theWidth;
 }
 
 void StGLButton::setHeight(const int theHeight) {

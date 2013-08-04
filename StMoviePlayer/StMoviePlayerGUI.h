@@ -177,6 +177,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL void doOpenLicense  (const size_t );
     ST_LOCAL void doShowFPS(const bool );
     ST_LOCAL void doAboutRenderer(const size_t );
+    ST_LOCAL void doAudioDelay   (const size_t );
 
         private:
 
