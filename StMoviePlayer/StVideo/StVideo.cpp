@@ -216,6 +216,7 @@ void StVideo::setBenchmark(bool toPerformBenchmark) {
 
 void StVideo::setAudioDelay(const float theDelaySec) {
     myAudioDelayMSec = int(theDelaySec * 1000.0f + (theDelaySec > 0.0f ? 0.5f : -0.5));
+    myVideoMaster->setAudioDelay(myAudioDelayMSec);
 }
 
 bool StVideo::addFile(const StString& theFileToLoad,

@@ -92,6 +92,10 @@ class StVideoQueue : public StAVPacketQueue {
         return aPts;
     }
 
+    ST_LOCAL void setAudioDelay(const int theDelayMSec) {
+        myAudioDelayMSec = theDelayMSec;
+    }
+
     ST_LOCAL StCString getPixelFormatString() const {
         return stAV::PIX_FMT::getString(myCodecCtx->pix_fmt);
     }
@@ -240,6 +244,7 @@ class StVideoQueue : public StAVPacketQueue {
 
     StMutex                    myAudioClockMutex; //!< audio to video sync clock
     double                     myAudioClock;      //!< audio clock
+    volatile int               myAudioDelayMSec;
 
     int64_t                    myFramesCounter;
     StImage                    myCachedFrame;

@@ -112,6 +112,7 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   myVideoPktPts(stAV::NOPTS_VALUE),
   //
   myAudioClock(0.0),
+  myAudioDelayMSec(0),
   myFramesCounter(1),
   myWasFlushed(false),
   mySrcFormat(ST_V_SRC_AUTODETECT),
@@ -661,7 +662,7 @@ void StVideoQueue::decodeLoop() {
         static const double OVERR_LIMIT = 0.2;
         static const double GREATER_LIMIT = 100.0;
         if(myMaster.isNull()) {
-            const double anAudioClock = getAClock();
+            const double anAudioClock = getAClock() + double(myAudioDelayMSec) * 0.001;
             double diff = anAudioClock - myFramePts;
             if(diff > OVERR_LIMIT && diff < GREATER_LIMIT) {
                 if(myAvDiscard != AVDISCARD_NONREF) {
