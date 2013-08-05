@@ -1111,7 +1111,7 @@ void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StStri
     if(theHasVideo) {
         if(!theStreamsList.isNull()
         && !theStreamsList->isEmpty()) {
-            aDelayItem = myMenuAudio->addItem("Audio/Video delay");
+            aDelayItem = myMenuAudio->addItem("Audio/Video delay    -  +0.000  +");
             aDelayItem->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAudioDelay);
             aDelayRange = new StGLRangeFieldFloat32(aDelayItem, myPlugin->params.AudioDelay,
                                                     0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT));
@@ -1129,9 +1129,10 @@ void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StStri
     myMenuAudio->stglInit();
 
     if(aDelayRange != NULL) {
+        const GLint aWidth = aDelayRange->getRectPx().width();
         aDelayRange->changeRectPx().bottom() = aDelayRange->getRectPx().top()  + myMenuAudio->getItemHeight();
-        aDelayRange->changeRectPx().left()   = aDelayItem->getRectPx().width()  - 116;
-        aDelayRange->changeRectPx().right()  = aDelayRange->getRectPx().left() + 100;
+        aDelayRange->changeRectPx().moveLeftTo(aDelayItem->getRectPx().width() - aWidth - 16);
+        aDelayItem->setText("Audio/Video delay");
     }
 }
 
