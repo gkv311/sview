@@ -88,8 +88,6 @@ class StMoviePlayerGUI : public StGLRootWidget {
     StGLMenu*          myMenuAudio;
     StGLMenu*      myMenuSubtitles;
 
-    StGLRangeFieldFloat32* myAudioDelay;
-
     StGLWidget*        upperRegion; // upper toolbar
     StGLTextureButton*     btnOpen;
     StGLTextureButton*   btnSwapLR;

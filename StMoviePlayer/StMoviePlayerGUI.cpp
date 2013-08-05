@@ -863,7 +863,6 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
   myMenuRecent(NULL),
   myMenuAudio(NULL),
   myMenuSubtitles(NULL),
-  myAudioDelay(NULL),
   // upper toolbar
   upperRegion(NULL),
   btnOpen(NULL),
@@ -1088,7 +1087,6 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& cursorZo, bool isMouseAct
 
 void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StString> >& theStreamsList,
                                               const bool theHasVideo) {
-    myAudioDelay = NULL;
     if(myMenuAudio == NULL) {
         return;
     }
@@ -1109,18 +1107,19 @@ void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StStri
 
     //myMenuAudio->addSplitter();
     StGLMenuItem* aDelayItem = NULL;
+    StGLRangeFieldFloat32* aDelayRange = NULL;
     if(theHasVideo) {
         if(!theStreamsList.isNull()
         && !theStreamsList->isEmpty()) {
             aDelayItem = myMenuAudio->addItem("Audio/Video delay");
             aDelayItem->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAudioDelay);
-            myAudioDelay = new StGLRangeFieldFloat32(aDelayItem, myPlugin->params.AudioDelay,
-                                                     0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT));
-            myAudioDelay->setFormat(stCString("%+01.3f"));
-            myAudioDelay->setColor(StGLRangeFieldFloat32::FieldColor_Default,  StGLVec3(0.0f, 0.0f, 0.0f));
-            myAudioDelay->setColor(StGLRangeFieldFloat32::FieldColor_Positive, StGLVec3(0.4f, 0.8f, 0.4f));
-            myAudioDelay->setColor(StGLRangeFieldFloat32::FieldColor_Negative, StGLVec3(1.0f, 0.0f, 0.0f));
-            myAudioDelay->setVisibility(true, true);
+            aDelayRange = new StGLRangeFieldFloat32(aDelayItem, myPlugin->params.AudioDelay,
+                                                    0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT));
+            aDelayRange->setFormat(stCString("%+01.3f"));
+            aDelayRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  StGLVec3(0.0f, 0.0f, 0.0f));
+            aDelayRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, StGLVec3(0.4f, 0.8f, 0.4f));
+            aDelayRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, StGLVec3(1.0f, 0.0f, 0.0f));
+            aDelayRange->setVisibility(true, true);
         }
         myMenuAudio->addItem("Attach from file")
                    ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doAddAudioStream);
@@ -1129,10 +1128,10 @@ void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StStri
     // update menu representation
     myMenuAudio->stglInit();
 
-    if(myAudioDelay != NULL) {
-        myAudioDelay->changeRectPx().bottom() = myAudioDelay->getRectPx().top()  + myMenuAudio->getItemHeight();
-        myAudioDelay->changeRectPx().left()   = aDelayItem->getRectPx().width()  - 116;
-        myAudioDelay->changeRectPx().right()  = myAudioDelay->getRectPx().left() + 100;
+    if(aDelayRange != NULL) {
+        aDelayRange->changeRectPx().bottom() = aDelayRange->getRectPx().top()  + myMenuAudio->getItemHeight();
+        aDelayRange->changeRectPx().left()   = aDelayItem->getRectPx().width()  - 116;
+        aDelayRange->changeRectPx().right()  = aDelayRange->getRectPx().left() + 100;
     }
 }
 
