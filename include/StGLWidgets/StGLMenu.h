@@ -96,6 +96,13 @@ class StGLMenu : public StGLWidget {
     }
 
     /**
+     * Draw bounds rectangle (off by default).
+     */
+    inline void setShowBounds(const bool theToShow) {
+        myToDrawBounds = theToShow;
+    }
+
+    /**
      * Update all children menus layout.
      */
     ST_CPPEXPORT void stglUpdateSubmenuLayout();
@@ -144,6 +151,7 @@ class StGLMenu : public StGLWidget {
 
     StGLShare<StGLMenuProgram> myProgram;
     StGLVertexBuffer           myVertexBuf;
+    StGLVertexBuffer           myVertexBndBuf;
     StGLVec4                   myColorVec;
     int                        myOrient;
     int                        myItemHeight;
@@ -152,6 +160,7 @@ class StGLMenu : public StGLWidget {
     bool                       myIsActive;
     bool                       myKeepActive;
     bool                       myIsInitialized;
+    bool                       myToDrawBounds;
 
 };
 

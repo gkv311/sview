@@ -51,12 +51,14 @@ StGLMenu::StGLMenu(StGLWidget* theParent,
   myIsRootMenu(theIsRootMenu),
   myIsActive(!theIsRootMenu),
   myKeepActive(false),
-  myIsInitialized(false) {
+  myIsInitialized(false),
+  myToDrawBounds(false) {
     //
 }
 
 StGLMenu::~StGLMenu() {
-    myVertexBuf.release(getContext());
+    myVertexBuf   .release(getContext());
+    myVertexBndBuf.release(getContext());
 }
 
 const StString& StGLMenu::getClassName() {
@@ -79,6 +81,16 @@ void StGLMenu::stglResize() {
     StArray<StGLVec2> aVertices(4);
     getRectGl(aVertices);
     myVertexBuf.init(aCtx, aVertices);
+
+    if(myToDrawBounds) {
+        StRectI_t aRectBnd = getRectPxAbsolute();
+        aRectBnd.left()   -= 1;
+        aRectBnd.right()  += 1;
+        aRectBnd.top()    -= 1;
+        aRectBnd.bottom() += 1;
+        myRoot->getRectGl(aRectBnd, aVertices);
+        myVertexBndBuf.init(aCtx, aVertices);
+    }
 
     if(!myProgram.isNull()) {
         myProgram->use(aCtx);
@@ -185,6 +197,14 @@ void StGLMenu::stglDraw(unsigned int theView) {
     StGLContext& aCtx = getContext();
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     aCtx.core20fwd->glEnable(GL_BLEND);
+
+    if(myVertexBndBuf.isValid()) {
+        myProgram->use(aCtx, StGLVec4(0.0f, 0.0f, 0.0f, 1.0f), GLfloat(opacityValue), getRoot()->getScreenDispX());
+        myVertexBndBuf.bindVertexAttrib  (aCtx, myProgram->getVVertexLoc());
+        aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        myVertexBndBuf.unBindVertexAttrib(aCtx, myProgram->getVVertexLoc());
+    }
+
     myProgram->use(aCtx, myColorVec, GLfloat(opacityValue), getRoot()->getScreenDispX());
 
     myVertexBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());

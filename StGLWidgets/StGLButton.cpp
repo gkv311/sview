@@ -17,6 +17,7 @@ StGLButton::StGLButton(StGLWidget*     theParent,
                        const int       theTop,
                        const StString& theText)
 : StGLMenu(theParent, theLeft, theTop, StGLMenu::MENU_ZERO) {
+    setShowBounds(true);
     StGLMenuItem* aBtn = addItem(theText);
     aBtn->signals.onItemClick.connect(this, &StGLButton::doItemClick);
     aBtn->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
