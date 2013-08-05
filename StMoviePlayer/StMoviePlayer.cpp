@@ -182,7 +182,6 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     params.AudioMute    = new StBoolParam(false);
     params.AudioMute->signals.onChanged = stSlot(this, &StMoviePlayer::doSetAudioMute);
     params.AudioDelay   = new StFloat32Param(0.0f, -5.0f, 5.0f, 0.0f, 0.100f);
-    params.AudioDelay->signals.onChanged = stSlot(this, &StMoviePlayer::doSetAudioDelay);
     params.isFullscreen = new StBoolParam(false);
     params.isFullscreen->signals.onChanged = stSlot(this, &StMoviePlayer::doFullscreen);
     params.toRestoreRatio   = new StBoolParam(false);
@@ -989,25 +988,6 @@ void StMoviePlayer::doSetAudioVolume(const float theGain) {
 void StMoviePlayer::doSetAudioMute(const bool theToMute) {
     if(!myVideo.isNull()) {
         myVideo->setAudioVolume(theToMute ? 0.0f : params.AudioGain->getValue());
-    }
-}
-
-void StMoviePlayer::doSetAudioDelay(const float theDelaySec) {
-    if(!myVideo.isNull()) {
-        myVideo->setAudioDelay(theDelaySec);
-        if(myGUI != NULL
-        && myGUI->myAudioDelay != NULL) {
-            char aBuff[128];
-            stsprintf(aBuff, 128, "%+01.3f", theDelaySec);
-            myGUI->myAudioDelay->setText(aBuff);
-            if(stAreEqual(theDelaySec, 0.0f, 0.00001f)) {
-                myGUI->myAudioDelay->setTextColor(StGLVec3(0.0f, 0.0f, 0.0f));
-            } else if(theDelaySec > 0.0f) {
-                myGUI->myAudioDelay->setTextColor(StGLVec3(0.4f, 0.8f, 0.4f));
-            } else {
-                myGUI->myAudioDelay->setTextColor(StGLVec3(1.0f, 0.0f, 0.0f));
-            }
-        }
     }
 }
 

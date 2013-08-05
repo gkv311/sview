@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,6 +11,17 @@
 
 #include <StTemplates/StVec2.h>
 #include <StStrings/StString.h>
+
+/**
+ * Access to the components as vector methods.
+ */
+#define ST_VEC_COMPONENTS_3D(theX, theY, theZ) \
+    const StVec3<Element_t> theX##theY##theZ() const { return StVec3<Element_t>(theX(), theY(), theZ()); } \
+    const StVec3<Element_t> theX##theZ##theY() const { return StVec3<Element_t>(theX(), theZ(), theY()); } \
+    const StVec3<Element_t> theY##theX##theZ() const { return StVec3<Element_t>(theY(), theX(), theZ()); } \
+    const StVec3<Element_t> theY##theZ##theX() const { return StVec3<Element_t>(theY(), theZ(), theX()); } \
+    const StVec3<Element_t> theZ##theY##theX() const { return StVec3<Element_t>(theZ(), theY(), theX()); } \
+    const StVec3<Element_t> theZ##theX##theY() const { return StVec3<Element_t>(theZ(), theX(), theY()); }
 
 /**
  * Generic 3-components vector.
@@ -83,6 +94,13 @@ class StVec3 {
 
     Element_t z() const { return v[2]; }
     Element_t b() const { return v[2]; } // Blue color
+
+    ST_VEC_COMPONENTS_2D(x, y);
+    ST_VEC_COMPONENTS_2D(x, z);
+    ST_VEC_COMPONENTS_2D(y, z);
+    ST_VEC_COMPONENTS_3D(x, y, z);
+    StVec2<Element_t>& xy() { return *((StVec2<Element_t>* )&v[0]); }
+    StVec2<Element_t>& yz() { return *((StVec2<Element_t>* )&v[1]); }
 
     Element_t& x() { return v[0]; }
     Element_t& r() { return v[0]; } // Red color

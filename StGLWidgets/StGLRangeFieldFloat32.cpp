@@ -20,7 +20,7 @@ StGLRangeFieldFloat32::StGLRangeFieldFloat32(StGLWidget* theParent,
 : StGLWidget(theParent, theLeft, theTop, theCorner),
   myTrackValue(theTrackedValue),
   myValueText(NULL),
-  myFormat(stCString("%01.3f")) {
+  myFormat(stCString("%+01.3f")) {
     myTrackValue->signals.onChanged += stSlot(this, &StGLRangeFieldFloat32::onValueChange);
 }
 
@@ -37,7 +37,7 @@ bool StGLRangeFieldFloat32::stglInit() {
         return true;
     }
 
-    myValueText = new StGLTextArea(this, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), -1, 10);
+    myValueText = new StGLTextArea(this, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT), -1, 10);
     onValueChange(0.0f);
     myValueText->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
     myValueText->setVisibility(true, true);
@@ -53,14 +53,16 @@ bool StGLRangeFieldFloat32::stglInit() {
     const GLint aHeight = myValueText->getRectPx().height();
 
     StGLButton* aButDec = new StGLButton(this, 0, 0, "-");
+    aButDec->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT));
     aButDec->setHeight(aHeight);
     aButDec->setWidth(15);
     aButDec->setVisibility(true, true);
     aButDec->signals.onBtnClick += stSlot(this, &StGLRangeFieldFloat32::doDecrement);
 
-    myValueText->changeRectPx().moveLeftTo(aButDec->getRectPx().right() + 5);
+    myValueText->changeRectPx().moveLeftTo(aButDec->getRectPx().right() - 5);
 
-    StGLButton* aButInc = new StGLButton(this, myValueText->getRectPx().right() + 10, 0, "+");
+    StGLButton* aButInc = new StGLButton(this, myValueText->getRectPx().right() + 5, 0, "+");
+    aButInc->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT));
     aButInc->setHeight(aHeight);
     aButInc->setWidth(15);
     aButInc->setVisibility(true, true);
@@ -77,6 +79,13 @@ void StGLRangeFieldFloat32::onValueChange(const float theValue) {
         char aBuff[128];
         stsprintf(aBuff, 128, myFormat.toCString(), theValue);
         myValueText->setText(aBuff);
+        if(myTrackValue->isDefaultValue()) {
+            myValueText->setTextColor(myColors[FieldColor_Default]);
+        } else if(theValue > 0.0f) {
+            myValueText->setTextColor(myColors[FieldColor_Positive]);
+        } else {
+            myValueText->setTextColor(myColors[FieldColor_Negative]);
+        }
     }
 }
 

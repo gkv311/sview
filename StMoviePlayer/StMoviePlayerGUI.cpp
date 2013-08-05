@@ -573,6 +573,10 @@ class StDelayControl : public StGLMessageBox {
 
         myRange = new StGLRangeFieldFloat32(aContent, theTrackedValue,
                                             aLabel->getRectPx().right() + 10, aLabel->getRectPx().top());
+        myRange->setFormat(stCString("%+01.3f"));
+        myRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  StGLVec3(1.0f, 1.0f, 1.0f));
+        myRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, StGLVec3(0.4f, 0.8f, 0.4f));
+        myRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, StGLVec3(1.0f, 0.0f, 0.0f));
         myRange->setVisibility(true, true);
         myRange->stglInit();
 
@@ -1110,11 +1114,12 @@ void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StStri
         && !theStreamsList->isEmpty()) {
             aDelayItem = myMenuAudio->addItem("Audio/Video delay");
             aDelayItem->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAudioDelay);
-            myAudioDelay = new StGLTextArea(aDelayItem, 0, 0,
-                                            StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT), 100);
-            myAudioDelay->setupAlignment(StGLTextFormatter::ST_ALIGN_X_RIGHT,
-                                         StGLTextFormatter::ST_ALIGN_Y_CENTER);
-            myAudioDelay->setTextColor(StGLVec3(0.0f, 0.0f, 0.0f));
+            myAudioDelay = new StGLRangeFieldFloat32(aDelayItem, myPlugin->params.AudioDelay,
+                                                     0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT));
+            myAudioDelay->setFormat(stCString("%+01.3f"));
+            myAudioDelay->setColor(StGLRangeFieldFloat32::FieldColor_Default,  StGLVec3(0.0f, 0.0f, 0.0f));
+            myAudioDelay->setColor(StGLRangeFieldFloat32::FieldColor_Positive, StGLVec3(0.4f, 0.8f, 0.4f));
+            myAudioDelay->setColor(StGLRangeFieldFloat32::FieldColor_Negative, StGLVec3(1.0f, 0.0f, 0.0f));
             myAudioDelay->setVisibility(true, true);
         }
         myMenuAudio->addItem("Attach from file")

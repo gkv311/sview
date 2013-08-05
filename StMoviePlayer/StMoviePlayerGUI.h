@@ -34,6 +34,7 @@ class StGLImageRegion;
 class StGLMenu;
 class StGLMenuItem;
 class StGLMsgStack;
+class StGLRangeFieldFloat32;
 class StGLSubtitles;
 class StGLPlayList;
 class StGLTextArea;
@@ -87,7 +88,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
     StGLMenu*          myMenuAudio;
     StGLMenu*      myMenuSubtitles;
 
-    StGLTextArea*     myAudioDelay;
+    StGLRangeFieldFloat32* myAudioDelay;
 
     StGLWidget*        upperRegion; // upper toolbar
     StGLTextureButton*     btnOpen;

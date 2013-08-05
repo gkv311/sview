@@ -89,6 +89,13 @@ class StGLMenu : public StGLWidget {
     }
 
     /**
+     * Setup background color of menu.
+     */
+    inline void setColor(const StGLVec3& theColor) {
+        myColorVec.rgb() = theColor;
+    }
+
+    /**
      * Update all children menus layout.
      */
     ST_CPPEXPORT void stglUpdateSubmenuLayout();

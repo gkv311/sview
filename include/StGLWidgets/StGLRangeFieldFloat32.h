@@ -19,6 +19,15 @@ class StGLTextArea;
  */
 class StGLRangeFieldFloat32 : public StGLWidget {
 
+        public:
+
+    enum FieldColor {
+        FieldColor_Default,
+        FieldColor_Positive,
+        FieldColor_Negative,
+        FieldColorNb,
+    };
+
         public: //! @name overriders
 
     /**
@@ -35,6 +44,15 @@ class StGLRangeFieldFloat32 : public StGLWidget {
 
         public:
 
+    ST_LOCAL inline void setColor(const FieldColor theType,
+                                  const StGLVec3&  theColor) {
+        myColors[theType] = theColor;
+    }
+
+    ST_LOCAL inline void setFormat(const StCString& theFormat) {
+        myFormat = theFormat;
+    }
+
     ST_CPPEXPORT void doResetValue(const size_t );
     ST_CPPEXPORT void doDecrement(const size_t );
     ST_CPPEXPORT void doIncrement(const size_t );
@@ -46,6 +64,7 @@ class StGLRangeFieldFloat32 : public StGLWidget {
         private:
 
     StHandle<StFloat32Param> myTrackValue; //!< handle to tracked value
+    StGLVec3                 myColors[FieldColorNb];
     StGLTextArea*            myValueText;  //!< text area
     StString                 myFormat;     //!< value format
 

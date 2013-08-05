@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -9,7 +9,7 @@
 #ifndef __StVec4_h_
 #define __StVec4_h_
 
-#include "StVec3.h"
+#include <StTemplates/StVec3.h>
 
 /**
  * Generic 4-components vector.
@@ -26,22 +26,6 @@ class StVec4 {
     Element_t v[4];
 
         public:
-
-    /**void* operator new(size_t size) {
-        return stMemAllocAligned(size, 16);
-    }
-
-    void operator delete(void* ptr) {
-        return stMemFreeAligned(ptr);
-    }
-
-    void* operator new[](size_t size) {
-        return stMemAllocAligned(size, 16);
-    }
-
-    void operator delete[](void* ptr) {
-        return stMemFreeAligned(ptr);
-    }*/
 
     static size_t length() {
         return 4;
@@ -116,8 +100,19 @@ class StVec4 {
     Element_t w() const { return v[3]; }
     Element_t a() const { return v[3]; } // Alpha color
 
-    StVec3<Element_t> rgb() const { return StVec3<Element_t>(r(), g(), b()); } // Red+Green+Blue colors
-    StVec3<Element_t> xyz() const { return StVec3<Element_t>(x(), y(), z()); }
+    ST_VEC_COMPONENTS_2D(x, y);
+    ST_VEC_COMPONENTS_2D(x, z);
+    ST_VEC_COMPONENTS_2D(x, w);
+    ST_VEC_COMPONENTS_2D(y, z);
+    ST_VEC_COMPONENTS_2D(y, w);
+    ST_VEC_COMPONENTS_2D(z, w);
+
+    ST_VEC_COMPONENTS_3D(x, y, z);
+    ST_VEC_COMPONENTS_3D(x, y, w);
+    ST_VEC_COMPONENTS_3D(x, z, w);
+    ST_VEC_COMPONENTS_3D(y, z, w);
+
+    ST_VEC_COMPONENTS_3D(r, g, b);
 
     Element_t& x() { return v[0]; }
     Element_t& r() { return v[0]; } // Red color
@@ -130,6 +125,13 @@ class StVec4 {
 
     Element_t& w() { return v[3]; }
     Element_t& a() { return v[3]; } // Alpha color
+
+    StVec2<Element_t>& xy()  { return *((StVec2<Element_t>* )&v[0]); }
+    StVec2<Element_t>& yz()  { return *((StVec2<Element_t>* )&v[1]); }
+    StVec2<Element_t>& zw()  { return *((StVec2<Element_t>* )&v[2]); }
+    StVec3<Element_t>& xyz() { return *((StVec3<Element_t>* )&v[0]); }
+    StVec3<Element_t>& yzw() { return *((StVec3<Element_t>* )&v[1]); }
+    StVec3<Element_t>& rgb() { return *((StVec3<Element_t>* )&v[0]); }
 
     /**
      * Row access to the data (for OpenGL exchange).

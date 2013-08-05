@@ -13,6 +13,10 @@
 
 #ifdef __cplusplus
 
+#define ST_VEC_COMPONENTS_2D(theX, theY) \
+    const StVec2<Element_t> theX##theY() const { return StVec2<Element_t>(theX(), theY()); } \
+    const StVec2<Element_t> theY##theX() const { return StVec2<Element_t>(theY(), theX()); }
+
 /**
  * Defines the 2D-vector template.
  */
@@ -73,6 +77,8 @@ class StVec2 {
      */
     Element_t x() const { return v[0]; }
     Element_t y() const { return v[1]; }
+
+    ST_VEC_COMPONENTS_2D(x, y);
 
     /**
      * Per-component access (for modifications).
