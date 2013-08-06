@@ -31,7 +31,17 @@ class StLangMap {
      * value is assigned to the element (the element is constructed using its default constructor)
      */
     ST_CPPEXPORT StString& changeValue(const size_t theId);
-    ST_CPPEXPORT StString& operator[] (const size_t theId);
+    ST_LOCAL inline StString& operator[](const size_t theId) {
+        return changeValue(theId);
+    }
+
+    /**
+     * @return string for specified key, or empty string if key not found
+     */
+    ST_CPPEXPORT const StString& getValue(const size_t theId) const;
+    ST_LOCAL inline const StString& operator[](const size_t theId) const {
+        return getValue(theId);
+    }
 
     /**
      * If value not exists - default value is used.
@@ -50,10 +60,11 @@ class StLangMap {
 
     typedef std::map<size_t, StString> stMapInt2String_t;
 
-    StString      myLngFile; //!< path to the language file
-    stMapInt2String_t myMap; //!< key -> string map
-    bool  myIsHeaderSection;
-    bool         myToShowId;
+    StString          myLngFile;         //!< path to the language file
+    StString          myEmptyStr;
+    stMapInt2String_t myMap;             //!< key -> string map
+    bool              myIsHeaderSection;
+    bool              myToShowId;
 
 };
 

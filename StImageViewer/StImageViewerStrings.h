@@ -19,6 +19,10 @@
 #ifndef __StImageViewerStrings_h_
 #define __StImageViewerStrings_h_
 
+#include <stTypes.h>
+
+class StLangMap;
+
 namespace StImageViewerStrings {
 
     // strings' ids in the language dictionary
@@ -113,6 +117,11 @@ namespace StImageViewerStrings {
 
     };
 
+    /**
+     * Load default strings for entries not found in language file.
+     */
+    ST_LOCAL void loadDefaults(StLangMap& theStrings);
+
 };
 
-#endif //__StImageViewerStrings_h_
+#endif // __StImageViewerStrings_h_

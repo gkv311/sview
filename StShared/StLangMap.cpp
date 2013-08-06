@@ -172,8 +172,9 @@ StString& StLangMap::changeValue(const size_t theId) {
     return myMap[theId];
 }
 
-StString& StLangMap::operator[](const size_t theId) {
-    return myMap[theId];
+const StString& StLangMap::getValue(const size_t theId) const {
+    const std::map<size_t, StString>::const_iterator anIter = myMap.find(theId);
+    return (anIter != myMap.end()) ? anIter->second : myEmptyStr;
 }
 
 StString& StLangMap::changeValueId(const size_t theId,

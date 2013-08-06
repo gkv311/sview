@@ -220,8 +220,7 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
                               const StHandle<StStereoParams>& theParams,
                               StImageFile::ImageType          theImgType) {
     if(theParams.isNull() || theParams.isNull() || theImgType == StImageFile::ST_TYPE_NONE) {
-        stInfo(myLangMap->changeValueId(StImageViewerStrings::DIALOG_NOTHING_TO_SAVE,
-                                        "Nothing to save!"));
+        stInfo(myLangMap->getValue(StImageViewerStrings::DIALOG_NOTHING_TO_SAVE));
         return false;
     }
 
@@ -235,8 +234,7 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
     }
 
     if(result == StGLTextureQueue::SNAPSHOT_NO_NEW || dataLeft.isNull()) {
-        stInfo(myLangMap->changeValueId(StImageViewerStrings::DIALOG_NO_SNAPSHOT,
-                                        "Snapshot not available!"));
+        stInfo(myLangMap->getValue(StImageViewerStrings::DIALOG_NO_SNAPSHOT));
         return false;
     }
     StHandle<StImageFile> dataResult = StImageFile::create(myImageLib);
@@ -255,8 +253,7 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
         dataResult->initWrapper(dataLeft);
     }
 
-    StString title = myLangMap->changeValueId(StImageViewerStrings::DIALOG_SAVE_SNAPSHOT,
-                                              "Choose location to save snapshot");
+    const StString& aTitle = myLangMap->getValue(StImageViewerStrings::DIALOG_SAVE_SNAPSHOT);
     StMIMEList filter;
     StString saveExt;
     if(toSaveStereo) {
@@ -288,7 +285,7 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
     }
 
     StString fileToSave;
-    if(StFileNode::openFileDialog(theSource->getFolderPath(), title, filter, fileToSave, true)) {
+    if(StFileNode::openFileDialog(theSource->getFolderPath(), aTitle, filter, fileToSave, true)) {
         if(StFileNode::getExtension(fileToSave) != saveExt) {
             fileToSave += StString('.') + saveExt;
         }

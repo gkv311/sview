@@ -324,6 +324,7 @@
 		</Unit>
 		<Unit filename="StImageViewerGUI.cpp" />
 		<Unit filename="StImageViewerGUI.h" />
+		<Unit filename="StImageViewerStrings.cpp" />
 		<Unit filename="StImageViewerStrings.h" />
 		<Unit filename="lang/english/StImageViewer.lng">
 			<Option target="&lt;{~None~}&gt;" />

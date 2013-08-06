@@ -85,6 +85,8 @@ StImageViewer::StImageViewer(const StNativeWin_t         theParentWin,
   myToCheckUpdates(true),
   myToSaveSrcFormat(false),
   myEscNoQuit(false) {
+    StImageViewerStrings::loadDefaults(*myLangMap);
+
     myTitle = "sView - Image Viewer";
     //
     params.isFullscreen = new StBoolParam(false);
@@ -683,23 +685,17 @@ void StImageViewer::doOpenFileDialog(const size_t filesCount) {
             params.lastFolder = aCurrFile->isEmpty() ? aCurrFile->getFolderPath() : aCurrFile->getValue(0)->getFolderPath();
         }
     }
-    StString title;
-    if(filesCount == 2) {
-        title = myGUI->myLangMap->changeValueId(StImageViewerStrings::DIALOG_OPEN_LEFT,
-                                                "Choose LEFT image file to open");
-    } else {
-        title = myGUI->myLangMap->changeValueId(StImageViewerStrings::DIALOG_OPEN_FILE,
-                                                "Choose the image file to open");
-    }
+    StString aTitle = (filesCount == 2)
+                    ? myLangMap->getValue(StImageViewerStrings::DIALOG_OPEN_LEFT)
+                    : myLangMap->getValue(StImageViewerStrings::DIALOG_OPEN_FILE);
 
     StString aFilePath, aDummy;
-    if(StFileNode::openFileDialog(params.lastFolder, title, myLoader->getMimeList(), aFilePath, false)) {
+    if(StFileNode::openFileDialog(params.lastFolder, aTitle, myLoader->getMimeList(), aFilePath, false)) {
         if(filesCount == 2) {
-            title = myGUI->myLangMap->changeValueId(StImageViewerStrings::DIALOG_OPEN_RIGHT,
-                                                    "Choose RIGHT image file to open");
+            aTitle = myLangMap->getValue(StImageViewerStrings::DIALOG_OPEN_RIGHT);
             StFileNode::getFolderAndFile(aFilePath, params.lastFolder, aDummy);
             StString filePathRToOpen;
-            if(StFileNode::openFileDialog(params.lastFolder, title, myLoader->getMimeList(), filePathRToOpen, false)) {
+            if(StFileNode::openFileDialog(params.lastFolder, aTitle, myLoader->getMimeList(), filePathRToOpen, false)) {
                 // meta-file
                 myLoader->getPlayList().clear();
                 myLoader->getPlayList().addOneFile(aFilePath, filePathRToOpen);

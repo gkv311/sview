@@ -110,13 +110,10 @@ void StImageViewerGUI::createMainMenu() {
     StGLMenu* aMenuHelp    = createHelpMenu();   // Root -> Help   menu
 
     // Attach sub menus to root
-    menu0Root->addItem(myLangMap->changeValueId(MENU_MEDIA,
-                       "Media"), aMenuMedia);
-    menu0Root->addItem(myLangMap->changeValueId(MENU_VIEW,
-                       "View"),  aMenuView);
+    menu0Root->addItem(tr(MENU_VIEW), aMenuMedia);
+    menu0Root->addItem(tr(MENU_VIEW), aMenuView);
     menu0Root->addItem(myPlugin->StApplication::params.ActiveDevice->getActiveValue(), aDevicesMenu);
-    menu0Root->addItem(myLangMap->changeValueId(MENU_HELP,
-                       "Help"),  aMenuHelp);
+    menu0Root->addItem(tr(MENU_HELP), aMenuHelp);
 }
 
 /**
@@ -128,10 +125,8 @@ StGLMenu* StImageViewerGUI::createMediaMenu() {
     StGLMenu* aMenuOpenImage = createOpenImageMenu(); // Root -> Media -> Open image menu
     StGLMenu* aMenuSaveImage = createSaveImageMenu(); // Root -> Media -> Save image menu
 
-    aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_OPEN_IMAGE,
-                        "Open Image..."),    aMenuOpenImage);
-    aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_SAVE_IMAGE_AS,
-                        "Save Image As..."), aMenuSaveImage);
+    aMenuMedia->addItem(tr(MENU_MEDIA_OPEN_IMAGE),    aMenuOpenImage);
+    aMenuMedia->addItem(tr(MENU_MEDIA_SAVE_IMAGE_AS), aMenuSaveImage);
 
     aMenuMedia->addItem("First File in folder")
               ->signals.onItemClick.connect(myPlugin, &StImageViewer::doListFirst);
@@ -142,9 +137,8 @@ StGLMenu* StImageViewerGUI::createMediaMenu() {
     aMenuMedia->addItem("Last File in folder")
               ->signals.onItemClick.connect(myPlugin, &StImageViewer::doListLast);
 
-    aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_SRC_FORMAT,
-                        "Source stereo format"), aMenuSrcFormat);
-    aMenuMedia->addItem(myLangMap->changeValueId(MENU_MEDIA_QUIT, "Quit"))
+    aMenuMedia->addItem(tr(MENU_MEDIA_SRC_FORMAT), aMenuSrcFormat);
+    aMenuMedia->addItem(tr(MENU_MEDIA_QUIT))
               ->signals.onItemClick.connect(myPlugin, &StImageViewer::doQuit);
     return aMenuMedia;
 }
@@ -154,9 +148,9 @@ StGLMenu* StImageViewerGUI::createMediaMenu() {
  */
 StGLMenu* StImageViewerGUI::createOpenImageMenu() {
     StGLMenu* menu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    menu->addItem(myLangMap->changeValueId(MENU_MEDIA_OPEN_IMAGE_1, "From One file"), 1)
+    menu->addItem(tr(MENU_MEDIA_OPEN_IMAGE_1), 1)
         ->signals.onItemClick.connectUnsafe(myPlugin, StImageViewer::doOpenFileDialog);
-    menu->addItem(myLangMap->changeValueId(MENU_MEDIA_OPEN_IMAGE_2, "Left+Right files"), 2)
+    menu->addItem(tr(MENU_MEDIA_OPEN_IMAGE_2), 2)
         ->signals.onItemClick.connect(myPlugin, &StImageViewer::doOpen2FilesDialog);
     return menu;
 }
@@ -178,26 +172,16 @@ StGLMenu* StImageViewerGUI::createSaveImageMenu() {
  */
 StGLMenu* StImageViewerGUI::createSrcFormatMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(myLangMap->changeValueId(MENU_SRC_FORMAT_AUTO,
-                   "Autodetection"),           myPlugin->params.srcFormat, ST_V_SRC_AUTODETECT);
-    aMenu->addItem(myLangMap->changeValueId(MENU_SRC_FORMAT_MONO,
-                   "Mono"),                    myPlugin->params.srcFormat, ST_V_SRC_MONO);
-    aMenu->addItem(myLangMap->changeValueId(MENU_SRC_FORMAT_CROSS_EYED,
-                   "Cross-eyed"),              myPlugin->params.srcFormat, ST_V_SRC_SIDE_BY_SIDE);
-    aMenu->addItem(myLangMap->changeValueId(MENU_SRC_FORMAT_PARALLEL,
-                   "Parallel Pair"),           myPlugin->params.srcFormat, ST_V_SRC_PARALLEL_PAIR);
-    aMenu->addItem(myLangMap->changeValueId(MENU_SRC_FORMAT_OVERUNDER_RL,
-                   "Over/Under (R/L)"),        myPlugin->params.srcFormat, ST_V_SRC_OVER_UNDER_RL);
-    aMenu->addItem(myLangMap->changeValueId(MENU_SRC_FORMAT_OVERUNDER_LR,
-                   "Over/Under (L/R)"),        myPlugin->params.srcFormat, ST_V_SRC_OVER_UNDER_LR);
-    aMenu->addItem(myLangMap->changeValueId(MENU_SRC_FORMAT_INTERLACED,
-                   "Interlaced"),              myPlugin->params.srcFormat, ST_V_SRC_ROW_INTERLACE);
-    aMenu->addItem(myLangMap->changeValueId(MENU_SRC_FORMAT_ANA_RC,
-                   "Anaglyph Red/Cyan"),       myPlugin->params.srcFormat, ST_V_SRC_ANAGLYPH_RED_CYAN);
-    aMenu->addItem(myLangMap->changeValueId(MENU_SRC_FORMAT_ANA_RB,
-                   "Anaglyph Green/Red+Blue"), myPlugin->params.srcFormat, ST_V_SRC_ANAGLYPH_G_RB);
-    aMenu->addItem(myLangMap->changeValueId(MENU_SRC_FORMAT_ANA_YB,
-                   "Anaglyph Yellow/Blue"),    myPlugin->params.srcFormat, ST_V_SRC_ANAGLYPH_YELLOW_BLUE);
+    aMenu->addItem(tr(MENU_SRC_FORMAT_AUTO),         myPlugin->params.srcFormat, ST_V_SRC_AUTODETECT);
+    aMenu->addItem(tr(MENU_SRC_FORMAT_MONO),         myPlugin->params.srcFormat, ST_V_SRC_MONO);
+    aMenu->addItem(tr(MENU_SRC_FORMAT_CROSS_EYED),   myPlugin->params.srcFormat, ST_V_SRC_SIDE_BY_SIDE);
+    aMenu->addItem(tr(MENU_SRC_FORMAT_PARALLEL),     myPlugin->params.srcFormat, ST_V_SRC_PARALLEL_PAIR);
+    aMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_RL), myPlugin->params.srcFormat, ST_V_SRC_OVER_UNDER_RL);
+    aMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_LR), myPlugin->params.srcFormat, ST_V_SRC_OVER_UNDER_LR);
+    aMenu->addItem(tr(MENU_SRC_FORMAT_INTERLACED),   myPlugin->params.srcFormat, ST_V_SRC_ROW_INTERLACE);
+    aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RC),       myPlugin->params.srcFormat, ST_V_SRC_ANAGLYPH_RED_CYAN);
+    aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RB),       myPlugin->params.srcFormat, ST_V_SRC_ANAGLYPH_G_RB);
+    aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_YB),       myPlugin->params.srcFormat, ST_V_SRC_ANAGLYPH_YELLOW_BLUE);
     return aMenu;
 }
 
@@ -211,21 +195,14 @@ StGLMenu* StImageViewerGUI::createViewMenu() {
     StGLMenu* aMenuTexFilter = createSmoothFilterMenu(); // Root -> View menu -> Smooth Filter
     StGLMenu* aMenuGamma     = createGammaMenu();        // Root -> View menu -> Gamma Correction
 
-    aMenuView->addItem(myLangMap->changeValueId(MENU_VIEW_DISPLAY_MODE,
-                       "Stereo Output"), aMenuDispMode);
-
-    aMenuView->addItem(myLangMap->changeValueId(MENU_VIEW_FULLSCREEN, "Fullscreen"),
-                       myPlugin->params.isFullscreen);
-    aMenuView->addItem(myLangMap->changeValueId(MENU_VIEW_RESET, "Reset"))
+    aMenuView->addItem(tr(MENU_VIEW_DISPLAY_MODE),  aMenuDispMode);
+    aMenuView->addItem(tr(MENU_VIEW_FULLSCREEN),    myPlugin->params.isFullscreen);
+    aMenuView->addItem(tr(MENU_VIEW_RESET))
              ->signals.onItemClick.connect(myPlugin, &StImageViewer::doReset);
-    aMenuView->addItem(myLangMap->changeValueId(MENU_VIEW_SWAP_LR, "Swap Left/Right"),
-                       stImageRegion->params.swapLR);
-    aMenuView->addItem(myLangMap->changeValueId(MENU_VIEW_DISPLAY_RATIO,
-                       "Display Ratio"),    aMenuDispRatio);
-    aMenuView->addItem(myLangMap->changeValueId(MENU_VIEW_TEXFILTER,
-                       "Smooth Filter"),    aMenuTexFilter);
-    aMenuView->addItem(myLangMap->changeValueId(MENU_VIEW_GAMMA,
-                       "Gamma Correction"), aMenuGamma);
+    aMenuView->addItem(tr(MENU_VIEW_SWAP_LR),       stImageRegion->params.swapLR);
+    aMenuView->addItem(tr(MENU_VIEW_DISPLAY_RATIO), aMenuDispRatio);
+    aMenuView->addItem(tr(MENU_VIEW_TEXFILTER),     aMenuTexFilter);
+    aMenuView->addItem(tr(MENU_VIEW_GAMMA),         aMenuGamma);
     return aMenuView;
 }
 
@@ -234,19 +211,19 @@ StGLMenu* StImageViewerGUI::createViewMenu() {
  */
 StGLMenu* StImageViewerGUI::createDisplayModeMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_DISPLAY_MODE_STEREO,       "Stereo"),
+    aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_STEREO),
                    stImageRegion->params.displayMode, StGLImageRegion::MODE_STEREO);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_DISPLAY_MODE_LEFT,         "Left view"),
+    aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_LEFT),
                    stImageRegion->params.displayMode, StGLImageRegion::MODE_ONLY_LEFT);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_DISPLAY_MODE_RIGHT,        "Right view"),
+    aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_RIGHT),
                    stImageRegion->params.displayMode, StGLImageRegion::MODE_ONLY_RIGHT);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_DISPLAY_MODE_PARALLEL,     "Parallel pair"),
+    aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_PARALLEL),
                    stImageRegion->params.displayMode, StGLImageRegion::MODE_PARALLEL);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_DISPLAY_MODE_CROSSYED,     "Cross-eyed pair"),
+    aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_CROSSYED),
                    stImageRegion->params.displayMode, StGLImageRegion::MODE_CROSSYED);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_DISPLAY_MODE_OVERUNDER_LR, "Over/Under (L/R)"),
+    aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_OVERUNDER_LR),
                    stImageRegion->params.displayMode, StGLImageRegion::MODE_OVER_UNDER_LR);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_DISPLAY_MODE_OVERUNDER_RL, "Over/Under (R/L)"),
+    aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_OVERUNDER_RL),
                    stImageRegion->params.displayMode, StGLImageRegion::MODE_OVER_UNDER_RL);
     return aMenu;
 }
@@ -272,9 +249,9 @@ StGLMenu* StImageViewerGUI::createDisplayRatioMenu() {
  */
 StGLMenu* StImageViewerGUI::createSmoothFilterMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_TEXFILTER_NEAREST, "Nearest"),
+    aMenu->addItem(tr(MENU_VIEW_TEXFILTER_NEAREST),
                    stImageRegion->params.textureFilter, StGLImageProgram::FILTER_NEAREST);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_TEXFILTER_LINEAR,  "Linear"),
+    aMenu->addItem(tr(MENU_VIEW_TEXFILTER_LINEAR),
                    stImageRegion->params.textureFilter, StGLImageProgram::FILTER_LINEAR);
     return aMenu;
 }
@@ -311,14 +288,11 @@ StGLMenu* StImageViewerGUI::createOutputMenu() {
         aMenuChangeDevice->addItem(aValuesList[aValIter], aDevicesEnum, int32_t(aValIter));
     }
 
-    aMenu->addItem(myLangMap->changeValueId(MENU_CHANGE_DEVICE,  "Change Device"),
-                   aMenuChangeDevice);
-    aMenu->addItem(myLangMap->changeValueId(MENU_ABOUT_RENDERER, "About Plugin..."))
+    aMenu->addItem(tr(MENU_CHANGE_DEVICE), aMenuChangeDevice);
+    aMenu->addItem(tr(MENU_ABOUT_RENDERER))
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doAboutRenderer);
-    aMenu->addItem(myLangMap->changeValueId(MENU_SHOW_FPS,       "Show FPS"),
-                   myPlugin->params.ToShowFps);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VSYNC,          "VSync"),
-                   myPlugin->params.IsVSyncOn);
+    aMenu->addItem(tr(MENU_SHOW_FPS),      myPlugin->params.ToShowFps);
+    aMenu->addItem(tr(MENU_VSYNC),         myPlugin->params.IsVSyncOn);
 
     const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
     StParamsList aParams;
@@ -342,20 +316,15 @@ StGLMenu* StImageViewerGUI::createOutputMenu() {
 }
 
 void StImageViewerGUI::doAboutProgram(const size_t ) {
-    StString& aTitle = myLangMap->changeValueId(ABOUT_DPLUGIN_NAME,
-        "sView - Image Viewer");
-    StString& aVerString = myLangMap->changeValueId(ABOUT_VERSION, "version");
-    StString& aDescr = myLangMap->changeValueId(ABOUT_DESCRIPTION,
-        "Image viewer allows you to open stereoscopic images in formats JPEG, PNG, MPO and a lot of others.\n"
-        "(C) 2007-2013 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis program distributed under GPL3.0");
-    StGLMessageBox* aboutDialog = new StGLMessageBox(this, aTitle + '\n'
-        + aVerString + ": " + StVersionInfo::getSDKVersionString()
-        + " "+ StThread::getArchString()
-        + "\n \n" + aDescr,
+    StGLMessageBox* aDialog = new StGLMessageBox(this,
+          tr(ABOUT_DPLUGIN_NAME) + '\n'
+        + tr(ABOUT_VERSION) + ": " + StVersionInfo::getSDKVersionString()
+        + " " + StThread::getArchString()
+        + "\n \n" + tr(ABOUT_DESCRIPTION),
         512, 300);
-    aboutDialog->addButton("Close");
-    aboutDialog->setVisibility(true, true);
-    aboutDialog->stglInit();
+    aDialog->addButton("Close");
+    aDialog->setVisibility(true, true);
+    aDialog->stglInit();
 }
 
 void StImageViewerGUI::doUserTips(const size_t ) {
@@ -366,10 +335,10 @@ void StImageViewerGUI::doAboutSystem(const size_t ) {
     StString aTitle = "System Info";
     StString anInfo = getContext().stglFullInfo();
     StString aString = aTitle + "\n\n \n" + anInfo;
-    StGLMessageBox* aSysInfoDialog = new StGLMessageBox(this, aString, 512, 256);
-    aSysInfoDialog->addButton("Close");
-    aSysInfoDialog->setVisibility(true, true);
-    aSysInfoDialog->stglInit();
+    StGLMessageBox* aDialog = new StGLMessageBox(this, aString, 512, 256);
+    aDialog->addButton("Close");
+    aDialog->setVisibility(true, true);
+    aDialog->stglInit();
 }
 
 void StImageViewerGUI::doAboutImage(const size_t ) {
@@ -390,10 +359,10 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
         anInfo += anInfoList[anIter];
     }
     StString aString = aTitle + "\n\n \n" + anInfo;
-    StGLMessageBox* anInfoDialog = new StGLMessageBox(this, aString, 512, 300);
-    anInfoDialog->addButton("Close");
-    anInfoDialog->setVisibility(true, true);
-    anInfoDialog->stglInit();
+    StGLMessageBox* aDialog = new StGLMessageBox(this, aString, 512, 300);
+    aDialog->addButton("Close");
+    aDialog->setVisibility(true, true);
+    aDialog->stglInit();
 
 }
 
@@ -415,20 +384,16 @@ StGLMenu* StImageViewerGUI::createHelpMenu() {
     StGLMenu* aMenuCheckUpdates = createCheckUpdatesMenu(); // Root -> Help -> Check updates menu
     StGLMenu* aMenuLanguage     = createLanguageMenu();     // Root -> Help -> Language menu
 
-    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_ABOUT,   "About..."))
+    aMenu->addItem(tr(MENU_HELP_ABOUT))
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doAboutProgram);
-
-    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_USERTIPS,"User Tips"))
+    aMenu->addItem(tr(MENU_HELP_USERTIPS))
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doUserTips);
-
-    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_LICENSE, "License text"))
+    aMenu->addItem(tr(MENU_HELP_LICENSE))
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doOpenLicense);
-
-    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_SYSINFO, "System Info"))
+    aMenu->addItem(tr(MENU_HELP_SYSINFO))
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doAboutSystem);
-
-    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_UPDATES, "Check for updates"), aMenuCheckUpdates);
-    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_LANGS,   "Language"),          aMenuLanguage);
+    aMenu->addItem(tr(MENU_HELP_UPDATES), aMenuCheckUpdates);
+    aMenu->addItem(tr(MENU_HELP_LANGS),   aMenuLanguage);
     return aMenu;
 }
 
@@ -437,18 +402,12 @@ StGLMenu* StImageViewerGUI::createHelpMenu() {
  */
 StGLMenu* StImageViewerGUI::createCheckUpdatesMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-
-    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_UPDATES_NOW, "Now"))
+    aMenu->addItem(tr(MENU_HELP_UPDATES_NOW))
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doCheckUpdates);
-
-    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_UPDATES_DAY,   "Each day"),
-                   myPlugin->params.checkUpdatesDays, 1);
-    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_UPDATES_WEEK,  "Each week"),
-                   myPlugin->params.checkUpdatesDays, 7);
-    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_UPDATES_YEAR,  "Each year"),
-                   myPlugin->params.checkUpdatesDays, 355);
-    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_UPDATES_NEVER, "Never"),
-                   myPlugin->params.checkUpdatesDays, 0);
+    aMenu->addItem(tr(MENU_HELP_UPDATES_DAY),   myPlugin->params.checkUpdatesDays, 1);
+    aMenu->addItem(tr(MENU_HELP_UPDATES_WEEK),  myPlugin->params.checkUpdatesDays, 7);
+    aMenu->addItem(tr(MENU_HELP_UPDATES_YEAR),  myPlugin->params.checkUpdatesDays, 355);
+    aMenu->addItem(tr(MENU_HELP_UPDATES_NEVER), myPlugin->params.checkUpdatesDays, 0);
     return aMenu;
 }
 
@@ -577,20 +536,16 @@ void StImageViewerGUI::setVisibility(const StPointD_t& cursorZo, bool isMouseAct
     if(stTextDescr != NULL) {
         stTextDescr->setVisibility(true, true);
         if(::isPointIn(btnOpen, cursorZo)) {
-            stTextDescr->setText(myLangMap->changeValueId(IMAGE_OPEN,
-                                 "Open another image"));
+            stTextDescr->setText(tr(IMAGE_OPEN));
         } else if(::isPointIn(btnPrev, cursorZo)) {
-            stTextDescr->setText(myLangMap->changeValueId(IMAGE_PREVIOUS,
-                                 "Previous image"));
+            stTextDescr->setText(tr(IMAGE_PREVIOUS));
         } else if(::isPointIn(btnNext, cursorZo)) {
-            stTextDescr->setText(myLangMap->changeValueId(IMAGE_NEXT,
-                                 "Next image"));
+            stTextDescr->setText(tr(IMAGE_NEXT));
         } else if(::isPointIn(btnSwapLR, cursorZo)) {
             size_t aLngId = stImageRegion->params.swapLR->getValue() ? SWAP_LR_ON : SWAP_LR_OFF;
-            stTextDescr->setText(myLangMap->changeValueId(aLngId, ""));
+            stTextDescr->setText(tr(aLngId));
         } else if(::isPointIn(myBtnFull, cursorZo)) {
-            stTextDescr->setText(myLangMap->changeValueId(FULLSCREEN,
-                                 "Switch\nfullscreen/windowed"));
+            stTextDescr->setText(tr(FULLSCREEN));
         } else if(::isPointIn(myBtnSrcFrmt, cursorZo)) {
             size_t aLngId = MENU_SRC_FORMAT_AUTO;
             switch(myPlugin->params.srcFormat->getValue()) {
@@ -607,9 +562,7 @@ void StImageViewerGUI::setVisibility(const StPointD_t& cursorZo, bool isMouseAct
                 default:
                 case ST_V_SRC_AUTODETECT:           aLngId = MENU_SRC_FORMAT_AUTO;         break;
             }
-            StString text = myLangMap->changeValueId(BTN_SRC_FORMAT, "Source format:\n")
-                          + myLangMap->changeValueId(aLngId, "");
-            stTextDescr->setText(text);
+            stTextDescr->setText(tr(BTN_SRC_FORMAT) + tr(aLngId));
         } else {
             stTextDescr->setVisibility(false, true);
         }
@@ -697,9 +650,8 @@ void StImageViewerGUI::doAboutRenderer(const size_t ) {
 }
 
 void StImageViewerGUI::showUpdatesNotify() {
-    StGLMessageBox* notifyMsg = new StGLMessageBox(this, myLangMap->changeValueId(UPDATES_NOTIFY,
-        "A new version of sView is available on the official site www.sview.ru.\nPlease update your program."));
-    notifyMsg->addButton("Close");
-    notifyMsg->setVisibility(true, true);
-    notifyMsg->stglInit();
+    StGLMessageBox* aDialog = new StGLMessageBox(this, tr(UPDATES_NOTIFY));
+    aDialog->addButton("Close");
+    aDialog->setVisibility(true, true);
+    aDialog->stglInit();
 }
