@@ -110,6 +110,10 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL void createUpperToolbar();
     ST_LOCAL void createBottomToolbar();
 
+    ST_LOCAL const StString& tr(const size_t theId) const {
+        return myLangMap->getValue(theId);
+    }
+
         private: //!< menus creation routines
 
     ST_LOCAL void      createMainMenu();         // Root (Main menu)

@@ -375,6 +375,7 @@
 		<Unit filename="StMoviePlayerGUI.cpp" />
 		<Unit filename="StMoviePlayerGUI.h" />
 		<Unit filename="StMoviePlayerInfo.h" />
+		<Unit filename="StMoviePlayerStrings.cpp" />
 		<Unit filename="StMoviePlayerStrings.h" />
 		<Unit filename="StSeekBar.cpp" />
 		<Unit filename="StSeekBar.h" />

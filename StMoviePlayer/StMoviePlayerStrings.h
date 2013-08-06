@@ -19,6 +19,10 @@
 #ifndef __StMoviePlayerStrings_h_
 #define __StMoviePlayerStrings_h_
 
+#include <stTypes.h>
+
+class StLangMap;
+
 namespace StMoviePlayerStrings {
 
     // strings' ids in the language dictionary
@@ -144,6 +148,12 @@ namespace StMoviePlayerStrings {
         UPDATES_NOTIFY         = 3003,
 
     };
+
+    /**
+     * Load default strings for entries not found in language file.
+     */
+    ST_LOCAL void loadDefaults(StLangMap& theStrings);
+
 };
 
-#endif //__StMoviePlayerStrings_h_
+#endif // __StMoviePlayerStrings_h_

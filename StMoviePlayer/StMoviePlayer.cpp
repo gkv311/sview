@@ -169,6 +169,7 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
   myToUpdateALList(false),
   myIsBenchmark(false),
   myToCheckUpdates(true) {
+    StMoviePlayerStrings::loadDefaults(*myLangMap);
     myTitle = "sView - Movie Player";
 
     params.alDevice = new StALDeviceParam();
@@ -1131,14 +1132,11 @@ void StMoviePlayer::doOpenFileDialog(const size_t theOpenType) {
     StString aTitle;
     switch(theOpenType) {
         case OPEN_FILE_2MOVIES: {
-            aTitle = myGUI->myLangMap->changeValueId(StMoviePlayerStrings::DIALOG_OPEN_LEFT,
-                                                     "Choose LEFT video file to open");
+            aTitle = myLangMap->getValue(StMoviePlayerStrings::DIALOG_OPEN_LEFT);
             break;
         }
         case OPEN_STREAM_AUDIO: {
             aTitle = "Choose audio file to attach";
-                     ///myGUI->myLangMap->changeValueId(StMoviePlayerStrings::DIALOG_ADD_AUDIO,
-                     ///                               "Choose audio stream to attach");
             if(aCurrFile.isNull()) {
                 myEventDialog.reset();
                 return;
@@ -1147,8 +1145,6 @@ void StMoviePlayer::doOpenFileDialog(const size_t theOpenType) {
         }
         case OPEN_STREAM_SUBTITLES: {
             aTitle = "Choose subtitles file to attach";
-                     ///myGUI->myLangMap->changeValueId(StMoviePlayerStrings::DIALOG_ADD_AUDIO,
-                     ///                               "Choose audio stream to attach");
             if(aCurrFile.isNull()) {
                 myEventDialog.reset();
                 return;
@@ -1157,8 +1153,7 @@ void StMoviePlayer::doOpenFileDialog(const size_t theOpenType) {
         }
         case OPEN_FILE_MOVIE:
         default: {
-            aTitle = myGUI->myLangMap->changeValueId(StMoviePlayerStrings::DIALOG_OPEN_FILE,
-                                                     "Choose the video file to open");
+            aTitle = myLangMap->getValue(StMoviePlayerStrings::DIALOG_OPEN_FILE);
         }
     }
 
@@ -1173,8 +1168,7 @@ void StMoviePlayer::doOpenFileDialog(const size_t theOpenType) {
     }
     switch(theOpenType) {
         case OPEN_FILE_2MOVIES: {
-            aTitle = myGUI->myLangMap->changeValueId(StMoviePlayerStrings::DIALOG_OPEN_RIGHT,
-                                                     "Choose RIGHT video file to open");
+            aTitle = myLangMap->getValue(StMoviePlayerStrings::DIALOG_OPEN_RIGHT);
             StFileNode::getFolderAndFile(aFilePath, params.lastFolder, aDummy);
             StString aFilePathR;
             if(StFileNode::openFileDialog(params.lastFolder, aTitle, myVideo->getMimeListVideo(), aFilePathR, false)) {

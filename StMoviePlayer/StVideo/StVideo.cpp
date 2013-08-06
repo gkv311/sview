@@ -893,8 +893,7 @@ void StVideo::packetsLoop() {
 
 bool StVideo::saveSnapshotAs(StImageFile::ImageType theImgType) {
     if(myCurrParams.isNull() || myCurrNode.isNull()) {
-        stInfo(myLangMap->changeValueId(StMoviePlayerStrings::DIALOG_NOTHING_TO_SAVE,
-                                        "Nothing to save!"));
+        stInfo(myLangMap->getValue(StMoviePlayerStrings::DIALOG_NOTHING_TO_SAVE));
         return false;
     }
 
@@ -910,8 +909,7 @@ bool StVideo::saveSnapshotAs(StImageFile::ImageType theImgType) {
     }
 
     if(result == StGLTextureQueue::SNAPSHOT_NO_NEW || dataLeft.isNull()) {
-        stInfo(myLangMap->changeValueId(StMoviePlayerStrings::DIALOG_NO_SNAPSHOT,
-                                        "Snapshot not available!"));
+        stInfo(myLangMap->getValue(StMoviePlayerStrings::DIALOG_NO_SNAPSHOT));
         return false;
     }
     StHandle<StImageFile> dataResult = StImageFile::create();
@@ -930,8 +928,7 @@ bool StVideo::saveSnapshotAs(StImageFile::ImageType theImgType) {
         dataResult->initWrapper(dataLeft);
     }
 
-    StString title = myLangMap->changeValueId(StMoviePlayerStrings::DIALOG_SAVE_SNAPSHOT,
-                                              "Choose location to save snapshot");
+    StString title = myLangMap->getValue(StMoviePlayerStrings::DIALOG_SAVE_SNAPSHOT);
     StMIMEList filter;
     StString saveExt;
     if(toSaveStereo) {
