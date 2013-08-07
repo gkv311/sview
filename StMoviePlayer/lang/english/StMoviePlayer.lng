@@ -68,6 +68,8 @@ English translation file for StMoviePlayer program
 1322="Audio delay:"
 1323="second(s)"
 1350="Subtitles"
+1351="None"
+1353="Attach from file"
 1400="Change device"
 1401="About Plugin..."
 1402="FPS Control"

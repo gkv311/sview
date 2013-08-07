@@ -68,6 +68,8 @@
 1322="Audio delay:"
 1323="second(s)"
 1350="Subtitles"
+1351="None"
+1353="Attach from file"
 1400="Changer la sortie"
 1401="A propos du Plugin..."
 1402="Contrôle de I/S"

@@ -49,6 +49,10 @@ void loadDefaults(StLangMap& theStrings) {
                "seconds");
     theStrings(MENU_SUBTITLES,
                "Subtitles");
+    theStrings(MENU_SUBTITLES_NONE,
+               "None");
+    theStrings(MENU_SUBTITLES_ATTACH,
+               "Attach from file");
     theStrings(MENU_HELP,
                "Help");
     theStrings(MENU_MEDIA_OPEN_MOVIE,

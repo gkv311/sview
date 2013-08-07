@@ -593,8 +593,7 @@ void StMoviePlayerGUI::doAudioDelay(const size_t ) {
  */
 StGLMenu* StMoviePlayerGUI::createSubtitlesMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem("None", myPlugin->params.subtitlesStream, -1);
-
+    aMenu->addItem(tr(MENU_SUBTITLES_NONE), myPlugin->params.subtitlesStream, -1);
     return aMenu;
 }
 
@@ -657,7 +656,7 @@ void StMoviePlayerGUI::doAboutProgram(const size_t ) {
         + " "+ StThread::getArchString()
         + "\n \n" + tr(ABOUT_DESCRIPTION),
         512, 300);
-    aDialog->addButton("Close");
+    aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
@@ -671,7 +670,7 @@ void StMoviePlayerGUI::doAboutSystem(const size_t ) {
     StString anInfo = getContext().stglFullInfo();
     StString aString = aTitle + "\n\n \n" + anInfo;
     StGLMessageBox* aDialog = new StGLMessageBox(this, aString, 512, 256);
-    aDialog->addButton("Close");
+    aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
@@ -704,7 +703,7 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
     }
     StString aString = aTitle + "\n\n \n" + anInfo + aCodecsInfo;
     StGLMessageBox* aDialog = new StGLMessageBox(this, aString, 512, 300);
-    aDialog->addButton("Close");
+    aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
@@ -1083,7 +1082,7 @@ void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<St
         delete anItem;
     }
 
-    myMenuSubtitles->addItem("None", myPlugin->params.subtitlesStream, -1);
+    myMenuSubtitles->addItem(tr(MENU_SUBTITLES_NONE), myPlugin->params.subtitlesStream, -1);
     if(!theStreamsList.isNull()) {
         for(size_t aStreamId = 0; aStreamId < theStreamsList->size(); ++aStreamId) {
             myMenuSubtitles->addItem(theStreamsList->getValue(aStreamId), myPlugin->params.subtitlesStream, int32_t(aStreamId));
@@ -1091,7 +1090,7 @@ void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<St
     }
 
     //myMenuSubtitles->addSplitter();
-    myMenuSubtitles->addItem("Attach from file")
+    myMenuSubtitles->addItem(tr(MENU_SUBTITLES_ATTACH))
                    ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doAddSubtitleStream);
 
     // update menu representation
@@ -1130,14 +1129,14 @@ void StMoviePlayerGUI::doAboutRenderer(const size_t ) {
     }
 
     StGLMessageBox* aDialog = new StGLMessageBox(this, anAboutText, 512, 300);
-    aDialog->addButton("Close");
+    aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
 
 void StMoviePlayerGUI::showUpdatesNotify() {
     StGLMessageBox* aDialog = new StGLMessageBox(this, tr(UPDATES_NOTIFY));
-    aDialog->addButton("Close");
+    aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
