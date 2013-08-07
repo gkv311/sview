@@ -8,6 +8,7 @@
 var myPlayItem   = -1; // currently played item id within playlist
 var myListSerial = -1; // playlist serail number
 var myList;            // playlist content
+var myOffCount   = 0;  // offline counter
 
 function postRequest(theUrl, theFunc, theASync) {
   var aReq = new XMLHttpRequest();
@@ -108,8 +109,16 @@ function refreshPlaylist() {
 function doRefresh() {
   postRequest('current?id', function() {
     if(this.readyState != 4 || this.status != 200) {
+      if(myOffCount >= 10) {
+        document.getElementById('stOffline').innerHTML = "[offline]";
+      }
+      ++myOffCount;
       return;
     }
+    if(myOffCount >= 10) {
+      document.getElementById('stOffline').innerHTML = "";
+    }
+    myOffCount = 0;
 
     var aCurrArr = this.responseText.split(":");
     var aCurrListId = aCurrArr[0];
@@ -160,7 +169,7 @@ window.setInterval(function() { doRefresh() }, 2000);
 </head>
 <body>
 
-<h2>sView - Remote Control (<span id="stVer"></span>)</h2>
+<h2>sView - Remote Control (<span id="stVer"></span>) <span id="stOffline"></span></h2>
 <script>
   postRequest('version', function() {
     if(this.readyState == 4 && this.status == 200) {
