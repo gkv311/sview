@@ -412,6 +412,7 @@
 		<Unit filename="stMongoose.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="web/index.htm" />
 		<Extensions>
 			<code_completion />
 			<envvars />
