@@ -224,7 +224,7 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
     anItem->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doOpenRecent);
 
 #ifdef ST_HAVE_MONGOOSE
-    aMenuMedia->addItem(StString("Web UI:") + myPlugin->params.WebUIPort->getValue(), aMenuWebUI);
+    aMenuMedia->addItem(tr(MENU_MEDIA_WEBUI) + ":" + myPlugin->params.WebUIPort->getValue(), aMenuWebUI);
 #endif
     aMenuMedia->addItem(tr(MENU_MEDIA_QUIT))
               ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doQuit);
@@ -344,10 +344,10 @@ void StMoviePlayerGUI::fillRecentMenu(StGLMenu* theMenu) {
  */
 StGLMenu* StMoviePlayerGUI::createWebUIMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem("Turn Off",         myPlugin->params.StartWebUI, StMoviePlayer::WEBUI_OFF);
-    aMenu->addItem("Launch once",      myPlugin->params.StartWebUI, StMoviePlayer::WEBUI_ONCE);
-    aMenu->addItem("Launch each time", myPlugin->params.StartWebUI, StMoviePlayer::WEBUI_AUTO);
-    aMenu->addItem("Show errors",      myPlugin->params.ToPrintWebErrors);
+    for(size_t anIter = 0; anIter < myPlugin->params.StartWebUI->getValues().size(); ++anIter) {
+        aMenu->addItem(myPlugin->params.StartWebUI->getValues()[anIter], myPlugin->params.StartWebUI, anIter);
+    }
+    aMenu->addItem(tr(MENU_MEDIA_WEBUI_SHOW_ERRORS), myPlugin->params.ToPrintWebErrors);
     return aMenu;
 }
 
@@ -462,7 +462,7 @@ StGLMenu* StMoviePlayerGUI::createGammaMenu() {
  */
 StGLMenu* StMoviePlayerGUI::createAudioMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem("None", myPlugin->params.audioStream, -1);
+    aMenu->addItem(tr(MENU_AUDIO_NONE), myPlugin->params.audioStream, -1);
     return aMenu;
 }
 
@@ -503,13 +503,13 @@ class StDelayControl : public StGLMessageBox {
 
     StDelayControl(StMoviePlayerGUI*               theParent,
                    const StHandle<StFloat32Param>& theTrackedValue)
-    : StGLMessageBox(theParent, "", 400, 240),
+    : StGLMessageBox(theParent, "", 400, 260),
       myRange(NULL) {
         changeRectPx().moveX(  64);
         changeRectPx().moveY(-128);
         setCorner(StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT));
-        StGLButton* aResetBtn = addButton("Reset");
-        addButton("Close");
+        StGLButton* aResetBtn = addButton(theParent->tr(BUTTON_RESET));
+        addButton(theParent->tr(BUTTON_CLOSE));
         setVisibility(true, true);
 
         StGLWidget* aContent = new StGLWidget(getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
@@ -520,20 +520,20 @@ class StDelayControl : public StGLMessageBox {
         StGLTextArea* aTitle = new StGLTextArea(aContent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
                                                 aContent->getRectPx().width(), 10);
         aTitle->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER, StGLTextFormatter::ST_ALIGN_Y_TOP);
-        aTitle->setText(stCString("Audio/Video syncronization"));
+        aTitle->setText(theParent->tr(DIALOG_AUDIO_DELAY_TITLE));
         aTitle->setTextColor(aWhite);
         aTitle->setVisibility(true, true);
         aTitle->stglInitAutoHeight();
 
         StGLTextArea* aText = new StGLTextArea(aContent, 0, aTitle->getRectPx().bottom(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
                                                aContent->getRectPx().width(), 10);
-        aText->setText(stCString("\n\nEnter positive value if audio appears earlier than video and negative otherwise.\n"));
+        aText->setText(StString("\n\n") + theParent->tr(DIALOG_AUDIO_DELAY_DESC) + "\n");
         aText->setTextColor(aWhite);
         aText->setVisibility(true, true);
         aText->stglInitAutoHeight();
 
         StGLTextArea* aLabel = new StGLTextArea(aContent, 0, aText->getRectPx().bottom(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), -1, 10);
-        aLabel->setText(stCString("Audio delay:"));
+        aLabel->setText(theParent->tr(DIALOG_AUDIO_DELAY_LABEL));
         aLabel->setTextColor(aWhite);
         aLabel->setVisibility(true, true);
         aLabel->stglInitAutoHeightWidth();
@@ -549,7 +549,7 @@ class StDelayControl : public StGLMessageBox {
 
         StGLTextArea* aLabUnits = new StGLTextArea(aContent, myRange->getRectPx().right() + 10, aLabel->getRectPx().top(),
                                                    StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), -1, 10);
-        aLabUnits->setText(stCString("seconds"));
+        aLabUnits->setText(theParent->tr(DIALOG_AUDIO_DELAY_UNITS));
         aLabUnits->setTextColor(aWhite);
         aLabUnits->setVisibility(true, true);
         aLabUnits->stglInitAutoHeightWidth();
@@ -1034,7 +1034,7 @@ void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StStri
     }
 
     if(theHasVideo || theStreamsList.isNull() || theStreamsList->isEmpty()) {
-        myMenuAudio->addItem("None", myPlugin->params.audioStream, -1);
+        myMenuAudio->addItem(tr(MENU_AUDIO_NONE), myPlugin->params.audioStream, -1);
     }
     if(!theStreamsList.isNull()) {
         for(size_t aStreamId = 0; aStreamId < theStreamsList->size(); ++aStreamId) {
@@ -1048,7 +1048,7 @@ void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StStri
     if(theHasVideo) {
         if(!theStreamsList.isNull()
         && !theStreamsList->isEmpty()) {
-            aDelayItem = myMenuAudio->addItem("Audio/Video delay    -  +0.000  +");
+            aDelayItem = myMenuAudio->addItem(tr(MENU_AUDIO_DELAY) + "    -  +0.000  +");
             aDelayItem->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAudioDelay);
             aDelayRange = new StGLRangeFieldFloat32(aDelayItem, myPlugin->params.AudioDelay,
                                                     0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT));
@@ -1058,7 +1058,7 @@ void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StStri
             aDelayRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, StGLVec3(1.0f, 0.0f, 0.0f));
             aDelayRange->setVisibility(true, true);
         }
-        myMenuAudio->addItem("Attach from file")
+        myMenuAudio->addItem(tr(MENU_AUDIO_ATTACH))
                    ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doAddAudioStream);
     }
 
@@ -1069,7 +1069,7 @@ void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StStri
         const GLint aWidth = aDelayRange->getRectPx().width();
         aDelayRange->changeRectPx().bottom() = aDelayRange->getRectPx().top()  + myMenuAudio->getItemHeight();
         aDelayRange->changeRectPx().moveLeftTo(aDelayItem->getRectPx().width() - aWidth - 16);
-        aDelayItem->setText("Audio/Video delay");
+        aDelayItem->setText(tr(MENU_AUDIO_DELAY));
     }
 }
 

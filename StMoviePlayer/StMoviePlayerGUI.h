@@ -105,14 +105,14 @@ class StMoviePlayerGUI : public StGLRootWidget {
 
     bool isGUIVisible;
 
+    ST_LOCAL const StString& tr(const size_t theId) const {
+        return myLangMap->getValue(theId);
+    }
+
         private:
 
     ST_LOCAL void createUpperToolbar();
     ST_LOCAL void createBottomToolbar();
-
-    ST_LOCAL const StString& tr(const size_t theId) const {
-        return myLangMap->getValue(theId);
-    }
 
         private: //!< menus creation routines
 

@@ -364,6 +364,10 @@ class StStringUnicode : public StConstStringUnicode<Type> {
     StStringUnicode replace(const StStringUnicode& theSubString,
                             const StStringUnicode& theReplacer) const;
 
+    inline StStringUnicode format(const StStringUnicode& theArg0) const {
+        return replace("{0}", theArg0);
+    }
+
     /**
      * Replace all substring occurrences within given replacement.
      * This is a low-level method and requires that substring and replacement has same size

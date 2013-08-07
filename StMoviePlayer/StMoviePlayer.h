@@ -247,6 +247,10 @@ class StMoviePlayer : public StApplication {
      */
     ST_LOCAL void releaseDevice();
 
+    ST_LOCAL const StString& tr(const size_t theId) const {
+        return myLangMap->getValue(theId);
+    }
+
         private: //! @name private callback Slots
 
     ST_LOCAL void doSwitchVSync(const bool theValue);

@@ -23,12 +23,30 @@
 namespace StMoviePlayerStrings {
 
 void loadDefaults(StLangMap& theStrings) {
+    theStrings(BUTTON_CLOSE,
+               "Close");
+    theStrings(BUTTON_RESET,
+               "Reset");
     theStrings(MENU_MEDIA,
                "Media");
     theStrings(MENU_VIEW,
                "View");
     theStrings(MENU_AUDIO,
                "Audio");
+    theStrings(MENU_AUDIO_NONE,
+               "None");
+    theStrings(MENU_AUDIO_DELAY,
+               "Audio/Video delay");
+    theStrings(MENU_AUDIO_ATTACH,
+               "Attach from file");
+    theStrings(DIALOG_AUDIO_DELAY_TITLE,
+               "Audio/Video syncronization");
+    theStrings(DIALOG_AUDIO_DELAY_DESC,
+               "Enter positive value if audio appears earlier than video and negative otherwise.");
+    theStrings(DIALOG_AUDIO_DELAY_LABEL,
+               "Audio delay:");
+    theStrings(DIALOG_AUDIO_DELAY_UNITS,
+               "seconds");
     theStrings(MENU_SUBTITLES,
                "Subtitles");
     theStrings(MENU_HELP,
@@ -47,6 +65,18 @@ void loadDefaults(StLangMap& theStrings) {
                "Shuffle");
     theStrings(MENU_MEDIA_RECENT,
                "Recent files");
+    theStrings(MENU_MEDIA_WEBUI,
+               "Web UI");
+    theStrings(MENU_MEDIA_WEBUI_OFF,
+               "Turn Off");
+    theStrings(MENU_MEDIA_WEBUI_ONCE,
+               "Launch once");
+    theStrings(MENU_MEDIA_WEBUI_ON,
+               "Launch every time");
+    theStrings(MENU_MEDIA_WEBUI_SHOW_ERRORS,
+               "Show errors");
+    theStrings(WEBUI_ERROR_PORT_BUSY,
+               "Web UI can not be started on {0} port!");
     theStrings(MENU_MEDIA_QUIT,
                "Quit");
     theStrings(MENU_MEDIA_OPEN_MOVIE_1,

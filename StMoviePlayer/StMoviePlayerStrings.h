@@ -46,6 +46,7 @@ namespace StMoviePlayerStrings {
         MENU_MEDIA_SHUFFLE      = 1105,
         MENU_MEDIA_RECENT       = 1106,
         MENU_MEDIA_GPU_DECODING = 1107,
+        MENU_MEDIA_WEBUI        = 1108,
         MENU_MEDIA_QUIT = 1109,
 
         // Root -> Media menu -> Open File menu
@@ -68,6 +69,13 @@ namespace StMoviePlayerStrings {
 
         // Root -> Media menu -> Recent files menu
         MENU_MEDIA_RECENT_CLEAR = 1160,
+
+        // Root -> Media menu -> Web UI menu
+        MENU_MEDIA_WEBUI_OFF    = 1180,
+        MENU_MEDIA_WEBUI_ONCE   = 1181,
+        MENU_MEDIA_WEBUI_ON     = 1182,
+        MENU_MEDIA_WEBUI_SHOW_ERRORS = 1185,
+        WEBUI_ERROR_PORT_BUSY   = 1186,
 
         // Root -> View menu
         MENU_VIEW = 1200,
@@ -93,7 +101,15 @@ namespace StMoviePlayerStrings {
 
         // Root -> Audio menu
         MENU_AUDIO = 1300,
-        //MENU_AUDIO_NONE = 1301,
+        MENU_AUDIO_NONE   = 1301,
+        MENU_AUDIO_DELAY  = 1302,
+        MENU_AUDIO_ATTACH = 1303,
+
+        DIALOG_AUDIO_DELAY_TITLE  = 1320,
+        DIALOG_AUDIO_DELAY_DESC   = 1321,
+        DIALOG_AUDIO_DELAY_LABEL  = 1322,
+        DIALOG_AUDIO_DELAY_UNITS  = 1323,
+        //
 
         // Root -> Subtitles menu
         MENU_SUBTITLES = 1350,
@@ -146,6 +162,9 @@ namespace StMoviePlayerStrings {
         ABOUT_VERSION          = 3001,
         ABOUT_DESCRIPTION      = 3002,
         UPDATES_NOTIFY         = 3003,
+
+        BUTTON_CLOSE = 4000,
+        BUTTON_RESET = 4005,
 
     };
 

@@ -50,6 +50,8 @@
 
 const StString StMoviePlayer::ST_DRAWER_PLUGIN_NAME = "StMoviePlayer";
 
+using namespace StMoviePlayerStrings;
+
 namespace {
 
     static const char ST_SETTING_FPSTARGET[]     = "fpsTarget";
@@ -200,9 +202,9 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     StApplication::params.VSyncMode->setValue(StGLContext::VSync_ON);
     params.ToLimitFps       = new StBoolParam(true);
     params.StartWebUI       = new StEnumParam(WEBUI_OFF, "Web UI start option");
-    params.StartWebUI->changeValues().add("Off");
-    params.StartWebUI->changeValues().add("Launch once");
-    params.StartWebUI->changeValues().add("Launch every time");
+    params.StartWebUI->changeValues().add(tr(MENU_MEDIA_WEBUI_OFF));
+    params.StartWebUI->changeValues().add(tr(MENU_MEDIA_WEBUI_ONCE));
+    params.StartWebUI->changeValues().add(tr(MENU_MEDIA_WEBUI_ON));
     params.ToPrintWebErrors = new StBoolParam(true);
     params.WebUIPort        = new StInt32Param(8080);
     params.audioStream = new StInt32Param(-1);
@@ -440,7 +442,7 @@ void StMoviePlayer::doStartWebUI() {
     myWebCtx = mg_start(&aCallbacks, this, anOptions);
     if(myWebCtx == NULL
     && params.ToPrintWebErrors->getValue()) {
-        myMsgQueue->pushError(StString("Web UI can not be started on ") + aPort + " port!");
+        myMsgQueue->pushError(tr(WEBUI_ERROR_PORT_BUSY).format(aPort));
     }
 #endif
 }
@@ -1132,7 +1134,7 @@ void StMoviePlayer::doOpenFileDialog(const size_t theOpenType) {
     StString aTitle;
     switch(theOpenType) {
         case OPEN_FILE_2MOVIES: {
-            aTitle = myLangMap->getValue(StMoviePlayerStrings::DIALOG_OPEN_LEFT);
+            aTitle = tr(DIALOG_OPEN_LEFT);
             break;
         }
         case OPEN_STREAM_AUDIO: {
@@ -1153,7 +1155,7 @@ void StMoviePlayer::doOpenFileDialog(const size_t theOpenType) {
         }
         case OPEN_FILE_MOVIE:
         default: {
-            aTitle = myLangMap->getValue(StMoviePlayerStrings::DIALOG_OPEN_FILE);
+            aTitle = tr(DIALOG_OPEN_FILE);
         }
     }
 
@@ -1168,7 +1170,7 @@ void StMoviePlayer::doOpenFileDialog(const size_t theOpenType) {
     }
     switch(theOpenType) {
         case OPEN_FILE_2MOVIES: {
-            aTitle = myLangMap->getValue(StMoviePlayerStrings::DIALOG_OPEN_RIGHT);
+            aTitle = tr(DIALOG_OPEN_RIGHT);
             StFileNode::getFolderAndFile(aFilePath, params.lastFolder, aDummy);
             StString aFilePathR;
             if(StFileNode::openFileDialog(params.lastFolder, aTitle, myVideo->getMimeListVideo(), aFilePathR, false)) {
