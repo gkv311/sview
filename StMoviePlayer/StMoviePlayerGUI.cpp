@@ -402,10 +402,6 @@ StGLMenu* StMoviePlayerGUI::createDisplayModeMenu() {
                    stImageRegion->params.displayMode, StGLImageRegion::MODE_PARALLEL);
     aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_CROSSYED),
                    stImageRegion->params.displayMode, StGLImageRegion::MODE_CROSSYED);
-    aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_OVERUNDER_LR),
-                   stImageRegion->params.displayMode, StGLImageRegion::MODE_OVER_UNDER_LR);
-    aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_OVERUNDER_RL),
-                   stImageRegion->params.displayMode, StGLImageRegion::MODE_OVER_UNDER_RL);
     return aMenu;
 }
 

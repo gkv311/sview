@@ -137,10 +137,6 @@ void loadDefaults(StLangMap& theStrings) {
                "Parallel pair");
     theStrings(MENU_VIEW_DISPLAY_MODE_CROSSYED,
                "Cross-eyed pair");
-    theStrings(MENU_VIEW_DISPLAY_MODE_OVERUNDER_LR,
-               "Over/Under (L/R)");
-    theStrings(MENU_VIEW_DISPLAY_MODE_OVERUNDER_RL,
-               "Over/Under (R/L)");
     theStrings(MENU_VIEW_TEXFILTER_NEAREST,
                "Nearest");
     theStrings(MENU_VIEW_TEXFILTER_LINEAR,

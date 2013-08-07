@@ -32,8 +32,6 @@ class StGLImageRegion : public StGLWidget {
         MODE_ONLY_RIGHT,    //!< draw only Right view
         MODE_PARALLEL,      //!< draw parallel   pair
         MODE_CROSSYED,      //!< draw cross-eyed pair
-        MODE_OVER_UNDER_LR, //!< draw Over/Under
-        MODE_OVER_UNDER_RL, //!< draw Over/Under
     } DisplayMode;
 
     typedef enum tagDisplayRatio {

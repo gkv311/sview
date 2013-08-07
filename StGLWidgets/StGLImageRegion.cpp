@@ -301,8 +301,6 @@ void StGLImageRegion::stglDraw(unsigned int theView) {
     switch(params.displayMode->getValue()) {
         case MODE_PARALLEL:
         case MODE_CROSSYED:
-        case MODE_OVER_UNDER_LR:
-        case MODE_OVER_UNDER_RL:
             stglDrawView(ST_DRAW_LEFT);
             stglDrawView(ST_DRAW_RIGHT);
             break;
@@ -360,26 +358,6 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                 } else {
                     aFrameRectPx.left() += aFrameRectPx.width() / 2;
                     aFrustrumL = 3.0f;
-                }
-                break;
-            }
-            case MODE_OVER_UNDER_LR: {
-                if(theView == ST_DRAW_LEFT) {
-                    aFrameRectPx.bottom() /= 2;
-                    aFrustrumB = 3.0f;
-                } else {
-                    aFrameRectPx.top() += aFrameRectPx.height() / 2;
-                    aFrustrumT = 3.0f;
-                }
-                break;
-            }
-            case MODE_OVER_UNDER_RL: {
-                if(theView == ST_DRAW_RIGHT) {
-                    aFrameRectPx.bottom() /= 2;
-                    aFrustrumB = 3.0f;
-                } else {
-                    aFrameRectPx.top() += aFrameRectPx.height() / 2;
-                    aFrustrumT = 3.0f;
                 }
                 break;
             }
