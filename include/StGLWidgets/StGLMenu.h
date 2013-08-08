@@ -151,7 +151,8 @@ class StGLMenu : public StGLWidget {
      * @return created menu item widget
      */
     ST_CPPEXPORT StGLMenuItem* addItem(const StString&           theLabel,
-                                       const StHandle<StAction>& theAction);
+                                       const StHandle<StAction>& theAction,
+                                       StGLMenu*                 theSubMenu = NULL);
 
         private:
 

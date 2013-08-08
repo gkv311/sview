@@ -293,8 +293,9 @@ class StGLMenuActionItem : public StGLMenuItem {
         public:
 
     ST_LOCAL StGLMenuActionItem(StGLMenu*                 theParent,
-                                const StHandle<StAction>& theAction)
-    : StGLMenuItem(theParent, 0, 0, NULL),
+                                const StHandle<StAction>& theAction,
+                                StGLMenu*                 theSubMenu)
+    : StGLMenuItem(theParent, 0, 0, theSubMenu),
       myAction(theAction) {
         StGLMenuItem::signals.onItemClick.connect(this, &StGLMenuActionItem::doItemClick);
     }
@@ -314,8 +315,9 @@ class StGLMenuActionItem : public StGLMenuItem {
 };
 
 StGLMenuItem* StGLMenu::addItem(const StString&           theLabel,
-                                const StHandle<StAction>& theAction) {
-    StGLMenuItem* aNewItem = new StGLMenuActionItem(this, theAction);
+                                const StHandle<StAction>& theAction,
+                                StGLMenu*                 theSubMenu) {
+    StGLMenuItem* aNewItem = new StGLMenuActionItem(this, theAction, theSubMenu);
     aNewItem->setText(theLabel);
     return aNewItem;
 }

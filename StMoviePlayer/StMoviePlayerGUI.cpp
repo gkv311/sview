@@ -187,10 +187,8 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
     StGLMenu* aMenuOpenImage = createOpenMovieMenu();    // Root -> Media -> Open movie menu
     StGLMenu* aMenuSaveImage = createSaveImageMenu();    // Root -> Media -> Save snapshot menu
 
-    aMenuMedia->addItem(tr(MENU_MEDIA_OPEN_MOVIE), aMenuOpenImage)
-              ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doOpen1File);
-    aMenuMedia->addItem(tr(MENU_MEDIA_SAVE_SNAPSHOT_AS), aMenuSaveImage)
-              ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doSnapshot);
+    aMenuMedia->addItem(tr(MENU_MEDIA_OPEN_MOVIE),       myPlugin->getAction(StMoviePlayer::Action_Open1File),    aMenuOpenImage);
+    aMenuMedia->addItem(tr(MENU_MEDIA_SAVE_SNAPSHOT_AS), myPlugin->getAction(StMoviePlayer::Action_SaveSnapshot), aMenuSaveImage);
     aMenuMedia->addItem(tr(MENU_MEDIA_SRC_FORMAT), aMenuSrcFormat);
     aMenuMedia->addItem(tr(MENU_MEDIA_AL_DEVICE),  myMenuOpenAL);
 
@@ -226,8 +224,7 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
 #ifdef ST_HAVE_MONGOOSE
     aMenuMedia->addItem(tr(MENU_MEDIA_WEBUI) + ":" + myPlugin->params.WebUIPort->getValue(), aMenuWebUI);
 #endif
-    aMenuMedia->addItem(tr(MENU_MEDIA_QUIT))
-              ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doQuit);
+    aMenuMedia->addItem(tr(MENU_MEDIA_QUIT), myPlugin->getAction(StMoviePlayer::Action_Quit));
     return aMenuMedia;
 }
 
@@ -236,8 +233,7 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
  */
 StGLMenu* StMoviePlayerGUI::createOpenMovieMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(tr(MENU_MEDIA_OPEN_MOVIE_1))
-         ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doOpen1File);
+    aMenu->addItem(tr(MENU_MEDIA_OPEN_MOVIE_1), myPlugin->getAction(StMoviePlayer::Action_Open1File));
     aMenu->addItem(tr(MENU_MEDIA_OPEN_MOVIE_2))
          ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doOpen2Files);
     return aMenu;
