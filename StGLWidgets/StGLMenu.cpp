@@ -120,17 +120,18 @@ bool StGLMenu::stglInit() {
     if(!myIsInitialized) {
         return false;
     }
+    int aMarginLeft = 0;
     for(StGLWidget* aChild = getChildren()->getStart(); aChild != NULL; aChild = aChild->getNext()) {
         StGLMenuItem* anItem = (StGLMenuItem* )aChild;
-        int anItemW = anItem->computeTextWidth();
+        aMarginLeft = stMax(aMarginLeft, anItem->getMarginLeft());
+        int anItemW = anItem->getMarginLeft() + anItem->computeTextWidth() + anItem->getMarginRight();
         if(myOrient == MENU_HORIZONTAL) {
-            anItemW += 16; // extra margin at right
             anItem->changeRectPx().moveLeftTo(myWidth);
             anItem->changeRectPx().right() = anItem->getRectPx().left() + anItemW;
-            anItem->setTextWidth(anItemW);
+            anItem->setTextWidth(anItemW - anItem->getMarginLeft());
             myWidth += anItemW;
         } else {
-            myWidth = (anItemW > myWidth) ? anItemW : myWidth;
+            myWidth = stMax(myWidth, anItemW);
         }
         if(anItem->getSubMenu() != NULL) {
             if(myOrient == MENU_HORIZONTAL) {
@@ -146,7 +147,6 @@ bool StGLMenu::stglInit() {
         changeRectPx().bottom() = getRectPx().top()  + aChildLast->getRectPx().bottom();
     }
     if(myOrient == MENU_VERTICAL) {
-        myWidth += 32 + 16; // icon offset + extra margin at right
         changeRectPx().right() = getRectPx().left() + myWidth;
         int anItemCount = 0;
         for(StGLWidget* aChild = getChildren()->getStart(); aChild != NULL; aChild = aChild->getNext(), ++anItemCount) {

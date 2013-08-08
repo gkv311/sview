@@ -374,7 +374,7 @@ StGLMenu* StMoviePlayerGUI::createViewMenu() {
     StGLMenu* aMenuDispMode  = createDisplayModeMenu();  // Root -> View menu -> Output
     StGLMenu* aMenuDispRatio = createDisplayRatioMenu(); // Root -> View menu -> Display Ratio
     StGLMenu* aMenuTexFilter = createSmoothFilterMenu(); // Root -> View menu -> Smooth Filter
-    StGLMenu* aMenuGamma     = createGammaMenu();        // Root -> View menu -> Gamma Correction
+    StGLMenu* aMenuImgAdjust = createImageAdjustMenu();  // Root -> View menu -> Image Adjust
 
     aMenuView->addItem(tr(MENU_VIEW_DISPLAY_MODE),  aMenuDispMode);
     aMenuView->addItem(tr(MENU_VIEW_FULLSCREEN),    myPlugin->params.isFullscreen);
@@ -383,7 +383,7 @@ StGLMenu* StMoviePlayerGUI::createViewMenu() {
     aMenuView->addItem(tr(MENU_VIEW_SWAP_LR),       stImageRegion->params.swapLR);
     aMenuView->addItem(tr(MENU_VIEW_DISPLAY_RATIO), aMenuDispRatio);
     aMenuView->addItem(tr(MENU_VIEW_TEXFILTER),     aMenuTexFilter);
-    aMenuView->addItem(tr(MENU_VIEW_GAMMA),         aMenuGamma);
+    aMenuView->addItem(tr(MENU_VIEW_IMAGE_ADJUST),  aMenuImgAdjust);
     return aMenuView;
 }
 
@@ -436,20 +436,46 @@ StGLMenu* StMoviePlayerGUI::createSmoothFilterMenu() {
 }
 
 /**
- * Root -> View menu -> Gamma Correction
+ * Root -> View menu -> Image Adjust
  */
-StGLMenu* StMoviePlayerGUI::createGammaMenu() {
+StGLMenu* StMoviePlayerGUI::createImageAdjustMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    ///menu->addItem("Coeff. *.*", size_t(StGLImageRegion::GAMMA_MAN))
-    ///    ->signals.onItemClick.connect(stImageRegion, &StGLImageRegion::doGammaMenu);
-    stUtf8_t aBuff[256];
-    stsprintf(aBuff, 256, "%01.1f", 0.8);
-    aMenu->addItem(aBuff, stImageRegion->params.gamma, 0.8f);
-    aMenu->addItem("Off", stImageRegion->params.gamma, 1.0f);
-    stsprintf(aBuff, 256, "%01.1f", 1.2);
-    aMenu->addItem(aBuff, stImageRegion->params.gamma, 1.2f);
-    stsprintf(aBuff, 256, "%01.1f", 1.4);
-    aMenu->addItem(aBuff, stImageRegion->params.gamma, 1.4f);
+    const StGLVec3 aBlack(0.0f, 0.0f, 0.0f);
+    const StGLVec3 aGreen(0.4f, 0.8f, 0.4f);
+    const StGLVec3 aRed  (1.0f, 0.0f, 0.0f);
+
+    //aMenu->addItem(tr(MENU_VIEW_ADJUST_RESET));
+
+    StGLMenuItem* anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_GAMMA));
+    anItem->setMarginRight(100 + 16);
+    StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, stImageRegion->params.gamma,
+                                                              -16, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+    aRange->setFormat(stCString("%+01.2f"));
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aRed);
+    aRange->setVisibility(true, true);
+
+    anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_BRIGHTNESS));
+    anItem->setMarginRight(100 + 16);
+    aRange = new StGLRangeFieldFloat32(anItem, stImageRegion->params.brightness,
+                                       -16, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+    aRange->setFormat(stCString("%+01.2f"));
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aRed);
+    aRange->setVisibility(true, true);
+
+    anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_SATURATION));
+    anItem->setMarginRight(100 + 16);
+    aRange = new StGLRangeFieldFloat32(anItem, stImageRegion->params.saturation,
+                                       -16, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+    aRange->changeRectPx().bottom() = aRange->getRectPx().top() + aMenu->getItemHeight();
+    aRange->setFormat(stCString("%+01.2f"));
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aRed);
+    aRange->setVisibility(true, true);
     return aMenu;
 }
 
@@ -1043,10 +1069,12 @@ void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StStri
     if(theHasVideo) {
         if(!theStreamsList.isNull()
         && !theStreamsList->isEmpty()) {
-            aDelayItem = myMenuAudio->addItem(tr(MENU_AUDIO_DELAY) + "    -  +0.000  +");
+            aDelayItem = myMenuAudio->addItem(tr(MENU_AUDIO_DELAY));
+            aDelayItem->setMarginRight(100 + 16);
             aDelayItem->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAudioDelay);
             aDelayRange = new StGLRangeFieldFloat32(aDelayItem, myPlugin->params.AudioDelay,
-                                                    0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT));
+                                                    -16, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+            aDelayRange->changeRectPx().bottom() = aDelayRange->getRectPx().top()  + myMenuAudio->getItemHeight();
             aDelayRange->setFormat(stCString("%+01.3f"));
             aDelayRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  StGLVec3(0.0f, 0.0f, 0.0f));
             aDelayRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, StGLVec3(0.4f, 0.8f, 0.4f));
@@ -1059,13 +1087,6 @@ void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StStri
 
     // update menu representation
     myMenuAudio->stglInit();
-
-    if(aDelayRange != NULL) {
-        const GLint aWidth = aDelayRange->getRectPx().width();
-        aDelayRange->changeRectPx().bottom() = aDelayRange->getRectPx().top()  + myMenuAudio->getItemHeight();
-        aDelayRange->changeRectPx().moveLeftTo(aDelayItem->getRectPx().width() - aWidth - 16);
-        aDelayItem->setText(tr(MENU_AUDIO_DELAY));
-    }
 }
 
 void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<StString> >& theStreamsList) {

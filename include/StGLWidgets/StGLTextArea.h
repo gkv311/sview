@@ -53,6 +53,34 @@ class StGLTextArea : public StGLWidget {
     ST_CPPEXPORT void setText(const StString& theText);
 
     /**
+     * @return extra margin at left side (before text)
+     */
+    ST_LOCAL inline int getMarginLeft() const {
+        return myMarginLeft;
+    }
+
+    /**
+     * @param theMargin extra margin at left side (before text)
+     */
+    ST_LOCAL inline void setMarginLeft(const int theMargin) {
+        myMarginLeft = theMargin;
+    }
+
+    /**
+     * @return extra margin at right side (after text)
+     */
+    ST_LOCAL inline int getMarginRight() const {
+        return myMarginRight;
+    }
+
+    /**
+     * @param theMargin extra margin at right side (after text)
+     */
+    ST_LOCAL inline void setMarginRight(const int theMargin) {
+        myMarginRight = theMargin;
+    }
+
+    /**
      * Setup alignment style.
      * @param theAlignX horizontal alignment
      * @param theAlignY vertical   alignment

@@ -125,8 +125,16 @@ void loadDefaults(StLangMap& theStrings) {
                "Display Ratio");
     theStrings(MENU_VIEW_TEXFILTER,
                "Smooth Filter");
-    theStrings(MENU_VIEW_GAMMA,
-               "Gamma Correction");
+    theStrings(MENU_VIEW_IMAGE_ADJUST,
+               "Image Adjust");
+    theStrings(MENU_VIEW_ADJUST_RESET,
+               "Reset to defaults");
+    theStrings(MENU_VIEW_ADJUST_BRIGHTNESS,
+               "Brightness");
+    theStrings(MENU_VIEW_ADJUST_SATURATION,
+               "Saturation");
+    theStrings(MENU_VIEW_ADJUST_GAMMA,
+               "Gamma");
     theStrings(MENU_VIEW_DISPLAY_MODE_STEREO,
                "Stereo");
     theStrings(MENU_VIEW_DISPLAY_MODE_LEFT,

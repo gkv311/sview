@@ -40,6 +40,25 @@ StGLMenuItem::StGLMenuItem(StGLMenu* theParent,
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
   myIsItemSelected(false),
   myToHilightText(false) {
+    switch(getParentMenu()->getOrient()) {
+        case StGLMenu::MENU_VERTICAL: {
+            myMarginLeft  = 32;
+            myMarginRight = 16;
+            break;
+        }
+        case StGLMenu::MENU_HORIZONTAL: {
+            myMarginLeft  = 2;
+            myMarginRight = 16;
+            break;
+        }
+        default:
+        case StGLMenu::MENU_ZERO: {
+            myMarginLeft  = 0;
+            myMarginRight = 0;
+            break;
+        }
+    }
+
     StGLWidget::signals.onMouseUnclick = stSlot(this, &StGLMenuItem::doMouseUnclick);
 
     myFormatter.setupAlignment(StGLTextFormatter::ST_ALIGN_X_LEFT,
@@ -172,22 +191,6 @@ void StGLMenuItem::stglDrawArea(const StGLMenuItem::State theState) {
 void StGLMenuItem::stglDraw(unsigned int theView) {
     if(!myIsInitialized || !isVisible()) {
         return;
-    }
-
-    switch(getParentMenu()->getOrient()) {
-        case StGLMenu::MENU_VERTICAL: {
-            myMarginLeft = 32;
-            break;
-        }
-        case StGLMenu::MENU_HORIZONTAL: {
-            myMarginLeft = 2;
-            break;
-        }
-        default:
-        case StGLMenu::MENU_ZERO: {
-            myMarginLeft = 0;
-            break;
-        }
     }
 
     StGLMenuItem::State aState = StGLMenuItem::PASSIVE;

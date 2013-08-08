@@ -46,8 +46,12 @@ namespace {
         }
 
         virtual bool setValue(const float theValue) {
-            return myTracked1->setValue(theValue)
-                || myTracked2->setValue(theValue);
+            if(myTracked1->setValue(theValue)
+            || myTracked2->setValue(theValue)) {
+                signals.onChanged(theValue);
+                return true;
+            }
+            return false;
         }
 
     };

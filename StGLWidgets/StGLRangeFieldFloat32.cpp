@@ -81,7 +81,7 @@ void StGLRangeFieldFloat32::onValueChange(const float theValue) {
         myValueText->setText(aBuff);
         if(myTrackValue->isDefaultValue()) {
             myValueText->setTextColor(myColors[FieldColor_Default]);
-        } else if(theValue > 0.0f) {
+        } else if(theValue > myTrackValue->getDefValue()) {
             myValueText->setTextColor(myColors[FieldColor_Positive]);
         } else {
             myValueText->setTextColor(myColors[FieldColor_Negative]);

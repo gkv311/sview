@@ -85,7 +85,7 @@ namespace StMoviePlayerStrings {
         MENU_VIEW_SWAP_LR       = 1204,
         MENU_VIEW_DISPLAY_RATIO = 1205,
         MENU_VIEW_TEXFILTER     = 1206,
-        MENU_VIEW_GAMMA         = 1207,
+        MENU_VIEW_IMAGE_ADJUST  = 1207,
 
         MENU_VIEW_DISPLAY_MODE_STEREO       = 1210,
         MENU_VIEW_DISPLAY_MODE_LEFT         = 1211,
@@ -96,6 +96,11 @@ namespace StMoviePlayerStrings {
         MENU_VIEW_TEXFILTER_NEAREST = 1260,
         MENU_VIEW_TEXFILTER_LINEAR  = 1261,
         MENU_VIEW_TEXFILTER_BLEND   = 1262,
+
+        MENU_VIEW_ADJUST_RESET      = 1270,
+        MENU_VIEW_ADJUST_BRIGHTNESS = 1271,
+        MENU_VIEW_ADJUST_SATURATION = 1272,
+        MENU_VIEW_ADJUST_GAMMA      = 1273,
 
         // Root -> Audio menu
         MENU_AUDIO = 1300,
