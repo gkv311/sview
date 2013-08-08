@@ -173,6 +173,9 @@ StImageViewer::StImageViewer(const StNativeWin_t         theParentWin,
 
     anAction = new StActionIntSlot(stCString("DoDeleteFile"), stSlot(this, &StImageViewer::doDeleteFileBegin), 0);
     addAction(Action_DeleteFile, anAction, ST_VK_DELETE | ST_VF_SHIFT);
+
+    anAction = new StActionIntSlot(stCString("DoImageAdjustReset"), stSlot(this, &StImageViewer::doImageAdjustReset), 0);
+    addAction(Action_ImageAdjustReset, anAction);
 }
 
 bool StImageViewer::resetDevice() {
@@ -409,6 +412,16 @@ void StImageViewer::doResize(const StSizeEvent& ) {
     }
 
     myGUI->stglResize(myWindow->getPlacement());
+}
+
+void StImageViewer::doImageAdjustReset(const size_t ) {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    myGUI->stImageRegion->params.gamma     ->reset();
+    myGUI->stImageRegion->params.brightness->reset();
+    myGUI->stImageRegion->params.saturation->reset();
 }
 
 void StImageViewer::doDeleteFileBegin(const size_t ) {

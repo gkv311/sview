@@ -13,6 +13,7 @@
 #include <StGL/StGLVertexBuffer.h>
 
 // forward declarations
+class StAction;
 class StBoolParam;
 class StInt32Param;
 class StFloat32Param;
@@ -142,6 +143,15 @@ class StGLMenu : public StGLWidget {
     ST_CPPEXPORT StGLMenuItem* addItem(const StString&                 theLabel,
                                        const StHandle<StFloat32Param>& theTrackedValue,
                                        const float                     theOnValue);
+
+    /**
+     * Append menu item with bound action.
+     * @param theLabel  menu item text
+     * @param theAction action to invoke on click
+     * @return created menu item widget
+     */
+    ST_CPPEXPORT StGLMenuItem* addItem(const StString&           theLabel,
+                                       const StHandle<StAction>& theAction);
 
         private:
 

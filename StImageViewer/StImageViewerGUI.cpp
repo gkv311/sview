@@ -263,7 +263,7 @@ StGLMenu* StImageViewerGUI::createImageAdjustMenu() {
     const StGLVec3 aGreen(0.4f, 0.8f, 0.4f);
     const StGLVec3 aRed  (1.0f, 0.0f, 0.0f);
 
-    //aMenu->addItem(tr(MENU_VIEW_ADJUST_RESET));
+    aMenu->addItem(tr(MENU_VIEW_ADJUST_RESET), myPlugin->getAction(StImageViewer::Action_ImageAdjustReset));
 
     StGLMenuItem* anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_GAMMA));
     anItem->setMarginRight(100 + 16);

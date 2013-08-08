@@ -102,6 +102,7 @@ class StImageViewer : public StApplication {
     ST_LOCAL void doSlideShow(const size_t dummy = 0);
     ST_LOCAL void doQuit(const size_t dummy = 0);
 
+    ST_LOCAL void doImageAdjustReset(const size_t dummy = 0);
     ST_LOCAL void doReset(const size_t dummy = 0);
 
     ST_LOCAL void doUpdateStateLoading();
@@ -161,6 +162,7 @@ class StImageViewer : public StApplication {
         Action_SavePng,
         Action_SaveJpeg,
         Action_DeleteFile,
+        Action_ImageAdjustReset,
         Action_StereoParamsBegin,
         Action_StereoParamsEnd = Action_StereoParamsBegin + StGLImageRegion::ActionsNb,
     };
@@ -202,6 +204,10 @@ class StImageViewer : public StApplication {
     bool                       myToCheckUpdates;
     bool                       myToSaveSrcFormat; //!< indicates that active source format should be saved or not
     bool                       myEscNoQuit;       //!< if true then Escape will not quit application
+
+        private:
+
+    friend class StImageViewerGUI;
 
 };
 

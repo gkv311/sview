@@ -268,6 +268,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doUpdateStateLoaded();
     ST_LOCAL friend SV_THREAD_FUNCTION openFileThread(void* theArg);
     ST_LOCAL void doOpenFileDialog(const size_t theOpenType);
+    ST_LOCAL void doImageAdjustReset(const size_t dummy = 0);
 
         private:
 
@@ -300,6 +301,7 @@ class StMoviePlayer : public StApplication {
         Action_SubsPrev,
         Action_SubsNext,
         Action_ShowList,
+        Action_ImageAdjustReset,
         Action_StereoParamsBegin,
         Action_StereoParamsEnd = Action_StereoParamsBegin + StGLImageRegion::ActionsNb,
     };

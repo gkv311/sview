@@ -16,6 +16,8 @@
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 
+#include <StSlots/StAction.h>
+
 namespace {
     static const StString CLASS_NAME("StGLMenu");
     static const size_t SHARE_PROGRAM_ID = StGLRootWidget::generateShareId();
@@ -279,6 +281,41 @@ StGLMenuItem* StGLMenu::addItem(const StString&                 theLabel,
                                 const StHandle<StFloat32Param>& theTrackedValue,
                                 const float                     theOnValue) {
     StGLMenuItem* aNewItem = new StGLMenuRadioButton(this, theTrackedValue, theOnValue);
+    aNewItem->setText(theLabel);
+    return aNewItem;
+}
+
+/**
+ * Simple menu item widget with bound action.
+ */
+class StGLMenuActionItem : public StGLMenuItem {
+
+        public:
+
+    ST_LOCAL StGLMenuActionItem(StGLMenu*                 theParent,
+                                const StHandle<StAction>& theAction)
+    : StGLMenuItem(theParent, 0, 0, NULL),
+      myAction(theAction) {
+        StGLMenuItem::signals.onItemClick.connect(this, &StGLMenuActionItem::doItemClick);
+    }
+
+    ST_LOCAL virtual ~StGLMenuActionItem() {}
+
+        private:
+
+    ST_LOCAL void doItemClick(const size_t ) {
+        myAction->doTrigger(NULL);
+    }
+
+        private:
+
+    StHandle<StAction> myAction;
+
+};
+
+StGLMenuItem* StGLMenu::addItem(const StString&           theLabel,
+                                const StHandle<StAction>& theAction) {
+    StGLMenuItem* aNewItem = new StGLMenuActionItem(this, theAction);
     aNewItem->setText(theLabel);
     return aNewItem;
 }

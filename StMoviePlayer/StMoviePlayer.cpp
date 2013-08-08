@@ -344,6 +344,9 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
 
     anAction = new StActionIntSlot(stCString("DoPlayListReverse"), stSlot(this, &StMoviePlayer::doPlayListReverse), 0);
     addAction(Action_ShowList, anAction, ST_VK_L | ST_VF_CONTROL);
+
+    anAction = new StActionIntSlot(stCString("DoImageAdjustReset"), stSlot(this, &StMoviePlayer::doImageAdjustReset), 0);
+    addAction(Action_ImageAdjustReset, anAction);
 }
 
 bool StMoviePlayer::resetDevice() {
@@ -416,6 +419,16 @@ StMoviePlayer::~StMoviePlayer() {
     releaseDevice();
     // wait video playback thread to quit and release resources
     myVideo.nullify();
+}
+
+void StMoviePlayer::doImageAdjustReset(const size_t ) {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    myGUI->stImageRegion->params.gamma     ->reset();
+    myGUI->stImageRegion->params.brightness->reset();
+    myGUI->stImageRegion->params.saturation->reset();
 }
 
 void StMoviePlayer::doStopWebUI() {
