@@ -70,51 +70,59 @@ class StMoviePlayerGUI : public StGLRootWidget {
         CLICKED_ICON_FULLSCREEN,
     };
 
-    StMoviePlayer*            myPlugin; //!< link to the main Drawer class
-    StWindow*                 myWindow; //!< link to the window instance
-    StTranslations*          myLangMap; //!< translated strings map
-    StString          texturesPathRoot; // textures directory
-    StTimer          stTimeVisibleLock; // minimum visible delay
-
-    StGLImageRegion* stImageRegion; // the main video frame
-    StGLSubtitles*     stSubtitles; // the main subtitles
-    StGLDescription*       stDescr; // description text shown near mouse cursor
-    StGLMsgStack*       myMsgStack; // messages stack
-    StGLPlayList*       myPlayList;
-
-    StGLMenu*            menu0Root; // main menu
-    StGLMenu*         myMenuOpenAL;
-    StGLMenu*         myMenuRecent;
-    StGLMenu*          myMenuAudio;
-    StGLMenu*      myMenuSubtitles;
-
-    StGLWidget*        upperRegion; // upper toolbar
-    StGLTextureButton*     btnOpen;
-    StGLTextureButton*   btnSwapLR;
-    StGLWidget*       myBtnSrcFrmt;
-
-    StGLWidget*       bottomRegion; // bottom toolbar
-    StSeekBar*             seekBar;
-    StGLTextureButton*     btnPlay;
-    StTimeBox*           stTimeBox;
-    StGLTextureButton*     btnPrev;
-    StGLTextureButton*     btnNext;
-    StGLTextureButton*     btnList;
-    StGLTextureButton*  btnFullScr;
-    StGLFpsLabel*      myFpsWidget;
-
-    bool isGUIVisible;
-
+    /**
+     * @return translation for the string with specified id
+     */
     ST_LOCAL const StString& tr(const size_t theId) const {
         return myLangMap->getValue(theId);
     }
+
+    /**
+     * @return absolute path to the texture
+     */
+    ST_LOCAL StString getTexturePath(const StCString& theTextureName) const {
+        return myTexturesFolder + theTextureName;
+    }
+
+        public: //! @name StGLRootWidget overrides
+
+    ST_LOCAL StMoviePlayerGUI(StMoviePlayer*  thePlugin,
+                              StWindow*       theWindow,
+                              StTranslations* theLangMap,
+                              const StHandle<StPlayList>&       thePlayList,
+                              const StHandle<StGLTextureQueue>& theTextureQueue,
+                              const StHandle<StSubQueue>&       theSubQueue);
+    ST_LOCAL virtual ~StMoviePlayerGUI();
+    ST_LOCAL virtual void stglUpdate(const StPointD_t& thePointZo,
+                                     const GLfloat     theProgress,
+                                     const double      thePTS);
+    ST_LOCAL virtual void stglResize(const StRectI_t& winRectPx);
+    ST_LOCAL virtual void stglDraw(unsigned int theView);
+    ST_LOCAL virtual void setVisibility(const StPointD_t& theCursor,
+                                        bool              theIsMouseMoved);
+
+        public:
+
+    ST_LOCAL bool toHideCursor();
+    ST_LOCAL void showUpdatesNotify();
+
+        public: //! @name menu update routines
+
+    ST_LOCAL void updateOpenALDeviceMenu();
+    ST_LOCAL void updateAudioStreamsMenu    (const StHandle< StArrayList<StString> >& theStreamsList,
+                                             const bool theHasVideo);
+    ST_LOCAL void updateSubtitlesStreamsMenu(const StHandle< StArrayList<StString> >& theStreamsList);
+
+    ST_LOCAL void updateRecentMenu();
+
+    ST_LOCAL void doAboutFile(const size_t );
 
         private:
 
     ST_LOCAL void createUpperToolbar();
     ST_LOCAL void createBottomToolbar();
 
-        private: //!< menus creation routines
+        private: //! @name menus creation routines
 
     ST_LOCAL void      createMainMenu();         // Root (Main menu)
     ST_LOCAL StGLMenu* createMediaMenu();        // Root -> Media menu
@@ -142,39 +150,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL void fillOpenALDeviceMenu(StGLMenu* theMenu);
     ST_LOCAL void fillRecentMenu(StGLMenu* theMenu);
 
-        public: //!< StGLRootWidget overrides
-
-    ST_LOCAL StMoviePlayerGUI(StMoviePlayer*  thePlugin,
-                              StWindow*       theWindow,
-                              StTranslations* theLangMap,
-                              const StHandle<StPlayList>&       thePlayList,
-                              const StHandle<StGLTextureQueue>& theTextureQueue,
-                              const StHandle<StSubQueue>&       theSubQueue);
-    ST_LOCAL virtual ~StMoviePlayerGUI();
-    ST_LOCAL virtual void stglUpdate(const StPointD_t& thePointZo,
-                                     const GLfloat theProgress,
-                                     const double thePTS);
-    ST_LOCAL virtual void stglResize(const StRectI_t& winRectPx);
-    ST_LOCAL virtual void stglDraw(unsigned int theView);
-    ST_LOCAL virtual void setVisibility(const StPointD_t& pointZo, bool isMouseActive = false);
-
-        public:
-
-    ST_LOCAL bool toHideCursor();
-    ST_LOCAL void showUpdatesNotify();
-
-        public: //!< menu update routines
-
-    ST_LOCAL void updateOpenALDeviceMenu();
-    ST_LOCAL void updateAudioStreamsMenu    (const StHandle< StArrayList<StString> >& theStreamsList,
-                                             const bool theHasVideo);
-    ST_LOCAL void updateSubtitlesStreamsMenu(const StHandle< StArrayList<StString> >& theStreamsList);
-
-    ST_LOCAL void updateRecentMenu();
-
-    ST_LOCAL void doAboutFile(const size_t );
-
-        private: //!< callback Slots
+        private: //! @name callback Slots
 
     ST_LOCAL void doAboutProgram (const size_t );
     ST_LOCAL void doUserTips     (const size_t );
@@ -185,10 +161,48 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL void doAboutRenderer(const size_t );
     ST_LOCAL void doAudioDelay   (const size_t );
 
+        private: //! @name private fields
+
+    StMoviePlayer*      myPlugin;           //!< link to the main Drawer class
+    StWindow*           myWindow;           //!< link to the window instance
+    StTranslations*     myLangMap;          //!< translated strings map
+    StString            myTexturesFolder;   //!< folder with textures
+    StTimer             myVisibilityTimer;  //!< minimum visible delay
+
+    StGLImageRegion*    myImage;            //!< the main video frame
+    StGLSubtitles*      mySubtitles;        //!< the subtitles
+    StGLDescription*    myDescr;            //!< description text shown near mouse cursor
+    StGLMsgStack*       myMsgStack;         //!< messages stack
+    StGLPlayList*       myPlayList;
+
+    StGLMenu*           myMenuRoot;         //!< root of the main menu
+    StGLMenu*           myMenuOpenAL;
+    StGLMenu*           myMenuRecent;
+    StGLMenu*           myMenuAudio;
+    StGLMenu*           myMenuSubtitles;
+
+    StGLWidget*         myPanelUpper;       //!< upper toolbar
+    StGLTextureButton*  myBtnOpen;
+    StGLTextureButton*  myBtnSwapLR;
+    StGLWidget*         myBtnSrcFrmt;
+
+    StGLWidget*         myPanelBottom;      //!< bottom toolbar
+    StSeekBar*          mySeekBar;
+    StGLTextureButton*  myBtnPlay;
+    StTimeBox*          myTimeBox;
+    StGLTextureButton*  myBtnPrev;
+    StGLTextureButton*  myBtnNext;
+    StGLTextureButton*  myBtnList;
+    StGLTextureButton*  myBtnFullScr;
+    StGLFpsLabel*       myFpsWidget;
+
+    bool                myIsVisibleGUI;
+    bool                myIsExperimental;
+
         private:
 
-    bool myIsExperimental;
+    friend class StMoviePlayer;
 
 };
 
-#endif //__StMoviePlayerGUI_h_
+#endif // __StMoviePlayerGUI_h_

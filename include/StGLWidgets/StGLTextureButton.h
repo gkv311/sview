@@ -41,8 +41,12 @@ class StGLTextureButton : public StGLWidget {
         myFaceId = theId;
     }
 
+    ST_LOCAL inline void setTexturePath(const StString& theTexturesPath) {
+        setTexturePath(&theTexturesPath, 1);
+    }
+
     ST_CPPEXPORT void setTexturePath(const StString* theTexturesPaths,
-                                     const size_t    theCount = 1);
+                                     const size_t    theCount);
 
     ST_CPPEXPORT virtual void stglResize(const StRectI_t& winRectPx);
     ST_CPPEXPORT virtual bool stglInit();

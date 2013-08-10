@@ -366,14 +366,14 @@ bool StMoviePlayer::resetDevice() {
 
 void StMoviePlayer::releaseDevice() {
     if(!myGUI.isNull()) {
-        mySettings->saveParam (ST_SETTING_STEREO_MODE,        myGUI->stImageRegion->params.displayMode);
-        mySettings->saveInt32 (ST_SETTING_GAMMA,              stRound(100.0f * myGUI->stImageRegion->params.gamma->getValue()));
+        mySettings->saveParam (ST_SETTING_STEREO_MODE,        myGUI->myImage->params.displayMode);
+        mySettings->saveInt32 (ST_SETTING_GAMMA,              stRound(100.0f * myGUI->myImage->params.gamma->getValue()));
         if(params.toRestoreRatio->getValue()) {
-            mySettings->saveParam(ST_SETTING_RATIO,           myGUI->stImageRegion->params.displayRatio);
+            mySettings->saveParam(ST_SETTING_RATIO,           myGUI->myImage->params.displayRatio);
         } else {
             mySettings->saveInt32(ST_SETTING_RATIO,           StGLImageRegion::RATIO_AUTO);
         }
-        mySettings->saveParam (ST_SETTING_TEXFILTER,          myGUI->stImageRegion->params.textureFilter);
+        mySettings->saveParam (ST_SETTING_TEXFILTER,          myGUI->myImage->params.textureFilter);
         mySettings->saveInt32 (ST_SETTING_FPSTARGET,          params.TargetFps);
         mySettings->saveString(ST_SETTING_OPENAL_DEVICE,      params.alDevice->getTitle());
         mySettings->saveInt32 (ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
@@ -426,9 +426,9 @@ void StMoviePlayer::doImageAdjustReset(const size_t ) {
         return;
     }
 
-    myGUI->stImageRegion->params.gamma     ->reset();
-    myGUI->stImageRegion->params.brightness->reset();
-    myGUI->stImageRegion->params.saturation->reset();
+    myGUI->myImage->params.gamma     ->reset();
+    myGUI->myImage->params.brightness->reset();
+    myGUI->myImage->params.saturation->reset();
 }
 
 void StMoviePlayer::doStopWebUI() {
@@ -511,19 +511,19 @@ bool StMoviePlayer::init() {
     myGUI->setContext(myContext);
 
     // load settings
-    mySettings->loadParam (ST_SETTING_STEREO_MODE, myGUI->stImageRegion->params.displayMode);
-    mySettings->loadParam (ST_SETTING_TEXFILTER,   myGUI->stImageRegion->params.textureFilter);
-    mySettings->loadParam (ST_SETTING_RATIO,       myGUI->stImageRegion->params.displayRatio);
-    params.toRestoreRatio->setValue(myGUI->stImageRegion->params.displayRatio->getValue() != StGLImageRegion::RATIO_AUTO);
+    mySettings->loadParam (ST_SETTING_STEREO_MODE, myGUI->myImage->params.displayMode);
+    mySettings->loadParam (ST_SETTING_TEXFILTER,   myGUI->myImage->params.textureFilter);
+    mySettings->loadParam (ST_SETTING_RATIO,       myGUI->myImage->params.displayRatio);
+    params.toRestoreRatio->setValue(myGUI->myImage->params.displayRatio->getValue() != StGLImageRegion::RATIO_AUTO);
     int32_t loadedGamma = 100; // 1.0f
         mySettings->loadInt32(ST_SETTING_GAMMA, loadedGamma);
-        myGUI->stImageRegion->params.gamma->setValue(0.01f * loadedGamma);
+        myGUI->myImage->params.gamma->setValue(0.01f * loadedGamma);
 
     // capture multimedia keys even without window focus
     myWindow->setAttribute(StWinAttr_GlobalMediaKeys, params.areGlobalMKeys->getValue());
 
     // initialize frame region early to show dedicated error description
-    if(!myGUI->stImageRegion->stglInit()) {
+    if(!myGUI->myImage->stglInit()) {
         myMsgQueue->pushError(stCString("Movie Player - critical error:\nFrame region initialization failed!"));
         myMsgQueue->popAll();
         myGUI.nullify();
@@ -549,8 +549,8 @@ bool StMoviePlayer::init() {
         doStartWebUI();
     #endif
     }
-    for(size_t anIter = 0; anIter < myGUI->stImageRegion->getActions().size(); ++anIter) {
-        StHandle<StAction>& anAction = myGUI->stImageRegion->changeActions()[anIter];
+    for(size_t anIter = 0; anIter < myGUI->myImage->getActions().size(); ++anIter) {
+        StHandle<StAction>& anAction = myGUI->myImage->changeActions()[anIter];
         mySettings->loadHotKey(anAction);
         addAction(Action_StereoParamsBegin + int(anIter), anAction);
     }
@@ -686,7 +686,7 @@ void StMoviePlayer::doKeyDown(const StKeyEvent& theEvent) {
     StApplication::doKeyDown(theEvent);
     switch(theEvent.VKey) {
         case ST_VK_W:
-            myGUI->stImageRegion->params.swapLR->reverse();
+            myGUI->myImage->params.swapLR->reverse();
             return;
 
         // file walk
@@ -697,9 +697,9 @@ void StMoviePlayer::doKeyDown(const StKeyEvent& theEvent) {
         // post process keys
         case ST_VK_B: {
             if(theEvent.Flags == ST_VF_SHIFT) {
-                myGUI->stImageRegion->params.brightness->increment();
+                myGUI->myImage->params.brightness->increment();
             } else if(theEvent.Flags == ST_VF_CONTROL) {
-                myGUI->stImageRegion->params.brightness->decrement();
+                myGUI->myImage->params.brightness->decrement();
             } else {
             #ifdef __ST_DEBUG__
                 myIsBenchmark = !myIsBenchmark;
@@ -732,7 +732,7 @@ void StMoviePlayer::doKeyUp(const StKeyEvent& theEvent) {
     if(myGUI->getFocus() != NULL) {
         myGUI->doKeyUp(theEvent);
     } else {
-        myGUI->stImageRegion->doKeyUp(theEvent);
+        myGUI->myImage->doKeyUp(theEvent);
     }
 }
 
@@ -900,11 +900,11 @@ void StMoviePlayer::stglDraw(unsigned int view) {
         bool isVideoPlayed = false, isAudioPlayed = false;
         bool isPlaying = myVideo->getPlaybackState(aDuration, aPts, isVideoPlayed, isAudioPlayed);
         double aPosition = (aDuration > 0.0) ? (aPts / aDuration) : 0.0;
-        if(myGUI->btnPlay != NULL) {
-            myGUI->btnPlay->setFaceId(isPlaying ? 1 : 0); // set play/pause
+        if(myGUI->myBtnPlay != NULL) {
+            myGUI->myBtnPlay->setFaceId(isPlaying ? 1 : 0); // set play/pause
         }
-        if(myGUI->stTimeBox != NULL) {
-            myGUI->stTimeBox->setTime(aPts, aDuration);
+        if(myGUI->myTimeBox != NULL) {
+            myGUI->myTimeBox->setTime(aPts, aDuration);
         }
         myGUI->stglUpdate(myWindow->getMousePos(), GLfloat(aPosition), aPts);
 
@@ -949,10 +949,10 @@ void StMoviePlayer::stglDraw(unsigned int view) {
         myWindow->showCursor(!myGUI->toHideCursor());
 
         // check for mono state
-        StHandle<StStereoParams> aParams = myGUI->stImageRegion->getSource();
+        StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
         if(!aParams.isNull()) {
             myWindow->setStereoOutput(!aParams->isMono()
-                                && (myGUI->stImageRegion->params.displayMode->getValue() == StGLImageRegion::MODE_STEREO));
+                                && (myGUI->myImage->params.displayMode->getValue() == StGLImageRegion::MODE_STEREO));
         }
     }
 
@@ -1040,7 +1040,7 @@ void StMoviePlayer::doSwitchSrcFormat(const int32_t theSrcFormat) {
 }
 
 void StMoviePlayer::doReset(const size_t ) {
-    StHandle<StStereoParams> aParams = myGUI->stImageRegion->getSource();
+    StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
     if(!aParams.isNull()) {
         aParams->reset();
     }

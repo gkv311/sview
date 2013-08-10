@@ -56,6 +56,9 @@
 
 #include "StMoviePlayerStrings.h"
 
+// auxiliary pre-processor definition
+#define stCTexture(theString) getTexturePath(stCString(theString))
+
 using namespace StMoviePlayerStrings;
 
 namespace {
@@ -70,37 +73,34 @@ namespace {
  * Create upper toolbar
  */
 void StMoviePlayerGUI::createUpperToolbar() {
-    int i = 0;
+    int aBtnIter = 0;
 
     const StRectI_t& aMargins = getRootMarginsPx();
-    upperRegion = new StGLWidget(this, aMargins.left(), aMargins.top(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), 4096, 128);
+    myPanelUpper = new StGLWidget(this, aMargins.left(), aMargins.top(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), 4096, 128);
 
     // append the textured buttons
-    btnOpen     = new StGLTextureButton(upperRegion, DISPL_X_REGION_UPPER + (i++) * ICON_WIDTH, DISPL_Y_REGION_UPPER);
-    btnOpen->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doOpen1File);
+    myBtnOpen = new StGLTextureButton(myPanelUpper, DISPL_X_REGION_UPPER + (aBtnIter++) * ICON_WIDTH, DISPL_Y_REGION_UPPER);
+    myBtnOpen->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doOpen1File);
+    myBtnOpen->setTexturePath(stCTexture("openImage.std"));
 
-    btnSwapLR   = new StGLCheckboxTextured(upperRegion, stImageRegion->params.swapLR,
-                                           texturesPathRoot + "swapLRoff.std",
-                                           texturesPathRoot + "swapLRon.std",
-                                           DISPL_X_REGION_UPPER + (i++) * ICON_WIDTH, DISPL_Y_REGION_UPPER,
+    myBtnSwapLR = new StGLCheckboxTextured(myPanelUpper, myImage->params.swapLR,
+                                           stCTexture("swapLRoff.std"),
+                                           stCTexture("swapLRon.std"),
+                                           DISPL_X_REGION_UPPER + (aBtnIter++) * ICON_WIDTH, DISPL_Y_REGION_UPPER,
                                            StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
 
-    StGLSwitchTextured* aSrcBtn = new StGLSwitchTextured(upperRegion, myPlugin->params.srcFormat,
-                                                         DISPL_X_REGION_UPPER + (i++) * ICON_WIDTH, DISPL_Y_REGION_UPPER,
+    StGLSwitchTextured* aSrcBtn = new StGLSwitchTextured(myPanelUpper, myPlugin->params.srcFormat,
+                                                         DISPL_X_REGION_UPPER + (aBtnIter++) * ICON_WIDTH, DISPL_Y_REGION_UPPER,
                                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
 
-    aSrcBtn->addItem(ST_V_SRC_AUTODETECT,    texturesPathRoot + "srcFrmtAuto.std");
-    aSrcBtn->addItem(ST_V_SRC_MONO,          texturesPathRoot + "srcFrmtMono.std");
-    aSrcBtn->addItem(ST_V_SRC_ROW_INTERLACE, texturesPathRoot + "srcFrmtInterlace.std");
-    aSrcBtn->addItem(ST_V_SRC_SIDE_BY_SIDE,  texturesPathRoot + "srcFrmtSideBySide.std");
-    aSrcBtn->addItem(ST_V_SRC_PARALLEL_PAIR, texturesPathRoot + "srcFrmtSideBySide.std", true);
-    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_LR, texturesPathRoot + "srcFrmtOverUnder.std");
-    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_RL, texturesPathRoot + "srcFrmtOverUnder.std",  true);
+    aSrcBtn->addItem(ST_V_SRC_AUTODETECT,    stCTexture("srcFrmtAuto.std"));
+    aSrcBtn->addItem(ST_V_SRC_MONO,          stCTexture("srcFrmtMono.std"));
+    aSrcBtn->addItem(ST_V_SRC_ROW_INTERLACE, stCTexture("srcFrmtInterlace.std"));
+    aSrcBtn->addItem(ST_V_SRC_SIDE_BY_SIDE,  stCTexture("srcFrmtSideBySide.std"));
+    aSrcBtn->addItem(ST_V_SRC_PARALLEL_PAIR, stCTexture("srcFrmtSideBySide.std"), true);
+    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_LR, stCTexture("srcFrmtOverUnder.std"));
+    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_RL, stCTexture("srcFrmtOverUnder.std"),  true);
     myBtnSrcFrmt = aSrcBtn;
-
-    // setup textures for the buttons
-    StString textPath = texturesPathRoot + "openImage.std";
-        btnOpen->setTexturePath(&textPath);
 }
 
 /**
@@ -108,45 +108,36 @@ void StMoviePlayerGUI::createUpperToolbar() {
  */
 void StMoviePlayerGUI::createBottomToolbar() {
     const StRectI_t& aMargins = getRootMarginsPx();
-    bottomRegion = new StGLWidget(this, aMargins.left(), -aMargins.bottom(), StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), 4096, 128);
+    myPanelBottom = new StGLWidget(this, aMargins.left(), -aMargins.bottom(), StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), 4096, 128);
 
     // append the textured buttons
-    btnPlay      = new StGLTextureButton(bottomRegion, DISPL_X_REGION_BOTTOM, DISPL_Y_REGION_BOTTOM,
-                                         StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), 2);
-    btnPlay->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doPlayPause);
+    myBtnPlay = new StGLTextureButton(myPanelBottom, DISPL_X_REGION_BOTTOM, DISPL_Y_REGION_BOTTOM,
+                                      StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), 2);
+    myBtnPlay->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doPlayPause);
+    const StString aPaths[2] = { stCTexture("moviePlay.std"), stCTexture("moviePause.std") };
+    myBtnPlay->setTexturePath(aPaths, 2);
 
-    stTimeBox    = new StTimeBox(bottomRegion, DISPL_X_REGION_BOTTOM + 1 * ICON_WIDTH, DISPL_Y_REGION_BOTTOM);
-    btnPrev      = new StGLTextureButton(bottomRegion, -DISPL_X_REGION_BOTTOM - 3 * ICON_WIDTH, DISPL_Y_REGION_BOTTOM,
+    myTimeBox = new StTimeBox(myPanelBottom, DISPL_X_REGION_BOTTOM + 1 * ICON_WIDTH, DISPL_Y_REGION_BOTTOM);
+    myTimeBox->setTexturePath(stCTexture("timebox.std"));
+    myBtnPrev = new StGLTextureButton(myPanelBottom, -DISPL_X_REGION_BOTTOM - 3 * ICON_WIDTH, DISPL_Y_REGION_BOTTOM,
+                                      StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    myBtnPrev->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doListPrev);
+    myBtnPrev->setTexturePath(stCTexture("moviePrior.std"));
+
+    myBtnNext = new StGLTextureButton(myPanelBottom, -DISPL_X_REGION_BOTTOM - 2 * ICON_WIDTH, DISPL_Y_REGION_BOTTOM,
+                                      StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    myBtnNext->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doListNext);
+    myBtnNext->setTexturePath(stCTexture("movieNext.std"));
+
+    myBtnList = new StGLTextureButton(myPanelBottom, -DISPL_X_REGION_BOTTOM - ICON_WIDTH, DISPL_Y_REGION_BOTTOM,
+                                      StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    myBtnList->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doPlayListReverse);
+    myBtnList->setTexturePath(stCTexture("moviePlaylist.std"));
+
+    myBtnFullScr = new StGLTextureButton(myPanelBottom, -DISPL_X_REGION_BOTTOM, DISPL_Y_REGION_BOTTOM,
                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
-    btnPrev->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doListPrev);
-
-    btnNext      = new StGLTextureButton(bottomRegion, -DISPL_X_REGION_BOTTOM - 2 * ICON_WIDTH, DISPL_Y_REGION_BOTTOM,
-                                         StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
-    btnNext->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doListNext);
-
-    btnList      = new StGLTextureButton(bottomRegion, -DISPL_X_REGION_BOTTOM - ICON_WIDTH, DISPL_Y_REGION_BOTTOM,
-                                         StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
-    btnList->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doPlayListReverse);
-
-    btnFullScr   = new StGLTextureButton(bottomRegion, -DISPL_X_REGION_BOTTOM, DISPL_Y_REGION_BOTTOM,
-                                         StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
-    btnFullScr->signals.onBtnClick.connect(myPlugin->params.isFullscreen.operator->(), &StBoolParam::doReverse);
-
-    // setup textures for the buttons
-    StString textPathsDuo[2];
-    textPathsDuo[0] = texturesPathRoot + "moviePlay.std";
-    textPathsDuo[1] = texturesPathRoot + "moviePause.std";
-        btnPlay->setTexturePath(textPathsDuo, 2);
-    StString textPath = texturesPathRoot + "timebox.std";
-        stTimeBox->setTexturePath(&textPath);
-    textPath = texturesPathRoot + "moviePrior.std";
-        btnPrev->setTexturePath(&textPath);
-    textPath = texturesPathRoot + "movieNext.std";
-        btnNext->setTexturePath(&textPath);
-    textPath = texturesPathRoot + "moviePlaylist.std";
-        btnList->setTexturePath(&textPath);
-    textPath = texturesPathRoot + "movieFullScr.std";
-        btnFullScr->setTexturePath(&textPath);
+    myBtnFullScr->signals.onBtnClick.connect(myPlugin->params.isFullscreen.operator->(), &StBoolParam::doReverse);
+    myBtnFullScr->setTexturePath(stCTexture("movieFullScr.std"));
 }
 
 /**
@@ -154,7 +145,7 @@ void StMoviePlayerGUI::createBottomToolbar() {
  */
 void StMoviePlayerGUI::createMainMenu() {
     const StRectI_t& aMargins = getRootMarginsPx();
-    menu0Root = new StGLMenu(this, aMargins.left(), aMargins.top(), StGLMenu::MENU_HORIZONTAL, true);
+    myMenuRoot = new StGLMenu(this, aMargins.left(), aMargins.top(), StGLMenu::MENU_HORIZONTAL, true);
 
     StGLMenu* aMenuMedia   = createMediaMenu();     // Root -> Media menu
     StGLMenu* aMenuView    = createViewMenu();      // Root -> View menu
@@ -164,12 +155,12 @@ void StMoviePlayerGUI::createMainMenu() {
     StGLMenu* aMenuHelp    = createHelpMenu();      // Root -> Help menu
 
     // Attach sub menus to root
-    menu0Root->addItem(tr(MENU_MEDIA),     aMenuMedia);
-    menu0Root->addItem(tr(MENU_VIEW),      aMenuView);
-    menu0Root->addItem(tr(MENU_AUDIO),     myMenuAudio);
-    menu0Root->addItem(tr(MENU_SUBTITLES), myMenuSubtitles);
-    menu0Root->addItem(myPlugin->StApplication::params.ActiveDevice->getActiveValue(), aDevicesMenu);
-    menu0Root->addItem(tr(MENU_HELP),      aMenuHelp);
+    myMenuRoot->addItem(tr(MENU_MEDIA),     aMenuMedia);
+    myMenuRoot->addItem(tr(MENU_VIEW),      aMenuView);
+    myMenuRoot->addItem(tr(MENU_AUDIO),     myMenuAudio);
+    myMenuRoot->addItem(tr(MENU_SUBTITLES), myMenuSubtitles);
+    myMenuRoot->addItem(myPlugin->StApplication::params.ActiveDevice->getActiveValue(), aDevicesMenu);
+    myMenuRoot->addItem(tr(MENU_HELP),      aMenuHelp);
 }
 
 /**
@@ -376,7 +367,7 @@ StGLMenu* StMoviePlayerGUI::createViewMenu() {
     aMenuView->addItem(tr(MENU_VIEW_FULLSCREEN),    myPlugin->params.isFullscreen);
     aMenuView->addItem(tr(MENU_VIEW_RESET))
              ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doReset);
-    aMenuView->addItem(tr(MENU_VIEW_SWAP_LR),       stImageRegion->params.swapLR);
+    aMenuView->addItem(tr(MENU_VIEW_SWAP_LR),       myImage->params.swapLR);
     aMenuView->addItem(tr(MENU_VIEW_DISPLAY_RATIO), aMenuDispRatio);
     aMenuView->addItem(tr(MENU_VIEW_TEXFILTER),     aMenuTexFilter);
     aMenuView->addItem(tr(MENU_VIEW_IMAGE_ADJUST),  aMenuImgAdjust);
@@ -389,15 +380,15 @@ StGLMenu* StMoviePlayerGUI::createViewMenu() {
 StGLMenu* StMoviePlayerGUI::createDisplayModeMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_STEREO),
-                   stImageRegion->params.displayMode, StGLImageRegion::MODE_STEREO);
+                   myImage->params.displayMode, StGLImageRegion::MODE_STEREO);
     aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_LEFT),
-                   stImageRegion->params.displayMode, StGLImageRegion::MODE_ONLY_LEFT);
+                   myImage->params.displayMode, StGLImageRegion::MODE_ONLY_LEFT);
     aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_RIGHT),
-                   stImageRegion->params.displayMode, StGLImageRegion::MODE_ONLY_RIGHT);
+                   myImage->params.displayMode, StGLImageRegion::MODE_ONLY_RIGHT);
     aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_PARALLEL),
-                   stImageRegion->params.displayMode, StGLImageRegion::MODE_PARALLEL);
+                   myImage->params.displayMode, StGLImageRegion::MODE_PARALLEL);
     aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_CROSSYED),
-                   stImageRegion->params.displayMode, StGLImageRegion::MODE_CROSSYED);
+                   myImage->params.displayMode, StGLImageRegion::MODE_CROSSYED);
     return aMenu;
 }
 
@@ -406,13 +397,13 @@ StGLMenu* StMoviePlayerGUI::createDisplayModeMenu() {
  */
 StGLMenu* StMoviePlayerGUI::createDisplayRatioMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem("Auto",   stImageRegion->params.displayRatio, StGLImageRegion::RATIO_AUTO);
-    aMenu->addItem("1:1",    stImageRegion->params.displayRatio, StGLImageRegion::RATIO_1_1);
-    aMenu->addItem("4:3",    stImageRegion->params.displayRatio, StGLImageRegion::RATIO_4_3);
-    aMenu->addItem("16:9",   stImageRegion->params.displayRatio, StGLImageRegion::RATIO_16_9);
-    aMenu->addItem("16:10",  stImageRegion->params.displayRatio, StGLImageRegion::RATIO_16_10);
-    aMenu->addItem("2.21:1", stImageRegion->params.displayRatio, StGLImageRegion::RATIO_221_1);
-    aMenu->addItem("5:4",    stImageRegion->params.displayRatio, StGLImageRegion::RATIO_5_4);
+    aMenu->addItem("Auto",   myImage->params.displayRatio, StGLImageRegion::RATIO_AUTO);
+    aMenu->addItem("1:1",    myImage->params.displayRatio, StGLImageRegion::RATIO_1_1);
+    aMenu->addItem("4:3",    myImage->params.displayRatio, StGLImageRegion::RATIO_4_3);
+    aMenu->addItem("16:9",   myImage->params.displayRatio, StGLImageRegion::RATIO_16_9);
+    aMenu->addItem("16:10",  myImage->params.displayRatio, StGLImageRegion::RATIO_16_10);
+    aMenu->addItem("2.21:1", myImage->params.displayRatio, StGLImageRegion::RATIO_221_1);
+    aMenu->addItem("5:4",    myImage->params.displayRatio, StGLImageRegion::RATIO_5_4);
     aMenu->addItem("Keep on restart", myPlugin->params.toRestoreRatio);
     return aMenu;
 }
@@ -423,11 +414,11 @@ StGLMenu* StMoviePlayerGUI::createDisplayRatioMenu() {
 StGLMenu* StMoviePlayerGUI::createSmoothFilterMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     aMenu->addItem(tr(MENU_VIEW_TEXFILTER_NEAREST),
-                   stImageRegion->params.textureFilter, StGLImageProgram::FILTER_NEAREST);
+                   myImage->params.textureFilter, StGLImageProgram::FILTER_NEAREST);
     aMenu->addItem(tr(MENU_VIEW_TEXFILTER_LINEAR),
-                   stImageRegion->params.textureFilter, StGLImageProgram::FILTER_LINEAR);
+                   myImage->params.textureFilter, StGLImageProgram::FILTER_LINEAR);
     aMenu->addItem(tr(MENU_VIEW_TEXFILTER_BLEND),
-                   stImageRegion->params.textureFilter, StGLImageProgram::FILTER_BLEND);
+                   myImage->params.textureFilter, StGLImageProgram::FILTER_BLEND);
     return aMenu;
 }
 
@@ -444,7 +435,7 @@ StGLMenu* StMoviePlayerGUI::createImageAdjustMenu() {
 
     StGLMenuItem* anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_GAMMA));
     anItem->setMarginRight(100 + 16);
-    StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, stImageRegion->params.gamma,
+    StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, myImage->params.gamma,
                                                               -16, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->setFormat(stCString("%+01.2f"));
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
@@ -454,7 +445,7 @@ StGLMenu* StMoviePlayerGUI::createImageAdjustMenu() {
 
     anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_BRIGHTNESS));
     anItem->setMarginRight(100 + 16);
-    aRange = new StGLRangeFieldFloat32(anItem, stImageRegion->params.brightness,
+    aRange = new StGLRangeFieldFloat32(anItem, myImage->params.brightness,
                                        -16, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->setFormat(stCString("%+01.2f"));
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
@@ -464,7 +455,7 @@ StGLMenu* StMoviePlayerGUI::createImageAdjustMenu() {
 
     anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_SATURATION));
     anItem->setMarginRight(100 + 16);
-    aRange = new StGLRangeFieldFloat32(anItem, stImageRegion->params.saturation,
+    aRange = new StGLRangeFieldFloat32(anItem, myImage->params.saturation,
                                        -16, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->changeRectPx().bottom() = aRange->getRectPx().top() + aMenu->getItemHeight();
     aRange->setFormat(stCString("%+01.2f"));
@@ -811,53 +802,53 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
   myPlugin(thePlugin),
   myWindow(theWindow),
   myLangMap(theLangMap),
-  texturesPathRoot(StProcess::getStShareFolder() + "textures" + SYS_FS_SPLITTER),
-  stTimeVisibleLock(true),
+  myTexturesFolder(StProcess::getStShareFolder() + "textures" + SYS_FS_SPLITTER),
+  myVisibilityTimer(true),
   //
-  stImageRegion(NULL),
-  stSubtitles(NULL),
-  stDescr(NULL),
+  myImage(NULL),
+  mySubtitles(NULL),
+  myDescr(NULL),
   myMsgStack(NULL),
   myPlayList(NULL),
   // main menu
-  menu0Root(NULL),
+  myMenuRoot(NULL),
   myMenuOpenAL(NULL),
   myMenuRecent(NULL),
   myMenuAudio(NULL),
   myMenuSubtitles(NULL),
   // upper toolbar
-  upperRegion(NULL),
-  btnOpen(NULL),
-  btnSwapLR(NULL),
+  myPanelUpper(NULL),
+  myBtnOpen(NULL),
+  myBtnSwapLR(NULL),
   myBtnSrcFrmt(NULL),
   // bottom toolbar
-  bottomRegion(NULL),
-  seekBar(NULL),
-  btnPlay(NULL),
-  stTimeBox(NULL),
-  btnPrev(NULL),
-  btnNext(NULL),
-  btnList(NULL),
-  btnFullScr(NULL),
+  myPanelBottom(NULL),
+  mySeekBar(NULL),
+  myBtnPlay(NULL),
+  myTimeBox(NULL),
+  myBtnPrev(NULL),
+  myBtnNext(NULL),
+  myBtnList(NULL),
+  myBtnFullScr(NULL),
   //
   myFpsWidget(NULL),
   //
-  isGUIVisible(true),
+  myIsVisibleGUI(true),
   myIsExperimental(myPlugin->params.ToShowExtra->getValue()) {
     setRootMarginsPx(myWindow->getMargins());
     const StRectI_t& aMargins = getRootMarginsPx();
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StMoviePlayerGUI::doShowFPS);
-    stImageRegion = new StGLImageRegion(this, theTextureQueue, false);
-    stSubtitles   = new StGLSubtitles  (this, theSubQueue);
+    myImage     = new StGLImageRegion(this, theTextureQueue, false);
+    mySubtitles = new StGLSubtitles  (this, theSubQueue);
 
     createUpperToolbar();
 
-    seekBar = new StSeekBar(this, -aMargins.bottom() - 78);
-    seekBar->signals.onSeekClick.connect(myPlugin, &StMoviePlayer::doSeek);
+    mySeekBar = new StSeekBar(this, -aMargins.bottom() - 78);
+    mySeekBar->signals.onSeekClick.connect(myPlugin, &StMoviePlayer::doSeek);
 
     createBottomToolbar();
 
-    stDescr = new StGLDescription(this);
+    myDescr = new StGLDescription(this);
 
     myPlayList = new StGLPlayList(this, thePlayList);
     myPlayList->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
@@ -884,21 +875,21 @@ void StMoviePlayerGUI::stglUpdate(const StPointD_t& thePointZo,
                                   const GLfloat theProgress,
                                   const double thePTS) {
     StGLRootWidget::stglUpdate(thePointZo);
-    if(stSubtitles != NULL) {
-        stSubtitles->setPTS(thePTS);
+    if(mySubtitles != NULL) {
+        mySubtitles->setPTS(thePTS);
     }
-    if(seekBar != NULL) {
-        seekBar->setProgress(theProgress);
+    if(mySeekBar != NULL) {
+        mySeekBar->setProgress(theProgress);
     }
-    if(stDescr != NULL) {
-        stDescr->setPoint(thePointZo);
+    if(myDescr != NULL) {
+        myDescr->setPoint(thePointZo);
     }
 
     if(myLangMap->wasReloaded()
     || myIsExperimental != myPlugin->params.ToShowExtra->getValue()) {
-        StGLMenu::DeleteWithSubMenus(menu0Root); menu0Root = NULL;
+        StGLMenu::DeleteWithSubMenus(myMenuRoot); myMenuRoot = NULL;
         createMainMenu();
-        menu0Root->stglUpdateSubmenuLayout();
+        myMenuRoot->stglUpdateSubmenuLayout();
         myLangMap->resetReloaded();
         myIsExperimental = myPlugin->params.ToShowExtra->getValue();
         // turn back topmost position
@@ -907,8 +898,8 @@ void StMoviePlayerGUI::stglUpdate(const StPointD_t& thePointZo,
 }
 
 void StMoviePlayerGUI::stglResize(const StRectI_t& winRectPx) {
-    stImageRegion->changeRectPx().bottom() = winRectPx.height();
-    stImageRegion->changeRectPx().right()  = winRectPx.width();
+    myImage->changeRectPx().bottom() = winRectPx.height();
+    myImage->changeRectPx().right()  = winRectPx.width();
 
     const StRectI_t& aMargins = myWindow->getMargins();
     const bool areNewMargins = aMargins != getRootMarginsPx();
@@ -916,29 +907,29 @@ void StMoviePlayerGUI::stglResize(const StRectI_t& winRectPx) {
         setRootMarginsPx(aMargins);
     }
 
-    if(upperRegion != NULL) {
-        upperRegion->changeRectPx().right()  = stMax(winRectPx.width() - aMargins.right(), 2);
+    if(myPanelUpper != NULL) {
+        myPanelUpper->changeRectPx().right()  = stMax(winRectPx.width() - aMargins.right(), 2);
     }
-    if(bottomRegion != NULL) {
-        bottomRegion->changeRectPx().right() = stMax(winRectPx.width() - aMargins.right(), 2);
+    if(myPanelBottom != NULL) {
+        myPanelBottom->changeRectPx().right() = stMax(winRectPx.width() - aMargins.right(), 2);
     }
 
     if(areNewMargins) {
-        if(upperRegion != NULL) {
-            upperRegion->changeRectPx().left() = aMargins.left();
-            upperRegion->changeRectPx().moveTopTo(aMargins.top());
+        if(myPanelUpper != NULL) {
+            myPanelUpper->changeRectPx().left() = aMargins.left();
+            myPanelUpper->changeRectPx().moveTopTo(aMargins.top());
         }
-        if(bottomRegion != NULL) {
-            bottomRegion->changeRectPx().left() =  aMargins.left();
-            bottomRegion->changeRectPx().moveTopTo(-aMargins.bottom());
+        if(myPanelBottom != NULL) {
+            myPanelBottom->changeRectPx().left() =  aMargins.left();
+            myPanelBottom->changeRectPx().moveTopTo(-aMargins.bottom());
         }
-        if(seekBar != NULL) {
-            seekBar->changeRectPx().moveTopTo(-aMargins.bottom() - 78);
+        if(mySeekBar != NULL) {
+            mySeekBar->changeRectPx().moveTopTo(-aMargins.bottom() - 78);
         }
-        if(menu0Root != NULL) {
-            menu0Root->changeRectPx().left() = aMargins.left();
-            menu0Root->changeRectPx().top()  = aMargins.top();
-            menu0Root->stglUpdateSubmenuLayout();
+        if(myMenuRoot != NULL) {
+            myMenuRoot->changeRectPx().left() = aMargins.left();
+            myMenuRoot->changeRectPx().top()  = aMargins.top();
+            myMenuRoot->stglUpdateSubmenuLayout();
         }
     }
 
@@ -946,65 +937,66 @@ void StMoviePlayerGUI::stglResize(const StRectI_t& winRectPx) {
 }
 
 bool StMoviePlayerGUI::toHideCursor() {
-    if(bottomRegion == NULL) {
+    if(myPanelBottom == NULL) {
         return false;
     }
-    StGLWidget* child = bottomRegion->getChildren()->getStart();
+    StGLWidget* child = myPanelBottom->getChildren()->getStart();
     return child != NULL && !child->isVisible();
 }
 
-void StMoviePlayerGUI::setVisibility(const StPointD_t& cursorZo, bool isMouseActive) {
+void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
+                                     bool              theIsMouseMoved) {
     const bool toShowPlayList = myPlugin->params.ToShowPlayList->getValue();
-    isGUIVisible = isMouseActive
-        || stTimeVisibleLock.getElapsedTime() < 2.0
-        || (upperRegion  != NULL && upperRegion->isPointIn(cursorZo))
-        || (bottomRegion != NULL && bottomRegion->isPointIn(cursorZo))
-        || (seekBar   != NULL && seekBar->isPointIn(cursorZo))
-        || (toShowPlayList    && myPlayList->isPointIn(cursorZo))
-        || (menu0Root != NULL && menu0Root->isActive());
-    if(isMouseActive) {
-        stTimeVisibleLock.restart();
+    myIsVisibleGUI = theIsMouseMoved
+        || myVisibilityTimer.getElapsedTime() < 2.0
+        || (myPanelUpper  != NULL && myPanelUpper ->isPointIn(theCursor))
+        || (myPanelBottom != NULL && myPanelBottom->isPointIn(theCursor))
+        || (mySeekBar     != NULL && mySeekBar    ->isPointIn(theCursor))
+        || (toShowPlayList        && myPlayList   ->isPointIn(theCursor))
+        || (myMenuRoot    != NULL && myMenuRoot->isActive());
+    if(theIsMouseMoved) {
+        myVisibilityTimer.restart();
     }
 
     // always visible
     StGLRootWidget::setVisibility(true, true);
-    stImageRegion->setVisibility(true, true);
-    stSubtitles->setVisibility(true, true);
+    myImage->setVisibility(true, true);
+    mySubtitles->setVisibility(true, true);
 
-    if(menu0Root != NULL) {
-        menu0Root->setVisibility(isGUIVisible, false);
+    if(myMenuRoot != NULL) {
+        myMenuRoot->setVisibility(myIsVisibleGUI, false);
     }
 
-    if(seekBar != NULL) {
-        seekBar->setVisibility(isGUIVisible);
+    if(mySeekBar != NULL) {
+        mySeekBar->setVisibility(myIsVisibleGUI);
     }
 
-    if(upperRegion != NULL) {
-        upperRegion->setVisibility(isGUIVisible);
-        for(StGLWidget* child = upperRegion->getChildren()->getStart(); child != NULL; child = child->getNext()) {
-            child->setVisibility(isGUIVisible);
+    if(myPanelUpper != NULL) {
+        myPanelUpper->setVisibility(myIsVisibleGUI);
+        for(StGLWidget* child = myPanelUpper->getChildren()->getStart(); child != NULL; child = child->getNext()) {
+            child->setVisibility(myIsVisibleGUI);
         }
     }
 
-    if(bottomRegion != NULL) {
-        bottomRegion->setVisibility(isGUIVisible);
-        for(StGLWidget* child = bottomRegion->getChildren()->getStart(); child != NULL; child = child->getNext()) {
-            child->setVisibility(isGUIVisible);
+    if(myPanelBottom != NULL) {
+        myPanelBottom->setVisibility(myIsVisibleGUI);
+        for(StGLWidget* child = myPanelBottom->getChildren()->getStart(); child != NULL; child = child->getNext()) {
+            child->setVisibility(myIsVisibleGUI);
         }
     }
 
     if(toShowPlayList) {
-        myPlayList->setVisibility(isGUIVisible, false);
+        myPlayList->setVisibility(myIsVisibleGUI, false);
     }
 
-    if(stDescr != NULL) {
-        stDescr->setVisibility(true, true);
-        if(btnOpen->isPointIn(cursorZo)) {
-            stDescr->setText(tr(FILE_VIDEO_OPEN));
-        } else if(btnSwapLR->isPointIn(cursorZo)) {
-            size_t aLngId = stImageRegion->params.swapLR->getValue() ? SWAP_LR_ON : SWAP_LR_OFF;
-            stDescr->setText(tr(aLngId));
-        } else if(myBtnSrcFrmt->isPointIn(cursorZo)) {
+    if(myDescr != NULL) {
+        myDescr->setVisibility(true, true);
+        if(myBtnOpen->isPointIn(theCursor)) {
+            myDescr->setText(tr(FILE_VIDEO_OPEN));
+        } else if(myBtnSwapLR->isPointIn(theCursor)) {
+            size_t aLngId = myImage->params.swapLR->getValue() ? SWAP_LR_ON : SWAP_LR_OFF;
+            myDescr->setText(tr(aLngId));
+        } else if(myBtnSrcFrmt->isPointIn(theCursor)) {
             size_t aLngId = MENU_SRC_FORMAT_AUTO;
             switch(myPlugin->params.srcFormat->getValue()) {
                 case ST_V_SRC_MONO:                 aLngId = MENU_SRC_FORMAT_MONO; break;
@@ -1022,19 +1014,19 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& cursorZo, bool isMouseAct
                 default:
                 case ST_V_SRC_AUTODETECT:           aLngId = MENU_SRC_FORMAT_AUTO; break;
             }
-            stDescr->setText(tr(BTN_SRC_FORMAT) + tr(aLngId));
-        } else if(btnPlay->isPointIn(cursorZo)) {
-            stDescr->setText(tr(VIDEO_PLAYPAUSE));
-        } else if(btnPrev->isPointIn(cursorZo)) {
-            stDescr->setText(tr(VIDEO_LIST_PREV));
-        } else if(btnNext->isPointIn(cursorZo)) {
-            stDescr->setText(tr(VIDEO_LIST_NEXT));
-        } else if(btnList->isPointIn(cursorZo)) {
-            stDescr->setText(tr(VIDEO_LIST));
-        } else if(btnFullScr->isPointIn(cursorZo)) {
-            stDescr->setText(tr(FULLSCREEN));
+            myDescr->setText(tr(BTN_SRC_FORMAT) + tr(aLngId));
+        } else if(myBtnPlay->isPointIn(theCursor)) {
+            myDescr->setText(tr(VIDEO_PLAYPAUSE));
+        } else if(myBtnPrev->isPointIn(theCursor)) {
+            myDescr->setText(tr(VIDEO_LIST_PREV));
+        } else if(myBtnNext->isPointIn(theCursor)) {
+            myDescr->setText(tr(VIDEO_LIST_NEXT));
+        } else if(myBtnList->isPointIn(theCursor)) {
+            myDescr->setText(tr(VIDEO_LIST));
+        } else if(myBtnFullScr->isPointIn(theCursor)) {
+            myDescr->setText(tr(FULLSCREEN));
         } else {
-            stDescr->setVisibility(false, true);
+            myDescr->setVisibility(false, true);
         }
     }
 }
@@ -1114,9 +1106,9 @@ void StMoviePlayerGUI::stglDraw(unsigned int theView) {
     setLensDist(myPlugin->getMainWindow()->getLensDist());
     if(theView == ST_DRAW_LEFT
     && myFpsWidget != NULL) {
-        stImageRegion->getTextureQueue()->getQueueInfo(myFpsWidget->changePlayQueued(),
-                                                       myFpsWidget->changePlayQueueLength(),
-                                                       myFpsWidget->changePlayFps());
+        myImage->getTextureQueue()->getQueueInfo(myFpsWidget->changePlayQueued(),
+                                                 myFpsWidget->changePlayQueueLength(),
+                                                 myFpsWidget->changePlayFps());
         myFpsWidget->update(myPlugin->getMainWindow()->isStereoOutput(),
                             myPlugin->getMainWindow()->getTargetFps());
     }

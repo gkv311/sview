@@ -195,14 +195,14 @@ bool StImageViewer::resetDevice() {
 
 void StImageViewer::releaseDevice() {
     if(!myGUI.isNull()) {
-        mySettings->saveParam(ST_SETTING_STEREO_MODE, myGUI->stImageRegion->params.displayMode);
-        mySettings->saveInt32(ST_SETTING_GAMMA, stRound(100.0f * myGUI->stImageRegion->params.gamma->getValue()));
+        mySettings->saveParam(ST_SETTING_STEREO_MODE, myGUI->myImage->params.displayMode);
+        mySettings->saveInt32(ST_SETTING_GAMMA, stRound(100.0f * myGUI->myImage->params.gamma->getValue()));
         if(params.toRestoreRatio->getValue()) {
-            mySettings->saveParam(ST_SETTING_RATIO, myGUI->stImageRegion->params.displayRatio);
+            mySettings->saveParam(ST_SETTING_RATIO, myGUI->myImage->params.displayRatio);
         } else {
             mySettings->saveInt32(ST_SETTING_RATIO, StGLImageRegion::RATIO_AUTO);
         }
-        mySettings->saveParam(ST_SETTING_TEXFILTER, myGUI->stImageRegion->params.textureFilter);
+        mySettings->saveParam(ST_SETTING_TEXFILTER, myGUI->myImage->params.textureFilter);
         mySettings->saveInt32(ST_SETTING_FPSTARGET, params.TargetFps);
         mySettings->saveInt32(ST_SETTING_SLIDESHOW_DELAY, int(mySlideShowDelay));
         mySettings->saveInt32(ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
@@ -261,16 +261,16 @@ bool StImageViewer::init() {
 
     // load settings
     myWindow->setTargetFps(double(params.TargetFps));
-    mySettings->loadParam (ST_SETTING_STEREO_MODE,        myGUI->stImageRegion->params.displayMode);
-    mySettings->loadParam (ST_SETTING_TEXFILTER,          myGUI->stImageRegion->params.textureFilter);
-    mySettings->loadParam (ST_SETTING_RATIO,              myGUI->stImageRegion->params.displayRatio);
-    params.toRestoreRatio->setValue(myGUI->stImageRegion->params.displayRatio->getValue() != StGLImageRegion::RATIO_AUTO);
+    mySettings->loadParam (ST_SETTING_STEREO_MODE,        myGUI->myImage->params.displayMode);
+    mySettings->loadParam (ST_SETTING_TEXFILTER,          myGUI->myImage->params.textureFilter);
+    mySettings->loadParam (ST_SETTING_RATIO,              myGUI->myImage->params.displayRatio);
+    params.toRestoreRatio->setValue(myGUI->myImage->params.displayRatio->getValue() != StGLImageRegion::RATIO_AUTO);
     int32_t loadedGamma = 100; // 1.0f
         mySettings->loadInt32(ST_SETTING_GAMMA, loadedGamma);
-        myGUI->stImageRegion->params.gamma->setValue(0.01f * loadedGamma);
+        myGUI->myImage->params.gamma->setValue(0.01f * loadedGamma);
 
     // initialize frame region early to show dedicated error description
-    if(!myGUI->stImageRegion->stglInit()) {
+    if(!myGUI->myImage->stglInit()) {
         myMsgQueue->pushError(stCString("Image Viewer - critical error:\nFrame region initialization failed!"));
         myMsgQueue->popAll();
         myGUI.nullify();
@@ -284,7 +284,7 @@ bool StImageViewer::init() {
         StString imageLibString;
         mySettings->loadString(ST_SETTING_IMAGELIB, imageLibString);
         params.imageLib = StImageFile::imgLibFromString(imageLibString);
-        myLoader = new StImageLoader(params.imageLib, myMsgQueue, myLangMap, myGUI->stImageRegion->getTextureQueue());
+        myLoader = new StImageLoader(params.imageLib, myMsgQueue, myLangMap, myGUI->myImage->getTextureQueue());
         myLoader->signals.onLoaded.connect(this, &StImageViewer::doLoaded);
 
         // load hot-keys
@@ -293,8 +293,8 @@ bool StImageViewer::init() {
             mySettings->loadHotKey(anIter->second);
         }
     }
-    for(size_t anIter = 0; anIter < myGUI->stImageRegion->getActions().size(); ++anIter) {
-        StHandle<StAction>& anAction = myGUI->stImageRegion->changeActions()[anIter];
+    for(size_t anIter = 0; anIter < myGUI->myImage->getActions().size(); ++anIter) {
+        StHandle<StAction>& anAction = myGUI->myImage->changeActions()[anIter];
         mySettings->loadHotKey(anAction);
         addAction(Action_StereoParamsBegin + int(anIter), anAction);
     }
@@ -419,9 +419,9 @@ void StImageViewer::doImageAdjustReset(const size_t ) {
         return;
     }
 
-    myGUI->stImageRegion->params.gamma     ->reset();
-    myGUI->stImageRegion->params.brightness->reset();
-    myGUI->stImageRegion->params.saturation->reset();
+    myGUI->myImage->params.gamma     ->reset();
+    myGUI->myImage->params.brightness->reset();
+    myGUI->myImage->params.saturation->reset();
 }
 
 void StImageViewer::doDeleteFileBegin(const size_t ) {
@@ -503,18 +503,18 @@ void StImageViewer::doKeyDown(const StKeyEvent& theEvent) {
         // post process keys
         case ST_VK_B: {
             if(theEvent.Flags == ST_VF_SHIFT) {
-                myGUI->stImageRegion->params.brightness->increment();
+                myGUI->myImage->params.brightness->increment();
             } else if(theEvent.Flags == ST_VF_CONTROL) {
-                myGUI->stImageRegion->params.brightness->decrement();
+                myGUI->myImage->params.brightness->decrement();
             }
             return;
         }
         case ST_VK_T: {
             /// TODO (Kirill Gavrilov#9) remove this hot key
             if(theEvent.Flags == ST_VF_SHIFT) {
-                myGUI->stImageRegion->params.saturation->increment();
+                myGUI->myImage->params.saturation->increment();
             } else if(theEvent.Flags == ST_VF_CONTROL) {
-                myGUI->stImageRegion->params.saturation->decrement();
+                myGUI->myImage->params.saturation->decrement();
             }
             return;
         }
@@ -542,7 +542,7 @@ void StImageViewer::doKeyUp(const StKeyEvent& theEvent) {
     if(myGUI->getFocus() != NULL) {
         myGUI->doKeyUp(theEvent);
     } else {
-        myGUI->stImageRegion->doKeyUp(theEvent);
+        myGUI->myImage->doKeyUp(theEvent);
     }
 }
 
@@ -639,10 +639,10 @@ void StImageViewer::stglDraw(unsigned int theView) {
         myGUI->stglUpdate(myWindow->getMousePos());
 
         // check for mono state
-        StHandle<StStereoParams> aParams = myGUI->stImageRegion->getSource();
+        StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
         if(!aParams.isNull()) {
             myWindow->setStereoOutput(!aParams->isMono() && myWindow->isActive()
-                                   && (myGUI->stImageRegion->params.displayMode->getValue() == StGLImageRegion::MODE_STEREO));
+                                   && (myGUI->myImage->params.displayMode->getValue() == StGLImageRegion::MODE_STEREO));
         }
     }
 
@@ -803,7 +803,7 @@ void StImageViewer::doFullscreen(const bool theIsFullscreen) {
 }
 
 void StImageViewer::doReset(const size_t ) {
-    StHandle<StStereoParams> aParams = myGUI->stImageRegion->getSource();
+    StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
     if(!aParams.isNull()) {
         aParams->reset();
     }

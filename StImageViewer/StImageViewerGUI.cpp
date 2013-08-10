@@ -43,6 +43,9 @@
 
 #include "StImageViewerStrings.h"
 
+// auxiliary pre-processor definition
+#define stCTexture(theString) getTexturePath(stCString(theString))
+
 using namespace StImageViewerStrings;
 
 namespace {
@@ -55,47 +58,41 @@ namespace {
  * Create upper toolbar
  */
 void StImageViewerGUI::createUpperToolbar() {
-    int i = 0;
+    int aBtnIter = 0;
 
     const StRectI_t& aMargins = getRootMarginsPx();
-    upperRegion = new StGLWidget(this, aMargins.left(), aMargins.top(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), 4096, 128);
+    myPanelUpper = new StGLWidget(this, aMargins.left(), aMargins.top(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), 4096, 128);
 
     // append textured buttons
-    btnOpen     = new StGLTextureButton(upperRegion, DISPL_X_REGION_UPPER + (i++) * ICON_WIDTH, DISPL_Y_REGION_UPPER);
-    btnOpen->signals.onBtnClick.connectUnsafe(myPlugin, StImageViewer::doOpenFileDialog);
+    myBtnOpen   = new StGLTextureButton(myPanelUpper, DISPL_X_REGION_UPPER + (aBtnIter++) * ICON_WIDTH, DISPL_Y_REGION_UPPER);
+    myBtnOpen->signals.onBtnClick.connectUnsafe(myPlugin, StImageViewer::doOpenFileDialog);
+    myBtnOpen->setTexturePath(stCTexture("openImage.std"));
 
-    btnPrev     = new StGLTextureButton(upperRegion, DISPL_X_REGION_UPPER + (i++) * ICON_WIDTH, DISPL_Y_REGION_UPPER);
-    btnPrev->signals.onBtnClick.connect(myPlugin, &StImageViewer::doListPrev);
+    myBtnPrev   = new StGLTextureButton(myPanelUpper, DISPL_X_REGION_UPPER + (aBtnIter++) * ICON_WIDTH, DISPL_Y_REGION_UPPER);
+    myBtnPrev->signals.onBtnClick.connect(myPlugin, &StImageViewer::doListPrev);
+    myBtnPrev->setTexturePath(stCTexture("imagePrev.std"));
 
-    btnNext     = new StGLTextureButton(upperRegion, DISPL_X_REGION_UPPER + (i++) * ICON_WIDTH, DISPL_Y_REGION_UPPER);
-    btnNext->signals.onBtnClick.connect(myPlugin, &StImageViewer::doListNext);
+    myBtnNext   = new StGLTextureButton(myPanelUpper, DISPL_X_REGION_UPPER + (aBtnIter++) * ICON_WIDTH, DISPL_Y_REGION_UPPER);
+    myBtnNext->signals.onBtnClick.connect(myPlugin, &StImageViewer::doListNext);
+    myBtnNext->setTexturePath(stCTexture("imageNext.std"));
 
-    btnSwapLR   = new StGLCheckboxTextured(upperRegion, stImageRegion->params.swapLR,
-                                           texturesPathRoot + "swapLRoff.std",
-                                           texturesPathRoot + "swapLRon.std",
-                                           DISPL_X_REGION_UPPER + (i++) * ICON_WIDTH, DISPL_Y_REGION_UPPER,
+    myBtnSwapLR = new StGLCheckboxTextured(myPanelUpper, myImage->params.swapLR,
+                                           stCTexture("swapLRoff.std"),
+                                           stCTexture("swapLRon.std"),
+                                           DISPL_X_REGION_UPPER + (aBtnIter++) * ICON_WIDTH, DISPL_Y_REGION_UPPER,
                                            StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
 
-    StGLSwitchTextured* aSrcBtn = new StGLSwitchTextured(upperRegion, myPlugin->params.srcFormat,
-                                                         DISPL_X_REGION_UPPER + (i++) * ICON_WIDTH, DISPL_Y_REGION_UPPER,
+    StGLSwitchTextured* aSrcBtn = new StGLSwitchTextured(myPanelUpper, myPlugin->params.srcFormat,
+                                                         DISPL_X_REGION_UPPER + (aBtnIter++) * ICON_WIDTH, DISPL_Y_REGION_UPPER,
                                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
-
-    aSrcBtn->addItem(ST_V_SRC_AUTODETECT,    texturesPathRoot + "srcFrmtAuto.std");
-    aSrcBtn->addItem(ST_V_SRC_MONO,          texturesPathRoot + "srcFrmtMono.std");
-    aSrcBtn->addItem(ST_V_SRC_ROW_INTERLACE, texturesPathRoot + "srcFrmtInterlace.std");
-    aSrcBtn->addItem(ST_V_SRC_SIDE_BY_SIDE,  texturesPathRoot + "srcFrmtSideBySide.std");
-    aSrcBtn->addItem(ST_V_SRC_PARALLEL_PAIR, texturesPathRoot + "srcFrmtSideBySide.std", true);
-    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_LR, texturesPathRoot + "srcFrmtOverUnder.std");
-    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_RL, texturesPathRoot + "srcFrmtOverUnder.std",  true);
+    aSrcBtn->addItem(ST_V_SRC_AUTODETECT,    stCTexture("srcFrmtAuto.std"));
+    aSrcBtn->addItem(ST_V_SRC_MONO,          stCTexture("srcFrmtMono.std"));
+    aSrcBtn->addItem(ST_V_SRC_ROW_INTERLACE, stCTexture("srcFrmtInterlace.std"));
+    aSrcBtn->addItem(ST_V_SRC_SIDE_BY_SIDE,  stCTexture("srcFrmtSideBySide.std"));
+    aSrcBtn->addItem(ST_V_SRC_PARALLEL_PAIR, stCTexture("srcFrmtSideBySide.std"), true);
+    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_LR, stCTexture("srcFrmtOverUnder.std"));
+    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_RL, stCTexture("srcFrmtOverUnder.std"),  true);
     myBtnSrcFrmt = aSrcBtn;
-
-    // setup textures for the buttons
-    StString textPath = texturesPathRoot + "openImage.std";
-        btnOpen->setTexturePath(&textPath);
-    textPath = texturesPathRoot + "imageNext.std";
-        btnNext->setTexturePath(&textPath);
-    textPath = texturesPathRoot + "imagePrev.std";
-        btnPrev->setTexturePath(&textPath);
 }
 
 /**
@@ -103,7 +100,7 @@ void StImageViewerGUI::createUpperToolbar() {
  */
 void StImageViewerGUI::createMainMenu() {
     const StRectI_t& aMargins = getRootMarginsPx();
-    menu0Root = new StGLMenu(this, aMargins.left(), aMargins.top(), StGLMenu::MENU_HORIZONTAL, true);
+    myMenuRoot = new StGLMenu(this, aMargins.left(), aMargins.top(), StGLMenu::MENU_HORIZONTAL, true);
 
     StGLMenu* aMenuMedia   = createMediaMenu();  // Root -> Media  menu
     StGLMenu* aMenuView    = createViewMenu();   // Root -> View   menu
@@ -111,10 +108,10 @@ void StImageViewerGUI::createMainMenu() {
     StGLMenu* aMenuHelp    = createHelpMenu();   // Root -> Help   menu
 
     // Attach sub menus to root
-    menu0Root->addItem(tr(MENU_MEDIA), aMenuMedia);
-    menu0Root->addItem(tr(MENU_VIEW),  aMenuView);
-    menu0Root->addItem(myPlugin->StApplication::params.ActiveDevice->getActiveValue(), aDevicesMenu);
-    menu0Root->addItem(tr(MENU_HELP),  aMenuHelp);
+    myMenuRoot->addItem(tr(MENU_MEDIA), aMenuMedia);
+    myMenuRoot->addItem(tr(MENU_VIEW),  aMenuView);
+    myMenuRoot->addItem(myPlugin->StApplication::params.ActiveDevice->getActiveValue(), aDevicesMenu);
+    myMenuRoot->addItem(tr(MENU_HELP),  aMenuHelp);
 }
 
 /**
@@ -200,7 +197,7 @@ StGLMenu* StImageViewerGUI::createViewMenu() {
     aMenuView->addItem(tr(MENU_VIEW_FULLSCREEN),    myPlugin->params.isFullscreen);
     aMenuView->addItem(tr(MENU_VIEW_RESET))
              ->signals.onItemClick.connect(myPlugin, &StImageViewer::doReset);
-    aMenuView->addItem(tr(MENU_VIEW_SWAP_LR),       stImageRegion->params.swapLR);
+    aMenuView->addItem(tr(MENU_VIEW_SWAP_LR),       myImage->params.swapLR);
     aMenuView->addItem(tr(MENU_VIEW_DISPLAY_RATIO), aMenuDispRatio);
     aMenuView->addItem(tr(MENU_VIEW_TEXFILTER),     aMenuTexFilter);
     aMenuView->addItem(tr(MENU_VIEW_IMAGE_ADJUST),  aMenuImgAdjust);
@@ -213,15 +210,15 @@ StGLMenu* StImageViewerGUI::createViewMenu() {
 StGLMenu* StImageViewerGUI::createDisplayModeMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_STEREO),
-                   stImageRegion->params.displayMode, StGLImageRegion::MODE_STEREO);
+                   myImage->params.displayMode, StGLImageRegion::MODE_STEREO);
     aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_LEFT),
-                   stImageRegion->params.displayMode, StGLImageRegion::MODE_ONLY_LEFT);
+                   myImage->params.displayMode, StGLImageRegion::MODE_ONLY_LEFT);
     aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_RIGHT),
-                   stImageRegion->params.displayMode, StGLImageRegion::MODE_ONLY_RIGHT);
+                   myImage->params.displayMode, StGLImageRegion::MODE_ONLY_RIGHT);
     aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_PARALLEL),
-                   stImageRegion->params.displayMode, StGLImageRegion::MODE_PARALLEL);
+                   myImage->params.displayMode, StGLImageRegion::MODE_PARALLEL);
     aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_CROSSYED),
-                   stImageRegion->params.displayMode, StGLImageRegion::MODE_CROSSYED);
+                   myImage->params.displayMode, StGLImageRegion::MODE_CROSSYED);
     return aMenu;
 }
 
@@ -230,13 +227,13 @@ StGLMenu* StImageViewerGUI::createDisplayModeMenu() {
  */
 StGLMenu* StImageViewerGUI::createDisplayRatioMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem("Auto",   stImageRegion->params.displayRatio, StGLImageRegion::RATIO_AUTO);
-    aMenu->addItem("1:1",    stImageRegion->params.displayRatio, StGLImageRegion::RATIO_1_1);
-    aMenu->addItem("4:3",    stImageRegion->params.displayRatio, StGLImageRegion::RATIO_4_3);
-    aMenu->addItem("16:9",   stImageRegion->params.displayRatio, StGLImageRegion::RATIO_16_9);
-    aMenu->addItem("16:10",  stImageRegion->params.displayRatio, StGLImageRegion::RATIO_16_10);
-    aMenu->addItem("2.21:1", stImageRegion->params.displayRatio, StGLImageRegion::RATIO_221_1);
-    aMenu->addItem("5:4",    stImageRegion->params.displayRatio, StGLImageRegion::RATIO_5_4);
+    aMenu->addItem("Auto",   myImage->params.displayRatio, StGLImageRegion::RATIO_AUTO);
+    aMenu->addItem("1:1",    myImage->params.displayRatio, StGLImageRegion::RATIO_1_1);
+    aMenu->addItem("4:3",    myImage->params.displayRatio, StGLImageRegion::RATIO_4_3);
+    aMenu->addItem("16:9",   myImage->params.displayRatio, StGLImageRegion::RATIO_16_9);
+    aMenu->addItem("16:10",  myImage->params.displayRatio, StGLImageRegion::RATIO_16_10);
+    aMenu->addItem("2.21:1", myImage->params.displayRatio, StGLImageRegion::RATIO_221_1);
+    aMenu->addItem("5:4",    myImage->params.displayRatio, StGLImageRegion::RATIO_5_4);
     aMenu->addItem("Keep on restart", myPlugin->params.toRestoreRatio);
     return aMenu;
 }
@@ -247,9 +244,9 @@ StGLMenu* StImageViewerGUI::createDisplayRatioMenu() {
 StGLMenu* StImageViewerGUI::createSmoothFilterMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     aMenu->addItem(tr(MENU_VIEW_TEXFILTER_NEAREST),
-                   stImageRegion->params.textureFilter, StGLImageProgram::FILTER_NEAREST);
+                   myImage->params.textureFilter, StGLImageProgram::FILTER_NEAREST);
     aMenu->addItem(tr(MENU_VIEW_TEXFILTER_LINEAR),
-                   stImageRegion->params.textureFilter, StGLImageProgram::FILTER_LINEAR);
+                   myImage->params.textureFilter, StGLImageProgram::FILTER_LINEAR);
     return aMenu;
 }
 
@@ -267,7 +264,7 @@ StGLMenu* StImageViewerGUI::createImageAdjustMenu() {
 
     StGLMenuItem* anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_GAMMA));
     anItem->setMarginRight(100 + 16);
-    StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, stImageRegion->params.gamma,
+    StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, myImage->params.gamma,
                                                               -16, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->setFormat(stCString("%+01.2f"));
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
@@ -277,7 +274,7 @@ StGLMenu* StImageViewerGUI::createImageAdjustMenu() {
 
     anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_BRIGHTNESS));
     anItem->setMarginRight(100 + 16);
-    aRange = new StGLRangeFieldFloat32(anItem, stImageRegion->params.brightness,
+    aRange = new StGLRangeFieldFloat32(anItem, myImage->params.brightness,
                                        -16, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->setFormat(stCString("%+01.2f"));
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
@@ -287,7 +284,7 @@ StGLMenu* StImageViewerGUI::createImageAdjustMenu() {
 
     anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_SATURATION));
     anItem->setMarginRight(100 + 16);
-    aRange = new StGLRangeFieldFloat32(anItem, stImageRegion->params.saturation,
+    aRange = new StGLRangeFieldFloat32(anItem, myImage->params.saturation,
                                        -16, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->changeRectPx().bottom() = aRange->getRectPx().top() + aMenu->getItemHeight();
     aRange->setFormat(stCString("%+01.2f"));
@@ -454,27 +451,27 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
   myPlugin(thePlugin),
   myWindow(theWindow),
   myLangMap(theLangMap),
-  texturesPathRoot(StProcess::getStShareFolder() + "textures" + SYS_FS_SPLITTER),
-  stTimeVisibleLock(true),
+  myTexturesFolder(StProcess::getStShareFolder() + "textures" + SYS_FS_SPLITTER),
+  myVisibilityTimer(true),
   //
-  stImageRegion(NULL),
-  stTextDescr(NULL),
+  myImage(NULL),
+  myDescr(NULL),
   myMsgStack(NULL),
   //
-  menu0Root(NULL),
+  myMenuRoot(NULL),
   //
-  upperRegion(NULL),
-  btnOpen(NULL),
-  btnPrev(NULL),
-  btnNext(NULL),
-  btnSwapLR(NULL),
+  myPanelUpper(NULL),
+  myBtnOpen(NULL),
+  myBtnPrev(NULL),
+  myBtnNext(NULL),
+  myBtnSwapLR(NULL),
   myBtnSrcFrmt(NULL),
   myBtnFull(NULL),
   //
   myFpsWidget(NULL),
   //
-  isGUIVisible(true),
-  isGUIMinimal(true) {
+  myIsVisibleGUI(true),
+  myIsMinimalGUI(true) {
     setRootMarginsPx(myWindow->getMargins());
     const StRectI_t& aMargins = getRootMarginsPx();
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StImageViewerGUI::doShowFPS);
@@ -483,7 +480,7 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
     if(aTextureQueue.isNull()) {
         aTextureQueue = new StGLTextureQueue(2);
     }
-    stImageRegion = new StGLImageRegion(this, aTextureQueue, true);
+    myImage = new StGLImageRegion(this, aTextureQueue, true);
 
     createUpperToolbar();
 
@@ -491,10 +488,9 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
     myBtnFull = new StGLTextureButton(this, -aMargins.right() - 8, -aMargins.bottom() - 8,
                                       StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_RIGHT));
     myBtnFull->signals.onBtnClick.connect(myPlugin->params.isFullscreen.operator->(), &StBoolParam::doReverse);
-    StString aTextPath = texturesPathRoot + "fullscr.std";
-    myBtnFull->setTexturePath(&aTextPath);
+    myBtnFull->setTexturePath(stCTexture("fullscr.std"));
 
-    stTextDescr = new StGLDescription(this);
+    myDescr = new StGLDescription(this);
 
     // create Main menu
     createMainMenu();
@@ -513,7 +509,7 @@ StImageViewerGUI::~StImageViewerGUI() {
 }
 
 bool StImageViewerGUI::toHideCursor() const {
-    return (menu0Root != NULL) && !menu0Root->isVisible();
+    return (myMenuRoot != NULL) && !myMenuRoot->isVisible();
 }
 
 namespace {
@@ -527,50 +523,51 @@ namespace {
 
 };
 
-void StImageViewerGUI::setVisibility(const StPointD_t& cursorZo, bool isMouseActive) {
-    isGUIVisible = isMouseActive
-        || stTimeVisibleLock.getElapsedTime() < 2.0
-        || (upperRegion != NULL && !isGUIMinimal && upperRegion->isPointIn(cursorZo))
-        || (menu0Root != NULL && menu0Root->isActive());
+void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
+                                     bool              isMouseActive) {
+    myIsVisibleGUI = isMouseActive
+        || myVisibilityTimer.getElapsedTime() < 2.0
+        || (myPanelUpper != NULL && !myIsMinimalGUI && myPanelUpper->isPointIn(theCursor))
+        || (myMenuRoot   != NULL && myMenuRoot->isActive());
     if(isMouseActive) {
-        stTimeVisibleLock.restart();
+        myVisibilityTimer.restart();
     }
-    const bool toShowAll = !isGUIMinimal && isGUIVisible;
+    const bool toShowAll = !myIsMinimalGUI && myIsVisibleGUI;
 
     // always visible
     StGLRootWidget::setVisibility(true, true);
-    stImageRegion->setVisibility(true, true);
+    myImage->setVisibility(true, true);
 
-    if(menu0Root != NULL) {
-        ///menu0Root->setVisibility(isGUIVisible, false);
-        menu0Root->setVisibility(toShowAll, false);
+    if(myMenuRoot != NULL) {
+        ///myMenuRoot->setVisibility(myIsVisibleGUI, false);
+        myMenuRoot->setVisibility(toShowAll, false);
     }
 
-    if(upperRegion != NULL) {
-        upperRegion->setVisibility(toShowAll);
-        for(StGLWidget* child = upperRegion->getChildren()->getStart();
+    if(myPanelUpper != NULL) {
+        myPanelUpper->setVisibility(toShowAll);
+        for(StGLWidget* child = myPanelUpper->getChildren()->getStart();
             child != NULL; child = child->getNext()) {
             child->setVisibility(toShowAll);
         }
     }
     if(myBtnFull != NULL) {
-        myBtnFull->setVisibility(isGUIMinimal || toShowAll);
+        myBtnFull->setVisibility(myIsMinimalGUI || toShowAll);
     }
 
-    if(stTextDescr != NULL) {
-        stTextDescr->setVisibility(true, true);
-        if(::isPointIn(btnOpen, cursorZo)) {
-            stTextDescr->setText(tr(IMAGE_OPEN));
-        } else if(::isPointIn(btnPrev, cursorZo)) {
-            stTextDescr->setText(tr(IMAGE_PREVIOUS));
-        } else if(::isPointIn(btnNext, cursorZo)) {
-            stTextDescr->setText(tr(IMAGE_NEXT));
-        } else if(::isPointIn(btnSwapLR, cursorZo)) {
-            size_t aLngId = stImageRegion->params.swapLR->getValue() ? SWAP_LR_ON : SWAP_LR_OFF;
-            stTextDescr->setText(tr(aLngId));
-        } else if(::isPointIn(myBtnFull, cursorZo)) {
-            stTextDescr->setText(tr(FULLSCREEN));
-        } else if(::isPointIn(myBtnSrcFrmt, cursorZo)) {
+    if(myDescr != NULL) {
+        myDescr->setVisibility(true, true);
+        if(::isPointIn(myBtnOpen, theCursor)) {
+            myDescr->setText(tr(IMAGE_OPEN));
+        } else if(::isPointIn(myBtnPrev, theCursor)) {
+            myDescr->setText(tr(IMAGE_PREVIOUS));
+        } else if(::isPointIn(myBtnNext, theCursor)) {
+            myDescr->setText(tr(IMAGE_NEXT));
+        } else if(::isPointIn(myBtnSwapLR, theCursor)) {
+            size_t aLngId = myImage->params.swapLR->getValue() ? SWAP_LR_ON : SWAP_LR_OFF;
+            myDescr->setText(tr(aLngId));
+        } else if(::isPointIn(myBtnFull, theCursor)) {
+            myDescr->setText(tr(FULLSCREEN));
+        } else if(::isPointIn(myBtnSrcFrmt, theCursor)) {
             size_t aLngId = MENU_SRC_FORMAT_AUTO;
             switch(myPlugin->params.srcFormat->getValue()) {
                 case ST_V_SRC_MONO:                 aLngId = MENU_SRC_FORMAT_MONO;         break;
@@ -586,22 +583,22 @@ void StImageViewerGUI::setVisibility(const StPointD_t& cursorZo, bool isMouseAct
                 default:
                 case ST_V_SRC_AUTODETECT:           aLngId = MENU_SRC_FORMAT_AUTO;         break;
             }
-            stTextDescr->setText(tr(BTN_SRC_FORMAT) + tr(aLngId));
+            myDescr->setText(tr(BTN_SRC_FORMAT) + tr(aLngId));
         } else {
-            stTextDescr->setVisibility(false, true);
+            myDescr->setVisibility(false, true);
         }
     }
 }
 
 void StImageViewerGUI::stglUpdate(const StPointD_t& pointZo) {
     StGLRootWidget::stglUpdate(pointZo);
-    if(stTextDescr != NULL) {
-        stTextDescr->setPoint(pointZo);
+    if(myDescr != NULL) {
+        myDescr->setPoint(pointZo);
     }
     if(myLangMap->wasReloaded()) {
-        StGLMenu::DeleteWithSubMenus(menu0Root); menu0Root = NULL;
+        StGLMenu::DeleteWithSubMenus(myMenuRoot); myMenuRoot = NULL;
         createMainMenu();
-        menu0Root->stglUpdateSubmenuLayout();
+        myMenuRoot->stglUpdateSubmenuLayout();
         myLangMap->resetReloaded();
         // turn back topmost position
         getChildren()->moveToTop(myMsgStack);
@@ -611,8 +608,8 @@ void StImageViewerGUI::stglUpdate(const StPointD_t& pointZo) {
 void StImageViewerGUI::stglResize(const StRectI_t& winRectPx) {
     const int aSizeX = winRectPx.width();
     const int aSizeY = winRectPx.height();
-    stImageRegion->changeRectPx().bottom() = aSizeY;
-    stImageRegion->changeRectPx().right()  = aSizeX;
+    myImage->changeRectPx().bottom() = aSizeY;
+    myImage->changeRectPx().right()  = aSizeX;
 
     const StRectI_t& aMargins = myWindow->getMargins();
     const bool areNewMargins = aMargins != getRootMarginsPx();
@@ -620,19 +617,19 @@ void StImageViewerGUI::stglResize(const StRectI_t& winRectPx) {
         setRootMarginsPx(aMargins);
     }
 
-    if(upperRegion != NULL) {
-        upperRegion->changeRectPx().right() = aSizeX;
-        isGUIMinimal = (aSizeY < 400 || aSizeX < 400);
+    if(myPanelUpper != NULL) {
+        myPanelUpper->changeRectPx().right() = aSizeX;
+        myIsMinimalGUI = (aSizeY < 400 || aSizeX < 400);
     }
     if(areNewMargins) {
-        if(upperRegion != NULL) {
-            upperRegion->changeRectPx().left() = aMargins.left();
-            upperRegion->changeRectPx().top()  = aMargins.top();
+        if(myPanelUpper != NULL) {
+            myPanelUpper->changeRectPx().left() = aMargins.left();
+            myPanelUpper->changeRectPx().top()  = aMargins.top();
         }
-        if(menu0Root != NULL) {
-            menu0Root->changeRectPx().left() = aMargins.left();
-            menu0Root->changeRectPx().top()  = aMargins.top();
-            menu0Root->stglUpdateSubmenuLayout();
+        if(myMenuRoot != NULL) {
+            myMenuRoot->changeRectPx().left() = aMargins.left();
+            myMenuRoot->changeRectPx().top()  = aMargins.top();
+            myMenuRoot->stglUpdateSubmenuLayout();
         }
     }
 

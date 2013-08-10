@@ -57,29 +57,32 @@ class StImageViewerGUI : public StGLRootWidget {
         CLICKED_ICON_SRC2AUTODETECT,
     };
 
-    StImageViewer*           myPlugin;  //!< link to the main Drawer class
-    StWindow*                myWindow;  //!< link to the window instance
-    StTranslations*          myLangMap; //!< translated strings map
-    StString      texturesPathRoot; // textures directory
-    StTimer      stTimeVisibleLock; // minimum visible delay
+    /**
+     * @return absolute path to the texture
+     */
+    ST_LOCAL StString getTexturePath(const StCString& theTextureName) const {
+        return myTexturesFolder + theTextureName;
+    }
 
-    StGLImageRegion* stImageRegion; // the main image
-    StGLDescription*   stTextDescr; // description text shown near mouse cursor
-    StGLMsgStack*       myMsgStack; // messages stack
+        public: //! @name StGLRootWidget overrides
 
-    StGLMenu*            menu0Root; // main menu
+    ST_LOCAL StImageViewerGUI(StImageViewer*  thePlugin,
+                              StWindow*       theWindow,
+                              StTranslations* theLangMap,
+                              const StHandle<StGLTextureQueue>& theTextureQueue);
+    ST_LOCAL virtual ~StImageViewerGUI();
+    ST_LOCAL virtual void stglUpdate(const StPointD_t& pointZo);
+    ST_LOCAL virtual void stglResize(const StRectI_t& winRectPx);
+    ST_LOCAL virtual void stglDraw(unsigned int theView);
+    ST_LOCAL virtual void setVisibility(const StPointD_t& theCursor,
+                                        bool              isMouseActive);
 
-    StGLWidget*        upperRegion; // upper toolbar
-    StGLTextureButton*     btnOpen;
-    StGLTextureButton*     btnPrev;
-    StGLTextureButton*     btnNext;
-    StGLTextureButton*   btnSwapLR;
-    StGLWidget*       myBtnSrcFrmt;
-    StGLTextureButton*   myBtnFull;
-    StGLFpsLabel*      myFpsWidget;
+        public:
 
-    bool isGUIVisible;
-    bool isGUIMinimal;
+    ST_LOCAL bool toHideCursor() const;
+    ST_LOCAL void showUpdatesNotify();
+
+    ST_LOCAL void doAboutImage(const size_t );
 
         private:
 
@@ -89,7 +92,7 @@ class StImageViewerGUI : public StGLRootWidget {
         return myLangMap->getValue(theId);
     }
 
-        private: //!< menus creation routines
+        private: //! @name menus creation routines
 
     ST_LOCAL void      createMainMenu();         // Root (Main menu)
     ST_LOCAL StGLMenu* createMediaMenu();        // Root -> Media menu
@@ -106,26 +109,7 @@ class StImageViewerGUI : public StGLRootWidget {
     ST_LOCAL StGLMenu* createCheckUpdatesMenu(); // Root -> Help -> Check updates menu
     ST_LOCAL StGLMenu* createLanguageMenu();     // Root -> Help -> Language menu
 
-        public: //!< StGLRootWidget overrides
-
-    ST_LOCAL StImageViewerGUI(StImageViewer*  thePlugin,
-                              StWindow*       theWindow,
-                              StTranslations* theLangMap,
-                              const StHandle<StGLTextureQueue>& theTextureQueue);
-    ST_LOCAL virtual ~StImageViewerGUI();
-    ST_LOCAL virtual void stglUpdate(const StPointD_t& pointZo);
-    ST_LOCAL virtual void stglResize(const StRectI_t& winRectPx);
-    ST_LOCAL virtual void stglDraw(unsigned int theView);
-    ST_LOCAL virtual void setVisibility(const StPointD_t& pointZo, bool isMouseActive = false);
-
-        public:
-
-    ST_LOCAL bool toHideCursor() const;
-    ST_LOCAL void showUpdatesNotify();
-
-    ST_LOCAL void doAboutImage(const size_t );
-
-        private: //!< callback Slots
+        private: //! @name callback Slots
 
     ST_LOCAL void doAboutProgram(const size_t );
     ST_LOCAL void doUserTips    (const size_t );
@@ -135,6 +119,36 @@ class StImageViewerGUI : public StGLRootWidget {
     ST_LOCAL void doShowFPS(const bool );
     ST_LOCAL void doAboutRenderer(const size_t );
 
+        private: //! @name private fields
+
+    StImageViewer*      myPlugin;           //!< link to the main Drawer class
+    StWindow*           myWindow;           //!< link to the window instance
+    StTranslations*     myLangMap;          //!< translated strings map
+    StString            myTexturesFolder;   //!< textures directory
+    StTimer             myVisibilityTimer;  //!< minimum visible delay
+
+    StGLImageRegion*    myImage;            //!< the main image
+    StGLDescription*    myDescr;            //!< description text shown near mouse cursor
+    StGLMsgStack*       myMsgStack;         //!< messages stack
+
+    StGLMenu*           myMenuRoot;         //!< main menu
+
+    StGLWidget*         myPanelUpper;       //!< upper toolbar
+    StGLTextureButton*  myBtnOpen;
+    StGLTextureButton*  myBtnPrev;
+    StGLTextureButton*  myBtnNext;
+    StGLTextureButton*  myBtnSwapLR;
+    StGLWidget*         myBtnSrcFrmt;
+    StGLTextureButton*  myBtnFull;
+    StGLFpsLabel*       myFpsWidget;
+
+    bool                myIsVisibleGUI;
+    bool                myIsMinimalGUI;
+
+        private:
+
+    friend class StImageViewer;
+
 };
 
-#endif //__StImageViewerGUI_h_
+#endif // __StImageViewerGUI_h_
