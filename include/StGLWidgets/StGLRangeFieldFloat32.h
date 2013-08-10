@@ -60,6 +60,7 @@ class StGLRangeFieldFloat32 : public StGLWidget {
         private:
 
     ST_LOCAL void onValueChange(const float theValue);
+    ST_LOCAL void doMouseUnclick(const int theBtnId);
 
         private:
 

@@ -21,7 +21,8 @@ StGLRangeFieldFloat32::StGLRangeFieldFloat32(StGLWidget* theParent,
   myTrackValue(theTrackedValue),
   myValueText(NULL),
   myFormat(stCString("%+01.3f")) {
-    myTrackValue->signals.onChanged += stSlot(this, &StGLRangeFieldFloat32::onValueChange);
+    myTrackValue->signals.onChanged   += stSlot(this, &StGLRangeFieldFloat32::onValueChange);
+    StGLWidget::signals.onMouseUnclick = stSlot(this, &StGLRangeFieldFloat32::doMouseUnclick);
 }
 
 StGLRangeFieldFloat32::~StGLRangeFieldFloat32() {
@@ -99,4 +100,12 @@ void StGLRangeFieldFloat32::doDecrement(const size_t ) {
 
 void StGLRangeFieldFloat32::doIncrement(const size_t ) {
     myTrackValue->increment();
+}
+
+void StGLRangeFieldFloat32::doMouseUnclick(const int theBtnId) {
+    if(theBtnId == ST_MOUSE_SCROLL_V_UP) {
+        myTrackValue->increment();
+    } else if(theBtnId == ST_MOUSE_SCROLL_V_DOWN) {
+        myTrackValue->decrement();
+    }
 }
