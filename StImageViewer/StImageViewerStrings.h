@@ -57,6 +57,7 @@ namespace StImageViewerStrings {
         MENU_SRC_FORMAT_ANA_RC = 1137,
         MENU_SRC_FORMAT_ANA_RB = 1138,
         MENU_SRC_FORMAT_ANA_YB = 1139,
+        MENU_SRC_FORMAT_SEPARATE = 1142,
 
         // Root -> View menu
         MENU_VIEW = 1200,

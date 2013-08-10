@@ -111,6 +111,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Frame-sequential");
     theStrings(MENU_SRC_FORMAT_TILED_4X,
                "Tiled 4X");
+    theStrings(MENU_SRC_FORMAT_SEPARATE,
+               "2 streams");
     theStrings(MENU_MEDIA_RECENT_CLEAR,
                "Clear history");
     theStrings(MENU_VIEW_DISPLAY_MODE,

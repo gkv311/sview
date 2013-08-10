@@ -998,7 +998,12 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
             myDescr->setText(tr(aLngId));
         } else if(myBtnSrcFrmt->isPointIn(theCursor)) {
             size_t aLngId = MENU_SRC_FORMAT_AUTO;
-            switch(myPlugin->params.srcFormat->getValue()) {
+            StFormatEnum aSrcFormat = (StFormatEnum )myPlugin->params.srcFormat->getValue();
+            if(aSrcFormat == ST_V_SRC_AUTODETECT
+            && !myImage->params.stereoFile.isNull()) {
+                aSrcFormat = myImage->params.stereoFile->getSrcFormat();
+            }
+            switch(aSrcFormat) {
                 case ST_V_SRC_MONO:                 aLngId = MENU_SRC_FORMAT_MONO; break;
                 case ST_V_SRC_SIDE_BY_SIDE:         aLngId = MENU_SRC_FORMAT_CROSS_EYED; break;
                 case ST_V_SRC_PARALLEL_PAIR:        aLngId = MENU_SRC_FORMAT_PARALLEL;   break;
@@ -1010,7 +1015,7 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
                 case ST_V_SRC_ANAGLYPH_YELLOW_BLUE: aLngId = MENU_SRC_FORMAT_ANA_YB;   break;
                 case ST_V_SRC_PAGE_FLIP:            aLngId = MENU_SRC_FORMAT_PAGEFLIP; break;
                 case ST_V_SRC_TILED_4X:             aLngId = MENU_SRC_FORMAT_TILED_4X; break;
-                //case ST_V_SRC_SEPARATE_FRAMES:      aLngId = MENU_SRC_FORMAT_SEPARATE; break;
+                case ST_V_SRC_SEPARATE_FRAMES:      aLngId = MENU_SRC_FORMAT_SEPARATE; break;
                 default:
                 case ST_V_SRC_AUTODETECT:           aLngId = MENU_SRC_FORMAT_AUTO; break;
             }

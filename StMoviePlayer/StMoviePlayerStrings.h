@@ -66,6 +66,7 @@ namespace StMoviePlayerStrings {
         MENU_SRC_FORMAT_ANA_YB = 1139,
         MENU_SRC_FORMAT_PAGEFLIP = 1140,
         MENU_SRC_FORMAT_TILED_4X = 1141,
+        MENU_SRC_FORMAT_SEPARATE = 1142,
 
         // Root -> Media menu -> Recent files menu
         MENU_MEDIA_RECENT_CLEAR = 1160,

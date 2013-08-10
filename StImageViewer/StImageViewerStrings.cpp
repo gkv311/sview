@@ -61,6 +61,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Anaglyph Green/Red+Blue");
     theStrings(MENU_SRC_FORMAT_ANA_YB,
                "Anaglyph Yellow/Blue");
+    theStrings(MENU_SRC_FORMAT_SEPARATE,
+               "2 streams");
     theStrings(MENU_VIEW_DISPLAY_MODE,
                "Stereo Output");
     theStrings(MENU_VIEW_FULLSCREEN,
