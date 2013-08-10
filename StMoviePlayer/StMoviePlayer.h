@@ -257,6 +257,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doSwitchAudioDevice(const int32_t theDevId);
     ST_LOCAL void doSetAudioVolume(const float theGain);
     ST_LOCAL void doSetAudioMute(const bool theToMute);
+    ST_LOCAL void doSetAudioDelay(const float theDelaySec);
     ST_LOCAL void doSwitchShuffle(const bool theShuffleOn);
     ST_LOCAL void doSwitchLoopSingle(const bool theValue);
     ST_LOCAL void doFullscreen(const bool theIsFullscreen);
