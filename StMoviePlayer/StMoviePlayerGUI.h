@@ -52,24 +52,6 @@ class StMoviePlayerGUI : public StGLRootWidget {
 
         public:
 
-    enum {
-        CLICKED_NONE = 0,
-        CLICKED_ICON_OPEN_FILE,
-        CLICKED_ICON_SWAP_LR,
-        CLICKED_ICON_SRC2MONO,
-        CLICKED_ICON_SRC2SIDE_BY_SIDE,
-        CLICKED_ICON_SRC2SOVER_UNDER,
-        CLICKED_ICON_SRC2HOR_INTERLACE,
-        CLICKED_ICON_SRC2AUTODETECT,
-        CLICKED_SEEKBAR,
-        CLICKED_ICON_PLAY,
-        CLICKED_TIMEBOX,
-        CLICKED_ICON_PREV_FILE,
-        CLICKED_ICON_NEXT_FILE,
-        CLICKED_ICON_PLAYLIST,
-        CLICKED_ICON_FULLSCREEN,
-    };
-
     /**
      * @return translation for the string with specified id
      */

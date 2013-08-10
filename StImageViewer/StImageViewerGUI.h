@@ -44,19 +44,6 @@ class StImageViewerGUI : public StGLRootWidget {
 
         public:
 
-    enum {
-        CLICKED_NONE = 0,
-        CLICKED_ICON_OPEN_FILE,
-        CLICKED_ICON_PREV_FILE,
-        CLICKED_ICON_NEXT_FILE,
-        CLICKED_ICON_SWAP_LR,
-        CLICKED_ICON_SRC2MONO,
-        CLICKED_ICON_SRC2SIDE_BY_SIDE,
-        CLICKED_ICON_SRC2SOVER_UNDER,
-        CLICKED_ICON_SRC2HOR_INTERLACE,
-        CLICKED_ICON_SRC2AUTODETECT,
-    };
-
     /**
      * @return absolute path to the texture
      */
