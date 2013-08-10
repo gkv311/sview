@@ -166,6 +166,8 @@ bool StGLMenu::stglInit() {
 
     // already initialized?
     if(myVertexBuf.isValid()) {
+        // synchronize menu items visibility
+        setVisibility(isVisible(), true);
         return true;
     }
 
