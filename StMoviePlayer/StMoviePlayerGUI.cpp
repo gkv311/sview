@@ -358,10 +358,11 @@ void StMoviePlayerGUI::updateRecentMenu() {
  */
 StGLMenu* StMoviePlayerGUI::createViewMenu() {
     StGLMenu* aMenuView = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    StGLMenu* aMenuDispMode  = createDisplayModeMenu();  // Root -> View menu -> Output
-    StGLMenu* aMenuDispRatio = createDisplayRatioMenu(); // Root -> View menu -> Display Ratio
-    StGLMenu* aMenuTexFilter = createSmoothFilterMenu(); // Root -> View menu -> Smooth Filter
-    StGLMenu* aMenuImgAdjust = createImageAdjustMenu();  // Root -> View menu -> Image Adjust
+    StGLMenu* aMenuDispMode  = createDisplayModeMenu();
+    StGLMenu* aMenuDispRatio = createDisplayRatioMenu();
+    StGLMenu* aMenuSurface   = createSurfaceMenu();
+    StGLMenu* aMenuTexFilter = createSmoothFilterMenu();
+    StGLMenu* aMenuImgAdjust = createImageAdjustMenu();
 
     aMenuView->addItem(tr(MENU_VIEW_DISPLAY_MODE),  aMenuDispMode);
     aMenuView->addItem(tr(MENU_VIEW_FULLSCREEN),    myPlugin->params.isFullscreen);
@@ -369,6 +370,7 @@ StGLMenu* StMoviePlayerGUI::createViewMenu() {
              ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doReset);
     aMenuView->addItem(tr(MENU_VIEW_SWAP_LR),       myImage->params.swapLR);
     aMenuView->addItem(tr(MENU_VIEW_DISPLAY_RATIO), aMenuDispRatio);
+    aMenuView->addItem(tr(MENU_VIEW_SURFACE),       aMenuSurface);
     aMenuView->addItem(tr(MENU_VIEW_TEXFILTER),     aMenuTexFilter);
     aMenuView->addItem(tr(MENU_VIEW_IMAGE_ADJUST),  aMenuImgAdjust);
     return aMenuView;
@@ -405,6 +407,18 @@ StGLMenu* StMoviePlayerGUI::createDisplayRatioMenu() {
     aMenu->addItem("2.21:1", myImage->params.displayRatio, StGLImageRegion::RATIO_221_1);
     aMenu->addItem("5:4",    myImage->params.displayRatio, StGLImageRegion::RATIO_5_4);
     aMenu->addItem("Keep on restart", myPlugin->params.toRestoreRatio);
+    return aMenu;
+}
+
+/**
+ * Root -> View menu -> Surface
+ */
+StGLMenu* StMoviePlayerGUI::createSurfaceMenu() {
+    StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+    aMenu->addItem(tr(MENU_VIEW_SURFACE_PLANE),
+                   myImage->params.ViewMode, StStereoParams::FLAT_IMAGE);
+    aMenu->addItem(tr(MENU_VIEW_SURFACE_SPHERE),
+                   myImage->params.ViewMode, StStereoParams::PANORAMA_SPHERE);
     return aMenu;
 }
 

@@ -58,22 +58,18 @@ namespace {
 
     class ST_LOCAL StSwapLRParam : public StBoolParam {
 
-            private:
-
-        StHandle<StStereoParams> myTrackedParams;
-
             public:
 
-        StSwapLRParam()
-        : StBoolParam(false),
-          myTrackedParams() {}
+        StSwapLRParam() : StBoolParam(false) {}
 
         virtual bool getValue() const {
-            return myTrackedParams.isNull() ? false : myTrackedParams->isSwapLR();
+            return !myTrackedParams.isNull()
+                 && myTrackedParams->isSwapLR();
         }
 
         virtual bool setValue(const bool theValue) {
-            if(myTrackedParams.isNull() || myTrackedParams->isSwapLR() == theValue) {
+            if(myTrackedParams.isNull()
+            || myTrackedParams->isSwapLR() == theValue) {
                 return false;
             }
             myTrackedParams->setSwapLR(theValue);
@@ -83,6 +79,39 @@ namespace {
         void setTrackedHandle(const StHandle<StStereoParams>& theTrackedParams) {
             myTrackedParams = theTrackedParams;
         }
+
+            private:
+
+        StHandle<StStereoParams> myTrackedParams;
+
+    };
+
+    class ST_LOCAL StViewModeParam : public StInt32Param {
+
+            public:
+
+        StViewModeParam() : StInt32Param(0) {}
+
+        virtual int32_t getValue() const {
+            return myTrackedParams.isNull() ? 0 : myTrackedParams->getViewMode();
+        }
+
+        virtual bool setValue(const int32_t theValue) {
+            if(myTrackedParams.isNull()
+            || myTrackedParams->getViewMode() == theValue) {
+                return false;
+            }
+            myTrackedParams->setViewMode((StStereoParams::ViewMode )theValue);
+            return true;
+        }
+
+        void setTrackedHandle(const StHandle<StStereoParams>& theTrackedParams) {
+            myTrackedParams = theTrackedParams;
+        }
+
+            private:
+
+        StHandle<StStereoParams> myTrackedParams;
 
     };
 
@@ -113,7 +142,8 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
                                                 myProgramSphere.params.brightness);
     params.saturation = new StTrackedFloatParam(myProgramFlat.params.saturation,
                                                 myProgramSphere.params.saturation);
-    params.swapLR = new StSwapLRParam();
+    params.swapLR   = new StSwapLRParam();
+    params.ViewMode = new StViewModeParam();
 
     // create actions
     StHandle<StAction> anAction;
@@ -231,7 +261,8 @@ void StGLImageRegion::stglUpdate(const StPointD_t& pointZo) {
     if(myIsInitialized) {
         myHasVideoStream = myTextureQueue->stglUpdateStTextures(getContext()) || myTextureQueue->hasConnectedStream();
         params.stereoFile = myTextureQueue->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE).getSource();
-        ((StSwapLRParam* )params.swapLR.access())->setTrackedHandle(params.stereoFile);
+        ((StSwapLRParam*   )params.swapLR  .access())->setTrackedHandle(params.stereoFile);
+        ((StViewModeParam* )params.ViewMode.access())->setTrackedHandle(params.stereoFile);
     }
 }
 

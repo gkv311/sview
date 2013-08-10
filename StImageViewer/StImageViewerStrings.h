@@ -68,6 +68,7 @@ namespace StImageViewerStrings {
         MENU_VIEW_DISPLAY_RATIO = 1205,
         MENU_VIEW_TEXFILTER     = 1206,
         MENU_VIEW_IMAGE_ADJUST  = 1207,
+        MENU_VIEW_SURFACE       = 1208,
 
         MENU_VIEW_DISPLAY_MODE_STEREO       = 1210,
         MENU_VIEW_DISPLAY_MODE_LEFT         = 1211,
@@ -82,6 +83,10 @@ namespace StImageViewerStrings {
         MENU_VIEW_ADJUST_BRIGHTNESS = 1271,
         MENU_VIEW_ADJUST_SATURATION = 1272,
         MENU_VIEW_ADJUST_GAMMA      = 1273,
+
+        MENU_VIEW_SURFACE_PLANE     = 1280,
+        MENU_VIEW_SURFACE_SPHERE    = 1281,
+        MENU_VIEW_SURFACE_CYLINDER  = 1282,
 
         // Root -> Output -> Change Device menu
         MENU_CHANGE_DEVICE  = 1400,

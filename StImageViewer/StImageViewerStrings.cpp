@@ -85,6 +85,14 @@ void loadDefaults(StLangMap& theStrings) {
                "Saturation");
     theStrings(MENU_VIEW_ADJUST_GAMMA,
                "Gamma");
+    theStrings(MENU_VIEW_SURFACE,
+               "Surface");
+    theStrings(MENU_VIEW_SURFACE_PLANE,
+               "Plane");
+    theStrings(MENU_VIEW_SURFACE_SPHERE,
+               "Sphere");
+    theStrings(MENU_VIEW_SURFACE_CYLINDER,
+               "Cylinder");
     theStrings(MENU_VIEW_DISPLAY_MODE_STEREO,
                "Stereo");
     theStrings(MENU_VIEW_DISPLAY_MODE_LEFT,

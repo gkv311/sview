@@ -117,6 +117,7 @@ class StGLImageRegion : public StGLWidget {
         // per file parameters
         StHandle<StStereoParams> stereoFile;
         StHandle<StBoolParam>    swapLR;        //!< reversion flag
+        StHandle<StInt32Param>   ViewMode;      //!< StStereoParams::ViewMode
 
     } params;
 

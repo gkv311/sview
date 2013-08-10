@@ -89,6 +89,7 @@ class StImageViewerGUI : public StGLRootWidget {
     ST_LOCAL StGLMenu* createViewMenu();         // Root -> View menu
     ST_LOCAL StGLMenu* createDisplayModeMenu();  // Root -> View menu -> Output
     ST_LOCAL StGLMenu* createDisplayRatioMenu(); // Root -> View menu -> Display Ratio
+    ST_LOCAL StGLMenu* createSurfaceMenu();      // Root -> View   -> Surface
     ST_LOCAL StGLMenu* createSmoothFilterMenu(); // Root -> View menu -> Smooth Filter
     ST_LOCAL StGLMenu* createImageAdjustMenu();  // Root -> View menu -> Image Adjust
     ST_LOCAL StGLMenu* createOutputMenu();       // Root -> Output menu
