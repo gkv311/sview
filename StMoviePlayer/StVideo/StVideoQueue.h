@@ -250,8 +250,8 @@ class StVideoQueue : public StAVPacketQueue {
     StImage                    myCachedFrame;
     bool                       myWasFlushed;
 
-    StFormatEnum               mySrcFormat;       //!< source format
-    StFormatEnum               mySrcFormatInfo;   //!< source format information retrieved from stream
+    volatile StFormatEnum      mySrcFormat;       //!< source format
+    volatile StFormatEnum      mySrcFormatInfo;   //!< source format information retrieved from stream
 
 };
 

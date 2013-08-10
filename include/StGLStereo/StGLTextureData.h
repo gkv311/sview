@@ -56,8 +56,14 @@ class StGLTextureData {
 
         public:
 
+    /**
+     * Default constructor
+     */
     ST_CPPEXPORT StGLTextureData();
 
+    /**
+     * Destructor.
+     */
     ST_CPPEXPORT ~StGLTextureData();
 
     /**
@@ -75,14 +81,14 @@ class StGLTextureData {
      * @return presentation timestamp
      */
     inline double getPTS() {
-        return srcPTS;
+        return myPts;
     }
 
     /**
      * @return format of source data
      */
-    inline StFormatEnum getSourceFormat() {
-        return srcFormat;
+    inline StFormatEnum getSourceFormat() const {
+        return mySrcFormat;
     }
 
     /**
@@ -90,17 +96,17 @@ class StGLTextureData {
      * @return previous item
      */
     inline StGLTextureData* getPrev() {
-        return prev;
+        return myPrev;
     }
 
     /**
      * Iterator's function, communicate queue.
      * @param textureData setted previous item
      */
-    inline void setPrev(StGLTextureData* textureData) {
-        prev = textureData;
-        if(textureData != NULL) {
-            textureData->next = this;
+    inline void setPrev(StGLTextureData* theTextureData) {
+        myPrev = theTextureData;
+        if(theTextureData != NULL) {
+            theTextureData->myNext = this;
         }
     }
 
@@ -109,34 +115,39 @@ class StGLTextureData {
      * @return next item
      */
     inline StGLTextureData* getNext() {
-        return next;
+        return myNext;
     }
 
     /**
      * Iterator's function, communicate queue.
      * @param textureData setted next item
      */
-    inline void setNext(StGLTextureData* textureData) {
-        next = textureData;
-        if(textureData != NULL) {
-            textureData->prev = this;
+    inline void setNext(StGLTextureData* theTextureData) {
+        myNext = theTextureData;
+        if(theTextureData != NULL) {
+            theTextureData->myPrev = this;
         }
     }
 
     /**
      * Setup new data.
-     * @param srcPTS (double ) - presentation timestamp.
+     * @param theDataL    frame which contains left view or left+right views
+     * @param theDataR    frame which contains right view (optional)
+     * @param theStParams handle to associated data
+     * @param theFormat   stereo layout in data
+     * @param thePts      presentation timestamp
      */
-    ST_CPPEXPORT void updateData(const StImage& srcDataLeft,
-                                 const StImage& srcDataRight,
+    ST_CPPEXPORT void updateData(const StImage&                  theDataL,
+                                 const StImage&                  theDataR,
                                  const StHandle<StStereoParams>& theStParams,
-                                 StFormatEnum srcFormat,
-                                 double srcPTS);
+                                 const StFormatEnum              theFormat,
+                                 const double                    thePts);
 
     /**
      * Perform texture update with current data.
-     * @param stQTexture - texture to fill in.
-     * @return true if texture update (all iterations) finished.
+     * @param theCtx      OpenGL context
+     * @param theQTexture texture to fill in
+     * @return true if texture update (all iterations) finished
      */
     ST_CPPEXPORT bool fillTexture(StGLContext&     theCtx,
                                   StGLQuadTexture& theQTexture);
@@ -151,7 +162,7 @@ class StGLTextureData {
         private:
 
 
-    ST_LOCAL bool reAllocate(size_t newSizeBytes);
+    ST_LOCAL bool reAllocate(const size_t theSizeBytes);
 
     /**
      * Fill the texture plane.
@@ -164,21 +175,21 @@ class StGLTextureData {
 
         private:
 
-    StGLTextureData*    prev; // pointer to previous item
-    StGLTextureData*    next; // pointer to next item
+    StGLTextureData*         myPrev;          //!< pointer to previous item in the list
+    StGLTextureData*         myNext;          //!< pointer to next item
 
-    GLubyte*         dataPtr; // data for left and right views
-    size_t     dataSizeBytes; // allocated data size in bytes
-    StImage          myDataL;
-    StImage          myDataR;
+    GLubyte*                 myDataPtr;       //!< data for left and right views
+    size_t                   myDataSizeBytes; //!< allocated data size in bytes
+    StImage                  myDataL;
+    StImage                  myDataR;
 
     StHandle<StStereoParams> myStParams;
-    double            srcPTS; // presentation timestamp
-    StFormatEnum   srcFormat;
+    double                   myPts;           //!< presentation timestamp
+    StFormatEnum             mySrcFormat;
 
-    GLsizei      fillFromRow;
-    GLsizei         fillRows;
+    GLsizei                  myFillFromRow;
+    GLsizei                  myFillRows;
 
 };
 
-#endif //__StGLTextureData_h_
+#endif // __StGLTextureData_h_

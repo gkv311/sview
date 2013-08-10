@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -12,17 +12,15 @@
 #include <StGLCore/StGLCore11.h>
 
 StGLTextureData::StGLTextureData()
-: prev(NULL),
-  next(NULL),
-  dataPtr(NULL),
-  dataSizeBytes(0),
-  myDataL(),
-  myDataR(),
+: myPrev(NULL),
+  myNext(NULL),
+  myDataPtr(NULL),
+  myDataSizeBytes(0),
   myStParams(),
-  srcPTS(0.0),
-  srcFormat(ST_V_SRC_AUTODETECT),
-  fillFromRow(0),
-  fillRows(0) {
+  myPts(0.0),
+  mySrcFormat(ST_V_SRC_AUTODETECT),
+  myFillFromRow(0),
+  myFillRows(0) {
     //
 }
 
@@ -33,28 +31,28 @@ StGLTextureData::~StGLTextureData() {
 void StGLTextureData::reset() {
     myDataL.nullify();
     myDataR.nullify();
-    if(dataPtr != NULL) {
-        stMemFreeAligned(dataPtr);
-        dataPtr = NULL;
+    if(myDataPtr != NULL) {
+        stMemFreeAligned(myDataPtr);
+        myDataPtr = NULL;
     }
-    dataSizeBytes = 0;
-    fillRows = fillFromRow = 0;
+    myDataSizeBytes = 0;
+    myFillRows = myFillFromRow = 0;
 }
 
-bool StGLTextureData::reAllocate(size_t newSizeBytes) {
+bool StGLTextureData::reAllocate(const size_t theSizeBytes) {
     // reallocate only if summary data is not same
     // this allows to smoothly switch to different stereo source formats
     // over/under -> sideBySide -> mono
     // because the summary buffer needed for both views will be same
-    if(dataSizeBytes != newSizeBytes) {
+    if(myDataSizeBytes != theSizeBytes) {
         reset();
-        dataSizeBytes = newSizeBytes;
-        dataPtr = stMemAllocAligned<GLubyte*>(dataSizeBytes);
+        myDataSizeBytes = theSizeBytes;
+        myDataPtr       = stMemAllocAligned<GLubyte*>(myDataSizeBytes);
 
         // reset the buffer (make black)
         /// this is probably useless and wrong in case of non RGB image data
-        stMemSet(dataPtr, 0, dataSizeBytes);
-        ST_DEBUG_LOG("StGLTextureData (re)allocated to " + dataSizeBytes + " bytes");
+        stMemZero(myDataPtr, myDataSizeBytes);
+        ST_DEBUG_LOG("StGLTextureData (re)allocated to " + myDataSizeBytes + " bytes");
         return true;
     }
     return false;
@@ -62,159 +60,158 @@ bool StGLTextureData::reAllocate(size_t newSizeBytes) {
 
 /**
  * Function tries to detect stereo format;
- * this detection possible only for many side by side files.
- * Note: most original DVDs video couldn't be detected as stereo at all.
- * @param ratio (const GLfloat ) - image ratio;
- * @return StFormatEnum - autodetected mono/stereo format.
+ * this detection possible only for side by side files.
+ * @param theRatio image ratio
+ * @return autodetected mono/stereo format
  */
-static StFormatEnum formatFromRatio(const GLfloat ratio) {
+static StFormatEnum formatFromRatio(const GLfloat theRatio) {
     static const GLfloat LAMBDA = 0.18f;
-    if(   stAreEqual(ratio, videoRatio::TV_SIDEBYSIDE, LAMBDA)
-       || stAreEqual(ratio, videoRatio::WIDE_SIDEBYSIDE, LAMBDA)
-       || stAreEqual(ratio, videoRatio::USERDEF_SIDEBYSIDE, LAMBDA)) {
+    if(stAreEqual(theRatio, videoRatio::TV_SIDEBYSIDE,      LAMBDA)
+    || stAreEqual(theRatio, videoRatio::WIDE_SIDEBYSIDE,    LAMBDA)
+    || stAreEqual(theRatio, videoRatio::USERDEF_SIDEBYSIDE, LAMBDA)) {
         return ST_V_SRC_SIDE_BY_SIDE;
     }
     return ST_V_SRC_MONO;
 }
 
-static GLubyte* readFromParallel(const StImagePlane& srcData,
-                                 GLubyte* outDataPtr,
-                                 StImagePlane& outDataL,
-                                 StImagePlane& outDataR) {
-    if(srcData.isNull()) {
-        return outDataPtr;
+static GLubyte* readFromParallel(const StImagePlane& theSrc,
+                                 GLubyte*            theDataPtr,
+                                 StImagePlane&       theDataL,
+                                 StImagePlane&       theDataR) {
+    if(theSrc.isNull()) {
+        return theDataPtr;
     }
 
-    size_t srcDataSizeXHalf = srcData.getSizeX() / 2;
-    size_t anOutRowBytes = getEvenNumber(srcDataSizeXHalf * srcData.getSizePixelBytes());
-    outDataL.initWrapper(srcData.getFormat(), outDataPtr,
-                         srcDataSizeXHalf, srcData.getSizeY(),
+    const size_t srcDataSizeXHalf = theSrc.getSizeX() / 2;
+    const size_t anOutRowBytes    = getEvenNumber(srcDataSizeXHalf * theSrc.getSizePixelBytes());
+    theDataL.initWrapper(theSrc.getFormat(), theDataPtr,
+                         srcDataSizeXHalf, theSrc.getSizeY(),
                          anOutRowBytes);
-    outDataR.initWrapper(srcData.getFormat(), &outDataPtr[outDataL.getSizeBytes()],
-                         outDataL.getSizeX(), outDataL.getSizeY(),
+    theDataR.initWrapper(theSrc.getFormat(), &theDataPtr[theDataL.getSizeBytes()],
+                         theDataL.getSizeX(), theDataL.getSizeY(),
                          anOutRowBytes);
 
-    size_t copyRows      = stMin(outDataL.getSizeY(), srcData.getSizeY());
-    size_t copyRowBytes  = stMin(outDataL.getSizeX(), srcDataSizeXHalf) * outDataL.getSizePixelBytes();
+    const size_t aCopyRows      = stMin(theDataL.getSizeY(), theSrc.getSizeY());
+    const size_t aCopyRowBytes  = stMin(theDataL.getSizeX(), srcDataSizeXHalf) * theDataL.getSizePixelBytes();
 
     // copy row by row
-    size_t aRowInc = srcData.isTopDown() ? 1 : size_t(-1);
-    size_t aRowTo  = srcData.isTopDown() ? 0 : (copyRows - 1);
-    for(size_t aRowFrom = 0; aRowFrom < copyRows; ++aRowFrom, aRowTo += aRowInc) {
-        stMemCpy(outDataL.changeData(aRowTo, 0),
-                 srcData.getData(aRowFrom, 0),
-                 copyRowBytes);
-        stMemCpy(outDataR.changeData(aRowTo, 0),
-                 srcData.getData(aRowFrom, srcDataSizeXHalf),
-                 copyRowBytes);
+    size_t aRowInc = theSrc.isTopDown() ? 1 : size_t(-1);
+    size_t aRowTo  = theSrc.isTopDown() ? 0 : (aCopyRows - 1);
+    for(size_t aRowFrom = 0; aRowFrom < aCopyRows; ++aRowFrom, aRowTo += aRowInc) {
+        stMemCpy(theDataL.changeData(aRowTo, 0),
+                 theSrc.getData(aRowFrom, 0),
+                 aCopyRowBytes);
+        stMemCpy(theDataR.changeData(aRowTo, 0),
+                 theSrc.getData(aRowFrom, srcDataSizeXHalf),
+                 aCopyRowBytes);
     }
-    return &outDataPtr[2 * outDataL.getSizeBytes()];
+    return &theDataPtr[2 * theDataL.getSizeBytes()];
 }
 
-static GLubyte* readFromOverUnderLR(const StImagePlane& srcData,
-                                    GLubyte* outDataPtr,
-                                    StImagePlane& outDataL,
-                                    StImagePlane& outDataR) {
-    if(srcData.isNull()) {
-        return outDataPtr;
+static GLubyte* readFromOverUnderLR(const StImagePlane& theSrc,
+                                    GLubyte*            theDataPtr,
+                                    StImagePlane&       theDataL,
+                                    StImagePlane&       theDataR) {
+    if(theSrc.isNull()) {
+        return theDataPtr;
     }
 
-    size_t srcDataSizeYHalf = srcData.getSizeY() / 2;
-    size_t anOutRowBytes = getEvenNumber(srcData.getSizeX() * srcData.getSizePixelBytes());
-    outDataL.initWrapper(srcData.getFormat(), outDataPtr,
-                         srcData.getSizeX(), srcDataSizeYHalf,
+    const size_t srcDataSizeYHalf = theSrc.getSizeY() / 2;
+    const size_t anOutRowBytes    = getEvenNumber(theSrc.getSizeX() * theSrc.getSizePixelBytes());
+    theDataL.initWrapper(theSrc.getFormat(), theDataPtr,
+                         theSrc.getSizeX(), srcDataSizeYHalf,
                          anOutRowBytes);
-    outDataR.initWrapper(srcData.getFormat(), &outDataPtr[outDataL.getSizeBytes()],
-                         outDataL.getSizeX(), outDataL.getSizeY(),
+    theDataR.initWrapper(theSrc.getFormat(), &theDataPtr[theDataL.getSizeBytes()],
+                         theDataL.getSizeX(), theDataL.getSizeY(),
                          anOutRowBytes);
 
-    size_t copyRows      = stMin(outDataL.getSizeY(), srcDataSizeYHalf);
-    size_t copyRowBytes  = stMin(outDataL.getSizeX(), srcData.getSizeX()) * outDataL.getSizePixelBytes();
+    const size_t aCopyRows      = stMin(theDataL.getSizeY(), srcDataSizeYHalf);
+    const size_t aCopyRowBytes  = stMin(theDataL.getSizeX(), theSrc.getSizeX()) * theDataL.getSizePixelBytes();
 
-    if(outDataL.getSizeRowBytes() == srcData.getSizeRowBytes() && srcData.isTopDown()) {
+    if(theDataL.getSizeRowBytes() == theSrc.getSizeRowBytes() && theSrc.isTopDown()) {
         // perform fat copy
-        stMemCpy(outDataL.changeData(),
-                 srcData.getData(0, 0),
-                 copyRows * copyRowBytes);
-        stMemCpy(outDataR.changeData(),
-                 srcData.getData(srcDataSizeYHalf, 0),
-                 copyRows * copyRowBytes);
+        stMemCpy(theDataL.changeData(),
+                 theSrc.getData(0, 0),
+                 aCopyRows * aCopyRowBytes);
+        stMemCpy(theDataR.changeData(),
+                 theSrc.getData(srcDataSizeYHalf, 0),
+                 aCopyRows * aCopyRowBytes);
     } else {
         // check if data is upside-down
-        size_t aRowTop    = srcData.isTopDown() ? 0 : srcDataSizeYHalf;
-        size_t aRowBottom = srcData.isTopDown() ? srcDataSizeYHalf : 0;
+        const size_t aRowTop    = theSrc.isTopDown() ? 0 : srcDataSizeYHalf;
+        const size_t aRowBottom = theSrc.isTopDown() ? srcDataSizeYHalf : 0;
 
         // copy row by row
-        size_t aRowInc = srcData.isTopDown() ? 1 : size_t(-1);
-        size_t aRowTo  = srcData.isTopDown() ? 0 : (copyRows - 1);
-        for(size_t aRow = 0; aRow < copyRows; ++aRow, aRowTo += aRowInc) {
-            stMemCpy(outDataL.changeData(aRowTo, 0),
-                     srcData.getData(aRowTop + aRow, 0),
-                     copyRowBytes);
+        const size_t aRowInc = theSrc.isTopDown() ? 1 : size_t(-1);
+        size_t       aRowTo  = theSrc.isTopDown() ? 0 : (aCopyRows - 1);
+        for(size_t aRow = 0; aRow < aCopyRows; ++aRow, aRowTo += aRowInc) {
+            stMemCpy(theDataL.changeData(aRowTo, 0),
+                     theSrc.getData(aRowTop + aRow, 0),
+                     aCopyRowBytes);
         }
-        aRowTo = srcData.isTopDown() ? 0 : (copyRows - 1);
-        for(size_t aRow = 0; aRow < copyRows; ++aRow, aRowTo += aRowInc) {
-            stMemCpy(outDataR.changeData(aRowTo, 0),
-                     srcData.getData(aRowBottom + aRow, 0),
-                     copyRowBytes);
+        aRowTo = theSrc.isTopDown() ? 0 : (aCopyRows - 1);
+        for(size_t aRow = 0; aRow < aCopyRows; ++aRow, aRowTo += aRowInc) {
+            stMemCpy(theDataR.changeData(aRowTo, 0),
+                     theSrc.getData(aRowBottom + aRow, 0),
+                     aCopyRowBytes);
         }
     }
-    return &outDataPtr[2 * outDataL.getSizeBytes()];
+    return &theDataPtr[2 * theDataL.getSizeBytes()];
 }
 
 
-static GLubyte* readFromRowInterlace(const StImagePlane& srcData,
-                                     GLubyte* outDataPtr,
-                                     StImagePlane& outDataL,
-                                     StImagePlane& outDataR) {
-    if(srcData.isNull()) {
-        return outDataPtr;
+static GLubyte* readFromRowInterlace(const StImagePlane& theSrc,
+                                     GLubyte*            theDataPtr,
+                                     StImagePlane&       theDataL,
+                                     StImagePlane&       theDataR) {
+    if(theSrc.isNull()) {
+        return theDataPtr;
     }
 
-    size_t srcDataSizeYHalf = srcData.getSizeY() / 2;
-    size_t anOutRowBytes = getEvenNumber(srcData.getSizeX() * srcData.getSizePixelBytes());
-    outDataL.initWrapper(srcData.getFormat(), outDataPtr,
-                         srcData.getSizeX(), srcDataSizeYHalf,
+    const size_t srcDataSizeYHalf = theSrc.getSizeY() / 2;
+    const size_t anOutRowBytes = getEvenNumber(theSrc.getSizeX() * theSrc.getSizePixelBytes());
+    theDataL.initWrapper(theSrc.getFormat(), theDataPtr,
+                         theSrc.getSizeX(), srcDataSizeYHalf,
                          anOutRowBytes);
-    outDataR.initWrapper(srcData.getFormat(), &outDataPtr[outDataL.getSizeBytes()],
-                         outDataL.getSizeX(), outDataL.getSizeY(),
+    theDataR.initWrapper(theSrc.getFormat(), &theDataPtr[theDataL.getSizeBytes()],
+                         theDataL.getSizeX(), theDataL.getSizeY(),
                          anOutRowBytes);
 
-    size_t copyRows      = stMin(outDataL.getSizeY(), srcDataSizeYHalf);
-    size_t copyRowBytes  = stMin(outDataL.getSizeX(), srcData.getSizeX()) * outDataL.getSizePixelBytes();
+    const size_t aCopyRows     = stMin(theDataL.getSizeY(), srcDataSizeYHalf);
+    const size_t aCopyRowBytes = stMin(theDataL.getSizeX(), theSrc.getSizeX()) * theDataL.getSizePixelBytes();
 
-    size_t srcRowLeft  = srcData.isTopDown() ? 0 : 1;
-    size_t srcRowRight = srcData.isTopDown() ? 1 : 0;
+    const size_t aSrcRowLeft   = theSrc.isTopDown() ? 0 : 1;
+    const size_t aSrcRowRight  = theSrc.isTopDown() ? 1 : 0;
 
     // prepare iterator for bottom-up source data
-    size_t aRowInc = srcData.isTopDown() ? 1 : size_t(-1);
-    size_t aRowTo  = srcData.isTopDown() ? 0 : (copyRows - 1);
+    const size_t aRowInc = theSrc.isTopDown() ? 1 : size_t(-1);
+    size_t       aRowTo  = theSrc.isTopDown() ? 0 : (aCopyRows - 1);
 
     // copy row by row
-    for(size_t aRowFrom = 0; aRowFrom < copyRows; ++aRowFrom, aRowTo += aRowInc) {
-        stMemCpy(outDataR.changeData(aRowTo, 0),
-                 srcData.getData(2 * aRowFrom + srcRowRight, 0),
-                 copyRowBytes);
-        stMemCpy(outDataL.changeData(aRowTo, 0),
-                 srcData.getData(2 * aRowFrom + srcRowLeft, 0),
-                 copyRowBytes);
+    for(size_t aRowFrom = 0; aRowFrom < aCopyRows; ++aRowFrom, aRowTo += aRowInc) {
+        stMemCpy(theDataR.changeData(aRowTo, 0),
+                 theSrc.getData(2 * aRowFrom + aSrcRowRight, 0),
+                 aCopyRowBytes);
+        stMemCpy(theDataL.changeData(aRowTo, 0),
+                 theSrc.getData(2 * aRowFrom + aSrcRowLeft, 0),
+                 aCopyRowBytes);
     }
-    return &outDataPtr[2 * outDataL.getSizeBytes()];
+    return &theDataPtr[2 * theDataL.getSizeBytes()];
 }
 
 static GLubyte* readFromTiled4X(const StImagePlane& theDataSrc,
-                                GLubyte* theDataOutPtr,
-                                StImagePlane& theDataOutL,
-                                StImagePlane& theDataOutR) {
+                                GLubyte*            theDataOutPtr,
+                                StImagePlane&       theDataOutL,
+                                StImagePlane&       theDataOutR) {
     if(theDataSrc.isNull()) {
         return theDataOutPtr;
     }
 
-    size_t aDataSizeX = (theDataSrc.getSizeX() / 3) * 2;
-    size_t aDataSizeY = (theDataSrc.getSizeY() / 3) * 2;
-    size_t aDataSizeXHalf = aDataSizeX / 2;
+    const size_t aDataSizeX = (theDataSrc.getSizeX() / 3) * 2;
+    const size_t aDataSizeY = (theDataSrc.getSizeY() / 3) * 2;
+    const size_t aDataSizeXHalf = aDataSizeX / 2;
 
-    size_t anOutRowBytes = getEvenNumber(aDataSizeX * theDataSrc.getSizePixelBytes());
+    const size_t anOutRowBytes = getEvenNumber(aDataSizeX * theDataSrc.getSizePixelBytes());
     theDataOutL.initWrapper(theDataSrc.getFormat(), theDataOutPtr,
                             aDataSizeX, aDataSizeY,
                             anOutRowBytes);
@@ -229,7 +226,7 @@ static GLubyte* readFromTiled4X(const StImagePlane& theDataSrc,
     size_t aRowSrcTop = theDataSrc.isTopDown() ? 0 : (theDataSrc.getSizeY() - 1);
 
     // copy Left view (1 big tile at top-left corner)
-    size_t aRowInc = theDataSrc.isTopDown() ? 1 : size_t(-1);
+    const size_t aRowInc = theDataSrc.isTopDown() ? 1 : size_t(-1);
     size_t aRowTo  = 0;
     size_t aRowSrc = aRowSrcTop;
     for(; aRowTo < aCopyRows; ++aRowTo, aRowSrc += aRowInc) {
@@ -272,45 +269,45 @@ static GLubyte* readFromTiled4X(const StImagePlane& theDataSrc,
     return &theDataOutPtr[2 * theDataOutL.getSizeBytes()];
 }
 
-static GLubyte* readFromMono(const StImagePlane& srcData,
-                             GLubyte* outDataPtr,
-                             StImagePlane& outData) {
-    if(srcData.isNull()) {
-        return outDataPtr;
+static GLubyte* readFromMono(const StImagePlane& theSrc,
+                             GLubyte*            theDataPtr,
+                             StImagePlane&       theData) {
+    if(theSrc.isNull()) {
+        return theDataPtr;
     }
 
-    size_t anOutRowBytes = getEvenNumber(srcData.getSizeX() * srcData.getSizePixelBytes());
-    outData.initWrapper(srcData.getFormat(), outDataPtr,
-                        srcData.getSizeX(), srcData.getSizeY(),
+    const size_t anOutRowBytes = getEvenNumber(theSrc.getSizeX() * theSrc.getSizePixelBytes());
+    theData.initWrapper(theSrc.getFormat(), theDataPtr,
+                        theSrc.getSizeX(), theSrc.getSizeY(),
                         anOutRowBytes);
 
-    if(outData.getSizeRowBytes() == srcData.getSizeRowBytes() && srcData.isTopDown()) {
+    if(theData.getSizeRowBytes() == theSrc.getSizeRowBytes() && theSrc.isTopDown()) {
         // perform fat copy
-        stMemCpy(outData.changeData(), srcData.getData(),
-                 stMin(outData.getSizeBytes(), srcData.getSizeBytes()));
+        stMemCpy(theData.changeData(), theSrc.getData(),
+                 stMin(theData.getSizeBytes(), theSrc.getSizeBytes()));
     } else {
-        size_t     copyRows = stMin(outData.getSizeY(), srcData.getSizeY());
-        size_t copyRowBytes = stMin(outData.getSizeX(), srcData.getSizeX()) * outData.getSizePixelBytes();
-        size_t      aRowInc = srcData.isTopDown() ? 1 : size_t(-1);
-        size_t       aRowTo = srcData.isTopDown() ? 0 : (copyRows - 1);
-        for(size_t aRowFrom = 0; aRowFrom < copyRows; ++aRowFrom, aRowTo += aRowInc) {
-            stMemCpy(outData.changeData(aRowTo, 0), srcData.getData(aRowFrom, 0), copyRowBytes);
+        const size_t aCopyRows     = stMin(theData.getSizeY(), theSrc.getSizeY());
+        const size_t aCopyRowBytes = stMin(theData.getSizeX(), theSrc.getSizeX()) * theData.getSizePixelBytes();
+        const size_t aRowInc       = theSrc.isTopDown() ? 1 : size_t(-1);
+        size_t       aRowTo        = theSrc.isTopDown() ? 0 : (aCopyRows - 1);
+        for(size_t aRowFrom = 0; aRowFrom < aCopyRows; ++aRowFrom, aRowTo += aRowInc) {
+            stMemCpy(theData.changeData(aRowTo, 0), theSrc.getData(aRowFrom, 0), aCopyRowBytes);
         }
     }
-    return &outDataPtr[outData.getSizeBytes()];
+    return &theDataPtr[theData.getSizeBytes()];
 }
 
 /**
  * Compute buffer size to fit image copy
  * with reserve for different source formats.
  */
-inline size_t computeBufferSize(const StImage& srcData) {
-    if(srcData.isNull()) {
+inline size_t computeBufferSize(const StImage& theData) {
+    if(theData.isNull()) {
         return 0;
     }
     size_t aBufferSize = 0;
     for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
-        const StImagePlane& aPlane = srcData.getPlane(aPlaneId);
+        const StImagePlane& aPlane = theData.getPlane(aPlaneId);
         size_t sizeX_4 = getAligned(aPlane.getSizeX(), 4);
         size_t sizeY_4 = getAligned(aPlane.getSizeY(), 4);
         aBufferSize += sizeX_4 * sizeY_4 * aPlane.getSizePixelBytes();
@@ -318,91 +315,88 @@ inline size_t computeBufferSize(const StImage& srcData) {
     return aBufferSize;
 }
 
-void StGLTextureData::updateData(const StImage& srcDataL,
-                                 const StImage& srcDataR,
+void StGLTextureData::updateData(const StImage&                  theDataL,
+                                 const StImage&                  theDataR,
                                  const StHandle<StStereoParams>& theStParams,
-                                 StFormatEnum srcFormat,
-                                 double srcPTS) {
+                                 const StFormatEnum              theFormat,
+                                 const double                    thePts) {
     // setup new stereo source
     myStParams = theStParams;
-    this->srcPTS = srcPTS;
+    myPts      = thePts;
 
     // detect format from ratio if not defined
-    if(srcFormat == ST_V_SRC_AUTODETECT) {
-        srcFormat = formatFromRatio(srcDataL.getRatio());
-    }
-    this->srcFormat = srcFormat;
+    mySrcFormat = (theFormat != ST_V_SRC_AUTODETECT) ? theFormat : formatFromRatio(theDataL.getRatio());
 
     // reset fill texture state
-    fillRows = fillFromRow = 0;
+    myFillRows = myFillFromRow = 0;
 
     // reallocate buffer if needed
-    size_t newSizeBytes = computeBufferSize(srcDataL) + computeBufferSize(srcDataR);
-    if(newSizeBytes == 0) {
+    const size_t aNewSizeBytes = computeBufferSize(theDataL) + computeBufferSize(theDataR);
+    if(aNewSizeBytes == 0) {
         // invalid data
         myDataL.nullify();
         myDataR.nullify();
         return;
     }
 
-    reAllocate(newSizeBytes);
-    myDataL.setColorModel(srcDataL.getColorModel());
-    myDataL.setColorScale(srcDataL.getColorScale());
-    myDataR.setColorModel(srcDataR.isNull() ? srcDataL.getColorModel() : srcDataR.getColorModel());
-    myDataR.setColorScale(srcDataR.isNull() ? srcDataL.getColorScale() : srcDataR.getColorScale());
-    myDataL.setPixelRatio(srcDataL.getPixelRatio());
-    myDataR.setPixelRatio(srcDataL.getPixelRatio());
+    reAllocate(aNewSizeBytes);
+    myDataL.setColorModel(theDataL.getColorModel());
+    myDataL.setColorScale(theDataL.getColorScale());
+    myDataR.setColorModel(theDataR.isNull() ? theDataL.getColorModel() : theDataR.getColorModel());
+    myDataR.setColorScale(theDataR.isNull() ? theDataL.getColorScale() : theDataR.getColorScale());
+    myDataL.setPixelRatio(theDataL.getPixelRatio());
+    myDataR.setPixelRatio(theDataL.getPixelRatio());
 
-    switch(srcFormat) {
+    switch(mySrcFormat) {
         case ST_V_SRC_SIDE_BY_SIDE:
         case ST_V_SRC_PARALLEL_PAIR: {
-            GLubyte* dataDispl = dataPtr;
+            GLubyte* aDataDispl = myDataPtr;
             for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
-                dataDispl = readFromParallel(srcDataL.getPlane(aPlaneId), dataDispl,
-                                             (srcFormat == ST_V_SRC_PARALLEL_PAIR) ? myDataL.changePlane(aPlaneId) : myDataR.changePlane(aPlaneId),
-                                             (srcFormat == ST_V_SRC_PARALLEL_PAIR) ? myDataR.changePlane(aPlaneId) : myDataL.changePlane(aPlaneId));
+                aDataDispl = readFromParallel(theDataL.getPlane(aPlaneId), aDataDispl,
+                                              (mySrcFormat == ST_V_SRC_PARALLEL_PAIR) ? myDataL.changePlane(aPlaneId) : myDataR.changePlane(aPlaneId),
+                                              (mySrcFormat == ST_V_SRC_PARALLEL_PAIR) ? myDataR.changePlane(aPlaneId) : myDataL.changePlane(aPlaneId));
             }
             break;
         }
         case ST_V_SRC_OVER_UNDER_RL:
         case ST_V_SRC_OVER_UNDER_LR: {
-            GLubyte* dataDispl = dataPtr;
+            GLubyte* aDataDispl = myDataPtr;
             for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
-                dataDispl = readFromOverUnderLR(srcDataL.getPlane(aPlaneId), dataDispl,
-                                                (srcFormat == ST_V_SRC_OVER_UNDER_LR) ? myDataL.changePlane(aPlaneId) : myDataR.changePlane(aPlaneId),
-                                                (srcFormat == ST_V_SRC_OVER_UNDER_LR) ? myDataR.changePlane(aPlaneId) : myDataL.changePlane(aPlaneId));
+                aDataDispl = readFromOverUnderLR(theDataL.getPlane(aPlaneId), aDataDispl,
+                                                 (mySrcFormat == ST_V_SRC_OVER_UNDER_LR) ? myDataL.changePlane(aPlaneId) : myDataR.changePlane(aPlaneId),
+                                                 (mySrcFormat == ST_V_SRC_OVER_UNDER_LR) ? myDataR.changePlane(aPlaneId) : myDataL.changePlane(aPlaneId));
             }
             break;
         }
         case ST_V_SRC_ROW_INTERLACE: {
-            myDataL.setPixelRatio(srcDataL.getPixelRatio() * 0.5f);
-            myDataR.setPixelRatio(srcDataL.getPixelRatio() * 0.5f);
-            GLubyte* dataDispl = dataPtr;
+            myDataL.setPixelRatio(theDataL.getPixelRatio() * 0.5f);
+            myDataR.setPixelRatio(theDataL.getPixelRatio() * 0.5f);
+            GLubyte* aDataDispl = myDataPtr;
             // TODO (Kirill Gavrilov#9) wrong for yuv420p?
             for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
-                dataDispl = readFromRowInterlace(srcDataL.getPlane(aPlaneId), dataDispl,
-                                                 myDataL.changePlane(aPlaneId), myDataR.changePlane(aPlaneId));
+                aDataDispl = readFromRowInterlace(theDataL.getPlane(aPlaneId), aDataDispl,
+                                                  myDataL.changePlane(aPlaneId), myDataR.changePlane(aPlaneId));
 
             }
             break;
         }
         case ST_V_SRC_SEPARATE_FRAMES: {
-            myDataR.setColorModel(srcDataR.getColorModel());
-            myDataR.setPixelRatio(srcDataR.getPixelRatio());
-            GLubyte* dataDispl = dataPtr;
+            myDataR.setColorModel(theDataR.getColorModel());
+            myDataR.setPixelRatio(theDataR.getPixelRatio());
+            GLubyte* aDataDispl = myDataPtr;
             for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
-                dataDispl = readFromMono(srcDataL.getPlane(aPlaneId), dataDispl, myDataL.changePlane(aPlaneId));
+                aDataDispl = readFromMono(theDataL.getPlane(aPlaneId), aDataDispl, myDataL.changePlane(aPlaneId));
             }
             for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
-                dataDispl = readFromMono(srcDataR.getPlane(aPlaneId), dataDispl, myDataR.changePlane(aPlaneId));
+                aDataDispl = readFromMono(theDataR.getPlane(aPlaneId), aDataDispl, myDataR.changePlane(aPlaneId));
             }
             break;
         }
         case ST_V_SRC_TILED_4X: {
-            GLubyte* dataDispl = dataPtr;
+            GLubyte* aDataDispl = myDataPtr;
             for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
-                dataDispl = readFromTiled4X(srcDataL.getPlane(aPlaneId), dataDispl,
-                                            myDataL.changePlane(aPlaneId), myDataR.changePlane(aPlaneId));
+                aDataDispl = readFromTiled4X(theDataL.getPlane(aPlaneId), aDataDispl,
+                                             myDataL.changePlane(aPlaneId), myDataR.changePlane(aPlaneId));
             }
             break;
         }
@@ -413,9 +407,9 @@ void StGLTextureData::updateData(const StImage& srcDataL,
         case ST_V_SRC_PAGE_FLIP:          // not supported
         case ST_V_SRC_MONO:
         default: {
-            GLubyte* dataDispl = dataPtr;
+            GLubyte* aDataDispl = myDataPtr;
             for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
-                dataDispl = readFromMono(srcDataL.getPlane(aPlaneId), dataDispl, myDataL.changePlane(aPlaneId));
+                aDataDispl = readFromMono(theDataL.getPlane(aPlaneId), aDataDispl, myDataL.changePlane(aPlaneId));
             }
             break;
         }
@@ -428,7 +422,7 @@ void StGLTextureData::fillTexture(StGLContext&        theCtx,
     if(!theFrameTexture.isValid() || theData.isNull()) {
         return;
     }
-    theFrameTexture.fill(theCtx, theData, fillFromRow, fillFromRow + fillRows);
+    theFrameTexture.fill(theCtx, theData, myFillFromRow, myFillFromRow + myFillRows);
 }
 
 static void setupDataRectangle(const StImagePlane& theImagePlane,
@@ -488,7 +482,7 @@ bool StGLTextureData::fillTexture(StGLContext&     theCtx,
                                   StGLQuadTexture& theQTexture) {
 
     // setup rows count to be filled per fillTexture()
-    if(fillRows == 0 || fillFromRow == 0) {
+    if(myFillRows == 0 || myFillFromRow == 0) {
         // prepare textures for new data
         prepareTextures(theCtx, myDataL, theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE));
         prepareTextures(theCtx, myDataR, theQTexture.getBack(StGLQuadTexture::RIGHT_TEXTURE));
@@ -506,11 +500,11 @@ bool StGLTextureData::fillTexture(StGLContext&     theCtx,
             maxRows    = stMax(maxRows, stMin(GLsizei(myDataR.getSizeY()), theQTexture.getBack(StGLQuadTexture::RIGHT_TEXTURE).getSizeY()));
             iterations = maxRows / UPDATED_ROWS_MAX + 1;
         }
-        fillRows = maxRows / iterations;
-        fillFromRow = 0;
+        myFillRows = maxRows / iterations;
+        myFillFromRow = 0;
     }
 
-    if(fillRows == 0) {
+    if(myFillRows == 0) {
         // prevent dead loop
         return true;
     }
@@ -531,9 +525,9 @@ bool StGLTextureData::fillTexture(StGLContext&     theCtx,
     }
     theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE).unbind(theCtx);
 
-    fillFromRow += fillRows;
-    if(fillFromRow >= GLsizei(myDataL.getSizeY())
-    && (myDataR.isNull() || fillFromRow >= GLsizei(myDataR.getSizeY()))) {
+    myFillFromRow += myFillRows;
+    if(myFillFromRow >= GLsizei(myDataL.getSizeY())
+    && (myDataR.isNull() || myFillFromRow >= GLsizei(myDataR.getSizeY()))) {
         if(!myDataL.isNull() && theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE).isValid()) {
             setupAttributes(theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE), myDataL);
         }
@@ -542,7 +536,7 @@ bool StGLTextureData::fillTexture(StGLContext&     theCtx,
         }
 
         if(!myStParams.isNull()) {
-            myStParams->setSrcFormat(srcFormat);
+            myStParams->setSrcFormat(mySrcFormat);
         }
         return true;
     } else {
@@ -550,11 +544,12 @@ bool StGLTextureData::fillTexture(StGLContext&     theCtx,
     }
 }
 
-void StGLTextureData::getCopy(StImage* outDataL, StImage* outDataR) const {
-    if(outDataL != NULL) {
-        outDataL->initCopy(myDataL);
+void StGLTextureData::getCopy(StImage* theDataL,
+                              StImage* theDataR) const {
+    if(theDataL != NULL) {
+        theDataL->initCopy(myDataL);
     }
-    if(outDataR != NULL) {
-        outDataR->initCopy(myDataR);
+    if(theDataR != NULL) {
+        theDataR->initCopy(myDataR);
     }
 }
