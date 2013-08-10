@@ -749,6 +749,14 @@ void StMoviePlayer::doMouseUp(const StClickEvent& theEvent) {
         return;
     }
 
+    const StPointD_t aPnt(theEvent.PointX, theEvent.PointY);
+    const bool isNeutral = myGUI->getFocus() == NULL
+                       || !myGUI->getFocus()->isPointIn(aPnt);
+    if(!isNeutral) {
+        myGUI->tryUnClick(aPnt, theEvent.Button);
+        return;
+    }
+
     switch(theEvent.Button) {
         case ST_MOUSE_MIDDLE: {
             params.isFullscreen->reverse();
@@ -772,7 +780,7 @@ void StMoviePlayer::doMouseUp(const StClickEvent& theEvent) {
             }
         }
         default: {
-            myGUI->tryUnClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
+            myGUI->tryUnClick(aPnt, theEvent.Button);
             break;
         }
     }
