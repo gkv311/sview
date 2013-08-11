@@ -67,6 +67,11 @@ namespace {
     static const int DISPL_X_REGION_BOTTOM = 52;
     static const int DISPL_Y_REGION_BOTTOM = 64;
     static const int ICON_WIDTH            = 64;
+
+    static const StGLVec3 aBlack(0.0f, 0.0f, 0.0f);
+    static const StGLVec3 aGreen(0.4f, 0.8f, 0.4f);
+    static const StGLVec3 aRed  (1.0f, 0.0f, 0.0f);
+
 };
 
 /**
@@ -441,10 +446,6 @@ StGLMenu* StMoviePlayerGUI::createSmoothFilterMenu() {
  */
 StGLMenu* StMoviePlayerGUI::createImageAdjustMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    const StGLVec3 aBlack(0.0f, 0.0f, 0.0f);
-    const StGLVec3 aGreen(0.4f, 0.8f, 0.4f);
-    const StGLVec3 aRed  (1.0f, 0.0f, 0.0f);
-
     aMenu->addItem(tr(MENU_VIEW_ADJUST_RESET), myPlugin->getAction(StMoviePlayer::Action_ImageAdjustReset));
 
     StGLMenuItem* anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_GAMMA));
@@ -494,25 +495,17 @@ StGLMenu* StMoviePlayerGUI::createAudioMenu() {
  */
 StGLMenu* StMoviePlayerGUI::createAudioGainMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    stUtf8_t aBuff[256];
 
-    //aGainFactor = -2.0;
-    //aGain    = std::pow(2.0, aGainFactor);
-    //aGain_dB = 6.0 * aGainFactor;
-    stsprintf(aBuff, 256, "%01.2f", 1.0);
-    aMenu->addItem(aBuff, myPlugin->params.AudioGain, 1.0f);
-    stsprintf(aBuff, 256, "%01.2f (-3 dB)", 0.71);
-    aMenu->addItem(aBuff, myPlugin->params.AudioGain, std::pow(2.0f, -0.5f));
-    stsprintf(aBuff, 256, "%01.2f (-6 dB)", 0.5);
-    aMenu->addItem(aBuff, myPlugin->params.AudioGain, 0.5f);
-    stsprintf(aBuff, 256, "%01.2f (-9 dB)", 0.35);
-    aMenu->addItem(aBuff, myPlugin->params.AudioGain, std::pow(2.0f, -1.5f));
-    stsprintf(aBuff, 256, "%01.2f (-12 dB)", 0.25);
-    aMenu->addItem(aBuff, myPlugin->params.AudioGain, 0.25f);
-    stsprintf(aBuff, 256, "%01.2f (-15 dB)", 0.18);
-    aMenu->addItem(aBuff, myPlugin->params.AudioGain, std::pow(2.0f, -2.5f));
-    stsprintf(aBuff, 256, "%01.2f (-18 dB)", 0.125);
-    aMenu->addItem(aBuff, myPlugin->params.AudioGain, 0.125f);
+    StGLMenuItem* anItem = aMenu->addItem("Volume");
+    anItem->setMarginRight(110 + 16);
+    StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.AudioGain,
+                                                              -16, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+    aRange->setFormat(stCString("%+03.0f dB"));
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aRed);
+    aRange->setVisibility(true, true);
+
     aMenu->addItem("Mute", myPlugin->params.AudioMute);
     return aMenu;
 }

@@ -175,12 +175,12 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     myTitle = "sView - Movie Player";
 
     params.alDevice = new StALDeviceParam();
-    params.AudioGain = new StFloat32Param( 1.0f, // sound is unattenuated
-                                           0.0f, // mute
+    params.AudioGain = new StFloat32Param( 0.0f, // sound is unattenuated
+                                         -50.0f, // almost mute
                                           10.0f, // max amplification
-                                           1.0f, // default
-                                         0.001f, // step
-                                         1.e-7f);
+                                           0.0f, // default
+                                           1.0f, // step
+                                         1.e-3f);
     params.AudioGain->signals.onChanged = stSlot(this, &StMoviePlayer::doSetAudioVolume);
     params.AudioMute    = new StBoolParam(false);
     params.AudioMute->signals.onChanged = stSlot(this, &StMoviePlayer::doSetAudioMute);
@@ -1003,16 +1003,22 @@ void StMoviePlayer::doSwitchAudioDevice(const int32_t /*theDevId*/) {
     }
 }
 
-void StMoviePlayer::doSetAudioVolume(const float theGain) {
+void StMoviePlayer::doSetAudioVolume(const float theGaindB) {
     if(!myVideo.isNull()
     && !params.AudioMute->getValue()) {
-        myVideo->setAudioVolume(theGain);
+        const GLfloat aGain = params.AudioGain->isMinValue()
+                            ? 0.0f
+                            : StMoviePlayerGUI::dBellToRatio(theGaindB);
+        myVideo->setAudioVolume(aGain);
     }
 }
 
 void StMoviePlayer::doSetAudioMute(const bool theToMute) {
     if(!myVideo.isNull()) {
-        myVideo->setAudioVolume(theToMute ? 0.0f : params.AudioGain->getValue());
+        const GLfloat aGain = (theToMute || params.AudioGain->isMinValue())
+                            ? 0.0f
+                            : StMoviePlayerGUI::dBellToRatio(params.AudioGain->getValue());
+        myVideo->setAudioVolume(aGain);
     }
 }
 

@@ -55,16 +55,25 @@ class StMoviePlayerGUI : public StGLRootWidget {
     /**
      * @return translation for the string with specified id
      */
-    ST_LOCAL const StString& tr(const size_t theId) const {
+    ST_LOCAL inline const StString& tr(const size_t theId) const {
         return myLangMap->getValue(theId);
     }
 
     /**
      * @return absolute path to the texture
      */
-    ST_LOCAL StString getTexturePath(const StCString& theTextureName) const {
+    ST_LOCAL inline StString getTexturePath(const StCString& theTextureName) const {
         return myTexturesFolder + theTextureName;
     }
+
+    /**
+     * Convert dB to amplitude ratio
+     */
+    ST_LOCAL static inline double dBellToRatio(const double thedB) {
+        return std::pow(10.0, thedB * 0.05);
+    }
+
+
 
         public: //! @name StGLRootWidget overrides
 

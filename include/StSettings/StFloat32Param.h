@@ -74,8 +74,25 @@ class StFloat32Param : public StParam<float> {
         //
     }
 
-    bool isDefaultValue() const {
+    /**
+     * @return true if currently set value is default
+     */
+    inline bool isDefaultValue() const {
         return areEqual(getValue(), myDefValue);
+    }
+
+    /**
+     * @return true if currently set value is maximum
+     */
+    inline bool isMaxValue() const {
+        return areEqual(getValue(), myMaxValue);
+    }
+
+    /**
+     * @return true if currently set value is minimum
+     */
+    inline bool isMinValue() const {
+        return areEqual(getValue(), myMinValue);
     }
 
     /**
