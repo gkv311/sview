@@ -159,8 +159,16 @@
  */
 #define ST_VOB_MIME "video/dvd"
 #define ST_VOB_EXT  "vob"
-#define ST_VOB_DESC "VOB - Video files on DVD"
+#define ST_VOB_DESC "VOB - DVD Video object"
 #define ST_VOB_MIME_STRING ST_VOB_MIME ":" ST_VOB_EXT ":" ST_VOB_DESC
+
+/**
+ *.aob  - Audio files on DVD
+ */
+#define ST_AOB_MIME "audio/x-aob"
+#define ST_AOB_EXT  "aob"
+#define ST_AOB_DESC "AOB - DVD Audio object"
+#define ST_AOB_MIME_STRING ST_AOB_MIME ":" ST_AOB_EXT ":" ST_AOB_DESC
 
 /**
  *.ts   - MPEG transport stream data
@@ -291,6 +299,7 @@ ST_MOV_MIME_STRING ";" \
 ST_QT_MIME_STRING ";" \
 ST_FLV_MIME_STRING ";" \
 ST_VOB_MIME_STRING ";" \
+ST_AOB_MIME_STRING ";" \
 ST_TS_MIME_STRING ";" \
 ST_M2TS_MIME_STRING ";" \
 ST_BIK_MIME_STRING ";" \
@@ -313,6 +322,7 @@ ST_M3U_MIME_STRING ";" \
 #define ST_VIDEO_PLUGIN_AUDIO_MIME_CHAR ST_MKA_MIME_STRING ";" \
 ST_FLAC_MIME_STRING ";" \
 ST_APE_MIME_STRING ";" \
+ST_AOB_MIME_STRING ";" \
 ST_MP3_MIME_STRING ";" \
 ST_OGG_MIME_STRING ";" \
 ST_AC3_MIME_STRING ";" \
@@ -337,4 +347,4 @@ ST_WAV_MIME_STRING ";" \
 #define ST_VIDEO_PLUGIN_SUBTIT_MIME_CHAR ST_SRT_MIME_STRING ";" \
 "\000"
 
-#endif //__StVideoPluginInfo_h_
+#endif // __StVideoPluginInfo_h_

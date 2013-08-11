@@ -1008,7 +1008,7 @@ void StMoviePlayer::doSetAudioVolume(const float theGaindB) {
     && !params.AudioMute->getValue()) {
         const GLfloat aGain = params.AudioGain->isMinValue()
                             ? 0.0f
-                            : StMoviePlayerGUI::dBellToRatio(theGaindB);
+                            : GLfloat(StMoviePlayerGUI::dBellToRatio(theGaindB));
         myVideo->setAudioVolume(aGain);
     }
 }
@@ -1017,7 +1017,7 @@ void StMoviePlayer::doSetAudioMute(const bool theToMute) {
     if(!myVideo.isNull()) {
         const GLfloat aGain = (theToMute || params.AudioGain->isMinValue())
                             ? 0.0f
-                            : StMoviePlayerGUI::dBellToRatio(params.AudioGain->getValue());
+                            : GLfloat(StMoviePlayerGUI::dBellToRatio(params.AudioGain->getValue()));
         myVideo->setAudioVolume(aGain);
     }
 }
