@@ -332,12 +332,12 @@ void StMoviePlayerGUI::fillRecentMenu(StGLMenu* theMenu) {
 }
 
 /**
- * Root -> Media  -> Web UI menu
+ * Root -> Media -> Web UI menu
  */
 StGLMenu* StMoviePlayerGUI::createWebUIMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     for(size_t anIter = 0; anIter < myPlugin->params.StartWebUI->getValues().size(); ++anIter) {
-        aMenu->addItem(myPlugin->params.StartWebUI->getValues()[anIter], myPlugin->params.StartWebUI, anIter);
+        aMenu->addItem(myPlugin->params.StartWebUI->getValues()[anIter], myPlugin->params.StartWebUI, (int32_t )anIter);
     }
     aMenu->addItem(tr(MENU_MEDIA_WEBUI_SHOW_ERRORS), myPlugin->params.ToPrintWebErrors);
     return aMenu;

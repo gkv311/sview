@@ -1293,7 +1293,7 @@ void StMoviePlayer::doSnapshot(const size_t theImgType) {
     if(theImgType == StImageFile::ST_TYPE_NONE) {
         aType = params.SnapshotImgType->getValue();
     } else {
-        params.SnapshotImgType->setValue(theImgType);
+        params.SnapshotImgType->setValue((int32_t )theImgType);
     }
     myVideo->doSaveSnapshotAs(aType);
 }
