@@ -184,6 +184,9 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
     StGLMenu* aMenuSaveImage = createSaveImageMenu();    // Root -> Media -> Save snapshot menu
 
     aMenuMedia->addItem(tr(MENU_MEDIA_OPEN_MOVIE),       myPlugin->getAction(StMoviePlayer::Action_Open1File),    aMenuOpenImage);
+    StGLMenuItem* anItem = aMenuMedia->addItem(tr(MENU_MEDIA_RECENT), myMenuRecent);
+    anItem->setUserData(0);
+    anItem->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doOpenRecent);
     aMenuMedia->addItem(tr(MENU_MEDIA_SAVE_SNAPSHOT_AS), myPlugin->getAction(StMoviePlayer::Action_SaveSnapshot), aMenuSaveImage);
     aMenuMedia->addItem(tr(MENU_MEDIA_SRC_FORMAT), aMenuSrcFormat);
     aMenuMedia->addItem(tr(MENU_MEDIA_AL_DEVICE),  myMenuOpenAL);
@@ -212,10 +215,6 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
     if(myPlugin->params.ToShowExtra->getValue()) {
         aMenuMedia->addItem("Loop single item", myPlugin->params.ToLoopSingle);
     }
-
-    StGLMenuItem* anItem = aMenuMedia->addItem(tr(MENU_MEDIA_RECENT), myMenuRecent);
-    anItem->setUserData(0);
-    anItem->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doOpenRecent);
 
 #ifdef ST_HAVE_MONGOOSE
     aMenuMedia->addItem(tr(MENU_MEDIA_WEBUI) + ":" + myPlugin->params.WebUIPort->getValue(), aMenuWebUI);
