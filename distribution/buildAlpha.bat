@@ -1,2 +1,2 @@
 @echo off
-call "%~dp0build.bat" ALPHA
+call "%~dp0build.bat" ST_ALPHA

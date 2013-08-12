@@ -1,6 +1,6 @@
 /**
  * This is a header for version structure in 'Ubuntu-style' (Year.Month).
- * Copyright © 2008-2009 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2008-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -10,26 +10,22 @@
 #ifndef __StVersion_h_
 #define __StVersion_h_
 
-#ifdef ST_HAVE_STCONFIG
+#define ST_DEVELOPMENT_RELEASE 0
+#define ST_ALPHA               1
+#define ST_BETA                2
+#define ST_RELEASE_CANDIDATE   3
+#define ST_RELEASE             4
+
+#if defined(ST_HAVE_STCONFIG) || defined(RC_INVOKED)
     #include <stconfig.conf>
 #else
     #ifndef SVIEW_SDK_VER_STATUS
-        #define SVIEW_SDK_VER_STATUS RELEASE
+        #define SVIEW_SDK_VER_STATUS ST_RELEASE
     #endif
     #ifndef SVIEW_SDK_VERSION_AUTO
         #define SVIEW_SDK_VERSION_AUTO
     #endif
 #endif
-
-enum {
-    DEV = 0,
-    DEVELOPMENT_RELEASE = 0,
-    ALPHA = 1,
-    BETA = 2,
-    RC = 3,
-    RELEASE_CANDIDATE = 3,
-    RELEASE = 4,
-};
 
 #define __YEAR__ ((((__DATE__ [7]-'0')*10+(__DATE__ [8]-'0'))*10+(__DATE__ [9]-'0'))*10+(__DATE__ [10]-'0'))
 
@@ -46,14 +42,6 @@ enum {
 
 #define __DAY__ ((__DATE__ [4]==' ' ? 0 : __DATE__ [4]-'0')*10+(__DATE__[5]-'0'))
 
-#ifdef _WIN32
-    //FILEFLAGS VS_DEBUG | VS_PRIVATEBUILD | VS_SPECIALBUILD | VS_PRERELEASE | VS_PATCHED
-    #ifndef __ST_DEBUG__
-        #define ST_WIN32_FILEFLAGS FILEFLAGS VS_FF_DEBUG
-    #else
-        #define ST_WIN32_FILEFLAGS
-    #endif
-#endif
 
 // just empty version here
 // should be redefined in stconfig.conf
@@ -66,7 +54,17 @@ enum {
 #endif
 
 #ifndef SVIEW_SDK_VER_STATUS
-    #define SVIEW_SDK_VER_STATUS DEVELOPMENT_RELEASE
+    #define SVIEW_SDK_VER_STATUS ST_DEVELOPMENT_RELEASE
+#endif
+
+#ifdef RC_INVOKED
+    #if defined(__ST_DEBUG__) || (SVIEW_SDK_VER_STATUS == 0)
+        #define ST_WIN32_FILEFLAGS FILEFLAGS VS_FF_DEBUG
+    #elif (SVIEW_SDK_VER_STATUS != 4)
+        #define ST_WIN32_FILEFLAGS FILEFLAGS VS_FF_PRERELEASE
+    #else
+        #define ST_WIN32_FILEFLAGS
+    #endif
 #endif
 
 /**
@@ -82,7 +80,7 @@ struct StVersion {
     int rSubVer;
 };
 
-#ifndef ST_RESOURCE_COMPILER
+#ifndef RC_INVOKED
 
 #include <StStrings/StLogger.h>
 #include <StStrings/stUtfTools.h>
@@ -142,12 +140,12 @@ class ST_LOCAL StVersionInfo {
 #else
     static bool checkTimeBomb(const StString& theTitle) {
         StVersionInfo aVer = getSDKVersionInfo();
-        if(aVer.getReleaseStatus() == DEVELOPMENT_RELEASE) {
+        if(aVer.getReleaseStatus() == ST_DEVELOPMENT_RELEASE) {
             time_t rawtime;
             struct tm* timeinfo;
             time(&rawtime);
             timeinfo = localtime(&rawtime);
-            StVersionInfo test = StVersionInfo(1900 + timeinfo->tm_year, timeinfo->tm_mon + 1, DEVELOPMENT_RELEASE, 0);
+            StVersionInfo test = StVersionInfo(1900 + timeinfo->tm_year, timeinfo->tm_mon + 1, ST_DEVELOPMENT_RELEASE, 0);
             aVer++; aVer++;
             if(test > aVer) {
                 stError(StString()
@@ -230,13 +228,13 @@ class ST_LOCAL StVersionInfo {
     StString toString() const {
         StString subVersion;
         switch (ver.rStatus){
-            case RELEASE:
+            case ST_RELEASE:
                 subVersion = ' '; break;
-            case RELEASE_CANDIDATE:
+            case ST_RELEASE_CANDIDATE:
                 subVersion = StString("RC")    + ver.rSubVer; break;
-            case BETA:
+            case ST_BETA:
                 subVersion = StString("beta")  + ver.rSubVer; break;
-            case ALPHA:
+            case ST_ALPHA:
                 subVersion = StString("alpha") + ver.rSubVer; break;
             default:
                 subVersion = StString("dev")   + ver.rSubVer; break;
@@ -328,7 +326,6 @@ class ST_LOCAL StVersionInfo {
 
 };
 
-#endif // ST_RESOURCE_COMPILER
-
+#endif // RC_INVOKED
 
 #endif //__StVersion_h_

@@ -2,21 +2,21 @@
 
 # This script perform compilation of sView.
 #
-# Copyright © Kirill Gavrilov, 2010-2012
+# Copyright © Kirill Gavrilov, 2010-2013
 
 # go to the script directory
 aScriptPath=${BASH_SOURCE%/*}; if [ -d "${aScriptPath}" ]; then cd "$aScriptPath"; fi; aScriptPath="$PWD";
 
-releaseStatus="RELEASE"
+releaseStatus="ST_RELEASE"
 
 for i in $*
 do
-  if [ "$i" == "RELEASE" ]; then
-    releaseStatus="RELEASE";
-  elif [ "$i" == "ALPHA" ]; then
-    releaseStatus="ALPHA"
-  elif [ "$i" == "RELEASE_CANDIDATE" ]; then
-    releaseStatus="RELEASE_CANDIDATE"
+  if [ "$i" == "ST_RELEASE" ]; then
+    releaseStatus="ST_RELEASE";
+  elif [ "$i" == "ST_ALPHA" ]; then
+    releaseStatus="ST_ALPHA"
+  elif [ "$i" == "ST_RELEASE_CANDIDATE" ]; then
+    releaseStatus="ST_RELEASE_CANDIDATE"
   fi
 done
 

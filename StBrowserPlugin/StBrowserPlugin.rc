@@ -1,5 +1,3 @@
-#define ST_RESOURCE_COMPILER
-
 #include <windows.h>
 #include <StVersion.h>   // header for version
 #include "StBrPluginInfo.h"

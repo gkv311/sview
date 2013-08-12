@@ -2,7 +2,7 @@
 
 # This script generates the DEB and RPM packages.
 #
-# Copyright © Kirill Gavrilov, 2010-2012
+# Copyright © Kirill Gavrilov, 2010-2013
 
 # go to the script directory
 aScriptPath=${BASH_SOURCE%/*}
@@ -13,7 +13,7 @@ fi
 aSuit=stable
 for i in $*
 do
-  if [ "$i" == "ALPHA" ] || [ "$i" == "RELEASE_CANDIDATE" ]; then
+  if [ "$i" == "ST_ALPHA" ] || [ "$i" == "ST_RELEASE_CANDIDATE" ]; then
     aSuit=experimental
   fi
 done

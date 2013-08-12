@@ -2,7 +2,7 @@
 
 # This script generates the DMG package.
 #
-# Copyright © Kirill Gavrilov, 2011-2012
+# Copyright © Kirill Gavrilov, 2011-2013
 
 # go to the script directory
 aScriptPath=${BASH_SOURCE%/*}
@@ -17,11 +17,11 @@ aTmpDmg=temp/pack.temp.dmg
 aVerType="_";
 for i in $*
 do
-  if [ "$i" == "RELEASE" ]; then
+  if [ "$i" == "ST_RELEASE" ]; then
     aVerType="_";
-  elif [ "$i" == "ALPHA" ]; then
+  elif [ "$i" == "ST_ALPHA" ]; then
     aVerType="alpha"
-  elif [ "$i" == "RELEASE_CANDIDATE" ]; then
+  elif [ "$i" == "ST_RELEASE_CANDIDATE" ]; then
     aVerType="rc"
   fi
 done

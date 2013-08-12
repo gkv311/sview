@@ -7,18 +7,18 @@ if "%INNO_PATH%"=="" set "INNO_PATH=%PROGRAMFILES%\Inno Setup 5"
 if "%CB_PATH%"==""   set "CB_PATH=%PROGRAMFILES%\CodeBlocks"
 
 rem Build type
-set releaseStatus=RELEASE
+set releaseStatus=ST_RELEASE
 set SVIEW_VER_TYPE=_
 set SVIEW_VER_TYPE_NUM=4
 
-if "%1"=="ALPHA" (
-  set releaseStatus=ALPHA
+if "%1"=="ST_ALPHA" (
+  set releaseStatus=ST_ALPHA
   set SVIEW_VER_TYPE=alpha
   set SVIEW_VER_TYPE_NUM=1
 )
 
-if "%1"=="RELEASE_CANDIDATE" (
-  set releaseStatus=RELEASE_CANDIDATE
+if "%1"=="ST_RELEASE_CANDIDATE" (
+  set releaseStatus=ST_RELEASE_CANDIDATE
   set SVIEW_VER_TYPE=rc
   set SVIEW_VER_TYPE_NUM=3
 )
@@ -65,7 +65,7 @@ rem START creating config file
 echo #ifndef __stConfig_conf_> "%SVIEW_BUILD_CONF%"
 echo #define __stConfig_conf_>> "%SVIEW_BUILD_CONF%"
 
-if not "%releaseStatus%"=="RELEASE" (
+if not "%releaseStatus%"=="ST_RELEASE" (
   echo     Timebomb=ON
   echo #ifndef __ST_TIMEBOMB__>> "%SVIEW_BUILD_CONF%"
   echo   #define __ST_TIMEBOMB__>> "%SVIEW_BUILD_CONF%"
