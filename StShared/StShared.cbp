@@ -498,6 +498,13 @@
 		<Unit filename="../include/stAssert.h" />
 		<Unit filename="../include/stTypes.h" />
 		<Unit filename="../include/stconfig.conf" />
+		<Unit filename="StShared.rc">
+			<Option compilerVar="WINDRES" />
+			<Option target="WIN_gcc_x86" />
+			<Option target="WIN_vc_x86" />
+			<Option target="WIN_vc_x86_DEBUG" />
+			<Option target="WIN_vc_AMD64" />
+		</Unit>
 		<Extensions>
 			<code_completion />
 			<envvars />

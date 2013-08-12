@@ -261,6 +261,13 @@
 		<Unit filename="StGLTextureButton.cpp" />
 		<Unit filename="StGLWidget.cpp" />
 		<Unit filename="StGLWidgetList.cpp" />
+		<Unit filename="StGLWidgets.rc">
+			<Option compilerVar="WINDRES" />
+			<Option target="WIN_gcc_x86" />
+			<Option target="WIN_vc_x86" />
+			<Option target="WIN_vc_x86_DEBUG" />
+			<Option target="WIN_vc_AMD64" />
+		</Unit>
 		<Unit filename="StSubQueue.cpp" />
 		<Unit filename="shaders/StGLTextureButton.shf" />
 		<Unit filename="shaders/StGLTextureButton.shv" />
