@@ -10,6 +10,7 @@
 #include <StGLWidgets/StGLMenuItem.h>
 #include <StGLWidgets/StGLMenuProgram.h>
 #include <StGLWidgets/StGLRootWidget.h>
+#include <StGLWidgets/StGLTextureButton.h>
 
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
@@ -37,6 +38,7 @@ StGLMenuItem::StGLMenuItem(StGLMenu* theParent,
                theLeft, theTop,
                StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT)),
   mySubMenu(theSubMenu),
+  myIcon(NULL),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
   myIsItemSelected(false),
   myToHilightText(false) {
@@ -75,6 +77,19 @@ StGLMenuItem::~StGLMenuItem() {
 
 const StString& StGLMenuItem::getClassName() {
     return CLASS_NAME;
+}
+
+void StGLMenuItem::setIcon(const StString* theImgPaths,
+                           const size_t    theCount) {
+    const int anIconMargin = 16 + 8;
+    if(myIcon != NULL) {
+        delete myIcon;
+    } else {
+        myMarginLeft += anIconMargin;
+    }
+    myIcon = new StGLIcon(this, myMarginLeft - anIconMargin, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT), theCount);
+    myIcon->setVisibility(true, true);
+    myIcon->setTexturePath(theImgPaths, theCount);
 }
 
 void StGLMenuItem::setHilightText() {

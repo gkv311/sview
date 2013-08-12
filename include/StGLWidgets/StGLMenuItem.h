@@ -15,6 +15,7 @@
 
 class StGLMenu;
 class StGLMenuProgram;
+class StGLIcon;
 
 /**
  * Widget for item in the menu.
@@ -74,6 +75,19 @@ class StGLMenuItem : public StGLTextArea {
 
     ST_CPPEXPORT void setHilightText();
 
+    /**
+     * Setup icon.
+     */
+    ST_CPPEXPORT void setIcon(const StString* theImgPaths,
+                              const size_t    theCount);
+
+    /**
+     * Setup icon.
+     */
+    ST_LOCAL inline void setIcon(const StString& theImgPath) {
+        setIcon(&theImgPath, 1);
+    }
+
         public:  //! @name Signals
 
     struct {
@@ -102,6 +116,7 @@ class StGLMenuItem : public StGLTextArea {
         private: //! @name private fields
 
     StGLMenu*                  mySubMenu;        //!< child menu
+    StGLIcon*                  myIcon;           //!< optional icon
     StGLShare<StGLMenuProgram> myProgram;        //!< GLSL program
     StGLVertexBuffer           myBackVertexBuf;  //!< background vertices
     StGLVec4                   myBackColor[3];   //!< background color per state
@@ -110,4 +125,4 @@ class StGLMenuItem : public StGLTextArea {
 
 };
 
-#endif //__StGLMenuItem_h_
+#endif // __StGLMenuItem_h_

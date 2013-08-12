@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -118,6 +118,7 @@ StGLTextureButton::StGLTextureButton(StGLWidget*      theParent,
 : StGLWidget(theParent, theLeft, theTop, theCorner),
   myFaceId(0),
   myFacesCount(theFacesCount),
+  myAnim(Anim_Wave),
   myTextures(theFacesCount),
   myTexturesPaths(theFacesCount),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
@@ -234,13 +235,15 @@ void StGLTextureButton::stglDraw(unsigned int ) {
     GLdouble butWGl = butRectGl.right() - butRectGl.left();
     GLdouble butHGl = butRectGl.top() - butRectGl.bottom();
 
-    StPointD_t mouseGl = getPointGl(getRoot()->getCursorZo());
-    glWaveTimerControl();
+    const StPointD_t aMouseGl = getPointGl(getRoot()->getCursorZo());;
+    if(myAnim == Anim_Wave) {
+        glWaveTimerControl();
+    }
 
     myProgram->use(aCtx,
                    myWaveTimer.getElapsedTimeInSec(),
-                  (mouseGl.x() - butRectGl.left()) / butWGl,
-                  (butRectGl.top()  - mouseGl.y()) / butHGl,
+                  (aMouseGl.x() - butRectGl.left()) / butWGl,
+                  (butRectGl.top()  - aMouseGl.y()) / butHGl,
                    opacityValue,
                    isClicked(ST_MOUSE_LEFT),
                    getRoot()->getScreenDispX());
@@ -278,4 +281,21 @@ void StGLTextureButton::doMouseUnclick(const int theBtnId) {
     if(theBtnId == ST_MOUSE_LEFT) {
         signals.onBtnClick(getUserData());
     }
+}
+
+StGLIcon::StGLIcon(StGLWidget*      theParent,
+                   const int        theLeft,
+                   const int        theTop,
+                   const StGLCorner theCorner,
+                   const size_t     theFacesCount)
+: StGLTextureButton(theParent, theLeft, theTop, theCorner, theFacesCount) {
+    myAnim = Anim_None;
+}
+
+bool StGLIcon::tryClick(const StPointD_t& , const int& , bool& ) {
+    return false;
+}
+
+bool StGLIcon::tryUnClick(const StPointD_t& , const int& , bool& ) {
+    return false;
 }

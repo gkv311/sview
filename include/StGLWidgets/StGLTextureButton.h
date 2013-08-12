@@ -23,6 +23,14 @@ class StGLTextureButton : public StGLWidget {
 
         public:
 
+    enum Animation {
+        Anim_None, //!< no animation
+        Anim_Wave  //!< wave animation
+    };
+
+
+        public:
+
     ST_CPPEXPORT StGLTextureButton(StGLWidget*      theParent,
                                    const int        theLeft = 32,
                                    const int        theTop = 32,
@@ -55,7 +63,7 @@ class StGLTextureButton : public StGLWidget {
     ST_CPPEXPORT virtual bool tryClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemClicked);
     ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemUnclicked);
 
-        public:    //!< Signals
+        public:    //! @name Signals
 
     struct {
         /**
@@ -65,7 +73,7 @@ class StGLTextureButton : public StGLWidget {
         StSignal<void (const size_t )> onBtnClick;
     } signals;
 
-        private:   //!< callback Slots (private overriders)
+        private:   //! @name callback Slots (private overriders)
 
     ST_LOCAL void doMouseUnclick(const int theBtnId);
 
@@ -73,12 +81,13 @@ class StGLTextureButton : public StGLWidget {
 
     ST_LOCAL void glWaveTimerControl();
 
-        private:
+        protected:
 
     StGLVertexBuffer           myVertBuf;
     StGLVertexBuffer           myTCrdBuf;
     size_t                     myFaceId;
     size_t                     myFacesCount;
+    Animation                  myAnim;
     StArray<StGLTexture>       myTextures;
     StArray<StString>          myTexturesPaths;
 
@@ -89,4 +98,22 @@ class StGLTextureButton : public StGLWidget {
 
 };
 
-#endif //__StGLTextureButton_h_
+/**
+ * Passive icon.
+ */
+class StGLIcon : public StGLTextureButton {
+
+        public:
+
+    ST_CPPEXPORT StGLIcon(StGLWidget*      theParent,
+                          const int        theLeft,
+                          const int        theTop,
+                          const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                          const size_t     theFacesCount = 1);
+
+    ST_CPPEXPORT virtual bool tryClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemClicked);
+    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemUnclicked);
+
+};
+
+#endif // __StGLTextureButton_h_
