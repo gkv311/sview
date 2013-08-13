@@ -155,6 +155,10 @@ void loadDefaults(StLangMap& theStrings) {
                "Parallel pair");
     theStrings(MENU_VIEW_DISPLAY_MODE_CROSSYED,
                "Cross-eyed pair");
+    theStrings(MENU_VIEW_DISPLAY_RATIO_SRC,
+               "Source");
+    theStrings(MENU_VIEW_KEEP_ON_RESTART,
+               "Keep on restart");
     theStrings(MENU_VIEW_TEXFILTER_NEAREST,
                "Nearest");
     theStrings(MENU_VIEW_TEXFILTER_LINEAR,

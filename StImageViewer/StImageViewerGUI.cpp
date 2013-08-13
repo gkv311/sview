@@ -239,14 +239,21 @@ StGLMenu* StImageViewerGUI::createDisplayModeMenu() {
  */
 StGLMenu* StImageViewerGUI::createDisplayRatioMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem("Auto",   myImage->params.displayRatio, StGLImageRegion::RATIO_AUTO);
-    aMenu->addItem("1:1",    myImage->params.displayRatio, StGLImageRegion::RATIO_1_1);
-    aMenu->addItem("4:3",    myImage->params.displayRatio, StGLImageRegion::RATIO_4_3);
-    aMenu->addItem("16:9",   myImage->params.displayRatio, StGLImageRegion::RATIO_16_9);
-    aMenu->addItem("16:10",  myImage->params.displayRatio, StGLImageRegion::RATIO_16_10);
-    aMenu->addItem("2.21:1", myImage->params.displayRatio, StGLImageRegion::RATIO_221_1);
-    aMenu->addItem("5:4",    myImage->params.displayRatio, StGLImageRegion::RATIO_5_4);
-    aMenu->addItem("Keep on restart", myPlugin->params.toRestoreRatio);
+    aMenu->addItem(tr(MENU_VIEW_DISPLAY_RATIO_SRC), myImage->params.displayRatio, StGLImageRegion::RATIO_AUTO)
+         ->setIcon(stCTexture("menuAuto16.png"));
+    aMenu->addItem("2.21:1", myImage->params.displayRatio, StGLImageRegion::RATIO_221_1)
+         ->setIcon(stCTexture("menuRatio2_1_16.png"));
+    aMenu->addItem("16:9",   myImage->params.displayRatio, StGLImageRegion::RATIO_16_9)
+         ->setIcon(stCTexture("menuRatio16_9_16.png"));
+    aMenu->addItem("16:10",  myImage->params.displayRatio, StGLImageRegion::RATIO_16_10)
+         ->setIcon(stCTexture("menuRatio16_10_16.png"));
+    aMenu->addItem("4:3",    myImage->params.displayRatio, StGLImageRegion::RATIO_4_3)
+         ->setIcon(stCTexture("menuRatio4_3_16.png"));
+    aMenu->addItem("5:4",    myImage->params.displayRatio, StGLImageRegion::RATIO_5_4)
+         ->setIcon(stCTexture("menuRatio5_4_16.png"));
+    aMenu->addItem("1:1",    myImage->params.displayRatio, StGLImageRegion::RATIO_1_1)
+         ->setIcon(stCTexture("menuRatio1_1_16.png"));
+    aMenu->addItem(tr(MENU_VIEW_KEEP_ON_RESTART),   myPlugin->params.toRestoreRatio);
     return aMenu;
 }
 
