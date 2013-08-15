@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,6 +11,7 @@
 #include <StGLWidgets/StGLRadioButton.h>
 #include <StGLWidgets/StGLRadioButtonFloat32.h>
 #include <StGLWidgets/StGLMenuProgram.h>
+#include <StGLWidgets/StGLRootWidget.h>
 
 namespace {
     static const StString CLASS_NAME("StGLMenuRadioButton");
@@ -25,9 +26,8 @@ StGLMenuRadioButton::StGLMenuRadioButton(StGLMenu* theParent,
                                          const int32_t theOnValue)
 : StGLMenuItem(theParent, 0, 0, NULL),
   myRadio(NULL) {
-    //
     myRadio = new StGLRadioButton(this, theTrackedValue, theOnValue,
-                                  8, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT));
+                                  myRoot->scale(8), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT));
     StGLMenuItem::signals.onItemClick.connect(this, &StGLMenuRadioButton::doItemClick);
 }
 
@@ -36,9 +36,8 @@ StGLMenuRadioButton::StGLMenuRadioButton(StGLMenu* theParent,
                                          const float theOnValue)
 : StGLMenuItem(theParent, 0, 0, NULL),
   myRadio(NULL) {
-    //
     myRadio = new StGLRadioButtonFloat32(this, theTrackedValue, theOnValue,
-                                         8, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT));
+                                         myRoot->scale(8), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT));
     StGLMenuItem::signals.onItemClick.connect(this, &StGLMenuRadioButton::doItemClick);
 }
 

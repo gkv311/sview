@@ -7,6 +7,7 @@
  */
 
 #include <StGLWidgets/StGLDescription.h>
+#include <StGLWidgets/StGLRootWidget.h>
 
 namespace {
     static const StString TheClassName("StGLDescription");
@@ -18,7 +19,9 @@ const StString& StGLDescription::getClassName() {
 
 StGLDescription::StGLDescription(StGLWidget* theParent,
                                  const int&  theWidth)
-: StGLTextArea(theParent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), theWidth, 96) {
+: StGLTextArea(theParent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+               theWidth,
+               theParent->getRoot()->scale(96)) {
     myFormatter.setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
                                StGLTextFormatter::ST_ALIGN_Y_TOP);
     setBorder(true);

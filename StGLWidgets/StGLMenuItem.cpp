@@ -36,7 +36,9 @@ StGLMenuItem::StGLMenuItem(StGLMenu* theParent,
                            StGLMenu* theSubMenu)
 : StGLTextArea(theParent,
                theLeft, theTop,
-               StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT)),
+               StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+               theParent->getRoot()->scale(256),
+               theParent->getRoot()->scale(32)),
   mySubMenu(theSubMenu),
   myIcon(NULL),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
@@ -44,13 +46,13 @@ StGLMenuItem::StGLMenuItem(StGLMenu* theParent,
   myToHilightText(false) {
     switch(getParentMenu()->getOrient()) {
         case StGLMenu::MENU_VERTICAL: {
-            myMarginLeft  = 32;
-            myMarginRight = 16;
+            myMarginLeft  = myRoot->scale(32);
+            myMarginRight = myRoot->scale(16);
             break;
         }
         case StGLMenu::MENU_HORIZONTAL: {
-            myMarginLeft  = 2;
-            myMarginRight = 16;
+            myMarginLeft  = myRoot->scale(2);
+            myMarginRight = myRoot->scale(16);
             break;
         }
         default:
@@ -81,7 +83,7 @@ const StString& StGLMenuItem::getClassName() {
 
 void StGLMenuItem::setIcon(const StString* theImgPaths,
                            const size_t    theCount) {
-    const int anIconMargin = 16 + 8;
+    const int anIconMargin = myRoot->scale(16 + 8);
     if(myIcon != NULL) {
         delete myIcon;
     } else {
@@ -99,7 +101,7 @@ void StGLMenuItem::setHilightText() {
 const int StGLMenuItem::computeTextWidth() {
     StHandle<StFTFont>& aFont = myFont->getFont();
     if(aFont.isNull() || !aFont->isValid()) {
-        return int(10 * (myText.getLength() + 2));
+        return myRoot->scale(int(10 * (myText.getLength() + 2)));
     }
 
     GLfloat aWidth    = 0.0f;
@@ -122,7 +124,7 @@ const int StGLMenuItem::computeTextWidth() {
         aWidth += aFont->getAdvanceX(aCharThis, aCharNext);
     }
     aWidthMax = stMax(aWidthMax, aWidth);
-    return int(aWidthMax);
+    return int(aWidthMax + 0.5f);
 }
 
 void StGLMenuItem::stglResize() {

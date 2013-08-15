@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -36,7 +36,8 @@ StGLCheckbox::StGLCheckbox(StGLWidget* theParent,
 : StGLWidget(theParent,
              theLeft, theTop,
              theCorner,
-             16, 16), // default dimensions = 16 x 16
+             theParent->getRoot()->scale(16),
+             theParent->getRoot()->scale(16)), // default dimensions = 16 x 16
   myTrackValue(theTrackedValue),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)) {
     StGLWidget::signals.onMouseUnclick = stSlot(this, &StGLCheckbox::doMouseUnclick);
@@ -58,10 +59,10 @@ void StGLCheckbox::stglResize() {
     StGLContext& aCtx = getContext();
 
     // inner vertices
-    aRectPx.left()   += 4;
-    aRectPx.right()  -= 4;
-    aRectPx.top()    += 4;
-    aRectPx.bottom() -= 4;
+    aRectPx.left()   += myRoot->scale(4);
+    aRectPx.right()  -= myRoot->scale(4);
+    aRectPx.top()    += myRoot->scale(4);
+    aRectPx.bottom() -= myRoot->scale(4);
     getRoot()->getRectGl(aRectPx, aVertices, 4);
     myVertBuf.init(aCtx, aVertices);
 

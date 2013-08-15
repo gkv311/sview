@@ -97,6 +97,13 @@ class StGLRootWidget : public StGLWidget {
     }
 
     /**
+     * @return scaled units
+     */
+    ST_LOCAL inline int scale(const int thePixels) const {
+        return int(myScaleGUI * GLfloat(thePixels) + 0.1f);
+    }
+
+    /**
      * @param theScale scale factor for GUI elements (text, icons)
      */
     ST_CPPEXPORT void setScale(const GLfloat     theScale,

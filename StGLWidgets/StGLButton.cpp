@@ -8,6 +8,7 @@
 
 #include <StGLWidgets/StGLButton.h>
 #include <StGLWidgets/StGLMenuItem.h>
+#include <StGLWidgets/StGLRootWidget.h>
 
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
@@ -23,7 +24,7 @@ StGLButton::StGLButton(StGLWidget*     theParent,
     aBtn->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
                          StGLTextFormatter::ST_ALIGN_Y_CENTER);
 
-    myWidth = aBtn->computeTextWidth() + 16;
+    myWidth = aBtn->computeTextWidth() + myRoot->scale(16);
 }
 
 StGLButton::~StGLButton() {

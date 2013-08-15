@@ -37,7 +37,8 @@ StGLRadioButton::StGLRadioButton(StGLWidget* theParent,
 : StGLWidget(theParent,
              theLeft, theTop,
              theCorner,
-             16, 16), // default dimensions = 16 x 16
+             theParent->getRoot()->scale(16),
+             theParent->getRoot()->scale(16)), // default dimensions = 16 x 16
   myTrackValue(theTrackedValue),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
   myVertBuf(),
@@ -62,10 +63,10 @@ void StGLRadioButton::stglResize() {
     getRoot()->getRectGl(aRectPx, aVertices, 0);
 
     // inner vertices
-    aRectPx.left()   += 4;
-    aRectPx.right()  -= 4;
-    aRectPx.top()    += 4;
-    aRectPx.bottom() -= 4;
+    aRectPx.left()   += myRoot->scale(4);
+    aRectPx.right()  -= myRoot->scale(4);
+    aRectPx.top()    += myRoot->scale(4);
+    aRectPx.bottom() -= myRoot->scale(4);
     getRoot()->getRectGl(aRectPx, aVertices, 4);
     myVertBuf.init(aCtx, aVertices);
 

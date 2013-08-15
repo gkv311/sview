@@ -23,9 +23,11 @@ class StGLMessageBox : public StGLWidget {
         public:
 
     ST_CPPEXPORT StGLMessageBox(StGLWidget*     theParent,
+                                const StString& theText);
+    ST_CPPEXPORT StGLMessageBox(StGLWidget*     theParent,
                                 const StString& theText,
-                                const int       theWidth  = 384,
-                                const int       theHeight = 200);
+                                const int       theWidth,
+                                const int       theHeight);
     ST_CPPEXPORT virtual ~StGLMessageBox();
     ST_CPPEXPORT virtual bool stglInit();
     ST_CPPEXPORT virtual void stglResize();
@@ -61,6 +63,10 @@ class StGLMessageBox : public StGLWidget {
         private:   //! @name callback Slots (private overriders)
 
     ST_LOCAL void doMouseUnclick(const int theBtnId);
+
+    ST_LOCAL void create(const StString& theText,
+                         const int       theWidth,
+                         const int       theHeight);
 
         public:    //! @name Signals
 

@@ -378,17 +378,19 @@ bool StGLTextArea::stglInit() {
 
 void StGLTextArea::recomputeBorder(StGLContext& theCtx) {
     GLfloat aTextAreaW = GLfloat(getRectPx().width());
+    GLfloat aMarg      = GLfloat(myRoot->scale(3));
     const GLfloat quadVerticesInner[4 * 4] = {
-        3.0f + aTextAreaW, myTextBndBox.top()    + 3.0f, 0.0f, 1.0f, // top-right
-        3.0f + aTextAreaW, myTextBndBox.bottom() - 3.0f, 0.0f, 1.0f, // bottom-right
-                    -3.0f, myTextBndBox.top()    + 3.0f, 0.0f, 1.0f, // top-left
-                    -3.0f, myTextBndBox.bottom() - 3.0f, 0.0f, 1.0f  // bottom-left
+        aMarg + aTextAreaW, myTextBndBox.top()    + aMarg, 0.0f, 1.0f, // top-right
+        aMarg + aTextAreaW, myTextBndBox.bottom() - aMarg, 0.0f, 1.0f, // bottom-right
+                    -aMarg, myTextBndBox.top()    + aMarg, 0.0f, 1.0f, // top-left
+                    -aMarg, myTextBndBox.bottom() - aMarg, 0.0f, 1.0f  // bottom-left
     };
+    aMarg += 1.0f;
     const GLfloat quadVerticesOuter[4 * 4] = {
-        4.0f + aTextAreaW, myTextBndBox.top()    + 4.0f, 0.0f, 1.0f, // top-right
-        4.0f + aTextAreaW, myTextBndBox.bottom() - 4.0f, 0.0f, 1.0f, // bottom-right
-                    -4.0f, myTextBndBox.top()    + 4.0f, 0.0f, 1.0f, // top-left
-                    -4.0f, myTextBndBox.bottom() - 4.0f, 0.0f, 1.0f  // bottom-left
+        aMarg + aTextAreaW, myTextBndBox.top()    + aMarg, 0.0f, 1.0f, // top-right
+        aMarg + aTextAreaW, myTextBndBox.bottom() - aMarg, 0.0f, 1.0f, // bottom-right
+                    -aMarg, myTextBndBox.top()    + aMarg, 0.0f, 1.0f, // top-left
+                    -aMarg, myTextBndBox.bottom() - aMarg, 0.0f, 1.0f  // bottom-left
     };
     myBorderIVertBuf.init(theCtx, 4, 4, quadVerticesInner);
     myBorderOVertBuf.init(theCtx, 4, 4, quadVerticesOuter);

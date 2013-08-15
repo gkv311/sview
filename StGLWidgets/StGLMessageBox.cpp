@@ -25,20 +25,38 @@ StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
   myBtnPanel(NULL),
   myDefaultBtn(NULL),
   myButtonsNb(0) {
+    create(theText, theWidth, theHeight);
+}
+
+StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
+                               const StString& theText)
+: StGLWidget(theParent, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER),
+             theParent->getRoot()->scale(384),
+             theParent->getRoot()->scale(200)),
+  myContent(NULL),
+  myBtnPanel(NULL),
+  myDefaultBtn(NULL),
+  myButtonsNb(0) {
+    create(theText, myRoot->scale(384), myRoot->scale(200));
+}
+
+void StGLMessageBox::create(const StString& theText,
+                            const int       theWidth,
+                            const int       theHeight) {
     StGLWidget::signals.onMouseUnclick.connect(this, &StGLMessageBox::doMouseUnclick);
 
-    const int OFFSET_PIXELS = 32;
+    const int OFFSET_PIXELS = myRoot->scale(32);
     int anOffsetX = theWidth  > 2 * OFFSET_PIXELS ? OFFSET_PIXELS : 0;
     int anOffsetY = theHeight > 2 * OFFSET_PIXELS ? OFFSET_PIXELS : 0;
     myContent = new StGLScrollArea(this, anOffsetX, anOffsetY,
                                    StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
-                                   theWidth - 2 * anOffsetX, theHeight - 24 * 3 - anOffsetY);
+                                   theWidth - 2 * anOffsetX, theHeight - myRoot->scale(24 * 3) - anOffsetY);
     setText(theText);
 
     myIsTopWidget = true;
     getRoot()->setFocus(this); // take input focus
 
-    myBtnPanel = new StGLWidget(this, 0, -24, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER), 0, 24);
+    myBtnPanel = new StGLWidget(this, 0, -myRoot->scale(24), StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER), 0, myRoot->scale(24));
     myBtnPanel->setVisibility(true);
 }
 
@@ -109,12 +127,12 @@ StGLButton* StGLMessageBox::addButton(const StString& theTitle,
                                       const int       theWidth) {
     int aRight = myBtnPanel->getRectPx().right();
     if(aRight > 0) {
-        aRight += 24;
+        aRight += myRoot->scale(24);
     }
 
     StGLButton* aButton = new StGLButton(myBtnPanel, aRight, 0, theTitle);
     aButton->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
-    aButton->setHeight(24);
+    aButton->setHeight(myRoot->scale(24));
     aButton->setVisibility(true, true);
 
     if(theWidth > 0) {

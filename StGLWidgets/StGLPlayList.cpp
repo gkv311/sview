@@ -8,19 +8,20 @@
 
 #include <StGLWidgets/StGLPlayList.h>
 #include <StGLWidgets/StGLMenuItem.h>
+#include <StGLWidgets/StGLRootWidget.h>
 
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 
 StGLPlayList::StGLPlayList(StGLWidget*                 theParent,
                            const StHandle<StPlayList>& theList)
-: StGLMenu(theParent, -32, 0, StGLMenu::MENU_VERTICAL),
+: StGLMenu(theParent, -theParent->getRoot()->scale(32), 0, StGLMenu::MENU_VERTICAL),
   myList(theList),
   myFromId(0),
   myItemsNb(0),
   myToResetList(false),
   myToUpdateList(false) {
-    myWidth = 250;
+    myWidth = myRoot->scale(250);
     StGLWidget::signals.onMouseUnclick = stSlot(this, &StGLPlayList::doMouseUnclick);
     myList->signals.onPlaylistChange  += stSlot(this, &StGLPlayList::doResetList);
     myList->signals.onTitleChange     += stSlot(this, &StGLPlayList::doChangeItem);
@@ -130,8 +131,8 @@ void StGLPlayList::stglResize(const StRectI_t& theWinRectPx) {
     }
 
     myWidth = theWinRectPx.width() / 4;
-    myWidth = stMin(myWidth, 400);
-    myWidth = stMax(myWidth, 250);
+    myWidth = stMin(myWidth, myRoot->scale(400));
+    myWidth = stMax(myWidth, myRoot->scale(250));
     resizeWidth();
 
     StGLMenu::stglResize(theWinRectPx);

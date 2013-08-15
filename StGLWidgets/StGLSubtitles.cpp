@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -7,6 +7,7 @@
  */
 
 #include <StGLWidgets/StGLSubtitles.h>
+#include <StGLWidgets/StGLRootWidget.h>
 
 namespace {
     static const StString CLASS_NAME("StGLSubtitles");
@@ -59,9 +60,9 @@ const StString& StGLSubtitles::getClassName() {
 StGLSubtitles::StGLSubtitles(StGLWidget* theParent,
                              const StHandle<StSubQueue>& theSubQueue)
 : StGLTextArea(theParent,
-               0, -100,
+               0, -theParent->getRoot()->scale(100),
                StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER),
-               800, 160,
+               theParent->getRoot()->scale(800), theParent->getRoot()->scale(160),
                StGLTextArea::SIZE_DOUBLE),
   myQueue(theSubQueue),
   myShowItems(),

@@ -44,11 +44,12 @@ StGLMenu::StGLMenu(StGLWidget* theParent,
 : StGLWidget(theParent,
              theLeft, theTop,
              StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
-             32, 32),
+             theParent->getRoot()->scale(32),
+             theParent->getRoot()->scale(32)),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
   myColorVec(0.855f, 0.855f, 0.855f, 1.0f),
   myOrient(theOrient),
-  myItemHeight(32),
+  myItemHeight(theParent->getRoot()->scale(32)),
   myWidth(0),
   myIsRootMenu(theIsRootMenu),
   myIsActive(!theIsRootMenu),
@@ -139,7 +140,8 @@ bool StGLMenu::stglInit() {
             if(myOrient == MENU_HORIZONTAL) {
                 anItem->getSubMenu()->changeRectPx().moveTopLeftTo(anItem->getRectPxAbsolute().left(), anItem->getRectPxAbsolute().bottom());
             } else if(myOrient == MENU_VERTICAL) {
-                anItem->getSubMenu()->changeRectPx().moveTopLeftTo(anItem->getRectPxAbsolute().right() - 10, anItem->getRectPxAbsolute().top());
+                anItem->getSubMenu()->changeRectPx().moveTopLeftTo(anItem->getRectPxAbsolute().right() - myRoot->scale(10),
+                                                                   anItem->getRectPxAbsolute().top());
             }
         }
     }
@@ -157,7 +159,7 @@ bool StGLMenu::stglInit() {
             anItem->changeRectPx().right() = anItem->getRectPx().left() + myWidth;
             anItem->setTextWidth(myWidth);
             if(anItem->getSubMenu() != NULL) {
-                anItem->getSubMenu()->changeRectPx().moveTopLeftTo(getRectPxAbsolute().right() - 10,
+                anItem->getSubMenu()->changeRectPx().moveTopLeftTo(getRectPxAbsolute().right() - myRoot->scale(10),
                                                                    anItem->getRectPxAbsolute().top());
             }
         }

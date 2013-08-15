@@ -7,12 +7,18 @@
  */
 
 #include <StGLWidgets/StGLFpsLabel.h>
+#include <StGLWidgets/StGLRootWidget.h>
 
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 
 StGLFpsLabel::StGLFpsLabel(StGLWidget* theParent)
-: StGLTextArea(theParent, -32,  32, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT), 128, 32),
+: StGLTextArea(theParent,
+              -theParent->getRoot()->scale(32),
+               theParent->getRoot()->scale(32),
+               StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT),
+               theParent->getRoot()->scale(128),
+               theParent->getRoot()->scale(32)),
   myPlayFps(-1.0),
   myPlayQueued(0),
   myPlayQueueLen(0),

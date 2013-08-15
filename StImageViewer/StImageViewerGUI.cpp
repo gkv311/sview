@@ -59,31 +59,33 @@ namespace {
  */
 void StImageViewerGUI::createUpperToolbar() {
     int aBtnIter = 0;
+    const int aTop  = scale(DISPL_Y_REGION_UPPER);
+    const int aLeft = scale(DISPL_X_REGION_UPPER);
 
     const StRectI_t& aMargins = getRootMarginsPx();
     myPanelUpper = new StGLWidget(this, aMargins.left(), aMargins.top(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), 4096, 128);
 
     // append textured buttons
-    myBtnOpen   = new StGLTextureButton(myPanelUpper, DISPL_X_REGION_UPPER + (aBtnIter++) * ICON_WIDTH, DISPL_Y_REGION_UPPER);
+    myBtnOpen   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * ICON_WIDTH, aTop);
     myBtnOpen->signals.onBtnClick.connectUnsafe(myPlugin, StImageViewer::doOpenFileDialog);
     myBtnOpen->setTexturePath(stCTexture("openImage.std"));
 
-    myBtnPrev   = new StGLTextureButton(myPanelUpper, DISPL_X_REGION_UPPER + (aBtnIter++) * ICON_WIDTH, DISPL_Y_REGION_UPPER);
+    myBtnPrev   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * ICON_WIDTH, aTop);
     myBtnPrev->signals.onBtnClick.connect(myPlugin, &StImageViewer::doListPrev);
     myBtnPrev->setTexturePath(stCTexture("imagePrev.std"));
 
-    myBtnNext   = new StGLTextureButton(myPanelUpper, DISPL_X_REGION_UPPER + (aBtnIter++) * ICON_WIDTH, DISPL_Y_REGION_UPPER);
+    myBtnNext   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * ICON_WIDTH, aTop);
     myBtnNext->signals.onBtnClick.connect(myPlugin, &StImageViewer::doListNext);
     myBtnNext->setTexturePath(stCTexture("imageNext.std"));
 
     myBtnSwapLR = new StGLCheckboxTextured(myPanelUpper, myImage->params.swapLR,
                                            stCTexture("swapLRoff.std"),
                                            stCTexture("swapLRon.std"),
-                                           DISPL_X_REGION_UPPER + (aBtnIter++) * ICON_WIDTH, DISPL_Y_REGION_UPPER,
+                                           aLeft + (aBtnIter++) * ICON_WIDTH, aTop,
                                            StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
 
     StGLSwitchTextured* aSrcBtn = new StGLSwitchTextured(myPanelUpper, myPlugin->params.srcFormat,
-                                                         DISPL_X_REGION_UPPER + (aBtnIter++) * ICON_WIDTH, DISPL_Y_REGION_UPPER,
+                                                         aLeft + (aBtnIter++) * ICON_WIDTH, aTop,
                                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
     aSrcBtn->addItem(ST_V_SRC_AUTODETECT,    stCTexture("srcFrmtAuto.std"));
     aSrcBtn->addItem(ST_V_SRC_MONO,          stCTexture("srcFrmtMono.std"));
@@ -170,26 +172,34 @@ StGLMenu* StImageViewerGUI::createSaveImageMenu() {
  */
 StGLMenu* StImageViewerGUI::createSrcFormatMenu() {
     StGLMenu*     aMenu  = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+    int anIconSize = scale(16);
+    if(anIconSize < 30) {
+        anIconSize = 16;
+    } else if(anIconSize < 60) {
+        anIconSize = 32;
+    } else {
+        anIconSize = 64;
+    }
     aMenu->addItem(tr(MENU_SRC_FORMAT_AUTO),         myPlugin->params.srcFormat, ST_V_SRC_AUTODETECT)
-         ->setIcon(stCTexture("menuAuto16.png"));
+         ->setIcon(getTexturePath(StString("menuAuto") + anIconSize + ".png"));
     aMenu->addItem(tr(MENU_SRC_FORMAT_MONO),         myPlugin->params.srcFormat, ST_V_SRC_MONO)
-         ->setIcon(stCTexture("menuMono16.png"));
+         ->setIcon(getTexturePath(StString("menuMono") + anIconSize + ".png"));
     aMenu->addItem(tr(MENU_SRC_FORMAT_CROSS_EYED),   myPlugin->params.srcFormat, ST_V_SRC_SIDE_BY_SIDE)
-         ->setIcon(stCTexture("menuSbsRL16.png"));
+         ->setIcon(getTexturePath(StString("menuSbsRL") + anIconSize + ".png"));
     aMenu->addItem(tr(MENU_SRC_FORMAT_PARALLEL),     myPlugin->params.srcFormat, ST_V_SRC_PARALLEL_PAIR)
-         ->setIcon(stCTexture("menuSbsLR16.png"));
+         ->setIcon(getTexturePath(StString("menuSbsLR") + anIconSize + ".png"));
     aMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_RL), myPlugin->params.srcFormat, ST_V_SRC_OVER_UNDER_RL)
-         ->setIcon(stCTexture("menuOverUnderRL16.png"));
+         ->setIcon(getTexturePath(StString("menuOverUnderRL") + anIconSize + ".png"));
     aMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_LR), myPlugin->params.srcFormat, ST_V_SRC_OVER_UNDER_LR)
-         ->setIcon(stCTexture("menuOverUnderLR16.png"));
+         ->setIcon(getTexturePath(StString("menuOverUnderLR") + anIconSize + ".png"));
     aMenu->addItem(tr(MENU_SRC_FORMAT_INTERLACED),   myPlugin->params.srcFormat, ST_V_SRC_ROW_INTERLACE)
-         ->setIcon(stCTexture("menuRowLR16.png"));
+         ->setIcon(getTexturePath(StString("menuRowLR") + anIconSize + ".png"));
     aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RC),       myPlugin->params.srcFormat, ST_V_SRC_ANAGLYPH_RED_CYAN)
-         ->setIcon(stCTexture("menuRedCyanLR16.png"));
+         ->setIcon(getTexturePath(StString("menuRedCyanLR") + anIconSize + ".png"));
     aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RB),       myPlugin->params.srcFormat, ST_V_SRC_ANAGLYPH_G_RB)
-         ->setIcon(stCTexture("menuGreenMagentaLR16.png"));
+         ->setIcon(getTexturePath(StString("menuGreenMagentaLR") + anIconSize + ".png"));
     aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_YB),       myPlugin->params.srcFormat, ST_V_SRC_ANAGLYPH_YELLOW_BLUE)
-         ->setIcon(stCTexture("menuYellowBlueLR16.png"));
+         ->setIcon(getTexturePath(StString("menuYellowBlueLR") + anIconSize + ".png"));
     return aMenu;
 }
 
@@ -294,9 +304,9 @@ StGLMenu* StImageViewerGUI::createImageAdjustMenu() {
     aMenu->addItem(tr(MENU_VIEW_ADJUST_RESET), myPlugin->getAction(StImageViewer::Action_ImageAdjustReset));
 
     StGLMenuItem* anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_GAMMA));
-    anItem->setMarginRight(100 + 16);
+    anItem->setMarginRight(scale(100 + 16));
     StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, myImage->params.gamma,
-                                                              -16, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+                                                              -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->setFormat(stCString("%+01.2f"));
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
@@ -304,9 +314,9 @@ StGLMenu* StImageViewerGUI::createImageAdjustMenu() {
     aRange->setVisibility(true, true);
 
     anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_BRIGHTNESS));
-    anItem->setMarginRight(100 + 16);
+    anItem->setMarginRight(scale(100 + 16));
     aRange = new StGLRangeFieldFloat32(anItem, myImage->params.brightness,
-                                       -16, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+                                       -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->setFormat(stCString("%+01.2f"));
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
@@ -314,9 +324,9 @@ StGLMenu* StImageViewerGUI::createImageAdjustMenu() {
     aRange->setVisibility(true, true);
 
     anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_SATURATION));
-    anItem->setMarginRight(100 + 16);
+    anItem->setMarginRight(scale(100 + 16));
     aRange = new StGLRangeFieldFloat32(anItem, myImage->params.saturation,
-                                       -16, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+                                       -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->changeRectPx().bottom() = aRange->getRectPx().top() + aMenu->getItemHeight();
     aRange->setFormat(stCString("%+01.2f"));
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
@@ -373,7 +383,7 @@ void StImageViewerGUI::doAboutProgram(const size_t ) {
         + tr(ABOUT_VERSION) + ": " + StVersionInfo::getSDKVersionString()
         + " " + StThread::getArchString()
         + "\n \n" + tr(ABOUT_DESCRIPTION),
-        512, 300);
+        scale(512), scale(300));
     aDialog->addButton("Close");
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
@@ -387,7 +397,7 @@ void StImageViewerGUI::doAboutSystem(const size_t ) {
     StString aTitle = "System Info";
     StString anInfo = getContext().stglFullInfo();
     StString aString = aTitle + "\n\n \n" + anInfo;
-    StGLMessageBox* aDialog = new StGLMessageBox(this, aString, 512, 256);
+    StGLMessageBox* aDialog = new StGLMessageBox(this, aString, scale(512), scale(256));
     aDialog->addButton("Close");
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
@@ -411,7 +421,7 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
         anInfo += anInfoList[anIter];
     }
     StString aString = aTitle + "\n\n \n" + anInfo;
-    StGLMessageBox* aDialog = new StGLMessageBox(this, aString, 512, 300);
+    StGLMessageBox* aDialog = new StGLMessageBox(this, aString, scale(512), scale(300));
     aDialog->addButton("Close");
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
@@ -714,7 +724,7 @@ void StImageViewerGUI::doAboutRenderer(const size_t ) {
         anAboutText = StString() + "Plugin '" + myPlugin->getMainWindow()->getRendererId() + "' doesn't provide description";
     }
 
-    StGLMessageBox* aDialog = new StGLMessageBox(this, anAboutText, 512, 300);
+    StGLMessageBox* aDialog = new StGLMessageBox(this, anAboutText, scale(512), scale(300));
     aDialog->addButton("Close");
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
