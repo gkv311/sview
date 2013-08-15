@@ -137,6 +137,16 @@ void loadDefaults(StLangMap& theStrings) {
                "License text");
     theStrings(MENU_HELP_SYSINFO,
                "System Info");
+    theStrings(MENU_HELP_SCALE,
+               "Scale Interface");
+    theStrings(MENU_HELP_SCALE_SMALL,
+               "Small");
+    theStrings(MENU_HELP_SCALE_NORMAL,
+               "Normal");
+    theStrings(MENU_HELP_SCALE_BIG,
+               "Big");
+    theStrings(MENU_HELP_SCALE_HIDPI2X,
+               "Force HiDPI 2X");
     theStrings(MENU_HELP_UPDATES,
                "Check for updates");
     theStrings(MENU_HELP_LANGS,

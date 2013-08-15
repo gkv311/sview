@@ -65,6 +65,8 @@ namespace {
     static const char ST_SETTING_GPU_DECODING[]  = "gpuDecoding";
     static const char ST_SETTING_VSYNC[]         = "vsync";
 
+    static const char ST_SETTING_SCALE_ADJUST[]  = "scaleAdjust";
+    static const char ST_SETTING_SCALE_FORCE2X[] = "scale2X";
     static const char ST_SETTING_FULLSCREEN[]    = "fullscreen";
     static const char ST_SETTING_VIEWMODE[]      = "viewMode";
     static const char ST_SETTING_STEREO_MODE[]   = "viewStereoMode";
@@ -168,11 +170,24 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
   myWebCtx(NULL),
   //
   myLastUpdateDay(0),
+  myToRecreateMenu(false),
   myToUpdateALList(false),
   myIsBenchmark(false),
   myToCheckUpdates(true) {
     StMoviePlayerStrings::loadDefaults(*myLangMap);
     myTitle = "sView - Movie Player";
+
+    params.ScaleAdjust      = new StInt32Param(StGLRootWidget::ScaleAdjust_Normal);
+    mySettings->loadParam (ST_SETTING_SCALE_ADJUST, params.ScaleAdjust);
+    params.ScaleAdjust->signals.onChanged = stSlot(this, &StMoviePlayer::doScaleGui);
+    params.ScaleHiDPI       = new StFloat32Param(1.0f,       // initial value
+                                                 1.0f, 3.0f, // min, max values
+                                                 1.0f,       // default value
+                                                 1.0f,       // incremental step
+                                                 0.001f);    // equality tolerance
+    params.ScaleHiDPI2X     = new StBoolParam(false);
+    mySettings->loadParam (ST_SETTING_SCALE_FORCE2X, params.ScaleHiDPI2X);
+    params.ScaleHiDPI2X->signals.onChanged = stSlot(this, &StMoviePlayer::doScaleHiDPI);
 
     params.alDevice = new StALDeviceParam();
     params.AudioGain = new StFloat32Param( 0.0f, // sound is unattenuated
@@ -186,6 +201,7 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     params.AudioMute->signals.onChanged = stSlot(this, &StMoviePlayer::doSetAudioMute);
     params.AudioDelay   = new StFloat32Param(0.0f, -5.0f, 5.0f, 0.0f, 0.100f);
     params.AudioDelay->signals.onChanged = stSlot(this, &StMoviePlayer::doSetAudioDelay);
+
     params.isFullscreen = new StBoolParam(false);
     params.isFullscreen->signals.onChanged = stSlot(this, &StMoviePlayer::doFullscreen);
     params.toRestoreRatio   = new StBoolParam(false);
@@ -365,16 +381,26 @@ bool StMoviePlayer::resetDevice() {
     return open();
 }
 
+void StMoviePlayer::saveGuiParams() {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    mySettings->saveParam (ST_SETTING_STEREO_MODE, myGUI->myImage->params.displayMode);
+    mySettings->saveInt32 (ST_SETTING_GAMMA,       stRound(100.0f * myGUI->myImage->params.gamma->getValue()));
+    if(params.toRestoreRatio->getValue()) {
+        mySettings->saveParam(ST_SETTING_RATIO,    myGUI->myImage->params.displayRatio);
+    } else {
+        mySettings->saveInt32(ST_SETTING_RATIO,    StGLImageRegion::RATIO_AUTO);
+    }
+    mySettings->saveParam (ST_SETTING_TEXFILTER,   myGUI->myImage->params.textureFilter);
+}
+
 void StMoviePlayer::releaseDevice() {
+    saveGuiParams();
     if(!myGUI.isNull()) {
-        mySettings->saveParam (ST_SETTING_STEREO_MODE,        myGUI->myImage->params.displayMode);
-        mySettings->saveInt32 (ST_SETTING_GAMMA,              stRound(100.0f * myGUI->myImage->params.gamma->getValue()));
-        if(params.toRestoreRatio->getValue()) {
-            mySettings->saveParam(ST_SETTING_RATIO,           myGUI->myImage->params.displayRatio);
-        } else {
-            mySettings->saveInt32(ST_SETTING_RATIO,           StGLImageRegion::RATIO_AUTO);
-        }
-        mySettings->saveParam (ST_SETTING_TEXFILTER,          myGUI->myImage->params.textureFilter);
+        mySettings->saveParam (ST_SETTING_SCALE_ADJUST,       params.ScaleAdjust);
+        mySettings->saveParam (ST_SETTING_SCALE_FORCE2X,      params.ScaleHiDPI2X);
         mySettings->saveInt32 (ST_SETTING_FPSTARGET,          params.TargetFps);
         mySettings->saveString(ST_SETTING_OPENAL_DEVICE,      params.alDevice->getTitle());
         mySettings->saveInt32 (ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
@@ -420,6 +446,42 @@ StMoviePlayer::~StMoviePlayer() {
     releaseDevice();
     // wait video playback thread to quit and release resources
     myVideo.nullify();
+}
+
+bool StMoviePlayer::createGui(StHandle<StGLTextureQueue>& theTextureQueue,
+                              StHandle<StSubQueue>&       theSubQueue) {
+    if(!myGUI.isNull()) {
+        saveGuiParams();
+        myGUI.nullify();
+    }
+
+    if(!myVideo.isNull()) {
+        theTextureQueue = myVideo->getTextureQueue();
+        theSubQueue     = myVideo->getSubtitlesQueue();
+    } else {
+        theTextureQueue = new StGLTextureQueue(16);
+        theSubQueue     = new StSubQueue();
+    }
+    myGUI = new StMoviePlayerGUI(this, myWindow.access(), myLangMap.access(), myPlayList, theTextureQueue, theSubQueue);
+    myGUI->setContext(myContext);
+
+    // load settings
+    mySettings->loadParam (ST_SETTING_STEREO_MODE, myGUI->myImage->params.displayMode);
+    mySettings->loadParam (ST_SETTING_TEXFILTER,   myGUI->myImage->params.textureFilter);
+    mySettings->loadParam (ST_SETTING_RATIO,       myGUI->myImage->params.displayRatio);
+    params.toRestoreRatio->setValue(myGUI->myImage->params.displayRatio->getValue() != StGLImageRegion::RATIO_AUTO);
+    int32_t loadedGamma = 100; // 1.0f
+        mySettings->loadInt32(ST_SETTING_GAMMA, loadedGamma);
+        myGUI->myImage->params.gamma->setValue(0.01f * loadedGamma);
+
+    // initialize frame region early to show dedicated error description
+    if(!myGUI->myImage->stglInit()) {
+        return false;
+    }
+
+    myGUI->stglInit();
+    myGUI->stglResize(myWindow->getPlacement());
+    return true;
 }
 
 void StMoviePlayer::doImageAdjustReset(const size_t ) {
@@ -501,37 +563,15 @@ bool StMoviePlayer::init() {
     // create the GUI with default values
     StHandle<StGLTextureQueue> aTextureQueue;
     StHandle<StSubQueue>       aSubQueue;
-    if(!myVideo.isNull()) {
-        aTextureQueue = myVideo->getTextureQueue();
-        aSubQueue     = myVideo->getSubtitlesQueue();
-    } else {
-        aTextureQueue = new StGLTextureQueue(16);
-        aSubQueue     = new StSubQueue();
-    }
-    myGUI = new StMoviePlayerGUI(this, myWindow.access(), myLangMap.access(), myPlayList, aTextureQueue, aSubQueue);
-    myGUI->setContext(myContext);
-
-    // load settings
-    mySettings->loadParam (ST_SETTING_STEREO_MODE, myGUI->myImage->params.displayMode);
-    mySettings->loadParam (ST_SETTING_TEXFILTER,   myGUI->myImage->params.textureFilter);
-    mySettings->loadParam (ST_SETTING_RATIO,       myGUI->myImage->params.displayRatio);
-    params.toRestoreRatio->setValue(myGUI->myImage->params.displayRatio->getValue() != StGLImageRegion::RATIO_AUTO);
-    int32_t loadedGamma = 100; // 1.0f
-        mySettings->loadInt32(ST_SETTING_GAMMA, loadedGamma);
-        myGUI->myImage->params.gamma->setValue(0.01f * loadedGamma);
-
-    // capture multimedia keys even without window focus
-    myWindow->setAttribute(StWinAttr_GlobalMediaKeys, params.areGlobalMKeys->getValue());
-
-    // initialize frame region early to show dedicated error description
-    if(!myGUI->myImage->stglInit()) {
+    if(!createGui(aTextureQueue, aSubQueue)) {
         myMsgQueue->pushError(stCString("Movie Player - critical error:\nFrame region initialization failed!"));
         myMsgQueue->popAll();
         myGUI.nullify();
         return false;
     }
-    myGUI->stglInit();
-    myGUI->stglResize(myWindow->getPlacement());
+
+    // capture multimedia keys even without window focus
+    myWindow->setAttribute(StWinAttr_GlobalMediaKeys, params.areGlobalMKeys->getValue());
 
     // create the video playback thread
     if(!isReset) {
@@ -838,6 +878,13 @@ void StMoviePlayer::beforeDraw() {
         return;
     }
 
+    if(myToRecreateMenu) {
+        StHandle<StGLTextureQueue> aTextureQueue;
+        StHandle<StSubQueue>       aSubQueue;
+        createGui(aTextureQueue, aSubQueue);
+        myToRecreateMenu = false;
+    }
+
     const bool isMouseMove = myWindow->isMouseMoved();
     if(myEventLoaded.checkReset()) {
         doUpdateStateLoaded();
@@ -1065,6 +1112,20 @@ void StMoviePlayer::doReset(const size_t ) {
     if(!aParams.isNull()) {
         aParams->reset();
     }
+}
+
+void StMoviePlayer::doScaleGui(const int32_t ) {
+    if(myGUI.isNull()) {
+        return;
+    }
+    myToRecreateMenu = true;
+}
+
+void StMoviePlayer::doScaleHiDPI(const bool ) {
+    if(myGUI.isNull()) {
+        return;
+    }
+    myToRecreateMenu = true;
 }
 
 void StMoviePlayer::doLoaded() {

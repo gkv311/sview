@@ -433,6 +433,7 @@ void StImageViewerGUI::doOpenLicense(const size_t ) {
  */
 StGLMenu* StImageViewerGUI::createHelpMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+    StGLMenu* aMenuScale        = createScaleMenu();        // Root -> Help -> Scale Interface menu
     StGLMenu* aMenuCheckUpdates = createCheckUpdatesMenu(); // Root -> Help -> Check updates menu
     StGLMenu* aMenuLanguage     = createLanguageMenu();     // Root -> Help -> Language menu
 
@@ -444,8 +445,21 @@ StGLMenu* StImageViewerGUI::createHelpMenu() {
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doOpenLicense);
     aMenu->addItem(tr(MENU_HELP_SYSINFO))
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doAboutSystem);
+    aMenu->addItem(tr(MENU_HELP_SCALE),   aMenuScale);
     aMenu->addItem(tr(MENU_HELP_UPDATES), aMenuCheckUpdates);
     aMenu->addItem(tr(MENU_HELP_LANGS),   aMenuLanguage);
+    return aMenu;
+}
+
+/**
+ * Root -> Help -> Check updates menu
+ */
+StGLMenu* StImageViewerGUI::createScaleMenu() {
+    StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+    aMenu->addItem(tr(MENU_HELP_SCALE_SMALL),   myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Small);
+    aMenu->addItem(tr(MENU_HELP_SCALE_NORMAL),  myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Normal);
+    aMenu->addItem(tr(MENU_HELP_SCALE_BIG),     myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Big);
+    aMenu->addItem(tr(MENU_HELP_SCALE_HIDPI2X), myPlugin->params.ScaleHiDPI2X);
     return aMenu;
 }
 
@@ -503,6 +517,9 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
   //
   myIsVisibleGUI(true),
   myIsMinimalGUI(true) {
+    const GLfloat aScale = myPlugin->params.ScaleHiDPI2X->getValue() ? 2.0f : myPlugin->params.ScaleHiDPI ->getValue();
+    StGLRootWidget::setScale(aScale, (StGLRootWidget::ScaleAdjust )myPlugin->params.ScaleAdjust->getValue());
+
     setRootMarginsPx(myWindow->getMargins());
     const StRectI_t& aMargins = getRootMarginsPx();
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StImageViewerGUI::doShowFPS);
@@ -632,12 +649,9 @@ void StImageViewerGUI::stglUpdate(const StPointD_t& pointZo) {
         myDescr->setPoint(pointZo);
     }
     if(myLangMap->wasReloaded()) {
-        StGLMenu::DeleteWithSubMenus(myMenuRoot); myMenuRoot = NULL;
-        createMainMenu();
-        myMenuRoot->stglUpdateSubmenuLayout();
+        myPlugin->myToRecreateMenu = true;
         myLangMap->resetReloaded();
-        // turn back topmost position
-        getChildren()->moveToTop(myMsgStack);
+        StImageViewerStrings::loadDefaults(*myLangMap);
     }
 }
 

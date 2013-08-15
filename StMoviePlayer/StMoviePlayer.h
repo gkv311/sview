@@ -37,6 +37,7 @@ class StMoviePlayerGUI;
 class StPlayList;
 class StSettings;
 class StStereoParams;
+class StSubQueue;
 class StVideo;
 class StWindow;
 struct StMovieInfo;
@@ -189,6 +190,9 @@ class StMoviePlayer : public StApplication {
 
     struct {
 
+        StHandle<StInt32Param>    ScaleAdjust;      //!< adjust GUI size, see StGLRootWidget::ScaleAdjust
+        StHandle<StFloat32Param>  ScaleHiDPI;       //!< adapt  GUI size for HiDPI resolution
+        StHandle<StBoolParam>     ScaleHiDPI2X;     //!< option to set HiDPI resolution to 2.0
         StHandle<StALDeviceParam> alDevice;         //!< active OpenAL device
         StHandle<StFloat32Param>  AudioGain;        //!< volume factor
         StHandle<StBoolParam>     AudioMute;        //!< volume mute flag
@@ -236,6 +240,9 @@ class StMoviePlayer : public StApplication {
      * Initialization routines.
      */
     ST_LOCAL bool init();
+    ST_LOCAL void saveGuiParams();
+    ST_LOCAL bool createGui(StHandle<StGLTextureQueue>& theTextureQueue,
+                            StHandle<StSubQueue>&       theSubQueue);
 
     /**
      * Parse arguments.
@@ -253,6 +260,8 @@ class StMoviePlayer : public StApplication {
 
         private: //! @name private callback Slots
 
+    ST_LOCAL void doScaleGui(const int32_t );
+    ST_LOCAL void doScaleHiDPI(const bool );
     ST_LOCAL void doSwitchVSync(const bool theValue);
     ST_LOCAL void doSwitchAudioDevice(const int32_t theDevId);
     ST_LOCAL void doSetAudioVolume(const float theGain);
@@ -335,6 +344,7 @@ class StMoviePlayer : public StApplication {
     mg_context*                myWebCtx;          //!< web UI context
 
     int32_t                    myLastUpdateDay;
+    bool                       myToRecreateMenu;
     bool                       myToUpdateALList;
     bool                       myIsBenchmark;
     bool                       myToCheckUpdates;

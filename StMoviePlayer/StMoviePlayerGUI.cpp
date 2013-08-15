@@ -757,6 +757,7 @@ void StMoviePlayerGUI::doOpenLicense(const size_t ) {
  */
 StGLMenu* StMoviePlayerGUI::createHelpMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+    StGLMenu* aMenuScale        = createScaleMenu();        // Root -> Help -> Scale Interface menu
     StGLMenu* aMenuBlockSleep   = createBlockSleepMenu();   // Root -> Help -> Block sleeping
     StGLMenu* aMenuCheckUpdates = createCheckUpdatesMenu(); // Root -> Help -> Check updates menu
     StGLMenu* aMenuLanguage     = createLanguageMenu();     // Root -> Help -> Language menu
@@ -770,9 +771,22 @@ StGLMenu* StMoviePlayerGUI::createHelpMenu() {
     aMenu->addItem(tr(MENU_HELP_SYSINFO))
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAboutSystem);
     aMenu->addItem(tr(MENU_HELP_EXPERIMENTAL), myPlugin->params.ToShowExtra);
+    aMenu->addItem(tr(MENU_HELP_SCALE),        aMenuScale);
     aMenu->addItem(tr(MENU_HELP_BLOCKSLP),     aMenuBlockSleep);
     aMenu->addItem(tr(MENU_HELP_UPDATES),      aMenuCheckUpdates);
     aMenu->addItem(tr(MENU_HELP_LANGS),        aMenuLanguage);
+    return aMenu;
+}
+
+/**
+ * Root -> Help -> Check updates menu
+ */
+StGLMenu* StMoviePlayerGUI::createScaleMenu() {
+    StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+    aMenu->addItem(tr(MENU_HELP_SCALE_SMALL),   myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Small);
+    aMenu->addItem(tr(MENU_HELP_SCALE_NORMAL),  myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Normal);
+    aMenu->addItem(tr(MENU_HELP_SCALE_BIG),     myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Big);
+    aMenu->addItem(tr(MENU_HELP_SCALE_HIDPI2X), myPlugin->params.ScaleHiDPI2X);
     return aMenu;
 }
 
@@ -860,6 +874,9 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
   //
   myIsVisibleGUI(true),
   myIsExperimental(myPlugin->params.ToShowExtra->getValue()) {
+    const GLfloat aScale = myPlugin->params.ScaleHiDPI2X->getValue() ? 2.0f : myPlugin->params.ScaleHiDPI ->getValue();
+    StGLRootWidget::setScale(aScale, (StGLRootWidget::ScaleAdjust )myPlugin->params.ScaleAdjust->getValue());
+
     setRootMarginsPx(myWindow->getMargins());
     const StRectI_t& aMargins = getRootMarginsPx();
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StMoviePlayerGUI::doShowFPS);
@@ -910,8 +927,11 @@ void StMoviePlayerGUI::stglUpdate(const StPointD_t& thePointZo,
         myDescr->setPoint(thePointZo);
     }
 
-    if(myLangMap->wasReloaded()
-    || myIsExperimental != myPlugin->params.ToShowExtra->getValue()) {
+    if(myLangMap->wasReloaded()) {
+        myPlugin->myToRecreateMenu = true;
+        myLangMap->resetReloaded();
+        StMoviePlayerStrings::loadDefaults(*myLangMap);
+    } else if(myIsExperimental != myPlugin->params.ToShowExtra->getValue()) {
         StGLMenu::DeleteWithSubMenus(myMenuRoot); myMenuRoot = NULL;
         createMainMenu();
         myMenuRoot->stglUpdateSubmenuLayout();

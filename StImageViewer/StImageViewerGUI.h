@@ -94,6 +94,7 @@ class StImageViewerGUI : public StGLRootWidget {
     ST_LOCAL StGLMenu* createImageAdjustMenu();  // Root -> View menu -> Image Adjust
     ST_LOCAL StGLMenu* createOutputMenu();       // Root -> Output menu
     ST_LOCAL StGLMenu* createHelpMenu();         // Root -> Help menu
+    ST_LOCAL StGLMenu* createScaleMenu();        // Root -> Scale Interface menu
     ST_LOCAL StGLMenu* createCheckUpdatesMenu(); // Root -> Help -> Check updates menu
     ST_LOCAL StGLMenu* createLanguageMenu();     // Root -> Help -> Language menu
 

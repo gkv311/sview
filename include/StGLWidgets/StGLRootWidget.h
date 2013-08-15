@@ -21,6 +21,14 @@ class StGLRootWidget : public StGLWidget {
 
         public:
 
+    enum ScaleAdjust {
+        ScaleAdjust_Small,
+        ScaleAdjust_Normal,
+        ScaleAdjust_Big,
+    };
+
+        public:
+
     /**
      * Main constructor.
      */
@@ -91,7 +99,8 @@ class StGLRootWidget : public StGLWidget {
     /**
      * @param theScale scale factor for GUI elements (text, icons)
      */
-    ST_CPPEXPORT void setScale(const GLfloat theScale);
+    ST_CPPEXPORT void setScale(const GLfloat     theScale,
+                               const ScaleAdjust theScaleAdjust = ScaleAdjust_Normal);
 
     /**
      * @return resolution DPI, 72 for normal displays

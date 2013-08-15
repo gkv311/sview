@@ -148,6 +148,7 @@ namespace StMoviePlayerStrings {
         MENU_HELP_USERTIPS= 1506,
         MENU_HELP_EXPERIMENTAL= 1507,
         MENU_HELP_SYSINFO = 1508,
+        MENU_HELP_SCALE   = 1509,
 
         // Root -> Help -> Check for updates menu
         MENU_HELP_UPDATES_NOW   = 1520,
@@ -161,6 +162,11 @@ namespace StMoviePlayerStrings {
         MENU_HELP_BLOCKSLP_ALWAYS   = 1551,
         MENU_HELP_BLOCKSLP_PLAYBACK = 1552,
         MENU_HELP_BLOCKSLP_FULLSCR  = 1553,
+
+        MENU_HELP_SCALE_SMALL   = 1590,
+        MENU_HELP_SCALE_NORMAL  = 1591,
+        MENU_HELP_SCALE_BIG     = 1592,
+        MENU_HELP_SCALE_HIDPI2X = 1593,
 
         // Open/Save dialogs
         DIALOG_OPEN_FILE       = 2000,

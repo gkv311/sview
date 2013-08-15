@@ -52,6 +52,8 @@ namespace {
     static const char ST_SETTING_COMPRESS[]    = "toCompress";
     static const char ST_SETTING_ESCAPENOQUIT[]= "escNoQuit";
 
+    static const char ST_SETTING_SCALE_ADJUST[]  = "scaleAdjust";
+    static const char ST_SETTING_SCALE_FORCE2X[] = "scale2X";
     static const char ST_SETTING_FULLSCREEN[]  = "fullscreen";
     static const char ST_SETTING_SLIDESHOW[]   = "slideshow";
     static const char ST_SETTING_SHOW_FPS[]    = "toShowFps";
@@ -83,6 +85,7 @@ StImageViewer::StImageViewer(const StNativeWin_t         theParentWin,
   //
   myLastUpdateDay(0),
   myToCheckUpdates(true),
+  myToRecreateMenu(false),
   myToSaveSrcFormat(false),
   myEscNoQuit(false) {
     StImageViewerStrings::loadDefaults(*myLangMap);
@@ -92,6 +95,17 @@ StImageViewer::StImageViewer(const StNativeWin_t         theParentWin,
     params.isFullscreen = new StBoolParam(false);
     params.isFullscreen->signals.onChanged.connect(this, &StImageViewer::doFullscreen);
     params.toRestoreRatio   = new StBoolParam(false);
+    params.ScaleAdjust      = new StInt32Param(StGLRootWidget::ScaleAdjust_Normal);
+    mySettings->loadParam (ST_SETTING_SCALE_ADJUST, params.ScaleAdjust);
+    params.ScaleAdjust->signals.onChanged = stSlot(this, &StImageViewer::doScaleGui);
+    params.ScaleHiDPI       = new StFloat32Param(1.0f,       // initial value
+                                                 1.0f, 3.0f, // min, max values
+                                                 1.0f,       // default value
+                                                 1.0f,       // incremental step
+                                                 0.001f);    // equality tolerance
+    params.ScaleHiDPI2X     = new StBoolParam(false);
+    mySettings->loadParam (ST_SETTING_SCALE_FORCE2X, params.ScaleHiDPI2X);
+    params.ScaleHiDPI2X->signals.onChanged = stSlot(this, &StImageViewer::doScaleHiDPI);
     params.checkUpdatesDays = new StInt32Param(7);
     params.srcFormat        = new StInt32Param(ST_V_SRC_AUTODETECT);
     params.srcFormat->signals.onChanged.connect(this, &StImageViewer::doSwitchSrcFormat);
@@ -193,16 +207,26 @@ bool StImageViewer::resetDevice() {
     return open();
 }
 
+void StImageViewer::saveGuiParams() {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    mySettings->saveParam(ST_SETTING_STEREO_MODE, myGUI->myImage->params.displayMode);
+    mySettings->saveInt32(ST_SETTING_GAMMA, stRound(100.0f * myGUI->myImage->params.gamma->getValue()));
+    if(params.toRestoreRatio->getValue()) {
+        mySettings->saveParam(ST_SETTING_RATIO, myGUI->myImage->params.displayRatio);
+    } else {
+        mySettings->saveInt32(ST_SETTING_RATIO, StGLImageRegion::RATIO_AUTO);
+    }
+    mySettings->saveParam(ST_SETTING_TEXFILTER, myGUI->myImage->params.textureFilter);
+}
+
 void StImageViewer::releaseDevice() {
+    saveGuiParams();
     if(!myGUI.isNull()) {
-        mySettings->saveParam(ST_SETTING_STEREO_MODE, myGUI->myImage->params.displayMode);
-        mySettings->saveInt32(ST_SETTING_GAMMA, stRound(100.0f * myGUI->myImage->params.gamma->getValue()));
-        if(params.toRestoreRatio->getValue()) {
-            mySettings->saveParam(ST_SETTING_RATIO, myGUI->myImage->params.displayRatio);
-        } else {
-            mySettings->saveInt32(ST_SETTING_RATIO, StGLImageRegion::RATIO_AUTO);
-        }
-        mySettings->saveParam(ST_SETTING_TEXFILTER, myGUI->myImage->params.textureFilter);
+        mySettings->saveParam (ST_SETTING_SCALE_ADJUST,  params.ScaleAdjust);
+        mySettings->saveParam (ST_SETTING_SCALE_FORCE2X, params.ScaleHiDPI2X);
         mySettings->saveInt32(ST_SETTING_FPSTARGET, params.TargetFps);
         mySettings->saveInt32(ST_SETTING_SLIDESHOW_DELAY, int(mySlideShowDelay));
         mySettings->saveInt32(ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
@@ -234,24 +258,10 @@ StImageViewer::~StImageViewer() {
     myLoader.nullify();
 }
 
-bool StImageViewer::init() {
-    const bool isReset = !myLoader.isNull();
-    if(!myContext.isNull()
-    && !myGUI.isNull()) {
-        return true;
-    }
-
-    // initialize GL context
-    myContext = new StGLContext();
-    myContext->setMessagesQueue(myMsgQueue);
-    if(!myContext->stglInit()) {
-        myMsgQueue->pushError(stCString("Image Viewer - critical error:\nOpenGL context is broken!\n(OpenGL library internal error?)"));
-        myMsgQueue->popAll();
-        return false;
-    } else if(!myContext->isGlGreaterEqual(2, 0)) {
-        myMsgQueue->pushError(stCString("OpenGL 2.0 is required by Image Viewer!"));
-        myMsgQueue->popAll();
-        return false;
+bool StImageViewer::createGui() {
+    if(!myGUI.isNull()) {
+        saveGuiParams();
+        myGUI.nullify();
     }
 
     // create the GUI with default values
@@ -278,6 +288,36 @@ bool StImageViewer::init() {
     }
     myGUI->stglInit();
     myGUI->stglResize(myWindow->getPlacement());
+    return true;
+}
+
+bool StImageViewer::init() {
+    const bool isReset = !myLoader.isNull();
+    if(!myContext.isNull()
+    && !myGUI.isNull()) {
+        return true;
+    }
+
+    // initialize GL context
+    myContext = new StGLContext();
+    myContext->setMessagesQueue(myMsgQueue);
+    if(!myContext->stglInit()) {
+        myMsgQueue->pushError(stCString("Image Viewer - critical error:\nOpenGL context is broken!\n(OpenGL library internal error?)"));
+        myMsgQueue->popAll();
+        return false;
+    } else if(!myContext->isGlGreaterEqual(2, 0)) {
+        myMsgQueue->pushError(stCString("OpenGL 2.0 is required by Image Viewer!"));
+        myMsgQueue->popAll();
+        return false;
+    }
+
+    // create the GUI with default values
+    if(!createGui()) {
+        myMsgQueue->pushError(stCString("Image Viewer - critical error:\nFrame region initialization failed!"));
+        myMsgQueue->popAll();
+        myGUI.nullify();
+        return false;
+    }
 
     // create the image loader thread
     if(!isReset) {
@@ -597,6 +637,11 @@ void StImageViewer::beforeDraw() {
         return;
     }
 
+    if(myToRecreateMenu) {
+        createGui();
+        myToRecreateMenu = false;
+    }
+
     const bool isMouseMove = myWindow->isMouseMoved();
     if(mySlideShowTimer.getElapsedTimeInSec() > mySlideShowDelay) {
         mySlideShowTimer.restart();
@@ -648,6 +693,20 @@ void StImageViewer::stglDraw(unsigned int theView) {
 
     // draw GUI
     myGUI->stglDraw(theView);
+}
+
+void StImageViewer::doScaleGui(const int32_t ) {
+    if(myGUI.isNull()) {
+        return;
+    }
+    myToRecreateMenu = true;
+}
+
+void StImageViewer::doScaleHiDPI(const bool ) {
+    if(myGUI.isNull()) {
+        return;
+    }
+    myToRecreateMenu = true;
 }
 
 void StImageViewer::doSwitchSrcFormat(const int32_t theSrcFormat) {

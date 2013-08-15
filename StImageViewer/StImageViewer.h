@@ -117,15 +117,18 @@ class StImageViewer : public StApplication {
 
     struct {
 
-        StHandle<StBoolParam>   isFullscreen;     //!< fullscreen state
-        StHandle<StBoolParam>   toRestoreRatio;   //!< restore ratio on restart
-        StHandle<StInt32Param>  checkUpdatesDays; //!< days count between updates checks
-        StHandle<StInt32Param>  srcFormat;        //!< source format
-        StHandle<StBoolParam>   ToShowFps;        //!< display FPS meter
-        StHandle<StBoolParam>   IsVSyncOn;        //!< flag to use VSync
-        StString                lastFolder;       //!< laster folder used to open / save file
-        StImageFile::ImageClass imageLib;         //!< preferred image library
-        int                     TargetFps;        //!< limit or not rendering FPS
+        StHandle<StBoolParam>    isFullscreen;     //!< fullscreen state
+        StHandle<StBoolParam>    toRestoreRatio;   //!< restore ratio on restart
+        StHandle<StInt32Param>   ScaleAdjust;      //!< adjust GUI size, see StGLRootWidget::ScaleAdjust
+        StHandle<StFloat32Param> ScaleHiDPI;       //!< adapt  GUI size for HiDPI resolution
+        StHandle<StBoolParam>    ScaleHiDPI2X;     //!< option to set HiDPI resolution to 2.0
+        StHandle<StInt32Param>   checkUpdatesDays; //!< days count between updates checks
+        StHandle<StInt32Param>   srcFormat;        //!< source format
+        StHandle<StBoolParam>    ToShowFps;        //!< display FPS meter
+        StHandle<StBoolParam>    IsVSyncOn;        //!< flag to use VSync
+        StString                 lastFolder;       //!< laster folder used to open / save file
+        StImageFile::ImageClass  imageLib;         //!< preferred image library
+        int                      TargetFps;        //!< limit or not rendering FPS
 
     } params;
 
@@ -138,6 +141,8 @@ class StImageViewer : public StApplication {
 
         private: //! @name private callback Slots
 
+    ST_LOCAL void doScaleGui(const int32_t );
+    ST_LOCAL void doScaleHiDPI(const bool );
     ST_LOCAL void doSwitchVSync(const bool theValue);
     ST_LOCAL void doFullscreen(const bool theIsFullscreen);
     ST_LOCAL void doSwitchSrcFormat(const int32_t theSrcFormat);
@@ -173,6 +178,8 @@ class StImageViewer : public StApplication {
      * Initialization routines.
      */
     ST_LOCAL bool init();
+    ST_LOCAL bool createGui();
+    ST_LOCAL void saveGuiParams();
 
     /**
      * Parse arguments.
@@ -202,6 +209,7 @@ class StImageViewer : public StApplication {
 
     int32_t                    myLastUpdateDay;
     bool                       myToCheckUpdates;
+    bool                       myToRecreateMenu;
     bool                       myToSaveSrcFormat; //!< indicates that active source format should be saved or not
     bool                       myEscNoQuit;       //!< if true then Escape will not quit application
 

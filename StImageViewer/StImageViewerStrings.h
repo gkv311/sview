@@ -105,6 +105,7 @@ namespace StImageViewerStrings {
         MENU_HELP_LANGS   = 1504,
         MENU_HELP_USERTIPS= 1506,
         MENU_HELP_SYSINFO = 1508,
+        MENU_HELP_SCALE   = 1509,
 
         // Root -> Help -> Check for updates menu
         MENU_HELP_UPDATES_NOW   = 1520,
@@ -112,6 +113,11 @@ namespace StImageViewerStrings {
         MENU_HELP_UPDATES_WEEK  = 1522,
         MENU_HELP_UPDATES_YEAR  = 1523,
         MENU_HELP_UPDATES_NEVER = 1524,
+
+        MENU_HELP_SCALE_SMALL   = 1590,
+        MENU_HELP_SCALE_NORMAL  = 1591,
+        MENU_HELP_SCALE_BIG     = 1592,
+        MENU_HELP_SCALE_HIDPI2X = 1593,
 
         // Open/Save dialogs
         DIALOG_OPEN_FILE       = 2000,

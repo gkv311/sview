@@ -74,12 +74,21 @@ void StGLRootWidget::setContext(const StHandle<StGLContext>& theCtx) {
     myGlCtx = theCtx;
 }
 
-void StGLRootWidget::setScale(const GLfloat theScale) {
-    if(stAreEqual(myScaleGUI, theScale, 0.001f)) {
+void StGLRootWidget::setScale(const GLfloat     theScale,
+                              const ScaleAdjust theScaleAdjust) {
+    GLfloat aScale = theScale;
+    switch(theScaleAdjust) {
+        case ScaleAdjust_Small:  aScale *= 0.8f; break;
+        case ScaleAdjust_Big:    aScale *= 1.2f; break;
+        default:
+        case ScaleAdjust_Normal: break;
+    }
+
+    if(stAreEqual(myScaleGUI, aScale, 0.001f)) {
         return;
     }
-    myScaleGUI   = theScale;
-    myResolution = (unsigned int )(72.0f * theScale + 0.1f);
+    myScaleGUI   = aScale;
+    myResolution = (unsigned int )(72.0f * aScale + 0.1f);
 }
 
 bool StGLRootWidget::stglInit() {
