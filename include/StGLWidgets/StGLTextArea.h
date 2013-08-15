@@ -25,9 +25,12 @@ class StGLTextArea : public StGLWidget {
         public:
 
     typedef enum {
+        SIZE_SMALLEST,
+        SIZE_SMALL,
         SIZE_NORMAL,
         SIZE_BIG,
-        SIZE_SMALL,
+        SIZE_BIGGEST,
+        SIZE_DOUBLE,
     } FontSize;
 
         public:
@@ -131,13 +134,20 @@ class StGLTextArea : public StGLWidget {
 
     inline const int getFontSize() const {
         switch(mySize) {
+            case SIZE_SMALLEST:
+                return 12;
             case SIZE_SMALL:
                 return 12;
-            case SIZE_BIG:
-                return 28;
             case SIZE_NORMAL:
-            default:
                 return 16;
+            case SIZE_BIG:
+                return 18;
+            case SIZE_BIGGEST:
+                return 20;
+            case SIZE_DOUBLE:
+                return 28;
+            default:
+                return mySize;
         }
     }
 

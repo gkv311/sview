@@ -125,6 +125,7 @@ StGLMenu* StImageViewerGUI::createMediaMenu() {
 
     aMenuMedia->addItem(tr(MENU_MEDIA_OPEN_IMAGE),    aMenuOpenImage);
     aMenuMedia->addItem(tr(MENU_MEDIA_SAVE_IMAGE_AS), aMenuSaveImage);
+    aMenuMedia->addItem(tr(MENU_MEDIA_SRC_FORMAT),    aMenuSrcFormat);
 
     aMenuMedia->addItem("First File in folder")
               ->signals.onItemClick.connect(myPlugin, &StImageViewer::doListFirst);
@@ -135,7 +136,6 @@ StGLMenu* StImageViewerGUI::createMediaMenu() {
     aMenuMedia->addItem("Last File in folder")
               ->signals.onItemClick.connect(myPlugin, &StImageViewer::doListLast);
 
-    aMenuMedia->addItem(tr(MENU_MEDIA_SRC_FORMAT), aMenuSrcFormat);
     aMenuMedia->addItem(tr(MENU_MEDIA_QUIT))
               ->signals.onItemClick.connect(myPlugin, &StImageViewer::doQuit);
     return aMenuMedia;

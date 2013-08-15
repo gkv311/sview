@@ -81,6 +81,25 @@ class StGLRootWidget : public StGLWidget {
      */
     ST_CPPEXPORT virtual bool doKeyUp  (const StKeyEvent& theEvent);
 
+    /**
+     * @return scale factor for GUI elements (text, icons), 1.0 for normal displays
+     */
+    ST_LOCAL inline GLfloat getScale() const {
+        return myScaleGUI;
+    }
+
+    /**
+     * @param theScale scale factor for GUI elements (text, icons)
+     */
+    ST_CPPEXPORT void setScale(const GLfloat theScale);
+
+    /**
+     * @return resolution DPI, 72 for normal displays
+     */
+    ST_LOCAL inline unsigned int getResolution() const {
+        return myResolution;
+    }
+
     inline GLdouble getRootScaleX() const {
         return myScaleGlX;
     }
@@ -230,6 +249,8 @@ class StGLRootWidget : public StGLWidget {
     StRectD_t                myRectGl;      //!< rectangle in GL coordinates
     GLdouble                 myScaleGlX;    //!< scale factor to optimize convertion from Pixels -> GL coordinates
     GLdouble                 myScaleGlY;    //!< scale factor to optimize convertion from Pixels -> GL coordinates
+    GLfloat                  myScaleGUI;    //!< scale factor for GUI elements (text, icons), 1.0 by default
+    unsigned int             myResolution;  //!< resolution in DPI (for text rendering), 72 by default, stored with myScaleGUI applied
     StPointD_t               cursorZo;      //!< mouse cursor position
     GLint                    myViewport[4]; //!< cached GL viewport
 
@@ -238,4 +259,4 @@ class StGLRootWidget : public StGLWidget {
 
 };
 
-#endif //__StGLRootWidget_h_
+#endif // __StGLRootWidget_h_

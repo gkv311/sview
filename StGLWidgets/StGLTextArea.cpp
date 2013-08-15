@@ -284,7 +284,7 @@ StGLTextArea::StGLTextArea(StGLWidget* theParent,
         StStringUtf8 aFontPath = StFileNode::getCompatibleName(ST_FONT_SANS_PATH);
 
         StHandle<StFTFont> aFont = new StFTFont();
-        if(!aFont->init(aFontPath, getFontSize())) {
+        if(!aFont->init(aFontPath, getFontSize(), myRoot->getResolution())) {
             ST_ERROR_LOG("Could not load font '" + ST_FONT_SANS_PATH + '\'');
         }
         myFont.create(getRoot()->getContextHandle(), new StGLFont(aFont));

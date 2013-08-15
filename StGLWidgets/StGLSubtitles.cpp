@@ -62,7 +62,7 @@ StGLSubtitles::StGLSubtitles(StGLWidget* theParent,
                0, -100,
                StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER),
                800, 160,
-               StGLTextArea::SIZE_BIG),
+               StGLTextArea::SIZE_DOUBLE),
   myQueue(theSubQueue),
   myShowItems(),
   myPTS(0.0) {

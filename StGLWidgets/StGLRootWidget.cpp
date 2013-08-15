@@ -29,6 +29,8 @@ StGLRootWidget::StGLRootWidget()
   myLensDist(0.0f),
   myScaleGlX(1.0),
   myScaleGlY(1.0),
+  myScaleGUI(1.0f),
+  myResolution(72),
   cursorZo(0.0, 0.0),
   myFocusWidget(NULL) {
     // unify access
@@ -70,6 +72,14 @@ const StHandle<StGLContext>& StGLRootWidget::getContextHandle() {
 
 void StGLRootWidget::setContext(const StHandle<StGLContext>& theCtx) {
     myGlCtx = theCtx;
+}
+
+void StGLRootWidget::setScale(const GLfloat theScale) {
+    if(stAreEqual(myScaleGUI, theScale, 0.001f)) {
+        return;
+    }
+    myScaleGUI   = theScale;
+    myResolution = (unsigned int )(72.0f * theScale + 0.1f);
 }
 
 bool StGLRootWidget::stglInit() {
