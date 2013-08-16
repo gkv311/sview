@@ -262,6 +262,7 @@ bool StImageViewer::createGui() {
     if(!myGUI.isNull()) {
         saveGuiParams();
         myGUI.nullify();
+        myKeyActions.clear();
     }
 
     // create the GUI with default values
@@ -288,6 +289,13 @@ bool StImageViewer::createGui() {
     }
     myGUI->stglInit();
     myGUI->stglResize(myWindow->getPlacement());
+
+    for(size_t anIter = 0; anIter < myGUI->myImage->getActions().size(); ++anIter) {
+        StHandle<StAction>& anAction = myGUI->myImage->changeActions()[anIter];
+        mySettings->loadHotKey(anAction);
+        addAction(Action_StereoParamsBegin + int(anIter), anAction);
+    }
+    registerHotKeys();
     return true;
 }
 
@@ -311,6 +319,14 @@ bool StImageViewer::init() {
         return false;
     }
 
+    // load hot-keys
+    if(!isReset) {
+        for(std::map< int, StHandle<StAction> >::iterator anIter = myActions.begin();
+            anIter != myActions.end(); ++anIter) {
+            mySettings->loadHotKey(anIter->second);
+        }
+    }
+
     // create the GUI with default values
     if(!createGui()) {
         myMsgQueue->pushError(stCString("Image Viewer - critical error:\nFrame region initialization failed!"));
@@ -320,29 +336,15 @@ bool StImageViewer::init() {
     }
 
     // create the image loader thread
-    if(!isReset) {
-        StString imageLibString;
-        mySettings->loadString(ST_SETTING_IMAGELIB, imageLibString);
-        params.imageLib = StImageFile::imgLibFromString(imageLibString);
-        myLoader = new StImageLoader(params.imageLib, myMsgQueue, myLangMap, myGUI->myImage->getTextureQueue());
-        myLoader->signals.onLoaded.connect(this, &StImageViewer::doLoaded);
-
-        // load hot-keys
-        for(std::map< int, StHandle<StAction> >::iterator anIter = myActions.begin();
-            anIter != myActions.end(); ++anIter) {
-            mySettings->loadHotKey(anIter->second);
-        }
-    }
-    for(size_t anIter = 0; anIter < myGUI->myImage->getActions().size(); ++anIter) {
-        StHandle<StAction>& anAction = myGUI->myImage->changeActions()[anIter];
-        mySettings->loadHotKey(anAction);
-        addAction(Action_StereoParamsBegin + int(anIter), anAction);
-    }
-    registerHotKeys();
-
     if(isReset) {
         return true;
     }
+
+    StString anImgLibStr;
+    mySettings->loadString(ST_SETTING_IMAGELIB, anImgLibStr);
+    params.imageLib = StImageFile::imgLibFromString(anImgLibStr);
+    myLoader = new StImageLoader(params.imageLib, myMsgQueue, myLangMap, myGUI->myImage->getTextureQueue());
+    myLoader->signals.onLoaded.connect(this, &StImageViewer::doLoaded);
 
     // load this parameter AFTER image thread creation
     mySettings->loadParam(ST_SETTING_SRCFORMAT, params.srcFormat);

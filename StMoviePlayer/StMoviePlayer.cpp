@@ -453,6 +453,7 @@ bool StMoviePlayer::createGui(StHandle<StGLTextureQueue>& theTextureQueue,
     if(!myGUI.isNull()) {
         saveGuiParams();
         myGUI.nullify();
+        myKeyActions.clear();
     }
 
     if(!myVideo.isNull()) {
@@ -481,6 +482,13 @@ bool StMoviePlayer::createGui(StHandle<StGLTextureQueue>& theTextureQueue,
 
     myGUI->stglInit();
     myGUI->stglResize(myWindow->getPlacement());
+
+    for(size_t anIter = 0; anIter < myGUI->myImage->getActions().size(); ++anIter) {
+        StHandle<StAction>& anAction = myGUI->myImage->changeActions()[anIter];
+        mySettings->loadHotKey(anAction);
+        addAction(Action_StereoParamsBegin + int(anIter), anAction);
+    }
+    registerHotKeys();
     return true;
 }
 
@@ -560,11 +568,20 @@ bool StMoviePlayer::init() {
         return false;
     }
 
+    // load hot-keys
+    if(!isReset) {
+        for(std::map< int, StHandle<StAction> >::iterator anIter = myActions.begin();
+            anIter != myActions.end(); ++anIter) {
+            mySettings->loadHotKey(anIter->second);
+        }
+    }
+
     // create the GUI with default values
     StHandle<StGLTextureQueue> aTextureQueue;
     StHandle<StSubQueue>       aSubQueue;
     if(!createGui(aTextureQueue, aSubQueue)) {
-        myMsgQueue->pushError(stCString("Movie Player - critical error:\nFrame region initialization failed!"));
+        myMsgQueue->pushError(stCString("Movie Player - critical error:\n"
+                                        "Frame region initialization failed!"));
         myMsgQueue->popAll();
         myGUI.nullify();
         return false;
@@ -580,21 +597,11 @@ bool StMoviePlayer::init() {
         myVideo->signals.onLoaded = stSlot(this,                &StMoviePlayer::doLoaded);
         myVideo->params.UseGpu = params.UseGpu;
 
-        // load hot-keys
-        for(std::map< int, StHandle<StAction> >::iterator anIter = myActions.begin();
-            anIter != myActions.end(); ++anIter) {
-            mySettings->loadHotKey(anIter->second);
-        }
-
     #ifdef ST_HAVE_MONGOOSE
         doStartWebUI();
     #endif
     }
-    for(size_t anIter = 0; anIter < myGUI->myImage->getActions().size(); ++anIter) {
-        StHandle<StAction>& anAction = myGUI->myImage->changeActions()[anIter];
-        mySettings->loadHotKey(anAction);
-        addAction(Action_StereoParamsBegin + int(anIter), anAction);
-    }
+
     myPlayList->setShuffle   (params.isShuffle   ->getValue());
     myPlayList->setLoopSingle(params.ToLoopSingle->getValue());
 
@@ -602,7 +609,6 @@ bool StMoviePlayer::init() {
     mySettings->loadString(ST_SETTING_RECENT_FILES, aRecentList);
     myPlayList->loadRecentList(aRecentList);
 
-    registerHotKeys();
     if(isReset) {
         return true;
     }
