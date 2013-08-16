@@ -68,32 +68,32 @@ void StImageViewerGUI::createUpperToolbar() {
     // append textured buttons
     myBtnOpen   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * ICON_WIDTH, aTop);
     myBtnOpen->signals.onBtnClick.connectUnsafe(myPlugin, StImageViewer::doOpenFileDialog);
-    myBtnOpen->setTexturePath(stCTexture("openImage.std"));
+    myBtnOpen->setTexturePath(stCTexture("openImage.png"));
 
     myBtnPrev   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * ICON_WIDTH, aTop);
     myBtnPrev->signals.onBtnClick.connect(myPlugin, &StImageViewer::doListPrev);
-    myBtnPrev->setTexturePath(stCTexture("imagePrev.std"));
+    myBtnPrev->setTexturePath(stCTexture("imagePrev.png"));
 
     myBtnNext   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * ICON_WIDTH, aTop);
     myBtnNext->signals.onBtnClick.connect(myPlugin, &StImageViewer::doListNext);
-    myBtnNext->setTexturePath(stCTexture("imageNext.std"));
+    myBtnNext->setTexturePath(stCTexture("imageNext.png"));
 
     myBtnSwapLR = new StGLCheckboxTextured(myPanelUpper, myImage->params.swapLR,
-                                           stCTexture("swapLRoff.std"),
-                                           stCTexture("swapLRon.std"),
+                                           stCTexture("swapLRoff.png"),
+                                           stCTexture("swapLRon.png"),
                                            aLeft + (aBtnIter++) * ICON_WIDTH, aTop,
                                            StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
 
     StGLSwitchTextured* aSrcBtn = new StGLSwitchTextured(myPanelUpper, myPlugin->params.srcFormat,
                                                          aLeft + (aBtnIter++) * ICON_WIDTH, aTop,
                                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
-    aSrcBtn->addItem(ST_V_SRC_AUTODETECT,    stCTexture("srcFrmtAuto.std"));
-    aSrcBtn->addItem(ST_V_SRC_MONO,          stCTexture("srcFrmtMono.std"));
-    aSrcBtn->addItem(ST_V_SRC_ROW_INTERLACE, stCTexture("srcFrmtInterlace.std"));
-    aSrcBtn->addItem(ST_V_SRC_SIDE_BY_SIDE,  stCTexture("srcFrmtSideBySide.std"));
-    aSrcBtn->addItem(ST_V_SRC_PARALLEL_PAIR, stCTexture("srcFrmtSideBySide.std"), true);
-    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_LR, stCTexture("srcFrmtOverUnder.std"));
-    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_RL, stCTexture("srcFrmtOverUnder.std"),  true);
+    aSrcBtn->addItem(ST_V_SRC_AUTODETECT,    stCTexture("srcFrmtAuto.png"));
+    aSrcBtn->addItem(ST_V_SRC_MONO,          stCTexture("srcFrmtMono.png"));
+    aSrcBtn->addItem(ST_V_SRC_ROW_INTERLACE, stCTexture("srcFrmtInterlace.png"));
+    aSrcBtn->addItem(ST_V_SRC_SIDE_BY_SIDE,  stCTexture("srcFrmtSideBySide.png"));
+    aSrcBtn->addItem(ST_V_SRC_PARALLEL_PAIR, stCTexture("srcFrmtSideBySide.png"), true);
+    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_LR, stCTexture("srcFrmtOverUnder.png"));
+    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_RL, stCTexture("srcFrmtOverUnder.png"),  true);
     myBtnSrcFrmt = aSrcBtn;
 }
 
@@ -546,7 +546,7 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
     myBtnFull = new StGLTextureButton(this, -aMargins.right() - 8, -aMargins.bottom() - 8,
                                       StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_RIGHT));
     myBtnFull->signals.onBtnClick.connect(myPlugin->params.isFullscreen.operator->(), &StBoolParam::doReverse);
-    myBtnFull->setTexturePath(stCTexture("fullscr.std"));
+    myBtnFull->setTexturePath(stCTexture("fullScreen.png"));
 
     myDescr = new StGLDescription(this);
 

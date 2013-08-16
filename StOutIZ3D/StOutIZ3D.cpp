@@ -228,8 +228,8 @@ bool StOutIZ3D::create() {
 
     // INIT iZ3D tables textures
     const StString aTexturesFolder = StProcess::getStShareFolder() + "textures" + SYS_FS_SPLITTER;
-    const StString aTableOldPath   = aTexturesFolder + "iz3dTableOld.std";
-    const StString aTableNewPath   = aTexturesFolder + "iz3dTableNew.std";
+    const StString aTableOldPath   = aTexturesFolder + "iz3dTableOld.png";
+    const StString aTableNewPath   = aTexturesFolder + "iz3dTableNew.png";
 
     StHandle<StImageFile> aTableImg = StImageFile::create();
     if(aTableImg.isNull()) {

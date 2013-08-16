@@ -131,7 +131,7 @@ rem shared resources
 xcopy /Y ..\share\sView\demo\demo.jps       %SVIEW_DISTR_PATH_X86%\
 xcopy /S /Y ..\bin\WIN_vc_x86\lang\*        %SVIEW_DISTR_PATH_X86%\lang\
 xcopy /S /Y ..\bin\WIN_vc_x86\shaders\*     %SVIEW_DISTR_PATH_X86%\shaders\
-xcopy /Y ..\bin\WIN_vc_x86\textures\*.std   %SVIEW_DISTR_PATH_X86%\textures\
+xcopy /Y ..\bin\WIN_vc_x86\textures\*.png   %SVIEW_DISTR_PATH_X86%\textures\
 xcopy /Y ..\bin\WIN_vc_x86\web\*.htm        %SVIEW_DISTR_PATH_X86%\web\
 xcopy /Y media\sView_JPS.ico                %SVIEW_DISTR_PATH_X86%\icons\
 xcopy /Y media\sView_PNS.ico                %SVIEW_DISTR_PATH_X86%\icons\

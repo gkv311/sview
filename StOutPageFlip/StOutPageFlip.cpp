@@ -461,7 +461,7 @@ bool StOutPageFlip::create() {
     // load fullscreen-only warning
     StAVImage anImage;
     const StString aTexturesFolder  = StProcess::getStShareFolder() + "textures" + SYS_FS_SPLITTER;
-    const StString aWarnTexturePath = aTexturesFolder + "pageflip_fullscreen.std";
+    const StString aWarnTexturePath = aTexturesFolder + "pageflip_fullscreen.png";
     if(anImage.load(aWarnTexturePath, StImageFile::ST_TYPE_PNG)) {
         myWarning = new StGLTexture(GL_RGBA8);
         if(!myWarning->init(*myContext, anImage.getPlane())) {
