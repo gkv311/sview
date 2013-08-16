@@ -79,23 +79,25 @@ namespace {
  */
 void StMoviePlayerGUI::createUpperToolbar() {
     int aBtnIter = 0;
+    const int aTop  = scale(DISPL_Y_REGION_UPPER);
+    const int aLeft = scale(DISPL_X_REGION_UPPER);
 
     const StRectI_t& aMargins = getRootMarginsPx();
-    myPanelUpper = new StGLWidget(this, aMargins.left(), aMargins.top(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), 4096, 128);
+    myPanelUpper = new StGLWidget(this, aMargins.left(), aMargins.top(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(128));
 
     // append the textured buttons
-    myBtnOpen = new StGLTextureButton(myPanelUpper, DISPL_X_REGION_UPPER + (aBtnIter++) * ICON_WIDTH, DISPL_Y_REGION_UPPER);
+    myBtnOpen = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * ICON_WIDTH, aTop);
     myBtnOpen->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doOpen1File);
     myBtnOpen->setTexturePath(stCTexture("openImage.std"));
 
     myBtnSwapLR = new StGLCheckboxTextured(myPanelUpper, myImage->params.swapLR,
                                            stCTexture("swapLRoff.std"),
                                            stCTexture("swapLRon.std"),
-                                           DISPL_X_REGION_UPPER + (aBtnIter++) * ICON_WIDTH, DISPL_Y_REGION_UPPER,
+                                           aLeft + (aBtnIter++) * ICON_WIDTH, aTop,
                                            StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
 
     StGLSwitchTextured* aSrcBtn = new StGLSwitchTextured(myPanelUpper, myPlugin->params.srcFormat,
-                                                         DISPL_X_REGION_UPPER + (aBtnIter++) * ICON_WIDTH, DISPL_Y_REGION_UPPER,
+                                                         aLeft + (aBtnIter++) * ICON_WIDTH, aTop,
                                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
 
     aSrcBtn->addItem(ST_V_SRC_AUTODETECT,    stCTexture("srcFrmtAuto.std"));
@@ -113,33 +115,35 @@ void StMoviePlayerGUI::createUpperToolbar() {
  */
 void StMoviePlayerGUI::createBottomToolbar() {
     const StRectI_t& aMargins = getRootMarginsPx();
-    myPanelBottom = new StGLWidget(this, aMargins.left(), -aMargins.bottom(), StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), 4096, 128);
+    const int aTop  = scale(DISPL_Y_REGION_BOTTOM);
+    const int aLeft = scale(DISPL_X_REGION_BOTTOM);
+    myPanelBottom = new StGLWidget(this, aMargins.left(), -aMargins.bottom(), StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(128));
 
     // append the textured buttons
-    myBtnPlay = new StGLTextureButton(myPanelBottom, DISPL_X_REGION_BOTTOM, DISPL_Y_REGION_BOTTOM,
+    myBtnPlay = new StGLTextureButton(myPanelBottom, aLeft, aTop,
                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), 2);
     myBtnPlay->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doPlayPause);
     const StString aPaths[2] = { stCTexture("moviePlay.std"), stCTexture("moviePause.std") };
     myBtnPlay->setTexturePath(aPaths, 2);
 
-    myTimeBox = new StTimeBox(myPanelBottom, DISPL_X_REGION_BOTTOM + 1 * ICON_WIDTH, DISPL_Y_REGION_BOTTOM);
+    myTimeBox = new StTimeBox(myPanelBottom, aLeft + 1 * ICON_WIDTH, aTop);
     myTimeBox->setTexturePath(stCTexture("timebox.std"));
-    myBtnPrev = new StGLTextureButton(myPanelBottom, -DISPL_X_REGION_BOTTOM - 3 * ICON_WIDTH, DISPL_Y_REGION_BOTTOM,
+    myBtnPrev = new StGLTextureButton(myPanelBottom, -aLeft - 3 * ICON_WIDTH, aTop,
                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myBtnPrev->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doListPrev);
     myBtnPrev->setTexturePath(stCTexture("moviePrior.std"));
 
-    myBtnNext = new StGLTextureButton(myPanelBottom, -DISPL_X_REGION_BOTTOM - 2 * ICON_WIDTH, DISPL_Y_REGION_BOTTOM,
+    myBtnNext = new StGLTextureButton(myPanelBottom, -aLeft - 2 * ICON_WIDTH, aTop,
                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myBtnNext->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doListNext);
     myBtnNext->setTexturePath(stCTexture("movieNext.std"));
 
-    myBtnList = new StGLTextureButton(myPanelBottom, -DISPL_X_REGION_BOTTOM - ICON_WIDTH, DISPL_Y_REGION_BOTTOM,
+    myBtnList = new StGLTextureButton(myPanelBottom, -aLeft - ICON_WIDTH, aTop,
                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myBtnList->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doPlayListReverse);
     myBtnList->setTexturePath(stCTexture("moviePlaylist.std"));
 
-    myBtnFullScr = new StGLTextureButton(myPanelBottom, -DISPL_X_REGION_BOTTOM, DISPL_Y_REGION_BOTTOM,
+    myBtnFullScr = new StGLTextureButton(myPanelBottom, -aLeft, aTop,
                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myBtnFullScr->signals.onBtnClick.connect(myPlugin->params.isFullscreen.operator->(), &StBoolParam::doReverse);
     myBtnFullScr->setTexturePath(stCTexture("movieFullScr.std"));
@@ -302,7 +306,7 @@ void StMoviePlayerGUI::fillOpenALDeviceMenu(StGLMenu* theMenu) {
     for(size_t devId = 0; devId < aDevList.size(); ++devId) {
         StGLMenuItem* anItem = theMenu->addItem(aDevList[devId],
                                                 StHandle<StInt32Param>::downcast(myPlugin->params.alDevice), int32_t(devId));
-        anItem->changeRectPx().right() = anItem->getRectPx().left() + 10 * int(aLen);
+        anItem->changeRectPx().right() = anItem->getRectPx().left() + scale(10 * int(aLen));
     }
 }
 
@@ -467,9 +471,9 @@ StGLMenu* StMoviePlayerGUI::createImageAdjustMenu() {
     aMenu->addItem(tr(MENU_VIEW_ADJUST_RESET), myPlugin->getAction(StMoviePlayer::Action_ImageAdjustReset));
 
     StGLMenuItem* anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_GAMMA));
-    anItem->setMarginRight(100 + 16);
+    anItem->setMarginRight(scale(100 + 16));
     StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, myImage->params.gamma,
-                                                              -16, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+                                                              -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->setFormat(stCString("%+01.2f"));
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
@@ -477,9 +481,9 @@ StGLMenu* StMoviePlayerGUI::createImageAdjustMenu() {
     aRange->setVisibility(true, true);
 
     anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_BRIGHTNESS));
-    anItem->setMarginRight(100 + 16);
+    anItem->setMarginRight(scale(100 + 16));
     aRange = new StGLRangeFieldFloat32(anItem, myImage->params.brightness,
-                                       -16, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+                                       -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->setFormat(stCString("%+01.2f"));
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
@@ -487,9 +491,9 @@ StGLMenu* StMoviePlayerGUI::createImageAdjustMenu() {
     aRange->setVisibility(true, true);
 
     anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_SATURATION));
-    anItem->setMarginRight(100 + 16);
+    anItem->setMarginRight(scale(100 + 16));
     aRange = new StGLRangeFieldFloat32(anItem, myImage->params.saturation,
-                                       -16, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+                                       -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->changeRectPx().bottom() = aRange->getRectPx().top() + aMenu->getItemHeight();
     aRange->setFormat(stCString("%+01.2f"));
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
@@ -515,9 +519,9 @@ StGLMenu* StMoviePlayerGUI::createAudioGainMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
 
     StGLMenuItem* anItem = aMenu->addItem("Volume");
-    anItem->setMarginRight(110 + 16);
+    anItem->setMarginRight(scale(110 + 16));
     StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.AudioGain,
-                                                              -16, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+                                                              -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->setFormat(stCString("%+03.0f dB"));
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
@@ -537,10 +541,10 @@ class StDelayControl : public StGLMessageBox {
 
     StDelayControl(StMoviePlayerGUI*               theParent,
                    const StHandle<StFloat32Param>& theTrackedValue)
-    : StGLMessageBox(theParent, "", 400, 260),
+    : StGLMessageBox(theParent, "", theParent->scale(400), theParent->scale(260)),
       myRange(NULL) {
-        changeRectPx().moveX(  64);
-        changeRectPx().moveY(-128);
+        changeRectPx().moveX( myRoot->scale( 64));
+        changeRectPx().moveY(-myRoot->scale(128));
         setCorner(StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT));
         StGLButton* aResetBtn = addButton(theParent->tr(BUTTON_RESET));
         addButton(theParent->tr(BUTTON_CLOSE));
@@ -552,7 +556,7 @@ class StDelayControl : public StGLMessageBox {
 
         const StGLVec3 aWhite(1.0f, 1.0f, 1.0f);
         StGLTextArea* aTitle = new StGLTextArea(aContent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
-                                                aContent->getRectPx().width(), 10);
+                                                aContent->getRectPx().width(), myRoot->scale(10));
         aTitle->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER, StGLTextFormatter::ST_ALIGN_Y_TOP);
         aTitle->setText(theParent->tr(DIALOG_AUDIO_DELAY_TITLE));
         aTitle->setTextColor(aWhite);
@@ -560,20 +564,21 @@ class StDelayControl : public StGLMessageBox {
         aTitle->stglInitAutoHeight();
 
         StGLTextArea* aText = new StGLTextArea(aContent, 0, aTitle->getRectPx().bottom(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
-                                               aContent->getRectPx().width(), 10);
+                                               aContent->getRectPx().width(), myRoot->scale(10));
         aText->setText(StString("\n\n") + theParent->tr(DIALOG_AUDIO_DELAY_DESC) + "\n");
         aText->setTextColor(aWhite);
         aText->setVisibility(true, true);
         aText->stglInitAutoHeight();
 
-        StGLTextArea* aLabel = new StGLTextArea(aContent, 0, aText->getRectPx().bottom(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), -1, 10);
+        StGLTextArea* aLabel = new StGLTextArea(aContent, 0, aText->getRectPx().bottom(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                                                -myRoot->scale(1), myRoot->scale(10));
         aLabel->setText(theParent->tr(DIALOG_AUDIO_DELAY_LABEL));
         aLabel->setTextColor(aWhite);
         aLabel->setVisibility(true, true);
         aLabel->stglInitAutoHeightWidth();
 
         myRange = new StGLRangeFieldFloat32(aContent, theTrackedValue,
-                                            aLabel->getRectPx().right() + 10, aLabel->getRectPx().top());
+                                            aLabel->getRectPx().right() + myRoot->scale(10), aLabel->getRectPx().top());
         myRange->setFormat(stCString("%+01.3f"));
         myRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  StGLVec3(1.0f, 1.0f, 1.0f));
         myRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, StGLVec3(0.4f, 0.8f, 0.4f));
@@ -581,8 +586,8 @@ class StDelayControl : public StGLMessageBox {
         myRange->setVisibility(true, true);
         myRange->stglInit();
 
-        StGLTextArea* aLabUnits = new StGLTextArea(aContent, myRange->getRectPx().right() + 10, aLabel->getRectPx().top(),
-                                                   StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), -1, 10);
+        StGLTextArea* aLabUnits = new StGLTextArea(aContent, myRange->getRectPx().right() + myRoot->scale(10), aLabel->getRectPx().top(),
+                                                   StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), -myRoot->scale(1), myRoot->scale(10));
         aLabUnits->setText(theParent->tr(DIALOG_AUDIO_DELAY_UNITS));
         aLabUnits->setTextColor(aWhite);
         aLabUnits->setVisibility(true, true);
@@ -689,7 +694,7 @@ void StMoviePlayerGUI::doAboutProgram(const size_t ) {
         + tr(ABOUT_VERSION) + ": " + StVersionInfo::getSDKVersionString()
         + " "+ StThread::getArchString()
         + "\n \n" + tr(ABOUT_DESCRIPTION),
-        512, 300);
+        scale(512), scale(300));
     aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
@@ -703,7 +708,7 @@ void StMoviePlayerGUI::doAboutSystem(const size_t ) {
     StString aTitle = "System Info";
     StString anInfo = getContext().stglFullInfo();
     StString aString = aTitle + "\n\n \n" + anInfo;
-    StGLMessageBox* aDialog = new StGLMessageBox(this, aString, 512, 256);
+    StGLMessageBox* aDialog = new StGLMessageBox(this, aString, scale(512), scale(256));
     aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
@@ -736,7 +741,7 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
         anInfo += anInfoList[anIter];
     }
     StString aString = aTitle + "\n\n \n" + anInfo + aCodecsInfo;
-    StGLMessageBox* aDialog = new StGLMessageBox(this, aString, 512, 300);
+    StGLMessageBox* aDialog = new StGLMessageBox(this, aString, scale(512), scale(300));
     aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
@@ -885,7 +890,7 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
 
     createUpperToolbar();
 
-    mySeekBar = new StSeekBar(this, -aMargins.bottom() - 78);
+    mySeekBar = new StSeekBar(this, -aMargins.bottom() - scale(78));
     mySeekBar->signals.onSeekClick.connect(myPlugin, &StMoviePlayer::doSeek);
 
     createBottomToolbar();
@@ -969,7 +974,7 @@ void StMoviePlayerGUI::stglResize(const StRectI_t& winRectPx) {
             myPanelBottom->changeRectPx().moveTopTo(-aMargins.bottom());
         }
         if(mySeekBar != NULL) {
-            mySeekBar->changeRectPx().moveTopTo(-aMargins.bottom() - 78);
+            mySeekBar->changeRectPx().moveTopTo(-aMargins.bottom() - scale(78));
         }
         if(myMenuRoot != NULL) {
             myMenuRoot->changeRectPx().left() = aMargins.left();
@@ -1108,10 +1113,10 @@ void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StStri
         if(!theStreamsList.isNull()
         && !theStreamsList->isEmpty()) {
             aDelayItem = myMenuAudio->addItem(tr(MENU_AUDIO_DELAY));
-            aDelayItem->setMarginRight(100 + 16);
+            aDelayItem->setMarginRight(scale(100 + 16));
             aDelayItem->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAudioDelay);
             aDelayRange = new StGLRangeFieldFloat32(aDelayItem, myPlugin->params.AudioDelay,
-                                                    -16, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+                                                    -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
             aDelayRange->changeRectPx().bottom() = aDelayRange->getRectPx().top()  + myMenuAudio->getItemHeight();
             aDelayRange->setFormat(stCString("%+01.3f"));
             aDelayRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  StGLVec3(0.0f, 0.0f, 0.0f));
@@ -1183,7 +1188,7 @@ void StMoviePlayerGUI::doAboutRenderer(const size_t ) {
         anAboutText = StString() + "Plugin '" + myPlugin->getMainWindow()->getRendererId() + "' doesn't provide description";
     }
 
-    StGLMessageBox* aDialog = new StGLMessageBox(this, anAboutText, 512, 300);
+    StGLMessageBox* aDialog = new StGLMessageBox(this, anAboutText, scale(512), scale(300));
     aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->setVisibility(true, true);
     aDialog->stglInit();

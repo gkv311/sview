@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -108,11 +108,11 @@ class StSeekBar::StProgramSB : public StGLProgram {
 
 StSeekBar::StSeekBar(StGLWidget* theParent,
                      const int   theTop)
-: StGLWidget(theParent, 0, theTop, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER), 512, 12),
+: StGLWidget(theParent, 0, theTop, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER),
+             theParent->getRoot()->scale(512), theParent->getRoot()->scale(12)),
   myProgram(new StProgramSB()),
   myProgress(0.0f),
   myProgressPx(0) {
-    //
     StGLWidget::signals.onMouseUnclick.connect(this, &StSeekBar::doMouseUnclick);
 }
 
@@ -134,7 +134,7 @@ void StSeekBar::stglResize(const StRectI_t& winRectPx) {
     StGLContext& aCtx = getContext();
 
     // update pixel coordinates
-    changeRectPx().right() = getParent()->getRectPx().width() - 128;
+    changeRectPx().right() = getParent()->getRectPx().width() - myRoot->scale(128);
 
     stglUpdateVertices();
 

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,8 @@ class ST_LOCAL StTimeBox : public StGLTextureButton {
               const int   theLeft = 32,
               const int   theTop  = 32)
     : StGLTextureButton(          theParent, theLeft, theTop, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT)),
-      myTextArea(new StGLTextArea(theParent, theLeft, theTop, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), 32, 32)),
+      myTextArea(new StGLTextArea(theParent, theLeft, theTop, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                                  theParent->getRoot()->scale(32), theParent->getRoot()->scale(32))),
       myProgressSec(0.0),
       myDurationSec(0.0),
       myToShowElapsed(true) {
