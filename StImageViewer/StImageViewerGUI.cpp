@@ -537,10 +537,10 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
     createUpperToolbar();
 
     // fullscreen button
-    myBtnFull = new StGLTextureButton(this, -aMargins.right() - 8, -aMargins.bottom() - 8,
+    myBtnFull = new StGLTextureButton(this, -aMargins.right() - scale(8), -aMargins.bottom() - scale(8),
                                       StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_RIGHT));
     myBtnFull->signals.onBtnClick.connect(myPlugin->params.isFullscreen.operator->(), &StBoolParam::doReverse);
-    myBtnFull->setTexturePath(stCTexture("fullScreen.png"));
+    myBtnFull->setTexturePath(iconTexture(stCString("fullScreen"), scaleIcon(32)));
 
     myDescr = new StGLDescription(this);
 
