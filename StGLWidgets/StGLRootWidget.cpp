@@ -10,11 +10,26 @@
 
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
+#include <StFile/StFileNode.h>
 
 namespace {
+
     // we do not use StAtomic<> template here to avoid static classes initialization ambiguity
     static volatile size_t ST_WIDGET_RES_COUNTER = 0;
     static const StString CLASS_NAME("StGLRootWidget");
+
+    static const int THE_ICON_SIZES[StGLRootWidget::IconSizeNb + 1] {
+        16,
+        24,
+        32,
+        48,
+        64,
+        128,
+        192,
+        256,
+        0
+    };
+
 };
 
 size_t StGLRootWidget::generateShareId() {
@@ -72,6 +87,44 @@ const StHandle<StGLContext>& StGLRootWidget::getContextHandle() {
 
 void StGLRootWidget::setContext(const StHandle<StGLContext>& theCtx) {
     myGlCtx = theCtx;
+}
+
+StGLRootWidget::IconSize StGLRootWidget::scaleIcon(const int theSize) const {
+    const int anIconSize = scale(theSize);
+    if(anIconSize < 20) {
+        return IconSize_16;
+    } else if(anIconSize < 30) {
+        return IconSize_24;
+    } else if(anIconSize < 42) {
+        return IconSize_32;
+    } else if(anIconSize < 60) {
+        return IconSize_48;
+    } else if(anIconSize < 110) {
+        return IconSize_64;
+    } else if(anIconSize < 180) {
+        return IconSize_128;
+    } else if(anIconSize < 240) {
+        return IconSize_192;
+    } else {
+        return IconSize_256;
+    }
+}
+
+StString StGLRootWidget::iconTexture(const StString& theName,
+                                     const IconSize  theSize) const {
+    for(int anIter = theSize; anIter >= 0; --anIter) {
+        const StString aPath = theName + THE_ICON_SIZES[anIter] + ".png";
+        if(StFileNode::isFileExists(aPath)) {
+            return aPath;
+        }
+    }
+    for(int anIter = theSize + 1; anIter < IconSizeNb; ++anIter) {
+        const StString aPath = theName + THE_ICON_SIZES[anIter] + ".png";
+        if(StFileNode::isFileExists(aPath)) {
+            return aPath;
+        }
+    }
+    return "";
 }
 
 void StGLRootWidget::setScale(const GLfloat     theScale,

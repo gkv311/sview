@@ -27,6 +27,21 @@ class StGLRootWidget : public StGLWidget {
         ScaleAdjust_Big,
     };
 
+    /**
+     * List of standard icon sizes.
+     */
+    enum IconSize {
+        IconSize_16,
+        IconSize_24,
+        IconSize_32,
+        IconSize_48,
+        IconSize_64,
+        IconSize_128,
+        IconSize_192,
+        IconSize_256,
+        IconSizeNb
+    };
+
         public:
 
     /**
@@ -102,6 +117,17 @@ class StGLRootWidget : public StGLWidget {
     ST_LOCAL inline int scale(const int thePixels) const {
         return int(myScaleGUI * GLfloat(thePixels) + 0.1f);
     }
+
+    /**
+     * Scale specified size to the nearest default icon size.
+     */
+    ST_CPPEXPORT IconSize scaleIcon(const int theSize) const;
+
+    /**
+     * Returns texture for icon with specified default size.
+     */
+    ST_CPPEXPORT StString iconTexture(const StString& theName,
+                                      const IconSize  theSize) const;
 
     /**
      * @param theScale scale factor for GUI elements (text, icons)

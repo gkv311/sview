@@ -67,6 +67,14 @@ class StMoviePlayerGUI : public StGLRootWidget {
     }
 
     /**
+     * @return absolute path to the texture
+     */
+    ST_LOCAL StString iconTexture(const StCString& theName,
+                                  const IconSize   theSize) const {
+        return StGLRootWidget::iconTexture(myTexturesFolder + theName, theSize);
+    }
+
+    /**
      * Convert dB to amplitude ratio
      */
     ST_LOCAL static inline double dBellToRatio(const double thedB) {

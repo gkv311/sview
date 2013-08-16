@@ -51,6 +51,14 @@ class StImageViewerGUI : public StGLRootWidget {
         return myTexturesFolder + theTextureName;
     }
 
+    /**
+     * @return absolute path to the texture
+     */
+    ST_LOCAL StString iconTexture(const StCString& theName,
+                                  const IconSize   theSize) const {
+        return StGLRootWidget::iconTexture(myTexturesFolder + theName, theSize);
+    }
+
         public: //! @name StGLRootWidget overrides
 
     ST_LOCAL StImageViewerGUI(StImageViewer*  thePlugin,

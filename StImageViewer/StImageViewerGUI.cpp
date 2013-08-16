@@ -63,7 +63,7 @@ void StImageViewerGUI::createUpperToolbar() {
     const int aLeft = scale(DISPL_X_REGION_UPPER);
 
     const StRectI_t& aMargins = getRootMarginsPx();
-    myPanelUpper = new StGLWidget(this, aMargins.left(), aMargins.top(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), 4096, 128);
+    myPanelUpper = new StGLWidget(this, aMargins.left(), aMargins.top(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(128));
 
     // append textured buttons
     myBtnOpen   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * ICON_WIDTH, aTop);
@@ -171,35 +171,28 @@ StGLMenu* StImageViewerGUI::createSaveImageMenu() {
  * Root -> Media -> Source format menu
  */
 StGLMenu* StImageViewerGUI::createSrcFormatMenu() {
-    StGLMenu*     aMenu  = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    int anIconSize = scale(16);
-    if(anIconSize < 30) {
-        anIconSize = 16;
-    } else if(anIconSize < 60) {
-        anIconSize = 32;
-    } else {
-        anIconSize = 64;
-    }
+    const IconSize anIconSize = scaleIcon(16);
+    StGLMenu* aMenu  = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     aMenu->addItem(tr(MENU_SRC_FORMAT_AUTO),         myPlugin->params.srcFormat, ST_V_SRC_AUTODETECT)
-         ->setIcon(getTexturePath(StString("menuAuto") + anIconSize + ".png"));
+         ->setIcon(iconTexture(stCString("menuAuto"), anIconSize));
     aMenu->addItem(tr(MENU_SRC_FORMAT_MONO),         myPlugin->params.srcFormat, ST_V_SRC_MONO)
-         ->setIcon(getTexturePath(StString("menuMono") + anIconSize + ".png"));
+         ->setIcon(iconTexture(stCString("menuMono"), anIconSize));
     aMenu->addItem(tr(MENU_SRC_FORMAT_CROSS_EYED),   myPlugin->params.srcFormat, ST_V_SRC_SIDE_BY_SIDE)
-         ->setIcon(getTexturePath(StString("menuSbsRL") + anIconSize + ".png"));
+         ->setIcon(iconTexture(stCString("menuSbsRL"), anIconSize));
     aMenu->addItem(tr(MENU_SRC_FORMAT_PARALLEL),     myPlugin->params.srcFormat, ST_V_SRC_PARALLEL_PAIR)
-         ->setIcon(getTexturePath(StString("menuSbsLR") + anIconSize + ".png"));
+         ->setIcon(iconTexture(stCString("menuSbsLR"), anIconSize));
     aMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_RL), myPlugin->params.srcFormat, ST_V_SRC_OVER_UNDER_RL)
-         ->setIcon(getTexturePath(StString("menuOverUnderRL") + anIconSize + ".png"));
+         ->setIcon(iconTexture(stCString("menuOverUnderRL"), anIconSize));
     aMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_LR), myPlugin->params.srcFormat, ST_V_SRC_OVER_UNDER_LR)
-         ->setIcon(getTexturePath(StString("menuOverUnderLR") + anIconSize + ".png"));
+         ->setIcon(iconTexture(stCString("menuOverUnderLR"), anIconSize));
     aMenu->addItem(tr(MENU_SRC_FORMAT_INTERLACED),   myPlugin->params.srcFormat, ST_V_SRC_ROW_INTERLACE)
-         ->setIcon(getTexturePath(StString("menuRowLR") + anIconSize + ".png"));
+         ->setIcon(iconTexture(stCString("menuRowLR"), anIconSize));
     aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RC),       myPlugin->params.srcFormat, ST_V_SRC_ANAGLYPH_RED_CYAN)
-         ->setIcon(getTexturePath(StString("menuRedCyanLR") + anIconSize + ".png"));
+         ->setIcon(iconTexture(stCString("menuRedCyanLR"), anIconSize));
     aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RB),       myPlugin->params.srcFormat, ST_V_SRC_ANAGLYPH_G_RB)
-         ->setIcon(getTexturePath(StString("menuGreenMagentaLR") + anIconSize + ".png"));
+         ->setIcon(iconTexture(stCString("menuGreenMagentaLR"), anIconSize));
     aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_YB),       myPlugin->params.srcFormat, ST_V_SRC_ANAGLYPH_YELLOW_BLUE)
-         ->setIcon(getTexturePath(StString("menuYellowBlueLR") + anIconSize + ".png"));
+         ->setIcon(iconTexture(stCString("menuYellowBlueLR"), anIconSize));
     return aMenu;
 }
 
@@ -248,21 +241,22 @@ StGLMenu* StImageViewerGUI::createDisplayModeMenu() {
  * Root -> View menu -> Display Ratio
  */
 StGLMenu* StImageViewerGUI::createDisplayRatioMenu() {
+    const IconSize anIconSize = scaleIcon(16);
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     aMenu->addItem(tr(MENU_VIEW_DISPLAY_RATIO_SRC), myImage->params.displayRatio, StGLImageRegion::RATIO_AUTO)
-         ->setIcon(stCTexture("menuAuto16.png"));
+         ->setIcon(iconTexture(stCString("menuAuto"), anIconSize));
     aMenu->addItem("2.21:1", myImage->params.displayRatio, StGLImageRegion::RATIO_221_1)
-         ->setIcon(stCTexture("menuRatio2_1_16.png"));
+         ->setIcon(iconTexture(stCString("menuRatio2_1_"), anIconSize));
     aMenu->addItem("16:9",   myImage->params.displayRatio, StGLImageRegion::RATIO_16_9)
-         ->setIcon(stCTexture("menuRatio16_9_16.png"));
+         ->setIcon(iconTexture(stCString("menuRatio16_9_"), anIconSize));
     aMenu->addItem("16:10",  myImage->params.displayRatio, StGLImageRegion::RATIO_16_10)
-         ->setIcon(stCTexture("menuRatio16_10_16.png"));
+         ->setIcon(iconTexture(stCString("menuRatio16_10_"), anIconSize));
     aMenu->addItem("4:3",    myImage->params.displayRatio, StGLImageRegion::RATIO_4_3)
-         ->setIcon(stCTexture("menuRatio4_3_16.png"));
+         ->setIcon(iconTexture(stCString("menuRatio4_3_"), anIconSize));
     aMenu->addItem("5:4",    myImage->params.displayRatio, StGLImageRegion::RATIO_5_4)
-         ->setIcon(stCTexture("menuRatio5_4_16.png"));
+         ->setIcon(iconTexture(stCString("menuRatio5_4_"), anIconSize));
     aMenu->addItem("1:1",    myImage->params.displayRatio, StGLImageRegion::RATIO_1_1)
-         ->setIcon(stCTexture("menuRatio1_1_16.png"));
+         ->setIcon(iconTexture(stCString("menuRatio1_1_"), anIconSize));
     aMenu->addItem(tr(MENU_VIEW_KEEP_ON_RESTART),   myPlugin->params.toRestoreRatio);
     return aMenu;
 }
