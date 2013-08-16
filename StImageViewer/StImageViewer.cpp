@@ -642,6 +642,7 @@ void StImageViewer::beforeDraw() {
     if(myToRecreateMenu) {
         createGui();
         myToRecreateMenu = false;
+        myLoader->doLoadNext();
     }
 
     const bool isMouseMove = myWindow->isMouseMoved();
