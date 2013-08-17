@@ -29,6 +29,12 @@
 #include <StCocoa/StCocoaLocalPool.h>
 #include <StCocoa/StCocoaString.h>
 
+#if !defined(MAC_OS_X_VERSION_10_7) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_7)
+@interface NSView (LionAPI)
+    - (NSSize )convertSizeToBacking: (NSSize )theSize;
+@end
+#endif
+
 static const NSOpenGLPixelFormatAttribute THE_DOUBLE_BUFF[] = {
     //NSOpenGLPFAColorSize, (NSOpenGLPixelFormatAttribute) 32,
     //NSOpenGLPFADepthSize, (NSOpenGLPixelFormatAttribute) 0,
@@ -52,6 +58,25 @@ void StWindowImpl::setTitle(const StString& theTitle) {
         StCocoaString aTitle(myWindowTitle);
         [myMaster.hWindow setTitle: aTitle.toStringNs()];
     }
+}
+
+void StWindowImpl::convertRectToBacking(StGLBoxPx& theRect,
+                                        const int  theWinId) const {
+    NSView* aView = (theWinId == ST_WIN_SLAVE) ? mySlave.hViewGl : myMaster.hViewGl;
+    if(aView == NULL
+    || ![aView respondsToSelector: @selector(convertSizeToBacking:)]) {
+        return;
+    }
+
+    //[aView convertRectToBacking:(NSRect)aRect];
+    NSSize aTopLeft     = { (float )theRect.x(),     (float )theRect.y() };
+    NSSize aWidthHeight = { (float )theRect.width(), (float )theRect.height() };
+    NSSize aRes = [aView convertSizeToBacking: aTopLeft];
+    theRect.x() = (int )aRes.width;
+    theRect.y() = (int )aRes.height;
+    aRes = [aView convertSizeToBacking: aWidthHeight];
+    theRect.width()  = (int )aRes.width;
+    theRect.height() = (int )aRes.height;
 }
 
 void StWindowImpl::setPlacement(const StRectI_t& theRect,

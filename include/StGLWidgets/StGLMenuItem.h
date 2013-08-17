@@ -37,7 +37,7 @@ class StGLMenuItem : public StGLTextArea {
 
     ST_CPPEXPORT virtual const StString& getClassName();
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo);
-    ST_CPPEXPORT virtual void stglResize(const StRectI_t& theWinRectPx);
+    ST_CPPEXPORT virtual void stglResize();
     ST_CPPEXPORT virtual bool stglInit();
     ST_CPPEXPORT virtual void stglDraw(unsigned int view);
     ST_CPPEXPORT virtual bool tryClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& theIsItemClicked);
@@ -110,7 +110,6 @@ class StGLMenuItem : public StGLTextArea {
         CLICKED,
     } State;
 
-    ST_LOCAL void stglResize();
     ST_LOCAL void stglDrawArea(const StGLMenuItem::State theState);
 
         private: //! @name private fields

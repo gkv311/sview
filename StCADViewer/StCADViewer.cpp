@@ -314,7 +314,7 @@ bool StCADViewer::init() {
         myGUI.nullify();
         return false;
     }
-    myGUI->stglResize(myWindow->getPlacement());
+    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER));
 
     // create working threads
     if(!isReset) {
@@ -374,7 +374,7 @@ void StCADViewer::doResize(const StSizeEvent& ) {
         return;
     }
 
-    const StRectI_t aWinRect = myWindow->getPlacement();
+    const StGLBoxPx aWinRect = myWindow->stglViewport(ST_WIN_MASTER);
     myGUI->stglResize(aWinRect);
     myProjection.resize(*myContext, aWinRect.width(), aWinRect.height());
 }

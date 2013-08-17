@@ -245,7 +245,7 @@ class StGLRootWidget : public StGLWidget {
     }
 
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& cursorZo);
-    ST_CPPEXPORT virtual void stglResize(const StRectI_t& winRectPx);
+    ST_CPPEXPORT virtual void stglResize(const StGLBoxPx&  theRectPx);
 
     /**
      * @return viewport dimensions from bound GL context (4-indices array)

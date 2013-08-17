@@ -314,9 +314,10 @@ void StOutAnaglyph::processEvents() {
 
 void StOutAnaglyph::stglDraw() {
     myFPSControl.setTargetFPS(StWindow::getTargetFps());
+    const StGLBoxPx aVPort = StWindow::stglViewport(ST_WIN_MASTER);
     if(!StWindow::isStereoOutput() || myIsBroken) {
         StWindow::stglMakeCurrent(ST_WIN_MASTER);
-        myContext->stglResize(StWindow::getPlacement());
+        myContext->stglResizeViewport(aVPort);
         if(myToCompressMem) {
             myFrBuffer->release(*myContext);
         }
@@ -329,29 +330,25 @@ void StOutAnaglyph::stglDraw() {
         return;
     }
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
-    myContext->stglResize(StWindow::getPlacement());
-    const StRectI_t aWinRect = StWindow::getPlacement();
 
     // resize FBO
-    if(!myFrBuffer->initLazy(*myContext, aWinRect.width(), aWinRect.height(), StWindow::hasDepthBuffer())) {
+    if(!myFrBuffer->initLazy(*myContext, aVPort.width(), aVPort.height(), StWindow::hasDepthBuffer())) {
         myMsgQueue->pushError(stCString("Anaglyph output - critical error:\nFrame Buffer Object resize failed!"));
         myIsBroken = true;
         return;
     }
 
     // draw into virtual frame buffers (textures)
-    GLint aVPort[4]; // real window viewport
-    myContext->core20fwd->glGetIntegerv(GL_VIEWPORT, aVPort);
     myFrBuffer->setupViewPort(*myContext);       // we set TEXTURE sizes here
     myFrBuffer->bindBufferLeft(*myContext);
         StWindow::signals.onRedraw(ST_DRAW_LEFT);
     myFrBuffer->bindBufferRight(*myContext);
         StWindow::signals.onRedraw(ST_DRAW_RIGHT);
     myFrBuffer->unbindBufferRight(*myContext);
-    myContext->core20fwd->glViewport(aVPort[0], aVPort[1], aVPort[2], aVPort[3]);
 
     // now draw to real screen buffer
     // clear the screen and the depth buffer
+    myContext->stglResizeViewport(aVPort);
     myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     myContext->core20fwd->glDisable(GL_DEPTH_TEST);

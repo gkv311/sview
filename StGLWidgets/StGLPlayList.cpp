@@ -95,8 +95,8 @@ void StGLPlayList::doMouseUnclick(const int theBtnId) {
     }
 }
 
-void StGLPlayList::stglResize(const StRectI_t& theWinRectPx) {
-    const int aNewHeight = theWinRectPx.height();
+void StGLPlayList::stglResize() {
+    const int aNewHeight = myRoot->getRectPx().height();
     const int anItemsOld = myItemsNb;
     myItemsNb = stMax(aNewHeight / myItemHeight - 6, 0);
 
@@ -130,12 +130,12 @@ void StGLPlayList::stglResize(const StRectI_t& theWinRectPx) {
         stglInit();
     }
 
-    myWidth = theWinRectPx.width() / 4;
+    myWidth = myRoot->getRectPx().width() / 4;
     myWidth = stMin(myWidth, myRoot->scale(400));
     myWidth = stMax(myWidth, myRoot->scale(250));
     resizeWidth();
 
-    StGLMenu::stglResize(theWinRectPx);
+    StGLMenu::stglResize();
 }
 
 void StGLPlayList::resizeWidth() {

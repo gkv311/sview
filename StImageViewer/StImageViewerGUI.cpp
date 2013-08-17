@@ -659,9 +659,9 @@ void StImageViewerGUI::stglUpdate(const StPointD_t& pointZo) {
     }
 }
 
-void StImageViewerGUI::stglResize(const StRectI_t& winRectPx) {
-    const int aSizeX = winRectPx.width();
-    const int aSizeY = winRectPx.height();
+void StImageViewerGUI::stglResize(const StGLBoxPx& theRectPx) {
+    const int aSizeX = theRectPx.width();
+    const int aSizeY = theRectPx.height();
     myImage->changeRectPx().bottom() = aSizeY;
     myImage->changeRectPx().right()  = aSizeX;
 
@@ -687,7 +687,7 @@ void StImageViewerGUI::stglResize(const StRectI_t& winRectPx) {
         }
     }
 
-    StGLRootWidget::stglResize(winRectPx);
+    StGLRootWidget::stglResize(theRectPx);
 }
 
 void StImageViewerGUI::stglDraw(unsigned int theView) {

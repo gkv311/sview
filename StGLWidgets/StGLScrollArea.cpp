@@ -44,12 +44,7 @@ bool StGLScrollArea::stglInit() {
 }
 
 void StGLScrollArea::stglResize() {
-    //
-}
-
-void StGLScrollArea::stglResize(const StRectI_t& theWinRectPx) {
-    stglResize();
-    StGLWidget::stglResize(theWinRectPx);
+    StGLWidget::stglResize();
 }
 
 void StGLScrollArea::stglDraw(unsigned int theView) {
@@ -81,7 +76,7 @@ void StGLScrollArea::doScroll(const int theDir) {
 
     aContent->changeRectPx().top()    += 10 * theDir;
     aContent->changeRectPx().bottom() += 10 * theDir;
-    stglResize(myRoot->getRectPx());
+    stglResize();
 }
 
 void StGLScrollArea::doMouseUnclick(const int theBtnId) {

@@ -72,10 +72,8 @@ void StGLCheckbox::stglResize() {
         myProgram->setProjMat(aCtx, getRoot()->getScreenProjection());
         myProgram->unuse(aCtx);
     }
-}
 
-void StGLCheckbox::stglResize(const StRectI_t& ST_UNUSED(theWinRectPx)) {
-    stglResize();
+    StGLWidget::stglResize();
 }
 
 bool StGLCheckbox::stglInit() {

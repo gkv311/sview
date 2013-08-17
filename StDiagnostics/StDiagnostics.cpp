@@ -81,7 +81,7 @@ bool StDiagnostics::open() {
         myGUI.nullify();
         return false;
     }
-    myGUI->stglResize(myWindow->getPlacement());
+    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER));
     return true;
 }
 
@@ -90,7 +90,7 @@ void StDiagnostics::doResize(const StSizeEvent& ) {
         return;
     }
 
-    myGUI->stglResize(myWindow->getPlacement());
+    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER));
 }
 
 void StDiagnostics::doMouseDown(const StClickEvent& theEvent) {

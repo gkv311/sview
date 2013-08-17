@@ -481,7 +481,7 @@ bool StMoviePlayer::createGui(StHandle<StGLTextureQueue>& theTextureQueue,
     }
 
     myGUI->stglInit();
-    myGUI->stglResize(myWindow->getPlacement());
+    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER));
 
     for(size_t anIter = 0; anIter < myGUI->myImage->getActions().size(); ++anIter) {
         StHandle<StAction>& anAction = myGUI->myImage->changeActions()[anIter];
@@ -717,7 +717,7 @@ void StMoviePlayer::doResize(const StSizeEvent& ) {
         return;
     }
 
-    myGUI->stglResize(myWindow->getPlacement());
+    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER));
 }
 
 void StMoviePlayer::doKeyDown(const StKeyEvent& theEvent) {
@@ -884,7 +884,8 @@ void StMoviePlayer::beforeDraw() {
         return;
     }
 
-    if(myToRecreateMenu) {
+    if(params.ScaleHiDPI->setValue(myWindow->getScaleFactor())
+    || myToRecreateMenu) {
         StHandle<StGLTextureQueue> aTextureQueue;
         StHandle<StSubQueue>       aSubQueue;
         createGui(aTextureQueue, aSubQueue);

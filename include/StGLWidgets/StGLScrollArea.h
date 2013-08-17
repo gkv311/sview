@@ -30,7 +30,6 @@ class StGLScrollArea : public StGLWidget {
     ST_CPPEXPORT virtual ~StGLScrollArea();
     ST_CPPEXPORT virtual bool stglInit();
     ST_CPPEXPORT virtual void stglResize();
-    ST_CPPEXPORT virtual void stglResize(const StRectI_t& theWinRectPx);
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
 
         public:

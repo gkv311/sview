@@ -55,6 +55,8 @@ const StString& StGLRadioButton::getClassName() {
 }
 
 void StGLRadioButton::stglResize() {
+    StGLWidget::stglResize();
+
     StGLContext& aCtx = getContext();
 
     // outer vertices
@@ -76,10 +78,6 @@ void StGLRadioButton::stglResize() {
         myProgram->setProjMat(aCtx, getRoot()->getScreenProjection());
         myProgram->unuse(aCtx);
     }
-}
-
-void StGLRadioButton::stglResize(const StRectI_t& ST_UNUSED(theWinRectPx)) {
-    stglResize();
 }
 
 bool StGLRadioButton::stglInit() {

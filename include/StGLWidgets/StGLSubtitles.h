@@ -61,7 +61,7 @@ class StGLSubtitles : public StGLTextArea {
     ST_CPPEXPORT virtual ~StGLSubtitles();
     ST_CPPEXPORT virtual const StString& getClassName();
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& thePointZo);
-    ST_CPPEXPORT virtual void stglResize(const StRectI_t& theWinRectPx);
+    ST_CPPEXPORT virtual void stglResize();
 
     /**
      * Retrieve handle to the queue.

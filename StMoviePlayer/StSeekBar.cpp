@@ -129,8 +129,8 @@ const StString& StSeekBar::getClassName() {
     return className;
 }
 
-void StSeekBar::stglResize(const StRectI_t& winRectPx) {
-    StGLWidget::stglResize(winRectPx);
+void StSeekBar::stglResize() {
+    StGLWidget::stglResize();
     StGLContext& aCtx = getContext();
 
     // update pixel coordinates

@@ -101,6 +101,20 @@ class StMonitor {
     }
 
     /**
+     * @return pixels density scale factor
+     */
+    ST_LOCAL float getScale() const {
+        return myScale;
+    }
+
+    /**
+     * @param theScale pixels density scale factor
+     */
+    ST_LOCAL void setScale(const float theScale) {
+        myScale = theScale;
+    }
+
+    /**
      * @return current vertical refresh rate
      */
     ST_LOCAL int getFreq() const {
@@ -200,6 +214,7 @@ class StMonitor {
     int          mySysId;   //!< monitor id
     int          myFreq;    //!< frequency in Hertz
     int          myFreqMax; //!< maximum frequency in Hertz
+    float        myScale;   //!< hight pixel density scale factor
 
 };
 

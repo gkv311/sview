@@ -715,6 +715,7 @@ StGLBoxPx StWindowImpl::stglViewport(const int& theWinId) const {
             } else if(theWinId == ST_WIN_ALL) {
                 aRect.width() += aWidth;
             }
+            convertRectToBacking(aRect, ST_WIN_MASTER);
             return aRect;
         }
         case TiledCfg_SlaveMasterX: {
@@ -723,6 +724,7 @@ StGLBoxPx StWindowImpl::stglViewport(const int& theWinId) const {
             } else if(theWinId == ST_WIN_ALL) {
                 aRect.width() += aWidth;
             }
+            convertRectToBacking(aRect, ST_WIN_MASTER);
             return aRect;
         }
         case TiledCfg_MasterSlaveY: {
@@ -731,6 +733,7 @@ StGLBoxPx StWindowImpl::stglViewport(const int& theWinId) const {
             } else if(theWinId == ST_WIN_ALL) {
                 aRect.height() += aHeight;
             }
+            convertRectToBacking(aRect, ST_WIN_MASTER);
             return aRect;
         }
         case TiledCfg_SlaveMasterY: {
@@ -739,10 +742,12 @@ StGLBoxPx StWindowImpl::stglViewport(const int& theWinId) const {
             } else if(theWinId == ST_WIN_ALL) {
                 aRect.height() += aHeight;
             }
+            convertRectToBacking(aRect, ST_WIN_MASTER);
             return aRect;
         }
         case TiledCfg_Separate:
         default: {
+            convertRectToBacking(aRect, theWinId);
             return aRect;
         }
     }

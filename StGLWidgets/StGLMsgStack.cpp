@@ -8,6 +8,7 @@
 
 #include <StGLWidgets/StGLMsgStack.h>
 #include <StGLWidgets/StGLMessageBox.h>
+#include <StGLWidgets/StGLRootWidget.h>
 
 StGLMsgStack::StGLMsgStack(StGLWidget*                 theParent,
                            const StHandle<StMsgQueue>& theMsgQueue)
@@ -20,10 +21,10 @@ StGLMsgStack::~StGLMsgStack() {
     //
 }
 
-void StGLMsgStack::stglResize(const StRectI_t& theWinRectPx) {
-    StGLWidget::stglResize(theWinRectPx);
-    changeRectPx().bottom() = theWinRectPx.height();
-    changeRectPx().right()  = theWinRectPx.width();
+void StGLMsgStack::stglResize() {
+    StGLWidget::stglResize();
+    changeRectPx().bottom() = myRoot->getRectPx().height();
+    changeRectPx().right()  = myRoot->getRectPx().width();
 }
 
 void StGLMsgStack::stglUpdate(const StPointD_t& thePointZo) {

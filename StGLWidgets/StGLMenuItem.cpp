@@ -141,11 +141,8 @@ void StGLMenuItem::stglResize() {
         myProgram->setProjMat(aCtx, getRoot()->getScreenProjection());
         myProgram->unuse(aCtx);
     }
-}
 
-void StGLMenuItem::stglResize(const StRectI_t& theWinRectPx) {
-    StGLTextArea::stglResize(theWinRectPx);
-    stglResize();
+    StGLTextArea::stglResize();
 }
 
 void StGLMenuItem::stglUpdate(const StPointD_t& theCursorZo) {

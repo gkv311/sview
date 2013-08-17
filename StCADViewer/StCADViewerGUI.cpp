@@ -174,7 +174,7 @@ void StCADViewerGUI::stglUpdate(const StPointD_t& theCursorZo) {
     }
 }
 
-void StCADViewerGUI::stglResize(const StRectI_t& winRectPx) {
+void StCADViewerGUI::stglResize(const StGLBoxPx& theRectPx) {
     const StRectI_t& aMargins = myPlugin->getMainWindow()->getMargins();
     const bool areNewMargins = aMargins != getRootMarginsPx();
     if(areNewMargins) {
@@ -189,7 +189,7 @@ void StCADViewerGUI::stglResize(const StRectI_t& winRectPx) {
         }
     }
 
-    StGLRootWidget::stglResize(winRectPx);
+    StGLRootWidget::stglResize(theRectPx);
 }
 
 void StCADViewerGUI::stglDraw(unsigned int theView) {

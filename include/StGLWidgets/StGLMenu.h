@@ -47,7 +47,7 @@ class StGLMenu : public StGLWidget {
 
     ST_CPPEXPORT virtual const StString& getClassName();
     ST_CPPEXPORT virtual void setVisibility(bool isVisible, bool isForce);
-    ST_CPPEXPORT virtual void stglResize(const StRectI_t& theWinRectPx);
+    ST_CPPEXPORT virtual void stglResize();
     ST_CPPEXPORT virtual bool stglInit();
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
     ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& theIsItemUnclicked);
@@ -153,10 +153,6 @@ class StGLMenu : public StGLWidget {
     ST_CPPEXPORT StGLMenuItem* addItem(const StString&           theLabel,
                                        const StHandle<StAction>& theAction,
                                        StGLMenu*                 theSubMenu = NULL);
-
-        private:
-
-    ST_LOCAL void stglResize();
 
         protected: //! @name protected fields
 

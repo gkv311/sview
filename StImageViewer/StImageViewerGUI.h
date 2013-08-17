@@ -67,7 +67,7 @@ class StImageViewerGUI : public StGLRootWidget {
                               const StHandle<StGLTextureQueue>& theTextureQueue);
     ST_LOCAL virtual ~StImageViewerGUI();
     ST_LOCAL virtual void stglUpdate(const StPointD_t& pointZo);
-    ST_LOCAL virtual void stglResize(const StRectI_t& winRectPx);
+    ST_LOCAL virtual void stglResize(const StGLBoxPx& theRectPx);
     ST_LOCAL virtual void stglDraw(unsigned int theView);
     ST_LOCAL virtual void setVisibility(const StPointD_t& theCursor,
                                         bool              isMouseActive);

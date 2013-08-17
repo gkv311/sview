@@ -245,6 +245,10 @@ bool StWindow::isParentOnScreen() const {
     return myWin->isParentOnScreen();
 }
 
+GLfloat StWindow::getScaleFactor() const {
+    return myWin->getScaleFactor();
+}
+
 GLfloat StWindow::getLensDist() const {
     return 0.0f;
 }

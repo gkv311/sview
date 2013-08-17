@@ -25,6 +25,12 @@
 #include <StStrings/StLogger.h>
 #include <StTemplates/StRect.h>
 
+#if !defined(MAC_OS_X_VERSION_10_7) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_7)
+@interface NSOpenGLView (LionAPI)
+    - (void )setWantsBestResolutionOpenGLSurface: (BOOL )theFlag;
+@end
+#endif
+
 @implementation StCocoaView
 
     - (id ) initWithStWin: (StWindowImpl* ) theStWin
@@ -36,6 +42,11 @@
             return NULL;
         }
         myStWin = theStWin;
+
+        // enable HiDPI mode
+        if([self respondsToSelector: @selector(setWantsBestResolutionOpenGLSurface:)]) {
+            [self setWantsBestResolutionOpenGLSurface: YES];
+        }
 
         // setup fullscreen options
         NSString* aKeys[] = {

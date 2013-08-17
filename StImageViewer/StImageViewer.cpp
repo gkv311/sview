@@ -288,7 +288,7 @@ bool StImageViewer::createGui() {
         return false;
     }
     myGUI->stglInit();
-    myGUI->stglResize(myWindow->getPlacement());
+    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER));
 
     for(size_t anIter = 0; anIter < myGUI->myImage->getActions().size(); ++anIter) {
         StHandle<StAction>& anAction = myGUI->myImage->changeActions()[anIter];
@@ -453,7 +453,7 @@ void StImageViewer::doResize(const StSizeEvent& ) {
         return;
     }
 
-    myGUI->stglResize(myWindow->getPlacement());
+    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER));
 }
 
 void StImageViewer::doImageAdjustReset(const size_t ) {
@@ -639,7 +639,9 @@ void StImageViewer::beforeDraw() {
         return;
     }
 
-    if(myToRecreateMenu) {
+    // recreate menu event
+    if(params.ScaleHiDPI->setValue(myWindow->getScaleFactor())
+    || myToRecreateMenu) {
         createGui();
         myToRecreateMenu = false;
         myLoader->doLoadNext();

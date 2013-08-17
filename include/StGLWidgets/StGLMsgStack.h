@@ -22,7 +22,7 @@ class StGLMsgStack : public StGLWidget {
     ST_CPPEXPORT StGLMsgStack(StGLWidget*                 theParent,
                               const StHandle<StMsgQueue>& theMsgQueue);
     ST_CPPEXPORT virtual ~StGLMsgStack();
-    ST_CPPEXPORT virtual void stglResize(const StRectI_t& theWinRectPx);
+    ST_CPPEXPORT virtual void stglResize();
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& thePointZo);
 
         private:

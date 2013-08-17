@@ -29,7 +29,7 @@ class StGLPlayList : public StGLMenu {
     ST_CPPEXPORT virtual ~StGLPlayList();
     ST_CPPEXPORT virtual bool stglInit();
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
-    ST_CPPEXPORT virtual void stglResize(const StRectI_t& theWinRectPx);
+    ST_CPPEXPORT virtual void stglResize();
 
         public:  //!< @name Signals
 

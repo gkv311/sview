@@ -67,6 +67,9 @@ class StWindowImpl {
     ST_LOCAL StGLBoxPx stglViewport(const int& theWinId) const;
     ST_LOCAL void processEvents();
     ST_LOCAL void post(StEvent& theEvent);
+    ST_LOCAL GLfloat getScaleFactor() const {
+        return myMonitors[myWinOnMonitorId].getScale();
+    }
     ST_LOCAL const StSearchMonitors& getMonitors() const {
         return myMonitors;
     }
@@ -141,6 +144,9 @@ class StWindowImpl {
 
     ST_LOCAL void getTiledWinRect(StRectI_t& theRect) const;
     ST_LOCAL void correctTiledCursor(int& theLeft, int& theTop) const;
+
+    ST_LOCAL void convertRectToBacking(StGLBoxPx& theRect,
+                                       const int  theWinId) const;
 
     ST_LOCAL void updateSlaveConfig() {
         myMonSlave.idSlave = int(attribs.SlaveMonId);

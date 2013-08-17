@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -23,6 +23,12 @@
 
 #import <Cocoa/Cocoa.h>
 #import <IOKit/graphics/IOGraphicsLib.h>
+
+#if !defined(MAC_OS_X_VERSION_10_7) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_7)
+@interface NSScreen (LionAPI)
+    - (CGFloat )backingScaleFactor;
+@end
+#endif
 
 void StSearchMonitors::findMonitorsCocoa() {
     if(NSApp == NULL) {
@@ -49,6 +55,15 @@ void StSearchMonitors::findMonitorsCocoa() {
 
         CGDirectDisplayID aDispId = [aNumber unsignedIntValue];
         CGRect aRectCg = CGDisplayBounds(aDispId);
+
+        GLfloat aScale = 1.0f;
+        if([aScreen respondsToSelector: @selector(backingScaleFactor)]) {
+            aScale = [aScreen backingScaleFactor];
+        } else {
+            aScale = [aScreen userSpaceScaleFactor];
+        }
+        aStMon.setScale(aScale);
+
         aStMon.setVRect(StRectI_t(aRectCg.origin.y, aRectCg.origin.y + aRectCg.size.height,
                                   aRectCg.origin.x, aRectCg.origin.x + aRectCg.size.width));
 

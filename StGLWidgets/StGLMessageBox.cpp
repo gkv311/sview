@@ -178,6 +178,7 @@ bool StGLMessageBox::stglInit() {
 }
 
 void StGLMessageBox::stglResize() {
+    StGLWidget::stglResize();
     GLfloat toZScreen = -getCamera()->getZScreen();
 
     StRectD_t aRectGl = getRectGl();
@@ -188,11 +189,6 @@ void StGLMessageBox::stglResize() {
         GLfloat(aRectGl.left()),  GLfloat(aRectGl.bottom()), toZScreen, 1.0f  // bottom-left
     };
     myVertexBuf.init(getContext(), 4, 4, aQuadVertices);
-}
-
-void StGLMessageBox::stglResize(const StRectI_t& theWinRectPx) {
-    stglResize();
-    StGLWidget::stglResize(theWinRectPx);
 }
 
 void StGLMessageBox::stglDraw(unsigned int theView) {

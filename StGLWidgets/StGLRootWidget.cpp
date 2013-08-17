@@ -221,11 +221,11 @@ void StGLRootWidget::stglScissorRect(const StRectI_t& theRect,
     theScissorRect.height() = GLint(aHeightFactor * GLdouble(theRect.height()));
 }
 
-void StGLRootWidget::stglResize(const StRectI_t& theWinRectPx) {
-    myProjCamera.resize(*myGlCtx, theWinRectPx.width(), theWinRectPx.height());
+void StGLRootWidget::stglResize(const StGLBoxPx& theRectPx) {
+    myProjCamera.resize(*myGlCtx, theRectPx.width(), theRectPx.height());
 
-    changeRectPx().right()  = theWinRectPx.width();  // (left, top) forced to zero point (0, 0)
-    changeRectPx().bottom() = theWinRectPx.height();
+    changeRectPx().right()  = theRectPx.width();  // (left, top) forced to zero point (0, 0)
+    changeRectPx().bottom() = theRectPx.height();
 
     myProjCamera.getZParams(myRectGl);
     myScaleGlX = (myRectGl.right() - myRectGl.left()) / GLdouble(getRectPx().width());
@@ -235,7 +235,7 @@ void StGLRootWidget::stglResize(const StRectI_t& theWinRectPx) {
     myScrProjMat.translate(StGLVec3(0.0f, 0.0f, -myProjCamera.getZScreen()));
 
     // update all child widgets
-    StGLWidget::stglResize(theWinRectPx);
+    StGLWidget::stglResize();
 }
 
 StRectD_t StGLRootWidget::getRectGl(const StRectI_t& theRectPx) const {

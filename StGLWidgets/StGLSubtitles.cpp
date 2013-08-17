@@ -99,11 +99,11 @@ void StGLSubtitles::stglUpdate(const StPointD_t& ) {
     }
 }
 
-void StGLSubtitles::stglResize(const StRectI_t& theWinRectPx) {
+void StGLSubtitles::stglResize() {
     changeRectPx().right() = (getParent()->getRectPx().width() / 5) * 3;
     myTextWidth = (GLfloat )getRectPx().width();
     myToRecompute = true;
-    StGLTextArea::stglResize(theWinRectPx);
+    StGLTextArea::stglResize();
 }
 
 const StHandle<StSubQueue>& StGLSubtitles::getQueue() const {

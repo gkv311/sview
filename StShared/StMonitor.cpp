@@ -9,14 +9,10 @@
 #include <StCore/StMonitor.h>
 
 StMonitor::StMonitor()
-: myPnpId(),
-  myName(),
-  myGpuName(),
-  myEdid(),
-  myRect(),
-  mySysId(0),
+: mySysId(0),
   myFreq(0),
-  myFreqMax(0) {
+  myFreqMax(0),
+  myScale(1.0f) {
     //
 }
 
@@ -28,7 +24,8 @@ StMonitor::StMonitor(const StMonitor& theCopy)
   myRect(theCopy.myRect),
   mySysId(theCopy.mySysId),
   myFreq(theCopy.myFreq),
-  myFreqMax(theCopy.myFreqMax) {
+  myFreqMax(theCopy.myFreqMax),
+  myScale(theCopy.myScale) {
     //
 }
 
@@ -42,7 +39,7 @@ StString StMonitor::toString() const {
         + "Monitor #" + mySysId + ", PnP ID: " + myPnpId + " (" + myName + ')'
         + aStereoType + '\n'
         + "Connected to " + myGpuName + '\n'
-        + "freq= " + myFreq + "Hz / freqMax= " + myFreqMax + "Hz\n"
+        + "freq= " + myFreq + "Hz / freqMax= " + myFreqMax + "Hz / scale= " + myScale + "\n"
         + myRect.toString()
     );
 }

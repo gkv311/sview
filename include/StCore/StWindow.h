@@ -301,6 +301,11 @@ class StWindow {
      */
     ST_CPPEXPORT StGLBoxPx stglViewport(const int theWinEnum) const;
 
+    /**
+     * @return GUI scale factor for compatibility with low-resolution and high-resolution displays
+     */
+    ST_CPPEXPORT virtual GLfloat getScaleFactor() const;
+
         public: //! @name renderer properties
 
     /**
@@ -466,4 +471,4 @@ class StWindow {
 };
 template<> inline void StArray< StHandle<StWindow> >::sort() {}
 
-#endif //__StWindow_h_
+#endif // __StWindow_h_

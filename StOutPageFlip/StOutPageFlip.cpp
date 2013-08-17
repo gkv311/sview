@@ -581,9 +581,9 @@ void StOutPageFlip::stglDrawWarning() {
 
     myWarning->bind(*myContext);
 
-    const StRectI_t aRect = StWindow::getPlacement();
-    const int aWinSizeX = aRect.width();
-    const int aWinSizeY = aRect.height();
+    const StGLBoxPx aVPort = StWindow::stglViewport(ST_WIN_MASTER);
+    const int aWinSizeX = aVPort.width();
+    const int aWinSizeY = aVPort.height();
     const GLfloat aWidth  = (aWinSizeX > 0) ?        GLfloat(myWarning->getSizeX()) / GLfloat(aWinSizeX) : 1.0f;
     const GLfloat aBottom = (aWinSizeY > 0) ? 100.0f / GLfloat(aWinSizeY) : 0.0f;
     const GLfloat aHeight = (aWinSizeY > 0) ? 2.0f * GLfloat(myWarning->getSizeY()) / GLfloat(aWinSizeY) : 1.0f;
@@ -623,8 +623,8 @@ void StOutPageFlip::stglDraw() {
     myFPSControl.setTargetFPS(StWindow::getTargetFps());
 
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
-    const StRectI_t aRect = StWindow::getPlacement();
-    myContext->stglResize(aRect);
+    const StGLBoxPx aVPort = StWindow::stglViewport(ST_WIN_MASTER);
+    myContext->stglResizeViewport(aVPort);
 
     if(!StWindow::isStereoOutput()) {
         // Vuzix driver control
@@ -692,7 +692,7 @@ void StOutPageFlip::stglDraw() {
                 StWindow::signals.onRedraw(ST_DRAW_LEFT);
                 stglDrawExtra(ST_DRAW_LEFT, StGLDeviceControl::OUT_STEREO);
 
-                myContext->stglResize(aRect);
+                myContext->stglResizeViewport(aVPort);
                 myContext->core20fwd->glDrawBuffer(GL_BACK_RIGHT);
                 StWindow::signals.onRedraw(ST_DRAW_RIGHT);
                 stglDrawExtra(ST_DRAW_RIGHT, StGLDeviceControl::OUT_STEREO);
@@ -709,22 +709,20 @@ void StOutPageFlip::stglDraw() {
 
                 // draw into virtual frame buffers (textures)
                 if(!myOutD3d.myGLBuffer.isNull()) {
-                    GLint aVPort[4]; // real window viewport
-                    myContext->core20fwd->glGetIntegerv(GL_VIEWPORT, aVPort);
-                        myOutD3d.myGLBuffer->setupViewPort(*myContext); // we set TEXTURE sizes here
-                        myOutD3d.myGLBuffer->bindBuffer(*myContext);
-                            StWindow::signals.onRedraw(ST_DRAW_LEFT);
-                            stglDrawExtra(ST_DRAW_LEFT, StGLDeviceControl::OUT_STEREO);
-                            while(myOutD3d.myDxWindow->isInUpdate()) {
-                                StThread::sleep(2);
-                            }
-                            // read OpenGL buffers and write into Direct3D surface
-                            dxDraw(ST_DRAW_LEFT);
-                            StWindow::signals.onRedraw(ST_DRAW_RIGHT);
-                            stglDrawExtra(ST_DRAW_RIGHT, StGLDeviceControl::OUT_STEREO);
-                            dxDraw(ST_DRAW_RIGHT);
-                        myOutD3d.myGLBuffer->unbindBuffer(*myContext);
-                    myContext->core20fwd->glViewport(aVPort[0], aVPort[1], aVPort[2], aVPort[3]);
+                    myOutD3d.myGLBuffer->setupViewPort(*myContext); // we set TEXTURE sizes here
+                    myOutD3d.myGLBuffer->bindBuffer(*myContext);
+                        StWindow::signals.onRedraw(ST_DRAW_LEFT);
+                        stglDrawExtra(ST_DRAW_LEFT, StGLDeviceControl::OUT_STEREO);
+                        while(myOutD3d.myDxWindow->isInUpdate()) {
+                            StThread::sleep(2);
+                        }
+                        // read OpenGL buffers and write into Direct3D surface
+                        dxDraw(ST_DRAW_LEFT);
+                        StWindow::signals.onRedraw(ST_DRAW_RIGHT);
+                        stglDrawExtra(ST_DRAW_RIGHT, StGLDeviceControl::OUT_STEREO);
+                        dxDraw(ST_DRAW_RIGHT);
+                    myOutD3d.myGLBuffer->unbindBuffer(*myContext);
+                    myContext->stglResizeViewport(aVPort);
                 }
                 break;
             } else { //is windowed output - we doesn't break, just use aggressive behaviour!
@@ -756,8 +754,9 @@ void StOutPageFlip::stglDrawExtra(unsigned int , int ) {
 }
 
 void StOutPageFlip::stglDrawAggressive(unsigned int theView) {
+    const StGLBoxPx aVPort = StWindow::stglViewport(ST_WIN_MASTER);
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
-    myContext->stglResize(StWindow::getPlacement());
+    myContext->stglResizeViewport(aVPort);
     StWindow::signals.onRedraw(theView);
 
     if(myDevice == DEVICE_VUZIX) {

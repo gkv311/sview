@@ -262,10 +262,9 @@ class StGLWidget {
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo);
 
     /**
-     * Update widget and sub-widgets according to new window's dimensions.
-     * @param theWinRectPx new window rectangle
+     * Update widget and sub-widgets according to new backing store dimensions.
      */
-    ST_CPPEXPORT virtual void stglResize(const StRectI_t& theWinRectPx);
+    ST_CPPEXPORT virtual void stglResize();
 
     /**
      * Process initialization.

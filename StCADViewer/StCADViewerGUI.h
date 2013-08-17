@@ -48,7 +48,7 @@ class StCADViewerGUI : public StGLRootWidget {
     ST_LOCAL StCADViewerGUI(StCADViewer* thePlugin);
     ST_LOCAL virtual ~StCADViewerGUI();
     ST_LOCAL virtual void stglUpdate(const StPointD_t& theCursorZo);
-    ST_LOCAL virtual void stglResize(const StRectI_t& winRectPx);
+    ST_LOCAL virtual void stglResize(const StGLBoxPx&  theRectPx);
     ST_LOCAL virtual void stglDraw(unsigned int theView);
     ST_LOCAL virtual void setVisibility(const StPointD_t& theCursorZo, bool );
 

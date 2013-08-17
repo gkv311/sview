@@ -162,8 +162,8 @@ void StGLTextureButton::setTexturePath(const StString* theTexturesPaths,
     }
 }
 
-void StGLTextureButton::stglResize(const StRectI_t& winRectPx) {
-    StGLWidget::stglResize(winRectPx);
+void StGLTextureButton::stglResize() {
+    StGLWidget::stglResize();
     StGLContext& aCtx = getContext();
 
     // update vertices

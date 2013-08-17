@@ -949,9 +949,9 @@ void StMoviePlayerGUI::stglUpdate(const StPointD_t& thePointZo,
     }
 }
 
-void StMoviePlayerGUI::stglResize(const StRectI_t& winRectPx) {
-    myImage->changeRectPx().bottom() = winRectPx.height();
-    myImage->changeRectPx().right()  = winRectPx.width();
+void StMoviePlayerGUI::stglResize(const StGLBoxPx& theRectPx) {
+    myImage->changeRectPx().bottom() = theRectPx.height();
+    myImage->changeRectPx().right()  = theRectPx.width();
 
     const StRectI_t& aMargins = myWindow->getMargins();
     const bool areNewMargins = aMargins != getRootMarginsPx();
@@ -960,10 +960,10 @@ void StMoviePlayerGUI::stglResize(const StRectI_t& winRectPx) {
     }
 
     if(myPanelUpper != NULL) {
-        myPanelUpper->changeRectPx().right()  = stMax(winRectPx.width() - aMargins.right(), 2);
+        myPanelUpper->changeRectPx().right()  = stMax(theRectPx.width() - aMargins.right(), 2);
     }
     if(myPanelBottom != NULL) {
-        myPanelBottom->changeRectPx().right() = stMax(winRectPx.width() - aMargins.right(), 2);
+        myPanelBottom->changeRectPx().right() = stMax(theRectPx.width() - aMargins.right(), 2);
     }
 
     if(areNewMargins) {
@@ -985,7 +985,7 @@ void StMoviePlayerGUI::stglResize(const StRectI_t& winRectPx) {
         }
     }
 
-    StGLRootWidget::stglResize(winRectPx);
+    StGLRootWidget::stglResize(theRectPx);
 }
 
 bool StMoviePlayerGUI::toHideCursor() {

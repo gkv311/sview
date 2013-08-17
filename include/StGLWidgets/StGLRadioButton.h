@@ -37,7 +37,7 @@ class StGLRadioButton : public StGLWidget {
                                  const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
     ST_CPPEXPORT virtual ~StGLRadioButton();
     ST_CPPEXPORT virtual const StString& getClassName();
-    ST_CPPEXPORT virtual void stglResize(const StRectI_t& theWinRectPx);
+    ST_CPPEXPORT virtual void stglResize();
     ST_CPPEXPORT virtual bool stglInit();
     ST_CPPEXPORT virtual void stglDraw(unsigned int view);
     ST_CPPEXPORT virtual bool tryClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemClicked);
@@ -58,13 +58,6 @@ class StGLRadioButton : public StGLWidget {
         private: //!< callback Slots (private overriders)
 
     ST_LOCAL void doMouseUnclick(const int theBtnId);
-
-        private:
-
-    /**
-     * Auxiliary method.
-     */
-    ST_CPPEXPORT void stglResize();
 
         private:
 

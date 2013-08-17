@@ -79,6 +79,8 @@ void StGLMenu::setVisibility(bool isVisible, bool isForce) {
 }
 
 void StGLMenu::stglResize() {
+    StGLWidget::stglResize();
+
     StGLContext& aCtx = getContext();
 
     StArray<StGLVec2> aVertices(4);
@@ -100,11 +102,6 @@ void StGLMenu::stglResize() {
         myProgram->setProjMat(aCtx, getRoot()->getScreenProjection());
         myProgram->unuse(aCtx);
     }
-}
-
-void StGLMenu::stglResize(const StRectI_t& winRectPx) {
-    StGLWidget::stglResize(winRectPx);
-    stglResize();
 }
 
 void StGLMenu::stglUpdateSubmenuLayout() {

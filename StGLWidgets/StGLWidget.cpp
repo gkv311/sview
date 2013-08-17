@@ -250,12 +250,13 @@ void StGLWidget::stglUpdate(const StPointD_t& cursorZo) {
     }
 }
 
-void StGLWidget::stglResize(const StRectI_t& theWinRectPx) {
+void StGLWidget::stglResize() {
     for(StGLWidget *child(myChildren.getStart()), *childActive(NULL); child != NULL;) {
         childActive = child;
         child = child->getNext();
-        childActive->stglResize(theWinRectPx);
+        childActive->stglResize();
     }
+    isResized = false;
 }
 
 bool StGLWidget::stglInit() {

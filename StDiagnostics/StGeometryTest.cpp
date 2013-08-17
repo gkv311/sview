@@ -20,6 +20,7 @@
 
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
+#include <StGLWidgets/StGLRootWidget.h>
 
 StGeometryTest::StGeometryTest(StGLWidget* parent)
 : StGLWidget(parent),
@@ -211,13 +212,13 @@ void StGeometryTest::resizeBrightness() {
     myBrightness.changeVBO(ST_VBO_COLORS)->init(aCtx, aColorsArray);
 }
 
-void StGeometryTest::stglResize(const StRectI_t& winRectPx) {
-    StGLWidget::stglResize(winRectPx);
+void StGeometryTest::stglResize() {
+    StGLWidget::stglResize();
 
-    myPixelSize.x() = 2.0f / GLfloat(winRectPx.width());
-    myPixelSize.y() = 2.0f / GLfloat(winRectPx.height());
+    myPixelSize.x() = 2.0f / GLfloat(myRoot->getRectPx().width());
+    myPixelSize.y() = 2.0f / GLfloat(myRoot->getRectPx().height());
 
-    resizeGrid(winRectPx); // grid lines and circles (main test)
+    resizeGrid(myRoot->getRectPx()); // grid lines and circles (main test)
     resizeColor();         // color rectangles
     resizeBrightness();    // brightness rectangles
 }

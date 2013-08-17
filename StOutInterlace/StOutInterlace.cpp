@@ -669,8 +669,9 @@ void StOutInterlace::stglDraw() {
     myFPSControl.setTargetFPS(StWindow::getTargetFps());
 
     // always draw LEFT view into real screen buffer
+    const StGLBoxPx aVPort = StWindow::stglViewport(ST_WIN_MASTER);
     StWindow::stglMakeCurrent(ST_WIN_MASTER);
-    myContext->stglResize(StWindow::getPlacement());
+    myContext->stglResizeViewport(aVPort);
     StWindow::signals.onRedraw(ST_DRAW_LEFT);
 
     if(!StWindow::isStereoOutput() || myIsBroken) {
@@ -701,12 +702,13 @@ void StOutInterlace::stglDraw() {
         return;
     }
 
+    /// TODO (Kirill Gavrilov#1) retrieve rectangle for HiDPI mode
     // reverse L/R according to window position
     bool isPixelReverse = false;
     const StRectI_t aWinRect = StWindow::getPlacement();
 
     // resize FBO
-    if(!myFrmBuffer->initLazy(*myContext, aWinRect.width(), aWinRect.height(), StWindow::hasDepthBuffer())) {
+    if(!myFrmBuffer->initLazy(*myContext, aVPort.width(), aVPort.height(), StWindow::hasDepthBuffer())) {
         myMsgQueue->pushError(stCString("Interlace output - critical error:\nFrame Buffer Object resize failed!"));
         myIsBroken = true;
         return;
@@ -752,17 +754,15 @@ void StOutInterlace::stglDraw() {
     myQuadTexCoordBuf.init(*myContext, aTCoords);
 
     // draw into virtual frame buffer
-    GLint aVPort[4]; // real window viewport
-    myContext->core20fwd->glGetIntegerv(GL_VIEWPORT, aVPort);
     myFrmBuffer->setupViewPort(*myContext); // we set TEXTURE sizes here
     myFrmBuffer->bindBuffer(*myContext);
         StWindow::signals.onRedraw(ST_DRAW_RIGHT);
     myFrmBuffer->unbindBuffer(*myContext);
-    myContext->core20fwd->glViewport(aVPort[0], aVPort[1], aVPort[2], aVPort[3]);
 
     myContext->core20fwd->glDisable(GL_DEPTH_TEST);
     myContext->core20fwd->glDisable(GL_BLEND);
 
+    myContext->stglResizeViewport(aVPort);
     myFrmBuffer->bindTexture(*myContext);
     const StHandle<StProgramFB>& aProgram = isPixelReverse ? myGlProgramsRev[myDevice] : myGlPrograms[myDevice];
     aProgram->use(*myContext);

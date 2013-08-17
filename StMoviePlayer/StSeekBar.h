@@ -49,7 +49,7 @@ class ST_LOCAL StSeekBar : public StGLWidget {
         myProgress = theProgress;
     }
 
-    virtual void stglResize(const StRectI_t& winRectPx);
+    virtual void stglResize();
     virtual bool stglInit();
     virtual void stglDraw(unsigned int view);
 

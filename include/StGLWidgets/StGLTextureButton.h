@@ -56,7 +56,7 @@ class StGLTextureButton : public StGLWidget {
     ST_CPPEXPORT void setTexturePath(const StString* theTexturesPaths,
                                      const size_t    theCount);
 
-    ST_CPPEXPORT virtual void stglResize(const StRectI_t& winRectPx);
+    ST_CPPEXPORT virtual void stglResize();
     ST_CPPEXPORT virtual bool stglInit();
     ST_CPPEXPORT virtual void stglDraw(unsigned int view);
 
