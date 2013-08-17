@@ -451,6 +451,12 @@ class StWindow {
      */
     ST_CPPEXPORT double getEventTime(const uint32_t theTime) const;
 
+    /**
+     * Convert rectangle from desktop units into backing store units (pixels).
+     */
+    ST_CPPEXPORT void convertRectToBacking(StGLBoxPx& theRect,
+                                           const int  theWinId);
+
         private: //! @name private fields
 
     StWindowImpl*        myWin;       //!< window implementation class - we hide implementation details since them too platform-specific

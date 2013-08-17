@@ -702,10 +702,15 @@ void StOutInterlace::stglDraw() {
         return;
     }
 
-    /// TODO (Kirill Gavrilov#1) retrieve rectangle for HiDPI mode
     // reverse L/R according to window position
     bool isPixelReverse = false;
     const StRectI_t aWinRect = StWindow::getPlacement();
+    StGLBoxPx aBackStore;
+    aBackStore.x()      = aWinRect.left();
+    aBackStore.y()      = aWinRect.top();
+    aBackStore.width()  = aWinRect.width();
+    aBackStore.height() = aWinRect.height();
+    convertRectToBacking(aBackStore, ST_WIN_MASTER);
 
     // resize FBO
     if(!myFrmBuffer->initLazy(*myContext, aVPort.width(), aVPort.height(), StWindow::hasDepthBuffer())) {
@@ -715,7 +720,7 @@ void StOutInterlace::stglDraw() {
     }
 
     // odd vertically?
-    if(!StWindow::isFullScreen() && aWinRect.bottom() % 2 == 1) {
+    if(!StWindow::isFullScreen() && (aBackStore.y() + aBackStore.height()) % 2 == 1) {
         switch(myDevice) {
             case DEVICE_CHESSBOARD:
             case DEVICE_HINTERLACE:
@@ -725,7 +730,7 @@ void StOutInterlace::stglDraw() {
     }
 
     // odd horizontally?
-    if(!StWindow::isFullScreen() && aWinRect.left() % 2 == 1) {
+    if(!StWindow::isFullScreen() && aBackStore.x() % 2 == 1) {
         switch(myDevice) {
             case DEVICE_CHESSBOARD:
             case DEVICE_VINTERLACE:
