@@ -45,6 +45,11 @@ static LRESULT CALLBACK stWndProcWrapper(HWND in_hWnd, UINT uMsg, WPARAM wParam,
     }
 }
 
+void StWindowImpl::convertRectToBacking(StGLBoxPx& /*theRect*/,
+                                        const int  /*theWinId*/) const {
+    // should be implemented support for Windows 8.1
+}
+
 bool StWindowImpl::create() {
     myKeysState.reset();
     myInitState = STWIN_INITNOTSTART;

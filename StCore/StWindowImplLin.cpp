@@ -85,6 +85,11 @@ namespace {
 
 };
 
+void StWindowImpl::convertRectToBacking(StGLBoxPx& ,
+                                        const int  ) const {
+    // there no any HiDPI API in Linux... yet
+}
+
 // function create GUI window
 bool StWindowImpl::create() {
     myKeysState.reset();
