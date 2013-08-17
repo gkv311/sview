@@ -1423,12 +1423,19 @@ int StMoviePlayer::beginRequest(mg_connection*         theConnection,
     } else if(anURI.isEquals(stCString("/mute"))) {
         invokeAction(Action_AudioMute);
         aContent = "audio mute/unmute...";
+    } else if(anURI.isEquals(stCString("/vol"))) {
+        StCLocale aCLocale;
+        const long aVol = stStringToLong(aQuery.toCString(), 10, aCLocale);
+        params.AudioGain->setValue(volumeToGain(params.AudioGain, GLfloat(aVol) * 0.01f));
+        aContent = "audio set volume...";
     } else if(anURI.isEquals(stCString("/fullscr_win"))) {
         invokeAction(Action_Fullscreen);
         aContent = "switch fullscreen/windowed...";
     } else if(anURI.isEquals(stCString("/current"))) {
         if(aQuery.isEquals(stCString("id"))) {
-            aContent = StString(myPlayList->getSerial()) + ":" + myPlayList->getCurrentId();
+            aContent = StString(myPlayList->getSerial())
+                     + ":" + myPlayList->getCurrentId()
+                     + ":" + int(gainToVolume(params.AudioGain) * 100.0f);
         } else if(aQuery.isEquals(stCString("title"))) {
             aContent = myPlayList->getCurrentTitle();
         }

@@ -5,8 +5,11 @@
 
 <script>
 
+var isFirefox = typeof InstallTrigger !== 'undefined';
+
 var myPlayItem   = -1; // currently played item id within playlist
-var myListSerial = -1; // playlist serail number
+var myListSerial = -1; // playlist serial number
+var myVolume     = -1; // volume
 var myList;            // playlist content
 var myOffCount   = 0;  // offline counter
 
@@ -23,7 +26,69 @@ function doListPrev()  { postRequest('prev',        function() {}, true); }
 function doListNext()  { postRequest('next',        function() {}, true); }
 function doFullWin()   { postRequest('fullscr_win', function() {}, true); }
 function doAudioMute() { postRequest('mute',        function() {}, true); }
+function doAudioVol()  { postRequest('vol?'  + myVolume,   function() {}, true); }
 function doListItem()  { postRequest('item?' + this.myPos, function() {}, true); }
+
+function getAbsolutePosition(theElement) {
+  var aPos = { x: theElement.offsetLeft, y: theElement.offsetTop };
+  if(theElement.offsetParent) {
+    var aTmp = getAbsolutePosition(theElement.offsetParent);
+    aPos.x += aTmp.x;
+    aPos.y += aTmp.y;
+  }
+  return aPos;
+}
+
+function getRelativeCoordinates(theEvent, theReference) {
+  var x, y;
+  theEvent = theEvent || window.event;
+  var el = theEvent.target || theEvent.srcElement;
+
+  if(!window.opera && typeof theEvent.offsetX != 'undefined') {
+    // Use offset coordinates and find common offsetParent
+    var aPos = { x: theEvent.offsetX, y: theEvent.offsetY };
+
+    // Send the coordinates upwards through the offsetParent chain.
+    var e = el;
+    while(e) {
+      e.mouseX = aPos.x;
+      e.mouseY = aPos.y;
+      aPos.x += e.offsetLeft;
+      aPos.y += e.offsetTop;
+      e = e.offsetParent;
+    }
+
+    // Look for the coordinates starting from the reference element.
+    var e = theReference;
+    var anOffset = { x: 0, y: 0 }
+    while(e) {
+      if(typeof e.mouseX != 'undefined') {
+        x = e.mouseX - anOffset.x;
+        y = e.mouseY - anOffset.y;
+        break;
+      }
+      anOffset.x += e.offsetLeft;
+      anOffset.y += e.offsetTop;
+      e = e.offsetParent;
+    }
+
+    // reset stored coordinates
+    e = el;
+    while(e) {
+      e.mouseX = undefined;
+      e.mouseY = undefined;
+      e = e.offsetParent;
+    }
+  } else {
+    // absolute coordinates
+    var aPos = getAbsolutePosition(theReference);
+    x = theEvent.pageX - aPos.x;
+    y = theEvent.pageY - aPos.y;
+  }
+
+  // Subtract distance to middle
+  return { x: x, y: y };
+}
 
 function doUpdateTitle() {
   postRequest('current?title', function() {
@@ -106,6 +171,62 @@ function refreshPlaylist() {
   }, true);
 }
 
+function onVolumeClick(theEvent) {
+  var aPos = getRelativeCoordinates(theEvent, this);
+  myVolume = aPos.x > 98 ? 100 : aPos.x;
+  drawVolume();
+  doAudioVol();
+}
+
+function onVolumeWheel(theEvent) {
+  var aDelta = theEvent.detail ? -theEvent.detail : theEvent.wheelDelta / 120;
+  var aVolume = myVolume + Number((aDelta > 0) ? 1 : -1);
+  if(aVolume < 0 || aVolume > 150 || myVolume < 0) {
+    return;
+  }
+
+  myVolume = aVolume;
+  drawVolume();
+  doAudioVol();
+
+  if(theEvent.preventDefault) {
+    theEvent.preventDefault();
+  } else {
+    return false;
+  }
+}
+
+function drawVolume() {
+  var aCanvas = document.getElementById('stVolumeCanvas');
+  var aCtx    = aCanvas.getContext('2d');
+  var aWidth  = 100;
+
+  aCtx.beginPath();
+  aCtx.rect(1, 1, aWidth - 2, 18);
+  aCtx.fillStyle = 'yellow';
+  aCtx.fill();
+
+  aCtx.lineWidth = 1;
+  aCtx.strokeStyle = 'black';
+  aCtx.stroke();
+
+  var aFilled = (myVolume / 100) * (aWidth - 2);
+  aFilled = Math.max(aFilled, 0);
+  aFilled = Math.min(aFilled, aWidth - 2);
+
+  aCtx.beginPath();
+  aCtx.rect(1, 1, aFilled, 18);
+  aCtx.fillStyle = 'blue';
+  aCtx.fill();
+
+  aCtx.font = 'bold 8pt Calibri';
+  aCtx.textAlign = 'center';
+  aCtx.fillStyle = 'black';
+  aCtx.fillText(myVolume + '%', aWidth / 2 + 1, 15);
+  aCtx.fillStyle = myVolume <= 100 ? 'white' : 'red';
+  aCtx.fillText(myVolume + '%', aWidth / 2, 14);
+}
+
 function doRefresh() {
   postRequest('current?id', function() {
     if(this.readyState != 4 || this.status != 200) {
@@ -123,6 +244,12 @@ function doRefresh() {
     var aCurrArr = this.responseText.split(":");
     var aCurrListId = aCurrArr[0];
     var aCurrItemId = aCurrArr[1];
+    var aCurrVolume = Number(aCurrArr[2]);
+    if(aCurrVolume != myVolume) {
+      myVolume = aCurrVolume;
+      drawVolume();
+    }
+
     if(aCurrListId == myListSerial
     && aCurrItemId == myPlayItem) {
       return;
@@ -187,13 +314,23 @@ window.setInterval(function() { doRefresh() }, 2000);
     <td><a href="javascript:void(0)" onclick="doListPrev();return false;"> <img src='textures/moviePrior.png'   width='64' height='64' alt='Previous'   /></a></td>
     <td><a href="javascript:void(0)" onclick="doListNext();return false;"> <img src='textures/movieNext.png'    width='64' height='64' alt='Next'       /></a></td>
     <td><a href="javascript:void(0)" onclick="doFullWin();return false;">  <img src='textures/movieFullScr.png' width='64' height='64' alt='Fullscreen/Windowed' /></a></td>
+    <td><canvas id="stVolumeCanvas" width="100" height="20"></canvas></td>
     <td><button onclick="doAudioMute()">Mute</button></td>
-    <td><button onclick="doRefresh()">Refresh</button></td>
   </tr></table>
 </td></tr></table>
 
 <div id='stPlaylist'></div>
 <script>
+  // setup mouse events
+  var aVolCtrl = document.getElementById('stVolumeCanvas');
+  aVolCtrl.ondragstart = function() { return false; }; // block dragging
+  aVolCtrl.myMouseTrack = 0;
+  aVolCtrl.onmousedown  = onVolumeClick;
+  if(aVolCtrl.addEventListener) {
+    aVolCtrl.addEventListener(isFirefox ? 'DOMMouseScroll' : 'mousewheel', onVolumeWheel, false);
+  }
+
+  // first update
   doRefresh();
 </script>
 

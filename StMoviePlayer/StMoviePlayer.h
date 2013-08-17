@@ -258,6 +258,15 @@ class StMoviePlayer : public StApplication {
         return myLangMap->getValue(theId);
     }
 
+    ST_LOCAL static GLfloat gainToVolume(const StHandle<StFloat32Param>& theGain) {
+        return (theGain->getMinValue() - theGain->getValue()) / theGain->getMinValue();
+    }
+
+    ST_LOCAL static GLfloat volumeToGain(const StHandle<StFloat32Param>& theGain,
+                                         const GLfloat                   theVol) {
+        return theGain->getMinValue() - theVol * theGain->getMinValue();
+    }
+
         private: //! @name private callback Slots
 
     ST_LOCAL void doScaleGui(const int32_t );
