@@ -18,7 +18,7 @@ namespace {
     static volatile size_t ST_WIDGET_RES_COUNTER = 0;
     static const StString CLASS_NAME("StGLRootWidget");
 
-    static const int THE_ICON_SIZES[StGLRootWidget::IconSizeNb + 1] {
+    static const int THE_ICON_SIZES[StGLRootWidget::IconSizeNb + 1] = {
         16,
         24,
         32,

@@ -128,7 +128,7 @@ bool StGLTexture::getDataFormat(const StImagePlane& theData,
     }
 }
 
-#ifdef __ST_DEBUG__
+#if defined(__ST_DEBUG__) && defined(__ST_DEBUG_TEXTURES__)
 /**
  * Dummy function to display texture internal format.
  */
