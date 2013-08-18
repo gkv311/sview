@@ -47,13 +47,15 @@
 
         /**
          * Switch into fullscreen state.
+         * This method should be called from main thread!
          */
-        - (void ) goToFullscreen;
+        - (void ) goToFullscreen: (id ) theSender;
 
         /**
          * Switch into windowed state.
+         * This method should be called from main thread!
          */
-        - (void ) goToWindowed;
+        - (void ) goToWindowed: (id ) theSender;
 
     @end
 #else

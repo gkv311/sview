@@ -365,7 +365,13 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
         myRectFull = aMon.getVRect();
 
         if(attribs.Slave != StWinSlave_slaveOff && mySlave.hViewGl != NULL) {
-            [mySlave.hViewGl goToFullscreen];
+            if([NSThread isMainThread]) {
+                [mySlave.hViewGl goToFullscreen: NULL];
+            } else {
+                [mySlave.hViewGl performSelectorOnMainThread: @selector(goToFullscreen:)
+                                                  withObject: NULL
+                                               waitUntilDone: YES];
+            }
         } else if(attribs.Split == StWinSlave_splitHorizontal) {
             myTiledCfg = TiledCfg_MasterSlaveX;
             myRectFull.right() -= myRectFull.width() / 2;
@@ -375,15 +381,33 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
         }
 
         if(myMaster.hViewGl != NULL) {
-            [myMaster.hViewGl goToFullscreen];
+            if([NSThread isMainThread]) {
+                [myMaster.hViewGl goToFullscreen: NULL];
+            } else {
+                [myMaster.hViewGl performSelectorOnMainThread: @selector(goToFullscreen:)
+                                                   withObject: NULL
+                                                waitUntilDone: YES];
+            }
         }
     } else {
         myTiledCfg = TiledCfg_Separate;
         if(attribs.Slave != StWinSlave_slaveOff && mySlave.hViewGl != NULL) {
-            [mySlave.hViewGl goToWindowed];
+            if([NSThread isMainThread]) {
+                [mySlave.hViewGl goToWindowed: NULL];
+            } else {
+                [mySlave.hViewGl performSelectorOnMainThread: @selector(goToWindowed:)
+                                                  withObject: NULL
+                                               waitUntilDone: YES];
+            }
         }
         if(myMaster.hViewGl != NULL) {
-            [myMaster.hViewGl goToWindowed];
+            if([NSThread isMainThread]) {
+                [myMaster.hViewGl goToWindowed: NULL];
+            } else {
+                [myMaster.hViewGl performSelectorOnMainThread: @selector(goToWindowed:)
+                                                   withObject: NULL
+                                                waitUntilDone: YES];
+            }
         }
     }
 }

@@ -358,13 +358,13 @@
         myStWin->postKeyUp(myStEvent);
     }
 
-    - (void ) goToFullscreen {
+    - (void ) goToFullscreen: (id ) theSender {
         if(![self isInFullScreenMode]) {
             [self enterFullScreenMode: [[self window] screen] withOptions: myFullScrOpts];
         }
     }
 
-    - (void ) goToWindowed {
+    - (void ) goToWindowed: (id ) theSender {
         if([self isInFullScreenMode]) {
             [self exitFullScreenModeWithOptions: myFullScrOpts];
             [[self window] makeFirstResponder: self];
