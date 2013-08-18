@@ -181,7 +181,7 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     mySettings->loadParam (ST_SETTING_SCALE_ADJUST, params.ScaleAdjust);
     params.ScaleAdjust->signals.onChanged = stSlot(this, &StMoviePlayer::doScaleGui);
     params.ScaleHiDPI       = new StFloat32Param(1.0f,       // initial value
-                                                 1.0f, 3.0f, // min, max values
+                                                 0.5f, 3.0f, // min, max values
                                                  1.0f,       // default value
                                                  1.0f,       // incremental step
                                                  0.001f);    // equality tolerance

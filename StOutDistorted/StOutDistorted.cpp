@@ -279,6 +279,7 @@ StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
   //myBarrelCoef(1.0f, 0.18f, 0.115f, 0.0387f),
   myChromAb(0.996f, -0.004f, 1.014f, 0.0f),
   //myChromAb(1.0f, 0.0f, 1.0f, 0.0f),
+  myToReduceGui(false),
   myToShowCursor(true),
   myToSavePlacement(theParentWindow == (StNativeWin_t )NULL),
   myToCompressMem(myInstancesNb.increment() > 1),
@@ -484,6 +485,16 @@ GLfloat StOutDistorted::getLensDist() const {
     return (myIsStereoOn && params.Barrel->getValue()) ? 0.1453f : 0.0f;
 }
 
+GLfloat StOutDistorted::getScaleFactor() const {
+    if(!myToReduceGui
+    || !myIsStereoOn
+    || !params.Barrel->getValue()) {
+        return StWindow::getScaleFactor();
+    }
+
+    return 0.8f;
+}
+
 void StOutDistorted::setFullScreen(const bool theFullScreen) {
     if(!theFullScreen) {
         myMargins = StRectI_t();
@@ -559,6 +570,7 @@ void StOutDistorted::stglDraw() {
     GLint aFrSizeX = aViewPortL.width();
     GLint aFrSizeY = aViewPortL.height();
     if(params.Barrel->getValue()) {
+        myToReduceGui = aFrSizeX <= 640;
         aFrSizeX = int(std::ceil(double(aFrSizeX) * 1.25) + 0.5);
         aFrSizeY = int(std::ceil(double(aFrSizeY) * 1.25) + 0.5);
     }

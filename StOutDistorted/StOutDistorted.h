@@ -111,6 +111,11 @@ class StOutDistorted : public StWindow {
 
     ST_CPPEXPORT virtual GLfloat getLensDist() const;
 
+    /**
+     * Downscale GUI for low-resolution Oculus Rift prototype
+     */
+    ST_CPPEXPORT virtual GLfloat getScaleFactor() const;
+
         private:
 
     /**
@@ -165,6 +170,7 @@ class StOutDistorted : public StWindow {
 
     StRectI_t                 myBarMargins;      //!< GUI margins
 
+    bool                      myToReduceGui;     //!< scale down GUI
     bool                      myToShowCursor;    //!< cursor visibility flag
     bool                      myToSavePlacement; //!< to save window position on exit
     bool                      myToCompressMem;   //!< reduce memory usage
