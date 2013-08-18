@@ -129,16 +129,11 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
     // alternatively we can add method applicationDidChangeScreenParameters to application delegate
     CGDisplayRegisterReconfigurationCallback(stDisplayChangeCallBack, this);
 
-    // read system uptime
-    struct timeval aBootTime;
-    size_t aBTimeSize = sizeof(aBootTime);
-    int anItems[2] = { CTL_KERN, KERN_BOOTTIME };
-    if(sysctl(anItems, 2, &aBootTime, &aBTimeSize, NULL, 0) >= 0) {
-        const time_t aTimeBoot = aBootTime.tv_sec;
-        const time_t aTimeCurr = time(NULL);
-        const time_t aTimeDiff = aTimeCurr - aTimeBoot;
-        myEventsTimer.restart(double(aTimeDiff) * 1000000.0); // convert to microseconds
-    }
+    // use function from CoreServices to retrieve system uptime
+    const Nanoseconds anUpTimeNano = AbsoluteToNanoseconds(UpTime());
+    // convert to microseconds
+    const double      anUpTime     = double((*(uint64_t* )&anUpTimeNano) / 1000);
+    myEventsTimer.restart(anUpTime);
 #elif (defined(__linux__) || defined(__linux))
     // read system uptime (in seconds)
     struct sysinfo aSysInfo;
