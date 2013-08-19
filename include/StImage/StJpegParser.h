@@ -102,6 +102,14 @@ class StJpegParser {
         return StHandle<StJpegParser::Image>();
     }
 
+    inline unsigned char* getData() const {
+        return myData;
+    }
+
+    inline size_t getDataSize() const {
+        return myLength;
+    }
+
         private:
 
     /**

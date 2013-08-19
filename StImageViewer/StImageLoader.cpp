@@ -106,7 +106,9 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         theParams->setZRotateZero((GLfloat )StJpegParser::getRotationAngle(anOrient));
         anImg1->getParallax(anHParallax);
         if(!stImageL->load(fileToLoadPath, StImageFile::ST_TYPE_JPEG,
-                           (uint8_t* )anImg1->myData, (int )anImg1->myLength)) {
+                           (uint8_t* )anImg1->myData, (int )anImg1->myLength)
+        && !stImageL->load(fileToLoadPath, StImageFile::ST_TYPE_JPEG,
+                           (uint8_t* )aJpegParser.getData(), (int )aJpegParser.getDataSize())) {
             processLoadFail(formatError(fileToLoadPath, stImageL->getState()));
             return false;
         }
