@@ -153,8 +153,8 @@ static bool convert(const StImage& theImageFrom, PixelFormat theFormatFrom,
 void StAVImage::close() {
     if(codec != NULL && codecCtx != NULL) {
         avcodec_close(codecCtx); // close VIDEO codec
-        codec = NULL;
     }
+    codec = NULL;
     if(formatCtx != NULL) {
     #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 17, 0))
         avformat_close_input(&formatCtx);
@@ -178,38 +178,6 @@ bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
     setState();
     close();
 
-    if(theImageType == ST_TYPE_NONE || !StFileNode::isFileExists(theFilePath)) {
-        // open image file and detect its type, its could be non local file!
-    #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 2, 0))
-        int avErrCode = avformat_open_input(&formatCtx, theFilePath.toCString(), imageFormat, NULL);
-    #else
-        int avErrCode = av_open_input_file(&formatCtx, theFilePath.toCString(), imageFormat, 0, NULL);
-    #endif
-        if(avErrCode != 0) {
-            setState(StString("AVFormat library, couldn't open image file. Error: ") + stAV::getAVErrorDescription(avErrCode));
-            close();
-            return false;
-        }
-
-        // dump information about file onto standard output (console)
-        //dump_format(formatCtx, 0, strLoadVideo.c_str(), false);
-        unsigned int streamId = 0;
-        for(; streamId < formatCtx->nb_streams; ++streamId) {
-            if(formatCtx->streams[streamId]->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
-                break;
-            }
-        }
-
-        if(streamId >= formatCtx->nb_streams) {
-            setState("AVFormat library, couldn't find image stream");
-            close();
-            return false;
-        }
-
-        // find the decoder for the video stream
-        codecCtx = formatCtx->streams[streamId]->codec;
-    }
-
     switch(theImageType) {
         case ST_TYPE_PNG:
         case ST_TYPE_PNS: {
@@ -222,14 +190,46 @@ bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
             codec = avcodec_find_decoder_by_name("mjpeg");
             break;
         }
-        case ST_TYPE_NONE: {
-            codec = avcodec_find_decoder(codecCtx->codec_id);
+        default: {
             break;
         }
-        default: {
-            setState(StString("StAVImage, unsupported image type id #") + theImageType + '!');
+    }
+
+    if(theImageType == ST_TYPE_NONE || !StFileNode::isFileExists(theFilePath)) {
+        // open image file and detect its type, its could be non local file!
+    #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 2, 0))
+        int avErrCode = avformat_open_input(&formatCtx, theFilePath.toCString(), imageFormat, NULL);
+    #else
+        int avErrCode = av_open_input_file(&formatCtx, theFilePath.toCString(), imageFormat, 0, NULL);
+    #endif
+        if(avErrCode != 0
+        || formatCtx->nb_streams < 1
+        || formatCtx->streams[0]->codec->codec_id == 0) {
+        #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 17, 0))
+            avformat_close_input(&formatCtx);
+        #else
+            av_close_input_file(formatCtx);
+            formatCtx = NULL;
+        #endif
+
+        #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 2, 0))
+            avErrCode = avformat_open_input(&formatCtx, theFilePath.toCString(), NULL, NULL);
+        #else
+            avErrCode = av_open_input_file(&formatCtx, theFilePath.toCString(), NULL, 0, NULL);
+        #endif
+        }
+
+        if(avErrCode != 0
+        || formatCtx->nb_streams < 1) {
+            setState(StString("AVFormat library, couldn't open image file. Error: ") + stAV::getAVErrorDescription(avErrCode));
             close();
             return false;
+        }
+
+        // find the decoder for the video stream
+        codecCtx = formatCtx->streams[0]->codec;
+        if(theImageType == ST_TYPE_NONE) {
+            codec = avcodec_find_decoder(codecCtx->codec_id);
         }
     }
 
