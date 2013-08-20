@@ -61,6 +61,17 @@
         // reset any pressed keys
         myStWin->myKeysState.reset();
         [super resignKeyWindow];
+
+        // release topmost state
+        [self setLevel: NSNormalWindowLevel];
+    }
+
+    - (void ) becomeKeyWindow {
+        [super becomeKeyWindow];
+        if(myStWin->isFullScreen()) {
+            // restore topmost state
+            [self setLevel: NSPopUpMenuWindowLevel];
+        }
     }
 
 @end
