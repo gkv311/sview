@@ -41,7 +41,9 @@
         if(self == NULL) {
             return NULL;
         }
-        myStWin = theStWin;
+        myStWin        = theStWin;
+        myWinStyle     = 0;
+        myIsFullscreen = false;
 
         // enable HiDPI mode
         if([self respondsToSelector: @selector(setWantsBestResolutionOpenGLSurface:)]) {
@@ -359,16 +361,59 @@
     }
 
     - (void ) goToFullscreen: (id ) theSender {
-        if(![self isInFullScreenMode]) {
-            [self enterFullScreenMode: [[self window] screen] withOptions: myFullScrOpts];
+        if(myStWin->attribs.IsExclusiveFullScr) {
+            if(![self isInFullScreenMode]) {
+                [self enterFullScreenMode: [[self window] screen] withOptions: myFullScrOpts];
+            }
+            return;
+        } else if(myIsFullscreen) {
+            return;
         }
+
+        const bool isSlave = (self != myStWin->myMaster.hViewGl);
+        const StMonitor& aMon = (myStWin->myMonMasterFull == -1)
+                              ? myStWin->myMonitors[myStWin->myRectNorm.center()]
+                              : myStWin->myMonitors[myStWin->myMonMasterFull];
+        StRectI_t aRect = aMon.getVRect();
+        if(isSlave) {
+            if(myStWin->attribs.Slave == StWinSlave_slaveOff
+            || !myStWin->isSlaveIndependent()
+            || myStWin->myMonitors.size() == 1) {
+                return;
+            }
+
+            aRect.left()   = myStWin->getSlaveLeft();
+            aRect.top()    = myStWin->getSlaveTop();
+            aRect.right()  = aRect.left() + myStWin->myRectFull.width();
+            aRect.bottom() = aRect.top()  + myStWin->myRectFull.height();
+        }
+        NSRect aFullRect = myStWin->myCocoaCoords.normalToCocoa(aRect);
+
+        NSWindow* aWin = [self window];
+        myRectWindowed = [aWin frame];
+        myIsFullscreen = true;
+        myWinStyle     = [aWin styleMask];
+        [aWin setStyleMask: NSBorderlessWindowMask];
+        [aWin setLevel: NSPopUpMenuWindowLevel];
+        [aWin setFrame: aFullRect display: YES];
+        [aWin makeFirstResponder: self];
     }
 
     - (void ) goToWindowed: (id ) theSender {
         if([self isInFullScreenMode]) {
             [self exitFullScreenModeWithOptions: myFullScrOpts];
             [[self window] makeFirstResponder: self];
+            return;
+        } else if(!myIsFullscreen) {
+            return;
         }
+
+        NSWindow* aWin = [self window];
+        myIsFullscreen = false;
+        [aWin setStyleMask: myWinStyle];
+        [aWin setLevel: NSNormalWindowLevel];
+        [aWin setFrame: myRectWindowed display: YES];
+        [aWin makeFirstResponder: self];
     }
 
     - (NSDragOperation ) draggingEntered: (id <NSDraggingInfo> ) theSender {

@@ -86,6 +86,7 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
     attribs.IsGlStereo     = false;
     attribs.GlDepthSize    = 16;
     attribs.IsFullScreen   = false;
+    attribs.IsExclusiveFullScr = false;
     attribs.IsHidden       = false;
     attribs.ToHideCursor   = false;
     attribs.ToBlockSleepSystem  = false;

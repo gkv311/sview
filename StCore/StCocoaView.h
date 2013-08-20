@@ -31,9 +31,12 @@
 
     @interface StCocoaView : NSOpenGLView
     {
-        StWindowImpl* myStWin;       //!< pointer to StWindowImpl instance
-        NSDictionary* myFullScrOpts; //!< options to switch into fullscreen mode
-        StEvent       myStEvent;
+        StWindowImpl* myStWin;        //!< pointer to StWindowImpl instance
+        NSDictionary* myFullScrOpts;  //!< options to switch into fullscreen mode
+        StEvent       myStEvent;      //!< temporary variable to generate events
+        NSRect        myRectWindowed; //!< remember window position in windowed mode
+        NSUInteger    myWinStyle;     //!< remember window style in windowed mode
+        bool          myIsFullscreen; //!< cached fullscreen state
     }
 
         /**
