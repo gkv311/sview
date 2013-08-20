@@ -206,7 +206,14 @@ void StWindowImpl::close() {
 }
 
 double StWindowImpl::getEventTime() const {
+#ifdef __APPLE__
+    // use function from CoreServices to retrieve system uptime
+    const Nanoseconds anUpTimeNano = AbsoluteToNanoseconds(UpTime());
+    // convert to microseconds
+    return double((*(uint64_t* )&anUpTimeNano) / 1000) * 0.000001;
+#else
     return myEventsTimer.getElapsedTime();
+#endif
 }
 
 double StWindowImpl::getEventTime(const uint32_t theTime) const {
