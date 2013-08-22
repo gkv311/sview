@@ -117,6 +117,18 @@ void StSearchMonitors::findMonitorsWinAPI() {
         aScale = float(aDpiX) / 96.0f; // 96 is 100% in Windows
     }
 
+    // load HiDPI API for Win8.1+
+    typedef HRESULT (WINAPI *GetScaleFactorForMonitor_t)(HMONITOR   theMon,
+                                                         int*       theScale);
+    typedef HRESULT (WINAPI *RegisterScaleChangeEvent_t)(HANDLE     theEvent,
+                                                         DWORD_PTR* theCookie);
+    typedef HRESULT (WINAPI *UnregisterScaleChangeEvent_t)(DWORD_PTR theCookie);
+    HMODULE aShcoreLib = GetModuleHandleW(L"Shcore");
+    GetScaleFactorForMonitor_t aMonScaleFunc = NULL;
+    if(aShcoreLib != NULL) {
+        aMonScaleFunc = (GetScaleFactorForMonitor_t )GetProcAddress(aShcoreLib, "GetScaleFactorForMonitor");
+    }
+
     // collect system and monitor information, and display it using a message box
     DISPLAY_DEVICEW dispDevice; dispDevice.cb = sizeof(dispDevice);
     DWORD dev = 0;  // device index
@@ -170,6 +182,12 @@ void StSearchMonitors::findMonitorsWinAPI() {
             continue;
         }
         StMonitor aMon;
+
+        if(aMonScaleFunc != NULL) {
+            int aScalePercents = 100;
+            aMonScaleFunc(hMonitor, &aScalePercents);
+            aScale = float(aScalePercents) * 0.01f;
+        }
         aMon.setScale(aScale);
 
         // status flags: primary, disabled, removable
