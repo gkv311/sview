@@ -17,8 +17,17 @@ const StString& StGLDescription::getClassName() {
     return TheClassName;
 }
 
+StGLDescription::StGLDescription(StGLWidget* theParent)
+: StGLTextArea(theParent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+               theParent->getRoot()->scale(256),
+               theParent->getRoot()->scale(96)) {
+    myFormatter.setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+                               StGLTextFormatter::ST_ALIGN_Y_TOP);
+    setBorder(true);
+}
+
 StGLDescription::StGLDescription(StGLWidget* theParent,
-                                 const int&  theWidth)
+                                 const int   theWidth)
 : StGLTextArea(theParent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
                theWidth,
                theParent->getRoot()->scale(96)) {

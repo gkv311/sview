@@ -15,8 +15,13 @@ class StGLDescription : public StGLTextArea {
 
         public:
 
+    /**
+     * Creates description widget with default size 256x96.
+     */
+    ST_CPPEXPORT StGLDescription(StGLWidget* theParent);
+
     ST_CPPEXPORT StGLDescription(StGLWidget* theParent,
-                                 const int&  theWidth = 256);
+                                 const int   theWidth);
 
     ST_CPPEXPORT virtual ~StGLDescription();
 
@@ -31,4 +36,4 @@ class StGLDescription : public StGLTextArea {
 
 };
 
-#endif //__StGLDescription_h_
+#endif // __StGLDescription_h_
