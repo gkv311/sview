@@ -205,12 +205,14 @@ bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
         if(avErrCode != 0
         || formatCtx->nb_streams < 1
         || formatCtx->streams[0]->codec->codec_id == 0) {
-        #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 17, 0))
-            avformat_close_input(&formatCtx);
-        #else
-            av_close_input_file(formatCtx);
-            formatCtx = NULL;
-        #endif
+            if(formatCtx != NULL) {
+            #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 17, 0))
+                avformat_close_input(&formatCtx);
+            #else
+                av_close_input_file(formatCtx);
+                formatCtx = NULL;
+            #endif
+            }
 
         #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 2, 0))
             avErrCode = avformat_open_input(&formatCtx, theFilePath.toCString(), NULL, NULL);
