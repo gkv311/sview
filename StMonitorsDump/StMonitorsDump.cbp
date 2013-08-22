@@ -60,7 +60,7 @@
 					<Add library="nvapi" />
 				</Linker>
 				<ExtraCommands>
-					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;1' />
+					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /manifest &quot;..\dpiAware.manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;1' />
 				</ExtraCommands>
 			</Target>
 			<Target title="WIN_vc_x86_DEBUG">
@@ -96,7 +96,7 @@
 					<Add library="nvapi" />
 				</Linker>
 				<ExtraCommands>
-					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;1' />
+					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /manifest &quot;..\dpiAware.manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;1' />
 				</ExtraCommands>
 			</Target>
 			<Target title="WIN_vc_AMD64">
@@ -127,7 +127,7 @@
 					<Add library="nvapi64" />
 				</Linker>
 				<ExtraCommands>
-					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;1' />
+					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /manifest &quot;..\dpiAware.manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;1' />
 				</ExtraCommands>
 			</Target>
 			<Target title="LINUX_gcc">
