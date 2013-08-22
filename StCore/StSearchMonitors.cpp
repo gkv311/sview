@@ -107,6 +107,16 @@ void StSearchMonitors::findMonitorsBlind(const int rootX, const int rootY) {
 #ifdef _WIN32
 void StSearchMonitors::findMonitorsWinAPI() {
     int monCount = 0;
+
+    // retrieve global scale factor (deprecated since Win 8.1)
+    float aScale = 1.0f;
+    HDC aDeskCtx = GetDC(NULL);
+    if(aDeskCtx != NULL) {
+        const int aDpiX = GetDeviceCaps(aDeskCtx, LOGPIXELSX);
+        ReleaseDC(NULL, aDeskCtx);
+        aScale = float(aDpiX) / 96.0f; // 96 is 100% in Windows
+    }
+
     // collect system and monitor information, and display it using a message box
     DISPLAY_DEVICEW dispDevice; dispDevice.cb = sizeof(dispDevice);
     DWORD dev = 0;  // device index
@@ -159,12 +169,13 @@ void StSearchMonitors::findMonitorsWinAPI() {
         if(hMonitor == NULL) {
             continue;
         }
-        StMonitor stMon;
+        StMonitor aMon;
+        aMon.setScale(aScale);
 
         // status flags: primary, disabled, removable
         bool isPrimary = false;
         if(!(dispDevice.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP)) {
-            ///stMon.setDisabled(true);
+            ///aMon.setDisabled(true);
         } else if(dispDevice.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE) {
             isPrimary = true;
         }
@@ -173,15 +184,15 @@ void StSearchMonitors::findMonitorsWinAPI() {
         }
 
         StRectI_t stRect(monInfo.rcMonitor.top, monInfo.rcMonitor.bottom, monInfo.rcMonitor.left, monInfo.rcMonitor.right);
-        stMon.setVRect(stRect);
-        stMon.setId(monId);
-        stMon.setFreq((int )dm.dmDisplayFrequency);
+        aMon.setVRect(stRect);
+        aMon.setId(monId);
+        aMon.setFreq((int )dm.dmDisplayFrequency);
         // TODO
-        stMon.setFreqMax((int )dm.dmDisplayFrequency);
+        aMon.setFreqMax((int )dm.dmDisplayFrequency);
 
         // ddMon.DeviceString = "Plug and Play monitor"
         // ddMon.DeviceName = "\\.\DISPLAY2\Monitor0"
-        stMon.setName(StString() + (*ddMon.DeviceName ? ddMon.DeviceName : dispDevice.DeviceName));
+        aMon.setName(StString() + (*ddMon.DeviceName ? ddMon.DeviceName : dispDevice.DeviceName));
 
         // NOTE: we get wrong id here for second monitor on WinXP x64
         StString aPnpId;
@@ -200,9 +211,9 @@ void StSearchMonitors::findMonitorsWinAPI() {
         if(aPnpId.isEmpty()) {
           aPnpId = StString(ddMon.DeviceID);
         }
-        stMon.setPnPId(aPnpId);
-        stMon.setGpuName(StString(dispDevice.DeviceString));
-        add(stMon);
+        aMon.setPnPId(aPnpId);
+        aMon.setGpuName(StString(dispDevice.DeviceString));
+        add(aMon);
 
         // make primary display first in our list
         if(isPrimary && monCount != 0) {
