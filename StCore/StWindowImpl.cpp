@@ -111,6 +111,18 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
     myEventCursorShow = CreateEvent(0, true, false, NULL);
     myEventCursorHide = CreateEvent(0, true, false, NULL);
 
+    // Adjust system timer
+    // By default Windows2K+ timer has ugly precision
+    // Thus - Sleep(1) may be long 14ms!
+    // We force best available precision to make Sleep() more adequate
+    // This affect whole system while running application!
+    TIMECAPS aTimeCaps = {0, 0};
+    if(timeGetDevCaps(&aTimeCaps, sizeof(aTimeCaps)) == TIMERR_NOERROR) {
+        timeBeginPeriod(aTimeCaps.wPeriodMin);
+    } else {
+        timeBeginPeriod(1);
+    }
+
     // read system uptime (in milliseconds)
     if(StSys::isVistaPlus()) {
         HMODULE aKern32 = GetModuleHandleW(L"kernel32");
@@ -167,6 +179,14 @@ StWindowImpl::~StWindowImpl() {
     CloseHandle(myEventQuit);
     CloseHandle(myEventCursorShow);
     CloseHandle(myEventCursorHide);
+
+    // restore timer adjustments
+    TIMECAPS aTimeCaps = {0, 0};
+    if(timeGetDevCaps(&aTimeCaps, sizeof(aTimeCaps)) == TIMERR_NOERROR) {
+        timeEndPeriod(aTimeCaps.wPeriodMin);
+    } else {
+        timeEndPeriod(1);
+    }
 #endif
 
 #ifdef __APPLE__
