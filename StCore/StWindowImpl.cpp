@@ -113,15 +113,10 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
 
     // read system uptime (in milliseconds)
     if(StSys::isVistaPlus()) {
-        typedef ULONGLONG (WINAPI *GetTickCount64_t)();
         HMODULE aKern32 = GetModuleHandleW(L"kernel32");
-        GetTickCount64_t aFunc = (GetTickCount64_t )GetProcAddress(aKern32, "GetTickCount64");
-        const uint64_t anUptime = (aFunc != NULL) ? aFunc() : (uint64_t )GetTickCount();
-        myEventsTimer.restart(double(anUptime) * 1000.0); // convert to microseconds
-    } else {
-        const uint32_t anUptime = GetTickCount();
-        myEventsTimer.restart(double(anUptime) * 1000.0); // convert to microseconds
+        myGetTick64 = (GetTickCount64_t )GetProcAddress(aKern32, "GetTickCount64");
     }
+    myEventsTimer.restart(getUptime() * 1000.0); // convert to microseconds
 #endif
 
     myMonitors.init();
@@ -140,6 +135,19 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
     struct sysinfo aSysInfo;
     ::sysinfo(&aSysInfo);
     myEventsTimer.restart(double(aSysInfo.uptime) * 1000000.0); // convert to microseconds
+#endif
+}
+
+double StWindowImpl::getUptime() const {
+#ifdef _WIN32
+    const uint64_t anUptime = (myGetTick64 != NULL) ? myGetTick64() : (uint64_t )GetTickCount();
+    return double(anUptime) * 0.001;
+#elif defined(__APPLE__)
+    // use function from CoreServices to retrieve system uptime
+    const Nanoseconds anUpTimeNano = AbsoluteToNanoseconds(UpTime());
+    return double((*(uint64_t* )&anUpTimeNano) / 1000) * 0.000001;
+#else
+    return 0.0;
 #endif
 }
 
@@ -206,11 +214,8 @@ void StWindowImpl::close() {
 }
 
 double StWindowImpl::getEventTime() const {
-#ifdef __APPLE__
-    // use function from CoreServices to retrieve system uptime
-    const Nanoseconds anUpTimeNano = AbsoluteToNanoseconds(UpTime());
-    // convert to microseconds
-    return double((*(uint64_t* )&anUpTimeNano) / 1000) * 0.000001;
+#if defined(_WIN32) || defined(__APPLE__)
+    return getUptime();
 #else
     return myEventsTimer.getElapsedTime();
 #endif

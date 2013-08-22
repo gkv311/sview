@@ -110,12 +110,17 @@ class StWindowImpl {
     ST_LOCAL void swapEventsBuffers();
 
     /**
-     * @return upload time in seconds
+     * @return uptime in seconds using system API
+     */
+    ST_LOCAL double getUptime() const;
+
+    /**
+     * @return uptime in seconds for event
      */
     ST_LOCAL double getEventTime() const;
 
     /**
-     * @return upload time in seconds
+     * @return uptime in seconds (convert from 32-bit integer)
      */
     ST_LOCAL double getEventTime(const uint32_t theTime) const;
 
@@ -262,6 +267,9 @@ class StWindowImpl {
     TiledCfg           myTiledCfg;        //!< tiles configuration (multiple viewports within the same window)
 
 #ifdef _WIN32
+    typedef ULONGLONG (WINAPI *GetTickCount64_t)();
+    GetTickCount64_t   myGetTick64;       //!< retrieve uptime without 49 days overflow problem
+
     POINT              myPointTest;       //!< temporary point object to verify cached window position
     StHandle<StThread> myMsgThread;       //!< dedicated thread for window message loop
     StCondition        myEventInitWin;    //!< special event waited from createWindows() thread
@@ -331,4 +339,4 @@ class StWindowImpl {
 
 };
 
-#endif //__StWindowImpl_h_
+#endif // __StWindowImpl_h_
