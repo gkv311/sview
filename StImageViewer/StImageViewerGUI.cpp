@@ -673,7 +673,7 @@ void StImageViewerGUI::stglResize(const StGLBoxPx& theRectPx) {
 
     if(myPanelUpper != NULL) {
         myPanelUpper->changeRectPx().right() = aSizeX;
-        myIsMinimalGUI = (aSizeY < 400 || aSizeX < 400);
+        myIsMinimalGUI = (aSizeY < scale(400) || aSizeX < scale(400));
     }
     if(areNewMargins) {
         if(myPanelUpper != NULL) {
