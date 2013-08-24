@@ -50,6 +50,12 @@
             [self setWantsBestResolutionOpenGLSurface: YES];
         }
 
+        // create blank cursor
+        NSImage* aBlackImg = [[NSImage alloc] initWithSize: NSMakeSize(16, 16)];
+        myBlankCursor = [[NSCursor alloc] initWithImage: aBlackImg hotSpot: NSZeroPoint];
+        [aBlackImg release];
+        myToHideCursor = false;
+
         // setup fullscreen options
         NSString* aKeys[] = {
             NSFullScreenModeSetting,
@@ -76,6 +82,7 @@
     }
 
     - (void ) dealloc {
+        [myBlankCursor release];
         [myFullScrOpts release];
         [super dealloc];
     }
@@ -422,6 +429,12 @@
         }
         // not a drag we can use
         return NSDragOperationNone;
+    }
+
+    - (void ) resetCursorRects {
+        if(myToHideCursor) {
+            [self addCursorRect: [self visibleRect] cursor: myBlankCursor];
+        }
     }
 
     - (void ) draggingExited: (id <NSDraggingInfo> ) theSender {

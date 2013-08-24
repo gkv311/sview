@@ -74,6 +74,14 @@
         }
     }
 
+    - (void ) doResetCursors: (id ) theSender {
+        [self resetCursorRects];
+
+        [[self contentView] setNeedsDisplay: YES];
+        [self disableCursorRects];
+        [self enableCursorRects];
+    }
+
 @end
 
 #endif // __APPLE__

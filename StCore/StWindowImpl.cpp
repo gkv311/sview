@@ -643,7 +643,6 @@ void StWindowImpl::hide(const int theWinNum) {
         attribs.IsSlaveHidden = true;
     }
 }
-#endif // !__APPLE__
 
 void StWindowImpl::showCursor(bool toShow) {
     if(attribs.ToHideCursor != toShow) {
@@ -667,7 +666,6 @@ void StWindowImpl::showCursor(bool toShow) {
     attribs.ToHideCursor = !toShow;
 }
 
-#if (!defined(__APPLE__))
 void StWindowImpl::setPlacement(const StRectI_t& theRect,
                                 const bool       theMoveToScreen) {
     if(theMoveToScreen) {

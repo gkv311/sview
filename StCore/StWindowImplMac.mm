@@ -60,6 +60,24 @@ void StWindowImpl::setTitle(const StString& theTitle) {
     }
 }
 
+void StWindowImpl::showCursor(bool toShow) {
+    if(attribs.ToHideCursor != toShow) {
+        return; // nothing to update
+    }
+
+    myMaster.hViewGl->myToHideCursor = !toShow;
+
+    if([NSThread isMainThread]) {
+        [myMaster.hWindow doResetCursors: NULL];
+    } else {
+        [myMaster.hWindow performSelectorOnMainThread: @selector(doResetCursors:)
+                                           withObject: NULL
+                                        waitUntilDone: YES];
+    }
+
+    attribs.ToHideCursor = !toShow;
+}
+
 void StWindowImpl::convertRectToBacking(StGLBoxPx& theRect,
                                         const int  theWinId) const {
     NSView* aView = (theWinId == ST_WIN_SLAVE) ? mySlave.hViewGl : myMaster.hViewGl;

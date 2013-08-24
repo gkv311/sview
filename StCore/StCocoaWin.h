@@ -49,6 +49,11 @@
          */
         - (void ) forceClose;
 
+        /**
+         * Update cursor icon.
+         */
+        - (void ) doResetCursors: (id ) theSender;
+
     @end
 #else
     class StCocoaWin;
