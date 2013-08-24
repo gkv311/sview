@@ -715,8 +715,14 @@ void StImageViewer::doScaleHiDPI(const bool ) {
 }
 
 void StImageViewer::doSwitchSrcFormat(const int32_t theSrcFormat) {
+    if(myLoader.isNull()) {
+        return;
+    }
+
     myLoader->setSrcFormat(StFormatEnum(theSrcFormat));
-    myLoader->doLoadNext();
+    if(!myLoader->getPlayList().isEmpty()) {
+        myLoader->doLoadNext();
+    }
     myToSaveSrcFormat = true;
 }
 
