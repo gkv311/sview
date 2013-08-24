@@ -139,10 +139,20 @@ bool StWindowImpl::create() {
         None
     };
 
+    // FBConfigs were added in GLX version 1.3
+    int aGlxMajor = 0;
+    int aGlxMinor = 0;
+    const bool hasFBCfg = glXQueryVersion(hDisplay, &aGlxMajor, &aGlxMinor)
+                       && ((aGlxMajor == 1 && aGlxMinor >= 3) || (aGlxMajor > 1));
+
     int aFBCount = 0;
-    GLXFBConfig* aFBCfgList = glXChooseFBConfig(hDisplay, DefaultScreen(hDisplay),
-                                                anAttribsBuff, &aFBCount);
+    GLXFBConfig* aFBCfgList = NULL;
+    if(hasFBCfg) {
+        glXChooseFBConfig(hDisplay, DefaultScreen(hDisplay),
+                          anAttribsBuff, &aFBCount);
+    }
     if(aFBCfgList == NULL
+    && hasFBCfg
     && attribs.IsGlStereo) {
         ST_ERROR_LOG("X, no Quad Buffered visual");
         anAttribsBuff[1] = False;
