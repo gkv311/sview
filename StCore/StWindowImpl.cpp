@@ -25,7 +25,7 @@
 
 #ifdef __APPLE__
     #include <sys/sysctl.h>
-#elif (defined(__linux__) || defined(__linux))
+#elif defined(__linux__)
     #include <sys/sysinfo.h>
 #endif
 
@@ -276,7 +276,7 @@ void StWindowImpl::setTitle(const StString& theTitle) {
     myWindowTitle = theTitle;
 #ifdef _WIN32
     myIsUpdated = true;
-#elif(defined(__linux__) || defined(__linux))
+#elif defined(__linux__)
     if(myMaster.hWindow != 0){
         XTextProperty aTitleProperty = {NULL, 0, 0, 0};
         aTitleProperty.encoding = None;
@@ -459,7 +459,7 @@ void StWindowImpl::updateBlockSleep() {
         }
         myBlockSleep = BlockSleep_OFF;
     }
-#elif(defined(__APPLE__))
+#elif defined(__APPLE__)
     if(attribs.ToBlockSleepDisplay) {
         if(myBlockSleep == BlockSleep_DISPLAY) {
             return;
@@ -493,7 +493,7 @@ void StWindowImpl::updateBlockSleep() {
         }
         myBlockSleep = BlockSleep_OFF;
     }
-#elif(defined(__linux__) || defined(__linux))
+#elif defined(__linux__)
     if(attribs.ToBlockSleepDisplay) { // || attribs.ToBlockSleepSystem
         if(myBlockSleep == BlockSleep_DISPLAY
         || myMaster.stXDisplay.isNull()
@@ -568,7 +568,7 @@ void StWindowImpl::show(const int theWinNum) {
         } else if(myMaster.hWindowGl != NULL) {
             ShowWindow(myMaster.hWindowGl, SW_SHOW);
         }
-    #elif(defined(__linux__) || defined(__linux))
+    #elif defined(__linux__)
         if(!myMaster.stXDisplay.isNull()) {
             if(myMaster.hWindow != 0) {
                 XMapWindow(myMaster.getDisplay(), myMaster.hWindow);
@@ -588,7 +588,7 @@ void StWindowImpl::show(const int theWinNum) {
         if(mySlave.hWindowGl != NULL) {
             ShowWindow(mySlave.hWindowGl, SW_SHOW);
         }
-    #elif(defined(__linux__) || defined(__linux))
+    #elif defined(__linux__)
         if(!mySlave.stXDisplay.isNull() && mySlave.hWindowGl != 0) {
             XMapWindow(mySlave.getDisplay(), mySlave.hWindowGl);
             //XIfEvent(myMaster.getDisplay(), &myXEvent, stXWaitMapped, (char* )mySlave.hWindowGl);
@@ -608,7 +608,7 @@ void StWindowImpl::hide(const int theWinNum) {
         } else if(myMaster.hWindowGl != NULL) {
             ShowWindow(myMaster.hWindowGl, SW_HIDE);
         }
-    #elif(defined(__linux__) || defined(__linux))
+    #elif defined(__linux__)
         if(!myMaster.stXDisplay.isNull()) {
             if(myMaster.hWindow != 0) {
                 XUnmapWindow(myMaster.getDisplay(), myMaster.hWindow);
@@ -627,7 +627,7 @@ void StWindowImpl::hide(const int theWinNum) {
         if(mySlave.hWindowGl != NULL) {
             ShowWindow(mySlave.hWindowGl, SW_HIDE);
         }
-    #elif(defined(__linux__) || defined(__linux))
+    #elif defined(__linux__)
         if(!mySlave.stXDisplay.isNull() && mySlave.hWindowGl != 0) {
             XUnmapWindow(mySlave.getDisplay(), mySlave.hWindowGl);
             myIsUpdated = true; // ?
@@ -650,7 +650,7 @@ void StWindowImpl::showCursor(bool toShow) {
     } else {
         SetEvent(myEventCursorHide);
     }
-#elif(defined(__linux__) || defined(__linux))
+#elif defined(__linux__)
     if(toShow) {
         XUndefineCursor(myMaster.getDisplay(), myMaster.hWindowGl);
     } else {
@@ -684,16 +684,22 @@ void StWindowImpl::setPlacement(const StRectI_t& theRect,
     }
     myIsUpdated = true;
 #ifdef _WIN32
-    if(myMaster.hWindow != NULL && !attribs.IsFullScreen) {
-        int posLeft   = myRectNorm.left() - (!attribs.IsNoDecor ?  GetSystemMetrics(SM_CXSIZEFRAME) : 0);
-        int posTop    = myRectNorm.top()  - (!attribs.IsNoDecor ? (GetSystemMetrics(SM_CYSIZEFRAME) + GetSystemMetrics(SM_CYCAPTION)) : 0);
-        int winWidth  = (!attribs.IsNoDecor ? 2 * GetSystemMetrics(SM_CXSIZEFRAME) : 0) + myRectNorm.width();
-        int winHeight = (!attribs.IsNoDecor ? (GetSystemMetrics(SM_CYCAPTION) + 2 * GetSystemMetrics(SM_CYSIZEFRAME)) : 0) + myRectNorm.height();
+    if(myMaster.hWindow != NULL
+    && !attribs.IsFullScreen) {
+        RECT aRect;
+        aRect.top    = myRectNorm.top();
+        aRect.bottom = myRectNorm.bottom();
+        aRect.left   = myRectNorm.left();
+        aRect.right  = myRectNorm.right();
+        // take into account decorations
+        const DWORD aWinStyle   = (!attribs.IsNoDecor ? WS_OVERLAPPEDWINDOW : WS_POPUP) | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
+        const DWORD aWinStyleEx = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE | WS_EX_ACCEPTFILES;
+        AdjustWindowRectEx(&aRect, aWinStyle, FALSE, aWinStyleEx);
         SetWindowPos(myMaster.hWindow, HWND_NOTOPMOST,
-                     posLeft, posTop, winWidth, winHeight,
+                     aRect.left, aRect.top, aRect.right - aRect.left, aRect.bottom - aRect.top,
                      SWP_NOACTIVATE);
     }
-#elif(defined(__linux__) || defined(__linux))
+#elif defined(__linux__)
     if(!myMaster.stXDisplay.isNull() && !attribs.IsFullScreen && myMaster.hWindow != 0) {
         XMoveResizeWindow(myMaster.getDisplay(), myMaster.hWindow,
                           myRectNorm.left(),  myRectNorm.top(),

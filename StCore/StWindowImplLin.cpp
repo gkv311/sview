@@ -16,7 +16,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if(defined(__linux__) || defined(__linux))
+#if defined(__linux__)
 
 #include "StWindowImpl.h"
 #include "stvkeysxarray.h" // X keys to VKEYs lookup array

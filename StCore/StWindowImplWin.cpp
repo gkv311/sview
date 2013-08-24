@@ -89,21 +89,26 @@ bool StWindowImpl::wndCreateWindows() {
     myMaster.ThreadWnd = mySlave.ThreadWnd = StThread::getCurrentThreadId();
 
     // ========= At first - create windows' instances =========
-    // parent Master window could be decorated - we parse this situation to get true coordinates
-    int posLeft   = myRectNorm.left() - (!attribs.IsNoDecor ? GetSystemMetrics(SM_CXSIZEFRAME) : 0);
-    int posTop    = myRectNorm.top() - (!attribs.IsNoDecor ? (GetSystemMetrics(SM_CYSIZEFRAME) + GetSystemMetrics(SM_CYCAPTION)) : 0);
-    int winWidth  = (!attribs.IsNoDecor ? 2 * GetSystemMetrics(SM_CXSIZEFRAME) : 0) + myRectNorm.width();
-    int winHeight = (!attribs.IsNoDecor ? (GetSystemMetrics(SM_CYCAPTION) + 2 * GetSystemMetrics(SM_CYSIZEFRAME)) : 0) + myRectNorm.height();
     HINSTANCE hInstance = GetModuleHandleW(NULL);
+    RECT aRect;
+    aRect.top    = myRectNorm.top();
+    aRect.bottom = myRectNorm.bottom();
+    aRect.left   = myRectNorm.left();
+    aRect.right  = myRectNorm.right();
 
     if(myParentWin == NULL) {
+        // parent Master window could be decorated - we parse this situation to get true coordinates
+        const DWORD aWinStyle   = (!attribs.IsNoDecor ? WS_OVERLAPPEDWINDOW : WS_POPUP) | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
+        const DWORD aWinStyleEx = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE | WS_EX_ACCEPTFILES;
+        AdjustWindowRectEx(&aRect, aWinStyle, FALSE, aWinStyleEx);
+
         // WS_EX_ACCEPTFILES - Drag&Drop support
-        myMaster.hWindow = CreateWindowExW(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE | WS_EX_ACCEPTFILES,
+        myMaster.hWindow = CreateWindowExW(aWinStyleEx,
                                            myMaster.ClassBase.toCString(),
                                            myWindowTitle.toUtfWide().toCString(),
-                                           (!attribs.IsNoDecor ? WS_OVERLAPPEDWINDOW : WS_POPUP) | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
-                                           posLeft, posTop,
-                                           winWidth, winHeight,
+                                           aWinStyle,
+                                           aRect.left, aRect.top,
+                                           aRect.right - aRect.left, aRect.bottom - aRect.top,
                                            NULL, NULL, hInstance, this); // put pointer to class, getted on WM_CREATE
         if(myMaster.hWindow == NULL) {
             myMaster.close();
@@ -115,18 +120,12 @@ bool StWindowImpl::wndCreateWindows() {
         // we have external native parent window
         attribs.IsNoDecor = true;
 
-        RECT aRect;
         GetWindowRect(myParentWin, &aRect);
-
         myRectNorm.left()   = aRect.left;
         myRectNorm.right()  = aRect.right;
         myRectNorm.top()    = aRect.top;
         myRectNorm.bottom() = aRect.bottom;
 
-        posLeft   = myRectNorm.left();
-        posTop    = myRectNorm.top();
-        winWidth  = myRectNorm.width();
-        winHeight = myRectNorm.height();
         myIsUpdated = true;
     }
 
@@ -150,8 +149,8 @@ bool StWindowImpl::wndCreateWindows() {
         mySlave.hWindowGl = CreateWindowExW(WS_EX_TOOLWINDOW | WS_EX_WINDOWEDGE | WS_EX_NOACTIVATE,
                                             mySlave.ClassGL.toCString(),
                                             L"Slave window",
-                                            WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_DISABLED, // slave always disabled (hasn't input focus)!
-                                            posLeft, posTop, // initialize slave window at same screen as master to workaround bugs in drivers that may prevent GL context sharing
+                                            WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_DISABLED, // slave is always disabled (hasn't input focus)!
+                                            aRect.left, aRect.top, // initialize slave window at same screen as master to workaround bugs in drivers that may prevent GL context sharing
                                             myRectNorm.width(), myRectNorm.height(),
                                             NULL, NULL, hInstance, NULL);
         if(mySlave.hWindowGl == NULL) {
@@ -179,7 +178,7 @@ bool StWindowImpl::wndCreateWindows() {
 
     if(!attribs.IsHidden) {
         SetWindowPos(myMaster.hWindow, HWND_NOTOPMOST,
-                     posLeft, posTop, winWidth, winHeight,
+                     aRect.left, aRect.top, aRect.right - aRect.left, aRect.bottom - aRect.top,
                      SWP_SHOWWINDOW);
 
         SetWindowPos(myMaster.hWindowGl, HWND_NOTOPMOST,
