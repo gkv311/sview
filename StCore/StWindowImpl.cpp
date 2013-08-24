@@ -156,16 +156,7 @@ void StWindowImpl::StSyncTimer::initUpTime() {
     myTimeInMicroSec = double((*(uint64_t* )&anUpTimeNano) / 1000); // convert to microseconds
     fillCounter(myCounterStart);
 #else
-    struct sysinfo aSysInfo;
-    ::sysinfo(&aSysInfo);
-    const uint64_t anUptime0 = (uint64_t )aSysInfo.uptime;
-    uint64_t anUptime1 = 0;
-    do {
-        ::sysinfo(&aSysInfo);
-        anUptime1 = (uint64_t )aSysInfo.uptime;
-        fillCounter(myCounterStart);
-    } while(anUptime0 == anUptime1);
-    myTimeInMicroSec = double(anUptime1) * 1000000.0;
+    myTimeInMicroSec = getUpTimeFromSystem() * 1000000.0;
     fillCounter(myCounterStart);
 #endif
     myIsPaused = false;
@@ -186,6 +177,19 @@ void StWindowImpl::StSyncTimer::resyncUpTime() {
     myLastSyncMicroSec = aTimerValue;
     //ST_DEBUG_LOG("resyncUpTime()= " + double(mySyncMicroSec) * 0.001
     //           + " msec (" + getElapsedTimeFromLastStartInMicroSec() + " after app start)");
+#elif !defined(__APPLE__)
+    struct sysinfo aSysInfo;
+    ::sysinfo(&aSysInfo);
+    const uint64_t anUptime0 = (uint64_t )aSysInfo.uptime;
+    uint64_t anUptime1 = 0;
+    double aTimerValue = 0.0;
+    do {
+        ::sysinfo(&aSysInfo);
+        anUptime1 = (uint64_t )aSysInfo.uptime;
+        aTimerValue = getElapsedTimeInMicroSec();
+    } while(anUptime0 == anUptime1);
+    mySyncMicroSec     = float(anUptime1 * 1000000.0 - aTimerValue);
+    myLastSyncMicroSec = aTimerValue;
 #endif
 }
 
