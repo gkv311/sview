@@ -121,7 +121,7 @@ class StTimer {
         return myIsPaused ? 0.0 : timeFromStart();
     }
 
-        private:
+        protected:
 
 #ifdef _WIN32
     typedef LARGE_INTEGER stTimeCounter_t;
@@ -129,7 +129,7 @@ class StTimer {
     typedef timeval       stTimeCounter_t;
 #endif
 
-        private:
+        protected:
 
     static void fillCounter(stTimeCounter_t& theCounter) {
     #ifdef _WIN32
@@ -164,11 +164,11 @@ class StTimer {
      * Reset current timestamp to zero.
      */
     void reset() {
-        stMemSet(&myCounterStart, 0, sizeof(myCounterStart));
+        stMemZero(&myCounterStart, sizeof(myCounterStart));
         myTimeInMicroSec = 0.0;
     }
 
-        private:
+        protected:
 
     double          myTimeInMicroSec; //!< cumulative elapsed time
     stTimeCounter_t myCounterStart;

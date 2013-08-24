@@ -75,7 +75,6 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
   myIsActive(false),
   myBlockSleep(BlockSleep_OFF),
   myIsDispChanged(false),
-  myEventsTimer(true),
   myLastEventsTime(0.0),
   myEventsThreaded(false),
   myIsMouseMoved(false) {
@@ -122,13 +121,6 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
     } else {
         timeBeginPeriod(1);
     }
-
-    // read system uptime (in milliseconds)
-    if(StSys::isVistaPlus()) {
-        HMODULE aKern32 = GetModuleHandleW(L"kernel32");
-        myGetTick64 = (GetTickCount64_t )GetProcAddress(aKern32, "GetTickCount64");
-    }
-    myEventsTimer.restart(getUptime() * 1000.0); // convert to microseconds
 #endif
 
     myMonitors.init();
@@ -136,30 +128,54 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
     // register callback for display configuration changes
     // alternatively we can add method applicationDidChangeScreenParameters to application delegate
     CGDisplayRegisterReconfigurationCallback(stDisplayChangeCallBack, this);
-
-    // use function from CoreServices to retrieve system uptime
-    const Nanoseconds anUpTimeNano = AbsoluteToNanoseconds(UpTime());
-    // convert to microseconds
-    const double      anUpTime     = double((*(uint64_t* )&anUpTimeNano) / 1000);
-    myEventsTimer.restart(anUpTime);
-#elif (defined(__linux__) || defined(__linux))
-    // read system uptime (in seconds)
-    struct sysinfo aSysInfo;
-    ::sysinfo(&aSysInfo);
-    myEventsTimer.restart(double(aSysInfo.uptime) * 1000000.0); // convert to microseconds
 #endif
+
+    myEventsTimer.initUpTime();
 }
 
-double StWindowImpl::getUptime() const {
-#ifdef _WIN32
-    const uint64_t anUptime = (myGetTick64 != NULL) ? myGetTick64() : (uint64_t )GetTickCount();
-    return double(anUptime) * 0.001;
+void StWindowImpl::StSyncTimer::initUpTime() {
+#if defined(_WIN32)
+    myGetTick64 = NULL;
+    if(StSys::isVistaPlus()) {
+        HMODULE aKern32 = GetModuleHandleW(L"kernel32");
+        myGetTick64 = (GetTickCount64_t )GetProcAddress(aKern32, "GetTickCount64");
+    }
+
+    // Spin waiting for a change in system time (should take up to 15 ms on modern systems).
+    // Alternatively timeGetTime() might be used instead which handle time in 1 ms precision
+    // when used in combination with timeBeginPeriod(1).
+    const uint64_t anUptime0 = (myGetTick64 != NULL) ? myGetTick64() : (uint64_t )GetTickCount();
+    uint64_t anUptime1 = 0;
+    do {
+        anUptime1 = (myGetTick64 != NULL) ? myGetTick64() : (uint64_t )GetTickCount();
+        fillCounter(myCounterStart);
+    } while(anUptime0 == anUptime1);
+    myTimeInMicroSec = anUptime1 * 1000.0; // convert to microseconds
 #elif defined(__APPLE__)
     // use function from CoreServices to retrieve system uptime
     const Nanoseconds anUpTimeNano = AbsoluteToNanoseconds(UpTime());
-    return double((*(uint64_t* )&anUpTimeNano) / 1000) * 0.000001;
+    myTimeInMicroSec = double((*(uint64_t* )&anUpTimeNano) / 1000); // convert to microseconds
 #else
-    return 0.0;
+    myTimeInMicroSec = getUpTimeFromSystem() * 1000000.0;
+#endif
+    myIsPaused = false;
+    myLastSyncMicroSec = myTimeInMicroSec;
+}
+
+void StWindowImpl::StSyncTimer::resyncUpTime() {
+#if defined(_WIN32)
+    // spin waiting for a change in system time (should take up to 15 ms on modern systems)
+    const uint64_t anUptime0 = (myGetTick64 != NULL) ? myGetTick64() : (uint64_t )GetTickCount();
+    uint64_t anUptime1 = 0;
+    double aTimerValue = 0.0;
+    do {
+        anUptime1   = (myGetTick64 != NULL) ? myGetTick64() : (uint64_t )GetTickCount();
+        aTimerValue = getElapsedTimeInMicroSec();
+    } while(anUptime0 == anUptime1);
+    mySyncMicroSec     = float(anUptime1 * 1000.0 - aTimerValue);
+    myLastSyncMicroSec = aTimerValue;
+    //ST_DEBUG_LOG("resyncUpTime()= " + double(mySyncMicroSec) * 0.001
+    //           + " msec (" + getElapsedTimeFromLastStartInMicroSec() + " after app start)");
 #endif
 }
 
@@ -234,10 +250,11 @@ void StWindowImpl::close() {
 }
 
 double StWindowImpl::getEventTime() const {
-#if defined(_WIN32) || defined(__APPLE__)
-    return getUptime();
+#if defined(__APPLE__)
+    // read UpTimer directly from system - it is precise enough
+    return myEventsTimer.getUpTimeFromSystem();
 #else
-    return myEventsTimer.getElapsedTime();
+    return myEventsTimer.getUpTime();
 #endif
 }
 
@@ -245,7 +262,7 @@ double StWindowImpl::getEventTime(const uint32_t theTime) const {
     double aTime = double(theTime) * 0.001; // system upload time in milliseconds
 
     // workaround integer overflows each 49 days
-    const double aTimeSys = myEventsTimer.getElapsedTime() - 7200.0; // current time - 2 hours
+    const double aTimeSys = myEventsTimer.getUpTime() - 7200.0; // current time - 2 hours
     for(; aTime < aTimeSys; ) {
         aTime += double(uint32_t(-1)) * 0.001;
     }

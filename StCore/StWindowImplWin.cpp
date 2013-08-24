@@ -282,6 +282,11 @@ bool StWindowImpl::wndCreateWindows() {
                 break;
             }
             case WAIT_OBJECT_0 + 3: {
+                // synchronize high-precision timer with system UpTime
+                if(myEventsTimer.isResyncNeeded()) {
+                    myEventsTimer.resyncUpTime();
+                }
+
                 // A thread's (window's) message(s) has arrived
                 // We should process ALL messages cause MsgWaitForMultipleObjects
                 // will NOT triggered for new messages already in stack!!!

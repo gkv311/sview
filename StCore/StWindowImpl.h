@@ -110,11 +110,6 @@ class StWindowImpl {
     ST_LOCAL void swapEventsBuffers();
 
     /**
-     * @return uptime in seconds using system API
-     */
-    ST_LOCAL double getUptime() const;
-
-    /**
      * @return uptime in seconds for event
      */
     ST_LOCAL double getEventTime() const;
@@ -267,9 +262,6 @@ class StWindowImpl {
     TiledCfg           myTiledCfg;        //!< tiles configuration (multiple viewports within the same window)
 
 #ifdef _WIN32
-    typedef ULONGLONG (WINAPI *GetTickCount64_t)();
-    GetTickCount64_t   myGetTick64;       //!< retrieve uptime without 49 days overflow problem
-
     POINT              myPointTest;       //!< temporary point object to verify cached window position
     StHandle<StThread> myMsgThread;       //!< dedicated thread for window message loop
     StCondition        myEventInitWin;    //!< special event waited from createWindows() thread
@@ -328,8 +320,77 @@ class StWindowImpl {
         StSignal<void (const StActionEvent& )>* onAction;
     } signals;
 
+    class StSyncTimer : public StTimer {
+
+            public:
+
+        /**
+         * Constructor.
+         */
+        StSyncTimer()
+        : StTimer(),
+          myLastSyncMicroSec(0.0),
+          mySyncMicroSec(0.0f) {
+        #if defined(_WIN32)
+            myGetTick64 = NULL;
+        #endif
+        }
+
+        /**
+         * Initialize timer from current UpTime using system API.
+         */
+        ST_LOCAL void initUpTime();
+
+        /**
+         * @return UpTime computed with this timer
+         */
+        ST_LOCAL double getUpTime() const {
+            return getElapsedTime() + double(mySyncMicroSec) * 0.000001;
+        }
+
+        /**
+         * @return true each 2 minutes
+         */
+        ST_LOCAL bool isResyncNeeded() const {
+            return (getElapsedTimeInMicroSec() - myLastSyncMicroSec) > 120000000.0;
+        }
+
+        /**
+         * Compute correction for high-performance timer value
+         * relative to real system UpTime.
+         */
+        ST_LOCAL void resyncUpTime();
+
+        /**
+         * Retrieve UpTime using system API.
+         */
+        ST_LOCAL double getUpTimeFromSystem() const {
+        #ifdef _WIN32
+            const uint64_t anUptime = (myGetTick64 != NULL) ? myGetTick64() : (uint64_t )GetTickCount();
+            return double(anUptime) * 0.001;
+        #elif defined(__APPLE__)
+            // use function from CoreServices to retrieve system uptime
+            const Nanoseconds anUpTimeNano = AbsoluteToNanoseconds(UpTime());
+            return double((*(uint64_t* )&anUpTimeNano) / 1000) * 0.000001;
+        #else
+            // read system uptime (in seconds)
+            struct sysinfo aSysInfo;
+            ::sysinfo(&aSysInfo);
+            return double(aSysInfo.uptime);
+        #endif
+        }
+
+    #ifdef _WIN32
+        typedef ULONGLONG (WINAPI *GetTickCount64_t)();
+        GetTickCount64_t   myGetTick64;
+    #endif
+        double             myLastSyncMicroSec; //!< timestamp of last synchronization
+        float              mySyncMicroSec;     //!< should be replaced by double with atomic accessors
+
+    };
+
     StKeysState    myKeysState;        //!< cached keyboard state
-    StTimer        myEventsTimer;
+    StSyncTimer    myEventsTimer;
     StEventsBuffer myEventsBuffer;     //!< window events double buffer
     StEvent        myStEvent;          //!< temporary event object (to be used in message loop thread)
     StEvent        myStEventAux;       //!< extra temporary event object (to be used in StWindow creation thread)
