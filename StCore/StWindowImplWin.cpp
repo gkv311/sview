@@ -117,7 +117,7 @@ bool StWindowImpl::wndCreateWindows() {
             return false;
         }
     } else {
-        // we have external native parent window
+        // external native parent window
         attribs.IsNoDecor = true;
 
         GetWindowRect(myParentWin, &aRect);
@@ -129,7 +129,7 @@ bool StWindowImpl::wndCreateWindows() {
         myIsUpdated = true;
     }
 
-    // we use WS_EX_NOPARENTNOTIFY style to prevent to send notify on destroing our child window (NPAPI plugin -> deadlock)
+    // use WS_EX_NOPARENTNOTIFY style to prevent to send notify on destroing our child window (NPAPI plugin -> deadlock)
     DWORD masterWindowGl_dwExStyle = (myParentWin == NULL) ? WS_EX_NOACTIVATE : (WS_EX_NOACTIVATE | WS_EX_NOPARENTNOTIFY);
     myMaster.hWindowGl = CreateWindowExW(masterWindowGl_dwExStyle,
                                          myMaster.ClassGL.toCString(),
@@ -162,7 +162,7 @@ bool StWindowImpl::wndCreateWindows() {
         }
     }
 
-    // ========= Synchronization barrier - wait until MAIN thread create GL contexts =========
+    // ========= Synchronization barrier - wait until MAIN thread creates GL contexts =========
     myInitState = STWIN_INIT_SUCCESS; // 'send' it's OK for main thread
     myEventInitWin.set();
     myEventInitGl.wait();
@@ -191,7 +191,6 @@ bool StWindowImpl::wndCreateWindows() {
 
     // ========= Start callback procedure =========
     if(!attribs.IsHidden && myParentWin == NULL) {
-        // TODO (Kirill Gavrilov#4) need we special StWindow function to make window on top?
         SetForegroundWindow(myMaster.hWindow); // make sure Master window on top and has input focus
     }
 

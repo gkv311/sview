@@ -387,6 +387,14 @@ bool StGLContext::stglInit() {
         if(stglCheckExtension(aWglExts, "WGL_EXT_swap_control")) {
             STGL_READ_FUNC(wglSwapIntervalEXT);
         }
+        if(stglCheckExtension(aWglExts, "WGL_ARB_pixel_format")) {
+            //STGL_READ_FUNC(wglGetPixelFormatAttribivARB);
+            //STGL_READ_FUNC(wglGetPixelFormatAttribfvARB);
+            STGL_READ_FUNC(wglChoosePixelFormatARB);
+        }
+        if(stglCheckExtension(aWglExts, "WGL_ARB_create_context_profile")) {
+            STGL_READ_FUNC(wglCreateContextAttribsARB);
+        }
         extSwapTear = stglCheckExtension(aWglExts, "WGL_EXT_swap_control_tear");
         if(stglCheckExtension(aWglExts, "WGL_NV_DX_interop")) {
             STGL_READ_FUNC(wglDXSetResourceShareHandleNV);
