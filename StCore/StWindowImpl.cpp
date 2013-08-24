@@ -154,8 +154,19 @@ void StWindowImpl::StSyncTimer::initUpTime() {
     // use function from CoreServices to retrieve system uptime
     const Nanoseconds anUpTimeNano = AbsoluteToNanoseconds(UpTime());
     myTimeInMicroSec = double((*(uint64_t* )&anUpTimeNano) / 1000); // convert to microseconds
+    fillCounter(myCounterStart);
 #else
-    myTimeInMicroSec = getUpTimeFromSystem() * 1000000.0;
+    struct sysinfo aSysInfo;
+    ::sysinfo(&aSysInfo);
+    const uint64_t anUptime0 = (uint64_t )aSysInfo.uptime;
+    uint64_t anUptime1 = 0;
+    do {
+        ::sysinfo(&aSysInfo);
+        anUptime1 = (uint64_t )aSysInfo.uptime;
+        fillCounter(myCounterStart);
+    } while(anUptime0 == anUptime1);
+    myTimeInMicroSec = double(anUptime1) * 1000000.0;
+    fillCounter(myCounterStart);
 #endif
     myIsPaused = false;
     myLastSyncMicroSec = myTimeInMicroSec;
