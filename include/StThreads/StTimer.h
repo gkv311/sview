@@ -134,6 +134,8 @@ class StTimer {
     static void fillCounter(stTimeCounter_t& theCounter) {
     #ifdef _WIN32
         QueryPerformanceCounter(&theCounter);
+    #elif defined(_POSIX_MONOTONIC_CLOCK)
+        clock_gettime(CLOCK_MONOTONIC, &theCounter);
     #else
         gettimeofday(&theCounter, NULL);
     #endif
