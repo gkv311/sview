@@ -21,10 +21,10 @@
 
 #ifdef _WIN32
     #include <windows.h>   // header file for Windows
-#elif (defined(__APPLE__))
+#elif defined(__APPLE__)
     #include "StCocoaView.h"
     #include "StCocoaWin.h"
-#elif (defined(__linux__) || defined(__linux))
+#elif defined(__linux__)
     #include <GL/glx.h>
 #endif
 
@@ -100,43 +100,6 @@ class StWinHandles {
 
         public:
 
-#ifdef _WIN32
-    size_t      threadIdWnd; // id of the thread, in wich window was created
-    StCondition evMsgThread; // special event to check message thread active state
-    HWND            hWindow; // WinAPI windows' handles
-    HWND          hWindowGl;
-    StStringUtfWide   className; // WinAPI classes' names
-    StStringUtfWide classNameGl;
-    ATOM         myMKeyStop;
-    ATOM         myMKeyPlay;
-    ATOM         myMKeyPrev;
-    ATOM         myMKeyNext;
-
-    StMutex         stMutex;
-    size_t      threadIdOgl; // id of the thread, in wich rendering context was created
-    HDC                 hDC; // WinAPI Device Descriptor handle
-    StWinGlrcH          hRC; // WinAPI Rendering Context handle
-#elif (defined(__APPLE__))
-    StCocoaWin*     hWindow;
-    StCocoaView*    hViewGl;
-#elif (defined(__linux__) || defined(__linux))
-    Window          hWindow; // X-window handle
-    Window        hWindowGl; // X-window handle for undecorated GL window
-    StXDisplayH  stXDisplay; // X-server display connection
-    StWinGlrcH          hRC; // X-GLX rendering context
-
-    Pixmap        iconImage; // icon stuff
-    Pixmap        iconShape;
-
-    Atom    xDNDRequestType; // X Drag & Drop stuff
-    Window    xDNDSrcWindow;
-    int         xDNDVersion;
-    int     xrandrEventBase;
-    bool  isRecXRandrEvents;
-#endif
-
-        public:
-
     /**
      * Creates NULL-handles.
      */
@@ -174,7 +137,34 @@ class StWinHandles {
      */
     ST_LOCAL static StStringUtfWide getNewClassName();
 
-#elif(defined(__linux__) || defined(__linux))
+    /**
+     * Register window class with specified name.
+     * @param theName class name
+     * @param theProc callback function
+     * @return true on success
+     */
+    ST_LOCAL static bool registerClass(const StStringUtfWide& theName,
+                                       WNDPROC                theProc);
+
+    /**
+     * Register window classes.
+     */
+    ST_LOCAL bool registerClasses(StWinHandles* theSlave,
+                                  WNDPROC       theProc);
+
+    /**
+     * Unregister window class with specified name.
+     * @param theName class name, will be cleared on success
+     * @return true on success
+     */
+    ST_LOCAL static bool unregisterClass(StStringUtfWide& theName);
+
+    /**
+     * Destroy window.
+     */
+    ST_LOCAL static bool destroyWindow(HWND& theWindow);
+
+#elif defined(__linux__)
     /**
      * Fast link
      */
@@ -194,6 +184,45 @@ class StWinHandles {
     ST_LOCAL void setupNoCursor();
 #endif
 
+        public:
+
+#ifdef _WIN32
+    size_t          ThreadWnd;      //!< id of the thread, in wich window was created
+    StCondition     EventMsgThread; //!< special event to check message thread active state
+    HWND            hWindow; // WinAPI windows' handles
+    HWND            hWindowGl;
+    HWND            hWinTmp; // temporary window
+    StStringUtfWide ClassBase;      //!< WinAPI classes' names
+    StStringUtfWide ClassGL;
+    StStringUtfWide ClassTmp;
+    ATOM            myMKeyStop;
+    ATOM            myMKeyPlay;
+    ATOM            myMKeyPrev;
+    ATOM            myMKeyNext;
+
+    StMutex         myMutex;
+    size_t          ThreadGL;       //!< id of the thread, in which rendering contexts were created
+    HDC             hDC; // WinAPI Device Descriptor handle
+    StWinGlrcH      hRC; // WinAPI Rendering Context handle
+#elif defined(__APPLE__)
+    StCocoaWin*     hWindow;
+    StCocoaView*    hViewGl;
+#elif defined(__linux__)
+    Window          hWindow; // X-window handle
+    Window          hWindowGl; // X-window handle for undecorated GL window
+    StXDisplayH     stXDisplay; // X-server display connection
+    StWinGlrcH      hRC; // X-GLX rendering context
+
+    Pixmap          iconImage; // icon stuff
+    Pixmap          iconShape;
+
+    Atom            xDNDRequestType; // X Drag & Drop stuff
+    Window          xDNDSrcWindow;
+    int             xDNDVersion;
+    int             xrandrEventBase;
+    bool            isRecXRandrEvents;
+#endif
+
 };
 
-#endif //__StWinHandles_h_
+#endif // __StWinHandles_h_

@@ -26,7 +26,7 @@
 #include "StWinHandles.h"
 #include "StEventsBuffer.h"
 
-#if (defined(__APPLE__))
+#if defined(__APPLE__)
     #include <StCocoa/StCocoaCoords.h>
     #include <IOKit/pwr_mgt/IOPMLib.h>
 #endif
@@ -80,10 +80,9 @@ class StWindowImpl {
 
     ST_LOCAL void updateChildRect();
 #ifdef _WIN32
-    ST_LOCAL bool wndRegisterClass(const StStringUtfWide& theClassName);
     ST_LOCAL bool wndCreateWindows(); // called from non-main thread
     ST_LOCAL LRESULT stWndProc(HWND , UINT , WPARAM , LPARAM );
-#elif (defined(__APPLE__))
+#elif defined(__APPLE__)
     ST_LOCAL void doCreateWindows(NSOpenGLContext* theGLContextMaster,
                                   NSOpenGLContext* theGLContextSlave);
 #endif
@@ -94,7 +93,7 @@ class StWindowImpl {
     ST_LOCAL void updateWindowPos();
     ST_LOCAL void updateActiveState();
     ST_LOCAL void updateBlockSleep();
-#if (defined(__linux__) || defined(__linux))
+#if defined(__linux__)
     ST_LOCAL void parseXDNDClientMsg();
     ST_LOCAL void parseXDNDSelectionMsg();
 

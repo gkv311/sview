@@ -105,18 +105,19 @@ bool StWinGlrc::makeCurrent(GLXDrawable theDrawable) {
 
 StWinHandles::StWinHandles()
 #ifdef _WIN32
-: threadIdWnd(0),
-  evMsgThread(true),
+: ThreadWnd(0),
+  EventMsgThread(true),
   hWindow(NULL),
   hWindowGl(NULL),
+  hWinTmp(NULL),
   myMKeyStop(GlobalAddAtom(MAKEINTATOM(VK_MEDIA_STOP))),
   myMKeyPlay(GlobalAddAtom(MAKEINTATOM(VK_MEDIA_PLAY_PAUSE))),
   myMKeyPrev(GlobalAddAtom(MAKEINTATOM(VK_MEDIA_PREV_TRACK))),
   myMKeyNext(GlobalAddAtom(MAKEINTATOM(VK_MEDIA_NEXT_TRACK))),
-  threadIdOgl(0),
+  ThreadGL(0),
   hDC(NULL) {
     //
-#elif (defined(__linux__) || defined(__linux))
+#elif defined(__linux__)
 : hWindow(0),
   hWindowGl(0),
   stXDisplay(),
@@ -140,7 +141,7 @@ void StWinHandles::glSwap() {
     if(hDC != NULL) {
         SwapBuffers(hDC);
     }
-#elif (defined(__linux__) || defined(__linux))
+#elif defined(__linux__)
     if(!stXDisplay.isNull()
     && hRC->makeCurrent(hWindowGl)) { // if GL rendering context is bound to another drawable - we got BadMatch error
         glXSwapBuffers(stXDisplay->hDisplay, hWindowGl);
@@ -154,7 +155,7 @@ bool StWinHandles::glMakeCurrent() {
         return hRC->isCurrent(hDC)
             || hRC->makeCurrent(hDC);
     }
-#elif (defined(__linux__) || defined(__linux))
+#elif defined(__linux__)
     if(!stXDisplay.isNull() && !hRC.isNull()) {
         return hRC->makeCurrent(hWindowGl);
     }
@@ -175,13 +176,13 @@ int StWinHandles::glCreateContext(StWinHandles* theSlave,
                                   const int     theDepthSize,
                                   const bool    theIsQuadStereo) {
 #ifdef _WIN32
-    threadIdOgl = StThread::getCurrentThreadId();
-    ST_DEBUG_LOG("WinAPI, glCreateContext, threadIdOgl= " + threadIdOgl + ", threadIdWnd= " + threadIdWnd);
+    ThreadGL = StThread::getCurrentThreadId();
+    ST_DEBUG_LOG("WinAPI, glCreateContext, ThreadGL= " + ThreadGL + ", ThreadWnd= " + ThreadWnd);
     hDC = GetDC(hWindowGl);
     ST_GL_ERROR_CHECK(hDC != NULL, STWIN_ERROR_WIN32_GLDC,
                       "WinAPI, Can't create Master GL Device Context");
     if(theSlave != NULL) {
-        theSlave->threadIdOgl = threadIdOgl;
+        theSlave->ThreadGL = ThreadGL;
         theSlave->hDC = GetDC(theSlave->hWindowGl);
         ST_GL_ERROR_CHECK(theSlave->hDC != NULL, STWIN_ERROR_WIN32_GLDC,
                           "WinAPI, Can't create Slave GL Device Context");
@@ -227,7 +228,7 @@ int StWinHandles::glCreateContext(StWinHandles* theSlave,
     ST_GL_ERROR_CHECK(hRC->makeCurrent(hDC),
                       STWIN_ERROR_WIN32_GLRC_ACTIVATE, "WinAPI, Can't activate Master GL Rendering Context");
     return STWIN_INIT_SUCCESS;
-#elif (defined(__linux__) || defined(__linux))
+#elif defined(__linux__)
     // create an OpenGL rendering context
     hRC = new StWinGlrc(stXDisplay);
     ST_GL_ERROR_CHECK(hRC->isValid(),
@@ -250,11 +251,11 @@ int StWinHandles::glCreateContext(StWinHandles* theSlave,
 bool StWinHandles::close() {
 #ifdef _WIN32
     // NOTE - destroy functions will fail if called from another thread than created
-    size_t currThreadId = StThread::getCurrentThreadId();
-    stMutex.lock();
+    const size_t aThreadId = StThread::getCurrentThreadId();
+    myMutex.lock();
     // ========= Release OpenGL resources =========
-    if(currThreadId == threadIdOgl && hWindowGl != NULL) {
-        ST_DEBUG_LOG("WinAPI, close, currThreadId= " + currThreadId + ", threadIdOgl= " + threadIdOgl + ", threadIdWnd= " + threadIdWnd);
+    if(aThreadId == ThreadGL && hWindowGl != NULL) {
+        ST_DEBUG_LOG("WinAPI, close, aThreadId= " + aThreadId + ", ThreadGL= " + ThreadGL + ", ThreadWnd= " + ThreadWnd);
 
         // release Rendering Context
         hRC.nullify();
@@ -263,66 +264,39 @@ bool StWinHandles::close() {
         if(hDC != NULL && hWindowGl != NULL) {
             if(ReleaseDC(hWindowGl, hDC) == 0) {
                 ST_DEBUG_LOG("WinAPI, FAILED to release DC");
-                stMutex.unlock();
+                myMutex.unlock();
                 return false;
             } else {
                 ST_DEBUG_LOG("WinAPI, Released DC");
                 hDC = NULL;
-                threadIdOgl = 0;
+                ThreadGL = 0;
             }
         }
     }
 
-    // ========= Release window resources =========
-    if(currThreadId == threadIdWnd && hDC == NULL) {
-        ST_DEBUG_LOG("WinAPI, close, currThreadId= " + currThreadId + ", threadIdOgl= " + threadIdOgl + ", threadIdWnd= " + threadIdWnd);
+    // release window resources
+    if(aThreadId == ThreadWnd && hDC == NULL) {
+        ST_DEBUG_LOG("WinAPI, close, aThreadId= " + aThreadId + ", ThreadGL= " + ThreadGL + ", ThreadWnd= " + ThreadWnd);
 
-        // are we able to Destroy the Window?
-        if(hWindowGl != NULL) {
-            if(DestroyWindow(hWindowGl) == 0) {
-                ST_DEBUG_LOG("WinAPI, FAILED to destroy the Window");
-                stMutex.unlock();
-                return false;
-            } else {
-                ST_DEBUG_LOG("WinAPI, Destroyed GLwindow");
-                hWindowGl = NULL;
-            }
-        }
-        if(hWindow != NULL) {
-            if(DestroyWindow(hWindow) == 0) {
-                ST_DEBUG_LOG("WinAPI, FAILED to destroy the Window");
-                stMutex.unlock();
-                return false;
-            } else {
-                ST_DEBUG_LOG("WinAPI, Destroyed window");
-                hWindow = NULL;
-            }
+        // destroy windows
+        if(!destroyWindow(hWindowGl)
+        || !destroyWindow(hWindow)) {
+            myMutex.unlock();
+            return false;
         }
 
-        // are we able to unregister Class
-        if(hWindowGl == NULL && hWindow == NULL && !classNameGl.isEmpty()) {
-            if(UnregisterClassW(classNameGl.toCString(), GetModuleHandle(NULL)) == 0) {
-                ST_DEBUG_LOG("WinAPI, FAILED to unregister Class= '" + classNameGl.toUtf8() + "'");
-                stMutex.unlock();
+        // unregister window classes
+        if(hWindowGl == NULL && hWindow == NULL) {
+            if(!unregisterClass(ClassGL)
+            || !unregisterClass(ClassBase)
+            || !unregisterClass(ClassTmp)) {
+                myMutex.unlock();
                 return false;
-            } else {
-                ST_DEBUG_LOG("WinAPI, Unregistered Class= " + classNameGl.toUtf8());
-                classNameGl.clear();
-            }
-        }
-        if(hWindowGl == NULL && hWindow == NULL && !className.isEmpty()) {
-            if(UnregisterClassW(className.toCString(), GetModuleHandle(NULL)) == 0) {
-                ST_DEBUG_LOG("WinAPI, FAILED to unregister Class= '" + className.toUtf8() + "'");
-                stMutex.unlock();
-                return false;
-            } else {
-                ST_DEBUG_LOG("WinAPI, Unregistered Class= " + className.toUtf8());
-                className.clear();
             }
         }
     }
-    stMutex.unlock();
-#elif (defined(__linux__) || defined(__linux))
+    myMutex.unlock();
+#elif defined(__linux__)
     // release active context
     hRC.nullify();
     if(!stXDisplay.isNull()) {
@@ -361,6 +335,83 @@ namespace {
 
 StStringUtfWide StWinHandles::getNewClassName() {
     return StStringUtfWide(L"StWindowClass") + StStringUtfWide(ST_CLASS_COUNTER.increment());
+}
+
+bool StWinHandles::registerClass(const StStringUtfWide& theName,
+                                 WNDPROC                theProc) {
+    HINSTANCE aModule = GetModuleHandleW(NULL);
+    WNDCLASSW aClass; stMemZero(&aClass, sizeof(aClass));
+    // redraw on resize, and request own DC for window
+    aClass.style         = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+    aClass.lpfnWndProc   = theProc;
+    aClass.cbClsExtra    = 0;
+    aClass.cbWndExtra    = 0;
+    aClass.hInstance     = aModule;
+    aClass.hIcon         = LoadIconW(aModule, L"A");
+    aClass.hCursor       = LoadCursor(NULL, IDC_ARROW);
+    aClass.hbrBackground = NULL;
+    aClass.lpszMenuName  = NULL;
+    aClass.lpszClassName = theName.toCString();
+    if(RegisterClassW(&aClass) == 0) {
+        stError(StString("WinAPI: Failed to register window class '") + theName.toUtf8() + "'");
+        return false;
+    }
+    return true;
+}
+
+bool StWinHandles::registerClasses(StWinHandles* theSlave,
+                                   WNDPROC       theProc) {
+    const StStringUtfWide aBase      = getNewClassName();
+    const StStringUtfWide aNameGl    = aBase + StStringUtfWide(L"Gl");
+    const StStringUtfWide aNameTmp   = aBase + StStringUtfWide(L"Tmp");
+    const StStringUtfWide aNameSlave = aBase + StStringUtfWide(L"SGl");
+    if(!registerClass(aBase, theProc)) {
+        return false;
+    }
+    ClassBase = aBase;
+
+    if(!registerClass(aNameGl, theProc)) {
+        return false;
+    }
+    ClassGL = aNameGl;
+
+    if(!registerClass(aNameTmp, theProc)) {
+        return false;
+    }
+    ClassTmp = aNameTmp;
+
+    if(theSlave != NULL) {
+        if(!registerClass(aNameSlave, theProc)) {
+            return false;
+        }
+        theSlave->ClassGL = aNameSlave;
+    }
+    return true;
+}
+
+bool StWinHandles::unregisterClass(StStringUtfWide& theName) {
+    HMODULE aModule = GetModuleHandleW(NULL);
+    if(!theName.isEmpty()) {
+        if(UnregisterClassW(theName.toCString(), aModule) == 0) {
+            ST_DEBUG_LOG("WinAPI, FAILED to unregister Class= '" + theName.toUtf8() + "'");
+            return false;
+        }
+        ST_DEBUG_LOG("WinAPI, Unregistered Class= " + theName.toUtf8());
+        theName.clear();
+    }
+    return true;
+}
+
+bool StWinHandles::destroyWindow(HWND& theWindow) {
+    if(theWindow != NULL) {
+        if(DestroyWindow(theWindow) == 0) {
+            ST_DEBUG_LOG("WinAPI, FAILED to destroy the Window");
+            return false;
+        }
+        ST_DEBUG_LOG("WinAPI, Destroyed window");
+        theWindow = NULL;
+    }
+    return true;
 }
 
 #else

@@ -214,16 +214,17 @@ void StWindowImpl::close() {
     hide(ST_WIN_MASTER);
     hide(ST_WIN_SLAVE);
 
-    mySlave.close(); // close GL contexts
+    // close GL contexts
+    mySlave.close();
     myMaster.close();
 #ifdef _WIN32
     SetEvent(myEventQuit);
-    size_t TIME_LIMIT = 60000;
-    size_t timeWait = 10000;
-    while(!myMaster.evMsgThread.wait(timeWait)) {
-        ST_DEBUG_LOG("WinAPI, wait for Message thread to quit " + (timeWait / 1000) + " seconds!");
-        timeWait += 10000;
-        if(timeWait > TIME_LIMIT) {
+    const size_t TIME_LIMIT = 60000;
+    size_t       aTimeWait  = 10000;
+    while(!myMaster.EventMsgThread.wait(aTimeWait)) {
+        ST_DEBUG_LOG("WinAPI, wait for Message thread to quit " + (aTimeWait / 1000) + " seconds!");
+        aTimeWait += 10000;
+        if(aTimeWait > TIME_LIMIT) {
             ST_DEBUG_LOG("WinAPI, Message thread was killed (timeout " + (TIME_LIMIT / 1000) + " seconds exceeded!)");
             myMsgThread->kill();
             break;

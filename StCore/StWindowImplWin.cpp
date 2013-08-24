@@ -72,23 +72,6 @@ bool StWindowImpl::create() {
     return (isGlCtx == STWIN_INIT_SUCCESS);
 }
 
-bool StWindowImpl::wndRegisterClass(const StStringUtfWide& theClassName) {
-    HINSTANCE hInstance = GetModuleHandleW(NULL);
-    WNDCLASSW wndClass;                                           // Windows Class Structure
-    wndClass.style         = CS_HREDRAW | CS_VREDRAW | CS_OWNDC; // Redraw On Size, And Own DC For Window.
-    wndClass.lpfnWndProc   = (WNDPROC )stWndProcWrapper;         // WndProc Handles Messages
-    wndClass.cbClsExtra    = 0;                                  // No Extra Window Data
-    wndClass.cbWndExtra    = 0;                                  // No Extra Window Data
-    wndClass.hInstance     = hInstance;                          // Set The Instance
-    // TODO (Kirill Gavrilov) change icon setup
-    wndClass.hIcon         = LoadIcon(hInstance, L"A");          // Load The Icon A
-    wndClass.hCursor       = LoadCursor(NULL, IDC_ARROW);        // Load The Arrow Pointer
-    wndClass.hbrBackground = NULL;                               // No Background Required For GL
-    wndClass.lpszMenuName  = NULL;                               // No menu
-    wndClass.lpszClassName = theClassName.toCString();           // Set The Class Name
-    return (RegisterClassW(&wndClass) != 0);
-}
-
 // Function create windows' handles in another thread (to take events impact-less to GL-rendering)
 static SV_THREAD_FUNCTION threadCreateWindows(void* inStWin) {
     StWindowImpl* stWin = (StWindowImpl* )inStWin;
@@ -97,38 +80,13 @@ static SV_THREAD_FUNCTION threadCreateWindows(void* inStWin) {
 }
 
 bool StWindowImpl::wndCreateWindows() {
-    StStringUtfWide aNewClassName = StWinHandles::getNewClassName();
-
-    // need we register class for Master window?
-    if(myParentWin == NULL) {
-        if(!wndRegisterClass(aNewClassName)) {
-            stError("WinAPI: Failed to register Master window class");
-            myInitState = STWIN_ERROR_WIN32_REGCLASS;
-            return false;
-        } else {
-            myMaster.className = aNewClassName;
-        }
-    }
-
-    aNewClassName += "Gl";
-    if(!wndRegisterClass(aNewClassName)) {
-        stError("WinAPI: Failed to register Master window class");
+    // register classes
+    if(!myMaster.registerClasses(attribs.Slave != StWinSlave_slaveOff ? &mySlave : NULL,
+                                 (WNDPROC )stWndProcWrapper)) {
         myInitState = STWIN_ERROR_WIN32_REGCLASS;
         return false;
-    } else {
-        myMaster.classNameGl = aNewClassName;
     }
-    if(attribs.Slave != StWinSlave_slaveOff) {
-        aNewClassName = StWinHandles::getNewClassName() + "Gl";
-        if(!wndRegisterClass(aNewClassName)) {
-            stError("WinAPI: Failed to register Slave window class");
-            myInitState = STWIN_ERROR_WIN32_REGCLASS;
-            return false;
-        } else {
-            mySlave.classNameGl = aNewClassName;
-        }
-    }
-    myMaster.threadIdWnd = mySlave.threadIdWnd = StThread::getCurrentThreadId();
+    myMaster.ThreadWnd = mySlave.ThreadWnd = StThread::getCurrentThreadId();
 
     // ========= At first - create windows' instances =========
     // parent Master window could be decorated - we parse this situation to get true coordinates
@@ -141,7 +99,7 @@ bool StWindowImpl::wndCreateWindows() {
     if(myParentWin == NULL) {
         // WS_EX_ACCEPTFILES - Drag&Drop support
         myMaster.hWindow = CreateWindowExW(WS_EX_APPWINDOW | WS_EX_WINDOWEDGE | WS_EX_ACCEPTFILES,
-                                           myMaster.className.toCString(),
+                                           myMaster.ClassBase.toCString(),
                                            myWindowTitle.toUtfWide().toCString(),
                                            (!attribs.IsNoDecor ? WS_OVERLAPPEDWINDOW : WS_POPUP) | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
                                            posLeft, posTop,
@@ -175,7 +133,7 @@ bool StWindowImpl::wndCreateWindows() {
     // we use WS_EX_NOPARENTNOTIFY style to prevent to send notify on destroing our child window (NPAPI plugin -> deadlock)
     DWORD masterWindowGl_dwExStyle = (myParentWin == NULL) ? WS_EX_NOACTIVATE : (WS_EX_NOACTIVATE | WS_EX_NOPARENTNOTIFY);
     myMaster.hWindowGl = CreateWindowExW(masterWindowGl_dwExStyle,
-                                         myMaster.classNameGl.toCString(),
+                                         myMaster.ClassGL.toCString(),
                                          myWindowTitle.toUtfWide().toCString(),
                                          WS_VISIBLE | WS_CHILD,  // this is child sub-window!
                                          0, 0, myRectNorm.width(), myRectNorm.height(),
@@ -190,7 +148,7 @@ bool StWindowImpl::wndCreateWindows() {
 
     if(attribs.Slave != StWinSlave_slaveOff) {
         mySlave.hWindowGl = CreateWindowExW(WS_EX_TOOLWINDOW | WS_EX_WINDOWEDGE | WS_EX_NOACTIVATE,
-                                            mySlave.classNameGl.toCString(),
+                                            mySlave.ClassGL.toCString(),
                                             L"Slave window",
                                             WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_DISABLED, // slave always disabled (hasn't input focus)!
                                             posLeft, posTop, // initialize slave window at same screen as master to workaround bugs in drivers that may prevent GL context sharing
@@ -230,7 +188,7 @@ bool StWindowImpl::wndCreateWindows() {
     }
 
     // always wait for message thread exit before quit
-    myMaster.evMsgThread.reset();
+    myMaster.EventMsgThread.reset();
 
     // ========= Start callback procedure =========
     if(!attribs.IsHidden && myParentWin == NULL) {
@@ -259,11 +217,11 @@ bool StWindowImpl::wndCreateWindows() {
                 mySlave.close();  // close window handles
                 myMaster.close();
 
-                mySlave.threadIdWnd  = 0;
-                myMaster.threadIdWnd = 0;
+                mySlave.ThreadWnd  = 0;
+                myMaster.ThreadWnd = 0;
 
                 ResetEvent(myEventQuit);
-                myMaster.evMsgThread.set(); // thread now exit, nothing should be after!
+                myMaster.EventMsgThread.set(); // thread now exit, nothing should be after!
                 return true;
             }
             case WAIT_OBJECT_0 + 1: {
@@ -749,7 +707,7 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
     anEvent.Size.Time  = getEventTime();
     anEvent.Size.SizeX = aRect.width();
     anEvent.Size.SizeY = aRect.height();
-    if(StThread::getCurrentThreadId() == myMaster.threadIdOgl) {
+    if(StThread::getCurrentThreadId() == myMaster.ThreadGL) {
         updateWindowPos();
         signals.onResize->emit(anEvent.Size);
     } else {
