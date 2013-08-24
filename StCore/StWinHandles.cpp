@@ -18,11 +18,12 @@
 
 #ifndef __APPLE__
 
+#include <StGL/StGLFunctions.h>
+#include <StGL/StGLContext.h>
+
 #include "StWinHandles.h"
 #include <StThreads/StThread.h>
 #include <StStrings/StLogger.h>
-#include <StGL/StGLContext.h>
-#include <StGL/StGLFunctions.h>
 
 #ifdef _WIN32
 

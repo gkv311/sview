@@ -25,8 +25,6 @@
 
 #ifdef __APPLE__
     #include <sys/sysctl.h>
-#elif defined(__linux__)
-    #include <sys/sysinfo.h>
 #endif
 
 namespace {

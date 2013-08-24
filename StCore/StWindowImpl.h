@@ -29,6 +29,8 @@
 #if defined(__APPLE__)
     #include <StCocoa/StCocoaCoords.h>
     #include <IOKit/pwr_mgt/IOPMLib.h>
+#elif !defined(_WIN32)
+    #include <sys/sysinfo.h>
 #endif
 
 class NSOpenGLContext;
