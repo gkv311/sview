@@ -124,7 +124,8 @@ class StWinHandles {
      */
     ST_LOCAL int glCreateContext(StWinHandles* theSlave,
                                  const int     theDepthSize,
-                                 const bool    theIsQuadStereo);
+                                 const bool    theIsQuadStereo,
+                                 const bool    theDebugCtx);
 
     /**
      * Close all handles.

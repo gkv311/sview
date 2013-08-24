@@ -62,6 +62,7 @@ StApplication::StApplication()
   myWinParent((StNativeWin_t )NULL),
   myRendId(ST_SETTING_AUTO_VALUE),
   myExitCode(0),
+  myGlDebug(false),
   myIsOpened(false),
   myToQuit(false) {
     stApplicationInit(NULL);
@@ -74,12 +75,16 @@ StApplication::StApplication(const StNativeWin_t         theParentWin,
   myWinParent(theParentWin),
   myRendId(ST_SETTING_AUTO_VALUE),
   myExitCode(0),
+  myGlDebug(false),
   myIsOpened(false),
   myToQuit(false) {
     stApplicationInit(theOpenInfo);
 }
 
 void StApplication::stApplicationInit(const StHandle<StOpenInfo>& theOpenInfo) {
+#ifdef __ST_DEBUG_GL__
+    myGlDebug = true;
+#endif
     StSettings aGlobalSettings("sview");
     params.ActiveDevice = new StEnumParam(0, "Change device");
     params.ActiveDevice->signals.onChanged.connect(this, &StApplication::doChangeDevice);
@@ -112,14 +117,19 @@ void StApplication::stApplicationInit(const StHandle<StOpenInfo>& theOpenInfo) {
     const StArgumentsMap anArgs = myOpenFileInfo->getArgumentsMap();
     const StString ARGUMENT_PLUGIN_OUT        = "out";
     const StString ARGUMENT_PLUGIN_OUT_DEVICE = "outDevice";
+    const StString ARGUMENT_GLDEBUG           = "gldebug";
     StArgument anArgRenderer = anArgs[ARGUMENT_PLUGIN_OUT];
     StArgument anArgDevice   = anArgs[ARGUMENT_PLUGIN_OUT_DEVICE];
+    StArgument anArgGlDebug  = anArgs[ARGUMENT_GLDEBUG];
     if(anArgRenderer.isValid()) {
         myRendId = anArgRenderer.getValue();
     }
     //if(anArgDevice.isValid()) {
     //    aDevice = anArgDevice.getValue();
     //}
+    if(anArgGlDebug.isValid()) {
+        myGlDebug = true;
+    }
 }
 
 StApplication::~StApplication() {
@@ -213,6 +223,13 @@ bool StApplication::open() {
             break;
         }
     }
+
+    // setup GL options before window creation
+    const StWinAttr anAttribs[] = {
+        StWinAttr_GlDebug, (StWinAttr )myGlDebug,
+        StWinAttr_NULL
+    };
+    myWindow->setAttributes(anAttribs);
 
     myIsOpened = myWindow->create();
     if(myIsOpened) {

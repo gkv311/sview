@@ -266,6 +266,7 @@ class StApplication {
     StOutDevicesList      myDevices;
     StString              myRendId;                //!< renderer ID
     int                   myExitCode;
+    bool                  myGlDebug;               //!< request debug OpenGL context
     bool                  myIsOpened;              //!< application execution state
     bool                  myToQuit;                //!< request for application termination
 

@@ -1,6 +1,7 @@
 *.h         text
 *.inl       text
 *.cpp       text
+*.conf      text
 *.mm        text
 *.c         text
 *.js        eol=lf

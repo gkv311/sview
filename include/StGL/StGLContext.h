@@ -269,6 +269,16 @@ class StGLContext {
         return myIsRectFboSupported;
     }
 
+    /**
+     * Proceed OpenGL debug message.
+     */
+    ST_CPPEXPORT virtual void stglDebugCallback(unsigned int theSource,
+                                                unsigned int theType,
+                                                unsigned int theId,
+                                                unsigned int theSeverity,
+                                                int          theLength,
+                                                const char*  theMessage);
+
         protected: //! @name auxiliary methods
 
     /**

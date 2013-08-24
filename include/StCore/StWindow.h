@@ -92,6 +92,7 @@ enum StWinSplit {
 enum StWinAttr {
     StWinAttr_NULL = 0,            //!< NULL-termination of array of the attributes
     StWinAttr_GlQuadStereo,        //!< boolean, request OpenGL context with Quad Buffer, turned OFF by default
+    StWinAttr_GlDebug,             //!< boolean, request Debug OpenGL context, FALSE by default
     StWinAttr_GlDepthSize,         //!< integer, minimum size of Depth Buffer (in bits) or 0 if not needed, 16 bit by default
     StWinAttr_ToBlockSleepSystem,  //!< boolean, prevent system  going to sleep (display could be turned off), FALSE by default
     StWinAttr_ToBlockSleepDisplay, //!< boolean, prevent display going to sleep, FALSE by default

@@ -700,6 +700,13 @@ struct StGLFunctions {
 
         public: //! @name OpenGL 4.3
 
+        public: //! @name GL_ARB_debug_output (optional)
+
+    PFNGLDEBUGMESSAGECONTROLARBPROC  glDebugMessageControlARB;
+    PFNGLDEBUGMESSAGEINSERTARBPROC   glDebugMessageInsertARB;
+    PFNGLDEBUGMESSAGECALLBACKARBPROC glDebugMessageCallbackARB;
+    PFNGLGETDEBUGMESSAGELOGARBPROC   glGetDebugMessageLogARB;
+
 #if defined(_WIN32)
         public: //! @name wgl extensions
 

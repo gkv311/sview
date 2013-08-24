@@ -238,7 +238,8 @@ bool StWindowImpl::create() {
 
     int isGlCtx = myMaster.glCreateContext(attribs.Slave != StWinSlave_slaveOff ? &mySlave : NULL,
                                            attribs.GlDepthSize,
-                                           attribs.IsGlStereo);
+                                           attribs.IsGlStereo,
+                                           attribs.IsGlDebug);
     if(isGlCtx != STWIN_INIT_SUCCESS) {
         myMaster.close();
         mySlave.close();

@@ -83,6 +83,7 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
     attribs.IsNoDecor      = false;
     attribs.IsStereoOutput = false;
     attribs.IsGlStereo     = false;
+    attribs.IsGlDebug      = false;
     attribs.GlDepthSize    = 16;
     attribs.IsFullScreen   = false;
     attribs.IsExclusiveFullScr = false;
@@ -300,6 +301,9 @@ void StWindowImpl::getAttributes(StWinAttr* theAttributes) const {
             case StWinAttr_GlQuadStereo:
                 anIter[1] = (StWinAttr )attribs.IsGlStereo;
                 break;
+            case StWinAttr_GlDebug:
+                anIter[1] = (StWinAttr )attribs.IsGlDebug;
+                break;
             case StWinAttr_GlDepthSize:
                 anIter[1] = (StWinAttr )attribs.GlDepthSize;
                 break;
@@ -338,6 +342,9 @@ void StWindowImpl::setAttributes(const StWinAttr* theAttributes) {
         switch(anIter[0]) {
             case StWinAttr_GlQuadStereo:
                 attribs.IsGlStereo = (anIter[1] == 1);
+                break;
+            case StWinAttr_GlDebug:
+                attribs.IsGlDebug  = (anIter[1] == 1);
                 break;
             case StWinAttr_GlDepthSize:
                 attribs.GlDepthSize = (int8_t )anIter[1];
