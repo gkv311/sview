@@ -33,6 +33,7 @@
 #include <StCore/StWinErrorCodes.h>
 #include <StThreads/StMutex.h>
 #include <StThreads/StCondition.h>
+#include <StTemplates/StRect.h>
 
 #ifndef __APPLE__
 /**
@@ -122,10 +123,11 @@ class StWinHandles {
      * Create 1 or 2 GL rendering contexts (and share them)
      * for opened windows handles.
      */
-    ST_LOCAL int glCreateContext(StWinHandles* theSlave,
-                                 const int     theDepthSize,
-                                 const bool    theIsQuadStereo,
-                                 const bool    theDebugCtx);
+    ST_LOCAL int glCreateContext(StWinHandles*    theSlave,
+                                 const StRectI_t& theRect,
+                                 const int        theDepthSize,
+                                 const bool       theIsQuadStereo,
+                                 const bool       theDebugCtx);
 
     /**
      * Close all handles.

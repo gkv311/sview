@@ -174,10 +174,11 @@ bool StWinHandles::glMakeCurrent() {
         return theErrCode; \
     }
 
-int StWinHandles::glCreateContext(StWinHandles* theSlave,
-                                  const int     theDepthSize,
-                                  const bool    theIsQuadStereo,
-                                  const bool    theDebugCtx) {
+int StWinHandles::glCreateContext(StWinHandles*    theSlave,
+                                  const StRectI_t& theRect,
+                                  const int        theDepthSize,
+                                  const bool       theIsQuadStereo,
+                                  const bool       theDebugCtx) {
 #ifdef _WIN32
     ThreadGL = StThread::getCurrentThreadId();
     ST_DEBUG_LOG("WinAPI, glCreateContext, ThreadGL= " + ThreadGL + ", ThreadWnd= " + ThreadWnd);
@@ -220,7 +221,7 @@ int StWinHandles::glCreateContext(StWinHandles* theSlave,
     hWinTmp = CreateWindowExW(WS_EX_TOOLWINDOW | WS_EX_WINDOWEDGE | WS_EX_NOACTIVATE,
                               ClassTmp.toCString(), L"TmpWnd",
                               WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_DISABLED,
-                              2, 2, 4, 4,
+                              theRect.left() + 2, theRect.top() + 2, 4, 4,
                               NULL, NULL, aModule, NULL);
     ST_GL_ERROR_CHECK(hWinTmp != NULL, STWIN_ERROR_WIN32_GLDC,
                       "WinAPI, Temporary window creation error");

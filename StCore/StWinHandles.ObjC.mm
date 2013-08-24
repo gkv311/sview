@@ -47,10 +47,11 @@ bool StWinHandles::glMakeCurrent() {
     return false;
 }
 
-int StWinHandles::glCreateContext(StWinHandles* theSlave,
-                                  const int     theDepthSize,
-                                  const bool    theIsQuadStereo,
-                                  const bool    theDebugCtx) {
+int StWinHandles::glCreateContext(StWinHandles*    theSlave,
+                                  const StRectI_t& theRect,
+                                  const int        theDepthSize,
+                                  const bool       theIsQuadStereo,
+                                  const bool       theDebugCtx) {
     return STWIN_INIT_SUCCESS;
 }
 
