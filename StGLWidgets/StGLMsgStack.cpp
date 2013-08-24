@@ -22,9 +22,9 @@ StGLMsgStack::~StGLMsgStack() {
 }
 
 void StGLMsgStack::stglResize() {
-    StGLWidget::stglResize();
     changeRectPx().bottom() = myRoot->getRectPx().height();
     changeRectPx().right()  = myRoot->getRectPx().width();
+    StGLWidget::stglResize();
 }
 
 void StGLMsgStack::stglUpdate(const StPointD_t& thePointZo) {
