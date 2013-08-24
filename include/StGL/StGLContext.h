@@ -279,7 +279,7 @@ class StGLContext {
                                                 int          theLength,
                                                 const char*  theMessage);
 
-        protected: //! @name auxiliary methods
+        public: //! @name auxiliary methods
 
     /**
      * Calls system function to retrieve GL function pointer by name.
@@ -290,8 +290,8 @@ class StGLContext {
      * Check string in specified string
      * (old way with huge string for all extensions).
      */
-    ST_CPPEXPORT bool stglCheckExtension(const char* theStringList,
-                                         const char* theName) const;
+    ST_CPPEXPORT static bool stglCheckExtension(const char* theStringList,
+                                                const char* theName);
 
     /**
      * Read OpenGL version information from active context.

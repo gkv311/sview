@@ -81,10 +81,31 @@ StWinGlrc::~StWinGlrc() {
 
 #else
 
-StWinGlrc::StWinGlrc(StHandle<StXDisplay>& theDisplay)
+typedef GLXContext (*glXCreateContextAttribsARB_t)(Display* , GLXFBConfig , GLXContext , Bool , const int* );
+
+StWinGlrc::StWinGlrc(StHandle<StXDisplay>& theDisplay,
+                     const bool            theDebugCtx)
 : myDisplay(theDisplay->hDisplay),
-  myRC(glXCreateContext(theDisplay->hDisplay, theDisplay->hVisInfo, None, true)) {
-    //
+  myRC(NULL) {
+    const char* aGlxExts = glXQueryExtensionsString(theDisplay->hDisplay, DefaultScreen(theDisplay->hDisplay));
+    if(StGLContext::stglCheckExtension(aGlxExts, "GLX_ARB_create_context_profile")) {
+        glXCreateContextAttribsARB_t aCreateCtxFunc = (glXCreateContextAttribsARB_t )glXGetProcAddress((const GLubyte* )"glXCreateContextAttribsARB");
+
+        int aCtxAttribs[] = {
+            //GLX_CONTEXT_MAJOR_VERSION_ARB, 2,
+            //GLX_CONTEXT_MINOR_VERSION_ARB, 0,
+            GLX_CONTEXT_FLAGS_ARB,        theDebugCtx ? GLX_CONTEXT_DEBUG_BIT_ARB : 0,
+            GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
+            None
+        };
+
+        myRC = aCreateCtxFunc(theDisplay->hDisplay, theDisplay->FBCfg, 0, True, aCtxAttribs);
+    }
+
+    if(myRC == NULL) {
+        // fallback compatibility mode
+        myRC = glXCreateContext(theDisplay->hDisplay, theDisplay->hVisInfo, None, true);
+    }
 }
 
 StWinGlrc::~StWinGlrc() {
@@ -294,7 +315,7 @@ int StWinHandles::glCreateContext(StWinHandles*    theSlave,
     return STWIN_INIT_SUCCESS;
 #elif defined(__linux__)
     // create an OpenGL rendering context
-    hRC = new StWinGlrc(stXDisplay);
+    hRC = new StWinGlrc(stXDisplay, theIsQuadStereo);
     ST_GL_ERROR_CHECK(hRC->isValid(),
                       STWIN_ERROR_X_GLRC_CREATE, "GLX, could not create rendering context for Master");
     if(theSlave != NULL) {

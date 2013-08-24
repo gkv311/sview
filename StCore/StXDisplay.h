@@ -19,12 +19,13 @@
 #ifndef __StXDisplay_h_
 #define __StXDisplay_h_
 
-#if(defined(__linux__) || defined(__linux))
+#if defined(__linux__)
 
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
+#include <GL/glx.h>
 
 #include <StStrings/StString.h>
 #include <StTemplates/StHandle.h>
@@ -41,6 +42,7 @@ class StXDisplay {
 
     Display*     hDisplay; // connection to the X-server
     XVisualInfo* hVisInfo; // visual info
+    GLXFBConfig     FBCfg;
 
     XIM      hInputMethod;
     XIC         hInputCtx;

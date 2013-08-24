@@ -201,7 +201,7 @@ bool StGLContext::stglCheckExtension(const char* theName) const {
 }
 
 bool StGLContext::stglCheckExtension(const char* theStringList,
-                                     const char* theName) const {
+                                     const char* theName) {
     if(theName == NULL || theStringList == NULL) {
         return false;
     }

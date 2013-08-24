@@ -49,7 +49,8 @@ class StWinGlrc {
 #ifdef _WIN32
     ST_LOCAL StWinGlrc(HDC theDC, HGLRC theRC);
 #else
-    ST_LOCAL StWinGlrc(StHandle<StXDisplay>& theDisplay);
+    ST_LOCAL StWinGlrc(StHandle<StXDisplay>& theDisplay,
+                       const bool            theDebugCtx);
 #endif
 
     /**

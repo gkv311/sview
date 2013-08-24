@@ -121,26 +121,70 @@ bool StWindowImpl::create() {
         return false;
     }
 
-    int aDblBuff[] = {
-        GLX_RGBA,
-        GLX_DEPTH_SIZE, attribs.GlDepthSize,
-        GLX_DOUBLEBUFFER,
+    int anAttribsBuff[] = {
+        GLX_STEREO,        attribs.IsGlStereo ? True : False,
+        GLX_X_RENDERABLE,  True,
+        GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
+        GLX_RENDER_TYPE,   GLX_RGBA_BIT,
+        GLX_X_VISUAL_TYPE, GLX_TRUE_COLOR,
+        GLX_RED_SIZE,      8,
+        GLX_GREEN_SIZE,    8,
+        GLX_BLUE_SIZE,     8,
+        GLX_ALPHA_SIZE,    8,
+        GLX_DEPTH_SIZE,    24,
+        GLX_STENCIL_SIZE,  8,
+        GLX_DOUBLEBUFFER,  True,
+        //GLX_SAMPLE_BUFFERS, 1,
+        //GLX_SAMPLES,        4,
         None
     };
 
-    if(attribs.IsGlStereo) {
-        // find an appropriate visual
-        int aQuadBuff[] = {
+    int aFBCount = 0;
+    GLXFBConfig* aFBCfgList = glXChooseFBConfig(hDisplay, DefaultScreen(hDisplay),
+                                                anAttribsBuff, &aFBCount);
+    if(aFBCfgList == NULL
+    && attribs.IsGlStereo) {
+        ST_ERROR_LOG("X, no Quad Buffered visual");
+        anAttribsBuff[1] = False;
+        aFBCfgList = glXChooseFBConfig(hDisplay, DefaultScreen(hDisplay),
+                                       anAttribsBuff, &aFBCount);
+    }
+    if(aFBCfgList != NULL
+    && aFBCount >= 1) {
+        stXDisplay->FBCfg    = aFBCfgList[0];
+        stXDisplay->hVisInfo = glXGetVisualFromFBConfig(hDisplay, stXDisplay->FBCfg);
+    } else {
+        // try to use glXChooseVisual... pointless?
+        int aDblBuff[] = {
             GLX_RGBA,
             GLX_DEPTH_SIZE, attribs.GlDepthSize,
             GLX_DOUBLEBUFFER,
-            GLX_STEREO,
             None
         };
+        if(attribs.IsGlStereo) {
+            // find an appropriate visual
+            int aQuadBuff[] = {
+                GLX_RGBA,
+                GLX_DEPTH_SIZE, attribs.GlDepthSize,
+                GLX_DOUBLEBUFFER,
+                GLX_STEREO,
+                None
+            };
 
-        stXDisplay->hVisInfo = glXChooseVisual(hDisplay, DefaultScreen(hDisplay), aQuadBuff);
-        if(stXDisplay->hVisInfo == NULL) {
-            ST_ERROR_LOG("X, no Quad Buffered visual");
+            stXDisplay->hVisInfo = glXChooseVisual(hDisplay, DefaultScreen(hDisplay), aQuadBuff);
+            if(stXDisplay->hVisInfo == NULL) {
+                ST_ERROR_LOG("X, no Quad Buffered visual");
+                stXDisplay->hVisInfo = glXChooseVisual(hDisplay, DefaultScreen(hDisplay), aDblBuff);
+                if(stXDisplay->hVisInfo == NULL) {
+                    myMaster.close();
+                    stError("X, no RGB visual with depth buffer");
+                    myInitState = STWIN_ERROR_X_NORGB;
+                    return false;
+                }
+            }
+        } else {
+            // find an appropriate visual
+            // find an OpenGL-capable RGB visual with depth buffer
             stXDisplay->hVisInfo = glXChooseVisual(hDisplay, DefaultScreen(hDisplay), aDblBuff);
             if(stXDisplay->hVisInfo == NULL) {
                 myMaster.close();
@@ -149,17 +193,9 @@ bool StWindowImpl::create() {
                 return false;
             }
         }
-    } else {
-        // find an appropriate visual
-        // find an OpenGL-capable RGB visual with depth buffer
-        stXDisplay->hVisInfo = glXChooseVisual(hDisplay, DefaultScreen(hDisplay), aDblBuff);
-        if(stXDisplay->hVisInfo == NULL) {
-            myMaster.close();
-            stError("X, no RGB visual with depth buffer");
-            myInitState = STWIN_ERROR_X_NORGB;
-            return false;
-        }
     }
+    XFree(aFBCfgList);
+
     if(attribs.Slave != StWinSlave_slaveOff) {
         // just copy handle
         mySlave.stXDisplay = stXDisplay;
