@@ -117,6 +117,7 @@ class StGLContext {
         public:    //! @name OpenGL functions - extensions
 
     StGLArbFbo*     arbFbo;     //!< GL_ARB_framebuffer_object
+    bool            arbNPTW;    //!< GL_ARB_texture_non_power_of_two
     StGLFunctions*  extAll;     //!< access to ALL extensions for advanced users
     bool            extSwapTear;//!< WGL_EXT_swap_control_tear/GLX_EXT_swap_control_tear
 
@@ -263,13 +264,6 @@ class StGLContext {
     ST_CPPEXPORT void stglResetErrors();
 
     /**
-     * Method to detect obsolete hardware.
-     */
-    inline bool stglIsRectangularFboSupported() const {
-        return myIsRectFboSupported;
-    }
-
-    /**
      * Proceed OpenGL debug message.
      */
     ST_CPPEXPORT virtual void stglDebugCallback(unsigned int theSource,
@@ -314,7 +308,6 @@ class StGLContext {
     GLint                   myVerMajor;           //!< cached GL version major number
     GLint                   myVerMinor;           //!< cached GL version minor number
     GLint                   myMaxTexDim;          //!< maximum texture dimension
-    bool                    myIsRectFboSupported; //!< compatibility flag
     bool                    myWasInit;            //!< initialization state
 
         protected: //! @name current state

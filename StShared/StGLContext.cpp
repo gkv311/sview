@@ -38,13 +38,13 @@ StGLContext::StGLContext()
   core42(NULL),
   core42back(NULL),
   arbFbo(NULL),
+  arbNPTW(false),
   extAll(NULL),
   extSwapTear(false),
   myFuncs(new StGLFunctions()),
   myGpuName(GPU_UNKNOWN),
   myVerMajor(0),
   myVerMinor(0),
-  myIsRectFboSupported(false),
   myWasInit(false) {
     stMemZero(&(*myFuncs), sizeof(StGLFunctions));
     extAll = &(*myFuncs);
@@ -65,13 +65,13 @@ StGLContext::StGLContext(const bool theToInitialize)
   core42(NULL),
   core42back(NULL),
   arbFbo(NULL),
+  arbNPTW(false),
   extAll(NULL),
   extSwapTear(false),
   myFuncs(new StGLFunctions()),
   myGpuName(GPU_UNKNOWN),
   myVerMajor(0),
   myVerMinor(0),
-  myIsRectFboSupported(false),
   myWasInit(false) {
     stMemZero(&(*myFuncs), sizeof(StGLFunctions));
     extAll = &(*myFuncs);
@@ -485,6 +485,7 @@ bool StGLContext::stglInit() {
     }
     extSwapTear = stglCheckExtension(aGlxExts, "GLX_EXT_swap_control_tear");
 #endif
+    arbNPTW = stglCheckExtension("GL_ARB_texture_non_power_of_two");
     if(stglCheckExtension("GL_ARB_debug_output")) {
         STGL_READ_FUNC(glDebugMessageControlARB);
         STGL_READ_FUNC(glDebugMessageInsertARB);
@@ -804,6 +805,12 @@ bool StGLContext::stglInit() {
     // load GL_ARB_copy_buffer (added to OpenGL 3.1 core)
     const bool hasCopyBufSubData = (isGlGreaterEqual(3, 1) || stglCheckExtension("GL_ARB_copy_buffer"))
          && STGL_READ_FUNC(glCopyBufferSubData);
+
+    if(has30) {
+        // NPOT textures are required by OpenGL 2.0 specifications
+        // but doesn't hardware accellerated by some ancient OpenGL 2.1 hardware (GeForce FX, RadeOn 9700 etc.)
+        arbNPTW = true;
+    }
 
     // load OpenGL 3.1 new functions
     has31 = isGlGreaterEqual(3, 1)
@@ -1154,18 +1161,7 @@ bool StGLContext::stglInit() {
          && hasShaderImgLoadStore
          && hasTextureStorage;
 
-    // It seems that all many problematic cards / drivers
-    // (FrameBuffer with non-power-of-two size corrupted / slowdown)
-    // are GLSL 1.1 limited (and OpenGL2.0).
-    // SURE - this is NOT rootcouse of the problem, but just some detection mechanism
-    const StCString aGLSL_old  = stCString("1.10");
-    // latest drivers for GeForce FX return GLSL1.2 vc OpenGL2.1 support level
-    // but slowdown rendering - so we detect them here.
-    const StCString aGeForceFX = stCString("GeForce FX");
-    const StString  aGLSLVersion((const char* )core11fwd->glGetString(GL_SHADING_LANGUAGE_VERSION));
     const StString  aGlRenderer ((const char* )core11fwd->glGetString(GL_RENDERER));
-    myIsRectFboSupported = !aGLSLVersion.isContains(aGLSL_old) && !aGlRenderer.isContains(aGeForceFX);
-
     if(aGlRenderer.isContains(stCString("GeForce"))) {
         myGpuName = GPU_GEFORCE;
     } else if(aGlRenderer.isContains(stCString("Quadro"))) {

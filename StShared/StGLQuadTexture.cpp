@@ -55,8 +55,12 @@ void StGLFrameTextures::increaseSize(StGLContext&      theCtx,
         const GLsizei anOriginalSizeY = theTexture.getSizeY();
 
         const GLint aMaxTexDim = theCtx.getMaxTextureSize();
-        GLsizei aNewSizeX = getPowerOfTwo(theTextureSizeX, GLsizei(aMaxTexDim));
-        GLsizei aNewSizeY = getPowerOfTwo(theTextureSizeY, GLsizei(aMaxTexDim));
+        GLsizei aNewSizeX = stMin(theTextureSizeX, GLsizei(aMaxTexDim));
+        GLsizei aNewSizeY = stMin(theTextureSizeY, GLsizei(aMaxTexDim));
+        if(!theCtx.arbNPTW) {
+            aNewSizeX = getPowerOfTwo(theTextureSizeX, GLsizei(aMaxTexDim));
+            aNewSizeY = getPowerOfTwo(theTextureSizeY, GLsizei(aMaxTexDim));
+        }
         if((aNewSizeY != anOriginalSizeY)
         || (aNewSizeX != anOriginalSizeX)) {
             if(!theTexture.initTrash(theCtx, aNewSizeX, aNewSizeY)) {
