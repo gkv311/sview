@@ -111,6 +111,7 @@ typedef struct tagStSlaveWindowCfg {
     int ySub;
 } StSlaveWindowCfg_t;
 
+class StGLContext;
 class StSearchMonitors;
 class StWindowImpl;
 
@@ -306,6 +307,11 @@ class StWindow {
      * @return GUI scale factor for compatibility with low-resolution and high-resolution displays
      */
     ST_CPPEXPORT virtual GLfloat getScaleFactor() const;
+
+    /**
+     * @return OpenGL context
+     */
+    ST_CPPEXPORT const StHandle<StGLContext>& getContext() const;
 
         public: //! @name renderer properties
 

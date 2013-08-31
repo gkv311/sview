@@ -22,6 +22,7 @@
 #include <StSys/StSys.h>
 #include <StThreads/StProcess.h>
 #include <StThreads/StThread.h>
+#include <StGL/StGLContext.h>
 
 #ifdef __APPLE__
     #include <sys/sysctl.h>
@@ -229,6 +230,7 @@ void StWindowImpl::close() {
     hide(ST_WIN_SLAVE);
 
     // close GL contexts
+    myGlContext.nullify();
     mySlave.close();
     myMaster.close();
 #ifdef _WIN32

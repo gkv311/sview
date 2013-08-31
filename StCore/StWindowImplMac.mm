@@ -22,6 +22,7 @@
 #include "stvkeysxarray.h" // X keys to VKEYs lookup array
 
 #include <StStrings/StLogger.h>
+#include <StGL/StGLContext.h>
 
 #include "StCocoaView.h"
 #include "StCocoaWin.h"
@@ -355,6 +356,12 @@ bool StWindowImpl::create() {
     }
 
     myMaster.glMakeCurrent();
+    myGlContext = new StGLContext();
+    if(!myGlContext->stglInit()) {
+        stError("Critical error - broken GL context!\nInvalid OpenGL driver?");
+        myInitState = STWIN_ERROR_COCOA_NO_GL;
+        return false;
+    }
 
     myIsUpdated = true;
     myInitState = STWIN_INIT_SUCCESS;

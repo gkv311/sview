@@ -59,13 +59,9 @@ bool StDiagnostics::open() {
     }
 
     // initialize GL context
-    myContext = new StGLContext();
+    myContext = myWindow->getContext();
     myContext->setMessagesQueue(myMsgQueue);
-    if(!myContext->stglInit()) {
-        myMsgQueue->pushError(stCString("StDiagnostics - critical error:\nOpenGL context is broken!\n(OpenGL library internal error?)"));
-        myMsgQueue->popAll();
-        return false;
-    } else if(!myContext->isGlGreaterEqual(2, 0)) {
+    if(!myContext->isGlGreaterEqual(2, 0)) {
         myMsgQueue->pushError(stCString("OpenGL 2.0 is required by StDiagnostics!"));
         myMsgQueue->popAll();
         return false;

@@ -390,12 +390,9 @@ bool StOutInterlace::create() {
     }
 
     // initialize GL context
-    myContext = new StGLContext();
+    myContext = StWindow::getContext();
     myContext->setMessagesQueue(myMsgQueue);
-    if(!myContext->stglInit()) {
-        myMsgQueue->pushError(stCString("Interlace output - critical error:\nOpenGL context is broken!\n(OpenGL library internal error?)"));
-        return false;
-    } else if(!myContext->isGlGreaterEqual(2, 0)) {
+    if(!myContext->isGlGreaterEqual(2, 0)) {
         myMsgQueue->pushError(stCString("OpenGL 2.0 is required by Interlace Output"));
         myIsBroken = true;
         return true;

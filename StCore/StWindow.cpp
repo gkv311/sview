@@ -249,6 +249,10 @@ GLfloat StWindow::getScaleFactor() const {
     return myWin->getScaleFactor();
 }
 
+const StHandle<StGLContext>& StWindow::getContext() const {
+    return myWin->myGlContext;
+}
+
 void StWindow::convertRectToBacking(StGLBoxPx& theRect,
                                     const int  theWinId) {
     return myWin->convertRectToBacking(theRect, theWinId);

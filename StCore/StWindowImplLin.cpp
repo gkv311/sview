@@ -22,6 +22,7 @@
 #include "stvkeysxarray.h" // X keys to VKEYs lookup array
 
 #include <StStrings/StLogger.h>
+#include <StGL/StGLContext.h>
 
 #include <X11/extensions/Xrandr.h>
 #include <X11/xpm.h>
@@ -291,6 +292,15 @@ bool StWindowImpl::create() {
         myMaster.close();
         mySlave.close();
         myInitState = isGlCtx;
+        return false;
+    }
+
+    myGlContext = new StGLContext();
+    if(!myGlContext->stglInit()) {
+        myMaster.close();
+        mySlave.close();
+        stError("Critical error - broken GL context!\nInvalid OpenGL driver?");
+        myInitState = STWIN_ERROR_X_GLRC_CREATE;
         return false;
     }
 

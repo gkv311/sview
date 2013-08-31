@@ -22,6 +22,7 @@
 
 #include <StStrings/StLogger.h>
 #include <StThreads/StThread.h>
+#include <StGL/StGLContext.h>
 
 #include <cmath>
 
@@ -70,6 +71,12 @@ bool StWindowImpl::create() {
                                            attribs.IsGlStereo,
                                            attribs.IsGlDebug);
     myEventInitGl.set();
+    myGlContext = new StGLContext();
+    if(!myGlContext->stglInit()) {
+        stError("Critical error - broken GL context!\nInvalid OpenGL driver?");
+        myInitState = STWIN_ERROR_WIN32_GLRC_ACTIVATE;
+        return false;
+    }
 
     return (isGlCtx == STWIN_INIT_SUCCESS);
 }

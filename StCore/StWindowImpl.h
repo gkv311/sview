@@ -34,6 +34,7 @@
 #endif
 
 class NSOpenGLContext;
+class StGLContext;
 class StThread;
 
 /**
@@ -243,6 +244,7 @@ class StWindowImpl {
 
     static StAtomic<int32_t> myFullScreenWinNb; //!< shared counter for fullscreen windows to detect inactive state
 
+    StHandle<StGLContext> myGlContext;
     StWinHandles       myMaster;          //!< master window
     StWinHandles       mySlave;           //!< slave  window (optional)
     StNativeWin_t      myParentWin;       //!< parent window (optional, for embedding)
