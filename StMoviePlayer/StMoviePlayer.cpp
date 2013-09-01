@@ -728,10 +728,6 @@ void StMoviePlayer::doKeyDown(const StKeyEvent& theEvent) {
 
     StApplication::doKeyDown(theEvent);
     switch(theEvent.VKey) {
-        case ST_VK_W:
-            myGUI->myImage->params.swapLR->reverse();
-            return;
-
         // file walk
         case ST_VK_I:
             myGUI->doAboutFile(0);
