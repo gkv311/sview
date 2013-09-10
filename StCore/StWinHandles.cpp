@@ -95,7 +95,7 @@ StWinGlrc::StWinGlrc(StHandle<StXDisplay>& theDisplay,
             //GLX_CONTEXT_MAJOR_VERSION_ARB, 2,
             //GLX_CONTEXT_MINOR_VERSION_ARB, 0,
             GLX_CONTEXT_FLAGS_ARB,        theDebugCtx ? GLX_CONTEXT_DEBUG_BIT_ARB : 0,
-            GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
+            //GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
             None
         };
 
@@ -289,10 +289,12 @@ int StWinHandles::glCreateContext(StWinHandles*    theSlave,
 
     HGLRC aRendCtx = NULL;
     if(aCtx.extAll->wglCreateContextAttribsARB != NULL) {
+        // Beware! NVIDIA drivers reject context creation when WGL_CONTEXT_PROFILE_MASK_ARB are specified
+        // but not WGL_CONTEXT_MAJOR_VERSION_ARB/WGL_CONTEXT_MINOR_VERSION_ARB
         int aCtxAttribs[] = {
             //WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
             //WGL_CONTEXT_MINOR_VERSION_ARB, 2,
-            WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB, //WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+            //WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB, //WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
             WGL_CONTEXT_FLAGS_ARB,         theDebugCtx ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
             0, 0
         };
