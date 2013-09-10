@@ -317,7 +317,7 @@ int StWinHandles::glCreateContext(StWinHandles*    theSlave,
     return STWIN_INIT_SUCCESS;
 #elif defined(__linux__)
     // create an OpenGL rendering context
-    hRC = new StWinGlrc(stXDisplay, theIsQuadStereo);
+    hRC = new StWinGlrc(stXDisplay, theDebugCtx);
     ST_GL_ERROR_CHECK(hRC->isValid(),
                       STWIN_ERROR_X_GLRC_CREATE, "GLX, could not create rendering context for Master");
     if(theSlave != NULL) {
