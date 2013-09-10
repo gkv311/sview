@@ -42,6 +42,7 @@ StXDisplay::StXDisplay()
   xDNDPlainText(None),
   xDNDPrimary(None),
   XA_TARGETS(None) {
+    stMemZero(&FBCfg, sizeof(GLXFBConfig)); // should be just a pointer
     open();
 }
 
