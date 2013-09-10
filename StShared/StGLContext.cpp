@@ -375,6 +375,7 @@ void StGLContext::stglResetScissorRect() {
 void StGLContext::stglResizeViewport(const StGLBoxPx& theRect) {
     const GLsizei aHeight = (theRect.height() == 0) ? 1 : theRect.height();
     core11fwd->glViewport(theRect.x(), theRect.y(), theRect.width(), aHeight);
+    myViewport = theRect;
 }
 
 bool StGLContext::stglSetVSync(const VSync_Mode theVSyncMode) {

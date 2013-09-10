@@ -253,7 +253,7 @@ void StGLStereoFrameBuffer::setVPDimensions(StGLContext&  theCtx,
 }
 
 void StGLStereoFrameBuffer::setupViewPort(StGLContext& theCtx) {
-    theCtx.core20fwd->glViewport(0, 0, myViewPortX, myViewPortY);
+    theCtx.stglResizeViewport(myViewPortX, myViewPortY);
 }
 
 void StGLStereoFrameBuffer::drawQuad(StGLContext& theCtx,

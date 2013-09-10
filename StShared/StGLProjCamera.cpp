@@ -90,7 +90,7 @@ void StGLProjCamera::resize(StGLContext&  theCtx,
     const GLsizei aSizeY = (theSizeY > 0) ? theSizeY : 1;
     myAspect = GLfloat(theSizeX) / GLfloat(aSizeY);
 
-    theCtx.core11fwd->glViewport(0, 0, theSizeX, aSizeY); // reset the current viewport
+    theCtx.stglResizeViewport(theSizeX, aSizeY); // reset the current viewport
     updateFrustum();
 }
 

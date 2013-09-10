@@ -571,7 +571,7 @@ void StOutDistorted::stglDraw() {
         aFrSizeX = int(std::ceil(double(aFrSizeX) * 1.25) + 0.5);
         aFrSizeY = int(std::ceil(double(aFrSizeY) * 1.25) + 0.5);
     }
-    if(!myFrBuffer->initLazy(*myContext, aFrSizeX, aFrSizeY, StWindow::hasDepthBuffer())) {
+    if(!myFrBuffer->initLazy(*myContext, GL_RGBA8, aFrSizeX, aFrSizeY, StWindow::hasDepthBuffer())) {
         myMsgQueue->pushError(stCString("Distorted output - critical error:\nFrame Buffer Object resize failed!"));
         myIsBroken = true;
         return;

@@ -10,12 +10,13 @@
 #define __StGLFrameBuffer_h_
 
 #include <StGL/StGLTexture.h>
+#include <StTemplates/StHandle.h>
 
 /**
  * Simple class represents Virtual (texture) stereo Frame buffer object.
  * This allow render to texture.
  */
-class StGLFrameBuffer : public StGLTexture {
+class StGLFrameBuffer : public StGLResource {
 
         public:
 
@@ -26,11 +27,6 @@ class StGLFrameBuffer : public StGLTexture {
      * Empty constructor.
      */
     ST_CPPEXPORT StGLFrameBuffer();
-
-    /**
-     * Empty constructor.
-     */
-    ST_CPPEXPORT StGLFrameBuffer(const GLint theTextureFormat);
 
     /**
      * Destructor - should be called after release()!
@@ -46,15 +42,25 @@ class StGLFrameBuffer : public StGLTexture {
      * Returns true if FBO was initialized.
      */
     inline bool isValid() const {
-        return isValidFrameBuffer() && StGLTexture::isValid();// && isValidDepthBuffer();
+        return isValidFrameBuffer()
+            && !myTextureColor.isNull()
+            && myTextureColor->isValid();
     }
 
     /**
      * Initialize the FBO with specified dimensions.
      */
     ST_CPPEXPORT bool init(StGLContext&  theCtx,
+                           const GLint   theTextureFormat,
                            const GLsizei theSizeX,
                            const GLsizei theSizeY,
+                           const bool    theNeedDepthBuffer);
+
+    /**
+     * Initialize the FBO with specified color texture.
+     */
+    ST_CPPEXPORT bool init(StGLContext&  theCtx,
+                           const StHandle<StGLTexture>& theColorTexture,
                            const bool    theNeedDepthBuffer);
 
     /**
@@ -66,10 +72,25 @@ class StGLFrameBuffer : public StGLTexture {
      * @param theToCompress      if set to true then FBO will be re-initialized with lesser dimensions
      */
     ST_CPPEXPORT bool initLazy(StGLContext&  theCtx,
+                               const GLint   theTextureFormat,
                                const GLsizei theSizeX,
                                const GLsizei theSizeY,
                                const bool    theNeedDepthBuffer,
                                const bool    theToCompress = true);
+
+    /**
+     * @return texture width.
+     */
+    inline GLsizei getSizeX() const {
+        return myTextureColor->getSizeX();
+    }
+
+    /**
+     * @return texture height.
+     */
+    inline GLsizei getSizeY() const {
+        return myTextureColor->getSizeY();
+    }
 
     /**
      * FBO viewport width.
@@ -125,15 +146,15 @@ class StGLFrameBuffer : public StGLTexture {
      * Bind color texture (to render the texture).
      */
     inline void bindTexture(StGLContext& theCtx,
-                     const GLenum theTextureUnit = GL_TEXTURE0) {
-        StGLTexture::bind(theCtx, theTextureUnit);
+                            const GLenum theTextureUnit = GL_TEXTURE0) {
+        myTextureColor->bind(theCtx, theTextureUnit);
     }
 
     /**
      * Unbind color texture.
      */
     inline void unbindTexture(StGLContext& theCtx) {
-        StGLTexture::unbind(theCtx);
+        myTextureColor->unbind(theCtx);
     }
 
     /**
@@ -142,6 +163,18 @@ class StGLFrameBuffer : public StGLTexture {
     ST_CPPEXPORT static void convertToPowerOfTwo(StGLContext& theCtx,
                                                  GLsizei&     theFrSizeX,
                                                  GLsizei&     theFrSizeY);
+
+    /**
+     * Detach texture from this FBO without destruction.
+     */
+    ST_CPPEXPORT void detachColorTexture(StGLContext&                 theCtx,
+                                         const StHandle<StGLTexture>& theTextureColor);
+
+    /**
+     * Create temporary FBO and clear specified texture using glClear call.
+     */
+    ST_CPPEXPORT static void clearTexture(StGLContext&                 theCtx,
+                                          const StHandle<StGLTexture>& theTexture);
 
         private:
 
@@ -161,6 +194,8 @@ class StGLFrameBuffer : public StGLTexture {
 
         private:
 
+    StHandle<StGLTexture> myTextureColor;
+
     GLuint  myGLFBufferId; //!< FrameBuffer  object ID
     GLuint  myGLDepthRBId; //!< RenderBuffer object for depth ID
     GLsizei myViewPortX;   //!< FBO viewport width  <= texture width
@@ -168,4 +203,4 @@ class StGLFrameBuffer : public StGLTexture {
 
 };
 
-#endif //__StGLFrameBuffer_h_
+#endif // __StGLFrameBuffer_h_

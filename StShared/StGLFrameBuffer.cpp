@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -16,17 +16,7 @@
 #include <stAssert.h>
 
 StGLFrameBuffer::StGLFrameBuffer()
-: StGLTexture(GL_RGBA8),
-  myGLFBufferId(NO_FRAMEBUFFER),
-  myGLDepthRBId(NO_RENDERBUFFER),
-  myViewPortX(0),
-  myViewPortY(0) {
-    //
-}
-
-StGLFrameBuffer::StGLFrameBuffer(const GLint theTextureFormat)
-: StGLTexture(theTextureFormat),
-  myGLFBufferId(NO_FRAMEBUFFER),
+: myGLFBufferId(NO_FRAMEBUFFER),
   myGLDepthRBId(NO_RENDERBUFFER),
   myViewPortX(0),
   myViewPortY(0) {
@@ -39,7 +29,9 @@ StGLFrameBuffer::~StGLFrameBuffer() {
 }
 
 void StGLFrameBuffer::release(StGLContext& theCtx) {
-    StGLTexture::release(theCtx);
+    if(!myTextureColor.isNull()) {
+        myTextureColor->release(theCtx);
+    }
     if(isValidDepthBuffer()) {
         theCtx.arbFbo->glDeleteRenderbuffers(1, &myGLDepthRBId);
         myGLDepthRBId = NO_RENDERBUFFER;
@@ -51,7 +43,7 @@ void StGLFrameBuffer::release(StGLContext& theCtx) {
 }
 
 void StGLFrameBuffer::setupViewPort(StGLContext& theCtx) {
-    theCtx.core11fwd->glViewport(0, 0, myViewPortX, myViewPortY);
+    theCtx.stglResizeViewport(myViewPortX, myViewPortY);
 }
 
 void StGLFrameBuffer::bindBuffer(StGLContext& theCtx) {
@@ -63,22 +55,22 @@ void StGLFrameBuffer::unbindBufferGlobal(StGLContext& theCtx) {
 }
 
 bool StGLFrameBuffer::initLazy(StGLContext&  theCtx,
+                               const GLint   theTextureFormat,
                                const GLsizei theSizeX,
                                const GLsizei theSizeY,
                                const bool    theNeedDepthBuffer,
                                const bool    theToCompress) {
     if(isValid()
-    && (theSizeX <= getSizeX() && getSizeX() < theCtx.getMaxTextureSize())
-    && (theSizeY <= getSizeY() && getSizeY() < theCtx.getMaxTextureSize())) {
+    && (theSizeX <= myTextureColor->getSizeX() && myTextureColor->getSizeX() < theCtx.getMaxTextureSize())
+    && (theSizeY <= myTextureColor->getSizeY() && myTextureColor->getSizeY() < theCtx.getMaxTextureSize())) {
         if(!theToCompress
-        || (((getSizeX() - theSizeX) < 256)
-        &&  ((getSizeY() - theSizeY) < 256))) {
+        || (((myTextureColor->getSizeX() - theSizeX) < 256)
+        &&  ((myTextureColor->getSizeY() - theSizeY) < 256))) {
             setVPSizeX(theSizeX);
             setVPSizeY(theSizeY);
             return true;
         }
     }
-    release(theCtx);
 
     GLsizei aSizeX = stMax(32, (GLsizei )getAligned(theSizeX, 256));
     GLsizei aSizeY = stMax(32, (GLsizei )getAligned(theSizeY, 256));
@@ -86,7 +78,7 @@ bool StGLFrameBuffer::initLazy(StGLContext&  theCtx,
         StGLFrameBuffer::convertToPowerOfTwo(theCtx, aSizeX, aSizeY);
     }
 
-    if(!init(theCtx, aSizeX, aSizeY, theNeedDepthBuffer)) {
+    if(!init(theCtx, theTextureFormat, aSizeX, aSizeY, theNeedDepthBuffer)) {
         return false;
     }
 
@@ -98,32 +90,55 @@ bool StGLFrameBuffer::initLazy(StGLContext&  theCtx,
 }
 
 bool StGLFrameBuffer::init(StGLContext&  theCtx,
+                           const GLint   theTextureFormat,
                            const GLsizei theSizeX,
                            const GLsizei theSizeY,
                            const bool    theNeedDepthBuffer) {
-    // release current object
-    release(theCtx);
-
     // create the texture
-    if(!StGLTexture::initTrash(theCtx, theSizeX, theSizeY)) {
+    if(myTextureColor.isNull()) {
+        myTextureColor = new StGLTexture(theTextureFormat);
+    }
+    if(!myTextureColor->initTrash(theCtx, theSizeX, theSizeY)) {
         release(theCtx);
         return false;
+    }
+    return init(theCtx, myTextureColor, theNeedDepthBuffer);
+}
+
+bool StGLFrameBuffer::init(StGLContext&  theCtx,
+                           const StHandle<StGLTexture>& theColorTexture,
+                           const bool    theNeedDepthBuffer) {
+    if(theColorTexture.isNull()) {
+        release(theCtx);
+        return false;
+    } else if(myTextureColor != theColorTexture) {
+        if(!myTextureColor.isNull()) {
+            myTextureColor->release(theCtx);
+        }
+        myTextureColor = theColorTexture;
     }
 
     if(theNeedDepthBuffer) {
         // create RenderBuffer (will be used as depth buffer)
-        theCtx.arbFbo->glGenRenderbuffers(1, &myGLDepthRBId);
+        if(myGLDepthRBId == NO_RENDERBUFFER) {
+            theCtx.arbFbo->glGenRenderbuffers(1, &myGLDepthRBId);
+        }
         theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, myGLDepthRBId);
-        theCtx.arbFbo->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, theSizeX, theSizeY);
+        theCtx.arbFbo->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT,
+                                             myTextureColor->getSizeX(), myTextureColor->getSizeY());
+    } else if(myGLDepthRBId != NO_RENDERBUFFER) {
+        theCtx.arbFbo->glDeleteRenderbuffers(1, &myGLDepthRBId);
+        myGLDepthRBId = NO_RENDERBUFFER;
     }
 
     // build FBO and setup it as texture
-    theCtx.arbFbo->glGenFramebuffers(1, &myGLFBufferId);
+    if(myGLFBufferId == NO_FRAMEBUFFER) {
+        theCtx.arbFbo->glGenFramebuffers(1, &myGLFBufferId);
+    }
     bindBuffer(theCtx);
-    // bind texture to the FBO as color buffer
-    StGLTexture::bind(theCtx);
+    // attach texture to the FBO as color buffer
     theCtx.arbFbo->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                                          StGLTexture::getTextureId(), 0);
+                                          myTextureColor->getTextureId(), 0);
     if(theNeedDepthBuffer) {
         // bind render buffer to the FBO as depth buffer
         theCtx.arbFbo->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
@@ -134,13 +149,54 @@ bool StGLFrameBuffer::init(StGLContext&  theCtx,
         theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, NO_RENDERBUFFER);
         return false;
     }
-    StGLTexture::unbind(theCtx);
     unbindBuffer(theCtx);
     theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, NO_RENDERBUFFER);
 
-    myViewPortX = theSizeX;
-    myViewPortY = theSizeY;
+    myViewPortX = myTextureColor->getSizeX();
+    myViewPortY = myTextureColor->getSizeY();
     return true;
+}
+
+void StGLFrameBuffer::detachColorTexture(StGLContext&                 theCtx,
+                                         const StHandle<StGLTexture>& theTextureColor) {
+    if(myGLFBufferId == NO_FRAMEBUFFER
+    || theTextureColor.isNull()
+    || myTextureColor != theTextureColor
+    || !myTextureColor->isValid()) {
+        return;
+    }
+
+    bindBuffer(theCtx);
+    theCtx.arbFbo->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                                          0, 0);
+    unbindBuffer(theCtx);
+    myTextureColor.nullify();
+}
+
+void StGLFrameBuffer::clearTexture(StGLContext&                 theCtx,
+                                   const StHandle<StGLTexture>& theTexture) {
+    StGLFrameBuffer aFbo;
+    if(!aFbo.init(theCtx, theTexture, false)) {
+        return;
+    }
+
+    const StGLBoxPx aVPortBack = theCtx.stglViewport();
+    aFbo.setupViewPort(theCtx);
+    if(theCtx.stglHasScissorRect()) {
+        theCtx.core11fwd->glDisable(GL_SCISSOR_TEST);
+    }
+
+    aFbo.bindBuffer(theCtx);
+    //theCtx.core11fwd->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    theCtx.core11fwd->glClear(GL_COLOR_BUFFER_BIT);
+    aFbo.unbindBuffer(theCtx);
+
+    aFbo.detachColorTexture(theCtx, theTexture);
+    aFbo.release(theCtx);
+    theCtx.stglResizeViewport(aVPortBack);
+    if(theCtx.stglHasScissorRect()) {
+        theCtx.core11fwd->glEnable(GL_SCISSOR_TEST);
+    }
 }
 
 void StGLFrameBuffer::convertToPowerOfTwo(StGLContext& theCtx,

@@ -17,6 +17,7 @@
  */
 
 #include <StGLCore/StGLCore11Fwd.h>
+#include <StGL/StGLContext.h>
 
 #include "StWindowImpl.h"
 
@@ -194,9 +195,15 @@ void StWindow::stglMakeCurrent(const int theWinEnum) {
 }
 
 void StWindow::stglDraw() {
+    if(myWin->myGlContext.isNull()) {
+        return;
+    }
+
     const StGLBoxPx aVPMaster = StWindow::stglViewport(ST_WIN_MASTER);
     const GLsizei aHeight = (aVPMaster .height() == 0) ? 1 : aVPMaster .height();
-    glViewport(aVPMaster .x(), aVPMaster .y(), aVPMaster .width(), aHeight);
+    const StGLBoxPx aRect = {{ aVPMaster.x(), aVPMaster.y(), aVPMaster.width(), aHeight }};
+    myWin->myGlContext->stglResizeViewport(aRect);
+
     signals.onRedraw(ST_DRAW_LEFT);
     stglSwap(ST_WIN_ALL);
 }

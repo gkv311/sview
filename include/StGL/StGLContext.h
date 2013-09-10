@@ -227,6 +227,13 @@ class StGLContext {
     ST_CPPEXPORT void stglResetScissorRect();
 
     /**
+     * @return true if scissor test was activated
+     */
+    ST_LOCAL inline bool stglHasScissorRect() const {
+        return !myScissorStack.empty();
+    }
+
+    /**
      * Setup viewport.
      */
     ST_CPPEXPORT void stglResizeViewport(const StGLBoxPx& theRect);
@@ -238,6 +245,13 @@ class StGLContext {
                                    const GLsizei theSizeY) {
         const StGLBoxPx aRect = {{ 0, 0, theSizeX, theSizeY }};
         stglResizeViewport(aRect);
+    }
+
+    /**
+     * @return current viewport rectangle
+     */
+    inline const StGLBoxPx& stglViewport() const {
+        return myViewport;
     }
 
     /**
@@ -313,6 +327,7 @@ class StGLContext {
         protected: //! @name current state
 
     std::stack<StGLBoxPx>   myScissorStack;       //!< cached stack of scissor rectangles
+    StGLBoxPx               myViewport;           //!< cached viewport rectangle
 
 };
 

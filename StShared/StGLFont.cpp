@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -10,6 +10,7 @@
 
 #include <StGLCore/StGLCore11.h>
 #include <StGL/StGLContext.h>
+#include <StGL/StGLFrameBuffer.h>
 
 #include <StStrings/StLogger.h>
 #include <stAssert.h>
@@ -62,15 +63,16 @@ bool StGLFont::createTexture(StGLContext& theCtx) {
     const size_t  aTilesPerRow  = aTextureSizeX / myTileSizeX;
     const GLsizei aTextureSizeY = getPowerOfTwo(GLint((aGlyphsNb / aTilesPerRow) + 1) * myTileSizeY, aMaxSize);
 
-    stMemSet(&myLastTilePx, 0, sizeof(myLastTilePx));
+    stMemZero(&myLastTilePx, sizeof(myLastTilePx));
     myLastTilePx.bottom() = myTileSizeY;
 
     myTextures.add(new StGLTexture(myTextureFormat));
     StHandle<StGLTexture>& aTexture = myTextures[myTextures.size() - 1];
-    ///return aTexture->initTrash(theCtx, aTextureSizeX, aTextureSizeY);
-    if(!aTexture->initBlack(theCtx, aTextureSizeX, aTextureSizeY)) {
+
+    if(!aTexture->initTrash(theCtx, aTextureSizeX, aTextureSizeY)) {
         return false;
     }
+    StGLFrameBuffer::clearTexture(theCtx, aTexture);
 
     aTexture->bind(theCtx);
     theCtx.core11fwd->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
