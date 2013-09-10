@@ -149,8 +149,8 @@ bool StWindowImpl::create() {
     int aFBCount = 0;
     GLXFBConfig* aFBCfgList = NULL;
     if(hasFBCfg) {
-        glXChooseFBConfig(hDisplay, DefaultScreen(hDisplay),
-                          anAttribsBuff, &aFBCount);
+        aFBCfgList = glXChooseFBConfig(hDisplay, DefaultScreen(hDisplay),
+                                       anAttribsBuff, &aFBCount);
     }
     if(aFBCfgList == NULL
     && hasFBCfg
