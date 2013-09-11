@@ -48,6 +48,7 @@ StGLContext::StGLContext()
   myWasInit(false) {
     stMemZero(&(*myFuncs), sizeof(StGLFunctions));
     extAll = &(*myFuncs);
+    stMemZero(&myViewport, sizeof(StGLBoxPx));
 #ifdef __APPLE__
     mySysLib.loadSimple("/System/Library/Frameworks/OpenGL.framework/Versions/Current/OpenGL");
 #endif
@@ -75,6 +76,7 @@ StGLContext::StGLContext(const bool theToInitialize)
   myWasInit(false) {
     stMemZero(&(*myFuncs), sizeof(StGLFunctions));
     extAll = &(*myFuncs);
+    stMemZero(&myViewport, sizeof(StGLBoxPx));
 #ifdef __APPLE__
     mySysLib.loadSimple("/System/Library/Frameworks/OpenGL.framework/Versions/Current/OpenGL");
 #endif
