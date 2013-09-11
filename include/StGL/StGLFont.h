@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,6 +11,7 @@
 
 #include <StFT/StFTFont.h>
 #include <StGL/StGLTexture.h>
+#include <StGL/StGLFrameBuffer.h>
 #include <StGL/StGLVec.h>
 #include <StTemplates/StRect.h>
 
@@ -36,6 +37,7 @@ struct StGLTile {
 };
 
 template<> inline void StArray< StHandle<StGLTexture> >::sort() {}
+template<> inline void StArray< StHandle<StGLFrameBuffer> >::sort() {}
 template<> inline void StArray<StGLTile>::sort() {}
 template<> inline void StArray<StGLRect>::sort() {}
 
@@ -152,8 +154,9 @@ class StGLFont : public StGLResource {
     StRect<int>        myLastTilePx;
     GLint              myTextureFormat;       //!< texture format
 
-    StArrayList< StHandle<StGLTexture> > myTextures; //!< texture list
-    StArrayList<StGLTile> myTiles;                   //!< tiles list
+    StArrayList< StHandle<StGLTexture> >     myTextures; //!< texture list
+    StArrayList< StHandle<StGLFrameBuffer> > myFbos;     //!< FBO list
+    StArrayList<StGLTile> myTiles;            //!< tiles list
 
     std::map<stUtf32_t, size_t> myGlyphMap;
 

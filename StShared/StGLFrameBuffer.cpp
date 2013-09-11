@@ -173,6 +173,28 @@ void StGLFrameBuffer::detachColorTexture(StGLContext&                 theCtx,
     myTextureColor.nullify();
 }
 
+void StGLFrameBuffer::clearTexture(StGLContext& theCtx) {
+    if(!isValid()) {
+        return;
+    }
+
+    const StGLBoxPx aVPortBack = theCtx.stglViewport();
+    setupViewPort(theCtx);
+    if(theCtx.stglHasScissorRect()) {
+        theCtx.core11fwd->glDisable(GL_SCISSOR_TEST);
+    }
+
+    bindBuffer(theCtx);
+    //theCtx.core11fwd->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    theCtx.core11fwd->glClear(GL_COLOR_BUFFER_BIT);
+    unbindBuffer(theCtx);
+
+    theCtx.stglResizeViewport(aVPortBack);
+    if(theCtx.stglHasScissorRect()) {
+        theCtx.core11fwd->glEnable(GL_SCISSOR_TEST);
+    }
+}
+
 void StGLFrameBuffer::clearTexture(StGLContext&                 theCtx,
                                    const StHandle<StGLTexture>& theTexture) {
     StGLFrameBuffer aFbo;
@@ -180,23 +202,9 @@ void StGLFrameBuffer::clearTexture(StGLContext&                 theCtx,
         return;
     }
 
-    const StGLBoxPx aVPortBack = theCtx.stglViewport();
-    aFbo.setupViewPort(theCtx);
-    if(theCtx.stglHasScissorRect()) {
-        theCtx.core11fwd->glDisable(GL_SCISSOR_TEST);
-    }
-
-    aFbo.bindBuffer(theCtx);
-    //theCtx.core11fwd->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    theCtx.core11fwd->glClear(GL_COLOR_BUFFER_BIT);
-    aFbo.unbindBuffer(theCtx);
-
+    aFbo.clearTexture(theCtx);
     aFbo.detachColorTexture(theCtx, theTexture);
     aFbo.release(theCtx);
-    theCtx.stglResizeViewport(aVPortBack);
-    if(theCtx.stglHasScissorRect()) {
-        theCtx.core11fwd->glEnable(GL_SCISSOR_TEST);
-    }
 }
 
 void StGLFrameBuffer::convertToPowerOfTwo(StGLContext& theCtx,

@@ -171,6 +171,11 @@ class StGLFrameBuffer : public StGLResource {
                                          const StHandle<StGLTexture>& theTextureColor);
 
     /**
+     * Clear texture using glClear call.
+     */
+    ST_CPPEXPORT void clearTexture(StGLContext& theCtx);
+
+    /**
      * Create temporary FBO and clear specified texture using glClear call.
      */
     ST_CPPEXPORT static void clearTexture(StGLContext&                 theCtx,

@@ -31,12 +31,18 @@ StGLFont::~StGLFont() {
 }
 
 void StGLFont::release(StGLContext& theCtx) {
+    for(size_t anIter = 0; anIter < myFbos.size(); ++anIter) {
+        StHandle<StGLFrameBuffer>& aFbo = myFbos.changeValue(anIter);
+        aFbo->release(theCtx);
+        aFbo.nullify();
+    }
     for(size_t anIter = 0; anIter < myTextures.size(); ++anIter) {
         StHandle<StGLTexture>& aTexture = myTextures.changeValue(anIter);
         aTexture->release(theCtx);
         aTexture.nullify();
     }
     myTextures.clear();
+    myFbos.clear();
 }
 
 bool StGLFont::stglInit(StGLContext& theCtx) {
@@ -67,17 +73,23 @@ bool StGLFont::createTexture(StGLContext& theCtx) {
     myLastTilePx.bottom() = myTileSizeY;
 
     myTextures.add(new StGLTexture(myTextureFormat));
-    StHandle<StGLTexture>& aTexture = myTextures[myTextures.size() - 1];
-
+    myFbos.add(new StGLFrameBuffer());
+    StHandle<StGLTexture>&     aTexture = myTextures[myTextures.size() - 1];
+    StHandle<StGLFrameBuffer>& aFbo     = myFbos    [myTextures.size() - 1];
     if(!aTexture->initTrash(theCtx, aTextureSizeX, aTextureSizeY)) {
         return false;
     }
-    StGLFrameBuffer::clearTexture(theCtx, aTexture);
-
     aTexture->bind(theCtx);
     theCtx.core11fwd->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     theCtx.core11fwd->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     aTexture->unbind(theCtx);
+
+    // destruction of temporary FBO produces broken texture on Catalyst drivers for unknown reason
+    //StGLFrameBuffer::clearTexture(theCtx, aTexture);
+    if(aFbo->init(theCtx, aTexture, false)) {
+        aFbo->clearTexture(theCtx);
+    }
+
     return true;
 }
 
