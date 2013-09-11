@@ -321,7 +321,7 @@ bool StOutPageFlip::dxInit() {
     GLsizei aFrBufferSizeY = aNvMonitor.getVRect().height();
 
     // INIT framebuffers
-    if(!myContext->stglIsRectangularFboSupported()) {
+    if(!myContext->arbNPTW) {
         StGLFrameBuffer::convertToPowerOfTwo(*myContext, aFrBufferSizeX, aFrBufferSizeY);
         myOutD3d.myToUsePBO = false; // force compatible mode
         ST_DEBUG_LOG(ST_OUT_PLUGIN_NAME + " Plugin, old videocard detected (GLSL 1.1)!");
@@ -383,7 +383,7 @@ void StOutPageFlip::dxActivate() {
 
             if(myOutD3d.myGLBuffer.isNull()) {
                 myOutD3d.myGLBuffer = new StGLFrameBuffer();
-                if(!myOutD3d.myGLBuffer->init(*myContext, (GLsizei )myOutD3d.myDxWindow->getFboSizeX(), (GLsizei )myOutD3d.myDxWindow->getFboSizeY(),
+                if(!myOutD3d.myGLBuffer->init(*myContext, GL_RGBA8, (GLsizei )myOutD3d.myDxWindow->getFboSizeX(), (GLsizei )myOutD3d.myDxWindow->getFboSizeY(),
                                               StWindow::hasDepthBuffer())) {
                     myMsgQueue->pushError(stCString("PageFlip output - Failed to init OpenGL Frame Buffer!"));
                     myOutD3d.myGLBuffer->release(*myContext);
