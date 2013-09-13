@@ -19,6 +19,7 @@
 #include <StThreads/StProcess.h>
 #include <StCore/StSearchMonitors.h>
 #include <StStrings/stConsole.h>
+#include <StSocket/StSocket.h>
 #include <StFile/StRawFile.h>
 #include <StVersion.h>
 
@@ -321,22 +322,31 @@ int main(int , char** ) { // force console output
     st::cout << aDumpStr;
     st::cout << stostream_text("\n\n");
 
-    st::ofstream aFileOut;
-    aFileOut.open("stMonitorsDump.txt");
+    std::ofstream aFileOut;
+    bool isTmpFile = false;
+    StString aFileName = "stMonitorsDump.htm";
+    aFileOut.open(aFileName.toCString());
     if(aFileOut.fail()) {
-        st::cout << st::COLOR_FOR_RED << stostream_text("Couldn't open file \"stMonitorsDump.txt\"!\n") << st::COLOR_FOR_WHITE;
-        st::cout << stostream_text("Press any key to exit...") << st::SYS_PAUSE_EMPTY;
-        return -1;
+        aFileName = StProcess::getTempFolder() + "/stMonitorsDump.htm";
+        isTmpFile = true;
+        aFileOut.open(aFileName.toCString());
+        if(aFileOut.fail()) {
+            st::cout << st::COLOR_FOR_RED << stostream_text("Couldn't open file \"stMonitorsDump.htm\"!\n") << st::COLOR_FOR_WHITE;
+            st::cout << stostream_text("Press any key to exit...") << st::SYS_PAUSE_EMPTY;
+            return -1;
+        }
     }
-    aFileOut << aDumpStr;
+    aFileOut << "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" /></head><body><pre>\n";
+    aFileOut.write(aDumpStr.toCString(), aDumpStr.getSize());
+    aFileOut << "</pre></body></html>\n";
     aFileOut.close();
 
-    st::cout << st::COLOR_FOR_GREEN << stostream_text("Dump stored to file \"stMonitorsDump.txt\"\n") << st::COLOR_FOR_WHITE;
+    st::cout << st::COLOR_FOR_GREEN << stostream_text("Dump stored to file \"stMonitorsDump.htm\"\n") << st::COLOR_FOR_WHITE;
 
-#ifdef _WIN32
-    system("notepad.exe stMonitorsDump.txt");
-#endif
-
+    StSocket::openURL(aFileName);
     st::cout << stostream_text("Press any key to exit...") << st::SYS_PAUSE_EMPTY;
+    if(isTmpFile) {
+        StFileNode::removeFile(aFileName);
+    }
     return 0;
 }
