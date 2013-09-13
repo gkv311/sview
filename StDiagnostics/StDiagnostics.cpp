@@ -160,7 +160,8 @@ void StDiagnostics::beforeDraw() {
 }
 
 void StDiagnostics::stglDraw(unsigned int theView) {
-    if(!myContext.isNull()) {
+    if(!myContext.isNull()
+    && myContext->core20fwd != NULL) {
         // clear the screen and the depth buffer
         myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
