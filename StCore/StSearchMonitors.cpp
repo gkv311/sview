@@ -118,15 +118,21 @@ void StSearchMonitors::findMonitorsWinAPI() {
     }
 
     // load HiDPI API for Win8.1+
+    typedef HRESULT (WINAPI *GetDpiForMonitor_t)(HMONITOR theMon,
+                                                 int      theDpiType, // MONITOR_DPI_TYPE
+                                                 UINT*    theDpiX,
+                                                 UINT*    theDpiY);
     typedef HRESULT (WINAPI *GetScaleFactorForMonitor_t)(HMONITOR   theMon,
                                                          int*       theScale);
     typedef HRESULT (WINAPI *RegisterScaleChangeEvent_t)(HANDLE     theEvent,
                                                          DWORD_PTR* theCookie);
     typedef HRESULT (WINAPI *UnregisterScaleChangeEvent_t)(DWORD_PTR theCookie);
     HMODULE aShcoreLib = GetModuleHandleW(L"Shcore");
-    GetScaleFactorForMonitor_t aMonScaleFunc = NULL;
+    GetDpiForMonitor_t         aMonDpiFunc   = NULL;
+    //GetScaleFactorForMonitor_t aMonScaleFunc = NULL;
     if(aShcoreLib != NULL) {
-        aMonScaleFunc = (GetScaleFactorForMonitor_t )GetProcAddress(aShcoreLib, "GetScaleFactorForMonitor");
+        aMonDpiFunc   = (GetDpiForMonitor_t         )GetProcAddress(aShcoreLib, "GetDpiForMonitor");
+        //aMonScaleFunc = (GetScaleFactorForMonitor_t )GetProcAddress(aShcoreLib, "GetScaleFactorForMonitor");
     }
 
     // collect system and monitor information, and display it using a message box
@@ -183,10 +189,15 @@ void StSearchMonitors::findMonitorsWinAPI() {
         }
         StMonitor aMon;
 
-        if(aMonScaleFunc != NULL) {
-            int aScalePercents = 100;
-            aMonScaleFunc(hMonitor, &aScalePercents);
-            aScale = float(aScalePercents) * 0.01f;
+        if(aMonDpiFunc != NULL) {
+            // theDpiType = MDT_Default = MDT_Effective_DPI = 0
+            UINT aDpiX = 96;
+            UINT aDpiY = 96;
+            aMonDpiFunc(hMonitor, 0, &aDpiX, &aDpiY);
+            aScale = float(aDpiX) / 96.0f; // 96 is 100% in Windows
+            //int aScalePercents = 100;
+            //aMonScaleFunc(hMonitor, &aScalePercents);
+            //aScale = float(aScalePercents) * 0.01f;
         }
         aMon.setScale(aScale);
 
