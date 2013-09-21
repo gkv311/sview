@@ -1205,6 +1205,9 @@ bool StGLContext::stglInit() {
 
     myWasInit = true;
 
+    // log OpenGL info
+    ST_DEBUG_LOG("Created new GL context:\n" + stglFullInfo());
+
     if(hasFBO) {
         arbFbo = (StGLArbFbo* )(&(*myFuncs));
     }
