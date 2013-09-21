@@ -30,27 +30,13 @@
 #include <StCocoa/StCocoaLocalPool.h>
 #include <StCocoa/StCocoaString.h>
 
+#include <OpenGL/CGLRenderers.h>
+
 #if !defined(MAC_OS_X_VERSION_10_7) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_7)
 @interface NSView (LionAPI)
     - (NSSize )convertSizeToBacking: (NSSize )theSize;
 @end
 #endif
-
-static const NSOpenGLPixelFormatAttribute THE_DOUBLE_BUFF[] = {
-    //NSOpenGLPFAColorSize, (NSOpenGLPixelFormatAttribute) 32,
-    //NSOpenGLPFADepthSize, (NSOpenGLPixelFormatAttribute) 0,
-    //NSOpenGLPFAStencilSize, 0,
-    NSOpenGLPFADoubleBuffer,
-    NSOpenGLPFAAccelerated,
-    0
-};
-
-static const NSOpenGLPixelFormatAttribute THE_QUAD_BUFF[] = {
-    NSOpenGLPFAStereo, 1,
-    NSOpenGLPFADoubleBuffer,
-    NSOpenGLPFAAccelerated,
-    0
-};
 
 void StWindowImpl::setTitle(const StString& theTitle) {
     myWindowTitle = theTitle;
@@ -290,36 +276,40 @@ bool StWindowImpl::create() {
 
     StCocoaLocalPool aLocalPool;
 
+    const bool isNoAccel = false;
+    const NSOpenGLPixelFormatAttribute aDummyAttrib = NSOpenGLPFACompliant;
+    NSOpenGLPixelFormatAttribute anAttribs[] = {
+        attribs.IsGlStereo ? NSOpenGLPFAStereo : aDummyAttrib,
+        //NSOpenGLPFAColorSize,   32,
+        //NSOpenGLPFADepthSize,   0,
+        //NSOpenGLPFAStencilSize, 0,
+        NSOpenGLPFADoubleBuffer,
+        isNoAccel ? NSOpenGLPFARendererID : NSOpenGLPFAAccelerated,
+        isNoAccel ? kCGLRendererGenericFloatID : 0,
+        0
+    };
+
     // create the Master GL context
     ///NSOpenGLPixelFormat* aGlFormatMaster = [[[NSOpenGLView class] defaultPixelFormat] retain];
     NSOpenGLPixelFormat* aGLFormat    = NULL;
     NSOpenGLContext* aGLContextMaster = NULL;
     NSOpenGLContext* aGLContextSlave  = NULL;
-    if(attribs.IsGlStereo) {
-        aGLFormat = [[[NSOpenGLPixelFormat alloc] initWithAttributes: THE_QUAD_BUFF] autorelease];
+
+    aGLFormat = [[[NSOpenGLPixelFormat alloc] initWithAttributes: anAttribs] autorelease];
+    aGLContextMaster = [[[NSOpenGLContext alloc] initWithFormat: aGLFormat
+                                                   shareContext: NULL] autorelease];
+    if(aGLContextMaster == NULL
+    && attribs.IsGlStereo) {
+        ST_ERROR_LOG("Cocoa, fail to create Quad Buffered OpenGL context");
+        anAttribs[0] = aDummyAttrib;
+        aGLFormat = [[[NSOpenGLPixelFormat alloc] initWithAttributes: anAttribs] autorelease];
         aGLContextMaster = [[[NSOpenGLContext alloc] initWithFormat: aGLFormat
                                                        shareContext: NULL] autorelease];
-        if(aGLContextMaster == NULL) {
-            aGLFormat = [[[NSOpenGLPixelFormat alloc] initWithAttributes: THE_DOUBLE_BUFF] autorelease];
-            aGLContextMaster = [[[NSOpenGLContext alloc] initWithFormat: aGLFormat
-                                                           shareContext: NULL] autorelease];
-            if(aGLContextMaster == NULL) {
-                stError("Cocoa, fail to create Double Buffered OpenGL context");
-                myInitState = STWIN_ERROR_COCOA_NO_GL;
-                return false;
-            } else {
-                ST_ERROR_LOG("Cocoa, fail to create Quad Buffered OpenGL context");
-            }
-        }
-    } else {
-        aGLFormat = [[[NSOpenGLPixelFormat alloc] initWithAttributes: THE_DOUBLE_BUFF] autorelease];
-        aGLContextMaster = [[[NSOpenGLContext alloc] initWithFormat: aGLFormat
-                                                       shareContext: NULL] autorelease];
-        if(aGLContextMaster == NULL) {
-            stError("Cocoa, fail to create Double Buffered OpenGL context");
-            myInitState = STWIN_ERROR_COCOA_NO_GL;
-            return false;
-        }
+    }
+    if(aGLContextMaster == NULL) {
+        stError("Cocoa, fail to create Double Buffered OpenGL context");
+        myInitState = STWIN_ERROR_COCOA_NO_GL;
+        return false;
     }
 
     // create the Slave GL context
