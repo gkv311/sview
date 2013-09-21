@@ -120,6 +120,10 @@ bool StGLStereoFrameBuffer::init(StGLContext&  theCtx,
         return false;
     }
 
+    const GLuint aFboBakDraw = theCtx.stglFramebufferDraw();
+    const GLuint aFboBakRead = theCtx.stglFramebufferRead();
+    theCtx.stglBindFramebuffer(StGLFrameBuffer::NO_FRAMEBUFFER);
+
     if(theNeedDepthBuffer) {
         // generate RenderBuffers (will be used as depth buffer)
         theCtx.arbFbo->glGenRenderbuffers(2, myGLDepthRBIds);
@@ -131,10 +135,9 @@ bool StGLStereoFrameBuffer::init(StGLContext&  theCtx,
 
     // build FBOs
     theCtx.arbFbo->glGenFramebuffers(2, myGLFBufferIds);
-    theCtx.arbFbo->glBindFramebuffer(GL_FRAMEBUFFER, myGLFBufferIds[StGLStereoTexture::LEFT_TEXTURE]);
+    theCtx.stglBindFramebuffer(myGLFBufferIds[StGLStereoTexture::LEFT_TEXTURE]);
 
     // bind left texture to left FBO as color buffer
-    StGLStereoTexture::bindLeft(theCtx);
     theCtx.arbFbo->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                                           StGLStereoTexture::myTextures[StGLStereoTexture::LEFT_TEXTURE].getTextureId(), 0);
     if(theNeedDepthBuffer) {
@@ -142,13 +145,15 @@ bool StGLStereoFrameBuffer::init(StGLContext&  theCtx,
         theCtx.arbFbo->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
                                                  myGLFBufferIds[StGLStereoTexture::LEFT_TEXTURE]);
     }
-    if(theCtx.arbFbo->glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+    bool isOk = theCtx.arbFbo->glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+    theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, StGLFrameBuffer::NO_RENDERBUFFER);
+    if(!isOk) {
         release(theCtx);
-        theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, StGLFrameBuffer::NO_RENDERBUFFER);
+        theCtx.stglBindFramebufferDraw(aFboBakDraw);
+        theCtx.stglBindFramebufferRead(aFboBakRead);
         return false;
     }
-    unbindBufferLeft(theCtx);
-    StGLStereoTexture::unbindLeft(theCtx);
+    theCtx.stglBindFramebuffer(StGLFrameBuffer::NO_FRAMEBUFFER);
 
     if(theNeedDepthBuffer) {
         // create right RenderBuffer (will be used as depth buffer)
@@ -156,10 +161,9 @@ bool StGLStereoFrameBuffer::init(StGLContext&  theCtx,
         theCtx.arbFbo->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, theTextureSizeX, theTextureSizeY);
     }
 
-    theCtx.arbFbo->glBindFramebuffer(GL_FRAMEBUFFER, myGLFBufferIds[StGLStereoTexture::RIGHT_TEXTURE]);
+    theCtx.stglBindFramebuffer(myGLFBufferIds[StGLStereoTexture::RIGHT_TEXTURE]);
 
     // bind right texture to rights FBO as color buffer
-    StGLStereoTexture::bindRight(theCtx);
     theCtx.arbFbo->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                                           StGLStereoTexture::myTextures[StGLStereoTexture::RIGHT_TEXTURE].getTextureId(), 0);
 
@@ -168,14 +172,14 @@ bool StGLStereoFrameBuffer::init(StGLContext&  theCtx,
         theCtx.arbFbo->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
                                                  myGLFBufferIds[StGLStereoTexture::RIGHT_TEXTURE]);
     }
-    if(theCtx.arbFbo->glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+    isOk = theCtx.arbFbo->glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+    theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, StGLFrameBuffer::NO_RENDERBUFFER);
+    theCtx.stglBindFramebufferDraw(aFboBakDraw);
+    theCtx.stglBindFramebufferRead(aFboBakRead);
+    if(!isOk) {
         release(theCtx);
-        theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, StGLFrameBuffer::NO_RENDERBUFFER);
         return false;
     }
-    unbindBufferRight(theCtx);
-    StGLStereoTexture::unbindRight(theCtx);
-    theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, StGLFrameBuffer::NO_RENDERBUFFER);
 
     ST_DEBUG_LOG("OpenGL, created StFrameBuffer(WxH= " + getSizeX() + 'x' + getSizeY() + ')');
 
@@ -268,9 +272,9 @@ void StGLStereoFrameBuffer::drawQuad(StGLContext& theCtx,
 }
 
 void StGLStereoFrameBuffer::bindBufferLeft(StGLContext& theCtx) {
-    theCtx.arbFbo->glBindFramebuffer(GL_FRAMEBUFFER, myGLFBufferIds[StGLStereoTexture::LEFT_TEXTURE]);
+    theCtx.stglBindFramebuffer(myGLFBufferIds[StGLStereoTexture::LEFT_TEXTURE]);
 }
 
 void StGLStereoFrameBuffer::bindBufferRight(StGLContext& theCtx) {
-    theCtx.arbFbo->glBindFramebuffer(GL_FRAMEBUFFER, myGLFBufferIds[StGLStereoTexture::RIGHT_TEXTURE]);
+    theCtx.stglBindFramebuffer(myGLFBufferIds[StGLStereoTexture::RIGHT_TEXTURE]);
 }

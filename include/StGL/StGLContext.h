@@ -118,6 +118,7 @@ class StGLContext {
 
     StGLArbFbo*     arbFbo;     //!< GL_ARB_framebuffer_object
     bool            arbNPTW;    //!< GL_ARB_texture_non_power_of_two
+    bool            arbTexRG;   //!< GL_ARB_texture_rg
     StGLFunctions*  extAll;     //!< access to ALL extensions for advanced users
     bool            extSwapTear;//!< WGL_EXT_swap_control_tear/GLX_EXT_swap_control_tear
 
@@ -263,6 +264,35 @@ class StGLContext {
     }
 
     /**
+     * @return currently bound FBO for drawing operations
+     */
+    inline GLuint stglFramebufferDraw() const {
+        return myFramebufferDraw;
+    }
+
+    /**
+     * @return currently bound FBO for reading operations
+     */
+    inline GLuint stglFramebufferRead() const {
+        return myFramebufferDraw;
+    }
+
+    /**
+     * Setup new FBO for drawing operations
+     */
+    ST_CPPEXPORT void stglBindFramebufferDraw(const GLuint theFramebuffer);
+
+    /**
+     * Setup new FBO for reading operations
+     */
+    ST_CPPEXPORT void stglBindFramebufferRead(const GLuint theFramebuffer);
+
+    /**
+     * Setup new FBO for both - drawing and reading operations
+     */
+    ST_CPPEXPORT void stglBindFramebuffer(const GLuint theFramebuffer);
+
+    /**
      * Control VSync.
      */
     ST_CPPEXPORT bool stglSetVSync(const VSync_Mode theVSyncMode);
@@ -328,6 +358,8 @@ class StGLContext {
 
     std::stack<StGLBoxPx>   myScissorStack;       //!< cached stack of scissor rectangles
     StGLBoxPx               myViewport;           //!< cached viewport rectangle
+    GLuint                  myFramebufferDraw;    //!< bound draw buffer
+    GLuint                  myFramebufferRead;    //!< bound read buffer
 
 };
 

@@ -14,6 +14,7 @@
 #include <StGL/StGLFunctions.h>
 
 #include <StGLCore/StGLCore42.h>
+#include <StGL/StGLArbFbo.h>
 
 #include <StStrings/StLogger.h>
 
@@ -39,13 +40,16 @@ StGLContext::StGLContext()
   core42back(NULL),
   arbFbo(NULL),
   arbNPTW(false),
+  arbTexRG(false),
   extAll(NULL),
   extSwapTear(false),
   myFuncs(new StGLFunctions()),
   myGpuName(GPU_UNKNOWN),
   myVerMajor(0),
   myVerMinor(0),
-  myWasInit(false) {
+  myWasInit(false),
+  myFramebufferDraw(0),
+  myFramebufferRead(0) {
     stMemZero(&(*myFuncs), sizeof(StGLFunctions));
     extAll = &(*myFuncs);
     stMemZero(&myViewport, sizeof(StGLBoxPx));
@@ -67,13 +71,16 @@ StGLContext::StGLContext(const bool theToInitialize)
   core42back(NULL),
   arbFbo(NULL),
   arbNPTW(false),
+  arbTexRG(false),
   extAll(NULL),
   extSwapTear(false),
   myFuncs(new StGLFunctions()),
   myGpuName(GPU_UNKNOWN),
   myVerMajor(0),
   myVerMinor(0),
-  myWasInit(false) {
+  myWasInit(false),
+  myFramebufferDraw(0),
+  myFramebufferRead(0) {
     stMemZero(&(*myFuncs), sizeof(StGLFunctions));
     extAll = &(*myFuncs);
     stMemZero(&myViewport, sizeof(StGLBoxPx));
@@ -380,6 +387,22 @@ void StGLContext::stglResizeViewport(const StGLBoxPx& theRect) {
     myViewport = theRect;
 }
 
+void StGLContext::stglBindFramebufferDraw(const GLuint theFramebuffer) {
+    myFramebufferDraw = theFramebuffer;
+    arbFbo->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, theFramebuffer);
+}
+
+void StGLContext::stglBindFramebufferRead(const GLuint theFramebuffer) {
+    myFramebufferRead = theFramebuffer;
+    arbFbo->glBindFramebuffer(GL_READ_FRAMEBUFFER, theFramebuffer);
+}
+
+void StGLContext::stglBindFramebuffer(const GLuint theFramebuffer) {
+    myFramebufferDraw = theFramebuffer;
+    myFramebufferRead = theFramebuffer;
+    arbFbo->glBindFramebuffer(GL_FRAMEBUFFER, theFramebuffer);
+}
+
 bool StGLContext::stglSetVSync(const VSync_Mode theVSyncMode) {
     GLint aSyncInt = 0;
     switch(theVSyncMode) {
@@ -488,7 +511,8 @@ bool StGLContext::stglInit() {
     }
     extSwapTear = stglCheckExtension(aGlxExts, "GLX_EXT_swap_control_tear");
 #endif
-    arbNPTW = stglCheckExtension("GL_ARB_texture_non_power_of_two");
+    arbNPTW  = stglCheckExtension("GL_ARB_texture_non_power_of_two");
+    arbTexRG = stglCheckExtension("GL_ARB_texture_rg");
     if(stglCheckExtension("GL_ARB_debug_output")) {
         STGL_READ_FUNC(glDebugMessageControlARB);
         STGL_READ_FUNC(glDebugMessageInsertARB);
@@ -812,7 +836,8 @@ bool StGLContext::stglInit() {
     if(has30) {
         // NPOT textures are required by OpenGL 2.0 specifications
         // but doesn't hardware accellerated by some ancient OpenGL 2.1 hardware (GeForce FX, RadeOn 9700 etc.)
-        arbNPTW = true;
+        arbNPTW  = true;
+        arbTexRG = true;
     }
 
     // load OpenGL 3.1 new functions

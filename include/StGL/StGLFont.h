@@ -152,7 +152,6 @@ class StGLFont : public StGLResource {
     GLsizei            myTileSizeY;           //!< tile height
     size_t             myLastTileId;          //!< id of last tile
     StRect<int>        myLastTilePx;
-    GLint              myTextureFormat;       //!< texture format
 
     StArrayList< StHandle<StGLTexture> >     myTextures; //!< texture list
     StArrayList< StHandle<StGLFrameBuffer> > myFbos;     //!< FBO list

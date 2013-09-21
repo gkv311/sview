@@ -21,12 +21,7 @@ class StGLTextArea::StTextProgram : public StGLProgram {
         public:
 
     StTextProgram()
-    : StGLProgram("StGLTextArea, Text Program"),
-      uniProjMatLoc(),
-      uniModelMatLoc(),
-      uniTextColorLoc(),
-      atrVVertexLoc(),
-      atrVTexCoordLoc() {
+    : StGLProgram("StGLTextArea, Text Program") {
         //
     }
 
@@ -65,13 +60,20 @@ class StGLTextArea::StTextProgram : public StGLProgram {
                 gl_Position = uProjMat * uModelMat * vVertex; \
             }";
 
+        const char FRAGMENT_GET_RED[] =
+           "float getAlpha(void) { return texture2D(uTexture, fTexCoord).r; }";
+
+        const char FRAGMENT_GET_ALPHA[] =
+           "float getAlpha(void) { return texture2D(uTexture, fTexCoord).a; }";
+
         const char FRAGMENT_SHADER[] =
            "uniform sampler2D uTexture;"
            "uniform vec4 uTextColor;"
            "varying vec2 fTexCoord;"
+           "float getAlpha(void);"
            "void main(void) {"
            "     vec4 color = uTextColor;"
-           "     color.a *= texture2D(uTexture, fTexCoord).a;"
+           "     color.a *= getAlpha();"
            "     gl_FragColor = color;"
            "}";
 
@@ -80,7 +82,8 @@ class StGLTextArea::StTextProgram : public StGLProgram {
         StGLAutoRelease aTmp1(theCtx, aVertexShader);
 
         StGLFragmentShader aFragmentShader(StGLProgram::getTitle());
-        aFragmentShader.init(theCtx, FRAGMENT_SHADER);
+        aFragmentShader.init(theCtx, FRAGMENT_SHADER,
+                             theCtx.arbTexRG ? FRAGMENT_GET_RED : FRAGMENT_GET_ALPHA);
         StGLAutoRelease aTmp2(theCtx, aFragmentShader);
         if(!StGLProgram::create(theCtx)
            .attachShader(theCtx, aVertexShader)

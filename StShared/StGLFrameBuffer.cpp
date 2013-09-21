@@ -47,11 +47,11 @@ void StGLFrameBuffer::setupViewPort(StGLContext& theCtx) {
 }
 
 void StGLFrameBuffer::bindBuffer(StGLContext& theCtx) {
-    theCtx.arbFbo->glBindFramebuffer(GL_FRAMEBUFFER, myGLFBufferId);
+    theCtx.stglBindFramebuffer(myGLFBufferId);
 }
 
 void StGLFrameBuffer::unbindBufferGlobal(StGLContext& theCtx) {
-    theCtx.arbFbo->glBindFramebuffer(GL_FRAMEBUFFER, NO_FRAMEBUFFER);
+    theCtx.stglBindFramebuffer(NO_FRAMEBUFFER);
 }
 
 bool StGLFrameBuffer::initLazy(StGLContext&  theCtx,
@@ -108,7 +108,8 @@ bool StGLFrameBuffer::init(StGLContext&  theCtx,
 bool StGLFrameBuffer::init(StGLContext&  theCtx,
                            const StHandle<StGLTexture>& theColorTexture,
                            const bool    theNeedDepthBuffer) {
-    if(theColorTexture.isNull()) {
+    if(theColorTexture.isNull()
+    || theCtx.arbFbo == NULL) {
         release(theCtx);
         return false;
     } else if(myTextureColor != theColorTexture) {
@@ -117,6 +118,10 @@ bool StGLFrameBuffer::init(StGLContext&  theCtx,
         }
         myTextureColor = theColorTexture;
     }
+
+    const GLuint aFboBakDraw = theCtx.stglFramebufferDraw();
+    const GLuint aFboBakRead = theCtx.stglFramebufferRead();
+    theCtx.stglBindFramebuffer(NO_FRAMEBUFFER);
 
     if(theNeedDepthBuffer) {
         // create RenderBuffer (will be used as depth buffer)
@@ -144,13 +149,17 @@ bool StGLFrameBuffer::init(StGLContext&  theCtx,
         theCtx.arbFbo->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
                                                  myGLFBufferId);
     }
-    if(theCtx.arbFbo->glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        release(theCtx);
+    const bool isOk = theCtx.arbFbo->glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+    if(myGLDepthRBId != NO_RENDERBUFFER) {
         theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, NO_RENDERBUFFER);
+    }
+    theCtx.stglBindFramebufferDraw(aFboBakDraw);
+    theCtx.stglBindFramebufferRead(aFboBakRead);
+
+    if(!isOk) {
+        release(theCtx);
         return false;
     }
-    unbindBuffer(theCtx);
-    theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, NO_RENDERBUFFER);
 
     myViewPortX = myTextureColor->getSizeX();
     myViewPortY = myTextureColor->getSizeY();
@@ -178,6 +187,9 @@ void StGLFrameBuffer::clearTexture(StGLContext& theCtx) {
         return;
     }
 
+    const GLuint aFboBakDraw = theCtx.stglFramebufferDraw();
+    const GLuint aFboBakRead = theCtx.stglFramebufferRead();
+
     const StGLBoxPx aVPortBack = theCtx.stglViewport();
     setupViewPort(theCtx);
     if(theCtx.stglHasScissorRect()) {
@@ -187,7 +199,8 @@ void StGLFrameBuffer::clearTexture(StGLContext& theCtx) {
     bindBuffer(theCtx);
     //theCtx.core11fwd->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     theCtx.core11fwd->glClear(GL_COLOR_BUFFER_BIT);
-    unbindBuffer(theCtx);
+    theCtx.stglBindFramebufferDraw(aFboBakDraw);
+    theCtx.stglBindFramebufferRead(aFboBakRead);
 
     theCtx.stglResizeViewport(aVPortBack);
     if(theCtx.stglHasScissorRect()) {

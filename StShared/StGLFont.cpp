@@ -21,9 +21,8 @@ StGLFont::StGLFont(StHandle<StFTFont>& theFont)
   myLineSpacing(0.0f),
   myTileSizeX(0),
   myTileSizeY(0),
-  myLastTileId(size_t(-1)),
-  myTextureFormat(GL_ALPHA8) {
-    stMemSet(&myLastTilePx, 0, sizeof(myLastTilePx));
+  myLastTileId(size_t(-1)) {
+    stMemZero(&myLastTilePx, sizeof(myLastTilePx));
 }
 
 StGLFont::~StGLFont() {
@@ -72,7 +71,7 @@ bool StGLFont::createTexture(StGLContext& theCtx) {
     stMemZero(&myLastTilePx, sizeof(myLastTilePx));
     myLastTilePx.bottom() = myTileSizeY;
 
-    myTextures.add(new StGLTexture(myTextureFormat));
+    myTextures.add(new StGLTexture(theCtx.arbTexRG ? GL_R8 : GL_ALPHA8));
     myFbos.add(new StGLFrameBuffer());
     StHandle<StGLTexture>&     aTexture = myTextures[myTextures.size() - 1];
     StHandle<StGLFrameBuffer>& aFbo     = myFbos    [myTextures.size() - 1];
@@ -127,7 +126,8 @@ bool StGLFont::renderGlyph(StGLContext&    theCtx,
 
     theCtx.core11fwd->glTexSubImage2D(GL_TEXTURE_2D, 0,
                                       myLastTilePx.left(), myLastTilePx.top(), (GLsizei )anImg.getSizeX(), (GLsizei )anImg.getSizeY(),
-                                      GL_ALPHA, GL_UNSIGNED_BYTE, anImg.getData());
+                                      theCtx.arbTexRG ? GL_RED : GL_ALPHA,
+                                      GL_UNSIGNED_BYTE, anImg.getData());
 
     StGLTile aTile;
     aTile.uv.left()   = GLfloat(myLastTilePx.left())                   / GLfloat(aTexture->getSizeX());
