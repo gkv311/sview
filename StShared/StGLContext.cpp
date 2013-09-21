@@ -23,6 +23,7 @@
 #if(defined(__APPLE__))
     #include <dlfcn.h>
     #include <OpenGL/OpenGL.h>
+    #include <ApplicationServices/ApplicationServices.h>
 #elif(!defined(_WIN32))
     #include <GL/glx.h> // glXGetProcAddress()
 #endif
@@ -323,6 +324,35 @@ StString StGLContext::stglFullInfo() const {
         + "  GLdevice: "    + (const char* )glGetString(GL_RENDERER) + "\n"
         + "  GLversion: "   + (const char* )glGetString(GL_VERSION)  + "\n"
         + "  GLSLversion: " + (const char* )glGetString(GL_SHADING_LANGUAGE_VERSION);
+
+#ifdef __APPLE__
+    GLint aGlRendId = 0;
+    CGLGetParameter(CGLGetCurrentContext(), kCGLCPCurrentRendererID, &aGlRendId);
+
+    CGLRendererInfoObj  aRendObj  = NULL;
+    CGOpenGLDisplayMask aDispMask = CGDisplayIDToOpenGLDisplayMask(kCGDirectMainDisplay);
+    GLint aRendNb = 0;
+    CGLQueryRendererInfo(aDispMask, &aRendObj, &aRendNb);
+    for(GLint aRendIter = 0; aRendIter < aRendNb; ++aRendIter) {
+        GLint aRendId = 0;
+        if(CGLDescribeRenderer(aRendObj, aRendIter, kCGLRPRendererID, &aRendId) != kCGLNoError
+        || aRendId != aGlRendId) {
+            continue;
+        }
+
+        //kCGLRPVideoMemoryMegabytes   = 131;
+        //kCGLRPTextureMemoryMegabytes = 132;
+        GLint aVMem = 0;
+        if(CGLDescribeRenderer(aRendObj, aRendIter, kCGLRPVideoMemory, &aVMem) == kCGLNoError) {
+            anInfo = anInfo + "\n"
+            + "  GPU memory: " + (aVMem / (1024 * 1024))  + " MiB";
+        }
+        if(CGLDescribeRenderer(aRendObj, aRendIter, kCGLRPTextureMemory, &aVMem) == kCGLNoError) {
+            anInfo = anInfo + "\n"
+            + "  GPU Texture memory: " + (aVMem / (1024 * 1024))  + " MiB";
+        }
+    }
+#endif
 
     if(stglCheckExtension("GL_ATI_meminfo")) {
         GLint aMemInfo[4]; stMemSet(aMemInfo, -1, sizeof(aMemInfo));
