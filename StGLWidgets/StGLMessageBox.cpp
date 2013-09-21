@@ -81,6 +81,33 @@ void StGLMessageBox::setText(const StString& theText) {
     aText->setVisibility(true, true);
 }
 
+bool StGLMessageBox::doNextButton(const int theDir) {
+    if(myButtonsNb < 2) {
+        return false;
+    }
+
+    StGLButton* aNewFocus = NULL;
+    if(theDir > 0) {
+        aNewFocus = dynamic_cast<StGLButton*>(myDefaultBtn->getNext());
+        if(aNewFocus == NULL) {
+            aNewFocus = dynamic_cast<StGLButton*>(myBtnPanel->getChildren()->getStart());
+        }
+    } else {
+        aNewFocus = dynamic_cast<StGLButton*>(myDefaultBtn->getPrev());
+        if(aNewFocus == NULL) {
+            aNewFocus = dynamic_cast<StGLButton*>(myBtnPanel->getChildren()->getLast());
+        }
+    }
+    if(aNewFocus == NULL) {
+        return false;
+    }
+
+    myDefaultBtn->setFocus(false);
+    myDefaultBtn = aNewFocus;
+    myDefaultBtn->setFocus(true);
+    return true;
+}
+
 bool StGLMessageBox::doKeyDown(const StKeyEvent& theEvent) {
     switch(theEvent.VKey) {
         case ST_VK_ESCAPE: {
@@ -88,23 +115,7 @@ bool StGLMessageBox::doKeyDown(const StKeyEvent& theEvent) {
             return true;
         }
         case ST_VK_TAB:
-            if(myButtonsNb > 1) {
-                bool isNext = false;
-                for(StGLWidget* aChild = myBtnPanel->getChildren()->getStart(); aChild != NULL; aChild = aChild->getNext()) {
-                    if(myDefaultBtn == aChild) {
-                        isNext = true;
-                        myDefaultBtn->setFocus(false);
-                    } else if(isNext) {
-                        myDefaultBtn = dynamic_cast<StGLButton*>(aChild);
-                        isNext = false;
-                    }
-                }
-                if(isNext) {
-                    myDefaultBtn = dynamic_cast<StGLButton*>(myBtnPanel->getChildren()->getStart());
-                }
-                myDefaultBtn->setFocus(true);
-            }
-            return true;
+            return doNextButton(1);
         case ST_VK_SPACE:
         case ST_VK_RETURN:
             if(myDefaultBtn != NULL) {
@@ -112,11 +123,21 @@ bool StGLMessageBox::doKeyDown(const StKeyEvent& theEvent) {
             }
             return true;
         case ST_VK_UP:
-            myContent->doScroll(1);
-            return true;
+            if(myContent->isScrollable()) {
+                myContent->doScroll(1);
+                return true;
+            }
+            return doNextButton(-1);
         case ST_VK_DOWN:
-            myContent->doScroll(-1);
-            return true;
+            if(myContent->isScrollable()) {
+                myContent->doScroll(-1);
+                return true;
+            }
+            return doNextButton(1);
+        case ST_VK_LEFT:
+            return doNextButton(-1);
+        case ST_VK_RIGHT:
+            return doNextButton(1);
         default:
             return false;
     }

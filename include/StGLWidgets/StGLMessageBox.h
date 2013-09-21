@@ -63,6 +63,13 @@ class StGLMessageBox : public StGLWidget {
 
     ST_LOCAL void doMouseUnclick(const int theBtnId);
 
+    /**
+     * Move focus to the next button.
+     * @param theDir determine direction (1 forward, -1 backward)
+     * @return true if next button is available
+     */
+    ST_LOCAL bool doNextButton(const int theDir);
+
     ST_LOCAL void create(const StString& theText,
                          const int       theWidth,
                          const int       theHeight);

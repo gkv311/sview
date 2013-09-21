@@ -34,6 +34,19 @@ class StGLScrollArea : public StGLWidget {
 
         public:
 
+    /**
+     * @return true if content doesn't fit into scroll area
+     */
+    ST_LOCAL inline bool isScrollable() const {
+        const StGLWidget* aContent = myChildren.getStart();
+        return aContent != NULL
+            && aContent->getRectPx().height() > getRectPx().height();
+    }
+
+    /**
+     * Scroll (vertically) content.
+     * @param theDir Determine scroll direction (1 forward, -1 backward)
+     */
     ST_CPPEXPORT void doScroll(const int theDir);
 
         private:   //! @name callback Slots (private overriders)

@@ -68,12 +68,11 @@ void StGLScrollArea::stglDraw(unsigned int theView) {
 }
 
 void StGLScrollArea::doScroll(const int theDir) {
-    StGLWidget* aContent = myChildren.getStart();
-    if(aContent == NULL
-    || aContent->getRectPx().height() <= getRectPx().height()) {
+    if(!isScrollable()) {
         return;
     }
 
+    StGLWidget* aContent = myChildren.getStart();
     aContent->changeRectPx().top()    += 10 * theDir;
     aContent->changeRectPx().bottom() += 10 * theDir;
     stglResize();
