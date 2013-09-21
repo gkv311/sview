@@ -116,7 +116,6 @@ bool StGLFrameBuffer::init(StGLContext&  theCtx,
         if(!myTextureColor.isNull()) {
             myTextureColor->release(theCtx);
         }
-        myTextureColor = theColorTexture;
     }
 
     const GLuint aFboBakDraw = theCtx.stglFramebufferDraw();
@@ -130,7 +129,7 @@ bool StGLFrameBuffer::init(StGLContext&  theCtx,
         }
         theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, myGLDepthRBId);
         theCtx.arbFbo->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT,
-                                             myTextureColor->getSizeX(), myTextureColor->getSizeY());
+                                             theColorTexture->getSizeX(), theColorTexture->getSizeY());
     } else if(myGLDepthRBId != NO_RENDERBUFFER) {
         theCtx.arbFbo->glDeleteRenderbuffers(1, &myGLDepthRBId);
         myGLDepthRBId = NO_RENDERBUFFER;
@@ -143,7 +142,7 @@ bool StGLFrameBuffer::init(StGLContext&  theCtx,
     bindBuffer(theCtx);
     // attach texture to the FBO as color buffer
     theCtx.arbFbo->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                                          myTextureColor->getTextureId(), 0);
+                                          theColorTexture->getTextureId(), 0);
     if(theNeedDepthBuffer) {
         // bind render buffer to the FBO as depth buffer
         theCtx.arbFbo->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
@@ -161,8 +160,9 @@ bool StGLFrameBuffer::init(StGLContext&  theCtx,
         return false;
     }
 
-    myViewPortX = myTextureColor->getSizeX();
-    myViewPortY = myTextureColor->getSizeY();
+    myViewPortX    = theColorTexture->getSizeX();
+    myViewPortY    = theColorTexture->getSizeY();
+    myTextureColor = theColorTexture;
     return true;
 }
 
