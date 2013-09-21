@@ -87,6 +87,8 @@ bool StGLFont::createTexture(StGLContext& theCtx) {
     //StGLFrameBuffer::clearTexture(theCtx, aTexture);
     if(aFbo->init(theCtx, aTexture, false)) {
         aFbo->clearTexture(theCtx);
+    } else {
+        ST_ERROR_LOG("Fail to bind " + (theCtx.arbTexRG ? "GL_R8" : "GL_ALPHA8") + " texture to FBO!");
     }
 
     return true;
