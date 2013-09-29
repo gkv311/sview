@@ -19,6 +19,7 @@
 #include <StCore/StSearchMonitors.h>
 
 #include <StSettings/StSettings.h>
+#include <StStrings/StStringStream.h>
 #include <StThreads/StMutex.h>
 #include <StThreads/StTimer.h>
 
@@ -285,6 +286,9 @@ bool StSearchMonitors::getXRootSize(int& theSizeX, int& theSizeY) {
 }
 
 namespace {
+    /**
+     * Auxiliary function to retrieve EDID propetry.
+     */
     static StEDIDParser readXPropertyEDID(Display* theDisplay,
                                           RROutput theOutput,
                                           Atom     theAtom) {
@@ -308,6 +312,36 @@ namespace {
         XFree(aPropData);
         return anEDID;
     }
+
+    static const int THE_XLIB_DEF_DPI = 96;
+    static const StCString THE_XFTDPI = stCString("Xft.dpi:");
+
+    /**
+     * Auxiliary function to retrieve Xft.dpi propetry.
+     */
+    static int readXftDpi(Display* theDisplay) {
+
+        char* aXResMgr = XResourceManagerString(theDisplay);
+        if(aXResMgr == NULL) {
+            return THE_XLIB_DEF_DPI;
+        }
+
+        const StString aFullStr(aXResMgr);
+        const StHandle <StArrayList<StString> > aList = aFullStr.split(stUtf32_t('\n'));
+        for(size_t anIter = 0; anIter < aList->size(); ++anIter) {
+            const StString& anEntry = aList->getValue(anIter);
+            if(!anEntry.isStartsWith(THE_XFTDPI)) {
+                continue;
+            }
+
+            const StString aValueStr = anEntry.subString(THE_XFTDPI.Length, anEntry.Length);
+            StCLocale aCLocale;
+            const int aValue = (int )stStringToLong(aValueStr.toCString(), 10, aCLocale);
+            return stMax(aValue, 72);
+        }
+        return THE_XLIB_DEF_DPI;
+    }
+
 };
 
 void StSearchMonitors::findMonitorsXRandr() {
@@ -316,6 +350,9 @@ void StSearchMonitors::findMonitorsXRandr() {
         ST_ERROR_LOG("StSearchMonitors, X: could not open display");
         return;
     }
+
+    // read global DPI value
+    const float aScale = float(readXftDpi(aDisplay)) / float(THE_XLIB_DEF_DPI);
 
     int anXRandrEvent(0), anXRandrError(0);
     int anXRandrMajor(0), anXRandrMinor(0);
@@ -366,6 +403,7 @@ void StSearchMonitors::findMonitorsXRandr() {
                         aCrtcInfo->x, aCrtcInfo->x + aCrtcInfo->width);
         aMonitor.setVRect(aRect);
         aMonitor.setId(aCrtcId);
+        aMonitor.setScale(aScale);
 
         // detect active refresh rate
         for(int aModeIter = 0; aModeIter < aScrResources->nmode; ++aModeIter) {

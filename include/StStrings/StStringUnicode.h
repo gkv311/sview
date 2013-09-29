@@ -301,7 +301,7 @@ class StStringUnicode : public StConstStringUnicode<Type> {
     /**
      * Returns the substring.
      * @param theStart start index (inclusive) of subString
-     * @param theEnd   end index (exclusive) of subString
+     * @param theEnd   end   index (exclusive) of subString
      * @return the substring
      */
     StStringUnicode subString(const size_t theStart,
