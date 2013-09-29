@@ -423,144 +423,7 @@ void StSearchMonitors::findMonitorsXRandr() {
     XRRFreeScreenResources(aScrResources);
     XCloseDisplay(aDisplay);
 }
-
-void StSearchMonitors::findMonitorsADLsdk() {
-    StADLsdk anAdlSdk;
-    if(!anAdlSdk.init()) {
-        return;
-    }
-
-    ADLsdkFunctions* aFuncs = anAdlSdk.getFunctions();
-
-    size_t xMonCount = 0;
-    size_t monCount = 0;
-    int xRootSizeX = 0;
-    int xRootSizeY = 0;
-    bool isHaveXRootSizes = getXRootSize(xRootSizeX, xRootSizeY);
-    int aDisplaysNb = 0;
-    LPADLDisplayInfo anAdlDisplayInfo = NULL;
-    if(aFuncs->ADL_Display_DisplayInfo_Get(-1, &aDisplaysNb, &anAdlDisplayInfo, 0) != ADL_OK) {
-        return;
-    }
-
-    StArrayList<int> aDipArr;
-    ADLDisplayEDIDData anEdidData;
-    ADLDDCInfo aDdcInfo;
-    for(int aDispId = 0; aDispId < aDisplaysNb; ++aDispId) {
-        const ADLDisplayInfo& aDispInfo = anAdlDisplayInfo[aDispId];
-        if((ADL_DISPLAY_DISPLAYINFO_DISPLAYCONNECTED & aDispInfo.iDisplayInfoValue) == 0 ||
-           (ADL_DISPLAY_DISPLAYINFO_DISPLAYMAPPED    & aDispInfo.iDisplayInfoValue) == 0) {
-            continue; // skip the not connected or non-active displays
-        }
-
-        // filter duplicated entities
-        bool isAlreadyShown = false;
-        for(size_t aDId = 0; aDId < aDipArr.size(); ++aDId) {
-            if(aDipArr[aDId] == aDispInfo.displayID.iDisplayPhysicalIndex) {
-                isAlreadyShown = true;
-                break;
-            }
-        }
-        if(isAlreadyShown) {
-            continue;
-        }
-        aDipArr.add(aDispInfo.displayID.iDisplayPhysicalIndex);
-
-        // read desktop configuration
-        int aDesktopConfig = ADL_DESKTOPCONFIG_UNKNOWN;
-        if(aFuncs->ADL_DesktopConfig_Get != NULL) {
-            aFuncs->ADL_DesktopConfig_Get(aDispInfo.displayID.iDisplayLogicalAdapterIndex, &aDesktopConfig);
-        }
-        /**StString aDeskConfDesc = "UNKNOWN";
-        switch(aDesktopConfig) {
-            case ADL_DESKTOPCONFIG_SINGLE:     aDeskConfDesc = "single"; break;
-            case ADL_DESKTOPCONFIG_CLONE:      aDeskConfDesc = "clone"; break;
-            case ADL_DESKTOPCONFIG_BIGDESK_H:  aDeskConfDesc = "big desktop H"; break;
-            case ADL_DESKTOPCONFIG_BIGDESK_V:  aDeskConfDesc = "big desktop V"; break;
-            case ADL_DESKTOPCONFIG_BIGDESK_HR: aDeskConfDesc = "big desktop HR"; break;
-            case ADL_DESKTOPCONFIG_BIGDESK_VR: aDeskConfDesc = "big desktop VR"; break;
-            case ADL_DESKTOPCONFIG_RANDR12:    aDeskConfDesc = "randr v.1.2"; break;
-        }
-        ST_DEBUG_LOG("StMonitors, X ADL desktop config is \"" + aDeskConfDesc + "\"");*/
-
-        switch(aDesktopConfig) {
-            case ADL_DESKTOPCONFIG_UNKNOWN:
-            case ADL_DESKTOPCONFIG_SINGLE:
-            case ADL_DESKTOPCONFIG_CLONE:
-            case ADL_DESKTOPCONFIG_BIGDESK_H:
-            case ADL_DESKTOPCONFIG_BIGDESK_V:
-                if(xMonCount == 0 && isHaveXRootSizes) {
-                    findMonitorsBlind(xRootSizeX, xRootSizeY);
-                    xMonCount = size();
-                }
-                break;
-            case ADL_DESKTOPCONFIG_BIGDESK_HR:
-            case ADL_DESKTOPCONFIG_BIGDESK_VR:
-                if(xMonCount == 0 && isHaveXRootSizes) {
-                    findMonitorsBlind(xRootSizeX, xRootSizeY);
-                    xMonCount = size();
-                    if(xMonCount == 2) {
-                        // reverse rectangles
-                        StRectI_t aCopyRect = getValue(0).getVRect();
-                        changeValue(0).setVRect(getValue(1).getVRect());
-                        changeValue(1).setVRect(aCopyRect);
-                    }
-                }
-                break;
-            case ADL_DESKTOPCONFIG_RANDR12:
-                if(xMonCount == 0) {
-                    findMonitorsXRandr();
-                    xMonCount = size();
-                    if(xMonCount == 0 && isHaveXRootSizes) {
-                        findMonitorsBlind(xRootSizeX, xRootSizeY);
-                        xMonCount = size();
-                    }
-                }
-                break;
-        }
-
-        // retrieve EDID data
-        stMemSet(&anEdidData, 0, sizeof(ADLDisplayEDIDData));
-        anEdidData.iSize = sizeof(ADLDisplayEDIDData);
-        if(aFuncs->ADL_Display_EdidData_Get != NULL) {
-            aFuncs->ADL_Display_EdidData_Get(aDispInfo.displayID.iDisplayLogicalAdapterIndex,
-                                             aDispInfo.displayID.iDisplayLogicalIndex,
-                                             &anEdidData);
-        }
-
-        // retrieve DDC info
-        stMemSet(&aDdcInfo, 0, sizeof(ADLDDCInfo));
-        aDdcInfo.ulSize = sizeof(ADLDDCInfo);
-        if(aFuncs->ADL_Display_DDCInfo_Get != NULL) {
-            aFuncs->ADL_Display_DDCInfo_Get(aDispInfo.displayID.iDisplayLogicalAdapterIndex,
-                                            aDispInfo.displayID.iDisplayLogicalIndex,
-                                            &aDdcInfo);
-        }
-
-        // fill StMonitor structure
-        if(size() <= monCount) {
-            add(StMonitor());
-        }
-        StMonitor& aMonitor = changeValue(monCount++);
-        aMonitor.setFreq(aDdcInfo.ulPTMRefreshRate);
-        aMonitor.setFreqMax(aDdcInfo.ulMaxRefresh);
-        aMonitor.changeEdid().init((unsigned char* )anEdidData.cEDIDData);
-        if(aMonitor.getEdid().isValid()) {
-            aMonitor.setPnPId(aMonitor.getEdid().getPnPId());
-        }
-        aMonitor.setName(StString(aDispInfo.strDisplayName));
-
-        for(int anAdaptId = 0; anAdaptId < anAdlSdk.getAdaptersNum(); ++anAdaptId) {
-            const AdapterInfo& anAdapInfo = anAdlSdk.getAdapters()[anAdaptId];
-            if(anAdapInfo.iAdapterIndex == aDispInfo.displayID.iDisplayLogicalAdapterIndex) {
-                aMonitor.setGpuName(StString(anAdapInfo.strAdapterName));
-                break;
-            }
-        }
-    }
-    StADLsdk::ADL_Main_Memory_Free(anAdlDisplayInfo);
-}
-#endif // ADLsdk for Linux
+#endif // __linux__
 
 void StSearchMonitors::listEDID(StArrayList<StEDIDParser>& theEdids) {
     theEdids.clear();
@@ -755,20 +618,14 @@ void StSearchMonitors::initFromSystem() {
 #elif defined(__APPLE__)
     findMonitorsCocoa();
 #elif defined(__linux__)
-    // It seems this library is not thread-safe - random crashes and freezes
-    // are detected when launched from browsers.
-    ///findMonitorsADLsdk();
-
+    findMonitorsXRandr();
     if(isEmpty()) {
-        findMonitorsXRandr();
-        if(isEmpty()) {
-            int rootX(0), rootY(0);
-            if(!getXRootSize(rootX, rootY)) {
-                ST_DEBUG_ASSERT(rootX > 0 && rootY > 0);
-                rootX = rootY = 800;
-            }
-            findMonitorsBlind(rootX, rootY);
+        int aRootX(0), aRootY(0);
+        if(!getXRootSize(aRootX, aRootY)) {
+            ST_DEBUG_ASSERT(aRootX > 0 && aRootY > 0);
+            aRootX = aRootY = 800;
         }
+        findMonitorsBlind(aRootX, aRootY);
     }
 #endif
 }

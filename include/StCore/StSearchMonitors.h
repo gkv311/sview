@@ -96,10 +96,6 @@ class StSearchMonitors : public StArrayList<StMonitor> {
      */
     ST_LOCAL void findMonitorsXRandr();
     ST_LOCAL static bool getXRootSize(int& sizeX, int& sizeY);
-    /**
-     * Function retrieves displays' configuration from ADLsdk (AMD Catalyst)
-     */
-    ST_LOCAL void findMonitorsADLsdk();
 #endif
 
     /**
