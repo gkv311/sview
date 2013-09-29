@@ -88,9 +88,9 @@ class StSearchMonitors : public StArrayList<StMonitor> {
      * Function retrieves displays' configuration from WinAPI
      */
     ST_LOCAL void findMonitorsWinAPI();
-#elif (defined(__APPLE__))
+#elif defined(__APPLE__)
     ST_LOCAL void findMonitorsCocoa();
-#elif (defined(__linux__) || defined(__linux))
+#elif defined(__linux__)
     /**
      * Function retrieves displays' configuration from XRandr extension
      */

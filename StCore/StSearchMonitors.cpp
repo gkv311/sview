@@ -24,7 +24,7 @@
 
 #ifdef _WIN32
     #include <wnt/nvapi.h> // NVIDIA API
-#elif (defined(__linux__) || defined(__linux))
+#elif defined(__linux__)
     #include "StWinHandles.h"
     #include <X11/extensions/Xrandr.h>
 #endif
@@ -268,20 +268,20 @@ void StSearchMonitors::findMonitorsWinAPI() {
 }
 #endif // WinAPI
 
-#if (defined(__linux__) || defined(__linux))
-bool StSearchMonitors::getXRootSize(int& sizeX, int& sizeY) {
-    Display* hDisplay = XOpenDisplay(NULL); // get first display on server from DISPLAY in env
-    if(hDisplay == NULL) {
-        ST_DEBUG_LOG("StSearchMonitors, X: could not open display");
+#if defined(__linux__)
+bool StSearchMonitors::getXRootSize(int& theSizeX, int& theSizeY) {
+    Display* aDisplay = XOpenDisplay(NULL); // get first display on server from DISPLAY in env
+    if(aDisplay == NULL) {
+        ST_ERROR_LOG("StSearchMonitors, X: could not open display");
         return false;
     }
 
-    XWindowAttributes xwa;
-    XGetWindowAttributes(hDisplay, RootWindow(hDisplay, 0), &xwa);
-    sizeX = xwa.width;
-    sizeY = xwa.height;
-    XCloseDisplay(hDisplay);
-    return (sizeX > 0 && sizeY > 0);
+    XWindowAttributes aWinAttr;
+    XGetWindowAttributes(aDisplay, RootWindow(aDisplay, 0), &aWinAttr);
+    theSizeX = aWinAttr.width;
+    theSizeY = aWinAttr.height;
+    XCloseDisplay(aDisplay);
+    return (theSizeX > 0 && theSizeY > 0);
 }
 
 namespace {
@@ -292,7 +292,7 @@ namespace {
         int            anActualFormat = 0;
         unsigned long  anItemsNb      = 0;
         unsigned long  aBytesAfter    = 0;
-        Atom           anActualType;
+        Atom           anActualType   = (Atom )0;
         XRRGetOutputProperty(theDisplay, theOutput, theAtom,
                              0, 100, False, False,
                              AnyPropertyType,
@@ -311,66 +311,66 @@ namespace {
 };
 
 void StSearchMonitors::findMonitorsXRandr() {
-    Display* hDisplay = XOpenDisplay(NULL); // get first display on server from DISPLAY in env
-    if(hDisplay == NULL) {
-        ST_DEBUG_LOG("StSearchMonitors, X: could not open display");
+    Display* aDisplay = XOpenDisplay(NULL); // get first display on server from DISPLAY in env
+    if(aDisplay == NULL) {
+        ST_ERROR_LOG("StSearchMonitors, X: could not open display");
         return;
     }
 
-    int xrandrEvent(0), xrandrError(0);
-    int xrandrMajor(0), xrandrMinor(0);
-    int isOK = XRRQueryExtension(hDisplay, &xrandrEvent, &xrandrError);
+    int anXRandrEvent(0), anXRandrError(0);
+    int anXRandrMajor(0), anXRandrMinor(0);
+    int isOK = XRRQueryExtension(aDisplay, &anXRandrEvent, &anXRandrError);
     if(!isOK) {
-        XCloseDisplay(hDisplay);
+        XCloseDisplay(aDisplay);
         return;
     }
-    ///X11DRV_expect_error(hDisplay, XRandRErrorHandler, NULL); // TODO
-    isOK = XRRQueryVersion(hDisplay, &xrandrMajor, &xrandrMinor);
+    ///X11DRV_expect_error(aDisplay, XRandRErrorHandler, NULL); // TODO
+    isOK = XRRQueryVersion(aDisplay, &anXRandrMajor, &anXRandrMinor);
     ///if (X11DRV_check_error()) { isOK = false; }
-    if(!isOK || xrandrMajor < 1 || (xrandrMajor == 1 && xrandrMinor < 2)) {
-        XCloseDisplay(hDisplay);
+    if(!isOK || anXRandrMajor < 1 || (anXRandrMajor == 1 && anXRandrMinor < 2)) {
+        XCloseDisplay(aDisplay);
         return;
     }
 
-    Window rootWindow = RootWindow(hDisplay, 0);
-    XRRScreenResources* pScreenResources = NULL;
-    if(xrandrMajor > 1 || (xrandrMajor == 1 && xrandrMinor >= 3)) {
+    Window aRootWin = RootWindow(aDisplay, 0);
+    XRRScreenResources* aScrResources = NULL;
+    if(anXRandrMajor > 1 || (anXRandrMajor == 1 && anXRandrMinor >= 3)) {
         // for XRandr 1.3+; works much faster
-        pScreenResources = XRRGetScreenResourcesCurrent(hDisplay, rootWindow);
+        aScrResources = XRRGetScreenResourcesCurrent(aDisplay, aRootWin);
     } else {
         // for XRandr 1.2; works VERY slow (~0.8sec)!
-        pScreenResources = XRRGetScreenResources(hDisplay, rootWindow);
+        aScrResources = XRRGetScreenResources(aDisplay, aRootWin);
     }
 
 #ifndef RR_PROPERTY_RANDR_EDID
     #define RR_PROPERTY_RANDR_EDID "EDID"
 #endif
     Atom anAtomsEdid[] = {
-        XInternAtom(hDisplay, RR_PROPERTY_RANDR_EDID,      False), // should be returned by all new drivers
-        XInternAtom(hDisplay, "EDID_DATA",                 False), // returned by old and proprietary drivers
-        XInternAtom(hDisplay, "XFree86_DDC_EDID1_RAWDATA", False), // outdated atom?
+        XInternAtom(aDisplay, RR_PROPERTY_RANDR_EDID,      False), // should be returned by all new drivers
+        XInternAtom(aDisplay, "EDID_DATA",                 False), // returned by old and proprietary drivers
+        XInternAtom(aDisplay, "XFree86_DDC_EDID1_RAWDATA", False), // outdated atom?
         0
     };
 
-    for(int crtcId = 0; crtcId < pScreenResources->ncrtc; ++crtcId) {
+    for(int aCrtcId = 0; aCrtcId < aScrResources->ncrtc; ++aCrtcId) {
         StMonitor aMonitor;
         // CRTC is a CRT Controller (this is X terminology)
-        XRRCrtcInfo* pCrtcInfo = XRRGetCrtcInfo(hDisplay, pScreenResources, pScreenResources->crtcs[crtcId]);
-        if(pCrtcInfo->noutput == 0) {
-            XRRFreeCrtcInfo(pCrtcInfo);
+        XRRCrtcInfo* aCrtcInfo = XRRGetCrtcInfo(aDisplay, aScrResources, aScrResources->crtcs[aCrtcId]);
+        if(aCrtcInfo->noutput == 0) {
+            XRRFreeCrtcInfo(aCrtcInfo);
             continue;
         }
 
         // read virtual coordinates
-        StRectI_t stRect(pCrtcInfo->y, pCrtcInfo->y + pCrtcInfo->height,
-                         pCrtcInfo->x, pCrtcInfo->x + pCrtcInfo->width);
-        aMonitor.setVRect(stRect);
-        aMonitor.setId(crtcId);
+        StRectI_t aRect(aCrtcInfo->y, aCrtcInfo->y + aCrtcInfo->height,
+                        aCrtcInfo->x, aCrtcInfo->x + aCrtcInfo->width);
+        aMonitor.setVRect(aRect);
+        aMonitor.setId(aCrtcId);
 
         // detect active refresh rate
-        for(int aModeIter = 0; aModeIter < pScreenResources->nmode; ++aModeIter) {
-            const XRRModeInfo& aMode = pScreenResources->modes[aModeIter];
-            if(aMode.id != pCrtcInfo->mode) {
+        for(int aModeIter = 0; aModeIter < aScrResources->nmode; ++aModeIter) {
+            const XRRModeInfo& aMode = aScrResources->modes[aModeIter];
+            if(aMode.id != aCrtcInfo->mode) {
                 continue;
             } else if(aMode.hTotal == 0 || aMode.vTotal == 0) {
                 break;
@@ -380,12 +380,12 @@ void StSearchMonitors::findMonitorsXRandr() {
             break;
         }
 
-        RROutput anOutput = pCrtcInfo->outputs[0];
-        XRROutputInfo* anOutputInfo = XRRGetOutputInfo(hDisplay, pScreenResources, anOutput);
+        RROutput anOutput = aCrtcInfo->outputs[0];
+        XRROutputInfo* anOutputInfo = XRRGetOutputInfo(aDisplay, aScrResources, anOutput);
 
         // read EDID
         for(size_t anIter = 0; anAtomsEdid[anIter] != 0; ++anIter) {
-            aMonitor.changeEdid() = readXPropertyEDID(hDisplay, anOutput, anAtomsEdid[anIter]);
+            aMonitor.changeEdid() = readXPropertyEDID(aDisplay, anOutput, anAtomsEdid[anIter]);
             if(aMonitor.getEdid().isValid()) {
                 break;
             }
@@ -396,7 +396,7 @@ void StSearchMonitors::findMonitorsXRandr() {
             aMonitor.setName(aMonitor.getEdid().getName());
         } else {
             aMonitor.setName(anOutputInfo->name);
-            ST_DEBUG_LOG("EDID from XRandr for Output #" + anOutput + " ("+ aMonitor.getName() + ") is invalid!");
+            ST_ERROR_LOG("EDID from XRandr for Output #" + anOutput + " ("+ aMonitor.getName() + ") is invalid!");
         }
 
         // detect max refresh rate
@@ -404,8 +404,8 @@ void StSearchMonitors::findMonitorsXRandr() {
         double aRate = 0.0;
         for(int aModeInOutputIter = 0; aModeInOutputIter < anOutputInfo->nmode; ++aModeInOutputIter) {
             RRMode aModeId = anOutputInfo->modes[aModeInOutputIter];
-            for(int aModeIter = 0; aModeIter < pScreenResources->nmode; ++aModeIter) {
-                const XRRModeInfo& aMode = pScreenResources->modes[aModeIter];
+            for(int aModeIter = 0; aModeIter < aScrResources->nmode; ++aModeIter) {
+                const XRRModeInfo& aMode = aScrResources->modes[aModeIter];
                 if(aMode.id != aModeId) {
                     continue;
                 }
@@ -416,12 +416,12 @@ void StSearchMonitors::findMonitorsXRandr() {
         aMonitor.setFreqMax(int(aMaxRate));
         XRRFreeOutputInfo(anOutputInfo);
 
-        XRRFreeCrtcInfo(pCrtcInfo);
+        XRRFreeCrtcInfo(aCrtcInfo);
         add(aMonitor);
     }
 
-    XRRFreeScreenResources(pScreenResources);
-    XCloseDisplay(hDisplay);
+    XRRFreeScreenResources(aScrResources);
+    XCloseDisplay(aDisplay);
 }
 
 void StSearchMonitors::findMonitorsADLsdk() {
@@ -430,7 +430,7 @@ void StSearchMonitors::findMonitorsADLsdk() {
         return;
     }
 
-    ADLsdkFunctions* flist = anAdlSdk.getFunctions();
+    ADLsdkFunctions* aFuncs = anAdlSdk.getFunctions();
 
     size_t xMonCount = 0;
     size_t monCount = 0;
@@ -439,7 +439,7 @@ void StSearchMonitors::findMonitorsADLsdk() {
     bool isHaveXRootSizes = getXRootSize(xRootSizeX, xRootSizeY);
     int aDisplaysNb = 0;
     LPADLDisplayInfo anAdlDisplayInfo = NULL;
-    if(flist->ADL_Display_DisplayInfo_Get(-1, &aDisplaysNb, &anAdlDisplayInfo, 0) != ADL_OK) {
+    if(aFuncs->ADL_Display_DisplayInfo_Get(-1, &aDisplaysNb, &anAdlDisplayInfo, 0) != ADL_OK) {
         return;
     }
 
@@ -468,8 +468,8 @@ void StSearchMonitors::findMonitorsADLsdk() {
 
         // read desktop configuration
         int aDesktopConfig = ADL_DESKTOPCONFIG_UNKNOWN;
-        if(flist->ADL_DesktopConfig_Get != NULL) {
-            flist->ADL_DesktopConfig_Get(aDispInfo.displayID.iDisplayLogicalAdapterIndex, &aDesktopConfig);
+        if(aFuncs->ADL_DesktopConfig_Get != NULL) {
+            aFuncs->ADL_DesktopConfig_Get(aDispInfo.displayID.iDisplayLogicalAdapterIndex, &aDesktopConfig);
         }
         /**StString aDeskConfDesc = "UNKNOWN";
         switch(aDesktopConfig) {
@@ -522,19 +522,19 @@ void StSearchMonitors::findMonitorsADLsdk() {
         // retrieve EDID data
         stMemSet(&anEdidData, 0, sizeof(ADLDisplayEDIDData));
         anEdidData.iSize = sizeof(ADLDisplayEDIDData);
-        if(flist->ADL_Display_EdidData_Get != NULL) {
-            flist->ADL_Display_EdidData_Get(aDispInfo.displayID.iDisplayLogicalAdapterIndex,
-                                            aDispInfo.displayID.iDisplayLogicalIndex,
-                                            &anEdidData);
+        if(aFuncs->ADL_Display_EdidData_Get != NULL) {
+            aFuncs->ADL_Display_EdidData_Get(aDispInfo.displayID.iDisplayLogicalAdapterIndex,
+                                             aDispInfo.displayID.iDisplayLogicalIndex,
+                                             &anEdidData);
         }
 
         // retrieve DDC info
         stMemSet(&aDdcInfo, 0, sizeof(ADLDDCInfo));
         aDdcInfo.ulSize = sizeof(ADLDDCInfo);
-        if(flist->ADL_Display_DDCInfo_Get != NULL) {
-            flist->ADL_Display_DDCInfo_Get(aDispInfo.displayID.iDisplayLogicalAdapterIndex,
-                                           aDispInfo.displayID.iDisplayLogicalIndex,
-                                           &aDdcInfo);
+        if(aFuncs->ADL_Display_DDCInfo_Get != NULL) {
+            aFuncs->ADL_Display_DDCInfo_Get(aDispInfo.displayID.iDisplayLogicalAdapterIndex,
+                                            aDispInfo.displayID.iDisplayLogicalIndex,
+                                            &aDdcInfo);
         }
 
         // fill StMonitor structure
@@ -567,14 +567,14 @@ void StSearchMonitors::listEDID(StArrayList<StEDIDParser>& theEdids) {
 #ifndef __APPLE__
     StADLsdk anAdlSdk;
     if(anAdlSdk.init()) {
-        ADLsdkFunctions* flist = anAdlSdk.getFunctions();
+        ADLsdkFunctions* aFuncs = anAdlSdk.getFunctions();
         StArrayList<int> aDipArr;
         ADLDisplayEDIDData anEdidData;
         for(int anAdIter = -1; anAdIter < anAdlSdk.getAdaptersNum(); ++anAdIter) {
             int aDisplaysNb = 0;
             LPADLDisplayInfo anAdlDisplayInfo = NULL;
             int anAdapterIndex = (anAdIter >= 0) ? anAdlSdk.getAdapters()[anAdIter].iAdapterIndex : -1;
-            if(flist->ADL_Display_DisplayInfo_Get(anAdapterIndex, &aDisplaysNb, &anAdlDisplayInfo, 0) != ADL_OK) {
+            if(aFuncs->ADL_Display_DisplayInfo_Get(anAdapterIndex, &aDisplaysNb, &anAdlDisplayInfo, 0) != ADL_OK) {
                 aDisplaysNb = 0;
             }
 
@@ -588,17 +588,17 @@ void StSearchMonitors::listEDID(StArrayList<StEDIDParser>& theEdids) {
                 int iDisplayIndex = aDispInfo.displayID.iDisplayLogicalIndex;
                 stMemSet(&anEdidData, 0, sizeof(ADLDisplayEDIDData));
                 anEdidData.iSize = sizeof(ADLDisplayEDIDData);
-                if(flist->ADL_Display_EdidData_Get != NULL) {
-                    flist->ADL_Display_EdidData_Get(aDispInfo.displayID.iDisplayLogicalAdapterIndex,
-                                                    iDisplayIndex, &anEdidData);
+                if(aFuncs->ADL_Display_EdidData_Get != NULL) {
+                    aFuncs->ADL_Display_EdidData_Get(aDispInfo.displayID.iDisplayLogicalAdapterIndex,
+                                                     iDisplayIndex, &anEdidData);
                 }
 
                 // notice that this API reads 256 bytes pages from EDID, not 128 blocks
                 StEDIDParser aParser((unsigned char* )anEdidData.cEDIDData, anEdidData.iEDIDSize);
                 if(aParser.getExtensionsNb() >= 2) {
                     anEdidData.iBlockIndex = 2; // read extra blocks
-                    flist->ADL_Display_EdidData_Get(aDispInfo.displayID.iDisplayLogicalAdapterIndex,
-                                                    iDisplayIndex, &anEdidData);
+                    aFuncs->ADL_Display_EdidData_Get(aDispInfo.displayID.iDisplayLogicalAdapterIndex,
+                                                     iDisplayIndex, &anEdidData);
                     aParser.add((unsigned char* )anEdidData.cEDIDData, anEdidData.iEDIDSize);
                 }
 
@@ -718,32 +718,32 @@ void StSearchMonitors::initFromConfig() {
         return;
     }
 
-    StMonitor stMonMaster;
-    StMonitor stMonSlave;
+    StMonitor aMonMaster;
+    StMonitor aMonSlave;
 
     StSettings aGlobalSettings(ST_GLOBAL_SETTINGS_GROUP);
-    aGlobalSettings.loadInt32Rect(ST_GLOBAL_SETTINGS_MON_MASTER, stMonMaster.changeVRect());
-    aGlobalSettings.loadInt32Rect(ST_GLOBAL_SETTINGS_MON_SLAVE,  stMonSlave.changeVRect());
+    aGlobalSettings.loadInt32Rect(ST_GLOBAL_SETTINGS_MON_MASTER, aMonMaster.changeVRect());
+    aGlobalSettings.loadInt32Rect(ST_GLOBAL_SETTINGS_MON_SLAVE,  aMonSlave.changeVRect());
 
     // save settings (to simple change them)
-    aGlobalSettings.saveInt32Rect(ST_GLOBAL_SETTINGS_MON_MASTER, stMonMaster.changeVRect());
-    aGlobalSettings.saveInt32Rect(ST_GLOBAL_SETTINGS_MON_SLAVE,  stMonSlave.changeVRect());
+    aGlobalSettings.saveInt32Rect(ST_GLOBAL_SETTINGS_MON_MASTER, aMonMaster.changeVRect());
+    aGlobalSettings.saveInt32Rect(ST_GLOBAL_SETTINGS_MON_SLAVE,  aMonSlave.changeVRect());
 
-    if(stMonMaster.isValid()) {
-        StRectI_t stRectCopy = stMonMaster.getVRect();
+    if(aMonMaster.isValid()) {
+        StRectI_t aRectCopy = aMonMaster.getVRect();
         // copy setting from some real display
-        stMonMaster = sysMons[stRectCopy.center()];
-        stMonMaster.setVRect(stRectCopy);
-        stMonMaster.setId(0);
-        stMonMaster.setName("StMasterDisplay");
-        add(stMonMaster);
-        if(stMonSlave.isValid()) {
-            stRectCopy = stMonSlave.getVRect();
-            stMonSlave = sysMons[stRectCopy.center()];
-            stMonSlave.setVRect(stRectCopy);
-            stMonSlave.setId(1);
-            stMonSlave.setName("StSlaveDisplay");
-            add(stMonSlave);
+        aMonMaster = sysMons[aRectCopy.center()];
+        aMonMaster.setVRect(aRectCopy);
+        aMonMaster.setId(0);
+        aMonMaster.setName("StMasterDisplay");
+        add(aMonMaster);
+        if(aMonSlave.isValid()) {
+            aRectCopy = aMonSlave.getVRect();
+            aMonSlave = sysMons[aRectCopy.center()];
+            aMonSlave.setVRect(aRectCopy);
+            aMonSlave.setId(1);
+            aMonSlave.setName("StSlaveDisplay");
+            add(aMonSlave);
         }
     }
 }
@@ -752,9 +752,9 @@ void StSearchMonitors::initFromSystem() {
     clear();
 #ifdef _WIN32
     findMonitorsWinAPI();
-#elif (defined(__APPLE__))
+#elif defined(__APPLE__)
     findMonitorsCocoa();
-#elif (defined(__linux__) || defined(__linux))
+#elif defined(__linux__)
     // It seems this library is not thread-safe - random crashes and freezes
     // are detected when launched from browsers.
     ///findMonitorsADLsdk();
