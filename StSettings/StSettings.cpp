@@ -132,6 +132,21 @@ bool StSettings::saveParam(const StString&              theLabel,
     return saveBool(theLabel, theBoolParam->getValue());
 }
 
+bool StSettings::loadParam(const StString&           theLabel,
+                           StHandle<StFloat32Param>& theFloatParam) {
+    double aValue = (double )theFloatParam->getValue();
+    if(loadFloat(theLabel, aValue)) {
+        theFloatParam->setValue((float )aValue);
+        return true;
+    }
+    return false;
+}
+
+bool StSettings::saveParam(const StString&                 theLabel,
+                           const StHandle<StFloat32Param>& theFloatParam) {
+    return saveFloat(theLabel, theFloatParam->getValue());
+}
+
 bool StSettings::loadHotKey(StHandle<StAction>& theAction) {
     if(theAction->getName().isEmpty()) {
         return false;

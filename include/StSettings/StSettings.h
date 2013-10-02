@@ -13,6 +13,7 @@
 #include <StTemplates/StRect.h>
 #include <StTemplates/StVec4.h>
 #include <StSettings/StParam.h>
+#include <StSettings/StFloat32Param.h>
 
 #ifdef __OBJC__
     @class NSMutableDictionary;
@@ -180,6 +181,24 @@ class StSettings {
      */
     ST_CPPEXPORT bool saveParam(const StString&              theLabel,
                                 const StHandle<StBoolParam>& theBoolParam);
+
+    /**
+     * Method to load float parameter.
+     * @param theLabel      parameter label (should be unique)
+     * @param theFloatParam handle to the parameter
+     * @return true if parameter was loaded
+     */
+    ST_CPPEXPORT bool loadParam(const StString&           theLabel,
+                                StHandle<StFloat32Param>& theFloatParam);
+
+    /**
+     * Method to save float parameter.
+     * @param theLabel      parameter label (should be unique)
+     * @param theFloatParam handle to the parameter
+     * @return true if parameter was saved
+     */
+    ST_CPPEXPORT bool saveParam(const StString&                 theLabel,
+                                const StHandle<StFloat32Param>& theFloatParam);
 
     /**
      * Method to load hot key for action triggering.
