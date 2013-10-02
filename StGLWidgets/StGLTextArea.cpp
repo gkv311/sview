@@ -207,8 +207,11 @@ namespace {
     static const size_t SHARE_TEXT_PROGRAM_ID   = StGLRootWidget::generateShareId();
     static const size_t SHARE_BORDER_PROGRAM_ID = StGLRootWidget::generateShareId();
     static const size_t SHARE_FONT_NORMAL_ID    = StGLRootWidget::generateShareId();
+    static const size_t SHARE_FONT_SMALLEST_ID  = StGLRootWidget::generateShareId();
     static const size_t SHARE_FONT_SMALL_ID     = StGLRootWidget::generateShareId();
     static const size_t SHARE_FONT_BIG_ID       = StGLRootWidget::generateShareId();
+    static const size_t SHARE_FONT_BIGGEST_ID   = StGLRootWidget::generateShareId();
+    static const size_t SHARE_FONT_DOUBLE_ID    = StGLRootWidget::generateShareId();
 
     enum {
         ST_FONT_SERIF,
@@ -227,7 +230,7 @@ namespace {
             default:
                 return "tahoma.ttf";
         }
-    #elif (defined(__APPLE__))
+    #elif defined(__APPLE__)
         switch(theFontType) {
             case ST_FONT_SERIF:
                 return "Times.dfont";
@@ -241,7 +244,7 @@ namespace {
             default:
                 return "Monaco.dfont";
         }
-    #elif (defined(__linux__) || defined(__linux))
+    #elif defined(__linux__)
         switch(theFontType) {
             case ST_FONT_SERIF:
                 return "DejaVuSerif.ttf";
@@ -255,18 +258,35 @@ namespace {
         #error undefined fonts
     #endif
     }
+
+    inline size_t getFontShareId(const StGLTextArea::FontSize theSize,
+                                 const size_t                 theShareId) {
+        if(theShareId != size_t(-1)) {
+            return theShareId;
+        }
+
+        switch(theSize) {
+            case StGLTextArea::SIZE_SMALLEST: return SHARE_FONT_SMALLEST_ID;
+            case StGLTextArea::SIZE_SMALL:    return SHARE_FONT_SMALL_ID;
+            case StGLTextArea::SIZE_NORMAL:   return SHARE_FONT_NORMAL_ID;
+            case StGLTextArea::SIZE_BIGGEST:  return SHARE_FONT_BIGGEST_ID;
+            case StGLTextArea::SIZE_DOUBLE:   return SHARE_FONT_DOUBLE_ID;
+            case StGLTextArea::SIZE_BIG:
+            default:                          return SHARE_FONT_BIG_ID;
+        }
+    }
 };
 
 StGLTextArea::StGLTextArea(StGLWidget* theParent,
                            const int theLeft, const int theTop,
                            const StGLCorner theCorner,
                            const int theWidth, const int theHeight,
-                           const FontSize theSize)
+                           const FontSize theSize,
+                           const size_t   theShareId)
 : StGLWidget(theParent, theLeft, theTop, theCorner, theWidth, theHeight),
   myTextProgram(getRoot()->getShare(SHARE_TEXT_PROGRAM_ID)),
   myBorderProgram(getRoot()->getShare(SHARE_BORDER_PROGRAM_ID)),
-  myFont(getRoot()->getShare((theSize == SIZE_NORMAL) ? SHARE_FONT_NORMAL_ID
-                          : ((theSize == SIZE_SMALL)  ? SHARE_FONT_SMALL_ID : SHARE_FONT_BIG_ID))),
+  myFont(getRoot()->getShare(getFontShareId(theSize, theShareId))),
   mySize(theSize),
   myTextColor(0.0f, 0.0f, 0.0f, 1.0f),
   myShadowColor(0.0f, 0.0f, 0.0f, 1.0f),
@@ -319,6 +339,19 @@ void StGLTextArea::setText(const StString& theText) {
         myText = theText;
         myToRecompute = true;
     }
+}
+
+void StGLTextArea::stglSetTextSize(const FontSize theSize) {
+    if(mySize == theSize
+    || myFont.isNull()) {
+        return;
+    }
+
+    mySize = theSize;
+    myToRecompute = true;
+
+    StGLContext& aCtx = getContext();
+    myFont->stglInit(aCtx, getFontSize(), myRoot->getResolution());
 }
 
 void StGLTextArea::setTextWidth(const int theWidth) {

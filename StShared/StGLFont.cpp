@@ -42,6 +42,26 @@ void StGLFont::release(StGLContext& theCtx) {
     }
     myTextures.clear();
     myFbos.clear();
+
+    myAscender    = 0.0f;
+    myLineSpacing = 0.0f;
+    myTileSizeX   = 0;
+    myTileSizeY   = 0;
+    stMemZero(&myLastTilePx, sizeof(myLastTilePx));
+    myTiles.clear();
+    myGlyphMap.clear();
+    myLastTileId = size_t(-1);
+}
+
+bool StGLFont::stglInit(StGLContext&       theCtx,
+                        const unsigned int thePointSize,
+                        const unsigned int theResolution) {
+    release(theCtx);
+    if(!myFont->init(thePointSize, theResolution)) {
+        return false;
+    }
+
+    return stglInit(theCtx);
 }
 
 bool StGLFont::stglInit(StGLContext& theCtx) {
@@ -66,7 +86,10 @@ bool StGLFont::createTexture(StGLContext& theCtx) {
 
     const GLsizei aTextureSizeX = getPowerOfTwo(aGlyphsNb * myTileSizeX, aMaxSize);
     const size_t  aTilesPerRow  = aTextureSizeX / myTileSizeX;
-    const GLsizei aTextureSizeY = getPowerOfTwo(GLint((aGlyphsNb / aTilesPerRow) + 1) * myTileSizeY, aMaxSize);
+    GLsizei aTextureSizeY = stMin(getEvenNumber(GLint((aGlyphsNb / aTilesPerRow) + 1) * myTileSizeY), aMaxSize);
+    if(!theCtx.arbNPTW) {
+        aTextureSizeY = getPowerOfTwo(aTextureSizeY, aMaxSize);
+    }
 
     stMemZero(&myLastTilePx, sizeof(myLastTilePx));
     myLastTilePx.bottom() = myTileSizeY;

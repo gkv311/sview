@@ -11,6 +11,7 @@
 
 namespace {
     static const StString CLASS_NAME("StGLSubtitles");
+    static const size_t SHARE_SUBS_FONT_ID = StGLRootWidget::generateShareId();
 };
 
 StGLSubtitles::StSubShowItems::StSubShowItems()
@@ -57,13 +58,16 @@ const StString& StGLSubtitles::getClassName() {
     return CLASS_NAME;
 }
 
-StGLSubtitles::StGLSubtitles(StGLWidget* theParent,
-                             const StHandle<StSubQueue>& theSubQueue)
+StGLSubtitles::StGLSubtitles(StGLWidget*                     theParent,
+                             const StHandle<StSubQueue>&     theSubQueue,
+                             const StHandle<StFloat32Param>& theFontSize)
 : StGLTextArea(theParent,
                0, -theParent->getRoot()->scale(100),
                StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER),
                theParent->getRoot()->scale(800), theParent->getRoot()->scale(160),
-               StGLTextArea::SIZE_DOUBLE),
+               (FontSize )theFontSize->getValue(),
+               SHARE_SUBS_FONT_ID),
+  myFontSize(theFontSize),
   myQueue(theSubQueue),
   myShowItems(),
   myPTS(0.0) {
@@ -89,6 +93,7 @@ void StGLSubtitles::stglUpdate(const StPointD_t& ) {
         isChanged = true;
         myShowItems.add(aNewSubItem);
     }
+
     if(isChanged) {
         setText(myShowItems.myText);
         StString aLog;
@@ -96,6 +101,12 @@ void StGLSubtitles::stglUpdate(const StPointD_t& ) {
             aLog += ST_STRING(" from ") + myShowItems[anId]->myTimeStart + " to " + myShowItems[anId]->myTimeEnd + "\n";
         }
         ST_DEBUG_LOG("(" + myPTS + ") myShowItems.myText= '" + myShowItems.myText + "'\n" + aLog);*/
+    }
+
+    const FontSize aNewSize = (FontSize )myFontSize->getValue();
+    if(!myText.isEmpty()
+    && aNewSize != mySize) {
+        stglSetTextSize(aNewSize);
     }
 }
 

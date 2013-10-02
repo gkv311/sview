@@ -59,13 +59,22 @@ class StFTFont {
 
     /**
      * Initialize the font.
-     * @param theFontPath   - path to the font;
-     * @param thePointSize  - the face size in points (1/72 inch);
-     * @param theResolution - the resolution of the target device;
-     * @return true on success.
+     * @param theFontPath   path to the font
+     * @param thePointSize  the face size in points (1/72 inch)
+     * @param theResolution the resolution of the target device
+     * @return true on success
      */
     ST_CPPEXPORT bool init(const StString&    theFontPath,
                            const unsigned int thePointSize,
+                           const unsigned int theResolution = 72);
+
+    /**
+     * Re-initialize the font.
+     * @param thePointSize  the face size in points (1/72 inch)
+     * @param theResolution the resolution of the target device
+     * @return true on success
+     */
+    ST_CPPEXPORT bool init(const unsigned int thePointSize,
                            const unsigned int theResolution = 72);
 
     /**

@@ -93,6 +93,13 @@ class StGLFont : public StGLResource {
     ST_CPPEXPORT bool stglInit(StGLContext& theCtx);
 
     /**
+     * Re-initialize GL resources.
+     */
+    ST_CPPEXPORT bool stglInit(StGLContext&       theCtx,
+                               const unsigned int thePointSize,
+                               const unsigned int theResolution);
+
+    /**
      * Compute advance to the next character with kerning applied when applicable.
      * Assuming text rendered horizontally.
      */

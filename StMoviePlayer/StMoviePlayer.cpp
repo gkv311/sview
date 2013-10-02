@@ -67,6 +67,7 @@ namespace {
 
     static const char ST_SETTING_SCALE_ADJUST[]  = "scaleAdjust";
     static const char ST_SETTING_SCALE_FORCE2X[] = "scale2X";
+    static const char ST_SETTING_SUBTITLES_SIZE[]= "subsSize";
     static const char ST_SETTING_FULLSCREEN[]    = "fullscreen";
     static const char ST_SETTING_VIEWMODE[]      = "viewMode";
     static const char ST_SETTING_STEREO_MODE[]   = "viewStereoMode";
@@ -188,6 +189,11 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     params.ScaleHiDPI2X     = new StBoolParam(false);
     mySettings->loadParam (ST_SETTING_SCALE_FORCE2X, params.ScaleHiDPI2X);
     params.ScaleHiDPI2X->signals.onChanged = stSlot(this, &StMoviePlayer::doScaleHiDPI);
+    params.SubtitlesSize    = new StFloat32Param(28.0f,       // initial value
+                                                 8.0f, 96.0f, // min, max values
+                                                 28.0f,       // default value
+                                                 1.0f,        // incremental step
+                                                 0.1f);       // equality tolerance
 
     params.alDevice = new StALDeviceParam();
     params.AudioGain = new StFloat32Param( 0.0f, // sound is unattenuated
@@ -243,6 +249,7 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     mySettings->loadParam (ST_SETTING_LOOP_SINGLE,        params.ToLoopSingle);
     mySettings->loadParam (ST_SETTING_GLOBAL_MKEYS,       params.areGlobalMKeys);
     mySettings->loadParam (ST_SETTING_SHOW_LIST,          params.ToShowPlayList);
+    mySettings->loadParam (ST_SETTING_SUBTITLES_SIZE,     params.SubtitlesSize);
 
     mySettings->loadParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
     mySettings->loadParam (ST_SETTING_VSYNC,              params.IsVSyncOn);
@@ -401,6 +408,7 @@ void StMoviePlayer::releaseDevice() {
     if(!myGUI.isNull()) {
         mySettings->saveParam (ST_SETTING_SCALE_ADJUST,       params.ScaleAdjust);
         mySettings->saveParam (ST_SETTING_SCALE_FORCE2X,      params.ScaleHiDPI2X);
+        mySettings->saveParam (ST_SETTING_SUBTITLES_SIZE,     params.SubtitlesSize);
         mySettings->saveInt32 (ST_SETTING_FPSTARGET,          params.TargetFps);
         mySettings->saveString(ST_SETTING_OPENAL_DEVICE,      params.alDevice->getTitle());
         mySettings->saveInt32 (ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);

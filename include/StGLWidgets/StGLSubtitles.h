@@ -12,6 +12,8 @@
 #include <StGLWidgets/StGLTextArea.h>
 #include <StGLWidgets/StSubQueue.h>
 
+#include <StSettings/StFloat32Param.h>
+
 // dummy
 template<>
 inline void StArray<StHandle <StSubItem> >::sort() {}
@@ -56,8 +58,9 @@ class StGLSubtitles : public StGLTextArea {
 
         public:
 
-    ST_CPPEXPORT StGLSubtitles(StGLWidget*                 theParent,
-                               const StHandle<StSubQueue>& theSubQueue);
+    ST_CPPEXPORT StGLSubtitles(StGLWidget*                     theParent,
+                               const StHandle<StSubQueue>&     theSubQueue,
+                               const StHandle<StFloat32Param>& theFontSize);
     ST_CPPEXPORT virtual ~StGLSubtitles();
     ST_CPPEXPORT virtual const StString& getClassName();
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& thePointZo);
@@ -75,10 +78,11 @@ class StGLSubtitles : public StGLTextArea {
 
         private:
 
-    StHandle<StSubQueue> myQueue;     //!< thread-safe subtitles queue
-    StSubShowItems       myShowItems; //!< active (shown) subtitle items
-    double               myPTS;       //!< active PTS
+    StHandle<StFloat32Param> myFontSize;  //!< font size parameter
+    StHandle<StSubQueue>     myQueue;     //!< thread-safe subtitles queue
+    StSubShowItems           myShowItems; //!< active (shown) subtitle items
+    double                   myPTS;       //!< active PTS
 
 };
 
-#endif //__StGLSubtitles_h_
+#endif // __StGLSubtitles_h_

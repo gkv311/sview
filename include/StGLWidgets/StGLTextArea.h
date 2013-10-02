@@ -39,7 +39,8 @@ class StGLTextArea : public StGLWidget {
                               const int theLeft = 32, const int theTop = 32,
                               const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
                               const int theWidth = 256, const int theHeight = 32,
-                              const FontSize theSize = StGLTextArea::SIZE_NORMAL);
+                              const FontSize theSize = StGLTextArea::SIZE_NORMAL,
+                              const size_t   theShareId = size_t(-1));
 
     ST_CPPEXPORT virtual ~StGLTextArea();
 
@@ -135,7 +136,7 @@ class StGLTextArea : public StGLWidget {
     inline const int getFontSize() const {
         switch(mySize) {
             case SIZE_SMALLEST:
-                return 12;
+                return 10;
             case SIZE_SMALL:
                 return 12;
             case SIZE_NORMAL:
@@ -185,6 +186,13 @@ class StGLTextArea : public StGLWidget {
     inline GLint getTextWidth() const {
         return std::abs(GLint(myTextBndBox.width()));
     }
+
+        protected:
+
+    /**
+     * Re-initialize font with new size.
+     */
+    ST_CPPEXPORT void stglSetTextSize(const FontSize theSize);
 
         private:
 

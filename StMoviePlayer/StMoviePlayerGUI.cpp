@@ -19,7 +19,7 @@
 #include "StMoviePlayerGUI.h"
 
 // OpenAL headers
-#if (defined(__APPLE__))
+#if defined(__APPLE__)
     #include <OpenAL/al.h>
     #include <OpenAL/alc.h>
 #else
@@ -888,7 +888,7 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
     const StRectI_t& aMargins = getRootMarginsPx();
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StMoviePlayerGUI::doShowFPS);
     myImage     = new StGLImageRegion(this, theTextureQueue, false);
-    mySubtitles = new StGLSubtitles  (this, theSubQueue);
+    mySubtitles = new StGLSubtitles  (this, theSubQueue, myPlugin->params.SubtitlesSize);
 
     createUpperToolbar();
 
@@ -1154,6 +1154,18 @@ void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<St
     //myMenuSubtitles->addSplitter();
     myMenuSubtitles->addItem(tr(MENU_SUBTITLES_ATTACH))
                    ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doAddSubtitleStream);
+
+    //myMenuSubtitles->addSplitter();
+    StGLMenuItem* anItem = myMenuSubtitles->addItem("Font Size");
+    anItem->setMarginRight(scale(100 + 16));
+    StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.SubtitlesSize,
+                                                             -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+    aRange->changeRectPx().bottom() = aRange->getRectPx().top() + myMenuSubtitles->getItemHeight();
+    aRange->setFormat(stCString("%02.0f"));
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aBlack);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aBlack);
+    aRange->setVisibility(true, true);
 
     // update menu representation
     myMenuSubtitles->stglInit();

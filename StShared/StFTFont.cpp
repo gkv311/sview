@@ -33,6 +33,22 @@ void StFTFont::release() {
     }
 }
 
+bool StFTFont::init(const unsigned int thePointSize,
+                    const unsigned int theResolution) {
+    if(!isValid()) {
+        return false;
+    }
+
+    myGlyphImg.nullify();
+    myUChar = 0;
+    if(FT_Set_Char_Size(myFTFace, 0L, thePointSize * 64, theResolution, theResolution) != 0) {
+        ST_DEBUG_LOG("Font '" + myFontPath + "' doesn't contain requested size!");
+        release();
+        return false;
+    }
+    return true;
+}
+
 bool StFTFont::init(const StString&    theFontPath,
                     const unsigned int thePointSize,
                     const unsigned int theResolution) {
@@ -49,11 +65,11 @@ bool StFTFont::init(const StString&    theFontPath,
         release();
         return false;
     } else if(FT_Select_Charmap(myFTFace, ft_encoding_unicode) != 0) {
-        ST_DEBUG_LOG("Font '" + aFontPath + "' doesn't contains Unicode charmap!");
+        ST_DEBUG_LOG("Font '" + aFontPath + "' doesn't contain Unicode charmap!");
         release();
         return false;
     } else if(FT_Set_Char_Size(myFTFace, 0L, thePointSize * 64, theResolution, theResolution) != 0) {
-        ST_DEBUG_LOG("Font '" + aFontPath + "' doesn't contains Unicode charmap!");
+        ST_DEBUG_LOG("Font '" + aFontPath + "' doesn't contain requested size!");
         release();
         return false;
     }
