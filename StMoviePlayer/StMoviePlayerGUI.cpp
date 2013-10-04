@@ -1136,7 +1136,8 @@ void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StStri
     myMenuAudio->stglInit();
 }
 
-void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<StString> >& theStreamsList) {
+void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<StString> >& theStreamsList,
+                                                  const bool theIsFilePlayed) {
     if(myMenuSubtitles == NULL) {
         return;
     }
@@ -1153,32 +1154,37 @@ void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<St
         }
     }
 
-    //myMenuSubtitles->addSplitter();
-    StGLMenuItem* anItem = myMenuSubtitles->addItem(tr(MENU_SUBTITLES_SIZE));
-    anItem->setMarginRight(scale(100 + 16));
-    StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.SubtitlesSize,
-                                                             -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
-    aRange->changeRectPx().bottom() = aRange->getRectPx().top() + myMenuSubtitles->getItemHeight();
-    aRange->setFormat(stCString("%02.0f"));
-    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
-    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aBlack);
-    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aBlack);
-    aRange->setVisibility(true, true);
+    if(!theStreamsList.isNull()
+    && !theStreamsList->isEmpty()) {
+        //myMenuSubtitles->addSplitter();
+        StGLMenuItem* anItem = myMenuSubtitles->addItem(tr(MENU_SUBTITLES_SIZE));
+        anItem->setMarginRight(scale(100 + 16));
+        StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.SubtitlesSize,
+                                                                 -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+        aRange->changeRectPx().bottom() = aRange->getRectPx().top() + myMenuSubtitles->getItemHeight();
+        aRange->setFormat(stCString("%02.0f"));
+        aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
+        aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aBlack);
+        aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aBlack);
+        aRange->setVisibility(true, true);
 
-    anItem = myMenuSubtitles->addItem(tr(MENU_SUBTITLES_PARALLAX));
-    anItem->setMarginRight(scale(100 + 16));
-    aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.SubtitlesParallax,
-                                      -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
-    aRange->changeRectPx().bottom() = aRange->getRectPx().top() + myMenuSubtitles->getItemHeight();
-    aRange->setFormat(stCString("%+03.0f"));
-    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
-    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aBlack);
-    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aBlack);
-    aRange->setVisibility(true, true);
+        anItem = myMenuSubtitles->addItem(tr(MENU_SUBTITLES_PARALLAX));
+        anItem->setMarginRight(scale(100 + 16));
+        aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.SubtitlesParallax,
+                                          -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+        aRange->changeRectPx().bottom() = aRange->getRectPx().top() + myMenuSubtitles->getItemHeight();
+        aRange->setFormat(stCString("%+03.0f"));
+        aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
+        aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aBlack);
+        aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aBlack);
+        aRange->setVisibility(true, true);
+    }
 
-    //myMenuSubtitles->addSplitter();
-    myMenuSubtitles->addItem(tr(MENU_SUBTITLES_ATTACH))
-                   ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doAddSubtitleStream);
+    if(theIsFilePlayed) {
+        //myMenuSubtitles->addSplitter();
+        myMenuSubtitles->addItem(tr(MENU_SUBTITLES_ATTACH))
+                       ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doAddSubtitleStream);
+    }
 
     // update menu representation
     myMenuSubtitles->stglInit();

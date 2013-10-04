@@ -897,9 +897,12 @@ void StMoviePlayer::beforeDraw() {
         StHandle<StGLTextureQueue> aTextureQueue;
         StHandle<StSubQueue>       aSubQueue;
         createGui(aTextureQueue, aSubQueue);
+
         myGUI->updateAudioStreamsMenu(myVideo->params.activeAudio->getList(),
                                       myVideo->hasVideoStream());
-        myGUI->updateSubtitlesStreamsMenu(myVideo->params.activeSubtitles->getList());
+        myGUI->updateSubtitlesStreamsMenu(myVideo->params.activeSubtitles->getList(),
+                                          myVideo->hasAudioStream() || myVideo->hasVideoStream());
+
         myToRecreateMenu = false;
     }
 
@@ -1115,7 +1118,8 @@ void StMoviePlayer::doUpdateStateLoaded() {
     myGUI->updateAudioStreamsMenu(myVideo->params.activeAudio->getList(),
                                   myVideo->hasVideoStream());
     params.audioStream->setValue(myVideo->params.activeAudio->getValue());
-    myGUI->updateSubtitlesStreamsMenu(myVideo->params.activeSubtitles->getList());
+    myGUI->updateSubtitlesStreamsMenu(myVideo->params.activeSubtitles->getList(),
+                                      myVideo->hasAudioStream() || myVideo->hasVideoStream());
     params.subtitlesStream->setValue(myVideo->params.activeSubtitles->getValue());
     if(mySeekOnLoad > 0.0) {
         myVideo->pushPlayEvent(ST_PLAYEVENT_SEEK, mySeekOnLoad);

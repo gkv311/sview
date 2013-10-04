@@ -107,6 +107,13 @@ class StVideo {
     }
 
     /**
+     * @return true if audio stream loaded
+     */
+    ST_LOCAL bool hasAudioStream() const {
+        return myAudio->isInitialized();
+    }
+
+    /**
      * @return true if video stream loaded
      */
     ST_LOCAL bool hasVideoStream() const {

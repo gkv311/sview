@@ -110,7 +110,8 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL void updateOpenALDeviceMenu();
     ST_LOCAL void updateAudioStreamsMenu    (const StHandle< StArrayList<StString> >& theStreamsList,
                                              const bool theHasVideo);
-    ST_LOCAL void updateSubtitlesStreamsMenu(const StHandle< StArrayList<StString> >& theStreamsList);
+    ST_LOCAL void updateSubtitlesStreamsMenu(const StHandle< StArrayList<StString> >& theStreamsList,
+                                             const bool theIsFilePlayed);
 
     ST_LOCAL void updateRecentMenu();
 
