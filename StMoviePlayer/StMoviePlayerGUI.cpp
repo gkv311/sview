@@ -1154,7 +1154,7 @@ void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<St
     }
 
     //myMenuSubtitles->addSplitter();
-    StGLMenuItem* anItem = myMenuSubtitles->addItem("Font Size");
+    StGLMenuItem* anItem = myMenuSubtitles->addItem(tr(MENU_SUBTITLES_SIZE));
     anItem->setMarginRight(scale(100 + 16));
     StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.SubtitlesSize,
                                                              -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
@@ -1165,7 +1165,7 @@ void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<St
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aBlack);
     aRange->setVisibility(true, true);
 
-    anItem = myMenuSubtitles->addItem("Parallax");
+    anItem = myMenuSubtitles->addItem(tr(MENU_SUBTITLES_PARALLAX));
     anItem->setMarginRight(scale(100 + 16));
     aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.SubtitlesParallax,
                                       -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));

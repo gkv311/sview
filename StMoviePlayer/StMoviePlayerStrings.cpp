@@ -53,6 +53,10 @@ void loadDefaults(StLangMap& theStrings) {
                "None");
     theStrings(MENU_SUBTITLES_ATTACH,
                "Attach from file");
+    theStrings(MENU_SUBTITLES_SIZE,
+               "Font Size");
+    theStrings(MENU_SUBTITLES_PARALLAX,
+               "Parallax");
     theStrings(MENU_HELP,
                "Help");
     theStrings(MENU_MEDIA_OPEN_MOVIE,

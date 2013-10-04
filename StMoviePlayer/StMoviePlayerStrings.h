@@ -125,8 +125,10 @@ namespace StMoviePlayerStrings {
 
         // Root -> Subtitles menu
         MENU_SUBTITLES = 1350,
-        MENU_SUBTITLES_NONE   = 1351,
-        MENU_SUBTITLES_ATTACH = 1353,
+        MENU_SUBTITLES_NONE     = 1351,
+        MENU_SUBTITLES_ATTACH   = 1353,
+        MENU_SUBTITLES_SIZE     = 1354,
+        MENU_SUBTITLES_PARALLAX = 1355,
 
         // Root -> Output menu
         MENU_CHANGE_DEVICE  = 1400, // Root -> Output -> Change Device menu
