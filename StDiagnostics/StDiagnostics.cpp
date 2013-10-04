@@ -38,6 +38,9 @@ StDiagnostics::StDiagnostics(const StNativeWin_t         theParentWin,
 : StApplication(theParentWin, theOpenInfo),
   myToQuit(false) {
     myTitle = "sView - Stereoscopic Device Diagnostics";
+    params.IsFullscreen = new StBoolParam(false);
+    params.IsFullscreen->signals.onChanged.connect(this, &StDiagnostics::doFullscreen);
+
     myGUI = new StDiagnosticsGUI(this);
 
     addRenderer(new StOutAnaglyph(theParentWin));
@@ -46,6 +49,17 @@ StDiagnostics::StDiagnostics(const StNativeWin_t         theParentWin,
     addRenderer(new StOutInterlace(theParentWin));
     addRenderer(new StOutDistorted(theParentWin));
     addRenderer(new StOutPageFlipExt(theParentWin));
+
+    // create actions
+    StHandle<StAction> anAction;
+    anAction = new StActionBool(stCString("DoFullscreen"), params.IsFullscreen);
+    addAction(Action_Fullscreen, anAction, ST_VK_F, ST_VK_RETURN);
+
+    anAction = new StActionIntSlot(stCString("DoStereoModeOn"),  stSlot(this, &StDiagnostics::doStereoMode), 1);
+    addAction(Action_StereoModeOn,  anAction, ST_VK_S);
+
+    anAction = new StActionIntSlot(stCString("DoStereoModeOff"), stSlot(this, &StDiagnostics::doStereoMode), 0);
+    addAction(Action_StereoModeOff, anAction, ST_VK_M);
 }
 
 StDiagnostics::~StDiagnostics() {
@@ -78,6 +92,7 @@ bool StDiagnostics::open() {
         return false;
     }
     myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER));
+    registerHotKeys();
     return true;
 }
 
@@ -103,7 +118,7 @@ void StDiagnostics::doMouseUp(const StClickEvent& theEvent) {
     }
 
     if(theEvent.Button == ST_MOUSE_MIDDLE) {
-        doSwitchFullscreen();
+        params.IsFullscreen->reverse();
     }
     myGUI->tryUnClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
 }
@@ -118,19 +133,10 @@ void StDiagnostics::doKeyDown(const StKeyEvent& theEvent) {
         return;
     }
 
+    StApplication::doKeyDown(theEvent);
     switch(theEvent.VKey) {
         case ST_VK_ESCAPE:
             StApplication::exit(0);
-            return;
-        case ST_VK_F:
-        case ST_VK_RETURN:
-            doSwitchFullscreen();
-            return;
-        case ST_VK_M:
-            myWindow->setStereoOutput(false);
-            return;
-        case ST_VK_S:
-            myWindow->setStereoOutput(true);
             return;
         default:
             break;
@@ -180,8 +186,16 @@ void StDiagnostics::stglDraw(unsigned int theView) {
     myGUI->stglDraw(theView);
 }
 
-void StDiagnostics::doSwitchFullscreen(const size_t ) {
-    myWindow->setFullScreen(!myWindow->isFullScreen());
+void StDiagnostics::doFullscreen(const bool theIsFullscreen) {
+    if(!myWindow.isNull()) {
+        myWindow->setFullScreen(theIsFullscreen);
+    }
+}
+
+void StDiagnostics::doStereoMode(const size_t theMode) {
+    if(!myWindow.isNull()) {
+        myWindow->setStereoOutput(theMode != 0);
+    }
 }
 
 void StDiagnostics::doFpsClick(const size_t ) {

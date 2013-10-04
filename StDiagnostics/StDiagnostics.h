@@ -49,10 +49,30 @@ class StDiagnostics : public StApplication {
     ST_LOCAL virtual void doMouseDown(const StClickEvent& theEvent);
     ST_LOCAL virtual void doMouseUp  (const StClickEvent& theEvent);
 
-        public: //!< callback Slots
+        public: //! @name Properties
 
-    ST_LOCAL void doSwitchFullscreen(const size_t dummy = 0);
+    struct {
+
+        StHandle<StBoolParam> IsFullscreen; //!< fullscreen state
+
+    } params;
+
+        public: //!< @name callback Slots
+
+    ST_LOCAL void doFullscreen(const bool theIsFullscreen);
+    ST_LOCAL void doStereoMode(const size_t theMode);
     ST_LOCAL void doFpsClick(const size_t dummy = 0);
+
+        private:
+
+    /**
+     * Actions identifiers.
+     */
+    enum ActionId {
+        Action_Fullscreen,
+        Action_StereoModeOn,
+        Action_StereoModeOff,
+    };
 
         private:
 
