@@ -897,6 +897,9 @@ void StMoviePlayer::beforeDraw() {
         StHandle<StGLTextureQueue> aTextureQueue;
         StHandle<StSubQueue>       aSubQueue;
         createGui(aTextureQueue, aSubQueue);
+        myGUI->updateAudioStreamsMenu(myVideo->params.activeAudio->getList(),
+                                      myVideo->hasVideoStream());
+        myGUI->updateSubtitlesStreamsMenu(myVideo->params.activeSubtitles->getList());
         myToRecreateMenu = false;
     }
 
