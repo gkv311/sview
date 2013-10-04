@@ -434,7 +434,7 @@ void StSearchMonitors::findMonitorsXRandr() {
             aMonitor.setName(aMonitor.getEdid().getName());
         } else {
             aMonitor.setName(anOutputInfo->name);
-            ST_ERROR_LOG("EDID from XRandr for Output #" + anOutput + " ("+ aMonitor.getName() + ") is invalid!");
+            ST_ERROR_LOG("EDID from XRandr for Output #" + uint64_t(anOutput) + " ("+ aMonitor.getName() + ") is invalid!");
         }
 
         // detect max refresh rate
