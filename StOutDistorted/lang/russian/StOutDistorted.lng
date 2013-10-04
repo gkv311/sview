@@ -10,6 +10,7 @@ Russian translation file for StOutDistorted library
 1120="Фильтр"
 1121="None"
 1122="Barrel"
+1123="Отображать моно в стерео"
 2000="sView - Distorted Output module"
 2001="версия"
 2002="© 2013 Гаврилов Кирилл <kirill@sview.ru>\nОфициальный сайт: www.sview.ru\n\nБиблиотека распространяется на условиях LGPL3.0"

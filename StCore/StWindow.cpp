@@ -42,14 +42,15 @@ void StWindow::copySignals() {
 
 StWindow::StWindow()
 : myWin(new StWindowImpl((StNativeWin_t )NULL)),
-  myTargetFps(0.0) {
+  myTargetFps(0.0),
+  myIsForcedStereo(false) {
     copySignals();
 }
 
 StWindow::StWindow(const StNativeWin_t theParentWindow)
 : myWin(new StWindowImpl(theParentWindow)),
   myTargetFps(0.0),
-  myMargins(0, 0, 0, 0) {
+  myIsForcedStereo(false) {
     copySignals();
 }
 
@@ -114,11 +115,15 @@ void StWindow::getOptions(StParamsList& ) const {
 }
 
 bool StWindow::isStereoOutput() const {
-    return myWin->isStereoOutput();
+    return myIsForcedStereo || myWin->isStereoOutput();
 }
 
 void StWindow::setStereoOutput(const bool theStereoState) {
     myWin->setStereoOutput(theStereoState);
+}
+
+bool StWindow::isStereoSource() const {
+    return myWin->isStereoOutput();
 }
 
 double StWindow::getTargetFps() const {

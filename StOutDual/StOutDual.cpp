@@ -36,6 +36,7 @@ namespace {
     static const char ST_SETTING_DEVICE_ID[] = "deviceId";
     static const char ST_SETTING_WINDOWPOS[] = "windowPos";
     static const char ST_SETTING_SLAVE_ID[]  = "slaveId";
+    static const char ST_SETTING_MONOCLONE[] = "monoClone";
 
     // translation resources
     enum {
@@ -45,7 +46,8 @@ namespace {
         STTR_MIRROR_DESC = 1003,
 
         // parameters
-        STTR_PARAMETER_SLAVE_ID = 1102,
+        STTR_PARAMETER_SLAVE_ID  = 1102,
+        STTR_PARAMETER_MONOCLONE = 1103,
 
         // about info
         STTR_PLUGIN_TITLE       = 2000,
@@ -173,6 +175,7 @@ void StOutDual::getDevices(StOutDevicesList& theList) const {
 
 void StOutDual::getOptions(StParamsList& theList) const {
     theList.add(params.SlaveMonId);
+    theList.add(params.MonoClone);
 }
 
 StOutDual::StOutDual(const StNativeWin_t theParentWindow)
@@ -239,6 +242,9 @@ StOutDual::StOutDual(const StNativeWin_t theParentWindow)
     aSlaveMon->signals.onChanged.connect(this, &StOutDual::doSlaveMon);
     params.SlaveMonId = aSlaveMon;
 
+    params.MonoClone = new StBoolParamNamed(false, aLangMap.changeValueId(STTR_PARAMETER_MONOCLONE, "Show Mono in Stereo"));
+    mySettings->loadParam(ST_SETTING_MONOCLONE, params.MonoClone);
+
     // load window position
     StRect<int32_t> aRect(256, 768, 256, 1024);
     mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
@@ -280,6 +286,7 @@ void StOutDual::releaseResources() {
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
     }
     mySettings->saveParam(ST_SETTING_SLAVE_ID,  params.SlaveMonId);
+    mySettings->saveParam(ST_SETTING_MONOCLONE, params.MonoClone);
     mySettings->saveInt32(ST_SETTING_DEVICE_ID, myDevice);
 }
 
@@ -373,7 +380,9 @@ void StOutDual::stglDraw() {
 
     const StGLBoxPx aVPMaster = StWindow::stglViewport(ST_WIN_MASTER);
     const StGLBoxPx aVPSlave  = StWindow::stglViewport(ST_WIN_SLAVE);
-    if(!StWindow::isStereoOutput() || myIsBroken) {
+    const bool toShowStereo = (StWindow::isStereoSource() || params.MonoClone->getValue()) && !myIsBroken;
+    myIsForcedStereo = toShowStereo && params.MonoClone->getValue();
+    if(!toShowStereo) {
         StWindow::stglMakeCurrent(ST_WIN_MASTER);
 
         if(myToCompressMem) {

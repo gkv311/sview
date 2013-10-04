@@ -146,6 +146,7 @@ class StOutDistorted : public StWindow {
         StHandle<StInt32Param> Layout;   //!< pair layout
         StHandle<StBoolParam>  Anamorph; //!< anamorph filter
         StHandle<StBoolParam>  Barrel;   //!< Barrel filter
+        StHandle<StBoolParam>  MonoClone;//!< display mono in stereo
 
     } params;
 

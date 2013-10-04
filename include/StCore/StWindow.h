@@ -464,15 +464,21 @@ class StWindow {
     ST_CPPEXPORT void convertRectToBacking(StGLBoxPx& theRect,
                                            const int  theWinId);
 
+    /**
+     * @return stereo output flag specified by application (means - have stereo data)
+     */
+    ST_CPPEXPORT bool isStereoSource() const;
+
         private: //! @name private fields
 
-    StWindowImpl*        myWin;       //!< window implementation class - we hide implementation details since them too platform-specific
-    double               myTargetFps; //!< user data
+    StWindowImpl*        myWin;            //!< window implementation class - we hide implementation details since them too platform-specific
+    double               myTargetFps;      //!< user data
 
         protected:
 
-    StHandle<StMsgQueue> myMsgQueue;  //!< messages queue
-    StRectI_t            myMargins;   //!< GUI margins
+    StHandle<StMsgQueue> myMsgQueue;       //!< messages queue
+    StRectI_t            myMargins;        //!< GUI margins
+    bool                 myIsForcedStereo; //!< flag to force stereo output for mono sources
 
         private: //! @name no copies, please
 

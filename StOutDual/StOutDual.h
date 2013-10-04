@@ -133,6 +133,7 @@ class StOutDual : public StWindow {
     struct {
 
         StHandle<StInt32Param> SlaveMonId; //!< slave window position
+        StHandle<StBoolParam>  MonoClone;  //!< display mono in stereo
 
     } params;
 

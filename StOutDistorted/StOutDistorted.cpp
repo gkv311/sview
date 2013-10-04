@@ -39,6 +39,7 @@ namespace {
     static const char ST_SETTING_LAYOUT[]    = "layout";
     static const char ST_SETTING_BARREL[]    = "barrel";
     static const char ST_SETTING_ANAMORPH[]  = "anamorph";
+    static const char ST_SETTING_MONOCLONE[] = "monoClone";
     static const char ST_SETTING_MARGINS[]   = "margins";
     static const char ST_SETTING_WARP_COEF[] = "warpCoef";
     static const char ST_SETTING_CHROME_AB[] = "chromeAb";
@@ -55,6 +56,7 @@ namespace {
         STTR_PARAMETER_DISTORTION = 1120,
         STTR_PARAMETER_DISTORTION_OFF    = 1121,
         STTR_PARAMETER_DISTORTION_BARREL = 1122,
+        STTR_PARAMETER_MONOCLONE         = 1123,
 
         // about info
         STTR_PLUGIN_TITLE       = 2000,
@@ -266,6 +268,7 @@ void StOutDistorted::getOptions(StParamsList& theList) const {
     theList.add(params.Layout);
     theList.add(params.Barrel);
     theList.add(params.Anamorph);
+    theList.add(params.MonoClone);
 }
 
 StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
@@ -321,6 +324,8 @@ StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
     mySettings->loadParam(ST_SETTING_BARREL, params.Barrel);
     params.Anamorph = new StBoolParamNamed(false, "Anamorph");
     mySettings->loadParam(ST_SETTING_ANAMORPH, params.Anamorph);
+    params.MonoClone = new StBoolParamNamed(false, aLangMap.changeValueId(STTR_PARAMETER_MONOCLONE, "Show Mono in Stereo"));
+    mySettings->loadParam(ST_SETTING_MONOCLONE, params.MonoClone);
 
     // Layout option
     StHandle<StEnumParam> aLayoutParam = new StEnumParam(LAYOUT_SIDE_BY_SIDE,
@@ -367,6 +372,7 @@ void StOutDistorted::releaseResources() {
     mySettings->saveParam(ST_SETTING_LAYOUT,     params.Layout);
     mySettings->saveParam(ST_SETTING_BARREL,     params.Barrel);
     mySettings->saveParam(ST_SETTING_ANAMORPH,   params.Anamorph);
+    mySettings->saveParam(ST_SETTING_MONOCLONE,  params.MonoClone);
     mySettings->saveInt32Rect(ST_SETTING_MARGINS,   myBarMargins);
     mySettings->saveFloatVec4(ST_SETTING_WARP_COEF, myBarrelCoef);
     mySettings->saveFloatVec4(ST_SETTING_CHROME_AB, myChromAb);
@@ -502,9 +508,10 @@ void StOutDistorted::setFullScreen(const bool theFullScreen) {
 void StOutDistorted::stglDraw() {
     myFPSControl.setTargetFPS(StWindow::getTargetFps());
 
-    myIsStereoOn = StWindow::isStereoOutput()
+    myIsStereoOn = (StWindow::isStereoSource() || params.MonoClone->getValue())
                 && StWindow::isFullScreen()
                 && !myIsBroken;
+    myIsForcedStereo = myIsStereoOn && params.MonoClone->getValue();
     if(myIsStereoOn
     && params.Barrel->getValue()) {
         myMargins = myBarMargins;
