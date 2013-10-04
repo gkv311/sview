@@ -143,7 +143,7 @@ bool StGLStereoFrameBuffer::init(StGLContext&  theCtx,
     if(theNeedDepthBuffer) {
         // bind left render buffer to left FBO as depth buffer
         theCtx.arbFbo->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
-                                                 myGLFBufferIds[StGLStereoTexture::LEFT_TEXTURE]);
+                                                 myGLDepthRBIds[StGLStereoTexture::LEFT_TEXTURE]);
     }
     bool isOk = theCtx.arbFbo->glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
     theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, StGLFrameBuffer::NO_RENDERBUFFER);
@@ -170,7 +170,7 @@ bool StGLStereoFrameBuffer::init(StGLContext&  theCtx,
     if(theNeedDepthBuffer) {
         // bind right render buffer to right FBO as depth buffer
         theCtx.arbFbo->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
-                                                 myGLFBufferIds[StGLStereoTexture::RIGHT_TEXTURE]);
+                                                 myGLDepthRBIds[StGLStereoTexture::RIGHT_TEXTURE]);
     }
     isOk = theCtx.arbFbo->glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
     theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, StGLFrameBuffer::NO_RENDERBUFFER);

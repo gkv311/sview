@@ -146,7 +146,7 @@ bool StGLFrameBuffer::init(StGLContext&  theCtx,
     if(theNeedDepthBuffer) {
         // bind render buffer to the FBO as depth buffer
         theCtx.arbFbo->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
-                                                 myGLFBufferId);
+                                                 myGLDepthRBId);
     }
     const bool isOk = theCtx.arbFbo->glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
     if(myGLDepthRBId != NO_RENDERBUFFER) {
