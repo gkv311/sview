@@ -20,11 +20,11 @@
 
 #include <stAssert.h>
 
-#if(defined(__APPLE__))
+#if defined(__APPLE__)
     #include <dlfcn.h>
     #include <OpenGL/OpenGL.h>
     #include <ApplicationServices/ApplicationServices.h>
-#elif(!defined(_WIN32))
+#elif !defined(_WIN32)
     #include <GL/glx.h> // glXGetProcAddress()
 #endif
 
@@ -455,7 +455,7 @@ bool StGLContext::stglSetVSync(const VSync_Mode theVSyncMode) {
         myFuncs->wglSwapIntervalEXT(aSyncInt);
         return true;
     }
-#elif(defined(__APPLE__))
+#elif defined(__APPLE__)
     return CGLSetParameter(CGLGetCurrentContext(), kCGLCPSwapInterval, &aSyncInt) == kCGLNoError;
 #else
     if(aSyncInt == -1 && myFuncs->glXSwapIntervalEXT != NULL) {
@@ -528,7 +528,7 @@ bool StGLContext::stglInit() {
             STGL_READ_FUNC(wglDXUnlockObjectsNV);
         }
     }
-#elif(defined(__APPLE__))
+#elif defined(__APPLE__)
     //
 #else
     Display* aDisp = glXGetCurrentDisplay();
@@ -551,7 +551,9 @@ bool StGLContext::stglInit() {
         if(myFuncs->glDebugMessageCallbackARB != NULL) {
             // setup default callback
             myFuncs->glDebugMessageCallbackARB(debugCallbackWrap, this);
+        #if defined(__ST_DEBUG__) || defined(__ST_DEBUG_GL__)
             core11fwd->glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+        #endif
         }
     }
 
