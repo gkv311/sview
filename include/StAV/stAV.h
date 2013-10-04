@@ -270,8 +270,8 @@ namespace stAV {
         ST_CPPEXPORT StString getChannelLayoutString(const AVCodecContext* theCtx);
 
         namespace SAMPLE_FMT {
-            static const AVSampleFormat NONE = (AVSampleFormat )-1;
         #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 0, 0))
+            static const AVSampleFormat NONE = (AVSampleFormat )-1;
             ST_SHARED_CPPEXPORT AVSampleFormat U8;
             ST_SHARED_CPPEXPORT AVSampleFormat S16;
             ST_SHARED_CPPEXPORT AVSampleFormat S32;
@@ -283,6 +283,7 @@ namespace stAV {
             ST_SHARED_CPPEXPORT AVSampleFormat FLTP;
             ST_SHARED_CPPEXPORT AVSampleFormat DBLP;
         #else
+            static const SampleFormat NONE = (SampleFormat )-1;
             ST_SHARED_CPPEXPORT SampleFormat   U8;
             ST_SHARED_CPPEXPORT SampleFormat   S16;
             ST_SHARED_CPPEXPORT SampleFormat   S32;
