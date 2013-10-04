@@ -194,7 +194,7 @@ void StCADViewerGUI::stglResize(const StGLBoxPx& theRectPx) {
 
 void StCADViewerGUI::stglDraw(unsigned int theView) {
     setLensDist(myPlugin->getMainWindow()->getLensDist());
-    if(theView == ST_DRAW_LEFT
+    if((theView == ST_DRAW_LEFT || theView == ST_DRAW_MONO)
     && myFpsWidget != NULL) {
         myFpsWidget->update(myPlugin->getMainWindow()->isStereoOutput(),
                             myPlugin->getMainWindow()->getTargetFps());
