@@ -16,6 +16,11 @@
 #else
     #include <sys/time.h>
     #include <stdlib.h> // just for NULL declaration
+
+    #if !defined(__APPLE__) && defined(_POSIX_MONOTONIC_CLOCK) && (_POSIX_MONOTONIC_CLOCK > 0)
+        #define ST_HAVE_MONOTONIC_CLOCK
+    #endif
+
 #endif
 
 /**
@@ -125,6 +130,8 @@ class StTimer {
 
 #ifdef _WIN32
     typedef LARGE_INTEGER stTimeCounter_t;
+#elif defined(ST_HAVE_MONOTONIC_CLOCK)
+    typedef timespec      stTimeCounter_t;
 #else
     typedef timeval       stTimeCounter_t;
 #endif
@@ -134,7 +141,7 @@ class StTimer {
     static void fillCounter(stTimeCounter_t& theCounter) {
     #ifdef _WIN32
         QueryPerformanceCounter(&theCounter);
-    #elif !defined(__APPLE__) && defined(_POSIX_MONOTONIC_CLOCK)
+    #elif defined(ST_HAVE_MONOTONIC_CLOCK)
         clock_gettime(CLOCK_MONOTONIC, &theCounter);
     #else
         gettimeofday(&theCounter, NULL);
@@ -156,6 +163,9 @@ class StTimer {
     #ifdef _WIN32
         static const double INV_FREQ = winInvFrequency();
         return double(aCounterEnd.QuadPart - myCounterStart.QuadPart) * INV_FREQ;
+    #elif defined(ST_HAVE_MONOTONIC_CLOCK)
+        return (double(aCounterEnd.tv_sec  - myCounterStart.tv_sec ) * 1000000.0)
+             + (double(aCounterEnd.tv_nsec - myCounterStart.tv_nsec) * 0.001);
     #else
         return (double(aCounterEnd.tv_sec  - myCounterStart.tv_sec) * 1000000.0)
               + double(aCounterEnd.tv_usec - myCounterStart.tv_usec);
