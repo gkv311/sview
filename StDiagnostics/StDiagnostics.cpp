@@ -171,7 +171,8 @@ void StDiagnostics::stglDraw(unsigned int theView) {
     }
 
     myGUI->getCamera()->setView(theView);
-    if(theView == ST_DRAW_LEFT) {
+    if(theView == ST_DRAW_LEFT
+    || theView == ST_DRAW_MONO) {
         myGUI->stglUpdate(myWindow->getMousePos());
     }
 

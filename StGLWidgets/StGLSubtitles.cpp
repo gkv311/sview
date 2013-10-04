@@ -60,7 +60,8 @@ const StString& StGLSubtitles::getClassName() {
 
 StGLSubtitles::StGLSubtitles(StGLWidget*                     theParent,
                              const StHandle<StSubQueue>&     theSubQueue,
-                             const StHandle<StFloat32Param>& theFontSize)
+                             const StHandle<StFloat32Param>& theFontSize,
+                             const StHandle<StFloat32Param>& theParallax)
 : StGLTextArea(theParent,
                0, -theParent->getRoot()->scale(100),
                StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER),
@@ -68,6 +69,7 @@ StGLSubtitles::StGLSubtitles(StGLWidget*                     theParent,
                (FontSize )theFontSize->getValue(),
                SHARE_SUBS_FONT_ID),
   myFontSize(theFontSize),
+  myParallax(theParallax),
   myQueue(theSubQueue),
   myShowItems(),
   myPTS(0.0) {
@@ -108,6 +110,29 @@ void StGLSubtitles::stglUpdate(const StPointD_t& ) {
     && aNewSize != mySize) {
         stglSetTextSize(aNewSize);
     }
+}
+
+void StGLSubtitles::stglDraw(unsigned int theView) {
+    if(!myIsInitialized || !isVisible() || myText.isEmpty()) {
+        return;
+    }
+
+    StGLContext& aCtx = getContext();
+    formatText(aCtx);
+
+    switch(theView) {
+        case ST_DRAW_LEFT:
+            myTextDX = -myParallax->getValue() * GLfloat(0.5 * 0.001 * myRoot->getRootRectGl().width());
+            break;
+        case ST_DRAW_RIGHT:
+            myTextDX =  myParallax->getValue() * GLfloat(0.5 * 0.001 * myRoot->getRootRectGl().width());
+            break;
+        case ST_DRAW_MONO:
+        default:
+            myTextDX = 0.0f;
+            break;
+    }
+    StGLTextArea::stglDraw(theView);
 }
 
 void StGLSubtitles::stglResize() {

@@ -194,9 +194,10 @@ class StGLTextArea : public StGLWidget {
      */
     ST_CPPEXPORT void stglSetTextSize(const FontSize theSize);
 
+    ST_CPPEXPORT void formatText(StGLContext& theCtx);
+
         private:
 
-    ST_LOCAL void formatText(StGLContext& theCtx);
     ST_LOCAL void drawText  (StGLContext& theCtx);
 
     ST_LOCAL void recomputeBorder(StGLContext& theCtx);
@@ -230,6 +231,7 @@ class StGLTextArea : public StGLWidget {
     int                  myMarginRight;
     int                  myMarginTop;
     int                  myMarginBottom;
+    GLfloat              myTextDX;        //!< extra displacement
     StGLRect             myTextBndBox;    //!< text boundary box
 
     GLfloat              myTextWidth;     //!< text width limit
@@ -241,4 +243,4 @@ class StGLTextArea : public StGLWidget {
 
 };
 
-#endif //__StGLTextArea_h_
+#endif // __StGLTextArea_h_

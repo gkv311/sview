@@ -68,6 +68,7 @@ namespace {
     static const char ST_SETTING_SCALE_ADJUST[]  = "scaleAdjust";
     static const char ST_SETTING_SCALE_FORCE2X[] = "scale2X";
     static const char ST_SETTING_SUBTITLES_SIZE[]= "subsSize";
+    static const char ST_SETTING_SUBTITLES_PARALLAX[] = "subsParallax";
     static const char ST_SETTING_FULLSCREEN[]    = "fullscreen";
     static const char ST_SETTING_VIEWMODE[]      = "viewMode";
     static const char ST_SETTING_STEREO_MODE[]   = "viewStereoMode";
@@ -194,6 +195,11 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
                                                  28.0f,       // default value
                                                  1.0f,        // incremental step
                                                  0.1f);       // equality tolerance
+    params.SubtitlesParallax= new StFloat32Param(0.0f,        // initial value
+                                                -90.0f, 90.0f,// min, max values
+                                                 0.0f,        // default value
+                                                 1.0f,        // incremental step
+                                                 0.1f);       // equality tolerance
 
     params.alDevice = new StALDeviceParam();
     params.AudioGain = new StFloat32Param( 0.0f, // sound is unattenuated
@@ -250,6 +256,7 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     mySettings->loadParam (ST_SETTING_GLOBAL_MKEYS,       params.areGlobalMKeys);
     mySettings->loadParam (ST_SETTING_SHOW_LIST,          params.ToShowPlayList);
     mySettings->loadParam (ST_SETTING_SUBTITLES_SIZE,     params.SubtitlesSize);
+    mySettings->loadParam (ST_SETTING_SUBTITLES_PARALLAX, params.SubtitlesParallax);
 
     mySettings->loadParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
     mySettings->loadParam (ST_SETTING_VSYNC,              params.IsVSyncOn);
@@ -409,6 +416,7 @@ void StMoviePlayer::releaseDevice() {
         mySettings->saveParam (ST_SETTING_SCALE_ADJUST,       params.ScaleAdjust);
         mySettings->saveParam (ST_SETTING_SCALE_FORCE2X,      params.ScaleHiDPI2X);
         mySettings->saveParam (ST_SETTING_SUBTITLES_SIZE,     params.SubtitlesSize);
+        mySettings->saveParam (ST_SETTING_SUBTITLES_PARALLAX, params.SubtitlesParallax);
         mySettings->saveInt32 (ST_SETTING_FPSTARGET,          params.TargetFps);
         mySettings->saveString(ST_SETTING_OPENAL_DEVICE,      params.alDevice->getTitle());
         mySettings->saveInt32 (ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
@@ -930,7 +938,7 @@ void StMoviePlayer::doUpdateOpenALDeviceList(const size_t ) {
     myToUpdateALList = true;
 }
 
-void StMoviePlayer::stglDraw(unsigned int view) {
+void StMoviePlayer::stglDraw(unsigned int theView) {
     if(!myContext.isNull()
     && myContext->core20fwd != NULL) {
         // clear the screen and the depth buffer
@@ -957,8 +965,9 @@ void StMoviePlayer::stglDraw(unsigned int view) {
         myGUI->updateRecentMenu();
     }
 
-    myGUI->getCamera()->setView(view);
-    if(view == ST_DRAW_LEFT) {
+    myGUI->getCamera()->setView(theView);
+    if(theView == ST_DRAW_LEFT
+    || theView == ST_DRAW_MONO) {
         double aDuration = 0.0;
         double aPts      = 0.0;
         bool isVideoPlayed = false, isAudioPlayed = false;
@@ -1021,7 +1030,7 @@ void StMoviePlayer::stglDraw(unsigned int view) {
     }
 
     // draw GUI
-    myGUI->stglDraw(view);
+    myGUI->stglDraw(theView);
 }
 
 void StMoviePlayer::doShowPlayList(const bool theToShow) {

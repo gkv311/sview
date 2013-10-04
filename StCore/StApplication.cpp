@@ -234,7 +234,7 @@ bool StApplication::open() {
     myIsOpened = myWindow->create();
     if(myIsOpened) {
         // connect slots
-        myWindow->signals.onRedraw    = stSlot(this, &StApplication::stglDraw);
+        myWindow->signals.onRedraw    = stSlot(this, &StApplication::doDrawProxy);
         myWindow->signals.onClose     = stSlot(this, &StApplication::doClose);
         myWindow->signals.onResize    = stSlot(this, &StApplication::doResize);
         myWindow->signals.onAction    = stSlot(this, &StApplication::doAction);
@@ -268,6 +268,10 @@ void StApplication::addRenderer(const StHandle<StWindow>& theRenderer) {
 
 void StApplication::beforeDraw() {
     //
+}
+
+void StApplication::doDrawProxy(unsigned int theView) {
+    stglDraw(!myWindow.isNull() && myWindow->isStereoOutput() ? theView : ST_DRAW_MONO);
 }
 
 void StApplication::stglDraw(unsigned int ) {

@@ -194,6 +194,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StFloat32Param>  ScaleHiDPI;       //!< adapt  GUI size for HiDPI resolution
         StHandle<StBoolParam>     ScaleHiDPI2X;     //!< option to set HiDPI resolution to 2.0
         StHandle<StFloat32Param>  SubtitlesSize;    //!< subtitles font size
+        StHandle<StFloat32Param>  SubtitlesParallax;//!< subtitles parallax
         StHandle<StALDeviceParam> alDevice;         //!< active OpenAL device
         StHandle<StFloat32Param>  AudioGain;        //!< volume factor
         StHandle<StBoolParam>     AudioMute;        //!< volume mute flag

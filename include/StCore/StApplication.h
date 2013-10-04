@@ -246,6 +246,7 @@ class StApplication {
         private:
 
     ST_LOCAL void stApplicationInit(const StHandle<StOpenInfo>& theOpenInfo);
+    ST_LOCAL void doDrawProxy(unsigned int theView);
 
         protected: //! @name protected fields
 

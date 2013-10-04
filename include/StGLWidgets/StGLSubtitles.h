@@ -60,10 +60,12 @@ class StGLSubtitles : public StGLTextArea {
 
     ST_CPPEXPORT StGLSubtitles(StGLWidget*                     theParent,
                                const StHandle<StSubQueue>&     theSubQueue,
-                               const StHandle<StFloat32Param>& theFontSize);
+                               const StHandle<StFloat32Param>& theFontSize,
+                               const StHandle<StFloat32Param>& theParallax);
     ST_CPPEXPORT virtual ~StGLSubtitles();
     ST_CPPEXPORT virtual const StString& getClassName();
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& thePointZo);
+    ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
     ST_CPPEXPORT virtual void stglResize();
 
     /**
@@ -79,6 +81,7 @@ class StGLSubtitles : public StGLTextArea {
         private:
 
     StHandle<StFloat32Param> myFontSize;  //!< font size parameter
+    StHandle<StFloat32Param> myParallax;  //!< text parallax
     StHandle<StSubQueue>     myQueue;     //!< thread-safe subtitles queue
     StSubShowItems           myShowItems; //!< active (shown) subtitle items
     double                   myPTS;       //!< active PTS

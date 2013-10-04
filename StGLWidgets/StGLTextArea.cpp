@@ -296,6 +296,7 @@ StGLTextArea::StGLTextArea(StGLWidget* theParent,
   myMarginRight(0),
   myMarginTop(0),
   myMarginBottom(0),
+  myTextDX(0.0f),
   myTextWidth(-1.0f),
   myToRecompute(true),
   myToShowBorder(false),
@@ -487,7 +488,7 @@ void StGLTextArea::stglDraw(unsigned int theView) {
     GLfloat aSizeOut = 2.0f * GLfloat(zparams.top()) / GLfloat(getRoot()->getRectPx().height());
 
     StGLMatrix aModelMat;
-    aModelMat.translate(StGLVec3(getRoot()->getScreenDispX(), 0.0f, -getCamera()->getZScreen()));
+    aModelMat.translate(StGLVec3(getRoot()->getScreenDispX() + myTextDX, 0.0f, -getCamera()->getZScreen()));
     aModelMat.translate(StGLVec3(GLfloat(aTextRectGl.left()),
                                  GLfloat(aTextRectGl.top()),
                                  0.0f));
@@ -532,7 +533,7 @@ void StGLTextArea::stglDraw(unsigned int theView) {
             aTextRectPx.left() -= 1;
             aTextRectPx.top()  -= 1;
             aTextRectGl = getRoot()->getRectGl(getAbsolute(aTextRectPx));
-            aModelMat.translate(StGLVec3(0.0f, 0.0f, -getCamera()->getZScreen()));
+            aModelMat.translate(StGLVec3(getRoot()->getScreenDispX() + myTextDX, 0.0f, -getCamera()->getZScreen()));
             aModelMat.translate(StGLVec3(GLfloat(aTextRectGl.left()),
                                          GLfloat(aTextRectGl.top()),
                                          0.0f));

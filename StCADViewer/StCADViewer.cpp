@@ -658,8 +658,9 @@ void StCADViewer::stglDraw(unsigned int theView) {
     }
 
     myGUI->getCamera()->setView(theView);
-    myProjection.setView(myWindow->isStereoOutput() ? theView : ST_DRAW_MONO);
-    if(theView == ST_DRAW_LEFT) {
+    myProjection.setView(theView);
+    if(theView == ST_DRAW_LEFT
+    || theView == ST_DRAW_MONO) {
         myGUI->stglUpdate(myWindow->getMousePos());
     }
 
