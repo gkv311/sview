@@ -1,5 +1,21 @@
 sview (unknown_version) unknown_distrib; urgency=low
 
+  + Linux, XLib - read Xft.dpi property to scale interface appropriately.
+  + Added option to scale GUI.
+  + Movie Player - added subtitles font size control.
+  + Movie Player - new Audio/Video synchronization control.
+  + Movie Player, Web UI - added audio volume control
+  + Distorted Output, Dual Output - added option to display Mono sources in Stereo.
+  + Added icons for source format menu items
+  * Display dual-stream video as stereo only when chosen "Autodetection" source format.
+  * Fixed memory corruption on deletion of last item in playlist (file deletion).
+  ^ Accelerate high-range planar YUV (9/10/16 bits per component) to RGB color conversion (using GLSL).
+  ^ Optimized font initialization time and GPU memory usage.
+
+ -- Kirill Gavrilov <kirill@sview.ru>  unknown_date
+
+sview (13.06-1~unknown_distrib) unknown_distrib; urgency=low
+
   + Movie Player - added menu with recently played files.
   + Movie Player - added hot keys to switch subtitles ('T') and audio treks ('L').
   + Movie Player - read stereoscopic tags from WMV files.
@@ -15,7 +31,7 @@ sview (unknown_version) unknown_distrib; urgency=low
   * Improved message box widget - added Close button.
   * Do not append m3u files to playlist.
 
- -- Kirill Gavrilov <kirill@sview.ru>  unknown_date
+ -- Kirill Gavrilov <kirill@sview.ru>  Sat, 15 Jun 2013 11:19:44 +0400
 
 sview (13.01-1~unknown_distrib) unknown_distrib; urgency=low
 
