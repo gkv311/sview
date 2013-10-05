@@ -82,6 +82,7 @@ bool StGLFrameBuffer::initLazy(StGLContext&  theCtx,
         return false;
     }
 
+    theCtx.stglFillBitsFBO(myGLFBufferId, aSizeX, aSizeY);
     ST_DEBUG_LOG("FBO resized to " + aSizeX + " x " + aSizeY + " (for " + theSizeX + " x " + theSizeY + ")");
 
     setVPSizeX(stMin(aSizeX, theSizeX));

@@ -48,12 +48,15 @@ StGLContext::StGLContext()
   myGpuName(GPU_UNKNOWN),
   myVerMajor(0),
   myVerMinor(0),
+  myMaxTexDim(0),
   myWasInit(false),
   myFramebufferDraw(0),
   myFramebufferRead(0) {
-    stMemZero(&(*myFuncs), sizeof(StGLFunctions));
+    stMemZero(&(*myFuncs),   sizeof(StGLFunctions));
     extAll = &(*myFuncs);
-    stMemZero(&myViewport, sizeof(StGLBoxPx));
+    stMemZero(&myViewport,   sizeof(StGLBoxPx));
+    stMemZero(&myWindowBits, sizeof(BufferBits));
+    stMemZero(&myFBOBits,    sizeof(BufferBits));
 #ifdef __APPLE__
     mySysLib.loadSimple("/System/Library/Frameworks/OpenGL.framework/Versions/Current/OpenGL");
 #endif
@@ -79,12 +82,15 @@ StGLContext::StGLContext(const bool theToInitialize)
   myGpuName(GPU_UNKNOWN),
   myVerMajor(0),
   myVerMinor(0),
+  myMaxTexDim(0),
   myWasInit(false),
   myFramebufferDraw(0),
   myFramebufferRead(0) {
-    stMemZero(&(*myFuncs), sizeof(StGLFunctions));
+    stMemZero(&(*myFuncs),   sizeof(StGLFunctions));
     extAll = &(*myFuncs);
-    stMemZero(&myViewport, sizeof(StGLBoxPx));
+    stMemZero(&myViewport,   sizeof(StGLBoxPx));
+    stMemZero(&myWindowBits, sizeof(BufferBits));
+    stMemZero(&myFBOBits,    sizeof(BufferBits));
 #ifdef __APPLE__
     mySysLib.loadSimple("/System/Library/Frameworks/OpenGL.framework/Versions/Current/OpenGL");
 #endif
@@ -318,12 +324,48 @@ StString StGLContext::stglInfo() {
     return anInfo;
 }
 
+void StGLContext::stglFillBitsFBO(const GLuint theBuffId,
+                                  const GLint  theSizeX,
+                                  const GLint  theSizeY) {
+    myFBOBits.SizeX = theSizeX;
+    myFBOBits.SizeY = theSizeY;
+    if(theBuffId == 0) {
+        stMemZero(&myFBOBits, sizeof(BufferBits));
+        return;
+    }
+
+    GLint aBitsRed   = 0;
+    GLint aBitsGreen = 0;
+    GLint aBitsBlue  = 0;
+    arbFbo->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, theBuffId);
+    arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,  GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE,     &aBitsRed);
+    arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,  GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE,   &aBitsGreen);
+    arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,  GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE,    &aBitsBlue);
+    arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,  GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE,   &myFBOBits.Alpha);
+    arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,   GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE,   &myFBOBits.Depth);
+    arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE, &myFBOBits.Stencil);
+    arbFbo->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, myFramebufferDraw);
+    myFBOBits.RGB = aBitsRed + aBitsGreen + aBitsBlue;
+}
+
 StString StGLContext::stglFullInfo() const {
+    StString aFBOBits;
+    if(myFBOBits.RGB > 0) {
+        aFBOBits = StString("\n")
+            + "  FBO    Info: " + myFBOBits.SizeX + "x" + myFBOBits.SizeY
+                            + " RGB" + myFBOBits.RGB + " A" + myFBOBits.Alpha
+                            + " D" + myFBOBits.Depth + " S" + myFBOBits.Stencil;
+    }
+
     StString anInfo = StString()
         + "  GLvendor: "    + (const char* )glGetString(GL_VENDOR)   + "\n"
         + "  GLdevice: "    + (const char* )glGetString(GL_RENDERER) + "\n"
         + "  GLversion: "   + (const char* )glGetString(GL_VERSION)  + "\n"
-        + "  GLSLversion: " + (const char* )glGetString(GL_SHADING_LANGUAGE_VERSION);
+        + "  GLSLversion: " + (const char* )glGetString(GL_SHADING_LANGUAGE_VERSION) + "\n"
+        + "  Window Info: " + myViewport.width() + "x" + myViewport.height()
+                        + " RGB" + myWindowBits.RGB + " A" + myWindowBits.Alpha
+                        + " D" + myWindowBits.Depth + " S" + myWindowBits.Stencil
+        + aFBOBits;
 
 #ifdef __APPLE__
     GLint aGlRendId = 0;
@@ -1237,12 +1279,35 @@ bool StGLContext::stglInit() {
 
     myWasInit = true;
 
-    // log OpenGL info
-    ST_DEBUG_LOG("Created new GL context:\n" + stglFullInfo());
+    // deprecated in core!
+    GLint aBitsRed = 0, aBitsGreen = 0, aBitsBlue = 0;
+    core11fwd->glGetIntegerv(GL_RED_BITS,     &aBitsRed);
+    core11fwd->glGetIntegerv(GL_GREEN_BITS,   &aBitsGreen);
+    core11fwd->glGetIntegerv(GL_BLUE_BITS,    &aBitsBlue);
+    core11fwd->glGetIntegerv(GL_ALPHA_BITS,   &myWindowBits.Alpha);
+    core11fwd->glGetIntegerv(GL_DEPTH_BITS,   &myWindowBits.Depth);
+    core11fwd->glGetIntegerv(GL_STENCIL_BITS, &myWindowBits.Stencil);
+    myWindowBits.RGB = aBitsRed + aBitsGreen + aBitsBlue;
 
     if(hasFBO) {
         arbFbo = (StGLArbFbo* )(&(*myFuncs));
+
+        // invalid attachment (GL_INVALID_ENUM) on AMD, Windows
+        /*GLint aParam = GL_NONE;
+        arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE,     &aParam);
+        if(aParam != GL_NONE) {
+            arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE,     &aBitsRed);
+            arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE,   &aBitsGreen);
+            arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE,    &aBitsBlue);
+            arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE,   &myWindowBits.Alpha);
+            arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH,     GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE,   &myWindowBits.Depth);
+            arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL,   GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE, &myWindowBits.Stencil);
+            myWindowBits.RGB = aBitsRed + aBitsGreen + aBitsBlue;
+        }*/
     }
+
+    // log OpenGL info
+    ST_DEBUG_LOG("Created new GL context:\n" + stglFullInfo());
 
     if(!has12) {
         myVerMajor = 1;

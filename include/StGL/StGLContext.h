@@ -101,6 +101,19 @@ class StGLContext {
         VSync_MIXED =  2, //!< wait for sync only when FPS is higher than monitor refresh rate
     };
 
+    /**
+     * Color + Depth + Stencil buffer bits.
+     */
+    struct BufferBits {
+        GLint RGB;      //!< red + green + blue bits
+        GLint Alpha;    //!< alpha bits
+        GLint Depth;    //!< depth bits
+        GLint Stencil;  //!< stencil bits
+
+        GLint SizeX;
+        GLint SizeY;
+    };
+
         public:    //! @name OpenGL functions - core versions
 
     StGLCore11*     core11;     //!< OpenGL 1.1 core functionality
@@ -293,6 +306,13 @@ class StGLContext {
     ST_CPPEXPORT void stglBindFramebuffer(const GLuint theFramebuffer);
 
     /**
+     * Fill bits information from currently bound FBO.
+     */
+    ST_CPPEXPORT void stglFillBitsFBO(const GLuint theBuffId,
+                                      const GLint  theSizeX,
+                                      const GLint  theSizeY);
+
+    /**
      * Control VSync.
      */
     ST_CPPEXPORT bool stglSetVSync(const VSync_Mode theVSyncMode);
@@ -352,6 +372,8 @@ class StGLContext {
     GLint                   myVerMajor;           //!< cached GL version major number
     GLint                   myVerMinor;           //!< cached GL version minor number
     GLint                   myMaxTexDim;          //!< maximum texture dimension
+    BufferBits              myWindowBits;         //!< default buffer (window) bits
+    BufferBits              myFBOBits;            //!< FBO bits
     bool                    myWasInit;            //!< initialization state
 
         protected: //! @name current state

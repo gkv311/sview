@@ -230,6 +230,7 @@ bool StGLStereoFrameBuffer::initLazy(StGLContext&  theCtx,
         return false;
     }
 
+    theCtx.stglFillBitsFBO(myGLFBufferIds[StGLStereoTexture::LEFT_TEXTURE], aSizeX, aSizeY);
     ST_DEBUG_LOG("FBO resized to " + aSizeX + " x " + aSizeY + " (for " + theSizeX + " x " + theSizeY + ")");
 
     setVPDimensions(theCtx, theSizeX, theSizeY);
