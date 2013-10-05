@@ -327,10 +327,10 @@ StString StGLContext::stglInfo() {
 void StGLContext::stglFillBitsFBO(const GLuint theBuffId,
                                   const GLint  theSizeX,
                                   const GLint  theSizeY) {
+    stMemZero(&myFBOBits, sizeof(BufferBits));
     myFBOBits.SizeX = theSizeX;
     myFBOBits.SizeY = theSizeY;
     if(theBuffId == 0) {
-        stMemZero(&myFBOBits, sizeof(BufferBits));
         return;
     }
 
@@ -342,8 +342,17 @@ void StGLContext::stglFillBitsFBO(const GLuint theBuffId,
     arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,  GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE,   &aBitsGreen);
     arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,  GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE,    &aBitsBlue);
     arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,  GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE,   &myFBOBits.Alpha);
-    arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,   GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE,   &myFBOBits.Depth);
-    arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE, &myFBOBits.Stencil);
+
+    GLint aType = GL_NONE;
+    arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,   GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &aType);
+    if(aType != GL_NONE) {
+        arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,   GL_FRAMEBUFFER_ATTACHMENT_DEPTH_SIZE,   &myFBOBits.Depth);
+    }
+    aType = GL_NONE;
+    arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &aType);
+    if(aType != GL_NONE) {
+        arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE, &myFBOBits.Stencil);
+    }
     arbFbo->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, myFramebufferDraw);
     myFBOBits.RGB = aBitsRed + aBitsGreen + aBitsBlue;
 }
