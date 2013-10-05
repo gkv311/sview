@@ -66,7 +66,7 @@ StGLSubtitles::StGLSubtitles(StGLWidget*                     theParent,
                0, -theParent->getRoot()->scale(100),
                StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER),
                theParent->getRoot()->scale(800), theParent->getRoot()->scale(160),
-               (FontSize )theFontSize->getValue(),
+               (FontSize )(int )theFontSize->getValue(),
                SHARE_SUBS_FONT_ID),
   myFontSize(theFontSize),
   myParallax(theParallax),
@@ -105,7 +105,7 @@ void StGLSubtitles::stglUpdate(const StPointD_t& ) {
         ST_DEBUG_LOG("(" + myPTS + ") myShowItems.myText= '" + myShowItems.myText + "'\n" + aLog);*/
     }
 
-    const FontSize aNewSize = (FontSize )myFontSize->getValue();
+    const FontSize aNewSize = (FontSize )(int )myFontSize->getValue();
     if(!myText.isEmpty()
     && aNewSize != mySize) {
         stglSetTextSize(aNewSize);
