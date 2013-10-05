@@ -34,7 +34,7 @@ static PIXELFORMATDESCRIPTOR THE_PIXELFRMT_DOUBLE = {
     PFD_SUPPORT_OPENGL |             // Format Must Support OpenGL
     PFD_DOUBLEBUFFER,                // Must Support Double Buffering
     PFD_TYPE_RGBA,                   // Request An RGBA Format
-    32,                              // Select Our Color Depth
+    24,                              // Select Our Color Depth
     0, 0, 0, 0, 0, 0,                // Color Bits Ignored
     0,                               // No Alpha Buffer
     0,                               // Shift Bit Ignored
@@ -274,9 +274,9 @@ int StWinHandles::glCreateContext(StWinHandles*    theSlave,
             //WGL_SAMPLE_BUFFERS_ARB, 1,
             //WGL_SAMPLES_ARB,        8,
             // WGL_CONTEXT_ROBUST_ACCESS_BIT_ARB       0x00000004
-            WGL_COLOR_BITS_ARB,     32,
-            WGL_DEPTH_BITS_ARB,     24,
-            WGL_STENCIL_BITS_ARB,   8,
+            WGL_COLOR_BITS_ARB,     24,
+            WGL_DEPTH_BITS_ARB,     theDepthSize,
+            WGL_STENCIL_BITS_ARB,   0,
             0, 0,
         };
         unsigned int aFrmtsNb = 0;
