@@ -172,7 +172,7 @@ void StGLFont::renderGlyph(StGLContext&    theCtx,
                            const stUtf32_t theUCharNext,
                            StGLTile&       theGlyph,
                            StGLVec2&       thePen) {
-    std::map<stUtf32_t, size_t>::iterator aTileIter = myGlyphMap.find(theUChar);
+    std::unordered_map<stUtf32_t, size_t>::iterator aTileIter = myGlyphMap.find(theUChar);
     size_t aTileId;
     if(aTileIter == myGlyphMap.end()) {
         if(renderGlyph(theCtx, theUChar)) {
