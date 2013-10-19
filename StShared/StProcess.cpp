@@ -22,6 +22,8 @@
 
 namespace {
 
+    static const StCString ST_FILE_PROTOCOL = stCString("file://");
+
     static const StString ST_ENV_NAME_STSHARE     = "StShare";
 #if defined(_WIN64) || defined(_LP64) || defined(__LP64__)
     static const StString ST_ENV_NAME_STCORE_PATH = "StCore64";
@@ -300,10 +302,18 @@ StString StProcess::getTempFolder() {
 }
 
 StString StProcess::getAbsolutePath(const StString& thePath) {
-    if(StFileNode::isAbsolutePath(thePath)) {
-        return thePath;
+    StString aPath;
+    if(thePath.isStartsWith(ST_FILE_PROTOCOL)) {
+        const StString aData = thePath.subString(ST_FILE_PROTOCOL.getLength(), thePath.getLength());
+        aPath.fromUrl(aData);
+    } else {
+        aPath = thePath;
     }
-    return StProcess::getWorkingFolder() + thePath; // do absolute path
+
+    if(StFileNode::isAbsolutePath(aPath)) {
+        return aPath;
+    }
+    return StProcess::getWorkingFolder() + aPath; // make absolute path
 }
 
 #ifdef _WIN32
