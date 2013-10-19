@@ -273,8 +273,10 @@ void StOutPageFlip::releaseResources() {
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
     }
     mySettings->saveInt32(ST_SETTING_DEVICE_ID,  myDevice);
-    mySettings->saveParam(ST_SETTING_QUADBUFFER, params.QuadBuffer);
     mySettings->saveParam(ST_SETTING_ADVANCED,   params.ToShowExtra);
+    if(myWasUsed) {
+        mySettings->saveParam(ST_SETTING_QUADBUFFER, params.QuadBuffer);
+    }
 }
 
 StOutPageFlip::~StOutPageFlip() {

@@ -43,6 +43,7 @@ void StWindow::copySignals() {
 StWindow::StWindow()
 : myWin(new StWindowImpl((StNativeWin_t )NULL)),
   myTargetFps(0.0),
+  myWasUsed(false),
   myIsForcedStereo(false) {
     copySignals();
 }
@@ -50,6 +51,7 @@ StWindow::StWindow()
 StWindow::StWindow(const StNativeWin_t theParentWindow)
 : myWin(new StWindowImpl(theParentWindow)),
   myTargetFps(0.0),
+  myWasUsed(false),
   myIsForcedStereo(false) {
     copySignals();
 }
@@ -180,6 +182,7 @@ StPointD_t StWindow::getMousePos() const {
 }
 
 bool StWindow::create() {
+    myWasUsed = true;
     return myWin->create();
 }
 

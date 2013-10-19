@@ -370,12 +370,14 @@ void StOutDistorted::releaseResources() {
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
     }
     mySettings->saveParam(ST_SETTING_LAYOUT,     params.Layout);
-    mySettings->saveParam(ST_SETTING_BARREL,     params.Barrel);
     mySettings->saveParam(ST_SETTING_ANAMORPH,   params.Anamorph);
     mySettings->saveParam(ST_SETTING_MONOCLONE,  params.MonoClone);
     mySettings->saveInt32Rect(ST_SETTING_MARGINS,   myBarMargins);
     mySettings->saveFloatVec4(ST_SETTING_WARP_COEF, myBarrelCoef);
     mySettings->saveFloatVec4(ST_SETTING_CHROME_AB, myChromAb);
+    if(myWasUsed) {
+        mySettings->saveParam(ST_SETTING_BARREL, params.Barrel);
+    }
 }
 
 StOutDistorted::~StOutDistorted() {
