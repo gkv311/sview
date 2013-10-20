@@ -43,6 +43,8 @@ struct StMovieInfo {
 
 };
 
+template<> inline void StArray< StHandle<StFileNode> >::sort() {}
+
 /**
  * Special class for video playback.
  */
@@ -140,7 +142,7 @@ class StVideo {
      */
     ST_LOCAL StHandle<StMovieInfo> getFileInfo(const StHandle<StStereoParams>& theParams) const;
 
-        public: //!< callback Slots
+        public: //! @name callback Slots
 
     /**
      * Interrupt the playback and load current position in playlist.
@@ -148,6 +150,11 @@ class StVideo {
     ST_LOCAL void doLoadNext() {
         pushPlayEvent(ST_PLAYEVENT_NEXT);
     }
+
+    /**
+     * Add file node for removal.
+     */
+    ST_LOCAL void doRemovePhysically(const StHandle<StFileNode>& theFile);
 
     /**
      * Save current displayed frame.
@@ -180,7 +187,7 @@ class StVideo {
 
     ST_LOCAL void setAudioDelay(const float theDelaySec);
 
-        public: //!< Properties
+        public: //! @name Properties
 
     struct {
 
@@ -190,7 +197,7 @@ class StVideo {
 
     } params;
 
-        public: //!< Signals
+        public: //! @name Signals
 
     /**
      * All callback handlers should be thread-safe.
@@ -358,6 +365,9 @@ class StVideo {
     StHandle<StStereoParams>      myCurrParams;   //!< paramters for active file node
     StHandle<StGLTextureQueue>    myTextureQueue; //!< decoded frames queue
 
+    StArrayList< StHandle<StFileNode> >
+                                  myFilesToDelete;//!< file nodes for removal
+
     StHandle<StVideoTimer>        myVideoTimer;   //!< video refresh timer (Audio -> Video sync)
     mutable StMutex               myEventMutex;   //!< lock for thread-safety
     double                        myDuration;     //!< active file duration in seconds
@@ -372,4 +382,4 @@ class StVideo {
 
 };
 
-#endif //__StVideo_h_
+#endif // __StVideo_h_

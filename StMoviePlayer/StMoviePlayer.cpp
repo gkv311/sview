@@ -29,7 +29,9 @@
 
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
+#include <StGLWidgets/StGLButton.h>
 #include <StGLWidgets/StGLImageRegion.h>
+#include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLMsgStack.h>
 #include <StGLWidgets/StGLPlayList.h>
 #include <StGLWidgets/StGLSubtitles.h>
@@ -358,6 +360,9 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     anAction = new StActionIntSlot(stCString("DoSnapshot"), stSlot(this, &StMoviePlayer::doSnapshot), StImageFile::ST_TYPE_NONE);
     addAction(Action_SaveSnapshot, anAction, ST_VK_S | ST_VF_CONTROL);
 
+    anAction = new StActionIntSlot(stCString("DoDeleteFile"), stSlot(this, &StMoviePlayer::doDeleteFileBegin), 0);
+    addAction(Action_DeleteFile, anAction, ST_VK_DELETE | ST_VF_SHIFT);
+
     anAction = new StActionBool(stCString("DoAudioMute"), params.AudioMute);
     addAction(Action_AudioMute, anAction);
 
@@ -516,6 +521,39 @@ void StMoviePlayer::doImageAdjustReset(const size_t ) {
     myGUI->myImage->params.gamma     ->reset();
     myGUI->myImage->params.brightness->reset();
     myGUI->myImage->params.saturation->reset();
+}
+
+
+void StMoviePlayer::doDeleteFileBegin(const size_t ) {
+    //if(!myFileToDelete.isNull()) {
+    //    return;
+    //}
+
+    myFileToDelete = myVideo->getPlayList().getCurrentFile();
+    if(myFileToDelete.isNull()
+    || myFileToDelete->size() != 0) {
+        myFileToDelete.nullify();
+        return;
+    }
+
+    const StString aText = StString("Do you really want to completely remove this file?\n")
+                         + myFileToDelete->getPath() + "";
+
+    StGLMessageBox* aDialog = new StGLMessageBox(myGUI.access(), aText, 512, 256);
+    aDialog->addButton("Delete", true,  96)->signals.onBtnClick += stSlot(this, &StMoviePlayer::doDeleteFileEnd);
+    aDialog->addButton("Cancel", false, 96);
+    aDialog->setVisibility(true, true);
+    aDialog->stglInit();
+}
+
+void StMoviePlayer::doDeleteFileEnd(const size_t ) {
+    if(myFileToDelete.isNull()
+    || myVideo.isNull()) {
+        return;
+    }
+
+    myVideo->doRemovePhysically(myFileToDelete);
+    myFileToDelete.nullify();
 }
 
 void StMoviePlayer::doStopWebUI() {

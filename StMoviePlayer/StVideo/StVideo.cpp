@@ -998,6 +998,26 @@ StHandle<StMovieInfo> StVideo::getFileInfo(const StHandle<StStereoParams>& thePa
     return anInfo;
 }
 
+void StVideo::doRemovePhysically(const StHandle<StFileNode>& theFile) {
+    if(theFile.isNull()
+    || theFile->size() != 0) {
+        return;
+    }
+
+    const StHandle<StFileNode> aCurrent = myPlayList->getCurrentFile();
+    const bool toPlayNext = !aCurrent.isNull()
+                          && aCurrent->size() == 0
+                          && aCurrent->getPath().isEquals(theFile->getPath());
+
+    myEventMutex.lock();
+    myFilesToDelete.add(theFile);
+    myEventMutex.unlock();
+
+    if(toPlayNext) {
+        doLoadNext();
+    }
+}
+
 void StVideo::mainLoop() {
     bool isOpenSuccess = false;
     StHandle<StFileNode> aFileToLoad;
@@ -1043,6 +1063,14 @@ void StVideo::mainLoop() {
         packetsLoop();
 
         myVideoTimer.nullify();
+
+        myEventMutex.lock();
+        for(size_t anIter = 0; anIter < myFilesToDelete.size(); ++anIter) {
+            const StHandle<StFileNode>& aNode = myFilesToDelete[anIter];
+            myPlayList->removePhysically(aNode);
+        }
+        myFilesToDelete.clear();
+        myEventMutex.unlock();
 
         for(;;) {
             if(popPlayEvent(aDummy, aDummyBool) == ST_PLAYEVENT_NEXT) {

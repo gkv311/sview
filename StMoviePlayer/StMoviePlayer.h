@@ -158,6 +158,8 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doListPrev(const size_t dummy = 0);
     ST_LOCAL void doListNext(const size_t dummy = 0);
     ST_LOCAL void doListLast(const size_t dummy = 0);
+    ST_LOCAL void doDeleteFileBegin(const size_t dummy = 0);
+    ST_LOCAL void doDeleteFileEnd  (const size_t dummy = 0);
     ST_LOCAL void doAudioNext(size_t theDirection);
     ST_LOCAL void doSubtitlesNext(size_t theDirection);
 
@@ -316,6 +318,7 @@ class StMoviePlayer : public StApplication {
         Action_SeekRight5,
         Action_Open1File,
         Action_SaveSnapshot,
+        Action_DeleteFile,
         Action_AudioMute,
         Action_AudioPrev,
         Action_AudioNext,
@@ -347,6 +350,7 @@ class StMoviePlayer : public StApplication {
     StHandle<StMoviePlayerGUI> myGUI;             //!< GUI root widget
     StHandle<StVideo>          myVideo;           //!< main video playback class
     StHandle<StCheckUpdates>   myUpdates;         //!< check updates utility
+    StHandle<StFileNode>       myFileToDelete;    //!< file node for removal
 
     StCondition                myEventDialog;     //!< event to prevent showing multiple open/save file dialogs
     StCondition                myEventLoaded;     //!< indicate that new file was open
