@@ -121,6 +121,12 @@ void StPlayList::delPlayItem(StPlayItem* theRemItem) {
         myFirst = myFirst->hasNext() ? myFirst->getNext() : NULL;
     }
 
+    // reset enumeration
+    size_t aPosId = theRemItem->getPosition();
+    for(StPlayItem* anIter = theRemItem->getNext(); anIter != NULL; ++aPosId, anIter = anIter->getNext()) {
+        anIter->setPosition(aPosId);
+    }
+
     if(theRemItem->hasPrev()) {
         // connect previous and next items
         theRemItem->getPrev()->setNext(theRemItem->getNext());
