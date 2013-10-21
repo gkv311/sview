@@ -1073,12 +1073,11 @@ void StVideo::mainLoop() {
         myEventMutex.unlock();
 
         for(;;) {
-            if(popPlayEvent(aDummy, aDummyBool) == ST_PLAYEVENT_NEXT) {
-                if(toQuit) {
-                    return;
-                }
-            } else {
+            if(popPlayEvent(aDummy, aDummyBool) != ST_PLAYEVENT_NEXT) {
                 myPlayList->walkToNext(false);
+            }
+            if(toQuit) {
+                return;
             }
             isOpenSuccess = false;
             if(myPlayList->getCurrentFile(aFileToLoad, aFileParams)) {
