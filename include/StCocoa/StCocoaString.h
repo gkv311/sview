@@ -42,7 +42,7 @@ class ST_LOCAL StCocoaString {
      * Create instance from NSString.
      * Does NOT perform copying!
      */
-    StCocoaString(const NSString* theStringNs)
+    StCocoaString(NSString* theStringNs)
     : myStringNs([theStringNs retain]) {
         //
     }

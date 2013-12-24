@@ -93,7 +93,7 @@ namespace {
     /**
      * Singletone implementation.
      */
-    - (void ) release {
+    - (oneway void ) release {
         //do nothing
     }
 

@@ -33,7 +33,12 @@
     #include <sys/sysinfo.h>
 #endif
 
-class NSOpenGLContext;
+#ifdef __OBJC__
+    @class NSOpenGLContext;
+#else
+    class NSOpenGLContext;
+#endif
+
 class StGLContext;
 class StThread;
 

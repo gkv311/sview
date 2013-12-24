@@ -79,7 +79,6 @@ class StDiagnostics : public StApplication {
     StHandle<StGLContext>      myContext;
     StHandle<StSettings>       mySettings; //!< settings manager for Diagnostics plugin
     StHandle<StDiagnosticsGUI> myGUI;      //!< GUI root widget
-    bool                       myToQuit;
 
 };
 

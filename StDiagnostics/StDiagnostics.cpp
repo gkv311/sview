@@ -35,8 +35,7 @@ const StString StDiagnostics::ST_DRAWER_PLUGIN_NAME("StDiagnostics");
 
 StDiagnostics::StDiagnostics(const StNativeWin_t         theParentWin,
                              const StHandle<StOpenInfo>& theOpenInfo)
-: StApplication(theParentWin, theOpenInfo),
-  myToQuit(false) {
+: StApplication(theParentWin, theOpenInfo) {
     myTitle = "sView - Stereoscopic Device Diagnostics";
     params.IsFullscreen = new StBoolParam(false);
     params.IsFullscreen->signals.onChanged.connect(this, &StDiagnostics::doFullscreen);

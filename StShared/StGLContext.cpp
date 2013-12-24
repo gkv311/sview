@@ -107,9 +107,9 @@ static void APIENTRY debugCallbackWrap(unsigned int theSource,
                                        unsigned int theType,
                                        unsigned int theId,
                                        unsigned int theSeverity,
-                                       int          theLength,
-                                       const char*  theMessage,
-                                       void*        theUserParam) {
+                                       int                 theLength,
+                                       const char*   theMessage,
+                                       const void*   theUserParam) {
     ((StGLContext* )theUserParam)->stglDebugCallback(theSource, theType, theId, theSeverity, theLength, theMessage);
 }
 
