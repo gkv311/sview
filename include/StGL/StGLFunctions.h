@@ -59,6 +59,7 @@
 #undef GL_VERSION_4_1
 #undef GL_VERSION_4_2
 #undef GL_VERSION_4_3
+#undef GL_VERSION_4_4
 
 #include <StGL/StGLExt.h>
 
@@ -699,6 +700,62 @@ struct StGLFunctions {
         public: //! @name OpenGL 4.2
 
         public: //! @name OpenGL 4.3
+
+    PFNGLCLEARBUFFERDATAPROC                 glClearBufferData;
+    PFNGLCLEARBUFFERSUBDATAPROC              glClearBufferSubData;
+    PFNGLDISPATCHCOMPUTEPROC                 glDispatchCompute;
+    PFNGLDISPATCHCOMPUTEINDIRECTPROC         glDispatchComputeIndirect;
+    PFNGLCOPYIMAGESUBDATAPROC                glCopyImageSubData;
+    PFNGLFRAMEBUFFERPARAMETERIPROC           glFramebufferParameteri;
+    PFNGLGETFRAMEBUFFERPARAMETERIVPROC       glGetFramebufferParameteriv;
+    PFNGLGETINTERNALFORMATI64VPROC           glGetInternalformati64v;
+    PFNGLINVALIDATETEXSUBIMAGEPROC           glInvalidateTexSubImage;
+    PFNGLINVALIDATETEXIMAGEPROC              glInvalidateTexImage;
+    PFNGLINVALIDATEBUFFERSUBDATAPROC         glInvalidateBufferSubData;
+    PFNGLINVALIDATEBUFFERDATAPROC            glInvalidateBufferData;
+    PFNGLINVALIDATEFRAMEBUFFERPROC           glInvalidateFramebuffer;
+    PFNGLINVALIDATESUBFRAMEBUFFERPROC        glInvalidateSubFramebuffer;
+    PFNGLMULTIDRAWARRAYSINDIRECTPROC         glMultiDrawArraysIndirect;
+    PFNGLMULTIDRAWELEMENTSINDIRECTPROC       glMultiDrawElementsIndirect;
+    PFNGLGETPROGRAMINTERFACEIVPROC           glGetProgramInterfaceiv;
+    PFNGLGETPROGRAMRESOURCEINDEXPROC         glGetProgramResourceIndex;
+    PFNGLGETPROGRAMRESOURCENAMEPROC          glGetProgramResourceName;
+    PFNGLGETPROGRAMRESOURCEIVPROC            glGetProgramResourceiv;
+    PFNGLGETPROGRAMRESOURCELOCATIONPROC      glGetProgramResourceLocation;
+    PFNGLGETPROGRAMRESOURCELOCATIONINDEXPROC glGetProgramResourceLocationIndex;
+    PFNGLSHADERSTORAGEBLOCKBINDINGPROC       glShaderStorageBlockBinding;
+    PFNGLTEXBUFFERRANGEPROC                  glTexBufferRange;
+    PFNGLTEXSTORAGE2DMULTISAMPLEPROC         glTexStorage2DMultisample;
+    PFNGLTEXSTORAGE3DMULTISAMPLEPROC         glTexStorage3DMultisample;
+    PFNGLTEXTUREVIEWPROC                     glTextureView;
+    PFNGLBINDVERTEXBUFFERPROC                glBindVertexBuffer;
+    PFNGLVERTEXATTRIBFORMATPROC              glVertexAttribFormat;
+    PFNGLVERTEXATTRIBIFORMATPROC             glVertexAttribIFormat;
+    PFNGLVERTEXATTRIBLFORMATPROC             glVertexAttribLFormat;
+    PFNGLVERTEXATTRIBBINDINGPROC             glVertexAttribBinding;
+    PFNGLVERTEXBINDINGDIVISORPROC            glVertexBindingDivisor;
+    PFNGLDEBUGMESSAGECONTROLPROC             glDebugMessageControl;
+    PFNGLDEBUGMESSAGEINSERTPROC              glDebugMessageInsert;
+    PFNGLDEBUGMESSAGECALLBACKPROC            glDebugMessageCallback;
+    PFNGLGETDEBUGMESSAGELOGPROC              glGetDebugMessageLog;
+    PFNGLPUSHDEBUGGROUPPROC                  glPushDebugGroup;
+    PFNGLPOPDEBUGGROUPPROC                   glPopDebugGroup;
+    PFNGLOBJECTLABELPROC                     glObjectLabel;
+    PFNGLGETOBJECTLABELPROC                  glGetObjectLabel;
+    PFNGLOBJECTPTRLABELPROC                  glObjectPtrLabel;
+    PFNGLGETOBJECTPTRLABELPROC               glGetObjectPtrLabel;
+
+        public: //! @name OpenGL 4.4
+
+    PFNGLBUFFERSTORAGEPROC     glBufferStorage;
+    PFNGLCLEARTEXIMAGEPROC     glClearTexImage;
+    PFNGLCLEARTEXSUBIMAGEPROC  glClearTexSubImage;
+    PFNGLBINDBUFFERSBASEPROC   glBindBuffersBase;
+    PFNGLBINDBUFFERSRANGEPROC  glBindBuffersRange;
+    PFNGLBINDTEXTURESPROC      glBindTextures;
+    PFNGLBINDSAMPLERSPROC      glBindSamplers;
+    PFNGLBINDIMAGETEXTURESPROC glBindImageTextures;
+    PFNGLBINDVERTEXBUFFERSPROC glBindVertexBuffers;
 
         public: //! @name GL_ARB_debug_output (optional)
 

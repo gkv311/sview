@@ -389,6 +389,7 @@
 		<Unit filename="../include/StGL/StGLEnums.h" />
 		<Unit filename="../include/StGL/StGLFont.h" />
 		<Unit filename="../include/StGL/StGLFrameBuffer.h" />
+		<Unit filename="../include/StGL/StGLFunctions.h" />
 		<Unit filename="../include/StGL/StGLMatrix.h" />
 		<Unit filename="../include/StGL/StGLProgram.h" />
 		<Unit filename="../include/StGL/StGLResource.h" />
@@ -417,6 +418,8 @@
 		<Unit filename="../include/StGLCore/StGLCore40.h" />
 		<Unit filename="../include/StGLCore/StGLCore41.h" />
 		<Unit filename="../include/StGLCore/StGLCore42.h" />
+		<Unit filename="../include/StGLCore/StGLCore43.h" />
+		<Unit filename="../include/StGLCore/StGLCore44.h" />
 		<Unit filename="../include/StGLMesh/StBndBox.h" />
 		<Unit filename="../include/StGLMesh/StBndCameraBox.h" />
 		<Unit filename="../include/StGLMesh/StBndContainer.h" />

@@ -13,7 +13,7 @@
 #include <StGL/StGLContext.h>
 #include <StGL/StGLFunctions.h>
 
-#include <StGLCore/StGLCore42.h>
+#include <StGLCore/StGLCore44.h>
 #include <StGL/StGLArbFbo.h>
 
 #include <StStrings/StLogger.h>
@@ -39,6 +39,10 @@ StGLContext::StGLContext()
   core41back(NULL),
   core42(NULL),
   core42back(NULL),
+  core43(NULL),
+  core43back(NULL),
+  core44(NULL),
+  core44back(NULL),
   arbFbo(NULL),
   arbNPTW(false),
   arbTexRG(false),
@@ -73,6 +77,10 @@ StGLContext::StGLContext(const bool theToInitialize)
   core41back(NULL),
   core42(NULL),
   core42back(NULL),
+  core43(NULL),
+  core43back(NULL),
+  core44(NULL),
+  core44back(NULL),
   arbFbo(NULL),
   arbNPTW(false),
   arbTexRG(false),
@@ -549,6 +557,8 @@ bool StGLContext::stglInit() {
     bool has40 = false;
     bool has41 = false;
     bool has42 = false;
+    bool has43 = false;
+    bool has44 = false;
 
     #define STGL_READ_FUNC(theFunc) stglFindProc(#theFunc, myFuncs->theFunc)
 
@@ -1272,7 +1282,63 @@ bool StGLContext::stglInit() {
          && hasShaderImgLoadStore
          && hasTextureStorage;
 
-    const StString  aGlRenderer ((const char* )core11fwd->glGetString(GL_RENDERER));
+    has43 = isGlGreaterEqual(4, 3)
+         && STGL_READ_FUNC(glClearBufferData)
+         && STGL_READ_FUNC(glClearBufferSubData)
+         && STGL_READ_FUNC(glDispatchCompute)
+         && STGL_READ_FUNC(glDispatchComputeIndirect)
+         && STGL_READ_FUNC(glCopyImageSubData)
+         && STGL_READ_FUNC(glFramebufferParameteri)
+         && STGL_READ_FUNC(glGetFramebufferParameteriv)
+         && STGL_READ_FUNC(glGetInternalformati64v)
+         && STGL_READ_FUNC(glInvalidateTexSubImage)
+         && STGL_READ_FUNC(glInvalidateTexImage)
+         && STGL_READ_FUNC(glInvalidateBufferSubData)
+         && STGL_READ_FUNC(glInvalidateBufferData)
+         && STGL_READ_FUNC(glInvalidateFramebuffer)
+         && STGL_READ_FUNC(glInvalidateSubFramebuffer)
+         && STGL_READ_FUNC(glMultiDrawArraysIndirect)
+         && STGL_READ_FUNC(glMultiDrawElementsIndirect)
+         && STGL_READ_FUNC(glGetProgramInterfaceiv)
+         && STGL_READ_FUNC(glGetProgramResourceIndex)
+         && STGL_READ_FUNC(glGetProgramResourceName)
+         && STGL_READ_FUNC(glGetProgramResourceiv)
+         && STGL_READ_FUNC(glGetProgramResourceLocation)
+         && STGL_READ_FUNC(glGetProgramResourceLocationIndex)
+         && STGL_READ_FUNC(glShaderStorageBlockBinding)
+         && STGL_READ_FUNC(glTexBufferRange)
+         && STGL_READ_FUNC(glTexStorage2DMultisample)
+         && STGL_READ_FUNC(glTexStorage3DMultisample)
+         && STGL_READ_FUNC(glTextureView)
+         && STGL_READ_FUNC(glBindVertexBuffer)
+         && STGL_READ_FUNC(glVertexAttribFormat)
+         && STGL_READ_FUNC(glVertexAttribIFormat)
+         && STGL_READ_FUNC(glVertexAttribLFormat)
+         && STGL_READ_FUNC(glVertexAttribBinding)
+         && STGL_READ_FUNC(glVertexBindingDivisor)
+         && STGL_READ_FUNC(glDebugMessageControl)
+         && STGL_READ_FUNC(glDebugMessageInsert)
+         && STGL_READ_FUNC(glDebugMessageCallback)
+         && STGL_READ_FUNC(glGetDebugMessageLog)
+         && STGL_READ_FUNC(glPushDebugGroup)
+         && STGL_READ_FUNC(glPopDebugGroup)
+         && STGL_READ_FUNC(glObjectLabel)
+         && STGL_READ_FUNC(glGetObjectLabel)
+         && STGL_READ_FUNC(glObjectPtrLabel)
+         && STGL_READ_FUNC(glGetObjectPtrLabel);
+
+    has44 = isGlGreaterEqual(4, 4)
+         && STGL_READ_FUNC(glBufferStorage)
+         && STGL_READ_FUNC(glClearTexImage)
+         && STGL_READ_FUNC(glClearTexSubImage)
+         && STGL_READ_FUNC(glBindBuffersBase)
+         && STGL_READ_FUNC(glBindBuffersRange)
+         && STGL_READ_FUNC(glBindTextures)
+         && STGL_READ_FUNC(glBindSamplers)
+         && STGL_READ_FUNC(glBindImageTextures)
+         && STGL_READ_FUNC(glBindVertexBuffers);
+
+    const StString aGlRenderer((const char* )core11fwd->glGetString(GL_RENDERER));
     if(aGlRenderer.isContains(stCString("GeForce"))) {
         myGpuName = GPU_GEFORCE;
     } else if(aGlRenderer.isContains(stCString("Quadro"))) {
@@ -1405,6 +1471,24 @@ bool StGLContext::stglInit() {
     } else {
         myVerMajor = 4;
         myVerMinor = 1;
+        return true;
+    }
+
+    if(has43) {
+        core43     = (StGLCore43*     )(&(*myFuncs));
+        core43back = (StGLCore43Back* )(&(*myFuncs));
+    } else {
+        myVerMajor = 4;
+        myVerMinor = 2;
+        return true;
+    }
+
+    if(has44) {
+        core44     = (StGLCore44*     )(&(*myFuncs));
+        core44back = (StGLCore44Back* )(&(*myFuncs));
+    } else {
+        myVerMajor = 4;
+        myVerMinor = 3;
         return true;
     }
 

@@ -80,6 +80,14 @@ template<typename theBaseClass_t> struct stglTmplCore42;
 typedef stglTmplCore42<StGLCore41Back> StGLCore42Back;
 typedef stglTmplCore42<StGLCore41>     StGLCore42;
 
+template<typename theBaseClass_t> struct stglTmplCore43;
+typedef stglTmplCore43<StGLCore42Back> StGLCore43Back;
+typedef stglTmplCore43<StGLCore42>     StGLCore43;
+
+template<typename theBaseClass_t> struct stglTmplCore44;
+typedef stglTmplCore44<StGLCore43Back> StGLCore44Back;
+typedef stglTmplCore44<StGLCore43>     StGLCore44;
+
 /**
  * Class provides access to OpenGL functions.
  */
@@ -126,6 +134,10 @@ class StGLContext {
     StGLCore41Back* core41back; //!< OpenGL 4.1 backward compatibility profile
     StGLCore42*     core42;     //!< OpenGL 4.2 core profile
     StGLCore42Back* core42back; //!< OpenGL 4.2 backward compatibility profile
+    StGLCore43*     core43;     //!< OpenGL 4.3 core profile
+    StGLCore43Back* core43back; //!< OpenGL 4.3 backward compatibility profile
+    StGLCore44*     core44;     //!< OpenGL 4.4 core profile
+    StGLCore44Back* core44back; //!< OpenGL 4.4 backward compatibility profile
 
         public:    //! @name OpenGL functions - extensions
 

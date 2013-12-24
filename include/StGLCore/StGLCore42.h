@@ -65,4 +65,4 @@ typedef stglTmplCore42<StGLCore41Back> StGLCore42Back;
 typedef stglTmplCore42<StGLCore41>     StGLCore42;
 
 
-#endif // __StGLCore41_h_
+#endif // __StGLCore42_h_
