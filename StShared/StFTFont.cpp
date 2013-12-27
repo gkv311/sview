@@ -13,7 +13,8 @@
 
 StFTFont::StFTFont(StHandle<StFTLibrary> theFTLib)
 : myFTLib(theFTLib),
-  myFTFace(NULL) {
+  myFTFace(NULL),
+  myHasCJK(false) {
     if(myFTLib.isNull()) {
         myFTLib = new StFTLibrary();
     }
@@ -54,6 +55,7 @@ bool StFTFont::init(const StString&    theFontPath,
                     const unsigned int theResolution) {
     release();
     myFontPath = theFontPath;
+    myHasCJK   = false;
     if(!myFTLib->isValid()) {
         ST_DEBUG_LOG("StFTFont, FreeType library is unavailable!");
         return false;
@@ -73,12 +75,17 @@ bool StFTFont::init(const StString&    theFontPath,
         release();
         return false;
     }
+
+    // check some CJK symbols
+    myHasCJK = FT_Get_Char_Index(myFTFace, 45937) != 0
+            && FT_Get_Char_Index(myFTFace, 53552) != 0;
+
     return true;
 }
 
 bool StFTFont::loadGlyph(const stUtf32_t theUChar) {
     if(myUChar == theUChar) {
-        return true;
+        return myUChar != 0;
     }
 
     myGlyphImg.nullify();
@@ -96,9 +103,13 @@ bool StFTFont::loadGlyph(const stUtf32_t theUChar) {
 bool StFTFont::renderGlyph(const stUtf32_t theUChar) {
     myGlyphImg.nullify();
     myUChar = 0;
+
+    const FT_UInt aGlyphIndex = theUChar != 0
+                              ? FT_Get_Char_Index(myFTFace, theUChar)
+                              : 0;
     // | FT_LOAD_NO_BITMAP
-    if(theUChar == 0
-    || FT_Load_Char(myFTFace, theUChar, FT_LOAD_RENDER | FT_LOAD_NO_HINTING | FT_LOAD_TARGET_NORMAL) != 0
+    if(aGlyphIndex == 0
+    || FT_Load_Glyph(myFTFace, aGlyphIndex, FT_LOAD_RENDER | FT_LOAD_NO_HINTING | FT_LOAD_TARGET_NORMAL) != 0
     || myFTFace->glyph == NULL
     || myFTFace->glyph->format != FT_GLYPH_FORMAT_BITMAP) {
         return false;
@@ -115,6 +126,29 @@ bool StFTFont::renderGlyph(const stUtf32_t theUChar) {
     }
     myGlyphImg.setTopDown(aBitmap.pitch > 0);
     myUChar = theUChar;
+    return true;
+}
+
+bool StFTFont::renderGlyphNotdef() {
+    myGlyphImg.nullify();
+    myUChar = 0;
+
+    if(FT_Load_Glyph(myFTFace, 0, FT_LOAD_RENDER | FT_LOAD_NO_HINTING | FT_LOAD_TARGET_NORMAL) != 0
+    || myFTFace->glyph == NULL
+    || myFTFace->glyph->format != FT_GLYPH_FORMAT_BITMAP) {
+        return false;
+    }
+
+    FT_Bitmap aBitmap = myFTFace->glyph->bitmap;
+    if(aBitmap.pixel_mode != FT_PIXEL_MODE_GRAY
+    || aBitmap.buffer == NULL || aBitmap.width <= 0 || aBitmap.rows <= 0) {
+        return false;
+    }
+    if(!myGlyphImg.initWrapper(StImagePlane::ImgGray, aBitmap.buffer,
+                               aBitmap.width, aBitmap.rows, std::abs(aBitmap.pitch))) {
+        return false;
+    }
+    myGlyphImg.setTopDown(aBitmap.pitch > 0);
     return true;
 }
 

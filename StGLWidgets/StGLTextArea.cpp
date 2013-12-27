@@ -312,6 +312,15 @@ StGLTextArea::StGLTextArea(StGLWidget* theParent,
             ST_ERROR_LOG("Could not load font '" + ST_FONT_SANS_PATH + '\'');
         }
         myFont.create(getRoot()->getContextHandle(), new StGLFont(aFont));
+
+        /**const StString ST_FONT_CJK_PATH = "NanumMyeongjo.ttf";
+        StStringUtf8 aFontPathCJK = StFileNode::getCompatibleName(ST_FONT_CJK_PATH);
+        StHandle<StFTFont> aFontCJK = new StFTFont();
+        if(!aFontCJK->init(aFontPathCJK, getFontSize(), myRoot->getResolution())) {
+            ST_ERROR_LOG("Could not load font '" + ST_FONT_CJK_PATH + '\'');
+        } else {
+            myFont->changeFontCJK(StFTFont::Style_Regular) = new StGLFontEntry(aFontCJK);
+        }*/
     }
 }
 
@@ -436,7 +445,7 @@ void StGLTextArea::recomputeBorder(StGLContext& theCtx) {
 void StGLTextArea::formatText(StGLContext& theCtx) {
     if(myToRecompute) {
         myFormatter.reset();
-        myFormatter.append(theCtx, myText, *myFont->changeFont(StFTFont::Style_Regular));
+        myFormatter.append(theCtx, myText, StFTFont::Style_Regular, *myFont);
         myFormatter.format(myTextWidth, GLfloat(getRectPx().height()));
         myFormatter.getResult(theCtx, myTexturesList, myTextVertBuf, myTextTCrdBuf);
         myFormatter.getBndBox(myTextBndBox);

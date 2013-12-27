@@ -90,14 +90,16 @@ class StGLFontEntry : public StGLResource {
      * Initialize GL resources.
      * FreeType font instance should be already initialized!
      */
-    ST_CPPEXPORT bool stglInit(StGLContext& theCtx);
+    ST_CPPEXPORT bool stglInit(StGLContext& theCtx,
+                               const bool   theToCreateTexture = true);
 
     /**
      * Re-initialize GL resources.
      */
     ST_CPPEXPORT bool stglInit(StGLContext&       theCtx,
                                const unsigned int thePointSize,
-                               const unsigned int theResolution);
+                               const unsigned int theResolution,
+                               const bool         theToCreateTexture = true);
 
     /**
      * Compute advance to the next character with kerning applied when applicable.
@@ -123,15 +125,34 @@ class StGLFontEntry : public StGLResource {
     }
 
     /**
+     * @return true if this font contains CJK (Chinese, Japanese, and Korean) glyphs
+     */
+    ST_LOCAL bool hasCJK() const {
+        return !myFont.isNull()
+             && myFont->hasCJK();
+    }
+
+    /**
+     * @return true if font contains specified symbol
+     */
+    ST_LOCAL bool hasSymbol(const stUtf32_t theUChar) const {
+        return !myFont.isNull()
+             && myFont->hasSymbol(theUChar);
+    }
+
+    /**
      * Compute glyph rectangle at specified pen position (on baseline)
      * and render it to texture if not already.
-     * @param theCtx       active context
-     * @param theUChar     unicode symbol to render
-     * @param theUCharNext next symbol to compute advance with kerning when available
-     * @param theGlyph     computed glyph position rectangle, texture ID and UV coordinates
-     * @param thePen       pen position on baseline to place new glyph
+     * @param theCtx         active context
+     * @param theToDrawUndef when true than undefined character is drawn as empty rectangle
+     * @param theUChar       unicode symbol to render
+     * @param theUCharNext   next symbol to compute advance with kerning when available
+     * @param theGlyph       computed glyph position rectangle, texture ID and UV coordinates
+     * @param thePen         pen position on baseline to place new glyph
+     * @return true if font contains specified character
      */
-    ST_CPPEXPORT void renderGlyph(StGLContext&    theCtx,
+    ST_CPPEXPORT bool renderGlyph(StGLContext&    theCtx,
+                                  const bool      theToDrawUndef,
                                   const stUtf32_t theUChar,
                                   const stUtf32_t theUCharNext,
                                   StGLTile&       theGlyph,
@@ -143,7 +164,8 @@ class StGLFontEntry : public StGLResource {
      * Render new glyph to the texture.
      */
     ST_CPPEXPORT bool renderGlyph(StGLContext&    theCtx,
-                                  const stUtf32_t theChar);
+                                  const stUtf32_t theChar,
+                                  const bool      theToForce);
 
     /**
      * Allocate new texture.

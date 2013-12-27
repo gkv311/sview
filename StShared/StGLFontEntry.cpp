@@ -55,16 +55,18 @@ void StGLFontEntry::release(StGLContext& theCtx) {
 
 bool StGLFontEntry::stglInit(StGLContext&       theCtx,
                              const unsigned int thePointSize,
-                             const unsigned int theResolution) {
+                             const unsigned int theResolution,
+                             const bool         theToCreateTexture) {
     release(theCtx);
     if(!myFont->init(thePointSize, theResolution)) {
         return false;
     }
 
-    return stglInit(theCtx);
+    return stglInit(theCtx, theToCreateTexture);
 }
 
-bool StGLFontEntry::stglInit(StGLContext& theCtx) {
+bool StGLFontEntry::stglInit(StGLContext& theCtx,
+                             const bool   theToCreateTexture) {
     release(theCtx);
     if(myFont.isNull() || !myFont->isValid()) {
         return false;
@@ -76,7 +78,8 @@ bool StGLFontEntry::stglInit(StGLContext& theCtx) {
     myTileSizeY   = myFont->getGlyphMaxSizeY();
 
     myLastTileId = size_t(-1);
-    return createTexture(theCtx);
+    return !theToCreateTexture
+         || createTexture(theCtx);
 }
 
 bool StGLFontEntry::createTexture(StGLContext& theCtx) {
@@ -118,9 +121,13 @@ bool StGLFontEntry::createTexture(StGLContext& theCtx) {
 }
 
 bool StGLFontEntry::renderGlyph(StGLContext&    theCtx,
-                                const stUtf32_t theChar) {
+                                const stUtf32_t theChar,
+                                const bool      theToForce) {
     if(!myFont->renderGlyph(theChar)) {
-        return false;
+        if(!theToForce
+        || !myFont->renderGlyphNotdef()) {
+            return false;
+        }
     }
 
     if(myTextures.isEmpty()
@@ -144,7 +151,7 @@ bool StGLFontEntry::renderGlyph(StGLContext&    theCtx,
             if(!createTexture(theCtx)) {
                 return false;
             }
-            return renderGlyph(theCtx, theChar);
+            return renderGlyph(theCtx, theChar, theToForce);
         }
     }
 
@@ -172,23 +179,32 @@ bool StGLFontEntry::renderGlyph(StGLContext&    theCtx,
     return true;
 }
 
-void StGLFontEntry::renderGlyph(StGLContext&    theCtx,
+bool StGLFontEntry::renderGlyph(StGLContext&    theCtx,
+                                const bool      theToDrawUndef,
                                 const stUtf32_t theUChar,
                                 const stUtf32_t theUCharNext,
                                 StGLTile&       theGlyph,
                                 StGLVec2&       thePen) {
     std::unordered_map<stUtf32_t, size_t>::iterator aTileIter = myGlyphMap.find(theUChar);
     size_t aTileId;
-    if(aTileIter == myGlyphMap.end()) {
-        if(renderGlyph(theCtx, theUChar)) {
+    if(aTileIter != myGlyphMap.end()) {
+        aTileId = aTileIter->second;
+    } else if(renderGlyph(theCtx, theUChar, false)) {
+        aTileId = myLastTileId;
+        myGlyphMap[theUChar] = aTileId;
+    } else if(!theToDrawUndef) {
+        return false;
+    } else {
+        aTileIter = myGlyphMap.find(0);
+        if(aTileIter != myGlyphMap.end()) {
+            aTileId = aTileIter->second;
+        } else if(renderGlyph(theCtx, theUChar, true)) {
             aTileId = myLastTileId;
+            myGlyphMap[theUChar] = aTileId;
         } else {
             thePen.x() += myFont->getAdvanceX(theUChar, theUCharNext);
-            return;
+            return false;
         }
-        myGlyphMap[theUChar] = aTileId;
-    } else {
-        aTileId = aTileIter->second;
     }
 
     const StGLTile& aTile = myTiles[aTileId];
@@ -199,4 +215,5 @@ void StGLFontEntry::renderGlyph(StGLContext&    theCtx,
     theGlyph.texture = aTile.texture;
 
     thePen.x() += myFont->getAdvanceX(theUChar, theUCharNext);
+    return true;
 }

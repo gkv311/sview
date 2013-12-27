@@ -173,9 +173,10 @@ void StGLTextFormatter::getResult(StGLContext&                                th
     }
 }
 
-void StGLTextFormatter::append(StGLContext&    theCtx,
-                               const StString& theString,
-                               StGLFontEntry&  theFont) {
+void StGLTextFormatter::append(StGLContext&          theCtx,
+                               const StString&       theString,
+                               const StFTFont::Style theStyle,
+                               StGLFont&             theFont) {
     myAscender    = stMax(myAscender,    theFont.getAscender());
     myLineSpacing = stMax(myLineSpacing, theFont.getLineSpacing());
 
@@ -197,12 +198,12 @@ void StGLTextFormatter::append(StGLContext&    theCtx,
             /// if(theWidth <= 0.0f) myAlignWidth =
             continue; // will be processed on second pass
         } else if(aCharThis == ' ') {
-            myPen.x() += theFont.getAdvanceX(aCharThis, aCharNext);
+            myPen.x() += theFont.changeFont(StFTFont::Style_Regular)->getAdvanceX(aCharThis, aCharNext);
             continue;
         }
 
         theFont.renderGlyph(theCtx,
-                            aCharThis, aCharNext,
+                            theStyle, aCharThis, aCharNext,
                             aTile, myPen);
         myRects.add(aTile);
 

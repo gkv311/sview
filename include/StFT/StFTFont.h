@@ -96,8 +96,21 @@ class StFTFont {
 
     /**
      * Render specified glyph into internal buffer (bitmap).
+     * Notice that this method ignores notdef symbol!
      */
     ST_CPPEXPORT bool renderGlyph(const stUtf32_t theChar);
+
+    /**
+     * Render special notdef glyph into internal buffer (bitmap).
+     */
+    ST_CPPEXPORT bool renderGlyphNotdef();
+
+    /**
+     * @return true if font contains specified symbol
+     */
+    ST_LOCAL bool hasSymbol(const stUtf32_t theUChar) const {
+        return FT_Get_Char_Index(myFTFace, theUChar) != 0;
+    }
 
     /**
      * @return maximal glyph width in pixels (rendered to bitmap).
@@ -197,6 +210,13 @@ class StFTFont {
         return myFTFace->family_name;
     }
 
+    /**
+     * @return true if this font contains CJK (Chinese, Japanese, and Korean) glyphs
+     */
+    ST_LOCAL bool hasCJK() const {
+        return myHasCJK;
+    }
+
         protected:
 
     /**
@@ -209,6 +229,7 @@ class StFTFont {
     StHandle<StFTLibrary> myFTLib;       //!< handle to the FT library object
     FT_Face               myFTFace;      //!< FT face object
     StString              myFontPath;    //!< font path
+    bool                  myHasCJK;      //!< flag indicates that this font contains some CJK glyphs
 
     StImagePlane          myGlyphImg;    //!< cached glyph plane
     FT_Vector             myKernAdvance; //!< buffer variable

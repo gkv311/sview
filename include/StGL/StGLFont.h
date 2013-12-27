@@ -53,6 +53,13 @@ class StGLFont : public StGLResource {
     }
 
     /**
+     * @return textured font instance of specified style
+     */
+    ST_LOCAL StHandle<StGLFontEntry>& changeFontCJK(const StFTFont::Style theStyle) {
+        return myFontsCJK[theStyle];
+    }
+
+    /**
      * Initialize GL resources.
      * FreeType font instance should be already initialized!
      */
@@ -87,6 +94,23 @@ class StGLFont : public StGLResource {
     ST_LOCAL inline GLfloat getLineSpacing() const {
         return myLineSpacing;
     }
+
+    /**
+     * Compute glyph rectangle at specified pen position (on baseline)
+     * and render it to texture if not already.
+     * @param theCtx       active context
+     * @param theStyle     font style
+     * @param theUChar     unicode symbol to render
+     * @param theUCharNext next symbol to compute advance with kerning when available
+     * @param theGlyph     computed glyph position rectangle, texture ID and UV coordinates
+     * @param thePen       pen position on baseline to place new glyph
+     */
+    ST_CPPEXPORT void renderGlyph(StGLContext&          theCtx,
+                                  const StFTFont::Style theStyle,
+                                  const stUtf32_t       theUChar,
+                                  const stUtf32_t       theUCharNext,
+                                  StGLTile&             theGlyph,
+                                  StGLVec2&             thePen);
 
         protected:
 

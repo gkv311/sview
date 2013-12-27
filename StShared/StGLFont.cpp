@@ -45,16 +45,35 @@ bool StGLFont::stglInit(StGLContext&       theCtx,
     bool isOk = true;
     myAscender    = 0.0f;
     myLineSpacing = 0.0f;
+    const StHandle<StGLFontEntry>& aFontReg = myFonts[StFTFont::Style_Regular];
     for(size_t anIter = 0; anIter < StFTFont::StylesNB; ++anIter) {
-        StHandle<StGLFontEntry>& aFont    = myFonts   [anIter];
-        StHandle<StGLFontEntry>& aFontCJK = myFontsCJK[anIter];
+        StHandle<StGLFontEntry>& aFont = myFonts[anIter];
+        if(anIter != StFTFont::Style_Regular
+        && aFont  == aFontReg) {
+            continue;
+        }
+
         if(!aFont.isNull()) {
             isOk = aFont->stglInit(theCtx, thePointSize, theResolution) && isOk;
             myAscender    = stMax(myAscender,    aFont->getAscender());
             myLineSpacing = stMax(myLineSpacing, aFont->getLineSpacing());
+        } else {
+            aFont = aFontReg;
         }
-        if(!aFontCJK.isNull()) {
-            aFontCJK->stglInit(theCtx, thePointSize, theResolution);
+    }
+
+    const StHandle<StGLFontEntry>& aFontRegCJK = myFontsCJK[StFTFont::Style_Regular];
+    for(size_t anIter = 0; anIter < StFTFont::StylesNB; ++anIter) {
+        StHandle<StGLFontEntry>& aFont = myFontsCJK[anIter];
+        if(anIter != StFTFont::Style_Regular
+        && aFont  == aFontRegCJK) {
+            continue;
+        }
+
+        if(!aFont.isNull()) {
+            aFont->stglInit(theCtx, thePointSize, theResolution, false);
+        } else {
+            aFont = aFontRegCJK;
         }
     }
     return isOk;
@@ -64,17 +83,55 @@ bool StGLFont::stglInit(StGLContext& theCtx) {
     bool isOk = true;
     myAscender    = 0.0f;
     myLineSpacing = 0.0f;
+    const StHandle<StGLFontEntry>& aFontReg = myFonts[StFTFont::Style_Regular];
     for(size_t anIter = 0; anIter < StFTFont::StylesNB; ++anIter) {
-        StHandle<StGLFontEntry>& aFont    = myFonts   [anIter];
-        StHandle<StGLFontEntry>& aFontCJK = myFontsCJK[anIter];
+        StHandle<StGLFontEntry>& aFont = myFonts[anIter];
+        if(anIter != StFTFont::Style_Regular
+        && aFont  == aFontReg) {
+            continue;
+        }
+
         if(!aFont.isNull()) {
             isOk = aFont->stglInit(theCtx) && isOk;
             myAscender    = stMax(myAscender,    aFont->getAscender());
             myLineSpacing = stMax(myLineSpacing, aFont->getLineSpacing());
+        } else {
+            aFont = aFontReg;
         }
-        if(!aFontCJK.isNull()) {
-            aFontCJK->stglInit(theCtx);
+    }
+
+    const StHandle<StGLFontEntry>& aFontRegCJK = myFontsCJK[StFTFont::Style_Regular];
+    for(size_t anIter = 0; anIter < StFTFont::StylesNB; ++anIter) {
+        StHandle<StGLFontEntry>& aFont = myFontsCJK[anIter];
+        if(anIter != StFTFont::Style_Regular
+        && aFont  == aFontRegCJK) {
+            continue;
+        }
+
+        if(!aFont.isNull()) {
+            aFont->stglInit(theCtx, false);
+        } else {
+            aFont = aFontRegCJK;
         }
     }
     return isOk;
+}
+
+void StGLFont::renderGlyph(StGLContext&          theCtx,
+                           const StFTFont::Style theStyle,
+                           const stUtf32_t       theUChar,
+                           const stUtf32_t       theUCharNext,
+                           StGLTile&             theGlyph,
+                           StGLVec2&             thePen) {
+    StHandle<StGLFontEntry>& aFont = myFonts[theStyle];
+    if(!aFont->hasSymbol(theUChar)
+    && !aFont->hasCJK()) {
+        StHandle<StGLFontEntry>& aFontCJK = myFontsCJK[theStyle];
+        if(!aFontCJK.isNull()
+         && aFontCJK->hasSymbol(theUChar)
+         && aFontCJK->renderGlyph(theCtx, false, theUChar, theUCharNext, theGlyph, thePen)) {
+            return;
+        }
+    }
+    aFont->renderGlyph(theCtx, true, theUChar, theUCharNext, theGlyph, thePen);
 }
