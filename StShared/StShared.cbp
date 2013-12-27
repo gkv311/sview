@@ -301,7 +301,7 @@
 		<Unit filename="StFreeImage.cpp" />
 		<Unit filename="StGLCircle.cpp" />
 		<Unit filename="StGLContext.cpp" />
-		<Unit filename="StGLFont.cpp" />
+		<Unit filename="StGLFontEntry.cpp" />
 		<Unit filename="StGLFrameBuffer.cpp" />
 		<Unit filename="StGLMatrix.cpp" />
 		<Unit filename="StGLMesh.cpp" />
@@ -387,7 +387,7 @@
 		<Unit filename="../include/StGL/StGLBrightnessMatrix.h" />
 		<Unit filename="../include/StGL/StGLContext.h" />
 		<Unit filename="../include/StGL/StGLEnums.h" />
-		<Unit filename="../include/StGL/StGLFont.h" />
+		<Unit filename="../include/StGL/StGLFontEntry.h" />
 		<Unit filename="../include/StGL/StGLFrameBuffer.h" />
 		<Unit filename="../include/StGL/StGLFunctions.h" />
 		<Unit filename="../include/StGL/StGLMatrix.h" />
