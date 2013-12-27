@@ -311,7 +311,7 @@ StGLTextArea::StGLTextArea(StGLWidget* theParent,
         if(!aFont->init(aFontPath, getFontSize(), myRoot->getResolution())) {
             ST_ERROR_LOG("Could not load font '" + ST_FONT_SANS_PATH + '\'');
         }
-        myFont.create(getRoot()->getContextHandle(), new StGLFontEntry(aFont));
+        myFont.create(getRoot()->getContextHandle(), new StGLFont(aFont));
     }
 }
 
@@ -369,13 +369,13 @@ bool StGLTextArea::stglInit() {
     StGLContext& aCtx = getContext();
     if(!myFont->wasInitialized()) {
         myFont.setContext(getRoot()->getContextHandle());
-        if(!myFont->getFont()->isValid()) {
+        if(!myFont->changeFont(StFTFont::Style_Regular)->getFont()->isValid()) {
             return false; // critical error
         } else if(!myFont->stglInit(aCtx)) {
             ST_ERROR_LOG("Could not initialize OpenGL resources for font");
             return false;
         }
-    } else if(!myFont->isValid()) {
+    } else if(!myFont->changeFont(StFTFont::Style_Regular)->isValid()) {
         return false;
     }
 
@@ -436,7 +436,7 @@ void StGLTextArea::recomputeBorder(StGLContext& theCtx) {
 void StGLTextArea::formatText(StGLContext& theCtx) {
     if(myToRecompute) {
         myFormatter.reset();
-        myFormatter.append(theCtx, myText, *myFont);
+        myFormatter.append(theCtx, myText, *myFont->changeFont(StFTFont::Style_Regular));
         myFormatter.format(myTextWidth, GLfloat(getRectPx().height()));
         myFormatter.getResult(theCtx, myTexturesList, myTextVertBuf, myTextTCrdBuf);
         myFormatter.getBndBox(myTextBndBox);

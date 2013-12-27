@@ -9,7 +9,7 @@
 #ifndef __StGLTextFormatter_h_
 #define __StGLTextFormatter_h_
 
-#include <StGL/StGLFontEntry.h>
+#include <StGL/StGLFont.h>
 
 class StGLVertexBuffer;
 

@@ -51,7 +51,7 @@ class StGLFontEntry : public StGLResource {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StGLFontEntry(StHandle<StFTFont>& theFont);
+    ST_CPPEXPORT StGLFontEntry(const StHandle<StFTFont>& theFont);
 
     /**
      * Destructor - should be called after release()!
@@ -103,22 +103,22 @@ class StGLFontEntry : public StGLResource {
      * Compute advance to the next character with kerning applied when applicable.
      * Assuming text rendered horizontally.
      */
-    inline float getAdvanceX(const stUtf32_t theUChar,
-                      const stUtf32_t theUCharNext) {
+    ST_LOCAL inline float getAdvanceX(const stUtf32_t theUChar,
+                                      const stUtf32_t theUCharNext) {
         return myFont->getAdvanceX(theUChar, theUCharNext);
     }
 
     /**
      * @return vertical distance from the horizontal baseline to the highest character coordinate.
      */
-    inline GLfloat getAscender() const {
+    ST_LOCAL inline GLfloat getAscender() const {
         return myAscender;
     }
 
     /**
      * @return default line spacing (the baseline-to-baseline distance).
      */
-    inline GLfloat getLineSpacing() const {
+    ST_LOCAL inline GLfloat getLineSpacing() const {
         return myLineSpacing;
     }
 

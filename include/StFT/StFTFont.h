@@ -24,6 +24,16 @@ class StFTFont {
 
         public:
 
+    enum Style {
+      Style_Regular,
+      Style_Bold,
+      Style_Italic,
+      Style_BoldItalic,
+      StylesNB
+    };
+
+        public:
+
     /**
      * Create uninitialized instance.
      */
@@ -48,7 +58,9 @@ class StFTFont {
         return myGlyphImg;
     }
 
-///
+    /**
+     * Compute glyph rectangle.
+     */
     inline void getGlyphRect(StRect<float>& theRect) const {
         FT_Bitmap aBitmap = myFTFace->glyph->bitmap;
         theRect.left()   = float(myFTFace->glyph->bitmap_left);
@@ -174,8 +186,15 @@ class StFTFont {
     /**
      * @return glyphs number in this font.
      */
-    inline int getGlyphsNumber() const {
+    ST_LOCAL inline int getGlyphsNumber() const {
         return myFTFace->num_glyphs;
+    }
+
+    /**
+     * @return family name as reported by font file itself
+     */
+    ST_LOCAL StString getFamilyName() const {
+        return myFTFace->family_name;
     }
 
         protected:

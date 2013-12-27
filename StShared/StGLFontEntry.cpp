@@ -15,7 +15,7 @@
 #include <StStrings/StLogger.h>
 #include <stAssert.h>
 
-StGLFontEntry::StGLFontEntry(StHandle<StFTFont>& theFont)
+StGLFontEntry::StGLFontEntry(const StHandle<StFTFont>& theFont)
 : myFont(theFont),
   myAscender(0.0f),
   myLineSpacing(0.0f),
@@ -120,6 +120,11 @@ bool StGLFontEntry::createTexture(StGLContext& theCtx) {
 bool StGLFontEntry::renderGlyph(StGLContext&    theCtx,
                                 const stUtf32_t theChar) {
     if(!myFont->renderGlyph(theChar)) {
+        return false;
+    }
+
+    if(myTextures.isEmpty()
+    && !createTexture(theCtx)) {
         return false;
     }
 

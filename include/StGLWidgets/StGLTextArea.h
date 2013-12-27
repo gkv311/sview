@@ -11,6 +11,7 @@
 
 #include <StTemplates/StArrayList.h>
 
+#include <StGL/StGLFont.h>
 #include <StGL/StGLVertexBuffer.h>
 #include <StGL/StGLVec.h>
 #include <StGL/StGLTextFormatter.h>
@@ -218,7 +219,7 @@ class StGLTextArea : public StGLWidget {
 
         protected:
 
-    StGLShare<StGLFontEntry> myFont;      //!< used font
+    StGLShare<StGLFont>  myFont;      //!< used font
     StGLTextFormatter    myFormatter;     //!< text formatter
     StString             myText;          //!< text
     FontSize             mySize;          //!< font size
