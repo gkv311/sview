@@ -311,7 +311,7 @@ StGLTextArea::StGLTextArea(StGLWidget* theParent,
         if(!aFont->init(aFontPath, getFontSize(), myRoot->getResolution())) {
             ST_ERROR_LOG("Could not load font '" + ST_FONT_SANS_PATH + '\'');
         }
-        myFont.create(getRoot()->getContextHandle(), new StGLFont(aFont));
+        myFont.create(getRoot()->getContextHandle(), new StGLFontEntry(aFont));
     }
 }
 

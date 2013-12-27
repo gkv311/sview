@@ -6,8 +6,8 @@
  * http://www.boost.org/LICENSE_1_0.txt
  */
 
-#ifndef __StGLFont_h_
-#define __StGLFont_h_
+#ifndef __StGLFontEntry_h_
+#define __StGLFontEntry_h_
 
 #include <StFT/StFTFont.h>
 #include <StGL/StGLTexture.h>
@@ -44,19 +44,19 @@ template<> inline void StArray<StGLRect>::sort() {}
 /**
  * Texture font.
  */
-class StGLFont : public StGLResource {
+class StGLFontEntry : public StGLResource {
 
         public:
 
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StGLFont(StHandle<StFTFont>& theFont);
+    ST_CPPEXPORT StGLFontEntry(StHandle<StFTFont>& theFont);
 
     /**
      * Destructor - should be called after release()!
      */
-    ST_CPPEXPORT virtual ~StGLFont();
+    ST_CPPEXPORT virtual ~StGLFontEntry();
 
     /**
      * Release GL resources.
@@ -168,4 +168,4 @@ class StGLFont : public StGLResource {
 
 };
 
-#endif // __StGLFont_h_
+#endif // __StGLFontEntry_h_

@@ -9,7 +9,7 @@
 #ifndef __StGLTextFormatter_h_
 #define __StGLTextFormatter_h_
 
-#include <StGL/StGLFont.h>
+#include <StGL/StGLFontEntry.h>
 
 class StGLVertexBuffer;
 
@@ -65,7 +65,7 @@ class StGLTextFormatter {
      */
     ST_CPPEXPORT void append(StGLContext&    theCtx,
                              const StString& theString,
-                             StGLFont&       theFont);
+                             StGLFontEntry&  theFont);
 
     /**
      * Perform formatting on the buffered text.

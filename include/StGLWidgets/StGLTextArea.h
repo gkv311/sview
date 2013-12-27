@@ -218,7 +218,7 @@ class StGLTextArea : public StGLWidget {
 
         protected:
 
-    StGLShare<StGLFont>  myFont;          //!< used font
+    StGLShare<StGLFontEntry> myFont;      //!< used font
     StGLTextFormatter    myFormatter;     //!< text formatter
     StString             myText;          //!< text
     FontSize             mySize;          //!< font size

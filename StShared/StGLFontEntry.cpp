@@ -6,7 +6,7 @@
  * http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include <StGL/StGLFont.h>
+#include <StGL/StGLFontEntry.h>
 
 #include <StGLCore/StGLCore11.h>
 #include <StGL/StGLContext.h>
@@ -15,7 +15,7 @@
 #include <StStrings/StLogger.h>
 #include <stAssert.h>
 
-StGLFont::StGLFont(StHandle<StFTFont>& theFont)
+StGLFontEntry::StGLFontEntry(StHandle<StFTFont>& theFont)
 : myFont(theFont),
   myAscender(0.0f),
   myLineSpacing(0.0f),
@@ -25,11 +25,11 @@ StGLFont::StGLFont(StHandle<StFTFont>& theFont)
     stMemZero(&myLastTilePx, sizeof(myLastTilePx));
 }
 
-StGLFont::~StGLFont() {
-    ST_ASSERT(myTextures.isEmpty(), "~StGLFont() with unreleased GL resources");
+StGLFontEntry::~StGLFontEntry() {
+    ST_ASSERT(myTextures.isEmpty(), "~StGLFontEntry() with unreleased GL resources");
 }
 
-void StGLFont::release(StGLContext& theCtx) {
+void StGLFontEntry::release(StGLContext& theCtx) {
     for(size_t anIter = 0; anIter < myFbos.size(); ++anIter) {
         StHandle<StGLFrameBuffer>& aFbo = myFbos.changeValue(anIter);
         aFbo->release(theCtx);
@@ -53,9 +53,9 @@ void StGLFont::release(StGLContext& theCtx) {
     myLastTileId = size_t(-1);
 }
 
-bool StGLFont::stglInit(StGLContext&       theCtx,
-                        const unsigned int thePointSize,
-                        const unsigned int theResolution) {
+bool StGLFontEntry::stglInit(StGLContext&       theCtx,
+                             const unsigned int thePointSize,
+                             const unsigned int theResolution) {
     release(theCtx);
     if(!myFont->init(thePointSize, theResolution)) {
         return false;
@@ -64,7 +64,7 @@ bool StGLFont::stglInit(StGLContext&       theCtx,
     return stglInit(theCtx);
 }
 
-bool StGLFont::stglInit(StGLContext& theCtx) {
+bool StGLFontEntry::stglInit(StGLContext& theCtx) {
     release(theCtx);
     if(myFont.isNull() || !myFont->isValid()) {
         return false;
@@ -79,7 +79,7 @@ bool StGLFont::stglInit(StGLContext& theCtx) {
     return createTexture(theCtx);
 }
 
-bool StGLFont::createTexture(StGLContext& theCtx) {
+bool StGLFontEntry::createTexture(StGLContext& theCtx) {
     const GLint aMaxSize = theCtx.getMaxTextureSize();
 
     GLint aGlyphsNb = myFont->getGlyphsNumber() - GLint(myLastTileId) + 1;
@@ -117,8 +117,8 @@ bool StGLFont::createTexture(StGLContext& theCtx) {
     return true;
 }
 
-bool StGLFont::renderGlyph(StGLContext&    theCtx,
-                           const stUtf32_t theChar) {
+bool StGLFontEntry::renderGlyph(StGLContext&    theCtx,
+                                const stUtf32_t theChar) {
     if(!myFont->renderGlyph(theChar)) {
         return false;
     }
@@ -167,11 +167,11 @@ bool StGLFont::renderGlyph(StGLContext&    theCtx,
     return true;
 }
 
-void StGLFont::renderGlyph(StGLContext&    theCtx,
-                           const stUtf32_t theUChar,
-                           const stUtf32_t theUCharNext,
-                           StGLTile&       theGlyph,
-                           StGLVec2&       thePen) {
+void StGLFontEntry::renderGlyph(StGLContext&    theCtx,
+                                const stUtf32_t theUChar,
+                                const stUtf32_t theUCharNext,
+                                StGLTile&       theGlyph,
+                                StGLVec2&       thePen) {
     std::unordered_map<stUtf32_t, size_t>::iterator aTileIter = myGlyphMap.find(theUChar);
     size_t aTileId;
     if(aTileIter == myGlyphMap.end()) {

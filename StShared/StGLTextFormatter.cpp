@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -175,7 +175,7 @@ void StGLTextFormatter::getResult(StGLContext&                                th
 
 void StGLTextFormatter::append(StGLContext&    theCtx,
                                const StString& theString,
-                               StGLFont&       theFont) {
+                               StGLFontEntry&  theFont) {
     myAscender    = stMax(myAscender,    theFont.getAscender());
     myLineSpacing = stMax(myLineSpacing, theFont.getLineSpacing());
 
@@ -184,8 +184,6 @@ void StGLTextFormatter::append(StGLContext&    theCtx,
     }
 
     myString += theString;
-    ///myVerts.initArray(theString.getLength()); /// TODO resize
-    ///myTCrds.initArray(theString.getLength());
 
     // first pass - render all symbols using associated font on single ZERO baseline
     StGLTile aTile;
