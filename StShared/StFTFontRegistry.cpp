@@ -166,7 +166,7 @@ void StFTFontRegistry::init(const bool theToSearchAll) {
     StFTFontPack& aMono  = myTypefaces[StFTFont::Typeface_Monospace];
 #ifdef _WIN32
     aSerif.Western = findFont(stCString("Times New Roman"));
-    aSans .Western = findFont(stCString("Microsoft Sans Serif"));
+    aSans .Western = findFont(stCString("Trebuchet MS"));
     aMono .Western = findFont(stCString("Tahoma"));
     aSerif.Korean  = findFont(stCString("Malgun Gothic"));
     aSans .Korean  = findFont(stCString("Malgun Gothic"));
