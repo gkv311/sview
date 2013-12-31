@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -13,11 +13,11 @@
 
 StFTFont::StFTFont(StHandle<StFTLibrary> theFTLib)
 : myFTLib(theFTLib),
-  myFTFace(NULL),
-  myHasCJK(false) {
+  myFTFace(NULL) {
     if(myFTLib.isNull()) {
         myFTLib = new StFTLibrary();
     }
+    stMemZero(mySubsets, sizeof(mySubsets));
 }
 
 StFTFont::~StFTFont() {
@@ -55,7 +55,6 @@ bool StFTFont::init(const StString&    theFontPath,
                     const unsigned int theResolution) {
     release();
     myFontPath = theFontPath;
-    myHasCJK   = false;
     if(!myFTLib->isValid()) {
         ST_DEBUG_LOG("StFTFont, FreeType library is unavailable!");
         return false;
@@ -76,9 +75,14 @@ bool StFTFont::init(const StString&    theFontPath,
         return false;
     }
 
-    // check some CJK symbols
-    myHasCJK = FT_Get_Char_Index(myFTFace, 45937) != 0
-            && FT_Get_Char_Index(myFTFace, 53552) != 0;
+    // test Unicode subsets
+    mySubsets[Subset_General] = true;
+    mySubsets[Subset_Korean]  = FT_Get_Char_Index(myFTFace, 0x0B371) != 0
+                             && FT_Get_Char_Index(myFTFace, 0x0D130) != 0;
+    mySubsets[Subset_CJK]     = FT_Get_Char_Index(myFTFace, 0x06F22) != 0;
+
+//if(mySubsets[Subset_Korean]) { std::cerr << "  found Korean in " << myFontPath << "\n"; }
+//if(mySubsets[Subset_CJK])    { std::cerr << "  found CJK    in " << myFontPath << "\n"; }
 
     return true;
 }

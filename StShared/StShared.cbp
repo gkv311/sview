@@ -280,6 +280,7 @@
 		<Unit filename="StEDIDParser.cpp" />
 		<Unit filename="StExifDir.cpp" />
 		<Unit filename="StFTFont.cpp" />
+		<Unit filename="StFTFontRegistry.cpp" />
 		<Unit filename="StFTLibrary.cpp" />
 		<Unit filename="StFileNode.cpp" />
 		<Unit filename="StFileNode2.cpp">
@@ -303,6 +304,7 @@
 		<Unit filename="StGLContext.cpp" />
 		<Unit filename="StGLFont.cpp" />
 		<Unit filename="StGLFontEntry.cpp" />
+		<Unit filename="StGLFontManager.cpp" />
 		<Unit filename="StGLFrameBuffer.cpp" />
 		<Unit filename="StGLMatrix.cpp" />
 		<Unit filename="StGLMesh.cpp" />
@@ -378,6 +380,7 @@
 			<Option target="MAC_gcc_DEBUG" />
 		</Unit>
 		<Unit filename="../include/StFT/StFTFont.h" />
+		<Unit filename="../include/StFT/StFTFontRegistry.h" />
 		<Unit filename="../include/StFT/StFTLibrary.h" />
 		<Unit filename="../include/StFile/StFileNode.h" />
 		<Unit filename="../include/StFile/StFolder.h" />
@@ -390,6 +393,7 @@
 		<Unit filename="../include/StGL/StGLEnums.h" />
 		<Unit filename="../include/StGL/StGLFont.h" />
 		<Unit filename="../include/StGL/StGLFontEntry.h" />
+		<Unit filename="../include/StGL/StGLFontManager.h" />
 		<Unit filename="../include/StGL/StGLFrameBuffer.h" />
 		<Unit filename="../include/StGL/StGLFunctions.h" />
 		<Unit filename="../include/StGL/StGLMatrix.h" />

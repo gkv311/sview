@@ -41,6 +41,21 @@ bool StFileNode::isFolder() const {
     return false;
 }
 
+const StFileNode* StFileNode::findValue(const StCString& theName) const {
+    for(size_t aChildIter = 0; aChildIter < size(); ++aChildIter) {
+        const StFileNode* aChildNode = getValue(aChildIter);
+        if(aChildNode->getSubPath() == theName) {
+            return aChildNode;
+        }
+
+        const StFileNode* aRecFindNode = aChildNode->findValue(theName);
+        if(aRecFindNode != NULL) {
+            return aRecFindNode;
+        }
+    }
+    return NULL;
+}
+
 StHandle<StFileNode> StFileNode::detach() const {
     StHandle<StFileNode> aCopy = new StFileNode(getPath());
     aCopy->setMIME(getMIME());

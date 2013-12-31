@@ -64,6 +64,7 @@ StGLRootWidget::StGLRootWidget()
     for(size_t aResId = 0; aResId < myShareSize; ++aResId) {
         myShareArray[aResId] = new StGLSharePointer();
     }
+    myGlFontMgr = new StGLFontManager(myResolution);
 }
 
 StGLRootWidget::~StGLRootWidget() {
@@ -75,13 +76,17 @@ StGLRootWidget::~StGLRootWidget() {
         delete myShareArray[aResId];
     }
     delete[] myShareArray;
+    if(!myGlCtx.isNull()) {
+        myGlFontMgr->release(*myGlCtx);
+        myGlFontMgr.nullify();
+    }
 }
 
 StGLContext& StGLRootWidget::getContext() {
     return *myGlCtx;
 }
 
-const StHandle<StGLContext>& StGLRootWidget::getContextHandle() {
+const StHandle<StGLContext>& StGLRootWidget::getContextHandle() const {
     return myGlCtx;
 }
 
@@ -142,6 +147,7 @@ void StGLRootWidget::setScale(const GLfloat     theScale,
     }
     myScaleGUI   = aScale;
     myResolution = (unsigned int )(72.0f * aScale + 0.1f);
+    myGlFontMgr->setResolution(myResolution);
 }
 
 bool StGLRootWidget::stglInit() {

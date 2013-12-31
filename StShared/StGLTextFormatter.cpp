@@ -198,7 +198,7 @@ void StGLTextFormatter::append(StGLContext&          theCtx,
             /// if(theWidth <= 0.0f) myAlignWidth =
             continue; // will be processed on second pass
         } else if(aCharThis == ' ') {
-            myPen.x() += theFont.changeFont(StFTFont::Style_Regular)->getAdvanceX(aCharThis, aCharNext);
+            myPen.x() += theFont.changeFont()->getAdvanceX(aCharThis, aCharNext);
             continue;
         }
 

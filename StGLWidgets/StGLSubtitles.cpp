@@ -11,7 +11,6 @@
 
 namespace {
     static const StString CLASS_NAME("StGLSubtitles");
-    static const size_t SHARE_SUBS_FONT_ID = StGLRootWidget::generateShareId();
 };
 
 StGLSubtitles::StSubShowItems::StSubShowItems()
@@ -65,9 +64,7 @@ StGLSubtitles::StGLSubtitles(StGLWidget*                     theParent,
 : StGLTextArea(theParent,
                0, -theParent->getRoot()->scale(100),
                StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER),
-               theParent->getRoot()->scale(800), theParent->getRoot()->scale(160),
-               (FontSize )(int )theFontSize->getValue(),
-               SHARE_SUBS_FONT_ID),
+               theParent->getRoot()->scale(800), theParent->getRoot()->scale(160)),
   myFontSize(theFontSize),
   myParallax(theParallax),
   myQueue(theSubQueue),
@@ -83,10 +80,29 @@ StGLSubtitles::StGLSubtitles(StGLWidget*                     theParent,
 
     myFormatter.setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
                                StGLTextFormatter::ST_ALIGN_Y_BOTTOM);
+
+    StHandle<StGLFont> aFontNew = new StGLFont();
+    StHandle<StFTLibrary> aLib = getRoot()->getFontManager()->getLibraty();
+    const FontSize     aSize       = (FontSize )(int )myFontSize->getValue();
+    const unsigned int aResolution = getRoot()->getFontManager()->getResolution();
+    for(size_t anIter = 0; anIter < StFTFont::SubsetsNB; ++anIter) {
+        StHandle<StGLFontEntry>& aFontGlSrc = myFont->changeFont((StFTFont::Subset )anIter);
+        if(aFontGlSrc.isNull()) {
+            continue;
+        }
+
+        StHandle<StFTFont> aFontFt = new StFTFont(aLib);
+        aFontFt->init(aFontGlSrc->getFont()->getFilePath(), aSize, aResolution);
+        aFontNew->changeFont((StFTFont::Subset )anIter) = new StGLFontEntry(aFontFt);
+    }
+    mySize = aSize;
+    myFont = aFontNew;
 }
 
 StGLSubtitles::~StGLSubtitles() {
-    //
+    StGLContext& aCtx = getContext();
+    myFont->release(aCtx);
+    myFont.nullify();
 }
 
 void StGLSubtitles::stglUpdate(const StPointD_t& ) {
@@ -108,7 +124,11 @@ void StGLSubtitles::stglUpdate(const StPointD_t& ) {
     const FontSize aNewSize = (FontSize )(int )myFontSize->getValue();
     if(!myText.isEmpty()
     && aNewSize != mySize) {
-        stglSetTextSize(aNewSize);
+        mySize = aNewSize;
+        myToRecompute = true;
+
+        StGLContext& aCtx = getContext();
+        myFont->stglInit(aCtx, getFontSize(), myRoot->getResolution());
     }
 }
 

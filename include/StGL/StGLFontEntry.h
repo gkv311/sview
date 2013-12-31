@@ -125,14 +125,6 @@ class StGLFontEntry : public StGLResource {
     }
 
     /**
-     * @return true if this font contains CJK (Chinese, Japanese, and Korean) glyphs
-     */
-    ST_LOCAL bool hasCJK() const {
-        return !myFont.isNull()
-             && myFont->hasCJK();
-    }
-
-    /**
      * @return true if font contains specified symbol
      */
     ST_LOCAL bool hasSymbol(const stUtf32_t theUChar) const {

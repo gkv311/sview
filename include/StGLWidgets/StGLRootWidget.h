@@ -11,6 +11,7 @@
 
 #include <StGLWidgets/StGLShare.h>
 #include <StGLWidgets/StGLWidget.h>
+#include <StGL/StGLFontManager.h>
 
 #include <StTemplates/StHandle.h>
 
@@ -210,12 +211,19 @@ class StGLRootWidget : public StGLWidget {
     /**
      * @return OpenGL context.
      */
-    ST_CPPEXPORT const StHandle<StGLContext>& getContextHandle();
+    ST_CPPEXPORT const StHandle<StGLContext>& getContextHandle() const;
 
     /**
      * Setup OpenGL context.
      */
     ST_CPPEXPORT void setContext(const StHandle<StGLContext>& theCtx);
+
+    /**
+     * @return reference to shared font manager
+     */
+    ST_LOCAL StHandle<StGLFontManager>& getFontManager() {
+        return myGlFontMgr;
+    }
 
     /**
      * Returns camera projection matrix within to-screen displacement
@@ -279,25 +287,26 @@ class StGLRootWidget : public StGLWidget {
 
         private:
 
-    StGLSharePointer**       myShareArray;  //!< resources shared within GL context (commonly used)
-    size_t                   myShareSize;
-    StGLProjCamera           myProjCamera;  //!< projection camera
-    StGLMatrix               myScrProjMat;  //!< projection matrix within translation to the screen
-    StHandle<StGLContext>    myGlCtx;       //!< OpenGL context
-    GLfloat                  myScrDispX;
-    GLfloat                  myLensDist;
+    StGLSharePointer**        myShareArray;    //!< resources shared within GL context (commonly used)
+    size_t                    myShareSize;
+    StGLProjCamera            myProjCamera;    //!< projection camera
+    StGLMatrix                myScrProjMat;    //!< projection matrix within translation to the screen
+    StHandle<StGLFontManager> myGlFontMgr;     //!< shared font manager
+    StHandle<StGLContext>     myGlCtx;         //!< OpenGL context
+    GLfloat                   myScrDispX;
+    GLfloat                   myLensDist;
 
-    StRectI_t                myMarginsPx;   //!< active area margins in pixels
-    StRectD_t                myRectGl;      //!< rectangle in GL coordinates
-    GLdouble                 myScaleGlX;    //!< scale factor to optimize convertion from Pixels -> GL coordinates
-    GLdouble                 myScaleGlY;    //!< scale factor to optimize convertion from Pixels -> GL coordinates
-    GLfloat                  myScaleGUI;    //!< scale factor for GUI elements (text, icons), 1.0 by default
-    unsigned int             myResolution;  //!< resolution in DPI (for text rendering), 72 by default, stored with myScaleGUI applied
-    StPointD_t               cursorZo;      //!< mouse cursor position
-    GLint                    myViewport[4]; //!< cached GL viewport
+    StRectI_t                 myMarginsPx;     //!< active area margins in pixels
+    StRectD_t                 myRectGl;        //!< rectangle in GL coordinates
+    GLdouble                  myScaleGlX;      //!< scale factor to optimize convertion from Pixels -> GL coordinates
+    GLdouble                  myScaleGlY;      //!< scale factor to optimize convertion from Pixels -> GL coordinates
+    GLfloat                   myScaleGUI;      //!< scale factor for GUI elements (text, icons), 1.0 by default
+    unsigned int              myResolution;    //!< resolution in DPI (for text rendering), 72 by default, stored with myScaleGUI applied
+    StPointD_t                cursorZo;        //!< mouse cursor position
+    GLint                     myViewport[4];   //!< cached GL viewport
 
-    StArrayList<StGLWidget*> myDestroyList; //!< list of widgets to be destroyed
-    StGLWidget*              myFocusWidget; //!< widget currently in focus
+    StArrayList<StGLWidget*>  myDestroyList;   //!< list of widgets to be destroyed
+    StGLWidget*               myFocusWidget;   //!< widget currently in focus
 
 };
 

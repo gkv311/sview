@@ -148,6 +148,7 @@
 					<Add option="-Wall" />
 					<Add option="-mmmx" />
 					<Add option="-msse" />
+					<Add option="`freetype-config --cflags`" />
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
@@ -175,6 +176,7 @@
 					<Add option="-g" />
 					<Add option="-mmmx" />
 					<Add option="-msse" />
+					<Add option="`freetype-config --cflags`" />
 					<Add option="-D__ST_DEBUG__" />
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
@@ -199,6 +201,7 @@
 				<Compiler>
 					<Add option="-O3" />
 					<Add option="-Wall" />
+					<Add option="`freetype-config --cflags`" />
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
@@ -225,6 +228,7 @@
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
+					<Add option="`freetype-config --cflags`" />
 					<Add option="-D__ST_DEBUG__" />
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>

@@ -24,7 +24,7 @@ class StGLFont : public StGLResource {
     ST_CPPEXPORT StGLFont();
 
     /**
-     * Default constructor from FT font with regular style.
+     * Default constructor from FT font.
      */
     ST_CPPEXPORT StGLFont(const StHandle<StFTFont>& theFtFont);
 
@@ -39,24 +39,17 @@ class StGLFont : public StGLResource {
     ST_CPPEXPORT virtual void release(StGLContext& theCtx);
 
     /**
-     * @return textured font instance of specified style
+     * @return textured font instance of specified Unicode subset
      */
-    ST_LOCAL const StHandle<StGLFontEntry>& getFont(const StFTFont::Style theStyle) const {
-        return myFonts[theStyle];
+    ST_LOCAL const StHandle<StGLFontEntry>& getFont(const StFTFont::Subset theSubset = StFTFont::Subset_General) const {
+        return myFonts[theSubset];
     }
 
     /**
-     * @return textured font instance of specified style
+     * @return textured font instance of specified Unicode subset
      */
-    ST_LOCAL StHandle<StGLFontEntry>& changeFont(const StFTFont::Style theStyle) {
-        return myFonts[theStyle];
-    }
-
-    /**
-     * @return textured font instance of specified style
-     */
-    ST_LOCAL StHandle<StGLFontEntry>& changeFontCJK(const StFTFont::Style theStyle) {
-        return myFontsCJK[theStyle];
+    ST_LOCAL StHandle<StGLFontEntry>& changeFont(const StFTFont::Subset theSubset = StFTFont::Subset_General) {
+        return myFonts[theSubset];
     }
 
     /**
@@ -77,8 +70,8 @@ class StGLFont : public StGLResource {
      * @return true if initialization was already called.
      */
     inline bool wasInitialized() const {
-        return !myFonts[StFTFont::Style_Regular].isNull()
-             && myFonts[StFTFont::Style_Regular]->wasInitialized();
+        return !myFonts[0].isNull()
+             && myFonts[0]->wasInitialized();
     }
 
     /**
@@ -114,10 +107,8 @@ class StGLFont : public StGLResource {
 
         protected:
 
-    StHandle<StGLFontEntry> myFonts   [StFTFont::StylesNB]; //!< textured font instances
-    StHandle<StGLFontEntry> myFontsCJK[StFTFont::StylesNB]; //!< textured font instances (CJK back-end)
+    StHandle<StGLFontEntry> myFonts[StFTFont::SubsetsNB]; //!< textured font instances
 
-    StString myFamily;      //!< font family name
     GLfloat  myAscender;    //!< ascender     provided my FT font
     GLfloat  myLineSpacing; //!< line spacing provided my FT font
 

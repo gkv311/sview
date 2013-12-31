@@ -206,87 +206,16 @@ namespace {
     static const StString CLASS_NAME("StGLTextArea");
     static const size_t SHARE_TEXT_PROGRAM_ID   = StGLRootWidget::generateShareId();
     static const size_t SHARE_BORDER_PROGRAM_ID = StGLRootWidget::generateShareId();
-    static const size_t SHARE_FONT_NORMAL_ID    = StGLRootWidget::generateShareId();
-    static const size_t SHARE_FONT_SMALLEST_ID  = StGLRootWidget::generateShareId();
-    static const size_t SHARE_FONT_SMALL_ID     = StGLRootWidget::generateShareId();
-    static const size_t SHARE_FONT_BIG_ID       = StGLRootWidget::generateShareId();
-    static const size_t SHARE_FONT_BIGGEST_ID   = StGLRootWidget::generateShareId();
-    static const size_t SHARE_FONT_DOUBLE_ID    = StGLRootWidget::generateShareId();
-
-    enum {
-        ST_FONT_SERIF,
-        ST_FONT_SANS,
-        ST_FONT_MONO,
-    };
-
-    static StString getFont(const int theFontType) {
-    #ifdef _WIN32
-        switch(theFontType) {
-            case ST_FONT_SERIF:
-                return "times.ttf";
-            case ST_FONT_SANS:
-                return "micross.ttf";
-            case ST_FONT_MONO:
-            default:
-                return "tahoma.ttf";
-        }
-    #elif defined(__APPLE__)
-        switch(theFontType) {
-            case ST_FONT_SERIF:
-                return "Times.dfont";
-            case ST_FONT_SANS:
-                return "Trebuchet MS.ttf";
-                //return "LucidaGrande.ttc";
-                //return "Geneva.dfont";
-                //return "HelveticaNeue.dfont";
-                //return "Helvetica.dfont";
-            case ST_FONT_MONO:
-            default:
-                return "Monaco.dfont";
-        }
-    #elif defined(__linux__)
-        switch(theFontType) {
-            case ST_FONT_SERIF:
-                return "DejaVuSerif.ttf";
-            case ST_FONT_SANS:
-                return "DejaVuSans.ttf";
-            case ST_FONT_MONO:
-            default:
-                return "DejaVuSansMono.ttf";
-        }
-    #else
-        #error undefined fonts
-    #endif
-    }
-
-    inline size_t getFontShareId(const StGLTextArea::FontSize theSize,
-                                 const size_t                 theShareId) {
-        if(theShareId != size_t(-1)) {
-            return theShareId;
-        }
-
-        switch(theSize) {
-            case StGLTextArea::SIZE_SMALLEST: return SHARE_FONT_SMALLEST_ID;
-            case StGLTextArea::SIZE_SMALL:    return SHARE_FONT_SMALL_ID;
-            case StGLTextArea::SIZE_NORMAL:   return SHARE_FONT_NORMAL_ID;
-            case StGLTextArea::SIZE_BIGGEST:  return SHARE_FONT_BIGGEST_ID;
-            case StGLTextArea::SIZE_DOUBLE:   return SHARE_FONT_DOUBLE_ID;
-            case StGLTextArea::SIZE_BIG:
-            default:                          return SHARE_FONT_BIG_ID;
-        }
-    }
 };
 
 StGLTextArea::StGLTextArea(StGLWidget* theParent,
                            const int theLeft, const int theTop,
                            const StGLCorner theCorner,
                            const int theWidth, const int theHeight,
-                           const FontSize theSize,
-                           const size_t   theShareId)
+                           const FontSize theSize)
 : StGLWidget(theParent, theLeft, theTop, theCorner, theWidth, theHeight),
   myTextProgram(getRoot()->getShare(SHARE_TEXT_PROGRAM_ID)),
   myBorderProgram(getRoot()->getShare(SHARE_BORDER_PROGRAM_ID)),
-  myFont(getRoot()->getShare(getFontShareId(theSize, theShareId))),
   mySize(theSize),
   myTextColor(0.0f, 0.0f, 0.0f, 1.0f),
   myShadowColor(0.0f, 0.0f, 0.0f, 1.0f),
@@ -302,26 +231,7 @@ StGLTextArea::StGLTextArea(StGLWidget* theParent,
   myToShowBorder(false),
   myToDrawShadow(false),
   myIsInitialized(false) {
-    // initialize FreeType font without GL resources
-    if(myFont.isNull()) {
-        const StString ST_FONT_SANS_PATH = StProcess::getFontsRoot() + getFont(ST_FONT_SANS);
-        StStringUtf8 aFontPath = StFileNode::getCompatibleName(ST_FONT_SANS_PATH);
-
-        StHandle<StFTFont> aFont = new StFTFont();
-        if(!aFont->init(aFontPath, getFontSize(), myRoot->getResolution())) {
-            ST_ERROR_LOG("Could not load font '" + ST_FONT_SANS_PATH + '\'');
-        }
-        myFont.create(getRoot()->getContextHandle(), new StGLFont(aFont));
-
-        /**const StString ST_FONT_CJK_PATH = "NanumMyeongjo.ttf";
-        StStringUtf8 aFontPathCJK = StFileNode::getCompatibleName(ST_FONT_CJK_PATH);
-        StHandle<StFTFont> aFontCJK = new StFTFont();
-        if(!aFontCJK->init(aFontPathCJK, getFontSize(), myRoot->getResolution())) {
-            ST_ERROR_LOG("Could not load font '" + ST_FONT_CJK_PATH + '\'');
-        } else {
-            myFont->changeFontCJK(StFTFont::Style_Regular) = new StGLFontEntry(aFontCJK);
-        }*/
-    }
+    myFont = getRoot()->getFontManager()->findCreate(StFTFont::Typeface_SansSerif, getFontSize());
 }
 
 StGLTextArea::~StGLTextArea() {
@@ -351,19 +261,6 @@ void StGLTextArea::setText(const StString& theText) {
     }
 }
 
-void StGLTextArea::stglSetTextSize(const FontSize theSize) {
-    if(mySize == theSize
-    || myFont.isNull()) {
-        return;
-    }
-
-    mySize = theSize;
-    myToRecompute = true;
-
-    StGLContext& aCtx = getContext();
-    myFont->stglInit(aCtx, getFontSize(), myRoot->getResolution());
-}
-
 void StGLTextArea::setTextWidth(const int theWidth) {
     myTextWidth = (GLfloat )theWidth;
     myToRecompute = true;
@@ -377,14 +274,15 @@ bool StGLTextArea::stglInit() {
     // initialize GL resources for the font
     StGLContext& aCtx = getContext();
     if(!myFont->wasInitialized()) {
-        myFont.setContext(getRoot()->getContextHandle());
-        if(!myFont->changeFont(StFTFont::Style_Regular)->getFont()->isValid()) {
+        if( myFont->changeFont().isNull()
+        ||  myFont->changeFont()->getFont().isNull()
+        || !myFont->changeFont()->getFont()->isValid()) {
             return false; // critical error
         } else if(!myFont->stglInit(aCtx)) {
             ST_ERROR_LOG("Could not initialize OpenGL resources for font");
             return false;
         }
-    } else if(!myFont->changeFont(StFTFont::Style_Regular)->isValid()) {
+    } else if(!myFont->changeFont()->isValid()) {
         return false;
     }
 

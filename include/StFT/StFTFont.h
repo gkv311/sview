@@ -16,6 +16,24 @@
 #include <StTemplates/StRect.h>
 
 /**
+ * Structure holds the paths to font family files.
+ */
+struct StFTFontFamily {
+    StString FamilyName;
+
+    StString Regular;
+    StString Bold;
+    StString Italic;
+    StString BoldItalic;
+};
+
+struct StFTFontPack {
+    StFTFontFamily Western;
+    StFTFontFamily CJK;
+    StFTFontFamily Korean;
+};
+
+/**
  * Class to read font using FreeType library.
  * Notice that this class uses internal buffers for loaded glyphs
  * and it is absolutely UNSAFE to load/read glyph from concurrent threads!
@@ -24,13 +42,68 @@ class StFTFont {
 
         public:
 
+    /**
+     * Font styles.
+     */
     enum Style {
-      Style_Regular,
-      Style_Bold,
-      Style_Italic,
-      Style_BoldItalic,
-      StylesNB
+        Style_Regular,      //!< normal letters
+        Style_Bold,         //!< wide letters
+        Style_Italic,       //!< oblique letters
+        Style_BoldItalic,   //!< wide oblique letters
+        StylesNB
     };
+
+    /**
+     * Typefaces.
+     */
+    enum Typeface {
+        Typeface_Serif,     //!< contains small features at the end of strokes within letters
+        Typeface_SansSerif, //!< without serifs
+        Typeface_Monospace, //!< non-proportional / fixed-width
+        TypefacesNB
+    };
+
+    /**
+     * Unicode subsets.
+     */
+    enum Subset {
+        Subset_General,
+        Subset_Korean,  //!< modern Korean letters
+        Subset_CJK,     //!< Chinese characters (Chinese, Japanese, Korean and Vietnam)
+        SubsetsNB
+    };
+
+    /**
+     * @return true if specified character is within subset of modern CJK characters
+     */
+    ST_LOCAL static bool isCJK(const stUtf32_t theUChar) {
+        return (theUChar >= 0x03400 && theUChar <= 0x04DFF)
+            || (theUChar >= 0x04E00 && theUChar <= 0x09FFF)
+            || (theUChar >= 0x0F900 && theUChar <= 0x0FAFF)
+            || (theUChar >= 0x20000 && theUChar <= 0x2A6DF)
+            || (theUChar >= 0x2F800 && theUChar <= 0x2FA1F);
+    }
+
+    /**
+     * @return true if specified character is within subset of modern Korean characters (Hangul)
+     */
+    ST_LOCAL static bool isKorean(const stUtf32_t theUChar) {
+        return (theUChar >= 0x01100 && theUChar <= 0x011FF)
+            || (theUChar >= 0x03130 && theUChar <= 0x0318F)
+            || (theUChar >= 0x0AC00 && theUChar <= 0x0D7A3);
+    }
+
+    /**
+     * Determine Unicode subset for specified character
+     */
+    ST_LOCAL static Subset subset(const stUtf32_t theUChar) {
+        if(isCJK(theUChar)) {
+            return Subset_CJK;
+        } else if(isKorean(theUChar)) {
+            return Subset_Korean;
+        }
+        return Subset_General;
+    }
 
         public:
 
@@ -67,6 +140,13 @@ class StFTFont {
         theRect.top()    = float(myFTFace->glyph->bitmap_top);
         theRect.right()  = float(myFTFace->glyph->bitmap_left + aBitmap.width);
         theRect.bottom() = float(myFTFace->glyph->bitmap_top  - aBitmap.rows);
+    }
+
+    /**
+     * @return font path
+     */
+    ST_LOCAL const StString& getFilePath() const {
+        return myFontPath;
     }
 
     /**
@@ -214,7 +294,7 @@ class StFTFont {
      * @return true if this font contains CJK (Chinese, Japanese, and Korean) glyphs
      */
     ST_LOCAL bool hasCJK() const {
-        return myHasCJK;
+        return mySubsets[Subset_CJK];
     }
 
         protected:
@@ -229,7 +309,7 @@ class StFTFont {
     StHandle<StFTLibrary> myFTLib;       //!< handle to the FT library object
     FT_Face               myFTFace;      //!< FT face object
     StString              myFontPath;    //!< font path
-    bool                  myHasCJK;      //!< flag indicates that this font contains some CJK glyphs
+    bool                  mySubsets[SubsetsNB];
 
     StImagePlane          myGlyphImg;    //!< cached glyph plane
     FT_Vector             myKernAdvance; //!< buffer variable

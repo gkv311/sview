@@ -216,7 +216,7 @@ bool StGLTexture::init(StGLContext&   theCtx,
                        const GLubyte* theData) {
     // check texture size is fit dimension maximum
     const GLint aMaxTexDim = theCtx.getMaxTextureSize();
-    if(theTextureSizeX < 16 || theTextureSizeY < 16) {
+    if(theTextureSizeX < 16 || theTextureSizeY < 4) {
         ST_DEBUG_LOG("Texture size X or Y ("  + theTextureSizeX + " x " + theTextureSizeY + ") lesser than minimum dimension (16)!");
         return false;
     } else if(theTextureSizeX > aMaxTexDim && theTextureSizeY > aMaxTexDim) {

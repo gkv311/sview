@@ -99,7 +99,7 @@ void StGLMenuItem::setHilightText() {
 }
 
 const int StGLMenuItem::computeTextWidth() {
-    StHandle<StFTFont>& aFont = myFont->changeFont(StFTFont::Style_Regular)->getFont();
+    StHandle<StFTFont>& aFont = myFont->changeFont()->getFont();
     if(aFont.isNull() || !aFont->isValid()) {
         return myRoot->scale(int(10 * (myText.getLength() + 2)));
     }

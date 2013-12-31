@@ -63,6 +63,11 @@ class StFileNode : public StNode {
     }
 
     /**
+     * Method to find child file node by name.
+     */
+    ST_CPPEXPORT const StFileNode* findValue(const StCString& theName) const;
+
+    /**
      * Fast flag to determine StFolder instance.
      */
     ST_CPPEXPORT virtual bool isFolder() const;
