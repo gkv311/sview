@@ -25,7 +25,9 @@ StGLFontManager::~StGLFontManager() {
 void StGLFontManager::release(StGLContext& theCtx) {
     for(std::map< StGLFontKey, StHandle<StGLFontEntry> >::iterator anIter = myFonts.begin();
         anIter != myFonts.end(); ++anIter) {
-        anIter->second->release(theCtx);
+        if(!anIter->second.isNull()) {
+            anIter->second->release(theCtx);
+        }
     }
     myFonts.clear();
     myFontTypes.clear();
