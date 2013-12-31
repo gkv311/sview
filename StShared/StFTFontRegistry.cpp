@@ -61,10 +61,10 @@ StFTFontRegistry::StFTFontRegistry() {
     myFilesMajor.add(stCString("Trebuchet MS Bold Italic.ttf"));
     myFilesMajor.add(stCString("Monaco.dfont"));
     // korean
-    myFilesMajor.add(stCString("AppleMyungjo.ttf"));
+    //myFilesMajor.add(stCString("AppleMyungjo.ttf"));
     myFilesMajor.add(stCString("AppleGothic.ttf"));
     // chinese
-    myFilesMajor.add(stCString("Hei.ttf"));
+    myFilesMajor.add(stCString("华文仿宋.ttf"));
 #else
     myFolders.add(stCString("/usr/share/fonts"));
     myFolders.add(stCString("/usr/local/share/fonts"));
@@ -120,7 +120,8 @@ void StFTFontRegistry::searchFiles(const StArrayList<StString>& theNames,
         FT_Face aFace = NULL;
         if(FT_New_Face(myFTLib->getInstance(), aPath.toCString(), 0, &aFace) != 0) {
             if(theIsMajor) {
-                ST_ERROR_LOG("StFTFontRegistry, major font file '" + aName + "' fail to load!");
+                ST_ERROR_LOG("StFTFontRegistry, major font file '" + aName + "' fail to load"
+                            + " from path '" + aPath + "'!");
             }
             if(aFace != NULL) {
                 FT_Done_Face(aFace);
@@ -177,12 +178,12 @@ void StFTFontRegistry::init(const bool theToSearchAll) {
     aSerif.Western = findFont(stCString("Times New Roman"));
     aSans .Western = findFont(stCString("Trebuchet MS"));
     aMono .Western = findFont(stCString("Monaco"));
-    aSerif.Korean  = findFont(stCString("AppleMyungjo"));
+    aSerif.Korean  = findFont(stCString("AppleGothic")); // AppleMyungjo can not be loaded
     aSans .Korean  = findFont(stCString("AppleGothic"));
     aMono .Korean  = findFont(stCString("AppleGothic"));
-    aSerif.CJK     = findFont(stCString("Hei"));
-    aSans .CJK     = findFont(stCString("Hei"));
-    aMono .CJK     = findFont(stCString("Hei"));
+    aSerif.CJK     = findFont(stCString("STFangsong"));
+    aSans .CJK     = findFont(stCString("STFangsong"));
+    aMono .CJK     = findFont(stCString("STFangsong"));
 #else
     aSerif.Western = findFont(stCString("DejaVu Serif"));
     aSans .Western = findFont(stCString("DejaVu Sans"));
