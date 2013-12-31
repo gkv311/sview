@@ -12,7 +12,7 @@
 #include <StFT/StFTFont.h>
 #include <StFile/StFolder.h>
 
-#include <unordered_map>
+#include <map>
 
 /**
  * Class to manage the list of available fonts in the system.
@@ -74,7 +74,7 @@ class StFTFontRegistry {
     StFolder              myFoldersRoot; //!< files tree
     StHandle<StFTLibrary> myFTLib;       //!< handle to the FT library object
 
-    std::unordered_map<std::string, StFTFontFamily> myFonts; //!< map family name -> font files
+    std::map<StString, StFTFontFamily> myFonts; //!< map family name -> font files
 
     StFTFontPack myTypefaces[StFTFont::TypefacesNB]; //!< predefined typefaces
 

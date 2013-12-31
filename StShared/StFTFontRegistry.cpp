@@ -197,7 +197,7 @@ void StFTFontRegistry::init(const bool theToSearchAll) {
 }
 
 const StFTFontFamily& StFTFontRegistry::findFont(const StCString& theFamily) {
-    std::unordered_map<std::string, StFTFontFamily>::iterator anIter = myFonts.find(theFamily.toCString());
+    std::map<StString, StFTFontFamily>::iterator anIter = myFonts.find(theFamily.toCString());
     return anIter != myFonts.end()
          ? anIter->second
          : THE_NO_FAMILY;
