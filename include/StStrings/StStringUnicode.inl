@@ -429,7 +429,7 @@ bool StStringUnicode<Type>::operator>(const StStringUnicode& theCompare) const {
     StUtfIterator<Type> anIterOther(theCompare.String);
     for(;; ++anIterMe, ++anIterOther) {
         if(*anIterMe == 0) {
-            return false;
+            return *anIterOther != 0;
         } else if(*anIterOther == 0) {
             return true;
         } else if(*anIterMe == *anIterOther) {
@@ -449,7 +449,7 @@ bool StStringUnicode<Type>::operator<(const StStringUnicode& theCompare) const {
     StUtfIterator<Type> anIterOther(theCompare.String);
     for(;; ++anIterMe, ++anIterOther) {
         if(*anIterMe == 0) {
-            return true;
+            return *anIterOther != 0;
         } else if(*anIterOther == 0) {
             return false;
         } else if(*anIterMe == *anIterOther) {
