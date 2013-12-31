@@ -15,7 +15,7 @@
 #include <StGL/StGLVec.h>
 #include <StTemplates/StRect.h>
 
-#include <unordered_map>
+#include <map>
 
 typedef StRect<GLfloat> StGLRect;
 
@@ -178,7 +178,7 @@ class StGLFontEntry : public StGLResource {
     StArrayList< StHandle<StGLFrameBuffer> > myFbos;     //!< FBO list
     StArrayList<StGLTile> myTiles;            //!< tiles list
 
-    std::unordered_map<stUtf32_t, size_t> myGlyphMap;
+    std::map<stUtf32_t, size_t> myGlyphMap;
 
 };
 

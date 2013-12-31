@@ -185,7 +185,7 @@ bool StGLFontEntry::renderGlyph(StGLContext&    theCtx,
                                 const stUtf32_t theUCharNext,
                                 StGLTile&       theGlyph,
                                 StGLVec2&       thePen) {
-    std::unordered_map<stUtf32_t, size_t>::iterator aTileIter = myGlyphMap.find(theUChar);
+    std::map<stUtf32_t, size_t>::const_iterator aTileIter = myGlyphMap.find(theUChar);
     size_t aTileId;
     if(aTileIter != myGlyphMap.end()) {
         aTileId = aTileIter->second;
