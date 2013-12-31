@@ -10,6 +10,7 @@
 
 #include <StFile/StFolder.h>
 #include <StStrings/StLogger.h>
+#include <StThreads/StProcess.h>
 #include <stAssert.h>
 
 namespace {

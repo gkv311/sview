@@ -144,34 +144,6 @@ StArgument StArgumentsMap::operator[](const StString& theKey) const {
     return StArgument();
 }
 
-static StString GetFontsRoot() {
-#ifdef _WIN32
-    return StProcess::getWindowsFolder() + "fonts\\";
-#elif defined(__APPLE__)
-    //return stCString("/System/Library/Fonts/");
-    return stCString("/Library/Fonts/");
-    //return stCString("/usr/X11/lib/X11/fonts/TTF/");
-#elif defined(__linux__)
-    if(StFileNode::isFileExists(stCString("/usr/share/fonts/truetype/ttf-dejavu"))) {
-        // Ubuntu
-        return stCString("/usr/share/fonts/truetype/ttf-dejavu/");
-    } else if(StFileNode::isFileExists(stCString("/usr/share/fonts/dejavu"))) {
-        // Gentoo
-        return stCString("/usr/share/fonts/dejavu/");
-    } else if(StFileNode::isFileExists(stCString("/usr/share/fonts/TTF/dejavu"))) {
-        // Mandriva
-        return stCString("/usr/share/fonts/TTF/dejavu/");
-    }
-    // unknown
-    return stCString("/usr/share/fonts/");
-#endif
-}
-
-StString StProcess::getFontsRoot() {
-    static const StString FONTS_ROOT = GetFontsRoot();
-    return FONTS_ROOT;
-}
-
 StString StProcess::getProcessFullPath() {
 #ifdef _WIN32
     // TODO (Kirill Gavrilov#9) - implement correct method

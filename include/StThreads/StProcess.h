@@ -213,11 +213,6 @@ class StProcess {
 #endif
 
     /**
-     * @return absolute Fonts path
-     */
-    ST_CPPEXPORT static StString getFontsRoot();
-
-    /**
      * @return command line arguments as flat list
      */
     ST_CPPEXPORT static StArrayList<StString> getArguments();
