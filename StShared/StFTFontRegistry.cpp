@@ -20,6 +20,7 @@ namespace {
 StFTFontRegistry::StFTFontRegistry() {
     myFTLib = new StFTLibrary();
     myExtensions.add("ttf");
+    myExtensions.add("ttc");
 
 #ifdef _WIN32
     myFolders.add(StProcess::getWindowsFolder() + "fonts");
