@@ -312,6 +312,9 @@
 		<Unit filename="lang/french/StImageViewer.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="lang/german/StImageViewer.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="lang/russian/StImageViewer.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>

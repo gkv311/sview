@@ -378,6 +378,9 @@
 		<Unit filename="lang/french/StMoviePlayer.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="lang/german/StMoviePlayer.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="lang/russian/StMoviePlayer.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>

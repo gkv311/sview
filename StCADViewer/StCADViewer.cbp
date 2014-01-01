@@ -353,6 +353,9 @@
 		<Unit filename="lang/french/StCADViewer.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="lang/german/StCADViewer.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="lang/russian/StCADViewer.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>

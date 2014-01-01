@@ -292,6 +292,9 @@
 		<Unit filename="lang/french/StOutAnaglyph.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="lang/german/StOutAnaglyph.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="lang/russian/StOutAnaglyph.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>

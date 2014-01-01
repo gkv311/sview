@@ -297,6 +297,9 @@
 		<Unit filename="lang/french/StOutIZ3D.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="lang/german/StOutIZ3D.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="lang/russian/StOutIZ3D.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>

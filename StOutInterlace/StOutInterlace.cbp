@@ -290,6 +290,9 @@
 		<Unit filename="lang/french/StOutInterlace.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="lang/german/StOutInterlace.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="lang/russian/StOutInterlace.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>

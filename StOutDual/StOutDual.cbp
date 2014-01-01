@@ -282,6 +282,9 @@
 		<Unit filename="lang/french/StOutDual.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="lang/german/StOutDual.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="lang/russian/StOutDual.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>

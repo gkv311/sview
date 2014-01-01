@@ -281,6 +281,9 @@
 		<Unit filename="lang/french/StOutDistorted.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="lang/german/StOutDistorted.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="lang/russian/StOutDistorted.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>

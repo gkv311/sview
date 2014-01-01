@@ -309,6 +309,9 @@
 		<Unit filename="lang/french/StDiagnostics.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="lang/german/StDiagnostics.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="lang/russian/StDiagnostics.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>

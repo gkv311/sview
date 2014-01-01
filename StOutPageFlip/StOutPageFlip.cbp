@@ -331,6 +331,9 @@
 		<Unit filename="lang/french/StOutPageFlip.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="lang/german/StOutPageFlip.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="lang/russian/StOutPageFlip.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
