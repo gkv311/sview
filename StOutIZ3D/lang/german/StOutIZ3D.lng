@@ -2,12 +2,12 @@ German translation file for StOutIZ3D library
 @author Kirill Gavrilov
 
 --------
-1000="IZ3D Display"
-1001="IZ3D Display"
-1102="iZ3D glasses"
-1120="Classic"
+1000="IZ3D Bildschirmen"
+1001="IZ3D Bildschirmen"
+1102="iZ3D Brillen"
+1120="Klassisch"
 1121="Modern"
-1122="Classic (fast)"
-2000="sView - iZ3D Output module"
-2001="version"
+1122="Klassisch (schnell)"
+2000="sView - iZ3D Ausgangsmodul"
+2001="Version"
 2002="© 2009-2014 Kirill Gavrilov <kirill@sview.ru>\n© 2007-2009 iZ3D LLC\nOfficial site: www.sview.ru\nSite iZ3D LLC: www.iz3d.com\n\nThis library distributed under LGPL3.0"
