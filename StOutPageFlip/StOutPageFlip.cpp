@@ -143,7 +143,7 @@ StOutPageFlip::StOutPageFlip(const StNativeWin_t theParentWindow)
     StString& aTitle     = myLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - PageFlip Output module");
     StString& aVerString = myLangMap.changeValueId(STTR_VERSION_STRING, "version");
     StString& aDescr     = myLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
-        "(C) 2007-2013 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0");
+        "(C) 2007-2014 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0");
     myAbout = aTitle + '\n' + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr;
 
     // detect connected displays

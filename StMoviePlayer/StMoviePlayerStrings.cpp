@@ -188,7 +188,7 @@ void loadDefaults(StLangMap& theStrings) {
                "version");
     theStrings(ABOUT_DESCRIPTION,
                "Movie player allows you to play stereoscopic video.\n"
-               "(C) 2007-2013 Kirill Gavrilov <kirill@sview.ru>\n"
+               "(C) 2007-2014 Kirill Gavrilov <kirill@sview.ru>\n"
                "Official site: www.sview.ru\n"
                "\n"
                "This program distributed under GPL3.0");

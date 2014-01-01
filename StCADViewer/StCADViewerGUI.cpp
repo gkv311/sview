@@ -207,7 +207,7 @@ void StCADViewerGUI::doAboutProgram(const size_t ) {
     const StString& aVerString = myLangMap->changeValueId(ABOUT_VERSION,      "version");
     const StString& aDescr     = myLangMap->changeValueId(ABOUT_DESCRIPTION,
         "CAD viewer allows you to view CAD files in formats IGES, STEP, BREP using OCCT.\n"
-        "(C) 2011-2013 Kirill Gavrilov (kirill@sview.ru).\nOfficial site: www.sview.ru");
+        "(C) 2011-2014 Kirill Gavrilov (kirill@sview.ru).\nOfficial site: www.sview.ru");
     StGLMessageBox* anAboutDialog = new StGLMessageBox(this, aTitle + '\n'
         + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr,
         512, 300);

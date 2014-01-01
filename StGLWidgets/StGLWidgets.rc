@@ -15,7 +15,7 @@ BEGIN
     BEGIN
       VALUE "FileDescription", "OpenGL Widgets library\000"
       VALUE "FileVersion",     SVIEW_SDK_VER_STRING "\000"
-      VALUE "LegalCopyright",  "\251 2009-2013 Kirill Gavrilov\000"
+      VALUE "LegalCopyright",  "\251 2009-2014 Kirill Gavrilov\000"
       VALUE "ProductName",     "StGLWidgets\000"
       VALUE "ProductVersion",  SVIEW_SDK_VER_STRING "\000"
       VALUE "OfficialSite",    "www.sview.ru\000"
