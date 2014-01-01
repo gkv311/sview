@@ -55,18 +55,22 @@ FlatComponentsList=false
 Name: english; MessagesFile: compiler:Default.isl;           LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
 Name: russian; MessagesFile: compiler:Languages\Russian.isl; LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
 Name: french;  MessagesFile: compiler:Languages\French.isl;  LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
+Name: german;  MessagesFile: compiler:Languages\German.isl;  LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
 
 [CustomMessages]
 ; Installation types
 english.FullInstall=Full Installation
 russian.FullInstall=Полная установка
 french.FullInstall=Installation complète
+german.FullInstall=Full Installation
 english.CustomInstall=Custom Installation
 russian.CustomInstall=Выборочная установка
 french.CustomInstall=Installation personnalisée
+german.CustomInstall=Benutzerdefinierte Installation
 ; Components
 english.StCore=Core files
 russian.StCore=Общие файлы
+german.StCore=Core-Dateien
 english.StBrowserPlugins=NPAPI Browser plugin (Firefox, Google Chrome, Opera,...)
 russian.StBrowserPlugins=NPAPI плагин для браузеров Firefox, Google Chrome, Opera,...
 english.StActiveXPlugin=ActiveX control for Internet Explorer
@@ -79,29 +83,38 @@ english.StMoviePlayer=Stereoscopic Movie Player
 russian.StMoviePlayer=Воспроизведение стереовидео
 english.StRenderers=Device support
 russian.StRenderers=Поддержка устройств стереовывода
+german.StRenderers=Geräteunterstützung
 english.StOutAnaglyph=Anaglyph glasses
 russian.StOutAnaglyph=Анаглифные очки
+german.StOutAnaglyph=Anaglyphenbrille
 english.StOutDual=Mirror Displays, Dual Projectors
 russian.StOutDual=Зеркальные системы, 2х-проекторные системы
 english.StOutInterlace=Interlaced Displays, DLP TV
 russian.StOutInterlace=Чересстрочные мониторы, DLP ТВ
 english.StOutIZ3D=IZ3D Display
 russian.StOutIZ3D=Монитор IZ3D
+german.StOutIZ3D=iZ3D-Bildschirmen
 english.StOutPageFlip=Shutter glasses
 russian.StOutPageFlip=Затворные очки
+german.StOutPageFlip=Shutterbrille
 english.StOutDistorted=Distorted output
 russian.StOutDistorted=Искажённый вывод
 ; File associations
 english.FileAssociations=File associations
 russian.FileAssociations=Файловые ассоциации
+german.FileAssociations=Dateizuordnungen
 english.AssocStereoImages=Associate stereoscopic images with sView (*.jps; *.pns; *.mpo)
 russian.AssocStereoImages=Связать с sView стереоизображения (*.jps; *.pns; *.mpo)
+german.AssocStereoImages=Associate stereoskopische Bilder mit sView (*.jps; *.pns; *.mpo)
 english.AssocImages=Associate common images with sView (*.jpg; *.png; *.webp; *.bmp; *.exr; *.hdr; *.tga)
 russian.AssocImages=Связать с sView обычные изображения (*.jpg; *.png; *.webp; *.bmp; *.exr; *.hdr; *.tga)
+german.AssocImages=Associate normale Bilder mit sView (*.jpg; *.png; *.webp; *.bmp; *.exr; *.hdr; *.tga)
 english.AssocMovies=Associate video files with sView (*.avi; *.mkv; *.mk3d; *.webm; *.wmv; *.ts)
 russian.AssocMovies=Связать с sView видеофайлы (*.avi; *.mkv; *.mk3d; *.webm; *.wmv; *.ts)
+german.AssocMovies=Associate Videodateien mit sView (*.avi; *.mkv; *.mk3d; *.webm; *.wmv; *.ts)
 english.AssocMusic=Associate music files with sView (*.mp3; *.ogg; *.wav; *.flac; *.ape)
 russian.AssocMusic=Связать с sView музыкальные файлы (*.mp3; *.ogg; *.wav; *.flac; *.ape)
+german.AssocMusic=Associate Musikdateien mit sView (*.mp3; *.ogg; *.wav; *.flac; *.ape)
 ; OpenAL soft
 english.OpenALSoft51=OpenAL soft - force 5.1 channel output
 russian.OpenALSoft51=OpenAL soft - force 5.1 channel output
@@ -260,8 +273,9 @@ Filename: regsvr32; Parameters: "/s ""{app}\amd64\npStBrowserPlugin.dll"""; Comp
 ; Install/Uninstall info
 Root: HKCU; Subkey: SOFTWARE\sView;       ValueType: none; Flags: uninsdeletekey; Tasks: ; Languages: ; ValueData: sView 2011
 Root: HKCU; Subkey: Software\sView\sView; ValueType: string; ValueName: language; ValueData: русский;  Tasks: ; Languages: russian; Flags: uninsdeletekey
-Root: HKCU; Subkey: Software\sView\sView; ValueType: string; ValueName: language; ValueData: english;  Tasks: ; Languages: english; Flags: uninsdeletekey
+Root: HKCU; Subkey: Software\sView\sView; ValueType: string; ValueName: language; ValueData: English;  Tasks: ; Languages: english; Flags: uninsdeletekey
 Root: HKCU; Subkey: Software\sView\sView; ValueType: string; ValueName: language; ValueData: français; Tasks: ; Languages: french;  Flags: uninsdeletekey
+Root: HKCU; Subkey: Software\sView\sView; ValueType: string; ValueName: language; ValueData: Deutsch;  Tasks: ; Languages: german;  Flags: uninsdeletekey
 ; Associations JPS
 Root: HKCR; SubKey: .jps;                                      ValueType: string; ValueData: JPEG Stereo Image;             Tasks: flagAssocStereoImages; Flags: uninsdeletekey
 Root: HKCR; SubKey: JPEG Stereo Image;                         ValueType: string; ValueData: JPEG Stereo Image;             Tasks: flagAssocStereoImages; Flags: uninsdeletekey
@@ -388,4 +402,3 @@ Name: {group}\;                Type: filesandordirs
 Name: {app}\input\;            Type: filesandordirs
 Name: {app}\StRenderers\;      Type: filesandordirs
 Name: {app}\StBrowserPlugins\; Type: filesandordirs
-
