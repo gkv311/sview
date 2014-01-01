@@ -30,14 +30,7 @@
 					<Add library="Version" />
 				</Linker>
 				<ExtraCommands>
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\english&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\english&quot;' />
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot;' />
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\français&quot;' />
-					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)lang\english\&quot;' />
-					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)lang\русский\&quot;' />
-					<Add before='cmd /c COPY /Y lang\french\* &quot;$(TARGET_OUTPUT_DIR)lang\français\&quot;' />
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)shaders\$(TARGET_OUTPUT_BASENAME)&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)shaders\$(TARGET_OUTPUT_BASENAME)&quot;' />
-					<Add before='cmd /c COPY /Y shaders\* &quot;$(TARGET_OUTPUT_DIR)shaders\$(TARGET_OUTPUT_BASENAME)\&quot;' />
+					<Add before='cmd /c call ..\copy_res.bat $(TARGET_OUTPUT_DIR) $(TARGET_OUTPUT_BASENAME)' />
 				</ExtraCommands>
 			</Target>
 			<Target title="WIN_vc_x86">
@@ -67,14 +60,7 @@
 					<Add library="Shell32" />
 				</Linker>
 				<ExtraCommands>
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\english&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\english&quot;' />
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot;' />
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\français&quot;' />
-					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)lang\english\&quot;' />
-					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)lang\русский\&quot;' />
-					<Add before='cmd /c COPY /Y lang\french\* &quot;$(TARGET_OUTPUT_DIR)lang\français\&quot;' />
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)shaders\$(TARGET_OUTPUT_BASENAME)&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)shaders\$(TARGET_OUTPUT_BASENAME)&quot;' />
-					<Add before='cmd /c COPY /Y shaders\* &quot;$(TARGET_OUTPUT_DIR)shaders\$(TARGET_OUTPUT_BASENAME)\&quot;' />
+					<Add before='cmd /c call ..\copy_res.bat $(TARGET_OUTPUT_DIR) $(TARGET_OUTPUT_BASENAME)' />
 					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;2' />
 				</ExtraCommands>
 			</Target>
@@ -110,14 +96,7 @@
 					<Add library="Version" />
 				</Linker>
 				<ExtraCommands>
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\english&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\english&quot;' />
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot;' />
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\français&quot;' />
-					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)lang\english\&quot;' />
-					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)lang\русский\&quot;' />
-					<Add before='cmd /c COPY /Y lang\french\* &quot;$(TARGET_OUTPUT_DIR)lang\français\&quot;' />
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)shaders\$(TARGET_OUTPUT_BASENAME)&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)shaders\$(TARGET_OUTPUT_BASENAME)&quot;' />
-					<Add before='cmd /c COPY /Y shaders\* &quot;$(TARGET_OUTPUT_DIR)shaders\$(TARGET_OUTPUT_BASENAME)\&quot;' />
+					<Add before='cmd /c call ..\copy_res.bat $(TARGET_OUTPUT_DIR) $(TARGET_OUTPUT_BASENAME)' />
 					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;2' />
 				</ExtraCommands>
 			</Target>
@@ -148,14 +127,7 @@
 					<Add library="Shell32" />
 				</Linker>
 				<ExtraCommands>
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\english&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\english&quot;' />
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\русский&quot;' />
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)lang\français&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)lang\français&quot;' />
-					<Add before='cmd /c COPY /Y lang\english\* &quot;$(TARGET_OUTPUT_DIR)lang\english\&quot;' />
-					<Add before='cmd /c COPY /Y lang\russian\* &quot;$(TARGET_OUTPUT_DIR)lang\русский\&quot;' />
-					<Add before='cmd /c COPY /Y lang\french\* &quot;$(TARGET_OUTPUT_DIR)lang\français\&quot;' />
-					<Add before='cmd /c IF NOT EXIST &quot;$(TARGET_OUTPUT_DIR)shaders\$(TARGET_OUTPUT_BASENAME)&quot; MKDIR &quot;$(TARGET_OUTPUT_DIR)shaders\$(TARGET_OUTPUT_BASENAME)&quot;' />
-					<Add before='cmd /c COPY /Y shaders\* &quot;$(TARGET_OUTPUT_DIR)shaders\$(TARGET_OUTPUT_BASENAME)\&quot;' />
+					<Add before='cmd /c call ..\copy_res.bat $(TARGET_OUTPUT_DIR) $(TARGET_OUTPUT_BASENAME)' />
 					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;2' />
 				</ExtraCommands>
 			</Target>
