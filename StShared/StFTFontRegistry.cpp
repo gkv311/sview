@@ -40,6 +40,8 @@ StFTFontRegistry::StFTFontRegistry() {
     // korean
     myFilesMajor.add(stCString("malgun.ttf"));
     myFilesMajor.add(stCString("malgunbd.ttf"));
+    myFilesMinor.add(stCString("gulim.ttc")); // Win XP
+    myFilesMinor.add(stCString("gulim.ttf"));
     // chinese
     myFilesMajor.add(stCString("simsun.ttc"));
 #elif defined(__APPLE__)
@@ -168,12 +170,18 @@ void StFTFontRegistry::init(const bool theToSearchAll) {
     aSerif.Western = findFont(stCString("Times New Roman"));
     aSans .Western = findFont(stCString("Trebuchet MS"));
     aMono .Western = findFont(stCString("Tahoma"));
-    aSerif.Korean  = findFont(stCString("Malgun Gothic"));
-    aSans .Korean  = findFont(stCString("Malgun Gothic"));
-    aMono .Korean  = findFont(stCString("Malgun Gothic"));
-    aSerif.CJK     = findFont(stCString("SimSun"));
-    aSans .CJK     = findFont(stCString("SimSun"));
-    aMono .CJK     = findFont(stCString("SimSun"));
+    const StFTFontFamily& aMalgun = findFont(stCString("Malgun Gothic"));
+    const StFTFontFamily& aGulim  = findFont(stCString("Gulim"));
+    const StFTFontFamily& aKor = aMalgun.FamilyName.isEmpty() && !aGulim.FamilyName.isEmpty()
+                               ? aGulim
+                               : aMalgun;
+    aSerif.Korean  = aKor;
+    aSans .Korean  = aKor;
+    aMono .Korean  = aKor;
+    const StFTFontFamily& aSimSun  = findFont(stCString("SimSun"));
+    aSerif.CJK     = aSimSun;
+    aSans .CJK     = aSimSun;
+    aMono .CJK     = aSimSun;
 #elif defined(__APPLE__)
     aSerif.Western = findFont(stCString("Times New Roman"));
     aSans .Western = findFont(stCString("Trebuchet MS"));
