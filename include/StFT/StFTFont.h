@@ -25,6 +25,8 @@ struct StFTFontFamily {
     StString Bold;
     StString Italic;
     StString BoldItalic;
+
+    ST_LOCAL StFTFontFamily() {}
 };
 
 struct StFTFontPack {
