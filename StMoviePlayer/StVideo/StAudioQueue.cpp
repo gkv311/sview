@@ -12,16 +12,16 @@
 /**
  * Check OpenAL state.
  */
-void stalCheckErrors(const StString& ST_DEBUG_VAR(theProcedure)) {
-    ALenum error = alGetError();
-    switch(error) {
-        case AL_NO_ERROR: return; // alright
-        case AL_INVALID_NAME:      ST_DEBUG_LOG(theProcedure + ": AL_INVALID_NAME");      return;
-        case AL_INVALID_ENUM:      ST_DEBUG_LOG(theProcedure + ": AL_INVALID_ENUM");      return;
-        case AL_INVALID_VALUE:     ST_DEBUG_LOG(theProcedure + ": AL_INVALID_VALUE");     return;
-        case AL_INVALID_OPERATION: ST_DEBUG_LOG(theProcedure + ": AL_INVALID_OPERATION"); return;
-        case AL_OUT_OF_MEMORY:     ST_DEBUG_LOG(theProcedure + ": AL_OUT_OF_MEMORY");     return;
-        default:                   ST_DEBUG_LOG(theProcedure + ": OpenAL unknown error"); return;
+bool stalCheckErrors(const StString& ST_DEBUG_VAR(theProcedure)) {
+    ALenum anError = alGetError();
+    switch(anError) {
+        case AL_NO_ERROR: return true; // alright
+        case AL_INVALID_NAME:      ST_DEBUG_LOG(theProcedure + ": AL_INVALID_NAME");      return false;
+        case AL_INVALID_ENUM:      ST_DEBUG_LOG(theProcedure + ": AL_INVALID_ENUM");      return false;
+        case AL_INVALID_VALUE:     ST_DEBUG_LOG(theProcedure + ": AL_INVALID_VALUE");     return false;
+        case AL_INVALID_OPERATION: ST_DEBUG_LOG(theProcedure + ": AL_INVALID_OPERATION"); return false;
+        case AL_OUT_OF_MEMORY:     ST_DEBUG_LOG(theProcedure + ": AL_OUT_OF_MEMORY");     return false;
+        default:                   ST_DEBUG_LOG(theProcedure + ": OpenAL unknown error"); return false;
     }
 }
 
@@ -546,6 +546,11 @@ bool StAudioQueue::stalQueue(const double thePts) {
     bool toTryToPlay = false;
     bool isQueued = false;
     if(aProcessed == 0 && aQueued < NUM_AL_BUFFERS) {
+        if(myBufferOut.isEmpty()) {
+            ST_DEBUG_LOG(" EMPTY BUFFER ");
+            return true;
+        }
+
         stalCheckErrors("reset state");
         ///ST_DEBUG_LOG("AL, queue more buffers " + aQueued + " / " + NUM_AL_BUFFERS);
         myPrevFormat    = myAlFormat;
@@ -554,7 +559,7 @@ bool StAudioQueue::stalQueue(const double thePts) {
             alBufferData(myAlBuffers[aSrcId][aQueued], myAlFormat,
                          myBufferOut.getPlane(aSrcId), (ALsizei )myBufferOut.getPlaneSize(),
                          myBufferOut.getFreq());
-            stalCheckErrors("alBufferData");
+            stalCheckErrors("alBufferData1");
             alSourceQueueBuffers(myAlSources[aSrcId], 1, &myAlBuffers[aSrcId][aQueued]);
             stalCheckErrors("alSourceQueueBuffers");
         }
@@ -596,7 +601,7 @@ bool StAudioQueue::stalQueue(const double thePts) {
                 alBufferData(alBuffIdToFill, myAlFormat,
                              myBufferOut.getPlane(aSrcId), (ALsizei )myBufferOut.getPlaneSize(),
                              myBufferOut.getFreq());
-                stalCheckErrors("alBufferData");
+                stalCheckErrors("alBufferData2");
                 alSourceQueueBuffers(myAlSources[aSrcId], 1, &alBuffIdToFill);
                 stalCheckErrors("alSourceQueueBuffers");
             } else {
