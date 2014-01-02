@@ -154,14 +154,7 @@
 					<Add library="pthread" />
 				</Linker>
 				<ExtraCommands>
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
-					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
-					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
-					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)shaders/$(PROJECT_NAME)/&quot;' />
-					<Add before='cp -f -r shaders/* &quot;$(TARGET_OUTPUT_DIR)shaders/$(PROJECT_NAME)/&quot;' />
+					<Add before='bash ../copy_res.sh $(TARGET_OUTPUT_DIR) $(PROJECT_NAME)' />
 				</ExtraCommands>
 			</Target>
 			<Target title="LINUX_gcc_DEBUG">
@@ -187,14 +180,7 @@
 					<Add library="pthread" />
 				</Linker>
 				<ExtraCommands>
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
-					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
-					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
-					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)shaders/$(PROJECT_NAME)/&quot;' />
-					<Add before='cp -f -r shaders/* &quot;$(TARGET_OUTPUT_DIR)shaders/$(PROJECT_NAME)/&quot;' />
+					<Add before='bash ../copy_res.sh $(TARGET_OUTPUT_DIR) $(PROJECT_NAME)' />
 				</ExtraCommands>
 			</Target>
 			<Target title="MAC_gcc">
@@ -217,14 +203,7 @@
 					<Add library="objc" />
 				</Linker>
 				<ExtraCommands>
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
-					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
-					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
-					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)shaders/$(PROJECT_NAME)/&quot;' />
-					<Add before='cp -f -r shaders/* &quot;$(TARGET_OUTPUT_DIR)shaders/$(PROJECT_NAME)/&quot;' />
+					<Add before='bash ../copy_res.sh $(TARGET_OUTPUT_DIR) $(PROJECT_NAME)' />
 					<Add after='install_name_tool -id @executable_path/$(TARGET_OUTPUT_BASENAME).dylib &quot;$(TARGET_OUTPUT_FILE)&quot;' />
 					<Add after='ln -f -s &quot;../$(TARGET_OUTPUT_FILE)&quot; ../lib/$(TARGET_NAME)' />
 				</ExtraCommands>
@@ -249,14 +228,7 @@
 					<Add library="objc" />
 				</Linker>
 				<ExtraCommands>
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
-					<Add before='cp -f -r lang/english/* &quot;$(TARGET_OUTPUT_DIR)lang/english/&quot;' />
-					<Add before='cp -f -r lang/russian/* &quot;$(TARGET_OUTPUT_DIR)lang/русский/&quot;' />
-					<Add before='cp -f -r lang/french/* &quot;$(TARGET_OUTPUT_DIR)lang/français/&quot;' />
-					<Add before='mkdir -p &quot;$(TARGET_OUTPUT_DIR)shaders/$(PROJECT_NAME)/&quot;' />
-					<Add before='cp -f -r shaders/* &quot;$(TARGET_OUTPUT_DIR)shaders/$(PROJECT_NAME)/&quot;' />
+					<Add before='bash ../copy_res.sh $(TARGET_OUTPUT_DIR) $(PROJECT_NAME)' />
 					<Add after='install_name_tool -id @executable_path/$(TARGET_OUTPUT_BASENAME).dylib &quot;$(TARGET_OUTPUT_FILE)&quot;' />
 					<Add after='ln -f -s &quot;../$(TARGET_OUTPUT_FILE)&quot; ../lib/$(TARGET_NAME)' />
 				</ExtraCommands>
