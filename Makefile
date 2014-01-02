@@ -72,9 +72,10 @@ install:
 	rm -f    $(DESTDIR)/usr/$(USR_LIB)/sView/*.a
 
 pre_all:
-	mkdir -p $(BUILD_ROOT)/lang/english
+	mkdir -p $(BUILD_ROOT)/lang/English
 	mkdir -p $(BUILD_ROOT)/lang/русский
 	mkdir -p $(BUILD_ROOT)/lang/français
+	mkdir -p $(BUILD_ROOT)/lang/Deutsch
 	mkdir -p $(BUILD_ROOT)/textures
 	mkdir -p $(BUILD_ROOT)/web
 	cp -f -r textures/*.png $(BUILD_ROOT)/textures/
@@ -131,9 +132,10 @@ $(aStOutAnaglyph) : pre_StOutAnaglyph $(aStOutAnaglyph_OBJS)
 pre_StOutAnaglyph:
 	mkdir -p $(BUILD_ROOT)/shaders/StOutAnaglyph/
 	cp -f -r StOutAnaglyph/shaders/*      $(BUILD_ROOT)/shaders/StOutAnaglyph/
-	cp -f -r StOutAnaglyph/lang/english/* $(BUILD_ROOT)/lang/english/
+	cp -f -r StOutAnaglyph/lang/english/* $(BUILD_ROOT)/lang/English/
 	cp -f -r StOutAnaglyph/lang/russian/* $(BUILD_ROOT)/lang/русский/
 	cp -f -r StOutAnaglyph/lang/french/*  $(BUILD_ROOT)/lang/français/
+	cp -f -r StOutAnaglyph/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
 clean_StOutAnaglyph:
 	rm -f $(aStOutAnaglyph)
 	rm -rf StOutAnaglyph/*.o
@@ -145,9 +147,10 @@ aStOutDual_LIB  := $(LIB) -lStShared -lStSettings -lStCore $(LIB_GLX) $(LIB_GTK)
 $(aStOutDual) : pre_StOutDual $(aStOutDual_OBJS)
 	$(LD) -shared -z defs $(LDFLAGS) $(LIBDIR) $(aStOutDual_OBJS) $(aStOutDual_LIB) -o $(aStOutDual)
 pre_StOutDual:
-	cp -f -r StOutDual/lang/english/* $(BUILD_ROOT)/lang/english/
+	cp -f -r StOutDual/lang/english/* $(BUILD_ROOT)/lang/English/
 	cp -f -r StOutDual/lang/russian/* $(BUILD_ROOT)/lang/русский/
 	cp -f -r StOutDual/lang/french/*  $(BUILD_ROOT)/lang/français/
+	cp -f -r StOutDual/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
 clean_StOutDual:
 	rm -f $(aStOutDual)
 	rm -rf StOutDual/*.o
@@ -161,9 +164,10 @@ $(aStOutIZ3D) : pre_StOutIZ3D $(aStOutIZ3D_OBJS)
 pre_StOutIZ3D:
 	mkdir -p $(BUILD_ROOT)/shaders/StOutIZ3D/
 	cp -f -r StOutIZ3D/shaders/*      $(BUILD_ROOT)/shaders/StOutIZ3D/
-	cp -f -r StOutIZ3D/lang/english/* $(BUILD_ROOT)/lang/english/
+	cp -f -r StOutIZ3D/lang/english/* $(BUILD_ROOT)/lang/English/
 	cp -f -r StOutIZ3D/lang/russian/* $(BUILD_ROOT)/lang/русский/
 	cp -f -r StOutIZ3D/lang/french/*  $(BUILD_ROOT)/lang/français/
+	cp -f -r StOutIZ3D/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
 clean_StOutIZ3D:
 	rm -f $(aStOutIZ3D)
 	rm -rf StOutIZ3D/*.o
@@ -177,9 +181,10 @@ $(aStOutInterlace) : pre_StOutInterlace $(aStOutInterlace_OBJS)
 pre_StOutInterlace:
 	mkdir -p $(BUILD_ROOT)/shaders/StOutInterlace/
 	cp -f -r StOutInterlace/shaders/*      $(BUILD_ROOT)/shaders/StOutInterlace/
-	cp -f -r StOutInterlace/lang/english/* $(BUILD_ROOT)/lang/english/
+	cp -f -r StOutInterlace/lang/english/* $(BUILD_ROOT)/lang/English/
 	cp -f -r StOutInterlace/lang/russian/* $(BUILD_ROOT)/lang/русский/
 	cp -f -r StOutInterlace/lang/french/*  $(BUILD_ROOT)/lang/français/
+	cp -f -r StOutInterlace/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
 clean_StOutInterlace:
 	rm -f $(aStOutInterlace)
 	rm -rf StOutInterlace/*.o
@@ -191,9 +196,10 @@ aStOutPageFlip_LIB  := $(LIB) -lStShared -lStSettings -lStCore $(LIB_GLX) $(LIB_
 $(aStOutPageFlip) : pre_StOutPageFlip $(aStOutPageFlip_OBJS)
 	$(LD) -shared -z defs $(LDFLAGS) $(LIBDIR) $(aStOutPageFlip_OBJS) $(aStOutPageFlip_LIB) -o $(aStOutPageFlip)
 pre_StOutPageFlip:
-	cp -f -r StOutPageFlip/lang/english/* $(BUILD_ROOT)/lang/english/
+	cp -f -r StOutPageFlip/lang/english/* $(BUILD_ROOT)/lang/English/
 	cp -f -r StOutPageFlip/lang/russian/* $(BUILD_ROOT)/lang/русский/
 	cp -f -r StOutPageFlip/lang/french/*  $(BUILD_ROOT)/lang/français/
+	cp -f -r StOutPageFlip/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
 clean_StOutPageFlip:
 	rm -f $(aStOutPageFlip)
 	rm -rf StOutPageFlip/*.o
@@ -205,9 +211,10 @@ aStOutDistorted_LIB  := $(LIB) -lStShared -lStSettings -lStCore $(LIB_GLX) $(LIB
 $(aStOutDistorted) : pre_StOutDistorted $(aStOutDistorted_OBJS)
 	$(LD) -shared -z defs $(LDFLAGS) $(LIBDIR) $(aStOutDistorted_OBJS) $(aStOutDistorted_LIB) -o $(aStOutDistorted)
 pre_StOutDistorted:
-	cp -f -r StOutDistorted/lang/english/* $(BUILD_ROOT)/lang/english/
+	cp -f -r StOutDistorted/lang/english/* $(BUILD_ROOT)/lang/English/
 	cp -f -r StOutDistorted/lang/russian/* $(BUILD_ROOT)/lang/русский/
 	cp -f -r StOutDistorted/lang/french/*  $(BUILD_ROOT)/lang/français/
+	cp -f -r StOutDistorted/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
 clean_StOutDistorted:
 	rm -f $(aStOutDistorted)
 	rm -rf StOutDistorted/*.o
@@ -219,9 +226,10 @@ aStImageViewer_LIB  := $(LIB) -lStGLWidgets -lStShared -lStSettings -lStCore -lS
 $(aStImageViewer) : pre_StImageViewer $(aStImageViewer_OBJS)
 	$(LD) -shared -z defs $(LDFLAGS) $(LIBDIR) $(aStImageViewer_OBJS) $(aStImageViewer_LIB) -o $(aStImageViewer)
 pre_StImageViewer:
-	cp -f -r StImageViewer/lang/english/* $(BUILD_ROOT)/lang/english/
+	cp -f -r StImageViewer/lang/english/* $(BUILD_ROOT)/lang/English/
 	cp -f -r StImageViewer/lang/russian/* $(BUILD_ROOT)/lang/русский/
 	cp -f -r StImageViewer/lang/french/*  $(BUILD_ROOT)/lang/français/
+	cp -f -r StImageViewer/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
 clean_StImageViewer:
 	rm -f $(aStImageViewer)
 	rm -rf StImageViewer/*.o
@@ -237,9 +245,10 @@ aStMoviePlayer_LIB   := $(LIB) -lStGLWidgets -lStShared -lStSettings -lStCore -l
 $(aStMoviePlayer) : pre_StMoviePlayer $(aStMoviePlayer_OBJS1) $(aStMoviePlayer_OBJS2) $(aStMoviePlayer_OBJS3)
 	$(LD) -shared -z defs $(LDFLAGS) $(LIBDIR) $(aStMoviePlayer_OBJS1) $(aStMoviePlayer_OBJS2) $(aStMoviePlayer_OBJS3) $(aStMoviePlayer_LIB) -o $(aStMoviePlayer)
 pre_StMoviePlayer:
-	cp -f -r StMoviePlayer/lang/english/* $(BUILD_ROOT)/lang/english/
+	cp -f -r StMoviePlayer/lang/english/* $(BUILD_ROOT)/lang/English/
 	cp -f -r StMoviePlayer/lang/russian/* $(BUILD_ROOT)/lang/русский/
 	cp -f -r StMoviePlayer/lang/french/*  $(BUILD_ROOT)/lang/français/
+	cp -f -r StMoviePlayer/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
 	cp -f -r StMoviePlayer/web/*          $(BUILD_ROOT)/web/
 clean_StMoviePlayer:
 	rm -f $(aStMoviePlayer)
@@ -252,9 +261,10 @@ aStDiagnostics_LIB  := $(LIB) -lStGLWidgets -lStShared -lStSettings -lStCore -lS
 $(aStDiagnostics) : pre_StDiagnostics $(aStDiagnostics_OBJS)
 	$(LD) -shared -z defs $(LDFLAGS) $(LIBDIR) $(aStDiagnostics_OBJS) $(aStDiagnostics_LIB) -o $(aStDiagnostics)
 pre_StDiagnostics:
-	cp -f -r StDiagnostics/lang/english/* $(BUILD_ROOT)/lang/english/
+	cp -f -r StDiagnostics/lang/english/* $(BUILD_ROOT)/lang/English/
 	cp -f -r StDiagnostics/lang/russian/* $(BUILD_ROOT)/lang/русский/
 	cp -f -r StDiagnostics/lang/french/*  $(BUILD_ROOT)/lang/français/
+	cp -f -r StDiagnostics/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
 clean_StDiagnostics:
 	rm -f $(aStDiagnostics)
 	rm -rf StDiagnostics/*.o
@@ -269,9 +279,10 @@ endif
 $(aStCADViewer) : pre_StCADViewer $(aStCADViewer_OBJS)
 	$(LD) -shared -z defs $(LDFLAGS) $(LIBDIR) $(aStCADViewer_OBJS) $(aStCADViewer_LIB) -o $(aStCADViewer)
 pre_StCADViewer:
-	cp -f -r StCADViewer/lang/english/* $(BUILD_ROOT)/lang/english/
+	cp -f -r StCADViewer/lang/english/* $(BUILD_ROOT)/lang/English/
 	cp -f -r StCADViewer/lang/russian/* $(BUILD_ROOT)/lang/русский/
 	cp -f -r StCADViewer/lang/french/*  $(BUILD_ROOT)/lang/français/
+	cp -f -r StCADViewer/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
 clean_StCADViewer:
 	rm -f $(aStCADViewer)
 	rm -rf StCADViewer/*.o
