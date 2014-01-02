@@ -177,9 +177,12 @@ void StGLTextFormatter::append(StGLContext&          theCtx,
                                const StString&       theString,
                                const StFTFont::Style theStyle,
                                StGLFont&             theFont) {
-    myAscender    = stMax(myAscender,    theFont.getAscender());
-    myLineSpacing = stMax(myLineSpacing, theFont.getLineSpacing());
+    if(theFont.getFont().isNull()) {
+        return;
+    }
 
+    myAscender    = stMax(myAscender,    theFont.getFont()->getAscender());
+    myLineSpacing = stMax(myLineSpacing, theFont.getFont()->getLineSpacing());
     if(theString.isEmpty()) {
         return;
     }

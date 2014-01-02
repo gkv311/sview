@@ -75,20 +75,6 @@ class StGLFont : public StGLResource {
     }
 
     /**
-     * @return vertical distance from the horizontal baseline to the highest character coordinate.
-     */
-    ST_LOCAL inline GLfloat getAscender() const {
-        return myAscender;
-    }
-
-    /**
-     * @return default line spacing (the baseline-to-baseline distance).
-     */
-    ST_LOCAL inline GLfloat getLineSpacing() const {
-        return myLineSpacing;
-    }
-
-    /**
      * Compute glyph rectangle at specified pen position (on baseline)
      * and render it to texture if not already.
      * @param theCtx       active context
@@ -108,9 +94,6 @@ class StGLFont : public StGLResource {
         protected:
 
     StHandle<StGLFontEntry> myFonts[StFTFont::SubsetsNB]; //!< textured font instances
-
-    GLfloat  myAscender;    //!< ascender     provided my FT font
-    GLfloat  myLineSpacing; //!< line spacing provided my FT font
 
 };
 

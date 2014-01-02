@@ -8,15 +8,11 @@
 
 #include <StGL/StGLFont.h>
 
-StGLFont::StGLFont()
-: myAscender(0.0f),
-  myLineSpacing(0.0f) {
+StGLFont::StGLFont() {
     //
 }
 
-StGLFont::StGLFont(const StHandle<StFTFont>& theFtFont)
-: myAscender(0.0f),
-  myLineSpacing(0.0f) {
+StGLFont::StGLFont(const StHandle<StFTFont>& theFtFont) {
     myFonts[0] = new StGLFontEntry(theFtFont);
 }
 
@@ -36,15 +32,11 @@ void StGLFont::release(StGLContext& theCtx) {
 bool StGLFont::stglInit(StGLContext&       theCtx,
                         const unsigned int thePointSize,
                         const unsigned int theResolution) {
-    myAscender    = 0.0f;
-    myLineSpacing = 0.0f;
     StHandle<StGLFontEntry>& aFontMain = myFonts[0];
     if(aFontMain.isNull()
     || !aFontMain->stglInit(theCtx, thePointSize, theResolution)) {
         return false;
     }
-    myAscender    = aFontMain->getAscender();
-    myLineSpacing = aFontMain->getLineSpacing();
 
     for(size_t anIter = 1; anIter < StFTFont::SubsetsNB; ++anIter) {
         StHandle<StGLFontEntry>& aFont = myFonts[anIter];
@@ -56,15 +48,11 @@ bool StGLFont::stglInit(StGLContext&       theCtx,
 }
 
 bool StGLFont::stglInit(StGLContext& theCtx) {
-    myAscender    = 0.0f;
-    myLineSpacing = 0.0f;
     StHandle<StGLFontEntry>& aFontMain = myFonts[0];
     if(aFontMain.isNull()
     || !aFontMain->stglInit(theCtx)) {
         return false;
     }
-    myAscender    = aFontMain->getAscender();
-    myLineSpacing = aFontMain->getLineSpacing();
 
     for(size_t anIter = 1; anIter < StFTFont::SubsetsNB; ++anIter) {
         StHandle<StGLFontEntry>& aFont = myFonts[anIter];
