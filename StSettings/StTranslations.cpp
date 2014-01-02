@@ -37,10 +37,10 @@ StTranslations::StTranslations(const StString& theModuleName)
 
     if(myLangList.isEmpty()) {
         // add built-in language
-        myLangList.add("english");
+        myLangList.add("English");
     }
 
-    StString aLang("english");
+    StString aLang("English");
     StSettings aGlobalSettings(ST_GLOBAL_SETTINGS_GROUP);
     aGlobalSettings.loadString(ST_SETTING_LANGUAGE, aLang);
 
