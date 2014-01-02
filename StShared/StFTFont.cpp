@@ -120,12 +120,28 @@ bool StFTFont::renderGlyph(const stUtf32_t theUChar) {
     }
 
     FT_Bitmap aBitmap = myFTFace->glyph->bitmap;
-    if(aBitmap.pixel_mode != FT_PIXEL_MODE_GRAY
-    || aBitmap.buffer == NULL || aBitmap.width <= 0 || aBitmap.rows <= 0) {
+    if(aBitmap.buffer == NULL || aBitmap.width <= 0 || aBitmap.rows <= 0) {
         return false;
     }
-    if(!myGlyphImg.initWrapper(StImagePlane::ImgGray, aBitmap.buffer,
-                               aBitmap.width, aBitmap.rows, std::abs(aBitmap.pitch))) {
+
+    if(aBitmap.pixel_mode == FT_PIXEL_MODE_GRAY) {
+        if(!myGlyphImg.initWrapper(StImagePlane::ImgGray, aBitmap.buffer,
+                                   aBitmap.width, aBitmap.rows, std::abs(aBitmap.pitch))) {
+            return false;
+        }
+    } else if(aBitmap.pixel_mode == FT_PIXEL_MODE_MONO) {
+        if(!myGlyphImg.initTrash(StImagePlane::ImgGray, aBitmap.width, aBitmap.rows)) {
+            return false;
+        }
+
+        const int aNumOfBytesInRow = aBitmap.width / 8 + (aBitmap.width % 8 ? 1 : 0);
+        for(int aRow = 0; aRow < aBitmap.rows; ++aRow) {
+            for(int aCol = 0; aCol < aBitmap.width; ++aCol) {
+                const int aBitOn = aBitmap.buffer[aNumOfBytesInRow * aRow + aCol / 8] & (0x80 >> (aCol % 8));
+                myGlyphImg.changeFirstByte(aRow, aCol) = aBitOn ? 255 : 0;
+            }
+        }
+    } else {
         return false;
     }
     myGlyphImg.setTopDown(aBitmap.pitch > 0);
