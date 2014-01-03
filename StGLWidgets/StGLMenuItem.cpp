@@ -99,8 +99,8 @@ void StGLMenuItem::setHilightText() {
 }
 
 const int StGLMenuItem::computeTextWidth() {
-    StHandle<StFTFont>& aFont = myFont->changeFont()->getFont();
-    if(aFont.isNull() || !aFont->isValid()) {
+    StHandle<StFTFont>& aFontGen = myFont->changeFont()->getFont();
+    if(aFontGen.isNull() || !aFontGen->isValid()) {
         return myRoot->scale(int(10 * (myText.getLength() + 2)));
     }
 
@@ -117,11 +117,18 @@ const int StGLMenuItem::computeTextWidth() {
             aWidth = 0.0f;
             continue; // will be processed on second pass
         } else if(aCharThis == ' ') {
-            aWidth += aFont->getAdvanceX(aCharThis, aCharNext);
+            aWidth += aFontGen->getAdvanceX(aCharThis, aCharNext);
             continue;
         }
 
-        aWidth += aFont->getAdvanceX(aCharThis, aCharNext);
+        const StFTFont::Subset aSubset = StFTFont::subset(aCharThis);
+        StHandle<StFTFont>&    aFont   = myFont->changeFont(aSubset)->getFont();
+        if(!aFont.isNull()
+         && aFont->hasSymbol(aCharThis)) {
+            aWidth += aFont->getAdvanceX(aCharThis, aCharNext);
+        } else {
+            aWidth += aFontGen->getAdvanceX(aCharThis, aCharNext);
+        }
     }
     aWidthMax = stMax(aWidthMax, aWidth);
     return int(aWidthMax + 0.5f);

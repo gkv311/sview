@@ -263,3 +263,7 @@ void StFTFont::addAdvanceY(const stUtf32_t  theUCharNext,
         thePen.y() += float(myKernAdvance.y + myFTFace->glyph->advance.y) / 64.0f;
     }
 }
+
+bool StFTFont::hasSymbol(const stUtf32_t theUChar) const {
+    return FT_Get_Char_Index(myFTFace, theUChar) != 0;
+}

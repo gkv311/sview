@@ -190,9 +190,7 @@ class StFTFont {
     /**
      * @return true if font contains specified symbol
      */
-    ST_LOCAL bool hasSymbol(const stUtf32_t theUChar) const {
-        return FT_Get_Char_Index(myFTFace, theUChar) != 0;
-    }
+    ST_CPPEXPORT bool hasSymbol(const stUtf32_t theUChar) const;
 
     /**
      * @return maximal glyph width in pixels (rendered to bitmap).
