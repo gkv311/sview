@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2013 Kirill Gavrilov
+ * Copyright © 2010-2014 Kirill Gavrilov
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -25,7 +25,7 @@ class StTranslations : public StLangMap {
 
     /**
      * Main constructor.
-     * @param theModuleName (const StString& ) - module name, the subfolder where translations files should be placed.
+     * @param theModuleName module name, the subfolder where translations files should be placed
      */
     ST_CPPEXPORT StTranslations(const StString& theModuleName);
 
@@ -37,7 +37,7 @@ class StTranslations : public StLangMap {
     /**
      * Returns active translation.
      */
-    ST_CPPEXPORT StString getLanguage() const;
+    ST_CPPEXPORT const StString& getLanguage() const;
 
     /**
      * Return list of available translations.
@@ -62,7 +62,7 @@ class StTranslations : public StLangMap {
         myWasReloaded = false;
     }
 
-        public: //!< Properties
+        public: //! @name Properties
 
     struct {
 
@@ -70,7 +70,7 @@ class StTranslations : public StLangMap {
 
     } params;
 
-        private: //!< private callback slots
+        private: //! @name private callback slots
 
     /**
      * Changes translation.
@@ -84,9 +84,10 @@ class StTranslations : public StLangMap {
 
         private:
 
-    StString              myModuleName;  //!< module name like 'StImageViewer'
-    StArrayList<StString> myLangList;    //!< available (found) translations
-    bool                  myWasReloaded; //!< flag indicates that translation was reloaded
+    StString              myModuleName;     //!< module name like 'StImageViewer'
+    StArrayList<StString> myLangList;       //!< available (found) translations
+    StArrayList<StString> myLangFolderList; //!< translation files
+    bool                  myWasReloaded;    //!< flag indicates that translation was reloaded
 
 };
 

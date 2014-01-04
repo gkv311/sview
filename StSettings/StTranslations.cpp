@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -7,6 +7,8 @@
  */
 
 #include <StSettings/StTranslations.h>
+
+#include <StFile/StRawFile.h>
 
 namespace {
     static const char ST_GLOBAL_SETTINGS_GROUP[] = "sview";
@@ -17,27 +19,30 @@ const StString StTranslations::DEFAULT_EXTENSION =  "lng";
 const StString StTranslations::DEFAULT_SUFFIX    = ".lng";
 
 StTranslations::StTranslations(const StString& theModuleName)
-: StLangMap(),
-  myModuleName(theModuleName),
-  myLangList(),
+: myModuleName(theModuleName),
   myWasReloaded(false) {
     params.language = new StInt32Param(0);
 
     // detect available translations
-    StFolder stFolder(StProcess::getStShareFolder() + "lang" + SYS_FS_SPLITTER);
+    StFolder aLangRoot(StProcess::getStShareFolder() + "lang" + SYS_FS_SPLITTER);
     StArrayList<StString> anExtensions(1);
     anExtensions.add(StTranslations::DEFAULT_EXTENSION);
-    stFolder.init(anExtensions, 2);
-    for(size_t nodeId = 0; nodeId < stFolder.size(); ++nodeId) {
-        StFileNode* subFileNode = stFolder.changeValue(nodeId);
-        if(subFileNode->isFolder()) {
-            myLangList.add(subFileNode->getSubPath());
+    aLangRoot.init(anExtensions, 2);
+    for(size_t aNodeId = 0; aNodeId < aLangRoot.size(); ++aNodeId) {
+        const StFileNode* aFileNode = aLangRoot.getValue(aNodeId);
+        if(!aFileNode->isFolder()) {
+            continue;
         }
+
+        myLangFolderList.add(aFileNode->getPath());
+        const StString aName = StRawFile::readTextFile(aFileNode->getPath() + SYS_FS_SPLITTER + "language.lng");
+        myLangList.add(aName.isEmpty() ? aFileNode->getSubPath() : aName);
     }
 
     if(myLangList.isEmpty()) {
         // add built-in language
         myLangList.add("English");
+        myLangFolderList.add("English");
     }
 
     StString aLang("English");
@@ -49,9 +54,8 @@ StTranslations::StTranslations(const StString& theModuleName)
         params.language->setValue(int32_t(anIdInList));
     }
 
-    StLangMap::open(StProcess::getStShareFolder()
-                  + "lang"       + SYS_FS_SPLITTER
-                  + aLang        + SYS_FS_SPLITTER
+    const StString& aFolder = myLangFolderList[anIdInList];
+    StLangMap::open(aFolder      + SYS_FS_SPLITTER
                   + myModuleName + StTranslations::DEFAULT_SUFFIX);
 
     // connect signal
@@ -62,7 +66,7 @@ StTranslations::~StTranslations() {
     //
 }
 
-StString StTranslations::getLanguage() const {
+const StString& StTranslations::getLanguage() const {
     return myLangList[params.language->getValue()];
 }
 
@@ -71,15 +75,14 @@ void StTranslations::setLanguage(const int32_t theNewLang) {
     if(size_t(theNewLang) >= myLangList.size()) {
         return;
     }
-    StString aLang = myLangList[theNewLang];
+    const StString& aLang   = myLangList      [theNewLang];
+    const StString& aFolder = myLangFolderList[theNewLang];
     StSettings aGlobalSettings(ST_GLOBAL_SETTINGS_GROUP);
     aGlobalSettings.saveString(ST_SETTING_LANGUAGE, aLang);
 
     // reload translation file
     StLangMap::clear();
-    StLangMap::open(StProcess::getStShareFolder()
-                  + "lang"       + SYS_FS_SPLITTER
-                  + aLang        + SYS_FS_SPLITTER
+    StLangMap::open(aFolder      + SYS_FS_SPLITTER
                   + myModuleName + StTranslations::DEFAULT_SUFFIX);
     myWasReloaded = true;
 }
