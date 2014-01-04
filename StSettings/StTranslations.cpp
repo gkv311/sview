@@ -34,7 +34,7 @@ StTranslations::StTranslations(const StString& theModuleName)
             continue;
         }
 
-        myLangFolderList.add(aFileNode->getPath());
+        myLangFolderList.add(aFileNode->getSubPath());
         const StString aName = StRawFile::readTextFile(aFileNode->getPath() + SYS_FS_SPLITTER + "language.lng");
         myLangList.add(aName.isEmpty() ? aFileNode->getSubPath() : aName);
     }
@@ -45,17 +45,20 @@ StTranslations::StTranslations(const StString& theModuleName)
         myLangFolderList.add("English");
     }
 
-    StString aLang("English");
+    StString aLangParam("English");
     StSettings aGlobalSettings(ST_GLOBAL_SETTINGS_GROUP);
-    aGlobalSettings.loadString(ST_SETTING_LANGUAGE, aLang);
+    aGlobalSettings.loadString(ST_SETTING_LANGUAGE, aLangParam);
 
     size_t anIdInList = 0;
-    if(myLangList.contains(aLang, anIdInList)) {
+    if(myLangFolderList.contains(aLangParam,           anIdInList)
+    || myLangFolderList.contains(stCString("English"), anIdInList)) {
         params.language->setValue(int32_t(anIdInList));
     }
 
-    const StString& aFolder = myLangFolderList[anIdInList];
-    StLangMap::open(aFolder      + SYS_FS_SPLITTER
+    const StString& aFolderName = myLangFolderList[anIdInList];
+    StLangMap::open(StProcess::getStShareFolder()
+                  + "lang"       + SYS_FS_SPLITTER
+                  + aFolderName  + SYS_FS_SPLITTER
                   + myModuleName + StTranslations::DEFAULT_SUFFIX);
 
     // connect signal
@@ -75,14 +78,15 @@ void StTranslations::setLanguage(const int32_t theNewLang) {
     if(size_t(theNewLang) >= myLangList.size()) {
         return;
     }
-    const StString& aLang   = myLangList      [theNewLang];
-    const StString& aFolder = myLangFolderList[theNewLang];
+    const StString& aFolderName = myLangFolderList[theNewLang];
     StSettings aGlobalSettings(ST_GLOBAL_SETTINGS_GROUP);
-    aGlobalSettings.saveString(ST_SETTING_LANGUAGE, aLang);
+    aGlobalSettings.saveString(ST_SETTING_LANGUAGE, aFolderName);
 
     // reload translation file
     StLangMap::clear();
-    StLangMap::open(aFolder      + SYS_FS_SPLITTER
+    StLangMap::open(StProcess::getStShareFolder()
+                  + "lang"       + SYS_FS_SPLITTER
+                  + aFolderName  + SYS_FS_SPLITTER
                   + myModuleName + StTranslations::DEFAULT_SUFFIX);
     myWasReloaded = true;
 }
