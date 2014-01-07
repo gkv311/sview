@@ -1,0 +1,17 @@
+English translation file for StOutInterlace library
+@author Kirill Gavrilov
+
+--------
+1000="Row Interlaced"
+1001="Row interlaced displays: Zalman, Hyundai,..."
+1002="Column Interlaced"
+1003="Column interlaced displays"
+1006="DLP TV (chessboard)"
+1007="DLP TV (chessboard)"
+1008="Interlaced ED"
+1009="EDimensional in interlaced mode"
+1102="Reverse Order"
+1103="Bind to supported monitor"
+2000="sView - Interlaced Output module"
+2001="version"
+2002="© 2009-2014 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0"

@@ -1,0 +1,26 @@
+English translation file for StCADViewer
+@author Kirill Gavrilov
+
+--------
+1200="View"
+1201="Projection type"
+1202="Fullscreen"
+1203="Show normals"
+1204="Show trihedron"
+1205="Two sides lighting"
+1206="Projection"
+1207="Fill Mode"
+1208="Fit ALL"
+1240="Orthogonal"
+1241="Perspective"
+1242="Stereo"
+1250="Mesh"
+1251="Shaded"
+1252="Shaded + Mesh"
+1500="Help"
+1501="About..."
+1503="License text"
+1504="Language"
+3000="sView - Tiny CAD Viewer"
+3001="version"
+3002="CAD viewer allows you to view CAD files in formats IGES, STEP, BREP using OpenCASCADE Technology.\n © 2011-2014 Kirill Gavrilov (kirill@sview.ru).\nOfficial site: www.sview.ru"

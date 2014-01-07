@@ -56,17 +56,20 @@ Name: english; MessagesFile: compiler:Default.isl;           LicenseFile: {#SVIE
 Name: russian; MessagesFile: compiler:Languages\Russian.isl; LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
 Name: french;  MessagesFile: compiler:Languages\French.isl;  LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
 Name: german;  MessagesFile: compiler:Languages\German.isl;  LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
+Name: korean;  MessagesFile: compiler:Languages\Korean.isl;  LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
 
 [CustomMessages]
 ; Installation types
-english.FullInstall=Full Installation
-russian.FullInstall=Полная установка
-french.FullInstall=Installation complète
-german.FullInstall=Full Installation
-english.CustomInstall=Custom Installation
-russian.CustomInstall=Выборочная установка
-french.CustomInstall=Installation personnalisée
-german.CustomInstall=Benutzerdefinierte Installation
+english.FullInstallation=Full Installation
+russian.FullInstallation=Полная установка
+french.FullInstallation=Installation complète
+german.FullInstallation=Vollständige Installation
+korean.FullInstallation=전체 설치
+english.CustomInstallation=Custom Installation
+russian.CustomInstallation=Выборочная установка
+french.CustomInstallation=Installation personnalisée
+german.CustomInstallation=Benutzerdefinierte Installation
+korean.CustomInstallation=사용자 설치
 ; Components
 english.StCore=Core files
 russian.StCore=Общие файлы
@@ -120,8 +123,8 @@ english.OpenALSoft51=OpenAL soft - force 5.1 channel output
 russian.OpenALSoft51=OpenAL soft - force 5.1 channel output
 
 [Types]
-Name: full;   Description: "{cm:FullInstall}"
-Name: custom; Description: "{cm:CustomInstall}"; Flags: iscustom
+Name: full;   Description: "{cm:FullInstallation}"
+Name: custom; Description: "{cm:CustomInstallation}"; Flags: iscustom
 
 [Components]
 Name: StCore;                     Description: "{cm:StCore}";           Types: custom full; Flags: fixed
@@ -163,6 +166,7 @@ Source: {#SVIEW_DISTR_PATH_AMD64}\StSettings.dll; DestDir: {app}\amd64;  Flags: 
 Source: {#SVIEW_DISTR_PATH_x86}\StDiagnostics.dll;   DestDir: {app};       Flags: 32bit ignoreversion; Components: StCore
 Source: {#SVIEW_DISTR_PATH_AMD64}\StDiagnostics.dll; DestDir: {app}\amd64; Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 Source: {#SVIEW_DISTR_PATH_x86}\shaders\StGLWidgets\*;         DestDir: {app}\shaders\StGLWidgets;       Flags: 32bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH_x86}\lang\Korean\language.lng;      DestDir: {app}\lang\Korean;               Flags: 32bit ignoreversion; Components: StCore
 ; MSVC C-Runtime libraries (mask compatible for vc100)
 Source: {#SVIEW_DISTR_PATH_x86}\msvc*.dll;        DestDir: {app};        Flags: 32bit ignoreversion; Components: StCore
 Source: {#SVIEW_DISTR_PATH_AMD64}\msvc*.dll;      DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
@@ -276,6 +280,7 @@ Root: HKCU; Subkey: Software\sView\sView; ValueType: string; ValueName: language
 Root: HKCU; Subkey: Software\sView\sView; ValueType: string; ValueName: language; ValueData: English;  Tasks: ; Languages: english; Flags: uninsdeletekey
 Root: HKCU; Subkey: Software\sView\sView; ValueType: string; ValueName: language; ValueData: français; Tasks: ; Languages: french;  Flags: uninsdeletekey
 Root: HKCU; Subkey: Software\sView\sView; ValueType: string; ValueName: language; ValueData: Deutsch;  Tasks: ; Languages: german;  Flags: uninsdeletekey
+Root: HKCU; Subkey: Software\sView\sView; ValueType: string; ValueName: language; ValueData: Korean;   Tasks: ; Languages: korean;  Flags: uninsdeletekey
 ; Associations JPS
 Root: HKCR; SubKey: .jps;                                      ValueType: string; ValueData: JPEG Stereo Image;             Tasks: flagAssocStereoImages; Flags: uninsdeletekey
 Root: HKCR; SubKey: JPEG Stereo Image;                         ValueType: string; ValueData: JPEG Stereo Image;             Tasks: flagAssocStereoImages; Flags: uninsdeletekey

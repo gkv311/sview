@@ -1,0 +1,26 @@
+English translation file for StOutPageFlip library
+@author Kirill Gavrilov
+
+--------
+1000="Shutter glasses"
+1001="Shutter glasses"
+1002="Vuzix HMD"
+1003="Vuzix HMD"
+1102="Quad Buffer type"
+1103="Glasses control codes"
+1120="OpenGL Emulated"
+1122="OpenGL Hardware"
+1123="Direct3D (Fullscreen)"
+1124="Direct3D (Unavailable)"
+1125="Direct3D AMD (Fullscreen)"
+1126="Direct3D AMD (Unavailable)"
+1127="Direct3D NVIDIA (Fullscreen)"
+1128="Direct3D NVIDIA (Disabled)"
+1130="No codes"
+1131="Blue line sync"
+1132="White line sync"
+1134="eDimensional auto on/off"
+2000="sView - PageFlip Output module"
+2001="version"
+2002="© 2007-2014 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0"
+3001="OpenGL Hardware QuadBuffer is unavailable!"
