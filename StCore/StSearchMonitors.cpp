@@ -587,10 +587,8 @@ namespace {
 
 void StSearchMonitors::initGlobal() {
     clear();
+    initFromSystem();
     initFromConfig();
-    if(isEmpty()) {
-        initFromSystem();
-    }
 }
 
 void StSearchMonitors::init(const bool theForced) {
@@ -607,46 +605,69 @@ void StSearchMonitors::init(const bool theForced) {
     }
 }
 
-void StSearchMonitors::initFromConfig() {
-    clear();
-    const StString ST_GLOBAL_SETTINGS_GROUP("sview");
-    const StString ST_GLOBAL_SETTINGS_MON_MASTER("monMaster");
-    const StString ST_GLOBAL_SETTINGS_MON_SLAVE("monSlave");
+static void readMonitor(const StString& thePrefix,
+                        StSettings&     theConfig,
+                        StMonitor&      theMon) {
+    // read/override monitor properties
+    const StString aRectKey  = thePrefix + stCString(".rect");
+    const StString aScaleKey = thePrefix + stCString(".scale");
+    theConfig.loadInt32Rect(aRectKey, theMon.changeVRect());
 
-    StSearchMonitors sysMons;
-    sysMons.initFromSystem();
-    if(sysMons.isEmpty()) {
+    float aScale = 1.0f;
+    if(theConfig.loadFloat(aScaleKey, aScale)) {
+        theMon.setScale(aScale);
+    }
+}
+
+void StSearchMonitors::initFromConfig() {
+    const StString ST_GLOBAL_SETTINGS_GROUP("sview");
+    const StString ST_GLOBAL_SETTINGS_MONITORS("monitors");
+
+    StSettings aGlobalSettings(ST_GLOBAL_SETTINGS_GROUP);
+    const StMonitor aMonDummy;
+    for(size_t aParamIter = 0; aParamIter < 256; ++aParamIter) {
+        const StString aPrefix     = ST_GLOBAL_SETTINGS_MONITORS + stCString(".") + aParamIter;
+        const StString anActiveKey = aPrefix + stCString(".active");
+        bool isActive = false;
+        aGlobalSettings.loadBool(anActiveKey, isActive);
+        if(!isActive) {
+            break;
+        }
+
+        // read monitor(s) identifier
+        const StString anIdKey   = aPrefix + stCString(".id");
+        const StString aPnpIdKey = aPrefix + stCString(".pnpid");
+        int32_t  aMonId = -1;
+        StString aPnpId;
+        aGlobalSettings.loadInt32 (anIdKey,   aMonId);
+        aGlobalSettings.loadString(aPnpIdKey, aPnpId);
+        if(aPnpId.getLength() == 7) {
+            for(size_t aMonIter = 0; aMonIter < size(); ++aMonIter) {
+                StMonitor& aMon = changeValue(aMonIter);
+                if(aMon.getPnPId() == aPnpId) {
+                    readMonitor(aPrefix, aGlobalSettings, aMon);
+                }
+            }
+        } else if(aMonId >= 0) {
+            while(size() <= (size_t )aMonId) {
+                add(aMonDummy);
+            }
+            readMonitor(aPrefix, aGlobalSettings, changeValue((size_t )aMonId));
+        }
+    }
+
+    // save sample configuration to simplify manual edition
+    const StString anActiveKey = ST_GLOBAL_SETTINGS_MONITORS + stCString(".999.active");
+    bool isActive = false;
+    if(aGlobalSettings.loadBool(anActiveKey, isActive)) {
         return;
     }
 
-    StMonitor aMonMaster;
-    StMonitor aMonSlave;
-
-    StSettings aGlobalSettings(ST_GLOBAL_SETTINGS_GROUP);
-    aGlobalSettings.loadInt32Rect(ST_GLOBAL_SETTINGS_MON_MASTER, aMonMaster.changeVRect());
-    aGlobalSettings.loadInt32Rect(ST_GLOBAL_SETTINGS_MON_SLAVE,  aMonSlave.changeVRect());
-
-    // save settings (to simple change them)
-    aGlobalSettings.saveInt32Rect(ST_GLOBAL_SETTINGS_MON_MASTER, aMonMaster.changeVRect());
-    aGlobalSettings.saveInt32Rect(ST_GLOBAL_SETTINGS_MON_SLAVE,  aMonSlave.changeVRect());
-
-    if(aMonMaster.isValid()) {
-        StRectI_t aRectCopy = aMonMaster.getVRect();
-        // copy setting from some real display
-        aMonMaster = sysMons[aRectCopy.center()];
-        aMonMaster.setVRect(aRectCopy);
-        aMonMaster.setId(0);
-        aMonMaster.setName("StMasterDisplay");
-        add(aMonMaster);
-        if(aMonSlave.isValid()) {
-            aRectCopy = aMonSlave.getVRect();
-            aMonSlave = sysMons[aRectCopy.center()];
-            aMonSlave.setVRect(aRectCopy);
-            aMonSlave.setId(1);
-            aMonSlave.setName("StSlaveDisplay");
-            add(aMonSlave);
-        }
-    }
+    aGlobalSettings.saveBool     (anActiveKey, false);
+    aGlobalSettings.saveInt32    (ST_GLOBAL_SETTINGS_MONITORS + stCString(".999.id"),    999);
+    aGlobalSettings.saveString   (ST_GLOBAL_SETTINGS_MONITORS + stCString(".999.pnpid"), "PNP0000");
+    aGlobalSettings.saveInt32Rect(ST_GLOBAL_SETTINGS_MONITORS + stCString(".999.rect"),  StRect<int32_t>(0, 1080, 0, 1920));
+    aGlobalSettings.saveFloat    (ST_GLOBAL_SETTINGS_MONITORS + stCString(".999.scale"), 1.2f);
 }
 
 void StSearchMonitors::initFromSystem() {
