@@ -100,6 +100,7 @@ enum StWinAttr {
     StWinAttr_SlaveCfg,            //!< StWinSlave, create StWindow with slave window and specify slave window position rules, StWinSlave_slaveOff by default
     StWinAttr_SlaveMon,            //!< integer, slave window monitor id, 1 by default
     StWinAttr_SplitCfg,            //!< StWinSplit, split master window
+    StWinAttr_ToAlignEven,         //!< boolean, align window position to even numbers, FALSE by default
 };
 
 typedef struct tagStSlaveWindowCfg {
@@ -159,7 +160,7 @@ class StWindow {
     /**
      * Setup window attributes.
      * Notice that some attributes should be set BEFORE window creation:
-     *  - Slave window existance
+     *  - Slave window existence
      *  - OpenGL context attributes (additional buffers)
      * @param theAttributes NULL-terminated list of key-value pairs (values should be casted to StWinAttr)
      */

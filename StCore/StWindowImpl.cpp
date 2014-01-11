@@ -95,6 +95,7 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
     attribs.Slave      = StWinSlave_slaveOff;
     attribs.SlaveMonId = 1;
     attribs.Split      = StWinSlave_splitOff;
+    attribs.ToAlignEven = false;
 
     myMonSlave.idMaster = 0;
     myMonSlave.idSlave  = 1; // second by default
@@ -341,6 +342,9 @@ void StWindowImpl::getAttributes(StWinAttr* theAttributes) const {
             case StWinAttr_SplitCfg:
                 anIter[1] = (StWinAttr )attribs.Split;
                 break;
+            case StWinAttr_ToAlignEven:
+                anIter[1] = (StWinAttr )attribs.ToAlignEven;
+                break;
             default:
                 ST_DEBUG_LOG("UNKNOWN window attribute #" + anIter[0] + " requested");
                 break;
@@ -406,6 +410,9 @@ void StWindowImpl::setAttributes(const StWinAttr* theAttributes) {
                     signals.onResize->emit(myStEventAux.Size);
                 }
                 attribs.Split = (StWinSplit )anIter[1];
+                break;
+            case StWinAttr_ToAlignEven:
+                attribs.ToAlignEven = (anIter[1] == 1);
                 break;
             default:
                 ST_DEBUG_LOG("UNKNOWN window attribute #" + anIter[0] + " requested");

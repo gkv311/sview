@@ -295,7 +295,7 @@ class StWindowImpl {
 
     /**
      * Window attributes structure for internal use.
-     * Notice that some options couln't be changed after window was created!
+     * Notice that some options could not be changed after window was created!
      */
     struct {
         bool       IsNoDecor;          //!< to decorate master window or not (will be ignored in case of embedded and fullscreen)
@@ -314,6 +314,7 @@ class StWindowImpl {
         StWinSlave Slave;              //!< slave configuration
         int8_t     SlaveMonId;         //!< on which monitor show slave window (1 by default)
         StWinSplit Split;              //!< split window configuration
+        bool       ToAlignEven;        //!< align window position to even numbers
     } attribs;
 
     struct {

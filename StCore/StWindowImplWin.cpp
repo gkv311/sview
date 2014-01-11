@@ -378,6 +378,16 @@ void StWindowImpl::updateChildRect() {
     }
 }
 
+/**
+ * @return normalized delta (-1 or 0 or +1)
+ */
+inline int getDirNorm(const int theFrom,
+                      const int theTo) {
+    return theFrom > theTo
+         ? -1
+         : (theFrom < theTo ? 1 : 0);
+}
+
 LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch(uMsg) {                 // Check For Windows Messages
         case WM_ACTIVATE: {        // Watch For Window Activate Message
@@ -481,10 +491,35 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 break;
             } else if(theWin == myMaster.hWindow) {
                 RECT* aRect = (RECT* )(LPARAM )lParam;
+                const StRectI_t aPrevRect = myRectNorm;
                 myRectNorm.left()   = aRect->left   + GetSystemMetrics(SM_CXSIZEFRAME);
                 myRectNorm.right()  = aRect->right  - GetSystemMetrics(SM_CXSIZEFRAME);
                 myRectNorm.top()    = aRect->top    + GetSystemMetrics(SM_CYSIZEFRAME) + GetSystemMetrics(SM_CYCAPTION);
                 myRectNorm.bottom() = aRect->bottom - GetSystemMetrics(SM_CYSIZEFRAME);
+                if(attribs.ToAlignEven)
+                {
+                    // adjust window position to ensure alignment
+                    const int aDL = getDirNorm(aPrevRect.left(),   myRectNorm.left());
+                    const int aDR = getDirNorm(aPrevRect.right(),  myRectNorm.right());
+                    const int aDT = getDirNorm(aPrevRect.top(),    myRectNorm.top());
+                    const int aDB = getDirNorm(aPrevRect.bottom(), myRectNorm.bottom());
+                    if(isOddNumber(myRectNorm.left())) {
+                        myRectNorm.left()   += aDL;
+                        aRect->left         += aDL;
+                    }
+                    if(isEvenNumber(myRectNorm.right())) {
+                        myRectNorm.right()  += aDR;
+                        aRect->right        += aDR;
+                    }
+                    if(isOddNumber(myRectNorm.top())) {
+                        myRectNorm.top()    += aDT;
+                        aRect->top          += aDT;
+                    }
+                    if(isEvenNumber(myRectNorm.bottom())) {
+                        aRect->bottom       += aDB;
+                        myRectNorm.bottom() += aDB;
+                    }
+                }
 
                 // determine monitor scale factor change
                 const StMonitor& aMonTo    = myMonitors[myRectNorm.center()];

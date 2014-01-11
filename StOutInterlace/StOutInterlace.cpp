@@ -32,7 +32,7 @@ namespace {
 
     static const char ST_OUT_PLUGIN_NAME[] = "StOutInterlace";
 
-    // shaders data
+    // shaders data files
     static const char VSHADER_ED[]              = "vED.shv";
     static const char FSHADER_EDINTERLACE_ON[]  = "fEDinterlace.shf";
     static const char FSHADER_ED_OFF[]          = "fEDoff.shf";
@@ -321,7 +321,8 @@ StOutInterlace::StOutInterlace(const StNativeWin_t theParentWindow)
 
     // request slave window
     const StWinAttr anAttribs[] = {
-        StWinAttr_SlaveCfg, (StWinAttr )StWinSlave_slaveHLineTop,
+        StWinAttr_SlaveCfg,    (StWinAttr )StWinSlave_slaveHLineTop,
+        StWinAttr_ToAlignEven, (StWinAttr )true,
         StWinAttr_NULL
     };
     StWindow::setAttributes(anAttribs);
