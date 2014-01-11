@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -267,6 +267,7 @@ class StWindowImpl {
     StSlaveWindowCfg_t myMonSlave;        //!< slave window options
     size_t             mySyncCounter;
     int                myWinOnMonitorId;  //!< monitor id where window is placed
+    int                myWinMonScaleId;   //!< monitor id from which scale factor is applied
     TiledCfg           myTiledCfg;        //!< tiles configuration (multiple viewports within the same window)
 
 #ifdef _WIN32

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -59,6 +59,7 @@ StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
   myMonMasterFull(-1),
   mySyncCounter(0),
   myWinOnMonitorId(0),
+  myWinMonScaleId(0),
   myTiledCfg(TiledCfg_Separate),
 #ifdef _WIN32
   myEventInitWin(false),

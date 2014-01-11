@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -138,7 +138,10 @@ bool StWindowImpl::wndCreateWindows() {
         myIsUpdated = true;
     }
 
-    // use WS_EX_NOPARENTNOTIFY style to prevent to send notify on destroing our child window (NPAPI plugin -> deadlock)
+    myWinOnMonitorId = myMonitors[myRectNorm.center()].getId();
+    myWinMonScaleId  = myWinOnMonitorId;
+
+    // use WS_EX_NOPARENTNOTIFY style to prevent to send notify on destroying our child window (NPAPI plugin -> deadlock)
     DWORD masterWindowGl_dwExStyle = (myParentWin == NULL) ? WS_EX_NOACTIVATE : (WS_EX_NOACTIVATE | WS_EX_NOPARENTNOTIFY);
     myMaster.hWindowGl = CreateWindowExW(masterWindowGl_dwExStyle,
                                          myMaster.ClassGL.toCString(),
@@ -482,6 +485,38 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 myRectNorm.right()  = aRect->right  - GetSystemMetrics(SM_CXSIZEFRAME);
                 myRectNorm.top()    = aRect->top    + GetSystemMetrics(SM_CYSIZEFRAME) + GetSystemMetrics(SM_CYCAPTION);
                 myRectNorm.bottom() = aRect->bottom - GetSystemMetrics(SM_CYSIZEFRAME);
+
+                // determine monitor scale factor change
+                const StMonitor& aMonTo    = myMonitors[myRectNorm.center()];
+                const int        aNewMonId = aMonTo.getId();
+                if(myWinMonScaleId != aNewMonId) {
+                    const StMonitor& aMonFrom = myMonitors[myWinMonScaleId];
+                    if(!stAreEqual(aMonTo.getScale(), aMonFrom.getScale(), 0.1f)) {
+                        StRectI_t aRectScaled = myRectNorm;
+                        const double aCoeff = double(aMonTo.getScale()) / double(aMonFrom.getScale());
+                        const int aWidth  = int(double(myRectNorm.width())  * aCoeff);
+                        const int aHeight = int(double(myRectNorm.height()) * aCoeff);
+                        aRectScaled.right()  = aRectScaled.left() + aWidth;
+                        aRectScaled.bottom() = aRectScaled.top()  + aHeight;
+                        const StMonitor& aMonMon = myMonitors[aRectScaled.center()];
+                        if(aMonMon.getId() == aNewMonId) {
+                            // process only if resized window is still on the same monitor (protect against cascade scaling)
+                            myRectNorm = aRectScaled;
+                            aRect->top    = myRectNorm.top();
+                            aRect->bottom = myRectNorm.bottom();
+                            aRect->left   = myRectNorm.left();
+                            aRect->right  = myRectNorm.right();
+                            // take into account decorations
+                            const DWORD aWinStyle   = (!attribs.IsNoDecor ? WS_OVERLAPPEDWINDOW : WS_POPUP) | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
+                            const DWORD aWinStyleEx = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE | WS_EX_ACCEPTFILES;
+                            AdjustWindowRectEx(aRect, aWinStyle, FALSE, aWinStyleEx);
+                            myWinMonScaleId = aNewMonId;
+                        }
+                    } else {
+                        myWinMonScaleId = aNewMonId;
+                    }
+                }
+
                 myIsUpdated = true;
 
                 myStEvent.Type       = stEvent_Size;
@@ -800,9 +835,10 @@ void StWindowImpl::updateWindowPos() {
 
     // detect when window moved to another monitor
     if(!attribs.IsFullScreen && myMonitors.size() > 1) {
-        int aNewMonId = myMonitors[myRectNorm.center()].getId();
+        const StMonitor& aMonTo    = myMonitors[myRectNorm.center()];
+        const int        aNewMonId = aMonTo.getId();
         if(myWinOnMonitorId != aNewMonId) {
-            myStEventAux.Type  = stEvent_NewMonitor;
+            myStEventAux.Type = stEvent_NewMonitor;
             myStEventAux.Size.Time  = getEventTime();
             myStEventAux.Size.SizeX = myRectNorm.width();
             myStEventAux.Size.SizeY = myRectNorm.height();
