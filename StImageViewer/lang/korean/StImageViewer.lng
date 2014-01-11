@@ -1,6 +1,6 @@
 ﻿Korean translation file for StImageViewer program
 @author Kirill Gavrilov
-@translator 권 대석 <hyntel@clunix.com>
+@translator Kwon Daesuk <hyntel@clunix.com>
 
 --------
 1000="앞 이미지"
@@ -58,7 +58,7 @@
 1402="Show FPS"
 1403="VSync"
 1500="도움말"
-1501="About..."
+1501="이 프로그램에 대해..."
 1502="업데이트 확인"
 1503="라이선스 문서"
 1504="언어 (Language)"
