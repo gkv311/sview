@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2010 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -342,9 +342,18 @@ ST_WAV_MIME_STRING ";" \
 #define ST_SRT_MIME_STRING ST_SRT_MIME ":" ST_SRT_EXT ":" ST_SRT_DESC
 
 /**
+ *.smi
+ */
+#define ST_SMI_MIME "subtitles/x-smi"
+#define ST_SMI_EXT  "smi"
+#define ST_SMI_DESC "SAMI - Utf-8 subtitles"
+#define ST_SMI_MIME_STRING ST_SMI_MIME ":" ST_SMI_EXT ":" ST_SMI_DESC
+
+/**
  * Define Subtitles MIME list.
  */
 #define ST_VIDEO_PLUGIN_SUBTIT_MIME_CHAR ST_SRT_MIME_STRING ";" \
+ST_SMI_MIME_STRING ";" \
 "\000"
 
 #endif // __StVideoPluginInfo_h_
