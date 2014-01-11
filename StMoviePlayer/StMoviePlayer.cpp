@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -170,6 +170,8 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
   myEventDialog(false),
   myEventLoaded(false),
   mySeekOnLoad(-1.0),
+  myAudioOnLoad(-1),
+  mySubsOnLoad(-1),
   //
   myWebCtx(NULL),
   //
@@ -1163,6 +1165,16 @@ void StMoviePlayer::doUpdateStateLoaded() {
         myVideo->pushPlayEvent(ST_PLAYEVENT_SEEK, mySeekOnLoad);
         mySeekOnLoad = -1.0;
     }
+    if(myAudioOnLoad >= 0) {
+        myVideo->params.activeAudio->setValue(myAudioOnLoad);
+        params.audioStream->setValue(myAudioOnLoad);
+        myAudioOnLoad = -1;
+    }
+    if(mySubsOnLoad >= 0) {
+        myVideo->params.activeSubtitles->setValue(mySubsOnLoad);
+        params.subtitlesStream->setValue(mySubsOnLoad);
+        mySubsOnLoad = -1;
+    }
 }
 
 void StMoviePlayer::doSwitchSrcFormat(const int32_t theSrcFormat) {
@@ -1325,6 +1337,7 @@ void StMoviePlayer::doOpenFileDialog(const size_t theOpenType) {
         myEventDialog.reset();
         return;
     }
+
     switch(theOpenType) {
         case OPEN_FILE_2MOVIES: {
             aTitle = tr(DIALOG_OPEN_RIGHT);
@@ -1337,10 +1350,18 @@ void StMoviePlayer::doOpenFileDialog(const size_t theOpenType) {
             }
             break;
         }
-        case OPEN_STREAM_AUDIO:
+        case OPEN_STREAM_AUDIO: {
+            myPlayList->addToNode(aCurrFile, aFilePath);
+            myAudioOnLoad = myVideo->params.activeAudio->getListSize();
+            mySubsOnLoad  = myVideo->params.activeSubtitles->getValue();
+            mySeekOnLoad  = myVideo->getPts();
+            break;
+        }
         case OPEN_STREAM_SUBTITLES: {
             myPlayList->addToNode(aCurrFile, aFilePath);
-            mySeekOnLoad = myVideo->getPts();
+            myAudioOnLoad = myVideo->params.activeAudio->getValue();
+            mySubsOnLoad  = myVideo->params.activeSubtitles->getListSize();
+            mySeekOnLoad  = myVideo->getPts();
             break;
         }
         case OPEN_FILE_MOVIE:

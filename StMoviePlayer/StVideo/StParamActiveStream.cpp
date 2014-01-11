@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,13 @@ StParamActiveStream::StParamActiveStream()
   myList(new StArrayList<StString>(1)),
   myMutex(),
   myIsChanged(false) {}
+
+int32_t StParamActiveStream::getListSize() const {
+    myMutex.lock();
+    const int32_t aSize = int32_t(myList->size());
+    myMutex.unlock();
+    return aSize;
+}
 
 StHandle< StArrayList<StString> > StParamActiveStream::getList() const {
     myMutex.lock();

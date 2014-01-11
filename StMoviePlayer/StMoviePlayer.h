@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -355,6 +355,8 @@ class StMoviePlayer : public StApplication {
     StCondition                myEventDialog;     //!< event to prevent showing multiple open/save file dialogs
     StCondition                myEventLoaded;     //!< indicate that new file was open
     double                     mySeekOnLoad;      //!< seeking target
+    int32_t                    myAudioOnLoad;     //!< audio     track on load
+    int32_t                    mySubsOnLoad;      //!< subtitles track on load
 
     mg_context*                myWebCtx;          //!< web UI context
 

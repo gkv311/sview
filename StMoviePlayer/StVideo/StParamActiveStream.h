@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,6 +73,11 @@ class StParamActiveStream : public StInt32Param {
      * and automatically reset this state.
      */
     ST_LOCAL bool wasChanged() const;
+
+    /**
+     * @return list size
+     */
+    ST_LOCAL int32_t getListSize() const;
 
         private:
 
