@@ -160,6 +160,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doListLast(const size_t dummy = 0);
     ST_LOCAL void doDeleteFileBegin(const size_t dummy = 0);
     ST_LOCAL void doDeleteFileEnd  (const size_t dummy = 0);
+    ST_LOCAL void doAudioVolume(size_t theDirection);
     ST_LOCAL void doAudioNext(size_t theDirection);
     ST_LOCAL void doSubtitlesNext(size_t theDirection);
 
@@ -320,6 +321,8 @@ class StMoviePlayer : public StApplication {
         Action_SaveSnapshot,
         Action_DeleteFile,
         Action_AudioMute,
+        Action_AudioDecrease,
+        Action_AudioIncrease,
         Action_AudioPrev,
         Action_AudioNext,
         Action_SubsPrev,

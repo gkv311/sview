@@ -368,6 +368,12 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     anAction = new StActionBool(stCString("DoAudioMute"), params.AudioMute);
     addAction(Action_AudioMute, anAction);
 
+    anAction = new StActionIntSlot(stCString("DoAudioDecrease"), stSlot(this, &StMoviePlayer::doAudioVolume), (size_t )-1);
+    addAction(Action_AudioDecrease, anAction, ST_VK_DOWN);
+
+    anAction = new StActionIntSlot(stCString("DoAudioIncrease"), stSlot(this, &StMoviePlayer::doAudioVolume), 1);
+    addAction(Action_AudioIncrease, anAction, ST_VK_UP);
+
     anAction = new StActionIntSlot(stCString("DoAudioNext"), stSlot(this, &StMoviePlayer::doAudioNext), 1);
     addAction(Action_AudioNext, anAction, ST_VK_H, ST_VK_L);
 
@@ -878,6 +884,18 @@ void StMoviePlayer::doMouseUp(const StClickEvent& theEvent) {
             myGUI->tryUnClick(aPnt, theEvent.Button);
             break;
         }
+    }
+}
+
+void StMoviePlayer::doAudioVolume(size_t theDirection) {
+    if(myVideo.isNull()) {
+        return;
+    }
+
+    if(theDirection == 1) {
+        params.AudioGain->increment();
+    } else {
+        params.AudioGain->decrement();
     }
 }
 
