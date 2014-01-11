@@ -624,7 +624,7 @@ void StSearchMonitors::initFromConfig() {
     const StString ST_GLOBAL_SETTINGS_MONITORS("monitors");
 
     StSettings aGlobalSettings(ST_GLOBAL_SETTINGS_GROUP);
-    const StMonitor aMonDummy;
+    StMonitor aMonDummy;
     for(size_t aParamIter = 0; aParamIter < 256; ++aParamIter) {
         const StString aPrefix     = ST_GLOBAL_SETTINGS_MONITORS + stCString(".") + aParamIter;
         const StString anActiveKey = aPrefix + stCString(".active");
@@ -649,7 +649,8 @@ void StSearchMonitors::initFromConfig() {
                 }
             }
         } else if(aMonId >= 0) {
-            while(size() <= (size_t )aMonId) {
+            for(int aMonAddIter = (int )size(); aMonAddIter <= aMonId; ++aMonAddIter) {
+                aMonDummy.setId(aMonAddIter);
                 add(aMonDummy);
             }
             readMonitor(aPrefix, aGlobalSettings, changeValue((size_t )aMonId));
