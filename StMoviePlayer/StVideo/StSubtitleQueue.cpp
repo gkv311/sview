@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,8 @@
 #include <StGLWidgets/StSubQueue.h>
 #include <StThreads/StThread.h>
 
+#include <StAV/StAVImage.h>
+
 namespace {
     static const StString ST_CRLF_REDUNDANT   = "\x0D\x0A";
     static const StString ST_CRLF_REPLACEMENT = " \x0A";
@@ -39,10 +41,8 @@ StSubtitleQueue::StSubtitleQueue(const StHandle<StSubQueue>& theSubtitlesQueue)
 : StAVPacketQueue(512),
   myOutQueue(theSubtitlesQueue),
   myThread(NULL),
-  myASS(),
   evDowntime(true),
   toQuit(false) {
-    //
     myThread = new StThread(threadFunction, (void* )this);
 }
 
@@ -166,14 +166,50 @@ void StSubtitleQueue::decodeLoop() {
 
                     switch(aRect->type) {
                         case SUBTITLE_BITMAP: {
-                            // unsupported yet
+                            if(aDuration < 0.001) {
+                                aDuration = 3.0; // duration is always zero here...
+                            }
+
+                            StHandle<StSubItem> aNewSubItem = new StSubItem(aPts, aPts + aDuration);
+                            aNewSubItem->Image.initTrash(StImagePlane::ImgRGBA, aRect->w, aRect->h);
+
+                            SwsContext* aCtxToRgb = sws_getContext(aRect->w, aRect->h, stAV::PIX_FMT::PAL8,
+                                                                   aRect->w, aRect->h, stAV::PIX_FMT::RGBA32,
+                                                                   SWS_BICUBIC, NULL, NULL, NULL);
+                            if(aCtxToRgb == NULL) {
+                                break;
+                            }
+
+                            uint8_t* aDstData[4] = {
+                                (uint8_t* )aNewSubItem->Image.getData(),
+                                NULL,
+                                NULL,
+                                NULL
+                            };
+                            const int aDstLinesize[4] = {
+                                (int )aNewSubItem->Image.getSizeRowBytes(),
+                                0,
+                                0,
+                                0
+                            };
+
+                            sws_scale(aCtxToRgb,
+                                      aRect->pict.data, aRect->pict.linesize,
+                                      0, aRect->h,
+                                      aDstData, aDstLinesize);
+                            sws_freeContext(aCtxToRgb);
+
+                            /*ST_DEBUG_LOG("  |" + aRectId + "/" + aSubtitle.num_rects + "| " //+ aRect->x + "x" + aRect->y + " WH= "
+                                            + aRect->w + "x" + aRect->h + " c= " + aRect->nb_colors
+                                            + " pts= " + aPts
+                                            + " dur= " + aDuration);*/
+                            myOutQueue->push(aNewSubItem);
                             break;
                         }
                         case SUBTITLE_TEXT: {
-                            StString aText = aRect->text;
-                            aText.replaceFast(ST_CRLF_REDUNDANT, ST_CRLF_REPLACEMENT); // remove redundant CR symbols
-                            StHandle<StSubItem> aNewSubItem = new StSubItem(aText,
-                                                                            aPts, aPts + aDuration);
+                            StHandle<StSubItem> aNewSubItem = new StSubItem(aPts, aPts + aDuration);
+                            aNewSubItem->Text = aRect->text;
+                            aNewSubItem->Text.replaceFast(ST_CRLF_REDUNDANT, ST_CRLF_REPLACEMENT); // remove redundant CR symbols
                             myOutQueue->push(aNewSubItem);
                             break;
                         }
@@ -208,10 +244,9 @@ void StSubtitleQueue::decodeLoop() {
         #endif
         } else {
             // just plain text
-            StString aText = (const char* )aPacket->getData();
-            aText.replaceFast(ST_CRLF_REDUNDANT, ST_CRLF_REPLACEMENT); // remove redundant CR symbols
-            StHandle<StSubItem> aNewSubItem = new StSubItem(aText,
-                                                            aPts, aPts + aDuration);
+            StHandle<StSubItem> aNewSubItem = new StSubItem(aPts, aPts + aDuration);
+            aNewSubItem->Text = (const char* )aPacket->getData();
+            aNewSubItem->Text.replaceFast(ST_CRLF_REDUNDANT, ST_CRLF_REPLACEMENT); // remove redundant CR symbols
             myOutQueue->push(aNewSubItem);
         }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -33,7 +33,8 @@ class StGLSubtitles : public StGLTextArea {
 
             public:
 
-        StString myText; //!< active string representation
+        StString     Text;  //!< active string representation
+        StImagePlane Image; //!< active image  representation
 
             public:
 
@@ -44,8 +45,8 @@ class StGLSubtitles : public StGLTextArea {
 
         /**
          * Remove subtitle items with outdated PTS.
-         * @param thePTS (const double ) - current presentation timestamp;
-         * @return true if active representation was changed (items were removed).
+         * @param thePTS current presentation timestamp
+         * @return true if active representation was changed (items were removed)
          */
         ST_LOCAL bool pop(const double thePTS);
 
@@ -64,6 +65,7 @@ class StGLSubtitles : public StGLTextArea {
                                const StHandle<StFloat32Param>& theParallax);
     ST_CPPEXPORT virtual ~StGLSubtitles();
     ST_CPPEXPORT virtual const StString& getClassName();
+    ST_CPPEXPORT virtual bool stglInit();
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& thePointZo);
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
     ST_CPPEXPORT virtual void stglResize();
@@ -82,9 +84,15 @@ class StGLSubtitles : public StGLTextArea {
 
     StHandle<StFloat32Param> myFontSize;  //!< font size parameter
     StHandle<StFloat32Param> myParallax;  //!< text parallax
+    StGLTexture              myTexture;   //!< texture for image-based subtitles
+    StGLVertexBuffer         myVertBuf;   //!< vertex buffer for image-based subtitles
+    StGLVertexBuffer         myTCrdBuf;   //!< texture coordinates buffer for image-based subtitles
     StHandle<StSubQueue>     myQueue;     //!< thread-safe subtitles queue
     StSubShowItems           myShowItems; //!< active (shown) subtitle items
     double                   myPTS;       //!< active PTS
+
+    class StImgProgram;
+    StGLShare<StImgProgram>  myImgProgram;
 
 };
 

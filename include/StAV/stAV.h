@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -176,6 +176,8 @@ namespace stAV {
      */
     namespace PIX_FMT {
         ST_SHARED_CPPEXPORT PixelFormat NONE;
+        ST_SHARED_CPPEXPORT PixelFormat PAL8;      //!< palette
+
         ST_SHARED_CPPEXPORT PixelFormat GRAY8;     //!< Y,  8bpp
         ST_SHARED_CPPEXPORT PixelFormat GRAY16;    //!< Y, 16bpp
         // planar YUV formats

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -7,10 +7,83 @@
  */
 
 #include <StGLWidgets/StGLSubtitles.h>
+
+#include <StGLCore/StGLCore20.h>
+#include <StGL/StGLProgram.h>
 #include <StGLWidgets/StGLRootWidget.h>
 
 namespace {
     static const StString CLASS_NAME("StGLSubtitles");
+    static const size_t SHARE_IMAGE_PROGRAM_ID = StGLRootWidget::generateShareId();
+};
+
+class StGLSubtitles::StImgProgram : public StGLProgram {
+
+        public:
+
+    StImgProgram() : StGLProgram("StGLSubtitles") {}
+
+    StGLVarLocation getVVertexLoc()   const { return StGLVarLocation(0); }
+    StGLVarLocation getVTexCoordLoc() const { return StGLVarLocation(1); }
+
+    void setProjMat(StGLContext&      theCtx,
+                    const StGLMatrix& theProjMat) {
+        theCtx.core20fwd->glUniformMatrix4fv(uniProjMatLoc, 1, GL_FALSE, theProjMat);
+    }
+
+    virtual bool init(StGLContext& theCtx) {
+        const char VERTEX_SHADER[] =
+           "uniform mat4 uProjMat;\n"
+           "uniform vec4 uDisp;\n"
+           "attribute vec4 vVertex;\n"
+           "attribute vec2 vTexCoord;\n"
+           "varying   vec2 fTexCoord;\n"
+           "void main(void) {\n"
+           "    fTexCoord = vTexCoord;\n"
+           "    gl_Position = uProjMat * (vVertex + uDisp);\n"
+           "}\n";
+
+        const char FRAGMENT_SHADER[] =
+           "uniform sampler2D uTexture;\n"
+           "varying vec2      fTexCoord;\n"
+           "void main(void) {\n"
+           "    gl_FragColor = texture2D(uTexture, fTexCoord);\n"
+           "}\n";
+
+        StGLVertexShader aVertexShader(StGLProgram::getTitle());
+        aVertexShader.init(theCtx, VERTEX_SHADER);
+        StGLAutoRelease aTmp1(theCtx, aVertexShader);
+
+        StGLFragmentShader aFragmentShader(StGLProgram::getTitle());
+        aFragmentShader.init(theCtx, FRAGMENT_SHADER);
+        StGLAutoRelease aTmp2(theCtx, aFragmentShader);
+        if(!StGLProgram::create(theCtx)
+           .attachShader(theCtx, aVertexShader)
+           .attachShader(theCtx, aFragmentShader)
+           .bindAttribLocation(theCtx, "vVertex",   getVVertexLoc())
+           .bindAttribLocation(theCtx, "vTexCoord", getVTexCoordLoc())
+           .link(theCtx)) {
+            return false;
+        }
+
+        StGLVarLocation uniTextureLoc = StGLProgram::getUniformLocation(theCtx, "uTexture");
+        if(uniTextureLoc.isValid()) {
+            StGLProgram::use(theCtx);
+            theCtx.core20fwd->glUniform1i(uniTextureLoc, StGLProgram::TEXTURE_SAMPLE_0);
+            StGLProgram::unuse(theCtx);
+        }
+
+        uniProjMatLoc = StGLProgram::getUniformLocation(theCtx, "uProjMat");
+        uniDispLoc    = StGLProgram::getUniformLocation(theCtx, "uDisp");
+        return uniProjMatLoc.isValid()
+            && uniTextureLoc.isValid();
+    }
+
+        private:
+
+    StGLVarLocation uniProjMatLoc;
+    StGLVarLocation uniDispLoc;
+
 };
 
 StGLSubtitles::StSubShowItems::StSubShowItems()
@@ -23,33 +96,49 @@ bool StGLSubtitles::StSubShowItems::pop(const double thePTS) {
     for(size_t anId = size() - 1; anId < size_t(-1); --anId) {
         // filter outdated and forward items
         const StHandle<StSubItem>& anItem = getValue(anId);
-        if(anItem->myTimeEnd < thePTS || anItem->myTimeStart > thePTS) {
+        if(anItem->TimeEnd < thePTS || anItem->TimeStart > thePTS) {
             remove(anId);
             isChanged = true;
         }
     }
     if(!isChanged) {
-        return isChanged;
+        return false;
     } else if(isEmpty()) {
-        myText.clear();
-        return isChanged;
+        Text.clear();
+        Image.nullify();
+        return true;
     }
 
     // update active text
-    myText = getFirst()->myText;
+    Text = getFirst()->Text;
     for(size_t anId = 1; anId < size(); ++anId) {
         const StHandle<StSubItem>& anItem = getValue(anId);
-        myText += StString('\n');
-        myText += anItem->myText;
+        Text += StString('\n');
+        Text += anItem->Text;
     }
+
+    // update active image
+    const StImagePlane& anImage = getFirst()->Image;
+    if(!anImage.isNull()) {
+        Image.initCopy(anImage);
+    } else {
+        Image.nullify();
+    }
+
     return isChanged;
 }
 
 void StGLSubtitles::StSubShowItems::add(const StHandle<StSubItem>& theItem) {
-    if(!myText.isEmpty()) {
-        myText += StString('\n');
+    if(!Text.isEmpty()) {
+        Text += StString('\n');
     }
-    myText += theItem->myText;
+    Text += theItem->Text;
+
+    const StImagePlane& anImage = theItem->Image;
+    if(!anImage.isNull()) {
+        Image.initCopy(anImage);
+    }
+
     StArrayList<StHandle <StSubItem> >::add(theItem);
 }
 
@@ -68,8 +157,8 @@ StGLSubtitles::StGLSubtitles(StGLWidget*                     theParent,
   myFontSize(theFontSize),
   myParallax(theParallax),
   myQueue(theSubQueue),
-  myShowItems(),
-  myPTS(0.0) {
+  myPTS(0.0),
+  myImgProgram(getRoot()->getShare(SHARE_IMAGE_PROGRAM_ID)) {
     if(myQueue.isNull()) {
         myQueue = new StSubQueue();
     }
@@ -103,6 +192,30 @@ StGLSubtitles::~StGLSubtitles() {
     StGLContext& aCtx = getContext();
     myFont->release(aCtx);
     myFont.nullify();
+    myTexture.release(aCtx);
+    myVertBuf.release(aCtx);
+    myTCrdBuf.release(aCtx);
+}
+
+bool StGLSubtitles::stglInit() {
+    if(!myVertBuf.isValid()) {
+        StArray<StGLVec2> aDummyVert(4);
+        StArray<StGLVec2> aTexCoords(4);
+        aTexCoords[0] = StGLVec2(1.0f, 0.0f);
+        aTexCoords[1] = StGLVec2(1.0f, 1.0f);
+        aTexCoords[2] = StGLVec2(0.0f, 0.0f);
+        aTexCoords[3] = StGLVec2(0.0f, 1.0f);
+
+        StGLContext& aCtx = getContext();
+        myVertBuf.init(aCtx, aDummyVert);
+        myTCrdBuf.init(aCtx, aTexCoords);
+
+        if(myImgProgram.isNull()) {
+            myImgProgram.create(getRoot()->getContextHandle(), new StImgProgram());
+            myImgProgram->init(aCtx);
+        }
+    }
+    return StGLTextArea::stglInit();
 }
 
 void StGLSubtitles::stglUpdate(const StPointD_t& ) {
@@ -112,8 +225,16 @@ void StGLSubtitles::stglUpdate(const StPointD_t& ) {
         myShowItems.add(aNewSubItem);
     }
 
+    StGLContext& aCtx = getContext();
     if(isChanged) {
-        setText(myShowItems.myText);
+        setText(myShowItems.Text);
+
+        if(!myShowItems.Image.isNull()) {
+            myTexture.init(aCtx, myShowItems.Image);
+        } else {
+            myTexture.release(aCtx);
+        }
+
         StString aLog;
         /**for(size_t anId = 0; anId < myShowItems.size(); ++anId) {
             aLog += ST_STRING(" from ") + myShowItems[anId]->myTimeStart + " to " + myShowItems[anId]->myTimeEnd + "\n";
@@ -127,32 +248,66 @@ void StGLSubtitles::stglUpdate(const StPointD_t& ) {
         mySize = aNewSize;
         myToRecompute = true;
 
-        StGLContext& aCtx = getContext();
         myFont->stglInit(aCtx, getFontSize(), myRoot->getResolution());
     }
 }
 
 void StGLSubtitles::stglDraw(unsigned int theView) {
-    if(!myIsInitialized || !isVisible() || myText.isEmpty()) {
+    if(!myIsInitialized || !isVisible()) {
         return;
     }
 
     StGLContext& aCtx = getContext();
-    formatText(aCtx);
+    if(!myText.isEmpty()) {
+        formatText(aCtx);
 
-    switch(theView) {
-        case ST_DRAW_LEFT:
-            myTextDX = -myParallax->getValue() * GLfloat(0.5 * 0.001 * myRoot->getRootRectGl().width());
-            break;
-        case ST_DRAW_RIGHT:
-            myTextDX =  myParallax->getValue() * GLfloat(0.5 * 0.001 * myRoot->getRootRectGl().width());
-            break;
-        case ST_DRAW_MONO:
-        default:
-            myTextDX = 0.0f;
-            break;
+        switch(theView) {
+            case ST_DRAW_LEFT:
+                myTextDX = -myParallax->getValue() * GLfloat(0.5 * 0.001 * myRoot->getRootRectGl().width());
+                break;
+            case ST_DRAW_RIGHT:
+                myTextDX =  myParallax->getValue() * GLfloat(0.5 * 0.001 * myRoot->getRootRectGl().width());
+                break;
+            case ST_DRAW_MONO:
+            default:
+                myTextDX = 0.0f;
+                break;
+        }
+        StGLTextArea::stglDraw(theView);
     }
-    StGLTextArea::stglDraw(theView);
+
+    if(!myTexture.isValid()
+    || !myImgProgram->isValid()) {
+        return;
+    }
+
+    aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    aCtx.core20fwd->glEnable(GL_BLEND);
+    myTexture.bind(aCtx);
+
+    // update vertices
+    StRectI_t aRect = getRectPxAbsolute();
+    aRect.top()   = aRect.bottom() - myTexture.getSizeY();
+    aRect.left()  = aRect.left() + aRect.width() / 2 - myTexture.getSizeX() / 2;
+    aRect.right() = aRect.left() + myTexture.getSizeX();
+
+    StArray<StGLVec2> aVertices(4);
+    myRoot->getRectGl(aRect, aVertices);
+    myVertBuf.init(aCtx, aVertices);
+
+    myImgProgram->use(aCtx);
+
+    myVertBuf.bindVertexAttrib(aCtx, myImgProgram->getVVertexLoc());
+    myTCrdBuf.bindVertexAttrib(aCtx, myImgProgram->getVTexCoordLoc());
+
+    aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    myTCrdBuf.unBindVertexAttrib(aCtx, myImgProgram->getVTexCoordLoc());
+    myVertBuf.unBindVertexAttrib(aCtx, myImgProgram->getVVertexLoc());
+
+    myImgProgram->unuse(aCtx);
+    myTexture.unbind(aCtx);
+    aCtx.core20fwd->glDisable(GL_BLEND);
 }
 
 void StGLSubtitles::stglResize() {
@@ -160,6 +315,14 @@ void StGLSubtitles::stglResize() {
     myTextWidth = (GLfloat )getRectPx().width();
     myToRecompute = true;
     StGLTextArea::stglResize();
+
+    // update projection matrix
+    if(!myImgProgram.isNull()) {
+        StGLContext& aCtx = getContext();
+        myImgProgram->use(aCtx);
+        myImgProgram->setProjMat(aCtx, getRoot()->getScreenProjection());
+        myImgProgram->unuse(aCtx);
+    }
 }
 
 const StHandle<StSubQueue>& StGLSubtitles::getQueue() const {

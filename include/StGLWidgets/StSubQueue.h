@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -12,6 +12,7 @@
 #include <StTemplates/StHandle.h>
 #include <StTemplates/StArrayList.h>
 #include <StThreads/StMutex.h>
+#include <StImage/StImagePlane.h>
 
 /**
  * Subtitle primitive (Text that bound to one time interval).
@@ -20,18 +21,17 @@ class StSubItem {
 
         public:
 
-    StString myText;      //!< subtitle textual representation
-    double   myTimeStart; //!< PTS to show subtitle item
-    double   myTimeEnd;   //!< PTS to hide subtitle item
+    StString     Text;      //!< subtitle textual representation
+    StImagePlane Image;     //!< subtitle image   representation
+    double       TimeStart; //!< PTS to show subtitle item
+    double       TimeEnd;   //!< PTS to hide subtitle item
 
         public:
 
-    StSubItem(const StString& theText,
-              const double    theTimeStart,
-              const double    theTimeEnd)
-    : myText(theText),
-      myTimeStart(theTimeStart),
-      myTimeEnd(theTimeEnd) {
+    ST_LOCAL StSubItem(const double    theTimeStart,
+                       const double    theTimeEnd)
+    : TimeStart(theTimeStart),
+      TimeEnd(theTimeEnd) {
         //
     }
 
@@ -41,25 +41,6 @@ class StSubItem {
  * Thread-safe subtitles queue.
  */
 class StSubQueue {
-
-        private:
-
-    struct QueueItem {
-
-        StHandle<StSubItem> myItem;
-        QueueItem* myNext;
-
-        QueueItem(const StHandle<StSubItem>& theItem)
-        : myItem(theItem),
-          myNext(NULL) {}
-
-    };
-
-        private: //!< private fields
-
-    QueueItem* myFront; //!< queue front item
-    QueueItem*  myBack; //!< queue back item
-    StMutex    myMutex; //!< lock for thread safety
 
         public:
 
@@ -97,6 +78,25 @@ class StSubQueue {
      */
     ST_CPPEXPORT void push(const StHandle<StSubItem>& theSubItem);
 
+        private:
+
+    struct QueueItem {
+
+        StHandle<StSubItem> myItem;
+        QueueItem* myNext;
+
+        ST_LOCAL QueueItem(const StHandle<StSubItem>& theItem)
+        : myItem(theItem),
+          myNext(NULL) {}
+
+    };
+
+        private: //! @name private fields
+
+    QueueItem* myFront; //!< queue front item
+    QueueItem* myBack;  //!< queue back item
+    StMutex    myMutex; //!< lock for thread safety
+
 };
 
-#endif //__StSubQueue_h_
+#endif // __StSubQueue_h_

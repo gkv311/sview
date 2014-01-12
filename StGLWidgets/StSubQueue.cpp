@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -42,12 +42,12 @@ StHandle<StSubItem> StSubQueue::pop(const double thePTS) {
     myMutex.lock();
     for(QueueItem* anItem = myFront; anItem != NULL;) {
         StHandle<StSubItem> aSubItem = anItem->myItem;
-        if(anItem->myItem->myTimeEnd < thePTS) {
+        if(anItem->myItem->TimeEnd < thePTS) {
             // remove outdated items
             myFront = myFront->myNext;
             delete anItem;
             anItem = myFront;
-        } else if(anItem->myItem->myTimeStart <= thePTS) {
+        } else if(anItem->myItem->TimeStart <= thePTS) {
             // pop the item
             StHandle<StSubItem> aSubItem = anItem->myItem;
             myFront = myFront->myNext;

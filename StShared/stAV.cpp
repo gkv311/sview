@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -87,6 +87,7 @@ const int64_t stAV::NOPTS_VALUE = 0x8000000000000000LL;
 #endif
 const PixelFormat stAV::PIX_FMT::NONE       = PixelFormat(-1);
 const PixelFormat stAV::PIX_FMT::YUV420P    = PixelFormat( 0);
+const PixelFormat stAV::PIX_FMT::PAL8       = ST_AV_GETPIXFMT("pal8");
 const PixelFormat stAV::PIX_FMT::GRAY8      = ST_AV_GETPIXFMT("gray");
 const PixelFormat stAV::PIX_FMT::GRAY16     = ST_AV_GETPIXFMT("gray16");
 const PixelFormat stAV::PIX_FMT::YUV422P    = ST_AV_GETPIXFMT("yuv422p");
@@ -129,6 +130,8 @@ StCString stAV::PIX_FMT::getString(const PixelFormat theFrmt) {
         return stCString("none");
     } else if(theFrmt == stAV::PIX_FMT::YUV420P) {
         return stCString("yuv420p");
+    } else if(theFrmt == stAV::PIX_FMT::PAL8) {
+        return stCString("pal8");
     } else if(theFrmt == stAV::PIX_FMT::GRAY8) {
         return stCString("gray8");
     } else if(theFrmt == stAV::PIX_FMT::GRAY16) {

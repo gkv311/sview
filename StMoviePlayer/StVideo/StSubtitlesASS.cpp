@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -252,7 +252,7 @@ StHandle<StSubItem> StSubtitlesASS::parseEvent(const StString& theString,
     aText.replaceFast(ST_CRLF_REDUNDANT, ST_CRLF_REPLACEMENT);
     aText.replaceFast(ST_ASS_NEWLINE,    ST_NEWLINE_REPLACEMENT);
     aText.replaceFast(ST_ASS_NEWLINE2,   ST_NEWLINE_REPLACEMENT);
-    StHandle<StSubItem> aNewSubItem = new StSubItem(aText,
-                                                    thePts, thePts + aDuration);
+    StHandle<StSubItem> aNewSubItem = new StSubItem(thePts, thePts + aDuration);
+    aNewSubItem->Text = aText;
     return aNewSubItem;
 }
