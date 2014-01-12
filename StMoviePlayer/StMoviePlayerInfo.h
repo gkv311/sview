@@ -350,10 +350,19 @@ ST_WAV_MIME_STRING ";" \
 #define ST_SMI_MIME_STRING ST_SMI_MIME ":" ST_SMI_EXT ":" ST_SMI_DESC
 
 /**
+ *.sub
+ */
+#define ST_SUB_MIME "subtitles/x-sub"
+#define ST_SUB_EXT  "sub"
+#define ST_SUB_DESC "SUB - Image-based subtitles"
+#define ST_SUB_MIME_STRING ST_SUB_MIME ":" ST_SUB_EXT ":" ST_SUB_DESC
+
+/**
  * Define Subtitles MIME list.
  */
 #define ST_VIDEO_PLUGIN_SUBTIT_MIME_CHAR ST_SRT_MIME_STRING ";" \
 ST_SMI_MIME_STRING ";" \
+ST_SUB_MIME_STRING ";" \
 "\000"
 
 #endif // __StVideoPluginInfo_h_
