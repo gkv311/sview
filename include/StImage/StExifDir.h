@@ -110,6 +110,7 @@ class StExifDir {
     StArrayList< StExifEntry > myEntries;         //!< entries list
     StString       myCameraMaker; //!< just useful identification strings
     StString       myCameraModel;
+    StString       myUserComment; //!< UserComment text
     unsigned char* myStartPtr;    //!< start pointer in the memory
     bool           myIsFileBE;    //!< indicate that data in this EXIF directory stored in Big-Endian order
     bool           myIsMakerNote; //!< maker notes from different vendors may probably has overlapped tags ids

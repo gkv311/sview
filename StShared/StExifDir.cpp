@@ -18,6 +18,7 @@ enum {
     TAG_MODEL                 = 0x0110,
     TAG_EXIF_OFFSET           = 0x8769,
     TAG_MAKER_NOTE            = 0x927C,
+    TAG_USER_COMMENT          = 0x9286,
     TAG_INTEROP_OFFSET        = 0xA005,
 };
 
@@ -243,6 +244,23 @@ bool StExifDir::readDirectory(unsigned char* theDirStart, unsigned char* theOffs
                     }
                 } else {
                     ST_DEBUG_LOG("StExifDir, found unknown (" + myCameraMaker + ") maker notes");
+                }
+                break;
+            }
+            case TAG_USER_COMMENT: {
+                // custom block with undefined type
+                if(anEntry.getBytes() < 9) {
+                    break;
+                }
+
+                if(stAreEqual(anEntry.myValuePtr, "ASCII\0\0\0", 8)) {
+                    const char* aStart = (const char* )anEntry.myValuePtr + 8;
+                    myUserComment = StString(aStart, anEntry.getBytes() - 8);
+                    ST_DEBUG_LOG("StExifDir, UserComment= '" + myUserComment + "'");
+                } else if(stAreEqual(anEntry.myValuePtr, "UNICODE\0",   8)) {
+                    const char* aStart = (const char* )anEntry.myValuePtr + 8;
+                    myUserComment = StString((stUtf16_t *)aStart, (anEntry.getBytes() - 8) / 2);
+                    ST_DEBUG_LOG("StExifDir, UserComment= '" + myUserComment + "'");
                 }
                 break;
             }
