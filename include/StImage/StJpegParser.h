@@ -124,9 +124,10 @@ class StJpegParser {
 
         private:
 
-    StHandle<Image> myImages; //!< images list
-    unsigned char*  myData;   //!< pointer to the data
-    size_t          myLength; //!< data length
+    StHandle<Image> myImages;  //!< images list
+    unsigned char*  myData;    //!< pointer to the data
+    size_t          myLength;  //!< data length
+    StString        myComment; //!< string stored in COM segment (directly in JPEG, NOT inside EXIF)
 
 };
 

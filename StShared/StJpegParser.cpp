@@ -57,6 +57,7 @@ StJpegParser::~StJpegParser() {
 void StJpegParser::reset() {
     // destroy all images
     myImages.nullify();
+    myComment.clear();
 
     // destroy cached data
     stMemFreeAligned(myData);
@@ -122,32 +123,31 @@ bool StJpegParser::parse() {
 StHandle<StJpegParser::Image> StJpegParser::parseImage(unsigned char* theDataStart) {
     unsigned char* aData    = theDataStart;
     unsigned char* aDataEnd = myData + myLength; // common data limit
-    StHandle<StJpegParser::Image> anImg;
 
     // check out of bounds
-    if(theDataStart == NULL || (aData + 2) > aDataEnd) {
-        return anImg;
+    if(theDataStart == NULL
+    || (aData + 2) > aDataEnd) {
+        return StHandle<StJpegParser::Image>();
     }
 
     // check the jpeg identifier
     if(aData[0] != 0xFF || aData[1] != M_SOI) {
         ST_DEBUG_LOG("Not a JPEG file");
-        return anImg;
+        return StHandle<StJpegParser::Image>();
     }
     aData += 2; // skip already read bytes
 
     // parse the data
-    anImg = new StJpegParser::Image();
+    StHandle<StJpegParser::Image> anImg = new StJpegParser::Image();
     anImg->myData = aData - 2;
 
-    size_t aSubImg = 0; // subimages counters
-
-    size_t aSkippedBytes  = 0;
+    int           aSubImg = 0; // subimages counters
     unsigned char aMarker = 0;
     for(;;) {
         // search for the next marker in the file
         ++aData; // one byte forward
-        for(aSkippedBytes = 0; aData < aDataEnd; ++aSkippedBytes, ++aData) {
+        size_t aSkippedBytes  = 0;
+        for(; aData < aDataEnd; ++aSkippedBytes, ++aData) {
             aMarker = aData[0];
             if(aData[-1] == 0xFF && aMarker != 0xFF) {
                 ++aData; // skip already read byte
@@ -186,10 +186,11 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(unsigned char* theDataSta
         //ST_DEBUG_LOG("Jpeg marker " + aMarker + " at position " + size_t(aData - myData - 1));
 
         // read the length of the section.
-        int aLenH = aData[0];
-        int aLenL = aData[1];
-        int anItemLen = (aLenH << 8) | aLenL;
-        if(anItemLen < 2 || (aData + anItemLen + 2) > aDataEnd) {
+        const int aLenH = aData[0];
+        const int aLenL = aData[1];
+        const int anItemLen = (aLenH << 8) | aLenL;
+        if(anItemLen < 2
+        || (aData + anItemLen + 2) > aDataEnd) {
             //ST_DEBUG_LOG("Invalid marker " + aMarker + " in jpeg (item lenght = " + anItemLen
             //           + " from position " + int(aDataEnd - aData - 2) + ')');
             // just ignore probably unknown sections
@@ -224,6 +225,12 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(unsigned char* theDataSta
                     //ST_DEBUG_LOG("Image cotains XMP section");
                 }
                 // skip already read bytes
+                aData += anItemLen + 2;
+                break;
+            }
+            case M_COM: {
+                myComment = StString((char* )aData + 2, anItemLen);
+                ST_DEBUG_LOG("StJpegParser, comment= '" + myComment + "'");
                 aData += anItemLen + 2;
                 break;
             }
