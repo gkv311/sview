@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -59,10 +59,8 @@ void StJpegParser::reset() {
     myImages.nullify();
 
     // destroy cached data
-    if(myData != NULL) {
-        delete[] myData;
-        myData = NULL;
-    }
+    stMemFreeAligned(myData);
+    myData = NULL;
     myLength = 0;
 }
 
@@ -70,7 +68,7 @@ bool StJpegParser::read(const StString& theFileName) {
     // clean up old data
     reset();
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     FILE* aFileHandle = _wfopen(theFileName.toUtfWide().toCString(), L"rb");
 #else
     FILE* aFileHandle =   fopen(theFileName.toCString(),              "rb");
@@ -91,7 +89,7 @@ bool StJpegParser::read(const StString& theFileName) {
     myLength = size_t(aFileLen);
     fseek(aFileHandle, 0, SEEK_SET);
 
-    myData = new unsigned char[myLength];
+    myData = stMemAllocAligned<unsigned char*>(myLength);
     size_t aCountRead = fread(myData, 1, myLength, aFileHandle);
     (void )aCountRead;
 

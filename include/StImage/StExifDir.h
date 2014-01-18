@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -68,7 +68,8 @@ class StExifDir {
     /**
      * Empty constructor.
      */
-    ST_CPPEXPORT StExifDir(bool theIsFileBE = false, bool theIsMakerNote = false);
+    ST_CPPEXPORT StExifDir(bool theIsFileBE    = false,
+                           bool theIsMakerNote = false);
 
     inline bool isFileBE() const {
         return myIsFileBE;
@@ -95,14 +96,14 @@ class StExifDir {
 
     /**
      * Find entry by tag in current directory and subdirectories.
-     * @param theIsMakerNote (const bool ) - search for maker note tag or general tag;
-     * @param theEntry (StExifEntry& ) - the entry to find (tag field should be set);
-     * @param theIsBigEndian (bool& ) - the endianless in which entry was stored;
-     * @return true if entry was found.
+     * @param theIsMakerNote search for maker note tag or general tag
+     * @param theEntry       the entry to find (tag field should be set)
+     * @param theIsBigEndian the endianless in which entry was stored
+     * @return true if entry was found
      */
-    ST_CPPEXPORT bool findEntry(const bool theIsMakerNote, // probably we can use makernote string here...
+    ST_CPPEXPORT bool findEntry(const bool   theIsMakerNote, // probably we can use makernote string here...
                                 StExifEntry& theEntry,
-                                bool& theIsBigEndian) const;
+                                bool&        theIsBigEndian) const;
 
         private:
 
@@ -120,4 +121,4 @@ class StExifDir {
 template<>
 inline void StArray< StHandle<StExifDir> >::sort() {}
 
-#endif //__StExifDir_h_
+#endif // __StExifDir_h_

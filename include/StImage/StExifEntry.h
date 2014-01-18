@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -58,32 +58,15 @@ struct StExifEntry {
         return size_t(myComponents) * BYTES_PER_FORMAT[myFormat];
     }
 
-        public: //!< comparators
+        public: //! @name comparators
 
-    bool operator==(const StExifEntry& theCompare) const {
-        return (myValuePtr == theCompare.myValuePtr);
-    }
-
-    bool operator!=(const StExifEntry& theCompare) const {
-        return (myValuePtr != theCompare.myValuePtr);
-    }
-
-    bool operator>(const StExifEntry& theCompare) const {
-        return (myValuePtr > theCompare.myValuePtr);
-    }
-
-    bool operator<(const StExifEntry& theCompare) const {
-        return (myValuePtr < theCompare.myValuePtr);
-    }
-
-    bool operator>=(const StExifEntry& theCompare) const {
-        return (myValuePtr >= theCompare.myValuePtr);
-    }
-
-    bool operator<=(const StExifEntry& theCompare) const {
-        return (myValuePtr <= theCompare.myValuePtr);
-    }
+    bool operator==(const StExifEntry& theCompare) const { return (myValuePtr == theCompare.myValuePtr); }
+    bool operator!=(const StExifEntry& theCompare) const { return (myValuePtr != theCompare.myValuePtr); }
+    bool operator> (const StExifEntry& theCompare) const { return (myValuePtr >  theCompare.myValuePtr); }
+    bool operator< (const StExifEntry& theCompare) const { return (myValuePtr <  theCompare.myValuePtr); }
+    bool operator>=(const StExifEntry& theCompare) const { return (myValuePtr >= theCompare.myValuePtr); }
+    bool operator<=(const StExifEntry& theCompare) const { return (myValuePtr <= theCompare.myValuePtr); }
 
 };
 
-#endif //__StExifEntry_h_
+#endif // __StExifEntry_h_

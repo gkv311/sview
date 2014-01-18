@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -13,7 +13,7 @@
 
 /**
  * JPEG format parser (Joint Photographic Experts Group).
- * Notice this class doesn't decode the image!
+ * This class doesn't decode the image but only parses format structure.
  */
 class StJpegParser {
 
@@ -130,4 +130,4 @@ class StJpegParser {
 
 };
 
-#endif //__StJpegParser_h_
+#endif // __StJpegParser_h_

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -173,7 +173,8 @@ bool StExifDir::readDirectory(unsigned char* theDirStart, unsigned char* theOffs
             case TAG_EXIF_OFFSET:
             case TAG_INTEROP_OFFSET: {
                 unsigned char* aSubdirStart = theOffsetBase + size_t(get32u(anEntry.myValuePtr));
-                if(aSubdirStart < theOffsetBase || aSubdirStart > theOffsetBase + theExifLength) {
+                if(aSubdirStart < theOffsetBase
+                || aSubdirStart > theOffsetBase + theExifLength) {
                     ST_DEBUG_LOG("StExifDir, Illegal EXIF or interop offset directory link");
                 } else {
                     StHandle<StExifDir> aSubDir = new StExifDir(isFileBE());
@@ -236,7 +237,8 @@ bool StExifDir::readDirectory(unsigned char* theDirStart, unsigned char* theOffs
                     ST_DEBUG_LOG("StExifDir, reading " + myCameraMaker + " maker notes");
                     aSubDir->myCameraMaker = myCameraMaker;
                     aSubDir->myCameraModel = myCameraModel;
-                    if(aSubdirStart < theOffsetBase || aSubdirStart > theOffsetBase + theExifLength) {
+                    if(aSubdirStart < theOffsetBase
+                    || aSubdirStart > theOffsetBase + theExifLength) {
                         ST_DEBUG_LOG("StExifDir, illegal maker notes offset directory link");
                     } else if(aSubDir->readDirectory(aSubdirStart, anOffsetBase,
                                                      anOffsetLimit, theNestingLevel + 1)) {
@@ -275,7 +277,8 @@ bool StExifDir::readDirectory(unsigned char* theDirStart, unsigned char* theOffs
         if(anOffset > 0) {
             unsigned char* aSubdirStart = theOffsetBase + anOffset;
             if(aSubdirStart > theOffsetBase + theExifLength || aSubdirStart < theOffsetBase) {
-                if(aSubdirStart > theOffsetBase && aSubdirStart < theOffsetBase + theExifLength + 20) {
+                if(aSubdirStart > theOffsetBase
+                && aSubdirStart < theOffsetBase + theExifLength + 20) {
                     //
                 } else {
                     ST_DEBUG_LOG("StExifDir, Illegal subdirectory link in EXIF header");
@@ -299,9 +302,9 @@ bool StExifDir::readDirectory(unsigned char* theDirStart, unsigned char* theOffs
     return true;
 }
 
-bool StExifDir::findEntry(const bool theIsMakerNote,
+bool StExifDir::findEntry(const bool   theIsMakerNote,
                           StExifEntry& theEntry,
-                          bool& theIsBigEndian) const {
+                          bool&        theIsBigEndian) const {
     // search own entries
     if(!(theIsMakerNote ^ myIsMakerNote)) {
         for(size_t anEntryId = 0; anEntryId < myEntries.size(); ++anEntryId) {
@@ -316,7 +319,8 @@ bool StExifDir::findEntry(const bool theIsMakerNote,
     // search in subfolders
     for(size_t aDirId = 0; aDirId < mySubDirs.size(); ++aDirId) {
         const StHandle<StExifDir>& aDir = mySubDirs[aDirId];
-        if(!aDir.isNull() && aDir->findEntry(theIsMakerNote, theEntry, theIsBigEndian)) {
+        if(!aDir.isNull()
+         && aDir->findEntry(theIsMakerNote, theEntry, theIsBigEndian)) {
             return true;
         }
     }
