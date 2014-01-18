@@ -30,23 +30,45 @@ enum {
     M_SOF13 = 0xCD,
     M_SOF14 = 0xCE,
     M_SOF15 = 0xCF,
+
+    M_DHT   = 0xC4, // Huffman table definition
+
     M_SOI   = 0xD8, // Start Of Image (beginning of datastream)
     M_EOI   = 0xD9, // End Of Image (end of datastream)
     M_SOS   = 0xDA, // Start Of Scan (begins compressed data)
-    M_JFIF  = 0xE0, // Jfif marker
+    M_DQT   = 0xDB, // define quantization tables
+    M_DNL   = 0xDC, // define number of lines
+    M_DRI   = 0xDD, // define restart interval
+    M_DHP   = 0xDE, // define hierarchical progression
+    M_EXP   = 0xDF, // expand reference components
+
+    M_JFIF  = 0xE0, // Jfif marker (APP0)
     M_EXIF  = 0xE1, // Exif attribute information (APP1)
     M_APP2  = 0xE2, // Exif extended data
+    M_APP3  = 0xE3, // _JPSJPS_
+    M_APP4  = 0xE4,
+    M_APP5  = 0xE5,
+    M_APP6  = 0xE6,
+    M_APP7  = 0xE7,
+    M_APP8  = 0xE8,
+    M_APP9  = 0xE9,
+    M_APP10 = 0xEA,
+    M_APP11 = 0xEB,
+    M_APP12 = 0xEC,
+    M_APP13 = 0xED,
+    M_IPTC  = M_APP13, // IPTC marker
+    M_APP14 = 0xEE,
+    M_APP15 = 0xEF,
+
     M_COM   = 0xFE, // COMment
-    M_DQT   = 0xDB, // Quantization table definition
-    M_DHT   = 0xC4, // Huffman table definition
-    M_DRI   = 0xDD, // Restart Interoperability definition
-    M_IPTC  = 0xED, // IPTC marker
+
 };
 
 StJpegParser::StJpegParser()
 : myImages(NULL),
   myData(NULL),
-  myLength(0) {
+  myLength(0),
+  myStFormat(ST_V_SRC_AUTODETECT) {
     //
 }
 
@@ -58,6 +80,7 @@ void StJpegParser::reset() {
     // destroy all images
     myImages.nullify();
     myComment.clear();
+    myStFormat = ST_V_SRC_AUTODETECT;
 
     // destroy cached data
     stMemFreeAligned(myData);
@@ -212,9 +235,13 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(unsigned char* theDataSta
                 aData += anItemLen + 2;
                 break;
             }
+            case M_JFIF: {
+                aData += anItemLen + 2;
+                break;
+            }
             case M_EXIF:
             case M_APP2: {
-                // there can be different section using the same marker.
+                // there can be different section using the same marker
                 if(stAreEqual(&aData[2], "Exif", 4)) {
                     //ST_DEBUG_LOG("Exif section...");
                     StHandle<StExifDir> aSubDir = new StExifDir(true);
@@ -223,6 +250,42 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(unsigned char* theDataSta
                     }
                 } else if(stAreEqual(&aData[2], "http:", 5)) {
                     //ST_DEBUG_LOG("Image cotains XMP section");
+                }
+                // skip already read bytes
+                aData += anItemLen + 2;
+                break;
+            }
+            case M_APP3: {
+                if(anItemLen >= 14
+                && stAreEqual(&aData[2], "_JPSJPS_", 8)) {
+                    // outdated VRex section
+                    ST_DEBUG_LOG("Jpeg, _JPSJPS_ section");
+                    //const int16_t aBlockLen   = StAlienData::Get16sBE(&aData[2 + 8]);
+                    const int32_t aStereoDesc = StAlienData::Get32sBE(&aData[2 + 8 + 2]);
+
+                    #define SD_LAYOUT_INTERLEAVED 0x00000100
+                    #define SD_LAYOUT_SIDEBYSIDE  0x00000200
+                    #define SD_LAYOUT_OVERUNDER   0x00000300
+                    #define SD_LAYOUT_ANAGLYPH    0x00000400
+
+                    #define SD_HALF_HEIGHT        0x00010000
+                    #define SD_HALF_WIDTH         0x00020000
+                    #define SD_LEFT_FIELD_FIRST   0x00040000
+
+                    if(aStereoDesc & 0x00000001) {
+                        const bool isLeftFirst = aStereoDesc & SD_LEFT_FIELD_FIRST;
+                        switch(aStereoDesc & 0x0000FF00) {
+                            case SD_LAYOUT_INTERLEAVED: myStFormat = ST_V_SRC_ROW_INTERLACE;     break;
+                            case SD_LAYOUT_SIDEBYSIDE:  myStFormat = isLeftFirst
+                                                                   ? ST_V_SRC_PARALLEL_PAIR
+                                                                   : ST_V_SRC_SIDE_BY_SIDE;      break;
+                            case SD_LAYOUT_OVERUNDER:   myStFormat = isLeftFirst
+                                                                   ? ST_V_SRC_OVER_UNDER_LR
+                                                                   : ST_V_SRC_OVER_UNDER_RL;     break;
+                            case SD_LAYOUT_ANAGLYPH:    myStFormat = ST_V_SRC_ANAGLYPH_RED_CYAN; break;
+                            default: break;
+                        }
+                    }
                 }
                 // skip already read bytes
                 aData += anItemLen + 2;

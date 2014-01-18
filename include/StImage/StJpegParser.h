@@ -9,6 +9,8 @@
 #ifndef __StJpegParser_h_
 #define __StJpegParser_h_
 
+#include <StGLStereo/StFormatEnum.h>
+
 #include "StExifDir.h"
 
 /**
@@ -117,6 +119,13 @@ class StJpegParser {
         return myComment;
     }
 
+    /**
+     * @return stereo format stored in file
+     */
+    ST_LOCAL StFormatEnum getSrcFormat() const {
+        return myStFormat;
+    }
+
         private:
 
     /**
@@ -131,10 +140,11 @@ class StJpegParser {
 
         private:
 
-    StHandle<Image> myImages;  //!< images list
-    unsigned char*  myData;    //!< pointer to the data
-    size_t          myLength;  //!< data length
-    StString        myComment; //!< string stored in COM segment (directly in JPEG, NOT inside EXIF)
+    StHandle<Image> myImages;   //!< images list
+    unsigned char*  myData;     //!< pointer to the data
+    size_t          myLength;   //!< data length
+    StString        myComment;  //!< string stored in COM segment (directly in JPEG, NOT inside EXIF)
+    StFormatEnum    myStFormat; //!< stereo format
 
 };
 

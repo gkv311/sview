@@ -146,6 +146,10 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
                 metadataFromExif(anImg1->myExif[anExifId], anImgInfo);
             }
         }
+        if(mySrcFormat            == ST_V_SRC_AUTODETECT
+        && aParser.getSrcFormat() != ST_V_SRC_AUTODETECT) {
+            aSrcFormatCurr = aParser.getSrcFormat();
+        }
 
         if(!isParsed) {
             processLoadFail(StString("Can not read the file \"") + aFilePath + '\"');
