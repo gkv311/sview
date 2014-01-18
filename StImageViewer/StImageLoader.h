@@ -24,6 +24,7 @@
 #include <StGL/StPlayList.h>
 #include <StGLStereo/StGLTextureQueue.h>
 #include <StImage/StImageFile.h>
+#include <StImage/StJpegParser.h>
 #include <StSlots/StSignal.h>
 #include <StThreads/StProcess.h>
 
@@ -123,6 +124,12 @@ class StImageLoader {
      * Auxiliary method to process image load error.
      */
     ST_LOCAL void processLoadFail(const StString& theErrorDesc);
+
+    /**
+     * Fill metadata map from EXIF.
+     */
+    ST_LOCAL void metadataFromExif(const StHandle<StExifDir>& theDir,
+                                   StHandle<StImageInfo>&     theInfo);
 
         private:
 

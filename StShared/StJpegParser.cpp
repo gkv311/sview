@@ -246,9 +246,7 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(unsigned char* theDataSta
 
 StJpegParser::Image::Image()
 : myData(NULL),
-  myLength(0),
-  myExif(),
-  myNext() {
+  myLength(0) {
     //
 }
 

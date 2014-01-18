@@ -21,7 +21,6 @@
 #include "StImageViewerStrings.h"
 
 #include <StStrings/StLangMap.h>
-#include <StImage/StJpegParser.h>
 #include <StThreads/StThread.h>
 
 const char* StImageLoader::ST_IMAGES_MIME_STRING = ST_IMAGE_PLUGIN_MIME_CHAR;
@@ -80,6 +79,27 @@ void StImageLoader::processLoadFail(const StString& theErrorDesc) {
     myTextureQueue->clear();
 }
 
+void StImageLoader::metadataFromExif(const StHandle<StExifDir>& theDir,
+                                     StHandle<StImageInfo>&     theInfo) {
+    if(theDir.isNull()) {
+        return;
+    }
+
+    if(!theDir->getCameraMaker().isEmpty()) {
+        theInfo->myInfo.set(StArgument("Camera maker", theDir->getCameraMaker()));
+    }
+    if(!theDir->getCameraModel().isEmpty()) {
+        theInfo->myInfo.set(StArgument("Camera model", theDir->getCameraModel()));
+    }
+    if(!theDir->getUserComment().isEmpty()) {
+        theInfo->myInfo.set(StArgument("User comment", theDir->getUserComment()));
+    }
+
+    for(size_t anExifId = 0; anExifId < theDir->getSubDirs().size(); ++anExifId) {
+        metadataFromExif(theDir->getSubDirs()[anExifId], theInfo);
+    }
+}
+
 bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
                               StHandle<StStereoParams>&   theParams) {
     const StString               aFilePath = theSource->getPath();
@@ -93,33 +113,58 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         return false;
     }
 
+    StHandle<StImageInfo> anImgInfo = new StImageInfo();
+    anImgInfo->myId = theParams;
+
+    StString aTitleString, aFolder;
+    if(theSource->size() >= 2) {
+        StFileNode::getFolderAndFile(theSource->getValue(0)->getPath(), aFolder, aTitleString);
+        anImgInfo->myInfo.add(StArgument("Name (L)", aTitleString));
+        StFileNode::getFolderAndFile(theSource->getValue(1)->getPath(), aFolder, aTitleString);
+        anImgInfo->myInfo.add(StArgument("Name (R)", aTitleString));
+    } else {
+        StFileNode::getFolderAndFile(aFilePath, aFolder, aTitleString);
+        anImgInfo->myInfo.add(StArgument("Name", aTitleString));
+    }
+
     StTimer aLoadTimer(true);
     StFormatEnum aSrcFormatCurr = mySrcFormat;
     if(anImgType == StImageFile::ST_TYPE_MPO
     || anImgType == StImageFile::ST_TYPE_JPEG) {
         // special procedure to divide MPO (Multi Picture Object)
-        StJpegParser aJpegParser;
+        StJpegParser aParser;
         double anHParallax = 0.0; // parallax in percents
-        if(!aJpegParser.read(aFilePath)) {
+        const bool isParsed = aParser.read(aFilePath);
+        StHandle<StJpegParser::Image> anImg1 = aParser.getImage(0);
+
+        // copy metadata
+        if(!aParser.getComment().isEmpty()) {
+            anImgInfo->myInfo.add(StArgument("Comment", aParser.getComment()));
+        }
+        if(!anImg1.isNull()) {
+            for(size_t anExifId = 0; anExifId < anImg1->myExif.size(); ++anExifId) {
+                metadataFromExif(anImg1->myExif[anExifId], anImgInfo);
+            }
+        }
+
+        if(!isParsed) {
             processLoadFail(StString("Can not read the file \"") + aFilePath + '\"');
             return false;
         }
 
         // read image from memory
-        StHandle<StJpegParser::Image> anImg1 = aJpegParser.getImage(0);
-
         const StJpegParser::Orient anOrient = anImg1->getOrientation();
         theParams->setZRotateZero((GLfloat )StJpegParser::getRotationAngle(anOrient));
         anImg1->getParallax(anHParallax);
         if(!anImageL->load(aFilePath, StImageFile::ST_TYPE_JPEG,
                            (uint8_t* )anImg1->myData, (int )anImg1->myLength)
         && !anImageL->load(aFilePath, StImageFile::ST_TYPE_JPEG,
-                           (uint8_t* )aJpegParser.getData(), (int )aJpegParser.getDataSize())) {
+                           (uint8_t* )aParser.getData(), (int )aParser.getDataSize())) {
             processLoadFail(formatError(aFilePath, anImageL->getState()));
             return false;
         }
 
-        StHandle<StJpegParser::Image> anImg2 = aJpegParser.getImage(1);
+        StHandle<StJpegParser::Image> anImg2 = aParser.getImage(1);
         if(!anImg2.isNull()
          && anImgType == StImageFile::ST_TYPE_MPO) {
             // read image from memory
@@ -184,19 +229,6 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         myTextureQueue->push(*anImageL, *anImageR, theParams, aSrcFormatCurr, 0.0);
     }
 
-    StHandle<StImageInfo> anImgInfo = new StImageInfo();
-    anImgInfo->myId = theParams;
-
-    StString aTitleString, aFolder;
-    if(theSource->size() >= 2) {
-        StFileNode::getFolderAndFile(theSource->getValue(0)->getPath(), aFolder, aTitleString);
-        anImgInfo->myInfo.add(StArgument("Name (L)", aTitleString));
-        StFileNode::getFolderAndFile(theSource->getValue(1)->getPath(), aFolder, aTitleString);
-        anImgInfo->myInfo.add(StArgument("Name (R)", aTitleString));
-    } else {
-        StFileNode::getFolderAndFile(aFilePath, aFolder, aTitleString);
-        anImgInfo->myInfo.add(StArgument("Name", aTitleString));
-    }
     if(!anImageR->isNull()) {
         anImgInfo->myInfo.add(StArgument("Dimensions (L)",  StString() + anImageL->getSizeX()
                                                                + " x " + anImageL->getSizeY()));

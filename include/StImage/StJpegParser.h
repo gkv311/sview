@@ -110,6 +110,13 @@ class StJpegParser {
         return myLength;
     }
 
+    /**
+     * @return file comment
+     */
+    ST_LOCAL const StString& getComment() const {
+        return myComment;
+    }
+
         private:
 
     /**

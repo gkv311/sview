@@ -79,8 +79,22 @@ class StExifDir {
      * Camera maker identificator.
      * In generic it could be editing software identificator.
      */
-    inline const StString& getCameraMaker() const {
+    ST_LOCAL const StString& getCameraMaker() const {
         return myCameraMaker;
+    }
+
+    /**
+     * @return camera model
+     */
+    ST_LOCAL const StString& getCameraModel() const {
+        return myCameraModel;
+    }
+
+    /**
+     * @return user comment
+     */
+    ST_LOCAL const StString& getUserComment() const {
+        return myUserComment;
     }
 
     /**
@@ -104,6 +118,13 @@ class StExifDir {
     ST_CPPEXPORT bool findEntry(const bool   theIsMakerNote, // probably we can use makernote string here...
                                 StExifEntry& theEntry,
                                 bool&        theIsBigEndian) const;
+
+    /**
+     * @return subdirectories list
+     */
+    ST_LOCAL const StArrayList< StHandle<StExifDir> >& getSubDirs() const {
+        return mySubDirs;
+    }
 
         private:
 

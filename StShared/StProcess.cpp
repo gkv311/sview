@@ -144,6 +144,17 @@ StArgument StArgumentsMap::operator[](const StString& theKey) const {
     return StArgument();
 }
 
+void StArgumentsMap::set(const StArgument& thePair) {
+    for(size_t anId = 0; anId < size(); ++anId) {
+        StArgument& anArg = changeValue(anId);
+        if(anArg.getKey().isEqualsIgnoreCase(thePair.getKey())) {
+            anArg.setValue(thePair.getValue());
+            return;
+        }
+    }
+    add(thePair);
+}
+
 StString StProcess::getProcessFullPath() {
 #ifdef _WIN32
     // TODO (Kirill Gavrilov#9) - implement correct method

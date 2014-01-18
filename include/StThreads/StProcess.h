@@ -136,18 +136,18 @@ class StArgumentsMap : public StArrayList<StArgument> {
     /**
      * Parse string and create arguments list.
      */
-    ST_CPPEXPORT void parseList(const StArrayList<StString>& stringList);
+    ST_CPPEXPORT void parseList(const StArrayList<StString>& theStringList);
 
     /**
      * Parse string and create arguments list.
      */
-    ST_CPPEXPORT void parseString(const StString& string);
+    ST_CPPEXPORT void parseString(const StString& theString);
 
     /**
      * Access to the argument throw the key.
      * Returns an empty argument if key not found.
      */
-    ST_CPPEXPORT StArgument operator[](const StString& key) const;
+    ST_CPPEXPORT StArgument operator[](const StString& theKey) const;
 
     /**
      * Access to the arguments throw indexes.
@@ -156,6 +156,11 @@ class StArgumentsMap : public StArrayList<StArgument> {
     inline const StArgument& getFromIndex(const size_t index) const {
         return StArrayList<StArgument>::getValue(index);
     }
+
+    /**
+     * Add/modifies value for specified key.
+     */
+    ST_CPPEXPORT void set(const StArgument& thePair);
 
     ST_CPPEXPORT virtual StString toString() const;
 
