@@ -229,6 +229,9 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         myTextureQueue->push(*anImageL, *anImageR, theParams, aSrcFormatCurr, 0.0);
     }
 
+    if(!stAreEqual(anImageL->getPixelRatio(), 1.0f, 0.001f)) {
+        anImgInfo->myInfo.add(StArgument("Pixel Ratio", StString() + anImageL->getPixelRatio()));
+    }
     if(!anImageR->isNull()) {
         anImgInfo->myInfo.add(StArgument("Dimensions (L)",  StString() + anImageL->getSizeX()
                                                                + " x " + anImageL->getSizeY()));
