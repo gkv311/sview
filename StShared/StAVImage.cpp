@@ -314,6 +314,14 @@ bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
         return false;
     }
 
+    // read aspect ratio
+    if(codecCtx->sample_aspect_ratio.num == 0
+    || codecCtx->sample_aspect_ratio.den == 0) {
+        setPixelRatio(1.0f);
+    } else {
+        setPixelRatio(GLfloat(codecCtx->sample_aspect_ratio.num) / GLfloat(codecCtx->sample_aspect_ratio.den));
+    }
+
     stAV::dimYUV aDimsYUV;
     if(codecCtx->pix_fmt == stAV::PIX_FMT::RGB24) {
         setColorModel(StImage::ImgColor_RGB);
