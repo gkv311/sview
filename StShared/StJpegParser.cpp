@@ -138,16 +138,16 @@ namespace {
     }
 }
 
-StJpegParser::StJpegParser()
-: myImages(NULL),
-  myData(NULL),
+StJpegParser::StJpegParser(const StCString& theFilePath)
+: StRawFile(theFilePath),
+  myImages(NULL),
   myLength(0),
   myStFormat(ST_V_SRC_AUTODETECT) {
-    //
+    stMemZero(myOffsets, sizeof(myOffsets));
 }
 
 StJpegParser::~StJpegParser() {
-    reset();
+    //
 }
 
 void StJpegParser::reset() {
@@ -155,55 +155,31 @@ void StJpegParser::reset() {
     myImages.nullify();
     myComment.clear();
     myStFormat = ST_V_SRC_AUTODETECT;
-
-    // destroy cached data
-    stMemFreeAligned(myData);
-    myData = NULL;
     myLength = 0;
+    stMemZero(myOffsets, sizeof(myOffsets));
 }
 
-bool StJpegParser::read(const StString& theFileName) {
-    // clean up old data
+bool StJpegParser::readFile(const StCString& theFilePath) {
     reset();
-
-#if defined(_WIN32)
-    FILE* aFileHandle = _wfopen(theFileName.toUtfWide().toCString(), L"rb");
-#else
-    FILE* aFileHandle =   fopen(theFileName.toCString(),              "rb");
-#endif
-
-    if(aFileHandle == NULL) {
+    if(!StRawFile::readFile(theFilePath)) {
         return false;
     }
 
-    // determine length of file
-    fseek(aFileHandle, 0, SEEK_END);
-    long aFileLen = ftell(aFileHandle);
-    if(aFileLen <= 0L) {
-        fclose(aFileHandle);
-        return false;
-    }
-
-    myLength = size_t(aFileLen);
-    fseek(aFileHandle, 0, SEEK_SET);
-
-    myData = stMemAllocAligned<unsigned char*>(myLength);
-    size_t aCountRead = fread(myData, 1, myLength, aFileHandle);
-    (void )aCountRead;
-
-    fclose(aFileHandle);
-
-    // parse the structure
+    myLength = myBuffSize;
     return parse();
 }
 
+size_t StJpegParser::writeFile(size_t theBytes) {
+    return StRawFile::writeFile(theBytes != 0 ? theBytes : myLength);
+}
+
 bool StJpegParser::parse() {
-    if(myData == NULL) {
+    if(myBuffer == NULL) {
         return false;
     }
 
     int aCount = 0;
-    myImages = parseImage(++aCount, 1, myData, false);
+    myImages = parseImage(++aCount, 1, myBuffer, false);
     if(myImages.isNull()) {
         return false;
     }
@@ -227,7 +203,7 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
     }
 
     unsigned char*       aData    = theDataStart;
-    const unsigned char* aDataEnd = myData + myLength;
+    const unsigned char* aDataEnd = myBuffer + myLength;
 
     // search image beginning
     if(theToFindSOI) {
@@ -247,7 +223,7 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
 
     // check the jpeg identifier
     if(aData[0] != 0xFF || aData[1] != M_SOI) {
-        ST_DEBUG_LOG("StJpegParser, no SOI at position " + size_t(aData - myData) + " / " + myLength);
+        ST_DEBUG_LOG("StJpegParser, no SOI at position " + size_t(aData - myBuffer) + " / " + myLength);
         return StHandle<StJpegParser::Image>();
     }
     aData += 2; // skip already read bytes
@@ -271,14 +247,14 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
             }
         }
 
-        //ST_DEBUG_LOG(" #" + theImgCount + "." + theDepth + " [" + markerString(aMarker) + "] at position " + size_t(aData - myData - 1) + " / " + myLength); ///
+        //ST_DEBUG_LOG(" #" + theImgCount + "." + theDepth + " [" + markerString(aMarker) + "] at position " + size_t(aData - myBuffer) + " / " + myLength); ///
         if(aMarker == M_EOI) {
-            //ST_DEBUG_LOG("Jpeg, EOI at position " + size_t(aData - myData - 1) + " / " + myLength);
+            //ST_DEBUG_LOG("Jpeg, EOI at position " + size_t(aData - myBuffer) + " / " + myLength);
             anImg->Length = size_t(aData - anImg->Data);
             return anImg;
         } else if(aMarker == M_SOI) {
             // here the subimage (thumbnail)...
-            //ST_DEBUG_LOG("Jpeg, SOI at position " + size_t(aData - myData - 1) + " / " + myLength);
+            //ST_DEBUG_LOG("Jpeg, SOI at position " + size_t(aData - myBuffer) + " / " + myLength);
             anImg->Thumb = StJpegParser::parseImage(theImgCount, theDepth + 1, aData - 2, false);
             if(!anImg->Thumb.isNull()) {
                 //ST_DEBUG_LOG("anImg->Thumb->Length= " + anImg->Thumb->Length);
@@ -287,11 +263,10 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
             continue;
         }
 
-        aData += 2; // section length stored in 2 bytes
-        if(aData >= aDataEnd) {
+        if(aData + 2 >= aDataEnd) {
             ST_DEBUG_LOG("Corrupt jpeg file or error in parser");
             if(myImages.isNull()) {
-                anImg->Data   = myData;
+                anImg->Data   = myBuffer;
                 anImg->Length = myLength;
             }
             return anImg;
@@ -300,9 +275,9 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
         }
 
         // read the length of the section (including these 2 bytes but excluding marker)
-        const int anItemLen = StAlienData::Get16uBE(aData - 2);
+        const int anItemLen = StAlienData::Get16uBE(aData);
         if(anItemLen < 3
-        || (aData + anItemLen - 2) > aDataEnd) {
+        || (aData + anItemLen) > aDataEnd) {
             //ST_DEBUG_LOG("Invalid marker " + aMarker + " in jpeg (item lenght = " + anItemLen
             //           + " from position " + int(aDataEnd - aData - 2) + ')');
             // just ignore probably unknown sections
@@ -315,24 +290,24 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
             case M_SOF2:
             case M_SOF3: {
                 if(anItemLen >= 7) {
-                    anImg->SizeY = StAlienData::Get16uBE(aData + 1);
-                    anImg->SizeX = StAlienData::Get16uBE(aData + 3);
+                    anImg->SizeY = StAlienData::Get16uBE(aData + 2 + 1);
+                    anImg->SizeX = StAlienData::Get16uBE(aData + 2 + 3);
                     //ST_DEBUG_LOG("   SOF " + anImg->SizeX + "x" + anImg->SizeY);
                 }
-                aData += anItemLen - 2;
+                aData += anItemLen;
                 break;
             }
             case M_DRI: {
                 if(anItemLen == 4) {
-                    //const int16_t aNbRestartBlocks = anImg->SizeY = StAlienData::Get16uBE(aData);
+                    //const int16_t aNbRestartBlocks = anImg->SizeY = StAlienData::Get16uBE(aData + 2);
                 }
-                aData += anItemLen - 2;
+                aData += anItemLen;
                 break;
             }
             case M_SOS: {
                 // here the image data...
-                //ST_DEBUG_LOG("Jpeg, SOS at position " + size_t(aData - myData - 1) + " / " + myLength);
-                aData += anItemLen - 2;
+                //ST_DEBUG_LOG("Jpeg, SOS at position " + size_t(aData - myBuffer - 1) + " / " + myLength);
+                aData += anItemLen;
                 break;
             }
             case M_RST0:
@@ -343,62 +318,58 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
             case M_RST5:
             case M_RST6:
             case M_RST7: {
-                // aData += aNbRestartBlocks * aMcuSize - 2;
+                // aData += aNbRestartBlocks * aMcuSize;
                 break;
             }
             case M_JFIF: {
                 if(anItemLen >= 16
-                && stAreEqual(aData, "JFIF\0", 5)) {
-                    //const int8_t aVerMaj = (int8_t )aData[5];
-                    //const int8_t aVerMin = (int8_t )aData[6];
-                    const JfifUnitsXY aUnits = (JfifUnitsXY )aData[7];
-                    const uint16_t aDensityX = StAlienData::Get16uBE(aData + 8);
-                    const uint16_t aDensityY = StAlienData::Get16uBE(aData + 10);
-                    //const int8_t  aThumbX   = (int8_t )aData[12];
-                    //const int8_t  aThumbY   = (int8_t )aData[13];
+                && stAreEqual(aData + 2, "JFIF\0", 5)) {
+                    myOffsets[Offset_Jfif] = aData - myBuffer - 2;
+                    //const int8_t aVerMaj = (int8_t )aData[7];
+                    //const int8_t aVerMin = (int8_t )aData[8];
+                    const JfifUnitsXY aUnits = (JfifUnitsXY )aData[9];
+                    const uint16_t aDensityX = StAlienData::Get16uBE(aData + 10);
+                    const uint16_t aDensityY = StAlienData::Get16uBE(aData + 12);
+                    //const int8_t  aThumbX   = (int8_t )aData[14];
+                    //const int8_t  aThumbY   = (int8_t )aData[15];
                     if(aUnits == JfifUnitsXY_AspectRatio) {
                         anImg->ParX = aDensityX;
                         anImg->ParY = aDensityY;
                     }
                     //ST_DEBUG_LOG("  ## JFIF" + aVerMaj + "." + aVerMin + " u" + (int )aUnits + " " + aDensityX + "x" + aDensityY
                     //           + " thumb " + aThumbX + "x" + aThumbY);
-                } else if(stAreEqual(aData, "JFXX\0", 5)) {
+                } else if(stAreEqual(aData + 2, "JFXX\0", 5)) {
                     // JFIF extension
-                    //ST_DEBUG_LOG("  JFXX " + anItemLen);
-                    //ST_DEBUG_LOG("Jpeg, SOI at position " + size_t(aData - myData - 1) + " / " + myLength);
-                    //anImg->Thumb = StJpegParser::parseImage(theImgCount, theDepth + 1, aData - 2, false);
-                    //if(!anImg->Thumb.isNull()) {
-                        //ST_DEBUG_LOG("anImg->Thumb->Length= " + anImg->Thumb->Length);
-                    //    aData += anImg->Thumb->Length - 2;
-                    //}
                 }
 
-                aData += anItemLen - 2;
+                aData += anItemLen;
                 break;
             }
             case M_EXIF:
             case M_APP2: {
+                myOffsets[aMarker == M_EXIF ? Offset_Exif : Offset_ExifExtra] = aData - myBuffer - 2;
                 // there can be different section using the same marker
-                if(stAreEqual(aData, "Exif", 4)) {
+                if(stAreEqual(aData + 2, "Exif", 4)) {
                     //ST_DEBUG_LOG("Exif section...");
                     StHandle<StExifDir> aSubDir = new StExifDir(true);
-                    if(aSubDir->parseExif(aData - 2, anItemLen)) {
+                    if(aSubDir->parseExif(aData, anItemLen)) {
                         anImg->Exif.add(aSubDir);
                     }
-                } else if(stAreEqual(aData, "http:", 5)) {
+                } else if(stAreEqual(aData + 2, "http:", 5)) {
                     //ST_DEBUG_LOG("Image cotains XMP section");
                 }
                 // skip already read bytes
-                aData += anItemLen - 2;
+                aData += anItemLen;
                 break;
             }
             case M_APP3: {
                 if(anItemLen >= 16
-                && stAreEqual(aData, "_JPSJPS_", 8)) {
+                && stAreEqual(aData + 2, "_JPSJPS_", 8)) {
                     // outdated VRex section
-                    ST_DEBUG_LOG("Jpeg, _JPSJPS_ section");
-                    //const int16_t aBlockLen   = StAlienData::Get16sBE(aData + 8);
-                    const int32_t aStereoDesc = StAlienData::Get32sBE(aData + 8 + 2);
+                    myOffsets[Offset_Jps] = aData - myBuffer - 2;
+                    ST_DEBUG_LOG("Jpeg, _JPSJPS_ section (len= )" + anItemLen);
+                    //const uint16_t aBlockLen   = StAlienData::Get16uBE(aData + 10);
+                    const uint32_t aStereoDesc = StAlienData::Get32uBE(aData + 12);
 
                     #define SD_LAYOUT_INTERLEAVED 0x00000100
                     #define SD_LAYOUT_SIDEBYSIDE  0x00000200
@@ -422,10 +393,22 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
                             case SD_LAYOUT_ANAGLYPH:    myStFormat = ST_V_SRC_ANAGLYPH_RED_CYAN; break;
                             default: break;
                         }
+                    } else {
+                        myStFormat = ST_V_SRC_MONO;
+                    }
+                    if(anItemLen > 18) {
+                        const uint16_t aStringLen = StAlienData::Get16uBE(aData + 16);
+                        char* aStrData = (char* )aData + 18;
+                        myComment = StString(aStrData, aStringLen);
                     }
                 }
                 // skip already read bytes
-                aData += anItemLen - 2;
+                aData += anItemLen;
+                break;
+            }
+            case M_DQT: {
+                myOffsets[Offset_Dqt] = aData - myBuffer - 2;
+                aData += anItemLen;
                 break;
             }
             case M_APP4:
@@ -441,13 +424,16 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
             case M_APP14:
             case M_APP15:
             case M_DHT: {
-                aData += anItemLen - 2;
+                aData += anItemLen;
                 break;
             }
             case M_COM: {
-                myComment = StString((char* )aData, anItemLen);
+                myOffsets[Offset_Comment] = aData - myBuffer - 2;
+                if(anItemLen > 2) {
+                    myComment = StString((char* )aData + 2, anItemLen - 2);
+                }
                 //ST_DEBUG_LOG("StJpegParser, comment= '" + myComment + "'");
-                aData += anItemLen - 2;
+                aData += anItemLen;
                 break;
             }
             default: {
@@ -457,6 +443,103 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
             }
         }
     }
+}
+
+bool StJpegParser::insertSection(const uint8_t   theMarker,
+                                 const uint16_t  theSectLen,
+                                 const ptrdiff_t theOffset) {
+    const size_t aDiff    = size_t(theSectLen) + 2; // 2 bytes for marker
+    const size_t aNewSize = myLength + aDiff;
+    if(aNewSize > myBuffSize) {
+        myBuffSize = aNewSize + 256;
+        stUByte_t* aNewData = stMemAllocAligned<stUByte_t*>(myBuffSize);
+        if(aNewData == NULL) {
+            return false;
+        }
+        stMemCpy(aNewData, myBuffer, myLength);
+        stMemFree(myBuffer);
+        myBuffer = aNewData;
+    }
+    myLength = aNewSize;
+
+    // update offset table
+    for(size_t anIter = 0; anIter < OffsetsNb; ++anIter) {
+        if(myOffsets[anIter] >= theOffset) {
+            myOffsets[anIter] += aDiff;
+        }
+    }
+
+    // initialize new section
+    const size_t aTailSize = myLength - theOffset;
+    std::memmove(myBuffer + theOffset + 2 + size_t(theSectLen),
+                 myBuffer + theOffset,
+                 aTailSize);
+    stUByte_t* aData = myBuffer + theOffset;
+    aData[0] = 0xFF;
+    aData[1] = theMarker;
+    StAlienData::Set16uBE(aData + 2, theSectLen);
+    return true;
+}
+
+bool StJpegParser::setupJps(const StFormatEnum theFormat) {
+    if(myBuffer == NULL) {
+        return false;
+    }
+
+    if(myOffsets[Offset_Jps] == 0) {
+        if(myOffsets[Offset_Dqt] == 0) {
+            return false;
+        }
+
+        // insert section right after DQT
+        const uint16_t  aDqtLen  = StAlienData::Get16uBE(myBuffer + myOffsets[Offset_Dqt] + 2);
+        const ptrdiff_t anOffset = myOffsets[Offset_Dqt] + aDqtLen + 2;
+        const uint16_t  aJpsLen  = 16 + 2 + 6; // including "sView" description
+        if(!insertSection(M_APP3, aJpsLen, anOffset)) {
+            return false;
+        }
+
+        const StCString THE_APP_DESC = stCString("sView");
+        myOffsets[Offset_Jps] = anOffset;
+        stUByte_t* aData = myBuffer + anOffset + 2;
+        stMemCpy(aData + 2, "_JPSJPS_", 8);
+        StAlienData::Set16uBE(aData + 10, 4);
+        StAlienData::Set32uBE(aData + 12, 0);
+        StAlienData::Set16uBE(aData + 16, THE_APP_DESC.Size);
+        stMemCpy(aData + 18, THE_APP_DESC.String, THE_APP_DESC.Size + 1);
+    } else if(myStFormat == theFormat) {
+        return false;
+    }
+
+    myStFormat = theFormat;
+    uint32_t aStereoDesc = 0x00000001;
+    switch(theFormat) {
+        case ST_V_SRC_PARALLEL_PAIR:
+            aStereoDesc |= SD_LAYOUT_SIDEBYSIDE | SD_LEFT_FIELD_FIRST;
+            break;
+        case ST_V_SRC_SIDE_BY_SIDE:
+            aStereoDesc |= SD_LAYOUT_SIDEBYSIDE;
+            break;
+        case ST_V_SRC_OVER_UNDER_LR:
+            aStereoDesc |= SD_LAYOUT_OVERUNDER | SD_LEFT_FIELD_FIRST;
+            break;
+        case ST_V_SRC_OVER_UNDER_RL:
+            aStereoDesc |= SD_LAYOUT_OVERUNDER;
+            break;
+        case ST_V_SRC_ROW_INTERLACE:
+            aStereoDesc |= SD_LAYOUT_INTERLEAVED;
+            break;
+        case ST_V_SRC_ANAGLYPH_RED_CYAN:
+            aStereoDesc |= SD_LAYOUT_ANAGLYPH;
+            break;
+        case ST_V_SRC_MONO:
+        default:
+            aStereoDesc = 0x00000000;
+            break;
+    }
+
+    StAlienData::Set32uBE(myBuffer + myOffsets[Offset_Jps] + 2 + 8 + 2 + 2, aStereoDesc);
+    return true;
 }
 
 StJpegParser::Image::Image()

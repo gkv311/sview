@@ -9,6 +9,7 @@
 #ifndef __StJpegParser_h_
 #define __StJpegParser_h_
 
+#include <StFile/StRawFile.h>
 #include <StGLStereo/StFormatEnum.h>
 
 #include "StExifDir.h"
@@ -17,7 +18,7 @@
  * JPEG format parser (Joint Photographic Experts Group).
  * This class doesn't decode the image but only parses format structure.
  */
-class StJpegParser {
+class StJpegParser : public StRawFile {
 
         public:
 
@@ -32,11 +33,25 @@ class StJpegParser {
         ORIENT_ROT90        = 8, //!< 0th row ~ left-hand  side, 0th column ~ visual bottom
     } Orient;
 
+    /**
+     * Units enumeration used in JFIF section
+     */
     enum JfifUnitsXY
     {
         JfifUnitsXY_AspectRatio = 0,
         JfifUnitsXY_DotsPerInch = 1,
         JfifUnitsXY_DotsPerCm   = 2,
+    };
+
+    enum Offset {
+        Offset_Dqt = 0,
+        Offset_Jfif,
+        Offset_Exif,      //!< APP1
+        Offset_ExifExtra, //!< APP2
+        Offset_Jps,       //!< APP3
+        Offset_Iptc,      //!< APP13
+        Offset_Comment,
+        OffsetsNb,
     };
 
     struct Image {
@@ -86,16 +101,23 @@ class StJpegParser {
     /**
      * Empty constructor.
      */
-    ST_CPPEXPORT StJpegParser();
-    ST_CPPEXPORT ~StJpegParser();
+    ST_CPPEXPORT StJpegParser(const StCString& theFilePath = stCString(""));
 
-    ST_CPPEXPORT void reset();
+    /**
+     * Destructor.
+     */
+    ST_CPPEXPORT virtual ~StJpegParser();
+
+    ST_CPPEXPORT virtual void reset();
 
     /**
      * Read the file content.
      */
-    ST_CPPEXPORT bool read(const StString& theFileName);
+    ST_CPPEXPORT virtual bool readFile(const StCString& theFilePath);
 
+    /**
+     * Determines images count.
+     */
     inline size_t getNbImages() const {
         size_t aCount = 0;
         for(StHandle<StJpegParser::Image> anImg = myImages;
@@ -105,6 +127,9 @@ class StJpegParser {
         return aCount;
     }
 
+    /**
+     * Access image with specified index
+     */
     inline StHandle<StJpegParser::Image> getImage(size_t theImgId) const {
         size_t aCount = 0;
         for(StHandle<StJpegParser::Image> anImg = myImages;
@@ -117,10 +142,9 @@ class StJpegParser {
         return StHandle<StJpegParser::Image>();
     }
 
-    inline unsigned char* getData() const {
-        return myData;
-    }
-
+    /**
+     * @return image data size
+     */
     inline size_t getDataSize() const {
         return myLength;
     }
@@ -139,12 +163,33 @@ class StJpegParser {
         return myStFormat;
     }
 
-        private:
-
     /**
      * Parse the structure.
      */
     ST_CPPEXPORT bool parse();
+
+        public:
+
+    /**
+     * Create/modify JPS section.
+     */
+    ST_CPPEXPORT bool setupJps(const StFormatEnum theFormat);
+
+    /**
+     * Override data length.
+     */
+    ST_LOCAL void setDataSize(const size_t theLength) {
+        if(theLength <= myBuffSize) {
+            myLength = theLength;
+        }
+    }
+
+    /**
+     * Save the file.
+     */
+    ST_CPPEXPORT virtual size_t writeFile(size_t theBytes = 0);
+
+        protected:
 
     /**
      * Parse one image in data.
@@ -154,13 +199,24 @@ class StJpegParser {
                                                           unsigned char* theDataStart,
                                                           const bool     theToFindSOI);
 
-        private:
+    /**
+     * Create new section at specified offset.
+     * @param theMarker  section marker
+     * @param theSectLen section length excluding marker
+     * @param theOffset  section offset from file beginning (at marker position)
+     */
+    ST_CPPEXPORT bool insertSection(const uint8_t   theMarker,
+                                    const uint16_t  theSectLen,
+                                    const ptrdiff_t theOffset);
 
-    StHandle<Image> myImages;   //!< images list
-    unsigned char*  myData;     //!< pointer to the data
-    size_t          myLength;   //!< data length
-    StString        myComment;  //!< string stored in COM segment (directly in JPEG, NOT inside EXIF)
-    StFormatEnum    myStFormat; //!< stereo format
+        protected:
+
+    StHandle<Image> myImages;     //!< images list
+    ptrdiff_t       myOffsets[OffsetsNb];
+                                  //!< array of offsets in image data, starting from session lenght (zero offset is invalid)
+    size_t          myLength;     //!< data length
+    StString        myComment;    //!< string stored in COM segment (directly in JPEG, NOT inside EXIF)
+    StFormatEnum    myStFormat;   //!< stereo format
 
 };
 

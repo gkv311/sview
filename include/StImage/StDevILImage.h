@@ -45,7 +45,8 @@ class StDevILImage : public StImageFile {
                                    ImageType theImageType = ST_TYPE_NONE,
                                    uint8_t* theDataPtr = NULL, int theDataSize = 0);
     ST_CPPEXPORT virtual bool save(const StString& theFilePath,
-                                   ImageType theImageType);
+                                   ImageType       theImageType,
+                                   StFormatEnum    theSrcFormat);
     ST_CPPEXPORT virtual bool resize(size_t theSizeX, size_t theSizeY);
 
 };

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -10,6 +10,7 @@
 #define __StImageFile_h_
 
 #include <StTemplates/StHandle.h>
+#include <StGLStereo/StFormatEnum.h>
 
 #include "StImage.h"
 
@@ -111,12 +112,14 @@ class StImageFile : public StImage {
 
     /**
      * This virtual function should be implemented by inheritors.
-     * @param theFilePath (const StString& ) path to save the file;
-     * @param theImageType (int ) image type;
-     * @return true on success.
+     * @param theFilePath  path to save the file
+     * @param theImageType image type
+     * @param theSrcFormat stereo format - might be stored as metadata
+     * @return true on success
      */
     virtual bool save(const StString& theFilePath,
-                      ImageType theImageType) = 0;
+                      ImageType       theImageType,
+                      StFormatEnum    theSrcFormat) = 0;
 
     /**
      * Resize image.

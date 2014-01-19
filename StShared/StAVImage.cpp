@@ -11,6 +11,7 @@
 #include <StAV/StAVPacket.h>
 #include <StFile/StFileNode.h>
 #include <StFile/StRawFile.h>
+#include <StImage/StJpegParser.h>
 #include <StStrings/StLogger.h>
 
 bool StAVImage::init() {
@@ -423,7 +424,8 @@ bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
 }
 
 bool StAVImage::save(const StString& theFilePath,
-                     ImageType       theImageType) {
+                     ImageType       theImageType,
+                     StFormatEnum    theSrcFormat) {
     close();
     setState();
     if(isNull()) {
@@ -539,7 +541,7 @@ bool StAVImage::save(const StString& theFilePath,
     // wrap own data into AVFrame
     fillPointersAV(anImage, myFrame->data, myFrame->linesize);
 
-    StRawFile aRawFile(theFilePath);
+    StJpegParser aRawFile(theFilePath);
     if(!aRawFile.openFile(StRawFile::WRITE)) {
         setState("Can not open the file for writing");
         close();
@@ -557,9 +559,22 @@ bool StAVImage::save(const StString& theFilePath,
         close();
         return false;
     }
+    aRawFile.setDataSize((size_t )anEncSize);
+
+    // save metadata when possible
+    if(theImageType == ST_TYPE_JPEG
+    || theImageType == ST_TYPE_JPS) {
+        if(aRawFile.parse()) {
+            if(theSrcFormat != ST_V_SRC_AUTODETECT) {
+                aRawFile.setupJps(theSrcFormat);
+            }
+        } else {
+            ST_ERROR_LOG("AVCodec library, created JPEG can not be parsed!");
+        }
+    }
 
     // store current content
-    aRawFile.writeFile(anEncSize);
+    aRawFile.writeFile();
     // and finally close the file handle
     aRawFile.closeFile();
 

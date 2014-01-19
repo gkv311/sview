@@ -134,7 +134,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         // special procedure to divide MPO (Multi Picture Object)
         StJpegParser aParser;
         double anHParallax = 0.0; // parallax in percents
-        const bool isParsed = aParser.read(aFilePath);
+        const bool isParsed = aParser.readFile(aFilePath);
 
         StHandle<StJpegParser::Image> anImg1, anImg2;
         size_t aMaxSizeX = 0;
@@ -188,7 +188,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         if(!anImageL->load(aFilePath, StImageFile::ST_TYPE_JPEG,
                            (uint8_t* )anImg1->Data, (int )anImg1->Length)
         && !anImageL->load(aFilePath, StImageFile::ST_TYPE_JPEG,
-                           (uint8_t* )aParser.getData(), (int )aParser.getDataSize())) {
+                           (uint8_t* )aParser.getBuffer(), (int )aParser.getSize())) {
             processLoadFail(formatError(aFilePath, anImageL->getState()));
             return false;
         }
@@ -297,6 +297,8 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
         return false;
     }
 
+    //const StFormatEnum aSrcFormat = theParams->getSrcFormat();
+
     int aResult = StGLTextureQueue::SNAPSHOT_NO_NEW;
     StImage aDataLeft, aDataRight;
     if(!theParams->isSwapLR()) {
@@ -378,7 +380,8 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
         if(toSave) {
             ST_DEBUG_LOG("Save snapshot to the path '" + aFileToSave + '\'');
             StString strSaveState;
-            if(!aDataResult->save(aFileToSave, theImgType)) {
+            if(!aDataResult->save(aFileToSave, theImgType,
+                                  toSaveStereo ? ST_V_SRC_SIDE_BY_SIDE : ST_V_SRC_AUTODETECT)) {
                 // TODO (Kirill Gavrilov#7)
                 myMsgQueue->pushError(aDataResult->getState());
                 return false;

@@ -40,7 +40,8 @@ class StAVImage : public StImageFile {
                                    ImageType       theImageType = ST_TYPE_NONE,
                                    uint8_t* theDataPtr = NULL, int theDataSize = 0);
     ST_CPPEXPORT virtual bool save(const StString& theFilePath,
-                                   ImageType       theImageType);
+                                   ImageType       theImageType,
+                                   StFormatEnum    theSrcFormat = ST_V_SRC_AUTODETECT);
     ST_CPPEXPORT virtual bool resize(size_t , size_t );
 
         private:

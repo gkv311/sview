@@ -91,7 +91,7 @@ class StRawFile : public StFileNode {
      * Write current buffer content to the file.
      * If size not set - whole buffer will be saved.
      */
-    ST_CPPEXPORT size_t writeFile(size_t theBytes = 0);
+    ST_CPPEXPORT virtual size_t writeFile(size_t theBytes = 0);
 
     /**
      * Write buffer to the file.
@@ -111,7 +111,7 @@ class StRawFile : public StFileNode {
      * @param theFilePath the file path
      * @return true if file was read
      */
-    ST_CPPEXPORT bool readFile(const StCString& theFilePath = stCString(""));
+    ST_CPPEXPORT virtual bool readFile(const StCString& theFilePath = stCString(""));
 
     /**
      * Write the buffer into the file.
@@ -125,7 +125,7 @@ class StRawFile : public StFileNode {
      */
     ST_CPPEXPORT static StString readTextFile(const StCString& theFilePath);
 
-        private:
+        protected:
 
     FILE*      myFileHandle;
     stUByte_t* myBuffer;

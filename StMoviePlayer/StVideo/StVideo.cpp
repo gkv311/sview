@@ -969,7 +969,8 @@ bool StVideo::saveSnapshotAs(StImageFile::ImageType theImgType) {
             fileToSave += StString('.') + saveExt;
         }
         ST_DEBUG_LOG("Save snapshot to the path '" + fileToSave + '\'');
-        if(!dataResult->save(fileToSave, theImgType)) {
+        if(!dataResult->save(fileToSave, theImgType,
+                             toSaveStereo ? ST_V_SRC_SIDE_BY_SIDE : ST_V_SRC_AUTODETECT)) {
             // TODO (Kirill Gavrilov#7)
             signals.onError(dataResult->getState());
             return false;

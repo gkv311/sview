@@ -397,7 +397,8 @@ bool StFreeImage::load(const StString& theFilePath, ImageType theImageType,
 }
 
 bool StFreeImage::save(const StString& theFilePath,
-                       ImageType theImageType) {
+                       ImageType       theImageType,
+                       StFormatEnum ) {
     if(!StFreeImage::init()) {
         setState("FreeImage library is not initialized");
         return false;
