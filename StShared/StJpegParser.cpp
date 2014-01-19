@@ -33,6 +33,17 @@ enum {
 
     M_DHT   = 0xC4, // Huffman table definition
 
+    M_DAC   = 0xCC, // define arithmetic-coding conditioning
+
+    M_RST0  = 0xD0, // restart with modulo 8 count "m"
+    M_RST1  = 0xD1,
+    M_RST2  = 0xD2,
+    M_RST3  = 0xD3,
+    M_RST4  = 0xD4,
+    M_RST5  = 0xD5,
+    M_RST6  = 0xD6,
+    M_RST7  = 0xD7,
+
     M_SOI   = 0xD8, // Start Of Image (beginning of datastream)
     M_EOI   = 0xD9, // End Of Image (end of datastream)
     M_SOS   = 0xDA, // Start Of Scan (begins compressed data)
@@ -82,6 +93,17 @@ namespace {
             case M_SOF15: return stCString("SOF15");
 
             case M_DHT:   return stCString("DHT  ");
+
+            case M_DAC:   return stCString("DAC  ");
+
+            case M_RST0:  return stCString("RST0 ");
+            case M_RST1:  return stCString("RST1 ");
+            case M_RST2:  return stCString("RST2 ");
+            case M_RST3:  return stCString("RST3 ");
+            case M_RST4:  return stCString("RST4 ");
+            case M_RST5:  return stCString("RST5 ");
+            case M_RST6:  return stCString("RST6 ");
+            case M_RST7:  return stCString("RST7 ");
 
             case M_SOI:   return stCString("SOI  ");
             case M_EOI:   return stCString("EOI  ");
@@ -251,12 +273,12 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
 
         //ST_DEBUG_LOG(" #" + theImgCount + "." + theDepth + " [" + markerString(aMarker) + "] at position " + size_t(aData - myData - 1) + " / " + myLength); ///
         if(aMarker == M_EOI) {
-            ST_DEBUG_LOG("Jpeg, EOI at position " + size_t(aData - myData - 1) + " / " + myLength);
+            //ST_DEBUG_LOG("Jpeg, EOI at position " + size_t(aData - myData - 1) + " / " + myLength);
             anImg->Length = size_t(aData - anImg->Data);
             return anImg;
         } else if(aMarker == M_SOI) {
             // here the subimage (thumbnail)...
-            ST_DEBUG_LOG("Jpeg, SOI at position " + size_t(aData - myData - 1) + " / " + myLength);
+            //ST_DEBUG_LOG("Jpeg, SOI at position " + size_t(aData - myData - 1) + " / " + myLength);
             anImg->Thumb = StJpegParser::parseImage(theImgCount, theDepth + 1, aData - 2, false);
             if(!anImg->Thumb.isNull()) {
                 //ST_DEBUG_LOG("anImg->Thumb->Length= " + anImg->Thumb->Length);
@@ -288,11 +310,21 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
         }
 
         switch(aMarker) {
-            case M_SOF0: {
+            case M_SOF0:
+            case M_SOF1:
+            case M_SOF2:
+            case M_SOF3: {
                 if(anItemLen >= 7) {
                     anImg->SizeY = StAlienData::Get16uBE(aData + 1);
                     anImg->SizeX = StAlienData::Get16uBE(aData + 3);
                     //ST_DEBUG_LOG("   SOF " + anImg->SizeX + "x" + anImg->SizeY);
+                }
+                aData += anItemLen - 2;
+                break;
+            }
+            case M_DRI: {
+                if(anItemLen == 4) {
+                    //const int16_t aNbRestartBlocks = anImg->SizeY = StAlienData::Get16uBE(aData);
                 }
                 aData += anItemLen - 2;
                 break;
@@ -303,8 +335,20 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
                 aData += anItemLen - 2;
                 break;
             }
+            case M_RST0:
+            case M_RST1:
+            case M_RST2:
+            case M_RST3:
+            case M_RST4:
+            case M_RST5:
+            case M_RST6:
+            case M_RST7: {
+                // aData += aNbRestartBlocks * aMcuSize - 2;
+                break;
+            }
             case M_JFIF: {
-                if(stAreEqual(aData, "JFIF\0", 5)) {
+                if(anItemLen >= 16
+                && stAreEqual(aData, "JFIF\0", 5)) {
                     //const int8_t aVerMaj = (int8_t )aData[5];
                     //const int8_t aVerMin = (int8_t )aData[6];
                     const JfifUnitsXY aUnits = (JfifUnitsXY )aData[7];
@@ -349,7 +393,7 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
                 break;
             }
             case M_APP3: {
-                if(anItemLen >= 14
+                if(anItemLen >= 16
                 && stAreEqual(aData, "_JPSJPS_", 8)) {
                     // outdated VRex section
                     ST_DEBUG_LOG("Jpeg, _JPSJPS_ section");
@@ -395,13 +439,14 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
             case M_APP12:
             case M_APP13:
             case M_APP14:
-            case M_APP15: {
+            case M_APP15:
+            case M_DHT: {
                 aData += anItemLen - 2;
                 break;
             }
             case M_COM: {
                 myComment = StString((char* )aData, anItemLen);
-                ST_DEBUG_LOG("StJpegParser, comment= '" + myComment + "'");
+                //ST_DEBUG_LOG("StJpegParser, comment= '" + myComment + "'");
                 aData += anItemLen - 2;
                 break;
             }

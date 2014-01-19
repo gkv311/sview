@@ -93,10 +93,10 @@ bool StExifDir::parseExif(unsigned char* theExifSection,
     }
 
     if(stAreEqual(theExifSection + 8, "II", 2)) {
-        ST_DEBUG_LOG("Exif section in Little-Endian order");
+        //ST_DEBUG_LOG("Exif section in Little-Endian order");
         myIsFileBE = false;
     } else if(stAreEqual(theExifSection + 8, "MM", 2)) {
-        ST_DEBUG_LOG("Exif section in Big-Endian order");
+        //ST_DEBUG_LOG("Exif section in Big-Endian order");
         myIsFileBE = true;
     } else {
         ST_DEBUG_LOG("Invalid Exif endianness marker");
@@ -293,8 +293,8 @@ bool StExifDir::readDirectory(unsigned char* theDirStart, unsigned char* theOffs
             }
         }
     }
-    ST_DEBUG_LOG("StExifDir, subdir level= " + theNestingLevel
-               + " entries number= " + myEntries.size());
+    //ST_DEBUG_LOG("StExifDir, subdir level= " + theNestingLevel
+    //           + " entries number= " + myEntries.size());
     return true;
 }
 
