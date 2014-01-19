@@ -136,7 +136,9 @@ class StJpegParser {
     /**
      * Parse one image in data.
      */
-    ST_CPPEXPORT StHandle<StJpegParser::Image> parseImage(unsigned char* theDataStart);
+    ST_CPPEXPORT StHandle<StJpegParser::Image> parseImage(const int      theDepth,
+                                                          unsigned char* theDataStart,
+                                                          const bool     theToFindSOI = false);
 
         private:
 
