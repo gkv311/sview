@@ -130,7 +130,8 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     StTimer aLoadTimer(true);
     StFormatEnum aSrcFormatCurr = mySrcFormat;
     if(anImgType == StImageFile::ST_TYPE_MPO
-    || anImgType == StImageFile::ST_TYPE_JPEG) {
+    || anImgType == StImageFile::ST_TYPE_JPEG
+    || anImgType == StImageFile::ST_TYPE_JPS) {
         // special procedure to divide MPO (Multi Picture Object)
         StJpegParser aParser;
         double anHParallax = 0.0; // parallax in percents
@@ -171,9 +172,12 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
                 metadataFromExif(anImg1->Exif[anExifId], anImgInfo);
             }
         }
-        if(mySrcFormat            == ST_V_SRC_AUTODETECT
-        && aParser.getSrcFormat() != ST_V_SRC_AUTODETECT) {
-            aSrcFormatCurr = aParser.getSrcFormat();
+        if(mySrcFormat == ST_V_SRC_AUTODETECT) {
+            if(aParser.getSrcFormat() != ST_V_SRC_AUTODETECT) {
+                aSrcFormatCurr = aParser.getSrcFormat();
+            } else if(anImgType == StImageFile::ST_TYPE_JPS) {
+                aSrcFormatCurr = ST_V_SRC_SIDE_BY_SIDE;
+            }
         }
 
         if(!isParsed) {
@@ -193,8 +197,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             return false;
         }
 
-        if(!anImg2.isNull()
-         && anImgType == StImageFile::ST_TYPE_MPO) {
+        if(!anImg2.isNull()) {
             // read image from memory
             anImg2->getParallax(anHParallax); // in MPO parallax generally stored ONLY in second frame
             if(!anImageR->load(aFilePath, StImageFile::ST_TYPE_JPEG,
@@ -226,7 +229,8 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             return false;
         }
     } else {
-        if(mySrcFormat == ST_V_SRC_AUTODETECT && (anImgType == StImageFile::ST_TYPE_JPS || anImgType == StImageFile::ST_TYPE_PNS)) {
+        if(mySrcFormat == ST_V_SRC_AUTODETECT
+        && anImgType == StImageFile::ST_TYPE_PNS) {
             aSrcFormatCurr = ST_V_SRC_SIDE_BY_SIDE;
         }
         if(!anImageL->load(aFilePath, anImgType)) {
