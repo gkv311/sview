@@ -247,6 +247,29 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theDepth,
                 break;
             }
             case M_JFIF: {
+                if(stAreEqual(aData, "JFIF\0", 5)) {
+                    //ST_DEBUG_LOG("Exif section...");
+                    //
+                    const int8_t aVerMaj = (int8_t )aData[5];
+                    const int8_t aVerMin = (int8_t )aData[6];
+                    enum XYUnits
+                    {
+                        XYUnits_AspectRatio = 0,
+                        XYUnits_DotsPerInch = 1,
+                        XYUnits_DotsPerCm   = 2,
+                    };
+                    const XYUnits aUnits = (XYUnits )aData[7];
+                    const int16_t aDensityX = StAlienData::Get16uBE(aData + 8);
+                    const int16_t aDensityY = StAlienData::Get16uBE(aData + 10);
+                    if(aUnits == XYUnits_AspectRatio) {
+                        anImg->ParX = aDensityX;
+                        anImg->ParY = aDensityY;
+                    }
+                    //ST_DEBUG_LOG("  ## JFIF" + aVerMaj + "." + aVerMin + " u" + (int )aUnits + " " + aDensityX + "x" + aDensityY); ///
+                } else if(stAreEqual(aData, "JFXX\0", 5)) {
+                    // JFIF extension
+                }
+
                 aData += anItemLen;
                 break;
             }
@@ -334,7 +357,9 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theDepth,
 
 StJpegParser::Image::Image()
 : myData(NULL),
-  myLength(0) {
+  myLength(0),
+  ParX(0),
+  ParY(0) {
     //
 }
 

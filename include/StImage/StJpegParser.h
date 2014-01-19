@@ -37,6 +37,8 @@ class StJpegParser {
         size_t          myLength; //!< data length
         StArrayList< StHandle<StExifDir> > myExif; //!< EXIF sections
         StHandle<Image> myNext;   //!< link to the next image in file (if any)
+        int16_t         ParX;     //!< Pixel Aspect Ratio
+        int16_t         ParY;     //!< Pixel Aspect Ratio
 
         ST_CPPEXPORT Image();
         ST_CPPEXPORT ~Image();
