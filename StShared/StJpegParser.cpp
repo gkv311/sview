@@ -135,9 +135,8 @@ bool StJpegParser::parse() {
 
     // continue reading the file (MPO may contains more than 1 image)
     for(StHandle<StJpegParser::Image> anImg = myImages;
-        !anImg.isNull(); anImg = anImg->myNext) {
-        //ST_DEBUG_LOG("curr= " + size_t(anImg->myData) + "; next= " + size_t(anImg->myData + anImg->myLength));
-        anImg->myNext = parseImage(1, anImg->myData + anImg->myLength, true);
+        !anImg.isNull(); anImg = anImg->Next) {
+        anImg->Next = parseImage(1, anImg->Data + anImg->Length, true);
     }
 
     return true;
@@ -179,7 +178,7 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theDepth,
 
     // parse the data
     StHandle<StJpegParser::Image> anImg = new StJpegParser::Image();
-    anImg->myData = aData - 2;
+    anImg->Data = aData - 2;
 
     for(;;) {
         // search for the next marker in the file
@@ -199,15 +198,15 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theDepth,
         //ST_DEBUG_LOG(" #" + theDepth + " [" + aMarker + "] at position " + size_t(aData - myData - 1) + " / " + myLength); ///
         if(aMarker == M_EOI) {
             ST_DEBUG_LOG("Jpeg, EOI at position " + size_t(aData - myData - 1) + " / " + myLength);
-            anImg->myLength = size_t(aData - anImg->myData);
+            anImg->Length = size_t(aData - anImg->Data);
             return anImg;
         } else if(aMarker == M_SOI) {
             // here the subimage (thumbnail)...
             ST_DEBUG_LOG("Jpeg, SOI at position " + size_t(aData - myData - 1) + " / " + myLength);
             StHandle<StJpegParser::Image> aSubImage = StJpegParser::parseImage(theDepth + 1, aData - 2);
             if(!aSubImage.isNull()) {
-                //ST_DEBUG_LOG("aSubImage->myLength= " + aSubImage->myLength);
-                aData += aSubImage->myLength - 2;
+                //ST_DEBUG_LOG("aSubImage->Length= " + aSubImage->Length);
+                aData += aSubImage->Length - 2;
             }
             continue;
         }
@@ -216,8 +215,8 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theDepth,
         if(aData >= aDataEnd) {
             ST_DEBUG_LOG("Corrupt jpeg file or error in parser");
             if(myImages.isNull()) {
-                anImg->myData   = myData;
-                anImg->myLength = myLength;
+                anImg->Data   = myData;
+                anImg->Length = myLength;
             }
             return anImg;
         } else if(aSkippedBytes > 10) {
@@ -248,20 +247,12 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theDepth,
             }
             case M_JFIF: {
                 if(stAreEqual(aData, "JFIF\0", 5)) {
-                    //ST_DEBUG_LOG("Exif section...");
-                    //
-                    const int8_t aVerMaj = (int8_t )aData[5];
-                    const int8_t aVerMin = (int8_t )aData[6];
-                    enum XYUnits
-                    {
-                        XYUnits_AspectRatio = 0,
-                        XYUnits_DotsPerInch = 1,
-                        XYUnits_DotsPerCm   = 2,
-                    };
-                    const XYUnits aUnits = (XYUnits )aData[7];
+                    //const int8_t aVerMaj = (int8_t )aData[5];
+                    //const int8_t aVerMin = (int8_t )aData[6];
+                    const JfifUnitsXY aUnits = (JfifUnitsXY )aData[7];
                     const int16_t aDensityX = StAlienData::Get16uBE(aData + 8);
                     const int16_t aDensityY = StAlienData::Get16uBE(aData + 10);
-                    if(aUnits == XYUnits_AspectRatio) {
+                    if(aUnits == JfifUnitsXY_AspectRatio) {
                         anImg->ParX = aDensityX;
                         anImg->ParY = aDensityY;
                     }
@@ -280,7 +271,7 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theDepth,
                     //ST_DEBUG_LOG("Exif section...");
                     StHandle<StExifDir> aSubDir = new StExifDir(true);
                     if(aSubDir->parseExif(aData - 2, anItemLen)) {
-                        anImg->myExif.add(aSubDir);
+                        anImg->Exif.add(aSubDir);
                     }
                 } else if(stAreEqual(aData, "http:", 5)) {
                     //ST_DEBUG_LOG("Image cotains XMP section");
@@ -356,8 +347,8 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theDepth,
 }
 
 StJpegParser::Image::Image()
-: myData(NULL),
-  myLength(0),
+: Data(NULL),
+  Length(0),
   ParX(0),
   ParY(0) {
     //
@@ -370,20 +361,18 @@ StJpegParser::Image::~Image() {
 bool StJpegParser::Image::getParallax(double& theParallax) const {
     StExifEntry anEntry;
     bool isBigEndian = false;
-    for(size_t anExifId = 0; anExifId < myExif.size(); ++anExifId) {
-        const StHandle<StExifDir>& aDir = myExif[anExifId];
+    for(size_t anExifId = 0; anExifId < Exif.size(); ++anExifId) {
+        const StHandle<StExifDir>& aDir = Exif[anExifId];
         if(aDir.isNull()) {
             // should never happens
             continue;
         }
         if(aDir->getCameraMaker() == StString("FUJIFILM")) {
-            anEntry.myTag = 0xB211;
+            anEntry.Tag = 0xB211;
             if(aDir->findEntry(true, anEntry, isBigEndian)) {
-                if(anEntry.myFormat == StExifEntry::FMT_SRATIONAL) {
-                    int32_t aNumerator = isBigEndian ? StAlienData::Get32sBE(anEntry.myValuePtr)
-                                                     : StAlienData::Get32sLE(anEntry.myValuePtr);
-                    int32_t aDenominator = isBigEndian ? StAlienData::Get32sBE(anEntry.myValuePtr + 4)
-                                                       : StAlienData::Get32sLE(anEntry.myValuePtr + 4);
+                if(anEntry.Format == StExifEntry::FMT_SRATIONAL) {
+                    int32_t aNumerator   = StAlienData::Get32s(anEntry.ValuePtr,     isBigEndian);
+                    int32_t aDenominator = StAlienData::Get32s(anEntry.ValuePtr + 4, isBigEndian);
                     if(aDenominator != 0) {
                         theParallax = double(aNumerator) / double(aDenominator);
                         //ST_DEBUG_LOG("Parallax found(" + aNumerator + " / " + aDenominator + ")= " + theParallax);
@@ -398,15 +387,14 @@ bool StJpegParser::Image::getParallax(double& theParallax) const {
 
 StJpegParser::Orient StJpegParser::Image::getOrientation() const {
     StExifEntry anEntry;
-    anEntry.myTag = 0x112;
+    anEntry.Tag = 0x112;
     bool isBigEndian = false;
-    for(size_t anExifId = 0; anExifId < myExif.size(); ++anExifId) {
-        const StHandle<StExifDir>& aDir = myExif[anExifId];
+    for(size_t anExifId = 0; anExifId < Exif.size(); ++anExifId) {
+        const StHandle<StExifDir>& aDir = Exif[anExifId];
         if(!aDir.isNull()
-        && aDir->findEntry(false, anEntry, isBigEndian)
-        && anEntry.myFormat == StExifEntry::FMT_USHORT) {
-            int16_t aValue = isBigEndian ? StAlienData::Get16uBE(anEntry.myValuePtr)
-                                         : StAlienData::Get16uLE(anEntry.myValuePtr);
+         && aDir->findEntry(false, anEntry, isBigEndian)
+         && anEntry.Format == StExifEntry::FMT_USHORT) {
+            const int16_t aValue = StAlienData::Get16u(anEntry.ValuePtr, isBigEndian);
             return (StJpegParser::Orient )aValue;
         }
     }

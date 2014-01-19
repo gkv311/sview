@@ -142,8 +142,8 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             anImgInfo->myInfo.add(StArgument("Comment", aParser.getComment()));
         }
         if(!anImg1.isNull()) {
-            for(size_t anExifId = 0; anExifId < anImg1->myExif.size(); ++anExifId) {
-                metadataFromExif(anImg1->myExif[anExifId], anImgInfo);
+            for(size_t anExifId = 0; anExifId < anImg1->Exif.size(); ++anExifId) {
+                metadataFromExif(anImg1->Exif[anExifId], anImgInfo);
             }
         }
         if(mySrcFormat            == ST_V_SRC_AUTODETECT
@@ -161,7 +161,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         theParams->setZRotateZero((GLfloat )StJpegParser::getRotationAngle(anOrient));
         anImg1->getParallax(anHParallax);
         if(!anImageL->load(aFilePath, StImageFile::ST_TYPE_JPEG,
-                           (uint8_t* )anImg1->myData, (int )anImg1->myLength)
+                           (uint8_t* )anImg1->Data, (int )anImg1->Length)
         && !anImageL->load(aFilePath, StImageFile::ST_TYPE_JPEG,
                            (uint8_t* )aParser.getData(), (int )aParser.getDataSize())) {
             processLoadFail(formatError(aFilePath, anImageL->getState()));
@@ -174,7 +174,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             // read image from memory
             anImg2->getParallax(anHParallax); // in MPO parallax generally stored ONLY in second frame
             if(!anImageR->load(aFilePath, StImageFile::ST_TYPE_JPEG,
-                               (uint8_t* )anImg2->myData, (int )anImg2->myLength)) {
+                               (uint8_t* )anImg2->Data, (int )anImg2->Length)) {
                 processLoadFail(formatError(aFilePath, anImageR->getState()));
                 anImageL->close();
                 anImageL->nullify();

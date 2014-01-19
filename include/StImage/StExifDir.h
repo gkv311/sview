@@ -27,21 +27,21 @@ class StExifDir {
      * Retrieve uint16_t value.
      */
     inline uint16_t get16u(const unsigned char* theShort) const {
-        return myIsFileBE ? StAlienData::Get16uBE(theShort) : StAlienData::Get16uLE(theShort);
+        return StAlienData::Get16u(theShort, myIsFileBE);
     }
 
     /**
      * Retrieve int32_t value.
      */
     inline int32_t get32s(const unsigned char* theLong) const {
-        return myIsFileBE ? StAlienData::Get32sBE(theLong) : StAlienData::Get32sLE(theLong);
+        return StAlienData::Get32s(theLong, myIsFileBE);
     }
 
     /**
      * Retrieve uint32_t value.
      */
     inline uint32_t get32u(const unsigned char* theLong) const {
-        return myIsFileBE ? StAlienData::Get32uBE(theLong) : StAlienData::Get32uLE(theLong);
+        return StAlienData::Get32u(theLong, myIsFileBE);
     }
 
     /**

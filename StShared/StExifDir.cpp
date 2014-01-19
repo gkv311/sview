@@ -25,11 +25,7 @@ enum {
 const size_t StExifEntry::BYTES_PER_FORMAT[StExifEntry::NUM_FORMATS + 1] = {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8};
 
 StExifDir::StExifDir(bool theIsFileBE, bool theIsMakerNote)
-: mySubDirs(),
-  myEntries(),
-  myCameraMaker(),
-  myCameraModel(),
-  myStartPtr(NULL),
+: myStartPtr(NULL),
   myIsFileBE(theIsFileBE),
   myIsMakerNote(theIsMakerNote) {
     //
@@ -43,22 +39,22 @@ bool StExifDir::readEntry(unsigned char* theEntryAddress,
         return false;
     }
 
-    theEntry.myTag        = get16u(theEntryAddress);
-    theEntry.myFormat     = get16u(theEntryAddress + 2);
-    theEntry.myComponents = get32u(theEntryAddress + 4);
+    theEntry.Tag        = get16u(theEntryAddress);
+    theEntry.Format     = get16u(theEntryAddress + 2);
+    theEntry.Components = get32u(theEntryAddress + 4);
 
     // validate format
-    if((theEntry.myFormat - 1) >= StExifEntry::NUM_FORMATS) {
+    if((theEntry.Format - 1) >= StExifEntry::NUM_FORMATS) {
         // (-1) catches illegal zero case as unsigned underflows to positive large.
-        ST_DEBUG_LOG("StExifDir, Illegal number format " + theEntry.myFormat + " for tag "
-                     + theEntry.myTag + " in Exif");
+        ST_DEBUG_LOG("StExifDir, Illegal number format " + theEntry.Format + " for tag "
+                     + theEntry.Tag + " in Exif");
         return false;
     }
 
     // validate components number
-    if((unsigned int )theEntry.myComponents > 0x10000) {
-        ST_DEBUG_LOG("StExifDir, Too many components (" + theEntry.myComponents + ") for tag "
-                     + theEntry.myTag + " in Exif");
+    if((unsigned int )theEntry.Components > 0x10000) {
+        ST_DEBUG_LOG("StExifDir, Too many components (" + theEntry.Components + ") for tag "
+                     + theEntry.Tag + " in Exif");
         return false;
     }
 
@@ -68,13 +64,13 @@ bool StExifDir::readEntry(unsigned char* theEntryAddress,
         // if its bigger than 4 bytes, the dir entry contains an offset.
         if(anOffsetVal + aBytesCount > theExifLength) {
             // bogus pointer offset and / or bytecount value
-            ST_DEBUG_LOG("StExifDir, Illegal value pointer for tag " + theEntry.myTag + " in Exif");
+            ST_DEBUG_LOG("StExifDir, Illegal value pointer for tag " + theEntry.Tag + " in Exif");
             return false;
         }
-        theEntry.myValuePtr = theOffsetBase + anOffsetVal;
+        theEntry.ValuePtr = theOffsetBase + anOffsetVal;
     } else {
         // 4 bytes or less and value is in the dir entry itself
-        theEntry.myValuePtr = theEntryAddress + 8;
+        theEntry.ValuePtr = theEntryAddress + 8;
     }
     return true;
 }
@@ -169,10 +165,10 @@ bool StExifDir::readDirectory(unsigned char* theDirStart, unsigned char* theOffs
         }
         myEntries.add(anEntry);
 
-        switch(anEntry.myTag) {
+        switch(anEntry.Tag) {
             case TAG_EXIF_OFFSET:
             case TAG_INTEROP_OFFSET: {
-                unsigned char* aSubdirStart = theOffsetBase + size_t(get32u(anEntry.myValuePtr));
+                unsigned char* aSubdirStart = theOffsetBase + size_t(get32u(anEntry.ValuePtr));
                 if(aSubdirStart < theOffsetBase
                 || aSubdirStart > theOffsetBase + theExifLength) {
                     ST_DEBUG_LOG("StExifDir, Illegal EXIF or interop offset directory link");
@@ -188,17 +184,17 @@ bool StExifDir::readDirectory(unsigned char* theDirStart, unsigned char* theOffs
                 break;
             }
             case TAG_MAKE: {
-                if(anEntry.myFormat == StExifEntry::FMT_STRING) {
+                if(anEntry.Format == StExifEntry::FMT_STRING) {
                     // NULL-terminated ASCII string
-                    myCameraMaker = StString((char *)anEntry.myValuePtr);
+                    myCameraMaker = StString((char *)anEntry.ValuePtr);
                     ST_DEBUG_LOG("StExifDir, CameraMaker= " + myCameraMaker);
                 }
                 break;
             }
             case TAG_MODEL: {
-                if(anEntry.myFormat == StExifEntry::FMT_STRING) {
+                if(anEntry.Format == StExifEntry::FMT_STRING) {
                     // NULL-terminated ASCII string
-                    myCameraModel = StString((char *)anEntry.myValuePtr);
+                    myCameraModel = StString((char *)anEntry.ValuePtr);
                     ST_DEBUG_LOG("StExifDir, CameraModel= " + myCameraModel);
                 }
                 break;
@@ -206,7 +202,7 @@ bool StExifDir::readDirectory(unsigned char* theDirStart, unsigned char* theOffs
             case TAG_MAKER_NOTE: {
                 // maker note (vendor-specific tags)
                 /// TODO (Kirill Gavrilov#9) base offset may be wrong for some camera makers
-                unsigned char* aSubdirStart = anEntry.myValuePtr;
+                unsigned char* aSubdirStart = anEntry.ValuePtr;
                 unsigned char* anOffsetBase = theOffsetBase;
                 size_t anOffsetLimit = theExifLength;
                 StHandle<StExifDir> aSubDir;
@@ -215,17 +211,17 @@ bool StExifDir::readDirectory(unsigned char* theDirStart, unsigned char* theOffs
                     aSubDir = new StExifDir(false, true);
                     // it seems that Fujifilm maker notes start with an ID string,
                     // followed by an IFD offset relative to the MakerNote tag
-                    if(stAreEqual(anEntry.myValuePtr, "FUJIFILM", 8)) {
+                    if(stAreEqual(anEntry.ValuePtr, "FUJIFILM", 8)) {
                         //ST_DEBUG_LOG("Fuji string ID found");
-                        aSubdirStart += size_t(StAlienData::Get16uLE(anEntry.myValuePtr + 8)); // read Little-Endian, that is
+                        aSubdirStart += size_t(StAlienData::Get16uLE(anEntry.ValuePtr + 8)); // read Little-Endian, that is
                         // found experimental
-                        anOffsetBase  = anEntry.myValuePtr;
+                        anOffsetBase  = anEntry.ValuePtr;
                         anOffsetLimit = theOffsetBase + theExifLength - anOffsetBase;
                     }
                 } else if(myCameraMaker.isStartsWith(stCString("OLYMP"))) {
                     aSubDir = new StExifDir(isFileBE(), true);
                     // it seems that Olympus maker notes start with an ID string
-                    if(stAreEqual(anEntry.myValuePtr, "OLYMP", 5)) {
+                    if(stAreEqual(anEntry.ValuePtr, "OLYMP", 5)) {
                         //ST_DEBUG_LOG("OLYMP string ID found");
                         aSubdirStart += 8; // here is really 8 bytes offset!
                     }
@@ -255,12 +251,12 @@ bool StExifDir::readDirectory(unsigned char* theDirStart, unsigned char* theOffs
                     break;
                 }
 
-                if(stAreEqual(anEntry.myValuePtr, "ASCII\0\0\0", 8)) {
-                    const char* aStart = (const char* )anEntry.myValuePtr + 8;
+                if(stAreEqual(anEntry.ValuePtr, "ASCII\0\0\0", 8)) {
+                    const char* aStart = (const char* )anEntry.ValuePtr + 8;
                     myUserComment = StString(aStart, anEntry.getBytes() - 8);
                     ST_DEBUG_LOG("StExifDir, UserComment= '" + myUserComment + "'");
-                } else if(stAreEqual(anEntry.myValuePtr, "UNICODE\0",   8)) {
-                    const char* aStart = (const char* )anEntry.myValuePtr + 8;
+                } else if(stAreEqual(anEntry.ValuePtr, "UNICODE\0",   8)) {
+                    const char* aStart = (const char* )anEntry.ValuePtr + 8;
                     myUserComment = StString((stUtf16_t *)aStart, (anEntry.getBytes() - 8) / 2);
                     ST_DEBUG_LOG("StExifDir, UserComment= '" + myUserComment + "'");
                 }
@@ -309,8 +305,8 @@ bool StExifDir::findEntry(const bool   theIsMakerNote,
     if(!(theIsMakerNote ^ myIsMakerNote)) {
         for(size_t anEntryId = 0; anEntryId < myEntries.size(); ++anEntryId) {
             const StExifEntry& anEntry = myEntries[anEntryId];
-            if(anEntry.myTag == theEntry.myTag) {
-                theEntry = anEntry;
+            if(anEntry.Tag == theEntry.Tag) {
+                theEntry       = anEntry;
                 theIsBigEndian = myIsFileBE;
                 return true;
             }

@@ -32,11 +32,19 @@ class StJpegParser {
         ORIENT_ROT90        = 8, //!< 0th row ~ left-hand  side, 0th column ~ visual bottom
     } Orient;
 
+    enum JfifUnitsXY
+    {
+        JfifUnitsXY_AspectRatio = 0,
+        JfifUnitsXY_DotsPerInch = 1,
+        JfifUnitsXY_DotsPerCm   = 2,
+    };
+
     struct Image {
-        unsigned char*  myData;   //!< pointer to the data
-        size_t          myLength; //!< data length
-        StArrayList< StHandle<StExifDir> > myExif; //!< EXIF sections
-        StHandle<Image> myNext;   //!< link to the next image in file (if any)
+        unsigned char*  Data;     //!< pointer to the data
+        size_t          Length;   //!< data length
+        StArrayList< StHandle<StExifDir> >
+                        Exif;     //!< EXIF sections
+        StHandle<Image> Next;     //!< link to the next image in file (if any)
         int16_t         ParX;     //!< Pixel Aspect Ratio
         int16_t         ParY;     //!< Pixel Aspect Ratio
 
@@ -85,10 +93,10 @@ class StJpegParser {
      */
     ST_CPPEXPORT bool read(const StString& theFileName);
 
-    inline size_t getImageCount() const {
+    inline size_t getNbImages() const {
         size_t aCount = 0;
         for(StHandle<StJpegParser::Image> anImg = myImages;
-            !anImg.isNull(); anImg = anImg->myNext) {
+            !anImg.isNull(); anImg = anImg->Next) {
             ++aCount;
         }
         return aCount;
@@ -97,7 +105,7 @@ class StJpegParser {
     inline StHandle<StJpegParser::Image> getImage(size_t theImgId) const {
         size_t aCount = 0;
         for(StHandle<StJpegParser::Image> anImg = myImages;
-            !anImg.isNull(); anImg = anImg->myNext) {
+            !anImg.isNull(); anImg = anImg->Next) {
             if(aCount == theImgId) {
                 return anImg;
             }

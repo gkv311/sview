@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -17,7 +17,15 @@
  */
 class StAlienData {
 
-        public: //!< static functions
+        public: //! @name static functions
+
+    /**
+     * Retrieve uint16_t.
+     */
+    static uint16_t Get16u(const unsigned char* theShort,
+                           const bool           theIsBE) {
+        return theIsBE ? Get16uBE(theShort) : Get16uLE(theShort);
+    }
 
     /**
      * Retrieve uint16_t stored in Little-Endian order.
@@ -34,6 +42,14 @@ class StAlienData {
     }
 
     /**
+     * Retrieve int32_t.
+     */
+    static int32_t Get32s(const unsigned char* theLong,
+                          const bool           theIsBE) {
+        return theIsBE ? Get32sBE(theLong) : Get32sLE(theLong);
+    }
+
+    /**
      * Retrieve int32_t stored in Little-Endian order.
      */
     static int32_t Get32sLE(const unsigned char* theLong) {
@@ -47,6 +63,14 @@ class StAlienData {
     static int32_t Get32sBE(const unsigned char* theLong) {
         return (((char*          )theLong)[0] << 24) | (((unsigned char* )theLong)[1] << 16)
              | (((unsigned char* )theLong)[2] << 8 ) | (((unsigned char* )theLong)[3] << 0 );
+    }
+
+    /**
+     * Retrieve uint32_t.
+     */
+    static uint32_t Get32u(const unsigned char* theLong,
+                           const bool           theIsBE) {
+        return theIsBE ? Get32uBE(theLong) : Get32uLE(theLong);
     }
 
     /**
@@ -78,4 +102,4 @@ class StAlienData {
 
 };
 
-#endif //__StAlienData_h_
+#endif // __StAlienData_h_

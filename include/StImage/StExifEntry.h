@@ -18,10 +18,10 @@ struct StExifEntry {
 
         public:
 
-    unsigned char* myValuePtr;   //!< pointer to the entry value(s)
-    uint16_t       myTag;        //!< entry tag
-    uint16_t       myFormat;     //!< data type
-    uint32_t       myComponents; //!< components number
+    unsigned char* ValuePtr;   //!< pointer to the entry value(s)
+    uint16_t       Tag;        //!< entry tag
+    uint16_t       Format;     //!< data type
+    uint32_t       Components; //!< components number
 
         public:
 
@@ -55,17 +55,17 @@ struct StExifEntry {
      * Returns the bytes number for entry values data.
      */
     inline size_t getBytes() const {
-        return size_t(myComponents) * BYTES_PER_FORMAT[myFormat];
+        return size_t(Components) * BYTES_PER_FORMAT[Format];
     }
 
         public: //! @name comparators
 
-    bool operator==(const StExifEntry& theCompare) const { return (myValuePtr == theCompare.myValuePtr); }
-    bool operator!=(const StExifEntry& theCompare) const { return (myValuePtr != theCompare.myValuePtr); }
-    bool operator> (const StExifEntry& theCompare) const { return (myValuePtr >  theCompare.myValuePtr); }
-    bool operator< (const StExifEntry& theCompare) const { return (myValuePtr <  theCompare.myValuePtr); }
-    bool operator>=(const StExifEntry& theCompare) const { return (myValuePtr >= theCompare.myValuePtr); }
-    bool operator<=(const StExifEntry& theCompare) const { return (myValuePtr <= theCompare.myValuePtr); }
+    bool operator==(const StExifEntry& theCompare) const { return (ValuePtr == theCompare.ValuePtr); }
+    bool operator!=(const StExifEntry& theCompare) const { return (ValuePtr != theCompare.ValuePtr); }
+    bool operator> (const StExifEntry& theCompare) const { return (ValuePtr >  theCompare.ValuePtr); }
+    bool operator< (const StExifEntry& theCompare) const { return (ValuePtr <  theCompare.ValuePtr); }
+    bool operator>=(const StExifEntry& theCompare) const { return (ValuePtr >= theCompare.ValuePtr); }
+    bool operator<=(const StExifEntry& theCompare) const { return (ValuePtr <= theCompare.ValuePtr); }
 
 };
 
