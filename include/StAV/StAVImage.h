@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -37,10 +37,10 @@ class StAVImage : public StImageFile {
 
     ST_CPPEXPORT virtual void close();
     ST_CPPEXPORT virtual bool load(const StString& theFilePath,
-                                   ImageType theImageType = ST_TYPE_NONE,
+                                   ImageType       theImageType = ST_TYPE_NONE,
                                    uint8_t* theDataPtr = NULL, int theDataSize = 0);
     ST_CPPEXPORT virtual bool save(const StString& theFilePath,
-                                   ImageType theImageType);
+                                   ImageType       theImageType);
     ST_CPPEXPORT virtual bool resize(size_t , size_t );
 
         private:
@@ -49,11 +49,11 @@ class StAVImage : public StImageFile {
 
         private:
 
-    AVInputFormat*   imageFormat; //!< image format
-    AVFormatContext* formatCtx;   //!< file context
-    AVCodecContext*  codecCtx;    //!< codec context
-    AVCodec*         codec;       //!< codec
-    AVFrame*         frame;
+    AVInputFormat*   myImageFormat; //!< image format
+    AVFormatContext* myFormatCtx;   //!< file context
+    AVCodecContext*  myCodecCtx;    //!< codec context
+    AVCodec*         myCodec;       //!< codec
+    AVFrame*         myFrame;
 
 };
 

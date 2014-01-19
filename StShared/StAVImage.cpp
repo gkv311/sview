@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -18,20 +18,19 @@ bool StAVImage::init() {
 }
 
 StAVImage::StAVImage()
-: StImageFile(),
-  imageFormat(NULL),
-  formatCtx(NULL),
-  codecCtx(NULL),
-  codec(NULL),
-  frame(NULL) {
+: myImageFormat(NULL),
+  myFormatCtx(NULL),
+  myCodecCtx(NULL),
+  myCodec(NULL),
+  myFrame(NULL) {
     StAVImage::init();
-    imageFormat = av_find_input_format("image2");
-    frame = avcodec_alloc_frame();
+    myImageFormat = av_find_input_format("image2");
+    myFrame = avcodec_alloc_frame();
 }
 
 StAVImage::~StAVImage() {
     close();
-    av_free(frame);
+    av_free(myFrame);
 }
 
 int StAVImage::getAVPixelFormat() {
@@ -128,10 +127,10 @@ static bool convert(const StImage& theImageFrom, PixelFormat theFormatFrom,
                           StImage& theImageTo,   PixelFormat theFormatTo) {
     ST_DEBUG_LOG("StAVImage, convert from " + stAV::PIX_FMT::getString(theFormatFrom)
                + " to " + stAV::PIX_FMT::getString(theFormatTo) + " using swscale");
-    SwsContext* pToRgbCtx = sws_getContext((int )theImageFrom.getSizeX(), (int )theImageFrom.getSizeY(), theFormatFrom, // source
+    SwsContext* aCtxToRgb = sws_getContext((int )theImageFrom.getSizeX(), (int )theImageFrom.getSizeY(), theFormatFrom, // source
                                            (int )theImageTo.getSizeX(),   (int )theImageTo.getSizeY(),   theFormatTo,   // destination
                                            SWS_BICUBIC, NULL, NULL, NULL);
-    if(pToRgbCtx == NULL) {
+    if(aCtxToRgb == NULL) {
         return false;
     }
 
@@ -141,32 +140,32 @@ static bool convert(const StImage& theImageFrom, PixelFormat theFormatFrom,
     uint8_t* aDstData[4]; int aDstLinesize[4];
     fillPointersAV(theImageTo, aDstData, aDstLinesize);
 
-    sws_scale(pToRgbCtx,
+    sws_scale(aCtxToRgb,
               aSrcData, aSrcLinesize,
               0, (int )theImageFrom.getSizeY(),
               aDstData, aDstLinesize);
 
-    sws_freeContext(pToRgbCtx);
+    sws_freeContext(aCtxToRgb);
     return true;
 }
 
 void StAVImage::close() {
-    if(codec != NULL && codecCtx != NULL) {
-        avcodec_close(codecCtx); // close VIDEO codec
+    if(myCodec != NULL && myCodecCtx != NULL) {
+        avcodec_close(myCodecCtx); // close VIDEO codec
     }
-    codec = NULL;
-    if(formatCtx != NULL) {
+    myCodec = NULL;
+    if(myFormatCtx != NULL) {
     #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 17, 0))
-        avformat_close_input(&formatCtx);
+        avformat_close_input(&myFormatCtx);
     #else
-        av_close_input_file(formatCtx); // close video file
-        formatCtx = NULL;
+        av_close_input_file(myFormatCtx); // close video file
+        myFormatCtx = NULL;
     #endif
         // codec context allocated by av_open_input_file() function
-        codecCtx = NULL;
-    } else if(codecCtx != NULL) {
+        myCodecCtx = NULL;
+    } else if(myCodecCtx != NULL) {
         // codec context allocated by ourself with avcodec_alloc_context() function
-        av_freep(&codecCtx);
+        av_freep(&myCodecCtx);
     }
 }
 
@@ -181,13 +180,13 @@ bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
     switch(theImageType) {
         case ST_TYPE_PNG:
         case ST_TYPE_PNS: {
-            codec = avcodec_find_decoder_by_name("png");
+            myCodec = avcodec_find_decoder_by_name("png");
             break;
         }
         case ST_TYPE_JPEG:
         case ST_TYPE_MPO:
         case ST_TYPE_JPS: {
-            codec = avcodec_find_decoder_by_name("mjpeg");
+            myCodec = avcodec_find_decoder_by_name("mjpeg");
             break;
         }
         default: {
@@ -198,58 +197,58 @@ bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
     if(theImageType == ST_TYPE_NONE || !StFileNode::isFileExists(theFilePath)) {
         // open image file and detect its type, its could be non local file!
     #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 2, 0))
-        int avErrCode = avformat_open_input(&formatCtx, theFilePath.toCString(), imageFormat, NULL);
+        int avErrCode = avformat_open_input(&myFormatCtx, theFilePath.toCString(), myImageFormat, NULL);
     #else
-        int avErrCode = av_open_input_file(&formatCtx, theFilePath.toCString(), imageFormat, 0, NULL);
+        int avErrCode = av_open_input_file (&myFormatCtx, theFilePath.toCString(), myImageFormat, 0, NULL);
     #endif
         if(avErrCode != 0
-        || formatCtx->nb_streams < 1
-        || formatCtx->streams[0]->codec->codec_id == 0) {
-            if(formatCtx != NULL) {
+        || myFormatCtx->nb_streams < 1
+        || myFormatCtx->streams[0]->codec->codec_id == 0) {
+            if(myFormatCtx != NULL) {
             #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 17, 0))
-                avformat_close_input(&formatCtx);
+                avformat_close_input(&myFormatCtx);
             #else
-                av_close_input_file(formatCtx);
-                formatCtx = NULL;
+                av_close_input_file(myFormatCtx);
+                myFormatCtx = NULL;
             #endif
             }
 
         #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 2, 0))
-            avErrCode = avformat_open_input(&formatCtx, theFilePath.toCString(), NULL, NULL);
+            avErrCode = avformat_open_input(&myFormatCtx, theFilePath.toCString(), NULL, NULL);
         #else
-            avErrCode = av_open_input_file(&formatCtx, theFilePath.toCString(), NULL, 0, NULL);
+            avErrCode = av_open_input_file(&myFormatCtx, theFilePath.toCString(), NULL, 0, NULL);
         #endif
         }
 
         if(avErrCode != 0
-        || formatCtx->nb_streams < 1) {
+        || myFormatCtx->nb_streams < 1) {
             setState(StString("AVFormat library, couldn't open image file. Error: ") + stAV::getAVErrorDescription(avErrCode));
             close();
             return false;
         }
 
         // find the decoder for the video stream
-        codecCtx = formatCtx->streams[0]->codec;
+        myCodecCtx = myFormatCtx->streams[0]->codec;
         if(theImageType == ST_TYPE_NONE) {
-            codec = avcodec_find_decoder(codecCtx->codec_id);
+            myCodec = avcodec_find_decoder(myCodecCtx->codec_id);
         }
     }
 
-    if(codec == NULL) {
+    if(myCodec == NULL) {
         setState("AVCodec library, video codec not found");
         close();
         return false;
-    } else if(formatCtx == NULL) {
+    } else if(myFormatCtx == NULL) {
         // use given image type to load decoder
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
-        codecCtx = avcodec_alloc_context3(codec);
+        myCodecCtx = avcodec_alloc_context3(myCodec);
     #else
-        codecCtx = avcodec_alloc_context();
+        myCodecCtx = avcodec_alloc_context();
     #endif
     }
 
     // stupid check
-    if(codecCtx == NULL) {
+    if(myCodecCtx == NULL) {
         setState("AVCodec library, codec context is NULL");
         close();
         return false;
@@ -257,9 +256,9 @@ bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
 
     // open VIDEO codec
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
-    if(avcodec_open2(codecCtx, codec, NULL) < 0) {
+    if(avcodec_open2(myCodecCtx, myCodec, NULL) < 0) {
 #else
-    if(avcodec_open(codecCtx, codec) < 0) {
+    if(avcodec_open(myCodecCtx, myCodec) < 0) {
 #endif
         setState("AVCodec library, could not open video codec");
         close();
@@ -273,8 +272,8 @@ bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
         anAvPkt.getAVpkt()->data = theDataPtr;
         anAvPkt.getAVpkt()->size = theDataSize;
     } else {
-        if(formatCtx != NULL) {
-            if(av_read_frame(formatCtx, anAvPkt.getAVpkt()) < 0) {
+        if(myFormatCtx != NULL) {
+            if(av_read_frame(myFormatCtx, anAvPkt.getAVpkt()) < 0) {
                 setState("AVFormat library, could not read first packet");
                 close();
                 return false;
@@ -294,9 +293,9 @@ bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
     // decode one frame
     int isFrameFinished = 0;
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 23, 0))
-    avcodec_decode_video2(codecCtx, frame, &isFrameFinished, anAvPkt.getAVpkt());
+    avcodec_decode_video2(myCodecCtx, myFrame, &isFrameFinished, anAvPkt.getAVpkt());
 #else
-    avcodec_decode_video(codecCtx, frame, &isFrameFinished,
+    avcodec_decode_video(myCodecCtx, myFrame, &isFrameFinished,
                          theDataPtr, theDataSize);
 #endif
 
@@ -308,20 +307,20 @@ bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
     }
 
     // check frame size
-    if(codecCtx->width <= 0 || codecCtx->height <= 0) {
+    if(myCodecCtx->width <= 0 || myCodecCtx->height <= 0) {
         setState("AVCodec library, codec returns wrong frame size");
         close();
         return false;
     }
 
     // read aspect ratio
-    if(codecCtx->sample_aspect_ratio.num == 0
-    || codecCtx->sample_aspect_ratio.den == 0) {
+    if(myCodecCtx->sample_aspect_ratio.num == 0
+    || myCodecCtx->sample_aspect_ratio.den == 0) {
         setPixelRatio(1.0f);
     } else {
-        const GLfloat aRatio = GLfloat(codecCtx->sample_aspect_ratio.num) / GLfloat(codecCtx->sample_aspect_ratio.den);
+        const GLfloat aRatio = GLfloat(myCodecCtx->sample_aspect_ratio.num) / GLfloat(myCodecCtx->sample_aspect_ratio.den);
         if(aRatio > 70.0f) {
-            ST_DEBUG_LOG("AVCodec library, igning wrong PAR " + codecCtx->sample_aspect_ratio.num + ":" + codecCtx->sample_aspect_ratio.den);
+            ST_DEBUG_LOG("AVCodec library, igning wrong PAR " + myCodecCtx->sample_aspect_ratio.num + ":" + myCodecCtx->sample_aspect_ratio.den);
             setPixelRatio(1.0f);
         } else {
             setPixelRatio(aRatio);
@@ -329,39 +328,39 @@ bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
     }
 
     stAV::dimYUV aDimsYUV;
-    if(codecCtx->pix_fmt == stAV::PIX_FMT::RGB24) {
+    if(myCodecCtx->pix_fmt == stAV::PIX_FMT::RGB24) {
         setColorModel(StImage::ImgColor_RGB);
-        changePlane(0).initWrapper(StImagePlane::ImgRGB, frame->data[0],
-                                   codecCtx->width, codecCtx->height,
-                                   frame->linesize[0]);
-    } else if(codecCtx->pix_fmt == stAV::PIX_FMT::BGR24) {
+        changePlane(0).initWrapper(StImagePlane::ImgRGB, myFrame->data[0],
+                                   myCodecCtx->width, myCodecCtx->height,
+                                   myFrame->linesize[0]);
+    } else if(myCodecCtx->pix_fmt == stAV::PIX_FMT::BGR24) {
         setColorModel(StImage::ImgColor_RGB);
-        changePlane(0).initWrapper(StImagePlane::ImgBGR, frame->data[0],
-                                   codecCtx->width, codecCtx->height,
-                                   frame->linesize[0]);
-    } else if(codecCtx->pix_fmt == stAV::PIX_FMT::RGBA32) {
+        changePlane(0).initWrapper(StImagePlane::ImgBGR, myFrame->data[0],
+                                   myCodecCtx->width, myCodecCtx->height,
+                                   myFrame->linesize[0]);
+    } else if(myCodecCtx->pix_fmt == stAV::PIX_FMT::RGBA32) {
         setColorModel(StImage::ImgColor_RGBA);
-        changePlane(0).initWrapper(StImagePlane::ImgRGBA, frame->data[0],
-                                   codecCtx->width, codecCtx->height,
-                                   frame->linesize[0]);
-    } else if(codecCtx->pix_fmt == stAV::PIX_FMT::BGRA32) {
+        changePlane(0).initWrapper(StImagePlane::ImgRGBA, myFrame->data[0],
+                                   myCodecCtx->width, myCodecCtx->height,
+                                   myFrame->linesize[0]);
+    } else if(myCodecCtx->pix_fmt == stAV::PIX_FMT::BGRA32) {
         setColorModel(StImage::ImgColor_RGBA);
-        changePlane(0).initWrapper(StImagePlane::ImgBGRA, frame->data[0],
-                                   codecCtx->width, codecCtx->height,
-                                   frame->linesize[0]);
-    } else if(codecCtx->pix_fmt == stAV::PIX_FMT::GRAY8) {
+        changePlane(0).initWrapper(StImagePlane::ImgBGRA, myFrame->data[0],
+                                   myCodecCtx->width, myCodecCtx->height,
+                                   myFrame->linesize[0]);
+    } else if(myCodecCtx->pix_fmt == stAV::PIX_FMT::GRAY8) {
         setColorModel(StImage::ImgColor_GRAY);
-        changePlane(0).initWrapper(StImagePlane::ImgGray, frame->data[0],
-                                   codecCtx->width, codecCtx->height,
-                                   frame->linesize[0]);
-    } else if(codecCtx->pix_fmt == stAV::PIX_FMT::GRAY16) {
+        changePlane(0).initWrapper(StImagePlane::ImgGray, myFrame->data[0],
+                                   myCodecCtx->width, myCodecCtx->height,
+                                   myFrame->linesize[0]);
+    } else if(myCodecCtx->pix_fmt == stAV::PIX_FMT::GRAY16) {
         setColorModel(StImage::ImgColor_GRAY);
-        changePlane(0).initWrapper(StImagePlane::ImgGray16, frame->data[0],
-                                   codecCtx->width, codecCtx->height,
-                                   frame->linesize[0]);
-    } else if(stAV::isFormatYUVPlanar(codecCtx, aDimsYUV)) {
+        changePlane(0).initWrapper(StImagePlane::ImgGray16, myFrame->data[0],
+                                   myCodecCtx->width, myCodecCtx->height,
+                                   myFrame->linesize[0]);
+    } else if(stAV::isFormatYUVPlanar(myCodecCtx, aDimsYUV)) {
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 29, 0))
-        if(codecCtx->color_range == AVCOL_RANGE_JPEG) {
+        if(myCodecCtx->color_range == AVCOL_RANGE_JPEG) {
             aDimsYUV.isFullScale = true;
         }
     #endif
@@ -378,17 +377,17 @@ bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
             aPlaneFrmt = StImagePlane::ImgGray16;
         }
 
-        changePlane(0).initWrapper(aPlaneFrmt, frame->data[0],
-                                   size_t(aDimsYUV.widthY), size_t(aDimsYUV.heightY), frame->linesize[0]);
-        changePlane(1).initWrapper(aPlaneFrmt, frame->data[1],
-                                   size_t(aDimsYUV.widthU), size_t(aDimsYUV.heightU), frame->linesize[1]);
-        changePlane(2).initWrapper(aPlaneFrmt, frame->data[2],
-                                   size_t(aDimsYUV.widthV), size_t(aDimsYUV.heightV), frame->linesize[2]);
+        changePlane(0).initWrapper(aPlaneFrmt, myFrame->data[0],
+                                   size_t(aDimsYUV.widthY), size_t(aDimsYUV.heightY), myFrame->linesize[0]);
+        changePlane(1).initWrapper(aPlaneFrmt, myFrame->data[1],
+                                   size_t(aDimsYUV.widthU), size_t(aDimsYUV.heightU), myFrame->linesize[1]);
+        changePlane(2).initWrapper(aPlaneFrmt, myFrame->data[2],
+                                   size_t(aDimsYUV.widthV), size_t(aDimsYUV.heightV), myFrame->linesize[2]);
     } else {
-        ///ST_DEBUG_LOG("StAVImage, perform conversion from Pixel format '" + avcodec_get_pix_fmt_name(codecCtx->pix_fmt) + "' to RGB");
+        ///ST_DEBUG_LOG("StAVImage, perform conversion from Pixel format '" + avcodec_get_pix_fmt_name(myCodecCtx->pix_fmt) + "' to RGB");
         // initialize software scaler/converter
-        SwsContext* pToRgbCtx = sws_getContext(codecCtx->width, codecCtx->height, codecCtx->pix_fmt,    // source
-                                               codecCtx->width, codecCtx->height, stAV::PIX_FMT::RGB24, // destination
+        SwsContext* pToRgbCtx = sws_getContext(myCodecCtx->width, myCodecCtx->height, myCodecCtx->pix_fmt,    // source
+                                               myCodecCtx->width, myCodecCtx->height, stAV::PIX_FMT::RGB24, // destination
                                                SWS_BICUBIC, NULL, NULL, NULL);
         if(pToRgbCtx == NULL) {
             setState("SWScale library, failed to create SWScaler context");
@@ -399,7 +398,7 @@ bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
         // initialize additional buffer for converted RGB data
         setColorModel(StImage::ImgColor_RGB);
         changePlane(0).initTrash(StImagePlane::ImgRGB,
-                                 codecCtx->width, codecCtx->height);
+                                 myCodecCtx->width, myCodecCtx->height);
 
         uint8_t* rgbData[4]; stMemZero(rgbData,     sizeof(rgbData));
         int  rgbLinesize[4]; stMemZero(rgbLinesize, sizeof(rgbLinesize));
@@ -407,8 +406,8 @@ bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
         rgbLinesize[0] = (int )changePlane(0).getSizeRowBytes();
 
         sws_scale(pToRgbCtx,
-                  frame->data, frame->linesize,
-                  0, codecCtx->height,
+                  myFrame->data, myFrame->linesize,
+                  0, myCodecCtx->height,
                   rgbData, rgbLinesize);
 
         sws_freeContext(pToRgbCtx);
@@ -436,8 +435,8 @@ bool StAVImage::save(const StString& theFilePath,
     switch(theImageType) {
         case ST_TYPE_PNG:
         case ST_TYPE_PNS: {
-            codec = avcodec_find_encoder_by_name("png");
-            if(codec == NULL) {
+            myCodec = avcodec_find_encoder_by_name("png");
+            if(myCodec == NULL) {
                 setState("AVCodec library, video codec 'png' not found");
                 close();
                 return false;
@@ -459,23 +458,23 @@ bool StAVImage::save(const StString& theFilePath,
                 aPFormatAV = aPFrmtTarget;
             }
         #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
-            codecCtx = avcodec_alloc_context3(codec);
+            myCodecCtx = avcodec_alloc_context3(myCodec);
         #else
-            codecCtx = avcodec_alloc_context();
+            myCodecCtx = avcodec_alloc_context();
         #endif
 
             // setup encoder
-            codecCtx->pix_fmt = aPFormatAV;
-            codecCtx->width   = (int )anImage.getSizeX();
-            codecCtx->height  = (int )anImage.getSizeY();
-            codecCtx->compression_level = 9; // 0..9
+            myCodecCtx->pix_fmt = aPFormatAV;
+            myCodecCtx->width   = (int )anImage.getSizeX();
+            myCodecCtx->height  = (int )anImage.getSizeY();
+            myCodecCtx->compression_level = 9; // 0..9
             break;
         }
         case ST_TYPE_JPEG:
         case ST_TYPE_MPO:
         case ST_TYPE_JPS: {
-            codec = avcodec_find_encoder_by_name("mjpeg");
-            if(codec == NULL) {
+            myCodec = avcodec_find_encoder_by_name("mjpeg");
+            if(myCodec == NULL) {
                 setState("AVCodec library, video codec 'mjpeg' not found");
                 close();
                 return false;
@@ -508,16 +507,16 @@ bool StAVImage::save(const StString& theFilePath,
             }
 
         #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
-            codecCtx = avcodec_alloc_context3(codec);
+            myCodecCtx = avcodec_alloc_context3(myCodec);
         #else
-            codecCtx = avcodec_alloc_context();
+            myCodecCtx = avcodec_alloc_context();
         #endif
-            codecCtx->pix_fmt = aPFormatAV;
-            codecCtx->width   = (int )anImage.getSizeX();
-            codecCtx->height  = (int )anImage.getSizeY();
-            codecCtx->time_base.num = 1;
-            codecCtx->time_base.den = 1;
-            codecCtx->qmin = codecCtx->qmax = 10; // quality factor - lesser is better
+            myCodecCtx->pix_fmt = aPFormatAV;
+            myCodecCtx->width   = (int )anImage.getSizeX();
+            myCodecCtx->height  = (int )anImage.getSizeY();
+            myCodecCtx->time_base.num = 1;
+            myCodecCtx->time_base.den = 1;
+            myCodecCtx->qmin = myCodecCtx->qmax = 10; // quality factor - lesser is better
             break;
         }
         case ST_TYPE_NONE:
@@ -528,9 +527,9 @@ bool StAVImage::save(const StString& theFilePath,
 
     // open VIDEO codec
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
-    if(avcodec_open2(codecCtx, codec, NULL) < 0) {
+    if(avcodec_open2(myCodecCtx, myCodec, NULL) < 0) {
 #else
-    if(avcodec_open(codecCtx, codec) < 0) {
+    if(avcodec_open(myCodecCtx, myCodec) < 0) {
 #endif
         setState("AVCodec library, could not open video codec");
         close();
@@ -538,7 +537,7 @@ bool StAVImage::save(const StString& theFilePath,
     }
 
     // wrap own data into AVFrame
-    fillPointersAV(anImage, frame->data, frame->linesize);
+    fillPointersAV(anImage, myFrame->data, myFrame->linesize);
 
     StRawFile aRawFile(theFilePath);
     if(!aRawFile.openFile(StRawFile::WRITE)) {
@@ -552,7 +551,7 @@ bool StAVImage::save(const StString& theFilePath,
     aRawFile.initBuffer(aBuffSize);
 
     // encode the image
-    int anEncSize = avcodec_encode_video(codecCtx, (uint8_t* )aRawFile.changeBuffer(), aBuffSize, frame);
+    int anEncSize = avcodec_encode_video(myCodecCtx, (uint8_t* )aRawFile.changeBuffer(), aBuffSize, myFrame);
     if(anEncSize <= 0) {
         setState("AVCodec library, fail to encode the image");
         close();
