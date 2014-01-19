@@ -64,6 +64,58 @@ enum {
 
 };
 
+namespace {
+    inline StString markerString(const int theMarker) {
+        switch(theMarker) {
+            case M_SOF0:  return stCString("SOF0 ");
+            case M_SOF1:  return stCString("SOF1 ");
+            case M_SOF2:  return stCString("SOF2 ");
+            case M_SOF3:  return stCString("SOF3 ");
+            case M_SOF5:  return stCString("SOF5 ");
+            case M_SOF6:  return stCString("SOF6 ");
+            case M_SOF7:  return stCString("SOF6 ");
+            case M_SOF9:  return stCString("SOF9 ");
+            case M_SOF10: return stCString("SOF10");
+            case M_SOF11: return stCString("SOF11");
+            case M_SOF13: return stCString("SOF13");
+            case M_SOF14: return stCString("SOF14");
+            case M_SOF15: return stCString("SOF15");
+
+            case M_DHT:   return stCString("DHT  ");
+
+            case M_SOI:   return stCString("SOI  ");
+            case M_EOI:   return stCString("EOI  ");
+            case M_SOS:   return stCString("SOS  ");
+            case M_DQT:   return stCString("DQT  ");
+            case M_DNL:   return stCString("DNL  ");
+            case M_DRI:   return stCString("DRI  ");
+            case M_DHP:   return stCString("DHP  ");
+            case M_EXP:   return stCString("EXP  ");
+
+            case M_JFIF:  return stCString("JFIF ");
+            case M_EXIF:  return stCString("EXIF ");
+            case M_APP2:  return stCString("APP2 ");
+            case M_APP3:  return stCString("APP3 ");
+            case M_APP4:  return stCString("APP4 ");
+            case M_APP5:  return stCString("APP5 ");
+            case M_APP6:  return stCString("APP6 ");
+            case M_APP7:  return stCString("APP7 ");
+            case M_APP8:  return stCString("APP8 ");
+            case M_APP9:  return stCString("APP9 ");
+            case M_APP10: return stCString("APP10");
+            case M_APP11: return stCString("APP11");
+            case M_APP12: return stCString("APP12");
+            case M_IPTC:  return stCString("IPTC ");
+            case M_APP14: return stCString("APP14");
+            case M_APP15: return stCString("APP15");
+
+            case M_COM:   return stCString("COM  ");
+
+            default:      return StString(theMarker) + "  ";
+        }
+    }
+}
+
 StJpegParser::StJpegParser()
 : myImages(NULL),
   myData(NULL),
@@ -128,7 +180,8 @@ bool StJpegParser::parse() {
         return false;
     }
 
-    myImages = parseImage(1, myData, false);
+    int aCount = 0;
+    myImages = parseImage(++aCount, 1, myData, false);
     if(myImages.isNull()) {
         return false;
     }
@@ -136,13 +189,14 @@ bool StJpegParser::parse() {
     // continue reading the file (MPO may contains more than 1 image)
     for(StHandle<StJpegParser::Image> anImg = myImages;
         !anImg.isNull(); anImg = anImg->Next) {
-        anImg->Next = parseImage(1, anImg->Data + anImg->Length, true);
+        anImg->Next = parseImage(++aCount, 1, anImg->Data + anImg->Length, true);
     }
 
     return true;
 }
 
-StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theDepth,
+StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCount,
+                                                       const int      theDepth,
                                                        unsigned char* theDataStart,
                                                        const bool     theToFindSOI) {
     // check out of bounds
@@ -195,7 +249,7 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theDepth,
             }
         }
 
-        //ST_DEBUG_LOG(" #" + theDepth + " [" + aMarker + "] at position " + size_t(aData - myData - 1) + " / " + myLength); ///
+        //ST_DEBUG_LOG(" #" + theImgCount + "." + theDepth + " [" + markerString(aMarker) + "] at position " + size_t(aData - myData - 1) + " / " + myLength); ///
         if(aMarker == M_EOI) {
             ST_DEBUG_LOG("Jpeg, EOI at position " + size_t(aData - myData - 1) + " / " + myLength);
             anImg->Length = size_t(aData - anImg->Data);
@@ -203,10 +257,10 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theDepth,
         } else if(aMarker == M_SOI) {
             // here the subimage (thumbnail)...
             ST_DEBUG_LOG("Jpeg, SOI at position " + size_t(aData - myData - 1) + " / " + myLength);
-            StHandle<StJpegParser::Image> aSubImage = StJpegParser::parseImage(theDepth + 1, aData - 2);
-            if(!aSubImage.isNull()) {
-                //ST_DEBUG_LOG("aSubImage->Length= " + aSubImage->Length);
-                aData += aSubImage->Length - 2;
+            anImg->Thumb = StJpegParser::parseImage(theImgCount, theDepth + 1, aData - 2, false);
+            if(!anImg->Thumb.isNull()) {
+                //ST_DEBUG_LOG("anImg->Thumb->Length= " + anImg->Thumb->Length);
+                aData += anImg->Thumb->Length - 2;
             }
             continue;
         }
@@ -223,26 +277,30 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theDepth,
             //ST_DEBUG_LOG("Extraneous " + (aSkippedBytes - 1) + " padding bytes before section " + aMarker);
         }
 
-        //ST_DEBUG_LOG("Jpeg marker " + aMarker + " at position " + size_t(aData - myData - 1));
-
-        // read the length of the section
-        const int aLenH = aData[-2];
-        const int aLenL = aData[-1];
-        const int anItemLen = (aLenH << 8) | aLenL;
-        if(anItemLen < 2
-        || (aData + anItemLen) > aDataEnd) {
+        // read the length of the section (including these 2 bytes but excluding marker)
+        const int anItemLen = StAlienData::Get16uBE(aData - 2);
+        if(anItemLen < 3
+        || (aData + anItemLen - 2) > aDataEnd) {
             //ST_DEBUG_LOG("Invalid marker " + aMarker + " in jpeg (item lenght = " + anItemLen
             //           + " from position " + int(aDataEnd - aData - 2) + ')');
             // just ignore probably unknown sections
-            aData += 2;
             continue;
         }
 
         switch(aMarker) {
+            case M_SOF0: {
+                if(anItemLen >= 7) {
+                    anImg->SizeY = StAlienData::Get16uBE(aData + 1);
+                    anImg->SizeX = StAlienData::Get16uBE(aData + 3);
+                    //ST_DEBUG_LOG("   SOF " + anImg->SizeX + "x" + anImg->SizeY);
+                }
+                aData += anItemLen - 2;
+                break;
+            }
             case M_SOS: {
                 // here the image data...
                 //ST_DEBUG_LOG("Jpeg, SOS at position " + size_t(aData - myData - 1) + " / " + myLength);
-                aData += anItemLen;
+                aData += anItemLen - 2;
                 break;
             }
             case M_JFIF: {
@@ -250,18 +308,28 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theDepth,
                     //const int8_t aVerMaj = (int8_t )aData[5];
                     //const int8_t aVerMin = (int8_t )aData[6];
                     const JfifUnitsXY aUnits = (JfifUnitsXY )aData[7];
-                    const int16_t aDensityX = StAlienData::Get16uBE(aData + 8);
-                    const int16_t aDensityY = StAlienData::Get16uBE(aData + 10);
+                    const uint16_t aDensityX = StAlienData::Get16uBE(aData + 8);
+                    const uint16_t aDensityY = StAlienData::Get16uBE(aData + 10);
+                    //const int8_t  aThumbX   = (int8_t )aData[12];
+                    //const int8_t  aThumbY   = (int8_t )aData[13];
                     if(aUnits == JfifUnitsXY_AspectRatio) {
                         anImg->ParX = aDensityX;
                         anImg->ParY = aDensityY;
                     }
-                    //ST_DEBUG_LOG("  ## JFIF" + aVerMaj + "." + aVerMin + " u" + (int )aUnits + " " + aDensityX + "x" + aDensityY); ///
+                    //ST_DEBUG_LOG("  ## JFIF" + aVerMaj + "." + aVerMin + " u" + (int )aUnits + " " + aDensityX + "x" + aDensityY
+                    //           + " thumb " + aThumbX + "x" + aThumbY);
                 } else if(stAreEqual(aData, "JFXX\0", 5)) {
                     // JFIF extension
+                    //ST_DEBUG_LOG("  JFXX " + anItemLen);
+                    //ST_DEBUG_LOG("Jpeg, SOI at position " + size_t(aData - myData - 1) + " / " + myLength);
+                    //anImg->Thumb = StJpegParser::parseImage(theImgCount, theDepth + 1, aData - 2, false);
+                    //if(!anImg->Thumb.isNull()) {
+                        //ST_DEBUG_LOG("anImg->Thumb->Length= " + anImg->Thumb->Length);
+                    //    aData += anImg->Thumb->Length - 2;
+                    //}
                 }
 
-                aData += anItemLen;
+                aData += anItemLen - 2;
                 break;
             }
             case M_EXIF:
@@ -277,7 +345,7 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theDepth,
                     //ST_DEBUG_LOG("Image cotains XMP section");
                 }
                 // skip already read bytes
-                aData += anItemLen;
+                aData += anItemLen - 2;
                 break;
             }
             case M_APP3: {
@@ -313,7 +381,7 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theDepth,
                     }
                 }
                 // skip already read bytes
-                aData += anItemLen;
+                aData += anItemLen - 2;
                 break;
             }
             case M_APP4:
@@ -328,13 +396,13 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theDepth,
             case M_APP13:
             case M_APP14:
             case M_APP15: {
-                aData += anItemLen;
+                aData += anItemLen - 2;
                 break;
             }
             case M_COM: {
                 myComment = StString((char* )aData, anItemLen);
                 ST_DEBUG_LOG("StJpegParser, comment= '" + myComment + "'");
-                aData += anItemLen;
+                aData += anItemLen - 2;
                 break;
             }
             default: {
@@ -349,6 +417,8 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theDepth,
 StJpegParser::Image::Image()
 : Data(NULL),
   Length(0),
+  SizeX(0),
+  SizeY(0),
   ParX(0),
   ParY(0) {
     //

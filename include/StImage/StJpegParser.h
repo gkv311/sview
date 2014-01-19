@@ -44,9 +44,12 @@ class StJpegParser {
         size_t          Length;   //!< data length
         StArrayList< StHandle<StExifDir> >
                         Exif;     //!< EXIF sections
+        StHandle<Image> Thumb;    //!< optional thumbnail
         StHandle<Image> Next;     //!< link to the next image in file (if any)
-        int16_t         ParX;     //!< Pixel Aspect Ratio
-        int16_t         ParY;     //!< Pixel Aspect Ratio
+        size_t          SizeX;    //!< image width  in pixels
+        size_t          SizeY;    //!< image height in pixels
+        uint16_t        ParX;     //!< Pixel Aspect Ratio
+        uint16_t        ParY;     //!< Pixel Aspect Ratio
 
         ST_CPPEXPORT Image();
         ST_CPPEXPORT ~Image();
@@ -146,9 +149,10 @@ class StJpegParser {
     /**
      * Parse one image in data.
      */
-    ST_CPPEXPORT StHandle<StJpegParser::Image> parseImage(const int      theDepth,
+    ST_CPPEXPORT StHandle<StJpegParser::Image> parseImage(const int      theImgCount,
+                                                          const int      theDepth,
                                                           unsigned char* theDataStart,
-                                                          const bool     theToFindSOI = false);
+                                                          const bool     theToFindSOI);
 
         private:
 
