@@ -135,7 +135,32 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         StJpegParser aParser;
         double anHParallax = 0.0; // parallax in percents
         const bool isParsed = aParser.read(aFilePath);
-        StHandle<StJpegParser::Image> anImg1 = aParser.getImage(0);
+
+        StHandle<StJpegParser::Image> anImg1, anImg2;
+        size_t aMaxSizeX = 0;
+        size_t aMaxSizeY = 0;
+        for(StHandle<StJpegParser::Image> anImgIter = aParser.getImage(0); !anImgIter.isNull();
+            anImgIter = anImgIter->Next) {
+            aMaxSizeX = stMax(aMaxSizeX, anImgIter->SizeX);
+            aMaxSizeY = stMax(aMaxSizeY, anImgIter->SizeY);
+        }
+
+        int anImgCounter = 1;
+        for(StHandle<StJpegParser::Image> anImgIter = aParser.getImage(0); !anImgIter.isNull();
+            anImgIter = anImgIter->Next, ++anImgCounter) {
+            if(anImgIter->SizeX == aMaxSizeX
+            && anImgIter->SizeY == aMaxSizeY) {
+                if(anImg1.isNull()) {
+                    anImg1 = anImgIter;
+                    continue;
+                } else if(anImg2.isNull()) {
+                    anImg2 = anImgIter;
+                    continue;
+                }
+            }
+            anImgInfo->myInfo.add(StArgument(StString("Dimensions (") + anImgCounter + ")",
+                                             StString() + anImgIter->SizeX + " x " + anImgIter->SizeY));
+        }
 
         // copy metadata
         if(!aParser.getComment().isEmpty()) {
@@ -168,7 +193,6 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             return false;
         }
 
-        StHandle<StJpegParser::Image> anImg2 = aParser.getImage(1);
         if(!anImg2.isNull()
          && anImgType == StImageFile::ST_TYPE_MPO) {
             // read image from memory
