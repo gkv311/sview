@@ -319,7 +319,13 @@ bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
     || codecCtx->sample_aspect_ratio.den == 0) {
         setPixelRatio(1.0f);
     } else {
-        setPixelRatio(GLfloat(codecCtx->sample_aspect_ratio.num) / GLfloat(codecCtx->sample_aspect_ratio.den));
+        const GLfloat aRatio = GLfloat(codecCtx->sample_aspect_ratio.num) / GLfloat(codecCtx->sample_aspect_ratio.den);
+        if(aRatio > 70.0f) {
+            ST_DEBUG_LOG("AVCodec library, igning wrong PAR " + codecCtx->sample_aspect_ratio.num + ":" + codecCtx->sample_aspect_ratio.den);
+            setPixelRatio(1.0f);
+        } else {
+            setPixelRatio(aRatio);
+        }
     }
 
     stAV::dimYUV aDimsYUV;
