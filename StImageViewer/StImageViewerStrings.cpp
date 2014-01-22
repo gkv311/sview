@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -124,7 +124,7 @@ void loadDefaults(StLangMap& theStrings) {
     theStrings(ABOUT_VERSION,
                "version");
     theStrings(ABOUT_DESCRIPTION,
-               "Image viewer allows you to open stereoscopic images in formats JPEG, PNG, MPO and a lot of others.\n"
+               "Image viewer allows you to open stereoscopic images in formats JPEG, PNG, MPO and others.\n"
                "(C) 2007-2014 Kirill Gavrilov <kirill@sview.ru>\n"
                "Official site: www.sview.ru\n"
                "\n"
@@ -167,6 +167,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Previous image");
     theStrings(IMAGE_NEXT,
                "Next image");
+    theStrings(PLAYLIST,
+               "PlayList");
     theStrings(FULLSCREEN,
                "Switch\n"
                "fullscreen/windowed");

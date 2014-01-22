@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -515,6 +515,7 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
   myBtnNext(NULL),
   myBtnSwapLR(NULL),
   myBtnSrcFrmt(NULL),
+  myBtnPlayList(NULL),
   myBtnFull(NULL),
   //
   myFpsWidget(NULL),
@@ -535,6 +536,10 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
     myImage = new StGLImageRegion(this, aTextureQueue, true);
 
     createUpperToolbar();
+
+    myBtnPlayList = new StGLTextureButton(this, -aMargins.right() - scale(8 + 8 + 32), -aMargins.bottom() - scale(8),
+                                          StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_RIGHT));
+    myBtnPlayList->setTexturePath(iconTexture(stCString("playList"), scaleIcon(32)));
 
     // fullscreen button
     myBtnFull = new StGLTextureButton(this, -aMargins.right() - scale(8), -aMargins.bottom() - scale(8),
@@ -591,7 +596,6 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
     myImage->setVisibility(true, true);
 
     if(myMenuRoot != NULL) {
-        ///myMenuRoot->setVisibility(myIsVisibleGUI, false);
         myMenuRoot->setVisibility(toShowAll, false);
     }
 
@@ -601,6 +605,9 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
             child != NULL; child = child->getNext()) {
             child->setVisibility(toShowAll);
         }
+    }
+    if(myBtnPlayList != NULL) {
+        //myBtnPlayList->setVisibility(myIsMinimalGUI || toShowAll);
     }
     if(myBtnFull != NULL) {
         myBtnFull->setVisibility(myIsMinimalGUI || toShowAll);
@@ -617,6 +624,8 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
         } else if(::isPointIn(myBtnSwapLR, theCursor)) {
             size_t aLngId = myImage->params.swapLR->getValue() ? SWAP_LR_ON : SWAP_LR_OFF;
             myDescr->setText(tr(aLngId));
+        } else if(::isPointIn(myBtnPlayList, theCursor)) {
+            myDescr->setText(tr(PLAYLIST));
         } else if(::isPointIn(myBtnFull, theCursor)) {
             myDescr->setText(tr(FULLSCREEN));
         } else if(::isPointIn(myBtnSrcFrmt, theCursor)) {

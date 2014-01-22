@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ namespace StImageViewerStrings {
         SWAP_LR_ON = 1003,
         BTN_SRC_FORMAT = 1004,
         IMAGE_OPEN = 1015,
+        PLAYLIST   = 1028,
         FULLSCREEN = 1029,
 
         // Root -> Media menu

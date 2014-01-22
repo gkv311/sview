@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -136,6 +136,7 @@ class StImageViewerGUI : public StGLRootWidget {
     StGLTextureButton*  myBtnNext;
     StGLTextureButton*  myBtnSwapLR;
     StGLWidget*         myBtnSrcFrmt;
+    StGLTextureButton*  myBtnPlayList;
     StGLTextureButton*  myBtnFull;
     StGLFpsLabel*       myFpsWidget;
 
