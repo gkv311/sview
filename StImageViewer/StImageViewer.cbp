@@ -298,6 +298,12 @@
 		<Unit filename="lang/russian/StImageViewer.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="lang/korean/language.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/korean/StImageViewer.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Extensions>
 			<code_completion />
 			<envvars />

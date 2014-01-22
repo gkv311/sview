@@ -356,6 +356,12 @@
 		<Unit filename="lang/russian/StMoviePlayer.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="lang/korean/language.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/korean/StMoviePlayer.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="stMongoose.c">
 			<Option compilerVar="CC" />
 		</Unit>
