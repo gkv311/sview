@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -13,7 +13,8 @@
 
 StFTFont::StFTFont(StHandle<StFTLibrary> theFTLib)
 : myFTLib(theFTLib),
-  myFTFace(NULL) {
+  myFTFace(NULL),
+  myLoadFlags(FT_LOAD_NO_HINTING | FT_LOAD_TARGET_NORMAL) {
     if(myFTLib.isNull()) {
         myFTLib = new StFTLibrary();
     }
@@ -95,7 +96,7 @@ bool StFTFont::loadGlyph(const stUtf32_t theUChar) {
     myGlyphImg.nullify();
     myUChar = 0;
     if(theUChar == 0
-    || FT_Load_Char(myFTFace, theUChar, FT_LOAD_TARGET_NORMAL) != 0
+    || FT_Load_Char(myFTFace, theUChar, myLoadFlags) != 0
     || myFTFace->glyph == NULL) {
         return false;
     }
@@ -113,7 +114,7 @@ bool StFTFont::renderGlyph(const stUtf32_t theUChar) {
                               : 0;
     // | FT_LOAD_NO_BITMAP
     if(aGlyphIndex == 0
-    || FT_Load_Glyph(myFTFace, aGlyphIndex, FT_LOAD_RENDER | FT_LOAD_NO_HINTING | FT_LOAD_TARGET_NORMAL) != 0
+    || FT_Load_Glyph(myFTFace, aGlyphIndex, myLoadFlags | FT_LOAD_RENDER) != 0
     || myFTFace->glyph == NULL
     || myFTFace->glyph->format != FT_GLYPH_FORMAT_BITMAP) {
         return false;
@@ -153,7 +154,7 @@ bool StFTFont::renderGlyphNotdef() {
     myGlyphImg.nullify();
     myUChar = 0;
 
-    if(FT_Load_Glyph(myFTFace, 0, FT_LOAD_RENDER | FT_LOAD_NO_HINTING | FT_LOAD_TARGET_NORMAL) != 0
+    if(FT_Load_Glyph(myFTFace, 0, myLoadFlags | FT_LOAD_RENDER) != 0
     || myFTFace->glyph == NULL
     || myFTFace->glyph->format != FT_GLYPH_FORMAT_BITMAP) {
         return false;
