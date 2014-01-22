@@ -41,6 +41,7 @@ namespace StImageViewerStrings {
         MENU_MEDIA_OPEN_IMAGE = 1101,
         MENU_MEDIA_SAVE_IMAGE_AS = 1102,
         MENU_MEDIA_SRC_FORMAT = 1103,
+        MENU_MEDIA_FILE_INFO  = 1104,
         MENU_MEDIA_QUIT = 1109,
 
         // Root -> Media menu -> Open File menu

@@ -128,6 +128,7 @@ StGLMenu* StImageViewerGUI::createMediaMenu() {
     aMenuMedia->addItem(tr(MENU_MEDIA_OPEN_IMAGE),    aMenuOpenImage);
     aMenuMedia->addItem(tr(MENU_MEDIA_SAVE_IMAGE_AS), aMenuSaveImage);
     aMenuMedia->addItem(tr(MENU_MEDIA_SRC_FORMAT),    aMenuSrcFormat);
+    aMenuMedia->addItem(tr(MENU_MEDIA_FILE_INFO),     myPlugin->getAction(StImageViewer::Action_FileInfo));
 
     aMenuMedia->addItem("First File in folder")
               ->signals.onItemClick.connect(myPlugin, &StImageViewer::doListFirst);

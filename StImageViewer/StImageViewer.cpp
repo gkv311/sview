@@ -164,6 +164,9 @@ StImageViewer::StImageViewer(const StNativeWin_t         theParentWin,
     anAction = new StActionIntValue(stCString("DoSrcSideBySide"), params.srcFormat, ST_V_SRC_SIDE_BY_SIDE);
     addAction(Action_SrcSideBySideRL, anAction, ST_VK_S);
 
+    anAction = new StActionIntSlot(stCString("DoFileInfo"), stSlot(this, &StImageViewer::doAboutImage), 0);
+    addAction(Action_FileInfo, anAction, ST_VK_I);
+
     anAction = new StActionIntSlot(stCString("DoListFirst"), stSlot(this, &StImageViewer::doListFirst), 0);
     addAction(Action_ListFirst, anAction, ST_VK_HOME);
 
@@ -520,9 +523,6 @@ void StImageViewer::doKeyDown(const StKeyEvent& theEvent) {
         }
 
         // file walk
-        case ST_VK_I:
-            myGUI->doAboutImage(0);
-            return;
         case ST_VK_MEDIA_PREV_TRACK:
         case ST_VK_BROWSER_BACK:
             doListPrev();
@@ -815,6 +815,12 @@ void StImageViewer::doUpdateStateLoaded() {
         myWindow->setTitle("sView - Image Viewer");
     } else {
         myWindow->setTitle(aFileToLoad + " - sView");
+    }
+}
+
+void StImageViewer::doAboutImage(const size_t ) {
+    if(!myGUI.isNull()) {
+        myGUI->doAboutImage(0);
     }
 }
 

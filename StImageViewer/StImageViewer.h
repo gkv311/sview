@@ -93,6 +93,7 @@ class StImageViewer : public StApplication {
 
     ST_LOCAL void doOpen2FilesDialog(const size_t dummy = 0);
     ST_LOCAL void doSaveImageAs(const size_t theImgType) { myLoader->doSaveImageAs(theImgType); }
+    ST_LOCAL void doAboutImage(const size_t dummy = 0);
     ST_LOCAL void doListFirst(const size_t dummy = 0);
     ST_LOCAL void doListPrev(const size_t dummy = 0);
     ST_LOCAL void doListNext(const size_t dummy = 0);
@@ -159,6 +160,7 @@ class StImageViewer : public StApplication {
         Action_SrcMono,
         Action_SrcOverUnderLR,
         Action_SrcSideBySideRL,
+        Action_FileInfo,
         Action_ListFirst,
         Action_ListLast,
         Action_ListPrev,
