@@ -71,6 +71,7 @@ namespace {
     static const char ST_SETTING_SCALE_FORCE2X[] = "scale2X";
     static const char ST_SETTING_SUBTITLES_SIZE[]= "subsSize";
     static const char ST_SETTING_SUBTITLES_PARALLAX[] = "subsParallax";
+    static const char ST_SETTING_SEARCH_SUBS[]   = "toSearchSubs";
     static const char ST_SETTING_FULLSCREEN[]    = "fullscreen";
     static const char ST_SETTING_VIEWMODE[]      = "viewMode";
     static const char ST_SETTING_STEREO_MODE[]   = "viewStereoMode";
@@ -204,6 +205,7 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
                                                  0.0f,        // default value
                                                  1.0f,        // incremental step
                                                  0.1f);       // equality tolerance
+    params.ToSearchSubs = new StBoolParam(true);
 
     params.alDevice = new StALDeviceParam();
     params.AudioGain = new StFloat32Param( 0.0f, // sound is unattenuated
@@ -261,6 +263,7 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     mySettings->loadParam (ST_SETTING_SHOW_LIST,          params.ToShowPlayList);
     mySettings->loadParam (ST_SETTING_SUBTITLES_SIZE,     params.SubtitlesSize);
     mySettings->loadParam (ST_SETTING_SUBTITLES_PARALLAX, params.SubtitlesParallax);
+    mySettings->loadParam (ST_SETTING_SEARCH_SUBS,        params.ToSearchSubs);
 
     mySettings->loadParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
     mySettings->loadParam (ST_SETTING_VSYNC,              params.IsVSyncOn);
@@ -430,6 +433,7 @@ void StMoviePlayer::releaseDevice() {
         mySettings->saveParam (ST_SETTING_SCALE_FORCE2X,      params.ScaleHiDPI2X);
         mySettings->saveParam (ST_SETTING_SUBTITLES_SIZE,     params.SubtitlesSize);
         mySettings->saveParam (ST_SETTING_SUBTITLES_PARALLAX, params.SubtitlesParallax);
+        mySettings->saveParam (ST_SETTING_SEARCH_SUBS,        params.ToSearchSubs);
         mySettings->saveInt32 (ST_SETTING_FPSTARGET,          params.TargetFps);
         mySettings->saveString(ST_SETTING_OPENAL_DEVICE,      params.alDevice->getTitle());
         mySettings->saveInt32 (ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
@@ -653,7 +657,8 @@ bool StMoviePlayer::init() {
         myVideo = new StVideo(params.alDevice->getTitle(), myLangMap, myPlayList, aTextureQueue, aSubQueue);
         myVideo->signals.onError  = stSlot(myMsgQueue.access(), &StMsgQueue::doPushError);
         myVideo->signals.onLoaded = stSlot(this,                &StMoviePlayer::doLoaded);
-        myVideo->params.UseGpu = params.UseGpu;
+        myVideo->params.UseGpu       = params.UseGpu;
+        myVideo->params.ToSearchSubs = params.ToSearchSubs;
 
     #ifdef ST_HAVE_MONGOOSE
         doStartWebUI();

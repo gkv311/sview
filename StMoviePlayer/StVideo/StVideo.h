@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -192,6 +192,7 @@ class StVideo {
     struct {
 
         StHandle<StBoolParam>         UseGpu;          //!< use video decoding on GPU when available
+        StHandle<StBoolParam>         ToSearchSubs;    //!< automatically search for additional subtitles/audio track files nearby video file
         StHandle<StParamActiveStream> activeAudio;     //!< active Audio stream
         StHandle<StParamActiveStream> activeSubtitles; //!< active Subtitles stream
 
@@ -365,6 +366,8 @@ class StVideo {
     StHandle<StStereoParams>      myCurrParams;   //!< paramters for active file node
     StHandle<StGLTextureQueue>    myTextureQueue; //!< decoded frames queue
 
+    StArrayList<StString>         myTracksExt;    //!< extra tracks extensions list
+    StFolder                      myTracksFolder; //!< cached list of subtitles/audio tracks in the current folder
     StArrayList< StHandle<StFileNode> >
                                   myFilesToDelete;//!< file nodes for removal
 

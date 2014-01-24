@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,6 +63,11 @@ StVideo::StVideo(const StString&                   theALDeviceName,
     stAV::init();
 
     myPlayList->setExtensions(myMimesVideo.getExtensionsList());
+    myTracksExt = myMimesSubs.getExtensionsList();
+    StArrayList<StString> anAudioExt = myMimesAudio.getExtensionsList();
+    for(size_t anExtIter = 0; anExtIter < anAudioExt.size(); ++anExtIter) {
+        myTracksExt.add(anAudioExt.getValue(anExtIter));
+    }
 
     params.UseGpu          = new StBoolParam(false);
     params.activeAudio     = new StParamActiveStream();
@@ -420,9 +425,38 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
             return false;
         }
     } else {
-        if(!addFile(theNewSource->getPath(),
+        const StString aFullPath = theNewSource->getPath();
+        if(!addFile(aFullPath,
                     aStreamsListA, aStreamsListS, aDuration)) {
             return false;
+        }
+
+        // search for additional tracks
+        if(params.ToSearchSubs->getValue()
+        && myVideoMaster->isInitialized()
+        && !StFileNode::isRemoteProtocolPath(aFullPath)) {
+            StString aFolder, aFileName;
+            StFileNode::getFolderAndFile(aFullPath, aFolder, aFileName);
+            if(aFileName.getLength() > 8) { // ignore too short names
+                StString aName, anExtension, aTrackName, aTrackExtension;
+                StFileNode::getNameAndExtension(aFileName, aName, anExtension);
+                if(myTracksFolder.getPath() != aFolder) {
+                    // notice that playlist re-loading is not checked here...
+                    myTracksFolder.setSubPath(aFolder);
+                    myTracksFolder.init(myTracksExt, 1);
+                }
+                for(size_t aNodeIter = 0; aNodeIter < myTracksFolder.size(); ++aNodeIter) {
+                    const StFileNode* aNode          = myTracksFolder.getValue(aNodeIter);
+                    const StString&   aTrackFileName = aNode->getSubPath();
+                    StFileNode::getNameAndExtension(aTrackFileName, aTrackName, aTrackExtension);
+                    if(aTrackName.isStartsWithIgnoreCase(aName)) {
+                        //myPlayList->addToNode(aCurrFile, aFilePath);
+                        //myPlayList->getCurrentFile(theNewSource, theNewParams)
+                        addFile(aNode->getPath(),
+                                aStreamsListA, aStreamsListS, aDuration);
+                    }
+                }
+            }
         }
     }
 
