@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -95,6 +95,7 @@ class StChannelMap {
         //CH31,
         CH40,
         //CH41,
+        CH50, // 3 Front + 2 Rear
         CH51, // 3 Front + 2 Rear + LFE
         //CH61,
         //CH71

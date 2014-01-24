@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -126,6 +126,7 @@ class StAudioQueue : public StAVPacketQueue {
     ST_LOCAL void stalConfigureSources1();
     ST_LOCAL void stalConfigureSources2_0();
     ST_LOCAL void stalConfigureSources4_0();
+    ST_LOCAL void stalConfigureSources5_0();
     ST_LOCAL void stalConfigureSources5_1();
 
     ST_LOCAL bool stalQueue(const double thePts);

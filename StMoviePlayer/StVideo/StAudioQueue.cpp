@@ -1,7 +1,7 @@
 /**
  * This source is a part of sView program.
  *
- * Copyright © Kirill Gavrilov, 2009-2013
+ * Copyright © Kirill Gavrilov, 2009-2014
  */
 
 #include "StAudioQueue.h"
@@ -74,6 +74,15 @@ void StAudioQueue::stalConfigureSources4_0() {
     alSourcefv(myAlSources[2], AL_POSITION, POSITION_REAR_LEFT);
     alSourcefv(myAlSources[3], AL_POSITION, POSITION_REAR_RIGHT);
     stalCheckErrors("alSource*4.0");
+}
+
+void StAudioQueue::stalConfigureSources5_0() {
+    alSourcefv(myAlSources[0], AL_POSITION, POSITION_FRONT_LEFT);
+    alSourcefv(myAlSources[1], AL_POSITION, POSITION_FRONT_RIGHT);
+    alSourcefv(myAlSources[2], AL_POSITION, POSITION_FRONT_CENTER);
+    alSourcefv(myAlSources[3], AL_POSITION, POSITION_REAR_LEFT);
+    alSourcefv(myAlSources[4], AL_POSITION, POSITION_REAR_RIGHT);
+    stalCheckErrors("alSource*5.0");
 }
 
 void StAudioQueue::stalConfigureSources5_1() {
@@ -373,8 +382,10 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
             deinit();
             return false;
         }
-    } else if(myCodecCtx->channels == 6) {
-        if(myAlCtx.hasExtMultiChannel) {
+    } else if(myCodecCtx->channels == 5
+           || myCodecCtx->channels == 6) {
+        if(myAlCtx.hasExtMultiChannel
+        && myCodecCtx->channels != 5) {
             if(myBufferSrc.getFormat() == PCM8_UNSIGNED) {
                 myAlFormat = alGetEnumValue("AL_FORMAT_51CHN8");
                 myBufferOut.setFormat(PCM8_UNSIGNED);
@@ -425,20 +436,27 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
                 myBufferOut.setFormat(PCM16_SIGNED);
             }
 
-            myBufferOut.setupChannels(StChannelMap::CH51, StChannelMap::PCM, 6);
-            if(isReoderingNeeded()) {
-                // workaround for old FFmpeg
-                if(myCodec->id == CODEC_ID_AC3) {
-                    myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::AC3, 1);
-                } else if(myCodec->id == CODEC_ID_VORBIS) {
-                    myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::OGG, 1);
-                } else {
-                    myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, 1);
-                }
+
+            if(myCodecCtx->channels == 5) {
+                myBufferOut.setupChannels(StChannelMap::CH50, StChannelMap::PCM, 5);
+                myBufferSrc.setupChannels(StChannelMap::CH50, StChannelMap::PCM, isPlanar ? myCodecCtx->channels : 1);
+                stalConfigureSources5_0();
             } else {
-                myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, isPlanar ? myCodecCtx->channels : 1);
+                myBufferOut.setupChannels(StChannelMap::CH51, StChannelMap::PCM, 6);
+                if(isReoderingNeeded()) {
+                    // workaround for old FFmpeg
+                    if(myCodec->id == CODEC_ID_AC3) {
+                        myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::AC3, 1);
+                    } else if(myCodec->id == CODEC_ID_VORBIS) {
+                        myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::OGG, 1);
+                    } else {
+                        myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, 1);
+                    }
+                } else {
+                    myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, isPlanar ? myCodecCtx->channels : 1);
+                }
+                stalConfigureSources5_1();
             }
-            stalConfigureSources5_1();
             ST_DEBUG_LOG("OpenAL: multichannel extension (AL_FORMAT_51CHN16) not available");
         }
     }

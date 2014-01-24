@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,14 @@ StChannelMap::StChannelMap(const StChannelMap::Channels theChannels,
             RL = 2;
             RR = 3;
             FC = LFE = 0;
+            return;
+        case StChannelMap::CH50:
+            count = 5;
+            FL  = 0;
+            FR  = 1;
+            FC  = 2;
+            RL  = 3;
+            RR  = 4;
             return;
         case StChannelMap::CH51:
             count = 6;
@@ -346,6 +354,17 @@ bool StPCMBuffer::addConvert(const StPCMBuffer& theBuffer) {
                 sampleConv(aBuffersSrc[1][sampleSrcId], aBuffersOut[1][sampleOutId]);
                 sampleConv(aBuffersSrc[2][sampleSrcId], aBuffersOut[2][sampleOutId]);
                 sampleConv(aBuffersSrc[3][sampleSrcId], aBuffersOut[3][sampleOutId]);
+            }
+            myPlaneSize += anAddedPlaneSize;
+            return true;
+        }
+        case StChannelMap::CH50: {
+            for(size_t sampleSrcId(0), sampleOutId(0); sampleSrcId < aSamplesSrcCount; sampleSrcId += aSmplSrcInc, sampleOutId += aSmplOutInc) {
+                sampleConv(aBuffersSrc[0][sampleSrcId], aBuffersOut[0][sampleOutId]);
+                sampleConv(aBuffersSrc[1][sampleSrcId], aBuffersOut[1][sampleOutId]);
+                sampleConv(aBuffersSrc[2][sampleSrcId], aBuffersOut[2][sampleOutId]);
+                sampleConv(aBuffersSrc[3][sampleSrcId], aBuffersOut[3][sampleOutId]);
+                sampleConv(aBuffersSrc[4][sampleSrcId], aBuffersOut[4][sampleOutId]);
             }
             myPlaneSize += anAddedPlaneSize;
             return true;
