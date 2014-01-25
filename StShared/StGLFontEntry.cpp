@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -85,7 +85,19 @@ bool StGLFontEntry::stglInit(StGLContext& theCtx,
 bool StGLFontEntry::createTexture(StGLContext& theCtx) {
     const GLint aMaxSize = theCtx.getMaxTextureSize();
 
-    GLint aGlyphsNb = myFont->getGlyphsNumber() - GLint(myLastTileId) + 1;
+    GLint aGlyphsNb = 0;
+    if(myFont->hasCJK()
+    || myFont->hasKorean()) {
+        // italic does not make sense for Chinese
+        // limit overall number of glyphs in the single texture to 4k
+        // (single font file might contain about 20k-50k glyphs)
+        aGlyphsNb = stMin(4000, 2 * myFont->getGlyphsNumber() - GLint(myLastTileId) + 1);
+    } else {
+        // western might contain reg/bold/italic/bolditalic styles
+        // limit overall number of glyphs in the single texture to 1k
+        // (single font file might contain about 6k glyphs for different languages)
+        aGlyphsNb = stMin(1000, 4 * myFont->getGlyphsNumber() - GLint(myLastTileId) + 1);
+    }
 
     const GLsizei aTextureSizeX = getPowerOfTwo(aGlyphsNb * myTileSizeX, aMaxSize);
     const size_t  aTilesPerRow  = aTextureSizeX / myTileSizeX;

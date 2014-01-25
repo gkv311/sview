@@ -297,6 +297,13 @@ class StFTFont {
         return mySubsets[Subset_CJK];
     }
 
+    /**
+     * @return true if this font contains Korean glyphs
+     */
+    ST_LOCAL bool hasKorean() const {
+        return mySubsets[Subset_Korean];
+    }
+
         protected:
 
     /**
