@@ -15,6 +15,8 @@ StFTFont::StFTFont(StHandle<StFTLibrary> theFTLib)
 : myFTLib(theFTLib),
   myFTFace(NULL),
   myLoadFlags(FT_LOAD_NO_HINTING | FT_LOAD_TARGET_NORMAL),
+  myGlyphMaxWidth(1),
+  myGlyphMaxHeight(1),
   myUChar(0) {
     if(myFTLib.isNull()) {
         myFTLib = new StFTLibrary();
@@ -31,6 +33,8 @@ void StFTFont::release() {
     myUChar  = 0;
     myFTFace = NULL;
     myGlyphImg.nullify();
+    myGlyphMaxWidth  = 1;
+    myGlyphMaxHeight = 1;
     for(size_t aStyleIt = 0; aStyleIt < StylesNB; ++aStyleIt) {
         FT_Face& aFace = myFTFaces[aStyleIt];
         if(aFace != NULL) {
@@ -46,17 +50,35 @@ bool StFTFont::init(const unsigned int thePointSize,
     myUChar  = 0;
     myFTFace = NULL;
     myGlyphImg.nullify();
+    myGlyphMaxWidth  = 1;
+    myGlyphMaxHeight = 1;
     if(myFTFaces[Style_Regular] == NULL) {
         return false;
     }
 
     for(size_t aStyleIt = 0; aStyleIt < StylesNB; ++aStyleIt) {
         FT_Face& aFace = myFTFaces[aStyleIt];
-        if(aFace != NULL
-        && FT_Set_Char_Size(aFace, 0L, thePointSize * 64, theResolution, theResolution) != 0) {
+        if(aFace == NULL) {
+            continue;
+        } else if(FT_Set_Char_Size(aFace, 0L, thePointSize * 64, theResolution, theResolution) != 0) {
             ST_ERROR_LOG("Font '" + myFontPaths[aStyleIt] + "' doesn't contain requested size!");
             return false;
         }
+
+        float aWidth = (FT_IS_SCALABLE(aFace) != 0)
+                     ? float(aFace->bbox.xMax - aFace->bbox.xMin) * (float(aFace->size->metrics.x_ppem) / float(aFace->units_per_EM))
+                     : float(aFace->size->metrics.max_advance) / 64.0f;
+        float aHeight = (FT_IS_SCALABLE(aFace) != 0)
+                      ? float(aFace->bbox.yMax - aFace->bbox.yMin) * (float(aFace->size->metrics.y_ppem) / float(aFace->units_per_EM))
+                      : float(aFace->size->metrics.height) / 64.0f;
+        myGlyphMaxWidth  = stMax(myGlyphMaxWidth,  (unsigned int)(aWidth  + 0.5f));
+        myGlyphMaxHeight = stMax(myGlyphMaxHeight, (unsigned int)(aHeight + 0.5f));
+
+        /*myFTFace = myFTFaces[aStyleIt];
+        if(myFTFace != NULL) {
+            ST_DEBUG_LOG("Font '" + myFTFace->family_name + "'[" + aStyleIt + "] maxSize= " + myGlyphMaxWidth + "x" + myGlyphMaxHeight
+                       + " lineSize= " + getLineSpacing());
+        }*/
     }
     myFTFace = myFTFaces[Style_Regular];
     return true;
@@ -187,20 +209,6 @@ bool StFTFont::renderGlyphNotdef() {
     }
     myGlyphImg.setTopDown(aBitmap.pitch > 0);
     return true;
-}
-
-unsigned int StFTFont::getGlyphMaxSizeX() const {
-    float aWidth = (FT_IS_SCALABLE(myFTFace) != 0)
-                 ? float(myFTFace->bbox.xMax - myFTFace->bbox.xMin) * (float(myFTFace->size->metrics.x_ppem) / float(myFTFace->units_per_EM))
-                 : float(myFTFace->size->metrics.max_advance) / 64.0f;
-    return (unsigned int)(aWidth + 0.5f);
-}
-
-unsigned int StFTFont::getGlyphMaxSizeY() const {
-    float aHeight = (FT_IS_SCALABLE(myFTFace) != 0)
-                  ? float(myFTFace->bbox.yMax - myFTFace->bbox.yMin) * (float(myFTFace->size->metrics.y_ppem) / float(myFTFace->units_per_EM))
-                  : float(myFTFace->size->metrics.height) / 64.0f;
-    return (unsigned int)(aHeight + 0.5f);
 }
 
 float StFTFont::getAdvanceX(const stUtf32_t theUChar,

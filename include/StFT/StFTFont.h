@@ -186,12 +186,16 @@ class StFTFont {
     /**
      * @return maximal glyph width in pixels (rendered to bitmap).
      */
-    ST_CPPEXPORT unsigned int getGlyphMaxSizeX() const;
+    ST_LOCAL unsigned int getGlyphMaxSizeX() const {
+        return myGlyphMaxWidth;
+    }
 
     /**
      * @return maximal glyph height in pixels (rendered to bitmap).
      */
-    ST_CPPEXPORT unsigned int getGlyphMaxSizeY() const;
+    ST_LOCAL unsigned int getGlyphMaxSizeY() const {
+        return myGlyphMaxHeight;
+    }
 
     /**
      * @return vertical distance from the horizontal baseline to the highest character coordinate.
@@ -317,6 +321,8 @@ class StFTFont {
     StString              myFontPaths[StylesNB]; //!< font paths
     bool                  mySubsets[SubsetsNB];
     FT_Int32              myLoadFlags;           //!< default load flags
+    unsigned int          myGlyphMaxWidth;       //!< maximum glyph width
+    unsigned int          myGlyphMaxHeight;      //!< maximum glyph height
 
     StImagePlane          myGlyphImg;            //!< cached glyph plane
     FT_Vector             myKernAdvance;         //!< buffer variable
