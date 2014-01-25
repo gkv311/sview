@@ -203,7 +203,7 @@ void StGLTextFormatter::append(StGLContext&          theCtx,
 
     // first pass - render all symbols using associated font on single ZERO baseline
     StGLTile aTile;
-    for(StUtf8Iter anIter = theString.iterator(); *anIter != 0 && anIter.getIndex() <= theString.Length;) {
+    for(StUtf8Iter anIter = theString.iterator(); *anIter != 0 && anIter.getIndex() < theString.Length;) {
         const stUtf32_t aCharThis =   *anIter;
         const stUtf32_t aCharNext = *++anIter;
 
@@ -245,11 +245,12 @@ void StGLTextFormatter::appendHTML(StGLContext&    theCtx,
         return;
     }
 
-    const stUtf8_t* aStartPtr = theString.String;
-    size_t          aStartId  = 0;
+    StUtf8Iter anIter = theString.iterator();
+    size_t          aStartId  = anIter.getIndex();
+    const stUtf8_t* aStartPtr = anIter.getBufferHere();
     StFTFont::Style aStyle    = StFTFont::Style_Regular;
-    for(StUtf8Iter anIter = theString.iterator(); *anIter != 0;) {
-        const stUtf8_t* anEndPtr  = anIter.getBufferHere();
+    for(; *anIter != 0;) {
+        const stUtf8_t* anEndPtr  =    anIter.getBufferHere();
         const size_t    aCurrId   =    anIter.getIndex();
         const stUtf32_t aCharThis =   *anIter;
         const stUtf32_t aCharNext = *++anIter;
@@ -277,8 +278,8 @@ void StGLTextFormatter::appendHTML(StGLContext&    theCtx,
         }
 
         if(anEndPtr != aStartPtr) {
-            const size_t    aSubSize   = size_t(anEndPtr - aStartPtr - 1);
-            const size_t    aSubLen    = aCurrId - aStartId - 1;
+            const size_t    aSubSize   = size_t(anEndPtr - aStartPtr);
+            const size_t    aSubLen    = aCurrId - aStartId;
             const StCString aSubString = stStringExtConstr(aStartPtr, aSubSize, aSubLen);
             append(theCtx, aSubString, aStyle, theFont);
         }
