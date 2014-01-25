@@ -30,13 +30,13 @@ StFTFontRegistry::StFTFontRegistry() {
     myFilesMajor.add(stCString("timesbd.ttf"));
     myFilesMajor.add(stCString("timesi.ttf"));
     myFilesMajor.add(stCString("timesbi.ttf"));
-    myFilesMajor.add(stCString("micross.ttf"));
-    myFilesMajor.add(stCString("tahoma.ttf"));
-    myFilesMajor.add(stCString("tahomabd.ttf"));
     myFilesMajor.add(stCString("trebuc.ttf"));
     myFilesMajor.add(stCString("trebucbd.ttf"));
     myFilesMajor.add(stCString("trebucit.ttf"));
     myFilesMajor.add(stCString("trebucbi.ttf"));
+    myFilesMajor.add(stCString("tahoma.ttf"));
+    myFilesMajor.add(stCString("tahomabd.ttf"));
+    myFilesMajor.add(stCString("micross.ttf"));
     // korean
     myFilesMajor.add(stCString("malgun.ttf"));
     myFilesMajor.add(stCString("malgunbd.ttf"));
@@ -55,12 +55,12 @@ StFTFontRegistry::StFTFontRegistry() {
     myFilesMajor.add(stCString("Times New Roman Bold.ttf"));
     myFilesMajor.add(stCString("Times New Roman Italic.ttf"));
     myFilesMajor.add(stCString("Times New Roman Bold Italic.ttf"));
-    myFilesMajor.add(stCString("Tahoma.ttf"));
-    myFilesMajor.add(stCString("Tahoma Bold.ttf"));
     myFilesMajor.add(stCString("Trebuchet MS.ttf"));
     myFilesMajor.add(stCString("Trebuchet MS Bold.ttf"));
     myFilesMajor.add(stCString("Trebuchet MS Italic.ttf"));
     myFilesMajor.add(stCString("Trebuchet MS Bold Italic.ttf"));
+    myFilesMajor.add(stCString("Tahoma.ttf"));
+    myFilesMajor.add(stCString("Tahoma Bold.ttf"));
     myFilesMajor.add(stCString("Monaco.dfont"));
     // korean
     //myFilesMajor.add(stCString("AppleMyungjo.ttf"));
@@ -78,6 +78,15 @@ StFTFontRegistry::StFTFontRegistry() {
     myFilesMajor.add(stCString("DejaVuSans-Bold.ttf"));
     myFilesMajor.add(stCString("DejaVuSansMono.ttf"));
     myFilesMajor.add(stCString("DejaVuSansMono-Bold.ttf"));
+
+    myFilesMajor.add(stCString("FreeSerif.ttf"));
+    myFilesMajor.add(stCString("FreeSerifBold.ttf"));
+    myFilesMajor.add(stCString("FreeSerifItalic.ttf"));
+    myFilesMajor.add(stCString("FreeSerifBoldItalic.ttf"));
+    myFilesMajor.add(stCString("FreeSans.ttf"));
+    myFilesMajor.add(stCString("FreeSansBold.ttf"));
+    myFilesMajor.add(stCString("FreeSansOblique.ttf"));
+    myFilesMajor.add(stCString("FreeSansBoldOblique.ttf"));
 
     // korean
     myFilesMajor.add(stCString("NanumMyeongjo.ttf"));
@@ -142,6 +151,7 @@ void StFTFontRegistry::searchFiles(const StArrayList<StString>& theNames,
         } else {
             aFamily.Regular = aPath;
         }
+        //ST_DEBUG_LOG("StFTFontRegistry, font file '" + aName + "', family '" + aFamily.FamilyName + "', contains " + aFace->num_glyphs + " glyphs!");
 
         FT_Done_Face(aFace);
     }
@@ -193,8 +203,12 @@ void StFTFontRegistry::init(const bool theToSearchAll) {
     aSans .CJK     = findFont(stCString("STFangsong"));
     aMono .CJK     = findFont(stCString("STFangsong"));
 #else
-    aSerif.Western = findFont(stCString("DejaVu Serif"));
-    aSans .Western = findFont(stCString("DejaVu Sans"));
+    aSerif.Western = findFont(stCString("FreeSerif"));
+    aSans .Western = findFont(stCString("FreeSans"));
+    if(aSerif.Western.FamilyName.isEmpty()) {
+        aSerif.Western = findFont(stCString("DejaVu Serif"));
+        aSans .Western = findFont(stCString("DejaVu Sans"));
+    }
     aMono .Western = findFont(stCString("DejaVu Sans Mono"));
     aSerif.Korean  = findFont(stCString("NanumMyeongjo"));
     aSans .Korean  = findFont(stCString("NanumGothic"));
