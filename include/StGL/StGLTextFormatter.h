@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -42,6 +42,11 @@ class StGLTextFormatter {
         ST_ALIGN_Y_BOTTOM,
     } StAlignY;
 
+    enum Parser {
+        Parser_PlainText, //!< ignore any tags - prints text as is
+        Parser_LiteHTML,  //!< process minimal set of HTML tags but print unknown tags as is (save for unknown source)
+    };
+
         public:
 
     /**
@@ -56,9 +61,23 @@ class StGLTextFormatter {
                                      const StGLTextFormatter::StAlignY theAlignY);
 
     /**
+     * Setup parser.
+     */
+    ST_LOCAL void setupParser(const StGLTextFormatter::Parser theParser) {
+        myParser = theParser;
+    }
+
+    /**
      * Reset current progress.
      */
     ST_CPPEXPORT void reset();
+
+    /**
+     * Render specified text to inner buffer.
+     */
+    ST_CPPEXPORT void append(StGLContext&    theCtx,
+                             const StString& theString,
+                             StGLFont&       theFont);
 
     /**
      * Render specified text to inner buffer.
@@ -67,6 +86,13 @@ class StGLTextFormatter {
                              const StString&       theString,
                              const StFTFont::Style theStyle,
                              StGLFont&             theFont);
+
+    /**
+     * Process minimal set of formatting tags from HTML.
+     */
+    ST_CPPEXPORT void appendHTML(StGLContext&    theCtx,
+                                 const StString& theString,
+                                 StGLFont&       theFont);
 
     /**
      * Perform formatting on the buffered text.
@@ -125,6 +151,7 @@ class StGLTextFormatter {
 
     StAlignX              myAlignX;        //!< horizontal alignment style
     StAlignY              myAlignY;        //!< vertical   alignment style
+    Parser                myParser;        //!< parser configuration
 
         protected: //! @name input data
 

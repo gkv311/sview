@@ -20,7 +20,7 @@
  * for internal or external distribution as long as this notice
  * remains attached.
  *
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -103,6 +103,16 @@ class StUtfIterator {
         StUtfIterator aCopy = *this;
         ++*this;
         return aCopy;
+    }
+
+    /**
+     * Several characters forward.
+     */
+    inline StUtfIterator& operator+=(int theIncrement) {
+        for(; theIncrement > 0; --theIncrement) {
+            ++*this;
+        }
+        return *this;
     }
 
     /**

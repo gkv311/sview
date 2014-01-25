@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -52,6 +52,7 @@ inline void moveY(StArray<StGLTile>& theRects,
 StGLTextFormatter::StGLTextFormatter()
 : myAlignX(ST_ALIGN_X_LEFT),
   myAlignY(ST_ALIGN_Y_TOP),
+  myParser(Parser_LiteHTML),
   //
   myPen(0.0f, 0.0f),
   myRectsNb(0),
@@ -173,6 +174,16 @@ void StGLTextFormatter::getResult(StGLContext&                                th
     }
 }
 
+void StGLTextFormatter::append(StGLContext&    theCtx,
+                               const StString& theString,
+                               StGLFont&       theFont) {
+    if(myParser == Parser_LiteHTML) {
+        appendHTML(theCtx, theString, theFont);
+        return;
+    }
+    append(theCtx, theString, StFTFont::Style_Regular, theFont);
+}
+
 void StGLTextFormatter::append(StGLContext&          theCtx,
                                const StString&       theString,
                                const StFTFont::Style theStyle,
@@ -213,6 +224,98 @@ void StGLTextFormatter::append(StGLContext&          theCtx,
 
         ++myRectsNb;
     }
+}
+
+enum CtrlTag {
+    CtrlTag_UNKNOWN,
+    CtrlTag_Italic,
+    CtrlTag_Bold,
+};
+
+void StGLTextFormatter::appendHTML(StGLContext&    theCtx,
+                                   const StString& theString,
+                                   StGLFont&       theFont) {
+    if(theFont.getFont().isNull()) {
+        return;
+    }
+
+    myAscender    = stMax(myAscender,    theFont.getFont()->getAscender());
+    myLineSpacing = stMax(myLineSpacing, theFont.getFont()->getLineSpacing());
+    if(theString.isEmpty()) {
+        return;
+    }
+
+    size_t          aStart  = 0;
+    StFTFont::Style aStyle  = StFTFont::Style_Regular;
+    bool            isClose = false;
+    CtrlTag         aTag    = CtrlTag_UNKNOWN;
+    for(StUtf8Iter anIter = theString.iterator(); *anIter != 0;) {
+        const size_t    anIndex   =    anIter.getIndex();
+        const stUtf32_t aCharThis =   *anIter;
+        const stUtf32_t aCharNext = *++anIter;
+        if(aCharThis != '<') {
+            continue;
+        }
+        if(aCharNext == '/') {
+            isClose = false;
+            ++anIter;
+        }
+
+        if(stAreEqual(anIter.getBufferHere(), "I>", 2)
+        || stAreEqual(anIter.getBufferHere(), "i>", 2)) {
+            aTag    = CtrlTag_Italic;
+            anIter += 2;
+        } else if(stAreEqual(anIter.getBufferHere(), "B>", 2)
+               || stAreEqual(anIter.getBufferHere(), "b>", 2)) {
+            aTag    = CtrlTag_Bold;
+            anIter += 2;
+        } else {
+            // ignore unknown tags
+            continue;
+        }
+
+        switch(aTag) {
+            case CtrlTag_Italic: {
+                if(isClose) {
+                    if(aStyle == StFTFont::Style_BoldItalic) {
+                        aStyle = StFTFont::Style_Bold;
+                    } else if(aStyle == StFTFont::Style_Italic) {
+                        aStyle = StFTFont::Style_Regular;
+                    }
+                } else {
+                    if(aStyle == StFTFont::Style_Bold) {
+                        aStyle = StFTFont::Style_BoldItalic;
+                    } else if(aStyle == StFTFont::Style_Regular) {
+                        aStyle = StFTFont::Style_Italic;
+                    }
+                }
+                break;
+            }
+            case CtrlTag_Bold: {
+                if(isClose) {
+                    if(aStyle == StFTFont::Style_BoldItalic) {
+                        aStyle = StFTFont::Style_Italic;
+                    } else if(aStyle == StFTFont::Style_Bold) {
+                        aStyle = StFTFont::Style_Regular;
+                    }
+                } else {
+                    if(aStyle == StFTFont::Style_Italic) {
+                        aStyle = StFTFont::Style_BoldItalic;
+                    } else if(aStyle == StFTFont::Style_Regular) {
+                        aStyle = StFTFont::Style_Bold;
+                    }
+                }
+                break;
+            }
+            default: break;
+        }
+
+        const StString aSubString = theString.subString(aStart, anIndex);
+        aStart = anIter.getIndex();
+        append(theCtx, aSubString, aStyle, theFont);
+    }
+    const StString aSubString = theString.subString(aStart, theString.getLength());
+    append(theCtx, aSubString, aStyle, theFont);
 }
 
 void StGLTextFormatter::newLine(const size_t theLastRect) {

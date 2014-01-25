@@ -343,7 +343,7 @@ void StGLTextArea::recomputeBorder(StGLContext& theCtx) {
 void StGLTextArea::formatText(StGLContext& theCtx) {
     if(myToRecompute) {
         myFormatter.reset();
-        myFormatter.append(theCtx, myText, StFTFont::Style_Regular, *myFont);
+        myFormatter.append(theCtx, myText, *myFont);
         myFormatter.format(myTextWidth, GLfloat(getRectPx().height()));
         myFormatter.getResult(theCtx, myTexturesList, myTextVertBuf, myTextTCrdBuf);
         myFormatter.getBndBox(myTextBndBox);
