@@ -145,22 +145,13 @@ class StFTFont {
     }
 
     /**
-     * @return font path
-     */
-    ST_LOCAL const StString& getFilePath() const {
-        return myFontPath;
-    }
-
-    /**
-     * Initialize the font.
-     * @param theFontPath   path to the font
-     * @param thePointSize  the face size in points (1/72 inch)
-     * @param theResolution the resolution of the target device
+     * Load the font from specified path.
+     * @param theFontPath path to the font
+     * @param theStyle    the font style
      * @return true on success
      */
-    ST_CPPEXPORT bool init(const StString&    theFontPath,
-                           const unsigned int thePointSize,
-                           const unsigned int theResolution = 72);
+    ST_CPPEXPORT bool load(const StString&       theFontPath,
+                           const StFTFont::Style theStyle);
 
     /**
      * Re-initialize the font.
@@ -291,6 +282,13 @@ class StFTFont {
     }
 
     /**
+     * @return font path
+     */
+    ST_LOCAL const StString& getFilePath(const StFTFont::Style theStyle) const {
+        return myFontPaths[theStyle];
+    }
+
+    /**
      * @return true if this font contains CJK (Chinese, Japanese, and Korean) glyphs
      */
     ST_LOCAL bool hasCJK() const {
@@ -313,15 +311,16 @@ class StFTFont {
 
         protected:
 
-    StHandle<StFTLibrary> myFTLib;       //!< handle to the FT library object
-    FT_Face               myFTFace;      //!< FT face object
-    StString              myFontPath;    //!< font path
+    StHandle<StFTLibrary> myFTLib;               //!< handle to the FT library object
+    FT_Face               myFTFace;              //!< active FT face object
+    FT_Face               myFTFaces[StylesNB];   //!< FT face objects
+    StString              myFontPaths[StylesNB]; //!< font paths
     bool                  mySubsets[SubsetsNB];
-    FT_Int32              myLoadFlags;   //!< default load flags
+    FT_Int32              myLoadFlags;           //!< default load flags
 
-    StImagePlane          myGlyphImg;    //!< cached glyph plane
-    FT_Vector             myKernAdvance; //!< buffer variable
-    stUtf32_t             myUChar;       //!< currently loaded unicode character
+    StImagePlane          myGlyphImg;            //!< cached glyph plane
+    FT_Vector             myKernAdvance;         //!< buffer variable
+    stUtf32_t             myUChar;               //!< currently loaded unicode character
 
 };
 

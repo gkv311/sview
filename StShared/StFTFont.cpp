@@ -14,11 +14,13 @@
 StFTFont::StFTFont(StHandle<StFTLibrary> theFTLib)
 : myFTLib(theFTLib),
   myFTFace(NULL),
-  myLoadFlags(FT_LOAD_NO_HINTING | FT_LOAD_TARGET_NORMAL) {
+  myLoadFlags(FT_LOAD_NO_HINTING | FT_LOAD_TARGET_NORMAL),
+  myUChar(0) {
     if(myFTLib.isNull()) {
         myFTLib = new StFTLibrary();
     }
     stMemZero(mySubsets, sizeof(mySubsets));
+    stMemZero(myFTFaces, sizeof(myFTFaces));
 }
 
 StFTFont::~StFTFont() {
@@ -26,61 +28,75 @@ StFTFont::~StFTFont() {
 }
 
 void StFTFont::release() {
+    myUChar  = 0;
+    myFTFace = NULL;
     myGlyphImg.nullify();
-    myFontPath.clear();
-    myUChar = 0;
-    if(myFTFace != NULL) {
-        FT_Done_Face(myFTFace);
-        myFTFace = NULL;
+    for(size_t aStyleIt = 0; aStyleIt < StylesNB; ++aStyleIt) {
+        FT_Face& aFace = myFTFaces[aStyleIt];
+        if(aFace != NULL) {
+            FT_Done_Face(aFace);
+            aFace = NULL;
+        }
+        myFontPaths[aStyleIt].clear();
     }
 }
 
 bool StFTFont::init(const unsigned int thePointSize,
                     const unsigned int theResolution) {
-    if(!isValid()) {
+    myUChar  = 0;
+    myFTFace = NULL;
+    myGlyphImg.nullify();
+    if(myFTFaces[Style_Regular] == NULL) {
         return false;
     }
 
-    myGlyphImg.nullify();
-    myUChar = 0;
-    if(FT_Set_Char_Size(myFTFace, 0L, thePointSize * 64, theResolution, theResolution) != 0) {
-        ST_DEBUG_LOG("Font '" + myFontPath + "' doesn't contain requested size!");
-        release();
-        return false;
+    for(size_t aStyleIt = 0; aStyleIt < StylesNB; ++aStyleIt) {
+        FT_Face& aFace = myFTFaces[aStyleIt];
+        if(aFace != NULL
+        && FT_Set_Char_Size(aFace, 0L, thePointSize * 64, theResolution, theResolution) != 0) {
+            ST_ERROR_LOG("Font '" + myFontPaths[aStyleIt] + "' doesn't contain requested size!");
+            return false;
+        }
     }
+    myFTFace = myFTFaces[Style_Regular];
     return true;
 }
 
-bool StFTFont::init(const StString&    theFontPath,
-                    const unsigned int thePointSize,
-                    const unsigned int theResolution) {
-    release();
-    myFontPath = theFontPath;
-    if(!myFTLib->isValid()) {
-        ST_DEBUG_LOG("StFTFont, FreeType library is unavailable!");
+bool StFTFont::load(const StString&       theFontPath,
+                    const StFTFont::Style theStyle) {
+    if(!myFTLib->isValid()
+    || theStyle <  Style_Regular
+    || theStyle >= StylesNB
+    || theFontPath.isEmpty()) {
         return false;
     }
+    myUChar  = 0;
+    myFTFace = NULL;
+    myGlyphImg.nullify();
+    myFontPaths[theStyle] = theFontPath;
 
-    const StString aFontPath = StFileNode::getCompatibleName(myFontPath);
-    if(FT_New_Face(myFTLib->getInstance(), aFontPath.toCString(), 0, &myFTFace) != 0) {
+    FT_Face& aFace = myFTFaces[theStyle];
+    if(aFace != NULL) {
+        FT_Done_Face(aFace);
+    }
+    const StString aFontPath = StFileNode::getCompatibleName(theFontPath);
+    if(FT_New_Face(myFTLib->getInstance(), aFontPath.toCString(), 0, &aFace) != 0) {
         ST_DEBUG_LOG("Font '" + aFontPath + "' fail to load!");
-        release();
+        FT_Done_Face(aFace);
+        aFace = NULL;
         return false;
-    } else if(FT_Select_Charmap(myFTFace, ft_encoding_unicode) != 0) {
+    } else if(FT_Select_Charmap(aFace, ft_encoding_unicode) != 0) {
         ST_DEBUG_LOG("Font '" + aFontPath + "' doesn't contain Unicode charmap!");
-        release();
-        return false;
-    } else if(FT_Set_Char_Size(myFTFace, 0L, thePointSize * 64, theResolution, theResolution) != 0) {
-        ST_DEBUG_LOG("Font '" + aFontPath + "' doesn't contain requested size!");
-        release();
+        FT_Done_Face(aFace);
+        aFace = NULL;
         return false;
     }
 
     // test Unicode subsets
     mySubsets[Subset_General] = true;
-    mySubsets[Subset_Korean]  = FT_Get_Char_Index(myFTFace, 0x0B371) != 0
-                             && FT_Get_Char_Index(myFTFace, 0x0D130) != 0;
-    mySubsets[Subset_CJK]     = FT_Get_Char_Index(myFTFace, 0x06F22) != 0;
+    mySubsets[Subset_Korean]  = FT_Get_Char_Index(aFace, 0x0B371) != 0
+                             && FT_Get_Char_Index(aFace, 0x0D130) != 0;
+    mySubsets[Subset_CJK]     = FT_Get_Char_Index(aFace, 0x06F22) != 0;
 
 //if(mySubsets[Subset_Korean]) { std::cerr << "  found Korean in " << myFontPath << "\n"; }
 //if(mySubsets[Subset_CJK])    { std::cerr << "  found CJK    in " << myFontPath << "\n"; }

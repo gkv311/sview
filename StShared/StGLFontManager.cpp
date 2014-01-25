@@ -60,7 +60,11 @@ StHandle<StGLFontEntry> StGLFontManager::findCreate(const StString& theName,
     }
 
     StHandle<StFTFont> aFontFt = new StFTFont(myFTLib);
-    aFontFt->init(aFont.Regular, theSize, myResolution);
+    aFontFt->load(aFont.Regular,    StFTFont::Style_Regular);
+    aFontFt->load(aFont.Bold,       StFTFont::Style_Bold);
+    aFontFt->load(aFont.Italic,     StFTFont::Style_Italic);
+    aFontFt->load(aFont.BoldItalic, StFTFont::Style_BoldItalic);
+    aFontFt->init(theSize, myResolution);
     aFontGl = new StGLFontEntry(aFontFt);
     return aFontGl;
 }
