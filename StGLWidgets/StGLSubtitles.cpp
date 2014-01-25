@@ -149,13 +149,15 @@ const StString& StGLSubtitles::getClassName() {
 StGLSubtitles::StGLSubtitles(StGLWidget*                     theParent,
                              const StHandle<StSubQueue>&     theSubQueue,
                              const StHandle<StFloat32Param>& theFontSize,
-                             const StHandle<StFloat32Param>& theParallax)
+                             const StHandle<StFloat32Param>& theParallax,
+                             const StHandle<StEnumParam>&    theParser)
 : StGLTextArea(theParent,
                0, -theParent->getRoot()->scale(100),
                StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER),
                theParent->getRoot()->scale(800), theParent->getRoot()->scale(160)),
   myFontSize(theFontSize),
   myParallax(theParallax),
+  myParser(theParser),
   myQueue(theSubQueue),
   myPTS(0.0),
   myImgProgram(getRoot()->getShare(SHARE_IMAGE_PROGRAM_ID)) {
@@ -261,6 +263,10 @@ void StGLSubtitles::stglDraw(unsigned int theView) {
     }
 
     StGLContext& aCtx = getContext();
+    if(myFormatter.getParser() != (StGLTextFormatter::Parser )myParser->getValue()) {
+        myFormatter.setupParser((StGLTextFormatter::Parser )myParser->getValue());
+        myToRecompute = true;
+    }
     if(!myText.isEmpty()) {
         formatText(aCtx);
 

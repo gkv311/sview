@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -129,6 +129,10 @@ namespace StMoviePlayerStrings {
         MENU_SUBTITLES_ATTACH   = 1353,
         MENU_SUBTITLES_SIZE     = 1354,
         MENU_SUBTITLES_PARALLAX = 1355,
+        MENU_SUBTITLES_PARSER   = 1356,
+
+        MENU_SUBTITLES_PLAIN_TEXT = 1360,
+        MENU_SUBTITLES_LITE_HTML  = 1361,
 
         // Root -> Output menu
         MENU_CHANGE_DEVICE  = 1400, // Root -> Output -> Change Device menu

@@ -12,6 +12,7 @@
 #include <StGLWidgets/StGLTextArea.h>
 #include <StGLWidgets/StSubQueue.h>
 
+#include <StSettings/StEnumParam.h>
 #include <StSettings/StFloat32Param.h>
 
 // dummy
@@ -62,7 +63,8 @@ class StGLSubtitles : public StGLTextArea {
     ST_CPPEXPORT StGLSubtitles(StGLWidget*                     theParent,
                                const StHandle<StSubQueue>&     theSubQueue,
                                const StHandle<StFloat32Param>& theFontSize,
-                               const StHandle<StFloat32Param>& theParallax);
+                               const StHandle<StFloat32Param>& theParallax,
+                               const StHandle<StEnumParam>&    theParser);
     ST_CPPEXPORT virtual ~StGLSubtitles();
     ST_CPPEXPORT virtual const StString& getClassName();
     ST_CPPEXPORT virtual bool stglInit();
@@ -84,6 +86,7 @@ class StGLSubtitles : public StGLTextArea {
 
     StHandle<StFloat32Param> myFontSize;  //!< font size parameter
     StHandle<StFloat32Param> myParallax;  //!< text parallax
+    StHandle<StEnumParam>    myParser;    //!< text parser option
     StGLTexture              myTexture;   //!< texture for image-based subtitles
     StGLVertexBuffer         myVertBuf;   //!< vertex buffer for image-based subtitles
     StGLVertexBuffer         myTCrdBuf;   //!< texture coordinates buffer for image-based subtitles

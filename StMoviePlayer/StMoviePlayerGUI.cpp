@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -890,7 +890,8 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
     myImage     = new StGLImageRegion(this, theTextureQueue, false);
     mySubtitles = new StGLSubtitles  (this, theSubQueue,
                                       myPlugin->params.SubtitlesSize,
-                                      myPlugin->params.SubtitlesParallax);
+                                      myPlugin->params.SubtitlesParallax,
+                                      myPlugin->params.SubtitlesParser);
 
     createUpperToolbar();
 
@@ -1147,6 +1148,13 @@ void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<St
         delete anItem;
     }
 
+    // create text parser menu
+    StGLMenu* aParserMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+    for(size_t anIter = 0; anIter < myPlugin->params.SubtitlesParser->getValues().size(); ++anIter) {
+        aParserMenu->addItem(myPlugin->params.SubtitlesParser->getValues()[anIter], myPlugin->params.SubtitlesParser, (int32_t )anIter);
+    }
+    aParserMenu->stglInit();
+
     myMenuSubtitles->addItem(tr(MENU_SUBTITLES_NONE), myPlugin->params.subtitlesStream, -1);
     if(!theStreamsList.isNull()) {
         for(size_t aStreamId = 0; aStreamId < theStreamsList->size(); ++aStreamId) {
@@ -1185,6 +1193,8 @@ void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<St
         myMenuSubtitles->addItem(tr(MENU_SUBTITLES_ATTACH))
                        ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doAddSubtitleStream);
     }
+
+    myMenuSubtitles->addItem(tr(MENU_SUBTITLES_PARSER), aParserMenu);
 
     // update menu representation
     myMenuSubtitles->stglInit();

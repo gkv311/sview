@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,6 +57,12 @@ void loadDefaults(StLangMap& theStrings) {
                "Font Size");
     theStrings(MENU_SUBTITLES_PARALLAX,
                "Parallax");
+    theStrings(MENU_SUBTITLES_PARSER,
+               "Parser");
+    theStrings(MENU_SUBTITLES_PLAIN_TEXT,
+               "Plain text");
+    theStrings(MENU_SUBTITLES_LITE_HTML,
+               "Lite HTML");
     theStrings(MENU_HELP,
                "Help");
     theStrings(MENU_MEDIA_OPEN_MOVIE,

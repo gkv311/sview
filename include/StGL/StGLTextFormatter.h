@@ -61,6 +61,13 @@ class StGLTextFormatter {
                                      const StGLTextFormatter::StAlignY theAlignY);
 
     /**
+     * @return active parser
+     */
+    ST_LOCAL StGLTextFormatter::Parser getParser() const {
+        return myParser;
+    }
+
+    /**
      * Setup parser.
      */
     ST_LOCAL void setupParser(const StGLTextFormatter::Parser theParser) {
