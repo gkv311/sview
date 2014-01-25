@@ -475,9 +475,15 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
     }
 
     if(anArtist.isValid() && aTitle.isValid()) {
-        myPlayList->setTitle(theNewParams, anArtist.getValue() + " - " + aTitle.getValue());
+        StString anArtistStr = anArtist.getValue();
+        StString aTitleStr   = aTitle.getValue();
+        anArtistStr.rightAdjust();
+        aTitleStr  .rightAdjust();
+        myPlayList->setTitle(theNewParams, anArtistStr + " - " + aTitleStr);
     } else if(aTitle.isValid()) {
-        if(aTitle.getValue().getLength() < 20) {
+        StString aTitleStr = aTitle.getValue();
+        aTitleStr.rightAdjust();
+        if(aTitleStr.getLength() < 20) {
             // protection against messed title
             StString aFileName;
             StString aFolder;
@@ -488,9 +494,9 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
                 aPath = theNewSource->getPath();
             }
             StFileNode::getFolderAndFile(aPath, aFolder, aFileName);
-            myPlayList->setTitle(theNewParams, aTitle.getValue() + " (" + aFileName + ")");
+            myPlayList->setTitle(theNewParams, aTitleStr + " (" + aFileName + ")");
         } else {
-            myPlayList->setTitle(theNewParams, aTitle.getValue());
+            myPlayList->setTitle(theNewParams, aTitleStr);
         }
     }
 

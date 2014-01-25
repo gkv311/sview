@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -353,6 +353,11 @@ class StStringUnicode : public StConstStringUnicode<Type> {
     StStringUnicode unquoted() const;
 
     /**
+     * Cut off all trailing space characters.
+     */
+    void rightAdjust();
+
+    /**
      * Split the string using delimiter char.
      * @param theDelimeter delimiter char
      * @param theLimitNb   maximum split sections (when reached - trailing part will be in one string without parsing)
@@ -515,4 +520,4 @@ typedef StStringUnicode<stUtfWide_t> StStringUtfWide;
 // template implementation (inline methods)
 #include <StStrings/StStringUnicode.inl>
 
-#endif //__StStringUnicode_h__
+#endif // __StStringUnicode_h__

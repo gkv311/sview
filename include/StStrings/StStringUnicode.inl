@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -761,6 +761,23 @@ void StStringUnicode<Type>::replaceFast(const StStringUnicode<Type>& theSubStrin
 }
 
 template<typename Type> inline
+void StStringUnicode<Type>::rightAdjust() {
+    if(this->Length == 0) {
+        return;
+    }
+    for(size_t anIter = this->Size / sizeof(Type) - 1; anIter != 0; --anIter) {
+      if(this->String[anIter] == (Type )' '
+      || this->String[anIter] == (Type )'\t') {
+          ((Type* )this->String)[anIter] = (Type )'\0';
+          this->Size -= sizeof(Type);
+          --this->Length;
+      } else {
+          return;
+      }
+    }
+}
+
+template<typename Type> inline
 int StStringUnicode<Type>::hexPairValue(const Type* theCode) {
     int aValue = 0;
     int aDigit;
@@ -885,4 +902,4 @@ inline std::wostream& operator<<(std::wostream& theStream,
 }
 #endif
 
-#endif //__StStringUnicode_inl__
+#endif // __StStringUnicode_inl__
