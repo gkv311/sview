@@ -71,6 +71,18 @@ class StGLFontEntry : public StGLResource {
     }
 
     /**
+     * @return active font style
+     */
+    ST_LOCAL StFTFont::Style getActiveStyle() const {
+        return myFont->getActiveStyle();
+    }
+
+    /**
+     * @return setup active font style
+     */
+    ST_CPPEXPORT bool setActiveStyle(const StFTFont::Style theStyle);
+
+    /**
      * @return true if font was loaded successfully.
      */
     inline bool isValid() const {
@@ -178,7 +190,8 @@ class StGLFontEntry : public StGLResource {
     StArrayList< StHandle<StGLFrameBuffer> > myFbos;     //!< FBO list
     StArrayList<StGLTile> myTiles;            //!< tiles list
 
-    std::map<stUtf32_t, size_t> myGlyphMap;
+    std::map<stUtf32_t, size_t>  myGlyphMaps[StFTFont::StylesNB];
+    std::map<stUtf32_t, size_t>* myGlyphMap;                      //!< glyphs map for active style
 
 };
 

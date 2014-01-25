@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -53,6 +53,11 @@ class StGLFont : public StGLResource {
     }
 
     /**
+     * @return setup active font style
+     */
+    ST_CPPEXPORT bool setActiveStyle(const StFTFont::Style theStyle);
+
+    /**
      * Initialize GL resources.
      * FreeType font instance should be already initialized!
      */
@@ -78,18 +83,16 @@ class StGLFont : public StGLResource {
      * Compute glyph rectangle at specified pen position (on baseline)
      * and render it to texture if not already.
      * @param theCtx       active context
-     * @param theStyle     font style
      * @param theUChar     unicode symbol to render
      * @param theUCharNext next symbol to compute advance with kerning when available
      * @param theGlyph     computed glyph position rectangle, texture ID and UV coordinates
      * @param thePen       pen position on baseline to place new glyph
      */
-    ST_CPPEXPORT void renderGlyph(StGLContext&          theCtx,
-                                  const StFTFont::Style theStyle,
-                                  const stUtf32_t       theUChar,
-                                  const stUtf32_t       theUCharNext,
-                                  StGLTile&             theGlyph,
-                                  StGLVec2&             thePen);
+    ST_CPPEXPORT void renderGlyph(StGLContext&    theCtx,
+                                  const stUtf32_t theUChar,
+                                  const stUtf32_t theUCharNext,
+                                  StGLTile&       theGlyph,
+                                  StGLVec2&       thePen);
 
         protected:
 

@@ -293,6 +293,18 @@ class StFTFont {
     }
 
     /**
+     * @return active font style
+     */
+    ST_LOCAL StFTFont::Style getActiveStyle() const {
+        return myStyle;
+    }
+
+    /**
+     * @return setup active font style
+     */
+    ST_CPPEXPORT bool setActiveStyle(const StFTFont::Style theStyle);
+
+    /**
      * @return true if this font contains CJK (Chinese, Japanese, and Korean) glyphs
      */
     ST_LOCAL bool hasCJK() const {
@@ -317,6 +329,7 @@ class StFTFont {
 
     StHandle<StFTLibrary> myFTLib;               //!< handle to the FT library object
     FT_Face               myFTFace;              //!< active FT face object
+    StFTFont::Style       myStyle;               //!< active FT face style
     FT_Face               myFTFaces[StylesNB];   //!< FT face objects
     StString              myFontPaths[StylesNB]; //!< font paths
     bool                  mySubsets[SubsetsNB];

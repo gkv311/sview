@@ -181,6 +181,7 @@ void StGLTextFormatter::append(StGLContext&          theCtx,
         return;
     }
 
+    theFont.setActiveStyle(theStyle);
     myAscender    = stMax(myAscender,    theFont.getFont()->getAscender());
     myLineSpacing = stMax(myLineSpacing, theFont.getFont()->getLineSpacing());
     if(theString.isEmpty()) {
@@ -206,7 +207,7 @@ void StGLTextFormatter::append(StGLContext&          theCtx,
         }
 
         theFont.renderGlyph(theCtx,
-                            theStyle, aCharThis, aCharNext,
+                            aCharThis, aCharNext,
                             aTile, myPen);
         myRects.add(aTile);
 

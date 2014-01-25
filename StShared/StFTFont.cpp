@@ -14,6 +14,7 @@
 StFTFont::StFTFont(StHandle<StFTLibrary> theFTLib)
 : myFTLib(theFTLib),
   myFTFace(NULL),
+  myStyle(StFTFont::Style_Regular),
   myLoadFlags(FT_LOAD_NO_HINTING | FT_LOAD_TARGET_NORMAL),
   myGlyphMaxWidth(1),
   myGlyphMaxHeight(1),
@@ -43,6 +44,23 @@ void StFTFont::release() {
         }
         myFontPaths[aStyleIt].clear();
     }
+}
+
+bool StFTFont::setActiveStyle(const StFTFont::Style theStyle) {
+    if(myStyle == theStyle) {
+        return true;
+    }
+
+    if(myFTFaces[theStyle] != NULL) {
+        myStyle  = theStyle;
+        myFTFace = myFTFaces[theStyle];
+        return true;
+    }
+    if(!hasCJK()
+    && !hasKorean()) {
+        // simulate style using transformation
+    }
+    return false;
 }
 
 bool StFTFont::init(const unsigned int thePointSize,
@@ -80,7 +98,7 @@ bool StFTFont::init(const unsigned int thePointSize,
                        + " lineSize= " + getLineSpacing());
         }*/
     }
-    myFTFace = myFTFaces[Style_Regular];
+    myFTFace = myFTFaces[myStyle];
     return true;
 }
 

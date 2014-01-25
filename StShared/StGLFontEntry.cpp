@@ -21,8 +21,13 @@ StGLFontEntry::StGLFontEntry(const StHandle<StFTFont>& theFont)
   myLineSpacing(0.0f),
   myTileSizeX(0),
   myTileSizeY(0),
-  myLastTileId(size_t(-1)) {
+  myLastTileId(size_t(-1)),
+  myGlyphMap(NULL) {
     stMemZero(&myLastTilePx, sizeof(myLastTilePx));
+    if(!myFont.isNull()) {
+        myFont->setActiveStyle(StFTFont::Style_Regular);
+    }
+    myGlyphMap = &myGlyphMaps[StFTFont::Style_Regular];
 }
 
 StGLFontEntry::~StGLFontEntry() {
@@ -49,7 +54,9 @@ void StGLFontEntry::release(StGLContext& theCtx) {
     myTileSizeY   = 0;
     stMemZero(&myLastTilePx, sizeof(myLastTilePx));
     myTiles.clear();
-    myGlyphMap.clear();
+    for(size_t aStyleIt = 0; aStyleIt < StFTFont::StylesNB; ++aStyleIt) {
+        myGlyphMaps[aStyleIt].clear();
+    }
     myLastTileId = size_t(-1);
 }
 
@@ -132,6 +139,12 @@ bool StGLFontEntry::createTexture(StGLContext& theCtx) {
     return true;
 }
 
+bool StGLFontEntry::setActiveStyle(const StFTFont::Style theStyle) {
+    const bool hasStyle = myFont->setActiveStyle(theStyle);
+    myGlyphMap = &myGlyphMaps[myFont->getActiveStyle()];
+    return hasStyle;
+}
+
 bool StGLFontEntry::renderGlyph(StGLContext&    theCtx,
                                 const stUtf32_t theChar,
                                 const bool      theToForce) {
@@ -197,22 +210,22 @@ bool StGLFontEntry::renderGlyph(StGLContext&    theCtx,
                                 const stUtf32_t theUCharNext,
                                 StGLTile&       theGlyph,
                                 StGLVec2&       thePen) {
-    std::map<stUtf32_t, size_t>::const_iterator aTileIter = myGlyphMap.find(theUChar);
+    std::map<stUtf32_t, size_t>::const_iterator aTileIter = myGlyphMap->find(theUChar);
     size_t aTileId;
-    if(aTileIter != myGlyphMap.end()) {
+    if(aTileIter != myGlyphMap->end()) {
         aTileId = aTileIter->second;
     } else if(renderGlyph(theCtx, theUChar, false)) {
         aTileId = myLastTileId;
-        myGlyphMap[theUChar] = aTileId;
+        (*myGlyphMap)[theUChar] = aTileId;
     } else if(!theToDrawUndef) {
         return false;
     } else {
-        aTileIter = myGlyphMap.find(0);
-        if(aTileIter != myGlyphMap.end()) {
+        aTileIter = myGlyphMap->find(0);
+        if(aTileIter != myGlyphMap->end()) {
             aTileId = aTileIter->second;
         } else if(renderGlyph(theCtx, theUChar, true)) {
             aTileId = myLastTileId;
-            myGlyphMap[theUChar] = aTileId;
+            (*myGlyphMap)[theUChar] = aTileId;
         } else {
             thePen.x() += myFont->getAdvanceX(theUChar, theUCharNext);
             return false;

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -63,12 +63,22 @@ bool StGLFont::stglInit(StGLContext& theCtx) {
     return true;
 }
 
-void StGLFont::renderGlyph(StGLContext&          theCtx,
-                           const StFTFont::Style /*theStyle*/,
-                           const stUtf32_t       theUChar,
-                           const stUtf32_t       theUCharNext,
-                           StGLTile&             theGlyph,
-                           StGLVec2&             thePen) {
+bool StGLFont::setActiveStyle(const StFTFont::Style theStyle) {
+    bool hasStyle = false;
+    for(size_t anIter = 0; anIter < StFTFont::SubsetsNB; ++anIter) {
+        StHandle<StGLFontEntry>& aFont = myFonts[anIter];
+        if(!aFont.isNull()) {
+            hasStyle = aFont->setActiveStyle(theStyle) || hasStyle;
+        }
+    }
+    return hasStyle;
+}
+
+void StGLFont::renderGlyph(StGLContext&    theCtx,
+                           const stUtf32_t theUChar,
+                           const stUtf32_t theUCharNext,
+                           StGLTile&       theGlyph,
+                           StGLVec2&       thePen) {
     const StFTFont::Subset aSubset = StFTFont::subset(theUChar);
     StHandle<StGLFontEntry>& aFont = myFonts[aSubset];
     if(!aFont.isNull()
