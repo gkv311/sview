@@ -185,7 +185,7 @@ void StGLTextFormatter::append(StGLContext&    theCtx,
 }
 
 void StGLTextFormatter::append(StGLContext&          theCtx,
-                               const StString&       theString,
+                               const StCString&      theString,
                                const StFTFont::Style theStyle,
                                StGLFont&             theFont) {
     if(theFont.getFont().isNull()) {
@@ -203,7 +203,7 @@ void StGLTextFormatter::append(StGLContext&          theCtx,
 
     // first pass - render all symbols using associated font on single ZERO baseline
     StGLTile aTile;
-    for(StUtf8Iter anIter = theString.iterator(); *anIter != 0;) {
+    for(StUtf8Iter anIter = theString.iterator(); *anIter != 0 && anIter.getIndex() <= theString.Length;) {
         const stUtf32_t aCharThis =   *anIter;
         const stUtf32_t aCharNext = *++anIter;
 
@@ -245,22 +245,24 @@ void StGLTextFormatter::appendHTML(StGLContext&    theCtx,
         return;
     }
 
-    size_t          aStart  = 0;
-    StFTFont::Style aStyle  = StFTFont::Style_Regular;
-    bool            isClose = false;
-    CtrlTag         aTag    = CtrlTag_UNKNOWN;
+    const stUtf8_t* aStartPtr = theString.String;
+    size_t          aStartId  = 0;
+    StFTFont::Style aStyle    = StFTFont::Style_Regular;
     for(StUtf8Iter anIter = theString.iterator(); *anIter != 0;) {
-        const size_t    anIndex   =    anIter.getIndex();
+        const stUtf8_t* anEndPtr  = anIter.getBufferHere();
+        const size_t    aCurrId   =    anIter.getIndex();
         const stUtf32_t aCharThis =   *anIter;
         const stUtf32_t aCharNext = *++anIter;
         if(aCharThis != '<') {
             continue;
         }
+        bool isClose = false;
         if(aCharNext == '/') {
-            isClose = false;
+            isClose = true;
             ++anIter;
         }
 
+        CtrlTag aTag = CtrlTag_UNKNOWN;
         if(stAreEqual(anIter.getBufferHere(), "I>", 2)
         || stAreEqual(anIter.getBufferHere(), "i>", 2)) {
             aTag    = CtrlTag_Italic;
@@ -273,6 +275,15 @@ void StGLTextFormatter::appendHTML(StGLContext&    theCtx,
             // ignore unknown tags
             continue;
         }
+
+        if(anEndPtr != aStartPtr) {
+            const size_t    aSubSize   = size_t(anEndPtr - aStartPtr - 1);
+            const size_t    aSubLen    = aCurrId - aStartId - 1;
+            const StCString aSubString = stStringExtConstr(aStartPtr, aSubSize, aSubLen);
+            append(theCtx, aSubString, aStyle, theFont);
+        }
+        aStartId  = anIter.getIndex();
+        aStartPtr = anIter.getBufferHere();
 
         switch(aTag) {
             case CtrlTag_Italic: {
@@ -309,13 +320,15 @@ void StGLTextFormatter::appendHTML(StGLContext&    theCtx,
             }
             default: break;
         }
+    }
 
-        const StString aSubString = theString.subString(aStart, anIndex);
-        aStart = anIter.getIndex();
+    const stUtf8_t* anEndPtr = theString.String + theString.Size;
+    if(anEndPtr != aStartPtr) {
+        const size_t    aSubSize   = size_t(anEndPtr - aStartPtr);
+        const size_t    aSubLen    = theString.Length - aStartId;
+        const StCString aSubString = stStringExtConstr(aStartPtr, aSubSize, aSubLen);
         append(theCtx, aSubString, aStyle, theFont);
     }
-    const StString aSubString = theString.subString(aStart, theString.getLength());
-    append(theCtx, aSubString, aStyle, theFont);
 }
 
 void StGLTextFormatter::newLine(const size_t theLastRect) {

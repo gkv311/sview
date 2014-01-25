@@ -83,7 +83,7 @@ class StGLTextFormatter {
      * Render specified text to inner buffer.
      */
     ST_CPPEXPORT void append(StGLContext&          theCtx,
-                             const StString&       theString,
+                             const StCString&      theString,
                              const StFTFont::Style theStyle,
                              StGLFont&             theFont);
 
