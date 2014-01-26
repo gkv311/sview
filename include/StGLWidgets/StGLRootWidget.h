@@ -295,6 +295,7 @@ class StGLRootWidget : public StGLWidget {
     StHandle<StGLContext>     myGlCtx;         //!< OpenGL context
     GLfloat                   myScrDispX;
     GLfloat                   myLensDist;
+    int                       myScrDispXPx;
 
     StRectI_t                 myMarginsPx;     //!< active area margins in pixels
     StRectD_t                 myRectGl;        //!< rectangle in GL coordinates

@@ -42,6 +42,7 @@ StGLRootWidget::StGLRootWidget()
   myShareSize(10),
   myScrDispX(0.0f),
   myLensDist(0.0f),
+  myScrDispXPx(0),
   myScaleGlX(1.0),
   myScaleGlY(1.0),
   myScaleGUI(1.0f),
@@ -166,14 +167,17 @@ void StGLRootWidget::stglDraw(unsigned int theView) {
 
     switch(theView) {
         case ST_DRAW_LEFT:
-            myScrDispX =  myLensDist * GLfloat(0.5 * myRectGl.width());
+            myScrDispX   =             myLensDist * GLfloat(0.5 * myRectGl.width());
+            myScrDispXPx =  int(double(myLensDist) * 0.5 * double(rectPx.width()));
             break;
         case ST_DRAW_RIGHT:
-            myScrDispX = -myLensDist * GLfloat(0.5 * myRectGl.width());
+            myScrDispX   =            -myLensDist * GLfloat(0.5 * myRectGl.width());
+            myScrDispXPx = -int(double(myLensDist) * 0.5 * double(rectPx.width()));
             break;
         case ST_DRAW_MONO:
         default:
-            myScrDispX = 0.0f;
+            myScrDispX   = 0.0f;
+            myScrDispXPx = 0;
             break;
     }
 
@@ -220,7 +224,7 @@ void StGLRootWidget::stglScissorRect(const StRectI_t& theRect,
     const GLdouble aWidthFactor  = GLdouble(aVPortWidth)  / GLdouble(aRootWidth);
     const GLdouble aHeightFactor = GLdouble(aVPortHeight) / GLdouble(aRootHeight);
 
-    theScissorRect.x() = myViewport[0] + GLint(aWidthFactor  * GLdouble(theRect.left()));
+    theScissorRect.x() = myViewport[0] + GLint(aWidthFactor  * GLdouble(theRect.left())) + myScrDispXPx;
     theScissorRect.y() = myViewport[1] + GLint(aHeightFactor * GLdouble(aRootHeight - theRect.bottom()));
 
     theScissorRect.width()  = GLint(aWidthFactor  * GLdouble(theRect.width()));
