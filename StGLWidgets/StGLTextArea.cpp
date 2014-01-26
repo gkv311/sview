@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -264,6 +264,22 @@ void StGLTextArea::setText(const StString& theText) {
 void StGLTextArea::setTextWidth(const int theWidth) {
     myTextWidth = (GLfloat )theWidth;
     myToRecompute = true;
+}
+
+bool StGLTextArea::stglInitAutoHeightWidth(const int theMaxWidth) {
+    changeRectPx().right() = getRectPx().left() + theMaxWidth; // compute width from text
+    if(!stglInit()) {
+        return false;
+    }
+    changeRectPx().bottom() = getRectPx().top() + getTextHeight();
+    if(theMaxWidth > 0) {
+        changeRectPx().right() = getRectPx().left() + GLint(myFormatter.getMaxLineWidth() + 1.5f);
+        myTextWidth = (GLfloat )getRectPx().width();
+        myToRecompute = true;
+    } else {
+        changeRectPx().right() = getRectPx().left() + getTextWidth();
+    }
+    return true;
 }
 
 bool StGLTextArea::stglInit() {

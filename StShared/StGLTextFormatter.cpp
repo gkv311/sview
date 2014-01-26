@@ -53,6 +53,7 @@ StGLTextFormatter::StGLTextFormatter()
 : myAlignX(ST_ALIGN_X_LEFT),
   myAlignY(ST_ALIGN_Y_TOP),
   myParser(Parser_LiteHTML),
+  myDefStyle(StFTFont::Style_Regular),
   //
   myPen(0.0f, 0.0f),
   myRectsNb(0),
@@ -64,6 +65,7 @@ StGLTextFormatter::StGLTextFormatter()
   myRectWordStart(0),
   myPenCurrLine(0.0f),
   myAlignWidth(0.0f),
+  myTextWidth(0.0f),
   myLineLeft(0.0f),
   myMoveVec(0.0f, 0.0f) {
     //
@@ -181,7 +183,7 @@ void StGLTextFormatter::append(StGLContext&    theCtx,
         appendHTML(theCtx, theString, theFont);
         return;
     }
-    append(theCtx, theString, StFTFont::Style_Regular, theFont);
+    append(theCtx, theString, myDefStyle, theFont);
 }
 
 void StGLTextFormatter::append(StGLContext&          theCtx,
@@ -248,7 +250,7 @@ void StGLTextFormatter::appendHTML(StGLContext&    theCtx,
     StUtf8Iter anIter = theString.iterator();
     size_t          aStartId  = anIter.getIndex();
     const stUtf8_t* aStartPtr = anIter.getBufferHere();
-    StFTFont::Style aStyle    = StFTFont::Style_Regular;
+    StFTFont::Style aStyle    = myDefStyle;
     for(; *anIter != 0;) {
         const stUtf8_t* anEndPtr  =    anIter.getBufferHere();
         const size_t    aCurrId   =    anIter.getIndex();
@@ -379,6 +381,7 @@ void StGLTextFormatter::format(const GLfloat theWidth,
     myLinesNb = myRectLineStart = myRectWordStart = 0;
     myLineLeft   = 0.0f;
     myBndTop     = 0.0f;
+    myTextWidth  = 0.0f;
     myAlignWidth = theWidth;
     myMoveVec.x() = myMoveVec.y() = 0.0f;
 
@@ -404,6 +407,7 @@ void StGLTextFormatter::format(const GLfloat theWidth,
         }
 
         GLfloat aWidth = myRects[aRectIter].px.right() - myLineLeft;
+        myTextWidth = stMax(myTextWidth, aWidth);
         if(theWidth > 0.0f && aWidth >= theWidth) {
             // force next line
             size_t aLastRect = myRectWordStart - 1; // last rect on current line
@@ -419,6 +423,9 @@ void StGLTextFormatter::format(const GLfloat theWidth,
     }
 
     // move last line
+    if(myRectsNb != 0) {
+        myTextWidth = stMax(myTextWidth, myRects[myRectsNb - 1].px.right());
+    }
     newLine(myRectsNb - 1);
     if(myRectsNb != 0
     && myAlignWidth <= 0.0f) {

@@ -199,6 +199,31 @@ class StArray {
     }
 
     /**
+     * Equality operator.
+     */
+    bool operator==(const StArray& theOther) const {
+        if(this == &theOther) {
+            return true;
+        } else if(mySize != theOther.mySize) {
+            return false;
+        }
+
+        for(size_t anElem = 0; anElem < mySize; ++anElem) {
+            if(myArray[anElem] != theOther.myArray[anElem]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Inequality operator.
+     */
+    bool operator!=(const StArray& theOther) const {
+        return !(*this == theOther);
+    }
+
+    /**
      * Base template for to string method. Will be instantiated only when needed.
      */
     StString toString(const StString& theSplitter = StString('\n')) const;

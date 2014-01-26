@@ -61,6 +61,13 @@ class StGLTextFormatter {
                                      const StGLTextFormatter::StAlignY theAlignY);
 
     /**
+     * Setup default font style.
+     */
+    ST_LOCAL void setDefaultStyle(const StFTFont::Style theStyle) {
+        myDefStyle = theStyle;
+    }
+
+    /**
      * @return active parser
      */
     ST_LOCAL StGLTextFormatter::Parser getParser() const {
@@ -138,6 +145,13 @@ class StGLTextFormatter {
     }
 
     /**
+     * @return maximum width of formatted text (<= getResultWidth())
+     */
+    inline GLfloat getMaxLineWidth() const {
+        return myTextWidth;
+    }
+
+    /**
      * @param bounding box.
      */
     inline void getBndBox(StGLRect& theBndBox) const {
@@ -159,6 +173,7 @@ class StGLTextFormatter {
     StAlignX              myAlignX;        //!< horizontal alignment style
     StAlignY              myAlignY;        //!< vertical   alignment style
     Parser                myParser;        //!< parser configuration
+    StFTFont::Style       myDefStyle;      //!< default font style
 
         protected: //! @name input data
 
@@ -177,6 +192,7 @@ class StGLTextFormatter {
     size_t                myRectWordStart; //!< id of first rectangle in the current word
     GLfloat               myPenCurrLine;   //!< current baseline position
     GLfloat               myAlignWidth;    //!< line width used for horizontal alignment
+    GLfloat               myTextWidth;     //!< maximum text width (<= myAlignWidth)
     GLfloat               myLineLeft;      //!< left x position of first glyph on line before formatting applied
     GLfloat               myBndTop;
     StGLVec2              myMoveVec;       //!< local variable

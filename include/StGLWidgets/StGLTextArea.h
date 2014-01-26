@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -94,6 +94,13 @@ class StGLTextArea : public StGLWidget {
     }
 
     /**
+     * Setup font style.
+     */
+    ST_LOCAL void setupStyle(const StFTFont::Style theStyle) {
+        myFormatter.setDefaultStyle(theStyle);
+    }
+
+    /**
      * @param theToShow - to show border with background or not
      */
     inline void setBorder(const bool theToShow) {
@@ -157,7 +164,7 @@ class StGLTextArea : public StGLWidget {
     /**
      * This method initialize the widget and set it's height to computed formatted text height.
      */
-    ST_LOCAL inline bool stglInitAutoHeight() {
+    ST_LOCAL bool stglInitAutoHeight() {
         if(!stglInit()) {
             return false;
         }
@@ -167,16 +174,9 @@ class StGLTextArea : public StGLWidget {
 
     /**
      * This method initialize the widget and set it's height to computed formatted text height/width.
+     * @param theMaxWidth specifies maximum widget width, -1 means unlimited
      */
-    ST_LOCAL inline bool stglInitAutoHeightWidth() {
-        changeRectPx().right() = getRectPx().left() - 1; // compute width from text
-        if(!stglInit()) {
-            return false;
-        }
-        changeRectPx().right()  = getRectPx().left() + getTextWidth();
-        changeRectPx().bottom() = getRectPx().top()  + getTextHeight();
-        return true;
-    }
+    ST_CPPEXPORT bool stglInitAutoHeightWidth(const int theMaxWidth = -1);
 
     inline GLint getTextHeight() const {
         return std::abs(GLint(myTextBndBox.height()));
