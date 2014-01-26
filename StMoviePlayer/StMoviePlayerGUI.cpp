@@ -715,33 +715,52 @@ void StMoviePlayerGUI::doAboutSystem(const size_t ) {
 }
 
 void StMoviePlayerGUI::doAboutFile(const size_t ) {
+    const StString aTitle = "File Info";
+    StGLMessageBox* aDialog = new StGLMessageBox(this, aTitle, "", scale(512), scale(300));
+
     StHandle<StFileNode>     aFileNode;
     StHandle<StStereoParams> aParams;
     StHandle<StMovieInfo>    anExtraInfo;
-    StString                 aCodecsInfo;
-    StArrayList<StString>    anInfoList(10);
     if(myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo) && !anExtraInfo.isNull()) {
-        for(size_t aKeyIter = 0; aKeyIter < anExtraInfo->myInfo.size(); ++aKeyIter) {
-            const StArgument& aPair = anExtraInfo->myInfo.getFromIndex(aKeyIter);
-            anInfoList.add(aPair.getKey() + ": " + aPair.getValue() + "\n");
-        }
+        const StGLVec3 aWhite(1.0f, 1.0f, 1.0f);
+        const int    aWidthMax  = aDialog->getContent()->getRectPx().width();
+        StGLTable*   aTable     = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
+        const size_t aNbRowsMax = anExtraInfo->myInfo.size() + anExtraInfo->myCodecs.size() + 1;
+        aTable->setupTable((int )aNbRowsMax, 2);
+        aTable->setVisibility(true, true);
+        aTable->fillFromMap(anExtraInfo->myInfo, aWhite,
+                            aWidthMax, aWidthMax / 2);
 
-        aCodecsInfo = "\nActive codecs\n \n";
+        int aRowLast = (int )anExtraInfo->myInfo.size();
+
+        StGLTextArea* aCodecsText = new StGLTextArea(aTable, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
+        aCodecsText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+                                    StGLTextFormatter::ST_ALIGN_Y_TOP);
+        aCodecsText->setText("\nActive decoders:\n");
+        aCodecsText->setTextColor(aWhite);
+        aCodecsText->setVisibility(true, true);
+        aCodecsText->stglInitAutoHeightWidth(aWidthMax);
+        aTable->setElement(aRowLast++, 0, aCodecsText, 1, 2);
+
         for(size_t aKeyIter = 0; aKeyIter < anExtraInfo->myCodecs.size(); ++aKeyIter) {
             const StArgument& aPair = anExtraInfo->myCodecs.getFromIndex(aKeyIter);
-            if(!aPair.getValue().isEmpty()) {
-                aCodecsInfo += aPair.getValue() + "\n";
+            if(aPair.getValue().isEmpty()) {
+                continue;
             }
+
+            StGLTextArea* aText = new StGLTextArea(aTable, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+            aText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_LEFT,
+                                  StGLTextFormatter::ST_ALIGN_Y_TOP);
+            aText->setText(aPair.getValue());
+            aText->setTextColor(aWhite);
+            aText->setVisibility(true, true);
+            aText->stglInitAutoHeightWidth(aWidthMax);
+            aTable->setElement(aRowLast++, 0, aText, 1, 2);
         }
+    } else {
+        aDialog->setText("Information is unavailable");
     }
 
-    StString aTitle = "File Info";
-    StString anInfo;
-    for(size_t anIter = 0; anIter < anInfoList.size(); ++anIter) {
-        anInfo += anInfoList[anIter];
-    }
-    StString aString = anInfo + aCodecsInfo;
-    StGLMessageBox* aDialog = new StGLMessageBox(this, aTitle, aString, scale(512), scale(300));
     aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
