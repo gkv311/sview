@@ -109,6 +109,11 @@ class StGLTable : public StGLWidget {
      */
     ST_CPPEXPORT void updateLayout();
 
+    ST_LOCAL int getMarginLeft()   const { return myMarginLeft; }
+    ST_LOCAL int getMarginRight()  const { return myMarginRight; }
+    ST_LOCAL int getMarginTop()    const { return myMarginTop; }
+    ST_LOCAL int getMarginBottom() const { return myMarginBottom; }
+
         protected: //! @name protected fields
 
     StArrayList< StArrayList<StGLTableItem> >

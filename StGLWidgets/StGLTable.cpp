@@ -93,7 +93,8 @@ void StGLTable::fillFromMap(const StArgumentsMap& theMap,
     }
 
     // fill first column with keys
-    int aCol1Width = 0;
+    const int aCol1MaxWidth = theCol1MaxWidth - (myMarginLeft + myMarginRight);
+    int       aCol1Width    = 0;
     for(size_t anIter = 0; anIter < theMap.size(); ++anIter) {
         const StArgument& aPair = theMap.getValue(anIter);
         StGLTextArea* aText = new StGLTextArea(this, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
@@ -103,7 +104,7 @@ void StGLTable::fillFromMap(const StArgumentsMap& theMap,
         aText->setTextColor(theTextColor);
         aText->setupStyle(StFTFont::Style_Bold);
         aText->setVisibility(true, true);
-        aText->stglInitAutoHeightWidth(theCol1MaxWidth);
+        aText->stglInitAutoHeightWidth(aCol1MaxWidth);
         aCol1Width = stMax(aCol1Width, aText->getRectPx().width());
         setElement(theRowId + anIter, theColId, aText);
     }
@@ -117,7 +118,7 @@ void StGLTable::fillFromMap(const StArgumentsMap& theMap,
     }
 
     // fill second column with values
-    int aCol2MaxWidth = theMaxWidth - aCol1Width;
+    int aCol2MaxWidth = theMaxWidth - aCol1Width - 2 * (myMarginLeft + myMarginRight);
     for(size_t anIter = 0; anIter < theMap.size(); ++anIter) {
         const StArgument& aPair = theMap.getValue(anIter);
         StGLTextArea* aText = new StGLTextArea(this, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));

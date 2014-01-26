@@ -733,13 +733,15 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
 
         int aRowLast = (int )anExtraInfo->myInfo.size();
 
-        StGLTextArea* aCodecsText = new StGLTextArea(aTable, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
+        const int aTextMaxWidth = aWidthMax - (aTable->getMarginLeft() + aTable->getMarginRight());
+
+        StGLTextArea* aCodecsText = new StGLTextArea(aTable, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
         aCodecsText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
                                     StGLTextFormatter::ST_ALIGN_Y_TOP);
         aCodecsText->setText("\nActive decoders:\n");
         aCodecsText->setTextColor(aWhite);
         aCodecsText->setVisibility(true, true);
-        aCodecsText->stglInitAutoHeightWidth(aWidthMax);
+        aCodecsText->stglInitAutoHeightWidth(aTextMaxWidth);
         aTable->setElement(aRowLast++, 0, aCodecsText, 1, 2);
 
         for(size_t aKeyIter = 0; aKeyIter < anExtraInfo->myCodecs.size(); ++aKeyIter) {
@@ -754,7 +756,7 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
             aText->setText(aPair.getValue());
             aText->setTextColor(aWhite);
             aText->setVisibility(true, true);
-            aText->stglInitAutoHeightWidth(aWidthMax);
+            aText->stglInitAutoHeightWidth(aTextMaxWidth);
             aTable->setElement(aRowLast++, 0, aText, 1, 2);
         }
     } else {
