@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -17,30 +17,35 @@
 #include <StCore/StEvent.h>
 
 StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
+                               const StString& theTitle,
                                const StString& theText,
                                const int       theWidth,
                                const int       theHeight)
 : StGLWidget(theParent, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER), theWidth, theHeight),
   myContent(NULL),
+  myTitle(NULL),
   myBtnPanel(NULL),
   myDefaultBtn(NULL),
   myButtonsNb(0) {
-    create(theText, theWidth, theHeight);
+    create(theTitle, theText, theWidth, theHeight);
 }
 
 StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
+                               const StString& theTitle,
                                const StString& theText)
 : StGLWidget(theParent, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER),
              theParent->getRoot()->scale(384),
              theParent->getRoot()->scale(200)),
   myContent(NULL),
+  myTitle(NULL),
   myBtnPanel(NULL),
   myDefaultBtn(NULL),
   myButtonsNb(0) {
-    create(theText, myRoot->scale(384), myRoot->scale(200));
+    create(theTitle, theText, myRoot->scale(384), myRoot->scale(200));
 }
 
-void StGLMessageBox::create(const StString& theText,
+void StGLMessageBox::create(const StString& theTitle,
+                            const StString& theText,
                             const int       theWidth,
                             const int       theHeight) {
     StGLWidget::signals.onMouseUnclick.connect(this, &StGLMessageBox::doMouseUnclick);
@@ -48,9 +53,26 @@ void StGLMessageBox::create(const StString& theText,
     const int OFFSET_PIXELS = myRoot->scale(32);
     int anOffsetX = theWidth  > 2 * OFFSET_PIXELS ? OFFSET_PIXELS : 0;
     int anOffsetY = theHeight > 2 * OFFSET_PIXELS ? OFFSET_PIXELS : 0;
-    myContent = new StGLScrollArea(this, anOffsetX, anOffsetY,
+    int aTitleHeight = 0;
+    if(!theTitle.isEmpty()) {
+        myTitle = new StGLTextArea(this, anOffsetX, anOffsetY,
                                    StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
                                    theWidth - 2 * anOffsetX, theHeight - myRoot->scale(24 * 3) - anOffsetY);
+        myTitle->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+                                StGLTextFormatter::ST_ALIGN_Y_TOP);
+        myTitle->setText(theTitle);
+        myTitle->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
+        myTitle->setVisibility(true, true);
+        int aWidth = 0;
+        myTitle->computeTextWidth(GLfloat(myTitle->getRectPx().width()), aWidth, aTitleHeight);
+        myTitle->changeRectPx().bottom() = myTitle->getRectPx().top() + aTitleHeight;
+        myTitle->stglInitAutoHeight();
+    }
+
+    const int aTitleOffset = aTitleHeight > 0 ? (aTitleHeight + myRoot->scale(24)) : 0;
+    myContent = new StGLScrollArea(this, anOffsetX, anOffsetY + aTitleOffset,
+                                   StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                                   theWidth - 2 * anOffsetX, theHeight - myRoot->scale(24 * 3) - anOffsetY - aTitleOffset);
     setText(theText);
 
     myIsTopWidget = true;
@@ -64,6 +86,12 @@ StGLMessageBox::~StGLMessageBox() {
     StGLContext& aCtx = getContext();
     myVertexBuf.release(aCtx);
     myProgram.release(aCtx);
+}
+
+void StGLMessageBox::setTitle(const StString& theTitle) {
+    if(myTitle != NULL) {
+        myTitle->setText(theTitle);
+    }
 }
 
 void StGLMessageBox::setText(const StString& theText) {

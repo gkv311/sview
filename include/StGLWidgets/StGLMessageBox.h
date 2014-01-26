@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -23,8 +23,10 @@ class StGLMessageBox : public StGLWidget {
         public:
 
     ST_CPPEXPORT StGLMessageBox(StGLWidget*     theParent,
+                                const StString& theTitle,
                                 const StString& theText);
     ST_CPPEXPORT StGLMessageBox(StGLWidget*     theParent,
+                                const StString& theTitle,
                                 const StString& theText,
                                 const int       theWidth,
                                 const int       theHeight);
@@ -44,6 +46,11 @@ class StGLMessageBox : public StGLWidget {
     ST_LOCAL inline StGLScrollArea* getContent() const {
         return myContent;
     }
+
+    /**
+     * Set message box title.
+     */
+    ST_CPPEXPORT void setTitle(const StString& theTitle);
 
     /**
      * Set content to the plain text.
@@ -70,7 +77,8 @@ class StGLMessageBox : public StGLWidget {
      */
     ST_LOCAL bool doNextButton(const int theDir);
 
-    ST_LOCAL void create(const StString& theText,
+    ST_LOCAL void create(const StString& theTitle,
+                         const StString& theText,
                          const int       theWidth,
                          const int       theHeight);
 
@@ -88,9 +96,10 @@ class StGLMessageBox : public StGLWidget {
 
     ST_CPPEXPORT void doKillSelf(const size_t );
 
-        private:   //! @name private fields
+        protected:   //! @name private fields
 
     StGLScrollArea*   myContent;    //!< content widget
+    StGLTextArea*     myTitle;      //!< window title
     StGLWidget*       myBtnPanel;   //!< panel for buttons
     StGLButton*       myDefaultBtn; //!< default button to redirect Enter
     StGLMenuProgram   myProgram;    //!< GLSL program

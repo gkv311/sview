@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -96,42 +96,6 @@ void StGLMenuItem::setIcon(const StString* theImgPaths,
 
 void StGLMenuItem::setHilightText() {
     myToHilightText = true;
-}
-
-const int StGLMenuItem::computeTextWidth() {
-    StHandle<StFTFont>& aFontGen = myFont->changeFont()->getFont();
-    if(aFontGen.isNull() || !aFontGen->isValid()) {
-        return myRoot->scale(int(10 * (myText.getLength() + 2)));
-    }
-
-    GLfloat aWidth    = 0.0f;
-    GLfloat aWidthMax = 0.0f;
-    for(StUtf8Iter anIter = myText.iterator(); *anIter != 0;) {
-        const stUtf32_t aCharThis =   *anIter;
-        const stUtf32_t aCharNext = *++anIter;
-
-        if(aCharThis == '\x0D') {
-            continue; // ignore CR
-        } else if(aCharThis == '\x0A') {
-            aWidthMax = stMax(aWidthMax, aWidth);
-            aWidth = 0.0f;
-            continue; // will be processed on second pass
-        } else if(aCharThis == ' ') {
-            aWidth += aFontGen->getAdvanceX(aCharThis, aCharNext);
-            continue;
-        }
-
-        const StFTFont::Subset aSubset = StFTFont::subset(aCharThis);
-        StHandle<StFTFont>&    aFont   = myFont->changeFont(aSubset)->getFont();
-        if(!aFont.isNull()
-         && aFont->hasSymbol(aCharThis)) {
-            aWidth += aFont->getAdvanceX(aCharThis, aCharNext);
-        } else {
-            aWidth += aFontGen->getAdvanceX(aCharThis, aCharNext);
-        }
-    }
-    aWidthMax = stMax(aWidthMax, aWidth);
-    return int(aWidthMax + 0.5f);
 }
 
 void StGLMenuItem::stglResize() {

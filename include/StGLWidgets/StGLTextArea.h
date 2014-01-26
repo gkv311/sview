@@ -178,6 +178,13 @@ class StGLTextArea : public StGLWidget {
      */
     ST_CPPEXPORT bool stglInitAutoHeightWidth(const int theMaxWidth = -1);
 
+    /**
+     * Roughly estimate text dimensions.
+     */
+    ST_CPPEXPORT void computeTextWidth(const GLfloat theWidthMax,
+                                       int&          theWidth,
+                                       int&          theHeight);
+
     inline GLint getTextHeight() const {
         return std::abs(GLint(myTextBndBox.height()));
     }

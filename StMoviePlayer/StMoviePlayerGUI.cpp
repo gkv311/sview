@@ -543,7 +543,7 @@ class StDelayControl : public StGLMessageBox {
 
     StDelayControl(StMoviePlayerGUI*               theParent,
                    const StHandle<StFloat32Param>& theTrackedValue)
-    : StGLMessageBox(theParent, "", theParent->scale(400), theParent->scale(260)),
+    : StGLMessageBox(theParent, theParent->tr(DIALOG_AUDIO_DELAY_TITLE), "", theParent->scale(400), theParent->scale(260)),
       myRange(NULL) {
         changeRectPx().moveX( myRoot->scale( 64));
         changeRectPx().moveY(-myRoot->scale(128));
@@ -557,17 +557,9 @@ class StDelayControl : public StGLMessageBox {
         aContent->setVisibility(true, true);
 
         const StGLVec3 aWhite(1.0f, 1.0f, 1.0f);
-        StGLTextArea* aTitle = new StGLTextArea(aContent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
-                                                aContent->getRectPx().width(), myRoot->scale(10));
-        aTitle->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER, StGLTextFormatter::ST_ALIGN_Y_TOP);
-        aTitle->setText(theParent->tr(DIALOG_AUDIO_DELAY_TITLE));
-        aTitle->setTextColor(aWhite);
-        aTitle->setVisibility(true, true);
-        aTitle->stglInitAutoHeight();
-
-        StGLTextArea* aText = new StGLTextArea(aContent, 0, aTitle->getRectPx().bottom(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+        StGLTextArea* aText = new StGLTextArea(aContent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
                                                aContent->getRectPx().width(), myRoot->scale(10));
-        aText->setText(StString("\n\n") + theParent->tr(DIALOG_AUDIO_DELAY_DESC) + "\n");
+        aText->setText(theParent->tr(DIALOG_AUDIO_DELAY_DESC) + "\n");
         aText->setTextColor(aWhite);
         aText->setVisibility(true, true);
         aText->stglInitAutoHeight();
@@ -691,7 +683,7 @@ StGLMenu* StMoviePlayerGUI::createFpsMenu() {
 }
 
 void StMoviePlayerGUI::doAboutProgram(const size_t ) {
-    StGLMessageBox* aDialog = new StGLMessageBox(this,
+    StGLMessageBox* aDialog = new StGLMessageBox(this, "",
           tr(ABOUT_DPLUGIN_NAME) + '\n'
         + tr(ABOUT_VERSION) + ": " + StVersionInfo::getSDKVersionString()
         + " "+ StThread::getArchString()
@@ -709,8 +701,7 @@ void StMoviePlayerGUI::doUserTips(const size_t ) {
 void StMoviePlayerGUI::doAboutSystem(const size_t ) {
     StString aTitle = "System Info";
     StString anInfo = getContext().stglFullInfo();
-    StString aString = aTitle + "\n\n \n" + anInfo;
-    StGLMessageBox* aDialog = new StGLMessageBox(this, aString, scale(512), scale(256));
+    StGLMessageBox* aDialog = new StGLMessageBox(this, aTitle, anInfo, scale(512), scale(256));
     aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
@@ -742,8 +733,8 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
     for(size_t anIter = 0; anIter < anInfoList.size(); ++anIter) {
         anInfo += anInfoList[anIter];
     }
-    StString aString = aTitle + "\n\n \n" + anInfo + aCodecsInfo;
-    StGLMessageBox* aDialog = new StGLMessageBox(this, aString, scale(512), scale(300));
+    StString aString = anInfo + aCodecsInfo;
+    StGLMessageBox* aDialog = new StGLMessageBox(this, aTitle, aString, scale(512), scale(300));
     aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
@@ -1231,14 +1222,14 @@ void StMoviePlayerGUI::doAboutRenderer(const size_t ) {
         anAboutText = StString() + "Plugin '" + myPlugin->getMainWindow()->getRendererId() + "' doesn't provide description";
     }
 
-    StGLMessageBox* aDialog = new StGLMessageBox(this, anAboutText, scale(512), scale(300));
+    StGLMessageBox* aDialog = new StGLMessageBox(this, "", anAboutText, scale(512), scale(300));
     aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
 
 void StMoviePlayerGUI::showUpdatesNotify() {
-    StGLMessageBox* aDialog = new StGLMessageBox(this, tr(UPDATES_NOTIFY));
+    StGLMessageBox* aDialog = new StGLMessageBox(this, "", tr(UPDATES_NOTIFY));
     aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->setVisibility(true, true);
     aDialog->stglInit();

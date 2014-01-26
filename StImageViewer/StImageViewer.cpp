@@ -480,7 +480,7 @@ void StImageViewer::doDeleteFileBegin(const size_t ) {
     const StString aText = StString("Do you really want to completely remove this file?\n")
                          + myFileToDelete->getPath() + "";
 
-    StGLMessageBox* aDialog = new StGLMessageBox(myGUI.access(), aText, 512, 256);
+    StGLMessageBox* aDialog = new StGLMessageBox(myGUI.access(), "Confirmation", aText, 512, 256);
     aDialog->addButton("Delete", true,  96)->signals.onBtnClick += stSlot(this, &StImageViewer::doDeleteFileEnd);
     aDialog->addButton("Cancel", false, 96);
     aDialog->setVisibility(true, true);

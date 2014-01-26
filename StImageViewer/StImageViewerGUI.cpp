@@ -34,7 +34,9 @@
 #include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLMsgStack.h>
 #include <StGLWidgets/StGLRangeFieldFloat32.h>
+#include <StGLWidgets/StGLScrollArea.h>
 #include <StGLWidgets/StGLSwitchTextured.h>
+#include <StGLWidgets/StGLTable.h>
 #include <StGLWidgets/StGLTextureButton.h>
 #include <StGLWidgets/StGLFpsLabel.h>
 
@@ -373,7 +375,7 @@ StGLMenu* StImageViewerGUI::createOutputMenu() {
 }
 
 void StImageViewerGUI::doAboutProgram(const size_t ) {
-    StGLMessageBox* aDialog = new StGLMessageBox(this,
+    StGLMessageBox* aDialog = new StGLMessageBox(this, "",
           tr(ABOUT_DPLUGIN_NAME) + '\n'
         + tr(ABOUT_VERSION) + ": " + StVersionInfo::getSDKVersionString()
         + " " + StThread::getArchString()
@@ -391,8 +393,7 @@ void StImageViewerGUI::doUserTips(const size_t ) {
 void StImageViewerGUI::doAboutSystem(const size_t ) {
     StString aTitle = "System Info";
     StString anInfo = getContext().stglFullInfo();
-    StString aString = aTitle + "\n\n \n" + anInfo;
-    StGLMessageBox* aDialog = new StGLMessageBox(this, aString, scale(512), scale(256));
+    StGLMessageBox* aDialog = new StGLMessageBox(this, aTitle, anInfo, scale(512), scale(256));
     aDialog->addButton("Close");
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
@@ -415,12 +416,11 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
     for(size_t anIter = 0; anIter < anInfoList.size(); ++anIter) {
         anInfo += anInfoList[anIter];
     }
-    StString aString = aTitle + "\n\n \n" + anInfo;
-    StGLMessageBox* aDialog = new StGLMessageBox(this, aString, scale(512), scale(300));
+
+    StGLMessageBox* aDialog = new StGLMessageBox(this, aTitle, anInfo, scale(512), scale(300));
     aDialog->addButton("Close");
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
-
 }
 
 void StImageViewerGUI::doCheckUpdates(const size_t ) {
@@ -728,14 +728,14 @@ void StImageViewerGUI::doAboutRenderer(const size_t ) {
         anAboutText = StString() + "Plugin '" + myPlugin->getMainWindow()->getRendererId() + "' doesn't provide description";
     }
 
-    StGLMessageBox* aDialog = new StGLMessageBox(this, anAboutText, scale(512), scale(300));
+    StGLMessageBox* aDialog = new StGLMessageBox(this, "", anAboutText, scale(512), scale(300));
     aDialog->addButton("Close");
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
 
 void StImageViewerGUI::showUpdatesNotify() {
-    StGLMessageBox* aDialog = new StGLMessageBox(this, tr(UPDATES_NOTIFY));
+    StGLMessageBox* aDialog = new StGLMessageBox(this, "", tr(UPDATES_NOTIFY));
     aDialog->addButton("Close");
     aDialog->setVisibility(true, true);
     aDialog->stglInit();

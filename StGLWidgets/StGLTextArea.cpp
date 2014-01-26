@@ -266,6 +266,60 @@ void StGLTextArea::setTextWidth(const int theWidth) {
     myToRecompute = true;
 }
 
+void StGLTextArea::computeTextWidth(const GLfloat theWidthMax,
+                                    int&          theWidth,
+                                    int&          theHeight) {
+    StHandle<StFTFont>& aFontGen = myFont->changeFont()->getFont();
+    if(aFontGen.isNull() || !aFontGen->isValid()) {
+        theWidth  = myRoot->scale(int(10 * (myText.getLength() + 2)));
+        theHeight = myRoot->scale(16);
+        return;
+    }
+
+    GLfloat aWidth    = 0.0f;
+    GLfloat aWidthMax = 0.0f;
+    size_t  aCharsInLine = 0;
+    size_t  aNbLines     = 1;
+    for(StUtf8Iter anIter = myText.iterator(); *anIter != 0;) {
+        const stUtf32_t aCharThis =   *anIter;
+        const stUtf32_t aCharNext = *++anIter;
+
+        if(aCharThis == '\x0D') {
+            continue; // ignore CR
+        } else if(aCharThis == '\x0A') {
+            aWidthMax = stMax(aWidthMax, aWidth);
+            aWidth = 0.0f;
+            ++aNbLines;
+            aCharsInLine = 0;
+            continue; // will be processed on second pass
+        } else if(aCharThis == ' ') {
+            aWidth += aFontGen->getAdvanceX(aCharThis, aCharNext);
+            continue;
+        }
+
+        const StFTFont::Subset aSubset = StFTFont::subset(aCharThis);
+        StHandle<StFTFont>&    aFont   = myFont->changeFont(aSubset)->getFont();
+        GLfloat anAdvance = (!aFont.isNull() && aFont->hasSymbol(aCharThis))
+                          ? aFont->getAdvanceX(aCharThis, aCharNext)
+                          : aFontGen->getAdvanceX(aCharThis, aCharNext);
+        aWidth += anAdvance;
+        if(theWidthMax > 0.0f
+        && aWidth > theWidthMax) {
+            if(aCharsInLine != 0) {
+                aWidthMax = stMax(aWidthMax, aWidth - anAdvance);
+                aWidth    = anAdvance;
+            } else {
+                aWidthMax = stMax(aWidthMax, aWidth);
+                aWidth    = 0.0f;
+            }
+            ++aNbLines;
+        }
+    }
+    aWidthMax = stMax(aWidthMax, aWidth);
+    theWidth  = int(aWidthMax + 1.5f);
+    theHeight = int(GLfloat(aNbLines) * aFontGen->getLineSpacing() + 0.5f);
+}
+
 bool StGLTextArea::stglInitAutoHeightWidth(const int theMaxWidth) {
     changeRectPx().right() = getRectPx().left() + theMaxWidth; // compute width from text
     if(!stglInit()) {

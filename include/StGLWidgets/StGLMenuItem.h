@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -43,7 +43,11 @@ class StGLMenuItem : public StGLTextArea {
     ST_CPPEXPORT virtual bool tryClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& theIsItemClicked);
     ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& theIsItemUnclicked);
 
-    ST_CPPEXPORT const int computeTextWidth();
+    ST_LOCAL const int computeTextWidth() {
+        int aWidth = 0, aHeight = 0;
+        StGLTextArea::computeTextWidth(-1.0f, aWidth, aHeight);
+        return aWidth;
+    }
 
     inline StGLMenu* getParentMenu() {
         return (StGLMenu* )StGLWidget::getParent();
