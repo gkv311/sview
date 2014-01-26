@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -28,6 +28,8 @@ struct StGLArbFbo;
 
 struct StGLCore11;
 struct StGLCore11Fwd;
+
+class StArgumentsMap;
 
 template<typename theBaseClass_t> struct stglTmplCore12;
 typedef stglTmplCore12<StGLCore11>     StGLCore12;
@@ -233,6 +235,11 @@ class StGLContext {
      * Retrieve info from OpenGL context and create info string.
      */
     ST_CPPEXPORT StString stglFullInfo() const;
+
+    /**
+     * Retrieve info from OpenGL context and create info string.
+     */
+    ST_CPPEXPORT void stglFullInfo(StArgumentsMap& theMap) const;
 
     /**
      * This method intended to synchronize current OpenGL state and local cache.

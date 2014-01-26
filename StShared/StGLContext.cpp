@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -17,6 +17,7 @@
 #include <StGL/StGLArbFbo.h>
 
 #include <StStrings/StLogger.h>
+#include <StThreads/StProcess.h>
 
 #include <stAssert.h>
 
@@ -366,23 +367,41 @@ void StGLContext::stglFillBitsFBO(const GLuint theBuffId,
 }
 
 StString StGLContext::stglFullInfo() const {
+    StArgumentsMap aMap;
+    stglFullInfo(aMap);
+    StString aText;
+    bool isFirst = true;
+    for(size_t aKeyIter = 0; aKeyIter < aMap.size(); ++aKeyIter) {
+        if(isFirst) {
+            isFirst = false;
+        } else {
+            aText += "\n";
+        }
+        const StArgument& aPair = aMap.getFromIndex(aKeyIter);
+        aText += StString("  ") + aPair.getKey() + ": " + aPair.getValue();
+    }
+    return aText;
+}
+
+void StGLContext::stglFullInfo(StArgumentsMap& theMap) const {
     StString aFBOBits;
     if(myFBOBits.RGB > 0) {
-        aFBOBits = StString("\n")
-            + "  FBO    Info: " + myFBOBits.SizeX + "x" + myFBOBits.SizeY
-                            + " RGB" + myFBOBits.RGB + " A" + myFBOBits.Alpha
-                            + " D" + myFBOBits.Depth + " S" + myFBOBits.Stencil;
+        aFBOBits = StString() + myFBOBits.SizeX + "x" + myFBOBits.SizeY
+                              + " RGB" + myFBOBits.RGB + " A" + myFBOBits.Alpha
+                              + " D" + myFBOBits.Depth + " S" + myFBOBits.Stencil;
     }
 
-    StString anInfo = StString()
-        + "  GLvendor: "    + (const char* )glGetString(GL_VENDOR)   + "\n"
-        + "  GLdevice: "    + (const char* )glGetString(GL_RENDERER) + "\n"
-        + "  GLversion: "   + (const char* )glGetString(GL_VERSION)  + "\n"
-        + "  GLSLversion: " + (const char* )glGetString(GL_SHADING_LANGUAGE_VERSION) + "\n"
-        + "  Window Info: " + myViewport.width() + "x" + myViewport.height()
-                        + " RGB" + myWindowBits.RGB + " A" + myWindowBits.Alpha
-                        + " D" + myWindowBits.Depth + " S" + myWindowBits.Stencil
-        + aFBOBits;
+    theMap.add(StArgument("GLvendor",    (const char* )glGetString(GL_VENDOR)));
+    theMap.add(StArgument("GLdevice",    (const char* )glGetString(GL_RENDERER)));
+    theMap.add(StArgument("GLversion",   (const char* )glGetString(GL_VERSION)));
+    theMap.add(StArgument("GLSLversion", (const char* )glGetString(GL_SHADING_LANGUAGE_VERSION)));
+    theMap.add(StArgument("Window Info", StString()
+            + myViewport.width() + "x" + myViewport.height()
+            + " RGB" + myWindowBits.RGB + " A" + myWindowBits.Alpha
+            + " D" + myWindowBits.Depth + " S" + myWindowBits.Stencil));
+    if(!aFBOBits.isEmpty()) {
+        theMap.add(StArgument("FBO    Info", aFBOBits));
+    }
 
 #ifdef __APPLE__
     GLint aGlRendId = 0;
@@ -403,12 +422,10 @@ StString StGLContext::stglFullInfo() const {
         //kCGLRPTextureMemoryMegabytes = 132;
         GLint aVMem = 0;
         if(CGLDescribeRenderer(aRendObj, aRendIter, kCGLRPVideoMemory, &aVMem) == kCGLNoError) {
-            anInfo = anInfo + "\n"
-            + "  GPU memory: " + (aVMem / (1024 * 1024))  + " MiB";
+            theMap.add(StArgument("GPU memory",         StString() + (aVMem / (1024 * 1024))  + " MiB"));
         }
         if(CGLDescribeRenderer(aRendObj, aRendIter, kCGLRPTextureMemory, &aVMem) == kCGLNoError) {
-            anInfo = anInfo + "\n"
-            + "  GPU Texture memory: " + (aVMem / (1024 * 1024))  + " MiB";
+            theMap.add(StArgument("GPU Texture memory", StString() + (aVMem / (1024 * 1024))  + " MiB"));
         }
     }
 #endif
@@ -416,17 +433,15 @@ StString StGLContext::stglFullInfo() const {
     if(stglCheckExtension("GL_ATI_meminfo")) {
         GLint aMemInfo[4]; stMemSet(aMemInfo, -1, sizeof(aMemInfo));
         core11fwd->glGetIntegerv(GL_VBO_FREE_MEMORY_ATI, aMemInfo);
-        anInfo = anInfo + "\n"
-        + "  Free GPU memory: " + (aMemInfo[0] / 1024)  + " MiB";
+        theMap.add(StArgument("Free GPU memory", StString() + (aMemInfo[0] / 1024)  + " MiB"));
     } else if(stglCheckExtension("GL_NVX_gpu_memory_info")) {
         GLint aDedicated     = -1;
         GLint aDedicatedFree = -1;
         glGetIntegerv(0x9047, &aDedicated);     // GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX
         glGetIntegerv(0x9049, &aDedicatedFree); // GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX
-        anInfo = anInfo + "\n"
-        + "  Free GPU memory: " + (aDedicatedFree / 1024)  + " MiB (from " + (aDedicated / 1024) + " MiB)";
+        theMap.add(StArgument("Free GPU memory",
+                   StString() + (aDedicatedFree / 1024)  + " MiB (from " + (aDedicated / 1024) + " MiB)"));
     }
-    return anInfo;
 }
 
 void StGLContext::stglSyncState() {

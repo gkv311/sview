@@ -391,9 +391,15 @@ void StImageViewerGUI::doUserTips(const size_t ) {
 }
 
 void StImageViewerGUI::doAboutSystem(const size_t ) {
-    StString aTitle = "System Info";
-    StString anInfo = getContext().stglFullInfo();
-    StGLMessageBox* aDialog = new StGLMessageBox(this, aTitle, anInfo, scale(512), scale(256));
+    const StString aTitle = "System Info";
+    StGLMessageBox* aDialog = new StGLMessageBox(this, aTitle, "", scale(512), scale(256));
+
+    StArgumentsMap anInfo;
+    getContext().stglFullInfo(anInfo);
+    StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
+    aTable->setVisibility(true, true);
+    aTable->fillFromMap(anInfo, StGLVec3(1.0f, 1.0f, 1.0f), aDialog->getContent()->getRectPx().width(), aDialog->getContent()->getRectPx().width() / 2);
+
     aDialog->addButton("Close");
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
