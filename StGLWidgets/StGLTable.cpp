@@ -154,6 +154,7 @@ void StGLTable::updateLayout() {
     }
 
     // determine rows heights
+    int aBottomPrev = 0;
     for(size_t aRowIter = 0; aRowIter < myRowBottoms.size(); ++aRowIter) {
         StArrayList<StGLTableItem>& aRow = myTable.changeValue(aRowIter);
         for(size_t aColIter = 0; aColIter < myColRights.size(); ++aColIter) {
@@ -171,9 +172,13 @@ void StGLTable::updateLayout() {
                             aBefore + anItem.Item->getRectPx().height()
                           + myMarginTop + myMarginBottom);
         }
+        int& aBottom = myRowBottoms.changeValue(aRowIter);
+        aBottom      = stMax(aBottom, aBottomPrev);
+        aBottomPrev  = aBottom;
     }
 
     // determine columns widths
+    int aRightPrev = 0;
     for(size_t aColIter = 0; aColIter < myColRights.size(); ++aColIter) {
         for(size_t aRowIter = 0; aRowIter < myRowBottoms.size(); ++aRowIter) {
             StGLTableItem& anItem = myTable.changeValue(aRowIter).changeValue(aColIter);
@@ -190,6 +195,9 @@ void StGLTable::updateLayout() {
                            aBefore + anItem.Item->getRectPx().width()
                          + myMarginLeft + myMarginRight);
         }
+        int& aRight = myColRights.changeValue(aColIter);
+        aRight      = stMax(aRight, aRightPrev);
+        aRightPrev  = aRight;
     }
     changeRectPx().right()  = getRectPx().left() + myColRights.getLast();
     changeRectPx().bottom() = getRectPx().top()  + myRowBottoms.getLast();
