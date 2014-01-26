@@ -182,6 +182,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doReset(const size_t dummy = 0);
 
     ST_LOCAL void doSnapshot(const size_t theImgType);
+    ST_LOCAL void doAboutFile(const size_t dummy = 0);
 
         public: //! @name Properties
 
@@ -309,6 +310,7 @@ class StMoviePlayer : public StApplication {
         Action_SrcMono,
         Action_SrcOverUnderLR,
         Action_SrcSideBySideRL,
+        Action_FileInfo,
         Action_ListFirst,
         Action_ListLast,
         Action_ListPrev,

@@ -48,6 +48,7 @@ namespace StMoviePlayerStrings {
         MENU_MEDIA_GPU_DECODING = 1107,
         MENU_MEDIA_WEBUI        = 1108,
         MENU_MEDIA_QUIT = 1109,
+        MENU_MEDIA_FILE_INFO    = 1170,
 
         // Root -> Media menu -> Open File menu
         MENU_MEDIA_OPEN_MOVIE_1 = 1110,

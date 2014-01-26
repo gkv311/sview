@@ -93,6 +93,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Web UI can not be started on {0} port!");
     theStrings(MENU_MEDIA_QUIT,
                "Quit");
+    theStrings(MENU_MEDIA_FILE_INFO,
+               "File info");
     theStrings(MENU_MEDIA_OPEN_MOVIE_1,
                "From One file");
     theStrings(MENU_MEDIA_OPEN_MOVIE_2,

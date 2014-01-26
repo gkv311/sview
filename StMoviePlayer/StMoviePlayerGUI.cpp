@@ -194,6 +194,7 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
     anItem->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doOpenRecent);
     aMenuMedia->addItem(tr(MENU_MEDIA_SAVE_SNAPSHOT_AS), myPlugin->getAction(StMoviePlayer::Action_SaveSnapshot), aMenuSaveImage);
     aMenuMedia->addItem(tr(MENU_MEDIA_SRC_FORMAT), aMenuSrcFormat);
+    aMenuMedia->addItem(tr(MENU_MEDIA_FILE_INFO),  myPlugin->getAction(StMoviePlayer::Action_FileInfo));
     aMenuMedia->addItem(tr(MENU_MEDIA_AL_DEVICE),  myMenuOpenAL);
 
     aMenuMedia->addItem("Audio Volume", aMenuVolume);

@@ -334,6 +334,9 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     anAction = new StActionIntValue(stCString("DoSrcSideBySide"), params.srcFormat, ST_V_SRC_SIDE_BY_SIDE);
     addAction(Action_SrcSideBySideRL, anAction, ST_VK_S);
 
+    anAction = new StActionIntSlot(stCString("DoFileInfo"), stSlot(this, &StMoviePlayer::doAboutFile), 0);
+    addAction(Action_FileInfo, anAction, ST_VK_I);
+
     anAction = new StActionIntSlot(stCString("DoListFirst"), stSlot(this, &StMoviePlayer::doListFirst), 0);
     addAction(Action_ListFirst, anAction, ST_VK_HOME);
 
@@ -801,11 +804,6 @@ void StMoviePlayer::doKeyDown(const StKeyEvent& theEvent) {
 
     StApplication::doKeyDown(theEvent);
     switch(theEvent.VKey) {
-        // file walk
-        case ST_VK_I:
-            myGUI->doAboutFile(0);
-            return;
-
         // post process keys
         case ST_VK_B: {
             if(theEvent.Flags == ST_VF_SHIFT) {
@@ -1203,6 +1201,12 @@ void StMoviePlayer::doUpdateStateLoaded() {
         myVideo->params.activeSubtitles->setValue(mySubsOnLoad);
         params.subtitlesStream->setValue(mySubsOnLoad);
         mySubsOnLoad = -1;
+    }
+}
+
+void StMoviePlayer::doAboutFile(const size_t ) {
+    if(!myGUI.isNull()) {
+        myGUI->doAboutFile(0);
     }
 }
 
