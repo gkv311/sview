@@ -411,8 +411,7 @@ void StGLTextFormatter::format(const GLfloat theWidth,
         if(theWidth > 0.0f && aWidth >= theWidth) {
             // force next line
             size_t aLastRect = myRectWordStart - 1; // last rect on current line
-            if(myRectWordStart == myRectLineStart)
-            {
+            if(myRectWordStart == myRectLineStart) {
                 aLastRect = aRectIter - 1;
             }
 
@@ -430,6 +429,9 @@ void StGLTextFormatter::format(const GLfloat theWidth,
     if(myRectsNb != 0
     && myAlignWidth <= 0.0f) {
         myAlignWidth = myRects[myRectsNb - 1].px.right();
+    }
+    if(myTextWidth > myAlignWidth) {
+        myTextWidth = myAlignWidth;
     }
 
     // apply vertical alignment style
