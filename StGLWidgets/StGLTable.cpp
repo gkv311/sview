@@ -129,6 +129,8 @@ void StGLTable::fillFromMap(const StArgumentsMap& theMap,
         aText->stglInitAutoHeightWidth(aCol2MaxWidth);
         setElement(theRowId + anIter, theColId + 1, aText);
     }
+
+    updateLayout();
 }
 
 void StGLTable::stglResize() {
@@ -140,9 +142,15 @@ bool StGLTable::stglInit() {
     if(!myIsInitialized) {
         return false;
     }
+
+    updateLayout();
+    return true;
+}
+
+void StGLTable::updateLayout() {
     if(myRowBottoms.isEmpty()
     || myColRights .isEmpty()) {
-        return true;
+        return;
     }
 
     // determine rows heights
@@ -203,7 +211,6 @@ bool StGLTable::stglInit() {
             anItem.Item->changeRectPx().moveLeftTo(aLeft + myMarginLeft);
         }
     }
-    return true;
 }
 
 void StGLTable::stglDraw(unsigned int theView) {

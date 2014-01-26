@@ -414,11 +414,14 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
     StHandle<StImageInfo>    anExtraInfo;
     if(myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo)
     && !anExtraInfo.isNull()) {
-        StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
+        StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
         aTable->setVisibility(true, true);
         aTable->fillFromMap(anExtraInfo->myInfo, StGLVec3(1.0f, 1.0f, 1.0f), aDialog->getContent()->getRectPx().width(), aDialog->getContent()->getRectPx().width() / 2);
+        if(aTable->getRectPx().height() <= aDialog->getContent()->getRectPx().height()) {
+            aTable->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
+        }
     } else {
-        aDialog->setText("No information is available");
+        aDialog->setText("Information is unavailable");
     }
 
     aDialog->addButton("Close");

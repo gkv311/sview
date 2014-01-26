@@ -104,6 +104,11 @@ class StGLTable : public StGLWidget {
                                   const int             theRowId = 0,
                                   const int             theColId = 0);
 
+    /**
+     * Re-compute position of table elements.
+     */
+    ST_CPPEXPORT void updateLayout();
+
         protected: //! @name protected fields
 
     StArrayList< StArrayList<StGLTableItem> >
