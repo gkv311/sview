@@ -2,14 +2,15 @@ German translation file for StOutDistorted library
 @author Kirill Gavrilov
 
 --------
-1000="Distorted Output"
-1001="Oculur Rift"
+1000="Parallel Pair"
+1001="Distorted Output"
+1002="Oculus Rift"
+1003="Barrel distortion"
 1110="Layout"
 1111="Side-by-Side"
 1112="Top-and-Bottom"
 1120="Verzerrung"
 1121="keiner"
-1122="Barrel"
 1123="Show Mono in Stereo"
 2000="sView - Distorted Ausgangsmodul"
 2001="Version"

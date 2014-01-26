@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutDual library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -37,7 +37,6 @@ namespace {
     static const char ST_SETTING_DEVICE_ID[] = "deviceId";
     static const char ST_SETTING_WINDOWPOS[] = "windowPos";
     static const char ST_SETTING_LAYOUT[]    = "layout";
-    static const char ST_SETTING_BARREL[]    = "barrel";
     static const char ST_SETTING_ANAMORPH[]  = "anamorph";
     static const char ST_SETTING_MONOCLONE[] = "monoClone";
     static const char ST_SETTING_MARGINS[]   = "margins";
@@ -48,6 +47,8 @@ namespace {
     enum {
         STTR_DISTORTED_NAME     = 1000,
         STTR_DISTORTED_DESC     = 1001,
+        STTR_OCULUS_NAME        = 1002,
+        STTR_OCULUS_DESC        = 1003,
 
         // parameters
         STTR_PARAMETER_LAYOUT     = 1110,
@@ -55,7 +56,6 @@ namespace {
         STTR_PARAMETER_LAYOUT_OVERUNDER  = 1112,
         STTR_PARAMETER_DISTORTION = 1120,
         STTR_PARAMETER_DISTORTION_OFF    = 1121,
-        STTR_PARAMETER_DISTORTION_BARREL = 1122,
         STTR_PARAMETER_MONOCLONE         = 1123,
 
         // about info
@@ -251,11 +251,30 @@ const char* StOutDistorted::getRendererId() const {
 }
 
 const char* StOutDistorted::getDeviceId() const {
-    return "Distorted";
+    switch(myDevice) {
+        case DEVICE_OCULUS:    return "Oculus";
+        case DEVICE_DISTORTED:
+        default:               return "Distorted";
+    }
+}
+
+bool StOutDistorted::isLostDevice() const {
+    return myToResetDevice;
 }
 
 bool StOutDistorted::setDevice(const StString& theDevice) {
-    return theDevice == "Distorted";
+    if(theDevice == "Oculus") {
+        if(myDevice != DEVICE_OCULUS) {
+            myToResetDevice = true;
+        }
+        myDevice = DEVICE_OCULUS;
+    } else if(theDevice == "Distorted") {
+        if(myDevice != DEVICE_DISTORTED) {
+            myToResetDevice = true;
+        }
+        myDevice = DEVICE_DISTORTED;
+    }
+    return false;
 }
 
 void StOutDistorted::getDevices(StOutDevicesList& theList) const {
@@ -265,15 +284,18 @@ void StOutDistorted::getDevices(StOutDevicesList& theList) const {
 }
 
 void StOutDistorted::getOptions(StParamsList& theList) const {
-    theList.add(params.Layout);
-    theList.add(params.Barrel);
-    theList.add(params.Anamorph);
+    if(myDevice != DEVICE_OCULUS) {
+        theList.add(params.Layout);
+        theList.add(params.Anamorph);
+    }
     theList.add(params.MonoClone);
 }
 
 StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
 : StWindow(theParentWindow),
   mySettings(new StSettings(ST_OUT_PLUGIN_NAME)),
+  myDevice(DEVICE_AUTO),
+  myToResetDevice(false),
   myFrBuffer(new StGLFrameBuffer()),
   myCursor(new StGLTexture(GL_RGBA8)),
   myProgramFlat(new StProgramFlat()),
@@ -313,15 +335,26 @@ StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
     StHandle<StOutDevice> aDevDistorted = new StOutDevice();
     aDevDistorted->PluginId = ST_OUT_PLUGIN_NAME;
     aDevDistorted->DeviceId = "Distorted";
-    aDevDistorted->Priority = aSupportLevel;
-    aDevDistorted->Name     = aLangMap.changeValueId(STTR_DISTORTED_NAME, "Distorted Output");
-    aDevDistorted->Desc     = aLangMap.changeValueId(STTR_DISTORTED_DESC, "Oculus Rift");
+    aDevDistorted->Priority = ST_DEVICE_SUPPORT_NONE;
+    aDevDistorted->Name     = aLangMap.changeValueId(STTR_DISTORTED_NAME, "Parallel Pair");
+    aDevDistorted->Desc     = aLangMap.changeValueId(STTR_DISTORTED_DESC, "Distorted Output");
     myDevices.add(aDevDistorted);
 
+    StHandle<StOutDevice> aDevOculus = new StOutDevice();
+    aDevOculus->PluginId = ST_OUT_PLUGIN_NAME;
+    aDevOculus->DeviceId = "Oculus";
+    aDevOculus->Priority = aSupportLevel;
+    aDevOculus->Name     = aLangMap.changeValueId(STTR_OCULUS_NAME, "Oculus Rift");
+    aDevOculus->Desc     = aLangMap.changeValueId(STTR_OCULUS_DESC, "Distorted Output");
+    myDevices.add(aDevOculus);
+
+    // load device settings
+    mySettings->loadInt32(ST_SETTING_DEVICE_ID, myDevice);
+    if(myDevice == DEVICE_AUTO) {
+        myDevice = DEVICE_DISTORTED;
+    }
+
     // Distortion parameters
-    params.Barrel = new StBoolParamNamed(aSupportLevel != ST_DEVICE_SUPPORT_NONE,
-                                         aLangMap.changeValueId(STTR_PARAMETER_DISTORTION_BARREL,  "Barrel Side-by-Side"));
-    mySettings->loadParam(ST_SETTING_BARREL, params.Barrel);
     params.Anamorph = new StBoolParamNamed(false, "Anamorph");
     mySettings->loadParam(ST_SETTING_ANAMORPH, params.Anamorph);
     params.MonoClone = new StBoolParamNamed(false, aLangMap.changeValueId(STTR_PARAMETER_MONOCLONE, "Show Mono in Stereo"));
@@ -376,7 +409,7 @@ void StOutDistorted::releaseResources() {
     mySettings->saveFloatVec4(ST_SETTING_WARP_COEF, myBarrelCoef);
     mySettings->saveFloatVec4(ST_SETTING_CHROME_AB, myChromAb);
     if(myWasUsed) {
-        mySettings->saveParam(ST_SETTING_BARREL, params.Barrel);
+        mySettings->saveInt32(ST_SETTING_DEVICE_ID, myDevice);
     }
 }
 
@@ -387,6 +420,7 @@ StOutDistorted::~StOutDistorted() {
 
 void StOutDistorted::close() {
     StWindow::params.VSyncMode->signals.onChanged -= stSlot(this, &StOutDistorted::doSwitchVSync);
+    myToResetDevice = false;
     releaseResources();
     StWindow::close();
 }
@@ -487,13 +521,13 @@ void StOutDistorted::stglDrawCursor() {
 }
 
 GLfloat StOutDistorted::getLensDist() const {
-    return (myIsStereoOn && params.Barrel->getValue()) ? 0.1453f : 0.0f;
+    return (myIsStereoOn && myDevice == DEVICE_OCULUS) ? 0.1453f : 0.0f;
 }
 
 GLfloat StOutDistorted::getScaleFactor() const {
     if(!myToReduceGui
     || !myIsStereoOn
-    || !params.Barrel->getValue()) {
+    ||  myDevice != DEVICE_OCULUS) {
         return StWindow::getScaleFactor();
     }
 
@@ -515,15 +549,15 @@ void StOutDistorted::stglDraw() {
                 && !myIsBroken;
     myIsForcedStereo = myIsStereoOn && params.MonoClone->getValue();
     if(myIsStereoOn
-    && params.Barrel->getValue()) {
+    && myDevice == DEVICE_OCULUS) {
         myMargins = myBarMargins;
     } else {
         myMargins = StRectI_t();
     }
 
     if(myIsStereoOn
-    && !params.Anamorph->getValue()) {
-        StWindow::setAttribute(StWinAttr_SplitCfg, params.Layout->getValue() == LAYOUT_OVER_UNDER
+    && (myDevice == DEVICE_OCULUS || !params.Anamorph->getValue())) {
+        StWindow::setAttribute(StWinAttr_SplitCfg, (params.Layout->getValue() == LAYOUT_OVER_UNDER && myDevice != DEVICE_OCULUS)
                                                  ? StWinSlave_splitVertical : StWinSlave_splitHorizontal);
     } else {
         StWindow::setAttribute(StWinAttr_SplitCfg, StWinSlave_splitOff);
@@ -554,7 +588,8 @@ void StOutDistorted::stglDraw() {
 
     StGLBoxPx aViewPortL = aVPMaster;
     StGLBoxPx aViewPortR = aVPSlave;
-    if(params.Anamorph->getValue()) {
+    if(params.Anamorph->getValue()
+    && myDevice != DEVICE_OCULUS) {
         switch(params.Layout->getValue()) {
             case LAYOUT_OVER_UNDER: {
                 aViewPortL.height() /= 2;
@@ -575,7 +610,7 @@ void StOutDistorted::stglDraw() {
     // resize FBO
     GLint aFrSizeX = aViewPortL.width();
     GLint aFrSizeY = aViewPortL.height();
-    if(params.Barrel->getValue()) {
+    if(myDevice == DEVICE_OCULUS) {
         myToReduceGui = aFrSizeX <= 640;
         aFrSizeX = int(std::ceil(double(aFrSizeX) * 1.25) + 0.5);
         aFrSizeY = int(std::ceil(double(aFrSizeY) * 1.25) + 0.5);
@@ -604,7 +639,8 @@ void StOutDistorted::stglDraw() {
     const GLfloat aCurTop  = GLfloat( 1.0 - aCursorPos.y() * 2.0);
     GLfloat aCurWidth  = 2.0f * GLfloat(myCursor->getSizeX()) / GLfloat(myFrBuffer->getVPSizeX());
     GLfloat aCurHeight = 2.0f * GLfloat(myCursor->getSizeY()) / GLfloat(myFrBuffer->getVPSizeY());
-    if(params.Anamorph->getValue()) {
+    if(params.Anamorph->getValue()
+    && myDevice != DEVICE_OCULUS) {
         if(params.Layout->getValue() == LAYOUT_OVER_UNDER) {
             aCurHeight *= 0.5;
         } else {
@@ -637,7 +673,7 @@ void StOutDistorted::stglDraw() {
     StGLProgram*    aProgram   = myProgramFlat.access();
     StGLVarLocation aVertexLoc = myProgramFlat->getVVertexLoc();
     StGLVarLocation aTexCrdLoc = myProgramFlat->getVTexCoordLoc();
-    if(params.Barrel->getValue()) {
+    if(myDevice == DEVICE_OCULUS) {
         aProgram   = myProgramBarrel.access();
         aVertexLoc = myProgramBarrel->getVVertexLoc();
         aTexCrdLoc = myProgramBarrel->getVTexCoordLoc();

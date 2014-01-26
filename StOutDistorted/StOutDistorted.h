@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutDual library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -61,6 +61,12 @@ class StOutDistorted : public StWindow {
      * Active Device id.
      */
     ST_CPPEXPORT virtual const char* getDeviceId() const;
+
+    /**
+     * This methods returns device lost state.
+     * @return true if rendering device requires reinitialization
+     */
+    ST_CPPEXPORT virtual bool isLostDevice() const;
 
     /**
      * Activate Device.
@@ -136,6 +142,13 @@ class StOutDistorted : public StWindow {
 
         private:
 
+    enum {
+        DEVICE_AUTO         =-1,
+        DEVICE_DISTORTED    = 0, //!< general output
+        DEVICE_OCULUS       = 1, //!< Oculus Rift
+        DEVICE_NB,
+    };
+
     enum Layout {
         LAYOUT_SIDE_BY_SIDE = 0, //!< anamorph side by side
         LAYOUT_OVER_UNDER   = 1, //!< anamorph over under
@@ -145,7 +158,6 @@ class StOutDistorted : public StWindow {
 
         StHandle<StInt32Param> Layout;   //!< pair layout
         StHandle<StBoolParam>  Anamorph; //!< anamorph filter
-        StHandle<StBoolParam>  Barrel;   //!< Barrel filter
         StHandle<StBoolParam>  MonoClone;//!< display mono in stereo
 
     } params;
@@ -156,6 +168,8 @@ class StOutDistorted : public StWindow {
     StHandle<StSettings>      mySettings;
     StString                  myAbout;           //!< about string
 
+    int                       myDevice;          //!< currently active device
+    bool                      myToResetDevice;
     StHandle<StGLContext>     myContext;
     StHandle<StGLFrameBuffer> myFrBuffer;        //!< OpenGL frame buffer object
     StHandle<StGLTexture>     myCursor;          //!< cursor texture - we can not use normal cursor due to distortions
