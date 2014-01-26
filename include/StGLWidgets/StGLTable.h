@@ -11,23 +11,49 @@
 
 #include <StGLWidgets/StGLTextArea.h>
 
+class StGLTable;
+
 /**
  * Table element definition.
  */
-struct StGLTableItem {
-    StGLWidget* Item;
-    int         ColSpan;
-    int         RowSpan;
+class StGLTableItem : public StGLWidget {
 
-    StGLTableItem() : Item(NULL), ColSpan(1), RowSpan(1) {}
+        public:
 
-    bool operator==(const StGLTableItem& theOther) const { return Item == theOther.Item; }
-    bool operator!=(const StGLTableItem& theOther) const { return Item != theOther.Item; }
+    ST_LOCAL int  getColSpan() const { return myColSpan; }
+    ST_LOCAL int  getRowSpan() const { return myRowSpan; }
+
+    ST_LOCAL void setColSpan(int theValue) { myColSpan = theValue; }
+    ST_LOCAL void setRowSpan(int theValue) { myRowSpan = theValue; }
+
+    ST_LOCAL const StGLWidget* getItem() const {
+        return myChildren.getStart();
+    }
+
+    ST_LOCAL StGLWidget* getItem() {
+        return myChildren.getStart();
+    }
+
+    /**
+     * Default constructor.
+     */
+    ST_CPPEXPORT StGLTableItem(StGLTable* theParent);
+
+    /**
+     * Destructor.
+     */
+    ST_CPPEXPORT virtual ~StGLTableItem();
+
+        private:
+
+    int myColSpan; //!< columns span
+    int myRowSpan; //!< rows    span
+
 };
 
 // dummy
-template<> inline void StArray<             StGLTableItem  >::sort() {}
-template<> inline void StArray< StArrayList<StGLTableItem> >::sort() {}
+template<> inline void StArray<             StGLTableItem*  >::sort() {}
+template<> inline void StArray< StArrayList<StGLTableItem*> >::sort() {}
 
 class StArgumentsMap;
 
@@ -64,20 +90,11 @@ class StGLTable : public StGLWidget {
                                  const int theNbColumns);
 
     /**
-     * Setup table element at specified position.
-     */
-    ST_CPPEXPORT void setElement(const int   theRowId,
-                                 const int   theColId,
-                                 StGLWidget* theItem,
-                                 const int   theRowSpan = 1,
-                                 const int   theColSpan = 1);
-
-    /**
      * Access table element at specified position.
      */
     ST_LOCAL const StGLTableItem& getElement(const int theRowId,
                                              const int theColId) const {
-        return myTable.getValue(theRowId).getValue(theColId);
+        return *myTable.getValue(theRowId).getValue(theColId);
     }
 
     /**
@@ -85,7 +102,7 @@ class StGLTable : public StGLWidget {
      */
     ST_LOCAL StGLTableItem& changeElement(const int theRowId,
                                           const int theColId) {
-        return myTable.changeValue(theRowId).changeValue(theColId);
+        return *myTable.changeValue(theRowId).changeValue(theColId);
     }
 
     /**
@@ -116,7 +133,7 @@ class StGLTable : public StGLWidget {
 
         protected: //! @name protected fields
 
-    StArrayList< StArrayList<StGLTableItem> >
+    StArrayList< StArrayList<StGLTableItem*> >
                      myTable;         //!< table content
 
     StArrayList<int> myRowBottoms;    //!< array of rows    bottoms

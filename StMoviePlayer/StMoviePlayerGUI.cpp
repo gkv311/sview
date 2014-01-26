@@ -735,14 +735,16 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
 
         const int aTextMaxWidth = aWidthMax - (aTable->getMarginLeft() + aTable->getMarginRight());
 
-        StGLTextArea* aCodecsText = new StGLTextArea(aTable, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
-        aCodecsText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+        StGLTableItem& aCodecItem = aTable->changeElement(aRowLast++, 0);
+        aCodecItem.setColSpan(2);
+
+        StGLTextArea* aCodecsText = new StGLTextArea(&aCodecItem, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
+        aCodecsText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_LEFT,
                                     StGLTextFormatter::ST_ALIGN_Y_TOP);
         aCodecsText->setText("\nActive decoders:\n");
         aCodecsText->setTextColor(aWhite);
         aCodecsText->setVisibility(true, true);
         aCodecsText->stglInitAutoHeightWidth(aTextMaxWidth);
-        aTable->setElement(aRowLast++, 0, aCodecsText, 1, 2);
 
         for(size_t aKeyIter = 0; aKeyIter < anExtraInfo->myCodecs.size(); ++aKeyIter) {
             const StArgument& aPair = anExtraInfo->myCodecs.getFromIndex(aKeyIter);
@@ -750,14 +752,16 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
                 continue;
             }
 
-            StGLTextArea* aText = new StGLTextArea(aTable, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+            StGLTableItem& anItem = aTable->changeElement(aRowLast++, 0);
+            anItem.setColSpan(2);
+
+            StGLTextArea* aText = new StGLTextArea(&anItem, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
             aText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_LEFT,
                                   StGLTextFormatter::ST_ALIGN_Y_TOP);
             aText->setText(aPair.getValue());
             aText->setTextColor(aWhite);
             aText->setVisibility(true, true);
             aText->stglInitAutoHeightWidth(aTextMaxWidth);
-            aTable->setElement(aRowLast++, 0, aText, 1, 2);
         }
     } else {
         aDialog->setText("Information is unavailable");

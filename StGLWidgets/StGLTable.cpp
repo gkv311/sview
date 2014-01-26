@@ -20,6 +20,21 @@ namespace {
     static const StString CLASS_NAME("StGLTable");
 };
 
+StGLTableItem::StGLTableItem(StGLTable* theParent)
+: StGLWidget(theParent,
+             theParent->getMarginLeft(), theParent->getMarginTop(),
+             StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+             theParent->getRoot()->scale(32),
+             theParent->getRoot()->scale(32)),
+  myColSpan(1),
+  myRowSpan(1) {
+    setVisibility(true, true);
+}
+
+StGLTableItem::~StGLTableItem() {
+    //
+}
+
 StGLTable::StGLTable(StGLWidget* theParent,
                      const int   theLeft,
                      const int   theTop,
@@ -47,33 +62,29 @@ const StString& StGLTable::getClassName() {
 
 void StGLTable::setupTable(const int theNbRows,
                            const int theNbColumns) {
+    // destroy old content
+    for(size_t aRowIter = 0; aRowIter < myTable.size(); ++aRowIter) {
+        StArrayList<StGLTableItem*>& aRow = myTable.changeValue(aRowIter);
+        for(size_t aColIter = 0; aColIter < aRow.size(); ++aColIter) {
+            StGLTableItem* anItem = aRow.changeValue(aColIter);
+            delete anItem;
+        }
+    }
     myTable.clear();
+
+    // initialize new empty content
     for(int aRowIter = 0; aRowIter < theNbRows; ++aRowIter) {
-        myTable.add(StArrayList<StGLTableItem>());
-        myTable.changeLast().initArray(theNbColumns);
+        myTable.add(StArrayList<StGLTableItem*>());
+        StArrayList<StGLTableItem*>& aRow = myTable.changeLast();
+        aRow.initArray(theNbColumns);
+        for(size_t aColIter = 0; aColIter < aRow.size(); ++aColIter) {
+            aRow.changeValue(aColIter) = new StGLTableItem(this);
+        }
     }
     myRowBottoms.initArray(theNbRows);
     myColRights .initArray(theNbColumns);
     stMemZero(&myRowBottoms.changeFirst(), sizeof(int) * myRowBottoms.size());
     stMemZero(&myColRights .changeFirst(), sizeof(int) * myColRights .size());
-}
-
-void StGLTable::setElement(const int   theRowId,
-                           const int   theColId,
-                           StGLWidget* theItem,
-                           const int   theRowSpan,
-                           const int   theColSpan) {
-    ST_ASSERT_SLIP(theRowId >= 0
-                && theColId >= 0
-                && theRowId < (int )myRowBottoms.size()
-                && theColId < (int )myColRights.size(),
-                   "StGLTable::setElement() out of range",
-                   return);
-
-    StGLTableItem& anItem = myTable.changeValue(theRowId).changeValue(theColId);
-    anItem.Item    = theItem;
-    anItem.RowSpan = theRowSpan;
-    anItem.ColSpan = theColSpan;
 }
 
 void StGLTable::fillFromMap(const StArgumentsMap& theMap,
@@ -96,8 +107,12 @@ void StGLTable::fillFromMap(const StArgumentsMap& theMap,
     const int aCol1MaxWidth = theCol1MaxWidth - (myMarginLeft + myMarginRight);
     int       aCol1Width    = 0;
     for(size_t anIter = 0; anIter < theMap.size(); ++anIter) {
-        const StArgument& aPair = theMap.getValue(anIter);
-        StGLTextArea* aText = new StGLTextArea(this, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+        const StArgument& aPair  = theMap.getValue(anIter);
+        StGLTableItem&    anItem = changeElement(theRowId + anIter, theColId);
+        anItem.setRowSpan(1);
+        anItem.setColSpan(1);
+
+        StGLTextArea* aText = new StGLTextArea(&anItem, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
         aText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_RIGHT,
                               StGLTextFormatter::ST_ALIGN_Y_TOP);
         aText->setText(aPair.getKey());
@@ -106,29 +121,31 @@ void StGLTable::fillFromMap(const StArgumentsMap& theMap,
         aText->setVisibility(true, true);
         aText->stglInitAutoHeightWidth(aCol1MaxWidth);
         aCol1Width = stMax(aCol1Width, aText->getRectPx().width());
-        setElement(theRowId + anIter, theColId, aText);
     }
 
     // adjust width of all elements in first column
     // (alternatively we might adjust right corner)
     for(size_t anIter = 0; anIter < theMap.size(); ++anIter) {
         StGLTableItem& anItem = changeElement(theRowId + anIter, theColId);
-        anItem.Item->changeRectPx().right() = anItem.Item->getRectPx().left() + aCol1Width;
-        ((StGLTextArea* )anItem.Item)->setTextWidth(aCol1Width);
+        anItem.getItem()->changeRectPx().right() = anItem.getItem()->getRectPx().left() + aCol1Width;
+        ((StGLTextArea* )anItem.getItem())->setTextWidth(aCol1Width);
     }
 
     // fill second column with values
     int aCol2MaxWidth = theMaxWidth - aCol1Width - 2 * (myMarginLeft + myMarginRight);
     for(size_t anIter = 0; anIter < theMap.size(); ++anIter) {
-        const StArgument& aPair = theMap.getValue(anIter);
-        StGLTextArea* aText = new StGLTextArea(this, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+        const StArgument& aPair  = theMap.getValue(anIter);
+        StGLTableItem&    anItem = changeElement(theRowId + anIter, theColId + 1);
+        anItem.setRowSpan(1);
+        anItem.setColSpan(1);
+
+        StGLTextArea* aText = new StGLTextArea(&anItem, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
         aText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_LEFT,
                               StGLTextFormatter::ST_ALIGN_Y_TOP);
         aText->setText(aPair.getValue());
         aText->setTextColor(theTextColor);
         aText->setVisibility(true, true);
         aText->stglInitAutoHeightWidth(aCol2MaxWidth);
-        setElement(theRowId + anIter, theColId + 1, aText);
     }
 
     updateLayout();
@@ -157,20 +174,20 @@ void StGLTable::updateLayout() {
     // determine rows heights
     int aBottomPrev = 0;
     for(size_t aRowIter = 0; aRowIter < myRowBottoms.size(); ++aRowIter) {
-        StArrayList<StGLTableItem>& aRow = myTable.changeValue(aRowIter);
+        StArrayList<StGLTableItem*>& aRow = myTable.changeValue(aRowIter);
         for(size_t aColIter = 0; aColIter < myColRights.size(); ++aColIter) {
-            StGLTableItem& anItem = aRow.changeValue(aColIter);
-            if(anItem.Item == NULL) {
+            StGLTableItem* anItem = aRow.changeValue(aColIter);
+            if(anItem->getItem() == NULL) {
                 continue;
             }
 
             const int aBefore = aRowIter != 0
                               ? myRowBottoms.changeValue(aRowIter - 1)
                               : 0;
-            size_t aBotRowId = aRowIter + anItem.RowSpan - 1;
+            size_t aBotRowId = aRowIter + anItem->getRowSpan() - 1;
             int&   aBottom   = myRowBottoms.changeValue(aBotRowId);
             aBottom = stMax(aBottom,
-                            aBefore + anItem.Item->getRectPx().height()
+                            aBefore + anItem->getItem()->getRectPx().height()
                           + myMarginTop + myMarginBottom);
         }
         int& aBottom = myRowBottoms.changeValue(aRowIter);
@@ -182,18 +199,18 @@ void StGLTable::updateLayout() {
     int aRightPrev = 0;
     for(size_t aColIter = 0; aColIter < myColRights.size(); ++aColIter) {
         for(size_t aRowIter = 0; aRowIter < myRowBottoms.size(); ++aRowIter) {
-            StGLTableItem& anItem = myTable.changeValue(aRowIter).changeValue(aColIter);
-            if(anItem.Item == NULL) {
+            StGLTableItem* anItem = myTable.changeValue(aRowIter).changeValue(aColIter);
+            if(anItem->getItem() == NULL) {
                 continue;
             }
 
             const int aBefore = aColIter != 0
                               ? myColRights.changeValue(aColIter - 1)
                               : 0;
-            size_t aRightColId = aColIter + anItem.ColSpan - 1;
+            size_t aRightColId = aColIter + anItem->getColSpan() - 1;
             int&   aRight      = myColRights.changeValue(aRightColId);
             aRight = stMax(aRight,
-                           aBefore + anItem.Item->getRectPx().width()
+                           aBefore + anItem->getItem()->getRectPx().width()
                          + myMarginLeft + myMarginRight);
         }
         int& aRight = myColRights.changeValue(aColIter);
@@ -206,18 +223,16 @@ void StGLTable::updateLayout() {
     // adjust table elements positions
     int aTop = 0;
     for(size_t aRowIter = 0; aRowIter < myRowBottoms.size(); aTop = myRowBottoms.getValue(aRowIter++)) {
-        StArrayList<StGLTableItem>& aRow = myTable.changeValue(aRowIter);
+        StArrayList<StGLTableItem*>& aRow = myTable.changeValue(aRowIter);
         int aLeft = 0;
         for(size_t aColIter = 0; aColIter < myColRights.size(); aLeft = myColRights.getValue(aColIter++)) {
-            StGLTableItem& anItem = aRow.changeValue(aColIter);
-            if(anItem.Item == NULL) {
-                continue;
-            }
-
-            //size_t aBotRowId   = aRowIter + anItem.RowSpan - 1;
-            //size_t aRightColId = aColIter + anItem.ColSpan - 1;
-            anItem.Item->changeRectPx().moveTopTo(aTop + myMarginTop);
-            anItem.Item->changeRectPx().moveLeftTo(aLeft + myMarginLeft);
+            StGLTableItem* anItem = aRow.changeValue(aColIter);
+            const size_t aBotRowId   = aRowIter + anItem->getRowSpan() - 1;
+            const size_t aRightColId = aColIter + anItem->getColSpan() - 1;
+            anItem->changeRectPx().top()    = aTop  + myMarginTop;
+            anItem->changeRectPx().left()   = aLeft + myMarginLeft;
+            anItem->changeRectPx().bottom() = myRowBottoms.changeValue(aBotRowId)   - myMarginBottom;
+            anItem->changeRectPx().right()  = myColRights .changeValue(aRightColId) - myMarginRight;
         }
     }
 }
