@@ -381,7 +381,7 @@ void StImageViewerGUI::doAboutProgram(const size_t ) {
         + " " + StThread::getArchString()
         + "\n \n" + tr(ABOUT_DESCRIPTION),
         scale(512), scale(300));
-    aDialog->addButton("Close");
+    aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
@@ -400,7 +400,7 @@ void StImageViewerGUI::doAboutSystem(const size_t ) {
     aTable->setVisibility(true, true);
     aTable->fillFromMap(anInfo, StGLVec3(1.0f, 1.0f, 1.0f), aDialog->getContent()->getRectPx().width(), aDialog->getContent()->getRectPx().width() / 2);
 
-    aDialog->addButton("Close");
+    aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
@@ -424,7 +424,7 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
         aDialog->setText("Information is unavailable");
     }
 
-    aDialog->addButton("Close");
+    aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
@@ -735,14 +735,14 @@ void StImageViewerGUI::doAboutRenderer(const size_t ) {
     }
 
     StGLMessageBox* aDialog = new StGLMessageBox(this, "", anAboutText, scale(512), scale(300));
-    aDialog->addButton("Close");
+    aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
 
 void StImageViewerGUI::showUpdatesNotify() {
     StGLMessageBox* aDialog = new StGLMessageBox(this, "", tr(UPDATES_NOTIFY));
-    aDialog->addButton("Close");
+    aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }

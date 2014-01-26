@@ -23,6 +23,8 @@
 namespace StImageViewerStrings {
 
 void loadDefaults(StLangMap& theStrings) {
+    theStrings(BUTTON_CLOSE,
+               "Close");
     theStrings(MENU_MEDIA,
                "Media");
     theStrings(MENU_VIEW,
