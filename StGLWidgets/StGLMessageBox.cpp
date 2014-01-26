@@ -255,7 +255,7 @@ void StGLMessageBox::stglDraw(unsigned int theView) {
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     aCtx.core20fwd->glEnable(GL_BLEND);
 
-    myProgram.use(aCtx);
+    myProgram.use(aCtx, getRoot()->getScreenDispX());
     myProgram.setProjMat(aCtx, getCamera()->getProjMatrix());
     myProgram.setColor(aCtx, StGLVec4(0.06f, 0.06f, 0.06f, 1.0f), GLfloat(opacityValue) * 0.8f);
 
