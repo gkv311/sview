@@ -94,6 +94,13 @@ class StGLTextArea : public StGLWidget {
     }
 
     /**
+     * @return default font style
+     */
+    ST_LOCAL StFTFont::Style getDefaultStyle() const {
+        return myFormatter.getDefaultStyle();
+    }
+
+    /**
      * Setup font style.
      */
     ST_LOCAL void setupStyle(const StFTFont::Style theStyle) {

@@ -60,6 +60,7 @@ void StGLMessageBox::create(const StString& theTitle,
                                    theWidth - 2 * anOffsetX, theHeight - myRoot->scale(24 * 3) - anOffsetY);
         myTitle->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
                                 StGLTextFormatter::ST_ALIGN_Y_TOP);
+        myTitle->setupStyle(StFTFont::Style_Bold);
         myTitle->setText(theTitle);
         myTitle->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
         myTitle->setVisibility(true, true);

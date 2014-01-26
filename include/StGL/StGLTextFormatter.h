@@ -61,6 +61,13 @@ class StGLTextFormatter {
                                      const StGLTextFormatter::StAlignY theAlignY);
 
     /**
+     * @return default font style
+     */
+    ST_LOCAL StFTFont::Style getDefaultStyle() const {
+        return myDefStyle;
+    }
+
+    /**
      * Setup default font style.
      */
     ST_LOCAL void setDefaultStyle(const StFTFont::Style theStyle) {

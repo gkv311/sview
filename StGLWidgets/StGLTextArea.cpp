@@ -280,6 +280,7 @@ void StGLTextArea::computeTextWidth(const GLfloat theWidthMax,
     GLfloat aWidthMax = 0.0f;
     size_t  aCharsInLine = 0;
     size_t  aNbLines     = 1;
+    aFontGen->setActiveStyle(myFormatter.getDefaultStyle());
     for(StUtf8Iter anIter = myText.iterator(); *anIter != 0;) {
         const stUtf32_t aCharThis =   *anIter;
         const stUtf32_t aCharNext = *++anIter;
