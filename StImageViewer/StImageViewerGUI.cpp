@@ -400,24 +400,21 @@ void StImageViewerGUI::doAboutSystem(const size_t ) {
 }
 
 void StImageViewerGUI::doAboutImage(const size_t ) {
+    const StString aTitle = "Image Info";
+    StGLMessageBox* aDialog = new StGLMessageBox(this, aTitle, "", scale(512), scale(300));
+
     StHandle<StFileNode>     aFileNode;
     StHandle<StStereoParams> aParams;
     StHandle<StImageInfo>    anExtraInfo;
-    StArrayList<StString> anInfoList(10);
-    if(myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo) && !anExtraInfo.isNull()) {
-        for(size_t aKeyIter = 0; aKeyIter < anExtraInfo->myInfo.size(); ++aKeyIter) {
-            const StArgument& aPair = anExtraInfo->myInfo.getFromIndex(aKeyIter);
-            anInfoList.add(aPair.getKey() + ": " + aPair.getValue() + "\n");
-        }
+    if(myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo)
+    && !anExtraInfo.isNull()) {
+        StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
+        aTable->setVisibility(true, true);
+        aTable->fillFromMap(anExtraInfo->myInfo, StGLVec3(1.0f, 1.0f, 1.0f), aDialog->getContent()->getRectPx().width(), aDialog->getContent()->getRectPx().width() / 2);
+    } else {
+        aDialog->setText("No information is available");
     }
 
-    StString aTitle = "Image Info";
-    StString anInfo;
-    for(size_t anIter = 0; anIter < anInfoList.size(); ++anIter) {
-        anInfo += anInfoList[anIter];
-    }
-
-    StGLMessageBox* aDialog = new StGLMessageBox(this, aTitle, anInfo, scale(512), scale(300));
     aDialog->addButton("Close");
     aDialog->setVisibility(true, true);
     aDialog->stglInit();

@@ -66,7 +66,7 @@ void StGLMessageBox::create(const StString& theTitle,
         int aWidth = 0;
         myTitle->computeTextWidth(GLfloat(myTitle->getRectPx().width()), aWidth, aTitleHeight);
         myTitle->changeRectPx().bottom() = myTitle->getRectPx().top() + aTitleHeight;
-        myTitle->stglInitAutoHeight();
+        //myTitle->stglInitAutoHeight();
     }
 
     const int aTitleOffset = aTitleHeight > 0 ? (aTitleHeight + myRoot->scale(24)) : 0;

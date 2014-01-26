@@ -43,7 +43,8 @@ class StGLTable : public StGLWidget {
      */
     ST_CPPEXPORT StGLTable(StGLWidget* theParent,
                            const int   theLeft,
-                           const int   theTop);
+                           const int   theTop,
+                           StGLCorner  theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
 
     /**
      * Destructor.

@@ -22,10 +22,11 @@ namespace {
 
 StGLTable::StGLTable(StGLWidget* theParent,
                      const int   theLeft,
-                     const int   theTop)
+                     const int   theTop,
+                     StGLCorner  theCorner)
 : StGLWidget(theParent,
              theLeft, theTop,
-             StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+             theCorner,
              theParent->getRoot()->scale(32),
              theParent->getRoot()->scale(32)),
   myMarginLeft   (theParent->getRoot()->scale(5)),
