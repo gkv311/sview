@@ -328,7 +328,7 @@ bool StGLTextArea::stglInitAutoHeightWidth(const int theMaxWidth) {
     }
     changeRectPx().bottom() = getRectPx().top() + getTextHeight();
     if(theMaxWidth > 0) {
-        changeRectPx().right() = getRectPx().left() + GLint(myFormatter.getMaxLineWidth() + 1.5f);
+        changeRectPx().right() = getRectPx().left() + GLint(myFormatter.getMaxLineWidth() + 2.5f);
         myTextWidth = (GLfloat )getRectPx().width();
         myToRecompute = true;
     } else {
