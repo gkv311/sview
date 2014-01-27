@@ -116,7 +116,7 @@ English translation file for StMoviePlayer program
 1593="Force HiDPI 2X"
 2000="Choose the video file to open"
 2001="Choose LEFT video file to open"
-2001="Choose RIGHT video file to open"
+2002="Choose RIGHT video file to open"
 2010="Choose location to save snapshot"
 2011="Nothing to save!"
 2012="Snapshot not available!"

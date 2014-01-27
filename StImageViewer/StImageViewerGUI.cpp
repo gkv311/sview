@@ -406,7 +406,7 @@ void StImageViewerGUI::doAboutSystem(const size_t ) {
 }
 
 void StImageViewerGUI::doAboutImage(const size_t ) {
-    const StString aTitle = "Image Info";
+    const StString  aTitle  = tr(DIALOG_FILE_INFO);
     StGLMessageBox* aDialog = new StGLMessageBox(this, aTitle, "", scale(512), scale(300));
 
     StHandle<StFileNode>     aFileNode;
@@ -474,7 +474,7 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
             //aDialog->addButton(tr(BUTTON_SAVE_METADATA));
         }
     } else {
-        aDialog->setText("Information is unavailable");
+        aDialog->setText(tr(DIALOG_FILE_NOINFO));
     }
 
     aDialog->addButton(tr(BUTTON_CLOSE), true);

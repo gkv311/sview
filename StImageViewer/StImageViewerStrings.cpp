@@ -189,6 +189,10 @@ void loadDefaults(StLangMap& theStrings) {
                "Choose LEFT image file to open");
     theStrings(DIALOG_OPEN_RIGHT,
                "Choose RIGHT image file to open");
+    theStrings(DIALOG_FILE_INFO,
+               "Image Info");
+    theStrings(DIALOG_FILE_NOINFO,
+               "Information is unavailable");
     theStrings(DIALOG_NOTHING_TO_SAVE,
                "Nothing to save!");
     theStrings(DIALOG_NO_SNAPSHOT,
