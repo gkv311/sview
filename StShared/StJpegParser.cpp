@@ -141,7 +141,6 @@ namespace {
 StJpegParser::StJpegParser(const StCString& theFilePath)
 : StRawFile(theFilePath),
   myImages(NULL),
-  myLength(0),
   myStFormat(ST_V_SRC_AUTODETECT) {
     stMemZero(myOffsets, sizeof(myOffsets));
 }
@@ -167,10 +166,6 @@ bool StJpegParser::readFile(const StCString& theFilePath) {
 
     myLength = myBuffSize;
     return parse();
-}
-
-size_t StJpegParser::writeFile(size_t theBytes) {
-    return StRawFile::writeFile(theBytes != 0 ? theBytes : myLength);
 }
 
 bool StJpegParser::parse() {

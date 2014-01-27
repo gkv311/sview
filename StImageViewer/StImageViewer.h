@@ -93,6 +93,7 @@ class StImageViewer : public StApplication {
 
     ST_LOCAL void doOpen2FilesDialog(const size_t dummy = 0);
     ST_LOCAL void doSaveImageAs(const size_t theImgType) { myLoader->doSaveImageAs(theImgType); }
+    ST_LOCAL void doSaveImageInfo(const size_t theToSave);
     ST_LOCAL void doAboutImage(const size_t dummy = 0);
     ST_LOCAL void doListFirst(const size_t dummy = 0);
     ST_LOCAL void doListPrev(const size_t dummy = 0);
@@ -202,6 +203,7 @@ class StImageViewer : public StApplication {
     StHandle<StImageLoader>    myLoader;          //!< main image loader class
     StHandle<StCheckUpdates>   myUpdates;         //!< check updates utility
     StHandle<StFileNode>       myFileToDelete;    //!< file node for removal
+    StHandle<StImageInfo>      myFileInfo;        //!< file info for opened dialog
 
     StCondition                myEventDialog;     //!< event to prevent showing multiple open/save file dialogs
     StCondition                myEventLoaded;     //!< indicate that new file was open

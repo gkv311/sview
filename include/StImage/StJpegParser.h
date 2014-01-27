@@ -191,11 +191,6 @@ class StJpegParser : public StRawFile {
         }
     }
 
-    /**
-     * Save the file.
-     */
-    ST_CPPEXPORT virtual size_t writeFile(size_t theBytes = 0);
-
         protected:
 
     /**
@@ -221,7 +216,6 @@ class StJpegParser : public StRawFile {
     StHandle<Image> myImages;     //!< images list
     ptrdiff_t       myOffsets[OffsetsNb];
                                   //!< array of offsets in image data, starting from session lenght (zero offset is invalid)
-    size_t          myLength;     //!< data length
     StString        myComment;    //!< string stored in COM segment (directly in JPEG, NOT inside EXIF)
     StString        myJpsComment; //!< string stored in JPS segment
     StFormatEnum    myStFormat;   //!< stereo format

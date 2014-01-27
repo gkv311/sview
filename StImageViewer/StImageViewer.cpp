@@ -824,6 +824,15 @@ void StImageViewer::doAboutImage(const size_t ) {
     }
 }
 
+void StImageViewer::doSaveImageInfo(const size_t theToSave) {
+    if(!myGUI.isNull()
+    && !myFileInfo.isNull()
+    &&  theToSave == 1) {
+        myLoader->doSaveInfo(myFileInfo);
+    }
+    myFileInfo.nullify();
+}
+
 void StImageViewer::doListFirst(const size_t ) {
     if(myLoader->getPlayList().walkToFirst()) {
         myLoader->doLoadNext();

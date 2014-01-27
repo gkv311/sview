@@ -26,6 +26,7 @@
 #include <StThreads/StThread.h>
 
 #include <StGL/StParams.h>
+#include <StGLWidgets/StGLButton.h>
 #include <StGLWidgets/StGLCheckboxTextured.h>
 #include <StGLWidgets/StGLDescription.h>
 #include <StGLWidgets/StGLImageRegion.h>
@@ -406,12 +407,16 @@ void StImageViewerGUI::doAboutSystem(const size_t ) {
 }
 
 void StImageViewerGUI::doAboutImage(const size_t ) {
+    StHandle<StImageInfo>& anExtraInfo = myPlugin->myFileInfo;
+    if(!anExtraInfo.isNull()) {
+        return;
+    }
+
     const StString  aTitle  = tr(DIALOG_FILE_INFO);
     StGLMessageBox* aDialog = new StGLMessageBox(this, aTitle, "", scale(512), scale(300));
 
     StHandle<StFileNode>     aFileNode;
     StHandle<StStereoParams> aParams;
-    StHandle<StImageInfo>    anExtraInfo;
     if(myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo)
     && !anExtraInfo.isNull()) {
         // translate known metadata tag names
@@ -470,14 +475,19 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
             aTable->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
         }
 
-        if(anExtraInfo->IsSavable) {
-            //aDialog->addButton(tr(BUTTON_SAVE_METADATA));
+        if(anExtraInfo->IsSavable
+        && !aSrcInfo.isEmpty()) {
+            StGLButton* aSaveBtn = aDialog->addButton(tr(BUTTON_SAVE_METADATA));
+            aSaveBtn->setUserData(1);
+            aSaveBtn->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doSaveImageInfo);
         }
     } else {
         aDialog->setText(tr(DIALOG_FILE_NOINFO));
     }
 
-    aDialog->addButton(tr(BUTTON_CLOSE), true);
+    StGLButton* aCloseBtn = aDialog->addButton(tr(BUTTON_CLOSE), true);
+    aCloseBtn->setUserData(0);
+    aCloseBtn->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doSaveImageInfo);
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }

@@ -57,14 +57,13 @@ StImageLoader::StImageLoader(const StImageFile::ImageClass     theImageLib,
   myTextureQueue(theTextureQueue),
   myMsgQueue(theMsgQueue),
   myImageLib(theImageLib),
-  myToSave(StImageFile::ST_TYPE_NONE),
-  myToQuit(false) {
+  myAction(Action_NONE) {
       myPlayList.setExtensions(myMimeList.getExtensionsList());
       myThread = new StThread(threadFunction, (void* )this);
 }
 
 StImageLoader::~StImageLoader() {
-    myToQuit = true;
+    myAction = Action_Quit;
     myLoadNextEvent.set(); // stop the thread
     myThread->wait();
     myThread.nullify();
@@ -119,6 +118,8 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
 
     StHandle<StImageInfo> anImgInfo = new StImageInfo();
     anImgInfo->Id        = theParams;
+    anImgInfo->Path      = aFilePath;
+    anImgInfo->ImageType = anImgType;
     anImgInfo->IsSavable = false;
 
     StString aTitleString, aFolder;
@@ -309,7 +310,9 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
                                        aModelL));
     }
     anImgInfo->Info.add(StArgument(tr(INFO_LOAD_TIME), StString(aLoadTimeMSec) + " " + tr(INFO_TIME_MSEC)));
+    myLock.lock();
     myImgInfo = anImgInfo;
+    myLock.unlock();
 
     // clean up - close opened files and reset memory
     anImageL->close();
@@ -329,11 +332,9 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
                               StImageFile::ImageType          theImgType) {
     if(theParams.isNull()
     || theImgType == StImageFile::ST_TYPE_NONE) {
-        stInfo(myLangMap->getValue(StImageViewerStrings::DIALOG_NOTHING_TO_SAVE));
+        myMsgQueue->pushError(tr(DIALOG_NOTHING_TO_SAVE));
         return false;
     }
-
-    //const StFormatEnum aSrcFormat = theParams->getSrcFormat();
 
     int aResult = StGLTextureQueue::SNAPSHOT_NO_NEW;
     StImage aDataLeft, aDataRight;
@@ -345,7 +346,7 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
 
     if(aResult == StGLTextureQueue::SNAPSHOT_NO_NEW
     || aDataLeft.isNull()) {
-        stInfo(myLangMap->getValue(StImageViewerStrings::DIALOG_NO_SNAPSHOT));
+        myMsgQueue->pushInfo(tr(DIALOG_NO_SNAPSHOT));
         return false;
     }
     StHandle<StImageFile> aDataResult = StImageFile::create(myImageLib);
@@ -431,27 +432,77 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
     return true;
 }
 
+bool StImageLoader::saveImageInfo(const StHandle<StImageInfo>& theInfo) {
+    if(theInfo.isNull()
+    || theInfo->Path.isEmpty()) {
+        myMsgQueue->pushError(tr(DIALOG_NOTHING_TO_SAVE));
+        return false;
+    } else if(theInfo->ImageType != StImageFile::ST_TYPE_JPEG
+           && theInfo->ImageType != StImageFile::ST_TYPE_JPS) {
+        myMsgQueue->pushError(stCString("Operation is unavailable for this image type"));
+        return false;
+    }
+
+    StFormatEnum aSrcFormat = theInfo->Id->getSrcFormat();
+    if(theInfo->Id->isSwapLR()) {
+        aSrcFormat = st::formatReversed(aSrcFormat);
+    }
+
+    StJpegParser aParser;
+    if(!aParser.readFile(theInfo->Path)) {
+        myMsgQueue->pushError(tr(DIALOG_NOTHING_TO_SAVE));
+        return false;
+    }
+
+    aParser.setupJps(aSrcFormat);
+    if(!aParser.saveFile(theInfo->Path)) {
+        myMsgQueue->pushError(StString("File can not be saved at path '") + theInfo->Path + "'!");
+        return false;
+    }
+    return true;
+}
+
 void StImageLoader::mainLoop() {
     StHandle<StFileNode>     aFileToLoad;
     StHandle<StStereoParams> aFileParams;
     for(;;) {
         myLoadNextEvent.wait();
-        if(myToQuit) {
-            // exit the loop
-            return;
-        } else if(myToSave != StImageFile::ST_TYPE_NONE) {
-            StImageFile::ImageType anImgType = myToSave;
-            myToSave = StImageFile::ST_TYPE_NONE;
-            myLoadNextEvent.reset();
-            // save current image (set as current in playlist)
-            if(myPlayList.getCurrentFile(aFileToLoad, aFileParams)) {
-                saveImage(aFileToLoad, aFileParams, anImgType);
+        switch(myAction) {
+            case Action_Quit: {
+                // exit the loop
+                return;
             }
-        } else {
-            // load next image (set as current in playlist)
-            myLoadNextEvent.reset();
-            if(myPlayList.getCurrentFile(aFileToLoad, aFileParams)) {
-                loadImage(aFileToLoad, aFileParams);
+            case Action_SaveJPEG:
+            case Action_SavePNG: {
+                StImageFile::ImageType anImgType = (myAction == Action_SaveJPEG)
+                                                 ? StImageFile::ST_TYPE_JPEG
+                                                 : StImageFile::ST_TYPE_PNG;
+                myAction = Action_NONE;
+                myLoadNextEvent.reset();
+                // save current image (set as current in playlist)
+                if(myPlayList.getCurrentFile(aFileToLoad, aFileParams)) {
+                    saveImage(aFileToLoad, aFileParams, anImgType);
+                }
+                break;
+            }
+            case Action_SaveInfo: {
+                myLock.lock();
+                StHandle<StImageInfo> anInfo = myInfoToSave;
+                myInfoToSave.nullify();
+                myAction = Action_NONE;
+                myLock.unlock();
+                myLoadNextEvent.reset();
+                saveImageInfo(anInfo);
+                break;
+            }
+            case Action_NONE:
+            default: {
+                // load next image (set as current in playlist)
+                myLoadNextEvent.reset();
+                if(myPlayList.getCurrentFile(aFileToLoad, aFileParams)) {
+                    loadImage(aFileToLoad, aFileParams);
+                }
+                break;
             }
         }
     }

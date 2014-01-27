@@ -35,10 +35,12 @@ struct StImageInfo {
 
     StHandle<StStereoParams> Id;
     StArgumentsMap           Info;
+    StString                 Path;      //!< file path
+    StImageFile::ImageType   ImageType; //!< image type
     StFormatEnum             SrcFormat; //!< source format as stored in file metadata
     bool                     IsSavable; //!< indicate that file can be saved without re-encoding
 
-    StImageInfo() : SrcFormat(ST_V_SRC_AUTODETECT), IsSavable(false) {}
+    StImageInfo() : ImageType(StImageFile::ST_TYPE_NONE), SrcFormat(ST_V_SRC_AUTODETECT), IsSavable(false) {}
 
 };
 
@@ -46,6 +48,16 @@ struct StImageInfo {
  * Auxiliary class to load images from dedicated thread.
  */
 class StImageLoader {
+
+        public:
+
+    enum Action {
+        Action_NONE,
+        Action_Quit,
+        Action_SaveJPEG,
+        Action_SavePNG,
+        Action_SaveInfo,
+    };
 
         public:
 
@@ -74,12 +86,33 @@ class StImageLoader {
     }
 
     ST_LOCAL void doSaveImageAs(const size_t theImgType) {
-        myToSave = StImageFile::ImageType(theImgType);
+        if(myAction == Action_Quit) {
+            return;
+        }
+
+        if(theImgType == StImageFile::ST_TYPE_JPEG) {
+            myAction = Action_SaveJPEG;
+        } else if(theImgType == StImageFile::ST_TYPE_PNG) {
+            myAction = Action_SavePNG;
+        } else {
+            ST_ERROR_LOG("Attempt to save in unsupported image format " + theImgType);
+            return;
+        }
+        myLoadNextEvent.set();
+    }
+
+    ST_LOCAL void doSaveInfo(const StHandle<StImageInfo>& theInfo) {
+        myLock.lock();
+        myInfoToSave = theInfo;
+        myAction     = Action_SaveInfo;
+        myLock.unlock();
         myLoadNextEvent.set();
     }
 
     ST_LOCAL StHandle<StImageInfo> getFileInfo(const StHandle<StStereoParams>& theParams) const {
+        myLock.lock();
         StHandle<StImageInfo> anInfo = myImgInfo;
+        myLock.unlock();
         return (!anInfo.isNull() && anInfo->Id == theParams) ? anInfo : NULL;
     }
 
@@ -122,6 +155,8 @@ class StImageLoader {
                             const StHandle<StStereoParams>& theParams,
                             StImageFile::ImageType theImgType);
 
+    ST_LOCAL bool saveImageInfo(const StHandle<StImageInfo>& theInfo);
+
     ST_LOCAL int getSnapshot(StImage* outDataLeft, StImage* outDataRight, bool isForce = false) {
         return myTextureQueue->getSnapshot(outDataLeft, outDataRight, isForce);
     }
@@ -147,15 +182,16 @@ class StImageLoader {
     StHandle<StThread>         myThread;        //!< main loop thread
     StHandle<StLangMap>        myLangMap;       //!< translations dictionary
     StPlayList                 myPlayList;      //!< play list
+    mutable StMutex            myLock;          //!< lock to access not thread-safe properties
     StCondition                myLoadNextEvent;
     StFormatEnum               mySrcFormat;     //!< target source format (auto-detect by default)
     StHandle<StGLTextureQueue> myTextureQueue;  //!< decoded frames queue
     StHandle<StImageInfo>      myImgInfo;       //!< info about currently loaded image
+    StHandle<StImageInfo>      myInfoToSave;    //!< modified info to be saved
     StHandle<StMsgQueue>       myMsgQueue;      //!< messages queue
 
     volatile StImageFile::ImageClass myImageLib;
-    volatile StImageFile::ImageType  myToSave;
-    volatile bool              myToQuit;
+    volatile Action            myAction;
 
         private: //! @name no copies, please
 

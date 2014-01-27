@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -18,7 +18,8 @@ StRawFile::StRawFile(const StCString& theFilePath,
 : StFileNode(theFilePath, theParent),
   myFileHandle(NULL),
   myBuffer(NULL),
-  myBuffSize(0) {
+  myBuffSize(0),
+  myLength(0) {
     //
 }
 
@@ -102,7 +103,9 @@ bool StRawFile::saveFile(const StCString& theFilePath) {
     if(!openFile(StRawFile::WRITE, theFilePath)) {
         return false;
     }
-    bool isSuccess = writeFile() == myBuffSize;
+
+    const size_t aSize = (myLength != 0) ? myLength : myBuffSize;
+    bool isSuccess = writeFile() == aSize;
     closeFile();
     return isSuccess;
 }
@@ -120,7 +123,9 @@ size_t StRawFile::writeFile(size_t theBytes) {
     if(myBuffSize == 0) {
         return 0;
     }
-    return write((const char* )myBuffer, (theBytes == 0 && theBytes < myBuffSize) ? myBuffSize : theBytes);
+
+    const size_t aSize = (myLength != 0) ? myLength : myBuffSize;
+    return write((const char* )myBuffer, (theBytes == 0 && theBytes < aSize) ? aSize : theBytes);
 }
 
 StString StRawFile::readTextFile(const StCString& theFilePath) {
