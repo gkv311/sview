@@ -406,14 +406,39 @@ void StImageViewerGUI::doAboutSystem(const size_t ) {
     aDialog->stglInit();
 }
 
+/**
+ * Customized message box.
+ */
+class StInfoDialog : public StGLMessageBox {
+
+        public:
+
+    ST_LOCAL StInfoDialog(StImageViewer*  thePlugin,
+                          StGLWidget*     theParent,
+                          const StString& theTitle,
+                          const int       theWidth,
+                          const int       theHeight)
+    : StGLMessageBox(theParent, theTitle, "", theWidth, theHeight),
+      myPlugin(thePlugin) {}
+
+    ST_LOCAL virtual ~StInfoDialog() {
+        myPlugin->doSaveImageInfo(0);
+    }
+
+        private:
+
+    StImageViewer* myPlugin;
+
+};
+
 void StImageViewerGUI::doAboutImage(const size_t ) {
     StHandle<StImageInfo>& anExtraInfo = myPlugin->myFileInfo;
     if(!anExtraInfo.isNull()) {
         return;
     }
 
-    const StString  aTitle  = tr(DIALOG_FILE_INFO);
-    StGLMessageBox* aDialog = new StGLMessageBox(this, aTitle, "", scale(512), scale(300));
+    const StString aTitle  = tr(DIALOG_FILE_INFO);
+    StInfoDialog*  aDialog = new StInfoDialog(myPlugin, this, aTitle, scale(512), scale(300));
 
     StHandle<StFileNode>     aFileNode;
     StHandle<StStereoParams> aParams;
@@ -485,9 +510,7 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
         aDialog->setText(tr(DIALOG_FILE_NOINFO));
     }
 
-    StGLButton* aCloseBtn = aDialog->addButton(tr(BUTTON_CLOSE), true);
-    aCloseBtn->setUserData(0);
-    aCloseBtn->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doSaveImageInfo);
+    aDialog->addButton(tr(BUTTON_CLOSE), true);
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
