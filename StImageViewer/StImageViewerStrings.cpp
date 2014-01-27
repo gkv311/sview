@@ -25,8 +25,12 @@ namespace StImageViewerStrings {
 void loadDefaults(StLangMap& theStrings) {
     theStrings(BUTTON_CLOSE,
                "Close");
+    theStrings(BUTTON_CANCEL,
+               "Cancel");
     theStrings(BUTTON_SAVE_METADATA,
                "Save");
+    theStrings(BUTTON_DELETE,
+               "Delete");
     theStrings(MENU_MEDIA,
                "Media");
     theStrings(MENU_VIEW,
@@ -193,6 +197,10 @@ void loadDefaults(StLangMap& theStrings) {
                "Image Info");
     theStrings(DIALOG_FILE_NOINFO,
                "Information is unavailable");
+    theStrings(DIALOG_DELETE_FILE_TITLE,
+               "File deletion");
+    theStrings(DIALOG_DELETE_FILE_QUESTION,
+               "Do you really want to completely remove this file?");
     theStrings(DIALOG_NOTHING_TO_SAVE,
                "Nothing to save!");
     theStrings(DIALOG_NO_SNAPSHOT,
