@@ -84,6 +84,14 @@ class StWindowImpl {
 
     ST_LOCAL bool isParentOnScreen() const;
 
+        public: //! @name clipboard
+
+    ST_LOCAL bool toClipboard(const StString& theText);
+
+#if defined(__linux__)
+    StString myTextToCopy;
+#endif
+
         public: //! @name additional
 
     ST_LOCAL void updateChildRect();

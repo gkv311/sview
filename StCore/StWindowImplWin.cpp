@@ -934,4 +934,25 @@ void StWindowImpl::processEvents() {
     swapEventsBuffers();
 }
 
+bool StWindowImpl::toClipboard(const StString& theText) {
+    const StStringUtfWide aWideText = theText.toUtfWide();
+    HGLOBAL aMem = GlobalAlloc(GMEM_MOVEABLE, aWideText.Size + sizeof(wchar_t));
+    if(aMem == NULL) {
+        return false;
+    }
+
+    stMemCpy(GlobalLock(aMem), aWideText.String, aWideText.Size + sizeof(wchar_t));
+    GlobalUnlock(aMem);
+    if(!OpenClipboard(NULL)) {
+        return false;
+    }
+
+    EmptyClipboard();
+    if(!SetClipboardData(CF_UNICODETEXT, aMem)) {
+        CloseClipboard();
+        return false;
+    }
+    CloseClipboard();
+}
+
 #endif

@@ -795,6 +795,42 @@ void StWindowImpl::processEvents() {
                 parseXDNDSelectionMsg();
                 break;
             }
+            case SelectionRequest: {
+                const XSelectionRequestEvent& aRequest = myXEvent.xselectionrequest;
+                if(aRequest.selection != aDisplay->XA_CLIPBOARD) {
+                    break;
+                }
+
+                XSelectionEvent aReply;
+                stMemZero(&aReply, sizeof(aReply));
+                aReply.type      = SelectionNotify;
+                aReply.serial    = myXEvent.xany.send_event;
+                aReply.display   = aRequest.display;
+                aReply.requestor = aRequest.requestor;
+                aReply.selection = aRequest.selection;
+                aReply.property  = aRequest.property;
+                aReply.target    = None;
+                aReply.time      = aRequest.time;
+                if(aRequest.target == aDisplay->XA_TARGETS) {
+                    //ST_DEBUG_LOG("SelectionRequest(XA_TARGETS)");
+                    Atom aTargets[] = { XA_STRING, aDisplay->XA_UTF8_STRING, aDisplay->XA_COMPOUND_TEXT };
+                    XChangeProperty(aDisplay->hDisplay, aRequest.requestor, aRequest.property,
+                                    XA_ATOM, 32, PropModeReplace, (unsigned char* )aTargets, 3);
+
+                } else if(aRequest.target == XA_STRING
+                       || aRequest.target == aDisplay->XA_UTF8_STRING
+                       || aRequest.target == aDisplay->XA_COMPOUND_TEXT) {
+                    //ST_DEBUG_LOG("SelectionRequest(XA_STRING)= " + myTextToCopy);
+                    XChangeProperty(aDisplay->hDisplay, aRequest.requestor, aRequest.property,
+                                    aRequest.target, 8, PropModeReplace, (unsigned char* )myTextToCopy.toCString(), myTextToCopy.getSize());
+                } else {
+                    aReply.property = None;
+                }
+
+                XSendEvent(aDisplay->hDisplay, aRequest.requestor, False, NoEventMask, (XEvent* )&aReply);
+                XFlush(aDisplay->hDisplay);
+                break;
+            }
             case DestroyNotify: {
                 // something else...
                 break;
@@ -953,6 +989,21 @@ void StWindowImpl::processEvents() {
     // thus this double buffer is not in use
     // however user events may be posted to it
     swapEventsBuffers();
+}
+
+bool StWindowImpl::toClipboard(const StString& theText) {
+    const StXDisplayH& aDisplay = myMaster.stXDisplay;
+    if(aDisplay.isNull() || myMaster.hWindowGl == 0) {
+        // window is closed!
+        return false;
+    }
+
+    myTextToCopy = theText;
+
+    // setup owner of the XA_CLIPBOARD atom
+    XSetSelectionOwner(aDisplay->hDisplay, aDisplay->XA_CLIPBOARD,
+                       myMaster.hWindowGl, CurrentTime);
+    return true;
 }
 
 #endif

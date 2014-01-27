@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -389,6 +389,13 @@ class StWindow {
     ST_CPPEXPORT bool isParentOnScreen() const;
 
     ST_CPPEXPORT virtual GLfloat getLensDist() const;
+
+        public: //! @name clipboard
+
+    /**
+     * Put text into clipboard.
+     */
+    ST_CPPEXPORT void toClipboard(const StString& theText);
 
         public: //! @name signals
 

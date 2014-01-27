@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -41,7 +41,10 @@ StXDisplay::StXDisplay()
   xDNDAware(None),
   xDNDPlainText(None),
   xDNDPrimary(None),
-  XA_TARGETS(None) {
+  XA_TARGETS(None),
+  XA_COMPOUND_TEXT(None),
+  XA_UTF8_STRING(None),
+  XA_CLIPBOARD(None) {
     stMemZero(&FBCfg, sizeof(GLXFBConfig)); // should be just a pointer
     open();
 }
@@ -119,12 +122,15 @@ void StXDisplay::initAtoms() {
     xDNDSelection  = XInternAtom(hDisplay, "XdndSelection",    False);
     xDNDProxy      = XInternAtom(hDisplay, "XdndProxy",        False);
     xDNDAware      = XInternAtom(hDisplay, "XdndAware",        False);
-    xDNDPlainText  = XInternAtom(hDisplay, "text/plain",       False); //"UTF8_STRING", "COMPOUND_TEXT"
+    xDNDPlainText  = XInternAtom(hDisplay, "text/plain",       False);
     xDNDPrimary    = XInternAtom(hDisplay, "PRIMARY",          False);
     // This is a meta-format for data to be "pasted" in to.
     // Requesting this format acquires a list of possible
     // formats from the application which copied the data.
-    XA_TARGETS     = XInternAtom(hDisplay, "TARGETS",          False);
+    XA_TARGETS       = XInternAtom(hDisplay, "TARGETS",        True);
+    XA_COMPOUND_TEXT = XInternAtom(hDisplay, "COMPOUND_TEXT",  True);
+    XA_UTF8_STRING   = XInternAtom(hDisplay, "UTF8_STRING",    True);
+    XA_CLIPBOARD     = XInternAtom(hDisplay, "CLIPBOARD",      True);
 
 }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -512,6 +512,15 @@ void StWindowImpl::processEvents() {
     updateActiveState();
 
     swapEventsBuffers();
+}
+
+bool StWindowImpl::toClipboard(const StString& theText) {
+    StCocoaLocalPool aLocalPool;
+    NSPasteboard* aPasteBoard = [NSPasteboard generalPasteboard];
+    [aPasteBoard clearContents];
+    StCocoaString aStringMy(theText);
+    NSArray* anObjects = [NSArray arrayWithObject: aStringMy.toStringNs()];
+    return [aPasteBoard writeObjects: anObjects] == YES;
 }
 
 #endif // __APPLE__

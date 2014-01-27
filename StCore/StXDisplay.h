@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -42,28 +42,32 @@ class StXDisplay {
 
     Display*     hDisplay; // connection to the X-server
     XVisualInfo* hVisInfo; // visual info
-    GLXFBConfig     FBCfg;
+    GLXFBConfig  FBCfg;
 
-    XIM      hInputMethod;
-    XIC         hInputCtx;
+    XIM          hInputMethod;
+    XIC          hInputCtx;
 
-    Atom     wndProtocols;
-    Atom   wndDestroyAtom; // Atom for close message
+    Atom         wndProtocols;
+    Atom         wndDestroyAtom; // Atom for close message
 
-    Atom        xDNDEnter; // Atoms for X drag&drop protocol
-    Atom     xDNDPosition;
-    Atom       xDNDStatus;
-    Atom     xDNDTypeList;
-    Atom   xDNDActionCopy;
+    Atom         xDNDEnter; // Atoms for X drag&drop protocol
+    Atom         xDNDPosition;
+    Atom         xDNDStatus;
+    Atom         xDNDTypeList;
+    Atom         xDNDActionCopy;
     Atom         xDNDDrop;
-    Atom        xDNDLeave;
-    Atom     xDNDFinished;
-    Atom    xDNDSelection;
-    Atom        xDNDProxy;
-    Atom        xDNDAware;
-    Atom    xDNDPlainText;
-    Atom      xDNDPrimary;
-    Atom       XA_TARGETS;
+    Atom         xDNDLeave;
+    Atom         xDNDFinished;
+    Atom         xDNDSelection;
+    Atom         xDNDProxy;
+    Atom         xDNDAware;
+    Atom         xDNDPlainText;
+    Atom         xDNDPrimary;
+
+    Atom         XA_TARGETS;
+    Atom         XA_COMPOUND_TEXT;
+    Atom         XA_UTF8_STRING;
+    Atom         XA_CLIPBOARD;
 
         private:
 
