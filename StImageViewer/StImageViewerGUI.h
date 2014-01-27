@@ -79,6 +79,8 @@ class StImageViewerGUI : public StGLRootWidget {
 
     ST_LOCAL void doAboutImage(const size_t );
 
+    ST_LOCAL static size_t trSrcFormatId(const StFormatEnum theSrcFormat);
+
         private:
 
     ST_LOCAL void createUpperToolbar();
@@ -87,7 +89,9 @@ class StImageViewerGUI : public StGLRootWidget {
         return myLangMap->getValue(theId);
     }
 
-    ST_LOCAL const StString& trSrcFormat(const StFormatEnum theSrcFormat) const;
+    ST_LOCAL const StString& trSrcFormat(const StFormatEnum theSrcFormat) const {
+        return tr(trSrcFormatId(theSrcFormat));
+    }
 
         private: //! @name menus creation routines
 

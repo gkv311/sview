@@ -640,20 +640,20 @@ namespace {
 
 };
 
-const StString& StImageViewerGUI::trSrcFormat(const StFormatEnum theSrcFormat) const {
+size_t StImageViewerGUI::trSrcFormatId(const StFormatEnum theSrcFormat) {
     switch(theSrcFormat) {
-        case ST_V_SRC_MONO:                 return tr(MENU_SRC_FORMAT_MONO);
-        case ST_V_SRC_SIDE_BY_SIDE:         return tr(MENU_SRC_FORMAT_CROSS_EYED);
-        case ST_V_SRC_PARALLEL_PAIR:        return tr(MENU_SRC_FORMAT_PARALLEL);
-        case ST_V_SRC_OVER_UNDER_RL:        return tr(MENU_SRC_FORMAT_OVERUNDER_RL);
-        case ST_V_SRC_OVER_UNDER_LR:        return tr(MENU_SRC_FORMAT_OVERUNDER_LR);
-        case ST_V_SRC_ROW_INTERLACE:        return tr(MENU_SRC_FORMAT_INTERLACED);
-        case ST_V_SRC_ANAGLYPH_G_RB:        return tr(MENU_SRC_FORMAT_ANA_RB);
-        case ST_V_SRC_ANAGLYPH_RED_CYAN:    return tr(MENU_SRC_FORMAT_ANA_RC);
-        case ST_V_SRC_ANAGLYPH_YELLOW_BLUE: return tr(MENU_SRC_FORMAT_ANA_YB);
-        case ST_V_SRC_SEPARATE_FRAMES:      return tr(MENU_SRC_FORMAT_SEPARATE);
+        case ST_V_SRC_MONO:                 return MENU_SRC_FORMAT_MONO;
+        case ST_V_SRC_SIDE_BY_SIDE:         return MENU_SRC_FORMAT_CROSS_EYED;
+        case ST_V_SRC_PARALLEL_PAIR:        return MENU_SRC_FORMAT_PARALLEL;
+        case ST_V_SRC_OVER_UNDER_RL:        return MENU_SRC_FORMAT_OVERUNDER_RL;
+        case ST_V_SRC_OVER_UNDER_LR:        return MENU_SRC_FORMAT_OVERUNDER_LR;
+        case ST_V_SRC_ROW_INTERLACE:        return MENU_SRC_FORMAT_INTERLACED;
+        case ST_V_SRC_ANAGLYPH_G_RB:        return MENU_SRC_FORMAT_ANA_RB;
+        case ST_V_SRC_ANAGLYPH_RED_CYAN:    return MENU_SRC_FORMAT_ANA_RC;
+        case ST_V_SRC_ANAGLYPH_YELLOW_BLUE: return MENU_SRC_FORMAT_ANA_YB;
+        case ST_V_SRC_SEPARATE_FRAMES:      return MENU_SRC_FORMAT_SEPARATE;
         default:
-        case ST_V_SRC_AUTODETECT:           return tr(MENU_SRC_FORMAT_AUTO);
+        case ST_V_SRC_AUTODETECT:           return MENU_SRC_FORMAT_AUTO;
     }
 }
 
@@ -710,6 +710,9 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
             if(aSrcFormat == ST_V_SRC_AUTODETECT
             && !myImage->params.stereoFile.isNull()) {
                 aSrcFormat = myImage->params.stereoFile->getSrcFormat();
+                aSrcFormat = myImage->params.swapLR->getValue()
+                           ? st::formatReversed(aSrcFormat)
+                           : aSrcFormat;
             }
             myDescr->setText(tr(BTN_SRC_FORMAT) + "\n" + trSrcFormat(aSrcFormat));
         } else {

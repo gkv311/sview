@@ -19,6 +19,7 @@
 #include "StImageLoader.h"
 #include "StImagePluginInfo.h"
 #include "StImageViewerStrings.h"
+#include "StImageViewerGUI.h"
 
 #include <StThreads/StThread.h>
 
@@ -200,7 +201,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         anImgInfo->SrcFormat = aParser.getSrcFormat();
         if(anImgInfo->SrcFormat != ST_V_SRC_AUTODETECT) {
             StDictEntry& anEntry  = anImgInfo->Info.addChange("Jpeg.JpsStereo");
-            anEntry.changeValue() = st::formatToString(anImgInfo->SrcFormat);
+            anEntry.changeValue() = tr(StImageViewerGUI::trSrcFormatId(anImgInfo->SrcFormat));
         }
 
         // read image from memory
