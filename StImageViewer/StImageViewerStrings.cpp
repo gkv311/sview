@@ -212,6 +212,10 @@ void loadDefaults(StLangMap& theStrings) {
                "Pixel ratio");
     theStrings(INFO_COLOR_MODEL,
                "Color model");
+    theStrings(INFO_NO_SRCFORMAT,
+               "(does not stored in metadata)");
+    theStrings(INFO_WRONG_SRCFORMAT,
+               "(does not match metadata)");
 
     theStrings(METADATA_JPEG_COMMENT,
                "JPEG Comment");

@@ -43,6 +43,11 @@ namespace st {
      */
     ST_CPPEXPORT StFormatEnum formatFromString(const StString& theFormatString);
 
+    /**
+     * Return source format with reversed views.
+     */
+    ST_CPPEXPORT StFormatEnum formatReversed(const StFormatEnum theFormatEnum);
+
 };
 
 #endif //__StFormatEnum_h_

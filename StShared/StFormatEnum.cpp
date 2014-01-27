@@ -52,3 +52,17 @@ StFormatEnum st::formatFromString(const StString& theFormatString) {
         return ST_V_SRC_AUTODETECT;
     }
 }
+
+StFormatEnum st::formatReversed(const StFormatEnum theFormatEnum) {
+    switch(theFormatEnum) {
+        case ST_V_SRC_SIDE_BY_SIDE:  return ST_V_SRC_PARALLEL_PAIR;
+        case ST_V_SRC_PARALLEL_PAIR: return ST_V_SRC_SIDE_BY_SIDE;
+        case ST_V_SRC_OVER_UNDER_RL: return ST_V_SRC_OVER_UNDER_LR;
+        case ST_V_SRC_OVER_UNDER_LR: return ST_V_SRC_OVER_UNDER_RL;
+        case ST_V_SRC_ROW_INTERLACE:
+        case ST_V_SRC_PAGE_FLIP:
+        case ST_V_SRC_MONO:
+        case ST_V_SRC_AUTODETECT:
+        default:                     return theFormatEnum;
+    }
+}

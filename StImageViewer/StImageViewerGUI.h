@@ -87,6 +87,8 @@ class StImageViewerGUI : public StGLRootWidget {
         return myLangMap->getValue(theId);
     }
 
+    ST_LOCAL const StString& trSrcFormat(const StFormatEnum theSrcFormat) const;
+
         private: //! @name menus creation routines
 
     ST_LOCAL void      createMainMenu();         // Root (Main menu)

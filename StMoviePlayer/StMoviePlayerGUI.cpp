@@ -726,13 +726,12 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
         const StGLVec3 aWhite(1.0f, 1.0f, 1.0f);
         const int    aWidthMax  = aDialog->getContent()->getRectPx().width();
         StGLTable*   aTable     = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
-        const size_t aNbRowsMax = anExtraInfo->myInfo.size() + anExtraInfo->myCodecs.size() + 1;
+        int          aRowLast   = (int )anExtraInfo->myInfo.size();
+        const int    aNbRowsMax = aRowLast + (int )anExtraInfo->myCodecs.size() + 1;
         aTable->setupTable((int )aNbRowsMax, 2);
         aTable->setVisibility(true, true);
         aTable->fillFromMap(anExtraInfo->myInfo, aWhite,
                             aWidthMax, aWidthMax / 2);
-
-        int aRowLast = (int )anExtraInfo->myInfo.size();
 
         const int aTextMaxWidth = aWidthMax - (aTable->getMarginLeft() + aTable->getMarginRight());
 

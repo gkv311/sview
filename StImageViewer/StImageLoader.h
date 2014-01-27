@@ -33,8 +33,12 @@ class StThread;
 
 struct StImageInfo {
 
-    StHandle<StStereoParams> myId;
-    StArgumentsMap           myInfo;
+    StHandle<StStereoParams> Id;
+    StArgumentsMap           Info;
+    StFormatEnum             SrcFormat; //!< source format as stored in file metadata
+    bool                     IsSavable; //!< indicate that file can be saved without re-encoding
+
+    StImageInfo() : SrcFormat(ST_V_SRC_AUTODETECT), IsSavable(false) {}
 
 };
 
@@ -76,7 +80,7 @@ class StImageLoader {
 
     ST_LOCAL StHandle<StImageInfo> getFileInfo(const StHandle<StStereoParams>& theParams) const {
         StHandle<StImageInfo> anInfo = myImgInfo;
-        return (!anInfo.isNull() && anInfo->myId == theParams) ? anInfo : NULL;
+        return (!anInfo.isNull() && anInfo->Id == theParams) ? anInfo : NULL;
     }
 
     ST_LOCAL StPlayList& getPlayList() {

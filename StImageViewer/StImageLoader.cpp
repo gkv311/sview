@@ -86,15 +86,15 @@ void StImageLoader::metadataFromExif(const StHandle<StExifDir>& theDir,
     }
 
     if(!theDir->getCameraMaker().isEmpty()) {
-        StDictEntry& anEntry  = theInfo->myInfo.addChange("Exif.Maker");
+        StDictEntry& anEntry  = theInfo->Info.addChange("Exif.Maker");
         anEntry.changeValue() = theDir->getCameraMaker();
     }
     if(!theDir->getCameraModel().isEmpty()) {
-        StDictEntry& anEntry  = theInfo->myInfo.addChange("Exif.Model");
+        StDictEntry& anEntry  = theInfo->Info.addChange("Exif.Model");
         anEntry.changeValue() = theDir->getCameraModel();
     }
     if(!theDir->getUserComment().isEmpty()) {
-        StDictEntry& anEntry  = theInfo->myInfo.addChange("Exif.UserComment");
+        StDictEntry& anEntry  = theInfo->Info.addChange("Exif.UserComment");
         anEntry.changeValue() = theDir->getUserComment();
     }
 
@@ -117,19 +117,20 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     }
 
     StHandle<StImageInfo> anImgInfo = new StImageInfo();
-    anImgInfo->myId = theParams;
+    anImgInfo->Id        = theParams;
+    anImgInfo->IsSavable = false;
 
     StString aTitleString, aFolder;
     if(theSource->size() >= 2) {
         StString aTitleString2;
         StFileNode::getFolderAndFile(theSource->getValue(0)->getPath(), aFolder, aTitleString);
         StFileNode::getFolderAndFile(theSource->getValue(1)->getPath(), aFolder, aTitleString2);
-        anImgInfo->myInfo.add(StArgument(tr(INFO_FILE_NAME),
-                                         aTitleString  + " " + tr(INFO_LEFT) + "\n"
-                                       + aTitleString2 + " " + tr(INFO_RIGHT)));
+        anImgInfo->Info.add(StArgument(tr(INFO_FILE_NAME),
+                                       aTitleString  + " " + tr(INFO_LEFT) + "\n"
+                                     + aTitleString2 + " " + tr(INFO_RIGHT)));
     } else {
         StFileNode::getFolderAndFile(aFilePath, aFolder, aTitleString);
-        anImgInfo->myInfo.add(StArgument(tr(INFO_FILE_NAME), aTitleString));
+        anImgInfo->Info.add(StArgument(tr(INFO_FILE_NAME), aTitleString));
     }
 
     StTimer aLoadTimer(true);
@@ -164,17 +165,17 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
                     continue;
                 }
             }
-            anImgInfo->myInfo.add(StArgument(tr(INFO_DIMENSIONS) + (" (") + anImgCounter + ")",
-                                             StString() + anImgIter->SizeX + " x " + anImgIter->SizeY));
+            anImgInfo->Info.add(StArgument(tr(INFO_DIMENSIONS) + (" (") + anImgCounter + ")",
+                                           StString() + anImgIter->SizeX + " x " + anImgIter->SizeY));
         }
 
         // copy metadata
         if(!aParser.getComment().isEmpty()) {
-            StDictEntry& anEntry  = anImgInfo->myInfo.addChange("Jpeg.Comment");
+            StDictEntry& anEntry  = anImgInfo->Info.addChange("Jpeg.Comment");
             anEntry.changeValue() = aParser.getComment();
         }
         if(!aParser.getJpsComment().isEmpty()) {
-            StDictEntry& anEntry  = anImgInfo->myInfo.addChange("Jpeg.JpsComment");
+            StDictEntry& anEntry  = anImgInfo->Info.addChange("Jpeg.JpsComment");
             anEntry.changeValue() = aParser.getJpsComment();
         }
         if(!anImg1.isNull()) {
@@ -193,6 +194,13 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         if(!isParsed) {
             processLoadFail(StString("Can not read the file \"") + aFilePath + '\"');
             return false;
+        }
+
+        anImgInfo->IsSavable = anImg2.isNull();
+        anImgInfo->SrcFormat = aParser.getSrcFormat();
+        if(anImgInfo->SrcFormat != ST_V_SRC_AUTODETECT) {
+            StDictEntry& anEntry  = anImgInfo->Info.addChange("Jpeg.JpsStereo");
+            anEntry.changeValue() = st::formatToString(anImgInfo->SrcFormat);
         }
 
         // read image from memory
@@ -219,7 +227,12 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             }
 
             // convert percents to pixels
-            theParams->setSeparationNeutral(GLint(anHParallax * anImageR->getSizeX() * 0.01));
+            const GLint aParallaxPx = GLint(anHParallax * anImageR->getSizeX() * 0.01);
+            if(aParallaxPx != 0) {
+                StDictEntry& anEntry  = anImgInfo->Info.addChange("Exif.Mpo.Parallax");
+                anEntry.changeValue() = StString(anHParallax);
+            }
+            theParams->setSeparationNeutral(aParallaxPx);
         } else if(anImgType == StImageFile::ST_TYPE_MPO) {
             ST_DEBUG_LOG("MPO image \"" + aFilePath + "\" is invalid!");
         }
@@ -272,30 +285,29 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     }
 
     if(!stAreEqual(anImageL->getPixelRatio(), 1.0f, 0.001f)) {
-        anImgInfo->myInfo.add(StArgument(tr(INFO_PIXEL_RATIO),
-                                         StString(anImageL->getPixelRatio())));
+        anImgInfo->Info.add(StArgument(tr(INFO_PIXEL_RATIO),
+                                       StString(anImageL->getPixelRatio())));
     }
     const StString aModelL = anImageL->formatImgColorModel();
     if(!anImageR->isNull()) {
-        anImgInfo->myInfo.add(StArgument(tr(INFO_DIMENSIONS), StString()
-                                       + anImageL->getSizeX() + " x " + anImageL->getSizeY() + " " + tr(INFO_LEFT) + "\n"
-                                       + anImageR->getSizeX() + " x " + anImageR->getSizeY() + " " + tr(INFO_RIGHT)));
+        anImgInfo->Info.add(StArgument(tr(INFO_DIMENSIONS), StString()
+                                     + anImageL->getSizeX() + " x " + anImageL->getSizeY() + " " + tr(INFO_LEFT) + "\n"
+                                     + anImageR->getSizeX() + " x " + anImageR->getSizeY() + " " + tr(INFO_RIGHT)));
         const StString aModelR = anImageR->formatImgColorModel();
         if(aModelL == aModelR) {
-            anImgInfo->myInfo.add(StArgument(tr(INFO_COLOR_MODEL),
-                                  aModelL));
+            anImgInfo->Info.add(StArgument(tr(INFO_COLOR_MODEL), aModelL));
         } else {
-            anImgInfo->myInfo.add(StArgument(tr(INFO_COLOR_MODEL),
-                                  aModelL + " " + tr(INFO_LEFT) + "\n"
-                                + aModelR + " " + tr(INFO_RIGHT)));
+            anImgInfo->Info.add(StArgument(tr(INFO_COLOR_MODEL),
+                                aModelL + " " + tr(INFO_LEFT) + "\n"
+                              + aModelR + " " + tr(INFO_RIGHT)));
         }
     } else {
-        anImgInfo->myInfo.add(StArgument(tr(INFO_DIMENSIONS), StString()
-                                       + anImageL->getSizeX() + " x " + anImageL->getSizeY()));
-        anImgInfo->myInfo.add(StArgument(tr(INFO_COLOR_MODEL),
-                                         aModelL));
+        anImgInfo->Info.add(StArgument(tr(INFO_DIMENSIONS), StString()
+                                     + anImageL->getSizeX() + " x " + anImageL->getSizeY()));
+        anImgInfo->Info.add(StArgument(tr(INFO_COLOR_MODEL),
+                                       aModelL));
     }
-    anImgInfo->myInfo.add(StArgument(tr(INFO_LOAD_TIME), StString(aLoadTimeMSec) + " " + tr(INFO_TIME_MSEC)));
+    anImgInfo->Info.add(StArgument(tr(INFO_LOAD_TIME), StString(aLoadTimeMSec) + " " + tr(INFO_TIME_MSEC)));
     myImgInfo = anImgInfo;
 
     // clean up - close opened files and reset memory

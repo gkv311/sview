@@ -414,23 +414,70 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
     StHandle<StImageInfo>    anExtraInfo;
     if(myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo)
     && !anExtraInfo.isNull()) {
-        for(size_t aMapIter = 0; aMapIter < anExtraInfo->myInfo.size(); ++aMapIter) {
-            StDictEntry& anEntry = anExtraInfo->myInfo.changeValue(aMapIter);
+        // translate known metadata tag names
+        for(size_t aMapIter = 0; aMapIter < anExtraInfo->Info.size(); ++aMapIter) {
+            StDictEntry& anEntry = anExtraInfo->Info.changeValue(aMapIter);
             anEntry.changeName() = myLangMap->getValue(anEntry.getKey());
         }
+        const int aWidthMax  = aDialog->getContent()->getRectPx().width();
+        int       aRowLast   = (int )anExtraInfo->Info.size();
+        const int aNbRowsMax = aRowLast + 2;
 
         StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
+        aTable->setupTable(aNbRowsMax, 2);
         aTable->setVisibility(true, true);
-        aTable->fillFromMap(anExtraInfo->myInfo, StGLVec3(1.0f, 1.0f, 1.0f), aDialog->getContent()->getRectPx().width(), aDialog->getContent()->getRectPx().width() / 2);
+        aTable->fillFromMap(anExtraInfo->Info, StGLVec3(1.0f, 1.0f, 1.0f), aWidthMax, aWidthMax / 2);
+
+        const StFormatEnum anActiveSrcFormat = aParams->isSwapLR()
+                                             ? st::formatReversed(aParams->getSrcFormat())
+                                             : aParams->getSrcFormat();
+        const int aTextMaxWidth = aWidthMax - (aTable->getMarginLeft() + aTable->getMarginRight());
+        StGLTableItem& aSrcFormatItem = aTable->changeElement(aRowLast++, 0); aSrcFormatItem.setColSpan(2);
+        StGLTextArea*  aSrcFormatText = new StGLTextArea(&aSrcFormatItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
+        aSrcFormatText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+                                       StGLTextFormatter::ST_ALIGN_Y_TOP);
+        aSrcFormatText->setText(StString("\n") + tr(BTN_SRC_FORMAT) + " " + trSrcFormat(anActiveSrcFormat));
+        aSrcFormatText->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
+        aSrcFormatText->setVisibility(true, true);
+        aSrcFormatText->stglInitAutoHeightWidth(aTextMaxWidth);
+
+        StString aSrcInfo;
+        StGLVec3 anExtraColor(1.0f, 1.0f, 1.0f);
+        if(anExtraInfo->SrcFormat == ST_V_SRC_AUTODETECT
+        && anActiveSrcFormat != ST_V_SRC_MONO
+        && anActiveSrcFormat != ST_V_SRC_SEPARATE_FRAMES) {
+            aSrcInfo     = tr(INFO_NO_SRCFORMAT);
+            anExtraColor = StGLVec3(1.0f, 1.0f, 0.8f);
+        } else if(anExtraInfo->SrcFormat != ST_V_SRC_AUTODETECT
+               && anExtraInfo->SrcFormat != anActiveSrcFormat
+               && anActiveSrcFormat != ST_V_SRC_MONO) {
+            aSrcInfo     = tr(INFO_WRONG_SRCFORMAT);
+            anExtraColor = StGLVec3(1.0f, 0.0f, 0.0f);
+        }
+        if(!aSrcInfo.isEmpty()) {
+            StGLTableItem& aTabItem = aTable->changeElement(aRowLast++, 0); aTabItem.setColSpan(2);
+            StGLTextArea*  aText    = new StGLTextArea(&aTabItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
+            aText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+                                  StGLTextFormatter::ST_ALIGN_Y_TOP);
+            aText->setText(aSrcInfo);
+            aText->setTextColor(anExtraColor);
+            aText->setVisibility(true, true);
+            aText->stglInitAutoHeightWidth(aTextMaxWidth);
+        }
+
+        aTable->updateLayout();
         if(aTable->getRectPx().height() <= aDialog->getContent()->getRectPx().height()) {
             aTable->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
+        }
+
+        if(anExtraInfo->IsSavable) {
+            //aDialog->addButton(tr(BUTTON_SAVE_METADATA));
         }
     } else {
         aDialog->setText("Information is unavailable");
     }
 
-    //aDialog->addButton(tr(BUTTON_SAVE_METADATA));
-    aDialog->addButton(tr(BUTTON_CLOSE));
+    aDialog->addButton(tr(BUTTON_CLOSE), true);
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
@@ -593,6 +640,23 @@ namespace {
 
 };
 
+const StString& StImageViewerGUI::trSrcFormat(const StFormatEnum theSrcFormat) const {
+    switch(theSrcFormat) {
+        case ST_V_SRC_MONO:                 return tr(MENU_SRC_FORMAT_MONO);
+        case ST_V_SRC_SIDE_BY_SIDE:         return tr(MENU_SRC_FORMAT_CROSS_EYED);
+        case ST_V_SRC_PARALLEL_PAIR:        return tr(MENU_SRC_FORMAT_PARALLEL);
+        case ST_V_SRC_OVER_UNDER_RL:        return tr(MENU_SRC_FORMAT_OVERUNDER_RL);
+        case ST_V_SRC_OVER_UNDER_LR:        return tr(MENU_SRC_FORMAT_OVERUNDER_LR);
+        case ST_V_SRC_ROW_INTERLACE:        return tr(MENU_SRC_FORMAT_INTERLACED);
+        case ST_V_SRC_ANAGLYPH_G_RB:        return tr(MENU_SRC_FORMAT_ANA_RB);
+        case ST_V_SRC_ANAGLYPH_RED_CYAN:    return tr(MENU_SRC_FORMAT_ANA_RC);
+        case ST_V_SRC_ANAGLYPH_YELLOW_BLUE: return tr(MENU_SRC_FORMAT_ANA_YB);
+        case ST_V_SRC_SEPARATE_FRAMES:      return tr(MENU_SRC_FORMAT_SEPARATE);
+        default:
+        case ST_V_SRC_AUTODETECT:           return tr(MENU_SRC_FORMAT_AUTO);
+    }
+}
+
 void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
                                      bool              isMouseActive) {
     myIsVisibleGUI = isMouseActive
@@ -642,27 +706,12 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
         } else if(::isPointIn(myBtnFull, theCursor)) {
             myDescr->setText(tr(FULLSCREEN));
         } else if(::isPointIn(myBtnSrcFrmt, theCursor)) {
-            size_t aLngId = MENU_SRC_FORMAT_AUTO;
             StFormatEnum aSrcFormat = (StFormatEnum )myPlugin->params.srcFormat->getValue();
             if(aSrcFormat == ST_V_SRC_AUTODETECT
             && !myImage->params.stereoFile.isNull()) {
                 aSrcFormat = myImage->params.stereoFile->getSrcFormat();
             }
-            switch(aSrcFormat) {
-                case ST_V_SRC_MONO:                 aLngId = MENU_SRC_FORMAT_MONO;         break;
-                case ST_V_SRC_SIDE_BY_SIDE:         aLngId = MENU_SRC_FORMAT_CROSS_EYED;   break;
-                case ST_V_SRC_PARALLEL_PAIR:        aLngId = MENU_SRC_FORMAT_PARALLEL;     break;
-                case ST_V_SRC_OVER_UNDER_RL:        aLngId = MENU_SRC_FORMAT_OVERUNDER_RL; break;
-                case ST_V_SRC_OVER_UNDER_LR:        aLngId = MENU_SRC_FORMAT_OVERUNDER_LR; break;
-                case ST_V_SRC_ROW_INTERLACE:        aLngId = MENU_SRC_FORMAT_INTERLACED;   break;
-                case ST_V_SRC_ANAGLYPH_G_RB:        aLngId = MENU_SRC_FORMAT_ANA_RB;       break;
-                case ST_V_SRC_ANAGLYPH_RED_CYAN:    aLngId = MENU_SRC_FORMAT_ANA_RC;       break;
-                case ST_V_SRC_ANAGLYPH_YELLOW_BLUE: aLngId = MENU_SRC_FORMAT_ANA_YB;       break;
-                case ST_V_SRC_SEPARATE_FRAMES:      aLngId = MENU_SRC_FORMAT_SEPARATE;     break;
-                default:
-                case ST_V_SRC_AUTODETECT:           aLngId = MENU_SRC_FORMAT_AUTO;         break;
-            }
-            myDescr->setText(tr(BTN_SRC_FORMAT) + tr(aLngId));
+            myDescr->setText(tr(BTN_SRC_FORMAT) + "\n" + trSrcFormat(aSrcFormat));
         } else {
             myDescr->setVisibility(false, true);
         }
