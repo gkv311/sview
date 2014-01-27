@@ -397,6 +397,9 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     anAction = new StActionIntSlot(stCString("DoSubtitlesPrev"), stSlot(this, &StMoviePlayer::doSubtitlesNext), (size_t )-1);
     addAction(Action_SubsPrev, anAction, ST_VK_U | ST_VF_SHIFT, ST_VK_T | ST_VF_SHIFT);
 
+    anAction = new StActionIntSlot(stCString("DoSubtitlesCopy"), stSlot(this, &StMoviePlayer::doSubtitlesCopy), 0);
+    addAction(Action_CopyToClipboard, anAction, ST_VK_C | ST_VF_CONTROL, ST_VK_INSERT | ST_VF_CONTROL);
+
     anAction = new StActionIntSlot(stCString("DoPlayListReverse"), stSlot(this, &StMoviePlayer::doPlayListReverse), 0);
     addAction(Action_ShowList, anAction, ST_VK_L | ST_VF_CONTROL);
 
@@ -924,6 +927,20 @@ void StMoviePlayer::doSubtitlesNext(size_t theDirection) {
 
     const int32_t aValue = myVideo->params.activeSubtitles->nextValue(theDirection == 1 ? 1 : -1);
     params.subtitlesStream->setValue(aValue);
+}
+
+void StMoviePlayer::doSubtitlesCopy(size_t ) {
+    if(myVideo.isNull()
+    || myGUI.isNull()
+    || myGUI->mySubtitles == NULL) {
+        return;
+    }
+
+    const StString& aText = myGUI->mySubtitles->getText();
+    if(aText.isEmpty()) {
+        return;
+    }
+    myWindow->toClipboard(aText);
 }
 
 void StMoviePlayer::doFileNext() {
