@@ -1212,13 +1212,12 @@ void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<St
         aRange->setVisibility(true, true);
     }
 
+    myMenuSubtitles->addItem(tr(MENU_SUBTITLES_PARSER), aParserMenu);
     if(theIsFilePlayed) {
         //myMenuSubtitles->addSplitter();
         myMenuSubtitles->addItem(tr(MENU_SUBTITLES_ATTACH))
                        ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doAddSubtitleStream);
     }
-
-    myMenuSubtitles->addItem(tr(MENU_SUBTITLES_PARSER), aParserMenu);
 
     // update menu representation
     myMenuSubtitles->stglInit();
