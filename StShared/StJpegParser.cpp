@@ -453,6 +453,24 @@ bool StJpegParser::insertSection(const uint8_t   theMarker,
         }
         stMemCpy(aNewData, myBuffer, myLength);
         stMemFree(myBuffer);
+
+        // update pointers of image(s) data
+        for(StHandle<StJpegParser::Image> anImg = myImages;
+            !anImg.isNull(); anImg = anImg->Next) {
+            ptrdiff_t anOffset = anImg->Data - myBuffer;
+            if(anOffset >= theOffset) {
+                anOffset += aDiff;
+            }
+            anImg->Data = aNewData + anOffset;
+            if(!anImg->Thumb.isNull()) {
+                anOffset = anImg->Thumb->Data - myBuffer;
+                if(anOffset >= theOffset) {
+                    anOffset += aDiff;
+                }
+                anImg->Thumb->Data = aNewData + anOffset;
+            }
+        }
+
         myBuffer = aNewData;
     }
     myLength = aNewSize;
