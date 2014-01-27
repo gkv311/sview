@@ -492,8 +492,10 @@ void StImageLoader::mainLoop() {
                 myAction = Action_NONE;
                 myLock.unlock();
                 myLoadNextEvent.reset();
-                saveImageInfo(anInfo);
-                break;
+                if(!saveImageInfo(anInfo)) {
+                    break;
+                }
+                // re-load image file
             }
             case Action_NONE:
             default: {
