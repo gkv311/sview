@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -9,162 +9,13 @@
 #ifndef __StProcess_h_
 #define __StProcess_h_
 
-#include <StStrings/StString.h>
-#include <StTemplates/StArrayList.h>
+#include <StStrings/StDictionary.h>
 
 #include "StMutex.h"
 
-/**
- * This class represents an argument (to program for example) in style key+value.
- */
-class StArgument {
-
-        public:
-
-    /**
-     * Empty constructor.
-     */
-    ST_CPPEXPORT StArgument();
-
-    /**
-     * Default constructor.
-     */
-    ST_CPPEXPORT StArgument(const StString& theKey,
-                            const StString& theValue);
-
-    /**
-     * Destructor.
-     */
-    ST_CPPEXPORT ~StArgument();
-
-    /**
-     * Check key is not empty.
-     */
-    bool isValid() const {
-        return !key.isEmpty();
-    }
-
-    /**
-     * Default values 'on' or 'true' are preferred for switch.
-     */
-    ST_CPPEXPORT bool isValueOn() const;
-
-    /**
-     * Default values 'off' or 'false' are preferred for switch.
-     */
-    ST_CPPEXPORT bool isValueOff() const;
-
-    /**
-     * Parse string and create key/value pair.
-     * String should be in format 'KEY="VALUE"'.
-     * Newline '\n' symbol is disallowed in the key string.
-     */
-    ST_CPPEXPORT void parseString(const StString& theString);
-
-    const StString& getKey() const {
-        return key;
-    }
-
-    void setKey(const StString& newKey) {
-        this->key = newKey;
-    }
-
-    const StString& getValue() const {
-        return val;
-    }
-
-    StString& changeValue() {
-        return val;
-    }
-
-    void setValue(const StString& val) {
-        this->val = val.unquoted();
-    }
-
-    /**
-     * Arguments keys are NOT case sensitive!
-     */
-    bool operator==(const StArgument& theCompare) const {
-        if(&theCompare == this) {
-            return true;
-        }
-        return theCompare.key.isEqualsIgnoreCase(this->key);
-    }
-
-    bool operator!=(const StArgument& theCompare) const {
-        if(&theCompare == this) {
-            return false;
-        }
-        return !theCompare.key.isEqualsIgnoreCase(this->key);
-    }
-
-    bool operator> (const StArgument& theCompare) const { return this->key >  theCompare.key; }
-    bool operator< (const StArgument& theCompare) const { return this->key <  theCompare.key; }
-    bool operator>=(const StArgument& theCompare) const { return this->key >= theCompare.key; }
-    bool operator<=(const StArgument& theCompare) const { return this->key <= theCompare.key; }
-
-    ST_CPPEXPORT StString toString() const;
-
-        private:
-
-    static const StString ST_ARG_ON;
-    static const StString ST_ARG_TRUE;
-    static const StString ST_ARG_OFF;
-    static const StString ST_ARG_FALSE;
-
-        private:
-
-    StString key; // key
-    StString val; // value
-
-};
-
-/**
- * Simple array-map for StArguments. Could be exported/imported into/from string
- * (default '\n' symbol will be used as delimiter).
- */
-class StArgumentsMap : public StArrayList<StArgument> {
-
-        public:
-
-    /**
-     * Empty constructor.
-     */
-    ST_CPPEXPORT StArgumentsMap();
-    ST_CPPEXPORT virtual ~StArgumentsMap();
-
-    /**
-     * Parse string and create arguments list.
-     */
-    ST_CPPEXPORT void parseList(const StArrayList<StString>& theStringList);
-
-    /**
-     * Parse string and create arguments list.
-     */
-    ST_CPPEXPORT void parseString(const StString& theString);
-
-    /**
-     * Access to the argument throw the key.
-     * Returns an empty argument if key not found.
-     */
-    ST_CPPEXPORT StArgument operator[](const StString& theKey) const;
-
-    /**
-     * Access to the arguments throw indexes.
-     * Use parent ::size() method to retrieve map's size.
-     */
-    inline const StArgument& getFromIndex(const size_t index) const {
-        return StArrayList<StArgument>::getValue(index);
-    }
-
-    /**
-     * Add/modifies value for specified key.
-     */
-    ST_CPPEXPORT void set(const StArgument& thePair);
-
-    ST_CPPEXPORT virtual StString toString() const;
-
-};
+// compatibility with old definitions
+typedef StDictEntry  StArgument;
+typedef StDictionary StArgumentsMap;
 
 /**
  * Helper class to get process/system variables.

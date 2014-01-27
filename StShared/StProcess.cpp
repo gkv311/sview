@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -48,111 +48,6 @@ namespace {
             && StFileNode::isFileExists(thePath + STCORE_NAME);
     }
 
-};
-
-const StString StArgument::ST_ARG_ON   ("on");
-const StString StArgument::ST_ARG_TRUE ("true");
-const StString StArgument::ST_ARG_OFF  ("off");
-const StString StArgument::ST_ARG_FALSE("false");
-
-StArgument::StArgument() {}
-
-StArgument::StArgument(const StString& theKey,
-                       const StString& theValue)
-: key(theKey),
-  val(theValue.unquoted()) {
-    //
-}
-
-StArgument::~StArgument() {
-    //
-}
-
-StString StArgument::toString() const {
-    return key + "=\"" + val + '\"';
-}
-
-bool StArgument::isValueOn() const {
-    return val.isEqualsIgnoreCase(ST_ARG_ON) || val.isEqualsIgnoreCase(ST_ARG_TRUE);
-}
-
-bool StArgument::isValueOff() const {
-    return val.isEqualsIgnoreCase(ST_ARG_OFF) || val.isEqualsIgnoreCase(ST_ARG_FALSE);
-}
-
-void StArgument::parseString(const StString& theString) {
-    for(StUtf8Iter anIter = theString.iterator(); *anIter != 0; ++anIter) {
-        if(*anIter == stUtf32_t('=')) {
-            key = theString.subString(0, anIter.getIndex());
-            val = theString.subString(anIter.getIndex() + 1, theString.getLength()).unquoted();
-            return;
-        }
-    }
-    key = theString;
-}
-
-StArgumentsMap::StArgumentsMap()
-: StArrayList<StArgument>() {
-    //
-}
-
-StArgumentsMap::~StArgumentsMap() {
-    //
-}
-
-StString StArgumentsMap::toString() const {
-    return StArrayList<StArgument>::toString();
-}
-
-void StArgumentsMap::parseList(const StArrayList<StString>& theStringList) {
-    for(size_t id = 0; id < theStringList.size(); ++id) {
-        StArgument newArgument;
-        newArgument.parseString(theStringList[id]);
-        add(newArgument);
-    }
-}
-
-void StArgumentsMap::parseString(const StString& theString) {
-    size_t aStart = 0;
-    bool isInQuotes1 = false;
-    bool isInQuotes2 = false;
-    for(StUtf8Iter anIter = theString.iterator();; ++anIter) {
-        if(*anIter == stUtf32_t('\'') && !isInQuotes2) {
-            isInQuotes1 = !isInQuotes1;
-        } else if(*anIter == stUtf32_t('\"') && !isInQuotes1) {
-            isInQuotes2 = !isInQuotes2;
-        } else if((*anIter == stUtf32_t('\n')
-                || *anIter == stUtf32_t('\0')) && !isInQuotes1 && !isInQuotes2) {
-            StArgument aNewArgument;
-            aNewArgument.parseString(theString.subString(aStart, anIter.getIndex()));
-            add(aNewArgument);
-            aStart = anIter.getIndex() + 1;
-        }
-        if(*anIter == 0) {
-            return;
-        }
-    }
-}
-
-StArgument StArgumentsMap::operator[](const StString& theKey) const {
-    for(size_t anId = 0; anId < size(); ++anId) {
-        const StArgument& anArg = getValue(anId);
-        if(anArg.getKey().isEqualsIgnoreCase(theKey)) {
-            return anArg;
-        }
-    }
-    return StArgument();
-}
-
-void StArgumentsMap::set(const StArgument& thePair) {
-    for(size_t anId = 0; anId < size(); ++anId) {
-        StArgument& anArg = changeValue(anId);
-        if(anArg.getKey().isEqualsIgnoreCase(thePair.getKey())) {
-            anArg.setValue(thePair.getValue());
-            return;
-        }
-    }
-    add(thePair);
 }
 
 StString StProcess::getProcessFullPath() {

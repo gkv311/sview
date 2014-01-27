@@ -29,7 +29,7 @@ struct StGLArbFbo;
 struct StGLCore11;
 struct StGLCore11Fwd;
 
-class StArgumentsMap;
+class StDictionary;
 
 template<typename theBaseClass_t> struct stglTmplCore12;
 typedef stglTmplCore12<StGLCore11>     StGLCore12;
@@ -239,7 +239,7 @@ class StGLContext {
     /**
      * Retrieve info from OpenGL context and create info string.
      */
-    ST_CPPEXPORT void stglFullInfo(StArgumentsMap& theMap) const;
+    ST_CPPEXPORT void stglFullInfo(StDictionary& theMap) const;
 
     /**
      * This method intended to synchronize current OpenGL state and local cache.

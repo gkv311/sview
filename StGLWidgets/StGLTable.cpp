@@ -9,10 +9,10 @@
 #include <StGLWidgets/StGLTable.h>
 #include <StGLWidgets/StGLRootWidget.h>
 
-#include <StThreads/StProcess.h>
-
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
+
+#include <StStrings/StDictionary.h>
 
 #include <stAssert.h>
 
@@ -87,12 +87,12 @@ void StGLTable::setupTable(const int theNbRows,
     stMemZero(&myColRights .changeFirst(), sizeof(int) * myColRights .size());
 }
 
-void StGLTable::fillFromMap(const StArgumentsMap& theMap,
-                            const StGLVec3&       theTextColor,
-                            const int             theMaxWidth,
-                            const int             theCol1MaxWidth,
-                            const int             theRowId,
-                            const int             theColId) {
+void StGLTable::fillFromMap(const StDictionary& theMap,
+                            const StGLVec3&     theTextColor,
+                            const int           theMaxWidth,
+                            const int           theCol1MaxWidth,
+                            const int           theRowId,
+                            const int           theColId) {
     ST_ASSERT_SLIP(theRowId >= 0 && theColId >= 0,
                    "StGLTable::fillFromMap() out of range",
                    return);
@@ -107,8 +107,8 @@ void StGLTable::fillFromMap(const StArgumentsMap& theMap,
     const int aCol1MaxWidth = theCol1MaxWidth - (myMarginLeft + myMarginRight);
     int       aCol1Width    = 0;
     for(size_t anIter = 0; anIter < theMap.size(); ++anIter) {
-        const StArgument& aPair  = theMap.getValue(anIter);
-        StGLTableItem&    anItem = changeElement(theRowId + anIter, theColId);
+        const StDictEntry& aPair  = theMap.getValue(anIter);
+        StGLTableItem&     anItem = changeElement(theRowId + anIter, theColId);
         anItem.setRowSpan(1);
         anItem.setColSpan(1);
 
@@ -134,8 +134,8 @@ void StGLTable::fillFromMap(const StArgumentsMap& theMap,
     // fill second column with values
     int aCol2MaxWidth = theMaxWidth - aCol1Width - 2 * (myMarginLeft + myMarginRight);
     for(size_t anIter = 0; anIter < theMap.size(); ++anIter) {
-        const StArgument& aPair  = theMap.getValue(anIter);
-        StGLTableItem&    anItem = changeElement(theRowId + anIter, theColId + 1);
+        const StDictEntry& aPair  = theMap.getValue(anIter);
+        StGLTableItem&     anItem = changeElement(theRowId + anIter, theColId + 1);
         anItem.setRowSpan(1);
         anItem.setColSpan(1);
 

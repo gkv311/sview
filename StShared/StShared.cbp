@@ -356,6 +356,7 @@
 			<Option target="MAC_gcc" />
 			<Option target="MAC_gcc_DEBUG" />
 		</Unit>
+		<Unit filename="StDictionary.cpp" />
 		<Unit filename="StThread.cpp" />
 		<Unit filename="StVirtualKeys.cpp" />
 		<Unit filename="StWebPImage.cpp" />
@@ -463,6 +464,7 @@
 		<Unit filename="../include/StSlots/StSlotTypes.h" />
 		<Unit filename="../include/StSocket/StCheckUpdates.h" />
 		<Unit filename="../include/StSocket/StSocket.h" />
+		<Unit filename="../include/StStrings/StDictionary.h" />
 		<Unit filename="../include/StStrings/StFormatTime.h" />
 		<Unit filename="../include/StStrings/StLangMap.h" />
 		<Unit filename="../include/StStrings/StLogger.h" />

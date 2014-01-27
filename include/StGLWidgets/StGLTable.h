@@ -55,7 +55,7 @@ class StGLTableItem : public StGLWidget {
 template<> inline void StArray<             StGLTableItem*  >::sort() {}
 template<> inline void StArray< StArrayList<StGLTableItem*> >::sort() {}
 
-class StArgumentsMap;
+class StDictionary;
 
 /**
  * Widget represents table of widgets.
@@ -114,12 +114,12 @@ class StGLTable : public StGLWidget {
      * @param theRowId        row    of top-bottom table corner to fill from
      * @param theColId        column of top-bottom table corner to fill from
      */
-    ST_CPPEXPORT void fillFromMap(const StArgumentsMap& theMap,
-                                  const StGLVec3&       theTextColor,
-                                  const int             theMaxWidth,
-                                  const int             theCol1MaxWidth,
-                                  const int             theRowId = 0,
-                                  const int             theColId = 0);
+    ST_CPPEXPORT void fillFromMap(const StDictionary& theMap,
+                                  const StGLVec3&     theTextColor,
+                                  const int           theMaxWidth,
+                                  const int           theCol1MaxWidth,
+                                  const int           theRowId = 0,
+                                  const int           theColId = 0);
 
     /**
      * Re-compute position of table elements.

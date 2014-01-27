@@ -16,8 +16,8 @@
 #include <StGLCore/StGLCore44.h>
 #include <StGL/StGLArbFbo.h>
 
+#include <StStrings/StDictionary.h>
 #include <StStrings/StLogger.h>
-#include <StThreads/StProcess.h>
 
 #include <stAssert.h>
 
@@ -367,7 +367,7 @@ void StGLContext::stglFillBitsFBO(const GLuint theBuffId,
 }
 
 StString StGLContext::stglFullInfo() const {
-    StArgumentsMap aMap;
+    StDictionary aMap;
     stglFullInfo(aMap);
     StString aText;
     bool isFirst = true;
@@ -377,13 +377,13 @@ StString StGLContext::stglFullInfo() const {
         } else {
             aText += "\n";
         }
-        const StArgument& aPair = aMap.getFromIndex(aKeyIter);
+        const StDictEntry& aPair = aMap.getFromIndex(aKeyIter);
         aText += StString("  ") + aPair.getKey() + ": " + aPair.getValue();
     }
     return aText;
 }
 
-void StGLContext::stglFullInfo(StArgumentsMap& theMap) const {
+void StGLContext::stglFullInfo(StDictionary& theMap) const {
     StString aFBOBits;
     if(myFBOBits.RGB > 0) {
         aFBOBits = StString() + myFBOBits.SizeX + "x" + myFBOBits.SizeY
@@ -391,16 +391,16 @@ void StGLContext::stglFullInfo(StArgumentsMap& theMap) const {
                               + " D" + myFBOBits.Depth + " S" + myFBOBits.Stencil;
     }
 
-    theMap.add(StArgument("GLvendor",    (const char* )glGetString(GL_VENDOR)));
-    theMap.add(StArgument("GLdevice",    (const char* )glGetString(GL_RENDERER)));
-    theMap.add(StArgument("GLversion",   (const char* )glGetString(GL_VERSION)));
-    theMap.add(StArgument("GLSLversion", (const char* )glGetString(GL_SHADING_LANGUAGE_VERSION)));
-    theMap.add(StArgument("Window Info", StString()
+    theMap.add(StDictEntry("GLvendor",    (const char* )glGetString(GL_VENDOR)));
+    theMap.add(StDictEntry("GLdevice",    (const char* )glGetString(GL_RENDERER)));
+    theMap.add(StDictEntry("GLversion",   (const char* )glGetString(GL_VERSION)));
+    theMap.add(StDictEntry("GLSLversion", (const char* )glGetString(GL_SHADING_LANGUAGE_VERSION)));
+    theMap.add(StDictEntry("Window Info", StString()
             + myViewport.width() + "x" + myViewport.height()
             + " RGB" + myWindowBits.RGB + " A" + myWindowBits.Alpha
             + " D" + myWindowBits.Depth + " S" + myWindowBits.Stencil));
     if(!aFBOBits.isEmpty()) {
-        theMap.add(StArgument("FBO    Info", aFBOBits));
+        theMap.add(StDictEntry("FBO    Info", aFBOBits));
     }
 
 #ifdef __APPLE__
@@ -422,10 +422,10 @@ void StGLContext::stglFullInfo(StArgumentsMap& theMap) const {
         //kCGLRPTextureMemoryMegabytes = 132;
         GLint aVMem = 0;
         if(CGLDescribeRenderer(aRendObj, aRendIter, kCGLRPVideoMemory, &aVMem) == kCGLNoError) {
-            theMap.add(StArgument("GPU memory",         StString() + (aVMem / (1024 * 1024))  + " MiB"));
+            theMap.add(StDictEntry("GPU memory",         StString() + (aVMem / (1024 * 1024))  + " MiB"));
         }
         if(CGLDescribeRenderer(aRendObj, aRendIter, kCGLRPTextureMemory, &aVMem) == kCGLNoError) {
-            theMap.add(StArgument("GPU Texture memory", StString() + (aVMem / (1024 * 1024))  + " MiB"));
+            theMap.add(StDictEntry("GPU Texture memory", StString() + (aVMem / (1024 * 1024))  + " MiB"));
         }
     }
 #endif
@@ -433,13 +433,13 @@ void StGLContext::stglFullInfo(StArgumentsMap& theMap) const {
     if(stglCheckExtension("GL_ATI_meminfo")) {
         GLint aMemInfo[4]; stMemSet(aMemInfo, -1, sizeof(aMemInfo));
         core11fwd->glGetIntegerv(GL_VBO_FREE_MEMORY_ATI, aMemInfo);
-        theMap.add(StArgument("Free GPU memory", StString() + (aMemInfo[0] / 1024)  + " MiB"));
+        theMap.add(StDictEntry("Free GPU memory", StString() + (aMemInfo[0] / 1024)  + " MiB"));
     } else if(stglCheckExtension("GL_NVX_gpu_memory_info")) {
         GLint aDedicated     = -1;
         GLint aDedicatedFree = -1;
         glGetIntegerv(0x9047, &aDedicated);     // GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX
         glGetIntegerv(0x9049, &aDedicatedFree); // GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX
-        theMap.add(StArgument("Free GPU memory",
+        theMap.add(StDictEntry("Free GPU memory",
                    StString() + (aDedicatedFree / 1024)  + " MiB (from " + (aDedicated / 1024) + " MiB)"));
     }
 }
