@@ -195,6 +195,18 @@ StString& StLangMap::operator()(const size_t theId,
     return changeValueId(theId, theDefaultValue);
 }
 
+void StLangMap::addAlias(const StString& theStringKey,
+                         const size_t    theIntKey) {
+    myMapStrKeys[theStringKey] = theIntKey;
+}
+
+const StString& StLangMap::getValue(const StString& theStringKey) const {
+    const std::map<StString, size_t>::const_iterator anIter = myMapStrKeys.find(theStringKey);
+    return anIter != myMapStrKeys.end()
+         ? getValue(anIter->second)
+         : myEmptyStr;
+}
+
 size_t StLangMap::size() const {
     return myMap.size();
 }

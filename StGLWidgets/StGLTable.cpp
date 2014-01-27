@@ -115,7 +115,7 @@ void StGLTable::fillFromMap(const StDictionary& theMap,
         StGLTextArea* aText = new StGLTextArea(&anItem, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
         aText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_RIGHT,
                               StGLTextFormatter::ST_ALIGN_Y_TOP);
-        aText->setText(aPair.getKey());
+        aText->setText(aPair.getName().isEmpty() ? aPair.getKey() : aPair.getName());
         aText->setTextColor(theTextColor);
         aText->setupStyle(StFTFont::Style_Bold);
         aText->setVisibility(true, true);

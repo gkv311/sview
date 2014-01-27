@@ -27,6 +27,11 @@ class StDictEntry {
     /**
      * Default constructor.
      */
+    ST_CPPEXPORT StDictEntry(const StString& theKey);
+
+    /**
+     * Default constructor.
+     */
     ST_CPPEXPORT StDictEntry(const StString& theKey,
                              const StString& theValue);
 
@@ -185,6 +190,8 @@ class StDictionary : public StArrayList<StDictEntry> {
      * Add/modifies value for specified key.
      */
     ST_CPPEXPORT void set(const StDictEntry& thePair);
+
+    ST_CPPEXPORT StDictEntry& addChange(const StString& theKey);
 
     ST_CPPEXPORT virtual StString toString() const;
 

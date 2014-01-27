@@ -52,17 +52,32 @@ class StLangMap {
     ST_CPPEXPORT size_t size() const;
     ST_CPPEXPORT void clear();
 
+    /**
+     * Add string key alias.
+     */
+    ST_CPPEXPORT void addAlias(const StString& theStringKey,
+                               const size_t    theIntKey);
+
+    /**
+     * Get value from string key (if alias has been registered).
+     */
+    ST_CPPEXPORT const StString& getValue(const StString& theStringKey) const;
+
+        public:
+
+    typedef std::map<size_t, StString> stMapInt2String_t;
+    typedef std::map<StString, size_t> stMapString2Int_t;
+
         private:
 
     ST_LOCAL void parseLine(const StString& theLine);
 
         private:
 
-    typedef std::map<size_t, StString> stMapInt2String_t;
-
     StString          myLngFile;         //!< path to the language file
     StString          myEmptyStr;
     stMapInt2String_t myMap;             //!< key -> string map
+    stMapString2Int_t myMapStrKeys;      //!< auxiliary map of string key -> int key
     bool              myIsHeaderSection;
     bool              myToShowId;
 

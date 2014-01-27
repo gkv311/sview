@@ -19,7 +19,7 @@
 #ifndef __StImageViewerStrings_h_
 #define __StImageViewerStrings_h_
 
-#include <stTypes.h>
+#include <StStrings/StString.h>
 
 class StLangMap;
 
@@ -136,7 +136,25 @@ namespace StImageViewerStrings {
         ABOUT_DESCRIPTION      = 3002,
         UPDATES_NOTIFY         = 3003,
 
-        BUTTON_CLOSE = 4000,
+        BUTTON_CLOSE           = 4000,
+        BUTTON_SAVE_METADATA   = 4006,
+
+        // metadata keys
+        INFO_LEFT              = 5000,
+        INFO_RIGHT             = 5001,
+        INFO_FILE_NAME         = 5002,
+        INFO_DIMENSIONS        = 5003,
+        INFO_LOAD_TIME         = 5004,
+        INFO_TIME_MSEC         = 5005,
+        INFO_PIXEL_RATIO       = 5006,
+        INFO_COLOR_MODEL       = 5007,
+
+        // metadata keys
+        METADATA_JPEG_COMMENT     = 5100,
+        METADATA_JPEG_JPSCOMMENT  = 5101,
+        METADATA_EXIF_MAKER       = 5200,
+        METADATA_EXIF_MODEL       = 5201,
+        METADATA_EXIF_USERCOMMENT = 5202,
 
     };
 

@@ -399,7 +399,7 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
                     if(anItemLen > 18) {
                         const uint16_t aStringLen = StAlienData::Get16uBE(aData + 16);
                         char* aStrData = (char* )aData + 18;
-                        myComment = StString(aStrData, aStringLen);
+                        myJpsComment = StString(aStrData, aStringLen);
                     }
                 }
                 // skip already read bytes

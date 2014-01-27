@@ -150,10 +150,17 @@ class StJpegParser : public StRawFile {
     }
 
     /**
-     * @return file comment
+     * @return file comment in COM section
      */
     ST_LOCAL const StString& getComment() const {
         return myComment;
+    }
+
+    /**
+     * @return file comment in JPS section
+     */
+    ST_LOCAL const StString& getJpsComment() const {
+        return myJpsComment;
     }
 
     /**
@@ -216,6 +223,7 @@ class StJpegParser : public StRawFile {
                                   //!< array of offsets in image data, starting from session lenght (zero offset is invalid)
     size_t          myLength;     //!< data length
     StString        myComment;    //!< string stored in COM segment (directly in JPEG, NOT inside EXIF)
+    StString        myJpsComment; //!< string stored in JPS segment
     StFormatEnum    myStFormat;   //!< stereo format
 
 };

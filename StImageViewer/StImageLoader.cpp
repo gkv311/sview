@@ -20,8 +20,9 @@
 #include "StImagePluginInfo.h"
 #include "StImageViewerStrings.h"
 
-#include <StStrings/StLangMap.h>
 #include <StThreads/StThread.h>
+
+using namespace StImageViewerStrings;
 
 const char* StImageLoader::ST_IMAGES_MIME_STRING = ST_IMAGE_PLUGIN_MIME_CHAR;
 
@@ -66,7 +67,6 @@ StImageLoader::~StImageLoader() {
     myLoadNextEvent.set(); // stop the thread
     myThread->wait();
     myThread.nullify();
-    ///ST_DEBUG_LOG_AT("Destructor done");
 }
 
 void StImageLoader::setCompressMemory(const bool theToCompress) {
@@ -86,13 +86,16 @@ void StImageLoader::metadataFromExif(const StHandle<StExifDir>& theDir,
     }
 
     if(!theDir->getCameraMaker().isEmpty()) {
-        theInfo->myInfo.set(StArgument("Camera maker", theDir->getCameraMaker()));
+        StDictEntry& anEntry  = theInfo->myInfo.addChange("Exif.Maker");
+        anEntry.changeValue() = theDir->getCameraMaker();
     }
     if(!theDir->getCameraModel().isEmpty()) {
-        theInfo->myInfo.set(StArgument("Camera model", theDir->getCameraModel()));
+        StDictEntry& anEntry  = theInfo->myInfo.addChange("Exif.Model");
+        anEntry.changeValue() = theDir->getCameraModel();
     }
     if(!theDir->getUserComment().isEmpty()) {
-        theInfo->myInfo.set(StArgument("User comment", theDir->getUserComment()));
+        StDictEntry& anEntry  = theInfo->myInfo.addChange("Exif.UserComment");
+        anEntry.changeValue() = theDir->getUserComment();
     }
 
     for(size_t anExifId = 0; anExifId < theDir->getSubDirs().size(); ++anExifId) {
@@ -118,13 +121,15 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
 
     StString aTitleString, aFolder;
     if(theSource->size() >= 2) {
+        StString aTitleString2;
         StFileNode::getFolderAndFile(theSource->getValue(0)->getPath(), aFolder, aTitleString);
-        anImgInfo->myInfo.add(StArgument("Name (L)", aTitleString));
-        StFileNode::getFolderAndFile(theSource->getValue(1)->getPath(), aFolder, aTitleString);
-        anImgInfo->myInfo.add(StArgument("Name (R)", aTitleString));
+        StFileNode::getFolderAndFile(theSource->getValue(1)->getPath(), aFolder, aTitleString2);
+        anImgInfo->myInfo.add(StArgument(tr(INFO_FILE_NAME),
+                                         aTitleString  + " " + tr(INFO_LEFT) + "\n"
+                                       + aTitleString2 + " " + tr(INFO_RIGHT)));
     } else {
         StFileNode::getFolderAndFile(aFilePath, aFolder, aTitleString);
-        anImgInfo->myInfo.add(StArgument("Name", aTitleString));
+        anImgInfo->myInfo.add(StArgument(tr(INFO_FILE_NAME), aTitleString));
     }
 
     StTimer aLoadTimer(true);
@@ -159,13 +164,18 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
                     continue;
                 }
             }
-            anImgInfo->myInfo.add(StArgument(StString("Dimensions (") + anImgCounter + ")",
+            anImgInfo->myInfo.add(StArgument(tr(INFO_DIMENSIONS) + (" (") + anImgCounter + ")",
                                              StString() + anImgIter->SizeX + " x " + anImgIter->SizeY));
         }
 
         // copy metadata
         if(!aParser.getComment().isEmpty()) {
-            anImgInfo->myInfo.add(StArgument("Comment", aParser.getComment()));
+            StDictEntry& anEntry  = anImgInfo->myInfo.addChange("Jpeg.Comment");
+            anEntry.changeValue() = aParser.getComment();
+        }
+        if(!aParser.getJpsComment().isEmpty()) {
+            StDictEntry& anEntry  = anImgInfo->myInfo.addChange("Jpeg.JpsComment");
+            anEntry.changeValue() = aParser.getJpsComment();
         }
         if(!anImg1.isNull()) {
             for(size_t anExifId = 0; anExifId < anImg1->Exif.size(); ++anExifId) {
@@ -262,21 +272,30 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     }
 
     if(!stAreEqual(anImageL->getPixelRatio(), 1.0f, 0.001f)) {
-        anImgInfo->myInfo.add(StArgument("Pixel Ratio", StString() + anImageL->getPixelRatio()));
+        anImgInfo->myInfo.add(StArgument(tr(INFO_PIXEL_RATIO),
+                                         StString(anImageL->getPixelRatio())));
     }
+    const StString aModelL = anImageL->formatImgColorModel();
     if(!anImageR->isNull()) {
-        anImgInfo->myInfo.add(StArgument("Dimensions (L)",  StString() + anImageL->getSizeX()
-                                                               + " x " + anImageL->getSizeY()));
-        anImgInfo->myInfo.add(StArgument("Dimensions (R)",  StString() + anImageR->getSizeX()
-                                                               + " x " + anImageR->getSizeY()));
-        anImgInfo->myInfo.add(StArgument("Color Model (L)", anImageL->formatImgColorModel()));
-        anImgInfo->myInfo.add(StArgument("Color Model (R)", anImageR->formatImgColorModel()));
+        anImgInfo->myInfo.add(StArgument(tr(INFO_DIMENSIONS), StString()
+                                       + anImageL->getSizeX() + " x " + anImageL->getSizeY() + " " + tr(INFO_LEFT) + "\n"
+                                       + anImageR->getSizeX() + " x " + anImageR->getSizeY() + " " + tr(INFO_RIGHT)));
+        const StString aModelR = anImageR->formatImgColorModel();
+        if(aModelL == aModelR) {
+            anImgInfo->myInfo.add(StArgument(tr(INFO_COLOR_MODEL),
+                                  aModelL));
+        } else {
+            anImgInfo->myInfo.add(StArgument(tr(INFO_COLOR_MODEL),
+                                  aModelL + " " + tr(INFO_LEFT) + "\n"
+                                + aModelR + " " + tr(INFO_RIGHT)));
+        }
     } else {
-        anImgInfo->myInfo.add(StArgument("Dimensions",      StString() + anImageL->getSizeX()
-                                                               + " x " + anImageL->getSizeY()));
-        anImgInfo->myInfo.add(StArgument("Color Model",     anImageL->formatImgColorModel()));
+        anImgInfo->myInfo.add(StArgument(tr(INFO_DIMENSIONS), StString()
+                                       + anImageL->getSizeX() + " x " + anImageL->getSizeY()));
+        anImgInfo->myInfo.add(StArgument(tr(INFO_COLOR_MODEL),
+                                         aModelL));
     }
-    anImgInfo->myInfo.add(StArgument("Load time", StString(aLoadTimeMSec) + " msec"));
+    anImgInfo->myInfo.add(StArgument(tr(INFO_LOAD_TIME), StString(aLoadTimeMSec) + " " + tr(INFO_TIME_MSEC)));
     myImgInfo = anImgInfo;
 
     // clean up - close opened files and reset memory

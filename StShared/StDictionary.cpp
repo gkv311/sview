@@ -19,6 +19,11 @@ namespace {
 
 StDictEntry::StDictEntry() {}
 
+StDictEntry::StDictEntry(const StString& theKey)
+: myKey(theKey) {
+    //
+}
+
 StDictEntry::StDictEntry(const StString& theKey,
                          const StString& theValue)
 : myKey(theKey),
@@ -106,6 +111,17 @@ const StDictEntry& StDictionary::operator[](const StString& theKey) const {
         }
     }
     return THE_NULL_ENTRY;
+}
+
+StDictEntry& StDictionary::addChange(const StString& theKey) {
+    for(size_t anId = 0; anId < size(); ++anId) {
+        StDictEntry& anArg = changeValue(anId);
+        if(anArg.getKey().isEqualsIgnoreCase(theKey)) {
+            return anArg;
+        }
+    }
+    add(StDictEntry(theKey));
+    return changeLast();
 }
 
 void StDictionary::set(const StDictEntry& thePair) {

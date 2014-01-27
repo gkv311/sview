@@ -25,6 +25,8 @@ namespace StImageViewerStrings {
 void loadDefaults(StLangMap& theStrings) {
     theStrings(BUTTON_CLOSE,
                "Close");
+    theStrings(BUTTON_SAVE_METADATA,
+               "Save");
     theStrings(MENU_MEDIA,
                "Media");
     theStrings(MENU_VIEW,
@@ -193,6 +195,42 @@ void loadDefaults(StLangMap& theStrings) {
                "Snapshot not available!");
     theStrings(DIALOG_SAVE_SNAPSHOT,
                "Choose location to save snapshot");
+
+    theStrings(INFO_LEFT,
+               "(left)");
+    theStrings(INFO_RIGHT,
+               "(right)");
+    theStrings(INFO_FILE_NAME,
+               "File name");
+    theStrings(INFO_DIMENSIONS,
+               "Dimensions");
+    theStrings(INFO_LOAD_TIME,
+               "Load time");
+    theStrings(INFO_TIME_MSEC,
+               "msec");
+    theStrings(INFO_PIXEL_RATIO,
+               "Pixel ratio");
+    theStrings(INFO_COLOR_MODEL,
+               "Color model");
+
+    theStrings(METADATA_JPEG_COMMENT,
+               "JPEG Comment");
+    theStrings(METADATA_JPEG_JPSCOMMENT,
+               "JPS Comment");
+
+    theStrings(METADATA_EXIF_MAKER,
+               "Camera Maker");
+    theStrings(METADATA_EXIF_MODEL,
+               "Camera Model");
+    theStrings(METADATA_EXIF_USERCOMMENT,
+               "User Comment");
+
+    // define metadat keys
+    theStrings.addAlias("Jpeg.Comment",     METADATA_JPEG_COMMENT);
+    theStrings.addAlias("Jpeg.JpsComment",  METADATA_JPEG_JPSCOMMENT);
+    theStrings.addAlias("Exif.Maker",       METADATA_EXIF_MAKER);
+    theStrings.addAlias("Exif.Model",       METADATA_EXIF_MODEL);
+    theStrings.addAlias("Exif.UserComment", METADATA_EXIF_USERCOMMENT);
 }
 
 };

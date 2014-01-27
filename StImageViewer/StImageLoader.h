@@ -26,9 +26,9 @@
 #include <StImage/StImageFile.h>
 #include <StImage/StJpegParser.h>
 #include <StSlots/StSignal.h>
+#include <StStrings/StLangMap.h>
 #include <StThreads/StProcess.h>
 
-class StLangMap;
 class StThread;
 
 struct StImageInfo {
@@ -46,6 +46,8 @@ class StImageLoader {
         public:
 
     static const char* ST_IMAGES_MIME_STRING;
+
+        public:
 
     ST_LOCAL const StMIMEList& getMimeList() const {
         return myMimeList;
@@ -98,7 +100,7 @@ class StImageLoader {
      */
     ST_LOCAL void setCompressMemory(const bool theToCompress);
 
-        public:  //!< Signals
+        public:  //! @name Signals
 
     struct {
         /**
@@ -130,6 +132,10 @@ class StImageLoader {
      */
     ST_LOCAL void metadataFromExif(const StHandle<StExifDir>& theDir,
                                    StHandle<StImageInfo>&     theInfo);
+
+    ST_LOCAL const StString& tr(const size_t theId) const {
+        return myLangMap->getValue(theId);
+    }
 
         private:
 

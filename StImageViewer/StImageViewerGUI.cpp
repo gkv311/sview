@@ -414,6 +414,11 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
     StHandle<StImageInfo>    anExtraInfo;
     if(myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo)
     && !anExtraInfo.isNull()) {
+        for(size_t aMapIter = 0; aMapIter < anExtraInfo->myInfo.size(); ++aMapIter) {
+            StDictEntry& anEntry = anExtraInfo->myInfo.changeValue(aMapIter);
+            anEntry.changeName() = myLangMap->getValue(anEntry.getKey());
+        }
+
         StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
         aTable->setVisibility(true, true);
         aTable->fillFromMap(anExtraInfo->myInfo, StGLVec3(1.0f, 1.0f, 1.0f), aDialog->getContent()->getRectPx().width(), aDialog->getContent()->getRectPx().width() / 2);
@@ -424,6 +429,7 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
         aDialog->setText("Information is unavailable");
     }
 
+    //aDialog->addButton(tr(BUTTON_SAVE_METADATA));
     aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
