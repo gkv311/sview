@@ -13,6 +13,10 @@ const StString StDictEntry::ST_ARG_TRUE ("true");
 const StString StDictEntry::ST_ARG_OFF  ("off");
 const StString StDictEntry::ST_ARG_FALSE("false");
 
+namespace {
+    static const StDictEntry THE_NULL_ENTRY;
+}
+
 StDictEntry::StDictEntry() {}
 
 StDictEntry::StDictEntry(const StString& theKey,
@@ -94,14 +98,14 @@ void StDictionary::parseString(const StString& theString) {
     }
 }
 
-StDictEntry StDictionary::operator[](const StString& theKey) const {
+const StDictEntry& StDictionary::operator[](const StString& theKey) const {
     for(size_t anId = 0; anId < size(); ++anId) {
         const StDictEntry& anArg = getValue(anId);
         if(anArg.getKey().isEqualsIgnoreCase(theKey)) {
             return anArg;
         }
     }
-    return StDictEntry();
+    return THE_NULL_ENTRY;
 }
 
 void StDictionary::set(const StDictEntry& thePair) {

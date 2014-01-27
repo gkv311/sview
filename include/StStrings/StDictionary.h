@@ -59,21 +59,46 @@ class StDictEntry {
      */
     ST_CPPEXPORT void parseString(const StString& theString);
 
+    /**
+     * @return key
+     */
     ST_LOCAL const StString& getKey() const {
         return myKey;
     }
 
+    /**
+     * Change key.
+     */
     ST_LOCAL void setKey(const StString& theKey) {
         myKey = theKey;
     }
 
-    ST_LOCAL const StString& getValue() const {
-        return myValue;
+    /**
+     * @return key name
+     */
+    ST_LOCAL const StString& getName() const {
+        return myName;
     }
 
-    ST_LOCAL StString& changeValue() {
-        return myValue;
+    /**
+     * @return key name
+     */
+    ST_LOCAL StString& changeName() {
+        return myName;
     }
+
+    /**
+     * Change name.
+     */
+    ST_LOCAL void setName(const StString& theName) {
+        myName = theName;
+    }
+
+    /**
+     * Access value.
+     */
+    ST_LOCAL const StString& getValue() const { return myValue; }
+    ST_LOCAL       StString& changeValue()    { return myValue; }
 
     ST_LOCAL void setValue(const StString& theValue) {
         myValue = theValue.unquoted();
@@ -114,6 +139,7 @@ class StDictEntry {
 
     StString myKey;   //!< key
     StString myValue; //!< value
+    StString myName;  //!< key name (optional)
 
 };
 
@@ -145,7 +171,7 @@ class StDictionary : public StArrayList<StDictEntry> {
      * Access to the argument throw the key.
      * Returns an empty argument if key not found.
      */
-    ST_CPPEXPORT StDictEntry operator[](const StString& theKey) const;
+    ST_CPPEXPORT const StDictEntry& operator[](const StString& theKey) const;
 
     /**
      * Access to the arguments throw indexes.
