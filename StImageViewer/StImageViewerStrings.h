@@ -163,6 +163,7 @@ namespace StImageViewerStrings {
         METADATA_EXIF_MAKER       = 5200,
         METADATA_EXIF_MODEL       = 5201,
         METADATA_EXIF_USERCOMMENT = 5202,
+        METADATA_EXIF_DATETIME    = 5203,
 
     };
 

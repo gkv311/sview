@@ -184,6 +184,11 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             for(size_t anExifId = 0; anExifId < anImg1->Exif.size(); ++anExifId) {
                 metadataFromExif(anImg1->Exif[anExifId], anImgInfo);
             }
+            const StString aTime = anImg1->getDateTime();
+            if(!aTime.isEmpty()) {
+                StDictEntry& anEntry  = anImgInfo->Info.addChange("Exif.Image.DateTime");
+                anEntry.changeValue() = aTime;
+            }
         }
         if(mySrcFormat == ST_V_SRC_AUTODETECT) {
             if(aParser.getSrcFormat() != ST_V_SRC_AUTODETECT) {

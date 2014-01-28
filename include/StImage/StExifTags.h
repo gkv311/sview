@@ -51,6 +51,7 @@ namespace StExifTags {
 
     enum Image {
         Image_Orientation = 0x0112,
+        Image_DateTime    = 0x0132,
     };
 
     enum Fuji {

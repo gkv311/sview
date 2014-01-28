@@ -70,6 +70,11 @@ class StJpegParser : public StRawFile {
         ST_CPPEXPORT ~Image();
 
         /**
+         * Read image timestamp property.
+         */
+        ST_CPPEXPORT StString getDateTime() const;
+
+        /**
          * Reads the parallax information from EXIF (currently - only for Fujifilm MPO).
          * @param theParallax the parallax in per cents
          * @return true if tag found

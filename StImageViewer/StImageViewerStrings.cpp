@@ -230,23 +230,26 @@ void loadDefaults(StLangMap& theStrings) {
                "(does not match metadata)");
 
     theStrings(METADATA_JPEG_COMMENT,
-               "JPEG Comment");
+               "JPEG comment");
     theStrings(METADATA_JPEG_JPSCOMMENT,
-               "JPS Comment");
+               "JPS comment");
 
     theStrings(METADATA_EXIF_MAKER,
-               "Camera Maker");
+               "Camera maker");
     theStrings(METADATA_EXIF_MODEL,
-               "Camera Model");
+               "Camera model");
     theStrings(METADATA_EXIF_USERCOMMENT,
-               "User Comment");
+               "User comment");
+    theStrings(METADATA_EXIF_DATETIME,
+               "Image timestamp");
 
     // define metadat keys
-    theStrings.addAlias("Jpeg.Comment",     METADATA_JPEG_COMMENT);
-    theStrings.addAlias("Jpeg.JpsComment",  METADATA_JPEG_JPSCOMMENT);
-    theStrings.addAlias("Exif.Image.Make",  METADATA_EXIF_MAKER);
-    theStrings.addAlias("Exif.Image.Model", METADATA_EXIF_MODEL);
-    theStrings.addAlias("Exif.UserComment", METADATA_EXIF_USERCOMMENT);
+    theStrings.addAlias("Jpeg.Comment",        METADATA_JPEG_COMMENT);
+    theStrings.addAlias("Jpeg.JpsComment",     METADATA_JPEG_JPSCOMMENT);
+    theStrings.addAlias("Exif.Image.Make",     METADATA_EXIF_MAKER);
+    theStrings.addAlias("Exif.Image.Model",    METADATA_EXIF_MODEL);
+    theStrings.addAlias("Exif.UserComment",    METADATA_EXIF_USERCOMMENT);
+    theStrings.addAlias("Exif.Image.DateTime", METADATA_EXIF_DATETIME);
 }
 
 };

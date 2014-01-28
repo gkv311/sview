@@ -591,6 +591,15 @@ void StJpegParser::fillDictionary(StDictionary& theDict,
     }
 }
 
+StString StJpegParser::Image::getDateTime() const {
+    StString aString;
+    StExifDir::Query aQuery(StExifDir::DType_General, StExifTags::Image_DateTime);
+    if(StExifDir::findEntry(Exif, aQuery)) {
+        aQuery.Folder->format(aQuery.Entry, aString);
+    }
+    return aString;
+}
+
 bool StJpegParser::Image::getParallax(double& theParallax) const {
     StExifDir::Query aQuery(StExifDir::DType_MakerFuji, StExifTags::Fuji_Parallax);
     if(!StExifDir::findEntry(Exif, aQuery)
