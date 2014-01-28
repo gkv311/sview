@@ -22,15 +22,15 @@ class StAlienData {
     /**
      * Retrieve uint16_t.
      */
-    static uint16_t Get16u(const unsigned char* theShort,
-                           const bool           theIsBE) {
+    static uint16_t Get16u(const stUByte_t* theShort,
+                           const bool       theIsBE) {
         return theIsBE ? Get16uBE(theShort) : Get16uLE(theShort);
     }
 
     /**
      * Store uint16_t.
      */
-    static void Set16u(unsigned char* thePtr,
+    static void Set16u(stUByte_t*     thePtr,
                        const uint16_t theValue,
                        const bool     theIsBE) {
         theIsBE ? Set16uBE(thePtr, theValue) : Set16uLE(thePtr, theValue);
@@ -39,21 +39,21 @@ class StAlienData {
     /**
      * Retrieve uint16_t stored in Little-Endian order.
      */
-    static uint16_t Get16uLE(const unsigned char* theShort) {
+    static uint16_t Get16uLE(const stUByte_t* theShort) {
         return (theShort[1] << 8) | theShort[0];
     }
 
     /**
      * Retrieve uint16_t stored in Big-Endian order.
      */
-    static uint16_t Get16uBE(const unsigned char* theShort) {
+    static uint16_t Get16uBE(const stUByte_t* theShort) {
         return (theShort[0] << 8) | theShort[1];
     }
 
     /**
      * Store uint16_t in Little-Endian order.
      */
-    static void Set16uLE(unsigned char* thePtr,
+    static void Set16uLE(stUByte_t*     thePtr,
                          const uint16_t theValue) {
         thePtr[0] = (theValue & 0x00FF);
         thePtr[1] = (theValue & 0xFF00) >> 8;
@@ -62,7 +62,7 @@ class StAlienData {
     /**
      * Store uint16_t in Big-Endian order.
      */
-    static void Set16uBE(unsigned char* thePtr,
+    static void Set16uBE(stUByte_t*     thePtr,
                          const uint16_t theValue) {
         thePtr[0] = (theValue & 0xFF00) >> 8;
         thePtr[1] = (theValue & 0x00FF);
@@ -71,39 +71,39 @@ class StAlienData {
     /**
      * Retrieve int32_t.
      */
-    static int32_t Get32s(const unsigned char* theLong,
-                          const bool           theIsBE) {
+    static int32_t Get32s(const stUByte_t* theLong,
+                          const bool       theIsBE) {
         return theIsBE ? Get32sBE(theLong) : Get32sLE(theLong);
     }
 
     /**
      * Retrieve int32_t stored in Little-Endian order.
      */
-    static int32_t Get32sLE(const unsigned char* theLong) {
-        return (((char*          )theLong)[3] << 24) | (((unsigned char* )theLong)[2] << 16)
-             | (((unsigned char* )theLong)[1] << 8 ) | (((unsigned char* )theLong)[0] << 0 );
+    static int32_t Get32sLE(const stUByte_t* theLong) {
+        return (((char*      )theLong)[3] << 24) | (((stUByte_t* )theLong)[2] << 16)
+             | (((stUByte_t* )theLong)[1] << 8 ) | (((stUByte_t* )theLong)[0] << 0 );
     }
 
     /**
      * Retrieve int32_t stored in Big-Endian order.
      */
-    static int32_t Get32sBE(const unsigned char* theLong) {
-        return (((char*          )theLong)[0] << 24) | (((unsigned char* )theLong)[1] << 16)
-             | (((unsigned char* )theLong)[2] << 8 ) | (((unsigned char* )theLong)[3] << 0 );
+    static int32_t Get32sBE(const stUByte_t* theLong) {
+        return (((char*      )theLong)[0] << 24) | (((stUByte_t* )theLong)[1] << 16)
+             | (((stUByte_t* )theLong)[2] << 8 ) | (((stUByte_t* )theLong)[3] << 0 );
     }
 
     /**
      * Retrieve uint32_t.
      */
-    static uint32_t Get32u(const unsigned char* theLong,
-                           const bool           theIsBE) {
+    static uint32_t Get32u(const stUByte_t* theLong,
+                           const bool       theIsBE) {
         return theIsBE ? Get32uBE(theLong) : Get32uLE(theLong);
     }
 
     /**
      * Store uint32_t.
      */
-    static void Set32u(unsigned char* thePtr,
+    static void Set32u(stUByte_t*     thePtr,
                        const uint32_t theValue,
                        const bool     theIsBE) {
         theIsBE ? Set32uBE(thePtr, theValue) : Set32uLE(thePtr, theValue);
@@ -112,23 +112,23 @@ class StAlienData {
     /**
      * Retrieve uint32_t stored in Little-Endian order.
      */
-    static uint32_t Get32uLE(const unsigned char* theLong) {
-        return (((char*          )theLong)[3] << 24) | (((unsigned char* )theLong)[2] << 16)
-             | (((unsigned char* )theLong)[1] << 8 ) | (((unsigned char* )theLong)[0] << 0 );
+    static uint32_t Get32uLE(const stUByte_t* theLong) {
+        return (((char*      )theLong)[3] << 24) | (((stUByte_t* )theLong)[2] << 16)
+             | (((stUByte_t* )theLong)[1] << 8 ) | (((stUByte_t* )theLong)[0] << 0 );
     }
 
     /**
      * Retrieve uint32_t stored in Big-Endian order.
      */
-    static uint32_t Get32uBE(const unsigned char* theLong) {
-        return (((char*          )theLong)[0] << 24) | (((unsigned char* )theLong)[1] << 16)
-             | (((unsigned char* )theLong)[2] << 8 ) | (((unsigned char* )theLong)[3] << 0 );
+    static uint32_t Get32uBE(const stUByte_t* theLong) {
+        return (((char*      )theLong)[0] << 24) | (((stUByte_t* )theLong)[1] << 16)
+             | (((stUByte_t* )theLong)[2] << 8 ) | (((stUByte_t* )theLong)[3] << 0 );
     }
 
     /**
      * Store uint32_t in Little-Endian order.
      */
-    static void Set32uLE(unsigned char* thePtr,
+    static void Set32uLE(stUByte_t*     thePtr,
                          const uint32_t theValue) {
         thePtr[0] = (theValue & 0x000000FF);
         thePtr[1] = (theValue & 0x0000FF00) >> 8;
@@ -139,24 +139,13 @@ class StAlienData {
     /**
      * Store uint32_t in Big-Endian order.
      */
-    static void Set32uBE(unsigned char* thePtr,
+    static void Set32uBE(stUByte_t*     thePtr,
                          const uint32_t theValue) {
         thePtr[0] = (theValue & 0xFF000000) >> 24;
         thePtr[1] = (theValue & 0x00FF0000) >> 16;
         thePtr[2] = (theValue & 0x0000FF00) >> 8;
         thePtr[3] = (theValue & 0x000000FF);
     }
-
-        /*private:
-
-    unsigned char* myData; //!< data pointer
-    bool    myIsBigEndian; //!< Big-Endian data flag
-
-        public:
-
-    StAlienData(bool theIsBigEndian, unsigned char* theData = NULL)
-    : myData(theData),
-      myIsBigEndian(theIsBigEndian) {}*/
 
 };
 
