@@ -347,15 +347,17 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
                 if(stAreEqual(aData + 2, "Exif\0\0", 6)) {
                     //ST_DEBUG_LOG("Exif section...");
                     StHandle<StExifDir> aSubDir = new StExifDir();
-                    if(aSubDir->parseExif(aData + 8, anItemLen - 8)) {
-                        anImg->Exif.add(aSubDir);
+                    anImg->Exif.add(aSubDir);
+                    if(!aSubDir->parseExif(anImg->Exif, aData + 8, anItemLen - 8)) {
+                        //
                     }
                 } else if(stAreEqual(aData + 2, "MPF\0", 4)) {
                     // MP Extensions (MPO)
                     StHandle<StExifDir> aSubDir = new StExifDir();
                     aSubDir->Type = StExifDir::DType_MPO;
-                    if(aSubDir->parseExif(aData + 6, anItemLen - 6)) {
-                        anImg->Exif.add(aSubDir);
+                    anImg->Exif.add(aSubDir);
+                    if(!aSubDir->parseExif(anImg->Exif, aData + 6, anItemLen - 6)) {
+                        //
                     }
                 } else if(stAreEqual(aData + 2, "http:", 5)) {
                     //ST_DEBUG_LOG("Image cotains XMP section");

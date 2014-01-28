@@ -35,10 +35,12 @@ class StExifDir {
         DType_MPO,        //!< MP extensions
     };
 
+    typedef StArrayList< StHandle<StExifDir> > List;
+
         public:
 
-    StArrayList< StHandle<StExifDir> > SubDirs; //!< subdirectories list
-    StArrayList< StExifEntry >         Entries; //!< entries list
+    StExifDir::List           SubDirs; //!< subdirectories list
+    StArrayList<StExifEntry>  Entries; //!< entries list
 
     DirType  Type;        //!< tags from different vendors/extensions may has overlapped ids
     bool     IsFileBE;    //!< indicate that data in this EXIF directory stored in Big-Endian order
@@ -56,8 +58,9 @@ class StExifDir {
     /**
      * Read the EXIF.
      */
-    ST_CPPEXPORT bool parseExif(stUByte_t*   theExifSection,
-                                const size_t theLength);
+    ST_CPPEXPORT bool parseExif(StExifDir::List& theParentList,
+                                stUByte_t*       theExifSection,
+                                const size_t     theLength);
 
     /**
      * Find entry by tag in current directory and subdirectories.
@@ -79,10 +82,11 @@ class StExifDir {
     /**
      * Read the EXIF directory and its subdirectories.
      */
-    ST_CPPEXPORT bool readDirectory(stUByte_t*   theDirStart,
-                                    stUByte_t*   theOffsetBase,
-                                    const size_t theExifLength,
-                                    const int    theNestingLevel);
+    ST_CPPEXPORT bool readDirectory(StExifDir::List& theParentList,
+                                    stUByte_t*       theDirStart,
+                                    stUByte_t*       theOffsetBase,
+                                    const size_t     theExifLength,
+                                    const int        theNestingLevel);
 
     /**
      * Read one entry in the EXIF directory.
@@ -95,11 +99,13 @@ class StExifDir {
     /**
      * Get pointer to the entry.
      */
-    ST_CPPEXPORT stUByte_t* getEntryAddress(const uint16_t theEntryId) const;
+    ST_LOCAL stUByte_t* getEntryAddress(const uint16_t theEntryId) const {
+        return myStartPtr + 2 + size_t(theEntryId) * 12;
+    }
 
         private:
 
-    stUByte_t* myStartPtr;  //!< start pointer in the memory
+    stUByte_t* myStartPtr; //!< start pointer in the memory
 
 };
 

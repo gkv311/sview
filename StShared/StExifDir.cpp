@@ -75,14 +75,9 @@ bool StExifDir::readEntry(stUByte_t*   theEntryAddress,
     return true;
 }
 
-stUByte_t* StExifDir::getEntryAddress(const uint16_t theEntryId) const {
-    return (myStartPtr != NULL)
-         ? (myStartPtr + 2 + size_t(theEntryId) * 12)
-         : NULL;
-}
-
-bool StExifDir::parseExif(stUByte_t*   theExifSection,
-                          const size_t theLength) {
+bool StExifDir::parseExif(StExifDir::List& theParentList,
+                          stUByte_t*       theExifSection,
+                          const size_t     theLength) {
     if(theLength < 10) {
         ST_DEBUG_LOG("StExifDir, wrong length " + theLength);
         return false;
@@ -118,13 +113,14 @@ bool StExifDir::parseExif(stUByte_t*   theExifSection,
 
     // first directory starts 16 bytes in
     // all offset are relative to 8 bytes in
-    return readDirectory(theExifSection + aFirstOffset, theExifSection, theLength, 0);
+    return readDirectory(theParentList, theExifSection + aFirstOffset, theExifSection, theLength, 0);
 }
 
-bool StExifDir::readDirectory(stUByte_t*   theDirStart,
-                              stUByte_t*   theOffsetBase,
-                              const size_t theExifLength,
-                              const int    theNestingLevel) {
+bool StExifDir::readDirectory(StExifDir::List& theParentList,
+                              stUByte_t*       theDirStart,
+                              stUByte_t*       theOffsetBase,
+                              const size_t     theExifLength,
+                              const int        theNestingLevel) {
     if(theNestingLevel > 4) {
         ST_DEBUG_LOG("StExifDir, Maximum EXIF directory nesting exceeded (corrupt EXIF header)");
         return false;
@@ -175,9 +171,11 @@ bool StExifDir::readDirectory(stUByte_t*   theDirStart,
                     aSubDir->IsFileBE    = IsFileBE;
                     aSubDir->CameraMaker = CameraMaker;
                     aSubDir->CameraModel = CameraModel;
-                    if(aSubDir->readDirectory(aSubdirStart, theOffsetBase,
-                                              theExifLength, theNestingLevel + 1)) {
-                        SubDirs.add(aSubDir);
+                    SubDirs.add(aSubDir);
+                    if(!aSubDir->readDirectory(SubDirs,
+                                               aSubdirStart, theOffsetBase,
+                                               theExifLength, theNestingLevel + 1)) {
+                        //
                     }
                 }
                 break;
@@ -240,9 +238,13 @@ bool StExifDir::readDirectory(stUByte_t*   theDirStart,
                     if(aSubdirStart < theOffsetBase
                     || aSubdirStart > theOffsetBase + theExifLength) {
                         ST_DEBUG_LOG("StExifDir, illegal maker notes offset directory link");
-                    } else if(aSubDir->readDirectory(aSubdirStart, anOffsetBase,
-                                                     anOffsetLimit, theNestingLevel + 1)) {
+                    } else {
                         SubDirs.add(aSubDir);
+                        if(!aSubDir->readDirectory(SubDirs,
+                                                   aSubdirStart, anOffsetBase,
+                                                   anOffsetLimit, theNestingLevel + 1)) {
+                            //
+                        }
                     }
                 } else {
                     ST_DEBUG_LOG("StExifDir, found unsupported (" + CameraMaker + ") maker notes");
@@ -289,9 +291,11 @@ bool StExifDir::readDirectory(stUByte_t*   theDirStart,
                     aSubDir->IsFileBE    = IsFileBE;
                     aSubDir->CameraMaker = CameraMaker;
                     aSubDir->CameraModel = CameraModel;
-                    if(aSubDir->readDirectory(aSubdirStart, theOffsetBase,
-                                              theExifLength, theNestingLevel + 1)) {
-                        SubDirs.add(aSubDir);
+                    theParentList.add(aSubDir);
+                    if(aSubDir->readDirectory(theParentList,
+                                              aSubdirStart, theOffsetBase,
+                                              theExifLength, theNestingLevel)) {
+                        ST_DEBUG_LOG(" !!!! StExifDir, exta directory!"); ///
                     }
                 }
             }
