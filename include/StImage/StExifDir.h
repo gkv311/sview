@@ -26,42 +26,44 @@ class StExifDir {
     /**
      * Retrieve uint16_t value.
      */
-    inline uint16_t get16u(const unsigned char* theShort) const {
+    inline uint16_t get16u(const stUByte_t* theShort) const {
         return StAlienData::Get16u(theShort, myIsFileBE);
     }
 
     /**
      * Retrieve int32_t value.
      */
-    inline int32_t get32s(const unsigned char* theLong) const {
+    inline int32_t get32s(const stUByte_t* theLong) const {
         return StAlienData::Get32s(theLong, myIsFileBE);
     }
 
     /**
      * Retrieve uint32_t value.
      */
-    inline uint32_t get32u(const unsigned char* theLong) const {
+    inline uint32_t get32u(const stUByte_t* theLong) const {
         return StAlienData::Get32u(theLong, myIsFileBE);
     }
 
     /**
      * Read the EXIF directory and its subdirectories.
      */
-    ST_CPPEXPORT bool readDirectory(unsigned char* theDirStart, unsigned char* theOffsetBase,
-                                    const size_t theExifLength, int theNestingLevel);
+    ST_CPPEXPORT bool readDirectory(stUByte_t*   theDirStart,
+                                    stUByte_t*   theOffsetBase,
+                                    const size_t theExifLength,
+                                    const int    theNestingLevel);
 
     /**
      * Read one entry in the EXIF directory.
      */
-    ST_CPPEXPORT bool readEntry(unsigned char* theEntryAddress,
-                                unsigned char* theOffsetBase,
-                                const size_t   theExifLength,
-                                StExifEntry&   theEntry);
+    ST_CPPEXPORT bool readEntry(stUByte_t*   theEntryAddress,
+                                stUByte_t*   theOffsetBase,
+                                const size_t theExifLength,
+                                StExifEntry& theEntry);
 
     /**
      * Get pointer to the entry.
      */
-    ST_CPPEXPORT unsigned char* getEntryAddress(const size_t theEntryId) const;
+    ST_CPPEXPORT stUByte_t* getEntryAddress(const uint16_t theEntryId) const;
 
         public:
 
@@ -98,15 +100,10 @@ class StExifDir {
     }
 
     /**
-     * Clear current content of the directory.
-     */
-    ST_CPPEXPORT void reset();
-
-    /**
      * Read the EXIF.
      */
-    ST_CPPEXPORT bool parseExif(unsigned char* theExifSection,
-                                const size_t   theLength);
+    ST_CPPEXPORT bool parseExif(stUByte_t*   theExifSection,
+                                const size_t theLength);
 
     /**
      * Find entry by tag in current directory and subdirectories.
@@ -133,7 +130,7 @@ class StExifDir {
     StString       myCameraMaker; //!< just useful identification strings
     StString       myCameraModel;
     StString       myUserComment; //!< UserComment text
-    unsigned char* myStartPtr;    //!< start pointer in the memory
+    stUByte_t*     myStartPtr;    //!< start pointer in the memory
     bool           myIsFileBE;    //!< indicate that data in this EXIF directory stored in Big-Endian order
     bool           myIsMakerNote; //!< maker notes from different vendors may probably has overlapped tags ids
 

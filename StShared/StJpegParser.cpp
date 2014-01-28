@@ -344,14 +344,22 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
             case M_APP2: {
                 myOffsets[aMarker == M_EXIF ? Offset_Exif : Offset_ExifExtra] = aData - myBuffer - 2;
                 // there can be different section using the same marker
-                if(stAreEqual(aData + 2, "Exif", 4)) {
+                if(stAreEqual(aData + 2, "Exif\0\0", 6)) {
                     //ST_DEBUG_LOG("Exif section...");
                     StHandle<StExifDir> aSubDir = new StExifDir(true);
-                    if(aSubDir->parseExif(aData, anItemLen)) {
+                    if(aSubDir->parseExif(aData + 8, anItemLen - 8)) {
+                        anImg->Exif.add(aSubDir);
+                    }
+                } else if(stAreEqual(aData + 2, "MPF\0", 4)) {
+                    // MP Extensions (MPO)
+                    StHandle<StExifDir> aSubDir = new StExifDir(true);
+                    if(aSubDir->parseExif(aData + 6, anItemLen - 6)) {
                         anImg->Exif.add(aSubDir);
                     }
                 } else if(stAreEqual(aData + 2, "http:", 5)) {
                     //ST_DEBUG_LOG("Image cotains XMP section");
+                } else {
+                    //ST_DEBUG_LOG("  @@@ APP2 " + StString((char* )aData + 2));
                 }
                 // skip already read bytes
                 aData += anItemLen;

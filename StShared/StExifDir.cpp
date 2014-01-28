@@ -31,10 +31,10 @@ StExifDir::StExifDir(bool theIsFileBE, bool theIsMakerNote)
     //
 }
 
-bool StExifDir::readEntry(unsigned char* theEntryAddress,
-                          unsigned char* theOffsetBase,
-                          const size_t   theExifLength,
-                          StExifEntry&   theEntry) {
+bool StExifDir::readEntry(stUByte_t*   theEntryAddress,
+                          stUByte_t*   theOffsetBase,
+                          const size_t theExifLength,
+                          StExifEntry& theEntry) {
     if(theEntryAddress == NULL) {
         return false;
     }
@@ -75,27 +75,18 @@ bool StExifDir::readEntry(unsigned char* theEntryAddress,
     return true;
 }
 
-unsigned char* StExifDir::getEntryAddress(const size_t theEntryId) const {
-    return (myStartPtr != NULL) ? (myStartPtr + 2 + theEntryId * 12) : NULL;
+stUByte_t* StExifDir::getEntryAddress(const uint16_t theEntryId) const {
+    return (myStartPtr != NULL)
+         ? (myStartPtr + 2 + size_t(theEntryId) * 12)
+         : NULL;
 }
 
-void StExifDir::reset() {
-    /// TODO (Kirill Gavrilov#1) implement
-}
-
-bool StExifDir::parseExif(unsigned char* theExifSection,
-                          const size_t   theLength) {
-    // check the EXIF header component
-    static const unsigned char EXIF_HEADER[] = "Exif\0\0";
-    if(!stAreEqual(theExifSection + 2, EXIF_HEADER, 6)) {
-        ST_DEBUG_LOG("Incorrect Exif header");
-        return false;
-    }
-
-    if(stAreEqual(theExifSection + 8, "II", 2)) {
+bool StExifDir::parseExif(stUByte_t*   theExifSection,
+                          const size_t theLength) {
+    if(stAreEqual(theExifSection, "II", 2)) {
         //ST_DEBUG_LOG("Exif section in Little-Endian order");
         myIsFileBE = false;
-    } else if(stAreEqual(theExifSection + 8, "MM", 2)) {
+    } else if(stAreEqual(theExifSection, "MM", 2)) {
         //ST_DEBUG_LOG("Exif section in Big-Endian order");
         myIsFileBE = true;
     } else {
@@ -104,14 +95,14 @@ bool StExifDir::parseExif(unsigned char* theExifSection,
     }
 
     // check the next value for correctness.
-    if(get16u(theExifSection + 10) != 0x2A) {
+    if(get16u(theExifSection + 2) != 0x2A) {
         ST_DEBUG_LOG("Invalid Exif start (1)");
         return false;
     }
 
-    size_t aFirstOffset = size_t(get32u(theExifSection + 12));
+    size_t aFirstOffset = size_t(get32u(theExifSection + 4));
     if(aFirstOffset < 8 || aFirstOffset > 16) {
-        if(aFirstOffset < 16 || aFirstOffset > theLength - 16) {
+        if(aFirstOffset < 16 || aFirstOffset > theLength - 8) {
             ST_DEBUG_LOG("invalid offset for first Exif IFD value");
             return false;
         }
@@ -121,11 +112,13 @@ bool StExifDir::parseExif(unsigned char* theExifSection,
 
     // first directory starts 16 bytes in
     // all offset are relative to 8 bytes in
-    return readDirectory(theExifSection + 8 + aFirstOffset, theExifSection + 8, theLength - 8, 0);
+    return readDirectory(theExifSection + aFirstOffset, theExifSection, theLength, 0);
 }
 
-bool StExifDir::readDirectory(unsigned char* theDirStart, unsigned char* theOffsetBase,
-                              const size_t theExifLength, int theNestingLevel) {
+bool StExifDir::readDirectory(stUByte_t*   theDirStart,
+                              stUByte_t*   theOffsetBase,
+                              const size_t theExifLength,
+                              const int    theNestingLevel) {
     if(theNestingLevel > 4) {
         ST_DEBUG_LOG("StExifDir, Maximum EXIF directory nesting exceeded (corrupt EXIF header)");
         return false;
@@ -134,8 +127,8 @@ bool StExifDir::readDirectory(unsigned char* theDirStart, unsigned char* theOffs
     myStartPtr = theDirStart;
 
     // read number of entries
-    size_t anEntriesNb = size_t(get16u(myStartPtr));
-    unsigned char* aDirEnd = getEntryAddress(anEntriesNb);
+    const uint16_t   anEntriesNb = get16u(myStartPtr);
+    const stUByte_t* aDirEnd     = getEntryAddress(anEntriesNb);
 
     /*ST_DEBUG_LOG("StExifDir, subdirectory " + size_t(theOffsetBase)
                + "; " + size_t(myStartPtr - theOffsetBase)
@@ -149,15 +142,14 @@ bool StExifDir::readDirectory(unsigned char* theDirStart, unsigned char* theOffs
             // this also caught later on as well.
         } else {
             ST_DEBUG_LOG("StExifDir, Illegally sized Exif subdirectory (" + anEntriesNb + " entries)");
-            reset();
             return false;
         }
     }
 
     // add all entries
-    myEntries.initList(anEntriesNb); // reserve space for the list
+    myEntries.initList((size_t )anEntriesNb); // reserve space for the list
     StExifEntry anEntry;
-    for(size_t anEntryId = 0; anEntryId < anEntriesNb; ++anEntryId) {
+    for(uint16_t anEntryId = 0; anEntryId < anEntriesNb; ++anEntryId) {
         if(!readEntry(getEntryAddress(anEntryId),
                       theOffsetBase, theExifLength,
                       anEntry)) {
@@ -168,7 +160,7 @@ bool StExifDir::readDirectory(unsigned char* theDirStart, unsigned char* theOffs
         switch(anEntry.Tag) {
             case TAG_EXIF_OFFSET:
             case TAG_INTEROP_OFFSET: {
-                unsigned char* aSubdirStart = theOffsetBase + size_t(get32u(anEntry.ValuePtr));
+                stUByte_t* aSubdirStart = theOffsetBase + size_t(get32u(anEntry.ValuePtr));
                 if(aSubdirStart < theOffsetBase
                 || aSubdirStart > theOffsetBase + theExifLength) {
                     ST_DEBUG_LOG("StExifDir, Illegal EXIF or interop offset directory link");
@@ -202,9 +194,9 @@ bool StExifDir::readDirectory(unsigned char* theDirStart, unsigned char* theOffs
             case TAG_MAKER_NOTE: {
                 // maker note (vendor-specific tags)
                 /// TODO (Kirill Gavrilov#9) base offset may be wrong for some camera makers
-                unsigned char* aSubdirStart = anEntry.ValuePtr;
-                unsigned char* anOffsetBase = theOffsetBase;
-                size_t anOffsetLimit = theExifLength;
+                stUByte_t* aSubdirStart  = anEntry.ValuePtr;
+                stUByte_t* anOffsetBase  = theOffsetBase;
+                size_t     anOffsetLimit = theExifLength;
                 StHandle<StExifDir> aSubDir;
                 if(myCameraMaker.isEquals(stCString("FUJIFILM"))) {
                     // the Fujifilm maker note appears to be in little endian byte order regardless of the rest of the file
@@ -241,7 +233,7 @@ bool StExifDir::readDirectory(unsigned char* theDirStart, unsigned char* theOffs
                         mySubDirs.add(aSubDir);
                     }
                 } else {
-                    ST_DEBUG_LOG("StExifDir, found unknown (" + myCameraMaker + ") maker notes");
+                    ST_DEBUG_LOG("StExifDir, found unsupported (" + myCameraMaker + ") maker notes");
                 }
                 break;
             }
@@ -266,12 +258,11 @@ bool StExifDir::readDirectory(unsigned char* theDirStart, unsigned char* theOffs
     }
 
     // in addition to linking to subdirectories via exif tags,
-    // there's also a potential link to another directory at the end of each
-    // directory.  this has got to be the result of a committee!
+    // there's also a potential link to another directory at the end of each directory.
     if(getEntryAddress(anEntriesNb) + 4 <= theOffsetBase + theExifLength) {
         const size_t anOffset = size_t(get32u(myStartPtr + 2 + anEntriesNb * 12));
-        if(anOffset > 0) {
-            unsigned char* aSubdirStart = theOffsetBase + anOffset;
+        if(anOffset != 0) {
+            stUByte_t* aSubdirStart = theOffsetBase + anOffset;
             if(aSubdirStart > theOffsetBase + theExifLength || aSubdirStart < theOffsetBase) {
                 if(aSubdirStart > theOffsetBase
                 && aSubdirStart < theOffsetBase + theExifLength + 20) {
