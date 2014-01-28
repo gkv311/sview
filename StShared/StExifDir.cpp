@@ -288,6 +288,7 @@ bool StExifDir::readDirectory(StExifDir::List& theParentList,
                 if(aSubdirStart <= theOffsetBase + theExifLength) {
                     // continued directory
                     StHandle<StExifDir> aSubDir = new StExifDir();
+                    aSubDir->Type        = Type;
                     aSubDir->IsFileBE    = IsFileBE;
                     aSubDir->CameraMaker = CameraMaker;
                     aSubDir->CameraModel = CameraModel;
