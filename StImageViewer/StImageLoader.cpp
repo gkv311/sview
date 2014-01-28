@@ -85,21 +85,21 @@ void StImageLoader::metadataFromExif(const StHandle<StExifDir>& theDir,
         return;
     }
 
-    if(!theDir->getCameraMaker().isEmpty()) {
+    if(!theDir->CameraMaker.isEmpty()) {
         StDictEntry& anEntry  = theInfo->Info.addChange("Exif.Maker");
-        anEntry.changeValue() = theDir->getCameraMaker();
+        anEntry.changeValue() = theDir->CameraMaker;
     }
-    if(!theDir->getCameraModel().isEmpty()) {
+    if(!theDir->CameraModel.isEmpty()) {
         StDictEntry& anEntry  = theInfo->Info.addChange("Exif.Model");
-        anEntry.changeValue() = theDir->getCameraModel();
+        anEntry.changeValue() = theDir->CameraModel;
     }
-    if(!theDir->getUserComment().isEmpty()) {
+    if(!theDir->UserComment.isEmpty()) {
         StDictEntry& anEntry  = theInfo->Info.addChange("Exif.UserComment");
-        anEntry.changeValue() = theDir->getUserComment();
+        anEntry.changeValue() = theDir->UserComment;
     }
 
-    for(size_t anExifId = 0; anExifId < theDir->getSubDirs().size(); ++anExifId) {
-        metadataFromExif(theDir->getSubDirs()[anExifId], theInfo);
+    for(size_t anExifId = 0; anExifId < theDir->SubDirs.size(); ++anExifId) {
+        metadataFromExif(theDir->SubDirs[anExifId], theInfo);
     }
 }
 

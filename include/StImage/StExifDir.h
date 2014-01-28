@@ -21,28 +21,60 @@
  */
 class StExifDir {
 
-        private: //!< retrieve values functions
+        public:
 
     /**
-     * Retrieve uint16_t value.
+     * Directory type.
      */
-    inline uint16_t get16u(const stUByte_t* theShort) const {
-        return StAlienData::Get16u(theShort, myIsFileBE);
-    }
+    enum DirType {
+        DType_General,    //!< general EXIF directory
+        //DType_MakerNote,  //!< Maker Note sub-directory (unsupported vendor)
+        DType_MakerOlypm, //!< Maker Note sub-directory ("OLYMP")
+        DType_MakerCanon, //!< Maker Note sub-directory ("Canon")
+        DType_MakerFuji,  //!< Maker Note sub-directory ("FUJIFILM")
+        DType_MPO,        //!< MP extensions
+    };
+
+        public:
+
+    StArrayList< StHandle<StExifDir> > SubDirs; //!< subdirectories list
+    StArrayList< StExifEntry >         Entries; //!< entries list
+
+    DirType  Type;        //!< tags from different vendors/extensions may has overlapped ids
+    bool     IsFileBE;    //!< indicate that data in this EXIF directory stored in Big-Endian order
+    StString CameraMaker; //!< Camera maker identificator. In generic it could be editing software identificator.
+    StString CameraModel;
+    StString UserComment; //!< UserComment text
+
+        public:
 
     /**
-     * Retrieve int32_t value.
+     * Empty constructor.
      */
-    inline int32_t get32s(const stUByte_t* theLong) const {
-        return StAlienData::Get32s(theLong, myIsFileBE);
-    }
+    ST_CPPEXPORT StExifDir();
 
     /**
-     * Retrieve uint32_t value.
+     * Read the EXIF.
      */
-    inline uint32_t get32u(const stUByte_t* theLong) const {
-        return StAlienData::Get32u(theLong, myIsFileBE);
-    }
+    ST_CPPEXPORT bool parseExif(stUByte_t*   theExifSection,
+                                const size_t theLength);
+
+    /**
+     * Find entry by tag in current directory and subdirectories.
+     * @param theDirType     directory type filter
+     * @param theEntry       the entry to find (tag field should be set)
+     * @param theIsBigEndian the endianless in which entry was stored
+     * @return true if entry was found
+     */
+    ST_CPPEXPORT bool findEntry(const DirType theDirType,
+                                StExifEntry&  theEntry,
+                                bool&         theIsBigEndian) const;
+
+        private: //! @name retrieve values functions
+
+    inline uint16_t get16u(const stUByte_t* theShort) const { return StAlienData::Get16u(theShort, IsFileBE); }
+    inline int32_t  get32s(const stUByte_t* theLong)  const { return StAlienData::Get32s(theLong,  IsFileBE); }
+    inline uint32_t get32u(const stUByte_t* theLong)  const { return StAlienData::Get32u(theLong,  IsFileBE); }
 
     /**
      * Read the EXIF directory and its subdirectories.
@@ -65,74 +97,9 @@ class StExifDir {
      */
     ST_CPPEXPORT stUByte_t* getEntryAddress(const uint16_t theEntryId) const;
 
-        public:
-
-    /**
-     * Empty constructor.
-     */
-    ST_CPPEXPORT StExifDir(bool theIsFileBE    = false,
-                           bool theIsMakerNote = false);
-
-    inline bool isFileBE() const {
-        return myIsFileBE;
-    }
-
-    /**
-     * Camera maker identificator.
-     * In generic it could be editing software identificator.
-     */
-    ST_LOCAL const StString& getCameraMaker() const {
-        return myCameraMaker;
-    }
-
-    /**
-     * @return camera model
-     */
-    ST_LOCAL const StString& getCameraModel() const {
-        return myCameraModel;
-    }
-
-    /**
-     * @return user comment
-     */
-    ST_LOCAL const StString& getUserComment() const {
-        return myUserComment;
-    }
-
-    /**
-     * Read the EXIF.
-     */
-    ST_CPPEXPORT bool parseExif(stUByte_t*   theExifSection,
-                                const size_t theLength);
-
-    /**
-     * Find entry by tag in current directory and subdirectories.
-     * @param theIsMakerNote search for maker note tag or general tag
-     * @param theEntry       the entry to find (tag field should be set)
-     * @param theIsBigEndian the endianless in which entry was stored
-     * @return true if entry was found
-     */
-    ST_CPPEXPORT bool findEntry(const bool   theIsMakerNote, // probably we can use makernote string here...
-                                StExifEntry& theEntry,
-                                bool&        theIsBigEndian) const;
-
-    /**
-     * @return subdirectories list
-     */
-    ST_LOCAL const StArrayList< StHandle<StExifDir> >& getSubDirs() const {
-        return mySubDirs;
-    }
-
         private:
 
-    StArrayList< StHandle<StExifDir> > mySubDirs; //!< subdirectories list
-    StArrayList< StExifEntry > myEntries;         //!< entries list
-    StString       myCameraMaker; //!< just useful identification strings
-    StString       myCameraModel;
-    StString       myUserComment; //!< UserComment text
-    stUByte_t*     myStartPtr;    //!< start pointer in the memory
-    bool           myIsFileBE;    //!< indicate that data in this EXIF directory stored in Big-Endian order
-    bool           myIsMakerNote; //!< maker notes from different vendors may probably has overlapped tags ids
+    stUByte_t* myStartPtr;  //!< start pointer in the memory
 
 };
 

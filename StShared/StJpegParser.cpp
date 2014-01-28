@@ -346,13 +346,14 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
                 // there can be different section using the same marker
                 if(stAreEqual(aData + 2, "Exif\0\0", 6)) {
                     //ST_DEBUG_LOG("Exif section...");
-                    StHandle<StExifDir> aSubDir = new StExifDir(true);
+                    StHandle<StExifDir> aSubDir = new StExifDir();
                     if(aSubDir->parseExif(aData + 8, anItemLen - 8)) {
                         anImg->Exif.add(aSubDir);
                     }
                 } else if(stAreEqual(aData + 2, "MPF\0", 4)) {
                     // MP Extensions (MPO)
-                    StHandle<StExifDir> aSubDir = new StExifDir(true);
+                    StHandle<StExifDir> aSubDir = new StExifDir();
+                    aSubDir->Type = StExifDir::DType_MPO;
                     if(aSubDir->parseExif(aData + 6, anItemLen - 6)) {
                         anImg->Exif.add(aSubDir);
                     }
@@ -579,25 +580,19 @@ StJpegParser::Image::~Image() {
 
 bool StJpegParser::Image::getParallax(double& theParallax) const {
     StExifEntry anEntry;
+    anEntry.Tag = 0xB211;
     bool isBigEndian = false;
     for(size_t anExifId = 0; anExifId < Exif.size(); ++anExifId) {
         const StHandle<StExifDir>& aDir = Exif[anExifId];
-        if(aDir.isNull()) {
-            // should never happens
-            continue;
-        }
-        if(aDir->getCameraMaker() == StString("FUJIFILM")) {
-            anEntry.Tag = 0xB211;
-            if(aDir->findEntry(true, anEntry, isBigEndian)) {
-                if(anEntry.Format == StExifEntry::FMT_SRATIONAL) {
-                    int32_t aNumerator   = StAlienData::Get32s(anEntry.ValuePtr,     isBigEndian);
-                    int32_t aDenominator = StAlienData::Get32s(anEntry.ValuePtr + 4, isBigEndian);
-                    if(aDenominator != 0) {
-                        theParallax = double(aNumerator) / double(aDenominator);
-                        //ST_DEBUG_LOG("Parallax found(" + aNumerator + " / " + aDenominator + ")= " + theParallax);
-                        return true;
-                    }
-                }
+        if(!aDir.isNull()
+        &&  aDir->findEntry(StExifDir::DType_MakerFuji, anEntry, isBigEndian)
+        &&  anEntry.Format == StExifEntry::FMT_SRATIONAL) {
+            const int32_t aNumerator   = StAlienData::Get32s(anEntry.ValuePtr,     isBigEndian);
+            const int32_t aDenominator = StAlienData::Get32s(anEntry.ValuePtr + 4, isBigEndian);
+            if(aDenominator != 0) {
+                theParallax = double(aNumerator) / double(aDenominator);
+                //ST_DEBUG_LOG("Parallax found(" + aNumerator + " / " + aDenominator + ")= " + theParallax);
+                return true;
             }
         }
     }
@@ -611,7 +606,7 @@ StJpegParser::Orient StJpegParser::Image::getOrientation() const {
     for(size_t anExifId = 0; anExifId < Exif.size(); ++anExifId) {
         const StHandle<StExifDir>& aDir = Exif[anExifId];
         if(!aDir.isNull()
-         && aDir->findEntry(false, anEntry, isBigEndian)
+         && aDir->findEntry(StExifDir::DType_General, anEntry, isBigEndian)
          && anEntry.Format == StExifEntry::FMT_USHORT) {
             const int16_t aValue = StAlienData::Get16u(anEntry.ValuePtr, isBigEndian);
             return (StJpegParser::Orient )aValue;

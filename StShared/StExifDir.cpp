@@ -24,10 +24,10 @@ enum {
 
 const size_t StExifEntry::BYTES_PER_FORMAT[StExifEntry::NUM_FORMATS + 1] = {0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8};
 
-StExifDir::StExifDir(bool theIsFileBE, bool theIsMakerNote)
-: myStartPtr(NULL),
-  myIsFileBE(theIsFileBE),
-  myIsMakerNote(theIsMakerNote) {
+StExifDir::StExifDir()
+: Type(StExifDir::DType_General),
+  IsFileBE(true),
+  myStartPtr(NULL) {
     //
 }
 
@@ -58,7 +58,7 @@ bool StExifDir::readEntry(stUByte_t*   theEntryAddress,
         return false;
     }
 
-    size_t aBytesCount = theEntry.getBytes();
+    const size_t aBytesCount = theEntry.getBytes();
     if(aBytesCount > 4) {
         size_t anOffsetVal = size_t(get32u(theEntryAddress + 8));
         // if its bigger than 4 bytes, the dir entry contains an offset.
@@ -83,12 +83,17 @@ stUByte_t* StExifDir::getEntryAddress(const uint16_t theEntryId) const {
 
 bool StExifDir::parseExif(stUByte_t*   theExifSection,
                           const size_t theLength) {
+    if(theLength < 10) {
+        ST_DEBUG_LOG("StExifDir, wrong length " + theLength);
+        return false;
+    }
+
     if(stAreEqual(theExifSection, "II", 2)) {
         //ST_DEBUG_LOG("Exif section in Little-Endian order");
-        myIsFileBE = false;
+        IsFileBE = false;
     } else if(stAreEqual(theExifSection, "MM", 2)) {
         //ST_DEBUG_LOG("Exif section in Big-Endian order");
-        myIsFileBE = true;
+        IsFileBE = true;
     } else {
         ST_DEBUG_LOG("Invalid Exif endianness marker");
         return false;
@@ -100,14 +105,15 @@ bool StExifDir::parseExif(stUByte_t*   theExifSection,
         return false;
     }
 
-    size_t aFirstOffset = size_t(get32u(theExifSection + 4));
-    if(aFirstOffset < 8 || aFirstOffset > 16) {
-        if(aFirstOffset < 16 || aFirstOffset > theLength - 8) {
-            ST_DEBUG_LOG("invalid offset for first Exif IFD value");
-            return false;
-        }
+    const size_t aFirstOffset = size_t(get32u(theExifSection + 4));
+    if(aFirstOffset < 8
+    || aFirstOffset >= theLength - 8 - 2) {
+        ST_DEBUG_LOG("StExifDir, invalid offset " + aFirstOffset + " for first Exif IFD value");
+        return false;
+    }
+    if(aFirstOffset > 16) {
         // usually set to 8, but other values valid too
-        ST_DEBUG_LOG("Suspicious offset of first Exif IFD value");
+        ST_DEBUG_LOG("StExifDir, suspicious offset of first Exif IFD value");
     }
 
     // first directory starts 16 bytes in
@@ -147,7 +153,7 @@ bool StExifDir::readDirectory(stUByte_t*   theDirStart,
     }
 
     // add all entries
-    myEntries.initList((size_t )anEntriesNb); // reserve space for the list
+    Entries.initList((size_t )anEntriesNb); // reserve space for the list
     StExifEntry anEntry;
     for(uint16_t anEntryId = 0; anEntryId < anEntriesNb; ++anEntryId) {
         if(!readEntry(getEntryAddress(anEntryId),
@@ -155,7 +161,7 @@ bool StExifDir::readDirectory(stUByte_t*   theDirStart,
                       anEntry)) {
             continue;
         }
-        myEntries.add(anEntry);
+        Entries.add(anEntry);
 
         switch(anEntry.Tag) {
             case TAG_EXIF_OFFSET:
@@ -165,12 +171,13 @@ bool StExifDir::readDirectory(stUByte_t*   theDirStart,
                 || aSubdirStart > theOffsetBase + theExifLength) {
                     ST_DEBUG_LOG("StExifDir, Illegal EXIF or interop offset directory link");
                 } else {
-                    StHandle<StExifDir> aSubDir = new StExifDir(isFileBE());
-                    aSubDir->myCameraMaker = myCameraMaker;
-                    aSubDir->myCameraModel = myCameraModel;
+                    StHandle<StExifDir> aSubDir = new StExifDir();
+                    aSubDir->IsFileBE    = IsFileBE;
+                    aSubDir->CameraMaker = CameraMaker;
+                    aSubDir->CameraModel = CameraModel;
                     if(aSubDir->readDirectory(aSubdirStart, theOffsetBase,
                                               theExifLength, theNestingLevel + 1)) {
-                        mySubDirs.add(aSubDir);
+                        SubDirs.add(aSubDir);
                     }
                 }
                 break;
@@ -178,16 +185,16 @@ bool StExifDir::readDirectory(stUByte_t*   theDirStart,
             case TAG_MAKE: {
                 if(anEntry.Format == StExifEntry::FMT_STRING) {
                     // NULL-terminated ASCII string
-                    myCameraMaker = StString((char *)anEntry.ValuePtr);
-                    ST_DEBUG_LOG("StExifDir, CameraMaker= " + myCameraMaker);
+                    CameraMaker = StString((char *)anEntry.ValuePtr);
+                    ST_DEBUG_LOG("StExifDir, CameraMaker= " + CameraMaker);
                 }
                 break;
             }
             case TAG_MODEL: {
                 if(anEntry.Format == StExifEntry::FMT_STRING) {
                     // NULL-terminated ASCII string
-                    myCameraModel = StString((char *)anEntry.ValuePtr);
-                    ST_DEBUG_LOG("StExifDir, CameraModel= " + myCameraModel);
+                    CameraModel = StString((char *)anEntry.ValuePtr);
+                    ST_DEBUG_LOG("StExifDir, CameraModel= " + CameraModel);
                 }
                 break;
             }
@@ -198,42 +205,47 @@ bool StExifDir::readDirectory(stUByte_t*   theDirStart,
                 stUByte_t* anOffsetBase  = theOffsetBase;
                 size_t     anOffsetLimit = theExifLength;
                 StHandle<StExifDir> aSubDir;
-                if(myCameraMaker.isEquals(stCString("FUJIFILM"))) {
+                if(CameraMaker.isEquals(stCString("FUJIFILM"))) {
                     // the Fujifilm maker note appears to be in little endian byte order regardless of the rest of the file
-                    aSubDir = new StExifDir(false, true);
+                    aSubDir = new StExifDir();
+                    aSubDir->IsFileBE = false;
+                    aSubDir->Type     = DType_MakerFuji;
                     // it seems that Fujifilm maker notes start with an ID string,
                     // followed by an IFD offset relative to the MakerNote tag
                     if(stAreEqual(anEntry.ValuePtr, "FUJIFILM", 8)) {
-                        //ST_DEBUG_LOG("Fuji string ID found");
                         aSubdirStart += size_t(StAlienData::Get16uLE(anEntry.ValuePtr + 8)); // read Little-Endian, that is
                         // found experimental
                         anOffsetBase  = anEntry.ValuePtr;
                         anOffsetLimit = theOffsetBase + theExifLength - anOffsetBase;
                     }
-                } else if(myCameraMaker.isStartsWith(stCString("OLYMP"))) {
-                    aSubDir = new StExifDir(isFileBE(), true);
+                } else if(CameraMaker.isStartsWith(stCString("OLYMP"))) {
+                    aSubDir = new StExifDir();
+                    aSubDir->IsFileBE = IsFileBE;
+                    aSubDir->Type     = DType_MakerOlypm;
                     // it seems that Olympus maker notes start with an ID string
                     if(stAreEqual(anEntry.ValuePtr, "OLYMP", 5)) {
                         //ST_DEBUG_LOG("OLYMP string ID found");
                         aSubdirStart += 8; // here is really 8 bytes offset!
                     }
-                } else if(myCameraMaker.isStartsWith(stCString("Canon"))) {
+                } else if(CameraMaker.isStartsWith(stCString("Canon"))) {
                     // it seems that Canon maker notes is always little endian
-                    aSubDir = new StExifDir(false, true);
+                    aSubDir = new StExifDir();
+                    aSubDir->IsFileBE = false;
+                    aSubDir->Type     = DType_MakerCanon;
                 }
                 if(!aSubDir.isNull()) {
-                    ST_DEBUG_LOG("StExifDir, reading " + myCameraMaker + " maker notes");
-                    aSubDir->myCameraMaker = myCameraMaker;
-                    aSubDir->myCameraModel = myCameraModel;
+                    ST_DEBUG_LOG("StExifDir, reading " + CameraMaker + " maker notes");
+                    aSubDir->CameraMaker = CameraMaker;
+                    aSubDir->CameraModel = CameraModel;
                     if(aSubdirStart < theOffsetBase
                     || aSubdirStart > theOffsetBase + theExifLength) {
                         ST_DEBUG_LOG("StExifDir, illegal maker notes offset directory link");
                     } else if(aSubDir->readDirectory(aSubdirStart, anOffsetBase,
                                                      anOffsetLimit, theNestingLevel + 1)) {
-                        mySubDirs.add(aSubDir);
+                        SubDirs.add(aSubDir);
                     }
                 } else {
-                    ST_DEBUG_LOG("StExifDir, found unsupported (" + myCameraMaker + ") maker notes");
+                    ST_DEBUG_LOG("StExifDir, found unsupported (" + CameraMaker + ") maker notes");
                 }
                 break;
             }
@@ -245,12 +257,12 @@ bool StExifDir::readDirectory(stUByte_t*   theDirStart,
 
                 if(stAreEqual(anEntry.ValuePtr, "ASCII\0\0\0", 8)) {
                     const char* aStart = (const char* )anEntry.ValuePtr + 8;
-                    myUserComment = StString(aStart, anEntry.getBytes() - 8);
-                    ST_DEBUG_LOG("StExifDir, UserComment= '" + myUserComment + "'");
+                    UserComment = StString(aStart, anEntry.getBytes() - 8);
+                    ST_DEBUG_LOG("StExifDir, UserComment= '" + UserComment + "'");
                 } else if(stAreEqual(anEntry.ValuePtr, "UNICODE\0",   8)) {
                     const char* aStart = (const char* )anEntry.ValuePtr + 8;
-                    myUserComment = StString((stUtf16_t *)aStart, (anEntry.getBytes() - 8) / 2);
-                    ST_DEBUG_LOG("StExifDir, UserComment= '" + myUserComment + "'");
+                    UserComment = StString((stUtf16_t *)aStart, (anEntry.getBytes() - 8) / 2);
+                    ST_DEBUG_LOG("StExifDir, UserComment= '" + UserComment + "'");
                 }
                 break;
             }
@@ -273,12 +285,13 @@ bool StExifDir::readDirectory(stUByte_t*   theDirStart,
             } else {
                 if(aSubdirStart <= theOffsetBase + theExifLength) {
                     // continued directory
-                    StHandle<StExifDir> aSubDir = new StExifDir(isFileBE());
-                    aSubDir->myCameraMaker = myCameraMaker;
-                    aSubDir->myCameraModel = myCameraModel;
+                    StHandle<StExifDir> aSubDir = new StExifDir();
+                    aSubDir->IsFileBE    = IsFileBE;
+                    aSubDir->CameraMaker = CameraMaker;
+                    aSubDir->CameraModel = CameraModel;
                     if(aSubDir->readDirectory(aSubdirStart, theOffsetBase,
                                               theExifLength, theNestingLevel + 1)) {
-                        mySubDirs.add(aSubDir);
+                        SubDirs.add(aSubDir);
                     }
                 }
             }
@@ -289,25 +302,26 @@ bool StExifDir::readDirectory(stUByte_t*   theDirStart,
     return true;
 }
 
-bool StExifDir::findEntry(const bool   theIsMakerNote,
-                          StExifEntry& theEntry,
-                          bool&        theIsBigEndian) const {
+bool StExifDir::findEntry(const DirType theDirType,
+                          StExifEntry&  theEntry,
+                          bool&         theIsBigEndian) const {
     // search own entries
-    if(!(theIsMakerNote ^ myIsMakerNote)) {
-        for(size_t anEntryId = 0; anEntryId < myEntries.size(); ++anEntryId) {
-            const StExifEntry& anEntry = myEntries[anEntryId];
+    if(Type == theDirType) {
+        for(size_t anEntryId = 0; anEntryId < Entries.size(); ++anEntryId) {
+            const StExifEntry& anEntry = Entries[anEntryId];
             if(anEntry.Tag == theEntry.Tag) {
                 theEntry       = anEntry;
-                theIsBigEndian = myIsFileBE;
+                theIsBigEndian = IsFileBE;
                 return true;
             }
         }
     }
+
     // search in subfolders
-    for(size_t aDirId = 0; aDirId < mySubDirs.size(); ++aDirId) {
-        const StHandle<StExifDir>& aDir = mySubDirs[aDirId];
+    for(size_t aDirId = 0; aDirId < SubDirs.size(); ++aDirId) {
+        const StHandle<StExifDir>& aDir = SubDirs[aDirId];
         if(!aDir.isNull()
-         && aDir->findEntry(theIsMakerNote, theEntry, theIsBigEndian)) {
+         && aDir->findEntry(theDirType, theEntry, theIsBigEndian)) {
             return true;
         }
     }
