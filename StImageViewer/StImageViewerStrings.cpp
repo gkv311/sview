@@ -244,8 +244,8 @@ void loadDefaults(StLangMap& theStrings) {
     // define metadat keys
     theStrings.addAlias("Jpeg.Comment",     METADATA_JPEG_COMMENT);
     theStrings.addAlias("Jpeg.JpsComment",  METADATA_JPEG_JPSCOMMENT);
-    theStrings.addAlias("Exif.Maker",       METADATA_EXIF_MAKER);
-    theStrings.addAlias("Exif.Model",       METADATA_EXIF_MODEL);
+    theStrings.addAlias("Exif.Image.Make",  METADATA_EXIF_MAKER);
+    theStrings.addAlias("Exif.Image.Model", METADATA_EXIF_MODEL);
     theStrings.addAlias("Exif.UserComment", METADATA_EXIF_USERCOMMENT);
 }
 

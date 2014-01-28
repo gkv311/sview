@@ -16,6 +16,8 @@
 #include <StTemplates/StHandle.h>
 #include <StTemplates/StArrayList.h>
 
+class StDictionary;
+
 /**
  * Exif directory (Exchangeable Image File Format).
  */
@@ -85,6 +87,15 @@ class StExifDir {
                                 stUByte_t*       theExifSection,
                                 const size_t     theLength);
 
+    ST_CPPEXPORT void format(const StExifEntry& theEntry,
+                             StString&          theString) const;
+
+    /**
+     * Fill dictionary with known tags.
+     */
+    ST_CPPEXPORT void fillDictionary(StDictionary& theDict,
+                                     const bool    theToShowUnknown) const;
+
     /**
      * Find entry by tag. On search fail theQuery will be left untouched.
      * @param theList  directory list
@@ -96,6 +107,9 @@ class StExifDir {
 
         public: //! @name retrieve values functions
 
+    inline   int8_t  get8s(const stUByte_t* theByte)  const { return StAlienData::Get8s(theByte); }
+    inline  uint8_t  get8u(const stUByte_t* theByte)  const { return StAlienData::Get8u(theByte); }
+    inline  int16_t get16s(const stUByte_t* theShort) const { return StAlienData::Get16s(theShort, IsFileBE); }
     inline uint16_t get16u(const stUByte_t* theShort) const { return StAlienData::Get16u(theShort, IsFileBE); }
     inline  int32_t get32s(const stUByte_t* theLong)  const { return StAlienData::Get32s(theLong,  IsFileBE); }
     inline uint32_t get32u(const stUByte_t* theLong)  const { return StAlienData::Get32u(theLong,  IsFileBE); }

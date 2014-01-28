@@ -175,6 +175,9 @@ class StJpegParser : public StRawFile {
      */
     ST_CPPEXPORT bool parse();
 
+    ST_CPPEXPORT void fillDictionary(StDictionary& theDict,
+                                     const bool    theToShowUnknown) const;
+
         public:
 
     /**

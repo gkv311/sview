@@ -20,6 +20,28 @@ class StAlienData {
         public: //! @name static functions
 
     /**
+     * Retrieve uint8_t.
+     */
+    static uint8_t Get8u(const stUByte_t* theByte) {
+        return theByte[0];
+    }
+
+    /**
+     * Retrieve int8_t.
+     */
+    static int8_t Get8s(const stUByte_t* theByte) {
+        return ((char* )theByte)[0];
+    }
+
+    /**
+     * Retrieve int16_t.
+     */
+    static int16_t Get16s(const stUByte_t* theShort,
+                          const bool       theIsBE) {
+        return theIsBE ? Get16sBE(theShort) : Get16sLE(theShort);
+    }
+
+    /**
      * Retrieve uint16_t.
      */
     static uint16_t Get16u(const stUByte_t* theShort,
@@ -34,6 +56,20 @@ class StAlienData {
                        const uint16_t theValue,
                        const bool     theIsBE) {
         theIsBE ? Set16uBE(thePtr, theValue) : Set16uLE(thePtr, theValue);
+    }
+
+    /**
+     * Retrieve int16_t stored in Little-Endian order.
+     */
+    static int16_t Get16sLE(const stUByte_t* theShort) {
+        return (((char* )theShort)[1] << 8) | theShort[0];
+    }
+
+    /**
+     * Retrieve int16_t stored in Big-Endian order.
+     */
+    static int16_t Get16sBE(const stUByte_t* theShort) {
+        return (((char* )theShort)[0] << 8) | theShort[1];
     }
 
     /**

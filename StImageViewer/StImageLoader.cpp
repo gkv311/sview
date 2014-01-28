@@ -86,11 +86,11 @@ void StImageLoader::metadataFromExif(const StHandle<StExifDir>& theDir,
     }
 
     if(!theDir->CameraMaker.isEmpty()) {
-        StDictEntry& anEntry  = theInfo->Info.addChange("Exif.Maker");
+        StDictEntry& anEntry  = theInfo->Info.addChange("Exif.Image.Make");
         anEntry.changeValue() = theDir->CameraMaker;
     }
     if(!theDir->CameraModel.isEmpty()) {
-        StDictEntry& anEntry  = theInfo->Info.addChange("Exif.Model");
+        StDictEntry& anEntry  = theInfo->Info.addChange("Exif.Image.Model");
         anEntry.changeValue() = theDir->CameraModel;
     }
     if(!theDir->UserComment.isEmpty()) {
@@ -193,6 +193,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             }
         }
 
+        //aParser.fillDictionary(anImgInfo->Info, true);
         if(!isParsed) {
             processLoadFail(StString("Can not read the file \"") + aFilePath + '\"');
             return false;
@@ -231,7 +232,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             // convert percents to pixels
             const GLint aParallaxPx = GLint(anHParallax * anImageR->getSizeX() * 0.01);
             if(aParallaxPx != 0) {
-                StDictEntry& anEntry  = anImgInfo->Info.addChange("Exif.Mpo.Parallax");
+                StDictEntry& anEntry  = anImgInfo->Info.addChange("Exif.Fujifilm.Parallax");
                 anEntry.changeValue() = StString(anHParallax);
             }
             theParams->setSeparationNeutral(aParallaxPx);

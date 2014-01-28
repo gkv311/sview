@@ -9,6 +9,7 @@
 #include <cstdio> // forward-declared to work-around broken MinGW headers
 
 #include <StImage/StJpegParser.h>
+#include <StImage/StExifTags.h>
 
 #include <StStrings/StLogger.h>
 
@@ -580,8 +581,18 @@ StJpegParser::Image::~Image() {
     //
 }
 
+void StJpegParser::fillDictionary(StDictionary& theDict,
+                                  const bool    theToShowUnknown) const {
+    for(StHandle<StJpegParser::Image> anImg = myImages;
+        !anImg.isNull(); anImg = anImg->Next) {
+        for(size_t anExifId = 0; anExifId < anImg->Exif.size(); ++anExifId) {
+            anImg->Exif[anExifId]->fillDictionary(theDict, theToShowUnknown);
+        }
+    }
+}
+
 bool StJpegParser::Image::getParallax(double& theParallax) const {
-    StExifDir::Query aQuery(StExifDir::DType_MakerFuji, 0xB211);
+    StExifDir::Query aQuery(StExifDir::DType_MakerFuji, StExifTags::Fuji_Parallax);
     if(!StExifDir::findEntry(Exif, aQuery)
     ||  aQuery.Entry.Format != StExifEntry::FMT_SRATIONAL) {
         return false;
@@ -591,14 +602,13 @@ bool StJpegParser::Image::getParallax(double& theParallax) const {
     const int32_t aDenominator = aQuery.Folder->get32s(aQuery.Entry.ValuePtr + 4);
     if(aDenominator != 0) {
         theParallax = double(aNumerator) / double(aDenominator);
-        //ST_DEBUG_LOG("Parallax found(" + aNumerator + " / " + aDenominator + ")= " + theParallax);
         return true;
     }
     return false;
 }
 
 StJpegParser::Orient StJpegParser::Image::getOrientation() const {
-    StExifDir::Query aQuery(StExifDir::DType_General, 0x112);
+    StExifDir::Query aQuery(StExifDir::DType_General, StExifTags::Image_Orientation);
     if(!StExifDir::findEntry(Exif, aQuery)
     ||  aQuery.Entry.Format != StExifEntry::FMT_USHORT) {
         return StJpegParser::ORIENT_NORM;

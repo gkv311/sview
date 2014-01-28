@@ -7,7 +7,9 @@
  */
 
 #include <StImage/StExifDir.h>
+#include <StImage/StExifTags.h>
 
+#include <StStrings/StDictionary.h>
 #include <StStrings/StLogger.h>
 
 /**
@@ -293,10 +295,10 @@ bool StExifDir::readDirectory(StExifDir::List& theParentList,
                     aSubDir->CameraMaker = CameraMaker;
                     aSubDir->CameraModel = CameraModel;
                     theParentList.add(aSubDir);
-                    if(aSubDir->readDirectory(theParentList,
-                                              aSubdirStart, theOffsetBase,
-                                              theExifLength, theNestingLevel)) {
-                        ST_DEBUG_LOG(" !!!! StExifDir, exta directory!"); ///
+                    if(!aSubDir->readDirectory(theParentList,
+                                               aSubdirStart, theOffsetBase,
+                                               theExifLength, theNestingLevel)) {
+                        //
                     }
                 }
             }
@@ -305,6 +307,159 @@ bool StExifDir::readDirectory(StExifDir::List& theParentList,
     //ST_DEBUG_LOG("StExifDir, subdir level= " + theNestingLevel
     //           + " entries number= " + myEntries.size());
     return true;
+}
+
+void StExifDir::format(const StExifEntry& theEntry,
+                       StString&          theString) const {
+    switch(theEntry.Format) {
+        case StExifEntry::FMT_BYTE: {
+            theString = get8u(theEntry.ValuePtr);
+            return;
+        }
+        case StExifEntry::FMT_STRING: {
+            theString = StString((char *)theEntry.ValuePtr);
+            return;
+        }
+        case StExifEntry::FMT_USHORT: {
+            theString = get16u(theEntry.ValuePtr);
+            return;
+        }
+        case StExifEntry::FMT_ULONG: {
+            theString = get32u(theEntry.ValuePtr);
+            return;
+        }
+        case StExifEntry::FMT_URATIONAL: {
+            const uint32_t aNum = get32u(theEntry.ValuePtr);
+            const uint32_t aDen = get32u(theEntry.ValuePtr + 4);
+            theString = StString() + aNum + "/" + aDen;
+            if(aDen != 0
+            && aDen != 1) {
+                theString += StString(" (") + (double(aNum) / double(aDen)) + ")";
+            }
+            return;
+        }
+        case StExifEntry::FMT_SBYTE: {
+            theString = get8s(theEntry.ValuePtr);
+            return;
+        }
+        case StExifEntry::FMT_SSHORT: {
+            theString = get16s(theEntry.ValuePtr);
+            return;
+        }
+        case StExifEntry::FMT_SLONG: {
+            theString = get32s(theEntry.ValuePtr);
+            return;
+        }
+        case StExifEntry::FMT_SRATIONAL: {
+            const int32_t aNum = get32s(theEntry.ValuePtr);
+            const int32_t aDen = get32s(theEntry.ValuePtr + 4);
+            theString = StString() + aNum + "/" + aDen;
+            if(aDen != 0
+            && aDen != 1) {
+                theString += StString(" (") + (double(aNum) / double(aDen)) + ")";
+            }
+            return;
+        }
+        case StExifEntry::FMT_SINGLE: {
+            theString = StString(*(float* )theEntry.ValuePtr);
+            return;
+        }
+        case StExifEntry::FMT_DOUBLE: {
+            theString = StString(*(double* )theEntry.ValuePtr);
+            return;
+        }
+        case StExifEntry::FMT_UNDEFINED:
+        default: {
+            theString = stCString("N/A");
+            return;
+        }
+    }
+}
+
+inline void formatTag(const uint16_t theTag,
+                      char*          theString) {
+    stsprintf(theString, 5, "%04X", theTag);
+}
+
+void StExifDir::fillDictionary(StDictionary& theDict,
+                               const bool    theToShowUnknown) const {
+    using namespace StExifTags;
+    char aTagHex[8];
+    StExifTagsMap aMap;
+    switch(Type) {
+        case DType_General: {
+            for(size_t anEntryId = 0; anEntryId < Entries.size(); ++anEntryId) {
+                const StExifEntry& anEntry = Entries[anEntryId];
+                const StExifTag*   aTagDef = aMap.findImageTag(anEntry.Tag);
+                if(aTagDef != NULL) {
+                    format(anEntry, theDict.addChange(aTagDef->Name).changeValue());
+                } else if(theToShowUnknown) {
+                    formatTag(anEntry.Tag, aTagHex);
+                    format(anEntry, theDict.addChange(StString("Exif.Image.") + aTagHex).changeValue());
+                }
+            }
+            break;
+        }
+        case DType_MakerOlypm: {
+            for(size_t anEntryId = 0; anEntryId < Entries.size(); ++anEntryId) {
+                const StExifEntry& anEntry = Entries[anEntryId];
+                const StExifTag*   aTagDef = aMap.findOlympTag(anEntry.Tag);
+                if(aTagDef != NULL) {
+                    format(anEntry, theDict.addChange(aTagDef->Name).changeValue());
+                } else if(theToShowUnknown) {
+                    formatTag(anEntry.Tag, aTagHex);
+                    format(anEntry, theDict.addChange(StString("Exif.Olympus.") + aTagHex).changeValue());
+                }
+            }
+            break;
+        }
+        case DType_MakerCanon: {
+            for(size_t anEntryId = 0; anEntryId < Entries.size(); ++anEntryId) {
+                const StExifEntry& anEntry = Entries[anEntryId];
+                const StExifTag*   aTagDef = aMap.findCanonTag(anEntry.Tag);
+                if(aTagDef != NULL) {
+                    format(anEntry, theDict.addChange(aTagDef->Name).changeValue());
+                } else if(theToShowUnknown) {
+                    formatTag(anEntry.Tag, aTagHex);
+                    format(anEntry, theDict.addChange(StString("Exif.Canon.") + aTagHex).changeValue());
+                }
+            }
+            break;
+        }
+        case DType_MakerFuji: {
+            for(size_t anEntryId = 0; anEntryId < Entries.size(); ++anEntryId) {
+                const StExifEntry& anEntry = Entries[anEntryId];
+                const StExifTag*   aTagDef = aMap.findFujiTag(anEntry.Tag);
+                if(aTagDef != NULL) {
+                    format(anEntry, theDict.addChange(aTagDef->Name).changeValue());
+                } else if(theToShowUnknown) {
+                    formatTag(anEntry.Tag, aTagHex);
+                    format(anEntry, theDict.addChange(StString("Exif.Fujifilm.") + aTagHex).changeValue());
+                }
+            }
+            break;
+        }
+        case DType_MPO: {
+            for(size_t anEntryId = 0; anEntryId < Entries.size(); ++anEntryId) {
+                const StExifEntry& anEntry = Entries[anEntryId];
+                const StExifTag*   aTagDef = aMap.findMpoTag(anEntry.Tag);
+                if(aTagDef != NULL) {
+                    format(anEntry, theDict.addChange(aTagDef->Name).changeValue());
+                } else if(theToShowUnknown) {
+                    formatTag(anEntry.Tag, aTagHex);
+                    format(anEntry, theDict.addChange(StString("Exif.MP.") + aTagHex).changeValue());
+                }
+            }
+            break;
+        }
+    }
+
+    for(size_t aDirId = 0; aDirId < SubDirs.size(); ++aDirId) {
+        const StHandle<StExifDir>& aDir = SubDirs[aDirId];
+        if(!aDir.isNull()) {
+            aDir->fillDictionary(theDict, theToShowUnknown);
+        }
+    }
 }
 
 bool StExifDir::findEntry(const StExifDir::List& theList,

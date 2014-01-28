@@ -279,6 +279,7 @@
 		<Unit filename="StDevILImage.cpp" />
 		<Unit filename="StEDIDParser.cpp" />
 		<Unit filename="StExifDir.cpp" />
+		<Unit filename="StExifTags.cpp" />
 		<Unit filename="StFTFont.cpp" />
 		<Unit filename="StFTFontRegistry.cpp" />
 		<Unit filename="StFTLibrary.cpp" />
@@ -446,6 +447,7 @@
 		<Unit filename="../include/StImage/StDevILImage.h" />
 		<Unit filename="../include/StImage/StExifDir.h" />
 		<Unit filename="../include/StImage/StExifEntry.h" />
+		<Unit filename="../include/StImage/StExifTags.h" />
 		<Unit filename="../include/StImage/StFreeImage.h" />
 		<Unit filename="../include/StImage/StImage.h" />
 		<Unit filename="../include/StImage/StImageFile.h" />
