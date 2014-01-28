@@ -306,26 +306,26 @@ bool StExifDir::readDirectory(StExifDir::List& theParentList,
     return true;
 }
 
-bool StExifDir::findEntry(const DirType theDirType,
-                          StExifEntry&  theEntry,
-                          bool&         theIsBigEndian) const {
-    // search own entries
-    if(Type == theDirType) {
-        for(size_t anEntryId = 0; anEntryId < Entries.size(); ++anEntryId) {
-            const StExifEntry& anEntry = Entries[anEntryId];
-            if(anEntry.Tag == theEntry.Tag) {
-                theEntry       = anEntry;
-                theIsBigEndian = IsFileBE;
-                return true;
+bool StExifDir::findEntry(const StExifDir::List& theList,
+                          StExifDir::Query&      theQuery) {
+    // search in subfolders
+    for(size_t aDirId = 0; aDirId < theList.size(); ++aDirId) {
+        const StHandle<StExifDir>& aDir = theList[aDirId];
+        if(aDir.isNull()) {
+            continue;
+        }
+
+        if(aDir->Type == theQuery.Type) {
+            for(size_t anEntryId = 0; anEntryId < aDir->Entries.size(); ++anEntryId) {
+                const StExifEntry& anEntry = aDir->Entries[anEntryId];
+                if(anEntry.Tag == theQuery.Entry.Tag) {
+                    theQuery.Entry  = anEntry;
+                    theQuery.Folder = aDir.access();
+                    return true;
+                }
             }
         }
-    }
-
-    // search in subfolders
-    for(size_t aDirId = 0; aDirId < SubDirs.size(); ++aDirId) {
-        const StHandle<StExifDir>& aDir = SubDirs[aDirId];
-        if(!aDir.isNull()
-         && aDir->findEntry(theDirType, theEntry, theIsBigEndian)) {
+        if(findEntry(aDir->SubDirs, theQuery)) {
             return true;
         }
     }

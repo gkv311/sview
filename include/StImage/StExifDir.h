@@ -37,6 +37,29 @@ class StExifDir {
 
     typedef StArrayList< StHandle<StExifDir> > List;
 
+    /**
+     * Structure for search request.
+     */
+    struct Query {
+        DirType          Type;   //!< directory filter
+        StExifEntry      Entry;  //!< entry
+        const StExifDir* Folder; //!< (sub) folder containing the entry
+
+        Query() : Type(DType_General), Folder(NULL) {
+            Entry.ValuePtr   = NULL;
+            Entry.Tag        = 0;
+            Entry.Format     = 0;
+            Entry.Components = 0;
+        }
+
+        Query(DirType theType, uint16_t theTag) : Type(theType), Folder(NULL) {
+            Entry.ValuePtr   = NULL;
+            Entry.Tag        = theTag;
+            Entry.Format     = 0;
+            Entry.Components = 0;
+        }
+    };
+
         public:
 
     StExifDir::List           SubDirs; //!< subdirectories list
@@ -63,21 +86,21 @@ class StExifDir {
                                 const size_t     theLength);
 
     /**
-     * Find entry by tag in current directory and subdirectories.
-     * @param theDirType     directory type filter
-     * @param theEntry       the entry to find (tag field should be set)
-     * @param theIsBigEndian the endianless in which entry was stored
+     * Find entry by tag. On search fail theQuery will be left untouched.
+     * @param theList  directory list
+     * @param theQuery the search query with specified tag and directory filter, will be filled with other data on success
      * @return true if entry was found
      */
-    ST_CPPEXPORT bool findEntry(const DirType theDirType,
-                                StExifEntry&  theEntry,
-                                bool&         theIsBigEndian) const;
+    ST_CPPEXPORT static bool findEntry(const StExifDir::List& theList,
+                                       StExifDir::Query&      theQuery);
 
-        private: //! @name retrieve values functions
+        public: //! @name retrieve values functions
 
     inline uint16_t get16u(const stUByte_t* theShort) const { return StAlienData::Get16u(theShort, IsFileBE); }
-    inline int32_t  get32s(const stUByte_t* theLong)  const { return StAlienData::Get32s(theLong,  IsFileBE); }
+    inline  int32_t get32s(const stUByte_t* theLong)  const { return StAlienData::Get32s(theLong,  IsFileBE); }
     inline uint32_t get32u(const stUByte_t* theLong)  const { return StAlienData::Get32u(theLong,  IsFileBE); }
+
+        private:
 
     /**
      * Read the EXIF directory and its subdirectories.

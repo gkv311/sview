@@ -581,38 +581,29 @@ StJpegParser::Image::~Image() {
 }
 
 bool StJpegParser::Image::getParallax(double& theParallax) const {
-    StExifEntry anEntry;
-    anEntry.Tag = 0xB211;
-    bool isBigEndian = false;
-    for(size_t anExifId = 0; anExifId < Exif.size(); ++anExifId) {
-        const StHandle<StExifDir>& aDir = Exif[anExifId];
-        if(!aDir.isNull()
-        &&  aDir->findEntry(StExifDir::DType_MakerFuji, anEntry, isBigEndian)
-        &&  anEntry.Format == StExifEntry::FMT_SRATIONAL) {
-            const int32_t aNumerator   = StAlienData::Get32s(anEntry.ValuePtr,     isBigEndian);
-            const int32_t aDenominator = StAlienData::Get32s(anEntry.ValuePtr + 4, isBigEndian);
-            if(aDenominator != 0) {
-                theParallax = double(aNumerator) / double(aDenominator);
-                //ST_DEBUG_LOG("Parallax found(" + aNumerator + " / " + aDenominator + ")= " + theParallax);
-                return true;
-            }
-        }
+    StExifDir::Query aQuery(StExifDir::DType_MakerFuji, 0xB211);
+    if(!StExifDir::findEntry(Exif, aQuery)
+    ||  aQuery.Entry.Format != StExifEntry::FMT_SRATIONAL) {
+        return false;
+    }
+
+    const int32_t aNumerator   = aQuery.Folder->get32s(aQuery.Entry.ValuePtr);
+    const int32_t aDenominator = aQuery.Folder->get32s(aQuery.Entry.ValuePtr + 4);
+    if(aDenominator != 0) {
+        theParallax = double(aNumerator) / double(aDenominator);
+        //ST_DEBUG_LOG("Parallax found(" + aNumerator + " / " + aDenominator + ")= " + theParallax);
+        return true;
     }
     return false;
 }
 
 StJpegParser::Orient StJpegParser::Image::getOrientation() const {
-    StExifEntry anEntry;
-    anEntry.Tag = 0x112;
-    bool isBigEndian = false;
-    for(size_t anExifId = 0; anExifId < Exif.size(); ++anExifId) {
-        const StHandle<StExifDir>& aDir = Exif[anExifId];
-        if(!aDir.isNull()
-         && aDir->findEntry(StExifDir::DType_General, anEntry, isBigEndian)
-         && anEntry.Format == StExifEntry::FMT_USHORT) {
-            const int16_t aValue = StAlienData::Get16u(anEntry.ValuePtr, isBigEndian);
-            return (StJpegParser::Orient )aValue;
-        }
+    StExifDir::Query aQuery(StExifDir::DType_General, 0x112);
+    if(!StExifDir::findEntry(Exif, aQuery)
+    ||  aQuery.Entry.Format != StExifEntry::FMT_USHORT) {
+        return StJpegParser::ORIENT_NORM;
     }
-    return StJpegParser::ORIENT_NORM;
+
+    const int16_t aValue = aQuery.Folder->get16u(aQuery.Entry.ValuePtr);
+    return (StJpegParser::Orient )aValue;
 }
