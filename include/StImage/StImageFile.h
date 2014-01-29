@@ -42,10 +42,6 @@ class StImageFile : public StImage {
         ST_WEBP,
     } ImageClass;
 
-        private:
-
-    StString myStateDescr;
-
         public:
 
     ST_CPPEXPORT static ImageClass imgLibFromString(const StString&  thePreferred);
@@ -84,6 +80,10 @@ class StImageFile : public StImage {
 
     inline void setState(const StString& theDescr = StString()) {
         myStateDescr = theDescr;
+    }
+
+    ST_LOCAL StFormatEnum getFormat() const {
+        return mySrcFormat;
     }
 
     /**
@@ -125,6 +125,11 @@ class StImageFile : public StImage {
      * Resize image.
      */
     virtual bool resize(size_t theSizeX, size_t theSizeY) = 0;
+
+        protected:
+
+    StString     myStateDescr;
+    StFormatEnum mySrcFormat;
 
 };
 

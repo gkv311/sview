@@ -328,6 +328,20 @@ bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
         }
     }
 
+#ifdef ST_AV_NEWSTEREO
+    // currently it is unlikelly... but maybe in future?
+    AVFrameSideData* aSideData = av_frame_get_side_data(myFrame, AV_FRAME_DATA_STEREO3D);
+    if(aSideData != NULL) {
+        AVStereo3D* aStereo = (AVStereo3D* )aSideData->data;
+        mySrcFormat = stAV::stereo3dAvToSt(aStereo->type);
+        if(aStereo->flags & AV_STEREO3D_FLAG_INVERT) {
+            mySrcFormat = st::formatReversed(mySrcFormat);
+        }
+    } else {
+        mySrcFormat = ST_V_SRC_AUTODETECT;
+    }
+#endif
+
     stAV::dimYUV aDimsYUV;
     if(myCodecCtx->pix_fmt == stAV::PIX_FMT::RGB24) {
         setColorModel(StImage::ImgColor_RGB);
@@ -540,6 +554,17 @@ bool StAVImage::save(const StString& theFilePath,
 
     // wrap own data into AVFrame
     fillPointersAV(anImage, myFrame->data, myFrame->linesize);
+
+#ifdef ST_AV_NEWSTEREO
+    // currently it is unlikelly... but maybe in future?
+    AVStereo3DType anAvStereoType = stAV::stereo3dStToAv(theSrcFormat);
+    if(anAvStereoType != -1) {
+        AVStereo3D* aStereo = av_stereo3d_create_side_data(myFrame);
+        if(aStereo != NULL) {
+            aStereo->type = anAvStereoType;
+        }
+    }
+#endif
 
     StJpegParser aRawFile(theFilePath);
     if(!aRawFile.openFile(StRawFile::WRITE)) {

@@ -260,13 +260,18 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             return false;
         }
     } else {
-        if(mySrcFormat == ST_V_SRC_AUTODETECT
-        && anImgType == StImageFile::ST_TYPE_PNS) {
-            aSrcFormatCurr = ST_V_SRC_SIDE_BY_SIDE;
-        }
         if(!anImageL->load(aFilePath, anImgType)) {
             processLoadFail(formatError(aFilePath, anImageL->getState()));
             return false;
+        }
+
+        anImgInfo->SrcFormat = anImageL->getFormat();
+        if(mySrcFormat == ST_V_SRC_AUTODETECT) {
+            aSrcFormatCurr = anImageL->getFormat();
+        }
+        if(aSrcFormatCurr == ST_V_SRC_AUTODETECT
+        && anImgType == StImageFile::ST_TYPE_PNS) {
+            aSrcFormatCurr = ST_V_SRC_SIDE_BY_SIDE;
         }
     }
     const double aLoadTimeMSec = aLoadTimer.getElapsedTimeInMilliSec();

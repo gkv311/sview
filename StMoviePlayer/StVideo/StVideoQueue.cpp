@@ -691,6 +691,16 @@ void StVideoQueue::decodeLoop() {
         }
 
         // we currently allow to override source format stored in metadata
+    #ifdef ST_AV_NEWSTEREO
+        AVFrameSideData* aSideData = av_frame_get_side_data(myFrame.Frame, AV_FRAME_DATA_STEREO3D);
+        if(aSideData != NULL) {
+            AVStereo3D* aStereo = (AVStereo3D* )aSideData->data;
+            mySrcFormatInfo = stAV::stereo3dAvToSt(aStereo->type);
+            if(aStereo->flags & AV_STEREO3D_FLAG_INVERT) {
+                mySrcFormatInfo = st::formatReversed(mySrcFormatInfo);
+            }
+        }
+    #endif
         if(stAV::meta::readTag(myFrame.Frame, THE_SRC_MODE_KEY, aTagValue)) {
             for(size_t aSrcId = 0;; ++aSrcId) {
                 const StFFmpegStereoFormat& aFlag = STEREOFLAGS[aSrcId];

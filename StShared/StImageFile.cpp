@@ -15,7 +15,8 @@
 #include <StFile/StFileNode.h>
 #include <StFile/StMIME.h>
 
-StImageFile::StImageFile() {
+StImageFile::StImageFile()
+: mySrcFormat(ST_V_SRC_AUTODETECT) {
     //
 }
 
