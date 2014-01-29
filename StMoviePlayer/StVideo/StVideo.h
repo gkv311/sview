@@ -41,6 +41,11 @@ struct StMovieInfo {
     StHandle<StStereoParams> Id;
     StArgumentsMap           Info;
     StArgumentsMap           Codecs;
+    StString                 Path;      //!< file path
+    StFormatEnum             SrcFormat; //!< source format as stored in file metadata
+    bool                     IsSavable; //!< indicate that file can be saved without re-encoding
+
+    StMovieInfo() : SrcFormat(ST_V_SRC_AUTODETECT), IsSavable(false) {}
 
 };
 

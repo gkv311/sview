@@ -771,7 +771,7 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
     const int    aWidthMax  = aDialog->getContent()->getRectPx().width();
     StGLTable*   aTable     = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
     int          aRowLast   = (int )anExtraInfo->Info.size();
-    const int    aNbRowsMax = aRowLast + (int )anExtraInfo->Codecs.size() + 1;
+    const int    aNbRowsMax = aRowLast + (int )anExtraInfo->Codecs.size() + 3;
     aTable->setupTable((int )aNbRowsMax, 2);
     aTable->setVisibility(true, true);
     aTable->fillFromMap(anExtraInfo->Info, aWhite,
@@ -788,9 +788,34 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
     aSrcFormatText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
                                    StGLTextFormatter::ST_ALIGN_Y_TOP);
     aSrcFormatText->setText(StString("\n") + tr(BTN_SRC_FORMAT) + " " + trSrcFormat(anActiveSrcFormat));
-    aSrcFormatText->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
+    aSrcFormatText->setTextColor(aWhite);
     aSrcFormatText->setVisibility(true, true);
     aSrcFormatText->stglInitAutoHeightWidth(aTextMaxWidth);
+
+    // warn about wrong/missing stereoscopic format information
+    StString aSrcInfo;
+    StGLVec3 anExtraColor = aWhite;
+    if(anExtraInfo->SrcFormat == ST_V_SRC_AUTODETECT
+    && anActiveSrcFormat != ST_V_SRC_MONO
+    && anActiveSrcFormat != ST_V_SRC_SEPARATE_FRAMES) {
+        aSrcInfo     = tr(INFO_NO_SRCFORMAT);
+        anExtraColor = StGLVec3(1.0f, 1.0f, 0.8f);
+    } else if(anExtraInfo->SrcFormat != ST_V_SRC_AUTODETECT
+           && anExtraInfo->SrcFormat != anActiveSrcFormat
+           && anActiveSrcFormat != ST_V_SRC_MONO) {
+        aSrcInfo     = tr(INFO_WRONG_SRCFORMAT);
+        anExtraColor = StGLVec3(1.0f, 0.0f, 0.0f);
+    }
+    if(!aSrcInfo.isEmpty()) {
+        StGLTableItem& aTabItem = aTable->changeElement(aRowLast++, 0); aTabItem.setColSpan(2);
+        StGLTextArea*  aText    = new StGLTextArea(&aTabItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
+        aText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+                              StGLTextFormatter::ST_ALIGN_Y_TOP);
+        aText->setText(aSrcInfo);
+        aText->setTextColor(anExtraColor);
+        aText->setVisibility(true, true);
+        aText->stglInitAutoHeightWidth(aTextMaxWidth);
+    }
 
     // append information about active decoders
     StGLTableItem& aCodecItem = aTable->changeElement(aRowLast++, 0);

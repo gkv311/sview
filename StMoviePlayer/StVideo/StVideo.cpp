@@ -279,6 +279,9 @@ bool StVideo::addFile(const StString& theFileToLoad,
 
     StString aTitleString, aFolder;
     StFileNode::getFolderAndFile(theFileToLoad, aFolder, aTitleString);
+    if(myFileInfoTmp->Path.isEmpty()) {
+        myFileInfoTmp->Path = theFileToLoad;
+    }
     StDictEntry& aFileNamePair = myFileInfoTmp->Info.addChange(tr(INFO_FILE_NAME));
     if(!aFileNamePair.getValue().isEmpty()) {
         aFileNamePair.changeValue() += "\n";
@@ -1042,6 +1045,9 @@ StHandle<StMovieInfo> StVideo::getFileInfo(const StHandle<StStereoParams>& thePa
     if(anInfo.isNull() || anInfo->Id != theParams) {
         return NULL;
     }
+
+    // continuously read source format since it can be stored in frame
+    anInfo->SrcFormat = myVideoMaster->getSrcFormatInfo();
 
     anInfo->Codecs.clear();
     anInfo->Codecs.add(StArgument("vcodec1",   myVideoMaster->getCodecInfo()));

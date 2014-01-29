@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -100,6 +100,16 @@ class StVideoQueue : public StAVPacketQueue {
         return stAV::PIX_FMT::getString(myCodecCtx->pix_fmt);
     }
 
+    /**
+     * @return sterescopic information stored in file
+     */
+    ST_LOCAL StFormatEnum getSrcFormatInfo() const {
+        return mySrcFormatInfo;
+    }
+
+    /**
+     * @return source format detection rule
+     */
     ST_LOCAL StFormatEnum getSrcFormat() const {
         return mySrcFormat;
     }
