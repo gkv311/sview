@@ -181,6 +181,9 @@ namespace StMoviePlayerStrings {
         DIALOG_OPEN_RIGHT      = 2002,
         DIALOG_FILE_INFO       = 2003,
         DIALOG_FILE_NOINFO     = 2004,
+        DIALOG_DELETE_FILE_TITLE    = 2005,
+        DIALOG_DELETE_FILE_QUESTION = 2006,
+        DIALOG_FILE_DECODERS   = 2007,
 
         DIALOG_SAVE_SNAPSHOT   = 2010,
         DIALOG_NOTHING_TO_SAVE = 2011,
@@ -191,9 +194,13 @@ namespace StMoviePlayerStrings {
         ABOUT_VERSION          = 3001,
         ABOUT_DESCRIPTION      = 3002,
         UPDATES_NOTIFY         = 3003,
+        ABOUT_SYSTEM           = 3004,
 
-        BUTTON_CLOSE = 4000,
-        BUTTON_RESET = 4005,
+        BUTTON_CLOSE           = 4000,
+        BUTTON_CANCEL          = 4001,
+        BUTTON_RESET           = 4005,
+        BUTTON_SAVE_METADATA   = 4006,
+        BUTTON_DELETE          = 4007,
 
         // metadata keys
         INFO_LEFT              = 5000,

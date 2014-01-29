@@ -560,12 +560,12 @@ void StMoviePlayer::doDeleteFileBegin(const size_t ) {
         return;
     }
 
-    const StString aText = StString("Do you really want to completely remove this file?\n")
-                         + myFileToDelete->getPath() + "";
+    const StString aText = myLangMap->getValue(StMoviePlayerStrings::DIALOG_DELETE_FILE_QUESTION)
+                         + "\n" + myFileToDelete->getPath();
 
-    StGLMessageBox* aDialog = new StGLMessageBox(myGUI.access(), "Confirmation", aText, 512, 256);
-    aDialog->addButton("Delete", true,  96)->signals.onBtnClick += stSlot(this, &StMoviePlayer::doDeleteFileEnd);
-    aDialog->addButton("Cancel", false, 96);
+    StGLMessageBox* aDialog = new StGLMessageBox(myGUI.access(), myLangMap->getValue(StMoviePlayerStrings::DIALOG_DELETE_FILE_TITLE), aText, 512, 256);
+    aDialog->addButton(myLangMap->getValue(StMoviePlayerStrings::BUTTON_DELETE), true,  96)->signals.onBtnClick += stSlot(this, &StMoviePlayer::doDeleteFileEnd);
+    aDialog->addButton(myLangMap->getValue(StMoviePlayerStrings::BUTTON_CANCEL), false, 96);
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }

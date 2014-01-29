@@ -139,6 +139,7 @@ namespace StImageViewerStrings {
         ABOUT_VERSION          = 3001,
         ABOUT_DESCRIPTION      = 3002,
         UPDATES_NOTIFY         = 3003,
+        ABOUT_SYSTEM           = 3004,
 
         BUTTON_CLOSE           = 4000,
         BUTTON_CANCEL          = 4001,

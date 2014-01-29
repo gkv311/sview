@@ -25,8 +25,14 @@ namespace StMoviePlayerStrings {
 void loadDefaults(StLangMap& theStrings) {
     theStrings(BUTTON_CLOSE,
                "Close");
+    theStrings(BUTTON_CANCEL,
+               "Cancel");
     theStrings(BUTTON_RESET,
                "Reset");
+    theStrings(BUTTON_SAVE_METADATA,
+               "Save");
+    theStrings(BUTTON_DELETE,
+               "Delete");
     theStrings(MENU_MEDIA,
                "Media");
     theStrings(MENU_VIEW,
@@ -200,6 +206,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Official site: www.sview.ru\n"
                "\n"
                "This program distributed under GPL3.0");
+    theStrings(ABOUT_SYSTEM,
+               "System Info");
     theStrings(MENU_HELP_ABOUT,
                "About...");
     theStrings(MENU_HELP_USERTIPS,
@@ -271,6 +279,12 @@ void loadDefaults(StLangMap& theStrings) {
                "File Info");
     theStrings(DIALOG_FILE_NOINFO,
                "Information is unavailable");
+    theStrings(DIALOG_DELETE_FILE_TITLE,
+               "File deletion");
+    theStrings(DIALOG_DELETE_FILE_QUESTION,
+               "Do you really want to completely remove this file?");
+    theStrings(DIALOG_FILE_DECODERS,
+               "Active decoders:");
     theStrings(DIALOG_NOTHING_TO_SAVE,
                "Nothing to save!");
     theStrings(DIALOG_NO_SNAPSHOT,

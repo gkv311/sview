@@ -392,7 +392,7 @@ void StImageViewerGUI::doUserTips(const size_t ) {
 }
 
 void StImageViewerGUI::doAboutSystem(const size_t ) {
-    const StString aTitle = "System Info";
+    const StString aTitle = tr(ABOUT_SYSTEM);
     StGLMessageBox* aDialog = new StGLMessageBox(this, aTitle, "", scale(512), scale(256));
 
     StArgumentsMap anInfo;

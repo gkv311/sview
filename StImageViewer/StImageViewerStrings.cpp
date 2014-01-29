@@ -139,6 +139,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Official site: www.sview.ru\n"
                "\n"
                "This program distributed under GPL3.0");
+    theStrings(ABOUT_SYSTEM,
+               "System Info");
     theStrings(MENU_HELP_ABOUT,
                "About...");
     theStrings(MENU_HELP_USERTIPS,

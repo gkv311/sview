@@ -701,7 +701,7 @@ void StMoviePlayerGUI::doUserTips(const size_t ) {
 }
 
 void StMoviePlayerGUI::doAboutSystem(const size_t ) {
-    const StString aTitle = "System Info";
+    const StString aTitle = tr(ABOUT_SYSTEM);
     StGLMessageBox* aDialog = new StGLMessageBox(this, aTitle, "", scale(512), scale(256));
 
     StArgumentsMap anInfo;
@@ -785,7 +785,7 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
     StGLTextArea* aCodecsText = new StGLTextArea(&aCodecItem, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
     aCodecsText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_LEFT,
                                 StGLTextFormatter::ST_ALIGN_Y_TOP);
-    aCodecsText->setText("\nActive decoders:\n");
+    aCodecsText->setText(StString('\n') + tr(DIALOG_FILE_DECODERS) + '\n');
     aCodecsText->setTextColor(aWhite);
     aCodecsText->setVisibility(true, true);
     aCodecsText->stglInitAutoHeightWidth(aTextMaxWidth);
