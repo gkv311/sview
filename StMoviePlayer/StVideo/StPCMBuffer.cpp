@@ -26,7 +26,7 @@
  */
 #define ST_MAX_AUDIO_FRAME_SIZE 192000
 
-StChannelMap::StChannelMap(const StChannelMap::Channels theChannels,
+StChannelMap::StChannelMap(const StChannelMap::Channels   theChannels,
                            const StChannelMap::OrderRules theRules)
 : count(0),
   channels(theChannels) {
@@ -35,11 +35,11 @@ StChannelMap::StChannelMap(const StChannelMap::Channels theChannels,
     }
     switch(theChannels) {
         case StChannelMap::CH10:
-            FL = FR = FC = LFE = RL = RR = 0;
+            FL = FR = FC = LFE = RL = RR = SL = SR = 0;
             count = 1;
             return;
         case StChannelMap::CH20:
-            FL = FC = LFE = RL = RR = 0; FR = 1;
+            FL = FC = LFE = RL = RR = SL = SR = 0; FR = 1;
             count = 2;
             return;
         case StChannelMap::CH40:
@@ -48,7 +48,7 @@ StChannelMap::StChannelMap(const StChannelMap::Channels theChannels,
             FR = 1;
             RL = 2;
             RR = 3;
-            FC = LFE = 0;
+            FC = LFE = SL = SR = 0;
             return;
         case StChannelMap::CH50:
             count = 5;
@@ -57,9 +57,11 @@ StChannelMap::StChannelMap(const StChannelMap::Channels theChannels,
             FC  = 2;
             RL  = 3;
             RR  = 4;
+            LFE = SL = SR = 0;
             return;
         case StChannelMap::CH51:
             count = 6;
+            SL = SR = 0;
             switch(theRules) {
                 case StChannelMap::PCM: {
                     FL  = 0;
@@ -87,6 +89,17 @@ StChannelMap::StChannelMap(const StChannelMap::Channels theChannels,
                     return;
                 }
             }
+        case StChannelMap::CH71:
+            count = 8;
+            FL  = 0;
+            FR  = 1;
+            FC  = 2;
+            LFE = 3;
+            RL  = 4;
+            RR  = 5;
+            SL  = 6;
+            SR  = 7;
+            return;
     }
 }
 
@@ -377,6 +390,20 @@ bool StPCMBuffer::addConvert(const StPCMBuffer& theBuffer) {
                 sampleConv(aBuffersSrc[3][sampleSrcId], aBuffersOut[3][sampleOutId]);
                 sampleConv(aBuffersSrc[4][sampleSrcId], aBuffersOut[4][sampleOutId]);
                 sampleConv(aBuffersSrc[5][sampleSrcId], aBuffersOut[5][sampleOutId]);
+            }
+            myPlaneSize += anAddedPlaneSize;
+            return true;
+        }
+        case StChannelMap::CH71: {
+            for(size_t sampleSrcId(0), sampleOutId(0); sampleSrcId < aSamplesSrcCount; sampleSrcId += aSmplSrcInc, sampleOutId += aSmplOutInc) {
+                sampleConv(aBuffersSrc[0][sampleSrcId], aBuffersOut[0][sampleOutId]);
+                sampleConv(aBuffersSrc[1][sampleSrcId], aBuffersOut[1][sampleOutId]);
+                sampleConv(aBuffersSrc[2][sampleSrcId], aBuffersOut[2][sampleOutId]);
+                sampleConv(aBuffersSrc[3][sampleSrcId], aBuffersOut[3][sampleOutId]);
+                sampleConv(aBuffersSrc[4][sampleSrcId], aBuffersOut[4][sampleOutId]);
+                sampleConv(aBuffersSrc[5][sampleSrcId], aBuffersOut[5][sampleOutId]);
+                sampleConv(aBuffersSrc[6][sampleSrcId], aBuffersOut[6][sampleOutId]);
+                sampleConv(aBuffersSrc[7][sampleSrcId], aBuffersOut[7][sampleOutId]);
             }
             myPlaneSize += anAddedPlaneSize;
             return true;

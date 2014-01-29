@@ -25,15 +25,21 @@ bool stalCheckErrors(const StString& ST_DEBUG_VAR(theProcedure)) {
     }
 }
 
-static const StGLVec3 POSITION_CENTER       ( 0.0f, 0.0f,  0.0f);
 static const StGLVec3 POSITION_LEFT         (-1.0f, 0.0f,  0.0f);
 static const StGLVec3 POSITION_RIGHT        ( 1.0f, 0.0f,  0.0f);
+
+static const StGLVec3 POSITION_CENTER       ( 0.0f, 0.0f,  0.0f);
 static const StGLVec3 POSITION_FRONT_LEFT   (-1.0f, 0.0f, -1.0f);
 static const StGLVec3 POSITION_FRONT_CENTER ( 0.0f, 0.0f, -1.0f);
 static const StGLVec3 POSITION_FRONT_RIGHT  ( 1.0f, 0.0f, -1.0f);
 static const StGLVec3 POSITION_LFE          ( 0.0f, 0.0f,  0.0f);
 static const StGLVec3 POSITION_REAR_LEFT    (-1.0f, 0.0f,  1.0f);
 static const StGLVec3 POSITION_REAR_RIGHT   ( 1.0f, 0.0f,  1.0f);
+
+static const StGLVec3 POSITION_REAR_LEFT71  (-1.0f, 0.0f,  1.0f);
+static const StGLVec3 POSITION_REAR_RIGHT71 ( 1.0f, 0.0f,  1.0f);
+static const StGLVec3 POSITION_SIDE_LEFT71  (-1.0f, 0.0f,  0.0f);
+static const StGLVec3 POSITION_SIDE_RIGHT71 ( 1.0f, 0.0f,  0.0f);
 
 /**
  * Check if dynamically linked version of FFmpeg libraries
@@ -93,6 +99,18 @@ void StAudioQueue::stalConfigureSources5_1() {
     alSourcefv(myAlSources[4], AL_POSITION, POSITION_REAR_LEFT);
     alSourcefv(myAlSources[5], AL_POSITION, POSITION_REAR_RIGHT);
     stalCheckErrors("alSource*5.1");
+}
+
+void StAudioQueue::stalConfigureSources7_1() {
+    alSourcefv(myAlSources[0], AL_POSITION, POSITION_FRONT_LEFT);
+    alSourcefv(myAlSources[1], AL_POSITION, POSITION_FRONT_RIGHT);
+    alSourcefv(myAlSources[2], AL_POSITION, POSITION_FRONT_CENTER);
+    alSourcefv(myAlSources[3], AL_POSITION, POSITION_LFE);
+    alSourcefv(myAlSources[4], AL_POSITION, POSITION_REAR_LEFT71);
+    alSourcefv(myAlSources[5], AL_POSITION, POSITION_REAR_RIGHT71);
+    alSourcefv(myAlSources[6], AL_POSITION, POSITION_SIDE_LEFT71);
+    alSourcefv(myAlSources[7], AL_POSITION, POSITION_SIDE_RIGHT71);
+    stalCheckErrors("alSource*7.1");
 }
 
 bool StAudioQueue::stalInit() {
@@ -458,6 +476,52 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
                 stalConfigureSources5_1();
             }
             ST_DEBUG_LOG("OpenAL: multichannel extension (AL_FORMAT_51CHN16) not available");
+        }
+    } else if(myCodecCtx->channels == 8) {
+        if(myAlCtx.hasExtMultiChannel) {
+            if(myBufferSrc.getFormat() == PCM8_UNSIGNED) {
+                myAlFormat = alGetEnumValue("AL_FORMAT_71CHN8");
+                myBufferOut.setFormat(PCM8_UNSIGNED);
+            } else if(myBufferSrc.getFormat() == PCM32_SIGNED ||
+                      myBufferSrc.getFormat() == PCM32FLOAT ||
+                      myBufferSrc.getFormat() == PCM64FLOAT) {
+                // use float32 format to reduce quality degradation
+                myAlFormat = alGetEnumValue("AL_FORMAT_71CHN32");
+                myBufferOut.setFormat(PCM32FLOAT);
+            } else {
+                // default - int16_t
+                myAlFormat = alGetEnumValue("AL_FORMAT_71CHN16");
+                myBufferOut.setFormat(PCM16_SIGNED);
+            }
+
+            myBufferSrc.setupChannels(StChannelMap::CH40, StChannelMap::PCM, isPlanar ? myCodecCtx->channels : 1);
+            myBufferOut.setupChannels(StChannelMap::CH40, StChannelMap::PCM, 1);
+            stalConfigureSources1();
+        } else {
+            if(myBufferSrc.getFormat() == PCM8_UNSIGNED) {
+                myAlFormat = AL_FORMAT_MONO8;
+                myBufferOut.setFormat(PCM8_UNSIGNED);
+            } else if(myBufferSrc.getFormat() == PCM64FLOAT && myAlCtx.hasExtFloat64) {
+                // use float64 extension
+                myAlFormat = alGetEnumValue("AL_FORMAT_MONO_DOUBLE_EXT");
+                myBufferOut.setFormat(PCM64FLOAT);
+            } else if((myBufferSrc.getFormat() == PCM32_SIGNED ||
+                       myBufferSrc.getFormat() == PCM32FLOAT ||
+                       myBufferSrc.getFormat() == PCM64FLOAT)
+                   && myAlCtx.hasExtFloat32) {
+                // use float32 extension to reduce quality degradation
+                myAlFormat = alGetEnumValue("AL_FORMAT_MONO_FLOAT32");
+                myBufferOut.setFormat(PCM32FLOAT);
+            } else {
+                // default - int16_t
+                myAlFormat = AL_FORMAT_MONO16;
+                myBufferOut.setFormat(PCM16_SIGNED);
+            }
+
+            myBufferOut.setupChannels(StChannelMap::CH71, StChannelMap::PCM, 8);
+            myBufferSrc.setupChannels(StChannelMap::CH71, StChannelMap::PCM, isPlanar ? myCodecCtx->channels : 1);
+            stalConfigureSources7_1();
+            ST_DEBUG_LOG("OpenAL: multichannel extension (AL_FORMAT_71CHN16) not available");
         }
     }
     fillCodecInfo(myCodec);

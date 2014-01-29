@@ -98,7 +98,7 @@ class StChannelMap {
         CH50, // 3 Front + 2 Rear
         CH51, // 3 Front + 2 Rear + LFE
         //CH61,
-        //CH71
+        CH71
     } Channels;
 
     typedef enum tagOrderRules {
@@ -120,6 +120,8 @@ class StChannelMap {
     size_t LFE; //!< Low Frequency
     size_t RL;  //!< Rear Left
     size_t RR;  //!< Rear Right
+    size_t SL;  //!< Side Left
+    size_t SR;  //!< Side Right
 
         public:
 
@@ -132,7 +134,9 @@ class StChannelMap {
             && FC  == theOther.FC
             && LFE == theOther.LFE
             && RL  == theOther.RL
-            && RR  == theOther.RR;
+            && RR  == theOther.RR
+            && SL  == theOther.SL
+            && SR  == theOther.SR;
     }
 
     ST_LOCAL bool operator!=(const StChannelMap& theOther) const {

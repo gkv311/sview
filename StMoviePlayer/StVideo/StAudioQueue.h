@@ -128,6 +128,7 @@ class StAudioQueue : public StAVPacketQueue {
     ST_LOCAL void stalConfigureSources4_0();
     ST_LOCAL void stalConfigureSources5_0();
     ST_LOCAL void stalConfigureSources5_1();
+    ST_LOCAL void stalConfigureSources7_1();
 
     ST_LOCAL bool stalQueue(const double thePts);
 
