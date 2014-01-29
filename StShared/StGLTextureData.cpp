@@ -380,6 +380,7 @@ void StGLTextureData::updateData(const StImage&                  theDataL,
             }
             break;
         }
+        case ST_V_SRC_PAGE_FLIP:
         case ST_V_SRC_SEPARATE_FRAMES: {
             myDataR.setColorModel(theDataR.getColorModel());
             myDataR.setPixelRatio(theDataR.getPixelRatio());
@@ -404,7 +405,6 @@ void StGLTextureData::updateData(const StImage&                  theDataL,
         case ST_V_SRC_ANAGLYPH_G_RB:
         case ST_V_SRC_ANAGLYPH_YELLOW_BLUE:
         case ST_V_SRC_VERTICAL_INTERLACE: // not supported
-        case ST_V_SRC_PAGE_FLIP:          // not supported
         case ST_V_SRC_MONO:
         default: {
             GLubyte* aDataDispl = myDataPtr;

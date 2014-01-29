@@ -765,7 +765,7 @@ void StVideoQueue::decodeLoop() {
                 if(isOddNumber(myFramesCounter)) {
                     myCachedFrame.fill(myDataAdp);
                 } else {
-                    pushFrame(myCachedFrame, myDataAdp, aPacket->getSource(), ST_V_SRC_SEPARATE_FRAMES, myFramePts);
+                    pushFrame(myCachedFrame, myDataAdp, aPacket->getSource(), ST_V_SRC_PAGE_FLIP, myFramePts);
                 }
                 ++myFramesCounter;
             } else {
