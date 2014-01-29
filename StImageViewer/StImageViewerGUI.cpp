@@ -463,6 +463,7 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
     aTable->setVisibility(true, true);
     aTable->fillFromMap(anExtraInfo->Info, StGLVec3(1.0f, 1.0f, 1.0f), aWidthMax, aWidthMax / 2);
 
+    // add stereoscopic format info
     const StFormatEnum anActiveSrcFormat = aParams->isSwapLR()
                                          ? st::formatReversed(aParams->getSrcFormat())
                                          : aParams->getSrcFormat();
@@ -476,6 +477,7 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
     aSrcFormatText->setVisibility(true, true);
     aSrcFormatText->stglInitAutoHeightWidth(aTextMaxWidth);
 
+    // warn about wrong/missing stereoscopic format information
     StString aSrcInfo;
     StGLVec3 anExtraColor(1.0f, 1.0f, 1.0f);
     if(anExtraInfo->SrcFormat == ST_V_SRC_AUTODETECT
@@ -741,9 +743,10 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
             if(aSrcFormat == ST_V_SRC_AUTODETECT
             && !myImage->params.stereoFile.isNull()) {
                 aSrcFormat = myImage->params.stereoFile->getSrcFormat();
-                aSrcFormat = myImage->params.swapLR->getValue()
-                           ? st::formatReversed(aSrcFormat)
-                           : aSrcFormat;
+            }
+            if(!myImage->params.stereoFile.isNull()
+             && myImage->params.swapLR->getValue()) {
+                aSrcFormat = st::formatReversed(aSrcFormat);
             }
             myDescr->setText(tr(BTN_SRC_FORMAT) + "\n" + trSrcFormat(aSrcFormat));
         } else {

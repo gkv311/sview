@@ -185,7 +185,7 @@ void loadDefaults(StLangMap& theStrings) {
                "Switch\n"
                "fullscreen/windowed");
     theStrings(BTN_SRC_FORMAT,
-               "Source format:\n");
+               "Source format:");
     theStrings(UPDATES_NOTIFY,
                "A new version of sView is available on the official site www.sview.ru.\n"
                "Please update your program.");

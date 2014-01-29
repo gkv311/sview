@@ -255,7 +255,7 @@ void loadDefaults(StLangMap& theStrings) {
     theStrings(FILE_VIDEO_OPEN,
                "Open another movie");
     theStrings(BTN_SRC_FORMAT,
-               "Source format:\n");
+               "Source format:");
     theStrings(VIDEO_PLAYPAUSE,
                "Play/Pause");
     theStrings(VIDEO_LIST_PREV,

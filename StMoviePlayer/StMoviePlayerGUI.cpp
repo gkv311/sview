@@ -779,6 +779,20 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
 
     const int aTextMaxWidth = aWidthMax - (aTable->getMarginLeft() + aTable->getMarginRight());
 
+    // add stereoscopic format info
+    const StFormatEnum anActiveSrcFormat = aParams->isSwapLR()
+                                         ? st::formatReversed(aParams->getSrcFormat())
+                                         : aParams->getSrcFormat();
+    StGLTableItem& aSrcFormatItem = aTable->changeElement(aRowLast++, 0); aSrcFormatItem.setColSpan(2);
+    StGLTextArea*  aSrcFormatText = new StGLTextArea(&aSrcFormatItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
+    aSrcFormatText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+                                   StGLTextFormatter::ST_ALIGN_Y_TOP);
+    aSrcFormatText->setText(StString("\n") + tr(BTN_SRC_FORMAT) + " " + trSrcFormat(anActiveSrcFormat));
+    aSrcFormatText->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
+    aSrcFormatText->setVisibility(true, true);
+    aSrcFormatText->stglInitAutoHeightWidth(aTextMaxWidth);
+
+    // append information about active decoders
     StGLTableItem& aCodecItem = aTable->changeElement(aRowLast++, 0);
     aCodecItem.setColSpan(2);
 
@@ -789,7 +803,6 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
     aCodecsText->setTextColor(aWhite);
     aCodecsText->setVisibility(true, true);
     aCodecsText->stglInitAutoHeightWidth(aTextMaxWidth);
-
     for(size_t aKeyIter = 0; aKeyIter < anExtraInfo->Codecs.size(); ++aKeyIter) {
         const StArgument& aPair = anExtraInfo->Codecs.getFromIndex(aKeyIter);
         if(aPair.getValue().isEmpty()) {
@@ -1069,6 +1082,23 @@ bool StMoviePlayerGUI::toHideCursor() {
     return child != NULL && !child->isVisible();
 }
 
+size_t StMoviePlayerGUI::trSrcFormatId(const StFormatEnum theSrcFormat) {
+    switch(theSrcFormat) {
+        case ST_V_SRC_MONO:                 return MENU_SRC_FORMAT_MONO;
+        case ST_V_SRC_SIDE_BY_SIDE:         return MENU_SRC_FORMAT_CROSS_EYED;
+        case ST_V_SRC_PARALLEL_PAIR:        return MENU_SRC_FORMAT_PARALLEL;
+        case ST_V_SRC_OVER_UNDER_RL:        return MENU_SRC_FORMAT_OVERUNDER_RL;
+        case ST_V_SRC_OVER_UNDER_LR:        return MENU_SRC_FORMAT_OVERUNDER_LR;
+        case ST_V_SRC_ROW_INTERLACE:        return MENU_SRC_FORMAT_INTERLACED;
+        case ST_V_SRC_ANAGLYPH_G_RB:        return MENU_SRC_FORMAT_ANA_RB;
+        case ST_V_SRC_ANAGLYPH_RED_CYAN:    return MENU_SRC_FORMAT_ANA_RC;
+        case ST_V_SRC_ANAGLYPH_YELLOW_BLUE: return MENU_SRC_FORMAT_ANA_YB;
+        case ST_V_SRC_SEPARATE_FRAMES:      return MENU_SRC_FORMAT_SEPARATE;
+        default:
+        case ST_V_SRC_AUTODETECT:           return MENU_SRC_FORMAT_AUTO;
+    }
+}
+
 void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
                                      bool              theIsMouseMoved) {
     const bool toShowPlayList = myPlugin->params.ToShowPlayList->getValue();
@@ -1122,29 +1152,16 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
             size_t aLngId = myImage->params.swapLR->getValue() ? SWAP_LR_ON : SWAP_LR_OFF;
             myDescr->setText(tr(aLngId));
         } else if(myBtnSrcFrmt->isPointIn(theCursor)) {
-            size_t aLngId = MENU_SRC_FORMAT_AUTO;
             StFormatEnum aSrcFormat = (StFormatEnum )myPlugin->params.srcFormat->getValue();
             if(aSrcFormat == ST_V_SRC_AUTODETECT
             && !myImage->params.stereoFile.isNull()) {
                 aSrcFormat = myImage->params.stereoFile->getSrcFormat();
             }
-            switch(aSrcFormat) {
-                case ST_V_SRC_MONO:                 aLngId = MENU_SRC_FORMAT_MONO; break;
-                case ST_V_SRC_SIDE_BY_SIDE:         aLngId = MENU_SRC_FORMAT_CROSS_EYED; break;
-                case ST_V_SRC_PARALLEL_PAIR:        aLngId = MENU_SRC_FORMAT_PARALLEL;   break;
-                case ST_V_SRC_OVER_UNDER_RL:        aLngId = MENU_SRC_FORMAT_OVERUNDER_RL; break;
-                case ST_V_SRC_OVER_UNDER_LR:        aLngId = MENU_SRC_FORMAT_OVERUNDER_LR; break;
-                case ST_V_SRC_ROW_INTERLACE:        aLngId = MENU_SRC_FORMAT_INTERLACED;   break;
-                case ST_V_SRC_ANAGLYPH_G_RB:        aLngId = MENU_SRC_FORMAT_ANA_RB;   break;
-                case ST_V_SRC_ANAGLYPH_RED_CYAN:    aLngId = MENU_SRC_FORMAT_ANA_RC;   break;
-                case ST_V_SRC_ANAGLYPH_YELLOW_BLUE: aLngId = MENU_SRC_FORMAT_ANA_YB;   break;
-                case ST_V_SRC_PAGE_FLIP:            aLngId = MENU_SRC_FORMAT_PAGEFLIP; break;
-                case ST_V_SRC_TILED_4X:             aLngId = MENU_SRC_FORMAT_TILED_4X; break;
-                case ST_V_SRC_SEPARATE_FRAMES:      aLngId = MENU_SRC_FORMAT_SEPARATE; break;
-                default:
-                case ST_V_SRC_AUTODETECT:           aLngId = MENU_SRC_FORMAT_AUTO; break;
+            if(!myImage->params.stereoFile.isNull()
+             && myImage->params.swapLR->getValue()) {
+                aSrcFormat = st::formatReversed(aSrcFormat);
             }
-            myDescr->setText(tr(BTN_SRC_FORMAT) + tr(aLngId));
+            myDescr->setText(tr(BTN_SRC_FORMAT) + "\n" + trSrcFormat(aSrcFormat));
         } else if(myBtnPlay->isPointIn(theCursor)) {
             myDescr->setText(tr(VIDEO_PLAYPAUSE));
         } else if(myBtnPrev->isPointIn(theCursor)) {

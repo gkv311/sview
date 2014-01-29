@@ -59,6 +59,12 @@ class StMoviePlayerGUI : public StGLRootWidget {
         return myLangMap->getValue(theId);
     }
 
+    ST_LOCAL const StString& trSrcFormat(const StFormatEnum theSrcFormat) const {
+        return tr(trSrcFormatId(theSrcFormat));
+    }
+
+    ST_LOCAL static size_t trSrcFormatId(const StFormatEnum theSrcFormat);
+
     /**
      * @return absolute path to the texture
      */
