@@ -358,6 +358,16 @@ class StStringUnicode : public StConstStringUnicode<Type> {
     void rightAdjust();
 
     /**
+     * Convert upper case latin characters to lower case.
+     */
+    void toLowerCase();
+
+    /**
+     * Convert upper case latin characters to lower case.
+     */
+    StStringUnicode lowerCased() const;
+
+    /**
      * Split the string using delimiter char.
      * @param theDelimeter delimiter char
      * @param theLimitNb   maximum split sections (when reached - trailing part will be in one string without parsing)

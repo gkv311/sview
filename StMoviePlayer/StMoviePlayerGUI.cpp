@@ -761,7 +761,8 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
     // translate known metadata tag names
     for(size_t aMapIter = 0; aMapIter < anExtraInfo->Info.size(); ++aMapIter) {
         StDictEntry& anEntry = anExtraInfo->Info.changeValue(aMapIter);
-        anEntry.changeName() = myLangMap->getValue(anEntry.getKey());
+        StString     aKey    = anEntry.getKey().lowerCased();
+        anEntry.changeName() = myLangMap->getValue(aKey);
     }
 
     const StGLVec3 aWhite(1.0f, 1.0f, 1.0f);

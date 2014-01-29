@@ -300,6 +300,93 @@ void loadDefaults(StLangMap& theStrings) {
                "(does not match metadata)");
     theStrings(INFO_DURATION,
                "Duration");
+
+    theStrings(METADATA_TITLE,
+               "Title");
+    theStrings(METADATA_COMPOSER,
+               "Composer");
+    theStrings(METADATA_ARTIST,
+               "Artist");
+    theStrings(METADATA_ALBUM_ARTIST,
+               "Album artist");
+    theStrings(METADATA_ALBUM,
+               "Album");
+    theStrings(METADATA_DISC,
+               "Disc");
+    theStrings(METADATA_DISC_TOTAL,
+               "Nb. of discs");
+    theStrings(METADATA_GENRE,
+               "Genre");
+    theStrings(METADATA_COMMENT,
+               "Comment");
+    theStrings(METADATA_NOTES,
+               "Notes");
+    theStrings(METADATA_DESCRIPTION,
+               "Description");
+    theStrings(METADATA_PUBLISHER,
+               "Publisher");
+    theStrings(METADATA_COPYRIGHT,
+               "Copyright");
+    theStrings(METADATA_ENCODER,
+               "Encoder");
+    theStrings(METADATA_ENGINEER,
+               "Engineer");
+    theStrings(METADATA_SOURCE,
+               "Source");
+    theStrings(METADATA_CREATION_TIME,
+               "Creation time");
+    theStrings(METADATA_DATE,
+               "Date");
+    theStrings(METADATA_YEAR,
+               "Year");
+    theStrings(METADATA_LANGUAGE,
+               "Language");
+    theStrings(METADATA_TRACK,
+               "Track");
+    theStrings(METADATA_TRACK_TOTAL,
+               "Nb. of tracks");
+    theStrings(METADATA_TRACK_GAIN,
+               "Track gain");
+    theStrings(METADATA_TRACK_PEAK,
+               "Track peak");
+    theStrings(METADATA_ALBUM_GAIN,
+               "Album gain");
+    theStrings(METADATA_ALBUM_PEAK,
+               "Album peak");
+
+    // define metadata keys, should be lower cased
+    theStrings.addAlias("title",         METADATA_TITLE);
+    theStrings.addAlias("composer",      METADATA_COMPOSER);
+    theStrings.addAlias("artist",        METADATA_ARTIST);
+    theStrings.addAlias("album_artist",  METADATA_ALBUM_ARTIST);
+    theStrings.addAlias("album artist",  METADATA_ALBUM_ARTIST);
+    theStrings.addAlias("album",         METADATA_ALBUM);
+    theStrings.addAlias("disc",          METADATA_DISC);
+    theStrings.addAlias("disctotal",     METADATA_DISC_TOTAL);
+    theStrings.addAlias("totaldiscs",    METADATA_DISC_TOTAL);
+    theStrings.addAlias("genre",         METADATA_GENRE);
+    theStrings.addAlias("comment",       METADATA_COMMENT);
+    theStrings.addAlias("notes",         METADATA_NOTES);
+    theStrings.addAlias("description",   METADATA_DESCRIPTION);
+    theStrings.addAlias("publisher",     METADATA_PUBLISHER);
+    theStrings.addAlias("copyright",     METADATA_COPYRIGHT);
+    theStrings.addAlias("encoder",       METADATA_ENCODER);
+    theStrings.addAlias("encoded_by",    METADATA_ENCODER);
+    theStrings.addAlias("engineer",      METADATA_ENGINEER);
+    theStrings.addAlias("source",        METADATA_SOURCE);
+    theStrings.addAlias("creation_time", METADATA_CREATION_TIME);
+    theStrings.addAlias("date",          METADATA_DATE);
+    theStrings.addAlias("year",          METADATA_YEAR);
+    theStrings.addAlias("language",      METADATA_LANGUAGE);
+    theStrings.addAlias("track",         METADATA_TRACK);
+    theStrings.addAlias("tracktotal",    METADATA_TRACK_TOTAL);
+    theStrings.addAlias("totaltracks",   METADATA_TRACK_TOTAL);
+    theStrings.addAlias("replaygain_track_gain", METADATA_TRACK_GAIN);
+    theStrings.addAlias("replaygain_track_peak", METADATA_TRACK_PEAK);
+    theStrings.addAlias("replaygain_album_gain", METADATA_ALBUM_GAIN);
+    theStrings.addAlias("replaygain_album_peak", METADATA_ALBUM_PEAK);
+    //theStrings.addAlias("album dynamic range",   METADATA_ALBUM_DYNAMIC_RANGE);
+    //theStrings.addAlias("dynamic range",         METADATA_DYNAMIC_RANGE);
 }
 
 };

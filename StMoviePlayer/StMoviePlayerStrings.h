@@ -208,6 +208,34 @@ namespace StMoviePlayerStrings {
         INFO_WRONG_SRCFORMAT   = 5009,
         INFO_DURATION          = 5010,
 
+        // metadata keys
+        METADATA_TITLE         = 5300,
+        METADATA_COMPOSER      = 5301,
+        METADATA_ARTIST        = 5302,
+        METADATA_ALBUM_ARTIST  = 5303,
+        METADATA_ALBUM         = 5304,
+        METADATA_DISC          = 5305,
+        METADATA_DISC_TOTAL    = 5306,
+        METADATA_GENRE         = 5307,
+        METADATA_COMMENT       = 5308,
+        METADATA_NOTES         = 5309,
+        METADATA_DESCRIPTION   = 5310,
+        METADATA_PUBLISHER     = 5311,
+        METADATA_COPYRIGHT     = 5312,
+        METADATA_ENCODER       = 5313,
+        METADATA_ENGINEER      = 5314,
+        METADATA_SOURCE        = 5315,
+        METADATA_CREATION_TIME = 5316,
+        METADATA_DATE          = 5317,
+        METADATA_YEAR          = 5318,
+        METADATA_LANGUAGE      = 5319,
+        METADATA_TRACK         = 5320,
+        METADATA_TRACK_TOTAL   = 5321,
+        METADATA_TRACK_GAIN    = 5322,
+        METADATA_TRACK_PEAK    = 5323,
+        METADATA_ALBUM_GAIN    = 5324,
+        METADATA_ALBUM_PEAK    = 5325,
+
     };
 
     /**
