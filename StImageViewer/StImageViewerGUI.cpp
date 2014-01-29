@@ -434,80 +434,78 @@ class StInfoDialog : public StGLMessageBox {
 void StImageViewerGUI::doAboutImage(const size_t ) {
     StHandle<StImageInfo>& anExtraInfo = myPlugin->myFileInfo;
     if(!anExtraInfo.isNull()) {
+        return; // already opened
+    }
+
+    StHandle<StFileNode>     aFileNode;
+    StHandle<StStereoParams> aParams;
+    if(!myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo)
+    ||  anExtraInfo.isNull()) {
+        StHandle<StMsgQueue> aQueue = myPlugin->getMessagesQueue();
+        aQueue->pushInfo(tr(DIALOG_FILE_NOINFO));
         return;
     }
 
     const StString aTitle  = tr(DIALOG_FILE_INFO);
     StInfoDialog*  aDialog = new StInfoDialog(myPlugin, this, aTitle, scale(512), scale(300));
 
-    StHandle<StFileNode>     aFileNode;
-    StHandle<StStereoParams> aParams;
-    if(myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo)
-    && !anExtraInfo.isNull()) {
-        // translate known metadata tag names
-        for(size_t aMapIter = 0; aMapIter < anExtraInfo->Info.size(); ++aMapIter) {
-            StDictEntry& anEntry = anExtraInfo->Info.changeValue(aMapIter);
-            anEntry.changeName() = myLangMap->getValue(anEntry.getKey());
-        }
-        const int aWidthMax  = aDialog->getContent()->getRectPx().width();
-        int       aRowLast   = (int )anExtraInfo->Info.size();
-        const int aNbRowsMax = aRowLast + 2;
+    // translate known metadata tag names
+    for(size_t aMapIter = 0; aMapIter < anExtraInfo->Info.size(); ++aMapIter) {
+        StDictEntry& anEntry = anExtraInfo->Info.changeValue(aMapIter);
+        anEntry.changeName() = myLangMap->getValue(anEntry.getKey());
+    }
+    const int aWidthMax  = aDialog->getContent()->getRectPx().width();
+    int       aRowLast   = (int )anExtraInfo->Info.size();
+    const int aNbRowsMax = aRowLast + 2;
 
-        StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
-        aTable->setupTable(aNbRowsMax, 2);
-        aTable->setVisibility(true, true);
-        aTable->fillFromMap(anExtraInfo->Info, StGLVec3(1.0f, 1.0f, 1.0f), aWidthMax, aWidthMax / 2);
+    StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
+    aTable->setupTable(aNbRowsMax, 2);
+    aTable->setVisibility(true, true);
+    aTable->fillFromMap(anExtraInfo->Info, StGLVec3(1.0f, 1.0f, 1.0f), aWidthMax, aWidthMax / 2);
 
-        const StFormatEnum anActiveSrcFormat = aParams->isSwapLR()
-                                             ? st::formatReversed(aParams->getSrcFormat())
-                                             : aParams->getSrcFormat();
-        const int aTextMaxWidth = aWidthMax - (aTable->getMarginLeft() + aTable->getMarginRight());
-        StGLTableItem& aSrcFormatItem = aTable->changeElement(aRowLast++, 0); aSrcFormatItem.setColSpan(2);
-        StGLTextArea*  aSrcFormatText = new StGLTextArea(&aSrcFormatItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
-        aSrcFormatText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
-                                       StGLTextFormatter::ST_ALIGN_Y_TOP);
-        aSrcFormatText->setText(StString("\n") + tr(BTN_SRC_FORMAT) + " " + trSrcFormat(anActiveSrcFormat));
-        aSrcFormatText->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
-        aSrcFormatText->setVisibility(true, true);
-        aSrcFormatText->stglInitAutoHeightWidth(aTextMaxWidth);
+    const StFormatEnum anActiveSrcFormat = aParams->isSwapLR()
+                                         ? st::formatReversed(aParams->getSrcFormat())
+                                         : aParams->getSrcFormat();
+    const int aTextMaxWidth = aWidthMax - (aTable->getMarginLeft() + aTable->getMarginRight());
+    StGLTableItem& aSrcFormatItem = aTable->changeElement(aRowLast++, 0); aSrcFormatItem.setColSpan(2);
+    StGLTextArea*  aSrcFormatText = new StGLTextArea(&aSrcFormatItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
+    aSrcFormatText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+                                   StGLTextFormatter::ST_ALIGN_Y_TOP);
+    aSrcFormatText->setText(StString("\n") + tr(BTN_SRC_FORMAT) + " " + trSrcFormat(anActiveSrcFormat));
+    aSrcFormatText->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
+    aSrcFormatText->setVisibility(true, true);
+    aSrcFormatText->stglInitAutoHeightWidth(aTextMaxWidth);
 
-        StString aSrcInfo;
-        StGLVec3 anExtraColor(1.0f, 1.0f, 1.0f);
-        if(anExtraInfo->SrcFormat == ST_V_SRC_AUTODETECT
-        && anActiveSrcFormat != ST_V_SRC_MONO
-        && anActiveSrcFormat != ST_V_SRC_SEPARATE_FRAMES) {
-            aSrcInfo     = tr(INFO_NO_SRCFORMAT);
-            anExtraColor = StGLVec3(1.0f, 1.0f, 0.8f);
-        } else if(anExtraInfo->SrcFormat != ST_V_SRC_AUTODETECT
-               && anExtraInfo->SrcFormat != anActiveSrcFormat
-               && anActiveSrcFormat != ST_V_SRC_MONO) {
-            aSrcInfo     = tr(INFO_WRONG_SRCFORMAT);
-            anExtraColor = StGLVec3(1.0f, 0.0f, 0.0f);
-        }
-        if(!aSrcInfo.isEmpty()) {
-            StGLTableItem& aTabItem = aTable->changeElement(aRowLast++, 0); aTabItem.setColSpan(2);
-            StGLTextArea*  aText    = new StGLTextArea(&aTabItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
-            aText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
-                                  StGLTextFormatter::ST_ALIGN_Y_TOP);
-            aText->setText(aSrcInfo);
-            aText->setTextColor(anExtraColor);
-            aText->setVisibility(true, true);
-            aText->stglInitAutoHeightWidth(aTextMaxWidth);
-        }
+    StString aSrcInfo;
+    StGLVec3 anExtraColor(1.0f, 1.0f, 1.0f);
+    if(anExtraInfo->SrcFormat == ST_V_SRC_AUTODETECT
+    && anActiveSrcFormat != ST_V_SRC_MONO
+    && anActiveSrcFormat != ST_V_SRC_SEPARATE_FRAMES) {
+        aSrcInfo     = tr(INFO_NO_SRCFORMAT);
+        anExtraColor = StGLVec3(1.0f, 1.0f, 0.8f);
+    } else if(anExtraInfo->SrcFormat != ST_V_SRC_AUTODETECT
+           && anExtraInfo->SrcFormat != anActiveSrcFormat
+           && anActiveSrcFormat != ST_V_SRC_MONO) {
+        aSrcInfo     = tr(INFO_WRONG_SRCFORMAT);
+        anExtraColor = StGLVec3(1.0f, 0.0f, 0.0f);
+    }
+    if(!aSrcInfo.isEmpty()) {
+        StGLTableItem& aTabItem = aTable->changeElement(aRowLast++, 0); aTabItem.setColSpan(2);
+        StGLTextArea*  aText    = new StGLTextArea(&aTabItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
+        aText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+                              StGLTextFormatter::ST_ALIGN_Y_TOP);
+        aText->setText(aSrcInfo);
+        aText->setTextColor(anExtraColor);
+        aText->setVisibility(true, true);
+        aText->stglInitAutoHeightWidth(aTextMaxWidth);
+    }
+    aTable->updateLayout();
 
-        aTable->updateLayout();
-        if(aTable->getRectPx().height() <= aDialog->getContent()->getRectPx().height()) {
-            aTable->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
-        }
-
-        if(anExtraInfo->IsSavable
-        && !aSrcInfo.isEmpty()) {
-            StGLButton* aSaveBtn = aDialog->addButton(tr(BUTTON_SAVE_METADATA));
-            aSaveBtn->setUserData(1);
-            aSaveBtn->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doSaveImageInfo);
-        }
-    } else {
-        aDialog->setText(tr(DIALOG_FILE_NOINFO));
+    if(anExtraInfo->IsSavable
+    && !aSrcInfo.isEmpty()) {
+        StGLButton* aSaveBtn = aDialog->addButton(tr(BUTTON_SAVE_METADATA));
+        aSaveBtn->setUserData(1);
+        aSaveBtn->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doSaveImageInfo);
     }
 
     aDialog->addButton(tr(BUTTON_CLOSE), true);

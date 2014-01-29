@@ -16,6 +16,10 @@
 
 #include <StCore/StEvent.h>
 
+namespace {
+    static const int OFFSET_PIXELS = 32;
+};
+
 StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
                                const StString& theTitle,
                                const StString& theText,
@@ -26,7 +30,13 @@ StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
   myTitle(NULL),
   myBtnPanel(NULL),
   myDefaultBtn(NULL),
-  myButtonsNb(0) {
+  myButtonsNb(0),
+  myMarginLeft(0),
+  myMarginRight(0),
+  myMarginTop(0),
+  myMarginBottom(0),
+  myMinSizeY(0),
+  myToAdjustY(true) {
     create(theTitle, theText, theWidth, theHeight);
 }
 
@@ -40,7 +50,13 @@ StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
   myTitle(NULL),
   myBtnPanel(NULL),
   myDefaultBtn(NULL),
-  myButtonsNb(0) {
+  myButtonsNb(0),
+  myMarginLeft(0),
+  myMarginRight(0),
+  myMarginTop(0),
+  myMarginBottom(0),
+  myMinSizeY(0),
+  myToAdjustY(true) {
     create(theTitle, theText, myRoot->scale(384), myRoot->scale(200));
 }
 
@@ -50,14 +66,17 @@ void StGLMessageBox::create(const StString& theTitle,
                             const int       theHeight) {
     StGLWidget::signals.onMouseUnclick.connect(this, &StGLMessageBox::doMouseUnclick);
 
-    const int OFFSET_PIXELS = myRoot->scale(32);
-    int anOffsetX = theWidth  > 2 * OFFSET_PIXELS ? OFFSET_PIXELS : 0;
-    int anOffsetY = theHeight > 2 * OFFSET_PIXELS ? OFFSET_PIXELS : 0;
+    myMarginLeft   = myRoot->scale(OFFSET_PIXELS);
+    myMarginRight  = myRoot->scale(OFFSET_PIXELS);
+    myMarginTop    = myRoot->scale(OFFSET_PIXELS);
+    myMarginBottom = myRoot->scale(24 * 3);
+    myMinSizeY     = myRoot->scale(200); ///getRectPx().bottom() myParent->getRectPx().height()
+
     int aTitleHeight = 0;
     if(!theTitle.isEmpty()) {
-        myTitle = new StGLTextArea(this, anOffsetX, anOffsetY,
+        myTitle = new StGLTextArea(this, myMarginLeft, myMarginTop,
                                    StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
-                                   theWidth - 2 * anOffsetX, theHeight - myRoot->scale(24 * 3) - anOffsetY);
+                                   theWidth - myMarginLeft - myMarginRight, theHeight - myMarginTop - myMarginBottom);
         myTitle->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
                                 StGLTextFormatter::ST_ALIGN_Y_TOP);
         myTitle->setupStyle(StFTFont::Style_Bold);
@@ -71,9 +90,10 @@ void StGLMessageBox::create(const StString& theTitle,
     }
 
     const int aTitleOffset = aTitleHeight > 0 ? (aTitleHeight + myRoot->scale(24)) : 0;
-    myContent = new StGLScrollArea(this, anOffsetX, anOffsetY + aTitleOffset,
+    myMarginTop += aTitleOffset;
+    myContent = new StGLScrollArea(this, myMarginLeft, myMarginTop,
                                    StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
-                                   theWidth - 2 * anOffsetX, theHeight - myRoot->scale(24 * 3) - anOffsetY - aTitleOffset);
+                                   theWidth - myMarginLeft - myMarginRight, theHeight - myMarginTop - myMarginBottom);
     setText(theText);
 
     myIsTopWidget = true;
@@ -228,6 +248,18 @@ bool StGLMessageBox::stglInit() {
 }
 
 void StGLMessageBox::stglResize() {
+    if(myContent != NULL) {
+        const StGLWidget* aContent = myContent->getChildren()->getStart();
+        if(aContent != NULL
+        && myToAdjustY) {
+            // adjust message box to fit content
+            const int aSizeYToFit = aContent->getRectPx().height() + myMarginTop + myMarginBottom;
+            const int aNewSizeY   = stMax(myMinSizeY, stMin(aSizeYToFit, myParent->getRectPx().height() - myRoot->scale(120)));
+            changeRectPx().bottom() = aNewSizeY;
+            myContent->changeRectPx().bottom() = myContent->getRectPx().top() + aNewSizeY - myMarginTop - myMarginBottom;
+        }
+    }
+
     StGLWidget::stglResize();
     GLfloat toZScreen = -getCamera()->getZScreen();
 

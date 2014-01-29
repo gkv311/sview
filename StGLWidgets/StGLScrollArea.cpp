@@ -44,6 +44,16 @@ bool StGLScrollArea::stglInit() {
 }
 
 void StGLScrollArea::stglResize() {
+    StGLWidget* aContent = myChildren.getStart();
+    if(!isScrollable()
+    && aContent != NULL
+    && aContent->getRectPx().top() < 0
+    && aContent->getCorner().v == ST_VCORNER_TOP) {
+        const int aDelta = -aContent->getRectPx().top();
+        aContent->changeRectPx().top()    += aDelta;
+        aContent->changeRectPx().bottom() += aDelta;
+    }
+
     StGLWidget::stglResize();
 }
 

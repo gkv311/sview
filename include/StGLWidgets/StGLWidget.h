@@ -113,13 +113,17 @@ class StGLWidget {
     /**
      * @return position relative to parent widget
      */
-    ST_CPPEXPORT StGLCorner getCorner() const;
+    ST_LOCAL const StGLCorner& getCorner() const {
+        return myCorner;
+    }
 
     /**
      * Setup widget layout.
      * @param theCorner position relative to parent widget
      */
-    ST_CPPEXPORT void setCorner(const StGLCorner theCorner);
+    ST_LOCAL void setCorner(const StGLCorner& theCorner) {
+        myCorner = theCorner;
+    }
 
         public:
 

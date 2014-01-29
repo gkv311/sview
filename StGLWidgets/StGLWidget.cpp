@@ -67,14 +67,6 @@ void StGLWidget::destroyChildren() {
     }
 }
 
-StGLCorner StGLWidget::getCorner() const {
-    return myCorner;
-}
-
-void StGLWidget::setCorner(const StGLCorner theCorner) {
-    myCorner = theCorner;
-}
-
 bool StGLWidget::isChild(StGLWidget* theWidget,
                          const bool  theIsRecursive) {
     for(StGLWidget* aChild = myChildren.getStart(); aChild != NULL; aChild = aChild->getNext()) {

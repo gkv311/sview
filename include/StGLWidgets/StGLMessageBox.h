@@ -98,13 +98,21 @@ class StGLMessageBox : public StGLWidget {
 
         protected:   //! @name private fields
 
-    StGLScrollArea*   myContent;    //!< content widget
-    StGLTextArea*     myTitle;      //!< window title
-    StGLWidget*       myBtnPanel;   //!< panel for buttons
-    StGLButton*       myDefaultBtn; //!< default button to redirect Enter
-    StGLMenuProgram   myProgram;    //!< GLSL program
-    StGLVertexBuffer  myVertexBuf;  //!< vertices VBO
-    int               myButtonsNb;  //!< number of buttons added to this message box
+    StGLScrollArea*   myContent;      //!< content widget
+    StGLTextArea*     myTitle;        //!< window title
+    StGLWidget*       myBtnPanel;     //!< panel for buttons
+    StGLButton*       myDefaultBtn;   //!< default button to redirect Enter
+    StGLMenuProgram   myProgram;      //!< GLSL program
+    StGLVertexBuffer  myVertexBuf;    //!< vertices VBO
+    int               myButtonsNb;    //!< number of buttons added to this message box
+
+
+    int               myMarginLeft;   //!< margins to content
+    int               myMarginRight;
+    int               myMarginTop;
+    int               myMarginBottom;
+    int               myMinSizeY;     //!< minimal height of the message box
+    bool              myToAdjustY;    //!< flag to automatically adjust height to fit content / window
 
 };
 
