@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -166,6 +166,9 @@ StImageViewer::StImageViewer(const StNativeWin_t         theParentWin,
 
     anAction = new StActionIntSlot(stCString("DoFileInfo"), stSlot(this, &StImageViewer::doAboutImage), 0);
     addAction(Action_FileInfo, anAction, ST_VK_I);
+
+    anAction = new StActionIntSlot(stCString("DoSaveFileInfo"), stSlot(this, &StImageViewer::doSaveImageInfoBegin), 0);
+    addAction(Action_SaveFileInfo, anAction, ST_VK_I | ST_VF_SHIFT);
 
     anAction = new StActionIntSlot(stCString("DoListFirst"), stSlot(this, &StImageViewer::doListFirst), 0);
     addAction(Action_ListFirst, anAction, ST_VK_HOME);
@@ -465,6 +468,40 @@ void StImageViewer::doImageAdjustReset(const size_t ) {
     myGUI->myImage->params.saturation->reset();
 }
 
+void StImageViewer::doSaveImageInfoBegin(const size_t ) {
+    if(!myFileInfo.isNull()) {
+        return; // already opened
+    }
+
+    StHandle<StFileNode>     aFileNode;
+    StHandle<StStereoParams> aParams;
+    if(!getCurrentFile(aFileNode, aParams, myFileInfo)
+    ||  myFileInfo.isNull()) {
+        myMsgQueue->pushInfo(myLangMap->getValue(StImageViewerStrings::DIALOG_FILE_NOINFO));
+        myFileInfo.nullify();
+        return;
+    } else if(!myFileInfo->IsSavable) {
+        myMsgQueue->pushInfo(myLangMap->getValue(StImageViewerStrings::DIALOG_SAVE_INFO_UNSUPPORTED));
+        myFileInfo.nullify();
+        return;
+    }
+
+    const StString aText = myLangMap->getValue(StImageViewerStrings::DIALOG_SAVE_INFO_QUESTION)
+                         + "\n" + myFileInfo->Path;
+
+    StInfoDialog* aDialog = new StInfoDialog(this, myGUI.access(), myLangMap->getValue(StImageViewerStrings::DIALOG_SAVE_INFO_TITLE),
+                                             myGUI->scale(512), myGUI->scale(256));
+    aDialog->setText(aText);
+
+    StGLButton* aSaveBtn = aDialog->addButton(myLangMap->getValue(StImageViewerStrings::BUTTON_SAVE_METADATA), true);
+    aSaveBtn->setUserData(1);
+    aSaveBtn->signals.onBtnClick += stSlot(this, &StImageViewer::doSaveImageInfo);
+
+    aDialog->addButton(myLangMap->getValue(StImageViewerStrings::BUTTON_CANCEL));
+    aDialog->setVisibility(true, true);
+    aDialog->stglInit();
+}
+
 void StImageViewer::doDeleteFileBegin(const size_t ) {
     //if(!myFileToDelete.isNull()) {
     //    return;
@@ -480,9 +517,10 @@ void StImageViewer::doDeleteFileBegin(const size_t ) {
     const StString aText = myLangMap->getValue(StImageViewerStrings::DIALOG_DELETE_FILE_QUESTION)
                          + "\n" + myFileToDelete->getPath();
 
-    StGLMessageBox* aDialog = new StGLMessageBox(myGUI.access(), myLangMap->getValue(StImageViewerStrings::DIALOG_DELETE_FILE_TITLE), aText, 512, 256);
-    aDialog->addButton(myLangMap->getValue(StImageViewerStrings::BUTTON_DELETE), true,  96)->signals.onBtnClick += stSlot(this, &StImageViewer::doDeleteFileEnd);
-    aDialog->addButton(myLangMap->getValue(StImageViewerStrings::BUTTON_CANCEL), false, 96);
+    StGLMessageBox* aDialog = new StGLMessageBox(myGUI.access(), myLangMap->getValue(StImageViewerStrings::DIALOG_DELETE_FILE_TITLE),
+                                                 aText, myGUI->scale(512), myGUI->scale(256));
+    aDialog->addButton(myLangMap->getValue(StImageViewerStrings::BUTTON_DELETE), true)->signals.onBtnClick += stSlot(this, &StImageViewer::doDeleteFileEnd);
+    aDialog->addButton(myLangMap->getValue(StImageViewerStrings::BUTTON_CANCEL), false);
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }

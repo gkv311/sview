@@ -203,6 +203,12 @@ void loadDefaults(StLangMap& theStrings) {
                "File deletion");
     theStrings(DIALOG_DELETE_FILE_QUESTION,
                "Do you really want to completely remove this file?");
+    theStrings(DIALOG_SAVE_INFO_TITLE,
+               "File metadata saving");
+    theStrings(DIALOG_SAVE_INFO_QUESTION,
+               "Do you really want to save metadata to the file?");
+    theStrings(DIALOG_SAVE_INFO_UNSUPPORTED,
+               "Metadata can be saved only into JPEG files.");
     theStrings(DIALOG_NOTHING_TO_SAVE,
                "Nothing to save!");
     theStrings(DIALOG_NO_SNAPSHOT,

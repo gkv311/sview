@@ -19,7 +19,7 @@
 #ifndef __StImageViewerGUI_h_
 #define __StImageViewerGUI_h_
 
-#include <StGLWidgets/StGLWidget.h>
+#include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLRootWidget.h>
 #include <StGLStereo/StGLTextureQueue.h>
 #include <StGLStereo/StFormatEnum.h>
@@ -36,6 +36,29 @@ class StGLImageRegion;
 class StGLMsgStack;
 class StGLFpsLabel;
 class StWindow;
+
+/**
+ * Customized message box.
+ */
+class ST_LOCAL StInfoDialog : public StGLMessageBox {
+
+        public:
+
+    ST_LOCAL StInfoDialog(StImageViewer*  thePlugin,
+                          StGLWidget*     theParent,
+                          const StString& theTitle,
+                          const int       theWidth,
+                          const int       theHeight)
+    : StGLMessageBox(theParent, theTitle, "", theWidth, theHeight),
+      myPlugin(thePlugin) {}
+
+    ST_LOCAL virtual ~StInfoDialog();
+
+        private:
+
+    StImageViewer* myPlugin;
+
+};
 
 /**
  * Root GUI widget for Image Viewer plugin.

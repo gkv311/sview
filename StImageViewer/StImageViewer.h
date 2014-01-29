@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -94,6 +94,7 @@ class StImageViewer : public StApplication {
     ST_LOCAL void doOpen2FilesDialog(const size_t dummy = 0);
     ST_LOCAL void doSaveImageAs(const size_t theImgType) { myLoader->doSaveImageAs(theImgType); }
     ST_LOCAL void doSaveImageInfo(const size_t theToSave);
+    ST_LOCAL void doSaveImageInfoBegin(const size_t dummy = 0);
     ST_LOCAL void doAboutImage(const size_t dummy = 0);
     ST_LOCAL void doListFirst(const size_t dummy = 0);
     ST_LOCAL void doListPrev(const size_t dummy = 0);
@@ -169,6 +170,7 @@ class StImageViewer : public StApplication {
         Action_SlideShow,
         Action_SavePng,
         Action_SaveJpeg,
+        Action_SaveFileInfo,
         Action_DeleteFile,
         Action_ImageAdjustReset,
         Action_StereoParamsBegin,

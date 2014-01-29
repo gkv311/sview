@@ -752,6 +752,7 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
     ||  anExtraInfo.isNull()) {
         StHandle<StMsgQueue> aQueue = myPlugin->getMessagesQueue();
         aQueue->pushInfo(tr(DIALOG_FILE_NOINFO));
+        anExtraInfo.nullify();
         return;
     }
 

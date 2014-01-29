@@ -32,7 +32,6 @@
 #include <StGLWidgets/StGLImageRegion.h>
 #include <StGLWidgets/StGLMenu.h>
 #include <StGLWidgets/StGLMenuItem.h>
-#include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLMsgStack.h>
 #include <StGLWidgets/StGLRangeFieldFloat32.h>
 #include <StGLWidgets/StGLScrollArea.h>
@@ -56,6 +55,10 @@ namespace {
     static const int DISPL_X_REGION_UPPER = 32;
     static const int ICON_WIDTH           = 64;
 };
+
+StInfoDialog::~StInfoDialog() {
+    myPlugin->doSaveImageInfo(0);
+}
 
 /**
  * Create upper toolbar
@@ -406,31 +409,6 @@ void StImageViewerGUI::doAboutSystem(const size_t ) {
     aDialog->stglInit();
 }
 
-/**
- * Customized message box.
- */
-class ST_LOCAL StInfoDialog : public StGLMessageBox {
-
-        public:
-
-    ST_LOCAL StInfoDialog(StImageViewer*  thePlugin,
-                          StGLWidget*     theParent,
-                          const StString& theTitle,
-                          const int       theWidth,
-                          const int       theHeight)
-    : StGLMessageBox(theParent, theTitle, "", theWidth, theHeight),
-      myPlugin(thePlugin) {}
-
-    ST_LOCAL virtual ~StInfoDialog() {
-        myPlugin->doSaveImageInfo(0);
-    }
-
-        private:
-
-    StImageViewer* myPlugin;
-
-};
-
 void StImageViewerGUI::doAboutImage(const size_t ) {
     StHandle<StImageInfo>& anExtraInfo = myPlugin->myFileInfo;
     if(!anExtraInfo.isNull()) {
@@ -443,6 +421,7 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
     ||  anExtraInfo.isNull()) {
         StHandle<StMsgQueue> aQueue = myPlugin->getMessagesQueue();
         aQueue->pushInfo(tr(DIALOG_FILE_NOINFO));
+        anExtraInfo.nullify();
         return;
     }
 
