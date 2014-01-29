@@ -461,7 +461,8 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
                     const StFileNode* aNode          = myTracksFolder.getValue(aNodeIter);
                     const StString&   aTrackFileName = aNode->getSubPath();
                     StFileNode::getNameAndExtension(aTrackFileName, aTrackName, aTrackExtension);
-                    if(aTrackName.isStartsWithIgnoreCase(aName)) {
+                    if(aFileName != aTrackFileName
+                    && aTrackName.isStartsWithIgnoreCase(aName)) {
                         //myPlayList->addToNode(aCurrFile, aFilePath);
                         //myPlayList->getCurrentFile(theNewSource, theNewParams)
                         addFile(aNode->getPath(),
