@@ -66,6 +66,11 @@ class StGLMessageBox : public StGLWidget {
 
     ST_CPPEXPORT virtual bool doKeyDown(const StKeyEvent& theEvent);
 
+    ST_LOCAL int getMarginLeft()   const { return myMarginLeft; }
+    ST_LOCAL int getMarginRight()  const { return myMarginRight; }
+    ST_LOCAL int getMarginTop()    const { return myMarginTop; }
+    ST_LOCAL int getMarginBottom() const { return myMarginBottom; }
+
         private:   //! @name callback Slots (private overriders)
 
     ST_LOCAL void doMouseUnclick(const int theBtnId);

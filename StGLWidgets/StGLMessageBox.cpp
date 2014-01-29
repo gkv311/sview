@@ -70,12 +70,12 @@ void StGLMessageBox::create(const StString& theTitle,
     myMarginRight  = myRoot->scale(OFFSET_PIXELS);
     myMarginTop    = myRoot->scale(OFFSET_PIXELS);
     myMarginBottom = myRoot->scale(24 * 3);
-    myMinSizeY     = myRoot->scale(200); ///getRectPx().bottom() myParent->getRectPx().height()
+    myMinSizeY     = myRoot->scale(200);
 
     int aTitleHeight = 0;
     if(!theTitle.isEmpty()) {
-        myTitle = new StGLTextArea(this, myMarginLeft, myMarginTop,
-                                   StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+        myTitle = new StGLTextArea(this, 0, myMarginTop,
+                                   StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER),
                                    theWidth - myMarginLeft - myMarginRight, theHeight - myMarginTop - myMarginBottom);
         myTitle->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
                                 StGLTextFormatter::ST_ALIGN_Y_TOP);

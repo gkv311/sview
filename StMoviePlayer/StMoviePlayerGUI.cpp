@@ -755,8 +755,10 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
         return;
     }
 
+    const int THE_MIN_WIDTH = scale(512);
     const StString aTitle  = tr(DIALOG_FILE_INFO);
-    StInfoDialog*  aDialog = new StInfoDialog(myPlugin, this, aTitle, scale(512), scale(300));
+    const int      aWidth  = stMax(int(double(getRectPx().width()) * 0.6), THE_MIN_WIDTH);
+    StInfoDialog*  aDialog = new StInfoDialog(myPlugin, this, aTitle, aWidth, scale(300));
 
     // translate known metadata tag names
     for(size_t aMapIter = 0; aMapIter < anExtraInfo->Info.size(); ++aMapIter) {
@@ -804,6 +806,12 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
         aText->setTextColor(aWhite);
         aText->setVisibility(true, true);
         aText->stglInitAutoHeightWidth(aTextMaxWidth);
+    }
+    aTable->updateLayout();
+    const int aWidthAdjust = aWidth - stMax(aTable->getRectPx().width() + aDialog->getMarginLeft() + aDialog->getMarginRight(), THE_MIN_WIDTH);
+    if(aWidthAdjust > 0) {
+        aDialog->changeRectPx().right()               -= aWidthAdjust;
+        aDialog->getContent()->changeRectPx().right() -= aWidthAdjust;
     }
 
     aDialog->addButton(tr(BUTTON_CLOSE));
