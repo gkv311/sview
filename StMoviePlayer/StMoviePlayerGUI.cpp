@@ -1116,10 +1116,13 @@ size_t StMoviePlayerGUI::trSrcFormatId(const StFormatEnum theSrcFormat) {
         case ST_V_SRC_OVER_UNDER_RL:        return MENU_SRC_FORMAT_OVERUNDER_RL;
         case ST_V_SRC_OVER_UNDER_LR:        return MENU_SRC_FORMAT_OVERUNDER_LR;
         case ST_V_SRC_ROW_INTERLACE:        return MENU_SRC_FORMAT_INTERLACED;
-        case ST_V_SRC_ANAGLYPH_G_RB:        return MENU_SRC_FORMAT_ANA_RB;
-        case ST_V_SRC_ANAGLYPH_RED_CYAN:    return MENU_SRC_FORMAT_ANA_RC;
-        case ST_V_SRC_ANAGLYPH_YELLOW_BLUE: return MENU_SRC_FORMAT_ANA_YB;
+        //case ST_V_SRC_VERTICAL_INTERLACE:
         case ST_V_SRC_SEPARATE_FRAMES:      return MENU_SRC_FORMAT_SEPARATE;
+        case ST_V_SRC_PAGE_FLIP:            return MENU_SRC_FORMAT_PAGEFLIP;
+        case ST_V_SRC_ANAGLYPH_RED_CYAN:    return MENU_SRC_FORMAT_ANA_RC;
+        case ST_V_SRC_ANAGLYPH_G_RB:        return MENU_SRC_FORMAT_ANA_RB;
+        case ST_V_SRC_ANAGLYPH_YELLOW_BLUE: return MENU_SRC_FORMAT_ANA_YB;
+        case ST_V_SRC_TILED_4X:             return MENU_SRC_FORMAT_TILED_4X;
         default:
         case ST_V_SRC_AUTODETECT:           return MENU_SRC_FORMAT_AUTO;
     }
