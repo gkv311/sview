@@ -409,7 +409,7 @@ void StImageViewerGUI::doAboutSystem(const size_t ) {
 /**
  * Customized message box.
  */
-class StInfoDialog : public StGLMessageBox {
+class ST_LOCAL StInfoDialog : public StGLMessageBox {
 
         public:
 

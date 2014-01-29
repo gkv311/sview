@@ -267,12 +267,39 @@ void loadDefaults(StLangMap& theStrings) {
                "Choose the video file to open");
     theStrings(DIALOG_OPEN_RIGHT,
                "Choose RIGHT video file to open");
+    theStrings(DIALOG_FILE_INFO,
+               "File Info");
+    theStrings(DIALOG_FILE_NOINFO,
+               "Information is unavailable");
     theStrings(DIALOG_NOTHING_TO_SAVE,
                "Nothing to save!");
     theStrings(DIALOG_NO_SNAPSHOT,
                "Snapshot not available!");
     theStrings(DIALOG_SAVE_SNAPSHOT,
                "Choose location to save snapshot");
+
+    theStrings(INFO_LEFT,
+               "[left]");
+    theStrings(INFO_RIGHT,
+               "[right]");
+    theStrings(INFO_FILE_NAME,
+               "File name(s)");
+    theStrings(INFO_DIMENSIONS,
+               "Video dimensions");
+    theStrings(INFO_LOAD_TIME,
+               "Load time");
+    theStrings(INFO_TIME_MSEC,
+               "msec");
+    theStrings(INFO_PIXEL_RATIO,
+               "Pixel ratio");
+    theStrings(INFO_PIXEL_FORMAT,
+               "Pixel format");
+    theStrings(INFO_NO_SRCFORMAT,
+               "(does not stored in metadata)");
+    theStrings(INFO_WRONG_SRCFORMAT,
+               "(does not match metadata)");
+    theStrings(INFO_DURATION,
+               "Duration");
 }
 
 };

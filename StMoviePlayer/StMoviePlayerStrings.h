@@ -179,6 +179,8 @@ namespace StMoviePlayerStrings {
         DIALOG_OPEN_FILE       = 2000,
         DIALOG_OPEN_LEFT       = 2001,
         DIALOG_OPEN_RIGHT      = 2002,
+        DIALOG_FILE_INFO       = 2003,
+        DIALOG_FILE_NOINFO     = 2004,
 
         DIALOG_SAVE_SNAPSHOT   = 2010,
         DIALOG_NOTHING_TO_SAVE = 2011,
@@ -192,6 +194,19 @@ namespace StMoviePlayerStrings {
 
         BUTTON_CLOSE = 4000,
         BUTTON_RESET = 4005,
+
+        // metadata keys
+        INFO_LEFT              = 5000,
+        INFO_RIGHT             = 5001,
+        INFO_FILE_NAME         = 5002,
+        INFO_DIMENSIONS        = 5003,
+        INFO_LOAD_TIME         = 5004,
+        INFO_TIME_MSEC         = 5005,
+        INFO_PIXEL_RATIO       = 5006,
+        INFO_PIXEL_FORMAT      = 5007,
+        INFO_NO_SRCFORMAT      = 5008,
+        INFO_WRONG_SRCFORMAT   = 5009,
+        INFO_DURATION          = 5010,
 
     };
 

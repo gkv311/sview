@@ -209,9 +209,9 @@ void loadDefaults(StLangMap& theStrings) {
                "Choose location to save snapshot");
 
     theStrings(INFO_LEFT,
-               "(left)");
+               "[left]");
     theStrings(INFO_RIGHT,
-               "(right)");
+               "[right]");
     theStrings(INFO_FILE_NAME,
                "File name");
     theStrings(INFO_DIMENSIONS,
@@ -243,7 +243,7 @@ void loadDefaults(StLangMap& theStrings) {
     theStrings(METADATA_EXIF_DATETIME,
                "Image timestamp");
 
-    // define metadat keys
+    // define metadata keys
     theStrings.addAlias("Jpeg.Comment",        METADATA_JPEG_COMMENT);
     theStrings.addAlias("Jpeg.JpsComment",     METADATA_JPEG_JPSCOMMENT);
     theStrings.addAlias("Exif.Image.Make",     METADATA_EXIF_MAKER);

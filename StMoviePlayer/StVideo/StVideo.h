@@ -30,6 +30,7 @@
 #include <StThreads/StThread.h>
 #include <StGL/StPlayList.h>
 #include <StImage/StImageFile.h>
+#include <StStrings/StLangMap.h>
 
 // forward declarations
 class StSubQueue;
@@ -37,9 +38,9 @@ class StLangMap;
 
 struct StMovieInfo {
 
-    StHandle<StStereoParams> myId;
-    StArgumentsMap           myInfo;
-    StArgumentsMap           myCodecs;
+    StHandle<StStereoParams> Id;
+    StArgumentsMap           Info;
+    StArgumentsMap           Codecs;
 
 };
 
@@ -268,6 +269,10 @@ class StVideo {
     }
 
         private: //! @name auxiliary methods
+
+    ST_LOCAL const StString& tr(const size_t theId) const {
+        return myLangMap->getValue(theId);
+    }
 
     /**
      * Just redirect callback slot.

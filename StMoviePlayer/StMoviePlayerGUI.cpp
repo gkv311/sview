@@ -539,7 +539,7 @@ StGLMenu* StMoviePlayerGUI::createAudioGainMenu() {
 /**
  * Dialog for Audio/Video synchronization control.
  */
-class StDelayControl : public StGLMessageBox {
+class ST_LOCAL StDelayControl : public StGLMessageBox {
 
         public:
 
@@ -715,56 +715,94 @@ void StMoviePlayerGUI::doAboutSystem(const size_t ) {
     aDialog->stglInit();
 }
 
+/**
+ * Customized message box.
+ */
+class ST_LOCAL StInfoDialog : public StGLMessageBox {
+
+        public:
+
+    ST_LOCAL StInfoDialog(StMoviePlayer*  thePlugin,
+                          StGLWidget*     theParent,
+                          const StString& theTitle,
+                          const int       theWidth,
+                          const int       theHeight)
+    : StGLMessageBox(theParent, theTitle, "", theWidth, theHeight),
+      myPlugin(thePlugin) {}
+
+    ST_LOCAL virtual ~StInfoDialog() {
+        myPlugin->doSaveFileInfo(0);
+    }
+
+        private:
+
+    StMoviePlayer* myPlugin;
+
+};
+
 void StMoviePlayerGUI::doAboutFile(const size_t ) {
-    const StString aTitle = "File Info";
-    StGLMessageBox* aDialog = new StGLMessageBox(this, aTitle, "", scale(512), scale(300));
+    StHandle<StMovieInfo>& anExtraInfo = myPlugin->myFileInfo;
+    if(!anExtraInfo.isNull()) {
+        return; // already opened
+    }
 
     StHandle<StFileNode>     aFileNode;
     StHandle<StStereoParams> aParams;
-    StHandle<StMovieInfo>    anExtraInfo;
-    if(myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo) && !anExtraInfo.isNull()) {
-        const StGLVec3 aWhite(1.0f, 1.0f, 1.0f);
-        const int    aWidthMax  = aDialog->getContent()->getRectPx().width();
-        StGLTable*   aTable     = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
-        int          aRowLast   = (int )anExtraInfo->myInfo.size();
-        const int    aNbRowsMax = aRowLast + (int )anExtraInfo->myCodecs.size() + 1;
-        aTable->setupTable((int )aNbRowsMax, 2);
-        aTable->setVisibility(true, true);
-        aTable->fillFromMap(anExtraInfo->myInfo, aWhite,
-                            aWidthMax, aWidthMax / 2);
+    if(!myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo)
+    ||  anExtraInfo.isNull()) {
+        StHandle<StMsgQueue> aQueue = myPlugin->getMessagesQueue();
+        aQueue->pushInfo(tr(DIALOG_FILE_NOINFO));
+        return;
+    }
 
-        const int aTextMaxWidth = aWidthMax - (aTable->getMarginLeft() + aTable->getMarginRight());
+    const StString aTitle  = tr(DIALOG_FILE_INFO);
+    StInfoDialog*  aDialog = new StInfoDialog(myPlugin, this, aTitle, scale(512), scale(300));
 
-        StGLTableItem& aCodecItem = aTable->changeElement(aRowLast++, 0);
-        aCodecItem.setColSpan(2);
+    // translate known metadata tag names
+    for(size_t aMapIter = 0; aMapIter < anExtraInfo->Info.size(); ++aMapIter) {
+        StDictEntry& anEntry = anExtraInfo->Info.changeValue(aMapIter);
+        anEntry.changeName() = myLangMap->getValue(anEntry.getKey());
+    }
 
-        StGLTextArea* aCodecsText = new StGLTextArea(&aCodecItem, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
-        aCodecsText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_LEFT,
-                                    StGLTextFormatter::ST_ALIGN_Y_TOP);
-        aCodecsText->setText("\nActive decoders:\n");
-        aCodecsText->setTextColor(aWhite);
-        aCodecsText->setVisibility(true, true);
-        aCodecsText->stglInitAutoHeightWidth(aTextMaxWidth);
+    const StGLVec3 aWhite(1.0f, 1.0f, 1.0f);
+    const int    aWidthMax  = aDialog->getContent()->getRectPx().width();
+    StGLTable*   aTable     = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
+    int          aRowLast   = (int )anExtraInfo->Info.size();
+    const int    aNbRowsMax = aRowLast + (int )anExtraInfo->Codecs.size() + 1;
+    aTable->setupTable((int )aNbRowsMax, 2);
+    aTable->setVisibility(true, true);
+    aTable->fillFromMap(anExtraInfo->Info, aWhite,
+                        aWidthMax, aWidthMax / 2);
 
-        for(size_t aKeyIter = 0; aKeyIter < anExtraInfo->myCodecs.size(); ++aKeyIter) {
-            const StArgument& aPair = anExtraInfo->myCodecs.getFromIndex(aKeyIter);
-            if(aPair.getValue().isEmpty()) {
-                continue;
-            }
+    const int aTextMaxWidth = aWidthMax - (aTable->getMarginLeft() + aTable->getMarginRight());
 
-            StGLTableItem& anItem = aTable->changeElement(aRowLast++, 0);
-            anItem.setColSpan(2);
+    StGLTableItem& aCodecItem = aTable->changeElement(aRowLast++, 0);
+    aCodecItem.setColSpan(2);
 
-            StGLTextArea* aText = new StGLTextArea(&anItem, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
-            aText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_LEFT,
-                                  StGLTextFormatter::ST_ALIGN_Y_TOP);
-            aText->setText(aPair.getValue());
-            aText->setTextColor(aWhite);
-            aText->setVisibility(true, true);
-            aText->stglInitAutoHeightWidth(aTextMaxWidth);
+    StGLTextArea* aCodecsText = new StGLTextArea(&aCodecItem, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
+    aCodecsText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_LEFT,
+                                StGLTextFormatter::ST_ALIGN_Y_TOP);
+    aCodecsText->setText("\nActive decoders:\n");
+    aCodecsText->setTextColor(aWhite);
+    aCodecsText->setVisibility(true, true);
+    aCodecsText->stglInitAutoHeightWidth(aTextMaxWidth);
+
+    for(size_t aKeyIter = 0; aKeyIter < anExtraInfo->Codecs.size(); ++aKeyIter) {
+        const StArgument& aPair = anExtraInfo->Codecs.getFromIndex(aKeyIter);
+        if(aPair.getValue().isEmpty()) {
+            continue;
         }
-    } else {
-        aDialog->setText("Information is unavailable");
+
+        StGLTableItem& anItem = aTable->changeElement(aRowLast++, 0);
+        anItem.setColSpan(2);
+
+        StGLTextArea* aText = new StGLTextArea(&anItem, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
+        aText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_LEFT,
+                              StGLTextFormatter::ST_ALIGN_Y_TOP);
+        aText->setText(aPair.getValue());
+        aText->setTextColor(aWhite);
+        aText->setVisibility(true, true);
+        aText->stglInitAutoHeightWidth(aTextMaxWidth);
     }
 
     aDialog->addButton(tr(BUTTON_CLOSE));

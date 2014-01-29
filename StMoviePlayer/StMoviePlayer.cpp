@@ -1316,6 +1316,15 @@ void StMoviePlayer::doOpen2Files(const size_t ) {
     doOpenFileThreaded(this, OPEN_FILE_2MOVIES);
 }
 
+void StMoviePlayer::doSaveFileInfo(const size_t theToSave) {
+    if(!myGUI.isNull()
+    && !myFileInfo.isNull()
+    &&  theToSave == 1) {
+        //myLoader->doSaveInfo(myFileInfo);
+    }
+    myFileInfo.nullify();
+}
+
 void StMoviePlayer::doOpenRecent(const size_t theItemId) {
     if(myVideo.isNull()) {
         return;

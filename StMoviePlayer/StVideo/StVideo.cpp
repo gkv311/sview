@@ -21,7 +21,8 @@
 #include "../StMoviePlayerStrings.h"
 
 #include <StStrings/StFormatTime.h>
-#include <StStrings/StLangMap.h>
+
+using namespace StMoviePlayerStrings;
 
 namespace {
     static const char ST_AUDIOS_MIME_STRING[] = ST_VIDEO_PLUGIN_AUDIO_MIME_CHAR;
@@ -278,13 +279,17 @@ bool StVideo::addFile(const StString& theFileToLoad,
 
     StString aTitleString, aFolder;
     StFileNode::getFolderAndFile(theFileToLoad, aFolder, aTitleString);
-    myFileInfoTmp->myInfo.add(StArgument("File name", aTitleString));
+    StDictEntry& aFileNamePair = myFileInfoTmp->Info.addChange(tr(INFO_FILE_NAME));
+    if(!aFileNamePair.getValue().isEmpty()) {
+        aFileNamePair.changeValue() += "\n";
+    }
+    aFileNamePair.changeValue() += aTitleString;
 
     // collect metadata
     for(stAV::meta::Tag* aTag = stAV::meta::findTag(aFormatCtx->metadata, "", NULL, stAV::meta::SEARCH_IGNORE_SUFFIX);
         aTag != NULL;
         aTag = stAV::meta::findTag(aFormatCtx->metadata, "", aTag, stAV::meta::SEARCH_IGNORE_SUFFIX)) {
-        myFileInfoTmp->myInfo.add(StArgument(aTag->key, aTag->value));
+        myFileInfoTmp->Info.add(StArgument(aTag->key, aTag->value));
     }
 
     theMaxDuration = stMax(theMaxDuration, stAV::unitsToSeconds(aFormatCtx->duration));
@@ -301,19 +306,22 @@ bool StVideo::addFile(const StString& theFileToLoad,
                 if(myVideoMaster->isInitialized()) {
                     const int aSizeX      = myVideoMaster->sizeX();
                     const int aSizeY      = myVideoMaster->sizeY();
-                    StString aDimsStr = StString() + aSizeX + " x " + aSizeY;
                     const int aCodedSizeX = myVideoMaster->getCodedSizeX();
                     const int aCodedSizeY = myVideoMaster->getCodedSizeY();
+                    StString  aDimsStr    = StString() + aSizeX + " x " + aSizeY;
                     if(aCodedSizeX != aSizeX
                     || aCodedSizeY != aSizeY) {
                         aDimsStr += StString(" (") + aCodedSizeX + " x " + aCodedSizeY + ")";
                     }
-                    myFileInfoTmp->myInfo.add(StArgument("Video Dimensions", aDimsStr));
-                    myFileInfoTmp->myInfo.add(StArgument("Pixel Format",
+
+                    StDictEntry& aDimInfo = myFileInfoTmp->Info.addChange(tr(INFO_DIMENSIONS));
+                    aDimInfo.changeValue() = aDimsStr;
+
+                    myFileInfoTmp->Info.add(StArgument(tr(INFO_PIXEL_FORMAT),
                         myVideoMaster->getPixelFormatString()));
-                    myFileInfoTmp->myInfo.add(StArgument("Pixel Ratio",
+                    myFileInfoTmp->Info.add(StArgument(tr(INFO_PIXEL_RATIO),
                         StString() + myVideoMaster->getPixelRatio()));
-                    myFileInfoTmp->myInfo.add(StArgument("Duration",
+                    myFileInfoTmp->Info.add(StArgument(tr(INFO_DURATION),
                         StFormatTime::formatSeconds(theMaxDuration)));
                 }
             } else if(!myVideoSlave->isInitialized()) {
@@ -324,14 +332,18 @@ bool StVideo::addFile(const StString& theFileToLoad,
 
                     const int aSizeX      = myVideoSlave->sizeX();
                     const int aSizeY      = myVideoSlave->sizeY();
-                    StString aDimsStr = StString() + aSizeX + " x " + aSizeY;
                     const int aCodedSizeX = myVideoSlave->getCodedSizeX();
                     const int aCodedSizeY = myVideoSlave->getCodedSizeY();
+                    StString  aDimsStr    = StString() + aSizeX + " x " + aSizeY;
                     if(aCodedSizeX != aSizeX
                     || aCodedSizeY != aSizeY) {
                         aDimsStr += StString(" (") + aCodedSizeX + " x " + aCodedSizeY + ")";
                     }
-                    myFileInfoTmp->myInfo.add(StArgument("Video Dimensions (slave)", aDimsStr));
+                    aDimsStr += " [2]";
+
+                    StDictEntry& aDimInfo = myFileInfoTmp->Info.addChange(tr(INFO_DIMENSIONS));
+                    aDimInfo.changeValue() += "\n";
+                    aDimInfo.changeValue() += aDimsStr;
 
                     if(myVideoMaster->getSrcFormat() == ST_V_SRC_AUTODETECT) {
                         myVideoMaster->setSlave(myVideoSlave);
@@ -465,13 +477,13 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
         return false;
     }
 
-    StArgument aTitle = myFileInfoTmp->myInfo["TITLE"];
+    StArgument aTitle = myFileInfoTmp->Info["TITLE"];
     if(!aTitle.isValid()) {
-        aTitle = myFileInfoTmp->myInfo["title"];
+        aTitle = myFileInfoTmp->Info["title"];
     }
-    StArgument anArtist = myFileInfoTmp->myInfo["ARTIST"];
+    StArgument anArtist = myFileInfoTmp->Info["ARTIST"];
     if(!anArtist.isValid()) {
-        anArtist = myFileInfoTmp->myInfo["artist"];
+        anArtist = myFileInfoTmp->Info["artist"];
     }
 
     if(anArtist.isValid() && aTitle.isValid()) {
@@ -502,7 +514,7 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
 
     myCurrNode   = theNewSource;
     myCurrParams = theNewParams;
-    myFileInfoTmp->myId = myCurrParams;
+    myFileInfoTmp->Id = myCurrParams;
 
     params.activeAudio->setList(aStreamsListA, aStreamsListA->isEmpty() ? -1 : 0);
     params.activeSubtitles->setList(aStreamsListS, -1); // do not show subtitles by default
@@ -1026,15 +1038,15 @@ StHandle<StMovieInfo> StVideo::getFileInfo(const StHandle<StStereoParams>& thePa
     myEventMutex.lock();
     StHandle<StMovieInfo> anInfo = myFileInfo;
     myEventMutex.unlock();
-    if(anInfo.isNull() || anInfo->myId != theParams) {
+    if(anInfo.isNull() || anInfo->Id != theParams) {
         return NULL;
     }
 
-    anInfo->myCodecs.clear();
-    anInfo->myCodecs.add(StArgument("vcodec1",   myVideoMaster->getCodecInfo()));
-    anInfo->myCodecs.add(StArgument("vcodec2",   myVideoSlave->getCodecInfo()));
-    anInfo->myCodecs.add(StArgument("audio",     myAudio->getCodecInfo()));
-    anInfo->myCodecs.add(StArgument("subtitles", mySubtitles->getCodecInfo()));
+    anInfo->Codecs.clear();
+    anInfo->Codecs.add(StArgument("vcodec1",   myVideoMaster->getCodecInfo()));
+    anInfo->Codecs.add(StArgument("vcodec2",   myVideoSlave->getCodecInfo()));
+    anInfo->Codecs.add(StArgument("audio",     myAudio->getCodecInfo()));
+    anInfo->Codecs.add(StArgument("subtitles", mySubtitles->getCodecInfo()));
 
     return anInfo;
 }

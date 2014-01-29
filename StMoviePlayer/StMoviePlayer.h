@@ -170,6 +170,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doFileNext();
     ST_LOCAL void doOpen1File(const size_t dummy = 0);
     ST_LOCAL void doOpen2Files(const size_t dummy = 0);
+    ST_LOCAL void doSaveFileInfo(const size_t theToSave);
     ST_LOCAL void doOpenRecent(const size_t theItemId);
     ST_LOCAL void doClearRecent(const size_t dummy = 0);
     ST_LOCAL void doUpdateOpenALDeviceList(const size_t dummy = 0);
@@ -360,6 +361,7 @@ class StMoviePlayer : public StApplication {
     StHandle<StVideo>          myVideo;           //!< main video playback class
     StHandle<StCheckUpdates>   myUpdates;         //!< check updates utility
     StHandle<StFileNode>       myFileToDelete;    //!< file node for removal
+    StHandle<StMovieInfo>      myFileInfo;        //!< file info for opened dialog
 
     StCondition                myEventDialog;     //!< event to prevent showing multiple open/save file dialogs
     StCondition                myEventLoaded;     //!< indicate that new file was open
