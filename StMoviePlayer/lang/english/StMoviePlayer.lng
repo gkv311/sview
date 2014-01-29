@@ -4,7 +4,7 @@ English translation file for StMoviePlayer program
 --------
 1002="Swap Left/Right"
 1003="UnSwap Left/Right"
-1004="Source format:"
+1004="Stereoscopic format:"
 1015="Open another movie"
 1020="Play/Pause"
 1021="Show/Hide playlist"
@@ -14,7 +14,7 @@ English translation file for StMoviePlayer program
 1100="Media"
 1101="Open Movie..."
 1102="Save Snapshot..."
-1103="Source stereo format"
+1103="Stereoscopic format"
 1170="File info"
 1104="Audio Device"
 1105="Shuffle"
