@@ -1,3 +1,158 @@
+== sView 14.01 ==
+
+14.01 (2014.01.30)
+  + Windows 8.1 - adjust dimensions when window moved to monitor with another scale factor.
+  + Windows, Interlaced Output - align window position to avoid temporary L/R reversion during window moves.
+  + Movie Player - switch to new audio/subtitles track right after attachment.
+  + Movie Player - preliminary support of image-based subtitles.
+  + Movie Player - process trivial HTML formatting tags (<b> and <i>) in text subtitles.
+  + Movie Player - copy shown subtitle text to the clipboard on Ctrl + C.
+  + Movie Player - automatically attach audio/subtitles tracks from files with similar name.
+  + Image Viewer - parse/save _JPSJPS_ extension section in JPEG files.
+  + Image Viewer - show stereoscopic metadata issues (missing, mismatch) in File Info dialog.
+  + Added support for new stereo3d API in FFmpeg.
+  * Improved and extended information provided by File Info dialog.
+  * Image Viewer - read pixel aspect ratio property from image, when available.
+  * Image Viewer - handle MPO files with big thumbnails (load full images).
+  * Image Viewer - improved JPEG parser robustness.
+  * Movie Player - fixed playback of 5.0 and 7.1 audio streams.
+  * Define Oculus Rift as dedicated device to simplify configuration.
+  * Fix text characters positioning issue (displacement at second+ displaying time).
+
+14.01 (2014.01.07)
+  + Added partial German translation;
+  + Added partial Korean translation;
+  + Korean and CJK fonts now loaded in addition to Western when required;
+  * OS X 10.9 - workaround crash in OpenAL framework;
+  * Improved font searching robustness on Linux;
+  * Linux - fixed loading of recent files from Gnome recent files menu (URLs with file protocol file:// prefix);
+
+13.10 (2013.10.05)
+  + Windows - implemented DPI-awareness for Windows Vista+ and per-monitor DPI for Windows 8.1;
+  + Linux, XLib - read Xft.dpi property to scale interface appropriately;
+  + Distorted Output, Dual Output - added option to display Mono sources in Stereo;
+  + Movie Player - added subtitles font size control and parallax control;
+  * Movie Player - fixed regression, key 'W' doesn't reverse left/right views;
+  ^ Optimized font initialization time and GPU memory usage;
+
+13.08 (2013.08.18)
+  + Mac OS X - Introduced support for high pixel density displays (Retina);
+  + Added option to scale GUI;
+  + Movie Player - new Audio/Video synchronization control;
+  + Movie Player, Web UI - added audio volume control;
+  + Added icons for source format menu items;
+  * Fixed memory corruption on deletion of last item in playlist (file deletion);
+  * Mac OS X - Fixed application hang during fullscreen->windowed on Mountain Lion;
+  * Mac OS X - Corrected events' timing (wrong behavior of holding key events);
+  * Various improvements in GUI;
+  * Fix version information in DLL files;
+
+13.07 (2013.07.28)
+  + Porting to FFmpeg 2.0 (new APIs, planar audio frames, disable cropping on detected tiled dual 720p in 1080p streams);
+  + Detect source stereo format in per-frame basis, when provided by codec;
+  + Mac OS X - added experimental support of decoding using VDA (accelerated by GPU);
+  * Accelerate high-range planar YUV (9/10/16 bits per component) to RGB color conversion (using GLSL);
+  * Display dual-stream video as stereo only when chosen "Autodetection" source format;
+  * Workaround problems with wglMakeCurrent() in some OpenGL drivers on Windows (possible memory leaks);
+
+13.06 (2013.06.15)
+  + Movie Player - added tiny Web UI;
+  + added preliminary Oculus Rift support (stereo output);
+  * minor fixes;
+
+13.05 (2013.05.25)
+  + Movie Player - added menu with recently played files;
+  + Movie Player - added hot keys to switch subtitles ('T') and audio treks ('L');
+  + Movie Player - added simple playlist widget (Ctrl + L);
+  + Movie Player - read stereoscopic tags from WMV files;
+  + added Distorted output for anamorphic side-by-side, over/under outputs;
+  + added Over / Under output mode;
+  * Linux - fixed XRandr compatibility issues;
+  * added FPS meter widget;
+  * Dual output - extend single window in full-screen mode when possible to improve synchronization;
+  * browser plugin - fixed full-screen monitor binding;
+  * browser plugin - do not load plugin until it is not visible;
+  * improved libraries packaging;
+  * keep file playback during output device change;
+  * do not create depth buffer when there is no need in it (slightly reduce GPU memory usage);
+  * keyboard input handling improvements;
+  * improved message box widget (added Close button, added keyboard focus);
+  * do not append m3u files to playlist, m3u parser fixes;
+
+13.01 (2013.01.06)
+  + adjust stereo separation within '<' and '>' keys to cover notebook keyboards;
+  + use undo/redo buffer to keep played items order in shuffle mode;
+  + detect display(s) reconfiguration during application work (to correctly launch full-screen mode);
+  + Movie Player - added new option to prevent system going to sleep during playback;
+  + Movie Player - handle Audio device disconnection during application work;
+  + show dirty information about opened file by 'I' hot-key;
+  * shuffle playback - generate random order rather than the same pseudo-random order;
+  * Movie Player - fixed seeking in paused state;
+  * Movie Player - fixed switching between audio streams with different frequency;
+  * fixed saving of BMP image in PNG format;
+  * Mac OS X - fixed opening file within Finder when sView already started;
+  * Mac OS X - fixed key combinations within Shift and Ctrl buttons;
+  * fixed displaying of stereo images with different dimensions per view;
+  * fixed regression - window position didn't restored after application restart;
+  * Linux - workaround bugs in some drivers (Catalyst) when window content doesn't redrawn after switching back from full-screen mode;
+
+12.10 (2012.10.03)
+  * PageFlip output plugin - show on-screen warning (require full screen mode);
+  * browser plugin - download preview image when not in full screen mode;
+  * browser plugin - improved thread-safety;
+  * browser plugin - improved browsers compatibility;
+  * output plugins - reduced memory usage;
+  * movie player - fixed possible crash on exit;
+  * removed dependency from GLEW;
+
+12.09 (2012.09.16)
+  + added support for webp/webpll images (using libwebp 0.2);
+  + added audio gain control;
+  + setup icon for sView window on Linux (XLib);
+  + interlace output - added option to disable binding to compatible monitor at application start;
+  + dual output - added menu for slave monitor selection;
+  + show Display Aspect Ratio in Image Viewer too;
+  + preliminary support for reading playlist in M3U format;
+  + added experimental ActiveX component (likewise NPAPI plugin);
+  * improved compatibility with Max OS X 10.8 Mountain Lion (removed redundant dependency from X11 libraries);
+  * improved backward seeking in movie player;
+  * switch audio device (OpenAL) without application restart;
+  * improved compatibility with some OpenAL implementations;
+  * Image Viewer - reduce FPS for inactive window;
+  * (internal) removed dependency from patched FTGL;
+  * improved text layout;
+
+12.06 (2012.06.06)
+  + introduced support for Mac OS X (with some limitations, Intel x86_64 CPU required);
+  + added AMD HD3D output support (for shutter glasses, Windows-only);
+  + added simple Blend deinterlacing filter (Movie Player);
+  + added French localization;
+  + added tiled stereoformat 720p in 1080p (used by some Europe broadcasters);
+  + introduced UTF-8 subtitles output support;
+  + introduced Debian source package (builds for Ubuntu now available in PPA);
+  + added shuffle play-list playback (Movie Player);
+  + added option to restore Aspect Ratio overridden value after program restart;
+  + added Amber-Blue Dubious filter to Anaglyph output;
+  + added inverse option for Interlaced output (for displays with different left/right lines order);
+  + added full-screen switch button to Image Viewer (to comply with Movie Player GUI);
+  + orientation information now read from JPEG photos to apply automatic rotation;
+  + added option to attach files as additional Audio/Subtitles streams (Movie Player);
+  + added support for 8-bit and 32-bit audio formats;
+  + added playback support for mk3d files (matroska 3D-stereo) within stereo format flag;
+  + read parallax value stored in MPO images by Fujifilm cameras;
+  ^ anaglyph source formats now decomposed via GPU nor CPU (performance improvement);
+  ^ improved NVIDIA 3DVision output support (launch speed, 24-bit color quality and stability);
+  * improved compatibility with recent FFmpeg API;
+  * FFmpeg binaries migrated to version 0.10.2 (Windows builds);
+  * improved compatibility with BUGs in recent AMD Catalyst releases (Interlaced and Dual outputs);
+  * fixed misprint in Mirror Output that cause Y-flip mis-function;
+  * slightly improved compatibility with Safari browser on Windows (NPAPI plugin);
+  * improved compatibility with Unicode file paths;
+  * improved compatibility with another OpenAL implementations (Apple);
+  * small fixes in Drag&Drop support on Linux (Nautilus compatibility);
+  * general improvements and fixes.
+
+
 == sView 2011 ==
 
 11.05 (2011.05.29)

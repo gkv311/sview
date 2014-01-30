@@ -1,5 +1,25 @@
 sview (unknown_version) unknown_distrib; urgency=low
 
+  + Movie Player - switch to new audio/subtitles track right after attachment.
+  + Movie Player - preliminary support of image-based subtitles.
+  + Movie Player - process trivial HTML formatting tags (<b> and <i>) in text subtitles.
+  + Movie Player - copy shown subtitle text to the clipboard on Ctrl + C.
+  + Movie Player - automatically attach audio/subtitles tracks from files with similar name.
+  + Image Viewer - parse/save _JPSJPS_ extension section in JPEG files.
+  + Image Viewer - show stereoscopic metadata issues (missing, mismatch) in File Info dialog.
+  + Added support for new stereo3d API in FFmpeg.
+  * Improved and extended information provided by File Info dialog.
+  * Image Viewer - read pixel aspect ratio property from image, when available.
+  * Image Viewer - handle MPO files with big thumbnails (load full images).
+  * Image Viewer - improved JPEG parser robustness.
+  * Movie Player - fixed playback of 5.0 and 7.1 audio streams.
+  * Define Oculus Rift as dedicated device to simplify configuration.
+  * Fix text characters positioning issue (displacement at second+ displaying time).
+
+ -- Kirill Gavrilov <kirill@sview.ru>  unknown_date
+
+sview (13.10-4~unknown_distrib) unknown_distrib; urgency=low
+
   + Linux, XLib - read Xft.dpi property to scale interface appropriately.
   + Added option to scale GUI.
   + Movie Player - added subtitles font size control.
@@ -12,7 +32,7 @@ sview (unknown_version) unknown_distrib; urgency=low
   ^ Accelerate high-range planar YUV (9/10/16 bits per component) to RGB color conversion (using GLSL).
   ^ Optimized font initialization time and GPU memory usage.
 
- -- Kirill Gavrilov <kirill@sview.ru>  unknown_date
+ -- Kirill Gavrilov <kirill@sview.ru>  Thu, 17 Oct 2013 20:58:32 +0400
 
 sview (13.06-1~unknown_distrib) unknown_distrib; urgency=low
 
