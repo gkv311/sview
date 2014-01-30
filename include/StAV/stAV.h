@@ -24,7 +24,7 @@ extern "C" {
     #include <libswscale/swscale.h>
 
     // new stereoscopic info API
-#if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(52, 20, 0))
+#if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(52, 56, 100))
     #define ST_AV_NEWSTEREO
     #include <libavutil/stereo3d.h>
 #endif
