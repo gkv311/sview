@@ -1128,11 +1128,20 @@ void StVideo::mainLoop() {
         myVideoTimer.nullify();
 
         myEventMutex.lock();
-        for(size_t anIter = 0; anIter < myFilesToDelete.size(); ++anIter) {
-            const StHandle<StFileNode>& aNode = myFilesToDelete[anIter];
-            myPlayList->removePhysically(aNode);
+        if(!myFilesToDelete.isEmpty()) {
+            const StHandle<StFileNode> aCurrent = myPlayList->getCurrentFile();
+            if(!aCurrent.isNull()
+             && aCurrent->getPath().isEquals(myFilesToDelete[0]->getPath())) {
+                close();
+            }
+            for(size_t anIter = 0; anIter < myFilesToDelete.size(); ++anIter) {
+                const StHandle<StFileNode>& aNode = myFilesToDelete[anIter];
+                if(!myPlayList->removePhysically(aNode)) {
+                    signals.onError(StString("File can not be deleted!\n" + aNode->getPath()));
+                }
+            }
+            myFilesToDelete.clear();
         }
-        myFilesToDelete.clear();
         myEventMutex.unlock();
 
         for(;;) {

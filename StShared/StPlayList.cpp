@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -523,13 +523,13 @@ void StPlayList::addToNode(const StHandle<StFileNode>& theFileNode,
     aFileNode->add(new StFileNode(thePathToAdd, aFileNode));
 }
 
-void StPlayList::removePhysically(const StHandle<StFileNode>& theFileNode) {
+bool StPlayList::removePhysically(const StHandle<StFileNode>& theFileNode) {
     StString aPath = theFileNode->getPath();
     StPlayItem* aRemItem = NULL;
     StMutexAuto anAutoLock(myMutex);
     if(myCurrent == NULL) {
         // empty playlist
-        return;
+        return false;
     } else if(aPath != myCurrent->getPath()) {
         // search play item
         for(StPlayItem* anItem = myFirst; anItem != NULL; anItem = anItem->getNext()) {
@@ -551,13 +551,16 @@ void StPlayList::removePhysically(const StHandle<StFileNode>& theFileNode) {
     }
 
     // remove item itself
-    if(aRemItem != NULL && StFileNode::removeFile(aPath)) {
+    const bool isDeleted = aRemItem != NULL
+                        && StFileNode::removeFile(aPath);
+    if(isDeleted) {
         delPlayItem(aRemItem);
         delete aRemItem;
     }
 
     anAutoLock.unlock();
     signals.onPlaylistChange();
+    return isDeleted;
 }
 
 bool StPlayList::checkExtension(const StString& thePath) {
