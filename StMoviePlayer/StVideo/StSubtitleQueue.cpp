@@ -186,7 +186,7 @@ void StSubtitleQueue::decodeLoop() {
                                 NULL,
                                 NULL
                             };
-                            const int aDstLinesize[4] = {
+                            /*const*/ int aDstLinesize[4] = {
                                 (int )aNewSubItem->Image.getSizeRowBytes(),
                                 0,
                                 0,
