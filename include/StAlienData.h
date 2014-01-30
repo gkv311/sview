@@ -166,10 +166,10 @@ class StAlienData {
      */
     static void Set32uLE(stUByte_t*     thePtr,
                          const uint32_t theValue) {
-        thePtr[0] = (theValue & 0x000000FF);
-        thePtr[1] = (theValue & 0x0000FF00) >> 8;
-        thePtr[2] = (theValue & 0x00FF0000) >> 16;
-        thePtr[3] = (theValue & 0xFF000000) >> 24;
+        thePtr[0] = stUByte_t((theValue & 0x000000FF));
+        thePtr[1] = stUByte_t((theValue & 0x0000FF00) >> 8);
+        thePtr[2] = stUByte_t((theValue & 0x00FF0000) >> 16);
+        thePtr[3] = stUByte_t((theValue & 0xFF000000) >> 24);
     }
 
     /**
@@ -177,10 +177,10 @@ class StAlienData {
      */
     static void Set32uBE(stUByte_t*     thePtr,
                          const uint32_t theValue) {
-        thePtr[0] = (theValue & 0xFF000000) >> 24;
-        thePtr[1] = (theValue & 0x00FF0000) >> 16;
-        thePtr[2] = (theValue & 0x0000FF00) >> 8;
-        thePtr[3] = (theValue & 0x000000FF);
+        thePtr[0] = stUByte_t((theValue & 0xFF000000) >> 24);
+        thePtr[1] = stUByte_t((theValue & 0x00FF0000) >> 16);
+        thePtr[2] = stUByte_t((theValue & 0x0000FF00) >> 8);
+        thePtr[3] = stUByte_t((theValue & 0x000000FF));
     }
 
 };

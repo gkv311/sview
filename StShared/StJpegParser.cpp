@@ -388,7 +388,7 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
                     #define SD_LEFT_FIELD_FIRST   0x00040000
 
                     if(aStereoDesc & 0x00000001) {
-                        const bool isLeftFirst = aStereoDesc & SD_LEFT_FIELD_FIRST;
+                        const bool isLeftFirst = (aStereoDesc & SD_LEFT_FIELD_FIRST) != 0;
                         switch(aStereoDesc & 0x0000FF00) {
                             case SD_LAYOUT_INTERLEAVED: myStFormat = ST_V_SRC_ROW_INTERLACE;     break;
                             case SD_LAYOUT_SIDEBYSIDE:  myStFormat = isLeftFirst
@@ -530,7 +530,7 @@ bool StJpegParser::setupJps(const StFormatEnum theFormat) {
         stMemCpy(aData + 2, "_JPSJPS_", 8);
         StAlienData::Set16uBE(aData + 10, 4);
         StAlienData::Set32uBE(aData + 12, 0);
-        StAlienData::Set16uBE(aData + 16, THE_APP_DESC.Size);
+        StAlienData::Set16uBE(aData + 16, (uint16_t )THE_APP_DESC.Size);
         stMemCpy(aData + 18, THE_APP_DESC.String, THE_APP_DESC.Size + 1);
     } else if(myStFormat == theFormat) {
         return false;
