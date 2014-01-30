@@ -175,9 +175,9 @@ Source: {#SVIEW_DISTR_PATH_x86}\freetype.dll;     DestDir: {app};        Flags: 
 Source: {#SVIEW_DISTR_PATH_AMD64}\freetype.dll;   DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 ; FFmpeg libraries are commonly used
 Source: {#SVIEW_DISTR_PATH_x86}\av*.dll;          DestDir: {app};        Flags: 32bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH_x86}\swscale*.dll;     DestDir: {app};        Flags: 32bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH_x86}\sw*.dll;          DestDir: {app};        Flags: 32bit ignoreversion; Components: StCore
 Source: {#SVIEW_DISTR_PATH_AMD64}\av*.dll;        DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
-Source: {#SVIEW_DISTR_PATH_AMD64}\swscale*.dll;   DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_AMD64}\sw*.dll;        DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 
 ; Browser plugin
 Source: {#SVIEW_DISTR_PATH_x86}\npStBrowserPlugin.dll;   DestDir: {app};       Flags: 32bit ignoreversion; Components: StBrowserPlugins or StActiveXPlugin
