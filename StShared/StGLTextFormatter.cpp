@@ -423,7 +423,7 @@ void StGLTextFormatter::format(const GLfloat theWidth,
 
     // move last line
     if(myRectsNb != 0) {
-        myTextWidth = stMax(myTextWidth, myRects[myRectsNb - 1].px.right());
+        myTextWidth = stMax(myTextWidth, myRects[myRectsNb - 1].px.right() - myLineLeft);
     }
     newLine(myRectsNb - 1);
     if(myRectsNb != 0
@@ -431,7 +431,7 @@ void StGLTextFormatter::format(const GLfloat theWidth,
         myAlignWidth = myRects[myRectsNb - 1].px.right();
     }
     if(myTextWidth > myAlignWidth) {
-        myTextWidth = myAlignWidth;
+        //myTextWidth = myAlignWidth;
     }
 
     // apply vertical alignment style
