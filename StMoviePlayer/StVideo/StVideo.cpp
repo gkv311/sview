@@ -571,10 +571,13 @@ void StVideo::doSeekContext(AVFormatContext* theFormatCtx,
     }
     if(!isSeekDone) {
         // at last - try to seek the format context itself...
-        int64_t aSeekTarget = stAV::secondsToUnits(theSeekPts);
-        isSeekDone = av_seek_frame(theFormatCtx, -1, aSeekTarget, 0) >= 0;
+        const int aFlags      = toSeekBack ? AVSEEK_FLAG_BACKWARD : 0;
+        int64_t   aSeekTarget = stAV::secondsToUnits(theSeekPts);
+        isSeekDone = av_seek_frame(theFormatCtx, -1, aSeekTarget, aFlags) >= 0;
         if(!isSeekDone) {
-            ST_DEBUG_LOG("Seeking disaster!");
+        #ifdef __ST_DEBUG__
+            ST_ERROR_LOG("Disaster! Seeking to " + theSeekPts + " [" + theFormatCtx->filename + "] has failed.");
+        #endif
         }
     }
 }
@@ -583,16 +586,16 @@ bool StVideo::doSeekStream(AVFormatContext* theFormatCtx,
                            const signed int theStreamId,
                            const double     theSeekPts,
                            const bool       toSeekBack) {
+    const int aFlags = toSeekBack ? AVSEEK_FLAG_BACKWARD : 0;
     AVStream* aStream = theFormatCtx->streams[theStreamId];
     int64_t aSeekTarget = stAV::secondsToUnits(aStream, theSeekPts + stAV::unitsToSeconds(aStream, aStream->start_time));
-
-    bool isSeekDone = av_seek_frame(theFormatCtx, theStreamId, aSeekTarget, 0) >= 0;
+    bool isSeekDone = av_seek_frame(theFormatCtx, theStreamId, aSeekTarget, aFlags) >= 0;
 
     // try 10 more times in backward direction to work-around huge duration between key frames
     // will not work for some streams with undefined cur_dts (AV_NOPTS_VALUE)!!!
     for(int aTries = 10; isSeekDone && toSeekBack && aTries > 0 && (aStream->cur_dts > aSeekTarget); --aTries) {
         aSeekTarget -= stAV::secondsToUnits(aStream, 1.0);
-        isSeekDone = av_seek_frame(theFormatCtx, theStreamId, aSeekTarget, 0) >= 0;
+        isSeekDone = av_seek_frame(theFormatCtx, theStreamId, aSeekTarget, aFlags) >= 0;
     }
 
     if(!isSeekDone) {
