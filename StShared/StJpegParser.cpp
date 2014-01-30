@@ -374,7 +374,7 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
                 && stAreEqual(aData + 2, "_JPSJPS_", 8)) {
                     // outdated VRex section
                     myOffsets[Offset_Jps] = aData - myBuffer - 2;
-                    ST_DEBUG_LOG("Jpeg, _JPSJPS_ section (len= )" + anItemLen);
+                    //ST_DEBUG_LOG("Jpeg, _JPSJPS_ section (len= )" + anItemLen);
                     //const uint16_t aBlockLen   = StAlienData::Get16uBE(aData + 10);
                     const uint32_t aStereoDesc = StAlienData::Get32uBE(aData + 12);
 
@@ -517,14 +517,14 @@ bool StJpegParser::setupJps(const StFormatEnum theFormat) {
         }
 
         // insert section right after DQT
+        const StCString THE_APP_DESC = stCString("Written by sView");
         const uint16_t  aDqtLen  = StAlienData::Get16uBE(myBuffer + myOffsets[Offset_Dqt] + 2);
         const ptrdiff_t anOffset = myOffsets[Offset_Dqt] + aDqtLen + 2;
-        const uint16_t  aJpsLen  = 16 + 2 + 6; // including "sView" description
+        const uint16_t  aJpsLen  = 16 + 2 + ((uint16_t )THE_APP_DESC.Size + 1);
         if(!insertSection(M_APP3, aJpsLen, anOffset)) {
             return false;
         }
 
-        const StCString THE_APP_DESC = stCString("sView");
         myOffsets[Offset_Jps] = anOffset;
         stUByte_t* aData = myBuffer + anOffset + 2;
         stMemCpy(aData + 2, "_JPSJPS_", 8);
