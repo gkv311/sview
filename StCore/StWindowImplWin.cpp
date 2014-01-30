@@ -953,6 +953,7 @@ bool StWindowImpl::toClipboard(const StString& theText) {
         return false;
     }
     CloseClipboard();
+    return true;
 }
 
 #endif
