@@ -26,6 +26,7 @@
 				</Compiler>
 				<Linker>
 					<Add library="opengl32" />
+					<Add library="user32" />
 				</Linker>
 				<ExtraCommands>
 					<Add before='cmd /c IF NOT EXIST &quot;..\bin\$(TARGET_NAME)\shaders\$(PROJECT_NAME)&quot; MKDIR &quot;..\bin\$(TARGET_NAME)\shaders\$(PROJECT_NAME)&quot;' />
@@ -51,6 +52,7 @@
 				</Compiler>
 				<Linker>
 					<Add library="opengl32" />
+					<Add library="user32" />
 				</Linker>
 				<ExtraCommands>
 					<Add before='cmd /c IF NOT EXIST &quot;..\bin\$(TARGET_NAME)\shaders\$(PROJECT_NAME)&quot; MKDIR &quot;..\bin\$(TARGET_NAME)\shaders\$(PROJECT_NAME)&quot;' />
@@ -79,6 +81,7 @@
 				<Linker>
 					<Add option="/DEBUG" />
 					<Add library="opengl32" />
+					<Add library="user32" />
 				</Linker>
 				<ExtraCommands>
 					<Add before='cmd /c IF NOT EXIST &quot;..\bin\$(TARGET_NAME)\shaders\$(PROJECT_NAME)&quot; MKDIR &quot;..\bin\$(TARGET_NAME)\shaders\$(PROJECT_NAME)&quot;' />
@@ -104,6 +107,7 @@
 				</Compiler>
 				<Linker>
 					<Add library="opengl32" />
+					<Add library="user32" />
 				</Linker>
 				<ExtraCommands>
 					<Add before='cmd /c IF NOT EXIST &quot;..\bin\$(TARGET_NAME)\shaders\$(PROJECT_NAME)&quot; MKDIR &quot;..\bin\$(TARGET_NAME)\shaders\$(PROJECT_NAME)&quot;' />
