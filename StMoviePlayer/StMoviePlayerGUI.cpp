@@ -802,8 +802,7 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
         aSrcInfo     = tr(INFO_NO_SRCFORMAT);
         anExtraColor = StGLVec3(1.0f, 1.0f, 0.8f);
     } else if(anExtraInfo->SrcFormat != ST_V_SRC_AUTODETECT
-           && anExtraInfo->SrcFormat != anActiveSrcFormat
-           && anActiveSrcFormat != ST_V_SRC_MONO) {
+           && anExtraInfo->SrcFormat != anActiveSrcFormat) {
         aSrcInfo     = tr(INFO_WRONG_SRCFORMAT);
         anExtraColor = StGLVec3(1.0f, 0.0f, 0.0f);
     }
