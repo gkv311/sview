@@ -781,7 +781,7 @@ template<typename Type> inline
 void StStringUnicode<Type>::toLowerCase() {
     for(StUtfIterator<Type> anIter(this->String); *anIter != 0; ++anIter) {
         if(*anIter > 64 && *anIter < 91) {
-            *anIter.changeBufferHere() = *anIter + 32;
+            *anIter.changeBufferHere() = Type(*anIter + 32);
         }
     }
 }

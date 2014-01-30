@@ -96,7 +96,7 @@ void StGLTable::fillFromMap(const StDictionary& theMap,
     ST_ASSERT_SLIP(theRowId >= 0 && theColId >= 0,
                    "StGLTable::fillFromMap() out of range",
                    return);
-    const int aRowsNb = theRowId + theMap.size();
+    const int aRowsNb = theRowId + (int )theMap.size();
     const int aColsNb = theColId + 2;
     if(aRowsNb > (int )myRowBottoms.size()
     || aColsNb > (int )myColRights.size()) {
@@ -108,7 +108,7 @@ void StGLTable::fillFromMap(const StDictionary& theMap,
     int       aCol1Width    = 0;
     for(size_t anIter = 0; anIter < theMap.size(); ++anIter) {
         const StDictEntry& aPair  = theMap.getValue(anIter);
-        StGLTableItem&     anItem = changeElement(theRowId + anIter, theColId);
+        StGLTableItem&     anItem = changeElement(theRowId + (int )anIter, theColId);
         anItem.setRowSpan(1);
         anItem.setColSpan(1);
 
@@ -126,7 +126,7 @@ void StGLTable::fillFromMap(const StDictionary& theMap,
     // adjust width of all elements in first column
     // (alternatively we might adjust right corner)
     for(size_t anIter = 0; anIter < theMap.size(); ++anIter) {
-        StGLTableItem& anItem = changeElement(theRowId + anIter, theColId);
+        StGLTableItem& anItem = changeElement(theRowId + (int )anIter, theColId);
         anItem.getItem()->changeRectPx().right() = anItem.getItem()->getRectPx().left() + aCol1Width;
         ((StGLTextArea* )anItem.getItem())->setTextWidth(aCol1Width);
     }
@@ -135,7 +135,7 @@ void StGLTable::fillFromMap(const StDictionary& theMap,
     int aCol2MaxWidth = theMaxWidth - aCol1Width - 2 * (myMarginLeft + myMarginRight);
     for(size_t anIter = 0; anIter < theMap.size(); ++anIter) {
         const StDictEntry& aPair  = theMap.getValue(anIter);
-        StGLTableItem&     anItem = changeElement(theRowId + anIter, theColId + 1);
+        StGLTableItem&     anItem = changeElement(theRowId + (int )anIter, theColId + 1);
         anItem.setRowSpan(1);
         anItem.setColSpan(1);
 
