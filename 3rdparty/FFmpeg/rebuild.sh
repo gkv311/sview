@@ -27,7 +27,7 @@ do
 done
 
 # cross-compilers prefixes
-GCC_MACHINE_MINGW_32="mingw32"
+GCC_MACHINE_MINGW_32="i686-w64-mingw32"
 GCC_MACHINE_MINGW_32_1="i686-mingw32"
 GCC_MACHINE_MINGW_64="x86_64-w64-mingw32"
 GCC_MACHINE_MINGW_64_1="x86_64-pc-mingw32"
@@ -142,7 +142,7 @@ echo
 cat $OUTPUT_FOLDER/config.log
 echo
 
-make 2>$OUTPUT_FOLDER/make.log
+make -j6 2>$OUTPUT_FOLDER/make.log
 cat $OUTPUT_FOLDER/make.log | grep -i -w 'ошибка'
 echo
 
@@ -155,63 +155,63 @@ if [ -f libavcodec/avcodec.dll ]; then
   cp -f libavcodec/*.dll $OUTPUT_FOLDER
   cp -f libavcodec/*.lib $OUTPUT_FOLDER &>/dev/null
 elif [ -f libavcodec/libavcodec.dylib ]; then
-  cp -f libavcodec/*.dylib* $OUTPUT_FOLDER/lib
+  cp -f -d libavcodec/*.dylib* $OUTPUT_FOLDER/lib
 else
-  cp -f libavcodec/*.so* $OUTPUT_FOLDER/lib
+  cp -f -d libavcodec/*.so* $OUTPUT_FOLDER/lib
 fi
 
 if [ -f libavdevice/avdevice.dll ]; then
   cp -f libavdevice/*.dll $OUTPUT_FOLDER
   cp -f libavdevice/*.lib $OUTPUT_FOLDER &>/dev/null
 elif [ -f libavdevice/libavdevice.dylib ]; then
-  cp -f libavdevice/*.dylib* $OUTPUT_FOLDER/lib
+  cp -f -d libavdevice/*.dylib* $OUTPUT_FOLDER/lib
 else
-  cp -f libavdevice/*.so* $OUTPUT_FOLDER/lib
+  cp -f -d libavdevice/*.so* $OUTPUT_FOLDER/lib
 fi
 
 if [ -f libavfilter/avfilter.dll ]; then
   cp -f libavfilter/*.dll $OUTPUT_FOLDER
   cp -f libavfilter/*.lib $OUTPUT_FOLDER &>/dev/null
 elif [ -f libavfilter/libavfilter.dylib ]; then
-  cp -f libavfilter/*.dylib* $OUTPUT_FOLDER/lib
+  cp -f -d libavfilter/*.dylib* $OUTPUT_FOLDER/lib
 else
-  cp -f libavfilter/*.so* $OUTPUT_FOLDER/lib
+  cp -f -d libavfilter/*.so* $OUTPUT_FOLDER/lib
 fi
 
 if [ -f libavformat/avformat.dll ]; then
   cp -f libavformat/*.dll $OUTPUT_FOLDER
   cp -f libavformat/*.lib $OUTPUT_FOLDER &>/dev/null
 elif [ -f libavformat/libavformat.dylib ]; then
-  cp -f libavformat/*.dylib* $OUTPUT_FOLDER/lib
+  cp -f -d libavformat/*.dylib* $OUTPUT_FOLDER/lib
 else
-  cp -f libavformat/*.so* $OUTPUT_FOLDER/lib
+  cp -f -d libavformat/*.so* $OUTPUT_FOLDER/lib
 fi
 
 if [ -f libavutil/avutil.dll ]; then
   cp -f libavutil/*.dll $OUTPUT_FOLDER
   cp -f libavutil/*.lib $OUTPUT_FOLDER &>/dev/null
 elif [ -f libavutil/libavutil.dylib ]; then
-  cp -f libavutil/*.dylib* $OUTPUT_FOLDER/lib
+  cp -f -d libavutil/*.dylib* $OUTPUT_FOLDER/lib
 else
-  cp -f libavutil/*.so* $OUTPUT_FOLDER/lib
+  cp -f -d libavutil/*.so* $OUTPUT_FOLDER/lib
 fi
 
 if [ -f libswscale/swscale.dll ]; then
   cp -f libswscale/*.dll $OUTPUT_FOLDER
   cp -f libswscale/*.lib $OUTPUT_FOLDER &>/dev/null
 elif [ -f libswscale/libswscale.dylib ]; then
-  cp -f libswscale/*.dylib* $OUTPUT_FOLDER/lib
+  cp -f -d libswscale/*.dylib* $OUTPUT_FOLDER/lib
 else
-  cp -f libswscale/*.so* $OUTPUT_FOLDER/lib
+  cp -f -d libswscale/*.so* $OUTPUT_FOLDER/lib
 fi
 
 if [ -f libswresample/swresample.dll ]; then
   cp -f libswresample/*.dll $OUTPUT_FOLDER
   cp -f libswresample/*.lib $OUTPUT_FOLDER &>/dev/null
 elif [ -f libswresample/libswresample.dylib ]; then
-  cp -f libswresample/*.dylib* $OUTPUT_FOLDER/lib
+  cp -f -d libswresample/*.dylib* $OUTPUT_FOLDER/lib
 else
-  cp -f libswresample/*.so* $OUTPUT_FOLDER/lib
+  cp -f -d libswresample/*.so* $OUTPUT_FOLDER/lib
 fi
 
 cp -f *.exe      $OUTPUT_FOLDER &>/dev/null
@@ -224,7 +224,7 @@ cp -f ffserver_g $OUTPUT_FOLDER/bin &>/dev/null
 cp -f ffplay     $OUTPUT_FOLDER/bin &>/dev/null
 
 # remove duplicates (only Windows)
-rm $OUTPUT_FOLDER/avcodec.dll $OUTPUT_FOLDER/avcore.dll $OUTPUT_FOLDER/avdevice.dll $OUTPUT_FOLDER/avfilter.dll $OUTPUT_FOLDER/avformat.dll $OUTPUT_FOLDER/avutil.dll $OUTPUT_FOLDER/swscale.dll &>/dev/null
+rm $OUTPUT_FOLDER/avcodec.dll $OUTPUT_FOLDER/swresample.dll $OUTPUT_FOLDER/avdevice.dll $OUTPUT_FOLDER/avfilter.dll $OUTPUT_FOLDER/avformat.dll $OUTPUT_FOLDER/avutil.dll $OUTPUT_FOLDER/swscale.dll &>/dev/null
 
 # create binaries archive
 if command -v 7za &>/dev/null
