@@ -1051,6 +1051,7 @@ StHandle<StMovieInfo> StVideo::getFileInfo(const StHandle<StStereoParams>& thePa
 
     // continuously read source format since it can be stored in frame
     anInfo->SrcFormat = myVideoMaster->getSrcFormatInfo();
+    anInfo->HasVideo  = myVideoMaster->isInitialized();
 
     anInfo->Codecs.clear();
     anInfo->Codecs.add(StArgument("vcodec1",   myVideoMaster->getCodecInfo()));

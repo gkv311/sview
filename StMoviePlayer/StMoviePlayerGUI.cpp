@@ -780,41 +780,43 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
 
     const int aTextMaxWidth = aWidthMax - (aTable->getMarginLeft() + aTable->getMarginRight());
 
-    // add stereoscopic format info
-    const StFormatEnum anActiveSrcFormat = aParams->isSwapLR()
-                                         ? st::formatReversed(aParams->getSrcFormat())
-                                         : aParams->getSrcFormat();
-    StGLTableItem& aSrcFormatItem = aTable->changeElement(aRowLast++, 0); aSrcFormatItem.setColSpan(2);
-    StGLTextArea*  aSrcFormatText = new StGLTextArea(&aSrcFormatItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
-    aSrcFormatText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
-                                   StGLTextFormatter::ST_ALIGN_Y_TOP);
-    aSrcFormatText->setText(StString("\n") + tr(BTN_SRC_FORMAT) + " " + trSrcFormat(anActiveSrcFormat));
-    aSrcFormatText->setTextColor(aWhite);
-    aSrcFormatText->setVisibility(true, true);
-    aSrcFormatText->stglInitAutoHeightWidth(aTextMaxWidth);
+    if(anExtraInfo->HasVideo) {
+        // add stereoscopic format info
+        const StFormatEnum anActiveSrcFormat = aParams->isSwapLR()
+                                             ? st::formatReversed(aParams->getSrcFormat())
+                                             : aParams->getSrcFormat();
+        StGLTableItem& aSrcFormatItem = aTable->changeElement(aRowLast++, 0); aSrcFormatItem.setColSpan(2);
+        StGLTextArea*  aSrcFormatText = new StGLTextArea(&aSrcFormatItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
+        aSrcFormatText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+                                       StGLTextFormatter::ST_ALIGN_Y_TOP);
+        aSrcFormatText->setText(StString("\n") + tr(BTN_SRC_FORMAT) + " " + trSrcFormat(anActiveSrcFormat));
+        aSrcFormatText->setTextColor(aWhite);
+        aSrcFormatText->setVisibility(true, true);
+        aSrcFormatText->stglInitAutoHeightWidth(aTextMaxWidth);
 
-    // warn about wrong/missing stereoscopic format information
-    StString aSrcInfo;
-    StGLVec3 anExtraColor = aWhite;
-    if(anExtraInfo->SrcFormat == ST_V_SRC_AUTODETECT
-    && anActiveSrcFormat != ST_V_SRC_MONO
-    && anActiveSrcFormat != ST_V_SRC_SEPARATE_FRAMES) {
-        aSrcInfo     = tr(INFO_NO_SRCFORMAT);
-        anExtraColor = StGLVec3(1.0f, 1.0f, 0.8f);
-    } else if(anExtraInfo->SrcFormat != ST_V_SRC_AUTODETECT
-           && anExtraInfo->SrcFormat != anActiveSrcFormat) {
-        aSrcInfo     = tr(INFO_WRONG_SRCFORMAT);
-        anExtraColor = StGLVec3(1.0f, 0.0f, 0.0f);
-    }
-    if(!aSrcInfo.isEmpty()) {
-        StGLTableItem& aTabItem = aTable->changeElement(aRowLast++, 0); aTabItem.setColSpan(2);
-        StGLTextArea*  aText    = new StGLTextArea(&aTabItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
-        aText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
-                              StGLTextFormatter::ST_ALIGN_Y_TOP);
-        aText->setText(aSrcInfo);
-        aText->setTextColor(anExtraColor);
-        aText->setVisibility(true, true);
-        aText->stglInitAutoHeightWidth(aTextMaxWidth);
+        // warn about wrong/missing stereoscopic format information
+        StString aSrcInfo;
+        StGLVec3 anExtraColor = aWhite;
+        if(anExtraInfo->SrcFormat == ST_V_SRC_AUTODETECT
+        && anActiveSrcFormat != ST_V_SRC_MONO
+        && anActiveSrcFormat != ST_V_SRC_SEPARATE_FRAMES) {
+            aSrcInfo     = tr(INFO_NO_SRCFORMAT);
+            anExtraColor = StGLVec3(1.0f, 1.0f, 0.8f);
+        } else if(anExtraInfo->SrcFormat != ST_V_SRC_AUTODETECT
+               && anExtraInfo->SrcFormat != anActiveSrcFormat) {
+            aSrcInfo     = tr(INFO_WRONG_SRCFORMAT);
+            anExtraColor = StGLVec3(1.0f, 0.0f, 0.0f);
+        }
+        if(!aSrcInfo.isEmpty()) {
+            StGLTableItem& aTabItem = aTable->changeElement(aRowLast++, 0); aTabItem.setColSpan(2);
+            StGLTextArea*  aText    = new StGLTextArea(&aTabItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
+            aText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+                                  StGLTextFormatter::ST_ALIGN_Y_TOP);
+            aText->setText(aSrcInfo);
+            aText->setTextColor(anExtraColor);
+            aText->setVisibility(true, true);
+            aText->stglInitAutoHeightWidth(aTextMaxWidth);
+        }
     }
 
     // append information about active decoders
