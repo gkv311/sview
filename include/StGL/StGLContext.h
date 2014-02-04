@@ -146,6 +146,7 @@ class StGLContext {
     StGLArbFbo*     arbFbo;     //!< GL_ARB_framebuffer_object
     bool            arbNPTW;    //!< GL_ARB_texture_non_power_of_two
     bool            arbTexRG;   //!< GL_ARB_texture_rg
+    bool            arbTexClear;//!< GL_ARB_clear_texture
     StGLFunctions*  extAll;     //!< access to ALL extensions for advanced users
     bool            extSwapTear;//!< WGL_EXT_swap_control_tear/GLX_EXT_swap_control_tear
 

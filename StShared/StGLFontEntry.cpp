@@ -130,7 +130,13 @@ bool StGLFontEntry::createTexture(StGLContext& theCtx) {
 
     // destruction of temporary FBO produces broken texture on Catalyst drivers for unknown reason
     //StGLFrameBuffer::clearTexture(theCtx, aTexture);
-    if(aFbo->init(theCtx, aTexture, false)) {
+    if(theCtx.arbTexClear) {
+        theCtx.core11fwd->glPixelStorei(GL_UNPACK_LSB_FIRST,  GL_FALSE);
+        theCtx.core11fwd->glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        theCtx.core11fwd->glPixelStorei(GL_UNPACK_ALIGNMENT,  1);
+        const stUByte_t THE_BLACK = 0;
+        theCtx.extAll->glClearTexImage(aTexture->getTextureId(), 0, theCtx.arbTexRG ? GL_RED : GL_ALPHA, GL_UNSIGNED_BYTE, &THE_BLACK);
+    } else if(aFbo->init(theCtx, aTexture, false)) {
         aFbo->clearTexture(theCtx);
     } else {
         ST_ERROR_LOG("Fail to bind " + (theCtx.arbTexRG ? "GL_R8" : "GL_ALPHA8") + " texture to FBO!");

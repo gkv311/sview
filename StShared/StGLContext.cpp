@@ -47,6 +47,7 @@ StGLContext::StGLContext()
   arbFbo(NULL),
   arbNPTW(false),
   arbTexRG(false),
+  arbTexClear(false),
   extAll(NULL),
   extSwapTear(false),
   myFuncs(new StGLFunctions()),
@@ -85,6 +86,7 @@ StGLContext::StGLContext(const bool theToInitialize)
   arbFbo(NULL),
   arbNPTW(false),
   arbTexRG(false),
+  arbTexClear(false),
   extAll(NULL),
   extSwapTear(false),
   myFuncs(new StGLFunctions()),
@@ -1342,10 +1344,14 @@ bool StGLContext::stglInit() {
          && STGL_READ_FUNC(glObjectPtrLabel)
          && STGL_READ_FUNC(glGetObjectPtrLabel);
 
-    has44 = isGlGreaterEqual(4, 4)
-         && STGL_READ_FUNC(glBufferStorage)
+    // load GL_ARB_clear_texture (added to OpenGL 4.4 core)
+    arbTexClear = (isGlGreaterEqual(4, 4) || stglCheckExtension("GL_ARB_clear_texture"))
          && STGL_READ_FUNC(glClearTexImage)
-         && STGL_READ_FUNC(glClearTexSubImage)
+         && STGL_READ_FUNC(glClearTexSubImage);
+
+    has44 = isGlGreaterEqual(4, 4)
+         && arbTexClear
+         && STGL_READ_FUNC(glBufferStorage)
          && STGL_READ_FUNC(glBindBuffersBase)
          && STGL_READ_FUNC(glBindBuffersRange)
          && STGL_READ_FUNC(glBindTextures)
