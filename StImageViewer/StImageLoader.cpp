@@ -349,7 +349,7 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
 
     int aResult = StGLTextureQueue::SNAPSHOT_NO_NEW;
     StImage aDataLeft, aDataRight;
-    if(!theParams->isSwapLR()) {
+    if(!theParams->ToSwapLR) {
         aResult = getSnapshot(&aDataLeft, &aDataRight, true);
     } else {
         aResult = getSnapshot(&aDataRight, &aDataLeft, true);
@@ -454,8 +454,8 @@ bool StImageLoader::saveImageInfo(const StHandle<StImageInfo>& theInfo) {
         return false;
     }
 
-    StFormatEnum aSrcFormat = theInfo->Id->getSrcFormat();
-    if(theInfo->Id->isSwapLR()) {
+    StFormatEnum aSrcFormat = theInfo->Id->StereoFormat;
+    if(theInfo->Id->ToSwapLR) {
         aSrcFormat = st::formatReversed(aSrcFormat);
     }
 

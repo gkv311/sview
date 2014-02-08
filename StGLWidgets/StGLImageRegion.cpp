@@ -64,12 +64,12 @@ namespace {
 
         virtual bool getValue() const {
             return !myTrackedParams.isNull()
-                 && myTrackedParams->isSwapLR();
+                 && myTrackedParams->ToSwapLR;
         }
 
         virtual bool setValue(const bool theValue) {
             if(myTrackedParams.isNull()
-            || myTrackedParams->isSwapLR() == theValue) {
+            || myTrackedParams->ToSwapLR == theValue) {
                 return false;
             }
             myTrackedParams->setSwapLR(theValue);
@@ -93,15 +93,15 @@ namespace {
         StViewModeParam() : StInt32Param(0) {}
 
         virtual int32_t getValue() const {
-            return myTrackedParams.isNull() ? 0 : myTrackedParams->getViewMode();
+            return myTrackedParams.isNull() ? 0 : myTrackedParams->ViewingMode;
         }
 
         virtual bool setValue(const int32_t theValue) {
             if(myTrackedParams.isNull()
-            || myTrackedParams->getViewMode() == theValue) {
+            || myTrackedParams->ViewingMode == theValue) {
                 return false;
             }
-            myTrackedParams->setViewMode((StStereoParams::ViewMode )theValue);
+            myTrackedParams->ViewingMode = (StStereoParams::ViewMode )theValue;
             return true;
         }
 
@@ -308,11 +308,11 @@ StGLVec2 StGLImageRegion::getMouseMoveSphere(const StPointD_t& theCursorZoFrom,
                                              const StPointD_t& theCursorZoTo) {
     /// TODO (Kirill Gavrilov#5) these computations are invalid
     StGLVec2 stVec = getMouseMoveFlat(theCursorZoFrom, theCursorZoTo);
-    GLfloat sphereScale = SPHERE_RADIUS * getSource()->getScale();
+    GLfloat aSphereScale = SPHERE_RADIUS * getSource()->ScaleFactor;
     StRectD_t zParams;
     getCamera()->getZParams(getCamera()->getZNear(), zParams);
-    stVec.x() *= -90.0f * GLfloat(zParams.right() - zParams.left()) / sphereScale;
-    stVec.y() *=  90.0f * GLfloat(zParams.bottom() - zParams.top()) / sphereScale;
+    stVec.x() *= -90.0f * GLfloat(zParams.right() - zParams.left()) / aSphereScale;
+    stVec.y() *=  90.0f * GLfloat(zParams.bottom() - zParams.top()) / aSphereScale;
     return stVec;
 }
 
@@ -360,8 +360,8 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     }
 
     StGLContext& aCtx = getContext();
-    bool toShowRight = ( aParams->isSwapLR() && (theView == ST_DRAW_LEFT )) ||
-                       (!aParams->isSwapLR() && (theView == ST_DRAW_RIGHT));
+    bool toShowRight = ( aParams->ToSwapLR && (theView == ST_DRAW_LEFT )) ||
+                       (!aParams->ToSwapLR && (theView == ST_DRAW_RIGHT));
     if(aParams->isMono()) {
         leftOrRight = StGLQuadTexture::LEFT_TEXTURE;
     } else if(myTextureQueue->getQTexture().getFront(StGLQuadTexture::RIGHT_TEXTURE).isValid()) {
@@ -422,7 +422,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     StGLVec4 dataClampVec;
     StGLVec4 dataUVClampVec;
     if(params.textureFilter->getValue() == StGLImageProgram::FILTER_NEAREST
-    || aParams->getViewMode() == StStereoParams::PANORAMA_SPHERE) {
+    || aParams->ViewingMode == StStereoParams::PANORAMA_SPHERE) {
         myTextureQueue->getQTexture().setMinMagFilter(aCtx, GL_NEAREST);
         //
         dataClampVec.x() = 0.0f;
@@ -453,7 +453,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     // select (de)anaglyph color filter
     StGLVec3 aColorScale(1.0f, 1.0f, 1.0f);
     bool isAnaglyph = false;
-    switch(aParams->getSrcFormat()) {
+    switch(aParams->StereoFormat) {
         case ST_V_SRC_ANAGLYPH_RED_CYAN: {
             if(!toShowRight) {
                 aColorScale.g() = 0.0f;
@@ -487,7 +487,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
         default: break;
     }
 
-    switch(aParams->getViewMode()) {
+    switch(aParams->ViewingMode) {
         default:
         case StStereoParams::FLAT_IMAGE: {
             // apply (de)anaglyph color filter
@@ -514,10 +514,10 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             }
 
             // apply scale
-            stModelMat.scale(aParams->getScale(), aParams->getScale(), 1.0f);
+            stModelMat.scale(aParams->ScaleFactor, aParams->ScaleFactor, 1.0f);
 
             // apply position
-            stModelMat.translate(StGLVec3(aParams->getCenter()));
+            stModelMat.translate(StGLVec3(aParams->PanCenter));
 
             GLfloat rectRatio = GLfloat(getRectPx().ratio());
             StGLVec2 aMouseMove = aParams->moveFlatDelta(getMouseMoveFlat(), rectRatio);
@@ -584,13 +584,13 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             /// TODO (Kirill Gavrilov#5) apply separation
 
             // perform scaling
-            stModelMat.scale(SPHERE_RADIUS * aParams->getScale(), SPHERE_RADIUS * aParams->getScale(), SPHERE_RADIUS);
+            stModelMat.scale(SPHERE_RADIUS * aParams->ScaleFactor, SPHERE_RADIUS * aParams->ScaleFactor, SPHERE_RADIUS);
 
             /// TODO (Kirill Gavrilov#5) fix horizontal movement direction after upside-downing
             // apply movements
             StGLVec2 mouseMove = getMouseMoveSphere();
-            stModelMat.rotate(         aParams->getTheta() + mouseMove.y(),  StGLVec3::DX());
-            stModelMat.rotate(90.0f - (aParams->getPhi()   + mouseMove.x()), StGLVec3::DY());
+            stModelMat.rotate(         aParams->PanTheta + mouseMove.y(),  StGLVec3::DX());
+            stModelMat.rotate(90.0f - (aParams->PanPhi   + mouseMove.x()), StGLVec3::DY());
 
             // apply rotations
             if(theView == ST_DRAW_LEFT) {
@@ -625,7 +625,9 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     aCtx.stglResetScissorRect();
 }
 
-bool StGLImageRegion::tryClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemClicked) {
+bool StGLImageRegion::tryClick(const StPointD_t& theCursorZo,
+                               const int&        theMouseBtn,
+                               bool&             isItemClicked) {
     if(StGLWidget::tryClick(theCursorZo, theMouseBtn, isItemClicked)) {
         myClickPntZo = theCursorZo;
         isItemClicked = true;
@@ -634,14 +636,16 @@ bool StGLImageRegion::tryClick(const StPointD_t& theCursorZo, const int& theMous
     return false;
 }
 
-bool StGLImageRegion::tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemUnclicked) {
+bool StGLImageRegion::tryUnClick(const StPointD_t& theCursorZo,
+                                 const int&        theMouseBtn,
+                                 bool&             isItemUnclicked) {
     StHandle<StStereoParams> aParams = getSource();
     if(!myIsInitialized || aParams.isNull()) {
         return false;
     }
     if(isClicked(ST_MOUSE_LEFT) && theMouseBtn == ST_MOUSE_LEFT) {
         // ignore out of window
-        switch(aParams->getViewMode()) {
+        switch(aParams->ViewingMode) {
             default:
             case StStereoParams::FLAT_IMAGE: {
                 aParams->moveFlat(getMouseMoveFlat(myClickPntZo, theCursorZo), GLfloat(getRectPx().ratio()));
@@ -659,35 +663,35 @@ bool StGLImageRegion::tryUnClick(const StPointD_t& theCursorZo, const int& theMo
     }
     if(StGLWidget::tryUnClick(theCursorZo, theMouseBtn, isItemUnclicked)) {
         const GLfloat SCALE_STEPS = 0.16f;
-        StPointD_t centerCursor(0.5, 0.5);
+        StPointD_t aCenterCursor(0.5, 0.5);
         if(theMouseBtn == ST_MOUSE_SCROLL_V_UP) {
-            switch(aParams->getViewMode()) {
+            switch(aParams->ViewingMode) {
                 default:
                 case StStereoParams::FLAT_IMAGE: {
-                    StGLVec2 stVec = getMouseMoveFlat(centerCursor, theCursorZo) * (-SCALE_STEPS * aParams->getScaleStep());
+                    const StGLVec2 aVec = getMouseMoveFlat(aCenterCursor, theCursorZo) * (-SCALE_STEPS);
                     aParams->scaleIn(SCALE_STEPS);
-                    aParams->moveFlat(stVec, GLfloat(getRectPx().ratio()));
+                    aParams->moveFlat(aVec, GLfloat(getRectPx().ratio()));
                     break;
                 }
                 case StStereoParams::PANORAMA_SPHERE: {
-                    StGLVec2 stVec = getMouseMoveSphere(centerCursor, theCursorZo) * (-SCALE_STEPS * aParams->getScaleStep());
+                    const StGLVec2 aVec = getMouseMoveSphere(aCenterCursor, theCursorZo) * (-SCALE_STEPS);
                     aParams->scaleIn(SCALE_STEPS);
-                    aParams->moveSphere(stVec);
+                    aParams->moveSphere(aVec);
                     break;
                 }
             }
         } else if(theMouseBtn == ST_MOUSE_SCROLL_V_DOWN) {
-            switch(aParams->getViewMode()) {
+            switch(aParams->ViewingMode) {
                 default:
                 case StStereoParams::FLAT_IMAGE: {
-                    StGLVec2 stVec = getMouseMoveFlat(centerCursor, theCursorZo) * (SCALE_STEPS * aParams->getScaleStep());
-                    aParams->moveFlat(stVec, GLfloat(getRectPx().ratio()));
+                    const StGLVec2 aVec = getMouseMoveFlat(aCenterCursor, theCursorZo) * SCALE_STEPS;
+                    aParams->moveFlat(aVec, GLfloat(getRectPx().ratio()));
                     aParams->scaleOut(SCALE_STEPS);
                     break;
                 }
                 case StStereoParams::PANORAMA_SPHERE: {
-                    StGLVec2 stVec = getMouseMoveSphere(centerCursor, theCursorZo) * (SCALE_STEPS * aParams->getScaleStep());
-                    aParams->moveSphere(stVec);
+                    const StGLVec2 aVec = getMouseMoveSphere(aCenterCursor, theCursorZo) * SCALE_STEPS;
+                    aParams->moveSphere(aVec);
                     aParams->scaleOut(SCALE_STEPS);
                     break;
                 }

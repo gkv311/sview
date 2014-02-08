@@ -536,7 +536,7 @@ bool StGLTextureData::fillTexture(StGLContext&     theCtx,
         }
 
         if(!myStParams.isNull()) {
-            myStParams->setSrcFormat(mySrcFormat);
+            myStParams->StereoFormat = mySrcFormat;
         }
         return true;
     } else {

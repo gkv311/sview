@@ -720,7 +720,7 @@ void StMoviePlayer::parseArguments(const StArgumentsMap& theArguments) {
         params.isFullscreen->setValue(!anArgFullscr.isValueOff());
     }
     if(anArgViewMode.isValid()) {
-        myPlayList->changeDefParams().setViewMode(StStereoParams::GET_VIEW_MODE_FROM_STRING(anArgViewMode.getValue()));
+        myPlayList->changeDefParams().ViewingMode = StStereoParams::GET_VIEW_MODE_FROM_STRING(anArgViewMode.getValue());
     }
     if(anArgSrcFormat.isValid()) {
         params.srcFormat->setValue(st::formatFromString(anArgSrcFormat.getValue()));

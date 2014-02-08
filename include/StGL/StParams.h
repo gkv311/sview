@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -27,6 +27,8 @@ class StStereoParams {
         PANORAMA_CYLINDER, // cylindrical panorama
     } ViewMode;
 
+    static const int THE_SEP_STEP_PX = 2; //!< separation inc/dec step
+
     static StString GET_VIEW_MODE_NAME(ViewMode theViewMode) {
         switch(theViewMode) {
             case PANORAMA_SPHERE: return "sphere";
@@ -49,21 +51,19 @@ class StStereoParams {
      * Main constructor - default parameters.
      */
     StStereoParams(ViewMode theViewMode = FLAT_IMAGE)
-    : mySrcFormat(ST_V_SRC_MONO),
+    : ViewingMode(theViewMode),
+      StereoFormat(ST_V_SRC_MONO),
+      ToSwapLR(false),
+      PanCenter(0.0f, 0.0f),
+      PanTheta(0.0f),
+      PanPhi(0.0f),
+      ScaleFactor(1.0f),
       mySepDxPx(0),
       mySepDxZeroPx(0),
       mySepDyPx(0),
-      mySepStepPx(2),
       mySepRotDegrees(0.0f),
       myZRotateDegrees(0.0f),
-      myZRotateZero(0.0f),
-      myCenter(0.0f, 0.0f),
-      myScaleFactor(1.0f),
-      myScaleStep(1.0f),
-      myPanoTheta(0.0f),
-      myPanoPhi(0.0f),
-      myViewMode(theViewMode),
-      myToSwapLR(false) {
+      myZRotateZero(0.0f) {
         //
     }
 
@@ -71,61 +71,19 @@ class StStereoParams {
      * @return true if source format is MONO image.
      */
     bool isMono() const {
-        return mySrcFormat == ST_V_SRC_MONO;
-    }
-
-    /**
-     * @return image source format.
-     */
-    StFormatEnum getSrcFormat() const {
-        return mySrcFormat;
-    }
-
-    /**
-     * @param theSrcFormat - image source format.
-     */
-    void setSrcFormat(StFormatEnum theSrcFormat) {
-        mySrcFormat = theSrcFormat;
-    }
-
-    /**
-     * @return viewing mode (panorama or flat image).
-     */
-    ViewMode getViewMode() const {
-        return myViewMode;
-    }
-
-    /**
-     * @param theViewMode - viewing mode (panorama or flat image).
-     */
-    void setViewMode(ViewMode theViewMode) {
-        myViewMode = theViewMode;
+        return StereoFormat == ST_V_SRC_MONO;
     }
 
     /**
      * Switch to the next viewing mode.
      */
     void nextViewMode() {
-        switch(myViewMode) {
-            case FLAT_IMAGE:        myViewMode = PANORAMA_SPHERE; break;
+        switch(ViewingMode) {
+            case FLAT_IMAGE:        ViewingMode = PANORAMA_SPHERE; break;
             case PANORAMA_SPHERE:
             case PANORAMA_CYLINDER:
-            default:                myViewMode = FLAT_IMAGE;
+            default:                ViewingMode = FLAT_IMAGE;
         }
-    }
-
-    /**
-     * @return scaling factor ('zoom').
-     */
-    GLfloat getScale() const {
-        return myScaleFactor;
-    }
-
-    /**
-     * @return scaling factor inc/dec step.
-     */
-    GLfloat getScaleStep() const {
-        return myScaleStep;
     }
 
     /**
@@ -159,27 +117,6 @@ class StStereoParams {
     }
 
     /**
-     * @return flat position vector.
-     */
-    const StGLVec2& getCenter() const {
-        return myCenter;
-    }
-
-    /**
-     * @return rotation angle #1 for panorama view.
-     */
-    GLfloat getTheta() const {
-        return myPanoTheta;
-    }
-
-    /**
-     * @return rotation angle #2 for panorama view.
-     */
-    GLfloat getPhi() const {
-        return myPanoPhi;
-    }
-
-    /**
      * @return rotation anlge in degrees.
      */
     GLfloat getZRotate() const {
@@ -194,54 +131,47 @@ class StStereoParams {
     }
 
     /**
-     * @return true if swap Left/Right flag setted.
+     * @param toSwapLR set swap Left/Right flag.
      */
-    bool isSwapLR() const {
-        return myToSwapLR;
-    }
-
-    /**
-     * @param toSwapLR (bool ) - set swap Left/Right flag.
-     */
-    void setSwapLR(bool toSwapLR) {
-        myToSwapLR = toSwapLR;
+    void setSwapLR(const bool theToSwapLR) {
+        ToSwapLR = theToSwapLR;
     }
 
     /**
      * Reverse swap Left/Right flag.
      */
     void doSwapLR() {
-        myToSwapLR = !myToSwapLR;
+        ToSwapLR = !ToSwapLR;
     }
 
     /**
      * Zoom in.
      */
     void scaleIn(const GLfloat theDuration = 0.02f) {
-        myScaleFactor *= (1.0f + theDuration * myScaleStep);
+        ScaleFactor *= (1.0f + theDuration);
     }
 
     /**
      * Zoom out.
      */
     void scaleOut(const GLfloat theDuration = 0.02f) {
-        myScaleFactor /= (1.0f + theDuration * myScaleStep);
+        ScaleFactor /= (1.0f + theDuration);
     }
 
     void incSeparationDx() {
-        mySepDxPx += mySepStepPx;
+        mySepDxPx += THE_SEP_STEP_PX;
     }
 
     void decSeparationDx() {
-        mySepDxPx -= mySepStepPx;
+        mySepDxPx -= THE_SEP_STEP_PX;
     }
 
     void incSeparationDy() {
-        mySepDyPx += mySepStepPx;
+        mySepDyPx += THE_SEP_STEP_PX;
     }
 
     void decSeparationDy() {
-        mySepDyPx -= mySepStepPx;
+        mySepDyPx -= THE_SEP_STEP_PX;
     }
 
     void incSepRotation(const GLfloat theDuration = 0.02f) {
@@ -265,53 +195,53 @@ class StStereoParams {
 
     StGLVec2 moveFlatDelta(const StGLVec2& theMoveVec,
                            const GLfloat   theRectRatio) const {
-        return StGLVec2((theMoveVec.x() * theRectRatio) / myScaleFactor,
-                         theMoveVec.y() / myScaleFactor);
+        return StGLVec2((theMoveVec.x() * theRectRatio) / ScaleFactor,
+                         theMoveVec.y() / ScaleFactor);
     }
 
     void moveFlat(const StGLVec2& theMoveVec,
                   const GLfloat   theRectRatio) {
-        myCenter += moveFlatDelta(theMoveVec, theRectRatio);
+        PanCenter += moveFlatDelta(theMoveVec, theRectRatio);
     }
 
     void moveSphere(const StGLVec2& theMoveVec) {
-        myPanoPhi   += theMoveVec.x();
-        myPanoTheta += theMoveVec.y();
+        PanPhi   += theMoveVec.x();
+        PanTheta += theMoveVec.y();
     }
 
     void moveToRight(const GLfloat theDuration = 0.02f) {
-        switch(myViewMode) {
+        switch(ViewingMode) {
             case PANORAMA_SPHERE:
-            case PANORAMA_CYLINDER: myPanoPhi += 100.0f * theDuration; break;
+            case PANORAMA_CYLINDER: PanPhi += 100.0f * theDuration; break;
             case FLAT_IMAGE:
-            default: myCenter.x() += 0.5f * theDuration / myScaleFactor;
+            default: PanCenter.x() += 0.5f * theDuration / ScaleFactor;
         }
     }
 
     void moveToLeft(const GLfloat theDuration = 0.02f) {
-        switch(myViewMode) {
+        switch(ViewingMode) {
             case PANORAMA_SPHERE:
-            case PANORAMA_CYLINDER: myPanoPhi -= 100.0f * theDuration; break;
+            case PANORAMA_CYLINDER: PanPhi -= 100.0f * theDuration; break;
             case FLAT_IMAGE:
-            default: myCenter.x() -= 0.5f * theDuration / myScaleFactor;
+            default: PanCenter.x() -= 0.5f * theDuration / ScaleFactor;
         }
     }
 
     void moveToDown(const GLfloat theDuration = 0.02f) {
-        switch(myViewMode) {
+        switch(ViewingMode) {
             case PANORAMA_SPHERE:
-            case PANORAMA_CYLINDER: myPanoTheta -= 100.0f * theDuration; break;
+            case PANORAMA_CYLINDER: PanTheta -= 100.0f * theDuration; break;
             case FLAT_IMAGE:
-            default: myCenter.y() -= 0.5f * theDuration / myScaleFactor;
+            default: PanCenter.y() -= 0.5f * theDuration / ScaleFactor;
         }
     }
 
     void moveToUp(const GLfloat theDuration = 0.02f) {
-        switch(myViewMode) {
+        switch(ViewingMode) {
             case PANORAMA_SPHERE:
-            case PANORAMA_CYLINDER: myPanoTheta += 100.0f * theDuration; break;
+            case PANORAMA_CYLINDER: PanTheta += 100.0f * theDuration; break;
             case FLAT_IMAGE:
-            default: myCenter.y() += 0.5f * theDuration / myScaleFactor;
+            default: PanCenter.y() += 0.5f * theDuration / ScaleFactor;
         }
     }
 
@@ -337,33 +267,36 @@ class StStereoParams {
     void reset() {
         mySepDxPx = mySepDyPx = 0;
         mySepRotDegrees = myZRotateDegrees = 0.0f;
-        myCenter.x()  = 0.0f;
-        myCenter.y()  = 0.0f;
-        myPanoTheta   = 0.0f;
-        myPanoPhi     = 0.0f;
-        myScaleFactor = 1.0f;
-        myToSwapLR    = false;
+        PanCenter.x() = 0.0f;
+        PanCenter.y() = 0.0f;
+        PanTheta      = 0.0f;
+        PanPhi        = 0.0f;
+        ScaleFactor   = 1.0f;
+        ToSwapLR      = false;
     }
+
+        public:
+
+    ViewMode     ViewingMode;      //!< viewing mode - panorama or flat image
+
+    StFormatEnum StereoFormat;     //!< stereoscopic format
+    bool         ToSwapLR;         //!< reverse left/right views
+
+    StGLVec2     PanCenter;        //!< relative position
+    GLfloat      PanTheta;         //!< angle for panorama view
+    GLfloat      PanPhi;           //!< angle for panorama view
+
+    GLfloat      ScaleFactor;      //!< scaling factor
 
         private:
 
-    // TODO (Kirill Gavrilov#2#) implement velocity + timer behavior for smoothness
-    StFormatEnum mySrcFormat;      //!< source format
     GLint        mySepDxPx;        //!< horizontal    separation in pixels
     GLint        mySepDxZeroPx;    //!< zero-parallax separation in pixels
     GLint        mySepDyPx;        //!< vertical      separation in pixels
-    GLint        mySepStepPx;      //!< separation inc/dec step
     GLfloat      mySepRotDegrees;  //!< angular separation in degrees
     GLfloat      myZRotateDegrees; //!< rotation angle in degrees
     GLfloat      myZRotateZero;    //!< zero-rotation angle in degrees
-    StGLVec2     myCenter;         //!< relative position
-    GLfloat      myScaleFactor;    //!< scaling factor
-    GLfloat      myScaleStep;      //!< scaling factor inc/dec step
-    GLfloat      myPanoTheta;      //!< angle for panorama view
-    GLfloat      myPanoPhi;        //!< angle for panorama view
-    ViewMode     myViewMode;       //!< viewing mode - panorama or flat image
-    bool         myToSwapLR;       //!< reverse left/right views
 
 };
 
-#endif //__StStereoParams_h_
+#endif // __StStereoParams_h_

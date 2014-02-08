@@ -961,7 +961,7 @@ bool StVideo::saveSnapshotAs(StImageFile::ImageType theImgType) {
     StImage dataLeft;
     StImage dataRight;
     int result = StGLTextureQueue::SNAPSHOT_NO_NEW;
-    if(!myCurrParams->isSwapLR()) {
+    if(!myCurrParams->ToSwapLR) {
         result = myTextureQueue->getSnapshot(&dataLeft, &dataRight, true);
     } else {
         result = myTextureQueue->getSnapshot(&dataRight, &dataLeft, true);

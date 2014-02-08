@@ -24,6 +24,7 @@
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 #include <StGLWidgets/StGLButton.h>
+#include <StGLWidgets/StGLCheckbox.h>
 #include <StGLWidgets/StGLTextureButton.h>
 #include <StGLWidgets/StGLImageRegion.h>
 #include <StGLWidgets/StGLMessageBox.h>
@@ -388,7 +389,7 @@ void StImageViewer::parseArguments(const StArgumentsMap& theArguments) {
         doSlideShow();
     }
     if(argViewMode.isValid()) {
-        myLoader->getPlayList().changeDefParams().setViewMode(StStereoParams::GET_VIEW_MODE_FROM_STRING(argViewMode.getValue()));
+        myLoader->getPlayList().changeDefParams().ViewingMode = StStereoParams::GET_VIEW_MODE_FROM_STRING(argViewMode.getValue());
     }
     if(argSrcFormat.isValid()) {
         params.srcFormat->setValue(st::formatFromString(argSrcFormat.getValue()));
@@ -492,6 +493,15 @@ void StImageViewer::doSaveImageInfoBegin(const size_t ) {
     StInfoDialog* aDialog = new StInfoDialog(this, myGUI.access(), myLangMap->getValue(StImageViewerStrings::DIALOG_SAVE_INFO_TITLE),
                                              myGUI->scale(512), myGUI->scale(256));
     aDialog->setText(aText);
+
+    StHandle<StBoolParam> toOmitQuestion = new StBoolParam(false);
+    StGLCheckbox* aCheck = new StGLCheckbox(aDialog, toOmitQuestion, 32, -aDialog->getMarginBottom(), StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT));
+    aCheck->setVisibility(true, true);
+
+    StGLTextArea* aCheckText = new StGLTextArea(aDialog, 64, -aDialog->getMarginBottom(), StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT));
+    aCheckText->setText("Do not ask again during 1 minute");
+    aCheckText->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
+    aCheckText->setVisibility(true, true);
 
     StGLButton* aSaveBtn = aDialog->addButton(myLangMap->getValue(StImageViewerStrings::BUTTON_SAVE_METADATA), true);
     aSaveBtn->setUserData(1);

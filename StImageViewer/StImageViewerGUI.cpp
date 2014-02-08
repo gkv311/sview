@@ -443,9 +443,9 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
     aTable->fillFromMap(anExtraInfo->Info, StGLVec3(1.0f, 1.0f, 1.0f), aWidthMax, aWidthMax / 2);
 
     // add stereoscopic format info
-    const StFormatEnum anActiveSrcFormat = aParams->isSwapLR()
-                                         ? st::formatReversed(aParams->getSrcFormat())
-                                         : aParams->getSrcFormat();
+    const StFormatEnum anActiveSrcFormat = aParams->ToSwapLR
+                                         ? st::formatReversed(aParams->StereoFormat)
+                                         : aParams->StereoFormat;
     const int aTextMaxWidth = aWidthMax - (aTable->getMarginLeft() + aTable->getMarginRight());
     StGLTableItem& aSrcFormatItem = aTable->changeElement(aRowLast++, 0); aSrcFormatItem.setColSpan(2);
     StGLTextArea*  aSrcFormatText = new StGLTextArea(&aSrcFormatItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
@@ -720,7 +720,7 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
             StFormatEnum aSrcFormat = (StFormatEnum )myPlugin->params.srcFormat->getValue();
             if(aSrcFormat == ST_V_SRC_AUTODETECT
             && !myImage->params.stereoFile.isNull()) {
-                aSrcFormat = myImage->params.stereoFile->getSrcFormat();
+                aSrcFormat = myImage->params.stereoFile->StereoFormat;
             }
             if(!myImage->params.stereoFile.isNull()
              && myImage->params.swapLR->getValue()) {

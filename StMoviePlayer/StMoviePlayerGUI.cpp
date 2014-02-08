@@ -782,9 +782,9 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
 
     if(anExtraInfo->HasVideo) {
         // add stereoscopic format info
-        const StFormatEnum anActiveSrcFormat = aParams->isSwapLR()
-                                             ? st::formatReversed(aParams->getSrcFormat())
-                                             : aParams->getSrcFormat();
+        const StFormatEnum anActiveSrcFormat = aParams->ToSwapLR
+                                             ? st::formatReversed(aParams->StereoFormat)
+                                             : aParams->StereoFormat;
         StGLTableItem& aSrcFormatItem = aTable->changeElement(aRowLast++, 0); aSrcFormatItem.setColSpan(2);
         StGLTextArea*  aSrcFormatText = new StGLTextArea(&aSrcFormatItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
         aSrcFormatText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
@@ -1185,7 +1185,7 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
             StFormatEnum aSrcFormat = (StFormatEnum )myPlugin->params.srcFormat->getValue();
             if(aSrcFormat == ST_V_SRC_AUTODETECT
             && !myImage->params.stereoFile.isNull()) {
-                aSrcFormat = myImage->params.stereoFile->getSrcFormat();
+                aSrcFormat = myImage->params.stereoFile->StereoFormat;
             }
             if(!myImage->params.stereoFile.isNull()
              && myImage->params.swapLR->getValue()) {
