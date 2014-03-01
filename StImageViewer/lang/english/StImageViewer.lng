@@ -107,7 +107,7 @@ English translation file for StImageViewer program
 5007="Color model"
 5008="(does not stored in metadata)"
 5009="(does not match metadata)"
-5011="(does not stored in metadata\nbut detected from file name)"
+5011="(does not stored in metadata,\nbut detected from file name)"
 5100="JPEG Comment"
 5101="JPS Comment"
 5200="Camera Maker"
