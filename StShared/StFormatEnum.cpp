@@ -139,3 +139,12 @@ StFormatEnum st::formatFromName(const StString& theFileName,
     theIsAnamorph = false;
     return ST_V_SRC_AUTODETECT;
 }
+
+StFormatEnum st::formatFromRatio(const GLfloat theRatio) {
+    if(stAreEqual(theRatio, st::videoRatio::TV_SIDEBYSIDE,      0.18f)
+    || stAreEqual(theRatio, st::videoRatio::WIDE_SIDEBYSIDE,    0.18f)
+    || stAreEqual(theRatio, st::videoRatio::USERDEF_SIDEBYSIDE, 0.18f)) {
+        return ST_V_SRC_SIDE_BY_SIDE;
+    }
+    return ST_V_SRC_MONO;
+}

@@ -34,6 +34,26 @@ typedef enum tagStFormatEnum {
 namespace st {
 
     /**
+     * List of pre-defined frame ratios.
+     */
+    namespace videoRatio {
+        // TV
+        static const GLfloat TV_OVERUNDER       = 4.0f  / 6.0f;  //!< 0.6(6):1 ~ 4:6   Over/Under
+        static const GLfloat TV_NORMAL          = 4.0f  / 3.0f;  //!< 1.3(3):1 ~ 4:3   Mono
+        static const GLfloat TV_SIDEBYSIDE      = 8.0f  / 3.0f;  //!< 2.6(6):1 ~ 8:3   SideBySide
+
+        // Widescreen
+        static const GLfloat WIDE_NORMAL        = 16.0f / 9.0f;  //!< 1.7(7):1 ~ 16:9  Mono
+        static const GLfloat WIDE_PC            = 16.0f / 10.0f; //!< 1.6:1    ~ 16:10 Mono
+        static const GLfloat WIDE_SIDEBYSIDE    = 32.0f / 9.0f;  //!< 3.5(5):1 ~ 32:9  SideBySide
+
+        // Cinemascope
+        static const GLfloat CINEMASCOPE        = 29.0f / 9.0f;  //!< 3.2(2):1 ~ 29:9  Mono
+
+        static const GLfloat USERDEF_SIDEBYSIDE = 2.86f;
+    }
+
+    /**
      * Returns name for format.
      */
     ST_CPPEXPORT StString formatToString(StFormatEnum theFormatEnum);
@@ -59,6 +79,13 @@ namespace st {
      */
     ST_CPPEXPORT StFormatEnum formatFromName(const StString& theFileName,
                                              bool&           theIsAnamorph);
+
+    /**
+     * Function tries to detect side-by-side stereo format based on aspect ratio criteria.
+     * @param theRatio image ratio
+     * @return autodetected mono/stereo format
+     */
+    ST_CPPEXPORT StFormatEnum formatFromRatio(const GLfloat theRatio);
 
 };
 

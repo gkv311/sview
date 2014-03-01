@@ -58,22 +58,6 @@ bool StGLTextureData::reAllocate(const size_t theSizeBytes) {
     return false;
 }
 
-/**
- * Function tries to detect stereo format;
- * this detection possible only for side by side files.
- * @param theRatio image ratio
- * @return autodetected mono/stereo format
- */
-static StFormatEnum formatFromRatio(const GLfloat theRatio) {
-    static const GLfloat LAMBDA = 0.18f;
-    if(stAreEqual(theRatio, videoRatio::TV_SIDEBYSIDE,      LAMBDA)
-    || stAreEqual(theRatio, videoRatio::WIDE_SIDEBYSIDE,    LAMBDA)
-    || stAreEqual(theRatio, videoRatio::USERDEF_SIDEBYSIDE, LAMBDA)) {
-        return ST_V_SRC_SIDE_BY_SIDE;
-    }
-    return ST_V_SRC_MONO;
-}
-
 static GLubyte* readFromParallel(const StImagePlane& theSrc,
                                  GLubyte*            theDataPtr,
                                  StImagePlane&       theDataL,
@@ -321,11 +305,9 @@ void StGLTextureData::updateData(const StImage&                  theDataL,
                                  const StFormatEnum              theFormat,
                                  const double                    thePts) {
     // setup new stereo source
-    myStParams = theStParams;
-    myPts      = thePts;
-
-    // detect format from ratio if not defined
-    mySrcFormat = (theFormat != ST_V_SRC_AUTODETECT) ? theFormat : formatFromRatio(theDataL.getRatio());
+    myStParams  = theStParams;
+    myPts       = thePts;
+    mySrcFormat = theFormat != ST_V_SRC_AUTODETECT ? theFormat : ST_V_SRC_MONO;
 
     // reset fill texture state
     myFillRows = myFillFromRow = 0;

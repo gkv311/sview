@@ -739,6 +739,11 @@ void StVideoQueue::decodeLoop() {
             // try using format detected from file name
             aSrcFormat = myStFormatByName;
         }
+        /*if(aSrcFormat == ST_V_SRC_AUTODETECT
+        && sizeY() != 0) {
+            // try detection based on aspect ratio
+            aSrcFormat = st::formatFromRatio(GLfloat(sizeX()) / GLfloat(sizeY()));
+        }*/
 
         prepareFrame(aSrcFormat);
 

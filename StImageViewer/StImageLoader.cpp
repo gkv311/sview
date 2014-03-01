@@ -277,6 +277,12 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         aSrcFormatCurr = anImgInfo->StInfoFileName;
     }
 
+    // try detection based on aspect ratio
+    /*if(aSrcFormatCurr == ST_V_SRC_AUTODETECT
+    && !anImageL->isNull()) {
+        aSrcFormatCurr = st::formatFromRatio(anImageL->getRatio());
+    }*/
+
 #ifdef __ST_DEBUG__
     if(!anImageL->isNull()) {
         ST_DEBUG_LOG(anImageL->getState());

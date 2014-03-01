@@ -13,28 +13,6 @@
 #include <StGLStereo/StGLQuadTexture.h>
 
 /**
- * This is just ratio-table.
- */
-namespace videoRatio {
-
-    // TV
-    static const GLfloat TV_OVERUNDER       = 4.0f  / 6.0f;  // 0.6(6):1 ~ 4:6   Over/Under
-    static const GLfloat TV_NORMAL          = 4.0f  / 3.0f;  // 1.3(3):1 ~ 4:3   Mono
-    static const GLfloat TV_SIDEBYSIDE      = 8.0f  / 3.0f;  // 2.6(6):1 ~ 8:3   SideBySide
-
-    // Widescreen
-    static const GLfloat WIDE_NORMAL        = 16.0f / 9.0f;  // 1.7(7):1 ~ 16:9  Mono
-    static const GLfloat WIDE_PC            = 16.0f / 10.0f; // 1.6:1    ~ 16:10 Mono
-    static const GLfloat WIDE_SIDEBYSIDE    = 32.0f / 9.0f;  // 3.5(5):1 ~ 32:9  SideBySide
-
-    // Cinemascope
-    static const GLfloat CINEMASCOPE        = 29.0f / 9.0f;  // 3.2(2):1 ~ 29:9  Mono
-
-    static const GLfloat USERDEF_SIDEBYSIDE = 2.86f;
-
-}
-
-/**
  * This class represents stereo data for textures
  * in separate buffers.
  * Also structure store pointers for next and previous
