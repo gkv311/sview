@@ -232,10 +232,10 @@ void StPlayList::clear() {
 
     if(!myPlsFile.isNull()
     && myCurrent != NULL) {
-        if(myPlsFile->isEmpty()) {
-            myPlsFile->add(new StFileNode(myCurrent->getPath(), myPlsFile.access()));
+        if(myPlsFile->File->isEmpty()) {
+            myPlsFile->File->add(new StFileNode(myCurrent->getPath(), myPlsFile->File.access()));
         } else {
-            myPlsFile->changeValue(0)->setSubPath(myCurrent->getPath());
+            myPlsFile->File->changeValue(0)->setSubPath(myCurrent->getPath());
         }
     }
     myPlsFile.nullify();
@@ -480,10 +480,12 @@ void StPlayList::setTitle(const StHandle<StStereoParams>& theKey,
     signals.onTitleChange(anItemId);
 }
 
-bool StPlayList::getCurrentFile(StHandle<StFileNode>& theFileNode,
-                                StHandle<StStereoParams>& theParams) {
+bool StPlayList::getCurrentFile(StHandle<StFileNode>&     theFileNode,
+                                StHandle<StStereoParams>& theParams,
+                                StHandle<StFileNode>&     thePlsFile) {
     theFileNode.nullify();
     theParams.nullify();
+    thePlsFile.nullify();
     StMutexAuto anAutoLock(myMutex);
     if(myCurrent == NULL) {
         // empty list
@@ -496,7 +498,10 @@ bool StPlayList::getCurrentFile(StHandle<StFileNode>& theFileNode,
     }
 
     theFileNode = aFileNode->detach();
-    theParams = myCurrent->getParams();
+    theParams   = myCurrent->getParams();
+    if(!myPlsFile.isNull()) {
+        thePlsFile = myPlsFile->File;
+    }
     return true;
 }
 
@@ -793,6 +798,13 @@ StHandle<StStereoParams> StPlayList::openRecent(const size_t theItemId) {
 void StPlayList::updateRecent(const StHandle<StFileNode>&     theFile,
                               const StHandle<StStereoParams>& theParams) {
     StMutexAuto anAutoLock(myMutex);
+    if(!myPlsFile.isNull()
+     && myPlsFile->File == theFile) {
+        // remember properties of last played file
+        myPlsFile->Params = theParams;
+        return;
+    }
+
     for(size_t anIter = 0; anIter < myRecent.size(); ++anIter) {
         StHandle<StRecentItem>& aRecent = myRecent[anIter];
         if(stAreSameRecent(*theFile, *aRecent->File)) {
@@ -856,8 +868,9 @@ StString StPlayList::dumpRecentList() const {
         const StHandle<StRecentItem>&   aRecent = myRecent[anIter];
         const StHandle<StFileNode>&     aFile   = aRecent->File;
         const StHandle<StStereoParams>& aParams = aRecent->Params;
-        if(aFile == myPlsFile
-        && myCurrent != NULL) {
+        if(!myPlsFile.isNull()
+         && aFile == myPlsFile->File
+         && myCurrent != NULL) {
             StArgument anArgFile(StString("file")  + anIter, aFile->getPath());
             StArgument anArgPos (StString("pos")   + anIter, myCurrent->getPath());
             aMap.add(anArgFile);
@@ -962,7 +975,7 @@ void StPlayList::open(const StCString& thePath,
         // add all files from the folder and subfolders
         aFolderPath = thePath;
         aSearchDeep = myRecursionDeep;
-        myPlsFile = addRecentFile(StFileNode(thePath))->File; // append to recent files list
+        myPlsFile   = addRecentFile(StFileNode(thePath)); // append to recent files list
     } else if(StFileNode::isFileExists(thePath)) {
         // search only current folder
         StFileNode::getFolderAndFile(thePath, aFolderPath, aFileName);
@@ -987,7 +1000,7 @@ void StPlayList::open(const StCString& thePath,
                     anIter = parseM3UIter(anIter, aTitle);
                 }
 
-                myPlsFile = addRecentFile(StFileNode(thePath))->File; // append to recent files list
+                myPlsFile = addRecentFile(StFileNode(thePath)); // append to recent files list
                 if(hasTarget) {
                     // set current item
                     for(StPlayItem* anItem = myFirst; anItem != NULL; anItem = anItem->getNext()) {

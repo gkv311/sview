@@ -290,7 +290,8 @@ class StVideo {
                           double& theMaxDuration);
 
     ST_LOCAL bool openSource(const StHandle<StFileNode>&     theNewSource,
-                             const StHandle<StStereoParams>& theNewParams);
+                             const StHandle<StStereoParams>& theNewParams,
+                             const StHandle<StFileNode>&     theNewPlsFile);
 
     /**
      * Close active played file(s).
@@ -369,6 +370,7 @@ class StVideo {
     StHandle<StMovieInfo>         myFileInfoTmp;
     StHandle<StFileNode>          myCurrNode;     //!< active (played) file node
     StHandle<StStereoParams>      myCurrParams;   //!< paramters for active file node
+    StHandle<StFileNode>          myCurrPlsFile;  //!< active playlist file node
     StHandle<StGLTextureQueue>    myTextureQueue; //!< decoded frames queue
 
     StArrayList<StString>         myTracksExt;    //!< extra tracks extensions list

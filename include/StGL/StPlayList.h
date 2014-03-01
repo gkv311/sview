@@ -169,8 +169,19 @@ class StPlayList {
      * Returns file node and stereo parameters for current playing position.
      * @return true if playlist is not empty.
      */
-    ST_CPPEXPORT bool getCurrentFile(StHandle<StFileNode>& theFileNode,
-                                     StHandle<StStereoParams>& theParams);
+    ST_CPPEXPORT bool getCurrentFile(StHandle<StFileNode>&     theFileNode,
+                                     StHandle<StStereoParams>& theParams,
+                                     StHandle<StFileNode>&     thePlsFile);
+
+    /**
+     * Returns file node and stereo parameters for current playing position.
+     * @return true if playlist is not empty.
+     */
+    ST_LOCAL bool getCurrentFile(StHandle<StFileNode>&     theFileNode,
+                                 StHandle<StStereoParams>& theParams) {
+        StHandle<StFileNode> aPlsFile;
+        return getCurrentFile(theFileNode, theParams, aPlsFile);
+    }
 
     ST_CPPEXPORT void addToNode(const StHandle<StFileNode>& theFileNode,
                                 const StString&             thePathToAdd);
@@ -417,7 +428,7 @@ class StPlayList {
     bool                    myToLoopSingle;  //!< play single item in loop
     bool                    myIsLoopFlag;
 
-    StHandle<StFileNode>    myPlsFile;       //!< current playlist file (if any)
+    StHandle<StRecentItem>  myPlsFile;       //!< current playlist file (if any)
     std::deque< StHandle<StRecentItem> > myRecent; //!< list of recently opened files
     size_t                  myRecentLimit;   //!< the maximum size of list with recently opened files
     mutable bool            myIsNewRecent;   //!< flag indicates modified state of recent files list

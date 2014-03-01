@@ -210,6 +210,7 @@ void StVideo::close() {
     params.activeSubtitles->clearList();
     myCurrNode.nullify();
     myCurrParams.nullify();
+    myCurrPlsFile.nullify();
 
     myEventMutex.lock();
         myDuration = 0.0;
@@ -417,7 +418,8 @@ bool StVideo::addFile(const StString& theFileToLoad,
 }
 
 bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
-                         const StHandle<StStereoParams>& theNewParams) {
+                         const StHandle<StStereoParams>& theNewParams,
+                         const StHandle<StFileNode>&     theNewPlsFile) {
     // just for safe - close previously opened video
     close();
 
@@ -516,8 +518,9 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
         }
     }
 
-    myCurrNode   = theNewSource;
-    myCurrParams = theNewParams;
+    myCurrNode    = theNewSource;
+    myCurrParams  = theNewParams;
+    myCurrPlsFile = theNewPlsFile;
     myFileInfoTmp->Id = myCurrParams;
 
     params.activeAudio->setList(aStreamsListA, aStreamsListA->isEmpty() ? -1 : 0);
@@ -783,7 +786,7 @@ void StVideo::packetsLoop() {
                     myCurrParams->Timestamp = 0.0;
                 }
 
-                myPlayList->updateRecent(myCurrNode, myCurrParams);
+                myPlayList->updateRecent(myCurrPlsFile.isNull() ? myCurrNode : myCurrPlsFile, myCurrParams);
                 doFlush();
                 if(myAudio->isInitialized()) {
                     myAudio->pushPlayEvent(ST_PLAYEVENT_SEEK, 0.0);
@@ -1097,7 +1100,7 @@ void StVideo::doRemovePhysically(const StHandle<StFileNode>& theFile) {
 
 void StVideo::mainLoop() {
     bool isOpenSuccess = false;
-    StHandle<StFileNode> aFileToLoad;
+    StHandle<StFileNode> aFileToLoad, aPlsFile;
     StHandle<StStereoParams> aFileParams;
     double aDummy;
     bool aDummyBool;
@@ -1108,10 +1111,10 @@ void StVideo::mainLoop() {
             return;
         }
 
-        if(!myPlayList->getCurrentFile(aFileToLoad, aFileParams)) {
+        if(!myPlayList->getCurrentFile(aFileToLoad, aFileParams, aPlsFile)) {
             continue;
         }
-        isOpenSuccess = openSource(aFileToLoad, aFileParams);
+        isOpenSuccess = openSource(aFileToLoad, aFileParams, aPlsFile);
         if(isOpenSuccess) {
             break;
         }
@@ -1166,8 +1169,8 @@ void StVideo::mainLoop() {
                 return;
             }
             isOpenSuccess = false;
-            if(myPlayList->getCurrentFile(aFileToLoad, aFileParams)) {
-                isOpenSuccess = openSource(aFileToLoad, aFileParams);
+            if(myPlayList->getCurrentFile(aFileToLoad, aFileParams, aPlsFile)) {
+                isOpenSuccess = openSource(aFileToLoad, aFileParams, aPlsFile);
             }
             if(!isOpenSuccess) {
                 waitEvent();
