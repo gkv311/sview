@@ -57,7 +57,8 @@ class StSubtitleQueue : public StAVPacketQueue {
      * @return true if no error
      */
     ST_LOCAL bool init(AVFormatContext*   theFormatCtx,
-                       const unsigned int theStreamId);
+                       const unsigned int theStreamId,
+                       const StString&    theFileName);
 
     /**
      * Clean function.

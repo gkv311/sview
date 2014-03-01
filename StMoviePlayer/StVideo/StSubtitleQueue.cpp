@@ -57,8 +57,9 @@ StSubtitleQueue::~StSubtitleQueue() {
 }
 
 bool StSubtitleQueue::init(AVFormatContext*   theFormatCtx,
-                           const unsigned int theStreamId) {
-    if(!StAVPacketQueue::init(theFormatCtx, theStreamId)
+                           const unsigned int theStreamId,
+                           const StString&    theFileName) {
+    if(!StAVPacketQueue::init(theFormatCtx, theStreamId, theFileName)
     || myCodecCtx->codec_type != AVMEDIA_TYPE_SUBTITLE) {
         signals.onError(stCString("FFmpeg: invalid stream"));
         deinit();

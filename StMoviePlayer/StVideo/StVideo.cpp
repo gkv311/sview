@@ -303,7 +303,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
         if(aStream->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
             // video track
             if(!myVideoMaster->isInitialized()) {
-                myVideoMaster->init(aFormatCtx, aStreamId);
+                myVideoMaster->init(aFormatCtx, aStreamId, aTitleString);
                 myVideoMaster->setSlave(NULL);
 
                 if(myVideoMaster->isInitialized()) {
@@ -328,7 +328,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
                         StFormatTime::formatSeconds(theMaxDuration)));
                 }
             } else if(!myVideoSlave->isInitialized()) {
-                myVideoSlave->init(aFormatCtx, aStreamId);
+                myVideoSlave->init(aFormatCtx, aStreamId, "");
                 if(myVideoSlave->isInitialized()) {
                     mySlaveCtx    = aFormatCtx;
                     mySlaveStream = aStreamId;
@@ -348,7 +348,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
                     aDimInfo.changeValue() += "\n";
                     aDimInfo.changeValue() += aDimsStr;
 
-                    if(myVideoMaster->getSrcFormat() == ST_V_SRC_AUTODETECT) {
+                    if(myVideoMaster->getStereoFormatByUser() == ST_V_SRC_AUTODETECT) {
                         myVideoMaster->setSlave(myVideoSlave);
                     } else {
                         myVideoSlave->deinit();
@@ -385,7 +385,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
                                + (!aLanguage.isEmpty() ? (StString(" (") + aLanguage + ')') : StString()));
 
             if(!myAudio->isInitialized()) {
-                myAudio->init(aFormatCtx, aStreamId);
+                myAudio->init(aFormatCtx, aStreamId, "");
             }
         } else if(aStream->codec->codec_type == AVMEDIA_TYPE_SUBTITLE) {
             // subtitles track
@@ -619,7 +619,7 @@ bool StVideo::pushPacket(StHandle<StAVPacketQueue>& theAVPacketQueue,
 
 void StVideo::checkInitVideoStreams() {
     const bool toUseGpu      = params.UseGpu->getValue();
-    const bool toDecodeSlave = myVideoMaster->getSrcFormat() == ST_V_SRC_AUTODETECT
+    const bool toDecodeSlave = myVideoMaster->getStereoFormatByUser() == ST_V_SRC_AUTODETECT
                             && mySlaveStream >= 0;
     if(toUseGpu      != myVideoMaster->toUseGpu()
     || toDecodeSlave != myVideoSlave->isInitialized()) {
@@ -627,6 +627,7 @@ void StVideo::checkInitVideoStreams() {
         myVideoSlave ->setUseGpu(toUseGpu);
         doFlush();
         if(myVideoMaster->isInitialized()) {
+            const StString   aFileNameMaster = myVideoMaster->getFileName();
             AVFormatContext* aCtxMaster      = myVideoMaster->getContext();
             const signed int aStreamIdMaster = myVideoMaster->getId();
             myVideoMaster->pushEnd();
@@ -641,10 +642,10 @@ void StVideo::checkInitVideoStreams() {
             if(myVideoSlave->isInitialized()) {
                 myVideoSlave->deinit();
             }
-            myVideoMaster->init(aCtxMaster, aStreamIdMaster);
+            myVideoMaster->init(aCtxMaster, aStreamIdMaster, aFileNameMaster);
             myVideoMaster->setSlave(NULL);
             if(toDecodeSlave) {
-                myVideoSlave->init(mySlaveCtx, mySlaveStream);
+                myVideoSlave->init(mySlaveCtx, mySlaveStream, "");
                 myVideoMaster->setSlave(myVideoSlave);
             }
             myVideoMaster->pushStart();
@@ -802,7 +803,7 @@ void StVideo::packetsLoop() {
                     for(unsigned int aStreamId = 0; aStreamId < aFormatCtx->nb_streams; ++aStreamId) {
                         if(aFormatCtx->streams[aStreamId]->codec->codec_type == AVMEDIA_TYPE_AUDIO) {
                             if(aCounter == anActiveStreamId) {
-                                myAudio->init(aFormatCtx, aStreamId);
+                                myAudio->init(aFormatCtx, aStreamId, "");
                                 myAudio->pushStart();
                                 break;
                             }
@@ -849,7 +850,7 @@ void StVideo::packetsLoop() {
                     for(unsigned int aStreamId = 0; aStreamId < aFormatCtx->nb_streams; ++aStreamId) {
                         if(aFormatCtx->streams[aStreamId]->codec->codec_type == AVMEDIA_TYPE_SUBTITLE) {
                             if(aCounter == anActiveStreamId) {
-                                mySubtitles->init(aFormatCtx, aStreamId);
+                                mySubtitles->init(aFormatCtx, aStreamId, "");
                                 mySubtitles->pushStart();
                                 break;
                             }
@@ -1050,7 +1051,8 @@ StHandle<StMovieInfo> StVideo::getFileInfo(const StHandle<StStereoParams>& thePa
     }
 
     // continuously read source format since it can be stored in frame
-    anInfo->SrcFormat = myVideoMaster->getSrcFormatInfo();
+    anInfo->StInfoStream   = myVideoMaster->getStereoFormatFromStream();
+    anInfo->StInfoFileName = myVideoMaster->getStereoFormatFromName();
     anInfo->HasVideo  = myVideoMaster->isInitialized();
 
     anInfo->Codecs.clear();

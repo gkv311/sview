@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,7 +62,8 @@ class StAVPacketQueue {
      * Open stream.
      */
     ST_LOCAL virtual bool init(AVFormatContext*   theFormatCtx,
-                               const unsigned int theStreamId);
+                               const unsigned int theStreamId,
+                               const StString&    theFileName);
 
     /**
      * Close stream.
@@ -176,6 +177,13 @@ class StAVPacketQueue {
      */
     ST_LOCAL StString getCodecInfo() const;
 
+    /**
+     * @return file name
+     */
+    ST_LOCAL const StString& getFileName() const {
+        return myFileName;
+    }
+
         public: //! @name playback control methods
 
     /**
@@ -217,6 +225,7 @@ class StAVPacketQueue {
 
         protected: //! @name Fields should be full-controlled by heirs
 
+    StString         myFileName;       //!< file name
     AVFormatContext* myFormatCtx;      //!< pointer to video context
     AVStream*        myStream;         //!< pointer to stream in video context
     AVCodecContext*  myCodecCtx;       //!< codec context

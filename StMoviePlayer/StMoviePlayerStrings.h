@@ -214,6 +214,7 @@ namespace StMoviePlayerStrings {
         INFO_NO_SRCFORMAT      = 5008,
         INFO_WRONG_SRCFORMAT   = 5009,
         INFO_DURATION          = 5010,
+        INFO_NO_SRCFORMAT_EX   = 5011,
 
         // metadata keys
         METADATA_TITLE         = 5300,

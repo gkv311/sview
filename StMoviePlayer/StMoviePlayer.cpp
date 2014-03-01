@@ -1229,7 +1229,7 @@ void StMoviePlayer::doAboutFile(const size_t ) {
 }
 
 void StMoviePlayer::doSwitchSrcFormat(const int32_t theSrcFormat) {
-    myVideo->setSrcFormat(StFormatEnum(theSrcFormat));
+    myVideo->setStereoFormat(StFormatEnum(theSrcFormat));
 }
 
 void StMoviePlayer::doReset(const size_t ) {

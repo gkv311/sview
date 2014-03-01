@@ -249,7 +249,8 @@ StAudioQueue::~StAudioQueue() {
 }
 
 bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
-                        const unsigned int theStreamId) {
+                        const unsigned int theStreamId,
+                        const StString&    theFileName) {
     while(myIsAlValid == ST_AL_INIT_NA) {
         StThread::sleep(10);
         continue;
@@ -261,7 +262,7 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
         return false;
     }
 
-    if(!StAVPacketQueue::init(theFormatCtx, theStreamId)
+    if(!StAVPacketQueue::init(theFormatCtx, theStreamId, theFileName)
     || myCodecCtx->codec_type != AVMEDIA_TYPE_AUDIO) {
         signals.onError(stCString("FFmpeg: invalid stream"));
         deinit();

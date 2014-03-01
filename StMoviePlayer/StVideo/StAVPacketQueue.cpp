@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -96,7 +96,9 @@ double StAVPacketQueue::detectPtsStartBase(const AVFormatContext* theFormatCtx) 
 }
 
 bool StAVPacketQueue::init(AVFormatContext*   theFormatCtx,
-                           const unsigned int theStreamId) {
+                           const unsigned int theStreamId,
+                           const StString&    theFileName) {
+    myFileName       = theFileName;
     myFormatCtx      = theFormatCtx;
     myStream         = myFormatCtx->streams[theStreamId];
     myStreamId       = theStreamId;
@@ -111,6 +113,7 @@ bool StAVPacketQueue::init(AVFormatContext*   theFormatCtx,
 }
 
 void StAVPacketQueue::deinit() {
+    myFileName.clear();
     myFormatCtx = NULL;
     myStream    = NULL;
     if(myCodec != NULL && myCodecCtx != NULL) {

@@ -115,8 +115,9 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   myAudioDelayMSec(0),
   myFramesCounter(1),
   myWasFlushed(false),
-  mySrcFormat(ST_V_SRC_AUTODETECT),
-  mySrcFormatInfo(ST_V_SRC_AUTODETECT) {
+  myStFormatByUser(ST_V_SRC_AUTODETECT),
+  myStFormatByName(ST_V_SRC_AUTODETECT),
+  myStFormatInStream(ST_V_SRC_AUTODETECT) {
 
 #ifdef ST_USE64PTR
     myFrame.Frame->opaque = (void* )stAV::NOPTS_VALUE;
@@ -210,8 +211,9 @@ bool StVideoQueue::initCodec(AVCodec* theCodec) {
 }
 
 bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
-                        const unsigned int theStreamId) {
-    if(!StAVPacketQueue::init(theFormatCtx, theStreamId)
+                        const unsigned int theStreamId,
+                        const StString&    theFileName) {
+    if(!StAVPacketQueue::init(theFormatCtx, theStreamId, theFileName)
     || myCodecCtx->codec_type != AVMEDIA_TYPE_VIDEO) {
         signals.onError(stCString("FFmpeg: invalid stream"));
         deinit();
@@ -317,7 +319,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     }
 
     // stereoscopic mode tags
-    mySrcFormatInfo = is720in1080 ? ST_V_SRC_TILED_4X : ST_V_SRC_AUTODETECT;
+    myStFormatInStream = is720in1080 ? ST_V_SRC_TILED_4X : ST_V_SRC_AUTODETECT;
     if(stAV::meta::readTag(myFormatCtx, THE_SRC_MODE_KEY,     aValue)
     || stAV::meta::readTag(myStream,    THE_SRC_MODE_KEY,     aValue)
     || stAV::meta::readTag(myFormatCtx, THE_SRC_MODE_KEY_WMV, aValue)) {
@@ -326,10 +328,24 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
             if(aFlag.stID == ST_V_SRC_AUTODETECT || aFlag.name == NULL) {
                 break;
             } else if(aValue == aFlag.name) {
-                mySrcFormatInfo = aFlag.stID;
-                //ST_DEBUG_LOG("  read srcFormat from tags= " + mySrcFormatInfo);
+                myStFormatInStream = aFlag.stID;
+                //ST_DEBUG_LOG("  read srcFormat from tags= " + myStFormatInStream);
                 break;
             }
+        }
+    }
+
+    // detect information from file name
+    bool isAnamorphByName = false;
+    myStFormatByName = st::formatFromName(myFileName, isAnamorphByName);
+    if(myStFormatInStream == ST_V_SRC_AUTODETECT
+    && isAnamorphByName) {
+        if(myStFormatByName == ST_V_SRC_PARALLEL_PAIR
+        || myStFormatByName == ST_V_SRC_SIDE_BY_SIDE) {
+            myPixelRatio *= 2.0;
+        } else if(myStFormatByName == ST_V_SRC_OVER_UNDER_LR
+               || myStFormatByName == ST_V_SRC_OVER_UNDER_RL) {
+            myPixelRatio *= 0.5;
         }
     }
 
@@ -695,9 +711,9 @@ void StVideoQueue::decodeLoop() {
         AVFrameSideData* aSideData = av_frame_get_side_data(myFrame.Frame, AV_FRAME_DATA_STEREO3D);
         if(aSideData != NULL) {
             AVStereo3D* aStereo = (AVStereo3D* )aSideData->data;
-            mySrcFormatInfo = stAV::stereo3dAvToSt(aStereo->type);
+            myStFormatInStream = stAV::stereo3dAvToSt(aStereo->type);
             if(aStereo->flags & AV_STEREO3D_FLAG_INVERT) {
-                mySrcFormatInfo = st::formatReversed(mySrcFormatInfo);
+                myStFormatInStream = st::formatReversed(myStFormatInStream);
             }
         }
     #endif
@@ -707,14 +723,23 @@ void StVideoQueue::decodeLoop() {
                 if(aFlag.stID == ST_V_SRC_AUTODETECT || aFlag.name == NULL) {
                     break;
                 } else if(aTagValue == aFlag.name) {
-                    mySrcFormatInfo = aFlag.stID;
-                    //ST_DEBUG_LOG("  read srcFormat from tags= " + mySrcFormatInfo);
+                    myStFormatInStream = aFlag.stID;
+                    //ST_DEBUG_LOG("  read srcFormat from tags= " + myStFormatInStream);
                     break;
                 }
             }
         }
         // override source format stored in metadata
-        const StFormatEnum aSrcFormat = (mySrcFormat == ST_V_SRC_AUTODETECT) ? mySrcFormatInfo : mySrcFormat;
+        StFormatEnum aSrcFormat = myStFormatByUser;
+        if(aSrcFormat == ST_V_SRC_AUTODETECT) {
+            // prefer info stored in the stream itself
+            aSrcFormat = myStFormatInStream;
+        }
+        if(aSrcFormat == ST_V_SRC_AUTODETECT) {
+            // try using format detected from file name
+            aSrcFormat = myStFormatByName;
+        }
+
         prepareFrame(aSrcFormat);
 
         if(!mySlave.isNull()) {

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -48,6 +48,16 @@ namespace st {
      */
     ST_CPPEXPORT StFormatEnum formatReversed(const StFormatEnum theFormatEnum);
 
+    /**
+     * Detect stereoscopic format from file name tags:
+     * - ou,ab,ba  Over/Under, Above/Below
+     * - sbs,lr,rl SideBySide, Left/Right
+     * - 2d        Mono
+     * - half,q    Anamorph suffix
+     */
+    ST_CPPEXPORT StFormatEnum formatFromName(const StString& theFileName,
+                                             bool&           theIsAnamorph);
+
 };
 
-#endif //__StFormatEnum_h_
+#endif // __StFormatEnum_h_

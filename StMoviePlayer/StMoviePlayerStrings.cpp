@@ -314,6 +314,8 @@ void loadDefaults(StLangMap& theStrings) {
                "(does not match metadata)");
     theStrings(INFO_DURATION,
                "Duration");
+    theStrings(INFO_NO_SRCFORMAT_EX,
+               "(does not stored in metadata\nbut detected from file name)");
 
     theStrings(METADATA_TITLE,
                "Title");

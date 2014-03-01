@@ -146,6 +146,7 @@ German translation file for StMoviePlayer program
 5008="(does not stored in metadata)"
 5009="(does not match metadata)"
 5010="Dauer"
+5011="(does not stored in metadata\nbut detected from file name)"
 5300="Titel"
 5301="Composer"
 5302="Artist"

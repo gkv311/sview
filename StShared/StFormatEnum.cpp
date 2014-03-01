@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -7,6 +7,8 @@
  */
 
 #include <StGLStereo/StFormatEnum.h>
+
+#include <StFile/StFileNode.h>
 
 namespace {
     static const StCString ST_V_SRC_AUTODETECT_STRING    = stCString("auto");
@@ -65,4 +67,69 @@ StFormatEnum st::formatReversed(const StFormatEnum theFormatEnum) {
         case ST_V_SRC_AUTODETECT:
         default:                     return theFormatEnum;
     }
+}
+
+StFormatEnum st::formatFromName(const StString& theFileName,
+                                bool&           theIsAnamorph) {
+    StString aName, anExt;
+    StFileNode::getNameAndExtension(theFileName, aName, anExt);
+    aName.toLowerCase();
+
+    // this is not optimized search, but should be OK for most use cases
+    if(aName.isContains(stCString("halfou"))
+    || aName.isContains(stCString("half-ou"))
+    || aName.isContains(stCString("half_ou"))
+    || aName.isContains(stCString("half.ou"))
+    || aName.isContains(stCString("half ou"))
+    || aName.isEndsWith(stCString("-hou"))
+    || aName.isEndsWith(stCString("_hou"))
+    || aName.isEndsWith(stCString(".hou"))
+    || aName.isEndsWith(stCString(" hou"))
+    || aName.isEndsWith(stCString("-abq"))) {
+        theIsAnamorph = true;
+        return ST_V_SRC_OVER_UNDER_LR;
+    } else if(aName.isEndsWith(stCString("-baq"))) {
+        theIsAnamorph = true;
+        return ST_V_SRC_OVER_UNDER_RL;
+    } else if(aName.isEndsWith(stCString("-ab"))
+           //|| aName.isContains(stCString("-ou")) // too ambiguous
+           //|| aName.isContains(stCString("_ou"))
+           //|| aName.isContains(stCString(".ou"))
+           //|| aName.isContains(stCString(" ou"))
+             ) {
+        theIsAnamorph = false;
+        return ST_V_SRC_OVER_UNDER_LR;
+    } else if(aName.isEndsWith(stCString("-ba"))) {
+        theIsAnamorph = false;
+        return ST_V_SRC_OVER_UNDER_RL;
+    } else if(aName.isContains(stCString("halfsbs"))
+           || aName.isContains(stCString("half-sbs"))
+           || aName.isContains(stCString("half_sbs"))
+           || aName.isContains(stCString("half.sbs"))
+           || aName.isContains(stCString("half sbs"))
+           || aName.isContains(stCString(".hsbs"))
+           || aName.isContains(stCString("-hsbs"))
+           || aName.isContains(stCString("_hsbs"))
+           || aName.isContains(stCString(" hsbs"))
+           || aName.isEndsWith(stCString("-lrq"))) {
+        theIsAnamorph = true;
+        return ST_V_SRC_PARALLEL_PAIR;
+    } else if(aName.isEndsWith(stCString("-rlq"))) {
+        theIsAnamorph = true;
+        return ST_V_SRC_SIDE_BY_SIDE;
+    } else if(aName.isContains(stCString("-sbs"))
+           || aName.isContains(stCString(".sbs"))
+           || aName.isContains(stCString(" sbs"))
+           || aName.isEndsWith(stCString("-lr"))) {
+        theIsAnamorph = false;
+        return ST_V_SRC_PARALLEL_PAIR;
+    } else if(aName.isEndsWith(stCString("-rl"))) {
+        theIsAnamorph = false;
+        return ST_V_SRC_SIDE_BY_SIDE;
+    } else if(aName.isEndsWith(stCString("-2d"))) {
+        theIsAnamorph = false;
+        return ST_V_SRC_MONO;
+    }
+    theIsAnamorph = false;
+    return ST_V_SRC_AUTODETECT;
 }

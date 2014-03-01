@@ -797,13 +797,18 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
         // warn about wrong/missing stereoscopic format information
         StString aSrcInfo;
         StGLVec3 anExtraColor = aWhite;
-        if(anExtraInfo->SrcFormat == ST_V_SRC_AUTODETECT
+        if(anExtraInfo->StInfoStream == ST_V_SRC_AUTODETECT
         && anActiveSrcFormat != ST_V_SRC_MONO
         && anActiveSrcFormat != ST_V_SRC_SEPARATE_FRAMES) {
-            aSrcInfo     = tr(INFO_NO_SRCFORMAT);
             anExtraColor = StGLVec3(1.0f, 1.0f, 0.8f);
-        } else if(anExtraInfo->SrcFormat != ST_V_SRC_AUTODETECT
-               && anExtraInfo->SrcFormat != anActiveSrcFormat) {
+            if(anExtraInfo->StInfoFileName != ST_V_SRC_AUTODETECT
+            && anExtraInfo->StInfoFileName == anActiveSrcFormat) {
+                aSrcInfo = tr(INFO_NO_SRCFORMAT_EX);
+            } else {
+                aSrcInfo = tr(INFO_NO_SRCFORMAT);
+            }
+        } else if(anExtraInfo->StInfoStream != ST_V_SRC_AUTODETECT
+               && anExtraInfo->StInfoStream != anActiveSrcFormat) {
             aSrcInfo     = tr(INFO_WRONG_SRCFORMAT);
             anExtraColor = StGLVec3(1.0f, 0.0f, 0.0f);
         }

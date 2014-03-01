@@ -41,12 +41,13 @@ struct StMovieInfo {
     StHandle<StStereoParams> Id;
     StArgumentsMap           Info;
     StArgumentsMap           Codecs;
-    StString                 Path;      //!< file path
-    StFormatEnum             SrcFormat; //!< source format as stored in file metadata
-    bool                     HasVideo;  //!< true if file contains video
-    bool                     IsSavable; //!< indicate that file can be saved without re-encoding
+    StString                 Path;           //!< file path
+    StFormatEnum             StInfoStream;   //!< source format as stored in file metadata
+    StFormatEnum             StInfoFileName; //!< source format as stored in file metadata
+    bool                     HasVideo;       //!< true if file contains video
+    bool                     IsSavable;      //!< indicate that file can be saved without re-encoding
 
-    StMovieInfo() : SrcFormat(ST_V_SRC_AUTODETECT), HasVideo(false), IsSavable(false) {}
+    StMovieInfo() : StInfoStream(ST_V_SRC_AUTODETECT), StInfoFileName(ST_V_SRC_AUTODETECT), HasVideo(false), IsSavable(false) {}
 
 };
 
@@ -130,18 +131,11 @@ class StVideo {
     }
 
     /**
-     * Get default stereoscopic format.
-     */
-    ST_LOCAL StFormatEnum getSrcFormat() const {
-        return myVideoMaster->getSrcFormat();
-    }
-
-    /**
      * Set the stereoscopic format to be used for video
      * with ambiguous format information.
      */
-    ST_LOCAL void setSrcFormat(const StFormatEnum theSrcFormat) {
-        myVideoMaster->setSrcFormat(theSrcFormat);
+    ST_LOCAL void setStereoFormat(const StFormatEnum theSrcFormat) {
+        myVideoMaster->setStereoFormatByUser(theSrcFormat);
     }
 
     /**

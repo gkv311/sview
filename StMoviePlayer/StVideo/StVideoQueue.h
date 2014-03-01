@@ -103,19 +103,26 @@ class StVideoQueue : public StAVPacketQueue {
     /**
      * @return sterescopic information stored in file
      */
-    ST_LOCAL StFormatEnum getSrcFormatInfo() const {
-        return mySrcFormatInfo;
+    ST_LOCAL StFormatEnum getStereoFormatFromStream() const {
+        return myStFormatInStream;
     }
 
     /**
-     * @return source format detection rule
+     * @return source format specified by user
      */
-    ST_LOCAL StFormatEnum getSrcFormat() const {
-        return mySrcFormat;
+    ST_LOCAL StFormatEnum getStereoFormatByUser() const {
+        return myStFormatByUser;
     }
 
-    ST_LOCAL void setSrcFormat(const StFormatEnum theSrcFormat) {
-        mySrcFormat = theSrcFormat;
+    ST_LOCAL void setStereoFormatByUser(const StFormatEnum theSrcFormat) {
+        myStFormatByUser = theSrcFormat;
+    }
+
+    /**
+     * @return source format detected from file name
+     */
+    ST_LOCAL StFormatEnum getStereoFormatFromName() const {
+        return myStFormatByName;
     }
 
     ST_LOCAL StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
@@ -129,7 +136,8 @@ class StVideoQueue : public StAVPacketQueue {
      * @return true if no error
      */
     ST_LOCAL virtual bool init(AVFormatContext*   theFormatCtx,
-                               const unsigned int theStreamId);
+                               const unsigned int theStreamId,
+                               const StString&    theFileName);
 
     /**
      * Clean function.
@@ -260,9 +268,10 @@ class StVideoQueue : public StAVPacketQueue {
     StImage                    myCachedFrame;
     bool                       myWasFlushed;
 
-    volatile StFormatEnum      mySrcFormat;       //!< source format
-    volatile StFormatEnum      mySrcFormatInfo;   //!< source format information retrieved from stream
+    volatile StFormatEnum      myStFormatByUser;  //!< source format specified by user
+    volatile StFormatEnum      myStFormatByName;  //!< source format detected from file name
+    volatile StFormatEnum      myStFormatInStream;//!< source format information retrieved from stream
 
 };
 
-#endif //__StVideoQueue_h_
+#endif // __StVideoQueue_h_
