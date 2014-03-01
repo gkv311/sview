@@ -35,12 +35,13 @@ struct StImageInfo {
 
     StHandle<StStereoParams> Id;
     StArgumentsMap           Info;
-    StString                 Path;      //!< file path
-    StImageFile::ImageType   ImageType; //!< image type
-    StFormatEnum             SrcFormat; //!< source format as stored in file metadata
-    bool                     IsSavable; //!< indicate that file can be saved without re-encoding
+    StString                 Path;           //!< file path
+    StImageFile::ImageType   ImageType;      //!< image type
+    StFormatEnum             StInfoStream;   //!< source format as stored in file metadata
+    StFormatEnum             StInfoFileName; //!< source format detected from file name
+    bool                     IsSavable;      //!< indicate that file can be saved without re-encoding
 
-    StImageInfo() : ImageType(StImageFile::ST_TYPE_NONE), SrcFormat(ST_V_SRC_AUTODETECT), IsSavable(false) {}
+    StImageInfo() : ImageType(StImageFile::ST_TYPE_NONE), StInfoStream(ST_V_SRC_AUTODETECT), StInfoFileName(ST_V_SRC_AUTODETECT), IsSavable(false) {}
 
 };
 
@@ -120,12 +121,8 @@ class StImageLoader {
         return myPlayList;
     }
 
-    ST_LOCAL StFormatEnum getSrcFormat() const {
-        return mySrcFormat;
-    }
-
-    ST_LOCAL void setSrcFormat(const StFormatEnum theSrcFormat) {
-        mySrcFormat = theSrcFormat;
+    ST_LOCAL void setStereoFormat(const StFormatEnum theSrcFormat) {
+        myStFormatByUser = theSrcFormat;
     }
 
     ST_LOCAL void setImageLib(const StImageFile::ImageClass theImageLib) {
@@ -184,7 +181,7 @@ class StImageLoader {
     StPlayList                 myPlayList;      //!< play list
     mutable StMutex            myLock;          //!< lock to access not thread-safe properties
     StCondition                myLoadNextEvent;
-    StFormatEnum               mySrcFormat;     //!< target source format (auto-detect by default)
+    StFormatEnum               myStFormatByUser;//!< target source format (auto-detect by default)
     StHandle<StGLTextureQueue> myTextureQueue;  //!< decoded frames queue
     StHandle<StImageInfo>      myImgInfo;       //!< info about currently loaded image
     StHandle<StImageInfo>      myInfoToSave;    //!< modified info to be saved

@@ -53,7 +53,7 @@ StImageLoader::StImageLoader(const StImageFile::ImageClass     theImageLib,
   myLangMap(theLangMap),
   myPlayList(1),
   myLoadNextEvent(false),
-  mySrcFormat(ST_V_SRC_AUTODETECT),
+  myStFormatByUser(ST_V_SRC_AUTODETECT),
   myTextureQueue(theTextureQueue),
   myMsgQueue(theMsgQueue),
   myImageLib(theImageLib),
@@ -136,7 +136,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     }
 
     StTimer aLoadTimer(true);
-    StFormatEnum aSrcFormatCurr = mySrcFormat;
+    StFormatEnum aSrcFormatCurr = myStFormatByUser;
     if(anImgType == StImageFile::ST_TYPE_MPO
     || anImgType == StImageFile::ST_TYPE_JPEG
     || anImgType == StImageFile::ST_TYPE_JPS) {
@@ -190,12 +190,9 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
                 anEntry.changeValue() = aTime;
             }
         }
-        if(mySrcFormat == ST_V_SRC_AUTODETECT) {
-            if(aParser.getSrcFormat() != ST_V_SRC_AUTODETECT) {
-                aSrcFormatCurr = aParser.getSrcFormat();
-            } else if(anImgType == StImageFile::ST_TYPE_JPS) {
-                aSrcFormatCurr = ST_V_SRC_SIDE_BY_SIDE;
-            }
+        if(myStFormatByUser == ST_V_SRC_AUTODETECT
+        && aParser.getSrcFormat() != ST_V_SRC_AUTODETECT) {
+            aSrcFormatCurr = aParser.getSrcFormat();
         }
 
         //aParser.fillDictionary(anImgInfo->Info, true);
@@ -205,10 +202,10 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         }
 
         anImgInfo->IsSavable = anImg2.isNull();
-        anImgInfo->SrcFormat = aParser.getSrcFormat();
-        if(anImgInfo->SrcFormat != ST_V_SRC_AUTODETECT) {
+        anImgInfo->StInfoStream = aParser.getSrcFormat();
+        if(anImgInfo->StInfoStream != ST_V_SRC_AUTODETECT) {
             StDictEntry& anEntry  = anImgInfo->Info.addChange("Jpeg.JpsStereo");
-            anEntry.changeValue() = tr(StImageViewerGUI::trSrcFormatId(anImgInfo->SrcFormat));
+            anEntry.changeValue() = tr(StImageViewerGUI::trSrcFormatId(anImgInfo->StInfoStream));
         }
 
         // read image from memory
@@ -265,16 +262,20 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             return false;
         }
 
-        anImgInfo->SrcFormat = anImageL->getFormat();
-        if(mySrcFormat == ST_V_SRC_AUTODETECT) {
-            aSrcFormatCurr = anImageL->getFormat();
-        }
-        if(aSrcFormatCurr == ST_V_SRC_AUTODETECT
-        && anImgType == StImageFile::ST_TYPE_PNS) {
-            aSrcFormatCurr = ST_V_SRC_SIDE_BY_SIDE;
+        anImgInfo->StInfoStream = anImageL->getFormat();
+        if(myStFormatByUser == ST_V_SRC_AUTODETECT) {
+            aSrcFormatCurr = anImgInfo->StInfoStream;
         }
     }
     const double aLoadTimeMSec = aLoadTimer.getElapsedTimeInMilliSec();
+
+    // detect information from file name
+    bool isAnamorphByName = false;
+    anImgInfo->StInfoFileName = st::formatFromName(aTitleString, isAnamorphByName);
+    if(aSrcFormatCurr == ST_V_SRC_AUTODETECT
+    && anImgInfo->StInfoFileName != ST_V_SRC_AUTODETECT) {
+        aSrcFormatCurr = anImgInfo->StInfoFileName;
+    }
 
 #ifdef __ST_DEBUG__
     if(!anImageL->isNull()) {

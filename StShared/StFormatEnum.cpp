@@ -74,6 +74,12 @@ StFormatEnum st::formatFromName(const StString& theFileName,
     StString aName, anExt;
     StFileNode::getNameAndExtension(theFileName, aName, anExt);
     aName.toLowerCase();
+    anExt.toLowerCase();
+    if(anExt == stCString("pns")
+    || anExt == stCString("jps")) {
+        theIsAnamorph = false;
+        return ST_V_SRC_SIDE_BY_SIDE;
+    }
 
     // this is not optimized search, but should be OK for most use cases
     if(aName.isContains(stCString("halfou"))

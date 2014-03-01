@@ -43,7 +43,7 @@ struct StMovieInfo {
     StArgumentsMap           Codecs;
     StString                 Path;           //!< file path
     StFormatEnum             StInfoStream;   //!< source format as stored in file metadata
-    StFormatEnum             StInfoFileName; //!< source format as stored in file metadata
+    StFormatEnum             StInfoFileName; //!< source format detected from file name
     bool                     HasVideo;       //!< true if file contains video
     bool                     IsSavable;      //!< indicate that file can be saved without re-encoding
 

@@ -54,6 +54,8 @@ namespace st {
      * - sbs,lr,rl SideBySide, Left/Right
      * - 2d        Mono
      * - half,q    Anamorph suffix
+     * or file extension:
+     * - jps,pns   SideBySide (Right/Left order)
      */
     ST_CPPEXPORT StFormatEnum formatFromName(const StString& theFileName,
                                              bool&           theIsAnamorph);

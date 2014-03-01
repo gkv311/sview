@@ -765,7 +765,7 @@ void StImageViewer::doSwitchSrcFormat(const int32_t theSrcFormat) {
         return;
     }
 
-    myLoader->setSrcFormat(StFormatEnum(theSrcFormat));
+    myLoader->setStereoFormat(StFormatEnum(theSrcFormat));
     if(!myLoader->getPlayList().isEmpty()) {
         myLoader->doLoadNext();
     }

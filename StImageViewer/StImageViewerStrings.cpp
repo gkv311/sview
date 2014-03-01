@@ -236,6 +236,8 @@ void loadDefaults(StLangMap& theStrings) {
                "(does not stored in metadata)");
     theStrings(INFO_WRONG_SRCFORMAT,
                "(does not match metadata)");
+    theStrings(INFO_NO_SRCFORMAT_EX,
+               "(does not stored in metadata\nbut detected from file name)");
 
     theStrings(METADATA_JPEG_COMMENT,
                "JPEG comment");

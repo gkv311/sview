@@ -160,6 +160,7 @@ namespace StImageViewerStrings {
         INFO_COLOR_MODEL       = 5007,
         INFO_NO_SRCFORMAT      = 5008,
         INFO_WRONG_SRCFORMAT   = 5009,
+        INFO_NO_SRCFORMAT_EX   = 5011,
 
         // metadata keys
         METADATA_JPEG_COMMENT     = 5100,
