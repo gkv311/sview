@@ -467,10 +467,6 @@ void StMoviePlayer::releaseDevice() {
         mySettings->saveParam (ST_SETTING_SAVE_IMG_TYPE,      params.SnapshotImgType);
         mySettings->saveParam (ST_SETTING_EXPERIMENTAL,       params.ToShowExtra);
 
-        if(!myVideo.isNull()) {
-            mySettings->saveString(ST_SETTING_RECENT_FILES,   myPlayList->dumpRecentList());
-        }
-
         // store hot-keys
         for(std::map< int, StHandle<StAction> >::iterator anIter = myActions.begin();
             anIter != myActions.end(); ++anIter) {
@@ -491,6 +487,8 @@ StMoviePlayer::~StMoviePlayer() {
     releaseDevice();
     // wait video playback thread to quit and release resources
     myVideo.nullify();
+
+    mySettings->saveString(ST_SETTING_RECENT_FILES, myPlayList->dumpRecentList());
 }
 
 bool StMoviePlayer::createGui(StHandle<StGLTextureQueue>& theTextureQueue,
@@ -770,13 +768,22 @@ bool StMoviePlayer::open() {
     StArgument argFileRight = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_RIGHT];
     if(argFileLeft.isValid() && argFileRight.isValid()) {
         // meta-file
-        /// TODO (Kirill Gavrilov#4) we should use MIME type!
+        const size_t aRecent = myPlayList->findRecent(argFileLeft.getValue(), argFileRight.getValue());
+        if(aRecent != size_t(-1)) {
+            doOpenRecent(aRecent);
+            return true;
+        }
         myPlayList->addOneFile(argFileLeft.getValue(), argFileRight.getValue());
     } else if(!anOpenMIME.isEmpty()) {
         // create just one-file playlist
         myPlayList->addOneFile(myOpenFileInfo->getPath(), anOpenMIME);
     } else {
         // create playlist from file's folder
+        const size_t aRecent = myPlayList->findRecent(myOpenFileInfo->getPath());
+        if(aRecent != size_t(-1)) {
+            doOpenRecent(aRecent);
+            return true;
+        }
         myPlayList->open(myOpenFileInfo->getPath());
     }
 
@@ -957,6 +964,12 @@ void StMoviePlayer::doFileNext() {
 void StMoviePlayer::doFileDrop(const StDNDropEvent& theEvent) {
     const StString aFilePath = theEvent.File;
     if(myPlayList->checkExtension(aFilePath)) {
+        const size_t aRecent = myPlayList->findRecent(aFilePath);
+        if(aRecent != size_t(-1)) {
+            doOpenRecent(aRecent);
+            return;
+        }
+
         myPlayList->open(aFilePath);
         doUpdateStateLoading();
         myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
@@ -1330,10 +1343,14 @@ void StMoviePlayer::doOpenRecent(const size_t theItemId) {
     if(myVideo.isNull()) {
         return;
     }
-    myPlayList->openRecent(theItemId);
+
+    StHandle<StStereoParams> anOldParams = myPlayList->openRecent(theItemId);
     doUpdateStateLoading();
     myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
     myVideo->doLoadNext();
+    if(!anOldParams.isNull()) {
+        mySeekOnLoad = anOldParams->Timestamp;
+    }
 }
 
 void StMoviePlayer::doClearRecent(const size_t ) {

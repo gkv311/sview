@@ -52,6 +52,7 @@ class StStereoParams {
      */
     StStereoParams(ViewMode theViewMode = FLAT_IMAGE)
     : ViewingMode(theViewMode),
+      Timestamp(0.0f),
       StereoFormat(ST_V_SRC_MONO),
       ToSwapLR(false),
       PanCenter(0.0f, 0.0f),
@@ -278,6 +279,7 @@ class StStereoParams {
         public:
 
     ViewMode     ViewingMode;      //!< viewing mode - panorama or flat image
+    GLfloat      Timestamp;        //!< playback timestamp
 
     StFormatEnum StereoFormat;     //!< stereoscopic format
     bool         ToSwapLR;         //!< reverse left/right views

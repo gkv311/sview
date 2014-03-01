@@ -300,6 +300,13 @@ class StPlayList {
     ST_CPPEXPORT void getRecentList(StArrayList<StString>& theList) const;
 
     /**
+     * Search file path in the list of recently opened items.
+     * @return index of recent item or -1 if not found
+     */
+    ST_CPPEXPORT size_t findRecent(const StString thePathL,
+                                   const StString thePathR = "") const;
+
+    /**
      * Restore list of recent files from the string serialized by dumpRecentList() method.
      * @param theString String with list of files
      */
@@ -314,13 +321,20 @@ class StPlayList {
     /**
      * Open recent file at specified position.
      * @param theItemId Position in recent files list
+     * @return saved parameters or NULL
      */
-    ST_CPPEXPORT void openRecent(const size_t theItemId);
+    ST_CPPEXPORT StHandle<StStereoParams> openRecent(const size_t theItemId);
 
     /**
      * Reset list of recently opened files.
      */
     ST_CPPEXPORT void clearRecent();
+
+    /**
+     * Update parameters of recent item.
+     */
+    ST_CPPEXPORT void updateRecent(const StHandle<StFileNode>&     theFile,
+                                   const StHandle<StStereoParams>& theParams);
 
         public: //!< Signals
 
@@ -345,6 +359,13 @@ class StPlayList {
 
         private:
 
+    struct StRecentItem {
+        StHandle<StFileNode>     File;
+        StHandle<StStereoParams> Params;
+    };
+
+        private:
+
     /**
      * Add new item to double-linked list.
      */
@@ -363,8 +384,8 @@ class StPlayList {
     /**
      * Add file to list of recent files.
      */
-    ST_LOCAL const StHandle<StFileNode>& addRecentFile(const StFileNode& theFile,
-                                                       const bool        theToFront = true);
+    ST_LOCAL const StHandle<StRecentItem>& addRecentFile(const StFileNode& theFile,
+                                                         const bool        theToFront = true);
 
     /**
      * M3U parsing stuff.
@@ -397,7 +418,7 @@ class StPlayList {
     bool                    myIsLoopFlag;
 
     StHandle<StFileNode>    myPlsFile;       //!< current playlist file (if any)
-    std::deque< StHandle<StFileNode> > myRecent; //!< list of recently opened files
+    std::deque< StHandle<StRecentItem> > myRecent; //!< list of recently opened files
     size_t                  myRecentLimit;   //!< the maximum size of list with recently opened files
     mutable bool            myIsNewRecent;   //!< flag indicates modified state of recent files list
 
@@ -406,4 +427,4 @@ class StPlayList {
 
 };
 
-#endif //__StPlayList_h__
+#endif // __StPlayList_h__

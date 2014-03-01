@@ -774,6 +774,16 @@ void StVideo::packetsLoop() {
                 saveSnapshotAs(anImgType);
             } else {
                 // load next file
+                const double aPts = getPts();
+                const double aDur = getDuration();
+                if(aPts > 300.0
+                && aPts < aDur - 300.0) {
+                    myCurrParams->Timestamp = aPts;
+                } else {
+                    myCurrParams->Timestamp = 0.0;
+                }
+
+                myPlayList->updateRecent(myCurrNode, myCurrParams);
                 doFlush();
                 if(myAudio->isInitialized()) {
                     myAudio->pushPlayEvent(ST_PLAYEVENT_SEEK, 0.0);
@@ -932,6 +942,7 @@ void StVideo::packetsLoop() {
                 }
             }
             // end when any one in format context finished
+            myCurrParams->Timestamp = 0.0;
             break;
         }
     }
