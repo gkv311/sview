@@ -365,7 +365,6 @@ bool StPlayList::walkToNext(const bool theToForce) {
     || (myToLoopSingle && !theToForce)) {
         return false;
     } else if(myIsShuffle && myItemsCount >= 3) {
-        /// TODO (Kirill Gavrilov#5) walk to the history front before next random
         StPlayItem* aPrev = myCurrent;
         if(!myStackNext.empty()) {
             myCurrent = myStackNext.front();
@@ -387,39 +386,52 @@ bool StPlayList::walkToNext(const bool theToForce) {
                 ST_DEBUG_LOG("Restart the shuffle");
             }
 
-            const size_t aCurrPos = myCurrent->getPosition();
-            bool aCurrFlag  = myCurrent->getPlayedFlag();
-
-            StPlayItem* aNextItem;
-            size_t aNextPos;
-            size_t aNextDiff;
-            for(size_t anIter = 0;; ++anIter) {
-                aNextItem = myCurrent;
-                aNextPos = size_t(myRandGen.next() * myItemsCount);
-                if(aNextPos > aCurrPos) {
-                    // forward direction
-                    aNextDiff = aNextPos - aCurrPos;
-                    for(; aNextItem != NULL && aNextDiff > 0; --aNextDiff) {
-                        aNextItem = aNextItem->getNext();
-                    }
-                } else {
-                    // backward direction
-                    aNextDiff = aCurrPos - aNextPos;
-                    for(; aNextItem != NULL && aNextDiff > 0; --aNextDiff) {
-                        aNextItem = aNextItem->getPrev();
-                    }
+            // determine next random position
+            const size_t aCurrPos  = myCurrent->getPosition();
+            bool         aCurrFlag = myCurrent->getPlayedFlag();
+            StPlayItem*  aNextItem = myCurrent;
+            const size_t aNextPos  = stMin(size_t(myRandGen.next() * myItemsCount), myItemsCount - 1);
+            if(aNextPos > aCurrPos) {
+                // forward direction
+                for(size_t aNextDiff = aNextPos - aCurrPos; aNextItem != NULL && aNextDiff != 0; --aNextDiff) {
+                    aNextItem = aNextItem->getNext();
                 }
-                if(aCurrFlag != aNextItem->getPlayedFlag()) {
-                    // found the item!
-                    break;
-                } else if(anIter >= 2 * myItemsCount) {
-                    // something wrong!
-                    ST_DEBUG_LOG("Next shuffle position not found within " + anIter + " iterations!");
-                    aCurrFlag = !aCurrFlag;
+            } else {
+                // backward direction
+                for(size_t aNextDiff = aCurrPos - aNextPos; aNextItem != NULL && aNextDiff != 0; --aNextDiff) {
+                    aNextItem = aNextItem->getPrev();
                 }
             }
-            ST_DEBUG_LOG(aCurrPos + " -> " + aNextPos);
-            ++myPlayedCount; ///
+            if(aCurrFlag == aNextItem->getPlayedFlag()) {
+                // find nearest position not yet played - prefer item farther from current one
+                StPlayItem* aNextItem1 = aNextPos > aCurrPos ? aNextItem->getNext() : aNextItem->getPrev();
+                StPlayItem* aNextItem2 = aNextPos > aCurrPos ? aNextItem->getPrev() : aNextItem->getNext();
+                for(; aNextItem1 != NULL || aNextItem2 != NULL;) {
+                    if(aNextItem1 != NULL) {
+                        if(aCurrFlag != aNextItem1->getPlayedFlag()) {
+                            aNextItem = aNextItem1;
+                            break;
+                        }
+                        aNextItem1 = aNextPos > aCurrPos ? aNextItem1->getNext() : aNextItem1->getPrev();
+                    }
+                    if(aNextItem2 != NULL) {
+                        if(aCurrFlag != aNextItem2->getPlayedFlag()) {
+                            aNextItem = aNextItem2;
+                            break;
+                        }
+                        aNextItem2 = aNextPos > aCurrPos ? aNextItem2->getPrev() : aNextItem2->getNext();
+                    }
+                }
+                if(aCurrFlag == aNextItem->getPlayedFlag()) {
+                    // something wrong!
+                    ST_DEBUG_LOG("Next shuffle position not found!");
+                    aCurrFlag     = !aCurrFlag;
+                    myPlayedCount = size_t(-1);
+                }
+            }
+
+            ST_DEBUG_LOG(aCurrPos + " -> " + aNextItem->getPosition());
+            ++myPlayedCount;
 
             aNextItem->setPlayedFlag(aCurrFlag);
             myCurrent = aNextItem;
