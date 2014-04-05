@@ -424,9 +424,9 @@ bool StPlayList::walkToNext(const bool theToForce) {
                 }
                 if(aCurrFlag == aNextItem->getPlayedFlag()) {
                     // something wrong!
-                    ST_DEBUG_LOG("Next shuffle position not found!");
+                    ST_DEBUG_LOG("Disaster - next shuffle position not found!");
                     aCurrFlag     = !aCurrFlag;
-                    myPlayedCount = size_t(-1);
+                    myPlayedCount = 0;
                 }
             }
 
@@ -543,7 +543,7 @@ void StPlayList::addToNode(const StHandle<StFileNode>& theFileNode,
 }
 
 bool StPlayList::removePhysically(const StHandle<StFileNode>& theFileNode) {
-    StString aPath = theFileNode->getPath();
+    StString    aPath    = theFileNode->getPath();
     StPlayItem* aRemItem = NULL;
     StMutexAuto anAutoLock(myMutex);
     if(myCurrent == NULL) {
@@ -560,12 +560,24 @@ bool StPlayList::removePhysically(const StHandle<StFileNode>& theFileNode) {
     } else {
         // walk to another playlist position
         aRemItem = myCurrent;
+        const bool aPlayedFlag = aRemItem->getPlayedFlag();
         if(myCurrent->hasNext()) {
             myCurrent = myCurrent->getNext();
         } else if(myCurrent->hasPrev()) {
             myCurrent = myCurrent->getPrev();
         } else {
-            myCurrent = NULL;
+            myCurrent     = NULL;
+            myPlayedCount = 0;
+        }
+
+        if(myCurrent != NULL) {
+            if(aRemItem->getPlayedFlag() != aPlayedFlag) {
+                // the item has not been played yet - mark it as such
+                aRemItem->setPlayedFlag(aPlayedFlag);
+            } else {
+                // one played item has been removed
+                --myPlayedCount;
+            }
         }
     }
 
