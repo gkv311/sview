@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutPageFlip library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -34,12 +34,14 @@ StDXNVWindow::StDXNVWindow(const StHandle<StMsgQueue>& theMsgQueue,
                            const size_t     theFboSizeX,
                            const size_t     theFboSizeY,
                            const StMonitor& theMonitor,
-                           StOutPageFlip*   theStWin)
+                           StOutPageFlip*   theStWin,
+                           const bool       theHasWglDx)
 : myMsgQueue(theMsgQueue),
   myBufferL(NULL),
   myBufferR(NULL),
   myFboSizeX(theFboSizeX),
   myFboSizeY(theFboSizeY),
+  myHasWglDx(theHasWglDx),
   myWinD3d(NULL),
   myMonitor(theMonitor),
   myStWin(theStWin),
@@ -207,21 +209,24 @@ void StDXNVWindow::dxLoop() {
     HANDLE waitEvents[4] = {hEventQuit, hEventShow, hEventHide, hEventUpdate};
 
     MSG aMsg;
-    stMemSet(&aMsg, 0, sizeof(aMsg));
+    stMemZero(&aMsg, sizeof(aMsg));
     SetEvent(hEventReady);
     StKeysState& aKeysState = myStWin->changeKeysState();
     StEvent aKeyEvent;
-    BYTE aKeysMap[256];
+    BYTE    aKeysMap[256];
     wchar_t aCharBuff[4];
     for(;;) {
         switch(MsgWaitForMultipleObjects(4, waitEvents, FALSE, INFINITE, QS_ALLINPUT)) {
             case WAIT_OBJECT_0: {
                 // Event 1 (hEventQuit) has been set. If the event was created as autoreset, it has also been reset
                 ST_DEBUG_LOG_AT("releaseDXWindow()");
+
+                myMutex.lock();
                 myDxSurface.nullify();
                 /// TODO (Kirill Gavrilov#9) do we need this call here?
                 myDxManager->reset(myWinD3d, int(2), int(2), false);
                 myDxManager.nullify();
+                myMutex.unlock();
 
                 PostQuitMessage(0);
                 DestroyWindow(myWinD3d);
@@ -230,12 +235,13 @@ void StDXNVWindow::dxLoop() {
             case WAIT_OBJECT_0 + 1: {
                 // Event 2 (hEventShow) has been set. If the event was created as autoreset, it has also been reset
                 aShowState = true;
+                myMutex.lock();
                 myDxSurface.nullify();
                 GetCursorPos(&aCursorPos); // backup cursor position
 
                 if(myDxManager->reset(myWinD3d, int(getD3dSizeX()), int(getD3dSizeY()), aShowState)) {
-                    myDxSurface = new StDXNVSurface(getD3dSizeX() * 2, getD3dSizeY());
-                    if(!myDxSurface->create(myDxManager->getDevice())) {
+                    myDxSurface = new StDXNVSurface(getD3dSizeX(), getD3dSizeY());
+                    if(!myDxSurface->create(*myDxManager, myHasWglDx)) {
                         //stError(ST_TEXT("Output plugin, Failed to create Direct3D surface"));
                         ST_ERROR_LOG("StDXNVWindow, Failed to create Direct3D surface");
                         myMsgQueue->pushError(StString("PageFlip output - Failed to create Direct3D surface"));
@@ -248,6 +254,7 @@ void StDXNVWindow::dxLoop() {
                     aShowState = false;
                     ST_ERROR_LOG("StDXNVWindow, Failed to reset Direct3D device into FULLSCREEN state");
                 }
+                myMutex.unlock();
                 ShowWindow(myWinD3d, SW_SHOWMAXIMIZED);
                 UpdateWindow(myWinD3d); // debug staff
 
@@ -258,17 +265,16 @@ void StDXNVWindow::dxLoop() {
             case WAIT_OBJECT_0 + 2: {
                 // Event 3 (hEventHide) has been set. If the event was created as autoreset, it has also been reset
                 aShowState = false;
+                myMutex.lock();
                 myDxSurface.nullify();
                 GetCursorPos(&aCursorPos); // backup cursor position
 
                 // release unused memory
-                myMutex.lock();
                 releaseBuffers();
-                myMutex.unlock();
-
                 if(!myDxManager->reset(myWinD3d, int(getD3dSizeX()), int(getD3dSizeY()), aShowState)) {
                     ST_ERROR_LOG("StDXNVWindow, Failed to reset Direct3D device into WINDOWED state");
                 }
+                myMutex.unlock();
 
                 ShowWindow(myWinD3d, SW_HIDE);
                 UpdateWindow(myWinD3d);
@@ -284,16 +290,25 @@ void StDXNVWindow::dxLoop() {
                     break;
                 }
 
-                myMutex.lock();
-                if(myBufferL != NULL && myBufferR != NULL) {
-                    myDxSurface->update(myFboSizeX, myFboSizeY, myBufferR, false);
-                    myDxSurface->update(myFboSizeX, myFboSizeY, myBufferL, true);
+                if(myHasWglDx) {
+                    myMutex.lock();
+                    myDxManager->beginRender();
+                    myDxSurface->render(*myDxManager);
+                    ResetEvent(hEventUpdate);
+                    myDxManager->endRender();
+                    myMutex.unlock();
+                } else {
+                    myMutex.lock();
+                    if(myBufferL != NULL && myBufferR != NULL) {
+                        myDxSurface->update(myFboSizeX, myFboSizeY, myBufferR, false);
+                        myDxSurface->update(myFboSizeX, myFboSizeY, myBufferL, true);
+                    }
+                    myMutex.unlock();
+                    myDxManager->beginRender();
+                    myDxSurface->render(*myDxManager);
+                    ResetEvent(hEventUpdate);
+                    myDxManager->endRender();
                 }
-                myMutex.unlock();
-                myDxManager->beginRender();
-                myDxSurface->render(myDxManager->getDevice());
-                ResetEvent(hEventUpdate);
-                myDxManager->endRender();
 
                 if(!myDxManager->swap()) {
                     SetEvent(hEventShow);

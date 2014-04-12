@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutPageFlip library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -31,18 +31,6 @@ namespace {
     static const DWORD ST_D3D_DEVICE_FLAGS = D3DCREATE_HARDWARE_VERTEXPROCESSING; // sets the graphic card to do the hardware vertexprocessing
 
 #ifdef __ST_DEBUG__
-    static StString printErrorDesc(HRESULT theErrCode) {
-        switch(theErrCode) {
-            case D3D_OK:                     return "OK";
-            case D3DERR_DEVICELOST:          return "Device lost";
-            case D3DERR_DEVICEREMOVED:       return "Device removed";
-            case D3DERR_DRIVERINTERNALERROR: return "Driver internal error";
-            case D3DERR_OUTOFVIDEOMEMORY:    return "Out of video memory";
-            case D3DERR_INVALIDCALL:         return "Invalid call";
-            default:                         return StString("Error #") + int(theErrCode) + ")";
-        }
-    }
-
     static StString printD3dFormat(const D3DFORMAT theD3dFormat) {
         switch(theD3dFormat) {
             case D3DFMT_R8G8B8:       return "R8G8B8      (24bit)";
@@ -79,6 +67,18 @@ namespace {
 #endif // __ST_DEBUG__
 
 };
+
+StString StDXManager::printErrorDesc(HRESULT theErrCode) {
+    switch(theErrCode) {
+        case D3D_OK:                     return "OK";
+        case D3DERR_DEVICELOST:          return "Device lost";
+        case D3DERR_DEVICEREMOVED:       return "Device removed";
+        case D3DERR_DRIVERINTERNALERROR: return "Driver internal error";
+        case D3DERR_OUTOFVIDEOMEMORY:    return "Out of video memory";
+        case D3DERR_INVALIDCALL:         return "Invalid call";
+        default:                         return StString("Error #") + int(theErrCode) + ")";
+    }
+}
 
 StDXManager::StDXManager()
 : myD3dLib(NULL),
@@ -432,14 +432,8 @@ void StDXManager::beginRender() {
         return;
     }
 
-    // clear the backbuffer to a black color
-    myD3dDevice->Clear(0,                                // number of rectangles to clear, 0 for all
-                       NULL,                             // rects to be cleared, NULL for entire buffer
-                       D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER, // the buffer to clear
-                       D3DCOLOR_XRGB(0, 0, 0),           // the Color to fill the buffer with
-                       1.0f,                             // depth for the z-buffer, (since we arent using it it doesnt matter)
-                       0);                               // stencil buffer clear
-
+    // clear the back buffer
+    myD3dDevice->Clear(0, NULL, D3DCLEAR_TARGET|D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
     myD3dDevice->BeginScene();
 }
 
@@ -454,7 +448,7 @@ bool StDXManager::swap() {
         return false;
     }
 
-    HRESULT isOK = myD3dDevice->Present(NULL, NULL, NULL, NULL);
+    const HRESULT isOK = myD3dDevice->Present(NULL, NULL, NULL, NULL);
     if(isOK != D3D_OK) {
         ST_DEBUG_LOG("Direct3D9, Present device failed, " + printErrorDesc(isOK));
     }
@@ -462,6 +456,7 @@ bool StDXManager::swap() {
 }
 
 namespace {
+
     static LRESULT CALLBACK aDummyWinProc(HWND in_hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
         return DefWindowProcW(in_hWnd, uMsg, wParam, lParam);
     }
@@ -477,7 +472,7 @@ namespace {
         return SV_THREAD_RETURN 0;
     }
 
-};
+}
 
 void StDXManager::initInfoAsync() {
     if(!THE_DX_INIT_EVENT.check()) {

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutPageFlip library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -44,12 +44,21 @@ class StDXNVWindow {
                  const size_t     theFboSizeX,
                  const size_t     theFboSizeY,
                  const StMonitor& theMonitor,
-                 StOutPageFlip*   theStWin);
+                 StOutPageFlip*   theStWin,
+                 const bool       theHasWglDx);
 
     /**
      * Destructor.
      */
     ~StDXNVWindow();
+
+    const StHandle<StDXManager>& getD3dManager() const {
+        return myDxManager;
+    }
+
+    const StHandle<StDXNVSurface>& getD3dSurface() const {
+        return myDxSurface;
+    }
 
     size_t getD3dSizeX() const {
         return myMonitor.getVRect().width();
@@ -184,6 +193,7 @@ class StDXNVWindow {
     unsigned char*          myBufferR;
     size_t                  myFboSizeX;
     size_t                  myFboSizeY;
+    bool                    myHasWglDx;
 
     HWND                    myWinD3d;
     StStringUtfWide         myWinClass;

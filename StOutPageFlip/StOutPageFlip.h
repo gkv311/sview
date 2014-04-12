@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutPageFlip library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -209,16 +209,23 @@ class StOutPageFlip : public StWindow {
 #endif
     bool                  myToResetDevice;
 
+    class StGLDXFrameBuffer;
+    class StProgramQuad;
+
     struct StOutDirect3D {
-        StHandle<StGLFrameBuffer> myGLBuffer;
+        StHandle<StGLFrameBuffer>   GlBuffer;
+        StHandle<StProgramQuad>     Program;
+        StGLVertexBuffer            VertBuf;
+        StGLVertexBuffer            TCrdBuf;
     #ifdef _WIN32
-        StHandle<StDXNVWindow>    myDxWindow;
-        StHandle<StThread>        myDxThread;
+        StHandle<StDXNVWindow>      DxWindow;
+        StHandle<StThread>          DxThread;
+        StHandle<StGLDXFrameBuffer> WglDxBuffer;
     #endif
-        GLuint myGLIoBuff;
-        int    myActivateStep;
-        bool   myIsActive;
-        bool   myToUsePBO;
+        GLuint GlIoBuff;
+        int    ActivateStep;
+        bool   IsActive;
+        bool   ToUsePBO;
 
         ST_LOCAL StOutDirect3D();
 
@@ -232,4 +239,4 @@ class StOutPageFlip : public StWindow {
 
 };
 
-#endif //__StOutPageFlip_h_
+#endif // __StOutPageFlip_h_

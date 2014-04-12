@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutPageFlip library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -47,6 +47,8 @@ class StDXManager {
     static bool getInfo(StDXInfo&  theInfo,
                         const bool theForced = false);
 
+    static StString printErrorDesc(HRESULT theErrCode);
+
     enum {
         ST_DX_VENDOR_AMD    = 4098,
         ST_DX_VENDOR_NVIDIA = 4318,
@@ -65,9 +67,16 @@ class StDXManager {
     virtual ~StDXManager();
 
     /**
+     * @return true if IDirect3DDevice9Ex device has been created
+     */
+    bool isD3dEx() const {
+        return myIsD3dEx;
+    }
+
+    /**
      * Access Direct3D device instance.
      */
-    IDirect3DDevice9* getDevice() {
+    IDirect3DDevice9* getDevice() const {
         return myD3dDevice;
     }
 
@@ -111,7 +120,7 @@ class StDXManager {
 
     /**
      * Reset Direct3D output settings. Could be used to switch windowed/fullscreen modes.
-     * Use very carefully! Most objects should be released before and recareated after!
+     * Use very carefully! Most objects should be released before and recreated after!
      */
     bool reset(const HWND theWinHandle,
                const int  theSizeX,
@@ -159,4 +168,4 @@ class StDXManager {
 
 };
 
-#endif //__StDXManager_h_
+#endif // __StDXManager_h_

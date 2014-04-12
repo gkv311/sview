@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutPageFlip library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -19,6 +19,7 @@
 #if defined(_WIN32)
 #include "StDXNVSurface.h"
 #include "StDXAqbsControl.h"
+#include "StDXManager.h"
 
 #include <StStrings/StLogger.h>
 #include <StSys/StSys.h>
@@ -39,109 +40,144 @@ typedef struct _Nv_Stereo_Image_Header {
 
 StDXNVSurface::StDXNVSurface(const size_t theSizeX,
                              const size_t theSizeY)
-: mySurface(NULL),
-  myAqbsControl(NULL),
+: mySurfaceStereo(NULL),
+  myTextureL(NULL),
+  myTextureR(NULL),
+  myTextureLShare(NULL),
+  myTextureRShare(NULL),
+  mySurfaceL(NULL),
+  mySurfaceR(NULL),
   mySizeX(theSizeX),
   mySizeY(theSizeY) {
     // back buffer dimensions should be equal to surface half
     myDstRect.left   = 0;
-    myDstRect.right  = (LONG )mySizeX / 2;
+    myDstRect.right  = (LONG )theSizeX;
     myDstRect.top    = 0;
-    myDstRect.bottom = (LONG )mySizeY;
+    myDstRect.bottom = (LONG )theSizeY;
 
     // cross-eyed, right view
     mySrcRectR.left   = 0;
-    mySrcRectR.right  = (LONG )mySizeX / 2;
+    mySrcRectR.right  = (LONG )theSizeX;
     mySrcRectR.top    = 0;
-    mySrcRectR.bottom = (LONG )mySizeY;
+    mySrcRectR.bottom = (LONG )theSizeY;
 
     // cross-eyed, left view
-    mySrcRectL.left   = (LONG )mySizeX / 2;
-    mySrcRectL.right  = (LONG )mySizeX;
+    mySrcRectL.left   = (LONG )theSizeX;
+    mySrcRectL.right  = (LONG )theSizeX * 2;
     mySrcRectL.top    = 0;
-    mySrcRectL.bottom = (LONG )mySizeY;
+    mySrcRectL.bottom = (LONG )theSizeY;
 
     // those sizes only used for mono (stereo driver off / windowed;
     // otherwise NVIDIA driver will ignore them and will use header in surface itself)
     // we should used downsized values to prevent render fail
     if(StSys::isVistaPlus()) {
-        // only one view showed if we set width/2 here as for WinXP way
-        mySrcRect.left = 0; mySrcRect.right = (LONG )mySizeX;
+        // only one view shown if we set width/2 here as for WinXP way
+        mySrcRect.left = 0; mySrcRect.right = (LONG )theSizeX * 2;
     } else {
         // picture showed with wrong ratio (width/4) in other (like Vista+) way
-        mySrcRect.left = 0; mySrcRect.right = (LONG )mySizeX / 2;
+        mySrcRect.left = 0; mySrcRect.right = (LONG )theSizeX;
     }
-    mySrcRect.top = 0; mySrcRect.bottom = (LONG )mySizeY;
+    mySrcRect.top = 0; mySrcRect.bottom = (LONG )theSizeY;
 }
 
 StDXNVSurface::~StDXNVSurface() {
-    if(mySurface != NULL) {
-        mySurface->Release();
-        mySurface = NULL;
-    }
-    if(myAqbsControl != NULL) {
-        delete myAqbsControl;
-        myAqbsControl = NULL;
-    }
+    release();
 }
 
-bool StDXNVSurface::create(IDirect3DDevice9* theD3dDevice) {
-    // connect to AQBS if available
-    myAqbsControl = new StDXAqbsControl(theD3dDevice);
+void StDXNVSurface::release() {
+    if(mySurfaceL != NULL) {
+        mySurfaceL->Release();
+        mySurfaceL = NULL;
+    }
+    if(myTextureL != NULL) {
+        myTextureL->Release();
+        myTextureL      = NULL;
+        myTextureLShare = NULL;
+    }
+    if(mySurfaceR != NULL) {
+        mySurfaceR->Release();
+        mySurfaceR = NULL;
+    }
+    if(myTextureR != NULL) {
+        myTextureR->Release();
+        myTextureR      = NULL;
+        myTextureRShare = NULL;
+    }
+    if(mySurfaceStereo != NULL) {
+        mySurfaceStereo->Release();
+        mySurfaceStereo = NULL;
+    }
+    myAqbsControl.nullify();
+}
 
-    // create the Off Screen Surface
-    HRESULT hResult = theD3dDevice->CreateOffscreenPlainSurface(
-        (UINT )mySizeX,     // stereo width is twice the source width
-        (UINT )mySizeY + 1, // stereo height add one raw to encode signature
-        D3DFMT_A8R8G8B8,    // surface format, D3DFMT_A8R8G8B8 is a 32 bit format with 8 alpha bits
-        D3DPOOL_DEFAULT,    // create it in the default memory pool
-        &mySurface,
-        NULL
-    );
-    if(hResult != D3D_OK) {
+bool StDXNVSurface::create(StDXManager& theD3d,
+                           const bool   theHasWglDx) {
+    // connect to AQBS if available
+    myAqbsControl = new StDXAqbsControl(theD3d.getDevice());
+
+    // create independent sharable textures for left/right views
+    D3DFORMAT aFormat = D3DFMT_A8R8G8B8;
+    if(theHasWglDx) {
+        if(theD3d.getDevice()->CreateTexture((UINT )mySizeX, (UINT )mySizeY, 0, 0,
+                                             aFormat, D3DPOOL_DEFAULT,
+                                             &myTextureL, theD3d.isD3dEx() ? &myTextureLShare : NULL) != D3D_OK
+        || myTextureL->GetSurfaceLevel(0, &mySurfaceL) != D3D_OK) {
+            release();
+            return false;
+        }
+        if(theD3d.getDevice()->CreateTexture((UINT )mySizeX, (UINT )mySizeY, 0, 0,
+                                             aFormat, D3DPOOL_DEFAULT,
+                                             &myTextureR, theD3d.isD3dEx() ? &myTextureRShare : NULL) != D3D_OK
+        || myTextureR->GetSurfaceLevel(0, &mySurfaceR) != D3D_OK) {
+            release();
+            return false;
+        }
+    }
+
+    // create special lockable surface for 3D-Vision hack
+    if(theD3d.getDevice()->CreateRenderTarget((UINT )mySizeX * 2, (UINT )mySizeY + 1, // the extra row is for the stereo header
+                                              aFormat, D3DMULTISAMPLE_NONE, 0, TRUE,  // must be lockable to write header
+                                              &mySurfaceStereo, NULL) != D3D_OK) {
+        release();
         return false;
     }
+
     ST_DEBUG_LOG("Direct3D9, Created StDXNVSurface (WxH= " + mySizeX + "x"+ mySizeY + ")");
 
-    D3DLOCKED_RECT aLockedRect;
-    mySurface->LockRect(&aLockedRect, NULL, 0);
-    unsigned char* aData = (unsigned char* )aLockedRect.pBits;
-
-    // set black color
-    stMemSet(&aData[0], 0, 4 * mySizeY * mySizeX);
-
     // write stereo signature in the last raw of the stereo image
-    NVSTEREOIMAGEHEADER* aNvHeader
-        = (NVSTEREOIMAGEHEADER* )(((unsigned char* )aLockedRect.pBits) + (aLockedRect.Pitch * mySizeY));
-    // update the signature header values
+    D3DLOCKED_RECT aLockedRect;
+    mySurfaceStereo->LockRect(&aLockedRect, NULL, 0);
+    stUByte_t* aData = (stUByte_t* )aLockedRect.pBits;
+    stMemZero(&aData[0], 4 * mySizeY * mySizeX);
+    NVSTEREOIMAGEHEADER* aNvHeader = (NVSTEREOIMAGEHEADER* )(aData + aLockedRect.Pitch * mySizeY);
     aNvHeader->dwSignature = NVSTEREO_IMAGE_SIGNATURE;
     aNvHeader->dwBPP       = 32;
-    aNvHeader->dwFlags     = SIH_SWAP_EYES;          // Src image has left on left and right on right
-    aNvHeader->dwWidth     = (unsigned int )mySizeX; // full side by side width here
-    aNvHeader->dwHeight    = (unsigned int )mySizeY; // image height without NV header
-
-    mySurface->UnlockRect(); // unlock surface
-
+    aNvHeader->dwFlags     = SIH_SWAP_EYES;
+    aNvHeader->dwWidth     = (unsigned int )mySizeX * 2;
+    aNvHeader->dwHeight    = (unsigned int )mySizeY;
+    mySurfaceStereo->UnlockRect();
     return true;
 }
 
-void StDXNVSurface::update(const size_t theSrcSizeX, const size_t theSrcSizeY,
-                           const unsigned char* theSrcData, bool isLeft) {
-    if(mySurface == NULL) {
+void StDXNVSurface::update(const size_t     theSrcSizeX,
+                           const size_t     theSrcSizeY,
+                           const stUByte_t* theSrcData,
+                           bool             theIsLeft) {
+    if(mySurfaceStereo == NULL) {
         return;
     }
 
-    size_t aBytesOutLine = mySizeX * 4;
-    size_t aBytesOutDispl = isLeft ? (aBytesOutLine / 2) : 0; // cross-eyed for SIH_SWAP_EYES flag
-    if((mySizeX > (2 * theSrcSizeX))) {
-        aBytesOutDispl += 4 * ((mySizeX / 2 - theSrcSizeX) / 2);
+    size_t aBytesOutLine  = mySizeX * 2 * 4;
+    size_t aBytesOutDispl = theIsLeft ? (aBytesOutLine / 2) : 0; // cross-eyed for SIH_SWAP_EYES flag
+    if(mySizeX * 2 > theSrcSizeX * 2) {
+        aBytesOutDispl += 4 * ((mySizeX - theSrcSizeX) / 2);
     }
-    size_t aBytesSrcLine = theSrcSizeX * 4;
-    size_t aBytesSrcDispl = (mySizeX < (2 * theSrcSizeX)) ? (4 * ((theSrcSizeX - mySizeX / 2) / 2)) : 0;
-    size_t aCopyHeight = mySizeY <= theSrcSizeY ? mySizeY : theSrcSizeY;
-    size_t aCopyBytes = mySizeX <= theSrcSizeX ? (aBytesOutLine / 2) : aBytesSrcLine;
+    size_t aBytesSrcLine  = theSrcSizeX * 4;
+    size_t aBytesSrcDispl = (mySizeX < (2 * theSrcSizeX)) ? (4 * ((theSrcSizeX - mySizeX) / 2)) : 0;
+    size_t aCopyHeight    = mySizeY     <= theSrcSizeY ? mySizeY : theSrcSizeY;
+    size_t aCopyBytes     = mySizeX * 2 <= theSrcSizeX ? (aBytesOutLine / 2) : aBytesSrcLine;
     D3DLOCKED_RECT aLockedRect;
-    mySurface->LockRect(&aLockedRect, NULL, 0);
+    mySurfaceStereo->LockRect(&aLockedRect, NULL, 0);
         unsigned char* aDstData = (unsigned char* )aLockedRect.pBits;
         if(mySizeY == theSrcSizeY) {
             for(size_t aRow = 0; aRow < aCopyHeight; ++aRow) {
@@ -155,30 +191,44 @@ void StDXNVSurface::update(const size_t theSrcSizeX, const size_t theSrcSizeY,
                          &theSrcData[(theSrcSizeY   - aRow - 1) * aBytesSrcLine + aBytesSrcDispl], aCopyBytes);
             }
         }
-    mySurface->UnlockRect(); // unlock surface
+    mySurfaceStereo->UnlockRect(); // unlock surface
 }
 
-void StDXNVSurface::render(IDirect3DDevice9* theD3dDevice) {
-    if(mySurface == NULL) {
+void StDXNVSurface::render(StDXManager& theD3d) {
+    if(mySurfaceStereo == NULL) {
         return;
     }
 
-    // gets the backbuffer and copys our surface onto it
+    // get the backbuffer and copy surface into it
     IDirect3DSurface9* aBackbuffer = NULL;
-    theD3dDevice->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &aBackbuffer);
+    theD3d.getDevice()->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &aBackbuffer);
 
     if(myAqbsControl->isValid()) {
         if(!myAqbsControl->setDstLeft()) {
             ST_DEBUG_LOG("AQBS set LEFT error");
         }
-        theD3dDevice->StretchRect(mySurface, &mySrcRectL, aBackbuffer, &myDstRect, D3DTEXF_LINEAR);
+
+        if(mySurfaceL != NULL) {
+            theD3d.getDevice()->StretchRect(mySurfaceL, NULL, aBackbuffer, NULL, D3DTEXF_LINEAR);
+        } else {
+            theD3d.getDevice()->StretchRect(mySurfaceStereo, &mySrcRectL, aBackbuffer, &myDstRect, D3DTEXF_LINEAR);
+        }
 
         if(!myAqbsControl->setDstRight()) {
             ST_DEBUG_LOG("AQBS set RIGHT error");
         }
-        theD3dDevice->StretchRect(mySurface, &mySrcRectR, aBackbuffer, &myDstRect, D3DTEXF_LINEAR);
+
+        if(mySurfaceR != NULL) {
+            theD3d.getDevice()->StretchRect(mySurfaceR, NULL, aBackbuffer, NULL, D3DTEXF_LINEAR);
+        } else {
+            theD3d.getDevice()->StretchRect(mySurfaceStereo, &mySrcRectR, aBackbuffer, &myDstRect, D3DTEXF_LINEAR);
+        }
     } else {
-        theD3dDevice->StretchRect(mySurface, &mySrcRect,  aBackbuffer, &myDstRect, D3DTEXF_LINEAR);
+        if(mySurfaceL != NULL) {
+            theD3d.getDevice()->StretchRect(mySurfaceL, NULL, mySurfaceStereo, &mySrcRectL, D3DTEXF_NONE);
+            theD3d.getDevice()->StretchRect(mySurfaceR, NULL, mySurfaceStereo, &mySrcRectR, D3DTEXF_NONE);
+        }
+        theD3d.getDevice()->StretchRect(mySurfaceStereo, &mySrcRect, aBackbuffer, &myDstRect, D3DTEXF_LINEAR);
     }
 
     aBackbuffer->Release();
