@@ -296,6 +296,9 @@ void StDXNVWindow::dxLoop() {
                     myDxSurface->render(*myDxManager);
                     ResetEvent(hEventUpdate);
                     myDxManager->endRender();
+                    if(!myDxManager->swap()) {
+                        SetEvent(hEventShow);
+                    }
                     myMutex.unlock();
                 } else {
                     myMutex.lock();
@@ -308,10 +311,9 @@ void StDXNVWindow::dxLoop() {
                     myDxSurface->render(*myDxManager);
                     ResetEvent(hEventUpdate);
                     myDxManager->endRender();
-                }
-
-                if(!myDxManager->swap()) {
-                    SetEvent(hEventShow);
+                    if(!myDxManager->swap()) {
+                        SetEvent(hEventShow);
+                    }
                 }
 
                 //static StFPSMeter dxFPSMeter;
