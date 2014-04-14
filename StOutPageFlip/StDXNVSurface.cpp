@@ -55,17 +55,17 @@ StDXNVSurface::StDXNVSurface(const size_t theSizeX,
     myDstRect.top    = 0;
     myDstRect.bottom = (LONG )theSizeY;
 
-    // cross-eyed, right view
-    mySrcRectR.left   = 0;
-    mySrcRectR.right  = (LONG )theSizeX;
-    mySrcRectR.top    = 0;
-    mySrcRectR.bottom = (LONG )theSizeY;
-
-    // cross-eyed, left view
-    mySrcRectL.left   = (LONG )theSizeX;
-    mySrcRectL.right  = (LONG )theSizeX * 2;
+    // left view
+    mySrcRectL.left   = 0;
+    mySrcRectL.right  = (LONG )theSizeX;
     mySrcRectL.top    = 0;
     mySrcRectL.bottom = (LONG )theSizeY;
+
+    // right view
+    mySrcRectR.left   = (LONG )theSizeX;
+    mySrcRectR.right  = (LONG )theSizeX * 2;
+    mySrcRectR.top    = 0;
+    mySrcRectR.bottom = (LONG )theSizeY;
 
     // those sizes only used for mono (stereo driver off / windowed;
     // otherwise NVIDIA driver will ignore them and will use header in surface itself)
@@ -152,7 +152,7 @@ bool StDXNVSurface::create(StDXManager& theD3d,
     NVSTEREOIMAGEHEADER* aNvHeader = (NVSTEREOIMAGEHEADER* )(aData + aLockedRect.Pitch * mySizeY);
     aNvHeader->dwSignature = NVSTEREO_IMAGE_SIGNATURE;
     aNvHeader->dwBPP       = 32;
-    aNvHeader->dwFlags     = SIH_SWAP_EYES;
+    aNvHeader->dwFlags     = 0;
     aNvHeader->dwWidth     = (unsigned int )mySizeX * 2;
     aNvHeader->dwHeight    = (unsigned int )mySizeY;
     mySurfaceStereo->UnlockRect();
