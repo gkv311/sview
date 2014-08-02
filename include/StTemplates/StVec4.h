@@ -246,7 +246,7 @@ class StVec4 {
      * Compute per-component division by scale factor.
      */
     StVec4 operator/(Element_t invFactor) {
-        StVec4 result(this);
+        StVec4 result(*this);
         return result /= invFactor;
     }
 

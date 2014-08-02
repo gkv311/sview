@@ -168,6 +168,21 @@ class StVec2 {
     }
 
     /**
+     * Computes the vector modulus (magnitude, length).
+     */
+    Element_t modulus() const {
+        return std::sqrt(x() * x() + y() * y());
+    }
+
+    /**
+     * Computes the square of vector modulus (magnitude, length).
+     * This method may be used for performance tricks.
+     */
+    Element_t squareModulus() const {
+        return x() * x() + y() * y();
+    }
+
+    /**
      * Compute per-component multiplication by scale factor.
      */
     StVec2& operator*=(Element_t theFactor) {
