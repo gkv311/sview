@@ -225,7 +225,6 @@ class StGLImageRegion : public StGLWidget {
 
     ST_LOCAL StGLVec2 getMouseMoveFlat(const StPointD_t& theCursorZoFrom,
                                        const StPointD_t& theCursorZoTo);
-    ST_LOCAL StGLVec2 getMouseMoveFlat();
     ST_LOCAL StGLVec2 getMouseMoveSphere(const StPointD_t& theCursorZoFrom,
                                          const StPointD_t& theCursorZoTo);
     ST_LOCAL StGLVec2 getMouseMoveSphere();

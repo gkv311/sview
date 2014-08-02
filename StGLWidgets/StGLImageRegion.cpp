@@ -302,29 +302,6 @@ StGLVec2 StGLImageRegion::getMouseMoveFlat(const StPointD_t& theCursorZoFrom,
                     -2.0f * GLfloat(theCursorZoTo.y() - theCursorZoFrom.y()));
 }
 
-StGLVec2 StGLImageRegion::getMouseMoveFlat() {
-    if(!isClicked(ST_MOUSE_LEFT)
-     || myIsClickAborted) {
-        return StGLVec2();
-    }
-
-    if(myClickTimer.isOn()) {
-        if(myClickTimer.getElapsedTimeInMilliSec() < myDragDelayMs) {
-            const StPointD_t aCurr = getRoot()->getCursorZo();
-            const int aDx = int((aCurr.x() - myClickPntZo.x()) * double(getRectPx().width()));
-            const int aDy = int((aCurr.y() - myClickPntZo.y()) * double(getRectPx().height()));
-            if(std::abs(aDx) > 1
-            || std::abs(aDy) > 1) {
-                myIsClickAborted = true;
-                myClickTimer.stop();
-            }
-            return StGLVec2();
-        }
-        myClickTimer.stop();
-    }
-    return getMouseMoveFlat(myClickPntZo, getRoot()->getCursorZo());
-}
-
 StGLVec2 StGLImageRegion::getMouseMoveSphere(const StPointD_t& theCursorZoFrom,
                                              const StPointD_t& theCursorZoTo) {
     /// TODO (Kirill Gavrilov#5) these computations are invalid
@@ -508,6 +485,9 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
         default: break;
     }
 
+    // remember parameters to restore
+    const GLfloat  aScaleBack = aParams->ScaleFactor;
+    const StGLVec2 aPanBack   = aParams->PanCenter;
     switch(aParams->ViewingMode) {
         default:
         case StStereoParams::FLAT_IMAGE: {
@@ -534,15 +514,44 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                 stModelMat.translate(StGLVec3(-aLestDisp, 0.0f, 0.0f));
             }
 
+            // handle dragging timer
+            if( isClicked(ST_MOUSE_LEFT)
+            && !myIsClickAborted
+            &&  myClickTimer.isOn()) {
+                if(myClickTimer.getElapsedTimeInMilliSec() < myDragDelayMs) {
+                    const StPointD_t aCurr = getRoot()->getCursorZo();
+                    const int aDx = int((aCurr.x() - myClickPntZo.x()) * double(getRectPx().width()));
+                    const int aDy = int((aCurr.y() - myClickPntZo.y()) * double(getRectPx().height()));
+                    if(std::abs(aDx) > 1
+                    || std::abs(aDy) > 1) {
+                        myIsClickAborted = true;
+                        myClickTimer.stop();
+                    }
+                } else {
+                    myClickTimer.stop();
+                }
+            }
+
+            // handle dragging
+            if( isClicked(ST_MOUSE_LEFT)
+            && !myIsClickAborted
+            && !myClickTimer.isOn()) {
+                const GLfloat aRectRatio = GLfloat(getRectPx().ratio());
+                aParams->moveFlat(getMouseMoveFlat(myClickPntZo, getRoot()->getCursorZo()), aRectRatio);
+                if(myDragDelayMs > 1.0) {
+                    const GLfloat    aScaleSteps = 0.1f;
+                    const StPointD_t aCenterCursor(0.5, 0.5);
+                    const StGLVec2   aVec = getMouseMoveFlat(aCenterCursor, getRoot()->getCursorZo()) * (-aScaleSteps);
+                    aParams->scaleIn(aScaleSteps);
+                    aParams->moveFlat(aVec, aRectRatio);
+                }
+            }
+
             // apply scale
             stModelMat.scale(aParams->ScaleFactor, aParams->ScaleFactor, 1.0f);
 
             // apply position
             stModelMat.translate(StGLVec3(aParams->PanCenter));
-
-            GLfloat rectRatio = GLfloat(getRectPx().ratio());
-            StGLVec2 aMouseMove = aParams->moveFlatDelta(getMouseMoveFlat(), rectRatio);
-            stModelMat.translate(StGLVec3(aMouseMove));
 
             // apply rotations
             if(theView == ST_DRAW_LEFT) {
@@ -568,7 +577,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                 default: dispRatio = stFrameTexture.getPlane().getDisplayRatio(); break;
             }
 
-            rectRatio = GLfloat(aFrameRectPx.ratio());
+            GLfloat rectRatio = GLfloat(aFrameRectPx.ratio());
             StGLVec2 ratioScale = aParams->getRatioScale(rectRatio, dispRatio);
             stModelMat.scale(ratioScale.x(), ratioScale.y(), 1.0f);
 
@@ -591,6 +600,10 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             myQuad.draw(aCtx, myProgramFlat);
 
             myProgramFlat.unuse(aCtx);
+
+            // restore changed parameters
+            aParams->ScaleFactor = aScaleBack;
+            aParams->PanCenter   = aPanBack;
             break;
         }
         case StStereoParams::PANORAMA_SPHERE: {
