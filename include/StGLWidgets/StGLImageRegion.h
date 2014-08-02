@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -80,6 +80,20 @@ class StGLImageRegion : public StGLWidget {
     ST_CPPEXPORT StGLImageRegion(StGLWidget* theParent,
                                  const StHandle<StGLTextureQueue>& theTextureQueue,
                                  const bool  theUsePanningKeys);
+
+    /**
+     * Dragging delay in milliseconds, 0.0 by default.
+     */
+    ST_LOCAL inline double getDragDelayMs() const {
+        return myDragDelayMs;
+    }
+
+    /**
+     * Setup dragging delay in milliseconds.
+     */
+    ST_LOCAL inline void setDragDelayMs(const double theValue) {
+        myDragDelayMs = theValue;
+    }
 
     ST_LOCAL inline StHandle<StGLTextureQueue>& getTextureQueue() {
         return myTextureQueue;
@@ -229,6 +243,9 @@ class StGLImageRegion : public StGLWidget {
     StGLImageSphereProgram     myProgramSphere;  //!< GL program to draw spheric panorama
     StHandle<StGLTextureQueue> myTextureQueue;   //!< shared texture queue
     StPointD_t                 myClickPntZo;     //!< remembered mouse click position
+    StTimer                    myClickTimer;     //!< timer to delay dragging action
+    double                     myDragDelayMs;    //!< dragging delay in milliseconds
+    bool                       myIsClickAborted;
     bool                       myIsInitialized;  //!< initialization state
     bool                       myHasVideoStream; //!< should be initialized for each new stream
 

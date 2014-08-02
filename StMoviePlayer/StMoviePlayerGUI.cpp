@@ -1003,6 +1003,7 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
     const StRectI_t& aMargins = getRootMarginsPx();
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StMoviePlayerGUI::doShowFPS);
     myImage     = new StGLImageRegion(this, theTextureQueue, false);
+    myImage->setDragDelayMs(500.0);
     mySubtitles = new StGLSubtitles  (this, theSubQueue,
                                       myPlugin->params.SubtitlesSize,
                                       myPlugin->params.SubtitlesParallax,

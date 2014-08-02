@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -118,7 +118,7 @@ namespace {
     // we use negative scale factor to show sphere inside out!
     static const GLfloat SPHERE_RADIUS = -10.0f;
 
-};
+}
 
 StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
                                  const StHandle<StGLTextureQueue>& theTextureQueue,
@@ -130,6 +130,8 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
   myProgramSphere(),
   myTextureQueue(theTextureQueue),
   myClickPntZo(0.0, 0.0),
+  myDragDelayMs(0.0),
+  myIsClickAborted(false),
   myIsInitialized(false),
   myHasVideoStream(false) {
     params.displayMode   = new StInt32Param(MODE_STEREO);
@@ -301,7 +303,26 @@ StGLVec2 StGLImageRegion::getMouseMoveFlat(const StPointD_t& theCursorZoFrom,
 }
 
 StGLVec2 StGLImageRegion::getMouseMoveFlat() {
-    return isClicked(ST_MOUSE_LEFT) ? getMouseMoveFlat(myClickPntZo, getRoot()->getCursorZo()) : StGLVec2();
+    if(!isClicked(ST_MOUSE_LEFT)
+     || myIsClickAborted) {
+        return StGLVec2();
+    }
+
+    if(myClickTimer.isOn()) {
+        if(myClickTimer.getElapsedTimeInMilliSec() < myDragDelayMs) {
+            const StPointD_t aCurr = getRoot()->getCursorZo();
+            const int aDx = int((aCurr.x() - myClickPntZo.x()) * double(getRectPx().width()));
+            const int aDy = int((aCurr.y() - myClickPntZo.y()) * double(getRectPx().height()));
+            if(std::abs(aDx) > 1
+            || std::abs(aDy) > 1) {
+                myIsClickAborted = true;
+                myClickTimer.stop();
+            }
+            return StGLVec2();
+        }
+        myClickTimer.stop();
+    }
+    return getMouseMoveFlat(myClickPntZo, getRoot()->getCursorZo());
 }
 
 StGLVec2 StGLImageRegion::getMouseMoveSphere(const StPointD_t& theCursorZoFrom,
@@ -629,7 +650,11 @@ bool StGLImageRegion::tryClick(const StPointD_t& theCursorZo,
                                const int&        theMouseBtn,
                                bool&             isItemClicked) {
     if(StGLWidget::tryClick(theCursorZo, theMouseBtn, isItemClicked)) {
-        myClickPntZo = theCursorZo;
+        if(theMouseBtn == ST_MOUSE_LEFT) {
+            myClickPntZo = theCursorZo;
+            myClickTimer.restart();
+            myIsClickAborted = false;
+        }
         isItemClicked = true;
         return true;
     }
@@ -648,7 +673,9 @@ bool StGLImageRegion::tryUnClick(const StPointD_t& theCursorZo,
         switch(aParams->ViewingMode) {
             default:
             case StStereoParams::FLAT_IMAGE: {
-                aParams->moveFlat(getMouseMoveFlat(myClickPntZo, theCursorZo), GLfloat(getRectPx().ratio()));
+                if(!myIsClickAborted) {
+                    aParams->moveFlat(getMouseMoveFlat(myClickPntZo, theCursorZo), GLfloat(getRectPx().ratio()));
+                }
                 break;
             }
             case StStereoParams::PANORAMA_SPHERE: {
