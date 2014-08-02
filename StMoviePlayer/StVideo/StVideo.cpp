@@ -781,9 +781,9 @@ void StVideo::packetsLoop() {
                 const double aDur = getDuration();
                 if(aPts > 300.0
                 && aPts < aDur - 300.0) {
-                    myCurrParams->Timestamp = aPts;
+                    myCurrParams->Timestamp = (GLfloat )aPts;
                 } else {
-                    myCurrParams->Timestamp = 0.0;
+                    myCurrParams->Timestamp = 0.0f;
                 }
 
                 myPlayList->updateRecent(myCurrPlsFile.isNull() ? myCurrNode : myCurrPlsFile, myCurrParams);
@@ -945,7 +945,7 @@ void StVideo::packetsLoop() {
                 }
             }
             // end when any one in format context finished
-            myCurrParams->Timestamp = 0.0;
+            myCurrParams->Timestamp = 0.0f;
             break;
         }
     }
