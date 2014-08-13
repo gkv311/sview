@@ -38,7 +38,7 @@ namespace {
     }
 #endif
 
-#if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 18, 100))
+#ifdef ST_AV_OLDSYNC
     /**
      * These are called whenever we allocate a frame
      * buffer. We use this to store the global_pts in
@@ -349,7 +349,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
         }
     }
 
-#if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 18, 100))
+#ifdef ST_AV_OLDSYNC
     // override buffers' functions for getting true PTS rootines
     myCodecCtx->opaque = this;
     myCodecCtx->get_buffer = ourGetBuffer;
@@ -383,7 +383,7 @@ void StVideoQueue::deinit() {
     StAVPacketQueue::deinit();
 }
 
-#if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 18, 100))
+#ifdef ST_AV_OLDSYNC
 void StVideoQueue::syncVideo(AVFrame* theSrcFrame,
                              double*  thePts) {
     if(*thePts != 0.0) {
@@ -635,7 +635,7 @@ void StVideoQueue::decodeLoop() {
             myFramesCounter = 1;
         }
 
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 18, 100))
+    #ifndef ST_AV_OLDSYNC
         myVideoPktPts = av_frame_get_best_effort_timestamp(myFrame.Frame);
         if(myVideoPktPts == stAV::NOPTS_VALUE) {
             myVideoPktPts = 0;

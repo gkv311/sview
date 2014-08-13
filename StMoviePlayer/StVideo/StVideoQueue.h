@@ -31,6 +31,10 @@ class StThread;
 // define StHandle template specialization
 ST_DEFINE_HANDLE(StVideoQueue, StAVPacketQueue);
 
+#if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 18, 100))
+    #define ST_AV_OLDSYNC
+#endif
+
 /**
  * This is Video playback class (filled OpenGL textures)
  * which feeded with packets (StAVPacket),
@@ -144,7 +148,7 @@ class StVideoQueue : public StAVPacketQueue {
      */
     ST_LOCAL virtual void deinit();
 
-#if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 18, 100))
+#ifdef ST_AV_OLDSYNC
     ST_LOCAL void syncVideo(AVFrame* srcFrame, double* pts);
 #endif
 
