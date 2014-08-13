@@ -228,6 +228,7 @@ class StOutPageFlip : public StWindow {
         bool   ToUsePBO;
 
         ST_LOCAL StOutDirect3D();
+        ST_LOCAL ~StOutDirect3D();
 
     #ifdef _WIN32
         static SV_THREAD_FUNCTION dxThreadFunction(void* theStOutD3d);

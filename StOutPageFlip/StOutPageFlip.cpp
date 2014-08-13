@@ -53,7 +53,18 @@ StOutPageFlip::StOutDirect3D::StOutDirect3D()
     //
 }
 
-#ifdef _WIN32
+StOutPageFlip::StOutDirect3D::~StOutDirect3D() {
+    //
+}
+
+#ifndef _WIN32
+/**
+ * Just dummy GLSL program.
+ */
+class StOutPageFlip::StProgramQuad : public StGLProgram {
+    //
+};
+#else
 SV_THREAD_FUNCTION StOutPageFlip::StOutDirect3D::dxThreadFunction(void* theStOutD3d) {
     StOutPageFlip::StOutDirect3D* aStOutD3d = (StOutPageFlip::StOutDirect3D* )theStOutD3d;
     aStOutD3d->DxWindow->dxLoop();
