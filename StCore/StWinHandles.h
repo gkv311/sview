@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -21,6 +21,8 @@
 
 #ifdef _WIN32
     #include <windows.h>   // header file for Windows
+#elif defined(ST_HAVE_EGL)
+    #include <EGL/egl.h>
 #elif defined(__APPLE__)
     #include "StCocoaView.h"
     #include "StCocoaWin.h"
@@ -46,7 +48,11 @@ class StWinGlrc {
     /**
      * Create OpenGL Rendering Context for specified Device Context.
      */
-#ifdef _WIN32
+#if defined(ST_HAVE_EGL)
+    ST_LOCAL StWinGlrc(EGLDisplay theDisplay,
+                       const bool theDebugCtx,
+                       int8_t     theGlDepthSize);
+#elif defined(_WIN32)
     ST_LOCAL StWinGlrc(HDC theDC, HGLRC theRC);
 #else
     ST_LOCAL StWinGlrc(StHandle<StXDisplay>& theDisplay,
@@ -70,16 +76,34 @@ class StWinGlrc {
      * Device Context should have the one used on construction of this Rendering Context
      * or have the same Pixel Format.
      */
-#ifdef _WIN32
+#if defined(ST_HAVE_EGL)
+    ST_LOCAL bool makeCurrent(EGLSurface theSurface);
+#elif defined(_WIN32)
     ST_LOCAL bool makeCurrent(HDC theDC);
     ST_LOCAL bool isCurrent  (HDC theDC) const;
 #else
     ST_LOCAL bool makeCurrent(GLXDrawable theDrawable);
 #endif
 
+#if defined(ST_HAVE_EGL)
+    /**
+     * EGL display connection
+     */
+    ST_LOCAL EGLDisplay getDisplay() const { return myDisplay; }
+
+    /**
+     * EGL configuration
+     */
+    ST_LOCAL EGLConfig  getConfig()  const { return myConfig;  }
+#endif
+
         private:
 
-#ifdef _WIN32
+#if defined(ST_HAVE_EGL)
+    EGLDisplay myDisplay; //!< EGL display connection
+    EGLConfig  myConfig;  //!< EGL configuration
+    EGLContext myRC;      //!< EGL rendering context
+#elif defined(_WIN32)
     HGLRC      myRC;      //!< WinAPI Rendering Context handle
 #else
     Display*   myDisplay; //!< display connection
@@ -225,6 +249,10 @@ class StWinHandles {
     int             xDNDVersion;
     int             xrandrEventBase;
     bool            isRecXRandrEvents;
+#endif
+
+#if defined(ST_HAVE_EGL)
+    EGLSurface      eglSurface; //!< EGL surface (window)
 #endif
 
 };

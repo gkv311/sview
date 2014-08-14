@@ -114,6 +114,32 @@ bool StWindowImpl::create() {
     myMaster.stXDisplay = stXDisplay;
     Display* hDisplay = stXDisplay->hDisplay;
 
+#if defined(ST_HAVE_EGL)
+    myMaster.hRC = new StWinGlrc(eglGetDisplay(hDisplay), attribs.IsGlDebug, attribs.GlDepthSize);
+    if(!myMaster.hRC->isValid()) {
+        myMaster.close();
+        mySlave.close();
+        myInitState = STWIN_ERROR_X_GLRC_CREATE;
+        return false;
+    }
+
+    XVisualInfo aVisInfo;
+    aVisInfo.visualid = 0;
+    if (eglGetConfigAttrib(myMaster.hRC->getDisplay(),
+                           myMaster.hRC->getConfig(),
+                           EGL_NATIVE_VISUAL_ID,
+                           (EGLint* )&aVisInfo.visualid) != EGL_TRUE) {
+        myMaster.close();
+        mySlave.close();
+        myInitState = STWIN_ERROR_X_GLRC_CREATE;
+        return false;
+    }
+
+    int aNbVisuals = 0;
+    stXDisplay->hVisInfo = XGetVisualInfo(hDisplay, VisualIDMask, &aVisInfo, &aNbVisuals);
+
+#else // GLX
+
     // make sure OpenGL's GLX extension supported
     if(!glXQueryExtension(hDisplay, &dummy, &dummy)) {
         myMaster.close();
@@ -206,6 +232,7 @@ bool StWindowImpl::create() {
         }
     }
     XFree(aFBCfgList);
+#endif
 
     if(attribs.Slave != StWinSlave_slaveOff) {
         // just copy handle
@@ -495,7 +522,16 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
                                         InputOutput,
                                         myMaster.stXDisplay->getVisual(),
                                         CWBorderPixel | CWColormap | CWEventMask | CWOverrideRedirect, &aWinAttribsX);
+        #if defined(ST_HAVE_EGL)
+            EGLSurface anEglSurf = eglCreateWindowSurface(myMaster.hRC->getDisplay(), myMaster.hRC->getConfig(), aWin, NULL);
+            if(anEglSurf == EGL_NO_SURFACE
+            || !myMaster.hRC->makeCurrent(anEglSurf)) {
+                if(anEglSurf == EGL_NO_SURFACE) {
+                    eglDestroySurface(myMaster.hRC->getDisplay(), anEglSurf);
+                }
+        #else
             if(!myMaster.hRC->makeCurrent(aWin)) {
+        #endif
                 ST_ERROR_LOG("X, FAILED to bind rendering context to NEW master window");
                 XDestroyWindow(hDisplay, aWin);
                 XReparentWindow(hDisplay, myMaster.hWindowGl, aParent, 0, 0);
@@ -503,6 +539,10 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
                 XUnmapWindow  (hDisplay, myMaster.hWindowGl);
                 XDestroyWindow(hDisplay, myMaster.hWindowGl);
                 myMaster.hWindowGl = aWin;
+            #if defined(ST_HAVE_EGL)
+                eglDestroySurface(myMaster.hRC->getDisplay(), myMaster.eglSurface);
+                myMaster.eglSurface = anEglSurf;
+            #endif
                 XSetStandardProperties(hDisplay, myMaster.hWindowGl,
                                        "master window", "master window",
                                        None, NULL, 0, NULL);

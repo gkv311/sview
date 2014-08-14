@@ -25,6 +25,8 @@
     #include <dlfcn.h>
     #include <OpenGL/OpenGL.h>
     #include <ApplicationServices/ApplicationServices.h>
+#elif defined(ST_HAVE_EGL)
+    #include <EGL/egl.h>
 #elif !defined(_WIN32)
     #include <GL/glx.h> // glXGetProcAddress()
 #endif
@@ -192,7 +194,9 @@ void StGLContext::pushError(const StCString& theMessage) {
 }
 
 void* StGLContext::stglFindProc(const char* theName) const {
-#ifdef _WIN32
+#if defined(ST_HAVE_EGL)
+    return (void* )eglGetProcAddress(theName);
+#elif defined(_WIN32)
     return (void* )wglGetProcAddress(theName);
 #elif defined(__APPLE__)
     return mySysLib.isOpened() ? mySysLib.find(theName) : NULL;
@@ -526,7 +530,11 @@ bool StGLContext::stglSetVSync(const VSync_Mode theVSyncMode) {
             break;
     }
 
-#ifdef _WIN32
+#ifdef ST_HAVE_EGL
+    if(eglSwapInterval(eglGetCurrentDisplay(), aSyncInt) == EGL_TRUE) {
+        return true;
+    }
+#elif defined(_WIN32)
     if(myFuncs->wglSwapIntervalEXT != NULL) {
         myFuncs->wglSwapIntervalEXT(aSyncInt);
         return true;
@@ -580,7 +588,9 @@ bool StGLContext::stglInit() {
     #define STGL_READ_FUNC(theFunc) stglFindProc(#theFunc, myFuncs->theFunc)
 
     // retrieve platform-dependent extensions
-#ifdef _WIN32
+#if defined(ST_HAVE_EGL)
+    //const char* aEglExts = eglQueryString(eglGetCurrentDisplay(), EGL_EXTENSIONS);
+#elif defined(_WIN32)
     if(STGL_READ_FUNC(wglGetExtensionsStringARB)) {
         const char* aWglExts = myFuncs->wglGetExtensionsStringARB(wglGetCurrentDC());
         if(stglCheckExtension(aWglExts, "WGL_EXT_swap_control")) {

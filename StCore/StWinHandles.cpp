@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -25,7 +25,119 @@
 #include <StThreads/StThread.h>
 #include <StStrings/StLogger.h>
 
-#ifdef _WIN32
+#if defined(ST_HAVE_EGL)
+
+StWinGlrc::StWinGlrc(EGLDisplay theDisplay,
+                     const bool theDebugCtx,
+                     int8_t     theGlDepthSize)
+: myDisplay(theDisplay),
+  myConfig(NULL),
+  myRC(EGL_NO_CONTEXT) {
+    if(theDisplay == EGL_NO_DISPLAY) {
+        return;
+    }
+
+    EGLint aVerMajor = 0; EGLint aVerMinor = 0;
+    if(eglInitialize(myDisplay, &aVerMajor, &aVerMinor) != EGL_TRUE) {
+        ST_ERROR_LOG("EGL, FAILED to initialize Display");
+        return;
+    }
+
+    ST_DEBUG_LOG("EGL info\n"
+               + "  Version:     " + aVerMajor + "." + aVerMinor + " (" + eglQueryString(myDisplay, EGL_VERSION) + ")\n"
+               + "  Vendor:      " + eglQueryString(myDisplay, EGL_VENDOR) + "\n"
+               + "  Client APIs: " + eglQueryString(myDisplay, EGL_CLIENT_APIS) + "\n"
+               + "  Extensions:  " + eglQueryString(myDisplay, EGL_EXTENSIONS));
+
+    const EGLint aConfigAttribs[] = {
+        EGL_DEPTH_SIZE, theGlDepthSize,
+        EGL_NONE
+    };
+
+    EGLint aNbConfigs = 0;
+    if(eglChooseConfig(myDisplay, aConfigAttribs, &myConfig, 1, &aNbConfigs) != EGL_TRUE) {
+        ST_ERROR_LOG("EGL, eglChooseConfig FAILED");
+        return;
+    }
+
+    /*EGLenum aEglApi = eglQueryAPI();
+    switch(aEglApi) {
+        case EGL_OPENGL_ES_API: ST_DEBUG_LOG("EGL API: OpenGL ES\n"); break;
+        case EGL_OPENGL_API:    ST_DEBUG_LOG("EGL API: OpenGL\n");    break;
+        case EGL_OPENVG_API:    ST_DEBUG_LOG("EGL API: OpenNVG\n");   break;
+        case EGL_NONE:          ST_DEBUG_LOG("EGL API: NONE\n");      break;
+    }*/
+    if(eglBindAPI(EGL_OPENGL_API) != EGL_TRUE) {
+        ST_ERROR_LOG("EGL, EGL_OPENGL_API is unavailable!");
+        return;
+    }
+
+    #define ST_EGL_CONTEXT_MAJOR_VERSION_KHR                      0x3098
+    #define ST_EGL_CONTEXT_MINOR_VERSION_KHR                      0x30FB
+    #define ST_EGL_CONTEXT_FLAGS_KHR                              0x30FC
+    #define ST_EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR                0x30FD
+    #define ST_EGL_CONTEXT_OPENGL_RESET_NOTIFICATION_STRATEGY_KHR 0x31BD
+
+    // for EGL_CONTEXT_OPENGL_RESET_NOTIFICATION_STRATEGY_KHR
+    #define ST_EGL_NO_RESET_NOTIFICATION_KHR 0x31BE
+    #define ST_EGL_LOSE_CONTEXT_ON_RESET_KHR 0x31BF
+
+    // for EGL_CONTEXT_FLAGS_KHR
+    #define ST_EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR                 0x00000001
+    #define ST_EGL_CONTEXT_OPENGL_FORWARD_COMPATIBLE_BIT_KHR    0x00000002
+    #define ST_EGL_CONTEXT_OPENGL_ROBUST_ACCESS_BIT_KHR         0x00000004
+
+    // for EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR
+    #define ST_EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR          0x00000001
+    #define ST_EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT_KHR 0x00000002
+
+    const char* anEglExts = eglQueryString(myDisplay, EGL_EXTENSIONS);
+    if(StGLContext::stglCheckExtension(anEglExts, "EGL_KHR_create_context")) {
+        const EGLint anEglCtxAttribs[] = {
+            ST_EGL_CONTEXT_FLAGS_KHR, theDebugCtx ? ST_EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR : 0,
+            //EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR, ST_EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT_KHR,
+            EGL_NONE
+        };
+
+        myRC = eglCreateContext(myDisplay, myConfig, EGL_NO_CONTEXT, anEglCtxAttribs);
+    }
+
+    if(myRC == EGL_NO_CONTEXT) {
+        /*EGLint anEglCtxAttribs[] = {
+            EGL_CONTEXT_CLIENT_VERSION, 2,
+            EGL_NONE
+        };*/
+        myRC = eglCreateContext(myDisplay, myConfig, EGL_NO_CONTEXT, NULL);
+    }
+
+    if(myRC == EGL_NO_CONTEXT) {
+        ST_ERROR_LOG("EGL, eglCreateContext FAILED");
+    }
+}
+
+StWinGlrc::~StWinGlrc() {
+    if(myRC != EGL_NO_CONTEXT) {
+        if(eglMakeCurrent(myDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT) != EGL_TRUE) {
+            ST_DEBUG_LOG("EGL, FAILED to release OpenGL context");
+        }
+        eglDestroyContext(myDisplay, myRC);
+        myRC = EGL_NO_CONTEXT;
+    }
+
+    if(myDisplay != EGL_NO_DISPLAY) {
+        if(eglTerminate(myDisplay) != EGL_TRUE) {
+            ST_ERROR_LOG("EGL, eglTerminate FAILED");
+        }
+        myDisplay = EGL_NO_DISPLAY;
+    }
+}
+
+bool StWinGlrc::makeCurrent(EGLSurface theSurface) {
+    return myRC != EGL_NO_CONTEXT
+        && eglMakeCurrent(myDisplay, theSurface, theSurface, myRC) == EGL_TRUE;
+}
+
+#elif defined(_WIN32)
 
 static PIXELFORMATDESCRIPTOR THE_PIXELFRMT_DOUBLE = {
     sizeof(PIXELFORMATDESCRIPTOR),   // Size Of This Pixel Format Descriptor
@@ -139,8 +251,7 @@ StWinHandles::StWinHandles()
   myMKeyPrev(GlobalAddAtom(MAKEINTATOM(VK_MEDIA_PREV_TRACK))),
   myMKeyNext(GlobalAddAtom(MAKEINTATOM(VK_MEDIA_NEXT_TRACK))),
   ThreadGL(0),
-  hDC(NULL) {
-    //
+  hDC(NULL)
 #elif defined(__linux__)
 : hWindow(0),
   hWindowGl(0),
@@ -151,9 +262,14 @@ StWinHandles::StWinHandles()
   xDNDSrcWindow(0),
   xDNDVersion(0),
   xrandrEventBase(0),
-  isRecXRandrEvents(false) {
-    //
+  isRecXRandrEvents(false)
 #endif
+#if defined(ST_HAVE_EGL)
+  ,
+  eglSurface(EGL_NO_SURFACE)
+#endif
+{
+    //
 }
 
 StWinHandles::~StWinHandles() {
@@ -161,7 +277,11 @@ StWinHandles::~StWinHandles() {
 }
 
 void StWinHandles::glSwap() {
-#ifdef _WIN32
+#if defined(ST_HAVE_EGL)
+    if(eglSurface != EGL_NO_SURFACE) {
+        eglSwapBuffers(hRC->getDisplay(), eglSurface);
+    }
+#elif defined(_WIN32)
     if(hDC != NULL) {
         SwapBuffers(hDC);
     }
@@ -174,7 +294,12 @@ void StWinHandles::glSwap() {
 }
 
 bool StWinHandles::glMakeCurrent() {
-#ifdef _WIN32
+#if defined(ST_HAVE_EGL)
+    if(eglSurface != EGL_NO_SURFACE
+    && !hRC.isNull()) {
+        return hRC->makeCurrent(eglSurface);
+    }
+#elif defined(_WIN32)
     if(hDC != NULL && !hRC.isNull()) {
         return hRC->isCurrent(hDC)
             || hRC->makeCurrent(hDC);
@@ -317,6 +442,26 @@ int StWinHandles::glCreateContext(StWinHandles*    theSlave,
     return STWIN_INIT_SUCCESS;
 #elif defined(__linux__)
     // create an OpenGL rendering context
+#if defined(ST_HAVE_EGL)
+    // GL context is created beforehand for EGL
+    ST_GL_ERROR_CHECK(!hRC.isNull() && hRC->isValid(),
+                      STWIN_ERROR_X_GLRC_CREATE, "EGL, could not create rendering context for Master");
+
+    eglSurface = eglCreateWindowSurface(hRC->getDisplay(), hRC->getConfig(), hWindowGl, NULL);
+    if(theSlave != NULL) {
+        theSlave->hRC = hRC;
+        theSlave->eglSurface = eglCreateWindowSurface(hRC->getDisplay(), hRC->getConfig(), theSlave->hWindowGl, NULL);
+
+        // bind the rendering context to the window
+        ST_GL_ERROR_CHECK(hRC->makeCurrent(theSlave->eglSurface),
+                          STWIN_ERROR_X_GLRC_CREATE, "EGL, Can't activate Slave GL Rendering Context");
+    }
+
+    // bind the rendering context to the window
+    ST_GL_ERROR_CHECK(hRC->makeCurrent(eglSurface),
+                      STWIN_ERROR_X_GLRC_CREATE, "EGL, Can't activate Master GL Rendering Context");
+    return STWIN_INIT_SUCCESS;
+#else // GLX
     hRC = new StWinGlrc(stXDisplay, theDebugCtx);
     ST_GL_ERROR_CHECK(hRC->isValid(),
                       STWIN_ERROR_X_GLRC_CREATE, "GLX, could not create rendering context for Master");
@@ -332,6 +477,7 @@ int StWinHandles::glCreateContext(StWinHandles*    theSlave,
     ST_GL_ERROR_CHECK(hRC->makeCurrent(hWindowGl),
                       STWIN_ERROR_X_GLRC_CREATE, "GLX, Can't activate Master GL Rendering Context");
     return STWIN_INIT_SUCCESS;
+#endif // GLX or EGL
 #endif
 }
 
@@ -385,6 +531,17 @@ bool StWinHandles::close() {
     }
     myMutex.unlock();
 #elif defined(__linux__)
+
+#if defined(ST_HAVE_EGL)
+    if(!hRC.isNull()) {
+        hRC->makeCurrent(EGL_NO_SURFACE);
+        if(eglSurface != EGL_NO_SURFACE) {
+            eglDestroySurface(hRC->getDisplay(), eglSurface);
+            eglSurface = EGL_NO_SURFACE;
+        }
+    }
+#endif
+
     // release active context
     hRC.nullify();
     if(!stXDisplay.isNull()) {
