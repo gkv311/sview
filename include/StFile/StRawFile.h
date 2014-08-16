@@ -11,6 +11,9 @@
 
 #include <StFile/StFileNode.h>
 
+struct AVIOContext;
+struct AVIOInterruptCB;
+
 /**
  * @class class to access to the small binary and text files.
  */
@@ -73,7 +76,8 @@ class StRawFile : public StFileNode {
      * Returns true if file is opened.
      */
     bool isOpen() const {
-        return myFileHandle != NULL;
+        return myFileHandle != NULL
+            || myContextIO  != NULL;
     }
 
     /**
@@ -125,12 +129,26 @@ class StRawFile : public StFileNode {
      */
     ST_CPPEXPORT static StString readTextFile(const StCString& theFilePath);
 
+        private:
+
+    /**
+     * Interruption callback.
+     */
+    ST_LOCAL static int avInterruptCallback(void* thePtr);
+
+    /**
+     * Interruption callback.
+     * @return 0 to continue, 1 to abort
+     */
+    ST_LOCAL int onInterrupted() { return 0; }
+
         protected:
 
-    FILE*      myFileHandle;
-    stUByte_t* myBuffer;
-    size_t     myBuffSize;   //!< buffer size
-    size_t     myLength;     //!< data length
+    AVIOContext* myContextIO;  //!< file context
+    FILE*        myFileHandle; //!< file handle
+    stUByte_t*   myBuffer;     //!< buffer with file content
+    size_t       myBuffSize;   //!< buffer size
+    size_t       myLength;     //!< data length
 
 };
 

@@ -9,13 +9,28 @@
 #include <cstdio> // forward-declared to work-around broken MinGW headers
 
 #include <StFile/StRawFile.h>
+#include <StAV/stAV.h>
+#include <StStrings/StLogger.h>
 
 #include <iostream>
 #include <fstream>
+#include <limits>
+
+#ifdef max
+    #undef max
+#endif
+
+int StRawFile::avInterruptCallback(void* thePtr) {
+    StRawFile* aRawFile = reinterpret_cast<StRawFile*>(thePtr);
+    return aRawFile != NULL
+         ? aRawFile->onInterrupted()
+         : 0;
+}
 
 StRawFile::StRawFile(const StCString& theFilePath,
                      StNode*          theParent)
 : StFileNode(theFilePath, theParent),
+  myContextIO(NULL),
   myFileHandle(NULL),
   myBuffer(NULL),
   myBuffSize(0),
@@ -38,6 +53,20 @@ bool StRawFile::openFile(StRawFile::ReadWrite theFlags,
     }
 
     StString aFilePath = getPath();
+#if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 21, 0))
+    if(StFileNode::isRemoteProtocolPath(aFilePath)
+    && stAV::init()) {
+        AVIOInterruptCB anInterruptCB;
+        stMemZero(&anInterruptCB, sizeof(anInterruptCB));
+        anInterruptCB.callback = &StRawFile::avInterruptCallback;
+        anInterruptCB.opaque   = this;
+        if(avio_open2(&myContextIO, aFilePath.toCString(), (theFlags == StRawFile::WRITE) ? AVIO_FLAG_WRITE : AVIO_FLAG_READ, &anInterruptCB, NULL) < 0) {
+            return false;
+        }
+        return true;
+    }
+#endif
+
 #ifdef _WIN32
     StStringUtfWide aPathWide;
     aPathWide.fromUnicode(aFilePath);
@@ -45,10 +74,15 @@ bool StRawFile::openFile(StRawFile::ReadWrite theFlags,
 #else
     myFileHandle =   fopen(aFilePath.toCString(), (theFlags == StRawFile::WRITE) ?  "wb" :  "rb");
 #endif
+
     return myFileHandle != NULL;
 }
 
 void StRawFile::closeFile() {
+    if(myContextIO != NULL) {
+        avio_close(myContextIO);
+        myContextIO = NULL;
+    }
     if(myFileHandle != NULL) {
         fclose(myFileHandle);
         myFileHandle = NULL;
@@ -77,6 +111,84 @@ bool StRawFile::readFile(const StCString& theFilePath) {
 
     if(!openFile(StRawFile::READ, theFilePath)) {
         return false;
+    }
+
+    if(myContextIO != NULL) {
+        int64_t aFileLen = avio_size(myContextIO);
+        if(aFileLen > 0) {
+            // stream of known size - create a buffer and read the data
+            initBuffer(aFileLen <= int64_t(std::numeric_limits<ptrdiff_t>::max()) ? size_t(aFileLen) : 0);
+            if(myBuffSize != size_t(aFileLen)) {
+                return false;
+            }
+
+            stUByte_t*   aBufferIter = myBuffer;
+            size_t       aBytesLeft  = myBuffSize;
+            const size_t aChunkLimit = size_t(std::numeric_limits<int>::max());
+            for(;;) {
+                if(aBytesLeft < aChunkLimit) {
+                    const bool isOk = avio_read(myContextIO, aBufferIter, int(aChunkLimit)) != int(aBytesLeft);
+                    closeFile();
+                    return isOk;
+                }
+
+                if(avio_read(myContextIO, aBufferIter, int(aChunkLimit)) != int(aChunkLimit)) {
+                    closeFile();
+                    return false;
+                }
+                aBufferIter += aChunkLimit;
+                aBytesLeft  -= aChunkLimit;
+            }
+        }
+
+        // stream of unknown size - read until first error
+        StArrayList<stUByte_t*> aChunks;
+        aFileLen = 0;
+        const size_t aChunkLimit = 4096;
+        bool isOk = true;
+        for(;;) {
+            stUByte_t* aChunk = stMemAllocAligned<stUByte_t*>(aChunkLimit);
+            if(aChunk == NULL) {
+                isOk = false;
+                break;
+            }
+            int aReadBytes = avio_read(myContextIO, aChunk, int(aChunkLimit));
+            if(aReadBytes <= 0) {
+                stMemFreeAligned(aChunk);
+                break;
+            }
+
+            if(uint64_t(aFileLen) + 4096 > uint64_t(std::numeric_limits<ptrdiff_t>::max())) {
+                isOk = false;
+                break;
+            }
+
+            aFileLen += aReadBytes;
+            aChunks.add(aChunk);
+        }
+        closeFile();
+
+        // copy chunks to final destination
+        if(isOk) {
+            initBuffer(size_t(aFileLen));
+            isOk = myBuffSize == size_t(aFileLen);
+        }
+
+        stUByte_t* aBufferIter = myBuffer;
+        size_t     aBytesLeft  = myBuffSize;
+        for(size_t aChunkIter = 0; aChunkIter < aChunks.size(); ++aChunkIter) {
+            stUByte_t*   aChunk       = aChunks.changeValue(aChunkIter);
+            const size_t aBytesToCopy = stMin(aBytesLeft, aChunkLimit);
+            if(aBufferIter != NULL) {
+                stMemCpy(aBufferIter, aChunk, aBytesToCopy);
+            }
+            stMemFreeAligned(aChunk);
+            if(aBufferIter != NULL) {
+                aBufferIter += aBytesToCopy;
+            }
+            aBytesLeft -= aBytesToCopy;
+        }
+        return isOk;
     }
 
     // determine length of file
@@ -114,6 +226,22 @@ size_t StRawFile::write(const char*  theBuffer,
                         const size_t theBytes) {
     if(!isOpen()) {
         return 0;
+    }
+
+    if(myContextIO != NULL) {
+        const stUByte_t* aBufferIter = (const stUByte_t* )theBuffer;
+        size_t           aBytesLeft  = theBytes;
+        const size_t     aChunkLimit = size_t(std::numeric_limits<int>::max());
+        for(;;) {
+            if(aBytesLeft < aChunkLimit) {
+                avio_write(myContextIO, aBufferIter, int(aBytesLeft));
+                return theBytes;
+            }
+
+            avio_write(myContextIO, aBufferIter, int(aChunkLimit));
+            aBufferIter += aChunkLimit;
+            aBytesLeft  -= aChunkLimit;
+        }
     }
 
     return fwrite(theBuffer, 1, theBytes, myFileHandle);
