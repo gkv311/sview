@@ -217,7 +217,7 @@ void StCADViewerGUI::doAboutProgram(const size_t ) {
 }
 
 void StCADViewerGUI::doOpenLicense(const size_t ) {
-    StSocket::openURL(StProcess::getStShareFolder() + "info" + SYS_FS_SPLITTER + "license.txt");
+    StProcess::openURL(StProcess::getStShareFolder() + "info" + SYS_FS_SPLITTER + "license.txt");
 }
 
 void StCADViewerGUI::doShowFPS(const bool ) {

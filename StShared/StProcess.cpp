@@ -352,3 +352,23 @@ size_t StProcess::getPID() {
     return (size_t )getpid();
 #endif
 }
+
+#if !(defined(__APPLE__))
+
+void StProcess::openURL(const StString& theUrl) {
+#if defined(_WIN32)
+    ShellExecuteW(NULL, L"open", theUrl.toUtfWide().toCString(), NULL, NULL, SW_SHOWNORMAL);
+#elif(defined(__linux__) || defined(__linux))
+    // we use nice script tool from Xdg-utils package
+    // http://portland.freedesktop.org/wiki/
+    StArrayList<StString> anArguments(1);
+    anArguments.add(theUrl);
+    if(!StProcess::execProcess("/usr/bin/xdg-open", anArguments)) {
+        ST_DEBUG_LOG("/usr/bin/xdg-open is not found!");
+    }
+    // also we could use GTK function
+    //gtk_show_uri(NULL, uri, gtk_get_current_event_time(), &err);
+#endif
+}
+
+#endif // !__APPLE__

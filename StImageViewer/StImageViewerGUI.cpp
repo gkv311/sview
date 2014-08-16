@@ -391,7 +391,7 @@ void StImageViewerGUI::doAboutProgram(const size_t ) {
 }
 
 void StImageViewerGUI::doUserTips(const size_t ) {
-    StSocket::openURL("http://sview.ru/sview2009/usertips");
+    StProcess::openURL("http://sview.ru/sview2009/usertips");
 }
 
 void StImageViewerGUI::doAboutSystem(const size_t ) {
@@ -499,13 +499,13 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
 }
 
 void StImageViewerGUI::doCheckUpdates(const size_t ) {
-    StSocket::openURL("http://www.sview.ru/download");
+    StProcess::openURL("http://www.sview.ru/download");
 }
 
 void StImageViewerGUI::doOpenLicense(const size_t ) {
-    StSocket::openURL(StProcess::getStShareFolder()
-                      + "info" + SYS_FS_SPLITTER
-                      + "license.txt");
+    StProcess::openURL(StProcess::getStShareFolder()
+                       + "info" + SYS_FS_SPLITTER
+                       + "license.txt");
 }
 
 /**

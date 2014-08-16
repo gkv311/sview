@@ -350,7 +350,6 @@
 			<Option target="MAC_gcc" />
 			<Option target="MAC_gcc_DEBUG" />
 		</Unit>
-		<Unit filename="StSocket.cpp" />
 		<Unit filename="StStringUnicode.ObjC.mm">
 			<Option compile="1" />
 			<Option link="1" />
@@ -465,7 +464,6 @@
 		<Unit filename="../include/StSlots/StSlotProxy.h" />
 		<Unit filename="../include/StSlots/StSlotTypes.h" />
 		<Unit filename="../include/StSocket/StCheckUpdates.h" />
-		<Unit filename="../include/StSocket/StSocket.h" />
 		<Unit filename="../include/StStrings/StDictionary.h" />
 		<Unit filename="../include/StStrings/StFormatTime.h" />
 		<Unit filename="../include/StStrings/StLangMap.h" />

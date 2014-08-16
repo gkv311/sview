@@ -133,6 +133,11 @@ class StProcess {
     ST_CPPEXPORT static bool execProcess(const StString&          theExecutablePath,
                                          const StArray<StString>& theArguments);
 
+    /**
+     * Open specified URL using external application.
+     */
+    ST_CPPEXPORT static void openURL(const StString& theUrl);
+
 };
 
 #endif // __StProcess_h_

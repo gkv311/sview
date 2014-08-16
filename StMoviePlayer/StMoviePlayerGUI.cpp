@@ -697,7 +697,7 @@ void StMoviePlayerGUI::doAboutProgram(const size_t ) {
 }
 
 void StMoviePlayerGUI::doUserTips(const size_t ) {
-    StSocket::openURL("http://sview.ru/sview2009/usertips");
+    StProcess::openURL("http://sview.ru/sview2009/usertips");
 }
 
 void StMoviePlayerGUI::doAboutSystem(const size_t ) {
@@ -865,13 +865,13 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
 }
 
 void StMoviePlayerGUI::doCheckUpdates(const size_t ) {
-    StSocket::openURL("http://www.sview.ru/download");
+    StProcess::openURL("http://www.sview.ru/download");
 }
 
 void StMoviePlayerGUI::doOpenLicense(const size_t ) {
-    StSocket::openURL(StProcess::getStShareFolder()
-                      + "info" + SYS_FS_SPLITTER
-                      + "license.txt");
+    StProcess::openURL(StProcess::getStShareFolder()
+                       + "info" + SYS_FS_SPLITTER
+                       + "license.txt");
 }
 
 /**

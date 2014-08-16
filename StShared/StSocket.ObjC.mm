@@ -8,12 +8,12 @@
 
 #if (defined(__APPLE__))
 
-#include <StSocket/StSocket.h>
+#include <StThreads/StProcess.h>
 #include <StCocoa/StCocoaLocalPool.h>
 
 #import <Cocoa/Cocoa.h>
 
-void StSocket::openURL(const StString& theUrl) {
+void StProcess::openURL(const StString& theUrl) {
     StCocoaLocalPool aLocalPool;
     NSWorkspace* aWorkSpace = [NSWorkspace sharedWorkspace];
     if(aWorkSpace == NULL) {

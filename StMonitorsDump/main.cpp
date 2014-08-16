@@ -343,7 +343,7 @@ int main(int , char** ) { // force console output
 
     st::cout << st::COLOR_FOR_GREEN << stostream_text("Dump stored to file \"stMonitorsDump.htm\"\n") << st::COLOR_FOR_WHITE;
 
-    StSocket::openURL(aFileName);
+    StProcess::openURL(aFileName);
     st::cout << stostream_text("Press any key to exit...") << st::SYS_PAUSE_EMPTY;
     if(isTmpFile) {
         StFileNode::removeFile(aFileName);
