@@ -657,7 +657,7 @@ char* StPlayList::parseM3UIter(char*     theIter,
     }
 
     char* aNextLine = nextLine(theIter);
-    if(*aNextLine != '\0') {
+    if(aNextLine > theIter + 1) {
         // replace LF or CRLF with '\0'
         *(aNextLine - 1) = '\0';
         char* aTail = aNextLine - 2;
