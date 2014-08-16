@@ -410,6 +410,7 @@ class StPlayList {
      * M3U parsing stuff.
      */
     ST_LOCAL char* parseM3UIter(char*     theIter,
+                                StFolder* theFolder,
                                 StString& theTitle);
 
     /**

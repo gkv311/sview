@@ -652,6 +652,7 @@ static char* nextLine(char* theLine) {
 }
 
 char* StPlayList::parseM3UIter(char*     theIter,
+                               StFolder* theFolder,
                                StString& theTitle) {
     if(*theIter == '\0') {
         return NULL;
@@ -677,8 +678,13 @@ char* StPlayList::parseM3UIter(char*     theIter,
     }
 
     if(*theIter != '#') {
-        StFileNode* aFileNode = new StFileNode(StString(theIter), &myFoldersRoot);
-        myFoldersRoot.add(aFileNode);
+        StString    anItemPath = theIter;
+        StFolder*   aFolder    = theFolder != NULL
+                              && StFileNode::isRelativePath(anItemPath)
+                               ? theFolder
+                               : &myFoldersRoot;
+        StFileNode* aFileNode  = new StFileNode(anItemPath, aFolder);
+        aFolder->add(aFileNode);
 
         StPlayItem* anItem = new StPlayItem(aFileNode, myDefStParams);
         anItem->setTitle(theTitle);
@@ -1028,9 +1034,12 @@ void StPlayList::open(const StCString& thePath,
         || anExt.isEqualsIgnoreCase(stCString("m3u8"))) {
             StHandle<StRawFile> aRawFile = new StRawFile(thePath);
             if(aRawFile->readFile()) {
+                StFolder* aPlsFolder = new StFolder(aFolderPath, &myFoldersRoot);
+                myFoldersRoot.add(aPlsFolder);
+
                 StString aTitle;
                 for(char* anIter = skipBOM((char* )aRawFile->getBuffer()); anIter != NULL;) {
-                    anIter = parseM3UIter(anIter, aTitle);
+                    anIter = parseM3UIter(anIter, aPlsFolder, aTitle);
                 }
                 aRawFile.nullify();
 
@@ -1043,7 +1052,7 @@ void StPlayList::open(const StCString& thePath,
                         aRawFile = new StRawFile(aFirstPath);
                         if(aRawFile->readFile()) {
                             for(char* anIter = skipBOM((char* )aRawFile->getBuffer()); anIter != NULL;) {
-                                anIter = parseM3UIter(anIter, aTitle);
+                                anIter = parseM3UIter(anIter, NULL, aTitle);
                             }
                             remove(aFirstPath, false);
                         }
