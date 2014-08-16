@@ -34,7 +34,6 @@
 #include "StVideo/StVideo.h"
 
 #include <StImage/StImageFile.h>
-#include <StSocket/StSocket.h>
 #include <StSettings/StEnumParam.h>
 
 #include <StGLWidgets/StGLButton.h>

@@ -187,9 +187,17 @@ class StPlayList {
                                 const StString&             thePathToAdd);
 
     /**
+     * Remove file from playlist.
+     */
+    ST_CPPEXPORT bool remove(const StString& thePath,
+                             const bool      theToRemovePhysically);
+
+    /**
      * Remove file from playlist and delete it physically.
      */
-    ST_CPPEXPORT bool removePhysically(const StHandle<StFileNode>& theFileNode);
+    ST_LOCAL bool removePhysically(const StHandle<StFileNode>& theFileNode) {
+        return remove(theFileNode->getPath(), true);
+    }
 
     /**
      * Returns loop flag.

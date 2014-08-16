@@ -15,7 +15,6 @@
 #include <StGLWidgets/StGLTextureButton.h>
 #include <StGLWidgets/StGLMsgStack.h>
 
-#include <StSocket/StSocket.h>
 #include <StVersion.h>
 
 #include "StCADViewerStrings.h"

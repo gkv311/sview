@@ -19,7 +19,6 @@
 #include <StThreads/StProcess.h>
 #include <StCore/StSearchMonitors.h>
 #include <StStrings/stConsole.h>
-#include <StSocket/StSocket.h>
 #include <StFile/StRawFile.h>
 #include <StVersion.h>
 

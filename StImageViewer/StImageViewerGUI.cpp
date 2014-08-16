@@ -21,7 +21,6 @@
 
 #include <StCore/StWindow.h>
 
-#include <StSocket/StSocket.h>
 #include <StSettings/StEnumParam.h>
 #include <StThreads/StThread.h>
 

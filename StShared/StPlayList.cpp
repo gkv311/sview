@@ -542,8 +542,9 @@ void StPlayList::addToNode(const StHandle<StFileNode>& theFileNode,
     aFileNode->add(new StFileNode(thePathToAdd, aFileNode));
 }
 
-bool StPlayList::removePhysically(const StHandle<StFileNode>& theFileNode) {
-    StString    aPath    = theFileNode->getPath();
+bool StPlayList::remove(const StString& thePath,
+                        const bool      theToRemovePhysically) {
+    StString    aPath    = thePath;
     StPlayItem* aRemItem = NULL;
     StMutexAuto anAutoLock(myMutex);
     if(myCurrent == NULL) {
@@ -583,7 +584,7 @@ bool StPlayList::removePhysically(const StHandle<StFileNode>& theFileNode) {
 
     // remove item itself
     const bool isDeleted = aRemItem != NULL
-                        && StFileNode::removeFile(aPath);
+                        && (!theToRemovePhysically || StFileNode::removeFile(aPath));
     if(isDeleted) {
         delPlayItem(aRemItem);
         delete aRemItem;
@@ -968,6 +969,18 @@ void StPlayList::loadRecentList(const StString theString) {
     }
 }
 
+/**
+ * Skip BOM for UTF8 written by some weird programs
+ */
+static inline char* skipBOM(char* thePos) {
+    if(thePos[0] == '\xEF'
+    && thePos[1] == '\xBB'
+    && thePos[2] == '\xBF') {
+        return thePos + 3;
+    }
+    return thePos;
+}
+
 void StPlayList::open(const StCString& thePath,
                       const StCString& theItem) {
     StMutexAuto anAutoLock(myMutex);
@@ -1011,17 +1024,31 @@ void StPlayList::open(const StCString& thePath,
         }
 
         // parse m3u playlist
-        if(anExt.isEqualsIgnoreCase(stCString("m3u"))) {
-            StRawFile aRawFile(thePath);
-            if(aRawFile.readFile()) {
+        if(anExt.isEqualsIgnoreCase(stCString("m3u"))
+        || anExt.isEqualsIgnoreCase(stCString("m3u8"))) {
+            StHandle<StRawFile> aRawFile = new StRawFile(thePath);
+            if(aRawFile->readFile()) {
                 StString aTitle;
-                char* anIter = (char* )aRawFile.getBuffer();
-                if(anIter[0] == '\xEF' && anIter[1] == '\xBB' && anIter[2] == '\xBF') {
-                    // skip BOM for UTF8 written by some stupid programs
-                    anIter += 3;
-                }
-                while(anIter != NULL) {
+                for(char* anIter = skipBOM((char* )aRawFile->getBuffer()); anIter != NULL;) {
                     anIter = parseM3UIter(anIter, aTitle);
+                }
+                aRawFile.nullify();
+
+                if(myFirst != nullptr
+                && myFirst->getNext() == nullptr) {
+                    const StString aFirstPath = myFirst->getPath();
+                    StString anItemExt = StFileNode::getExtension(aFirstPath);
+                    if(anItemExt.isEqualsIgnoreCase(stCString("m3u"))
+                    || anItemExt.isEqualsIgnoreCase(stCString("m3u8"))) {
+                        aRawFile = new StRawFile(aFirstPath);
+                        if(aRawFile->readFile()) {
+                            for(char* anIter = skipBOM((char* )aRawFile->getBuffer()); anIter != NULL;) {
+                                anIter = parseM3UIter(anIter, aTitle);
+                            }
+                            remove(aFirstPath, false);
+                        }
+                        aRawFile.nullify();
+                    }
                 }
 
                 myPlsFile = addRecentFile(StFileNode(thePath)); // append to recent files list
