@@ -10,6 +10,7 @@
 #define __StGLShader_h_
 
 #include <StStrings/StString.h>
+#include <StTemplates/StArrayList.h>
 #include <StGL/StGLResource.h>
 
 /**
@@ -139,4 +140,7 @@ class StGLFragmentShader : public StGLShader {
 
 };
 
-#endif //__StGLShader_h_
+template<> inline void StArray< StHandle<StGLVertexShader>   >::sort() {}
+template<> inline void StArray< StHandle<StGLFragmentShader> >::sort() {}
+
+#endif // __StGLShader_h_

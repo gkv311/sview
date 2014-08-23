@@ -65,12 +65,12 @@ class StGLMeshProgram : public StGLProgram {
     ST_CPPEXPORT void setModelMat(StGLContext&      theCtx,
                                   const StGLMatrix& theModelMat);
 
-        protected: //! @name Uniforms
+        public: //! @name Uniforms
 
     StGLVarLocation  uniProjMatLoc; //!< projection matrix
     StGLVarLocation uniModelMatLoc; //!< model view matrix
 
-        protected: //! @name Vertex shader attributes
+        public: //! @name Vertex shader attributes
 
     StGLVarLocation  atrVVertexLoc; //!< vertices
     StGLVarLocation  atrVNormalLoc; //!< normals

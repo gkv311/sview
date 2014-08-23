@@ -217,10 +217,6 @@ class StGLImageRegion : public StGLWidget {
         if(!params.stereoFile.isNull()) { params.stereoFile->scaleOut((GLfloat )theValue); }
     }
 
-        private: //! @name private callback Slots
-
-    ST_LOCAL void doChangeTexFilter(const int32_t theTextureFilter);
-
         private: //! @name private methods
 
     ST_LOCAL StGLVec2 getMouseMoveFlat(const StPointD_t& theCursorZoFrom,

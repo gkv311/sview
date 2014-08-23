@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -16,18 +16,6 @@ class StGLImageFlatProgram : public StGLImageProgram {
         public:
 
     ST_CPPEXPORT StGLImageFlatProgram();
-
-    /**
-     * Initialize shaders and perform link.
-     */
-    ST_CPPEXPORT virtual bool init(StGLContext& theCtx);
-
-    ST_CPPEXPORT void setSmoothFilter(StGLContext&        theCtx,
-                                      const TextureFilter theTextureFilter);
-
-        private:
-
-    StGLFragmentShader* fGetColorPtr;
 
 };
 

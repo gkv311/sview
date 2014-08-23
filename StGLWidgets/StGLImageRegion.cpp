@@ -137,7 +137,6 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
     params.displayMode   = new StInt32Param(MODE_STEREO);
     params.displayRatio  = new StInt32Param(RATIO_AUTO);
     params.textureFilter = new StInt32Param(StGLImageProgram::FILTER_LINEAR);
-    params.textureFilter->signals.onChanged.connect(this, &StGLImageRegion::doChangeTexFilter);
     params.gamma      = new StTrackedFloatParam(myProgramFlat.params.gamma,
                                                 myProgramSphere.params.gamma);
     params.brightness = new StTrackedFloatParam(myProgramFlat.params.brightness,
@@ -274,11 +273,9 @@ bool StGLImageRegion::stglInit() {
     }
 
     StGLContext& aCtx = getContext();
-    myProgramFlat.setContext(getRoot()->getContextHandle());
-    myProgramSphere.setContext(getRoot()->getContextHandle());
-    if(!myProgramFlat.init(aCtx)) {
+    if(!myProgramFlat.init(aCtx, StImage::ImgColor_RGB, StImage::ImgScale_Full, StGLImageProgram::FragGetColor_Normal)) {
         return false;
-    } else if(!myProgramSphere.init(aCtx)) {
+    } else if(!myProgramSphere.init(aCtx, StImage::ImgColor_RGB, StImage::ImgScale_Full, StGLImageProgram::FragGetColor_Normal)) {
         return false;
     } else if(!myQuad.initScreen(aCtx)) {
         ST_DEBUG_LOG("Fail to init StGLQuad");
@@ -289,8 +286,6 @@ bool StGLImageRegion::stglInit() {
 
     // setup texture filter
     myTextureQueue->getQTexture().setMinMagFilter(aCtx, params.textureFilter->getValue() == StGLImageProgram::FILTER_NEAREST ? GL_NEAREST : GL_LINEAR);
-    myProgramFlat.setSmoothFilter  (aCtx, StGLImageProgram::TextureFilter(params.textureFilter->getValue()));
-    myProgramSphere.setSmoothFilter(aCtx, StGLImageProgram::TextureFilter(params.textureFilter->getValue()));
 
     myIsInitialized = true;
     return myIsInitialized;
@@ -491,20 +486,20 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     switch(aParams->ViewingMode) {
         default:
         case StStereoParams::FLAT_IMAGE: {
-            // apply (de)anaglyph color filter
-            if(isAnaglyph) {
-                myProgramFlat.setColorScale(aCtx, aColorScale);
-            } else {
-                myProgramFlat.resetColorScale(aCtx);
+            myProgramFlat.setColorScale(aColorScale); // apply de-anaglyph color filter
+            StGLImageProgram::FragGetColor aColorGetter = params.textureFilter->getValue() == StGLImageProgram::FILTER_BLEND
+                                                        ? StGLImageProgram::FragGetColor_Blend
+                                                        : StGLImageProgram::FragGetColor_Normal;
+            if(!myProgramFlat.init(aCtx, stFrameTexture.getColorModel(), stFrameTexture.getColorScale(), aColorGetter)) {
+                break;
             }
 
-            myProgramFlat.setupSrcColorShader(aCtx, stFrameTexture.getColorModel(), stFrameTexture.getColorScale());
-            myProgramFlat.use(aCtx);
+            myProgramFlat.getActiveProgram()->use(aCtx);
 
             // setup data rectangle in the texture
-            myProgramFlat.setTextureSizePx(aCtx, textureSizeVec);
+            myProgramFlat.setTextureSizePx      (aCtx, textureSizeVec);
             myProgramFlat.setTextureMainDataSize(aCtx, dataClampVec);
-            myProgramFlat.setTextureUVDataSize(aCtx, dataUVClampVec);
+            myProgramFlat.setTextureUVDataSize  (aCtx, dataUVClampVec);
 
             // lenses center correction
             const GLfloat aLestDisp = getRoot()->getLensDist() * GLfloat(getRoot()->getRectPx().ratio());
@@ -594,12 +589,12 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             stOrthoMat.initOrtho(StGLVolume(-rectRatio * aFrustrumL, rectRatio * aFrustrumR,
                                             -1.0f      * aFrustrumB, 1.0f      * aFrustrumT,
                                             -1.0f, 1.0f));
-            myProgramFlat.setProjMat(aCtx, stOrthoMat);
-            myProgramFlat.setModelMat(aCtx, stModelMat);
+            myProgramFlat.getActiveProgram()->setProjMat (aCtx, stOrthoMat);
+            myProgramFlat.getActiveProgram()->setModelMat(aCtx, stModelMat);
 
-            myQuad.draw(aCtx, myProgramFlat);
+            myQuad.draw(aCtx, *myProgramFlat.getActiveProgram());
 
-            myProgramFlat.unuse(aCtx);
+            myProgramFlat.getActiveProgram()->unuse(aCtx);
 
             // restore changed parameters
             aParams->ScaleFactor = aScaleBack;
@@ -607,11 +602,12 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             break;
         }
         case StStereoParams::PANORAMA_SPHERE: {
-            // apply (de)anaglyph color filter
-            if(isAnaglyph) {
-                myProgramSphere.setColorScale(aCtx, aColorScale);
-            } else {
-                myProgramSphere.resetColorScale(aCtx);
+            myProgramSphere.setColorScale(aColorScale); // apply de-anaglyph color filter
+            StGLImageProgram::FragGetColor aColorGetter = params.textureFilter->getValue() != StGLImageProgram::FILTER_NEAREST
+                                                        ? StGLImageProgram::FragGetColor_Blend
+                                                        : StGLImageProgram::FragGetColor_Normal;
+            if(!myProgramSphere.init(aCtx, stFrameTexture.getColorModel(), stFrameTexture.getColorScale(), aColorGetter)) {
+                break;
             }
 
             /// TODO (Kirill Gavrilov#5) implement cross-eyed/parallel pair output
@@ -636,20 +632,19 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             }
 
             // perform drawing
-            myProgramSphere.setupSrcColorShader(aCtx, stFrameTexture.getColorModel(), stFrameTexture.getColorScale());
-            myProgramSphere.use(aCtx);
+            myProgramSphere.getActiveProgram()->use(aCtx);
 
             // setup data rectangle in the texture
-            myProgramSphere.setTextureSizePx(aCtx, textureSizeVec);
+            myProgramSphere.setTextureSizePx      (aCtx, textureSizeVec);
             myProgramSphere.setTextureMainDataSize(aCtx, dataClampVec);
-            myProgramSphere.setTextureUVDataSize(aCtx, dataUVClampVec);
+            myProgramSphere.setTextureUVDataSize  (aCtx, dataUVClampVec);
 
-            myProgramSphere.setProjMat(aCtx, getCamera()->getProjMatrixMono());
-            myProgramSphere.setModelMat(aCtx, stModelMat);
+            myProgramSphere.getActiveProgram()->setProjMat (aCtx, getCamera()->getProjMatrixMono());
+            myProgramSphere.getActiveProgram()->setModelMat(aCtx, stModelMat);
 
-            myUVSphere.draw(aCtx, myProgramSphere);
+            myUVSphere.draw(aCtx, *myProgramSphere.getActiveProgram());
 
-            myProgramSphere.unuse(aCtx);
+            myProgramSphere.getActiveProgram()->unuse(aCtx);
             break;
         }
     }
@@ -740,14 +735,4 @@ bool StGLImageRegion::tryUnClick(const StPointD_t& theCursorZo,
         return true;
     }
     return false;
-}
-
-void StGLImageRegion::doChangeTexFilter(const int32_t theTextureFilter) {
-    if(!myIsInitialized) {
-        return;
-    }
-
-    StGLContext& aCtx = getContext();
-    myProgramFlat  .setSmoothFilter(aCtx, StGLImageProgram::TextureFilter(theTextureFilter));
-    myProgramSphere.setSmoothFilter(aCtx, StGLImageProgram::TextureFilter(theTextureFilter));
 }

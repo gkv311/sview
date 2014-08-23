@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,11 +11,15 @@
 
 #include <StGL/StGLSaturationMatrix.h>
 #include <StGL/StGLBrightnessMatrix.h>
+#include <StGL/StGLProgramMatrix.h>
 #include <StGLMesh/StGLMesh.h>
 #include <StImage/StImage.h>
 #include <StSettings/StFloat32Param.h>
 
-class StGLImageProgram : public StGLMeshProgram {
+/**
+ * GLSL program for Image Region widget.
+ */
+class StGLImageProgram : public StGLProgramMatrix<1, 5, StGLMeshProgram> {
 
         public:
 
@@ -25,20 +29,66 @@ class StGLImageProgram : public StGLMeshProgram {
         FILTER_BLEND,   //!< blend deinterlace filter
     } TextureFilter;
 
+    /**
+     * Color conversion options in GLSL Fragment Shader.
+     */
+    enum FragSection {
+        FragSection_Main = 0, //!< section with main() function
+        FragSection_GetColor, //!< read color values from textures
+        FragSection_ToRgb,    //!< color conversion
+        FragSection_Correct,  //!< color correction
+        FragSection_Gamma,    //!< gamma correction
+        FragSection_NB
+    };
+
+    /**
+     * Color getter options in GLSL Fragment Shader.
+     */
+    enum FragGetColor {
+        FragGetColor_Normal = 0,
+        FragGetColor_Blend,
+        FragGetColor_NB
+    };
+
+    /**
+     * Color conversion options in GLSL Fragment Shader.
+     */
+    enum FragToRgb {
+        FragToRgb_FromRgb = 0,
+        FragToRgb_FromRgba,
+        FragToRgb_FromGray,
+        FragToRgb_FromYuvFull,
+        FragToRgb_FromYuvMpeg,
+        FragToRgb_FromYuv9Full,
+        FragToRgb_FromYuv9Mpeg,
+        FragToRgb_FromYuv10Full,
+        FragToRgb_FromYuv10Mpeg,
+        FragToRgb_NB,
+    };
+
+    /**
+     * Color correction options in GLSL Fragment Shader.
+     */
+    enum FragCorrect {
+        FragCorrect_Off = 0,
+        FragCorrect_On,
+        FragCorrect_NB
+    };
+
+    /**
+     * Gamma correction options in GLSL Fragment Shader.
+     */
+    enum FragGamma {
+        FragGamma_Off = 0,
+        FragGamma_On,
+        FragGamma_NB
+    };
+
         public:
 
     ST_CPPEXPORT StGLImageProgram(const StString& theTitle);
 
     ST_CPPEXPORT virtual ~StGLImageProgram();
-
-    ST_CPPEXPORT virtual void release(StGLContext& theCtx);
-
-    /**
-     * Setup color model conversion
-     */
-    ST_CPPEXPORT void setupSrcColorShader(StGLContext&                 theCtx,
-                                          const StImage::ImgColorModel theColorModel,
-                                          const StImage::ImgColorScale theColorScale);
 
     ST_CPPEXPORT void setTextureSizePx(StGLContext&    theCtx,
                                        const StGLVec2& theVec2);
@@ -49,21 +99,21 @@ class StGLImageProgram : public StGLMeshProgram {
     ST_CPPEXPORT void setTextureUVDataSize(StGLContext&    theCtx,
                                            const StGLVec4& theTexDataVec4);
 
-    ST_CPPEXPORT void setColorScale(StGLContext&    theCtx,
-                                    const StGLVec3& theScale);
-    ST_CPPEXPORT void resetColorScale(StGLContext& theCtx);
+    ST_LOCAL void setColorScale(const StGLVec3& theScale) {
+        myColorScale = theScale;
+    }
 
-    ST_CPPEXPORT void setContext(const StHandle<StGLContext>& theCtx);
+    ST_LOCAL void resetColorScale() {
+        myColorScale = StGLVec3(1.0f, 1.0f, 1.0f);
+    }
 
     /**
      * Initialize default shaders, nothing more.
      */
-    ST_CPPEXPORT virtual bool init(StGLContext& theCtx);
-
-    /**
-     * Perform (re)link and search variables locations.
-     */
-    ST_CPPEXPORT virtual bool link(StGLContext& theCtx);
+    ST_CPPEXPORT virtual bool init(StGLContext&                 theCtx,
+                                   const StImage::ImgColorModel theColorModel,
+                                   const StImage::ImgColorScale theColorScale,
+                                   const FragGetColor           theFilter);
 
         public: //!< Properties
 
@@ -77,19 +127,17 @@ class StGLImageProgram : public StGLMeshProgram {
 
         private: //!< callback Slots
 
-    ST_LOCAL void doGammaChanged(const float );
-    ST_LOCAL void doSetupCorrectionShader(const float );
+    ST_LOCAL void setupCorrection(StGLContext& theCtx);
 
         protected:
 
-    ST_CPPEXPORT void setCorrectionUniform(StGLContext& theCtx);
-    ST_CPPEXPORT void setGammaUniform(StGLContext& theCtx);
-
-    ST_CPPEXPORT bool isNoColorScale() const;
+    ST_LOCAL bool hasNoColorScale() const {
+        return myColorScale.r() > 0.9f
+            && myColorScale.g() > 0.9f
+            && myColorScale.b() > 0.9f;
+    }
 
         protected:
-
-    StHandle<StGLContext> myContext; //!< hold handle to GL context for callback
 
     StGLVarLocation uniTexMainDataLoc;
     StGLVarLocation uniTexUVDataLoc;
@@ -98,31 +146,7 @@ class StGLImageProgram : public StGLMeshProgram {
     StGLVarLocation uniColorProcessingLoc;
     StGLVarLocation uniGammaLoc;
 
-    StGLFragmentShader  fGetColor;
-    StGLFragmentShader  fGetColorBlend;
-
-    // color conversion
-    StGLFragmentShader* f2RGBPtr;
-    StGLFragmentShader  fRGB2RGB;
-    StGLFragmentShader  fRGBA2RGB;
-    StGLFragmentShader  fGray2RGB;
-    StGLFragmentShader  fYUVtoRGB_full;
-    StGLFragmentShader  fYUVtoRGB_mpeg;
-    StGLFragmentShader  fYUV9toRGB_full;
-    StGLFragmentShader  fYUV9toRGB_mpeg;
-    StGLFragmentShader  fYUV10toRGB_full;
-    StGLFragmentShader  fYUV10toRGB_mpeg;
-    // color correction
-    StGLFragmentShader* fCorrectPtr;
-    StGLFragmentShader  fCorrectNO;
-    StGLFragmentShader  fCorrectON;
-    StGLBrightnessMatrix myBrightness;
-    StGLSaturationMatrix mySaturation;
-    StGLVec3             myColorScale; //!< scale filter for de-anaglyph processing
-    // gamma correction
-    StGLFragmentShader* fGammaPtr;
-    StGLFragmentShader  fGammaNO;
-    StGLFragmentShader  fGammaON;
+    StGLVec3        myColorScale; //!< scale filter for de-anaglyph processing
 
 };
 

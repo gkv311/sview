@@ -399,6 +399,7 @@
 		<Unit filename="../include/StGL/StGLFunctions.h" />
 		<Unit filename="../include/StGL/StGLMatrix.h" />
 		<Unit filename="../include/StGL/StGLProgram.h" />
+		<Unit filename="../include/StGL/StGLProgramMatrix.h" />
 		<Unit filename="../include/StGL/StGLResource.h" />
 		<Unit filename="../include/StGL/StGLResources.h" />
 		<Unit filename="../include/StGL/StGLSaturationMatrix.h" />
