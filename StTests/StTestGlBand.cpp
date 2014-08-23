@@ -72,6 +72,12 @@ void StTestGlBand::testTextureFill(StGLContext&  theCtx,
 void StTestGlBand::testTextureRead(StGLContext&  theCtx,
                                    const GLsizei theFrameSizeX,
                                    const GLsizei theFrameSizeY) {
+#if defined(GL_ES_VERSION_2_0)
+    (void )theCtx;
+    (void )theFrameSizeX;
+    (void )theFrameSizeY;
+    return;
+#else
     StGLTexture aTexture(GL_RGB8);
     if(!aTexture.initBlack(theCtx, theFrameSizeX, theFrameSizeY)) {
         st::cout << stostream_text("Fail to create texture ") << theFrameSizeX << stostream_text(" x ") << theFrameSizeY << stostream_text("\n");
@@ -98,6 +104,7 @@ void StTestGlBand::testTextureRead(StGLContext&  theCtx,
     st::cout << stostream_text("  read FPS:  \t") << (TEST_ITERATIONS_F / aTimeAllSec)  << stostream_text("\n");
 
     aTexture.release(theCtx);
+#endif
 }
 
 void StTestGlBand::testFrameCopyRAM(const GLsizei theFrameSizeX,

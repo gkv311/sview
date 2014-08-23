@@ -17,6 +17,8 @@
 template<typename theBaseClass_t>
 struct stglTmplCore42 : public theBaseClass_t {
 
+#if !defined(GL_ES_VERSION_2_0)
+
         public: //! @name GL_ARB_base_instance (added to OpenGL 4.2 core)
 
     using theBaseClass_t::glDrawArraysInstancedBaseInstance;
@@ -51,6 +53,8 @@ struct stglTmplCore42 : public theBaseClass_t {
     using theBaseClass_t::glTextureStorage3DEXT;
 
         public: //! @name OpenGL 4.2 additives to 4.1
+
+#endif
 
 };
 

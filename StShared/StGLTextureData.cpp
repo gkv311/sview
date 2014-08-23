@@ -448,7 +448,7 @@ static void prepareTextures(StGLContext&       theCtx,
             continue;
         }
 
-        if(!StGLTexture::getInternalFormat(anImgPlane, anInternalFormat)) {
+        if(!StGLTexture::getInternalFormat(theCtx, anImgPlane, anInternalFormat)) {
             theTextureFrame.getPlane(aPlaneId).release(theCtx);
             continue;
         }

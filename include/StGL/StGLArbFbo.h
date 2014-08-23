@@ -29,15 +29,18 @@ struct StGLArbFbo : protected StGLFunctions {
     using StGLFunctions::glDeleteFramebuffers;
     using StGLFunctions::glGenFramebuffers;
     using StGLFunctions::glCheckFramebufferStatus;
-    using StGLFunctions::glFramebufferTexture1D;
     using StGLFunctions::glFramebufferTexture2D;
-    using StGLFunctions::glFramebufferTexture3D;
     using StGLFunctions::glFramebufferRenderbuffer;
     using StGLFunctions::glGetFramebufferAttachmentParameteriv;
     using StGLFunctions::glGenerateMipmap;
+
+#if !defined(GL_ES_VERSION_2_0)
     using StGLFunctions::glBlitFramebuffer;
-    using StGLFunctions::glRenderbufferStorageMultisample;
+    using StGLFunctions::glFramebufferTexture1D;
+    using StGLFunctions::glFramebufferTexture3D;
     using StGLFunctions::glFramebufferTextureLayer;
+    using StGLFunctions::glRenderbufferStorageMultisample;
+#endif
 
 };
 

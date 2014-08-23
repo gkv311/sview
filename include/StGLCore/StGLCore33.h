@@ -17,6 +17,8 @@
 template<typename theBaseClass_t>
 struct stglTmplCore33 : public theBaseClass_t {
 
+#if !defined(GL_ES_VERSION_2_0)
+
         public: //! @name GL_ARB_blend_func_extended (added to OpenGL 3.3 core)
 
     using theBaseClass_t::glBindFragDataLocationIndexed;
@@ -89,6 +91,8 @@ struct stglTmplCore33 : public theBaseClass_t {
         public: //! @name OpenGL 3.3 additives to 3.2
 
     using theBaseClass_t::glVertexAttribDivisor;
+
+#endif
 
 };
 

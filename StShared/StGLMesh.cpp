@@ -60,6 +60,9 @@ void StGLMesh::unbind(StGLContext&           theCtx,
 }
 
 void StGLMesh::bindFixed(StGLContext& theCtx) const {
+#if defined(GL_ES_VERSION_2_0)
+    (void )theCtx;
+#else
     if(myVertexBuf.isValid()) {
         myVertexBuf.bind(theCtx);
         theCtx.core11->glEnableClientState(GL_VERTEX_ARRAY);
@@ -90,9 +93,13 @@ void StGLMesh::bindFixed(StGLContext& theCtx) const {
     } else {
         theCtx.core11->glDisableClientState(GL_COLOR_ARRAY);
     }
+#endif
 }
 
 void StGLMesh::unbindFixed(StGLContext& theCtx) const {
+#if defined(GL_ES_VERSION_2_0)
+    (void )theCtx;
+#else
     if(myColorsBuf.isValid()) {
         myColorsBuf.unbind(theCtx);
         theCtx.core11->glDisableClientState(GL_COLOR_ARRAY);
@@ -109,6 +116,7 @@ void StGLMesh::unbindFixed(StGLContext& theCtx) const {
         myVertexBuf.unbind(theCtx);
         theCtx.core11->glDisableClientState(GL_VERTEX_ARRAY);
     }
+#endif
 }
 
 StGLMesh::StGLMesh(const GLenum thePrimitives)

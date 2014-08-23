@@ -45,15 +45,16 @@ static bool wndRegisterClass(HINSTANCE              theInstance,
     aClass.lpszClassName = theClassName.toCString();
     return (RegisterClassW(&aClass) != 0);
 }
-#elif !(defined(__APPLE__))
+#elif !defined(__APPLE__) && !defined(ST_HAVE_EGL)
     #include <GL/glx.h>
 #endif
 
-#if !(defined(__APPLE__))
+#if !defined(__APPLE__)
 
 bool StQuadBufferCheck::testQuadBufferSupport() {
-    // Firstly INIT core library!
-#ifdef _WIN32
+#ifdef ST_HAVE_EGL
+    return false; // unsupported at all!
+#elif defined(_WIN32)
     HINSTANCE anAppInst = GetModuleHandleW(NULL); // Holds The Instance Of The Application
     const StStringUtfWide QUAD_TEST_CLASS = L"StTESTQuadBufferWin";
     if(!wndRegisterClass(anAppInst, QUAD_TEST_CLASS)) {
@@ -95,7 +96,7 @@ bool StQuadBufferCheck::testQuadBufferSupport() {
     UnregisterClassW(QUAD_TEST_CLASS.toCString(), anAppInst);
 
     return (aPixelFormat.dwFlags & PFD_STEREO) != 0;
-#elif(defined(__linux__) || defined(__linux))
+#elif defined(__linux__)
     Display* hDisplay = XOpenDisplay(NULL); // get first display on server from DISPLAY in env
     if(hDisplay == NULL) {
         ST_DEBUG_LOG_AT("X: could not open display");

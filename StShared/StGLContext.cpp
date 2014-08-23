@@ -25,7 +25,7 @@
     #include <dlfcn.h>
     #include <OpenGL/OpenGL.h>
     #include <ApplicationServices/ApplicationServices.h>
-#elif defined(ST_HAVE_EGL)
+#elif defined(ST_HAVE_EGL) || defined(__ANDROID__)
     #include <EGL/egl.h>
 #elif !defined(_WIN32)
     #include <GL/glx.h> // glXGetProcAddress()
@@ -50,6 +50,15 @@ StGLContext::StGLContext()
   arbNPTW(false),
   arbTexRG(false),
   arbTexClear(false),
+#if defined(GL_ES_VERSION_2_0)
+  hasHighp(false),
+  hasTexRGBA8(false),
+  extTexBGRA8(false),
+#else
+  hasHighp(true),
+  hasTexRGBA8(true), // always available on desktop
+  extTexBGRA8(true),
+#endif
   extAll(NULL),
   extSwapTear(false),
   myFuncs(new StGLFunctions()),
@@ -89,6 +98,15 @@ StGLContext::StGLContext(const bool theToInitialize)
   arbNPTW(false),
   arbTexRG(false),
   arbTexClear(false),
+#if defined(GL_ES_VERSION_2_0)
+  hasHighp(false),
+  hasTexRGBA8(false),
+  extTexBGRA8(false),
+#else
+  hasHighp(true),
+  hasTexRGBA8(true), // always available on desktop
+  extTexBGRA8(true),
+#endif
   extAll(NULL),
   extSwapTear(false),
   myFuncs(new StGLFunctions()),
@@ -116,6 +134,7 @@ StGLContext::~StGLContext() {
     //
 }
 
+#if !defined(GL_ES_VERSION_2_0)
 static void APIENTRY debugCallbackWrap(unsigned int theSource,
                                        unsigned int theType,
                                        unsigned int theId,
@@ -125,6 +144,7 @@ static void APIENTRY debugCallbackWrap(unsigned int theSource,
                                        const void*   theUserParam) {
     ((StGLContext* )theUserParam)->stglDebugCallback(theSource, theType, theId, theSeverity, theLength, theMessage);
 }
+#endif
 
 static const StCString THE_DBGMSG_SOURCE_UNKNOWN = stCString("UNKNOWN");
 static const StCString THE_DBGMSG_SOURCES[] = {
@@ -156,6 +176,7 @@ void StGLContext::stglDebugCallback(unsigned int theSource,
                                     unsigned int theSeverity,
                                     int          /*theLength*/,
                                     const char*  theMessage) {
+#ifdef GL_DEBUG_SOURCE_API_ARB
     const StCString& aSrc = (theSource >= GL_DEBUG_SOURCE_API_ARB
                           && theSource <= GL_DEBUG_SOURCE_OTHER_ARB)
                           ? THE_DBGMSG_SOURCES[theSource - GL_DEBUG_SOURCE_API_ARB]
@@ -179,6 +200,15 @@ void StGLContext::stglDebugCallback(unsigned int theSource,
     //if(!myMsgQueue.isNull()) {
     //    theType == GL_DEBUG_TYPE_ERROR_ARB ? myMsgQueue->pushError(aMsg) : myMsgQueue->pushInfo (aMsg);
     //}
+#else
+    // need GL_KHR_debug
+    StString aMsg = StString("Source:")         + theSource
+                  + StString(" | Type:")        + theType
+                  + StString(" | ID:")          + theId
+                  + StString(" | Severity:")    + theSeverity
+                  + StString(" | Message:\n  ") + theMessage + "\n";
+    StLogger::GetDefault().write(aMsg, StLogger::ST_WARNING);
+#endif
 }
 
 void StGLContext::setMessagesQueue(const StHandle<StMsgQueue>& theQueue) {
@@ -254,8 +284,10 @@ StString StGLContext::stglErrorToString(const GLenum theError) {
         case GL_INVALID_ENUM:      return "GL_INVALID_ENUM";
         case GL_INVALID_VALUE:     return "GL_INVALID_VALUE";
         case GL_INVALID_OPERATION: return "GL_INVALID_OPERATION";
+    #ifdef GL_STACK_OVERFLOW
         case GL_STACK_OVERFLOW:    return "GL_STACK_OVERFLOW";
         case GL_STACK_UNDERFLOW:   return "GL_STACK_UNDERFLOW";
+    #endif
         case GL_OUT_OF_MEMORY:     return "GL_OUT_OF_MEMORY";
         default: {
             return StString("Unknown GL error #") + int(theError);
@@ -275,7 +307,8 @@ void StGLContext::stglReadVersion() {
     myVerMajor = 0;
     myVerMinor = 0;
 
-    // available since OpenGL 3.0
+#ifdef GL_MAJOR_VERSION
+    // available since OpenGL 3.0 and OpenGL 3.0 ES
     glGetIntegerv(GL_MAJOR_VERSION, &myVerMajor);
     glGetIntegerv(GL_MINOR_VERSION, &myVerMinor);
     if(glGetError() == GL_NO_ERROR
@@ -283,9 +316,10 @@ void StGLContext::stglReadVersion() {
         return;
     }
     stglResetErrors();
+#endif
 
     // Read version string.
-    // Notice that only first two numbers splitted by point '2.1 XXXXX' are significant.
+    // Notice that only first two numbers split by point '2.1 XXXXX' are significant.
     // Following trash (after space) is vendor-specific.
     // New drivers also returns micro version of GL like '3.3.0' which has no meaning
     // and should be considered as vendor-specific too.
@@ -294,6 +328,15 @@ void StGLContext::stglReadVersion() {
         // invalid GL context
         return;
     }
+
+//#if defined(GL_ES_VERSION_2_0)
+    // skip "OpenGL ES-** " section
+    for(; *aVerStr != '\0'; ++aVerStr) {
+        if(*aVerStr >= '0' && *aVerStr <= '9') {
+            break;
+        }
+    }
+//#endif
 
     // parse string for major number
     char aMajorStr[32];
@@ -352,6 +395,7 @@ void StGLContext::stglFillBitsFBO(const GLuint theBuffId,
     GLint aBitsRed   = 0;
     GLint aBitsGreen = 0;
     GLint aBitsBlue  = 0;
+#if !defined(GL_ES_VERSION_2_0) || defined(GL_ES_VERSION_3_0)
     arbFbo->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, theBuffId);
     arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,  GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE,     &aBitsRed);
     arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,  GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE,   &aBitsGreen);
@@ -369,6 +413,7 @@ void StGLContext::stglFillBitsFBO(const GLuint theBuffId,
         arbFbo->glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_STENCIL_SIZE, &myFBOBits.Stencil);
     }
     arbFbo->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, myFramebufferDraw);
+#endif
     myFBOBits.RGB = aBitsRed + aBitsGreen + aBitsBlue;
 }
 
@@ -436,6 +481,7 @@ void StGLContext::stglFullInfo(StDictionary& theMap) const {
     }
 #endif
 
+#if !defined(GL_ES_VERSION_2_0)
     if(stglCheckExtension("GL_ATI_meminfo")) {
         GLint aMemInfo[4]; stMemSet(aMemInfo, -1, sizeof(aMemInfo));
         core11fwd->glGetIntegerv(GL_VBO_FREE_MEMORY_ATI, aMemInfo);
@@ -448,6 +494,7 @@ void StGLContext::stglFullInfo(StDictionary& theMap) const {
         theMap.add(StDictEntry("Free GPU memory",
                    StString() + (aDedicatedFree / 1024)  + " MiB (from " + (aDedicated / 1024) + " MiB)"));
     }
+#endif
 }
 
 void StGLContext::stglSyncState() {
@@ -499,12 +546,20 @@ void StGLContext::stglResizeViewport(const StGLBoxPx& theRect) {
 
 void StGLContext::stglBindFramebufferDraw(const GLuint theFramebuffer) {
     myFramebufferDraw = theFramebuffer;
+#if defined(GL_ES_VERSION_2_0)
+    arbFbo->glBindFramebuffer(GL_FRAMEBUFFER,      theFramebuffer);
+#else
     arbFbo->glBindFramebuffer(GL_DRAW_FRAMEBUFFER, theFramebuffer);
+#endif
 }
 
 void StGLContext::stglBindFramebufferRead(const GLuint theFramebuffer) {
     myFramebufferRead = theFramebuffer;
+#if defined(GL_ES_VERSION_2_0)
+    arbFbo->glBindFramebuffer(GL_FRAMEBUFFER,      theFramebuffer);
+#else
     arbFbo->glBindFramebuffer(GL_READ_FRAMEBUFFER, theFramebuffer);
+#endif
 }
 
 void StGLContext::stglBindFramebuffer(const GLuint theFramebuffer) {
@@ -569,6 +624,7 @@ bool StGLContext::stglInit() {
     myMaxTexDim = 2048;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &myMaxTexDim);
 
+#if !defined(GL_ES_VERSION_2_0)
     bool has12 = false;
     bool has13 = false;
     bool has14 = false;
@@ -584,6 +640,7 @@ bool StGLContext::stglInit() {
     bool has42 = false;
     bool has43 = false;
     bool has44 = false;
+#endif
 
     #define STGL_READ_FUNC(theFunc) stglFindProc(#theFunc, myFuncs->theFunc)
 
@@ -629,8 +686,39 @@ bool StGLContext::stglInit() {
     }
     extSwapTear = stglCheckExtension(aGlxExts, "GLX_EXT_swap_control_tear");
 #endif
-    arbNPTW  = stglCheckExtension("GL_ARB_texture_non_power_of_two");
-    arbTexRG = stglCheckExtension("GL_ARB_texture_rg");
+
+#if defined(GL_ES_VERSION_2_0)
+    arbNPTW     = isGlGreaterEqual(3, 0)
+               || stglCheckExtension("GL_OES_texture_npot");
+    hasTexRGBA8 = isGlGreaterEqual(3, 0)
+               || stglCheckExtension("GL_OES_rgb8_rgba8");
+    extTexBGRA8 = stglCheckExtension("GL_EXT_texture_format_BGRA8888");
+    arbTexRG    = isGlGreaterEqual(3, 0)
+               || stglCheckExtension("GL_EXT_texture_rg");
+    const bool hasFBO = isGlGreaterEqual(2, 0)
+                     || stglCheckExtension("GL_OES_framebuffer_object");
+
+    if(isGlGreaterEqual(2, 0)) {
+        // enable compatible functions
+        core20    = (StGLCore20*    )(&(*myFuncs));
+        core20fwd = (StGLCore20Fwd* )(&(*myFuncs));
+    }
+
+    hasHighp = stglCheckExtension("OES_fragment_precision_high");
+    GLint aRange[2] = {0, 0};
+    GLint aPrec [2] = {0, 0};
+    ::glGetShaderPrecisionFormat(GL_FRAGMENT_SHADER, GL_HIGH_FLOAT, aRange, aPrec);
+    if(aPrec[1] != 0) {
+        hasHighp = true;
+    }
+
+    //ST_DEBUG_LOG("glGetString(GL_EXTENSIONS)=\n" + (const char* )glGetString(GL_EXTENSIONS));
+#else
+    hasTexRGBA8 = true;
+    extTexBGRA8 = true;
+    arbNPTW     = stglCheckExtension("GL_ARB_texture_non_power_of_two");
+    arbTexRG    = stglCheckExtension("GL_ARB_texture_rg");
+
     if(stglCheckExtension("GL_ARB_debug_output")) {
         STGL_READ_FUNC(glDebugMessageControlARB);
         STGL_READ_FUNC(glDebugMessageInsertARB);
@@ -1369,6 +1457,8 @@ bool StGLContext::stglInit() {
          && STGL_READ_FUNC(glBindImageTextures)
          && STGL_READ_FUNC(glBindVertexBuffers);
 
+#endif // OpenGL desktop or ES
+
     const StString aGlRenderer((const char* )core11fwd->glGetString(GL_RENDERER));
     if(aGlRenderer.isContains(stCString("GeForce"))) {
         myGpuName = GPU_GEFORCE;
@@ -1415,6 +1505,7 @@ bool StGLContext::stglInit() {
     // log OpenGL info
     ST_DEBUG_LOG("Created new GL context:\n" + stglFullInfo());
 
+#if !defined(GL_ES_VERSION_2_0)
     if(!has12) {
         myVerMajor = 1;
         myVerMinor = 1;
@@ -1522,6 +1613,7 @@ bool StGLContext::stglInit() {
         myVerMinor = 3;
         return true;
     }
+#endif
 
     return true;
 }

@@ -19,6 +19,8 @@
  */
 struct StGLCore11 : public StGLCore11Fwd {
 
+#if !defined(GL_ES_VERSION_2_0)
+
         public: //! @name Begin/End primitive specification (removed since 3.1)
 
     ST_LOCAL inline
@@ -1358,6 +1360,8 @@ struct StGLCore11 : public StGLCore11Fwd {
     void glDisableClientState(GLenum theCap) {
         ::glDisableClientState(theCap);
     }
+
+#endif
 
 };
 

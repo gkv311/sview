@@ -17,6 +17,8 @@
 template<typename theBaseClass_t>
 struct stglTmplCore44 : public theBaseClass_t {
 
+#if !defined(GL_ES_VERSION_2_0)
+
         public: //! @name OpenGL 4.4 additives to 4.3
 
     using theBaseClass_t::glBufferStorage;
@@ -28,6 +30,8 @@ struct stglTmplCore44 : public theBaseClass_t {
     using theBaseClass_t::glBindSamplers;
     using theBaseClass_t::glBindImageTextures;
     using theBaseClass_t::glBindVertexBuffers;
+
+#endif
 
 };
 

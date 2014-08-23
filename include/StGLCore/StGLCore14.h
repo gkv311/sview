@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -20,12 +20,15 @@ struct stglTmplCore14 : public theBaseClass_t {
         public: //! @name OpenGL 1.4 additives to 1.3
 
     using theBaseClass_t::glBlendFuncSeparate;
-    using theBaseClass_t::glMultiDrawArrays;
     using theBaseClass_t::glMultiDrawElements;
+
+#if !defined(GL_ES_VERSION_2_0)
+    using theBaseClass_t::glMultiDrawArrays;
     using theBaseClass_t::glPointParameterf;
     using theBaseClass_t::glPointParameterfv;
     using theBaseClass_t::glPointParameteri;
     using theBaseClass_t::glPointParameteriv;
+#endif
 
 };
 

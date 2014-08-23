@@ -82,16 +82,20 @@ void StTestGlStress::perform() {
     aCtx.stglResizeViewport(aVPort);
     for(int anIter = 0; anIter < 10; ++anIter) {
         aCtx.core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    #if !defined(GL_ES_VERSION_2_0)
         aCtx.core11->glColor3f(1.0f, 0.0f, 0.0f);
+    #endif
         aTexture.bind(aCtx);
         aProgram.use(aCtx);
         aCtx.core20fwd->glUniform1i(uniTexLoc, StGLProgram::TEXTURE_SAMPLE_0);
+    #if !defined(GL_ES_VERSION_2_0)
         aCtx.core11->glBegin(GL_QUADS);
         aCtx.core11->glVertex2f(-1.0f, -1.0f);
         aCtx.core11->glVertex2f(-1.0f,  1.0f);
         aCtx.core11->glVertex2f( 1.0f,  1.0f);
         aCtx.core11->glVertex2f( 1.0f, -1.0f);
         aCtx.core11->glEnd();
+    #endif
         aProgram.unuse(aCtx);
         aTexture.unbind(aCtx);
         aWin->stglSwap();

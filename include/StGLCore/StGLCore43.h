@@ -17,6 +17,8 @@
 template<typename theBaseClass_t>
 struct stglTmplCore43 : public theBaseClass_t {
 
+#if !defined(GL_ES_VERSION_2_0)
+
         public: //! @name OpenGL 4.3 additives to 4.2
 
     using theBaseClass_t::glClearBufferData;
@@ -62,6 +64,8 @@ struct stglTmplCore43 : public theBaseClass_t {
     using theBaseClass_t::glGetObjectLabel;
     using theBaseClass_t::glObjectPtrLabel;
     using theBaseClass_t::glGetObjectPtrLabel;
+
+#endif
 
 };
 

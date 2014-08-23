@@ -18,15 +18,18 @@ struct StGLCore13Fwd : public StGLCore12Fwd {
 
         public: //! @name OpenGL 1.3 additives to 1.2
 
-    using StGLFunctions::glActiveTexture;
-    using StGLFunctions::glSampleCoverage;
+#if !defined(GL_ES_VERSION_2_0)
     using StGLFunctions::glCompressedTexImage3D;
-    using StGLFunctions::glCompressedTexImage2D;
     using StGLFunctions::glCompressedTexImage1D;
     using StGLFunctions::glCompressedTexSubImage3D;
-    using StGLFunctions::glCompressedTexSubImage2D;
     using StGLFunctions::glCompressedTexSubImage1D;
     using StGLFunctions::glGetCompressedTexImage;
+#endif
+
+    using StGLFunctions::glActiveTexture;
+    using StGLFunctions::glSampleCoverage;
+    using StGLFunctions::glCompressedTexImage2D;
+    using StGLFunctions::glCompressedTexSubImage2D;
 
 };
 
@@ -34,6 +37,8 @@ struct StGLCore13Fwd : public StGLCore12Fwd {
  * OpenGL 1.3 core based on 1.2 version.
  */
 struct StGLCore13 : public StGLCore12 {
+
+#if !defined(GL_ES_VERSION_2_0)
 
         public: //! @name OpenGL 1.3 additives to 1.2
 
@@ -90,6 +95,8 @@ struct StGLCore13 : public StGLCore12 {
     using StGLFunctions::glLoadTransposeMatrixd;
     using StGLFunctions::glMultTransposeMatrixf;
     using StGLFunctions::glMultTransposeMatrixd;
+
+#endif
 
 };
 

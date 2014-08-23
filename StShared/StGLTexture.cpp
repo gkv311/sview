@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -16,47 +16,69 @@
 #include <StStrings/StLogger.h>
 #include <stAssert.h>
 
-bool StGLTexture::getInternalFormat(const StImagePlane& theData,
-                                    GLint& theInternalFormat) {
+bool StGLTexture::getInternalFormat(const StGLContext&  theCtx,
+                                    const StImagePlane& theData,
+                                    GLint&              theInternalFormat) {
     switch(theData.getFormat()) {
         case StImagePlane::ImgRGBAF:
         case StImagePlane::ImgBGRAF:
+        #if defined(GL_ES_VERSION_2_0)
+            theInternalFormat = theCtx.hasTexRGBA8 ? GL_RGBA8 : GL_RGBA;
+        #else
             theInternalFormat = GL_RGBA32F;
+        #endif
             return true;
         case StImagePlane::ImgRGBF:
         case StImagePlane::ImgBGRF:
+        #if defined(GL_ES_VERSION_2_0)
+            theInternalFormat = theCtx.hasTexRGBA8 ? GL_RGB8 : GL_RGB;
+        #else
             theInternalFormat = GL_RGB32F;
+        #endif
             return true;
         case StImagePlane::ImgRGBA:
         case StImagePlane::ImgBGRA:
-            theInternalFormat = GL_RGBA8;
+            theInternalFormat = theCtx.hasTexRGBA8 ? GL_RGBA8 : GL_RGBA;
             return true;
         case StImagePlane::ImgRGB:
         case StImagePlane::ImgBGR:
         case StImagePlane::ImgRGB32:
         case StImagePlane::ImgBGR32:
-            theInternalFormat = GL_RGB8;
+            theInternalFormat = theCtx.hasTexRGBA8 ? GL_RGB8 : GL_RGB;
             return true;
         case StImagePlane::ImgGrayF:
+        #if defined(GL_ES_VERSION_2_0)
+            theInternalFormat = GL_ALPHA;
+        #else
             //theInternalFormat = GL_R32F;    // OpenGL3+ hardware
             //theInternalFormat = GL_ALPHA32F_ARB;
             theInternalFormat = GL_ALPHA16; // backward compatibility
+        #endif
             return true;
         case StImagePlane::ImgGray16:
+        #if defined(GL_ES_VERSION_2_0)
+            theInternalFormat = GL_ALPHA;
+        #else
             //theInternalFormat = GL_R16;   // OpenGL3+ hardware
             theInternalFormat = GL_ALPHA16; // backward compatibility
+        #endif
             return true;
         case StImagePlane::ImgGray:
+        #if defined(GL_ES_VERSION_2_0)
+            theInternalFormat = GL_ALPHA;
+        #else
             // this texture format is deprecated with OpenGL3+, use GL_R8 (GL_RED) instead
             //theInternalFormat = GL_R8;   // OpenGL3+ hardware
             theInternalFormat = GL_ALPHA8; // backward compatibility
+        #endif
             return true;
         default:
             return false;
     }
 }
 
-bool StGLTexture::getDataFormat(const StImagePlane& theData,
+bool StGLTexture::getDataFormat(const StGLContext&  theCtx,
+                                const StImagePlane& theData,
                                 GLenum& thePixelFormat,
                                 GLenum& theDataType) {
     thePixelFormat = GL_RGB;
@@ -82,9 +104,13 @@ bool StGLTexture::getDataFormat(const StImagePlane& theData,
             return true;
         }
         case StImagePlane::ImgBGR: {
+        #if defined(GL_ES_VERSION_2_0)
+            return false; // no extension available
+        #else
             thePixelFormat = GL_BGR;
             theDataType = GL_UNSIGNED_BYTE;
             return true;
+        #endif
         }
         case StImagePlane::ImgRGBA:
         case StImagePlane::ImgRGB32: {
@@ -94,7 +120,14 @@ bool StGLTexture::getDataFormat(const StImagePlane& theData,
         }
         case StImagePlane::ImgBGRA:
         case StImagePlane::ImgBGR32: {
+        #if defined(GL_ES_VERSION_2_0)
+            if(!theCtx.extTexBGRA8) {
+                return false;
+            }
+            thePixelFormat = GL_BGRA_EXT;
+        #else
             thePixelFormat = GL_BGRA;
+        #endif
             theDataType = GL_UNSIGNED_BYTE;
             return true;
         }
@@ -110,9 +143,13 @@ bool StGLTexture::getDataFormat(const StImagePlane& theData,
             return true;
         }
         case StImagePlane::ImgBGRF: {
+        #if defined(GL_ES_VERSION_2_0)
+            return false;
+        #else
             thePixelFormat = GL_BGR;
             theDataType = GL_FLOAT;
             return true;
+        #endif
         }
         case StImagePlane::ImgRGBAF: {
             thePixelFormat = GL_RGBA;
@@ -120,26 +157,57 @@ bool StGLTexture::getDataFormat(const StImagePlane& theData,
             return true;
         }
         case StImagePlane::ImgBGRAF: {
+        #if defined(GL_ES_VERSION_2_0)
+            return false;
+        #else
             thePixelFormat = GL_BGRA;
             theDataType = GL_FLOAT;
             return true;
+        #endif
         }
         default: return false;
     }
 }
 
 #if defined(__ST_DEBUG__) && defined(__ST_DEBUG_TEXTURES__)
+
+#ifndef GL_R16
+    #define GL_R16      0x822A
+    #define GL_R16F     0x822D
+    #define GL_R32F     0x822E
+    #define GL_RGB16F   0x881B
+    #define GL_RGBA32F  0x8814
+    #define GL_RGB32F   0x8815
+    #define GL_RGBA16F  0x881A
+    #define GL_RGB16F   0x881B
+    #define GL_RGB4     0x804F
+    #define GL_RGB5     0x8050
+    #define GL_RGB8     0x8051
+    #define GL_RGB10    0x8052
+    #define GL_RGB12    0x8053
+    #define GL_RGB16    0x8054
+    #define GL_RGBA8    0x8058
+    #define GL_RGB10_A2 0x8059
+    #define GL_RGBA12   0x805A
+    #define GL_RGBA16   0x805B
+    //#define GL_ALPHA4   0x803B
+    #define GL_ALPHA8   0x803C
+    #define GL_ALPHA16  0x803E
+#endif
+
 /**
  * Dummy function to display texture internal format.
  */
 static StString formatInternalFormat(const GLint theInternalFormat) {
     switch(theInternalFormat) {
         // RED variations (GL_RED, OpenGL 3.0+)
+        case GL_RED:      return "GL_RED";
         case GL_R8:       return "GL_R8";
         case GL_R16:      return "GL_R16";
         case GL_R16F:     return "GL_R16F"; // half-float
         case GL_R32F:     return "GL_R32F"; // float
         // RGB variations
+        case GL_RGB:      return "GL_RGB";
         case GL_RGB4:     return "GL_RGB4";
         case GL_RGB5:     return "GL_RGB5";
         case GL_RGB8:     return "GL_RGB8";
@@ -149,6 +217,7 @@ static StString formatInternalFormat(const GLint theInternalFormat) {
         case GL_RGB16F:   return "GL_RGB16F"; // half-float
         case GL_RGB32F:   return "GL_RGB32F"; // float
         // RGBA variations
+        case GL_RGBA:     return "GL_RGBA";
         case GL_RGBA8:    return "GL_RGBA8";
         case GL_RGB10_A2: return "GL_RGB10_A2";
         case GL_RGBA12:   return "GL_RGBA12";
@@ -156,13 +225,57 @@ static StString formatInternalFormat(const GLint theInternalFormat) {
         case GL_RGBA16F:  return "GL_RGBA16F"; // half-float
         case GL_RGBA32F:  return "GL_RGBA32F"; // float
         // ALPHA variations (deprecated)
-        case GL_ALPHA8:   return "GL_ALPHA8";
-        case GL_ALPHA16:  return "GL_ALPHA16";
+        case GL_ALPHA:     return "GL_ALPHA";
+        case GL_ALPHA8:    return "GL_ALPHA8";
+        case GL_ALPHA16:   return "GL_ALPHA16";
+        case GL_LUMINANCE: return "GL_LUMINANCE";
         // unknown...
         default:          return StString("GL_? (") + theInternalFormat + ')';
     }
 }
 #endif
+
+static inline GLenum getDataFormat(const GLint theInternalFormat) {
+    switch(theInternalFormat) {
+        // RED variations (GL_RED, OpenGL 3.0+)
+        case GL_RED:
+        case GL_R8:
+        case GL_R16:
+        case GL_R16F:
+        case GL_R32F:
+            return GL_RED;
+        // RGB variations
+        case GL_RGB:
+        case GL_RGB4:
+        case GL_RGB5:
+        case GL_RGB8:
+        case GL_RGB10:
+        case GL_RGB12:
+        case GL_RGB16:
+        case GL_RGB16F:
+        case GL_RGB32F:
+            return GL_RGB;
+        // RGBA variations
+        case GL_RGBA:
+        case GL_RGBA8:
+        case GL_RGB10_A2:
+        case GL_RGBA12:
+        case GL_RGBA16:
+        case GL_RGBA16F:
+        case GL_RGBA32F:
+            return GL_RGBA;
+        // ALPHA variations (deprecated)
+        case GL_ALPHA:
+        case GL_ALPHA8:
+        case GL_ALPHA16:
+            return GL_ALPHA;
+        case GL_LUMINANCE:
+            return GL_LUMINANCE;
+        // unknown...
+        default:
+            return GL_RGBA;
+    }
+}
 
 StGLTexture::StGLTexture()
 : mySizeX(0),
@@ -250,10 +363,14 @@ bool StGLTexture::initBlack(StGLContext&  theCtx,
 bool StGLTexture::initTrash(StGLContext&  theCtx,
                             const GLsizei theTextureSizeX,
                             const GLsizei theTextureSizeY) {
-    return init(theCtx, theTextureSizeX, theTextureSizeY, GL_RGBA, NULL);
+    return init(theCtx, theTextureSizeX, theTextureSizeY, ::getDataFormat(myTextFormat), NULL);
 }
 
 bool StGLTexture::isProxySuccess(StGLContext& theCtx) {
+#if defined(GL_ES_VERSION_2_0)
+    (void )theCtx;
+    return true; // unavailable on OpenGL ES
+#else
     // use proxy to check texture could be created or not
     theCtx.core20fwd->glTexImage2D(GL_PROXY_TEXTURE_2D, 0, myTextFormat,
                                    mySizeX, mySizeY, 0,
@@ -267,11 +384,16 @@ bool StGLTexture::isProxySuccess(StGLContext& theCtx) {
         return false;
     }
     return true;
+#endif
 }
 
 bool StGLTexture::create(StGLContext&   theCtx,
                          const GLenum   theDataFormat,
                          const GLubyte* theData) {
+#if defined(GL_ES_VERSION_2_0)
+    theCtx.stglResetErrors();
+#endif
+
     if(!isValid()) {
         theCtx.core20fwd->glGenTextures(1, &myTextureId); // Create The Texture
     }
@@ -289,7 +411,21 @@ bool StGLTexture::create(StGLContext&   theCtx,
     theCtx.core20fwd->glTexImage2D(GL_TEXTURE_2D, 0, myTextFormat,
                                    mySizeX, mySizeY, 0,
                                    theDataFormat, GL_UNSIGNED_BYTE, theData);
+#if defined(GL_ES_VERSION_2_0)
+    // proxy texture is unavailable - check for errors
+    GLenum anErr = theCtx.core20fwd->glGetError();
+    if(anErr != GL_NO_ERROR) {
+        ST_ERROR_LOG("Creation texture with size (" + mySizeX + " x "+ mySizeY
+                   + " @" + formatInternalFormat(myTextFormat) + " with data " + formatInternalFormat(theDataFormat) + ") FAILED: " + theCtx.stglErrorToString(anErr) + "!");
+        release(theCtx);
+        return false;
+    }
+#ifdef __ST_DEBUG_TEXTURES__
+    ST_DEBUG_LOG("Created StGLTexture " + mySizeX + " x "+ mySizeY
+               + " (format " + formatInternalFormat(myTextFormat) + ')');
+#endif
 
+#else
     // detect which texture was actually created
     GLint aResFormat = 0;
     GLint aResSizeX  = 0;
@@ -300,6 +436,7 @@ bool StGLTexture::create(StGLContext&   theCtx,
 #ifdef __ST_DEBUG_TEXTURES__
     ST_DEBUG_LOG("Created StGLTexture " + aResSizeX + " x "+ aResSizeY
                + " (format " + formatInternalFormat(aResFormat) + ')');
+#endif
 #endif
 
     unbind(theCtx);
@@ -341,7 +478,7 @@ bool StGLTexture::fill(StGLContext&        theCtx,
         return false;
     }
     GLenum aPixelFormat, aDataType;
-    if(!getDataFormat(theData, aPixelFormat, aDataType)) {
+    if(!getDataFormat(theCtx, theData, aPixelFormat, aDataType)) {
         return false;
     }
 
@@ -362,10 +499,20 @@ bool StGLTexture::fill(StGLContext&        theCtx,
     size_t anAligment = stMin(theData.getMaxRowAligment(), size_t(8)); // limit to 8 bytes for OpenGL
     theCtx.core20fwd->glPixelStorei(GL_UNPACK_ALIGNMENT, GLint(anAligment));
 
+    bool toBatchCopy = theData.getSizeX() <= size_t(getSizeX())
+                    && theBatchRows > 1;
+#if defined(GL_ES_VERSION_2_0)
+    if(anExtraBytes >= anAligment) {
+        toBatchCopy = false;
+    }
+#else
     const GLsizei aPixelsWidth = GLsizei(theData.getSizeRowBytes() / theData.getSizePixelBytes());
-    if(theData.getSizeX() <= size_t(getSizeX()) && theBatchRows > 1) {
+#endif
+    if(toBatchCopy) {
+    #if !defined(GL_ES_VERSION_2_0)
         // notice that GL_UNPACK_ROW_LENGTH is not available on OpenGL ES 2.0 without GL_EXT_unpack_subimage extension!
         theCtx.core20fwd->glPixelStorei(GL_UNPACK_ROW_LENGTH, (anExtraBytes >= anAligment) ? aPixelsWidth : 0);
+    #endif
 
         // do batch copy (more effective)
         GLsizei aPatchWidth = GLsizei(theData.getSizeX());
@@ -384,10 +531,14 @@ bool StGLTexture::fill(StGLContext&        theCtx,
                                               theData.getData(aRow, 0));
         }
 
+    #if !defined(GL_ES_VERSION_2_0)
         theCtx.core20fwd->glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    #endif
     } else {
         // copy row by row copy (the image plane greater than texture or batch copy is impossible)
+    #if !defined(GL_ES_VERSION_2_0)
         theCtx.core20fwd->glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    #endif
 
         GLsizei aPatchWidth = stMin(GLsizei(theData.getSizeX()), getSizeX());
         for(GLsizei aRow = theRowFrom; aRow < aRowTo; ++aRow) {

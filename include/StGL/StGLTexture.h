@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -32,14 +32,16 @@ class StGLTexture : public StGLResource {
      * Currently GL_ALPHA is returned for grayscale image data.
      * @return true if internal format was found.
      */
-    ST_CPPEXPORT static bool getInternalFormat(const StImagePlane& theData,
-                                               GLint& theInternalFormat);
+    ST_CPPEXPORT static bool getInternalFormat(const StGLContext&  theCtx,
+                                               const StImagePlane& theData,
+                                               GLint&              theInternalFormat);
 
     /**
      * Function convert StImagePlane format into OpenGL data format.
      * @return true if format supported.
      */
-    ST_CPPEXPORT static bool getDataFormat(const StImagePlane& theData,
+    ST_CPPEXPORT static bool getDataFormat(const StGLContext&  theCtx,
+                                           const StImagePlane& theData,
                                            GLenum& thePixelFormat,
                                            GLenum& theDataType);
 

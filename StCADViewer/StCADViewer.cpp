@@ -711,6 +711,8 @@ void StCADViewer::stglDraw(unsigned int theView) {
             myPrevMouse = aPt;
         }
     }
+
+#if !defined(GL_ES_VERSION_2_0)
     myContext->core11->glMatrixMode(GL_MODELVIEW);
     myContext->core11->glLoadIdentity();
     myContext->core11->glMultMatrixf(aCam);
@@ -803,6 +805,7 @@ void StCADViewer::stglDraw(unsigned int theView) {
             glVertex3fv(aTrihCenter + StGLVec3::DZ() * aLineLen);
         glEnd();
     }
+#endif
 
     // draw GUI
     myContext->core11fwd->glDisable(GL_DEPTH_TEST);

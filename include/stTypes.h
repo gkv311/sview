@@ -204,6 +204,7 @@ typedef signed char   GLbyte;
 typedef unsigned char GLubyte;
 typedef float         GLfloat;
 typedef double        GLdouble;
+typedef double        GLclampd;
 typedef ptrdiff_t     GLintptr;
 typedef ptrdiff_t     GLsizeiptr;
 

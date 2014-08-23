@@ -158,6 +158,9 @@ void StGLProjCamera::setupMatrix() {
 }
 
 void StGLProjCamera::setupFixed(StGLContext& theCtx) {
+#if defined(GL_ES_VERSION_2_0)
+    (void )theCtx;
+#else
     theCtx.core11->glMatrixMode(GL_PROJECTION);
     theCtx.core11->glLoadIdentity();
 
@@ -176,6 +179,7 @@ void StGLProjCamera::setupFixed(StGLContext& theCtx) {
 
     // turn back to model view matrix
     theCtx.core11->glMatrixMode(GL_MODELVIEW);
+#endif
 }
 
 StString StGLProjCamera::toString() const {

@@ -20,6 +20,7 @@
 
 #include <StGL/StGLFunctions.h>
 #include <StGL/StGLContext.h>
+#include <StGLCore/StGLCore11Fwd.h>
 
 #include "StWinHandles.h"
 #include <StThreads/StThread.h>
@@ -67,10 +68,18 @@ StWinGlrc::StWinGlrc(EGLDisplay theDisplay,
         case EGL_OPENVG_API:    ST_DEBUG_LOG("EGL API: OpenNVG\n");   break;
         case EGL_NONE:          ST_DEBUG_LOG("EGL API: NONE\n");      break;
     }*/
+
+#if defined(GL_ES_VERSION_2_0)
+    if(eglBindAPI(EGL_OPENGL_ES_API) != EGL_TRUE) {
+        ST_ERROR_LOG("EGL, EGL_OPENGL_ES_API is unavailable!");
+        return;
+    }
+#else
     if(eglBindAPI(EGL_OPENGL_API) != EGL_TRUE) {
         ST_ERROR_LOG("EGL, EGL_OPENGL_API is unavailable!");
         return;
     }
+#endif
 
     #define ST_EGL_CONTEXT_MAJOR_VERSION_KHR                      0x3098
     #define ST_EGL_CONTEXT_MINOR_VERSION_KHR                      0x30FB
@@ -95,6 +104,9 @@ StWinGlrc::StWinGlrc(EGLDisplay theDisplay,
     if(StGLContext::stglCheckExtension(anEglExts, "EGL_KHR_create_context")) {
         const EGLint anEglCtxAttribs[] = {
             ST_EGL_CONTEXT_FLAGS_KHR, theDebugCtx ? ST_EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR : 0,
+        #if defined(GL_ES_VERSION_2_0)
+            EGL_CONTEXT_CLIENT_VERSION, 2,
+        #endif
             //EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR, ST_EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT_KHR,
             EGL_NONE
         };
@@ -103,11 +115,15 @@ StWinGlrc::StWinGlrc(EGLDisplay theDisplay,
     }
 
     if(myRC == EGL_NO_CONTEXT) {
-        /*EGLint anEglCtxAttribs[] = {
+    #if defined(GL_ES_VERSION_2_0)
+        EGLint anEglCtxAttribs[] = {
             EGL_CONTEXT_CLIENT_VERSION, 2,
             EGL_NONE
-        };*/
-        myRC = eglCreateContext(myDisplay, myConfig, EGL_NO_CONTEXT, NULL);
+        };
+    #else
+        EGLint* anEglCtxAttribs = NULL;
+    #endif
+        myRC = eglCreateContext(myDisplay, myConfig, EGL_NO_CONTEXT, anEglCtxAttribs);
     }
 
     if(myRC == EGL_NO_CONTEXT) {

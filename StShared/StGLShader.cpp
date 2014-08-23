@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -14,6 +14,13 @@
 #include <StFile/StRawFile.h>
 #include <StStrings/StLogger.h>
 #include <stAssert.h>
+
+namespace {
+#ifdef GL_ES_VERSION_2_0
+    static const char THE_FRAG_PREC_HIGH[] = "precision highp float;\n";
+    static const char THE_FRAG_PREC_LOW[]  = "precision mediump float;\n";
+#endif
+}
 
 StString StGLShader::getTypeString() const {
     switch(getType()) {
@@ -59,11 +66,21 @@ bool StGLShader::init(StGLContext& theCtx,
         return false;
     }
 
-    GLsizei aCount = (theSrcLines1 == NULL) ? 1 : ((theSrcLines2 == NULL) ? 2 : 3);
-    const char* aSrcArray[3] = {theSrcLines0, theSrcLines1, theSrcLines2};
-
     myShaderId = theCtx.core20fwd->glCreateShader(getType());
-    theCtx.core20fwd->glShaderSource(myShaderId, aCount, aSrcArray, NULL);
+
+#if defined(GL_ES_VERSION_2_0)
+    if(myShaderType == GL_FRAGMENT_SHADER) {
+        GLsizei     aCount       = (theSrcLines1 == NULL) ? 2 : ((theSrcLines2 == NULL) ? 3 : 4);
+        const char* aSrcArray[4] = {theCtx.hasHighp ? THE_FRAG_PREC_HIGH : THE_FRAG_PREC_LOW, theSrcLines0, theSrcLines1, theSrcLines2};
+        theCtx.core20fwd->glShaderSource(myShaderId, aCount, aSrcArray, NULL);
+    }
+    else
+#endif
+    {
+        GLsizei aCount = (theSrcLines1 == NULL) ? 1 : ((theSrcLines2 == NULL) ? 2 : 3);
+        const char* aSrcArray[3] = {theSrcLines0, theSrcLines1, theSrcLines2};
+        theCtx.core20fwd->glShaderSource(myShaderId, aCount, aSrcArray, NULL);
+    }
 
     // compile shaders
     theCtx.core20fwd->glCompileShader(myShaderId);
@@ -72,11 +89,12 @@ bool StGLShader::init(StGLContext& theCtx,
     if(!isCompiled(theCtx)) {
         theCtx.pushError(StString("Compilation of the ") + getTypeString() + " '" + myTitle
                        + "' failed!\n" + getCompileInfo(theCtx)
-                       /*+ "\n=== Source code ===\n"
+                       + "\n=== Source code ===\n"
+                       //+ (myShaderType == GL_FRAGMENT_SHADER ? (theCtx.hasHighp ? THE_FRAG_PREC_HIGH : THE_FRAG_PREC_LOW) : "")
                        + (theSrcLines0 != NULL ? theSrcLines0 : "")
                        + (theSrcLines1 != NULL ? theSrcLines1 : "")
                        + (theSrcLines2 != NULL ? theSrcLines2 : "")
-                       + "==================="*/
+                       + "==================="
         );
         release(theCtx);
         return false;
@@ -96,6 +114,7 @@ bool StGLShader::initFile(StGLContext&    theCtx,
         theCtx.pushError(StString("Shader file '") + theFileName + "' is not found!");
         return false;
     }
+
     return init(theCtx, (const char* )aTextFile.getBuffer());
 }
 

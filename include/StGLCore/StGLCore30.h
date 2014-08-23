@@ -20,6 +20,8 @@
 template<typename theBaseClass_t>
 struct stglTmplCore30 : public theBaseClass_t {
 
+#if !defined(GL_ES_VERSION_2_0)
+
         public: //! @name GL_ARB_framebuffer_object (added to OpenGL 3.0 core)
 
     using theBaseClass_t::glIsRenderbuffer;
@@ -115,6 +117,8 @@ struct stglTmplCore30 : public theBaseClass_t {
     using theBaseClass_t::glClearBufferfv;
     using theBaseClass_t::glClearBufferfi;
     using theBaseClass_t::glGetStringi;
+
+#endif
 
 };
 

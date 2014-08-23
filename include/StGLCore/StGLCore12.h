@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -21,10 +21,13 @@ struct stglTmplCore12 : public theBaseClass_t {
 
     using theBaseClass_t::glBlendColor;
     using theBaseClass_t::glBlendEquation;
+
+#if !defined(GL_ES_VERSION_2_0)
     using theBaseClass_t::glDrawRangeElements;
     using theBaseClass_t::glTexImage3D;
     using theBaseClass_t::glTexSubImage3D;
     using theBaseClass_t::glCopyTexSubImage3D;
+#endif
 
 };
 

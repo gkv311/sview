@@ -212,11 +212,13 @@ void StOutPageFlipExt::stglDrawExtra(unsigned int theView,
         myContext->core20fwd->glViewport(0, 0, myVpSizeX, myVpSizeY); // always update slave window Viewport
 
         if(StOutPageFlip::params.QuadBuffer->getValue() == QUADBUFFER_HARD_OPENGL) {
+        #if !defined(GL_ES_VERSION_2_0)
             if(!StWindow::isStereoOutput()) {
                 myContext->core20fwd->glDrawBuffer(GL_BACK);
             } else {
                 myContext->core20fwd->glDrawBuffer(theView == ST_DRAW_LEFT ? GL_BACK_LEFT : GL_BACK_RIGHT);
             }
+        #endif
         }
         myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT);  // clear the screen
     }

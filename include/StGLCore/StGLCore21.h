@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -19,12 +19,14 @@ struct stglTmplCore21 : public theBaseClass_t {
 
         public: //! @name OpenGL 2.1 additives to 2.0
 
+#if defined(GL_ES_VERSION_2_0) && !defined(GL_ES_VERSION_3_0)
     using theBaseClass_t::glUniformMatrix2x3fv;
     using theBaseClass_t::glUniformMatrix3x2fv;
     using theBaseClass_t::glUniformMatrix2x4fv;
     using theBaseClass_t::glUniformMatrix4x2fv;
     using theBaseClass_t::glUniformMatrix3x4fv;
     using theBaseClass_t::glUniformMatrix4x3fv;
+#endif
 
 };
 

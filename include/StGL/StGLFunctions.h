@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -8,6 +8,10 @@
 
 #ifndef __StGLFunctions_h_
 #define __StGLFunctions_h_
+
+#ifdef ST_HAVE_STCONFIG
+    #include <stconfig.conf>
+#endif
 
 // required for correct APIENTRY definition
 #if(defined(_WIN32) && !defined(APIENTRY) && !defined(__CYGWIN__) && !defined(__SCITECH_SNAP__))
@@ -34,8 +38,20 @@
 #endif
 
 // include main OpenGL header provided with system
-#if(defined(__APPLE__))
+#if defined(__APPLE__)
     #include <OpenGL/gl.h>
+#elif defined(ST_HAVE_GLES2) || defined(__ANDROID__)
+    #include <GLES2/gl2.h>
+    ///#include <GLES3/gl3.h>
+
+    // in core since OpenGL ES 3.0, extension GL_EXT_texture_rg
+    #define GL_RED   0x1903
+    #define GL_R8    0x8229
+    // in core since OpenGL ES 3.0, extension GL_OES_rgb8_rgba8
+    #define GL_RGB8  0x8051
+    #define GL_RGBA8 0x8058
+    // GL_EXT_texture_format_BGRA8888
+    #define GL_BGRA_EXT 0x80E1 // same as GL_BGRA on desktop
 #else
     #include <GL/gl.h>
 #endif
@@ -44,24 +60,26 @@
     #undef __glext_h_
 #endif
 
-// GL version can be defined by system gl.h header
-#undef GL_VERSION_1_2
-#undef GL_VERSION_1_3
-#undef GL_VERSION_1_4
-#undef GL_VERSION_1_5
-#undef GL_VERSION_2_0
-#undef GL_VERSION_2_1
-#undef GL_VERSION_3_0
-#undef GL_VERSION_3_1
-#undef GL_VERSION_3_2
-#undef GL_VERSION_3_3
-#undef GL_VERSION_4_0
-#undef GL_VERSION_4_1
-#undef GL_VERSION_4_2
-#undef GL_VERSION_4_3
-#undef GL_VERSION_4_4
+#ifndef GL_ES_VERSION_2_0
+    // GL version can be defined by system gl.h header
+    #undef GL_VERSION_1_2
+    #undef GL_VERSION_1_3
+    #undef GL_VERSION_1_4
+    #undef GL_VERSION_1_5
+    #undef GL_VERSION_2_0
+    #undef GL_VERSION_2_1
+    #undef GL_VERSION_3_0
+    #undef GL_VERSION_3_1
+    #undef GL_VERSION_3_2
+    #undef GL_VERSION_3_3
+    #undef GL_VERSION_4_0
+    #undef GL_VERSION_4_1
+    #undef GL_VERSION_4_2
+    #undef GL_VERSION_4_3
+    #undef GL_VERSION_4_4
 
-#include <StGL/StGLExt.h>
+    #include <StGL/StGLExt.h>
+#endif
 
 #include <stTypes.h>
 
@@ -69,6 +87,525 @@
  * Mega structure defines the list of ALL OpenGL functions!
  */
 struct StGLFunctions {
+
+#if defined(GL_ES_VERSION_2_0)
+
+        public: //! @name OpenGL ES 1.1
+
+    ST_LOCAL inline
+    void glActiveTexture(GLenum texture) {
+        ::glActiveTexture(texture);
+    }
+
+    ST_LOCAL inline
+    void glCompressedTexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data) {
+        ::glCompressedTexImage2D(target, level, internalformat, width, height, border, imageSize, data);
+    }
+
+    ST_LOCAL inline
+    void glCompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid *data) {
+        ::glCompressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, imageSize, data);
+    }
+
+        public: //! @name OpenGL ES 2.0
+
+    ST_LOCAL inline
+    void glBlendColor(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) {
+        ::glBlendColor(red, green, blue, alpha);
+    }
+
+    ST_LOCAL inline
+    void glBlendEquation(GLenum mode) {
+        ::glBlendEquation(mode);
+    }
+
+    ST_LOCAL inline
+    void glBlendFuncSeparate(GLenum sfactorRGB, GLenum dfactorRGB, GLenum sfactorAlpha, GLenum dfactorAlpha) {
+        ::glBlendFuncSeparate(sfactorRGB, dfactorRGB, sfactorAlpha, dfactorAlpha);
+    }
+
+    ST_LOCAL inline
+    void glBlendEquationSeparate(GLenum modeRGB, GLenum modeAlpha) {
+        ::glBlendEquationSeparate(modeRGB, modeAlpha);
+    }
+
+    ST_LOCAL inline
+    void glStencilOpSeparate(GLenum face, GLenum sfail, GLenum dpfail, GLenum dppass) {
+        ::glStencilOpSeparate(face, sfail, dpfail, dppass);
+    }
+
+    ST_LOCAL inline
+    void glStencilFuncSeparate(GLenum face, GLenum func, GLint ref, GLuint mask) {
+        ::glStencilFuncSeparate(face, func, ref, mask);
+    }
+
+    ST_LOCAL inline
+    void glStencilMaskSeparate(GLenum face, GLuint mask) {
+        ::glStencilMaskSeparate(face, mask);
+    }
+
+    ST_LOCAL inline
+    void glAttachShader(GLuint program, GLuint shader) {
+        ::glAttachShader(program, shader);
+    }
+
+    ST_LOCAL inline
+    void glBindAttribLocation(GLuint program, GLuint index, const GLchar *name) {
+        ::glBindAttribLocation(program, index, name);
+    }
+
+    ST_LOCAL inline
+    void glBindBuffer(GLenum target, GLuint buffer) {
+        ::glBindBuffer(target, buffer);
+    }
+
+    ST_LOCAL inline
+    void glBindFramebuffer(GLenum target, GLuint framebuffer) {
+        ::glBindFramebuffer(target, framebuffer);
+    }
+
+    ST_LOCAL inline
+    void glBindRenderbuffer(GLenum target, GLuint renderbuffer) {
+        ::glBindRenderbuffer(target, renderbuffer);
+    }
+
+    ST_LOCAL inline
+    void glBufferData(GLenum target, GLsizeiptr size, const void* data, GLenum usage) {
+        ::glBufferData(target, size, data, usage);
+    }
+
+    ST_LOCAL inline
+    void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const void* data) {
+        ::glBufferSubData(target, offset, size, data);
+    }
+
+    ST_LOCAL inline
+    GLenum glCheckFramebufferStatus(GLenum target) {
+        return ::glCheckFramebufferStatus(target);
+    }
+
+    ST_LOCAL inline
+    void glCompileShader(GLuint shader) {
+        ::glCompileShader(shader);
+    }
+
+    ST_LOCAL inline
+    GLuint glCreateProgram() {
+        return ::glCreateProgram();
+    }
+
+    ST_LOCAL inline
+    GLuint glCreateShader(GLenum type) {
+        return ::glCreateShader(type);
+    }
+
+    ST_LOCAL inline
+    void glDeleteBuffers(GLsizei n, const GLuint *buffers) {
+        ::glDeleteBuffers(n, buffers);
+    }
+
+    ST_LOCAL inline
+    void glDeleteFramebuffers(GLsizei n, const GLuint *framebuffers) {
+        ::glDeleteFramebuffers(n, framebuffers);
+    }
+
+    ST_LOCAL inline
+    void glDeleteProgram(GLuint program) {
+        ::glDeleteProgram(program);
+    }
+
+    ST_LOCAL inline
+    void glDeleteRenderbuffers(GLsizei n, const GLuint *renderbuffers) {
+        ::glDeleteRenderbuffers(n, renderbuffers);
+    }
+
+    ST_LOCAL inline
+    void glDeleteShader(GLuint shader) {
+        ::glDeleteShader(shader);
+    }
+
+    ST_LOCAL inline
+    void glDeleteTextures(GLsizei n, const GLuint *textures) {
+        ::glDeleteTextures(n, textures);
+    }
+
+    ST_LOCAL inline
+    void glDepthFunc(GLenum func) {
+        ::glDepthFunc(func);
+    }
+
+    ST_LOCAL inline
+    void glDepthMask(GLboolean flag) {
+        ::glDepthMask(flag);
+    }
+
+    ST_LOCAL inline
+    void glDepthRangef(GLfloat n, GLfloat f) {
+        ::glDepthRangef(n, f);
+    }
+
+    ST_LOCAL inline
+    void glDetachShader(GLuint program, GLuint shader) {
+        ::glDetachShader(program, shader);
+    }
+
+    ST_LOCAL inline
+    void glDisableVertexAttribArray(GLuint index) {
+        ::glDisableVertexAttribArray(index);
+    }
+
+    ST_LOCAL inline
+    void glEnableVertexAttribArray(GLuint index) {
+        ::glEnableVertexAttribArray(index);
+    }
+
+    ST_LOCAL inline
+    void glFramebufferRenderbuffer(GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer) {
+        ::glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer);
+    }
+
+    ST_LOCAL inline
+    void glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level) {
+        ::glFramebufferTexture2D(target, attachment, textarget, texture, level);
+    }
+
+    ST_LOCAL inline
+    void glGenBuffers(GLsizei n, GLuint *buffers) {
+        ::glGenBuffers(n, buffers);
+    }
+
+    ST_LOCAL inline
+    void glGenerateMipmap(GLenum target) {
+        ::glGenerateMipmap(target);
+    }
+
+    ST_LOCAL inline
+    void glGenFramebuffers(GLsizei n, GLuint *framebuffers) {
+        ::glGenFramebuffers(n, framebuffers);
+    }
+
+    ST_LOCAL inline
+    void glGenRenderbuffers(GLsizei n, GLuint *renderbuffers) {
+        ::glGenRenderbuffers(n, renderbuffers);
+    }
+
+    ST_LOCAL inline
+    void glGenTextures(GLsizei n, GLuint *textures) {
+        ::glGenTextures(n, textures);
+    }
+
+    ST_LOCAL inline
+    void glGetActiveAttrib(GLuint program, GLuint index, GLsizei bufSize, GLsizei *length, GLint* size, GLenum *type, GLchar *name) {
+        ::glGetActiveAttrib(program, index, bufSize, length, size, type, name);
+    }
+
+    ST_LOCAL inline
+    void glGetActiveUniform(GLuint program, GLuint index, GLsizei bufSize, GLsizei *length, GLint* size, GLenum *type, GLchar *name) {
+        ::glGetActiveUniform(program, index, bufSize, length, size, type, name);
+    }
+
+    ST_LOCAL inline
+    void glGetAttachedShaders(GLuint program, GLsizei maxCount, GLsizei *count, GLuint *shaders) {
+        ::glGetAttachedShaders(program, maxCount, count, shaders);
+    }
+
+    ST_LOCAL inline
+    GLint glGetAttribLocation(GLuint program, const GLchar *name) {
+        return ::glGetAttribLocation(program, name);
+    }
+
+    ST_LOCAL inline
+    void glGetBufferParameteriv(GLenum target, GLenum pname, GLint* params) {
+        ::glGetBufferParameteriv(target, pname, params);
+    }
+
+    ST_LOCAL inline
+    void glGetFramebufferAttachmentParameteriv(GLenum target, GLenum attachment, GLenum pname, GLint* params) {
+        ::glGetFramebufferAttachmentParameteriv(target, attachment, pname, params);
+    }
+
+    ST_LOCAL inline
+    void glGetProgramiv(GLuint program, GLenum pname, GLint* params) {
+        ::glGetProgramiv(program, pname, params);
+    }
+
+    ST_LOCAL inline
+    void glGetProgramInfoLog(GLuint program, GLsizei bufSize, GLsizei *length, GLchar *infoLog) {
+        ::glGetProgramInfoLog(program, bufSize, length, infoLog);
+    }
+
+    ST_LOCAL inline
+    void glGetRenderbufferParameteriv(GLenum target, GLenum pname, GLint* params) {
+        ::glGetRenderbufferParameteriv(target, pname, params);
+    }
+
+    ST_LOCAL inline
+    void glGetShaderiv(GLuint shader, GLenum pname, GLint* params) {
+        ::glGetShaderiv(shader, pname, params);
+    }
+
+    ST_LOCAL inline
+    void glGetShaderInfoLog(GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *infoLog) {
+        ::glGetShaderInfoLog(shader, bufSize, length, infoLog);
+    }
+
+    ST_LOCAL inline
+    void glGetShaderPrecisionFormat(GLenum shadertype, GLenum precisiontype, GLint* range, GLint* precision) {
+        ::glGetShaderPrecisionFormat(shadertype, precisiontype, range, precision);
+    }
+
+    ST_LOCAL inline
+    void glGetShaderSource(GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *source) {
+        ::glGetShaderSource(shader, bufSize, length, source);
+    }
+
+    ST_LOCAL inline
+    void glGetUniformfv(GLuint program, GLint location, GLfloat* params) {
+        ::glGetUniformfv(program, location, params);
+    }
+
+    ST_LOCAL inline
+    void glGetUniformiv(GLuint program, GLint location, GLint* params) {
+        ::glGetUniformiv(program, location, params);
+    }
+
+    GLint glGetUniformLocation(GLuint program, const GLchar *name) {
+        return ::glGetUniformLocation(program, name);
+    }
+
+    ST_LOCAL inline
+    void glGetVertexAttribfv(GLuint index, GLenum pname, GLfloat* params) {
+        ::glGetVertexAttribfv(index, pname, params);
+    }
+
+    ST_LOCAL inline
+    void glGetVertexAttribiv(GLuint index, GLenum pname, GLint* params) {
+        ::glGetVertexAttribiv(index, pname, params);
+    }
+
+    ST_LOCAL inline
+    void glGetVertexAttribPointerv(GLuint index, GLenum pname, void* *pointer) {
+        ::glGetVertexAttribPointerv(index, pname, pointer);
+    }
+
+    ST_LOCAL inline
+    GLboolean glIsBuffer(GLuint buffer) {
+        return ::glIsBuffer(buffer);
+    }
+
+    ST_LOCAL inline
+    GLboolean glIsFramebuffer(GLuint framebuffer) {
+        return ::glIsFramebuffer(framebuffer);
+    }
+
+    ST_LOCAL inline
+    GLboolean glIsProgram(GLuint program) {
+        return ::glIsProgram(program);
+    }
+
+    ST_LOCAL inline
+    GLboolean glIsRenderbuffer(GLuint renderbuffer) {
+        return ::glIsRenderbuffer(renderbuffer);
+    }
+
+    ST_LOCAL inline
+    GLboolean glIsShader(GLuint shader) {
+        return ::glIsShader(shader);
+    }
+
+    ST_LOCAL inline
+    void glLinkProgram(GLuint program) {
+        ::glLinkProgram(program);
+    }
+
+    ST_LOCAL inline
+    void glReleaseShaderCompiler() {
+        ::glReleaseShaderCompiler();
+    }
+
+    ST_LOCAL inline
+    void glRenderbufferStorage(GLenum target, GLenum internalformat, GLsizei width, GLsizei height) {
+        ::glRenderbufferStorage(target, internalformat, width, height);
+    }
+
+    ST_LOCAL inline
+    void glSampleCoverage(GLfloat value, GLboolean invert) {
+        ::glSampleCoverage(value, invert);
+    }
+
+    ST_LOCAL inline
+    void glShaderBinary(GLsizei count, const GLuint *shaders, GLenum binaryformat, const void* binary, GLsizei length) {
+        ::glShaderBinary(count, shaders, binaryformat, binary, length);
+    }
+
+    ST_LOCAL inline
+    void glShaderSource(GLuint shader, GLsizei count, const GLchar *const*string, const GLint* length) {
+        ::glShaderSource(shader, count, string, length);
+    }
+
+    ST_LOCAL inline
+    void glUniform1f(GLint location, GLfloat v0) {
+        ::glUniform1f(location, v0);
+    }
+
+    ST_LOCAL inline
+    void glUniform1fv(GLint location, GLsizei count, const GLfloat* value) {
+        ::glUniform1fv(location, count, value);
+    }
+
+    ST_LOCAL inline
+    void glUniform1i(GLint location, GLint v0) {
+        ::glUniform1i(location, v0);
+    }
+
+    ST_LOCAL inline
+    void glUniform1iv(GLint location, GLsizei count, const GLint* value) {
+        ::glUniform1iv(location, count, value);
+    }
+
+    ST_LOCAL inline
+    void glUniform2f(GLint location, GLfloat v0, GLfloat v1) {
+        ::glUniform2f(location, v0, v1);
+    }
+
+    ST_LOCAL inline
+    void glUniform2fv(GLint location, GLsizei count, const GLfloat* value) {
+        ::glUniform2fv(location, count, value);
+    }
+
+    ST_LOCAL inline
+    void glUniform2i(GLint location, GLint v0, GLint v1) {
+        ::glUniform2i(location, v0, v1);
+    }
+
+    ST_LOCAL inline
+    void glUniform2iv(GLint location, GLsizei count, const GLint* value) {
+        ::glUniform2iv(location, count, value);
+    }
+
+    ST_LOCAL inline
+    void glUniform3f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2) {
+        ::glUniform3f(location, v0, v1, v2);
+    }
+
+    ST_LOCAL inline
+    void glUniform3fv(GLint location, GLsizei count, const GLfloat* value) {
+        ::glUniform3fv(location, count, value);
+    }
+
+    ST_LOCAL inline
+    void glUniform3i(GLint location, GLint v0, GLint v1, GLint v2) {
+        ::glUniform3i(location, v0, v1, v2);
+    }
+
+    ST_LOCAL inline
+    void glUniform3iv(GLint location, GLsizei count, const GLint* value) {
+        ::glUniform3iv(location, count, value);
+    }
+
+    ST_LOCAL inline
+    void glUniform4f(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3) {
+        ::glUniform4f(location, v0, v1, v2, v3);
+    }
+
+    ST_LOCAL inline
+    void glUniform4fv(GLint location, GLsizei count, const GLfloat* value) {
+        ::glUniform4fv(location, count, value);
+    }
+
+    ST_LOCAL inline
+    void glUniform4i(GLint location, GLint v0, GLint v1, GLint v2, GLint v3) {
+        ::glUniform4i(location, v0, v1, v2, v3);
+    }
+
+    ST_LOCAL inline
+    void glUniform4iv(GLint location, GLsizei count, const GLint* value) {
+        ::glUniform4iv(location, count, value);
+    }
+
+    ST_LOCAL inline
+    void glUniformMatrix2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value) {
+        ::glUniformMatrix2fv(location, count, transpose, value);
+    }
+
+    ST_LOCAL inline
+    void glUniformMatrix3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value) {
+        ::glUniformMatrix3fv(location, count, transpose, value);
+    }
+
+    ST_LOCAL inline
+    void glUniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value) {
+        ::glUniformMatrix4fv(location, count, transpose, value);
+    }
+
+    ST_LOCAL inline
+    void glUseProgram(GLuint program) {
+        ::glUseProgram(program);
+    }
+
+    ST_LOCAL inline
+    void glValidateProgram(GLuint program) {
+        ::glValidateProgram(program);
+    }
+
+    ST_LOCAL inline
+    void glVertexAttrib1f(GLuint index, GLfloat x) {
+        ::glVertexAttrib1f(index, x);
+    }
+
+    ST_LOCAL inline
+    void glVertexAttrib1fv(GLuint index, const GLfloat* v) {
+        ::glVertexAttrib1fv(index, v);
+    }
+
+    ST_LOCAL inline
+    void glVertexAttrib2f(GLuint index, GLfloat x, GLfloat y) {
+        ::glVertexAttrib2f(index, x, y);
+    }
+
+    ST_LOCAL inline
+    void glVertexAttrib2fv(GLuint index, const GLfloat* v) {
+        ::glVertexAttrib2fv(index, v);
+    }
+
+    ST_LOCAL inline
+    void glVertexAttrib3f(GLuint index, GLfloat x, GLfloat y, GLfloat z) {
+        ::glVertexAttrib3f(index, x, y, z);
+    }
+
+    ST_LOCAL inline
+    void glVertexAttrib3fv(GLuint index, const GLfloat* v) {
+        ::glVertexAttrib3fv(index, v);
+    }
+
+    ST_LOCAL inline
+    void glVertexAttrib4f(GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w) {
+        ::glVertexAttrib4f(index, x, y, z, w);
+    }
+
+    ST_LOCAL inline
+    void glVertexAttrib4fv(GLuint index, const GLfloat* v) {
+        ::glVertexAttrib4fv(index, v);
+    }
+
+    ST_LOCAL inline
+    void glVertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer) {
+        ::glVertexAttribPointer(index, size, type, normalized, stride, pointer);
+    }
+
+    ST_LOCAL inline
+    void glMultiDrawElements(GLenum theMode, const GLsizei* theCount, GLenum theType, const void* const* theIndices, GLsizei theDrawCount) {
+        if(theCount   == NULL
+        || theIndices == NULL) {
+            return;
+        }
+
+        for(GLsizei aBatchIter = 0; aBatchIter < theDrawCount; ++aBatchIter) {
+            ::glDrawElements(theMode, theCount[aBatchIter], theType, theIndices[aBatchIter]);
+        }
+    }
+
+#else
 
         public: //! @name OpenGL 1.2
 
@@ -927,6 +1464,8 @@ struct StGLFunctions {
     typedef int         (*glXSwapIntervalSGI_t)(int theInterval);
     glXSwapIntervalSGI_t glXSwapIntervalSGI;
 #endif
+
+#endif // OpenGL desktop or ES
 
 };
 

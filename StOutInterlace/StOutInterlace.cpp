@@ -649,6 +649,8 @@ void StOutInterlace::stglDrawEDCodes() {
             myContext->core20fwd->glUniform1i(myVpSizeYOffLoc, myVpSizeY);
         }
     }
+
+#if !defined(GL_ES_VERSION_2_0)
     // TODO (Kirill Gavrilov#5) use vertex buffer
     myContext->core11->glBegin(GL_QUADS);
         myContext->core11->glVertex2f(-1.0f, -1.0f);
@@ -656,6 +658,7 @@ void StOutInterlace::stglDrawEDCodes() {
         myContext->core11->glVertex2f( 1.0f,  1.0f);
         myContext->core11->glVertex2f(-1.0f,  1.0f);
     myContext->core11->glEnd();
+#endif
     myEDIntelaceOn->unuse(*myContext); // this is global unuse
     myContext->core20fwd->glDisable(GL_BLEND);
     if(!StWindow::isFullScreen()) {

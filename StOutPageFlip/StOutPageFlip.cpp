@@ -802,7 +802,9 @@ bool StOutPageFlip::create() {
             break; // VSync always on
         case QUADBUFFER_HARD_OPENGL: {
             GLboolean isStereoOn = GL_FALSE;
+        #if !defined(GL_ES_VERSION_2_0)
             myContext->core20fwd->glGetBooleanv(GL_STEREO, &isStereoOn);
+        #endif
             if(!isStereoOn) {
                 myMsgQueue->pushError(myLangMap.changeValueId(STTR_NO_GL_QUADBUFFER,
                                                               "OpenGL Hardware QuadBuffer is unavailable!"));
@@ -931,6 +933,7 @@ void StOutPageFlip::stglDrawWarning() {
         return;
     }
 
+#if !defined(GL_ES_VERSION_2_0)
     myContext->core20fwd->glDisable(GL_DEPTH_TEST);
     myContext->core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     myContext->core20fwd->glEnable(GL_BLEND);
@@ -974,6 +977,7 @@ void StOutPageFlip::stglDrawWarning() {
     myWarning->unbind(*myContext);
     myContext->core11->glDisable(GL_TEXTURE_2D);
     myContext->core20fwd->glDisable(GL_BLEND);
+#endif
 }
 
 void StOutPageFlip::stglDraw() {
@@ -1002,7 +1006,9 @@ void StOutPageFlip::stglDraw() {
 
         // setup whole back buffer (left+right) for hardware GL Quad Buffer
         if(params.QuadBuffer->getValue() == QUADBUFFER_HARD_OPENGL) {
+        #if !defined(GL_ES_VERSION_2_0)
             myContext->core20fwd->glDrawBuffer(GL_BACK);
+        #endif
         }
 
         // draw new MONO frame
@@ -1033,18 +1039,23 @@ void StOutPageFlip::stglDraw() {
             // Also we requires fullscreen for RadeOn cards on Windows 7.
             myContext->stglResetErrors(); // reset errors stack
             GLboolean isStereoOn = GL_FALSE;
+        #if !defined(GL_ES_VERSION_2_0)
             myContext->core20fwd->glGetBooleanv(GL_STEREO, &isStereoOn);
             if(isStereoOn) {
                 myContext->core20fwd->glDrawBuffer(GL_BACK_RIGHT);
                 isStereoOn = (myContext->core20fwd->glGetError() == GL_NO_ERROR);
             }
+        #endif
 
             if(!isStereoOn) {
+            #if !defined(GL_ES_VERSION_2_0)
                 myContext->core20fwd->glDrawBuffer(GL_BACK);
+            #endif
                 StWindow::signals.onRedraw(ST_DRAW_RIGHT);
                 StWindow::signals.onRedraw(ST_DRAW_LEFT);
                 stglDrawWarning();
             } else {
+            #if !defined(GL_ES_VERSION_2_0)
                 myContext->core20fwd->glDrawBuffer(GL_BACK_LEFT);
                 StWindow::signals.onRedraw(ST_DRAW_LEFT);
                 stglDrawExtra(ST_DRAW_LEFT, StGLDeviceControl::OUT_STEREO);
@@ -1053,6 +1064,7 @@ void StOutPageFlip::stglDraw() {
                 myContext->core20fwd->glDrawBuffer(GL_BACK_RIGHT);
                 StWindow::signals.onRedraw(ST_DRAW_RIGHT);
                 stglDrawExtra(ST_DRAW_RIGHT, StGLDeviceControl::OUT_STEREO);
+            #endif
             }
             StThread::sleep(1);
             StWindow::stglSwap(ST_WIN_MASTER);

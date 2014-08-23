@@ -44,7 +44,11 @@ bool StGLStereoFrameBuffer::StGLStereoProgram::link(StGLContext& theCtx) {
 }
 
 StGLStereoFrameBuffer::StGLStereoFrameBuffer()
+#if defined(GL_ES_VERSION_2_0)
+: StGLStereoTexture(GL_RGBA),
+#else
 : StGLStereoTexture(GL_RGBA8),
+#endif
   myVerticesBuf(),
   myTexCoordBuf(),
   myViewPortX(0),

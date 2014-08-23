@@ -13,7 +13,11 @@
 #include <stAssert.h>
 
 StGLFrameTexture::StGLFrameTexture()
+#if defined(GL_ES_VERSION_2_0)
+: StGLTexture(GL_RGB),
+#else
 : StGLTexture(GL_RGB8),
+#endif
   myDataSize(1.0f, 1.0f),
   myDisplayRatio(1.0f) {
     //

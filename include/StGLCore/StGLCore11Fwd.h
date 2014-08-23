@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -22,11 +22,6 @@ struct StGLCore11Fwd : protected StGLFunctions {
         public: //! @name Miscellaneous
 
     ST_LOCAL inline
-    void glClearIndex(GLfloat c) {
-        ::glClearIndex(c);
-    }
-
-    ST_LOCAL inline
     void glClearColor(GLclampf theRed, GLclampf theGreen, GLclampf theBlue, GLclampf theAlpha) {
         ::glClearColor(theRed, theGreen, theBlue, theAlpha);
     }
@@ -37,28 +32,13 @@ struct StGLCore11Fwd : protected StGLFunctions {
     }
 
     ST_LOCAL inline
-    void glIndexMask(GLuint theMask) {
-        ::glIndexMask(theMask);
-    }
-
-    ST_LOCAL inline
     void glColorMask(GLboolean theRed, GLboolean theGreen, GLboolean theBlue, GLboolean theAlpha) {
         ::glColorMask(theRed, theGreen, theBlue, theAlpha);
     }
 
     ST_LOCAL inline
-    void glAlphaFunc(GLenum theFunc, GLclampf theRef) {
-        ::glAlphaFunc(theFunc, theRef);
-    }
-
-    ST_LOCAL inline
     void glBlendFunc(GLenum sfactor, GLenum dfactor) {
         ::glBlendFunc(sfactor, dfactor);
-    }
-
-    ST_LOCAL inline
-    void glLogicOp(GLenum opcode) {
-        ::glLogicOp(opcode);
     }
 
     ST_LOCAL inline
@@ -72,18 +52,8 @@ struct StGLCore11Fwd : protected StGLFunctions {
     }
 
     ST_LOCAL inline
-    void glPointSize(GLfloat theSize) {
-        ::glPointSize(theSize);
-    }
-
-    ST_LOCAL inline
     void glLineWidth(GLfloat theWidth) {
         ::glLineWidth(theWidth);
-    }
-
-    ST_LOCAL inline
-    void glPolygonMode(GLenum theFace, GLenum theMode) {
-        ::glPolygonMode(theFace, theMode);
     }
 
     ST_LOCAL inline
@@ -94,16 +64,6 @@ struct StGLCore11Fwd : protected StGLFunctions {
     ST_LOCAL inline
     void glScissor(GLint theX, GLint theY, GLsizei theWidth, GLsizei theHeight) {
         ::glScissor(theX, theY, theWidth, theHeight);
-    }
-
-    ST_LOCAL inline
-    void glDrawBuffer(GLenum theMode) {
-        ::glDrawBuffer(theMode);
-    }
-
-    ST_LOCAL inline
-    void glReadBuffer(GLenum theMode) {
-        ::glReadBuffer(theMode);
     }
 
     ST_LOCAL inline
@@ -127,11 +87,6 @@ struct StGLCore11Fwd : protected StGLFunctions {
     }
 
     ST_LOCAL inline
-    void glGetDoublev(GLenum theParamName, GLdouble* theValues) {
-        ::glGetDoublev(theParamName, theValues);
-    }
-
-    ST_LOCAL inline
     void glGetFloatv(GLenum theParamName, GLfloat* theValues) {
         ::glGetFloatv(theParamName, theValues);
     }
@@ -139,11 +94,6 @@ struct StGLCore11Fwd : protected StGLFunctions {
     ST_LOCAL inline
     void glGetIntegerv(GLenum theParamName, GLint* theValues) {
         ::glGetIntegerv(theParamName, theValues);
-    }
-
-    ST_LOCAL inline
-    GLint glRenderMode(GLenum theMode) {
-        return ::glRenderMode(theMode);
     }
 
     ST_LOCAL inline
@@ -175,7 +125,20 @@ struct StGLCore11Fwd : protected StGLFunctions {
 
     ST_LOCAL inline
     void glClearDepth(GLclampd theDepth) {
+    #if defined(GL_ES_VERSION_2_0)
+        ::glClearDepthf((GLfloat )theDepth);
+    #else
         ::glClearDepth(theDepth);
+    #endif
+    }
+
+    ST_LOCAL inline
+    void glClearDepthf(GLfloat theDepth) {
+    #if defined(GL_ES_VERSION_2_0)
+        ::glClearDepthf(theDepth);
+    #else
+        ::glClearDepth((GLclampd )theDepth);
+    #endif
     }
 
     ST_LOCAL inline
@@ -189,8 +152,23 @@ struct StGLCore11Fwd : protected StGLFunctions {
     }
 
     ST_LOCAL inline
-    void glDepthRange(GLclampd theNearValue, GLclampd theFarValue) {
+    void glDepthRange(GLclampd theNearValue,
+                      GLclampd theFarValue) {
+    #if defined(GL_ES_VERSION_2_0)
+        ::glDepthRangef((GLfloat )theNearValue, (GLfloat )theFarValue);
+    #else
         ::glDepthRange(theNearValue, theFarValue);
+    #endif
+    }
+
+    ST_LOCAL inline
+    void glDepthRangef(GLfloat theNearValue,
+                       GLfloat theFarValue) {
+    #if defined(GL_ES_VERSION_2_0)
+        ::glDepthRangef(theNearValue, theFarValue);
+    #else
+        ::glDepthRange((GLclampd )theNearValue, (GLclampd )theFarValue);
+    #endif
     }
 
         public: //! @name Transformation
@@ -201,11 +179,6 @@ struct StGLCore11Fwd : protected StGLFunctions {
     }
 
         public: //! @name Vertex Arrays
-
-    ST_LOCAL inline
-    void glArrayElement(GLint i) {
-        ::glArrayElement(i);
-    }
 
     ST_LOCAL inline
     void glDrawArrays(GLenum theMode, GLint theFirst, GLsizei theCount) {
@@ -220,13 +193,192 @@ struct StGLCore11Fwd : protected StGLFunctions {
         public: //! @name Raster functions
 
     ST_LOCAL inline
-    void glPixelStoref(GLenum theParamName, GLfloat theParam) {
-        ::glPixelStoref(theParamName, theParam);
+    void glPixelStorei(GLenum theParamName, GLint   theParam) {
+        ::glPixelStorei(theParamName, theParam);
     }
 
     ST_LOCAL inline
-    void glPixelStorei(GLenum theParamName, GLint   theParam) {
-        ::glPixelStorei(theParamName, theParam);
+    void glReadPixels(GLint x, GLint y,
+                      GLsizei width, GLsizei height,
+                      GLenum format, GLenum type,
+                      GLvoid* pixels) {
+        ::glReadPixels(x, y, width, height, format, type, pixels);
+    }
+
+        public: //! @name Stenciling
+
+    ST_LOCAL inline
+    void glStencilFunc(GLenum func, GLint ref, GLuint mask) {
+        ::glStencilFunc(func, ref, mask);
+    }
+
+    ST_LOCAL inline
+    void glStencilMask(GLuint mask) {
+        ::glStencilMask(mask);
+    }
+
+    ST_LOCAL inline
+    void glStencilOp(GLenum fail, GLenum zfail, GLenum zpass) {
+        ::glStencilOp(fail, zfail, zpass);
+    }
+
+    ST_LOCAL inline
+    void glClearStencil(GLint s) {
+        ::glClearStencil(s);
+    }
+
+        public: //! @name Texture mapping
+
+    ST_LOCAL inline
+    void glTexParameterf(GLenum target, GLenum pname, GLfloat param) {
+        ::glTexParameterf(target, pname, param);
+    }
+
+    ST_LOCAL inline
+    void glTexParameteri(GLenum target, GLenum pname, GLint param) {
+        ::glTexParameteri(target, pname, param);
+    }
+
+    ST_LOCAL inline
+    void glTexParameterfv(GLenum target, GLenum pname, const GLfloat* params) {
+        ::glTexParameterfv(target, pname, params);
+    }
+
+    ST_LOCAL inline
+    void glTexParameteriv(GLenum target, GLenum pname, const GLint* params) {
+        ::glTexParameteriv(target, pname, params);
+    }
+
+    ST_LOCAL inline
+    void glGetTexParameterfv(GLenum target, GLenum pname, GLfloat* params) {
+        ::glGetTexParameterfv(target, pname, params);
+    }
+
+    ST_LOCAL inline
+    void glGetTexParameteriv(GLenum target, GLenum pname, GLint* params) {
+        ::glGetTexParameteriv(target, pname, params);
+    }
+
+    ST_LOCAL inline
+    void glTexImage2D(GLenum target, GLint level,
+                      GLint internalFormat,
+                      GLsizei width, GLsizei height,
+                      GLint border, GLenum format, GLenum type,
+                      const GLvoid* pixels) {
+        ::glTexImage2D(target, level, internalFormat, width, height, border, format, type, pixels);
+    }
+
+    ST_LOCAL inline
+    void glGenTextures(GLsizei n, GLuint* textures) {
+        ::glGenTextures(n, textures);
+    }
+
+    ST_LOCAL inline
+    void glDeleteTextures(GLsizei n, const GLuint* textures) {
+        ::glDeleteTextures(n, textures);
+    }
+
+    ST_LOCAL inline
+    void glBindTexture(GLenum target, GLuint texture) {
+        ::glBindTexture(target, texture);
+    }
+
+    ST_LOCAL inline
+    GLboolean glIsTexture(GLuint texture) {
+        return ::glIsTexture(texture);
+    }
+
+    ST_LOCAL inline
+    void glTexSubImage2D(GLenum target, GLint level,
+                         GLint xoffset, GLint yoffset,
+                         GLsizei width, GLsizei height,
+                         GLenum format, GLenum type,
+                         const GLvoid* pixels) {
+        ::glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
+    }
+
+    ST_LOCAL inline
+    void glCopyTexImage2D(GLenum target, GLint level,
+                          GLenum internalformat,
+                          GLint x, GLint y,
+                          GLsizei width, GLsizei height,
+                          GLint border) {
+        ::glCopyTexImage2D(target, level, internalformat, x, y, width, height, border);
+    }
+
+    ST_LOCAL inline
+    void glCopyTexSubImage2D(GLenum target, GLint level,
+                             GLint xoffset, GLint yoffset,
+                             GLint x, GLint y,
+                             GLsizei width, GLsizei height) {
+        ::glCopyTexSubImage2D(target, level, xoffset, yoffset, x, y, width, height);
+    }
+
+};
+
+/**
+ * OpenGL 1.1 core desktop.
+ */
+/*struct StGLCore11FwdDesktop : protected StGLCore11Fwd {
+
+    ST_LOCAL inline
+    void glClearIndex(GLfloat c) {
+        ::glClearIndex(c);
+    }
+
+    ST_LOCAL inline
+    void glIndexMask(GLuint theMask) {
+        ::glIndexMask(theMask);
+    }
+
+    ST_LOCAL inline
+    void glAlphaFunc(GLenum theFunc, GLclampf theRef) {
+        ::glAlphaFunc(theFunc, theRef);
+    }
+
+    ST_LOCAL inline
+    void glLogicOp(GLenum opcode) {
+        ::glLogicOp(opcode);
+    }
+
+    ST_LOCAL inline
+    void glPointSize(GLfloat theSize) {
+        ::glPointSize(theSize);
+    }
+
+    ST_LOCAL inline
+    void glPolygonMode(GLenum theFace, GLenum theMode) {
+        ::glPolygonMode(theFace, theMode);
+    }
+
+    ST_LOCAL inline
+    void glDrawBuffer(GLenum theMode) {
+        ::glDrawBuffer(theMode);
+    }
+
+    ST_LOCAL inline
+    void glReadBuffer(GLenum theMode) {
+        ::glReadBuffer(theMode);
+    }
+
+    ST_LOCAL inline
+    void glGetDoublev(GLenum theParamName, GLdouble* theValues) {
+        ::glGetDoublev(theParamName, theValues);
+    }
+
+    ST_LOCAL inline
+    GLint glRenderMode(GLenum theMode) {
+        return ::glRenderMode(theMode);
+    }
+
+    ST_LOCAL inline
+    void glArrayElement(GLint i) {
+        ::glArrayElement(i);
+    }
+
+    ST_LOCAL inline
+    void glPixelStoref(GLenum theParamName, GLfloat theParam) {
+        ::glPixelStoref(theParamName, theParam);
     }
 
     ST_LOCAL inline
@@ -270,38 +422,6 @@ struct StGLCore11Fwd : protected StGLFunctions {
     }
 
     ST_LOCAL inline
-    void glReadPixels(GLint x, GLint y,
-                      GLsizei width, GLsizei height,
-                      GLenum format, GLenum type,
-                      GLvoid* pixels) {
-        ::glReadPixels(x, y, width, height, format, type, pixels);
-    }
-
-        public: //! @name Stenciling
-
-    ST_LOCAL inline
-    void glStencilFunc(GLenum func, GLint ref, GLuint mask) {
-        ::glStencilFunc(func, ref, mask);
-    }
-
-    ST_LOCAL inline
-    void glStencilMask(GLuint mask) {
-        ::glStencilMask(mask);
-    }
-
-    ST_LOCAL inline
-    void glStencilOp(GLenum fail, GLenum zfail, GLenum zpass) {
-        ::glStencilOp(fail, zfail, zpass);
-    }
-
-    ST_LOCAL inline
-    void glClearStencil(GLint s) {
-        ::glClearStencil(s);
-    }
-
-        public: //! @name Texture mapping
-
-    ST_LOCAL inline
     void glTexEnvf(GLenum target, GLenum pname, GLfloat param) {
         ::glTexEnvf(target, pname, param);
     }
@@ -332,36 +452,6 @@ struct StGLCore11Fwd : protected StGLFunctions {
     }
 
     ST_LOCAL inline
-    void glTexParameterf(GLenum target, GLenum pname, GLfloat param) {
-        ::glTexParameterf(target, pname, param);
-    }
-
-    ST_LOCAL inline
-    void glTexParameteri(GLenum target, GLenum pname, GLint param) {
-        ::glTexParameteri(target, pname, param);
-    }
-
-    ST_LOCAL inline
-    void glTexParameterfv(GLenum target, GLenum pname, const GLfloat* params) {
-        ::glTexParameterfv(target, pname, params);
-    }
-
-    ST_LOCAL inline
-    void glTexParameteriv(GLenum target, GLenum pname, const GLint* params) {
-        ::glTexParameteriv(target, pname, params);
-    }
-
-    ST_LOCAL inline
-    void glGetTexParameterfv(GLenum target, GLenum pname, GLfloat* params) {
-        ::glGetTexParameterfv(target, pname, params);
-    }
-
-    ST_LOCAL inline
-    void glGetTexParameteriv(GLenum target, GLenum pname, GLint* params) {
-        ::glGetTexParameteriv(target, pname, params);
-    }
-
-    ST_LOCAL inline
     void glGetTexLevelParameterfv(GLenum target, GLint level, GLenum pname, GLfloat* params) {
         ::glGetTexLevelParameterfv(target, level, pname, params);
     }
@@ -381,56 +471,11 @@ struct StGLCore11Fwd : protected StGLFunctions {
     }
 
     ST_LOCAL inline
-    void glTexImage2D(GLenum target, GLint level,
-                      GLint internalFormat,
-                      GLsizei width, GLsizei height,
-                      GLint border, GLenum format, GLenum type,
-                      const GLvoid* pixels) {
-        ::glTexImage2D(target, level, internalFormat, width, height, border, format, type, pixels);
-    }
-
-    ST_LOCAL inline
-    void glGetTexImage(GLenum target, GLint level,
-                       GLenum format, GLenum type,
-                       GLvoid* pixels) {
-        ::glGetTexImage(target, level, format, type, pixels);
-    }
-
-    ST_LOCAL inline
-    void glGenTextures(GLsizei n, GLuint* textures) {
-        ::glGenTextures(n, textures);
-    }
-
-    ST_LOCAL inline
-    void glDeleteTextures(GLsizei n, const GLuint* textures) {
-        ::glDeleteTextures(n, textures);
-    }
-
-    ST_LOCAL inline
-    void glBindTexture(GLenum target, GLuint texture) {
-        ::glBindTexture(target, texture);
-    }
-
-    ST_LOCAL inline
-    GLboolean glIsTexture(GLuint texture) {
-        return ::glIsTexture(texture);
-    }
-
-    ST_LOCAL inline
     void glTexSubImage1D(GLenum target, GLint level,
                          GLint xoffset,
                          GLsizei width, GLenum format,
                          GLenum type, const GLvoid* pixels) {
         ::glTexSubImage1D(target, level, xoffset, width, format, type, pixels);
-    }
-
-    ST_LOCAL inline
-    void glTexSubImage2D(GLenum target, GLint level,
-                         GLint xoffset, GLint yoffset,
-                         GLsizei width, GLsizei height,
-                         GLenum format, GLenum type,
-                         const GLvoid* pixels) {
-        ::glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
     }
 
     ST_LOCAL inline
@@ -442,15 +487,6 @@ struct StGLCore11Fwd : protected StGLFunctions {
     }
 
     ST_LOCAL inline
-    void glCopyTexImage2D(GLenum target, GLint level,
-                          GLenum internalformat,
-                          GLint x, GLint y,
-                          GLsizei width, GLsizei height,
-                          GLint border) {
-        ::glCopyTexImage2D(target, level, internalformat, x, y, width, height, border);
-    }
-
-    ST_LOCAL inline
     void glCopyTexSubImage1D(GLenum target, GLint level,
                              GLint xoffset, GLint x, GLint y,
                              GLsizei width) {
@@ -458,49 +494,12 @@ struct StGLCore11Fwd : protected StGLFunctions {
     }
 
     ST_LOCAL inline
-    void glCopyTexSubImage2D(GLenum target, GLint level,
-                             GLint xoffset, GLint yoffset,
-                             GLint x, GLint y,
-                             GLsizei width, GLsizei height) {
-        ::glCopyTexSubImage2D(target, level, xoffset, yoffset, x, y, width, height);
+    void glGetTexImage(GLenum target, GLint level,
+                       GLenum format, GLenum type,
+                       GLvoid* pixels) {
+        ::glGetTexImage(target, level, format, type, pixels);
     }
 
-};
-
-/*#undef GL_LINE_STIPPLE
-#undef GL_POINT_SMOOTH
-#undef GL_POINT_SPRITE
-
-#undef GL_QUADS
-#undef GL_QUAD_STRIP
-#undef GL_POLYGON
-#undef GL_POLYGON_STIPPLE
-
-#undef GL_LIGHTING
-#undef GL_LIGHT0
-#undef GL_LIGHT1
-#undef GL_LIGHT2
-#undef GL_LIGHT3
-#undef GL_LIGHT4
-#undef GL_LIGHT5
-#undef GL_LIGHT6
-#undef GL_LIGHT7
-#undef GL_COLOR_MATERIAL
-#undef GL_VERTEX_PROGRAM_TWO_SIDE
-
-#undef GL_BITMAP
-#undef GL_ALPHA
-#undef GL_LUMINANCE
-#undef GL_LUMINANCE_ALPHA
-#undef GL_INTENSITY
-
-#undef GL_GENERATE_MIPMAP
-
-#undef GL_TEXTURE_PRIORITY
-#undef GL_TEXTURE_ENV
-#undef GL_TEXTURE_FILTER_CONTROL
-#undef GL_TEXTURE_LOD_BIAS
-
-#undef GL_ACCUM_BUFFER_BIT*/
+};*/
 
 #endif // __StGLCore11Fwd_h_
