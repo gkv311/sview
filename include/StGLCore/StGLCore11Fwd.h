@@ -314,6 +314,30 @@ struct StGLCore11Fwd : protected StGLFunctions {
         ::glCopyTexSubImage2D(target, level, xoffset, yoffset, x, y, width, height);
     }
 
+#if !defined(GL_ES_VERSION_2_0)
+    ST_LOCAL inline
+    void glGetTexLevelParameteriv(GLenum target, GLint level, GLenum pname, GLint* params) {
+        ::glGetTexLevelParameteriv(target, level, pname, params);
+    }
+
+    ST_LOCAL inline
+    void glGetTexImage(GLenum target, GLint level,
+                       GLenum format, GLenum type,
+                       GLvoid* pixels) {
+        ::glGetTexImage(target, level, format, type, pixels);
+    }
+
+    ST_LOCAL inline
+    void glDrawBuffer(GLenum theMode) {
+        ::glDrawBuffer(theMode);
+    }
+
+    ST_LOCAL inline
+    void glReadBuffer(GLenum theMode) {
+        ::glReadBuffer(theMode);
+    }
+#endif
+
 };
 
 /**
@@ -349,16 +373,6 @@ struct StGLCore11Fwd : protected StGLFunctions {
     ST_LOCAL inline
     void glPolygonMode(GLenum theFace, GLenum theMode) {
         ::glPolygonMode(theFace, theMode);
-    }
-
-    ST_LOCAL inline
-    void glDrawBuffer(GLenum theMode) {
-        ::glDrawBuffer(theMode);
-    }
-
-    ST_LOCAL inline
-    void glReadBuffer(GLenum theMode) {
-        ::glReadBuffer(theMode);
     }
 
     ST_LOCAL inline
@@ -457,11 +471,6 @@ struct StGLCore11Fwd : protected StGLFunctions {
     }
 
     ST_LOCAL inline
-    void glGetTexLevelParameteriv(GLenum target, GLint level, GLenum pname, GLint* params) {
-        ::glGetTexLevelParameteriv(target, level, pname, params);
-    }
-
-    ST_LOCAL inline
     void glTexImage1D(GLenum target, GLint level,
                       GLint internalFormat,
                       GLsizei width, GLint border,
@@ -491,13 +500,6 @@ struct StGLCore11Fwd : protected StGLFunctions {
                              GLint xoffset, GLint x, GLint y,
                              GLsizei width) {
         ::glCopyTexSubImage1D(target, level, xoffset, x, y, width);
-    }
-
-    ST_LOCAL inline
-    void glGetTexImage(GLenum target, GLint level,
-                       GLenum format, GLenum type,
-                       GLvoid* pixels) {
-        ::glGetTexImage(target, level, format, type, pixels);
     }
 
 };*/

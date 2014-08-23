@@ -81,8 +81,11 @@ bool StGLTexture::getDataFormat(const StGLContext&  theCtx,
                                 const StImagePlane& theData,
                                 GLenum& thePixelFormat,
                                 GLenum& theDataType) {
+#if !defined(GL_ES_VERSION_2_0)
+    (void )theCtx;
+#endif
     thePixelFormat = GL_RGB;
-    theDataType = GL_UNSIGNED_BYTE;
+    theDataType    = GL_UNSIGNED_BYTE;
     switch(theData.getFormat()) {
         case StImagePlane::ImgGray: {
             // we fill ALPHA channel in the texture!
@@ -377,8 +380,8 @@ bool StGLTexture::isProxySuccess(StGLContext& theCtx) {
                                    GL_RGBA, GL_UNSIGNED_BYTE, NULL); // no mention (we check graphical RAM here)
     GLint aTestParamX = 0;
     GLint aTestParamY = 0;
-    theCtx.core20fwd->glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &aTestParamX);
-    theCtx.core20fwd->glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &aTestParamY);
+    theCtx.core20fwd->glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_WIDTH,  &aTestParamX);
+    theCtx.core20fwd->glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &aTestParamY);
     if(aTestParamX == 0 || aTestParamY == 0) {
         ST_DEBUG_LOG("Creation texture with size (" + mySizeX + " x " + mySizeY + ") FAILED!");
         return false;
