@@ -172,8 +172,6 @@ bool StGLTexture::getDataFormat(const StGLContext&  theCtx,
     }
 }
 
-#if defined(__ST_DEBUG__) && defined(__ST_DEBUG_TEXTURES__)
-
 #ifndef GL_R16
     #define GL_R16      0x822A
     #define GL_R16F     0x822D
@@ -201,7 +199,7 @@ bool StGLTexture::getDataFormat(const StGLContext&  theCtx,
 /**
  * Dummy function to display texture internal format.
  */
-static StString formatInternalFormat(const GLint theInternalFormat) {
+ST_LOCAL inline StString formatInternalFormat(const GLint theInternalFormat) {
     switch(theInternalFormat) {
         // RED variations (GL_RED, OpenGL 3.0+)
         case GL_RED:      return "GL_RED";
@@ -236,7 +234,6 @@ static StString formatInternalFormat(const GLint theInternalFormat) {
         default:          return StString("GL_? (") + theInternalFormat + ')';
     }
 }
-#endif
 
 static inline GLenum getDataFormat(const GLint theInternalFormat) {
     switch(theInternalFormat) {

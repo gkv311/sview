@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -7,6 +7,7 @@
  */
 
 #include <StThreads/StThread.h>
+#include <StStrings/StLogger.h>
 
 #ifdef _WIN32
     #include <windows.h>
@@ -55,6 +56,8 @@ void StThread::kill() {
     if(isValid()) {
     #ifdef _WIN32
         TerminateThread((HANDLE )myThread, 0);
+    #elif defined(__ANDROID__)
+        ST_ERROR_LOG("StThread::kill() is unavailable on this platform!");
     #else
         pthread_cancel(myThread);
     #endif

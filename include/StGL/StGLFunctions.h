@@ -439,7 +439,7 @@ struct StGLFunctions {
     }
 
     ST_LOCAL inline
-    void glShaderSource(GLuint shader, GLsizei count, const GLchar *const*string, const GLint* length) {
+    void glShaderSource(GLuint shader, GLsizei count, const GLchar** string, const GLint* length) {
         ::glShaderSource(shader, count, string, length);
     }
 

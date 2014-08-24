@@ -14,6 +14,8 @@
 
 #ifdef _WIN32
     #include <windows.h>
+#elif defined(__ANDROID__)
+    //
 #elif defined(__linux__)
     #include <sys/types.h>
     #include <sys/stat.h>
@@ -108,6 +110,9 @@ bool StFileNode::openFileDialog(const StString& theFolder,
         theFilePath = StString(anOpenStruct.lpstrFile);
         return true;
     }
+    return false;
+#elif defined(__ANDROID__)
+    bool ST_NOT_IMPLEMENTED_FOR_ANDROID = true;
     return false;
 #elif defined(__linux__)
     if(!StMessageBox::initGlobals()) {

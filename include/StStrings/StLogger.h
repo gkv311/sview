@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -160,7 +160,7 @@ class StMessageBox {
 
         public:
 
-#ifdef __linux__
+#if !defined(__ANDROID__) && defined(__linux__)
     ST_LOCAL static bool initGlobals();
 #endif
 

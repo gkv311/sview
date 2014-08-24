@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -88,7 +88,7 @@ void StLogger::write(const StString&       theMessage,
     if(!myFilePath.isEmpty()) {
     #ifdef _WIN32
         myFileHandle = _wfopen(myFilePath.toCString(), L"ab");
-    #elif defined(__linux__)
+    #else
         myFileHandle =   fopen(myFilePath.toCString(),  "ab");
     #endif
         if(myFileHandle != NULL) {
@@ -199,6 +199,8 @@ void StLogger::write(const StString&       theMessage,
 
 #ifdef _WIN32
     #include <windows.h>
+#elif defined(__ANDROID__)
+    //#include <android/log.h>
 #elif defined(__linux__)
     #include <gtk/gtk.h>
     #include <X11/Xlib.h>
@@ -223,13 +225,13 @@ namespace {
         return isOK;
     }
 
-};
+}
 #endif
 
 // GUI dialogs are in Object-C for MacOS
 #ifndef __APPLE__
 
-#ifdef __linux__
+#if !defined(__ANDROID__) && defined(__linux__)
 bool StMessageBox::initGlobals() {
     static const bool isInitOK = stGtkInitForce();
     return isInitOK;
@@ -240,6 +242,8 @@ void StMessageBox::Info(const StString& theMessage) {
     StLogger::GetDefault().write(theMessage, StLogger::ST_INFO);
 #ifdef _WIN32
     MessageBoxW(NULL, theMessage.toUtfWide().toCString(), L"Info", MB_OK | MB_ICONINFORMATION | MB_SETFOREGROUND | MB_TOPMOST);
+#elif defined(__ANDROID__)
+    StMessageBox::InfoConsole(theMessage);
 #elif defined(__linux__)
     if(initGlobals()) {
         gdk_threads_enter();
@@ -256,6 +260,8 @@ void StMessageBox::Warn(const StString& theMessage) {
     StLogger::GetDefault().write(theMessage, StLogger::ST_WARNING);
 #ifdef _WIN32
     MessageBoxW(NULL, theMessage.toUtfWide().toCString(), L"Warning", MB_OK | MB_ICONWARNING | MB_SETFOREGROUND | MB_TOPMOST);
+#elif defined(__ANDROID__)
+    StMessageBox::WarnConsole(theMessage);
 #elif defined(__linux__)
     if(initGlobals()) {
         gdk_threads_enter();
@@ -272,6 +278,8 @@ void StMessageBox::Error(const StString& theMessage) {
     StLogger::GetDefault().write(theMessage, StLogger::ST_ERROR);
 #ifdef _WIN32
     MessageBoxW(NULL, theMessage.toUtfWide().toCString(), L"Error", MB_OK | MB_ICONERROR | MB_SETFOREGROUND | MB_TOPMOST);
+#elif defined(__ANDROID__)
+    StMessageBox::ErrorConsole(theMessage);
 #elif defined(__linux__)
     if(initGlobals()) {
         gdk_threads_enter();
@@ -287,6 +295,8 @@ void StMessageBox::Error(const StString& theMessage) {
 bool StMessageBox::Question(const StString& theMessage) {
 #ifdef _WIN32
     return MessageBoxW(NULL, theMessage.toUtfWide().toCString(), L"Question", MB_YESNO | MB_ICONQUESTION | MB_SETFOREGROUND | MB_TOPMOST) == IDYES;
+#elif defined(__ANDROID__)
+    return StMessageBox::QuestionConsole(theMessage);
 #elif defined(__linux__)
     if(initGlobals()) {
         gdk_threads_enter();

@@ -207,8 +207,13 @@ typedef unsigned char GLubyte;
 typedef float         GLfloat;
 typedef double        GLdouble;
 typedef double        GLclampd;
+#if defined(__arm__) && defined(__ANDROID__)
+typedef signed long int GLintptr;
+typedef signed long int GLsizeiptr;
+#else
 typedef ptrdiff_t     GLintptr;
 typedef ptrdiff_t     GLsizeiptr;
+#endif
 
 /**
  * Dummy structure definition.
