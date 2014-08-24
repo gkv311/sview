@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,10 +11,12 @@
 
 #include <stTypes.h>
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     #include <windows.h>
-#elif (defined(__APPLE__))
+#elif defined(__APPLE__)
     #include <libkern/OSAtomic.h>
+#elif defined(__ANDROID__)
+    //#include <sys/atomics.h>
 #endif
 
 /**
@@ -34,12 +36,14 @@ class StAtomicOp {
     #ifdef __GCC_HAVE_SYNC_COMPARE_AND_SWAP_4
         // g++ compiler
         return __sync_add_and_fetch(&theValue, 1);
-    #elif (defined(_WIN32) || defined(__WIN32__))
+    #elif defined(_WIN32)
         return InterlockedIncrement((volatile LONG* )&theValue);
-    #elif (defined(__APPLE__))
+    #elif defined(__APPLE__)
         return OSAtomicIncrement32Barrier(&theValue);
+    //#elif defined(__ANDROID__)
+    //    return __atomic_inc(&theValue) + 1; // analog of __sync_fetch_and_add
     #elif defined(__GNUC__)
-        #error "Set at least -march=i486 for gcc compiler"
+        #error "Set -march=i486 or -march=armv7-a for gcc compiler"
         return ++theValue;
     #else
         #error "Atomic operation doesn't implemented for current platform!"
@@ -56,12 +60,14 @@ class StAtomicOp {
     #ifdef __GCC_HAVE_SYNC_COMPARE_AND_SWAP_4
         // g++ compiler
         return __sync_sub_and_fetch(&theValue, 1);
-    #elif (defined(_WIN32) || defined(__WIN32__))
+    #elif defined(_WIN32)
         return InterlockedDecrement((volatile LONG* )&theValue);
-    #elif (defined(__APPLE__))
+    #elif defined(__APPLE__)
         return OSAtomicDecrement32Barrier(&theValue);
+    //#elif defined(__ANDROID__)
+    //    return __atomic_dec(&theValue) - 1; // analog of __sync_fetch_and_sub
     #elif defined(__GNUC__)
-        #error "Set at least -march=i486 for gcc compiler"
+        #error "Set -march=i486 or -march=armv7-a for gcc compiler"
         return --theValue;
     #else
         #error "Atomic operation doesn't implemented for current platform!"
@@ -99,9 +105,9 @@ class StAtomicOp {
     #ifdef __GCC_HAVE_SYNC_COMPARE_AND_SWAP_8
         // g++ compiler
         return __sync_add_and_fetch(&theValue, 1);
-    #elif (defined(_WIN32) || defined(__WIN32__))
+    #elif defined(_WIN32)
         return InterlockedIncrement64(&theValue);
-    #elif (defined(__APPLE__))
+    #elif defined(__APPLE__)
         return OSAtomicIncrement64Barrier(&theValue);
     #elif defined(__GNUC__)
         #error "Set at least -march=k8 for gcc compiler"
@@ -121,9 +127,9 @@ class StAtomicOp {
     #ifdef __GCC_HAVE_SYNC_COMPARE_AND_SWAP_8
         // g++ compiler
         return __sync_sub_and_fetch(&theValue, 1);
-    #elif (defined(_WIN32) || defined(__WIN32__))
+    #elif defined(_WIN32)
         return InterlockedDecrement64(&theValue);
-    #elif (defined(__APPLE__))
+    #elif defined(__APPLE__)
         return OSAtomicDecrement64Barrier(&theValue);
     #elif defined(__GNUC__)
         #error "Set at least -march=k8 for gcc compiler"

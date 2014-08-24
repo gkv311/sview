@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -49,7 +49,9 @@
 #include <cstddef>     // size_t, NULL
 #include <cstdlib>
 #include <cstring>     // for memcpy
-#include <xmmintrin.h> // for memory alignment
+#ifndef __arm__
+    #include <xmmintrin.h> // for memory alignment
+#endif
 #include <stdio.h>     // for _snprintf on MinGW
 
 /**
@@ -71,7 +73,7 @@
 #endif
 
 // int16_t/int32_t and so on
-#if(defined(_WIN32) && (_MSC_VER > 0 && _MSC_VER < 1600))
+#if defined(_MSC_VER) && (_MSC_VER > 0 && _MSC_VER < 1600)
     // old MSVC - hasn't stdint header
     #include <sysForVC/stdint.h>
 #else
@@ -153,7 +155,7 @@ typedef uint64_t stUInt64_t;
 typedef char          stUtf8_t;     //!< signed   UTF-8 char is just a byte
 typedef unsigned char stUtf8u_t;    //!< unsigned UTF-8 char is just a byte
 #if (!defined(__GNUC__) || ((__GNUC__ == 4) && (__GNUC_MINOR__ > 2)) || (__GNUC__ > 4)) \
- || (defined(_WIN32) && (_MSC_VER >= 1600))
+ || (defined(_MSC_VER) && (_MSC_VER >= 1600))
     typedef char16_t  stUtf16_t;    //!< UTF-16 char (always unsigned)
     typedef char32_t  stUtf32_t;    //!< UTF-32 char (always unsigned)
 #else // obsolete compilers compatibility
@@ -312,38 +314,40 @@ inline void stMemFree(void* ptr) {
  * Allocates an ALIGNED block in memory.
  * For SSE commands alignment should be 16.
  * You should use stMemFreeAligned() to deallocate memory.
- * @param bytesCount (const size_t& ) - size of the memory block, in bytes;
- * @param align (const size_t& ) - alignment constraint, must be a power of two;
- * @return on success, a pointer to the memory block allocated by the function; null pointer otherwise.
+ * @param theNbBytes size of the memory block, in bytes
+ * @param theAlign   alignment constraint, must be a power of two
+ * @return on success, a pointer to the memory block allocated by the function; null pointer otherwise
  */
-inline void* stMemAllocAligned(const size_t& bytesCount,
-                               const size_t& align = ST_ALIGNMENT) {
+inline void* stMemAllocAligned(const size_t& theNbBytes,
+                               const size_t& theAlign = ST_ALIGNMENT) {
 #if defined(_MSC_VER)
-    return _aligned_malloc(bytesCount, align);
+    return _aligned_malloc(theNbBytes, theAlign);
+#elif defined(__ANDROID__)
+    return memalign(theAlign, theNbBytes);
 #else
-    return _mm_malloc(bytesCount, align);
+    return _mm_malloc(theNbBytes, theAlign);
 #endif
 }
 
 /**
  * Same as stMemAllocAligned() but fill the allocated block with zeros;
  */
-inline void* stMemAllocZeroAligned(const size_t& bytesCount,
-                                   const size_t& align = ST_ALIGNMENT) {
-    void* aPtr = stMemAllocAligned(bytesCount, align);
+inline void* stMemAllocZeroAligned(const size_t& theNbBytes,
+                                   const size_t& theAlign = ST_ALIGNMENT) {
+    void* aPtr = stMemAllocAligned(theNbBytes, theAlign);
     if(aPtr != NULL) {
-        stMemSet(aPtr, 0, bytesCount);
+        stMemSet(aPtr, 0, theNbBytes);
     }
     return aPtr;
 }
 
-inline void* stMemReallocAligned(void* ptrAligned, const size_t& bytesCount,
-                                 const size_t& align = ST_ALIGNMENT) {
+inline void* stMemReallocAligned(void* thePtrAligned, const size_t& theNbBytes,
+                                 const size_t& theAlign = ST_ALIGNMENT) {
 #if defined(_MSC_VER)
-    return _aligned_realloc(ptrAligned, bytesCount, align);
+    return _aligned_realloc(thePtrAligned, theNbBytes, theAlign);
 #else
     /// TODO (Kirill Gavrilov#4) what should we call here???
-    return realloc(ptrAligned, bytesCount);
+    return realloc(thePtrAligned, theNbBytes);
 #endif
 }
 
@@ -351,11 +355,13 @@ inline void* stMemReallocAligned(void* ptrAligned, const size_t& bytesCount,
  * Deallocate space in memory.
  * @param ptr (void* ) - pointer to a memory block previously allocated with stMemAllocAligned() to be deallocated.
  */
-inline void stMemFreeAligned(void* ptrAligned) {
+inline void stMemFreeAligned(void* thePtrAligned) {
 #if defined(_MSC_VER)
-    _aligned_free(ptrAligned);
+    _aligned_free(thePtrAligned);
+#elif defined(__ANDROID__)
+    free(thePtrAligned);
 #else
-    _mm_free(ptrAligned);
+    _mm_free(thePtrAligned);
 #endif
 }
 
