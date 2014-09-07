@@ -289,13 +289,15 @@ double StWindowImpl::getEventTime(const uint32_t theTime) const {
     return aTime;
 }
 
-#if (!defined(__APPLE__))
+#if !defined(__APPLE__)
 void StWindowImpl::setTitle(const StString& theTitle) {
     myWindowTitle = theTitle;
 #ifdef _WIN32
     myIsUpdated = true;
+#elif defined(__ANDROID__)
+    //
 #elif defined(__linux__)
-    if(myMaster.hWindow != 0){
+    if(myMaster.hWindow != 0) {
         XTextProperty aTitleProperty = {NULL, 0, 0, 0};
         aTitleProperty.encoding = None;
         char* aTitle = (char* )myWindowTitle.toCString();
@@ -523,6 +525,8 @@ void StWindowImpl::updateBlockSleep() {
         }
         myBlockSleep = BlockSleep_OFF;
     }
+#elif defined(__ANDROID__)
+    //
 #elif defined(__linux__)
     if(attribs.ToBlockSleepDisplay) { // || attribs.ToBlockSleepSystem
         if(myBlockSleep == BlockSleep_DISPLAY
@@ -588,7 +592,7 @@ void StWindowImpl::updateActiveState() {
     }
 }
 
-#if (!defined(__APPLE__))
+#if !defined(__APPLE__)
 void StWindowImpl::show(const int theWinNum) {
     if((theWinNum == ST_WIN_MASTER || theWinNum == ST_WIN_ALL)
      && attribs.IsHidden) {
@@ -598,6 +602,8 @@ void StWindowImpl::show(const int theWinNum) {
         } else if(myMaster.hWindowGl != NULL) {
             ShowWindow(myMaster.hWindowGl, SW_SHOW);
         }
+    #elif defined(__ANDROID__)
+        ///
     #elif defined(__linux__)
         if(!myMaster.stXDisplay.isNull()) {
             if(myMaster.hWindow != 0) {
@@ -618,6 +624,8 @@ void StWindowImpl::show(const int theWinNum) {
         if(mySlave.hWindowGl != NULL) {
             ShowWindow(mySlave.hWindowGl, SW_SHOW);
         }
+    #elif defined(__ANDROID__)
+        ///
     #elif defined(__linux__)
         if(!mySlave.stXDisplay.isNull() && mySlave.hWindowGl != 0) {
             XMapWindow(mySlave.getDisplay(), mySlave.hWindowGl);
@@ -638,6 +646,8 @@ void StWindowImpl::hide(const int theWinNum) {
         } else if(myMaster.hWindowGl != NULL) {
             ShowWindow(myMaster.hWindowGl, SW_HIDE);
         }
+    #elif defined(__ANDROID__)
+        ///
     #elif defined(__linux__)
         if(!myMaster.stXDisplay.isNull()) {
             if(myMaster.hWindow != 0) {
@@ -657,6 +667,8 @@ void StWindowImpl::hide(const int theWinNum) {
         if(mySlave.hWindowGl != NULL) {
             ShowWindow(mySlave.hWindowGl, SW_HIDE);
         }
+    #elif defined(__ANDROID__)
+        ///
     #elif defined(__linux__)
         if(!mySlave.stXDisplay.isNull() && mySlave.hWindowGl != 0) {
             XUnmapWindow(mySlave.getDisplay(), mySlave.hWindowGl);
@@ -679,6 +691,8 @@ void StWindowImpl::showCursor(bool toShow) {
     } else {
         SetEvent(myEventCursorHide);
     }
+#elif defined(__ANDROID__)
+    ///
 #elif defined(__linux__)
     if(toShow) {
         XUndefineCursor(myMaster.getDisplay(), myMaster.hWindowGl);
@@ -727,6 +741,8 @@ void StWindowImpl::setPlacement(const StRectI_t& theRect,
                      aRect.left, aRect.top, aRect.right - aRect.left, aRect.bottom - aRect.top,
                      SWP_NOACTIVATE);
     }
+#elif defined(__ANDROID__)
+    ///
 #elif defined(__linux__)
     if(!myMaster.stXDisplay.isNull() && !attribs.IsFullScreen && myMaster.hWindow != 0) {
         XMoveResizeWindow(myMaster.getDisplay(), myMaster.hWindow,
@@ -844,13 +860,15 @@ StPointD_t StWindowImpl::getMousePos() {
                               (double(aCursor.ptScreenPos.y) - double(aWinRect.top()))  / double(aWinRect.height()));
         }
     }
-#elif (defined(__APPLE__))
+#elif defined(__APPLE__)
     CGEventRef anEvent = CGEventCreate(NULL);
     CGPoint aCursor = CGEventGetLocation(anEvent);
     CFRelease(anEvent);
     return StPointD_t((aCursor.x - double(aWinRect.left())) / double(aWinRect.width()),
                       (aCursor.y - double(aWinRect.top()))  / double(aWinRect.height()));
-#elif (defined(__linux__) || defined(__linux))
+#elif defined(__ANDROID__)
+    ///
+#elif defined(__linux__)
     if(myMaster.hWindowGl != 0) {
         Window childReturn;
         Window rootReturn = DefaultRootWindow(myMaster.getDisplay());

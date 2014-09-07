@@ -109,7 +109,7 @@ class StWindowImpl {
     ST_LOCAL void updateWindowPos();
     ST_LOCAL void updateActiveState();
     ST_LOCAL void updateBlockSleep();
-#if defined(__linux__)
+#if defined(__linux__) && !defined(__ANDROID__)
     ST_LOCAL void parseXDNDClientMsg();
     ST_LOCAL void parseXDNDSelectionMsg();
 
@@ -288,9 +288,11 @@ class StWindowImpl {
     HANDLE             myEventCursorHide;
     MSG                myEvent;           //!< message for windows' message loop
     bool               myIsVistaPlus;     //!< system is Vista+
-#elif (defined(__APPLE__))
+#elif defined(__APPLE__)
     StCocoaCoords      myCocoaCoords;
     IOPMAssertionLevel mySleepAssert;     //!< prevent system going to sleep
+#elif defined(__ANDROID__)
+    //
 #else
     XEvent             myXEvent;
     char               myXInputBuff[32];

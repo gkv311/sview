@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -14,7 +14,9 @@
 #include <sstream>
 #include <locale>
 
-#ifndef _MSC_VER
+#if defined(__ANDROID__)
+    #define ST_NO_XLOCALE
+#elif !defined(_MSC_VER)
     #if defined(_WIN32)
         #define ST_NO_XLOCALE
         #warning xlocale is not supported by compiler!

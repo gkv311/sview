@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -21,7 +21,7 @@
 
 #include <StCore/StVirtualKeys.h>
 
-#if(defined(__linux__) || defined(__linux))
+#if defined(__linux__) && !defined(__ANDROID__)
 #include <X11/keysym.h>
 /**
  * This is FAT lookup array to convert X key codes to ST_VKEY codes.

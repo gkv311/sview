@@ -26,6 +26,8 @@
 #elif defined(__APPLE__)
     #include "StCocoaView.h"
     #include "StCocoaWin.h"
+#elif defined(__ANDROID__)
+    #include <android/native_window.h>
 #elif defined(__linux__)
     #include <GL/glx.h>
 #endif
@@ -192,6 +194,8 @@ class StWinHandles {
      */
     ST_LOCAL static bool destroyWindow(HWND& theWindow);
 
+#elif defined(__ANDROID__)
+    //
 #elif defined(__linux__)
     /**
      * Fast link
@@ -235,6 +239,9 @@ class StWinHandles {
 #elif defined(__APPLE__)
     StCocoaWin*     hWindow;
     StCocoaView*    hViewGl;
+#elif defined(__ANDROID__)
+    ANativeWindow*  hWindowGl;
+    StWinGlrcH      hRC;
 #elif defined(__linux__)
     Window          hWindow; // X-window handle
     Window          hWindowGl; // X-window handle for undecorated GL window

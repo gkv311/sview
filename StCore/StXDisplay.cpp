@@ -16,7 +16,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if defined(__linux__)
+#if defined(__linux__) && !defined(__ANDROID__)
 
 #include "StXDisplay.h"
 #include <StStrings/StLogger.h>

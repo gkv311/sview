@@ -19,7 +19,7 @@
 #ifndef __StXDisplay_h_
 #define __StXDisplay_h_
 
-#if defined(__linux__)
+#if defined(__linux__) && !defined(__ANDROID__)
 
 #include <X11/X.h>
 #include <X11/Xlib.h>

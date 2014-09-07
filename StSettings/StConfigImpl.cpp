@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov
+ * Copyright © 2007-2014 Kirill Gavrilov
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -8,7 +8,22 @@
 
 #include <StSettings/StSettings.h>
 
-#if !defined(_WIN32) && !defined(__APPLE__)
+#if defined(__ANDROID__)
+
+bool StSettings::load() { return true; }
+bool StSettings::save() { return false; }
+StSettings::StSettings(const StString& theSettingsSet) {}
+StSettings::~StSettings() {}
+bool StSettings::loadInt32 (const StString& /*theParamPath*/,
+                            int32_t&        /*theValue*/) { return false; }
+bool StSettings::saveInt32 (const StString& /*theParamPath*/,
+                            const int32_t&  /*theValue*/) { return false; }
+bool StSettings::loadString(const StString& /*theParamPath*/,
+                            StString&       /*theValue*/) { return false; }
+bool StSettings::saveString(const StString& /*theParamPath*/,
+                            const StString& /*theValue*/) { return false; }
+
+#elif !defined(_WIN32) && !defined(__APPLE__)
 
 #include <StStrings/StLogger.h>
 #include <StThreads/StProcess.h>

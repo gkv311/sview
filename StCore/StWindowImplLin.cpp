@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -16,7 +16,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if defined(__linux__)
+#if defined(__linux__) && !defined(__ANDROID__)
 
 #include "StWindowImpl.h"
 #include "stvkeysxarray.h" // X keys to VKEYs lookup array

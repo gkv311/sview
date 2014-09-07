@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -25,12 +25,16 @@
 
 #ifdef _WIN32
     #include <wnt/nvapi.h> // NVIDIA API
+#elif defined(__ANDROID__)
+    //
 #elif defined(__linux__)
     #include "StWinHandles.h"
     #include <X11/extensions/Xrandr.h>
 #endif
 
-#include "StADLsdk.h"
+#if !defined(__ANDROID__)
+    #include "StADLsdk.h"
+#endif
 
 StSearchMonitors::StSearchMonitors()
 : StArrayList<StMonitor>(2) {
@@ -269,7 +273,7 @@ void StSearchMonitors::findMonitorsWinAPI() {
 }
 #endif // WinAPI
 
-#if defined(__linux__)
+#if defined(__linux__) && !defined(__ANDROID__)
 bool StSearchMonitors::getXRootSize(int& theSizeX, int& theSizeY) {
     Display* aDisplay = XOpenDisplay(NULL); // get first display on server from DISPLAY in env
     if(aDisplay == NULL) {
@@ -465,7 +469,7 @@ void StSearchMonitors::findMonitorsXRandr() {
 
 void StSearchMonitors::listEDID(StArrayList<StEDIDParser>& theEdids) {
     theEdids.clear();
-#ifndef __APPLE__
+#if !defined( __APPLE__) && !defined(__ANDROID__)
     StADLsdk anAdlSdk;
     if(anAdlSdk.init()) {
         ADLsdkFunctions* aFuncs = anAdlSdk.getFunctions();
@@ -677,6 +681,8 @@ void StSearchMonitors::initFromSystem() {
     findMonitorsWinAPI();
 #elif defined(__APPLE__)
     findMonitorsCocoa();
+#elif defined(__ANDROID__)
+    findMonitorsBlind(1280, 720);
 #elif defined(__linux__)
     findMonitorsXRandr();
     if(isEmpty()) {

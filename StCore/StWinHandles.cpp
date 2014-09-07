@@ -268,6 +268,8 @@ StWinHandles::StWinHandles()
   myMKeyNext(GlobalAddAtom(MAKEINTATOM(VK_MEDIA_NEXT_TRACK))),
   ThreadGL(0),
   hDC(NULL)
+#elif defined(__ANDROID__)
+: hWindowGl(NULL)
 #elif defined(__linux__)
 : hWindow(0),
   hWindowGl(0),
@@ -560,6 +562,10 @@ bool StWinHandles::close() {
 
     // release active context
     hRC.nullify();
+
+#if defined(__ANDROID__)
+    //
+#else
     if(!stXDisplay.isNull()) {
         // close x-server windows
         if(hWindowGl != 0) {
@@ -584,6 +590,8 @@ bool StWinHandles::close() {
         // close x-server connection
         stXDisplay.nullify();
     }
+#endif
+
 #endif
     return true;
 }
@@ -675,6 +683,8 @@ bool StWinHandles::destroyWindow(HWND& theWindow) {
     return true;
 }
 
+#elif defined(__ANDROID__)
+    //
 #else
 
 void StWinHandles::setupXDND() {
