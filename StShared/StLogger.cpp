@@ -12,6 +12,10 @@
 #include <StThreads/StMutexSlim.h>
 #include <StThreads/StProcess.h>
 
+#if defined(__ANDROID__)
+    #include <android/log.h>
+#endif
+
 // we do not use st::cerr here to avoid
 // global static variables initialization ambiguity
 #ifdef _WIN32
@@ -83,6 +87,21 @@ void StLogger::write(const StString&       theMessage,
     if(!myMutex.isNull()) {
         myMutex->lock();
     }
+
+#if defined(__ANDROID__)
+    android_LogPriority anAPrior = ANDROID_LOG_INFO;
+    switch(theLevel) {
+        case ST_PANIC:   anAPrior = ANDROID_LOG_FATAL; break;
+        case ST_FATAL:   anAPrior = ANDROID_LOG_FATAL; break;
+        case ST_ERROR:   anAPrior = ANDROID_LOG_ERROR; break;
+        case ST_WARNING: anAPrior = ANDROID_LOG_WARN;  break;
+        case ST_INFO:    anAPrior = ANDROID_LOG_INFO;  break;
+        case ST_VERBOSE: anAPrior = ANDROID_LOG_INFO;  break;
+        case ST_DEBUG:   anAPrior = ANDROID_LOG_DEBUG; break;
+        case ST_QUIET:   break;
+    }
+    __android_log_write(anAPrior, "StLogger", theMessage.toCString());
+#endif
 
     // log to the file
     if(!myFilePath.isEmpty()) {
