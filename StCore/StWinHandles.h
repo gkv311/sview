@@ -21,13 +21,14 @@
 
 #ifdef _WIN32
     #include <windows.h>   // header file for Windows
+#elif defined(__ANDROID__)
+    #include <EGL/egl.h>
+    #include <android/native_window.h>
 #elif defined(ST_HAVE_EGL)
     #include <EGL/egl.h>
 #elif defined(__APPLE__)
     #include "StCocoaView.h"
     #include "StCocoaWin.h"
-#elif defined(__ANDROID__)
-    #include <android/native_window.h>
 #elif defined(__linux__)
     #include <GL/glx.h>
 #endif
@@ -50,7 +51,7 @@ class StWinGlrc {
     /**
      * Create OpenGL Rendering Context for specified Device Context.
      */
-#if defined(ST_HAVE_EGL)
+#if defined(ST_HAVE_EGL) || defined(__ANDROID__)
     ST_LOCAL StWinGlrc(EGLDisplay theDisplay,
                        const bool theDebugCtx,
                        int8_t     theGlDepthSize);
@@ -78,7 +79,7 @@ class StWinGlrc {
      * Device Context should have the one used on construction of this Rendering Context
      * or have the same Pixel Format.
      */
-#if defined(ST_HAVE_EGL)
+#if defined(ST_HAVE_EGL) || defined(__ANDROID__)
     ST_LOCAL bool makeCurrent(EGLSurface theSurface);
 #elif defined(_WIN32)
     ST_LOCAL bool makeCurrent(HDC theDC);
@@ -87,7 +88,7 @@ class StWinGlrc {
     ST_LOCAL bool makeCurrent(GLXDrawable theDrawable);
 #endif
 
-#if defined(ST_HAVE_EGL)
+#if defined(ST_HAVE_EGL) || defined(__ANDROID__)
     /**
      * EGL display connection
      */
@@ -101,7 +102,7 @@ class StWinGlrc {
 
         private:
 
-#if defined(ST_HAVE_EGL)
+#if defined(ST_HAVE_EGL) || defined(__ANDROID__)
     EGLDisplay myDisplay; //!< EGL display connection
     EGLConfig  myConfig;  //!< EGL configuration
     EGLContext myRC;      //!< EGL rendering context
@@ -258,7 +259,7 @@ class StWinHandles {
     bool            isRecXRandrEvents;
 #endif
 
-#if defined(ST_HAVE_EGL)
+#if defined(ST_HAVE_EGL) || defined(__ANDROID__)
     EGLSurface      eglSurface; //!< EGL surface (window)
 #endif
 

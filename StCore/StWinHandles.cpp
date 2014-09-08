@@ -26,7 +26,7 @@
 #include <StThreads/StThread.h>
 #include <StStrings/StLogger.h>
 
-#if defined(ST_HAVE_EGL)
+#if defined(ST_HAVE_EGL) || defined(__ANDROID__)
 
 StWinGlrc::StWinGlrc(EGLDisplay theDisplay,
                      const bool theDebugCtx,
@@ -282,7 +282,7 @@ StWinHandles::StWinHandles()
   xrandrEventBase(0),
   isRecXRandrEvents(false)
 #endif
-#if defined(ST_HAVE_EGL)
+#if defined(ST_HAVE_EGL) || defined(__ANDROID__)
   ,
   eglSurface(EGL_NO_SURFACE)
 #endif
@@ -295,7 +295,7 @@ StWinHandles::~StWinHandles() {
 }
 
 void StWinHandles::glSwap() {
-#if defined(ST_HAVE_EGL)
+#if defined(ST_HAVE_EGL) || defined(__ANDROID__)
     if(eglSurface != EGL_NO_SURFACE) {
         eglSwapBuffers(hRC->getDisplay(), eglSurface);
     }
@@ -312,7 +312,7 @@ void StWinHandles::glSwap() {
 }
 
 bool StWinHandles::glMakeCurrent() {
-#if defined(ST_HAVE_EGL)
+#if defined(ST_HAVE_EGL) || defined(__ANDROID__)
     if(eglSurface != EGL_NO_SURFACE
     && !hRC.isNull()) {
         return hRC->makeCurrent(eglSurface);
@@ -460,10 +460,16 @@ int StWinHandles::glCreateContext(StWinHandles*    theSlave,
     return STWIN_INIT_SUCCESS;
 #elif defined(__linux__)
     // create an OpenGL rendering context
-#if defined(ST_HAVE_EGL)
+#if defined(ST_HAVE_EGL) || defined(__ANDROID__)
     // GL context is created beforehand for EGL
     ST_GL_ERROR_CHECK(!hRC.isNull() && hRC->isValid(),
                       STWIN_ERROR_X_GLRC_CREATE, "EGL, could not create rendering context for Master");
+
+#if defined(__ANDROID__)
+    EGLint aFormat = 0;
+    eglGetConfigAttrib(hRC->getDisplay(), hRC->getConfig(), EGL_NATIVE_VISUAL_ID, &aFormat);
+    ANativeWindow_setBuffersGeometry(hWindowGl, 0, 0, aFormat);
+#endif
 
     eglSurface = eglCreateWindowSurface(hRC->getDisplay(), hRC->getConfig(), hWindowGl, NULL);
     if(theSlave != NULL) {
@@ -550,7 +556,7 @@ bool StWinHandles::close() {
     myMutex.unlock();
 #elif defined(__linux__)
 
-#if defined(ST_HAVE_EGL)
+#if defined(ST_HAVE_EGL) || defined(__ANDROID__)
     if(!hRC.isNull()) {
         hRC->makeCurrent(EGL_NO_SURFACE);
         if(eglSurface != EGL_NO_SURFACE) {
