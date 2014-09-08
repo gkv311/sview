@@ -34,13 +34,55 @@ class StGLTextureButton::StButtonProgram : public StGLProgram {
     }
 
     virtual bool init(StGLContext& theCtx) {
-        const StGLResources aShaders("StGLWidgets");
+        const char VERT_SHADER[] =
+           "uniform mat4  uProjMat;\n"
+           "uniform vec4  uDisp;\n"
+           "uniform float uTime;\n"
+           "uniform int   uClicked;\n"
+            // per-vertex input
+           "attribute vec4 vVertex;\n"
+           "attribute vec2 vTexCoord;\n"
+            // outs to fragment shader
+           "varying vec2 fTexCoord;\n"
+
+           "void main(void) {\n"
+           "    fTexCoord = vTexCoord;\n"
+           "    vec4 v = vVertex + uDisp;\n"
+           "    if(uClicked > 10) {\n"
+           "        v.z = v.z - 0.25;\n"
+           "    } else {\n"
+           "        v.z = v.z + sin(uTime * v.x + uTime) * cos(v.y + uTime) * 0.25;\n"
+           "    }\n"
+           "    gl_Position = uProjMat * v;\n"
+           "}\n";
+
+        const char FRAG_SHADER[] =
+           "uniform sampler2D uTexture;\n"
+           "uniform vec3 uParams;\n"
+           "varying vec2 fTexCoord;\n"
+           "void main(void) {\n"
+           "    vec4 aColor = texture2D(uTexture, fTexCoord);\n"
+           "    float ups = 0.0;\n"
+           "        float upsx = (uParams.x - fTexCoord.x);\n"
+           "        upsx *= upsx;\n"
+           "        float upsy = (uParams.y - fTexCoord.y);\n"
+           "        upsy *= upsy;\n"
+           "        ups = upsx + upsy;\n"
+           "        ups = -ups * 0.2;\n"
+           "        if(ups < -0.1) {\n"
+           "            ups = -0.1;\n"
+           "        }\n"
+           "    aColor.rgb += 0.1 + ups;\n"
+           "    aColor.a *= uParams.z;\n"
+           "    gl_FragColor = aColor;\n"
+           "}\n";
+
         StGLVertexShader aVertexShader(StGLProgram::getTitle());
-        aVertexShader.initFile(theCtx, aShaders.getShaderFile("StGLTextureButton.shv"));
+        aVertexShader.init(theCtx, VERT_SHADER);
         StGLAutoRelease aTmp1(theCtx, aVertexShader);
 
         StGLFragmentShader aFragmentShader(StGLProgram::getTitle());
-        aFragmentShader.initFile(theCtx, aShaders.getShaderFile("StGLTextureButton.shf"));
+        aFragmentShader.init(theCtx, FRAG_SHADER);
         StGLAutoRelease aTmp2(theCtx, aFragmentShader);
         if(!StGLProgram::create(theCtx)
            .attachShader(theCtx, aVertexShader)

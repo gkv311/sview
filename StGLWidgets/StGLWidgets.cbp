@@ -274,8 +274,6 @@
 			<Option target="WIN_vc_AMD64" />
 		</Unit>
 		<Unit filename="StSubQueue.cpp" />
-		<Unit filename="shaders/StGLTextureButton.shf" />
-		<Unit filename="shaders/StGLTextureButton.shv" />
 		<Unit filename="../include/StGLWidgets/StGLButton.h" />
 		<Unit filename="../include/StGLWidgets/StGLCheckbox.h" />
 		<Unit filename="../include/StGLWidgets/StGLCheckboxTextured.h" />
