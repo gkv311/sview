@@ -67,6 +67,17 @@ StFTFontRegistry::StFTFontRegistry() {
     myFilesMajor.add(stCString("AppleGothic.ttf"));
     // chinese
     myFilesMajor.add(stCString("华文仿宋.ttf"));
+#elif defined(__ANDROID__)
+    myFolders.add(stCString("/system/fonts"));
+
+    // western
+    myFilesMajor.add(stCString("DroidSerif-Regular.ttf"));
+    myFilesMajor.add(stCString("DroidSerif-Bold.ttf"));
+    myFilesMajor.add(stCString("DroidSerif-Italic.ttf"));
+    myFilesMajor.add(stCString("DroidSerif-BoldItalic.ttf"));
+    myFilesMajor.add(stCString("DroidSans.ttf"));
+    myFilesMajor.add(stCString("DroidSans-Bold.ttf"));
+    myFilesMajor.add(stCString("DroidSansMono.ttf"));
 #else
     myFolders.add(stCString("/usr/share/fonts"));
     myFolders.add(stCString("/usr/local/share/fonts"));
@@ -202,6 +213,10 @@ void StFTFontRegistry::init(const bool theToSearchAll) {
     aSerif.CJK     = findFont(stCString("STFangsong"));
     aSans .CJK     = findFont(stCString("STFangsong"));
     aMono .CJK     = findFont(stCString("STFangsong"));
+#elif defined(__ANDROID__)
+    aSerif.Western = findFont(stCString("Droid Serif"));
+    aSans .Western = findFont(stCString("Roboto"));
+    aMono .Western = findFont(stCString("Droid Sans Mono"));
 #else
     aSerif.Western = findFont(stCString("FreeSerif"));
     aSans .Western = findFont(stCString("FreeSans"));
