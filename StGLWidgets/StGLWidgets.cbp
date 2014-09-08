@@ -276,12 +276,6 @@
 		<Unit filename="StSubQueue.cpp" />
 		<Unit filename="shaders/StGLTextureButton.shf" />
 		<Unit filename="shaders/StGLTextureButton.shv" />
-		<Unit filename="shaders/flatGetColorBlend.shf" />
-		<Unit filename="shaders/flatImage.shf" />
-		<Unit filename="shaders/flatImage.shv" />
-		<Unit filename="shaders/sphereGetColorLinear.shf" />
-		<Unit filename="shaders/sphereImage.shf" />
-		<Unit filename="shaders/sphereImage.shv" />
 		<Unit filename="../include/StGLWidgets/StGLButton.h" />
 		<Unit filename="../include/StGLWidgets/StGLCheckbox.h" />
 		<Unit filename="../include/StGLWidgets/StGLCheckboxTextured.h" />

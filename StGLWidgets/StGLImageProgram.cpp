@@ -16,20 +16,25 @@ StGLImageProgram::StGLImageProgram(const StString& theTitle)
 : myColorScale(1.0f, 1.0f, 1.0f) {
     myTitle = theTitle;
 
-    const StGLResources aShaders("StGLWidgets");
-    StRawFile aTextFile(aShaders.getShaderFile("flatGetColorBlend.shf"));
-    if(!aTextFile.readFile()) {
-        //theCtx.pushError(StString("Shader file '") + aTextFile.getPath() + "' is not found!");
-        ST_ERROR_LOG(StString("Shader file '") + aTextFile.getPath() + "' is not found!");
-    }
+    const char F_SHADER_GET_COLOR_BLEND[] =
+       "uniform sampler2D uTexture;\n"
+       "uniform vec4 uTexData;\n"
+       "uniform vec2 uTexelSize;\n"
+
+       "vec4 getColor(in vec2 texCoord) {\n"
+       "    if(texCoord.y < (uTexData.y + uTexelSize.y)) {\n"
+       "        return texture2D(uTexture, texCoord);\n"
+       "    }\n"
+       "    return mix(texture2D(uTexture, texCoord - vec2(0.0, uTexelSize.y)),\n"
+       "               texture2D(uTexture, texCoord), 0.5);\n"
+       "}\n\n";
 
     registerFragmentShaderPart(FragSection_GetColor, FragGetColor_Normal,
         "uniform sampler2D uTexture;\n"
         "vec4 getColor(in vec2 texCoord) {\n"
         "    return texture2D(uTexture, texCoord);\n"
         "}\n\n");
-    registerFragmentShaderPart(FragSection_GetColor, FragGetColor_Blend,
-        (const char* )aTextFile.getBuffer());
+    registerFragmentShaderPart(FragSection_GetColor, FragGetColor_Blend, F_SHADER_GET_COLOR_BLEND);
 
     registerFragmentShaderPart(FragSection_Correct, FragCorrect_Off,
         "void applyCorrection(inout vec4 color) {}\n\n");

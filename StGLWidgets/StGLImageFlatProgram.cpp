@@ -12,18 +12,47 @@
 
 StGLImageFlatProgram::StGLImageFlatProgram()
 : StGLImageProgram("StGLImageFlatProgram") {
-    const StGLResources aShaders("StGLWidgets");
-    StRawFile aVShaderFile(aShaders.getShaderFile("flatImage.shv"));
-    StRawFile aFShaderFile(aShaders.getShaderFile("flatImage.shf"));
-    if(!aVShaderFile.readFile()) {
-        //theCtx.pushError(StString("Shader file '") + aVShaderFile.getPath() + "' is not found!");
-        ST_ERROR_LOG(StString("Shader file '") + aVShaderFile.getPath() + "' is not found!");
-    }
-    if(!aFShaderFile.readFile()) {
-        //theCtx.pushError(StString("Shader file '") + aFShaderFile.getPath() + "' is not found!");
-        ST_ERROR_LOG(StString("Shader file '") + aFShaderFile.getPath() + "' is not found!");
-    }
+    const char V_SHADER_FLAT[] =
+       "uniform mat4 uProjMat;\n"
+       "uniform mat4 uModelMat;\n"
+       "uniform vec4 uTexData;\n"
+       "uniform vec4 uTexUVData;\n"
 
-    registerVertexShaderPart  (0,                0, (const char* )aVShaderFile.getBuffer());
-    registerFragmentShaderPart(FragSection_Main, 0, (const char* )aFShaderFile.getBuffer());
+       "attribute vec4 vVertex;\n"
+       "attribute vec2 vTexCoord;\n"
+
+       "varying vec2 fTexCoord;\n"
+       "varying vec2 fTexUVCoord;\n"
+
+       "void main(void) {\n"
+       "    fTexCoord   = uTexData.xy   + vTexCoord * uTexData.zw;\n"
+       "    fTexUVCoord = uTexUVData.xy + vTexCoord * uTexUVData.zw;\n"
+       "    gl_Position = uProjMat * uModelMat * vVertex;\n"
+       "}\n";
+
+    const char F_SHADER_FLAT[] =
+       "varying vec2 fTexCoord;\n"
+       "varying vec2 fTexUVCoord;\n"
+        // we split these functions for two reasons:
+        // - to change function code (like color conversion);
+        // - to optimize rendering on old hardware not supported conditions (GeForce FX for example).
+       "vec4 getColor(in vec2 texCoord);\n"
+       "void convertToRGB(inout vec4 theColor, in vec2 theTexUVCoord);\n"
+       "void applyCorrection(inout vec4 theColor);\n"
+       "void applyGamma(inout vec4 theColor);\n"
+
+       "void main(void) {\n"
+            // extract color from main texture
+       "    vec4 aColor = getColor(fTexCoord);\n"
+            // convert from alien color model (like YUV) to RGB
+       "    convertToRGB(aColor, fTexUVCoord);\n"
+            // color processing (saturation, brightness, etc)
+       "    applyCorrection(aColor);\n"
+            // gamma correction
+       "    applyGamma(aColor);\n"
+       "    gl_FragColor = aColor;\n"
+       "}";
+
+    registerVertexShaderPart  (0,                0, V_SHADER_FLAT);
+    registerFragmentShaderPart(FragSection_Main, 0, F_SHADER_FLAT);
 }
