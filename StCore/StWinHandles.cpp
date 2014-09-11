@@ -51,7 +51,18 @@ StWinGlrc::StWinGlrc(EGLDisplay theDisplay,
                + "  Extensions:  " + eglQueryString(myDisplay, EGL_EXTENSIONS));
 
     const EGLint aConfigAttribs[] = {
+        EGL_RED_SIZE,   8,
+        EGL_GREEN_SIZE, 8,
+        EGL_BLUE_SIZE,  8,
+        EGL_ALPHA_SIZE, 0,
         EGL_DEPTH_SIZE, theGlDepthSize,
+    #if defined(GL_ES_VERSION_2_0)
+        EGL_CONFORMANT,      EGL_OPENGL_ES2_BIT,
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+    #else
+        EGL_CONFORMANT,      EGL_OPENGL_BIT,
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
+    #endif
         EGL_NONE
     };
 
@@ -124,6 +135,14 @@ StWinGlrc::StWinGlrc(EGLDisplay theDisplay,
         EGLint* anEglCtxAttribs = NULL;
     #endif
         myRC = eglCreateContext(myDisplay, myConfig, EGL_NO_CONTEXT, anEglCtxAttribs);
+    /*#if defined(GL_ES_VERSION_2_0)
+        if(myRC == EGL_NO_CONTEXT) {
+            myRC = eglCreateContext(myDisplay, myConfig, EGL_NO_CONTEXT, NULL);
+            if(myRC != EGL_NO_CONTEXT) {
+                ST_ERROR_LOG("EGL, eglCreateContext FAILED when ES 2.0 is requested!");
+            }
+        }
+    #endif*/
     }
 
     if(myRC == EGL_NO_CONTEXT) {
