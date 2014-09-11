@@ -78,6 +78,14 @@ StFTFontRegistry::StFTFontRegistry() {
     myFilesMajor.add(stCString("DroidSans.ttf"));
     myFilesMajor.add(stCString("DroidSans-Bold.ttf"));
     myFilesMajor.add(stCString("DroidSansMono.ttf"));
+
+    // following have been found on recent plates, but not on old smartphones - so mark them optional
+
+    // korean
+    myFilesMinor.add(stCString("NanumGothic.ttf"));
+
+    // chinese
+    myFilesMinor.add(stCString("DroidSansFallback.ttf"));
 #else
     myFolders.add(stCString("/usr/share/fonts"));
     myFolders.add(stCString("/usr/local/share/fonts"));
@@ -217,6 +225,12 @@ void StFTFontRegistry::init(const bool theToSearchAll) {
     aSerif.Western = findFont(stCString("Droid Serif"));
     aSans .Western = findFont(stCString("Roboto"));
     aMono .Western = findFont(stCString("Droid Sans Mono"));
+    aSerif.Korean  = findFont(stCString("NanumGothic")); // no serif
+    aSans .Korean  = findFont(stCString("NanumGothic"));
+    aMono .Korean  = findFont(stCString("NanumGothic"));
+    aSerif.CJK     = findFont(stCString("Droid Sans Fallback"));
+    aSans .CJK     = findFont(stCString("Droid Sans Fallback"));
+    aMono .CJK     = findFont(stCString("Droid Sans Fallback"));
 #else
     aSerif.Western = findFont(stCString("FreeSerif"));
     aSans .Western = findFont(stCString("FreeSans"));
