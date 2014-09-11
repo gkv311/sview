@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- BEGIN_INCLUDE(manifest) -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.sview" android:versionCode="1" android:versionName="14.09">
+    <uses-sdk android:minSdkVersion="15" />
+    <application android:label="@string/app_name" android:hasCode="true" android:icon="@drawable/ic_launcher">
+        <activity android:name="com.sview.MainActivity" android:label="@string/app_name" android:configChanges="orientation|keyboardHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:mimeType="application/vnd.google.panorama360+jpg"/>
+                <data android:mimeType="image/*"/>
+                <data android:mimeType="video/*"/>
+                <data android:mimeType="audio/*"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="" />
+                <data android:scheme="file" />
+                <data android:scheme="ftp" />
+                <data android:scheme="content" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:mimeType="video/*" />
+                <data android:mimeType="audio/*" />
+                <data android:mimeType="*/avi" />
+                <data android:mimeType="*/mkv" />
+                <data android:mimeType="application/mp4" />
+                <data android:mimeType="application/mpeg*" />
+                <data android:mimeType="application/ogg" />
+                <data android:mimeType="application/vnd.3gp*" />
+                <data android:mimeType="application/vnd.apple.mpegurl" />
+                <data android:mimeType="application/x-iso9660-image" />
+                <data android:mimeType="application/x-extension-mp4" />
+                <data android:mimeType="application/x-flac" />
+                <data android:mimeType="application/x-matroska" />
+                <data android:mimeType="application/x-mpegURL" />
+                <data android:mimeType="application/x-ogg" />
+                <data android:mimeType="application/x-quicktimeplayer" />
+                <data android:mimeType="application/x-shockwave-flash" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="" />
+                <data android:scheme="file" />
+                <data android:scheme="ftp" />
+                <data android:scheme="content" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:host="*" />
+
+                <!-- image -->
+                <data android:pathPattern=".*\\.mpo" />
+                <data android:pathPattern=".*\\.jps" />
+                <data android:pathPattern=".*\\.pns" />
+                <data android:pathPattern=".*\\.webp" />
+
+                <!-- video -->
+                <data android:pathPattern=".*\\.asf" />
+                <data android:pathPattern=".*\\.avi" />
+                <data android:pathPattern=".*\\.f4v" />
+                <data android:pathPattern=".*\\.flv" />
+                <data android:pathPattern=".*\\.m3u8" />
+                <data android:pathPattern=".*\\.mkv" />
+                <data android:pathPattern=".*\\.mov" />
+                <data android:pathPattern=".*\\.mp2" />
+                <data android:pathPattern=".*\\.mp4" />
+                <data android:pathPattern=".*\\.mpe" />
+                <data android:pathPattern=".*\\.mpeg" />
+                <data android:pathPattern=".*\\.mpg" />
+                <data android:pathPattern=".*\\.mpv2" />
+                <data android:pathPattern=".*\\.ogm" />
+                <data android:pathPattern=".*\\.ogv" />
+                <data android:pathPattern=".*\\.ts" />
+                <data android:pathPattern=".*\\.vob" />
+                <data android:pathPattern=".*\\.webm" />
+                <data android:pathPattern=".*\\.wmv" />
+                <data android:pathPattern=".*\\.ASF" />
+                <data android:pathPattern=".*\\.AVI" />
+                <data android:pathPattern=".*\\.F4V" />
+                <data android:pathPattern=".*\\.FLV" />
+                <data android:pathPattern=".*\\.M3U8" />
+                <data android:pathPattern=".*\\.MKV" />
+                <data android:pathPattern=".*\\.MOV" />
+                <data android:pathPattern=".*\\.MP2" />
+                <data android:pathPattern=".*\\.MP4" />
+                <data android:pathPattern=".*\\.MPE" />
+                <data android:pathPattern=".*\\.MPEG" />
+                <data android:pathPattern=".*\\.MPG" />
+                <data android:pathPattern=".*\\.MPV2" />
+                <data android:pathPattern=".*\\.OGM" />
+                <data android:pathPattern=".*\\.OGV" />
+                <data android:pathPattern=".*\\.TS" />
+                <data android:pathPattern=".*\\.VOB" />
+                <data android:pathPattern=".*\\.WEBM" />
+                <data android:pathPattern=".*\\.WMV" />
+
+                <!-- audio -->
+                <data android:pathPattern=".*\\.ac3" />
+                <data android:pathPattern=".*\\.aob" />
+                <data android:pathPattern=".*\\.ape" />
+                <data android:pathPattern=".*\\.dts" />
+                <data android:pathPattern=".*\\.flac" />
+                <data android:pathPattern=".*\\.m4a" />
+                <data android:pathPattern=".*\\.mka" />
+                <data android:pathPattern=".*\\.mpa" />
+                <data android:pathPattern=".*\\.mp3" />
+                <data android:pathPattern=".*\\.mpga" />
+                <data android:pathPattern=".*\\.ogg" />
+                <data android:pathPattern=".*\\.wav" />
+                <data android:pathPattern=".*\\.wma" />
+                <data android:pathPattern=".*\\.AC3" />
+                <data android:pathPattern=".*\\.AOB" />
+                <data android:pathPattern=".*\\.APE" />
+                <data android:pathPattern=".*\\.DTS" />
+                <data android:pathPattern=".*\\.FLAC" />
+                <data android:pathPattern=".*\\.M4A" />
+                <data android:pathPattern=".*\\.MKA" />
+                <data android:pathPattern=".*\\.MPA" />
+                <data android:pathPattern=".*\\.MP3" />
+                <data android:pathPattern=".*\\.MPGA" />
+                <data android:pathPattern=".*\\.OGG" />
+                <data android:pathPattern=".*\\.WAV" />
+                <data android:pathPattern=".*\\.WMA" />
+            </intent-filter>
+        </activity>
+        <activity android:name="com.sview.StActivity" android:label="@string/app_name" android:configChanges="orientation|keyboardHidden">
+            <!-- Tell NativeActivity the name of or .so -->
+            <meta-data android:name="android.app.lib_name" android:value="sview" />
+        </activity>
+    </application>
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+</manifest> 
+<!-- END_INCLUDE(manifest) -->

@@ -274,6 +274,10 @@
 			<Option target="LINUX_gcc_DEBUG" />
 		</Unit>
 		<Unit filename="StADLsdk.h" />
+		<Unit filename="StAndroidGlue.cpp">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
 		<Unit filename="StApplication.cpp" />
 		<Unit filename="StCocoaView.h">
 			<Option target="MAC_gcc" />
@@ -329,6 +333,10 @@
 		<Unit filename="StWindow.cpp" />
 		<Unit filename="StWindowImpl.cpp" />
 		<Unit filename="StWindowImpl.h" />
+		<Unit filename="StWindowImplAnd.cpp">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
 		<Unit filename="StWindowImplLin.cpp">
 			<Option target="LINUX_gcc" />
 			<Option target="LINUX_gcc_DEBUG" />

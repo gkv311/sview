@@ -33,6 +33,10 @@
     #include <sys/sysinfo.h>
 #endif
 
+#if defined(__ANDROID__)
+    struct AInputEvent;
+#endif
+
 #ifdef __OBJC__
     @class NSOpenGLContext;
 #else
@@ -109,7 +113,10 @@ class StWindowImpl {
     ST_LOCAL void updateWindowPos();
     ST_LOCAL void updateActiveState();
     ST_LOCAL void updateBlockSleep();
-#if defined(__linux__) && !defined(__ANDROID__)
+#if defined(__ANDROID__)
+    ST_LOCAL void onAndroidInput(const AInputEvent* theEvent, bool& theIsProcessed);
+    ST_LOCAL void onAndroidCommand(int32_t theCommand);
+#elif defined(__linux__)
     ST_LOCAL void parseXDNDClientMsg();
     ST_LOCAL void parseXDNDSelectionMsg();
 

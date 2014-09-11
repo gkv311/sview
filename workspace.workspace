@@ -110,5 +110,6 @@
 			<Depends filename="StImageViewer/StImageViewer.cbp" />
 			<Depends filename="StMoviePlayer/StMoviePlayer.cbp" />
 		</Project>
+		<Project filename="sview/sViewMake.cbp">
 	</Workspace>
 </CodeBlocks_workspace_file>

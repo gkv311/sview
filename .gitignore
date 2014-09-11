@@ -12,6 +12,7 @@
 *_build_log.html
 *.exe
 *.dll
+*.so
 *.zip
 *.7z
 Doxygen/
@@ -46,3 +47,5 @@ StDiagnostics/obj/
 StCADViewer/obj/
 StBrowserPlugin/obj/
 sview/obj/
+sview/gen/
+sview/.settings/

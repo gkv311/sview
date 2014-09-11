@@ -274,6 +274,10 @@
 		</Linker>
 		<Unit filename="Contents/Info.plist" />
 		<Unit filename="Contents/PkgInfo" />
+		<Unit filename="jni/main.cpp">
+			<Option compile="0" />
+			<Option link="0" />
+		</Unit>
 		<Unit filename="Resources/English.lproj/MainMenu.xib" />
 		<Unit filename="Resources/sView.icns" />
 		<Unit filename="Resources/sView_Media.icns" />

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -19,16 +19,21 @@
 #ifndef __StNativeWin_t_h_
 #define __StNativeWin_t_h_
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     #include <windows.h>
     typedef HWND    StNativeWin_t;
-#elif(defined(__APPLE__))
+#elif defined(__APPLE__)
     #ifdef __OBJC__
         @class NSView;
     #else
         struct NSView;
     #endif
     typedef NSView* StNativeWin_t;
+#elif defined(__ANDROID__)
+    //struct ANativeWindow;
+    //typedef ANativeWindow* StNativeWin_t;
+    class StAndroidGlue;
+    typedef StAndroidGlue* StNativeWin_t;
 #else
     typedef void*   StNativeWin_t; // Window
 #endif
