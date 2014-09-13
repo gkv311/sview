@@ -16,6 +16,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#if defined(__ANDROID__)
+
 #include <StCore/StAndroidGlue.h>
 
 #include <StTemplates/StHandle.h>
@@ -368,3 +370,5 @@ void* StAndroidGlue::saveInstanceState(size_t* theOutLen) {
     pthread_mutex_unlock(&myMutex);
     return aSavedState;
 }
+
+#endif // __ANDROID__

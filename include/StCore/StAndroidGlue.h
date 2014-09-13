@@ -16,6 +16,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
+#if defined(__ANDROID__)
+
 #ifndef __StAndroidGlue_h_
 #define __StAndroidGlue_h_
 
@@ -299,3 +301,4 @@ class StAndroidGlue {
 };
 
 #endif // __StAndroidGlue_h_
+#endif // __ANDROID__

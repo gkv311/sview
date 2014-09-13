@@ -187,43 +187,47 @@ class StGLProgramMatrix : public StGLResource {
         myIsActiveValid = false;
         StString aVertSrc, aFragSrc, aCfg;
         for(int aSectionIter = 0; aSectionIter < theNbVShaderSections; ++aSectionIter) {
-            StArrayList< StHandle<StGLVertexShader> >& aShaders = myVShaderParts[aSectionIter];
-            const StArrayList<StString>&               aSources = myVShaderSrc  [aSectionIter];
+            const StArrayList<StString>& aSources = myVShaderSrc[aSectionIter];
             if(!aSources.isEmpty()) {
                 const int anActiveSrc = myVShader[aSectionIter];
                 aVertSrc += aSources.getValue(anActiveSrc);
                 aCfg     += anActiveSrc;
             }
+        #if defined(__ST_DEBUG_SHADERS__) && !defined(ST_HAVE_GLES2) && !defined(__ANDROID__)
             if(!myIsFirstInit) {
                 continue;
             }
 
+            StArrayList< StHandle<StGLVertexShader> >& aShaders = myVShaderParts[aSectionIter];
             for(size_t aShaderIter = 0; aShaderIter < aSources.size(); ++aShaderIter) {
                 const StString& aSource = aSources[aShaderIter];
                 StHandle<StGLVertexShader> aShader = new StGLVertexShader(myTitle + "::VS" + aSectionIter + "::" + aShaderIter);
                 aShader->init(theCtx, aSource.toCString());
                 aShaders.add(aShader);
             }
+        #endif
         }
 
         for(int aSectionIter = 0; aSectionIter < theNbFShaderSections; ++aSectionIter) {
-            StArrayList< StHandle<StGLFragmentShader> >& aShaders = myFShaderParts[aSectionIter];
-            const StArrayList<StString>&                 aSources = myFShaderSrc  [aSectionIter];
+            const StArrayList<StString>& aSources = myFShaderSrc[aSectionIter];
             if(!aSources.isEmpty()) {
                 const int anActiveSrc = myFShader[aSectionIter];
                 aFragSrc += aSources.getValue(anActiveSrc);
                 aCfg     += anActiveSrc;
             }
+        #if defined(__ST_DEBUG_SHADERS__) && !defined(ST_HAVE_GLES2) && !defined(__ANDROID__)
             if(!myIsFirstInit) {
                 continue;
             }
 
+            StArrayList< StHandle<StGLFragmentShader> >& aShaders = myFShaderParts[aSectionIter];
             for(size_t aShaderIter = 0; aShaderIter < aSources.size(); ++aShaderIter) {
                 const StString& aSource = aSources[aShaderIter];
                 StHandle<StGLFragmentShader> aShader = new StGLFragmentShader(myTitle + "::FS" + aSectionIter + "::" + aShaderIter);
                 aShader->init(theCtx, aSource.toCString());
                 aShaders.add(aShader);
             }
+        #endif
         }
         myIsFirstInit = false;
 
@@ -284,11 +288,11 @@ class StGLProgramMatrix : public StGLResource {
     int                                         myFShader[theNbFShaderSections];      //!< currently activated code parts in each section of Fragment Shader
 
     //std::map< int, StHandle<theProgramClass_t> > myPrograms;      //!< map of initialized GLSL programs
-    StHandle<theProgramClass_t>                  myActiveProgram;                     //!< currently active program
-    bool                                         myIsFirstInit;
-    bool                                         myIsActiveValid;
+    StHandle<theProgramClass_t>                 myActiveProgram;                      //!< currently active program
+    bool                                        myIsFirstInit;
+    bool                                        myIsActiveValid;
 
-    StString                                     myTitle;                             //!< shader program title prefix
+    StString                                    myTitle;                              //!< shader program title prefix
 
 };
 

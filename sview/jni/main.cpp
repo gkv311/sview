@@ -4,6 +4,8 @@
  * Copyright © Kirill Gavrilov, 2014
  */
 
+#if defined(__ANDROID__)
+
 #include <jni.h>
 
 #include <StCore/StAndroidGlue.h>
@@ -56,3 +58,5 @@ ST_CEXPORT void ANativeActivity_onCreate(ANativeActivity* theActivity,
     anApp->onAppEntry = app_entry_my;
     anApp->start();
 }
+
+#endif // __ANDROID__
