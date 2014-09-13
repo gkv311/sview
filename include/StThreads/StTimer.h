@@ -17,7 +17,7 @@
     #include <sys/time.h>
     #include <stdlib.h> // just for NULL declaration
 
-    #if !defined(__APPLE__) && defined(_POSIX_MONOTONIC_CLOCK) && (_POSIX_MONOTONIC_CLOCK > 0)
+    #if (!defined(__APPLE__) && defined(_POSIX_MONOTONIC_CLOCK) && (_POSIX_MONOTONIC_CLOCK > 0)) || defined(__ANDROID__)
         #define ST_HAVE_MONOTONIC_CLOCK
     #endif
 
