@@ -867,7 +867,10 @@ StPointD_t StWindowImpl::getMousePos() {
     return StPointD_t((aCursor.x - double(aWinRect.left())) / double(aWinRect.width()),
                       (aCursor.y - double(aWinRect.top()))  / double(aWinRect.height()));
 #elif defined(__ANDROID__)
-    ///
+    (void )aWinRect;
+    if(myMaster.hWindowGl != NULL) {
+        return myMousePt;
+    }
 #elif defined(__linux__)
     if(myMaster.hWindowGl != 0) {
         Window childReturn;
