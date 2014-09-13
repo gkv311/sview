@@ -64,8 +64,26 @@ class StThread {
      * Returns the CPU architecture used to build the program (may not match the system).
      */
     ST_LOCAL static const char* getArchString() {
-    #if (defined(_WIN64) || defined(__WIN64__))\
-     || (defined(_LP64)  || defined(__LP64__))
+    #if defined(__arm__)
+        #if defined(__ARM_ARCH_8A__)
+            #if defined(__LP64__)
+                return "ARMv8-A 64-bit";
+            #else
+                return "ARMv8-A 32-bit";
+            #endif
+        #elif defined(__ARM_ARCH_7A__)
+            return "ARMv7-A 32-bit";
+        #elif defined(__ARM_ARCH_7R__)
+            return "ARMv7-R 32-bit";
+        #elif defined(__ARM_ARCH_7M__)
+            return "ARMv7-M 32-bit";
+        #elif defined(__LP64__)
+            return "ARM 64-bit";
+        #else
+            return "ARM 32-bit";
+        #endif
+    #elif (defined(_WIN64) || defined(__WIN64__))\
+       || (defined(_LP64)  || defined(__LP64__))
         return "x86_64";
     #else
         return "x86";
