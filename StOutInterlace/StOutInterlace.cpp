@@ -218,7 +218,7 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     StWindow::signals.onAnotherMonitor = stSlot(this, &StOutInterlace::doNewMonitor);
 
     const StSearchMonitors& aMonitors = StWindow::getMonitors();
-    StTranslations aLangMap(ST_OUT_PLUGIN_NAME);
+    StTranslations aLangMap(getResourceManager(), ST_OUT_PLUGIN_NAME);
 
     myGlPrograms[DEVICE_HINTERLACE] = new StProgramFB("Row Interlace");
     myGlPrograms[DEVICE_VINTERLACE] = new StProgramFB("Column Interlace");

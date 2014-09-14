@@ -8,35 +8,41 @@
 
 #include <StSettings/StTranslations.h>
 
+#include <StFile/StFolder.h>
 #include <StFile/StRawFile.h>
+#include <StThreads/StProcess.h>
 
 namespace {
     static const char ST_GLOBAL_SETTINGS_GROUP[] = "sview";
     static const char ST_SETTING_LANGUAGE[]      = "language";
-};
+}
 
 const StString StTranslations::DEFAULT_EXTENSION =  "lng";
 const StString StTranslations::DEFAULT_SUFFIX    = ".lng";
 
-StTranslations::StTranslations(const StString& theModuleName)
-: myModuleName(theModuleName),
+StTranslations::StTranslations(const StHandle<StResourceManager>& theResMgr,
+                               const StString&                    theModuleName)
+: myResMgr(theResMgr),
+  myModuleName(theModuleName),
   myWasReloaded(false) {
     params.language = new StInt32Param(0);
 
     // detect available translations
-    StFolder aLangRoot(StProcess::getStShareFolder() + "lang" + SYS_FS_SPLITTER);
-    StArrayList<StString> anExtensions(1);
-    anExtensions.add(StTranslations::DEFAULT_EXTENSION);
-    aLangRoot.init(anExtensions, 2);
-    for(size_t aNodeId = 0; aNodeId < aLangRoot.size(); ++aNodeId) {
-        const StFileNode* aFileNode = aLangRoot.getValue(aNodeId);
-        if(!aFileNode->isFolder()) {
-            continue;
-        }
+    StArrayList<StString> aFolders;
+    myResMgr->listSubFolders("lang", aFolders);
+    for(size_t aNodeId = 0; aNodeId < aFolders.size(); ++aNodeId) {
+        myLangFolderList.add(aFolders[aNodeId]);
 
-        myLangFolderList.add(aFileNode->getSubPath());
-        const StString aName = StRawFile::readTextFile(aFileNode->getPath() + SYS_FS_SPLITTER + "language.lng");
-        myLangList.add(aName.isEmpty() ? aFileNode->getSubPath() : aName);
+        const StString aNameFile = StString("lang" ST_FILE_SPLITTER) + aFolders[aNodeId] + ST_FILE_SPLITTER "language.lng";
+        StHandle<StResource> aRes = myResMgr->getResource(aNameFile);
+        StString aName;
+        if(!aRes.isNull()
+        &&  aRes->read()) {
+            const char*  aSrc = (const char* )aRes->getData();
+            const size_t aLen = (size_t      )aRes->getSize();
+            aName = StString(aSrc, aLen);
+        }
+        myLangList.add(aName.isEmpty() ? aFolders[aNodeId] : aName);
     }
 
     if(myLangList.isEmpty()) {
@@ -56,10 +62,17 @@ StTranslations::StTranslations(const StString& theModuleName)
     }
 
     const StString& aFolderName = myLangFolderList[anIdInList];
-    StLangMap::open(StProcess::getStShareFolder()
-                  + "lang"       + SYS_FS_SPLITTER
-                  + aFolderName  + SYS_FS_SPLITTER
-                  + myModuleName + StTranslations::DEFAULT_SUFFIX);
+    const StString  aResName    = StString()
+                                + "lang"       + SYS_FS_SPLITTER
+                                + aFolderName  + SYS_FS_SPLITTER
+                                + myModuleName + StTranslations::DEFAULT_SUFFIX;
+    StHandle<StResource> aRes = myResMgr->getResource(aResName);
+    if(!aRes.isNull()
+    &&  aRes->read()) {
+        const char* aSrc = (const char* )aRes->getData();
+        const int   aLen = aRes->getSize();
+        read(aSrc, aLen);
+    }
 
     // connect signal
     params.language->signals.onChanged.connect(this, &StTranslations::setLanguage);
@@ -84,9 +97,17 @@ void StTranslations::setLanguage(const int32_t theNewLang) {
 
     // reload translation file
     StLangMap::clear();
-    StLangMap::open(StProcess::getStShareFolder()
-                  + "lang"       + SYS_FS_SPLITTER
-                  + aFolderName  + SYS_FS_SPLITTER
-                  + myModuleName + StTranslations::DEFAULT_SUFFIX);
+
+    const StString aResName = StString()
+                            + "lang" ST_FILE_SPLITTER
+                            + aFolderName  + SYS_FS_SPLITTER
+                            + myModuleName + StTranslations::DEFAULT_SUFFIX;
+    StHandle<StResource> aRes = myResMgr->getResource(aResName);
+    if(!aRes.isNull()
+    &&  aRes->read()) {
+        const char* aSrc = (const char* )aRes->getData();
+        const int   aLen = aRes->getSize();
+        read(aSrc, aLen);
+    }
     myWasReloaded = true;
 }

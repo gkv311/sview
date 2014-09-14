@@ -115,6 +115,12 @@ class StResourceManager {
      */
     ST_CPPEXPORT StHandle<StResource> getResource(const StString& theName) const;
 
+    /**
+     * Read content of specified folder.
+     */
+    ST_CPPEXPORT void listSubFolders(const StString&        theFolder,
+                                     StArrayList<StString>& theSubFolder) const;
+
         protected:
 
     StString myRoot;

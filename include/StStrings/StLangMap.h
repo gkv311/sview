@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,18 +11,18 @@
 
 #include <map> // STL map template
 
-#include "StString.h"
+#include <StStrings/StString.h>
 
 class StLangMap {
 
         public:
 
     ST_CPPEXPORT StLangMap();
-    ST_CPPEXPORT StLangMap(const StString& theLngFilePath);
 
     ST_CPPEXPORT virtual ~StLangMap();
 
-    ST_CPPEXPORT bool open(const StString& theLngFilePath);
+    ST_CPPEXPORT bool read(const char* theContent,
+                           const int   theLen);
 
     /**
      * If id does not match the key of any element in the container, the function

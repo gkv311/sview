@@ -312,7 +312,7 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
   myIsBroken(false),
   myIsStereoOn(false) {
     const StSearchMonitors& aMonitors = StWindow::getMonitors();
-    StTranslations aLangMap(ST_OUT_PLUGIN_NAME);
+    StTranslations aLangMap(getResourceManager(), ST_OUT_PLUGIN_NAME);
 
     // about string
     StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - Distorted Output module");

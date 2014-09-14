@@ -9,6 +9,7 @@
 #include <StThreads/StResourceManager.h>
 
 #include <StThreads/StProcess.h>
+#include <StFile/StFolder.h>
 
 #include <limits>
 #ifdef max
@@ -122,6 +123,38 @@ StHandle<StResource> StResourceManager::getResource(const StString& theName) con
     }
 #endif
     return StHandle<StResource>();
+}
+
+void StResourceManager::listSubFolders(const StString&        theFolder,
+                                       StArrayList<StString>& theSubFolders) const {
+    const StString aPath = myRoot + theFolder;
+    StFolder aFileDir(aPath);
+    StArrayList<StString> anExtensions(1);
+    aFileDir.init(anExtensions, 1, true);
+    for(size_t aNodeId = 0; aNodeId < aFileDir.size(); ++aNodeId) {
+        const StFileNode* aFileNode = aFileDir.getValue(aNodeId);
+        if(aFileNode->isFolder()) {
+            theSubFolders.add(aFileNode->getSubPath());
+        }
+    }
+    if(aFileDir.size() != 0) {
+        return;
+    }
+#if defined(__ANDROID__)
+    /*AAssetDir* anAssetDir = AAssetManager_openDir(myAssetMgr, aPath.toCString());
+    if(anAssetDir != NULL) {
+        for(const char* aSubFileAbsolute = AAssetDir_getNextFileName(anAssetDir); aSubFileAbsolute != NULL;
+            StString aFolder, aName;
+            StFileNode::getFolderAndFile(aSubFileAbsolute, aFolder, aName);
+            AAssetDir* aSubDir = AAssetManager_openDir(myAssetMgr, aSubFileAbsolute);
+            if(aSubDir != NULL) {
+                AAssetDir_close(aSubDir);
+                theSubFolders.add(aFileNode->getSubPath());
+            }
+        }
+        AAssetDir_close(anAssetDir);
+    }*/
+#endif
 }
 
 StResource::StResource(const StString& theName,

@@ -44,14 +44,16 @@ class StFolder : public StFileNode {
      * @param theDeep       Recursion level to read subfolders
      */
     ST_CPPEXPORT void init(const StArrayList<StString>& theExtensions,
-                           int theDeep = 1);
+                           const int                    theDeep = 1,
+                           const bool                   theToAddEmptyFolders = false);
 
         private:
 
     ST_LOCAL void addItem(const StArrayList<StString>& theExtensions,
-                          int theDeep,
+                          int             theDeep,
                           const StString& theSearchFolderPath,
-                          const StString& theCurrentItemName);
+                          const StString& theCurrentItemName,
+                          const bool      theToAddEmptyFolders);
 
 };
 

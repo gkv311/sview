@@ -429,7 +429,7 @@ StOutPageFlip::StOutPageFlip(const StHandle<StResourceManager>& theResMgr,
                              const StNativeWin_t                theParentWindow)
 : StWindow(theResMgr, theParentWindow),
   mySettings(new StSettings(ST_OUT_PLUGIN_NAME)),
-  myLangMap(ST_OUT_PLUGIN_NAME),
+  myLangMap(theResMgr, ST_OUT_PLUGIN_NAME),
   myDevice(DEVICE_AUTO),
   myToSavePlacement(theParentWindow == (StNativeWin_t )NULL),
   myToDrawStereo(false),

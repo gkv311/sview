@@ -121,7 +121,7 @@ StGLMenu* StCADViewerGUI::createLanguageMenu() {
 StCADViewerGUI::StCADViewerGUI(StCADViewer* thePlugin)
 : StGLRootWidget(thePlugin->myResMgr),
   myPlugin(thePlugin),
-  myLangMap(new StTranslations(StCADViewer::ST_DRAWER_PLUGIN_NAME)),
+  myLangMap(new StTranslations(thePlugin->myResMgr, StCADViewer::ST_DRAWER_PLUGIN_NAME)),
   myMouseDescr(NULL),
   myMsgStack(NULL),
   myMenu0Root(NULL),

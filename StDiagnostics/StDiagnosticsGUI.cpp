@@ -26,13 +26,13 @@
 StDiagnosticsGUI::StDiagnosticsGUI(StDiagnostics* thePlugin)
 : StGLRootWidget(thePlugin->myResMgr),
   myPlugin(thePlugin),
-  myLangMap(new StTranslations(StDiagnostics::ST_DRAWER_PLUGIN_NAME)),
+  myLangMap(new StTranslations(thePlugin->myResMgr, StDiagnostics::ST_DRAWER_PLUGIN_NAME)),
   myGeomWidget(NULL),
   myFpsWidget(NULL),
   myCntWidgetLT(NULL),
   myCntWidgetBR(NULL),
   myFrameCounter(0) {
-    myGeomWidget  = new StGeometryTest(this);
+    myGeomWidget = new StGeometryTest(this);
 
     // FPS widget
     myFpsWidget = new StGLFpsLabel(this);

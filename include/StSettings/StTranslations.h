@@ -10,8 +10,7 @@
 #define __StTranslations_h_
 
 #include <StStrings/StLangMap.h>
-#include <StThreads/StProcess.h>
-#include <StFile/StFolder.h>
+#include <StThreads/StResourceManager.h>
 #include <StSettings/StSettings.h>
 
 /**
@@ -25,9 +24,11 @@ class StTranslations : public StLangMap {
 
     /**
      * Main constructor.
+     * @param theResMgr     file resources manager
      * @param theModuleName module name, the subfolder where translations files should be placed
      */
-    ST_CPPEXPORT StTranslations(const StString& theModuleName);
+    ST_CPPEXPORT StTranslations(const StHandle<StResourceManager>& theResMgr,
+                                const StString&                    theModuleName);
 
     /**
      * Destructor.
@@ -84,6 +85,8 @@ class StTranslations : public StLangMap {
 
         private:
 
+    StHandle<StResourceManager>
+                          myResMgr;         //!< file resource manager
     StString              myModuleName;     //!< module name like 'StImageViewer'
     StArrayList<StString> myLangList;       //!< available (found) translations
     StArrayList<StString> myLangFolderList; //!< translation files

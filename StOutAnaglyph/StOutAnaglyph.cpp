@@ -116,7 +116,7 @@ StOutAnaglyph::StOutAnaglyph(const StHandle<StResourceManager>& theResMgr,
   myToSavePlacement(theParentWindow == (StNativeWin_t )NULL),
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false) {
-    StTranslations aLangMap(ST_OUT_PLUGIN_NAME);
+    StTranslations aLangMap(getResourceManager(), ST_OUT_PLUGIN_NAME);
 
     myStereoProgram = &mySimpleAnaglyph;
 

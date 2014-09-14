@@ -122,7 +122,7 @@ StOutIZ3D::StOutIZ3D(const StHandle<StResourceManager>& theResMgr,
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false) {
     const StSearchMonitors& aMonitors = StWindow::getMonitors();
-    StTranslations aLangMap(ST_OUT_PLUGIN_NAME);
+    StTranslations aLangMap(getResourceManager(), ST_OUT_PLUGIN_NAME);
 
     // about string
     StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - iZ3D Output module");

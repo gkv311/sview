@@ -65,7 +65,8 @@ bool StFolder::isFolder(const StCString& thePath) {
 void StFolder::addItem(const StArrayList<StString>& theExtensions,
                        int theDeep,
                        const StString& theSearchFolderPath,
-                       const StString& theCurrentItemName) {
+                       const StString& theCurrentItemName,
+                       const bool      theToAddEmptyFolders) {
     if(theCurrentItemName == IGNORE_DIR_CURR_NAME || theCurrentItemName == IGNORE_DIR_UP_NAME) {
         return;
     }
@@ -75,12 +76,16 @@ void StFolder::addItem(const StArrayList<StString>& theExtensions,
         if(theDeep > 1) {
             StFolder* aSubFolder = new StFolder(theCurrentItemName, this);
             aSubFolder->init(theExtensions, theDeep - 1);
-            if(aSubFolder->size() > 0) {
+            if(aSubFolder->size() > 0
+            || theToAddEmptyFolders) {
                 add(aSubFolder);
             } else {
                 // ignore empty folders
                 delete aSubFolder;
             }
+        } else if(theToAddEmptyFolders) {
+            StFolder* aSubFolder = new StFolder(theCurrentItemName, this);
+            add(aSubFolder);
         }
     } else {
         StString anItemExtension = StFileNode::getExtension(theCurrentItemName);
@@ -93,7 +98,9 @@ void StFolder::addItem(const StArrayList<StString>& theExtensions,
     }
 }
 
-void StFolder::init(const StArrayList<StString>& theExtensions, int theDeep) {
+void StFolder::init(const StArrayList<StString>& theExtensions,
+                    const int                    theDeep,
+                    const bool                   theToAddEmptyFolders) {
     // clean up old list...
     clear();
     StString aSearchFolderPath = getPath();
@@ -106,7 +113,7 @@ void StFolder::init(const StArrayList<StString>& theExtensions, int theDeep) {
         hasFile = FindNextFileW(hFind, &aFindFile)) {
         //
         StString aCurrItemName(aFindFile.cFileName);
-        addItem(theExtensions, theDeep, aSearchFolderPath, aCurrItemName);
+        addItem(theExtensions, theDeep, aSearchFolderPath, aCurrItemName, theToAddEmptyFolders);
     }
     FindClose(hFind);
 #else
@@ -123,7 +130,7 @@ void StFolder::init(const StArrayList<StString>& theExtensions, int theDeep) {
     #else
         StString aCurrItemName(aDirItem->d_name);
     #endif
-        addItem(theExtensions, theDeep, aSearchFolderPath, aCurrItemName);
+        addItem(theExtensions, theDeep, aSearchFolderPath, aCurrItemName, theToAddEmptyFolders);
     }
     closedir(aSearchedFolder);
 #endif
