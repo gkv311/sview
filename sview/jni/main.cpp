@@ -29,7 +29,7 @@ static void app_entry_my(StAndroidGlue* theApp) {
     anInfo->setPath(theApp->getDataPath());
     //anInfo = StApplication::parseProcessArguments();
 
-    StHandle<StResourceManager> aResMgr = new StResourceManager();
+    StHandle<StResourceManager> aResMgr = new StResourceManager(theApp->getActivity()->assetManager);
 
     StHandle<StApplication> anApp;
     const StMIMEList aMimeImg(ST_IMAGE_PLUGIN_MIME_CHAR);

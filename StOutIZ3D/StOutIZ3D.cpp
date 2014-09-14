@@ -22,7 +22,7 @@
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 
-#include <StAv/StAVImage.h>
+#include <StAV/StAVImage.h>
 
 #include <StSettings/StSettings.h>
 #include <StSettings/StTranslations.h>

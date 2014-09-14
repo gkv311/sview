@@ -113,6 +113,14 @@ class StAndroidGlue {
         return myDataPath;
     }
 
+
+    /**
+     * ANativeActivity object instance that this application is running in.
+     */
+    ST_LOCAL ANativeActivity* getActivity() const {
+        return myActivity;
+    }
+
     /**
      * When non-NULL, this is the window surface that the application can draw in.
      */

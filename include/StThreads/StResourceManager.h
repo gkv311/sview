@@ -12,6 +12,10 @@
 #include <StStrings/StString.h>
 #include <StFile/StRawFile.h>
 
+#if defined(__ANDROID__)
+struct AAssetManager;
+#endif
+
 /**
  * Resource interface.
  */
@@ -34,14 +38,14 @@ class StResource {
     /**
      * Resource name - file path relative to resources root.
      */
-    const StString& getName() const { return myName; }
+    ST_LOCAL const StString& getName() const { return myName; }
 
     /**
      * Absolute file path to access resource.
      * Might be invalid if resource is packed to archive.
      * @sa isFile()
      */
-    const StString& getPath() const { return myPath; }
+    ST_LOCAL const StString& getPath() const { return myPath; }
 
         public: //! @name methods to access resource content
 
@@ -53,12 +57,12 @@ class StResource {
     /**
      * Access data by pointer, should be called after read().
      */
-    const uint8_t* getData() const { return myData; }
+    ST_LOCAL const uint8_t* getData() const { return myData; }
 
     /**
      * Return resource size in bytes, should be called after read().
      */
-    int getSize() const { return mySize; }
+    ST_LOCAL int getSize() const { return mySize; }
 
         protected:
 
@@ -89,6 +93,13 @@ class StResourceManager {
      */
     ST_CPPEXPORT StResourceManager();
 
+#if defined(__ANDROID__)
+    /**
+     * Main constructor.
+     */
+    ST_CPPEXPORT StResourceManager(AAssetManager* theAssetMgr);
+#endif
+
     /**
      * Destructor.
      */
@@ -107,6 +118,9 @@ class StResourceManager {
         protected:
 
     StString myRoot;
+#if defined(__ANDROID__)
+    AAssetManager* myAssetMgr;
+#endif
 
 };
 
@@ -133,7 +147,7 @@ class StFileResource : public StResource {
      * (e.g. not packed into archive or binary).
      * @sa getPath()
      */
-    virtual bool isFile() const { return true; }
+    ST_LOCAL virtual bool isFile() const { return true; }
 
     /**
      * Read file content.

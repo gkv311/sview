@@ -62,6 +62,10 @@ StWindow::~StWindow() {
     delete myWin;
 }
 
+StNativeWin_t StWindow::getParentWindow() const {
+    return myWin->getParentWindow();
+}
+
 void StWindow::close() {
     myWin->close();
 }

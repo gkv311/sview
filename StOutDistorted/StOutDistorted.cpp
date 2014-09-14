@@ -28,7 +28,7 @@
 #include <StSettings/StEnumParam.h>
 #include <StCore/StSearchMonitors.h>
 #include <StVersion.h>
-#include <StAv/StAVImage.h>
+#include <StAV/StAVImage.h>
 
 namespace {
 

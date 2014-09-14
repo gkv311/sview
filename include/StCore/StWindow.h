@@ -145,6 +145,11 @@ class StWindow {
     ST_CPPEXPORT virtual ~StWindow();
 
     /**
+     * Return native parent window.
+     */
+    ST_CPPEXPORT StNativeWin_t getParentWindow() const;
+
+    /**
      * @param theTitle window title
      */
     ST_CPPEXPORT void setTitle(const StString& theTitle);
