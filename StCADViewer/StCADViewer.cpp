@@ -229,12 +229,18 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
 
     myGUI = new StCADViewerGUI(this);
 
+#if defined(__ANDROID__)
+    addRenderer(new StOutInterlace  (myResMgr, theParentWin));
+    addRenderer(new StOutAnaglyph   (myResMgr, theParentWin));
+    addRenderer(new StOutDistorted  (myResMgr, theParentWin));
+#else
     addRenderer(new StOutAnaglyph   (myResMgr, theParentWin));
     addRenderer(new StOutDual       (myResMgr, theParentWin));
     addRenderer(new StOutIZ3D       (myResMgr, theParentWin));
     addRenderer(new StOutInterlace  (myResMgr, theParentWin));
     addRenderer(new StOutDistorted  (myResMgr, theParentWin));
     addRenderer(new StOutPageFlipExt(myResMgr, theParentWin));
+#endif
 }
 
 bool StCADViewer::resetDevice() {

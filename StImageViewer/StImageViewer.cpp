@@ -129,12 +129,18 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadInt32 (ST_SETTING_SLIDESHOW_DELAY,    aSlideShowDelayInt);
     mySlideShowDelay = double(aSlideShowDelayInt);
 
+#if defined(__ANDROID__)
+    addRenderer(new StOutInterlace  (myResMgr, theParentWin));
+    addRenderer(new StOutAnaglyph   (myResMgr, theParentWin));
+    addRenderer(new StOutDistorted  (myResMgr, theParentWin));
+#else
     addRenderer(new StOutAnaglyph   (myResMgr, theParentWin));
     addRenderer(new StOutDual       (myResMgr, theParentWin));
     addRenderer(new StOutIZ3D       (myResMgr, theParentWin));
     addRenderer(new StOutInterlace  (myResMgr, theParentWin));
     addRenderer(new StOutDistorted  (myResMgr, theParentWin));
     addRenderer(new StOutPageFlipExt(myResMgr, theParentWin));
+#endif
 
     // no need in Depth buffer
     const StWinAttr anAttribs[] = {

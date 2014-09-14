@@ -102,10 +102,10 @@ public class MainActivity extends Activity {
         || !loadLibVerbose("StCore",          anErrors)
         || !loadLibVerbose("StOutAnaglyph",   anErrors)
         || !loadLibVerbose("StOutDistorted",  anErrors)
-        || !loadLibVerbose("StOutDual",       anErrors)
+        //|| !loadLibVerbose("StOutDual",       anErrors)
         || !loadLibVerbose("StOutInterlace",  anErrors)
-        || !loadLibVerbose("StOutIZ3D",       anErrors)
-        || !loadLibVerbose("StOutPageFlip",   anErrors)
+        //|| !loadLibVerbose("StOutIZ3D",       anErrors)
+        //|| !loadLibVerbose("StOutPageFlip",   anErrors)
         || !loadLibVerbose("StImageViewer",   anErrors)
         || !loadLibVerbose("StMoviePlayer",   anErrors)
         || !loadLibVerbose("sview",           anErrors)) {

@@ -294,12 +294,18 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.ToLoopSingle->signals.onChanged.connect(this, &StMoviePlayer::doSwitchLoopSingle);
     params.alDevice    ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchAudioDevice);
 
+#if defined(__ANDROID__)
+    addRenderer(new StOutInterlace  (myResMgr, theParentWin));
+    addRenderer(new StOutAnaglyph   (myResMgr, theParentWin));
+    addRenderer(new StOutDistorted  (myResMgr, theParentWin));
+#else
     addRenderer(new StOutAnaglyph   (myResMgr, theParentWin));
     addRenderer(new StOutDual       (myResMgr, theParentWin));
     addRenderer(new StOutIZ3D       (myResMgr, theParentWin));
     addRenderer(new StOutInterlace  (myResMgr, theParentWin));
     addRenderer(new StOutDistorted  (myResMgr, theParentWin));
     addRenderer(new StOutPageFlipExt(myResMgr, theParentWin));
+#endif
 
     // no need in Depth buffer
     const StWinAttr anAttribs[] = {
