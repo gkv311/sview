@@ -211,7 +211,8 @@ namespace {
             return false;
         }
 
-        myStApp = StMultiApp::getInstance(TheOpenInfo);
+        StHandle<StResourceManager> aResMgr = new StResourceManager();
+        myStApp = StMultiApp::getInstance(aResMgr, TheOpenInfo);
         if(!myStApp->open()) {
             myStApp.nullify();
             return false;

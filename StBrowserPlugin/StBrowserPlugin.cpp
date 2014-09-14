@@ -116,7 +116,7 @@ void NS_DestroyPluginInstance(NSPluginBase* aPlugin) {
 /**
  * Here plugin could provide more information to the browser about himself.
  */
-#if(defined(__linux__) || defined(__linux))
+#if defined(__linux__)
 NPError StBrowserPlugin::getValue(NPPVariable variable, void* value) {
     NPError err = NPERR_NO_ERROR;
     switch(variable) {
@@ -134,6 +134,7 @@ NPError StBrowserPlugin::getValue(NPPVariable variable, void* value) {
 
 StBrowserPlugin::StBrowserPlugin(NSPluginCreateData* theCreateDataStruct)
 : nppInstance(theCreateDataStruct->instance),
+  myResMgr(new StResourceManager()),
   myParentWin((StNativeWin_t )NULL),
 #ifdef _WIN32
   myProcOrig(NULL),
@@ -239,7 +240,7 @@ LRESULT StBrowserPlugin::stWndProc(HWND   theWnd,
 
 void StBrowserPlugin::stWindowLoop() {
     // do not load plugin until it is placed on screen
-    StWindow aParentWin(myParentWin);
+    StWindow aParentWin(myResMgr, myParentWin);
     for(;;) {
     #ifndef _WIN32
         const int32_t anActiveNb =
@@ -262,7 +263,7 @@ void StBrowserPlugin::stWindowLoop() {
     }
 
     // Load image viewer
-    myStApp = new StImageViewer(myParentWin, new StOpenInfo());
+    myStApp = new StImageViewer(myResMgr, myParentWin, new StOpenInfo());
 
     if(!myStApp->open()) {
         ST_PLUGIN_QUEUE.decrement();

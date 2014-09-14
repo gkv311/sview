@@ -24,7 +24,7 @@
 #include <StGLWidgets/StGLFpsLabel.h>
 
 StDiagnosticsGUI::StDiagnosticsGUI(StDiagnostics* thePlugin)
-: StGLRootWidget(),
+: StGLRootWidget(thePlugin->myResMgr),
   myPlugin(thePlugin),
   myLangMap(new StTranslations(StDiagnostics::ST_DRAWER_PLUGIN_NAME)),
   myGeomWidget(NULL),

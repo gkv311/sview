@@ -118,6 +118,8 @@ class StActiveXCtrl : public COleControl {
 
         private:
 
+    StHandle<StResourceManager>
+                            myResMgr;         //!< resources manager
     StNativeWin_t           myParentWin;      //!< handle to native window for this ActiveX component
     StHandle<StThread>      myThread;         //!< dedicated thread for this plugin instance
     StHandle<StApplication> myStApp;          //!< StCore application instance worked in dedicated thread

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutAnaglyph library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -36,7 +36,8 @@ class StOutAnaglyph : public StWindow {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StOutAnaglyph(const StNativeWin_t theParentWindow);
+    ST_CPPEXPORT StOutAnaglyph(const StHandle<StResourceManager>& theResMgr,
+                               const StNativeWin_t                theParentWindow);
 
     /**
      * Destructor.

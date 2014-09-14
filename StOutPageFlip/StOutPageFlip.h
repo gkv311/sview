@@ -56,7 +56,8 @@ class StOutPageFlip : public StWindow {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StOutPageFlip(const StNativeWin_t theParentWindow);
+    ST_CPPEXPORT StOutPageFlip(const StHandle<StResourceManager>& theResMgr,
+                               const StNativeWin_t                theParentWindow);
 
     /**
      * Destructor.

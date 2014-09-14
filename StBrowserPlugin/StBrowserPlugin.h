@@ -40,7 +40,7 @@ class StBrowserPlugin : public NSPluginBase {
     ST_LOCAL virtual bool isInitialized();
     ST_LOCAL virtual NPError streamNew(NPMIMEType , NPStream* , NPBool , uint16_t* );
     ST_LOCAL virtual void streamAsFile(NPStream* , const char* );
-#if(defined(__linux__) || defined(__linux))
+#if defined(__linux__)
     ST_LOCAL virtual NPError getValue(NPPVariable , void* );
 #endif
     //ST_LOCAL virtual uint16_t handleEvent(void* theEvent);
@@ -64,6 +64,8 @@ class StBrowserPlugin : public NSPluginBase {
         private:
 
     NPP                     nppInstance;
+    StHandle<StResourceManager>
+                            myResMgr;         //!< resources manager
     StNativeWin_t           myParentWin;      //!< handle to native window for this ActiveX component
 #ifdef _WIN32
     WNDPROC                 myProcOrig;       //!< original window procedure

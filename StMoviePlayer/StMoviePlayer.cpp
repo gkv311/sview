@@ -163,9 +163,10 @@ void StMoviePlayer::doChangeDevice(const int32_t theValue) {
     // update menu
 }
 
-StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
-                             const StHandle<StOpenInfo>& theOpenInfo)
-: StApplication(theParentWin, theOpenInfo),
+StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
+                             const StNativeWin_t                theParentWin,
+                             const StHandle<StOpenInfo>&        theOpenInfo)
+: StApplication(theResMgr, theParentWin, theOpenInfo),
   mySettings(new StSettings(ST_DRAWER_PLUGIN_NAME)),
   myLangMap(new StTranslations(StMoviePlayer::ST_DRAWER_PLUGIN_NAME)),
   myPlayList(new StPlayList(4, true)),
@@ -293,12 +294,12 @@ StMoviePlayer::StMoviePlayer(const StNativeWin_t         theParentWin,
     params.ToLoopSingle->signals.onChanged.connect(this, &StMoviePlayer::doSwitchLoopSingle);
     params.alDevice    ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchAudioDevice);
 
-    addRenderer(new StOutAnaglyph(theParentWin));
-    addRenderer(new StOutDual(theParentWin));
-    addRenderer(new StOutIZ3D(theParentWin));
-    addRenderer(new StOutInterlace(theParentWin));
-    addRenderer(new StOutDistorted(theParentWin));
-    addRenderer(new StOutPageFlipExt(theParentWin));
+    addRenderer(new StOutAnaglyph   (myResMgr, theParentWin));
+    addRenderer(new StOutDual       (myResMgr, theParentWin));
+    addRenderer(new StOutIZ3D       (myResMgr, theParentWin));
+    addRenderer(new StOutInterlace  (myResMgr, theParentWin));
+    addRenderer(new StOutDistorted  (myResMgr, theParentWin));
+    addRenderer(new StOutPageFlipExt(myResMgr, theParentWin));
 
     // no need in Depth buffer
     const StWinAttr anAttribs[] = {
@@ -1543,20 +1544,20 @@ int StMoviePlayer::beginRequest(mg_connection*         theConnection,
     // process general requests
     if(anURI.isEquals(stCString("/"))) {
         // return index page
-        const StString aPath = StProcess::getStShareFolder() + "web" + SYS_FS_SPLITTER + "index.htm";
-        mg_send_file(theConnection, aPath.toCString());
+        StHandle<StResource> aRes = myResMgr->getResource(StString("web") + SYS_FS_SPLITTER + "index.htm");
+        mg_send_file(theConnection, !aRes.isNull() ? aRes->getPath().toCString() : "");
         return 1;
     } else if(anURI.isStartsWith(stCString("/web"))) {
         // return Web UI files
         const StString aSubPath = anURI.subString(5, size_t(-1));
-        const StString aPath    = StProcess::getStShareFolder() + "web" + SYS_FS_SPLITTER + aSubPath;
-        mg_send_file(theConnection, aPath.toCString());
+        StHandle<StResource> aRes = myResMgr->getResource(StString("web") + SYS_FS_SPLITTER + aSubPath);
+        mg_send_file(theConnection, !aRes.isNull() ? aRes->getPath().toCString() : "");
         return 1;
     } else if(anURI.isStartsWith(stCString("/textures"))) {
         // return textures images
         const StString aSubPath = anURI.subString(10, size_t(-1));
-        const StString aPath    = StProcess::getStShareFolder() + "textures" + SYS_FS_SPLITTER + aSubPath;
-        mg_send_file(theConnection, aPath.toCString());
+        StHandle<StResource> aRes = myResMgr->getResource(StString("textures") + SYS_FS_SPLITTER + aSubPath);
+        mg_send_file(theConnection, !aRes.isNull() ? aRes->getPath().toCString() : "");
         return 1;
     }
 

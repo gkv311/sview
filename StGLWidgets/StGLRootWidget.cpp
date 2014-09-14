@@ -30,16 +30,17 @@ namespace {
         0
     };
 
-};
+}
 
 size_t StGLRootWidget::generateShareId() {
     return StAtomicOp::Increment(ST_WIDGET_RES_COUNTER);
 }
 
-StGLRootWidget::StGLRootWidget()
+StGLRootWidget::StGLRootWidget(const StHandle<StResourceManager>& theResMgr)
 : StGLWidget(NULL, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT)),
   myShareArray(new StGLSharePointer*[10]),
   myShareSize(10),
+  myResMgr(theResMgr),
   myScrDispX(0.0f),
   myLensDist(0.0f),
   myScrDispXPx(0),
@@ -120,13 +121,13 @@ StString StGLRootWidget::iconTexture(const StString& theName,
                                      const IconSize  theSize) const {
     for(int anIter = theSize; anIter >= 0; --anIter) {
         const StString aPath = theName + THE_ICON_SIZES[anIter] + ".png";
-        if(StFileNode::isFileExists(aPath)) {
+        if(myResMgr->isResourceExist(aPath)) {
             return aPath;
         }
     }
     for(int anIter = theSize + 1; anIter < IconSizeNb; ++anIter) {
         const StString aPath = theName + THE_ICON_SIZES[anIter] + ".png";
-        if(StFileNode::isFileExists(aPath)) {
+        if(myResMgr->isResourceExist(aPath)) {
             return aPath;
         }
     }

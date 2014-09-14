@@ -33,21 +33,22 @@
 
 const StString StDiagnostics::ST_DRAWER_PLUGIN_NAME("StDiagnostics");
 
-StDiagnostics::StDiagnostics(const StNativeWin_t         theParentWin,
-                             const StHandle<StOpenInfo>& theOpenInfo)
-: StApplication(theParentWin, theOpenInfo) {
+StDiagnostics::StDiagnostics(const StHandle<StResourceManager>& theResMgr,
+                             const StNativeWin_t                theParentWin,
+                             const StHandle<StOpenInfo>&        theOpenInfo)
+: StApplication(theResMgr, theParentWin, theOpenInfo) {
     myTitle = "sView - Stereoscopic Device Diagnostics";
     params.IsFullscreen = new StBoolParam(false);
     params.IsFullscreen->signals.onChanged.connect(this, &StDiagnostics::doFullscreen);
 
     myGUI = new StDiagnosticsGUI(this);
 
-    addRenderer(new StOutAnaglyph(theParentWin));
-    addRenderer(new StOutDual(theParentWin));
-    addRenderer(new StOutIZ3D(theParentWin));
-    addRenderer(new StOutInterlace(theParentWin));
-    addRenderer(new StOutDistorted(theParentWin));
-    addRenderer(new StOutPageFlipExt(theParentWin));
+    addRenderer(new StOutAnaglyph   (myResMgr, theParentWin));
+    addRenderer(new StOutDual       (myResMgr, theParentWin));
+    addRenderer(new StOutIZ3D       (myResMgr, theParentWin));
+    addRenderer(new StOutInterlace  (myResMgr, theParentWin));
+    addRenderer(new StOutDistorted  (myResMgr, theParentWin));
+    addRenderer(new StOutPageFlipExt(myResMgr, theParentWin));
 
     // create actions
     StHandle<StAction> anAction;

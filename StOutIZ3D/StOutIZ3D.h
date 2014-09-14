@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutIZ3D library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -37,7 +37,8 @@ class StOutIZ3D : public StWindow {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StOutIZ3D(const StNativeWin_t theParentWindow);
+    ST_CPPEXPORT StOutIZ3D(const StHandle<StResourceManager>& theResMgr,
+                           const StNativeWin_t                theParentWindow);
 
     /**
      * Destructor.

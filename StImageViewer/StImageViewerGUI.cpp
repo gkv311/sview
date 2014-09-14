@@ -571,11 +571,10 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
                                    StWindow*       theWindow,
                                    StTranslations* theLangMap,
                                    const StHandle<StGLTextureQueue>& theTextureQueue)
-: StGLRootWidget(),
+: StGLRootWidget(thePlugin->myResMgr),
   myPlugin(thePlugin),
   myWindow(theWindow),
   myLangMap(theLangMap),
-  myTexturesFolder(StProcess::getStShareFolder() + "textures" + SYS_FS_SPLITTER),
   myVisibilityTimer(true),
   //
   myImage(NULL),

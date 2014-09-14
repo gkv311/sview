@@ -43,7 +43,7 @@ namespace {
     static const char ST_SETTING_WINDOWPOS[]  = "windowPos";
     static const char ST_SETTING_DEVICE_ID[]  = "deviceId";
     static const char ST_SETTING_QUADBUFFER[] = "quadBufferType";
-};
+}
 
 StOutPageFlip::StOutDirect3D::StOutDirect3D()
 : GlIoBuff(0),
@@ -425,8 +425,9 @@ void StOutPageFlip::initGlobalsAsync() {
 #endif
 }
 
-StOutPageFlip::StOutPageFlip(const StNativeWin_t theParentWindow)
-: StWindow(theParentWindow),
+StOutPageFlip::StOutPageFlip(const StHandle<StResourceManager>& theResMgr,
+                             const StNativeWin_t                theParentWindow)
+: StWindow(theResMgr, theParentWindow),
   mySettings(new StSettings(ST_OUT_PLUGIN_NAME)),
   myLangMap(ST_OUT_PLUGIN_NAME),
   myDevice(DEVICE_AUTO),
@@ -819,9 +820,16 @@ bool StOutPageFlip::create() {
 
     // load fullscreen-only warning
     StAVImage anImage;
-    const StString aTexturesFolder  = StProcess::getStShareFolder() + "textures" + SYS_FS_SPLITTER;
-    const StString aWarnTexturePath = aTexturesFolder + "pageflip_fullscreen.png";
-    if(anImage.load(aWarnTexturePath, StImageFile::ST_TYPE_PNG)) {
+    StHandle<StResource> aWarnRes = myResMgr->getResource(StString("textures") + SYS_FS_SPLITTER + "pageflip_fullscreen.png");
+    uint8_t* aData     = NULL;
+    int      aDataSize = 0;
+    if(!aWarnRes.isNull()
+    && !aWarnRes->isFile()
+    &&  aWarnRes->read()) {
+        aData     = (uint8_t* )aWarnRes->getData();
+        aDataSize = aWarnRes->getSize();
+    }
+    if(anImage.load(!aWarnRes.isNull() ? aWarnRes->getPath() : StString(), StImageFile::ST_TYPE_PNG, aData, aDataSize)) {
         myWarning = new StGLTexture(GL_RGBA8);
         if(!myWarning->init(*myContext, anImage.getPlane())) {
             ST_ERROR_LOG(ST_OUT_PLUGIN_NAME + " Plugin, Texture can not be initialized!");

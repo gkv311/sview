@@ -32,8 +32,9 @@ class StDiagnostics : public StApplication {
 
     static const StString ST_DRAWER_PLUGIN_NAME;
 
-    ST_CPPEXPORT StDiagnostics(const StNativeWin_t         theParentWin = (StNativeWin_t )NULL,
-                               const StHandle<StOpenInfo>& theOpenInfo  = NULL);
+    ST_CPPEXPORT StDiagnostics(const StHandle<StResourceManager>& theResMgr,
+                               const StNativeWin_t                theParentWin = (StNativeWin_t )NULL,
+                               const StHandle<StOpenInfo>&        theOpenInfo  = NULL);
     ST_CPPEXPORT virtual ~StDiagnostics();
 
     ST_CPPEXPORT virtual bool open();
@@ -79,6 +80,10 @@ class StDiagnostics : public StApplication {
     StHandle<StGLContext>      myContext;
     StHandle<StSettings>       mySettings; //!< settings manager for Diagnostics plugin
     StHandle<StDiagnosticsGUI> myGUI;      //!< GUI root widget
+
+        private:
+
+    friend class StDiagnosticsGUI;
 
 };
 

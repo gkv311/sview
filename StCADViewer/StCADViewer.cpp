@@ -31,7 +31,7 @@ namespace {
     static const StString ST_PARAM_TRIHEDRON = "showTrihedron";
     static const StString ST_PARAM_PROJMODE  = "projMode";
     static const StString ST_PARAM_FILLMODE  = "fillMode";
-};
+}
 
 class ST_LOCAL StGLCamera {
 
@@ -199,9 +199,10 @@ static StGLNormalsMesh* myNormalsMesh = NULL; /// TODO move to...
 
 const StString StCADViewer::ST_DRAWER_PLUGIN_NAME = "StCADViewer";
 
-StCADViewer::StCADViewer(const StNativeWin_t         theParentWin,
-                         const StHandle<StOpenInfo>& theOpenInfo)
-: StApplication(theParentWin, theOpenInfo),
+StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
+                         const StNativeWin_t                theParentWin,
+                         const StHandle<StOpenInfo>&        theOpenInfo)
+: StApplication(theResMgr, theParentWin, theOpenInfo),
   mySettings(new StSettings(ST_DRAWER_PLUGIN_NAME)),
   myIsLeftHold(false),
   myIsRightHold(false),
@@ -228,12 +229,12 @@ StCADViewer::StCADViewer(const StNativeWin_t         theParentWin,
 
     myGUI = new StCADViewerGUI(this);
 
-    addRenderer(new StOutAnaglyph(theParentWin));
-    addRenderer(new StOutDual(theParentWin));
-    addRenderer(new StOutIZ3D(theParentWin));
-    addRenderer(new StOutInterlace(theParentWin));
-    addRenderer(new StOutDistorted(theParentWin));
-    addRenderer(new StOutPageFlipExt(theParentWin));
+    addRenderer(new StOutAnaglyph   (myResMgr, theParentWin));
+    addRenderer(new StOutDual       (myResMgr, theParentWin));
+    addRenderer(new StOutIZ3D       (myResMgr, theParentWin));
+    addRenderer(new StOutInterlace  (myResMgr, theParentWin));
+    addRenderer(new StOutDistorted  (myResMgr, theParentWin));
+    addRenderer(new StOutPageFlipExt(myResMgr, theParentWin));
 }
 
 bool StCADViewer::resetDevice() {

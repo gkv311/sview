@@ -48,9 +48,11 @@ StWindow::StWindow()
     copySignals();
 }
 
-StWindow::StWindow(const StNativeWin_t theParentWindow)
+StWindow::StWindow(const StHandle<StResourceManager>& theResMgr,
+                   const StNativeWin_t                theParentWindow)
 : myWin(new StWindowImpl(theParentWindow)),
   myTargetFps(0.0),
+  myResMgr(theResMgr),
   myWasUsed(false),
   myIsForcedStereo(false) {
     copySignals();
@@ -230,6 +232,10 @@ void StWindow::post(StEvent& theEvent) {
 
 bool StWindow::isMouseMoved() const {
     return myWin->myIsMouseMoved;
+}
+
+const StHandle<StResourceManager>& StWindow::getResourceManager() const {
+    return myResMgr;
 }
 
 const StHandle<StMsgQueue>& StWindow::getMessagesQueue() const {

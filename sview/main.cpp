@@ -42,7 +42,8 @@ int main(int , char** ) {
     StProcess::setEnv("StShare",               aProcessPath);
 #endif
 
-    StHandle<StApplication> anApp = StMultiApp::getInstance();
+    StHandle<StResourceManager> aResMgr = new StResourceManager();
+    StHandle<StApplication>     anApp   = StMultiApp::getInstance(aResMgr);
     if(anApp.isNull() || !anApp->open()) {
         return 1;
     }

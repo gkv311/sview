@@ -119,10 +119,9 @@ StGLMenu* StCADViewerGUI::createLanguageMenu() {
 }
 
 StCADViewerGUI::StCADViewerGUI(StCADViewer* thePlugin)
-: StGLRootWidget(),
+: StGLRootWidget(thePlugin->myResMgr),
   myPlugin(thePlugin),
   myLangMap(new StTranslations(StCADViewer::ST_DRAWER_PLUGIN_NAME)),
-  myTexturesRoot(StProcess::getStShareFolder() + "textures" + SYS_FS_SPLITTER),
   myMouseDescr(NULL),
   myMsgStack(NULL),
   myMenu0Root(NULL),

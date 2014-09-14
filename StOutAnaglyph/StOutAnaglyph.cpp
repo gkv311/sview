@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutAnaglyph library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -72,7 +72,7 @@ namespace {
         STTR_PLUGIN_DESCRIPTION = 2002,
     };
 
-};
+}
 
 StAtomic<int32_t> StOutAnaglyph::myInstancesNb(0);
 
@@ -100,8 +100,9 @@ void StOutAnaglyph::getOptions(StParamsList& theList) const {
     theList.add(params.AmberBlue);
 }
 
-StOutAnaglyph::StOutAnaglyph(const StNativeWin_t theParentWindow)
-: StWindow(theParentWindow),
+StOutAnaglyph::StOutAnaglyph(const StHandle<StResourceManager>& theResMgr,
+                             const StNativeWin_t                theParentWindow)
+: StWindow(theResMgr, theParentWindow),
   mySettings(new StSettings(ST_OUT_PLUGIN_NAME)),
   myFrBuffer(new StGLStereoFrameBuffer()),
   myStereoProgram(NULL),

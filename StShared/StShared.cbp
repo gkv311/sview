@@ -344,6 +344,7 @@
 		<Unit filename="StProcess.cpp" />
 		<Unit filename="StProcess2.cpp" />
 		<Unit filename="StRawFile.cpp" />
+		<Unit filename="StResourceManager.cpp" />
 		<Unit filename="StSocket.ObjC.mm">
 			<Option compile="1" />
 			<Option link="1" />
@@ -504,6 +505,7 @@
 		<Unit filename="../include/StThreads/StMutex.h" />
 		<Unit filename="../include/StThreads/StMutexSlim.h" />
 		<Unit filename="../include/StThreads/StProcess.h" />
+		<Unit filename="../include/StThreads/StResourceManager.h" />
 		<Unit filename="../include/StThreads/StThread.h" />
 		<Unit filename="../include/StThreads/StTimer.h" />
 		<Unit filename="../include/StVersion.h" />

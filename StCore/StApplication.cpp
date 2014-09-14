@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -33,7 +33,7 @@ namespace {
     static const StCString ST_SETTING_RENDERER_AUTO = stCString("rendererPluginAuto");
     static const StCString ST_SETTING_RENDERER      = stCString("rendererPlugin");
     static const StCString ST_SETTING_AUTO_VALUE    = stCString("Auto");
-};
+}
 
 void StApplication::doChangeDevice(const int32_t theValue) {
     if(myWindow.isNull() || !myIsOpened
@@ -56,21 +56,11 @@ void StApplication::doChangeDevice(const int32_t theValue) {
     }
 }
 
-StApplication::StApplication()
-: myMsgQueue(new StMsgQueue()),
-  myEventsBuffer(new StEventsBuffer()),
-  myWinParent((StNativeWin_t )NULL),
-  myRendId(ST_SETTING_AUTO_VALUE),
-  myExitCode(0),
-  myGlDebug(false),
-  myIsOpened(false),
-  myToQuit(false) {
-    stApplicationInit(NULL);
-}
-
-StApplication::StApplication(const StNativeWin_t         theParentWin,
-                             const StHandle<StOpenInfo>& theOpenInfo)
-: myMsgQueue(new StMsgQueue()),
+StApplication::StApplication(const StHandle<StResourceManager>& theResMgr,
+                             const StNativeWin_t                theParentWin,
+                             const StHandle<StOpenInfo>&        theOpenInfo)
+: myResMgr(theResMgr),
+  myMsgQueue(new StMsgQueue()),
   myEventsBuffer(new StEventsBuffer()),
   myWinParent(theParentWin),
   myRendId(ST_SETTING_AUTO_VALUE),
@@ -82,6 +72,9 @@ StApplication::StApplication(const StNativeWin_t         theParentWin,
 }
 
 void StApplication::stApplicationInit(const StHandle<StOpenInfo>& theOpenInfo) {
+    if(myResMgr.isNull()) {
+        myResMgr = new StResourceManager();
+    }
 #ifdef __ST_DEBUG_GL__
     myGlDebug = true;
 #endif
@@ -163,7 +156,7 @@ bool StApplication::open() {
         aGlobalSettings.saveBool  (ST_SETTING_RENDERER_AUTO, false);
     } else {
         if(myRenderers.isEmpty()) {
-            myWindow = new StWindow(myWinParent);
+            myWindow = new StWindow(myResMgr, myWinParent);
             myWindow->setMessagesQueue(myMsgQueue);
             myWindow->params.VSyncMode = params.VSyncMode;
         } else {

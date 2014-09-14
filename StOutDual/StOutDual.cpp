@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutDual library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -55,7 +55,7 @@ namespace {
         STTR_PLUGIN_DESCRIPTION = 2002,
     };
 
-};
+}
 
 /**
  * Just dummy GLSL program.
@@ -178,8 +178,9 @@ void StOutDual::getOptions(StParamsList& theList) const {
     theList.add(params.MonoClone);
 }
 
-StOutDual::StOutDual(const StNativeWin_t theParentWindow)
-: StWindow(theParentWindow),
+StOutDual::StOutDual(const StHandle<StResourceManager>& theResMgr,
+                     const StNativeWin_t                theParentWindow)
+: StWindow(theResMgr, theParentWindow),
   mySettings(new StSettings(ST_OUT_PLUGIN_NAME)),
   myFrBuffer(new StGLFrameBuffer()),
   myProgram(new StProgramMM()),

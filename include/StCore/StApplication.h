@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -46,13 +46,9 @@ class StApplication {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StApplication(const StNativeWin_t         theParentWin,
-                               const StHandle<StOpenInfo>& theOpenInfo  = NULL);
-
-    /**
-     * Empty constructor.
-     */
-    ST_CPPEXPORT StApplication();
+    ST_CPPEXPORT StApplication(const StHandle<StResourceManager>& theResMgr,
+                               const StNativeWin_t                theParentWin,
+                               const StHandle<StOpenInfo>&        theOpenInfo  = NULL);
 
     /**
      * Destructor.
@@ -251,6 +247,7 @@ class StApplication {
         protected: //! @name protected fields
 
     StArrayList< StHandle<StWindow> > myRenderers; //!< list of registered renderers
+    StHandle<StResourceManager>       myResMgr;    //!< resources manager
     StHandle<StMsgQueue>  myMsgQueue;              //!< messages queue
     StHandle<StWindow>    myWindow;                //!< active renderer and main application window
     StHandle<StWindow>    mySwitchTo;              //!< new renderer to switch to

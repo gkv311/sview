@@ -46,8 +46,9 @@ class StImageViewer : public StApplication {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StImageViewer(const StNativeWin_t         theParentWin = (StNativeWin_t )NULL,
-                               const StHandle<StOpenInfo>& theOpenInfo  = NULL);
+    ST_CPPEXPORT StImageViewer(const StHandle<StResourceManager>& theResMgr,
+                               const StNativeWin_t                theParentWin = (StNativeWin_t )NULL,
+                               const StHandle<StOpenInfo>&        theOpenInfo  = NULL);
 
     /**
      * Destructor.

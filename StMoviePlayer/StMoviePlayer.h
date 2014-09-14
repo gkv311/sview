@@ -118,8 +118,9 @@ class StMoviePlayer : public StApplication {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StMoviePlayer(const StNativeWin_t         theParentWin = (StNativeWin_t )NULL,
-                               const StHandle<StOpenInfo>& theOpenInfo  = NULL);
+    ST_CPPEXPORT StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
+                               const StNativeWin_t                theParentWin = (StNativeWin_t )NULL,
+                               const StHandle<StOpenInfo>&        theOpenInfo  = NULL);
 
     /**
      * Destructor.

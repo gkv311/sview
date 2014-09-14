@@ -170,8 +170,10 @@ void StAVImage::close() {
     }
 }
 
-bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
-                     uint8_t* theDataPtr, int theDataSize) {
+bool StAVImage::load(const StString& theFilePath,
+                     ImageType       theImageType,
+                     uint8_t*        theDataPtr,
+                     int             theDataSize) {
 
     // reset current data
     StImage::nullify();
@@ -195,7 +197,8 @@ bool StAVImage::load(const StString& theFilePath, ImageType theImageType,
         }
     }
 
-    if(theImageType == ST_TYPE_NONE || !StFileNode::isFileExists(theFilePath)) {
+    if(theImageType == ST_TYPE_NONE
+    || (theDataPtr == NULL && !StFileNode::isFileExists(theFilePath))) {
         // open image file and detect its type, its could be non local file!
     #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 2, 0))
         int avErrCode = avformat_open_input(&myFormatCtx, theFilePath.toCString(), myImageFormat, NULL);

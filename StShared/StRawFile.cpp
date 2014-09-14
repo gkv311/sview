@@ -203,7 +203,7 @@ bool StRawFile::readFile(const StCString& theFilePath) {
     initBuffer(size_t(aFileLen));
 
     fseek(myFileHandle, 0, SEEK_SET);
-    if(myBuffSize > 0) {
+    if(myBuffSize == size_t(aFileLen)) {
         size_t aCountRead = fread(myBuffer, 1, myBuffSize, myFileHandle);
         (void )aCountRead;
     }

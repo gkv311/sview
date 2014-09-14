@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutInterlace library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -96,7 +96,7 @@ namespace {
     static const StGLVarLocation ST_VATTRIB_VERTEX(0);
     static const StGLVarLocation ST_VATTRIB_TCOORD(1);
 
-};
+}
 
 StProgramFB::StProgramFB(const StString& theTitle)
 : StGLProgram(theTitle) {
@@ -190,8 +190,9 @@ void StOutInterlace::getOptions(StParamsList& theList) const {
     theList.add(params.BindToMon);
 }
 
-StOutInterlace::StOutInterlace(const StNativeWin_t theParentWindow)
-: StWindow(theParentWindow),
+StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
+                               const StNativeWin_t                theParentWindow)
+: StWindow(theResMgr, theParentWindow),
   mySettings(new StSettings(ST_OUT_PLUGIN_NAME)),
   myFrmBuffer(new StGLFrameBuffer()),
   myDevice(DEVICE_AUTO),

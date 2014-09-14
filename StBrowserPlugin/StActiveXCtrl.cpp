@@ -46,10 +46,11 @@ namespace {
       | OLEMISC_INSIDEOUT
       | OLEMISC_CANTLINKINSIDE
       | OLEMISC_RECOMPOSEONRESIZE;
-};
+}
 
 StActiveXCtrl::StActiveXCtrl()
-: myParentWin((StNativeWin_t )NULL),
+: myResMgr(new StResourceManager()),
+  myParentWin((StNativeWin_t )NULL),
   myOpenEvent(false),
   myHasPreview(false),
   myToBlockMsg(false),
@@ -106,7 +107,7 @@ StString StActiveXCtrl::loadURL(const CString& theUrl) {
 
 void StActiveXCtrl::stWindowLoop() {
     // do not load plugin until it is placed on screen
-    StWindow aParentWin(myParentWin);
+    StWindow aParentWin(myResMgr, myParentWin);
     for(;;) {
         if(aParentWin.isParentOnScreen()) {
             break;
@@ -118,7 +119,7 @@ void StActiveXCtrl::stWindowLoop() {
         }
     }
 
-    myStApp = new StImageViewer(myParentWin, new StOpenInfo());
+    myStApp = new StImageViewer(myResMgr, myParentWin, new StOpenInfo());
     if(!myStApp->open()) {
         myStApp.nullify();
         return;

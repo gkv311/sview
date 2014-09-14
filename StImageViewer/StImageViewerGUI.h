@@ -68,18 +68,18 @@ class StImageViewerGUI : public StGLRootWidget {
         public:
 
     /**
-     * @return absolute path to the texture
+     * @return relative path to the texture
      */
     ST_LOCAL StString getTexturePath(const StCString& theTextureName) const {
-        return myTexturesFolder + theTextureName;
+        return StString("textures" ST_FILE_SPLITTER) + theTextureName;
     }
 
     /**
-     * @return absolute path to the texture
+     * @return relative path to the texture
      */
     ST_LOCAL StString iconTexture(const StCString& theName,
                                   const IconSize   theSize) const {
-        return StGLRootWidget::iconTexture(myTexturesFolder + theName, theSize);
+        return StGLRootWidget::iconTexture(StString("textures" ST_FILE_SPLITTER) + theName, theSize);
     }
 
         public: //! @name StGLRootWidget overrides
@@ -150,7 +150,6 @@ class StImageViewerGUI : public StGLRootWidget {
     StImageViewer*      myPlugin;           //!< link to the main Drawer class
     StWindow*           myWindow;           //!< link to the window instance
     StTranslations*     myLangMap;          //!< translated strings map
-    StString            myTexturesFolder;   //!< textures directory
     StTimer             myVisibilityTimer;  //!< minimum visible delay
 
     StGLImageRegion*    myImage;            //!< the main image

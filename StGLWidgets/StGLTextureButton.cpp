@@ -222,24 +222,39 @@ void StGLTextureButton::stglResize() {
 }
 
 bool StGLTextureButton::stglInit() {
-    bool result = true;
-    StHandle<StImageFile> stImage = StImageFile::create();
+    StHandle<StImageFile> anImage = StImageFile::create();
     StGLContext& aCtx = getContext();
-    if(!stImage.isNull()) {
-        for(size_t t = 0; t < myFacesCount; ++t) {
-            if(myTexturesPaths[t].isEmpty()) {
-                ST_DEBUG_LOG("StGLTextureButton, texture for face " + t + " not set");
+    if(!anImage.isNull()) {
+        const StHandle<StResourceManager>& aResMgr = getRoot()->getResourceManager();
+        for(size_t aFaceIter = 0; aFaceIter < myFacesCount; ++aFaceIter) {
+            const StString& aName = myTexturesPaths[aFaceIter];
+            if(aName.isEmpty()) {
+                ST_DEBUG_LOG("StGLTextureButton, texture for face " + aFaceIter + " not set");
                 continue;
             }
-            if(!stImage->load(myTexturesPaths[t], StImageFile::ST_TYPE_PNG)) {
-                ST_DEBUG_LOG(stImage->getState());
+
+            StHandle<StResource> aRes = aResMgr->getResource(aName);
+            if(aRes.isNull()) {
+                ST_DEBUG_LOG("StGLTextureButton, texture '" + aName + "' not found");
                 continue;
             }
-            changeRectPx().right()  = getRectPx().left() + (int )stImage->getSizeX();
-            changeRectPx().bottom() = getRectPx().top()  + (int )stImage->getSizeY();
-            myTextures[t].init(aCtx, stImage->getPlane());
+
+            uint8_t* aData     = NULL;
+            int      aDataSize = 0;
+            if(!aRes->isFile()
+             && aRes->read()) {
+                aData     = (uint8_t* )aRes->getData();
+                aDataSize = aRes->getSize();
+            }
+            if(!anImage->load(aRes->getPath(), StImageFile::ST_TYPE_PNG, aData, aDataSize)) {
+                ST_DEBUG_LOG(anImage->getState());
+                continue;
+            }
+            changeRectPx().right()  = getRectPx().left() + (int )anImage->getSizeX();
+            changeRectPx().bottom() = getRectPx().top()  + (int )anImage->getSizeY();
+            myTextures[aFaceIter].init(aCtx, anImage->getPlane());
         }
-        stImage.nullify();
+        anImage.nullify();
     }
 
     if(myProgram.isNull()) {
@@ -260,7 +275,7 @@ bool StGLTextureButton::stglInit() {
 
     myVertBuf.init(aCtx, aDummyVert);
     myTCrdBuf.init(aCtx, aTexCoords);
-    return result;
+    return true;
 }
 
 void StGLTextureButton::stglDraw(unsigned int ) {

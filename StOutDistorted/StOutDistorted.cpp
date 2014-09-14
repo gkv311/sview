@@ -28,7 +28,7 @@
 #include <StSettings/StEnumParam.h>
 #include <StCore/StSearchMonitors.h>
 #include <StVersion.h>
-#include <StImage/StImageFile.h>
+#include <StAv/StAVImage.h>
 
 namespace {
 
@@ -73,7 +73,7 @@ namespace {
        "    gl_Position = vVertex;"
        "}";
 
-};
+}
 
 /**
  * Flat GLSL program.
@@ -291,8 +291,9 @@ void StOutDistorted::getOptions(StParamsList& theList) const {
     theList.add(params.MonoClone);
 }
 
-StOutDistorted::StOutDistorted(const StNativeWin_t theParentWindow)
-: StWindow(theParentWindow),
+StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
+                               const StNativeWin_t                theParentWindow)
+: StWindow(theResMgr, theParentWindow),
   mySettings(new StSettings(ST_OUT_PLUGIN_NAME)),
   myDevice(DEVICE_AUTO),
   myToResetDevice(false),
@@ -474,15 +475,20 @@ bool StOutDistorted::create() {
     myCurTCrdsBuf.init(*myContext, 2, 4, QUAD_TEXCOORD);
 
     // cursor texture
-    const StString aTexturesFolder = StProcess::getStShareFolder() + "textures" + SYS_FS_SPLITTER;
-    const StString aCursorPath     = aTexturesFolder + "cursor.png";
-    StHandle<StImageFile> aCursorImg = StImageFile::create();
-    if(!aCursorImg.isNull()
-    && aCursorImg->load(aCursorPath, StImageFile::ST_TYPE_PNG)) {
-        //myCursor->setMinMagFilter(*myContext, GL_NEAREST);
-        myCursor->init(*myContext, aCursorImg->getPlane());
+    StAVImage aCursorImg;
+    StHandle<StResource> aCursorRes = myResMgr->getResource(StString("textures") + SYS_FS_SPLITTER + "cursor.png");
+    uint8_t* aData     = NULL;
+    int      aDataSize = 0;
+    if(!aCursorRes.isNull()
+    && !aCursorRes->isFile()
+    &&  aCursorRes->read()) {
+        aData     = (uint8_t* )aCursorRes->getData();
+        aDataSize = aCursorRes->getSize();
     }
-    aCursorImg.nullify();
+    if(aCursorImg.load(!aCursorRes.isNull() ? aCursorRes->getPath() : StString(), StImageFile::ST_TYPE_PNG, aData, aDataSize)) {
+        //myCursor->setMinMagFilter(*myContext, GL_NEAREST);
+        myCursor->init(*myContext, aCursorImg.getPlane());
+    }
     myIsBroken = false;
     return true;
 }

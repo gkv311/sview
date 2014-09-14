@@ -37,8 +37,9 @@ class StCADViewer : public StApplication {
     /**
      * Constructor.
      */
-    ST_CPPEXPORT StCADViewer(const StNativeWin_t         theParentWin,
-                             const StHandle<StOpenInfo>& theOpenInfo);
+    ST_CPPEXPORT StCADViewer(const StHandle<StResourceManager>& theResMgr,
+                             const StNativeWin_t                theParentWin,
+                             const StHandle<StOpenInfo>&        theOpenInfo);
 
     /**
      * Destructor.
@@ -157,6 +158,10 @@ class StCADViewer : public StApplication {
     bool                     myIsMiddleHold;
     bool                     myIsCtrlPressed;
     bool                     myIsCamIterative;
+
+        private:
+
+    friend class StCADViewerGUI;
 
 };
 

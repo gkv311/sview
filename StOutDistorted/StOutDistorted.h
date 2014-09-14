@@ -40,7 +40,8 @@ class StOutDistorted : public StWindow {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StOutDistorted(const StNativeWin_t theParentWindow);
+    ST_CPPEXPORT StOutDistorted(const StHandle<StResourceManager>& theResMgr,
+                                const StNativeWin_t                theParentWindow);
 
     /**
      * Destructor.

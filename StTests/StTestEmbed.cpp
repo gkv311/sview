@@ -24,7 +24,7 @@
 #include <StStrings/stConsole.h>
 #include <StTemplates/StHandle.h>
 
-#if(defined(__linux__) || defined(__linux))
+#if defined(__linux__)
     #include <X11/X.h>
     #include <X11/Xlib.h>
     #include <X11/Xatom.h>
@@ -33,7 +33,7 @@
 
 namespace {
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     LRESULT WINAPI embedWindowProc(HWND   theWinHandle,
                                    UINT   theMsg,
                                    WPARAM theWParam,
@@ -57,7 +57,7 @@ bool StTestEmbed::createNative() {
     aRect.bottom() = 128 + 400;
     aRect.left()   = 128;
     aRect.right()  = 128 + 400;
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     WNDCLASSW aWinClass;
     stMemSet(&aWinClass, 0, sizeof(aWinClass));
     HINSTANCE anAppInst = GetModuleHandle(NULL);
@@ -76,7 +76,7 @@ bool StTestEmbed::createNative() {
     ShowWindow(aWin, TRUE);
     myParent = aWin;
     return true;
-#elif(defined(__linux__) || defined(__linux))
+#elif defined(__linux__)
     // open a connection to the X server
     Display* aDisplay = XOpenDisplay(NULL);
     if(aDisplay == NULL) {
@@ -123,7 +123,7 @@ SV_THREAD_FUNCTION StTestEmbed::embedAppThread(void* thePtr) {
 }
 
 void StTestEmbed::embedAppLoop() {
-    StHandle<StApplication> anApp = new StApplication(myParent);
+    StHandle<StApplication> anApp = new StApplication(new StResourceManager(), myParent);
     if(!anApp->open()) {
         return;
     }
@@ -133,14 +133,14 @@ void StTestEmbed::embedAppLoop() {
 
 #ifndef __APPLE__
 void StTestEmbed::nativeLoop() {
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     MSG aMsg;
     while(GetMessage(&aMsg, NULL, 0, 0)) {
         TranslateMessage(&aMsg);
         DispatchMessage(&aMsg);
     }
     DestroyWindow(myParent);
-#elif(defined(__linux__) || defined(__linux))
+#elif defined(__linux__)
     XEvent anEvent;
     for(;;) {
         XNextEvent((Display* )myDisplay, &anEvent);

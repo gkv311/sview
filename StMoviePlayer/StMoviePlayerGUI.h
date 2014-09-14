@@ -66,18 +66,18 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL static size_t trSrcFormatId(const StFormatEnum theSrcFormat);
 
     /**
-     * @return absolute path to the texture
+     * @return relative path to the texture
      */
     ST_LOCAL inline StString getTexturePath(const StCString& theTextureName) const {
-        return myTexturesFolder + theTextureName;
+        return StString("textures" ST_FILE_SPLITTER) + theTextureName;
     }
 
     /**
-     * @return absolute path to the texture
+     * @return relative path to the texture
      */
     ST_LOCAL StString iconTexture(const StCString& theName,
                                   const IconSize   theSize) const {
-        return StGLRootWidget::iconTexture(myTexturesFolder + theName, theSize);
+        return StGLRootWidget::iconTexture(StString("textures" ST_FILE_SPLITTER) + theName, theSize);
     }
 
     /**
@@ -174,7 +174,6 @@ class StMoviePlayerGUI : public StGLRootWidget {
     StMoviePlayer*      myPlugin;           //!< link to the main Drawer class
     StWindow*           myWindow;           //!< link to the window instance
     StTranslations*     myLangMap;          //!< translated strings map
-    StString            myTexturesFolder;   //!< folder with textures
     StTimer             myVisibilityTimer;  //!< minimum visible delay
 
     StGLImageRegion*    myImage;            //!< the main video frame

@@ -24,6 +24,7 @@
 #include <StSlots/StSignal.h>
 #include <StSettings/StEnumParam.h>
 #include <StTemplates/StRect.h>
+#include <StThreads/StResourceManager.h>
 #include <StGL/StGLEnums.h>
 #include <StGL/StGLVec.h>
 
@@ -132,9 +133,11 @@ class StWindow {
 
     /**
      * Default constructor. Window will not be displayed until create() call.
+     * @param theResMgr       resources manager
      * @param theParentWindow Parent window
      */
-    ST_CPPEXPORT StWindow(const StNativeWin_t theParentWindow);
+    ST_CPPEXPORT StWindow(const StHandle<StResourceManager>& theResMgr,
+                          const StNativeWin_t                theParentWindow);
 
     /**
      * Destructor.
@@ -274,6 +277,14 @@ class StWindow {
      */
     ST_CPPEXPORT bool isMouseMoved() const;
 
+    /**
+     * Resources manager.
+     */
+    ST_CPPEXPORT const StHandle<StResourceManager>& getResourceManager() const;
+
+    /**
+     * Messages queue.
+     */
     ST_CPPEXPORT const StHandle<StMsgQueue>& getMessagesQueue() const;
 
     ST_CPPEXPORT void setMessagesQueue(const StHandle<StMsgQueue>& theQueue);
@@ -479,15 +490,16 @@ class StWindow {
 
         private: //! @name private fields
 
-    StWindowImpl*        myWin;            //!< window implementation class - we hide implementation details since them too platform-specific
-    double               myTargetFps;      //!< user data
+    StWindowImpl*               myWin;            //!< window implementation class - we hide implementation details since them too platform-specific
+    double                      myTargetFps;      //!< user data
 
         protected:
 
-    StHandle<StMsgQueue> myMsgQueue;       //!< messages queue
-    StRectI_t            myMargins;        //!< GUI margins
-    bool                 myWasUsed;        //!< flag indicates that window has been actually used (created)
-    bool                 myIsForcedStereo; //!< flag to force stereo output for mono sources
+    StHandle<StResourceManager> myResMgr;         //!< resources manager
+    StHandle<StMsgQueue>        myMsgQueue;       //!< messages queue
+    StRectI_t                   myMargins;        //!< GUI margins
+    bool                        myWasUsed;        //!< flag indicates that window has been actually used (created)
+    bool                        myIsForcedStereo; //!< flag to force stereo output for mono sources
 
         private: //! @name no copies, please
 

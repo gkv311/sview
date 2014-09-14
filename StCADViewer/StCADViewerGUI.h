@@ -25,7 +25,6 @@ class StCADViewerGUI : public StGLRootWidget {
 
     StCADViewer*              myPlugin; //!< link to the main class
     StHandle<StTranslations> myLangMap; //!< translated strings map
-    StString            myTexturesRoot; //!< textures path root
 
     StGLDescription*      myMouseDescr; //!< description shown near mouse cursor
     StGLMsgStack*           myMsgStack; //!< messages stack

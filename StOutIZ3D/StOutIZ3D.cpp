@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutIZ3D library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -22,7 +22,7 @@
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 
-#include <StImage/StImageFile.h>
+#include <StAv/StAVImage.h>
 
 #include <StSettings/StSettings.h>
 #include <StSettings/StTranslations.h>
@@ -87,7 +87,7 @@ namespace {
         STTR_PLUGIN_DESCRIPTION = 2002,
     };
 
-};
+}
 
 StAtomic<int32_t> StOutIZ3D::myInstancesNb(0);
 
@@ -113,8 +113,9 @@ void StOutIZ3D::getOptions(StParamsList& theList) const {
     theList.add(params.Glasses);
 }
 
-StOutIZ3D::StOutIZ3D(const StNativeWin_t theParentWindow)
-: StWindow(theParentWindow),
+StOutIZ3D::StOutIZ3D(const StHandle<StResourceManager>& theResMgr,
+                     const StNativeWin_t                theParentWindow)
+: StWindow(theResMgr, theParentWindow),
   mySettings(new StSettings(ST_OUT_PLUGIN_NAME)),
   myFrBuffer(new StGLStereoFrameBuffer()),
   myToSavePlacement(theParentWindow == (StNativeWin_t )NULL),
@@ -224,39 +225,48 @@ bool StOutIZ3D::create() {
     StWindow::params.VSyncMode->signals.onChanged += stSlot(this, &StOutIZ3D::doSwitchVSync);
 
     // INIT iZ3D tables textures
-    const StString aTexturesFolder = StProcess::getStShareFolder() + "textures" + SYS_FS_SPLITTER;
-    const StString aTableOldPath   = aTexturesFolder + "iz3dTableOld.png";
-    const StString aTableNewPath   = aTexturesFolder + "iz3dTableNew.png";
-
-    StHandle<StImageFile> aTableImg = StImageFile::create();
-    if(aTableImg.isNull()) {
-        myMsgQueue->pushError(stCString("iZ3D output - internal error!"));
-        myIsBroken = true;
-        return true;
+    StAVImage aTableImg;
+    StHandle<StResource> aTableOld = myResMgr->getResource(StString("textures") + SYS_FS_SPLITTER + "iz3dTableOld.png");
+    uint8_t* aData     = NULL;
+    int      aDataSize = 0;
+    if(!aTableOld.isNull()
+    && !aTableOld->isFile()
+    &&  aTableOld->read()) {
+        aData     = (uint8_t* )aTableOld->getData();
+        aDataSize = aTableOld->getSize();
     }
-    if(!aTableImg->load(aTableOldPath, StImageFile::ST_TYPE_PNG)) {
-        myMsgQueue->pushError(StString("iZ3D output - critical error:\n") + aTableImg->getState());
+    if(!aTableImg.load(!aTableOld.isNull() ? aTableOld->getPath() : StString(), StImageFile::ST_TYPE_PNG, aData, aDataSize)) {
+        myMsgQueue->pushError(StString("iZ3D output - critical error:\n") + aTableImg.getState());
         myIsBroken = true;
         return true;
     }
     myTexTableOld.setMinMagFilter(*myContext, GL_NEAREST); // we need not linear filtrating for lookup-table!
-    if(!myTexTableOld.init(*myContext, aTableImg->getPlane())) {
+    if(!myTexTableOld.init(*myContext, aTableImg.getPlane())) {
         myMsgQueue->pushError(stCString("iZ3D output - critical error:\nLookup-table initalization failed!"));
         myIsBroken = true;
         return true;
     }
-    if(!aTableImg->load(aTableNewPath, StImageFile::ST_TYPE_PNG)) {
-        myMsgQueue->pushError(StString("iZ3D output - critical error:\n") + aTableImg->getState());
+
+    StHandle<StResource> aTableNew = myResMgr->getResource(StString("textures") + SYS_FS_SPLITTER + "iz3dTableNew.png");
+    aData     = NULL;
+    aDataSize = 0;
+    if(!aTableNew.isNull()
+    && !aTableNew->isFile()
+    &&  aTableNew->read()) {
+        aData     = (uint8_t* )aTableNew->getData();
+        aDataSize = aTableNew->getSize();
+    }
+    if(!aTableImg.load(!aTableNew.isNull() ? aTableNew->getPath() : StString(), StImageFile::ST_TYPE_PNG, aData, aDataSize)) {
+        myMsgQueue->pushError(StString("iZ3D output - critical error:\n") + aTableImg.getState());
         myIsBroken = true;
         return true;
     }
     myTexTableNew.setMinMagFilter(*myContext, GL_NEAREST); // we need not linear filtrating for lookup-table!
-    if(!myTexTableNew.init(*myContext, aTableImg->getPlane())) {
+    if(!myTexTableNew.init(*myContext, aTableImg.getPlane())) {
         myMsgQueue->pushError(stCString("iZ3D output - critical error:\nLookup-table initalization failed!"));
         myIsBroken = true;
         return true;
     }
-    aTableImg.nullify();
 
     // INIT shaders
     if(!myShaders.init(*myContext)) {

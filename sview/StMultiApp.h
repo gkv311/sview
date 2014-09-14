@@ -11,8 +11,9 @@
 
 namespace StMultiApp {
 
-    ST_LOCAL StHandle<StApplication> getInstance(const StHandle<StOpenInfo>& theInfo = NULL);
+    ST_LOCAL StHandle<StApplication> getInstance(const StHandle<StResourceManager>& theResMgr,
+                                                 const StHandle<StOpenInfo>&        theInfo = NULL);
 
-};
+}
 
 #endif // __StMultiApp_h_

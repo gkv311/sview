@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -12,6 +12,7 @@
 #include <StGLWidgets/StGLShare.h>
 #include <StGLWidgets/StGLWidget.h>
 #include <StGL/StGLFontManager.h>
+#include <StThreads/StResourceManager.h>
 
 #include <StTemplates/StHandle.h>
 
@@ -48,7 +49,7 @@ class StGLRootWidget : public StGLWidget {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StGLRootWidget();
+    ST_CPPEXPORT StGLRootWidget(const StHandle<StResourceManager>& theResMgr);
 
     /**
      * Destructor.
@@ -219,6 +220,13 @@ class StGLRootWidget : public StGLWidget {
     ST_CPPEXPORT void setContext(const StHandle<StGLContext>& theCtx);
 
     /**
+     * Access resource manager.
+     */
+    ST_LOCAL const StHandle<StResourceManager>& getResourceManager() const {
+        return myResMgr;
+    }
+
+    /**
      * @return reference to shared font manager
      */
     ST_LOCAL StHandle<StGLFontManager>& getFontManager() {
@@ -289,6 +297,7 @@ class StGLRootWidget : public StGLWidget {
 
     StGLSharePointer**        myShareArray;    //!< resources shared within GL context (commonly used)
     size_t                    myShareSize;
+    StHandle<StResourceManager> myResMgr;      //!< resources manager
     StGLProjCamera            myProjCamera;    //!< projection camera
     StGLMatrix                myScrProjMat;    //!< projection matrix within translation to the screen
     StHandle<StGLFontManager> myGlFontMgr;     //!< shared font manager

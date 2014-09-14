@@ -43,7 +43,8 @@ static StString getAbout() {
     return anAboutString;
 }
 
-StHandle<StApplication> StMultiApp::getInstance(const StHandle<StOpenInfo>& theInfo) {
+StHandle<StApplication> StMultiApp::getInstance(const StHandle<StResourceManager>& theResMgr,
+                                                const StHandle<StOpenInfo>&        theInfo) {
     StHandle<StOpenInfo> anInfo = theInfo;
     if(anInfo.isNull()
     || (!anInfo->hasPath() && !anInfo->hasArgs())) {
@@ -63,16 +64,16 @@ StHandle<StApplication> StMultiApp::getInstance(const StHandle<StOpenInfo>& theI
     if(anArgDrawer.isValid()) {
         if(anArgDrawer.getValue() == "image"
         || anArgDrawer.getValue() == "StImageViewer") {
-            return new StImageViewer(NULL, anInfo);
+            return new StImageViewer(theResMgr, NULL, anInfo);
         } else if(anArgDrawer.getValue() == "video"
                || anArgDrawer.getValue() == "StMoviePlayer") {
-            return new StMoviePlayer(NULL, anInfo);
+            return new StMoviePlayer(theResMgr, NULL, anInfo);
         } else if(anArgDrawer.getValue() == "diag"
                || anArgDrawer.getValue() == "StDiagnostics") {
-            return new StDiagnostics(NULL, anInfo);
+            return new StDiagnostics(theResMgr, NULL, anInfo);
         } else if(anArgDrawer.getValue() == "cad"
                || anArgDrawer.getValue() == "StCADViewer") {
-            return new StCADViewer(NULL, anInfo);
+            return new StCADViewer(theResMgr, NULL, anInfo);
         } else {
             // show help
             StString aShowHelpString = getAbout();
@@ -88,15 +89,15 @@ StHandle<StApplication> StMultiApp::getInstance(const StHandle<StOpenInfo>& theI
     const StMIMEList aMimeImg(ST_IMAGE_PLUGIN_MIME_CHAR);
     for(size_t aMimeIter = 0; aMimeIter < aMimeImg.size(); ++aMimeIter) {
         if(aFileExtension.isEqualsIgnoreCase(aMimeImg[aMimeIter].getExtension())) {
-            return new StImageViewer(NULL, anInfo);
+            return new StImageViewer(theResMgr, NULL, anInfo);
         }
     }
     const StMIMEList aMimeCad(ST_CAD_PLUGIN_MIME_CHAR);
     for(size_t aMimeIter = 0; aMimeIter < aMimeCad.size(); ++aMimeIter) {
         if(aFileExtension.isEqualsIgnoreCase(aMimeCad[aMimeIter].getExtension())) {
-            return new StCADViewer(NULL, anInfo);
+            return new StCADViewer(theResMgr, NULL, anInfo);
         }
     }
 
-    return new StMoviePlayer(NULL, anInfo);
+    return new StMoviePlayer(theResMgr, NULL, anInfo);
 }

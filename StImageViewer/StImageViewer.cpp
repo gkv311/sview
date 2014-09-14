@@ -73,9 +73,10 @@ namespace {
     static const char ST_ARGUMENT_FILE_RIGHT[] = "right";
 };
 
-StImageViewer::StImageViewer(const StNativeWin_t         theParentWin,
-                             const StHandle<StOpenInfo>& theOpenInfo)
-: StApplication(theParentWin, theOpenInfo),
+StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
+                             const StNativeWin_t                theParentWin,
+                             const StHandle<StOpenInfo>&        theOpenInfo)
+: StApplication(theResMgr, theParentWin, theOpenInfo),
   mySettings(new StSettings(ST_DRAWER_PLUGIN_NAME)),
   myLangMap(new StTranslations(StImageViewer::ST_DRAWER_PLUGIN_NAME)),
   myEventDialog(false),
@@ -128,12 +129,12 @@ StImageViewer::StImageViewer(const StNativeWin_t         theParentWin,
     mySettings->loadInt32 (ST_SETTING_SLIDESHOW_DELAY,    aSlideShowDelayInt);
     mySlideShowDelay = double(aSlideShowDelayInt);
 
-    addRenderer(new StOutAnaglyph(theParentWin));
-    addRenderer(new StOutDual(theParentWin));
-    addRenderer(new StOutIZ3D(theParentWin));
-    addRenderer(new StOutInterlace(theParentWin));
-    addRenderer(new StOutDistorted(theParentWin));
-    addRenderer(new StOutPageFlipExt(theParentWin));
+    addRenderer(new StOutAnaglyph   (myResMgr, theParentWin));
+    addRenderer(new StOutDual       (myResMgr, theParentWin));
+    addRenderer(new StOutIZ3D       (myResMgr, theParentWin));
+    addRenderer(new StOutInterlace  (myResMgr, theParentWin));
+    addRenderer(new StOutDistorted  (myResMgr, theParentWin));
+    addRenderer(new StOutPageFlipExt(myResMgr, theParentWin));
 
     // no need in Depth buffer
     const StWinAttr anAttribs[] = {

@@ -29,16 +29,18 @@ static void app_entry_my(StAndroidGlue* theApp) {
     anInfo->setPath(theApp->getDataPath());
     //anInfo = StApplication::parseProcessArguments();
 
+    StHandle<StResourceManager> aResMgr = new StResourceManager();
+
     StHandle<StApplication> anApp;
     const StMIMEList aMimeImg(ST_IMAGE_PLUGIN_MIME_CHAR);
     for(size_t aMimeIter = 0; aMimeIter < aMimeImg.size(); ++aMimeIter) {
         if(aFileExtension.isEqualsIgnoreCase(aMimeImg[aMimeIter].getExtension())) {
-            anApp = new StImageViewer(theApp, anInfo);
+            anApp = new StImageViewer(aResMgr, theApp, anInfo);
             break;
         }
     }
     if(anApp.isNull()) {
-        anApp = new StMoviePlayer(theApp, anInfo);
+        anApp = new StMoviePlayer(aResMgr, theApp, anInfo);
     }
     if(anApp.isNull() || !anApp->open()) {
         return;
