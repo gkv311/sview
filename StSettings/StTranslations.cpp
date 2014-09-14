@@ -44,6 +44,31 @@ StTranslations::StTranslations(const StHandle<StResourceManager>& theResMgr,
         }
         myLangList.add(aName.isEmpty() ? aFolders[aNodeId] : aName);
     }
+#if defined(__ANDROID__)
+    if(myLangList.isEmpty()) {
+        // no way to list sub-folder on Android - check known translations
+        if(myResMgr->isResourceExist(StString("lang" ST_FILE_SPLITTER "English" ST_FILE_SPLITTER) + myModuleName + StTranslations::DEFAULT_SUFFIX)) {
+            myLangList.add("English");
+            myLangFolderList.add("English");
+        }
+        if(myResMgr->isResourceExist(StString("lang" ST_FILE_SPLITTER "Russian" ST_FILE_SPLITTER) + myModuleName + StTranslations::DEFAULT_SUFFIX)) {
+            myLangList.add("русский");
+            myLangFolderList.add("Russian");
+        }
+        if(myResMgr->isResourceExist(StString("lang" ST_FILE_SPLITTER "French" ST_FILE_SPLITTER) + myModuleName + StTranslations::DEFAULT_SUFFIX)) {
+            myLangList.add("français");
+            myLangFolderList.add("French");
+        }
+        if(myResMgr->isResourceExist(StString("lang" ST_FILE_SPLITTER "German" ST_FILE_SPLITTER) + myModuleName + StTranslations::DEFAULT_SUFFIX)) {
+            myLangList.add("Deutsch");
+            myLangFolderList.add("German");
+        }
+        if(myResMgr->isResourceExist(StString("lang" ST_FILE_SPLITTER "Korean" ST_FILE_SPLITTER) + myModuleName + StTranslations::DEFAULT_SUFFIX)) {
+            myLangList.add("한국어");
+            myLangFolderList.add("Korean");
+        }
+    }
+#endif
 
     if(myLangList.isEmpty()) {
         // add built-in language

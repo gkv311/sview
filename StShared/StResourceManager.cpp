@@ -140,21 +140,6 @@ void StResourceManager::listSubFolders(const StString&        theFolder,
     if(aFileDir.size() != 0) {
         return;
     }
-#if defined(__ANDROID__)
-    /*AAssetDir* anAssetDir = AAssetManager_openDir(myAssetMgr, aPath.toCString());
-    if(anAssetDir != NULL) {
-        for(const char* aSubFileAbsolute = AAssetDir_getNextFileName(anAssetDir); aSubFileAbsolute != NULL;
-            StString aFolder, aName;
-            StFileNode::getFolderAndFile(aSubFileAbsolute, aFolder, aName);
-            AAssetDir* aSubDir = AAssetManager_openDir(myAssetMgr, aSubFileAbsolute);
-            if(aSubDir != NULL) {
-                AAssetDir_close(aSubDir);
-                theSubFolders.add(aFileNode->getSubPath());
-            }
-        }
-        AAssetDir_close(anAssetDir);
-    }*/
-#endif
 }
 
 StResource::StResource(const StString& theName,

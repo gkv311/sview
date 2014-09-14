@@ -63,7 +63,6 @@ bool StLangMap::read(const char* theContent,
         return false;
     }
 
-    char bufferOrig[READ_BUFFER_SIZE]; bufferOrig[0] = '\0';
     char* bufferLineOrig = new char[1];
     bufferLineOrig[0] = '\0';
     size_t aLineSize = 0;
