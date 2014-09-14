@@ -54,7 +54,8 @@ class StWindowImpl {
 
         public: //! @name main interface
 
-    ST_LOCAL StWindowImpl(const StNativeWin_t theParentWindow);
+    ST_LOCAL StWindowImpl(const StHandle<StResourceManager>& theResMgr,
+                          const StNativeWin_t                theParentWindow);
     ST_LOCAL ~StWindowImpl();
     ST_LOCAL StNativeWin_t getParentWindow() const { return myParentWin; }
     ST_LOCAL void close();
@@ -265,6 +266,7 @@ class StWindowImpl {
 
     static StAtomic<int32_t> myFullScreenWinNb; //!< shared counter for fullscreen windows to detect inactive state
 
+    StHandle<StResourceManager> myResMgr; //!< file resources manager
     StHandle<StGLContext> myGlContext;
     StWinHandles       myMaster;          //!< master window
     StWinHandles       mySlave;           //!< slave  window (optional)

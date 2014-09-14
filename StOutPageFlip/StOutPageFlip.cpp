@@ -820,7 +820,7 @@ bool StOutPageFlip::create() {
 
     // load fullscreen-only warning
     StAVImage anImage;
-    StHandle<StResource> aWarnRes = myResMgr->getResource(StString("textures") + SYS_FS_SPLITTER + "pageflip_fullscreen.png");
+    StHandle<StResource> aWarnRes = getResourceManager()->getResource(StString("textures") + SYS_FS_SPLITTER + "pageflip_fullscreen.png");
     uint8_t* aData     = NULL;
     int      aDataSize = 0;
     if(!aWarnRes.isNull()

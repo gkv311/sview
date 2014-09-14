@@ -322,7 +322,7 @@ bool StWindowImpl::create() {
         return false;
     }
 
-    myGlContext = new StGLContext();
+    myGlContext = new StGLContext(myResMgr);
     if(!myGlContext->stglInit()) {
         myMaster.close();
         mySlave.close();

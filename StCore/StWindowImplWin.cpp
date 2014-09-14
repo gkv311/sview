@@ -71,7 +71,7 @@ bool StWindowImpl::create() {
                                            attribs.IsGlStereo,
                                            attribs.IsGlDebug);
     myEventInitGl.set();
-    myGlContext = new StGLContext();
+    myGlContext = new StGLContext(myResMgr);
     if(!myGlContext->stglInit()) {
         stError("Critical error - broken GL context!\nInvalid OpenGL driver?");
         myInitState = STWIN_ERROR_WIN32_GLRC_ACTIVATE;

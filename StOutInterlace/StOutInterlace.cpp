@@ -515,8 +515,7 @@ bool StOutInterlace::create() {
                                        .link(*myContext);
 
     /// TODO (Kirill Gavrilov#3) fix shaders
-    const StString aShadersRoot = StProcess::getStShareFolder() + "shaders" + SYS_FS_SPLITTER
-                                + ST_OUT_PLUGIN_NAME + SYS_FS_SPLITTER;
+    const StString aShadersRoot = StString("shaders" ST_FILE_SPLITTER) + ST_OUT_PLUGIN_NAME + SYS_FS_SPLITTER;
     StGLVertexShader stVShaderED("ED control");
     StGLAutoRelease aTmp8(*myContext, stVShaderED);
     if(!stVShaderED.initFile(*myContext, aShadersRoot + VSHADER_ED)) {

@@ -58,33 +58,60 @@ class StGLShader : public StGLResource {
     ST_CPPEXPORT virtual const StString& getTitle() const;
 
     /**
-     * Vitual method could be overridden by classes contained
+     * Virtual method could be overridden by classes contained
      * shader program text internally.
      */
     ST_CPPEXPORT virtual bool init();
 
     /**
      * Initialize the shader program from text buffer.
-     * @param theSrcLines0 (const char* ) - shader program source;
-     * @return true on success.
+     * @param theNbParts  number of shader source parts
+     * @param theSrcParts source code
+     * @param theSrcLens  lengths of each source part
+     * @return true on success
      */
-    ST_CPPEXPORT virtual bool init(StGLContext& theCtx,
-                                   const char*  theSrcLines0,
-                                   const char*  theSrcLines1 = NULL,
-                                   const char*  theSrcLines2 = NULL);
-
-    /**virtual bool init(const StString& sourceUtfString) {
-        std::string sourceString = sourceUtfString.ansiText();
-        return init(sourceString.c_str());
-    }*/
+    ST_CPPEXPORT bool init(StGLContext&       theCtx,
+                           const GLsizei      theNbParts,
+                           const char* const* theSrcParts,
+                           const GLint*       theSrcLens = NULL);
 
     /**
-     * Initialize the shader from text file.
-     * @param theFileName (const StString& ) - file to read;
-     * @return true on success.
+     * Initialize the shader from text resource.
+     * @param theCtx  bound OpenGL context
+     * @param theName text resource to read
+     * @return true on success
      */
     ST_CPPEXPORT bool initFile(StGLContext&    theCtx,
-                               const StString& theFileName);
+                               const StString& theName);
+
+    /**
+     * Initialize the shader from single string.
+     */
+    ST_LOCAL bool init(StGLContext& theCtx,
+                       const char*  theSrc) {
+        return init(theCtx, 1, &theSrc, NULL);
+    }
+
+    /**
+     * Initialize the shader from two strings.
+     */
+    ST_LOCAL bool init(StGLContext& theCtx,
+                       const char*  theSrc1,
+                       const char*  theSrc2) {
+        const char* const aSrc[] = { theSrc1, theSrc2 };
+        return init(theCtx, theSrc2 != NULL ? 2 : 1, aSrc, NULL);
+    }
+
+    /**
+     * Initialize the shader from three strings.
+     */
+    ST_LOCAL bool init(StGLContext& theCtx,
+                       const char*  theSrc1,
+                       const char*  theSrc2,
+                       const char*  theSrc3) {
+        const char* const aSrc[] = { theSrc1, theSrc2, theSrc3 };
+        return init(theCtx, theSrc3 != NULL ? 3 : (theSrc2 != NULL ? 2 : 1), aSrc, NULL);
+    }
 
         protected:
 

@@ -31,7 +31,7 @@
     #include <GL/glx.h> // glXGetProcAddress()
 #endif
 
-StGLContext::StGLContext()
+StGLContext::StGLContext(const StHandle<StResourceManager>& theResMgr)
 : core11(NULL),
   core11fwd(NULL),
   core20(NULL),
@@ -62,6 +62,7 @@ StGLContext::StGLContext()
   extAll(NULL),
   extSwapTear(false),
   myFuncs(new StGLFunctions()),
+  myResMgr(theResMgr),
   myGpuName(GPU_UNKNOWN),
   myVerMajor(0),
   myVerMinor(0),

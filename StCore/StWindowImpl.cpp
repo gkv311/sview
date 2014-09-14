@@ -48,8 +48,10 @@ namespace {
 // shared counter for fullscreen windows to detect inactive state
 StAtomic<int32_t> StWindowImpl::myFullScreenWinNb(0);
 
-StWindowImpl::StWindowImpl(const StNativeWin_t theParentWindow)
-: myParentWin(theParentWindow),
+StWindowImpl::StWindowImpl(const StHandle<StResourceManager>& theResMgr,
+                           const StNativeWin_t                theParentWindow)
+: myResMgr(theResMgr),
+  myParentWin(theParentWindow),
   myWindowTitle(WINDOW_TITLE_DEFAULT),
   myInitState(STWIN_INITNOTSTART),
   myMousePt(0.5, 0.5),

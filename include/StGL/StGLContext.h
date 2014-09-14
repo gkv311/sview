@@ -15,6 +15,7 @@
 #include <StGL/StGLVec.h>
 
 #include <StStrings/StMsgQueue.h>
+#include <StThreads/StResourceManager.h>
 
 #ifdef __APPLE__
     #include <StLibrary.h>
@@ -158,7 +159,7 @@ class StGLContext {
     /**
      * Empty constructor.
      */
-    ST_CPPEXPORT StGLContext();
+    ST_CPPEXPORT StGLContext(const StHandle<StResourceManager>& theResMgr);
 
     /**
      * Default constructor.
@@ -169,6 +170,11 @@ class StGLContext {
      * Destructor.
      */
     ST_CPPEXPORT virtual ~StGLContext();
+
+    /**
+     * File resources manager.
+     */
+    ST_LOCAL const StHandle<StResourceManager>& getResourceManager() const { return myResMgr; }
 
     /**
      * Setup messages queue.
@@ -390,6 +396,8 @@ class StGLContext {
     StLibrary               mySysLib;             //!< optional handle to system GL library (MacOS X specific)
 #endif
     StHandle<StGLFunctions> myFuncs;              //!< mega structure for all GL functions
+    StHandle<StResourceManager>
+                            myResMgr;             //!< file resources manager
     StHandle<StMsgQueue>    myMsgQueue;           //!< messages queue
     GPU_Name                myGpuName;            //!< GPU name
     GLint                   myVerMajor;           //!< cached GL version major number

@@ -500,7 +500,6 @@ class StWindow {
 
         protected:
 
-    StHandle<StResourceManager> myResMgr;         //!< resources manager
     StHandle<StMsgQueue>        myMsgQueue;       //!< messages queue
     StRectI_t                   myMargins;        //!< GUI margins
     bool                        myWasUsed;        //!< flag indicates that window has been actually used (created)

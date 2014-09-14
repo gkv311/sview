@@ -476,7 +476,7 @@ bool StOutDistorted::create() {
 
     // cursor texture
     StAVImage aCursorImg;
-    StHandle<StResource> aCursorRes = myResMgr->getResource(StString("textures") + SYS_FS_SPLITTER + "cursor.png");
+    StHandle<StResource> aCursorRes = getResourceManager()->getResource(StString("textures") + SYS_FS_SPLITTER + "cursor.png");
     uint8_t* aData     = NULL;
     int      aDataSize = 0;
     if(!aCursorRes.isNull()

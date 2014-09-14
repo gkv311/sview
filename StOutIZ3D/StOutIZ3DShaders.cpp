@@ -69,8 +69,7 @@ bool StOutIZ3DShaders::init(StGLContext& theCtx) {
     const StString FSHADER_IZ3D_FRONT_TABLE   = "fIZ3DFrontTable.shf";
 
     StString aShadersError("StOutIZ3D Plugin, Failed to init Shaders");
-    const StString aShadersRoot = StProcess::getStShareFolder() + "shaders" + SYS_FS_SPLITTER
-                                   + "StOutIZ3D" + SYS_FS_SPLITTER;
+    const StString aShadersRoot("shaders" ST_FILE_SPLITTER "StOutIZ3D" ST_FILE_SPLITTER);
 
     // initialize shaders
     StGLVertexShader aVertexShader("iZ3D"); // common vertex shader

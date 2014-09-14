@@ -214,6 +214,7 @@ bool StOutIZ3D::create() {
     // initialize GL context
     myContext = StWindow::getContext();
     myContext->setMessagesQueue(myMsgQueue);
+    const StHandle<StResourceManager>& aResMgr = getResourceManager();
     if(!myContext->isGlGreaterEqual(2, 0)) {
         myMsgQueue->pushError(stCString("OpenGL 2.0 is required by iZ3D Output"));
         myIsBroken = true;
@@ -226,7 +227,7 @@ bool StOutIZ3D::create() {
 
     // INIT iZ3D tables textures
     StAVImage aTableImg;
-    StHandle<StResource> aTableOld = myResMgr->getResource(StString("textures") + SYS_FS_SPLITTER + "iz3dTableOld.png");
+    StHandle<StResource> aTableOld = aResMgr->getResource(StString("textures") + SYS_FS_SPLITTER + "iz3dTableOld.png");
     uint8_t* aData     = NULL;
     int      aDataSize = 0;
     if(!aTableOld.isNull()
@@ -247,7 +248,7 @@ bool StOutIZ3D::create() {
         return true;
     }
 
-    StHandle<StResource> aTableNew = myResMgr->getResource(StString("textures") + SYS_FS_SPLITTER + "iz3dTableNew.png");
+    StHandle<StResource> aTableNew = aResMgr->getResource(StString("textures") + SYS_FS_SPLITTER + "iz3dTableNew.png");
     aData     = NULL;
     aDataSize = 0;
     if(!aTableNew.isNull()

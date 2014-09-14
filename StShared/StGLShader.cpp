@@ -57,29 +57,37 @@ const StString& StGLShader::getTitle() const {
     return myTitle;
 }
 
-bool StGLShader::init(StGLContext& theCtx,
-                      const char*  theSrcLines0,
-                      const char*  theSrcLines1,
-                      const char*  theSrcLines2) {
-    if(theSrcLines0 == NULL
+bool StGLShader::init(StGLContext&       theCtx,
+                      const GLsizei      theNbParts,
+                      const char* const* theSrcParts,
+                      const GLint*       theSrcLens) {
+    if(theNbParts < 1
+    || theSrcParts == NULL
+    || theSrcParts[0] == NULL
     || theCtx.core20fwd == NULL) {
         return false;
     }
 
-    myShaderId = theCtx.core20fwd->glCreateShader(getType());
+    if(myShaderId == NO_SHADER) {
+        myShaderId = theCtx.core20fwd->glCreateShader(getType());
+    }
 
 #if defined(GL_ES_VERSION_2_0)
     if(myShaderType == GL_FRAGMENT_SHADER) {
-        GLsizei     aCount       = (theSrcLines1 == NULL) ? 2 : ((theSrcLines2 == NULL) ? 3 : 4);
-        const char* aSrcArray[4] = {theCtx.hasHighp ? THE_FRAG_PREC_HIGH : THE_FRAG_PREC_LOW, theSrcLines0, theSrcLines1, theSrcLines2};
-        theCtx.core20fwd->glShaderSource(myShaderId, aCount, aSrcArray, NULL);
+        const char** aSrcParts = (const char** )alloca(sizeof(char*) * (theNbParts + 1));
+        GLint*       aSrcLens  = (GLint*       )alloca(sizeof(GLint) * (theNbParts + 1));
+        aSrcParts[0] = theCtx.hasHighp ? THE_FRAG_PREC_HIGH : THE_FRAG_PREC_LOW;
+        aSrcLens [0] = -1;
+        for(GLsizei aPartIter = 0; aPartIter < theNbParts; ++aPartIter) {
+            aSrcParts[aPartIter + 1] = theSrcParts[aPartIter];
+            aSrcLens [aPartIter + 1] = theSrcLens != NULL ? theSrcLens[aPartIter] : -1;
+        }
+        theCtx.core20fwd->glShaderSource(myShaderId, theNbParts + 1, aSrcParts, aSrcLens);
     }
     else
 #endif
     {
-        GLsizei aCount = (theSrcLines1 == NULL) ? 1 : ((theSrcLines2 == NULL) ? 2 : 3);
-        const char* aSrcArray[3] = {theSrcLines0, theSrcLines1, theSrcLines2};
-        theCtx.core20fwd->glShaderSource(myShaderId, aCount, aSrcArray, NULL);
+        theCtx.core20fwd->glShaderSource(myShaderId, theNbParts, theSrcParts, theSrcLens);
     }
 
     // compile shaders
@@ -87,14 +95,21 @@ bool StGLShader::init(StGLContext& theCtx,
 
     // check compile success
     if(!isCompiled(theCtx)) {
+        StString aSrc;
+    #if defined(GL_ES_VERSION_2_0)
+        if(myShaderType == GL_FRAGMENT_SHADER) {
+            aSrc += theCtx.hasHighp ? THE_FRAG_PREC_HIGH : THE_FRAG_PREC_LOW;
+        }
+    #endif
+        for(GLsizei aPartIter = 0; aPartIter < theNbParts; ++aPartIter) {
+            aSrc += theSrcParts[aPartIter];
+        }
+
         theCtx.pushError(StString("Compilation of the ") + getTypeString() + " '" + myTitle
                        + "' failed!\n" + getCompileInfo(theCtx)
                        + "\n=== Source code ===\n"
-                       //+ (myShaderType == GL_FRAGMENT_SHADER ? (theCtx.hasHighp ? THE_FRAG_PREC_HIGH : THE_FRAG_PREC_LOW) : "")
-                       + (theSrcLines0 != NULL ? theSrcLines0 : "")
-                       + (theSrcLines1 != NULL ? theSrcLines1 : "")
-                       + (theSrcLines2 != NULL ? theSrcLines2 : "")
-                       + "==================="
+                       + aSrc
+                       + "\n==================="
         );
         release(theCtx);
         return false;
@@ -108,14 +123,16 @@ bool StGLShader::init(StGLContext& theCtx,
 }
 
 bool StGLShader::initFile(StGLContext&    theCtx,
-                          const StString& theFileName) {
-    StRawFile aTextFile(theFileName);
-    if(!aTextFile.readFile()) {
-        theCtx.pushError(StString("Shader file '") + theFileName + "' is not found!");
+                          const StString& theName) {
+    StHandle<StResource> aRes = theCtx.getResourceManager()->getResource(theName);
+    if( aRes.isNull()
+    || !aRes->read()) {
+        theCtx.pushError(StString("Shader file '") + theName + "' is not found!");
         return false;
     }
-
-    return init(theCtx, (const char* )aTextFile.getBuffer());
+    const char* aSrc = (const char* )aRes->getData();
+    GLint       aLen = aRes->getSize();
+    return init(theCtx, 1, &aSrc, &aLen);
 }
 
 bool StGLShader::isCompiled(StGLContext& theCtx) const {

@@ -177,7 +177,7 @@ void StWindowImpl::onAndroidCommand(int32_t theCommand) {
                 myRectNorm.right()  = myRectNorm.left() + aWidth;
                 myRectNorm.bottom() = myRectNorm.top()  + aHeight;
 
-                myGlContext = new StGLContext();
+                myGlContext = new StGLContext(myResMgr);
                 if(!myGlContext->stglInit()) {
                     myMaster.close();
                     mySlave.close();
@@ -192,7 +192,7 @@ void StWindowImpl::onAndroidCommand(int32_t theCommand) {
         case StAndroidGlue::CommandId_WindowTerm: {
             // the window is being hidden or closed, clean it up
             myMaster.close();
-            myGlContext = new StGLContext();
+            myGlContext = new StGLContext(myResMgr);
             break;
         }
         case StAndroidGlue::CommandId_FocusGained: {

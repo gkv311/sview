@@ -422,7 +422,7 @@ int StWinHandles::glCreateContext(StWinHandles*    theSlave,
     ST_GL_ERROR_CHECK(aRendCtxTmp->makeCurrent(aDevCtxTmp),
                       STWIN_ERROR_WIN32_GLRC_ACTIVATE, "WinAPI, Can't activate Tmp GL Rendering Context");
 
-    StGLContext aCtx;
+    StGLContext aCtx(false);
     ST_GL_ERROR_CHECK(aCtx.stglInit(),
                       STWIN_ERROR_WIN32_GLRC_ACTIVATE, "WinAPI, Broken Tmp GL Rendering Context");
 
