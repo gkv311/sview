@@ -83,12 +83,12 @@ bool StGLShader::init(StGLContext&       theCtx,
             aSrcLens [aPartIter + 1] = theSrcLens != NULL ? theSrcLens[aPartIter] : -1;
         }
         theCtx.core20fwd->glShaderSource(myShaderId, theNbParts + 1, aSrcParts, aSrcLens);
+    } else {
+        theCtx.core20fwd->glShaderSource(myShaderId, theNbParts, (const GLchar** )theSrcParts, theSrcLens);
     }
-    else
+#else
+    theCtx.core20fwd->glShaderSource(myShaderId, theNbParts, theSrcParts, theSrcLens);
 #endif
-    {
-        theCtx.core20fwd->glShaderSource(myShaderId, theNbParts, theSrcParts, theSrcLens);
-    }
 
     // compile shaders
     theCtx.core20fwd->glCompileShader(myShaderId);
