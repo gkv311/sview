@@ -19,6 +19,7 @@
 #if defined(__ANDROID__)
 
 #include <android/asset_manager.h>
+#include <android/configuration.h>
 
 /**
  * File resource.
@@ -76,15 +77,29 @@ class StAssetResource : public StResource {
 #endif
 
 StResourceManager::StResourceManager()
-: myRoot(StProcess::getStShareFolder()) {
+: myRoot(StProcess::getStShareFolder()),
+  myLang("en") {
     //
 }
 
 #if defined(__ANDROID__)
 StResourceManager::StResourceManager(AAssetManager* theAssetMgr)
 : myRoot(StProcess::getStShareFolder()),
+  myLang("en"),
   myAssetMgr(theAssetMgr) {
-    //
+    if(myAssetMgr == NULL) {
+        return;
+    }
+
+    AConfiguration* aConfig = AConfiguration_new();
+    AConfiguration_fromAssetManager(aConfig, myAssetMgr);
+    char aLang[3], aCountry[3];
+    AConfiguration_getLanguage(aConfig, aLang);
+    AConfiguration_getCountry (aConfig, aCountry);
+    aLang[2]    = '\0';
+    aCountry[2] = '\0';
+    myLang = aLang;
+    AConfiguration_delete(aConfig);
 }
 #endif
 

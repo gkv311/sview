@@ -106,6 +106,13 @@ class StResourceManager {
     ST_CPPEXPORT virtual ~StResourceManager();
 
     /**
+     * 2-letters system language code.
+     */
+    ST_LOCAL const StString& getSystemLanguage() const {
+        return myLang;
+    }
+
+    /**
      * Check if resource with specified name exists.
      */
     ST_CPPEXPORT bool isResourceExist(const StString& theName) const;
@@ -123,9 +130,10 @@ class StResourceManager {
 
         protected:
 
-    StString myRoot;
+    StString       myRoot;     //!< root path for resources, location is system-dependent
+    StString       myLang;     //!< system language code
 #if defined(__ANDROID__)
-    AAssetManager* myAssetMgr;
+    AAssetManager* myAssetMgr; //!< assets manger to retrieve resources from apk archive
 #endif
 
 };

@@ -76,14 +76,45 @@ StTranslations::StTranslations(const StHandle<StResourceManager>& theResMgr,
         myLangFolderList.add("English");
     }
 
-    StString aLangParam("English");
+    size_t     anIdInList = 0;
+    StString   aLangParam("English");
     StSettings aGlobalSettings(ST_GLOBAL_SETTINGS_GROUP);
-    aGlobalSettings.loadString(ST_SETTING_LANGUAGE, aLangParam);
-
-    size_t anIdInList = 0;
-    if(myLangFolderList.contains(aLangParam,           anIdInList)
-    || myLangFolderList.contains(stCString("English"), anIdInList)) {
-        params.language->setValue(int32_t(anIdInList));
+    bool isLangSet = false;
+    if(!aGlobalSettings.loadString(ST_SETTING_LANGUAGE, aLangParam)) {
+        // try to use system-wide language settings
+        const StString& aLang = myResMgr->getSystemLanguage();
+    #if defined(__ANDROID__)
+        if(aLang.isEqualsIgnoreCase(stCString("ru"))) {
+            if(myLangFolderList.contains(stCString("Russian"),  anIdInList)
+            || myLangFolderList.contains(stCString("русский"),  anIdInList)) {
+                params.language->setValue(int32_t(anIdInList));
+                isLangSet = true;
+            }
+        } else if(aLang.isEqualsIgnoreCase(stCString("de"))) {
+            if(myLangFolderList.contains(stCString("German"),   anIdInList)
+            || myLangFolderList.contains(stCString("Deutsch"),  anIdInList)) {
+                params.language->setValue(int32_t(anIdInList));
+                isLangSet = true;
+            }
+        } else if(aLang.isEqualsIgnoreCase(stCString("fr"))) {
+            if(myLangFolderList.contains(stCString("French"),   anIdInList)
+            || myLangFolderList.contains(stCString("français"), anIdInList)) {
+                params.language->setValue(int32_t(anIdInList));
+                isLangSet = true;
+            }
+        } else if(aLang.isEqualsIgnoreCase(stCString("ko"))) {
+            if(myLangFolderList.contains(stCString("Korean"),   anIdInList)) {
+                params.language->setValue(int32_t(anIdInList));
+                isLangSet = true;
+            }
+        }
+    #endif
+    }
+    if(!isLangSet) {
+        if(myLangFolderList.contains(aLangParam,           anIdInList)
+        || myLangFolderList.contains(stCString("English"), anIdInList)) {
+            params.language->setValue(int32_t(anIdInList));
+        }
     }
 
     const StString& aFolderName = myLangFolderList[anIdInList];
