@@ -19,11 +19,12 @@
 bool StGLTexture::getInternalFormat(const StGLContext&  theCtx,
                                     const StImagePlane& theData,
                                     GLint&              theInternalFormat) {
+    // sized formats are not supported by OpenGL ES
     switch(theData.getFormat()) {
         case StImagePlane::ImgRGBAF:
         case StImagePlane::ImgBGRAF:
         #if defined(GL_ES_VERSION_2_0)
-            theInternalFormat = theCtx.hasTexRGBA8 ? GL_RGBA8 : GL_RGBA;
+            theInternalFormat = GL_RGBA;
         #else
             theInternalFormat = GL_RGBA32F;
         #endif
@@ -31,20 +32,28 @@ bool StGLTexture::getInternalFormat(const StGLContext&  theCtx,
         case StImagePlane::ImgRGBF:
         case StImagePlane::ImgBGRF:
         #if defined(GL_ES_VERSION_2_0)
-            theInternalFormat = theCtx.hasTexRGBA8 ? GL_RGB8 : GL_RGB;
+            theInternalFormat = GL_RGB;
         #else
             theInternalFormat = GL_RGB32F;
         #endif
             return true;
         case StImagePlane::ImgRGBA:
         case StImagePlane::ImgBGRA:
-            theInternalFormat = theCtx.hasTexRGBA8 ? GL_RGBA8 : GL_RGBA;
+        #if defined(GL_ES_VERSION_2_0)
+            theInternalFormat = GL_RGBA;
+        #else
+            theInternalFormat = GL_RGBA8;
+        #endif
             return true;
         case StImagePlane::ImgRGB:
         case StImagePlane::ImgBGR:
         case StImagePlane::ImgRGB32:
         case StImagePlane::ImgBGR32:
-            theInternalFormat = theCtx.hasTexRGBA8 ? GL_RGB8 : GL_RGB;
+        #if defined(GL_ES_VERSION_2_0)
+            theInternalFormat = GL_RGB;
+        #else
+            theInternalFormat = GL_RGB8;
+        #endif
             return true;
         case StImagePlane::ImgGrayF:
         #if defined(GL_ES_VERSION_2_0)
@@ -408,7 +417,19 @@ bool StGLTexture::create(StGLContext&   theCtx,
         return false;
     }
 
-    theCtx.core20fwd->glTexImage2D(GL_TEXTURE_2D, 0, myTextFormat,
+    GLint anInternalFormat = myTextFormat;
+#if defined(GL_ES_VERSION_2_0)
+    // sized formats are not supported here
+    if(anInternalFormat == GL_RGBA8) {
+        anInternalFormat = GL_RGBA;
+    } else if(anInternalFormat == GL_RGB8) {
+        anInternalFormat = GL_RGB;
+    } else if(anInternalFormat == GL_ALPHA8) {
+        anInternalFormat = GL_ALPHA;
+    }
+#endif
+
+    theCtx.core20fwd->glTexImage2D(GL_TEXTURE_2D, 0, anInternalFormat,
                                    mySizeX, mySizeY, 0,
                                    theDataFormat, GL_UNSIGNED_BYTE, theData);
 #if defined(GL_ES_VERSION_2_0)
@@ -416,13 +437,13 @@ bool StGLTexture::create(StGLContext&   theCtx,
     GLenum anErr = theCtx.core20fwd->glGetError();
     if(anErr != GL_NO_ERROR) {
         ST_ERROR_LOG("Creation texture with size (" + mySizeX + " x "+ mySizeY
-                   + " @" + formatInternalFormat(myTextFormat) + " with data " + formatInternalFormat(theDataFormat) + ") FAILED: " + theCtx.stglErrorToString(anErr) + "!");
+                   + " @" + formatInternalFormat(anInternalFormat) + " with data " + formatInternalFormat(theDataFormat) + ") FAILED: " + theCtx.stglErrorToString(anErr) + "!");
         release(theCtx);
         return false;
     }
 #ifdef __ST_DEBUG_TEXTURES__
     ST_DEBUG_LOG("Created StGLTexture " + mySizeX + " x "+ mySizeY
-               + " (format " + formatInternalFormat(myTextFormat) + ')');
+               + " (format " + formatInternalFormat(anInternalFormat) + ')');
 #endif
 
 #else

@@ -514,6 +514,7 @@ bool StOutInterlace::create() {
                                        .attachShader(*myContext, aShaderChessRev)
                                        .link(*myContext);
 
+#if !defined(__ANDROID__)
     /// TODO (Kirill Gavrilov#3) fix shaders
     const StString aShadersRoot = StString("shaders" ST_FILE_SPLITTER) + ST_OUT_PLUGIN_NAME + SYS_FS_SPLITTER;
     StGLVertexShader stVShaderED("ED control");
@@ -555,6 +556,7 @@ bool StOutInterlace::create() {
         // could be eDimensional shuttered glasses
         myEDTimer.restart(2000000.0);
     }
+#endif
 
     // create vertices buffers to draw simple textured quad
     const GLfloat QUAD_VERTICES[4 * 4] = {
