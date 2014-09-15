@@ -83,7 +83,6 @@ StTranslations::StTranslations(const StHandle<StResourceManager>& theResMgr,
     if(!aGlobalSettings.loadString(ST_SETTING_LANGUAGE, aLangParam)) {
         // try to use system-wide language settings
         const StString& aLang = myResMgr->getSystemLanguage();
-    #if defined(__ANDROID__)
         if(aLang.isEqualsIgnoreCase(stCString("ru"))) {
             if(myLangFolderList.contains(stCString("Russian"),  anIdInList)
             || myLangFolderList.contains(stCString("русский"),  anIdInList)) {
@@ -108,7 +107,6 @@ StTranslations::StTranslations(const StHandle<StResourceManager>& theResMgr,
                 isLangSet = true;
             }
         }
-    #endif
     }
     if(!isLangSet) {
         if(myLangFolderList.contains(aLangParam,           anIdInList)

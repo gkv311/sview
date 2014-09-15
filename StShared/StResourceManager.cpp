@@ -79,7 +79,23 @@ class StAssetResource : public StResource {
 StResourceManager::StResourceManager()
 : myRoot(StProcess::getStShareFolder()),
   myLang("en") {
-    //
+#if !defined(__ANDROID__)
+    const char* aLocaleStr = ::setlocale(LC_CTYPE, NULL);
+    StString    aSysLoc(aLocaleStr != NULL ? aLocaleStr : "");
+    aSysLoc.toLowerCase();
+    if(aSysLoc.getLength() >= 3
+    && aSysLoc.getChar(2) == '-') {
+        myLang = aSysLoc.subString(0, 2);
+    } else if(aSysLoc.isStartsWith(stCString("russian"))) {
+        myLang = "ru";
+    } else if(aSysLoc.isStartsWith(stCString("french"))) {
+        myLang = "fr";
+    } else if(aSysLoc.isStartsWith(stCString("german"))) {
+        myLang = "de";
+    } else if(aSysLoc.isStartsWith(stCString("korean"))) {
+        myLang = "ko";
+    }
+#endif
 }
 
 #if defined(__ANDROID__)
