@@ -259,7 +259,7 @@ const char* StOutDistorted::getDeviceId() const {
 }
 
 bool StOutDistorted::isLostDevice() const {
-    return myToResetDevice;
+    return myToResetDevice || StWindow::isLostDevice();
 }
 
 bool StOutDistorted::setDevice(const StString& theDevice) {

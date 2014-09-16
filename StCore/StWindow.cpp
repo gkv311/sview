@@ -94,7 +94,7 @@ bool StWindow::isActive() const {
 }
 
 bool StWindow::isLostDevice() const {
-    return false;
+    return myWin->myToResetDevice;
 }
 
 const char* StWindow::getRendererId() const {

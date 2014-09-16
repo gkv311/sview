@@ -308,6 +308,7 @@ class StWindowImpl {
     char               myXInputBuff[32];
 #endif
 
+    bool               myToResetDevice;   //!< indicate device lost state
     bool               myIsUpdated;       //!< helper flag on window movements updates
     bool               myIsActive;        //!< window visible state
     BlockSleep         myBlockSleep;      //!< indicates that display sleep was blocked or not

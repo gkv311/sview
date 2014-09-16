@@ -26,6 +26,8 @@
 
 #ifdef __APPLE__
     #include <sys/sysctl.h>
+#elif defined(__ANDROID__)
+    #include <StCore/StAndroidGlue.h>
 #endif
 
 namespace {
@@ -43,7 +45,7 @@ namespace {
         aWin->myIsDispChanged = true;
     }
 #endif
-};
+}
 
 // shared counter for fullscreen windows to detect inactive state
 StAtomic<int32_t> StWindowImpl::myFullScreenWinNb(0);
@@ -73,6 +75,7 @@ StWindowImpl::StWindowImpl(const StHandle<StResourceManager>& theResMgr,
 #elif (defined(__APPLE__))
   mySleepAssert(0),
 #endif
+  myToResetDevice(false),
   myIsUpdated(false),
   myIsActive(false),
   myBlockSleep(BlockSleep_OFF),
@@ -251,6 +254,11 @@ void StWindowImpl::close() {
         }
     }
     myMsgThread.nullify();
+#elif defined(__ANDROID__)
+    if(myParentWin != NULL) {
+        myParentWin->signals.onInputEvent -= stSlot(this, &StWindowImpl::onAndroidInput);
+        myParentWin->signals.onAppCmd     -= stSlot(this, &StWindowImpl::onAndroidCommand);
+    }
 #endif
 
     // turn off display sleep blocking
@@ -262,7 +270,7 @@ void StWindowImpl::close() {
     attribs.ToBlockSleepSystem  = toBlockSleepSystem;
     attribs.ToBlockSleepDisplay = toBlockSleepDisplay;
 
-    myParentWin = (StNativeWin_t )NULL;
+    //myParentWin = (StNativeWin_t )NULL;
 
     if(attribs.IsFullScreen) {
         myFullScreenWinNb.decrement();

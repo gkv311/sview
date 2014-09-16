@@ -394,7 +394,7 @@ const char* StOutPageFlip::getDeviceId() const {
 }
 
 bool StOutPageFlip::isLostDevice() const {
-    return myToResetDevice;
+    return myToResetDevice || StWindow::isLostDevice();
 }
 
 bool StOutPageFlip::setDevice(const StString& theDevice) {

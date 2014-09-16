@@ -424,11 +424,15 @@ void StApplication::processEvents() {
     const StString aDevice = myWindow->getDeviceId();
     const int32_t  aDevNum = params.ActiveDevice->getValue();
     if(!mySwitchTo.isNull()) {
-        resetDevice();
+        if(!resetDevice()) {
+            myToQuit = true;
+        }
         mySwitchTo.nullify();
     } else if(myWindow->isLostDevice()) {
         mySwitchTo = myWindow;
-        resetDevice();
+        if(!resetDevice()) {
+            myToQuit = true;
+        }
         mySwitchTo.nullify();
     } else if(aDevNum >= 0
            && size_t(aDevNum) < myDevices.size()

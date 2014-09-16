@@ -34,7 +34,8 @@ void StWindowImpl::convertRectToBacking(StGLBoxPx& ,
 // function create GUI window
 bool StWindowImpl::create() {
     myKeysState.reset();
-    myInitState = STWIN_INITNOTSTART;
+    myInitState     = STWIN_INITNOTSTART;
+    myToResetDevice = false;
     if(myParentWin == NULL) {
         return false;
     }
@@ -59,7 +60,13 @@ bool StWindowImpl::create() {
         if(aSource != NULL) {
             aSource->process(myParentWin, aSource);
         }
-        if(myInitState != STWIN_INITNOTSTART) {
+        if(myToResetDevice || myParentWin->ToDestroy()) {
+            //myToResetDevice = true;
+            myStEvent.Type       = stEvent_Close;
+            myStEvent.Close.Time = getEventTime();
+            signals.onClose->emit(myStEvent.Close);
+            return false;
+        } else if(myInitState != STWIN_INITNOTSTART) {
             break;
         }
     }
@@ -190,9 +197,10 @@ void StWindowImpl::onAndroidCommand(int32_t theCommand) {
             break;
         }
         case StAndroidGlue::CommandId_WindowTerm: {
-            // the window is being hidden or closed, clean it up
-            myMaster.close();
-            myGlContext = new StGLContext(myResMgr);
+            myStEvent.Type       = stEvent_Close;
+            myStEvent.Close.Time = getEventTime();
+            signals.onClose->emit(myStEvent.Close);
+            //myToResetDevice = true;
             break;
         }
         case StAndroidGlue::CommandId_FocusGained: {
@@ -212,7 +220,8 @@ void StWindowImpl::onAndroidCommand(int32_t theCommand) {
 }
 
 void StWindowImpl::processEvents() {
-    if(myParentWin == NULL) {
+    if(myParentWin == NULL
+    || myToResetDevice) {
         // window is closed!
         return;
     }
@@ -226,6 +235,9 @@ void StWindowImpl::processEvents() {
         if(aSource != NULL) {
             aSource->process(myParentWin, aSource);
         }
+        if(myToResetDevice) {
+            break;
+        }
 
         /*if(aPollRes == LooperId_USER) {
             if(anEngine.accelerometerSensor != NULL) {
@@ -238,7 +250,6 @@ void StWindowImpl::processEvents() {
 
         // check if we are exiting
         if(myParentWin->ToDestroy()) {
-            myMaster.close();
             myStEvent.Type       = stEvent_Close;
             myStEvent.Close.Time = getEventTime();
             signals.onClose->emit(myStEvent.Close);
