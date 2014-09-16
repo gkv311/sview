@@ -214,11 +214,6 @@ class StGLWidget {
      * @param theCursorZo point in Zero2One coordinates
      * @param theMouseBtn mouse button id
      */
-    inline bool tryClick(const StPointD_t& theCursorZo,
-                         const int&        theMouseBtn) {
-        bool isItemClicked = false;
-        return tryClick(theCursorZo, theMouseBtn, isItemClicked);
-    }
     ST_CPPEXPORT virtual bool tryClick(const StPointD_t& theCursorZo,
                                        const int&        theMouseBtn,
                                        bool&             isItemClicked);

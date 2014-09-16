@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -49,7 +49,8 @@ StGLRootWidget::StGLRootWidget(const StHandle<StResourceManager>& theResMgr)
   myScaleGUI(1.0f),
   myResolution(72),
   cursorZo(0.0, 0.0),
-  myFocusWidget(NULL) {
+  myFocusWidget(NULL),
+  myIsMenuPressed(false) {
     // unify access
     StGLWidget::myRoot = this;
     myViewport[0] = 0;
@@ -268,9 +269,23 @@ void StGLRootWidget::getRectGl(const StRectI_t& theRectPx,
     theVertices[theFromId + 3] = StGLVec2(GLfloat(aRectGl.left()),  GLfloat(aRectGl.bottom()));
 }
 
+bool StGLRootWidget::tryClick(const StPointD_t& theCursorZo,
+                              const int&        theMouseBtn,
+                              bool&             theIsItemClicked) {
+    if(isPointIn(theCursorZo)) {
+        setClicked(theMouseBtn, true);
+    }
+
+    return StGLWidget::tryClick(theCursorZo, theMouseBtn, theIsItemClicked);
+}
+
 bool StGLRootWidget::tryUnClick(const StPointD_t& theCursorZo,
                                 const int&        theMouseBtn,
                                 bool&             theIsItemUnclicked) {
+    if(isPointIn(theCursorZo)) {
+        setClicked(theMouseBtn, false);
+    }
+
     const bool aResult = StGLWidget::tryUnClick(theCursorZo, theMouseBtn, theIsItemUnclicked);
     clearDestroyList();
     return aResult;

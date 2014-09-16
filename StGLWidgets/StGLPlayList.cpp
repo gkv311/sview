@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru
+ * Copyright © 2013-2014 Kirill Gavrilov <kirill@sview.ru
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -32,6 +32,11 @@ StGLPlayList::StGLPlayList(StGLWidget*                 theParent,
 StGLPlayList::~StGLPlayList() {
     myList->signals.onPlaylistChange  -= stSlot(this, &StGLPlayList::doResetList);
     myList->signals.onTitleChange     -= stSlot(this, &StGLPlayList::doChangeItem);
+}
+
+StGLMenuItem* StGLPlayList::addItem() {
+    StGLMenuItem* aNewItem = new StGLPassiveMenuItem(this);
+    return aNewItem;
 }
 
 void StGLPlayList::doItemClick(const size_t theItem) {
@@ -112,7 +117,7 @@ void StGLPlayList::stglResize() {
     }
 
     for(int anIter = anItemsOld; anIter < myItemsNb; ++anIter) {
-        StGLMenuItem* anItem = addItem("");
+        StGLMenuItem* anItem = addItem();
         anItem->setUserData(anIter);
         anItem->signals.onItemClick = stSlot(this, &StGLPlayList::doItemClick);
         anItem->StGLWidget::signals.onMouseUnclick += stSlot(this, &StGLPlayList::doMouseUnclick);

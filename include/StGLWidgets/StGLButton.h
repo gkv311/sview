@@ -46,7 +46,7 @@ class StGLButton : public StGLMenu {
 
     ST_CPPEXPORT void setFocus(const bool theValue);
 
-        public:  //!< @name Signals
+        public:  //! @name Signals
 
     struct {
         /**
@@ -56,9 +56,13 @@ class StGLButton : public StGLMenu {
         StSignal<void (const size_t )> onBtnClick;
     } signals;
 
-        private: //!< @name callback Slots (private overriders)
+        private: //! @name callback Slots (private overriders)
 
     ST_LOCAL void doItemClick(const size_t );
+
+        protected:
+
+    ST_LOCAL StGLMenuItem* addItem(const StString& theLabel);
 
 };
 

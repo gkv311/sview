@@ -71,6 +71,21 @@ class StGLRootWidget : public StGLWidget {
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
 
     /**
+     * Function iterate children and self to change clicking state.
+     * @param theCursorZo point in Zero2One coordinates
+     * @param theMouseBtn mouse button id
+     */
+    inline bool tryClick(const StPointD_t& theCursorZo,
+                         const int&        theMouseBtn) {
+        bool isItemClicked = false;
+        return tryClick(theCursorZo, theMouseBtn, isItemClicked);
+    }
+
+    ST_CPPEXPORT virtual bool tryClick(const StPointD_t& theCursorZo,
+                                       const int&        theMouseBtn,
+                                       bool&             theIsItemClicked);
+
+    /**
      * Function iterate children and self for unclicking state.
      * @param theCursorZo point in Zero2One coordinates
      * @param theMouseBtn mouse button id
@@ -286,6 +301,20 @@ class StGLRootWidget : public StGLWidget {
      */
     ST_CPPEXPORT virtual void destroyWithDelay(StGLWidget* theWidget);
 
+    /**
+     * Access global flag to perform navigation in menu after first item clicked.
+     */
+    ST_LOCAL bool isMenuPressed() const {
+        return myIsMenuPressed;
+    }
+
+    /**
+     * Setup global flag to perform navigation in menu after first item clicked.
+     */
+    ST_LOCAL void setMenuPressed(const bool theIsPressed) {
+        myIsMenuPressed = theIsPressed;
+    }
+
         private:
 
     /**
@@ -317,6 +346,8 @@ class StGLRootWidget : public StGLWidget {
 
     StArrayList<StGLWidget*>  myDestroyList;   //!< list of widgets to be destroyed
     StGLWidget*               myFocusWidget;   //!< widget currently in focus
+
+    bool                      myIsMenuPressed; //!< global flag to perform navigation in menu after first item clicked
 
 };
 

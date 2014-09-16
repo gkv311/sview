@@ -18,7 +18,7 @@
 namespace {
     static const StString CLASS_NAME("StGLMenuItem");
     static const size_t SHARE_PROGRAM_ID = StGLRootWidget::generateShareId();
-};
+}
 
 void StGLMenuItem::DeleteWithSubMenus(StGLMenuItem* theMenuItem) {
     if(theMenuItem == NULL) {
@@ -121,13 +121,15 @@ void StGLMenuItem::stglUpdate(const StPointD_t& theCursorZo) {
     if(!myIsInitialized || !isVisible()) {
         return;
     }
-    if(isClicked(ST_MOUSE_LEFT) || (isSelected() && hasSubMenu())) {
-        return;
-    }
     if(isPointIn(getRoot()->getCursorZo())) {
         if(getParentMenu()->isActive()) {
             setSelected(true);
+            if(getRoot()->isMenuPressed()) {
+                setClicked(ST_MOUSE_LEFT, getRoot()->isClicked(ST_MOUSE_LEFT));
+            }
         }
+    } else if(getRoot()->isMenuPressed()) {
+        setClicked(ST_MOUSE_LEFT, false);
     }
 }
 
@@ -179,7 +181,7 @@ void StGLMenuItem::stglDraw(unsigned int theView) {
     }
 
     StGLMenuItem::State aState = StGLMenuItem::PASSIVE;
-    if(isClicked(ST_MOUSE_LEFT) || (isSelected() && hasSubMenu())) {
+    if(isClicked(ST_MOUSE_LEFT) || (myIsItemSelected && hasSubMenu())) {
         aState = StGLMenuItem::CLICKED;
     } else if(isPointIn(getRoot()->getCursorZo()) || myHasFocus) {
         aState = StGLMenuItem::HIGHLIGHT;
@@ -231,9 +233,19 @@ void StGLMenuItem::setFocus(const bool theValue) {
 bool StGLMenuItem::tryClick(const StPointD_t& theCursorZo,
                             const int&        theMouseBtn,
                             bool&             theIsItemClicked) {
+    const bool wasClicked = theIsItemClicked;
     if(StGLWidget::tryClick(theCursorZo, theMouseBtn, theIsItemClicked)) {
         theIsItemClicked = true; // always clickable widget
+        if(getParentMenu()->isRootMenu()) {
+            getParentMenu()->setActive(true); // activate root menu
+        }
+        if(theMouseBtn == ST_MOUSE_LEFT) {
+            getRoot()->setMenuPressed(true);
+        }
         return true;
+    } else if(!wasClicked && theIsItemClicked) {
+        // disable continuous menu item pressing when child item has been clicked
+        getRoot()->setMenuPressed(false);
     }
     return false;
 }
@@ -244,11 +256,6 @@ bool StGLMenuItem::tryUnClick(const StPointD_t& theCursorZo,
     const bool wasUnclicked = theIsItemUnclicked;
     if(StGLWidget::tryUnClick(theCursorZo, theMouseBtn, theIsItemUnclicked)) {
         theIsItemUnclicked = true; // always clickable widget
-
-
-        if(getParentMenu()->isRootMenu()) {
-            getParentMenu()->setActive(true); // activate root menu
-        }
         return true;
     }
 
@@ -272,4 +279,16 @@ void StGLMenuItem::setHilightColor(const StGLVec4& theValue) {
 
 void StGLMenuItem::resetHilightColor() {
     myBackColor[StGLMenuItem::HIGHLIGHT] = StGLVec4(0.765f, 0.765f, 0.765f, 1.0f);
+}
+
+StGLPassiveMenuItem::StGLPassiveMenuItem(StGLMenu* theParent)
+: StGLMenuItem(theParent, 0, 0, NULL) {
+    //
+}
+
+void StGLPassiveMenuItem::stglUpdate(const StPointD_t& theCursorZo) {
+    stglUpdateTextArea(theCursorZo);
+    if(!myIsInitialized || !isVisible()) {
+        return;
+    }
 }

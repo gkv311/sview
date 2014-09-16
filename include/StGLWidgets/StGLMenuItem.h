@@ -106,6 +106,12 @@ class StGLMenuItem : public StGLTextArea {
 
     ST_LOCAL void doMouseUnclick(const int btnId);
 
+        protected:
+
+    ST_LOCAL void stglUpdateTextArea(const StPointD_t& theCursorZo) {
+        StGLTextArea::stglUpdate(theCursorZo);
+    }
+
         private: //! @name private methods
 
     typedef enum tagState {
@@ -125,6 +131,18 @@ class StGLMenuItem : public StGLTextArea {
     StGLVec4                   myBackColor[3];   //!< background color per state
     bool                       myIsItemSelected; //!< navigation selection flag
     bool                       myToHilightText;  //!< hilight text instead of time box
+
+};
+
+/**
+ * Auxiliary class representing menu item with disabled continuous pressing behavior.
+ */
+class StGLPassiveMenuItem : public StGLMenuItem {
+
+        public:
+
+    ST_CPPEXPORT StGLPassiveMenuItem(StGLMenu* theParent);
+    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo);
 
 };
 

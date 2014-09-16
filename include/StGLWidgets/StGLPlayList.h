@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -31,7 +31,7 @@ class StGLPlayList : public StGLMenu {
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
     ST_CPPEXPORT virtual void stglResize();
 
-        public:  //!< @name Signals
+        public:  //! @name Signals
 
     struct {
         /**
@@ -40,7 +40,7 @@ class StGLPlayList : public StGLMenu {
         StSignal<void (void )> onOpenItem;
     } signals;
 
-        private: //!< @name callback slots
+        private: //! @name callback slots
 
     ST_LOCAL void updateList();
     ST_LOCAL void doResetList();
@@ -48,6 +48,10 @@ class StGLPlayList : public StGLMenu {
     ST_LOCAL void doItemClick(const size_t );
     ST_LOCAL void doMouseUnclick(const int theBtnId);
     ST_LOCAL void resizeWidth();
+
+        protected:
+
+    ST_LOCAL StGLMenuItem* addItem();
 
         private:
 

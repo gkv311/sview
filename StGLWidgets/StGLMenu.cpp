@@ -242,7 +242,7 @@ bool StGLMenu::tryUnClick(const StPointD_t& theCursorZo,
     }
 
     if(isRootMenu() && !isSelfItemClicked) {
-        setActive(false); // disactivate root menu
+        setActive(false); // deactivate root menu
     }
 
     return isSelfClicked;
