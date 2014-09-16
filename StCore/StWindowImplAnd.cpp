@@ -103,7 +103,36 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
 }
 
 void StWindowImpl::updateWindowPos() {
-    //
+    if(myMaster.hRC.isNull()) {
+        return;
+    }
+
+    EGLint aWidth  = 0, aHeight = 0;
+    if(myMaster.hWindowGl != NULL) {
+        aWidth  = ANativeWindow_getWidth (myMaster.hWindowGl);
+        aHeight = ANativeWindow_getHeight(myMaster.hWindowGl);
+    } else if(myMaster.eglSurface == EGL_NO_SURFACE) {
+        eglQuerySurface(myMaster.hRC->getDisplay(), myMaster.eglSurface, EGL_WIDTH,  &aWidth);
+        eglQuerySurface(myMaster.hRC->getDisplay(), myMaster.eglSurface, EGL_HEIGHT, &aHeight);
+    } else {
+        return;
+    }
+
+    if(myRectNorm.width()  == aWidth
+    && myRectNorm.height() == aHeight) {
+        return;
+    }
+
+    myRectNorm.left()   = 0;
+    myRectNorm.top()    = 0;
+    myRectNorm.right()  = myRectNorm.left() + aWidth;
+    myRectNorm.bottom() = myRectNorm.top()  + aHeight;
+
+    myStEvent.Type       = stEvent_Size;
+    myStEvent.Size.Time  = getEventTime();
+    myStEvent.Size.SizeX = myRectNorm.width();
+    myStEvent.Size.SizeY = myRectNorm.height();
+    signals.onResize->emit(myStEvent.Size);
 }
 
 void StWindowImpl::onAndroidInput(const AInputEvent* theEvent,
@@ -155,7 +184,7 @@ void StWindowImpl::onAndroidCommand(int32_t theCommand) {
             /*StSavedState* aState = (StSavedState* )malloc(sizeof(StSavedState));
             *aState = state;
             myParentWin->setSavedState(aState, sizeof(StSavedState));*/
-            break;
+            return;
         }
         case StAndroidGlue::CommandId_WindowInit: {
             // the window is being shown, get it ready
@@ -174,10 +203,14 @@ void StWindowImpl::onAndroidCommand(int32_t theCommand) {
                     return;
                 }
 
-                EGLint aWidth  = 0;
-                EGLint aHeight = 0;
-                eglQuerySurface(myMaster.hRC->getDisplay(), myMaster.eglSurface, EGL_WIDTH,  &aWidth);
-                eglQuerySurface(myMaster.hRC->getDisplay(), myMaster.eglSurface, EGL_HEIGHT, &aHeight);
+                EGLint aWidth = 0, aHeight = 0;
+                if(myMaster.hWindowGl != NULL) {
+                    aWidth  = ANativeWindow_getWidth (myMaster.hWindowGl);
+                    aHeight = ANativeWindow_getHeight(myMaster.hWindowGl);
+                } else {
+                    eglQuerySurface(myMaster.hRC->getDisplay(), myMaster.eglSurface, EGL_WIDTH,  &aWidth);
+                    eglQuerySurface(myMaster.hRC->getDisplay(), myMaster.eglSurface, EGL_HEIGHT, &aHeight);
+                }
 
                 myRectNorm.left()   = 0;
                 myRectNorm.top()    = 0;
@@ -194,28 +227,30 @@ void StWindowImpl::onAndroidCommand(int32_t theCommand) {
                 }
                 myInitState = STWIN_INIT_SUCCESS;
             }
-            break;
+            return;
         }
         case StAndroidGlue::CommandId_WindowTerm: {
             myStEvent.Type       = stEvent_Close;
             myStEvent.Close.Time = getEventTime();
             signals.onClose->emit(myStEvent.Close);
             //myToResetDevice = true;
-            break;
+            return;
         }
         case StAndroidGlue::CommandId_FocusGained: {
             /*if(myAccelerometerSensor != NULL) {
                 ASensorEventQueue_enableSensor(mySensorEventQueue, myAccelerometerSensor);
                 ASensorEventQueue_setEventRate(mySensorEventQueue, myAccelerometerSensor, (1000L / 60) * 1000);
             }*/
-            break;
+            return;
         }
         case StAndroidGlue::CommandId_FocusLost: {
             /*if(myAccelerometerSensor != NULL) {
                 ASensorEventQueue_disableSensor(mySensorEventQueue, myAccelerometerSensor);
             }*/
-            break;
+            return;
         }
+        //case StAndroidGlue::CommandId_ConfigChanged: {
+        // do not handle resize event here - screen might be not yet resized
     }
 }
 
@@ -265,11 +300,10 @@ void StWindowImpl::processEvents() {
         }
     }
 
-    if(myIsUpdated) {
-        // update position only when all messages are parsed
-        updateWindowPos();
-        myIsUpdated = false;
-    }
+    // update position only when all messages are parsed
+    updateWindowPos();
+    myIsUpdated = false;
+
     updateActiveState();
 
     // StWindow XLib implementation process events in the same thread

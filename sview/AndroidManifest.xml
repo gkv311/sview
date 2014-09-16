@@ -136,7 +136,7 @@
                 <data android:pathPattern=".*\\.WMA" />
             </intent-filter>
         </activity>
-        <activity android:name="com.sview.StActivity" android:label="@string/app_name" android:configChanges="orientation|keyboardHidden">
+        <activity android:name="com.sview.StActivity" android:label="@string/app_name" android:configChanges="orientation|keyboardHidden|screenSize">
             <!-- Tell NativeActivity the name of or .so -->
             <meta-data android:name="android.app.lib_name" android:value="sview" />
         </activity>
