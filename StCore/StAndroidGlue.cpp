@@ -159,6 +159,16 @@ void StAndroidGlue::threadEntry() {
 
     onAppEntry(this);
 
+    // application is done but we are waiting for destroying event...
+    for(; !myToDestroy; ) {
+        StAndroidPollSource* aSource = NULL;
+        int aNbEvents = 0;
+        ALooper_pollAll(-1, NULL, &aNbEvents, (void** )&aSource);
+        if(aSource != NULL) {
+            aSource->process(this, aSource);
+        }
+    }
+
     freeSavedState();
     pthread_mutex_lock(&myMutex);
     if(myInputQueue != NULL) {
