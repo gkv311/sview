@@ -118,7 +118,6 @@ StOutIZ3D::StOutIZ3D(const StHandle<StResourceManager>& theResMgr,
 : StWindow(theResMgr, theParentWindow),
   mySettings(new StSettings(ST_OUT_PLUGIN_NAME)),
   myFrBuffer(new StGLStereoFrameBuffer()),
-  myToSavePlacement(theParentWindow == (StNativeWin_t )NULL),
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false) {
     const StSearchMonitors& aMonitors = StWindow::getMonitors();
@@ -164,9 +163,11 @@ StOutIZ3D::StOutIZ3D(const StHandle<StResourceManager>& theResMgr,
     params.Glasses = aGlasses;
 
     // load window position
-    StRect<int32_t> aRect(256, 768, 256, 1024);
-    mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
-    StWindow::setPlacement(aRect, true);
+    if(isMovable()) {
+        StRect<int32_t> aRect(256, 768, 256, 1024);
+        mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
+        StWindow::setPlacement(aRect, true);
+    }
     StWindow::setTitle("sView - iZ3D Renderer");
 
     // load parameters
@@ -187,7 +188,7 @@ void StOutIZ3D::releaseResources() {
 
     // read windowed placement
     StWindow::hide();
-    if(myToSavePlacement) {
+    if(isMovable()) {
         StWindow::setFullScreen(false);
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
     }

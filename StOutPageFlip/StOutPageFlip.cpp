@@ -431,7 +431,6 @@ StOutPageFlip::StOutPageFlip(const StHandle<StResourceManager>& theResMgr,
   mySettings(new StSettings(ST_OUT_PLUGIN_NAME)),
   myLangMap(theResMgr, ST_OUT_PLUGIN_NAME),
   myDevice(DEVICE_AUTO),
-  myToSavePlacement(theParentWindow == (StNativeWin_t )NULL),
   myToDrawStereo(false),
 #ifdef _WIN32
   myIsVistaPlus(StSys::isVistaPlus()),
@@ -487,27 +486,29 @@ StOutPageFlip::StOutPageFlip(const StHandle<StResourceManager>& theResMgr,
     myDevices.add(aDevVuzix);
 
     // load window position
-    StRect<int32_t> aRect(256, 768, 256, 1024);
-    if(mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect)) {
-        StMonitor aMonitor = aMonitors[aRect.center()];
-        if(!aMonitor.getVRect().isPointIn(aRect.center())) {
-            ST_DEBUG_LOG("Warning, stored window position is out of the monitor(" + aMonitor.getId() + ")!" + aRect.toString());
-            const int aWidth  = aRect.width();
-            const int aHeight = aRect.height();
-            aRect.left()   = aMonitor.getVRect().left() + 256;
-            aRect.right()  = aRect.left() + aWidth;
-            aRect.top()    = aMonitor.getVRect().top() + 256;
-            aRect.bottom() = aRect.top() + aHeight;
+    if(isMovable()) {
+        StRect<int32_t> aRect(256, 768, 256, 1024);
+        if(mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect)) {
+            StMonitor aMonitor = aMonitors[aRect.center()];
+            if(!aMonitor.getVRect().isPointIn(aRect.center())) {
+                ST_DEBUG_LOG("Warning, stored window position is out of the monitor(" + aMonitor.getId() + ")!" + aRect.toString());
+                const int aWidth  = aRect.width();
+                const int aHeight = aRect.height();
+                aRect.left()   = aMonitor.getVRect().left() + 256;
+                aRect.right()  = aRect.left() + aWidth;
+                aRect.top()    = aMonitor.getVRect().top() + 256;
+                aRect.bottom() = aRect.top() + aHeight;
+            }
+        } else {
+            // try to open window on display with highest frequency
+            aRect = aMon.getVRect();
+            aRect.left()   = aRect.left() + 256;
+            aRect.right()  = aRect.left() + 1024;
+            aRect.top()    = aRect.top()  + 256;
+            aRect.bottom() = aRect.top()  + 512;
         }
-    } else {
-        // try to open window on display with highest frequency
-        aRect = aMon.getVRect();
-        aRect.left()   = aRect.left() + 256;
-        aRect.right()  = aRect.left() + 1024;
-        aRect.top()    = aRect.top()  + 256;
-        aRect.bottom() = aRect.top()  + 512;
+        StWindow::setPlacement(aRect);
     }
-    StWindow::setPlacement(aRect);
 
     // load device settings
     int aDeviceInt = int(myDevice);
@@ -578,7 +579,7 @@ void StOutPageFlip::releaseResources() {
 
     // read windowed placement
     StWindow::hide();
-    if(myToSavePlacement) {
+    if(isMovable()) {
         StWindow::setFullScreen(false);
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
     }

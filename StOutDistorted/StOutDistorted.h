@@ -188,7 +188,6 @@ class StOutDistorted : public StWindow {
 
     bool                      myToReduceGui;     //!< scale down GUI
     bool                      myToShowCursor;    //!< cursor visibility flag
-    bool                      myToSavePlacement; //!< to save window position on exit
     bool                      myToCompressMem;   //!< reduce memory usage
     bool                      myIsBroken;        //!< special flag for broke state - when FBO can not be allocated
     bool                      myIsStereoOn;

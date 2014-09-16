@@ -62,7 +62,7 @@ StWindow::~StWindow() {
 }
 
 StNativeWin_t StWindow::getParentWindow() const {
-    return myWin->getParentWindow();
+    return myWin->myParentWin;
 }
 
 void StWindow::close() {
@@ -171,6 +171,10 @@ void StWindow::setFullScreen(const bool theFullScreen) {
 
 StRectI_t StWindow::getPlacement() const {
     return myWin->getPlacement();
+}
+
+bool StWindow::isMovable() const {
+    return myWin->myParentWin == NULL;
 }
 
 void StWindow::setPlacement(const StRectI_t& theRect,

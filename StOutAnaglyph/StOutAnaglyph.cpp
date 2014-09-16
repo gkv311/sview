@@ -113,7 +113,6 @@ StOutAnaglyph::StOutAnaglyph(const StHandle<StResourceManager>& theResMgr,
   myYellowAnaglyph("Anaglyph Yellow"),
   myYellowDubiosAnaglyph("Anaglyph Yellow Dubios"),
   myGreenAnaglyph("Anaglyph Green"),
-  myToSavePlacement(theParentWindow == (StNativeWin_t )NULL),
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false) {
     StTranslations aLangMap(getResourceManager(), ST_OUT_PLUGIN_NAME);
@@ -164,9 +163,11 @@ StOutAnaglyph::StOutAnaglyph(const StHandle<StResourceManager>& theResMgr,
     params.AmberBlue = aFilterAB;
 
     // load window position
-    StRect<int32_t> aRect(256, 768, 256, 1024);
-    mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
-    StWindow::setPlacement(aRect, true);
+    if(isMovable()) {
+        StRect<int32_t> aRect(256, 768, 256, 1024);
+        mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
+        StWindow::setPlacement(aRect, true);
+    }
     StWindow::setTitle("sView - Anaglyph Renderer");
 
     // load glasses settings
@@ -191,7 +192,7 @@ void StOutAnaglyph::releaseResources() {
 
     // read windowed placement
     StWindow::hide(ST_WIN_MASTER);
-    if(myToSavePlacement) {
+    if(isMovable()) {
         StWindow::setFullScreen(false);
         StRect<int32_t> savedRect = StWindow::getPlacement();
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, savedRect);

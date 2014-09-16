@@ -154,7 +154,6 @@ class StOutDual : public StWindow {
     StGLVertexBuffer          myTexCoordBuf;
 
     DeviceEnum                myDevice;
-    bool                      myToSavePlacement; //!< to save window position on exit
     bool                      myToCompressMem;   //!< reduce memory usage
     bool                      myIsBroken;        //!< special flag for broke state - when FBO can not be allocated
 

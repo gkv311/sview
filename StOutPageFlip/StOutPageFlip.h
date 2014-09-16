@@ -203,7 +203,6 @@ class StOutPageFlip : public StWindow {
     DeviceEnum            myDevice;
     StDXInfo              myDxInfo;
     StFPSControl          myFPSControl;
-    bool                  myToSavePlacement;
     bool                  myToDrawStereo;
 #ifdef _WIN32
     bool                  myIsVistaPlus;

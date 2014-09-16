@@ -195,7 +195,6 @@ class StOutInterlace : public StWindow {
     StGLVarLocation           myVpSizeYOffLoc;
 
     StFPSControl              myFPSControl;
-    bool                      myToSavePlacement;
     bool                      myIsMonReversed;            //!< indicates (known) monitor model with reversed rows order
     bool                      myIsStereo;
     bool                      myIsEDactive;

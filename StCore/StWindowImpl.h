@@ -57,7 +57,6 @@ class StWindowImpl {
     ST_LOCAL StWindowImpl(const StHandle<StResourceManager>& theResMgr,
                           const StNativeWin_t                theParentWindow);
     ST_LOCAL ~StWindowImpl();
-    ST_LOCAL StNativeWin_t getParentWindow() const { return myParentWin; }
     ST_LOCAL void close();
     ST_LOCAL void setTitle(const StString& theTitle);
     ST_LOCAL bool hasDepthBuffer() const { return attribs.GlDepthSize != 0; }

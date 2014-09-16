@@ -200,7 +200,6 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
   myEDIntelaceOn(new StGLProgram("ED Interlace On")),
   myEDOff(new StGLProgram("ED Interlace Off")),
   myVpSizeY(10),
-  myToSavePlacement(theParentWindow == (StNativeWin_t )NULL),
   myIsMonReversed(false),
   myIsStereo(false),
   myIsEDactive(false),
@@ -286,33 +285,35 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     params.BindToMon->signals.onChanged.connect(this, &StOutInterlace::doSetBindToMonitor);
 
     // load window position
-    StRect<int32_t> aRect(256, 768, 256, 1024);
-    bool isLoadedPosition = mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
-    StMonitor aMonitor = aMonitors[aRect.center()];
-    if(params.BindToMon->getValue()
-    && !aMon.isNull()
-    && !isInterlacedMonitor(aMonitor, myIsMonReversed)) {
-        aMonitor = *aMon;
-    }
-    if(isLoadedPosition) {
-        if(!aMonitor.getVRect().isPointIn(aRect.center())) {
-            ST_DEBUG_LOG("Warning, stored window position is out of the monitor(" + aMonitor.getId() + ")!" + aRect.toString());
-            const int aWidth  = aRect.width();
-            const int aHeight = aRect.height();
-            aRect.left()   = aMonitor.getVRect().left() + 256;
-            aRect.right()  = aRect.left() + aWidth;
-            aRect.top()    = aMonitor.getVRect().top() + 256;
-            aRect.bottom() = aRect.top() + aHeight;
+    if(isMovable()) {
+        StRect<int32_t> aRect(256, 768, 256, 1024);
+        bool isLoadedPosition = mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
+        StMonitor aMonitor = aMonitors[aRect.center()];
+        if(params.BindToMon->getValue()
+        && !aMon.isNull()
+        && !isInterlacedMonitor(aMonitor, myIsMonReversed)) {
+            aMonitor = *aMon;
         }
-    } else {
-        // try to open window on correct display
-        aRect = aMonitor.getVRect();
-        aRect.left()   = aRect.left() + 256;
-        aRect.right()  = aRect.left() + 1024;
-        aRect.top()    = aRect.top()  + 256;
-        aRect.bottom() = aRect.top()  + 512;
+        if(isLoadedPosition) {
+            if(!aMonitor.getVRect().isPointIn(aRect.center())) {
+                ST_DEBUG_LOG("Warning, stored window position is out of the monitor(" + aMonitor.getId() + ")!" + aRect.toString());
+                const int aWidth  = aRect.width();
+                const int aHeight = aRect.height();
+                aRect.left()   = aMonitor.getVRect().left() + 256;
+                aRect.right()  = aRect.left() + aWidth;
+                aRect.top()    = aMonitor.getVRect().top() + 256;
+                aRect.bottom() = aRect.top() + aHeight;
+            }
+        } else {
+            // try to open window on correct display
+            aRect = aMonitor.getVRect();
+            aRect.left()   = aRect.left() + 256;
+            aRect.right()  = aRect.left() + 1024;
+            aRect.top()    = aRect.top()  + 256;
+            aRect.bottom() = aRect.top()  + 512;
+        }
+        StWindow::setPlacement(aRect);
     }
-    StWindow::setPlacement(aRect);
 
     // load device settings
     mySettings->loadInt32(ST_SETTING_DEVICE_ID, myDevice);
@@ -346,7 +347,7 @@ void StOutInterlace::releaseResources() {
 
     // read windowed placement
     StWindow::hide();
-    if(myToSavePlacement) {
+    if(isMovable()) {
         StWindow::setFullScreen(false);
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
     }
@@ -824,6 +825,11 @@ void StOutInterlace::doSetBindToMonitor(const bool theValue) {
     StRectI_t aRect = StWindow::getPlacement();
     StMonitor aMon  = aMonitors[aRect.center()];
     StHandle<StMonitor> anInterlacedMon = StOutInterlace::getHInterlaceMonitor(aMonitors, myIsMonReversed);
+
+    if(isMovable()) {
+        return;
+    }
+
     if(!anInterlacedMon.isNull()
     && !isInterlacedMonitor(aMon, myIsMonReversed)) {
         int aWidth  = aRect.width();

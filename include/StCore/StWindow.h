@@ -226,6 +226,12 @@ class StWindow {
     ST_CPPEXPORT StRectI_t getPlacement() const;
 
     /**
+     * Return false if window position or dimensions can not be changes
+     * (systems supports only full-screen mode, or window is embedded).
+     */
+    ST_CPPEXPORT bool isMovable() const;
+
+    /**
      * Change GUI GL window placement
      * @param theRect new window position
      */

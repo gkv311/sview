@@ -307,7 +307,6 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
   //myChromAb(1.0f, 0.0f, 1.0f, 0.0f),
   myToReduceGui(false),
   myToShowCursor(true),
-  myToSavePlacement(theParentWindow == (StNativeWin_t )NULL),
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false),
   myIsStereoOn(false) {
@@ -370,9 +369,11 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam(ST_SETTING_LAYOUT, params.Layout);
 
     // load window position
-    StRect<int32_t> aRect(256, 768, 256, 1024);
-    mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
-    StWindow::setPlacement(aRect, true);
+    if(isMovable()) {
+        StRect<int32_t> aRect(256, 768, 256, 1024);
+        mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
+        StWindow::setPlacement(aRect, true);
+    }
     StWindow::setTitle("sView - Distorted Renderer");
 
     myBarMargins.left()   = 64;
@@ -399,7 +400,7 @@ void StOutDistorted::releaseResources() {
 
     // read windowed placement
     StWindow::hide();
-    if(myToSavePlacement) {
+    if(isMovable()) {
         StWindow::setFullScreen(false);
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
     }

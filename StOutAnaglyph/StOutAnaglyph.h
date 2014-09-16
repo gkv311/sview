@@ -168,7 +168,6 @@ class StOutAnaglyph : public StWindow {
     StStereoProgram_t               myGreenAnaglyph;
 
     StFPSControl                    myFPSControl;
-    bool                            myToSavePlacement;
     bool                            myToCompressMem;        //!< reduce memory usage
     bool                            myIsBroken;             //!< special flag for broke state - when FBO can not be allocated
 

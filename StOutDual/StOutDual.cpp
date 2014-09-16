@@ -185,7 +185,6 @@ StOutDual::StOutDual(const StHandle<StResourceManager>& theResMgr,
   myFrBuffer(new StGLFrameBuffer()),
   myProgram(new StProgramMM()),
   myDevice(DEVICE_AUTO),
-  myToSavePlacement(theParentWindow == (StNativeWin_t )NULL),
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false) {
     const StSearchMonitors& aMonitors = StWindow::getMonitors();
@@ -247,9 +246,11 @@ StOutDual::StOutDual(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam(ST_SETTING_MONOCLONE, params.MonoClone);
 
     // load window position
-    StRect<int32_t> aRect(256, 768, 256, 1024);
-    mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
-    StWindow::setPlacement(aRect, true);
+    if(isMovable()) {
+        StRect<int32_t> aRect(256, 768, 256, 1024);
+        mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
+        StWindow::setPlacement(aRect, true);
+    }
     StWindow::setTitle("sView - Dual Renderer");
 
     // load device settings
@@ -282,7 +283,7 @@ void StOutDual::releaseResources() {
 
     // read windowed placement
     StWindow::hide();
-    if(myToSavePlacement) {
+    if(isMovable()) {
         StWindow::setFullScreen(false);
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
     }
