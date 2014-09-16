@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ bool StALContext::create(const StString& theDeviceName) {
         // open default device
         hDevice = alcOpenDevice(NULL);
     } else {
-    #if(defined(_WIN32) || defined(__WIN32__))
+    #if defined(_WIN32)
         char aBuffer[ST_MAX_PATH];
         theDeviceName.toLocale(aBuffer, ST_MAX_PATH);
         hDevice = alcOpenDevice(aBuffer);
@@ -79,8 +79,10 @@ bool StALContext::create(const StString& theDeviceName) {
 
     // check extensions
     hasExtEAX2         = alIsExtensionPresent("EAX2.0") == AL_TRUE;
+#if !defined(__ANDROID__) // disable extensions broken on Android port
     hasExtFloat32      = alIsExtensionPresent("AL_EXT_float32")   == AL_TRUE;
     hasExtFloat64      = alIsExtensionPresent("AL_EXT_double")    == AL_TRUE;
+#endif
     hasExtMultiChannel = alIsExtensionPresent("AL_EXT_MCFORMATS") == AL_TRUE;
     hasExtDisconnect   = alcIsExtensionPresent(hDevice, "ALC_EXT_disconnect") == AL_TRUE;
 
