@@ -20,6 +20,7 @@
 
 #include <StCore/StAndroidGlue.h>
 
+#include <StCore/StSearchMonitors.h>
 #include <StTemplates/StHandle.h>
 #include <StThreads/StThread.h>
 #include <StStrings/StLogger.h>
@@ -139,6 +140,24 @@ StAndroidGlue::~StAndroidGlue() {
     myActivity->instance = NULL;
 }
 
+void StAndroidGlue::updateMonitors() {
+    if(myConfig == NULL) {
+        return;
+    }
+
+    StMonitor aMon;
+    aMon.setId(0);
+    aMon.changeVRect().top()    = 0;
+    aMon.changeVRect().left()   = 0;
+    aMon.changeVRect().right()  = AConfiguration_getScreenWidthDp (myConfig); //myWindow != NULL ? ANativeWindow_getWidth (myWindow) : 480;
+    aMon.changeVRect().bottom() = AConfiguration_getScreenHeightDp(myConfig); //myWindow != NULL ? ANativeWindow_getHeight(myWindow) : 240;
+
+    aMon.setOrientation(AConfiguration_getOrientation(myConfig) == ACONFIGURATION_ORIENTATION_PORT
+                      ? StMonitor::Orientation_Portrait : StMonitor::Orientation_Landscape);
+    aMon.setScale(1.0f);
+    StSearchMonitors::setupGlobalDisplay(aMon);
+}
+
 void StAndroidGlue::threadEntry() {
     if(onAppEntry == NULL) {
         return;
@@ -146,6 +165,7 @@ void StAndroidGlue::threadEntry() {
 
     myConfig = AConfiguration_new();
     AConfiguration_fromAssetManager(myConfig, myActivity->assetManager);
+    updateMonitors();
     printConfig();
 
     ALooper* aLooper = ALooper_prepare(ALOOPER_PREPARE_ALLOW_NON_CALLBACKS);
@@ -224,7 +244,6 @@ void StAndroidGlue::printConfig() {
 
 void StAndroidGlue::processInput() {
     for(AInputEvent* anEvent = NULL; AInputQueue_getEvent(myInputQueue, &anEvent) >= 0;) {
-ST_DEBUG_LOG("New input event: type=" + AInputEvent_getType(anEvent)); ///
         if(AInputQueue_preDispatchEvent(myInputQueue, anEvent)) {
             continue;
         }
@@ -288,6 +307,7 @@ void StAndroidGlue::processCommand() {
         }
         case CommandId_ConfigChanged: {
             AConfiguration_fromAssetManager(myConfig, myActivity->assetManager);
+            updateMonitors();
             printConfig();
             break;
         }

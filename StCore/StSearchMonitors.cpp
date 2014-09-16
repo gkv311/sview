@@ -586,8 +586,7 @@ namespace {
     static StMutex          THE_MON_MUTEX;
     static StTimer          THE_MON_INIT_TIMER(false);
     static StSearchMonitors THE_MONS_CACHED;
-
-};
+}
 
 void StSearchMonitors::initGlobal() {
     clear();
@@ -595,14 +594,24 @@ void StSearchMonitors::initGlobal() {
     initFromConfig();
 }
 
+#if defined(__ANDROID__)
+void StSearchMonitors::setupGlobalDisplay(const StMonitor& theDisplay) {
+    StMutexAuto aLock(THE_MON_MUTEX);
+    THE_MONS_CACHED.clear();
+    THE_MONS_CACHED.add(theDisplay);
+}
+#endif
+
 void StSearchMonitors::init(const bool theForced) {
     clear();
     StMutexAuto aLock(THE_MON_MUTEX);
+#if !defined(__ANDROID__)
     if(!THE_MON_INIT_TIMER.isOn()
     || (theForced && THE_MON_INIT_TIMER.getElapsedTime() > 30.0)) {
         THE_MONS_CACHED.initGlobal();
         THE_MON_INIT_TIMER.restart(0);
     }
+#endif
 
     for(size_t aMonIter = 0; aMonIter < THE_MONS_CACHED.size(); ++aMonIter) {
         add(THE_MONS_CACHED.getValue(aMonIter));

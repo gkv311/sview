@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -27,6 +27,16 @@
  * Class represents monitor connected to videocard.
  */
 class StMonitor {
+
+        public:
+
+    /**
+     * Monitor orientation.
+     */
+    enum Orientation {
+        Orientation_Landscape, //!< landscape orientation (default)
+        Orientation_Portrait,  //!< portrait  orientation
+    };
 
         public:
 
@@ -171,6 +181,20 @@ class StMonitor {
     }
 
     /**
+     * Return monitor orientation.
+     */
+    ST_LOCAL StMonitor::Orientation getOrientation() const {
+        return myOrient;
+    }
+
+    /**
+     * Setup monitor orientation.
+     */
+    ST_LOCAL void setOrientation(const StMonitor::Orientation theOrientation) {
+        myOrient = theOrientation;
+    }
+
+    /**
      * @return human-readable string with monitor description
      */
     ST_CPPEXPORT StString toString() const;
@@ -215,6 +239,7 @@ class StMonitor {
     int          myFreq;    //!< frequency in Hertz
     int          myFreqMax; //!< maximum frequency in Hertz
     float        myScale;   //!< hight pixel density scale factor
+    Orientation  myOrient;  //!< monitor orientation
 
 };
 

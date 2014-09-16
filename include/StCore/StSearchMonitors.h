@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -91,7 +91,11 @@ class StSearchMonitors : public StArrayList<StMonitor> {
 #elif defined(__APPLE__)
     ST_LOCAL void findMonitorsCocoa();
 #elif defined(__ANDROID__)
-    //
+    /**
+     * There is no way to retrieve displays from global context - setup it externally.
+     */
+    ST_LOCAL static void setupGlobalDisplay(const StMonitor& theDisplay);
+    friend class StAndroidGlue;
 #elif defined(__linux__)
     /**
      * Function retrieves displays' configuration from XRandr extension

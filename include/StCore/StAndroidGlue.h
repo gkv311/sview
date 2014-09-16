@@ -190,6 +190,11 @@ class StAndroidGlue {
     ST_CPPEXPORT void setWindow(ANativeWindow* theWindow);
     ST_CPPEXPORT void setActivityState(int8_t theState);
 
+    /**
+     * Update global monitors configuration.
+     */
+    ST_LOCAL void updateMonitors();
+
     ST_LOCAL static SV_THREAD_FUNCTION threadEntryWrapper(void* theParam) {
         StAndroidGlue* anApp = (StAndroidGlue* )theParam;
         anApp->threadEntry();

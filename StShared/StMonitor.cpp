@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -12,7 +12,8 @@ StMonitor::StMonitor()
 : mySysId(0),
   myFreq(0),
   myFreqMax(0),
-  myScale(1.0f) {
+  myScale(1.0f),
+  myOrient(Orientation_Landscape) {
     //
 }
 
@@ -25,7 +26,8 @@ StMonitor::StMonitor(const StMonitor& theCopy)
   mySysId(theCopy.mySysId),
   myFreq(theCopy.myFreq),
   myFreqMax(theCopy.myFreqMax),
-  myScale(theCopy.myScale) {
+  myScale(theCopy.myScale),
+  myOrient(theCopy.myOrient) {
     //
 }
 
@@ -35,11 +37,10 @@ bool StMonitor::isValid() const {
 
 StString StMonitor::toString() const {
     StString aStereoType = myEdid.isValid() ? (StString(", stereo type: ") + myEdid.getStereoString()) : StString();
-    return (StString()
-        + "Monitor #" + mySysId + ", PnP ID: " + myPnpId + " (" + myName + ')'
-        + aStereoType + '\n'
+    return StString()
+        + "Monitor #" + mySysId + ", PnP ID: " + myPnpId + " (" + myName + ")"
+        + (myOrient == Orientation_Portrait ? ", portrait" : "") + aStereoType + '\n'
         + "Connected to " + myGpuName + '\n'
         + "freq= " + myFreq + "Hz / freqMax= " + myFreqMax + "Hz / scale= " + myScale + "\n"
-        + myRect.toString()
-    );
+        + myRect.toString();
 }

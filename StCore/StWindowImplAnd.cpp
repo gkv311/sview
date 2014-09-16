@@ -249,8 +249,11 @@ void StWindowImpl::onAndroidCommand(int32_t theCommand) {
             }*/
             return;
         }
-        //case StAndroidGlue::CommandId_ConfigChanged: {
-        // do not handle resize event here - screen might be not yet resized
+        case StAndroidGlue::CommandId_ConfigChanged: {
+            // do not handle resize event here - screen might be not yet resized
+            updateMonitors();
+            return;
+        }
     }
 }
 
