@@ -214,7 +214,9 @@ StGLMenu* StImageViewerGUI::createViewMenu() {
     StGLMenu* aMenuImgAdjust = createImageAdjustMenu();
 
     aMenuView->addItem(tr(MENU_VIEW_DISPLAY_MODE),  aMenuDispMode);
+#if !defined(__ANDROID__)
     aMenuView->addItem(tr(MENU_VIEW_FULLSCREEN),    myPlugin->params.isFullscreen);
+#endif
     aMenuView->addItem(tr(MENU_VIEW_RESET))
              ->signals.onItemClick.connect(myPlugin, &StImageViewer::doReset);
     aMenuView->addItem(tr(MENU_VIEW_SWAP_LR),       myImage->params.swapLR);
@@ -616,10 +618,12 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
     myBtnPlayList->setTexturePath(iconTexture(stCString("playList"), scaleIcon(32)));
 
     // fullscreen button
+#if !defined(__ANDROID__)
     myBtnFull = new StGLTextureButton(this, -aMargins.right() - scale(8), -aMargins.bottom() - scale(8),
                                       StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_RIGHT));
     myBtnFull->signals.onBtnClick.connect(myPlugin->params.isFullscreen.operator->(), &StBoolParam::doReverse);
     myBtnFull->setTexturePath(iconTexture(stCString("fullScreen"), scaleIcon(32)));
+#endif
 
     myDescr = new StGLDescription(this);
 

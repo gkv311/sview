@@ -45,8 +45,10 @@ StGLMenu* StCADViewerGUI::createViewMenu() {
     StGLMenu* aMenuProj = createProjMenu(); // Root -> View menu -> Projection
     StGLMenu* aMenuFill = createFillMenu(); // Root -> View menu -> Fill Mode
 
+#if !defined(__ANDROID__)
     aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_FULLSCREEN, "Fullscreen"),
                    myPlugin->params.isFullscreen);
+#endif
     aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_NORMALS,    "Show Normals"),
                    myPlugin->params.toShowNormals);
     aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_TRIHEDRON,  "Show Trihedron"),
