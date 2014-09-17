@@ -1137,6 +1137,17 @@ size_t StMoviePlayerGUI::trSrcFormatId(const StFormatEnum theSrcFormat) {
     }
 }
 
+namespace {
+
+    inline bool isPointIn(const StGLWidget* theWidget,
+                          const StPointD_t& theCursorZo) {
+        return theWidget != NULL
+            && theWidget->isVisible()
+            && theWidget->isPointIn(theCursorZo);
+    }
+
+}
+
 void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
                                      bool              theIsMouseMoved) {
     const bool toShowPlayList = myPlugin->params.ToShowPlayList->getValue();
@@ -1184,12 +1195,12 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
 
     if(myDescr != NULL) {
         myDescr->setVisibility(true, true);
-        if(myBtnOpen->isPointIn(theCursor)) {
+        if(::isPointIn(myBtnOpen, theCursor)) {
             myDescr->setText(tr(FILE_VIDEO_OPEN));
-        } else if(myBtnSwapLR->isPointIn(theCursor)) {
+        } else if(::isPointIn(myBtnSwapLR, theCursor)) {
             size_t aLngId = myImage->params.swapLR->getValue() ? SWAP_LR_ON : SWAP_LR_OFF;
             myDescr->setText(tr(aLngId));
-        } else if(myBtnSrcFrmt->isPointIn(theCursor)) {
+        } else if(::isPointIn(myBtnSrcFrmt, theCursor)) {
             StFormatEnum aSrcFormat = (StFormatEnum )myPlugin->params.srcFormat->getValue();
             if(aSrcFormat == ST_V_SRC_AUTODETECT
             && !myImage->params.stereoFile.isNull()) {
@@ -1200,15 +1211,15 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
                 aSrcFormat = st::formatReversed(aSrcFormat);
             }
             myDescr->setText(tr(BTN_SRC_FORMAT) + "\n" + trSrcFormat(aSrcFormat));
-        } else if(myBtnPlay->isPointIn(theCursor)) {
+        } else if(::isPointIn(myBtnPlay, theCursor)) {
             myDescr->setText(tr(VIDEO_PLAYPAUSE));
-        } else if(myBtnPrev->isPointIn(theCursor)) {
+        } else if(::isPointIn(myBtnPrev, theCursor)) {
             myDescr->setText(tr(VIDEO_LIST_PREV));
-        } else if(myBtnNext->isPointIn(theCursor)) {
+        } else if(::isPointIn(myBtnNext, theCursor)) {
             myDescr->setText(tr(VIDEO_LIST_NEXT));
-        } else if(myBtnList->isPointIn(theCursor)) {
+        } else if(::isPointIn(myBtnList, theCursor)) {
             myDescr->setText(tr(VIDEO_LIST));
-        } else if(myBtnFullScr->isPointIn(theCursor)) {
+        } else if(::isPointIn(myBtnFullScr, theCursor)) {
             myDescr->setText(tr(FULLSCREEN));
         } else {
             myDescr->setVisibility(false, true);
