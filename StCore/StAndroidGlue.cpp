@@ -145,16 +145,20 @@ void StAndroidGlue::updateMonitors() {
         return;
     }
 
+    const int32_t aWidthDp  = AConfiguration_getScreenWidthDp (myConfig);
+    const int32_t aHeightDp = AConfiguration_getScreenHeightDp(myConfig);
+    const int32_t aDpi      = AConfiguration_getDensity       (myConfig);
+
     StMonitor aMon;
     aMon.setId(0);
     aMon.changeVRect().top()    = 0;
     aMon.changeVRect().left()   = 0;
-    aMon.changeVRect().right()  = AConfiguration_getScreenWidthDp (myConfig); //myWindow != NULL ? ANativeWindow_getWidth (myWindow) : 480;
-    aMon.changeVRect().bottom() = AConfiguration_getScreenHeightDp(myConfig); //myWindow != NULL ? ANativeWindow_getHeight(myWindow) : 240;
+    aMon.changeVRect().right()  = (int )(0.5 + double(aWidthDp ) * (double(aDpi) / 160.0));
+    aMon.changeVRect().bottom() = (int )(0.5 + double(aHeightDp) * (double(aDpi) / 160.0));
 
     aMon.setOrientation(AConfiguration_getOrientation(myConfig) == ACONFIGURATION_ORIENTATION_PORT
                       ? StMonitor::Orientation_Portrait : StMonitor::Orientation_Landscape);
-    aMon.setScale(1.0f);
+    aMon.setScale(float(double(aDpi) / 160.0));
     StSearchMonitors::setupGlobalDisplay(aMon);
 }
 
