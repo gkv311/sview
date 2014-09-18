@@ -7,16 +7,24 @@
  */
 
 #include <StGLWidgets/StGLImageSphereProgram.h>
+
 #include <StGL/StGLResources.h>
+#include <StGLCore/StGLCore20.h>
 #include <StFile/StRawFile.h>
+
+#if defined(GL_ES_VERSION_2_0)
+    #define THE_UTEXT_DATA "uniform mediump vec4 uTexData;\n"
+#else
+    #define THE_UTEXT_DATA "uniform vec4 uTexData;\n"
+#endif
 
 StGLImageSphereProgram::StGLImageSphereProgram()
 : StGLImageProgram("StGLImageSphereProgram") {
     const char V_SHADER[] =
        "uniform mat4 uProjMat;\n"
        "uniform mat4 uModelMat;\n"
-       "uniform vec4 uTexData;\n"
        "uniform vec4 uTexUVData;\n"
+       THE_UTEXT_DATA
 
        "attribute vec4 vVertex;\n"
        "attribute vec2 vTexCoord;\n"
@@ -47,9 +55,9 @@ StGLImageSphereProgram::StGLImageSphereProgram()
 
     const char F_SHADER_COLOR[] =
        "uniform sampler2D uTexture;\n"
-       "uniform vec4 uTexData;\n"
        "uniform vec2 uTexSizePx;\n"
        "uniform vec2 uTexelSize;\n"
+       THE_UTEXT_DATA
 
        "vec4 getColor(in vec2 texCoord) {\n"
        "    vec2 txCoord_CC = floor(uTexSizePx * texCoord) / uTexSizePx;\n"
