@@ -447,6 +447,7 @@ void StGLContext::stglFullInfo(StDictionary& theMap) const {
     theMap.add(StDictEntry("GLdevice",    (const char* )glGetString(GL_RENDERER)));
     theMap.add(StDictEntry("GLversion",   (const char* )glGetString(GL_VERSION)));
     theMap.add(StDictEntry("GLSLversion", (const char* )glGetString(GL_SHADING_LANGUAGE_VERSION)));
+    theMap.add(StDictEntry("Max texture size", myMaxTexDim));
     theMap.add(StDictEntry("Window Info", StString()
             + myViewport.width() + "x" + myViewport.height()
             + " RGB" + myWindowBits.RGB + " A" + myWindowBits.Alpha

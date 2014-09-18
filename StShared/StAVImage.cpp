@@ -34,9 +34,10 @@ StAVImage::~StAVImage() {
     av_free(myFrame);
 }
 
-int StAVImage::getAVPixelFormat() {
-    if(isPacked()) {
-        switch(getPlane(0).getFormat()) {
+int StAVImage::getAVPixelFormat(const StImage& theImage) {
+    const StImagePlane& aPlane0 = theImage.getPlane(0);
+    if(theImage.isPacked()) {
+        switch(aPlane0.getFormat()) {
             case StImagePlane::ImgRGB:    return stAV::PIX_FMT::RGB24;
             case StImagePlane::ImgBGR:    return stAV::PIX_FMT::BGR24;
             case StImagePlane::ImgRGBA:   return stAV::PIX_FMT::RGBA32;
@@ -46,14 +47,14 @@ int StAVImage::getAVPixelFormat() {
             default:                      return stAV::PIX_FMT::NONE;
         }
     }
-    switch(getColorModel()) {
+    switch(theImage.getColorModel()) {
         case StImage::ImgColor_YUV: {
-            size_t aDelimX = (getPlane(1).getSizeX() > 0) ? (getPlane(0).getSizeX() / getPlane(1).getSizeX()) : 1;
-            size_t aDelimY = (getPlane(1).getSizeY() > 0) ? (getPlane(0).getSizeY() / getPlane(1).getSizeY()) : 1;
+            size_t aDelimX = (theImage.getPlane(1).getSizeX() > 0) ? (aPlane0.getSizeX() / theImage.getPlane(1).getSizeX()) : 1;
+            size_t aDelimY = (theImage.getPlane(1).getSizeY() > 0) ? (aPlane0.getSizeY() / theImage.getPlane(1).getSizeY()) : 1;
             if(aDelimX == 1 && aDelimY == 1) {
-                switch(getColorScale()) {
+                switch(theImage.getColorScale()) {
                     case StImage::ImgScale_Mpeg:
-                        return getPlane(0).getFormat() == StImagePlane::ImgGray16
+                        return aPlane0.getFormat() == StImagePlane::ImgGray16
                              ? stAV::PIX_FMT::YUV444P16
                              : stAV::PIX_FMT::YUV444P;
                     case StImage::ImgScale_Mpeg9:
@@ -62,14 +63,14 @@ int StAVImage::getAVPixelFormat() {
                     case StImage::ImgScale_Jpeg10: return stAV::PIX_FMT::YUV444P10;
                     case StImage::ImgScale_Full:
                     default:
-                        return getPlane(0).getFormat() == StImagePlane::ImgGray16
+                        return aPlane0.getFormat() == StImagePlane::ImgGray16
                              ? stAV::PIX_FMT::YUV444P16 //
                              : stAV::PIX_FMT::YUVJ444P;
                 }
             } else if(aDelimX == 2 && aDelimY == 2) {
-                switch(getColorScale()) {
+                switch(theImage.getColorScale()) {
                     case StImage::ImgScale_Mpeg:
-                        return getPlane(0).getFormat() == StImagePlane::ImgGray16
+                        return aPlane0.getFormat() == StImagePlane::ImgGray16
                              ? stAV::PIX_FMT::YUV420P16
                              : stAV::PIX_FMT::YUV420P;
                     case StImage::ImgScale_Mpeg9:
@@ -78,14 +79,14 @@ int StAVImage::getAVPixelFormat() {
                     case StImage::ImgScale_Jpeg10: return stAV::PIX_FMT::YUV420P10;
                     case StImage::ImgScale_Full:
                     default:
-                        return getPlane(0).getFormat() == StImagePlane::ImgGray16
+                        return aPlane0.getFormat() == StImagePlane::ImgGray16
                              ? stAV::PIX_FMT::YUV420P16 // jpeg color range ignored!
                              : stAV::PIX_FMT::YUVJ420P;
                 }
             } else if(aDelimX == 2 && aDelimY == 1) {
-                switch(getColorScale()) {
+                switch(theImage.getColorScale()) {
                     case StImage::ImgScale_Mpeg:
-                        return getPlane(0).getFormat() == StImagePlane::ImgGray16
+                        return aPlane0.getFormat() == StImagePlane::ImgGray16
                              ? stAV::PIX_FMT::YUV422P16 // jpeg color range ignored!
                              : stAV::PIX_FMT::YUV422P;
                     case StImage::ImgScale_Mpeg9:
@@ -94,12 +95,12 @@ int StAVImage::getAVPixelFormat() {
                     case StImage::ImgScale_Jpeg10: return stAV::PIX_FMT::YUV422P10;
                     case StImage::ImgScale_Full:
                     default:
-                        return getPlane(0).getFormat() == StImagePlane::ImgGray16
+                        return aPlane0.getFormat() == StImagePlane::ImgGray16
                              ? stAV::PIX_FMT::YUV422P16 // jpeg color range ignored!
                              : stAV::PIX_FMT::YUVJ422P;
                 }
             } else if(aDelimX == 1 && aDelimY == 2) {
-                return getColorScale() == StImage::ImgScale_Mpeg
+                return theImage.getColorScale() == StImage::ImgScale_Mpeg
                      ? stAV::PIX_FMT::YUVJ440P : stAV::PIX_FMT::YUV440P;
             } else if(aDelimX == 4 && aDelimY == 1) {
                 return stAV::PIX_FMT::YUV411P;
@@ -148,6 +149,25 @@ static bool convert(const StImage& theImageFrom, PixelFormat theFormatFrom,
 
     sws_freeContext(aCtxToRgb);
     return true;
+}
+
+bool StAVImage::resize(const StImage& theImageFrom,
+                       StImage&       theImageTo) {
+    if(theImageFrom.isNull()
+    || theImageFrom.getSizeX() < 1
+    || theImageFrom.getSizeY() < 1
+    || theImageTo.isNull()
+    || theImageTo.getSizeX() < 1
+    || theImageTo.getSizeY() < 1) {
+        return false;
+    }
+
+    const PixelFormat aFormatFrom = (PixelFormat )StAVImage::getAVPixelFormat(theImageFrom);
+    const PixelFormat aFormatTo   = (PixelFormat )StAVImage::getAVPixelFormat(theImageTo);
+    return aFormatFrom != stAV::PIX_FMT::NONE
+        && aFormatTo   != stAV::PIX_FMT::NONE
+        && convert(theImageFrom, aFormatFrom,
+                   theImageTo,   aFormatTo);
 }
 
 void StAVImage::close() {
@@ -449,7 +469,7 @@ bool StAVImage::save(const StString& theFilePath,
         return false;
     }
 
-    PixelFormat aPFormatAV = (PixelFormat )getAVPixelFormat();
+    PixelFormat aPFormatAV = (PixelFormat )getAVPixelFormat(*this);
     StImage anImage;
     switch(theImageType) {
         case ST_TYPE_PNG:
@@ -614,8 +634,4 @@ bool StAVImage::save(const StString& theFilePath,
     setState(StString("AVCodec library, saved image '") + aFileName + "' " + getDescription());
 
     return true;
-}
-
-bool StAVImage::resize(size_t , size_t ) {
-    return false;
 }

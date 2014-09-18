@@ -478,7 +478,3 @@ bool StFreeImage::save(const StString& theFilePath,
 
     return true;
 }
-
-bool StFreeImage::resize(size_t , size_t ) {
-    return false;
-}

@@ -77,6 +77,41 @@ bool StImage::initWrapper(const StImage& theCopy) {
     return true;
 }
 
+bool StImage::initTrashLimited(const StImage& theRef,
+                               const size_t   theSizeX,
+                               const size_t   theSizeY) {
+    nullify();
+    setColorModel(theRef.getColorModel());
+    setColorScale(theRef.getColorScale());
+    if(theRef.isNull()
+    || theRef.getSizeX() < 1
+    || theRef.getSizeY() < 1
+    || theSizeX < 1
+    || theSizeY < 1) {
+        return false;
+    }
+
+    double aRatioX = double(theSizeX) / double(theRef.getSizeX());
+    double aRatioY = double(theSizeY) / double(theRef.getSizeY());
+    myPAR = float(double(theRef.getPixelRatio()) * aRatioY / aRatioX);
+
+    for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
+        const StImagePlane& aFromPlane = theRef.getPlane(aPlaneId);
+        if(aFromPlane.isNull()) {
+            continue;
+        }
+
+        const size_t aScaleX = theRef.getSizeX() / aFromPlane.getSizeX();
+        const size_t aScaleY = theRef.getSizeY() / aFromPlane.getSizeY();
+        const size_t aSizeX  = theSizeX / aScaleX;
+        const size_t aSizeY  = theSizeY / aScaleY;
+        if(!changePlane(aPlaneId).initTrash(aFromPlane.getFormat(), aSizeX, aSizeY)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 StPixelRGB StImage::getRGBFromYUV(const size_t theRow, const size_t theCol) const {
     // this code is not acceptable for full-range YUV!
     int OY = 298 * (getPlane(0).getFirstByte(theRow, theCol) - 16);

@@ -11,6 +11,10 @@
 
 #include "StImageFile.h"
 
+// define StHandle template specialization
+class StFreeImage;
+ST_DEFINE_HANDLE(StFreeImage, StImageFile);
+
 /**
  * This class implements image load/save operations using FreeImage library.
  */
@@ -35,7 +39,6 @@ class StFreeImage : public StImageFile {
     ST_CPPEXPORT virtual bool save(const StString& theFilePath,
                                    ImageType       theImageType,
                                    StFormatEnum    theSrcFormat);
-    ST_CPPEXPORT virtual bool resize(size_t , size_t );
 
         private:
 

@@ -21,6 +21,7 @@
 #include "StImageViewerStrings.h"
 #include "StImageViewerGUI.h"
 
+#include <StAV/StAVImage.h>
 #include <StThreads/StThread.h>
 
 using namespace StImageViewerStrings;
@@ -48,12 +49,14 @@ namespace {
 StImageLoader::StImageLoader(const StImageFile::ImageClass     theImageLib,
                              const StHandle<StMsgQueue>&       theMsgQueue,
                              const StHandle<StLangMap>&        theLangMap,
-                             const StHandle<StGLTextureQueue>& theTextureQueue)
+                             const StHandle<StGLTextureQueue>& theTextureQueue,
+                             const GLint                       theMaxTexDim)
 : myMimeList(ST_IMAGES_MIME_STRING),
   myLangMap(theLangMap),
   myPlayList(1),
   myLoadNextEvent(false),
   myStFormatByUser(ST_V_SRC_AUTODETECT),
+  myMaxTexDim(theMaxTexDim),
   myTextureQueue(theTextureQueue),
   myMsgQueue(theMsgQueue),
   myImageLib(theImageLib),
@@ -103,15 +106,36 @@ void StImageLoader::metadataFromExif(const StHandle<StExifDir>& theDir,
     }
 }
 
+inline StHandle<StImage> scaledImage(StHandle<StImageFile>& theRef,
+                                     const size_t           theMaxSize) {
+    if(theRef->isNull()) {
+        return theRef;
+    } else if(theRef->getSizeX() > theMaxSize
+           && theRef->getSizeY() > theMaxSize) {
+        return theRef;
+    }
+
+    StHandle<StImage> anImage = new StImage();
+    const size_t aSizeX = stMin(theRef->getSizeX(), theMaxSize);
+    const size_t aSizeY = stMin(theRef->getSizeY(), theMaxSize);
+    if(!anImage->initTrashLimited(*theRef, aSizeX, aSizeY)
+    || !StAVImage::resize(*theRef, *anImage)) {
+        ST_ERROR_LOG("Scale failed!");
+        return theRef;
+    }
+    theRef->close();
+    return anImage;
+}
+
 bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
                               StHandle<StStereoParams>&   theParams) {
     const StString               aFilePath = theSource->getPath();
     const StImageFile::ImageType anImgType = StImageFile::guessImageType(aFilePath, theSource->getMIME());
 
-    StHandle<StImageFile> anImageL = StImageFile::create(myImageLib, anImgType);
-    StHandle<StImageFile> anImageR = StImageFile::create(myImageLib, anImgType);
-    if(anImageL.isNull()
-    || anImageR.isNull()) {
+    StHandle<StImageFile> anImageFileL = StImageFile::create(myImageLib, anImgType);
+    StHandle<StImageFile> anImageFileR = StImageFile::create(myImageLib, anImgType);
+    if(anImageFileL.isNull()
+    || anImageFileR.isNull()) {
         processLoadFail("No any image library was found!");
         return false;
     }
@@ -212,27 +236,25 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         const StJpegParser::Orient anOrient = anImg1->getOrientation();
         theParams->setZRotateZero((GLfloat )StJpegParser::getRotationAngle(anOrient));
         anImg1->getParallax(anHParallax);
-        if(!anImageL->load(aFilePath, StImageFile::ST_TYPE_JPEG,
-                           (uint8_t* )anImg1->Data, (int )anImg1->Length)
-        && !anImageL->load(aFilePath, StImageFile::ST_TYPE_JPEG,
-                           (uint8_t* )aParser.getBuffer(), (int )aParser.getSize())) {
-            processLoadFail(formatError(aFilePath, anImageL->getState()));
+        if(!anImageFileL->load(aFilePath, StImageFile::ST_TYPE_JPEG,
+                               (uint8_t* )anImg1->Data, (int )anImg1->Length)
+        && !anImageFileL->load(aFilePath, StImageFile::ST_TYPE_JPEG,
+                               (uint8_t* )aParser.getBuffer(), (int )aParser.getSize())) {
+            processLoadFail(formatError(aFilePath, anImageFileL->getState()));
             return false;
         }
 
         if(!anImg2.isNull()) {
             // read image from memory
             anImg2->getParallax(anHParallax); // in MPO parallax generally stored ONLY in second frame
-            if(!anImageR->load(aFilePath, StImageFile::ST_TYPE_JPEG,
-                               (uint8_t* )anImg2->Data, (int )anImg2->Length)) {
-                processLoadFail(formatError(aFilePath, anImageR->getState()));
-                anImageL->close();
-                anImageL->nullify();
+            if(!anImageFileR->load(aFilePath, StImageFile::ST_TYPE_JPEG,
+                                   (uint8_t* )anImg2->Data, (int )anImg2->Length)) {
+                processLoadFail(formatError(aFilePath, anImageFileR->getState()));
                 return false;
             }
 
             // convert percents to pixels
-            const GLint aParallaxPx = GLint(anHParallax * anImageR->getSizeX() * 0.01);
+            const GLint aParallaxPx = GLint(anHParallax * anImageFileR->getSizeX() * 0.01);
             if(aParallaxPx != 0) {
                 StDictEntry& anEntry  = anImgInfo->Info.addChange("Exif.Fujifilm.Parallax");
                 anEntry.changeValue() = StString(anHParallax);
@@ -246,28 +268,34 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         const StString aFilePathRight = theSource->getValue(1)->getPath();
 
         // loading image with format autodetection
-        if(!anImageL->load(aFilePathLeft)) {
-            processLoadFail(formatError(aFilePathLeft, anImageL->getState()));
+        if(!anImageFileL->load(aFilePathLeft)) {
+            processLoadFail(formatError(aFilePathLeft, anImageFileL->getState()));
             return false;
         }
-        if(!anImageR->load(aFilePathRight)) {
-            processLoadFail(formatError(aFilePathRight, anImageR->getState()));
-            anImageL->close();
-            anImageL->nullify();
+        if(!anImageFileR->load(aFilePathRight)) {
+            processLoadFail(formatError(aFilePathRight, anImageFileR->getState()));
             return false;
         }
     } else {
-        if(!anImageL->load(aFilePath, anImgType)) {
-            processLoadFail(formatError(aFilePath, anImageL->getState()));
+        if(!anImageFileL->load(aFilePath, anImgType)) {
+            processLoadFail(formatError(aFilePath, anImageFileL->getState()));
             return false;
         }
 
-        anImgInfo->StInfoStream = anImageL->getFormat();
+        anImgInfo->StInfoStream = anImageFileL->getFormat();
         if(myStFormatByUser == ST_V_SRC_AUTODETECT) {
             aSrcFormatCurr = anImgInfo->StInfoStream;
         }
     }
     const double aLoadTimeMSec = aLoadTimer.getElapsedTimeInMilliSec();
+
+    // scale down image if it does not fit texture limits
+    StHandle<StImage> anImageL = scaledImage(anImageFileL, size_t(myMaxTexDim));
+    StHandle<StImage> anImageR = scaledImage(anImageFileR, size_t(myMaxTexDim));
+    const double aScaleTimeMSec = aLoadTimer.getElapsedTimeInMilliSec() - aLoadTimeMSec;
+    if(anImageL != anImageFileL) {
+        ST_DEBUG_LOG("Image is downscaled to fit texture limits in " + aScaleTimeMSec + " ms!");
+    }
 
     // detect information from file name
     bool isAnamorphByName = false;
@@ -284,11 +312,11 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     }*/
 
 #ifdef __ST_DEBUG__
-    if(!anImageL->isNull()) {
-        ST_DEBUG_LOG(anImageL->getState());
+    if(!anImageFileL->isNull()) {
+        ST_DEBUG_LOG(anImageFileL->getState());
     }
-    if(!anImageR->isNull()) {
-        ST_DEBUG_LOG(anImageR->getState());
+    if(!anImageFileR->isNull()) {
+        ST_DEBUG_LOG(anImageFileR->getState());
     }
 #endif
 
@@ -304,16 +332,16 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         myTextureQueue->push(*anImageL, *anImageR, theParams, aSrcFormatCurr, 0.0);
     }
 
-    if(!stAreEqual(anImageL->getPixelRatio(), 1.0f, 0.001f)) {
+    if(!stAreEqual(anImageFileL->getPixelRatio(), 1.0f, 0.001f)) {
         anImgInfo->Info.add(StArgument(tr(INFO_PIXEL_RATIO),
-                                       StString(anImageL->getPixelRatio())));
+                                       StString(anImageFileL->getPixelRatio())));
     }
-    const StString aModelL = anImageL->formatImgColorModel();
-    if(!anImageR->isNull()) {
+    const StString aModelL = anImageFileL->formatImgColorModel();
+    if(!anImageFileR->isNull()) {
         anImgInfo->Info.add(StArgument(tr(INFO_DIMENSIONS), StString()
-                                     + anImageL->getSizeX() + " x " + anImageL->getSizeY() + " " + tr(INFO_LEFT) + "\n"
-                                     + anImageR->getSizeX() + " x " + anImageR->getSizeY() + " " + tr(INFO_RIGHT)));
-        const StString aModelR = anImageR->formatImgColorModel();
+                                     + anImageFileL->getSizeX() + " x " + anImageFileL->getSizeY() + " " + tr(INFO_LEFT) + "\n"
+                                     + anImageFileR->getSizeX() + " x " + anImageFileR->getSizeY() + " " + tr(INFO_RIGHT)));
+        const StString aModelR = anImageFileR->formatImgColorModel();
         if(aModelL == aModelR) {
             anImgInfo->Info.add(StArgument(tr(INFO_COLOR_MODEL), aModelL));
         } else {
@@ -323,7 +351,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         }
     } else {
         anImgInfo->Info.add(StArgument(tr(INFO_DIMENSIONS), StString()
-                                     + anImageL->getSizeX() + " x " + anImageL->getSizeY()));
+                                     + anImageFileL->getSizeX() + " x " + anImageFileL->getSizeY()));
         anImgInfo->Info.add(StArgument(tr(INFO_COLOR_MODEL),
                                        aModelL));
     }
@@ -333,10 +361,10 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     myLock.unlock();
 
     // clean up - close opened files and reset memory
-    anImageL->close();
-    anImageL->nullify();
-    anImageR->close();
-    anImageR->nullify();
+    anImageL.nullify();
+    anImageR.nullify();
+    anImageFileL.nullify();
+    anImageFileR.nullify();
 
     myTextureQueue->stglSwapFB(0);
 

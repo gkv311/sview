@@ -17,6 +17,10 @@ struct AVCodecContext;
 struct AVCodec;
 struct AVFrame;
 
+// define StHandle template specialization
+class StAVImage;
+ST_DEFINE_HANDLE(StAVImage, StImageFile);
+
 /**
  * This class implements image load/save operation using libav* libraries.
  */
@@ -30,23 +34,49 @@ class StAVImage : public StImageFile {
      */
     ST_CPPEXPORT static bool init();
 
+    /**
+     * Resize image using swscale library from FFmpeg.
+     * There are several restriction:
+     * - Destination image should have the same format (this method is for scaling, not conversion).
+     * - Memory should be properly aligned.
+     */
+    ST_CPPEXPORT static bool resize(const StImage& theImageFrom,
+                                    StImage&       theImageTo);
+
         public:
 
+    /**
+     * Initialize empty image.
+     */
     ST_CPPEXPORT StAVImage();
+
+    /**
+     * Destructor.
+     */
     ST_CPPEXPORT virtual ~StAVImage();
 
+    /**
+     * Close currently opened image context and release memory.
+     */
     ST_CPPEXPORT virtual void close();
+
+    /**
+     * Decode image from specified file or memory pointer.
+     */
     ST_CPPEXPORT virtual bool load(const StString& theFilePath,
                                    ImageType       theImageType = ST_TYPE_NONE,
                                    uint8_t* theDataPtr = NULL, int theDataSize = 0);
+
+    /**
+     * Save image to specified path.
+     */
     ST_CPPEXPORT virtual bool save(const StString& theFilePath,
                                    ImageType       theImageType,
                                    StFormatEnum    theSrcFormat = ST_V_SRC_AUTODETECT);
-    ST_CPPEXPORT virtual bool resize(size_t , size_t );
 
         private:
 
-    ST_CPPEXPORT int getAVPixelFormat();
+    ST_LOCAL static int getAVPixelFormat(const StImage& theImage);
 
         private:
 

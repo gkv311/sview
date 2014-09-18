@@ -16,6 +16,10 @@
 
 class StMIME;
 
+// define StHandle template specialization
+class StImageFile;
+ST_DEFINE_HANDLE(StImageFile, StImage);
+
 class StImageFile : public StImage {
 
         public:
@@ -120,11 +124,6 @@ class StImageFile : public StImage {
     virtual bool save(const StString& theFilePath,
                       ImageType       theImageType,
                       StFormatEnum    theSrcFormat) = 0;
-
-    /**
-     * Resize image.
-     */
-    virtual bool resize(size_t theSizeX, size_t theSizeY) = 0;
 
         protected:
 

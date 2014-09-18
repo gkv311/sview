@@ -212,7 +212,3 @@ bool StWebPImage::save(const StString& /*theFilePath*/,
                        StFormatEnum    /*theSrcFormat*/) {
     return false;
 }
-
-bool StWebPImage::resize(size_t , size_t ) {
-    return false;
-}

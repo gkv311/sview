@@ -72,6 +72,16 @@ class StImage {
 
     ST_CPPEXPORT bool fill(const StImage& theCopy);
 
+    /**
+     * Advanced initializer for further scaling - creates an image from specified one with:
+     * - same format and list of planes
+     * - plane size limited by specified dimension
+     * - undefined data
+     */
+    ST_CPPEXPORT bool initTrashLimited(const StImage& theRef,
+                                       const size_t   theSizeX,
+                                       const size_t   theSizeY);
+
         public: //! @name image information
 
     /**

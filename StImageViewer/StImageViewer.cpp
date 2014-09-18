@@ -353,7 +353,8 @@ bool StImageViewer::init() {
     StString anImgLibStr;
     mySettings->loadString(ST_SETTING_IMAGELIB, anImgLibStr);
     params.imageLib = StImageFile::imgLibFromString(anImgLibStr);
-    myLoader = new StImageLoader(params.imageLib, myMsgQueue, myLangMap, myGUI->myImage->getTextureQueue());
+    myLoader = new StImageLoader(params.imageLib, myMsgQueue, myLangMap,
+                                 myGUI->myImage->getTextureQueue(), myContext->getMaxTextureSize());
     myLoader->signals.onLoaded.connect(this, &StImageViewer::doLoaded);
 
     // load this parameter AFTER image thread creation

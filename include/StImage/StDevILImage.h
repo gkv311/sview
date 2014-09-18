@@ -13,6 +13,10 @@
 
 typedef unsigned int ILuint;
 
+// define StHandle template specialization
+class StDevILImage;
+ST_DEFINE_HANDLE(StDevILImage, StImageFile);
+
 /**
  * This class implements image load/save operations using DevIL library.
  */
@@ -35,6 +39,8 @@ class StDevILImage : public StImageFile {
      */
     ST_CPPEXPORT static bool init();
 
+    ST_CPPEXPORT bool resize(size_t theSizeX, size_t theSizeY);
+
         public:
 
     ST_CPPEXPORT StDevILImage();
@@ -47,7 +53,6 @@ class StDevILImage : public StImageFile {
     ST_CPPEXPORT virtual bool save(const StString& theFilePath,
                                    ImageType       theImageType,
                                    StFormatEnum    theSrcFormat);
-    ST_CPPEXPORT virtual bool resize(size_t theSizeX, size_t theSizeY);
 
 };
 
