@@ -53,6 +53,13 @@ bool StWindowImpl::create() {
         myState = *(StSavedState* )myParentWin->getSavedState();
     }*/
 
+    myIsUpdated = true;
+    if(myParentWin->getWindow() != NULL) {
+        // re-starting output for existing window
+        return onAndroidInitWindow();
+    }
+
+    // first start - wait for CommandId_WindowInit...
     int aPollRes  = 0;
     int aNbEvents = 0;
     StAndroidPollSource* aSource = NULL;
@@ -71,7 +78,6 @@ bool StWindowImpl::create() {
         }
     }
 
-    myIsUpdated = true;
     return myInitState == STWIN_INIT_SUCCESS;
 }
 
@@ -177,6 +183,51 @@ void StWindowImpl::onAndroidInput(const AInputEvent* theEvent,
     }
 }
 
+bool StWindowImpl::onAndroidInitWindow() {
+    if(myParentWin->getWindow() == NULL) {
+        return false;
+    }
+
+    myMaster.hRC = new StWinGlrc(eglGetDisplay(EGL_DEFAULT_DISPLAY), attribs.IsGlDebug, attribs.GlDepthSize);
+    if(!myMaster.hRC->isValid()) {
+        myMaster.close();
+        mySlave.close();
+        myInitState = STWIN_ERROR_X_GLRC_CREATE;
+        return false;
+    }
+
+    myMaster.hWindowGl = myParentWin->getWindow();
+    myInitState = myMaster.glCreateContext(NULL, myRectNorm, attribs.GlDepthSize, attribs.IsGlStereo, attribs.IsGlDebug);
+    if(myInitState != STWIN_INIT_SUCCESS) {
+        return false;
+    }
+
+    EGLint aWidth = 0, aHeight = 0;
+    if(myMaster.hWindowGl != NULL) {
+        aWidth  = ANativeWindow_getWidth (myMaster.hWindowGl);
+        aHeight = ANativeWindow_getHeight(myMaster.hWindowGl);
+    } else {
+        eglQuerySurface(myMaster.hRC->getDisplay(), myMaster.eglSurface, EGL_WIDTH,  &aWidth);
+        eglQuerySurface(myMaster.hRC->getDisplay(), myMaster.eglSurface, EGL_HEIGHT, &aHeight);
+    }
+
+    myRectNorm.left()   = 0;
+    myRectNorm.top()    = 0;
+    myRectNorm.right()  = myRectNorm.left() + aWidth;
+    myRectNorm.bottom() = myRectNorm.top()  + aHeight;
+
+    myGlContext = new StGLContext(myResMgr);
+    if(!myGlContext->stglInit()) {
+        myMaster.close();
+        mySlave.close();
+        stError("Critical error - broken GL context!\nInvalid OpenGL driver?");
+        myInitState = STWIN_ERROR_X_GLRC_CREATE;
+        return false;
+    }
+    myInitState = STWIN_INIT_SUCCESS;
+    return true;
+}
+
 void StWindowImpl::onAndroidCommand(int32_t theCommand) {
     switch(theCommand) {
         case StAndroidGlue::CommandId_SaveState: {
@@ -188,45 +239,7 @@ void StWindowImpl::onAndroidCommand(int32_t theCommand) {
         }
         case StAndroidGlue::CommandId_WindowInit: {
             // the window is being shown, get it ready
-            if(myParentWin->getWindow() != NULL) {
-                myMaster.hRC = new StWinGlrc(eglGetDisplay(EGL_DEFAULT_DISPLAY), attribs.IsGlDebug, attribs.GlDepthSize);
-                if(!myMaster.hRC->isValid()) {
-                    myMaster.close();
-                    mySlave.close();
-                    myInitState = STWIN_ERROR_X_GLRC_CREATE;
-                    return;
-                }
-
-                myMaster.hWindowGl = myParentWin->getWindow();
-                myInitState = myMaster.glCreateContext(NULL, myRectNorm, attribs.GlDepthSize, attribs.IsGlStereo, attribs.IsGlDebug);
-                if(myInitState != STWIN_INIT_SUCCESS) {
-                    return;
-                }
-
-                EGLint aWidth = 0, aHeight = 0;
-                if(myMaster.hWindowGl != NULL) {
-                    aWidth  = ANativeWindow_getWidth (myMaster.hWindowGl);
-                    aHeight = ANativeWindow_getHeight(myMaster.hWindowGl);
-                } else {
-                    eglQuerySurface(myMaster.hRC->getDisplay(), myMaster.eglSurface, EGL_WIDTH,  &aWidth);
-                    eglQuerySurface(myMaster.hRC->getDisplay(), myMaster.eglSurface, EGL_HEIGHT, &aHeight);
-                }
-
-                myRectNorm.left()   = 0;
-                myRectNorm.top()    = 0;
-                myRectNorm.right()  = myRectNorm.left() + aWidth;
-                myRectNorm.bottom() = myRectNorm.top()  + aHeight;
-
-                myGlContext = new StGLContext(myResMgr);
-                if(!myGlContext->stglInit()) {
-                    myMaster.close();
-                    mySlave.close();
-                    stError("Critical error - broken GL context!\nInvalid OpenGL driver?");
-                    myInitState = STWIN_ERROR_X_GLRC_CREATE;
-                    return;
-                }
-                myInitState = STWIN_INIT_SUCCESS;
-            }
+            onAndroidInitWindow();
             return;
         }
         case StAndroidGlue::CommandId_WindowTerm: {

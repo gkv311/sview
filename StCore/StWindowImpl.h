@@ -117,6 +117,7 @@ class StWindowImpl {
 #if defined(__ANDROID__)
     ST_LOCAL void onAndroidInput(const AInputEvent* theEvent, bool& theIsProcessed);
     ST_LOCAL void onAndroidCommand(int32_t theCommand);
+    ST_LOCAL bool onAndroidInitWindow();
 #elif defined(__linux__)
     ST_LOCAL void parseXDNDClientMsg();
     ST_LOCAL void parseXDNDSelectionMsg();
