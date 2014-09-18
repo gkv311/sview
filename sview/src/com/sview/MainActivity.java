@@ -12,18 +12,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.Context;
 import android.content.ContextWrapper;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.text.Html;
 import android.text.method.ScrollingMovementMethod;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -31,57 +23,6 @@ import android.os.Bundle;
  * sView launcher.
  */
 public class MainActivity extends Activity {
-
-    /**
-     * Auxiliary method to close activity on critical error
-     */
-    public void exitWithError(String theError) {
-        AlertDialog.Builder aBuilder = new AlertDialog.Builder(this);
-        aBuilder.setMessage(theError).setNegativeButton("Exit", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface theDialog, int theId) {
-                Intent anIntent = new Intent(Intent.ACTION_MAIN);
-                anIntent.addCategory(Intent.CATEGORY_HOME);
-                anIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                anIntent.putExtra("EXIT", true);
-                startActivity(anIntent);
-            }
-        });
-        AlertDialog aDialog = aBuilder.create();
-        aDialog.show();
-    }
-
-    /**
-     * Auxiliary method to show temporary info messages
-     */
-    public void printShortInfo(CharSequence theInfo) {
-        Context aCtx = getApplicationContext();
-        Toast aToast = Toast.makeText(aCtx, theInfo, Toast.LENGTH_SHORT);
-        aToast.show();
-    }
-
-    /**
-     * Auxiliary method to show temporary info messages
-     */
-    private boolean loadLibVerbose(String        theLibName,
-                                   StringBuilder theErrors) {
-        try {
-            System.loadLibrary(theLibName);
-            theErrors.append("Info:  native library \"");
-            theErrors.append(theLibName);
-            theErrors.append("\" has been loaded\n");
-            return true;
-	    } catch(java.lang.UnsatisfiedLinkError theError) {
-            theErrors.append("Error: native library \"");
-            theErrors.append(theLibName);
-            theErrors.append("\" is unavailable:\n  " + theError.getMessage());
-            return false;
-	    } catch(SecurityException theError) {
-            theErrors.append("Error: native library \"");
-            theErrors.append(theLibName);
-            theErrors.append("\" can not be loaded for security reasons:\n  " + theError.getMessage());
-            return false;
-	    }
-    }
 
     @Override
     public void onCreate(Bundle theSavedInstanceState) {
@@ -101,32 +42,12 @@ public class MainActivity extends Activity {
         myTextView.setText("sView loader in progress...\n  URL: " + aDataPath + "\n  Type: " + aDataType);
         setContentView(myTextView);
 
-        StringBuilder anErrors = new StringBuilder();
-        if(!loadLibVerbose("gnustl_shared",   anErrors)
-        || !loadLibVerbose("freetype",        anErrors)
-        || !loadLibVerbose("avutil-54",       anErrors)
-        || !loadLibVerbose("swresample-1",    anErrors)
-        || !loadLibVerbose("avcodec-56",      anErrors)
-        || !loadLibVerbose("avformat-56",     anErrors)
-        || !loadLibVerbose("swscale-3",       anErrors)
-        || !loadLibVerbose("openal",          anErrors)
-        || !loadLibVerbose("StShared",        anErrors)
-        || !loadLibVerbose("StGLWidgets",     anErrors)
-        || !loadLibVerbose("StSettings",      anErrors)
-        || !loadLibVerbose("StCore",          anErrors)
-        || !loadLibVerbose("StOutAnaglyph",   anErrors)
-        || !loadLibVerbose("StOutDistorted",  anErrors)
-        //|| !loadLibVerbose("StOutDual",       anErrors)
-        || !loadLibVerbose("StOutInterlace",  anErrors)
-        //|| !loadLibVerbose("StOutIZ3D",       anErrors)
-        //|| !loadLibVerbose("StOutPageFlip",   anErrors)
-        || !loadLibVerbose("StImageViewer",   anErrors)
-        || !loadLibVerbose("StMoviePlayer",   anErrors)
-        || !loadLibVerbose("sview",           anErrors)) {
-	        exitWithError("Broken apk?\n" + anErrors);
-	        return;
+        StringBuilder anInfo = new StringBuilder();
+        if(!StActivity.loadNatives(this, anInfo)) {
+            //StActivity.exitWithError(this, "Broken apk?\n" + anInfo);
+            return;
         }
-        myTextView.append("\n\n" + anErrors);
+        myTextView.append("\n\n" + anInfo);
 
         Intent anImgViewer = new Intent(this, StActivity.class);
         anImgViewer.setDataAndType(aDataUrl, aDataType);
@@ -150,13 +71,13 @@ public class MainActivity extends Activity {
                 FileInputStream aLogStream = new FileInputStream(aLogFile);
                 BufferedReader  aLogReader = new BufferedReader(new InputStreamReader(aLogStream));
                 for(String aLine = aLogReader.readLine(); aLine != null; aLine = aLogReader.readLine()) {
-                    if(aLine.startsWith("ERROR !!")) {
+                    /*if(aLine.startsWith("ERROR !!")) {
                         myTextView.append(Html.fromHtml("<font color=\"#ff0000\">ERROR !!</font>"));
                         myTextView.append(aLine.substring(8));
                     } else if(aLine.startsWith("DEBUG --")) {
                         myTextView.append(Html.fromHtml("<font color=\"#d4aa00\">DEBUG --</font>"));
                         myTextView.append(aLine.substring(8));
-                    } else {
+                    } else*/ {
                         myTextView.append(aLine);
                     }
                     myTextView.append("\n");
