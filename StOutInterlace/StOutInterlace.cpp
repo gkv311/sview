@@ -187,7 +187,9 @@ void StOutInterlace::getDevices(StOutDevicesList& theList) const {
 
 void StOutInterlace::getOptions(StParamsList& theList) const {
     theList.add(params.ToReverse);
+#if !defined(__ANDROID__)
     theList.add(params.BindToMon);
+#endif
 }
 
 StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
@@ -253,6 +255,7 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     aDevCol->Desc     = aLangMap.changeValueId(STTR_VINTERLACE_DESC, "Column interlaced displays");
     myDevices.add(aDevCol);
 
+#if !defined(__ANDROID__)
     StHandle<StOutDevice> aDevChess = new StOutDevice();
     aDevChess->PluginId = ST_OUT_PLUGIN_NAME;
     aDevChess->DeviceId = "Chess";
@@ -268,6 +271,7 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     aDevED->Name     = aLangMap.changeValueId(STTR_HINTERLACE_ED_NAME, "Interlaced ED");
     aDevED->Desc     = aLangMap.changeValueId(STTR_HINTERLACE_ED_DESC, "EDimensional in interlaced mode");
     myDevices.add(aDevED);
+#endif
 
     // detect connected displays
     bool myIsMonReversed = false;
