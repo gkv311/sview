@@ -708,6 +708,7 @@ void StMoviePlayerGUI::doAboutSystem(const size_t ) {
     StGLMessageBox* aDialog = new StGLMessageBox(this, aTitle, "", scale(512), scale(256));
 
     StArgumentsMap anInfo;
+    anInfo.add(StDictEntry("CPU cores", StString(StThread::countLogicalProcessors()) + StString(" logical processor(s)")));
     getContext().stglFullInfo(anInfo);
     StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
     aTable->setVisibility(true, true);

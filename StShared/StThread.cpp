@@ -23,6 +23,8 @@
     #endif
 #endif
 
+#include <StFile/StRawFile.h>
+
 size_t StThread::getCurrentThreadId() {
 #ifdef _WIN32
     return (size_t )GetCurrentThreadId();
@@ -76,8 +78,8 @@ void StThread::detach() {
     }
 }
 
-#ifdef _WIN32
 namespace {
+#ifdef _WIN32
     // for a 64-bit app running under 64-bit Windows, this is FALSE
     static bool isWow64() {
         typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE , PBOOL );
@@ -89,15 +91,104 @@ namespace {
             && aFunIsWow64(GetCurrentProcess(), &bIsWow64)
             && bIsWow64 != FALSE;
     }
-}
+
+#elif defined(__ANDROID__)
+
+    /**
+     * Simple number parser.
+     */
+    static const char* parseNumber(int&        theResult,
+                                   const char* theInput,
+                                   const char* theLimit,
+                                   const int   theBase = 10) {
+        const char* aCharIter = theInput;
+        int aValue = 0;
+        while(aCharIter < theLimit) {
+            int aDigit = (*aCharIter - '0');
+            if((unsigned int )aDigit >= 10U) {
+                aDigit = (*aCharIter - 'a');
+                if((unsigned int )aDigit >= 6U) {
+                    aDigit = (*aCharIter - 'A');
+                }
+                if((unsigned int )aDigit >= 6U) {
+                    break;
+                }
+                aDigit += 10;
+            }
+            if(aDigit >= theBase) {
+                break;
+            }
+            aValue = aValue * theBase + aDigit;
+            ++aCharIter;
+        }
+        if(aCharIter == theInput) {
+            return NULL;
+        }
+
+        theResult = aValue;
+        return aCharIter;
+    }
+
+    /**
+     * Read CPUs mask from sysfs.
+     */
+    uint32_t readCpuMask(const StCString& thePath) {
+        StRawFile aFile;
+        if(!aFile.readFile(thePath)) {
+            return 0;
+        }
+
+        const char* aCharIter = (const char* )aFile.getBuffer();
+        const char* anEnd     = aCharIter + aFile.getSize();
+        uint32_t    aCpuMask  = 0;
+        while(aCharIter < anEnd && *aCharIter != '\n') {
+            const char* aChunkEnd = (const char* )::memchr(aCharIter, ',', anEnd - aCharIter);
+            if(aChunkEnd == NULL) {
+                aChunkEnd = anEnd;
+            }
+
+            // get first value
+            int anIndexLower = 0;
+            aCharIter = parseNumber(anIndexLower, aCharIter, aChunkEnd);
+            if(aCharIter == NULL) {
+                return aCpuMask;
+            }
+
+            // if we're not at the end of the item, expect a dash and and integer; extract end value.
+            int anIndexUpper = anIndexLower;
+            if(aCharIter < aChunkEnd && *aCharIter == '-') {
+                aCharIter = parseNumber(anIndexUpper, aCharIter + 1, aChunkEnd);
+                if(aCharIter == NULL) {
+                    return aCpuMask;
+                }
+            }
+
+            // set bits CPU list
+            for(int aCpuIndex = anIndexLower; aCpuIndex <= anIndexUpper; ++aCpuIndex) {
+                if((unsigned int )aCpuIndex < 32) {
+                    aCpuMask |= (uint32_t )(1U << aCpuIndex);
+                }
+            }
+
+            aCharIter = aChunkEnd;
+            if(aCharIter < anEnd) {
+                ++aCharIter;
+            }
+        }
+        return aCpuMask;
+    }
+
 #endif
+}
+
 
 int StThread::countLogicalProcessors() {
+#ifdef _WIN32
     static int aNumLogicalProcessors = 0;
     if(aNumLogicalProcessors != 0) {
         return aNumLogicalProcessors;
     }
-#ifdef _WIN32
+
     // GetSystemInfo() will return the number of processors in a data field in a SYSTEM_INFO structure.
     SYSTEM_INFO aSysInfo;
     if(isWow64()) {
@@ -114,12 +205,22 @@ int StThread::countLogicalProcessors() {
         GetSystemInfo(&aSysInfo);
     }
     aNumLogicalProcessors = aSysInfo.dwNumberOfProcessors;
+    return aNumLogicalProcessors;
 #else
+
+    #if defined(__ANDROID__)
+    uint32_t aCpuMaskPresent  = readCpuMask(stCString("/sys/devices/system/cpu/present"));
+    uint32_t aCpuMaskPossible = readCpuMask(stCString("/sys/devices/system/cpu/possible"));
+    aCpuMaskPresent &= aCpuMaskPossible;
+    const int aNbCores = __builtin_popcount(aCpuMaskPresent);
+    if(aNbCores >= 1) {
+        return aNbCores;
+    }
+    #endif
     // These are the choices. We'll check number of processors online.
     // _SC_NPROCESSORS_CONF   Number of processors configured
     // _SC_NPROCESSORS_MAX    Max number of processors supported by platform
     // _SC_NPROCESSORS_ONLN   Number of processors online
-    aNumLogicalProcessors = (int )sysconf(_SC_NPROCESSORS_ONLN);
+    return (int )sysconf(_SC_NPROCESSORS_ONLN);
 #endif
-    return aNumLogicalProcessors;
 }
