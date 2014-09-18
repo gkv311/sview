@@ -1014,7 +1014,7 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
 
     createUpperToolbar();
 
-    mySeekBar = new StSeekBar(this, -aMargins.bottom() - scale(78));
+    mySeekBar = new StSeekBar(this, -aMargins.bottom() - scale(74));
     mySeekBar->signals.onSeekClick.connect(myPlugin, &StMoviePlayer::doSeek);
 
     createBottomToolbar();

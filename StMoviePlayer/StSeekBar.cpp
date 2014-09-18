@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -109,7 +109,7 @@ class StSeekBar::StProgramSB : public StGLProgram {
 StSeekBar::StSeekBar(StGLWidget* theParent,
                      const int   theTop)
 : StGLWidget(theParent, 0, theTop, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER),
-             theParent->getRoot()->scale(512), theParent->getRoot()->scale(12)),
+             theParent->getRoot()->scale(512), theParent->getRoot()->scale(12 + 8)),
   myProgram(new StProgramSB()),
   myProgress(0.0f),
   myProgressPx(0) {
@@ -151,6 +151,9 @@ void StSeekBar::stglUpdateVertices() {
 
     // black border quad
     StRectI_t aRectPx(getRectPxAbsolute());
+    aRectPx.top()    += getRoot()->scale(4); // make bar virtually bigger remaining the same visible size
+    aRectPx.bottom() -= getRoot()->scale(4); // to simplify clicking on touch-screens
+
     getRoot()->getRectGl(aRectPx, aVertices, 0);
 
     // inner empty quad
