@@ -90,7 +90,11 @@ StWindowImpl::StWindowImpl(const StHandle<StResourceManager>& theResMgr,
     attribs.IsGlStereo     = false;
     attribs.IsGlDebug      = false;
     attribs.GlDepthSize    = 16;
+#if defined(__ANDROID__)
+    attribs.IsFullScreen   = true;
+#else
     attribs.IsFullScreen   = false;
+#endif
     attribs.IsExclusiveFullScr = false;
     attribs.IsHidden       = false;
     attribs.ToHideCursor   = false;
@@ -275,7 +279,9 @@ void StWindowImpl::close() {
     if(attribs.IsFullScreen) {
         myFullScreenWinNb.decrement();
     }
+#if !defined(__ANDROID__)
     attribs.IsFullScreen = false; // just hack to return window position after closing
+#endif
 }
 
 double StWindowImpl::getEventTime() const {
@@ -713,6 +719,12 @@ void StWindowImpl::showCursor(bool toShow) {
     attribs.ToHideCursor = !toShow;
 }
 
+#if defined(__ANDROID__)
+void StWindowImpl::setPlacement(const StRectI_t& ,
+                                const bool       ) {
+    //
+}
+#else
 void StWindowImpl::setPlacement(const StRectI_t& theRect,
                                 const bool       theMoveToScreen) {
     if(theMoveToScreen) {
@@ -735,7 +747,7 @@ void StWindowImpl::setPlacement(const StRectI_t& theRect,
         myRectNorm = theRect;
     }
     myIsUpdated = true;
-#ifdef _WIN32
+#if defined(_WIN32)
     if(myMaster.hWindow != NULL
     && !attribs.IsFullScreen) {
         RECT aRect;
@@ -751,8 +763,6 @@ void StWindowImpl::setPlacement(const StRectI_t& theRect,
                      aRect.left, aRect.top, aRect.right - aRect.left, aRect.bottom - aRect.top,
                      SWP_NOACTIVATE);
     }
-#elif defined(__ANDROID__)
-    ///
 #elif defined(__linux__)
     if(!myMaster.stXDisplay.isNull() && !attribs.IsFullScreen && myMaster.hWindow != 0) {
         XMoveResizeWindow(myMaster.getDisplay(), myMaster.hWindow,
@@ -762,6 +772,7 @@ void StWindowImpl::setPlacement(const StRectI_t& theRect,
     }
 #endif
 }
+#endif // !__ANDROID__
 #endif // !__APPLE__
 
 void StWindowImpl::getTiledWinRect(StRectI_t& theRect) const {

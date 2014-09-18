@@ -133,6 +133,7 @@ void StWindowImpl::updateWindowPos() {
     myRectNorm.top()    = 0;
     myRectNorm.right()  = myRectNorm.left() + aWidth;
     myRectNorm.bottom() = myRectNorm.top()  + aHeight;
+    myRectFull = myRectNorm;
 
     myStEvent.Type       = stEvent_Size;
     myStEvent.Size.Time  = getEventTime();
@@ -215,6 +216,7 @@ bool StWindowImpl::onAndroidInitWindow() {
     myRectNorm.top()    = 0;
     myRectNorm.right()  = myRectNorm.left() + aWidth;
     myRectNorm.bottom() = myRectNorm.top()  + aHeight;
+    myRectFull = myRectNorm;
 
     myGlContext = new StGLContext(myResMgr);
     if(!myGlContext->stglInit()) {

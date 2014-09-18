@@ -143,12 +143,12 @@ void StMoviePlayerGUI::createBottomToolbar() {
     myBtnList->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doPlayListReverse);
     myBtnList->setTexturePath(stCTexture("moviePlaylist.png"));
 
-#if !defined(__ANDROID__)
-    myBtnFullScr = new StGLTextureButton(myPanelBottom, -aLeft, aTop,
-                                         StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
-    myBtnFullScr->signals.onBtnClick.connect(myPlugin->params.isFullscreen.operator->(), &StBoolParam::doReverse);
-    myBtnFullScr->setTexturePath(stCTexture("movieFullScr.png"));
-#endif
+    if(myWindow->hasFullscreenMode()) {
+        myBtnFullScr = new StGLTextureButton(myPanelBottom, -aLeft, aTop,
+                                             StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+        myBtnFullScr->signals.onBtnClick.connect(myPlugin->params.isFullscreen.operator->(), &StBoolParam::doReverse);
+        myBtnFullScr->setTexturePath(stCTexture("movieFullScr.png"));
+    }
 }
 
 /**
@@ -389,9 +389,9 @@ StGLMenu* StMoviePlayerGUI::createViewMenu() {
     StGLMenu* aMenuImgAdjust = createImageAdjustMenu();
 
     aMenuView->addItem(tr(MENU_VIEW_DISPLAY_MODE),  aMenuDispMode);
-#if !defined(__ANDROID__)
-    aMenuView->addItem(tr(MENU_VIEW_FULLSCREEN),    myPlugin->params.isFullscreen);
-#endif
+    if(myWindow->hasFullscreenMode()) {
+        aMenuView->addItem(tr(MENU_VIEW_FULLSCREEN),    myPlugin->params.isFullscreen);
+    }
     aMenuView->addItem(tr(MENU_VIEW_RESET))
              ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doReset);
     aMenuView->addItem(tr(MENU_VIEW_SWAP_LR),       myImage->params.swapLR);

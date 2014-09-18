@@ -232,6 +232,12 @@ class StWindow {
     ST_CPPEXPORT bool isMovable() const;
 
     /**
+     * Return false if window can be switched into fullscreen mode.
+     * Fullscreen mode can be unavailable (e.g. no windowed mode) on mobile platforms.
+     */
+    ST_CPPEXPORT bool hasFullscreenMode() const;
+
+    /**
      * Change GUI GL window placement
      * @param theRect new window position
      */

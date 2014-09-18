@@ -177,6 +177,14 @@ bool StWindow::isMovable() const {
     return myWin->myParentWin == NULL;
 }
 
+bool StWindow::hasFullscreenMode() const {
+#if defined(__ANDROID__)
+    return false;
+#else
+    return true;
+#endif
+}
+
 void StWindow::setPlacement(const StRectI_t& theRect,
                             const bool       theMoveToScreen) {
     myWin->setPlacement(theRect, theMoveToScreen);
