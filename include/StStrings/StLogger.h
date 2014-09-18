@@ -12,6 +12,8 @@
 #include "StString.h"
 #include <StTemplates/StHandle.h>
 
+#include <typeinfo>
+
 // forward declarations
 class StMutexSlim;
 
@@ -179,14 +181,17 @@ inline bool stQuestionConsole(const StString& theMsg) { return StMessageBox::Que
  * Debugging info output.
  */
 #define ST_ERROR_LOG(msg);        StLogger::GetDefault().write(StString() + msg, StLogger::ST_ERROR);
+
 #ifndef __ST_DEBUG__
     #define ST_DEBUG_VAR(theVariable)
     #define ST_DEBUG_LOG(msg);
+    #define ST_DEBUG_LOG_CLASS(theMsg)
     #define ST_DEBUG_LOG_AT(msg);
     #define ST_ERROR_LOG_AT(msg); StLogger::GetDefault().write(StString() + msg, StLogger::ST_ERROR);
 #else
-    #define ST_DEBUG_VAR(theVariable) theVariable
-    #define ST_DEBUG_LOG(msg);    StLogger::GetDefault().write(StString() + msg, StLogger::ST_DEBUG);
+    #define ST_DEBUG_VAR(theVariable)  theVariable
+    #define ST_DEBUG_LOG(msg);         StLogger::GetDefault().write(StString() + msg, StLogger::ST_DEBUG);
+    #define ST_DEBUG_LOG_CLASS(theMsg) StLogger::GetDefault().write(StString() + "[" + typeid(*this).name() + "]" + theMsg, StLogger::ST_DEBUG);
     #define STRINGIFY(x) #x
     #define TOSTRING(x) STRINGIFY(x)
     #define __AT __FILE__ ":" TOSTRING(__LINE__)
