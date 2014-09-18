@@ -110,8 +110,8 @@ inline StHandle<StImage> scaledImage(StHandle<StImageFile>& theRef,
                                      const size_t           theMaxSize) {
     if(theRef->isNull()) {
         return theRef;
-    } else if(theRef->getSizeX() > theMaxSize
-           && theRef->getSizeY() > theMaxSize) {
+    } else if(theRef->getSizeX() <= theMaxSize
+           && theRef->getSizeY() <= theMaxSize) {
         return theRef;
     }
 

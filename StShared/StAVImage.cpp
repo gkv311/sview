@@ -127,8 +127,8 @@ static void fillPointersAV(const StImage& theImage,
  */
 static bool convert(const StImage& theImageFrom, PixelFormat theFormatFrom,
                           StImage& theImageTo,   PixelFormat theFormatTo) {
-    ST_DEBUG_LOG("StAVImage, convert from " + stAV::PIX_FMT::getString(theFormatFrom)
-               + " to " + stAV::PIX_FMT::getString(theFormatTo) + " using swscale");
+    ST_DEBUG_LOG("StAVImage, convert from " + stAV::PIX_FMT::getString(theFormatFrom) + " " + theImageFrom.getSizeX() + "x" + theImageFrom.getSizeY()
+               + " to " + stAV::PIX_FMT::getString(theFormatTo) + " " + theImageTo.getSizeX() + "x" + theImageTo.getSizeY());
     SwsContext* aCtxToRgb = sws_getContext((int )theImageFrom.getSizeX(), (int )theImageFrom.getSizeY(), theFormatFrom, // source
                                            (int )theImageTo.getSizeX(),   (int )theImageTo.getSizeY(),   theFormatTo,   // destination
                                            SWS_BICUBIC, NULL, NULL, NULL);
@@ -162,6 +162,7 @@ bool StAVImage::resize(const StImage& theImageFrom,
         return false;
     }
 
+    StAVImage::init();
     const PixelFormat aFormatFrom = (PixelFormat )StAVImage::getAVPixelFormat(theImageFrom);
     const PixelFormat aFormatTo   = (PixelFormat )StAVImage::getAVPixelFormat(theImageTo);
     return aFormatFrom != stAV::PIX_FMT::NONE
