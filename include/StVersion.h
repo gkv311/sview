@@ -1,6 +1,6 @@
 /**
  * This is a header for version structure in 'Ubuntu-style' (Year.Month).
- * Copyright © 2008-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2008-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -19,7 +19,7 @@
 #if defined(ST_HAVE_STCONFIG) || defined(RC_INVOKED)
     #include <stconfig.conf>
 #else
-    #ifndef SVIEW_SDK_VER_STATUS
+    #if !defined(SVIEW_SDK_VER_STATUS) && !defined(__ST_DEBUG__)
         #define SVIEW_SDK_VER_STATUS ST_RELEASE
     #endif
     #ifndef SVIEW_SDK_VERSION_AUTO
