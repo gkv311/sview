@@ -196,6 +196,7 @@ class StOutInterlace : public StWindow {
 
     StFPSControl              myFPSControl;
     bool                      myIsMonReversed;            //!< indicates (known) monitor model with reversed rows order
+    bool                      myIsMonPortrait;            //!< monitor is in portrait mode or not
     bool                      myIsStereo;
     bool                      myIsEDactive;
     bool                      myIsEDCodeFinished;

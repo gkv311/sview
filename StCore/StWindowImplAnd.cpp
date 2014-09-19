@@ -267,6 +267,13 @@ void StWindowImpl::onAndroidCommand(int32_t theCommand) {
         case StAndroidGlue::CommandId_ConfigChanged: {
             // do not handle resize event here - screen might be not yet resized
             updateMonitors();
+
+            myStEvent.Type  = stEvent_NewMonitor;
+            myStEvent.Size.Time  = getEventTime();
+            myStEvent.Size.SizeX = myRectNorm.width();
+            myStEvent.Size.SizeY = myRectNorm.height();
+            //myWinOnMonitorId = 0;
+            signals.onAnotherMonitor->emit(myStEvent.Size);
             return;
         }
     }

@@ -203,6 +203,7 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
   myEDOff(new StGLProgram("ED Interlace Off")),
   myVpSizeY(10),
   myIsMonReversed(false),
+  myIsMonPortrait(false),
   myIsStereo(false),
   myIsEDactive(false),
   myIsEDCodeFinished(false),
@@ -590,6 +591,9 @@ void StOutInterlace::doNewMonitor(const StSizeEvent& ) {
     const StRectI_t  aRect = StWindow::getPlacement();
     const StMonitor& aMon  = aMonitors[aRect.center()];
     myIsMonReversed = false;
+    // note that this enumeration is not enough to handle rotation direction,
+    // which is required to automatically swap lines/columns order)
+    myIsMonPortrait = aMon.getOrientation() == StMonitor::Orientation_Portrait;
     isInterlacedMonitor(aMon, myIsMonReversed);
 }
 
@@ -688,8 +692,7 @@ void StOutInterlace::stglDraw() {
         }
 
         if(myDevice == DEVICE_HINTERLACE_ED) {
-            // EDimensional disactivation
-            // TODO (Kirill Gavrilov#4#) implement logic to sync multiple sView instances
+            // EDimensional deactivation
             if(myIsEDCodeFinished) {
                 if(myIsStereo) {
                     if(myIsEDactive) {
@@ -727,9 +730,23 @@ void StOutInterlace::stglDraw() {
         return;
     }
 
+    int aDevice = myDevice;
+
+    // handle portrait orientation
+    if(myIsMonPortrait) {
+        switch(myDevice) {
+            case DEVICE_HINTERLACE:
+                aDevice = DEVICE_VINTERLACE;
+                break;
+            case DEVICE_VINTERLACE:
+                aDevice = DEVICE_HINTERLACE;
+                break;
+        }
+    }
+
     // odd vertically?
     if(!StWindow::isFullScreen() && (aBackStore.y() + aBackStore.height()) % 2 == 1) {
-        switch(myDevice) {
+        switch(aDevice) {
             case DEVICE_CHESSBOARD:
             case DEVICE_HINTERLACE:
             case DEVICE_HINTERLACE_ED:
@@ -739,7 +756,7 @@ void StOutInterlace::stglDraw() {
 
     // odd horizontally?
     if(!StWindow::isFullScreen() && aBackStore.x() % 2 == 1) {
-        switch(myDevice) {
+        switch(aDevice) {
             case DEVICE_CHESSBOARD:
             case DEVICE_VINTERLACE:
                 isPixelReverse = !isPixelReverse; break;
@@ -777,7 +794,7 @@ void StOutInterlace::stglDraw() {
 
     myContext->stglResizeViewport(aVPort);
     myFrmBuffer->bindTexture(*myContext);
-    const StHandle<StProgramFB>& aProgram = isPixelReverse ? myGlProgramsRev[myDevice] : myGlPrograms[myDevice];
+    const StHandle<StProgramFB>& aProgram = isPixelReverse ? myGlProgramsRev[aDevice] : myGlPrograms[aDevice];
     aProgram->use(*myContext);
     myQuadVertBuf.bindVertexAttrib(*myContext, ST_VATTRIB_VERTEX);
     myQuadTexCoordBuf.bindVertexAttrib(*myContext, ST_VATTRIB_TCOORD);
