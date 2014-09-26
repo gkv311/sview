@@ -78,7 +78,7 @@ StTranslations::StTranslations(const StHandle<StResourceManager>& theResMgr,
 
     size_t     anIdInList = 0;
     StString   aLangParam("English");
-    StSettings aGlobalSettings(ST_GLOBAL_SETTINGS_GROUP);
+    StSettings aGlobalSettings(myResMgr, ST_GLOBAL_SETTINGS_GROUP);
     bool isLangSet = false;
     if(!aGlobalSettings.loadString(ST_SETTING_LANGUAGE, aLangParam)) {
         // try to use system-wide language settings
@@ -146,7 +146,7 @@ void StTranslations::setLanguage(const int32_t theNewLang) {
         return;
     }
     const StString& aFolderName = myLangFolderList[theNewLang];
-    StSettings aGlobalSettings(ST_GLOBAL_SETTINGS_GROUP);
+    StSettings aGlobalSettings(myResMgr, ST_GLOBAL_SETTINGS_GROUP);
     aGlobalSettings.saveString(ST_SETTING_LANGUAGE, aFolderName);
 
     // reload translation file

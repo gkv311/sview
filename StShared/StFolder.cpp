@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -12,6 +12,7 @@
 #ifdef _WIN32
     #include <windows.h>
 #else
+    #include <sys/stat.h>
     #include <sys/types.h>
     #include <dirent.h>
 #endif
@@ -19,7 +20,7 @@
 namespace {
     static const StString IGNORE_DIR_CURR_NAME('.');
     static const StString IGNORE_DIR_UP_NAME("..");
-};
+}
 
 StFolder::StFolder()
 : StFileNode(stCString(""), NULL, NODE_TYPE_FOLDER) {
@@ -59,6 +60,20 @@ bool StFolder::isFolder(const StCString& thePath) {
     }
     closedir(aDir);
     return true;
+#endif
+}
+
+bool StFolder::createFolder(const StCString& thePath) {
+    if(thePath.isEmpty()) {
+        return false;
+    }
+
+#ifdef _WIN32
+    StStringUtfWide aPath;
+    aPath.fromUnicode(thePath);
+    return ::CreateDirectoryW(aPath.toCString(), NULL) != FALSE;
+#else
+    return ::mkdir(thePath.toCString(), 0755) == 0;
 #endif
 }
 

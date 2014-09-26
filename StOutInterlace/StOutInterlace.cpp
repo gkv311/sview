@@ -195,7 +195,7 @@ void StOutInterlace::getOptions(StParamsList& theList) const {
 StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
                                const StNativeWin_t                theParentWindow)
 : StWindow(theResMgr, theParentWindow),
-  mySettings(new StSettings(ST_OUT_PLUGIN_NAME)),
+  mySettings(new StSettings(theResMgr, ST_OUT_PLUGIN_NAME)),
   myFrmBuffer(new StGLFrameBuffer()),
   myDevice(DEVICE_AUTO),
   myEDTimer(true),

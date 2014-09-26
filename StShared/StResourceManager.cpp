@@ -76,9 +76,40 @@ class StAssetResource : public StResource {
 
 #endif
 
-StResourceManager::StResourceManager()
-: myRoot(StProcess::getStShareFolder()),
+StResourceManager::StResourceManager(const StString& theAppName)
+: myAppName(theAppName),
+  myUserHomeFolder(StProcess::getEnv(StString("HOME")) + SYS_FS_SPLITTER),
+  myResFolder(StProcess::getStShareFolder()),
   myLang("en") {
+
+#if defined(_WIN32)
+    //
+#elif defined(__APPLE__)
+    // OS X
+    myUserDataFolder = myUserHomeFolder + "Library/Application Support/" + myAppName + "/";
+    mySettingsFolder = myUserHomeFolder + "Library/Preferences/"         + myAppName + "/";
+    myCacheFolder    = myUserHomeFolder + "Library/Caches/"              + myAppName + "/";
+    // make sure parent paths are also exist (on broken home)
+    StFolder::createFolder(myUserHomeFolder + "Library");
+    StFolder::createFolder(myUserHomeFolder + "Library/Application Support");
+    StFolder::createFolder(myUserHomeFolder + "Library/Preferences");
+    StFolder::createFolder(myUserHomeFolder + "Library/Caches");
+#else
+    // Linux world
+    myUserDataFolder = myUserHomeFolder + ".local/share/" + myAppName + "/";
+    mySettingsFolder = myUserHomeFolder + ".config/"      + myAppName + "/";
+    myCacheFolder    = myUserHomeFolder + ".cache/"       + myAppName + "/";
+    // make sure parent paths are also exist (on broken home)
+    StFolder::createFolder(myUserHomeFolder + ".local");
+    StFolder::createFolder(myUserHomeFolder + ".local/share");
+    StFolder::createFolder(myUserHomeFolder + ".config");
+    StFolder::createFolder(myUserHomeFolder + ".cache");
+#endif
+
+    StFolder::createFolder(myUserDataFolder);
+    StFolder::createFolder(mySettingsFolder);
+    StFolder::createFolder(myCacheFolder);
+
 #if !defined(__ANDROID__)
     const char* aLocaleStr = ::setlocale(LC_CTYPE, NULL);
     StString    aSysLoc(aLocaleStr != NULL ? aLocaleStr : "");
@@ -99,10 +130,26 @@ StResourceManager::StResourceManager()
 }
 
 #if defined(__ANDROID__)
-StResourceManager::StResourceManager(AAssetManager* theAssetMgr)
-: myRoot(StProcess::getStShareFolder()),
+StResourceManager::StResourceManager(AAssetManager*  theAssetMgr,
+                                     const StString& theAppName)
+: myAppName(theAppName),
+  myResFolder(StProcess::getStShareFolder()),
   myLang("en"),
   myAssetMgr(theAssetMgr) {
+    const StString aRootInt = "/data/data/";
+    const StString aRootExt = "/sdcard/Android/data/";
+    const StString aRoot    = StFolder::isFolder(aRootExt) ? aRootExt : aRootInt;
+
+    myUserDataFolder = aRoot + theAppName + "/databases/";
+    mySettingsFolder = aRoot + theAppName + "/shared_prefs/";
+    myCacheFolder    = aRoot + theAppName + "/cache/";
+
+    // create folders when needed
+    StFolder::createFolder(aRoot + theAppName);
+    StFolder::createFolder(myUserDataFolder);
+    StFolder::createFolder(mySettingsFolder);
+    StFolder::createFolder(myCacheFolder);
+
     if(myAssetMgr == NULL) {
         return;
     }
@@ -124,7 +171,7 @@ StResourceManager::~StResourceManager() {
 }
 
 bool StResourceManager::isResourceExist(const StString& theName) const {
-    const StString aPath = myRoot + theName;
+    const StString aPath = myResFolder + theName;
     if(StFileNode::isFileExists(aPath)) {
         return true;
     }
@@ -141,7 +188,7 @@ bool StResourceManager::isResourceExist(const StString& theName) const {
 }
 
 StHandle<StResource> StResourceManager::getResource(const StString& theName) const {
-    const StString aPath = myRoot + theName;
+    const StString aPath = myResFolder + theName;
     if(StFileNode::isFileExists(aPath)) {
         return new StFileResource(theName, aPath);
     }
@@ -158,7 +205,7 @@ StHandle<StResource> StResourceManager::getResource(const StString& theName) con
 
 void StResourceManager::listSubFolders(const StString&        theFolder,
                                        StArrayList<StString>& theSubFolders) const {
-    const StString aPath = myRoot + theFolder;
+    const StString aPath = myResFolder + theFolder;
     StFolder aFileDir(aPath);
     StArrayList<StString> anExtensions(1);
     aFileDir.init(anExtensions, 1, true);

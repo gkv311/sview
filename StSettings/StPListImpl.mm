@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov
+ * Copyright © 2011-2014 Kirill Gavrilov
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -45,17 +45,10 @@ bool StSettings::save() {
     return true;
 }
 
-StSettings::StSettings(const StString& theSettingsSet)
-: myFilePath(),
-  myDict(NULL){
-    StString aRoot = StProcess::getEnv(StString("HOME")) + "/Library/Preferences";
-    StString aSViewConfigs = aRoot + "/sview";
-    myFilePath = aSViewConfigs + '/' + theSettingsSet + ".plist";
-
-    // make sure directory exists...
-    mkdir(aRoot.toCString(), 0700);
-    mkdir(aSViewConfigs.toCString(), 0700);
-
+StSettings::StSettings(const StHandle<StResourceManager>& theResMgr,
+                       const StString&                    theSettingsSet)
+: myDict(NULL){
+    myFilePath = theResMgr->getSettingsFolder() + theSettingsSet + ".plist";
     load();
 }
 

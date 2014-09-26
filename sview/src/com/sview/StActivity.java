@@ -87,6 +87,7 @@ public class StActivity extends NativeActivity {
 
         wasNativesLoadCalled = true;
         if(!loadLibVerbose("gnustl_shared",   theInfo)
+        //|| !loadLibVerbose("config++",        theInfo)
         || !loadLibVerbose("freetype",        theInfo)
         || !loadLibVerbose("avutil-54",       theInfo)
         || !loadLibVerbose("swresample-1",    theInfo)

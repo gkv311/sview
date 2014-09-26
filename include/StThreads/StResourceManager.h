@@ -91,19 +91,41 @@ class StResourceManager {
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StResourceManager();
+    ST_CPPEXPORT StResourceManager(const StString& theAppName = "sview");
 
 #if defined(__ANDROID__)
     /**
      * Main constructor.
      */
-    ST_CPPEXPORT StResourceManager(AAssetManager* theAssetMgr);
+    ST_CPPEXPORT StResourceManager(AAssetManager*  theAssetMgr,
+                                   const StString& theAppName = "com.sview");
 #endif
 
     /**
      * Destructor.
      */
     ST_CPPEXPORT virtual ~StResourceManager();
+
+    /**
+     * Folder containing user-specific application data.
+     */
+    ST_LOCAL const StString& getUserDataFolder() const {
+        return myUserDataFolder;
+    }
+
+    /**
+     * Folder containing user-specific application settings.
+     */
+    ST_LOCAL const StString& getSettingsFolder() const {
+        return mySettingsFolder;
+    }
+
+    /**
+     * Folder containing application cache.
+     */
+    ST_LOCAL const StString& getCacheFolder() const {
+        return myCacheFolder;
+    }
 
     /**
      * 2-letters system language code.
@@ -130,10 +152,15 @@ class StResourceManager {
 
         protected:
 
-    StString       myRoot;     //!< root path for resources, location is system-dependent
-    StString       myLang;     //!< system language code
+    StString       myAppName;        //!< application name - "sview" by default
+    StString       myUserHomeFolder; //!< user home folder
+    StString       myUserDataFolder; //!< folder for saving user-specific application data
+    StString       mySettingsFolder; //!< folder for saving user-specific application settings
+    StString       myCacheFolder;    //!< folder for saving application cache
+    StString       myResFolder;      //!< folder for immutable resources
+    StString       myLang;           //!< system language code
 #if defined(__ANDROID__)
-    AAssetManager* myAssetMgr; //!< assets manger to retrieve resources from apk archive
+    AAssetManager* myAssetMgr;       //!< assets manger to retrieve resources from apk archive
 #endif
 
 };

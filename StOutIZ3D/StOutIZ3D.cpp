@@ -116,7 +116,7 @@ void StOutIZ3D::getOptions(StParamsList& theList) const {
 StOutIZ3D::StOutIZ3D(const StHandle<StResourceManager>& theResMgr,
                      const StNativeWin_t                theParentWindow)
 : StWindow(theResMgr, theParentWindow),
-  mySettings(new StSettings(ST_OUT_PLUGIN_NAME)),
+  mySettings(new StSettings(theResMgr, ST_OUT_PLUGIN_NAME)),
   myFrBuffer(new StGLStereoFrameBuffer()),
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false) {

@@ -167,7 +167,6 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
                              const StNativeWin_t                theParentWin,
                              const StHandle<StOpenInfo>&        theOpenInfo)
 : StApplication(theResMgr, theParentWin, theOpenInfo),
-  mySettings(new StSettings(ST_DRAWER_PLUGIN_NAME)),
   myPlayList(new StPlayList(4, true)),
   myEventDialog(false),
   myEventLoaded(false),
@@ -182,7 +181,8 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
   myToUpdateALList(false),
   myIsBenchmark(false),
   myToCheckUpdates(true) {
-    myLangMap = new StTranslations(myResMgr, StMoviePlayer::ST_DRAWER_PLUGIN_NAME);
+    mySettings = new StSettings(myResMgr, ST_DRAWER_PLUGIN_NAME);
+    myLangMap  = new StTranslations(myResMgr, StMoviePlayer::ST_DRAWER_PLUGIN_NAME);
     StMoviePlayerStrings::loadDefaults(*myLangMap);
     myTitle = "sView - Movie Player";
 

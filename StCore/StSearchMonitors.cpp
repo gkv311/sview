@@ -591,7 +591,9 @@ namespace {
 void StSearchMonitors::initGlobal() {
     clear();
     initFromSystem();
+#if !defined(__ANDROID__)
     initFromConfig();
+#endif
 }
 
 #if defined(__ANDROID__)
@@ -636,7 +638,7 @@ void StSearchMonitors::initFromConfig() {
     const StString ST_GLOBAL_SETTINGS_GROUP("sview");
     const StString ST_GLOBAL_SETTINGS_MONITORS("monitors");
 
-    StSettings aGlobalSettings(ST_GLOBAL_SETTINGS_GROUP);
+    StSettings aGlobalSettings(new StResourceManager(), ST_GLOBAL_SETTINGS_GROUP);
     StMonitor aMonDummy;
     for(size_t aParamIter = 0; aParamIter < 256; ++aParamIter) {
         const StString aPrefix     = ST_GLOBAL_SETTINGS_MONITORS + stCString(".") + aParamIter;

@@ -77,7 +77,6 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
                              const StNativeWin_t                theParentWin,
                              const StHandle<StOpenInfo>&        theOpenInfo)
 : StApplication(theResMgr, theParentWin, theOpenInfo),
-  mySettings(new StSettings(ST_DRAWER_PLUGIN_NAME)),
   myEventDialog(false),
   myEventLoaded(false),
   //
@@ -89,7 +88,8 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
   myToRecreateMenu(false),
   myToSaveSrcFormat(false),
   myEscNoQuit(false) {
-    myLangMap = new StTranslations(myResMgr, StImageViewer::ST_DRAWER_PLUGIN_NAME);
+    mySettings = new StSettings(myResMgr, ST_DRAWER_PLUGIN_NAME);
+    myLangMap  = new StTranslations(myResMgr, StImageViewer::ST_DRAWER_PLUGIN_NAME);
     StImageViewerStrings::loadDefaults(*myLangMap);
 
     myTitle = "sView - Image Viewer";

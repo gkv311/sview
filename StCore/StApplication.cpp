@@ -78,7 +78,7 @@ void StApplication::stApplicationInit(const StHandle<StOpenInfo>& theOpenInfo) {
 #ifdef __ST_DEBUG_GL__
     myGlDebug = true;
 #endif
-    StSettings aGlobalSettings("sview");
+    StSettings aGlobalSettings(myResMgr, "sview");
     params.ActiveDevice = new StEnumParam(0, "Change device");
     params.ActiveDevice->signals.onChanged.connect(this, &StApplication::doChangeDevice);
 
@@ -147,7 +147,7 @@ bool StApplication::open() {
         return true;
     }
 
-    StSettings aGlobalSettings("sview");
+    StSettings aGlobalSettings(myResMgr, "sview");
     if(!mySwitchTo.isNull()) {
         myRendId = mySwitchTo->getRendererId();
         myWindow = mySwitchTo;

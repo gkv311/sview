@@ -8,22 +8,23 @@
 
 #include <StSettings/StSettings.h>
 
-#if defined(__ANDROID__)
+/*#if defined(__ANDROID__)
 
 bool StSettings::load() { return true; }
 bool StSettings::save() { return false; }
 StSettings::StSettings(const StString& theSettingsSet) {}
 StSettings::~StSettings() {}
-bool StSettings::loadInt32 (const StString& /*theParamPath*/,
-                            int32_t&        /*theValue*/) { return false; }
-bool StSettings::saveInt32 (const StString& /*theParamPath*/,
-                            const int32_t&  /*theValue*/) { return false; }
-bool StSettings::loadString(const StString& /*theParamPath*/,
-                            StString&       /*theValue*/) { return false; }
-bool StSettings::saveString(const StString& /*theParamPath*/,
-                            const StString& /*theValue*/) { return false; }
+bool StSettings::loadInt32 (const StString& ,
+                            int32_t&        ) { return false; }
+bool StSettings::saveInt32 (const StString& ,
+                            const int32_t&  ) { return false; }
+bool StSettings::loadString(const StString& ,
+                            StString&       ) { return false; }
+bool StSettings::saveString(const StString& ,
+                            const StString& ) { return false; }
 
-#elif !defined(_WIN32) && !defined(__APPLE__)
+#elif !defined(_WIN32) && !defined(__APPLE__)*/
+#if !defined(_WIN32) && !defined(__APPLE__)
 
 #include <StStrings/StLogger.h>
 #include <StThreads/StProcess.h>
@@ -58,20 +59,11 @@ bool StSettings::save() {
     return true;
 }
 
-StSettings::StSettings(const StString& theSettingsSet)
-: myFullFileName(),
-  myConfig(new Config()),
+StSettings::StSettings(const StHandle<StResourceManager>& theResMgr,
+                       const StString&                    theSettingsSet)
+: myConfig(new Config()),
   myIsLoaded(false) {
-    //
-#if(defined(__linux__) || defined(__linux))
-    StString aConfigRootPath  = StProcess::getEnv(StString("HOME")) + "/.config";
-    StString aConfigSViewPath = aConfigRootPath + "/sview";
-    myFullFileName = aConfigSViewPath + '/' + theSettingsSet + ".cfg";
-
-    // make sure directory exists...
-    mkdir(aConfigRootPath.toCString(),  0755);
-    mkdir(aConfigSViewPath.toCString(), 0755);
-#endif
+    myFullFileName = theResMgr->getSettingsFolder() + theSettingsSet + ".cfg";
 }
 
 StSettings::~StSettings() {

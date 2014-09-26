@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov
+ * Copyright © 2007-2014 Kirill Gavrilov
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -12,6 +12,7 @@
 #include <StStrings/StString.h>
 #include <StTemplates/StRect.h>
 #include <StTemplates/StVec4.h>
+#include <StThreads/StResourceManager.h>
 #include <StSettings/StParam.h>
 #include <StSettings/StFloat32Param.h>
 
@@ -20,9 +21,7 @@
 #elif defined(__APPLE__)
     struct NSMutableDictionary;
 #else
-    namespace libconfig {
-        class Config;
-    };
+    namespace libconfig { class Config; }
 #endif
 
 class StAction;
@@ -33,7 +32,8 @@ class StAction;
  *      1) Take parameter name as first argument (const StString& param, ...);
  *      2) Take values as second+ argument (by address);
  *      3) Return true/false to indicate load/save state;
- *      4) NOT ever broke output values if load failes (values must be unchanged).
+ *      4) NOT ever broke output values if load fails (values must be unchanged).
+ *         This also means that uninitialized values will be kept uninitialized!
  */
 class StSettings {
 
@@ -41,15 +41,18 @@ class StSettings {
 
     /**
      * Main constructor.
+     * @param theResMgr     file resources manager
+     * @param theModuleName module name to distinguish settings with the same name for different components/applications
      */
-    ST_CPPEXPORT StSettings(const StString& theSettingsSet);
+    ST_CPPEXPORT StSettings(const StHandle<StResourceManager>& theResMgr,
+                            const StString&                    theModuleName);
 
     /**
      * Destructor.
      */
     ST_CPPEXPORT virtual ~StSettings();
 
-        public: //!< persistance implementation
+        public: //! @name persistence implementation
 
     /**
      * Load integer value.
@@ -75,7 +78,7 @@ class StSettings {
     ST_CPPEXPORT virtual bool saveString(const StString& theParam,
                                          const StString& theValue);
 
-        public: //!< standard methods for more types that reuse virtual methods
+        public: //! @name standard methods for more types that reuse virtual methods
 
     /**
      * Save boolean value. Will use int32_t storage.
@@ -237,4 +240,4 @@ class StSettings {
 
 };
 
-#endif //__StSettings_h_
+#endif // __StSettings_h_

@@ -203,13 +203,13 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
                          const StNativeWin_t                theParentWin,
                          const StHandle<StOpenInfo>&        theOpenInfo)
 : StApplication(theResMgr, theParentWin, theOpenInfo),
-  mySettings(new StSettings(ST_DRAWER_PLUGIN_NAME)),
   myIsLeftHold(false),
   myIsRightHold(false),
   myIsMiddleHold(false),
   myIsCtrlPressed(false),
   myIsCamIterative(false) {
-    //
+    mySettings = new StSettings(myResMgr, ST_DRAWER_PLUGIN_NAME);
+
     myTitle = "sView - CAD Viewer";
     //
     params.isFullscreen = new StBoolParam(false);
