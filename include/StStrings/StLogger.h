@@ -79,8 +79,8 @@ class StLogger {
 
     /**
      * Default constructor.
-     * @param theLogFile (const StString& ) - log file name (if empty string - no logging to file);
-     * @param theFilter (const StLogger::Level ) - log level;
+     * @param theLogFile log file name (if empty string - no logging to file)
+     * @param theFilter  log level
      */
     ST_CPPEXPORT StLogger(const StString&       theLogFile,
                           const StLogger::Level theFilter  = StLogger::ST_VERBOSE,
@@ -118,15 +118,17 @@ class StLogger {
 
         private:
 
-    StHandle<StMutexSlim> myMutex;      //!< mutex lock for thread-safety
+    StHandle<StMutexSlim> myMutex;         //!< mutex lock for thread-safety
 #ifdef _WIN32
-    StStringUtfWide       myFilePath;   //!< file to write into
+    StStringUtfWide       myFilePath;      //!< file to write into
 #else
-    StString              myFilePath;   //!< file to write into
+    StString              myFilePath;      //!< file to write into
 #endif
-    FILE*                 myFileHandle; //!< file object
-    StLogger::Level       myFilter;     //!< define messages filter
+    FILE*                 myFileHandle;    //!< file object
+    StLogger::Level       myFilter;        //!< define messages filter
     const bool            myToLogCout;
+    const bool            myToLogToSystem; //!< log into system journal, false by default
+    const bool            myToLogThreadId; //!< option to prepend thread id to each message, false by default
 
         private:
 

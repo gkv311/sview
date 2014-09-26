@@ -11,6 +11,7 @@
 #include <StStrings/stConsole.h>
 #include <StThreads/StMutexSlim.h>
 #include <StThreads/StProcess.h>
+#include <StThreads/StThread.h>
 
 #if defined(__ANDROID__)
     #include <android/log.h>
@@ -67,7 +68,9 @@ StLogger::StLogger(const StString&       theLogFile,
 #endif
   myFileHandle(NULL),
   myFilter(theFilter),
-  myToLogCout(theOptions & StLogger::ST_OPT_COUT) {
+  myToLogCout(theOptions & StLogger::ST_OPT_COUT),
+  myToLogToSystem(false),
+  myToLogThreadId(false) {
     //
 }
 
@@ -88,21 +91,6 @@ void StLogger::write(const StString&       theMessage,
         myMutex->lock();
     }
 
-#if defined(__ANDROID__)
-    android_LogPriority anAPrior = ANDROID_LOG_INFO;
-    switch(theLevel) {
-        case ST_PANIC:   anAPrior = ANDROID_LOG_FATAL; break;
-        case ST_FATAL:   anAPrior = ANDROID_LOG_FATAL; break;
-        case ST_ERROR:   anAPrior = ANDROID_LOG_ERROR; break;
-        case ST_WARNING: anAPrior = ANDROID_LOG_WARN;  break;
-        case ST_INFO:    anAPrior = ANDROID_LOG_INFO;  break;
-        case ST_VERBOSE: anAPrior = ANDROID_LOG_INFO;  break;
-        case ST_DEBUG:   anAPrior = ANDROID_LOG_DEBUG; break;
-        case ST_QUIET:   break;
-    }
-    __android_log_write(anAPrior, "StLogger", theMessage.toCString());
-#endif
-
     // log to the file
     if(!myFilePath.isEmpty()) {
     #ifdef _WIN32
@@ -112,35 +100,21 @@ void StLogger::write(const StString&       theMessage,
     #endif
         if(myFileHandle != NULL) {
             switch(theLevel) {
-                case ST_PANIC:
-                    fwrite("PANIC !! ", 1, 9, myFileHandle);
-                    fwrite(theMessage.toCString(), 1, theMessage.getSize(), myFileHandle);
-                    break;
-                case ST_FATAL:
-                    fwrite("FATAL !! ", 1, 9, myFileHandle);
-                    fwrite(theMessage.toCString(), 1, theMessage.getSize(), myFileHandle);
-                    break;
-                case ST_ERROR:
-                    fwrite("ERROR !! ", 1, 9, myFileHandle);
-                    fwrite(theMessage.toCString(), 1, theMessage.getSize(), myFileHandle);
-                    break;
-                case ST_WARNING:
-                    fwrite("WARN  -- ", 1, 9, myFileHandle);
-                    fwrite(theMessage.toCString(), 1, theMessage.getSize(), myFileHandle);
-                    break;
+                case ST_PANIC:   fwrite("PANIC !! ", 1, 9, myFileHandle); break;
+                case ST_FATAL:   fwrite("FATAL !! ", 1, 9, myFileHandle); break;
+                case ST_ERROR:   fwrite("ERROR !! ", 1, 9, myFileHandle); break;
+                case ST_WARNING: fwrite("WARN  -- ", 1, 9, myFileHandle); break;
                 case ST_INFO:
-                case ST_VERBOSE:
-                    fwrite("INFO  -- ", 1, 9, myFileHandle);
-                    fwrite(theMessage.toCString(), 1, theMessage.getSize(), myFileHandle);
-                    break;
-                case ST_DEBUG:
-                    fwrite("DEBUG -- ", 1, 9, myFileHandle);
-                    fwrite(theMessage.toCString(), 1, theMessage.getSize(), myFileHandle);
-                    break;
-                default:
-                    fwrite(theMessage.toCString(), 1, theMessage.getSize(), myFileHandle);
-                    break;
+                case ST_VERBOSE: fwrite("INFO  -- ", 1, 9, myFileHandle); break;
+                case ST_DEBUG:   fwrite("DEBUG -- ", 1, 9, myFileHandle); break;
+                case ST_QUIET: break;
             }
+            if(myToLogThreadId) {
+                const size_t   aThreadId  = StThread::getCurrentThreadId();
+                const StString aThreadStr = StString("[") + aThreadId + "]";
+                fwrite(aThreadStr.toCString(), 1, aThreadStr.getSize(), myFileHandle);
+            }
+            fwrite(theMessage.toCString(), 1, theMessage.getSize(), myFileHandle);
             fwrite("\n", 1, 1, myFileHandle);
             fclose(myFileHandle);
             myFileHandle = NULL;
@@ -176,8 +150,8 @@ void StLogger::write(const StString&       theMessage,
     }
 
     // log to the system journal(s)
-/*#ifdef _WIN32
-    // get a handle to the event log
+#if defined(_WIN32)
+/*  // get a handle to the event log
     HANDLE anEventLog = RegisterEventSource(NULL,      // local computer
                                             L"sView"); // event source name
     if(anEventLog != NULL) {
@@ -207,8 +181,24 @@ void StLogger::write(const StString&       theMessage,
                     (LPCWSTR* )&theMessage.utfText(), // pointer to strings
                     NULL))           // no binary data
         DeregisterEventSource(anEventLog);
+    }*/
+
+#elif defined(__ANDROID__)
+    if(myToLogToSystem) {
+        android_LogPriority anAPrior = ANDROID_LOG_INFO;
+        switch(theLevel) {
+            case ST_PANIC:   anAPrior = ANDROID_LOG_FATAL; break;
+            case ST_FATAL:   anAPrior = ANDROID_LOG_FATAL; break;
+            case ST_ERROR:   anAPrior = ANDROID_LOG_ERROR; break;
+            case ST_WARNING: anAPrior = ANDROID_LOG_WARN;  break;
+            case ST_INFO:    anAPrior = ANDROID_LOG_INFO;  break;
+            case ST_VERBOSE: anAPrior = ANDROID_LOG_INFO;  break;
+            case ST_DEBUG:   anAPrior = ANDROID_LOG_DEBUG; break;
+            case ST_QUIET:   break;
+        }
+        __android_log_write(anAPrior, "StLogger", theMessage.toCString());
     }
-#endif*/
+#endif
 
     // unlock mutex
     if(!myMutex.isNull()) {
@@ -219,7 +209,7 @@ void StLogger::write(const StString&       theMessage,
 #ifdef _WIN32
     #include <windows.h>
 #elif defined(__ANDROID__)
-    //#include <android/log.h>
+    //
 #elif defined(__linux__)
     #include <gtk/gtk.h>
     #include <X11/Xlib.h>
