@@ -7,7 +7,9 @@ echo "Usage: $0 [FFmpegPath] [GPL || LGPL] [DEBUG || RELEASE] [GCC_PREFIX]"
 rebuildTarget="FFmpeg"
 rebuildLicense="LGPL"
 rebuildDebug="false"
+rebuildAndroid="false"
 compilerPrefix=""
+androidNdkRoot="~/develop/android-ndk-r10"
 
 for i in $*
 do
@@ -15,6 +17,8 @@ do
     rebuildLicense="GPL"
   elif [ "$i" == "lgpl"    ] || [ "$i" == "LGPL" ]; then
     rebuildLicense="LGPL"
+  elif [ "$i" == "android" ]; then
+    rebuildAndroid="true"
   elif [ "$i" == "debug"   ] || [ "$i" == "DEBUG" ]; then
     rebuildDebug="true"
   elif [ "$i" == "release" ] || [ "$i" == "RELEASE" ]; then
@@ -33,6 +37,10 @@ GCC_MACHINE_MINGW_64="x86_64-w64-mingw32"
 GCC_MACHINE_MINGW_64_1="x86_64-pc-mingw32"
 #GCC_MACHINE_LINUX_32=mingw32
 GCC_MACHINE_LINUX_64="x86_64-linux-gnu"
+
+if [ "$rebuildAndroid" == "true" ]; then
+  compilerPrefix="${androidNdkRoot}/toolchains/arm-linux-androideabi-4.8/prebuilt/linux-x86_64/arm-linux-androideabi/bin/"
+fi
 
 if [ "$compilerPrefix" != "" ]; then
   gccVersion=$("$compilerPrefix"gcc -dumpversion)
@@ -82,16 +90,16 @@ then
 fi
 
 configArguments="\
-    --extra-version=sView.ru  \
-    --enable-swscale          \
-    --enable-shared           \
-    --disable-static          \
-    --enable-memalign-hack    \
-    --enable-avfilter         \
-    --enable-hardcoded-tables \
-    --enable-pthreads         \
-    --disable-libopenjpeg     \
-    --enable-runtime-cpudetect"
+ --extra-version=sView.ru \
+ --enable-swscale \
+ --enable-shared \
+ --disable-static \
+ --enable-memalign-hack \
+ --enable-avfilter \
+ --enable-hardcoded-tables \
+ --enable-pthreads \
+ --disable-libopenjpeg \
+ --enable-runtime-cpudetect"
 
 #if [ "$gccMachine" != "$GCC_MACHINE_LINUX_64" ]; then
 if [ "$gccMachine" == "$GCC_MACHINE_MINGW_32" ] || [ "$gccMachine" == "$GCC_MACHINE_MINGW_32_1" ] \
@@ -109,6 +117,10 @@ if [ "$gccMachine" == "$GCC_MACHINE_MINGW_32" ] || [ "$gccMachine" == "$GCC_MACH
 elif [ "$gccMachine" == "$GCC_MACHINE_MINGW_64" ] || [ "$gccMachine" == "$GCC_MACHINE_MINGW_64_1" ]; then
   targetFlags="--cross-prefix=$compilerPrefix --arch=x86_64 --extra-cflags=-Dstrtod=__strtod"
   configArguments="$configArguments --enable-cross-compile --target-os=mingw32 $targetFlags"
+elif [ "$rebuildAndroid" == "true" ]; then
+  targetFlags="--cross-prefix=$compilerPrefix --sysroot=${androidNdkRoot}/platforms/android-15/arch-arm --arch=arm"
+  configArguments="$configArguments --target-os=linux $targetFlags"
+  #configArguments="$configArguments --extra-cflags='-fno-builtin-sin -fno-builtin-sinf'"
 fi
 
 # More options
@@ -138,11 +150,17 @@ fi
 echo
 echo "  ./configure $configArguments"
 echo
-./configure $configArguments >$OUTPUT_FOLDER/config.log 2>&1
+if [ "$rebuildAndroid" == "true" ]; then
+  ./configure $configArguments --disable-symver --extra-cflags='-fno-builtin-sin -fno-builtin-sinf' >$OUTPUT_FOLDER/config.log 2>&1
+else
+  ./configure $configArguments >$OUTPUT_FOLDER/config.log 2>&1
+fi
+
+
 cat $OUTPUT_FOLDER/config.log
 echo
 
-make -j6 2>$OUTPUT_FOLDER/make.log
+make -j8 2>$OUTPUT_FOLDER/make.log
 cat $OUTPUT_FOLDER/make.log | grep -i -w 'ошибка'
 echo
 

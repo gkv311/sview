@@ -49,3 +49,6 @@ fi
 # build for Linux
 ./rebuild.sh "$rebuildTarget" GPL  RELEASE
 ./rebuild.sh "$rebuildTarget" LGPL RELEASE
+
+# build for Android
+#./rebuild.sh "$rebuildTarget" GPL RELEASE "android"
