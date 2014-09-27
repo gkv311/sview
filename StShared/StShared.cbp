@@ -33,6 +33,7 @@
 					<Add library="Advapi32" />
 					<Add library="Comdlg32" />
 					<Add library="Shell32" />
+					<Add library="Ole32.lib" />
 					<Add library="Version" />
 					<Add library="Wsock32" />
 				</Linker>
@@ -62,6 +63,7 @@
 					<Add library="Advapi32" />
 					<Add library="Comdlg32" />
 					<Add library="Shell32" />
+					<Add library="Ole32.lib" />
 					<Add library="Version" />
 					<Add library="Wsock32" />
 				</Linker>
@@ -94,6 +96,7 @@
 					<Add library="Advapi32" />
 					<Add library="Comdlg32" />
 					<Add library="Shell32" />
+					<Add library="Ole32.lib" />
 					<Add library="Version" />
 					<Add library="Wsock32" />
 				</Linker>
@@ -123,6 +126,7 @@
 					<Add library="Advapi32" />
 					<Add library="Comdlg32" />
 					<Add library="Shell32" />
+					<Add library="Ole32.lib" />
 					<Add library="Version" />
 					<Add library="Wsock32" />
 				</Linker>

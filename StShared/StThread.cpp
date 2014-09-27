@@ -85,8 +85,9 @@ namespace {
         typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE , PBOOL );
         BOOL bIsWow64 = FALSE;
         HMODULE aKern32Module = GetModuleHandleW(L"kernel32");
-        LPFN_ISWOW64PROCESS aFunIsWow64 = (aKern32Module == NULL) ? (LPFN_ISWOW64PROCESS )NULL
-                                        : (LPFN_ISWOW64PROCESS )GetProcAddress(GetModuleHandle(L"kernel32"), "IsWow64Process");
+        LPFN_ISWOW64PROCESS aFunIsWow64 = aKern32Module == NULL
+                                        ? (LPFN_ISWOW64PROCESS )NULL
+                                        : (LPFN_ISWOW64PROCESS )GetProcAddress(aKern32Module, "IsWow64Process");
         return aFunIsWow64 != NULL
             && aFunIsWow64(GetCurrentProcess(), &bIsWow64)
             && bIsWow64 != FALSE;

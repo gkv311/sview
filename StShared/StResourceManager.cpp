@@ -16,7 +16,9 @@
     #undef max
 #endif
 
-#if defined(__ANDROID__)
+#if defined(_WIN32)
+  #include <Shlobj.h>
+#elif defined(__ANDROID__)
 
 #include <android/asset_manager.h>
 #include <android/configuration.h>
@@ -83,7 +85,70 @@ StResourceManager::StResourceManager(const StString& theAppName)
   myLang("en") {
 
 #if defined(_WIN32)
-    //
+    typedef HRESULT (WINAPI *SHGetKnownFolderPath_t)(const GUID* , DWORD , HANDLE , PWSTR* );
+    HMODULE aShell32Module = GetModuleHandleW(L"Shell32"); // should be already loaded
+    SHGetKnownFolderPath_t aGetFolder = aShell32Module != NULL
+                                      ? (SHGetKnownFolderPath_t )GetProcAddress(aShell32Module, "SHGetKnownFolderPath")
+                                      : (SHGetKnownFolderPath_t )NULL;
+    StString anAppDataLocal, anAppDataLocalLow, anAppDataRoam;
+    if(aGetFolder != NULL) {
+        // Vista+
+        wchar_t* aPath = NULL;
+
+        const GUID THE_FOLDER_APPLOC = { 0xF1B32785, 0x6FBA, 0x4FCF, {0x9D, 0x55, 0x7B, 0x8E, 0x7F, 0x15, 0x70, 0x91} }; // FOLDERID_LocalAppData
+        const GUID THE_FOLDER_APPLOW = { 0xA520A1A4, 0x1780, 0x4FF6, {0xBD, 0x18, 0x16, 0x73, 0x43, 0xC5, 0xAF, 0x16} }; // FOLDERID_LocalAppDataLow
+        const GUID THE_FOLDER_APPROA = { 0x3EB685DB, 0x65F9, 0x4CF6, {0xA0, 0x3A, 0xE3, 0xEF, 0x65, 0x72, 0x9F, 0x3D} }; // FOLDERID_RoamingAppData
+        const GUID THE_FOLDER_DOCS   = { 0xFDD39AD0, 0x238F, 0x46AF, {0xAD, 0xB4, 0x6C, 0x85, 0x48, 0x03, 0x69, 0xC7} }; // FOLDERID_Documents
+
+        if(aGetFolder(&THE_FOLDER_APPLOC, 0, NULL, &aPath) == S_OK) {
+            anAppDataLocal.fromUnicode(aPath);
+            ::CoTaskMemFree(aPath);
+        }
+        if(aGetFolder(&THE_FOLDER_APPLOW, 0, NULL, &aPath) == S_OK) {
+            anAppDataLocalLow.fromUnicode(aPath);
+            ::CoTaskMemFree(aPath);
+        }
+        if(aGetFolder(&THE_FOLDER_APPROA, 0, NULL, &aPath) == S_OK) {
+            anAppDataRoam.fromUnicode(aPath);
+            ::CoTaskMemFree(aPath);
+        }
+        if(aGetFolder(&THE_FOLDER_DOCS, 0, NULL, &aPath) == S_OK) {
+            myUserHomeFolder.fromUnicode(aPath);
+            myUserHomeFolder += "\\";
+            ::CoTaskMemFree(aPath);
+        }
+    } else {
+        wchar_t aPath[MAX_PATH];
+        if(::SHGetFolderPathW(NULL, CSIDL_FLAG_CREATE | CSIDL_LOCAL_APPDATA, NULL, 0, aPath) == S_OK) {
+            anAppDataLocal.fromUnicode(aPath);
+        }
+        if(::SHGetFolderPathW(NULL, CSIDL_FLAG_CREATE | CSIDL_APPDATA, NULL, 0, aPath) == S_OK) {
+            anAppDataRoam.fromUnicode(aPath);
+        }
+        if(::SHGetFolderPathW(NULL, CSIDL_FLAG_CREATE | CSIDL_PERSONAL, NULL, 0, aPath) == S_OK) {
+            myUserHomeFolder.fromUnicode(aPath);
+            myUserHomeFolder += "\\";
+        }
+    }
+
+    StString anAppData;
+    if(!anAppDataLocal.isEmpty()) {
+        anAppData = anAppDataLocal + "/"  + myAppName + "/";
+        if(!StFolder::createFolder(anAppData)) {
+            anAppData.clear();
+        }
+    }
+    if(anAppData.isEmpty() && !anAppDataLocalLow.isEmpty()) {
+        anAppData = anAppDataLocalLow + "/"  + myAppName + "/";
+        if(!StFolder::createFolder(anAppData)) {
+            //anAppData.clear();
+        }
+    }
+    if(!anAppData.isEmpty()) {
+        myUserDataFolder = anAppData + "share/";
+        mySettingsFolder = anAppData + "config/";
+        myCacheFolder    = anAppData + "cache/";
+    }
 #elif defined(__APPLE__)
     // OS X
     myUserDataFolder = myUserHomeFolder + "Library/Application Support/" + myAppName + "/";
