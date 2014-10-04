@@ -65,7 +65,6 @@ USR_LIB = lib
 
 aStShared       := libStShared.so
 aStGLWidgets    := libStGLWidgets.so
-aStSettings     := libStSettings.so
 aStCore         := libStCore.so
 aStOutAnaglyph  := libStOutAnaglyph.so
 aStOutDual      := libStOutDual.so
@@ -80,9 +79,9 @@ aStCADViewer    := libStCADViewer.so
 sView           := sView
 sViewAndroid    := libsview.so
 
-android:   pre_all $(aStShared) $(aStGLWidgets) $(aStSettings) $(aStCore) $(aStOutAnaglyph) $(aStOutInterlace) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(sViewAndroid) install_android
-all:       pre_all $(aStShared) $(aStGLWidgets) $(aStSettings) $(aStCore) $(aStOutAnaglyph) $(aStOutDual) $(aStOutInterlace) $(aStOutPageFlip) $(aStOutIZ3D) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(aStDiagnostics) $(aStCADViewer) $(sView)
-clean:     clean_StShared clean_StGLWidgets clean_StSettings clean_StCore clean_sView clean_StOutAnaglyph clean_StOutDual clean_StOutInterlace clean_StOutPageFlip clean_StOutIZ3D clean_StOutDistorted clean_StImageViewer clean_StMoviePlayer clean_StDiagnostics clean_StCADViewer clean_sViewAndroid
+android:   pre_all $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) $(aStOutInterlace) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(sViewAndroid) install_android
+all:       pre_all $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) $(aStOutDual) $(aStOutInterlace) $(aStOutPageFlip) $(aStOutIZ3D) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(aStDiagnostics) $(aStCADViewer) $(sView)
+clean:     clean_StShared clean_StGLWidgets clean_StCore clean_sView clean_StOutAnaglyph clean_StOutDual clean_StOutInterlace clean_StOutPageFlip clean_StOutIZ3D clean_StOutDistorted clean_StImageViewer clean_StMoviePlayer clean_StDiagnostics clean_StCADViewer clean_sViewAndroid
 distclean: clean
 
 install:
@@ -118,7 +117,6 @@ install_android:
 	mkdir -p sview/assets/textures
 	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStShared)       sview/libs/armeabi-v7a/$(aStShared)
 	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStGLWidgets)    sview/libs/armeabi-v7a/$(aStGLWidgets)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStSettings)     sview/libs/armeabi-v7a/$(aStSettings)
 	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStCore)         sview/libs/armeabi-v7a/$(aStCore)
 	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutAnaglyph)  sview/libs/armeabi-v7a/$(aStOutAnaglyph)
 	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutInterlace) sview/libs/armeabi-v7a/$(aStOutInterlace)
@@ -147,7 +145,7 @@ pre_all:
 # StShared static shared library
 aStShared_SRCS := $(wildcard StShared/*.cpp)
 aStShared_OBJS := ${aStShared_SRCS:.cpp=.o}
-aStShared_LIB  := $(LIB) $(LIB_GLX) $(LIB_GTK) -landroid -lavutil -lavformat -lavcodec -lswscale -lfreetype $(LIB_PTHREAD)
+aStShared_LIB  := $(LIB) $(LIB_GLX) $(LIB_GTK) -landroid -lavutil -lavformat -lavcodec -lswscale -lfreetype $(LIB_CONFIG) $(LIB_PTHREAD)
 $(aStShared) : $(aStShared_OBJS)
 	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStShared_OBJS) $(aStShared_LIB) -o $(BUILD_ROOT)/$(aStShared)
 clean_StShared:
@@ -166,20 +164,10 @@ clean_StGLWidgets:
 	rm -f $(BUILD_ROOT)/$(aStGLWidgets)
 	rm -rf StGLWidgets/*.o
 
-# StSetting shared library
-aStSettings_SRCS := $(wildcard StSettings/*.cpp)
-aStSettings_OBJS := ${aStSettings_SRCS:.cpp=.o}
-aStSettings_LIB  := $(LIB) -lStShared $(LIB_GTK) $(LIB_CONFIG)
-$(aStSettings) : $(aStSettings_OBJS)
-	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStSettings_OBJS) $(aStSettings_LIB) -o $(BUILD_ROOT)/$(aStSettings)
-clean_StSettings:
-	rm -f $(BUILD_ROOT)/$(aStSettings)
-	rm -rf StSettings/*.o
-
 # StCore library
 aStCore_SRCS := $(wildcard StCore/*.cpp)
 aStCore_OBJS := ${aStCore_SRCS:.cpp=.o}
-aStCore_LIB  := $(LIB) -lStShared -lStSettings $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD) $(LIB_XLIB)
+aStCore_LIB  := $(LIB) -lStShared $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD) $(LIB_XLIB)
 $(aStCore) : $(aStCore_OBJS)
 	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStCore_OBJS) $(aStCore_LIB) -o $(BUILD_ROOT)/$(aStCore)
 clean_StCore:
@@ -189,7 +177,7 @@ clean_StCore:
 # StOutAnaglyph library (Anaglyph output)
 aStOutAnaglyph_SRCS := $(wildcard StOutAnaglyph/*.cpp)
 aStOutAnaglyph_OBJS := ${aStOutAnaglyph_SRCS:.cpp=.o}
-aStOutAnaglyph_LIB  := $(LIB) -lStShared -lStSettings -lStCore $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
+aStOutAnaglyph_LIB  := $(LIB) -lStShared -lStCore $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
 $(aStOutAnaglyph) : pre_StOutAnaglyph $(aStOutAnaglyph_OBJS)
 	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStOutAnaglyph_OBJS) $(aStOutAnaglyph_LIB) -o $(BUILD_ROOT)/$(aStOutAnaglyph)
 pre_StOutAnaglyph:
@@ -206,7 +194,7 @@ clean_StOutAnaglyph:
 # StOutDual library (Dual output)
 aStOutDual_SRCS := $(wildcard StOutDual/*.cpp)
 aStOutDual_OBJS := ${aStOutDual_SRCS:.cpp=.o}
-aStOutDual_LIB  := $(LIB) -lStShared -lStSettings -lStCore $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
+aStOutDual_LIB  := $(LIB) -lStShared -lStCore $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
 $(aStOutDual) : pre_StOutDual $(aStOutDual_OBJS)
 	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStOutDual_OBJS) $(aStOutDual_LIB) -o $(BUILD_ROOT)/$(aStOutDual)
 pre_StOutDual:
@@ -221,7 +209,7 @@ clean_StOutDual:
 # StOutIZ3D library (iZ3D monitor)
 aStOutIZ3D_SRCS := $(wildcard StOutIZ3D/*.cpp)
 aStOutIZ3D_OBJS := ${aStOutIZ3D_SRCS:.cpp=.o}
-aStOutIZ3D_LIB  := $(LIB) -lStShared -lStSettings -lStCore $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
+aStOutIZ3D_LIB  := $(LIB) -lStShared -lStCore $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
 $(aStOutIZ3D) : pre_StOutIZ3D $(aStOutIZ3D_OBJS)
 	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStOutIZ3D_OBJS) $(aStOutIZ3D_LIB) -o $(BUILD_ROOT)/$(aStOutIZ3D)
 pre_StOutIZ3D:
@@ -238,7 +226,7 @@ clean_StOutIZ3D:
 # StOutInterlace library (Interlaced output)
 aStOutInterlace_SRCS := $(wildcard StOutInterlace/*.cpp)
 aStOutInterlace_OBJS := ${aStOutInterlace_SRCS:.cpp=.o}
-aStOutInterlace_LIB  := $(LIB) -lStShared -lStSettings -lStCore $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
+aStOutInterlace_LIB  := $(LIB) -lStShared -lStCore $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
 $(aStOutInterlace) : pre_StOutInterlace $(aStOutInterlace_OBJS)
 	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStOutInterlace_OBJS) $(aStOutInterlace_LIB) -o $(BUILD_ROOT)/$(aStOutInterlace)
 pre_StOutInterlace:
@@ -255,7 +243,7 @@ clean_StOutInterlace:
 # StOutPageFlip library (Shutter glasses output)
 aStOutPageFlip_SRCS := $(wildcard StOutPageFlip/*.cpp)
 aStOutPageFlip_OBJS := ${aStOutPageFlip_SRCS:.cpp=.o}
-aStOutPageFlip_LIB  := $(LIB) -lStShared -lStSettings -lStCore $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
+aStOutPageFlip_LIB  := $(LIB) -lStShared -lStCore $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
 $(aStOutPageFlip) : pre_StOutPageFlip $(aStOutPageFlip_OBJS)
 	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStOutPageFlip_OBJS) $(aStOutPageFlip_LIB) -o $(BUILD_ROOT)/$(aStOutPageFlip)
 pre_StOutPageFlip:
@@ -270,7 +258,7 @@ clean_StOutPageFlip:
 # StOutDistorted library
 aStOutDistorted_SRCS := $(wildcard StOutDistorted/*.cpp)
 aStOutDistorted_OBJS := ${aStOutDistorted_SRCS:.cpp=.o}
-aStOutDistorted_LIB  := $(LIB) -lStShared -lStSettings -lStCore $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
+aStOutDistorted_LIB  := $(LIB) -lStShared -lStCore $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
 $(aStOutDistorted) : pre_StOutDistorted $(aStOutDistorted_OBJS)
 	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStOutDistorted_OBJS) $(aStOutDistorted_LIB) -o $(BUILD_ROOT)/$(aStOutDistorted)
 pre_StOutDistorted:
@@ -285,7 +273,7 @@ clean_StOutDistorted:
 # StImageViewer library (Image Viewer)
 aStImageViewer_SRCS := $(wildcard StImageViewer/*.cpp)
 aStImageViewer_OBJS := ${aStImageViewer_SRCS:.cpp=.o}
-aStImageViewer_LIB  := $(LIB) -lStGLWidgets -lStShared -lStSettings -lStCore $(LIB_OUTPUTS) $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
+aStImageViewer_LIB  := $(LIB) -lStGLWidgets -lStShared -lStCore $(LIB_OUTPUTS) $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
 $(aStImageViewer) : pre_StImageViewer $(aStImageViewer_OBJS)
 	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStImageViewer_OBJS) $(aStImageViewer_LIB) -o $(BUILD_ROOT)/$(aStImageViewer)
 pre_StImageViewer:
@@ -304,7 +292,7 @@ aStMoviePlayer_SRCS2 := $(wildcard StMoviePlayer/StVideo/*.cpp)
 aStMoviePlayer_OBJS2 := ${aStMoviePlayer_SRCS2:.cpp=.o}
 aStMoviePlayer_SRCS3 := $(wildcard StMoviePlayer/*.c)
 aStMoviePlayer_OBJS3 := ${aStMoviePlayer_SRCS3:.c=.o}
-aStMoviePlayer_LIB   := $(LIB) -lStGLWidgets -lStShared -lStSettings -lStCore $(LIB_OUTPUTS) $(LIB_GLX) $(LIB_GTK) -lavutil -lavformat -lavcodec -lswscale -lopenal $(LIB_PTHREAD)
+aStMoviePlayer_LIB   := $(LIB) -lStGLWidgets -lStShared -lStCore $(LIB_OUTPUTS) $(LIB_GLX) $(LIB_GTK) -lavutil -lavformat -lavcodec -lswscale -lopenal $(LIB_PTHREAD)
 $(aStMoviePlayer) : pre_StMoviePlayer $(aStMoviePlayer_OBJS1) $(aStMoviePlayer_OBJS2) $(aStMoviePlayer_OBJS3)
 	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStMoviePlayer_OBJS1) $(aStMoviePlayer_OBJS2) $(aStMoviePlayer_OBJS3) $(aStMoviePlayer_LIB) -o $(BUILD_ROOT)/$(aStMoviePlayer)
 pre_StMoviePlayer:
@@ -321,7 +309,7 @@ clean_StMoviePlayer:
 # StDiagnostics library
 aStDiagnostics_SRCS := $(wildcard StDiagnostics/*.cpp)
 aStDiagnostics_OBJS := ${aStDiagnostics_SRCS:.cpp=.o}
-aStDiagnostics_LIB  := $(LIB) -lStGLWidgets -lStShared -lStSettings -lStCore $(LIB_OUTPUTS) $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
+aStDiagnostics_LIB  := $(LIB) -lStGLWidgets -lStShared -lStCore $(LIB_OUTPUTS) $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
 $(aStDiagnostics) : pre_StDiagnostics $(aStDiagnostics_OBJS)
 	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStDiagnostics_OBJS) $(aStDiagnostics_LIB) -o $(BUILD_ROOT)/$(aStDiagnostics)
 pre_StDiagnostics:
@@ -336,7 +324,7 @@ clean_StDiagnostics:
 # StCADViewer library
 aStCADViewer_SRCS := $(wildcard StCADViewer/*.cpp)
 aStCADViewer_OBJS := ${aStCADViewer_SRCS:.cpp=.o}
-aStCADViewer_LIB  := $(LIB) -lStGLWidgets -lStShared -lStSettings -lStCore $(LIB_OUTPUTS) $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
+aStCADViewer_LIB  := $(LIB) -lStGLWidgets -lStShared -lStCore $(LIB_OUTPUTS) $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
 ifdef WITH_OCCT
 aStCADViewer_LIB  += $(LIB_OCCT)
 endif
@@ -364,7 +352,7 @@ clean_sViewAndroid:
 # sView executable
 sView_SRCS := $(wildcard sview/*.cpp)
 sView_OBJS := ${sView_SRCS:.cpp=.o}
-sView_LIB  := $(LIB) -lStGLWidgets -lStShared -lStSettings -lStCore -lStImageViewer -lStMoviePlayer -lStDiagnostics -lStCADViewer $(LIB_OUTPUTS) $(LIB_GTK) -lX11 -ldl -lgthread-2.0 $(LIB_PTHREAD)
+sView_LIB  := $(LIB) -lStGLWidgets -lStShared -lStCore -lStImageViewer -lStMoviePlayer -lStDiagnostics -lStCADViewer $(LIB_OUTPUTS) $(LIB_GTK) -lX11 -ldl -lgthread-2.0 $(LIB_PTHREAD)
 ifdef WITH_OCCT
 sView_LIB += $(LIB_OCCT)
 endif

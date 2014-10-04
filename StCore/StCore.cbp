@@ -260,7 +260,6 @@
 		</ResourceCompiler>
 		<Linker>
 			<Add library="StShared" />
-			<Add library="StSettings" />
 			<Add directory="../3rdparty/lib/$(TARGET_NAME)" />
 			<Add directory="../lib/$(TARGET_NAME)" />
 			<Add directory="../bin/$(TARGET_NAME)" />

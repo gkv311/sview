@@ -93,7 +93,7 @@ EOF
 #cd $aDebRoot
 #sViewBin=$PWD/usr/share/sView
 #results=$PWD/debian/substvars
-#dpkg-shlibdeps -O $sViewBin/StDrawers/StImageViewer.so $sViewBin/StDrawers/StMoviePlayer.so $sViewBin/sView $sViewBin/StCore.so $sViewBin/StSettings.so $sViewBin/StMonitorsDump.so $sViewBin/StBrowserPlugins/npStBrowserPlugin.so $sViewBin/StRenderers/StOutAnaglyph.so $sViewBin/StRenderers/StOutDual.so $sViewBin/StRenderers/StOutInterlace.so $sViewBin/StRenderers/StOutIZ3D.so $sViewBin/StRenderers/StOutPageFlip.so
+#dpkg-shlibdeps -O $sViewBin/StDrawers/StImageViewer.so $sViewBin/StDrawers/StMoviePlayer.so $sViewBin/sView $sViewBin/StCore.so $sViewBin/StMonitorsDump.so $sViewBin/StBrowserPlugins/npStBrowserPlugin.so $sViewBin/StRenderers/StOutAnaglyph.so $sViewBin/StRenderers/StOutDual.so $sViewBin/StRenderers/StOutInterlace.so $sViewBin/StRenderers/StOutIZ3D.so $sViewBin/StRenderers/StOutPageFlip.so
 #cd ..
 
 # prepare directory for dpkg --build

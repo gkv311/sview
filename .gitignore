@@ -31,7 +31,6 @@ build/
 bin/
 lib/
 StShared/obj/
-StSettings/obj/
 StGLWidgets/obj/
 StCore/obj/
 StOutAnaglyph/obj/

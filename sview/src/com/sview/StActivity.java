@@ -97,7 +97,6 @@ public class StActivity extends NativeActivity {
         || !loadLibVerbose("openal",          theInfo)
         || !loadLibVerbose("StShared",        theInfo)
         || !loadLibVerbose("StGLWidgets",     theInfo)
-        || !loadLibVerbose("StSettings",      theInfo)
         || !loadLibVerbose("StCore",          theInfo)
         || !loadLibVerbose("StOutAnaglyph",   theInfo)
         || !loadLibVerbose("StOutDistorted",  theInfo)

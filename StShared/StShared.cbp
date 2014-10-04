@@ -153,6 +153,7 @@
 				<Linker>
 					<Add option="-s" />
 					<Add option="-z defs" />
+					<Add library="libconfig++.a" />
 					<Add library="gtk-x11-2.0" />
 					<Add library="gdk-x11-2.0" />
 					<Add library="gobject-2.0" />
@@ -185,6 +186,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-z defs" />
+					<Add library="libconfig++.a" />
 					<Add library="gtk-x11-2.0" />
 					<Add library="gdk-x11-2.0" />
 					<Add library="gobject-2.0" />
@@ -280,6 +282,10 @@
 			<Option target="MAC_gcc_DEBUG" />
 		</Unit>
 		<Unit filename="StCondition.cpp" />
+		<Unit filename="StConfigImpl.cpp">
+			<Option target="LINUX_gcc" />
+			<Option target="LINUX_gcc_DEBUG" />
+		</Unit>
 		<Unit filename="StDevILImage.cpp" />
 		<Unit filename="StEDIDParser.cpp" />
 		<Unit filename="StExifDir.cpp" />
@@ -345,10 +351,23 @@
 		<Unit filename="StMsgQueue.cpp" />
 		<Unit filename="StMutex.cpp" />
 		<Unit filename="StPlayList.cpp" />
+		<Unit filename="StPListImpl.mm">
+			<Option compile="1" />
+			<Option link="1" />
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
 		<Unit filename="StProcess.cpp" />
 		<Unit filename="StProcess2.cpp" />
 		<Unit filename="StRawFile.cpp" />
+		<Unit filename="StRegisterImpl.cpp">
+			<Option target="WIN_gcc_x86" />
+			<Option target="WIN_vc_x86" />
+			<Option target="WIN_vc_x86_DEBUG" />
+			<Option target="WIN_vc_AMD64" />
+		</Unit>
 		<Unit filename="StResourceManager.cpp" />
+		<Unit filename="StSettings.cpp" />
 		<Unit filename="StSocket.ObjC.mm">
 			<Option compile="1" />
 			<Option link="1" />
@@ -363,6 +382,7 @@
 		</Unit>
 		<Unit filename="StDictionary.cpp" />
 		<Unit filename="StThread.cpp" />
+		<Unit filename="StTranslations.cpp" />
 		<Unit filename="StVirtualKeys.cpp" />
 		<Unit filename="StWebPImage.cpp" />
 		<Unit filename="stAV.cpp" />
@@ -461,6 +481,11 @@
 		<Unit filename="../include/StImage/StPixelRGB.h" />
 		<Unit filename="../include/StImage/StWebPImage.h" />
 		<Unit filename="../include/StLibrary.h" />
+		<Unit filename="../include/StSettings/StEnumParam.h" />
+		<Unit filename="../include/StSettings/StFloat32Param.h" />
+		<Unit filename="../include/StSettings/StParam.h" />
+		<Unit filename="../include/StSettings/StSettings.h" />
+		<Unit filename="../include/StSettings/StTranslations.h" />
 		<Unit filename="../include/StSlots/StAction.h" />
 		<Unit filename="../include/StSlots/StSignal.h" />
 		<Unit filename="../include/StSlots/StSlot.h" />

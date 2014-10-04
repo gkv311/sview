@@ -257,7 +257,6 @@
 			<Add library="StShared" />
 			<Add library="StGLWidgets" />
 			<Add library="StCore" />
-			<Add library="StSettings" />
 			<Add library="StImageViewer" />
 			<Add library="StMoviePlayer" />
 			<Add library="StDiagnostics" />

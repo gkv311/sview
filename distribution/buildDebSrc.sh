@@ -37,7 +37,6 @@ cp -f -r ../StOutInterlace $aDebSrcRoot/
 cp -f -r ../StOutIZ3D      $aDebSrcRoot/
 cp -f -r ../StOutPageFlip  $aDebSrcRoot/
 cp -f -r ../StOutDistorted $aDebSrcRoot/
-cp -f -r ../StSettings     $aDebSrcRoot/
 cp -f -r ../StShared       $aDebSrcRoot/
 cp -f -r ../sview          $aDebSrcRoot/
 cp -f -r ../textures       $aDebSrcRoot/

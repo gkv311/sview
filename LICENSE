@@ -7,7 +7,6 @@ Notice that some sources are wrappers over other 3rd-parties
 and their licenses should be taken into account when used.
 
 StCore,
-StSettings,
 StOutAnaglyph,
 StOutDual,
 StOutInterlace,

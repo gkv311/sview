@@ -238,7 +238,6 @@
 		</ResourceCompiler>
 		<Linker>
 			<Add library="StShared" />
-			<Add library="StSettings" />
 			<Add library="StCore" />
 			<Add library="avutil" />
 			<Add library="avformat" />

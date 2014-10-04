@@ -158,11 +158,9 @@ Source: {#SVIEW_DISTR_PATH_AMD64}\*.exe;          DestDir: {app}\amd64;  Flags: 
 Source: {#SVIEW_DISTR_PATH_x86}\StShared.dll;     DestDir: {app};        Flags: 32bit ignoreversion; Components: StCore
 Source: {#SVIEW_DISTR_PATH_x86}\StGLWidgets.dll;  DestDir: {app};        Flags: 32bit ignoreversion; Components: StCore
 Source: {#SVIEW_DISTR_PATH_x86}\StCore.dll;       DestDir: {app};        Flags: 32bit ignoreversion; Components: StCore
-Source: {#SVIEW_DISTR_PATH_x86}\StSettings.dll;   DestDir: {app};        Flags: 32bit ignoreversion; Components: StCore
 Source: {#SVIEW_DISTR_PATH_AMD64}\StShared.dll;   DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 Source: {#SVIEW_DISTR_PATH_AMD64}\StGLWidgets.dll;DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 Source: {#SVIEW_DISTR_PATH_AMD64}\StCore.dll;     DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
-Source: {#SVIEW_DISTR_PATH_AMD64}\StSettings.dll; DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 Source: {#SVIEW_DISTR_PATH_x86}\StDiagnostics.dll;   DestDir: {app};       Flags: 32bit ignoreversion; Components: StCore
 Source: {#SVIEW_DISTR_PATH_AMD64}\StDiagnostics.dll; DestDir: {app}\amd64; Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 Source: {#SVIEW_DISTR_PATH_x86}\shaders\StGLWidgets\*;         DestDir: {app}\shaders\StGLWidgets;       Flags: 32bit ignoreversion; Components: StCore
