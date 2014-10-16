@@ -289,6 +289,7 @@ class StWindowImpl {
     TiledCfg           myTiledCfg;        //!< tiles configuration (multiple viewports within the same window)
 
 #ifdef _WIN32
+    StSearchMonitors   myMsgMonitors;     //!< available monitors, accessed from message thread
     POINT              myPointTest;       //!< temporary point object to verify cached window position
     StHandle<StThread> myMsgThread;       //!< dedicated thread for window message loop
     StCondition        myEventInitWin;    //!< special event waited from createWindows() thread

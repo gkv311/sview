@@ -138,7 +138,7 @@ bool StWindowImpl::wndCreateWindows() {
         myIsUpdated = true;
     }
 
-    myWinOnMonitorId = myMonitors[myRectNorm.center()].getId();
+    myWinOnMonitorId = myMsgMonitors[myRectNorm.center()].getId();
     myWinMonScaleId  = myWinOnMonitorId;
 
     // use WS_EX_NOPARENTNOTIFY style to prevent to send notify on destroying our child window (NPAPI plugin -> deadlock)
@@ -180,7 +180,7 @@ bool StWindowImpl::wndCreateWindows() {
     myEventInitGl.wait();
 
     // ========= Now show up the windows =========
-    if(attribs.Slave != StWinSlave_slaveOff && !attribs.IsSlaveHidden && (!isSlaveIndependent() || myMonitors.size() > 1)) {
+    if(attribs.Slave != StWinSlave_slaveOff && !attribs.IsSlaveHidden && (!isSlaveIndependent() || myMsgMonitors.size() > 1)) {
         SetWindowPos(mySlave.hWindowGl,
                      HWND_NOTOPMOST,
                      getSlaveLeft(),  getSlaveTop(),
@@ -206,7 +206,7 @@ bool StWindowImpl::wndCreateWindows() {
         SetForegroundWindow(myMaster.hWindow); // make sure Master window on top and has input focus
     }
     // register global updater - listen for WM_DISPLAYCHANGE events
-    myMonitors.registerUpdater(true);
+    myMsgMonitors.registerUpdater(true);
 
     // flag to track registered global hot-keys
     bool areGlobalHotKeys = false;
@@ -233,7 +233,7 @@ bool StWindowImpl::wndCreateWindows() {
                 myMaster.ThreadWnd = 0;
 
                 // end of events loop - WM_DISPLAYCHANGE will not be handled by this window anymore
-                myMonitors.registerUpdater(false);
+                myMsgMonitors.registerUpdater(false);
 
                 ResetEvent(myEventQuit);
                 myMaster.EventMsgThread.set(); // thread now exit, nothing should be after!
@@ -435,6 +435,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
         }
 
         case WM_DISPLAYCHANGE: {
+            myMsgMonitors.init(true);
             myIsDispChanged = true;
             return 0;
         }
@@ -463,9 +464,13 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
             if(attribs.IsFullScreen || myParentWin != NULL) {
                 break;
             } else if(theWin == myMaster.hWindow) {
+                const int aWidth  = myRectNorm.width();
+                const int aHeight = myRectNorm.height();
                 myIsUpdated = true;
-                myRectNorm.left() = (int )(short )LOWORD(lParam);
-                myRectNorm.top()  = (int )(short )HIWORD(lParam);
+                myRectNorm.left()   = (int )(short )LOWORD(lParam);
+                myRectNorm.top()    = (int )(short )HIWORD(lParam);
+                myRectNorm.right()  = myRectNorm.left() + aWidth;
+                myRectNorm.bottom() = myRectNorm.top() + aHeight;
                 break;
             }
             // ignore GL subwindow resize messages!
@@ -527,10 +532,10 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 }
 
                 // determine monitor scale factor change
-                const StMonitor& aMonTo    = myMonitors[myRectNorm.center()];
+                const StMonitor& aMonTo    = myMsgMonitors[myRectNorm.center()];
                 const int        aNewMonId = aMonTo.getId();
                 if(myWinMonScaleId != aNewMonId) {
-                    const StMonitor& aMonFrom = myMonitors[myWinMonScaleId];
+                    const StMonitor& aMonFrom = myMsgMonitors[myWinMonScaleId];
                     if(!stAreEqual(aMonTo.getScale(), aMonFrom.getScale(), 0.1f)) {
                         StRectI_t aRectScaled = myRectNorm;
                         const double aCoeff = double(aMonTo.getScale()) / double(aMonFrom.getScale());
@@ -538,7 +543,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                         const int aHeight = int(double(myRectNorm.height()) * aCoeff);
                         aRectScaled.right()  = aRectScaled.left() + aWidth;
                         aRectScaled.bottom() = aRectScaled.top()  + aHeight;
-                        const StMonitor& aMonMon = myMonitors[aRectScaled.center()];
+                        const StMonitor& aMonMon = myMsgMonitors[aRectScaled.center()];
                         if(aMonMon.getId() == aNewMonId) {
                             // process only if resized window is still on the same monitor (protect against cascade scaling)
                             myRectNorm = aRectScaled;
