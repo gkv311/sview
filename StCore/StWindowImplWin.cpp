@@ -464,13 +464,16 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
             if(attribs.IsFullScreen || myParentWin != NULL) {
                 break;
             } else if(theWin == myMaster.hWindow) {
-                const int aWidth  = myRectNorm.width();
-                const int aHeight = myRectNorm.height();
+                StRectI_t aNewRect = myRectNorm;
+                const int aWidth   = aNewRect.width();
+                const int aHeight  = aNewRect.height();
+                aNewRect.left()   = (int )(short )LOWORD(lParam);
+                aNewRect.top()    = (int )(short )HIWORD(lParam);
+                aNewRect.right()  = aNewRect.left() + aWidth;
+                aNewRect.bottom() = aNewRect.top() + aHeight;
+
+                myRectNorm = aNewRect;
                 myIsUpdated = true;
-                myRectNorm.left()   = (int )(short )LOWORD(lParam);
-                myRectNorm.top()    = (int )(short )HIWORD(lParam);
-                myRectNorm.right()  = myRectNorm.left() + aWidth;
-                myRectNorm.bottom() = myRectNorm.top() + aHeight;
                 break;
             }
             // ignore GL subwindow resize messages!
@@ -480,12 +483,12 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
             if(attribs.IsFullScreen || myParentWin != NULL) {
                 break;
             } else if(theWin == myMaster.hWindow) {
-                myIsUpdated = true;
                 int w = LOWORD(lParam);
                 int h = HIWORD(lParam);
                 myRectNorm.right()  = myRectNorm.left() + w;
                 myRectNorm.bottom() = myRectNorm.top()  + h;
 
+                myIsUpdated = true;
                 myStEvent.Type       = stEvent_Size;
                 myStEvent.Size.Time  = getEventTime(myEvent.time);
                 myStEvent.Size.SizeX = myRectNorm.width();
@@ -502,10 +505,19 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
             } else if(theWin == myMaster.hWindow) {
                 RECT* aRect = (RECT* )(LPARAM )lParam;
                 const StRectI_t aPrevRect = myRectNorm;
-                myRectNorm.left()   = aRect->left   + GetSystemMetrics(SM_CXSIZEFRAME);
-                myRectNorm.right()  = aRect->right  - GetSystemMetrics(SM_CXSIZEFRAME);
-                myRectNorm.top()    = aRect->top    + GetSystemMetrics(SM_CYSIZEFRAME) + GetSystemMetrics(SM_CYCAPTION);
-                myRectNorm.bottom() = aRect->bottom - GetSystemMetrics(SM_CYSIZEFRAME);
+
+                const int aBLeft   = GetSystemMetrics(SM_CXSIZEFRAME);
+                const int aBRight  = aBLeft;
+                const int aBBottom = GetSystemMetrics(SM_CYSIZEFRAME);
+                const int aBTop    = GetSystemMetrics(SM_CYCAPTION) + aBBottom;
+
+                StRectI_t aNewRect;
+                aNewRect.left()   = aRect->left   + aBLeft;
+                aNewRect.right()  = aRect->right  - aBRight;
+                aNewRect.top()    = aRect->top    + aBTop;
+                aNewRect.bottom() = aRect->bottom - aBBottom;
+
+                myRectNorm = aNewRect;
                 if(attribs.ToAlignEven)
                 {
                     // adjust window position to ensure alignment
