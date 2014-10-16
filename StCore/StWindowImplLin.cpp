@@ -389,6 +389,7 @@ bool StWindowImpl::create() {
     }
     // flushes the output buffer, most client apps needn't use this cause buffer is automatically flushed as needed by calls to XNextEvent()...
     XFlush(hDisplay);
+    myMonitors.registerUpdater(true);
     myIsUpdated = true;
     myInitState = STWIN_INIT_SUCCESS;
     return true;

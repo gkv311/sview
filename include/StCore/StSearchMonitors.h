@@ -113,6 +113,16 @@ class StSearchMonitors : public StArrayList<StMonitor> {
 
     ST_CPPEXPORT static void listEDID(StArrayList<StEDIDParser>& theEdids);
 
+    /**
+     * Register this instance as updater of global state
+     * (e.g. window listens to messages about configuration changes).
+     */
+    ST_CPPEXPORT void registerUpdater(const bool theIsUpdater);
+
+        protected:
+
+    bool myIsUpdater; //!< flag indicating updating listener
+
 };
 
 #endif //__StSearchMonitors_h_

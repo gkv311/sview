@@ -139,6 +139,7 @@ StWindowImpl::StWindowImpl(const StHandle<StResourceManager>& theResMgr,
     // register callback for display configuration changes
     // alternatively we can add method applicationDidChangeScreenParameters to application delegate
     CGDisplayRegisterReconfigurationCallback(stDisplayChangeCallBack, this);
+    myMonitors.registerUpdater(true);
 #endif
 
     myEventsTimer.initUpTime();
@@ -232,6 +233,7 @@ StWindowImpl::~StWindowImpl() {
 #endif
 
 #ifdef __APPLE__
+    myMonitors.registerUpdater(false);
     CGDisplayRemoveReconfigurationCallback(stDisplayChangeCallBack, this);
 #endif
 }
@@ -263,6 +265,11 @@ void StWindowImpl::close() {
         myParentWin->signals.onInputEvent -= stSlot(this, &StWindowImpl::onAndroidInput);
         myParentWin->signals.onAppCmd     -= stSlot(this, &StWindowImpl::onAndroidCommand);
     }
+#endif
+
+#if defined(__linux__) && !defined(__ANDROID__)
+    // window will no more receive Xlib events - unregister global updater
+    myMonitors.registerUpdater(false);
 #endif
 
     // turn off display sleep blocking

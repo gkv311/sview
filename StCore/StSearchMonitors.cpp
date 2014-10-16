@@ -37,12 +37,15 @@
 #endif
 
 StSearchMonitors::StSearchMonitors()
-: StArrayList<StMonitor>(2) {
+: StArrayList<StMonitor>(2),
+  myIsUpdater(false) {
     //
 }
 
 StSearchMonitors::~StSearchMonitors() {
-    //
+    if(myIsUpdater) {
+        registerUpdater(false);
+    }
 }
 
 StMonitor& StSearchMonitors::operator[](const StPointI_t& thePoint) {
@@ -584,8 +587,11 @@ void StSearchMonitors::listEDID(StArrayList<StEDIDParser>& theEdids) {
 namespace {
 
     static StMutex          THE_MON_MUTEX;
-    static StTimer          THE_MON_INIT_TIMER(false);
     static StSearchMonitors THE_MONS_CACHED;
+    static int              THE_MON_NB_UPDATERS = 0;
+    static int              THE_MON_WAIT_TO_UPDATE = 0;
+    static bool             THE_MON_IS_FIRST_CALL = true;
+
 }
 
 void StSearchMonitors::initGlobal() {
@@ -604,14 +610,41 @@ void StSearchMonitors::setupGlobalDisplay(const StMonitor& theDisplay) {
 }
 #endif
 
+void StSearchMonitors::registerUpdater(const bool theIsUpdater) {
+    if(myIsUpdater == theIsUpdater) {
+        return;
+    }
+    myIsUpdater = theIsUpdater;
+
+    StMutexAuto aLock(THE_MON_MUTEX);
+    if(myIsUpdater) {
+        ++THE_MON_NB_UPDATERS;
+        THE_MON_WAIT_TO_UPDATE = 0;
+    } else {
+        --THE_MON_NB_UPDATERS;
+        THE_MON_WAIT_TO_UPDATE = 0;
+    }
+}
+
 void StSearchMonitors::init(const bool theForced) {
     clear();
     StMutexAuto aLock(THE_MON_MUTEX);
 #if !defined(__ANDROID__)
-    if(!THE_MON_INIT_TIMER.isOn()
-    || (theForced && THE_MON_INIT_TIMER.getElapsedTime() > 30.0)) {
+    bool toUpdate = THE_MON_IS_FIRST_CALL;
+    if(theForced && myIsUpdater) {
+        ++THE_MON_WAIT_TO_UPDATE;
+        if(THE_MON_WAIT_TO_UPDATE == 1) {
+            // update within first listener in queue
+            toUpdate = true;
+        }
+        if(THE_MON_WAIT_TO_UPDATE == THE_MON_NB_UPDATERS) {
+            // all listeners received update event from system - reset counter
+            THE_MON_WAIT_TO_UPDATE = 0;
+        }
+    }
+    if(toUpdate) {
         THE_MONS_CACHED.initGlobal();
-        THE_MON_INIT_TIMER.restart(0);
+        THE_MON_IS_FIRST_CALL = false;
     }
 #endif
 

@@ -205,6 +205,8 @@ bool StWindowImpl::wndCreateWindows() {
     if(!attribs.IsHidden && myParentWin == NULL) {
         SetForegroundWindow(myMaster.hWindow); // make sure Master window on top and has input focus
     }
+    // register global updater - listen for WM_DISPLAYCHANGE events
+    myMonitors.registerUpdater(true);
 
     // flag to track registered global hot-keys
     bool areGlobalHotKeys = false;
@@ -229,6 +231,9 @@ bool StWindowImpl::wndCreateWindows() {
 
                 mySlave.ThreadWnd  = 0;
                 myMaster.ThreadWnd = 0;
+
+                // end of events loop - WM_DISPLAYCHANGE will not be handled by this window anymore
+                myMonitors.registerUpdater(false);
 
                 ResetEvent(myEventQuit);
                 myMaster.EventMsgThread.set(); // thread now exit, nothing should be after!
