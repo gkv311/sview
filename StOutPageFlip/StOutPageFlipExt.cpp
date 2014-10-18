@@ -121,6 +121,8 @@ void StOutPageFlipExt::beforeClose() {
 }
 
 bool StOutPageFlipExt::create() {
+    myIsQuiting = false;
+
     // request slave
     if(params.ControlCode->getValue() != DEVICE_CONTROL_NONE) {
 #ifdef _WIN32
