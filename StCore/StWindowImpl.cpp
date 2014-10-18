@@ -68,9 +68,9 @@ StWindowImpl::StWindowImpl(const StHandle<StResourceManager>& theResMgr,
 #ifdef _WIN32
   myEventInitWin(false),
   myEventInitGl(false),
-  myEventQuit(NULL),
-  myEventCursorShow(NULL),
-  myEventCursorHide(NULL),
+  myEventQuit(false),
+  myEventCursorShow(false),
+  myEventCursorHide(false),
   myIsVistaPlus(StSys::isVistaPlus()),
 #elif (defined(__APPLE__))
   mySleepAssert(0),
@@ -115,11 +115,6 @@ StWindowImpl::StWindowImpl(const StHandle<StResourceManager>& theResMgr,
 
 #ifdef _WIN32
     myEventsThreaded  = true; // events loop is always performed in dedicated thread
-
-    // we create Win32 event directly (not StCondition) to use it with MsgWaitForMultipleObjects()
-    myEventQuit       = CreateEvent(0, true, false, NULL);
-    myEventCursorShow = CreateEvent(0, true, false, NULL);
-    myEventCursorHide = CreateEvent(0, true, false, NULL);
 
     // Adjust system timer
     // By default Windows2K+ timer has ugly precision
@@ -220,10 +215,6 @@ void StWindowImpl::updateMonitors() {
 StWindowImpl::~StWindowImpl() {
     close();
 #ifdef _WIN32
-    CloseHandle(myEventQuit);
-    CloseHandle(myEventCursorShow);
-    CloseHandle(myEventCursorHide);
-
     // restore timer adjustments
     TIMECAPS aTimeCaps = {0, 0};
     if(timeGetDevCaps(&aTimeCaps, sizeof(aTimeCaps)) == TIMERR_NOERROR) {
@@ -248,7 +239,7 @@ void StWindowImpl::close() {
     mySlave.close();
     myMaster.close();
 #ifdef _WIN32
-    SetEvent(myEventQuit);
+    myEventQuit.set();
     const size_t TIME_LIMIT = 60000;
     size_t       aTimeWait  = 10000;
     while(!myMaster.EventMsgThread.wait(aTimeWait)) {
@@ -711,9 +702,9 @@ void StWindowImpl::showCursor(bool toShow) {
     // native show / hide function should be called from
     // window-message thread -> we set events to do that
     if(toShow) {
-        SetEvent(myEventCursorShow);
+        myEventCursorShow.set();
     } else {
-        SetEvent(myEventCursorHide);
+        myEventCursorHide.set();
     }
 #elif defined(__ANDROID__)
     ///

@@ -83,6 +83,13 @@ class StCondition {
      */
     ST_CPPEXPORT bool checkReset();
 
+#ifdef _WIN32
+    /**
+     * Access native HANDLE to Event object directly.
+     */
+    ST_LOCAL void* getHandle() const { return myEvent; }
+#endif
+
         private: //! @name private fields
 
 #ifdef _WIN32

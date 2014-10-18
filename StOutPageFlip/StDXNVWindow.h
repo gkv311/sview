@@ -25,6 +25,7 @@
 
 #include <StCore/StMonitor.h>
 #include <StCore/StWindow.h>
+#include <StThreads/StCondition.h>
 #include <StThreads/StMutex.h>
 #include <StThreads/StThread.h>
 
@@ -86,34 +87,34 @@ class StDXNVWindow {
      * Wait until Direct3D window not initialized in its dedicated thread.
      */
     void waitReady() {
-        WaitForSingleObject(hEventReady, INFINITE);
+        myEventReady.wait();
     }
 
     /**
      * Request Direct3D window to show.
      */
     void show() {
-        ResetEvent(hEventHide);
-        SetEvent(hEventShow);
+        myEventHide.reset();
+        myEventShow.set();
     }
 
     /**
      * Request Direct3D window to hide.
      */
     void hide() {
-        ResetEvent(hEventShow);
-        SetEvent(hEventHide);
+        myEventShow.reset();
+        myEventHide.set();
     }
 
     /**
      * Request Direct3D window to update stereo buffer.
      */
     void update() {
-        SetEvent(hEventUpdate);
+        myEventUpdate.set();
     }
 
     bool isInUpdate() {
-        return (WaitForSingleObject(hEventUpdate, (DWORD )0) != WAIT_TIMEOUT);
+        return myEventUpdate.check();
     }
 
     /**
@@ -167,7 +168,7 @@ class StDXNVWindow {
      * Set termination event.
      */
     void quit() {
-        SetEvent(hEventQuit);
+        myEventQuit.set();
     }
 
         private:
@@ -186,9 +187,34 @@ class StDXNVWindow {
 
     void updateMouseBtn(const int btnId, bool newState);
 
+    /**
+     * Unregister window class.
+     */
+    bool unregisterClass(StStringUtfWide& theName);
+
+    /**
+     * Process show event within D3D message loop thread.
+     */
+    void dxShow();
+
+    /**
+     * Process hide event within D3D message loop thread.
+     */
+    void dxHide();
+
+    /**
+     * Process update event within D3D message loop thread.
+     */
+    void dxUpdate();
+
+    /**
+     * Peek new window messages within D3D message loop thread.
+     */
+    void dxPeekMessages();
+
         private:
 
-    StHandle<StMsgQueue>    myMsgQueue; //!< messages queue
+    StHandle<StMsgQueue>    myMsgQueue;     //!< messages queue
     unsigned char*          myBufferL;
     unsigned char*          myBufferR;
     size_t                  myFboSizeX;
@@ -202,17 +228,21 @@ class StDXNVWindow {
     StHandle<StDXNVSurface> myDxSurface;
 
     StMonitor               myMonitor;
-    StOutPageFlip*          myStWin;
+    StOutPageFlip*          myStWin;        //!< link to StWindow
 
-    StMutex                 myMutex;
-
-    HANDLE                  hEventReady;
-    HANDLE                  hEventQuit; // quit message thread event
-    HANDLE                  hEventShow;
-    HANDLE                  hEventHide;
-    HANDLE                  hEventUpdate;
-
+    StMutex                 myMutex;        //!< lock for communication between StWindow and D3D threads
+    bool                    myShowState;    //!< D3D window show state
+    MSG                     myWinMsg;       //!< message for windows' message loop
+    StEvent                 myKeyEvent;     //!< key event
+    BYTE                    myKeysMap[256]; //!< pressed keys map
+    wchar_t                 myCharBuff[4];  //!< buffer for key event
     bool myMouseState[ST_MOUSE_MAX_ID + 1];
+
+    StCondition             myEventReady;
+    StCondition             myEventQuit;    //!< quit message thread event
+    StCondition             myEventShow;
+    StCondition             myEventHide;
+    StCondition             myEventUpdate;
 
 };
 

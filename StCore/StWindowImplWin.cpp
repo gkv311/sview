@@ -31,18 +31,21 @@ static SV_THREAD_FUNCTION threadCreateWindows(void* inStWin);
 /**
  * Static proc function just do recall to StWindowImpl class method.
  */
-static LRESULT CALLBACK stWndProcWrapper(HWND in_hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    if(uMsg == WM_CREATE) {
-        // save pointer to our class instance (sended on window create) to window storage
-        LPCREATESTRUCT pCS = (LPCREATESTRUCT )lParam;
-        SetWindowLongPtr(in_hWnd, int(GWLP_USERDATA), (LONG_PTR )pCS->lpCreateParams);
+static LRESULT CALLBACK stWndProcWrapper(HWND   theWnd,
+                                         UINT   theMsg,
+                                         WPARAM theParamW,
+                                         LPARAM theParamL) {
+    if(theMsg == WM_CREATE) {
+        // save pointer to our class instance (sent on window create) to window storage
+        CREATESTRUCTW* aCreateInfo = (CREATESTRUCTW* )theParamL;
+        ::SetWindowLongPtr(theWnd, GWLP_USERDATA, (LONG_PTR )aCreateInfo->lpCreateParams);
     }
     // get pointer to our class instance
-    StWindowImpl* pThis = (StWindowImpl* )GetWindowLongPtr(in_hWnd, int(GWLP_USERDATA));
-    if(pThis != NULL) {
-        return pThis->stWndProc(in_hWnd, uMsg, wParam, lParam);
+    StWindowImpl* aThis = (StWindowImpl* )::GetWindowLongPtr(theWnd, GWLP_USERDATA);
+    if(aThis != NULL) {
+        return aThis->stWndProc(theWnd, theMsg, theParamW, theParamL);
     } else {
-        return DefWindowProcW(in_hWnd, uMsg, wParam, lParam);
+        return ::DefWindowProcW(theWnd, theMsg, theParamW, theParamL);
     }
 }
 
@@ -57,7 +60,7 @@ bool StWindowImpl::create() {
 
     myEventInitWin.reset();
     myEventInitGl.reset();
-    ResetEvent(myEventQuit);
+    myEventQuit.reset();
     myMsgThread = new StThread(threadCreateWindows, (void* )this);
     // wait for thread to create window
     myEventInitWin.wait();
@@ -211,13 +214,23 @@ bool StWindowImpl::wndCreateWindows() {
     // flag to track registered global hot-keys
     bool areGlobalHotKeys = false;
 
+    enum {
+        StWntMsg_Quit = 0,
+        StWntMsg_CursorShow,
+        StWntMsg_CursorHide,
+        StWntMsg_WINDOW
+    };
+    HANDLE aWaitEvents[3] = {};
+    aWaitEvents[StWntMsg_Quit]       = myEventQuit      .getHandle();
+    aWaitEvents[StWntMsg_CursorShow] = myEventCursorShow.getHandle();
+    aWaitEvents[StWntMsg_CursorHide] = myEventCursorHide.getHandle();
+
     wchar_t aCharBuff[4];
     BYTE    aKeysMap[256];
-    HANDLE  waitEvents[3] = {myEventQuit, myEventCursorShow, myEventCursorHide};
     for(;;) {
-        switch(MsgWaitForMultipleObjects(3, waitEvents, FALSE, INFINITE, QS_ALLINPUT)) {
-            case WAIT_OBJECT_0: {
-                // Event 1 (myEventQuit) has been set. If the event was created as autoreset, it has also been reset
+        switch(::MsgWaitForMultipleObjects(3, aWaitEvents, FALSE, INFINITE, QS_ALLINPUT)) {
+            case WAIT_OBJECT_0 + StWntMsg_Quit: {
+                // if the event was created as autoreset, it has also been reset
                 ///ST_DEBUG_LOG("WinAPI, End of the message thread... (TID= " + StThread::getCurrentThreadId() + ")");
                 if(areGlobalHotKeys) {
                     UnregisterHotKey(myMaster.hWindowGl, myMaster.myMKeyStop);
@@ -235,26 +248,24 @@ bool StWindowImpl::wndCreateWindows() {
                 // end of events loop - WM_DISPLAYCHANGE will not be handled by this window anymore
                 myMsgMonitors.registerUpdater(false);
 
-                ResetEvent(myEventQuit);
+                myEventQuit.reset();
                 myMaster.EventMsgThread.set(); // thread now exit, nothing should be after!
                 return true;
             }
-            case WAIT_OBJECT_0 + 1: {
-                // Event 2 (myEventCursorShow) has been set. If the event was created as autoreset, it has also been reset
+            case WAIT_OBJECT_0 + StWntMsg_CursorShow: {
                 // show / hide cursor - SHOULD be called from window thread...
-                ShowCursor(TRUE);
-                ResetEvent(myEventCursorShow);
+                ::ShowCursor(TRUE);
+                myEventCursorShow.reset();
                 break;
             }
-            case WAIT_OBJECT_0 + 2: {
-                // Event 3 (myEventCursorHide) has been set. If the event was created as autoreset, it has also been reset
+            case WAIT_OBJECT_0 + StWntMsg_CursorHide: {
                 // warning - this is NOT force hide / show function;
                 // this call decrease or increase show counter
-                ShowCursor(FALSE);
-                ResetEvent(myEventCursorHide);
+                ::ShowCursor(FALSE);
+                myEventCursorHide.reset();
                 break;
             }
-            case WAIT_OBJECT_0 + 3: {
+            case WAIT_OBJECT_0 + StWntMsg_WINDOW: {
                 // synchronize high-precision timer with system UpTime
                 if(myEventsTimer.isResyncNeeded()) {
                     myEventsTimer.resyncUpTime();

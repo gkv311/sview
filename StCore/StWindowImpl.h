@@ -294,9 +294,9 @@ class StWindowImpl {
     StHandle<StThread> myMsgThread;       //!< dedicated thread for window message loop
     StCondition        myEventInitWin;    //!< special event waited from createWindows() thread
     StCondition        myEventInitGl;
-    HANDLE             myEventQuit;       //!< quit message thread event
-    HANDLE             myEventCursorShow;
-    HANDLE             myEventCursorHide;
+    StCondition        myEventQuit;       //!< quit message thread event
+    StCondition        myEventCursorShow;
+    StCondition        myEventCursorHide;
     MSG                myEvent;           //!< message for windows' message loop
     bool               myIsVistaPlus;     //!< system is Vista+
 #elif defined(__APPLE__)
