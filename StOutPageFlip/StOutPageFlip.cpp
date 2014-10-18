@@ -640,9 +640,19 @@ bool StOutPageFlip::dxInit() {
         ST_DEBUG_LOG(ST_OUT_PLUGIN_NAME + " Plugin, old videocard detected (GLSL 1.1)!");
     }
 
-    myOutD3d.DxWindow = new StDXNVWindow(myMsgQueue, aFrBufferSizeX, aFrBufferSizeY, aNvMonitor, this,
-                                         myContext->extAll->wglDXOpenDeviceNV != NULL);
+    myOutD3d.DxWindow = new StDXNVWindow(myMsgQueue, aFrBufferSizeX, aFrBufferSizeY, aNvMonitor, this);
+    myOutD3d.DxWindow->setWglDxInterop(myContext->extAll->wglDXOpenDeviceNV != NULL);
+    myOutD3d.DxWindow->setThreadedDx(false); // do not render from multiple threads
     myOutD3d.DxThread = new StThread(StOutDirect3D::dxThreadFunction, (void* )&myOutD3d);
+
+    if(!myOutD3d.DxWindow->isThreadedDx()) {
+        myOutD3d.DxWindow->waitReady();
+        if(!myOutD3d.DxWindow->dxInitManager()) {
+            dxRelease();
+            return false;
+        }
+    }
+
     return true;
 #else
     return false;
@@ -652,6 +662,10 @@ bool StOutPageFlip::dxInit() {
 void StOutPageFlip::dxRelease() {
 #ifdef _WIN32
     dxDisactivate();
+    if(!myOutD3d.DxWindow.isNull()
+    && !myOutD3d.DxWindow->isThreadedDx()) {
+        myOutD3d.DxWindow->dxReleaseManager();
+    }
     if(!myOutD3d.DxThread.isNull()) {
         myOutD3d.DxWindow->quit();
         myOutD3d.DxThread->wait();
@@ -700,7 +714,7 @@ void StOutPageFlip::dxActivate() {
             StWindow::hide();
 
             if(myOutD3d.WglDxBuffer.isNull()
-            && myContext->extAll->wglDXOpenDeviceNV != NULL) {
+            && myOutD3d.DxWindow->toUseWglDxInterop()) {
                 myOutD3d.DxWindow->lockLRBuffers();
                 myOutD3d.WglDxBuffer = new StGLDXFrameBuffer();
                 if(!myOutD3d.WglDxBuffer->init(*myContext, myOutD3d.DxWindow->getD3dManager()->getDevice())) {

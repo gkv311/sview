@@ -613,9 +613,10 @@ void StWindowImpl::show(const int theWinNum) {
      && attribs.IsHidden) {
     #ifdef _WIN32
         if(myMaster.hWindow != NULL) {
-            ShowWindow(myMaster.hWindow, SW_SHOW);
+            ::ShowWindow(myMaster.hWindow, SW_SHOW);
+            ::SetForegroundWindow(myMaster.hWindow); // make sure Master window on top and has input focus
         } else if(myMaster.hWindowGl != NULL) {
-            ShowWindow(myMaster.hWindowGl, SW_SHOW);
+            ::ShowWindow(myMaster.hWindowGl, SW_SHOW);
         }
     #elif defined(__ANDROID__)
         ///

@@ -45,13 +45,42 @@ class StDXNVWindow {
                  const size_t     theFboSizeX,
                  const size_t     theFboSizeY,
                  const StMonitor& theMonitor,
-                 StOutPageFlip*   theStWin,
-                 const bool       theHasWglDx);
+                 StOutPageFlip*   theStWin);
 
     /**
      * Destructor.
      */
     ~StDXNVWindow();
+
+    /**
+     * Specify if WGL <-> D3D interoperation extension should be used.
+     */
+    bool toUseWglDxInterop() const {
+        return myHasWglDx;
+    }
+
+    /**
+     * Specify if WGL <-> D3D interoperation extension should be used.
+     * Should be set before initialization.
+     */
+    void setWglDxInterop(const bool theHasWglDx) {
+        myHasWglDx = theHasWglDx;
+    }
+
+    /**
+     * Specify if D3D context should be created and managed within window message thread.
+     */
+    bool isThreadedDx() const {
+        return myIsThreadedDx;
+    }
+
+    /**
+     * Specify if D3D context should be created and managed within window message thread.
+     * Should be set before initialization.
+     */
+    void setThreadedDx(const bool theIsThreadedDx) {
+        myIsThreadedDx = theIsThreadedDx;
+    }
 
     const StHandle<StDXManager>& getD3dManager() const {
         return myDxManager;
@@ -94,6 +123,7 @@ class StDXNVWindow {
      * Request Direct3D window to show.
      */
     void show() {
+        dxShow();
         myEventHide.reset();
         myEventShow.set();
     }
@@ -102,6 +132,7 @@ class StDXNVWindow {
      * Request Direct3D window to hide.
      */
     void hide() {
+        dxHide();
         myEventShow.reset();
         myEventHide.set();
     }
@@ -110,7 +141,11 @@ class StDXNVWindow {
      * Request Direct3D window to update stereo buffer.
      */
     void update() {
-        myEventUpdate.set();
+        if(myIsThreadedDx) {
+            myEventUpdate.set();
+            return;
+        }
+        dxUpdate();
     }
 
     bool isInUpdate() {
@@ -165,6 +200,16 @@ class StDXNVWindow {
     void dxLoop();
 
     /**
+     * Create D3D manager.
+     */
+    bool dxInitManager();
+
+    /**
+     * Release D3D manager.
+     */
+    void dxReleaseManager();
+
+    /**
      * Set termination event.
      */
     void quit() {
@@ -193,12 +238,12 @@ class StDXNVWindow {
     bool unregisterClass(StStringUtfWide& theName);
 
     /**
-     * Process show event within D3D message loop thread.
+     * Process show event.
      */
     void dxShow();
 
     /**
-     * Process hide event within D3D message loop thread.
+     * Process hide event.
      */
     void dxHide();
 
@@ -210,7 +255,7 @@ class StDXNVWindow {
     /**
      * Peek new window messages within D3D message loop thread.
      */
-    void dxPeekMessages();
+    void peekMessages();
 
         private:
 
@@ -220,6 +265,7 @@ class StDXNVWindow {
     size_t                  myFboSizeX;
     size_t                  myFboSizeY;
     bool                    myHasWglDx;
+    bool                    myIsThreadedDx; //!< option to create D3D in window message loop
 
     HWND                    myWinD3d;
     StStringUtfWide         myWinClass;
