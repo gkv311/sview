@@ -292,10 +292,12 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     // scale down image if it does not fit texture limits
     StHandle<StImage> anImageL = scaledImage(anImageFileL, size_t(myMaxTexDim));
     StHandle<StImage> anImageR = scaledImage(anImageFileR, size_t(myMaxTexDim));
+#ifdef __ST_DEBUG__
     const double aScaleTimeMSec = aLoadTimer.getElapsedTimeInMilliSec() - aLoadTimeMSec;
     if(anImageL != anImageFileL) {
         ST_DEBUG_LOG("Image is downscaled to fit texture limits in " + aScaleTimeMSec + " ms!");
     }
+#endif
 
     // detect information from file name
     bool isAnamorphByName = false;

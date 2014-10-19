@@ -590,7 +590,9 @@ namespace {
     static StSearchMonitors THE_MONS_CACHED;
     static int              THE_MON_NB_UPDATERS = 0;
     static int              THE_MON_WAIT_TO_UPDATE = 0;
+#if !defined(__ANDROID__)
     static bool             THE_MON_IS_FIRST_CALL = true;
+#endif
 
 }
 

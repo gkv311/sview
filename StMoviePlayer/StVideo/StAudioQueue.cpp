@@ -805,6 +805,7 @@ void StAudioQueue::decodePacket(const StHandle<StAVPacket>& thePacket,
 
             #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 40, 0))
             //av_frame_unref(myFrame.Frame);
+            (void )aDataSize;
             myFrame.reset();
             const int aLen1 = avcodec_decode_audio4(myCodecCtx, myFrame.Frame,
                                                     &isGotFrame, anAvPkt.getAVpkt());

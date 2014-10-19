@@ -26,12 +26,20 @@ StAVImage::StAVImage()
   myFrame(NULL) {
     StAVImage::init();
     myImageFormat = av_find_input_format("image2");
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 45, 101))
+    myFrame = av_frame_alloc();
+#else
     myFrame = avcodec_alloc_frame();
+#endif
 }
 
 StAVImage::~StAVImage() {
     close();
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 45, 101))
+    av_frame_free(&myFrame);
+#else
     av_free(myFrame);
+#endif
 }
 
 int StAVImage::getAVPixelFormat(const StImage& theImage) {
