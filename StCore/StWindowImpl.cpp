@@ -127,10 +127,10 @@ StWindowImpl::StWindowImpl(const StHandle<StResourceManager>& theResMgr,
     } else {
         timeBeginPeriod(1);
     }
+    myMsgMonitors.init();
 #endif
 
     myMonitors.init();
-    myMsgMonitors.init();
 #ifdef __APPLE__
     // register callback for display configuration changes
     // alternatively we can add method applicationDidChangeScreenParameters to application delegate
