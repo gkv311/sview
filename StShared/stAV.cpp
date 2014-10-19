@@ -16,6 +16,11 @@ extern "C" {
 #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(50, 8, 0))
     #include <libavutil/pixdesc.h>
 #endif
+
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 0, 0))
+    // #include <libavresample/avresample.h>
+    #include <libavutil/channel_layout.h>
+#endif
 };
 
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 30, 0))
