@@ -1117,8 +1117,8 @@ void StOutPageFlip::stglDraw() {
                      && myOutD3d.WglDxBuffer->resize(*myContext,
                                                      aSurf->TextureL(), aSurf->TextureLShare(),
                                                      aSurf->TextureR(), aSurf->TextureRShare(),
-                                                     myOutD3d.DxWindow->getFboSizeX(),
-                                                     myOutD3d.DxWindow->getFboSizeY())) {
+                                                     GLsizei(myOutD3d.DxWindow->getFboSizeX()),
+                                                     GLsizei(myOutD3d.DxWindow->getFboSizeY()))) {
                         myOutD3d.DxWindow->unlockLRBuffers();
                         break;
                     }
