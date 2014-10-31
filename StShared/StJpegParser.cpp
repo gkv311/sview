@@ -264,6 +264,8 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
             if(myImages.isNull()) {
                 anImg->Data   = myBuffer;
                 anImg->Length = myLength;
+            } else {
+                anImg.nullify();
             }
             return anImg;
         } else if(aSkippedBytes > 10) {
