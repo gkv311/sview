@@ -34,6 +34,9 @@ extern "C" {
 #endif
 };
 
+// detect FFmpeg vs. LibAV here
+//#define ST_LIBAV_FORK
+
 #if(LIBAVUTIL_VERSION_INT < AV_VERSION_INT(50, 13, 0))
     // enumeration was renamed from CodecType
     enum AVMediaType {

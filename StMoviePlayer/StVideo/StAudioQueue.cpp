@@ -41,6 +41,7 @@ static const StGLVec3 POSITION_REAR_RIGHT71 ( 1.0f, 0.0f,  1.0f);
 static const StGLVec3 POSITION_SIDE_LEFT71  (-1.0f, 0.0f,  0.0f);
 static const StGLVec3 POSITION_SIDE_RIGHT71 ( 1.0f, 0.0f,  0.0f);
 
+#if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(53, 0, 0))
 /**
  * Check if dynamically linked version of FFmpeg libraries
  * is old or not.
@@ -62,6 +63,7 @@ inline bool isReoderingNeeded() {
     static bool isNeeded = isReoderingNeededInit();
     return isNeeded;
 }
+#endif
 
 void StAudioQueue::stalConfigureSources1() {
     alSourcefv(myAlSources[0], AL_POSITION, POSITION_CENTER);
@@ -421,6 +423,7 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
             }
 
             myBufferOut.setupChannels(StChannelMap::CH51, StChannelMap::PCM, 1);
+        #if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(53, 0, 0))
             if(isReoderingNeeded()) {
                 // workaround for old FFmpeg
                 if(myCodec->id == CODEC_ID_AC3) {
@@ -430,7 +433,9 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
                 } else {
                     myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, 1);
                 }
-            } else {
+            } else
+        #endif
+            {
                 myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, isPlanar ? myCodecCtx->channels : 1);
             }
             stalConfigureSources1();
@@ -462,6 +467,7 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
                 stalConfigureSources5_0();
             } else {
                 myBufferOut.setupChannels(StChannelMap::CH51, StChannelMap::PCM, 6);
+            #if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(53, 0, 0))
                 if(isReoderingNeeded()) {
                     // workaround for old FFmpeg
                     if(myCodec->id == CODEC_ID_AC3) {
@@ -471,7 +477,9 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
                     } else {
                         myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, 1);
                     }
-                } else {
+                } else
+            #endif
+                {
                     myBufferSrc.setupChannels(StChannelMap::CH51, StChannelMap::PCM, isPlanar ? myCodecCtx->channels : 1);
                 }
                 stalConfigureSources5_1();

@@ -66,7 +66,11 @@ bool StSubtitleQueue::init(AVFormatContext*   theFormatCtx,
         return false;
     }
 
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 51, 100))
+    if(myCodecCtx->codec_id != AV_CODEC_ID_TEXT) {
+#else
     if(myCodecCtx->codec_id != CODEC_ID_TEXT) {
+#endif
         // find the decoder for the subtitles stream
         myCodec = avcodec_find_decoder(myCodecCtx->codec_id);
         if(myCodec == NULL) {

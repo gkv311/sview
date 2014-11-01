@@ -31,7 +31,7 @@ class StThread;
 // define StHandle template specialization
 ST_DEFINE_HANDLE(StVideoQueue, StAVPacketQueue);
 
-#if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 18, 100))
+#if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 18, 100)) || defined(ST_LIBAV_FORK)
     #define ST_AV_OLDSYNC
 #endif
 
