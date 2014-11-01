@@ -298,11 +298,15 @@ void StGLTextArea::computeTextWidth(const GLfloat theWidthMax,
             continue;
         }
 
-        const StFTFont::Subset aSubset = StFTFont::subset(aCharThis);
-        StHandle<StFTFont>&    aFont   = myFont->changeFont(aSubset)->getFont();
-        GLfloat anAdvance = (!aFont.isNull() && aFont->hasSymbol(aCharThis))
-                          ? aFont->getAdvanceX(aCharThis, aCharNext)
-                          : aFontGen->getAdvanceX(aCharThis, aCharNext);
+        const StFTFont::Subset   aSubset = StFTFont::subset(aCharThis);
+        StHandle<StGLFontEntry>& anEntry = myFont->changeFont(aSubset);
+        GLfloat anAdvance = 0.0f;
+        if(!anEntry.isNull() && !anEntry->getFont().isNull()) {
+            anAdvance = anEntry->getFont()->getAdvanceX(aCharThis, aCharNext);
+        } else {
+            anAdvance = aFontGen->getAdvanceX(aCharThis, aCharNext);
+        }
+
         aWidth += anAdvance;
         if(theWidthMax > 0.0f
         && aWidth > theWidthMax) {
