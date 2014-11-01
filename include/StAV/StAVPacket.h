@@ -73,6 +73,10 @@ class StAVPacket {
         return myPacket.data;
     }
 
+    inline uint8_t* changeData() {
+        return myPacket.data;
+    }
+
     inline int getSize() const {
         return myPacket.size;
     }
