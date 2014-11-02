@@ -137,6 +137,18 @@ class StAVPacketQueue {
     }
 
     /**
+     * Check AV_DISPOSITION_ATTACHED_PIC flag.
+     */
+    ST_LOCAL bool isAttachedPicture() const {
+    #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(54, 2, 100))
+        return  myStream != NULL
+            && (myStream->disposition & AV_DISPOSITION_ATTACHED_PIC) != 0;
+    #else
+        return false;
+    #endif
+    }
+
+    /**
      * @return stream id in videofile or -1 if none
      */
     ST_LOCAL signed int getId() const {

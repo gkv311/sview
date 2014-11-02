@@ -548,6 +548,30 @@ void StVideo::doFlush() {
     if(mySubtitles->isInitialized())   mySubtitles->pushFlush();
 }
 
+void StVideo::doFlushSoft() {
+    // clear packet queues from obsolete data
+    mySubtitles->clear();
+    myAudio->clear();
+    myVideoMaster->clear();
+    myVideoSlave->clear();
+
+    // push FLUSH packet to queues so they must flush FFmpeg codec buffers
+    if( myVideoMaster->isInitialized()
+    && !myVideoMaster->isAttachedPicture()) {
+        myVideoMaster->pushFlush();
+    }
+    if( myVideoSlave->isInitialized()
+    && !myVideoSlave->isAttachedPicture()) {
+        myVideoSlave->pushFlush();
+    }
+    if(myAudio->isInitialized()) {
+        myAudio->pushFlush();
+    }
+    if(mySubtitles->isInitialized()) {
+        mySubtitles->pushFlush();
+    }
+}
+
 void StVideo::doSeek(const double theSeekPts,
                      const bool   toSeekBack) {
     for(size_t ctxId = 0; ctxId < myPlayCtxList.size(); ++ctxId) {
@@ -555,7 +579,7 @@ void StVideo::doSeek(const double theSeekPts,
     }
 
     // clear packet queues from obsolete data
-    doFlush();
+    doFlushSoft();
 }
 
 void StVideo::doSeekContext(AVFormatContext* theFormatCtx,
@@ -591,6 +615,12 @@ bool StVideo::doSeekStream(AVFormatContext* theFormatCtx,
                            const bool       toSeekBack) {
     const int aFlags = toSeekBack ? AVSEEK_FLAG_BACKWARD : 0;
     AVStream* aStream = theFormatCtx->streams[theStreamId];
+#if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(54, 2, 100))
+    if((aStream->disposition & AV_DISPOSITION_ATTACHED_PIC) != 0) {
+        return false;
+    }
+#endif
+
     int64_t aSeekTarget = stAV::secondsToUnits(aStream, theSeekPts + stAV::unitsToSeconds(aStream, aStream->start_time));
     bool isSeekDone = av_seek_frame(theFormatCtx, theStreamId, aSeekTarget, aFlags) >= 0;
 
@@ -797,7 +827,7 @@ void StVideo::packetsLoop() {
             }
         } else if(params.activeAudio->wasChanged()) {
             double aCurrPts = getPts();
-            doFlush();
+            doFlushSoft();
             if(myAudio->isInitialized()) {
                 myAudio->pushEnd();
                 while(!myAudio->isEmpty() || !myAudio->isInDowntime()) {
@@ -847,7 +877,7 @@ void StVideo::packetsLoop() {
             pushPlayEvent(ST_PLAYEVENT_SEEK, aCurrPts);
         } else if(params.activeSubtitles->wasChanged()) {
             double aCurrPts = getPts();
-            doFlush();
+            doFlushSoft();
             if(mySubtitles->isInitialized()) {
                 mySubtitles->pushEnd();
                 while(!mySubtitles->isEmpty() || !mySubtitles->isInDowntime()) {

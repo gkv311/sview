@@ -299,7 +299,17 @@ class StVideo {
     ST_LOCAL void close();
 
     ST_LOCAL void packetsLoop();
+
+    /**
+     * Clear packets queue and push Flush event to decoders.
+     */
     ST_LOCAL void doFlush();
+
+    /**
+     * Clear packets queue.
+     * Does not flush decoder for attached picture.
+     */
+    ST_LOCAL void doFlushSoft();
     ST_LOCAL void doSeek(const double theSeekPts,
                          const bool   toSeekBack);
     ST_LOCAL void doSeekContext(AVFormatContext* theFormatCtx,
