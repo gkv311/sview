@@ -80,6 +80,11 @@ class StAndroidGlue {
         CommandId_Destroy,       //!< activity is being destroyed, and waiting for the application thread to clean up and exit before proceeding
     };
 
+    /**
+     * Auxiliary function to dump command id.
+     */
+    static StCString getCommandIdName(StAndroidGlue::CommandId theCmd);
+
         public: //! @name public API
 
     /**

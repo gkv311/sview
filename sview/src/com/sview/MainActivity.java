@@ -60,7 +60,7 @@ public class MainActivity extends Activity {
     protected void onActivityResult(int    theRequestCode,
                                     int    theResultCode,
                                     Intent theData) {
-        myTextView.append("\n\nStActivity has stopped. Log:\n");
+        /*myTextView.append("\n\nStActivity has stopped. Log:\n");
         try {
             File anExtFolder = myContext.getExternalFilesDir(null);
             File aLogFile    = null;
@@ -77,7 +77,7 @@ public class MainActivity extends Activity {
                     } else if(aLine.startsWith("DEBUG --")) {
                         myTextView.append(Html.fromHtml("<font color=\"#d4aa00\">DEBUG --</font>"));
                         myTextView.append(aLine.substring(8));
-                    } else*/ {
+                    } else* / {
                         myTextView.append(aLine);
                     }
                     myTextView.append("\n");
@@ -96,7 +96,7 @@ public class MainActivity extends Activity {
                 final int aScrollY = myTextView.getLineBounds(myTextView.getLineCount() - 1, null) - aTop;
                 myTextView.scrollTo(0, aScrollY);
             }
-        });
+        });*/
     }
 
     private TextView       myTextView;

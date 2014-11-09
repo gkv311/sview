@@ -15,6 +15,7 @@ LIB_GTK = `pkg-config gtk+-2.0 --libs` -lgthread-2.0 -ldl
 LIB_OCCT = -lTKBRep -lTKIGES -lTKSTEP -lTKSTEP209 -lTKSTEPAttr -lTKSTEPBase -lTKMesh -lTKMath -lTKG3d -lTKTopAlgo -lTKShHealing -lTKXSBase -lTKBO -lTKBool -lTKPrim -lTKGeomBase -lTKGeomAlgo -lTKG2d -lTKG3d -lTKernel
 LIB_XLIB = -lXrandr -lXpm
 LIB_CONFIG = -lconfig++
+LIB_ANDROID =
 LIB_OUTPUTS = -lStOutAnaglyph -lStOutDual -lStOutInterlace -lStOutPageFlip -lStOutIZ3D -lStOutDistorted
 
 TOOLCHAIN =
@@ -24,7 +25,8 @@ HAVE_MONGOOSE =
 LIB_PTHREAD = -lc
 LIB_GLX = -lEGL -lGLESv2
 LIB_GTK = -llog
-LIB_XLIB = -landroid
+LIB_XLIB =
+LIB_ANDROID = -landroid
 LIB_OUTPUTS = -lStOutAnaglyph -lStOutInterlace -lStOutDistorted
 endif
 
@@ -145,7 +147,7 @@ pre_all:
 # StShared static shared library
 aStShared_SRCS := $(wildcard StShared/*.cpp)
 aStShared_OBJS := ${aStShared_SRCS:.cpp=.o}
-aStShared_LIB  := $(LIB) $(LIB_GLX) $(LIB_GTK) -landroid -lavutil -lavformat -lavcodec -lswscale -lfreetype $(LIB_CONFIG) $(LIB_PTHREAD)
+aStShared_LIB  := $(LIB) $(LIB_GLX) $(LIB_GTK) $(LIB_ANDROID) -lavutil -lavformat -lavcodec -lswscale -lfreetype $(LIB_CONFIG) $(LIB_PTHREAD)
 $(aStShared) : $(aStShared_OBJS)
 	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStShared_OBJS) $(aStShared_LIB) -o $(BUILD_ROOT)/$(aStShared)
 clean_StShared:
@@ -167,7 +169,7 @@ clean_StGLWidgets:
 # StCore library
 aStCore_SRCS := $(wildcard StCore/*.cpp)
 aStCore_OBJS := ${aStCore_SRCS:.cpp=.o}
-aStCore_LIB  := $(LIB) -lStShared $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD) $(LIB_XLIB)
+aStCore_LIB  := $(LIB) -lStShared $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD) $(LIB_XLIB) $(LIB_ANDROID)
 $(aStCore) : $(aStCore_OBJS)
 	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStCore_OBJS) $(aStCore_LIB) -o $(BUILD_ROOT)/$(aStCore)
 clean_StCore:

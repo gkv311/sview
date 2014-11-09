@@ -25,6 +25,27 @@
 #include <StThreads/StThread.h>
 #include <StStrings/StLogger.h>
 
+StCString StAndroidGlue::getCommandIdName(StAndroidGlue::CommandId theCmd) {
+    switch(theCmd) {
+        case StAndroidGlue::CommandId_InputChanged:  return stCString("InputChanged");
+        case StAndroidGlue::CommandId_WindowInit:    return stCString("WindowInit");
+        case StAndroidGlue::CommandId_WindowTerm:    return stCString("WindowTerm");
+        case StAndroidGlue::CommandId_WindowResize:  return stCString("WindowResize");
+        case StAndroidGlue::CommandId_WindowRedraw:  return stCString("WindowRedraw");
+        case StAndroidGlue::CommandId_FocusGained:   return stCString("FocusGained");
+        case StAndroidGlue::CommandId_FocusLost:     return stCString("FocusLost");
+        case StAndroidGlue::CommandId_ConfigChanged: return stCString("ConfigChanged");
+        case StAndroidGlue::CommandId_LowMemory:     return stCString("LowMemory");
+        case StAndroidGlue::CommandId_Start:         return stCString("Start");
+        case StAndroidGlue::CommandId_Resume:        return stCString("Resume");
+        case StAndroidGlue::CommandId_SaveState:     return stCString("SaveState");
+        case StAndroidGlue::CommandId_Pause:         return stCString("Pause");
+        case StAndroidGlue::CommandId_Stop:          return stCString("Stop");
+        case StAndroidGlue::CommandId_Destroy:       return stCString("Destroy");
+    }
+    return stCString("UNKNOWN");
+}
+
 StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
                              void*            theSavedState,
                              size_t           theSavedStateSize)

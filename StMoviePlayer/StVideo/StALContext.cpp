@@ -79,12 +79,8 @@ bool StALContext::create(const StString& theDeviceName) {
 
     // check extensions
     hasExtEAX2         = alIsExtensionPresent("EAX2.0") == AL_TRUE;
-#if defined(__ANDROID__) // disable extensions broken on Android port
-    bool ST_ANDROID_BROKEN_OPENAL = true;
-#else
     hasExtFloat32      = alIsExtensionPresent("AL_EXT_float32")   == AL_TRUE;
     hasExtFloat64      = alIsExtensionPresent("AL_EXT_double")    == AL_TRUE;
-#endif
     hasExtMultiChannel = alIsExtensionPresent("AL_EXT_MCFORMATS") == AL_TRUE;
     hasExtDisconnect   = alcIsExtensionPresent(hDevice, "ALC_EXT_disconnect") == AL_TRUE;
 

@@ -5,7 +5,7 @@ sView requires several 3rd-party components for building:
 - C/C++ compiler (g++, MSVC 2010+)
 - Code::Blocks (http://www.codeblocks.org)
 - FFmpeg (http://www.ffmpeg.org)
-- OpenAL (http://kcat.strangesoft.net/openal.html)
+- OpenAL soft (http://kcat.strangesoft.net/openal.html)
 - libwebp, optional (https://developers.google.com/speed/webp/download)
 - GTK2+, Linux only (http://www.gtk.org)
 - libconfig++, Linux only (http://www.hyperrealm.com/libconfig)
@@ -38,6 +38,9 @@ yum install ffmpeg-devel
 On Windows and Mac OS X please refer to official documentation for each project.
 Notice that DevIL and FreeImage libraries are optional and need not for building sView
 (libraries are loaded dynamically if available).
+
+On Android you might use the following forks:
+- OpenAL soft (https://github.com/nanexcool/openal-soft)
 
 II. Makefile on Linux
 =====================
