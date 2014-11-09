@@ -697,6 +697,7 @@ bool StMoviePlayer::init() {
     // load this parameter AFTER video thread creation
     mySettings->loadParam(ST_SETTING_SRCFORMAT, params.srcFormat);
 
+#if !defined(ST_NO_UPDATES_CHECK)
     // read the current time
     time_t aRawtime;
     time(&aRawtime);
@@ -709,7 +710,7 @@ bool StMoviePlayer::init() {
         myLastUpdateDay = aCurrentDayInYear;
         mySettings->saveInt32(ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
     }
-
+#endif
     return true;
 }
 

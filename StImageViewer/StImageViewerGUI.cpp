@@ -516,7 +516,9 @@ void StImageViewerGUI::doOpenLicense(const size_t ) {
 StGLMenu* StImageViewerGUI::createHelpMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     StGLMenu* aMenuScale        = createScaleMenu();        // Root -> Help -> Scale Interface menu
+#if !defined(ST_NO_UPDATES_CHECK)
     StGLMenu* aMenuCheckUpdates = createCheckUpdatesMenu(); // Root -> Help -> Check updates menu
+#endif
     StGLMenu* aMenuLanguage     = createLanguageMenu();     // Root -> Help -> Language menu
 
     aMenu->addItem(tr(MENU_HELP_ABOUT))
@@ -528,13 +530,15 @@ StGLMenu* StImageViewerGUI::createHelpMenu() {
     aMenu->addItem(tr(MENU_HELP_SYSINFO))
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doAboutSystem);
     aMenu->addItem(tr(MENU_HELP_SCALE),   aMenuScale);
+#if !defined(ST_NO_UPDATES_CHECK)
     aMenu->addItem(tr(MENU_HELP_UPDATES), aMenuCheckUpdates);
+#endif
     aMenu->addItem(tr(MENU_HELP_LANGS),   aMenuLanguage);
     return aMenu;
 }
 
 /**
- * Root -> Help -> Check updates menu
+ * Root -> Help -> Scale Interface menu
  */
 StGLMenu* StImageViewerGUI::createScaleMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
