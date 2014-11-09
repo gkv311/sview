@@ -1,5 +1,5 @@
 /**
- * Copyright © 2008-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2008-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -185,6 +185,10 @@ class StTimer {
     double          myTimeInMicroSec; //!< cumulative elapsed time
     stTimeCounter_t myCounterStart;
     bool            myIsPaused;       //!< pause flag
+
+        protected:
+
+    friend class StCondition;
 
 };
 

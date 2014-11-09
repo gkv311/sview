@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -33,7 +33,7 @@ class StCondition {
         public: //! @name public methods
 
     /**
-     * Default constructor, creates event in signalling state.
+     * Default constructor, creates event in signaling state.
      */
     ST_CPPEXPORT StCondition();
 
@@ -49,12 +49,12 @@ class StCondition {
     ST_CPPEXPORT ~StCondition();
 
     /**
-     * Set event into signalling state.
+     * Set event into signaling state.
      */
     ST_CPPEXPORT void set();
 
     /**
-     * Reset event (unset signalling state)
+     * Reset event (unset signaling state)
      */
     ST_CPPEXPORT void reset();
 
@@ -65,10 +65,10 @@ class StCondition {
 
     /**
      * Wait for signal requested time.
-     * @param theTimeMilliseconds (const size_t& ) - wait limit in millisecods;
-     * @return true if get event.
+     * @param theTimeMilliseconds wait limit in milliseconds
+     * @return true if get event
      */
-    ST_CPPEXPORT bool wait(const size_t& theTimeMilliseconds);
+    ST_CPPEXPORT bool wait(const size_t theTimeMilliseconds);
 
     /**
      * Do not wait for signal - just test it state.
