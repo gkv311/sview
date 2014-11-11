@@ -240,7 +240,16 @@ namespace {
 // GUI dialogs are in Object-C for MacOS
 #ifndef __APPLE__
 
-#if !defined(__ANDROID__) && defined(__linux__)
+#if defined(__ANDROID__)
+namespace {
+    StMessageBox::msgBoxFunc_t THE_MSGBOX = NULL;
+}
+
+void StMessageBox::setCallback(msgBoxFunc_t theFunc) {
+    THE_MSGBOX = theFunc;
+}
+
+#elif defined(__linux__)
 bool StMessageBox::initGlobals() {
     static const bool isInitOK = stGtkInitForce();
     return isInitOK;
@@ -252,7 +261,11 @@ void StMessageBox::Info(const StString& theMessage) {
 #ifdef _WIN32
     MessageBoxW(NULL, theMessage.toUtfWide().toCString(), L"Info", MB_OK | MB_ICONINFORMATION | MB_SETFOREGROUND | MB_TOPMOST);
 #elif defined(__ANDROID__)
-    StMessageBox::InfoConsole(theMessage);
+    if(THE_MSGBOX != NULL) {
+        THE_MSGBOX(StMessageBox::MsgType_Info, theMessage.toCString());
+    } else {
+        StMessageBox::InfoConsole(theMessage);
+    }
 #elif defined(__linux__)
     if(initGlobals()) {
         gdk_threads_enter();
@@ -270,7 +283,11 @@ void StMessageBox::Warn(const StString& theMessage) {
 #ifdef _WIN32
     MessageBoxW(NULL, theMessage.toUtfWide().toCString(), L"Warning", MB_OK | MB_ICONWARNING | MB_SETFOREGROUND | MB_TOPMOST);
 #elif defined(__ANDROID__)
-    StMessageBox::WarnConsole(theMessage);
+    if(THE_MSGBOX != NULL) {
+        THE_MSGBOX(StMessageBox::MsgType_Warning, theMessage.toCString());
+    } else {
+        StMessageBox::WarnConsole(theMessage);
+    }
 #elif defined(__linux__)
     if(initGlobals()) {
         gdk_threads_enter();
@@ -288,7 +305,11 @@ void StMessageBox::Error(const StString& theMessage) {
 #ifdef _WIN32
     MessageBoxW(NULL, theMessage.toUtfWide().toCString(), L"Error", MB_OK | MB_ICONERROR | MB_SETFOREGROUND | MB_TOPMOST);
 #elif defined(__ANDROID__)
-    StMessageBox::ErrorConsole(theMessage);
+    if(THE_MSGBOX != NULL) {
+        THE_MSGBOX(StMessageBox::MsgType_Error, theMessage.toCString());
+    } else {
+        StMessageBox::ErrorConsole(theMessage);
+    }
 #elif defined(__linux__)
     if(initGlobals()) {
         gdk_threads_enter();
@@ -305,7 +326,11 @@ bool StMessageBox::Question(const StString& theMessage) {
 #ifdef _WIN32
     return MessageBoxW(NULL, theMessage.toUtfWide().toCString(), L"Question", MB_YESNO | MB_ICONQUESTION | MB_SETFOREGROUND | MB_TOPMOST) == IDYES;
 #elif defined(__ANDROID__)
-    return StMessageBox::QuestionConsole(theMessage);
+    if(THE_MSGBOX != NULL) {
+        return THE_MSGBOX(StMessageBox::MsgType_Question, theMessage.toCString());
+    } else {
+        return StMessageBox::QuestionConsole(theMessage);
+    }
 #elif defined(__linux__)
     if(initGlobals()) {
         gdk_threads_enter();

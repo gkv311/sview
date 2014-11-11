@@ -24,6 +24,7 @@
 #elif defined(__ANDROID__)
     #include <EGL/egl.h>
     #include <android/native_window.h>
+    #include <android/window.h>
 #elif defined(ST_HAVE_EGL)
     #include <EGL/egl.h>
 #elif defined(__APPLE__)

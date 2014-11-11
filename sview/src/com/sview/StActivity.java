@@ -42,16 +42,6 @@ public class StActivity extends NativeActivity {
     /**
      * Auxiliary method to show temporary info messages
      */
-    public static void printShortInfo(Activity     theActivity,
-                                      CharSequence theInfo) {
-        Context aCtx   = theActivity.getApplicationContext();
-        Toast   aToast = Toast.makeText(aCtx, theInfo, Toast.LENGTH_SHORT);
-        aToast.show();
-    }
-
-    /**
-     * Auxiliary method to show temporary info messages
-     */
     private static boolean loadLibVerbose(String        theLibName,
                                           StringBuilder theErrors) {
         try {
@@ -115,6 +105,9 @@ public class StActivity extends NativeActivity {
         return true;
     }
 
+    /**
+     * Create activity.
+     */
     @Override
     public void onCreate(Bundle theSavedInstanceState) {
         StringBuilder anInfo = new StringBuilder();
@@ -125,6 +118,32 @@ public class StActivity extends NativeActivity {
         myContext.getExternalFilesDir(null);
 
         super.onCreate(theSavedInstanceState);
+    }
+
+    /**
+     * Auxiliary method to show temporary info message.
+     */
+    public void postToast(String theInfo) {
+        final String aText = theInfo;
+        this.runOnUiThread (new Runnable() { public void run() {
+			Context aCtx   = getApplicationContext();
+			Toast   aToast = Toast.makeText(aCtx, aText, Toast.LENGTH_SHORT);
+			aToast.show();
+        }});
+    }
+
+    /**
+     * Auxiliary method to show info message.
+     */
+    public void postMessage(String theMessage) {
+        final String  aText = theMessage;
+        final Context aCtx  = this;
+        this.runOnUiThread (new Runnable() { public void run() {
+            AlertDialog.Builder aBuilder = new AlertDialog.Builder(aCtx);
+            aBuilder.setMessage(aText).setNegativeButton("OK", null);
+            AlertDialog aDialog = aBuilder.create();
+            aDialog.show();
+        }});
     }
 
     private ContextWrapper myContext;

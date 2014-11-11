@@ -60,6 +60,8 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
   myActivityState(0),
   mySavedState(NULL),
   mySavedStateSize(0),
+  myJavaVM(NULL),
+  myThJniEnv(NULL),
   myMsgRead(0),
   myMsgWrite(0),
   myIsRunning(false),
@@ -68,7 +70,9 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
   myIsDestroyed(false) {
     theActivity->instance = this;
 
-    JNIEnv*     aJniEnv          = theActivity->env;
+    JNIEnv* aJniEnv = theActivity->env;
+    aJniEnv->GetJavaVM(&myJavaVM);
+
     jclass      anActivityJClass = aJniEnv->GetObjectClass(theActivity->clazz);
     jmethodID   anActivityJMetId = aJniEnv->GetMethodID(anActivityJClass, "getIntent", "()Landroid/content/Intent;");
     jobject     aJIntent         = aJniEnv->CallObjectMethod(theActivity->clazz, anActivityJMetId);
@@ -183,10 +187,87 @@ void StAndroidGlue::updateMonitors() {
     StSearchMonitors::setupGlobalDisplay(aMon);
 }
 
+void StAndroidGlue::postToast(const char* theInfo) {
+    if(myThJniEnv == NULL) {
+        return;
+    }
+
+    jclass  aJClassAct = myThJniEnv->GetObjectClass(myActivity->clazz);
+    if(aJClassAct == NULL) {
+        ST_ERROR_LOG("StAndroidGlue::postToast() - class is unavailable!");
+        return;
+    }
+
+    jmethodID aJMetId = myThJniEnv->GetMethodID(aJClassAct, "postToast", "(Ljava/lang/String;)V");
+    if(aJMetId == NULL) {
+        ST_ERROR_LOG("StAndroidGlue::postToast() - method is unavailable!");
+        return;
+    }
+
+    jstring aJStr = myThJniEnv->NewStringUTF(theInfo);
+    myThJniEnv->CallVoidMethod(myActivity->clazz, aJMetId, aJStr);
+    myThJniEnv->DeleteLocalRef (aJStr);
+}
+
+void StAndroidGlue::postMessage(const char* theInfo) {
+    if(myThJniEnv == NULL) {
+        return;
+    }
+
+    jclass  aJClassAct = myThJniEnv->GetObjectClass(myActivity->clazz);
+    if(aJClassAct == NULL) {
+        ST_ERROR_LOG("StAndroidGlue::postMessage() - class is unavailable!");
+        return;
+    }
+
+    jmethodID aJMetId = myThJniEnv->GetMethodID(aJClassAct, "postMessage", "(Ljava/lang/String;)V");
+    if(aJMetId == NULL) {
+        ST_ERROR_LOG("StAndroidGlue::postMessage() - method is unavailable!");
+        return;
+    }
+
+    jstring aJStr = myThJniEnv->NewStringUTF(theInfo);
+    myThJniEnv->CallVoidMethod(myActivity->clazz, aJMetId, aJStr);
+    myThJniEnv->DeleteLocalRef (aJStr);
+}
+
+namespace {
+
+    static StAndroidGlue* THE_ANDROID_GLUE = NULL;
+
+    static bool msgBoxCallback(StMessageBox::MsgType theType,
+                               const char*           theMessage) {
+        if(THE_ANDROID_GLUE == NULL) {
+            return false;
+        }
+
+        switch(theType) {
+            case StMessageBox::MsgType_Info: {
+                THE_ANDROID_GLUE->postToast(theMessage);
+                break;
+            }
+            case StMessageBox::MsgType_Warning:
+            case StMessageBox::MsgType_Error:
+            case StMessageBox::MsgType_Question: {
+                THE_ANDROID_GLUE->postMessage(theMessage);
+                break;
+            }
+        }
+        return false;
+    }
+
+}
+
 void StAndroidGlue::threadEntry() {
     if(onAppEntry == NULL) {
         return;
+    } else if(myJavaVM->AttachCurrentThread(&myThJniEnv, NULL) < 0) {
+        ST_ERROR_LOG("Failed to attach working thread to Java VM");
+        return;
     }
+
+    THE_ANDROID_GLUE = this;
+    StMessageBox::setCallback(msgBoxCallback);
 
     myConfig = AConfiguration_new();
     AConfiguration_fromAssetManager(myConfig, myActivity->assetManager);
@@ -223,6 +304,10 @@ void StAndroidGlue::threadEntry() {
     myIsDestroyed = true;
     pthread_cond_broadcast(&myCond);
     pthread_mutex_unlock(&myMutex);
+
+    myThJniEnv = NULL;
+    StMessageBox::setCallback(NULL);
+    THE_ANDROID_GLUE = NULL;
 }
 
 bool StAndroidGlue::writeCommand(const int8_t theCmd) {

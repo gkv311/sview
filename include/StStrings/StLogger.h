@@ -141,6 +141,15 @@ class StMessageBox {
 
         public:
 
+    enum MsgType {
+        MsgType_Info,
+        MsgType_Warning,
+        MsgType_Error,
+        MsgType_Question,
+    };
+
+        public:
+
     /**
      * Show INFO popup window.
      */
@@ -164,7 +173,11 @@ class StMessageBox {
 
         public:
 
-#if !defined(__ANDROID__) && defined(__linux__)
+    typedef bool (*msgBoxFunc_t)(MsgType theType, const char* theMessage);
+
+#if defined(__ANDROID__)
+    ST_CPPEXPORT static void setCallback(msgBoxFunc_t theFunc);
+#elif defined(__linux__)
     ST_LOCAL static bool initGlobals();
 #endif
 

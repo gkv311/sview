@@ -541,7 +541,21 @@ void StWindowImpl::updateBlockSleep() {
         myBlockSleep = BlockSleep_OFF;
     }
 #elif defined(__ANDROID__)
-    //
+    if(attribs.ToBlockSleepDisplay
+    || attribs.ToBlockSleepSystem) {
+        if(myBlockSleep == BlockSleep_DISPLAY) {
+            return;
+        } else if(myParentWin != NULL
+               && myParentWin->getActivity() != NULL) {
+            //ANativeActivity_setWindowFlags(myParentWin->getActivity(), AWINDOW_FLAG_KEEP_SCREEN_ON, 0);
+        }
+        myBlockSleep = BlockSleep_DISPLAY;
+    } else if(myBlockSleep != BlockSleep_OFF) {
+        if(myParentWin != NULL) {
+            //ANativeActivity_setWindowFlags(myParentWin->getActivity(), 0, AWINDOW_FLAG_KEEP_SCREEN_ON);
+        }
+        myBlockSleep = BlockSleep_OFF;
+    }
 #elif defined(__linux__)
     if(attribs.ToBlockSleepDisplay) { // || attribs.ToBlockSleepSystem
         if(myBlockSleep == BlockSleep_DISPLAY

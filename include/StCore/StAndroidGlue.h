@@ -159,6 +159,18 @@ class StAndroidGlue {
 
         public:
 
+    /**
+     * Post small message.
+     */
+    ST_CPPEXPORT void postToast(const char* theInfo);
+
+    /**
+     * Post message.
+     */
+    ST_CPPEXPORT void postMessage(const char* theInfo);
+
+        public:
+
     void (*onAppEntry)(StAndroidGlue* theApp);
 
         public:  //! @name Signals
@@ -302,6 +314,9 @@ class StAndroidGlue {
 
     void*               mySavedState;        //!< last instance's saved state, as provided at creation time
     size_t              mySavedStateSize;
+
+    JavaVM*             myJavaVM;            //!< pointer to global Java VM instance
+    JNIEnv*             myThJniEnv;          //!< Jni environment for working thread
 
     pthread_mutex_t     myMutex;
     pthread_cond_t      myCond;
