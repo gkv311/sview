@@ -577,8 +577,8 @@ bool StWinHandles::close() {
 
 #if defined(ST_HAVE_EGL) || defined(__ANDROID__)
     if(!hRC.isNull()) {
-        hRC->makeCurrent(EGL_NO_SURFACE);
         if(eglSurface != EGL_NO_SURFACE) {
+            hRC->makeCurrent(EGL_NO_SURFACE);
             eglDestroySurface(hRC->getDisplay(), eglSurface);
             eglSurface = EGL_NO_SURFACE;
         }

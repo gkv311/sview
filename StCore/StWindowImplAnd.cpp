@@ -117,7 +117,7 @@ void StWindowImpl::updateWindowPos() {
     if(myMaster.hWindowGl != NULL) {
         aWidth  = ANativeWindow_getWidth (myMaster.hWindowGl);
         aHeight = ANativeWindow_getHeight(myMaster.hWindowGl);
-    } else if(myMaster.eglSurface == EGL_NO_SURFACE) {
+    } else if(myMaster.eglSurface != EGL_NO_SURFACE) {
         eglQuerySurface(myMaster.hRC->getDisplay(), myMaster.eglSurface, EGL_WIDTH,  &aWidth);
         eglQuerySurface(myMaster.hRC->getDisplay(), myMaster.eglSurface, EGL_HEIGHT, &aHeight);
     } else {
@@ -207,7 +207,7 @@ bool StWindowImpl::onAndroidInitWindow() {
     if(myMaster.hWindowGl != NULL) {
         aWidth  = ANativeWindow_getWidth (myMaster.hWindowGl);
         aHeight = ANativeWindow_getHeight(myMaster.hWindowGl);
-    } else {
+    } else if(myMaster.eglSurface != EGL_NO_SURFACE) {
         eglQuerySurface(myMaster.hRC->getDisplay(), myMaster.eglSurface, EGL_WIDTH,  &aWidth);
         eglQuerySurface(myMaster.hRC->getDisplay(), myMaster.eglSurface, EGL_HEIGHT, &aHeight);
     }
