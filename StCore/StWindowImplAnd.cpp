@@ -189,6 +189,45 @@ bool StWindowImpl::onAndroidInitWindow() {
         return false;
     }
 
+    if(!myMaster.hRC.isNull()) {
+        myMaster.hWindowGl = myParentWin->getWindow();
+
+        EGLint anEglErr = eglGetError();
+        (void )anEglErr;
+
+        EGLint aFormat = 0;
+        if(eglGetConfigAttrib(myMaster.hRC->getDisplay(), myMaster.hRC->getConfig(), EGL_NATIVE_VISUAL_ID, &aFormat) == EGL_FALSE) {
+            anEglErr = eglGetError();
+        }
+        ANativeWindow_setBuffersGeometry(myMaster.hWindowGl, 0, 0, aFormat);
+
+        myMaster.eglSurface = eglCreateWindowSurface(myMaster.hRC->getDisplay(), myMaster.hRC->getConfig(), myMaster.hWindowGl, NULL);
+        if(myMaster.eglSurface == NULL) {
+            anEglErr = eglGetError();
+        }
+
+        // bind the rendering context to the window
+        if(!myMaster.hRC->makeCurrent(myMaster.eglSurface)) {
+            myMaster.close();
+            mySlave.close();
+            myInitState = STWIN_ERROR_X_GLRC_CREATE;
+            stError("Critical error - broken EGL context!");
+            return false;
+        }
+
+        const EGLint aWidth  = ANativeWindow_getWidth (myMaster.hWindowGl);
+        const EGLint aHeight = ANativeWindow_getHeight(myMaster.hWindowGl);
+
+        myRectNorm.left()   = 0;
+        myRectNorm.top()    = 0;
+        myRectNorm.right()  = myRectNorm.left() + aWidth;
+        myRectNorm.bottom() = myRectNorm.top()  + aHeight;
+        myRectFull = myRectNorm;
+
+        myInitState = STWIN_INIT_SUCCESS;
+        return true;
+    }
+
     myMaster.hRC = new StWinGlrc(eglGetDisplay(EGL_DEFAULT_DISPLAY), attribs.IsGlDebug, attribs.GlDepthSize);
     if(!myMaster.hRC->isValid()) {
         myMaster.close();
@@ -245,10 +284,14 @@ void StWindowImpl::onAndroidCommand(int32_t theCommand) {
             return;
         }
         case StAndroidGlue::CommandId_WindowTerm: {
-            myStEvent.Type       = stEvent_Close;
-            myStEvent.Close.Time = getEventTime();
-            signals.onClose->emit(myStEvent.Close);
-            //myToResetDevice = true;
+            if(!myMaster.hRC.isNull()) {
+                myMaster.hRC->makeCurrent(EGL_NO_SURFACE);
+                if(myMaster.eglSurface != EGL_NO_SURFACE) {
+                    eglDestroySurface(myMaster.hRC->getDisplay(), myMaster.eglSurface);
+                    myMaster.eglSurface = EGL_NO_SURFACE;
+                }
+            }
+            myMaster.hWindowGl = NULL;
             return;
         }
         case StAndroidGlue::CommandId_FocusGained: {
@@ -310,11 +353,16 @@ void StWindowImpl::processEvents() {
 
         // check if we are exiting
         if(myParentWin->ToDestroy()) {
-            myStEvent.Type       = stEvent_Close;
-            myStEvent.Close.Time = getEventTime();
-            signals.onClose->emit(myStEvent.Close);
-            return;
+            break;
         }
+    }
+
+    // check if we are exiting
+    if(myParentWin->ToDestroy()) {
+        myStEvent.Type       = stEvent_Close;
+        myStEvent.Close.Time = getEventTime();
+        signals.onClose->emit(myStEvent.Close);
+        return;
     }
 
     myIsMouseMoved = false;
