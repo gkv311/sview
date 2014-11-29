@@ -151,6 +151,41 @@ class StAudioQueue : public StAVPacketQueue {
 
         private:
 
+    //! Setup output format for mono source.
+    ST_LOCAL bool setupOutMonoFormat();
+
+    //! Setup output format and channels.
+    ST_LOCAL bool initOutChannels();
+
+    //! Initialize 1-channel stream.
+    ST_LOCAL bool initOutMono();
+
+    //! Initialize 2-channels stream.
+    ST_LOCAL bool initOutStereo(const bool theIsPlanar);
+
+    //! Initialize 4.0 stream by configuring 4 sources in 3D.
+    ST_LOCAL bool initOut40Soft(const bool theIsPlanar);
+
+    //! Initialize 4.0 stream using extension (AL_FORMAT_QUAD).
+    ST_LOCAL bool initOut40Ext(const bool theIsPlanar);
+
+    //! Initialize 5.0 stream by configuring 5 sources in 3D.
+    ST_LOCAL bool initOut50Soft(const bool theIsPlanar);
+
+    //! Initialize 5.1 stream by configuring 6 sources in 3D.
+    ST_LOCAL bool initOut51Soft(const bool theIsPlanar);
+
+    //! Initialize 5.1 stream using extension (AL_FORMAT_51CHN).
+    ST_LOCAL bool initOut51Ext(const bool theIsPlanar);
+
+    //! Initialize 7.1 stream by configuring 8 sources in 3D.
+    ST_LOCAL bool initOut71Soft(const bool theIsPlanar);
+
+    //! Initialize 7.1 stream using extension (AL_FORMAT_71CHN).
+    ST_LOCAL bool initOut71Ext(const bool theIsPlanar);
+
+        private:
+
     ST_LOCAL void playTimerStart(const double thePts) {
         myEventMutex.lock();
             // timer operate within microseconds
