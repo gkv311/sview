@@ -76,6 +76,13 @@ void StAudioQueue::stalConfigureSources2_0() {
     stalCheckErrors("alSource*2.0");
 }
 
+void StAudioQueue::stalConfigureSources3_0() {
+    alSourcefv(myAlSources[0], AL_POSITION, POSITION_LEFT);
+    alSourcefv(myAlSources[1], AL_POSITION, POSITION_RIGHT);
+    alSourcefv(myAlSources[2], AL_POSITION, POSITION_CENTER);
+    stalCheckErrors("alSource*3.0");
+}
+
 void StAudioQueue::stalConfigureSources4_0() {
     alSourcefv(myAlSources[0], AL_POSITION, POSITION_FRONT_LEFT);
     alSourcefv(myAlSources[1], AL_POSITION, POSITION_FRONT_RIGHT);
@@ -295,6 +302,17 @@ bool StAudioQueue::initOutMono() {
     return true;
 }
 
+bool StAudioQueue::initOut30Soft(const bool theIsPlanar) {
+    if(!setupOutMonoFormat()) {
+        return false;
+    }
+
+    myBufferOut.setupChannels(StChannelMap::CH30, StChannelMap::PCM, 3);
+    myBufferSrc.setupChannels(StChannelMap::CH30, StChannelMap::PCM, theIsPlanar ? myCodecCtx->channels : 1);
+    stalConfigureSources3_0();
+    return true;
+}
+
 bool StAudioQueue::initOutStereo(const bool theIsPlanar) {
     switch(myBufferSrc.getFormat()) {
         case PCM64FLOAT: {
@@ -508,6 +526,9 @@ bool StAudioQueue::initOutChannels() {
         }
         case 2: {
             return initOutStereo(isPlanar);
+        }
+        case 3: {
+            return initOut30Soft(isPlanar);
         }
         case 4: {
             if(myAlCtx.hasExtMultiChannel) {

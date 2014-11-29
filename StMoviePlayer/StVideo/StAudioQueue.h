@@ -126,6 +126,7 @@ class StAudioQueue : public StAVPacketQueue {
 
     ST_LOCAL void stalConfigureSources1();
     ST_LOCAL void stalConfigureSources2_0();
+    ST_LOCAL void stalConfigureSources3_0();
     ST_LOCAL void stalConfigureSources4_0();
     ST_LOCAL void stalConfigureSources5_0();
     ST_LOCAL void stalConfigureSources5_1();
@@ -162,6 +163,9 @@ class StAudioQueue : public StAVPacketQueue {
 
     //! Initialize 2-channels stream.
     ST_LOCAL bool initOutStereo(const bool theIsPlanar);
+
+    //! Initialize 3.0 stream by configuring 3 sources in 3D.
+    ST_LOCAL bool initOut30Soft(const bool theIsPlanar);
 
     //! Initialize 4.0 stream by configuring 4 sources in 3D.
     ST_LOCAL bool initOut40Soft(const bool theIsPlanar);

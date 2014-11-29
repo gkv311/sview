@@ -91,7 +91,7 @@ class StChannelMap {
         CH10, // mono
         CH20, // stereo
         //CH21, // stereo + LFE
-        //CH30,
+        CH30, // left + right + center
         //CH31,
         CH40,
         //CH41,

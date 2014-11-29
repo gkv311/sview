@@ -42,6 +42,13 @@ StChannelMap::StChannelMap(const StChannelMap::Channels   theChannels,
             FL = FC = LFE = RL = RR = SL = SR = 0; FR = 1;
             count = 2;
             return;
+        case StChannelMap::CH30:
+            count = 3;
+            FL = 0;
+            FR = 1;
+            FC = 2;
+            LFE = RL = RR = SL = SR = 0;
+            return;
         case StChannelMap::CH40:
             count = 4;
             FL = 0;
@@ -357,6 +364,15 @@ bool StPCMBuffer::addConvert(const StPCMBuffer& theBuffer) {
             for(size_t sampleSrcId(0), sampleOutId(0); sampleSrcId < aSamplesSrcCount; sampleSrcId += aSmplSrcInc, sampleOutId += aSmplOutInc) {
                 sampleConv(aBuffersSrc[0][sampleSrcId], aBuffersOut[0][sampleOutId]);
                 sampleConv(aBuffersSrc[1][sampleSrcId], aBuffersOut[1][sampleOutId]);
+            }
+            myPlaneSize += anAddedPlaneSize;
+            return true;
+        }
+        case StChannelMap::CH30: {
+            for(size_t sampleSrcId(0), sampleOutId(0); sampleSrcId < aSamplesSrcCount; sampleSrcId += aSmplSrcInc, sampleOutId += aSmplOutInc) {
+                sampleConv(aBuffersSrc[0][sampleSrcId], aBuffersOut[0][sampleOutId]);
+                sampleConv(aBuffersSrc[1][sampleSrcId], aBuffersOut[1][sampleOutId]);
+                sampleConv(aBuffersSrc[2][sampleSrcId], aBuffersOut[2][sampleOutId]);
             }
             myPlaneSize += anAddedPlaneSize;
             return true;
