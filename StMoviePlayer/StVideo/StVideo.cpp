@@ -33,12 +33,12 @@ namespace {
         aStVideo->mainLoop();
         return SV_THREAD_RETURN 0;
     }
-};
+}
 
 const char* StVideo::ST_VIDEOS_MIME_STRING = ST_VIDEO_PLUGIN_MIME_CHAR;
 
 StVideo::StVideo(const StString&                   theALDeviceName,
-                 const StHandle<StLangMap>&        theLangMap,
+                 const StHandle<StTranslations>&   theLangMap,
                  const StHandle<StPlayList>&       thePlayList,
                  const StHandle<StGLTextureQueue>& theTextureQueue,
                  const StHandle<StSubQueue>&       theSubtitlesQueue)
@@ -227,9 +227,7 @@ void StVideo::setAudioDelay(const float theDelaySec) {
 }
 
 bool StVideo::addFile(const StString& theFileToLoad,
-                      StHandle< StArrayList<StString> >& theStreamsListA,
-                      StHandle< StArrayList<StString> >& theStreamsListS,
-                      double& theMaxDuration) {
+                      StStreamsInfo&  theInfo) {
     StString aFileName, aDummy;
     StFileNode::getFolderAndFile(theFileToLoad, aDummy, aFileName);
 
@@ -296,10 +294,13 @@ bool StVideo::addFile(const StString& theFileToLoad,
         myFileInfoTmp->Info.add(StArgument(aTag->key, aTag->value));
     }
 
-    theMaxDuration = stMax(theMaxDuration, stAV::unitsToSeconds(aFormatCtx->duration));
+    const StString& aPrefLangAudio = myLangMap->getLanguageCode();
+    int32_t anAudioStreamId = (int32_t )theInfo.AudioList->size();
+
+    theInfo.Duration = stMax(theInfo.Duration, stAV::unitsToSeconds(aFormatCtx->duration));
     for(unsigned int aStreamId = 0; aStreamId < aFormatCtx->nb_streams; ++aStreamId) {
         AVStream* aStream = aFormatCtx->streams[aStreamId];
-        theMaxDuration = stMax(theMaxDuration, stAV::unitsToSeconds(aStream, aStream->duration));
+        theInfo.Duration = stMax(theInfo.Duration, stAV::unitsToSeconds(aStream, aStream->duration));
 
         if(aStream->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
             // video track
@@ -326,7 +327,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
                     myFileInfoTmp->Info.add(StArgument(tr(INFO_PIXEL_RATIO),
                         StString() + myVideoMaster->getPixelRatio()));
                     myFileInfoTmp->Info.add(StArgument(tr(INFO_DURATION),
-                        StFormatTime::formatSeconds(theMaxDuration)));
+                        StFormatTime::formatSeconds(theInfo.Duration)));
                 }
             } else if(!myVideoSlave->isInitialized()) {
                 myVideoSlave->init(aFormatCtx, aStreamId, "");
@@ -379,14 +380,16 @@ bool StVideo::addFile(const StString& theFileToLoad,
             if(aFormatCtx->nb_streams == 1) {
                 aLanguage = (aFileName.getLength() > 24) ? (StString("...") + aFileName.subString(aFileName.getLength() - 24, aFileName.getLength())) : aFileName;
             }
-            theStreamsListA->add(aCodecName
+            theInfo.AudioList->add(aCodecName
                                + (!aSampleRate.isEmpty() ? StString(", ") : StString()) + aSampleRate
                                + ", " + aChannelLayout
                                + (!aSampleFormat.isEmpty() ? StString(", ") : StString()) + aSampleFormat
                                + (!aLanguage.isEmpty() ? (StString(" (") + aLanguage + ')') : StString()));
 
-            if(!myAudio->isInitialized()) {
-                myAudio->init(aFormatCtx, aStreamId, "");
+            if(!myAudio->isInitialized()
+            && (aPrefLangAudio.isEmpty() || aLanguage == aPrefLangAudio)
+            &&  myAudio->init(aFormatCtx, aStreamId, "")) {
+                theInfo.LoadedAudio = (int32_t )(theInfo.AudioList->size() - 1);
             }
         } else if(aStream->codec->codec_type == AVMEDIA_TYPE_SUBTITLE) {
             // subtitles track
@@ -409,7 +412,32 @@ bool StVideo::addFile(const StString& theFileToLoad,
             #endif
                 aStreamTitle = aCodecName + (!aLanguage.isEmpty() ? (StString(" (") + aLanguage + ')') : StString());
             }
-            theStreamsListS->add(aStreamTitle);
+            theInfo.SubtitleList->add(aStreamTitle);
+        }
+    }
+
+    // load first audio stream if preferred language is unavailable
+    if(!myAudio->isInitialized()
+    && !aPrefLangAudio.isEmpty()
+    && !theInfo.AudioList->isEmpty()) {
+        for(unsigned int aStreamId = 0; aStreamId < aFormatCtx->nb_streams; ++aStreamId) {
+            AVStream* aStream = aFormatCtx->streams[aStreamId];
+            if(aStream->codec->codec_type != AVMEDIA_TYPE_AUDIO) {
+                continue;
+            }
+
+            StString aLanguage;
+        #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
+            stAV::meta::readTag(aStream, stCString("language"), aLanguage);
+        #else
+            aLanguage = aStream->language;
+        #endif
+            if(aLanguage != aPrefLangAudio
+            && myAudio->init(aFormatCtx, aStreamId, "")) {
+                theInfo.LoadedAudio = anAudioStreamId;
+                break;
+            }
+            ++anAudioStreamId;
         }
     }
 
@@ -429,22 +457,20 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
 
     myFileInfoTmp = new StMovieInfo();
 
-    double aDuration = 0.0;
-    StHandle< StArrayList<StString> > aStreamsListA = new StArrayList<StString>(8);
-    StHandle< StArrayList<StString> > aStreamsListS = new StArrayList<StString>(8);
+    StStreamsInfo aStreamsInfo;
+    aStreamsInfo.AudioList    = new StArrayList<StString>(8);
+    aStreamsInfo.SubtitleList = new StArrayList<StString>(8);
     if(!theNewSource->isEmpty()) {
         bool isLoaded = false;
         for(size_t aNode = 0; aNode < theNewSource->size(); ++aNode) {
-            isLoaded = addFile(theNewSource->getValue(aNode)->getPath(),
-                               aStreamsListA, aStreamsListS, aDuration) || isLoaded;
+            isLoaded = addFile(theNewSource->getValue(aNode)->getPath(), aStreamsInfo) || isLoaded;
         }
         if(!isLoaded) {
             return false;
         }
     } else {
         const StString aFullPath = theNewSource->getPath();
-        if(!addFile(aFullPath,
-                    aStreamsListA, aStreamsListS, aDuration)) {
+        if(!addFile(aFullPath, aStreamsInfo)) {
             return false;
         }
 
@@ -470,8 +496,7 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
                     && aTrackName.isStartsWithIgnoreCase(aName)) {
                         //myPlayList->addToNode(aCurrFile, aFilePath);
                         //myPlayList->getCurrentFile(theNewSource, theNewParams)
-                        addFile(aNode->getPath(),
-                                aStreamsListA, aStreamsListS, aDuration);
+                        addFile(aNode->getPath(), aStreamsInfo);
                     }
                 }
             }
@@ -523,11 +548,11 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
     myCurrPlsFile = theNewPlsFile;
     myFileInfoTmp->Id = myCurrParams;
 
-    params.activeAudio->setList(aStreamsListA, aStreamsListA->isEmpty() ? -1 : 0);
-    params.activeSubtitles->setList(aStreamsListS, -1); // do not show subtitles by default
+    params.activeAudio    ->setList(aStreamsInfo.AudioList,    aStreamsInfo.LoadedAudio);
+    params.activeSubtitles->setList(aStreamsInfo.SubtitleList, aStreamsInfo.LoadedSubtitles);
 
     myEventMutex.lock();
-        myDuration = aDuration;
+        myDuration = aStreamsInfo.Duration;
         myFileInfo = myFileInfoTmp;
     myEventMutex.unlock();
 

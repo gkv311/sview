@@ -114,6 +114,7 @@ StTranslations::StTranslations(const StHandle<StResourceManager>& theResMgr,
             params.language->setValue(int32_t(anIdInList));
         }
     }
+    updateLangCode(anIdInList);
 
     const StString& aFolderName = myLangFolderList[anIdInList];
     const StString  aResName    = StString()
@@ -140,14 +141,36 @@ const StString& StTranslations::getLanguage() const {
     return myLangList[params.language->getValue()];
 }
 
+void StTranslations::updateLangCode(const int32_t theNewLang) {
+    const StString& aLang = myLangList[theNewLang];
+    if(aLang == stCString("русский")) {
+        myLangCode = "rus";
+    } else if(aLang == stCString("français")) {
+        myLangCode = "fre";
+        //myLangCode = "fra";
+    } else if(aLang == stCString("Deutsch")) {
+        myLangCode = "ger";
+        //myLangCode = "deu";
+    } else if(aLang == stCString("한국어")) {
+        myLangCode = "kor";
+    } else if(aLang == stCString("English")) {
+        myLangCode = "eng";
+    } else {
+        myLangCode.clear();
+    }
+}
+
 void StTranslations::setLanguage(const int32_t theNewLang) {
-    // save global setting
     if(size_t(theNewLang) >= myLangList.size()) {
         return;
     }
+
+    // save global setting
     const StString& aFolderName = myLangFolderList[theNewLang];
     StSettings aGlobalSettings(myResMgr, ST_GLOBAL_SETTINGS_GROUP);
     aGlobalSettings.saveString(ST_SETTING_LANGUAGE, aFolderName);
+
+    updateLangCode(theNewLang);
 
     // reload translation file
     StLangMap::clear();

@@ -30,11 +30,10 @@
 #include <StThreads/StThread.h>
 #include <StGL/StPlayList.h>
 #include <StImage/StImageFile.h>
-#include <StStrings/StLangMap.h>
+#include <StSettings/StTranslations.h>
 
 // forward declarations
 class StSubQueue;
-class StLangMap;
 
 struct StMovieInfo {
 
@@ -52,6 +51,27 @@ struct StMovieInfo {
 };
 
 template<> inline void StArray< StHandle<StFileNode> >::sort() {}
+
+/**
+ * Auxiliary structure.
+ */
+struct StStreamsInfo {
+
+    StHandle< StArrayList<StString> > AudioList;
+    StHandle< StArrayList<StString> > SubtitleList;
+    double                            Duration;
+    int32_t                           LoadedAudio;
+    int32_t                           LoadedSubtitles;
+
+    StStreamsInfo()
+    : Duration(0.0),
+      LoadedAudio(-1),
+      LoadedSubtitles(-1) {
+        AudioList    = new StArrayList<StString>(8);
+        SubtitleList = new StArrayList<StString>(8);
+    }
+
+};
 
 /**
  * Special class for video playback.
@@ -86,7 +106,7 @@ class StVideo {
      * Main constructor.
      */
     ST_LOCAL StVideo(const StString&                   theALDeviceName,
-                     const StHandle<StLangMap>&        theLangMap,
+                     const StHandle<StTranslations>&   theLangMap,
                      const StHandle<StPlayList>&       thePlayList,
                      const StHandle<StGLTextureQueue>& theTextureQueue,
                      const StHandle<StSubQueue>&       theSubtitlesQueue);
@@ -285,9 +305,7 @@ class StVideo {
      * Private method to append one format context (one file).
      */
     ST_LOCAL bool addFile(const StString& theFileToLoad,
-                          StHandle< StArrayList<StString> >& theStreamsListA,
-                          StHandle< StArrayList<StString> >& theStreamsListS,
-                          double& theMaxDuration);
+                          StStreamsInfo&  theInfo);
 
     ST_LOCAL bool openSource(const StHandle<StFileNode>&     theNewSource,
                              const StHandle<StStereoParams>& theNewParams,
@@ -363,7 +381,7 @@ class StVideo {
     StMIMEList                    myMimesAudio;
     StMIMEList                    myMimesSubs;
     StHandle<StThread>            myThread;      //!< main loop thread
-    StHandle<StLangMap>           myLangMap;     //!< translations dictionary
+    StHandle<StTranslations>      myLangMap;     //!< translations dictionary
 
     StArrayList<AVFormatContext*> myCtxList;     //!< format context for each file
     StArrayList<AVFormatContext*> myPlayCtxList; //!< currently played contexts

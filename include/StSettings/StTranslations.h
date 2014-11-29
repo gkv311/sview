@@ -41,6 +41,13 @@ class StTranslations : public StLangMap {
     ST_CPPEXPORT const StString& getLanguage() const;
 
     /**
+     * Returns 3-letter language code of active translation.
+     */
+    ST_LOCAL const StString& getLanguageCode() const {
+        return myLangCode;
+    }
+
+    /**
      * Return list of available translations.
      */
     const StArrayList<StString>& getLanguagesList() const {
@@ -78,6 +85,8 @@ class StTranslations : public StLangMap {
      */
     ST_LOCAL void setLanguage(const int32_t theNewLang);
 
+    ST_LOCAL void updateLangCode(const int32_t theNewLang);
+
         private:
 
     ST_LOCAL static const StString DEFAULT_EXTENSION;
@@ -90,6 +99,7 @@ class StTranslations : public StLangMap {
     StString              myModuleName;     //!< module name like 'StImageViewer'
     StArrayList<StString> myLangList;       //!< available (found) translations
     StArrayList<StString> myLangFolderList; //!< translation files
+    StString              myLangCode;       //!< active language code
     bool                  myWasReloaded;    //!< flag indicates that translation was reloaded
 
 };
