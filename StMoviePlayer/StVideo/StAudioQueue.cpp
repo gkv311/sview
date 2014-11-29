@@ -228,8 +228,8 @@ StAudioQueue::StAudioQueue(const StString& theAlDeviceName)
 : StAVPacketQueue(512),
   myPlaybackTimer(false),
   myDowntimeEvent(true),
-  myBufferSrc(PCM16_SIGNED),
-  myBufferOut(PCM16_SIGNED),
+  myBufferSrc(StPcmFormat_Int16),
+  myBufferOut(StPcmFormat_Int16),
   myIsAlValid(ST_AL_INIT_NA),
   myToSwitchDev(false),
   myIsDisconnected(false),
@@ -259,32 +259,32 @@ StAudioQueue::~StAudioQueue() {
 
 bool StAudioQueue::setupOutMonoFormat() {
     switch(myBufferSrc.getFormat()) {
-        case PCM64FLOAT: {
+        case StPcmFormat_Float64: {
             if(myAlCtx.hasExtFloat64) {
                 // use float64 extension
                 myAlFormat = alGetEnumValue("AL_FORMAT_MONO_DOUBLE_EXT");
-                myBufferOut.setFormat(PCM64FLOAT);
+                myBufferOut.setFormat(StPcmFormat_Float64);
                 return true;
             }
         }
-        case PCM32_SIGNED:
-        case PCM32FLOAT: {
+        case StPcmFormat_Int32:
+        case StPcmFormat_Float32: {
             if(myAlCtx.hasExtFloat32) {
                 // use float32 extension to preserve more quality
                 myAlFormat = alGetEnumValue("AL_FORMAT_MONO_FLOAT32");
-                myBufferOut.setFormat(PCM32FLOAT);
+                myBufferOut.setFormat(StPcmFormat_Float32);
                 return true;
             }
         }
-        case PCM16_SIGNED: {
+        case StPcmFormat_Int16: {
             // default - int16_t
             myAlFormat = AL_FORMAT_MONO16;
-            myBufferOut.setFormat(PCM16_SIGNED);
+            myBufferOut.setFormat(StPcmFormat_Int16);
             return true;
         }
-        case PCM8_UNSIGNED: {
+        case StPcmFormat_UInt8: {
             myAlFormat = AL_FORMAT_MONO8;
-            myBufferOut.setFormat(PCM8_UNSIGNED);
+            myBufferOut.setFormat(StPcmFormat_UInt8);
             return true;
         }
     }
@@ -315,31 +315,31 @@ bool StAudioQueue::initOut30Soft(const bool theIsPlanar) {
 
 bool StAudioQueue::initOutStereo(const bool theIsPlanar) {
     switch(myBufferSrc.getFormat()) {
-        case PCM64FLOAT: {
+        case StPcmFormat_Float64: {
             if(myAlCtx.hasExtFloat64) {
                 // use float64 extension
                 myAlFormat = alGetEnumValue("AL_FORMAT_STEREO_DOUBLE_EXT");
-                myBufferOut.setFormat(PCM64FLOAT);
+                myBufferOut.setFormat(StPcmFormat_Float64);
                 break;
             }
         }
-        case PCM32_SIGNED:
-        case PCM32FLOAT: {
+        case StPcmFormat_Int32:
+        case StPcmFormat_Float32: {
             if(myAlCtx.hasExtFloat32) {
                 myAlFormat = alGetEnumValue("AL_FORMAT_STEREO_FLOAT32");
-                myBufferOut.setFormat(PCM32FLOAT);
+                myBufferOut.setFormat(StPcmFormat_Float32);
                 break;
             }
         }
-        case PCM16_SIGNED: {
+        case StPcmFormat_Int16: {
             // default - int16_t
             myAlFormat = AL_FORMAT_STEREO16;
-            myBufferOut.setFormat(PCM16_SIGNED);
+            myBufferOut.setFormat(StPcmFormat_Int16);
             break;
         }
-        case PCM8_UNSIGNED: {
+        case StPcmFormat_UInt8: {
             myAlFormat = AL_FORMAT_STEREO8;
-            myBufferOut.setFormat(PCM8_UNSIGNED);
+            myBufferOut.setFormat(StPcmFormat_UInt8);
             break;
         }
         default: return false;
@@ -364,21 +364,21 @@ bool StAudioQueue::initOut40Soft(const bool theIsPlanar) {
 
 bool StAudioQueue::initOut40Ext(const bool theIsPlanar) {
     switch(myBufferSrc.getFormat()) {
-        case PCM32_SIGNED:
-        case PCM32FLOAT:
-        case PCM64FLOAT: {
+        case StPcmFormat_Int32:
+        case StPcmFormat_Float32:
+        case StPcmFormat_Float64: {
             myAlFormat = alGetEnumValue("AL_FORMAT_QUAD32");
-            myBufferOut.setFormat(PCM32FLOAT);
+            myBufferOut.setFormat(StPcmFormat_Float32);
             break;
         }
-        case PCM16_SIGNED: {
+        case StPcmFormat_Int16: {
             myAlFormat = alGetEnumValue("AL_FORMAT_QUAD16");
-            myBufferOut.setFormat(PCM16_SIGNED);
+            myBufferOut.setFormat(StPcmFormat_Int16);
             break;
         }
-        case PCM8_UNSIGNED: {
+        case StPcmFormat_UInt8: {
             myAlFormat = alGetEnumValue("AL_FORMAT_QUAD8");
-            myBufferOut.setFormat(PCM8_UNSIGNED);
+            myBufferOut.setFormat(StPcmFormat_UInt8);
             break;
         }
         default: return false;
@@ -428,21 +428,21 @@ bool StAudioQueue::initOut51Soft(const bool theIsPlanar) {
 
 bool StAudioQueue::initOut51Ext(const bool theIsPlanar) {
     switch(myBufferSrc.getFormat()) {
-        case PCM32_SIGNED:
-        case PCM32FLOAT:
-        case PCM64FLOAT: {
+        case StPcmFormat_Int32:
+        case StPcmFormat_Float32:
+        case StPcmFormat_Float64: {
             myAlFormat = alGetEnumValue("AL_FORMAT_51CHN32");
-            myBufferOut.setFormat(PCM32FLOAT);
+            myBufferOut.setFormat(StPcmFormat_Float32);
             break;
         }
-        case PCM16_SIGNED: {
+        case StPcmFormat_Int16: {
             myAlFormat = alGetEnumValue("AL_FORMAT_51CHN16");
-            myBufferOut.setFormat(PCM16_SIGNED);
+            myBufferOut.setFormat(StPcmFormat_Int16);
             break;
         }
-        case PCM8_UNSIGNED: {
+        case StPcmFormat_UInt8: {
             myAlFormat = alGetEnumValue("AL_FORMAT_51CHN8");
-            myBufferOut.setFormat(PCM8_UNSIGNED);
+            myBufferOut.setFormat(StPcmFormat_UInt8);
             break;
         }
         default: return false;
@@ -486,21 +486,21 @@ bool StAudioQueue::initOut71Ext(const bool theIsPlanar) {
     }
 
     switch(myBufferSrc.getFormat()) {
-        case PCM32_SIGNED:
-        case PCM32FLOAT:
-        case PCM64FLOAT: {
+        case StPcmFormat_Int32:
+        case StPcmFormat_Float32:
+        case StPcmFormat_Float64: {
             myAlFormat = alGetEnumValue("AL_FORMAT_71CHN32");
-            myBufferOut.setFormat(PCM32FLOAT);
+            myBufferOut.setFormat(StPcmFormat_Float32);
             break;
         }
-        case PCM16_SIGNED: {
+        case StPcmFormat_Int16: {
             myAlFormat = alGetEnumValue("AL_FORMAT_71CHN16");
-            myBufferOut.setFormat(PCM16_SIGNED);
+            myBufferOut.setFormat(StPcmFormat_Int16);
             break;
         }
-        case PCM8_UNSIGNED: {
+        case StPcmFormat_UInt8: {
             myAlFormat = alGetEnumValue("AL_FORMAT_71CHN8");
-            myBufferOut.setFormat(PCM8_UNSIGNED);
+            myBufferOut.setFormat(StPcmFormat_UInt8);
             break;
         }
         default: return false;
@@ -604,19 +604,19 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
         return false;
     } else if(myCodecCtx->sample_fmt == stAV::audio::SAMPLE_FMT::U8
            || myCodecCtx->sample_fmt == stAV::audio::SAMPLE_FMT::U8P) {
-        myBufferSrc.setFormat(PCM8_UNSIGNED);
+        myBufferSrc.setFormat(StPcmFormat_UInt8);
     } else if(myCodecCtx->sample_fmt == stAV::audio::SAMPLE_FMT::S16
            || myCodecCtx->sample_fmt == stAV::audio::SAMPLE_FMT::S16P) {
-        myBufferSrc.setFormat(PCM16_SIGNED);
+        myBufferSrc.setFormat(StPcmFormat_Int16);
     } else if(myCodecCtx->sample_fmt == stAV::audio::SAMPLE_FMT::S32
            || myCodecCtx->sample_fmt == stAV::audio::SAMPLE_FMT::S32P) {
-        myBufferSrc.setFormat(PCM32_SIGNED);
+        myBufferSrc.setFormat(StPcmFormat_Int32);
     } else if(myCodecCtx->sample_fmt == stAV::audio::SAMPLE_FMT::FLT
            || myCodecCtx->sample_fmt == stAV::audio::SAMPLE_FMT::FLTP) {
-        myBufferSrc.setFormat(PCM32FLOAT);
+        myBufferSrc.setFormat(StPcmFormat_Float32);
     } else if(myCodecCtx->sample_fmt == stAV::audio::SAMPLE_FMT::DBL
            || myCodecCtx->sample_fmt == stAV::audio::SAMPLE_FMT::DBLP) {
-        myBufferSrc.setFormat(PCM64FLOAT);
+        myBufferSrc.setFormat(StPcmFormat_Float64);
     } else {
         signals.onError(StString("Audio sample format '") + stAV::audio::getSampleFormatString(myCodecCtx)
                       + "' not supported");

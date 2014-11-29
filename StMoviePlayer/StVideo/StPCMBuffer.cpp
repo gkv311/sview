@@ -110,18 +110,18 @@ StChannelMap::StChannelMap(const StChannelMap::Channels   theChannels,
     }
 }
 
-void StPCMBuffer::setFormat(const StPCMformat thePCMFormat) {
+void StPCMBuffer::setFormat(const StPcmFormat thePCMFormat) {
     switch(thePCMFormat) {
-        case PCM8_UNSIGNED: mySampleSize = sizeof(uint8_t); break;
-        case PCM16_SIGNED:  mySampleSize = sizeof(int16_t); break;
-        case PCM32_SIGNED:  mySampleSize = sizeof(int32_t); break;
-        case PCM32FLOAT:    mySampleSize = sizeof(float);   break;
-        case PCM64FLOAT:    mySampleSize = sizeof(double);  break;
+        case StPcmFormat_UInt8:   mySampleSize = sizeof(uint8_t); break;
+        case StPcmFormat_Int16:   mySampleSize = sizeof(int16_t); break;
+        case StPcmFormat_Int32:   mySampleSize = sizeof(int32_t); break;
+        case StPcmFormat_Float32: mySampleSize = sizeof(float);   break;
+        case StPcmFormat_Float64: mySampleSize = sizeof(double);  break;
     }
     myPCMFormat = thePCMFormat;
 }
 
-StPCMBuffer::StPCMBuffer(const StPCMformat thePCMFormat)
+StPCMBuffer::StPCMBuffer(const StPcmFormat thePCMFormat)
 : myBuffer(NULL),
   mySizeBytes(ST_MAX_AUDIO_FRAME_SIZE),
   myPlaneSize(0),
@@ -443,45 +443,45 @@ bool StPCMBuffer::addData(const StPCMBuffer& theBuffer) {
     || myPCMFormat != theBuffer.myPCMFormat) {
         // split interleaved data or remap channel order or convert format
         switch(theBuffer.myPCMFormat) {
-            case PCM8_UNSIGNED:
+            case StPcmFormat_UInt8:
                 switch(myPCMFormat) {
-                    case PCM8_UNSIGNED: return addConvert<uint8_t, uint8_t>(theBuffer);
-                    case PCM16_SIGNED:  return addConvert<uint8_t, int16_t>(theBuffer);
-                    case PCM32_SIGNED:  return addConvert<uint8_t, int32_t>(theBuffer);
-                    case PCM32FLOAT:    return addConvert<uint8_t, float  >(theBuffer);
-                    case PCM64FLOAT:    return addConvert<uint8_t, double >(theBuffer);
+                    case StPcmFormat_UInt8:   return addConvert<uint8_t, uint8_t>(theBuffer);
+                    case StPcmFormat_Int16:   return addConvert<uint8_t, int16_t>(theBuffer);
+                    case StPcmFormat_Int32:   return addConvert<uint8_t, int32_t>(theBuffer);
+                    case StPcmFormat_Float32: return addConvert<uint8_t, float  >(theBuffer);
+                    case StPcmFormat_Float64: return addConvert<uint8_t, double >(theBuffer);
                 }
-            case PCM16_SIGNED:
+            case StPcmFormat_Int16:
                 switch(myPCMFormat) {
-                    case PCM8_UNSIGNED: return addConvert<int16_t, uint8_t>(theBuffer);
-                    case PCM16_SIGNED:  return addConvert<int16_t, int16_t>(theBuffer);
-                    case PCM32_SIGNED:  return addConvert<int16_t, int32_t>(theBuffer);
-                    case PCM32FLOAT:    return addConvert<int16_t, float  >(theBuffer);
-                    case PCM64FLOAT:    return addConvert<int16_t, double >(theBuffer);
+                    case StPcmFormat_UInt8:   return addConvert<int16_t, uint8_t>(theBuffer);
+                    case StPcmFormat_Int16:   return addConvert<int16_t, int16_t>(theBuffer);
+                    case StPcmFormat_Int32:   return addConvert<int16_t, int32_t>(theBuffer);
+                    case StPcmFormat_Float32: return addConvert<int16_t, float  >(theBuffer);
+                    case StPcmFormat_Float64: return addConvert<int16_t, double >(theBuffer);
                 }
-            case PCM32_SIGNED:
+            case StPcmFormat_Int32:
                 switch(myPCMFormat) {
-                    case PCM8_UNSIGNED: return addConvert<int32_t, uint8_t>(theBuffer);
-                    case PCM16_SIGNED:  return addConvert<int32_t, int16_t>(theBuffer);
-                    case PCM32_SIGNED:  return addConvert<int32_t, int32_t>(theBuffer);
-                    case PCM32FLOAT:    return addConvert<int32_t, float  >(theBuffer);
-                    case PCM64FLOAT:    return addConvert<int32_t, double >(theBuffer);
+                    case StPcmFormat_UInt8:   return addConvert<int32_t, uint8_t>(theBuffer);
+                    case StPcmFormat_Int16:   return addConvert<int32_t, int16_t>(theBuffer);
+                    case StPcmFormat_Int32:   return addConvert<int32_t, int32_t>(theBuffer);
+                    case StPcmFormat_Float32: return addConvert<int32_t, float  >(theBuffer);
+                    case StPcmFormat_Float64: return addConvert<int32_t, double >(theBuffer);
                 }
-            case PCM32FLOAT:
+            case StPcmFormat_Float32:
                 switch(myPCMFormat) {
-                    case PCM8_UNSIGNED: return addConvert<float, uint8_t>(theBuffer);
-                    case PCM16_SIGNED:  return addConvert<float, int16_t>(theBuffer);
-                    case PCM32_SIGNED:  return addConvert<float, int32_t>(theBuffer);
-                    case PCM32FLOAT:    return addConvert<float, float  >(theBuffer);
-                    case PCM64FLOAT:    return addConvert<float, double >(theBuffer);
+                    case StPcmFormat_UInt8:   return addConvert<float, uint8_t>(theBuffer);
+                    case StPcmFormat_Int16:   return addConvert<float, int16_t>(theBuffer);
+                    case StPcmFormat_Int32:   return addConvert<float, int32_t>(theBuffer);
+                    case StPcmFormat_Float32: return addConvert<float, float  >(theBuffer);
+                    case StPcmFormat_Float64: return addConvert<float, double >(theBuffer);
                 }
-            case PCM64FLOAT:
+            case StPcmFormat_Float64:
                 switch(myPCMFormat) {
-                    case PCM8_UNSIGNED: return addConvert<double, uint8_t>(theBuffer);
-                    case PCM16_SIGNED:  return addConvert<double, int16_t>(theBuffer);
-                    case PCM32_SIGNED:  return addConvert<double, int32_t>(theBuffer);
-                    case PCM32FLOAT:    return addConvert<double, float  >(theBuffer);
-                    case PCM64FLOAT:    return addConvert<double, double >(theBuffer);
+                    case StPcmFormat_UInt8:   return addConvert<double, uint8_t>(theBuffer);
+                    case StPcmFormat_Int16:   return addConvert<double, int16_t>(theBuffer);
+                    case StPcmFormat_Int32:   return addConvert<double, int32_t>(theBuffer);
+                    case StPcmFormat_Float32: return addConvert<double, float  >(theBuffer);
+                    case StPcmFormat_Float64: return addConvert<double, double >(theBuffer);
                 }
         }
         return false;

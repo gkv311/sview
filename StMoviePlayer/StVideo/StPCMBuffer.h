@@ -26,20 +26,12 @@
 /**
  * All sample formats are in native-endian
  */
-typedef enum tagStPCMformat {
-    PCM8_UNSIGNED = 0,
-    PCM16_SIGNED = 1,
-    PCM32_SIGNED = 2,
-    PCM32FLOAT = 3,    // signed, should be -1.0 .. 1.0
-    PCM64FLOAT = 4,
-} StPCMformat;
-
-template<StPCMformat pcmFormat>
-class StPCMformatType;
-
-template<>
-class StPCMformatType<(StPCMformat )1> {
-    typedef int16_t type;
+enum StPcmFormat {
+    StPcmFormat_UInt8   = 0, //!< uint8_t
+    StPcmFormat_Int16   = 1, //!< int16_t
+    StPcmFormat_Int32   = 2, //!< int32_t
+    StPcmFormat_Float32 = 3, //!< signed 32-bit float, should be -1.0 .. 1.0
+    StPcmFormat_Float64 = 4, //!< signed 64-bit float, should be -1.0 .. 1.0
 };
 
 /**
@@ -153,9 +145,9 @@ class StPCMBuffer {
         public:
 
     /**
-     * @param pcmFormat     PCM format from PCMformat enum
+     * @param thePCMFormat PCM format
      */
-    ST_LOCAL StPCMBuffer(const StPCMformat thePCMFormat);
+    ST_LOCAL StPCMBuffer(const StPcmFormat thePCMFormat);
 
     /**
      * Destructor.
@@ -304,11 +296,11 @@ class StPCMBuffer {
         myPCMFreq = theFreq;
     }
 
-    ST_LOCAL StPCMformat getFormat() const {
+    ST_LOCAL StPcmFormat getFormat() const {
         return myPCMFormat;
     }
 
-    ST_LOCAL void setFormat(const StPCMformat thePCMFormat);
+    ST_LOCAL void setFormat(const StPcmFormat thePCMFormat);
 
     /**
      * @return planes number (1 for interleaved data)
@@ -347,7 +339,7 @@ class StPCMBuffer {
     size_t       myPlanesNb;       //!< number of planes (either - 1 for interleaved data or >= 2 for array of mono sources)
 
     size_t       mySampleSize;     //!< sample size (for 1 channel)
-    StPCMformat  myPCMFormat;      //!< sample format
+    StPcmFormat  myPCMFormat;      //!< sample format
     int          myPCMFreq;        //!< frequency
     StChannelMap myChMap;          //!< channel order rules
 
