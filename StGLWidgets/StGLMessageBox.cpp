@@ -72,6 +72,19 @@ void StGLMessageBox::create(const StString& theTitle,
     myMarginBottom = myRoot->scale(24 * 3);
     myMinSizeY     = myRoot->scale(200);
 
+    int aTitleOffset =  myRoot->scale(24);
+    int aBtnBot      = -myRoot->scale(24);
+
+    if(myRoot->getRectPx().width()  <= myRoot->scale(450)
+    || myRoot->getRectPx().height() <= myRoot->scale(450)) {
+        myMarginLeft   =  myRoot->scale(4);
+        myMarginRight  =  myRoot->scale(4);
+        myMarginTop    =  myRoot->scale(4);
+        myMarginBottom =  myRoot->scale(32);
+        aTitleOffset   =  myRoot->scale(4);
+        aBtnBot        = -myRoot->scale(4);
+    }
+
     int aTitleHeight = 0;
     if(!theTitle.isEmpty()) {
         myTitle = new StGLTextArea(this, 0, myMarginTop,
@@ -89,7 +102,12 @@ void StGLMessageBox::create(const StString& theTitle,
         //myTitle->stglInitAutoHeight();
     }
 
-    const int aTitleOffset = aTitleHeight > 0 ? (aTitleHeight + myRoot->scale(24)) : 0;
+    if(aTitleHeight > 0) {
+        aTitleOffset += aTitleHeight;
+    } else {
+        aTitleOffset = 0;
+    }
+
     myMarginTop += aTitleOffset;
     myContent = new StGLScrollArea(this, myMarginLeft, myMarginTop,
                                    StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
@@ -99,7 +117,7 @@ void StGLMessageBox::create(const StString& theTitle,
     myIsTopWidget = true;
     getRoot()->setFocus(this); // take input focus
 
-    myBtnPanel = new StGLWidget(this, 0, -myRoot->scale(24), StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER), 0, myRoot->scale(24));
+    myBtnPanel = new StGLWidget(this, 0, aBtnBot, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER), 0, myRoot->scale(24));
     myBtnPanel->setVisibility(true);
 }
 
