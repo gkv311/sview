@@ -106,6 +106,11 @@ typedef uint32_t stUInt32_t;
 typedef int64_t  stInt64_t;
 typedef uint64_t stUInt64_t;
 
+// compatibility with old compilers
+#if defined(__GNUC__) && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 6))
+    #define nullptr (void*)0
+#endif
+
 /**
  * Mordern compilers provide fixed-size primitives like int32_t.
  * Some developers can use these types in function overloads
