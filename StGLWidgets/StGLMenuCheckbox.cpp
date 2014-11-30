@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,14 +11,6 @@
 #include <StGLWidgets/StGLCheckbox.h>
 #include <StGLWidgets/StGLMenuProgram.h>
 #include <StGLWidgets/StGLRootWidget.h>
-
-namespace {
-    static const StString CLASS_NAME("StGLMenuCheckbox");
-};
-
-const StString& StGLMenuCheckbox::getClassName() {
-    return CLASS_NAME;
-}
 
 StGLMenuCheckbox::StGLMenuCheckbox(StGLMenu* theParent,
                                    const StHandle<StBoolParam>& theTrackedValue)

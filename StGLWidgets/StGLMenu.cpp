@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -19,9 +19,8 @@
 #include <StSlots/StAction.h>
 
 namespace {
-    static const StString CLASS_NAME("StGLMenu");
     static const size_t SHARE_PROGRAM_ID = StGLRootWidget::generateShareId();
-};
+}
 
 void StGLMenu::DeleteWithSubMenus(StGLMenu* theMenu) {
     if(theMenu == NULL) {
@@ -62,10 +61,6 @@ StGLMenu::StGLMenu(StGLWidget* theParent,
 StGLMenu::~StGLMenu() {
     myVertexBuf   .release(getContext());
     myVertexBndBuf.release(getContext());
-}
-
-const StString& StGLMenu::getClassName() {
-    return CLASS_NAME;
 }
 
 void StGLMenu::setVisibility(bool isVisible, bool isForce) {

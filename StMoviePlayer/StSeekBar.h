@@ -40,8 +40,6 @@ class ST_LOCAL StSeekBar : public StGLWidget {
      */
     virtual ~StSeekBar();
 
-    virtual const StString& getClassName();
-
     /**
      * @param theProgress - current progress from 0.0f to 1.0f;
      */

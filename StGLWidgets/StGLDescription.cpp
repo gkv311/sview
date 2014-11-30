@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -8,14 +8,6 @@
 
 #include <StGLWidgets/StGLDescription.h>
 #include <StGLWidgets/StGLRootWidget.h>
-
-namespace {
-    static const StString TheClassName("StGLDescription");
-};
-
-const StString& StGLDescription::getClassName() {
-    return TheClassName;
-}
 
 StGLDescription::StGLDescription(StGLWidget* theParent)
 : StGLTextArea(theParent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),

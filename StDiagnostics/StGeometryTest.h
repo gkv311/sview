@@ -52,8 +52,6 @@ class StGeometryTest : public StGLWidget {
     ST_LOCAL StGeometryTest(StGLWidget* parent);
     ST_LOCAL virtual ~StGeometryTest();
 
-    ST_LOCAL virtual const StString& getClassName();
-
     ST_LOCAL virtual void stglResize();
     ST_LOCAL virtual bool stglInit();
     ST_LOCAL virtual void stglDraw(unsigned int view);

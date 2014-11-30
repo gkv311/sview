@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -148,9 +148,8 @@ class StGLTextureButton::StButtonProgram : public StGLProgram {
 };
 
 namespace {
-    static const StString CLASS_NAME("StGLTextureButton");
     static const size_t SHARE_PROGRAM_ID = StGLRootWidget::generateShareId();
-};
+}
 
 StGLTextureButton::StGLTextureButton(StGLWidget*      theParent,
                                      const int        theLeft,
@@ -175,10 +174,6 @@ StGLTextureButton::~StGLTextureButton() {
     for(size_t anIter = 0; anIter < myTextures.size(); ++anIter) {
         myTextures[anIter].release(aCtx);
     }
-}
-
-const StString& StGLTextureButton::getClassName() {
-    return CLASS_NAME;
 }
 
 void StGLTextureButton::glWaveTimerControl() {

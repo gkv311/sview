@@ -23,10 +23,6 @@
 #include <StGLCore/StGLCore20.h>
 #include <StGLWidgets/StGLRootWidget.h>
 
-namespace {
-    static const StString className("StSeekBar");
-};
-
 class StSeekBar::StProgramSB : public StGLProgram {
 
         public:
@@ -123,10 +119,6 @@ StSeekBar::~StSeekBar() {
     }
     myVertices.release(aCtx);
     myColors.release(aCtx);
-}
-
-const StString& StSeekBar::getClassName() {
-    return className;
 }
 
 void StSeekBar::stglResize() {

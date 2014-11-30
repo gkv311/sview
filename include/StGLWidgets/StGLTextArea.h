@@ -43,8 +43,6 @@ class StGLTextArea : public StGLWidget {
 
     ST_CPPEXPORT virtual ~StGLTextArea();
 
-    ST_CPPEXPORT virtual const StString& getClassName();
-
     /**
      * @return currently drawn text
      */

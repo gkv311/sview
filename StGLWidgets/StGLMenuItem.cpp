@@ -16,7 +16,6 @@
 #include <StGLCore/StGLCore20.h>
 
 namespace {
-    static const StString CLASS_NAME("StGLMenuItem");
     static const size_t SHARE_PROGRAM_ID = StGLRootWidget::generateShareId();
 }
 
@@ -75,10 +74,6 @@ StGLMenuItem::StGLMenuItem(StGLMenu* theParent,
 
 StGLMenuItem::~StGLMenuItem() {
     myBackVertexBuf.release(getContext());
-}
-
-const StString& StGLMenuItem::getClassName() {
-    return CLASS_NAME;
 }
 
 void StGLMenuItem::setIcon(const StString* theImgPaths,

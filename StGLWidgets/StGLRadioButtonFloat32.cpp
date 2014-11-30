@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -7,10 +7,6 @@
  */
 
 #include <StGLWidgets/StGLRadioButtonFloat32.h>
-
-namespace {
-    static const StString CLASS_NAME("StGLRadioButtonFloat32");
-};
 
 StGLRadioButtonFloat32
     ::StGLRadioButtonFloat32(StGLWidget* theParent,
@@ -29,10 +25,6 @@ StGLRadioButtonFloat32
 }
 
 StGLRadioButtonFloat32::~StGLRadioButtonFloat32() {}
-
-const StString& StGLRadioButtonFloat32::getClassName() {
-    return CLASS_NAME;
-}
 
 bool StGLRadioButtonFloat32::isActiveState() const {
     return myTrackValue->areEqual(myTrackValue->getValue(), myValueOn);

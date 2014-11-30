@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -30,7 +30,6 @@ class StGLCheckboxTextured : public StGLTextureButton {
      * Destructor.
      */
     ST_CPPEXPORT virtual ~StGLCheckboxTextured();
-    ST_CPPEXPORT virtual const StString& getClassName();
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo);
 
         private: //!< callback Slots (private overriders)

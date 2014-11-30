@@ -56,8 +56,6 @@ class StGLRootWidget : public StGLWidget {
      */
     ST_CPPEXPORT virtual ~StGLRootWidget();
 
-    ST_CPPEXPORT virtual const StString& getClassName();
-
     /**
      * Process initialization.
      * @return true on success

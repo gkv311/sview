@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -40,7 +40,6 @@ class StGLRangeFieldFloat32 : public StGLWidget {
 
     ST_CPPEXPORT virtual ~StGLRangeFieldFloat32();
     ST_CPPEXPORT virtual bool stglInit();
-    ST_CPPEXPORT virtual const StString& getClassName();
 
         public:
 

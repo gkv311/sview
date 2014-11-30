@@ -110,7 +110,6 @@ class StGLImageRegion : public StGLWidget {
     }
 
     ST_CPPEXPORT virtual ~StGLImageRegion();
-    ST_CPPEXPORT virtual const StString& getClassName();
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& pointZo);
     ST_CPPEXPORT virtual bool stglInit();
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView);

@@ -203,10 +203,9 @@ class StGLTextArea::StBorderProgram : public StGLProgram {
 };
 
 namespace {
-    static const StString CLASS_NAME("StGLTextArea");
     static const size_t SHARE_TEXT_PROGRAM_ID   = StGLRootWidget::generateShareId();
     static const size_t SHARE_BORDER_PROGRAM_ID = StGLRootWidget::generateShareId();
-};
+}
 
 StGLTextArea::StGLTextArea(StGLWidget* theParent,
                            const int theLeft, const int theTop,
@@ -244,10 +243,6 @@ StGLTextArea::~StGLTextArea() {
 
     myBorderIVertBuf.release(aCtx);
     myBorderOVertBuf.release(aCtx);
-}
-
-const StString& StGLTextArea::getClassName() {
-    return CLASS_NAME;
 }
 
 const StString& StGLTextArea::getText() const {

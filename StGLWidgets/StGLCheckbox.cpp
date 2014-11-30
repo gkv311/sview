@@ -14,7 +14,7 @@
 #include <StGLCore/StGLCore20.h>
 
 namespace {
-    static const StString CLASS_NAME("StGLCheckbox");
+
     static const size_t SHARE_PROGRAM_ID = StGLRootWidget::generateShareId();
 
     static const StGLVec4 OUTER_COLORS[2] = {
@@ -27,7 +27,7 @@ namespace {
         StGLVec4(1.0f, 1.0f, 1.0f, 0.5f)  // on
     };
 
-};
+}
 
 StGLCheckbox::StGLCheckbox(StGLWidget* theParent,
                            const StHandle<StBoolParam>& theTrackedValue,
@@ -45,10 +45,6 @@ StGLCheckbox::StGLCheckbox(StGLWidget* theParent,
 
 StGLCheckbox::~StGLCheckbox() {
     myVertBuf.release(getContext());
-}
-
-const StString& StGLCheckbox::getClassName() {
-    return CLASS_NAME;
 }
 
 void StGLCheckbox::stglResize() {

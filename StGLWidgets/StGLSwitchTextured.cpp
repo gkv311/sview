@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -8,10 +8,6 @@
 
 #include <StGLWidgets/StGLSwitchTextured.h>
 #include <StGLWidgets/StGLRadioButtonTextured.h>
-
-namespace {
-    static const StString CLASS_NAME("StGLSwitchTextured");
-};
 
 StGLSwitchTextured::StGLSwitchTextured(StGLWidget* theParent,
                                        const StHandle<StInt32Param>& theTrackedValue,
@@ -26,11 +22,6 @@ StGLSwitchTextured::StGLSwitchTextured(StGLWidget* theParent,
 StGLSwitchTextured::~StGLSwitchTextured() {
     //
 }
-
-const StString& StGLSwitchTextured::getClassName() {
-    return CLASS_NAME;
-}
-
 
 void StGLSwitchTextured::setVisibility(bool isVisible, bool isForce) {
     // setup opacity

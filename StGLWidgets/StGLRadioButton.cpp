@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -14,7 +14,7 @@
 #include <StGLCore/StGLCore20.h>
 
 namespace {
-    static const StString CLASS_NAME("StGLRadioButton");
+
     static const size_t SHARE_PROGRAM_ID = StGLRootWidget::generateShareId();
 
     static const StGLVec4 OUTER_COLORS[2] = {
@@ -27,7 +27,7 @@ namespace {
         StGLVec4(1.0f, 1.0f, 1.0f, 0.5f)  // on
     };
 
-};
+}
 
 StGLRadioButton::StGLRadioButton(StGLWidget* theParent,
                                  const StHandle<StInt32Param>& theTrackedValue,
@@ -48,10 +48,6 @@ StGLRadioButton::StGLRadioButton(StGLWidget* theParent,
 
 StGLRadioButton::~StGLRadioButton() {
     myVertBuf.release(getContext());
-}
-
-const StString& StGLRadioButton::getClassName() {
-    return CLASS_NAME;
 }
 
 void StGLRadioButton::stglResize() {

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -14,10 +14,6 @@
 
 #include <StStrings/StLogger.h>
 #include <StThreads/StMutex.h>
-
-namespace {
-    static const StString CLASS_NAME("StGLWidget");
-};
 
 StGLWidget::StGLWidget(StGLWidget* theParent,
                        const int theLeft, const int theTop,
@@ -108,10 +104,6 @@ void StGLWidget::setNext(StGLWidget* theNext) {
         // set self as previous item
         theNext->setPrev(this);
     }
-}
-
-const StString& StGLWidget::getClassName() {
-    return CLASS_NAME;
 }
 
 GLdouble StGLWidget::getScaleX() const {

@@ -42,11 +42,6 @@ StGeometryTest::~StGeometryTest() {
     myBrightness.release(aCtx);
 }
 
-const StString& StGeometryTest::getClassName() {
-    static const StString className("StGeometryTest");
-    return className;
-}
-
 void StGeometryTest::resizeGrid(const StRectI_t& winRectPx) {
     StGLContext& aCtx = getContext();
 

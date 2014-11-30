@@ -18,7 +18,7 @@
 
 namespace {
     static const int OFFSET_PIXELS = 32;
-};
+}
 
 StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
                                const StString& theTitle,

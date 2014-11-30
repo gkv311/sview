@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -7,10 +7,6 @@
  */
 
 #include <StGLWidgets/StGLRadioButtonTextured.h>
-
-namespace {
-    static const StString CLASS_NAME("StGLRadioButtonTextured");
-};
 
 StGLRadioButtonTextured::StGLRadioButtonTextured(StGLWidget* theParent,
                                                  const StHandle<StInt32Param>& theTrackedValue, const int32_t theValueOn,
@@ -27,10 +23,6 @@ StGLRadioButtonTextured::StGLRadioButtonTextured(StGLWidget* theParent,
 
 StGLRadioButtonTextured::~StGLRadioButtonTextured() {
     //
-}
-
-const StString& StGLRadioButtonTextured::getClassName() {
-    return CLASS_NAME;
 }
 
 void StGLRadioButtonTextured::doClick(const size_t ) {

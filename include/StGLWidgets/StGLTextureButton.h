@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -38,8 +38,6 @@ class StGLTextureButton : public StGLWidget {
                                    const size_t     theFacesCount = 1);
 
     ST_CPPEXPORT virtual ~StGLTextureButton();
-
-    ST_CPPEXPORT virtual const StString& getClassName();
 
     inline size_t getFaceId() {
         return myFaceId;

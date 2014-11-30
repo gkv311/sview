@@ -77,7 +77,6 @@ class StGLTable : public StGLWidget {
      */
     ST_CPPEXPORT virtual ~StGLTable();
 
-    ST_CPPEXPORT virtual const StString& getClassName();
     ST_CPPEXPORT virtual void stglResize();
     ST_CPPEXPORT virtual bool stglInit();
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView);

@@ -13,9 +13,8 @@
 #include <StGLWidgets/StGLRootWidget.h>
 
 namespace {
-    static const StString CLASS_NAME("StGLSubtitles");
     static const size_t SHARE_IMAGE_PROGRAM_ID = StGLRootWidget::generateShareId();
-};
+}
 
 class StGLSubtitles::StImgProgram : public StGLProgram {
 
@@ -140,10 +139,6 @@ void StGLSubtitles::StSubShowItems::add(const StHandle<StSubItem>& theItem) {
     }
 
     StArrayList<StHandle <StSubItem> >::add(theItem);
-}
-
-const StString& StGLSubtitles::getClassName() {
-    return CLASS_NAME;
 }
 
 StGLSubtitles::StGLSubtitles(StGLWidget*                     theParent,

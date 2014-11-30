@@ -16,7 +16,6 @@ namespace {
 
     // we do not use StAtomic<> template here to avoid static classes initialization ambiguity
     static volatile size_t ST_WIDGET_RES_COUNTER = 0;
-    static const StString CLASS_NAME("StGLRootWidget");
 
     static const int THE_ICON_SIZES[StGLRootWidget::IconSizeNb + 1] = {
         16,
@@ -184,10 +183,6 @@ void StGLRootWidget::stglDraw(unsigned int theView) {
     }
 
     StGLWidget::stglDraw(theView);
-}
-
-const StString& StGLRootWidget::getClassName() {
-    return CLASS_NAME;
 }
 
 StGLSharePointer* StGLRootWidget::getShare(const size_t theResId) {

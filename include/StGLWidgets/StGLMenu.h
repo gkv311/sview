@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -45,7 +45,6 @@ class StGLMenu : public StGLWidget {
 
     ST_CPPEXPORT virtual ~StGLMenu();
 
-    ST_CPPEXPORT virtual const StString& getClassName();
     ST_CPPEXPORT virtual void setVisibility(bool isVisible, bool isForce);
     ST_CPPEXPORT virtual void stglResize();
     ST_CPPEXPORT virtual bool stglInit();

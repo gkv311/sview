@@ -35,7 +35,6 @@ class StGLMenuItem : public StGLTextArea {
 
     ST_CPPEXPORT virtual ~StGLMenuItem();
 
-    ST_CPPEXPORT virtual const StString& getClassName();
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo);
     ST_CPPEXPORT virtual void stglResize();
     ST_CPPEXPORT virtual bool stglInit();

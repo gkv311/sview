@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -38,11 +38,6 @@ class StGLWidget {
                             const int  theWidth = 32, const int theHeight = 32);
 
     ST_CPPEXPORT virtual ~StGLWidget();
-
-    /**
-     * This is class identification string (currently intended for debug purposes).
-     */
-    ST_CPPEXPORT virtual const StString& getClassName();
 
         public:
 

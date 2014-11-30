@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -9,10 +9,6 @@
 #include <StGLWidgets/StGLRangeFieldFloat32.h>
 #include <StGLWidgets/StGLRootWidget.h>
 #include <StGLWidgets/StGLButton.h>
-
-namespace {
-    static const StString CLASS_NAME("StGLRangeFieldFloat32");
-};
 
 StGLRangeFieldFloat32::StGLRangeFieldFloat32(StGLWidget* theParent,
                                              const StHandle<StFloat32Param>& theTrackedValue,
@@ -28,10 +24,6 @@ StGLRangeFieldFloat32::StGLRangeFieldFloat32(StGLWidget* theParent,
 
 StGLRangeFieldFloat32::~StGLRangeFieldFloat32() {
     myTrackValue->signals.onChanged -= stSlot(this, &StGLRangeFieldFloat32::onValueChange);
-}
-
-const StString& StGLRangeFieldFloat32::getClassName() {
-    return CLASS_NAME;
 }
 
 bool StGLRangeFieldFloat32::stglInit() {

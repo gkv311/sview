@@ -66,7 +66,6 @@ class StGLSubtitles : public StGLTextArea {
                                const StHandle<StFloat32Param>& theParallax,
                                const StHandle<StEnumParam>&    theParser);
     ST_CPPEXPORT virtual ~StGLSubtitles();
-    ST_CPPEXPORT virtual const StString& getClassName();
     ST_CPPEXPORT virtual bool stglInit();
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& thePointZo);
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView);

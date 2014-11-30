@@ -16,10 +16,6 @@
 
 #include <stAssert.h>
 
-namespace {
-    static const StString CLASS_NAME("StGLTable");
-};
-
 StGLTableItem::StGLTableItem(StGLTable* theParent)
 : StGLWidget(theParent,
              theParent->getMarginLeft(), theParent->getMarginTop(),
@@ -54,10 +50,6 @@ StGLTable::StGLTable(StGLWidget* theParent,
 
 StGLTable::~StGLTable() {
     //
-}
-
-const StString& StGLTable::getClassName() {
-    return CLASS_NAME;
 }
 
 void StGLTable::setupTable(const int theNbRows,

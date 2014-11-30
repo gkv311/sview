@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -7,14 +7,6 @@
  */
 
 #include <StGLWidgets/StGLCheckboxTextured.h>
-
-namespace {
-    static const StString CLASS_NAME("StGLCheckboxTextured");
-};
-
-const StString& StGLCheckboxTextured::getClassName() {
-    return CLASS_NAME;
-}
 
 StGLCheckboxTextured::StGLCheckboxTextured(StGLWidget* theParent,
                                            const StHandle<StBoolParam>& theTrackedValue,

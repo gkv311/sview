@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,11 +44,6 @@ class ST_LOCAL StTimeBox : public StGLTextureButton {
         myTextArea->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
                                    StGLTextFormatter::ST_ALIGN_Y_CENTER);
         StGLWidget::signals.onMouseUnclick.connect(this, &StTimeBox::doSwitchElapsed);
-    }
-
-    virtual const StString& getClassName() {
-        static const StString className("StTimeBox");
-        return className;
     }
 
     virtual bool stglInit() {

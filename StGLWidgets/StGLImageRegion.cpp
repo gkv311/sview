@@ -19,8 +19,6 @@
 
 namespace {
 
-    static const StString THE_CLASS_NAME("StGLImageRegion");
-
     class ST_LOCAL StTrackedFloatParam : public StFloat32Param {
 
             private:
@@ -251,10 +249,6 @@ StGLImageRegion::~StGLImageRegion() {
 
 StHandle<StStereoParams> StGLImageRegion::getSource() {
     return params.stereoFile;
-}
-
-const StString& StGLImageRegion::getClassName() {
-    return THE_CLASS_NAME;
 }
 
 void StGLImageRegion::stglUpdate(const StPointD_t& pointZo) {
