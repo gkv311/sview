@@ -542,7 +542,8 @@ void StWindowImpl::updateBlockSleep() {
     }
 #elif defined(__ANDROID__)
     if(attribs.ToBlockSleepDisplay
-    || attribs.ToBlockSleepSystem) {
+    //|| attribs.ToBlockSleepSystem
+    ) {
         if(myBlockSleep == BlockSleep_DISPLAY) {
             return;
         } else if(myParentWin != NULL
