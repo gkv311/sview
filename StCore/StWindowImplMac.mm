@@ -424,6 +424,11 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
                                                 waitUntilDone: YES];
             }
         }
+        if(myMaster.hWindow != NULL) {
+            StCocoaLocalPool aLocalPool;
+            StCocoaString aTitle(myWindowTitle);
+            [myMaster.hWindow setTitle: aTitle.toStringNs()];
+        }
     }
 }
 
