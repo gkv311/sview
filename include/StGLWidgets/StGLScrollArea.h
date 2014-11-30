@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -31,6 +31,8 @@ class StGLScrollArea : public StGLWidget {
     ST_CPPEXPORT virtual bool stglInit();
     ST_CPPEXPORT virtual void stglResize();
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
+    ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemClicked);
+    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemUnclicked);
 
         public:
 
@@ -49,9 +51,9 @@ class StGLScrollArea : public StGLWidget {
      */
     ST_CPPEXPORT void doScroll(const int theDir);
 
-        private:   //! @name callback Slots (private overriders)
+        protected:
 
-    ST_LOCAL void doMouseUnclick(const int theBtnId);
+    StPointD_t myClickPntZo; //!< remembered mouse click position
 
 };
 

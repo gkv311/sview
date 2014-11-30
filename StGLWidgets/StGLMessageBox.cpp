@@ -347,8 +347,8 @@ bool StGLMessageBox::tryClick(const StPointD_t& theCursorZo,
 bool StGLMessageBox::tryUnClick(const StPointD_t& theCursorZo,
                                 const int&        theMouseBtn,
                                 bool&             isItemUnclicked) {
-    if(isPointIn(theCursorZo)
-    && StGLWidget::tryUnClick(theCursorZo, theMouseBtn, isItemUnclicked)) {
+    if(//isPointIn(theCursorZo) &&
+       StGLWidget::tryUnClick(theCursorZo, theMouseBtn, isItemUnclicked)) {
         isItemUnclicked = true;
         return true;
     }
