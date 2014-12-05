@@ -57,6 +57,7 @@ Name: russian; MessagesFile: compiler:Languages\Russian.isl; LicenseFile: {#SVIE
 Name: french;  MessagesFile: compiler:Languages\French.isl;  LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
 Name: german;  MessagesFile: compiler:Languages\German.isl;  LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
 Name: korean;  MessagesFile: compiler:Languages\Korean.isl;  LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
+Name: chinese; MessagesFile: compiler:Languages\ChineseSimplified.isl; LicenseFile: {#SVIEW_DISTR_PATH_x86}\info\license.rtf
 
 [CustomMessages]
 ; Installation types
@@ -65,11 +66,13 @@ russian.FullInstallation=Полная установка
 french.FullInstallation=Installation complète
 german.FullInstallation=Vollständige Installation
 korean.FullInstallation=전체 설치
+chinese.FullInstallation=全部安装
 english.CustomInstallation=Custom Installation
 russian.CustomInstallation=Выборочная установка
 french.CustomInstallation=Installation personnalisée
 german.CustomInstallation=Benutzerdefinierte Installation
 korean.CustomInstallation=사용자 설치
+chinese.CustomInstallation=自定义安装
 ; Components
 english.StCore=Core files
 russian.StCore=Общие файлы
@@ -165,6 +168,7 @@ Source: {#SVIEW_DISTR_PATH_x86}\StDiagnostics.dll;   DestDir: {app};       Flags
 Source: {#SVIEW_DISTR_PATH_AMD64}\StDiagnostics.dll; DestDir: {app}\amd64; Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 Source: {#SVIEW_DISTR_PATH_x86}\shaders\StGLWidgets\*;         DestDir: {app}\shaders\StGLWidgets;       Flags: 32bit ignoreversion; Components: StCore
 Source: {#SVIEW_DISTR_PATH_x86}\lang\Korean\language.lng;      DestDir: {app}\lang\Korean;               Flags: 32bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH_x86}\lang\ChineseS\language.lng;    DestDir: {app}\lang\ChineseS;             Flags: 32bit ignoreversion; Components: StCore
 ; MSVC C-Runtime libraries (mask compatible for vc100)
 Source: {#SVIEW_DISTR_PATH_x86}\msvc*.dll;        DestDir: {app};        Flags: 32bit ignoreversion; Components: StCore
 Source: {#SVIEW_DISTR_PATH_AMD64}\msvc*.dll;      DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
@@ -279,6 +283,7 @@ Root: HKCU; Subkey: Software\sView\sView; ValueType: string; ValueName: language
 Root: HKCU; Subkey: Software\sView\sView; ValueType: string; ValueName: language; ValueData: français; Tasks: ; Languages: french;  Flags: uninsdeletekey
 Root: HKCU; Subkey: Software\sView\sView; ValueType: string; ValueName: language; ValueData: Deutsch;  Tasks: ; Languages: german;  Flags: uninsdeletekey
 Root: HKCU; Subkey: Software\sView\sView; ValueType: string; ValueName: language; ValueData: Korean;   Tasks: ; Languages: korean;  Flags: uninsdeletekey
+Root: HKCU; Subkey: Software\sView\sView; ValueType: string; ValueName: language; ValueData: ChineseS; Tasks: ; Languages: chinese; Flags: uninsdeletekey
 ; Associations JPS
 Root: HKCR; SubKey: .jps;                                      ValueType: string; ValueData: JPEG Stereo Image;             Tasks: flagAssocStereoImages; Flags: uninsdeletekey
 Root: HKCR; SubKey: JPEG Stereo Image;                         ValueType: string; ValueData: JPEG Stereo Image;             Tasks: flagAssocStereoImages; Flags: uninsdeletekey

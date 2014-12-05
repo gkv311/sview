@@ -282,6 +282,12 @@
 		<Unit filename="StDiagnosticsGUI.h" />
 		<Unit filename="StGeometryTest.cpp" />
 		<Unit filename="StGeometryTest.h" />
+		<Unit filename="lang/chinese/language.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/chinese/StDiagnostics.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="lang/english/StDiagnostics.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
@@ -292,6 +298,12 @@
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="lang/russian/StDiagnostics.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/korean/language.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/korean/StDiagnostics.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Extensions>

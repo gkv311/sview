@@ -1,0 +1,17 @@
+﻿Chinese translation file for StOutInterlace library
+@author YSC
+
+--------
+1000="水平交错"
+1001="水平交错显示: Zalman, 现代,..."
+1002="垂直交错"
+1003="垂直交错显示"
+1006="DLP TV (棋盘式)"
+1007="DLP TV (棋盘式)"
+1008="交错ED显示器"
+1009="空间交错模式"
+1102="次序颠倒"
+1103="强制支持显示器"
+2000="sView - 交错输出模块"
+2001="版本"
+2002="© 2009-2014 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0"

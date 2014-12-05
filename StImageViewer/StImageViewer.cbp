@@ -285,6 +285,12 @@
 		<Unit filename="StImageViewerGUI.h" />
 		<Unit filename="StImageViewerStrings.cpp" />
 		<Unit filename="StImageViewerStrings.h" />
+		<Unit filename="lang/chinese/language.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/chinese/StImageViewer.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="lang/english/StImageViewer.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>

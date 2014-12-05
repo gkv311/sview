@@ -255,6 +255,12 @@
 			<Option target="WIN_gcc_x86" />
 			<Option target="WIN_vc_x86_DEBUG" />
 		</Unit>
+		<Unit filename="lang/chinese/language.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/chinese/StOutDual.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="lang/english/StOutDual.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
@@ -265,6 +271,12 @@
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="lang/russian/StOutDual.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/korean/language.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/korean/StOutDual.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Extensions>

@@ -304,6 +304,12 @@
 		<Unit filename="StQuadBufferCheck.cpp" />
 		<Unit filename="StQuadBufferCheck.h" />
 		<Unit filename="StVuzixSDK.h" />
+		<Unit filename="lang/chinese/language.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/chinese/StOutPageFlip.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="lang/english/StOutPageFlip.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
@@ -314,6 +320,12 @@
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="lang/russian/StOutPageFlip.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/korean/language.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/korean/StOutPageFlip.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Extensions>

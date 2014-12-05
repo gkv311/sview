@@ -254,6 +254,12 @@
 			<Option target="WIN_vc_x86_DEBUG" />
 			<Option target="WIN_vc_AMD64" />
 		</Unit>
+		<Unit filename="lang/chinese/language.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/chinese/StOutDistorted.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="lang/english/StOutDistorted.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
@@ -264,6 +270,12 @@
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="lang/russian/StOutDistorted.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/korean/language.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/korean/StOutDistorted.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Extensions>

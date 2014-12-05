@@ -257,6 +257,12 @@
 			<Option target="WIN_gcc_x86" />
 			<Option target="WIN_vc_x86_DEBUG" />
 		</Unit>
+		<Unit filename="lang/chinese/language.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/chinese/StOutAnaglyph.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="lang/english/StOutAnaglyph.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
@@ -267,6 +273,12 @@
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="lang/russian/StOutAnaglyph.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/korean/language.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/korean/StOutAnaglyph.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="shaders/fAnaglyphGray.shf">

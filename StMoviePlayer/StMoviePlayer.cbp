@@ -343,6 +343,12 @@
 		<Unit filename="StVideo/StVideoQueue.h" />
 		<Unit filename="StVideo/StVideoTimer.cpp" />
 		<Unit filename="StVideo/StVideoTimer.h" />
+		<Unit filename="lang/chinese/language.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/chinese/StMoviePlayer.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="lang/english/StMoviePlayer.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>

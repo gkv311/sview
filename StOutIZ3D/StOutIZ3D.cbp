@@ -262,6 +262,12 @@
 		</Unit>
 		<Unit filename="StOutIZ3DShaders.cpp" />
 		<Unit filename="StOutIZ3DShaders.h" />
+		<Unit filename="lang/chinese/language.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/chinese/StOutIZ3D.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="lang/english/StOutIZ3D.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
@@ -272,6 +278,12 @@
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="lang/russian/StOutIZ3D.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/korean/language.lng">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="lang/korean/StOutIZ3D.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="shaders/fIZ3DBackClassic.shf" />

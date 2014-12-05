@@ -1,0 +1,13 @@
+﻿Chinese translation file for StOutDual library
+@author YSC
+
+--------
+1000="双输出"
+1001="双输出设备: some HMD,镜面立体显示器, 双投影"
+1002="镜面输出"
+1003="手工镜面立体显示器 (X-向镜面)"
+1102="从显示器(第二个)"
+1103="单画面"
+2000="sView - 双输出模式"
+2001="版本"
+2002="© 2007-2014 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0"
