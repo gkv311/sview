@@ -597,6 +597,12 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
         return false;
     }
 
+    if(myCodecCtx->sample_rate < FREQ_5500) {
+        signals.onError(StString("FFmpeg: wrong audio frequency ") + myCodecCtx->sample_rate);
+        deinit();
+        return false;
+    }
+
     // setup source sample format (bitness)
     if(myCodecCtx->sample_fmt == stAV::audio::SAMPLE_FMT::NONE) {
         signals.onError(stCString("Invalid audio sample format!"));
