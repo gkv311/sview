@@ -171,13 +171,18 @@
 #define ST_AOB_MIME_STRING ST_AOB_MIME ":" ST_AOB_EXT ":" ST_AOB_DESC
 
 /**
- *.ts   - MPEG transport stream data
- *.m2ts - MPEG-2 Transport Stream
+ *.ts   - MPEG   transport stream
+ *.mts  - MPEG   transport stream
+ *.m2ts - MPEG-2 transport stream
  */
 #define ST_TS_MIME "video/mpeg"
 #define ST_TS_EXT  "ts"
 #define ST_TS_DESC "TS - MPEG Transport Stream"
 #define ST_TS_MIME_STRING ST_TS_MIME ":" ST_TS_EXT ":" ST_TS_DESC
+#define ST_MTS_MIME "video/mp2t" // "video/avchd"
+#define ST_MTS_EXT  "mts"
+#define ST_MTS_DESC "mts - MPEG Transport Stream"
+#define ST_MTS_MIME_STRING ST_MTS_MIME ":" ST_MTS_EXT ":" ST_MTS_DESC
 #define ST_M2TS_MIME "video/mp2t" // "video/avchd"
 #define ST_M2TS_EXT  "m2ts"
 #define ST_M2TS_DESC "m2ts - MPEG-2 Transport Stream"
@@ -301,6 +306,7 @@ ST_FLV_MIME_STRING ";" \
 ST_VOB_MIME_STRING ";" \
 ST_AOB_MIME_STRING ";" \
 ST_TS_MIME_STRING ";" \
+ST_MTS_MIME_STRING ";" \
 ST_M2TS_MIME_STRING ";" \
 ST_BIK_MIME_STRING ";" \
 ST_FLAC_MIME_STRING ";" \
