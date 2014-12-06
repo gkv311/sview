@@ -96,7 +96,8 @@ namespace {
     static const char ST_ARGUMENT_FILE_RIGHT[] = "right";
     static const char ST_ARGUMENT_FILE_LAST[]  = "last";
     static const char ST_ARGUMENT_BENCHMARK[]  = "benchmark";
-};
+
+}
 
 StALDeviceParam::StALDeviceParam()
 : StInt32Param(0) {

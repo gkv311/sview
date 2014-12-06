@@ -276,8 +276,8 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
 
     // detect connected displays
     bool myIsMonReversed = false;
-    StHandle<StMonitor> aMon = StOutInterlace::getHInterlaceMonitor(aMonitors, myIsMonReversed);
-    if(!aMon.isNull()) {
+    StHandle<StMonitor> aMonInterlaced = StOutInterlace::getHInterlaceMonitor(aMonitors, myIsMonReversed);
+    if(!aMonInterlaced.isNull()) {
         aDevRow->Priority = ST_DEVICE_SUPPORT_PREFER;
     }
 
@@ -291,13 +291,16 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
 
     // load window position
     if(isMovable()) {
-        StRect<int32_t> aRect(256, 768, 256, 1024);
-        bool isLoadedPosition = mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
+        const int32_t aDefWidth  = 768;
+        const int32_t aDefHeight = 512;
+        StRect<int32_t> aRect(256, 256 + aDefHeight,
+                              256, 256 + aDefWidth);
+        const bool isLoadedPosition = mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
         StMonitor aMonitor = aMonitors[aRect.center()];
         if(params.BindToMon->getValue()
-        && !aMon.isNull()
+        && !aMonInterlaced.isNull()
         && !isInterlacedMonitor(aMonitor, myIsMonReversed)) {
-            aMonitor = *aMon;
+            aMonitor = *aMonInterlaced;
         }
         if(isLoadedPosition) {
             if(!aMonitor.getVRect().isPointIn(aRect.center())) {
@@ -311,11 +314,7 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
             }
         } else {
             // try to open window on correct display
-            aRect = aMonitor.getVRect();
-            aRect.left()   = aRect.left() + 256;
-            aRect.right()  = aRect.left() + 1024;
-            aRect.top()    = aRect.top()  + 256;
-            aRect.bottom() = aRect.top()  + 512;
+            aRect = defaultRect(&aMonitor);
         }
         StWindow::setPlacement(aRect);
     }

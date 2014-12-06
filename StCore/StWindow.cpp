@@ -301,3 +301,13 @@ GLfloat StWindow::getLensDist() const {
 void StWindow::toClipboard(const StString& theText) {
     myWin->toClipboard(theText);
 }
+
+StRectI_t StWindow::defaultRect(const StMonitor* theMon) const {
+    const StMonitor& aMon = theMon != NULL ? *theMon : myWin->getMonitors()[0];
+    StRectI_t aRect;
+    aRect.left()   = aMon.getVRect().left() + 256;
+    aRect.right()  = aRect.left() + int32_t(aMon.getScale() * 768.0f);
+    aRect.top()    = aMon.getVRect().top()  + 256;
+    aRect.bottom() = aRect.top()  + int32_t(aMon.getScale() * 512.0f);
+    return aRect;
+}

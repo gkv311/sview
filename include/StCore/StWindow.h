@@ -114,6 +114,7 @@ typedef struct tagStSlaveWindowCfg {
 } StSlaveWindowCfg_t;
 
 class StGLContext;
+class StMonitor;
 class StSearchMonitors;
 class StWindowImpl;
 
@@ -504,6 +505,11 @@ class StWindow {
      * @return stereo output flag specified by application (means - have stereo data)
      */
     ST_CPPEXPORT bool isStereoSource() const;
+
+    /**
+     * Setup default window placement.
+     */
+    ST_CPPEXPORT StRectI_t defaultRect(const StMonitor* theMon = NULL) const;
 
         private: //! @name private fields
 

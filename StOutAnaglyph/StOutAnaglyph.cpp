@@ -164,8 +164,10 @@ StOutAnaglyph::StOutAnaglyph(const StHandle<StResourceManager>& theResMgr,
 
     // load window position
     if(isMovable()) {
-        StRect<int32_t> aRect(256, 768, 256, 1024);
-        mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect);
+        StRect<int32_t> aRect;
+        if(!mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect)) {
+            aRect = defaultRect();
+        }
         StWindow::setPlacement(aRect, true);
     }
     StWindow::setTitle("sView - Anaglyph Renderer");

@@ -487,7 +487,7 @@ StOutPageFlip::StOutPageFlip(const StHandle<StResourceManager>& theResMgr,
 
     // load window position
     if(isMovable()) {
-        StRect<int32_t> aRect(256, 768, 256, 1024);
+        StRect<int32_t> aRect;
         if(mySettings->loadInt32Rect(ST_SETTING_WINDOWPOS, aRect)) {
             StMonitor aMonitor = aMonitors[aRect.center()];
             if(!aMonitor.getVRect().isPointIn(aRect.center())) {
@@ -501,11 +501,7 @@ StOutPageFlip::StOutPageFlip(const StHandle<StResourceManager>& theResMgr,
             }
         } else {
             // try to open window on display with highest frequency
-            aRect = aMon.getVRect();
-            aRect.left()   = aRect.left() + 256;
-            aRect.right()  = aRect.left() + 1024;
-            aRect.top()    = aRect.top()  + 256;
-            aRect.bottom() = aRect.top()  + 512;
+            aRect = defaultRect(&aMon);
         }
         StWindow::setPlacement(aRect);
     }
