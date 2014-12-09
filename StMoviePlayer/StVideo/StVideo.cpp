@@ -87,7 +87,7 @@ StVideo::StVideo(const StString&                   theALDeviceName,
     mySubtitles->signals.onError.connect(this, &StVideo::doOnErrorRedirect);
 
     // launch working thread
-    myThread = new StThread(threadFunction, (void* )this);
+    myThread = new StThread(threadFunction, (void* )this, "StVideo");
 }
 
 #include <stAssert.h>
@@ -129,7 +129,7 @@ class ST_LOCAL StHangKiller {
     : myState(new StString("initial")),
       myLimitSec(theLimitSec),
       myDoneEvent(false) {
-        myThread = new StThread(threadWatcher, this);
+        myThread = new StThread(threadWatcher, this, "StHangKiller");
     }
 
     ~StHangKiller() {

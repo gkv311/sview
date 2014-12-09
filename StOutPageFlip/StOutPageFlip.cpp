@@ -639,7 +639,7 @@ bool StOutPageFlip::dxInit() {
     myOutD3d.DxWindow = new StDXNVWindow(myMsgQueue, aFrBufferSizeX, aFrBufferSizeY, aNvMonitor, this);
     myOutD3d.DxWindow->setWglDxInterop(myContext->extAll->wglDXOpenDeviceNV != NULL);
     myOutD3d.DxWindow->setThreadedDx(false); // do not render from multiple threads
-    myOutD3d.DxThread = new StThread(StOutDirect3D::dxThreadFunction, (void* )&myOutD3d);
+    myOutD3d.DxThread = new StThread(StOutDirect3D::dxThreadFunction, (void* )&myOutD3d, "StDXNVWindow");
 
     if(!myOutD3d.DxWindow->isThreadedDx()) {
         myOutD3d.DxWindow->waitReady();

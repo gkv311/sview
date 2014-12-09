@@ -54,7 +54,7 @@ StVideoTimer::StVideoTimer(const StHandle<StVideoQueue>& theVideo,
   mySpeedSlowRev(1.0 / mySpeedSlow),
   myIsBenchmark(false) {
     stMemZero(mySpeedDesc, sizeof(mySpeedDesc));
-    myThread = new StThread(refreshThread, (void* )this);
+    myThread = new StThread(refreshThread, (void* )this, "StVideoTimer");
 }
 
 StVideoTimer::~StVideoTimer() {

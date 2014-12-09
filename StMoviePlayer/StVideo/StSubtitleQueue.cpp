@@ -43,7 +43,7 @@ StSubtitleQueue::StSubtitleQueue(const StHandle<StSubQueue>& theSubtitlesQueue)
   myThread(NULL),
   evDowntime(true),
   toQuit(false) {
-    myThread = new StThread(threadFunction, (void* )this);
+    myThread = new StThread(threadFunction, (void* )this, "StSubtitleQueue");
 }
 
 StSubtitleQueue::~StSubtitleQueue() {

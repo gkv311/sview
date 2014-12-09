@@ -124,7 +124,7 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
 #else
     myFrame.Frame->opaque = NULL;
 #endif
-    myThread = new StThread(threadFunction, (void* )this);
+    myThread = new StThread(threadFunction, (void* )this, theMaster.isNull() ? "StVideoQueueM" : "StVideoQueueS");
 }
 
 StVideoQueue::~StVideoQueue() {

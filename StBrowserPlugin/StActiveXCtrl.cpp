@@ -204,7 +204,7 @@ int StActiveXCtrl::OnCreate(LPCREATESTRUCT theCreateStruct) {
     myParentWin = m_hWnd;
 
     // starts out plugin main loop in another thread
-    myThread = new StThread(stThreadFunction, (void* )this);
+    myThread = new StThread(stThreadFunction, (void* )this, "StActiveXCtrl");
 
     // load URL
     StString aFilePath = loadURL(myHasPreview ? myUrlPreview : myUrlFull);

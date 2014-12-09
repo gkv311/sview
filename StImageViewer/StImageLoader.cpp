@@ -62,7 +62,7 @@ StImageLoader::StImageLoader(const StImageFile::ImageClass     theImageLib,
   myImageLib(theImageLib),
   myAction(Action_NONE) {
       myPlayList.setExtensions(myMimeList.getExtensionsList());
-      myThread = new StThread(threadFunction, (void* )this);
+      myThread = new StThread(threadFunction, (void* )this, "StImageLoader");
 }
 
 StImageLoader::~StImageLoader() {

@@ -12,6 +12,20 @@
 #ifdef _WIN32
     #include <windows.h>
     #include <process.h>
+
+    namespace {
+        static const DWORD MS_VC_EXCEPTION = 0x406D1388;
+    }
+
+    #pragma pack(push, 8)
+    struct MsWinThreadNameInfo {
+        DWORD  dwType;     //!< must be 0x1000
+        LPCSTR szName;     //!< pointer to name
+        DWORD  dwThreadID; //!< thread ID (-1 for caller thread)
+        DWORD  dwFlags;    //!< must be zero
+    };
+    #pragma pack(pop)
+
 #else
     #include <sys/types.h>
 
@@ -34,16 +48,69 @@ size_t StThread::getCurrentThreadId() {
 }
 
 StThread::StThread(threadFunction_t theThreadFunc,
-                   void*            theThreadParam) {
+                   void*            theThreadParam,
+                   const char*      theThreadName) {
 #ifdef _WIN32
     myThread = _beginthreadex(NULL, 0, theThreadFunc, theThreadParam, 0, &myThreadId);
 #else
     myHasHandle = (pthread_create(&myThread, (pthread_attr_t* )NULL, theThreadFunc, theThreadParam) == 0);
 #endif
+    setName(theThreadName);
 }
 
 StThread::~StThread() {
     detach();
+}
+
+void StThread::setName(const char* theName) {
+    if( theName == NULL
+    || *theName == '\0'
+    || !isValid()) {
+        return;
+    }
+
+#ifdef _WIN32
+    MsWinThreadNameInfo anInfo;
+    anInfo.dwType     = 0x1000;
+    anInfo.szName     = theName;
+    anInfo.dwThreadID = myThreadId;
+    anInfo.dwFlags    = 0;
+
+    __try {
+        ::RaiseException(MS_VC_EXCEPTION, 0, sizeof(anInfo)/sizeof(ULONG_PTR), (ULONG_PTR* )&anInfo);
+    } __except(EXCEPTION_EXECUTE_HANDLER) {
+        //
+    }
+#elif defined(__APPLE__)
+    (void )theName;
+#else
+    pthread_setname_np(myThread, theName);
+#endif
+}
+
+void StThread::setCurrentThreadName(const char* theName) {
+    if( theName == NULL
+    || *theName == '\0') {
+        return;
+    }
+
+#ifdef _WIN32
+    MsWinThreadNameInfo anInfo;
+    anInfo.dwType     = 0x1000;
+    anInfo.szName     = theName;
+    anInfo.dwThreadID = (DWORD )-1;
+    anInfo.dwFlags    = 0;
+
+    __try {
+        ::RaiseException(MS_VC_EXCEPTION, 0, sizeof(anInfo)/sizeof(ULONG_PTR), (ULONG_PTR* )&anInfo);
+    } __except(EXCEPTION_EXECUTE_HANDLER) {
+        //
+    }
+#elif defined(__APPLE__)
+    pthread_setname_np(theName);
+#else
+    pthread_setname_np(pthread_self(), theName);
+#endif
 }
 
 bool StThread::wait() {

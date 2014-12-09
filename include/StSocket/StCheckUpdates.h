@@ -67,7 +67,7 @@ class StCheckUpdates {
             myMutex.unlock();
             return;
         }
-        myThread = new StThread(checkUpdatesThread, this);
+        myThread = new StThread(checkUpdatesThread, this, "StCheckUpdates");
         myMutex.unlock();
     }
 

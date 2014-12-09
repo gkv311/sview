@@ -244,7 +244,7 @@ StAudioQueue::StAudioQueue(const StString& theAlDeviceName)
     stMemSet(myAlSources, 0, sizeof(myAlSources));
 
     // launch thread parse incoming packets from queue
-    myThread = new StThread(threadFunction, (void* )this);
+    myThread = new StThread(threadFunction, (void* )this, "StAudioQueue");
 }
 
 StAudioQueue::~StAudioQueue() {

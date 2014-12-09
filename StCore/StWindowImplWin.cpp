@@ -61,7 +61,7 @@ bool StWindowImpl::create() {
     myEventInitWin.reset();
     myEventInitGl.reset();
     myEventQuit.reset();
-    myMsgThread = new StThread(threadCreateWindows, (void* )this);
+    myMsgThread = new StThread(threadCreateWindows, (void* )this, "StWindowImplMSG");
     // wait for thread to create window
     myEventInitWin.wait();
     if(myInitState != STWIN_INIT_SUCCESS) {

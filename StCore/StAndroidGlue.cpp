@@ -139,7 +139,7 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
 }
 
 void StAndroidGlue::start() {
-    StHandle<StThread> aThread = new StThread(threadEntryWrapper, this);
+    StHandle<StThread> aThread = new StThread(threadEntryWrapper, this, "StAndroidGlue");
     aThread->detach();
 
     // Wait for thread to start

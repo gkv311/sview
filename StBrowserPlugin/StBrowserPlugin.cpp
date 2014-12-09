@@ -365,7 +365,7 @@ bool StBrowserPlugin::init(NPWindow* theWindow) {
         SetWindowLongPtr(myParentWin, GWLP_USERDATA, (LONG_PTR )this);
     }
 #endif
-    myThread = new StThread(stThreadFunction, this); // starts out plugin main loop in another thread
+    myThread = new StThread(stThreadFunction, this, "StBrowserPlugin");
 
     if(!myPreviewUrl.isEmpty() && NPNFuncs.geturl != NULL) {
         NPNFuncs.geturl(nppInstance, myPreviewUrl.toCString(), NULL);

@@ -61,6 +61,11 @@ class StThread {
     ST_CPPEXPORT static int countLogicalProcessors();
 
     /**
+     * Setup name for the active thread.
+     */
+    ST_CPPEXPORT static void setCurrentThreadName(const char* theName);
+
+    /**
      * Returns the CPU architecture used to build the program (may not match the system).
      */
     ST_LOCAL static const char* getArchString() {
@@ -122,11 +127,19 @@ class StThread {
 
     /**
      * Create the thread and start it.
-     * @param theThreadFunc  Thread function
-     * @param theThreadParam Thread function argument
+     * @param theThreadFunc  thread function
+     * @param theThreadParam thread function argument
+     * @param theThreadName  optional thread name, should shorter than 16-bytes
      */
     ST_CPPEXPORT StThread(threadFunction_t theThreadFunc,
-                          void*            theThreadParam);
+                          void*            theThreadParam,
+                          const char*      theThreadName = NULL);
+
+    /**
+     * Setup (new) name for this thread.
+     * @param theName thread name, should shorter than 16-bytes
+     */
+    ST_CPPEXPORT void setName(const char* theName);
 
     /**
      * Indicates valid thread handle.
