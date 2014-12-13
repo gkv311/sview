@@ -382,8 +382,7 @@ StGLMenu* StImageViewerGUI::createOutputMenu() {
 void StImageViewerGUI::doAboutProgram(const size_t ) {
     StGLMessageBox* aDialog = new StGLMessageBox(this, "",
           tr(ABOUT_DPLUGIN_NAME) + '\n'
-        + tr(ABOUT_VERSION) + ": " + StVersionInfo::getSDKVersionString()
-        + " " + StThread::getArchString()
+        + tr(ABOUT_VERSION) + " " + StVersionInfo::getSDKVersionString()
         + "\n \n" + tr(ABOUT_DESCRIPTION),
         scale(512), scale(300));
     aDialog->addButton(tr(BUTTON_CLOSE));

@@ -444,7 +444,7 @@ StOutPageFlip::StOutPageFlip(const StHandle<StResourceManager>& theResMgr,
     StString& aVerString = myLangMap.changeValueId(STTR_VERSION_STRING, "version");
     StString& aDescr     = myLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
         "(C) 2007-2014 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0");
-    myAbout = aTitle + '\n' + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr;
+    myAbout = aTitle + '\n' + aVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr;
 
     // detect connected displays
     bool hasQuadBufferGl  = false;

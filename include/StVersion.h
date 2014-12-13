@@ -78,25 +78,18 @@ struct StVersion {
 
     int rStatus;
     int rSubVer;
+
 };
 
 #ifndef RC_INVOKED
 
 #include <StStrings/StLogger.h>
 #include <StStrings/stUtfTools.h>
+#include <StThreads/StThread.h>
+
 #include <time.h>
 
 class ST_LOCAL StVersionInfo {
-
-        private:
-
-    StVersion ver;
-
-        private:
-
-    enum {
-        TH_SUB = 2000
-    };
 
         public:
 
@@ -109,8 +102,7 @@ class ST_LOCAL StVersionInfo {
     }
 
     static StVersion getSDKVersion() {
-        // TODO
-        int iVer[4] = {
+        const int aVerInt[4] = {
         #ifdef SVIEW_SDK_VERSION_AUTO
             __YEAR__,
             (__MONTH__) + 1,
@@ -121,13 +113,12 @@ class ST_LOCAL StVersionInfo {
         #endif
         };
 
-        ///int iVer[4] = {SVIEW_SDK_VERSION};
-        StVersion stVersion;
-        stVersion.year = iVer[0];
-        stVersion.month = iVer[1];
-        stVersion.rStatus = iVer[2];
-        stVersion.rSubVer = iVer[3];
-        return stVersion;
+        StVersion aVer;
+        aVer.year    = aVerInt[0];
+        aVer.month   = aVerInt[1];
+        aVer.rStatus = aVerInt[2];
+        aVer.rSubVer = aVerInt[3];
+        return aVer;
     }
 
     /**
@@ -141,15 +132,15 @@ class ST_LOCAL StVersionInfo {
     static bool checkTimeBomb(const StString& theTitle) {
         StVersionInfo aVer = getSDKVersionInfo();
         if(aVer.getReleaseStatus() == ST_DEVELOPMENT_RELEASE) {
-            time_t rawtime;
-            struct tm* timeinfo;
-            time(&rawtime);
-            timeinfo = localtime(&rawtime);
-            StVersionInfo test = StVersionInfo(1900 + timeinfo->tm_year, timeinfo->tm_mon + 1, ST_DEVELOPMENT_RELEASE, 0);
+            time_t aRawTime;
+            struct tm* aTimeInfo;
+            time(&aRawTime);
+            aTimeInfo = localtime(&aRawTime);
+            StVersionInfo aTest = StVersionInfo(1900 + aTimeInfo->tm_year, aTimeInfo->tm_mon + 1, ST_DEVELOPMENT_RELEASE, 0);
             aVer++; aVer++;
-            if(test > aVer) {
+            if(aTest > aVer) {
                 stError(StString()
-                    + "You running alpha version of the '"
+                    + "You are running alpha version of the '"
                     + theTitle + "'.\n"
                     + "Sorry but time for testing this build is expired.\n"
                     + "You should update program from official site (www.sview.ru)"
@@ -163,166 +154,193 @@ class ST_LOCAL StVersionInfo {
 
     /**
      * Simple version constructor.
-     * @param year (const int& ) - put year here;
-     * @param month (const int& ) - put month here;
-     * @param rstatus (const int& ) - release state (use enum);
-     * @param rsubver (const int& ) - subversion.
+     * @param theYear    put year  here
+     * @param theMonth   put month here
+     * @param theRStatus release state (use enum)
+     * @param theRSubVer subversion
      */
-    StVersionInfo(const int& year, const int& month, const int& rstatus, const int& rsubver) {
-        setYear(year);
-        setMonth(month);
-        ver.rStatus = rstatus;
-        ver.rSubVer = rsubver;
+    StVersionInfo(const int theYear,
+                  const int theMonth,
+                  const int theRStatus,
+                  const int theRSubVer) {
+        setYear (theYear);
+        setMonth(theMonth);
+        myVer.rStatus = theRStatus;
+        myVer.rSubVer = theRSubVer;
     }
 
     /**
      * Simple version constructor.
-     * @param version (Version ) - pur Version structure;
+     * @param version the version structure
      */
-    StVersionInfo(const StVersion& version) {
-        setVersion(version);
+    StVersionInfo(const StVersion& theVersion) {
+        setVersion(theVersion);
     }
 
     StVersion& getVersion() {
-        return ver;
+        return myVer;
     }
 
-    void setVersion(const StVersion& version) {
-        ver = version;
-        setYear(version.year);
-        setMonth(version.month);
+    void setVersion(const StVersion& theVersion) {
+        myVer = theVersion;
+        setYear (theVersion.year);
+        setMonth(theVersion.month);
     }
 
     int getYear() const {
-        return ver.year;
+        return myVer.year;
     }
 
-    void setYear(const int& year) {
-        ver.year = (year > TH_SUB) ? year : (TH_SUB + year);
+    void setYear(const int theYear) {
+        myVer.year = (theYear > TH_SUB) ? theYear : (TH_SUB + theYear);
     }
 
     int getMonth() const {
-        return ver.month;
+        return myVer.month;
     }
 
-    void setMonth(const int& month) {
-        ver.month = (month < 1) ? 12 : ( (month > 12) ? 1 : month );
+    void setMonth(const int theMonth) {
+        myVer.month = (theMonth < 1) ? 12 : ( (theMonth > 12) ? 1 : theMonth );
     }
 
     int getReleaseStatus() const {
-        return ver.rStatus;
+        return myVer.rStatus;
     }
 
-    void setReleaseStatus(const int& rstatus) {
-        ver.rStatus = rstatus;
+    void setReleaseStatus(const int theRStatus) {
+        myVer.rStatus = theRStatus;
     }
 
     int getSubVersion() const {
-        return ver.rSubVer;
+        return myVer.rSubVer;
     }
 
-    void setSubVersion(const int& rsubver) {
-        ver.rSubVer = rsubver;
+    void setSubVersion(const int theRSubVer) {
+        myVer.rSubVer = theRSubVer;
     }
 
+    /**
+     * Return string representation of the version.
+     */
     StString toString() const {
-        StString subVersion;
-        switch (ver.rStatus){
-            case ST_RELEASE:
-                subVersion = ' '; break;
-            case ST_RELEASE_CANDIDATE:
-                subVersion = StString("RC")    + ver.rSubVer; break;
-            case ST_BETA:
-                subVersion = StString("beta")  + ver.rSubVer; break;
-            case ST_ALPHA:
-                subVersion = StString("alpha") + ver.rSubVer; break;
-            default:
-                subVersion = StString("dev")   + ver.rSubVer; break;
+        const int aYear  =  __YEAR__;
+        const int aMonth = (__MONTH__) + 1;
+        const int aDay   =  __DAY__;
+
+        StString aState;
+        switch(myVer.rStatus) {
+            case ST_RELEASE:           break;
+            case ST_RELEASE_CANDIDATE: aState = StString("RC")    + myVer.rSubVer; break;
+            case ST_BETA:              aState = StString("beta")  + myVer.rSubVer; break;
+            case ST_ALPHA:             aState = StString("alpha") + myVer.rSubVer; break;
+            default:                   aState = StString("dev")   + myVer.rSubVer; break;
         }
         stUtf8_t aBuff[256];
-        stsprintf(aBuff, 256, "%d.%02d", (ver.year - TH_SUB), ver.month);
-        return (StString(aBuff) + subVersion);
+        stsprintf(aBuff, 256, "%d.%02d", (myVer.year - TH_SUB), myVer.month);
+        return StString(aBuff) + aState
+             + " " + StThread::getArchString()
+             + " (build " + aYear + "-" + aMonth + "-" + aDay + ")";
     }
 
+    /**
+     * Prefix ++
+     */
     StVersionInfo& operator++() {
-        // prefix ++
-        setMonth(getMonth() + 1);
+        setMonth(getMonth() +  1);
         setYear((getMonth() == 1) ? (getYear() + 1) : getYear());
-        return (*this);
+        return *this;
     }
 
+    /**
+     * Prefix --
+     */
     StVersionInfo& operator--() {
-        // prefix --
-        setMonth(getMonth() - 1);
+        setMonth(getMonth() -  1);
         setYear((getMonth() == 12) ? (getYear() - 1) : getYear());
-        return (*this);
+        return *this;
     }
 
+    /**
+     * Postfix ++
+     */
     StVersionInfo operator++(int ) {
-        // postfix ++
-        StVersionInfo verInfo = *this;
+        StVersionInfo aCopy = *this;
         ++(*this);
-        return verInfo;
+        return aCopy;
     }
 
+    /**
+     * Postfix --
+     */
     StVersionInfo operator--(int ) {
-        // postfix --
-        StVersionInfo verInfo = *this;
+        StVersionInfo aCopy = *this;
         --(*this);
-        return verInfo;
+        return aCopy;
     }
 
-    bool operator>(const StVersionInfo& compareVer) {
-        return ( getYear() > compareVer.getYear()
-            || ( getYear() == compareVer.getYear() && getMonth() > compareVer.getMonth())
-            || ( getYear() == compareVer.getYear() && getMonth() == compareVer.getMonth()
-                        && getReleaseStatus() > compareVer.getReleaseStatus())
-            || ( getYear() == compareVer.getYear() && getMonth() == compareVer.getMonth()
-                        && getReleaseStatus() == compareVer.getReleaseStatus()
-                        && getSubVersion() > compareVer.getSubVersion()) );
+    bool operator>(const StVersionInfo& theOther) const {
+        return   getYear() >  theOther.getYear()
+            || ( getYear() == theOther.getYear() && getMonth() >  theOther.getMonth())
+            || ( getYear() == theOther.getYear() && getMonth() == theOther.getMonth()
+                        && getReleaseStatus() > theOther.getReleaseStatus())
+            || ( getYear() == theOther.getYear() && getMonth() == theOther.getMonth()
+                        && getReleaseStatus() == theOther.getReleaseStatus()
+                        && getSubVersion()    >  theOther.getSubVersion());
     }
 
-    bool operator<(const StVersionInfo& compareVer) {
-        return ( getYear() < compareVer.getYear()
-            || ( getYear() == compareVer.getYear() && getMonth() < compareVer.getMonth())
-            || ( getYear() == compareVer.getYear() && getMonth() == compareVer.getMonth()
-                        && getReleaseStatus() < compareVer.getReleaseStatus())
-            || ( getYear() == compareVer.getYear() && getMonth() == compareVer.getMonth()
-                        && getReleaseStatus() == compareVer.getReleaseStatus()
-                        && getSubVersion() < compareVer.getSubVersion()) );
+    bool operator<(const StVersionInfo& theOther) const {
+        return   getYear() <  theOther.getYear()
+            || ( getYear() == theOther.getYear() && getMonth() <  theOther.getMonth())
+            || ( getYear() == theOther.getYear() && getMonth() == theOther.getMonth()
+                        && getReleaseStatus() < theOther.getReleaseStatus())
+            || ( getYear() == theOther.getYear() && getMonth() == theOther.getMonth()
+                        && getReleaseStatus() == theOther.getReleaseStatus()
+                        && getSubVersion()    <  theOther.getSubVersion());
     }
 
-    bool operator>=(const StVersionInfo& compareVer) {
-        return ( getYear() > compareVer.getYear()
-            || ( getYear() == compareVer.getYear() && getMonth() > compareVer.getMonth())
-            || ( getYear() == compareVer.getYear() && getMonth() == compareVer.getMonth()
-                        && getReleaseStatus() > compareVer.getReleaseStatus())
-            || ( getYear() == compareVer.getYear() && getMonth() == compareVer.getMonth()
-                        && getReleaseStatus() == compareVer.getReleaseStatus()
-                        && getSubVersion() >= compareVer.getSubVersion()) );
+    bool operator>=(const StVersionInfo& theOther) const {
+        return   getYear() >  theOther.getYear()
+            || ( getYear() == theOther.getYear() && getMonth() >  theOther.getMonth())
+            || ( getYear() == theOther.getYear() && getMonth() == theOther.getMonth()
+                        && getReleaseStatus() > theOther.getReleaseStatus())
+            || ( getYear() == theOther.getYear() && getMonth() == theOther.getMonth()
+                        && getReleaseStatus() == theOther.getReleaseStatus()
+                        && getSubVersion()    >= theOther.getSubVersion());
     }
 
-    bool operator<=(const StVersionInfo& compareVer) {
-        return ( getYear() < compareVer.getYear()
-            || ( getYear() == compareVer.getYear() && getMonth() < compareVer.getMonth())
-            || ( getYear() == compareVer.getYear() && getMonth() == compareVer.getMonth()
-                        && getReleaseStatus() < compareVer.getReleaseStatus())
-            || ( getYear() == compareVer.getYear() && getMonth() == compareVer.getMonth()
-                        && getReleaseStatus() == compareVer.getReleaseStatus()
-                        && getSubVersion() <= compareVer.getSubVersion()) );
+    bool operator<=(const StVersionInfo& theOther) const {
+        return   getYear() < theOther.getYear()
+            || ( getYear() == theOther.getYear() && getMonth() <  theOther.getMonth())
+            || ( getYear() == theOther.getYear() && getMonth() == theOther.getMonth()
+                        && getReleaseStatus() < theOther.getReleaseStatus())
+            || ( getYear() == theOther.getYear() && getMonth() == theOther.getMonth()
+                        && getReleaseStatus() == theOther.getReleaseStatus()
+                        && getSubVersion()    <= theOther.getSubVersion());
     }
 
-    bool operator==(const StVersionInfo& compareVer) {
-        return ( getYear() == compareVer.getYear() && getMonth() == compareVer.getMonth()
-                 && getReleaseStatus() == compareVer.getReleaseStatus()
-                 && getSubVersion() == compareVer.getSubVersion() );
+    bool operator==(const StVersionInfo& theOther) const {
+        return getYear()          == theOther.getYear()
+            && getMonth()         == theOther.getMonth()
+            && getReleaseStatus() == theOther.getReleaseStatus()
+            && getSubVersion()    == theOther.getSubVersion();
     }
 
-    bool operator!=(const StVersionInfo& compareVer) {
-        return ( getYear() != compareVer.getYear() || getMonth() != compareVer.getMonth()
-                 || getReleaseStatus() != compareVer.getReleaseStatus()
-                 || getSubVersion() != compareVer.getSubVersion() );
+    bool operator!=(const StVersionInfo& theOther) const {
+        return getYear()          != theOther.getYear()
+            || getMonth()         != theOther.getMonth()
+            || getReleaseStatus() != theOther.getReleaseStatus()
+            || getSubVersion()    != theOther.getSubVersion();
     }
+
+        private:
+
+    enum {
+        TH_SUB = 2000
+    };
+
+        private:
+
+    StVersion myVer;
 
 };
 

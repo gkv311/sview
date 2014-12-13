@@ -124,7 +124,7 @@ StOutAnaglyph::StOutAnaglyph(const StHandle<StResourceManager>& theResMgr,
     StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
     StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
         "(C) 2007-2014 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0");
-    myAbout = aTitle + '\n' + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr;
+    myAbout = aTitle + '\n' + aVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr;
 
     // devices list
     StHandle<StOutDevice> aDevice = new StOutDevice();

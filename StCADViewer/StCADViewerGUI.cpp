@@ -209,7 +209,7 @@ void StCADViewerGUI::doAboutProgram(const size_t ) {
         "CAD viewer allows you to view CAD files in formats IGES, STEP, BREP using OCCT.\n"
         "(C) 2011-2014 Kirill Gavrilov (kirill@sview.ru).\nOfficial site: www.sview.ru");
     StGLMessageBox* anAboutDialog = new StGLMessageBox(this, "", aTitle + '\n'
-        + aVerString + ": " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr,
+        + aVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr,
         512, 300);
     anAboutDialog->addButton("Close");
     anAboutDialog->setVisibility(true, true);
