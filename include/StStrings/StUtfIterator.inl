@@ -104,7 +104,7 @@ void StUtfIterator<Type>::readUTF16() {
     // if we have the first half of the surrogate pair
     if(aChar >= UTF16_SURROGATE_HIGH_START
     && aChar <= UTF16_SURROGATE_HIGH_END) {
-        stUtf32_t aChar2 = *myPosition;
+        const stUtf32_t aChar2 = *myPosNext;
         // complete the surrogate pair
         if(aChar2 >= UTF16_SURROGATE_LOW_START
         && aChar2 <= UTF16_SURROGATE_LOW_END) {

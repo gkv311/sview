@@ -37,6 +37,9 @@
  * It defines an iterator and provide correct way to read multi-byte text (UTF-8 and UTF-16)
  * and convert it from one to another.
  * The current value of iterator returned as UTF-32 Unicode code.
+ *
+ * Example of the string which requires surrogate pairs in UTF-16:
+ * "𐐐𐐄𐐢𐐆𐐤𐐝 𐐓𐐅 𐐜 𐐢𐐃𐐡𐐔" ("Holiness to the Lord") in the Deseret alphabet.
  */
 template<typename Type>
 class StUtfIterator {
