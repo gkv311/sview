@@ -15,7 +15,7 @@
 
 namespace {
     static size_t THE_UNDO_LIMIT = 1024;
-};
+}
 
 StPlayItem::StPlayItem(StFileNode* theFileNode,
                        const StStereoParams& theDefParams)

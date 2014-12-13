@@ -60,7 +60,13 @@ bool StRawFile::openFile(StRawFile::ReadWrite theFlags,
         stMemZero(&anInterruptCB, sizeof(anInterruptCB));
         anInterruptCB.callback = &StRawFile::avInterruptCallback;
         anInterruptCB.opaque   = this;
-        if(avio_open2(&myContextIO, aFilePath.toCString(), (theFlags == StRawFile::WRITE) ? AVIO_FLAG_WRITE : AVIO_FLAG_READ, &anInterruptCB, NULL) < 0) {
+        const int aResult = avio_open2(&myContextIO,
+                                       aFilePath.toCString(),
+                                       (theFlags == StRawFile::WRITE) ? AVIO_FLAG_WRITE : AVIO_FLAG_READ,
+                                       &anInterruptCB,
+                                       NULL);
+        if(aResult < 0) {
+            ST_ERROR_LOG("StRawFile, avio_open2(" + aFilePath + ") failed - " + stAV::getAVErrorDescription(aResult));
             return false;
         }
         return true;
@@ -127,12 +133,17 @@ bool StRawFile::readFile(const StCString& theFilePath) {
             const size_t aChunkLimit = size_t(std::numeric_limits<int>::max());
             for(;;) {
                 if(aBytesLeft < aChunkLimit) {
-                    const bool isOk = avio_read(myContextIO, aBufferIter, int(aChunkLimit)) != int(aBytesLeft);
+                    const int aResult = avio_read(myContextIO, aBufferIter, int(aBytesLeft));
+                    if(aResult < 0) {
+                        ST_ERROR_LOG("StRawFile, avio_read() failed - " + stAV::getAVErrorDescription(aResult));
+                    }
+
                     closeFile();
-                    return isOk;
+                    return aResult == int(aBytesLeft);
                 }
 
-                if(avio_read(myContextIO, aBufferIter, int(aChunkLimit)) != int(aChunkLimit)) {
+                const int aResult = avio_read(myContextIO, aBufferIter, int(aChunkLimit));
+                if(aResult != int(aChunkLimit)) {
                     closeFile();
                     return false;
                 }
