@@ -38,9 +38,17 @@
 
 #ifdef _MSC_VER
     #ifdef _DEBUG
-        #pragma comment(lib, "libovrd.lib")
+        #if defined(_WIN64) || defined(__WIN64__)
+            #pragma comment(lib, "libovr64d.lib")
+        #else
+            #pragma comment(lib, "libovrd.lib")
+        #endif
     #else
-        #pragma comment(lib, "libovr.lib")
+        #if defined(_WIN64) || defined(__WIN64__)
+            #pragma comment(lib, "libovr64.lib")
+        #else
+            #pragma comment(lib, "libovr.lib")
+        #endif
     #endif
     #pragma comment(lib, "Winmm.lib")
     #pragma comment(lib, "Ws2_32.lib") // requires Windows Vista+
