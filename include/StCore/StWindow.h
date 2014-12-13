@@ -511,6 +511,9 @@ class StWindow {
      */
     ST_CPPEXPORT StRectI_t defaultRect(const StMonitor* theMon = NULL) const;
 
+    ST_CPPEXPORT void* getNativeOglWin() const;
+    ST_CPPEXPORT void* getNativeOglDC()  const;
+
         private: //! @name private fields
 
     StWindowImpl*               myWin;            //!< window implementation class - we hide implementation details since them too platform-specific

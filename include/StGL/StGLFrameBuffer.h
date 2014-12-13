@@ -143,6 +143,13 @@ class StGLFrameBuffer : public StGLResource {
     ST_CPPEXPORT static void unbindBufferGlobal(StGLContext& theCtx);
 
     /**
+     * Return color texture.
+     */
+    ST_LOCAL const StHandle<StGLTexture>& getTextureColor() const {
+        return myTextureColor;
+    }
+
+    /**
      * Bind color texture (to render the texture).
      */
     inline void bindTexture(StGLContext& theCtx,

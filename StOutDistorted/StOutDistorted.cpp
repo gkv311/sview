@@ -30,6 +30,24 @@
 #include <StVersion.h>
 #include <StAV/StAVImage.h>
 
+#ifdef ST_HAVE_LIBOVR
+
+#include <OVR.h>
+//#include <OVR_CAPI_GL.h> // broken SDK
+#include <../Src/OVR_CAPI_GL.h>
+
+#ifdef _MSC_VER
+    #ifdef _DEBUG
+        #pragma comment(lib, "libovrd.lib")
+    #else
+        #pragma comment(lib, "libovr.lib")
+    #endif
+    #pragma comment(lib, "Winmm.lib")
+    #pragma comment(lib, "Ws2_32.lib") // requires Windows Vista+
+#endif
+
+#endif
+
 namespace {
 
     static const char ST_OUT_PLUGIN_NAME[]   = "StOutDistorted";
@@ -305,11 +323,17 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
   //myBarrelCoef(1.0f, 0.18f, 0.115f, 0.0387f),
   myChromAb(0.996f, -0.004f, 1.014f, 0.0f),
   //myChromAb(1.0f, 0.0f, 1.0f, 0.0f),
+  myOvrHmd(NULL),
   myToReduceGui(false),
   myToShowCursor(true),
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false),
   myIsStereoOn(false) {
+
+#ifdef ST_HAVE_LIBOVR
+    ovr_Initialize();
+#endif
+
     const StSearchMonitors& aMonitors = StWindow::getMonitors();
     StTranslations aLangMap(getResourceManager(), ST_OUT_PLUGIN_NAME);
 
@@ -420,9 +444,20 @@ void StOutDistorted::releaseResources() {
 StOutDistorted::~StOutDistorted() {
     myInstancesNb.decrement();
     releaseResources();
+
+#ifdef ST_HAVE_LIBOVR
+    ovr_Shutdown();
+#endif
 }
 
 void StOutDistorted::close() {
+#ifdef ST_HAVE_LIBOVR
+    if(myOvrHmd != NULL) {
+        ovrHmd_Destroy(myOvrHmd);
+        myOvrHmd = NULL;
+    }
+#endif
+
     StWindow::params.VSyncMode->signals.onChanged -= stSlot(this, &StOutDistorted::doSwitchVSync);
     myToResetDevice = false;
     releaseResources();
@@ -492,6 +527,67 @@ bool StOutDistorted::create() {
         //myCursor->setMinMagFilter(*myContext, GL_NEAREST);
         myCursor->init(*myContext, aCursorImg.getPlane());
     }
+
+#ifdef ST_HAVE_LIBOVR
+    if(myDevice == DEVICE_OCULUS) {
+        myOvrHmd = ovrHmd_Create(0);
+        if(myOvrHmd == NULL) {
+            myMsgQueue->pushError(stCString("Oculus Rift is not connected!"));
+            myOvrHmd = ovrHmd_CreateDebug(ovrHmd_DK1);
+            //myOvrHmd = ovrHmd_CreateDebug(ovrHmd_DK2);
+            if(myOvrHmd == NULL) {
+                myMsgQueue->pushError(stCString("Can not create debug libOVR device!"));
+            }
+        }
+    }
+
+    if(myOvrHmd != NULL) {
+        ovrGLConfig aCfg;
+        aCfg.OGL.Header.API              = ovrRenderAPI_OpenGL;
+        aCfg.OGL.Header.BackBufferSize.w = myOvrHmd->Resolution.w;
+        aCfg.OGL.Header.BackBufferSize.h = myOvrHmd->Resolution.h;
+        aCfg.OGL.Header.Multisample      = 1;
+    #ifdef _WIN32
+        aCfg.OGL.Window = (HWND )getNativeOglWin();
+        aCfg.OGL.DC     = (HDC  )getNativeOglDC();
+    #elif defined(__ANDROID__)
+        //
+    #elif defined(__linux__)
+        //aCfg.OGL.Disp = getNativeXDisplay();
+    #endif
+        ovrEyeRenderDesc anEyeRenderDesc[2];
+        if(!ovrHmd_ConfigureRendering(myOvrHmd, &aCfg.Config,
+                                      ovrDistortionCap_Chromatic | ovrDistortionCap_Vignette | ovrDistortionCap_TimeWarp | ovrDistortionCap_Overdrive,
+                                      myOvrHmd->DefaultEyeFov, anEyeRenderDesc)) {
+            myMsgQueue->pushError(stCString("ovrHmd_ConfigureRendering() FAILED"));
+        } else {
+        #ifdef _WIN32
+            if(!ovrHmd_AttachToWindow(myOvrHmd, aCfg.OGL.Window, NULL, NULL)) {
+                myMsgQueue->pushError(stCString("ovrHmd_AttachToWindow() FAILED!"));
+            } else {
+                ovrSizei aRecSizeL = ovrHmd_GetFovTextureSize(myOvrHmd, ovrEye_Left,
+                                                              myOvrHmd->DefaultEyeFov[0], 1.0f);
+                ovrSizei aRecSizeR = ovrHmd_GetFovTextureSize(myOvrHmd, ovrEye_Right,
+                                                              myOvrHmd->DefaultEyeFov[1], 1.0f);
+
+                //ovrHmd_SetEnabledCaps   (myOvrHmd, ovrHmdCap_LowPersistence | ovrHmdCap_DynamicPrediction);
+                //ovrHmd_ConfigureTracking(myOvrHmd, ovrTrackingCap_Orientation | ovrTrackingCap_MagYawCorrection | ovrTrackingCap_Position, 0);
+
+                ST_DEBUG_LOG("libOVR Resolution: " + myOvrHmd->Resolution.w + "x" + myOvrHmd->Resolution.h
+                            + "; eyeRectL= " + aRecSizeL.w + "x" + aRecSizeL.h
+                            + "; eyeRectR= " + aRecSizeR.w + "x" + aRecSizeR.h);
+                if(isMovable()) {
+                    StRect<int32_t> aRect = StWindow::getPlacement();
+                    aRect.right()  = aRect.left() + myOvrHmd->Resolution.w;
+                    aRect.bottom() = aRect.top()  + myOvrHmd->Resolution.h;
+                    StWindow::setPlacement(aRect, false);
+                }
+            }
+        #endif
+        }
+    }
+#endif
+
     myIsBroken = false;
     return true;
 }
@@ -504,12 +600,42 @@ void StOutDistorted::showCursor(const bool theToShow) {
     myToShowCursor = theToShow;
 }
 
-void StOutDistorted::stglDrawCursor() {
+void StOutDistorted::stglDrawCursor(const StPointD_t&  theCursorPos,
+                                    const unsigned int theView) {
     StWindow::showCursor(false);
     if(!myToShowCursor
     || !myCursor->isValid()) {
         return;
     }
+
+    const GLfloat aLensDisp = getLensDist() * 0.5f;
+
+    // compute cursor position
+    StArray<StGLVec4> aVerts(4);
+    const GLfloat aCurLeft = GLfloat(-1.0 + theCursorPos.x() * 2.0);
+    const GLfloat aCurTop  = GLfloat( 1.0 - theCursorPos.y() * 2.0);
+    GLfloat aCurWidth  = 2.0f * GLfloat(myCursor->getSizeX()) / GLfloat(myFrBuffer->getVPSizeX());
+    GLfloat aCurHeight = 2.0f * GLfloat(myCursor->getSizeY()) / GLfloat(myFrBuffer->getVPSizeY());
+    if(params.Anamorph->getValue()
+    && myDevice != DEVICE_OCULUS) {
+        if(params.Layout->getValue() == LAYOUT_OVER_UNDER) {
+            aCurHeight *= 0.5;
+        } else {
+            aCurWidth  *= 0.5;
+        }
+    }
+    if(theView == ST_DRAW_LEFT) {
+        aVerts[0] = StGLVec4( 2.0f * aLensDisp + aCurLeft + aCurWidth, aCurTop - aCurHeight, 0.0f, 1.0f);
+        aVerts[1] = StGLVec4( 2.0f * aLensDisp + aCurLeft + aCurWidth, aCurTop,              0.0f, 1.0f);
+        aVerts[2] = StGLVec4( 2.0f * aLensDisp + aCurLeft,             aCurTop - aCurHeight, 0.0f, 1.0f);
+        aVerts[3] = StGLVec4( 2.0f * aLensDisp + aCurLeft,             aCurTop,              0.0f, 1.0f);
+    } else {
+        aVerts[0] = StGLVec4(-2.0f * aLensDisp + aCurLeft + aCurWidth, aCurTop - aCurHeight, 0.0f, 1.0f);
+        aVerts[1] = StGLVec4(-2.0f * aLensDisp + aCurLeft + aCurWidth, aCurTop,              0.0f, 1.0f);
+        aVerts[2] = StGLVec4(-2.0f * aLensDisp + aCurLeft,             aCurTop - aCurHeight, 0.0f, 1.0f);
+        aVerts[3] = StGLVec4(-2.0f * aLensDisp + aCurLeft,             aCurTop,              0.0f, 1.0f);
+    }
+    myCurVertsBuf.init(*myContext, aVerts);
 
     myContext->core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     myContext->core20fwd->glEnable(GL_BLEND);
@@ -553,9 +679,17 @@ void StOutDistorted::setFullScreen(const bool theFullScreen) {
 void StOutDistorted::stglDraw() {
     myFPSControl.setTargetFPS(StWindow::getTargetFps());
 
-    myIsStereoOn = (StWindow::isStereoSource() || params.MonoClone->getValue())
+    const bool isStereoSource = (StWindow::isStereoSource() || params.MonoClone->getValue());
+    myIsStereoOn = isStereoSource
                 && StWindow::isFullScreen()
                 && !myIsBroken;
+#ifdef ST_HAVE_LIBOVR
+    if(myOvrHmd != NULL) {
+        myIsStereoOn = isStereoSource
+                    && !myIsBroken;
+    }
+#endif
+
     myIsForcedStereo = myIsStereoOn && params.MonoClone->getValue();
     if(myIsStereoOn
     && myDevice == DEVICE_OCULUS) {
@@ -595,6 +729,89 @@ void StOutDistorted::stglDraw() {
     const StGLBoxPx  aVPBoth    = StWindow::stglViewport(ST_WIN_ALL);
     const StPointD_t aCursorPos = StWindow::getMousePos();
 
+#ifdef ST_HAVE_LIBOVR
+    if(myOvrHmd != NULL) {
+        ovrSizei aRecSizeL = ovrHmd_GetFovTextureSize(myOvrHmd, ovrEye_Left,
+                                                      myOvrHmd->DefaultEyeFov[0], 1.0f);
+        ovrSizei aRecSizeR = ovrHmd_GetFovTextureSize(myOvrHmd, ovrEye_Right,
+                                                      myOvrHmd->DefaultEyeFov[1], 1.0f);
+        GLint aFrSizeX = aRecSizeL.w + aRecSizeR.w;
+        GLint aFrSizeY = stMax(aRecSizeL.h, aRecSizeR.h);
+        //aFrSizeX = aVPBoth.width();
+        //aFrSizeY = aVPBoth.height();
+        myToReduceGui = aFrSizeX <= 640;
+
+        if(!myFrBuffer->initLazy(*myContext, GL_RGBA8, aFrSizeX, aFrSizeY, StWindow::hasDepthBuffer())) {
+            myMsgQueue->pushError(stCString("Distorted output - critical error:\nFrame Buffer Object resize failed!"));
+            myIsBroken = true;
+            return;
+        }
+
+        const StGLBoxPx aViewPortL = {{ 0, 0,
+                                        myFrBuffer->getVPSizeX() / 2, myFrBuffer->getVPSizeY() }};
+        const StGLBoxPx aViewPortR = {{ (myFrBuffer->getVPSizeX() + 1) / 2, 0,
+                                        myFrBuffer->getVPSizeX() / 2, myFrBuffer->getVPSizeY() }};
+
+        ovrPosef     anOvrHeadPose[2] = {};
+        ovrGLTexture anOvrTextures[2] = {};
+
+        ovrHmd_BeginFrame(myOvrHmd, 0);
+        anOvrHeadPose[ovrEye_Left]  = ovrHmd_GetHmdPosePerEye(myOvrHmd, ovrEye_Left);
+        anOvrHeadPose[ovrEye_Right] = ovrHmd_GetHmdPosePerEye(myOvrHmd, ovrEye_Right);
+
+        // draw Left View into virtual frame buffer
+        myContext->stglResizeViewport(aViewPortL);
+        myContext->stglSetScissorRect(aViewPortL, false);
+        myFrBuffer->bindBuffer(*myContext);
+            StWindow::signals.onRedraw(ST_DRAW_LEFT);
+            stglDrawCursor(aCursorPos, ST_DRAW_LEFT);
+        myFrBuffer->unbindBuffer(*myContext);
+
+        // draw Right View into virtual frame buffer
+        myContext->stglResizeViewport(aViewPortR);
+        myContext->stglSetScissorRect(aViewPortR, false);
+        myFrBuffer->bindBuffer(*myContext);
+            StWindow::signals.onRedraw(ST_DRAW_RIGHT);
+            stglDrawCursor(aCursorPos, ST_DRAW_RIGHT);
+        myFrBuffer->unbindBuffer(*myContext);
+
+        myContext->stglResizeViewport(aVPBoth);
+        myContext->stglResetScissorRect();
+        myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        anOvrTextures[0].OGL.Header.API            = ovrRenderAPI_OpenGL;
+        anOvrTextures[0].OGL.Header.TextureSize.w  = myFrBuffer->getSizeX();
+        anOvrTextures[0].OGL.Header.TextureSize.h  = myFrBuffer->getSizeY();
+        anOvrTextures[0].OGL.Header.RenderViewport.Pos.x  = aViewPortL.x();
+        anOvrTextures[0].OGL.Header.RenderViewport.Pos.y  = aViewPortL.y();
+        anOvrTextures[0].OGL.Header.RenderViewport.Size.w = aViewPortL.width();
+        anOvrTextures[0].OGL.Header.RenderViewport.Size.h = aViewPortL.height();
+        anOvrTextures[0].OGL.TexId = myFrBuffer->getTextureColor()->getTextureId();
+
+        anOvrTextures[1].OGL.Header.API            = ovrRenderAPI_OpenGL;
+        anOvrTextures[1].OGL.Header.TextureSize.w  = myFrBuffer->getSizeX();
+        anOvrTextures[1].OGL.Header.TextureSize.h  = myFrBuffer->getSizeY();
+        anOvrTextures[1].OGL.Header.RenderViewport.Pos.x  = aViewPortR.x();
+        anOvrTextures[1].OGL.Header.RenderViewport.Pos.y  = aViewPortR.y();
+        anOvrTextures[1].OGL.Header.RenderViewport.Size.w = aViewPortR.width();
+        anOvrTextures[1].OGL.Header.RenderViewport.Size.h = aViewPortR.height();
+        anOvrTextures[1].OGL.TexId = myFrBuffer->getTextureColor()->getTextureId();
+
+        ovrHmd_EndFrame(myOvrHmd, anOvrHeadPose, (ovrTexture* )anOvrTextures);
+
+        ovrHSWDisplayState aWarnDispState;
+        ovrHmd_GetHSWDisplayState(myOvrHmd, &aWarnDispState);
+        if(aWarnDispState.Displayed) {
+            ovrHmd_DismissHSWDisplay(myOvrHmd);
+        }
+
+        myFPSControl.sleepToTarget(); // decrease FPS to target by thread sleeps
+        //StWindow::stglSwap(ST_WIN_ALL);
+        ++myFPSControl;
+        return;
+    }
+#endif
+
     StGLBoxPx aViewPortL = aVPMaster;
     StGLBoxPx aViewPortR = aVPSlave;
     if(params.Anamorph->getValue()
@@ -624,6 +841,7 @@ void StOutDistorted::stglDraw() {
         aFrSizeX = int(std::ceil(double(aFrSizeX) * 1.25) + 0.5);
         aFrSizeY = int(std::ceil(double(aFrSizeY) * 1.25) + 0.5);
     }
+
     if(!myFrBuffer->initLazy(*myContext, GL_RGBA8, aFrSizeX, aFrSizeY, StWindow::hasDepthBuffer())) {
         myMsgQueue->pushError(stCString("Distorted output - critical error:\nFrame Buffer Object resize failed!"));
         myIsBroken = true;
@@ -642,31 +860,11 @@ void StOutDistorted::stglDraw() {
 
     const GLfloat aLensDisp = getLensDist() * 0.5f;
 
-    // compute cursor position
-    StArray<StGLVec4> aVerts(4);
-    const GLfloat aCurLeft = GLfloat(-1.0 + aCursorPos.x() * 2.0);
-    const GLfloat aCurTop  = GLfloat( 1.0 - aCursorPos.y() * 2.0);
-    GLfloat aCurWidth  = 2.0f * GLfloat(myCursor->getSizeX()) / GLfloat(myFrBuffer->getVPSizeX());
-    GLfloat aCurHeight = 2.0f * GLfloat(myCursor->getSizeY()) / GLfloat(myFrBuffer->getVPSizeY());
-    if(params.Anamorph->getValue()
-    && myDevice != DEVICE_OCULUS) {
-        if(params.Layout->getValue() == LAYOUT_OVER_UNDER) {
-            aCurHeight *= 0.5;
-        } else {
-            aCurWidth  *= 0.5;
-        }
-    }
-    aVerts[0] = StGLVec4(2.0f * aLensDisp + aCurLeft + aCurWidth, aCurTop - aCurHeight, 0.0f, 1.0f);
-    aVerts[1] = StGLVec4(2.0f * aLensDisp + aCurLeft + aCurWidth, aCurTop,              0.0f, 1.0f);
-    aVerts[2] = StGLVec4(2.0f * aLensDisp + aCurLeft,             aCurTop - aCurHeight, 0.0f, 1.0f);
-    aVerts[3] = StGLVec4(2.0f * aLensDisp + aCurLeft,             aCurTop,              0.0f, 1.0f);
-    myCurVertsBuf.init(*myContext, aVerts);
-
     // draw Left View into virtual frame buffer
     myFrBuffer->setupViewPort(*myContext); // we set TEXTURE sizes here
     myFrBuffer->bindBuffer(*myContext);
         StWindow::signals.onRedraw(ST_DRAW_LEFT);
-        stglDrawCursor();
+        stglDrawCursor(aCursorPos, ST_DRAW_LEFT);
     myFrBuffer->unbindBuffer(*myContext);
 
     // now draw to real screen buffer
@@ -706,17 +904,10 @@ void StOutDistorted::stglDraw() {
     myFrBuffer->unbindTexture(*myContext);
     myContext->stglResetScissorRect();
 
-    // draw Right View into virtual frame buffer
-    aVerts[0] = StGLVec4(-2.0f * aLensDisp + aCurLeft + aCurWidth, aCurTop - aCurHeight, 0.0f, 1.0f);
-    aVerts[1] = StGLVec4(-2.0f * aLensDisp + aCurLeft + aCurWidth, aCurTop,              0.0f, 1.0f);
-    aVerts[2] = StGLVec4(-2.0f * aLensDisp + aCurLeft,             aCurTop - aCurHeight, 0.0f, 1.0f);
-    aVerts[3] = StGLVec4(-2.0f * aLensDisp + aCurLeft,             aCurTop,              0.0f, 1.0f);
-    myCurVertsBuf.init(*myContext, aVerts);
-
     myFrBuffer->setupViewPort(*myContext); // we set TEXTURE sizes here
     myFrBuffer->bindBuffer(*myContext);
         StWindow::signals.onRedraw(ST_DRAW_RIGHT);
-        stglDrawCursor();
+        stglDrawCursor(aCursorPos, ST_DRAW_RIGHT);
     myFrBuffer->unbindBuffer(*myContext);
 
     // draw Right view

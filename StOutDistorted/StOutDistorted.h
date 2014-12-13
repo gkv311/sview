@@ -29,6 +29,9 @@ class StProgramFlat;
 class StGLFrameBuffer;
 class StGLTexture;
 
+struct ovrHmdDesc_;
+typedef const ovrHmdDesc_* ovrHmd;
+
 /**
  * This class implements stereoscopic rendering on displays
  * wich require software distortion correction.
@@ -135,7 +138,8 @@ class StOutDistorted : public StWindow {
      */
     ST_LOCAL void doSwitchVSync(const int32_t theValue);
 
-    ST_LOCAL void stglDrawCursor();
+    ST_LOCAL void stglDrawCursor(const StPointD_t&  theCursorPos,
+                                 const unsigned int theView);
 
         private:
 
@@ -185,6 +189,8 @@ class StOutDistorted : public StWindow {
     StGLVec4                  myChromAb;         //!< chrome coefficients
 
     StRectI_t                 myBarMargins;      //!< GUI margins
+
+    ovrHmd                    myOvrHmd;
 
     bool                      myToReduceGui;     //!< scale down GUI
     bool                      myToShowCursor;    //!< cursor visibility flag

@@ -311,3 +311,25 @@ StRectI_t StWindow::defaultRect(const StMonitor* theMon) const {
     aRect.bottom() = aRect.top()  + int32_t(aMon.getScale() * 512.0f);
     return aRect;
 }
+
+void* StWindow::getNativeOglWin() const {
+#ifdef _WIN32
+    return (void* )myWin->myMaster.hWindowGl;
+#elif defined(__APPLE__)
+    return (void* )myWin->myMaster.hWindow;
+#elif defined(__ANDROID__)
+    return (void* )myWin->myMaster.hWindowGl;
+#elif defined(__linux__)
+    return (void* )myWin->myMaster.hWindowGl;
+#else
+    return NULL;
+#endif
+}
+
+void* StWindow::getNativeOglDC() const {
+#ifdef _WIN32
+    return (void* )myWin->myMaster.hDC;
+#else
+    return NULL;
+#endif
+}
