@@ -90,45 +90,16 @@ StVideo::StVideo(const StString&                   theALDeviceName,
     myThread = new StThread(threadFunction, (void* )this, "StVideo");
 }
 
-#include <stAssert.h>
 class ST_LOCAL StHangKiller {
-
-        private:
-
-    StHandle<StThread> myThread;
-    StHandle<StString> myState;
-    const double       myLimitSec;
-    StCondition        myDoneEvent;
-
-        private:
-
-    void waitLoop() {
-        StTimer aTimer(true);
-        StString aStr = "Waiting timeout, state: ";
-        for(;;) {
-            ///ST_DEBUG_LOG("...waiting " + aTimer.getElapsedTimeInSec() + " seconds"); ///
-            if(myDoneEvent.wait(1000)) {
-                return;
-            }
-            StHandle<StString> aState = myState;
-            ST_ASSERT_SLIP(aTimer.getElapsedTimeInSec() < myLimitSec,
-                           aStr + (aState.isNull() ? StString() : *aState),
-                           exit(-1));
-        }
-    }
-
-    static SV_THREAD_FUNCTION threadWatcher(void* theWatcher) {
-        StHangKiller* aWatcher = (StHangKiller* )theWatcher;
-        aWatcher->waitLoop();
-        return SV_THREAD_RETURN 0;
-    }
 
         public:
 
-    StHangKiller(const double& theLimitSec)
-    : myState(new StString("initial")),
+    StHangKiller(const double theLimitSec,
+                 const char** theStages)
+    : myStages(theStages),
       myLimitSec(theLimitSec),
-      myDoneEvent(false) {
+      myDoneEvent(false),
+      myStageIter(0) {
         myThread = new StThread(threadWatcher, this, "StHangKiller");
     }
 
@@ -138,24 +109,49 @@ class ST_LOCAL StHangKiller {
         myThread.nullify();
     }
 
-    void setState(const StString& theState) {
-        setState(new StString(theState));
-    }
-
-    void setState(const StHandle<StString>& theState) {
-        myState = theState;
+    void nextStage() {
+        myStageIter.increment();
     }
 
     void setDone() {
         myDoneEvent.set();
-        myState = new StString("done");
     }
 
         private:
 
-    // no copies, please
+    void waitLoop() {
+        StTimer aTimer(true);
+        for(;;) {
+            if(myDoneEvent.wait(1000)) {
+                return;
+            }
+
+            if(aTimer.getElapsedTimeInSec() >= myLimitSec) {
+                const char* aState = myStages[myStageIter.getValue()];
+                ST_ERROR_LOG("StHangKiller waiting for " + aState + "... " + aTimer.getElapsedTimeInSec() + " seconds elapsed, exiting!");
+                exit(-1);
+            }
+        }
+    }
+
+    static SV_THREAD_FUNCTION threadWatcher(void* theWatcher) {
+        StHangKiller* aWatcher = (StHangKiller* )theWatcher;
+        aWatcher->waitLoop();
+        return SV_THREAD_RETURN 0;
+    }
+
+        private: // no copies, please
+
     StHangKiller(const StHangKiller& theCopy);
     const StHangKiller& operator=(const StHangKiller& theCopy);
+
+        private:
+
+    StHandle<StThread> myThread;
+    const char**       myStages;
+    const double       myLimitSec;
+    StCondition        myDoneEvent;
+    StAtomic<int32_t>  myStageIter;
 
 };
 
@@ -167,20 +163,28 @@ StVideo::~StVideo() {
     myTextureQueue->clear();
 
     // wait main thread is quit
-    StHangKiller aHangKiller(10.0);
-    aHangKiller.setState("waiting for StVideo::mainLoop()");
+    const char* THE_STATES[] = {
+        "StVideo::mainLoop()",
+        "StSubtitleQueue thread",
+        "StAudioQueue thread",
+        "StVideoQueue (slave) thread",
+        "StVideoQueue (master) thread",
+        "DONE"
+    };
+
+    StHangKiller aHangKiller(10.0, THE_STATES);
     myThread->wait();
     myThread.nullify();
     myVideoTimer.nullify();
 
     // close all decoding threads
-    aHangKiller.setState("waiting for StSubtitleQueue thread");
+    aHangKiller.nextStage();
     mySubtitles.nullify();
-    aHangKiller.setState("waiting for StAudioQueue thread");
+    aHangKiller.nextStage();
     myAudio.nullify();
-    aHangKiller.setState("waiting for StVideoQueue (slave) thread");
+    aHangKiller.nextStage();
     myVideoSlave.nullify();
-    aHangKiller.setState("waiting for StVideoQueue (master) thread");
+    aHangKiller.nextStage();
     myVideoMaster.nullify();
     aHangKiller.setDone();
     close(); // we must quit or flush video/audio threads before close()!
