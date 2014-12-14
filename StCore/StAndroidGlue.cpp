@@ -66,8 +66,7 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
   myMsgWrite(0),
   myIsRunning(false),
   myIsStateSaved(false),
-  myToDestroy(false),
-  myIsDestroyed(false) {
+  myToDestroy(false) {
     theActivity->instance = this;
 
     JNIEnv* aJniEnv = theActivity->env;
@@ -139,8 +138,7 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
 }
 
 void StAndroidGlue::start() {
-    StHandle<StThread> aThread = new StThread(threadEntryWrapper, this, "StAndroidGlue");
-    aThread->detach();
+    myThread = new StThread(threadEntryWrapper, this, "StAndroidGlue");
 
     // Wait for thread to start
     pthread_mutex_lock(&myMutex);
@@ -153,10 +151,11 @@ void StAndroidGlue::start() {
 StAndroidGlue::~StAndroidGlue() {
     pthread_mutex_lock(&myMutex);
     writeCommand(CommandId_Destroy);
-    while(!myIsDestroyed) {
-        pthread_cond_wait(&myCond, &myMutex);
-    }
     pthread_mutex_unlock(&myMutex);
+
+    if(!myThread.isNull()) {
+        myThread->wait();
+    }
 
     ::close(myMsgRead);
     ::close(myMsgWrite);
@@ -301,13 +300,14 @@ void StAndroidGlue::threadEntry() {
         AInputQueue_detachLooper(myInputQueue);
     }
     AConfiguration_delete(myConfig);
-    myIsDestroyed = true;
     pthread_cond_broadcast(&myCond);
     pthread_mutex_unlock(&myMutex);
 
     myThJniEnv = NULL;
     StMessageBox::setCallback(NULL);
     THE_ANDROID_GLUE = NULL;
+
+    myJavaVM->DetachCurrentThread();
 }
 
 bool StAndroidGlue::writeCommand(const int8_t theCmd) {

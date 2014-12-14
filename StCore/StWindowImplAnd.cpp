@@ -329,6 +329,14 @@ void StWindowImpl::processEvents() {
         return;
     }
 
+    // check if we are exiting
+    if(myParentWin->ToDestroy()) {
+        myStEvent.Type       = stEvent_Close;
+        myStEvent.Close.Time = getEventTime();
+        signals.onClose->emit(myStEvent.Close);
+        return;
+    }
+
     StPointD_t anOldMousePt = myMousePt;
     int aPollRes  = 0;
     int aNbEvents = 0;

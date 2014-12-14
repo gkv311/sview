@@ -301,6 +301,7 @@ class StAndroidGlue {
 
         private: //! @name private fields
 
+    StHandle<StThread>  myThread;            //!< application thread
     ANativeActivity*    myActivity;          //!< ANativeActivity object instance that this application is running in
     AConfiguration*     myConfig;            //!< The current configuration the application is running in
     ALooper*            myLooper;            //!< ALooper associated with the application thread
@@ -330,7 +331,7 @@ class StAndroidGlue {
     bool                myIsRunning;
     bool                myIsStateSaved;
     bool                myToDestroy;         //!< this is non-zero when the application's NativeActivity is being destroyed and waiting for the application thread to complete
-    bool                myIsDestroyed;
+
 };
 
 #endif // __StAndroidGlue_h_
