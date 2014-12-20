@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">sView</string>
+    <string name="app_image_name">sView - Image Viewer</string>
+    <string name="app_movie_name">sView - Media Player</string>
 </resources>

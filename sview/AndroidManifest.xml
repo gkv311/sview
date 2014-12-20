@@ -1,12 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- BEGIN_INCLUDE(manifest) -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.sview" android:versionCode="2" android:versionName="14.10">
-    <application android:label="@string/app_name" android:hasCode="true" android:icon="@drawable/ic_launcher">
-        <activity android:name="com.sview.StActivity"
-                  android:label="@string/app_name"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.sview"
+          android:versionCode="2"
+          android:versionName="14.10">
+    <application android:label="@string/app_name"
+                 android:hasCode="true"
+                 android:icon="@drawable/ic_launcher">
+        <!-- Image Viewer -->
+        <activity android:name="com.sview.StImageActivity"
+                  android:label="@string/app_image_name"
                   android:launchMode="singleTask"
                   android:configChanges="orientation|keyboardHidden|screenSize"
                   android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+                  <!-- android:documentLaunchMode="always" - available since Android 5.0 -->
+            <!-- Tell NativeActivity the name of or .so -->
+            <meta-data android:name="android.app.lib_name" android:value="sview" />
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:mimeType="application/vnd.google.panorama360+jpg"/>
+                <data android:mimeType="image/*"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="" />
+                <data android:scheme="file" />
+                <data android:scheme="ftp" />
+                <data android:scheme="content" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:host="*" />
+
+                <data android:pathPattern=".*\\.mpo" />
+                <data android:pathPattern=".*\\.jps" />
+                <data android:pathPattern=".*\\.pns" />
+                <data android:pathPattern=".*\\.webp" />
+            </intent-filter>
+        </activity>
+        <!-- Movie Player -->
+        <activity android:name="com.sview.StMovieActivity"
+                  android:label="@string/app_movie_name"
+                  android:launchMode="singleTask"
+                  android:alwaysRetainTaskState="true"
+                  android:configChanges="orientation|keyboardHidden|screenSize"
+                  android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+                  <!-- android:documentLaunchMode="always" - available since Android 5.0 -->
             <!-- Tell NativeActivity the name of or .so -->
             <meta-data android:name="android.app.lib_name" android:value="sview" />
             <intent-filter>
@@ -17,8 +60,6 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:mimeType="application/vnd.google.panorama360+jpg"/>
-                <data android:mimeType="image/*"/>
                 <data android:mimeType="video/*"/>
                 <data android:mimeType="audio/*"/>
             </intent-filter>
@@ -43,7 +84,6 @@
                 <data android:mimeType="application/ogg" />
                 <data android:mimeType="application/vnd.3gp*" />
                 <data android:mimeType="application/vnd.apple.mpegurl" />
-                <data android:mimeType="application/x-iso9660-image" />
                 <data android:mimeType="application/x-extension-mp4" />
                 <data android:mimeType="application/x-flac" />
                 <data android:mimeType="application/x-matroska" />
@@ -65,12 +105,6 @@
                 <data android:scheme="http" />
                 <data android:scheme="https" />
                 <data android:host="*" />
-
-                <!-- image -->
-                <data android:pathPattern=".*\\.mpo" />
-                <data android:pathPattern=".*\\.jps" />
-                <data android:pathPattern=".*\\.pns" />
-                <data android:pathPattern=".*\\.webp" />
 
                 <!-- video -->
                 <data android:pathPattern=".*\\.asf" />
@@ -141,7 +175,7 @@
                 <data android:pathPattern=".*\\.WMA" />
             </intent-filter>
         </activity>
-	<!-- <activity android:name="com.sview.MainActivity" android:label="@string/app_name" android:configChanges="orientation|keyboardHidden"><intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter></activity> -->
+        <!-- <activity android:name="com.sview.MainActivity" android:label="@string/app_name" android:configChanges="orientation|keyboardHidden"><intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter></activity> -->
     </application>
 
     <uses-sdk android:minSdkVersion="15" />
@@ -151,4 +185,3 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 </manifest> 
-<!-- END_INCLUDE(manifest) -->
