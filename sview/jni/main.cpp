@@ -15,39 +15,45 @@
 #include "../../StMoviePlayer/StMoviePlayer.h"
 
 /**
- * Entry point for dedicated thread which will execute main application code
- * (e.g. OpenGL rendering and emulated event-handling loop).
+ * Player glue.
  */
-static void app_entry_my(StAndroidGlue* theApp) {
-    //const StString aProcessPath = StProcess::getProcessFolder();
-    //StProcess::setEnv(ST_ENV_NAME_STCORE_PATH, aProcessPath);
-    //StProcess::setEnv("StShare",               aProcessPath);
+class StMainGlue : public StAndroidGlue {
 
-    StHandle<StOpenInfo> anInfo = new StOpenInfo();
-    const StString aPath          = theApp->getDataPath();
-    const StString aFileExtension = StFileNode::getExtension(aPath);
-    anInfo->setPath(theApp->getDataPath());
-    //anInfo = StApplication::parseProcessArguments();
+        public:
 
-    StHandle<StResourceManager> aResMgr = new StResourceManager(theApp->getActivity()->assetManager);
+    /**
+     * Main constructor.
+     */
+    ST_LOCAL StMainGlue(ANativeActivity* theActivity,
+                        void*            theSavedState,
+                        size_t           theSavedStateSize)
+    : StAndroidGlue(theActivity, theSavedState, theSavedStateSize) {
+        //
+    }
 
-    StHandle<StApplication> anApp;
-    const StMIMEList aMimeImg(ST_IMAGE_PLUGIN_MIME_CHAR);
-    for(size_t aMimeIter = 0; aMimeIter < aMimeImg.size(); ++aMimeIter) {
-        if(aFileExtension.isEqualsIgnoreCase(aMimeImg[aMimeIter].getExtension())) {
-            anApp = new StImageViewer(aResMgr, theApp, anInfo);
-            break;
+    /**
+     * Choose and instantiate StApplication.
+     */
+    ST_LOCAL virtual void createApplication() override {
+        const StString aFileExtension = StFileNode::getExtension(myDataPath);
+
+        StHandle<StOpenInfo> anInfo = new StOpenInfo();
+        anInfo->setPath(myDataPath);
+
+        StHandle<StResourceManager> aResMgr = new StResourceManager(myActivity->assetManager);
+
+        const StMIMEList aMimeImg(ST_IMAGE_PLUGIN_MIME_CHAR);
+        for(size_t aMimeIter = 0; aMimeIter < aMimeImg.size(); ++aMimeIter) {
+            if(aFileExtension.isEqualsIgnoreCase(aMimeImg[aMimeIter].getExtension())) {
+                myApp = new StImageViewer(aResMgr, this, anInfo);
+                return;
+            }
         }
-    }
-    if(anApp.isNull()) {
-        anApp = new StMoviePlayer(aResMgr, theApp, anInfo);
-    }
-    if(anApp.isNull() || !anApp->open()) {
-        return;
+
+        myApp = new StMoviePlayer(aResMgr, this, anInfo);
     }
 
-    anApp->exec();
-}
+};
 
 /**
  * Main entry point - called from Java on creation.
@@ -56,8 +62,7 @@ static void app_entry_my(StAndroidGlue* theApp) {
 ST_CEXPORT void ANativeActivity_onCreate(ANativeActivity* theActivity,
                                          void*            theSavedState,
                                          size_t           theSavedStateSize) {
-    StAndroidGlue* anApp = new StAndroidGlue(theActivity, theSavedState, theSavedStateSize);
-    anApp->onAppEntry = app_entry_my;
+    StMainGlue* anApp = new StMainGlue(theActivity, theSavedState, theSavedStateSize);
     anApp->start();
 }
 

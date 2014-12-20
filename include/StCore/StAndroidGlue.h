@@ -29,6 +29,7 @@
 #include <android/native_activity.h>
 
 class StAndroidGlue;
+class StApplication;
 
 /**
  * Data associated with an ALooper fd that will be returned as the "outData" when that source has data ready.
@@ -85,6 +86,13 @@ class StAndroidGlue {
      */
     static StCString getCommandIdName(StAndroidGlue::CommandId theCmd);
 
+        public: //! @name interface to implement
+
+    /**
+     * Choose and instantiate StApplication.
+     */
+    virtual void createApplication() = 0;
+
         public: //! @name public API
 
     /**
@@ -102,7 +110,7 @@ class StAndroidGlue {
     /**
      * Destructor.
      */
-    ST_CPPEXPORT ~StAndroidGlue();
+    ST_CPPEXPORT virtual ~StAndroidGlue();
 
     /**
      * Intent data type.
@@ -169,10 +177,6 @@ class StAndroidGlue {
      */
     ST_CPPEXPORT void postMessage(const char* theInfo);
 
-        public:
-
-    void (*onAppEntry)(StAndroidGlue* theApp);
-
         public:  //! @name Signals
 
     struct {
@@ -191,7 +195,9 @@ class StAndroidGlue {
         StSignal<void (int32_t )> onAppCmd;
     } signals;
 
-        private: //! @name low-level implementation
+        protected: //! @name low-level implementation
+
+    ST_CPPEXPORT void readOpenPath();
 
     ST_CPPEXPORT bool writeCommand(const int8_t theCmd);
     ST_CPPEXPORT void printConfig();
@@ -299,38 +305,39 @@ class StAndroidGlue {
         anApp->setInput(NULL);
     }
 
-        private: //! @name private fields
+        protected: //! @name protected fields
 
-    StHandle<StThread>  myThread;            //!< application thread
-    ANativeActivity*    myActivity;          //!< ANativeActivity object instance that this application is running in
-    AConfiguration*     myConfig;            //!< The current configuration the application is running in
-    ALooper*            myLooper;            //!< ALooper associated with the application thread
-    AInputQueue*        myInputQueue;        //!< input queue from which the application will receive user input events
-    AInputQueue*        myInputQueuePending;
-    ANativeWindow*      myWindow;            //!< native window to draw into
-    ANativeWindow*      myWindowPending;
-    int                 myActivityState;     //!< Current state of the app's activity (APP_CMD_START, APP_CMD_RESUME, APP_CMD_PAUSE, or APP_CMD_STOP)
-    StString            myDataType;          //!< intent data type
-    StString            myDataPath;          //!< intent data string
+    StHandle<StThread>      myThread;            //!< application thread
+    StHandle<StApplication> myApp;               //!< application instance
+    ANativeActivity*        myActivity;          //!< ANativeActivity object instance that this application is running in
+    AConfiguration*         myConfig;            //!< The current configuration the application is running in
+    ALooper*                myLooper;            //!< ALooper associated with the application thread
+    AInputQueue*            myInputQueue;        //!< input queue from which the application will receive user input events
+    AInputQueue*            myInputQueuePending;
+    ANativeWindow*          myWindow;            //!< native window to draw into
+    ANativeWindow*          myWindowPending;
+    int                     myActivityState;     //!< Current state of the app's activity (APP_CMD_START, APP_CMD_RESUME, APP_CMD_PAUSE, or APP_CMD_STOP)
+    StString                myDataType;          //!< intent data type
+    StString                myDataPath;          //!< intent data string
 
-    void*               mySavedState;        //!< last instance's saved state, as provided at creation time
-    size_t              mySavedStateSize;
+    void*                   mySavedState;        //!< last instance's saved state, as provided at creation time
+    size_t                  mySavedStateSize;
 
-    JavaVM*             myJavaVM;            //!< pointer to global Java VM instance
-    JNIEnv*             myThJniEnv;          //!< Jni environment for working thread
+    JavaVM*                 myJavaVM;            //!< pointer to global Java VM instance
+    JNIEnv*                 myThJniEnv;          //!< Jni environment for working thread
 
-    pthread_mutex_t     myMutex;
-    pthread_cond_t      myCond;
+    pthread_mutex_t         myMutex;
+    pthread_cond_t          myCond;
 
-    int                 myMsgRead;
-    int                 myMsgWrite;
+    int                     myMsgRead;
+    int                     myMsgWrite;
 
-    StAndroidPollSource myCmdPollSource;
-    StAndroidPollSource myInputPollSource;
+    StAndroidPollSource     myCmdPollSource;
+    StAndroidPollSource     myInputPollSource;
 
-    bool                myIsRunning;
-    bool                myIsStateSaved;
-    bool                myToDestroy;         //!< this is non-zero when the application's NativeActivity is being destroyed and waiting for the application thread to complete
+    bool                    myIsRunning;
+    bool                    myIsStateSaved;
+    bool                    myToDestroy;         //!< this is non-zero when the application's NativeActivity is being destroyed and waiting for the application thread to complete
 
 };
 

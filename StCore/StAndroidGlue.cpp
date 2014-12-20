@@ -20,6 +20,7 @@
 
 #include <StCore/StAndroidGlue.h>
 
+#include <StCore/StApplication.h>
 #include <StCore/StSearchMonitors.h>
 #include <StTemplates/StHandle.h>
 #include <StThreads/StThread.h>
@@ -49,8 +50,7 @@ StCString StAndroidGlue::getCommandIdName(StAndroidGlue::CommandId theCmd) {
 StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
                              void*            theSavedState,
                              size_t           theSavedStateSize)
-: onAppEntry(NULL),
-  myActivity(theActivity),
+: myActivity(theActivity),
   myConfig(NULL),
   myLooper(NULL),
   myInputQueue(NULL),
@@ -68,35 +68,9 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
   myIsStateSaved(false),
   myToDestroy(false) {
     theActivity->instance = this;
+    theActivity->env->GetJavaVM(&myJavaVM);
 
-    JNIEnv* aJniEnv = theActivity->env;
-    aJniEnv->GetJavaVM(&myJavaVM);
-
-    jclass      anActivityJClass = aJniEnv->GetObjectClass(theActivity->clazz);
-    jmethodID   anActivityJMetId = aJniEnv->GetMethodID(anActivityJClass, "getIntent", "()Landroid/content/Intent;");
-    jobject     aJIntent         = aJniEnv->CallObjectMethod(theActivity->clazz, anActivityJMetId);
-    jclass      aJIntentClass    = aJniEnv->GetObjectClass(aJIntent);
-
-    // retrieve data path
-    jmethodID   aJIntentMetId = aJniEnv->GetMethodID(aJIntentClass, "getDataString", "()Ljava/lang/String;");
-    jstring     aJString      = (jstring )aJniEnv->CallObjectMethod(aJIntent, aJIntentMetId);
-    const char* aJStringStr   = aJniEnv->GetStringUTFChars(aJString, 0);
-    myDataPath = aJStringStr;
-    aJniEnv->ReleaseStringUTFChars(aJString, aJStringStr);
-
-    // retrieve data type
-    aJIntentMetId = aJniEnv->GetMethodID(aJIntentClass, "getType", "()Ljava/lang/String;");
-    aJString      = (jstring )aJniEnv->CallObjectMethod(aJIntent, aJIntentMetId);
-    aJStringStr   = aJniEnv->GetStringUTFChars(aJString, 0);
-    myDataType = aJStringStr;
-    aJniEnv->ReleaseStringUTFChars(aJString, aJStringStr);
-
-    const StString ST_FILE_PROTOCOL("file://");
-    if(myDataPath.isStartsWith(ST_FILE_PROTOCOL)) {
-        const size_t   aCutFrom = ST_FILE_PROTOCOL.getLength();
-        const StString aPath    = myDataPath.subString(aCutFrom, (size_t )-1);
-        myDataPath.fromUrl(aPath);
-    }
+    readOpenPath();
 
     myCmdPollSource.id        = LooperId_MAIN;
     myCmdPollSource.app       = this;
@@ -135,6 +109,36 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
     }
     myMsgRead  = aMsgPipe[0];
     myMsgWrite = aMsgPipe[1];
+}
+
+void StAndroidGlue::readOpenPath() {
+    JNIEnv* aJniEnv = myActivity->env;
+
+    jclass      anActivityJClass = aJniEnv->GetObjectClass(myActivity->clazz);
+    jmethodID   anActivityJMetId = aJniEnv->GetMethodID(anActivityJClass, "getIntent", "()Landroid/content/Intent;");
+    jobject     aJIntent         = aJniEnv->CallObjectMethod(myActivity->clazz, anActivityJMetId);
+    jclass      aJIntentClass    = aJniEnv->GetObjectClass(aJIntent);
+
+    // retrieve data path
+    jmethodID   aJIntentMetId = aJniEnv->GetMethodID(aJIntentClass, "getDataString", "()Ljava/lang/String;");
+    jstring     aJString      = (jstring )aJniEnv->CallObjectMethod(aJIntent, aJIntentMetId);
+    const char* aJStringStr   = aJniEnv->GetStringUTFChars(aJString, 0);
+    myDataPath = aJStringStr;
+    aJniEnv->ReleaseStringUTFChars(aJString, aJStringStr);
+
+    // retrieve data type
+    aJIntentMetId = aJniEnv->GetMethodID(aJIntentClass, "getType", "()Ljava/lang/String;");
+    aJString      = (jstring )aJniEnv->CallObjectMethod(aJIntent, aJIntentMetId);
+    aJStringStr   = aJniEnv->GetStringUTFChars(aJString, 0);
+    myDataType = aJStringStr;
+    aJniEnv->ReleaseStringUTFChars(aJString, aJStringStr);
+
+    const StString ST_FILE_PROTOCOL("file://");
+    if(myDataPath.isStartsWith(ST_FILE_PROTOCOL)) {
+        const size_t   aCutFrom = ST_FILE_PROTOCOL.getLength();
+        const StString aPath    = myDataPath.subString(aCutFrom, (size_t )-1);
+        myDataPath.fromUrl(aPath);
+    }
 }
 
 void StAndroidGlue::start() {
@@ -258,9 +262,7 @@ namespace {
 }
 
 void StAndroidGlue::threadEntry() {
-    if(onAppEntry == NULL) {
-        return;
-    } else if(myJavaVM->AttachCurrentThread(&myThJniEnv, NULL) < 0) {
+    if(myJavaVM->AttachCurrentThread(&myThJniEnv, NULL) < 0) {
         ST_ERROR_LOG("Failed to attach working thread to Java VM");
         return;
     }
@@ -282,7 +284,16 @@ void StAndroidGlue::threadEntry() {
     pthread_cond_broadcast(&myCond);
     pthread_mutex_unlock(&myMutex);
 
-    onAppEntry(this);
+    createApplication();
+    if(!myApp.isNull()) {
+        if(!myApp->open()) {
+            stError("Error: application can not be executed!");
+        }
+        myApp->exec();
+    } else {
+        stError("Error: no application to execute!");
+    }
+    myApp.nullify();
 
     // application is done but we are waiting for destroying event...
     for(; !myToDestroy; ) {
