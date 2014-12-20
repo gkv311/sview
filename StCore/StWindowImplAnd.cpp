@@ -354,6 +354,8 @@ void StWindowImpl::processEvents() {
         myEventsBuffer.append(myStEvent);
     }
 
+    updateActiveState();
+
     StPointD_t anOldMousePt = myMousePt;
     int aPollRes  = 0;
     int aNbEvents = 0;
@@ -401,8 +403,6 @@ void StWindowImpl::processEvents() {
     // update position only when all messages are parsed
     updateWindowPos();
     myIsUpdated = false;
-
-    updateActiveState();
 
     // StWindow XLib implementation process events in the same thread
     // thus this double buffer is not in use
