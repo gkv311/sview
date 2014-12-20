@@ -155,6 +155,16 @@ public class StActivity extends NativeActivity {
         }});
     }
 
+    /**
+     * Auxiliary method to close the activity.
+     */
+    public void postExit() {
+        final Activity aCtx = this;
+        this.runOnUiThread (new Runnable() { public void run() {
+            aCtx.finish();
+        }});
+    }
+
     private ContextWrapper myContext;
 
 }

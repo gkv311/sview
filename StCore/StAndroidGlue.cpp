@@ -256,6 +256,26 @@ void StAndroidGlue::postMessage(const char* theInfo) {
     myThJniEnv->DeleteLocalRef (aJStr);
 }
 
+void StAndroidGlue::postExit() {
+    if(myThJniEnv == NULL) {
+        return;
+    }
+
+    jclass  aJClassAct = myThJniEnv->GetObjectClass(myActivity->clazz);
+    if(aJClassAct == NULL) {
+        ST_ERROR_LOG("StAndroidGlue::postExit() - class is unavailable!");
+        return;
+    }
+
+    jmethodID aJMetId = myThJniEnv->GetMethodID(aJClassAct, "postExit", "()V");
+    if(aJMetId == NULL) {
+        ST_ERROR_LOG("StAndroidGlue::postExit() - method is unavailable!");
+        return;
+    }
+
+    myThJniEnv->CallVoidMethod(myActivity->clazz, aJMetId);
+}
+
 namespace {
 
     static StAndroidGlue* THE_ANDROID_GLUE = NULL;
@@ -318,7 +338,13 @@ void StAndroidGlue::threadEntry() {
     myApp.nullify();
 
     // application is done but we are waiting for destroying event...
+    bool isFirstWait = true;
     for(; !myToDestroy; ) {
+        if(isFirstWait) {
+            postExit();
+            isFirstWait = false;
+        }
+
         StAndroidPollSource* aSource = NULL;
         int aNbEvents = 0;
         ALooper_pollAll(-1, NULL, &aNbEvents, (void** )&aSource);

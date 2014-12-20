@@ -168,6 +168,11 @@ class StAndroidGlue {
      */
     ST_CPPEXPORT void postMessage(const char* theInfo);
 
+    /**
+     * Post exit.
+     */
+    ST_CPPEXPORT void postExit();
+
         public:  //! @name Signals
 
     struct {
