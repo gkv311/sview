@@ -934,20 +934,25 @@ StPointD_t StWindowImpl::getMousePos() {
 }
 
 // Change active GL context in current thread
-void StWindowImpl::stglMakeCurrent(const int& winNum){
+bool StWindowImpl::stglMakeCurrent(const int winNum){
     switch(winNum) {
           case ST_WIN_MASTER: {
-            myMaster.glMakeCurrent();
-            break;
+            if(myMaster.glMakeCurrent()) {
+                if(!myGlContext.isNull()) {
+                    myGlContext->stglResetErrors();
+                }
+                return true;
+            }
+            return false;
         } case ST_WIN_SLAVE: {
             if(myTiledCfg == TiledCfg_Separate) {
-                mySlave.glMakeCurrent();
+                return mySlave.glMakeCurrent();
             } else {
-                myMaster.glMakeCurrent();
+                return myMaster.glMakeCurrent();
             }
-            break;
         }
     }
+    return false;
 }
 
 // Swap Buffers (Double Buffering)

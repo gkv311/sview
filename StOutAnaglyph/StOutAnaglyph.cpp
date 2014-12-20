@@ -313,10 +313,15 @@ void StOutAnaglyph::processEvents() {
 }
 
 void StOutAnaglyph::stglDraw() {
+    if(!StWindow::stglMakeCurrent(ST_WIN_MASTER)) {
+        StWindow::signals.onRedraw(ST_DRAW_MONO);
+        StThread::sleep(10);
+        return;
+    }
+
     myFPSControl.setTargetFPS(StWindow::getTargetFps());
     const StGLBoxPx aVPort = StWindow::stglViewport(ST_WIN_MASTER);
     if(!StWindow::isStereoOutput() || myIsBroken) {
-        StWindow::stglMakeCurrent(ST_WIN_MASTER);
         myContext->stglResizeViewport(aVPort);
         if(myToCompressMem) {
             myFrBuffer->release(*myContext);
@@ -329,7 +334,6 @@ void StOutAnaglyph::stglDraw() {
         ++myFPSControl;
         return;
     }
-    StWindow::stglMakeCurrent(ST_WIN_MASTER);
 
     // resize FBO
     if(!myFrBuffer->initLazy(*myContext, aVPort.width(), aVPort.height(), StWindow::hasDepthBuffer())) {

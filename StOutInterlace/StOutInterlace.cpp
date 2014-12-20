@@ -677,11 +677,16 @@ void StOutInterlace::stglDrawEDCodes() {
 }
 
 void StOutInterlace::stglDraw() {
+    if(!StWindow::stglMakeCurrent(ST_WIN_MASTER)) {
+        StWindow::signals.onRedraw(ST_DRAW_MONO);
+        StThread::sleep(10);
+        return;
+    }
+
     myFPSControl.setTargetFPS(StWindow::getTargetFps());
 
     // always draw LEFT view into real screen buffer
     const StGLBoxPx aVPort = StWindow::stglViewport(ST_WIN_MASTER);
-    StWindow::stglMakeCurrent(ST_WIN_MASTER);
     myContext->stglResizeViewport(aVPort);
     StWindow::signals.onRedraw(ST_DRAW_LEFT);
 

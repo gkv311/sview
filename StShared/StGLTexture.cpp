@@ -339,16 +339,16 @@ bool StGLTexture::init(StGLContext&   theCtx,
     // check texture size is fit dimension maximum
     const GLint aMaxTexDim = theCtx.getMaxTextureSize();
     if(theTextureSizeX < 16 || theTextureSizeY < 4) {
-        ST_DEBUG_LOG("Texture size X or Y ("  + theTextureSizeX + " x " + theTextureSizeY + ") lesser than minimum dimension (16)!");
+        ST_ERROR_LOG("Texture size X or Y ("  + theTextureSizeX + " x " + theTextureSizeY + ") lesser than minimum dimension (16)!");
         return false;
     } else if(theTextureSizeX > aMaxTexDim && theTextureSizeY > aMaxTexDim) {
-        ST_DEBUG_LOG("Texture size X and Y (" + theTextureSizeX + " x " + theTextureSizeY + ") greater than maximum dimension (" + aMaxTexDim + ")!");
+        ST_ERROR_LOG("Texture size X and Y (" + theTextureSizeX + " x " + theTextureSizeY + ") greater than maximum dimension (" + aMaxTexDim + ")!");
         return false;
     } else if(theTextureSizeX > aMaxTexDim) {
-        ST_DEBUG_LOG("Texture size X (" + theTextureSizeX + ") greater than maximal dimension (" + aMaxTexDim + ")!");
+        ST_ERROR_LOG("Texture size X (" + theTextureSizeX + ") greater than maximal dimension (" + aMaxTexDim + ")!");
         return false;
     } else if(theTextureSizeY > aMaxTexDim) {
-        ST_DEBUG_LOG("Texture size Y (" + theTextureSizeY + ") greater than maximal dimension (" + aMaxTexDim + ")!");
+        ST_ERROR_LOG("Texture size Y (" + theTextureSizeY + ") greater than maximal dimension (" + aMaxTexDim + ")!");
         return false;
     }
 

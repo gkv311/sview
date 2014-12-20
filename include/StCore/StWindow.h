@@ -319,7 +319,7 @@ class StWindow {
     /**
      * Make GL context active in current thread.
      */
-    ST_CPPEXPORT void stglMakeCurrent();
+    ST_CPPEXPORT bool stglMakeCurrent();
 
     /**
      * Swap dual-buffered GL context. Notice that stglDraw will automatically call it.
@@ -475,7 +475,7 @@ class StWindow {
      * Make GL context for specified window active in current thread.
      * @param theWinEnum subwindow to activate GL context
      */
-    ST_CPPEXPORT void stglMakeCurrent(const int theWinEnum);
+    ST_CPPEXPORT bool stglMakeCurrent(const int theWinEnum);
 
     /**
      * Swap dual-buffered GL context for specified window.

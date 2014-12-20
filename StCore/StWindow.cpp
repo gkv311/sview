@@ -211,12 +211,20 @@ void StWindow::stglSwap(const int theWinEnum) {
      myWin->stglSwap(theWinEnum);
 }
 
-void StWindow::stglMakeCurrent() {
-    myWin->stglMakeCurrent(ST_WIN_MASTER);
+bool StWindow::stglMakeCurrent() {
+    const bool isBound = myWin->stglMakeCurrent(ST_WIN_MASTER);
+    if(!myWin->myGlContext.isNull()) {
+        myWin->myGlContext->setBound(isBound);
+    }
+    return isBound;
 }
 
-void StWindow::stglMakeCurrent(const int theWinEnum) {
-    myWin->stglMakeCurrent(theWinEnum);
+bool StWindow::stglMakeCurrent(const int theWinEnum) {
+    const bool isBound = myWin->stglMakeCurrent(theWinEnum);
+    if(!myWin->myGlContext.isNull()) {
+        myWin->myGlContext->setBound(isBound);
+    }
+    return isBound;
 }
 
 void StWindow::stglDraw() {

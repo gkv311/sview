@@ -298,12 +298,17 @@ void StOutIZ3D::processEvents() {
 }
 
 void StOutIZ3D::stglDraw() {
+    if(!StWindow::stglMakeCurrent(ST_WIN_MASTER)) {
+        StWindow::signals.onRedraw(ST_DRAW_MONO);
+        StThread::sleep(10);
+        return;
+    }
+
     myFPSControl.setTargetFPS(StWindow::getTargetFps());
 
     const StGLBoxPx aVPMaster = StWindow::stglViewport(ST_WIN_MASTER);
     const StGLBoxPx aVPSlave  = StWindow::stglViewport(ST_WIN_SLAVE);
     if(!StWindow::isStereoOutput() || myIsBroken) {
-        StWindow::stglMakeCurrent(ST_WIN_MASTER);
         if(myToCompressMem) {
             myFrBuffer->release(*myContext);
         }
@@ -327,7 +332,6 @@ void StOutIZ3D::stglDraw() {
         ++myFPSControl;
         return;
     }
-    StWindow::stglMakeCurrent(ST_WIN_MASTER);
 
     // resize FBO
     if(!myFrBuffer->initLazy(*myContext, aVPMaster.width(), aVPMaster.height(), StWindow::hasDepthBuffer())) {

@@ -251,6 +251,10 @@ StHandle<StStereoParams> StGLImageRegion::getSource() {
     return params.stereoFile;
 }
 
+void StGLImageRegion::stglSkipFrames() {
+    myTextureQueue->stglUpdateStTextures(getContext());
+}
+
 void StGLImageRegion::stglUpdate(const StPointD_t& pointZo) {
     StGLWidget::stglUpdate(pointZo);
     if(myIsInitialized) {

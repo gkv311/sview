@@ -1002,7 +1002,12 @@ void StOutPageFlip::stglDrawWarning() {
 void StOutPageFlip::stglDraw() {
     myFPSControl.setTargetFPS(StWindow::getTargetFps());
 
-    StWindow::stglMakeCurrent(ST_WIN_MASTER);
+    if(!StWindow::stglMakeCurrent(ST_WIN_MASTER)) {
+        StWindow::signals.onRedraw(ST_DRAW_MONO);
+        StThread::sleep(10);
+        return;
+    }
+
     const StGLBoxPx aVPort = StWindow::stglViewport(ST_WIN_MASTER);
     myContext->stglResizeViewport(aVPort);
 

@@ -1052,8 +1052,16 @@ void StMoviePlayer::doUpdateOpenALDeviceList(const size_t ) {
 }
 
 void StMoviePlayer::stglDraw(unsigned int theView) {
-    if(!myContext.isNull()
-    && myContext->core20fwd != NULL) {
+    if( myContext.isNull()
+    || !myContext->isBound()) {
+        if(!myGUI.isNull()
+         && myGUI->myImage != NULL) {
+            myGUI->myImage->stglSkipFrames();
+        }
+        return;
+    }
+
+    if(myContext->core20fwd != NULL) {
         // clear the screen and the depth buffer
         myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }

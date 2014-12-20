@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -7,6 +7,8 @@
  */
 
 #include <StGLStereo/StGLTextureQueue.h>
+
+#include <StGL/StGLContext.h>
 
 StGLTextureQueue::StGLTextureQueue(const size_t theQueueSizeMax)
 : myDataFront(NULL),
@@ -131,7 +133,8 @@ bool StGLTextureQueue::stglUpdateStTextures(StGLContext& theCtx) {
         return aSwapState == SWAPONREADY_SWAPPED;
     }
 
-    if(myDataFront->fillTexture(theCtx, myQTexture)) {
+    if(!theCtx.isBound()
+    || myDataFront->fillTexture(theCtx, myQTexture)) {
         myIsReadyToSwap = true;
         myMutexSize.lock();
             myCurrPts   = myDataFront->getPTS();

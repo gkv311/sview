@@ -69,7 +69,8 @@ StGLContext::StGLContext(const StHandle<StResourceManager>& theResMgr)
   myMaxTexDim(0),
   myWasInit(false),
   myFramebufferDraw(0),
-  myFramebufferRead(0) {
+  myFramebufferRead(0),
+  myIsBound(false) {
     stMemZero(&(*myFuncs),   sizeof(StGLFunctions));
     extAll = &(*myFuncs);
     stMemZero(&myViewport,   sizeof(StGLBoxPx));
@@ -117,7 +118,8 @@ StGLContext::StGLContext(const bool theToInitialize)
   myMaxTexDim(0),
   myWasInit(false),
   myFramebufferDraw(0),
-  myFramebufferRead(0) {
+  myFramebufferRead(0),
+  myIsBound(false) {
     stMemZero(&(*myFuncs),   sizeof(StGLFunctions));
     extAll = &(*myFuncs);
     stMemZero(&myViewport,   sizeof(StGLBoxPx));

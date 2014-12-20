@@ -714,8 +714,13 @@ void StOutDistorted::stglDraw() {
         StWindow::setAttribute(StWinAttr_SplitCfg, StWinSlave_splitOff);
     }
 
+    if(!StWindow::stglMakeCurrent(ST_WIN_MASTER)) {
+        StWindow::signals.onRedraw(ST_DRAW_MONO);
+        StThread::sleep(10);
+        return;
+    }
+
     const StGLBoxPx aVPMaster = StWindow::stglViewport(ST_WIN_MASTER);
-    StWindow::stglMakeCurrent(ST_WIN_MASTER);
     if(!myIsStereoOn) {
         if(myToCompressMem) {
             myFrBuffer->release(*myContext);

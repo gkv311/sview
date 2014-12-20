@@ -76,7 +76,7 @@ class StWindowImpl {
     ST_LOCAL StPointD_t getMousePos();
     ST_LOCAL bool create();
     ST_LOCAL void stglSwap(const int& theWinId);
-    ST_LOCAL void stglMakeCurrent(const int& theWinId);
+    ST_LOCAL bool stglMakeCurrent(const int theWinId);
     ST_LOCAL StGLBoxPx stglViewport(const int& theWinId) const;
     ST_LOCAL void processEvents();
     ST_LOCAL void post(StEvent& theEvent);

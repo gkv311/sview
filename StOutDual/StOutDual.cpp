@@ -380,6 +380,12 @@ void StOutDual::processEvents() {
 }
 
 void StOutDual::stglDraw() {
+    if(!StWindow::stglMakeCurrent(ST_WIN_MASTER)) {
+        StWindow::signals.onRedraw(ST_DRAW_MONO);
+        StThread::sleep(10);
+        return;
+    }
+
     myFPSControl.setTargetFPS(StWindow::getTargetFps());
 
     const StGLBoxPx aVPMaster = StWindow::stglViewport(ST_WIN_MASTER);
@@ -387,8 +393,6 @@ void StOutDual::stglDraw() {
     const bool toShowStereo = (StWindow::isStereoSource() || params.MonoClone->getValue()) && !myIsBroken;
     myIsForcedStereo = toShowStereo && params.MonoClone->getValue();
     if(!toShowStereo) {
-        StWindow::stglMakeCurrent(ST_WIN_MASTER);
-
         if(myToCompressMem) {
             myFrBuffer->release(*myContext);
         }
@@ -411,7 +415,6 @@ void StOutDual::stglDraw() {
         return;
     }
 
-    StWindow::stglMakeCurrent(ST_WIN_MASTER);
     if(myDevice == DUALMODE_SIMPLE) {
         myContext->stglResizeViewport(aVPMaster);
         myContext->stglSetScissorRect(aVPMaster, false);

@@ -172,6 +172,16 @@ class StGLContext {
     ST_CPPEXPORT virtual ~StGLContext();
 
     /**
+     * Flag indicating make current state.
+     */
+    ST_LOCAL bool isBound() const { return myIsBound; }
+
+    /**
+     * Setup make current state.
+     */
+    ST_LOCAL void setBound(const bool theIsBound) { myIsBound = theIsBound; }
+
+    /**
      * File resources manager.
      */
     ST_LOCAL const StHandle<StResourceManager>& getResourceManager() const { return myResMgr; }
@@ -413,6 +423,7 @@ class StGLContext {
     StGLBoxPx               myViewport;           //!< cached viewport rectangle
     GLuint                  myFramebufferDraw;    //!< bound draw buffer
     GLuint                  myFramebufferRead;    //!< bound read buffer
+    bool                    myIsBound;            //!< flag indicating make current state
 
 };
 

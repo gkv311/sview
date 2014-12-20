@@ -116,6 +116,11 @@ class StGLImageRegion : public StGLWidget {
     ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemClicked);
     ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemUnclicked);
 
+    /**
+     * Auxiliary method to discard frames in the textures queue without bound OpenGL context.
+     */
+    ST_CPPEXPORT void stglSkipFrames();
+
         public: //! @name Properties
 
     struct {
