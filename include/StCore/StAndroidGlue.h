@@ -156,6 +156,11 @@ class StAndroidGlue {
      */
     ST_CPPEXPORT bool popOpenNewFile(StString& theNewFile);
 
+    /**
+     * Return device memory class.
+     */
+    ST_LOCAL int getMemoryClass() const { return myMemoryClassMiB; }
+
         public:
 
     /**
@@ -313,6 +318,7 @@ class StAndroidGlue {
     ANativeWindow*          myWindow;            //!< native window to draw into
     ANativeWindow*          myWindowPending;
     int                     myActivityState;     //!< Current state of the app's activity (APP_CMD_START, APP_CMD_RESUME, APP_CMD_PAUSE, or APP_CMD_STOP)
+    int                     myMemoryClassMiB;    //!< device memory class
 
     void*                   mySavedState;        //!< last instance's saved state, as provided at creation time
     size_t                  mySavedStateSize;

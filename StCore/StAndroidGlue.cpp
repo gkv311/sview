@@ -58,6 +58,7 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
   myWindow(NULL),
   myWindowPending(NULL),
   myActivityState(0),
+  myMemoryClassMiB(0),
   mySavedState(NULL),
   mySavedStateSize(0),
   myJavaVM(NULL),
@@ -69,6 +70,20 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
   myToDestroy(false) {
     theActivity->instance = this;
     theActivity->env->GetJavaVM(&myJavaVM);
+
+    JNIEnv* aJniEnv = myActivity->env;
+
+    jclass    aJClass_Activity       = aJniEnv->GetObjectClass(myActivity->clazz);
+    jmethodID aJMet_getSystemService = aJniEnv->GetMethodID(aJClass_Activity, "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;");
+    jstring   aJStr_activity         = aJniEnv->NewStringUTF("activity");
+    jobject   aJActivityMgr          = aJniEnv->CallObjectMethod(myActivity->clazz, aJMet_getSystemService, aJStr_activity);
+    aJniEnv->DeleteLocalRef(aJStr_activity);
+    if(aJActivityMgr != NULL) {
+        // getLargeMemoryClass()
+        jclass aJClass_ActivityManager = aJniEnv->GetObjectClass(aJActivityMgr);
+        jmethodID aJMet_getMemoryClass = aJniEnv->GetMethodID(aJClass_ActivityManager, "getMemoryClass", "()I");
+        myMemoryClassMiB = aJniEnv->CallIntMethod(aJActivityMgr, aJMet_getMemoryClass);
+    }
 
     readOpenPath();
 

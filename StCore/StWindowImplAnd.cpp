@@ -283,6 +283,14 @@ void StWindowImpl::onAndroidCommand(int32_t theCommand) {
             onAndroidInitWindow();
             return;
         }
+        case StAndroidGlue::CommandId_Stop: {
+            if(myParentWin->getMemoryClass() < 50) {
+                myStEvent.Type       = stEvent_Close;
+                myStEvent.Close.Time = getEventTime();
+                signals.onClose->emit(myStEvent.Close);
+            }
+            break;
+        }
         case StAndroidGlue::CommandId_WindowTerm: {
             if(!myMaster.hRC.isNull()) {
                 myMaster.hRC->makeCurrent(EGL_NO_SURFACE);
