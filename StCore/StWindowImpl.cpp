@@ -602,6 +602,9 @@ bool StWindowImpl::isParentOnScreen() const {
 void StWindowImpl::updateActiveState() {
     updateBlockSleep();
 
+/*#if defined(__ANDROID__)
+    myIsActive = (myMaster.eglSurface != EGL_NO_SURFACE);
+#else*/
     if(attribs.IsFullScreen) {
         myIsActive = true;
         return;
@@ -620,6 +623,7 @@ void StWindowImpl::updateActiveState() {
             break;
         }
     }
+//#endif
 }
 
 #if !defined(__APPLE__)
