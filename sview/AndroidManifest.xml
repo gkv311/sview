@@ -2,7 +2,11 @@
 <!-- BEGIN_INCLUDE(manifest) -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.sview" android:versionCode="2" android:versionName="14.10">
     <application android:label="@string/app_name" android:hasCode="true" android:icon="@drawable/ic_launcher">
-        <activity android:name="com.sview.StActivity" android:label="@string/app_name" android:configChanges="orientation|keyboardHidden|screenSize" android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+        <activity android:name="com.sview.StActivity"
+                  android:label="@string/app_name"
+                  android:launchMode="singleTask"
+                  android:configChanges="orientation|keyboardHidden|screenSize"
+                  android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
             <!-- Tell NativeActivity the name of or .so -->
             <meta-data android:name="android.app.lib_name" android:value="sview" />
             <intent-filter>

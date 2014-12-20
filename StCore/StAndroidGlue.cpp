@@ -114,31 +114,53 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
 void StAndroidGlue::readOpenPath() {
     JNIEnv* aJniEnv = myActivity->env;
 
-    jclass      anActivityJClass = aJniEnv->GetObjectClass(myActivity->clazz);
-    jmethodID   anActivityJMetId = aJniEnv->GetMethodID(anActivityJClass, "getIntent", "()Landroid/content/Intent;");
-    jobject     aJIntent         = aJniEnv->CallObjectMethod(myActivity->clazz, anActivityJMetId);
-    jclass      aJIntentClass    = aJniEnv->GetObjectClass(aJIntent);
+    jclass      aJClassActivity = aJniEnv->GetObjectClass(myActivity->clazz);
+    jmethodID   aJMet_getIntent = aJniEnv->GetMethodID(aJClassActivity, "getIntent", "()Landroid/content/Intent;");
+    jmethodID   aJMet_setIntent = aJniEnv->GetMethodID(aJClassActivity, "setIntent", "(Landroid/content/Intent;)V");
+    jobject     aJIntent        = aJniEnv->CallObjectMethod(myActivity->clazz, aJMet_getIntent);
+    if(aJIntent == NULL) {
+        return;
+    }
+
+    jclass      aJClassIntent       = aJniEnv->GetObjectClass(aJIntent);
+    jmethodID   aJMet_getDataString = aJniEnv->GetMethodID(aJClassIntent, "getDataString", "()Ljava/lang/String;");
+    jmethodID   aJMet_getType       = aJniEnv->GetMethodID(aJClassIntent, "getType",       "()Ljava/lang/String;");
 
     // retrieve data path
-    jmethodID   aJIntentMetId = aJniEnv->GetMethodID(aJIntentClass, "getDataString", "()Ljava/lang/String;");
-    jstring     aJString      = (jstring )aJniEnv->CallObjectMethod(aJIntent, aJIntentMetId);
+    jstring     aJString      = (jstring )aJniEnv->CallObjectMethod(aJIntent, aJMet_getDataString);
     const char* aJStringStr   = aJniEnv->GetStringUTFChars(aJString, 0);
-    myDataPath = aJStringStr;
+    StString aDataPath = aJStringStr;
     aJniEnv->ReleaseStringUTFChars(aJString, aJStringStr);
 
     // retrieve data type
-    aJIntentMetId = aJniEnv->GetMethodID(aJIntentClass, "getType", "()Ljava/lang/String;");
-    aJString      = (jstring )aJniEnv->CallObjectMethod(aJIntent, aJIntentMetId);
+    aJString      = (jstring )aJniEnv->CallObjectMethod(aJIntent, aJMet_getType);
     aJStringStr   = aJniEnv->GetStringUTFChars(aJString, 0);
-    myDataType = aJStringStr;
+    const StString aDataType = aJStringStr;
     aJniEnv->ReleaseStringUTFChars(aJString, aJStringStr);
 
+    // reset intent in Activity
+    aJniEnv->CallObjectMethod(myActivity->clazz, aJMet_setIntent, NULL);
+
     const StString ST_FILE_PROTOCOL("file://");
-    if(myDataPath.isStartsWith(ST_FILE_PROTOCOL)) {
+    if(aDataPath.isStartsWith(ST_FILE_PROTOCOL)) {
         const size_t   aCutFrom = ST_FILE_PROTOCOL.getLength();
-        const StString aPath    = myDataPath.subString(aCutFrom, (size_t )-1);
-        myDataPath.fromUrl(aPath);
+        const StString aPath    = aDataPath.subString(aCutFrom, (size_t )-1);
+        aDataPath.fromUrl(aPath);
     }
+
+    StMutexAuto aLock(myDndLock);
+    myDndPath = aDataPath;
+}
+
+bool StAndroidGlue::popOpenNewFile(StString& theNewFile) {
+    StMutexAuto aLock(myDndLock);
+    if(myDndPath.isEmpty()) {
+        return false;
+    }
+
+    theNewFile = myDndPath;
+    myDndPath.clear();
+    return true;
 }
 
 void StAndroidGlue::start() {
@@ -489,6 +511,10 @@ void StAndroidGlue::setWindow(ANativeWindow* theWindow) {
 }
 
 void StAndroidGlue::setActivityState(int8_t theState) {
+    if(theState == StAndroidGlue::CommandId_Resume) {
+        readOpenPath();
+    }
+
     pthread_mutex_lock(&myMutex);
     writeCommand(theState);
     while(myActivityState != theState) {

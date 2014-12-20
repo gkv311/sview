@@ -23,6 +23,7 @@
 
 #include <StSlots/StSignal.h>
 #include <StStrings/StString.h>
+#include <StThreads/StMutex.h>
 #include <StThreads/StThread.h>
 
 #include <android/configuration.h>
@@ -113,21 +114,6 @@ class StAndroidGlue {
     ST_CPPEXPORT virtual ~StAndroidGlue();
 
     /**
-     * Intent data type.
-     */
-    ST_LOCAL const StString& getDataType() const {
-        return myDataType;
-    }
-
-    /**
-     * Intent data path (URL).
-     */
-    ST_LOCAL const StString& getDataPath() const {
-        return myDataPath;
-    }
-
-
-    /**
      * ANativeActivity object instance that this application is running in.
      */
     ST_LOCAL ANativeActivity* getActivity() const {
@@ -164,6 +150,11 @@ class StAndroidGlue {
         mySavedState     = theSavedState;
         mySavedStateSize = theSavedStateSize;
     }
+
+    /**
+     * Pop onNewIntent() open file event.
+     */
+    ST_CPPEXPORT bool popOpenNewFile(StString& theNewFile);
 
         public:
 
@@ -317,8 +308,6 @@ class StAndroidGlue {
     ANativeWindow*          myWindow;            //!< native window to draw into
     ANativeWindow*          myWindowPending;
     int                     myActivityState;     //!< Current state of the app's activity (APP_CMD_START, APP_CMD_RESUME, APP_CMD_PAUSE, or APP_CMD_STOP)
-    StString                myDataType;          //!< intent data type
-    StString                myDataPath;          //!< intent data string
 
     void*                   mySavedState;        //!< last instance's saved state, as provided at creation time
     size_t                  mySavedStateSize;
@@ -334,6 +323,9 @@ class StAndroidGlue {
 
     StAndroidPollSource     myCmdPollSource;
     StAndroidPollSource     myInputPollSource;
+
+    StMutex                 myDndLock;           //!< Drag & Drop data lock
+    StString                myDndPath;           //!< intent data string
 
     bool                    myIsRunning;
     bool                    myIsStateSaved;

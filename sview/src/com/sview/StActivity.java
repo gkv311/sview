@@ -121,6 +121,15 @@ public class StActivity extends NativeActivity {
     }
 
     /**
+     * Handle new open file event.
+     */
+    @Override
+    protected void onNewIntent(Intent theIntent) {
+        super.onNewIntent(theIntent);
+        setIntent(theIntent);
+    }
+
+    /**
      * Auxiliary method to show temporary info message.
      */
     public void postToast(String theInfo) {

@@ -35,10 +35,12 @@ class StMainGlue : public StAndroidGlue {
      * Choose and instantiate StApplication.
      */
     ST_LOCAL virtual void createApplication() override {
-        const StString aFileExtension = StFileNode::getExtension(myDataPath);
+        StMutexAuto aLock(myDndLock);
+        const StString aFileExtension = StFileNode::getExtension(myDndPath);
 
         StHandle<StOpenInfo> anInfo = new StOpenInfo();
-        anInfo->setPath(myDataPath);
+        anInfo->setPath(myDndPath);
+        myDndPath.clear();
 
         StHandle<StResourceManager> aResMgr = new StResourceManager(myActivity->assetManager);
 

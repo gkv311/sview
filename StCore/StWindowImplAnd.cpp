@@ -337,6 +337,15 @@ void StWindowImpl::processEvents() {
         return;
     }
 
+    // check onNewIntent event
+    StString aDndFile;
+    if(myParentWin->popOpenNewFile(aDndFile)) {
+        myStEvent.Type = stEvent_FileDrop;
+        myStEvent.DNDrop.Time = getEventTime();
+        myStEvent.DNDrop.File = aDndFile.toCString();
+        myEventsBuffer.append(myStEvent);
+    }
+
     StPointD_t anOldMousePt = myMousePt;
     int aPollRes  = 0;
     int aNbEvents = 0;
