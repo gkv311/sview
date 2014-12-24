@@ -25,7 +25,7 @@ namespace {
     const StAVPacket ST_FLUSH_PACKET(NULL, StAVPacket::FLUSH_PACKET);
     const StAVPacket ST_QUIT_PACKET (NULL, StAVPacket::QUIT_PACKET);
 
-};
+}
 
 // auxiliary structure
 struct StAVPacketQueue::QueueItem {
@@ -57,6 +57,7 @@ StAVPacketQueue::StAVPacketQueue(const size_t theSizeLimit)
   myPtsSeek(0.0),
   myPlayEvent(ST_PLAYEVENT_NONE),
   myIsPlaying(false),
+  myIsAttachedPic(false),
   // queue
   myFront(NULL),
   myBack(NULL),
@@ -109,6 +110,10 @@ bool StAVPacketQueue::init(AVFormatContext*   theFormatCtx,
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
     myGetBuffInit    = myCodecCtx->get_buffer2;
 #endif
+#if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(54, 2, 100))
+    myIsAttachedPic = myStream != NULL
+                  && (myStream->disposition & AV_DISPOSITION_ATTACHED_PIC) != 0;
+#endif
     return true;
 }
 
@@ -130,6 +135,7 @@ void StAVPacketQueue::deinit() {
     myGetFrmtInit = NULL;
     myGetBuffInit = NULL;
     myStreamId    = -1;
+    myIsAttachedPic = false;
 }
 
 void StAVPacketQueue::fillCodecInfo(AVCodec* theCodec) {

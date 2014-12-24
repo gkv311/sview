@@ -140,12 +140,7 @@ class StAVPacketQueue {
      * Check AV_DISPOSITION_ATTACHED_PIC flag.
      */
     ST_LOCAL bool isAttachedPicture() const {
-    #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(54, 2, 100))
-        return  myStream != NULL
-            && (myStream->disposition & AV_DISPOSITION_ATTACHED_PIC) != 0;
-    #else
-        return false;
-    #endif
+        return myIsAttachedPic;
     }
 
     /**
@@ -259,6 +254,7 @@ class StAVPacketQueue {
     double           myPtsSeek;        //!< seeking targert in seconds
     StPlayEvent_t    myPlayEvent;      //!< playback control event
     bool             myIsPlaying;      //!< playback state
+    bool             myIsAttachedPic;  //!< flag indicating the stream is attached image
 
         private: //! @name Private fields
 

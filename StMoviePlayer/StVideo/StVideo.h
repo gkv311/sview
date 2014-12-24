@@ -245,7 +245,8 @@ class StVideo {
             theDuration = myDuration;
         myEventMutex.unlock();
         thePts = getPts();
-        theIsVideoPlayed = myVideoMaster->isPlaying();
+        theIsVideoPlayed = myVideoMaster->isPlaying()
+                        && myVideoMaster->isAttachedPicture();
         theIsAudioPlayed = myAudio->isPlaying();
         return theIsVideoPlayed || theIsAudioPlayed;
     }

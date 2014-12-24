@@ -119,7 +119,7 @@ StTranslations::StTranslations(const StHandle<StResourceManager>& theResMgr,
             params.language->setValue(int32_t(anIdInList));
         }
     }
-    updateLangCode(anIdInList);
+    updateLangCode(int32_t(anIdInList));
 
     const StString& aFolderName = myLangFolderList[anIdInList];
     const StString  aResName    = StString()
