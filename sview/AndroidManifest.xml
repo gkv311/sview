@@ -109,10 +109,12 @@
                 <!-- video -->
                 <data android:pathPattern=".*\\.asf" />
                 <data android:pathPattern=".*\\.avi" />
+                <data android:pathPattern=".*\\.bik" />
                 <data android:pathPattern=".*\\.f4v" />
                 <data android:pathPattern=".*\\.flv" />
                 <data android:pathPattern=".*\\.m3u8" />
                 <data android:pathPattern=".*\\.mkv" />
+                <data android:pathPattern=".*\\.mk3d" />
                 <data android:pathPattern=".*\\.mov" />
                 <data android:pathPattern=".*\\.mp2" />
                 <data android:pathPattern=".*\\.mp4" />
@@ -123,15 +125,19 @@
                 <data android:pathPattern=".*\\.ogm" />
                 <data android:pathPattern=".*\\.ogv" />
                 <data android:pathPattern=".*\\.ts" />
+                <data android:pathPattern=".*\\.mts" />
+                <data android:pathPattern=".*\\.m2ts" />
                 <data android:pathPattern=".*\\.vob" />
                 <data android:pathPattern=".*\\.webm" />
                 <data android:pathPattern=".*\\.wmv" />
                 <data android:pathPattern=".*\\.ASF" />
                 <data android:pathPattern=".*\\.AVI" />
+                <data android:pathPattern=".*\\.BIK" />
                 <data android:pathPattern=".*\\.F4V" />
                 <data android:pathPattern=".*\\.FLV" />
                 <data android:pathPattern=".*\\.M3U8" />
                 <data android:pathPattern=".*\\.MKV" />
+                <data android:pathPattern=".*\\.MK3D" />
                 <data android:pathPattern=".*\\.MOV" />
                 <data android:pathPattern=".*\\.MP2" />
                 <data android:pathPattern=".*\\.MP4" />
@@ -142,6 +148,8 @@
                 <data android:pathPattern=".*\\.OGM" />
                 <data android:pathPattern=".*\\.OGV" />
                 <data android:pathPattern=".*\\.TS" />
+                <data android:pathPattern=".*\\.MTS" />
+                <data android:pathPattern=".*\\.M2TS" />
                 <data android:pathPattern=".*\\.VOB" />
                 <data android:pathPattern=".*\\.WEBM" />
                 <data android:pathPattern=".*\\.WMV" />
