@@ -692,8 +692,10 @@ bool StGLContext::stglInit() {
 #endif
 
 #if defined(GL_ES_VERSION_2_0)
-    arbNPTW     = isGlGreaterEqual(3, 0)
-               || stglCheckExtension("GL_OES_texture_npot");
+    // non-power-of-two textures are valid within OpenGL ES 2.0, but have limitations
+    //arbNPTW     = isGlGreaterEqual(3, 0)
+    //           || stglCheckExtension("GL_OES_texture_npot");
+    arbNPTW = true;
     hasTexRGBA8 = isGlGreaterEqual(3, 0)
                || stglCheckExtension("GL_OES_rgb8_rgba8");
     extTexBGRA8 = stglCheckExtension("GL_EXT_texture_format_BGRA8888");
