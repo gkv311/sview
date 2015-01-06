@@ -16,7 +16,7 @@
 #include <StStrings/StLogger.h>
 #include <stAssert.h>
 
-bool StGLTexture::getInternalFormat(const StGLContext&  theCtx,
+bool StGLTexture::getInternalFormat(const StGLContext&  /*theCtx*/,
                                     const StImagePlane& theData,
                                     GLint&              theInternalFormat) {
     // sized formats are not supported by OpenGL ES

@@ -27,7 +27,11 @@ StAVFrame::~StAVFrame() {
 }
 
 void StAVFrame::reset() {
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 45, 101))
+    av_frame_unref(Frame);
+#else
     avcodec_get_frame_defaults(Frame);
+#endif
 }
 
 void StAVFrame::getImageInfo(const AVCodecContext* theCodecCtx,
