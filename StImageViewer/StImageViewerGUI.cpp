@@ -135,15 +135,6 @@ StGLMenu* StImageViewerGUI::createMediaMenu() {
     aMenuMedia->addItem(tr(MENU_MEDIA_SRC_FORMAT),    aMenuSrcFormat);
     aMenuMedia->addItem(tr(MENU_MEDIA_FILE_INFO),     myPlugin->getAction(StImageViewer::Action_FileInfo));
 
-    aMenuMedia->addItem("First File in folder")
-              ->signals.onItemClick.connect(myPlugin, &StImageViewer::doListFirst);
-    aMenuMedia->addItem("Prev File in folder")
-              ->signals.onItemClick.connect(myPlugin, &StImageViewer::doListPrev);
-    aMenuMedia->addItem("Next File in folder")
-              ->signals.onItemClick.connect(myPlugin, &StImageViewer::doListNext);
-    aMenuMedia->addItem("Last File in folder")
-              ->signals.onItemClick.connect(myPlugin, &StImageViewer::doListLast);
-
     aMenuMedia->addItem(tr(MENU_MEDIA_QUIT))
               ->signals.onItemClick.connect(myPlugin, &StImageViewer::doQuit);
     return aMenuMedia;
