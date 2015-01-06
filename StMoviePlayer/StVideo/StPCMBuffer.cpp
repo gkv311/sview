@@ -484,7 +484,7 @@ bool StPCMBuffer::addData(const StPCMBuffer& theBuffer) {
                     case StPcmFormat_Float64: return addConvert<double, double >(theBuffer);
                 }
         }
-        return false;
+        return true;
     } else if(myChMap == theBuffer.myChMap) {
         // fast copy
         for(size_t aPlaneIter = 0; aPlaneIter < myPlanesNb; ++aPlaneIter) {
