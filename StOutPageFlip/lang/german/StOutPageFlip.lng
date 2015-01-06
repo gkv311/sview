@@ -22,5 +22,5 @@ German translation file for StOutPageFlip library
 1134="eDimensional auto on/off"
 2000="sView - PageFlip Ausgangsmodul"
 2001="Version"
-2002="© 2007-2014 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis library distributed under LGPL3.0"
+2002="© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0"
 3001="OpenGL Hardware QuadBuffer nicht verfügbar!"

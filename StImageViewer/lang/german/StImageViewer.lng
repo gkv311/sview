@@ -90,7 +90,7 @@ German translation file for StImageViewer program
 2012="Schnappschuss ist nicht verfügbar!"
 3000="sView - Image Viewer"
 3001="Version"
-3002="Image viewer allows you to open stereoscopic images in formats JPEG, PNG, MPO and a lot of others.\n © 2007-2014 Kirill Gavrilov <kirill@sview.ru>\nOfficial site: www.sview.ru\n\nThis program distributed under GPL3.0"
+3002="Image viewer allows you to open stereoscopic images in formats JPEG, PNG, MPO and a lot of others.\n © {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis program is distributed under GPL3.0"
 3003="A new version of sView is available on the official site www.sview.ru.\nPlease update your program."
 3004="System Info"
 4000="Schließen"

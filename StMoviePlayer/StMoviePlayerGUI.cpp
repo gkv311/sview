@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -691,7 +691,7 @@ void StMoviePlayerGUI::doAboutProgram(const size_t ) {
     StGLMessageBox* aDialog = new StGLMessageBox(this, "",
           tr(ABOUT_DPLUGIN_NAME) + '\n'
         + tr(ABOUT_VERSION) + " " + StVersionInfo::getSDKVersionString()
-        + "\n \n" + tr(ABOUT_DESCRIPTION),
+        + "\n \n" + tr(ABOUT_DESCRIPTION).format("2007-2015", "kirill@sview.ru", "www.sview.ru"),
         scale(512), scale(300));
     aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->setVisibility(true, true);

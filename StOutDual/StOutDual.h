@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutDual library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
