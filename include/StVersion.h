@@ -1,6 +1,6 @@
 /**
  * This is a header for version structure in 'Ubuntu-style' (Year.Month).
- * Copyright © 2008-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2008-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -239,7 +239,9 @@ class ST_LOCAL StVersionInfo {
         stsprintf(aBuff, 256, "%d.%02d", (myVer.year - TH_SUB), myVer.month);
         return StString(aBuff) + aState
              + " " + StThread::getArchString()
-             + " (build " + aYear + "-" + aMonth + "-" + aDay + ")";
+             + " (build " + aYear
+                          + "-" + (aMonth < 10 ? "0" : "") + aMonth
+                          + "-" + (aDay   < 10 ? "0" : "") + aDay + ")";
     }
 
     /**
