@@ -17,14 +17,14 @@
 static StString getAbout() {
     StString anAboutString =
         StString("sView ") + StVersionInfo::getSDKVersionString() + '\n'
-        + "Copyright (C) 2007-2014 Kirill Gavrilov (kirill@sview.ru).\n"
+        + "Copyright (C) 2007-2015 Kirill Gavrilov (kirill@sview.ru).\n"
         + "Usage: sView [options] - file\n"
         + "Available options:\n"
           "  --fullscreen         Open fullscreen\n"
           "  --slideshow          Start slideshow\n"
           "  --last               Open last file\n"
           "  --in=image,video     Application to open (predefined values: image, video, diag, cad)\n"
-          "  --out=RENDERER_PATH  Stereoscopic output module (auto, StOutAnaglyph, StOutDual,...)\n"
+          "  --out=RENDERER       Stereoscopic output module (auto, StOutAnaglyph, StOutDual,...)\n"
           "  --imageLib=IMGLIB    Setup 3rd-party library for image processing (FFmpeg, FreeImage, DevIL)\n"
           "  --viewMode=MODE      View mode (flat, sphere)\n"
           "  --srcFormat=FORMAT   Setup source format:\n"
@@ -37,7 +37,9 @@ static StString getAbout() {
             + st::formatToString(ST_V_SRC_OVER_UNDER_LR) + ", "
             + st::formatToString(ST_V_SRC_OVER_UNDER_RL) + ", "
             + st::formatToString(ST_V_SRC_ROW_INTERLACE) + ", "
-            + st::formatToString(ST_V_SRC_PAGE_FLIP)     + '\n';
+            + st::formatToString(ST_V_SRC_PAGE_FLIP)     + "\n"
+        + "  --left=PATH          Specify source for left view\n"
+          "  --right=PATH         Specify source for right view\n";
     return anAboutString;
 }
 
