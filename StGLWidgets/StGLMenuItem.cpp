@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -25,7 +25,7 @@ void StGLMenuItem::DeleteWithSubMenus(StGLMenuItem* theMenuItem) {
     }
     if(theMenuItem->getSubMenu() != NULL) {
         StGLMenu::DeleteWithSubMenus(theMenuItem->getSubMenu());
-        theMenuItem->setSubMenu(NULL);
+        theMenuItem->mySubMenu = NULL;
     }
     delete theMenuItem;
 }
@@ -42,11 +42,13 @@ StGLMenuItem::StGLMenuItem(StGLMenu* theParent,
   myIcon(NULL),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
   myIsItemSelected(false),
-  myToHilightText(false) {
+  myToHilightText(false),
+  myToDrawArrow(false) {
     switch(getParentMenu()->getOrient()) {
         case StGLMenu::MENU_VERTICAL: {
             myMarginLeft  = myRoot->scale(32);
-            myMarginRight = myRoot->scale(16);
+            myMarginRight = myRoot->scale(20);
+            myToDrawArrow = theSubMenu != NULL;
             break;
         }
         case StGLMenu::MENU_HORIZONTAL: {
@@ -97,8 +99,20 @@ void StGLMenuItem::stglResize() {
     StGLContext& aCtx = getContext();
 
     // back vertices
-    StArray<StGLVec2> aVertices(4);
-    getRectGl(aVertices);
+    StRectI_t aRectPx = getRectPxAbsolute();
+    StArray<StGLVec2> aVertices(myToDrawArrow ? 8 : 4);
+    myRoot->getRectGl(aRectPx, aVertices, 0);
+    if(myToDrawArrow) {
+        aRectPx.right()  -= myRoot->scale(8);
+        aRectPx.left()    = aRectPx.right() - myRoot->scale(4);
+        aRectPx.top()    += myRoot->scale(10);
+        aRectPx.bottom() -= myRoot->scale(10);
+
+        StRectD_t aRectGl = myRoot->getRectGl(aRectPx);
+        aVertices[4] = StGLVec2(GLfloat(aRectGl.left()),  GLfloat(aRectGl.top()));
+        aVertices[5] = StGLVec2(GLfloat(aRectGl.left()),  GLfloat(aRectGl.bottom()));
+        aVertices[6] = StGLVec2(GLfloat(aRectGl.right()), GLfloat(aRectGl.bottom() + aRectGl.top()) * 0.5f);
+    }
     myBackVertexBuf.init(aCtx, aVertices);
 
     // update projection matrix
@@ -149,21 +163,29 @@ bool StGLMenuItem::stglInit() {
         }
     }
 
-    StArray<StGLVec2> aDummyVert(4);
+    StArray<StGLVec2> aDummyVert(myToDrawArrow ? 8 : 4);
     myBackVertexBuf.init(aCtx, aDummyVert);
 
     stglResize();
     return myIsInitialized;
 }
 
-void StGLMenuItem::stglDrawArea(const StGLMenuItem::State theState) {
+void StGLMenuItem::stglDrawArea(const StGLMenuItem::State theState,
+                                const bool                theIsOnlyArrow) {
     StGLContext& aCtx = getContext();
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     aCtx.core20fwd->glEnable(GL_BLEND);
 
     myProgram->use(aCtx, myBackColor[theState], GLfloat(opacityValue), getRoot()->getScreenDispX());
-    myBackVertexBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
-    aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    if(!theIsOnlyArrow) {
+        myBackVertexBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
+        aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    }
+    if(myToDrawArrow) {
+        myProgram->setColor(aCtx, myTextColor, GLfloat(opacityValue) * 0.5f);
+        myBackVertexBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
+        aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 4, 3);
+    }
     myBackVertexBuf.unBindVertexAttrib(aCtx, myProgram->getVVertexLoc());
 
     myProgram->unuse(aCtx);
@@ -176,7 +198,8 @@ void StGLMenuItem::stglDraw(unsigned int theView) {
     }
 
     StGLMenuItem::State aState = StGLMenuItem::PASSIVE;
-    if(isClicked(ST_MOUSE_LEFT) || (myIsItemSelected && hasSubMenu())) {
+    if(isClicked(ST_MOUSE_LEFT)
+    || (myIsItemSelected && mySubMenu != NULL)) {
         aState = StGLMenuItem::CLICKED;
     } else if(isPointIn(getRoot()->getCursorZo()) || myHasFocus) {
         aState = StGLMenuItem::HIGHLIGHT;
@@ -188,16 +211,18 @@ void StGLMenuItem::stglDraw(unsigned int theView) {
     }
 
     if(myToHilightText) {
-        if(myHasFocus) {
-            stglDrawArea(StGLMenuItem::HIGHLIGHT);
-        }
         if(aState == StGLMenuItem::HIGHLIGHT) {
             setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
         } else {
             setTextColor(StGLVec3(0.8f, 0.8f, 0.8f));
         }
+        if(myHasFocus) {
+            stglDrawArea(StGLMenuItem::HIGHLIGHT, false);
+        }
     } else if(aState != StGLMenuItem::PASSIVE) {
-        stglDrawArea(aState);
+        stglDrawArea(aState, false);
+    } else if(myToDrawArrow) {
+        stglDrawArea(aState, true);
     }
 
     StGLTextArea::stglDraw(theView);
@@ -210,13 +235,9 @@ void StGLMenuItem::setSelected(bool theToSelect) {
                 ((StGLMenuItem* )aChild)->setSelected(false);
             }
         }
-        if(hasSubMenu()) {
-            mySubMenu->setVisibility(true, true);
-        }
-    } else {
-        if(hasSubMenu()) {
-            mySubMenu->setVisibility(false, true);
-        }
+    }
+    if(mySubMenu != NULL) {
+        mySubMenu->setVisibility(theToSelect, true);
     }
     myIsItemSelected = theToSelect;
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -54,10 +54,6 @@ class StGLMenuItem : public StGLTextArea {
 
     inline StGLMenu* getSubMenu() {
         return mySubMenu;
-    }
-
-    inline void setSubMenu(StGLMenu* theSubMenu) {
-        mySubMenu = theSubMenu;
     }
 
     inline bool hasSubMenu() {
@@ -119,7 +115,8 @@ class StGLMenuItem : public StGLTextArea {
         CLICKED,
     } State;
 
-    ST_LOCAL void stglDrawArea(const StGLMenuItem::State theState);
+    ST_LOCAL void stglDrawArea(const StGLMenuItem::State theState,
+                               const bool                theIsOnlyArrow);
 
         private: //! @name private fields
 
@@ -129,7 +126,8 @@ class StGLMenuItem : public StGLTextArea {
     StGLVertexBuffer           myBackVertexBuf;  //!< background vertices
     StGLVec4                   myBackColor[3];   //!< background color per state
     bool                       myIsItemSelected; //!< navigation selection flag
-    bool                       myToHilightText;  //!< hilight text instead of time box
+    bool                       myToHilightText;  //!< highlight text instead of its box
+    bool                       myToDrawArrow;    //!< draw arrow
 
 };
 

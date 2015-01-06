@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -30,7 +30,11 @@ class StGLVarLocation {
      * Construct a special location which actually means NO location.
      */
     StGLVarLocation() : myLocation(NO_LOC) {}
-    StGLVarLocation(const GLint theLocation) : myLocation(theLocation) {}
+
+    /**
+     * Constructor with initialization.
+     */
+    explicit StGLVarLocation(const GLint theLocation) : myLocation(theLocation) {}
 
     /**
      * Note you may safely put invalid location in functions like glUniform*
