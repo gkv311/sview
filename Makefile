@@ -354,7 +354,7 @@ clean_sViewAndroid:
 # sView executable
 sView_SRCS := $(wildcard sview/*.cpp)
 sView_OBJS := ${sView_SRCS:.cpp=.o}
-sView_LIB  := $(LIB) -lStGLWidgets -lStShared -lStCore -lStImageViewer -lStMoviePlayer -lStDiagnostics -lStCADViewer $(LIB_OUTPUTS) $(LIB_GTK) -lX11 -ldl -lgthread-2.0 $(LIB_PTHREAD)
+sView_LIB  := $(LIB) -lStGLWidgets -lStShared -lStCore -lStImageViewer -lStMoviePlayer -lStDiagnostics $(LIB_OUTPUTS) $(LIB_GTK) -lX11 -ldl -lgthread-2.0 $(LIB_PTHREAD)
 ifdef WITH_OCCT
 sView_LIB += $(LIB_OCCT)
 endif

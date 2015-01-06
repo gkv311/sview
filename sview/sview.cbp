@@ -52,14 +52,12 @@
 				</Compiler>
 				<Linker>
 					<Add option="/MANIFEST" />
-					<Add option="/DELAYLOAD:StCADViewer.dll" />
 					<Add library="gdi32" />
 					<Add library="user32" />
 					<Add library="kernel32" />
 					<Add library="Shell32" />
 					<Add library="Advapi32" />
 					<Add library="Comdlg32" />
-					<Add library="Delayimp" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /manifest &quot;..\dpiAware.manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;1' />
@@ -88,7 +86,6 @@
 				<Linker>
 					<Add option="/DEBUG" />
 					<Add option="/MANIFEST" />
-					<Add option="/DELAYLOAD:StCADViewer.dll" />
 					<Add library="gdi32" />
 					<Add library="user32" />
 					<Add library="kernel32" />
@@ -96,7 +93,6 @@
 					<Add library="Advapi32" />
 					<Add library="Comdlg32" />
 					<Add library="Version" />
-					<Add library="Delayimp" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /manifest &quot;..\dpiAware.manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;1' />
@@ -122,14 +118,12 @@
 				</Compiler>
 				<Linker>
 					<Add option="/MANIFEST" />
-					<Add option="/DELAYLOAD:StCADViewer.dll" />
 					<Add library="gdi32" />
 					<Add library="user32" />
 					<Add library="kernel32" />
 					<Add library="Shell32" />
 					<Add library="Advapi32" />
 					<Add library="Comdlg32" />
-					<Add library="Delayimp" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /manifest &quot;..\dpiAware.manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;1' />
@@ -260,7 +254,6 @@
 			<Add library="StImageViewer" />
 			<Add library="StMoviePlayer" />
 			<Add library="StDiagnostics" />
-			<Add library="StCADViewer" />
 			<Add library="StOutAnaglyph" />
 			<Add library="StOutDual" />
 			<Add library="StOutIZ3D" />
