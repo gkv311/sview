@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -137,11 +137,11 @@ class StFTFont {
      * Compute glyph rectangle.
      */
     inline void getGlyphRect(StRect<float>& theRect) const {
-        FT_Bitmap aBitmap = myFTFace->glyph->bitmap;
+        const FT_Bitmap& aBitmap = myFTFace->glyph->bitmap;
         theRect.left()   = float(myFTFace->glyph->bitmap_left);
         theRect.top()    = float(myFTFace->glyph->bitmap_top);
-        theRect.right()  = float(myFTFace->glyph->bitmap_left + aBitmap.width);
-        theRect.bottom() = float(myFTFace->glyph->bitmap_top  - aBitmap.rows);
+        theRect.right()  = float(myFTFace->glyph->bitmap_left + (int )aBitmap.width);
+        theRect.bottom() = float(myFTFace->glyph->bitmap_top  - (int )aBitmap.rows);
     }
 
     /**
