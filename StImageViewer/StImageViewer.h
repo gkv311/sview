@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ class StWindow;
 class StImageViewer : public StApplication {
 
     friend class StImageViewGUI;
+    class StOpenImage;
 
         public:
 
@@ -89,9 +90,7 @@ class StImageViewer : public StApplication {
 
         public: //! @name callback Slots
 
-    ST_LOCAL static void doOpenFileDialog(void* theReceiverPtr, size_t theFilesCount);
-    ST_LOCAL void doOpenFileDialog(const size_t filesCount = 1);
-
+    ST_LOCAL void doOpen1FileDialog(const size_t dummy = 0);
     ST_LOCAL void doOpen2FilesDialog(const size_t dummy = 0);
     ST_LOCAL void doSaveImageAs(const size_t theImgType) { myLoader->doSaveImageAs(theImgType); }
     ST_LOCAL void doSaveImageInfo(const size_t theToSave);
@@ -207,6 +206,7 @@ class StImageViewer : public StApplication {
     StHandle<StCheckUpdates>   myUpdates;         //!< check updates utility
     StHandle<StFileNode>       myFileToDelete;    //!< file node for removal
     StHandle<StImageInfo>      myFileInfo;        //!< file info for opened dialog
+    StHandle<StOpenImage>      myOpenDialog;      //!< file open dialog
 
     StCondition                myEventDialog;     //!< event to prevent showing multiple open/save file dialogs
     StCondition                myEventLoaded;     //!< indicate that new file was open

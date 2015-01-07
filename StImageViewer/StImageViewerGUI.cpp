@@ -72,7 +72,7 @@ void StImageViewerGUI::createUpperToolbar() {
 
     // append textured buttons
     myBtnOpen   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * ICON_WIDTH, aTop);
-    myBtnOpen->signals.onBtnClick.connectUnsafe(myPlugin, StImageViewer::doOpenFileDialog);
+    myBtnOpen->signals.onBtnClick.connect(myPlugin, &StImageViewer::doOpen1FileDialog);
     myBtnOpen->setTexturePath(stCTexture("openImage.png"));
 
     myBtnPrev   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * ICON_WIDTH, aTop);
@@ -146,7 +146,7 @@ StGLMenu* StImageViewerGUI::createMediaMenu() {
 StGLMenu* StImageViewerGUI::createOpenImageMenu() {
     StGLMenu* menu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     menu->addItem(tr(MENU_MEDIA_OPEN_IMAGE_1), 1)
-        ->signals.onItemClick.connectUnsafe(myPlugin, StImageViewer::doOpenFileDialog);
+        ->signals.onItemClick.connect(myPlugin, &StImageViewer::doOpen1FileDialog);
     menu->addItem(tr(MENU_MEDIA_OPEN_IMAGE_2), 2)
         ->signals.onItemClick.connect(myPlugin, &StImageViewer::doOpen2FilesDialog);
     return menu;

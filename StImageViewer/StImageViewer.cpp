@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,7 +71,151 @@ namespace {
     static const char ST_ARGUMENT_FILE[]       = "file";
     static const char ST_ARGUMENT_FILE_LEFT[]  = "left";
     static const char ST_ARGUMENT_FILE_RIGHT[] = "right";
+
 }
+
+/**
+ * Auxiliary class to create standard non-blocking open file dialog in dedicated thread.
+ */
+class StImageViewer::StOpenImage {
+
+        public:
+
+    enum DialogState {
+        Dialog_Inactive,     //!< dialog is not opened
+        Dialog_ActiveSingle, //!< dialog is opened and waiting for user input (one file)
+        Dialog_ActiveDouble, //!< dialog is opened and waiting for user input (two files)
+        Dialog_HasFiles,     //!< dialog has been closed and waiting for processing results
+    };
+
+        public:
+
+    /**
+     * Main constructor.
+     */
+    ST_LOCAL StOpenImage(StImageViewer* thePlugin)
+    : myPlugin(thePlugin),
+      myState(StOpenImage::Dialog_Inactive) {}
+
+    /**
+     * Destructor.
+     */
+    ST_LOCAL ~StOpenImage() {
+        if(!myThread.isNull()) {
+            myThread->wait();
+        }
+    }
+
+    /**
+     * Create open file dialog.
+     */
+    bool openDialog(const size_t theNbFiles) {
+        StMutexAuto aLock(myMutex);
+        if(myState != StOpenImage::Dialog_Inactive) {
+            return false;
+        }
+
+        if(!myThread.isNull()) {
+            myThread->wait();
+        }
+
+        if(myPlugin->params.lastFolder.isEmpty()) {
+            StHandle<StFileNode> aCurrFile = myPlugin->myLoader->getPlayList().getCurrentFile();
+            if(!aCurrFile.isNull()) {
+                myPlugin->params.lastFolder = aCurrFile->isEmpty() ? aCurrFile->getFolderPath() : aCurrFile->getValue(0)->getFolderPath();
+            }
+        }
+
+        myFolder = myPlugin->params.lastFolder;
+        myState  = theNbFiles == 2 ? StOpenImage::Dialog_ActiveDouble : StOpenImage::Dialog_ActiveSingle;
+        myThread = new StThread(openDialogThread, this);
+        return true;
+    }
+
+    /**
+     * Return true for Dialog_HasFiles state.
+     */
+    ST_LOCAL bool hasResults() {
+        StMutexAuto aLock(myMutex);
+        return myState == StOpenImage::Dialog_HasFiles;
+    }
+
+    /**
+     * Reset results.
+     */
+    ST_LOCAL void resetResults() {
+        StMutexAuto aLock(myMutex);
+        if(myState != StOpenImage::Dialog_HasFiles) {
+            return;
+        }
+        myState = Dialog_Inactive;
+        myPathLeft .clear();
+        myPathRight.clear();
+    }
+
+    /**
+     * Return path to the left file.
+     * Should NOT be called within Active state.
+     */
+    ST_LOCAL const StString& getPathLeft()  const { return myPathLeft; }
+
+    /**
+     * Return path to the right file.
+     * Should NOT be called within Active state.
+     */
+    ST_LOCAL const StString& getPathRight() const { return myPathRight; }
+
+        private:
+
+    /**
+     * Thread function wrapper.
+     */
+    static SV_THREAD_FUNCTION openDialogThread(void* theArg) {
+        StOpenImage* aHandler = (StOpenImage* )theArg;
+        aHandler->dialogLoop();
+        return SV_THREAD_RETURN 0;
+    }
+
+    /**
+     * Thread function.
+     */
+    ST_LOCAL void dialogLoop() {
+        myPathLeft .clear();
+        myPathRight.clear();
+        StString aTitle = myPlugin->myLangMap->getValue(myState == StOpenImage::Dialog_ActiveDouble
+                                                      ? StImageViewerStrings::DIALOG_OPEN_LEFT
+                                                      : StImageViewerStrings::DIALOG_OPEN_FILE);
+
+        StString aDummy;
+        if(!StFileNode::openFileDialog(myFolder, aTitle, myPlugin->myLoader->getMimeList(), myPathLeft, false)) {
+            StMutexAuto aLock(myMutex);
+            myState = StOpenImage::Dialog_Inactive;
+            return;
+        } else if(myState == StOpenImage::Dialog_ActiveDouble) {
+            aTitle = myPlugin->myLangMap->getValue(StImageViewerStrings::DIALOG_OPEN_RIGHT);
+            StFileNode::getFolderAndFile(myPathLeft, myFolder, aDummy);
+            if(!StFileNode::openFileDialog(myFolder, aTitle, myPlugin->myLoader->getMimeList(), myPathRight, false)) {
+                StMutexAuto aLock(myMutex);
+                myState = StOpenImage::Dialog_Inactive;
+                return;
+            }
+        }
+
+        StMutexAuto aLock(myMutex);
+        myState = StOpenImage::Dialog_HasFiles;
+    }
+
+        private:
+
+    StImageViewer*     myPlugin;
+    StHandle<StThread> myThread;
+    StMutex            myMutex;
+    StString           myFolder;
+    StString           myPathLeft;
+    StString           myPathRight;
+    DialogState        myState;
+
+};
 
 StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
                              const StNativeWin_t                theParentWin,
@@ -90,6 +234,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
   myEscNoQuit(false) {
     mySettings = new StSettings(myResMgr, ST_DRAWER_PLUGIN_NAME);
     myLangMap  = new StTranslations(myResMgr, StImageViewer::ST_DRAWER_PLUGIN_NAME);
+    myOpenDialog = new StOpenImage(this);
     StImageViewerStrings::loadDefaults(*myLangMap);
 
     myTitle = "sView - Image Viewer";
@@ -590,7 +735,7 @@ void StImageViewer::doKeyDown(const StKeyEvent& theEvent) {
             return;
         case ST_VK_O: {
             if(theEvent.Flags == ST_VF_CONTROL) {
-                doOpenFileDialog(this, 1);
+                myOpenDialog->openDialog(1);
             }
             return;
         }
@@ -692,6 +837,26 @@ void StImageViewer::beforeDraw() {
         return;
     }
 
+    if(myOpenDialog->hasResults()) {
+        if(!myOpenDialog->getPathRight().isEmpty()) {
+            // meta-file
+            myLoader->getPlayList().clear();
+            myLoader->getPlayList().addOneFile(myOpenDialog->getPathLeft(), myOpenDialog->getPathRight());
+        } else {
+            myLoader->getPlayList().open(myOpenDialog->getPathLeft());
+        }
+
+        doUpdateStateLoading();
+        myLoader->doLoadNext();
+
+        StString aDummy;
+        StFileNode::getFolderAndFile(myOpenDialog->getPathLeft(), params.lastFolder, aDummy);
+        if(!params.lastFolder.isEmpty()) {
+            mySettings->saveString(ST_SETTING_LAST_FOLDER, params.lastFolder);
+        }
+        myOpenDialog->resetResults();
+    }
+
     // recreate menu event
     if(params.ScaleHiDPI->setValue(myWindow->getScaleFactor())
     || myToRecreateMenu) {
@@ -785,79 +950,12 @@ void StImageViewer::doSwitchSrcFormat(const int32_t theSrcFormat) {
     myToSaveSrcFormat = true;
 }
 
+void StImageViewer::doOpen1FileDialog(const size_t ) {
+    myOpenDialog->openDialog(1);
+}
+
 void StImageViewer::doOpen2FilesDialog(const size_t ) {
-    doOpenFileDialog(this, 2);
-}
-
-namespace {
-    // TODO (Kirill Gavrilov#9) move to the StImageLoader thread
-    static SV_THREAD_FUNCTION doOpenFileDialogThread(void* theArg) {
-        struct ThreadArgs {
-            StImageViewer* receiverPtr; size_t filesCount;
-        };
-        ThreadArgs* aThreadArgs = (ThreadArgs* )theArg;
-        aThreadArgs->receiverPtr->doOpenFileDialog(aThreadArgs->filesCount);
-        delete aThreadArgs;
-        return SV_THREAD_RETURN 0;
-    }
-}
-
-void StImageViewer::doOpenFileDialog(void*  theReceiverPtr,
-                                     size_t theFilesCount) {
-    struct ThreadArgs {
-        StImageViewer* receiverPtr; size_t filesCount;
-    };
-    ThreadArgs* aThreadArgs = new ThreadArgs();
-    aThreadArgs->receiverPtr = (StImageViewer* )theReceiverPtr;
-    aThreadArgs->filesCount  = theFilesCount;
-    aThreadArgs->receiverPtr->params.isFullscreen->setValue(false); // workaround
-    StThread(doOpenFileDialogThread, (void* )aThreadArgs);
-}
-
-void StImageViewer::doOpenFileDialog(const size_t filesCount) {
-    if(myEventDialog.check()) {
-        return;
-    }
-    myEventDialog.set();
-
-    if(params.lastFolder.isEmpty()) {
-        // TODO
-        StHandle<StFileNode> aCurrFile = myLoader->getPlayList().getCurrentFile();
-        if(!aCurrFile.isNull()) {
-            params.lastFolder = aCurrFile->isEmpty() ? aCurrFile->getFolderPath() : aCurrFile->getValue(0)->getFolderPath();
-        }
-    }
-    StString aTitle = (filesCount == 2)
-                    ? myLangMap->getValue(StImageViewerStrings::DIALOG_OPEN_LEFT)
-                    : myLangMap->getValue(StImageViewerStrings::DIALOG_OPEN_FILE);
-
-    StString aFilePath, aDummy;
-    if(StFileNode::openFileDialog(params.lastFolder, aTitle, myLoader->getMimeList(), aFilePath, false)) {
-        if(filesCount == 2) {
-            aTitle = myLangMap->getValue(StImageViewerStrings::DIALOG_OPEN_RIGHT);
-            StFileNode::getFolderAndFile(aFilePath, params.lastFolder, aDummy);
-            StString filePathRToOpen;
-            if(StFileNode::openFileDialog(params.lastFolder, aTitle, myLoader->getMimeList(), filePathRToOpen, false)) {
-                // meta-file
-                myLoader->getPlayList().clear();
-                myLoader->getPlayList().addOneFile(aFilePath, filePathRToOpen);
-            }
-        } else {
-            myLoader->getPlayList().open(aFilePath);
-        }
-
-        doUpdateStateLoading();
-        myLoader->doLoadNext();
-
-        if(!aFilePath.isEmpty()) {
-            StString aDummy;
-            StFileNode::getFolderAndFile(aFilePath, params.lastFolder, aDummy);
-        }
-        if(!params.lastFolder.isEmpty()) {
-            mySettings->saveString(ST_SETTING_LAST_FOLDER, params.lastFolder);
-        }
-    }
-    myEventDialog.reset();
+    myOpenDialog->openDialog(2);
 }
 
 void StImageViewer::doUpdateStateLoading() {
