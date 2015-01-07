@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source files">
+      <UniqueIdentifier>{CACACF6C-18DA-13DF-148A-3C969CC3F588}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="StGLButton.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLCheckbox.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLCheckboxTextured.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLDescription.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLFpsLabel.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLImageFlatProgram.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLImageProgram.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLImageRegion.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLImageSphereProgram.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLMenu.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLMenuCheckbox.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLMenuItem.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLMenuProgram.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLMenuRadioButton.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLMessageBox.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLMsgStack.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLPlayList.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLRadioButton.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLRadioButtonFloat32.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLRadioButtonTextured.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLRangeFieldFloat32.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLRootWidget.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLScrollArea.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLSubtitles.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLSwitchTextured.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLTable.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLTextArea.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLTextureButton.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLWidget.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLWidgetList.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StSubQueue.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="StGLWidgets.rc" />
+  </ItemGroup>
+</Project>

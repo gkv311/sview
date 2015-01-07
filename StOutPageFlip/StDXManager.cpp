@@ -25,7 +25,15 @@
 #include <StThreads/StCondition.h>
 #include <StThreads/StThread.h>
 
-#include <wnt/nvapi.h> // NVIDIA API supported only under Windows at this moment
+#include <wnt/nvapi.h>
+#ifdef _MSC_VER
+    #ifdef _WIN64
+        #pragma comment(lib, "nvapi64.lib")
+    #else
+        #pragma comment(lib, "nvapi.lib")
+    #endif
+    #pragma comment(linker, "/NODEFAULTLIB:libcmt.lib")
+#endif
 
 namespace {
     static const DWORD ST_D3D_DEVICE_FLAGS = D3DCREATE_HARDWARE_VERTEXPROCESSING; // sets the graphic card to do the hardware vertexprocessing

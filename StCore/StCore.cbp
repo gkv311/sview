@@ -61,7 +61,6 @@
 					<Add library="shell32" />
 					<Add library="Comdlg32" />
 					<Add library="Winmm" />
-					<Add library="nvapi" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;2' />
@@ -99,7 +98,6 @@
 					<Add library="Comdlg32" />
 					<Add library="Winmm" />
 					<Add library="Version" />
-					<Add library="nvapi" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;2' />
@@ -132,7 +130,6 @@
 					<Add library="shell32" />
 					<Add library="Comdlg32" />
 					<Add library="Winmm" />
-					<Add library="nvapi64" />
 				</Linker>
 				<ExtraCommands>
 					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;2' />

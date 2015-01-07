@@ -10,6 +10,8 @@
 *.sh        eol=lf
 *.workspace eol=lf
 *.cbp       eol=lf
+*.vcxproj*  eol=crlf
+*.sln       eol=crlf
 *.svg       eol=lf
 *.xib       eol=lf
 *.plist     eol=lf

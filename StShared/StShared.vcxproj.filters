@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source files">
+      <UniqueIdentifier>{CACACF6C-18DA-13DF-148A-3C969CC3F588}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="StAVFrame.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StAVImage.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StAVPacket.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StAction.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StBndBox.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StBndCameraBox.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StBndSphere.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StCondition.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StConfigImpl.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StDevILImage.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StEDIDParser.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StExifDir.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StExifTags.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StFTFont.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StFTFontRegistry.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StFTLibrary.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StFileNode.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StFileNode2.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StFolder.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StFormatEnum.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StFreeImage.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLCircle.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLContext.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLFont.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLFontEntry.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLFontManager.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLFrameBuffer.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLMatrix.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLMesh.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLPrism.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLProgram.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLProjCamera.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLQuadTexture.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLQuads.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLResource.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLShader.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLStereoFrameBuffer.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLTextFormatter.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLTexture.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLTextureData.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLTextureQueue.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLUVSphere.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLVertexBuffer.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StImage.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StImageFile.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StImagePlane.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StJpegParser.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StLangMap.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StLibrary.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StLogger.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StMinGen.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StMonitor.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StMsgQueue.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StMutex.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StPlayList.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StProcess.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StProcess2.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StRawFile.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StRegisterImpl.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StResourceManager.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StSettings.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StDictionary.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StThread.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StTranslations.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StVirtualKeys.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StWebPImage.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="stAV.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="stConsole.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="stUtfTools.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="StShared.rc" />
+  </ItemGroup>
+</Project>

@@ -2,6 +2,9 @@
 *.obj
 *.a
 *.pdb
+*.suo
+*.sdf
+*.opensdf
 *.depend
 *.layout
 *.bak

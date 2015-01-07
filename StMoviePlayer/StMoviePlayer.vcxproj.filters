@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source files">
+      <UniqueIdentifier>{CACACF6C-18DA-13DF-148A-3C969CC3F588}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="StVideo\StALContext.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StVideo\StAudioQueue.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StVideo\StAVPacketQueue.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StVideo\StParamActiveStream.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StVideo\StPCMBuffer.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StVideo\StSubtitleQueue.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StVideo\StSubtitlesASS.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StVideo\StVideo.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StVideo\StVideoQueue.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StVideo\StVideoTimer.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="stMongoose.c">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StMoviePlayer.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StMoviePlayerGUI.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StMoviePlayerStrings.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StSeekBar.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="StMoviePlayer.rc" />
+  </ItemGroup>
+</Project>

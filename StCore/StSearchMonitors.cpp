@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -24,7 +24,15 @@
 #include <StThreads/StTimer.h>
 
 #ifdef _WIN32
-    #include <wnt/nvapi.h> // NVIDIA API
+    #include <wnt/nvapi.h>
+    #ifdef _MSC_VER
+        #ifdef _WIN64
+            #pragma comment(lib, "nvapi64.lib")
+        #else
+            #pragma comment(lib, "nvapi.lib")
+        #endif
+    #endif
+    #pragma comment(linker, "/NODEFAULTLIB:libcmt.lib")
 #elif defined(__ANDROID__)
     //
 #elif defined(__linux__)
