@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-<CodeBlocks_workspace_file>
-	<Workspace title="sView Movie Player">
-		<Project filename="StShared/StShared.cbp" />
-		<Project filename="StGLWidgets/StGLWidgets.cbp" />
-		<Project filename="StMoviePlayer/StMoviePlayer.cbp" active="1" />
-	</Workspace>
-</CodeBlocks_workspace_file>
