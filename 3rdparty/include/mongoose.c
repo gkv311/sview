@@ -142,6 +142,10 @@ typedef long off_t;
 #define flockfile(x) EnterCriticalSection(&global_log_file_lock)
 #define funlockfile(x) LeaveCriticalSection(&global_log_file_lock)
 #define sleep(x) Sleep((x) * 1000)
+
+#ifdef va_copy
+    #undef va_copy
+#endif
 #define va_copy(x, y) x = y
 
 #if !defined(fileno)

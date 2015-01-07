@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -9,7 +9,7 @@
 #ifndef __StSys_h_
 #define __StSys_h_
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     #include <windows.h>
 #endif
 
@@ -37,11 +37,18 @@ class ST_LOCAL StSys {
 
         private:
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
+
+#ifdef _MSC_VER
+    // suppress GetVersionExW is deprecated warning
+    #pragma warning(push)
+    #pragma warning(disable : 4996)
+#endif
+
     static SystemVersion getSystemVersionWin() {
-        OSVERSIONINFOEX aVerInfo; ZeroMemory(&aVerInfo, sizeof(OSVERSIONINFOEX));
-        aVerInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-        if(GetVersionEx((OSVERSIONINFO* )&aVerInfo) == 0
+        OSVERSIONINFOEXW aVerInfo; ZeroMemory(&aVerInfo, sizeof(OSVERSIONINFOEXW));
+        aVerInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEXW);
+        if(GetVersionExW((OSVERSIONINFOW* )&aVerInfo) == 0
         || aVerInfo.dwPlatformId != VER_PLATFORM_WIN32_NT
         || aVerInfo.dwMajorVersion < 5) {
             return SystemVersion_WinAncient;
@@ -65,12 +72,17 @@ class ST_LOCAL StSys {
             default: return SystemVersion_WinX;
         }
     }
+
+#ifdef _MSC_VER
+    #pragma warning(pop)
+#endif
+
 #endif
 
         public:
 
     static SystemType getSystemEnum() {
-    #if (defined(_WIN32) || defined(__WIN32__))
+    #if defined(_WIN32)
         return SystemType_WINDOWS;
     #elif (defined(__APPLE__))
         return SystemType_MAC_OS;
@@ -81,7 +93,7 @@ class ST_LOCAL StSys {
     #endif
     }
 
-#if (defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     static bool isVistaPlus() {
         return getSystemVersionWin() >= SystemVersion_Vista;
     }
