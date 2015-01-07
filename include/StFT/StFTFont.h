@@ -140,8 +140,8 @@ class StFTFont {
         FT_Bitmap aBitmap = myFTFace->glyph->bitmap;
         theRect.left()   = float(myFTFace->glyph->bitmap_left);
         theRect.top()    = float(myFTFace->glyph->bitmap_top);
-        theRect.right()  = float(myFTFace->glyph->bitmap_left + aBitmap.width);
-        theRect.bottom() = float(myFTFace->glyph->bitmap_top  - aBitmap.rows);
+        theRect.right()  = float((int)myFTFace->glyph->bitmap_left + (int)aBitmap.width);
+        theRect.bottom() = float((int)myFTFace->glyph->bitmap_top  - (int)aBitmap.rows);
     }
 
     /**
