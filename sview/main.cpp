@@ -9,6 +9,7 @@
 #include "StMultiApp.h"
 #include <StVersion.h>
 #include "../StOutPageFlip/StOutPageFlip.h"
+#include <X11/Xlib.h>
 
 #ifdef _WIN32
 #ifdef ST_DEBUG
@@ -42,6 +43,7 @@ int main(int , char** ) {
     StProcess::setEnv("StShare",               aProcessPath);
 #endif
 
+    XInitThreads();
     StHandle<StResourceManager> aResMgr = new StResourceManager();
     StHandle<StApplication>     anApp   = StMultiApp::getInstance(aResMgr);
     if(anApp.isNull() || !anApp->open()) {
