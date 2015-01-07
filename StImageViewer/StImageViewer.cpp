@@ -115,10 +115,6 @@ class StImageViewer::StOpenImage {
             return false;
         }
 
-        if(!myThread.isNull()) {
-            myThread->wait();
-        }
-
         if(myPlugin->params.lastFolder.isEmpty()) {
             StHandle<StFileNode> aCurrFile = myPlugin->myLoader->getPlayList().getCurrentFile();
             if(!aCurrFile.isNull()) {
@@ -148,6 +144,12 @@ class StImageViewer::StOpenImage {
         if(myState != StOpenImage::Dialog_HasFiles) {
             return;
         }
+
+        if(!myThread.isNull()) {
+            myThread->wait();
+            myThread.nullify();
+        }
+
         myState = Dialog_Inactive;
         myPathLeft .clear();
         myPathRight.clear();
@@ -221,7 +223,6 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
                              const StNativeWin_t                theParentWin,
                              const StHandle<StOpenInfo>&        theOpenInfo)
 : StApplication(theResMgr, theParentWin, theOpenInfo),
-  myEventDialog(false),
   myEventLoaded(false),
   //
   mySlideShowTimer(false),

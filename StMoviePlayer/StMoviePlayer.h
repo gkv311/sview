@@ -92,13 +92,7 @@ class StMoviePlayer : public StApplication {
         public:
 
     static const StString ST_DRAWER_PLUGIN_NAME;
-
-    enum {
-        OPEN_FILE_MOVIE       = 0,
-        OPEN_FILE_2MOVIES     = 1,
-        OPEN_STREAM_AUDIO     = 2,
-        OPEN_STREAM_SUBTITLES = 3,
-    };
+    class StOpenVideo;
 
     enum {
         BLOCK_SLEEP_NEVER      = 0,
@@ -296,8 +290,6 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doShowPlayList(const bool theToShow);
     ST_LOCAL void doUpdateStateLoading();
     ST_LOCAL void doUpdateStateLoaded();
-    ST_LOCAL friend SV_THREAD_FUNCTION openFileThread(void* theArg);
-    ST_LOCAL void doOpenFileDialog(const size_t theOpenType);
     ST_LOCAL void doImageAdjustReset(const size_t dummy = 0);
 
         private:
@@ -363,8 +355,8 @@ class StMoviePlayer : public StApplication {
     StHandle<StCheckUpdates>   myUpdates;         //!< check updates utility
     StHandle<StFileNode>       myFileToDelete;    //!< file node for removal
     StHandle<StMovieInfo>      myFileInfo;        //!< file info for opened dialog
+    StHandle<StOpenVideo>      myOpenDialog;      //!< file open dialog
 
-    StCondition                myEventDialog;     //!< event to prevent showing multiple open/save file dialogs
     StCondition                myEventLoaded;     //!< indicate that new file was open
     double                     mySeekOnLoad;      //!< seeking target
     int32_t                    myAudioOnLoad;     //!< audio     track on load

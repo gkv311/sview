@@ -208,7 +208,6 @@ class StImageViewer : public StApplication {
     StHandle<StImageInfo>      myFileInfo;        //!< file info for opened dialog
     StHandle<StOpenImage>      myOpenDialog;      //!< file open dialog
 
-    StCondition                myEventDialog;     //!< event to prevent showing multiple open/save file dialogs
     StCondition                myEventLoaded;     //!< indicate that new file was open
 
     StTimer                    mySlideShowTimer;  //!< slideshow stuff
