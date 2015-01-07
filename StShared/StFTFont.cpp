@@ -161,6 +161,40 @@ bool StFTFont::loadGlyph(const stUtf32_t theUChar) {
     return true;
 }
 
+inline bool wrapGlyphBitmap(const FT_Bitmap& theBitmap,
+                            StImagePlane&    theOutImage) {
+    const unsigned int aWidth  = (unsigned int )theBitmap.width;
+    const unsigned int aHeight = (unsigned int )theBitmap.rows;
+    if(theBitmap.buffer == NULL
+    || aWidth  == 0
+    || aHeight == 0) {
+        return false;
+    }
+
+    if(theBitmap.pixel_mode == FT_PIXEL_MODE_GRAY) {
+        if(!theOutImage.initWrapper(StImagePlane::ImgGray, theBitmap.buffer,
+                                    aWidth, aHeight, std::abs(theBitmap.pitch))) {
+            return false;
+        }
+    } else if(theBitmap.pixel_mode == FT_PIXEL_MODE_MONO) {
+        if(!theOutImage.initTrash(StImagePlane::ImgGray, aWidth, aHeight)) {
+            return false;
+        }
+
+        const int aNumOfBytesInRow = aWidth / 8 + (aWidth % 8 ? 1 : 0);
+        for(unsigned int aRow = 0; aRow < aHeight; ++aRow) {
+            for(unsigned int aCol = 0; aCol < aWidth; ++aCol) {
+                const int aBitOn = theBitmap.buffer[aNumOfBytesInRow * aRow + aCol / 8] & (0x80 >> (aCol % 8));
+                theOutImage.changeFirstByte(aRow, aCol) = aBitOn ? 255 : 0;
+            }
+        }
+    } else {
+        return false;
+    }
+    theOutImage.setTopDown(theBitmap.pitch > 0);
+    return true;
+}
+
 bool StFTFont::renderGlyph(const stUtf32_t theUChar) {
     myGlyphImg.nullify();
     myUChar = 0;
@@ -176,36 +210,10 @@ bool StFTFont::renderGlyph(const stUtf32_t theUChar) {
         return false;
     }
 
-    FT_Bitmap aBitmap = myFTFace->glyph->bitmap;
-    const unsigned int aWidth  = (unsigned int )aBitmap.width;
-    const unsigned int aHeight = (unsigned int )aBitmap.rows;
-    if(aBitmap.buffer == NULL
-    || aWidth  == 0
-    || aHeight == 0) {
+    if(!wrapGlyphBitmap(myFTFace->glyph->bitmap, myGlyphImg)) {
         return false;
     }
 
-    if(aBitmap.pixel_mode == FT_PIXEL_MODE_GRAY) {
-        if(!myGlyphImg.initWrapper(StImagePlane::ImgGray, aBitmap.buffer,
-                                   aWidth, aHeight, std::abs(aBitmap.pitch))) {
-            return false;
-        }
-    } else if(aBitmap.pixel_mode == FT_PIXEL_MODE_MONO) {
-        if(!myGlyphImg.initTrash(StImagePlane::ImgGray, aWidth, aHeight)) {
-            return false;
-        }
-
-        const int aNumOfBytesInRow = aWidth / 8 + (aWidth % 8 ? 1 : 0);
-        for(unsigned int aRow = 0; aRow < aHeight; ++aRow) {
-            for(unsigned int aCol = 0; aCol < aWidth; ++aCol) {
-                const int aBitOn = aBitmap.buffer[aNumOfBytesInRow * aRow + aCol / 8] & (0x80 >> (aCol % 8));
-                myGlyphImg.changeFirstByte(aRow, aCol) = aBitOn ? 255 : 0;
-            }
-        }
-    } else {
-        return false;
-    }
-    myGlyphImg.setTopDown(aBitmap.pitch > 0);
     myUChar = theUChar;
     return true;
 }
@@ -220,21 +228,7 @@ bool StFTFont::renderGlyphNotdef() {
         return false;
     }
 
-    FT_Bitmap aBitmap = myFTFace->glyph->bitmap;
-    const unsigned int aWidth  = (unsigned int )aBitmap.width;
-    const unsigned int aHeight = (unsigned int )aBitmap.rows;
-    if(aBitmap.pixel_mode != FT_PIXEL_MODE_GRAY
-    || aBitmap.buffer == NULL
-    || aWidth  == 0
-    || aHeight == 0) {
-        return false;
-    }
-    if(!myGlyphImg.initWrapper(StImagePlane::ImgGray, aBitmap.buffer,
-                               aWidth, aHeight, std::abs(aBitmap.pitch))) {
-        return false;
-    }
-    myGlyphImg.setTopDown(aBitmap.pitch > 0);
-    return true;
+    return wrapGlyphBitmap(myFTFace->glyph->bitmap, myGlyphImg);
 }
 
 float StFTFont::getAdvanceX(const stUtf32_t theUChar,
