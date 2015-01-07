@@ -43,7 +43,7 @@
 				<Option working_dir="../bin/$(TARGET_NAME)" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
-				<Option compiler="windows_sdk_x86" />
+				<Option compiler="msvc10" />
 				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="/MD" />
@@ -73,7 +73,7 @@
 				<Option working_dir="../bin/$(TARGET_NAME)" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
-				<Option compiler="windows_sdk_x86" />
+				<Option compiler="msvc10" />
 				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="/MDd" />

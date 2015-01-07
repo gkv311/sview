@@ -4,7 +4,7 @@
 	<Project>
 		<Option title="StTests" />
 		<Option pch_mode="2" />
-		<Option compiler="windows_sdk_x86" />
+		<Option compiler="gcc" />
 		<Build>
 			<Target title="WIN_gcc_x86">
 				<Option output="../bin/$(TARGET_NAME)/StTests" prefix_auto="1" extension_auto="1" />
@@ -38,7 +38,7 @@
 				<Option working_dir="../bin/$(TARGET_NAME)/" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="1" />
-				<Option compiler="windows_sdk_x86" />
+				<Option compiler="msvc10" />
 				<Option parameters="demo.jps" />
 				<Compiler>
 					<Add option="/MD" />
@@ -70,7 +70,7 @@
 				<Option working_dir="../bin/$(TARGET_NAME)/" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="1" />
-				<Option compiler="windows_sdk_x86" />
+				<Option compiler="msvc10" />
 				<Option parameters="demo.jps" />
 				<Compiler>
 					<Add option="/MDd" />

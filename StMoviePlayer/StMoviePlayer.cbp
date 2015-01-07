@@ -4,7 +4,7 @@
 	<Project>
 		<Option title="StMoviePlayer" />
 		<Option pch_mode="2" />
-		<Option compiler="windows_sdk_x86" />
+		<Option compiler="gcc" />
 		<Build>
 			<Target title="WIN_gcc_x86">
 				<Option output="../bin/$(TARGET_NAME)/libStMoviePlayer" imp_lib="../lib/$(TARGET_NAME)/$(TARGET_OUTPUT_BASENAME)" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME)" prefix_auto="1" extension_auto="1" />
@@ -45,7 +45,7 @@
 				<Option working_dir="../bin/$(TARGET_NAME)/" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
-				<Option compiler="windows_sdk_x86" />
+				<Option compiler="msvc10" />
 				<Option parameters="--in=StMoviePlayer" />
 				<Option host_application="./sView" />
 				<Option run_host_application_in_terminal="0" />
@@ -82,7 +82,7 @@
 				<Option working_dir="../bin/$(TARGET_NAME)/" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="3" />
-				<Option compiler="windows_sdk_x86" />
+				<Option compiler="msvc10" />
 				<Option parameters="--in=StMoviePlayer" />
 				<Option host_application="./sView" />
 				<Option run_host_application_in_terminal="0" />
