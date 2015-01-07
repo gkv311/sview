@@ -177,7 +177,7 @@ bool StFTFont::renderGlyph(const stUtf32_t theUChar) {
     }
 
     FT_Bitmap aBitmap = myFTFace->glyph->bitmap;
-    if(aBitmap.buffer == NULL || aBitmap.width <= 0 || aBitmap.rows <= 0) {
+    if(aBitmap.buffer == NULL || aBitmap.width == 0 || aBitmap.rows == 0) {
         return false;
     }
 
@@ -191,9 +191,9 @@ bool StFTFont::renderGlyph(const stUtf32_t theUChar) {
             return false;
         }
 
-        const int aNumOfBytesInRow = aBitmap.width / 8 + (aBitmap.width % 8 ? 1 : 0);
-        for(int aRow = 0; aRow < aBitmap.rows; ++aRow) {
-            for(int aCol = 0; aCol < aBitmap.width; ++aCol) {
+        const unsigned int aNumOfBytesInRow = aBitmap.width / 8 + (aBitmap.width % 8 ? 1 : 0);
+        for(unsigned int aRow = 0; aRow < aBitmap.rows; ++aRow) {
+            for(unsigned int aCol = 0; aCol < aBitmap.width; ++aCol) {
                 const int aBitOn = aBitmap.buffer[aNumOfBytesInRow * aRow + aCol / 8] & (0x80 >> (aCol % 8));
                 myGlyphImg.changeFirstByte(aRow, aCol) = aBitOn ? 255 : 0;
             }
@@ -218,7 +218,7 @@ bool StFTFont::renderGlyphNotdef() {
 
     FT_Bitmap aBitmap = myFTFace->glyph->bitmap;
     if(aBitmap.pixel_mode != FT_PIXEL_MODE_GRAY
-    || aBitmap.buffer == NULL || aBitmap.width <= 0 || aBitmap.rows <= 0) {
+    || aBitmap.buffer == NULL || aBitmap.width == 0 || aBitmap.rows == 0) {
         return false;
     }
     if(!myGlyphImg.initWrapper(StImagePlane::ImgGray, aBitmap.buffer,
