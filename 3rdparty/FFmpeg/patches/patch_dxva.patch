@@ -1,0 +1,1743 @@
+From dad9d95e75f601c9b8864724bf68cf4a7f63ccaa Mon Sep 17 00:00:00 2001
+From: Kirill Gavrilov <kirill@sview.ru>
+Date: Wed, 7 Jan 2015 11:33:03 +0400
+Subject: [PATCH] lavc/dxva2: add ffmpeg calling dxva2 APIs
+
+Signed-off-by: weixuan wang <batmanwwx@gmail.com>
+---
+ configure                  |   4 +
+ libavcodec/Makefile        |   4 +
+ libavcodec/allcodecs.c     |   4 +
+ libavcodec/dxva2_dec.c     | 356 +++++++++++++++++++++
+ libavcodec/dxva2_wrapper.c | 777 +++++++++++++++++++++++++++++++++++++++++++++
+ libavcodec/dxva2_wrapper.h | 389 +++++++++++++++++++++++
+ libavcodec/mpeg12.h        |  23 ++
+ libavcodec/mpeg12dec.c     |  20 --
+ 8 files changed, 1557 insertions(+), 20 deletions(-)
+ create mode 100644 libavcodec/dxva2_dec.c
+ create mode 100644 libavcodec/dxva2_wrapper.c
+ create mode 100644 libavcodec/dxva2_wrapper.h
+
+diff --git a/configure b/configure
+index c046e34..088a3d4 100755
+--- a/configure
++++ b/configure
+@@ -2273,6 +2273,7 @@ h263_vaapi_hwaccel_select="h263_decoder"
+ h263_vdpau_hwaccel_deps="vdpau"
+ h263_vdpau_hwaccel_select="h263_decoder"
+ h264_crystalhd_decoder_select="crystalhd h264_mp4toannexb_bsf h264_parser"
++h264_dxva2_decoder_select="dxva2 h264_parser h264_decoder h264_dxva2_hwaccel"
+ h264_dxva2_hwaccel_deps="dxva2"
+ h264_dxva2_hwaccel_select="h264_decoder"
+ h264_vaapi_hwaccel_deps="vaapi"
+@@ -2304,6 +2305,7 @@ mpeg2_vaapi_hwaccel_deps="vaapi"
+ mpeg2_vaapi_hwaccel_select="mpeg2video_decoder"
+ mpeg2_vdpau_hwaccel_deps="vdpau"
+ mpeg2_vdpau_hwaccel_select="mpeg2video_decoder"
++mpeg2video_dxva2_decoder_select="dxva2 mpeg2video_decoder mpeg2_dxva2_hwaccel"
+ mpeg2_xvmc_hwaccel_deps="xvmc"
+ mpeg2_xvmc_hwaccel_select="mpeg2video_decoder"
+ mpeg4_crystalhd_decoder_select="crystalhd"
+@@ -2315,6 +2317,7 @@ mpeg4_vdpau_hwaccel_deps="vdpau"
+ mpeg4_vdpau_hwaccel_select="mpeg4_decoder"
+ msmpeg4_crystalhd_decoder_select="crystalhd"
+ vc1_crystalhd_decoder_select="crystalhd"
++vc1_dxva2_decoder_select="dxva2 vc1_decoder vc1_dxva2_hwaccel"
+ vc1_dxva2_hwaccel_deps="dxva2"
+ vc1_dxva2_hwaccel_select="vc1_decoder"
+ vc1_vaapi_hwaccel_deps="vaapi"
+@@ -2324,6 +2327,7 @@ vc1_vdpau_decoder_select="vc1_decoder"
+ vc1_vdpau_hwaccel_deps="vdpau"
+ vc1_vdpau_hwaccel_select="vc1_decoder"
+ wmv3_crystalhd_decoder_select="crystalhd"
++wmv3_dxva2_decoder_select="dxva2 wmv3_decoder wmv3_dxva2_hwaccel"
+ wmv3_dxva2_hwaccel_select="vc1_dxva2_hwaccel"
+ wmv3_vaapi_hwaccel_select="vc1_vaapi_hwaccel"
+ wmv3_vdpau_decoder_select="vc1_vdpau_decoder"
+diff --git a/libavcodec/Makefile b/libavcodec/Makefile
+index fa0f53d..ffbb77c 100644
+--- a/libavcodec/Makefile
++++ b/libavcodec/Makefile
+@@ -259,6 +259,7 @@ OBJS-$(CONFIG_H264_DECODER)            += h264.o h264_cabac.o h264_cavlc.o \
+                                           h264_direct.o h264_loopfilter.o  \
+                                           h264_mb.o h264_picture.o h264_ps.o \
+                                           h264_refs.o h264_sei.o h264_slice.o
++OBJS-$(CONFIG_H264_DXVA2_DECODER)      += dxva2_wrapper.o dxva2_dec.o
+ OBJS-$(CONFIG_H264_VDA_DECODER)        += vda_h264_dec.o
+ OBJS-$(CONFIG_HEVC_DECODER)            += hevc.o hevc_mvs.o hevc_ps.o hevc_sei.o \
+                                           hevc_cabac.o hevc_refs.o hevcpred.o    \
+@@ -325,6 +326,7 @@ OBJS-$(CONFIG_MPEGVIDEO_DECODER)       += mpeg12dec.o mpeg12.o mpeg12data.o
+ OBJS-$(CONFIG_MPEG1VIDEO_DECODER)      += mpeg12dec.o mpeg12.o mpeg12data.o
+ OBJS-$(CONFIG_MPEG1VIDEO_ENCODER)      += mpeg12enc.o mpeg12.o
+ OBJS-$(CONFIG_MPEG2VIDEO_DECODER)      += mpeg12dec.o mpeg12.o mpeg12data.o
++OBJS-$(CONFIG_MPEG2VIDEO_DXVA2_DECODER)+= dxva2_wrapper.o dxva2_dec.o
+ OBJS-$(CONFIG_MPEG2VIDEO_ENCODER)      += mpeg12enc.o mpeg12.o
+ OBJS-$(CONFIG_MPEG4_DECODER)           += xvididct.o
+ OBJS-$(CONFIG_MPL2_DECODER)            += mpl2dec.o ass.o
+@@ -482,6 +484,7 @@ OBJS-$(CONFIG_VC1_DECODER)             += vc1dec.o vc1_block.o vc1_loopfilter.o
+                                           vc1dsp.o \
+                                           msmpeg4dec.o msmpeg4.o msmpeg4data.o \
+                                           wmv2dsp.o
++OBJS-$(CONFIG_VC1_DXVA2_DECODER)       += dxva2_wrapper.o dxva2_dec.o
+ OBJS-$(CONFIG_VCR1_DECODER)            += vcr1.o
+ OBJS-$(CONFIG_VMDAUDIO_DECODER)        += vmdaudio.o
+ OBJS-$(CONFIG_VMDVIDEO_DECODER)        += vmdvideo.o
+@@ -521,6 +524,7 @@ OBJS-$(CONFIG_WMV2_DECODER)            += wmv2dec.o wmv2.o wmv2dsp.o \
+                                           msmpeg4dec.o msmpeg4.o msmpeg4data.o
+ OBJS-$(CONFIG_WMV2_ENCODER)            += wmv2enc.o wmv2.o wmv2dsp.o \
+                                           msmpeg4.o msmpeg4enc.o msmpeg4data.o
++OBJS-$(CONFIG_WMV3_DXVA2_DECODER)      += dxva2_wrapper.o dxva2_dec.o
+ OBJS-$(CONFIG_WNV1_DECODER)            += wnv1.o
+ OBJS-$(CONFIG_WS_SND1_DECODER)         += ws-snd1.o
+ OBJS-$(CONFIG_XAN_DPCM_DECODER)        += dpcm.o
+diff --git a/libavcodec/allcodecs.c b/libavcodec/allcodecs.c
+index 0d39d33..548f0ef 100644
+--- a/libavcodec/allcodecs.c
++++ b/libavcodec/allcodecs.c
+@@ -169,6 +169,7 @@ void avcodec_register_all(void)
+     REGISTER_ENCDEC (H263P,             h263p);
+     REGISTER_DECODER(H264,              h264);
+     REGISTER_DECODER(H264_CRYSTALHD,    h264_crystalhd);
++    REGISTER_DECODER (H264_DXVA2, h264_dxva2);
+     REGISTER_DECODER(H264_VDA,          h264_vda);
+     REGISTER_DECODER(H264_VDPAU,        h264_vdpau);
+     REGISTER_DECODER(HEVC,              hevc);
+@@ -201,6 +202,7 @@ void avcodec_register_all(void)
+ #endif /* FF_API_XVMC */
+     REGISTER_ENCDEC (MPEG1VIDEO,        mpeg1video);
+     REGISTER_ENCDEC (MPEG2VIDEO,        mpeg2video);
++    REGISTER_DECODER (MPEG2VIDEO_DXVA2, mpeg2video_dxva2);
+     REGISTER_ENCDEC (MPEG4,             mpeg4);
+     REGISTER_DECODER(MPEG4_CRYSTALHD,   mpeg4_crystalhd);
+     REGISTER_DECODER(MPEG4_VDPAU,       mpeg4_vdpau);
+@@ -285,6 +287,7 @@ void avcodec_register_all(void)
+     REGISTER_DECODER(VBLE,              vble);
+     REGISTER_DECODER(VC1,               vc1);
+     REGISTER_DECODER(VC1_CRYSTALHD,     vc1_crystalhd);
++    REGISTER_DECODER (VC1_DXVA2, vc1_dxva2);
+     REGISTER_DECODER(VC1_VDPAU,         vc1_vdpau);
+     REGISTER_DECODER(VC1IMAGE,          vc1image);
+     REGISTER_DECODER(VCR1,              vcr1);
+@@ -304,6 +307,7 @@ void avcodec_register_all(void)
+     REGISTER_ENCDEC (WMV2,              wmv2);
+     REGISTER_DECODER(WMV3,              wmv3);
+     REGISTER_DECODER(WMV3_CRYSTALHD,    wmv3_crystalhd);
++    REGISTER_DECODER (WMV3_DXVA2, wmv3_dxva2);
+     REGISTER_DECODER(WMV3_VDPAU,        wmv3_vdpau);
+     REGISTER_DECODER(WMV3IMAGE,         wmv3image);
+     REGISTER_DECODER(WNV1,              wnv1);
+diff --git a/libavcodec/dxva2_dec.c b/libavcodec/dxva2_dec.c
+new file mode 100644
+index 0000000..e6b31cf
+--- /dev/null
++++ b/libavcodec/dxva2_dec.c
+@@ -0,0 +1,356 @@
++/*
++ * Call hardware decode acceleration through dxva2 API
++ *
++ * Copyright (c) 2012 Wei Gao <weigao@multicorewareinc.com>
++ *
++ * This file is part of FFmpeg.
++ *
++ * FFmpeg is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * FFmpeg is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with FFmpeg; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
++ */
++
++#include <string.h>
++#include "dxva2_wrapper.h"
++#include "h264.h"
++#include "vc1.h"
++#include "mpeg12.h"
++#include "avcodec.h"
++#include "internal.h"
++
++#if CONFIG_H264_DXVA2_DECODER
++extern AVCodec ff_h264_decoder,ff_h264_dxva2_decoder;
++#endif
++
++#if CONFIG_MPEG2VIDEO_DXVA2_DECODER
++extern AVCodec ff_mpeg2video_decoder,ff_mpeg2video_dxva2_decoder;
++#endif
++
++#if CONFIG_VC1_DXVA2_DECODER
++extern AVCodec ff_vc1_decoder,ff_vc1_dxva2_decoder;
++#endif
++
++#if CONFIG_WMV3_DXVA2_DECODER
++extern AVCodec ff_wmv3_decoder, ff_wmv3_dxva2_decoder;
++#endif
++
++typedef union {
++#if CONFIG_H264_DXVA2_DECODER
++    H264Context        h264ctx;
++#endif
++#if CONFIG_VC1_DXVA2_DECODER || CONFIG_WMV3_DXVA2_DECODER
++    VC1Context         vc1ctx;
++#endif
++#if CONFIG_MPEG2VIDEO_DXVA2_DECODER
++    Mpeg1Context       mpeg2videoctx;
++#endif
++}DecoderContext;
++
++typedef struct {
++    DecoderContext          decoderctx;
++    enum AVPixelFormat      pix_fmt;
++    int (*get_buffer2)(struct AVCodecContext *s, AVFrame *frame, int flags);
++    AVCodec                 *hwcodec;
++    AVCodec                 *codec;
++    dxva2_context           dxva2_ctx;
++} DXVA2_DecoderContext;
++
++static const enum AVPixelFormat dxva2_pixfmts[] = {
++    AV_PIX_FMT_YUV420P,
++    AV_PIX_FMT_NONE
++};
++static int check_format(AVCodecContext *avctx);
++
++static void get_hw_soft_codec(struct AVCodecContext *avctx,DXVA2_DecoderContext *ctx)
++{
++    switch (avctx->codec_id) {
++        #if CONFIG_H264_DXVA2_DECODER
++        case AV_CODEC_ID_H264:
++            ctx->hwcodec = &ff_h264_dxva2_decoder;
++            ctx->codec   = &ff_h264_decoder;
++            return;
++        #endif
++        #if CONFIG_MPEG2VIDEO_DXVA2_DECODER
++        case AV_CODEC_ID_MPEG2VIDEO:
++            ctx->hwcodec = &ff_mpeg2video_dxva2_decoder;
++            ctx->codec   = &ff_mpeg2video_decoder;
++            return;
++        #endif
++        #if CONFIG_VC1_DXVA2_DECODER
++        case AV_CODEC_ID_VC1:
++            ctx->hwcodec = &ff_vc1_dxva2_decoder;
++            ctx->codec   = &ff_vc1_decoder;
++            return;
++        #endif
++        #if CONFIG_WMV3_DXVA2_DECODER
++        case AV_CODEC_ID_WMV3:
++            ctx->hwcodec = &ff_wmv3_dxva2_decoder;
++            ctx->codec   = &ff_wmv3_decoder;
++            return;
++        #endif
++    }
++}
++
++static int get_buffer2(struct AVCodecContext *avctx, AVFrame *pic, int flags)
++{
++    int ret;
++    DXVA2_DecoderContext *ctx = (DXVA2_DecoderContext *)avctx->priv_data;
++    dxva2_context *dxva2_ctx = &ctx->dxva2_ctx;
++    avctx->pix_fmt = ctx->pix_fmt;
++    ff_init_buffer_info(avctx, pic);
++
++    if ((ret = ctx->get_buffer2(avctx, pic, flags)) < 0) {
++        return ret;
++    }
++    if (dxva2_ctx) {
++        ff_get_dxva2_surface(dxva2_ctx, pic);
++        return 0;
++    } else {
++        av_log(avctx, AV_LOG_ERROR, "No dxva2 context, get buffer failed\n");
++        return AVERROR(EINVAL);
++    }
++}
++
++static enum PixelFormat get_format(AVCodecContext *p_context,
++                                       const enum PixelFormat *pi_fmt)
++{
++     return AV_PIX_FMT_DXVA2_VLD;
++}
++
++static int dxva2dec_decode(AVCodecContext *avctx, void *data, int *got_frame,
++                                  AVPacket *avpkt)
++{
++    DXVA2_DecoderContext *ctx = (DXVA2_DecoderContext *)avctx->priv_data;
++    AVFrame *pic = data;
++    int ret;
++    AVCodec *codec = ctx->codec;
++    /* check if DXVA2 supports this file */
++    if (check_format(avctx) < 0)
++        return AVERROR(EINVAL);
++    ret = codec->decode(avctx, data, got_frame, avpkt);
++    if (*got_frame) {
++        pic->format = ctx->pix_fmt;
++        ff_extract_dxva2(&ctx->dxva2_ctx, pic);
++    }
++    avctx->pix_fmt = ctx->pix_fmt;
++    return ret;
++}
++
++static av_cold int dxva2dec_close(AVCodecContext *avctx)
++{
++    DXVA2_DecoderContext *ctx = avctx->priv_data;
++    AVCodec *codec = ctx->codec;
++    codec->flush(avctx);
++    /* release buffers and decoder */
++    ff_release_dxva2(&ctx->dxva2_ctx);
++    /* close decoder */
++    codec->close(avctx);
++    return 0;
++}
++static int get_mpeg2_video_format(AVCodecContext *avctx)
++{
++    GetBitContext gb;
++    const uint8_t *buf_ptr = avctx->extradata;
++    const uint8_t *buf_end = avctx->extradata + avctx->extradata_size;
++    int input_size, format = -1;
++    if (avctx->extradata) {
++        for (;;) {
++            uint32_t start_code = UINT32_MAX;
++            buf_ptr = avpriv_find_start_code(buf_ptr, buf_end, &start_code);
++            input_size = buf_end - buf_ptr;
++            if (input_size <= 0) {
++                break;
++            }
++            if (EXT_START_CODE == start_code) {
++                init_get_bits(&gb, buf_ptr, input_size * 8);
++                switch (get_bits(&gb, 4)) {
++                    case 0x1:
++                        skip_bits(&gb, 9);
++                        format = get_bits(&gb, 2);
++                        return format;
++                }
++            }
++        }
++    }
++    av_log(avctx, AV_LOG_ERROR,"get_mpeg2_video_format error\n");
++    return format;
++}
++
++static int check_format(AVCodecContext *avctx)
++{
++    uint8_t *pout;
++    int psize, index, ret = -1;
++    H264Context *h;
++    AVCodecParserContext *parser = NULL;
++    /* check if support */
++    switch (avctx->codec_id) {
++    case AV_CODEC_ID_H264:
++        /* init parser & parse file */
++        parser = av_parser_init(avctx->codec->id);
++        if (!parser) {
++            av_log(avctx, AV_LOG_ERROR, "Failed to open parser.\n");
++            return ret;
++        }
++        parser->flags = PARSER_FLAG_COMPLETE_FRAMES;
++        index = av_parser_parse2(parser, avctx, &pout, &psize, NULL, 0, 0, 0, 0);
++        if (index < 0) {
++            av_log(avctx, AV_LOG_ERROR, "Failed to parse this file.\n");
++            av_parser_close(parser);
++            return ret;
++        }
++        h = parser->priv_data;
++        if (8 == h->sps.bit_depth_luma) {
++            if (!CHROMA444(h) && !CHROMA422(h)) {
++                // only this will decoder switch to hwaccel
++                //check the profile
++                if ((FF_PROFILE_H264_BASELINE == h->sps.profile_idc) ||
++                    (FF_PROFILE_H264_MAIN == h->sps.profile_idc) ||
++                    (FF_PROFILE_H264_HIGH == h->sps.profile_idc)) {
++                    ret = 0;
++                }
++            }
++        }
++        break;
++    case AV_CODEC_ID_MPEG2VIDEO:
++        if (CHROMA_420 == get_mpeg2_video_format(avctx)) {
++            ret = 0;
++        }
++        break;
++    default:
++        ret = 0;
++        break;
++    }
++    
++    if (0 > ret) {
++        av_log(avctx, AV_LOG_ERROR, "Unsupported file.\n");
++    }
++    if (parser) {
++        av_parser_close(parser);
++    }
++    return ret;
++}
++
++static av_cold int dxva2dec_init(AVCodecContext *avctx)
++{
++    DXVA2_DecoderContext *ctx = (DXVA2_DecoderContext *)avctx->priv_data;
++    dxva2_context *dxva2_ctx = (dxva2_context *)(&ctx->dxva2_ctx);
++    AVCodec *hwcodec, *codec;
++    int ret;
++    get_hw_soft_codec(avctx,ctx);
++    hwcodec = ctx->hwcodec;
++    codec = ctx->codec;
++    /* init pix_fmts of codec */
++    if (!hwcodec->pix_fmts) {
++        hwcodec->pix_fmts = dxva2_pixfmts;
++    }
++    /* check if DXVA2 supports this file */
++    if (check_format(avctx) < 0)
++        return AVERROR(EINVAL);
++
++    /* init vda */
++    memset(dxva2_ctx, 0, sizeof(dxva2_context));
++    ret = ff_create_dxva2(avctx->codec_id, dxva2_ctx);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "create dxva2 error\n");
++        return AVERROR(EINVAL);
++    }
++    ctx->pix_fmt = avctx->get_format(avctx, avctx->codec->pix_fmts);
++    ret = ff_setup_dxva2(dxva2_ctx, &avctx->hwaccel_context, &avctx->pix_fmt, avctx->width, avctx->height);
++    if (ret < 0) {
++        av_log(avctx,AV_LOG_ERROR,"error DXVA setup %d\n", ret);
++        ret = AVERROR(EINVAL);
++        goto failed;
++    }
++    avctx->slice_flags |= SLICE_FLAG_ALLOW_FIELD;
++    /* changes callback functions */
++    ctx->get_buffer2 = avctx->get_buffer2;
++    avctx->get_format = get_format;
++    avctx->get_buffer2 = get_buffer2;
++    /* init decoder */
++
++    ret = codec->init(avctx);
++    if (ret < 0) {
++        av_log(avctx, AV_LOG_ERROR, "Failed to open decoder.\n");
++        goto failed;
++    }
++    return 0;
++failed:
++    dxva2dec_close(avctx);
++    return ret;
++}
++
++static void dxva2dec_flush(AVCodecContext *avctx)
++{
++    DXVA2_DecoderContext *ctx = (DXVA2_DecoderContext *)avctx->priv_data;
++    AVCodec *codec = ctx->codec;
++    return codec->flush(avctx);
++}
++#if CONFIG_H264_DXVA2_DECODER
++AVCodec ff_h264_dxva2_decoder = {
++    .name           = "h264_dxva2",
++    .type           = AVMEDIA_TYPE_VIDEO,
++    .id             = AV_CODEC_ID_H264,
++    .priv_data_size = sizeof(DXVA2_DecoderContext),
++    .init           = dxva2dec_init,
++    .close          = dxva2dec_close,
++    .decode         = dxva2dec_decode,
++    .capabilities   = CODEC_CAP_DELAY,
++    .flush          = dxva2dec_flush,
++    .long_name      = NULL_IF_CONFIG_SMALL("H.264 (DXVA2 acceleration)"),
++};
++#endif
++
++#if CONFIG_MPEG2VIDEO_DXVA2_DECODER
++AVCodec ff_mpeg2video_dxva2_decoder = {
++    .name           = "mpeg2video_dxva2",
++    .type           = AVMEDIA_TYPE_VIDEO,
++    .id             = AV_CODEC_ID_MPEG2VIDEO,
++    .priv_data_size = sizeof(DXVA2_DecoderContext),
++    .init           = dxva2dec_init,
++    .close          = dxva2dec_close,
++    .decode         = dxva2dec_decode,
++    .capabilities   = CODEC_CAP_DELAY,
++    .flush          = dxva2dec_flush,
++    .long_name      = NULL_IF_CONFIG_SMALL("MPEG2 Video (DXVA2 acceleration)"),
++};
++#endif
++
++#if CONFIG_VC1_DXVA2_DECODER
++AVCodec ff_vc1_dxva2_decoder = {
++    .name           = "vc1_dxva2",
++    .type           = AVMEDIA_TYPE_VIDEO,
++    .id             = AV_CODEC_ID_VC1,
++    .priv_data_size = sizeof(DXVA2_DecoderContext),
++    .init           = dxva2dec_init,
++    .close          = dxva2dec_close,
++    .decode         = dxva2dec_decode,
++    .capabilities   = CODEC_CAP_DELAY,
++    .flush          = dxva2dec_flush,
++    .long_name      = NULL_IF_CONFIG_SMALL("VC1 (DXVA2 acceleration)"),
++};
++#endif
++
++#if CONFIG_WMV3_DXVA2_DECODER
++AVCodec ff_wmv3_dxva2_decoder = {
++    .name           = "wmv3_dxva2",
++    .type           = AVMEDIA_TYPE_VIDEO,
++    .id             = AV_CODEC_ID_WMV3,
++    .priv_data_size = sizeof(DXVA2_DecoderContext),
++    .init           = dxva2dec_init,
++    .close          = dxva2dec_close,
++    .decode         = dxva2dec_decode,
++    .capabilities   = CODEC_CAP_DELAY,
++    .flush          = dxva2dec_flush,
++    .long_name      = NULL_IF_CONFIG_SMALL("WMV3 (DXVA2 acceleration)"),
++};
++#endif
+diff --git a/libavcodec/dxva2_wrapper.c b/libavcodec/dxva2_wrapper.c
+new file mode 100644
+index 0000000..7fceb74
+--- /dev/null
++++ b/libavcodec/dxva2_wrapper.c
+@@ -0,0 +1,777 @@
++/*
++ * Call hardware decode acceleration through dxva2 API
++ *
++ * Copyright (C) 2009 Geoffroy Couprie
++ * Copyright (C) 2009 Laurent Aimar
++ * $Id: 0af77c6633657d4a700a3f60e5ff7c417086822f $
++ *
++ * Authors: Geoffroy Couprie <geal@videolan.org>
++ *          Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
++ * Modified by Wei Gao <weigao@multicorewareinc.com>
++ *
++ * Attribute from VLC
++ *
++ * This file is part of FFmpeg.
++ *
++ * FFmpeg is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * FFmpeg is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with FFmpeg; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
++ */
++
++#include "dxva2_wrapper.h"
++#include <dxgi.h>
++
++/* XXX Prefered format must come first */
++static const d3d_format_t d3d_formats[] = {
++    { "YV12",   (D3DFORMAT)MAKEFOURCC('Y','V','1','2'),    AV_PIX_FMT_YUV420P },
++    { "NV12",   (D3DFORMAT)MAKEFOURCC('N','V','1','2'),    AV_PIX_FMT_NV12 },
++    { NULL, (D3DFORMAT)0, PIX_FMT_NONE }
++};
++
++static const GUID DXVA2_ModeMPEG2_MoComp = {
++    0xe6a9f44b, 0x61b0,0x4563, {0x9e,0xa4,0x63,0xd2,0xa3,0xc6,0xfe,0x66}
++};
++static const GUID DXVA2_ModeMPEG2_IDCT = {
++    0xbf22ad00, 0x03ea,0x4690, {0x80,0x77,0x47,0x33,0x46,0x20,0x9b,0x7e}
++};
++static const GUID DXVA2_ModeMPEG2_VLD = {
++    0xee27417f, 0x5e28,0x4e65, {0xbe,0xea,0x1d,0x26,0xb5,0x08,0xad,0xc9}
++};
++static const GUID DXVA2_ModeMPEG2and1_VLD = {
++    0x86695f12, 0x340e,0x4f04, {0x9f,0xd3,0x92,0x53,0xdd,0x32,0x74,0x60}
++};
++static const GUID DXVA2_ModeMPEG1_VLD = {
++    0x6f3ec719, 0x3735,0x42cc, {0x80,0x63,0x65,0xcc,0x3c,0xb3,0x66,0x16}
++};
++
++static const GUID DXVA2_ModeH264_A = {
++    0x1b81be64, 0xa0c7,0x11d3, {0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}
++};
++static const GUID DXVA2_ModeH264_B = {
++    0x1b81be65, 0xa0c7,0x11d3, {0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}
++};
++static const GUID DXVA2_ModeH264_C = {
++    0x1b81be66, 0xa0c7,0x11d3, {0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}
++};
++static const GUID DXVA2_ModeH264_D = {
++    0x1b81be67, 0xa0c7,0x11d3, {0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}
++};
++static const GUID DXVA2_ModeH264_E = {
++    0x1b81be68, 0xa0c7,0x11d3, {0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}
++};
++static const GUID DXVA2_ModeH264_F = {
++    0x1b81be69, 0xa0c7,0x11d3, {0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}
++};
++static const GUID DXVA_ModeH264_VLD_WithFMOASO_NoFGT = {
++    0xd5f04ff9, 0x3418,0x45d8, {0x95,0x61,0x32,0xa7,0x6a,0xae,0x2d,0xdd}
++};
++static const GUID DXVADDI_Intel_ModeH264_A = {
++    0x604F8E64, 0x4951,0x4c54, {0x88,0xFE,0xAB,0xD2,0x5C,0x15,0xB3,0xD6}
++};
++static const GUID DXVADDI_Intel_ModeH264_C = {
++    0x604F8E66, 0x4951,0x4c54, {0x88,0xFE,0xAB,0xD2,0x5C,0x15,0xB3,0xD6}
++};
++static const GUID DXVADDI_Intel_ModeH264_E = { // DXVA_Intel_H264_ClearVideo
++    0x604F8E68, 0x4951,0x4c54, {0x88,0xFE,0xAB,0xD2,0x5C,0x15,0xB3,0xD6}
++};
++static const GUID DXVA2_ModeWMV8_A = {
++    0x1b81be80, 0xa0c7,0x11d3, {0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}
++};
++static const GUID DXVA2_ModeWMV8_B = {
++    0x1b81be81, 0xa0c7,0x11d3, {0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}
++};
++static const GUID DXVA2_ModeWMV9_A = {
++    0x1b81be90, 0xa0c7,0x11d3, {0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}
++};
++static const GUID DXVA2_ModeWMV9_B = {
++    0x1b81be91, 0xa0c7,0x11d3, {0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}
++};
++static const GUID DXVA2_ModeWMV9_C = {
++    0x1b81be94, 0xa0c7,0x11d3, {0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}
++};
++
++static const GUID DXVA2_ModeVC1_A = {
++    0x1b81beA0, 0xa0c7,0x11d3, {0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}
++};
++static const GUID DXVA2_ModeVC1_B = {
++    0x1b81beA1, 0xa0c7,0x11d3, {0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}
++};
++static const GUID DXVA2_ModeVC1_C = {
++    0x1b81beA2, 0xa0c7,0x11d3, {0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}
++};
++static const GUID DXVA2_ModeVC1_D = {
++    0x1b81beA3, 0xa0c7,0x11d3, {0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}
++};
++/* Conformity to the August 2010 update of the specification, ModeVC1_VLD2010 */
++static const GUID DXVA2_ModeVC1_D2010 = {
++    0x1b81beA4, 0xa0c7,0x11d3, {0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}
++};
++
++static const GUID DXVA_NoEncrypt = {
++    0x1b81bed0, 0xa0c7,0x11d3, {0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5}
++};
++
++static const GUID DXVA_Intel_VC1_ClearVideo = {
++    0xBCC5DB6D, 0xA2B6,0x4AF0, {0xAC,0xE4,0xAD,0xB1,0xF7,0x87,0xBC,0x89}
++};
++
++static const GUID DXVA_nVidia_MPEG4_ASP = {
++    0x9947EC6F, 0x689B,0x11DC, {0xA3,0x20,0x00,0x19,0xDB,0xBC,0x41,0x84}
++};
++static const GUID DXVA_ModeMPEG4pt2_VLD_Simple = {
++    0xefd64d74, 0xc9e8,0x41d7, {0xa5,0xe9,0xe9,0xb0,0xe3,0x9f,0xa3,0x19}
++};
++static const GUID DXVA_ModeMPEG4pt2_VLD_AdvSimple_NoGMC = {
++    0xed418a9f, 0x10d,0x4eda,  {0x9a,0xe3,0x9a,0x65,0x35,0x8d,0x8d,0x2e}
++};
++static const GUID DXVA_ModeMPEG4pt2_VLD_AdvSimple_GMC = {
++    0xab998b5b, 0x4258,0x44a9, {0x9f,0xeb,0x94,0xe5,0x97,0xa6,0xba,0xae}
++};
++
++static const GUID IID_IDirectXVideoDecoderService = {
++    0xfc51a551, 0xd5e7, 0x11d9, {0xaf,0x55,0x00,0x05,0x4e,0x43,0xff,0x02}
++};
++static const GUID IID_IDirectXVideoAccelerationService = {
++    0xfc51a550, 0xd5e7, 0x11d9, {0xaf,0x55,0x00,0x05,0x4e,0x43,0xff,0x02}
++};
++
++/* XXX Prefered modes must come first */
++static const dxva2_mode_t dxva2_modes[] = {
++    { "MPEG-2 variable-length decoder",            &DXVA2_ModeMPEG2_VLD,     AV_CODEC_ID_MPEG2VIDEO },
++    { "MPEG-2 & MPEG-1 variable-length decoder",   &DXVA2_ModeMPEG2and1_VLD, AV_CODEC_ID_MPEG2VIDEO },
++    { "MPEG-2 motion compensation",                &DXVA2_ModeMPEG2_MoComp,  0 },
++    { "MPEG-2 inverse discrete cosine transform",  &DXVA2_ModeMPEG2_IDCT,    0 },
++
++    { "MPEG-1 variable-length decoder",            &DXVA2_ModeMPEG1_VLD,     0 },
++
++    { "H.264 variable-length decoder, film grain technology",                      &DXVA2_ModeH264_F,                   AV_CODEC_ID_H264 },
++    { "H.264 variable-length decoder, no film grain technology",                   &DXVA2_ModeH264_E,                   AV_CODEC_ID_H264 },
++    { "H.264 variable-length decoder, no film grain technology (Intel ClearVideo)",&DXVADDI_Intel_ModeH264_E,           AV_CODEC_ID_H264 },
++    { "H.264 variable-length decoder, no film grain technology, FMO/ASO",          &DXVA_ModeH264_VLD_WithFMOASO_NoFGT, AV_CODEC_ID_H264 },
++    { "H.264 inverse discrete cosine transform, film grain technology",            &DXVA2_ModeH264_D,                   0             },
++    { "H.264 inverse discrete cosine transform, no film grain technology",         &DXVA2_ModeH264_C,                   0             },
++    { "H.264 inverse discrete cosine transform, no film grain technology (Intel)", &DXVADDI_Intel_ModeH264_C,           0             },
++    { "H.264 motion compensation, film grain technology",                          &DXVA2_ModeH264_B,                   0             },
++    { "H.264 motion compensation, no film grain technology",                       &DXVA2_ModeH264_A,                   0             },
++    { "H.264 motion compensation, no film grain technology (Intel)",               &DXVADDI_Intel_ModeH264_A,           0             },
++
++    { "Windows Media Video 8 motion compensation", &DXVA2_ModeWMV8_B, 0 },
++    { "Windows Media Video 8 post processing",     &DXVA2_ModeWMV8_A, 0 },
++
++    { "Windows Media Video 9 IDCT",                &DXVA2_ModeWMV9_C, 0 },
++    { "Windows Media Video 9 motion compensation", &DXVA2_ModeWMV9_B, 0 },
++    { "Windows Media Video 9 post processing",     &DXVA2_ModeWMV9_A, 0 },
++
++    { "VC-1 variable-length decoder",              &DXVA2_ModeVC1_D, AV_CODEC_ID_VC1 },
++    { "VC-1 variable-length decoder",              &DXVA2_ModeVC1_D, AV_CODEC_ID_WMV3 },
++    { "VC-1 variable-length decoder",              &DXVA2_ModeVC1_D2010, AV_CODEC_ID_VC1 },
++    { "VC-1 variable-length decoder",              &DXVA2_ModeVC1_D2010, AV_CODEC_ID_WMV3 },
++    { "VC-1 inverse discrete cosine transform",    &DXVA2_ModeVC1_C, 0 },
++    { "VC-1 motion compensation",                  &DXVA2_ModeVC1_B, 0 },
++    { "VC-1 post processing",                      &DXVA2_ModeVC1_A, 0 },
++
++    { "VC-1 variable-length decoder (Intel)",      &DXVA_Intel_VC1_ClearVideo, 0 },
++
++    { "MPEG-4 Part 2 nVidia bitstream decoder",                                                         &DXVA_nVidia_MPEG4_ASP,                 0 },
++    { "MPEG-4 Part 2 variable-length decoder, Simple Profile",                                          &DXVA_ModeMPEG4pt2_VLD_Simple,          0 },
++    { "MPEG-4 Part 2 variable-length decoder, Simple&Advanced Profile, no global motion compensation",  &DXVA_ModeMPEG4pt2_VLD_AdvSimple_NoGMC, 0 },
++    { "MPEG-4 Part 2 variable-length decoder, Simple&Advanced Profile, global motion compensation",     &DXVA_ModeMPEG4pt2_VLD_AdvSimple_GMC,   0 },
++
++    { NULL, NULL, 0 }
++};
++
++typedef struct DXVA2Log {
++    const AVClass *class;
++    int   log_offset;
++    void *log_ctx;
++} DXVA2Log;
++
++static const AVClass dxva2wrapper_class = { "DXVA2WRAPPER", av_default_item_name, NULL,
++                                            LIBAVUTIL_VERSION_INT, offsetof(DXVA2Log,
++                                            log_offset), offsetof(DXVA2Log, log_ctx)};
++static DXVA2Log dxva2wrapper = {&dxva2wrapper_class,0,NULL};
++
++static const d3d_format_t *d3d_find_format(D3DFORMAT format)
++{
++    for (unsigned i = 0; d3d_formats[i].name; i++) {
++        if (d3d_formats[i].format == format)
++            return &d3d_formats[i];
++    }
++    return NULL;
++}
++
++static const dxva2_mode_t *dxva2_find_mode(const GUID *guid)
++{
++    for (unsigned i = 0; dxva2_modes[i].name; i++) {
++        if (IsEqualGUID(dxva2_modes[i].guid, guid))
++            return &dxva2_modes[i];
++    }
++    return NULL;
++}
++
++/**
++* It creates a Direct3D device usable for DXVA 2
++*/
++
++static int d3d_create_device(dxva2_context *va)
++{
++    typedef LPDIRECT3D9 (WINAPI *Create9func)(UINT SDKVersion);
++    typedef HWND (WINAPI *PROCGETSHELLWND)(void);
++    Create9func dx_create9 = (Create9func )GetProcAddress(va->hd3d9_dll, TEXT("Direct3DCreate9"));
++    LPDIRECT3D9 d3dobj;
++    D3DADAPTER_IDENTIFIER9 *d3dai = &va->d3dai;
++    PROCGETSHELLWND get_shell_window;
++    HMODULE hUser32 = GetModuleHandle( "user32" );
++    D3DPRESENT_PARAMETERS *d3dpp = &va->d3dpp;
++    LPDIRECT3DDEVICE9 d3ddev;
++    if (!dx_create9) {
++        av_log(&dxva2wrapper, AV_LOG_ERROR, "Cannot locate reference to Direct3DCreate9 ABI in DLL");
++        return AVERROR_EXTERNAL;
++    }
++    d3dobj = dx_create9(D3D_SDK_VERSION);
++    if (!d3dobj) {
++        av_log(&dxva2wrapper, AV_LOG_ERROR, "Direct3DCreate9 failed");
++        return AVERROR_EXTERNAL;
++    }
++    va->d3dobj = d3dobj;
++    if (FAILED(IDirect3D9_GetAdapterIdentifier(va->d3dobj,
++        D3DADAPTER_DEFAULT, 0, d3dai))) {
++            av_log(&dxva2wrapper, AV_LOG_WARNING, "IDirect3D9_GetAdapterIdentifier failed");
++            ZeroMemory(d3dai, sizeof(*d3dai));
++    }
++    get_shell_window = (PROCGETSHELLWND)
++                     GetProcAddress( hUser32, "GetShellWindow" );
++    ZeroMemory(d3dpp, sizeof(*d3dpp));
++    d3dpp->Flags = D3DPRESENTFLAG_VIDEO;
++    d3dpp->Windowed = TRUE;
++    d3dpp->hDeviceWindow = NULL;
++    d3dpp->SwapEffect = D3DSWAPEFFECT_DISCARD;
++    d3dpp->MultiSampleType = D3DMULTISAMPLE_NONE;
++    d3dpp->PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;
++    d3dpp->BackBufferCount = 0;
++    d3dpp->BackBufferFormat = D3DFMT_X8R8G8B8;
++    d3dpp->BackBufferWidth = 0;
++    d3dpp->BackBufferHeight = 0;
++    d3dpp->EnableAutoDepthStencil = FALSE;
++    if (FAILED(IDirect3D9_CreateDevice(d3dobj, D3DADAPTER_DEFAULT,
++        D3DDEVTYPE_HAL, get_shell_window(),
++        D3DCREATE_SOFTWARE_VERTEXPROCESSING |
++        D3DCREATE_MULTITHREADED,
++        d3dpp, &d3ddev))) {
++            av_log(&dxva2wrapper, AV_LOG_ERROR, "IDirect3D9_CreateDevice failed\n");
++            return AVERROR_EXTERNAL;
++    }
++    va->d3ddev = d3ddev;
++    return 0;
++}
++
++/**
++* It releases a Direct3D device and its resources.
++*/
++
++static void d3d_destroy_device(dxva2_context *va)
++{
++    if (va->d3ddev)
++        IDirect3DDevice9_Release(va->d3ddev);
++    if (va->d3dobj)
++        IDirect3D9_Release(va->d3dobj);
++}
++/**
++* It destroys a Direct3D device manager
++*/
++static void d3d_destroy_device_manager(dxva2_context *va)
++{
++    if (va->devmng)
++        IDirect3DDeviceManager9_Release( va->devmng );
++}
++
++static void dx_destroy_video_service(dxva2_context *va)
++{
++    if (va->device)
++        IDirect3DDeviceManager9_CloseDeviceHandle(va->devmng, va->device);
++
++    if (va->vs)
++        IDirectXVideoDecoderService_Release(va->vs);
++}
++
++static void dx_destroy_video_decoder(dxva2_context *va)
++{
++    unsigned int i;
++    if (va->decoder)
++        IDirectXVideoDecoder_Release(va->decoder);
++    va->decoder = NULL;
++    for (i = 0; i< va->surface_count; i++)
++        IDirect3DSurface9_Release(va->surface[i].d3d);
++    va->surface_count = 0;
++}
++
++static void close(dxva2_context *external)
++{
++    dxva2_context *va = external;
++
++    dx_destroy_video_decoder(va);
++    dx_destroy_video_service(va);
++    d3d_destroy_device_manager(va);
++    d3d_destroy_device(va);
++
++    if (va->hdxva2_dll)
++        FreeLibrary(va->hdxva2_dll);
++    if (va->hd3d9_dll)
++        FreeLibrary(va->hd3d9_dll);
++}
++
++/**
++* Find the best suited decoder mode GUID and render format.
++*/
++
++static int dx_find_video_service_conversion(dxva2_context *va, GUID *input,
++                                                      D3DFORMAT *output)
++{
++    /* Retrieve supported modes from the decoder service */
++    unsigned int output_count, input_count = 0;
++    GUID *input_list = NULL;
++    int is_suported, i, j, k, count;
++    D3DFORMAT *output_list;
++    if (FAILED(IDirectXVideoDecoderService_GetDecoderDeviceGuids( va->vs, &input_count, &input_list ))) {
++        av_log(&dxva2wrapper, AV_LOG_ERROR, "IDirectXVideoDecoderService_GetDecoderDeviceGuids failed\n");
++        return -1;
++    }
++    for (i = 0; i < input_count; i++) {
++        const GUID *g = &input_list[i];
++        const dxva2_mode_t *mode = dxva2_find_mode(g);
++        if (mode) {
++            av_log(&dxva2wrapper, AV_LOG_VERBOSE, "- '%s' is supported by hardware\n", mode->name);
++        } else {
++            av_log(&dxva2wrapper, AV_LOG_VERBOSE, "- Unknown GUID = %08X-%04x-%04x-XXXX\n",
++                (unsigned)g->Data1, g->Data2, g->Data3);
++        }
++    }
++    /* Try all supported mode by our priority */
++    for (i = 0; dxva2_modes[i].name; i++) {
++        const dxva2_mode_t *mode = &dxva2_modes[i];
++        if (!mode->codec || mode->codec != va->codec_id)
++            continue;
++
++        /* */
++        is_suported = FALSE;
++        for (count = 0; !is_suported && count < input_count; count++) {
++            const GUID *g = &input_list[count];
++            is_suported = IsEqualGUID(mode->guid, g) == 0;
++        }
++        if (!is_suported)
++            continue;
++        av_log(&dxva2wrapper, AV_LOG_VERBOSE, "Trying to use '%s' as input\n", mode->name);
++        output_count = 0;
++        output_list = NULL;
++        if (FAILED(IDirectXVideoDecoderService_GetDecoderRenderTargets(va->vs, mode->guid, &output_count, &output_list))) {
++                av_log(&dxva2wrapper, AV_LOG_VERBOSE, "IDirectXVideoDecoderService_GetDecoderRenderTargets failed,try others\n");
++                continue;
++        }
++        for (j = 0; j < output_count; j++) {
++            const D3DFORMAT f = output_list[j];
++            const d3d_format_t *format = d3d_find_format(f);
++            if (format) {
++                av_log(&dxva2wrapper, AV_LOG_VERBOSE, "%s is supported for output\n", format->name);
++            } else {
++                av_log(&dxva2wrapper, AV_LOG_VERBOSE, "%d is supported for output (%4.4s)\n", f, (const char*)&f);
++            }
++        }
++
++        /* */
++        for (j = 0; d3d_formats[j].name; j++){
++            const d3d_format_t *format = &d3d_formats[j];
++            is_suported = FALSE;
++            for (k = 0; !is_suported && k < output_count; k++) {
++                is_suported = format->format == output_list[k];
++            }
++            if (!is_suported)
++                continue;
++
++            /* We have our solution */
++            av_log(&dxva2wrapper, AV_LOG_VERBOSE, "Using '%s' to decode to '%s'\n", mode->name, format->name);
++            *input  = *mode->guid;
++            *output = format->format;
++            return 0;
++        }
++    }
++    return AVERROR_EXTERNAL;
++}
++
++/**
++* It creates a DirectX video service
++*/
++
++static int dx_create_video_service(dxva2_context *va)
++{
++    typedef HRESULT (WINAPI *CreateVideoService_func)(IDirect3DDevice9 *,
++        REFIID riid,
++        void **ppService);
++    CreateVideoService_func create_video_service =
++        (CreateVideoService_func)GetProcAddress(va->hdxva2_dll,
++        TEXT("DXVA2CreateVideoService"));
++
++    HRESULT hr;
++    HANDLE device;
++    IDirectXVideoDecoderService *vs;
++
++    if (!create_video_service) {
++        av_log(&dxva2wrapper, AV_LOG_ERROR, "cannot load function\n");
++        return AVERROR_EXTERNAL;
++    }
++    av_log(&dxva2wrapper, AV_LOG_VERBOSE, "DXVA2CreateVideoService Success!\n");
++    hr = IDirect3DDeviceManager9_OpenDeviceHandle(va->devmng, &device);
++    if (FAILED(hr)) {
++        av_log(&dxva2wrapper, AV_LOG_ERROR, "OpenDeviceHandle failed\n");
++        return AVERROR_EXTERNAL;
++    }
++    va->device = device;
++    hr = IDirect3DDeviceManager9_GetVideoService(va->devmng, device, &IID_IDirectXVideoDecoderService, (void **)(&vs));
++    if (FAILED(hr)) {
++        av_log(&dxva2wrapper, AV_LOG_ERROR, "GetVideoService failed\n");
++        return AVERROR_EXTERNAL;
++    }
++    va->vs = vs;
++    return 0;
++}
++
++/**
++* It creates a Direct3D device manager
++*/
++
++static int d3d_create_device_manager(dxva2_context *va)
++{
++    typedef HRESULT (WINAPI *CreateDeviceManager9_func)(UINT *pResetToken, IDirect3DDeviceManager9 **);
++    CreateDeviceManager9_func create_device_manager9 =
++        (CreateDeviceManager9_func)GetProcAddress(va->hdxva2_dll, TEXT("DXVA2CreateDirect3DDeviceManager9"));
++    UINT token;
++    HRESULT hr;
++    IDirect3DDeviceManager9 *devmng;
++    if (!create_device_manager9) {
++        av_log(&dxva2wrapper, AV_LOG_ERROR, "cannot load function\n");
++        return AVERROR_EXTERNAL;
++    }
++    av_log(&dxva2wrapper, AV_LOG_VERBOSE, "OurDirect3DCreateDeviceManager9 Success!\n");
++    if (FAILED(create_device_manager9(&token, &devmng))) {
++        av_log(&dxva2wrapper, AV_LOG_ERROR, " OurDirect3DCreateDeviceManager9 failed\n");
++        return AVERROR_EXTERNAL;
++    }
++
++    hr = IDirect3DDeviceManager9_ResetDevice(devmng, va->d3ddev, token);
++    if (FAILED(hr)) {
++        av_log(&dxva2wrapper, AV_LOG_ERROR, "IDirect3DDeviceManager9_ResetDevice failed: %08x", (unsigned)hr);
++        return AVERROR_EXTERNAL;
++    }
++
++    IDirect3DDeviceManager9_AddRef(devmng);
++    va->token  = token;
++    va->devmng = devmng;
++    av_log(&dxva2wrapper, AV_LOG_VERBOSE, "obtained IDirect3DDeviceManager9\n");
++    return 0;
++}
++
++int ff_create_dxva2(int codec_id, dxva2_context *dxva2_ctx)
++{
++    if (!dxva2_ctx)
++        return -1;
++
++    dxva2_ctx->codec_id = codec_id;
++    /* Load dll*/
++    dxva2_ctx->hd3d9_dll = LoadLibrary(TEXT("D3D9.DLL"));
++    if (!dxva2_ctx->hd3d9_dll) {
++        av_log(&dxva2wrapper, AV_LOG_ERROR, "cannot load d3d9.dll\n");
++        goto error;
++    }
++    dxva2_ctx->hdxva2_dll = LoadLibrary(TEXT("DXVA2.DLL"));
++    if (!dxva2_ctx->hdxva2_dll) {
++        av_log(&dxva2wrapper, AV_LOG_ERROR, "cannot load dxva2.dll\n");
++        goto error;
++    }
++    av_log(&dxva2wrapper, AV_LOG_VERBOSE, "DLLs loaded\n");
++
++    /* */
++    if (d3d_create_device(dxva2_ctx)) {
++        av_log(&dxva2wrapper, AV_LOG_ERROR, "Failed to create Direct3D device\n");
++        goto error;
++    }
++    av_log(&dxva2wrapper, AV_LOG_VERBOSE, "d3d_create_device succeed\n");
++
++    if (d3d_create_device_manager(dxva2_ctx)) {
++        av_log(&dxva2wrapper, AV_LOG_ERROR, "d3d_create_device_manager failed\n");
++        goto error;
++    }
++
++    if (dx_create_video_service(dxva2_ctx)) {
++        av_log(&dxva2wrapper, AV_LOG_ERROR, "dx_create_video_service failed\n");
++        goto error;
++    }
++
++    /* */
++    if (dx_find_video_service_conversion(dxva2_ctx, &dxva2_ctx->input, &dxva2_ctx->render)) {
++        av_log(&dxva2wrapper, AV_LOG_ERROR, "dx_find_video_service_conversion failed\n");
++        goto error;
++    }
++    return 0;
++    /* TODO print the hardware name/vendor for debugging purposes */
++error:
++    close(dxva2_ctx);
++    return AVERROR_EXTERNAL;
++}
++
++/**
++* It creates a DXVA2 decoder using the given video format
++*/
++
++static int dx_create_video_decoder(dxva2_context *va, int codec_id,
++                                            const struct video_format_t *fmt)
++{
++    LPDIRECT3DSURFACE9 surface_list[VA_DXVA2_MAX_SURFACE_COUNT];
++    DXVA2_VideoDesc dsc;
++    DXVA2_ExtendedFormat *ext;
++    UINT                      cfg_count = 0;
++    DXVA2_ConfigPictureDecode *cfg_list = NULL;
++    IDirectXVideoDecoder *decoder;
++    int cfg_score, score, i;
++    av_log(&dxva2wrapper, AV_LOG_VERBOSE, "dx_create_video_decoder id %d %dx%d\n",
++           codec_id, fmt->i_width, fmt->i_height);
++
++    va->width  = fmt->i_width;
++    va->height = fmt->i_height;
++
++    /* Allocates all surfaces needed for the decoder */
++
++    va->surface_width  = (fmt->i_width  + 255) & ~255;
++    va->surface_height = (fmt->i_height + 255) & ~255;
++
++    switch (codec_id) {
++    case AV_CODEC_ID_H264:
++        va->surface_count = 16 + 1;
++        break;
++    default:
++        va->surface_count = 4 + 1;
++        break;
++    }
++    if (FAILED(IDirectXVideoDecoderService_CreateSurface(va->vs,
++                                                          va->surface_width,
++                                                          va->surface_height,
++                                                          va->surface_count - 1,
++                                                          va->render,
++                                                          D3DPOOL_DEFAULT,
++                                                          0,
++                                                          DXVA2_VideoDecoderRenderTarget,
++                                                          surface_list, NULL ))) {
++        av_log(&dxva2wrapper, AV_LOG_ERROR, "IDirectXVideoAccelerationService_CreateSurface failed\n");
++        va->surface_count = 0;
++        return AVERROR_EXTERNAL;
++    }
++    for (i = 0; i < va->surface_count; i++) {
++        ff_va_surface_t *surface = &va->surface[i];
++        surface->d3d = surface_list[i];
++        surface->refcount = 0;
++        surface->order = 0;
++    }
++    av_log(&dxva2wrapper, AV_LOG_VERBOSE, "IDirectXVideoAccelerationService_CreateSurface succeed with %d surfaces (%dx%d)\n",
++           va->surface_count, fmt->i_width, fmt->i_height);
++    ZeroMemory(&dsc, sizeof(dsc));
++    dsc.SampleWidth  = fmt->i_width;
++    dsc.SampleHeight = fmt->i_height;
++    dsc.Format       = va->render;
++    if (fmt->i_frame_rate > 0 && fmt->i_frame_rate_base > 0) {
++        dsc.InputSampleFreq.Numerator   = fmt->i_frame_rate;
++        dsc.InputSampleFreq.Denominator = fmt->i_frame_rate_base;
++    } else {
++        dsc.InputSampleFreq.Numerator   = 0;
++        dsc.InputSampleFreq.Denominator = 0;
++    }
++    dsc.OutputFrameFreq = dsc.InputSampleFreq;
++    dsc.UABProtectionLevel = FALSE;
++    dsc.Reserved = 0;
++
++    ext = &dsc.SampleFormat;
++    ext->SampleFormat = 0;//DXVA2_SampleUnknown;
++    ext->VideoChromaSubsampling = 0;//DXVA2_VideoChromaSubsampling_Unknown;
++    ext->NominalRange = 0;//DXVA2_NominalRange_Unknown;
++    ext->VideoTransferMatrix = 0;//DXVA2_VideoTransferMatrix_Unknown;
++    ext->VideoLighting = 0;//DXVA2_VideoLighting_Unknown;
++    ext->VideoPrimaries = 0;//DXVA2_VideoPrimaries_Unknown;
++    ext->VideoTransferFunction = 0;//DXVA2_VideoTransFunc_Unknown;
++
++    /* List all configurations available for the decoder */
++
++    if (FAILED(IDirectXVideoDecoderService_GetDecoderConfigurations( va->vs, &va->input, &dsc, NULL, &cfg_count, &cfg_list ))) {
++        av_log(&dxva2wrapper, AV_LOG_ERROR, "IDirectXVideoDecoderService_GetDecoderConfigurations failed\n");
++        return AVERROR_EXTERNAL;
++    }
++    av_log(&dxva2wrapper, AV_LOG_VERBOSE, "we got %d decoder configurations\n", cfg_count);
++
++    /* Select the best decoder configuration */
++    cfg_score = 0;
++    for (i = 0; i < cfg_count; i++) {
++        const DXVA2_ConfigPictureDecode *cfg = &cfg_list[i];
++
++        /* */
++        av_log(&dxva2wrapper, AV_LOG_VERBOSE, "configuration[%d] ConfigBitstreamRaw %d\n",
++               i, cfg->ConfigBitstreamRaw);
++        if (cfg->ConfigBitstreamRaw == 1)
++            score = 1;
++        else if (codec_id == AV_CODEC_ID_H264 && cfg->ConfigBitstreamRaw == 2)
++            score = 2;
++        else
++            continue;
++        if (IsEqualGUID(&cfg->guidConfigBitstreamEncryption, &DXVA_NoEncrypt))
++            score += 16;
++        if (cfg_score < score) {
++            va->cfg = *cfg;
++            cfg_score = score;
++        }
++    }
++    if (cfg_score <= 0) {
++        av_log(&dxva2wrapper, AV_LOG_ERROR, "Failed to find a supported decoder configuration\n");
++        return AVERROR_EXTERNAL;
++    }
++    if (FAILED(IDirectXVideoDecoderService_CreateVideoDecoder(va->vs, &va->input, &dsc, &va->cfg, surface_list, va->surface_count, &decoder))) {
++            av_log(&dxva2wrapper, AV_LOG_ERROR, "IDirectXVideoDecoderService_CreateVideoDecoder failed\n");
++            return AVERROR_EXTERNAL;
++    }
++    va->decoder = decoder;
++    av_log(&dxva2wrapper, AV_LOG_VERBOSE, "IDirectXVideoDecoderService_CreateVideoDecoder succeed\n");
++    return 0;
++}
++
++static void dx_create_video_conversion(dxva2_context *va)
++{
++    switch (va->render) {
++    case MAKEFOURCC('N','V','1','2'):
++        va->output = (D3DFORMAT)MAKEFOURCC('Y','V','1','2');
++        break;
++    default:
++        va->output = va->render;
++        break;
++    }
++}
++
++int ff_setup_dxva2(dxva2_context *dxva2_ctx, void **hw,
++                         enum PixelFormat *chroma, int width, int height)
++{
++    struct video_format_t fmt;
++    const d3d_format_t *output;
++    int i, ret = 0;
++    if (dxva2_ctx->width == width && dxva2_ctx->height == height && dxva2_ctx->decoder)
++        goto ok;
++    dx_destroy_video_service(dxva2_ctx);
++    *chroma = AV_PIX_FMT_NONE;
++    if (width <= 0 || height <= 0)
++        return AVERROR(EINVAL);
++    memset(&fmt, 0, sizeof(fmt));
++    fmt.i_width = width;
++    fmt.i_height = height;
++    ret = dx_create_video_decoder(dxva2_ctx, dxva2_ctx->codec_id, &fmt);
++    if (ret < 0)
++        return ret;
++
++    dxva2_ctx->hw.decoder = dxva2_ctx->decoder;
++    dxva2_ctx->hw.cfg = &dxva2_ctx->cfg;
++    dxva2_ctx->hw.surface_count = dxva2_ctx->surface_count;
++    dxva2_ctx->hw.surface = dxva2_ctx->hw_surface;
++    for (i = 0; i < dxva2_ctx->surface_count; i++)
++        dxva2_ctx->hw.surface[i] = dxva2_ctx->surface[i].d3d;
++    dx_create_video_conversion(dxva2_ctx);
++ok:
++    *hw = &dxva2_ctx->hw;
++    output = d3d_find_format(dxva2_ctx->output);
++    *chroma = output->codec;
++    return 0;
++}
++
++void ff_get_dxva2_surface(dxva2_context *external, AVFrame *ff)
++{
++    dxva2_context *va = external;
++    unsigned int i, old;
++    ff_va_surface_t *surface;
++    for (i = 0, old = 0; i < va->surface_count; i++) {
++        ff_va_surface_t *surface = &va->surface[i];
++        if (!surface->refcount)
++            break;
++        if (surface->order < va->surface[old].order)
++            old = i;
++    }
++    if (i >= va->surface_count)
++        i = old;
++    surface = &va->surface[i];
++    surface->refcount = 1;
++    surface->order = va->surface_order++;
++    ff->data[3] = (uint8_t *)surface->d3d;
++    return;
++}
++
++void ff_release_dxva2_surface(dxva2_context *external, AVFrame *ff)
++{
++    dxva2_context *va = external;
++    LPDIRECT3DSURFACE9 d3d = (LPDIRECT3DSURFACE9)(uintptr_t)ff->data[3];
++    if (NULL == d3d)
++        return;
++    for (unsigned i = 0; i < va->surface_count; i++) {
++            if (va->surface[i].d3d == d3d)
++                va->surface[i].refcount--;
++    }
++}
++
++static void ff_copy_from_nv12(uint8_t *src[2], size_t src_pitch[2],
++                                     unsigned width, unsigned height, AVFrame *ff )
++{
++    unsigned int i, j;
++    uint8_t *dst_u, *dst_v;
++    unsigned int heitht_uv, width_uv;
++    dst_u = ff->data[1];
++    dst_v = ff->data[2];
++    heitht_uv = height/2;
++    width_uv = width/2;
++    for (i = 0; i < height; i++) {
++         memcpy( ff->data[0] + i * ff->linesize[0], src[0]+i*src_pitch[0], width );
++    }
++    for (i = 0; i < heitht_uv; i++) {
++        for (j = 0; j<width_uv; j++) {
++            dst_u[i*ff->linesize[1]+j] = *(src[1]+i*src_pitch[1]+2*j);
++            dst_v[i*ff->linesize[2]+j] = *(src[1]+i*src_pitch[1]+2*j+1);
++        }
++    }
++}
++
++int ff_extract_dxva2(dxva2_context *dxva2,AVFrame *frame)
++{
++    LPDIRECT3DSURFACE9 d3d;
++    D3DLOCKED_RECT lock;
++    d3d = (LPDIRECT3DSURFACE9)(uintptr_t)frame->data[3];
++    if (FAILED(IDirect3DSurface9_LockRect(d3d, &lock, NULL,D3DLOCK_READONLY))) {
++        av_log(&dxva2wrapper, AV_LOG_ERROR, "IDirect3DSurface9_LockRect Error\n");
++        return AVERROR_EXTERNAL;
++    }
++    if (dxva2->render == MAKEFOURCC( 'N', 'V', '1', '2' )) {
++        uint8_t *plane[2] = {
++            (uint8_t *)lock.pBits,
++            (uint8_t *)lock.pBits + lock.Pitch * dxva2->surface_height
++        };
++        size_t pitch[2] = {
++            lock.Pitch,
++            lock.Pitch,
++        };
++        ff_copy_from_nv12(plane, pitch, dxva2->width, dxva2->height, frame);
++    }
++    IDirect3DSurface9_UnlockRect( d3d );
++    return 0;
++}
++
++void ff_release_dxva2(dxva2_context *dxva2_ctx)
++{
++    if (dxva2_ctx)
++        close(dxva2_ctx);
++}
+diff --git a/libavcodec/dxva2_wrapper.h b/libavcodec/dxva2_wrapper.h
+new file mode 100644
+index 0000000..96560bf
+--- /dev/null
++++ b/libavcodec/dxva2_wrapper.h
+@@ -0,0 +1,389 @@
++/*
++ * Call hardware decode acceleration through dxva2 API
++
++ * Copyright (C) 2009 Geoffroy Couprie
++ * Copyright (C) 2009 Laurent Aimar
++ * $Id: 0af77c6633657d4a700a3f60e5ff7c417086822f $
++ *
++ * Authors: Geoffroy Couprie <geal@videolan.org>
++ *          Laurent Aimar <fenrir _AT_ videolan _DOT_ org>
++ * Modified by Wei Gao <weigao@multicorewareinc.com>
++ *
++ * Attribute from VLC
++ *
++ * This file is part of FFmpeg.
++ *
++ * FFmpeg is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * FFmpeg is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with FFmpeg; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
++ */
++
++#ifndef DXVA2_WRAPPER_H
++#define DXVA2_WRAPPER_H
++
++#define COBJMACROS
++#pragma once
++
++#include <windows.h>
++#include <d3d9.h>
++#include "avcodec.h"
++#include "dxva2.h"
++
++#ifndef false
++#define false FALSE
++#endif
++
++#define VA_DXVA2_MAX_SURFACE_COUNT (64)
++typedef struct {
++    /**
++     * D3D surface, used for decode.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    LPDIRECT3DSURFACE9 d3d;
++
++    /**
++     * D3D surface reference, if it is 1 means that the surface is being used.0 means the surface is free.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    int                refcount;
++
++    /**
++     * D3D surface order.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    unsigned int       order;
++} ff_va_surface_t;
++
++typedef struct{
++    /**
++     * Codec ID of Video.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    int                          codec_id;
++
++    /**
++     * Video width.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    int                          width;
++
++    /**
++     * Video height.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    int                         height;
++
++    /**
++     * Video D3D9 DLL handle.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    HINSTANCE                   hd3d9_dll;
++
++    /**
++     * Video DXVA2 DLL handle.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    HINSTANCE                   hdxva2_dll;
++
++    /**
++     * IDirect3D9 pointer.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    LPDIRECT3D9                  d3dobj;
++
++    /**
++     * IDirect3D9 pointer.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    LPDIRECT3DDEVICE9            d3ddev;
++
++    /**
++     * IDirect3D9 present parameters.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    D3DPRESENT_PARAMETERS        d3dpp;
++
++     /**
++     * IDirect3D9 adapter identifier.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    D3DADAPTER_IDENTIFIER9       d3dai;
++
++    /**
++     *  D3D reset token,use it to reset device.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    UINT                         token;
++
++    /**
++     *  A pointer to the IDirect3DDeviceManager9 interface.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    IDirect3DDeviceManager9      *devmng;
++
++    /**
++     *  A handle to a Direct3D device.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    HANDLE                       device;
++
++    /**
++     *  A pointer to the requested interface.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    IDirectXVideoDecoderService  *vs;
++
++    /**
++     * The  GUID of dxva2_modes.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    GUID                         input;
++
++    /**
++     *  The color format of D3D.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    D3DFORMAT                    render;
++
++    /**
++     *  The describes the configuration of a DXVA decoder device.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    DXVA2_ConfigPictureDecode    cfg;
++
++    /**
++     *  The DXVA2 decoder object.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    IDirectXVideoDecoder         *decoder;
++
++    /**
++     *  The color format of D3D.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    D3DFORMAT                    output;
++
++    /**
++     *  DXVA2 hwaccel context.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    struct dxva_context          hw;
++
++    /**
++     *  DXVA2 decode surfaces number.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    unsigned int                 surface_count;
++
++    /**
++     *  DXVA2 decode surfaces order, used for get surface.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    unsigned int                 surface_order;
++
++    /**
++     *  DXVA2 width of decode surfaces.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    int                          surface_width;
++
++    /**
++     *  DXVA2 heigt of decode surfaces.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    int                          surface_height;
++
++    /**
++     * Decode Surfaces used for decode.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    ff_va_surface_t              surface[VA_DXVA2_MAX_SURFACE_COUNT];
++
++    /**
++     * Decode Surfaces used for decode.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    LPDIRECT3DSURFACE9           hw_surface[VA_DXVA2_MAX_SURFACE_COUNT];
++} dxva2_context;
++
++typedef struct {
++    /**
++     * The d3d format name.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    const char        *name;
++
++    /**
++     *  The color format of D3D.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    D3DFORMAT         format;
++
++    /**
++     *  The codec pixel format.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    enum PixelFormat  codec;
++} d3d_format_t;
++
++/**
++ * video format description
++ */
++struct video_format_t
++{
++    /**
++     *  picture chroma.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    enum PixelFormat  i_chroma;
++
++    /**
++     *  picture width.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    unsigned int      i_width;
++
++    /**
++     *  picture height.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    unsigned int      i_height;
++    /**
++     *  frame rate numerator.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    unsigned int      i_frame_rate;
++
++    /**
++     *  frame rate denominator.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    unsigned int      i_frame_rate_base;
++};
++
++typedef struct {
++    /**
++     *  DXVA2 decode mode name.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    const char   *name;
++
++    /**
++     * The  GUID of dxva2_modes.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    const GUID   *guid;
++    /**
++     * The  codec id of ffmpeg.
++     *
++     * encoding: unused
++     * decoding: Set by user.
++     */
++    int          codec;
++} dxva2_mode_t;
++
++/** Create the DXVA2 Object. */
++int ff_create_dxva2(int codec_id,dxva2_context *dxva2_ctx);
++
++/** Initial DXVA2 Object. */
++int ff_setup_dxva2(dxva2_context *external, void **hw, enum PixelFormat *chroma,int width, int height);
++
++/** Convert NV12 video to yuv video and save it into AVFrame*/
++int ff_extract_dxva2( dxva2_context *dxva2,AVFrame *frame);
++
++/** Release DXVA2 object*/
++void ff_release_dxva2(dxva2_context *dxva2_ctx);
++
++/** Get DXVA2 decode surface*/
++void ff_get_dxva2_surface(dxva2_context *external, AVFrame *ff);
++
++/** Release DXVA2 decode surface*/
++void ff_release_dxva2_surface(dxva2_context *external, AVFrame *ff);
++
++#endif/* AVCODEC_DXVA2_WRAPPER_H */
+diff --git a/libavcodec/mpeg12.h b/libavcodec/mpeg12.h
+index b4ebd23..91ece2c 100644
+--- a/libavcodec/mpeg12.h
++++ b/libavcodec/mpeg12.h
+@@ -24,6 +24,8 @@
+ 
+ #include "mpegvideo.h"
+ 
++#include "libavutil/stereo3d.h"
++
+ #define DC_VLC_BITS 9
+ #define MV_VLC_BITS 9
+ #define TEX_VLC_BITS 9
+@@ -43,6 +45,27 @@ extern VLC ff_mv_vlc;
+ 
+ extern uint8_t ff_mpeg12_static_rl_table_store[2][2][2*MAX_RUN + MAX_LEVEL + 3];
+ 
++typedef struct Mpeg1Context {
++    MpegEncContext mpeg_enc_ctx;
++    int mpeg_enc_ctx_allocated; /* true if decoding context allocated */
++    int repeat_field;           /* true if we must repeat the field */
++    AVPanScan pan_scan;         /* some temporary storage for the panscan */
++    AVStereo3D stereo3d;
++    int has_stereo3d;
++    uint8_t *a53_caption;
++    int a53_caption_size;
++    uint8_t afd;
++    int has_afd;
++    int slice_count;
++    int save_aspect_info;
++    int save_width, save_height, save_progressive_seq;
++    AVRational frame_rate_ext;  /* MPEG-2 specific framerate modificator */
++    int sync;                   /* Did we reach a sync point like a GOP/SEQ/KEYFrame? */
++    int tmpgexs;
++    int first_slice;
++    int extradata_decoded;
++} Mpeg1Context;
++
+ void ff_mpeg12_common_init(MpegEncContext *s);
+ void ff_mpeg12_init_vlcs(void);
+ 
+diff --git a/libavcodec/mpeg12dec.c b/libavcodec/mpeg12dec.c
+index 78888c7..ef9a971 100644
+--- a/libavcodec/mpeg12dec.c
++++ b/libavcodec/mpeg12dec.c
+@@ -47,26 +47,6 @@
+ #include "vdpau_internal.h"
+ #include "xvmc_internal.h"
+ 
+-typedef struct Mpeg1Context {
+-    MpegEncContext mpeg_enc_ctx;
+-    int mpeg_enc_ctx_allocated; /* true if decoding context allocated */
+-    int repeat_field;           /* true if we must repeat the field */
+-    AVPanScan pan_scan;         /* some temporary storage for the panscan */
+-    AVStereo3D stereo3d;
+-    int has_stereo3d;
+-    uint8_t *a53_caption;
+-    int a53_caption_size;
+-    uint8_t afd;
+-    int has_afd;
+-    int slice_count;
+-    int save_aspect_info;
+-    int save_width, save_height, save_progressive_seq;
+-    AVRational frame_rate_ext;  /* MPEG-2 specific framerate modificator */
+-    int sync;                   /* Did we reach a sync point like a GOP/SEQ/KEYFrame? */
+-    int tmpgexs;
+-    int first_slice;
+-    int extradata_decoded;
+-} Mpeg1Context;
+ 
+ #define MB_TYPE_ZERO_MV   0x20000000
+ 
+-- 
+1.8.1.2
+
