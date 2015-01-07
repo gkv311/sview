@@ -292,16 +292,6 @@
 			<Add library="avformat" />
 			<Add library="avcodec" />
 			<Add library="swscale" />
-			<Add library="TKBRep" />
-			<Add library="TKIGES" />
-			<Add library="TKSTEP" />
-			<Add library="TKMesh" />
-			<Add library="TKMath" />
-			<Add library="TKG3d" />
-			<Add library="TKTopAlgo" />
-			<Add library="TKShHealing" />
-			<Add library="TKXSBase" />
-			<Add library="TKernel" />
 			<Add directory="../3rdparty/lib/$(TARGET_NAME)" />
 			<Add directory="../3rdparty/OCCT/lib/$(TARGET_NAME)" />
 			<Add directory="../lib/$(TARGET_NAME)" />
