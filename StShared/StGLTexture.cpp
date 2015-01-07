@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -441,7 +441,7 @@ bool StGLTexture::create(StGLContext&   theCtx,
         release(theCtx);
         return false;
     }
-#ifdef __ST_DEBUG_TEXTURES__
+#ifdef ST_DEBUG_TEXTURES
     ST_DEBUG_LOG("Created StGLTexture " + mySizeX + " x "+ mySizeY
                + " (format " + formatInternalFormat(anInternalFormat) + ')');
 #endif
@@ -454,7 +454,7 @@ bool StGLTexture::create(StGLContext&   theCtx,
     theCtx.core20fwd->glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH,           &aResSizeX);
     theCtx.core20fwd->glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT,          &aResSizeY);
     theCtx.core20fwd->glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &aResFormat);
-#ifdef __ST_DEBUG_TEXTURES__
+#ifdef ST_DEBUG_TEXTURES
     ST_DEBUG_LOG("Created StGLTexture " + aResSizeX + " x "+ aResSizeY
                + " (format " + formatInternalFormat(aResFormat) + ')');
 #endif

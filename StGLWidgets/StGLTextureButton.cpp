@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -189,9 +189,9 @@ void StGLTextureButton::glWaveTimerControl() {
 void StGLTextureButton::setTexturePath(const StString* theTexturesPaths,
                                        const size_t    theCount) {
     size_t minCount = (theCount > myFacesCount) ? myFacesCount : theCount;
-#ifdef __ST_DEBUG__
+#ifdef ST_DEBUG
     if(theCount != myFacesCount) {
-        ST_DEBUG_LOG_AT("WARNING, Not inaf textures paths for StGLTextureButton!");
+        ST_DEBUG_LOG_AT("WARNING, Not enough textures paths for StGLTextureButton!");
     }
 #endif
     for(size_t t = 0; t < minCount; ++t) {

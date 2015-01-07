@@ -1,5 +1,5 @@
 /**
- * Copyright © 2008-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2008-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -97,7 +97,7 @@ HMODULE StLibrary::DLibLoadFull(const StString& theLibName) {
     if(aModule == NULL) {
         ST_DEBUG_LOG("Failed to load library: \"" + theLibName + "\" (" + (int )GetLastError() + ')');
     } else {
-    #ifdef __ST_DEBUG_LIBS__
+    #ifdef ST_DEBUG_LIBS
         ST_DEBUG_LOG("Loaded library: \"" + theLibName + "\" " + DLibGetVersion(theLibName.toUtfWide()));
     #endif
     }
@@ -107,7 +107,7 @@ HMODULE StLibrary::DLibLoadFull(const StString& theLibName) {
     if(aModule == NULL) {
         ST_DEBUG_LOG("Failed to load library: \"" + theLibName + "\" (" + dlerror() + ')');
     } else {
-    #ifdef __ST_DEBUG_LIBS__
+    #ifdef ST_DEBUG_LIBS
         ST_DEBUG_LOG("Loaded library: \"" + theLibName + '\"');
     #endif
     }

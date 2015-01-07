@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -272,7 +272,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
         return false;
     }
 
-#ifdef __ST_DEBUG__
+#ifdef ST_DEBUG
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 101, 0))
     av_dump_format(aFormatCtx, 0, theFileToLoad.toCString(), false);
 #else
@@ -631,7 +631,7 @@ void StVideo::doSeekContext(AVFormatContext* theFormatCtx,
         int64_t   aSeekTarget = stAV::secondsToUnits(theSeekPts);
         isSeekDone = av_seek_frame(theFormatCtx, -1, aSeekTarget, aFlags) >= 0;
         if(!isSeekDone) {
-        #ifdef __ST_DEBUG__
+        #ifdef ST_DEBUG
             ST_ERROR_LOG("Disaster! Seeking to " + theSeekPts + " [" + theFormatCtx->filename + "] has failed.");
         #endif
         }

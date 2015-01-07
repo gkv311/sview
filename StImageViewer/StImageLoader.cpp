@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -292,7 +292,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     // scale down image if it does not fit texture limits
     StHandle<StImage> anImageL = scaledImage(anImageFileL, size_t(myMaxTexDim));
     StHandle<StImage> anImageR = scaledImage(anImageFileR, size_t(myMaxTexDim));
-#ifdef __ST_DEBUG__
+#ifdef ST_DEBUG
     const double aScaleTimeMSec = aLoadTimer.getElapsedTimeInMilliSec() - aLoadTimeMSec;
     if(anImageL != anImageFileL) {
         ST_DEBUG_LOG("Image is downscaled to fit texture limits in " + aScaleTimeMSec + " ms!");
@@ -313,7 +313,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         aSrcFormatCurr = st::formatFromRatio(anImageL->getRatio());
     }*/
 
-#ifdef __ST_DEBUG__
+#ifdef ST_DEBUG
     if(!anImageFileL->isNull()) {
         ST_DEBUG_LOG(anImageFileL->getState());
     }

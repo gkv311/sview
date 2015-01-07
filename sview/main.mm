@@ -1,7 +1,7 @@
 /**
  * This is source code for sView
  *
- * Copyright © Kirill Gavrilov, 2011-2013
+ * Copyright © Kirill Gavrilov, 2011-2015
  */
 
 #if (defined(__APPLE__))
@@ -300,7 +300,7 @@ namespace {
 @end
 
 int main(int , char** ) {
-#ifdef __ST_DEBUG__
+#ifdef ST_DEBUG
     // TODO (Kirill Gavrilov#9) debug environment
     #if (defined(_LP64) || defined(__LP64__))
         const StString ST_ENV_NAME_STCORE_PATH = "StCore64";

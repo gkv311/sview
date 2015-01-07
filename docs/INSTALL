@@ -82,8 +82,8 @@ Notice that by default "include/stconfig.conf" file is used to override these op
   (notice that since next releases of FFmpeg might have built-in support for webp/webpll image files)
 - ST_HAVE_MONGOOSE - should be defined to activate built-in web UI for remote Movie Player control
 - ST_HAVE_OCCT - should be defined to activate CAD files import in tiny CAD viewer
-- __ST_DEBUG__ - should be defined to activate debugging log output
-- __ST_DEBUG_LOG_TO_FILE__ - specifies file name or full path to duplicate debug log output
+- ST_DEBUG - should be defined to activate debugging log output
+- ST_DEBUG_LOG_TO_FILE - specifies file name or full path to duplicate debug log output
 
 V. Distribution scripts
 =======================

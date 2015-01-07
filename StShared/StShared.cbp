@@ -21,8 +21,8 @@
 					<Add option="-mmmx" />
 					<Add option="-msse" />
 					<Add option="-DUNICODE" />
-					<Add option="-D__ST_DEBUG__" />
-					<Add option="-D__ST_SHARED_DLL__" />
+					<Add option="-DST_DEBUG" />
+					<Add option="-DST_SHARED_DLL" />
 					<Add option="-D__MSVCRT_VERSION__=0x0601" />
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
@@ -53,7 +53,7 @@
 					<Add option="/MP" />
 					<Add option="/DUNICODE" />
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
-					<Add option="/D__ST_SHARED_DLL__" />
+					<Add option="/DST_SHARED_DLL" />
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
@@ -84,8 +84,8 @@
 					<Add option="/MP" />
 					<Add option="/DUNICODE" />
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
-					<Add option="/D__ST_DEBUG__" />
-					<Add option="/D__ST_SHARED_DLL__" />
+					<Add option="/DST_DEBUG" />
+					<Add option="/DST_SHARED_DLL" />
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
@@ -116,7 +116,7 @@
 					<Add option="/MP" />
 					<Add option="/DUNICODE" />
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
-					<Add option="/D__ST_SHARED_DLL__" />
+					<Add option="/DST_SHARED_DLL" />
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
@@ -147,7 +147,7 @@
 					<Add option="-mmmx" />
 					<Add option="-msse" />
 					<Add option="`pkg-config gtk+-2.0 --cflags`" />
-					<Add option="-D__ST_SHARED_DLL__" />
+					<Add option="-DST_SHARED_DLL" />
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
@@ -180,8 +180,8 @@
 					<Add option="-mmmx" />
 					<Add option="-msse" />
 					<Add option="`pkg-config gtk+-2.0 --cflags`" />
-					<Add option="-D__ST_DEBUG__" />
-					<Add option="-D__ST_SHARED_DLL__" />
+					<Add option="-DST_DEBUG" />
+					<Add option="-DST_SHARED_DLL" />
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
@@ -207,7 +207,7 @@
 					<Add option="-O3" />
 					<Add option="-Wall" />
 					<Add option="-fPIC" />
-					<Add option="-D__ST_SHARED_DLL__" />
+					<Add option="-DST_SHARED_DLL" />
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
@@ -230,8 +230,8 @@
 					<Add option="-Wall" />
 					<Add option="-g" />
 					<Add option="-fPIC" />
-					<Add option="-D__ST_DEBUG__" />
-					<Add option="-D__ST_SHARED_DLL__" />
+					<Add option="-DST_DEBUG" />
+					<Add option="-DST_SHARED_DLL" />
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>

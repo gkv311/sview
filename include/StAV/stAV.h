@@ -56,7 +56,7 @@ extern "C" {
     extern "C" int stFFmpegLock(void** theMutexPtrPtr, enum AVLockOp theOperation);
 #endif
 
-#ifdef __ST_SHARED_DLL__
+#ifdef ST_SHARED_DLL
     #define ST_SHARED_CPPEXPORT ST_CPPEXPORT extern const
 #else
     #define ST_SHARED_CPPEXPORT ST_CPPIMPORT extern const

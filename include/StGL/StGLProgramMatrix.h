@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2014-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -193,7 +193,7 @@ class StGLProgramMatrix : public StGLResource {
                 aVertSrc += aSources.getValue(anActiveSrc);
                 aCfg     += anActiveSrc;
             }
-        #if defined(__ST_DEBUG_SHADERS__) && !defined(ST_HAVE_GLES2) && !defined(__ANDROID__)
+        #if defined(ST_DEBUG_SHADERS) && !defined(ST_HAVE_GLES2) && !defined(__ANDROID__)
             if(!myIsFirstInit) {
                 continue;
             }
@@ -215,7 +215,7 @@ class StGLProgramMatrix : public StGLResource {
                 aFragSrc += aSources.getValue(anActiveSrc);
                 aCfg     += anActiveSrc;
             }
-        #if defined(__ST_DEBUG_SHADERS__) && !defined(ST_HAVE_GLES2) && !defined(__ANDROID__)
+        #if defined(ST_DEBUG_SHADERS) && !defined(ST_HAVE_GLES2) && !defined(__ANDROID__)
             if(!myIsFirstInit) {
                 continue;
             }

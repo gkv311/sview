@@ -41,7 +41,7 @@ EXTRA_CXXFLAGS =
 EXTRA_LDFLAGS  =
 
 # to activate debug build
-#EXTRA_CXXFLAGS = -D__ST_DEBUG_LOG_TO_FILE__=\"/sdcard/Android/data/com.sview/files/sview.log\" -D__ST_DEBUG__
+#EXTRA_CXXFLAGS = -DST_DEBUG_LOG_TO_FILE=\"/sdcard/Android/data/com.sview/files/sview.log\" -DST_DEBUG
 #LDSTRIP =
 
 ifdef ANDROID_NDK

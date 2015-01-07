@@ -1,7 +1,7 @@
 /**
  * This is source code for sView
  *
- * Copyright © Kirill Gavrilov, 2007-2013
+ * Copyright © Kirill Gavrilov, 2007-2015
  */
 
 #ifndef __APPLE__
@@ -11,7 +11,7 @@
 #include "../StOutPageFlip/StOutPageFlip.h"
 
 #ifdef _WIN32
-#ifdef __ST_DEBUG__
+#ifdef ST_DEBUG
 int main(int , char** ) { // force console output
 #else
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) { // prevent console output
@@ -30,7 +30,7 @@ int main(int , char** ) {
         return 1;
     }
 
-#ifdef __ST_DEBUG__
+#ifdef ST_DEBUG
     // override environment variable if sView is installed in the system
     #if defined(_WIN64) || defined(_LP64) || defined(__LP64__)
         const StString ST_ENV_NAME_STCORE_PATH = "StCore64";

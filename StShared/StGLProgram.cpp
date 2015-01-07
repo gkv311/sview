@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -78,7 +78,7 @@ bool StGLProgram::link(StGLContext& theCtx) {
         release(theCtx);
         return false;
     }
-#ifdef __ST_DEBUG_SHADERS__
+#ifdef ST_DEBUG_SHADERS
     const StString anInfo = getLinkageInfo(theCtx);
     ST_DEBUG_LOG("Program '" + myTitle + "' has been linked"
               + (!anInfo.isEmpty() ? (StString(". Log:\n") + anInfo) : (StString())));
@@ -92,7 +92,7 @@ StGLVarLocation StGLProgram::getUniformLocation(StGLContext& theCtx,
         return StGLVarLocation();
     }
     const StGLVarLocation aLocation(theCtx.core20fwd->glGetUniformLocation(myProgramId, theVarName));
-#ifdef __ST_DEBUG__
+#ifdef ST_DEBUG
     if(!aLocation.isValid()) {
         ST_DEBUG_LOG("Warning! Uniform variable '" + theVarName + "' doesn't found in the whole shader!");
     }
@@ -106,7 +106,7 @@ StGLVarLocation StGLProgram::getAttribLocation(StGLContext& theCtx,
         return StGLVarLocation();
     }
     const StGLVarLocation aLocation(theCtx.core20fwd->glGetAttribLocation(myProgramId, theVarName));
-#ifdef __ST_DEBUG__
+#ifdef ST_DEBUG
     if(!aLocation.isValid()) {
         ST_DEBUG_LOG("Warning! Attribute variable '" + theVarName + "' doesn't found in the vertex shader!");
     }

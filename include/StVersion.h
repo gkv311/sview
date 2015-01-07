@@ -19,7 +19,7 @@
 #if defined(ST_HAVE_STCONFIG) || defined(RC_INVOKED)
     #include <stconfig.conf>
 #else
-    #if !defined(SVIEW_SDK_VER_STATUS) && !defined(__ST_DEBUG__)
+    #if !defined(SVIEW_SDK_VER_STATUS) && !defined(ST_DEBUG)
         #define SVIEW_SDK_VER_STATUS ST_RELEASE
     #endif
     #ifndef SVIEW_SDK_VERSION_AUTO
@@ -58,7 +58,7 @@
 #endif
 
 #ifdef RC_INVOKED
-    #if defined(__ST_DEBUG__) || (SVIEW_SDK_VER_STATUS == 0)
+    #if defined(ST_DEBUG) || (SVIEW_SDK_VER_STATUS == 0)
         #define ST_WIN32_FILEFLAGS FILEFLAGS VS_FF_DEBUG
     #elif (SVIEW_SDK_VER_STATUS != 4)
         #define ST_WIN32_FILEFLAGS FILEFLAGS VS_FF_PRERELEASE
@@ -124,7 +124,7 @@ class ST_LOCAL StVersionInfo {
     /**
      * @return true if no errors.
      */
-#if(defined(__ST_TIMEBOMB__))
+#ifdef ST_TIMEBOMB
     static bool checkTimeBomb(const StString& ) {
         return true;
     }
@@ -150,7 +150,7 @@ class ST_LOCAL StVersionInfo {
         }
         return true;
     }
-#endif // __ST_TIMEBOMB__
+#endif // ST_TIMEBOMB
 
     /**
      * Simple version constructor.

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -81,7 +81,7 @@ namespace st {
         return aRes == ST_DBGASSERT_DEBUG;
     }
 
-#ifdef __ST_DEBUG__
+#ifdef ST_DEBUG
     /**
      * Classical assert. If expression is not TRUE will:
      *  - call debugger in DEBUG mode;

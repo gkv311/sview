@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -75,7 +75,7 @@ void StApplication::stApplicationInit(const StHandle<StOpenInfo>& theOpenInfo) {
     if(myResMgr.isNull()) {
         myResMgr = new StResourceManager();
     }
-#ifdef __ST_DEBUG_GL__
+#ifdef ST_DEBUG_GL
     myGlDebug = true;
 #endif
     StSettings aGlobalSettings(myResMgr, "sview");

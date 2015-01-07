@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -29,13 +29,13 @@
 StLogger& StLogger::GetDefault() {
     // global instance
     static StLogger THE_DEFAULT_LOGGER(
-    #if(defined(__ST_DEBUG_LOG_TO_FILE__) && defined(__ST_DEBUG__))
-        StString(__ST_DEBUG_LOG_TO_FILE__),
+    #if defined(ST_DEBUG_LOG_TO_FILE) && defined(ST_DEBUG)
+        StString(ST_DEBUG_LOG_TO_FILE),
     #else
         StString(),
     #endif
-    #ifdef __ST_DEBUG__
-        StLogger::ST_DEBUG,
+    #ifdef ST_DEBUG
+        StLogger::ST_TRACE,
     #else
         StLogger::ST_VERBOSE,
     #endif
@@ -106,7 +106,7 @@ void StLogger::write(const StString&       theMessage,
                 case ST_WARNING: fwrite("WARN  -- ", 1, 9, myFileHandle); break;
                 case ST_INFO:
                 case ST_VERBOSE: fwrite("INFO  -- ", 1, 9, myFileHandle); break;
-                case ST_DEBUG:   fwrite("DEBUG -- ", 1, 9, myFileHandle); break;
+                case ST_TRACE:   fwrite("TRACE -- ", 1, 9, myFileHandle); break;
                 case ST_QUIET: break;
             }
             if(myToLogThreadId) {
@@ -140,8 +140,8 @@ void StLogger::write(const StString&       theMessage,
             case ST_VERBOSE:
                 ST_LOG_CERR << st::COLOR_FOR_YELLOW_L << stostream_text("INFO  -- ") << st::COLOR_FOR_WHITE << theMessage << stostream_text('\n');
                 break;
-            case ST_DEBUG:
-                ST_LOG_CERR << st::COLOR_FOR_YELLOW_L << stostream_text("DEBUG -- ") << st::COLOR_FOR_WHITE << theMessage << stostream_text('\n');
+            case ST_TRACE:
+                ST_LOG_CERR << st::COLOR_FOR_YELLOW_L << stostream_text("TRACE -- ") << st::COLOR_FOR_WHITE << theMessage << stostream_text('\n');
                 break;
             default:
                 ST_LOG_CERR << theMessage << stostream_text('\n');
@@ -167,7 +167,7 @@ void StLogger::write(const StString&       theMessage,
                 break;
             case ST_INFO:
             case ST_VERBOSE:
-            case ST_DEBUG:
+            case ST_TRACE:
             default:
                 aLogType = EVENTLOG_INFORMATION_TYPE;
                 break;
@@ -193,7 +193,7 @@ void StLogger::write(const StString&       theMessage,
             case ST_WARNING: anAPrior = ANDROID_LOG_WARN;  break;
             case ST_INFO:    anAPrior = ANDROID_LOG_INFO;  break;
             case ST_VERBOSE: anAPrior = ANDROID_LOG_INFO;  break;
-            case ST_DEBUG:   anAPrior = ANDROID_LOG_DEBUG; break;
+            case ST_TRACE:   anAPrior = ANDROID_LOG_DEBUG; break;
             case ST_QUIET:   break;
         }
         __android_log_write(anAPrior, "StLogger", theMessage.toCString());

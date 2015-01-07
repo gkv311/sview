@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -19,7 +19,7 @@
     #define ST_FILE_SPLITTER "/"
 #endif
 
-#ifndef __ST_DEBUG__
+#ifndef ST_DEBUG
     #define ST_DEBUG_ASSERT(expression);
 #else
     #include <assert.h>
@@ -35,7 +35,7 @@ class StArrayList;
 typedef StStringUtf8  StString;  // dynamically allocated string class
 typedef StCStringUtf8 StCString; // POD structure for constant string
 
-#if (defined(__APPLE__))
+#if defined(__APPLE__)
 /**
  * Auxiliary function to convert from UTF8-Mac.
  */

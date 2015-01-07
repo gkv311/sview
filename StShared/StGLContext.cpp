@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -733,7 +733,7 @@ bool StGLContext::stglInit() {
         if(myFuncs->glDebugMessageCallbackARB != NULL) {
             // setup default callback
             myFuncs->glDebugMessageCallbackARB(debugCallbackWrap, this);
-        #if defined(__ST_DEBUG__) || defined(__ST_DEBUG_GL__)
+        #if defined(ST_DEBUG) || defined(ST_DEBUG_GL)
             core11fwd->glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
         #endif
         }

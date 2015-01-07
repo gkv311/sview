@@ -1,7 +1,19 @@
 /**
- * This source is a part of sView program.
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
- * Copyright © Kirill Gavrilov, 2009-2014
+ * StMoviePlayer program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * StMoviePlayer program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * License along with this program.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "StAudioQueue.h"
@@ -713,7 +725,7 @@ bool StAudioQueue::stalQueue(const double thePts) {
     alGetSourcei(myAlSources[0], AL_BUFFERS_PROCESSED, &aProcessed);
     alGetSourcei(myAlSources[0], AL_BUFFERS_QUEUED,    &aQueued);
 
-#if defined(__ST_DEBUG__)
+#ifdef ST_DEBUG
     if(myDbgPrevQueued != aQueued) {
         ST_DEBUG_LOG("OpenAL buffers: " + aQueued + " queued + "
             + aProcessed + " processed from " + NUM_AL_BUFFERS

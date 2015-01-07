@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StTests program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ void StTestGlStress::perform() {
     StGLContext aCtx(true);
 
     const StString aGlInfo = aCtx.stglFullInfo();
-#ifndef __ST_DEBUG__
+#ifndef ST_DEBUG
     st::cout << aGlInfo << stostream_text("\n");
 #else
     ST_DEBUG_LOG(aGlInfo);

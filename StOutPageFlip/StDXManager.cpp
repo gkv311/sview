@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StOutPageFlip library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -30,7 +30,7 @@
 namespace {
     static const DWORD ST_D3D_DEVICE_FLAGS = D3DCREATE_HARDWARE_VERTEXPROCESSING; // sets the graphic card to do the hardware vertexprocessing
 
-#ifdef __ST_DEBUG__
+#ifdef ST_DEBUG
     static StString printD3dFormat(const D3DFORMAT theD3dFormat) {
         switch(theD3dFormat) {
             case D3DFMT_R8G8B8:       return "R8G8B8      (24bit)";
@@ -64,9 +64,9 @@ namespace {
     static StString printDisplayFormat(const D3DDISPLAYMODE& theDispMode) {
         return printDisplayFormat(theDispMode.Width, theDispMode.Height, theDispMode.RefreshRate, theDispMode.Format);
     }
-#endif // __ST_DEBUG__
+#endif // ST_DEBUG
 
-};
+}
 
 StString StDXManager::printErrorDesc(HRESULT theErrCode) {
     switch(theErrCode) {

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -66,7 +66,7 @@ class StLogger {
         ST_WARNING =  3, //!< just warning, not an error
         ST_INFO    =  4, //!< message show just for info
         ST_VERBOSE =  5,
-        ST_DEBUG   =  6, //!< message will be shown only when compiled with debugging info
+        ST_TRACE   =  6, //!< message will be shown only when compiled with debugging info
     } Level;
 
     enum {
@@ -197,7 +197,7 @@ inline bool stQuestionConsole(const StString& theMsg) { return StMessageBox::Que
  */
 #define ST_ERROR_LOG(msg);        StLogger::GetDefault().write(StString() + msg, StLogger::ST_ERROR);
 
-#ifndef __ST_DEBUG__
+#ifndef ST_DEBUG
     #define ST_DEBUG_VAR(theVariable)
     #define ST_DEBUG_LOG(msg);
     #define ST_DEBUG_LOG_CLASS(theMsg)
@@ -205,12 +205,12 @@ inline bool stQuestionConsole(const StString& theMsg) { return StMessageBox::Que
     #define ST_ERROR_LOG_AT(msg); StLogger::GetDefault().write(StString() + msg, StLogger::ST_ERROR);
 #else
     #define ST_DEBUG_VAR(theVariable)  theVariable
-    #define ST_DEBUG_LOG(msg);         StLogger::GetDefault().write(StString() + msg, StLogger::ST_DEBUG);
-    #define ST_DEBUG_LOG_CLASS(theMsg) StLogger::GetDefault().write(StString() + "[" + typeid(*this).name() + "]" + theMsg, StLogger::ST_DEBUG);
+    #define ST_DEBUG_LOG(msg);         StLogger::GetDefault().write(StString() + msg, StLogger::ST_TRACE);
+    #define ST_DEBUG_LOG_CLASS(theMsg) StLogger::GetDefault().write(StString() + "[" + typeid(*this).name() + "]" + theMsg, StLogger::ST_TRACE);
     #define STRINGIFY(x) #x
     #define TOSTRING(x) STRINGIFY(x)
     #define __AT __FILE__ ":" TOSTRING(__LINE__)
-    #define ST_DEBUG_LOG_AT(msg); StLogger::GetDefault().write(StString() + __AT + " " + msg, StLogger::ST_DEBUG);
+    #define ST_DEBUG_LOG_AT(msg); StLogger::GetDefault().write(StString() + __AT + " " + msg, StLogger::ST_TRACE);
     #define ST_ERROR_LOG_AT(msg); StLogger::GetDefault().write(StString() + __AT + " " + msg, StLogger::ST_ERROR);
 #endif
 

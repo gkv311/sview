@@ -21,7 +21,7 @@
 					<Add option="-mmmx" />
 					<Add option="-msse" />
 					<Add option="-DUNICODE" />
-					<Add option="-D__ST_DEBUG__" />
+					<Add option="-DST_DEBUG" />
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
@@ -81,7 +81,7 @@
 					<Add option="/DUNICODE" />
 					<Add option="/D_CRT_SECURE_NO_WARNINGS" />
 					<Add option="/DNDEBUG" />
-					<Add option="/D__ST_DEBUG__" />
+					<Add option="/DST_DEBUG" />
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
@@ -170,7 +170,7 @@
 					<Add option="-fPIC" />
 					<Add option="-mmmx" />
 					<Add option="-msse" />
-					<Add option="-D__ST_DEBUG__" />
+					<Add option="-DST_DEBUG" />
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
@@ -217,7 +217,7 @@
 					<Add option="-Wall" />
 					<Add option="-g" />
 					<Add option="-fPIC" />
-					<Add option="-D__ST_DEBUG__" />
+					<Add option="-DST_DEBUG" />
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>

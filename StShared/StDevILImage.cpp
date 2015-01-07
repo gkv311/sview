@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -119,7 +119,7 @@ namespace {
     static iluImageParameter_t  iluImageParameter = NULL;
     static iluFlipImage_t       iluFlipImage = NULL;
 
-#ifdef __ST_DEBUG__
+#ifdef ST_DEBUG
     static ILint getVerMajor(ILint theFullVersion) {
         return theFullVersion / 100;
     }
@@ -198,7 +198,7 @@ namespace {
         ST_DEBUG_LOG("DevIL library initialized");
 
         // show up information about dynamically linked libraries
-    #ifdef __ST_DEBUG__
+    #ifdef ST_DEBUG
         ILint aVersion = ilGetInteger(IL_VERSION_NUM);
         ST_DEBUG_LOG("  IL\t"  + getVerMajor(aVersion) + '.' + getVerMinor(aVersion) + '.' + getVerMicro(aVersion));
         aVersion = iluGetInteger(IL_VERSION_NUM);

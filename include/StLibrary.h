@@ -1,6 +1,6 @@
 /**
  * This is a header for dynamic library wrappers.
- * Copyright © 2008-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2008-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -121,7 +121,7 @@ class StLibrary {
     template <typename FuncType>
     inline bool find(const char* theFuncName, FuncType& theFuncPtr) const {
         theFuncPtr = (FuncType )DLibGetfunction(myLibH, theFuncName);
-    #ifdef __ST_DEBUG__
+    #ifdef ST_DEBUG
         if(theFuncPtr == NULL) {
             ST_DEBUG_LOG("StLibrary, function \"" + theFuncName + "\" not found");
             return false;

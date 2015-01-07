@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StTests program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ int main(int , char** ) { // force console output
     setlocale(LC_ALL, ".OCP"); // we set default locale for console output
 #endif
 
-#ifdef __ST_DEBUG__
+#ifdef ST_DEBUG
     // Setup debug environment
     #if defined(_WIN64) || defined(_LP64) || defined(__LP64__)
         const StString ST_ENV_NAME_STCORE_PATH = "StCore64";

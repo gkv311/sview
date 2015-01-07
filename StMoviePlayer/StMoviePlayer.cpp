@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -831,7 +831,7 @@ void StMoviePlayer::doKeyDown(const StKeyEvent& theEvent) {
             } else if(theEvent.Flags == ST_VF_CONTROL) {
                 myGUI->myImage->params.brightness->decrement();
             } else {
-            #ifdef __ST_DEBUG__
+            #ifdef ST_DEBUG
                 myIsBenchmark = !myIsBenchmark;
                 myVideo->setBenchmark(myIsBenchmark);
             #endif

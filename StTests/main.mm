@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StTests program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -188,7 +188,7 @@ namespace {
 @end
 
 int main(int , char** ) {
-#ifdef __ST_DEBUG__
+#ifdef ST_DEBUG
     // TODO (Kirill Gavrilov#9) debug environment
     #if (defined(_LP64) || defined(__LP64__))
         const StString ST_ENV_NAME_STCORE_PATH = "StCore64";
