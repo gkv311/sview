@@ -67,8 +67,8 @@ echo #define __stConfig_conf_>> "%SVIEW_BUILD_CONF%"
 
 if not "%releaseStatus%"=="ST_RELEASE" (
   echo     Timebomb=ON
-  echo #ifndef __ST_TIMEBOMB__>> "%SVIEW_BUILD_CONF%"
-  echo   #define __ST_TIMEBOMB__>> "%SVIEW_BUILD_CONF%"
+  echo #ifndef ST_TIMEBOMB>> "%SVIEW_BUILD_CONF%"
+  echo   #define ST_TIMEBOMB>> "%SVIEW_BUILD_CONF%"
   echo #endif>> "%SVIEW_BUILD_CONF%"
 ) else (
   echo     Timebomb=OFF

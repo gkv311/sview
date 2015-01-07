@@ -46,8 +46,8 @@ if [ "$releaseStatus" == "RELEASE" ]; then
 else
   echo     Timebomb=ON
   aTimeBombDefine=$(cat << EOF
-#ifndef __ST_TIMEBOMB__
-    #define __ST_TIMEBOMB__
+#ifndef ST_TIMEBOMB
+    #define ST_TIMEBOMB
 #endif
 EOF
 )
