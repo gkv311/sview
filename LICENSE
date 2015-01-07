@@ -37,10 +37,7 @@ Formally it was licensed under Boost license terms.
 StCADViewer:
 ------------
 
-this program is under the GNU General Public License version 3.0 or later with exception:
-Kirill Gavrilov <kirill@sview.ru>, the copyright holder of StCADViewer,
-hereby grants you the right to link the source code within this program against
-the libraries of "Open CASCADE Technology" by Open CASCADE S.A.S.
+this program is under the GNU General Public License version 3.0 or later.
 
 External libraries:
 -------------------
@@ -57,10 +54,7 @@ http://kcat.strangesoft.net/openal.html
 FreeType library distributed under FreeType License (BSD-style license with a credit clause).
 http://www.freetype.org/
 
-GLEW library distributed under Modified BSD License.
-http://glew.sourceforge.net/
-
-Open CASCADE Technology libraries distributed under Open CASCADE Technology Public License (LGPL-like).
+Open CASCADE Technology libraries distributed under GNU Lesser General Public License version 2.1.
 http://dev.opencascade.org/
 
 Some 3rd-parties may depend on other libraries and provide more license options.

@@ -8,7 +8,7 @@ sView requires several 3rd-party components for building:
 - OpenAL soft (http://kcat.strangesoft.net/openal.html)
 - libwebp, optional (https://developers.google.com/speed/webp/download)
 - GTK2+, Linux only (http://www.gtk.org)
-- libconfig++, Linux only (http://www.hyperrealm.com/libconfig)
+- libconfig++, Linux and Android (http://www.hyperrealm.com/libconfig)
 - libxpm, Linux only
 
 On Debian/Ubuntu you might use the following command to install all dependencies at once:
@@ -39,9 +39,6 @@ On Windows and Mac OS X please refer to official documentation for each project.
 Notice that DevIL and FreeImage libraries are optional and need not for building sView
 (libraries are loaded dynamically if available).
 
-On Android you might use the following forks:
-- OpenAL soft (https://github.com/nanexcool/openal-soft)
-
 II. Makefile on Linux
 =====================
 
@@ -66,9 +63,10 @@ There are several building targets depending on platform
 - MAC_gcc,           Mac OS X target, g++ compatible compiler
 - MAC_gcc_DEBUG,     Mac OS X target with debugging options
 
-Notice that two extra compilers should be configured within Code::Blocks:
-- windows_sdk_x86,   configured to Visual Studio 2010+ compiler, PSDK and DXSDK
-- windows_sdk_x86_64 configured to 64-bit libraries and compiler toolchain
+Notice that the following compilers should be configured within Code::Blocks:
+- gcc,               configured to g++ or compatible compiler (on systems other than Windows)
+- msvc10,            configured to Visual Studio 2010+ compiler, PSDK and DXSDK
+- windows_sdk_x86_64 (copy of msvc10) configured to 64-bit libraries and compiler toolchain
 
 3rd-parties should be either configured as Code::Blocks global compiler options
 or placed into "3rdparty" folder.
