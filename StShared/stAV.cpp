@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -22,6 +22,14 @@ extern "C" {
     #include <libavutil/channel_layout.h>
 #endif
 };
+
+#ifdef ST_LIBAV_FORK
+    #ifdef _MSC_VER
+        #pragma message("stAV.cpp(28) : warning C4996: LibAV detected - compatibility workarounds have been activated!")
+    #else
+        #warning LibAV detected - compatibility workarounds have been activated!
+    #endif
+#endif
 
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 30, 0))
 class StFFMpegLocker {

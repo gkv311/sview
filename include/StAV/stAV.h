@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -34,8 +34,15 @@ extern "C" {
 #endif
 };
 
-// detect FFmpeg vs. LibAV here
-//#define ST_LIBAV_FORK
+// Detect FFmpeg vs. LibAV.
+// Current check is unsafe - there is no guarantee that flag AVIO_FLAG_DIRECT
+// (introduced in libavformat/avio.h since '2012)
+// will not be removed in further FFmpeg release,
+// will not be converted to enum,
+// and LibAV will not merge this change
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 18, 100)) && !defined(AVIO_FLAG_DIRECT)
+    #define ST_LIBAV_FORK
+#endif
 
 #if(LIBAVUTIL_VERSION_INT < AV_VERSION_INT(50, 13, 0))
     // enumeration was renamed from CodecType
