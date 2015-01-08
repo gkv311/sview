@@ -341,6 +341,25 @@ void StAndroidGlue::threadEntry() {
     pthread_cond_broadcast(&myCond);
     pthread_mutex_unlock(&myMutex);
 
+    // try to load stereo APIs
+    /**jclass aJClass_Real3D = myThJniEnv->FindClass("com/lge/real3d/Real3D");
+    if(aJClass_Real3D != NULL) {
+        jmethodID aJMet_isStereoDisplayAvailable = myThJniEnv->GetStaticMethodID(aJClass_Real3D, "isStereoDisplayAvailable", "(Landroid/content/Contex;)Z");
+        postMessage("com.lge.real3d.Real3D !!!");
+    }
+
+    jclass aJClass_HTC = myThJniEnv->FindClass("com/htc/view/DisplaySetting");
+    if(aJClass_HTC != NULL) {
+        jmethodID aJMet_isStereoDisplayAvailable = myThJniEnv->GetStaticMethodID(aJClass_HTC, "setStereoscopic3DFormat", "(Landroid/view/Surface;I)Z");
+        postMessage("com.htc.view.DisplaySetting !!!");
+    }
+
+    jclass aJClass_Sharp = myThJniEnv->FindClass("jp/co/sharp/android/stereo3dlcd/SurfaceController");
+    if(aJClass_Sharp != NULL) {
+        jmethodID aJMet_setStereoView = myThJniEnv->GetMethodID(aJClass_Sharp, "setStereoView", "(Z)V");
+        postMessage("jp.co.sharp.android.stereo3dlcd !!!");
+    }*/
+
     createApplication();
     if(!myApp.isNull()) {
         if(!myApp->open()) {

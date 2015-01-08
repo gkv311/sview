@@ -6,6 +6,10 @@
     <application android:label="@string/app_name"
                  android:hasCode="true"
                  android:icon="@drawable/ic_launcher">
+        <!-- <uses-library android:name="com.lge.real3d"
+                      android:required="false" />
+        <uses-library android:name="jp.co.sharp.android.stereo3dlcd"
+                      android:required="false" />  -->
         <!-- Image Viewer -->
         <activity android:name="com.sview.StImageActivity"
                   android:label="@string/app_image_name"
