@@ -81,8 +81,8 @@ aStCADViewer    := libStCADViewer.so
 sView           := sView
 sViewAndroid    := libsview.so
 
-android:   pre_all $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) $(aStOutInterlace) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(sViewAndroid) install_android
 all:       pre_all $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) $(aStOutDual) $(aStOutInterlace) $(aStOutPageFlip) $(aStOutIZ3D) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(aStDiagnostics) $(aStCADViewer) $(sView)
+android:   pre_all $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) $(aStOutInterlace) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(sViewAndroid) install_android
 clean:     clean_StShared clean_StGLWidgets clean_StCore clean_sView clean_StOutAnaglyph clean_StOutDual clean_StOutInterlace clean_StOutPageFlip clean_StOutIZ3D clean_StOutDistorted clean_StImageViewer clean_StMoviePlayer clean_StDiagnostics clean_StCADViewer clean_sViewAndroid
 distclean: clean
 
