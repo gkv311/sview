@@ -192,6 +192,8 @@ pre_StOutAnaglyph:
 clean_StOutAnaglyph:
 	rm -f $(BUILD_ROOT)/$(aStOutAnaglyph)
 	rm -rf StOutAnaglyph/*.o
+	rm -rf $(BUILD_ROOT)/shaders/*
+	rm -rf $(BUILD_ROOT)/lang/*/StOutAnaglyph.lng
 
 # StOutDual library (Dual output)
 aStOutDual_SRCS := $(wildcard StOutDual/*.cpp)
@@ -207,6 +209,7 @@ pre_StOutDual:
 clean_StOutDual:
 	rm -f $(BUILD_ROOT)/$(aStOutDual)
 	rm -rf StOutDual/*.o
+	rm -rf $(BUILD_ROOT)/lang/*/StOutDual.lng
 
 # StOutIZ3D library (iZ3D monitor)
 aStOutIZ3D_SRCS := $(wildcard StOutIZ3D/*.cpp)
@@ -224,6 +227,8 @@ pre_StOutIZ3D:
 clean_StOutIZ3D:
 	rm -f $(BUILD_ROOT)/$(aStOutIZ3D)
 	rm -rf StOutIZ3D/*.o
+	rm -rf $(BUILD_ROOT)/shaders/*
+	rm -rf $(BUILD_ROOT)/lang/*/StOutIZ3D.lng
 
 # StOutInterlace library (Interlaced output)
 aStOutInterlace_SRCS := $(wildcard StOutInterlace/*.cpp)
@@ -241,6 +246,8 @@ pre_StOutInterlace:
 clean_StOutInterlace:
 	rm -f $(BUILD_ROOT)/$(aStOutInterlace)
 	rm -rf StOutInterlace/*.o
+	rm -rf $(BUILD_ROOT)/shaders/*
+	rm -rf $(BUILD_ROOT)/lang/*/StOutInterlace.lng
 
 # StOutPageFlip library (Shutter glasses output)
 aStOutPageFlip_SRCS := $(wildcard StOutPageFlip/*.cpp)
@@ -256,6 +263,7 @@ pre_StOutPageFlip:
 clean_StOutPageFlip:
 	rm -f $(BUILD_ROOT)/$(aStOutPageFlip)
 	rm -rf StOutPageFlip/*.o
+	rm -rf $(BUILD_ROOT)/lang/*/StOutPageFlip.lng
 
 # StOutDistorted library
 aStOutDistorted_SRCS := $(wildcard StOutDistorted/*.cpp)
@@ -271,6 +279,7 @@ pre_StOutDistorted:
 clean_StOutDistorted:
 	rm -f $(BUILD_ROOT)/$(aStOutDistorted)
 	rm -rf StOutDistorted/*.o
+	rm -rf $(BUILD_ROOT)/lang/*/StOutDistorted.lng
 
 # StImageViewer library (Image Viewer)
 aStImageViewer_SRCS := $(wildcard StImageViewer/*.cpp)
@@ -286,6 +295,7 @@ pre_StImageViewer:
 clean_StImageViewer:
 	rm -f $(BUILD_ROOT)/$(aStImageViewer)
 	rm -rf StImageViewer/*.o
+	rm -rf $(BUILD_ROOT)/lang/*/StImageViewer.lng
 
 # StMoviePlayer library (Image Viewer)
 aStMoviePlayer_SRCS1 := $(wildcard StMoviePlayer/*.cpp)
@@ -307,6 +317,8 @@ clean_StMoviePlayer:
 	rm -f $(BUILD_ROOT)/$(aStMoviePlayer)
 	rm -rf StMoviePlayer/*.o
 	rm -rf StMoviePlayer/StVideo/*.o
+	rm -rf $(BUILD_ROOT)/lang/*/StMoviePlayer.lng
+	rm -rf $(BUILD_ROOT)/web/*
 
 # StDiagnostics library
 aStDiagnostics_SRCS := $(wildcard StDiagnostics/*.cpp)
@@ -322,6 +334,7 @@ pre_StDiagnostics:
 clean_StDiagnostics:
 	rm -f $(BUILD_ROOT)/$(aStDiagnostics)
 	rm -rf StDiagnostics/*.o
+	rm -rf $(BUILD_ROOT)/lang/*/StDiagnostics.lng
 
 # StCADViewer library
 aStCADViewer_SRCS := $(wildcard StCADViewer/*.cpp)
@@ -340,6 +353,7 @@ pre_StCADViewer:
 clean_StCADViewer:
 	rm -f $(BUILD_ROOT)/$(aStCADViewer)
 	rm -rf StCADViewer/*.o
+	rm -rf $(BUILD_ROOT)/lang/*/StCADViewer.lng
 
 # sView Android JNI executable
 sViewAndroid_SRCS := $(wildcard sview/jni/*.cpp)
