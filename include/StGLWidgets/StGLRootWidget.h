@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -38,7 +38,10 @@ class StGLRootWidget : public StGLWidget {
         IconSize_32,
         IconSize_48,
         IconSize_64,
+        IconSize_72,
+        IconSize_96,
         IconSize_128,
+        IconSize_144,
         IconSize_192,
         IconSize_256,
         IconSizeNb

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -23,7 +23,10 @@ namespace {
         32,
         48,
         64,
+        72,
+        96,
         128,
+        144,
         192,
         256,
         0
@@ -131,6 +134,12 @@ StString StGLRootWidget::iconTexture(const StString& theName,
             return aPath;
         }
     }
+
+    const StString aPath = theName + ".png";
+    if(myResMgr->isResourceExist(aPath)) {
+        return aPath;
+    }
+
     return "";
 }
 
