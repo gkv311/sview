@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru
+ * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -30,6 +30,13 @@ StGLButton::StGLButton(StGLWidget*     theParent,
 
 StGLButton::~StGLButton() {
     //
+}
+
+void StGLButton::setLabel(const StString& theLabel) {
+    StGLMenuItem* anItem = (StGLMenuItem* )getChildren()->getStart();
+    if(anItem != NULL) {
+        anItem->setText(theLabel);
+    }
 }
 
 StGLMenuItem* StGLButton::addItem(const StString& theLabel) {

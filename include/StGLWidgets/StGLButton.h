@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -26,6 +26,11 @@ class StGLButton : public StGLMenu {
     ST_CPPEXPORT virtual ~StGLButton();
 
     ST_CPPEXPORT virtual bool stglInit();
+
+    /**
+     * Change button text.
+     */
+    ST_CPPEXPORT void setLabel(const StString& theLabel);
 
     /**
      * @return button width

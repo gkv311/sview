@@ -15,6 +15,9 @@
     <ClCompile Include="StGLCheckboxTextured.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="StGLCombobox.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
     <ClCompile Include="StGLDescription.cpp">
       <Filter>Source files</Filter>
     </ClCompile>

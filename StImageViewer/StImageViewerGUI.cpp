@@ -604,8 +604,6 @@ void StImageViewerGUI::createMobileUI() {
         myFpsWidget = new StGLFpsLabel(this);
         myFpsWidget->setVisibility(true, true);
     }
-
-    myMenuMobileEx = createMobileExMenu();
 }
 
 /**
@@ -676,7 +674,7 @@ void StImageViewerGUI::createMobileBottomToolbar() {
     aBtnInfo->setTexturePath(iconTexture(stCString("actionInfo"),  anIconSize));
 }
 
-StGLMenu* StImageViewerGUI::createMobileExMenu() {
+void StImageViewerGUI::doShowMobileExMenu(const size_t ) {
     const IconSize anIconSize = scaleIcon(16);
     const int aTop = scale(56);
 
@@ -694,19 +692,8 @@ StGLMenu* StImageViewerGUI::createMobileExMenu() {
     anItem->setIcon(iconTexture(stCString("actionSettings"),  anIconSize));
     anItem = aMenu->addItem("Slideshow", myPlugin->getAction(StImageViewer::Action_SlideShow));
     anItem->setIcon(iconTexture(stCString("actionSlideShow"), anIconSize));
-    return aMenu;
-}
-
-void StImageViewerGUI::doShowMobileExMenu(const size_t ) {
-    if(myMenuMobileEx == NULL) {
-        return;
-    }
-
-    if(myMenuMobileEx->isVisible()) {
-        myMenuMobileEx->setVisibility(false, true);
-    } else {
-        myMenuMobileEx->setVisibility(true,  true);
-    }
+    aMenu->setVisibility(true, true);
+    aMenu->stglInit();
 }
 
 StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
@@ -724,8 +711,6 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
   myMsgStack(NULL),
   //
   myMenuRoot(NULL),
-  //
-  myMenuMobileEx(NULL),
   //
   myPanelUpper(NULL),
   myPanelBottom(NULL),

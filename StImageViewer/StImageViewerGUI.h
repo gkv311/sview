@@ -152,7 +152,6 @@ class StImageViewerGUI : public StGLRootWidget {
 
     ST_LOCAL void      createMobileUpperToolbar();
     ST_LOCAL void      createMobileBottomToolbar();
-    ST_LOCAL StGLMenu* createMobileExMenu();
 
         private: //! @name callback Slots
 
@@ -178,8 +177,6 @@ class StImageViewerGUI : public StGLRootWidget {
     StGLMsgStack*       myMsgStack;         //!< messages stack
 
     StGLMenu*           myMenuRoot;         //!< main menu
-
-    StGLMenu*           myMenuMobileEx;     //!< mobile menu - extra options
 
     StGLWidget*         myPanelUpper;       //!< upper  toolbar
     StGLWidget*         myPanelBottom;      //!< bottom toolbar

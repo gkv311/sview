@@ -209,6 +209,7 @@
     <ClCompile Include="StGLButton.cpp" />
     <ClCompile Include="StGLCheckbox.cpp" />
     <ClCompile Include="StGLCheckboxTextured.cpp" />
+    <ClCompile Include="StGLCombobox.cpp" />
     <ClCompile Include="StGLDescription.cpp" />
     <ClCompile Include="StGLFpsLabel.cpp" />
     <ClCompile Include="StGLImageFlatProgram.cpp" />

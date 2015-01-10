@@ -209,6 +209,7 @@
 		<Unit filename="StGLButton.cpp" />
 		<Unit filename="StGLCheckbox.cpp" />
 		<Unit filename="StGLCheckboxTextured.cpp" />
+		<Unit filename="StGLCombobox.cpp" />
 		<Unit filename="StGLDescription.cpp" />
 		<Unit filename="StGLFpsLabel.cpp" />
 		<Unit filename="StGLImageFlatProgram.cpp" />
@@ -247,6 +248,7 @@
 		<Unit filename="../include/StGLWidgets/StGLButton.h" />
 		<Unit filename="../include/StGLWidgets/StGLCheckbox.h" />
 		<Unit filename="../include/StGLWidgets/StGLCheckboxTextured.h" />
+		<Unit filename="../include/StGLWidgets/StGLCombobox.h" />
 		<Unit filename="../include/StGLWidgets/StGLCorner.h" />
 		<Unit filename="../include/StGLWidgets/StGLDescription.h" />
 		<Unit filename="../include/StGLWidgets/StGLFpsLabel.h" />

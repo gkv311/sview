@@ -244,7 +244,7 @@ bool StGLMenu::tryUnClick(const StPointD_t& theCursorZo,
     }
 
     if(myIsContextual) {
-        setVisibility(false, true);
+        myRoot->destroyWithDelay(this);
     }
 
     return isSelfClicked;
