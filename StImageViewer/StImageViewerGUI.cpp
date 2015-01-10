@@ -635,9 +635,9 @@ void StImageViewerGUI::createMobileUI() {
  */
 void StImageViewerGUI::createMobileUpperToolbar() {
     const IconSize anIconSize = scaleIcon(32);
-    const int aTop    = scale(16);
-    const int aLeft   = scale(16);
-    const int anIconW = scale(32);
+    const int aTop       = scale(16);
+    const int aLeft      = scale(16);
+    const int anIconStep = scale(48);
 
     const StRectI_t& aMargins = getRootMarginsPx();
     myPanelUpper = new StGLWidget(this, aMargins.left(), aMargins.top(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(56));
@@ -645,7 +645,7 @@ void StImageViewerGUI::createMobileUpperToolbar() {
     int aBtnIter = 0;
 
     StGLSwitchTextured* aSrcBtn = new StGLSwitchTextured(myPanelUpper, myPlugin->params.srcFormat,
-                                                         aLeft + (aBtnIter++) * anIconW, aTop,
+                                                         aLeft + (aBtnIter++) * anIconStep, aTop,
                                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
     aSrcBtn->addItem(ST_V_SRC_AUTODETECT,           iconTexture(stCString("menuAuto"),           anIconSize));
     aSrcBtn->addItem(ST_V_SRC_MONO,                 iconTexture(stCString("menuMono"),           anIconSize));
@@ -660,7 +660,7 @@ void StImageViewerGUI::createMobileUpperToolbar() {
 
     aBtnIter = 0;
     myBtnSrcFrmt = aSrcBtn;
-    StGLTextureButton* aBtnEx = new StGLTextureButton(myPanelUpper, -aLeft - (aBtnIter--) * anIconW, aTop,
+    StGLTextureButton* aBtnEx = new StGLTextureButton(myPanelUpper, -aLeft - (aBtnIter--) * anIconStep, aTop,
                                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     aBtnEx->setTexturePath(iconTexture(stCString("actionOverflow"), anIconSize));
     aBtnEx->signals.onBtnClick += stSlot(this, &StImageViewerGUI::doShowMobileExMenu);
@@ -677,23 +677,23 @@ void StImageViewerGUI::createMobileUpperToolbar() {
  */
 void StImageViewerGUI::createMobileBottomToolbar() {
     const IconSize anIconSize = scaleIcon(32);
-    const int aTop    = scale(16);
-    const int aLeft   = scale(16);
-    const int anIconW = scale(32);
+    const int aTop       = scale(16);
+    const int aLeft      = scale(16);
+    const int anIconStep = scale(48);
 
     const StRectI_t& aMargins = getRootMarginsPx();
     myPanelBottom = new StGLWidget(this, aMargins.left(), -aMargins.bottom(), StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(56));
 
     int aBtnIter = 0;
-    myBtnPrev = new StGLTextureButton(myPanelBottom, aLeft + (aBtnIter++) * anIconW, aTop);
+    myBtnPrev = new StGLTextureButton(myPanelBottom, aLeft + (aBtnIter++) * anIconStep, aTop);
     myBtnPrev->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doListPrev);
     myBtnPrev->setTexturePath(iconTexture(stCString("actionBack"), anIconSize));
 
-    myBtnNext = new StGLTextureButton(myPanelBottom, aLeft + (aBtnIter++) * anIconW, aTop);
+    myBtnNext = new StGLTextureButton(myPanelBottom, aLeft + (aBtnIter++) * anIconStep, aTop);
     myBtnNext->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doListNext);
     myBtnNext->setTexturePath(iconTexture(stCString("actionNext"), anIconSize));
 
-    StGLTextureButton* aBtnInfo = new StGLTextureButton(myPanelBottom, aLeft + (aBtnIter++) * anIconW, aTop);
+    StGLTextureButton* aBtnInfo = new StGLTextureButton(myPanelBottom, aLeft + (aBtnIter++) * anIconStep, aTop);
     aBtnInfo->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doAboutImage);
     aBtnInfo->setTexturePath(iconTexture(stCString("actionInfo"),  anIconSize));
 }
