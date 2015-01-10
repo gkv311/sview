@@ -79,7 +79,7 @@ StGLMenuItem::StGLMenuItem(StGLMenu* theParent,
 
     myBackColor[StGLMenuItem::HIGHLIGHT] = getRoot()->getColorForElement(StGLRootWidget::Color_MenuHighlighted);
     myBackColor[StGLMenuItem::CLICKED]   = getRoot()->getColorForElement(StGLRootWidget::Color_MenuClicked);
-    setTextColor(getRoot()->getColorForElement(StGLRootWidget::Color_MenuText).rgb());
+    setTextColor(getRoot()->getColorForElement(StGLRootWidget::Color_MenuText));
 }
 
 StGLMenuItem::~StGLMenuItem() {
@@ -95,6 +95,7 @@ void StGLMenuItem::setIcon(const StString* theImgPaths,
         myMarginLeft += anIconMargin;
     }
     myIcon = new StGLIcon(this, myMarginLeft - anIconMargin, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT), theCount);
+    myIcon->setColor(getRoot()->getColorForElement(StGLRootWidget::Color_MenuText));
     myIcon->setVisibility(true, true);
     myIcon->setTexturePath(theImgPaths, theCount);
 }

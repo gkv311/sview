@@ -94,7 +94,7 @@ void StGLMessageBox::create(const StString& theTitle,
                                 StGLTextFormatter::ST_ALIGN_Y_TOP);
         myTitle->setupStyle(StFTFont::Style_Bold);
         myTitle->setText(theTitle);
-        myTitle->setTextColor(getRoot()->getColorForElement(StGLRootWidget::Color_MessageText).rgb());
+        myTitle->setTextColor(getRoot()->getColorForElement(StGLRootWidget::Color_MessageText));
         myTitle->setVisibility(true, true);
         int aWidth = 0;
         myTitle->computeTextWidth(GLfloat(myTitle->getRectPx().width()), aWidth, aTitleHeight);
@@ -144,7 +144,7 @@ void StGLMessageBox::setText(const StString& theText) {
     aText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
                           StGLTextFormatter::ST_ALIGN_Y_TOP);
     aText->setText(theText);
-    aText->setTextColor(getRoot()->getColorForElement(StGLRootWidget::Color_MessageText).rgb());
+    aText->setTextColor(getRoot()->getColorForElement(StGLRootWidget::Color_MessageText));
     aText->setVisibility(true, true);
 }
 

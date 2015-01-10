@@ -205,6 +205,24 @@ bool StGLTexture::getDataFormat(const StGLContext&  theCtx,
     #define GL_ALPHA16  0x803E
 #endif
 
+bool StGLTexture::isAlphaFormat(const GLint theInternalFormat) {
+    switch(theInternalFormat) {
+        // RED variations (GL_RED, OpenGL 3.0+)
+        case GL_RED:
+        case GL_R8:
+        case GL_R16:
+        case GL_R16F:
+        case GL_R32F:
+        // ALPHA variations (deprecated)
+        case GL_ALPHA:
+        case GL_ALPHA8:
+        case GL_ALPHA16:
+            return true;
+        default:
+            return false;
+    }
+}
+
 /**
  * Dummy function to display texture internal format.
  */

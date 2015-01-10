@@ -77,6 +77,7 @@ StGLRootWidget::StGLRootWidget(const StHandle<StResourceManager>& theResMgr)
     myColors[Color_MenuText]        = StGLVec4(0.000f, 0.000f, 0.000f, 1.0f);
     myColors[Color_MessageBox]      = StGLVec4(0.060f, 0.060f, 0.060f, 1.0f);
     myColors[Color_MessageText]     = StGLVec4(1.000f, 1.000f, 1.000f, 1.0f);
+    myColors[Color_IconActive]      = StGLVec4(1.000f, 1.000f, 1.000f, 1.0f);
 }
 
 StGLRootWidget::~StGLRootWidget() {

@@ -57,6 +57,7 @@ class StGLRootWidget : public StGLWidget {
         Color_MenuText,
         Color_MessageBox,
         Color_MessageText,
+        Color_IconActive,
         Color_NB
     };
 

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -28,7 +28,6 @@ class StGLTextureButton : public StGLWidget {
         Anim_Wave  //!< wave animation
     };
 
-
         public:
 
     ST_CPPEXPORT StGLTextureButton(StGLWidget*      theParent,
@@ -39,13 +38,25 @@ class StGLTextureButton : public StGLWidget {
 
     ST_CPPEXPORT virtual ~StGLTextureButton();
 
-    inline size_t getFaceId() {
+    /**
+     * Setup color for alpha texture.
+     */
+    ST_LOCAL void setColor(const StGLVec4& theColor) {
+        myColor = theColor;
+    }
+
+    /**
+     * Get color for alpha texture.
+     */
+    ST_LOCAL const StGLVec4& getColor() const {
+        return myColor;
+    }
+
+    ST_LOCAL size_t getFaceId() const {
         return myFaceId;
     }
 
-    inline void setFaceId(const size_t theId) {
-        myFaceId = theId;
-    }
+    ST_CPPEXPORT void setFaceId(const size_t theId);
 
     ST_LOCAL inline void setTexturePath(const StString& theTexturesPath) {
         setTexturePath(&theTexturesPath, 1);
@@ -81,16 +92,28 @@ class StGLTextureButton : public StGLWidget {
 
         protected:
 
+    enum ProgramIndex {
+        ProgramIndex_WaveRGB,
+        ProgramIndex_WaveAlpha,
+        ProgramIndex_NB,
+    };
+
+    class Program;
+    class ButtonPrograms;
+
+        protected:
+
     StGLVertexBuffer           myVertBuf;
     StGLVertexBuffer           myTCrdBuf;
+    StGLVec4                   myColor;
     size_t                     myFaceId;
     size_t                     myFacesCount;
     Animation                  myAnim;
     StArray<StGLTexture>       myTextures;
     StArray<StString>          myTexturesPaths;
 
-    class StButtonProgram;
-    StGLShare<StButtonProgram> myProgram;
+    StGLShare<ButtonPrograms>  myProgram;
+    ProgramIndex               myProgramIndex;
 
     StTimer                    myWaveTimer;
 

@@ -122,7 +122,7 @@ class StGLTextArea : public StGLWidget {
     }
 
     /**
-     * @param theColor- background color
+     * @param theColor background color
      */
     inline void setBackColor(const StGLVec3& theColor) {
         myBackColor.r() = theColor.r();
@@ -131,12 +131,17 @@ class StGLTextArea : public StGLWidget {
     }
 
     /**
-     * @param theColor- text color
+     * @param theColor text color
      */
     inline void setTextColor(const StGLVec3& theColor) {
-        myTextColor.r() = theColor.r();
-        myTextColor.g() = theColor.g();
-        myTextColor.b() = theColor.b();
+        myTextColor.rgb() = theColor;
+    }
+
+    /**
+     * @param theColor text color
+     */
+    inline void setTextColor(const StGLVec4& theColor) {
+        myTextColor = theColor;
     }
 
     /**

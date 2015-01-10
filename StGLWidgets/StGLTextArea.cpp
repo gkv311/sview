@@ -450,7 +450,9 @@ void StGLTextArea::stglDraw(unsigned int theView) {
     }
 
     StGLContext& aCtx = getContext();
-    myTextColor.a() = myShadowColor.a() = myBackColor.a() = myBorderColor.a() = (GLfloat )opacityValue;
+    StGLVec4 aTextColor = myTextColor;
+    aTextColor.a()   *= (GLfloat )opacityValue;
+    myShadowColor.a() = myBackColor.a() = myBorderColor.a() = (GLfloat )opacityValue;
     formatText(aCtx);
 
     StRectI_t aTextRectPx = getRectPx();
@@ -501,7 +503,7 @@ void StGLTextArea::stglDraw(unsigned int theView) {
     myTextProgram->use(aCtx);
         myTextProgram->setProjMat(aCtx, getCamera()->getProjMatrix());
         myTextProgram->setModelMat(aCtx, aModelMat);
-        myTextProgram->setTextColor(aCtx, myToDrawShadow ? myShadowColor : myTextColor);
+        myTextProgram->setTextColor(aCtx, myToDrawShadow ? myShadowColor : aTextColor);
 
         drawText(aCtx);
 
@@ -517,7 +519,7 @@ void StGLTextArea::stglDraw(unsigned int theView) {
             aModelMat.scale(aSizeOut, aSizeOut, 0.0f);
 
             myTextProgram->setModelMat(aCtx, aModelMat);
-            myTextProgram->setTextColor(aCtx, myTextColor);
+            myTextProgram->setTextColor(aCtx, aTextColor);
 
             drawText(aCtx);
         }

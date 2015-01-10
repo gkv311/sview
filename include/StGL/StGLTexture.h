@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -35,6 +35,11 @@ class StGLTexture : public StGLResource {
     ST_CPPEXPORT static bool getInternalFormat(const StGLContext&  theCtx,
                                                const StImagePlane& theData,
                                                GLint&              theInternalFormat);
+
+    /**
+     * Return true for GL_ALPHA / GL_RED formats.
+     */
+    ST_CPPEXPORT static bool isAlphaFormat(const GLint theInternalFormat);
 
     /**
      * Function convert StImagePlane format into OpenGL data format.
@@ -86,7 +91,7 @@ class StGLTexture : public StGLResource {
     /**
      * Set texture format. Texture should be re-initialized after this change.
      */
-    inline void setTextureFormat(GLint theTextureFormat) {
+    inline void setTextureFormat(const GLint theTextureFormat) {
         myTextFormat = theTextureFormat;
     }
 
