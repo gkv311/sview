@@ -43,8 +43,22 @@ class StGLMessageBox : public StGLWidget {
     /**
      * @return child widget which holds content of this message box
      */
-    ST_LOCAL inline StGLScrollArea* getContent() const {
+    ST_LOCAL StGLScrollArea* getContent() const {
         return myContent;
+    }
+
+    /**
+     * Return true if message box should be destroyed on first mouse click.
+     */
+    ST_LOCAL bool isContextual() const {
+        return myIsContextual;
+    }
+
+    /**
+     * Setup flag to automatically destroy the message box on first mouse click.
+     */
+    ST_LOCAL void setContextual(const bool theIsContextual) {
+        myIsContextual = theIsContextual;
     }
 
     /**
@@ -118,6 +132,7 @@ class StGLMessageBox : public StGLWidget {
     int               myMarginBottom;
     int               myMinSizeY;     //!< minimal height of the message box
     bool              myToAdjustY;    //!< flag to automatically adjust height to fit content / window
+    bool              myIsContextual; //!< flag to automatically destroy the message box on first mouse click
 
 };
 

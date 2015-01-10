@@ -36,7 +36,8 @@ StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
   myMarginTop(0),
   myMarginBottom(0),
   myMinSizeY(0),
-  myToAdjustY(true) {
+  myToAdjustY(true),
+  myIsContextual(false) {
     create(theTitle, theText, theWidth, theHeight);
 }
 
@@ -56,7 +57,8 @@ StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
   myMarginTop(0),
   myMarginBottom(0),
   myMinSizeY(0),
-  myToAdjustY(true) {
+  myToAdjustY(true),
+  myIsContextual(false) {
     create(theTitle, theText, myRoot->scale(384), myRoot->scale(200));
 }
 
@@ -350,7 +352,15 @@ bool StGLMessageBox::tryUnClick(const StPointD_t& theCursorZo,
     if(//isPointIn(theCursorZo) &&
        StGLWidget::tryUnClick(theCursorZo, theMouseBtn, isItemUnclicked)) {
         isItemUnclicked = true;
+
+        if(myIsContextual) {
+            myRoot->destroyWithDelay(this);
+        }
         return true;
+    }
+
+    if(myIsContextual) {
+        myRoot->destroyWithDelay(this);
     }
     return false;
 }
