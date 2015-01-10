@@ -524,8 +524,8 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
 void StImageViewerGUI::doMobileSettings(const size_t ) {
     const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
     StParamsList aParams;
+    aParams.add(myPlugin->StApplication::params.ActiveDevice);
     aRend->getOptions(aParams);
-
     aParams.add(myPlugin->params.ToShowFps);
     aParams.add(myLangMap->params.language);
     aParams.add(myPlugin->params.IsMobileUI);
