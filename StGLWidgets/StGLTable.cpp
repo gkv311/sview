@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2014-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -7,12 +7,16 @@
  */
 
 #include <StGLWidgets/StGLTable.h>
+
+#include <StGLWidgets/StGLCombobox.h>
+#include <StGLWidgets/StGLCheckbox.h>
 #include <StGLWidgets/StGLRootWidget.h>
 
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 
 #include <StStrings/StDictionary.h>
+#include <StSettings/StEnumParam.h>
 
 #include <stAssert.h>
 
@@ -138,6 +142,96 @@ void StGLTable::fillFromMap(const StDictionary& theMap,
         aText->setTextColor(theTextColor);
         aText->setVisibility(true, true);
         aText->stglInitAutoHeightWidth(aCol2MaxWidth);
+    }
+
+    updateLayout();
+}
+
+void StGLTable::fillFromParams(const StParamsList& theParams,
+                               const StGLVec3&     theTextColor,
+                               const int           theMaxWidth,
+                               const int           theRowId,
+                               const int           theColId) {
+    ST_ASSERT_SLIP(theRowId >= 0 && theColId >= 0,
+                   "StGLTable::fillFromParams() out of range",
+                   return);
+    const int aRowsNb = theRowId + (int )theParams.size();
+    const int aColsNb = theColId + 2;
+    if(aRowsNb > (int )myRowBottoms.size()
+    || aColsNb > (int )myColRights.size()) {
+        setupTable(aRowsNb, aColsNb);
+    }
+
+    // fill first column with keys
+    int aCol2Width = 0;
+    StHandle<StBoolParamNamed> aBool;
+    StHandle<StEnumParam>      anEnum;
+    for(size_t anIter = 0; anIter < theParams.size(); ++anIter) {
+        const StHandle<StParamBase>& aParam = theParams[anIter];
+        StGLTableItem&               anItem = changeElement(theRowId + (int )anIter, theColId + 1);
+        anItem.setRowSpan(1);
+        anItem.setColSpan(1);
+        if(aBool.downcastFrom(aParam)) {
+            StGLCheckbox* aCheckBox = new StGLCheckbox(&anItem, aBool,
+                                                       myRoot->scale(8), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT));
+            aCheckBox->setVisibility(true, true);
+            aCol2Width = stMax(aCol2Width, aCheckBox->getRectPx().width());
+        } else if(anEnum.downcastFrom(aParam)) {
+            StGLCombobox* aButton = new StGLCombobox(&anItem, 0, 0, anEnum);
+            aButton->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+            aButton->setHeight(myRoot->scale(24));
+            aButton->setVisibility(true, true);
+
+            aCol2Width = stMax(aCol2Width, aButton->getRectPx().width());
+            const StArrayList<StString>& aValues = anEnum->getValues();
+            for(size_t aValIter = 0; aValIter < aValues.size(); ++aValIter) {
+                aCol2Width = stMax(aCol2Width, aButton->computeWidth(aValues[aValIter]));
+            }
+        } else {
+            // skip
+        }
+    }
+
+    // adjust width of all elements in second column
+    for(size_t anIter = 0; anIter < theParams.size(); ++anIter) {
+        StGLTableItem& anItem  = changeElement(theRowId + (int )anIter, theColId + 1);
+        StGLWidget*    aWidget = anItem.getItem();
+        if(aWidget == NULL) {
+            continue;
+        }
+
+        StGLCombobox* aButton = dynamic_cast<StGLCombobox* >(anItem.getItem());
+        if(aButton != NULL) {
+            anItem.getItem()->changeRectPx().right() = aWidget->getRectPx().left() + aCol2Width;
+            aButton->setWidth(aCol2Width);
+        }
+    }
+
+    // fill second column with values
+    int aCol1MaxWidth = theMaxWidth - aCol2Width - 2 * (myMarginLeft + myMarginRight);
+    for(size_t anIter = 0; anIter < theParams.size(); ++anIter) {
+        const StHandle<StParamBase>& aParam = theParams[anIter];
+        StGLTableItem&               anItem = changeElement(theRowId + (int )anIter, theColId);
+        anItem.setRowSpan(1);
+        anItem.setColSpan(1);
+
+        StString aLabelText;
+        if(aBool.downcastFrom(aParam)) {
+            aLabelText = aBool->getName();
+        } else if(anEnum.downcastFrom(aParam)) {
+            aLabelText = anEnum->getName();
+        } else {
+            // skip
+        }
+
+        StGLTextArea* aText = new StGLTextArea(&anItem, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+        aText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_LEFT,
+                              StGLTextFormatter::ST_ALIGN_Y_TOP);
+        aText->setText(aLabelText);
+        aText->setTextColor(theTextColor);
+        aText->setupStyle(StFTFont::Style_Bold);
+        aText->setVisibility(true, true);
+        aText->stglInitAutoHeightWidth(aCol1MaxWidth);
     }
 
     updateLayout();

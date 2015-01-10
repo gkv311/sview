@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2014-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -10,6 +10,7 @@
 #define __StGLTable_h_
 
 #include <StGLWidgets/StGLTextArea.h>
+#include <StSettings/StParam.h>
 
 class StGLTable;
 
@@ -119,6 +120,20 @@ class StGLTable : public StGLWidget {
                                   const int           theCol1MaxWidth,
                                   const int           theRowId = 0,
                                   const int           theColId = 0);
+
+    /**
+     * Initialize table or fill subpart of existing table from parameters list.
+     * @param theParams       array of parameters
+     * @param theTextColor    text color
+     * @param theMaxWidth     maximum width of these two columns
+     * @param theRowId        row    of top-bottom table corner to fill from
+     * @param theColId        column of top-bottom table corner to fill from
+     */
+    ST_CPPEXPORT void fillFromParams(const StParamsList& theParams,
+                                     const StGLVec3&     theTextColor,
+                                     const int           theMaxWidth,
+                                     const int           theRowId = 0,
+                                     const int           theColId = 0);
 
     /**
      * Re-compute position of table elements.
