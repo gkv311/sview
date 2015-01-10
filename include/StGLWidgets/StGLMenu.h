@@ -82,8 +82,15 @@ class StGLMenu : public StGLWidget {
     /**
      * @return height of item of standard size
      */
-    inline int getItemHeight() const {
+    ST_LOCAL int getItemHeight() const {
         return myItemHeight;
+    }
+
+    /**
+     * Setup height of item.
+     */
+    ST_LOCAL void setItemHeight(const int theHeight) {
+        myItemHeight = theHeight;
     }
 
     /**
