@@ -211,6 +211,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StInt32Param>    srcFormat;        //!< source format
         StHandle<StBoolParam>     ToShowPlayList;   //!< display playlist
         StHandle<StBoolParam>     ToShowFps;        //!< display FPS meter
+        StHandle<StBoolParam>     IsMobileUI;       //!< display mobile interface
         StHandle<StBoolParam>     ToLimitFps;       //!< limit CPU usage or not
         StHandle<StBoolParam>     IsVSyncOn;        //!< flag to use VSync
         StHandle<StEnumParam>     StartWebUI;       //!< to start Web UI or not

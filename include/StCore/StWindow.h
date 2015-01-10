@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -231,6 +231,11 @@ class StWindow {
      * (systems supports only full-screen mode, or window is embedded).
      */
     ST_CPPEXPORT bool isMovable() const;
+
+    /**
+     * Return true if window is displayed on mobile device.
+     */
+    ST_CPPEXPORT static bool isMobile();
 
     /**
      * Return false if window can be switched into fullscreen mode.

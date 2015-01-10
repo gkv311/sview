@@ -128,6 +128,7 @@ class StImageViewer : public StApplication {
         StHandle<StInt32Param>   checkUpdatesDays; //!< days count between updates checks
         StHandle<StInt32Param>   srcFormat;        //!< source format
         StHandle<StBoolParam>    ToShowFps;        //!< display FPS meter
+        StHandle<StBoolParam>    IsMobileUI;       //!< display mobile interface
         StHandle<StBoolParam>    IsVSyncOn;        //!< flag to use VSync
         StString                 lastFolder;       //!< laster folder used to open / save file
         StImageFile::ImageClass  imageLib;         //!< preferred image library

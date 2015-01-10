@@ -63,6 +63,7 @@ namespace {
     static const char ST_SETTING_RECENT_FILES[]  = "recent";
     static const char ST_SETTING_SHOW_LIST[]     = "showPlaylist";
     static const char ST_SETTING_SHOW_FPS[]      = "toShowFps";
+    static const char ST_SETTING_MOBILE_UI[]     = "isMobileUI";
     static const char ST_SETTING_LIMIT_FPS[]     = "toLimitFps";
     static const char ST_SETTING_GPU_DECODING[]  = "gpuDecoding";
     static const char ST_SETTING_VSYNC[]         = "vsync";
@@ -439,6 +440,8 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.ToShowPlayList   = new StBoolParam(false);
     params.ToShowPlayList->signals.onChanged = stSlot(this, &StMoviePlayer::doShowPlayList);
     params.ToShowFps   = new StBoolParam(false);
+    params.IsMobileUI  = new StBoolParam(StWindow::isMobile());
+    params.IsMobileUI->signals.onChanged = stSlot(this, &StMoviePlayer::doScaleHiDPI);
     params.IsVSyncOn   = new StBoolParam(true);
     params.IsVSyncOn->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchVSync);
     StApplication::params.VSyncMode->setValue(StGLContext::VSync_ON);
@@ -474,6 +477,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (ST_SETTING_SEARCH_SUBS,        params.ToSearchSubs);
 
     mySettings->loadParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
+    mySettings->loadParam (ST_SETTING_MOBILE_UI,          params.IsMobileUI);
     mySettings->loadParam (ST_SETTING_VSYNC,              params.IsVSyncOn);
     mySettings->loadParam (ST_SETTING_LIMIT_FPS,          params.ToLimitFps);
     mySettings->loadParam (ST_SETTING_GPU_DECODING,       params.UseGpu);
@@ -666,6 +670,7 @@ void StMoviePlayer::releaseDevice() {
         mySettings->saveParam (ST_SETTING_SHOW_LIST,          params.ToShowPlayList);
 
         mySettings->saveParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
+        mySettings->saveParam (ST_SETTING_MOBILE_UI,          params.IsMobileUI);
         mySettings->saveParam (ST_SETTING_VSYNC,              params.IsVSyncOn);
         mySettings->saveParam (ST_SETTING_LIMIT_FPS,          params.ToLimitFps);
         mySettings->saveParam (ST_SETTING_GPU_DECODING,       params.UseGpu);

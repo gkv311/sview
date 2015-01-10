@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -175,6 +175,14 @@ StRectI_t StWindow::getPlacement() const {
 
 bool StWindow::isMovable() const {
     return myWin->myParentWin == NULL;
+}
+
+bool StWindow::isMobile() {
+#if defined(__ANDROID__)
+    return true;
+#else
+    return false;
+#endif
 }
 
 bool StWindow::hasFullscreenMode() const {

@@ -106,8 +106,6 @@ class StImageViewerGUI : public StGLRootWidget {
 
         private:
 
-    ST_LOCAL void createUpperToolbar();
-
     ST_LOCAL const StString& tr(const size_t theId) const {
         return myLangMap->getValue(theId);
     }
@@ -116,7 +114,17 @@ class StImageViewerGUI : public StGLRootWidget {
         return tr(trSrcFormatId(theSrcFormat));
     }
 
-        private: //! @name menus creation routines
+        private: //! @name desktop interface creation routines
+
+    /**
+     * Create normal (desktop) interface.
+     */
+    ST_LOCAL void createDesktopUI();
+
+    /**
+     * Create upper tool-bar.
+     */
+    ST_LOCAL void createUpperToolbar();
 
     ST_LOCAL void      createMainMenu();         // Root (Main menu)
     ST_LOCAL StGLMenu* createMediaMenu();        // Root -> Media menu
@@ -135,6 +143,17 @@ class StImageViewerGUI : public StGLRootWidget {
     ST_LOCAL StGLMenu* createCheckUpdatesMenu(); // Root -> Help -> Check updates menu
     ST_LOCAL StGLMenu* createLanguageMenu();     // Root -> Help -> Language menu
 
+        private: //! @name mobile interface creation routines
+
+    /**
+     * Create mobile interface.
+     */
+    ST_LOCAL void      createMobileUI();
+
+    ST_LOCAL void      createMobileUpperToolbar();
+    ST_LOCAL void      createMobileBottomToolbar();
+    ST_LOCAL StGLMenu* createMobileExMenu();
+
         private: //! @name callback Slots
 
     ST_LOCAL void doAboutProgram(const size_t );
@@ -144,6 +163,8 @@ class StImageViewerGUI : public StGLRootWidget {
     ST_LOCAL void doOpenLicense (const size_t );
     ST_LOCAL void doShowFPS(const bool );
     ST_LOCAL void doAboutRenderer(const size_t );
+
+    ST_LOCAL void doShowMobileExMenu(const size_t );
 
         private: //! @name private fields
 
@@ -158,7 +179,10 @@ class StImageViewerGUI : public StGLRootWidget {
 
     StGLMenu*           myMenuRoot;         //!< main menu
 
-    StGLWidget*         myPanelUpper;       //!< upper toolbar
+    StGLMenu*           myMenuMobileEx;     //!< mobile menu - extra options
+
+    StGLWidget*         myPanelUpper;       //!< upper  toolbar
+    StGLWidget*         myPanelBottom;      //!< bottom toolbar
     StGLTextureButton*  myBtnOpen;
     StGLTextureButton*  myBtnPrev;
     StGLTextureButton*  myBtnNext;

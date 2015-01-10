@@ -196,9 +196,13 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
     aMenuMedia->addItem(tr(MENU_MEDIA_SAVE_SNAPSHOT_AS), myPlugin->getAction(StMoviePlayer::Action_SaveSnapshot), aMenuSaveImage);
     aMenuMedia->addItem(tr(MENU_MEDIA_SRC_FORMAT), aMenuSrcFormat);
     aMenuMedia->addItem(tr(MENU_MEDIA_FILE_INFO),  myPlugin->getAction(StMoviePlayer::Action_FileInfo));
-    aMenuMedia->addItem(tr(MENU_MEDIA_AL_DEVICE),  myMenuOpenAL);
 
-    aMenuMedia->addItem("Audio Volume", aMenuVolume);
+    if(myWindow->isMobile()) {
+        aMenuMedia->addItem("Mobile UI", myPlugin->params.IsMobileUI);
+    }
+
+    aMenuMedia->addItem(tr(MENU_MEDIA_AL_DEVICE),  myMenuOpenAL);
+    aMenuMedia->addItem("Audio Volume",            aMenuVolume);
 
 #if defined(_WIN32)
     const StCString aGpuAcc = stCString(" (DXVA2)");
@@ -916,6 +920,7 @@ StGLMenu* StMoviePlayerGUI::createScaleMenu() {
     aMenu->addItem(tr(MENU_HELP_SCALE_NORMAL),  myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Normal);
     aMenu->addItem(tr(MENU_HELP_SCALE_BIG),     myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Big);
     aMenu->addItem(tr(MENU_HELP_SCALE_HIDPI2X), myPlugin->params.ScaleHiDPI2X);
+    aMenu->addItem("Mobile UI",                 myPlugin->params.IsMobileUI);
     return aMenu;
 }
 
@@ -1003,7 +1008,8 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
   myIsVisibleGUI(true),
   myIsExperimental(myPlugin->params.ToShowExtra->getValue()) {
     const GLfloat aScale = myPlugin->params.ScaleHiDPI2X->getValue() ? 2.0f : myPlugin->params.ScaleHiDPI ->getValue();
-    StGLRootWidget::setScale(aScale, (StGLRootWidget::ScaleAdjust )myPlugin->params.ScaleAdjust->getValue());
+    setScale(aScale, (StGLRootWidget::ScaleAdjust )myPlugin->params.ScaleAdjust->getValue());
+    setMobile(myPlugin->params.IsMobileUI->getValue());
 
     setRootMarginsPx(myWindow->getMargins());
     const StRectI_t& aMargins = getRootMarginsPx();

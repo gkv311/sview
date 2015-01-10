@@ -58,6 +58,7 @@ namespace {
     static const char ST_SETTING_FULLSCREEN[]  = "fullscreen";
     static const char ST_SETTING_SLIDESHOW[]   = "slideshow";
     static const char ST_SETTING_SHOW_FPS[]    = "toShowFps";
+    static const char ST_SETTING_MOBILE_UI[]   = "isMobileUI";
     static const char ST_SETTING_VSYNC[]       = "vsync";
     static const char ST_SETTING_VIEWMODE[]    = "viewMode";
     static const char ST_SETTING_STEREO_MODE[] = "viewStereoMode";
@@ -257,10 +258,13 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     params.checkUpdatesDays = new StInt32Param(7);
     params.srcFormat        = new StInt32Param(ST_V_SRC_AUTODETECT);
     params.srcFormat->signals.onChanged.connect(this, &StImageViewer::doSwitchSrcFormat);
-    params.ToShowFps = new StBoolParam(false);
-    params.IsVSyncOn = new StBoolParam(true);
+    params.ToShowFps  = new StBoolParam(false);
+    params.IsMobileUI = new StBoolParam(StWindow::isMobile());
+    params.IsMobileUI->signals.onChanged = stSlot(this, &StImageViewer::doScaleHiDPI);
+    params.IsVSyncOn  = new StBoolParam(true);
     params.IsVSyncOn->signals.onChanged = stSlot(this, &StImageViewer::doSwitchVSync);
     StApplication::params.VSyncMode->setValue(StGLContext::VSync_ON);
+
     params.imageLib = StImageFile::ST_LIBAV,
     params.TargetFps = 0;
 
@@ -269,6 +273,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadInt32 (ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
     mySettings->loadParam (ST_SETTING_UPDATES_INTERVAL,   params.checkUpdatesDays);
     mySettings->loadParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
+    mySettings->loadParam (ST_SETTING_MOBILE_UI,          params.IsMobileUI);
     mySettings->loadParam (ST_SETTING_VSYNC,              params.IsVSyncOn);
 
     int32_t aSlideShowDelayInt = int32_t(mySlideShowDelay);
@@ -391,9 +396,10 @@ void StImageViewer::releaseDevice() {
         mySettings->saveInt32(ST_SETTING_SLIDESHOW_DELAY, int(mySlideShowDelay));
         mySettings->saveInt32(ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
         mySettings->saveParam(ST_SETTING_UPDATES_INTERVAL, params.checkUpdatesDays);
-        mySettings->saveString(ST_SETTING_IMAGELIB, StImageFile::imgLibToString(params.imageLib));
-        mySettings->saveParam (ST_SETTING_SHOW_FPS, params.ToShowFps);
-        mySettings->saveParam (ST_SETTING_VSYNC,    params.IsVSyncOn);
+        mySettings->saveString(ST_SETTING_IMAGELIB,  StImageFile::imgLibToString(params.imageLib));
+        mySettings->saveParam (ST_SETTING_SHOW_FPS,  params.ToShowFps);
+        mySettings->saveParam (ST_SETTING_MOBILE_UI, params.IsMobileUI);
+        mySettings->saveParam (ST_SETTING_VSYNC,     params.IsVSyncOn);
         if(myToSaveSrcFormat) {
             mySettings->saveParam(ST_SETTING_SRCFORMAT, params.srcFormat);
         }

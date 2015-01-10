@@ -46,6 +46,7 @@ StGLRootWidget::StGLRootWidget(const StHandle<StResourceManager>& theResMgr)
   myScrDispX(0.0f),
   myLensDist(0.0f),
   myScrDispXPx(0),
+  myIsMobile(false),
   myScaleGlX(1.0),
   myScaleGlY(1.0),
   myScaleGUI(1.0f),

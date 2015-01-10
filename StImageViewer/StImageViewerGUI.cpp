@@ -53,10 +53,37 @@ namespace {
     static const int DISPL_Y_REGION_UPPER = 32;
     static const int DISPL_X_REGION_UPPER = 32;
     static const int ICON_WIDTH           = 64;
-};
+}
 
 StInfoDialog::~StInfoDialog() {
     myPlugin->doSaveImageInfo(0);
+}
+
+void StImageViewerGUI::createDesktopUI() {
+    createUpperToolbar();
+
+    const StRectI_t& aMargins = getRootMarginsPx();
+    myBtnPlayList = new StGLTextureButton(this, -aMargins.right() - scale(8 + 8 + 32), -aMargins.bottom() - scale(8),
+                                          StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_RIGHT));
+    myBtnPlayList->setTexturePath(iconTexture(stCString("playList"), scaleIcon(32)));
+
+    // fullscreen button
+    if(myWindow->hasFullscreenMode()) {
+        myBtnFull = new StGLTextureButton(this, -aMargins.right() - scale(8), -aMargins.bottom() - scale(8),
+                                          StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_RIGHT));
+        myBtnFull->signals.onBtnClick.connect(myPlugin->params.isFullscreen.operator->(), &StBoolParam::doReverse);
+        myBtnFull->setTexturePath(iconTexture(stCString("fullScreen"), scaleIcon(32)));
+    }
+
+    myDescr = new StGLDescription(this);
+
+    // create Main menu
+    createMainMenu();
+
+    if(myPlugin->params.ToShowFps->getValue()) {
+        myFpsWidget = new StGLFpsLabel(this);
+        myFpsWidget->setVisibility(true, true);
+    }
 }
 
 /**
@@ -134,6 +161,10 @@ StGLMenu* StImageViewerGUI::createMediaMenu() {
     aMenuMedia->addItem(tr(MENU_MEDIA_SAVE_IMAGE_AS), aMenuSaveImage);
     aMenuMedia->addItem(tr(MENU_MEDIA_SRC_FORMAT),    aMenuSrcFormat);
     aMenuMedia->addItem(tr(MENU_MEDIA_FILE_INFO),     myPlugin->getAction(StImageViewer::Action_FileInfo));
+
+    if(myWindow->isMobile()) {
+        aMenuMedia->addItem("Mobile UI", myPlugin->params.IsMobileUI);
+    }
 
     aMenuMedia->addItem(tr(MENU_MEDIA_QUIT))
               ->signals.onItemClick.connect(myPlugin, &StImageViewer::doQuit);
@@ -536,6 +567,7 @@ StGLMenu* StImageViewerGUI::createScaleMenu() {
     aMenu->addItem(tr(MENU_HELP_SCALE_NORMAL),  myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Normal);
     aMenu->addItem(tr(MENU_HELP_SCALE_BIG),     myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Big);
     aMenu->addItem(tr(MENU_HELP_SCALE_HIDPI2X), myPlugin->params.ScaleHiDPI2X);
+    aMenu->addItem("Mobile UI",                 myPlugin->params.IsMobileUI);
     return aMenu;
 }
 
@@ -564,6 +596,119 @@ StGLMenu* StImageViewerGUI::createLanguageMenu() {
     return aMenu;
 }
 
+void StImageViewerGUI::createMobileUI() {
+    createMobileUpperToolbar();
+    createMobileBottomToolbar();
+
+    if(myPlugin->params.ToShowFps->getValue()) {
+        myFpsWidget = new StGLFpsLabel(this);
+        myFpsWidget->setVisibility(true, true);
+    }
+
+    myMenuMobileEx = createMobileExMenu();
+}
+
+/**
+ * Create upper toolbar
+ */
+void StImageViewerGUI::createMobileUpperToolbar() {
+    const IconSize anIconSize = scaleIcon(32);
+    const int aTop    = scale(16);
+    const int aLeft   = scale(16);
+    const int anIconW = scale(32);
+
+    const StRectI_t& aMargins = getRootMarginsPx();
+    myPanelUpper = new StGLWidget(this, aMargins.left(), aMargins.top(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(56));
+
+    int aBtnIter = 0;
+
+    StGLSwitchTextured* aSrcBtn = new StGLSwitchTextured(myPanelUpper, myPlugin->params.srcFormat,
+                                                         aLeft + (aBtnIter++) * anIconW, aTop,
+                                                         StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    aSrcBtn->addItem(ST_V_SRC_AUTODETECT,           iconTexture(stCString("menuAuto"),           anIconSize));
+    aSrcBtn->addItem(ST_V_SRC_MONO,                 iconTexture(stCString("menuMono"),           anIconSize));
+    aSrcBtn->addItem(ST_V_SRC_PARALLEL_PAIR,        iconTexture(stCString("menuSbsLR"),          anIconSize), true);
+    aSrcBtn->addItem(ST_V_SRC_SIDE_BY_SIDE,         iconTexture(stCString("menuSbsRL"),          anIconSize));
+    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_LR,        iconTexture(stCString("menuOverUnderLR"),    anIconSize));
+    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_RL,        iconTexture(stCString("menuOverUnderRL"),    anIconSize), true);
+    aSrcBtn->addItem(ST_V_SRC_ROW_INTERLACE,        iconTexture(stCString("menuRowLR"),          anIconSize));
+    aSrcBtn->addItem(ST_V_SRC_ANAGLYPH_RED_CYAN,    iconTexture(stCString("menuRedCyanLR"),      anIconSize));
+    aSrcBtn->addItem(ST_V_SRC_ANAGLYPH_G_RB,        iconTexture(stCString("menuGreenMagentaLR"), anIconSize));
+    aSrcBtn->addItem(ST_V_SRC_ANAGLYPH_YELLOW_BLUE, iconTexture(stCString("menuYellowBlueLR"),   anIconSize));
+
+    aBtnIter = 0;
+    myBtnSrcFrmt = aSrcBtn;
+    StGLTextureButton* aBtnEx = new StGLTextureButton(myPanelUpper, -aLeft - (aBtnIter--) * anIconW, aTop,
+                                                      StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    aBtnEx->setTexturePath(iconTexture(stCString("actionOverflow"), anIconSize));
+    aBtnEx->signals.onBtnClick += stSlot(this, &StImageViewerGUI::doShowMobileExMenu);
+
+    /**myBtnSwapLR = new StGLCheckboxTextured(myPanelUpper, myImage->params.swapLR,
+                                           stCTexture("swapLRoff.png"),
+                                           stCTexture("swapLRon.png"),
+                                           aLeft + (aBtnIter++) * ICON_WIDTH, aTop,
+                                           StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));*/
+}
+
+/**
+ * Create bottom toolbar
+ */
+void StImageViewerGUI::createMobileBottomToolbar() {
+    const IconSize anIconSize = scaleIcon(32);
+    const int aTop    = scale(16);
+    const int aLeft   = scale(16);
+    const int anIconW = scale(32);
+
+    const StRectI_t& aMargins = getRootMarginsPx();
+    myPanelBottom = new StGLWidget(this, aMargins.left(), -aMargins.bottom(), StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(56));
+
+    int aBtnIter = 0;
+    myBtnPrev = new StGLTextureButton(myPanelBottom, aLeft + (aBtnIter++) * anIconW, aTop);
+    myBtnPrev->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doListPrev);
+    myBtnPrev->setTexturePath(iconTexture(stCString("actionBack"), anIconSize));
+
+    myBtnNext = new StGLTextureButton(myPanelBottom, aLeft + (aBtnIter++) * anIconW, aTop);
+    myBtnNext->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doListNext);
+    myBtnNext->setTexturePath(iconTexture(stCString("actionNext"), anIconSize));
+
+    StGLTextureButton* aBtnInfo = new StGLTextureButton(myPanelBottom, aLeft + (aBtnIter++) * anIconW, aTop);
+    aBtnInfo->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doAboutImage);
+    aBtnInfo->setTexturePath(iconTexture(stCString("actionInfo"),  anIconSize));
+}
+
+StGLMenu* StImageViewerGUI::createMobileExMenu() {
+    const IconSize anIconSize = scaleIcon(16);
+    const int aTop = scale(56);
+
+    StGLMenu*     aMenu  = new StGLMenu(this, 0, aTop, StGLMenu::MENU_VERTICAL_COMPACT);
+    StGLMenuItem* anItem = NULL;
+    aMenu->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    aMenu->setContextual(true);
+    anItem = aMenu->addItem(tr(BUTTON_DELETE), myPlugin->getAction(StImageViewer::Action_DeleteFile));
+    anItem->setIcon(iconTexture(stCString("actionDiscard"),   anIconSize));
+    anItem = aMenu->addItem(tr(MENU_HELP_ABOUT));
+    anItem->setIcon(iconTexture(stCString("actionHelp"),      anIconSize));
+    anItem->signals.onItemClick += stSlot(this, &StImageViewerGUI::doAboutProgram);
+    //anItem = aMenu->addItem(myPlugin->StApplication::params.ActiveDevice->getActiveValue());
+    anItem = aMenu->addItem("Settings");
+    anItem->setIcon(iconTexture(stCString("actionSettings"),  anIconSize));
+    anItem = aMenu->addItem("Slideshow", myPlugin->getAction(StImageViewer::Action_SlideShow));
+    anItem->setIcon(iconTexture(stCString("actionSlideShow"), anIconSize));
+    return aMenu;
+}
+
+void StImageViewerGUI::doShowMobileExMenu(const size_t ) {
+    if(myMenuMobileEx == NULL) {
+        return;
+    }
+
+    if(myMenuMobileEx->isVisible()) {
+        myMenuMobileEx->setVisibility(false, true);
+    } else {
+        myMenuMobileEx->setVisibility(true,  true);
+    }
+}
+
 StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
                                    StWindow*       theWindow,
                                    StTranslations* theLangMap,
@@ -580,7 +725,10 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
   //
   myMenuRoot(NULL),
   //
+  myMenuMobileEx(NULL),
+  //
   myPanelUpper(NULL),
+  myPanelBottom(NULL),
   myBtnOpen(NULL),
   myBtnPrev(NULL),
   myBtnNext(NULL),
@@ -594,10 +742,10 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
   myIsVisibleGUI(true),
   myIsMinimalGUI(true) {
     const GLfloat aScale = myPlugin->params.ScaleHiDPI2X->getValue() ? 2.0f : myPlugin->params.ScaleHiDPI ->getValue();
-    StGLRootWidget::setScale(aScale, (StGLRootWidget::ScaleAdjust )myPlugin->params.ScaleAdjust->getValue());
+    setScale(aScale, (StGLRootWidget::ScaleAdjust )myPlugin->params.ScaleAdjust->getValue());
+    setMobile(myPlugin->params.IsMobileUI->getValue());
 
     setRootMarginsPx(myWindow->getMargins());
-    const StRectI_t& aMargins = getRootMarginsPx();
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StImageViewerGUI::doShowFPS);
 
     StHandle<StGLTextureQueue> aTextureQueue = theTextureQueue;
@@ -606,32 +754,14 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
     }
     myImage = new StGLImageRegion(this, aTextureQueue, true);
 
-    createUpperToolbar();
-
-    myBtnPlayList = new StGLTextureButton(this, -aMargins.right() - scale(8 + 8 + 32), -aMargins.bottom() - scale(8),
-                                          StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_RIGHT));
-    myBtnPlayList->setTexturePath(iconTexture(stCString("playList"), scaleIcon(32)));
-
-    // fullscreen button
-    if(myWindow->hasFullscreenMode()) {
-        myBtnFull = new StGLTextureButton(this, -aMargins.right() - scale(8), -aMargins.bottom() - scale(8),
-                                          StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_RIGHT));
-        myBtnFull->signals.onBtnClick.connect(myPlugin->params.isFullscreen.operator->(), &StBoolParam::doReverse);
-        myBtnFull->setTexturePath(iconTexture(stCString("fullScreen"), scaleIcon(32)));
+    if(isMobile()) {
+        createMobileUI();
+    } else {
+        createDesktopUI();
     }
-
-    myDescr = new StGLDescription(this);
-
-    // create Main menu
-    createMainMenu();
 
     myMsgStack = new StGLMsgStack(this, myPlugin->getMessagesQueue());
     myMsgStack->setVisibility(true, true);
-
-    if(myPlugin->params.ToShowFps->getValue()) {
-        myFpsWidget = new StGLFpsLabel(this);
-        myFpsWidget->setVisibility(true, true);
-    }
 }
 
 StImageViewerGUI::~StImageViewerGUI() {
@@ -651,7 +781,7 @@ namespace {
             && theWidget->isPointIn(theCursorZo);
     }
 
-};
+}
 
 size_t StImageViewerGUI::trSrcFormatId(const StFormatEnum theSrcFormat) {
     switch(theSrcFormat) {
@@ -674,7 +804,8 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
                                      bool              isMouseActive) {
     myIsVisibleGUI = isMouseActive
         || myVisibilityTimer.getElapsedTime() < 2.0
-        || (myPanelUpper != NULL && !myIsMinimalGUI && myPanelUpper->isPointIn(theCursor))
+        || (myPanelUpper  != NULL && !myIsMinimalGUI && myPanelUpper ->isPointIn(theCursor))
+        || (myPanelBottom != NULL && !myIsMinimalGUI && myPanelBottom->isPointIn(theCursor))
         || (myMenuRoot   != NULL && myMenuRoot->isActive());
     if(isMouseActive) {
         myVisibilityTimer.restart();
@@ -691,9 +822,16 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
 
     if(myPanelUpper != NULL) {
         myPanelUpper->setVisibility(toShowAll);
-        for(StGLWidget* child = myPanelUpper->getChildren()->getStart();
-            child != NULL; child = child->getNext()) {
-            child->setVisibility(toShowAll);
+        for(StGLWidget* aChildIter = myPanelUpper->getChildren()->getStart();
+            aChildIter != NULL; aChildIter = aChildIter->getNext()) {
+            aChildIter->setVisibility(toShowAll);
+        }
+    }
+    if(myPanelBottom != NULL) {
+        myPanelBottom->setVisibility(toShowAll);
+        for(StGLWidget* aChildIter = myPanelBottom->getChildren()->getStart();
+            aChildIter != NULL; aChildIter = aChildIter->getNext()) {
+            aChildIter->setVisibility(toShowAll);
         }
     }
     if(myBtnPlayList != NULL) {
@@ -761,12 +899,20 @@ void StImageViewerGUI::stglResize(const StGLBoxPx& theRectPx) {
 
     if(myPanelUpper != NULL) {
         myPanelUpper->changeRectPx().right() = aSizeX;
-        myIsMinimalGUI = (aSizeY < scale(400) || aSizeX < scale(400));
+        myIsMinimalGUI = myWindow->isMovable() && !isMobile()
+                     && (aSizeY < scale(400) || aSizeX < scale(400));
+    }
+    if(myPanelBottom != NULL) {
+        myPanelBottom->changeRectPx().right() = aSizeX;
     }
     if(areNewMargins) {
         if(myPanelUpper != NULL) {
             myPanelUpper->changeRectPx().left() = aMargins.left();
             myPanelUpper->changeRectPx().top()  = aMargins.top();
+        }
+        if(myPanelBottom != NULL) {
+            myPanelBottom->changeRectPx().left() = aMargins.left();
+            myPanelBottom->changeRectPx().top()  = aMargins.top();
         }
         if(myMenuRoot != NULL) {
             myMenuRoot->changeRectPx().left() = aMargins.left();

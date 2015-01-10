@@ -142,6 +142,20 @@ class StGLRootWidget : public StGLWidget {
     ST_CPPEXPORT virtual bool doKeyUp  (const StKeyEvent& theEvent);
 
     /**
+     * Return true if interface should be adopted to mobile device.
+     */
+    ST_LOCAL bool isMobile() const {
+        return myIsMobile;
+    }
+
+    /**
+     * Setup flag to prefer interface for mobile device.
+     */
+    ST_LOCAL void setMobile(const bool theValue) {
+        myIsMobile = theValue;
+    }
+
+    /**
      * @return scale factor for GUI elements (text, icons), 1.0 for normal displays
      */
     ST_LOCAL inline GLfloat getScale() const {
@@ -357,6 +371,7 @@ class StGLRootWidget : public StGLWidget {
 
     StGLVec4                  myColors[Color_NB]; //!< colors of standard elements
 
+    bool                      myIsMobile;      //!< flag indicating mobile device
     StRectI_t                 myMarginsPx;     //!< active area margins in pixels
     StRectD_t                 myRectGl;        //!< rectangle in GL coordinates
     GLdouble                  myScaleGlX;      //!< scale factor to optimize convertion from Pixels -> GL coordinates
