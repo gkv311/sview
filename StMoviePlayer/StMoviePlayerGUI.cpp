@@ -411,16 +411,10 @@ StGLMenu* StMoviePlayerGUI::createViewMenu() {
  */
 StGLMenu* StMoviePlayerGUI::createDisplayModeMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_STEREO),
-                   myImage->params.displayMode, StGLImageRegion::MODE_STEREO);
-    aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_LEFT),
-                   myImage->params.displayMode, StGLImageRegion::MODE_ONLY_LEFT);
-    aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_RIGHT),
-                   myImage->params.displayMode, StGLImageRegion::MODE_ONLY_RIGHT);
-    aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_PARALLEL),
-                   myImage->params.displayMode, StGLImageRegion::MODE_PARALLEL);
-    aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_CROSSYED),
-                   myImage->params.displayMode, StGLImageRegion::MODE_CROSSYED);
+    const StArrayList<StString>& aValuesList = myImage->params.displayMode->getValues();
+    for(size_t aValIter = 0; aValIter < aValuesList.size(); ++aValIter) {
+        aMenu->addItem(aValuesList[aValIter], myImage->params.displayMode, int32_t(aValIter));
+    }
     return aMenu;
 }
 
@@ -1014,8 +1008,16 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
     setRootMarginsPx(myWindow->getMargins());
     const StRectI_t& aMargins = getRootMarginsPx();
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StMoviePlayerGUI::doShowFPS);
-    myImage     = new StGLImageRegion(this, theTextureQueue, false);
+
+    myImage = new StGLImageRegion(this, theTextureQueue, false);
     myImage->setDragDelayMs(500.0);
+    myImage->params.displayMode->setName(tr(MENU_VIEW_DISPLAY_MODE));
+    myImage->params.displayMode->changeValues()[StGLImageRegion::MODE_STEREO]     = tr(MENU_VIEW_DISPLAY_MODE_STEREO);
+    myImage->params.displayMode->changeValues()[StGLImageRegion::MODE_ONLY_LEFT]  = tr(MENU_VIEW_DISPLAY_MODE_LEFT);
+    myImage->params.displayMode->changeValues()[StGLImageRegion::MODE_ONLY_RIGHT] = tr(MENU_VIEW_DISPLAY_MODE_RIGHT);
+    myImage->params.displayMode->changeValues()[StGLImageRegion::MODE_PARALLEL]   = tr(MENU_VIEW_DISPLAY_MODE_PARALLEL);
+    myImage->params.displayMode->changeValues()[StGLImageRegion::MODE_CROSSYED]   = tr(MENU_VIEW_DISPLAY_MODE_CROSSYED);
+
     mySubtitles = new StGLSubtitles  (this, theSubQueue,
                                       myPlugin->params.SubtitlesSize,
                                       myPlugin->params.SubtitlesParallax,

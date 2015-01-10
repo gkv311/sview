@@ -254,16 +254,10 @@ StGLMenu* StImageViewerGUI::createViewMenu() {
  */
 StGLMenu* StImageViewerGUI::createDisplayModeMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_STEREO),
-                   myImage->params.displayMode, StGLImageRegion::MODE_STEREO);
-    aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_LEFT),
-                   myImage->params.displayMode, StGLImageRegion::MODE_ONLY_LEFT);
-    aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_RIGHT),
-                   myImage->params.displayMode, StGLImageRegion::MODE_ONLY_RIGHT);
-    aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_PARALLEL),
-                   myImage->params.displayMode, StGLImageRegion::MODE_PARALLEL);
-    aMenu->addItem(tr(MENU_VIEW_DISPLAY_MODE_CROSSYED),
-                   myImage->params.displayMode, StGLImageRegion::MODE_CROSSYED);
+    const StArrayList<StString>& aValuesList = myImage->params.displayMode->getValues();
+    for(size_t aValIter = 0; aValIter < aValuesList.size(); ++aValIter) {
+        aMenu->addItem(aValuesList[aValIter], myImage->params.displayMode, int32_t(aValIter));
+    }
     return aMenu;
 }
 
@@ -525,6 +519,7 @@ void StImageViewerGUI::doMobileSettings(const size_t ) {
     const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
     StParamsList aParams;
     aParams.add(myPlugin->StApplication::params.ActiveDevice);
+    aParams.add(myImage->params.displayMode);
     aRend->getOptions(aParams);
     aParams.add(myPlugin->params.ToShowFps);
     aParams.add(myLangMap->params.language);
@@ -765,7 +760,14 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
     if(aTextureQueue.isNull()) {
         aTextureQueue = new StGLTextureQueue(2);
     }
+
     myImage = new StGLImageRegion(this, aTextureQueue, true);
+    myImage->params.displayMode->setName(tr(MENU_VIEW_DISPLAY_MODE));
+    myImage->params.displayMode->changeValues()[StGLImageRegion::MODE_STEREO]     = tr(MENU_VIEW_DISPLAY_MODE_STEREO);
+    myImage->params.displayMode->changeValues()[StGLImageRegion::MODE_ONLY_LEFT]  = tr(MENU_VIEW_DISPLAY_MODE_LEFT);
+    myImage->params.displayMode->changeValues()[StGLImageRegion::MODE_ONLY_RIGHT] = tr(MENU_VIEW_DISPLAY_MODE_RIGHT);
+    myImage->params.displayMode->changeValues()[StGLImageRegion::MODE_PARALLEL]   = tr(MENU_VIEW_DISPLAY_MODE_PARALLEL);
+    myImage->params.displayMode->changeValues()[StGLImageRegion::MODE_CROSSYED]   = tr(MENU_VIEW_DISPLAY_MODE_CROSSYED);
 
     if(isMobile()) {
         createMobileUI();

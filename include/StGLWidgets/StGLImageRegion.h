@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -12,13 +12,14 @@
 #include <StGLMesh/StGLUVSphere.h>
 #include <StGLMesh/StGLQuads.h>
 
-#include "StGLWidget.h"
-#include "StGLImageFlatProgram.h"
-#include "StGLImageSphereProgram.h"
+#include <StGLWidgets/StGLWidget.h>
+#include <StGLWidgets/StGLImageFlatProgram.h>
+#include <StGLWidgets/StGLImageSphereProgram.h>
 #include <StGLStereo/StGLTextureQueue.h>
+
 #include <StGL/StParams.h>
 
-#include <StSettings/StParam.h>
+#include <StSettings/StEnumParam.h>
 
 class StAction;
 
@@ -125,7 +126,7 @@ class StGLImageRegion : public StGLWidget {
 
     struct {
 
-        StHandle<StInt32Param>   displayMode;   //!< StGLImageRegion::DisplayMode    - display mode
+        StHandle<StEnumParam>    displayMode;   //!< StGLImageRegion::DisplayMode    - display mode
         StHandle<StInt32Param>   displayRatio;  //!< StGLImageRegion::DisplayRatio   - display ratio
         StHandle<StInt32Param>   textureFilter; //!< StGLImageProgram::TextureFilter - texture filter;
         StHandle<StFloat32Param> gamma;         //!< gamma correction coefficient

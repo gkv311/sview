@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -132,7 +132,13 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
   myIsClickAborted(false),
   myIsInitialized(false),
   myHasVideoStream(false) {
-    params.displayMode   = new StInt32Param(MODE_STEREO);
+    params.displayMode = new StEnumParam(MODE_STEREO, "Stereo Output");
+    params.displayMode->changeValues().add("Stereo");        // MODE_STEREO
+    params.displayMode->changeValues().add("Left View");     // MODE_ONLY_LEFT
+    params.displayMode->changeValues().add("Right View");    // MODE_ONLY_RIGHT
+    params.displayMode->changeValues().add("Parallel Pair"); // MODE_PARALLEL
+    params.displayMode->changeValues().add("Cross-eyed");    // MODE_CROSSYED
+
     params.displayRatio  = new StInt32Param(RATIO_AUTO);
     params.textureFilter = new StInt32Param(StGLImageProgram::FILTER_LINEAR);
     params.gamma      = new StTrackedFloatParam(myProgramFlat.params.gamma,
