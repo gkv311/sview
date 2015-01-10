@@ -58,7 +58,7 @@ int StGLButton::computeWidth(const StString& theText) {
         return 0;
     }
 
-    return anItem->computeTextWidth() + myRoot->scale(16);
+    return anItem->computeTextWidth(theText) + myRoot->scale(16);
 }
 
 int StGLButton::getWidth() const {
