@@ -140,10 +140,37 @@ class StGLTable : public StGLWidget {
      */
     ST_CPPEXPORT void updateLayout();
 
-    ST_LOCAL int getMarginLeft()   const { return myMarginLeft; }
-    ST_LOCAL int getMarginRight()  const { return myMarginRight; }
-    ST_LOCAL int getMarginTop()    const { return myMarginTop; }
-    ST_LOCAL int getMarginBottom() const { return myMarginBottom; }
+    ST_LOCAL int getMarginLeft() const {
+        return myMarginLeft;
+    }
+
+    ST_LOCAL void setMarginLeft(const int theMargin) {
+        myMarginLeft = theMargin;
+    }
+
+    ST_LOCAL int getMarginRight() const {
+        return myMarginRight;
+    }
+
+    ST_LOCAL void setMarginRight(const int theMargin) {
+        myMarginRight = theMargin;
+    }
+
+    ST_LOCAL int getMarginTop() const {
+        return myMarginTop;
+    }
+
+    ST_LOCAL void setMarginTop(const int theMargin) {
+        myMarginTop = theMargin;
+    }
+
+    ST_LOCAL int getMarginBottom() const {
+        return myMarginBottom;
+    }
+
+    ST_LOCAL void setMarginBottom(const int theMargin) {
+        myMarginBottom = theMargin;
+    }
 
         protected: //! @name protected fields
 

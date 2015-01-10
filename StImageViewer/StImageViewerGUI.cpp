@@ -534,6 +534,8 @@ void StImageViewerGUI::doMobileSettings(const size_t ) {
     const int aNbRowsMax = aRowLast + 2;
 
     StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
+    aTable->setMarginTop   (scale(4));
+    aTable->setMarginBottom(scale(4));
     aTable->setupTable(aNbRowsMax, 2);
     aTable->setVisibility(true, true);
     aTable->fillFromParams(aParams, StGLVec3(1.0f, 1.0f, 1.0f), aWidthMax);

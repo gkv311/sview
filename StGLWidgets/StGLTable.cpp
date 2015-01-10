@@ -173,12 +173,12 @@ void StGLTable::fillFromParams(const StParamsList& theParams,
         anItem.setColSpan(1);
         if(aBool.downcastFrom(aParam)) {
             StGLCheckbox* aCheckBox = new StGLCheckbox(&anItem, aBool,
-                                                       myRoot->scale(8), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT));
+                                                       0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
             aCheckBox->setVisibility(true, true);
             aCol2Width = stMax(aCol2Width, aCheckBox->getRectPx().width());
         } else if(anEnum.downcastFrom(aParam)) {
             StGLCombobox* aButton = new StGLCombobox(&anItem, 0, 0, anEnum);
-            aButton->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+            aButton->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
             aButton->setHeight(myRoot->scale(24));
             aButton->setVisibility(true, true);
 
@@ -224,7 +224,7 @@ void StGLTable::fillFromParams(const StParamsList& theParams,
             // skip
         }
 
-        StGLTextArea* aText = new StGLTextArea(&anItem, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+        StGLTextArea* aText = new StGLTextArea(&anItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT));
         aText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_LEFT,
                               StGLTextFormatter::ST_ALIGN_Y_TOP);
         aText->setText(aLabelText);
