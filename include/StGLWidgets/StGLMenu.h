@@ -28,9 +28,10 @@ class StGLMenu : public StGLWidget {
         public:
 
     enum {
-        MENU_VERTICAL   = 0,
-        MENU_HORIZONTAL = 1,
-        MENU_ZERO       = 2,
+        MENU_VERTICAL,         //!< vertical menu with offset reserved for check box icon
+        MENU_VERTICAL_COMPACT, //!< vertical menu without extra offset
+        MENU_HORIZONTAL,       //!< horizontal menu
+        MENU_ZERO,             //!< menu for single item
     };
 
     // recursively delete all submenus and that this menu itself
@@ -53,6 +54,10 @@ class StGLMenu : public StGLWidget {
 
     inline bool isRootMenu() const {
         return myIsRootMenu;
+    }
+
+    void setContextual(const bool theValue) {
+        myIsContextual = theValue;
     }
 
     inline bool isActive() const {
@@ -163,6 +168,7 @@ class StGLMenu : public StGLWidget {
     int                        myItemHeight;
     int                        myWidth;
     bool                       myIsRootMenu;
+    bool                       myIsContextual;
     bool                       myIsActive;
     bool                       myKeepActive;
     bool                       myIsInitialized;

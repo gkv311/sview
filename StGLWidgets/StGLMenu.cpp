@@ -51,6 +51,7 @@ StGLMenu::StGLMenu(StGLWidget* theParent,
   myItemHeight(theParent->getRoot()->scale(32)),
   myWidth(0),
   myIsRootMenu(theIsRootMenu),
+  myIsContextual(false),
   myIsActive(!theIsRootMenu),
   myKeepActive(false),
   myIsInitialized(false),
@@ -131,7 +132,8 @@ bool StGLMenu::stglInit() {
         if(anItem->getSubMenu() != NULL) {
             if(myOrient == MENU_HORIZONTAL) {
                 anItem->getSubMenu()->changeRectPx().moveTopLeftTo(anItem->getRectPxAbsolute().left(), anItem->getRectPxAbsolute().bottom());
-            } else if(myOrient == MENU_VERTICAL) {
+            } else if(myOrient == MENU_VERTICAL
+                   || myOrient == MENU_VERTICAL_COMPACT) {
                 anItem->getSubMenu()->changeRectPx().moveTopLeftTo(anItem->getRectPxAbsolute().right() - myRoot->scale(10),
                                                                    anItem->getRectPxAbsolute().top());
             }
@@ -142,7 +144,8 @@ bool StGLMenu::stglInit() {
         changeRectPx().right()  = getRectPx().left() + aChildLast->getRectPx().right();
         changeRectPx().bottom() = getRectPx().top()  + aChildLast->getRectPx().bottom();
     }
-    if(myOrient == MENU_VERTICAL) {
+    if(myOrient == MENU_VERTICAL
+    || myOrient == MENU_VERTICAL_COMPACT) {
         changeRectPx().right() = getRectPx().left() + myWidth;
         int anItemCount = 0;
         for(StGLWidget* aChild = getChildren()->getStart(); aChild != NULL; aChild = aChild->getNext(), ++anItemCount) {
@@ -236,8 +239,12 @@ bool StGLMenu::tryUnClick(const StPointD_t& theCursorZo,
         anItem->setSelected(false);
     }
 
-    if(isRootMenu() && !isSelfItemClicked) {
+    if(myIsRootMenu && !isSelfItemClicked) {
         setActive(false); // deactivate root menu
+    }
+
+    if(myIsContextual) {
+        setVisibility(false, true);
     }
 
     return isSelfClicked;

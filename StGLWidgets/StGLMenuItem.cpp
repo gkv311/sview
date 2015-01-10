@@ -51,6 +51,12 @@ StGLMenuItem::StGLMenuItem(StGLMenu* theParent,
             myToDrawArrow = theSubMenu != NULL;
             break;
         }
+        case StGLMenu::MENU_VERTICAL_COMPACT: {
+            myMarginLeft  = myRoot->scale(8);
+            myMarginRight = myRoot->scale(16);
+            myToDrawArrow = theSubMenu != NULL;
+            break;
+        }
         case StGLMenu::MENU_HORIZONTAL: {
             myMarginLeft  = myRoot->scale(2);
             myMarginRight = myRoot->scale(16);
