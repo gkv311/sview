@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -94,7 +94,7 @@ void StGLMessageBox::create(const StString& theTitle,
                                 StGLTextFormatter::ST_ALIGN_Y_TOP);
         myTitle->setupStyle(StFTFont::Style_Bold);
         myTitle->setText(theTitle);
-        myTitle->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
+        myTitle->setTextColor(getRoot()->getColorForElement(StGLRootWidget::Color_MessageText).rgb());
         myTitle->setVisibility(true, true);
         int aWidth = 0;
         myTitle->computeTextWidth(GLfloat(myTitle->getRectPx().width()), aWidth, aTitleHeight);
@@ -144,7 +144,7 @@ void StGLMessageBox::setText(const StString& theText) {
     aText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
                           StGLTextFormatter::ST_ALIGN_Y_TOP);
     aText->setText(theText);
-    aText->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
+    aText->setTextColor(getRoot()->getColorForElement(StGLRootWidget::Color_MessageText).rgb());
     aText->setVisibility(true, true);
 }
 
@@ -307,7 +307,7 @@ void StGLMessageBox::stglDraw(unsigned int theView) {
 
     myProgram.use(aCtx, getRoot()->getScreenDispX());
     myProgram.setProjMat(aCtx, getCamera()->getProjMatrix());
-    myProgram.setColor(aCtx, StGLVec4(0.06f, 0.06f, 0.06f, 1.0f), GLfloat(opacityValue) * 0.8f);
+    myProgram.setColor(aCtx, getRoot()->getColorForElement(StGLRootWidget::Color_MessageBox), GLfloat(opacityValue) * 0.8f);
 
         myVertexBuf.bindVertexAttrib(aCtx, myProgram.getVVertexLoc());
         aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -46,7 +46,7 @@ StGLMenu::StGLMenu(StGLWidget* theParent,
              theParent->getRoot()->scale(32),
              theParent->getRoot()->scale(32)),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
-  myColorVec(0.855f, 0.855f, 0.855f, 1.0f),
+  myColorVec(getRoot()->getColorForElement(StGLRootWidget::Color_Menu)),
   myOrient(theOrient),
   myItemHeight(theParent->getRoot()->scale(32)),
   myWidth(0),

@@ -47,6 +47,19 @@ class StGLRootWidget : public StGLWidget {
         IconSizeNb
     };
 
+    /**
+     * Colors of standard elements.
+     */
+    enum Color {
+        Color_Menu,
+        Color_MenuHighlighted,
+        Color_MenuClicked,
+        Color_MenuText,
+        Color_MessageBox,
+        Color_MessageText,
+        Color_NB
+    };
+
         public:
 
     /**
@@ -70,6 +83,11 @@ class StGLRootWidget : public StGLWidget {
      * Root widget caches OpenGL state (like viewport).
      */
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
+
+    /**
+     * Return color of standard element.
+     */
+    const StGLVec4& getColorForElement(const StGLRootWidget::Color theElement) const { return myColors[theElement]; }
 
     /**
      * Function iterate children and self to change clicking state.
@@ -335,6 +353,8 @@ class StGLRootWidget : public StGLWidget {
     GLfloat                   myScrDispX;
     GLfloat                   myLensDist;
     int                       myScrDispXPx;
+
+    StGLVec4                  myColors[Color_NB]; //!< colors of standard elements
 
     StRectI_t                 myMarginsPx;     //!< active area margins in pixels
     StRectD_t                 myRectGl;        //!< rectangle in GL coordinates

@@ -70,6 +70,13 @@ StGLRootWidget::StGLRootWidget(const StHandle<StResourceManager>& theResMgr)
         myShareArray[aResId] = new StGLSharePointer();
     }
     myGlFontMgr = new StGLFontManager(myResolution);
+
+    myColors[Color_Menu]            = StGLVec4(0.855f, 0.855f, 0.855f, 1.0f);
+    myColors[Color_MenuHighlighted] = StGLVec4(0.765f, 0.765f, 0.765f, 1.0f);
+    myColors[Color_MenuClicked]     = StGLVec4(0.500f, 0.500f, 0.500f, 1.0f);
+    myColors[Color_MenuText]        = StGLVec4(0.000f, 0.000f, 0.000f, 1.0f);
+    myColors[Color_MessageBox]      = StGLVec4(0.060f, 0.060f, 0.060f, 1.0f);
+    myColors[Color_MessageText]     = StGLVec4(1.000f, 1.000f, 1.000f, 1.0f);
 }
 
 StGLRootWidget::~StGLRootWidget() {

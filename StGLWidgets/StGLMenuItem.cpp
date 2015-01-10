@@ -70,8 +70,10 @@ StGLMenuItem::StGLMenuItem(StGLMenu* theParent,
                                StGLTextFormatter::ST_ALIGN_Y_CENTER);
 
     setBorder(false);
-    myBackColor[StGLMenuItem::HIGHLIGHT] = StGLVec4(0.765f, 0.765f, 0.765f, 1.0f);
-    myBackColor[StGLMenuItem::CLICKED]   = StGLVec4(0.500f, 0.500f, 0.500f, 1.0f);
+
+    myBackColor[StGLMenuItem::HIGHLIGHT] = getRoot()->getColorForElement(StGLRootWidget::Color_MenuHighlighted);
+    myBackColor[StGLMenuItem::CLICKED]   = getRoot()->getColorForElement(StGLRootWidget::Color_MenuClicked);
+    setTextColor(getRoot()->getColorForElement(StGLRootWidget::Color_MenuText).rgb());
 }
 
 StGLMenuItem::~StGLMenuItem() {
@@ -294,7 +296,7 @@ void StGLMenuItem::setHilightColor(const StGLVec4& theValue) {
 }
 
 void StGLMenuItem::resetHilightColor() {
-    myBackColor[StGLMenuItem::HIGHLIGHT] = StGLVec4(0.765f, 0.765f, 0.765f, 1.0f);
+    myBackColor[StGLMenuItem::HIGHLIGHT] = getRoot()->getColorForElement(StGLRootWidget::Color_MenuHighlighted);
 }
 
 StGLPassiveMenuItem::StGLPassiveMenuItem(StGLMenu* theParent)
