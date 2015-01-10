@@ -60,6 +60,11 @@ StInfoDialog::~StInfoDialog() {
 }
 
 void StImageViewerGUI::createDesktopUI() {
+    if(myPlugin->params.ToShowFps->getValue()) {
+        myFpsWidget = new StGLFpsLabel(this);
+        myFpsWidget->setVisibility(true, true);
+    }
+
     createUpperToolbar();
 
     const StRectI_t& aMargins = getRootMarginsPx();
@@ -79,11 +84,6 @@ void StImageViewerGUI::createDesktopUI() {
 
     // create Main menu
     createMainMenu();
-
-    if(myPlugin->params.ToShowFps->getValue()) {
-        myFpsWidget = new StGLFpsLabel(this);
-        myFpsWidget->setVisibility(true, true);
-    }
 }
 
 /**

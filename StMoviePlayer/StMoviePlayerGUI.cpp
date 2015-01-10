@@ -1021,6 +1021,11 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
                                       myPlugin->params.SubtitlesParallax,
                                       myPlugin->params.SubtitlesParser);
 
+    if(myPlugin->params.ToShowFps->getValue()) {
+        myFpsWidget = new StGLFpsLabel(this);
+        myFpsWidget->setVisibility(true, true);
+    }
+
     createUpperToolbar();
 
     mySeekBar = new StSeekBar(this, -aMargins.bottom() - scale(74));
@@ -1040,11 +1045,6 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
 
     myMsgStack = new StGLMsgStack(this, myPlugin->getMessagesQueue());
     myMsgStack->setVisibility(true, true);
-
-    if(myPlugin->params.ToShowFps->getValue()) {
-        myFpsWidget = new StGLFpsLabel(this);
-        myFpsWidget->setVisibility(true, true);
-    }
 }
 
 StMoviePlayerGUI::~StMoviePlayerGUI() {
