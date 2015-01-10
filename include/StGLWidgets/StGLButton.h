@@ -46,6 +46,11 @@ class StGLButton : public StGLMenu {
 
     ST_CPPEXPORT void setFocus(const bool theValue);
 
+    /**
+     * Estimate maximum button width for specified text.
+     */
+    ST_CPPEXPORT int computeWidth(const StString& theText);
+
         public:  //! @name Signals
 
     struct {

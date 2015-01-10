@@ -48,6 +48,12 @@ class StGLMenuItem : public StGLTextArea {
         return aWidth;
     }
 
+    ST_LOCAL const int computeTextWidth(const StString& theText) {
+        int aWidth = 0, aHeight = 0;
+        StGLTextArea::computeTextWidth(theText, -1.0f, aWidth, aHeight);
+        return aWidth;
+    }
+
     inline StGLMenu* getParentMenu() {
         return (StGLMenu* )StGLWidget::getParent();
     }

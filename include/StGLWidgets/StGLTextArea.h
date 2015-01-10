@@ -191,9 +191,19 @@ class StGLTextArea : public StGLWidget {
     /**
      * Roughly estimate text dimensions.
      */
-    ST_CPPEXPORT void computeTextWidth(const GLfloat theWidthMax,
-                                       int&          theWidth,
-                                       int&          theHeight);
+    ST_LOCAL void computeTextWidth(const GLfloat theWidthMax,
+                                   int&          theWidth,
+                                   int&          theHeight) {
+        computeTextWidth(myText, theWidthMax, theWidth, theHeight);
+    }
+
+    /**
+     * Roughly estimate text dimensions.
+     */
+    ST_CPPEXPORT void computeTextWidth(const StString& theText,
+                                       const GLfloat   theWidthMax,
+                                       int&            theWidth,
+                                       int&            theHeight);
 
     inline GLint getTextHeight() const {
         return std::abs(GLint(myTextBndBox.height()));

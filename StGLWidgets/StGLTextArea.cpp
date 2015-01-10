@@ -261,12 +261,13 @@ void StGLTextArea::setTextWidth(const int theWidth) {
     myToRecompute = true;
 }
 
-void StGLTextArea::computeTextWidth(const GLfloat theWidthMax,
-                                    int&          theWidth,
-                                    int&          theHeight) {
+void StGLTextArea::computeTextWidth(const StString& theText,
+                                    const GLfloat   theWidthMax,
+                                    int&            theWidth,
+                                    int&            theHeight) {
     StHandle<StFTFont>& aFontGen = myFont->changeFont()->getFont();
     if(aFontGen.isNull() || !aFontGen->isValid()) {
-        theWidth  = myRoot->scale(int(10 * (myText.getLength() + 2)));
+        theWidth  = myRoot->scale(int(10 * (theText.getLength() + 2)));
         theHeight = myRoot->scale(16);
         return;
     }
@@ -276,7 +277,7 @@ void StGLTextArea::computeTextWidth(const GLfloat theWidthMax,
     size_t  aCharsInLine = 0;
     size_t  aNbLines     = 1;
     aFontGen->setActiveStyle(myFormatter.getDefaultStyle());
-    for(StUtf8Iter anIter = myText.iterator(); *anIter != 0;) {
+    for(StUtf8Iter anIter = theText.iterator(); *anIter != 0;) {
         const stUtf32_t aCharThis =   *anIter;
         const stUtf32_t aCharNext = *++anIter;
 

@@ -45,6 +45,15 @@ void StGLButton::setFocus(const bool theValue) {
     }
 }
 
+int StGLButton::computeWidth(const StString& theText) {
+    StGLMenuItem* anItem = (StGLMenuItem* )getChildren()->getStart();
+    if(anItem == NULL) {
+        return 0;
+    }
+
+    return anItem->computeTextWidth() + myRoot->scale(16);
+}
+
 int StGLButton::getWidth() const {
     return myWidth;
 }

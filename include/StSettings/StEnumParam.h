@@ -46,8 +46,15 @@ class StEnumParam : public StInt32Param {
     /**
      * @return parameter label
      */
-    ST_LOCAL inline StString getName() const {
+    ST_LOCAL StString getName() const {
         return myParamName;
+    }
+
+    /**
+     * @return parameter label
+     */
+    ST_LOCAL void setName(const StString& theName) {
+        myParamName = theName;
     }
 
     /**
