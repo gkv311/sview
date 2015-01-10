@@ -164,6 +164,7 @@ class StImageViewerGUI : public StGLRootWidget {
     ST_LOCAL void doAboutRenderer(const size_t );
 
     ST_LOCAL void doShowMobileExMenu(const size_t );
+    ST_LOCAL void doMobileSettings(const size_t );
 
         private: //! @name private fields
 

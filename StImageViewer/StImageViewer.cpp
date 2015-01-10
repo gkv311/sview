@@ -259,8 +259,8 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     params.checkUpdatesDays = new StInt32Param(7);
     params.srcFormat        = new StInt32Param(ST_V_SRC_AUTODETECT);
     params.srcFormat->signals.onChanged.connect(this, &StImageViewer::doSwitchSrcFormat);
-    params.ToShowFps  = new StBoolParam(false);
-    params.IsMobileUI = new StBoolParam(StWindow::isMobile());
+    params.ToShowFps  = new StBoolParamNamed(false,                tr(StImageViewerStrings::MENU_SHOW_FPS));
+    params.IsMobileUI = new StBoolParamNamed(StWindow::isMobile(), "Mobile UI");
     params.IsMobileUI->signals.onChanged = stSlot(this, &StImageViewer::doScaleHiDPI);
     params.IsVSyncOn  = new StBoolParam(true);
     params.IsVSyncOn->signals.onChanged = stSlot(this, &StImageViewer::doSwitchVSync);

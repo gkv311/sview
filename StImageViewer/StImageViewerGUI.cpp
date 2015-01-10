@@ -521,6 +521,33 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
     aDialog->stglInit();
 }
 
+void StImageViewerGUI::doMobileSettings(const size_t ) {
+    const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
+    StParamsList aParams;
+    aRend->getOptions(aParams);
+
+    aParams.add(myPlugin->params.ToShowFps);
+    aParams.add(myLangMap->params.language);
+    aParams.add(myPlugin->params.IsMobileUI);
+    myLangMap->params.language->setName(tr(MENU_HELP_LANGS));
+
+    const StString aTitle  = "Settings";
+    StInfoDialog*  aDialog = new StInfoDialog(myPlugin, this, aTitle, scale(512), scale(300));
+
+    const int aWidthMax  = aDialog->getContent()->getRectPx().width();
+    int       aRowLast   = (int )aParams.size();
+    const int aNbRowsMax = aRowLast + 2;
+
+    StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
+    aTable->setupTable(aNbRowsMax, 2);
+    aTable->setVisibility(true, true);
+    aTable->fillFromParams(aParams, StGLVec3(1.0f, 1.0f, 1.0f), aWidthMax);
+
+    aDialog->addButton(tr(BUTTON_CLOSE), true);
+    aDialog->setVisibility(true, true);
+    aDialog->stglInit();
+}
+
 void StImageViewerGUI::doCheckUpdates(const size_t ) {
     StProcess::openURL("http://www.sview.ru/download");
 }
@@ -690,6 +717,7 @@ void StImageViewerGUI::doShowMobileExMenu(const size_t ) {
     //anItem = aMenu->addItem(myPlugin->StApplication::params.ActiveDevice->getActiveValue());
     anItem = aMenu->addItem("Settings");
     anItem->setIcon(iconTexture(stCString("actionSettings"),  anIconSize));
+    anItem->signals.onItemClick += stSlot(this, &StImageViewerGUI::doMobileSettings);
     anItem = aMenu->addItem("Slideshow", myPlugin->getAction(StImageViewer::Action_SlideShow));
     anItem->setIcon(iconTexture(stCString("actionSlideShow"), anIconSize));
     aMenu->setVisibility(true, true);

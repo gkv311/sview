@@ -197,6 +197,10 @@ class StImageViewer : public StApplication {
      */
     ST_LOCAL void releaseDevice();
 
+    ST_LOCAL const StString& tr(const size_t theId) const {
+        return myLangMap->getValue(theId);
+    }
+
         private: //! @name private fields
 
     StHandle<StGLContext>      myContext;
