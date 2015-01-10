@@ -25,7 +25,9 @@ StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
                                const StString& theText,
                                const int       theWidth,
                                const int       theHeight)
-: StGLWidget(theParent, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER), theWidth, theHeight),
+: StGLWidget(theParent, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER),
+             stMin(theWidth,  theParent->getRoot()->getRectPx().width()),
+             stMin(theHeight, theParent->getRoot()->getRectPx().height())),
   myContent(NULL),
   myTitle(NULL),
   myBtnPanel(NULL),
@@ -38,15 +40,15 @@ StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
   myMinSizeY(0),
   myToAdjustY(true),
   myIsContextual(false) {
-    create(theTitle, theText, theWidth, theHeight);
+    create(theTitle, theText, getRectPx().width(), getRectPx().height());
 }
 
 StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
                                const StString& theTitle,
                                const StString& theText)
 : StGLWidget(theParent, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER),
-             theParent->getRoot()->scale(384),
-             theParent->getRoot()->scale(200)),
+             stMin(theParent->getRoot()->scale(384),  theParent->getRoot()->getRectPx().width()),
+             stMin(theParent->getRoot()->scale(200),  theParent->getRoot()->getRectPx().height())),
   myContent(NULL),
   myTitle(NULL),
   myBtnPanel(NULL),
@@ -59,7 +61,7 @@ StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
   myMinSizeY(0),
   myToAdjustY(true),
   myIsContextual(false) {
-    create(theTitle, theText, myRoot->scale(384), myRoot->scale(200));
+    create(theTitle, theText, getRectPx().width(), getRectPx().height());
 }
 
 void StGLMessageBox::create(const StString& theTitle,
