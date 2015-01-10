@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -7,6 +7,8 @@
  */
 
 #include <StSettings/StTranslations.h>
+
+#include <StSettings/StSettings.h>
 
 #include <StFile/StFolder.h>
 #include <StFile/StRawFile.h>
@@ -25,7 +27,7 @@ StTranslations::StTranslations(const StHandle<StResourceManager>& theResMgr,
 : myResMgr(theResMgr),
   myModuleName(theModuleName),
   myWasReloaded(false) {
-    params.language = new StInt32Param(0);
+    params.language = new StEnumParam(0, "Language");
 
     // detect available translations
     StArrayList<StString> aFolders;
@@ -42,37 +44,37 @@ StTranslations::StTranslations(const StHandle<StResourceManager>& theResMgr,
             const size_t aLen = (size_t      )aRes->getSize();
             aName = StString(aSrc, aLen);
         }
-        myLangList.add(aName.isEmpty() ? aFolders[aNodeId] : aName);
+        params.language->changeValues().add(aName.isEmpty() ? aFolders[aNodeId] : aName);
     }
 #if defined(__ANDROID__)
-    if(myLangList.isEmpty()) {
+    if(params.language->getValues().isEmpty()) {
         // no way to list sub-folder on Android - check known translations
         if(myResMgr->isResourceExist(StString("lang" ST_FILE_SPLITTER "English" ST_FILE_SPLITTER) + myModuleName + StTranslations::DEFAULT_SUFFIX)) {
-            myLangList.add("English");
+            params.language->changeValues().add("English");
             myLangFolderList.add("English");
         }
         if(myResMgr->isResourceExist(StString("lang" ST_FILE_SPLITTER "Russian" ST_FILE_SPLITTER) + myModuleName + StTranslations::DEFAULT_SUFFIX)) {
-            myLangList.add("русский");
+            params.language->changeValues().add("русский");
             myLangFolderList.add("Russian");
         }
         if(myResMgr->isResourceExist(StString("lang" ST_FILE_SPLITTER "French" ST_FILE_SPLITTER) + myModuleName + StTranslations::DEFAULT_SUFFIX)) {
-            myLangList.add("français");
+            params.language->changeValues().add("français");
             myLangFolderList.add("French");
         }
         if(myResMgr->isResourceExist(StString("lang" ST_FILE_SPLITTER "German" ST_FILE_SPLITTER) + myModuleName + StTranslations::DEFAULT_SUFFIX)) {
-            myLangList.add("Deutsch");
+            params.language->changeValues().add("Deutsch");
             myLangFolderList.add("German");
         }
         if(myResMgr->isResourceExist(StString("lang" ST_FILE_SPLITTER "Korean" ST_FILE_SPLITTER) + myModuleName + StTranslations::DEFAULT_SUFFIX)) {
-            myLangList.add("한국어");
+            params.language->changeValues().add("한국어");
             myLangFolderList.add("Korean");
         }
     }
 #endif
 
-    if(myLangList.isEmpty()) {
+    if(params.language->getValues().isEmpty()) {
         // add built-in language
-        myLangList.add("English");
+        params.language->changeValues().add("English");
         myLangFolderList.add("English");
     }
 
@@ -143,11 +145,11 @@ StTranslations::~StTranslations() {
 }
 
 const StString& StTranslations::getLanguage() const {
-    return myLangList[params.language->getValue()];
+    return params.language->getValues()[params.language->getValue()];
 }
 
 void StTranslations::updateLangCode(const int32_t theNewLang) {
-    const StString& aLang = myLangList[theNewLang];
+    const StString& aLang = params.language->getValues()[theNewLang];
     if(aLang == stCString("русский")) {
         myLangCode = "rus";
     } else if(aLang == stCString("français")) {
@@ -168,7 +170,7 @@ void StTranslations::updateLangCode(const int32_t theNewLang) {
 }
 
 void StTranslations::setLanguage(const int32_t theNewLang) {
-    if(size_t(theNewLang) >= myLangList.size()) {
+    if(size_t(theNewLang) >= params.language->getValues().size()) {
         return;
     }
 

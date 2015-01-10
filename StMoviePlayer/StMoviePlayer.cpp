@@ -23,8 +23,9 @@
 #include "StVideo/StVideo.h"
 #include "StTimeBox.h"
 
-#include <StSocket/StCheckUpdates.h>
 #include <StImage/StImageFile.h>
+#include <StSocket/StCheckUpdates.h>
+#include <StSettings/StSettings.h>
 #include <StStrings/StStringStream.h>
 
 #include <StGL/StGLContext.h>

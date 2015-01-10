@@ -29,6 +29,7 @@
 #include <StGLWidgets/StGLImageRegion.h>
 #include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLMsgStack.h>
+#include <StSettings/StSettings.h>
 #include <StSocket/StCheckUpdates.h>
 #include <StThreads/StThread.h>
 #include <StImage/StImageFile.h>

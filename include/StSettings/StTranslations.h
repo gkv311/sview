@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2014 Kirill Gavrilov
+ * Copyright © 2010-2015 Kirill Gavrilov
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,7 +11,7 @@
 
 #include <StStrings/StLangMap.h>
 #include <StThreads/StResourceManager.h>
-#include <StSettings/StSettings.h>
+#include <StSettings/StEnumParam.h>
 
 /**
  * This class unify access to the translations for all modules.
@@ -51,7 +51,7 @@ class StTranslations : public StLangMap {
      * Return list of available translations.
      */
     const StArrayList<StString>& getLanguagesList() const {
-        return myLangList;
+        return params.language->getValues();
     }
 
     /**
@@ -74,7 +74,7 @@ class StTranslations : public StLangMap {
 
     struct {
 
-        StHandle<StInt32Param> language; //!< language id in available translations list
+        StHandle<StEnumParam> language; //!< language id in available translations list
 
     } params;
 
@@ -97,7 +97,6 @@ class StTranslations : public StLangMap {
     StHandle<StResourceManager>
                           myResMgr;         //!< file resource manager
     StString              myModuleName;     //!< module name like 'StImageViewer'
-    StArrayList<StString> myLangList;       //!< available (found) translations
     StArrayList<StString> myLangFolderList; //!< translation files
     StString              myLangCode;       //!< active language code
     bool                  myWasReloaded;    //!< flag indicates that translation was reloaded

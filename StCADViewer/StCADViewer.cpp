@@ -17,6 +17,8 @@
 #include <StGLCore/StGLCore20.h>
 #include <StGLWidgets/StGLMsgStack.h>
 
+#include <StSettings/StSettings.h>
+
 #include "../StOutAnaglyph/StOutAnaglyph.h"
 #include "../StOutDual/StOutDual.h"
 #include "../StOutIZ3D/StOutIZ3D.h"
