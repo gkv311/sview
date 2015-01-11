@@ -23,6 +23,7 @@ static StString getAbout() {
           "  --fullscreen         Open fullscreen\n"
           "  --slideshow          Start slideshow\n"
           "  --last               Open last file\n"
+          "  --paused             Open file in paused state\n"
           "  --in=image,video     Application to open (predefined values: image, video, diag, cad)\n"
           "  --out=RENDERER       Stereoscopic output module (auto, StOutAnaglyph, StOutDual,...)\n"
           "  --imageLib=IMGLIB    Setup 3rd-party library for image processing (FFmpeg, FreeImage, DevIL)\n"

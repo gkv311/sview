@@ -97,6 +97,8 @@ namespace {
     static const char ST_ARGUMENT_FILE_LEFT[]  = "left";
     static const char ST_ARGUMENT_FILE_RIGHT[] = "right";
     static const char ST_ARGUMENT_FILE_LAST[]  = "last";
+    static const char ST_ARGUMENT_FILE_PAUSE[] = "pause";
+    static const char ST_ARGUMENT_FILE_PAUSED[]= "paused";
     static const char ST_ARGUMENT_BENCHMARK[]  = "benchmark";
 
 }
@@ -966,12 +968,19 @@ bool StMoviePlayer::open() {
     }
 
     parseArguments(myOpenFileInfo->getArgumentsMap());
-    const StMIME anOpenMIME = myOpenFileInfo->getMIME();
+    const StMIME     anOpenMIME  = myOpenFileInfo->getMIME();
+    const StArgument anArgPause  = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_PAUSE];
+    const StArgument anArgPaused = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_PAUSED];
+    const bool       isPaused    = (anArgPause .isValid() && !anArgPause .isValueOff())
+                                || (anArgPaused.isValid() && !anArgPaused.isValueOff());
     if(myOpenFileInfo->getPath().isEmpty()) {
         // open drawer without files
         const StArgument anArgLast = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_LAST];
         if(anArgLast.isValid() && !anArgLast.isValueOff()) {
             doOpenRecent(0); // open last opened file
+            if(isPaused) {
+                myVideo->pushPlayEvent(ST_PLAYEVENT_PAUSE);
+            }
         }
         return true;
     }
@@ -987,6 +996,9 @@ bool StMoviePlayer::open() {
         const size_t aRecent = myPlayList->findRecent(argFileLeft.getValue(), argFileRight.getValue());
         if(aRecent != size_t(-1)) {
             doOpenRecent(aRecent);
+            if(isPaused) {
+                myVideo->pushPlayEvent(ST_PLAYEVENT_PAUSE);
+            }
             return true;
         }
         myPlayList->addOneFile(argFileLeft.getValue(), argFileRight.getValue());
@@ -998,6 +1010,9 @@ bool StMoviePlayer::open() {
         const size_t aRecent = myPlayList->findRecent(myOpenFileInfo->getPath());
         if(aRecent != size_t(-1)) {
             doOpenRecent(aRecent);
+            if(isPaused) {
+                myVideo->pushPlayEvent(ST_PLAYEVENT_PAUSE);
+            }
             return true;
         }
         myPlayList->open(myOpenFileInfo->getPath());
@@ -1007,6 +1022,9 @@ bool StMoviePlayer::open() {
         doUpdateStateLoading();
         myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
         myVideo->doLoadNext();
+        if(isPaused) {
+            myVideo->pushPlayEvent(ST_PLAYEVENT_PAUSE);
+        }
     }
     return true;
 }
