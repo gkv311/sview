@@ -24,8 +24,10 @@ StGLButton::StGLButton(StGLWidget*     theParent,
     aBtn->signals.onItemClick.connect(this, &StGLButton::doItemClick);
     aBtn->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
                          StGLTextFormatter::ST_ALIGN_Y_CENTER);
+    aBtn->changeMargins().left  = myRoot->scale(8);
+    aBtn->changeMargins().right = myRoot->scale(8);
 
-    myWidth = aBtn->computeTextWidth() + myRoot->scale(16);
+    myWidth = aBtn->computeTextWidth() + myRoot->scale(8) + aBtn->getMargins().left + aBtn->getMargins().right;
 }
 
 StGLButton::~StGLButton() {
@@ -58,7 +60,7 @@ int StGLButton::computeWidth(const StString& theText) {
         return 0;
     }
 
-    return anItem->computeTextWidth(theText) + myRoot->scale(16);
+    return anItem->computeTextWidth(theText) + myRoot->scale(8) + anItem->getMargins().left + anItem->getMargins().right;
 }
 
 int StGLButton::getWidth() const {
@@ -93,7 +95,7 @@ bool StGLButton::stglInit() {
     anItem->changeRectPx().left()   = 0;
     anItem->changeRectPx().right()  = myWidth;
     anItem->changeRectPx().bottom() = anItem->changeRectPx().top() + myItemHeight;
-    anItem->setTextWidth(myWidth);
+    anItem->setTextWidth(myWidth - anItem->getMargins().left - anItem->getMargins().right);
     changeRectPx().right()  = getRectPx().left() + myWidth;
     changeRectPx().bottom() = getRectPx().top()  + myItemHeight;
     return true;

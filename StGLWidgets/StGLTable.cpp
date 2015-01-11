@@ -174,7 +174,7 @@ void StGLTable::fillFromParams(const StParamsList& theParams,
         anItem.setColSpan(1);
         if(aBool.downcastFrom(aParam)) {
             StGLCheckbox* aCheckBox = new StGLCheckbox(&anItem, aBool,
-                                                       0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
+                                                       0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT));
             aCheckBox->changeRectPx().right()  = aCheckBox->getRectPx().left() + anIconWidth;
             aCheckBox->changeRectPx().bottom() = aCheckBox->getRectPx().top()  + anIconWidth;
             aCheckBox->changeMargins().setValues(anIconMargin);

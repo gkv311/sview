@@ -21,6 +21,8 @@ StGLCombobox::StGLCombobox(StGLWidget* theParent,
     StGLMenuItem* anItem = getMenuItem();
     if(anItem != NULL) {
         anItem->setArrowIcon(StGLMenuItem::Arrow_Bottom);
+        anItem->setupAlignment(StGLTextFormatter::ST_ALIGN_X_LEFT,
+                               StGLTextFormatter::ST_ALIGN_Y_CENTER);
     }
 
     StGLButton::signals.onBtnClick += stSlot(this, &StGLCombobox::doShowList);
