@@ -52,6 +52,14 @@ class StMainGlue : public StAndroidGlue {
             }
         }
 
+        if(anInfo->isEmpty()) {
+            // open recent file by default
+            StArgumentsMap anArgs = anInfo->getArgumentsMap();
+            anArgs.set(StDictEntry("last",   "true"));
+            anArgs.set(StDictEntry("paused", "true"));
+            anInfo->setArgumentsMap(anArgs);
+        }
+
         myApp = new StMoviePlayer(aResMgr, this, anInfo);
     }
 
