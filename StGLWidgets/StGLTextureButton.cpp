@@ -426,14 +426,16 @@ void StGLTextureButton::stglDraw(unsigned int ) {
     }
 
     StHandle<StGLTextureButton::Program>& aProgram = myProgram->getProgram(myProgramIndex);
-    if(aProgram.isNull()) {
+    StGLTexture& aTexture = myTextures[myFaceId];
+    if( aProgram.isNull()
+    || !aTexture.isValid()) {
         return;
     }
 
     StGLContext& aCtx = getContext();
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     aCtx.core20fwd->glEnable(GL_BLEND);
-    myTextures[myFaceId].bind(aCtx);
+    aTexture.bind(aCtx);
 
     StRectD_t butRectGl = getRectGl();
     GLdouble butWGl = butRectGl.right() - butRectGl.left();
@@ -462,7 +464,7 @@ void StGLTextureButton::stglDraw(unsigned int ) {
     myVertBuf.unBindVertexAttrib(aCtx, aProgram->getVVertexLoc());
 
     aProgram->unuse(aCtx);
-    myTextures[myFaceId].unbind(aCtx);
+    aTexture.unbind(aCtx);
     aCtx.core20fwd->glDisable(GL_BLEND);
 }
 

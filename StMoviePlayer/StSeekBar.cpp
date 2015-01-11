@@ -104,7 +104,7 @@ class StSeekBar::StProgramSB : public StGLProgram {
 
 StSeekBar::StSeekBar(StGLWidget* theParent,
                      const int   theTop)
-: StGLWidget(theParent, 0, theTop, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER),
+: StGLWidget(theParent, 0, theTop, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT),
              theParent->getRoot()->scale(512), theParent->getRoot()->scale(12 + 8)),
   myProgram(new StProgramSB()),
   myProgress(0.0f),
@@ -124,9 +124,6 @@ StSeekBar::~StSeekBar() {
 void StSeekBar::stglResize() {
     StGLWidget::stglResize();
     StGLContext& aCtx = getContext();
-
-    // update pixel coordinates
-    changeRectPx().right() = getParent()->getRectPx().width() - myRoot->scale(128);
 
     stglUpdateVertices();
 

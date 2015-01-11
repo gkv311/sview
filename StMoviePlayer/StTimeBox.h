@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,25 +30,44 @@ class ST_LOCAL StTimeBox : public StGLTextureButton {
     /**
      * Default constructor.
      */
-    StTimeBox(StGLWidget* theParent,
-              const int   theLeft = 32,
-              const int   theTop  = 32)
-    : StGLTextureButton(          theParent, theLeft, theTop, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT)),
-      myTextArea(new StGLTextArea(theParent, theLeft, theTop, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
-                                  theParent->getRoot()->scale(32), theParent->getRoot()->scale(32))),
+    StTimeBox(StGLWidget*       theParent,
+              const int         theLeft,
+              const int         theTop,
+              const StGLCorner& theCorner,
+              const StGLTextArea::FontSize theSize = StGLTextArea::SIZE_NORMAL)
+    : StGLTextureButton(theParent, theLeft, theTop, theCorner),
       myProgressSec(0.0),
       myDurationSec(0.0),
-      myToShowElapsed(true) {
+      myToShowElapsed(true),
+      myIsOverlay(false) {
+        myTextArea = new StGLTextArea(this, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER),
+                                      myRoot->scale(32), myRoot->scale(32), theSize);
         myTextArea->setBorder(false);
         myTextArea->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
         myTextArea->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
                                    StGLTextFormatter::ST_ALIGN_Y_CENTER);
-        StGLWidget::signals.onMouseUnclick.connect(this, &StTimeBox::doSwitchElapsed);
+    }
+
+    void setSwitchOnClick(const bool theToSwitch) {
+        if(theToSwitch) {
+            StGLWidget::signals.onMouseUnclick += stSlot(this, &StTimeBox::doSwitchElapsed);
+        } else {
+            StGLWidget::signals.onMouseUnclick -= stSlot(this, &StTimeBox::doSwitchElapsed);
+        }
+    }
+
+    void setOverlay(const bool theValue) {
+        myIsOverlay = theValue;
+    }
+
+    StGLTextArea* getTextArea() {
+        return myTextArea;
     }
 
     virtual bool stglInit() {
         bool isBtnInit = StGLTextureButton::stglInit();
-        myTextArea->changeRectPx() = StGLTextureButton::getRectPx();
+        myTextArea->changeRectPx().right()  = getRectPx().width();
+        myTextArea->changeRectPx().bottom() = getRectPx().height();
         return isBtnInit && myTextArea->stglInit();
     }
 
@@ -63,9 +82,25 @@ class ST_LOCAL StTimeBox : public StGLTextureButton {
         myTextArea->stglDraw(theView);
     }
 
-    void setVisibility(bool isVisible) {
-        StGLTextureButton::setVisibility(isVisible);
-        myTextArea->setVisibility(isVisible);
+    virtual bool tryClick(const StPointD_t& theCursor,
+                          const int&        theMouseBtn,
+                          bool&             theIsItemClicked) {
+        return myIsOverlay
+             ? false
+             : StGLTextureButton::tryClick(theCursor, theMouseBtn, theIsItemClicked);
+    }
+
+    virtual bool tryUnClick(const StPointD_t& theCursor,
+                            const int&        theMouseBtn,
+                            bool&             theIsItemUnclicked) {
+        return myIsOverlay
+             ? false
+             : StGLTextureButton::tryUnClick(theCursor, theMouseBtn, theIsItemUnclicked);
+    }
+
+    virtual void setVisibility(bool isVisible, bool isForce) {
+        StGLTextureButton::setVisibility(isVisible, isForce);
+        myTextArea->setVisibility(isVisible, isForce);
     }
 
     void setTime(const double theProgressSec,
@@ -86,6 +121,7 @@ class ST_LOCAL StTimeBox : public StGLTextureButton {
     double        myProgressSec;   //!< current progress in seconds
     double        myDurationSec;   //!< overall duration in seconds
     bool          myToShowElapsed; //!< to show elapsed or remaining time
+    bool          myIsOverlay;     //!< do not handle clicking
 
 };
 

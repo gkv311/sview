@@ -66,13 +66,32 @@ namespace {
     static const int DISPL_X_REGION_UPPER  = 32;
     static const int DISPL_X_REGION_BOTTOM = 52;
     static const int DISPL_Y_REGION_BOTTOM = 64;
-    static const int ICON_WIDTH            = 64;
 
     static const StGLVec3 aBlack(0.0f, 0.0f, 0.0f);
     static const StGLVec3 aGreen(0.4f, 0.8f, 0.4f);
     static const StGLVec3 aRed  (1.0f, 0.0f, 0.0f);
 
-};
+}
+
+void StMoviePlayerGUI::createDesktopUI(const StHandle<StPlayList>& thePlayList) {
+    createUpperToolbar();
+
+    const StMarginsI& aMargins = getRootMargins();
+    mySeekBar = new StSeekBar(this, -aMargins.bottom - scale(74));
+    mySeekBar->signals.onSeekClick.connect(myPlugin, &StMoviePlayer::doSeek);
+
+    createBottomToolbar();
+
+    myDescr = new StGLDescription(this);
+
+    myPlayList = new StGLPlayList(this, thePlayList);
+    myPlayList->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+    myPlayList->setVisibility(myPlugin->params.ToShowPlayList->getValue(), true);
+    myPlayList->signals.onOpenItem = stSlot(myPlugin, &StMoviePlayer::doFileNext);
+
+    // create main menu
+    createMainMenu();
+}
 
 /**
  * Create upper toolbar
@@ -86,18 +105,18 @@ void StMoviePlayerGUI::createUpperToolbar() {
     myPanelUpper = new StGLWidget(this, aMargins.left, aMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(128));
 
     // append the textured buttons
-    myBtnOpen = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * ICON_WIDTH, aTop);
+    myBtnOpen = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * myIconStep, aTop);
     myBtnOpen->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doOpen1File);
     myBtnOpen->setTexturePath(stCTexture("openImage.png"));
 
     myBtnSwapLR = new StGLCheckboxTextured(myPanelUpper, myImage->params.swapLR,
                                            stCTexture("swapLRoff.png"),
                                            stCTexture("swapLRon.png"),
-                                           aLeft + (aBtnIter++) * ICON_WIDTH, aTop,
+                                           aLeft + (aBtnIter++) * myIconStep, aTop,
                                            StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
 
     StGLSwitchTextured* aSrcBtn = new StGLSwitchTextured(myPanelUpper, myPlugin->params.srcFormat,
-                                                         aLeft + (aBtnIter++) * ICON_WIDTH, aTop,
+                                                         aLeft + (aBtnIter++) * myIconStep, aTop,
                                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
 
     aSrcBtn->addItem(ST_V_SRC_AUTODETECT,    stCTexture("srcFrmtAuto.png"));
@@ -126,19 +145,21 @@ void StMoviePlayerGUI::createBottomToolbar() {
     const StString aPaths[2] = { stCTexture("moviePlay.png"), stCTexture("moviePause.png") };
     myBtnPlay->setTexturePath(aPaths, 2);
 
-    myTimeBox = new StTimeBox(myPanelBottom, aLeft + 1 * ICON_WIDTH, aTop);
+    myTimeBox = new StTimeBox(myPanelBottom, aLeft + 1 * myIconStep, aTop,
+                              StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
     myTimeBox->setTexturePath(stCTexture("timebox.png"));
-    myBtnPrev = new StGLTextureButton(myPanelBottom, -aLeft - 3 * ICON_WIDTH, aTop,
+    myTimeBox->setSwitchOnClick(true);
+    myBtnPrev = new StGLTextureButton(myPanelBottom, -aLeft - 3 * myIconStep, aTop,
                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myBtnPrev->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doListPrev);
     myBtnPrev->setTexturePath(stCTexture("moviePrior.png"));
 
-    myBtnNext = new StGLTextureButton(myPanelBottom, -aLeft - 2 * ICON_WIDTH, aTop,
+    myBtnNext = new StGLTextureButton(myPanelBottom, -aLeft - 2 * myIconStep, aTop,
                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myBtnNext->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doListNext);
     myBtnNext->setTexturePath(stCTexture("movieNext.png"));
 
-    myBtnList = new StGLTextureButton(myPanelBottom, -aLeft - ICON_WIDTH, aTop,
+    myBtnList = new StGLTextureButton(myPanelBottom, -aLeft - myIconStep, aTop,
                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myBtnList->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doPlayListReverse);
     myBtnList->setTexturePath(stCTexture("moviePlaylist.png"));
@@ -959,6 +980,133 @@ StGLMenu* StMoviePlayerGUI::createLanguageMenu() {
     return aMenu;
 }
 
+void StMoviePlayerGUI::createMobileUI(const StHandle<StPlayList>& thePlayList) {
+    createMobileUpperToolbar();
+    createMobileBottomToolbar();
+
+    myPlayList = new StGLPlayList(this, thePlayList);
+    myPlayList->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+    myPlayList->setVisibility(myPlugin->params.ToShowPlayList->getValue(), true);
+    myPlayList->signals.onOpenItem = stSlot(myPlugin, &StMoviePlayer::doFileNext);
+}
+
+/**
+ * Create upper toolbar
+ */
+void StMoviePlayerGUI::createMobileUpperToolbar() {
+    const IconSize anIconSize = scaleIcon(32);
+    StMarginsI aButtonMargins;
+    aButtonMargins.setValues(12);
+
+    const StMarginsI& aRootMargins = getRootMargins();
+    myPanelUpper = new StGLWidget(this, aRootMargins.left, aRootMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(56));
+
+    int aBtnIter = 0;
+
+    StGLSwitchTextured* aSrcBtn = new StGLSwitchTextured(myPanelUpper, myPlugin->params.srcFormat,
+                                                         (aBtnIter++) * myIconStep, 0,
+                                                         StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    aSrcBtn->changeMargins() = aButtonMargins;
+    aSrcBtn->addItem(ST_V_SRC_AUTODETECT,           iconTexture(stCString("menuAuto"),           anIconSize));
+    aSrcBtn->addItem(ST_V_SRC_MONO,                 iconTexture(stCString("menuMono"),           anIconSize));
+    aSrcBtn->addItem(ST_V_SRC_PARALLEL_PAIR,        iconTexture(stCString("menuSbsLR"),          anIconSize), true);
+    aSrcBtn->addItem(ST_V_SRC_SIDE_BY_SIDE,         iconTexture(stCString("menuSbsRL"),          anIconSize));
+    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_LR,        iconTexture(stCString("menuOverUnderLR"),    anIconSize));
+    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_RL,        iconTexture(stCString("menuOverUnderRL"),    anIconSize), true);
+    aSrcBtn->addItem(ST_V_SRC_ROW_INTERLACE,        iconTexture(stCString("menuRowLR"),          anIconSize));
+    aSrcBtn->addItem(ST_V_SRC_ANAGLYPH_RED_CYAN,    iconTexture(stCString("menuRedCyanLR"),      anIconSize));
+    aSrcBtn->addItem(ST_V_SRC_ANAGLYPH_G_RB,        iconTexture(stCString("menuGreenMagentaLR"), anIconSize));
+    aSrcBtn->addItem(ST_V_SRC_ANAGLYPH_YELLOW_BLUE, iconTexture(stCString("menuYellowBlueLR"),   anIconSize));
+
+    aBtnIter = 0;
+    myBtnSrcFrmt = aSrcBtn;
+    StGLTextureButton* aBtnEx = new StGLTextureButton(myPanelUpper, (aBtnIter--) * (-myIconStep), 0,
+                                                      StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    aBtnEx->changeMargins() = aButtonMargins;
+    aBtnEx->setTexturePath(iconTexture(stCString("actionOverflow"), anIconSize));
+    aBtnEx->signals.onBtnClick += stSlot(this, &StMoviePlayerGUI::doShowMobileExMenu);
+
+    /**myBtnSwapLR = new StGLCheckboxTextured(myPanelUpper, myImage->params.swapLR,
+                                           stCTexture("swapLRoff.png"),
+                                           stCTexture("swapLRon.png"),
+                                           aLeft + (aBtnIter++) * myIconStep, aTop,
+                                           StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));*/
+}
+
+/**
+ * Create bottom toolbar
+ */
+void StMoviePlayerGUI::createMobileBottomToolbar() {
+    myBottomBarNbLeft  = 0;
+    myBottomBarNbRight = 0;
+
+    const IconSize anIconSize = scaleIcon(32);
+    StMarginsI aButtonMargins;
+    aButtonMargins.setValues(12);
+    const StMarginsI& aRootMargins = getRootMargins();
+    myPanelBottom = new StGLWidget(this, aRootMargins.left, -aRootMargins.bottom, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(56));
+
+    const StGLCorner aLeftCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT);
+    myBtnPrev = new StGLTextureButton(myPanelBottom, (myBottomBarNbLeft++) * myIconStep, 0);
+    myBtnPrev->signals.onBtnClick += stSlot(myPlugin, &StMoviePlayer::doListPrev);
+    myBtnPrev->setTexturePath(iconTexture(stCString("actionVideoPrevious"), anIconSize));
+    myBtnPrev->changeMargins() = aButtonMargins;
+
+    myBtnPlay = new StGLTextureButton(myPanelBottom, (myBottomBarNbLeft++) * myIconStep, 0, aLeftCorner, 2);
+    myBtnPlay->signals.onBtnClick += stSlot(myPlugin, &StMoviePlayer::doPlayPause);
+    const StString aPaths[2] = {
+        iconTexture(stCString("actionVideoPlay"),  anIconSize),
+        iconTexture(stCString("actionVideoPause"), anIconSize)
+    };
+    myBtnPlay->setTexturePath(aPaths, 2);
+    myBtnPlay->changeMargins() = aButtonMargins;
+
+    myBtnNext = new StGLTextureButton(myPanelBottom, (myBottomBarNbLeft++) * myIconStep, 0);
+    myBtnNext->signals.onBtnClick += stSlot(myPlugin, &StMoviePlayer::doListNext);
+    myBtnNext->setTexturePath(iconTexture(stCString("actionVideoNext"), anIconSize));
+    myBtnNext->changeMargins() = aButtonMargins;
+
+    const StGLCorner aRightCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT);
+    myBtnList = new StGLTextureButton(myPanelBottom, (myBottomBarNbRight++) * (-myIconStep), 0, aRightCorner);
+    myBtnList->signals.onBtnClick += stSlot(myPlugin, &StMoviePlayer::doPlayListReverse);
+    myBtnList->setTexturePath(iconTexture(stCString("actionVideoPlaylist"), anIconSize));
+    myBtnList->changeMargins() = aButtonMargins;
+
+    StGLTextureButton* aBtnInfo = new StGLTextureButton(myPanelBottom, (myBottomBarNbRight++) * (-myIconStep), 0, aRightCorner);
+    aBtnInfo->signals.onBtnClick += stSlot(myPlugin, &StMoviePlayer::doAboutFile);
+    aBtnInfo->setTexturePath(iconTexture(stCString("actionInfo"),  anIconSize));
+    aBtnInfo->changeMargins() = aButtonMargins;
+
+    mySeekBar = new StSeekBar(myPanelBottom, -scale(7));
+    mySeekBar->signals.onSeekClick.connect(myPlugin, &StMoviePlayer::doSeek);
+
+    myTimeBox = new StTimeBox(myPanelBottom, myBottomBarNbRight * (-myIconStep), 0, aRightCorner, StGLTextArea::SIZE_SMALL);
+    myTimeBox->setSwitchOnClick(true);
+    myTimeBox->changeRectPx().right()  = myTimeBox->getRectPx().left() + myIconStep * 2;
+    myTimeBox->changeRectPx().bottom() = myTimeBox->getRectPx().top()  + scale(48);
+}
+
+void StMoviePlayerGUI::doShowMobileExMenu(const size_t ) {
+    const IconSize anIconSize = scaleIcon(16);
+    const int aTop = scale(56);
+
+    StGLMenu*     aMenu  = new StGLMenu(this, 0, aTop, StGLMenu::MENU_VERTICAL_COMPACT);
+    StGLMenuItem* anItem = NULL;
+    aMenu->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    aMenu->setContextual(true);
+    anItem = aMenu->addItem(tr(BUTTON_DELETE), myPlugin->getAction(StMoviePlayer::Action_DeleteFile));
+    anItem->setIcon(iconTexture(stCString("actionDiscard"),   anIconSize));
+    anItem = aMenu->addItem(tr(MENU_HELP_ABOUT));
+    anItem->setIcon(iconTexture(stCString("actionHelp"),      anIconSize));
+    anItem->signals.onItemClick += stSlot(this, &StMoviePlayerGUI::doAboutProgram);
+    //anItem = aMenu->addItem(myPlugin->StApplication::params.ActiveDevice->getActiveValue());
+    anItem = aMenu->addItem("Settings");
+    anItem->setIcon(iconTexture(stCString("actionSettings"),  anIconSize));
+    anItem->signals.onItemClick += stSlot(this, &StMoviePlayerGUI::doMobileSettings);
+    aMenu->setVisibility(true, true);
+    aMenu->stglInit();
+}
+
 StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
                                    StWindow*       theWindow,
                                    StTranslations* theLangMap,
@@ -1000,13 +1148,17 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
   myFpsWidget(NULL),
   //
   myIsVisibleGUI(true),
-  myIsExperimental(myPlugin->params.ToShowExtra->getValue()) {
+  myIsExperimental(myPlugin->params.ToShowExtra->getValue()),
+  myIconStep(64),
+  myBottomBarNbLeft(0),
+  myBottomBarNbRight(0) {
     const GLfloat aScale = myPlugin->params.ScaleHiDPI2X->getValue() ? 2.0f : myPlugin->params.ScaleHiDPI ->getValue();
     setScale(aScale, (StGLRootWidget::ScaleAdjust )myPlugin->params.ScaleAdjust->getValue());
     setMobile(myPlugin->params.IsMobileUI->getValue());
 
+    myIconStep = isMobile() ? scale(56) : scale(64);
+
     changeRootMargins() = myWindow->getMargins();
-    const StMarginsI& aMargins = getRootMargins();
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StMoviePlayerGUI::doShowFPS);
 
     myImage = new StGLImageRegion(this, theTextureQueue, false);
@@ -1028,22 +1180,11 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
         myFpsWidget->setVisibility(true, true);
     }
 
-    createUpperToolbar();
-
-    mySeekBar = new StSeekBar(this, -aMargins.bottom - scale(74));
-    mySeekBar->signals.onSeekClick.connect(myPlugin, &StMoviePlayer::doSeek);
-
-    createBottomToolbar();
-
-    myDescr = new StGLDescription(this);
-
-    myPlayList = new StGLPlayList(this, thePlayList);
-    myPlayList->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
-    myPlayList->setVisibility(myPlugin->params.ToShowPlayList->getValue(), true);
-    myPlayList->signals.onOpenItem = stSlot(myPlugin, &StMoviePlayer::doFileNext);
-
-    // create main menu
-    createMainMenu();
+    if(isMobile()) {
+        createMobileUI(thePlayList);
+    } else {
+        createDesktopUI(thePlayList);
+    }
 
     myMsgStack = new StGLMsgStack(this, myPlugin->getMessagesQueue());
     myMsgStack->setVisibility(true, true);
@@ -1108,13 +1249,46 @@ void StMoviePlayerGUI::stglResize(const StGLBoxPx& theRectPx) {
             myPanelBottom->changeRectPx().left() =  aMargins.left;
             myPanelBottom->changeRectPx().moveTopTo(-aMargins.bottom);
         }
-        if(mySeekBar != NULL) {
-            mySeekBar->changeRectPx().moveTopTo(-aMargins.bottom - scale(78));
-        }
         if(myMenuRoot != NULL) {
             myMenuRoot->changeRectPx().left() = aMargins.left;
             myMenuRoot->changeRectPx().top()  = aMargins.top;
             myMenuRoot->stglUpdateSubmenuLayout();
+        }
+    }
+
+    if(mySeekBar != NULL) {
+        if(isMobile()) {
+            const int anXOffset = scale(24);
+            const int anXSpace  = theRectPx.width() - (myBottomBarNbLeft + myBottomBarNbRight) * myIconStep;
+            const int anXSpace2 = anXSpace - myBottomBarNbRight * myIconStep * 2;
+            const int aBoxWidth = myTimeBox->getRectPx().width();
+            if(anXSpace >= scale(250)) {
+                mySeekBar->changeRectPx().moveTopTo(-scale(22));
+                mySeekBar->changeRectPx().left()  = anXOffset + myBottomBarNbLeft * myIconStep;
+                mySeekBar->changeRectPx().right() = theRectPx.width() - anXOffset - myBottomBarNbRight * myIconStep;
+                if(anXSpace2 >= scale(250)) {
+                    mySeekBar->changeRectPx().right() -= myIconStep * 2;
+                    myTimeBox->changeRectPx().moveTopTo(0);
+                    myTimeBox->changeRectPx().moveLeftTo(myBottomBarNbRight * (-myIconStep));
+                    myTimeBox->setOverlay(false);
+                } else {
+                    myTimeBox->changeRectPx().moveTopTo(0);
+                    myTimeBox->changeRectPx().moveLeftTo(myBottomBarNbRight * (-myIconStep) - anXSpace / 2 + aBoxWidth / 2);
+                    myTimeBox->setOverlay(true);
+                }
+            } else {
+                mySeekBar->changeRectPx().moveTopTo(-scale(78));
+                mySeekBar->changeRectPx().left()  = anXOffset;
+                mySeekBar->changeRectPx().right() = theRectPx.width() - anXOffset;
+                myTimeBox->changeRectPx().moveTopTo(-scale(56));
+                myTimeBox->changeRectPx().moveLeftTo(-theRectPx.width() / 2 + aBoxWidth / 2);
+                myTimeBox->setOverlay(true);
+            }
+        } else {
+            const int anXOffset = scale(64);
+            mySeekBar->changeRectPx().moveTopTo(-aMargins.bottom - scale(78));
+            mySeekBar->changeRectPx().left()  = anXOffset;
+            mySeekBar->changeRectPx().right() = theRectPx.width() - anXOffset;
         }
     }
 
@@ -1168,7 +1342,7 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
         || (myPanelUpper  != NULL && myPanelUpper ->isPointIn(theCursor))
         || (myPanelBottom != NULL && myPanelBottom->isPointIn(theCursor))
         || (mySeekBar     != NULL && mySeekBar    ->isPointIn(theCursor))
-        || (toShowPlayList        && myPlayList   ->isPointIn(theCursor))
+        || (myPlayList    != NULL && toShowPlayList && myPlayList->isPointIn(theCursor))
         || (myMenuRoot    != NULL && myMenuRoot->isActive());
     if(theIsMouseMoved) {
         myVisibilityTimer.restart();
@@ -1201,7 +1375,8 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
         }
     }
 
-    if(toShowPlayList) {
+    if(myPlayList != NULL
+    && toShowPlayList) {
         myPlayList->setVisibility(myIsVisibleGUI, false);
     }
 
@@ -1387,6 +1562,36 @@ void StMoviePlayerGUI::doAboutRenderer(const size_t ) {
 void StMoviePlayerGUI::showUpdatesNotify() {
     StGLMessageBox* aDialog = new StGLMessageBox(this, "", tr(UPDATES_NOTIFY));
     aDialog->addButton(tr(BUTTON_CLOSE));
+    aDialog->setVisibility(true, true);
+    aDialog->stglInit();
+}
+
+void StMoviePlayerGUI::doMobileSettings(const size_t ) {
+    const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
+    StParamsList aParams;
+    aParams.add(myPlugin->StApplication::params.ActiveDevice);
+    aParams.add(myImage->params.displayMode);
+    aRend->getOptions(aParams);
+    aParams.add(myPlugin->params.ToShowFps);
+    aParams.add(myLangMap->params.language);
+    aParams.add(myPlugin->params.IsMobileUI);
+    myLangMap->params.language->setName(tr(MENU_HELP_LANGS));
+
+    const StString aTitle  = "Settings";
+    StInfoDialog*  aDialog = new StInfoDialog(myPlugin, this, aTitle, scale(512), scale(300));
+
+    const int aWidthMax  = aDialog->getContent()->getRectPx().width();
+    int       aRowLast   = (int )aParams.size();
+    const int aNbRowsMax = aRowLast + 2;
+
+    StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
+    aTable->changeItemMargins().top    = scale(4);
+    aTable->changeItemMargins().bottom = scale(4);
+    aTable->setupTable(aNbRowsMax, 2);
+    aTable->setVisibility(true, true);
+    aTable->fillFromParams(aParams, StGLVec3(1.0f, 1.0f, 1.0f), aWidthMax);
+
+    aDialog->addButton(tr(BUTTON_CLOSE), true);
     aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }

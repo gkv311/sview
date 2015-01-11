@@ -123,12 +123,14 @@ class StMoviePlayerGUI : public StGLRootWidget {
 
     ST_LOCAL void doAboutFile(const size_t );
 
-        private:
+        private: //! @name desktop interface creation routines
 
+    /**
+     * Create normal (desktop) interface.
+     */
+    ST_LOCAL void createDesktopUI(const StHandle<StPlayList>& thePlayList);
     ST_LOCAL void createUpperToolbar();
     ST_LOCAL void createBottomToolbar();
-
-        private: //! @name menus creation routines
 
     ST_LOCAL void      createMainMenu();         // Root (Main menu)
     ST_LOCAL StGLMenu* createMediaMenu();        // Root -> Media menu
@@ -158,6 +160,16 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL void fillOpenALDeviceMenu(StGLMenu* theMenu);
     ST_LOCAL void fillRecentMenu(StGLMenu* theMenu);
 
+        private: //! @name mobile interface creation routines
+
+    /**
+     * Create mobile interface.
+     */
+    ST_LOCAL void createMobileUI(const StHandle<StPlayList>& thePlayList);
+
+    ST_LOCAL void createMobileUpperToolbar();
+    ST_LOCAL void createMobileBottomToolbar();
+
         private: //! @name callback Slots
 
     ST_LOCAL void doAboutProgram (const size_t );
@@ -168,6 +180,9 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL void doShowFPS(const bool );
     ST_LOCAL void doAboutRenderer(const size_t );
     ST_LOCAL void doAudioDelay   (const size_t );
+
+    ST_LOCAL void doShowMobileExMenu(const size_t );
+    ST_LOCAL void doMobileSettings(const size_t );
 
         private: //! @name private fields
 
@@ -205,6 +220,9 @@ class StMoviePlayerGUI : public StGLRootWidget {
 
     bool                myIsVisibleGUI;
     bool                myIsExperimental;
+    int                 myIconStep;         //!< step between icons, in pixels
+    int                 myBottomBarNbLeft;  //!< number of icons at left  side of bottom bar, in pixels
+    int                 myBottomBarNbRight; //!< number of icons at right side of bottom bar, in pixels
 
         private:
 

@@ -440,8 +440,8 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.srcFormat->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchSrcFormat);
     params.ToShowPlayList   = new StBoolParam(false);
     params.ToShowPlayList->signals.onChanged = stSlot(this, &StMoviePlayer::doShowPlayList);
-    params.ToShowFps   = new StBoolParam(false);
-    params.IsMobileUI  = new StBoolParam(StWindow::isMobile());
+    params.ToShowFps   = new StBoolParamNamed(false, tr(MENU_FPS_METER));
+    params.IsMobileUI  = new StBoolParamNamed(StWindow::isMobile(), "Mobile UI");
     params.IsMobileUI->signals.onChanged = stSlot(this, &StMoviePlayer::doScaleHiDPI);
     params.IsVSyncOn   = new StBoolParam(true);
     params.IsVSyncOn->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchVSync);
@@ -1399,7 +1399,8 @@ void StMoviePlayer::stglDraw(unsigned int theView) {
 }
 
 void StMoviePlayer::doShowPlayList(const bool theToShow) {
-    if(myGUI.isNull()) {
+    if(myGUI.isNull()
+    || myGUI->myPlayList == NULL) {
         return;
     }
 
