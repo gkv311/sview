@@ -188,7 +188,7 @@ class StOutDistorted : public StWindow {
     StGLVec4                  myBarrelCoef;      //!< Barrel distortion coefficients
     StGLVec4                  myChromAb;         //!< chrome coefficients
 
-    StRectI_t                 myBarMargins;      //!< GUI margins
+    StMarginsI                myBarMargins;      //!< GUI margins
 
     ovrHmd                    myOvrHmd;
 

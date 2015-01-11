@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -220,10 +220,6 @@ StGLTextArea::StGLTextArea(StGLWidget* theParent,
   myShadowColor(0.0f, 0.0f, 0.0f, 1.0f),
   myBackColor(0.365f, 0.722f, 1.0f, 1.0f),
   myBorderColor(0.0f, 0.0f, 0.0f, 1.0f),
-  myMarginLeft(0),
-  myMarginRight(0),
-  myMarginTop(0),
-  myMarginBottom(0),
   myTextDX(0.0f),
   myTextWidth(-1.0f),
   myToRecompute(true),
@@ -457,10 +453,10 @@ void StGLTextArea::stglDraw(unsigned int theView) {
     formatText(aCtx);
 
     StRectI_t aTextRectPx = getRectPx();
-    aTextRectPx.left()   += myMarginLeft;
-    aTextRectPx.right()  -= myMarginRight;
-    aTextRectPx.top()    += myMarginTop;
-    aTextRectPx.bottom() -= myMarginBottom;
+    aTextRectPx.left()   += myMargins.left;
+    aTextRectPx.right()  -= myMargins.right;
+    aTextRectPx.top()    += myMargins.top;
+    aTextRectPx.bottom() -= myMargins.bottom;
     StRectD_t aTextRectGl = getRoot()->getRectGl(getAbsolute(aTextRectPx));
 
     // size corrector for FTGL

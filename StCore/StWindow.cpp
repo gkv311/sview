@@ -198,7 +198,7 @@ void StWindow::setPlacement(const StRectI_t& theRect,
     myWin->setPlacement(theRect, theMoveToScreen);
 }
 
-const StRectI_t& StWindow::getMargins() const {
+const StMarginsI& StWindow::getMargins() const {
     return myMargins;
 }
 

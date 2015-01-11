@@ -175,16 +175,16 @@ void StCADViewerGUI::stglUpdate(const StPointD_t& theCursorZo) {
 }
 
 void StCADViewerGUI::stglResize(const StGLBoxPx& theRectPx) {
-    const StRectI_t& aMargins = myPlugin->getMainWindow()->getMargins();
-    const bool areNewMargins = aMargins != getRootMarginsPx();
+    const StMarginsI& aMargins = myPlugin->getMainWindow()->getMargins();
+    const bool areNewMargins = aMargins != getRootMargins();
     if(areNewMargins) {
-        setRootMarginsPx(aMargins);
+        changeRootMargins() = aMargins;
     }
 
     if(areNewMargins) {
         if(myMenu0Root != NULL) {
-            myMenu0Root->changeRectPx().left() = aMargins.left();
-            myMenu0Root->changeRectPx().top()  = aMargins.top();
+            myMenu0Root->changeRectPx().left() = aMargins.left;
+            myMenu0Root->changeRectPx().top()  = aMargins.top;
             myMenu0Root->stglUpdateSubmenuLayout();
         }
     }
@@ -207,7 +207,7 @@ void StCADViewerGUI::doAboutProgram(const size_t ) {
     const StString& aVerString = myLangMap->changeValueId(ABOUT_VERSION,      "version");
     const StString& aDescr     = myLangMap->changeValueId(ABOUT_DESCRIPTION,
         "CAD viewer allows you to view CAD files in formats IGES, STEP, BREP using OCCT.\n"
-        "(C) 2011-2014 Kirill Gavrilov (kirill@sview.ru).\nOfficial site: www.sview.ru");
+        "(C) 2011-2015 Kirill Gavrilov (kirill@sview.ru).\nOfficial site: www.sview.ru");
     StGLMessageBox* anAboutDialog = new StGLMessageBox(this, "", aTitle + '\n'
         + aVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr,
         512, 300);

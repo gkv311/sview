@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2012 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -262,5 +262,34 @@ class StRect {
 
 typedef StRect<int>    StRectI_t;
 typedef StRect<double> StRectD_t;
+
+/**
+ * Simple structure to define rectangular margins.
+ */
+struct StMarginsI {
+
+        public:
+
+    int left;
+    int right;
+    int top;
+    int bottom;
+
+        public:
+
+    StMarginsI() : left(0), right(0), top(0), bottom(0) {}
+
+    bool operator==(const StMarginsI& theCompare) const {
+        return top    == theCompare.top
+            && left   == theCompare.left
+            && bottom == theCompare.bottom
+            && right  == theCompare.right;
+    }
+
+    bool operator!=(const StMarginsI& theCompare) const {
+        return !operator==(theCompare);
+    }
+
+};
 
 #endif //__StRect_h_

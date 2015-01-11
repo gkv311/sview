@@ -205,12 +205,12 @@ class StGLRootWidget : public StGLWidget {
         return myRectGl;
     }
 
-    inline const StRectI_t& getRootMarginsPx() const {
+    ST_LOCAL const StMarginsI& getRootMargins() const {
         return myMarginsPx;
     }
 
-    inline void setRootMarginsPx(const StRectI_t& theMargins) {
-        myMarginsPx = theMargins;
+    ST_LOCAL StMarginsI& changeRootMargins() {
+        return myMarginsPx;
     }
 
     /**
@@ -372,7 +372,7 @@ class StGLRootWidget : public StGLWidget {
     StGLVec4                  myColors[Color_NB]; //!< colors of standard elements
 
     bool                      myIsMobile;      //!< flag indicating mobile device
-    StRectI_t                 myMarginsPx;     //!< active area margins in pixels
+    StMarginsI                myMarginsPx;     //!< active area margins in pixels
     StRectD_t                 myRectGl;        //!< rectangle in GL coordinates
     GLdouble                  myScaleGlX;      //!< scale factor to optimize convertion from Pixels -> GL coordinates
     GLdouble                  myScaleGlY;      //!< scale factor to optimize convertion from Pixels -> GL coordinates

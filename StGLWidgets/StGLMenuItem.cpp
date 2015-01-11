@@ -46,26 +46,26 @@ StGLMenuItem::StGLMenuItem(StGLMenu* theParent,
   myToDrawArrow(false) {
     switch(getParentMenu()->getOrient()) {
         case StGLMenu::MENU_VERTICAL: {
-            myMarginLeft  = myRoot->scale(32);
-            myMarginRight = myRoot->scale(20);
-            myToDrawArrow = theSubMenu != NULL;
+            myMargins.left  = myRoot->scale(32);
+            myMargins.right = myRoot->scale(20);
+            myToDrawArrow   = theSubMenu != NULL;
             break;
         }
         case StGLMenu::MENU_VERTICAL_COMPACT: {
-            myMarginLeft  = myRoot->scale(8);
-            myMarginRight = myRoot->scale(16);
-            myToDrawArrow = theSubMenu != NULL;
+            myMargins.left  = myRoot->scale(8);
+            myMargins.right = myRoot->scale(16);
+            myToDrawArrow   = theSubMenu != NULL;
             break;
         }
         case StGLMenu::MENU_HORIZONTAL: {
-            myMarginLeft  = myRoot->scale(2);
-            myMarginRight = myRoot->scale(16);
+            myMargins.left  = myRoot->scale(2);
+            myMargins.right = myRoot->scale(16);
             break;
         }
         default:
         case StGLMenu::MENU_ZERO: {
-            myMarginLeft  = 0;
-            myMarginRight = 0;
+            myMargins.left  = 0;
+            myMargins.right = 0;
             break;
         }
     }
@@ -92,9 +92,9 @@ void StGLMenuItem::setIcon(const StString* theImgPaths,
     if(myIcon != NULL) {
         delete myIcon;
     } else {
-        myMarginLeft += anIconMargin;
+        myMargins.left += anIconMargin;
     }
-    myIcon = new StGLIcon(this, myMarginLeft - anIconMargin, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT), theCount);
+    myIcon = new StGLIcon(this, myMargins.left - anIconMargin, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT), theCount);
     myIcon->setColor(getRoot()->getColorForElement(StGLRootWidget::Color_MenuText));
     myIcon->setVisibility(true, true);
     myIcon->setTexturePath(theImgPaths, theCount);

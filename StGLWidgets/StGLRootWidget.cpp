@@ -61,11 +61,6 @@ StGLRootWidget::StGLRootWidget(const StHandle<StResourceManager>& theResMgr)
     myViewport[2] = 1;
     myViewport[3] = 1;
 
-    myMarginsPx.left()   = 0;
-    myMarginsPx.top()    = 0;
-    myMarginsPx.right()  = 0;
-    myMarginsPx.bottom() = 0;
-
     // allocate shared resources array
     for(size_t aResId = 0; aResId < myShareSize; ++aResId) {
         myShareArray[aResId] = new StGLSharePointer();

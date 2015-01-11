@@ -67,14 +67,14 @@ void StImageViewerGUI::createDesktopUI() {
 
     createUpperToolbar();
 
-    const StRectI_t& aMargins = getRootMarginsPx();
-    myBtnPlayList = new StGLTextureButton(this, -aMargins.right() - scale(8 + 8 + 32), -aMargins.bottom() - scale(8),
+    const StMarginsI& aMargins = getRootMargins();
+    myBtnPlayList = new StGLTextureButton(this, -aMargins.right - scale(8 + 8 + 32), -aMargins.bottom - scale(8),
                                           StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_RIGHT));
     myBtnPlayList->setTexturePath(iconTexture(stCString("playList"), scaleIcon(32)));
 
     // fullscreen button
     if(myWindow->hasFullscreenMode()) {
-        myBtnFull = new StGLTextureButton(this, -aMargins.right() - scale(8), -aMargins.bottom() - scale(8),
+        myBtnFull = new StGLTextureButton(this, -aMargins.right - scale(8), -aMargins.bottom - scale(8),
                                           StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_RIGHT));
         myBtnFull->signals.onBtnClick.connect(myPlugin->params.isFullscreen.operator->(), &StBoolParam::doReverse);
         myBtnFull->setTexturePath(iconTexture(stCString("fullScreen"), scaleIcon(32)));
@@ -94,8 +94,8 @@ void StImageViewerGUI::createUpperToolbar() {
     const int aTop  = scale(DISPL_Y_REGION_UPPER);
     const int aLeft = scale(DISPL_X_REGION_UPPER);
 
-    const StRectI_t& aMargins = getRootMarginsPx();
-    myPanelUpper = new StGLWidget(this, aMargins.left(), aMargins.top(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(128));
+    const StMarginsI& aMargins = getRootMargins();
+    myPanelUpper = new StGLWidget(this, aMargins.left, aMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(128));
 
     // append textured buttons
     myBtnOpen   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * ICON_WIDTH, aTop);
@@ -133,8 +133,8 @@ void StImageViewerGUI::createUpperToolbar() {
  * Main menu
  */
 void StImageViewerGUI::createMainMenu() {
-    const StRectI_t& aMargins = getRootMarginsPx();
-    myMenuRoot = new StGLMenu(this, aMargins.left(), aMargins.top(), StGLMenu::MENU_HORIZONTAL, true);
+    const StMarginsI& aMargins = getRootMargins();
+    myMenuRoot = new StGLMenu(this, aMargins.left, aMargins.top, StGLMenu::MENU_HORIZONTAL, true);
 
     StGLMenu* aMenuMedia   = createMediaMenu();  // Root -> Media  menu
     StGLMenu* aMenuView    = createViewMenu();   // Root -> View   menu
@@ -322,7 +322,7 @@ StGLMenu* StImageViewerGUI::createImageAdjustMenu() {
     aMenu->addItem(tr(MENU_VIEW_ADJUST_RESET), myPlugin->getAction(StImageViewer::Action_ImageAdjustReset));
 
     StGLMenuItem* anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_GAMMA));
-    anItem->setMarginRight(scale(100 + 16));
+    anItem->changeMargins().right = scale(100 + 16);
     StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, myImage->params.gamma,
                                                               -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->setFormat(stCString("%+01.2f"));
@@ -332,7 +332,7 @@ StGLMenu* StImageViewerGUI::createImageAdjustMenu() {
     aRange->setVisibility(true, true);
 
     anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_BRIGHTNESS));
-    anItem->setMarginRight(scale(100 + 16));
+    anItem->changeMargins().right = scale(100 + 16);
     aRange = new StGLRangeFieldFloat32(anItem, myImage->params.brightness,
                                        -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->setFormat(stCString("%+01.2f"));
@@ -342,7 +342,7 @@ StGLMenu* StImageViewerGUI::createImageAdjustMenu() {
     aRange->setVisibility(true, true);
 
     anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_SATURATION));
-    anItem->setMarginRight(scale(100 + 16));
+    anItem->changeMargins().right = scale(100 + 16);
     aRange = new StGLRangeFieldFloat32(anItem, myImage->params.saturation,
                                        -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->changeRectPx().bottom() = aRange->getRectPx().top() + aMenu->getItemHeight();
@@ -463,7 +463,7 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
     const StFormatEnum anActiveSrcFormat = aParams->ToSwapLR
                                          ? st::formatReversed(aParams->StereoFormat)
                                          : aParams->StereoFormat;
-    const int aTextMaxWidth = aWidthMax - (aTable->getMarginLeft() + aTable->getMarginRight());
+    const int aTextMaxWidth = aWidthMax - (aTable->getItemMargins().left + aTable->getItemMargins().right);
     StGLTableItem& aSrcFormatItem = aTable->changeElement(aRowLast++, 0); aSrcFormatItem.setColSpan(2);
     StGLTextArea*  aSrcFormatText = new StGLTextArea(&aSrcFormatItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
     aSrcFormatText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
@@ -534,8 +534,8 @@ void StImageViewerGUI::doMobileSettings(const size_t ) {
     const int aNbRowsMax = aRowLast + 2;
 
     StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
-    aTable->setMarginTop   (scale(4));
-    aTable->setMarginBottom(scale(4));
+    aTable->changeItemMargins().top    = scale(4);
+    aTable->changeItemMargins().bottom = scale(4);
     aTable->setupTable(aNbRowsMax, 2);
     aTable->setVisibility(true, true);
     aTable->fillFromParams(aParams, StGLVec3(1.0f, 1.0f, 1.0f), aWidthMax);
@@ -635,18 +635,22 @@ void StImageViewerGUI::createMobileUI() {
  */
 void StImageViewerGUI::createMobileUpperToolbar() {
     const IconSize anIconSize = scaleIcon(32);
-    const int aTop       = scale(16);
-    const int aLeft      = scale(16);
-    const int anIconStep = scale(48);
+    const int      anIconStep = scale(56);
+    StMarginsI aButtonMargins;
+    aButtonMargins.left   = scale(12);
+    aButtonMargins.right  = scale(12);
+    aButtonMargins.top    = scale(12);
+    aButtonMargins.bottom = scale(12);
 
-    const StRectI_t& aMargins = getRootMarginsPx();
-    myPanelUpper = new StGLWidget(this, aMargins.left(), aMargins.top(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(56));
+    const StMarginsI& aRootMargins = getRootMargins();
+    myPanelUpper = new StGLWidget(this, aRootMargins.left, aRootMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(56));
 
     int aBtnIter = 0;
 
     StGLSwitchTextured* aSrcBtn = new StGLSwitchTextured(myPanelUpper, myPlugin->params.srcFormat,
-                                                         aLeft + (aBtnIter++) * anIconStep, aTop,
+                                                         (aBtnIter++) * anIconStep, 0,
                                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    aSrcBtn->changeMargins() = aButtonMargins;
     aSrcBtn->addItem(ST_V_SRC_AUTODETECT,           iconTexture(stCString("menuAuto"),           anIconSize));
     aSrcBtn->addItem(ST_V_SRC_MONO,                 iconTexture(stCString("menuMono"),           anIconSize));
     aSrcBtn->addItem(ST_V_SRC_PARALLEL_PAIR,        iconTexture(stCString("menuSbsLR"),          anIconSize), true);
@@ -660,8 +664,9 @@ void StImageViewerGUI::createMobileUpperToolbar() {
 
     aBtnIter = 0;
     myBtnSrcFrmt = aSrcBtn;
-    StGLTextureButton* aBtnEx = new StGLTextureButton(myPanelUpper, -aLeft - (aBtnIter--) * anIconStep, aTop,
+    StGLTextureButton* aBtnEx = new StGLTextureButton(myPanelUpper, (aBtnIter--) * (-anIconStep), 0,
                                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    aBtnEx->changeMargins() = aButtonMargins;
     aBtnEx->setTexturePath(iconTexture(stCString("actionOverflow"), anIconSize));
     aBtnEx->signals.onBtnClick += stSlot(this, &StImageViewerGUI::doShowMobileExMenu);
 
@@ -677,25 +682,31 @@ void StImageViewerGUI::createMobileUpperToolbar() {
  */
 void StImageViewerGUI::createMobileBottomToolbar() {
     const IconSize anIconSize = scaleIcon(32);
-    const int aTop       = scale(16);
-    const int aLeft      = scale(16);
-    const int anIconStep = scale(48);
+    const int      anIconStep = scale(56);
+    StMarginsI aButtonMargins;
+    aButtonMargins.left   = scale(12);
+    aButtonMargins.right  = scale(12);
+    aButtonMargins.top    = scale(12);
+    aButtonMargins.bottom = scale(12);
 
-    const StRectI_t& aMargins = getRootMarginsPx();
-    myPanelBottom = new StGLWidget(this, aMargins.left(), -aMargins.bottom(), StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(56));
+    const StMarginsI& aRootMargins = getRootMargins();
+    myPanelBottom = new StGLWidget(this, aRootMargins.left, -aRootMargins.bottom, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(56));
 
     int aBtnIter = 0;
-    myBtnPrev = new StGLTextureButton(myPanelBottom, aLeft + (aBtnIter++) * anIconStep, aTop);
+    myBtnPrev = new StGLTextureButton(myPanelBottom, (aBtnIter++) * anIconStep, 0);
     myBtnPrev->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doListPrev);
     myBtnPrev->setTexturePath(iconTexture(stCString("actionBack"), anIconSize));
+    myBtnPrev->changeMargins() = aButtonMargins;
 
-    myBtnNext = new StGLTextureButton(myPanelBottom, aLeft + (aBtnIter++) * anIconStep, aTop);
+    myBtnNext = new StGLTextureButton(myPanelBottom, (aBtnIter++) * anIconStep, 0);
     myBtnNext->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doListNext);
     myBtnNext->setTexturePath(iconTexture(stCString("actionNext"), anIconSize));
+    myBtnNext->changeMargins() = aButtonMargins;
 
-    StGLTextureButton* aBtnInfo = new StGLTextureButton(myPanelBottom, aLeft + (aBtnIter++) * anIconStep, aTop);
+    StGLTextureButton* aBtnInfo = new StGLTextureButton(myPanelBottom, (aBtnIter++) * anIconStep, 0);
     aBtnInfo->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doAboutImage);
     aBtnInfo->setTexturePath(iconTexture(stCString("actionInfo"),  anIconSize));
+    aBtnInfo->changeMargins() = aButtonMargins;
 }
 
 void StImageViewerGUI::doShowMobileExMenu(const size_t ) {
@@ -755,7 +766,7 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
     setScale(aScale, (StGLRootWidget::ScaleAdjust )myPlugin->params.ScaleAdjust->getValue());
     setMobile(myPlugin->params.IsMobileUI->getValue());
 
-    setRootMarginsPx(myWindow->getMargins());
+    changeRootMargins() = myWindow->getMargins();
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StImageViewerGUI::doShowFPS);
 
     StHandle<StGLTextureQueue> aTextureQueue = theTextureQueue;
@@ -908,10 +919,10 @@ void StImageViewerGUI::stglResize(const StGLBoxPx& theRectPx) {
     myImage->changeRectPx().bottom() = aSizeY;
     myImage->changeRectPx().right()  = aSizeX;
 
-    const StRectI_t& aMargins = myWindow->getMargins();
-    const bool areNewMargins = aMargins != getRootMarginsPx();
+    const StMarginsI& aMargins = myWindow->getMargins();
+    const bool areNewMargins = aMargins != getRootMargins();
     if(areNewMargins) {
-        setRootMarginsPx(aMargins);
+        changeRootMargins() = aMargins;
     }
 
     if(myPanelUpper != NULL) {
@@ -924,16 +935,16 @@ void StImageViewerGUI::stglResize(const StGLBoxPx& theRectPx) {
     }
     if(areNewMargins) {
         if(myPanelUpper != NULL) {
-            myPanelUpper->changeRectPx().left() = aMargins.left();
-            myPanelUpper->changeRectPx().top()  = aMargins.top();
+            myPanelUpper->changeRectPx().left() = aMargins.left;
+            myPanelUpper->changeRectPx().top()  = aMargins.top;
         }
         if(myPanelBottom != NULL) {
-            myPanelBottom->changeRectPx().left() = aMargins.left();
-            myPanelBottom->changeRectPx().top()  = aMargins.top();
+            myPanelBottom->changeRectPx().left() = aMargins.left;
+            myPanelBottom->changeRectPx().top()  = aMargins.top;
         }
         if(myMenuRoot != NULL) {
-            myMenuRoot->changeRectPx().left() = aMargins.left();
-            myMenuRoot->changeRectPx().top()  = aMargins.top();
+            myMenuRoot->changeRectPx().left() = aMargins.left;
+            myMenuRoot->changeRectPx().top()  = aMargins.top;
             myMenuRoot->stglUpdateSubmenuLayout();
         }
     }

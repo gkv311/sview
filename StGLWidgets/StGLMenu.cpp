@@ -119,12 +119,12 @@ bool StGLMenu::stglInit() {
     int aMarginLeft = 0;
     for(StGLWidget* aChild = getChildren()->getStart(); aChild != NULL; aChild = aChild->getNext()) {
         StGLMenuItem* anItem = (StGLMenuItem* )aChild;
-        aMarginLeft = stMax(aMarginLeft, anItem->getMarginLeft());
-        int anItemW = anItem->getMarginLeft() + anItem->computeTextWidth() + anItem->getMarginRight();
+        aMarginLeft = stMax(aMarginLeft, anItem->getMargins().left);
+        int anItemW = anItem->getMargins().left + anItem->computeTextWidth() + anItem->getMargins().right;
         if(myOrient == MENU_HORIZONTAL) {
             anItem->changeRectPx().moveLeftTo(myWidth);
             anItem->changeRectPx().right() = anItem->getRectPx().left() + anItemW;
-            anItem->setTextWidth(anItemW - anItem->getMarginLeft());
+            anItem->setTextWidth(anItemW - anItem->getMargins().left);
             myWidth += anItemW;
         } else {
             myWidth = stMax(myWidth, anItemW);

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -54,31 +54,17 @@ class StGLTextArea : public StGLWidget {
     ST_CPPEXPORT void setText(const StString& theText);
 
     /**
-     * @return extra margin at left side (before text)
+     * Return extra margins before the text.
      */
-    ST_LOCAL inline int getMarginLeft() const {
-        return myMarginLeft;
+    ST_LOCAL const StMarginsI& getMargins() const {
+        return myMargins;
     }
 
     /**
-     * @param theMargin extra margin at left side (before text)
+     * Return extra margins before the text.
      */
-    ST_LOCAL inline void setMarginLeft(const int theMargin) {
-        myMarginLeft = theMargin;
-    }
-
-    /**
-     * @return extra margin at right side (after text)
-     */
-    ST_LOCAL inline int getMarginRight() const {
-        return myMarginRight;
-    }
-
-    /**
-     * @param theMargin extra margin at right side (after text)
-     */
-    ST_LOCAL inline void setMarginRight(const int theMargin) {
-        myMarginRight = theMargin;
+    ST_LOCAL StMarginsI& changeMargins() {
+        return myMargins;
     }
 
     /**
@@ -248,10 +234,7 @@ class StGLTextArea : public StGLWidget {
     StGLVec4             myBackColor;     //!< text area color
     StGLVec4             myBorderColor;   //!< text area border color
 
-    int                  myMarginLeft;
-    int                  myMarginRight;
-    int                  myMarginTop;
-    int                  myMarginBottom;
+    StMarginsI           myMargins;       //!< extra margins
     GLfloat              myTextDX;        //!< extra displacement
     StGLRect             myTextBndBox;    //!< text boundary box
 

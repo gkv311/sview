@@ -253,7 +253,7 @@ class StWindow {
     /**
      * @return GUI margins
      */
-    ST_CPPEXPORT const StRectI_t& getMargins() const;
+    ST_CPPEXPORT const StMarginsI& getMargins() const;
 
     /**
      * @return point relative to window mouse position
@@ -527,7 +527,7 @@ class StWindow {
         protected:
 
     StHandle<StMsgQueue>        myMsgQueue;       //!< messages queue
-    StRectI_t                   myMargins;        //!< GUI margins
+    StMarginsI                  myMargins;        //!< GUI margins
     bool                        myWasUsed;        //!< flag indicates that window has been actually used (created)
     bool                        myIsForcedStereo; //!< flag to force stereo output for mono sources
 

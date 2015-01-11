@@ -329,7 +329,12 @@ void StGLTextureButton::stglResize() {
 
     // update vertices
     StArray<StGLVec2> aVertices(4);
-    getRectGl(aVertices);
+    StRectI_t aRect = getRectPxAbsolute();
+    aRect.left()   += myMargins.left;
+    aRect.right()  -= myMargins.right;
+    aRect.top()    += myMargins.top;
+    aRect.bottom() -= myMargins.bottom;
+    myRoot->getRectGl(aRect, aVertices);
     myVertBuf.init(aCtx, aVertices);
 
     // update projection matrix
@@ -376,8 +381,8 @@ bool StGLTextureButton::stglInit() {
                 ST_DEBUG_LOG(anImage->getState());
                 continue;
             }
-            changeRectPx().right()  = getRectPx().left() + (int )anImage->getSizeX();
-            changeRectPx().bottom() = getRectPx().top()  + (int )anImage->getSizeY();
+            changeRectPx().right()  = getRectPx().left() + (int )anImage->getSizeX() + myMargins.left + myMargins.right;
+            changeRectPx().bottom() = getRectPx().top()  + (int )anImage->getSizeY() + myMargins.top  + myMargins.bottom;
 
             GLint anInternalFormat = GL_RGB;
             if(!StGLTexture::getInternalFormat(aCtx, anImage->getPlane(), anInternalFormat)) {

@@ -140,36 +140,18 @@ class StGLTable : public StGLWidget {
      */
     ST_CPPEXPORT void updateLayout();
 
-    ST_LOCAL int getMarginLeft() const {
-        return myMarginLeft;
+    /**
+     * Return extra margins within each item in the table.
+     */
+    ST_LOCAL const StMarginsI& getItemMargins() const {
+        return myItemMargins;
     }
 
-    ST_LOCAL void setMarginLeft(const int theMargin) {
-        myMarginLeft = theMargin;
-    }
-
-    ST_LOCAL int getMarginRight() const {
-        return myMarginRight;
-    }
-
-    ST_LOCAL void setMarginRight(const int theMargin) {
-        myMarginRight = theMargin;
-    }
-
-    ST_LOCAL int getMarginTop() const {
-        return myMarginTop;
-    }
-
-    ST_LOCAL void setMarginTop(const int theMargin) {
-        myMarginTop = theMargin;
-    }
-
-    ST_LOCAL int getMarginBottom() const {
-        return myMarginBottom;
-    }
-
-    ST_LOCAL void setMarginBottom(const int theMargin) {
-        myMarginBottom = theMargin;
+    /**
+     * Return extra margins within each item in the table.
+     */
+    ST_LOCAL StMarginsI& changeItemMargins() {
+        return myItemMargins;
     }
 
         protected: //! @name protected fields
@@ -180,10 +162,7 @@ class StGLTable : public StGLWidget {
     StArrayList<int> myRowBottoms;    //!< array of rows    bottoms
     StArrayList<int> myColRights;     //!< array of columns rights
 
-    int              myMarginLeft;    //!< left   margin for all table elements
-    int              myMarginRight;   //!< right  margin for all table elements
-    int              myMarginTop;     //!< tio    margin for all table elements
-    int              myMarginBottom;  //!< bottom margin for all table elements
+    StMarginsI       myItemMargins;   //!< margins for all table elements
 
     bool             myIsInitialized; //!< cached initialization state
 

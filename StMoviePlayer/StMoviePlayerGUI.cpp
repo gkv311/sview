@@ -82,8 +82,8 @@ void StMoviePlayerGUI::createUpperToolbar() {
     const int aTop  = scale(DISPL_Y_REGION_UPPER);
     const int aLeft = scale(DISPL_X_REGION_UPPER);
 
-    const StRectI_t& aMargins = getRootMarginsPx();
-    myPanelUpper = new StGLWidget(this, aMargins.left(), aMargins.top(), StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(128));
+    const StMarginsI& aMargins = getRootMargins();
+    myPanelUpper = new StGLWidget(this, aMargins.left, aMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(128));
 
     // append the textured buttons
     myBtnOpen = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * ICON_WIDTH, aTop);
@@ -114,10 +114,10 @@ void StMoviePlayerGUI::createUpperToolbar() {
  * Create bottom toolbar
  */
 void StMoviePlayerGUI::createBottomToolbar() {
-    const StRectI_t& aMargins = getRootMarginsPx();
+    const StMarginsI& aMargins = getRootMargins();
     const int aTop  = scale(DISPL_Y_REGION_BOTTOM);
     const int aLeft = scale(DISPL_X_REGION_BOTTOM);
-    myPanelBottom = new StGLWidget(this, aMargins.left(), -aMargins.bottom(), StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(128));
+    myPanelBottom = new StGLWidget(this, aMargins.left, -aMargins.bottom, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(128));
 
     // append the textured buttons
     myBtnPlay = new StGLTextureButton(myPanelBottom, aLeft, aTop,
@@ -155,8 +155,8 @@ void StMoviePlayerGUI::createBottomToolbar() {
  * Main menu
  */
 void StMoviePlayerGUI::createMainMenu() {
-    const StRectI_t& aMargins = getRootMarginsPx();
-    myMenuRoot = new StGLMenu(this, aMargins.left(), aMargins.top(), StGLMenu::MENU_HORIZONTAL, true);
+    const StMarginsI& aMargins = getRootMargins();
+    myMenuRoot = new StGLMenu(this, aMargins.left, aMargins.top, StGLMenu::MENU_HORIZONTAL, true);
 
     StGLMenu* aMenuMedia   = createMediaMenu();     // Root -> Media menu
     StGLMenu* aMenuView    = createViewMenu();      // Root -> View menu
@@ -476,7 +476,7 @@ StGLMenu* StMoviePlayerGUI::createImageAdjustMenu() {
     aMenu->addItem(tr(MENU_VIEW_ADJUST_RESET), myPlugin->getAction(StMoviePlayer::Action_ImageAdjustReset));
 
     StGLMenuItem* anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_GAMMA));
-    anItem->setMarginRight(scale(100 + 16));
+    anItem->changeMargins().right = scale(100 + 16);
     StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, myImage->params.gamma,
                                                               -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->setFormat(stCString("%+01.2f"));
@@ -486,7 +486,7 @@ StGLMenu* StMoviePlayerGUI::createImageAdjustMenu() {
     aRange->setVisibility(true, true);
 
     anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_BRIGHTNESS));
-    anItem->setMarginRight(scale(100 + 16));
+    anItem->changeMargins().right = scale(100 + 16);
     aRange = new StGLRangeFieldFloat32(anItem, myImage->params.brightness,
                                        -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->setFormat(stCString("%+01.2f"));
@@ -496,7 +496,7 @@ StGLMenu* StMoviePlayerGUI::createImageAdjustMenu() {
     aRange->setVisibility(true, true);
 
     anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_SATURATION));
-    anItem->setMarginRight(scale(100 + 16));
+    anItem->changeMargins().right = scale(100 + 16);
     aRange = new StGLRangeFieldFloat32(anItem, myImage->params.saturation,
                                        -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->changeRectPx().bottom() = aRange->getRectPx().top() + aMenu->getItemHeight();
@@ -524,7 +524,7 @@ StGLMenu* StMoviePlayerGUI::createAudioGainMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
 
     StGLMenuItem* anItem = aMenu->addItem("Volume");
-    anItem->setMarginRight(scale(110 + 16));
+    anItem->changeMargins().right = scale(110 + 16);
     StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.AudioGain,
                                                               -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->setFormat(stCString("%+03.0f dB"));
@@ -779,7 +779,7 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
     aTable->fillFromMap(anExtraInfo->Info, aWhite,
                         aWidthMax, aWidthMax / 2);
 
-    const int aTextMaxWidth = aWidthMax - (aTable->getMarginLeft() + aTable->getMarginRight());
+    const int aTextMaxWidth = aWidthMax - (aTable->getItemMargins().left + aTable->getItemMargins().right);
 
     if(anExtraInfo->HasVideo) {
         // add stereoscopic format info
@@ -1005,8 +1005,8 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
     setScale(aScale, (StGLRootWidget::ScaleAdjust )myPlugin->params.ScaleAdjust->getValue());
     setMobile(myPlugin->params.IsMobileUI->getValue());
 
-    setRootMarginsPx(myWindow->getMargins());
-    const StRectI_t& aMargins = getRootMarginsPx();
+    changeRootMargins() = myWindow->getMargins();
+    const StMarginsI& aMargins = getRootMargins();
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StMoviePlayerGUI::doShowFPS);
 
     myImage = new StGLImageRegion(this, theTextureQueue, false);
@@ -1030,7 +1030,7 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
 
     createUpperToolbar();
 
-    mySeekBar = new StSeekBar(this, -aMargins.bottom() - scale(74));
+    mySeekBar = new StSeekBar(this, -aMargins.bottom - scale(74));
     mySeekBar->signals.onSeekClick.connect(myPlugin, &StMoviePlayer::doSeek);
 
     createBottomToolbar();
@@ -1086,34 +1086,34 @@ void StMoviePlayerGUI::stglResize(const StGLBoxPx& theRectPx) {
     myImage->changeRectPx().bottom() = theRectPx.height();
     myImage->changeRectPx().right()  = theRectPx.width();
 
-    const StRectI_t& aMargins = myWindow->getMargins();
-    const bool areNewMargins = aMargins != getRootMarginsPx();
+    const StMarginsI& aMargins = myWindow->getMargins();
+    const bool areNewMargins = aMargins != getRootMargins();
     if(areNewMargins) {
-        setRootMarginsPx(aMargins);
+        changeRootMargins() = aMargins;
     }
 
     if(myPanelUpper != NULL) {
-        myPanelUpper->changeRectPx().right()  = stMax(theRectPx.width() - aMargins.right(), 2);
+        myPanelUpper->changeRectPx().right()  = stMax(theRectPx.width() - aMargins.right, 2);
     }
     if(myPanelBottom != NULL) {
-        myPanelBottom->changeRectPx().right() = stMax(theRectPx.width() - aMargins.right(), 2);
+        myPanelBottom->changeRectPx().right() = stMax(theRectPx.width() - aMargins.right, 2);
     }
 
     if(areNewMargins) {
         if(myPanelUpper != NULL) {
-            myPanelUpper->changeRectPx().left() = aMargins.left();
-            myPanelUpper->changeRectPx().moveTopTo(aMargins.top());
+            myPanelUpper->changeRectPx().left() = aMargins.left;
+            myPanelUpper->changeRectPx().moveTopTo(aMargins.top);
         }
         if(myPanelBottom != NULL) {
-            myPanelBottom->changeRectPx().left() =  aMargins.left();
-            myPanelBottom->changeRectPx().moveTopTo(-aMargins.bottom());
+            myPanelBottom->changeRectPx().left() =  aMargins.left;
+            myPanelBottom->changeRectPx().moveTopTo(-aMargins.bottom);
         }
         if(mySeekBar != NULL) {
-            mySeekBar->changeRectPx().moveTopTo(-aMargins.bottom() - scale(78));
+            mySeekBar->changeRectPx().moveTopTo(-aMargins.bottom - scale(78));
         }
         if(myMenuRoot != NULL) {
-            myMenuRoot->changeRectPx().left() = aMargins.left();
-            myMenuRoot->changeRectPx().top()  = aMargins.top();
+            myMenuRoot->changeRectPx().left() = aMargins.left;
+            myMenuRoot->changeRectPx().top()  = aMargins.top;
             myMenuRoot->stglUpdateSubmenuLayout();
         }
     }
@@ -1266,7 +1266,7 @@ void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StStri
         if(!theStreamsList.isNull()
         && !theStreamsList->isEmpty()) {
             aDelayItem = myMenuAudio->addItem(tr(MENU_AUDIO_DELAY));
-            aDelayItem->setMarginRight(scale(100 + 16));
+            aDelayItem->changeMargins().right = scale(100 + 16);
             aDelayItem->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAudioDelay);
             aDelayRange = new StGLRangeFieldFloat32(aDelayItem, myPlugin->params.AudioDelay,
                                                     -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
@@ -1314,7 +1314,7 @@ void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<St
     && !theStreamsList->isEmpty()) {
         //myMenuSubtitles->addSplitter();
         StGLMenuItem* anItem = myMenuSubtitles->addItem(tr(MENU_SUBTITLES_SIZE));
-        anItem->setMarginRight(scale(100 + 16));
+        anItem->changeMargins().right = scale(100 + 16);
         StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.SubtitlesSize,
                                                                  -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
         aRange->changeRectPx().bottom() = aRange->getRectPx().top() + myMenuSubtitles->getItemHeight();
@@ -1325,7 +1325,7 @@ void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<St
         aRange->setVisibility(true, true);
 
         anItem = myMenuSubtitles->addItem(tr(MENU_SUBTITLES_PARALLAX));
-        anItem->setMarginRight(scale(100 + 16));
+        anItem->changeMargins().right  = scale(100 + 16);
         aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.SubtitlesParallax,
                                           -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
         aRange->changeRectPx().bottom() = aRange->getRectPx().top() + myMenuSubtitles->getItemHeight();

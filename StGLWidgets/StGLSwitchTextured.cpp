@@ -124,7 +124,7 @@ void StGLSwitchTextured::addItem(const int32_t   theValueOn,
                                  const StString& theTexturePath,
                                  const bool      theToSkip) {
     StGLRadioButtonTextured* aNewItem = new StGLRadioButtonTextured(this, myTrackValue, theValueOn, theTexturePath, 0, 0);
-    (void )aNewItem;
+    aNewItem->changeMargins() = myMargins;
     if(theToSkip) {
         mySkipValues.add(theValueOn);
     }

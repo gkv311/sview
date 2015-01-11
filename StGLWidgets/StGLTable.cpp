@@ -22,7 +22,7 @@
 
 StGLTableItem::StGLTableItem(StGLTable* theParent)
 : StGLWidget(theParent,
-             theParent->getMarginLeft(), theParent->getMarginTop(),
+             theParent->getItemMargins().left, theParent->getItemMargins().top,
              StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
              theParent->getRoot()->scale(32),
              theParent->getRoot()->scale(32)),
@@ -44,12 +44,11 @@ StGLTable::StGLTable(StGLWidget* theParent,
              theCorner,
              theParent->getRoot()->scale(32),
              theParent->getRoot()->scale(32)),
-  myMarginLeft   (theParent->getRoot()->scale(5)),
-  myMarginRight  (theParent->getRoot()->scale(5)),
-  myMarginTop    (theParent->getRoot()->scale(2)),
-  myMarginBottom (theParent->getRoot()->scale(2)),
   myIsInitialized(false) {
-    //
+    myItemMargins.left   = myRoot->scale(5);
+    myItemMargins.right  = myRoot->scale(5);
+    myItemMargins.top    = myRoot->scale(2);
+    myItemMargins.bottom = myRoot->scale(2);
 }
 
 StGLTable::~StGLTable() {
@@ -100,7 +99,7 @@ void StGLTable::fillFromMap(const StDictionary& theMap,
     }
 
     // fill first column with keys
-    const int aCol1MaxWidth = theCol1MaxWidth - (myMarginLeft + myMarginRight);
+    const int aCol1MaxWidth = theCol1MaxWidth - (myItemMargins.left + myItemMargins.right);
     int       aCol1Width    = 0;
     for(size_t anIter = 0; anIter < theMap.size(); ++anIter) {
         const StDictEntry& aPair  = theMap.getValue(anIter);
@@ -128,7 +127,7 @@ void StGLTable::fillFromMap(const StDictionary& theMap,
     }
 
     // fill second column with values
-    int aCol2MaxWidth = theMaxWidth - aCol1Width - 2 * (myMarginLeft + myMarginRight);
+    int aCol2MaxWidth = theMaxWidth - aCol1Width - 2 * (myItemMargins.left + myItemMargins.right);
     for(size_t anIter = 0; anIter < theMap.size(); ++anIter) {
         const StDictEntry& aPair  = theMap.getValue(anIter);
         StGLTableItem&     anItem = changeElement(theRowId + (int )anIter, theColId + 1);
@@ -208,7 +207,7 @@ void StGLTable::fillFromParams(const StParamsList& theParams,
     }
 
     // fill second column with values
-    int aCol1MaxWidth = theMaxWidth - aCol2Width - 2 * (myMarginLeft + myMarginRight);
+    int aCol1MaxWidth = theMaxWidth - aCol2Width - 2 * (myItemMargins.left + myItemMargins.right);
     for(size_t anIter = 0; anIter < theParams.size(); ++anIter) {
         const StHandle<StParamBase>& aParam = theParams[anIter];
         StGLTableItem&               anItem = changeElement(theRowId + (int )anIter, theColId);
@@ -274,7 +273,7 @@ void StGLTable::updateLayout() {
             int&   aBottom   = myRowBottoms.changeValue(aBotRowId);
             aBottom = stMax(aBottom,
                             aBefore + anItem->getItem()->getRectPx().height()
-                          + myMarginTop + myMarginBottom);
+                          + myItemMargins.top + myItemMargins.bottom);
         }
         int& aBottom = myRowBottoms.changeValue(aRowIter);
         aBottom      = stMax(aBottom, aBottomPrev);
@@ -297,7 +296,7 @@ void StGLTable::updateLayout() {
             int&   aRight      = myColRights.changeValue(aRightColId);
             aRight = stMax(aRight,
                            aBefore + anItem->getItem()->getRectPx().width()
-                         + myMarginLeft + myMarginRight);
+                         + myItemMargins.left + myItemMargins.right);
         }
         int& aRight = myColRights.changeValue(aColIter);
         aRight      = stMax(aRight, aRightPrev);
@@ -315,10 +314,10 @@ void StGLTable::updateLayout() {
             StGLTableItem* anItem = aRow.changeValue(aColIter);
             const size_t aBotRowId   = aRowIter + anItem->getRowSpan() - 1;
             const size_t aRightColId = aColIter + anItem->getColSpan() - 1;
-            anItem->changeRectPx().top()    = aTop  + myMarginTop;
-            anItem->changeRectPx().left()   = aLeft + myMarginLeft;
-            anItem->changeRectPx().bottom() = myRowBottoms.changeValue(aBotRowId)   - myMarginBottom;
-            anItem->changeRectPx().right()  = myColRights .changeValue(aRightColId) - myMarginRight;
+            anItem->changeRectPx().top()    = aTop  + myItemMargins.top;
+            anItem->changeRectPx().left()   = aLeft + myItemMargins.left;
+            anItem->changeRectPx().bottom() = myRowBottoms.changeValue(aBotRowId)   - myItemMargins.bottom;
+            anItem->changeRectPx().right()  = myColRights .changeValue(aRightColId) - myItemMargins.right;
         }
     }
 }

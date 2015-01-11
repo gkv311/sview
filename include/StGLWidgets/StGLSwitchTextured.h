@@ -54,10 +54,25 @@ class StGLSwitchTextured : public StGLWidget {
                               const StString& theTexturePath,
                               bool            theToSkip = false);
 
+    /**
+     * Return extra margins before the texture.
+     */
+    ST_LOCAL const StMarginsI& getMargins() const {
+        return myMargins;
+    }
+
+    /**
+     * Return extra margins before the texture.
+     */
+    ST_LOCAL StMarginsI& changeMargins() {
+        return myMargins;
+    }
+
         private:
 
     StHandle<StInt32Param> myTrackValue; //!< handle to tracked value
     StArrayList<int32_t>   mySkipValues; //!< values to skip on click
+    StMarginsI             myMargins;
 
 };
 

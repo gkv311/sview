@@ -411,13 +411,19 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
     }
     StWindow::setTitle("sView - Distorted Renderer");
 
-    myBarMargins.left()   = 64;
-    myBarMargins.right()  = 64;
-    myBarMargins.top()    = 160;
-    myBarMargins.bottom() = 160;
-    mySettings->loadInt32Rect(ST_SETTING_MARGINS,   myBarMargins);
+    StRectI_t aMargins;
+    aMargins.left()   = 64;
+    aMargins.right()  = 64;
+    aMargins.top()    = 160;
+    aMargins.bottom() = 160;
+    mySettings->loadInt32Rect(ST_SETTING_MARGINS,   aMargins);
     mySettings->loadFloatVec4(ST_SETTING_WARP_COEF, myBarrelCoef);
     mySettings->loadFloatVec4(ST_SETTING_CHROME_AB, myChromAb);
+
+    myBarMargins.left   = aMargins.left();
+    myBarMargins.right  = aMargins.right();
+    myBarMargins.top    = aMargins.top();
+    myBarMargins.bottom = aMargins.bottom();
 }
 
 void StOutDistorted::releaseResources() {
@@ -439,10 +445,17 @@ void StOutDistorted::releaseResources() {
         StWindow::setFullScreen(false);
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
     }
+
+    StRectI_t aMargins;
+    aMargins.left()   = myBarMargins.left;
+    aMargins.right()  = myBarMargins.right;
+    aMargins.top()    = myBarMargins.top;
+    aMargins.bottom() = myBarMargins.bottom;
+
     mySettings->saveParam(ST_SETTING_LAYOUT,     params.Layout);
     mySettings->saveParam(ST_SETTING_ANAMORPH,   params.Anamorph);
     mySettings->saveParam(ST_SETTING_MONOCLONE,  params.MonoClone);
-    mySettings->saveInt32Rect(ST_SETTING_MARGINS,   myBarMargins);
+    mySettings->saveInt32Rect(ST_SETTING_MARGINS,   aMargins);
     mySettings->saveFloatVec4(ST_SETTING_WARP_COEF, myBarrelCoef);
     mySettings->saveFloatVec4(ST_SETTING_CHROME_AB, myChromAb);
     if(myWasUsed) {
@@ -680,7 +693,10 @@ GLfloat StOutDistorted::getScaleFactor() const {
 
 void StOutDistorted::setFullScreen(const bool theFullScreen) {
     if(!theFullScreen) {
-        myMargins = StRectI_t();
+        myMargins.left   = 0;
+        myMargins.right  = 0;
+        myMargins.top    = 0;
+        myMargins.bottom = 0;
     }
     StWindow::setFullScreen(theFullScreen);
 }
@@ -704,7 +720,10 @@ void StOutDistorted::stglDraw() {
     && myDevice == DEVICE_OCULUS) {
         myMargins = myBarMargins;
     } else {
-        myMargins = StRectI_t();
+        myMargins.left   = 0;
+        myMargins.right  = 0;
+        myMargins.top    = 0;
+        myMargins.bottom = 0;
     }
 
     if(myIsStereoOn
