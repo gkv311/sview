@@ -509,6 +509,7 @@ bool StImageViewer::init() {
     myLoader = new StImageLoader(params.imageLib, myMsgQueue, myLangMap,
                                  myGUI->myImage->getTextureQueue(), myContext->getMaxTextureSize());
     myLoader->signals.onLoaded.connect(this, &StImageViewer::doLoaded);
+    myLoader->setCompressMemory(myWindow->isMobile());
 
     // load this parameter AFTER image thread creation
     mySettings->loadParam(ST_SETTING_SRCFORMAT, params.srcFormat);
