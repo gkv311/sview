@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -9,9 +9,7 @@
 #ifndef __StGLRadioButton_h_
 #define __StGLRadioButton_h_
 
-#include <StGLWidgets/StGLShare.h>
-#include <StGLWidgets/StGLWidget.h>
-#include <StGL/StGLVertexBuffer.h>
+#include <StGLWidgets/StGLTextureButton.h>
 #include <StSettings/StParam.h>
 
 // forward declarations
@@ -23,7 +21,7 @@ class StGLMenuProgram;
  * and value associated to this item.
  * Thus multiple widgets can control one property without complex sync routines.
  */
-class StGLRadioButton : public StGLWidget {
+class StGLRadioButton : public StGLTextureButton {
 
         public: //!< overriders
 
@@ -39,8 +37,6 @@ class StGLRadioButton : public StGLWidget {
     ST_CPPEXPORT virtual void stglResize();
     ST_CPPEXPORT virtual bool stglInit();
     ST_CPPEXPORT virtual void stglDraw(unsigned int view);
-    ST_CPPEXPORT virtual bool tryClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemClicked);
-    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemUnclicked);
 
         public:
 

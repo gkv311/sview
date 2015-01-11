@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -34,16 +34,20 @@ StGLRadioButton::StGLRadioButton(StGLWidget* theParent,
                                  const int32_t theOnValue,
                                  const int theLeft, const int theTop,
                                  const StGLCorner theCorner)
-: StGLWidget(theParent,
-             theLeft, theTop,
-             theCorner,
-             theParent->getRoot()->scale(16),
-             theParent->getRoot()->scale(16)), // default dimensions = 16 x 16
+: StGLTextureButton(theParent,
+                    theLeft, theTop,
+                    theCorner,
+                    2),
   myTrackValue(theTrackedValue),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
-  myVertBuf(),
   myValueOn(theOnValue) {
     StGLWidget::signals.onMouseUnclick = stSlot(this, &StGLRadioButton::doMouseUnclick);
+
+    changeRectPx().right()  = getRectPx().left() + theParent->getRoot()->scale(16);
+    changeRectPx().bottom() = getRectPx().top()  + theParent->getRoot()->scale(16);
+
+    myTexturesPaths.changeValue(0) = myRoot->getIcon(StGLRootWidget::IconImage_RadioButtonOff);
+    myTexturesPaths.changeValue(1) = myRoot->getIcon(StGLRootWidget::IconImage_RadioButtonOn);
 }
 
 StGLRadioButton::~StGLRadioButton() {
@@ -51,7 +55,10 @@ StGLRadioButton::~StGLRadioButton() {
 }
 
 void StGLRadioButton::stglResize() {
-    StGLWidget::stglResize();
+    if(myProgram.isNull()) {
+        StGLTextureButton::stglResize();
+        return;
+    }
 
     StGLContext& aCtx = getContext();
 
@@ -77,6 +84,12 @@ void StGLRadioButton::stglResize() {
 }
 
 bool StGLRadioButton::stglInit() {
+    if( myTexturesPaths.size() != 0
+    && !myTexturesPaths.getFirst().isEmpty()
+    &&  StGLTextureButton::stglInit()) {
+        return true;
+    }
+
     // already initialized?
     if(myVertBuf.isValid()) {
         return true;
@@ -102,8 +115,14 @@ bool StGLRadioButton::isActiveState() const {
     return myTrackValue->getValue() == myValueOn;
 }
 
-void StGLRadioButton::stglDraw(unsigned int ST_UNUSED(theView)) {
+void StGLRadioButton::stglDraw(unsigned int theView) {
     if(!isVisible()) {
+        return;
+    }
+
+    myFaceId = isActiveState() ? 1 : 0;
+    if(myProgram.isNull()) {
+        StGLTextureButton::stglDraw(theView);
         return;
     }
 
@@ -118,32 +137,15 @@ void StGLRadioButton::stglDraw(unsigned int ST_UNUSED(theView)) {
     myProgram->use(aCtx, getRoot()->getScreenDispX());
     myVertBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
 
-        bool isChecked = isActiveState();
-        myProgram->setColor(aCtx, OUTER_COLORS[isChecked ? 1 : 0], GLfloat(opacityValue));
+        myProgram->setColor(aCtx, OUTER_COLORS[myFaceId], GLfloat(opacityValue));
         aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-        myProgram->setColor(aCtx, INNER_COLORS[isChecked ? 1 : 0], GLfloat(opacityValue));
+        myProgram->setColor(aCtx, INNER_COLORS[myFaceId], GLfloat(opacityValue));
         aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 4, 4);
 
     myVertBuf.unBindVertexAttrib(aCtx, myProgram->getVVertexLoc());
     myProgram->unuse(aCtx);
     aCtx.core20fwd->glDisable(GL_BLEND);
-}
-
-bool StGLRadioButton::tryClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemClicked) {
-    if(StGLWidget::tryClick(cursorZo, mouseBtn, isItemClicked)) {
-        isItemClicked = true; // always clickable widget
-        return true;
-    }
-    return false;
-}
-
-bool StGLRadioButton::tryUnClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemUnclicked) {
-    if(StGLWidget::tryUnClick(cursorZo, mouseBtn, isItemUnclicked)) {
-        isItemUnclicked = true; // always clickable widget
-        return true;
-    }
-    return false;
 }
 
 void StGLRadioButton::setValue() {

@@ -71,9 +71,12 @@ StGLRootWidget::StGLRootWidget(const StHandle<StResourceManager>& theResMgr)
     myColors[Color_MenuHighlighted] = StGLVec4(0.765f, 0.765f, 0.765f, 1.0f);
     myColors[Color_MenuClicked]     = StGLVec4(0.500f, 0.500f, 0.500f, 1.0f);
     myColors[Color_MenuText]        = StGLVec4(0.000f, 0.000f, 0.000f, 1.0f);
+    myColors[Color_MenuIcon]        = StGLVec4(0.000f, 0.000f, 0.000f, 0.8f);
     myColors[Color_MessageBox]      = StGLVec4(0.060f, 0.060f, 0.060f, 1.0f);
     myColors[Color_MessageText]     = StGLVec4(1.000f, 1.000f, 1.000f, 1.0f);
     myColors[Color_IconActive]      = StGLVec4(1.000f, 1.000f, 1.000f, 1.0f);
+
+    setupTextures();
 }
 
 StGLRootWidget::~StGLRootWidget() {
@@ -101,6 +104,14 @@ const StHandle<StGLContext>& StGLRootWidget::getContextHandle() const {
 
 void StGLRootWidget::setContext(const StHandle<StGLContext>& theCtx) {
     myGlCtx = theCtx;
+}
+
+void StGLRootWidget::setupTextures() {
+    const IconSize aCheckboxSize = scaleIcon(16);
+    myIcons[IconImage_CheckboxOff]    = iconTexture(StString("textures" ST_FILE_SPLITTER) + "checkboxOff",    aCheckboxSize);
+    myIcons[IconImage_CheckboxOn]     = iconTexture(StString("textures" ST_FILE_SPLITTER) + "checkboxOn",     aCheckboxSize);
+    myIcons[IconImage_RadioButtonOff] = iconTexture(StString("textures" ST_FILE_SPLITTER) + "radioButtonOff", aCheckboxSize);
+    myIcons[IconImage_RadioButtonOn]  = iconTexture(StString("textures" ST_FILE_SPLITTER) + "radioButtonOn",  aCheckboxSize);
 }
 
 StGLRootWidget::IconSize StGLRootWidget::scaleIcon(const int theSize) const {
@@ -160,9 +171,11 @@ void StGLRootWidget::setScale(const GLfloat     theScale,
     if(stAreEqual(myScaleGUI, aScale, 0.001f)) {
         return;
     }
+
     myScaleGUI   = aScale;
     myResolution = (unsigned int )(72.0f * aScale + 0.1f);
     myGlFontMgr->setResolution(myResolution);
+    setupTextures();
 }
 
 bool StGLRootWidget::stglInit() {

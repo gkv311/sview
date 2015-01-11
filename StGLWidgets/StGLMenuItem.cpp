@@ -95,7 +95,7 @@ void StGLMenuItem::setIcon(const StString* theImgPaths,
         myMargins.left += anIconMargin;
     }
     myIcon = new StGLIcon(this, myMargins.left - anIconMargin, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT), theCount);
-    myIcon->setColor(getRoot()->getColorForElement(StGLRootWidget::Color_MenuText));
+    myIcon->setColor(getRoot()->getColorForElement(StGLRootWidget::Color_MenuIcon));
     myIcon->setVisibility(true, true);
     myIcon->setTexturePath(theImgPaths, theCount);
 }

@@ -9,9 +9,7 @@
 #ifndef __StGLCheckbox_h_
 #define __StGLCheckbox_h_
 
-#include <StGLWidgets/StGLShare.h>
-#include <StGLWidgets/StGLWidget.h>
-#include <StGL/StGLVertexBuffer.h>
+#include <StGLWidgets/StGLTextureButton.h>
 #include <StSettings/StParam.h>
 
 // forward declarations
@@ -22,7 +20,7 @@ class StGLMenuProgram;
  * Initialized with handle to tracked boolean property
  * thus multiple widgets can show one property without complex sync routines.
  */
-class StGLCheckbox : public StGLWidget {
+class StGLCheckbox : public StGLTextureButton {
 
         public: //! @name overriders
 
@@ -41,8 +39,6 @@ class StGLCheckbox : public StGLWidget {
     ST_CPPEXPORT virtual void stglResize();
     ST_CPPEXPORT virtual bool stglInit();
     ST_CPPEXPORT virtual void stglDraw(unsigned int view);
-    ST_CPPEXPORT virtual bool tryClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemClicked);
-    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemUnclicked);
 
         public:
 

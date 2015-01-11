@@ -55,10 +55,22 @@ class StGLRootWidget : public StGLWidget {
         Color_MenuHighlighted,
         Color_MenuClicked,
         Color_MenuText,
+        Color_MenuIcon,
         Color_MessageBox,
         Color_MessageText,
         Color_IconActive,
         Color_NB
+    };
+
+    /**
+     * Images of standard elements.
+     */
+    enum IconImage {
+        IconImage_CheckboxOff,
+        IconImage_CheckboxOn,
+        IconImage_RadioButtonOff,
+        IconImage_RadioButtonOn,
+        IconImage_NB
     };
 
         public:
@@ -88,7 +100,12 @@ class StGLRootWidget : public StGLWidget {
     /**
      * Return color of standard element.
      */
-    const StGLVec4& getColorForElement(const StGLRootWidget::Color theElement) const { return myColors[theElement]; }
+    ST_LOCAL const StGLVec4& getColorForElement(const StGLRootWidget::Color theElement) const { return myColors[theElement]; }
+
+    /**
+     * Return icon of standard element.
+     */
+    ST_LOCAL const StString& getIcon(const StGLRootWidget::IconImage theIcon) const { return myIcons[theIcon]; }
 
     /**
      * Function iterate children and self to change clicking state.
@@ -354,7 +371,9 @@ class StGLRootWidget : public StGLWidget {
     /**
      * Perform pending destroy requests.
      */
-    ST_CPPEXPORT void clearDestroyList();
+    ST_LOCAL void clearDestroyList();
+
+    ST_LOCAL void setupTextures();
 
         private:
 
@@ -370,6 +389,7 @@ class StGLRootWidget : public StGLWidget {
     int                       myScrDispXPx;
 
     StGLVec4                  myColors[Color_NB]; //!< colors of standard elements
+    StString                  myIcons[IconImage_NB];
 
     bool                      myIsMobile;      //!< flag indicating mobile device
     StMarginsI                myMarginsPx;     //!< active area margins in pixels

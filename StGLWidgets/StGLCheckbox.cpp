@@ -33,14 +33,19 @@ StGLCheckbox::StGLCheckbox(StGLWidget* theParent,
                            const StHandle<StBoolParam>& theTrackedValue,
                            const int theLeft, const int theTop,
                            const StGLCorner theCorner)
-: StGLWidget(theParent,
-             theLeft, theTop,
-             theCorner,
-             theParent->getRoot()->scale(16),
-             theParent->getRoot()->scale(16)), // default dimensions = 16 x 16
+: StGLTextureButton(theParent,
+                    theLeft, theTop,
+                    theCorner,
+                    2),
   myTrackValue(theTrackedValue),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)) {
+    myAnim = Anim_None;
     StGLWidget::signals.onMouseUnclick = stSlot(this, &StGLCheckbox::doMouseUnclick);
+    changeRectPx().right()  = getRectPx().left() + theParent->getRoot()->scale(16);
+    changeRectPx().bottom() = getRectPx().top()  + theParent->getRoot()->scale(16);
+
+    myTexturesPaths.changeValue(0) = myRoot->getIcon(StGLRootWidget::IconImage_CheckboxOff);
+    myTexturesPaths.changeValue(1) = myRoot->getIcon(StGLRootWidget::IconImage_CheckboxOn);
 }
 
 StGLCheckbox::~StGLCheckbox() {
@@ -48,6 +53,11 @@ StGLCheckbox::~StGLCheckbox() {
 }
 
 void StGLCheckbox::stglResize() {
+    if(myProgram.isNull()) {
+        StGLTextureButton::stglResize();
+        return;
+    }
+
     // outer vertices
     StArray<StGLVec2> aVertices(8);
     StGLContext& aCtx = getContext();
@@ -73,11 +83,15 @@ void StGLCheckbox::stglResize() {
         myProgram->setProjMat(aCtx, getRoot()->getScreenProjection());
         myProgram->unuse(aCtx);
     }
-
-    StGLWidget::stglResize();
 }
 
 bool StGLCheckbox::stglInit() {
+    if( myTexturesPaths.size() != 0
+    && !myTexturesPaths.getFirst().isEmpty()
+    &&  StGLTextureButton::stglInit()) {
+        return true;
+    }
+
     // already initialized?
     if(myVertBuf.isValid()) {
         return true;
@@ -99,8 +113,14 @@ bool StGLCheckbox::stglInit() {
     return true;
 }
 
-void StGLCheckbox::stglDraw(unsigned int ST_UNUSED(theView)) {
+void StGLCheckbox::stglDraw(unsigned int theView) {
     if(!isVisible()) {
+        return;
+    }
+
+    myFaceId = myTrackValue->getValue() ? 1 : 0;
+    if(myProgram.isNull()) {
+        StGLTextureButton::stglDraw(theView);
         return;
     }
 
@@ -115,31 +135,15 @@ void StGLCheckbox::stglDraw(unsigned int ST_UNUSED(theView)) {
     myProgram->use(aCtx, getRoot()->getScreenDispX());
     myVertBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
 
-    myProgram->setColor(aCtx, OUTER_COLORS[myTrackValue->getValue() ? 1 : 0], GLfloat(opacityValue));
+    myProgram->setColor(aCtx, OUTER_COLORS[myFaceId], GLfloat(opacityValue));
     aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-    myProgram->setColor(aCtx, INNER_COLORS[myTrackValue->getValue() ? 1 : 0], GLfloat(opacityValue));
+    myProgram->setColor(aCtx, INNER_COLORS[myFaceId], GLfloat(opacityValue));
     aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 4, 4);
 
     myVertBuf.unBindVertexAttrib(aCtx, myProgram->getVVertexLoc());
     myProgram->unuse(aCtx);
     aCtx.core20fwd->glDisable(GL_BLEND);
-}
-
-bool StGLCheckbox::tryClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemClicked) {
-    if(StGLWidget::tryClick(cursorZo, mouseBtn, isItemClicked)) {
-        isItemClicked = true; // always clickable widget
-        return true;
-    }
-    return false;
-}
-
-bool StGLCheckbox::tryUnClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemUnclicked) {
-    if(StGLWidget::tryUnClick(cursorZo, mouseBtn, isItemUnclicked)) {
-        isItemUnclicked = true; // always clickable widget
-        return true;
-    }
-    return false;
 }
 
 void StGLCheckbox::reverseValue() {

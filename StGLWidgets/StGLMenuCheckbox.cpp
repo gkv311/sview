@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -18,6 +18,7 @@ StGLMenuCheckbox::StGLMenuCheckbox(StGLMenu* theParent,
   myCheckbox(NULL) {
     myCheckbox = new StGLCheckbox(this, theTrackedValue,
                                   myRoot->scale(8), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT));
+    myCheckbox->setColor(getRoot()->getColorForElement(StGLRootWidget::Color_MenuIcon));
     StGLMenuItem::signals.onItemClick.connect(this, &StGLMenuCheckbox::doItemClick);
 }
 

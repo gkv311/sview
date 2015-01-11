@@ -442,8 +442,10 @@ void StGLTextureButton::stglDraw(unsigned int ) {
     GLdouble butHGl = butRectGl.top() - butRectGl.bottom();
 
     const StPointD_t aMouseGl = getPointGl(getRoot()->getCursorZo());;
+    bool toShiftZ = false;
     if(myAnim == Anim_Wave) {
         glWaveTimerControl();
+        toShiftZ = isClicked(ST_MOUSE_LEFT);
     }
 
     aProgram->use( aCtx,
@@ -452,7 +454,7 @@ void StGLTextureButton::stglDraw(unsigned int ) {
                   (aMouseGl.x() - butRectGl.left()) / butWGl,
                   (butRectGl.top()  - aMouseGl.y()) / butHGl,
                    opacityValue,
-                   isClicked(ST_MOUSE_LEFT),
+                   toShiftZ,
                    getRoot()->getScreenDispX());
 
     myVertBuf.bindVertexAttrib(aCtx, aProgram->getVVertexLoc());
