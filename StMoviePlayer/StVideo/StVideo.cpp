@@ -381,7 +381,8 @@ bool StVideo::addFile(const StString& theFileToLoad,
             aLanguage = aStream->language;
         #endif
 
-            if(aFormatCtx->nb_streams == 1) {
+            if( aFormatCtx->nb_streams == 1
+            && !myCtxList.isEmpty()) {
                 aLanguage = (aFileName.getLength() > 24) ? (StString("...") + aFileName.subString(aFileName.getLength() - 24, aFileName.getLength())) : aFileName;
             }
             theInfo.AudioList->add(aCodecName
