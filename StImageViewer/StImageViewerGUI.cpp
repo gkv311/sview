@@ -722,6 +722,7 @@ void StImageViewerGUI::doShowMobileExMenu(const size_t ) {
     if(!anExtraInfo.isNull()) {
         anItem = aMenu->addItem(tr(BUTTON_DELETE), myPlugin->getAction(StImageViewer::Action_DeleteFile));
         anItem->setIcon(iconTexture(stCString("actionDiscard"), anIconSize));
+        anExtraInfo.nullify();
     }
     anItem = aMenu->addItem(tr(MENU_HELP_ABOUT));
     anItem->setIcon(iconTexture(stCString("actionHelp"),      anIconSize));

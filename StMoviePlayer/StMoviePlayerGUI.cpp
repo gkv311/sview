@@ -37,6 +37,7 @@
 #include <StSettings/StEnumParam.h>
 
 #include <StGLWidgets/StGLButton.h>
+#include <StGLWidgets/StGLCombobox.h>
 #include <StGLWidgets/StGLCheckboxTextured.h>
 #include <StGLWidgets/StGLDescription.h>
 #include <StGLWidgets/StGLFpsLabel.h>
@@ -1105,6 +1106,23 @@ void StMoviePlayerGUI::doShowMobileExMenu(const size_t ) {
     if(!anExtraInfo.isNull()) {
         anItem = aMenu->addItem(tr(BUTTON_DELETE), myPlugin->getAction(StMoviePlayer::Action_DeleteFile));
         anItem->setIcon(iconTexture(stCString("actionDiscard"), anIconSize));
+
+        const StHandle< StArrayList<StString> >& anAudioStreams = myPlugin->myVideo->params.activeAudio->getList();
+        if(!anAudioStreams.isNull()
+        && !anAudioStreams->isEmpty()) {
+            anItem = aMenu->addItem(tr(MENU_AUDIO));
+            anItem->setIcon(iconTexture(stCString("actionStreamAudio"), anIconSize));
+            anItem->signals.onItemClick += stSlot(this, &StMoviePlayerGUI::doAudioStreamsCombo);
+        }
+
+        const StHandle< StArrayList<StString> >& aSubsStreams = myPlugin->myVideo->params.activeSubtitles->getList();
+        if(!aSubsStreams.isNull()
+        && !aSubsStreams->isEmpty()) {
+            anItem = aMenu->addItem(tr(MENU_SUBTITLES));
+            anItem->setIcon(iconTexture(stCString("actionStreamSubtitles"), anIconSize));
+            anItem->signals.onItemClick += stSlot(this, &StMoviePlayerGUI::doSubtitlesStreamsCombo);
+        }
+        anExtraInfo.nullify();
     }
     anItem = aMenu->addItem(tr(MENU_HELP_ABOUT));
     anItem->setIcon(iconTexture(stCString("actionHelp"),      anIconSize));
@@ -1424,6 +1442,22 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
     }
 }
 
+void StMoviePlayerGUI::doAudioStreamsCombo(const size_t ) {
+    const StHandle< StArrayList<StString> >& aStreams = myPlugin->myVideo->params.activeAudio->getList();
+    const bool hasVideo = myPlugin->myVideo->hasVideoStream();
+
+    StGLCombobox::ListBuilder aBuilder(this);
+    if(hasVideo || aStreams.isNull() || aStreams->isEmpty()) {
+        aBuilder.getMenu()->addItem(tr(MENU_AUDIO_NONE), myPlugin->params.audioStream, -1);
+    }
+    if(!aStreams.isNull()) {
+        for(size_t aStreamId = 0; aStreamId < aStreams->size(); ++aStreamId) {
+            aBuilder.getMenu()->addItem(aStreams->getValue(aStreamId), myPlugin->params.audioStream, int32_t(aStreamId));
+        }
+    }
+    aBuilder.display();
+}
+
 void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StString> >& theStreamsList,
                                               const bool theHasVideo) {
     if(myMenuAudio == NULL) {
@@ -1468,6 +1502,19 @@ void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StStri
 
     // update menu representation
     myMenuAudio->stglInit();
+}
+
+void StMoviePlayerGUI::doSubtitlesStreamsCombo(const size_t ) {
+    const StHandle< StArrayList<StString> >& aStreams = myPlugin->myVideo->params.activeSubtitles->getList();
+
+    StGLCombobox::ListBuilder aBuilder(this);
+    aBuilder.getMenu()->addItem(tr(MENU_SUBTITLES_NONE), myPlugin->params.subtitlesStream, -1);
+    if(!aStreams.isNull()) {
+        for(size_t aStreamId = 0; aStreamId < aStreams->size(); ++aStreamId) {
+            aBuilder.getMenu()->addItem(aStreams->getValue(aStreamId), myPlugin->params.subtitlesStream, int32_t(aStreamId));
+        }
+    }
+    aBuilder.display();
 }
 
 void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<StString> >& theStreamsList,

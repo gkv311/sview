@@ -12,10 +12,31 @@
 #include <StGLWidgets/StGLButton.h>
 #include <StSettings/StEnumParam.h>
 
+class StGLMessageBox;
+
 /**
  * Simple combobox widget.
  */
 class StGLCombobox : public StGLButton {
+
+        public:
+
+    class ListBuilder {
+
+            public:
+
+        ST_CPPEXPORT ListBuilder(StGLWidget* theParent);
+
+        ST_LOCAL StGLMenu* getMenu() { return myMenu; }
+
+        ST_CPPEXPORT void display();
+
+            private:
+
+        StGLMessageBox* myBack;
+        StGLMenu*       myMenu;
+
+    };
 
         public:
 

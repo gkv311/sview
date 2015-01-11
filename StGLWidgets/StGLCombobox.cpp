@@ -30,39 +30,47 @@ StGLCombobox::~StGLCombobox() {
     myParam->signals.onChanged -= stSlot(this, &StGLCombobox::doValueChanged);
 }
 
+StGLCombobox::ListBuilder::ListBuilder(StGLWidget* theParent)
+: myBack(NULL),
+  myMenu(NULL) {
+    StGLWidget* aMenuParent = theParent->getRoot();
+    if(theParent->getRoot()->isMobile()) {
+        myBack = new StGLMessageBox(theParent->getRoot(), "", "",
+                                   theParent->getRoot()->getRectPx().width(), theParent->getRoot()->getRectPx().height());
+        myBack->setContextual(true);
+        aMenuParent = myBack;
+    }
+
+    const StRectI_t aRect = theParent->getRectPxAbsolute();
+    int aLeft = myBack != NULL ? 0 : aRect.left();
+    int aTop  = myBack != NULL ? 0 : aRect.bottom();
+
+    myMenu = new StGLMenu(aMenuParent, aLeft, aTop, StGLMenu::MENU_VERTICAL);
+    if(myBack != NULL) {
+        myMenu->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
+    }
+    myMenu->setContextual(myBack == NULL);
+}
+
+void StGLCombobox::ListBuilder::display() {
+    if(myBack != NULL) {
+        myBack->setVisibility(true, true);
+        myBack->stglInit();
+    } else {
+        myMenu->setVisibility(true, true);
+        myMenu->stglInit();
+    }
+}
+
 void StGLCombobox::doShowList(const size_t ) {
     myParam->signals.onChanged += stSlot(this, &StGLCombobox::doValueChanged);
 
-    StGLMessageBox* aBack   = NULL;
-    StGLWidget*     aParent = myRoot;
-    if(myRoot->isMobile()) {
-        aBack = new StGLMessageBox(myRoot, "", "",
-                                   myRoot->getRectPx().width(), myRoot->getRectPx().height());
-        aBack->setContextual(true);
-        aParent = aBack;
-    }
-
-    const StRectI_t aRect = getRectPxAbsolute();
-    int aLeft = aBack != NULL ? 0 : aRect.left();
-    int aTop  = aBack != NULL ? 0 : aRect.bottom();
-
-    StGLMenu* aMenu = new StGLMenu(aParent, aLeft, aTop, StGLMenu::MENU_VERTICAL);
-    if(aBack != NULL) {
-        aMenu->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
-    }
-    aMenu->setContextual(aBack == NULL);
+    ListBuilder aBuilder(this);
     const StArrayList<StString>& aValues = myParam->getValues();
     for(size_t aValIter = 0; aValIter < aValues.size(); ++aValIter) {
-        aMenu->addItem(aValues[aValIter], myParam, int32_t(aValIter));
+        aBuilder.getMenu()->addItem(aValues[aValIter], myParam, int32_t(aValIter));
     }
-
-    if(aBack != NULL) {
-        aBack->setVisibility(true, true);
-        aBack->stglInit();
-    } else {
-        aMenu->setVisibility(true, true);
-        aMenu->stglInit();
-    }
+    aBuilder.display();
 }
 
 void StGLCombobox::doValueChanged(const int32_t ) {
