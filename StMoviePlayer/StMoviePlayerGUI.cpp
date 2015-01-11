@@ -444,24 +444,34 @@ StGLMenu* StMoviePlayerGUI::createDisplayModeMenu() {
  * Root -> View menu -> Display Ratio
  */
 StGLMenu* StMoviePlayerGUI::createDisplayRatioMenu() {
-    const IconSize anIconSize = scaleIcon(16);
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem("Source", myImage->params.displayRatio, StGLImageRegion::RATIO_AUTO)
-         ->setIcon(iconTexture(stCString("menuAuto"), anIconSize));
-    aMenu->addItem("2.21:1", myImage->params.displayRatio, StGLImageRegion::RATIO_221_1)
-         ->setIcon(iconTexture(stCString("menuRatio2_1_"), anIconSize));
-    aMenu->addItem("16:9",   myImage->params.displayRatio, StGLImageRegion::RATIO_16_9)
-         ->setIcon(iconTexture(stCString("menuRatio16_9_"), anIconSize));
-    aMenu->addItem("16:10",  myImage->params.displayRatio, StGLImageRegion::RATIO_16_10)
-         ->setIcon(iconTexture(stCString("menuRatio16_10_"), anIconSize));
-    aMenu->addItem("4:3",    myImage->params.displayRatio, StGLImageRegion::RATIO_4_3)
-         ->setIcon(iconTexture(stCString("menuRatio4_3_"), anIconSize));
-    aMenu->addItem("5:4",    myImage->params.displayRatio, StGLImageRegion::RATIO_5_4)
-         ->setIcon(iconTexture(stCString("menuRatio5_4_"), anIconSize));
-    aMenu->addItem("1:1",    myImage->params.displayRatio, StGLImageRegion::RATIO_1_1)
-         ->setIcon(iconTexture(stCString("menuRatio1_1_"), anIconSize));
+    fillDisplayRatioMenu(aMenu);
     aMenu->addItem("Keep on restart", myPlugin->params.toRestoreRatio);
     return aMenu;
+}
+
+void StMoviePlayerGUI::fillDisplayRatioMenu(StGLMenu* theMenu) {
+    const IconSize anIconSize = scaleIcon(16);
+    theMenu->addItem("Source", myImage->params.displayRatio, StGLImageRegion::RATIO_AUTO)
+           ->setIcon(iconTexture(stCString("menuAuto"), anIconSize));
+    theMenu->addItem("2.21:1", myImage->params.displayRatio, StGLImageRegion::RATIO_221_1)
+           ->setIcon(iconTexture(stCString("menuRatio2_1_"), anIconSize));
+    theMenu->addItem("16:9",   myImage->params.displayRatio, StGLImageRegion::RATIO_16_9)
+           ->setIcon(iconTexture(stCString("menuRatio16_9_"), anIconSize));
+    theMenu->addItem("16:10",  myImage->params.displayRatio, StGLImageRegion::RATIO_16_10)
+           ->setIcon(iconTexture(stCString("menuRatio16_10_"), anIconSize));
+    theMenu->addItem("4:3",    myImage->params.displayRatio, StGLImageRegion::RATIO_4_3)
+           ->setIcon(iconTexture(stCString("menuRatio4_3_"), anIconSize));
+    theMenu->addItem("5:4",    myImage->params.displayRatio, StGLImageRegion::RATIO_5_4)
+           ->setIcon(iconTexture(stCString("menuRatio5_4_"), anIconSize));
+    theMenu->addItem("1:1",    myImage->params.displayRatio, StGLImageRegion::RATIO_1_1)
+           ->setIcon(iconTexture(stCString("menuRatio1_1_"), anIconSize));
+}
+
+void StMoviePlayerGUI::doDisplayRatioCombo(const size_t ) {
+    StGLCombobox::ListBuilder aBuilder(this);
+    fillDisplayRatioMenu(aBuilder.getMenu());
+    aBuilder.display();
 }
 
 /**
@@ -1122,6 +1132,13 @@ void StMoviePlayerGUI::doShowMobileExMenu(const size_t ) {
             anItem->setIcon(iconTexture(stCString("actionStreamSubtitles"), anIconSize));
             anItem->signals.onItemClick += stSlot(this, &StMoviePlayerGUI::doSubtitlesStreamsCombo);
         }
+
+        if(myPlugin->myVideo->hasVideoStream()) {
+            anItem = aMenu->addItem(tr(MENU_VIEW_DISPLAY_RATIO));
+            anItem->setIcon(iconTexture(stCString("actionDisplayRatio"), anIconSize));
+            anItem->signals.onItemClick += stSlot(this, &StMoviePlayerGUI::doDisplayRatioCombo);
+        }
+
         anExtraInfo.nullify();
     }
     anItem = aMenu->addItem(tr(MENU_HELP_ABOUT));

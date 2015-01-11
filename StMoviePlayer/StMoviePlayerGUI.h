@@ -159,6 +159,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
 
     ST_LOCAL void fillOpenALDeviceMenu(StGLMenu* theMenu);
     ST_LOCAL void fillRecentMenu(StGLMenu* theMenu);
+    ST_LOCAL void fillDisplayRatioMenu(StGLMenu* theMenu);
 
         private: //! @name mobile interface creation routines
 
@@ -185,6 +186,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL void doMobileSettings(const size_t );
     ST_LOCAL void doAudioStreamsCombo(const size_t );
     ST_LOCAL void doSubtitlesStreamsCombo(const size_t );
+    ST_LOCAL void doDisplayRatioCombo(const size_t );
 
         private: //! @name private fields
 
