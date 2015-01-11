@@ -41,20 +41,20 @@ StGLMenuItem::StGLMenuItem(StGLMenu* theParent,
   mySubMenu(theSubMenu),
   myIcon(NULL),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
+  myArrowIcon(Arrow_None),
   myIsItemSelected(false),
-  myToHilightText(false),
-  myToDrawArrow(false) {
+  myToHilightText(false) {
     switch(getParentMenu()->getOrient()) {
         case StGLMenu::MENU_VERTICAL: {
             myMargins.left  = myRoot->scale(32);
             myMargins.right = myRoot->scale(20);
-            myToDrawArrow   = theSubMenu != NULL;
+            myArrowIcon     = theSubMenu != NULL ? Arrow_Right : Arrow_None;
             break;
         }
         case StGLMenu::MENU_VERTICAL_COMPACT: {
             myMargins.left  = myRoot->scale(8);
             myMargins.right = myRoot->scale(16);
-            myToDrawArrow   = theSubMenu != NULL;
+            myArrowIcon     = theSubMenu != NULL ? Arrow_Right : Arrow_None;
             break;
         }
         case StGLMenu::MENU_HORIZONTAL: {
@@ -109,18 +109,40 @@ void StGLMenuItem::stglResize() {
 
     // back vertices
     StRectI_t aRectPx = getRectPxAbsolute();
-    StArray<StGLVec2> aVertices(myToDrawArrow ? 8 : 4);
+    StArray<StGLVec2> aVertices(myArrowIcon != Arrow_None ? 8 : 4);
     myRoot->getRectGl(aRectPx, aVertices, 0);
-    if(myToDrawArrow) {
-        aRectPx.right()  -= myRoot->scale(8);
-        aRectPx.left()    = aRectPx.right() - myRoot->scale(4);
-        aRectPx.top()    += myRoot->scale(10);
-        aRectPx.bottom() -= myRoot->scale(10);
+    switch(myArrowIcon) {
+        case Arrow_None: {
+            break;
+        }
+        case Arrow_Right: {
+            const int anIconHeight = myRoot->scale(12);
+            const int aHeight      = aRectPx.height();
+            aRectPx.right()  -= myRoot->scale(8);
+            aRectPx.left()    = aRectPx.right() - myRoot->scale(4);
+            aRectPx.top()     = aRectPx.top() + aHeight / 2 - anIconHeight / 2;
+            aRectPx.bottom()  = aRectPx.top() + anIconHeight;
 
-        StRectD_t aRectGl = myRoot->getRectGl(aRectPx);
-        aVertices[4] = StGLVec2(GLfloat(aRectGl.left()),  GLfloat(aRectGl.top()));
-        aVertices[5] = StGLVec2(GLfloat(aRectGl.left()),  GLfloat(aRectGl.bottom()));
-        aVertices[6] = StGLVec2(GLfloat(aRectGl.right()), GLfloat(aRectGl.bottom() + aRectGl.top()) * 0.5f);
+            StRectD_t aRectGl = myRoot->getRectGl(aRectPx);
+            aVertices[4] = StGLVec2(GLfloat(aRectGl.left()),  GLfloat(aRectGl.top()));
+            aVertices[5] = StGLVec2(GLfloat(aRectGl.left()),  GLfloat(aRectGl.bottom()));
+            aVertices[6] = StGLVec2(GLfloat(aRectGl.right()), GLfloat(aRectGl.bottom() + aRectGl.top()) * 0.5f);
+            break;
+        }
+        case Arrow_Bottom: {
+            const int anIconHeight = myRoot->scale(6);
+            const int aHeight      = aRectPx.height();
+            aRectPx.right()  -= myRoot->scale(8);
+            aRectPx.left()    = aRectPx.right() - myRoot->scale(8);
+            aRectPx.top()     = aRectPx.top() + aHeight / 2;
+            aRectPx.bottom()  = aRectPx.top() + anIconHeight;
+
+            StRectD_t aRectGl = myRoot->getRectGl(aRectPx);
+            aVertices[4] = StGLVec2(GLfloat(aRectGl.left()),                          GLfloat(aRectGl.top()));
+            aVertices[5] = StGLVec2(GLfloat(aRectGl.right()),                         GLfloat(aRectGl.top()));
+            aVertices[6] = StGLVec2(GLfloat(aRectGl.left() + aRectGl.right()) * 0.5f, GLfloat(aRectGl.bottom()));
+            break;
+        }
     }
     myBackVertexBuf.init(aCtx, aVertices);
 
@@ -172,7 +194,7 @@ bool StGLMenuItem::stglInit() {
         }
     }
 
-    StArray<StGLVec2> aDummyVert(myToDrawArrow ? 8 : 4);
+    StArray<StGLVec2> aDummyVert(myArrowIcon != Arrow_None ? 8 : 4);
     myBackVertexBuf.init(aCtx, aDummyVert);
 
     stglResize();
@@ -190,7 +212,7 @@ void StGLMenuItem::stglDrawArea(const StGLMenuItem::State theState,
         myBackVertexBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
         aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
-    if(myToDrawArrow) {
+    if(myArrowIcon != Arrow_None) {
         myProgram->setColor(aCtx, myTextColor, GLfloat(opacityValue) * 0.5f);
         myBackVertexBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
         aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 4, 3);
@@ -230,7 +252,7 @@ void StGLMenuItem::stglDraw(unsigned int theView) {
         }
     } else if(aState != StGLMenuItem::PASSIVE) {
         stglDrawArea(aState, false);
-    } else if(myToDrawArrow) {
+    } else if(myArrowIcon != Arrow_None) {
         stglDrawArea(aState, true);
     }
 

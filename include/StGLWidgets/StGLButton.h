@@ -56,6 +56,15 @@ class StGLButton : public StGLMenu {
      */
     ST_CPPEXPORT int computeWidth(const StString& theText);
 
+        protected:
+
+    /**
+     * Return the underlying menu item.
+     */
+    ST_LOCAL StGLMenuItem* getMenuItem() {
+        return (StGLMenuItem* )getChildren()->getStart();
+    }
+
         public:  //! @name Signals
 
     struct {

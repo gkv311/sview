@@ -24,6 +24,17 @@ class StGLMenuItem : public StGLTextArea {
 
         public:
 
+    /**
+     * Standard arrow icons.
+     */
+    enum Arrow {
+        Arrow_None,
+        Arrow_Right,
+        Arrow_Bottom,
+    };
+
+        public:
+
     // recursively delete all submenus and that this item itself
     // should be used only for dynamic menu recreation
     ST_CPPEXPORT static void DeleteWithSubMenus(StGLMenuItem* theMenuItem);
@@ -89,8 +100,22 @@ class StGLMenuItem : public StGLTextArea {
     /**
      * Setup icon.
      */
-    ST_LOCAL inline void setIcon(const StString& theImgPath) {
+    ST_LOCAL void setIcon(const StString& theImgPath) {
         setIcon(&theImgPath, 1);
+    }
+
+    /**
+     * Get arrow icon.
+     */
+    ST_LOCAL StGLMenuItem::Arrow getArrowIcon() const {
+        return myArrowIcon;
+    }
+
+    /**
+     * Setup arrow icon.
+     */
+    ST_LOCAL void setArrowIcon(const StGLMenuItem::Arrow theArrow) {
+        myArrowIcon = theArrow;
     }
 
         public:  //! @name Signals
@@ -115,11 +140,11 @@ class StGLMenuItem : public StGLTextArea {
 
         private: //! @name private methods
 
-    typedef enum tagState {
+    enum State {
         PASSIVE,
         HIGHLIGHT,
         CLICKED,
-    } State;
+    };
 
     ST_LOCAL void stglDrawArea(const StGLMenuItem::State theState,
                                const bool                theIsOnlyArrow);
@@ -131,9 +156,9 @@ class StGLMenuItem : public StGLTextArea {
     StGLShare<StGLMenuProgram> myProgram;        //!< GLSL program
     StGLVertexBuffer           myBackVertexBuf;  //!< background vertices
     StGLVec4                   myBackColor[3];   //!< background color per state
+    Arrow                      myArrowIcon;      //!< draw arrow
     bool                       myIsItemSelected; //!< navigation selection flag
     bool                       myToHilightText;  //!< highlight text instead of its box
-    bool                       myToDrawArrow;    //!< draw arrow
 
 };
 

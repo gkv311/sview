@@ -8,6 +8,7 @@
 
 #include <StGLWidgets/StGLCombobox.h>
 
+#include <StGLWidgets/StGLMenuItem.h>
 #include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLRootWidget.h>
 
@@ -17,6 +18,11 @@ StGLCombobox::StGLCombobox(StGLWidget* theParent,
                            const StHandle<StEnumParam>& theParam)
 : StGLButton(theParent, theLeft, theTop, theParam->getActiveValue()),
   myParam(theParam) {
+    StGLMenuItem* anItem = getMenuItem();
+    if(anItem != NULL) {
+        anItem->setArrowIcon(StGLMenuItem::Arrow_Bottom);
+    }
+
     StGLButton::signals.onBtnClick += stSlot(this, &StGLCombobox::doShowList);
 }
 

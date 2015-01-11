@@ -33,7 +33,7 @@ StGLButton::~StGLButton() {
 }
 
 void StGLButton::setLabel(const StString& theLabel) {
-    StGLMenuItem* anItem = (StGLMenuItem* )getChildren()->getStart();
+    StGLMenuItem* anItem = getMenuItem();
     if(anItem != NULL) {
         anItem->setText(theLabel);
     }
@@ -46,14 +46,14 @@ StGLMenuItem* StGLButton::addItem(const StString& theLabel) {
 }
 
 void StGLButton::setFocus(const bool theValue) {
-    StGLMenuItem* anItem = (StGLMenuItem* )getChildren()->getStart();
+    StGLMenuItem* anItem = getMenuItem();
     if(anItem != NULL) {
         anItem->setFocus(theValue);
     }
 }
 
 int StGLButton::computeWidth(const StString& theText) {
-    StGLMenuItem* anItem = (StGLMenuItem* )getChildren()->getStart();
+    StGLMenuItem* anItem = getMenuItem();
     if(anItem == NULL) {
         return 0;
     }
@@ -85,7 +85,7 @@ bool StGLButton::stglInit() {
     }
 
     myWidth = aWidth;
-    StGLMenuItem* anItem = (StGLMenuItem* )getChildren()->getStart();
+    StGLMenuItem* anItem = getMenuItem();
     if(anItem == NULL) {
         return true;
     }
