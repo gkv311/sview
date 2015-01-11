@@ -1090,12 +1090,22 @@ void StMoviePlayerGUI::doShowMobileExMenu(const size_t ) {
     const IconSize anIconSize = scaleIcon(16);
     const int aTop = scale(56);
 
+    StHandle<StMovieInfo>&   anExtraInfo = myPlugin->myFileInfo;
+    StHandle<StFileNode>     aFileNode;
+    StHandle<StStereoParams> aParams;
+    if(anExtraInfo.isNull()
+    && !myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo)) {
+        anExtraInfo.nullify();
+    }
+
     StGLMenu*     aMenu  = new StGLMenu(this, 0, aTop, StGLMenu::MENU_VERTICAL_COMPACT);
     StGLMenuItem* anItem = NULL;
     aMenu->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     aMenu->setContextual(true);
-    anItem = aMenu->addItem(tr(BUTTON_DELETE), myPlugin->getAction(StMoviePlayer::Action_DeleteFile));
-    anItem->setIcon(iconTexture(stCString("actionDiscard"),   anIconSize));
+    if(!anExtraInfo.isNull()) {
+        anItem = aMenu->addItem(tr(BUTTON_DELETE), myPlugin->getAction(StMoviePlayer::Action_DeleteFile));
+        anItem->setIcon(iconTexture(stCString("actionDiscard"), anIconSize));
+    }
     anItem = aMenu->addItem(tr(MENU_HELP_ABOUT));
     anItem->setIcon(iconTexture(stCString("actionHelp"),      anIconSize));
     anItem->signals.onItemClick += stSlot(this, &StMoviePlayerGUI::doAboutProgram);
