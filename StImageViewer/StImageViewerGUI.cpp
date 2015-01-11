@@ -637,10 +637,7 @@ void StImageViewerGUI::createMobileUpperToolbar() {
     const IconSize anIconSize = scaleIcon(32);
     const int      anIconStep = scale(56);
     StMarginsI aButtonMargins;
-    aButtonMargins.left   = scale(12);
-    aButtonMargins.right  = scale(12);
-    aButtonMargins.top    = scale(12);
-    aButtonMargins.bottom = scale(12);
+    aButtonMargins.setValues(12);
 
     const StMarginsI& aRootMargins = getRootMargins();
     myPanelUpper = new StGLWidget(this, aRootMargins.left, aRootMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(56));
@@ -684,10 +681,7 @@ void StImageViewerGUI::createMobileBottomToolbar() {
     const IconSize anIconSize = scaleIcon(32);
     const int      anIconStep = scale(56);
     StMarginsI aButtonMargins;
-    aButtonMargins.left   = scale(12);
-    aButtonMargins.right  = scale(12);
-    aButtonMargins.top    = scale(12);
-    aButtonMargins.bottom = scale(12);
+    aButtonMargins.setValues(12);
 
     const StMarginsI& aRootMargins = getRootMargins();
     myPanelBottom = new StGLWidget(this, aRootMargins.left, -aRootMargins.bottom, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(56));

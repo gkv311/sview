@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -49,10 +49,15 @@ StGLCheckbox::~StGLCheckbox() {
 
 void StGLCheckbox::stglResize() {
     // outer vertices
-    StRectI_t aRectPx = getRectPxAbsolute();
     StArray<StGLVec2> aVertices(8);
-    getRoot()->getRectGl(aRectPx, aVertices, 0);
     StGLContext& aCtx = getContext();
+
+    StRectI_t aRectPx = getRectPxAbsolute();
+    aRectPx.left()   += myMargins.left;
+    aRectPx.right()  -= myMargins.right;
+    aRectPx.top()    += myMargins.top;
+    aRectPx.bottom() -= myMargins.bottom;
+    getRoot()->getRectGl(aRectPx, aVertices, 0);
 
     // inner vertices
     aRectPx.left()   += myRoot->scale(4);

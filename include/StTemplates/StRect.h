@@ -277,7 +277,17 @@ struct StMarginsI {
 
         public:
 
+    /**
+     * Setup zero-margin.
+     */
     StMarginsI() : left(0), right(0), top(0), bottom(0) {}
+
+    /**
+     * Setup margin to specified value for all boundaries.
+     */
+    void setValues(const int theValue) {
+        left = right = top = bottom = theValue;
+    }
 
     bool operator==(const StMarginsI& theCompare) const {
         return top    == theCompare.top

@@ -165,6 +165,8 @@ void StGLTable::fillFromParams(const StParamsList& theParams,
     int aCol2Width = 0;
     StHandle<StBoolParamNamed> aBool;
     StHandle<StEnumParam>      anEnum;
+    const int anIconMargin = myRoot->scale(8);
+    const int anIconWidth  = anIconMargin * 2 + myRoot->scale(16);
     for(size_t anIter = 0; anIter < theParams.size(); ++anIter) {
         const StHandle<StParamBase>& aParam = theParams[anIter];
         StGLTableItem&               anItem = changeElement(theRowId + (int )anIter, theColId + 1);
@@ -173,6 +175,9 @@ void StGLTable::fillFromParams(const StParamsList& theParams,
         if(aBool.downcastFrom(aParam)) {
             StGLCheckbox* aCheckBox = new StGLCheckbox(&anItem, aBool,
                                                        0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
+            aCheckBox->changeRectPx().right()  = aCheckBox->getRectPx().left() + anIconWidth;
+            aCheckBox->changeRectPx().bottom() = aCheckBox->getRectPx().top()  + anIconWidth;
+            aCheckBox->changeMargins().setValues(anIconMargin);
             aCheckBox->setVisibility(true, true);
             aCol2Width = stMax(aCol2Width, aCheckBox->getRectPx().width());
         } else if(anEnum.downcastFrom(aParam)) {

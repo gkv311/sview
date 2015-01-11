@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -51,6 +51,20 @@ class StGLCheckbox : public StGLWidget {
      */
     ST_CPPEXPORT void reverseValue();
 
+    /**
+     * Return extra margins before the texture.
+     */
+    ST_LOCAL const StMarginsI& getMargins() const {
+        return myMargins;
+    }
+
+    /**
+     * Return extra margins before the texture.
+     */
+    ST_LOCAL StMarginsI& changeMargins() {
+        return myMargins;
+    }
+
         private: //! @name callback Slots (private overriders)
 
     ST_LOCAL void doMouseUnclick(const int theBtnId);
@@ -60,6 +74,7 @@ class StGLCheckbox : public StGLWidget {
     StHandle<StBoolParam>      myTrackValue; //!< handle to tracked value
     StGLShare<StGLMenuProgram> myProgram;    //!< shared program
     StGLVertexBuffer           myVertBuf;    //!< vertices buffer
+    StMarginsI                 myMargins;    //!< margins to the icon
 
 };
 
