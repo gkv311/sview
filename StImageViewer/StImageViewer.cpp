@@ -257,7 +257,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (ST_SETTING_SCALE_FORCE2X, params.ScaleHiDPI2X);
     params.ScaleHiDPI2X->signals.onChanged = stSlot(this, &StImageViewer::doScaleHiDPI);
     params.checkUpdatesDays = new StInt32Param(7);
-    params.srcFormat        = new StInt32Param(ST_V_SRC_AUTODETECT);
+    params.srcFormat        = new StInt32Param(StFormat_AUTO);
     params.srcFormat->signals.onChanged.connect(this, &StImageViewer::doSwitchSrcFormat);
     params.ToShowFps  = new StBoolParamNamed(false,                tr(StImageViewerStrings::MENU_SHOW_FPS));
     params.IsMobileUI = new StBoolParamNamed(StWindow::isMobile(), "Mobile UI");
@@ -312,16 +312,16 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     anAction = new StActionBool(stCString("DoShowFPS"), params.ToShowFps);
     addAction(Action_ShowFps, anAction, ST_VK_F12);
 
-    anAction = new StActionIntValue(stCString("DoSrcAuto"), params.srcFormat, ST_V_SRC_AUTODETECT);
+    anAction = new StActionIntValue(stCString("DoSrcAuto"), params.srcFormat, StFormat_AUTO);
     addAction(Action_SrcAuto, anAction, ST_VK_A);
 
-    anAction = new StActionIntValue(stCString("DoSrcMono"), params.srcFormat, ST_V_SRC_MONO);
+    anAction = new StActionIntValue(stCString("DoSrcMono"), params.srcFormat, StFormat_Mono);
     addAction(Action_SrcMono, anAction, ST_VK_M);
 
-    anAction = new StActionIntValue(stCString("DoSrcOverUnder"), params.srcFormat, ST_V_SRC_OVER_UNDER_LR);
+    anAction = new StActionIntValue(stCString("DoSrcOverUnder"), params.srcFormat, StFormat_TopBottom_LR);
     addAction(Action_SrcOverUnderLR, anAction, ST_VK_O);
 
-    anAction = new StActionIntValue(stCString("DoSrcSideBySide"), params.srcFormat, ST_V_SRC_SIDE_BY_SIDE);
+    anAction = new StActionIntValue(stCString("DoSrcSideBySide"), params.srcFormat, StFormat_SideBySide_RL);
     addAction(Action_SrcSideBySideRL, anAction, ST_VK_S);
 
     anAction = new StActionIntSlot(stCString("DoFileInfo"), stSlot(this, &StImageViewer::doAboutImage), 0);
@@ -952,7 +952,7 @@ void StImageViewer::doSwitchSrcFormat(const int32_t theSrcFormat) {
         return;
     }
 
-    myLoader->setStereoFormat(StFormatEnum(theSrcFormat));
+    myLoader->setStereoFormat(StFormat(theSrcFormat));
     if(!myLoader->getPlayList().isEmpty()) {
         myLoader->doLoadNext();
     }

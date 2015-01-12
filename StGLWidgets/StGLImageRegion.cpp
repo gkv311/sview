@@ -451,7 +451,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     // select (de)anaglyph color filter
     StGLVec3 aColorScale(1.0f, 1.0f, 1.0f);
     switch(aParams->StereoFormat) {
-        case ST_V_SRC_ANAGLYPH_RED_CYAN: {
+        case StFormat_AnaglyphRedCyan: {
             if(!toShowRight) {
                 aColorScale.g() = 0.0f;
                 aColorScale.b() = 0.0f;
@@ -460,7 +460,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             }
             break;
         }
-        case ST_V_SRC_ANAGLYPH_G_RB: {
+        case StFormat_AnaglyphGreenMagenta: {
             if(!toShowRight) {
                 aColorScale.r() = 0.0f;
                 aColorScale.b() = 0.0f;
@@ -469,7 +469,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             }
             break;
         }
-        case ST_V_SRC_ANAGLYPH_YELLOW_BLUE: {
+        case StFormat_AnaglyphYellowBlue: {
             if(!toShowRight) {
                 aColorScale.b() = 0.0f;
             } else {

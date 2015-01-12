@@ -191,8 +191,11 @@ int StActiveXCtrl::OnCreate(LPCREATESTRUCT theCreateStruct) {
     StArgument anArgSrcFormat = aDrawerArgs[ST_SETTING_SRCFORMAT];
     if(!anArgSrcFormat.isValid()) {
         anArgSrcFormat.setKey(ST_SETTING_SRCFORMAT);
-        if(aMime == ST_MIME_X_JPS || aMime == ST_MIME_JPS || aMime == ST_MIME_X_PNS || aMime == ST_MIME_PNS) {
-            anArgSrcFormat.setValue(st::formatToString(ST_V_SRC_SIDE_BY_SIDE));
+        if(aMime == ST_MIME_X_JPS
+        || aMime == ST_MIME_JPS
+        || aMime == ST_MIME_X_PNS
+        || aMime == ST_MIME_PNS) {
+            anArgSrcFormat.setValue(st::formatToString(StFormat_SideBySide_RL));
             aDrawerArgs.add(anArgSrcFormat);
         }
     }

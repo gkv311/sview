@@ -354,7 +354,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
                     aDimInfo.changeValue() += "\n";
                     aDimInfo.changeValue() += aDimsStr;
 
-                    if(myVideoMaster->getStereoFormatByUser() == ST_V_SRC_AUTODETECT) {
+                    if(myVideoMaster->getStereoFormatByUser() == StFormat_AUTO) {
                         myVideoMaster->setSlave(myVideoSlave);
                     } else {
                         myVideoSlave->deinit();
@@ -682,7 +682,7 @@ bool StVideo::pushPacket(StHandle<StAVPacketQueue>& theAVPacketQueue,
 
 void StVideo::checkInitVideoStreams() {
     const bool toUseGpu      = params.UseGpu->getValue();
-    const bool toDecodeSlave = myVideoMaster->getStereoFormatByUser() == ST_V_SRC_AUTODETECT
+    const bool toDecodeSlave = myVideoMaster->getStereoFormatByUser() == StFormat_AUTO
                             && mySlaveStream >= 0;
     if(toUseGpu      != myVideoMaster->toUseGpu()
     || toDecodeSlave != myVideoSlave->isInitialized()) {
@@ -1104,7 +1104,7 @@ bool StVideo::saveSnapshotAs(StImageFile::ImageType theImgType) {
         }
         ST_DEBUG_LOG("Save snapshot to the path '" + fileToSave + '\'');
         if(!dataResult->save(fileToSave, theImgType,
-                             toSaveStereo ? ST_V_SRC_SIDE_BY_SIDE : ST_V_SRC_AUTODETECT)) {
+                             toSaveStereo ? StFormat_SideBySide_RL : StFormat_AUTO)) {
             // TODO (Kirill Gavrilov#7)
             signals.onError(dataResult->getState());
             return false;

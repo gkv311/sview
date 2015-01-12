@@ -175,8 +175,11 @@ StBrowserPlugin::StBrowserPlugin(NSPluginCreateData* theCreateDataStruct)
     StArgument anArgSrcFormat = aDrawerArgs[ST_SETTING_SRCFORMAT];
     if(!anArgSrcFormat.isValid()) {
         anArgSrcFormat.setKey(ST_SETTING_SRCFORMAT);
-        if(stMIME == ST_MIME_X_JPS || stMIME == ST_MIME_JPS || stMIME == ST_MIME_X_PNS || stMIME == ST_MIME_PNS) {
-            anArgSrcFormat.setValue(st::formatToString(ST_V_SRC_SIDE_BY_SIDE));
+        if(stMIME == ST_MIME_X_JPS
+        || stMIME == ST_MIME_JPS
+        || stMIME == ST_MIME_X_PNS
+        || stMIME == ST_MIME_PNS) {
+            anArgSrcFormat.setValue(st::formatToString(StFormat_SideBySide_RL));
             aDrawerArgs.add(anArgSrcFormat);
         }
     }

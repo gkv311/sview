@@ -52,7 +52,7 @@ class StDevILImage : public StImageFile {
                                    uint8_t* theDataPtr = NULL, int theDataSize = 0);
     ST_CPPEXPORT virtual bool save(const StString& theFilePath,
                                    ImageType       theImageType,
-                                   StFormatEnum    theSrcFormat);
+                                   StFormat        theSrcFormat);
 
 };
 

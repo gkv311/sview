@@ -72,7 +72,7 @@ class StAVImage : public StImageFile {
      */
     ST_CPPEXPORT virtual bool save(const StString& theFilePath,
                                    ImageType       theImageType,
-                                   StFormatEnum    theSrcFormat = ST_V_SRC_AUTODETECT);
+                                   StFormat        theSrcFormat = StFormat_AUTO);
 
         private:
 

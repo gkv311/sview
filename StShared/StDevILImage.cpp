@@ -397,7 +397,7 @@ bool StDevILImage::resize(size_t theSizeX, size_t theSizeY) {
 
 bool StDevILImage::save(const StString& theFilePath,
                         ImageType       theImageType,
-                        StFormatEnum ) {
+                        StFormat ) {
     setState();
 
     ILenum anImageTypeIl = convertStImage2DevIL(theImageType);

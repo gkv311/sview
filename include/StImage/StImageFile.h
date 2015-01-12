@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -86,7 +86,7 @@ class StImageFile : public StImage {
         myStateDescr = theDescr;
     }
 
-    ST_LOCAL StFormatEnum getFormat() const {
+    ST_LOCAL StFormat getFormat() const {
         return mySrcFormat;
     }
 
@@ -123,12 +123,12 @@ class StImageFile : public StImage {
      */
     virtual bool save(const StString& theFilePath,
                       ImageType       theImageType,
-                      StFormatEnum    theSrcFormat) = 0;
+                      StFormat        theSrcFormat) = 0;
 
         protected:
 
-    StString     myStateDescr;
-    StFormatEnum mySrcFormat;
+    StString myStateDescr;
+    StFormat mySrcFormat;
 
 };
 

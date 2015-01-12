@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -25,12 +25,12 @@ class StGLTextureData {
     /**
      * Returns name for format.
      */
-    static StString GET_NAME_STRING(StFormatEnum formatEnum);
+    static StString GET_NAME_STRING(StFormat formatEnum);
 
     /**
      * Return enumeration value from the string.
      */
-    static StFormatEnum GET_FROM_STRING(const StString& formatString);
+    static StFormat GET_FROM_STRING(const StString& formatString);
 
         public:
 
@@ -65,7 +65,7 @@ class StGLTextureData {
     /**
      * @return format of source data
      */
-    inline StFormatEnum getSourceFormat() const {
+    inline StFormat getSourceFormat() const {
         return mySrcFormat;
     }
 
@@ -118,7 +118,7 @@ class StGLTextureData {
     ST_CPPEXPORT void updateData(const StImage&                  theDataL,
                                  const StImage&                  theDataR,
                                  const StHandle<StStereoParams>& theStParams,
-                                 const StFormatEnum              theFormat,
+                                 const StFormat                  theFormat,
                                  const double                    thePts);
 
     /**
@@ -163,7 +163,7 @@ class StGLTextureData {
 
     StHandle<StStereoParams> myStParams;
     double                   myPts;           //!< presentation timestamp
-    StFormatEnum             mySrcFormat;
+    StFormat                 mySrcFormat;
 
     GLsizei                  myFillFromRow;
     GLsizei                  myFillRows;

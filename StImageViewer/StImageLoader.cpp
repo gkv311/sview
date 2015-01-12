@@ -55,7 +55,7 @@ StImageLoader::StImageLoader(const StImageFile::ImageClass     theImageLib,
   myLangMap(theLangMap),
   myPlayList(1),
   myLoadNextEvent(false),
-  myStFormatByUser(ST_V_SRC_AUTODETECT),
+  myStFormatByUser(StFormat_AUTO),
   myMaxTexDim(theMaxTexDim),
   myTextureQueue(theTextureQueue),
   myMsgQueue(theMsgQueue),
@@ -160,7 +160,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     }
 
     StTimer aLoadTimer(true);
-    StFormatEnum aSrcFormatCurr = myStFormatByUser;
+    StFormat aSrcFormatCurr = myStFormatByUser;
     if(anImgType == StImageFile::ST_TYPE_MPO
     || anImgType == StImageFile::ST_TYPE_JPEG
     || anImgType == StImageFile::ST_TYPE_JPS) {
@@ -214,8 +214,8 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
                 anEntry.changeValue() = aTime;
             }
         }
-        if(myStFormatByUser == ST_V_SRC_AUTODETECT
-        && aParser.getSrcFormat() != ST_V_SRC_AUTODETECT) {
+        if(myStFormatByUser == StFormat_AUTO
+        && aParser.getSrcFormat() != StFormat_AUTO) {
             aSrcFormatCurr = aParser.getSrcFormat();
         }
 
@@ -227,7 +227,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
 
         anImgInfo->IsSavable = anImg2.isNull();
         anImgInfo->StInfoStream = aParser.getSrcFormat();
-        if(anImgInfo->StInfoStream != ST_V_SRC_AUTODETECT) {
+        if(anImgInfo->StInfoStream != StFormat_AUTO) {
             StDictEntry& anEntry  = anImgInfo->Info.addChange("Jpeg.JpsStereo");
             anEntry.changeValue() = tr(StImageViewerGUI::trSrcFormatId(anImgInfo->StInfoStream));
         }
@@ -283,7 +283,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         }
 
         anImgInfo->StInfoStream = anImageFileL->getFormat();
-        if(myStFormatByUser == ST_V_SRC_AUTODETECT) {
+        if(myStFormatByUser == StFormat_AUTO) {
             aSrcFormatCurr = anImgInfo->StInfoStream;
         }
     }
@@ -302,13 +302,13 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     // detect information from file name
     bool isAnamorphByName = false;
     anImgInfo->StInfoFileName = st::formatFromName(aTitleString, isAnamorphByName);
-    if(aSrcFormatCurr == ST_V_SRC_AUTODETECT
-    && anImgInfo->StInfoFileName != ST_V_SRC_AUTODETECT) {
+    if(aSrcFormatCurr == StFormat_AUTO
+    && anImgInfo->StInfoFileName != StFormat_AUTO) {
         aSrcFormatCurr = anImgInfo->StInfoFileName;
     }
 
     // try detection based on aspect ratio
-    /*if(aSrcFormatCurr == ST_V_SRC_AUTODETECT
+    /*if(aSrcFormatCurr == StFormat_AUTO
     && !anImageL->isNull()) {
         aSrcFormatCurr = st::formatFromRatio(anImageL->getRatio());
     }*/
@@ -329,7 +329,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
 
     myTextureQueue->setConnectedStream(true);
     if(!anImageR->isNull()) {
-        myTextureQueue->push(*anImageL, *anImageR, theParams, ST_V_SRC_SEPARATE_FRAMES, 0.0);
+        myTextureQueue->push(*anImageL, *anImageR, theParams, StFormat_SeparateFrames, 0.0);
     } else {
         myTextureQueue->push(*anImageL, *anImageR, theParams, aSrcFormatCurr, 0.0);
     }
@@ -466,7 +466,7 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
             ST_DEBUG_LOG("Save snapshot to the path '" + aFileToSave + '\'');
             StString strSaveState;
             if(!aDataResult->save(aFileToSave, theImgType,
-                                  toSaveStereo ? ST_V_SRC_SIDE_BY_SIDE : ST_V_SRC_AUTODETECT)) {
+                                  toSaveStereo ? StFormat_SideBySide_RL : StFormat_AUTO)) {
                 // TODO (Kirill Gavrilov#7)
                 myMsgQueue->pushError(aDataResult->getState());
                 return false;
@@ -491,7 +491,7 @@ bool StImageLoader::saveImageInfo(const StHandle<StImageInfo>& theInfo) {
         return false;
     }
 
-    StFormatEnum aSrcFormat = theInfo->Id->StereoFormat;
+    StFormat aSrcFormat = theInfo->Id->StereoFormat;
     if(theInfo->Id->ToSwapLR) {
         aSrcFormat = st::formatReversed(aSrcFormat);
     }

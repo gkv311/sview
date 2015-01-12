@@ -370,7 +370,7 @@ bool StAVImage::load(const StString& theFilePath,
             mySrcFormat = st::formatReversed(mySrcFormat);
         }
     } else {
-        mySrcFormat = ST_V_SRC_AUTODETECT;
+        mySrcFormat = StFormat_AUTO;
     }
 #endif
 
@@ -471,7 +471,7 @@ bool StAVImage::load(const StString& theFilePath,
 
 bool StAVImage::save(const StString& theFilePath,
                      ImageType       theImageType,
-                     StFormatEnum    theSrcFormat) {
+                     StFormat        theSrcFormat) {
     close();
     setState();
     if(isNull()) {
@@ -635,7 +635,7 @@ bool StAVImage::save(const StString& theFilePath,
     if(theImageType == ST_TYPE_JPEG
     || theImageType == ST_TYPE_JPS) {
         if(aRawFile.parse()) {
-            if(theSrcFormat != ST_V_SRC_AUTODETECT) {
+            if(theSrcFormat != StFormat_AUTO) {
                 aRawFile.setupJps(theSrcFormat);
             }
         } else {

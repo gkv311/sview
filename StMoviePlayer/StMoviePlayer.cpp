@@ -438,7 +438,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.ToLoopSingle     = new StBoolParam(false);
     params.areGlobalMKeys   = new StBoolParam(true);
     params.checkUpdatesDays = new StInt32Param(7);
-    params.srcFormat        = new StInt32Param(ST_V_SRC_AUTODETECT);
+    params.srcFormat        = new StInt32Param(StFormat_AUTO);
     params.srcFormat->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchSrcFormat);
     params.ToShowPlayList   = new StBoolParam(false);
     params.ToShowPlayList->signals.onChanged = stSlot(this, &StMoviePlayer::doShowPlayList);
@@ -538,16 +538,16 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     anAction = new StActionBool(stCString("DoShowFPS"), params.ToShowFps);
     addAction(Action_ShowFps, anAction, ST_VK_F12);
 
-    anAction = new StActionIntValue(stCString("DoSrcAuto"), params.srcFormat, ST_V_SRC_AUTODETECT);
+    anAction = new StActionIntValue(stCString("DoSrcAuto"), params.srcFormat, StFormat_AUTO);
     addAction(Action_SrcAuto, anAction, ST_VK_A);
 
-    anAction = new StActionIntValue(stCString("DoSrcMono"), params.srcFormat, ST_V_SRC_MONO);
+    anAction = new StActionIntValue(stCString("DoSrcMono"), params.srcFormat, StFormat_Mono);
     addAction(Action_SrcMono, anAction, ST_VK_M);
 
-    anAction = new StActionIntValue(stCString("DoSrcOverUnder"), params.srcFormat, ST_V_SRC_OVER_UNDER_LR);
+    anAction = new StActionIntValue(stCString("DoSrcOverUnder"), params.srcFormat, StFormat_TopBottom_LR);
     addAction(Action_SrcOverUnderLR, anAction, ST_VK_O);
 
-    anAction = new StActionIntValue(stCString("DoSrcSideBySide"), params.srcFormat, ST_V_SRC_SIDE_BY_SIDE);
+    anAction = new StActionIntValue(stCString("DoSrcSideBySide"), params.srcFormat, StFormat_SideBySide_RL);
     addAction(Action_SrcSideBySideRL, anAction, ST_VK_S);
 
     anAction = new StActionIntSlot(stCString("DoFileInfo"), stSlot(this, &StMoviePlayer::doAboutFile), 0);
@@ -1522,7 +1522,7 @@ void StMoviePlayer::doAboutFile(const size_t ) {
 }
 
 void StMoviePlayer::doSwitchSrcFormat(const int32_t theSrcFormat) {
-    myVideo->setStereoFormat(StFormatEnum(theSrcFormat));
+    myVideo->setStereoFormat(StFormat(theSrcFormat));
 }
 
 void StMoviePlayer::doReset(const size_t ) {

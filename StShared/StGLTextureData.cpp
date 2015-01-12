@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -18,7 +18,7 @@ StGLTextureData::StGLTextureData()
   myDataSizeBytes(0),
   myStParams(),
   myPts(0.0),
-  mySrcFormat(ST_V_SRC_AUTODETECT),
+  mySrcFormat(StFormat_AUTO),
   myFillFromRow(0),
   myFillRows(0) {
     //
@@ -302,12 +302,12 @@ inline size_t computeBufferSize(const StImage& theData) {
 void StGLTextureData::updateData(const StImage&                  theDataL,
                                  const StImage&                  theDataR,
                                  const StHandle<StStereoParams>& theStParams,
-                                 const StFormatEnum              theFormat,
+                                 const StFormat                  theFormat,
                                  const double                    thePts) {
     // setup new stereo source
     myStParams  = theStParams;
     myPts       = thePts;
-    mySrcFormat = theFormat != ST_V_SRC_AUTODETECT ? theFormat : ST_V_SRC_MONO;
+    mySrcFormat = theFormat != StFormat_AUTO ? theFormat : StFormat_Mono;
 
     // reset fill texture state
     myFillRows = myFillFromRow = 0;
@@ -330,27 +330,27 @@ void StGLTextureData::updateData(const StImage&                  theDataL,
     myDataR.setPixelRatio(theDataL.getPixelRatio());
 
     switch(mySrcFormat) {
-        case ST_V_SRC_SIDE_BY_SIDE:
-        case ST_V_SRC_PARALLEL_PAIR: {
+        case StFormat_SideBySide_LR:
+        case StFormat_SideBySide_RL: {
             GLubyte* aDataDispl = myDataPtr;
             for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
                 aDataDispl = readFromParallel(theDataL.getPlane(aPlaneId), aDataDispl,
-                                              (mySrcFormat == ST_V_SRC_PARALLEL_PAIR) ? myDataL.changePlane(aPlaneId) : myDataR.changePlane(aPlaneId),
-                                              (mySrcFormat == ST_V_SRC_PARALLEL_PAIR) ? myDataR.changePlane(aPlaneId) : myDataL.changePlane(aPlaneId));
+                                              (mySrcFormat == StFormat_SideBySide_LR) ? myDataL.changePlane(aPlaneId) : myDataR.changePlane(aPlaneId),
+                                              (mySrcFormat == StFormat_SideBySide_LR) ? myDataR.changePlane(aPlaneId) : myDataL.changePlane(aPlaneId));
             }
             break;
         }
-        case ST_V_SRC_OVER_UNDER_RL:
-        case ST_V_SRC_OVER_UNDER_LR: {
+        case StFormat_TopBottom_LR:
+        case StFormat_TopBottom_RL: {
             GLubyte* aDataDispl = myDataPtr;
             for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
                 aDataDispl = readFromOverUnderLR(theDataL.getPlane(aPlaneId), aDataDispl,
-                                                 (mySrcFormat == ST_V_SRC_OVER_UNDER_LR) ? myDataL.changePlane(aPlaneId) : myDataR.changePlane(aPlaneId),
-                                                 (mySrcFormat == ST_V_SRC_OVER_UNDER_LR) ? myDataR.changePlane(aPlaneId) : myDataL.changePlane(aPlaneId));
+                                                 (mySrcFormat == StFormat_TopBottom_LR) ? myDataL.changePlane(aPlaneId) : myDataR.changePlane(aPlaneId),
+                                                 (mySrcFormat == StFormat_TopBottom_LR) ? myDataR.changePlane(aPlaneId) : myDataL.changePlane(aPlaneId));
             }
             break;
         }
-        case ST_V_SRC_ROW_INTERLACE: {
+        case StFormat_Rows: {
             myDataL.setPixelRatio(theDataL.getPixelRatio() * 0.5f);
             myDataR.setPixelRatio(theDataL.getPixelRatio() * 0.5f);
             GLubyte* aDataDispl = myDataPtr;
@@ -362,8 +362,8 @@ void StGLTextureData::updateData(const StImage&                  theDataL,
             }
             break;
         }
-        case ST_V_SRC_PAGE_FLIP:
-        case ST_V_SRC_SEPARATE_FRAMES: {
+        case StFormat_FrameSequence:
+        case StFormat_SeparateFrames: {
             myDataR.setColorModel(theDataR.getColorModel());
             myDataR.setPixelRatio(theDataR.getPixelRatio());
             GLubyte* aDataDispl = myDataPtr;
@@ -375,7 +375,7 @@ void StGLTextureData::updateData(const StImage&                  theDataL,
             }
             break;
         }
-        case ST_V_SRC_TILED_4X: {
+        case StFormat_Tiled4x: {
             GLubyte* aDataDispl = myDataPtr;
             for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
                 aDataDispl = readFromTiled4X(theDataL.getPlane(aPlaneId), aDataDispl,
@@ -383,11 +383,11 @@ void StGLTextureData::updateData(const StImage&                  theDataL,
             }
             break;
         }
-        case ST_V_SRC_ANAGLYPH_RED_CYAN:
-        case ST_V_SRC_ANAGLYPH_G_RB:
-        case ST_V_SRC_ANAGLYPH_YELLOW_BLUE:
-        case ST_V_SRC_VERTICAL_INTERLACE: // not supported
-        case ST_V_SRC_MONO:
+        case StFormat_AnaglyphRedCyan:
+        case StFormat_AnaglyphGreenMagenta:
+        case StFormat_AnaglyphYellowBlue:
+        case StFormat_Columns: // not supported
+        case StFormat_Mono:
         default: {
             GLubyte* aDataDispl = myDataPtr;
             for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {

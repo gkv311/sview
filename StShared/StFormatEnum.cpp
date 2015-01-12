@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,66 +11,66 @@
 #include <StFile/StFileNode.h>
 
 namespace {
-    static const StCString ST_V_SRC_AUTODETECT_STRING    = stCString("auto");
-    static const StCString ST_V_SRC_SIDE_BY_SIDE_STRING  = stCString("crossEyed");
-    static const StCString ST_V_SRC_PARALLEL_PAIR_STRING = stCString("parallelPair");
-    static const StCString ST_V_SRC_OVER_UNDER_RL_STRING = stCString("overUnderRL");
-    static const StCString ST_V_SRC_OVER_UNDER_LR_STRING = stCString("overUnderLR");
-    static const StCString ST_V_SRC_ROW_INTERLACE_STRING = stCString("interlaceRow");
-    static const StCString ST_V_SRC_PAGE_FLIP_STRING     = stCString("frameSequential");
-    static const StCString ST_V_SRC_MONO_STRING          = stCString("mono");
+    static const StCString StFormat_AUTO_STRING          = stCString("auto");
+    static const StCString StFormat_SideBySide_RL_STRING = stCString("crossEyed");
+    static const StCString StFormat_SideBySide_LR_STRING = stCString("parallelPair");
+    static const StCString StFormat_TopBottom_RL_STRING  = stCString("overUnderRL");
+    static const StCString StFormat_TopBottom_LR_STRING  = stCString("overUnderLR");
+    static const StCString StFormat_Rows_STRING          = stCString("interlaceRow");
+    static const StCString StFormat_FrameSequence_STRING = stCString("frameSequential");
+    static const StCString StFormat_Mono_STRING          = stCString("mono");
 };
 
-StString st::formatToString(StFormatEnum theFormatEnum) {
+StString st::formatToString(StFormat theFormatEnum) {
     switch(theFormatEnum) {
-        case ST_V_SRC_MONO:          return ST_V_SRC_MONO_STRING;
-        case ST_V_SRC_SIDE_BY_SIDE:  return ST_V_SRC_SIDE_BY_SIDE_STRING;
-        case ST_V_SRC_PARALLEL_PAIR: return ST_V_SRC_PARALLEL_PAIR_STRING;
-        case ST_V_SRC_OVER_UNDER_RL: return ST_V_SRC_OVER_UNDER_RL_STRING;
-        case ST_V_SRC_OVER_UNDER_LR: return ST_V_SRC_OVER_UNDER_LR_STRING;
-        case ST_V_SRC_ROW_INTERLACE: return ST_V_SRC_ROW_INTERLACE_STRING;
-        case ST_V_SRC_PAGE_FLIP:     return ST_V_SRC_PAGE_FLIP_STRING;
-        case ST_V_SRC_AUTODETECT:
-        default:                     return ST_V_SRC_AUTODETECT_STRING;
+        case StFormat_Mono:          return StFormat_Mono_STRING;
+        case StFormat_SideBySide_LR: return StFormat_SideBySide_LR_STRING;
+        case StFormat_SideBySide_RL: return StFormat_SideBySide_RL_STRING;
+        case StFormat_TopBottom_LR:  return StFormat_TopBottom_LR_STRING;
+        case StFormat_TopBottom_RL:  return StFormat_TopBottom_RL_STRING;
+        case StFormat_Rows:          return StFormat_Rows_STRING;
+        case StFormat_FrameSequence: return StFormat_FrameSequence_STRING;
+        case StFormat_AUTO:
+        default:                     return StFormat_AUTO_STRING;
     }
 }
 
-StFormatEnum st::formatFromString(const StString& theFormatString) {
-    if(theFormatString.isEqualsIgnoreCase(ST_V_SRC_MONO_STRING)) {
-        return ST_V_SRC_MONO;
-    } else if(theFormatString.isEqualsIgnoreCase(ST_V_SRC_SIDE_BY_SIDE_STRING)) {
-        return ST_V_SRC_SIDE_BY_SIDE;
-    } else if(theFormatString.isEqualsIgnoreCase(ST_V_SRC_PARALLEL_PAIR_STRING)) {
-        return ST_V_SRC_PARALLEL_PAIR;
-    } else if(theFormatString.isEqualsIgnoreCase(ST_V_SRC_OVER_UNDER_RL_STRING)) {
-        return ST_V_SRC_OVER_UNDER_RL;
-    } else if(theFormatString.isEqualsIgnoreCase(ST_V_SRC_OVER_UNDER_LR_STRING)) {
-        return ST_V_SRC_OVER_UNDER_LR;
-    } else if(theFormatString.isEqualsIgnoreCase(ST_V_SRC_ROW_INTERLACE_STRING)) {
-        return ST_V_SRC_ROW_INTERLACE;
-    } else if(theFormatString.isEqualsIgnoreCase(ST_V_SRC_PAGE_FLIP_STRING)) {
-        return ST_V_SRC_PAGE_FLIP;
+StFormat st::formatFromString(const StString& theFormatString) {
+    if(theFormatString.isEqualsIgnoreCase(StFormat_Mono_STRING)) {
+        return StFormat_Mono;
+    } else if(theFormatString.isEqualsIgnoreCase(StFormat_SideBySide_RL_STRING)) {
+        return StFormat_SideBySide_RL;
+    } else if(theFormatString.isEqualsIgnoreCase(StFormat_SideBySide_LR_STRING)) {
+        return StFormat_SideBySide_LR;
+    } else if(theFormatString.isEqualsIgnoreCase(StFormat_TopBottom_RL_STRING)) {
+        return StFormat_TopBottom_RL;
+    } else if(theFormatString.isEqualsIgnoreCase(StFormat_TopBottom_LR_STRING)) {
+        return StFormat_TopBottom_LR;
+    } else if(theFormatString.isEqualsIgnoreCase(StFormat_Rows_STRING)) {
+        return StFormat_Rows;
+    } else if(theFormatString.isEqualsIgnoreCase(StFormat_FrameSequence_STRING)) {
+        return StFormat_FrameSequence;
     } else {
-        return ST_V_SRC_AUTODETECT;
+        return StFormat_AUTO;
     }
 }
 
-StFormatEnum st::formatReversed(const StFormatEnum theFormatEnum) {
+StFormat st::formatReversed(const StFormat theFormatEnum) {
     switch(theFormatEnum) {
-        case ST_V_SRC_SIDE_BY_SIDE:  return ST_V_SRC_PARALLEL_PAIR;
-        case ST_V_SRC_PARALLEL_PAIR: return ST_V_SRC_SIDE_BY_SIDE;
-        case ST_V_SRC_OVER_UNDER_RL: return ST_V_SRC_OVER_UNDER_LR;
-        case ST_V_SRC_OVER_UNDER_LR: return ST_V_SRC_OVER_UNDER_RL;
-        case ST_V_SRC_ROW_INTERLACE:
-        case ST_V_SRC_PAGE_FLIP:
-        case ST_V_SRC_MONO:
-        case ST_V_SRC_AUTODETECT:
+        case StFormat_SideBySide_RL: return StFormat_SideBySide_LR;
+        case StFormat_SideBySide_LR: return StFormat_SideBySide_RL;
+        case StFormat_TopBottom_RL:  return StFormat_TopBottom_LR;
+        case StFormat_TopBottom_LR:  return StFormat_TopBottom_RL;
+        case StFormat_Rows:
+        case StFormat_FrameSequence:
+        case StFormat_Mono:
+        case StFormat_AUTO:
         default:                     return theFormatEnum;
     }
 }
 
-StFormatEnum st::formatFromName(const StString& theFileName,
-                                bool&           theIsAnamorph) {
+StFormat st::formatFromName(const StString& theFileName,
+                            bool&           theIsAnamorph) {
     StString aName, anExt;
     StFileNode::getNameAndExtension(theFileName, aName, anExt);
     aName.toLowerCase();
@@ -78,7 +78,7 @@ StFormatEnum st::formatFromName(const StString& theFileName,
     if(anExt == stCString("pns")
     || anExt == stCString("jps")) {
         theIsAnamorph = false;
-        return ST_V_SRC_SIDE_BY_SIDE;
+        return StFormat_SideBySide_RL;
     }
 
     // this is not optimized search, but should be OK for most use cases
@@ -93,10 +93,10 @@ StFormatEnum st::formatFromName(const StString& theFileName,
     || aName.isEndsWith(stCString(" hou"))
     || aName.isEndsWith(stCString("-abq"))) {
         theIsAnamorph = true;
-        return ST_V_SRC_OVER_UNDER_LR;
+        return StFormat_TopBottom_LR;
     } else if(aName.isEndsWith(stCString("-baq"))) {
         theIsAnamorph = true;
-        return ST_V_SRC_OVER_UNDER_RL;
+        return StFormat_TopBottom_RL;
     } else if(aName.isEndsWith(stCString("-ab"))
            //|| aName.isContains(stCString("-ou")) // too ambiguous
            //|| aName.isContains(stCString("_ou"))
@@ -104,10 +104,10 @@ StFormatEnum st::formatFromName(const StString& theFileName,
            //|| aName.isContains(stCString(" ou"))
              ) {
         theIsAnamorph = false;
-        return ST_V_SRC_OVER_UNDER_LR;
+        return StFormat_TopBottom_LR;
     } else if(aName.isEndsWith(stCString("-ba"))) {
         theIsAnamorph = false;
-        return ST_V_SRC_OVER_UNDER_RL;
+        return StFormat_TopBottom_RL;
     } else if(aName.isContains(stCString("halfsbs"))
            || aName.isContains(stCString("half-sbs"))
            || aName.isContains(stCString("half_sbs"))
@@ -119,32 +119,32 @@ StFormatEnum st::formatFromName(const StString& theFileName,
            || aName.isContains(stCString(" hsbs"))
            || aName.isEndsWith(stCString("-lrq"))) {
         theIsAnamorph = true;
-        return ST_V_SRC_PARALLEL_PAIR;
+        return StFormat_SideBySide_LR;
     } else if(aName.isEndsWith(stCString("-rlq"))) {
         theIsAnamorph = true;
-        return ST_V_SRC_SIDE_BY_SIDE;
+        return StFormat_SideBySide_RL;
     } else if(aName.isContains(stCString("-sbs"))
            || aName.isContains(stCString(".sbs"))
            || aName.isContains(stCString(" sbs"))
            || aName.isEndsWith(stCString("-lr"))) {
         theIsAnamorph = false;
-        return ST_V_SRC_PARALLEL_PAIR;
+        return StFormat_SideBySide_LR;
     } else if(aName.isEndsWith(stCString("-rl"))) {
         theIsAnamorph = false;
-        return ST_V_SRC_SIDE_BY_SIDE;
+        return StFormat_SideBySide_RL;
     } else if(aName.isEndsWith(stCString("-2d"))) {
         theIsAnamorph = false;
-        return ST_V_SRC_MONO;
+        return StFormat_Mono;
     }
     theIsAnamorph = false;
-    return ST_V_SRC_AUTODETECT;
+    return StFormat_AUTO;
 }
 
-StFormatEnum st::formatFromRatio(const GLfloat theRatio) {
+StFormat st::formatFromRatio(const GLfloat theRatio) {
     if(stAreEqual(theRatio, st::videoRatio::TV_SIDEBYSIDE,      0.18f)
     || stAreEqual(theRatio, st::videoRatio::WIDE_SIDEBYSIDE,    0.18f)
     || stAreEqual(theRatio, st::videoRatio::USERDEF_SIDEBYSIDE, 0.18f)) {
-        return ST_V_SRC_SIDE_BY_SIDE;
+        return StFormat_SideBySide_RL;
     }
-    return ST_V_SRC_MONO;
+    return StFormat_Mono;
 }

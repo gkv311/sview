@@ -37,11 +37,11 @@ struct StImageInfo {
     StArgumentsMap           Info;
     StString                 Path;           //!< file path
     StImageFile::ImageType   ImageType;      //!< image type
-    StFormatEnum             StInfoStream;   //!< source format as stored in file metadata
-    StFormatEnum             StInfoFileName; //!< source format detected from file name
+    StFormat                 StInfoStream;   //!< source format as stored in file metadata
+    StFormat                 StInfoFileName; //!< source format detected from file name
     bool                     IsSavable;      //!< indicate that file can be saved without re-encoding
 
-    StImageInfo() : ImageType(StImageFile::ST_TYPE_NONE), StInfoStream(ST_V_SRC_AUTODETECT), StInfoFileName(ST_V_SRC_AUTODETECT), IsSavable(false) {}
+    StImageInfo() : ImageType(StImageFile::ST_TYPE_NONE), StInfoStream(StFormat_AUTO), StInfoFileName(StFormat_AUTO), IsSavable(false) {}
 
 };
 
@@ -122,7 +122,7 @@ class StImageLoader {
         return myPlayList;
     }
 
-    ST_LOCAL void setStereoFormat(const StFormatEnum theSrcFormat) {
+    ST_LOCAL void setStereoFormat(const StFormat theSrcFormat) {
         myStFormatByUser = theSrcFormat;
     }
 
@@ -182,7 +182,7 @@ class StImageLoader {
     StPlayList                 myPlayList;      //!< play list
     mutable StMutex            myLock;          //!< lock to access not thread-safe properties
     StCondition                myLoadNextEvent;
-    StFormatEnum               myStFormatByUser;//!< target source format (auto-detect by default)
+    StFormat                   myStFormatByUser;//!< target source format (auto-detect by default)
     GLint                      myMaxTexDim;     //!< value for GL_MAX_TEXTURE_SIZE
     StHandle<StGLTextureQueue> myTextureQueue;  //!< decoded frames queue
     StHandle<StImageInfo>      myImgInfo;       //!< info about currently loaded image

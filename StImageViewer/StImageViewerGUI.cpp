@@ -119,13 +119,13 @@ void StImageViewerGUI::createUpperToolbar() {
     StGLSwitchTextured* aSrcBtn = new StGLSwitchTextured(myPanelUpper, myPlugin->params.srcFormat,
                                                          aLeft + (aBtnIter++) * ICON_WIDTH, aTop,
                                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
-    aSrcBtn->addItem(ST_V_SRC_AUTODETECT,    stCTexture("srcFrmtAuto.png"));
-    aSrcBtn->addItem(ST_V_SRC_MONO,          stCTexture("srcFrmtMono.png"));
-    aSrcBtn->addItem(ST_V_SRC_ROW_INTERLACE, stCTexture("srcFrmtInterlace.png"));
-    aSrcBtn->addItem(ST_V_SRC_SIDE_BY_SIDE,  stCTexture("srcFrmtSideBySide.png"));
-    aSrcBtn->addItem(ST_V_SRC_PARALLEL_PAIR, stCTexture("srcFrmtSideBySide.png"), true);
-    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_LR, stCTexture("srcFrmtOverUnder.png"));
-    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_RL, stCTexture("srcFrmtOverUnder.png"),  true);
+    aSrcBtn->addItem(StFormat_AUTO,          stCTexture("srcFrmtAuto.png"));
+    aSrcBtn->addItem(StFormat_Mono,          stCTexture("srcFrmtMono.png"));
+    aSrcBtn->addItem(StFormat_Rows,          stCTexture("srcFrmtInterlace.png"));
+    aSrcBtn->addItem(StFormat_SideBySide_LR, stCTexture("srcFrmtSideBySide.png"));
+    aSrcBtn->addItem(StFormat_SideBySide_RL, stCTexture("srcFrmtSideBySide.png"), true);
+    aSrcBtn->addItem(StFormat_TopBottom_LR,  stCTexture("srcFrmtOverUnder.png"));
+    aSrcBtn->addItem(StFormat_TopBottom_RL,  stCTexture("srcFrmtOverUnder.png"),  true);
     myBtnSrcFrmt = aSrcBtn;
 }
 
@@ -201,25 +201,25 @@ StGLMenu* StImageViewerGUI::createSaveImageMenu() {
 StGLMenu* StImageViewerGUI::createSrcFormatMenu() {
     const IconSize anIconSize = scaleIcon(16);
     StGLMenu* aMenu  = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(tr(MENU_SRC_FORMAT_AUTO),         myPlugin->params.srcFormat, ST_V_SRC_AUTODETECT)
+    aMenu->addItem(tr(MENU_SRC_FORMAT_AUTO),         myPlugin->params.srcFormat, StFormat_AUTO)
          ->setIcon(iconTexture(stCString("menuAuto"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_MONO),         myPlugin->params.srcFormat, ST_V_SRC_MONO)
+    aMenu->addItem(tr(MENU_SRC_FORMAT_MONO),         myPlugin->params.srcFormat, StFormat_Mono)
          ->setIcon(iconTexture(stCString("menuMono"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_CROSS_EYED),   myPlugin->params.srcFormat, ST_V_SRC_SIDE_BY_SIDE)
-         ->setIcon(iconTexture(stCString("menuSbsRL"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_PARALLEL),     myPlugin->params.srcFormat, ST_V_SRC_PARALLEL_PAIR)
+    aMenu->addItem(tr(MENU_SRC_FORMAT_PARALLEL),     myPlugin->params.srcFormat, StFormat_SideBySide_LR)
          ->setIcon(iconTexture(stCString("menuSbsLR"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_RL), myPlugin->params.srcFormat, ST_V_SRC_OVER_UNDER_RL)
-         ->setIcon(iconTexture(stCString("menuOverUnderRL"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_LR), myPlugin->params.srcFormat, ST_V_SRC_OVER_UNDER_LR)
+    aMenu->addItem(tr(MENU_SRC_FORMAT_CROSS_EYED),   myPlugin->params.srcFormat, StFormat_SideBySide_RL)
+         ->setIcon(iconTexture(stCString("menuSbsRL"), anIconSize));
+    aMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_LR), myPlugin->params.srcFormat, StFormat_TopBottom_LR)
          ->setIcon(iconTexture(stCString("menuOverUnderLR"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_INTERLACED),   myPlugin->params.srcFormat, ST_V_SRC_ROW_INTERLACE)
+    aMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_RL), myPlugin->params.srcFormat, StFormat_TopBottom_RL)
+         ->setIcon(iconTexture(stCString("menuOverUnderRL"), anIconSize));
+    aMenu->addItem(tr(MENU_SRC_FORMAT_INTERLACED),   myPlugin->params.srcFormat, StFormat_Rows)
          ->setIcon(iconTexture(stCString("menuRowLR"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RC),       myPlugin->params.srcFormat, ST_V_SRC_ANAGLYPH_RED_CYAN)
+    aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RC),       myPlugin->params.srcFormat, StFormat_AnaglyphRedCyan)
          ->setIcon(iconTexture(stCString("menuRedCyanLR"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RB),       myPlugin->params.srcFormat, ST_V_SRC_ANAGLYPH_G_RB)
+    aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RB),       myPlugin->params.srcFormat, StFormat_AnaglyphGreenMagenta)
          ->setIcon(iconTexture(stCString("menuGreenMagentaLR"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_YB),       myPlugin->params.srcFormat, ST_V_SRC_ANAGLYPH_YELLOW_BLUE)
+    aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_YB),       myPlugin->params.srcFormat, StFormat_AnaglyphYellowBlue)
          ->setIcon(iconTexture(stCString("menuYellowBlueLR"), anIconSize));
     return aMenu;
 }
@@ -460,9 +460,9 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
     aTable->fillFromMap(anExtraInfo->Info, StGLVec3(1.0f, 1.0f, 1.0f), aWidthMax, aWidthMax / 2);
 
     // add stereoscopic format info
-    const StFormatEnum anActiveSrcFormat = aParams->ToSwapLR
-                                         ? st::formatReversed(aParams->StereoFormat)
-                                         : aParams->StereoFormat;
+    const StFormat anActiveSrcFormat = aParams->ToSwapLR
+                                     ? st::formatReversed(aParams->StereoFormat)
+                                     : aParams->StereoFormat;
     const int aTextMaxWidth = aWidthMax - (aTable->getItemMargins().left + aTable->getItemMargins().right);
     StGLTableItem& aSrcFormatItem = aTable->changeElement(aRowLast++, 0); aSrcFormatItem.setColSpan(2);
     StGLTextArea*  aSrcFormatText = new StGLTextArea(&aSrcFormatItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
@@ -476,17 +476,17 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
     // warn about wrong/missing stereoscopic format information
     StString aSrcInfo;
     StGLVec3 anExtraColor(1.0f, 1.0f, 1.0f);
-    if(anExtraInfo->StInfoStream == ST_V_SRC_AUTODETECT
-    && anActiveSrcFormat != ST_V_SRC_MONO
-    && anActiveSrcFormat != ST_V_SRC_SEPARATE_FRAMES) {
+    if(anExtraInfo->StInfoStream == StFormat_AUTO
+    && anActiveSrcFormat != StFormat_Mono
+    && anActiveSrcFormat != StFormat_SeparateFrames) {
         anExtraColor = StGLVec3(1.0f, 1.0f, 0.8f);
-        if(anExtraInfo->StInfoFileName != ST_V_SRC_AUTODETECT
+        if(anExtraInfo->StInfoFileName != StFormat_AUTO
         && anExtraInfo->StInfoFileName == anActiveSrcFormat) {
             aSrcInfo = tr(INFO_NO_SRCFORMAT_EX);
         } else {
             aSrcInfo = tr(INFO_NO_SRCFORMAT);
         }
-    } else if(anExtraInfo->StInfoStream != ST_V_SRC_AUTODETECT
+    } else if(anExtraInfo->StInfoStream != StFormat_AUTO
            && anExtraInfo->StInfoStream != anActiveSrcFormat) {
         aSrcInfo     = tr(INFO_WRONG_SRCFORMAT);
         anExtraColor = StGLVec3(1.0f, 0.0f, 0.0f);
@@ -648,16 +648,16 @@ void StImageViewerGUI::createMobileUpperToolbar() {
                                                          (aBtnIter++) * anIconStep, 0,
                                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
     aSrcBtn->changeMargins() = aButtonMargins;
-    aSrcBtn->addItem(ST_V_SRC_AUTODETECT,           iconTexture(stCString("menuAuto"),           anIconSize));
-    aSrcBtn->addItem(ST_V_SRC_MONO,                 iconTexture(stCString("menuMono"),           anIconSize));
-    aSrcBtn->addItem(ST_V_SRC_PARALLEL_PAIR,        iconTexture(stCString("menuSbsLR"),          anIconSize), true);
-    aSrcBtn->addItem(ST_V_SRC_SIDE_BY_SIDE,         iconTexture(stCString("menuSbsRL"),          anIconSize));
-    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_LR,        iconTexture(stCString("menuOverUnderLR"),    anIconSize));
-    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_RL,        iconTexture(stCString("menuOverUnderRL"),    anIconSize), true);
-    aSrcBtn->addItem(ST_V_SRC_ROW_INTERLACE,        iconTexture(stCString("menuRowLR"),          anIconSize));
-    aSrcBtn->addItem(ST_V_SRC_ANAGLYPH_RED_CYAN,    iconTexture(stCString("menuRedCyanLR"),      anIconSize));
-    aSrcBtn->addItem(ST_V_SRC_ANAGLYPH_G_RB,        iconTexture(stCString("menuGreenMagentaLR"), anIconSize));
-    aSrcBtn->addItem(ST_V_SRC_ANAGLYPH_YELLOW_BLUE, iconTexture(stCString("menuYellowBlueLR"),   anIconSize));
+    aSrcBtn->addItem(StFormat_AUTO,                 iconTexture(stCString("menuAuto"),           anIconSize));
+    aSrcBtn->addItem(StFormat_Mono,                 iconTexture(stCString("menuMono"),           anIconSize));
+    aSrcBtn->addItem(StFormat_SideBySide_LR,        iconTexture(stCString("menuSbsLR"),          anIconSize), true);
+    aSrcBtn->addItem(StFormat_SideBySide_RL,        iconTexture(stCString("menuSbsRL"),          anIconSize));
+    aSrcBtn->addItem(StFormat_TopBottom_LR,         iconTexture(stCString("menuOverUnderLR"),    anIconSize));
+    aSrcBtn->addItem(StFormat_TopBottom_RL,         iconTexture(stCString("menuOverUnderRL"),    anIconSize), true);
+    aSrcBtn->addItem(StFormat_Rows,                 iconTexture(stCString("menuRowLR"),          anIconSize));
+    aSrcBtn->addItem(StFormat_AnaglyphRedCyan,      iconTexture(stCString("menuRedCyanLR"),      anIconSize));
+    aSrcBtn->addItem(StFormat_AnaglyphGreenMagenta, iconTexture(stCString("menuGreenMagentaLR"), anIconSize));
+    aSrcBtn->addItem(StFormat_AnaglyphYellowBlue,   iconTexture(stCString("menuYellowBlueLR"),   anIconSize));
 
     aBtnIter = 0;
     myBtnSrcFrmt = aSrcBtn;
@@ -760,6 +760,7 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
   myBtnNext(NULL),
   myBtnSwapLR(NULL),
   myBtnSrcFrmt(NULL),
+  myBtnActualSrcFrmt(NULL),
   myBtnPlayList(NULL),
   myBtnFull(NULL),
   //
@@ -816,20 +817,20 @@ namespace {
 
 }
 
-size_t StImageViewerGUI::trSrcFormatId(const StFormatEnum theSrcFormat) {
+size_t StImageViewerGUI::trSrcFormatId(const StFormat theSrcFormat) {
     switch(theSrcFormat) {
-        case ST_V_SRC_MONO:                 return MENU_SRC_FORMAT_MONO;
-        case ST_V_SRC_SIDE_BY_SIDE:         return MENU_SRC_FORMAT_CROSS_EYED;
-        case ST_V_SRC_PARALLEL_PAIR:        return MENU_SRC_FORMAT_PARALLEL;
-        case ST_V_SRC_OVER_UNDER_RL:        return MENU_SRC_FORMAT_OVERUNDER_RL;
-        case ST_V_SRC_OVER_UNDER_LR:        return MENU_SRC_FORMAT_OVERUNDER_LR;
-        case ST_V_SRC_ROW_INTERLACE:        return MENU_SRC_FORMAT_INTERLACED;
-        case ST_V_SRC_ANAGLYPH_G_RB:        return MENU_SRC_FORMAT_ANA_RB;
-        case ST_V_SRC_ANAGLYPH_RED_CYAN:    return MENU_SRC_FORMAT_ANA_RC;
-        case ST_V_SRC_ANAGLYPH_YELLOW_BLUE: return MENU_SRC_FORMAT_ANA_YB;
-        case ST_V_SRC_SEPARATE_FRAMES:      return MENU_SRC_FORMAT_SEPARATE;
+        case StFormat_Mono:                 return MENU_SRC_FORMAT_MONO;
+        case StFormat_SideBySide_LR:        return MENU_SRC_FORMAT_PARALLEL;
+        case StFormat_SideBySide_RL:        return MENU_SRC_FORMAT_CROSS_EYED;
+        case StFormat_TopBottom_LR:         return MENU_SRC_FORMAT_OVERUNDER_LR;
+        case StFormat_TopBottom_RL:         return MENU_SRC_FORMAT_OVERUNDER_RL;
+        case StFormat_Rows:                 return MENU_SRC_FORMAT_INTERLACED;
+        case StFormat_AnaglyphGreenMagenta: return MENU_SRC_FORMAT_ANA_RB;
+        case StFormat_AnaglyphRedCyan:      return MENU_SRC_FORMAT_ANA_RC;
+        case StFormat_AnaglyphYellowBlue:   return MENU_SRC_FORMAT_ANA_YB;
+        case StFormat_SeparateFrames:       return MENU_SRC_FORMAT_SEPARATE;
         default:
-        case ST_V_SRC_AUTODETECT:           return MENU_SRC_FORMAT_AUTO;
+        case StFormat_AUTO:                 return MENU_SRC_FORMAT_AUTO;
     }
 }
 
@@ -874,6 +875,19 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
         myBtnFull->setVisibility(myIsMinimalGUI || toShowAll);
     }
 
+    StFormat aSrcFormat = (StFormat )myPlugin->params.srcFormat->getValue();
+    if(aSrcFormat == StFormat_AUTO
+    && !myImage->params.stereoFile.isNull()) {
+        aSrcFormat = myImage->params.stereoFile->StereoFormat;
+    }
+    if(!myImage->params.stereoFile.isNull()
+     && myImage->params.swapLR->getValue()) {
+        aSrcFormat = st::formatReversed(aSrcFormat);
+    }
+    if(myBtnActualSrcFrmt != NULL) {
+        myBtnActualSrcFrmt->setFaceId(aSrcFormat);
+    }
+
     if(myDescr != NULL) {
         myDescr->setVisibility(true, true);
         if(::isPointIn(myBtnOpen, theCursor)) {
@@ -890,15 +904,6 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
         } else if(::isPointIn(myBtnFull, theCursor)) {
             myDescr->setText(tr(FULLSCREEN));
         } else if(::isPointIn(myBtnSrcFrmt, theCursor)) {
-            StFormatEnum aSrcFormat = (StFormatEnum )myPlugin->params.srcFormat->getValue();
-            if(aSrcFormat == ST_V_SRC_AUTODETECT
-            && !myImage->params.stereoFile.isNull()) {
-                aSrcFormat = myImage->params.stereoFile->StereoFormat;
-            }
-            if(!myImage->params.stereoFile.isNull()
-             && myImage->params.swapLR->getValue()) {
-                aSrcFormat = st::formatReversed(aSrcFormat);
-            }
             myDescr->setText(tr(BTN_SRC_FORMAT) + "\n" + trSrcFormat(aSrcFormat));
         } else {
             myDescr->setVisibility(false, true);

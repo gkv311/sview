@@ -226,7 +226,7 @@ namespace stAV {
         ST_SHARED_CPPEXPORT PixelFormat BGRA32;
 
         ST_CPPEXPORT StCString getString(const PixelFormat theFrmt);
-    };
+    }
 
     /**
      * Simple structure for planar YUV frame dimensions.
@@ -313,9 +313,9 @@ namespace stAV {
             static const SampleFormat FLTP = (SampleFormat )-1;
             static const SampleFormat DBLP = (SampleFormat )-1;
         #endif
-        };
+        }
 
-    };
+    }
 
     /**
      * Metadata functions
@@ -373,50 +373,50 @@ namespace stAV {
                                   const StCString& theKey,
                                   StString&        theValue);
 
-    };
+    }
 
 #ifdef ST_AV_NEWSTEREO
     /**
      * Convert stereo3d enumeration from FFmpeg to sView definition.
      */
-    ST_LOCAL inline StFormatEnum stereo3dAvToSt(const AVStereo3DType theType) {
+    ST_LOCAL inline StFormat stereo3dAvToSt(const AVStereo3DType theType) {
         switch(theType) {
-            case AV_STEREO3D_2D:            return ST_V_SRC_MONO;
-            case AV_STEREO3D_SIDEBYSIDE:    return ST_V_SRC_PARALLEL_PAIR;
-            case AV_STEREO3D_TOPBOTTOM:     return ST_V_SRC_OVER_UNDER_LR;
-            case AV_STEREO3D_FRAMESEQUENCE: return ST_V_SRC_PAGE_FLIP;
-            //case AV_STEREO3D_CHECKERBOARD:        return ST_V_SRC_CHECKERBOARD;
-            //case AV_STEREO3D_SIDEBYSIDE_QUINCUNX: return ST_V_SRC_CHECKERBOARD;
-            case AV_STEREO3D_LINES:         return ST_V_SRC_ROW_INTERLACE;
-            case AV_STEREO3D_COLUMNS:       return ST_V_SRC_VERTICAL_INTERLACE;
-            default:                        return ST_V_SRC_AUTODETECT;
+            case AV_STEREO3D_2D:            return StFormat_Mono;
+            case AV_STEREO3D_SIDEBYSIDE:    return StFormat_SideBySide_LR;
+            case AV_STEREO3D_TOPBOTTOM:     return StFormat_TopBottom_LR;
+            case AV_STEREO3D_FRAMESEQUENCE: return StFormat_FrameSequence;
+            //case AV_STEREO3D_CHECKERBOARD:        return StFormat_Checkboard;
+            //case AV_STEREO3D_SIDEBYSIDE_QUINCUNX: return StFormat_Checkboard;
+            case AV_STEREO3D_LINES:         return StFormat_Rows;
+            case AV_STEREO3D_COLUMNS:       return StFormat_Columns;
+            default:                        return StFormat_AUTO;
         }
     }
 
     /**
      * Convert stereo3d enumeration from sView to FFmpeg definition.
      */
-    ST_LOCAL inline AVStereo3DType stereo3dStToAv(const StFormatEnum theType) {
+    ST_LOCAL inline AVStereo3DType stereo3dStToAv(const StFormat theType) {
         switch(theType) {
             default:
-            case ST_V_SRC_AUTODETECT:         return (AVStereo3DType )-1;
-            case ST_V_SRC_MONO:               return AV_STEREO3D_2D;
-            case ST_V_SRC_SIDE_BY_SIDE:
-            case ST_V_SRC_PARALLEL_PAIR:      return AV_STEREO3D_SIDEBYSIDE;
-            case ST_V_SRC_OVER_UNDER_RL:
-            case ST_V_SRC_OVER_UNDER_LR:      return AV_STEREO3D_TOPBOTTOM;
-            case ST_V_SRC_ROW_INTERLACE:      return AV_STEREO3D_LINES;
-            case ST_V_SRC_VERTICAL_INTERLACE: return AV_STEREO3D_COLUMNS;
-            //case ST_V_SRC_SEPARATE_FRAMES:
-            case ST_V_SRC_PAGE_FLIP:          return AV_STEREO3D_FRAMESEQUENCE;
-            //case ST_V_SRC_ANAGLYPH_RED_CYAN:
-            //case ST_V_SRC_ANAGLYPH_G_RB:
-            //case ST_V_SRC_ANAGLYPH_YELLOW_BLUE:
-            //case ST_V_SRC_TILED_4X:
+            case StFormat_AUTO:               return (AVStereo3DType )-1;
+            case StFormat_Mono:               return AV_STEREO3D_2D;
+            case StFormat_SideBySide_LR:
+            case StFormat_SideBySide_RL:      return AV_STEREO3D_SIDEBYSIDE;
+            case StFormat_TopBottom_LR:
+            case StFormat_TopBottom_RL:       return AV_STEREO3D_TOPBOTTOM;
+            case StFormat_Rows:               return AV_STEREO3D_LINES;
+            case StFormat_Columns:            return AV_STEREO3D_COLUMNS;
+            //case StFormat_SeparateFrames:
+            case StFormat_FrameSequence:      return AV_STEREO3D_FRAMESEQUENCE;
+            //case StFormat_AnaglyphRedCyan:
+            //case StFormat_AnaglyphGreenMagenta:
+            //case StFormat_AnaglyphYellowBlue:
+            //case StFormat_Tiled4x:
         }
     }
 #endif
 
-};
+}
 
 #endif // __stAV_h_

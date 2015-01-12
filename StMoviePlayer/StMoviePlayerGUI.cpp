@@ -120,13 +120,13 @@ void StMoviePlayerGUI::createUpperToolbar() {
                                                          aLeft + (aBtnIter++) * myIconStep, aTop,
                                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
 
-    aSrcBtn->addItem(ST_V_SRC_AUTODETECT,    stCTexture("srcFrmtAuto.png"));
-    aSrcBtn->addItem(ST_V_SRC_MONO,          stCTexture("srcFrmtMono.png"));
-    aSrcBtn->addItem(ST_V_SRC_ROW_INTERLACE, stCTexture("srcFrmtInterlace.png"));
-    aSrcBtn->addItem(ST_V_SRC_SIDE_BY_SIDE,  stCTexture("srcFrmtSideBySide.png"));
-    aSrcBtn->addItem(ST_V_SRC_PARALLEL_PAIR, stCTexture("srcFrmtSideBySide.png"), true);
-    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_LR, stCTexture("srcFrmtOverUnder.png"));
-    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_RL, stCTexture("srcFrmtOverUnder.png"),  true);
+    aSrcBtn->addItem(StFormat_AUTO,          stCTexture("srcFrmtAuto.png"));
+    aSrcBtn->addItem(StFormat_Mono,          stCTexture("srcFrmtMono.png"));
+    aSrcBtn->addItem(StFormat_Rows,          stCTexture("srcFrmtInterlace.png"));
+    aSrcBtn->addItem(StFormat_SideBySide_RL, stCTexture("srcFrmtSideBySide.png"));
+    aSrcBtn->addItem(StFormat_SideBySide_LR, stCTexture("srcFrmtSideBySide.png"), true);
+    aSrcBtn->addItem(StFormat_TopBottom_LR,  stCTexture("srcFrmtOverUnder.png"));
+    aSrcBtn->addItem(StFormat_TopBottom_RL,  stCTexture("srcFrmtOverUnder.png"),  true);
     myBtnSrcFrmt = aSrcBtn;
 }
 
@@ -285,29 +285,29 @@ StGLMenu* StMoviePlayerGUI::createSaveImageMenu() {
 StGLMenu* StMoviePlayerGUI::createSrcFormatMenu() {
     const IconSize anIconSize = scaleIcon(16);
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(tr(MENU_SRC_FORMAT_AUTO),         myPlugin->params.srcFormat, ST_V_SRC_AUTODETECT)
+    aMenu->addItem(tr(MENU_SRC_FORMAT_AUTO),         myPlugin->params.srcFormat, StFormat_AUTO)
          ->setIcon(iconTexture(stCString("menuAuto"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_MONO),         myPlugin->params.srcFormat, ST_V_SRC_MONO)
+    aMenu->addItem(tr(MENU_SRC_FORMAT_MONO),         myPlugin->params.srcFormat, StFormat_Mono)
          ->setIcon(iconTexture(stCString("menuMono"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_CROSS_EYED),   myPlugin->params.srcFormat, ST_V_SRC_SIDE_BY_SIDE)
-         ->setIcon(iconTexture(stCString("menuSbsRL"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_PARALLEL),     myPlugin->params.srcFormat, ST_V_SRC_PARALLEL_PAIR)
+    aMenu->addItem(tr(MENU_SRC_FORMAT_PARALLEL),     myPlugin->params.srcFormat, StFormat_SideBySide_LR)
          ->setIcon(iconTexture(stCString("menuSbsLR"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_RL), myPlugin->params.srcFormat, ST_V_SRC_OVER_UNDER_RL)
-         ->setIcon(iconTexture(stCString("menuOverUnderRL"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_LR), myPlugin->params.srcFormat, ST_V_SRC_OVER_UNDER_LR)
+    aMenu->addItem(tr(MENU_SRC_FORMAT_CROSS_EYED),   myPlugin->params.srcFormat, StFormat_SideBySide_RL)
+         ->setIcon(iconTexture(stCString("menuSbsRL"), anIconSize));
+    aMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_LR), myPlugin->params.srcFormat, StFormat_TopBottom_LR)
          ->setIcon(iconTexture(stCString("menuOverUnderLR"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_INTERLACED),   myPlugin->params.srcFormat, ST_V_SRC_ROW_INTERLACE)
+    aMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_RL), myPlugin->params.srcFormat, StFormat_TopBottom_RL)
+         ->setIcon(iconTexture(stCString("menuOverUnderRL"), anIconSize));
+    aMenu->addItem(tr(MENU_SRC_FORMAT_INTERLACED),   myPlugin->params.srcFormat, StFormat_Rows)
          ->setIcon(iconTexture(stCString("menuRowLR"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RC),       myPlugin->params.srcFormat, ST_V_SRC_ANAGLYPH_RED_CYAN)
+    aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RC),       myPlugin->params.srcFormat, StFormat_AnaglyphRedCyan)
          ->setIcon(iconTexture(stCString("menuRedCyanLR"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RB),       myPlugin->params.srcFormat, ST_V_SRC_ANAGLYPH_G_RB)
+    aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RB),       myPlugin->params.srcFormat, StFormat_AnaglyphGreenMagenta)
          ->setIcon(iconTexture(stCString("menuGreenMagentaLR"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_YB),       myPlugin->params.srcFormat, ST_V_SRC_ANAGLYPH_YELLOW_BLUE)
+    aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_YB),       myPlugin->params.srcFormat, StFormat_AnaglyphYellowBlue)
          ->setIcon(iconTexture(stCString("menuYellowBlueLR"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_PAGEFLIP),     myPlugin->params.srcFormat, ST_V_SRC_PAGE_FLIP)
+    aMenu->addItem(tr(MENU_SRC_FORMAT_PAGEFLIP),     myPlugin->params.srcFormat, StFormat_FrameSequence)
          ->setIcon(iconTexture(stCString("menuFrameSeqLR"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_TILED_4X),     myPlugin->params.srcFormat, ST_V_SRC_TILED_4X)
+    aMenu->addItem(tr(MENU_SRC_FORMAT_TILED_4X),     myPlugin->params.srcFormat, StFormat_Tiled4x)
          ->setIcon(iconTexture(stCString("menuTiledLR"), anIconSize));
     return aMenu;
 }
@@ -815,9 +815,9 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
 
     if(anExtraInfo->HasVideo) {
         // add stereoscopic format info
-        const StFormatEnum anActiveSrcFormat = aParams->ToSwapLR
-                                             ? st::formatReversed(aParams->StereoFormat)
-                                             : aParams->StereoFormat;
+        const StFormat anActiveSrcFormat = aParams->ToSwapLR
+                                         ? st::formatReversed(aParams->StereoFormat)
+                                         : aParams->StereoFormat;
         StGLTableItem& aSrcFormatItem = aTable->changeElement(aRowLast++, 0); aSrcFormatItem.setColSpan(2);
         StGLTextArea*  aSrcFormatText = new StGLTextArea(&aSrcFormatItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
         aSrcFormatText->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
@@ -830,17 +830,17 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
         // warn about wrong/missing stereoscopic format information
         StString aSrcInfo;
         StGLVec3 anExtraColor = aWhite;
-        if(anExtraInfo->StInfoStream == ST_V_SRC_AUTODETECT
-        && anActiveSrcFormat != ST_V_SRC_MONO
-        && anActiveSrcFormat != ST_V_SRC_SEPARATE_FRAMES) {
+        if(anExtraInfo->StInfoStream == StFormat_AUTO
+        && anActiveSrcFormat != StFormat_Mono
+        && anActiveSrcFormat != StFormat_SeparateFrames) {
             anExtraColor = StGLVec3(1.0f, 1.0f, 0.8f);
-            if(anExtraInfo->StInfoFileName != ST_V_SRC_AUTODETECT
+            if(anExtraInfo->StInfoFileName != StFormat_AUTO
             && anExtraInfo->StInfoFileName == anActiveSrcFormat) {
                 aSrcInfo = tr(INFO_NO_SRCFORMAT_EX);
             } else {
                 aSrcInfo = tr(INFO_NO_SRCFORMAT);
             }
-        } else if(anExtraInfo->StInfoStream != ST_V_SRC_AUTODETECT
+        } else if(anExtraInfo->StInfoStream != StFormat_AUTO
                && anExtraInfo->StInfoStream != anActiveSrcFormat) {
             aSrcInfo     = tr(INFO_WRONG_SRCFORMAT);
             anExtraColor = StGLVec3(1.0f, 0.0f, 0.0f);
@@ -1018,16 +1018,16 @@ void StMoviePlayerGUI::createMobileUpperToolbar() {
                                                          (aBtnIter++) * myIconStep, 0,
                                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
     aSrcBtn->changeMargins() = aButtonMargins;
-    aSrcBtn->addItem(ST_V_SRC_AUTODETECT,           iconTexture(stCString("menuAuto"),           anIconSize));
-    aSrcBtn->addItem(ST_V_SRC_MONO,                 iconTexture(stCString("menuMono"),           anIconSize));
-    aSrcBtn->addItem(ST_V_SRC_PARALLEL_PAIR,        iconTexture(stCString("menuSbsLR"),          anIconSize), true);
-    aSrcBtn->addItem(ST_V_SRC_SIDE_BY_SIDE,         iconTexture(stCString("menuSbsRL"),          anIconSize));
-    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_LR,        iconTexture(stCString("menuOverUnderLR"),    anIconSize));
-    aSrcBtn->addItem(ST_V_SRC_OVER_UNDER_RL,        iconTexture(stCString("menuOverUnderRL"),    anIconSize), true);
-    aSrcBtn->addItem(ST_V_SRC_ROW_INTERLACE,        iconTexture(stCString("menuRowLR"),          anIconSize));
-    aSrcBtn->addItem(ST_V_SRC_ANAGLYPH_RED_CYAN,    iconTexture(stCString("menuRedCyanLR"),      anIconSize));
-    aSrcBtn->addItem(ST_V_SRC_ANAGLYPH_G_RB,        iconTexture(stCString("menuGreenMagentaLR"), anIconSize));
-    aSrcBtn->addItem(ST_V_SRC_ANAGLYPH_YELLOW_BLUE, iconTexture(stCString("menuYellowBlueLR"),   anIconSize));
+    aSrcBtn->addItem(StFormat_AUTO,                 iconTexture(stCString("menuAuto"),           anIconSize));
+    aSrcBtn->addItem(StFormat_Mono,                 iconTexture(stCString("menuMono"),           anIconSize));
+    aSrcBtn->addItem(StFormat_SideBySide_LR,        iconTexture(stCString("menuSbsLR"),          anIconSize), true);
+    aSrcBtn->addItem(StFormat_SideBySide_RL,        iconTexture(stCString("menuSbsRL"),          anIconSize));
+    aSrcBtn->addItem(StFormat_TopBottom_LR,         iconTexture(stCString("menuOverUnderLR"),    anIconSize));
+    aSrcBtn->addItem(StFormat_TopBottom_RL,         iconTexture(stCString("menuOverUnderRL"),    anIconSize), true);
+    aSrcBtn->addItem(StFormat_Rows,                 iconTexture(stCString("menuRowLR"),          anIconSize));
+    aSrcBtn->addItem(StFormat_AnaglyphRedCyan,      iconTexture(stCString("menuRedCyanLR"),      anIconSize));
+    aSrcBtn->addItem(StFormat_AnaglyphGreenMagenta, iconTexture(stCString("menuGreenMagentaLR"), anIconSize));
+    aSrcBtn->addItem(StFormat_AnaglyphYellowBlue,   iconTexture(stCString("menuYellowBlueLR"),   anIconSize));
 
     aBtnIter = 0;
     myBtnSrcFrmt = aSrcBtn;
@@ -1348,23 +1348,23 @@ bool StMoviePlayerGUI::toHideCursor() {
     return child != NULL && !child->isVisible();
 }
 
-size_t StMoviePlayerGUI::trSrcFormatId(const StFormatEnum theSrcFormat) {
+size_t StMoviePlayerGUI::trSrcFormatId(const StFormat theSrcFormat) {
     switch(theSrcFormat) {
-        case ST_V_SRC_MONO:                 return MENU_SRC_FORMAT_MONO;
-        case ST_V_SRC_SIDE_BY_SIDE:         return MENU_SRC_FORMAT_CROSS_EYED;
-        case ST_V_SRC_PARALLEL_PAIR:        return MENU_SRC_FORMAT_PARALLEL;
-        case ST_V_SRC_OVER_UNDER_RL:        return MENU_SRC_FORMAT_OVERUNDER_RL;
-        case ST_V_SRC_OVER_UNDER_LR:        return MENU_SRC_FORMAT_OVERUNDER_LR;
-        case ST_V_SRC_ROW_INTERLACE:        return MENU_SRC_FORMAT_INTERLACED;
-        //case ST_V_SRC_VERTICAL_INTERLACE:
-        case ST_V_SRC_SEPARATE_FRAMES:      return MENU_SRC_FORMAT_SEPARATE;
-        case ST_V_SRC_PAGE_FLIP:            return MENU_SRC_FORMAT_PAGEFLIP;
-        case ST_V_SRC_ANAGLYPH_RED_CYAN:    return MENU_SRC_FORMAT_ANA_RC;
-        case ST_V_SRC_ANAGLYPH_G_RB:        return MENU_SRC_FORMAT_ANA_RB;
-        case ST_V_SRC_ANAGLYPH_YELLOW_BLUE: return MENU_SRC_FORMAT_ANA_YB;
-        case ST_V_SRC_TILED_4X:             return MENU_SRC_FORMAT_TILED_4X;
+        case StFormat_Mono:                 return MENU_SRC_FORMAT_MONO;
+        case StFormat_SideBySide_LR:        return MENU_SRC_FORMAT_PARALLEL;
+        case StFormat_SideBySide_RL:        return MENU_SRC_FORMAT_CROSS_EYED;
+        case StFormat_TopBottom_LR:         return MENU_SRC_FORMAT_OVERUNDER_LR;
+        case StFormat_TopBottom_RL:         return MENU_SRC_FORMAT_OVERUNDER_RL;
+        case StFormat_Rows:                 return MENU_SRC_FORMAT_INTERLACED;
+        //case StFormat_Columns:
+        case StFormat_SeparateFrames:       return MENU_SRC_FORMAT_SEPARATE;
+        case StFormat_FrameSequence:        return MENU_SRC_FORMAT_PAGEFLIP;
+        case StFormat_AnaglyphRedCyan:      return MENU_SRC_FORMAT_ANA_RC;
+        case StFormat_AnaglyphGreenMagenta: return MENU_SRC_FORMAT_ANA_RB;
+        case StFormat_AnaglyphYellowBlue:   return MENU_SRC_FORMAT_ANA_YB;
+        case StFormat_Tiled4x:              return MENU_SRC_FORMAT_TILED_4X;
         default:
-        case ST_V_SRC_AUTODETECT:           return MENU_SRC_FORMAT_AUTO;
+        case StFormat_AUTO:                 return MENU_SRC_FORMAT_AUTO;
     }
 }
 
@@ -1433,8 +1433,8 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
             size_t aLngId = myImage->params.swapLR->getValue() ? SWAP_LR_ON : SWAP_LR_OFF;
             myDescr->setText(tr(aLngId));
         } else if(::isPointIn(myBtnSrcFrmt, theCursor)) {
-            StFormatEnum aSrcFormat = (StFormatEnum )myPlugin->params.srcFormat->getValue();
-            if(aSrcFormat == ST_V_SRC_AUTODETECT
+            StFormat aSrcFormat = (StFormat )myPlugin->params.srcFormat->getValue();
+            if(aSrcFormat == StFormat_AUTO
             && !myImage->params.stereoFile.isNull()) {
                 aSrcFormat = myImage->params.stereoFile->StereoFormat;
             }

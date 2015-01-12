@@ -246,6 +246,7 @@ class StGLImageRegion : public StGLWidget {
     StTimer                    myClickTimer;     //!< timer to delay dragging action
     double                     myDragDelayMs;    //!< dragging delay in milliseconds
     bool                       myIsClickAborted;
+    bool                       myToRightRotate;
     bool                       myIsInitialized;  //!< initialization state
     bool                       myHasVideoStream; //!< should be initialized for each new stream
 

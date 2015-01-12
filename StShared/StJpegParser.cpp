@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -142,7 +142,7 @@ namespace {
 StJpegParser::StJpegParser(const StCString& theFilePath)
 : StRawFile(theFilePath),
   myImages(NULL),
-  myStFormat(ST_V_SRC_AUTODETECT) {
+  myStFormat(StFormat_AUTO) {
     stMemZero(myOffsets, sizeof(myOffsets));
 }
 
@@ -154,7 +154,7 @@ void StJpegParser::reset() {
     // destroy all images
     myImages.nullify();
     myComment.clear();
-    myStFormat = ST_V_SRC_AUTODETECT;
+    myStFormat = StFormat_AUTO;
     myLength = 0;
     stMemZero(myOffsets, sizeof(myOffsets));
 }
@@ -392,18 +392,18 @@ StHandle<StJpegParser::Image> StJpegParser::parseImage(const int      theImgCoun
                     if(aStereoDesc & 0x00000001) {
                         const bool isLeftFirst = (aStereoDesc & SD_LEFT_FIELD_FIRST) != 0;
                         switch(aStereoDesc & 0x0000FF00) {
-                            case SD_LAYOUT_INTERLEAVED: myStFormat = ST_V_SRC_ROW_INTERLACE;     break;
+                            case SD_LAYOUT_INTERLEAVED: myStFormat = StFormat_Rows;            break;
                             case SD_LAYOUT_SIDEBYSIDE:  myStFormat = isLeftFirst
-                                                                   ? ST_V_SRC_PARALLEL_PAIR
-                                                                   : ST_V_SRC_SIDE_BY_SIDE;      break;
+                                                                   ? StFormat_SideBySide_LR
+                                                                   : StFormat_SideBySide_RL;   break;
                             case SD_LAYOUT_OVERUNDER:   myStFormat = isLeftFirst
-                                                                   ? ST_V_SRC_OVER_UNDER_LR
-                                                                   : ST_V_SRC_OVER_UNDER_RL;     break;
-                            case SD_LAYOUT_ANAGLYPH:    myStFormat = ST_V_SRC_ANAGLYPH_RED_CYAN; break;
+                                                                   ? StFormat_TopBottom_LR
+                                                                   : StFormat_TopBottom_RL;    break;
+                            case SD_LAYOUT_ANAGLYPH:    myStFormat = StFormat_AnaglyphRedCyan; break;
                             default: break;
                         }
                     } else {
-                        myStFormat = ST_V_SRC_MONO;
+                        myStFormat = StFormat_Mono;
                     }
                     if(anItemLen > 18) {
                         const uint16_t aStringLen = StAlienData::Get16uBE(aData + 16);
@@ -508,7 +508,7 @@ bool StJpegParser::insertSection(const uint8_t   theMarker,
     return true;
 }
 
-bool StJpegParser::setupJps(const StFormatEnum theFormat) {
+bool StJpegParser::setupJps(const StFormat theFormat) {
     if(myBuffer == NULL) {
         return false;
     }
@@ -541,25 +541,25 @@ bool StJpegParser::setupJps(const StFormatEnum theFormat) {
     myStFormat = theFormat;
     uint32_t aStereoDesc = 0x00000001;
     switch(theFormat) {
-        case ST_V_SRC_PARALLEL_PAIR:
+        case StFormat_SideBySide_LR:
             aStereoDesc |= SD_LAYOUT_SIDEBYSIDE | SD_LEFT_FIELD_FIRST;
             break;
-        case ST_V_SRC_SIDE_BY_SIDE:
+        case StFormat_SideBySide_RL:
             aStereoDesc |= SD_LAYOUT_SIDEBYSIDE;
             break;
-        case ST_V_SRC_OVER_UNDER_LR:
+        case StFormat_TopBottom_LR:
             aStereoDesc |= SD_LAYOUT_OVERUNDER | SD_LEFT_FIELD_FIRST;
             break;
-        case ST_V_SRC_OVER_UNDER_RL:
+        case StFormat_TopBottom_RL:
             aStereoDesc |= SD_LAYOUT_OVERUNDER;
             break;
-        case ST_V_SRC_ROW_INTERLACE:
+        case StFormat_Rows:
             aStereoDesc |= SD_LAYOUT_INTERLEAVED;
             break;
-        case ST_V_SRC_ANAGLYPH_RED_CYAN:
+        case StFormat_AnaglyphRedCyan:
             aStereoDesc |= SD_LAYOUT_ANAGLYPH;
             break;
-        case ST_V_SRC_MONO:
+        case StFormat_Mono:
         default:
             aStereoDesc = 0x00000000;
             break;

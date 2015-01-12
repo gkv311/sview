@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -17,7 +17,7 @@ StGLTextureQueue::StGLTextureQueue(const size_t theQueueSizeMax)
   myQueueSize(0),
   myQueueSizeMax(theQueueSizeMax),
   mySwapFBCount(0),
-  myCurrSrcFormat(ST_V_SRC_MONO),
+  myCurrSrcFormat(StFormat_Mono),
   myCurrPts(0.0),
   myNewShotEvent(false),
   myIsInUpdTexture(false),
@@ -53,7 +53,7 @@ void StGLTextureQueue::setCompressMemory(const bool theToCompress) {
 bool StGLTextureQueue::push(const StImage&     theSrcDataLeft,
                             const StImage&     theSrcDataRight,
                             const StHandle<StStereoParams>& theStParams,
-                            const StFormatEnum theSrcFormat,
+                            const StFormat     theSrcFormat,
                             const double       theSrcPTS) {
     if(isFull()) {
         return false;

@@ -102,7 +102,7 @@ class StImageViewerGUI : public StGLRootWidget {
 
     ST_LOCAL void doAboutImage(const size_t );
 
-    ST_LOCAL static size_t trSrcFormatId(const StFormatEnum theSrcFormat);
+    ST_LOCAL static size_t trSrcFormatId(const StFormat theSrcFormat);
 
         private:
 
@@ -110,7 +110,7 @@ class StImageViewerGUI : public StGLRootWidget {
         return myLangMap->getValue(theId);
     }
 
-    ST_LOCAL const StString& trSrcFormat(const StFormatEnum theSrcFormat) const {
+    ST_LOCAL const StString& trSrcFormat(const StFormat theSrcFormat) const {
         return tr(trSrcFormatId(theSrcFormat));
     }
 
@@ -186,6 +186,7 @@ class StImageViewerGUI : public StGLRootWidget {
     StGLTextureButton*  myBtnNext;
     StGLTextureButton*  myBtnSwapLR;
     StGLWidget*         myBtnSrcFrmt;
+    StGLTextureButton*  myBtnActualSrcFrmt;
     StGLTextureButton*  myBtnPlayList;
     StGLTextureButton*  myBtnFull;
     StGLFpsLabel*       myFpsWidget;

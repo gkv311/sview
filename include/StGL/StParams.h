@@ -53,7 +53,7 @@ class StStereoParams {
     StStereoParams(ViewMode theViewMode = FLAT_IMAGE)
     : ViewingMode(theViewMode),
       Timestamp(0.0f),
-      StereoFormat(ST_V_SRC_MONO),
+      StereoFormat(StFormat_Mono),
       ToSwapLR(false),
       PanCenter(0.0f, 0.0f),
       PanTheta(0.0f),
@@ -74,7 +74,7 @@ class StStereoParams {
      * @return true if source format is MONO image.
      */
     bool isMono() const {
-        return StereoFormat == ST_V_SRC_MONO;
+        return StereoFormat == StFormat_Mono;
     }
 
     /**
@@ -314,7 +314,7 @@ class StStereoParams {
     ViewMode     ViewingMode;      //!< viewing mode - panorama or flat image
     GLfloat      Timestamp;        //!< playback timestamp
 
-    StFormatEnum StereoFormat;     //!< stereoscopic format
+    StFormat     StereoFormat;     //!< stereoscopic format
     bool         ToSwapLR;         //!< reverse left/right views
 
     StGLVec2     PanCenter;        //!< relative position

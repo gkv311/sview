@@ -209,6 +209,6 @@ bool StWebPImage::load(const StString& theFilePath,
 
 bool StWebPImage::save(const StString& /*theFilePath*/,
                        ImageType       /*theImageType*/,
-                       StFormatEnum    /*theSrcFormat*/) {
+                       StFormat        /*theSrcFormat*/) {
     return false;
 }

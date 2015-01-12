@@ -107,25 +107,25 @@ class StVideoQueue : public StAVPacketQueue {
     /**
      * @return sterescopic information stored in file
      */
-    ST_LOCAL StFormatEnum getStereoFormatFromStream() const {
+    ST_LOCAL StFormat getStereoFormatFromStream() const {
         return myStFormatInStream;
     }
 
     /**
      * @return source format specified by user
      */
-    ST_LOCAL StFormatEnum getStereoFormatByUser() const {
+    ST_LOCAL StFormat getStereoFormatByUser() const {
         return myStFormatByUser;
     }
 
-    ST_LOCAL void setStereoFormatByUser(const StFormatEnum theSrcFormat) {
+    ST_LOCAL void setStereoFormatByUser(const StFormat theSrcFormat) {
         myStFormatByUser = theSrcFormat;
     }
 
     /**
      * @return source format detected from file name
      */
-    ST_LOCAL StFormatEnum getStereoFormatFromName() const {
+    ST_LOCAL StFormat getStereoFormatFromName() const {
         return myStFormatByName;
     }
 
@@ -219,12 +219,12 @@ class StVideoQueue : public StAVPacketQueue {
     /**
      * Initialize adapter over AVframe or perform to RGB conversion.
      */
-    ST_LOCAL void prepareFrame(const StFormatEnum theSrcFormat);
+    ST_LOCAL void prepareFrame(const StFormat theSrcFormat);
 
     ST_LOCAL void pushFrame(const StImage&     theSrcDataLeft,
                             const StImage&     theSrcDataRight,
                             const StHandle<StStereoParams>& theStParams,
-                            const StFormatEnum theSrcFormat,
+                            const StFormat     theSrcFormat,
                             const double       theSrcPTS);
 
         private:
@@ -272,9 +272,9 @@ class StVideoQueue : public StAVPacketQueue {
     StImage                    myCachedFrame;
     bool                       myWasFlushed;
 
-    volatile StFormatEnum      myStFormatByUser;  //!< source format specified by user
-    volatile StFormatEnum      myStFormatByName;  //!< source format detected from file name
-    volatile StFormatEnum      myStFormatInStream;//!< source format information retrieved from stream
+    volatile StFormat          myStFormatByUser;  //!< source format specified by user
+    volatile StFormat          myStFormatByName;  //!< source format detected from file name
+    volatile StFormat          myStFormatInStream;//!< source format information retrieved from stream
 
 };
 

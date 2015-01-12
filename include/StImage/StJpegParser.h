@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -171,7 +171,7 @@ class StJpegParser : public StRawFile {
     /**
      * @return stereo format stored in file
      */
-    ST_LOCAL StFormatEnum getSrcFormat() const {
+    ST_LOCAL StFormat getSrcFormat() const {
         return myStFormat;
     }
 
@@ -188,7 +188,7 @@ class StJpegParser : public StRawFile {
     /**
      * Create/modify JPS section.
      */
-    ST_CPPEXPORT bool setupJps(const StFormatEnum theFormat);
+    ST_CPPEXPORT bool setupJps(const StFormat theFormat);
 
     /**
      * Override data length.
@@ -226,7 +226,7 @@ class StJpegParser : public StRawFile {
                                   //!< array of offsets in image data, starting from session lenght (zero offset is invalid)
     StString        myComment;    //!< string stored in COM segment (directly in JPEG, NOT inside EXIF)
     StString        myJpsComment; //!< string stored in JPS segment
-    StFormatEnum    myStFormat;   //!< stereo format
+    StFormat        myStFormat;   //!< stereo format
 
 };
 

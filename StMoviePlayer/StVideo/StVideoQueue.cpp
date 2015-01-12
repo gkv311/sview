@@ -115,9 +115,9 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   myAudioDelayMSec(0),
   myFramesCounter(1),
   myWasFlushed(false),
-  myStFormatByUser(ST_V_SRC_AUTODETECT),
-  myStFormatByName(ST_V_SRC_AUTODETECT),
-  myStFormatInStream(ST_V_SRC_AUTODETECT) {
+  myStFormatByUser(StFormat_AUTO),
+  myStFormatByName(StFormat_AUTO),
+  myStFormatInStream(StFormat_AUTO) {
 
 #ifdef ST_USE64PTR
     myFrame.Frame->opaque = (void* )stAV::NOPTS_VALUE;
@@ -142,8 +142,8 @@ StVideoQueue::~StVideoQueue() {
 namespace {
 
     struct StFFmpegStereoFormat {
-        StFormatEnum stID;
-        const char*  name;
+        StFormat    stID;
+        const char* name;
     };
 
     static const StCString THE_SRC_MODE_KEY     = stCString("STEREO_MODE");
@@ -151,26 +151,26 @@ namespace {
 
     static const StFFmpegStereoFormat STEREOFLAGS[] = {
         // MKV stereoscopic mode decoded by FFmpeg into STEREO_MODE metadata tag
-        {ST_V_SRC_MONO,               "mono"},
-        {ST_V_SRC_SIDE_BY_SIDE,       "right_left"},
-        {ST_V_SRC_PARALLEL_PAIR,      "left_right"},
-        {ST_V_SRC_OVER_UNDER_RL,      "bottom_top"},
-        {ST_V_SRC_OVER_UNDER_LR,      "top_bottom"},
-        {ST_V_SRC_ROW_INTERLACE,      "row_interleaved_rl"},
-        {ST_V_SRC_ROW_INTERLACE,      "row_interleaved_lr"},
-        {ST_V_SRC_VERTICAL_INTERLACE, "col_interleaved_rl"},
-        {ST_V_SRC_VERTICAL_INTERLACE, "col_interleaved_lr"},
-        {ST_V_SRC_PAGE_FLIP,          "block_lr"}, /// ???
-        {ST_V_SRC_PAGE_FLIP,          "block_rl"},
-        {ST_V_SRC_ANAGLYPH_RED_CYAN,  "anaglyph_cyan_red"},
-        {ST_V_SRC_ANAGLYPH_G_RB,      "anaglyph_green_magenta"},
+        {StFormat_Mono,                 "mono"},
+        {StFormat_SideBySide_RL,        "right_left"},
+        {StFormat_SideBySide_LR,        "left_right"},
+        {StFormat_TopBottom_RL,         "bottom_top"},
+        {StFormat_TopBottom_LR,         "top_bottom"},
+        {StFormat_Rows,                 "row_interleaved_rl"},
+        {StFormat_Rows,                 "row_interleaved_lr"},
+        {StFormat_Columns,              "col_interleaved_rl"},
+        {StFormat_Columns,              "col_interleaved_lr"},
+        {StFormat_FrameSequence,        "block_lr"}, /// ???
+        {StFormat_FrameSequence,        "block_rl"},
+        {StFormat_AnaglyphRedCyan,      "anaglyph_cyan_red"},
+        {StFormat_AnaglyphGreenMagenta, "anaglyph_green_magenta"},
         // values in WMV StereoscopicLayout tag
-        {ST_V_SRC_SIDE_BY_SIDE,       "SideBySideRF"}, // Right First
-        {ST_V_SRC_PARALLEL_PAIR,      "SideBySideLF"},
-        {ST_V_SRC_OVER_UNDER_LR,      "OverUnderLT"},  // Left Top
-        {ST_V_SRC_OVER_UNDER_RL,      "OverUnderRT"},
+        {StFormat_SideBySide_RL,        "SideBySideRF"}, // Right First
+        {StFormat_SideBySide_LR,        "SideBySideLF"},
+        {StFormat_TopBottom_LR,         "OverUnderLT"},  // Left Top
+        {StFormat_TopBottom_RL,         "OverUnderRT"},
         // NULL-terminate array
-        {ST_V_SRC_AUTODETECT, NULL}
+        {StFormat_AUTO, NULL}
     };
 
 };
@@ -319,13 +319,13 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     }
 
     // stereoscopic mode tags
-    myStFormatInStream = is720in1080 ? ST_V_SRC_TILED_4X : ST_V_SRC_AUTODETECT;
+    myStFormatInStream = is720in1080 ? StFormat_Tiled4x : StFormat_AUTO;
     if(stAV::meta::readTag(myFormatCtx, THE_SRC_MODE_KEY,     aValue)
     || stAV::meta::readTag(myStream,    THE_SRC_MODE_KEY,     aValue)
     || stAV::meta::readTag(myFormatCtx, THE_SRC_MODE_KEY_WMV, aValue)) {
         for(size_t aSrcId = 0;; ++aSrcId) {
             const StFFmpegStereoFormat& aFlag = STEREOFLAGS[aSrcId];
-            if(aFlag.stID == ST_V_SRC_AUTODETECT || aFlag.name == NULL) {
+            if(aFlag.stID == StFormat_AUTO || aFlag.name == NULL) {
                 break;
             } else if(aValue == aFlag.name) {
                 myStFormatInStream = aFlag.stID;
@@ -338,13 +338,13 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     // detect information from file name
     bool isAnamorphByName = false;
     myStFormatByName = st::formatFromName(myFileName, isAnamorphByName);
-    if(myStFormatInStream == ST_V_SRC_AUTODETECT
+    if(myStFormatInStream == StFormat_AUTO
     && isAnamorphByName) {
-        if(myStFormatByName == ST_V_SRC_PARALLEL_PAIR
-        || myStFormatByName == ST_V_SRC_SIDE_BY_SIDE) {
+        if(myStFormatByName == StFormat_SideBySide_LR
+        || myStFormatByName == StFormat_SideBySide_RL) {
             myPixelRatio *= 2.0;
-        } else if(myStFormatByName == ST_V_SRC_OVER_UNDER_LR
-               || myStFormatByName == ST_V_SRC_OVER_UNDER_RL) {
+        } else if(myStFormatByName == StFormat_TopBottom_LR
+               || myStFormatByName == StFormat_TopBottom_RL) {
             myPixelRatio *= 0.5;
         }
     }
@@ -402,7 +402,7 @@ void StVideoQueue::syncVideo(AVFrame* theSrcFrame,
 }
 #endif
 
-void StVideoQueue::prepareFrame(const StFormatEnum theSrcFormat) {
+void StVideoQueue::prepareFrame(const StFormat theSrcFormat) {
     int          aFrameSizeX = 0;
     int          aFrameSizeY = 0;
     PixelFormat  aPixFmt     = stAV::PIX_FMT::NONE;
@@ -425,7 +425,7 @@ void StVideoQueue::prepareFrame(const StFormatEnum theSrcFormat) {
         /// TODO (Kirill Gavrilov#5) remove hack
         // workaround for incorrect frame dimensions information in some files
         // critical for tiled source format that should be 1080p
-        if(theSrcFormat == ST_V_SRC_TILED_4X
+        if(theSrcFormat == StFormat_Tiled4x
         && aPixFmt      == stAV::PIX_FMT::YUV420P
         && aFrameSizeX >= 1906 && aFrameSizeX <= 1920
         && myFrame.getLineSize(0) >= 1920
@@ -519,7 +519,7 @@ void StVideoQueue::prepareFrame(const StFormatEnum theSrcFormat) {
 void StVideoQueue::pushFrame(const StImage&     theSrcDataLeft,
                              const StImage&     theSrcDataRight,
                              const StHandle<StStereoParams>& theStParams,
-                             const StFormatEnum theSrcFormat,
+                             const StFormat     theSrcFormat,
                              const double       theSrcPTS) {
     while(!myToFlush && myTextureQueue->isFull()) {
         StThread::sleep(10);
@@ -720,7 +720,7 @@ void StVideoQueue::decodeLoop() {
         if(stAV::meta::readTag(myFrame.Frame, THE_SRC_MODE_KEY, aTagValue)) {
             for(size_t aSrcId = 0;; ++aSrcId) {
                 const StFFmpegStereoFormat& aFlag = STEREOFLAGS[aSrcId];
-                if(aFlag.stID == ST_V_SRC_AUTODETECT || aFlag.name == NULL) {
+                if(aFlag.stID == StFormat_AUTO || aFlag.name == NULL) {
                     break;
                 } else if(aTagValue == aFlag.name) {
                     myStFormatInStream = aFlag.stID;
@@ -730,16 +730,16 @@ void StVideoQueue::decodeLoop() {
             }
         }
         // override source format stored in metadata
-        StFormatEnum aSrcFormat = myStFormatByUser;
-        if(aSrcFormat == ST_V_SRC_AUTODETECT) {
+        StFormat aSrcFormat = myStFormatByUser;
+        if(aSrcFormat == StFormat_AUTO) {
             // prefer info stored in the stream itself
             aSrcFormat = myStFormatInStream;
         }
-        if(aSrcFormat == ST_V_SRC_AUTODETECT) {
+        if(aSrcFormat == StFormat_AUTO) {
             // try using format detected from file name
             aSrcFormat = myStFormatByName;
         }
-        /*if(aSrcFormat == ST_V_SRC_AUTODETECT
+        /*if(aSrcFormat == StFormat_AUTO
         && sizeY() != 0) {
             // try detection based on aspect ratio
             aSrcFormat = st::formatFromRatio(GLfloat(sizeX()) / GLfloat(sizeY()));
@@ -779,7 +779,7 @@ void StVideoQueue::decodeLoop() {
                         break;
                     }
 
-                    pushFrame(myDataAdp, *aSlaveData, aPacket->getSource(), ST_V_SRC_SEPARATE_FRAMES, myFramePts);
+                    pushFrame(myDataAdp, *aSlaveData, aPacket->getSource(), StFormat_SeparateFrames, myFramePts);
 
                     aSlaveData = NULL;
                     mySlave->unlockData();
@@ -801,11 +801,11 @@ void StVideoQueue::decodeLoop() {
             }
 
             // simple one-stream case
-            if(aSrcFormat == ST_V_SRC_PAGE_FLIP) {
+            if(aSrcFormat == StFormat_FrameSequence) {
                 if(isOddNumber(myFramesCounter)) {
                     myCachedFrame.fill(myDataAdp);
                 } else {
-                    pushFrame(myCachedFrame, myDataAdp, aPacket->getSource(), ST_V_SRC_PAGE_FLIP, myFramePts);
+                    pushFrame(myCachedFrame, myDataAdp, aPacket->getSource(), StFormat_FrameSequence, myFramePts);
                 }
                 ++myFramesCounter;
             } else {
