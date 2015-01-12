@@ -143,6 +143,8 @@ class StImageViewerGUI : public StGLRootWidget {
     ST_LOCAL StGLMenu* createCheckUpdatesMenu(); // Root -> Help -> Check updates menu
     ST_LOCAL StGLMenu* createLanguageMenu();     // Root -> Help -> Language menu
 
+    ST_LOCAL void fillSrcFormatMenu(StGLMenu* theMenu);
+
         private: //! @name mobile interface creation routines
 
     /**
@@ -165,6 +167,7 @@ class StImageViewerGUI : public StGLRootWidget {
 
     ST_LOCAL void doShowMobileExMenu(const size_t );
     ST_LOCAL void doMobileSettings(const size_t );
+    ST_LOCAL void doDisplayStereoFormatCombo(const size_t );
 
         private: //! @name private fields
 

@@ -26,6 +26,7 @@
 
 #include <StGL/StParams.h>
 #include <StGLWidgets/StGLButton.h>
+#include <StGLWidgets/StGLCombobox.h>
 #include <StGLWidgets/StGLCheckboxTextured.h>
 #include <StGLWidgets/StGLDescription.h>
 #include <StGLWidgets/StGLImageRegion.h>
@@ -199,29 +200,39 @@ StGLMenu* StImageViewerGUI::createSaveImageMenu() {
  * Root -> Media -> Source format menu
  */
 StGLMenu* StImageViewerGUI::createSrcFormatMenu() {
-    const IconSize anIconSize = scaleIcon(16);
     StGLMenu* aMenu  = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(tr(MENU_SRC_FORMAT_AUTO),         myPlugin->params.srcFormat, StFormat_AUTO)
-         ->setIcon(iconTexture(stCString("menuAuto"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_MONO),         myPlugin->params.srcFormat, StFormat_Mono)
-         ->setIcon(iconTexture(stCString("menuMono"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_PARALLEL),     myPlugin->params.srcFormat, StFormat_SideBySide_LR)
-         ->setIcon(iconTexture(stCString("menuSbsLR"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_CROSS_EYED),   myPlugin->params.srcFormat, StFormat_SideBySide_RL)
-         ->setIcon(iconTexture(stCString("menuSbsRL"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_LR), myPlugin->params.srcFormat, StFormat_TopBottom_LR)
-         ->setIcon(iconTexture(stCString("menuOverUnderLR"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_RL), myPlugin->params.srcFormat, StFormat_TopBottom_RL)
-         ->setIcon(iconTexture(stCString("menuOverUnderRL"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_INTERLACED),   myPlugin->params.srcFormat, StFormat_Rows)
-         ->setIcon(iconTexture(stCString("menuRowLR"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RC),       myPlugin->params.srcFormat, StFormat_AnaglyphRedCyan)
-         ->setIcon(iconTexture(stCString("menuRedCyanLR"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RB),       myPlugin->params.srcFormat, StFormat_AnaglyphGreenMagenta)
-         ->setIcon(iconTexture(stCString("menuGreenMagentaLR"), anIconSize));
-    aMenu->addItem(tr(MENU_SRC_FORMAT_ANA_YB),       myPlugin->params.srcFormat, StFormat_AnaglyphYellowBlue)
-         ->setIcon(iconTexture(stCString("menuYellowBlueLR"), anIconSize));
+    fillSrcFormatMenu(aMenu);
     return aMenu;
+}
+
+void StImageViewerGUI::fillSrcFormatMenu(StGLMenu* theMenu) {
+    const IconSize anIconSize = scaleIcon(16);
+    theMenu->addItem(tr(MENU_SRC_FORMAT_AUTO),         myPlugin->params.srcFormat, StFormat_AUTO)
+           ->setIcon(iconTexture(stCString("menuAuto"), anIconSize));
+    theMenu->addItem(tr(MENU_SRC_FORMAT_MONO),         myPlugin->params.srcFormat, StFormat_Mono)
+           ->setIcon(iconTexture(stCString("menuMono"), anIconSize));
+    theMenu->addItem(tr(MENU_SRC_FORMAT_PARALLEL),     myPlugin->params.srcFormat, StFormat_SideBySide_LR)
+           ->setIcon(iconTexture(stCString("menuSbsLR"), anIconSize));
+    theMenu->addItem(tr(MENU_SRC_FORMAT_CROSS_EYED),   myPlugin->params.srcFormat, StFormat_SideBySide_RL)
+           ->setIcon(iconTexture(stCString("menuSbsRL"), anIconSize));
+    theMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_LR), myPlugin->params.srcFormat, StFormat_TopBottom_LR)
+           ->setIcon(iconTexture(stCString("menuOverUnderLR"), anIconSize));
+    theMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_RL), myPlugin->params.srcFormat, StFormat_TopBottom_RL)
+           ->setIcon(iconTexture(stCString("menuOverUnderRL"), anIconSize));
+    theMenu->addItem(tr(MENU_SRC_FORMAT_INTERLACED),   myPlugin->params.srcFormat, StFormat_Rows)
+           ->setIcon(iconTexture(stCString("menuRowLR"), anIconSize));
+    theMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RC),       myPlugin->params.srcFormat, StFormat_AnaglyphRedCyan)
+           ->setIcon(iconTexture(stCString("menuRedCyanLR"), anIconSize));
+    theMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RB),       myPlugin->params.srcFormat, StFormat_AnaglyphGreenMagenta)
+           ->setIcon(iconTexture(stCString("menuGreenMagentaLR"), anIconSize));
+    theMenu->addItem(tr(MENU_SRC_FORMAT_ANA_YB),       myPlugin->params.srcFormat, StFormat_AnaglyphYellowBlue)
+           ->setIcon(iconTexture(stCString("menuYellowBlueLR"), anIconSize));
+}
+
+void StImageViewerGUI::doDisplayStereoFormatCombo(const size_t ) {
+    StGLCombobox::ListBuilder aBuilder(this);
+    fillSrcFormatMenu(aBuilder.getMenu());
+    aBuilder.display();
 }
 
 /**
@@ -644,23 +655,29 @@ void StImageViewerGUI::createMobileUpperToolbar() {
 
     int aBtnIter = 0;
 
-    StGLSwitchTextured* aSrcBtn = new StGLSwitchTextured(myPanelUpper, myPlugin->params.srcFormat,
-                                                         (aBtnIter++) * anIconStep, 0,
-                                                         StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    StGLTextureButton* aSrcBtn = new StGLTextureButton(myPanelUpper, (aBtnIter++) * anIconStep, 0,
+                                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), StFormat_NB);
     aSrcBtn->changeMargins() = aButtonMargins;
-    aSrcBtn->addItem(StFormat_AUTO,                 iconTexture(stCString("menuAuto"),           anIconSize));
-    aSrcBtn->addItem(StFormat_Mono,                 iconTexture(stCString("menuMono"),           anIconSize));
-    aSrcBtn->addItem(StFormat_SideBySide_LR,        iconTexture(stCString("menuSbsLR"),          anIconSize), true);
-    aSrcBtn->addItem(StFormat_SideBySide_RL,        iconTexture(stCString("menuSbsRL"),          anIconSize));
-    aSrcBtn->addItem(StFormat_TopBottom_LR,         iconTexture(stCString("menuOverUnderLR"),    anIconSize));
-    aSrcBtn->addItem(StFormat_TopBottom_RL,         iconTexture(stCString("menuOverUnderRL"),    anIconSize), true);
-    aSrcBtn->addItem(StFormat_Rows,                 iconTexture(stCString("menuRowLR"),          anIconSize));
-    aSrcBtn->addItem(StFormat_AnaglyphRedCyan,      iconTexture(stCString("menuRedCyanLR"),      anIconSize));
-    aSrcBtn->addItem(StFormat_AnaglyphGreenMagenta, iconTexture(stCString("menuGreenMagentaLR"), anIconSize));
-    aSrcBtn->addItem(StFormat_AnaglyphYellowBlue,   iconTexture(stCString("menuYellowBlueLR"),   anIconSize));
+    aSrcBtn->signals.onBtnClick += stSlot(this, &StImageViewerGUI::doDisplayStereoFormatCombo);
+    const StString aSrcTextures[StFormat_NB] = {
+        iconTexture(stCString("menuMono"),           anIconSize),
+        iconTexture(stCString("menuSbsLR"),          anIconSize),
+        iconTexture(stCString("menuSbsRL"),          anIconSize),
+        iconTexture(stCString("menuOverUnderLR"),    anIconSize),
+        iconTexture(stCString("menuOverUnderRL"),    anIconSize),
+        iconTexture(stCString("menuRowLR"),          anIconSize),
+        iconTexture(stCString("menuColLR"),          anIconSize),
+        iconTexture(stCString("menuSrcSeparate"),    anIconSize),
+        iconTexture(stCString("menuFrameSeqLR"),     anIconSize),
+        iconTexture(stCString("menuRedCyanLR"),      anIconSize),
+        iconTexture(stCString("menuGreenMagentaLR"), anIconSize),
+        iconTexture(stCString("menuYellowBlueLR"),   anIconSize),
+        iconTexture(stCString("menuTiledLR"),        anIconSize)
+    };
+    aSrcBtn->setTexturePath(aSrcTextures, StFormat_NB);
+    myBtnActualSrcFrmt = aSrcBtn;
 
     aBtnIter = 0;
-    myBtnSrcFrmt = aSrcBtn;
     StGLTextureButton* aBtnEx = new StGLTextureButton(myPanelUpper, (aBtnIter--) * (-anIconStep), 0,
                                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     aBtnEx->changeMargins() = aButtonMargins;
@@ -885,7 +902,7 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
         aSrcFormat = st::formatReversed(aSrcFormat);
     }
     if(myBtnActualSrcFrmt != NULL) {
-        myBtnActualSrcFrmt->setFaceId(aSrcFormat);
+        myBtnActualSrcFrmt->setFaceId(aSrcFormat != StFormat_AUTO ? aSrcFormat : StFormat_Mono);
     }
 
     if(myDescr != NULL) {
