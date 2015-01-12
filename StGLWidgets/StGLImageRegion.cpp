@@ -130,6 +130,7 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
   myClickPntZo(0.0, 0.0),
   myDragDelayMs(0.0),
   myIsClickAborted(false),
+  myToRightRotate(false),
   myIsInitialized(false),
   myHasVideoStream(false) {
     params.displayMode = new StEnumParam(MODE_STEREO, "Stereo Output");
@@ -542,6 +543,13 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                 }
             }
 
+            GLfloat anXRotate = aParams->getXRotate();
+            GLfloat anYRotate = aParams->getYRotate();
+            if(isClicked(ST_MOUSE_RIGHT) && myToRightRotate) {
+                anXRotate += 180.0f * GLfloat(myRoot->getCursorZo().y() - myClickPntZo.y());
+                anYRotate += 180.0f * GLfloat(myRoot->getCursorZo().x() - myClickPntZo.x());
+            }
+
             // apply scale
             stModelMat.scale(aParams->ScaleFactor, aParams->ScaleFactor, 1.0f);
 
@@ -556,6 +564,8 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             } else {
                 stModelMat.rotate(aParams->getZRotate(), StGLVec3::DZ());
             }
+            stModelMat.rotate(anXRotate, StGLVec3::DX());
+            stModelMat.rotate(anYRotate, StGLVec3::DY());
 
             /// TODO (Kirill Gavrilov#8) implement fit all for rotated image
 
@@ -658,7 +668,10 @@ bool StGLImageRegion::tryClick(const StPointD_t& theCursorZo,
                                const int&        theMouseBtn,
                                bool&             isItemClicked) {
     if(StGLWidget::tryClick(theCursorZo, theMouseBtn, isItemClicked)) {
-        if(theMouseBtn == ST_MOUSE_LEFT) {
+        if(theMouseBtn == ST_MOUSE_RIGHT && myToRightRotate) {
+            myClickPntZo = theCursorZo;
+            myIsClickAborted = true;
+        } else if(theMouseBtn == ST_MOUSE_LEFT) {
             myClickPntZo = theCursorZo;
             myClickTimer.restart();
             myIsClickAborted = false;
@@ -676,7 +689,27 @@ bool StGLImageRegion::tryUnClick(const StPointD_t& theCursorZo,
     if(!myIsInitialized || aParams.isNull()) {
         return false;
     }
-    if(isClicked(ST_MOUSE_LEFT) && theMouseBtn == ST_MOUSE_LEFT) {
+
+    if(isClicked(ST_MOUSE_RIGHT) && theMouseBtn == ST_MOUSE_RIGHT && myToRightRotate) {
+        if(aParams->ViewingMode == StStereoParams::FLAT_IMAGE) {
+            GLfloat anXRotate = aParams->getXRotate() + 180.0f * GLfloat(theCursorZo.y() - myClickPntZo.y());
+            GLfloat anYRotate = aParams->getYRotate() + 180.0f * GLfloat(theCursorZo.x() - myClickPntZo.x());
+            for(; anXRotate > 360.0f;) {
+                anXRotate -= 360.0f;
+            }
+            for(; anXRotate < 0.0f;) {
+                anXRotate += 360.0f;
+            }
+            for(; anYRotate > 360.0f;) {
+                anYRotate -= 360.0f;
+            }
+            for(; anYRotate < 0.0f;) {
+                anYRotate += 360.0f;
+            }
+            aParams->setXRotate(anXRotate);
+            aParams->setYRotate(anYRotate);
+        }
+    } else if(isClicked(ST_MOUSE_LEFT) && theMouseBtn == ST_MOUSE_LEFT) {
         // ignore out of window
         switch(aParams->ViewingMode) {
             default:

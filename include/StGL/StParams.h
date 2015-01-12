@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -63,6 +63,8 @@ class StStereoParams {
       mySepDxZeroPx(0),
       mySepDyPx(0),
       mySepRotDegrees(0.0f),
+      myXRotateDegrees(0.0f),
+      myYRotateDegrees(0.0f),
       myZRotateDegrees(0.0f),
       myZRotateZero(0.0f) {
         //
@@ -118,14 +120,42 @@ class StStereoParams {
     }
 
     /**
-     * @return rotation anlge in degrees.
+     * @return rotation angle in degrees.
+     */
+    GLfloat getXRotate() const {
+        return myXRotateDegrees;
+    }
+
+    /**
+     * Change rotation angle in degrees.
+     */
+    void setXRotate(const GLfloat theValue) {
+        myXRotateDegrees = theValue;
+    }
+
+    /**
+     * @return rotation angle in degrees.
+     */
+    GLfloat getYRotate() const {
+        return myYRotateDegrees;
+    }
+
+    /**
+     * Change rotation angle in degrees.
+     */
+    void setYRotate(const GLfloat theValue) {
+        myYRotateDegrees = theValue;
+    }
+
+    /**
+     * @return rotation angle in degrees.
      */
     GLfloat getZRotate() const {
         return myZRotateZero + myZRotateDegrees;
     }
 
     /**
-     * @param theAngleDegrees - rotation anlge in degrees.
+     * @param theAngleDegrees - rotation angle in degrees.
      */
     void setZRotateZero(const GLfloat theAngleDegrees) {
         myZRotateZero = theAngleDegrees;
@@ -267,7 +297,10 @@ class StStereoParams {
      */
     void reset() {
         mySepDxPx = mySepDyPx = 0;
-        mySepRotDegrees = myZRotateDegrees = 0.0f;
+        mySepRotDegrees  = 0.0f;
+        myXRotateDegrees = 0.0f;
+        myYRotateDegrees = 0.0f;
+        myZRotateDegrees = 0.0f;
         PanCenter.x() = 0.0f;
         PanCenter.y() = 0.0f;
         PanTheta      = 0.0f;
@@ -296,6 +329,8 @@ class StStereoParams {
     GLint        mySepDxZeroPx;    //!< zero-parallax separation in pixels
     GLint        mySepDyPx;        //!< vertical      separation in pixels
     GLfloat      mySepRotDegrees;  //!< angular separation in degrees
+    GLfloat      myXRotateDegrees; //!< rotation angle in degrees
+    GLfloat      myYRotateDegrees; //!< rotation angle in degrees
     GLfloat      myZRotateDegrees; //!< rotation angle in degrees
     GLfloat      myZRotateZero;    //!< zero-rotation angle in degrees
 

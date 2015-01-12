@@ -322,7 +322,7 @@ class StGLRootWidget : public StGLWidget {
     /**
      * Returns mouse cursor position in GL coordinates.
      */
-    inline StPointD_t getCursorZo() {
+    ST_LOCAL const StPointD_t& getCursorZo() const {
         return cursorZo;
     }
 
