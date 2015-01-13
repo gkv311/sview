@@ -433,6 +433,7 @@ bool StImageViewer::createGui() {
     }
 
     // create the GUI with default values
+    params.ScaleHiDPI->setValue(myWindow->getScaleFactor());
     myGUI = new StImageViewerGUI(this, myWindow.access(), myLangMap.access(),
                                  myLoader.isNull() ? NULL : myLoader->getTextureQueue());
     myGUI->setContext(myContext);

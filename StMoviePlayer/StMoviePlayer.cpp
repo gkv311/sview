@@ -723,6 +723,8 @@ bool StMoviePlayer::createGui(StHandle<StGLTextureQueue>& theTextureQueue,
         theTextureQueue = new StGLTextureQueue(16);
         theSubQueue     = new StSubQueue();
     }
+
+    params.ScaleHiDPI->setValue(myWindow->getScaleFactor());
     myGUI = new StMoviePlayerGUI(this, myWindow.access(), myLangMap.access(), myPlayList, theTextureQueue, theSubQueue);
     myGUI->setContext(myContext);
 
