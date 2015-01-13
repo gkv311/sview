@@ -12,9 +12,11 @@
 #include <StGLWidgets/StGLShare.h>
 #include <StGLWidgets/StGLWidget.h>
 #include <StGL/StGLFontManager.h>
+#include <StGL/StGLTexture.h>
 #include <StThreads/StResourceManager.h>
 
-#include <StTemplates/StHandle.h>
+template<> inline void StArray<StGLNamedTexture>::sort() {}
+typedef StArray<StGLNamedTexture> StGLTextureArray;
 
 /**
  * Full OpenGL-window widget, must be ROOT for other widgets.
@@ -106,6 +108,9 @@ class StGLRootWidget : public StGLWidget {
      * Return icon of standard element.
      */
     ST_LOCAL const StString& getIcon(const StGLRootWidget::IconImage theIcon) const { return myIcons[theIcon]; }
+
+    ST_LOCAL StHandle<StGLTextureArray>& getCheckboxIcon() { return myCheckboxIcon; }
+    ST_LOCAL StHandle<StGLTextureArray>& getRadioIcon()    { return myRadioIcon; }
 
     /**
      * Function iterate children and self to change clicking state.
@@ -390,6 +395,9 @@ class StGLRootWidget : public StGLWidget {
 
     StGLVec4                  myColors[Color_NB]; //!< colors of standard elements
     StString                  myIcons[IconImage_NB];
+
+    StHandle<StGLTextureArray> myCheckboxIcon;
+    StHandle<StGLTextureArray> myRadioIcon;
 
     bool                      myIsMobile;      //!< flag indicating mobile device
     StMarginsI                myMarginsPx;     //!< active area margins in pixels

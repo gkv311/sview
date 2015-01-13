@@ -9,8 +9,8 @@
 #ifndef __StGLTexture_h_
 #define __StGLTexture_h_
 
-#include <stTypes.h>
 #include <StGL/StGLResource.h>
+#include <StStrings/StString.h>
 
 class StImagePlane;
 class StGLContext;
@@ -77,21 +77,21 @@ class StGLTexture : public StGLResource {
     /**
      * @return true if texture has valid ID (was created but not necessary initialized with valid data!).
      */
-    inline bool isValid() const {
+    ST_LOCAL bool isValid() const {
         return myTextureId != NO_TEXTURE;
     }
 
     /**
      * Get texture format.
      */
-    inline GLint getTextureFormat() {
+    ST_LOCAL GLint getTextureFormat() const {
         return myTextFormat;
     }
 
     /**
      * Set texture format. Texture should be re-initialized after this change.
      */
-    inline void setTextureFormat(const GLint theTextureFormat) {
+    ST_LOCAL void setTextureFormat(const GLint theTextureFormat) {
         myTextFormat = theTextureFormat;
     }
 
@@ -211,4 +211,34 @@ class StGLTexture : public StGLResource {
 
 };
 
-#endif //__StGLTexture_h_
+/**
+ * This class represent OpenGL texture with name.
+ */
+class StGLNamedTexture : public StGLTexture {
+
+        public:
+
+    /**
+     * Empty constructor for GL_RGBA8 format.
+     */
+    ST_CPPEXPORT StGLNamedTexture();
+
+    ST_CPPEXPORT virtual ~StGLNamedTexture();
+
+    /**
+     * Return texture name.
+     */
+    ST_LOCAL const StString& getName() const { return myName; }
+
+    /**
+     * Assign name to the texture.
+     */
+    ST_LOCAL void setName(const StString& theName) { myName = theName; }
+
+        protected:
+
+    StString myName; //!< user-defined name
+
+};
+
+#endif // __StGLTexture_h_

@@ -89,6 +89,18 @@ StGLRootWidget::~StGLRootWidget() {
     }
     delete[] myShareArray;
     if(!myGlCtx.isNull()) {
+        if(!myCheckboxIcon.isNull()) {
+            for(size_t aTexIter = 0; aTexIter < myCheckboxIcon->size(); ++aTexIter) {
+                myCheckboxIcon->changeValue(aTexIter).release(*myGlCtx);
+            }
+            myCheckboxIcon.nullify();
+        }
+        if(!myRadioIcon.isNull()) {
+            for(size_t aTexIter = 0; aTexIter < myRadioIcon->size(); ++aTexIter) {
+                myRadioIcon->changeValue(aTexIter).release(*myGlCtx);
+            }
+            myRadioIcon.nullify();
+        }
         myGlFontMgr->release(*myGlCtx);
         myGlFontMgr.nullify();
     }

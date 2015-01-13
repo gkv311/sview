@@ -596,3 +596,11 @@ bool StGLTexture::fill(StGLContext&        theCtx,
     unbind(theCtx);
     return true;
 }
+
+StGLNamedTexture::StGLNamedTexture() {
+    //
+}
+
+StGLNamedTexture::~StGLNamedTexture() {
+    //
+}

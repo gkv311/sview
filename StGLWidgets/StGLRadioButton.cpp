@@ -37,20 +37,31 @@ StGLRadioButton::StGLRadioButton(StGLWidget* theParent,
 : StGLTextureButton(theParent,
                     theLeft, theTop,
                     theCorner,
-                    2),
+                    0),
   myTrackValue(theTrackedValue),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
   myValueOn(theOnValue) {
     StGLWidget::signals.onMouseUnclick = stSlot(this, &StGLRadioButton::doMouseUnclick);
 
-    changeRectPx().right()  = getRectPx().left() + theParent->getRoot()->scale(16);
-    changeRectPx().bottom() = getRectPx().top()  + theParent->getRoot()->scale(16);
+    changeRectPx().right()  = getRectPx().left() + myRoot->scale(16);
+    changeRectPx().bottom() = getRectPx().top()  + myRoot->scale(16);
 
-    myTexturesPaths.changeValue(0) = myRoot->getIcon(StGLRootWidget::IconImage_RadioButtonOff);
-    myTexturesPaths.changeValue(1) = myRoot->getIcon(StGLRootWidget::IconImage_RadioButtonOn);
+    myTextures = myRoot->getRadioIcon();
+    if(myTextures.isNull()) {
+        const StString& anIcon0 = myRoot->getIcon(StGLRootWidget::IconImage_RadioButtonOff);
+        const StString& anIcon1 = myRoot->getIcon(StGLRootWidget::IconImage_RadioButtonOn);
+        if(!anIcon0.isEmpty()
+        && !anIcon1.isEmpty()) {
+            myTextures = new StGLTextureArray(2);
+            myTextures->changeValue(0).setName(anIcon0);
+            myTextures->changeValue(1).setName(anIcon1);
+            myRoot->getRadioIcon() = myTextures;
+        }
+    }
 }
 
 StGLRadioButton::~StGLRadioButton() {
+    myTextures.nullify(); // will be released by StGLRootWidget
     myVertBuf.release(getContext());
 }
 
@@ -84,9 +95,8 @@ void StGLRadioButton::stglResize() {
 }
 
 bool StGLRadioButton::stglInit() {
-    if( myTexturesPaths.size() != 0
-    && !myTexturesPaths.getFirst().isEmpty()
-    &&  StGLTextureButton::stglInit()) {
+    if(!myTextures.isNull()
+     && StGLTextureButton::stglInit()) {
         return true;
     }
 

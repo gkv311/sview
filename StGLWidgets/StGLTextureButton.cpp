@@ -14,7 +14,7 @@
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 
-#include <StImage/StImageFile.h>
+#include <StAV/StAVImage.h>
 #include <StThreads/StProcess.h>
 
 /**
@@ -270,13 +270,13 @@ StGLTextureButton::StGLTextureButton(StGLWidget*      theParent,
 : StGLWidget(theParent, theLeft, theTop, theCorner),
   myColor(getRoot()->getColorForElement(StGLRootWidget::Color_IconActive)),
   myFaceId(0),
-  myFacesCount(theFacesCount),
-  myAnim(Anim_Wave),
-  myTextures(theFacesCount),
-  myTexturesPaths(theFacesCount),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
   myProgramIndex(StGLTextureButton::ProgramIndex_WaveRGB),
-  myWaveTimer(false) {
+  myWaveTimer(false),
+  myAnim(Anim_Wave) {
+    if(theFacesCount != 0) {
+        myTextures = new StGLTextureArray(theFacesCount);
+    }
     StGLWidget::signals.onMouseUnclick = stSlot(this, &StGLTextureButton::doMouseUnclick);
 }
 
@@ -284,8 +284,10 @@ StGLTextureButton::~StGLTextureButton() {
     StGLContext& aCtx = getContext();
     myVertBuf.release(aCtx);
     myTCrdBuf.release(aCtx);
-    for(size_t anIter = 0; anIter < myTextures.size(); ++anIter) {
-        myTextures[anIter].release(aCtx);
+    if(!myTextures.isNull()) {
+        for(size_t anIter = 0; anIter < myTextures->size(); ++anIter) {
+            myTextures->changeValue(anIter).release(aCtx);
+        }
     }
 }
 
@@ -301,14 +303,14 @@ void StGLTextureButton::glWaveTimerControl() {
 
 void StGLTextureButton::setTexturePath(const StString* theTexturesPaths,
                                        const size_t    theCount) {
-    size_t minCount = (theCount > myFacesCount) ? myFacesCount : theCount;
+    const size_t aNbTextures = (theCount > myTextures->size()) ? myTextures->size() : theCount;
 #ifdef ST_DEBUG
-    if(theCount != myFacesCount) {
+    if(theCount != myTextures->size()) {
         ST_DEBUG_LOG_AT("WARNING, Not enough textures paths for StGLTextureButton!");
     }
 #endif
-    for(size_t t = 0; t < minCount; ++t) {
-        myTexturesPaths.changeValue(t) = theTexturesPaths[t];
+    for(size_t aTexIter = 0; aTexIter < aNbTextures; ++aTexIter) {
+        myTextures->changeValue(aTexIter).setName(theTexturesPaths[aTexIter]);
     }
 }
 
@@ -318,7 +320,8 @@ void StGLTextureButton::setFaceId(const size_t theId) {
     }
 
     myFaceId = theId;
-    myProgramIndex = StGLTexture::isAlphaFormat(myTextures[myFaceId].getTextureFormat())
+    const StGLNamedTexture& aTexture = myTextures->getValue(myFaceId);
+    myProgramIndex = StGLTexture::isAlphaFormat(aTexture.getTextureFormat())
                    ? StGLTextureButton::ProgramIndex_WaveAlpha
                    : StGLTextureButton::ProgramIndex_WaveRGB;
 }
@@ -353,49 +356,55 @@ void StGLTextureButton::stglResize() {
 }
 
 bool StGLTextureButton::stglInit() {
-    StHandle<StImageFile> anImage = StImageFile::create();
     StGLContext& aCtx = getContext();
-    if(!anImage.isNull()) {
-        const StHandle<StResourceManager>& aResMgr = getRoot()->getResourceManager();
-        for(size_t aFaceIter = 0; aFaceIter < myFacesCount; ++aFaceIter) {
-            const StString& aName = myTexturesPaths[aFaceIter];
-            if(aName.isEmpty()) {
-                ST_DEBUG_LOG("StGLTextureButton, texture for face " + aFaceIter + " not set");
-                continue;
-            }
-
-            StHandle<StResource> aRes = aResMgr->getResource(aName);
-            if(aRes.isNull()) {
-                ST_DEBUG_LOG("StGLTextureButton, texture '" + aName + "' not found");
-                continue;
-            }
-
-            uint8_t* aData     = NULL;
-            int      aDataSize = 0;
-            if(!aRes->isFile()
-             && aRes->read()) {
-                aData     = (uint8_t* )aRes->getData();
-                aDataSize = aRes->getSize();
-            }
-            if(!anImage->load(aRes->getPath(), StImageFile::ST_TYPE_PNG, aData, aDataSize)) {
-                ST_DEBUG_LOG(anImage->getState());
-                continue;
-            }
-            changeRectPx().right()  = getRectPx().left() + (int )anImage->getSizeX() + myMargins.left + myMargins.right;
-            changeRectPx().bottom() = getRectPx().top()  + (int )anImage->getSizeY() + myMargins.top  + myMargins.bottom;
-
-            GLint anInternalFormat = GL_RGB;
-            if(!StGLTexture::getInternalFormat(aCtx, anImage->getPlane(), anInternalFormat)) {
-                ST_ERROR_LOG("StGLTextureButton, texture '" + aName + "' has unsupported format!");
-                continue;
-            }
-
-            myTextures[aFaceIter].setTextureFormat(anInternalFormat);
-            myTextures[aFaceIter].init(aCtx, anImage->getPlane());
+    const StHandle<StResourceManager>& aResMgr = getRoot()->getResourceManager();
+    for(size_t aFaceIter = 0; aFaceIter < myTextures->size(); ++aFaceIter) {
+        StGLNamedTexture& aTexture = myTextures->changeValue(aFaceIter);
+        if(aTexture.isValid()) {
+            continue;
         }
-        anImage.nullify();
+
+        if(aTexture.getName().isEmpty()) {
+            ST_DEBUG_LOG("StGLTextureButton, texture for face " + aFaceIter + " not set");
+            continue;
+        }
+
+        StHandle<StResource> aRes = aResMgr->getResource(aTexture.getName());
+        if(aRes.isNull()) {
+            ST_DEBUG_LOG("StGLTextureButton, texture '" + aTexture.getName() + "' not found");
+            continue;
+        }
+
+        uint8_t* aData     = NULL;
+        int      aDataSize = 0;
+        if(!aRes->isFile()
+         && aRes->read()) {
+            aData     = (uint8_t* )aRes->getData();
+            aDataSize = aRes->getSize();
+        }
+
+        StAVImage anImage;
+        if(!anImage.load(aRes->getPath(), StImageFile::ST_TYPE_PNG, aData, aDataSize)) {
+            ST_DEBUG_LOG(anImage.getState());
+            continue;
+        }
+
+        GLint anInternalFormat = GL_RGB;
+        if(!StGLTexture::getInternalFormat(aCtx, anImage.getPlane(), anInternalFormat)) {
+            ST_ERROR_LOG("StGLTextureButton, texture '" + aTexture.getName() + "' has unsupported format!");
+            continue;
+        }
+
+        aTexture.setTextureFormat(anInternalFormat);
+        aTexture.init(aCtx, anImage.getPlane());
     }
-    myProgramIndex = StGLTexture::isAlphaFormat(myTextures[myFaceId].getTextureFormat())
+
+    const StGLNamedTexture& aTexture = myTextures->getValue(myFaceId);
+    if(aTexture.isValid()) {
+        changeRectPx().right()  = getRectPx().left() + aTexture.getSizeX() + myMargins.left + myMargins.right;
+        changeRectPx().bottom() = getRectPx().top()  + aTexture.getSizeY() + myMargins.top  + myMargins.bottom;
+    }
+    myProgramIndex = StGLTexture::isAlphaFormat(aTexture.getTextureFormat())
                    ? StGLTextureButton::ProgramIndex_WaveAlpha
                    : StGLTextureButton::ProgramIndex_WaveRGB;
 
@@ -426,7 +435,7 @@ void StGLTextureButton::stglDraw(unsigned int ) {
     }
 
     StHandle<StGLTextureButton::Program>& aProgram = myProgram->getProgram(myProgramIndex);
-    StGLTexture& aTexture = myTextures[myFaceId];
+    StGLNamedTexture& aTexture = myTextures->changeValue(myFaceId);
     if( aProgram.isNull()
     || !aTexture.isValid()) {
         return;

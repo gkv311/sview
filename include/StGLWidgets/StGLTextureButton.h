@@ -9,15 +9,10 @@
 #ifndef __StGLTextureButton_h_
 #define __StGLTextureButton_h_
 
-#include <StGLWidgets/StGLShare.h>
-#include <StGLWidgets/StGLWidget.h>
+#include <StGLWidgets/StGLRootWidget.h>
 
 #include <StGL/StGLVertexBuffer.h>
 #include <StGL/StGLTexture.h>
-
-#include <StTemplates/StArray.h>
-
-template<> inline void StArray<StGLTexture>::sort() {}
 
 class StGLTextureButton : public StGLWidget {
 
@@ -120,17 +115,15 @@ class StGLTextureButton : public StGLWidget {
     StGLVertexBuffer           myVertBuf;
     StGLVertexBuffer           myTCrdBuf;
     StGLVec4                   myColor;
+    StHandle<StGLTextureArray> myTextures;
     size_t                     myFaceId;
-    size_t                     myFacesCount;
-    Animation                  myAnim;
-    StArray<StGLTexture>       myTextures;
-    StArray<StString>          myTexturesPaths;
 
     StGLShare<ButtonPrograms>  myProgram;
     ProgramIndex               myProgramIndex;
 
     StTimer                    myWaveTimer;
     StMarginsI                 myMargins;
+    Animation                  myAnim;
 
 };
 

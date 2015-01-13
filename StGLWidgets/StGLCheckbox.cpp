@@ -36,7 +36,7 @@ StGLCheckbox::StGLCheckbox(StGLWidget* theParent,
 : StGLTextureButton(theParent,
                     theLeft, theTop,
                     theCorner,
-                    2),
+                    0),
   myTrackValue(theTrackedValue),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)) {
     myAnim = Anim_None;
@@ -44,11 +44,22 @@ StGLCheckbox::StGLCheckbox(StGLWidget* theParent,
     changeRectPx().right()  = getRectPx().left() + theParent->getRoot()->scale(16);
     changeRectPx().bottom() = getRectPx().top()  + theParent->getRoot()->scale(16);
 
-    myTexturesPaths.changeValue(0) = myRoot->getIcon(StGLRootWidget::IconImage_CheckboxOff);
-    myTexturesPaths.changeValue(1) = myRoot->getIcon(StGLRootWidget::IconImage_CheckboxOn);
+    myTextures = myRoot->getCheckboxIcon();
+    if(myTextures.isNull()) {
+        const StString& anIcon0 = myRoot->getIcon(StGLRootWidget::IconImage_CheckboxOff);
+        const StString& anIcon1 = myRoot->getIcon(StGLRootWidget::IconImage_CheckboxOn);
+        if(!anIcon0.isEmpty()
+        && !anIcon1.isEmpty()) {
+            myTextures = new StGLTextureArray(2);
+            myTextures->changeValue(0).setName(anIcon0);
+            myTextures->changeValue(1).setName(anIcon1);
+            myRoot->getCheckboxIcon() = myTextures;
+        }
+    }
 }
 
 StGLCheckbox::~StGLCheckbox() {
+    myTextures.nullify(); // will be released by StGLRootWidget
     myVertBuf.release(getContext());
 }
 
@@ -86,8 +97,7 @@ void StGLCheckbox::stglResize() {
 }
 
 bool StGLCheckbox::stglInit() {
-    if( myTexturesPaths.size() != 0
-    && !myTexturesPaths.getFirst().isEmpty()
+    if(!myTextures.isNull()
     &&  StGLTextureButton::stglInit()) {
         return true;
     }
