@@ -16,4 +16,9 @@
   <ItemGroup>
     <ResourceCompile Include="sview.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="..\dpiAware.manifest">
+      <Filter>Source files</Filter>
+    </Manifest>
+  </ItemGroup>
 </Project>
