@@ -112,7 +112,12 @@ bool StWindowImpl::wndCreateWindows() {
         // parent Master window could be decorated - we parse this situation to get true coordinates
         const DWORD aWinStyle   = (!attribs.IsNoDecor ? WS_OVERLAPPEDWINDOW : WS_POPUP) | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
         const DWORD aWinStyleEx = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE | WS_EX_ACCEPTFILES;
+        const RECT aRectOrig = aRect;
         AdjustWindowRectEx(&aRect, aWinStyle, FALSE, aWinStyleEx);
+        myDecMargins.left   = aRectOrig.left     - aRect.left;
+        myDecMargins.right  = aRect.right   - aRectOrig.right;
+        myDecMargins.top    = aRectOrig.top       - aRect.top;
+        myDecMargins.bottom = aRect.bottom - aRectOrig.bottom;
 
         // WS_EX_ACCEPTFILES - Drag&Drop support
         myMaster.hWindow = CreateWindowExW(aWinStyleEx,
@@ -192,9 +197,11 @@ bool StWindowImpl::wndCreateWindows() {
     }
 
     if(!attribs.IsHidden) {
-        SetWindowPos(myMaster.hWindow, HWND_NOTOPMOST,
-                     aRect.left, aRect.top, aRect.right - aRect.left, aRect.bottom - aRect.top,
-                     SWP_SHOWWINDOW);
+        if(myMaster.hWindow != NULL) {
+            SetWindowPos(myMaster.hWindow, HWND_NOTOPMOST,
+                         aRect.left, aRect.top, aRect.right - aRect.left, aRect.bottom - aRect.top,
+                         SWP_SHOWWINDOW);
+        }
 
         SetWindowPos(myMaster.hWindowGl, HWND_NOTOPMOST,
                      0, 0, myRectNorm.width(), myRectNorm.height(),
@@ -514,77 +521,69 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
             if(attribs.IsFullScreen || myParentWin != NULL) {
                 break;
             } else if(theWin == myMaster.hWindow) {
-                RECT* aRect = (RECT* )(LPARAM )lParam;
-                const StRectI_t aPrevRect = myRectNorm;
-
-                const int aBLeft   = GetSystemMetrics(SM_CXSIZEFRAME);
-                const int aBRight  = aBLeft;
-                const int aBBottom = GetSystemMetrics(SM_CYSIZEFRAME);
-                const int aBTop    = GetSystemMetrics(SM_CYCAPTION) + aBBottom;
+                RECT* aDragRect = (RECT* )(LPARAM )lParam;
 
                 StRectI_t aNewRect;
-                aNewRect.left()   = aRect->left   + aBLeft;
-                aNewRect.right()  = aRect->right  - aBRight;
-                aNewRect.top()    = aRect->top    + aBTop;
-                aNewRect.bottom() = aRect->bottom - aBBottom;
-
-                myRectNorm = aNewRect;
-                if(attribs.ToAlignEven)
-                {
+                aNewRect.left()   = aDragRect->left   + myDecMargins.left;
+                aNewRect.right()  = aDragRect->right  - myDecMargins.right;
+                aNewRect.top()    = aDragRect->top    + myDecMargins.top;
+                aNewRect.bottom() = aDragRect->bottom - myDecMargins.bottom;
+                const StRectI_t aPrevRect = myRectNorm;
+                if(attribs.ToAlignEven) {
                     // adjust window position to ensure alignment
-                    const int aDL = getDirNorm(aPrevRect.left(),   myRectNorm.left());
-                    const int aDR = getDirNorm(aPrevRect.right(),  myRectNorm.right());
-                    const int aDT = getDirNorm(aPrevRect.top(),    myRectNorm.top());
-                    const int aDB = getDirNorm(aPrevRect.bottom(), myRectNorm.bottom());
-                    if(isOddNumber(myRectNorm.left())) {
-                        myRectNorm.left()   += aDL;
-                        aRect->left         += aDL;
+                    const int aDL = getDirNorm(aPrevRect.left(),   aNewRect.left());
+                    const int aDR = getDirNorm(aPrevRect.right(),  aNewRect.right());
+                    const int aDT = getDirNorm(aPrevRect.top(),    aNewRect.top());
+                    const int aDB = getDirNorm(aPrevRect.bottom(), aNewRect.bottom());
+                    if(isOddNumber(aNewRect.left())) {
+                        aNewRect.left()   += aDL;
+                        aDragRect->left   += aDL;
                     }
-                    if(isEvenNumber(myRectNorm.right())) {
-                        myRectNorm.right()  += aDR;
-                        aRect->right        += aDR;
+                    if(isEvenNumber(aNewRect.right())) {
+                        aNewRect.right()  += aDR;
+                        aDragRect->right  += aDR;
                     }
-                    if(isOddNumber(myRectNorm.top())) {
-                        myRectNorm.top()    += aDT;
-                        aRect->top          += aDT;
+                    if(isOddNumber(aNewRect.top())) {
+                        aNewRect.top()    += aDT;
+                        aDragRect->top    += aDT;
                     }
-                    if(isEvenNumber(myRectNorm.bottom())) {
-                        aRect->bottom       += aDB;
-                        myRectNorm.bottom() += aDB;
+                    if(isEvenNumber(aNewRect.bottom())) {
+                        aNewRect.bottom() += aDB;
+                        aDragRect->bottom += aDB;
                     }
                 }
 
                 // determine monitor scale factor change
-                const StMonitor& aMonTo    = myMsgMonitors[myRectNorm.center()];
+                const StMonitor& aMonTo    = myMsgMonitors[aNewRect.center()];
                 const int        aNewMonId = aMonTo.getId();
                 if(myWinMonScaleId != aNewMonId) {
                     const StMonitor& aMonFrom = myMsgMonitors[myWinMonScaleId];
                     if(!stAreEqual(aMonTo.getScale(), aMonFrom.getScale(), 0.1f)) {
-                        StRectI_t aRectScaled = myRectNorm;
+                        StRectI_t aRectScaled = aNewRect;
                         const double aCoeff = double(aMonTo.getScale()) / double(aMonFrom.getScale());
-                        const int aWidth  = int(double(myRectNorm.width())  * aCoeff);
-                        const int aHeight = int(double(myRectNorm.height()) * aCoeff);
+                        const int aWidth  = int(double(aNewRect.width())  * aCoeff);
+                        const int aHeight = int(double(aNewRect.height()) * aCoeff);
                         aRectScaled.right()  = aRectScaled.left() + aWidth;
                         aRectScaled.bottom() = aRectScaled.top()  + aHeight;
                         const StMonitor& aMonMon = myMsgMonitors[aRectScaled.center()];
                         if(aMonMon.getId() == aNewMonId) {
                             // process only if resized window is still on the same monitor (protect against cascade scaling)
-                            myRectNorm = aRectScaled;
-                            aRect->top    = myRectNorm.top();
-                            aRect->bottom = myRectNorm.bottom();
-                            aRect->left   = myRectNorm.left();
-                            aRect->right  = myRectNorm.right();
+                            aNewRect = aRectScaled;
+                            aDragRect->top    = aNewRect.top();
+                            aDragRect->bottom = aNewRect.bottom();
+                            aDragRect->left   = aNewRect.left();
+                            aDragRect->right  = aNewRect.right();
                             // take into account decorations
                             const DWORD aWinStyle   = (!attribs.IsNoDecor ? WS_OVERLAPPEDWINDOW : WS_POPUP) | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
                             const DWORD aWinStyleEx = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE | WS_EX_ACCEPTFILES;
-                            AdjustWindowRectEx(aRect, aWinStyle, FALSE, aWinStyleEx);
+                            AdjustWindowRectEx(aDragRect, aWinStyle, FALSE, aWinStyleEx);
                             myWinMonScaleId = aNewMonId;
                         }
                     } else {
                         myWinMonScaleId = aNewMonId;
                     }
                 }
-
+                myRectNorm = aNewRect;
                 myIsUpdated = true;
 
                 myStEvent.Type       = stEvent_Size;
@@ -739,7 +738,9 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
         }
     }
 
-    ShowWindow(myMaster.hWindow, SW_HIDE);
+    if(myMaster.hWindow != NULL) {
+        ShowWindow(myMaster.hWindow, SW_HIDE);
+    }
     if(attribs.IsFullScreen) {
         HWND aWin = myMaster.hWindow;
         if(myParentWin != NULL) {
@@ -799,15 +800,25 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
             SetWindowLongPtr(myMaster.hWindow, GWL_STYLE, WS_OVERLAPPEDWINDOW);
         }
 
-        SetWindowPos(myMaster.hWindow, HWND_NOTOPMOST,
-                     myRectNorm.left() - GetSystemMetrics(SM_CXSIZEFRAME),
-                     myRectNorm.top()  - GetSystemMetrics(SM_CYSIZEFRAME) - GetSystemMetrics(SM_CYCAPTION),
-                     2 * GetSystemMetrics(SM_CXSIZEFRAME) + myRectNorm.width(),
-                     GetSystemMetrics(SM_CYCAPTION) + 2* GetSystemMetrics(SM_CYSIZEFRAME) + myRectNorm.height(),
-                     !attribs.IsHidden ? SWP_SHOWWINDOW : SWP_NOACTIVATE);
-        if(!attribs.IsHidden
-        && myParentWin == NULL) {
-            SetFocus(myMaster.hWindow);
+        RECT aRect;
+        aRect.top    = myRectNorm.top();
+        aRect.bottom = myRectNorm.bottom();
+        aRect.left   = myRectNorm.left();
+        aRect.right  = myRectNorm.right();
+
+        // parent Master window could be decorated - we parse this situation to get true coordinates
+        const DWORD aWinStyle   = (!attribs.IsNoDecor ? WS_OVERLAPPEDWINDOW : WS_POPUP) | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
+        const DWORD aWinStyleEx = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE | WS_EX_ACCEPTFILES;
+        ::AdjustWindowRectEx(&aRect, aWinStyle, FALSE, aWinStyleEx);
+
+        if(myMaster.hWindow != NULL) {
+            SetWindowPos(myMaster.hWindow, HWND_NOTOPMOST,
+                         aRect.left, aRect.top, aRect.right - aRect.left, aRect.bottom - aRect.top,
+                         !attribs.IsHidden ? SWP_SHOWWINDOW : SWP_NOACTIVATE);
+            if(!attribs.IsHidden
+            && myParentWin == NULL) {
+                SetFocus(myMaster.hWindow);
+            }
         }
     }
 
@@ -834,7 +845,7 @@ void StWindowImpl::updateWindowPos() {
     }
 
     if(attribs.Slave != StWinSlave_slaveOff && !attribs.IsSlaveHidden && (!isSlaveIndependent() || myMonitors.size() > 1)) {
-        HWND afterHWND = myMaster.hWindow;
+        HWND afterHWND = myParentWin != NULL ? myParentWin : myMaster.hWindow;
         UINT aFlags    = SWP_NOACTIVATE;
         if(attribs.Slave == StWinSlave_slaveHLineTop
         || attribs.Slave == StWinSlave_slaveHTop2Px
@@ -938,7 +949,9 @@ void StWindowImpl::processEvents() {
     }
 
     if(myIsUpdated) {
-        SetWindowTextW(myMaster.hWindow, myWindowTitle.toUtfWide().toCString());
+        if(myMaster.hWindow != NULL) {
+            SetWindowTextW(myMaster.hWindow, myWindowTitle.toUtfWide().toCString());
+        }
         updateWindowPos();
         myIsUpdated = false;
     }

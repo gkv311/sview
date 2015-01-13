@@ -279,6 +279,7 @@ class StWindowImpl {
     StRectI_t          myRectNorm;        //!< master window coordinates in normal     state
     StRectI_t          myRectFull;        //!< master window coordinates in fullscreen state
     StRectI_t          myRectNormPrev;    //!< window rectangle to track changes
+    StMarginsI         myDecMargins;      //!< decoration margins
 
     StSearchMonitors   myMonitors;        //!< available monitors
     int                myMonMasterFull;   //!< monitor for fullscreen (-1 - use monitor where window currently placed)
