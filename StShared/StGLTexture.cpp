@@ -429,6 +429,8 @@ bool StGLTexture::create(StGLContext&   theCtx,
     // texture interpolation parameters - could be overridden later
     theCtx.core20fwd->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, myTextureFilt);
     theCtx.core20fwd->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, myTextureFilt);
+    theCtx.core20fwd->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_CLAMP_TO_EDGE);
+    theCtx.core20fwd->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_CLAMP_TO_EDGE);
 
     if(!isProxySuccess(theCtx)) {
         release(theCtx);
