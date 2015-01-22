@@ -110,7 +110,8 @@ StSeekBar::StSeekBar(StGLWidget* theParent,
              theParent->getRoot()->scale(12) + theMargin * 2),
   myProgram(new StProgramSB()),
   myProgress(0.0f),
-  myProgressPx(0) {
+  myProgressPx(0),
+  myClickPos(-1) {
     StGLWidget::signals.onMouseUnclick.connect(this, &StSeekBar::doMouseUnclick);
     myMargins.top    = theMargin;
     myMargins.bottom = theMargin;
@@ -203,7 +204,7 @@ void StSeekBar::stglDraw(unsigned int ) {
 
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     aCtx.core20fwd->glEnable(GL_BLEND);
-    myProgram->use(aCtx, GLfloat(opacityValue), getRoot()->getScreenDispX());
+    myProgram->use(aCtx, GLfloat(opacityValue), myRoot->getScreenDispX());
 
     myVertices.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
     myColors  .bindVertexAttrib(aCtx, myProgram->getVColorLoc());
@@ -222,6 +223,33 @@ void StSeekBar::stglDraw(unsigned int ) {
     aCtx.core20fwd->glDisable(GL_BLEND);
 }
 
+void StSeekBar::stglUpdate(const StPointD_t& theCursor) {
+    if(!isClicked(ST_MOUSE_LEFT)) {
+        return;
+    }
+
+    const double aPos       = stMin(stMax(getPointIn(theCursor).x(), 0.0), 1.0);
+    const int    aTolerance = myRoot->scale(myRoot->isMobile() ? 16 : 8);
+    const int    aPosPx     = int(aPos * double(getRectPx().width()));
+    if(myClickPos >= 0
+    && std::abs(aPosPx - myClickPos) < aTolerance) {
+        return;
+    }
+
+    myClickPos = aPosPx;
+    signals.onSeekClick(ST_MOUSE_LEFT, aPos);
+}
+
 void StSeekBar::doMouseUnclick(const int mouseBtn) {
-    signals.onSeekClick(mouseBtn, getPointIn(getRoot()->getCursorZo()).x());
+    const double aPos       = stMin(stMax(getPointIn(myRoot->getCursorZo()).x(), 0.0), 1.0);
+    const int    aTolerance = myRoot->scale(1);
+    const int    aPosPx     = int(aPos * double(getRectPx().width()));
+    if(myClickPos >= 0
+    && std::abs(aPosPx - myClickPos) < aTolerance) {
+        myClickPos = -1;
+        return;
+    }
+
+    myClickPos = -1;
+    signals.onSeekClick(mouseBtn, getPointIn(myRoot->getCursorZo()).x());
 }

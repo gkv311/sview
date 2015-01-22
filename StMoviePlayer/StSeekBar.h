@@ -50,6 +50,7 @@ class ST_LOCAL StSeekBar : public StGLWidget {
 
     virtual void stglResize();
     virtual bool stglInit();
+    virtual void stglUpdate(const StPointD_t& theCursor);
     virtual void stglDraw(unsigned int view);
 
         public:  //!< Signals
@@ -80,6 +81,7 @@ class ST_LOCAL StSeekBar : public StGLWidget {
     StGLVertexBuffer      myColors;     //!< colors   VBO
     GLfloat               myProgress;   //!< current progress 0..1
     int                   myProgressPx; //!< current progress - width in pixels
+    int                   myClickPos;
 
 };
 
