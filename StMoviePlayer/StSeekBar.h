@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,8 @@ class ST_LOCAL StSeekBar : public StGLWidget {
      * Default constructor.
      */
     StSeekBar(StGLWidget* theParent,
-              const int   theTop = -64);
+              const int   theTop,
+              const int   theMargin);
 
     /**
      * Destructor.

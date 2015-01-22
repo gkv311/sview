@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -103,13 +103,17 @@ class StSeekBar::StProgramSB : public StGLProgram {
 };
 
 StSeekBar::StSeekBar(StGLWidget* theParent,
-                     const int   theTop)
+                     const int   theTop,
+                     const int   theMargin)
 : StGLWidget(theParent, 0, theTop, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT),
-             theParent->getRoot()->scale(512), theParent->getRoot()->scale(12 + 8)),
+             theParent->getRoot()->scale(512),
+             theParent->getRoot()->scale(12) + theMargin * 2),
   myProgram(new StProgramSB()),
   myProgress(0.0f),
   myProgressPx(0) {
     StGLWidget::signals.onMouseUnclick.connect(this, &StSeekBar::doMouseUnclick);
+    myMargins.top    = theMargin;
+    myMargins.bottom = theMargin;
 }
 
 StSeekBar::~StSeekBar() {
@@ -140,23 +144,23 @@ void StSeekBar::stglUpdateVertices() {
 
     // black border quad
     StRectI_t aRectPx(getRectPxAbsolute());
-    aRectPx.top()    += getRoot()->scale(4); // make bar virtually bigger remaining the same visible size
-    aRectPx.bottom() -= getRoot()->scale(4); // to simplify clicking on touch-screens
+    aRectPx.top()    += myMargins.top;
+    aRectPx.bottom() -= myMargins.bottom;
 
-    getRoot()->getRectGl(aRectPx, aVertices, 0);
+    myRoot->getRectGl(aRectPx, aVertices, 0);
 
     // inner empty quad
     aRectPx.top()    += 1;
     aRectPx.bottom() -= 1;
     aRectPx.left()   += 1;
     aRectPx.right()  -= 1;
-    getRoot()->getRectGl(aRectPx, aVertices, 4);
+    myRoot->getRectGl(aRectPx, aVertices, 4);
 
     // inner filled quad
     myProgressPx = int(myProgress * GLfloat(aRectPx.width()));
     myProgressPx = stClamp(myProgressPx, 0, aRectPx.width());
     aRectPx.right() = aRectPx.left() + myProgressPx;
-    getRoot()->getRectGl(aRectPx, aVertices, 8);
+    myRoot->getRectGl(aRectPx, aVertices, 8);
 
     myVertices.init(getContext(), aVertices);
 }

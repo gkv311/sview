@@ -78,7 +78,7 @@ void StMoviePlayerGUI::createDesktopUI(const StHandle<StPlayList>& thePlayList) 
     createUpperToolbar();
 
     const StMarginsI& aMargins = getRootMargins();
-    mySeekBar = new StSeekBar(this, -aMargins.bottom - scale(74));
+    mySeekBar = new StSeekBar(this, -aMargins.bottom - scale(74), scale(4));
     mySeekBar->signals.onSeekClick.connect(myPlugin, &StMoviePlayer::doSeek);
 
     createBottomToolbar();
@@ -1104,7 +1104,7 @@ void StMoviePlayerGUI::createMobileBottomToolbar() {
     aBtnInfo->setTexturePath(iconTexture(stCString("actionInfo"),  anIconSize));
     aBtnInfo->changeMargins() = aButtonMargins;
 
-    mySeekBar = new StSeekBar(myPanelBottom, -scale(7));
+    mySeekBar = new StSeekBar(myPanelBottom, 0, scale(18));
     mySeekBar->signals.onSeekClick.connect(myPlugin, &StMoviePlayer::doSeek);
 
     myTimeBox = new StTimeBox(myPanelBottom, myBottomBarNbRight * (-myIconStep), 0, aRightCorner, StGLTextArea::SIZE_SMALL);
@@ -1325,7 +1325,7 @@ void StMoviePlayerGUI::stglResize(const StGLBoxPx& theRectPx) {
             const int anXSpace2 = anXSpace - myBottomBarNbRight * myIconStep * 2;
             const int aBoxWidth = myTimeBox->getRectPx().width();
             if(anXSpace >= scale(250)) {
-                mySeekBar->changeRectPx().moveTopTo(-scale(22));
+                mySeekBar->changeRectPx().moveTopTo(-scale(8));
                 mySeekBar->changeRectPx().left()  = anXOffset + myBottomBarNbLeft * myIconStep;
                 mySeekBar->changeRectPx().right() = theRectPx.width() - anXOffset - myBottomBarNbRight * myIconStep;
                 if(anXSpace2 >= scale(250)) {
@@ -1339,7 +1339,7 @@ void StMoviePlayerGUI::stglResize(const StGLBoxPx& theRectPx) {
                     myTimeBox->setOverlay(true);
                 }
             } else {
-                mySeekBar->changeRectPx().moveTopTo(-scale(78));
+                mySeekBar->changeRectPx().moveTopTo(-scale(64));
                 mySeekBar->changeRectPx().left()  = anXOffset;
                 mySeekBar->changeRectPx().right() = theRectPx.width() - anXOffset;
                 myTimeBox->changeRectPx().moveTopTo(-scale(56));
