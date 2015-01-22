@@ -197,6 +197,8 @@ void StGLTable::fillFromParams(const StParamsList& theParams,
     }
 
     // adjust width of all elements in second column
+    const int aCol2MaxWidth = 2 * (theMaxWidth / 3);
+    aCol2Width = stMin(aCol2Width, aCol2MaxWidth);
     for(size_t anIter = 0; anIter < theParams.size(); ++anIter) {
         StGLTableItem& anItem  = changeElement(theRowId + (int )anIter, theColId + 1);
         StGLWidget*    aWidget = anItem.getItem();
