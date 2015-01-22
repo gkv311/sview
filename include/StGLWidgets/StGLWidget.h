@@ -123,6 +123,20 @@ class StGLWidget {
         public:
 
     /**
+     * Return extra margins before the main content of the widget (text, image, etc.).
+     */
+    ST_LOCAL const StMarginsI& getMargins() const {
+        return myMargins;
+    }
+
+    /**
+     * Return extra margins before the main content of the widget (text, image, etc.).
+     */
+    ST_LOCAL StMarginsI& changeMargins() {
+        return myMargins;
+    }
+
+    /**
      * Function returns <i>current</i> area rectangle (in pixels) relative to root area.
      * @return rectangle
      */
@@ -353,6 +367,7 @@ class StGLWidget {
 
     size_t          userData;        //!< user-defined data
     StRectI_t       rectPx;          //!< area coordinates in pixels
+    StMarginsI      myMargins;       //!< extra margins before main content of the widget (text, image, etc.)
     bool mouseClicked[ST_MOUSE_MAX_ID + 1]; // mouse clicking state
 
         protected: //! @name fields available to inheritors

@@ -54,20 +54,6 @@ class StGLTextArea : public StGLWidget {
     ST_CPPEXPORT void setText(const StString& theText);
 
     /**
-     * Return extra margins before the text.
-     */
-    ST_LOCAL const StMarginsI& getMargins() const {
-        return myMargins;
-    }
-
-    /**
-     * Return extra margins before the text.
-     */
-    ST_LOCAL StMarginsI& changeMargins() {
-        return myMargins;
-    }
-
-    /**
      * Setup alignment style.
      * @param theAlignX horizontal alignment
      * @param theAlignY vertical   alignment
@@ -234,7 +220,6 @@ class StGLTextArea : public StGLWidget {
     StGLVec4             myBackColor;     //!< text area color
     StGLVec4             myBorderColor;   //!< text area border color
 
-    StMarginsI           myMargins;       //!< extra margins
     GLfloat              myTextDX;        //!< extra displacement
     StGLRect             myTextBndBox;    //!< text boundary box
 

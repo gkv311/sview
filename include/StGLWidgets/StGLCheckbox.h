@@ -47,20 +47,6 @@ class StGLCheckbox : public StGLTextureButton {
      */
     ST_CPPEXPORT void reverseValue();
 
-    /**
-     * Return extra margins before the texture.
-     */
-    ST_LOCAL const StMarginsI& getMargins() const {
-        return myMargins;
-    }
-
-    /**
-     * Return extra margins before the texture.
-     */
-    ST_LOCAL StMarginsI& changeMargins() {
-        return myMargins;
-    }
-
         private: //! @name callback Slots (private overriders)
 
     ST_LOCAL void doMouseUnclick(const int theBtnId);
@@ -70,7 +56,6 @@ class StGLCheckbox : public StGLTextureButton {
     StHandle<StBoolParam>      myTrackValue; //!< handle to tracked value
     StGLShare<StGLMenuProgram> myProgram;    //!< shared program
     StGLVertexBuffer           myVertBuf;    //!< vertices buffer
-    StMarginsI                 myMargins;    //!< margins to the icon
 
 };
 
