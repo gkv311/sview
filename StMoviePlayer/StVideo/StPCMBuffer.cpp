@@ -343,10 +343,14 @@ bool StPCMBuffer::addConvert(const StPCMBuffer& theBuffer) {
     const size_t aSmplOutInc      = (myPlanesNb           > 1) ? 1 : myChMap.count;
 
     // capture the start pointer for each channel
-    sampleSrc_t* aBuffersSrc[ST_AUDIO_CHANNELS_MAX];
-    sampleOut_t* aBuffersOut[ST_AUDIO_CHANNELS_MAX];
+    sampleSrc_t* aBuffersSrc[ST_AUDIO_CHANNELS_MAX] = {};
+    sampleOut_t* aBuffersOut[ST_AUDIO_CHANNELS_MAX] = {};
     for(size_t aChIter = 0; aChIter < theBuffer.myChMap.count; ++aChIter) {
         theBuffer.getChannelDataStart(aChIter, aBuffersSrc[aChIter]);
+        if(aBuffersSrc[aChIter] == NULL) {
+            ST_ERROR_LOG("StPCMBuffer - NULL audio plane data!");
+            return false;
+        }
     }
     for(size_t aChIter = 0; aChIter < myChMap.count; ++aChIter) {
         getChannelDataEnd(aChIter, aBuffersOut[aChIter]);
