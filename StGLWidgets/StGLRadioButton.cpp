@@ -41,6 +41,7 @@ StGLRadioButton::StGLRadioButton(StGLWidget* theParent,
   myTrackValue(theTrackedValue),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
   myValueOn(theOnValue) {
+    myAnim = Anim_None;
     StGLWidget::signals.onMouseUnclick = stSlot(this, &StGLRadioButton::doMouseUnclick);
 
     changeRectPx().right()  = getRectPx().left() + myRoot->scale(16);
