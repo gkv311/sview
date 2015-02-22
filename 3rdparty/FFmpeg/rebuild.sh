@@ -101,6 +101,11 @@ configArguments="\
  --disable-libopenjpeg \
  --enable-runtime-cpudetect"
 
+aSystem=`uname -s`
+if [ "$aSystem" == "Darwin" ]; then
+  configArguments="$configArguments --enable-vda"
+fi
+
 #if [ "$gccMachine" != "$GCC_MACHINE_LINUX_64" ]; then
 if [ "$gccMachine" == "$GCC_MACHINE_MINGW_32" ] || [ "$gccMachine" == "$GCC_MACHINE_MINGW_32_1" ] \
 || [ "$gccMachine" == "$GCC_MACHINE_MINGW_64" ] || [ "$gccMachine" == "$GCC_MACHINE_MINGW_64_1" ]; then
@@ -173,7 +178,7 @@ if [ -f libavcodec/avcodec.dll ]; then
   cp -f libavcodec/*.dll $OUTPUT_FOLDER
   cp -f libavcodec/*.lib $OUTPUT_FOLDER &>/dev/null
 elif [ -f libavcodec/libavcodec.dylib ]; then
-  cp -f -d libavcodec/*.dylib* $OUTPUT_FOLDER/lib
+  cp -f -p libavcodec/*.dylib* $OUTPUT_FOLDER/lib
 else
   cp -f -d libavcodec/*.so* $OUTPUT_FOLDER/lib
 fi
@@ -182,7 +187,7 @@ if [ -f libavdevice/avdevice.dll ]; then
   cp -f libavdevice/*.dll $OUTPUT_FOLDER
   cp -f libavdevice/*.lib $OUTPUT_FOLDER &>/dev/null
 elif [ -f libavdevice/libavdevice.dylib ]; then
-  cp -f -d libavdevice/*.dylib* $OUTPUT_FOLDER/lib
+  cp -f -p libavdevice/*.dylib* $OUTPUT_FOLDER/lib
 else
   cp -f -d libavdevice/*.so* $OUTPUT_FOLDER/lib
 fi
@@ -191,7 +196,7 @@ if [ -f libavfilter/avfilter.dll ]; then
   cp -f libavfilter/*.dll $OUTPUT_FOLDER
   cp -f libavfilter/*.lib $OUTPUT_FOLDER &>/dev/null
 elif [ -f libavfilter/libavfilter.dylib ]; then
-  cp -f -d libavfilter/*.dylib* $OUTPUT_FOLDER/lib
+  cp -f -p libavfilter/*.dylib* $OUTPUT_FOLDER/lib
 else
   cp -f -d libavfilter/*.so* $OUTPUT_FOLDER/lib
 fi
@@ -200,7 +205,7 @@ if [ -f libavformat/avformat.dll ]; then
   cp -f libavformat/*.dll $OUTPUT_FOLDER
   cp -f libavformat/*.lib $OUTPUT_FOLDER &>/dev/null
 elif [ -f libavformat/libavformat.dylib ]; then
-  cp -f -d libavformat/*.dylib* $OUTPUT_FOLDER/lib
+  cp -f -p libavformat/*.dylib* $OUTPUT_FOLDER/lib
 else
   cp -f -d libavformat/*.so* $OUTPUT_FOLDER/lib
 fi
@@ -209,7 +214,7 @@ if [ -f libavutil/avutil.dll ]; then
   cp -f libavutil/*.dll $OUTPUT_FOLDER
   cp -f libavutil/*.lib $OUTPUT_FOLDER &>/dev/null
 elif [ -f libavutil/libavutil.dylib ]; then
-  cp -f -d libavutil/*.dylib* $OUTPUT_FOLDER/lib
+  cp -f -p libavutil/*.dylib* $OUTPUT_FOLDER/lib
 else
   cp -f -d libavutil/*.so* $OUTPUT_FOLDER/lib
 fi
@@ -218,7 +223,7 @@ if [ -f libswscale/swscale.dll ]; then
   cp -f libswscale/*.dll $OUTPUT_FOLDER
   cp -f libswscale/*.lib $OUTPUT_FOLDER &>/dev/null
 elif [ -f libswscale/libswscale.dylib ]; then
-  cp -f -d libswscale/*.dylib* $OUTPUT_FOLDER/lib
+  cp -f -p libswscale/*.dylib* $OUTPUT_FOLDER/lib
 else
   cp -f -d libswscale/*.so* $OUTPUT_FOLDER/lib
 fi
@@ -227,7 +232,7 @@ if [ -f libswresample/swresample.dll ]; then
   cp -f libswresample/*.dll $OUTPUT_FOLDER
   cp -f libswresample/*.lib $OUTPUT_FOLDER &>/dev/null
 elif [ -f libswresample/libswresample.dylib ]; then
-  cp -f -d libswresample/*.dylib* $OUTPUT_FOLDER/lib
+  cp -f -p libswresample/*.dylib* $OUTPUT_FOLDER/lib
 else
   cp -f -d libswresample/*.so* $OUTPUT_FOLDER/lib
 fi
