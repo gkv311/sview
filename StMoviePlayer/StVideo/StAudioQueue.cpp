@@ -609,6 +609,17 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
         return false;
     }
 
+    // setup buffers
+    if(!initBuffers()) {
+        deinit();
+        return false;
+    }
+
+    fillCodecInfo(myCodec);
+    return true;
+}
+
+bool StAudioQueue::initBuffers() {
     if(myCodecCtx->sample_rate < FREQ_5500) {
         signals.onError(StString("FFmpeg: wrong audio frequency ") + myCodecCtx->sample_rate);
         deinit();
@@ -652,8 +663,6 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
         signals.onError(stCString("OpenAL: unsupported format or channels configuration"));
         return false;
     }
-
-    fillCodecInfo(myCodec);
     return true;
 }
 
@@ -960,6 +969,19 @@ void StAudioQueue::decodePacket(const StHandle<StAVPacket>& thePacket,
             if(isGotFrame == 0) {
                 continue;
             }
+
+            if((int )myBufferSrc.getPlanesNb() != myCodecCtx->channels
+            || (int )myBufferSrc.getFreq()     != myCodecCtx->sample_rate) {
+                ST_DEBUG_LOG("Parameters of the Audio stream has been changed,"
+                           + " Nb. channels: " + myCodecCtx->channels    + " (was " + myBufferSrc.getPlanesNb() + ")"
+                           + " Sample Rate: "  + myCodecCtx->sample_rate + " (was " + myBufferSrc.getFreq() + ")");
+                myBufferSrc.clear();
+                myBufferOut.clear();
+                initBuffers();
+                checkMoreFrames = true;
+                break;
+            }
+
             for(size_t aPlaneIter = 0; aPlaneIter < myBufferSrc.getPlanesNb(); ++aPlaneIter) {
                 myBufferSrc.wrapPlane(aPlaneIter, myFrame.getPlane(aPlaneIter));
             }
