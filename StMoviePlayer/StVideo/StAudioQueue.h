@@ -270,6 +270,9 @@ class StAudioQueue : public StAVPacketQueue {
     mutable StTimer    myPlaybackTimer; //!< timer used for current PTS calculation
     StCondition        myDowntimeEvent;
     StAVFrame          myFrame;         //!< decoded audio frame
+    int                myAvSrcFormat;   //!< myCodecCtx->sample_fmt
+    int                myAvSampleRate;  //!< myCodecCtx->sample_rate
+    int                myAvNbChannels;  //!< myCodecCtx->channels
     StPCMBuffer        myBufferSrc;     //!< decoded PCM audio buffer
     StPCMBuffer        myBufferOut;     //!< output  PCM audio buffer
     StTimer            myLimitTimer;

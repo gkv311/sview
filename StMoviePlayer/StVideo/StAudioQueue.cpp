@@ -240,6 +240,9 @@ StAudioQueue::StAudioQueue(const StString& theAlDeviceName)
 : StAVPacketQueue(512),
   myPlaybackTimer(false),
   myDowntimeEvent(true),
+  myAvSrcFormat(-1),
+  myAvSampleRate(-1),
+  myAvNbChannels(-1),
   myBufferSrc(StPcmFormat_Int16),
   myBufferOut(StPcmFormat_Int16),
   myIsAlValid(ST_AL_INIT_NA),
@@ -620,6 +623,9 @@ bool StAudioQueue::init(AVFormatContext*   theFormatCtx,
 }
 
 bool StAudioQueue::initBuffers() {
+    myAvSrcFormat  = myCodecCtx->sample_fmt;
+    myAvSampleRate = myCodecCtx->sample_rate;
+    myAvNbChannels = myCodecCtx->channels;
     if(myCodecCtx->sample_rate < FREQ_5500) {
         signals.onError(StString("FFmpeg: wrong audio frequency ") + myCodecCtx->sample_rate);
         deinit();
@@ -669,6 +675,9 @@ bool StAudioQueue::initBuffers() {
 void StAudioQueue::deinit() {
     myBufferSrc.clear();
     myBufferOut.clear();
+    myAvSrcFormat  = -1;
+    myAvSampleRate = -1;
+    myAvNbChannels = -1;
     StAVPacketQueue::deinit();
 }
 
@@ -970,11 +979,12 @@ void StAudioQueue::decodePacket(const StHandle<StAVPacket>& thePacket,
                 continue;
             }
 
-            if((int )myBufferSrc.getPlanesNb() != myCodecCtx->channels
-            || (int )myBufferSrc.getFreq()     != myCodecCtx->sample_rate) {
+            if(myAvSrcFormat  != myCodecCtx->sample_fmt
+            || myAvNbChannels != myCodecCtx->channels
+            || myAvSampleRate != myCodecCtx->sample_rate) {
                 ST_DEBUG_LOG("Parameters of the Audio stream has been changed,"
-                           + " Nb. channels: " + myCodecCtx->channels    + " (was " + myBufferSrc.getPlanesNb() + ")"
-                           + " Sample Rate: "  + myCodecCtx->sample_rate + " (was " + myBufferSrc.getFreq() + ")");
+                           + " Nb. channels: " + myCodecCtx->channels    + " (was " + myAvNbChannels + ")"
+                           + " Sample Rate: "  + myCodecCtx->sample_rate + " (was " + myAvSampleRate + ")");
                 myBufferSrc.clear();
                 myBufferOut.clear();
                 initBuffers();
