@@ -49,7 +49,8 @@ class StImageViewer : public StApplication {
      */
     ST_CPPEXPORT StImageViewer(const StHandle<StResourceManager>& theResMgr,
                                const StNativeWin_t                theParentWin = (StNativeWin_t )NULL,
-                               const StHandle<StOpenInfo>&        theOpenInfo  = NULL);
+                               const StHandle<StOpenInfo>&        theOpenInfo  = NULL,
+                               const StString&                    theAppName   = "");
 
     /**
      * Destructor.
@@ -212,6 +213,7 @@ class StImageViewer : public StApplication {
     StHandle<StFileNode>       myFileToDelete;    //!< file node for removal
     StHandle<StImageInfo>      myFileInfo;        //!< file info for opened dialog
     StHandle<StOpenImage>      myOpenDialog;      //!< file open dialog
+    StString                   myAppName;         //!< name of customized application
 
     StCondition                myEventLoaded;     //!< indicate that new file was open
 

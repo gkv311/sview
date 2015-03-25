@@ -223,8 +223,10 @@ class StImageViewer::StOpenImage {
 
 StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
                              const StNativeWin_t                theParentWin,
-                             const StHandle<StOpenInfo>&        theOpenInfo)
+                             const StHandle<StOpenInfo>&        theOpenInfo,
+                             const StString&                    theAppName)
 : StApplication(theResMgr, theParentWin, theOpenInfo),
+  myAppName(theAppName),
   myEventLoaded(false),
   //
   mySlideShowTimer(false),
@@ -235,12 +237,16 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
   myToRecreateMenu(false),
   myToSaveSrcFormat(false),
   myEscNoQuit(false) {
-    mySettings = new StSettings(myResMgr, ST_DRAWER_PLUGIN_NAME);
+    const StString& anAppName = !theAppName.isEmpty() ? theAppName : ST_DRAWER_PLUGIN_NAME;
+    mySettings = new StSettings(myResMgr, anAppName);
     myLangMap  = new StTranslations(myResMgr, StImageViewer::ST_DRAWER_PLUGIN_NAME);
     myOpenDialog = new StOpenImage(this);
     StImageViewerStrings::loadDefaults(*myLangMap);
 
     myTitle = "sView - Image Viewer";
+    if(!theAppName.isEmpty()) {
+        myTitle = theAppName;
+    }
     //
     params.isFullscreen = new StBoolParam(false);
     params.isFullscreen->signals.onChanged.connect(this, &StImageViewer::doFullscreen);
@@ -971,9 +977,8 @@ void StImageViewer::doOpen2FilesDialog(const size_t ) {
 void StImageViewer::doUpdateStateLoading() {
     const StString aFileToLoad = myLoader->getPlayList().getCurrentTitle();
     if(aFileToLoad.isEmpty()) {
-        myWindow->setTitle("sView - Image Viewer");
+        myWindow->setTitle(myTitle);
     } else {
-        /// TODO (Kirill Gavrilov#4) - show Loading... after delay
         myWindow->setTitle(aFileToLoad + " Loading... - sView");
     }
 }
@@ -981,7 +986,7 @@ void StImageViewer::doUpdateStateLoading() {
 void StImageViewer::doUpdateStateLoaded() {
     const StString aFileToLoad = myLoader->getPlayList().getCurrentTitle();
     if(aFileToLoad.isEmpty()) {
-        myWindow->setTitle("sView - Image Viewer");
+        myWindow->setTitle(myTitle);
     } else {
         myWindow->setTitle(aFileToLoad + " - sView");
     }

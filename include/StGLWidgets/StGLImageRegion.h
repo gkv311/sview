@@ -222,6 +222,11 @@ class StGLImageRegion : public StGLWidget {
         if(!params.stereoFile.isNull()) { params.stereoFile->scaleOut((GLfloat )theValue); }
     }
 
+    ST_LOCAL void doParamsRotYLeft (const double theValue);
+    ST_LOCAL void doParamsRotYRight(const double theValue);
+    ST_LOCAL void doParamsRotXUp   (const double theValue);
+    ST_LOCAL void doParamsRotXDown (const double theValue);
+
         private: //! @name private methods
 
     ST_LOCAL StGLVec2 getMouseMoveFlat(const StPointD_t& theCursorZoFrom,

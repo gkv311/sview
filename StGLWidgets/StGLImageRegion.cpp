@@ -120,7 +120,7 @@ namespace {
 
 StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
                                  const StHandle<StGLTextureQueue>& theTextureQueue,
-                                 const bool  theUsePanningKeys)
+                                 bool theUsePanningKeys)
 : StGLWidget(theParent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT)),
   myQuad(),
   myUVSphere(StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 64),
@@ -130,7 +130,11 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
   myClickPntZo(0.0, 0.0),
   myDragDelayMs(0.0),
   myIsClickAborted(false),
+#ifdef ST_EXTRA_CONTROLS
+  myToRightRotate(true),
+#else
   myToRightRotate(false),
+#endif
   myIsInitialized(false),
   myHasVideoStream(false) {
     params.displayMode = new StEnumParam(MODE_STEREO, "Stereo Output");
@@ -150,6 +154,10 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
                                                 myProgramSphere.params.saturation);
     params.swapLR   = new StSwapLRParam();
     params.ViewMode = new StViewModeParam();
+
+#ifdef ST_EXTRA_CONTROLS
+    theUsePanningKeys = false;
+#endif
 
     // create actions
     StHandle<StAction> anAction;
@@ -171,22 +179,34 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
 
     anAction = new StActionIntSlot(stCString("DoParamsSepXDec"), stSlot(this, &StGLImageRegion::doParamsSepX), (size_t )-1);
     anAction->setHotKey1(ST_VK_COMMA);
-    anAction->setHotKey1(ST_VK_DIVIDE);
+    anAction->setHotKey2(ST_VK_DIVIDE);
+#ifdef ST_EXTRA_CONTROLS
+    anAction->setHotKey1(ST_VK_Q);
+#endif
     myActions.add(anAction);
 
     anAction = new StActionIntSlot(stCString("DoParamsSepXInc"), stSlot(this, &StGLImageRegion::doParamsSepX), 1);
     anAction->setHotKey1(ST_VK_PERIOD);
     anAction->setHotKey2(ST_VK_MULTIPLY);
+#ifdef ST_EXTRA_CONTROLS
+    anAction->setHotKey1(ST_VK_E);
+#endif
     myActions.add(anAction);
 
     anAction = new StActionIntSlot(stCString("DoParamsSepYDec"), stSlot(this, &StGLImageRegion::doParamsSepY), (size_t )-1);
     anAction->setHotKey1(ST_VK_COMMA  | ST_VF_CONTROL);
-    anAction->setHotKey1(ST_VK_DIVIDE | ST_VF_CONTROL);
+    anAction->setHotKey2(ST_VK_DIVIDE | ST_VF_CONTROL);
+#ifdef ST_EXTRA_CONTROLS
+    anAction->setHotKey1(ST_VK_Q      | ST_VF_CONTROL);
+#endif
     myActions.add(anAction);
 
     anAction = new StActionIntSlot(stCString("DoParamsSepYInc"), stSlot(this, &StGLImageRegion::doParamsSepY), 1);
     anAction->setHotKey1(ST_VK_PERIOD   | ST_VF_CONTROL);
     anAction->setHotKey2(ST_VK_MULTIPLY | ST_VF_CONTROL);
+#ifdef ST_EXTRA_CONTROLS
+    anAction->setHotKey1(ST_VK_E        | ST_VF_CONTROL);
+#endif
     myActions.add(anAction);
 
     anAction = new StActionHoldSlot(stCString("DoParamsSepRotDec"), stSlot(this, &StGLImageRegion::doParamsSepZDec));
@@ -241,6 +261,30 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
     anAction = new StActionHoldSlot(stCString("DoParamsScaleOut"), stSlot(this, &StGLImageRegion::doParamsScaleOut));
     anAction->setHotKey1(ST_VK_SUBTRACT);
     anAction->setHotKey2(ST_VK_OEM_MINUS);
+    myActions.add(anAction);
+
+    anAction = new StActionHoldSlot(stCString("DoParamsRotYLeft"), stSlot(this, &StGLImageRegion::doParamsRotYLeft));
+#ifdef ST_EXTRA_CONTROLS
+    anAction->setHotKey1(ST_VK_LEFT);
+#endif
+    myActions.add(anAction);
+
+    anAction = new StActionHoldSlot(stCString("DoParamsRotYRight"), stSlot(this, &StGLImageRegion::doParamsRotYRight));
+#ifdef ST_EXTRA_CONTROLS
+    anAction->setHotKey1(ST_VK_RIGHT);
+#endif
+    myActions.add(anAction);
+
+    anAction = new StActionHoldSlot(stCString("DoParamsRotXUp"), stSlot(this, &StGLImageRegion::doParamsRotXUp));
+#ifdef ST_EXTRA_CONTROLS
+    anAction->setHotKey1(ST_VK_UP);
+#endif
+    myActions.add(anAction);
+
+    anAction = new StActionHoldSlot(stCString("DoParamsRotXDown"), stSlot(this, &StGLImageRegion::doParamsRotXDown));
+#ifdef ST_EXTRA_CONTROLS
+    anAction->setHotKey1(ST_VK_DOWN);
+#endif
     myActions.add(anAction);
 }
 
@@ -768,4 +812,56 @@ bool StGLImageRegion::tryUnClick(const StPointD_t& theCursorZo,
         return true;
     }
     return false;
+}
+
+void StGLImageRegion::doParamsRotYLeft(const double ) {
+    if(params.stereoFile.isNull()
+    || params.stereoFile->ViewingMode != StStereoParams::FLAT_IMAGE) {
+        return;
+    }
+
+    GLfloat anYRotate = params.stereoFile->getYRotate() + 1.0f;
+    for(; anYRotate > 360.0f;) {
+        anYRotate -= 360.0f;
+    }
+    params.stereoFile->setYRotate(anYRotate);
+}
+
+void StGLImageRegion::doParamsRotYRight(const double ) {
+    if(params.stereoFile.isNull()
+    || params.stereoFile->ViewingMode != StStereoParams::FLAT_IMAGE) {
+        return;
+    }
+
+    GLfloat anYRotate = params.stereoFile->getYRotate() - 1.0f;
+    for(; anYRotate < 0.0f;) {
+        anYRotate += 360.0f;
+    }
+    params.stereoFile->setYRotate(anYRotate);
+}
+
+void StGLImageRegion::doParamsRotXUp(const double ) {
+    if(params.stereoFile.isNull()
+    || params.stereoFile->ViewingMode != StStereoParams::FLAT_IMAGE) {
+        return;
+    }
+
+    GLfloat anXRotate = params.stereoFile->getXRotate() + 1.0f;
+    for(; anXRotate > 360.0f;) {
+        anXRotate -= 360.0f;
+    }
+    params.stereoFile->setXRotate(anXRotate);
+}
+
+void StGLImageRegion::doParamsRotXDown(const double ) {
+    if(params.stereoFile.isNull()
+    || params.stereoFile->ViewingMode != StStereoParams::FLAT_IMAGE) {
+        return;
+    }
+
+    GLfloat anXRotate = params.stereoFile->getXRotate() - 1.0f;
+    for(; anXRotate < 0.0f;) {
+        anXRotate += 360.0f;
+    }
+    params.stereoFile->setXRotate(anXRotate);
 }
