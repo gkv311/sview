@@ -854,11 +854,20 @@ size_t StImageViewerGUI::trSrcFormatId(const StFormat theSrcFormat) {
 void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
                                      bool              isMouseActive,
                                      bool              toForceHide) {
+    const bool toShowToolbar  = !myIsMinimalGUI
+                             &&  myPlugin->params.ToShowToolbar->getValue();
+    const bool hasUpperPanel  = toShowToolbar
+                             && myPanelUpper  != NULL
+                             && myPanelUpper ->isPointIn(theCursor);
+    const bool hasBottomPanel = toShowToolbar
+                             && myPanelBottom != NULL
+                             && myPanelBottom->isPointIn(theCursor);
+
     myIsVisibleGUI = isMouseActive
         || myVisibilityTimer.getElapsedTime() < 2.0
-        || (myPanelUpper  != NULL && !myIsMinimalGUI && myPanelUpper ->isPointIn(theCursor))
-        || (myPanelBottom != NULL && !myIsMinimalGUI && myPanelBottom->isPointIn(theCursor))
-        || (myMenuRoot   != NULL && myMenuRoot->isActive());
+        || hasUpperPanel
+        || hasBottomPanel
+        || (myMenuRoot != NULL && myMenuRoot->isActive());
 
     if(isMouseActive) {
         myVisibilityTimer.restart();
@@ -874,17 +883,19 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
     }
 
     if(myPanelUpper != NULL) {
-        myPanelUpper->setVisibility(toShowAll);
+        const bool toShowUpper = hasUpperPanel && toShowAll;
+        myPanelUpper->setVisibility(toShowUpper);
         for(StGLWidget* aChildIter = myPanelUpper->getChildren()->getStart();
             aChildIter != NULL; aChildIter = aChildIter->getNext()) {
-            aChildIter->setVisibility(toShowAll);
+            aChildIter->setVisibility(toShowUpper);
         }
     }
     if(myPanelBottom != NULL) {
-        myPanelBottom->setVisibility(toShowAll);
+        const bool toShowBottom = hasBottomPanel && toShowAll;
+        myPanelBottom->setVisibility(toShowBottom);
         for(StGLWidget* aChildIter = myPanelBottom->getChildren()->getStart();
             aChildIter != NULL; aChildIter = aChildIter->getNext()) {
-            aChildIter->setVisibility(toShowAll);
+            aChildIter->setVisibility(toShowBottom);
         }
     }
     if(myBtnPlayList != NULL) {

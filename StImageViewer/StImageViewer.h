@@ -128,6 +128,7 @@ class StImageViewer : public StApplication {
         StHandle<StBoolParam>    ScaleHiDPI2X;     //!< option to set HiDPI resolution to 2.0
         StHandle<StInt32Param>   checkUpdatesDays; //!< days count between updates checks
         StHandle<StInt32Param>   srcFormat;        //!< source format
+        StHandle<StBoolParam>    ToShowToolbar;    //!< show/hide toolbar
         StHandle<StBoolParam>    ToShowFps;        //!< display FPS meter
         StHandle<StBoolParam>    IsMobileUI;       //!< display mobile interface
         StHandle<StBoolParam>    IsVSyncOn;        //!< flag to use VSync

@@ -54,6 +54,7 @@ namespace {
     static const char ST_SETTING_COMPRESS[]    = "toCompress";
     static const char ST_SETTING_ESCAPENOQUIT[]= "escNoQuit";
     static const char ST_SETTING_FULLSCREENUI[]= "fullScreenUI";
+    static const char ST_SETTING_SHOW_TOOLBAR[]= "toShowToolbar";
 
     static const char ST_SETTING_SCALE_ADJUST[]  = "scaleAdjust";
     static const char ST_SETTING_SCALE_FORCE2X[] = "scale2X";
@@ -267,7 +268,8 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     params.checkUpdatesDays = new StInt32Param(7);
     params.srcFormat        = new StInt32Param(StFormat_AUTO);
     params.srcFormat->signals.onChanged.connect(this, &StImageViewer::doSwitchSrcFormat);
-    params.ToShowFps  = new StBoolParamNamed(false,                tr(StImageViewerStrings::MENU_SHOW_FPS));
+    params.ToShowFps     = new StBoolParamNamed(false, tr(StImageViewerStrings::MENU_SHOW_FPS));
+    params.ToShowToolbar = new StBoolParamNamed(true, "Show toolbar");
     params.IsMobileUI = new StBoolParamNamed(StWindow::isMobile(), "Mobile UI");
     params.IsMobileUI->signals.onChanged = stSlot(this, &StImageViewer::doScaleHiDPI);
     params.IsVSyncOn  = new StBoolParam(true);
@@ -549,6 +551,7 @@ void StImageViewer::parseArguments(const StArgumentsMap& theArguments) {
     StArgument argToCompress = theArguments[ST_SETTING_COMPRESS];
     StArgument argEscNoQuit  = theArguments[ST_SETTING_ESCAPENOQUIT];
     StArgument argFullScreenUI = theArguments[ST_SETTING_FULLSCREENUI];
+    StArgument argToolbar    = theArguments[ST_SETTING_SHOW_TOOLBAR];
     if(argToCompress.isValid()) {
         myLoader->setCompressMemory(!argToCompress.isValueOff());
     }
@@ -557,6 +560,9 @@ void StImageViewer::parseArguments(const StArgumentsMap& theArguments) {
     }
     if(argFullScreenUI.isValid()) {
         myToHideUIFullScr = argFullScreenUI.isValueOff();
+    }
+    if(argToolbar.isValid()) {
+        params.ToShowToolbar->setValue(!argToolbar.isValueOff());
     }
     if(argFullscreen.isValid()) {
         params.isFullscreen->setValue(!argFullscreen.isValueOff());
