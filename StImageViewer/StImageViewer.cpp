@@ -53,6 +53,7 @@ namespace {
     static const char ST_SETTING_LAST_FOLDER[] = "lastFolder";
     static const char ST_SETTING_COMPRESS[]    = "toCompress";
     static const char ST_SETTING_ESCAPENOQUIT[]= "escNoQuit";
+    static const char ST_SETTING_FULLSCREENUI[]= "fullScreenUI";
 
     static const char ST_SETTING_SCALE_ADJUST[]  = "scaleAdjust";
     static const char ST_SETTING_SCALE_FORCE2X[] = "scale2X";
@@ -236,7 +237,8 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
   myToCheckUpdates(true),
   myToRecreateMenu(false),
   myToSaveSrcFormat(false),
-  myEscNoQuit(false) {
+  myEscNoQuit(false),
+  myToHideUIFullScr(false) {
     const StString& anAppName = !theAppName.isEmpty() ? theAppName : ST_DRAWER_PLUGIN_NAME;
     mySettings = new StSettings(myResMgr, anAppName);
     myLangMap  = new StTranslations(myResMgr, StImageViewer::ST_DRAWER_PLUGIN_NAME);
@@ -546,11 +548,15 @@ void StImageViewer::parseArguments(const StArgumentsMap& theArguments) {
     StArgument argImgLibrary = theArguments[ST_SETTING_IMAGELIB];
     StArgument argToCompress = theArguments[ST_SETTING_COMPRESS];
     StArgument argEscNoQuit  = theArguments[ST_SETTING_ESCAPENOQUIT];
+    StArgument argFullScreenUI = theArguments[ST_SETTING_FULLSCREENUI];
     if(argToCompress.isValid()) {
         myLoader->setCompressMemory(!argToCompress.isValueOff());
     }
     if(argEscNoQuit.isValid()) {
         myEscNoQuit = !argEscNoQuit.isValueOff();
+    }
+    if(argFullScreenUI.isValid()) {
+        myToHideUIFullScr = argFullScreenUI.isValueOff();
     }
     if(argFullscreen.isValid()) {
         params.isFullscreen->setValue(!argFullscreen.isValueOff());
@@ -898,8 +904,9 @@ void StImageViewer::beforeDraw() {
         myToCheckUpdates = false;
     }
 
-    myGUI->setVisibility(myWindow->getMousePos(), isMouseMove);
-    bool toHideCursor = params.isFullscreen->getValue() && myGUI->toHideCursor();
+    const bool isFullScreen = params.isFullscreen->getValue();
+    myGUI->setVisibility(myWindow->getMousePos(), isMouseMove, myToHideUIFullScr && isFullScreen);
+    bool toHideCursor = isFullScreen && myGUI->toHideCursor();
     myWindow->showCursor(!toHideCursor);
 }
 

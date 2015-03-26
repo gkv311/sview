@@ -852,16 +852,18 @@ size_t StImageViewerGUI::trSrcFormatId(const StFormat theSrcFormat) {
 }
 
 void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
-                                     bool              isMouseActive) {
+                                     bool              isMouseActive,
+                                     bool              toForceHide) {
     myIsVisibleGUI = isMouseActive
         || myVisibilityTimer.getElapsedTime() < 2.0
         || (myPanelUpper  != NULL && !myIsMinimalGUI && myPanelUpper ->isPointIn(theCursor))
         || (myPanelBottom != NULL && !myIsMinimalGUI && myPanelBottom->isPointIn(theCursor))
         || (myMenuRoot   != NULL && myMenuRoot->isActive());
+
     if(isMouseActive) {
         myVisibilityTimer.restart();
     }
-    const bool toShowAll = !myIsMinimalGUI && myIsVisibleGUI;
+    const bool toShowAll = !myIsMinimalGUI && myIsVisibleGUI && !toForceHide;
 
     // always visible
     StGLRootWidget::setVisibility(true, true);

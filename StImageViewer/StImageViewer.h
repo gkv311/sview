@@ -225,6 +225,7 @@ class StImageViewer : public StApplication {
     bool                       myToRecreateMenu;
     bool                       myToSaveSrcFormat; //!< indicates that active source format should be saved or not
     bool                       myEscNoQuit;       //!< if true then Escape will not quit application
+    bool                       myToHideUIFullScr; //!< if true then GUI will be hidden in full-screen mode
 
         private:
 
