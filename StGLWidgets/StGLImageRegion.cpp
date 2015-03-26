@@ -128,6 +128,7 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
   myProgramSphere(),
   myTextureQueue(theTextureQueue),
   myClickPntZo(0.0, 0.0),
+  myKeyFlags(ST_VF_NONE),
   myDragDelayMs(0.0),
   myIsClickAborted(false),
 #ifdef ST_EXTRA_CONTROLS
@@ -589,7 +590,8 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
 
             GLfloat anXRotate = aParams->getXRotate();
             GLfloat anYRotate = aParams->getYRotate();
-            if(isClicked(ST_MOUSE_RIGHT) && myToRightRotate) {
+            if(isClicked(ST_MOUSE_RIGHT)
+            && (myToRightRotate || (myKeyFlags & ST_VF_CONTROL) == ST_VF_CONTROL)) {
                 anXRotate += 180.0f * GLfloat(myRoot->getCursorZo().y() - myClickPntZo.y());
                 anYRotate += 180.0f * GLfloat(myRoot->getCursorZo().x() - myClickPntZo.x());
             }
@@ -708,11 +710,37 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     aCtx.stglResetScissorRect();
 }
 
+void StGLImageRegion::doRightUnclick(const StPointD_t& theCursorZo) {
+    StHandle<StStereoParams> aParams = getSource();
+    if(!myIsInitialized || aParams.isNull()
+     || aParams->ViewingMode != StStereoParams::FLAT_IMAGE) {
+        return;
+    }
+
+    GLfloat anXRotate = aParams->getXRotate() + 180.0f * GLfloat(theCursorZo.y() - myClickPntZo.y());
+    GLfloat anYRotate = aParams->getYRotate() + 180.0f * GLfloat(theCursorZo.x() - myClickPntZo.x());
+    for(; anXRotate > 360.0f;) {
+        anXRotate -= 360.0f;
+    }
+    for(; anXRotate < 0.0f;) {
+        anXRotate += 360.0f;
+    }
+    for(; anYRotate > 360.0f;) {
+        anYRotate -= 360.0f;
+    }
+    for(; anYRotate < 0.0f;) {
+        anYRotate += 360.0f;
+    }
+    aParams->setXRotate(anXRotate);
+    aParams->setYRotate(anYRotate);
+}
+
 bool StGLImageRegion::tryClick(const StPointD_t& theCursorZo,
                                const int&        theMouseBtn,
                                bool&             isItemClicked) {
     if(StGLWidget::tryClick(theCursorZo, theMouseBtn, isItemClicked)) {
-        if(theMouseBtn == ST_MOUSE_RIGHT && myToRightRotate) {
+        if(theMouseBtn == ST_MOUSE_RIGHT
+        && (myToRightRotate || (myKeyFlags & ST_VF_CONTROL) == ST_VF_CONTROL)) {
             myClickPntZo = theCursorZo;
             myIsClickAborted = true;
         } else if(theMouseBtn == ST_MOUSE_LEFT) {
@@ -734,25 +762,10 @@ bool StGLImageRegion::tryUnClick(const StPointD_t& theCursorZo,
         return false;
     }
 
-    if(isClicked(ST_MOUSE_RIGHT) && theMouseBtn == ST_MOUSE_RIGHT && myToRightRotate) {
-        if(aParams->ViewingMode == StStereoParams::FLAT_IMAGE) {
-            GLfloat anXRotate = aParams->getXRotate() + 180.0f * GLfloat(theCursorZo.y() - myClickPntZo.y());
-            GLfloat anYRotate = aParams->getYRotate() + 180.0f * GLfloat(theCursorZo.x() - myClickPntZo.x());
-            for(; anXRotate > 360.0f;) {
-                anXRotate -= 360.0f;
-            }
-            for(; anXRotate < 0.0f;) {
-                anXRotate += 360.0f;
-            }
-            for(; anYRotate > 360.0f;) {
-                anYRotate -= 360.0f;
-            }
-            for(; anYRotate < 0.0f;) {
-                anYRotate += 360.0f;
-            }
-            aParams->setXRotate(anXRotate);
-            aParams->setYRotate(anYRotate);
-        }
+    if(isClicked(ST_MOUSE_RIGHT)
+    && theMouseBtn == ST_MOUSE_RIGHT
+    && (myToRightRotate || (myKeyFlags & ST_VF_CONTROL) == ST_VF_CONTROL)) {
+        doRightUnclick(theCursorZo);
     } else if(isClicked(ST_MOUSE_LEFT) && theMouseBtn == ST_MOUSE_LEFT) {
         // ignore out of window
         switch(aParams->ViewingMode) {
@@ -777,6 +790,18 @@ bool StGLImageRegion::tryUnClick(const StPointD_t& theCursorZo,
         const GLfloat SCALE_STEPS = 0.16f;
         StPointD_t aCenterCursor(0.5, 0.5);
         if(theMouseBtn == ST_MOUSE_SCROLL_V_UP) {
+            if((myKeyFlags & ST_VF_CONTROL) == ST_VF_CONTROL) {
+                if((myKeyFlags & ST_VF_SHIFT) == ST_VF_SHIFT) {
+                    doParamsSepZDec(0.01);
+                } else {
+                    doParamsSepX(size_t(-1));
+                }
+                return true;
+            } else if((myKeyFlags & ST_VF_SHIFT) == ST_VF_SHIFT) {
+                doParamsSepY(size_t(-1));
+                return true;
+            }
+
             switch(aParams->ViewingMode) {
                 default:
                 case StStereoParams::FLAT_IMAGE: {
@@ -793,6 +818,18 @@ bool StGLImageRegion::tryUnClick(const StPointD_t& theCursorZo,
                 }
             }
         } else if(theMouseBtn == ST_MOUSE_SCROLL_V_DOWN) {
+            if((myKeyFlags & ST_VF_CONTROL) == ST_VF_CONTROL) {
+                if((myKeyFlags & ST_VF_SHIFT) == ST_VF_SHIFT) {
+                    doParamsSepZInc(0.01);
+                } else {
+                    doParamsSepX(size_t(1));
+                }
+                return true;
+            } else if((myKeyFlags & ST_VF_SHIFT) == ST_VF_SHIFT) {
+                doParamsSepY(size_t(1));
+                return true;
+            }
+
             switch(aParams->ViewingMode) {
                 default:
                 case StStereoParams::FLAT_IMAGE: {
@@ -810,6 +847,39 @@ bool StGLImageRegion::tryUnClick(const StPointD_t& theCursorZo,
             }
         }
         return true;
+    }
+    return false;
+}
+
+bool StGLImageRegion::doKeyDown(const StKeyEvent& theEvent) {
+    if(theEvent.VKey == ST_VK_CONTROL) {
+        if((myKeyFlags & ST_VF_CONTROL) == ST_VF_CONTROL) {
+            return false;
+        }
+        myKeyFlags = StVirtFlags(myKeyFlags | ST_VF_CONTROL);
+
+        if(isClicked(ST_MOUSE_RIGHT) && !myToRightRotate) {
+            myClickPntZo = myRoot->getCursorZo();
+        }
+    } else if(theEvent.VKey == ST_VK_SHIFT) {
+        myKeyFlags = StVirtFlags(myKeyFlags | ST_VF_SHIFT);
+    }
+    return false;
+}
+
+bool StGLImageRegion::doKeyUp(const StKeyEvent& theEvent) {
+    if(theEvent.VKey == ST_VK_CONTROL) {
+        if((myKeyFlags & ST_VF_CONTROL) == 0) {
+            return false;
+        }
+
+        myKeyFlags = StVirtFlags(myKeyFlags & ~ST_VF_CONTROL);
+
+        if(isClicked(ST_MOUSE_RIGHT) && !myToRightRotate) {
+            doRightUnclick(myRoot->getCursorZo());
+        }
+    } else if(theEvent.VKey == ST_VK_SHIFT) {
+        myKeyFlags = StVirtFlags(myKeyFlags & ~ST_VF_SHIFT);
     }
     return false;
 }

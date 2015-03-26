@@ -724,6 +724,7 @@ void StImageViewer::doKeyDown(const StKeyEvent& theEvent) {
         return;
     }
 
+    myGUI->myImage->doKeyDown(theEvent);
     if(myGUI->getFocus() != NULL) {
         myGUI->doKeyDown(theEvent);
         return;
@@ -795,10 +796,9 @@ void StImageViewer::doKeyUp(const StKeyEvent& theEvent) {
         return;
     }
 
+    myGUI->myImage->doKeyUp(theEvent);
     if(myGUI->getFocus() != NULL) {
         myGUI->doKeyUp(theEvent);
-    } else {
-        myGUI->myImage->doKeyUp(theEvent);
     }
 }
 

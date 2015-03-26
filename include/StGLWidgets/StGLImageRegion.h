@@ -116,6 +116,8 @@ class StGLImageRegion : public StGLWidget {
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
     ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemClicked);
     ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemUnclicked);
+    ST_CPPEXPORT virtual bool doKeyDown (const StKeyEvent& theEvent);
+    ST_CPPEXPORT virtual bool doKeyUp   (const StKeyEvent& theEvent);
 
     /**
      * Auxiliary method to discard frames in the textures queue without bound OpenGL context.
@@ -229,11 +231,14 @@ class StGLImageRegion : public StGLWidget {
 
         private: //! @name private methods
 
+
     ST_LOCAL StGLVec2 getMouseMoveFlat(const StPointD_t& theCursorZoFrom,
                                        const StPointD_t& theCursorZoTo);
     ST_LOCAL StGLVec2 getMouseMoveSphere(const StPointD_t& theCursorZoFrom,
                                          const StPointD_t& theCursorZoTo);
     ST_LOCAL StGLVec2 getMouseMoveSphere();
+
+    ST_LOCAL void doRightUnclick(const StPointD_t& theCursorZo);
 
     ST_LOCAL void stglDrawView(unsigned int theView);
 
@@ -249,6 +254,7 @@ class StGLImageRegion : public StGLWidget {
     StHandle<StGLTextureQueue> myTextureQueue;   //!< shared texture queue
     StPointD_t                 myClickPntZo;     //!< remembered mouse click position
     StTimer                    myClickTimer;     //!< timer to delay dragging action
+    StVirtFlags                myKeyFlags;       //!< active key flags
     double                     myDragDelayMs;    //!< dragging delay in milliseconds
     bool                       myIsClickAborted;
     bool                       myToRightRotate;
