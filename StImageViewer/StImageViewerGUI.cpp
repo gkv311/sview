@@ -856,17 +856,15 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
                                      bool              toForceHide) {
     const bool toShowToolbar  = !myIsMinimalGUI
                              &&  myPlugin->params.ToShowToolbar->getValue();
-    const bool hasUpperPanel  = toShowToolbar
-                             && myPanelUpper  != NULL
-                             && myPanelUpper ->isPointIn(theCursor);
-    const bool hasBottomPanel = toShowToolbar
-                             && myPanelBottom != NULL
-                             && myPanelBottom->isPointIn(theCursor);
+    const bool hasUpperPanel  =  toShowToolbar
+                             &&  myPanelUpper  != NULL;
+    const bool hasBottomPanel =  toShowToolbar
+                             &&  myPanelBottom != NULL;
 
     myIsVisibleGUI = isMouseActive
         || myVisibilityTimer.getElapsedTime() < 2.0
-        || hasUpperPanel
-        || hasBottomPanel
+        || (hasUpperPanel  && myPanelUpper ->isPointIn(theCursor))
+        || (hasBottomPanel && myPanelBottom->isPointIn(theCursor))
         || (myMenuRoot != NULL && myMenuRoot->isActive());
 
     if(isMouseActive) {
