@@ -18,6 +18,7 @@
 
 #include <StStrings/stConsole.h>
 #include <StThreads/StProcess.h>
+#include <StFile/StFolder.h>
 
 #include "StTestMutex.h"
 #include "StTestGlBand.h"
@@ -30,15 +31,20 @@ int main(int , char** ) { // force console output
     setlocale(LC_ALL, ".OCP"); // we set default locale for console output
 #endif
 
-#ifdef ST_DEBUG
-    // Setup debug environment
+    // setup environment variables
+    const StString ST_ENV_NAME_STCORE_PATH =
     #if defined(_WIN64) || defined(_LP64) || defined(__LP64__)
-        const StString ST_ENV_NAME_STCORE_PATH = "StCore64";
+        "StCore64";
     #else
-        const StString ST_ENV_NAME_STCORE_PATH = "StCore32";
+        "StCore32";
     #endif
-    StProcess::setEnv(ST_ENV_NAME_STCORE_PATH, StProcess::getProcessFolder());
-#endif
+    const StString aProcessPath = StProcess::getProcessFolder();
+    StProcess::setEnv(ST_ENV_NAME_STCORE_PATH, aProcessPath);
+    if(StFolder::isFolder(aProcessPath + "textures")) {
+        StProcess::setEnv("StShare", aProcessPath);
+    } else if(StFolder::isFolder(aProcessPath + ".." + SYS_FS_SPLITTER + "textures")) {
+        StProcess::setEnv("StShare", aProcessPath + ".." + SYS_FS_SPLITTER);
+    }
 
     st::cout << stostream_text("This application performs some synthetic tests\n");
 

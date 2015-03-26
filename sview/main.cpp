@@ -8,6 +8,7 @@
 
 #include "StMultiApp.h"
 #include <StVersion.h>
+#include <StFile/StFolder.h>
 #include "../StOutPageFlip/StOutPageFlip.h"
 
 #ifdef _WIN32
@@ -30,17 +31,20 @@ int main(int , char** ) {
         return 1;
     }
 
-#ifdef ST_DEBUG
-    // override environment variable if sView is installed in the system
+    // setup environment variables
+    const StString ST_ENV_NAME_STCORE_PATH =
     #if defined(_WIN64) || defined(_LP64) || defined(__LP64__)
-        const StString ST_ENV_NAME_STCORE_PATH = "StCore64";
+        "StCore64";
     #else
-        const StString ST_ENV_NAME_STCORE_PATH = "StCore32";
+        "StCore32";
     #endif
     const StString aProcessPath = StProcess::getProcessFolder();
     StProcess::setEnv(ST_ENV_NAME_STCORE_PATH, aProcessPath);
-    StProcess::setEnv("StShare",               aProcessPath);
-#endif
+    if(StFolder::isFolder(aProcessPath + "textures")) {
+        StProcess::setEnv("StShare", aProcessPath);
+    } else if(StFolder::isFolder(aProcessPath + ".." + SYS_FS_SPLITTER + "textures")) {
+        StProcess::setEnv("StShare", aProcessPath + ".." + SYS_FS_SPLITTER);
+    }
 
     StHandle<StResourceManager> aResMgr = new StResourceManager();
     StHandle<StApplication>     anApp   = StMultiApp::getInstance(aResMgr);
