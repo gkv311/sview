@@ -199,8 +199,8 @@ int StActiveXCtrl::OnCreate(LPCREATESTRUCT theCreateStruct) {
             aDrawerArgs.add(anArgSrcFormat);
         }
     }
-    aDrawerArgs.add(StArgument(ST_SETTING_COMPRESS,     true)); // optimize memory usage
-    aDrawerArgs.add(StArgument(ST_SETTING_ESCAPENOQUIT, true)); // do not close plugin instance by Escape key
+    aDrawerArgs.add(StArgument(ST_SETTING_COMPRESS,     "true")); // optimize memory usage
+    aDrawerArgs.add(StArgument(ST_SETTING_ESCAPENOQUIT, "true")); // do not close plugin instance by Escape key
     myOpenInfo.setArgumentsMap(aDrawerArgs);
 
     // set window
