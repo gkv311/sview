@@ -710,11 +710,11 @@ bool StGLContext::stglInit() {
         core20fwd = (StGLCore20Fwd* )(&(*myFuncs));
     }
 
-    hasHighp = stglCheckExtension("OES_fragment_precision_high");
+    hasHighp = stglCheckExtension("GL_OES_fragment_precision_high");
     GLint aRange[2] = {0, 0};
-    GLint aPrec [2] = {0, 0};
-    ::glGetShaderPrecisionFormat(GL_FRAGMENT_SHADER, GL_HIGH_FLOAT, aRange, aPrec);
-    if(aPrec[1] != 0) {
+    GLint aPrec     = 0;
+    ::glGetShaderPrecisionFormat(GL_FRAGMENT_SHADER, GL_HIGH_FLOAT, aRange, &aPrec);
+    if(aPrec != 0) {
         hasHighp = true;
     }
 
