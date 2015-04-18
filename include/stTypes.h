@@ -49,7 +49,7 @@
 #include <cstddef>     // size_t, NULL
 #include <cstdlib>
 #include <cstring>     // for memcpy
-#ifndef __arm__
+#if !defined(__arm__) && !defined(__arm__)
     #include <xmmintrin.h> // for memory alignment
 #endif
 #include <stdio.h>     // for _snprintf on MinGW
