@@ -59,6 +59,7 @@ class ST_LOCAL StGLControlED::StEDProgram : public StGLProgram {
         return atrVVertexLoc.isValid() && uniVPSizeYLoc.isValid();
     }
 
+    using StGLProgram::use;
     void use(StGLContext& theCtx, const GLint vpSizeY) {
         StGLProgram::use(theCtx);
         theCtx.core20fwd->glUniform1i(uniVPSizeYLoc, vpSizeY);

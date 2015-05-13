@@ -37,6 +37,7 @@ class StSeekBar::StProgramSB : public StGLProgram {
         theCtx.core20fwd->glUniformMatrix4fv(uniProjMatLoc, 1, GL_FALSE, theProjMat);
     }
 
+    using StGLProgram::use;
     void use(StGLContext& theCtx) {
         StGLProgram::use(theCtx);
     }

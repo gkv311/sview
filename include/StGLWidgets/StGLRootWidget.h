@@ -331,6 +331,7 @@ class StGLRootWidget : public StGLWidget {
         return cursorZo;
     }
 
+    using StGLWidget::stglResize;
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& cursorZo);
     ST_CPPEXPORT virtual void stglResize(const StGLBoxPx&  theRectPx);
 

@@ -93,7 +93,6 @@ namespace {
     static const char ST_SETTING_WEBUI_PORT[]    = "webuiPort";
     static const char ST_SETTING_WEBUI_ERRORS[]  = "webuiShowErrors";
 
-    static const char ST_ARGUMENT_FILE[]       = "file";
     static const char ST_ARGUMENT_FILE_LEFT[]  = "left";
     static const char ST_ARGUMENT_FILE_RIGHT[] = "right";
     static const char ST_ARGUMENT_FILE_LAST[]  = "last";

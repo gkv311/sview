@@ -590,7 +590,7 @@ bool StAVImage::save(const StString& theFilePath,
 #ifdef ST_AV_NEWSTEREO
     // currently it is unlikelly... but maybe in future?
     AVStereo3DType anAvStereoType = stAV::stereo3dStToAv(theSrcFormat);
-    if(anAvStereoType != -1) {
+    if(anAvStereoType != (AVStereo3DType )-1) {
         AVStereo3D* aStereo = av_stereo3d_create_side_data(myFrame);
         if(aStereo != NULL) {
             aStereo->type = anAvStereoType;

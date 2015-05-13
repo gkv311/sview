@@ -36,9 +36,6 @@ namespace {
 
     // settings
     static const char ST_SETTING_WINDOWPOS[]      = "windowPos";
-    static const char ST_SETTING_FRBUFF_X[]       = "frbufferX";
-    static const char ST_SETTING_FRBUFF_Y[]       = "frbufferY";
-    static const char ST_SETTING_USER_FRMB_SIZE[] = "useUserFrmbSize";
     static const char ST_SETTING_TABLE[]          = "tableId";
 
     // iZ3D monitor's models for autodetect

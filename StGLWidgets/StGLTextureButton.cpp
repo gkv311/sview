@@ -72,6 +72,7 @@ class StGLTextureButton::Program : public StGLProgram {
         StGLProgram::use(theCtx);
     }
 
+    using StGLProgram::use;
     void use(StGLContext&    theCtx,
              const StGLVec4& theColor,
              const double    theTime,

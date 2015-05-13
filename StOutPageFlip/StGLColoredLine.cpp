@@ -91,6 +91,7 @@ class ST_LOCAL StGLColoredLine::StColoredLineProgram : public StGLProgram {
         return atrVVertexLoc.isValid() && uniColorLoc.isValid() && uniLineLenPxLoc.isValid();
     }
 
+    using StGLProgram::use;
     void use(StGLContext&    theCtx,
              const StGLVec4& theColorVec4,
              const GLint     theLineLen) {

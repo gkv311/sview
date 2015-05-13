@@ -93,9 +93,11 @@ namespace {
     /**
      * Singletone implementation.
      */
-    - (void ) release {
-        //do nothing
-    }
+#if !defined(MAC_OS_X_VERSION_10_7) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_7)
+    - (void ) release {}
+#else
+    - (oneway void ) release {}
+#endif
 
     /**
      * Singletone implementation.

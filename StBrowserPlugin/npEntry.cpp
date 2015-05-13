@@ -50,6 +50,7 @@ static NPError fillPluginFunctionTable(NPPluginFuncs* aNPPFuncs) {
     return NPERR_NO_ERROR;
 }
 
+#if defined(_WIN32) || defined(__linux__) || defined(__linux)
 static NPError fillNetscapeFunctionTable(NPNetscapeFuncs* aNPNFuncs) {
     if(aNPNFuncs == NULL) {
         return NPERR_INVALID_FUNCTABLE_ERROR;
@@ -88,8 +89,9 @@ static NPError fillNetscapeFunctionTable(NPNetscapeFuncs* aNPNFuncs) {
 
     return NPERR_NO_ERROR;
 }
+#endif
 
-#if(defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     /**
      * Some exports are different on different platforms
      */

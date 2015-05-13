@@ -192,7 +192,7 @@ void StGLRootWidget::setScale(const GLfloat     theScale,
 
 bool StGLRootWidget::stglInit() {
     if(myGlCtx.isNull()) {
-        myGlCtx = new StGLContext(NULL);
+        myGlCtx = new StGLContext(myResMgr);
         if(!myGlCtx->stglInit()) {
             return false;
         }

@@ -93,6 +93,7 @@ class StImageViewerGUI : public StGLRootWidget {
     ST_LOCAL virtual void stglResize(const StGLBoxPx& theRectPx);
     ST_LOCAL virtual void stglDraw(unsigned int theView);
 
+    using StGLRootWidget::setVisibility;
     ST_LOCAL void setVisibility(const StPointD_t& theCursor,
                                 bool              isMouseActive,
                                 bool              toForceHide);

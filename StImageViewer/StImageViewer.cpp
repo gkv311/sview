@@ -72,7 +72,6 @@ namespace {
     static const char ST_SETTING_UPDATES_INTERVAL[]   = "updatesInterval";
     static const char ST_SETTING_IMAGELIB[]    = "imageLib";
 
-    static const char ST_ARGUMENT_FILE[]       = "file";
     static const char ST_ARGUMENT_FILE_LEFT[]  = "left";
     static const char ST_ARGUMENT_FILE_RIGHT[] = "right";
 
