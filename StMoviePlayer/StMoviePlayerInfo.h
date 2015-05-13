@@ -221,6 +221,14 @@
 #define ST_MP3_MIME_STRING ST_MP3_MIME ":" ST_MP3_EXT ":" ST_MP3_DESC
 
 /**
+ *.aac - Advanced Audio Coding, lossy
+ */
+#define ST_AAC_MIME "audio/mpeg"
+#define ST_AAC_EXT  "aac"
+#define ST_AAC_DESC "AAC - Advanced Audio Coding, lossy"
+#define ST_AAC_MIME_STRING ST_AAC_MIME ":" ST_AAC_EXT ":" ST_AAC_DESC
+
+/**
  *.ogg - OGG Vorbis Audio, lossy
  */
 #define ST_OGG_MIME "audio/x-ogg"
@@ -312,6 +320,7 @@ ST_BIK_MIME_STRING ";" \
 ST_FLAC_MIME_STRING ";" \
 ST_APE_MIME_STRING ";" \
 ST_MP3_MIME_STRING ";" \
+ST_AAC_MIME_STRING ";" \
 ST_OGG_MIME_STRING ";" \
 ST_AC3_MIME_STRING ";" \
 ST_WMA_MIME_STRING ";" \
@@ -330,6 +339,7 @@ ST_FLAC_MIME_STRING ";" \
 ST_APE_MIME_STRING ";" \
 ST_AOB_MIME_STRING ";" \
 ST_MP3_MIME_STRING ";" \
+ST_AAC_MIME_STRING ";" \
 ST_OGG_MIME_STRING ";" \
 ST_AC3_MIME_STRING ";" \
 ST_WMA_MIME_STRING ";" \

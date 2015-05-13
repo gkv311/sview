@@ -159,6 +159,7 @@
                 <data android:pathPattern=".*\\.WMV" />
 
                 <!-- audio -->
+                <data android:pathPattern=".*\\.aac" />
                 <data android:pathPattern=".*\\.ac3" />
                 <data android:pathPattern=".*\\.aob" />
                 <data android:pathPattern=".*\\.ape" />
@@ -172,6 +173,7 @@
                 <data android:pathPattern=".*\\.ogg" />
                 <data android:pathPattern=".*\\.wav" />
                 <data android:pathPattern=".*\\.wma" />
+                <data android:pathPattern=".*\\.AAC" />
                 <data android:pathPattern=".*\\.AC3" />
                 <data android:pathPattern=".*\\.AOB" />
                 <data android:pathPattern=".*\\.APE" />
