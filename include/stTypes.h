@@ -106,9 +106,13 @@ typedef uint32_t stUInt32_t;
 typedef int64_t  stInt64_t;
 typedef uint64_t stUInt64_t;
 
-// compatibility with old compilers
-#if defined(__GNUC__) && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 6))
-    #define nullptr (void*)0
+#if defined(__cplusplus) && (__cplusplus >= 201100L)
+    //
+#elif defined(__GNUC__) && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 6))
+    // compatibility with old compilers
+    #ifndef nullptr
+        #define nullptr (void*)0
+    #endif
 #endif
 
 /**
@@ -159,8 +163,9 @@ typedef uint64_t stUInt64_t;
  */
 typedef char          stUtf8_t;     //!< signed   UTF-8 char is just a byte
 typedef unsigned char stUtf8u_t;    //!< unsigned UTF-8 char is just a byte
-#if (!defined(__GNUC__) || ((__GNUC__ == 4) && (__GNUC_MINOR__ > 2)) || (__GNUC__ > 4)) \
- || (defined(_MSC_VER) && (_MSC_VER >= 1600))
+#if (defined(__cplusplus) && (__cplusplus >= 201100L)) \
+ || (defined(_MSC_VER) && (_MSC_VER >= 1600)) \
+ || (!defined(__GNUC__) || ((__GNUC__ == 4) && (__GNUC_MINOR__ > 2)) || (__GNUC__ > 4))
     typedef char16_t  stUtf16_t;    //!< UTF-16 char (always unsigned)
     typedef char32_t  stUtf32_t;    //!< UTF-32 char (always unsigned)
 #else // obsolete compilers compatibility
