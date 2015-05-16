@@ -5,6 +5,7 @@ Comment=Stereoscopic Media Player
 Name[ru]=sView - Универсальный проигрыватель
 Comment[ru]=Универсальный проигрыватель стереоскопического видео, аудио и изображений
 Exec=sView --in=video - %U
+StartupWMClass=sView
 Icon=/usr/share/sView/icons/menu.xpm
 Terminal=false
 Type=Application

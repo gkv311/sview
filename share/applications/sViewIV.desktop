@@ -5,6 +5,7 @@ Comment=View stereoscopic images
 Name[ru]=sView - Просмотрщик стереоизображений
 Comment[ru]=Универсальный проигрыватель стереоскопического видео, аудио и изображений
 Exec=sView --in=image - %U
+StartupWMClass=sView
 Icon=/usr/share/sView/icons/menu.xpm
 Terminal=false
 Type=Application

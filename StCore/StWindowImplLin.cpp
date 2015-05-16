@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -22,6 +22,7 @@
 #include "stvkeysxarray.h" // X keys to VKEYs lookup array
 
 #include <StStrings/StLogger.h>
+#include <StThreads/StProcess.h>
 #include <StGL/StGLContext.h>
 
 #include <X11/extensions/Xrandr.h>
@@ -266,6 +267,19 @@ bool StWindowImpl::create() {
                                myWindowTitle.toCString(),
                                myWindowTitle.toCString(),
                                None, NULL, 0, NULL);
+
+        // setup WM_CLASS in sync with .desktop StartupWMClass entity
+        // to ensure Window Manager would show an propriate icon for application
+        XClassHint* aClassHint = XAllocClassHint();
+        if(aClassHint != NULL) {
+            StString aName = StProcess::getProcessName();
+            StString aClass("sView");
+            // const_cast should be harmless here and it seems to be just broken signature of XClassHint structure
+            aClassHint->res_name  = const_cast<char* >(aName.toCString());
+            aClassHint->res_class = const_cast<char* >(aClass.toCString());
+            XSetClassHint(hDisplay, myMaster.hWindow, aClassHint);
+            XFree(aClassHint);
+        }
     }
 
     aWinAttribsX.override_redirect = True; // GL window always undecorated
