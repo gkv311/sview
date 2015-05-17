@@ -355,7 +355,11 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     addAction(Action_SlideShow, anAction, ST_VK_SPACE);
 
     anAction = new StActionIntSlot(stCString("DoSaveImageAsPng"), stSlot(this, &StImageViewer::doSaveImageAs), StImageFile::ST_TYPE_PNG);
+#ifdef __APPLE__
+    addAction(Action_SavePng, anAction, ST_VK_S | ST_VF_CONTROL, ST_VK_S | ST_VF_COMMAND);
+#else
     addAction(Action_SavePng, anAction, ST_VK_S | ST_VF_CONTROL);
+#endif
 
     anAction = new StActionIntSlot(stCString("DoSaveImageAsJpeg"), stSlot(this, &StImageViewer::doSaveImageAs), StImageFile::ST_TYPE_JPEG);
     addAction(Action_SaveJpeg, anAction);
@@ -762,7 +766,8 @@ void StImageViewer::doKeyDown(const StKeyEvent& theEvent) {
             doListNext();
             return;
         case ST_VK_O: {
-            if(theEvent.Flags == ST_VF_CONTROL) {
+            if(theEvent.Flags == ST_VF_CONTROL
+            || theEvent.Flags == ST_VF_COMMAND) {
                 myOpenDialog->openDialog(1);
             }
             return;

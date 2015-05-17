@@ -583,10 +583,18 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     addAction(Action_SeekRight5, anAction, ST_VK_RIGHT);
 
     anAction = new StActionIntSlot(stCString("DoOpen1File"), stSlot(this, &StMoviePlayer::doOpen1File), 0);
+#ifdef __APPLE__
+    addAction(Action_Open1File, anAction, ST_VK_O | ST_VF_CONTROL, ST_VK_O | ST_VF_COMMAND);
+#else
     addAction(Action_Open1File, anAction, ST_VK_O | ST_VF_CONTROL);
+#endif
 
     anAction = new StActionIntSlot(stCString("DoSnapshot"), stSlot(this, &StMoviePlayer::doSnapshot), StImageFile::ST_TYPE_NONE);
+#ifdef __APPLE__
+    addAction(Action_SaveSnapshot, anAction, ST_VK_S | ST_VF_CONTROL, ST_VK_S | ST_VF_COMMAND);
+#else
     addAction(Action_SaveSnapshot, anAction, ST_VK_S | ST_VF_CONTROL);
+#endif
 
     anAction = new StActionIntSlot(stCString("DoDeleteFile"), stSlot(this, &StMoviePlayer::doDeleteFileBegin), 0);
     addAction(Action_DeleteFile, anAction, ST_VK_DELETE | ST_VF_SHIFT);
@@ -613,7 +621,11 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     addAction(Action_SubsPrev, anAction, ST_VK_U | ST_VF_SHIFT, ST_VK_T | ST_VF_SHIFT);
 
     anAction = new StActionIntSlot(stCString("DoSubtitlesCopy"), stSlot(this, &StMoviePlayer::doSubtitlesCopy), 0);
+#ifdef __APPLE__
+    addAction(Action_CopyToClipboard, anAction, ST_VK_C | ST_VF_CONTROL, ST_VK_C      | ST_VF_COMMAND);
+#else
     addAction(Action_CopyToClipboard, anAction, ST_VK_C | ST_VF_CONTROL, ST_VK_INSERT | ST_VF_CONTROL);
+#endif
 
     anAction = new StActionIntSlot(stCString("DoPlayListReverse"), stSlot(this, &StMoviePlayer::doPlayListReverse), 0);
     addAction(Action_ShowList, anAction, ST_VK_L | ST_VF_CONTROL);
