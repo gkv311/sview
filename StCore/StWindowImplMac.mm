@@ -375,6 +375,12 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
         }
     }
 
+    if(attribs.IsHidden) {
+        // do nothing, just set the flag
+        // we should not post actions to the main thread within applicationWillTerminate() waiter
+        return;
+    }
+
     if(attribs.IsFullScreen) {
         const StMonitor& aMon = (myMonMasterFull == -1) ? myMonitors[myRectNorm.center()] : myMonitors[myMonMasterFull];
         myRectFull = aMon.getVRect();
