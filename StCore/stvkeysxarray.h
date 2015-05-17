@@ -369,10 +369,10 @@ static const unsigned int ST_XK2ST_VK[ST_XK2ST_VK_SIZE] = {
     0, // 0xFFE6
     0, // 0xFFE7
     0, // 0xFFE8
-    0, // 0xFFE9
-    0, // 0xFFEA
-    0, // 0xFFEB
-    0, // 0xFFEC
+    ST_VK_MENU,   // 0xFFE9 = XK_Alt_L
+    ST_VK_MENU,   // 0xFFEA = XK_Alt_R
+    0,            // 0xFFEB = XK_Super_L
+    0,            // 0xFFEC = XK_Super_R
     0, // 0xFFED
     0, // 0xFFEE
     0, // 0xFFEF
