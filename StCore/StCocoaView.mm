@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -311,6 +311,33 @@
                 myStWin->myKeysState.keyUp(ST_VK_SHIFT, [theEvent timestamp]);
             }
         }
+        if(aFlags & NSCommandKeyMask) {
+            if(!myStWin->myKeysState.isKeyDown(ST_VK_COMMAND)) {
+                myStWin->myKeysState.keyDown(ST_VK_COMMAND, [theEvent timestamp]);
+            }
+        } else {
+            if(myStWin->myKeysState.isKeyDown(ST_VK_COMMAND)) {
+                myStWin->myKeysState.keyUp(ST_VK_COMMAND, [theEvent timestamp]);
+            }
+        }
+        if(aFlags & NSFunctionKeyMask) {
+            if(!myStWin->myKeysState.isKeyDown(ST_VK_FUNCTION)) {
+                myStWin->myKeysState.keyDown(ST_VK_FUNCTION, [theEvent timestamp]);
+            }
+        } else {
+            if(myStWin->myKeysState.isKeyDown(ST_VK_FUNCTION)) {
+                myStWin->myKeysState.keyUp(ST_VK_FUNCTION, [theEvent timestamp]);
+            }
+        }
+        if(aFlags & NSAlternateKeyMask) {
+            if(!myStWin->myKeysState.isKeyDown(ST_VK_MENU)) {
+                myStWin->myKeysState.keyDown(ST_VK_MENU, [theEvent timestamp]);
+            }
+        } else {
+            if(myStWin->myKeysState.isKeyDown(ST_VK_MENU)) {
+                myStWin->myKeysState.keyUp(ST_VK_MENU, [theEvent timestamp]);
+            }
+        }
     }
 
     /**
@@ -325,7 +352,8 @@
 
         NSUInteger aFlags = [theEvent modifierFlags];
         if(aFlags & NSCommandKeyMask) {
-            return; // ignore Command + key combinations - key up event doesn't called!
+            // should be fixed by StNSApp
+            //return; // ignore Command + key combinations - key up event doesn't called!
         }
 
         StUtf8Iter aUIter([[theEvent characters] UTF8String]);

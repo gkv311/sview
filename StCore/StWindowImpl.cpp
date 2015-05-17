@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -1064,6 +1064,15 @@ void StWindowImpl::swapEventsBuffers() {
             if(myKeysState.isKeyDown(ST_VK_CONTROL)) {
                 aHoldEvent.Flags = StVirtFlags(aHoldEvent.Flags | ST_VF_CONTROL);
             }
+            if(myKeysState.isKeyDown(ST_VK_MENU)) {
+                aHoldEvent.Flags = StVirtFlags(aHoldEvent.Flags | ST_VF_MENU);
+            }
+            if(myKeysState.isKeyDown(ST_VK_COMMAND)) {
+                aHoldEvent.Flags = StVirtFlags(aHoldEvent.Flags | ST_VF_COMMAND);
+            }
+            if(myKeysState.isKeyDown(ST_VK_FUNCTION)) {
+                aHoldEvent.Flags = StVirtFlags(aHoldEvent.Flags | ST_VF_FUNCTION);
+            }
             if(aHoldEvent.Progress > 1.e-7) {
                 signals.onKeyHold->emit(aHoldEvent);
             }
@@ -1083,6 +1092,15 @@ void StWindowImpl::postKeyDown(StEvent& theEvent) {
     }
     if(myKeysState.isKeyDown(ST_VK_CONTROL)) {
         theEvent.Key.Flags = StVirtFlags(theEvent.Key.Flags | ST_VF_CONTROL);
+    }
+    if(myKeysState.isKeyDown(ST_VK_MENU)) {
+        theEvent.Key.Flags = StVirtFlags(theEvent.Key.Flags | ST_VF_MENU);
+    }
+    if(myKeysState.isKeyDown(ST_VK_COMMAND)) {
+        theEvent.Key.Flags = StVirtFlags(theEvent.Key.Flags | ST_VF_COMMAND);
+    }
+    if(myKeysState.isKeyDown(ST_VK_FUNCTION)) {
+        theEvent.Key.Flags = StVirtFlags(theEvent.Key.Flags | ST_VF_FUNCTION);
     }
 
     if(myEventsThreaded) {
@@ -1106,6 +1124,15 @@ void StWindowImpl::postKeyUp(StEvent& theEvent) {
     }
     if(myKeysState.isKeyDown(ST_VK_CONTROL)) {
         theEvent.Key.Flags = StVirtFlags(theEvent.Key.Flags | ST_VF_CONTROL);
+    }
+    if(myKeysState.isKeyDown(ST_VK_MENU)) {
+        theEvent.Key.Flags = StVirtFlags(theEvent.Key.Flags | ST_VF_MENU);
+    }
+    if(myKeysState.isKeyDown(ST_VK_COMMAND)) {
+        theEvent.Key.Flags = StVirtFlags(theEvent.Key.Flags | ST_VF_COMMAND);
+    }
+    if(myKeysState.isKeyDown(ST_VK_FUNCTION)) {
+        theEvent.Key.Flags = StVirtFlags(theEvent.Key.Flags | ST_VF_FUNCTION);
     }
 
     if(myEventsThreaded) {

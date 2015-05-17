@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -29,7 +29,7 @@ namespace {
         stCString(""),      // ST_VK_x0F
         stCString("Shift"), // ST_VK_SHIFT
         stCString("Ctrl"),  // ST_VK_CONTROL
-        stCString("Menu"),  // ST_VK_MENU
+        stCString("Alt"),   // ST_VK_MENU
         stCString("Pause"), // ST_VK_PAUSE
         stCString("Caps"),  // ST_VK_CAPITAL
         stCString(""),      // ST_VK_x15
@@ -227,8 +227,8 @@ namespace {
         stCString(""),      // 213
         stCString(""),      // 214
         stCString(""),      // 215
-        stCString(""),      // 216
-        stCString(""),      // 217
+        stCString("Cmd"),   // 216, ST_VK_COMMAND
+        stCString("Fn"),    // 217, ST_VK_FUNCTION
         stCString(""),      // 218
         stCString("["),     // ST_VK_BRACKETLEFT
         stCString("\\"),    // ST_VK_BACKSLASH
@@ -295,12 +295,36 @@ StString encodeHotKey(const unsigned int theKey) {
         }
         aStr += "Ctrl+";
     }
+    if(theKey & ST_VF_MENU) {
+        aKey &= ~(ST_VF_MENU);
+        if(aKey == ST_VK_MENU) {
+            return THE_VKEYS_NAMES[aKey];
+        }
+        aStr += "Alt+";
+    }
+    if(theKey & ST_VF_COMMAND) {
+        aKey &= ~(ST_VF_COMMAND);
+        if(aKey == ST_VK_COMMAND) {
+            return THE_VKEYS_NAMES[aKey];
+        }
+        aStr += "Cmd+";
+    }
+    if(theKey & ST_VF_FUNCTION) {
+        aKey &= ~(ST_VF_FUNCTION);
+        if(aKey == ST_VK_FUNCTION) {
+            return THE_VKEYS_NAMES[aKey];
+        }
+        aStr += "Fn+";
+    }
     if(aKey == 0
     || aKey > 255) {
         return "";
     }
     if(aKey == ST_VK_SHIFT
-    || aKey == ST_VK_CONTROL) {
+    || aKey == ST_VK_CONTROL
+    || aKey == ST_VK_MENU
+    || aKey == ST_VK_COMMAND
+    || aKey == ST_VK_FUNCTION) {
         return aStr;
     }
     return aStr + THE_VKEYS_NAMES[aKey];
@@ -331,6 +355,12 @@ unsigned int decodeHotKey(const StString& theString) {
                 aKey |= ST_VF_SHIFT;
             } else if(aSubStr.isEquals(THE_VKEYS_NAMES[ST_VK_CONTROL])) {
                 aKey |= ST_VF_CONTROL;
+            } else if(aSubStr.isEquals(THE_VKEYS_NAMES[ST_VK_MENU])) {
+                aKey |= ST_VF_MENU;
+            } else if(aSubStr.isEquals(THE_VKEYS_NAMES[ST_VK_COMMAND])) {
+                aKey |= ST_VF_COMMAND;
+            } else if(aSubStr.isEquals(THE_VKEYS_NAMES[ST_VK_FUNCTION])) {
+                aKey |= ST_VF_FUNCTION;
             }
 
             aFrom = anIter;

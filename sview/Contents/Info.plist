@@ -668,6 +668,6 @@
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
-	<string>NSApplication</string>
+	<string>StNSApp</string>
 </dict>
 </plist>

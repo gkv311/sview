@@ -32,6 +32,24 @@ namespace {
 
 };
 
+//! Override sendEvent() to ensure NSKeyUp is passed to keyUp()
+@interface StNSApp : NSApplication
+@end
+
+@implementation StNSApp
+
+- (void )sendEvent: (NSEvent* )theEvent {
+    if([theEvent type] == NSKeyUp) {
+        [[[self mainWindow] firstResponder]
+        tryToPerform: @selector(keyUp: ) with: theEvent];
+        return;
+    }
+
+    [super sendEvent: theEvent];
+}
+
+@end
+
 @implementation StAppResponder
 
     - (id ) init {
@@ -321,7 +339,7 @@ int main(int , char** ) {
                            withObject: NULL];
 
     // initialize Cocoa application
-    NSApplication* anAppNs = [NSApplication sharedApplication];
+    NSApplication* anAppNs = [StNSApp sharedApplication];
     StAppResponder* anAppResp = [StAppResponder sharedInstance];
     [anAppNs setDelegate: anAppResp];
     [NSBundle loadNibNamed: @"MainMenu"

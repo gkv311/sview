@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -36,10 +36,13 @@ enum StVirtButton {
 };
 
 enum StVirtFlags {
-    ST_VF_NONE    = 0,
+    ST_VF_NONE     = 0,
     // we reserve first 8 bits to combine value with StVirtKey
-    ST_VF_SHIFT   = 1 << 8, // ST_VK_SHIFT
-    ST_VF_CONTROL = 1 << 9, // ST_VK_CONTROL
+    ST_VF_SHIFT    = 1 <<  8, // ST_VK_SHIFT
+    ST_VF_CONTROL  = 1 <<  9, // ST_VK_CONTROL
+    ST_VF_MENU     = 1 << 10, // ST_VK_MENU
+    ST_VF_COMMAND  = 1 << 11, // ST_VK_COMMAND
+    ST_VF_FUNCTION = 1 << 12, // ST_VK_FUNCTION
 };
 
 /**
@@ -77,7 +80,7 @@ enum StVirtKey {
 
     ST_VK_SHIFT      = 0x10, // 016 = VK_SHIFT       | 'Shift' modifier key
     ST_VK_CONTROL    = 0x11, // 017 = VK_CONTROL     | 'Ctrl' modifier key
-    ST_VK_MENU       = 0x12, // 018 = VK_MENU        | Menu key
+    ST_VK_MENU       = 0x12, // 018 = VK_MENU        | 'Alt' modifier (Menu) key
     ST_VK_PAUSE      = 0x13, // 019 = VK_PAUSE       | Pause/break key
     ST_VK_CAPITAL    = 0x14, // 020 = VK_CAPITAL     | 'Caps Lock' modifier key
 
@@ -309,6 +312,11 @@ enum StVirtKey {
     ST_VK_BACKSLASH    = 0xDC, // 220 = VK_OEM_5       | '\|' for US
     ST_VK_BRACKETRIGHT = 0xDD, // 221 = VK_OEM_6       | ']}' for US
     ST_VK_APOSTROPHE   = 0xDE, // 222 = VK_OEM_7       | ''"' for US
+
+        // extensions
+
+    ST_VK_COMMAND      = 0xD8, // 216 | OS X command Key (NSCommandKeyMask)
+    ST_VK_FUNCTION     = 0xD9, // 217 | OS X fn key      (NSFunctionKeyMask)
 
 };
 
