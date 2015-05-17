@@ -6,7 +6,7 @@ Name[ru]=sView - Универсальный проигрыватель
 Comment[ru]=Универсальный проигрыватель стереоскопического видео, аудио и изображений
 Exec=sView --in=video - %U
 StartupWMClass=sView
-Icon=sView
+Icon=sview
 Terminal=false
 Type=Application
 Categories=AudioVideo;Player;
