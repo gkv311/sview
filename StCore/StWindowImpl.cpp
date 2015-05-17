@@ -1099,7 +1099,16 @@ void StWindowImpl::postKeyDown(StEvent& theEvent) {
     if(myKeysState.isKeyDown(ST_VK_COMMAND)) {
         theEvent.Key.Flags = StVirtFlags(theEvent.Key.Flags | ST_VF_COMMAND);
     }
+#ifdef __APPLE__
+    if(myKeysState.isKeyDown(ST_VK_FUNCTION)
+    && theEvent.Key.VKey != ST_VK_DELETE
+    && theEvent.Key.VKey != ST_VK_HOME
+    && theEvent.Key.VKey != ST_VK_END
+    && theEvent.Key.VKey != ST_VK_PRIOR
+    && theEvent.Key.VKey != ST_VK_NEXT) {
+#else
     if(myKeysState.isKeyDown(ST_VK_FUNCTION)) {
+#endif
         theEvent.Key.Flags = StVirtFlags(theEvent.Key.Flags | ST_VF_FUNCTION);
     }
 
@@ -1131,7 +1140,16 @@ void StWindowImpl::postKeyUp(StEvent& theEvent) {
     if(myKeysState.isKeyDown(ST_VK_COMMAND)) {
         theEvent.Key.Flags = StVirtFlags(theEvent.Key.Flags | ST_VF_COMMAND);
     }
+#ifdef __APPLE__
+    if(myKeysState.isKeyDown(ST_VK_FUNCTION)
+    && theEvent.Key.VKey != ST_VK_DELETE
+    && theEvent.Key.VKey != ST_VK_HOME
+    && theEvent.Key.VKey != ST_VK_END
+    && theEvent.Key.VKey != ST_VK_PRIOR
+    && theEvent.Key.VKey != ST_VK_NEXT) {
+#else
     if(myKeysState.isKeyDown(ST_VK_FUNCTION)) {
+#endif
         theEvent.Key.Flags = StVirtFlags(theEvent.Key.Flags | ST_VF_FUNCTION);
     }
 
