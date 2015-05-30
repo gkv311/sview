@@ -207,6 +207,8 @@ struct pollfd {
 #include <stdint.h>
 #include <inttypes.h>
 #include <netdb.h>
+//#include <grp.h>
+extern int setgroups(size_t __n, const __gid_t *__groups);
 
 #include <pwd.h>
 #include <unistd.h>
@@ -4448,12 +4450,20 @@ static int set_uid_option(struct mg_context *ctx) {
   } else {
     if ((pw = getpwnam(uid)) == NULL) {
       cry(fc(ctx), "%s: unknown user [%s]", __func__, uid);
-    } else if (setgid(pw->pw_gid) == -1) {
-      cry(fc(ctx), "%s: setgid(%s): %s", __func__, uid, strerror(errno));
-    } else if (setuid(pw->pw_uid) == -1) {
-      cry(fc(ctx), "%s: setuid(%s): %s", __func__, uid, strerror(errno));
     } else {
-      success = 1;
+      // When dropping privileges from root, the "setgroups" call will remove any extraneous groups.
+      // If we don't call this, then even though our uid has dropped, we may still have groups
+      // that enable us to do super-user things.
+      // This will fail if we aren't root, so don't bother checking the return value,
+      // this is just done as an optimistic privilege dropping function.
+      setgroups(0, NULL);
+      if (setgid(pw->pw_gid) == -1) {
+        cry(fc(ctx), "%s: setgid(%s): %s", __func__, uid, strerror(errno));
+      } else if (setuid(pw->pw_uid) == -1) {
+        cry(fc(ctx), "%s: setuid(%s): %s", __func__, uid, strerror(errno));
+      } else {
+        success = 1;
+      }
     }
   }
 
