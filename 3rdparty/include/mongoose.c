@@ -4689,25 +4689,54 @@ struct mg_connection *mg_connect(const char *host, int port, int use_ssl,
   static struct mg_context fake_ctx;
   struct mg_connection *conn = NULL;
   struct sockaddr_in sin;
-  struct hostent *he;
-  int sock;
+  //struct hostent *he;
+  int sock = INVALID_SOCKET;
+  int errcode;
+  struct addrinfo hints;
+  struct addrinfo *servinfo = NULL;
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_flags    = AI_ALL;
+  hints.ai_family   = PF_INET;
+  hints.ai_socktype = SOCK_STREAM;
+  //hints.ai_protocol = IPPROTO_IPV4;
 
   if (host == NULL) {
     snprintf(ebuf, ebuf_len, "%s", "NULL host");
   } else if (use_ssl && SSLv23_client_method == NULL) {
     snprintf(ebuf, ebuf_len, "%s", "SSL is not initialized");
-  } else if ((he = gethostbyname(host)) == NULL) {
+  } else if ((errcode = getaddrinfo(host, NULL, &hints, &servinfo)) != 0) {
+    snprintf(ebuf, ebuf_len, "getaddrinfo(%s): %s", host, gai_strerror(errcode));
+  } else {
+    struct addrinfo *addriter;
+    for (addriter = servinfo; addriter != NULL; addriter = addriter->ai_next) {
+      if ((sock = socket(addriter->ai_family, addriter->ai_socktype, addriter->ai_protocol)) == INVALID_SOCKET) {
+        snprintf(ebuf, ebuf_len, "socket(): %s", strerror(ERRNO));
+        continue;
+      } else if (connect(sock, addriter->ai_addr, addriter->ai_addrlen) != 0) {
+        snprintf(ebuf, ebuf_len, "connect(%s:%d): %s",
+                 host, port, strerror(ERRNO));
+        closesocket(sock);
+        sock = INVALID_SOCKET;
+        continue;
+      } else {
+        break;
+      }
+    }
+    if (sock != INVALID_SOCKET) {
+      return conn;
+  /*} else if ((he = gethostbyname(host)) == NULL) {
     snprintf(ebuf, ebuf_len, "gethostbyname(%s): %s", host, strerror(ERRNO));
   } else if ((sock = socket(PF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
     snprintf(ebuf, ebuf_len, "socket(): %s", strerror(ERRNO));
   } else {
     sin.sin_family = AF_INET;
     sin.sin_port = htons((uint16_t) port);
-    sin.sin_addr = * (struct in_addr *) he->h_addr_list[0];
+    sin.sin_addr = servinfo->ai_addr;
+    ///sin.sin_addr = * (struct in_addr *) he->h_addr_list[0];
     if (connect(sock, (struct sockaddr *) &sin, sizeof(sin)) != 0) {
       snprintf(ebuf, ebuf_len, "connect(%s:%d): %s",
                host, port, strerror(ERRNO));
-      closesocket(sock);
+      closesocket(sock);*/
     } else if ((conn = (struct mg_connection *)
                 calloc(1, sizeof(*conn) + MAX_REQUEST_SIZE)) == NULL) {
       snprintf(ebuf, ebuf_len, "calloc(): %s", strerror(ERRNO));
