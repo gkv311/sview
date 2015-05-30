@@ -207,8 +207,10 @@ struct pollfd {
 #include <stdint.h>
 #include <inttypes.h>
 #include <netdb.h>
-//#include <grp.h>
-extern int setgroups(size_t __n, const __gid_t *__groups);
+#include <grp.h>
+#ifndef __APPLE__
+  extern int setgroups(size_t __n, const __gid_t *__groups);
+#endif
 
 #include <pwd.h>
 #include <unistd.h>
