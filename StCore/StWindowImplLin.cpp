@@ -73,14 +73,15 @@ namespace {
         // what events we want to recive:
         aWinAttribsX.event_mask =  KeyPressMask   | KeyReleaseMask    // receive keyboard events
                                 | ButtonPressMask | ButtonReleaseMask // receive mouse events
-                                | StructureNotifyMask;                // receive ConfigureNotify event on resize and move
+                                | StructureNotifyMask                 // receive ConfigureNotify event on resize and move
+                                | FocusChangeMask;
                               //| ResizeRedirectMask                  // receive ResizeRequest event on resize (instead of common ConfigureNotify)
                               //| ExposureMask
                               //| EnterWindowMask|LeaveWindowMask
                               //| PointerMotionMask|PointerMotionHintMask|Button1MotionMask|Button2MotionMask|Button3MotionMask|Button4MotionMask|Button5MotionMask|ButtonMotionMask
                               //| KeymapStateMask|ExposureMask|VisibilityChangeMask
                               //| SubstructureNotifyMask|SubstructureRedirectMask
-                              //| FocusChangeMask|PropertyChangeMask|ColormapChangeMask|OwnerGrabButtonMask
+                              //| PropertyChangeMask|ColormapChangeMask|OwnerGrabButtonMask
         aWinAttribsX.override_redirect = False;
         return aWinAttribsX;
     }
@@ -1008,6 +1009,12 @@ void StWindowImpl::processEvents() {
                         myIsUpdated = true; // call updateWindowPos() to update position
                     }
                 }
+                break;
+            }
+            //case FocusIn:
+            case FocusOut: {
+                // input focus loss - release pressed keys cached state
+                myKeysState.reset();
                 break;
             }
             default: {
