@@ -230,7 +230,7 @@ void StSearchMonitors::findMonitorsWinAPI() {
 
         StRectI_t stRect(monInfo.rcMonitor.top, monInfo.rcMonitor.bottom, monInfo.rcMonitor.left, monInfo.rcMonitor.right);
         aMon.setVRect(stRect);
-        aMon.setId(monId);
+        aMon.setId(monCount);
         aMon.setFreq((int )dm.dmDisplayFrequency);
         // TODO
         aMon.setFreqMax((int )dm.dmDisplayFrequency);
@@ -254,7 +254,7 @@ void StSearchMonitors::findMonitorsWinAPI() {
             }
         }
         if(aPnpId.isEmpty()) {
-          aPnpId = StString(ddMon.DeviceID);
+            aPnpId = StString(ddMon.DeviceID);
         }
         aMon.setPnPId(aPnpId);
         aMon.setGpuName(StString(dispDevice.DeviceString));
@@ -262,9 +262,11 @@ void StSearchMonitors::findMonitorsWinAPI() {
 
         // make primary display first in our list
         if(isPrimary && monCount != 0) {
-            StMonitor copy = getFirst();
+            StMonitor aCopy = getFirst();
             changeFirst() = getLast();
-            changeLast() = copy;
+            changeFirst().setId(0);
+            changeLast()  = aCopy;
+            changeLast().setId(monCount);
         }
         ++monCount;
     }
@@ -274,9 +276,11 @@ void StSearchMonitors::findMonitorsWinAPI() {
         if(getValue(m).getGpuName() != getFirst().getGpuName()) {
             for(size_t mm = m + 1; mm < size(); ++mm) {
                 if(getValue(mm).getGpuName() == getFirst().getGpuName()) {
-                    StMonitor copy = getValue(m);
+                    StMonitor aCopy = getValue(m);
                     changeValue(m) = getValue(mm);
-                    changeValue(mm) = copy;
+                    changeValue(m).setId(m);
+                    changeValue(mm) = aCopy;
+                    changeValue(mm).setId(mm);
                 }
             }
         }
