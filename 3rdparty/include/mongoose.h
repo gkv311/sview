@@ -230,37 +230,6 @@ int mg_get_var(const char *data, size_t data_len,
 int mg_get_cookie(const struct mg_connection *,
                   const char *cookie_name, char *buf, size_t buf_len);
 
-
-// Download data from the remote web server.
-//   host: host name to connect to, e.g. "foo.com", or "10.12.40.1".
-//   port: port number, e.g. 80.
-//   use_ssl: wether to use SSL connection.
-//   error_buffer, error_buffer_size: error message placeholder.
-//   request_fmt,...: HTTP request.
-// Return:
-//   On success, valid pointer to the new connection, suitable for mg_read().
-//   On error, NULL. error_buffer contains error message.
-// Example:
-//   char ebuf[100];
-//   struct mg_connection *conn;
-//   conn = mg_download("google.com", 80, 0, ebuf, sizeof(ebuf),
-//                      "%s", "GET / HTTP/1.0\r\nHost: google.com\r\n\r\n");
-struct mg_connection *mg_download(const char *host, int port, int use_ssl,
-                                  char *error_buffer, size_t error_buffer_size,
-                                  PRINTF_FORMAT_STRING(const char *request_fmt),
-                                  ...) PRINTF_ARGS(6, 7);
-
-
-// Close the connection opened by mg_download().
-void mg_close_connection(struct mg_connection *conn);
-
-
-// File upload functionality. Each uploaded file gets saved into a temporary
-// file and MG_UPLOAD event is sent.
-// Return number of uploaded files.
-int mg_upload(struct mg_connection *conn, const char *destination_dir);
-
-
 // Convenience function -- create detached thread.
 // Return: 0 on success, non-0 on error.
 typedef void * (*mg_thread_func_t)(void *);
