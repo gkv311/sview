@@ -41,8 +41,11 @@
 
 // Disable WIN32_LEAN_AND_MEAN.
 // This makes windows.h always include winsock2.h
-#ifdef WIN32_LEAN_AND_MEAN
-#undef WIN32_LEAN_AND_MEAN
+//#ifdef WIN32_LEAN_AND_MEAN
+//#undef WIN32_LEAN_AND_MEAN
+//#endif
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
 #endif
 
 #if defined(__SYMBIAN32__)
@@ -72,6 +75,7 @@
 #if defined(_WIN32) && !defined(__SYMBIAN32__) // Windows specific
 #define _WIN32_WINNT 0x0400 // To make it link in VS2005
 #include <windows.h>
+#include <Ws2tcpip.h>
 
 #ifndef PATH_MAX
 #define PATH_MAX MAX_PATH
@@ -4721,6 +4725,9 @@ struct mg_connection *mg_connect(const char *host, int port, int use_ssl,
         sock = INVALID_SOCKET;
         continue;
       } else {
+        sin.sin_family = AF_INET;
+        sin.sin_port = htons((uint16_t) port);
+        sin.sin_addr = * (struct in_addr *) addriter->ai_addr;
         break;
       }
     }
