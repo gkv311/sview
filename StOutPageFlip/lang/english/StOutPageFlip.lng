@@ -23,4 +23,4 @@ English translation file for StOutPageFlip library
 2000="sView - PageFlip Output module"
 2001="version"
 2002="© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0"
-3001="OpenGL Hardware QuadBuffer is unavailable!"
+3001="OpenGL Hardware QuadBuffer is unavailable!\n\nYou can try another Quad Buffer type\n(including OpenGL emulated in Extra section)."
