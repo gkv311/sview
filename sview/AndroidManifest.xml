@@ -171,6 +171,7 @@
                 <data android:pathPattern=".*\\.mp3" />
                 <data android:pathPattern=".*\\.mpga" />
                 <data android:pathPattern=".*\\.ogg" />
+                <data android:pathPattern=".*\\.opus" />
                 <data android:pathPattern=".*\\.wav" />
                 <data android:pathPattern=".*\\.wma" />
                 <data android:pathPattern=".*\\.AAC" />
@@ -185,6 +186,7 @@
                 <data android:pathPattern=".*\\.MP3" />
                 <data android:pathPattern=".*\\.MPGA" />
                 <data android:pathPattern=".*\\.OGG" />
+                <data android:pathPattern=".*\\.OPUS" />
                 <data android:pathPattern=".*\\.WAV" />
                 <data android:pathPattern=".*\\.WMA" />
             </intent-filter>

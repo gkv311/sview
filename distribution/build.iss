@@ -1,4 +1,4 @@
-﻿
+
 #include "temp\config.iss"
 
 ; Should be defined in config file
@@ -341,6 +341,7 @@ Root: HKCR; SubKey: .mp3;                                      ValueType: string
 Root: HKCR; SubKey: .m4a;                                      ValueType: string; ValueData: sView Audio;                   Tasks: flagAssocMusic;  Flags: uninsdeletekey
 Root: HKCR; SubKey: .aac;                                      ValueType: string; ValueData: sView Audio;                   Tasks: flagAssocMusic;  Flags: uninsdeletekey
 Root: HKCR; SubKey: .ogg;                                      ValueType: string; ValueData: sView Audio;                   Tasks: flagAssocMusic;  Flags: uninsdeletekey
+Root: HKCR; SubKey: .opus;                                     ValueType: string; ValueData: sView Audio;                   Tasks: flagAssocMusic;  Flags: uninsdeletekey
 Root: HKCR; SubKey: .wav;                                      ValueType: string; ValueData: sView Audio;                   Tasks: flagAssocMusic;  Flags: uninsdeletekey
 Root: HKCR; SubKey: .flac;                                     ValueType: string; ValueData: sView Audio;                   Tasks: flagAssocMusic;  Flags: uninsdeletekey
 Root: HKCR; SubKey: .ape;                                      ValueType: string; ValueData: sView Audio;                   Tasks: flagAssocMusic;  Flags: uninsdeletekey

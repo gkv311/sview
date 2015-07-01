@@ -237,6 +237,13 @@
 #define ST_OGG_MIME_STRING ST_OGG_MIME ":" ST_OGG_EXT ":" ST_OGG_DESC
 
 /**
+ *.ogg - OGG Opus Audio, lossy
+ */
+#define ST_OPUS_EXT  "opus"
+#define ST_OPUS_DESC "OGG - OGG Opus Audio, lossy"
+#define ST_OPUS_MIME_STRING ST_OGG_MIME ":" ST_OPUS_EXT ":" ST_OPUS_DESC
+
+/**
  *.ac3 - AC3 Audio, lossy
  */
 #define ST_AC3_MIME "audio/x-ac3"
@@ -322,6 +329,7 @@ ST_APE_MIME_STRING ";" \
 ST_MP3_MIME_STRING ";" \
 ST_AAC_MIME_STRING ";" \
 ST_OGG_MIME_STRING ";" \
+ST_OPUS_MIME_STRING ";" \
 ST_AC3_MIME_STRING ";" \
 ST_WMA_MIME_STRING ";" \
 ST_DTS_MIME_STRING ";" \
@@ -341,6 +349,7 @@ ST_AOB_MIME_STRING ";" \
 ST_MP3_MIME_STRING ";" \
 ST_AAC_MIME_STRING ";" \
 ST_OGG_MIME_STRING ";" \
+ST_OPUS_MIME_STRING ";" \
 ST_AC3_MIME_STRING ";" \
 ST_WMA_MIME_STRING ";" \
 ST_DTS_MIME_STRING ";" \

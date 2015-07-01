@@ -114,6 +114,7 @@
 			<key>CFBundleTypeExtensions</key>
 			<array>
 				<string>ogg</string>
+				<string>opus</string>
 			</array>
 			<key>CFBundleTypeIconFile</key>
 			<string>sView_Media.icns</string>
