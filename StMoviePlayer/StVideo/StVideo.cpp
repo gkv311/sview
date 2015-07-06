@@ -374,25 +374,38 @@ bool StVideo::addFile(const StString& theFileToLoad,
             StString aSampleRate    = stAV::audio::getSampleRateString   (aCodecCtx);
             StString aChannelLayout = stAV::audio::getChannelLayoutString(aCodecCtx);
 
-            StString aLanguage;
+            StString aLang;
         #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
-            stAV::meta::readTag(aStream, stCString("language"), aLanguage);
+            stAV::meta::readTag(aStream, stCString("language"), aLang);
         #else
-            aLanguage = aStream->language;
+            aLang = aStream->language;
         #endif
+            if(aLang == "und") {
+                aLang.clear();
+            }
+
+            StString aStreamTitle = aCodecName;
+            if(!aSampleRate.isEmpty()) {
+                aStreamTitle += StString(", ") + aSampleRate;
+            }
+            aStreamTitle     += StString(", ") + aChannelLayout;
+            if(!aSampleFormat.isEmpty()) {
+                aStreamTitle += StString(", ") + aSampleFormat;
+            }
+            if(!aLang.isEmpty()) {
+                aStreamTitle += StString(" (") + aLang + ")";
+            }
 
             if( aFormatCtx->nb_streams == 1
             && !myCtxList.isEmpty()) {
-                aLanguage = (aFileName.getLength() > 24) ? (StString("...") + aFileName.subString(aFileName.getLength() - 24, aFileName.getLength())) : aFileName;
+                aStreamTitle += (aFileName.getLength() > 24)
+                              ? (StString(" ...") + aFileName.subString(aFileName.getLength() - 24, aFileName.getLength()))
+                              : (StString(" ") + aFileName);
             }
-            theInfo.AudioList->add(aCodecName
-                               + (!aSampleRate.isEmpty() ? StString(", ") : StString()) + aSampleRate
-                               + ", " + aChannelLayout
-                               + (!aSampleFormat.isEmpty() ? StString(", ") : StString()) + aSampleFormat
-                               + (!aLanguage.isEmpty() ? (StString(" (") + aLanguage + ')') : StString()));
+            theInfo.AudioList->add(aStreamTitle);
 
             if(!myAudio->isInitialized()
-            && (aPrefLangAudio.isEmpty() || aLanguage == aPrefLangAudio)
+            && (aPrefLangAudio.isEmpty() || aLang == aPrefLangAudio)
             &&  myAudio->init(aFormatCtx, aStreamId, "")) {
                 theInfo.LoadedAudio = (int32_t )(theInfo.AudioList->size() - 1);
             }
@@ -405,17 +418,22 @@ bool StVideo::addFile(const StString& theFileToLoad,
                 aCodecName = aCodec->name;
             }
 
-            StString aStreamTitle;
+            StString aLang;
+        #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
+            stAV::meta::readTag(aStream, stCString("language"), aLang);
+        #else
+            aLang = aStream->language;
+        #endif
+            if(aLang == "und") {
+                aLang.clear();
+            }
+
+            StString aStreamTitle = aCodecName;
+            if(!aLang.isEmpty()) {
+                aStreamTitle += StString(" (") + aLang + ")";
+            }
             if(aFormatCtx->nb_streams == 1) {
-                aStreamTitle = aCodecName + ", " + aFileName;
-            } else {
-                StString aLanguage;
-            #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
-                stAV::meta::readTag(aStream, stCString("language"), aLanguage);
-            #else
-                aLanguage = aStream->language;
-            #endif
-                aStreamTitle = aCodecName + (!aLanguage.isEmpty() ? (StString(" (") + aLanguage + ')') : StString());
+                aStreamTitle += StString(", ") + aFileName;
             }
             theInfo.SubtitleList->add(aStreamTitle);
         }
