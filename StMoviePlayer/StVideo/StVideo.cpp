@@ -876,6 +876,7 @@ void StVideo::packetsLoop() {
         } else if(params.activeAudio->wasChanged()) {
             double aCurrPts = getPts();
             doFlushSoft();
+            const bool toPlayNewAudio = isPlaying();
             if(myAudio->isInitialized()) {
                 myAudio->pushEnd();
                 while(!myAudio->isEmpty() || !myAudio->isInDowntime()) {
@@ -923,6 +924,9 @@ void StVideo::packetsLoop() {
             }
 
             pushPlayEvent(ST_PLAYEVENT_SEEK, aCurrPts);
+            if(toPlayNewAudio) {
+                myAudio->pushPlayEvent(ST_PLAYEVENT_PLAY);
+            }
         } else if(params.activeSubtitles->wasChanged()) {
             double aCurrPts = getPts();
             doFlushSoft();
