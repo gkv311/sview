@@ -627,6 +627,13 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     addAction(Action_CopyToClipboard, anAction, ST_VK_C | ST_VF_CONTROL, ST_VK_INSERT | ST_VF_CONTROL);
 #endif
 
+    anAction = new StActionIntSlot(stCString("DoOpenFromClipboard"), stSlot(this, &StMoviePlayer::doFromClipboard), 0);
+#ifdef __APPLE__
+    addAction(Action_PasteFromClipboard, anAction, ST_VK_V | ST_VF_CONTROL, ST_VK_V      | ST_VF_COMMAND);
+#else
+    addAction(Action_PasteFromClipboard, anAction, ST_VK_V | ST_VF_CONTROL, ST_VK_INSERT | ST_VF_SHIFT);
+#endif
+
     anAction = new StActionIntSlot(stCString("DoPlayListReverse"), stSlot(this, &StMoviePlayer::doPlayListReverse), 0);
     addAction(Action_ShowList, anAction, ST_VK_L | ST_VF_CONTROL);
 
@@ -1196,6 +1203,35 @@ void StMoviePlayer::doSubtitlesCopy(size_t ) {
         return;
     }
     myWindow->toClipboard(aText);
+}
+
+void StMoviePlayer::doFromClipboard(size_t ) {
+    if(myVideo.isNull()
+    || myGUI.isNull()) {
+        return;
+    }
+
+    StString aText;
+    if(!myWindow->fromClipboard(aText)
+    ||  aText.isEmpty()) {
+        return;
+    }
+
+    if(!StFileNode::isAbsolutePath(aText)) {
+        return;
+    }
+
+    const size_t aRecent = myPlayList->findRecent(aText);
+    if(aRecent != size_t(-1)) {
+        doOpenRecent(aRecent);
+        return;
+    }
+    myPlayList->open(aText);
+    if(!myPlayList->isEmpty()) {
+        doUpdateStateLoading();
+        myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
+        myVideo->doLoadNext();
+    }
 }
 
 void StMoviePlayer::doFileNext() {

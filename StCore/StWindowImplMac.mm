@@ -534,4 +534,25 @@ bool StWindowImpl::toClipboard(const StString& theText) {
     return [aPasteBoard writeObjects: anObjects] == YES;
 }
 
+bool StWindowImpl::fromClipboard(StString& theText) {
+    StCocoaLocalPool aLocalPool;
+    NSPasteboard* aPasteBoard  = [NSPasteboard generalPasteboard];
+    NSArray*      aClasses     = [[NSArray alloc] initWithObjects: [NSString class], NULL];
+    NSDictionary* anOptions    = [NSDictionary dictionary];
+    NSArray*      aCopiedItems = [aPasteBoard readObjectsForClasses: aClasses options: anOptions];
+    if( aCopiedItems == NULL
+    || [aCopiedItems count] < 1) {
+        return false;
+    }
+
+    NSString* aTextNs = (NSString* )[aCopiedItems objectAtIndex: 0];
+    if( aTextNs == NULL
+    || [aTextNs isKindOfClass: [NSString class]] == NO) {
+        return false;
+    }
+
+    theText = [[aTextNs precomposedStringWithCanonicalMapping] UTF8String];
+    return true;
+}
+
 #endif // __APPLE__

@@ -92,6 +92,7 @@ class StWindowImpl {
         public: //! @name clipboard
 
     ST_LOCAL bool toClipboard(const StString& theText);
+    ST_LOCAL bool fromClipboard(StString& theText);
 
 #if defined(__linux__)
     StString myTextToCopy;

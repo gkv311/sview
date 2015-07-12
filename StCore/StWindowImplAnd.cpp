@@ -414,4 +414,8 @@ bool StWindowImpl::toClipboard(const StString& theText) {
     return false;
 }
 
+bool StWindowImpl::fromClipboard(StString& theText) {
+    return false;
+}
+
 #endif

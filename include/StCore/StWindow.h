@@ -431,6 +431,11 @@ class StWindow {
      */
     ST_CPPEXPORT void toClipboard(const StString& theText);
 
+    /**
+     * Retrieve text from clipboard.
+     */
+    ST_CPPEXPORT bool fromClipboard(StString& theText);
+
         public: //! @name signals
 
     struct {

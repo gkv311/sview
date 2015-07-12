@@ -318,6 +318,10 @@ void StWindow::toClipboard(const StString& theText) {
     myWin->toClipboard(theText);
 }
 
+bool StWindow::fromClipboard(StString& theText) {
+    return myWin->fromClipboard(theText);
+}
+
 StRectI_t StWindow::defaultRect(const StMonitor* theMon) const {
     const StMonitor& aMon = theMon != NULL ? *theMon : myWin->getMonitors()[0];
     StRectI_t aRect;

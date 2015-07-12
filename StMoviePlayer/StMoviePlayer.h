@@ -159,6 +159,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doAudioNext(size_t theDirection);
     ST_LOCAL void doSubtitlesNext(size_t theDirection);
     ST_LOCAL void doSubtitlesCopy(size_t dummy = 0);
+    ST_LOCAL void doFromClipboard(size_t dummy = 0);
 
     ST_LOCAL void doQuit(const size_t dummy = 0);
 
@@ -328,6 +329,7 @@ class StMoviePlayer : public StApplication {
         Action_SubsPrev,
         Action_SubsNext,
         Action_CopyToClipboard,
+        Action_PasteFromClipboard,
         Action_ShowList,
         Action_ImageAdjustReset,
         Action_StereoParamsBegin,
