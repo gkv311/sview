@@ -242,6 +242,16 @@ class StFileNode : public StNode {
                                               StString&       theFileName);
 
     /**
+     * Return path to the parent folder.
+     * Example 1: IN  '/media/cdrom/'
+     *            OUT '/media'
+     * Example 2: IN  '/media/cdrom'
+     *            OUT '/media'
+     * @param thePath folder path
+     */
+    ST_CPPEXPORT static StString getFolderUp(const StString& thePath);
+
+    /**
      * Open native system open file dialog.
      * @param theFolder      path to open
      * @param theTitle       dialog title

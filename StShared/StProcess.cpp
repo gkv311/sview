@@ -40,7 +40,7 @@ namespace {
 
     inline bool isValidStSharePath(const StString& thePath) {
         return !thePath.isEmpty()
-            && StFileNode::isFileExists(thePath + "shaders");
+            && StFileNode::isFileExists(thePath + "textures");
     }
 
     inline bool isValidStCorePath(const StString& thePath) {

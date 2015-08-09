@@ -39,11 +39,15 @@ int main(int , char** ) {
         "StCore32";
     #endif
     const StString aProcessPath = StProcess::getProcessFolder();
+    StString aProcessUpPath = StFileNode::getFolderUp(aProcessPath);
+    if(!aProcessUpPath.isEmpty()) {
+        aProcessUpPath += SYS_FS_SPLITTER;
+    }
     StProcess::setEnv(ST_ENV_NAME_STCORE_PATH, aProcessPath);
     if(StFolder::isFolder(aProcessPath + "textures")) {
         StProcess::setEnv("StShare", aProcessPath);
-    } else if(StFolder::isFolder(aProcessPath + ".." + SYS_FS_SPLITTER + "textures")) {
-        StProcess::setEnv("StShare", aProcessPath + ".." + SYS_FS_SPLITTER);
+    } else if(StFolder::isFolder(aProcessUpPath + "textures")) {
+        StProcess::setEnv("StShare", aProcessUpPath);
     }
 
     StHandle<StResourceManager> aResMgr = new StResourceManager();

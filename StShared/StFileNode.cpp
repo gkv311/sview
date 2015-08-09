@@ -172,6 +172,26 @@ void StFileNode::getFolderAndFile(const StString& theFilePath,
     }
 }
 
+StString StFileNode::getFolderUp(const StString& thePath) {
+    size_t aLastSplit = size_t(-1);
+    size_t aPreSplit  = size_t(-1);
+    for(StUtf8Iter anIter = thePath.iterator(); *anIter != 0; ++anIter) {
+        if(*anIter == stUtf32_t(SYS_FS_SPLITTER)) {
+            aPreSplit  = aLastSplit;
+            aLastSplit = anIter.getIndex();
+        }
+    }
+
+    if(aLastSplit != thePath.getSize()) {
+        aLastSplit = aPreSplit;
+    }
+    if(aLastSplit == size_t(-1)) {
+        return StString();
+    }
+
+    return thePath.subString(0, aLastSplit);
+}
+
 bool StFileNode::isRemoteProtocolPath(const StCString& thePath) {
     StUtf8Iter anIter = thePath.iterator();
     if(*anIter == stUtf32_t(':')) {
