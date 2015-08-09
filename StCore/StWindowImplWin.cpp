@@ -982,28 +982,44 @@ void StWindowImpl::processEvents() {
 
 bool StWindowImpl::toClipboard(const StString& theText) {
     const StStringUtfWide aWideText = theText.toUtfWide();
-    HGLOBAL aMem = GlobalAlloc(GMEM_MOVEABLE, aWideText.Size + sizeof(wchar_t));
+    HGLOBAL aMem = ::GlobalAlloc(GMEM_MOVEABLE, aWideText.Size + sizeof(wchar_t));
     if(aMem == NULL) {
         return false;
     }
 
-    stMemCpy(GlobalLock(aMem), aWideText.String, aWideText.Size + sizeof(wchar_t));
-    GlobalUnlock(aMem);
-    if(!OpenClipboard(NULL)) {
+    stMemCpy(::GlobalLock(aMem), aWideText.String, aWideText.Size + sizeof(wchar_t));
+    ::GlobalUnlock(aMem);
+    if(!::OpenClipboard(NULL)) {
         return false;
     }
 
-    EmptyClipboard();
-    if(!SetClipboardData(CF_UNICODETEXT, aMem)) {
-        CloseClipboard();
+    ::EmptyClipboard();
+    if(!::SetClipboardData(CF_UNICODETEXT, aMem)) {
+        ::CloseClipboard();
         return false;
     }
-    CloseClipboard();
+    ::CloseClipboard();
     return true;
 }
 
 bool StWindowImpl::fromClipboard(StString& theText) {
-    return false;
+    if(!::IsClipboardFormatAvailable(CF_UNICODETEXT)
+    || !::OpenClipboard(NULL)) {
+        return false;
+    }
+
+    HANDLE aClipData = ::GetClipboardData(CF_UNICODETEXT);
+    bool hasText = false;
+    if(aClipData != NULL) {
+        const void* aStrData = ::GlobalLock(aClipData);
+        if(aStrData != NULL) {
+            theText.fromUnicode(reinterpret_cast<const wchar_t* >(aStrData));
+            ::GlobalUnlock(aClipData);
+            hasText = !theText.isEmpty();
+        }
+    }
+    ::CloseClipboard();
+    return hasText;
 }
 
 #endif
