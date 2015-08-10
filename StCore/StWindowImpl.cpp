@@ -160,9 +160,8 @@ void StWindowImpl::StSyncTimer::initUpTime() {
     } while(anUptime0 == anUptime1);
     myTimeInMicroSec = anUptime1 * 1000.0; // convert to microseconds
 #elif defined(__APPLE__)
-    // use function from CoreServices to retrieve system uptime
-    const Nanoseconds anUpTimeNano = AbsoluteToNanoseconds(UpTime());
-    myTimeInMicroSec = double((*(uint64_t* )&anUpTimeNano) / 1000); // convert to microseconds
+    const uint64_t anUpTimeNano = machUptimeInNanoseconds();
+    myTimeInMicroSec = double(anUpTimeNano / 1000); // convert to microseconds
     fillCounter(myCounterStart);
 #else
     myTimeInMicroSec = getUpTimeFromSystem() * 1000000.0;

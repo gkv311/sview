@@ -29,6 +29,7 @@
 #if defined(__APPLE__)
     #include <StCocoa/StCocoaCoords.h>
     #include <IOKit/pwr_mgt/IOPMLib.h>
+    #include <mach/mach_time.h>
 #elif !defined(_WIN32)
     #include <sys/sysinfo.h>
 #endif
@@ -368,6 +369,8 @@ class StWindowImpl {
           mySyncMicroSec(0.0f) {
         #if defined(_WIN32)
             myGetTick64 = NULL;
+        #elif defined(__APPLE__)
+            (void )::mach_timebase_info(&myTimebaseInfo);
         #endif
         }
 
@@ -396,6 +399,21 @@ class StWindowImpl {
          */
         ST_LOCAL void resyncUpTime();
 
+    #if defined(__APPLE__)
+        /**
+         * Replacement for deprecated AbsoluteToNanoseconds(UpTime()).
+         */
+        ST_LOCAL uint64_t machUptimeInNanoseconds() const {
+            //const Nanoseconds anUpTimeNano = ::AbsoluteToNanoseconds(::UpTime());
+            //sreturn *(uint64_t* )&anUpTimeNano;
+            // Convert to nanoseconds.
+            // We hope that the multiplication doesn't overflow; the price you pay for working in fixed point.
+            const uint64_t anElapsed     = ::mach_absolute_time();
+            const uint64_t anElapsedNano = anElapsed * myTimebaseInfo.numer / myTimebaseInfo.denom;
+            return anElapsedNano;
+        }
+    #endif
+
         /**
          * Retrieve UpTime using system API.
          */
@@ -405,8 +423,8 @@ class StWindowImpl {
             return double(anUptime) * 0.001;
         #elif defined(__APPLE__)
             // use function from CoreServices to retrieve system uptime
-            const Nanoseconds anUpTimeNano = AbsoluteToNanoseconds(UpTime());
-            return double((*(uint64_t* )&anUpTimeNano) / 1000) * 0.000001;
+            const uint64_t anUpTimeNano = machUptimeInNanoseconds();
+            return double(anUpTimeNano / 1000) * 0.000001;
         #else
             // read system uptime (in seconds)
             struct sysinfo aSysInfo;
@@ -418,6 +436,8 @@ class StWindowImpl {
     #ifdef _WIN32
         typedef ULONGLONG (WINAPI *GetTickCount64_t)();
         GetTickCount64_t   myGetTick64;
+    #elif defined(__APPLE__)
+        mach_timebase_info_data_t myTimebaseInfo;
     #endif
         double             myLastSyncMicroSec; //!< timestamp of last synchronization
         float              mySyncMicroSec;     //!< should be replaced by double with atomic accessors
