@@ -476,12 +476,21 @@ void StGLContext::stglFullInfo(StDictionary& theMap) const {
         //kCGLRPVideoMemoryMegabytes   = 131;
         //kCGLRPTextureMemoryMegabytes = 132;
         GLint aVMem = 0;
+    #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1070
+        if(CGLDescribeRenderer(aRendObj, aRendIter, kCGLRPVideoMemoryMegabytes, &aVMem) == kCGLNoError) {
+            theMap.add(StDictEntry("GPU memory",         StString() + aVMem + " MiB"));
+        }
+        if(CGLDescribeRenderer(aRendObj, aRendIter, kCGLRPTextureMemoryMegabytes, &aVMem) == kCGLNoError) {
+            theMap.add(StDictEntry("GPU Texture memory", StString() + aVMem + " MiB"));
+        }
+    #else
         if(CGLDescribeRenderer(aRendObj, aRendIter, kCGLRPVideoMemory, &aVMem) == kCGLNoError) {
             theMap.add(StDictEntry("GPU memory",         StString() + (aVMem / (1024 * 1024))  + " MiB"));
         }
         if(CGLDescribeRenderer(aRendObj, aRendIter, kCGLRPTextureMemory, &aVMem) == kCGLNoError) {
             theMap.add(StDictEntry("GPU Texture memory", StString() + (aVMem / (1024 * 1024))  + " MiB"));
         }
+    #endif
     }
 #endif
 

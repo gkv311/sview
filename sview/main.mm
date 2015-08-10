@@ -342,8 +342,14 @@ int main(int , char** ) {
     NSApplication* anAppNs = [StNSApp sharedApplication];
     StAppResponder* anAppResp = [StAppResponder sharedInstance];
     [anAppNs setDelegate: anAppResp];
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= 1080
+    [[NSBundle mainBundle] loadNibNamed: @"MainMenu"
+                                  owner: anAppResp
+                        topLevelObjects: NULL];
+#else
     [NSBundle loadNibNamed: @"MainMenu"
                      owner: anAppResp];
+#endif
 
     // create dummy hidden window - workaround against strange bug
     // when right half of GL window title doesn't allow to be moved

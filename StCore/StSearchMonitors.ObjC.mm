@@ -30,6 +30,54 @@
 @end
 #endif
 
+namespace {
+
+    /**
+     * Retrieve number from NSNumber.
+     */
+    inline uint32_t getNumber(NSNumber* theNum) {
+        if(theNum == NULL
+        || ![theNum isKindOfClass: [NSNumber class]]) {
+            return 0;
+        }
+        return [theNum intValue];
+    }
+
+    /**
+     * Find low-level info for specified display (replacement for deprecated CGDisplayIOServicePort(theDispId)).
+     */
+    static NSDictionary* findDispInfo(CGDirectDisplayID theDispId) {
+        io_iterator_t anIter;
+        CFMutableDictionaryRef aMatching = IOServiceMatching("IODisplayConnect");
+        if(IOServiceGetMatchingServices(kIOMasterPortDefault, aMatching, &anIter) != KERN_SUCCESS) {
+            return NULL;
+        }
+
+        const uint32_t aVendId = CGDisplayVendorNumber(theDispId);
+        const uint32_t aProdId = CGDisplayModelNumber (theDispId);
+        const uint32_t aSerial = CGDisplaySerialNumber(theDispId);
+        for(io_service_t aServ = IOIteratorNext(anIter); aServ != 0; aServ = IOIteratorNext(anIter)) {
+            NSDictionary* aDevInfo = (NSDictionary* )IODisplayCreateInfoDictionary(aServ, kIODisplayOnlyPreferredName);
+
+            NSNumber* aVendIdRef = [aDevInfo objectForKey: [NSString stringWithUTF8String: kDisplayVendorID]];
+            NSNumber* aProdIdRef = [aDevInfo objectForKey: [NSString stringWithUTF8String: kDisplayProductID]];
+            NSNumber* aSerialRef = [aDevInfo objectForKey: [NSString stringWithUTF8String: kDisplaySerialNumber]];
+            if(getNumber(aVendIdRef) == aVendId
+            && getNumber(aProdIdRef) == aProdId
+            && getNumber(aSerialRef) == aSerial) {
+                IOObjectRelease(anIter);
+                return aDevInfo;
+            }
+
+            [aDevInfo release];
+        }
+
+        ST_ERROR_LOG("StSearchMonitors, no match between NS and CF display");
+        IOObjectRelease(anIter);
+        return NULL;
+    }
+}
+
 void StSearchMonitors::findMonitorsCocoa() {
     if(NSApp == NULL) {
         return;
@@ -59,9 +107,12 @@ void StSearchMonitors::findMonitorsCocoa() {
         GLfloat aScale = 1.0f;
         if([aScreen respondsToSelector: @selector(backingScaleFactor)]) {
             aScale = [aScreen backingScaleFactor];
-        } else {
+        }
+    #if MAC_OS_X_VERSION_MIN_REQUIRED < 1070
+        else {
             aScale = [aScreen userSpaceScaleFactor];
         }
+    #endif
         aStMon.setScale(aScale);
 
         aStMon.setVRect(StRectI_t(aRectCg.origin.y, aRectCg.origin.y + aRectCg.size.height,
@@ -72,10 +123,14 @@ void StSearchMonitors::findMonitorsCocoa() {
         //double CGDisplayModeGetRefreshRate(CGDisplayModeRef mode);
 
         // retrieve low-level information about device
-        NSDictionary* aDevInfo = (NSDictionary* )IODisplayCreateInfoDictionary(CGDisplayIOServicePort(aDispId), kIODisplayOnlyPreferredName);
+        NSDictionary* aDevInfo = (NSDictionary* )findDispInfo(aDispId);
+        //NSDictionary* aDevInfo = (NSDictionary* )IODisplayCreateInfoDictionary(CGDisplayIOServicePort(aDispId), kIODisplayOnlyPreferredName);
 
         // retrieve display name
-        NSDictionary* aLocalizedNames = [aDevInfo objectForKey: [NSString stringWithUTF8String: kDisplayProductName]];
+        NSDictionary* aLocalizedNames = NULL;
+        if(aDevInfo != NULL) {
+            aLocalizedNames = [aDevInfo objectForKey: [NSString stringWithUTF8String: kDisplayProductName]];
+        }
         if(aLocalizedNames != NULL
         && [aLocalizedNames isKindOfClass: [NSDictionary class]]
         && [aLocalizedNames count] > 0) {
