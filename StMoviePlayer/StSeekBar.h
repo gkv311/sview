@@ -66,6 +66,7 @@ class ST_LOCAL StSeekBar : public StGLWidget {
 
         private: //! @name callback Slots (private overriders)
 
+    void doMouseClick  (const int );
     void doMouseUnclick(const int );
 
         private: //! @name private methods

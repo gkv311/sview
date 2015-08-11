@@ -113,6 +113,7 @@ StSeekBar::StSeekBar(StGLWidget* theParent,
   myProgress(0.0f),
   myProgressPx(0),
   myClickPos(-1) {
+    StGLWidget::signals.onMouseClick  .connect(this, &StSeekBar::doMouseClick);
     StGLWidget::signals.onMouseUnclick.connect(this, &StSeekBar::doMouseUnclick);
     myMargins.top    = theMargin;
     myMargins.bottom = theMargin;
@@ -239,6 +240,10 @@ void StSeekBar::stglUpdate(const StPointD_t& theCursor) {
 
     myClickPos = aPosPx;
     signals.onSeekClick(ST_MOUSE_LEFT, aPos);
+}
+
+void StSeekBar::doMouseClick(const int ) {
+    //
 }
 
 void StSeekBar::doMouseUnclick(const int mouseBtn) {
