@@ -738,6 +738,11 @@ void StGLImageRegion::doRightUnclick(const StPointD_t& theCursorZo) {
 bool StGLImageRegion::tryClick(const StPointD_t& theCursorZo,
                                const int&        theMouseBtn,
                                bool&             isItemClicked) {
+    StHandle<StStereoParams> aParams = getSource();
+    if(!myIsInitialized || aParams.isNull()) {
+        return false;
+    }
+
     if(StGLWidget::tryClick(theCursorZo, theMouseBtn, isItemClicked)) {
         if(theMouseBtn == ST_MOUSE_RIGHT
         && (myToRightRotate || (myKeyFlags & ST_VF_CONTROL) == ST_VF_CONTROL)) {
@@ -759,6 +764,11 @@ bool StGLImageRegion::tryUnClick(const StPointD_t& theCursorZo,
                                  bool&             isItemUnclicked) {
     StHandle<StStereoParams> aParams = getSource();
     if(!myIsInitialized || aParams.isNull()) {
+        if(isClicked(theMouseBtn)) {
+            isItemUnclicked = true;
+            setClicked(theMouseBtn, false);
+            return true;
+        }
         return false;
     }
 
