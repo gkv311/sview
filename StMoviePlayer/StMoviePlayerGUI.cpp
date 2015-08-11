@@ -103,7 +103,7 @@ void StMoviePlayerGUI::createUpperToolbar() {
     const int aLeft = scale(DISPL_X_REGION_UPPER);
 
     const StMarginsI& aMargins = getRootMargins();
-    myPanelUpper = new StGLWidget(this, aMargins.left, aMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(128));
+    myPanelUpper = new StGLContainer(this, aMargins.left, aMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(128));
 
     // append the textured buttons
     myBtnOpen = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * myIconStep, aTop);
@@ -137,7 +137,7 @@ void StMoviePlayerGUI::createBottomToolbar() {
     const StMarginsI& aMargins = getRootMargins();
     const int aTop  = scale(DISPL_Y_REGION_BOTTOM);
     const int aLeft = scale(DISPL_X_REGION_BOTTOM);
-    myPanelBottom = new StGLWidget(this, aMargins.left, -aMargins.bottom, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(128));
+    myPanelBottom = new StGLContainer(this, aMargins.left, -aMargins.bottom, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(128));
 
     // append the textured buttons
     myBtnPlay = new StGLTextureButton(myPanelBottom, aLeft, aTop,
@@ -597,8 +597,8 @@ class ST_LOCAL StDelayControl : public StGLMessageBox {
         addButton(theParent->tr(BUTTON_CLOSE));
         setVisibility(true, true);
 
-        StGLWidget* aContent = new StGLWidget(getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
-                                              getContent()->getRectPx().width(), getContent()->getRectPx().height());
+        StGLWidget* aContent = new StGLContainer(getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                                                 getContent()->getRectPx().width(), getContent()->getRectPx().height());
         aContent->setVisibility(true, true);
 
         const StGLVec3 aWhite(1.0f, 1.0f, 1.0f);
@@ -1020,7 +1020,7 @@ void StMoviePlayerGUI::createMobileUpperToolbar() {
     aButtonMargins.setValues(12);
 
     const StMarginsI& aRootMargins = getRootMargins();
-    myPanelUpper = new StGLWidget(this, aRootMargins.left, aRootMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(56));
+    myPanelUpper = new StGLContainer(this, aRootMargins.left, aRootMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(56));
 
     int aBtnIter = 0;
 
@@ -1071,7 +1071,7 @@ void StMoviePlayerGUI::createMobileBottomToolbar() {
     StMarginsI aButtonMargins;
     aButtonMargins.setValues(12);
     const StMarginsI& aRootMargins = getRootMargins();
-    myPanelBottom = new StGLWidget(this, aRootMargins.left, -aRootMargins.bottom, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(56));
+    myPanelBottom = new StGLContainer(this, aRootMargins.left, -aRootMargins.bottom, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(56));
 
     const StGLCorner aLeftCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT);
     myBtnPrev = new StGLTextureButton(myPanelBottom, (myBottomBarNbLeft++) * myIconStep, 0);

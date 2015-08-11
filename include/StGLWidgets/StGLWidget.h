@@ -384,4 +384,23 @@ class StGLWidget {
 
 };
 
+/**
+ * Simple container widget.
+ */
+class ST_LOCAL StGLContainer : public StGLWidget {
+
+        public: //! @name public methods
+
+    ST_CPPEXPORT StGLContainer(StGLWidget* theParent,
+                               const int   theLeft = 32, const int    theTop = 32,
+                               const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                               const int  theWidth = 32, const int theHeight = 32);
+
+    ST_CPPEXPORT virtual ~StGLContainer();
+
+    ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int& theMouseBtn, bool& theIsItemClicked);
+    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& theIsItemUnclicked);
+
+};
+
 #endif //__StGLWidget_h_

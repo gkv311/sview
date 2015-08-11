@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -12,7 +12,7 @@
 
 StGLMsgStack::StGLMsgStack(StGLWidget*                 theParent,
                            const StHandle<StMsgQueue>& theMsgQueue)
-: StGLWidget(theParent, 0, 0),
+: StGLContainer(theParent, 0, 0),
   myMsgQueue(theMsgQueue) {
     //
 }

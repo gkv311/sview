@@ -339,3 +339,39 @@ StGLContext& StGLWidget::getContext() {
 void StGLWidget::destroyWithDelay(StGLWidget* theWidget) {
     myRoot->destroyWithDelay(theWidget);
 }
+
+StGLContainer::StGLContainer(StGLWidget* theParent,
+                             const int theLeft,  const int theTop,
+                             const StGLCorner theCorner,
+                             const int theWidth, const int theHeight)
+: StGLWidget(theParent, theLeft, theTop, theCorner, theWidth, theHeight) {}
+
+StGLContainer::~StGLContainer() {}
+
+bool StGLContainer::tryClick(const StPointD_t& theCursorZo,
+                             const int&        theMouseBtn,
+                             bool&             theIsItemClicked) {
+    if(!isVisible()) {
+        return false;
+    }
+    for(StGLWidget *aChildIter(myChildren.getLast()), *aChildActive(NULL); aChildIter != NULL;) {
+        aChildActive = aChildIter;
+        aChildIter   = aChildIter->getPrev();
+        aChildActive->tryClick(theCursorZo, theMouseBtn, theIsItemClicked);
+    }
+    return false;
+}
+
+bool StGLContainer::tryUnClick(const StPointD_t& theCursorZo,
+                               const int&        theMouseBtn,
+                               bool&             theIsItemUnclicked) {
+    if(!isVisible()) {
+        return false;
+    }
+    for(StGLWidget *aChildIter(myChildren.getLast()), *aChildActive(NULL); aChildIter != NULL;) {
+        aChildActive = aChildIter;
+        aChildIter   = aChildIter->getPrev();
+        aChildActive->tryUnClick(theCursorZo, theMouseBtn, theIsItemUnclicked);
+    }
+    return false;
+}

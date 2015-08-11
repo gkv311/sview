@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -15,7 +15,7 @@
 /**
  * Widget intended to display text messages.
  */
-class StGLMsgStack : public StGLWidget {
+class StGLMsgStack : public StGLContainer {
 
         public:
 

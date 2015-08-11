@@ -127,7 +127,7 @@ void StGLMessageBox::create(const StString& theTitle,
     myIsTopWidget = true;
     getRoot()->setFocus(this); // take input focus
 
-    myBtnPanel = new StGLWidget(this, 0, aBtnBot, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER), 0, myRoot->scale(24));
+    myBtnPanel = new StGLContainer(this, 0, aBtnBot, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER), 0, myRoot->scale(24));
     myBtnPanel->setVisibility(true);
 }
 

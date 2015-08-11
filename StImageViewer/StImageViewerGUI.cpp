@@ -96,7 +96,7 @@ void StImageViewerGUI::createUpperToolbar() {
     const int aLeft = scale(DISPL_X_REGION_UPPER);
 
     const StMarginsI& aMargins = getRootMargins();
-    myPanelUpper = new StGLWidget(this, aMargins.left, aMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(128));
+    myPanelUpper = new StGLContainer(this, aMargins.left, aMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(128));
 
     // append textured buttons
     myBtnOpen   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * ICON_WIDTH, aTop);
@@ -651,7 +651,7 @@ void StImageViewerGUI::createMobileUpperToolbar() {
     aButtonMargins.setValues(12);
 
     const StMarginsI& aRootMargins = getRootMargins();
-    myPanelUpper = new StGLWidget(this, aRootMargins.left, aRootMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(56));
+    myPanelUpper = new StGLContainer(this, aRootMargins.left, aRootMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(56));
 
     int aBtnIter = 0;
 
@@ -701,7 +701,7 @@ void StImageViewerGUI::createMobileBottomToolbar() {
     aButtonMargins.setValues(12);
 
     const StMarginsI& aRootMargins = getRootMargins();
-    myPanelBottom = new StGLWidget(this, aRootMargins.left, -aRootMargins.bottom, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(56));
+    myPanelBottom = new StGLContainer(this, aRootMargins.left, -aRootMargins.bottom, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(56));
 
     int aBtnIter = 0;
     myBtnPrev = new StGLTextureButton(myPanelBottom, (aBtnIter++) * anIconStep, 0);
