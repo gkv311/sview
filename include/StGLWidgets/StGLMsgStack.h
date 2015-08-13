@@ -15,7 +15,7 @@
 /**
  * Widget intended to display text messages.
  */
-class StGLMsgStack : public StGLContainer {
+class ST_LOCAL StGLMsgStack : public StGLContainer {
 
         public:
 
