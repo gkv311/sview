@@ -224,8 +224,10 @@ StGLButton* StGLMessageBox::addButton(const StString& theTitle,
                                       const bool      theIsDefault,
                                       const int       theWidth) {
     int aRight = myBtnPanel->getRectPx().right();
+    int aGap   = 0;
     if(aRight > 0) {
-        aRight += myRoot->scale(24);
+        aGap    = myRoot->scale(24);
+        aRight += aGap;
     }
 
     StGLButton* aButton = new StGLButton(myBtnPanel, aRight, 0, theTitle);
@@ -237,7 +239,7 @@ StGLButton* StGLMessageBox::addButton(const StString& theTitle,
         aButton->setWidth(theWidth);
     }
 
-    myBtnPanel->changeRectPx().right() += aButton->getWidth();
+    myBtnPanel->changeRectPx().right() += aButton->getWidth() + aGap;
     if(++myButtonsNb > 1) {
         //
     }
