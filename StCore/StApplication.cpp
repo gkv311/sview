@@ -332,8 +332,8 @@ void StApplication::addAction(const int           theActionId,
                               StHandle<StAction>& theAction,
                               const unsigned int  theHotKey1,
                               const unsigned int  theHotKey2) {
-    theAction->setHotKey1(theHotKey1);
-    theAction->setHotKey2(theHotKey2);
+    theAction->setDefaultHotKey1(theHotKey1);
+    theAction->setDefaultHotKey2(theHotKey2);
     addAction(theActionId, theAction);
 }
 

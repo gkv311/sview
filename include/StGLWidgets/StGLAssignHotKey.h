@@ -63,6 +63,13 @@ class StGLAssignHotKey : public StGLMessageBox {
      */
     virtual StHandle<StAction> getActionForKey(unsigned int theHKey) const = 0;
 
+        private:
+
+    /**
+     * Update text.
+     */
+    ST_LOCAL void updateText();
+
         protected:
 
     StString           myTitleFrmt;       //!< "Assign new Hot Key for {0}..."

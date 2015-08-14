@@ -94,7 +94,31 @@ void StGLAssignHotKey::doSave(const size_t ) {
 }
 
 void StGLAssignHotKey::doReset(const size_t ) {
-    //
+    if(myHKeyIndex == 2) {
+        if(myKeyFlags != myAction->getDefaultHotKey2()) {
+            myKeyFlags = myAction->getDefaultHotKey2();
+            updateText();
+        }
+    } else {
+        if(myKeyFlags != myAction->getDefaultHotKey1()) {
+            myKeyFlags = myAction->getDefaultHotKey1();
+            updateText();
+        }
+    }
+}
+
+void StGLAssignHotKey::updateText() {
+    myHKeyLabel->setText(myKeyFlags != 0 ? encodeHotKey(myKeyFlags) : StString("..."));
+    StHandle<StAction> anOtherAction = getActionForKey(myKeyFlags);
+    if(!anOtherAction.isNull()
+     && anOtherAction != myAction) {
+        myConflictAction = anOtherAction;
+        myConflictLabel->setText("Conflicts with: " + myConflictAction->getName());
+    } else {
+        myConflictAction.nullify();
+        myConflictLabel->setText("");
+    }
+    stglInit();
 }
 
 bool StGLAssignHotKey::doKeyDown(const StKeyEvent& theEvent) {
@@ -124,17 +148,7 @@ bool StGLAssignHotKey::doKeyDown(const StKeyEvent& theEvent) {
             } else {
                 myKeyFlags = theEvent.VKey | theEvent.Flags;
             }
-            myHKeyLabel->setText(myKeyFlags != 0 ? encodeHotKey(myKeyFlags) : StString("..."));
-            StHandle<StAction> anOtherAction = getActionForKey(myKeyFlags);
-            if(!anOtherAction.isNull()
-             && anOtherAction != myAction) {
-                myConflictAction = anOtherAction;
-                myConflictLabel->setText("Conflicts with: " + myConflictAction->getName());
-            } else {
-                myConflictAction.nullify();
-                myConflictLabel->setText("");
-            }
-            stglInit();
+            updateText();
             return true;
         }
     }

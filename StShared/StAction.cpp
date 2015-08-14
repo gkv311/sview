@@ -13,6 +13,8 @@ StAction::StAction(const StCString& theName)
 : myName(theName),
   myHotKey1(0),
   myHotKey2(0),
+  myDefaultHotKey1(0),
+  myDefaultHotKey2(0),
   myToHoldKey(false) {
     //
 }

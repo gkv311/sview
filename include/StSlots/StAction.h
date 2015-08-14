@@ -60,6 +60,21 @@ class StAction {
     }
 
     /**
+     * Default value of hot key 1.
+     */
+    ST_LOCAL unsigned int getDefaultHotKey1() const {
+        return myDefaultHotKey1;
+    }
+
+    /**
+     * @param theKey default value of hot key 1
+     */
+    ST_LOCAL void setDefaultHotKey1(unsigned int theKey) {
+        myDefaultHotKey1 = theKey;
+        myHotKey1        = theKey;
+    }
+
+    /**
      * @return hot key 2 to trigger action
      */
     ST_LOCAL unsigned int getHotKey2() const {
@@ -78,6 +93,21 @@ class StAction {
      */
     ST_LOCAL void setHotKey2(unsigned int theKey) {
         myHotKey2 = theKey;
+    }
+
+    /**
+     * Default value of hot key 2.
+     */
+    ST_LOCAL unsigned int getDefaultHotKey2() const {
+        return myDefaultHotKey2;
+    }
+
+    /**
+     * @param theKey default value of hot key 2
+     */
+    ST_LOCAL void setDefaultHotKey2(unsigned int theKey) {
+        myDefaultHotKey2 = theKey;
+        myHotKey2        = theKey;
     }
 
     /**
@@ -103,10 +133,12 @@ class StAction {
 
         protected:
 
-    StString     myName;      //!< action name
-    unsigned int myHotKey1;   //!< key combination to execute action
-    unsigned int myHotKey2;   //!< key combination to execute action (extra)
-    bool         myToHoldKey; //!< this action process key hold event
+    StString     myName;           //!< action name
+    unsigned int myHotKey1;        //!< key combination to execute action
+    unsigned int myHotKey2;        //!< key combination to execute action (extra)
+    unsigned int myDefaultHotKey1; //!< default value of hot-key1
+    unsigned int myDefaultHotKey2; //!< default value of hot-key2
+    bool         myToHoldKey;      //!< this action process key hold event
 
 };
 
