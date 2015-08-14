@@ -25,6 +25,7 @@
 #include <StThreads/StThread.h>
 
 #include <StGL/StParams.h>
+#include <StGLWidgets/StGLAssignHotKey.h>
 #include <StGLWidgets/StGLButton.h>
 #include <StGLWidgets/StGLCombobox.h>
 #include <StGLWidgets/StGLCheckboxTextured.h>
@@ -526,6 +527,97 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
     aDialog->stglInit();
 }
 
+/**
+ * Widget to assign new hot key.
+ */
+class ST_LOCAL StHotKeyControl : public StGLAssignHotKey {
+
+        public:
+
+    /**
+     * Main constructor.
+     */
+    ST_LOCAL StHotKeyControl(StApplication*            thePlugin,
+                             StGLTable*                theHKeysTable,
+                             StImageViewerGUI*         theParent,
+                             const StHandle<StAction>& theAction,
+                             const int                 theHKeyIndex)
+    : StGLAssignHotKey(theParent, theAction, theHKeyIndex),
+      myPlugin(thePlugin),
+      myHKeysTable(theHKeysTable) {
+        //myTitleFrmt  =
+        //myAssignLab  =
+        //myDefaultLab =
+        myCancelLab = theParent->tr(BUTTON_CANCEL);
+        create();
+    }
+
+    /**
+     * Destructor.
+     */
+    ST_LOCAL virtual ~StHotKeyControl() {
+        myPlugin->registerHotKeys();
+        myHKeysTable->updateHotKeys(myPlugin->getActions());
+    }
+
+    /**
+     * Retrieve action for specified hot key.
+     */
+    ST_LOCAL virtual StHandle<StAction> getActionForKey(unsigned int theHKey) const {
+        return myPlugin->getActionForKey(myKeyFlags);
+    }
+
+        private:
+
+    StApplication* myPlugin;
+    StGLTable*     myHKeysTable;
+
+};
+
+void StImageViewerGUI::doListHotKeys(const size_t ) {
+    const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
+    StParamsList aParams;
+    aParams.add(myPlugin->StApplication::params.ActiveDevice);
+    aParams.add(myImage->params.displayMode);
+    aRend->getOptions(aParams);
+    aParams.add(myPlugin->params.ToShowFps);
+    aParams.add(myLangMap->params.language);
+    aParams.add(myPlugin->params.IsMobileUI);
+    myLangMap->params.language->setName(tr(MENU_HELP_LANGS));
+
+    const StString aTitle  = "Hot Keys";
+    StInfoDialog*  aDialog = new StInfoDialog(myPlugin, this, aTitle, scale(512), scale(300));
+
+    std::map< int, StHandle<StAction> >& anActionsMap = myPlugin->changeActions();
+
+    StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
+    aTable->changeItemMargins().top    = scale(4);
+    aTable->changeItemMargins().bottom = scale(4);
+    aTable->setupTable(anActionsMap.size(), 3);
+    aTable->setVisibility(true, true);
+
+    StHandle< StSlot<void (const size_t )> > aSlot1 = new StSlotMethod<StImageViewerGUI, void (const size_t )>(this, &StImageViewerGUI::doChangeHotKey1);
+    StHandle< StSlot<void (const size_t )> > aSlot2 = new StSlotMethod<StImageViewerGUI, void (const size_t )>(this, &StImageViewerGUI::doChangeHotKey2);
+    aTable->fillFromHotKeys(anActionsMap, aSlot1, aSlot2);
+    myHKeysTable = aTable;
+
+    aDialog->addButton(tr(BUTTON_CLOSE), true);
+    aDialog->setVisibility(true, true);
+    aDialog->stglInit();
+}
+
+void StImageViewerGUI::doChangeHotKey1(const size_t theId) {
+    const StHandle<StAction>& anAction = myPlugin->getAction(theId);
+    StHotKeyControl* aKeyChanger = new StHotKeyControl(myPlugin, myHKeysTable, this, anAction, 1);
+    aKeyChanger->stglInit();
+}
+
+void StImageViewerGUI::doChangeHotKey2(const size_t theId) {
+    const StHandle<StAction>& anAction = myPlugin->getAction(theId);
+    StHotKeyControl* aKeyChanger = new StHotKeyControl(myPlugin, myHKeysTable, this, anAction, 2);
+    aKeyChanger->stglInit();
+}
+
 void StImageViewerGUI::doMobileSettings(const size_t ) {
     const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
     StParamsList aParams;
@@ -581,6 +673,8 @@ StGLMenu* StImageViewerGUI::createHelpMenu() {
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doAboutProgram);
     aMenu->addItem(tr(MENU_HELP_USERTIPS))
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doUserTips);
+    aMenu->addItem("Hot Keys")
+         ->signals.onItemClick.connect(this, &StImageViewerGUI::doListHotKeys);
     aMenu->addItem(tr(MENU_HELP_LICENSE))
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doOpenLicense);
     aMenu->addItem(tr(MENU_HELP_SYSINFO))
@@ -782,6 +876,7 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
   myBtnFull(NULL),
   //
   myFpsWidget(NULL),
+  myHKeysTable(NULL),
   //
   myIsVisibleGUI(true),
   myIsMinimalGUI(true) {

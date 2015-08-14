@@ -37,6 +37,7 @@ class StGLMsgStack;
 class StGLRangeFieldFloat32;
 class StGLSubtitles;
 class StGLPlayList;
+class StGLTable;
 class StGLTextArea;
 class StGLTextureButton;
 class StPlayList;
@@ -186,6 +187,10 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL void doAboutRenderer(const size_t );
     ST_LOCAL void doAudioDelay   (const size_t );
 
+    ST_LOCAL void doListHotKeys(const size_t );
+    ST_LOCAL void doChangeHotKey1(const size_t );
+    ST_LOCAL void doChangeHotKey2(const size_t );
+
     ST_LOCAL void doShowMobileExMenu(const size_t );
     ST_LOCAL void doMobileSettings(const size_t );
     ST_LOCAL void doAudioStreamsCombo(const size_t );
@@ -227,6 +232,8 @@ class StMoviePlayerGUI : public StGLRootWidget {
     StGLTextureButton*  myBtnList;
     StGLTextureButton*  myBtnFullScr;
     StGLFpsLabel*       myFpsWidget;
+
+    StGLTable*          myHKeysTable;
 
     bool                myIsVisibleGUI;
     bool                myIsExperimental;

@@ -35,6 +35,7 @@ class StGLMenuItem;
 class StGLImageRegion;
 class StGLMsgStack;
 class StGLFpsLabel;
+class StGLTable;
 class StWindow;
 
 /**
@@ -107,8 +108,6 @@ class StImageViewerGUI : public StGLRootWidget {
 
     ST_LOCAL static size_t trSrcFormatId(const StFormat theSrcFormat);
 
-        private:
-
     ST_LOCAL const StString& tr(const size_t theId) const {
         return myLangMap->getValue(theId);
     }
@@ -168,6 +167,10 @@ class StImageViewerGUI : public StGLRootWidget {
     ST_LOCAL void doShowFPS(const bool );
     ST_LOCAL void doAboutRenderer(const size_t );
 
+    ST_LOCAL void doChangeHotKey1(const size_t );
+    ST_LOCAL void doChangeHotKey2(const size_t );
+    ST_LOCAL void doListHotKeys(const size_t );
+
     ST_LOCAL void doShowMobileExMenu(const size_t );
     ST_LOCAL void doMobileSettings(const size_t );
     ST_LOCAL void doDisplayStereoFormatCombo(const size_t );
@@ -197,12 +200,15 @@ class StImageViewerGUI : public StGLRootWidget {
     StGLTextureButton*  myBtnFull;
     StGLFpsLabel*       myFpsWidget;
 
+    StGLTable*          myHKeysTable;
+
     bool                myIsVisibleGUI;
     bool                myIsMinimalGUI;
 
         private:
 
     friend class StImageViewer;
+    friend class StHotKeyControl;
 
 };
 
