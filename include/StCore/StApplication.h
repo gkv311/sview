@@ -115,6 +115,26 @@ class StApplication {
      */
     ST_CPPEXPORT const StHandle<StMsgQueue>& getMessagesQueue() const;
 
+    /**
+     * Register hot keys for specified actions.
+     */
+    ST_CPPEXPORT void registerHotKeys();
+
+    /**
+     * Return the action association for specified hot-key.
+     */
+    ST_CPPEXPORT StHandle<StAction> getActionForKey(unsigned int theHKey) const;
+
+    /**
+     * @return action for specified ID
+     */
+    ST_CPPEXPORT const StHandle<StAction>& getAction(const int theActionId);
+
+    /**
+     * Get actions map.
+     */
+    ST_LOCAL const std::map< int, StHandle<StAction> >& getActions() const { return myActions; }
+
         protected:
 
     /**
@@ -138,14 +158,9 @@ class StApplication {
     ST_CPPEXPORT void addRenderer(const StHandle<StWindow>& theRenderer);
 
     /**
-     * Register hot keys for specified actions.
+     * Modify actions.
      */
-    ST_CPPEXPORT void registerHotKeys();
-
-    /**
-     * @return action for specified ID
-     */
-    ST_CPPEXPORT const StHandle<StAction>& getAction(const int theActionId);
+    ST_LOCAL std::map< int, StHandle<StAction> >& changeActions() { return myActions; }
 
     /**
      * Register the action.

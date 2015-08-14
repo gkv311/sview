@@ -10,7 +10,9 @@
 #define __StGLTable_h_
 
 #include <StGLWidgets/StGLTextArea.h>
+
 #include <StSettings/StParam.h>
+#include <StSlots/StAction.h>
 
 class StGLTable;
 
@@ -134,6 +136,29 @@ class StGLTable : public StGLWidget {
                                      const int           theMaxWidth,
                                      const int           theRowId = 0,
                                      const int           theColId = 0);
+
+    /**
+     * Initialize the table from per-action hot-keys.
+     * @param theActions      actions map
+     * @param theSlot1        callback slot to change first  hot-key for specified action ID
+     * @param theSlot2        callback slot to change second hot-key for specified action ID
+     * @param theMaxWidth     maximum width of these three columns
+     * @param theRowId        row    of top-bottom table corner to fill from
+     * @param theColId        column of top-bottom table corner to fill from
+     */
+    ST_CPPEXPORT void fillFromHotKeys(const std::map< int, StHandle<StAction> >&      theActions,
+                                      const StHandle< StSlot<void (const size_t )> >& theSlot1,
+                                      const StHandle< StSlot<void (const size_t )> >& theSlot2,
+                                      int                theMaxWidth = 0,
+                                      const int          theRowId = 0,
+                                      const int          theColId = 0);
+
+    /**
+     * Update hot-keys values.
+     */
+    ST_CPPEXPORT void updateHotKeys(const std::map< int, StHandle<StAction> >& theActions,
+                                    const int theRowId = 0,
+                                    const int theColId = 0);
 
     /**
      * Re-compute position of table elements.

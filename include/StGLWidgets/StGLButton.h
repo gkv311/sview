@@ -56,8 +56,6 @@ class StGLButton : public StGLMenu {
      */
     ST_CPPEXPORT int computeWidth(const StString& theText);
 
-        protected:
-
     /**
      * Return the underlying menu item.
      */

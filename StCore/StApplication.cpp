@@ -337,6 +337,13 @@ void StApplication::addAction(const int           theActionId,
     addAction(theActionId, theAction);
 }
 
+StHandle<StAction> StApplication::getActionForKey(unsigned int theHKey) const {
+    std::map< unsigned int, StHandle<StAction> >::const_iterator anAction = myKeyActions.find(theHKey);
+    return anAction != myKeyActions.end()
+         ? anAction->second
+         : StHandle<StAction>();
+}
+
 void StApplication::registerHotKeys() {
     myKeyActions.clear();
     for(std::map< int, StHandle<StAction> >::iterator anIter = myActions.begin();

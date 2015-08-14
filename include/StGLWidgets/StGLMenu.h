@@ -108,6 +108,13 @@ class StGLMenu : public StGLWidget {
     }
 
     /**
+     * Setup background color of menu.
+     */
+    ST_LOCAL void setColor(const StGLVec4& theColor) {
+        myColorVec = theColor;
+    }
+
+    /**
      * Draw bounds rectangle (off by default).
      */
     inline void setShowBounds(const bool theToShow) {

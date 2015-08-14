@@ -6,6 +6,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="StGLAssignHotKey.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
     <ClCompile Include="StGLButton.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
