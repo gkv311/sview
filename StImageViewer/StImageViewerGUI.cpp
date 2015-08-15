@@ -564,7 +564,7 @@ class ST_LOCAL StHotKeyControl : public StGLAssignHotKey {
      * Retrieve action for specified hot key.
      */
     ST_LOCAL virtual StHandle<StAction> getActionForKey(unsigned int theHKey) const {
-        return myPlugin->getActionForKey(myKeyFlags);
+        return myPlugin->getActionForKey(theHKey);
     }
 
         private:
