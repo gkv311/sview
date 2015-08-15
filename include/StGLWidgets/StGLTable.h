@@ -13,6 +13,7 @@
 
 #include <StSettings/StParam.h>
 #include <StSlots/StAction.h>
+#include <StStrings/StLangMap.h>
 
 class StGLTable;
 
@@ -140,6 +141,7 @@ class StGLTable : public StGLWidget {
     /**
      * Initialize the table from per-action hot-keys.
      * @param theActions      actions map
+     * @param theLangMap      map of translation strings
      * @param theSlot1        callback slot to change first  hot-key for specified action ID
      * @param theSlot2        callback slot to change second hot-key for specified action ID
      * @param theMaxWidth     maximum width of these three columns
@@ -147,6 +149,7 @@ class StGLTable : public StGLWidget {
      * @param theColId        column of top-bottom table corner to fill from
      */
     ST_CPPEXPORT void fillFromHotKeys(const std::map< int, StHandle<StAction> >&      theActions,
+                                      const StLangMap&                                theLangMap,
                                       const StHandle< StSlot<void (const size_t )> >& theSlot1,
                                       const StHandle< StSlot<void (const size_t )> >& theSlot2,
                                       int                theMaxWidth = 0,

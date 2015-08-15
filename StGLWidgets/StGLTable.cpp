@@ -250,6 +250,7 @@ void StGLTable::fillFromParams(const StParamsList& theParams,
 }
 
 void StGLTable::fillFromHotKeys(const std::map< int, StHandle<StAction> >&      theActions,
+                                const StLangMap&                                theLangMap,
                                 const StHandle< StSlot<void (const size_t )> >& theHKeySlot1,
                                 const StHandle< StSlot<void (const size_t )> >& theHKeySlot2,
                                 int       theMaxWidth,
@@ -265,7 +266,6 @@ void StGLTable::fillFromHotKeys(const std::map< int, StHandle<StAction> >&      
 
     // fill table
     int aRowIter = 0;
-    int aCol1Width    = 0;
     int aCol2Width    = 0;
     int aCol1MaxWidth = theMaxWidth / 2;
     const StGLCorner aCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT);
@@ -285,12 +285,15 @@ void StGLTable::fillFromHotKeys(const std::map< int, StHandle<StAction> >&      
         StGLTextArea* aTextLab = new StGLTextArea(&anItemLab, 0, 0, aCorner);
         aTextLab->setupAlignment(StGLTextFormatter::ST_ALIGN_X_LEFT,
                                  StGLTextFormatter::ST_ALIGN_Y_TOP);
-        aTextLab->setText(anAction->getName());
+        StString aDesc = theLangMap.getValue(anAction->getName());
+        if(aDesc.isEmpty()) {
+            aDesc = anAction->getName();
+        }
+        aTextLab->setText(aDesc);
         aTextLab->setTextColor(THE_COLOR_WHITE);
         aTextLab->setupStyle(StFTFont::Style_Bold);
         aTextLab->setVisibility(true, true);
         aTextLab->stglInitAutoHeightWidth(aCol1MaxWidth);
-        aCol1Width = stMax(aCol1Width, aTextLab->getRectPx().width());
 
         StGLButton* aTextKey1 = new StGLButton(&anItemKey1, 0, 0, encodeHotKey(anAction->getHotKey1()));
         aTextKey1->setVisibility(true, true);
@@ -317,7 +320,7 @@ void StGLTable::fillFromHotKeys(const std::map< int, StHandle<StAction> >&      
     const size_t aRowLast = theActions.size();
     for(size_t aRowIter = 0; aRowIter < aRowLast; ++aRowIter) {
         StGLTableItem& anItemLab = changeElement(theRowId + (int )aRowIter, theColId);
-        anItemLab.getItem()->changeRectPx().right() = anItemLab.getItem()->getRectPx().left() + aCol1Width;
+        anItemLab.getItem()->changeRectPx().right() = anItemLab.getItem()->getRectPx().left() + aCol1MaxWidth;
 
         StGLTableItem& anItemKey1 = changeElement(theRowId + (int )aRowIter, theColId + 1);
         StGLTableItem& anItemKey2 = changeElement(theRowId + (int )aRowIter, theColId + 2);

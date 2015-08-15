@@ -598,7 +598,7 @@ void StImageViewerGUI::doListHotKeys(const size_t ) {
 
     StHandle< StSlot<void (const size_t )> > aSlot1 = new StSlotMethod<StImageViewerGUI, void (const size_t )>(this, &StImageViewerGUI::doChangeHotKey1);
     StHandle< StSlot<void (const size_t )> > aSlot2 = new StSlotMethod<StImageViewerGUI, void (const size_t )>(this, &StImageViewerGUI::doChangeHotKey2);
-    aTable->fillFromHotKeys(anActionsMap, aSlot1, aSlot2);
+    aTable->fillFromHotKeys(anActionsMap, *myLangMap, aSlot1, aSlot2);
     myHKeysTable = aTable;
 
     aDialog->addButton(tr(BUTTON_CLOSE), true);

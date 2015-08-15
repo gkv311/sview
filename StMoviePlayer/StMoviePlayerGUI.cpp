@@ -1736,7 +1736,7 @@ void StMoviePlayerGUI::doListHotKeys(const size_t ) {
 
     StHandle< StSlot<void (const size_t )> > aSlot1 = new StSlotMethod<StMoviePlayerGUI, void (const size_t )>(this, &StMoviePlayerGUI::doChangeHotKey1);
     StHandle< StSlot<void (const size_t )> > aSlot2 = new StSlotMethod<StMoviePlayerGUI, void (const size_t )>(this, &StMoviePlayerGUI::doChangeHotKey2);
-    aTable->fillFromHotKeys(anActionsMap, aSlot1, aSlot2);
+    aTable->fillFromHotKeys(anActionsMap, *myLangMap, aSlot1, aSlot2);
     myHKeysTable = aTable;
 
     aDialog->addButton(tr(BUTTON_CLOSE), true);
