@@ -108,7 +108,17 @@ class StImageViewerGUI : public StGLRootWidget {
 
     ST_LOCAL static size_t trSrcFormatId(const StFormat theSrcFormat);
 
+    /**
+     * @return translation for the string with specified id
+     */
     ST_LOCAL const StString& tr(const size_t theId) const {
+        return myLangMap->getValue(theId);
+    }
+
+    /**
+     * @return translation for the string with specified id
+     */
+    ST_LOCAL const StString& tr(const StString& theId) const {
         return myLangMap->getValue(theId);
     }
 

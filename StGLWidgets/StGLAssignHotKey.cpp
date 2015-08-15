@@ -16,8 +16,9 @@
 StGLAssignHotKey::StGLAssignHotKey(StGLRootWidget*           theParent,
                                    const StHandle<StAction>& theAction,
                                    const int                 theHKeyIndex)
-: StGLMessageBox(theParent, "", "", theParent->scale(400), theParent->scale(200)),
-  myTitleFrmt("Assign new Hot Key for {0}..."),
+: StGLMessageBox(theParent, "Assign new Hot Key\n\n", "", theParent->scale(400), theParent->scale(250)),
+  myTitleFrmt("Assign new Hot Key for action\n<i>{0}</i>"),
+  myConflictFrmt("Conflicts with: <i>{0}</i>"),
   myAssignLab("Assign"),
   myDefaultLab("Default"),
   myCancelLab("Cancel"),
@@ -113,7 +114,7 @@ void StGLAssignHotKey::updateText() {
     if(!anOtherAction.isNull()
      && anOtherAction != myAction) {
         myConflictAction = anOtherAction;
-        myConflictLabel->setText("Conflicts with: " + myConflictAction->getName());
+        myConflictLabel->setText(myConflictFrmt.format(myConflictAction->getName()));
     } else {
         myConflictAction.nullify();
         myConflictLabel->setText("");

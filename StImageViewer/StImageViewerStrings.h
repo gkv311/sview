@@ -108,6 +108,7 @@ namespace StImageViewerStrings {
         MENU_HELP_USERTIPS= 1506,
         MENU_HELP_SYSINFO = 1508,
         MENU_HELP_SCALE   = 1509,
+        MENU_HELP_HOTKEYS = 1510,
 
         // Root -> Help -> Check for updates menu
         MENU_HELP_UPDATES_NOW   = 1520,
@@ -137,6 +138,9 @@ namespace StImageViewerStrings {
         DIALOG_NOTHING_TO_SAVE = 2011,
         DIALOG_NO_SNAPSHOT     = 2012,
 
+        DIALOG_ASSIGN_HOT_KEY  = 2013,
+        DIALOG_CONFLICTS_WITH  = 2014,
+
         // About dialog
         ABOUT_DPLUGIN_NAME     = 3000,
         ABOUT_VERSION          = 3001,
@@ -148,6 +152,9 @@ namespace StImageViewerStrings {
         BUTTON_CANCEL          = 4001,
         BUTTON_SAVE_METADATA   = 4006,
         BUTTON_DELETE          = 4007,
+        BUTTON_DEFAULT         = 4008,
+        BUTTON_DEFAULTS        = 4009,
+        BUTTON_ASSIGN          = 4010,
 
         // metadata keys
         INFO_LEFT              = 5000,

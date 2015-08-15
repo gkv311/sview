@@ -56,7 +56,14 @@ class StMoviePlayerGUI : public StGLRootWidget {
     /**
      * @return translation for the string with specified id
      */
-    ST_LOCAL inline const StString& tr(const size_t theId) const {
+    ST_LOCAL const StString& tr(const size_t theId) const {
+        return myLangMap->getValue(theId);
+    }
+
+    /**
+     * @return translation for the string with specified id
+     */
+    ST_LOCAL const StString& tr(const StString& theId) const {
         return myLangMap->getValue(theId);
     }
 

@@ -72,7 +72,8 @@ class StGLAssignHotKey : public StGLMessageBox {
 
         protected:
 
-    StString           myTitleFrmt;       //!< "Assign new Hot Key for {0}..."
+    StString           myTitleFrmt;       //!< "Assign new Hot Key for\n{0}"
+    StString           myConflictFrmt;    //!< "Conflicts with: {0}"
     StString           myAssignLab;       //!< "Assign"  key text
     StString           myDefaultLab;      //!< "Default" key text
     StString           myCancelLab;       //!< "Cancel"  key text

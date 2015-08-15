@@ -40,6 +40,12 @@ void loadDefaults(StLangMap& theStrings) {
                "Save");
     theStrings(BUTTON_DELETE,
                "Delete");
+    theStrings(BUTTON_DEFAULT,
+               "Default");
+    theStrings(BUTTON_DEFAULTS,
+               "Defaults");
+    theStrings(BUTTON_ASSIGN,
+               "Assign");
     theStrings(MENU_MEDIA,
                "Media");
     theStrings(MENU_VIEW,
@@ -182,6 +188,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Each year");
     theStrings(MENU_HELP_UPDATES_NEVER,
                "Never"),
+    theStrings(MENU_HELP_HOTKEYS,
+               "Hotkeys");
     theStrings(IMAGE_OPEN,
                "Open another image");
     theStrings(IMAGE_PREVIOUS,
@@ -224,6 +232,10 @@ void loadDefaults(StLangMap& theStrings) {
                "Snapshot not available!");
     theStrings(DIALOG_SAVE_SNAPSHOT,
                "Choose location to save snapshot");
+    theStrings(DIALOG_ASSIGN_HOT_KEY,
+               "Assign new Hot Key for action\n<i>{0}</i>");
+    theStrings(DIALOG_CONFLICTS_WITH,
+               "Conflicts with: <i>{0}</i>");
 
     theStrings(INFO_LEFT,
                "[left]");

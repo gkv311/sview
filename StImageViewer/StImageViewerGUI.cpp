@@ -545,10 +545,11 @@ class ST_LOCAL StHotKeyControl : public StGLAssignHotKey {
     : StGLAssignHotKey(theParent, theAction, theHKeyIndex),
       myPlugin(thePlugin),
       myHKeysTable(theHKeysTable) {
-        //myTitleFrmt  =
-        //myAssignLab  =
-        //myDefaultLab =
-        myCancelLab = theParent->tr(BUTTON_CANCEL);
+        myTitleFrmt    = theParent->tr(DIALOG_ASSIGN_HOT_KEY).format(theParent->tr(theAction->getName()));
+        myConflictFrmt = theParent->tr(DIALOG_CONFLICTS_WITH);
+        myAssignLab    = theParent->tr(BUTTON_ASSIGN);
+        myDefaultLab   = theParent->tr(BUTTON_DEFAULT);
+        myCancelLab    = theParent->tr(BUTTON_CANCEL);
         create();
     }
 
@@ -585,7 +586,7 @@ void StImageViewerGUI::doListHotKeys(const size_t ) {
     aParams.add(myPlugin->params.IsMobileUI);
     myLangMap->params.language->setName(tr(MENU_HELP_LANGS));
 
-    const StString aTitle  = "Hot Keys";
+    const StString aTitle  = tr(MENU_HELP_HOTKEYS);
     StInfoDialog*  aDialog = new StInfoDialog(myPlugin, this, aTitle, scale(564), scale(300));
 
     std::map< int, StHandle<StAction> >& anActionsMap = myPlugin->changeActions();
@@ -673,7 +674,7 @@ StGLMenu* StImageViewerGUI::createHelpMenu() {
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doAboutProgram);
     aMenu->addItem(tr(MENU_HELP_USERTIPS))
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doUserTips);
-    aMenu->addItem("Hot Keys")
+    aMenu->addItem(tr(MENU_HELP_HOTKEYS))
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doListHotKeys);
     aMenu->addItem(tr(MENU_HELP_LICENSE))
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doOpenLicense);
