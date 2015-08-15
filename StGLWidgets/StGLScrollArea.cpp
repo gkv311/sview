@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2014 Kirill Gavrilov <kirill@sview.ru
+ * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -67,11 +67,7 @@ void StGLScrollArea::stglDraw(unsigned int theView) {
         StPointD_t aDelta = getRoot()->getCursorZo() - myClickPntZo;
         int aDeltaY = int(aDelta.y() * getRoot()->getRectPx().height());
         myClickPntZo = getRoot()->getCursorZo();
-
-        StGLWidget* aContent = myChildren.getStart();
-        aContent->changeRectPx().top()    += aDeltaY;
-        aContent->changeRectPx().bottom() += aDeltaY;
-        isResized = true;
+        doScroll(aDeltaY);
     }
 
     StGLContext& aCtx = getContext();
@@ -89,15 +85,24 @@ void StGLScrollArea::stglDraw(unsigned int theView) {
     aCtx.stglResetScissorRect();
 }
 
-void StGLScrollArea::doScroll(const int theDir) {
+void StGLScrollArea::doScroll(const int theDelta) {
     if(!isScrollable()) {
         return;
     }
 
     StGLWidget* aContent = myChildren.getStart();
-    aContent->changeRectPx().top()    += 10 * theDir;
-    aContent->changeRectPx().bottom() += 10 * theDir;
-    stglResize();
+    const int aMinLim = 0;
+    const int aMaxLim = getRectPx().height() - aContent->getRectPx().height();
+    const int aTopOld = aContent->getRectPx().top();
+    const int aTopNew = stMax(stMin(aMinLim, aTopOld + theDelta), aMaxLim);
+    const int aDelta  = aTopNew - aTopOld;
+    if(aDelta == 0) {
+        return;
+    }
+
+    aContent->changeRectPx().top()    += aDelta;
+    aContent->changeRectPx().bottom() += aDelta;
+    isResized = true;
 }
 
 bool StGLScrollArea::tryClick(const StPointD_t& theCursorZo,
@@ -125,11 +130,11 @@ bool StGLScrollArea::tryUnClick(const StPointD_t& theCursorZo,
     if(StGLWidget::tryUnClick(theCursorZo, theMouseBtn, isItemUnclicked)) {
         switch(theMouseBtn) {
             case ST_MOUSE_SCROLL_V_UP: {
-                doScroll(1);
+                doScroll(10);
                 break;
             }
             case ST_MOUSE_SCROLL_V_DOWN: {
-                doScroll(-1);
+                doScroll(-10);
                 break;
             }
         }

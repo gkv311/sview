@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -47,9 +47,9 @@ class StGLScrollArea : public StGLWidget {
 
     /**
      * Scroll (vertically) content.
-     * @param theDir Determine scroll direction (1 forward, -1 backward)
+     * @param theDelta scroll delta
      */
-    ST_CPPEXPORT void doScroll(const int theDir);
+    ST_CPPEXPORT void doScroll(const int theDelta);
 
         protected:
 
