@@ -137,8 +137,12 @@ bool StGLAssignHotKey::doKeyDown(const StKeyEvent& theEvent) {
             myHKeyLabel->setText(aText + "...");
             return true;
         }
-        case ST_VK_ESCAPE:
-            //return StGLMessageBox::doKeyDown(theEvent);
+        case ST_VK_RETURN: {
+            if( myKeyFlags != 0
+            && !myHKeyLabel->getText().isEndsWith(stCString("..."))) {
+                return StGLMessageBox::doKeyDown(theEvent);
+            }
+        }
         default: {
             if(theEvent.VKey == ST_VK_ESCAPE) {
                 if(myKeyFlags == 0) {
