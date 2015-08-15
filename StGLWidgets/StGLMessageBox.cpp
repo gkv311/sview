@@ -201,16 +201,46 @@ bool StGLMessageBox::doKeyDown(const StKeyEvent& theEvent) {
             return true;
         case ST_VK_UP:
             if(myContent->isScrollable()) {
-                myContent->doScroll(1);
+                myContent->doScroll(myRoot->scale(10));
                 return true;
             }
             return doNextButton(-1);
         case ST_VK_DOWN:
             if(myContent->isScrollable()) {
-                myContent->doScroll(-1);
+                myContent->doScroll(-myRoot->scale(10));
                 return true;
             }
             return doNextButton(1);
+        case ST_VK_PAGE_UP: {
+            if(myContent->isScrollable()) {
+                myContent->doScroll(myContent->getRectPx().height());
+                return true;
+            }
+            return false;
+        }
+        case ST_VK_PAGE_DOWN: {
+            if(myContent->isScrollable()) {
+                myContent->doScroll(-myContent->getRectPx().height());
+                return true;
+            }
+            return false;
+        }
+        case ST_VK_PAGE_FIRST: {
+            if(myContent->isScrollable()) {
+                StGLWidget* aContent = myContent->getChildren()->getStart();
+                myContent->doScroll(aContent->getRectPx().height());
+                return true;
+            }
+            return false;
+        }
+        case ST_VK_PAGE_LAST: {
+            if(myContent->isScrollable()) {
+                StGLWidget* aContent = myContent->getChildren()->getStart();
+                myContent->doScroll(-aContent->getRectPx().height());
+                return true;
+            }
+            return false;
+        }
         case ST_VK_LEFT:
             return doNextButton(-1);
         case ST_VK_RIGHT:

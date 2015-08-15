@@ -130,11 +130,11 @@ bool StGLScrollArea::tryUnClick(const StPointD_t& theCursorZo,
     if(StGLWidget::tryUnClick(theCursorZo, theMouseBtn, isItemUnclicked)) {
         switch(theMouseBtn) {
             case ST_MOUSE_SCROLL_V_UP: {
-                doScroll(10);
+                doScroll(myRoot->scale(10));
                 break;
             }
             case ST_MOUSE_SCROLL_V_DOWN: {
-                doScroll(-10);
+                doScroll(-myRoot->scale(10));
                 break;
             }
         }
