@@ -1724,7 +1724,7 @@ void StMoviePlayerGUI::doListHotKeys(const size_t ) {
     myLangMap->params.language->setName(tr(MENU_HELP_LANGS));
 
     const StString aTitle  = "Hot Keys";
-    StInfoDialog*  aDialog = new StInfoDialog(myPlugin, this, aTitle, scale(512), scale(300));
+    StInfoDialog*  aDialog = new StInfoDialog(myPlugin, this, aTitle, scale(564), scale(300));
 
     std::map< int, StHandle<StAction> >& anActionsMap = myPlugin->changeActions();
 

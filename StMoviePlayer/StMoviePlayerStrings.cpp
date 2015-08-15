@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +18,18 @@
 
 #include "StMoviePlayerStrings.h"
 
+#include "StMoviePlayer.h"
 #include <StStrings/StLangMap.h>
 
 namespace StMoviePlayerStrings {
+
+inline void addAction(StLangMap&              theStrings,
+                      const int               theAction,
+                      const StString&         theAlias,
+                      const char*             theDefValue) {
+    theStrings(ACTIONS_FROM + theAction, theDefValue);
+    theStrings.addAlias(theAlias, ACTIONS_FROM + theAction);
+}
 
 void loadDefaults(StLangMap& theStrings) {
     theStrings(BUTTON_CLOSE,
@@ -403,6 +412,181 @@ void loadDefaults(StLangMap& theStrings) {
     theStrings.addAlias("replaygain_album_peak", METADATA_ALBUM_PEAK);
     //theStrings.addAlias("album dynamic range",   METADATA_ALBUM_DYNAMIC_RANGE);
     //theStrings.addAlias("dynamic range",         METADATA_DYNAMIC_RANGE);
+
+    // define actions
+    addAction(theStrings, StMoviePlayer::Action_Quit,
+              "DoQuit",
+              "Quit program");
+    addAction(theStrings, StMoviePlayer::Action_Fullscreen,
+              "DoFullscreen",
+              "Switch fullscreen/windowed");
+    addAction(theStrings, StMoviePlayer::Action_ShowFps,
+              "DoShowFPS",
+              "Show/hide FPS meter");
+    addAction(theStrings, StMoviePlayer::Action_SrcAuto,
+              "DoSrcAuto",
+              "Stereo format - Auto");
+    addAction(theStrings, StMoviePlayer::Action_SrcMono,
+              "DoSrcMono",
+              "Stereo format - Mono");
+    addAction(theStrings, StMoviePlayer::Action_SrcOverUnderLR,
+              "DoSrcOverUnder",
+              "Stereo format - Over/Under");
+    addAction(theStrings, StMoviePlayer::Action_SrcSideBySideRL,
+              "DoSrcSideBySide",
+              "Stereo format - Side by side");
+    addAction(theStrings, StMoviePlayer::Action_FileInfo,
+              "DoFileInfo",
+              "Show file info");
+    addAction(theStrings, StMoviePlayer::Action_ListFirst,
+              "DoListFirst",
+              "Playlist - Go to the first item");
+    addAction(theStrings, StMoviePlayer::Action_ListLast,
+              "DoListLast",
+              "Playlist - Go to the last item");
+    addAction(theStrings, StMoviePlayer::Action_ListPrev,
+              "DoListPrev",
+              "Playlist - Go to the previous item");
+    addAction(theStrings, StMoviePlayer::Action_ListNext,
+              "DoListNext",
+              "Playlist - Go to the next item");
+    addAction(theStrings, StMoviePlayer::Action_ListPrevExt,
+              "DoListPrevExt",
+              "Playlist - Go to the previous item [2]");
+    addAction(theStrings, StMoviePlayer::Action_ListNextExt,
+              "DoListNextExt",
+              "Playlist - Go to the next item [2]");
+    addAction(theStrings, StMoviePlayer::Action_PlayPause,
+              "DoPlayPause",
+              "Play/pause playback");
+    addAction(theStrings, StMoviePlayer::Action_Stop,
+              "DoStop",
+              "Stop playback");
+    addAction(theStrings, StMoviePlayer::Action_SeekLeft5,
+              "DoSeekLeft",
+              "Seek 5 seconds backward");
+    addAction(theStrings, StMoviePlayer::Action_SeekRight5,
+              "DoSeekRight",
+              "Seek 5 seconds forward");
+    addAction(theStrings, StMoviePlayer::Action_Open1File,
+              "DoOpen1File",
+              "Show open file dialog");
+    addAction(theStrings, StMoviePlayer::Action_SaveSnapshot,
+              "DoSnapshot",
+              "Save snapshot");
+    addAction(theStrings, StMoviePlayer::Action_DeleteFile,
+              "DoDeleteFile",
+              "Delete the file from file system");
+    addAction(theStrings, StMoviePlayer::Action_AudioMute,
+              "DoAudioMute",
+              "Mute/unmute audio");
+    addAction(theStrings, StMoviePlayer::Action_AudioDecrease,
+              "DoAudioDecrease",
+              "Audio volume down");
+    addAction(theStrings, StMoviePlayer::Action_AudioIncrease,
+              "DoAudioIncrease",
+              "Audio volume up");
+    addAction(theStrings, StMoviePlayer::Action_AudioPrev,
+              "DoAudioPrev",
+              "Previous audio track");
+    addAction(theStrings, StMoviePlayer::Action_AudioNext,
+              "DoAudioNext",
+              "Next audio track");
+    addAction(theStrings, StMoviePlayer::Action_SubsPrev,
+              "DoSubtitlesPrev",
+              "Next subtitles track");
+    addAction(theStrings, StMoviePlayer::Action_SubsNext,
+              "DoSubtitlesNext",
+              "Next subtitles track");
+    addAction(theStrings, StMoviePlayer::Action_CopyToClipboard,
+              "DoSubtitlesCopy",
+              "Copy displayed subtitles text");
+    addAction(theStrings, StMoviePlayer::Action_PasteFromClipboard,
+              "DoOpenFromClipboard",
+              "Open URL from clipboard");
+    addAction(theStrings, StMoviePlayer::Action_ShowList,
+              "DoPlayListReverse",
+              "Show/hide playlist");
+    addAction(theStrings, StMoviePlayer::Action_ImageAdjustReset,
+              "DoImageAdjustReset",
+              "Reset image adjustment");
+
+    // image region actions
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_Reset,
+              "DoParamsReset",
+              "Reset image position");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_SwapLR,
+              "DoParamsSwapLR",
+              "Swap Left/Right");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_GammaDec,
+              "DoParamsGammaDec",
+              "Gamma correction - decrease");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_GammaInc,
+              "DoParamsGammaInc",
+              "Gamma correction - increase");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_SepXDec,
+              "DoParamsSepXDec",
+              "DX separation - decrease");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_SepXInc,
+              "DoParamsSepXInc",
+              "DX separation - increase");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_SepYDec,
+              "DoParamsSepYDec",
+              "DY separation - decrease");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_SepYInc,
+              "DoParamsSepYInc",
+              "DY separation - increase");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_SepRotDec,
+              "DoParamsSepRotDec",
+              "Angular separation - decrease");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_SepRotInc,
+              "DoParamsSepRotInc",
+              "Angular separation - increase");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_Rot90Counter,
+              "DoParamsRotZ90Dec",
+              "Rotate 90 degrees counterclockwise");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_Rot90Clockwise,
+              "DoParamsRotZ90Inc",
+              "Rotate 90 degrees clockwise");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_RotCounter,
+              "DoParamsRotZDec",
+              "Rotate counterclockwise");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_RotClockwise,
+              "DoParamsRotZInc",
+              "Rotate clockwise");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_ModeNext,
+              "DoParamsModeNext",
+              "Select next mode");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_PanLeft,
+              "DoParamsPanLeft",
+              "Panning - navigate to the left");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_PanRight,
+              "DoParamsPanRight",
+              "Panning - navigate to the right");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_PanUp,
+              "DoParamsPanUp",
+              "Panning - navigate to the top");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_PanDown,
+              "DoParamsPanDown",
+              "Panning - navigate to the bottom");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_ScaleIn,
+              "DoParamsScaleIn",
+              "Scale - increment");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_ScaleOut,
+              "DoParamsScaleOut",
+              "Scale - decrement");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_RotYLeft,
+              "DoParamsRotYLeft",
+              "Y Rotation - left");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_RotYRight,
+              "DoParamsRotYRight",
+              "Y Rotation - right");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_RotXUp,
+              "DoParamsRotXUp",
+              "X Rotation - up");
+    addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_RotXDown,
+              "DoParamsRotXDown",
+              "X Rotation - down");
 }
 
 };

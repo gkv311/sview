@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -243,6 +243,9 @@ namespace StMoviePlayerStrings {
         METADATA_TRACK_PEAK    = 5323,
         METADATA_ALBUM_GAIN    = 5324,
         METADATA_ALBUM_PEAK    = 5325,
+
+        // keys reserved for actions (see StMoviePlayer::ActionId)
+        ACTIONS_FROM           = 6000,
 
     };
 

@@ -294,7 +294,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doUpdateStateLoaded();
     ST_LOCAL void doImageAdjustReset(const size_t dummy = 0);
 
-        private:
+        public:
 
     /**
      * Actions identifiers.
