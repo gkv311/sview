@@ -134,7 +134,6 @@ bool StGLAssignHotKey::doKeyDown(const StKeyEvent& theEvent) {
                 aText += "+";
             }
             myHKeyLabel->setText(aText + "...");
-            stglInit();
             return true;
         }
         case ST_VK_ESCAPE:
