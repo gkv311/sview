@@ -100,3 +100,27 @@ bool StGLButton::stglInit() {
     changeRectPx().bottom() = getRectPx().top()  + myItemHeight;
     return true;
 }
+
+bool StGLButton::tryClick(const StPointD_t& theCursorZo,
+                          const int&        theMouseBtn,
+                          bool&             theIsItemClicked) {
+    if(theMouseBtn == ST_MOUSE_SCROLL_V_UP
+    || theMouseBtn == ST_MOUSE_SCROLL_V_DOWN
+    || theMouseBtn == ST_MOUSE_SCROLL_LEFT
+    || theMouseBtn == ST_MOUSE_SCROLL_RIGHT) {
+        return false;
+    }
+    return StGLMenu::tryClick(theCursorZo, theMouseBtn, theIsItemClicked);
+}
+
+bool StGLButton::tryUnClick(const StPointD_t& theCursorZo,
+                            const int&        theMouseBtn,
+                            bool&             theIsItemUnclicked) {
+    if(theMouseBtn == ST_MOUSE_SCROLL_V_UP
+    || theMouseBtn == ST_MOUSE_SCROLL_V_DOWN
+    || theMouseBtn == ST_MOUSE_SCROLL_LEFT
+    || theMouseBtn == ST_MOUSE_SCROLL_RIGHT) {
+        return false;
+    }
+    return StGLMenu::tryUnClick(theCursorZo, theMouseBtn, theIsItemUnclicked);
+}
