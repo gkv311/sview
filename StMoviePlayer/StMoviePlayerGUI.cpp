@@ -1713,6 +1713,21 @@ class ST_LOCAL StHotKeyControl : public StGLAssignHotKey {
 
 };
 
+void StMoviePlayerGUI::doResetHotKeys(const size_t ) {
+    if(myHKeysTable == NULL) {
+        return;
+    }
+
+    for(std::map< int, StHandle<StAction> >::iterator anActionIter = myPlugin->changeActions().begin();
+        anActionIter != myPlugin->changeActions().end(); ++anActionIter) {
+        StHandle<StAction>& anAction = anActionIter->second;
+        anAction->setHotKey1(anAction->getDefaultHotKey1());
+        anAction->setHotKey2(anAction->getDefaultHotKey2());
+    }
+    myPlugin->registerHotKeys();
+    myHKeysTable->updateHotKeys(myPlugin->getActions());
+}
+
 void StMoviePlayerGUI::doListHotKeys(const size_t ) {
     const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
     StParamsList aParams;
@@ -1740,6 +1755,7 @@ void StMoviePlayerGUI::doListHotKeys(const size_t ) {
     aTable->fillFromHotKeys(anActionsMap, *myLangMap, aSlot1, aSlot2);
     myHKeysTable = aTable;
 
+    aDialog->addButton(tr(BUTTON_DEFAULTS), false)->signals.onBtnClick = stSlot(this, &StMoviePlayerGUI::doResetHotKeys);
     aDialog->addButton(tr(BUTTON_CLOSE), true);
     aDialog->setVisibility(true, true);
     aDialog->stglInit();

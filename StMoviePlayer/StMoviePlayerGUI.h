@@ -195,6 +195,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL void doAudioDelay   (const size_t );
 
     ST_LOCAL void doListHotKeys(const size_t );
+    ST_LOCAL void doResetHotKeys(const size_t );
     ST_LOCAL void doChangeHotKey1(const size_t );
     ST_LOCAL void doChangeHotKey2(const size_t );
 
