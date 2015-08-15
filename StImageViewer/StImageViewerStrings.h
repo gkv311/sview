@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -169,6 +169,9 @@ namespace StImageViewerStrings {
         METADATA_EXIF_MODEL       = 5201,
         METADATA_EXIF_USERCOMMENT = 5202,
         METADATA_EXIF_DATETIME    = 5203,
+
+        // keys reserved for actions (see StImageViewer::ActionId)
+        ACTIONS_FROM              = 6000,
 
     };
 

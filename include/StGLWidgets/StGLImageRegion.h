@@ -70,6 +70,10 @@ class StGLImageRegion : public StGLWidget {
         Action_PanDown,
         Action_ScaleIn,
         Action_ScaleOut,
+        Action_RotYLeft,
+        Action_RotYRight,
+        Action_RotXUp,
+        Action_RotXDown,
         ActionsNb,
     };
 

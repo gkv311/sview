@@ -153,7 +153,7 @@ class StImageViewer : public StApplication {
     ST_LOCAL void doFullscreen(const bool theIsFullscreen);
     ST_LOCAL void doSwitchSrcFormat(const int32_t theSrcFormat);
 
-        private:
+        public:
 
     /**
      * Actions identifiers.

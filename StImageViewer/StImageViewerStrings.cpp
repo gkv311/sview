@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +18,18 @@
 
 #include "StImageViewerStrings.h"
 
+#include "StImageViewer.h"
 #include <StStrings/StLangMap.h>
 
 namespace StImageViewerStrings {
+
+inline void addAction(StLangMap&              theStrings,
+                      const int               theAction,
+                      const StString&         theAlias,
+                      const char*             theDefValue) {
+    theStrings(ACTIONS_FROM + theAction, theDefValue);
+    theStrings.addAlias(theAlias, ACTIONS_FROM + theAction);
+}
 
 void loadDefaults(StLangMap& theStrings) {
     theStrings(BUTTON_CLOSE,
@@ -260,6 +269,136 @@ void loadDefaults(StLangMap& theStrings) {
     theStrings.addAlias("Exif.Image.Model",    METADATA_EXIF_MODEL);
     theStrings.addAlias("Exif.UserComment",    METADATA_EXIF_USERCOMMENT);
     theStrings.addAlias("Exif.Image.DateTime", METADATA_EXIF_DATETIME);
+
+    // define actions
+    addAction(theStrings, StImageViewer::Action_Fullscreen,
+              "DoFullscreen",
+              "Switch fullscreen/windowed");
+    addAction(theStrings, StImageViewer::Action_ShowFps,
+              "DoShowFPS",
+              "Show/hide FPS meter");
+    addAction(theStrings, StImageViewer::Action_SrcAuto,
+              "DoSrcAuto",
+              "Stereo format - Auto");
+    addAction(theStrings, StImageViewer::Action_SrcMono,
+              "DoSrcMono",
+              "Stereo format - Mono");
+    addAction(theStrings, StImageViewer::Action_SrcOverUnderLR,
+              "DoSrcOverUnder",
+              "Stereo format - Over/Under");
+    addAction(theStrings, StImageViewer::Action_SrcSideBySideRL,
+              "DoSrcSideBySide",
+              "Stereo format - Side by side");
+    addAction(theStrings, StImageViewer::Action_FileInfo,
+              "DoFileInfo",
+              "Show file info");
+    addAction(theStrings, StImageViewer::Action_ListFirst,
+              "DoListFirst",
+              "Playlist - Go to the first item");
+    addAction(theStrings, StImageViewer::Action_ListLast,
+              "DoListLast",
+              "Playlist - Go to the last item");
+    addAction(theStrings, StImageViewer::Action_ListPrev,
+              "DoListPrev",
+              "Playlist - Go to the previous item");
+    addAction(theStrings, StImageViewer::Action_ListNext,
+              "DoListNext",
+              "Playlist - Go to the next item");
+    addAction(theStrings, StImageViewer::Action_SlideShow,
+              "DoSlideShow",
+              "Playlist - Start/stop slideshow");
+    addAction(theStrings, StImageViewer::Action_SavePng,
+              "DoSaveImageAsPng",
+              "Save in PNG format");
+    addAction(theStrings, StImageViewer::Action_SaveJpeg,
+              "DoSaveImageAsJpeg",
+              "Save in JPEG format");
+    addAction(theStrings, StImageViewer::Action_SaveFileInfo,
+              "DoSaveFileInfo",
+              "Save file metadata");
+    addAction(theStrings, StImageViewer::Action_DeleteFile,
+              "DoDeleteFile",
+              "Delete the file from file system");
+    addAction(theStrings, StImageViewer::Action_ImageAdjustReset,
+              "DoImageAdjustReset",
+              "Reset image adjustment");
+
+    // image region actions
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_Reset,
+              "DoParamsReset",
+              "Reset image position");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_SwapLR,
+              "DoParamsSwapLR",
+              "Swap Left/Right");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_GammaDec,
+              "DoParamsGammaDec",
+              "Gamma correction - decrease");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_GammaInc,
+              "DoParamsGammaInc",
+              "Gamma correction - increase");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_SepXDec,
+              "DoParamsSepXDec",
+              "DX separation - decrease");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_SepXInc,
+              "DoParamsSepXInc",
+              "DX separation - increase");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_SepYDec,
+              "DoParamsSepYDec",
+              "DY separation - decrease");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_SepYInc,
+              "DoParamsSepYInc",
+              "DY separation - increase");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_SepRotDec,
+              "DoParamsSepRotDec",
+              "Angular separation - decrease");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_SepRotInc,
+              "DoParamsSepRotInc",
+              "Angular separation - increase");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_Rot90Counter,
+              "DoParamsRotZ90Dec",
+              "Rotate 90 degrees counterclockwise");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_Rot90Clockwise,
+              "DoParamsRotZ90Inc",
+              "Rotate 90 degrees clockwise");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_RotCounter,
+              "DoParamsRotZDec",
+              "Rotate counterclockwise");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_RotClockwise,
+              "DoParamsRotZInc",
+              "Rotate clockwise");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_ModeNext,
+              "DoParamsModeNext",
+              "Select next mode");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_PanLeft,
+              "DoParamsPanLeft",
+              "Panning - navigate to the left");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_PanRight,
+              "DoParamsPanRight",
+              "Panning - navigate to the right");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_PanUp,
+              "DoParamsPanUp",
+              "Panning - navigate to the top");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_PanDown,
+              "DoParamsPanDown",
+              "Panning - navigate to the bottom");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_ScaleIn,
+              "DoParamsScaleIn",
+              "Scale - increment");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_ScaleOut,
+              "DoParamsScaleOut",
+              "Scale - decrement");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_RotYLeft,
+              "DoParamsRotYLeft",
+              "Y Rotation - left");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_RotYRight,
+              "DoParamsRotYRight",
+              "Y Rotation - right");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_RotXUp,
+              "DoParamsRotXUp",
+              "X Rotation - up");
+    addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_RotXDown,
+              "DoParamsRotXDown",
+              "X Rotation - down");
 }
 
 };
