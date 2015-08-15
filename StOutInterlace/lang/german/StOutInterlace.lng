@@ -1,6 +1,5 @@
-German translation file for StOutInterlace library
-@author Kirill Gavrilov
-
+# German translation file for StOutInterlace library
+# @author Kirill Gavrilov
 --------
 1000="Horizontal Interlaced"
 1001="Row interlaced displays: Zalman, Hyundai,..."
@@ -14,4 +13,4 @@ German translation file for StOutInterlace library
 1103="Bind to supported monitor"
 2000="sView - Interlaced Ausgangsmodul"
 2001="Version"
-2002="© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0"
+?2002="© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0"

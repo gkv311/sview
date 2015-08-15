@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -20,18 +20,22 @@ void StLangMap::parseLine(const StString& theLine) {
     if(myIsHeaderSection) {
         myIsHeaderSection = !(theLine == StString(HEADER_SECTION_DELIM));
     }
+    if(theLine.isStartsWith('#')
+    || theLine.isStartsWith(';')
+    || theLine.isStartsWith('-')) {
+        return; // skip comments
+    }
 
+    const size_t aKeyStart = theLine.isStartsWith('?') ? 1 : 0; // ignore TODO flag
     for(StUtf8Iter anIter = theLine.iterator(); *anIter != 0; ++anIter) {
         if(*anIter != stUtf32_t('=')) {
             // not interesting
             continue;
         }
-        size_t aKey = size_t(std::atol(theLine.subString(0, anIter.getIndex()).toCString()));
+        const size_t aKey = size_t(std::atol(theLine.subString(aKeyStart, anIter.getIndex()).toCString()));
 
         // get value without quotes
         StString aValue = theLine.subString(anIter.getIndex() + 2, theLine.getLength() - 1);
-
-        ///TODO (Kirill Gavrilov#9) add all replacements
         for(anIter = aValue.iterator(); *anIter != 0; ++anIter) {
             if(*anIter.getBufferHere() == stUtf8_t('\\') && *anIter.getBufferNext() == stUtf8_t('n')) {
                 // this is a hacking code in fact...

@@ -1,7 +1,6 @@
-﻿Korean translation file for StImageViewer program
-@author Kirill Gavrilov
-@translator Kwon Daesuk <hyntel@clunix.com>
-
+﻿# Korean translation file for StImageViewer program
+# @author Kirill Gavrilov
+# @translator Kwon Daesuk <hyntel@clunix.com>
 --------
 1000="앞 이미지"
 1001="다음 이미지"

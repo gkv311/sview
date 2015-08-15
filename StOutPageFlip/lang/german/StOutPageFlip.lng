@@ -1,6 +1,5 @@
-German translation file for StOutPageFlip library
-@author Kirill Gavrilov
-
+# German translation file for StOutPageFlip library
+# @author Kirill Gavrilov
 --------
 1000="Shutterbrille"
 1001="Shutterbrille"
@@ -22,5 +21,5 @@ German translation file for StOutPageFlip library
 1134="eDimensional auto on/off"
 2000="sView - PageFlip Ausgangsmodul"
 2001="Version"
-2002="© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0"
+?2002="© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0"
 3001="OpenGL Hardware QuadBuffer nicht verfügbar!\n\nSie können eine andere Quad Buffer versuchen\n(einschließlich OpenGL emulierte in extra Sektion)."

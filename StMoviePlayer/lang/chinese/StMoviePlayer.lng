@@ -1,6 +1,5 @@
-﻿Chinese translation file for StMoviePlayer program
-@author YSC
-
+﻿# Chinese translation file for StMoviePlayer program
+# @author YSC
 --------
 1002="切换 左/右"
 1003="还原切换 左/右"
@@ -42,7 +41,7 @@
 1181="应用一次"
 1182="每次应用"
 1185="显示错误"
-1186="界面设计can not be started on {0} port!"
+?1186="界面设计can not be started on {0} port!"
 1200="视频"
 1201="立体输出->>"
 1202="全屏"
@@ -83,8 +82,8 @@
 1354="字体大小"
 1355="视差"
 1356="文本解析"
-1360="Plain text"
-1361="Lite HTML"
+?1360="Plain text"
+?1361="Lite HTML"
 1400="改变设备->>"
 1401="关于插件…"
 1402="FPS控制->>"
@@ -127,8 +126,8 @@
 2012="快照不为空!"
 3000="sView - Movie Player"
 3001="版本"
-3002="Movie player allows you to play stereoscopic video.\n © {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis program is distributed under GPL3.0"
-3003="A new version of sView is available on the official site www.sview.ru.\nPlease update your program."
+?3002="Movie player allows you to play stereoscopic video.\n © {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis program is distributed under GPL3.0"
+?3003="A new version of sView is available on the official site www.sview.ru.\nPlease update your program."
 3004="系统信息"
 4000="关闭"
 4001="取消"

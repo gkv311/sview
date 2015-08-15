@@ -1,6 +1,5 @@
-French translation file for StOutDual library
-@author gramoun for Kirill Gavrilov
-
+# French translation file for StOutDual library
+# @author gramoun for Kirill Gavrilov
 --------
 1000="Double-Sortie"
 1001="Sortie Stereo avec double affichage: HMD, moniteurs à miroir stéréo, Double Projecteurs"

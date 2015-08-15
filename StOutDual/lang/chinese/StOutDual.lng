@@ -1,6 +1,5 @@
-﻿Chinese translation file for StOutDual library
-@author YSC
-
+﻿# Chinese translation file for StOutDual library
+# @author YSC
 --------
 1000="双输出"
 1001="双输出设备: some HMD,镜面立体显示器, 双投影"
@@ -10,4 +9,4 @@
 1103="单画面"
 2000="sView - 双输出模式"
 2001="版本"
-2002="© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0"
+?2002="© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0"

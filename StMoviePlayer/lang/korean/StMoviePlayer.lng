@@ -1,7 +1,6 @@
-﻿Korean translation file for StMoviePlayer program
-@author Kirill Gavrilov
-@translator Kwon Daesuk <hyntel@clunix.com>
-
+﻿# Korean translation file for StMoviePlayer program
+# @author Kirill Gavrilov
+# @translator Kwon Daesuk <hyntel@clunix.com>
 --------
 1002="좌/우 교체"
 1003="좌/우 복원"

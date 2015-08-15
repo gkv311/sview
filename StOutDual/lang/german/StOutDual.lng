@@ -1,6 +1,5 @@
-German translation file for StOutDual library
-@author Kirill Gavrilov
-
+# German translation file for StOutDual library
+# @author Kirill Gavrilov
 --------
 1000="Doppelausgang"
 1001="Stereo-device with dual input: some HMD, Mirrored Stereo monitors, Dual-Projectors"

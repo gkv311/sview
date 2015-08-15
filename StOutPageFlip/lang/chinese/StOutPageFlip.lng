@@ -1,6 +1,5 @@
-﻿Chinese translation file for StOutPageFlip library
-@author YSC
-
+﻿# Chinese translation file for StOutPageFlip library
+# @author YSC
 --------
 1000="快门眼镜"
 1001="快门眼镜"
@@ -22,5 +21,5 @@
 1134="空间自动开/关"
 2000="sView - 快门输出模式"
 2001="版本"
-2002="© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0"
-3001="OpenGL Hardware QuadBuffer is unavailable!\n\nYou can try another Quad Buffer type\n(including OpenGL emulated in Extra section)."
+?2002="© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0"
+?3001="OpenGL Hardware QuadBuffer is unavailable!\n\nYou can try another Quad Buffer type\n(including OpenGL emulated in Extra section)."
