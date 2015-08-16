@@ -48,12 +48,20 @@ class StGLScrollArea : public StGLWidget {
     /**
      * Scroll (vertically) content.
      * @param theDelta scroll delta
+     * @return true if scrolling has been done
      */
-    ST_CPPEXPORT void doScroll(const int theDelta);
+    ST_CPPEXPORT bool doScroll(const int  theDelta,
+                               const bool theIsFling = false);
 
         protected:
 
-    StPointD_t myClickPntZo; //!< remembered mouse click position
+    StPointD_t myClickPntZo;  //!< remembered mouse click position
+    StTimer    myDragTimer;   //!< timer between dragging animation
+    double     myDragYDelta;  //!< last dragged distance
+    double     myFlingAccel;  //!< (positive) fling acceleration
+    StTimer    myFlingTimer;  //!< timer for dragging inertia
+    double     myFlingYSpeed; //!< the dragging velocity for inertial scrolling
+    int        myFlingYDone;  //!< already animated inertial scrolling
 
 };
 
