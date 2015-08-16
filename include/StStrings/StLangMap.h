@@ -13,14 +13,34 @@
 
 #include <StStrings/StString.h>
 
+/**
+ * Key -> string map for translation files.
+ * Implements reading from the simple file format:
+ * @code
+ *   # comment line
+ *   1010=Text for key 1010
+ *   1011=Text for another key
+ * @endcode
+ */
 class StLangMap {
 
         public:
 
+    /**
+     * Empty constructor.
+     */
     ST_CPPEXPORT StLangMap();
 
+    /**
+     * Destructor.
+     */
     ST_CPPEXPORT virtual ~StLangMap();
 
+    /**
+     * Read the translation file from specified buffer.
+     * @param theContent buffer
+     * @param theLen     length of the buffer
+     */
     ST_CPPEXPORT bool read(const char* theContent,
                            const int   theLen);
 
@@ -70,15 +90,10 @@ class StLangMap {
 
         private:
 
-    ST_LOCAL void parseLine(const StString& theLine);
-
-        private:
-
-    StString          myLngFile;         //!< path to the language file
-    StString          myEmptyStr;
-    stMapInt2String_t myMap;             //!< key -> string map
-    stMapString2Int_t myMapStrKeys;      //!< auxiliary map of string key -> int key
-    bool              myIsHeaderSection;
+    StString          myLngFile;    //!< path to the language file
+    StString          myEmptyStr;   //!< empty string to return for invalid keys
+    stMapInt2String_t myMap;        //!< key -> string map
+    stMapString2Int_t myMapStrKeys; //!< auxiliary map of string key -> int key
     bool              myToShowId;
 
 };

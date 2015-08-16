@@ -12,47 +12,24 @@
 #include <fstream> // file input/output
 
 namespace {
-    static const stUtf8_t HEADER_SECTION_DELIM[] = "--------";
-    static const size_t READ_BUFFER_SIZE = 4096U;
-}
+    static const StString ST_NEWLINE2            = "\\n";
+    static const StString ST_NEWLINE_REPLACEMENT = " \x0A";
 
-void StLangMap::parseLine(const StString& theLine) {
-    if(myIsHeaderSection) {
-        myIsHeaderSection = !(theLine == StString(HEADER_SECTION_DELIM));
-    }
-    if(theLine.isStartsWith('#')
-    || theLine.isStartsWith(';')
-    || theLine.isStartsWith('-')) {
-        return; // skip comments
-    }
-
-    const size_t aKeyStart = theLine.isStartsWith('?') ? 1 : 0; // ignore TODO flag
-    for(StUtf8Iter anIter = theLine.iterator(); *anIter != 0; ++anIter) {
-        if(*anIter != stUtf32_t('=')) {
-            // not interesting
-            continue;
-        }
-        const size_t aKey = size_t(std::atol(theLine.subString(aKeyStart, anIter.getIndex()).toCString()));
-
-        // get value without quotes
-        StString aValue = theLine.subString(anIter.getIndex() + 2, theLine.getLength() - 1);
-        for(anIter = aValue.iterator(); *anIter != 0; ++anIter) {
-            if(*anIter.getBufferHere() == stUtf8_t('\\') && *anIter.getBufferNext() == stUtf8_t('n')) {
-                // this is a hacking code in fact...
-                *(stUtf8_t* )anIter.getBufferHere() = stUtf8_t(' ');
-                *(stUtf8_t* )anIter.getBufferNext() = stUtf8_t('\n');
+    /**
+     * Auxiliary function to seek iterator to end of the current line.
+     */
+    inline void seekToEOL(StUtf8Iter& theIter,
+                          const char* theEnd) {
+        for(; theIter.getBufferHere() < theEnd && *theIter != 0; ++theIter) {
+            if(*theIter == stUtf32_t('\n')) {
+                return;
             }
         }
-        myMap.insert(std::pair<size_t, StString>(aKey, aValue));
-        return;
     }
 }
 
 StLangMap::StLangMap()
-: myLngFile(),
-  myMap(),
-  myIsHeaderSection(true),
-  myToShowId(true) {
+: myToShowId(true) {
     //
 }
 
@@ -67,62 +44,64 @@ bool StLangMap::read(const char* theContent,
         return false;
     }
 
-    char* bufferLineOrig = new char[1];
-    bufferLineOrig[0] = '\0';
-    size_t aLineSize = 0;
-
-    StString bufferLineUTF;
-    bool isCont = false;
-    size_t oldLen = 0;
-
-    size_t lineStart = 0;
-    for(size_t c = 0; c < (size_t )theLen; ++c) {
-        if(theContent[c] == '\n') {
-            if(isCont) {
-                char* aCopy = new char[oldLen + c - lineStart + 1];
-                stMemCpy(&aCopy[0], bufferLineOrig, oldLen);
-                stMemCpy(&aCopy[oldLen], &theContent[lineStart], (c - lineStart));
-                aLineSize = oldLen + c - lineStart;
-                delete[] bufferLineOrig;
-                bufferLineOrig = aCopy;
-            } else {
-                delete[] bufferLineOrig;
-                bufferLineOrig = new char[c - lineStart + 1];
-                stMemCpy(bufferLineOrig, &theContent[lineStart], (c - lineStart));
-                aLineSize = c - lineStart;
-            }
-            // remove CR symbol if needed
-            if(aLineSize > 0 && bufferLineOrig[aLineSize - 1] == stUtf8_t(13)) {
-                --aLineSize;
-            }
-            bufferLineOrig[aLineSize] = '\0';
-
-            bufferLineUTF = StString(bufferLineOrig);
-            parseLine(bufferLineUTF);
-
-            lineStart = c + 1;
-            oldLen = 0;
-            isCont = false;
-
-        } else if(c == (READ_BUFFER_SIZE - 1)) {
-            char* aCopy = new char[oldLen + READ_BUFFER_SIZE - lineStart];
-            if(oldLen > 0) {
-                stMemCpy(aCopy, bufferLineOrig, oldLen);
-            }
-            stMemCpy(&aCopy[oldLen], &theContent[lineStart], (READ_BUFFER_SIZE - lineStart));
-            delete[] bufferLineOrig;
-            bufferLineOrig = aCopy;
-            oldLen += (READ_BUFFER_SIZE - lineStart);
-            isCont = true;
+    const char* anEnd = theContent + theLen;
+    size_t aNbLines = 0;
+    for(StUtf8Iter aCharIter(theContent); aCharIter.getBufferHere() < anEnd && *aCharIter != 0; ++aCharIter) {
+        if(*aCharIter == '-'
+        || *aCharIter == '#'
+        || *aCharIter == ';'
+        || *aCharIter == ' '
+        || *aCharIter == '@') {
+            seekToEOL(aCharIter, anEnd); // skip the comments
+            ++aNbLines;
+            continue;
+        } else if(*aCharIter == stUtf32_t('\n')) {
+            ++aNbLines;
+            continue;
         }
 
-        if(!isCont) {
-            delete[] bufferLineOrig;
-            bufferLineOrig = new char[1];
-            bufferLineOrig[0] = '\0';
+        bool isTemp = false;
+        if(*aCharIter == stUtf32_t('?')) {
+            ++aCharIter; // skip TODO flag
+            isTemp = true;
         }
+
+        char* anEndPtr = NULL;
+        const size_t aKey = (size_t )::strtol(aCharIter.getBufferHere(), &anEndPtr, 10);
+        if(anEndPtr == aCharIter.getBufferHere()) {
+            seekToEOL(aCharIter, anEnd);
+            ++aNbLines;
+            continue;
+        }
+
+        aCharIter.init(anEndPtr);
+        if(*aCharIter != '=') {
+            seekToEOL(aCharIter, anEnd);
+            ++aNbLines;
+            continue;
+        }
+
+        StUtf8Iter aValuePos = ++aCharIter;
+        seekToEOL(aCharIter, anEnd);
+
+        size_t aValueSize = aCharIter.getBufferHere() - aValuePos.getBufferHere();
+        size_t aValueLen  = aCharIter.getIndex()      - aValuePos.getIndex();
+        if(aValueLen != 0
+        && *(aValuePos.getBufferHere() + aValueSize - 1) == char(13)) {
+            --aValueLen;
+            --aValueSize;
+        }
+        if(aValueLen >= 2
+        && *aValuePos == '\"'
+        && *(aValuePos.getBufferHere() + aValueSize - 1) == '\"') {
+            ++aValuePos;
+            aValueLen  -= 2;
+            aValueSize -= 2;
+        }
+        StString aValue(aValuePos.getBufferHere(), aValueLen);
+        aValue.replaceFast(ST_NEWLINE2, ST_NEWLINE_REPLACEMENT);
+        myMap.insert(std::pair<size_t, StString>(aKey, aValue));
     }
-    delete[] bufferLineOrig;
     return true;
 }
 
