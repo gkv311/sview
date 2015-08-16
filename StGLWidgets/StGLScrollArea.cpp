@@ -7,16 +7,23 @@
  */
 
 #include <StGLWidgets/StGLScrollArea.h>
-#include <StGLWidgets/StGLRootWidget.h>
 
+#include <StGLWidgets/StGLMenuProgram.h>
+#include <StGLWidgets/StGLRootWidget.h>
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
+
+namespace {
+    static const size_t SHARE_PROGRAM_ID = StGLRootWidget::generateShareId();
+}
 
 StGLScrollArea::StGLScrollArea(StGLWidget*      theParent,
                                const int        theLeft,  const int theTop,
                                const StGLCorner theCorner,
                                const int        theWidth, const int theHeight)
 : StGLWidget(theParent, theLeft, theTop, theCorner, theWidth, theHeight),
+  myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
+  myBarColor(getRoot()->getColorForElement(StGLRootWidget::Color_ScrollBar)),
   myDragYDelta(0.0),
   myFlingAccel((double )myRoot->scale(200)),
   myFlingYSpeed(0.0),
@@ -25,7 +32,7 @@ StGLScrollArea::StGLScrollArea(StGLWidget*      theParent,
 }
 
 StGLScrollArea::~StGLScrollArea() {
-    //
+    myVertBuf.release(getContext());
 }
 
 bool StGLScrollArea::stglInit() {
@@ -44,11 +51,20 @@ bool StGLScrollArea::stglInit() {
         }
     }
 
+    // initialize GLSL program
+    StGLContext& aCtx = getContext();
+    if(myProgram.isNull()) {
+        myProgram.create(myRoot->getContextHandle(), new StGLMenuProgram());
+        if(!myProgram->init(aCtx)) {
+            return false;
+        }
+    }
     return true;
 }
 
 void StGLScrollArea::stglResize() {
     StGLWidget* aContent = myChildren.getStart();
+    StGLContext& aCtx = getContext();
     if(!isScrollable()
     && aContent != NULL
     && aContent->getRectPx().top() < 0
@@ -56,6 +72,33 @@ void StGLScrollArea::stglResize() {
         const int aDelta = -aContent->getRectPx().top();
         aContent->changeRectPx().top()    += aDelta;
         aContent->changeRectPx().bottom() += aDelta;
+    }
+
+    if(isScrollable()
+    && aContent != NULL) {
+        const int    aSizeY       = stMax(getRectPx().height(), 1);
+        const int    aContSizeY   = aContent->getRectPx().height();
+        const double aScaleY      = double(aSizeY) / double(aContSizeY);
+        const int    aScrollSizeY = stMax(int(aScaleY * (double )aSizeY), myRoot->scale(4));
+        const double aPosY        = double(-aContent->getRectPx().top()) / double(aContSizeY - aSizeY);
+
+        StArray<StGLVec2> aVertices(4);
+        StRectI_t aRectPx = getRectPxAbsolute();
+        aRectPx.left()   =  aRectPx.right() - myRoot->scale(2);
+        aRectPx.top()    += int(aPosY * double(aSizeY - aScrollSizeY));
+        aRectPx.bottom() =  aRectPx.top() + aScrollSizeY;
+
+        myRoot->getRectGl(aRectPx, aVertices);
+        myVertBuf.init(aCtx, aVertices);
+    } else {
+        myVertBuf.release(aCtx);
+    }
+
+    // update projection matrix
+    if(!myProgram.isNull()) {
+        myProgram->use(aCtx);
+        myProgram->setProjMat(aCtx, myRoot->getScreenProjection());
+        myProgram->unuse(aCtx);
     }
 
     StGLWidget::stglResize();
@@ -130,6 +173,23 @@ void StGLScrollArea::stglDraw(unsigned int theView) {
     StGLWidget::stglDraw(theView); // draw children
 
     aCtx.stglResetScissorRect();
+
+    if( myProgram.isNull()
+    || !myProgram->isValid()
+    || !myVertBuf.isValid()) {
+        return;
+    }
+    aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    aCtx.core20fwd->glEnable(GL_BLEND);
+    myProgram->use(aCtx, myRoot->getScreenDispX());
+    myVertBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
+
+    myProgram->setColor(aCtx, myBarColor, GLfloat(opacityValue));
+    aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    myVertBuf.unBindVertexAttrib(aCtx, myProgram->getVVertexLoc());
+    myProgram->unuse(aCtx);
+    aCtx.core20fwd->glDisable(GL_BLEND);
 }
 
 bool StGLScrollArea::doScroll(const int  theDelta,
