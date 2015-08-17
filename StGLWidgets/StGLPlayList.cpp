@@ -27,7 +27,11 @@ StGLPlayList::StGLPlayList(StGLWidget*                 theParent,
   myFromId(0),
   myItemsNb(0),
   myToResetList(false),
-  myToUpdateList(false) {
+  myToUpdateList(false),
+  myIsLeftClick(false),
+  myDragDone(0),
+  myFlingAccel((double )myRoot->scale(200)),
+  myFlingYSpeed(0.0) {
     myWidth = myRoot->scale(250);
     StGLWidget::signals.onMouseUnclick = stSlot(this, &StGLPlayList::doMouseUnclick);
     myList->signals.onPlaylistChange  += stSlot(this, &StGLPlayList::doResetList);
@@ -63,6 +67,7 @@ void StGLPlayList::updateList() {
     for(StGLWidget* aChild = getChildren()->getStart();
         aChild != NULL && anIter < myItemsNb; ++anIter, aChild = aChild->getNext()) {
         StGLMenuItem* anItem = dynamic_cast<StGLMenuItem*>(aChild);
+        anItem->setClicked(ST_MOUSE_LEFT, false);
         if(size_t(anIter) < anUpperLimit) {
             anItem->setText(aList.getValue(anIter));
             anItem->setVisibility(true, true);
@@ -85,8 +90,34 @@ void StGLPlayList::doChangeItem(const size_t ) {
     myToUpdateList = true;
 }
 
+void StGLPlayList::doMouseClick(const int theBtnId) {
+    if(theBtnId != ST_MOUSE_LEFT) {
+        return;
+    }
+
+    myIsLeftClick = true;
+    myClickPntZo  = myRoot->getCursorZo();
+    myFlingPntZo  = myRoot->getCursorZo();
+    myDragDone    = 0;
+    myFlingTimer.stop();
+    for(StGLWidget* aChild = getChildren()->getStart(); aChild != NULL; aChild = aChild->getNext()) {
+        StGLMenuItem* anItem = dynamic_cast<StGLMenuItem*>(aChild);
+        if(anItem != NULL
+        && anItem->isPointIn(myClickPntZo)) {
+            // stick to the center
+            const StRectI_t aRect = anItem->getRectPxAbsolute();
+            myClickPntZo.y() = double(aRect.top() + aRect.height() / 2) / double(myRoot->getRectPx().height());
+            break;
+        }
+    }
+}
+
 void StGLPlayList::doMouseUnclick(const int theBtnId) {
     switch(theBtnId) {
+        case ST_MOUSE_LEFT: {
+            myIsLeftClick = false;
+            return;
+        }
         case ST_MOUSE_SCROLL_V_UP: {
             if(myFromId == 0) {
                 return;
@@ -128,6 +159,7 @@ void StGLPlayList::stglResize() {
         StGLMenuItem* anItem = addItem();
         anItem->setUserData(anIter);
         anItem->signals.onItemClick = stSlot(this, &StGLPlayList::doItemClick);
+        anItem->StGLWidget::signals.onMouseClick   += stSlot(this, &StGLPlayList::doMouseClick);
         anItem->StGLWidget::signals.onMouseUnclick += stSlot(this, &StGLPlayList::doMouseUnclick);
 
         anItem->setHilightText();
@@ -213,6 +245,70 @@ void StGLPlayList::stglDrawScrollBar(unsigned int theView) {
     myBarVertBuf.unBindVertexAttrib(aCtx, myProgram->getVVertexLoc());
     myProgram->unuse(aCtx);
     aCtx.core20fwd->glDisable(GL_BLEND);
+}
+
+void StGLPlayList::stglUpdate(const StPointD_t& theCursorZo) {
+    if(myIsLeftClick
+    && !myRoot->isClicked(ST_MOUSE_LEFT)) {
+        // handle global unclick to start inertial scrolling
+        myIsLeftClick = false;
+        myDragDone = 0;
+        if(std::abs(myFlingYSpeed) > 0.0000001) {
+            myFlingTimer.restart();
+        }
+    }
+
+    if((myIsLeftClick || myFlingTimer.isOn())) {
+        StPointD_t aDelta;
+        if(myFlingTimer.isOn()) {
+            double aTime   = myFlingTimer.getElapsedTime();
+            double anA     = (myFlingYSpeed > 0.0 ? -1.0 : 1.0) * (myFlingAccel / double(myRoot->getRectPx().height()));
+            double aDeltaY = myFlingYSpeed * aTime + anA * aTime * aTime;
+            aDelta = myFlingPntZo - myClickPntZo;
+            aDelta.y() += aDeltaY;
+        } else {
+            double aTime = myDragTimer.getElapsedTime();
+            if(aTime > 0.0000001) {
+                myFlingYSpeed = (myRoot->getCursorZo().y() - myFlingPntZo.y()) / aTime;
+            }
+            myFlingPntZo = myRoot->getCursorZo();
+            myDragTimer.restart();
+            aDelta = myFlingPntZo - myClickPntZo;
+        }
+        int64_t aPrevDone = myDragDone;
+        for(;;) {
+            double aDeltaY = aDelta.y() * myRoot->getRectPx().height() + double(myDragDone * myItemHeight);
+            if(aDeltaY > (double(myItemHeight / 2))) {
+                if(myFlingTimer.isOn()
+                && myFlingYSpeed < 0.0) {
+                    myFlingTimer.stop();
+                    break;
+                } else if(myFromId == 0
+                       || aPrevDone < myDragDone) {
+                    break;
+                }
+                --myFromId;
+                --myDragDone;
+                myToUpdateList = true;
+            } else if(aDeltaY < (double(-myItemHeight / 2))) {
+                if(myFlingTimer.isOn()
+                && myFlingYSpeed > 0.0) {
+                    myFlingTimer.stop();
+                    break;
+                } else if(myFromId + myItemsNb >= myList->getItemsCount()
+                       || aPrevDone > myDragDone) {
+                    break;
+                }
+                ++myFromId;
+                ++myDragDone;
+                myToUpdateList = true;
+            } else {
+                break;
+            }
+        }
+    }
+
+    StGLMenu::stglUpdate(theCursorZo);
 }
 
 void StGLPlayList::stglDraw(unsigned int theView) {

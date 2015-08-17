@@ -29,6 +29,7 @@ class StGLPlayList : public StGLMenu {
     ST_CPPEXPORT virtual ~StGLPlayList();
     ST_CPPEXPORT virtual bool stglInit();
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
+    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo);
     ST_CPPEXPORT virtual void stglResize();
 
         public:  //! @name Signals
@@ -46,6 +47,7 @@ class StGLPlayList : public StGLMenu {
     ST_LOCAL void doResetList();
     ST_LOCAL void doChangeItem(const size_t );
     ST_LOCAL void doItemClick(const size_t );
+    ST_LOCAL void doMouseClick  (const int theBtnId);
     ST_LOCAL void doMouseUnclick(const int theBtnId);
     ST_LOCAL void resizeWidth();
 
@@ -64,6 +66,15 @@ class StGLPlayList : public StGLMenu {
     int                  myItemsNb;      //!< number of items displayed on screen
     volatile bool        myToResetList;  //!< playlist has been reseted
     volatile bool        myToUpdateList; //!< playlist has been changed
+
+    bool       myIsLeftClick; //!< flag to perform dragging - some item has been clicked (but not yet unclicked)
+    StPointD_t myClickPntZo;  //!< remembered mouse click position
+    StTimer    myDragTimer;   //!< timer between dragging animation
+    int64_t    myDragDone;    //!< the number of dragged items (sign means direction)
+    double     myFlingAccel;  //!< (positive) fling acceleration
+    StPointD_t myFlingPntZo;  //!< remembered mouse unclick position
+    StTimer    myFlingTimer;  //!< timer for dragging inertia
+    double     myFlingYSpeed; //!< the dragging velocity for inertial scrolling
 
 };
 
