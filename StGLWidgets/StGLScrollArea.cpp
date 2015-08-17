@@ -32,7 +32,7 @@ StGLScrollArea::StGLScrollArea(StGLWidget*      theParent,
 }
 
 StGLScrollArea::~StGLScrollArea() {
-    myVertBuf.release(getContext());
+    myBarVertBuf.release(getContext());
 }
 
 bool StGLScrollArea::stglInit() {
@@ -89,9 +89,9 @@ void StGLScrollArea::stglResize() {
         aRectPx.bottom() =  aRectPx.top() + aScrollSizeY;
 
         myRoot->getRectGl(aRectPx, aVertices);
-        myVertBuf.init(aCtx, aVertices);
+        myBarVertBuf.init(aCtx, aVertices);
     } else {
-        myVertBuf.release(aCtx);
+        myBarVertBuf.release(aCtx);
     }
 
     // update projection matrix
@@ -116,10 +116,11 @@ void StGLScrollArea::stglDraw(unsigned int theView) {
     }
 
     if(isClicked(ST_MOUSE_LEFT)
-    && isScrollable()) {
-        StPointD_t aDelta = getRoot()->getCursorZo() - myClickPntZo;
-        double aDeltaY = aDelta.y() * getRoot()->getRectPx().height();
-        myClickPntZo = getRoot()->getCursorZo();
+    && isScrollable()
+    && theView != ST_DRAW_RIGHT) {
+        StPointD_t aDelta = myRoot->getCursorZo() - myClickPntZo;
+        double aDeltaY = aDelta.y() * myRoot->getRectPx().height();
+        myClickPntZo = myRoot->getCursorZo();
 
         double aTime = myDragTimer.getElapsedTime();
         if(myDragTimer.isOn()) {
@@ -145,7 +146,8 @@ void StGLScrollArea::stglDraw(unsigned int theView) {
             myDragTimer.restart();
         }
         doScroll((int )aDeltaY);
-    } else if(myFlingTimer.isOn()) {
+    } else if(myFlingTimer.isOn()
+           && theView != ST_DRAW_RIGHT) {
         double aTime = myFlingTimer.getElapsedTime();
         double anA   = (myFlingYSpeed > 0.0 ? -1.0 : 1.0) * myFlingAccel;
         int aFullDeltaY = int(myFlingYSpeed * aTime + anA * aTime * aTime);
@@ -176,18 +178,18 @@ void StGLScrollArea::stglDraw(unsigned int theView) {
 
     if( myProgram.isNull()
     || !myProgram->isValid()
-    || !myVertBuf.isValid()) {
+    || !myBarVertBuf.isValid()) {
         return;
     }
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     aCtx.core20fwd->glEnable(GL_BLEND);
     myProgram->use(aCtx, myRoot->getScreenDispX());
-    myVertBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
+    myBarVertBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
 
     myProgram->setColor(aCtx, myBarColor, GLfloat(opacityValue));
     aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-    myVertBuf.unBindVertexAttrib(aCtx, myProgram->getVVertexLoc());
+    myBarVertBuf.unBindVertexAttrib(aCtx, myProgram->getVVertexLoc());
     myProgram->unuse(aCtx);
     aCtx.core20fwd->glDisable(GL_BLEND);
 }

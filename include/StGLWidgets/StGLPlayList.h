@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -52,8 +52,12 @@ class StGLPlayList : public StGLMenu {
         protected:
 
     ST_LOCAL StGLMenuItem* addItem();
+    ST_LOCAL void stglDrawScrollBar(unsigned int theView);
 
         private:
+
+    StGLVertexBuffer     myBarVertBuf;   //!< vertices buffer
+    StGLVec4             myBarColor;     //!< color of scroll bar
 
     StHandle<StPlayList> myList;         //!< handle to playlist
     size_t               myFromId;       //!< id in playlist of first item displayed on screen

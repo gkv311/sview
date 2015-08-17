@@ -58,9 +58,9 @@ class StGLScrollArea : public StGLWidget {
 
         protected:
 
-    StGLShare<StGLMenuProgram> myProgram;  //!< shared program
-    StGLVertexBuffer           myVertBuf;  //!< vertices buffer
-    StGLVec4                   myBarColor; //!< color of scroll bar
+    StGLShare<StGLMenuProgram> myProgram;    //!< shared program
+    StGLVertexBuffer           myBarVertBuf; //!< vertices buffer
+    StGLVec4                   myBarColor;   //!< color of scroll bar
 
     StPointD_t myClickPntZo;  //!< remembered mouse click position
     StTimer    myDragTimer;   //!< timer between dragging animation

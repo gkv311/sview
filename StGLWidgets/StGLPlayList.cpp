@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2014 Kirill Gavrilov <kirill@sview.ru
+ * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -7,15 +7,22 @@
  */
 
 #include <StGLWidgets/StGLPlayList.h>
+
 #include <StGLWidgets/StGLMenuItem.h>
+#include <StGLWidgets/StGLMenuProgram.h>
 #include <StGLWidgets/StGLRootWidget.h>
 
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 
+namespace {
+    static const size_t SHARE_PROGRAM_ID = StGLRootWidget::generateShareId();
+}
+
 StGLPlayList::StGLPlayList(StGLWidget*                 theParent,
                            const StHandle<StPlayList>& theList)
 : StGLMenu(theParent, -theParent->getRoot()->scale(32), 0, StGLMenu::MENU_VERTICAL),
+  myBarColor(getRoot()->getColorForElement(StGLRootWidget::Color_ScrollBar)),
   myList(theList),
   myFromId(0),
   myItemsNb(0),
@@ -30,6 +37,7 @@ StGLPlayList::StGLPlayList(StGLWidget*                 theParent,
 }
 
 StGLPlayList::~StGLPlayList() {
+    myBarVertBuf.release(getContext());
     myList->signals.onPlaylistChange  -= stSlot(this, &StGLPlayList::doResetList);
     myList->signals.onTitleChange     -= stSlot(this, &StGLPlayList::doChangeItem);
 }
@@ -166,6 +174,47 @@ bool StGLPlayList::stglInit() {
     return true;
 }
 
+void StGLPlayList::stglDrawScrollBar(unsigned int theView) {
+    StGLContext& aCtx = getContext();
+    if((size_t )myItemsNb > myList->getItemsCount()
+    ||  myProgram.isNull()
+    || !myProgram->isValid()) {
+        return;
+    }
+
+    if(theView != ST_DRAW_RIGHT) {
+        const int    aSizeY       = stMax(getRectPx().height(), 1);
+        const int    aContSizeY   = myList->getItemsCount() * myItemHeight;
+        const double aScaleY      = double(aSizeY) / double(aContSizeY);
+        const int    aScrollSizeY = stMax(int(aScaleY * (double )aSizeY), myRoot->scale(4));
+        const double aPosY        = double(myFromId * myItemHeight) / double(aContSizeY - aSizeY);
+
+        StArray<StGLVec2> aVertices(4);
+        StRectI_t aRectPx = getRectPxAbsolute();
+        aRectPx.left()   =  aRectPx.right() - myRoot->scale(2);
+        aRectPx.top()    += int(aPosY * double(aSizeY - aScrollSizeY));
+        aRectPx.bottom() =  aRectPx.top() + aScrollSizeY;
+
+        myRoot->getRectGl(aRectPx, aVertices);
+        myBarVertBuf.init(aCtx, aVertices);
+    }
+    if(!myBarVertBuf.isValid()) {
+        return;
+    }
+
+    aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    aCtx.core20fwd->glEnable(GL_BLEND);
+    myProgram->use(aCtx, myRoot->getScreenDispX());
+    myBarVertBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
+
+    myProgram->setColor(aCtx, myBarColor, GLfloat(opacityValue));
+    aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    myBarVertBuf.unBindVertexAttrib(aCtx, myProgram->getVVertexLoc());
+    myProgram->unuse(aCtx);
+    aCtx.core20fwd->glDisable(GL_BLEND);
+}
+
 void StGLPlayList::stglDraw(unsigned int theView) {
     if(!isVisible()) {
         return;
@@ -199,4 +248,6 @@ void StGLPlayList::stglDraw(unsigned int theView) {
     StGLMenu::stglDraw(theView);
 
     aCtx.stglResetScissorRect();
+
+    stglDrawScrollBar(theView);
 }
