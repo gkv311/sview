@@ -306,22 +306,28 @@ void StGLRootWidget::getRectGl(const StRectI_t& theRectPx,
 bool StGLRootWidget::tryClick(const StPointD_t& theCursorZo,
                               const int&        theMouseBtn,
                               bool&             theIsItemClicked) {
+    const StPointD_t aCursorBack = cursorZo;
+    cursorZo = theCursorZo;
     if(isPointIn(theCursorZo)) {
         setClicked(theMouseBtn, true);
     }
-
-    return StGLWidget::tryClick(theCursorZo, theMouseBtn, theIsItemClicked);
+    const bool aResult = StGLWidget::tryClick(theCursorZo, theMouseBtn, theIsItemClicked);
+    cursorZo = aCursorBack;
+    return aResult;
 }
 
 bool StGLRootWidget::tryUnClick(const StPointD_t& theCursorZo,
                                 const int&        theMouseBtn,
                                 bool&             theIsItemUnclicked) {
+    const StPointD_t aCursorBack = cursorZo;
+    cursorZo = theCursorZo;
     if(isPointIn(theCursorZo)) {
         setClicked(theMouseBtn, false);
     }
 
     const bool aResult = StGLWidget::tryUnClick(theCursorZo, theMouseBtn, theIsItemUnclicked);
     clearDestroyList();
+    cursorZo = aCursorBack;
     return aResult;
 }
 

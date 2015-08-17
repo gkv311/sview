@@ -99,6 +99,7 @@ void StGLPlayList::doMouseClick(const int theBtnId) {
     myClickPntZo  = myRoot->getCursorZo();
     myFlingPntZo  = myRoot->getCursorZo();
     myDragDone    = 0;
+    myDragTimer .stop();
     myFlingTimer.stop();
     for(StGLWidget* aChild = getChildren()->getStart(); aChild != NULL; aChild = aChild->getNext()) {
         StGLMenuItem* anItem = dynamic_cast<StGLMenuItem*>(aChild);
@@ -258,6 +259,7 @@ void StGLPlayList::stglUpdate(const StPointD_t& theCursorZo) {
         // handle global unclick to start inertial scrolling
         myIsLeftClick = false;
         myDragDone = 0;
+        myDragTimer.stop();
         if(std::abs(myFlingYSpeed) > 0.0000001) {
             myFlingTimer.restart();
         }
