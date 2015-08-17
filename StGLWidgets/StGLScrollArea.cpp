@@ -110,14 +110,14 @@ inline bool haveSameSign(const T1 theVal1, const T2 theVal2) {
         || (theVal1 <= T1(0) && theVal2 < T2(0));
 }
 
-void StGLScrollArea::stglDraw(unsigned int theView) {
+void StGLScrollArea::stglUpdate(const StPointD_t& theCursorZo) {
     if(!isVisible()) {
+        StGLWidget::stglUpdate(theCursorZo);
         return;
     }
 
     if(isClicked(ST_MOUSE_LEFT)
-    && isScrollable()
-    && theView != ST_DRAW_RIGHT) {
+    && isScrollable()) {
         StPointD_t aDelta = myRoot->getCursorZo() - myClickPntZo;
         double aDeltaY = aDelta.y() * myRoot->getRectPx().height();
         myClickPntZo = myRoot->getCursorZo();
@@ -146,8 +146,7 @@ void StGLScrollArea::stglDraw(unsigned int theView) {
             myDragTimer.restart();
         }
         doScroll((int )aDeltaY);
-    } else if(myFlingTimer.isOn()
-           && theView != ST_DRAW_RIGHT) {
+    } else if(myFlingTimer.isOn()) {
         double aTime = myFlingTimer.getElapsedTime();
         double anA   = (myFlingYSpeed > 0.0 ? -1.0 : 1.0) * myFlingAccel;
         int aFullDeltaY = int(myFlingYSpeed * aTime + anA * aTime * aTime);
@@ -160,6 +159,14 @@ void StGLScrollArea::stglDraw(unsigned int theView) {
             myFlingYDone += aDeltaY;
             doScroll(aDeltaY, true);
         }
+    }
+
+    StGLWidget::stglUpdate(theCursorZo);
+}
+
+void StGLScrollArea::stglDraw(unsigned int theView) {
+    if(!isVisible()) {
+        return;
     }
 
     StGLContext& aCtx = getContext();

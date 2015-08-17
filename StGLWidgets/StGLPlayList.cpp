@@ -248,6 +248,11 @@ void StGLPlayList::stglDrawScrollBar(unsigned int theView) {
 }
 
 void StGLPlayList::stglUpdate(const StPointD_t& theCursorZo) {
+    if(!isVisible()) {
+        StGLMenu::stglUpdate(theCursorZo);
+        return;
+    }
+
     if(myIsLeftClick
     && !myRoot->isClicked(ST_MOUSE_LEFT)) {
         // handle global unclick to start inertial scrolling
