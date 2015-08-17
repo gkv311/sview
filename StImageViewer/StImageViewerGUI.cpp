@@ -602,7 +602,7 @@ void StImageViewerGUI::doListHotKeys(const size_t ) {
     myLangMap->params.language->setName(tr(MENU_HELP_LANGS));
 
     const StString aTitle  = tr(MENU_HELP_HOTKEYS);
-    StInfoDialog*  aDialog = new StInfoDialog(myPlugin, this, aTitle, scale(564), scale(300));
+    StInfoDialog*  aDialog = new StInfoDialog(myPlugin, this, aTitle, scale(650), scale(300));
 
     std::map< int, StHandle<StAction> >& anActionsMap = myPlugin->changeActions();
 

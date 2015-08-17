@@ -267,7 +267,7 @@ void StGLTable::fillFromHotKeys(const std::map< int, StHandle<StAction> >&      
     // fill table
     int aRowIter = 0;
     int aCol2Width    = 0;
-    int aCol1MaxWidth = theMaxWidth / 2;
+    int aCol1MaxWidth = theMaxWidth / 2 - myItemMargins.left - myItemMargins.right;
     const StGLCorner aCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT);
     for(std::map< int, StHandle<StAction> >::const_iterator anActionIter = theActions.begin();
         anActionIter != theActions.end(); ++anActionIter, ++aRowIter) {
