@@ -138,13 +138,18 @@ void StMoviePlayerGUI::createBottomToolbar() {
     const StMarginsI& aMargins = getRootMargins();
     const int aTop  = scale(DISPL_Y_REGION_BOTTOM);
     const int aLeft = scale(DISPL_X_REGION_BOTTOM);
+    const IconSize anIconSize = scaleIcon(64);
     myPanelBottom = new StGLContainer(this, aMargins.left, -aMargins.bottom, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(128));
 
     // append the textured buttons
     myBtnPlay = new StGLTextureButton(myPanelBottom, aLeft, aTop,
                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), 2);
     myBtnPlay->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doPlayPause);
-    const StString aPaths[2] = { stCTexture("moviePlay.png"), stCTexture("moviePause.png") };
+    const StString aPaths[2] = {
+        iconTexture(stCString("actionVideoPlayBlue"),  anIconSize),
+        iconTexture(stCString("actionVideoPauseBlue"), anIconSize)
+    };
+
     myBtnPlay->setTexturePath(aPaths, 2);
 
     myTimeBox = new StTimeBox(myPanelBottom, aLeft + 1 * myIconStep, aTop,
@@ -154,23 +159,23 @@ void StMoviePlayerGUI::createBottomToolbar() {
     myBtnPrev = new StGLTextureButton(myPanelBottom, -aLeft - 3 * myIconStep, aTop,
                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myBtnPrev->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doListPrev);
-    myBtnPrev->setTexturePath(stCTexture("moviePrior.png"));
+    myBtnPrev->setTexturePath(iconTexture(stCString("actionVideoPreviousBlue"), anIconSize));
 
     myBtnNext = new StGLTextureButton(myPanelBottom, -aLeft - 2 * myIconStep, aTop,
                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myBtnNext->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doListNext);
-    myBtnNext->setTexturePath(stCTexture("movieNext.png"));
+    myBtnNext->setTexturePath(iconTexture(stCString("actionVideoNextBlue"), anIconSize));
 
     myBtnList = new StGLTextureButton(myPanelBottom, -aLeft - myIconStep, aTop,
                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myBtnList->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doPlayListReverse);
-    myBtnList->setTexturePath(stCTexture("moviePlaylist.png"));
+    myBtnList->setTexturePath(iconTexture(stCString("actionVideoPlaylistBlue"), anIconSize));
 
     if(myWindow->hasFullscreenMode()) {
         myBtnFullScr = new StGLTextureButton(myPanelBottom, -aLeft, aTop,
                                              StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
         myBtnFullScr->signals.onBtnClick.connect(myPlugin->params.isFullscreen.operator->(), &StBoolParam::doReverse);
-        myBtnFullScr->setTexturePath(stCTexture("movieFullScr.png"));
+        myBtnFullScr->setTexturePath(iconTexture(stCString("actionVideoFullscreenBlue"), anIconSize));
     }
 }
 

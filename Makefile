@@ -142,7 +142,7 @@ pre_all:
 	mkdir -p $(BUILD_ROOT)/textures
 	mkdir -p $(BUILD_ROOT)/web
 	mkdir -p sview/libs/armeabi-v7a
-	cp -f -r textures/*.png $(BUILD_ROOT)/textures/
+	cp -f -r textures/* $(BUILD_ROOT)/textures/
 
 # StShared static shared library
 aStShared_SRCS := $(wildcard StShared/*.cpp)

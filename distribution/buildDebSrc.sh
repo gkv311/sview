@@ -56,7 +56,6 @@ find $aDebSrcRoot -iname "*.bak"    -exec rm {} \;
 find $aDebSrcRoot -iname "*.o"      -exec rm {} \;
 find $aDebSrcRoot -iname "*.depend" -exec rm {} \;
 find $aDebSrcRoot -iname "*.layout" -exec rm {} \;
-find $aDebSrcRoot -iname "*.svg"    -exec rm {} \;
 find $aDebSrcRoot -iname "*.exp"    -exec rm {} \;
 find $aDebSrcRoot -iname "*_build_log.html" -exec rm {} \;
 

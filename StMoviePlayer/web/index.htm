@@ -311,10 +311,18 @@ window.setInterval(function() { doRefresh() }, 2000);
   <table>
   <tr align='center'><td colspan='6'><div id='stTitle'></div></td></tr>
   <tr align='center'>
-    <td><a href="javascript:void(0)" onclick="doPlayPause();return false;"><img src='textures/moviePlay.png'    width='64' height='64' alt='Play/Pause' /></a></td>
-    <td><a href="javascript:void(0)" onclick="doListPrev();return false;"> <img src='textures/moviePrior.png'   width='64' height='64' alt='Previous'   /></a></td>
-    <td><a href="javascript:void(0)" onclick="doListNext();return false;"> <img src='textures/movieNext.png'    width='64' height='64' alt='Next'       /></a></td>
-    <td><a href="javascript:void(0)" onclick="doFullWin();return false;">  <img src='textures/movieFullScr.png' width='64' height='64' alt='Fullscreen/Windowed' /></a></td>
+    <td><a href="javascript:void(0)" onclick="doPlayPause();return false;">
+      <svg width='64' height='64'> <image width='64' height='64' xlink:href='textures/actionVideoPlayBlue.svg'       src='textures/actionVideoPlayBlue64.png'       alt='Play/Pause' /></svg>
+    </a></td>
+    <td><a href="javascript:void(0)" onclick="doListPrev();return false;">
+      <svg width='64' height='64'> <image width='64' height='64' xlink:href='textures/actionVideoPreviousBlue.svg'   src='textures/actionVideoPreviousBlue64.png'   alt='Previous' /></svg>
+    </a></td>
+    <td><a href="javascript:void(0)" onclick="doListNext();return false;">
+      <svg width='64' height='64'> <image width='64' height='64' xlink:href='textures/actionVideoNextBlue.svg'       src='textures/actionVideoNextBlue64.png'       alt='Next' /></svg>
+    </a></td>
+    <td><a href="javascript:void(0)" onclick="doFullWin();return false;">
+      <svg width='64' height='64'> <image width='64' height='64' xlink:href='textures/actionVideoFullscreenBlue.svg' src='textures/actionVideoFullscreenBlue64.png' alt='Fullscreen/Windowed' /></svg>
+    </a></td>
     <td><canvas id="stVolumeCanvas" width="100" height="20"></canvas></td>
     <td><button onclick="doAudioMute()">Mute</button></td>
   </tr></table>
