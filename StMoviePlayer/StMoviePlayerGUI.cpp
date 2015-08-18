@@ -1129,7 +1129,7 @@ void StMoviePlayerGUI::createMobileBottomToolbar() {
     myTimeBox = new StTimeBox(myPanelBottom, myBottomBarNbRight * (-myIconStep), 0, aRightCorner, StGLTextArea::SIZE_SMALL);
     myTimeBox->setSwitchOnClick(true);
     myTimeBox->changeRectPx().right()  = myTimeBox->getRectPx().left() + myIconStep * 2;
-    myTimeBox->changeRectPx().bottom() = myTimeBox->getRectPx().top()  + scale(48);
+    myTimeBox->changeRectPx().bottom() = myTimeBox->getRectPx().top()  + scale(56);
 }
 
 void StMoviePlayerGUI::doShowMobileExMenu(const size_t ) {
