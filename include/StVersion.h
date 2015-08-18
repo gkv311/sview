@@ -239,9 +239,9 @@ class ST_LOCAL StVersionInfo {
         stsprintf(aBuff, 256, "%d.%02d", (myVer.year - TH_SUB), myVer.month);
         return StString(aBuff) + aState
              + " " + StThread::getArchString()
-             + " (build " + aYear
+             + " [build " + aYear
                           + "-" + (aMonth < 10 ? "0" : "") + aMonth
-                          + "-" + (aDay   < 10 ? "0" : "") + aDay + ")";
+                          + "-" + (aDay   < 10 ? "0" : "") + aDay + "]";
     }
 
     /**
