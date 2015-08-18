@@ -46,6 +46,7 @@ class ST_LOCAL StTimeBox : public StGLTextureButton {
         myTextArea->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
         myTextArea->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
                                    StGLTextFormatter::ST_ALIGN_Y_CENTER);
+        myTextArea->setDrawShadow(true);
     }
 
     void setSwitchOnClick(const bool theToSwitch) {

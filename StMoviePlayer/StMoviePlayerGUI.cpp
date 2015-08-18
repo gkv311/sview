@@ -154,7 +154,6 @@ void StMoviePlayerGUI::createBottomToolbar() {
 
     myTimeBox = new StTimeBox(myPanelBottom, aLeft + 1 * myIconStep, aTop,
                               StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
-    myTimeBox->setTexturePath(stCTexture("timebox.png"));
     myTimeBox->setSwitchOnClick(true);
     myBtnPrev = new StGLTextureButton(myPanelBottom, -aLeft - 3 * myIconStep, aTop,
                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));

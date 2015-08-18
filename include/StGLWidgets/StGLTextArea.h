@@ -117,6 +117,20 @@ class StGLTextArea : public StGLWidget {
     }
 
     /**
+     * Return value of text shadow rendering flag.
+     */
+    ST_LOCAL bool toDrawShadow() {
+        return myToDrawShadow;
+    }
+
+    /**
+     * Assign value to text shadow rendering flag.
+     */
+    ST_LOCAL void setDrawShadow(const bool theToDraw) {
+        myToDrawShadow = theToDraw;
+    }
+
+    /**
      * @param theWidth - text width restriction to force newline (-1 means no restriction)
      */
     ST_CPPEXPORT void setTextWidth(const int theWidth);
