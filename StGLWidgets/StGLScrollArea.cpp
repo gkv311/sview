@@ -230,6 +230,9 @@ bool StGLScrollArea::doScroll(const int  theDelta,
 bool StGLScrollArea::tryClick(const StPointD_t& theCursorZo,
                               const int&        theMouseBtn,
                               bool&             isItemClicked) {
+    if(!isVisible() || !isPointIn(theCursorZo)) {
+        return false;
+    }
     if(StGLWidget::tryClick(theCursorZo, theMouseBtn, isItemClicked)) {
         if(theMouseBtn == ST_MOUSE_LEFT) {
             myClickPntZo = theCursorZo;
