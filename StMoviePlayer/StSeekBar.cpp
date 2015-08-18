@@ -106,7 +106,7 @@ class StSeekBar::StProgramSB : public StGLProgram {
 StSeekBar::StSeekBar(StGLWidget* theParent,
                      const int   theTop,
                      const int   theMargin)
-: StGLWidget(theParent, 0, theTop, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT),
+: StGLWidget(theParent, 0, theTop, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
              theParent->getRoot()->scale(512),
              theParent->getRoot()->scale(12) + theMargin * 2),
   myProgram(new StProgramSB()),

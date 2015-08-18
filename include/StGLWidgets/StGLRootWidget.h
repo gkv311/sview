@@ -194,8 +194,28 @@ class StGLRootWidget : public StGLWidget {
 
     /**
      * Scale specified size to the nearest default icon size.
+     * @param theSize desired icon size in pixels (will be scaled)
+     * @return the icon of standard size nearest to requested one
      */
     ST_CPPEXPORT IconSize scaleIcon(const int theSize) const;
+
+    /**
+     * Scale specified size to the nearest default icon size and compute margins.
+     * @param theSize desired icon size in pixels (will be scaled)
+     * @return the icon of standard size nearest to requested one
+     */
+    ST_LOCAL IconSize scaleIcon(const int   theSize,
+                                StMarginsI& theMargins) const {
+        const IconSize anStdSize = scaleIcon(theSize);
+        theMargins = iconMargins(anStdSize, theSize);
+        return anStdSize;
+    }
+
+    /**
+     * Compute margins to the icon of standard size to fit into the center of arbitrary size.
+     */
+    ST_CPPEXPORT StMarginsI iconMargins(StGLRootWidget::IconSize theStdSize,
+                                        const int                theSize) const;
 
     /**
      * Returns texture for icon with specified default size.

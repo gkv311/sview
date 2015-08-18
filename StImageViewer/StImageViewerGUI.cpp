@@ -70,16 +70,20 @@ void StImageViewerGUI::createDesktopUI() {
     createUpperToolbar();
 
     const StMarginsI& aMargins = getRootMargins();
+    StMarginsI aButtonMargins;
+    const IconSize anIconSize = scaleIcon(32, aButtonMargins);
     myBtnPlayList = new StGLTextureButton(this, -aMargins.right - scale(8 + 8 + 32), -aMargins.bottom - scale(8),
                                           StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_RIGHT));
-    myBtnPlayList->setTexturePath(iconTexture(stCString("playList"), scaleIcon(32)));
+    myBtnPlayList->setTexturePath(iconTexture(stCString("playList"), anIconSize));
+    myBtnPlayList->changeMargins() = aButtonMargins;
 
     // fullscreen button
     if(myWindow->hasFullscreenMode()) {
         myBtnFull = new StGLTextureButton(this, -aMargins.right - scale(8), -aMargins.bottom - scale(8),
                                           StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_RIGHT));
         myBtnFull->signals.onBtnClick.connect(myPlugin->params.isFullscreen.operator->(), &StBoolParam::doReverse);
-        myBtnFull->setTexturePath(iconTexture(stCString("fullScreen"), scaleIcon(32)));
+        myBtnFull->setTexturePath(iconTexture(stCString("fullScreen"), anIconSize));
+        myBtnFull->changeMargins() = aButtonMargins;
     }
 
     myDescr = new StGLDescription(this);
@@ -95,6 +99,9 @@ void StImageViewerGUI::createUpperToolbar() {
     int aBtnIter = 0;
     const int aTop  = scale(DISPL_Y_REGION_UPPER);
     const int aLeft = scale(DISPL_X_REGION_UPPER);
+    StMarginsI aButtonMargins;
+    //const IconSize anIconSize = scaleIcon(64, aButtonMargins);
+    aButtonMargins = iconMargins(StGLRootWidget::IconSize_64, 64);
 
     const StMarginsI& aMargins = getRootMargins();
     myPanelUpper = new StGLContainer(this, aMargins.left, aMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(128));
@@ -103,24 +110,29 @@ void StImageViewerGUI::createUpperToolbar() {
     myBtnOpen   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * ICON_WIDTH, aTop);
     myBtnOpen->signals.onBtnClick.connect(myPlugin, &StImageViewer::doOpen1FileDialog);
     myBtnOpen->setTexturePath(stCTexture("openImage.png"));
+    myBtnOpen->changeMargins() = aButtonMargins;
 
     myBtnPrev   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * ICON_WIDTH, aTop);
     myBtnPrev->signals.onBtnClick.connect(myPlugin, &StImageViewer::doListPrev);
     myBtnPrev->setTexturePath(stCTexture("imagePrev.png"));
+    myBtnPrev->changeMargins() = aButtonMargins;
 
     myBtnNext   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * ICON_WIDTH, aTop);
     myBtnNext->signals.onBtnClick.connect(myPlugin, &StImageViewer::doListNext);
     myBtnNext->setTexturePath(stCTexture("imageNext.png"));
+    myBtnNext->changeMargins() = aButtonMargins;
 
     myBtnSwapLR = new StGLCheckboxTextured(myPanelUpper, myImage->params.swapLR,
                                            stCTexture("swapLRoff.png"),
                                            stCTexture("swapLRon.png"),
                                            aLeft + (aBtnIter++) * ICON_WIDTH, aTop,
                                            StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    myBtnSwapLR->changeMargins() = aButtonMargins;
 
     StGLSwitchTextured* aSrcBtn = new StGLSwitchTextured(myPanelUpper, myPlugin->params.srcFormat,
                                                          aLeft + (aBtnIter++) * ICON_WIDTH, aTop,
                                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    aSrcBtn->changeMargins() = aButtonMargins;
     aSrcBtn->addItem(StFormat_AUTO,          stCTexture("srcFrmtAuto.png"));
     aSrcBtn->addItem(StFormat_Mono,          stCTexture("srcFrmtMono.png"));
     aSrcBtn->addItem(StFormat_Rows,          stCTexture("srcFrmtInterlace.png"));
@@ -756,10 +768,10 @@ void StImageViewerGUI::createMobileUI() {
  * Create upper toolbar
  */
 void StImageViewerGUI::createMobileUpperToolbar() {
-    const IconSize anIconSize = scaleIcon(32);
-    const int      anIconStep = scale(56);
     StMarginsI aButtonMargins;
-    aButtonMargins.setValues(12);
+    const IconSize anIconSize = scaleIcon(32, aButtonMargins);
+    const int      anIconStep = scale(56);
+    aButtonMargins.extend(scale(12));
 
     const StMarginsI& aRootMargins = getRootMargins();
     myPanelUpper = new StGLContainer(this, aRootMargins.left, aRootMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(56));
@@ -806,10 +818,10 @@ void StImageViewerGUI::createMobileUpperToolbar() {
  * Create bottom toolbar
  */
 void StImageViewerGUI::createMobileBottomToolbar() {
-    const IconSize anIconSize = scaleIcon(32);
-    const int      anIconStep = scale(56);
     StMarginsI aButtonMargins;
-    aButtonMargins.setValues(12);
+    const IconSize anIconSize = scaleIcon(32, aButtonMargins);
+    const int      anIconStep = scale(56);
+    aButtonMargins.extend(scale(12));
 
     const StMarginsI& aRootMargins = getRootMargins();
     myPanelBottom = new StGLContainer(this, aRootMargins.left, -aRootMargins.bottom, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(56));

@@ -77,11 +77,6 @@ namespace {
 
 void StMoviePlayerGUI::createDesktopUI(const StHandle<StPlayList>& thePlayList) {
     createUpperToolbar();
-
-    const StMarginsI& aMargins = getRootMargins();
-    mySeekBar = new StSeekBar(this, -aMargins.bottom - scale(74), scale(4));
-    mySeekBar->signals.onSeekClick.connect(myPlugin, &StMoviePlayer::doSeek);
-
     createBottomToolbar();
 
     myDescr = new StGLDescription(this);
@@ -102,6 +97,9 @@ void StMoviePlayerGUI::createUpperToolbar() {
     int aBtnIter = 0;
     const int aTop  = scale(DISPL_Y_REGION_UPPER);
     const int aLeft = scale(DISPL_X_REGION_UPPER);
+    StMarginsI aButtonMargins;
+    //const IconSize anIconSize = scaleIcon(64, aButtonMargins);
+    aButtonMargins = iconMargins(StGLRootWidget::IconSize_64, 64);
 
     const StMarginsI& aMargins = getRootMargins();
     myPanelUpper = new StGLContainer(this, aMargins.left, aMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(128));
@@ -110,17 +108,19 @@ void StMoviePlayerGUI::createUpperToolbar() {
     myBtnOpen = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * myIconStep, aTop);
     myBtnOpen->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doOpen1File);
     myBtnOpen->setTexturePath(stCTexture("openImage.png"));
+    myBtnOpen->changeMargins() = aButtonMargins;
 
     myBtnSwapLR = new StGLCheckboxTextured(myPanelUpper, myImage->params.swapLR,
                                            stCTexture("swapLRoff.png"),
                                            stCTexture("swapLRon.png"),
                                            aLeft + (aBtnIter++) * myIconStep, aTop,
                                            StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    myBtnSwapLR->changeMargins() = aButtonMargins;
 
     StGLSwitchTextured* aSrcBtn = new StGLSwitchTextured(myPanelUpper, myPlugin->params.srcFormat,
                                                          aLeft + (aBtnIter++) * myIconStep, aTop,
                                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
-
+    aSrcBtn->changeMargins() = aButtonMargins;
     aSrcBtn->addItem(StFormat_AUTO,          stCTexture("srcFrmtAuto.png"));
     aSrcBtn->addItem(StFormat_Mono,          stCTexture("srcFrmtMono.png"));
     aSrcBtn->addItem(StFormat_Rows,          stCTexture("srcFrmtInterlace.png"));
@@ -138,7 +138,9 @@ void StMoviePlayerGUI::createBottomToolbar() {
     const StMarginsI& aMargins = getRootMargins();
     const int aTop  = scale(DISPL_Y_REGION_BOTTOM);
     const int aLeft = scale(DISPL_X_REGION_BOTTOM);
-    const IconSize anIconSize = scaleIcon(64);
+    StMarginsI aButtonMargins;
+    const IconSize anIconSize = scaleIcon(64, aButtonMargins);
+
     myPanelBottom = new StGLContainer(this, aMargins.left, -aMargins.bottom, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(128));
 
     // append the textured buttons
@@ -151,31 +153,41 @@ void StMoviePlayerGUI::createBottomToolbar() {
     };
 
     myBtnPlay->setTexturePath(aPaths, 2);
+    myBtnPlay->changeMargins() = aButtonMargins;
 
     myTimeBox = new StTimeBox(myPanelBottom, aLeft + 1 * myIconStep, aTop,
                               StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
     myTimeBox->setSwitchOnClick(true);
+    myTimeBox->changeRectPx().right()  = myTimeBox->getRectPx().left() + scale(256);//myIconStep * 2;
+    myTimeBox->changeRectPx().bottom() = myTimeBox->getRectPx().top()  + scale(64);
     myBtnPrev = new StGLTextureButton(myPanelBottom, -aLeft - 3 * myIconStep, aTop,
                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myBtnPrev->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doListPrev);
     myBtnPrev->setTexturePath(iconTexture(stCString("actionVideoPreviousBlue"), anIconSize));
+    myBtnPrev->changeMargins() = aButtonMargins;
 
     myBtnNext = new StGLTextureButton(myPanelBottom, -aLeft - 2 * myIconStep, aTop,
                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myBtnNext->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doListNext);
     myBtnNext->setTexturePath(iconTexture(stCString("actionVideoNextBlue"), anIconSize));
+    myBtnNext->changeMargins() = aButtonMargins;
 
     myBtnList = new StGLTextureButton(myPanelBottom, -aLeft - myIconStep, aTop,
                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myBtnList->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doPlayListReverse);
     myBtnList->setTexturePath(iconTexture(stCString("actionVideoPlaylistBlue"), anIconSize));
+    myBtnList->changeMargins() = aButtonMargins;
 
     if(myWindow->hasFullscreenMode()) {
         myBtnFullScr = new StGLTextureButton(myPanelBottom, -aLeft, aTop,
                                              StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
         myBtnFullScr->signals.onBtnClick.connect(myPlugin->params.isFullscreen.operator->(), &StBoolParam::doReverse);
         myBtnFullScr->setTexturePath(iconTexture(stCString("actionVideoFullscreenBlue"), anIconSize));
+        myBtnFullScr->changeMargins() = aButtonMargins;
     }
+
+    mySeekBar = new StSeekBar(myPanelBottom, 0, scale(4));
+    mySeekBar->signals.onSeekClick.connect(myPlugin, &StMoviePlayer::doSeek);
 }
 
 /**
@@ -1022,9 +1034,9 @@ void StMoviePlayerGUI::createMobileUI(const StHandle<StPlayList>& thePlayList) {
  * Create upper toolbar
  */
 void StMoviePlayerGUI::createMobileUpperToolbar() {
-    const IconSize anIconSize = scaleIcon(32);
     StMarginsI aButtonMargins;
-    aButtonMargins.setValues(12);
+    const IconSize anIconSize = scaleIcon(32, aButtonMargins);
+    aButtonMargins.extend(scale(12));
 
     const StMarginsI& aRootMargins = getRootMargins();
     myPanelUpper = new StGLContainer(this, aRootMargins.left, aRootMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(56));
@@ -1074,9 +1086,9 @@ void StMoviePlayerGUI::createMobileBottomToolbar() {
     myBottomBarNbLeft  = 0;
     myBottomBarNbRight = 0;
 
-    const IconSize anIconSize = scaleIcon(32);
     StMarginsI aButtonMargins;
-    aButtonMargins.setValues(12);
+    const IconSize anIconSize = scaleIcon(32, aButtonMargins);
+    aButtonMargins.extend(scale(12));
     const StMarginsI& aRootMargins = getRootMargins();
     myPanelBottom = new StGLContainer(this, aRootMargins.left, -aRootMargins.bottom, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(56));
 
@@ -1326,14 +1338,18 @@ void StMoviePlayerGUI::stglResize(const StGLBoxPx& theRectPx) {
         }
     }
 
-    if(mySeekBar != NULL) {
+    if(mySeekBar != NULL
+    && myPanelBottom != NULL) {
+        const int aPanelSizeY = myPanelBottom->getRectPx().height();
+        const int aSeekSizeY  = mySeekBar->getRectPx().height();
         if(isMobile()) {
             const int anXOffset = scale(24);
             const int anXSpace  = theRectPx.width() - (myBottomBarNbLeft + myBottomBarNbRight) * myIconStep;
             const int anXSpace2 = anXSpace - myBottomBarNbRight * myIconStep * 2;
             const int aBoxWidth = myTimeBox->getRectPx().width();
+
             if(anXSpace >= scale(250)) {
-                mySeekBar->changeRectPx().moveTopTo(-scale(8));
+                mySeekBar->changeRectPx().moveTopTo((aPanelSizeY - aSeekSizeY) / 2);
                 mySeekBar->changeRectPx().left()  = anXOffset + myBottomBarNbLeft * myIconStep;
                 mySeekBar->changeRectPx().right() = theRectPx.width() - anXOffset - myBottomBarNbRight * myIconStep;
                 if(anXSpace2 >= scale(250)) {
@@ -1347,16 +1363,16 @@ void StMoviePlayerGUI::stglResize(const StGLBoxPx& theRectPx) {
                     myTimeBox->setOverlay(true);
                 }
             } else {
-                mySeekBar->changeRectPx().moveTopTo(-scale(64));
+                mySeekBar->changeRectPx().moveTopTo(-aPanelSizeY + (aPanelSizeY - aSeekSizeY) / 2);
                 mySeekBar->changeRectPx().left()  = anXOffset;
                 mySeekBar->changeRectPx().right() = theRectPx.width() - anXOffset;
-                myTimeBox->changeRectPx().moveTopTo(-scale(56));
+                myTimeBox->changeRectPx().moveTopTo(-aPanelSizeY);
                 myTimeBox->changeRectPx().moveLeftTo(-theRectPx.width() / 2 + aBoxWidth / 2);
                 myTimeBox->setOverlay(true);
             }
         } else {
             const int anXOffset = scale(64);
-            mySeekBar->changeRectPx().moveTopTo(-aMargins.bottom - scale(78));
+            mySeekBar->changeRectPx().moveTopTo(scale(34));
             mySeekBar->changeRectPx().left()  = anXOffset;
             mySeekBar->changeRectPx().right() = theRectPx.width() - anXOffset;
         }

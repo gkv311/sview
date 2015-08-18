@@ -289,6 +289,16 @@ struct StMarginsI {
         left = right = top = bottom = theValue;
     }
 
+    /**
+     * Extend margin to specified value for all boundaries.
+     */
+    void extend(const int theValue) {
+        left   += theValue;
+        right  += theValue;
+        top    += theValue;
+        bottom += theValue;
+    }
+
     bool operator==(const StMarginsI& theCompare) const {
         return top    == theCompare.top
             && left   == theCompare.left

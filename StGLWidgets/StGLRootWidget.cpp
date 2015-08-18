@@ -127,6 +127,21 @@ void StGLRootWidget::setupTextures() {
     myIcons[IconImage_RadioButtonOn]  = iconTexture(StString("textures" ST_FILE_SPLITTER) + "radioButtonOn",  aCheckboxSize);
 }
 
+StMarginsI StGLRootWidget::iconMargins(StGLRootWidget::IconSize theStdSize,
+                                       const int                theSize) const {
+    const int aSize     = scale(theSize);
+    const int anStdSize = THE_ICON_SIZES[theStdSize];
+    if(aSize <= anStdSize) {
+        return StMarginsI();
+    }
+    StMarginsI aMargins;
+    aMargins.left   = (aSize - anStdSize) / 2;
+    aMargins.right  =  aSize - anStdSize - aMargins.left;
+    aMargins.top    = aMargins.left;
+    aMargins.bottom = aMargins.right;
+    return aMargins;
+}
+
 StGLRootWidget::IconSize StGLRootWidget::scaleIcon(const int theSize) const {
     const int anIconSize = scale(theSize);
     if(anIconSize < 20) {
