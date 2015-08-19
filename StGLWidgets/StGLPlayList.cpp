@@ -91,16 +91,17 @@ void StGLPlayList::doChangeItem(const size_t ) {
 }
 
 void StGLPlayList::doMouseClick(const int theBtnId) {
+    myDragTimer .stop();
+    myFlingTimer.stop();
+    myClickPntZo = myRoot->getCursorZo();
+    myFlingPntZo = myRoot->getCursorZo();
+    myDragDone   = 0;
     if(theBtnId != ST_MOUSE_LEFT) {
+        myIsLeftClick = false;
         return;
     }
 
     myIsLeftClick = true;
-    myClickPntZo  = myRoot->getCursorZo();
-    myFlingPntZo  = myRoot->getCursorZo();
-    myDragDone    = 0;
-    myDragTimer .stop();
-    myFlingTimer.stop();
     for(StGLWidget* aChild = getChildren()->getStart(); aChild != NULL; aChild = aChild->getNext()) {
         StGLMenuItem* anItem = dynamic_cast<StGLMenuItem*>(aChild);
         if(anItem != NULL
