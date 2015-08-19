@@ -205,8 +205,7 @@ class StImageViewerGUI : public StGLRootWidget {
     StGLTextureButton*  myBtnPrev;
     StGLTextureButton*  myBtnNext;
     StGLTextureButton*  myBtnSwapLR;
-    StGLWidget*         myBtnSrcFrmt;
-    StGLTextureButton*  myBtnActualSrcFrmt;
+    StGLTextureButton*  myBtnSrcFrmt;
     StGLTextureButton*  myBtnPlayList;
     StGLTextureButton*  myBtnFull;
     StGLFpsLabel*       myFpsWidget;

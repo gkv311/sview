@@ -54,7 +54,6 @@ using namespace StImageViewerStrings;
 namespace {
     static const int DISPL_Y_REGION_UPPER = 32;
     static const int DISPL_X_REGION_UPPER = 32;
-    static const int ICON_WIDTH           = 64;
 }
 
 StInfoDialog::~StInfoDialog() {
@@ -100,47 +99,68 @@ void StImageViewerGUI::createUpperToolbar() {
     const int aTop  = scale(DISPL_Y_REGION_UPPER);
     const int aLeft = scale(DISPL_X_REGION_UPPER);
     StMarginsI aButtonMargins;
-    //const IconSize anIconSize = scaleIcon(64, aButtonMargins);
-    aButtonMargins = iconMargins(StGLRootWidget::IconSize_64, 64);
+    const IconSize anIconSize = scaleIcon(32, aButtonMargins);
+    const int      anIconStep = scale(48);
+    aButtonMargins.extend(scale(8));
 
     const StMarginsI& aMargins = getRootMargins();
     myPanelUpper = new StGLContainer(this, aMargins.left, aMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(128));
 
     // append textured buttons
-    myBtnOpen   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * ICON_WIDTH, aTop);
+    myBtnOpen   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop);
     myBtnOpen->signals.onBtnClick.connect(myPlugin, &StImageViewer::doOpen1FileDialog);
-    myBtnOpen->setTexturePath(stCTexture("openImage.png"));
+    myBtnOpen->setTexturePath(iconTexture(stCString("actionOpen"), anIconSize));
+    myBtnOpen->setDrawShadow(true);
     myBtnOpen->changeMargins() = aButtonMargins;
 
-    myBtnPrev   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * ICON_WIDTH, aTop);
+    myBtnPrev   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop);
     myBtnPrev->signals.onBtnClick.connect(myPlugin, &StImageViewer::doListPrev);
-    myBtnPrev->setTexturePath(stCTexture("imagePrev.png"));
+    myBtnPrev->setTexturePath(iconTexture(stCString("actionBack"), anIconSize));
+    myBtnPrev->setDrawShadow(true);
     myBtnPrev->changeMargins() = aButtonMargins;
 
-    myBtnNext   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * ICON_WIDTH, aTop);
+    myBtnNext   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop);
     myBtnNext->signals.onBtnClick.connect(myPlugin, &StImageViewer::doListNext);
-    myBtnNext->setTexturePath(stCTexture("imageNext.png"));
+    myBtnNext->setTexturePath(iconTexture(stCString("actionNext"), anIconSize));
+    myBtnNext->setDrawShadow(true);
     myBtnNext->changeMargins() = aButtonMargins;
 
-    myBtnSwapLR = new StGLCheckboxTextured(myPanelUpper, myImage->params.swapLR,
-                                           stCTexture("swapLRoff.png"),
-                                           stCTexture("swapLRon.png"),
-                                           aLeft + (aBtnIter++) * ICON_WIDTH, aTop,
-                                           StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
-    myBtnSwapLR->changeMargins() = aButtonMargins;
+    StGLTextureButton* aBtnInfo = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop);
+    aBtnInfo->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doAboutImage);
+    aBtnInfo->setTexturePath(iconTexture(stCString("actionInfo"),  anIconSize));
+    aBtnInfo->setDrawShadow(true);
+    aBtnInfo->changeMargins() = aButtonMargins;
 
-    StGLSwitchTextured* aSrcBtn = new StGLSwitchTextured(myPanelUpper, myPlugin->params.srcFormat,
-                                                         aLeft + (aBtnIter++) * ICON_WIDTH, aTop,
-                                                         StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    StGLTextureButton* aSrcBtn = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop,
+                                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), StFormat_NB);
     aSrcBtn->changeMargins() = aButtonMargins;
-    aSrcBtn->addItem(StFormat_AUTO,          stCTexture("srcFrmtAuto.png"));
-    aSrcBtn->addItem(StFormat_Mono,          stCTexture("srcFrmtMono.png"));
-    aSrcBtn->addItem(StFormat_Rows,          stCTexture("srcFrmtInterlace.png"));
-    aSrcBtn->addItem(StFormat_SideBySide_LR, stCTexture("srcFrmtSideBySide.png"));
-    aSrcBtn->addItem(StFormat_SideBySide_RL, stCTexture("srcFrmtSideBySide.png"), true);
-    aSrcBtn->addItem(StFormat_TopBottom_LR,  stCTexture("srcFrmtOverUnder.png"));
-    aSrcBtn->addItem(StFormat_TopBottom_RL,  stCTexture("srcFrmtOverUnder.png"),  true);
+    aSrcBtn->signals.onBtnClick += stSlot(this, &StImageViewerGUI::doDisplayStereoFormatCombo);
+    const StString aSrcTextures[StFormat_NB] = {
+        iconTexture(stCString("menuMono"),           anIconSize),
+        iconTexture(stCString("menuSbsLR"),          anIconSize),
+        iconTexture(stCString("menuSbsRL"),          anIconSize),
+        iconTexture(stCString("menuOverUnderLR"),    anIconSize),
+        iconTexture(stCString("menuOverUnderRL"),    anIconSize),
+        iconTexture(stCString("menuRowLR"),          anIconSize),
+        iconTexture(stCString("menuColLR"),          anIconSize),
+        iconTexture(stCString("menuSrcSeparate"),    anIconSize),
+        iconTexture(stCString("menuFrameSeqLR"),     anIconSize),
+        iconTexture(stCString("menuRedCyanLR"),      anIconSize),
+        iconTexture(stCString("menuGreenMagentaLR"), anIconSize),
+        iconTexture(stCString("menuYellowBlueLR"),   anIconSize),
+        iconTexture(stCString("menuTiledLR"),        anIconSize)
+    };
+    aSrcBtn->setTexturePath(aSrcTextures, StFormat_NB);
+    aSrcBtn->setDrawShadow(true);
     myBtnSrcFrmt = aSrcBtn;
+
+    myBtnSwapLR = new StGLCheckboxTextured(myPanelUpper, myImage->params.swapLR,
+                                           iconTexture(stCString("actionSwapLROff"), anIconSize),
+                                           iconTexture(stCString("actionSwapLROn"),  anIconSize),
+                                           aLeft + (aBtnIter++) * anIconStep, aTop,
+                                           StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    myBtnSwapLR->setDrawShadow(true);
+    myBtnSwapLR->changeMargins() = aButtonMargins;
 }
 
 /**
@@ -799,7 +819,15 @@ void StImageViewerGUI::createMobileUpperToolbar() {
     };
     aSrcBtn->setTexturePath(aSrcTextures, StFormat_NB);
     aSrcBtn->setDrawShadow(true);
-    myBtnActualSrcFrmt = aSrcBtn;
+    myBtnSrcFrmt = aSrcBtn;
+
+    myBtnSwapLR = new StGLCheckboxTextured(myPanelUpper, myImage->params.swapLR,
+                                           iconTexture(stCString("actionSwapLROff"), anIconSize),
+                                           iconTexture(stCString("actionSwapLROn"),  anIconSize),
+                                           (aBtnIter++) * anIconStep, 0,
+                                           StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    myBtnSwapLR->setDrawShadow(true);
+    myBtnSwapLR->changeMargins() = aButtonMargins;
 
     aBtnIter = 0;
     StGLTextureButton* aBtnEx = new StGLTextureButton(myPanelUpper, (aBtnIter--) * (-anIconStep), 0,
@@ -808,12 +836,6 @@ void StImageViewerGUI::createMobileUpperToolbar() {
     aBtnEx->setTexturePath(iconTexture(stCString("actionOverflow"), anIconSize));
     aBtnEx->setDrawShadow(true);
     aBtnEx->signals.onBtnClick += stSlot(this, &StImageViewerGUI::doShowMobileExMenu);
-
-    /**myBtnSwapLR = new StGLCheckboxTextured(myPanelUpper, myImage->params.swapLR,
-                                           stCTexture("swapLRoff.png"),
-                                           stCTexture("swapLRon.png"),
-                                           aLeft + (aBtnIter++) * ICON_WIDTH, aTop,
-                                           StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));*/
 }
 
 /**
@@ -905,7 +927,6 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
   myBtnNext(NULL),
   myBtnSwapLR(NULL),
   myBtnSrcFrmt(NULL),
-  myBtnActualSrcFrmt(NULL),
   myBtnPlayList(NULL),
   myBtnFull(NULL),
   //
@@ -1041,8 +1062,8 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
      && myImage->params.swapLR->getValue()) {
         aSrcFormat = st::formatReversed(aSrcFormat);
     }
-    if(myBtnActualSrcFrmt != NULL) {
-        myBtnActualSrcFrmt->setFaceId(aSrcFormat != StFormat_AUTO ? aSrcFormat : StFormat_Mono);
+    if(myBtnSrcFrmt != NULL) {
+        myBtnSrcFrmt->setFaceId(aSrcFormat != StFormat_AUTO ? aSrcFormat : StFormat_Mono);
     }
 
     if(myDescr != NULL) {
