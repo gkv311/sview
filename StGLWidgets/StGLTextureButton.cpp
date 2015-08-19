@@ -75,7 +75,7 @@ class StGLTextureButton::Program : public StGLProgram {
     using StGLProgram::use;
     void use(StGLContext&    theCtx,
              const StGLVec4& theColor,
-             const double    theTime,
+             const GLfloat   theTime,
              const double    theLightX,
              const double    theLightY,
              const double    theOpacity,
@@ -83,7 +83,7 @@ class StGLTextureButton::Program : public StGLProgram {
              const GLfloat   theDispX) {
         StGLProgram::use(theCtx);
         theCtx.core20fwd->glUniform4fv(uniColorLoc, 1, theColor);
-        theCtx.core20fwd->glUniform1f(uniTimeLoc, GLfloat(theTime));
+        theCtx.core20fwd->glUniform1f(uniTimeLoc, theTime);
         theCtx.core20fwd->glUniform1i(uniClickedLoc, (theIsClicked ? 20 : 2));
         theCtx.core20fwd->glUniform3f(uniParamsLoc, GLfloat(theLightX), GLfloat(theLightY), GLfloat(theOpacity));
         if(!stAreEqual(myDispX, theDispX, 0.0001f)) {
@@ -274,6 +274,7 @@ StGLTextureButton::StGLTextureButton(StGLWidget*      theParent,
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
   myProgramIndex(StGLTextureButton::ProgramIndex_WaveRGB),
   myWaveTimer(false),
+  myAnimTime(0.0f),
   myAnim(Anim_Wave) {
     if(theFacesCount != 0) {
         myTextures = new StGLTextureArray(theFacesCount);
@@ -289,16 +290,6 @@ StGLTextureButton::~StGLTextureButton() {
         for(size_t anIter = 0; anIter < myTextures->size(); ++anIter) {
             myTextures->changeValue(anIter).release(aCtx);
         }
-    }
-}
-
-void StGLTextureButton::glWaveTimerControl() {
-    if(isPointIn(getRoot()->getCursorZo())) {
-        if(!myWaveTimer.isOn()) {
-            myWaveTimer.restart();
-        }
-    } else {
-        myWaveTimer.stop();
     }
 }
 
@@ -430,6 +421,23 @@ bool StGLTextureButton::stglInit() {
     return true;
 }
 
+void StGLTextureButton::stglUpdate(const StPointD_t& theCursorZo) {
+    if(!isVisible()) {
+        return;
+    }
+
+    if(isPointIn(theCursorZo)) {
+        if(!myWaveTimer.isOn()) {
+            myWaveTimer.restart();
+        }
+        myAnimTime = (float )myWaveTimer.getElapsedTimeInSec();
+    } else {
+        myWaveTimer.stop();
+        myAnimTime = 0.0f;
+    }
+    StGLWidget::stglUpdate(theCursorZo);
+}
+
 void StGLTextureButton::stglDraw(unsigned int ) {
     if(!isVisible()) {
         return;
@@ -447,22 +455,15 @@ void StGLTextureButton::stglDraw(unsigned int ) {
     aCtx.core20fwd->glEnable(GL_BLEND);
     aTexture.bind(aCtx);
 
-    StRectD_t butRectGl = getRectGl();
-    GLdouble butWGl = butRectGl.right() - butRectGl.left();
-    GLdouble butHGl = butRectGl.top() - butRectGl.bottom();
-
+    const StRectD_t  aRectGl  = getRectGl();
     const StPointD_t aMouseGl = getPointGl(getRoot()->getCursorZo());;
-    bool toShiftZ = false;
-    if(myAnim == Anim_Wave) {
-        glWaveTimerControl();
-        toShiftZ = isClicked(ST_MOUSE_LEFT);
-    }
-
+    bool toShiftZ = myAnim == Anim_Wave
+                 && isClicked(ST_MOUSE_LEFT);
     aProgram->use( aCtx,
                    myColor,
-                   myWaveTimer.getElapsedTimeInSec(),
-                  (aMouseGl.x() - butRectGl.left()) / butWGl,
-                  (butRectGl.top()  - aMouseGl.y()) / butHGl,
+                   myAnimTime,
+                  (aMouseGl.x() - aRectGl.left()) /  aRectGl.width(),
+                  (aRectGl.top()  - aMouseGl.y()) / -aRectGl.height(),
                    opacityValue,
                    toShiftZ,
                    getRoot()->getScreenDispX());

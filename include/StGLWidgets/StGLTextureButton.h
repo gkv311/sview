@@ -62,10 +62,10 @@ class StGLTextureButton : public StGLWidget {
 
     ST_CPPEXPORT virtual void stglResize();
     ST_CPPEXPORT virtual bool stglInit();
-    ST_CPPEXPORT virtual void stglDraw(unsigned int view);
-
-    ST_CPPEXPORT virtual bool tryClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemClicked);
-    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemUnclicked);
+    ST_CPPEXPORT virtual void stglDraw  (unsigned int view);
+    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo);
+    ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int& theMouseBtn, bool& theIsItemClicked);
+    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& theIsItemUnclicked);
 
         public:    //! @name Signals
 
@@ -80,10 +80,6 @@ class StGLTextureButton : public StGLWidget {
         private:   //! @name callback Slots (private overriders)
 
     ST_LOCAL void doMouseUnclick(const int theBtnId);
-
-        private:
-
-    ST_LOCAL void glWaveTimerControl();
 
         protected:
 
@@ -108,6 +104,7 @@ class StGLTextureButton : public StGLWidget {
     ProgramIndex               myProgramIndex;
 
     StTimer                    myWaveTimer;
+    float                      myAnimTime;
     Animation                  myAnim;
 
 };
