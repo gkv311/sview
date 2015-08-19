@@ -1063,6 +1063,7 @@ void StMoviePlayerGUI::createMobileUpperToolbar() {
         iconTexture(stCString("menuTiledLR"),        anIconSize)
     };
     aSrcBtn->setTexturePath(aSrcTextures, StFormat_NB);
+    aSrcBtn->setDrawShadow(true);
     myBtnActualSrcFrmt = aSrcBtn;
 
     aBtnIter = 0;
@@ -1070,6 +1071,7 @@ void StMoviePlayerGUI::createMobileUpperToolbar() {
                                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     aBtnEx->changeMargins() = aButtonMargins;
     aBtnEx->setTexturePath(iconTexture(stCString("actionOverflow"), anIconSize));
+    aBtnEx->setDrawShadow(true);
     aBtnEx->signals.onBtnClick += stSlot(this, &StMoviePlayerGUI::doShowMobileExMenu);
 
     /**myBtnSwapLR = new StGLCheckboxTextured(myPanelUpper, myImage->params.swapLR,
@@ -1096,6 +1098,7 @@ void StMoviePlayerGUI::createMobileBottomToolbar() {
     myBtnPrev = new StGLTextureButton(myPanelBottom, (myBottomBarNbLeft++) * myIconStep, 0);
     myBtnPrev->signals.onBtnClick += stSlot(myPlugin, &StMoviePlayer::doListPrev);
     myBtnPrev->setTexturePath(iconTexture(stCString("actionVideoPrevious"), anIconSize));
+    myBtnPrev->setDrawShadow(true);
     myBtnPrev->changeMargins() = aButtonMargins;
 
     myBtnPlay = new StGLTextureButton(myPanelBottom, (myBottomBarNbLeft++) * myIconStep, 0, aLeftCorner, 2);
@@ -1105,22 +1108,26 @@ void StMoviePlayerGUI::createMobileBottomToolbar() {
         iconTexture(stCString("actionVideoPause"), anIconSize)
     };
     myBtnPlay->setTexturePath(aPaths, 2);
+    myBtnPlay->setDrawShadow(true);
     myBtnPlay->changeMargins() = aButtonMargins;
 
     myBtnNext = new StGLTextureButton(myPanelBottom, (myBottomBarNbLeft++) * myIconStep, 0);
     myBtnNext->signals.onBtnClick += stSlot(myPlugin, &StMoviePlayer::doListNext);
     myBtnNext->setTexturePath(iconTexture(stCString("actionVideoNext"), anIconSize));
+    myBtnNext->setDrawShadow(true);
     myBtnNext->changeMargins() = aButtonMargins;
 
     const StGLCorner aRightCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT);
     myBtnList = new StGLTextureButton(myPanelBottom, (myBottomBarNbRight++) * (-myIconStep), 0, aRightCorner);
     myBtnList->signals.onBtnClick += stSlot(myPlugin, &StMoviePlayer::doPlayListReverse);
     myBtnList->setTexturePath(iconTexture(stCString("actionVideoPlaylist"), anIconSize));
+    myBtnList->setDrawShadow(true);
     myBtnList->changeMargins() = aButtonMargins;
 
     StGLTextureButton* aBtnInfo = new StGLTextureButton(myPanelBottom, (myBottomBarNbRight++) * (-myIconStep), 0, aRightCorner);
     aBtnInfo->signals.onBtnClick += stSlot(myPlugin, &StMoviePlayer::doAboutFile);
     aBtnInfo->setTexturePath(iconTexture(stCString("actionInfo"),  anIconSize));
+    aBtnInfo->setDrawShadow(true);
     aBtnInfo->changeMargins() = aButtonMargins;
 
     mySeekBar = new StSeekBar(myPanelBottom, 0, scale(18));

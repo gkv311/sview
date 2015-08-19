@@ -14,6 +14,9 @@
 #include <StGL/StGLVertexBuffer.h>
 #include <StGL/StGLTexture.h>
 
+/**
+ * Widget of the clickable button with image face.
+ */
 class StGLTextureButton : public StGLWidget {
 
         public:
@@ -25,12 +28,18 @@ class StGLTextureButton : public StGLWidget {
 
         public:
 
+    /**
+     * Main constructor.
+     */
     ST_CPPEXPORT StGLTextureButton(StGLWidget*      theParent,
                                    const int        theLeft = 32,
                                    const int        theTop = 32,
                                    const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
                                    const size_t     theFacesCount = 1);
 
+    /**
+     * Destructor.
+     */
     ST_CPPEXPORT virtual ~StGLTextureButton();
 
     /**
@@ -45,6 +54,34 @@ class StGLTextureButton : public StGLWidget {
      */
     ST_LOCAL const StGLVec4& getColor() const {
         return myColor;
+    }
+
+    /**
+     * Setup color of the shadow for the alpha texture.
+     */
+    ST_LOCAL void setShadowColor(const StGLVec4& theColor) {
+        myShadowColor = theColor;
+    }
+
+    /**
+     * color of the shadow for the alpha texture.
+     */
+    ST_LOCAL const StGLVec4& getShadowColor() const {
+        return myShadowColor;
+    }
+
+    /**
+     * Return value of text shadow rendering flag (false by default).
+     */
+    ST_LOCAL bool toDrawShadow() {
+        return myToDrawShadow;
+    }
+
+    /**
+     * Assign value to text shadow rendering flag.
+     */
+    ST_LOCAL void setDrawShadow(const bool theToDraw) {
+        myToDrawShadow = theToDraw;
     }
 
     ST_LOCAL size_t getFaceId() const {
@@ -97,6 +134,7 @@ class StGLTextureButton : public StGLWidget {
     StGLVertexBuffer           myVertBuf;
     StGLVertexBuffer           myTCrdBuf;
     StGLVec4                   myColor;
+    StGLVec4                   myShadowColor;
     StHandle<StGLTextureArray> myTextures;
     size_t                     myFaceId;
 
@@ -106,6 +144,7 @@ class StGLTextureButton : public StGLWidget {
     StTimer                    myWaveTimer;
     float                      myAnimTime;
     Animation                  myAnim;
+    bool                       myToDrawShadow;
 
 };
 

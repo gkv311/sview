@@ -798,6 +798,7 @@ void StImageViewerGUI::createMobileUpperToolbar() {
         iconTexture(stCString("menuTiledLR"),        anIconSize)
     };
     aSrcBtn->setTexturePath(aSrcTextures, StFormat_NB);
+    aSrcBtn->setDrawShadow(true);
     myBtnActualSrcFrmt = aSrcBtn;
 
     aBtnIter = 0;
@@ -805,6 +806,7 @@ void StImageViewerGUI::createMobileUpperToolbar() {
                                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     aBtnEx->changeMargins() = aButtonMargins;
     aBtnEx->setTexturePath(iconTexture(stCString("actionOverflow"), anIconSize));
+    aBtnEx->setDrawShadow(true);
     aBtnEx->signals.onBtnClick += stSlot(this, &StImageViewerGUI::doShowMobileExMenu);
 
     /**myBtnSwapLR = new StGLCheckboxTextured(myPanelUpper, myImage->params.swapLR,
@@ -830,16 +832,19 @@ void StImageViewerGUI::createMobileBottomToolbar() {
     myBtnPrev = new StGLTextureButton(myPanelBottom, (aBtnIter++) * anIconStep, 0);
     myBtnPrev->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doListPrev);
     myBtnPrev->setTexturePath(iconTexture(stCString("actionBack"), anIconSize));
+    myBtnPrev->setDrawShadow(true);
     myBtnPrev->changeMargins() = aButtonMargins;
 
     myBtnNext = new StGLTextureButton(myPanelBottom, (aBtnIter++) * anIconStep, 0);
     myBtnNext->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doListNext);
     myBtnNext->setTexturePath(iconTexture(stCString("actionNext"), anIconSize));
+    myBtnNext->setDrawShadow(true);
     myBtnNext->changeMargins() = aButtonMargins;
 
     StGLTextureButton* aBtnInfo = new StGLTextureButton(myPanelBottom, (aBtnIter++) * anIconStep, 0);
     aBtnInfo->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doAboutImage);
     aBtnInfo->setTexturePath(iconTexture(stCString("actionInfo"),  anIconSize));
+    aBtnInfo->setDrawShadow(true);
     aBtnInfo->changeMargins() = aButtonMargins;
 }
 

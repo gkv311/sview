@@ -117,6 +117,20 @@ class StGLTextArea : public StGLWidget {
     }
 
     /**
+     * Setup shadow color.
+     */
+    ST_LOCAL void setShadowColor(const StGLVec4& theColor) {
+        myShadowColor = theColor;
+    }
+
+    /**
+     * Return shadow color.
+     */
+    ST_LOCAL const StGLVec4& getShadowColor() const {
+        return myShadowColor;
+    }
+
+    /**
      * Return value of text shadow rendering flag.
      */
     ST_LOCAL bool toDrawShadow() {

@@ -72,6 +72,11 @@ class StGLTextureButton::Program : public StGLProgram {
         StGLProgram::use(theCtx);
     }
 
+    void setColor(StGLContext&    theCtx,
+                  const StGLVec4& theColor) {
+        theCtx.core20fwd->glUniform4fv(uniColorLoc, 1, theColor);
+    }
+
     using StGLProgram::use;
     void use(StGLContext&    theCtx,
              const StGLVec4& theColor,
@@ -270,12 +275,14 @@ StGLTextureButton::StGLTextureButton(StGLWidget*      theParent,
                                      const size_t     theFacesCount)
 : StGLWidget(theParent, theLeft, theTop, theCorner),
   myColor(getRoot()->getColorForElement(StGLRootWidget::Color_IconActive)),
+  myShadowColor(0.0f, 0.0f, 0.0f, 1.0f),
   myFaceId(0),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
   myProgramIndex(StGLTextureButton::ProgramIndex_WaveRGB),
   myWaveTimer(false),
   myAnimTime(0.0f),
-  myAnim(Anim_Wave) {
+  myAnim(Anim_Wave),
+  myToDrawShadow(false) {
     if(theFacesCount != 0) {
         myTextures = new StGLTextureArray(theFacesCount);
     }
@@ -323,13 +330,17 @@ void StGLTextureButton::stglResize() {
     StGLContext& aCtx = getContext();
 
     // update vertices
-    StArray<StGLVec2> aVertices(4);
+    StArray<StGLVec2> aVertices(myToDrawShadow ? 8 : 4);
     StRectI_t aRect = getRectPxAbsolute();
     aRect.left()   += myMargins.left;
     aRect.right()  -= myMargins.right;
     aRect.top()    += myMargins.top;
     aRect.bottom() -= myMargins.bottom;
-    myRoot->getRectGl(aRect, aVertices);
+    myRoot->getRectGl(aRect, aVertices, 0);
+    if(myToDrawShadow) {
+        aRect.move(StVec2<int>(1, 1));
+        myRoot->getRectGl(aRect, aVertices, 4);
+    }
     myVertBuf.init(aCtx, aVertices);
 
     // update projection matrix
@@ -409,12 +420,18 @@ bool StGLTextureButton::stglInit() {
         return false;
     }
 
-    StArray<StGLVec2> aDummyVert(4);
-    StArray<StGLVec2> aTexCoords(4);
+    StArray<StGLVec2> aDummyVert(myToDrawShadow ? 8 : 4);
+    StArray<StGLVec2> aTexCoords(myToDrawShadow ? 8 : 4);
     aTexCoords[0] = StGLVec2(1.0f, 0.0f);
     aTexCoords[1] = StGLVec2(1.0f, 1.0f);
     aTexCoords[2] = StGLVec2(0.0f, 0.0f);
     aTexCoords[3] = StGLVec2(0.0f, 1.0f);
+    if(myToDrawShadow) {
+        aTexCoords[4] = aTexCoords[0];
+        aTexCoords[5] = aTexCoords[1];
+        aTexCoords[6] = aTexCoords[2];
+        aTexCoords[7] = aTexCoords[3];
+    }
 
     myVertBuf.init(aCtx, aDummyVert);
     myTCrdBuf.init(aCtx, aTexCoords);
@@ -445,6 +462,8 @@ void StGLTextureButton::stglDraw(unsigned int ) {
 
     StHandle<StGLTextureButton::Program>& aProgram = myProgram->getProgram(myProgramIndex);
     StGLNamedTexture& aTexture = myTextures->changeValue(myFaceId);
+    const bool hasShadow = myToDrawShadow
+                        && myProgramIndex == ProgramIndex_WaveAlpha;
     if( aProgram.isNull()
     || !aTexture.isValid()) {
         return;
@@ -460,7 +479,7 @@ void StGLTextureButton::stglDraw(unsigned int ) {
     bool toShiftZ = myAnim == Anim_Wave
                  && isClicked(ST_MOUSE_LEFT);
     aProgram->use( aCtx,
-                   myColor,
+                   hasShadow ? myShadowColor : myColor,
                    myAnimTime,
                   (aMouseGl.x() - aRectGl.left()) /  aRectGl.width(),
                   (aRectGl.top()  - aMouseGl.y()) / -aRectGl.height(),
@@ -468,13 +487,16 @@ void StGLTextureButton::stglDraw(unsigned int ) {
                    toShiftZ,
                    getRoot()->getScreenDispX());
 
-    myVertBuf.bindVertexAttrib(aCtx, aProgram->getVVertexLoc());
     myTCrdBuf.bindVertexAttrib(aCtx, aProgram->getVTexCoordLoc());
-
-    aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-    myTCrdBuf.unBindVertexAttrib(aCtx, aProgram->getVTexCoordLoc());
+    myVertBuf.bindVertexAttrib(aCtx, aProgram->getVVertexLoc());
+    aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, hasShadow ? 4 : 0, 4);
+    if(hasShadow) {
+        aProgram->setColor(aCtx, myColor);
+        myVertBuf.bindVertexAttrib(aCtx, aProgram->getVVertexLoc());
+        aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    }
     myVertBuf.unBindVertexAttrib(aCtx, aProgram->getVVertexLoc());
+    myTCrdBuf.unBindVertexAttrib(aCtx, aProgram->getVTexCoordLoc());
 
     aProgram->unuse(aCtx);
     aTexture.unbind(aCtx);
