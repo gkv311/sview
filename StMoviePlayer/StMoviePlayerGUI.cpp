@@ -757,31 +757,38 @@ StGLMenu* StMoviePlayerGUI::createFpsMenu() {
 }
 
 void StMoviePlayerGUI::doAboutProgram(const size_t ) {
-    StGLMessageBox* aDialog = new StGLMessageBox(this, "",
-          tr(ABOUT_DPLUGIN_NAME) + '\n'
-        + tr(ABOUT_VERSION) + " " + StVersionInfo::getSDKVersionString()
-        + "\n \n" + tr(ABOUT_DESCRIPTION).format("2007-2015", "kirill@sview.ru", "www.sview.ru"),
-        scale(512), scale(300));
+    const StGLVec3 THE_WHITE(1.0f, 1.0f, 1.0f);
+    const StString anAbout = tr(ABOUT_DPLUGIN_NAME) + '\n'
+                           + tr(ABOUT_VERSION) + " " + StVersionInfo::getSDKVersionString()
+                           + "\n \n" + tr(ABOUT_DESCRIPTION).format("2007-2015", "kirill@sview.ru", "www.sview.ru");
+
+    StArgumentsMap anInfo;
+    anInfo.add(StDictEntry("CPU cores", StString(StThread::countLogicalProcessors()) + StString(" logical processor(s)")));
+    getContext().stglFullInfo(anInfo);
+
+    StGLMessageBox* aDialog = new StGLMessageBox(this, tr(MENU_HELP_ABOUT), "", scale(512), scale(300));
+    StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
+    aTable->setupTable((int )anInfo.size() + 1, 2);
+
+    const int aTextMaxWidth = aDialog->getContent()->getRectPx().width() - 2 * (aTable->getItemMargins().left + aTable->getItemMargins().right);
+    StGLTableItem& anAboutItem = aTable->changeElement(0, 0); anAboutItem.setColSpan(2);
+    StGLTextArea*  anAboutLab  = new StGLTextArea(&anAboutItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
+    anAboutLab->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+                               StGLTextFormatter::ST_ALIGN_Y_TOP);
+    anAboutLab->setText(anAbout + "\n\n<b><i>" + tr(ABOUT_SYSTEM) + "</i></b>\n");
+    anAboutLab->setTextColor(THE_WHITE);
+    anAboutLab->stglInitAutoHeightWidth(aTextMaxWidth);
+
+    aTable->fillFromMap(anInfo, THE_WHITE,
+                        aDialog->getContent()->getRectPx().width(),
+                        aDialog->getContent()->getRectPx().width() / 2, 1);
+
     aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->stglInit();
 }
 
 void StMoviePlayerGUI::doUserTips(const size_t ) {
     StProcess::openURL("http://sview.ru/sview2009/usertips");
-}
-
-void StMoviePlayerGUI::doAboutSystem(const size_t ) {
-    const StString aTitle = tr(ABOUT_SYSTEM);
-    StGLMessageBox* aDialog = new StGLMessageBox(this, aTitle, "", scale(512), scale(256));
-
-    StArgumentsMap anInfo;
-    anInfo.add(StDictEntry("CPU cores", StString(StThread::countLogicalProcessors()) + StString(" logical processor(s)")));
-    getContext().stglFullInfo(anInfo);
-    StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
-    aTable->fillFromMap(anInfo, StGLVec3(1.0f, 1.0f, 1.0f), aDialog->getContent()->getRectPx().width(), aDialog->getContent()->getRectPx().width() / 2);
-
-    aDialog->addButton(tr(BUTTON_CLOSE));
-    aDialog->stglInit();
 }
 
 /**
@@ -959,9 +966,6 @@ StGLMenu* StMoviePlayerGUI::createHelpMenu() {
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doListHotKeys);
     aMenu->addItem(tr(MENU_HELP_LICENSE))
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doOpenLicense);
-    aMenu->addItem(tr(MENU_HELP_SYSINFO))
-         ->setIcon(iconTexture(stCString("actionInfo"), anIconSize), false)
-         ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAboutSystem);
     aMenu->addItem(tr(MENU_HELP_EXPERIMENTAL), myPlugin->params.ToShowExtra);
     aMenu->addItem(tr(MENU_HELP_SCALE),        aMenuScale);
     aMenu->addItem(tr(MENU_HELP_BLOCKSLP),     aMenuBlockSleep);

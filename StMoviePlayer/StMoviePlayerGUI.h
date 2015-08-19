@@ -186,7 +186,6 @@ class StMoviePlayerGUI : public StGLRootWidget {
 
     ST_LOCAL void doAboutProgram (const size_t );
     ST_LOCAL void doUserTips     (const size_t );
-    ST_LOCAL void doAboutSystem  (const size_t );
     ST_LOCAL void doCheckUpdates (const size_t );
     ST_LOCAL void doOpenLicense  (const size_t );
     ST_LOCAL void doShowFPS(const bool );
