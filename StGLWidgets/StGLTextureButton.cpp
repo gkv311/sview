@@ -443,14 +443,16 @@ void StGLTextureButton::stglUpdate(const StPointD_t& theCursorZo) {
         return;
     }
 
-    if(isPointIn(theCursorZo)) {
-        if(!myWaveTimer.isOn()) {
-            myWaveTimer.restart();
+    if(myAnim == Anim_Wave) {
+        if(isPointIn(theCursorZo)) {
+            if(!myWaveTimer.isOn()) {
+                myWaveTimer.restart();
+            }
+            myAnimTime = (float )myWaveTimer.getElapsedTimeInSec();
+        } else {
+            myWaveTimer.stop();
+            myAnimTime = 0.0f;
         }
-        myAnimTime = (float )myWaveTimer.getElapsedTimeInSec();
-    } else {
-        myWaveTimer.stop();
-        myAnimTime = 0.0f;
     }
     StGLWidget::stglUpdate(theCursorZo);
 }
