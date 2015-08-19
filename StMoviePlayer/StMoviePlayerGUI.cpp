@@ -112,11 +112,11 @@ void StMoviePlayerGUI::createUpperToolbar() {
     myBtnOpen->setDrawShadow(true);
     myBtnOpen->changeMargins() = aButtonMargins;
 
-    StGLTextureButton* aBtnInfo = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop);
-    aBtnInfo->signals.onBtnClick += stSlot(myPlugin, &StMoviePlayer::doAboutFile);
-    aBtnInfo->setTexturePath(iconTexture(stCString("actionInfo"),  anIconSize));
-    aBtnInfo->setDrawShadow(true);
-    aBtnInfo->changeMargins() = aButtonMargins;
+    myBtnInfo = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop);
+    myBtnInfo->signals.onBtnClick += stSlot(myPlugin, &StMoviePlayer::doAboutFile);
+    myBtnInfo->setTexturePath(iconTexture(stCString("actionInfo"),  anIconSize));
+    myBtnInfo->setDrawShadow(true);
+    myBtnInfo->changeMargins() = aButtonMargins;
 
     StGLTextureButton* aSrcBtn = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop,
                                                        StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), StFormat_NB);
@@ -1241,6 +1241,7 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
   // upper toolbar
   myPanelUpper(NULL),
   myBtnOpen(NULL),
+  myBtnInfo(NULL),
   myBtnSwapLR(NULL),
   myBtnSrcFrmt(NULL),
   // bottom toolbar
@@ -1510,6 +1511,8 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
         myDescr->setVisibility(true, true);
         if(::isPointIn(myBtnOpen, theCursor)) {
             myDescr->setText(tr(FILE_VIDEO_OPEN));
+        } else if(::isPointIn(myBtnInfo,   theCursor)) {
+            myDescr->setText(tr(MENU_MEDIA_FILE_INFO));
         } else if(::isPointIn(myBtnSwapLR, theCursor)) {
             size_t aLngId = myImage->params.swapLR->getValue() ? SWAP_LR_ON : SWAP_LR_OFF;
             myDescr->setText(tr(aLngId));

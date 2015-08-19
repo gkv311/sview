@@ -125,11 +125,11 @@ void StImageViewerGUI::createUpperToolbar() {
     myBtnNext->setDrawShadow(true);
     myBtnNext->changeMargins() = aButtonMargins;
 
-    StGLTextureButton* aBtnInfo = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop);
-    aBtnInfo->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doAboutImage);
-    aBtnInfo->setTexturePath(iconTexture(stCString("actionInfo"),  anIconSize));
-    aBtnInfo->setDrawShadow(true);
-    aBtnInfo->changeMargins() = aButtonMargins;
+    myBtnInfo = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop);
+    myBtnInfo->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doAboutImage);
+    myBtnInfo->setTexturePath(iconTexture(stCString("actionInfo"),  anIconSize));
+    myBtnInfo->setDrawShadow(true);
+    myBtnInfo->changeMargins() = aButtonMargins;
 
     StGLTextureButton* aSrcBtn = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop,
                                                        StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), StFormat_NB);
@@ -863,11 +863,11 @@ void StImageViewerGUI::createMobileBottomToolbar() {
     myBtnNext->setDrawShadow(true);
     myBtnNext->changeMargins() = aButtonMargins;
 
-    StGLTextureButton* aBtnInfo = new StGLTextureButton(myPanelBottom, (aBtnIter++) * anIconStep, 0);
-    aBtnInfo->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doAboutImage);
-    aBtnInfo->setTexturePath(iconTexture(stCString("actionInfo"),  anIconSize));
-    aBtnInfo->setDrawShadow(true);
-    aBtnInfo->changeMargins() = aButtonMargins;
+    myBtnInfo = new StGLTextureButton(myPanelBottom, (aBtnIter++) * anIconStep, 0);
+    myBtnInfo->signals.onBtnClick += stSlot(myPlugin, &StImageViewer::doAboutImage);
+    myBtnInfo->setTexturePath(iconTexture(stCString("actionInfo"),  anIconSize));
+    myBtnInfo->setDrawShadow(true);
+    myBtnInfo->changeMargins() = aButtonMargins;
 }
 
 void StImageViewerGUI::doShowMobileExMenu(const size_t ) {
@@ -925,6 +925,7 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
   myBtnOpen(NULL),
   myBtnPrev(NULL),
   myBtnNext(NULL),
+  myBtnInfo(NULL),
   myBtnSwapLR(NULL),
   myBtnSrcFrmt(NULL),
   myBtnPlayList(NULL),
@@ -1074,6 +1075,8 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
             myDescr->setText(tr(IMAGE_PREVIOUS));
         } else if(::isPointIn(myBtnNext, theCursor)) {
             myDescr->setText(tr(IMAGE_NEXT));
+        } else if(::isPointIn(myBtnInfo, theCursor)) {
+            myDescr->setText(tr(MENU_MEDIA_FILE_INFO));
         } else if(::isPointIn(myBtnSwapLR, theCursor)) {
             size_t aLngId = myImage->params.swapLR->getValue() ? SWAP_LR_ON : SWAP_LR_OFF;
             myDescr->setText(tr(aLngId));
