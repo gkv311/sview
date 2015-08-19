@@ -71,10 +71,10 @@ void StImageViewerGUI::createDesktopUI() {
     const StMarginsI& aMargins = getRootMargins();
     StMarginsI aButtonMargins;
     const IconSize anIconSize = scaleIcon(32, aButtonMargins);
-    myBtnPlayList = new StGLTextureButton(this, -aMargins.right - scale(8 + 8 + 32), -aMargins.bottom - scale(8),
+    /*myBtnPlayList = new StGLTextureButton(this, -aMargins.right - scale(8 + 8 + 32), -aMargins.bottom - scale(8),
                                           StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_RIGHT));
     myBtnPlayList->setTexturePath(iconTexture(stCString("playList"), anIconSize));
-    myBtnPlayList->changeMargins() = aButtonMargins;
+    myBtnPlayList->changeMargins() = aButtonMargins;*/
 
     // fullscreen button
     if(myWindow->hasFullscreenMode()) {

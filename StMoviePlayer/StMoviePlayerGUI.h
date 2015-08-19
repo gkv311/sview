@@ -228,8 +228,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
     StGLWidget*         myPanelUpper;       //!< upper toolbar
     StGLTextureButton*  myBtnOpen;
     StGLTextureButton*  myBtnSwapLR;
-    StGLWidget*         myBtnSrcFrmt;
-    StGLTextureButton*  myBtnActualSrcFrmt;
+    StGLTextureButton*  myBtnSrcFrmt;
 
     StGLWidget*         myPanelBottom;      //!< bottom toolbar
     StSeekBar*          mySeekBar;
