@@ -35,17 +35,23 @@ StGLCombobox::~StGLCombobox() {
 StGLCombobox::ListBuilder::ListBuilder(StGLWidget* theParent)
 : myBack(NULL),
   myMenu(NULL) {
-    StGLWidget* aMenuParent = theParent->getRoot();
-    if(theParent->getRoot()->isMobile()) {
-        myBack = new StGLMessageBox(theParent->getRoot(), "", "",
-                                   theParent->getRoot()->getRectPx().width(), theParent->getRoot()->getRectPx().height());
+    StGLRootWidget* aRoot       = theParent->getRoot();
+    StGLWidget*     aMenuParent = aRoot;
+    if(aRoot->isMobile()) {
+        myBack = new StGLMessageBox(aRoot, "", "",
+                                    aRoot->getRectPx().width(), aRoot->getRectPx().height());
         myBack->setContextual(true);
         aMenuParent = myBack;
     }
 
     const StRectI_t aRect = theParent->getRectPxAbsolute();
-    int aLeft = myBack != NULL ? 0 : aRect.left();
-    int aTop  = myBack != NULL ? 0 : aRect.bottom();
+
+    int aLeft = 0;
+    int aTop  = 0;
+    if(myBack == NULL) {
+        aLeft = int(aRoot->getCursorZo().x() * aRoot->getRectPx().width());
+        aTop  = int(aRoot->getCursorZo().y() * aRoot->getRectPx().height());
+    }
 
     myMenu = new StGLMenu(aMenuParent, aLeft, aTop, StGLMenu::MENU_VERTICAL);
     if(myBack != NULL) {
@@ -59,8 +65,22 @@ void StGLCombobox::ListBuilder::display() {
         myBack->setVisibility(true, true);
         myBack->stglInit();
     } else {
+        StGLRootWidget* aRoot = myMenu->getRoot();
         myMenu->setVisibility(true, true);
         myMenu->stglInit();
+        StRectI_t aRect  = myMenu->getRectPxAbsolute();
+        const int aRootX = aRoot->getRectPx().width();
+        const int aRootY = aRoot->getRectPx().height();
+        if(aRect.width()  >= aRootX) {
+            myMenu->changeRectPx().moveLeftTo(0);
+        } else if(aRect.right() > aRootX) {
+            myMenu->changeRectPx().moveRightTo(aRootX);
+        }
+        if(aRect.height() >= aRootY) {
+            myMenu->changeRectPx().moveTopTo(0);
+        } else if(aRect.bottom() > aRootY) {
+            myMenu->changeRectPx().moveBottomTo(aRootY);
+        }
     }
 }
 

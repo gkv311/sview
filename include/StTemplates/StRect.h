@@ -160,18 +160,45 @@ class StRect {
         return (anH > Element_t(0.0)) ? double(width()) / double(height()) : 1.0;
     }
 
+    /**
+     * Specify new Left without affecting dimensions.
+     */
     void moveLeftTo(const Element_t theLeft) {
         Element_t aWidth = width();
         left()  = theLeft;
         right() = theLeft + aWidth;
     }
 
+    /**
+     * Specify new Right without affecting dimensions.
+     */
+    void moveRightTo(const Element_t theRight) {
+        Element_t aWidth = width();
+        right() = theRight;
+        left()  = theRight - aWidth;
+    }
+
+    /**
+     * Specify new Top without affecting dimensions.
+     */
     void moveTopTo(const Element_t theTop) {
         Element_t anH = height();
         top()    = theTop;
         bottom() = theTop + anH;
     }
 
+    /**
+     * Specify new Bottom without affecting dimensions.
+     */
+    void moveBottomTo(const Element_t theBottom) {
+        Element_t anH = height();
+        bottom() = theBottom;
+        top()    = theBottom - anH;
+    }
+
+    /**
+     * Specify new Top-Left without affecting dimensions.
+     */
     void moveTopLeftTo(const Element_t theLeft,
                        const Element_t theTop) {
         moveLeftTo(theLeft);
