@@ -39,11 +39,11 @@ void StGLAssignHotKey::create() {
     StGLButton* anAssignBtn = addButton(myAssignLab);
     StGLButton* aDefaultBtn = addButton(myDefaultLab);
     addButton(myCancelLab);
-    setVisibility(true, true);
+    setOpacity(1.0f, true);
 
     StGLWidget* aContent = new StGLContainer(getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
                                              getContent()->getRectPx().width(), getContent()->getRectPx().height());
-    aContent->setVisibility(true, true);
+    aContent->setOpacity(1.0f, true);
 
     myHKeyLabel = new StGLTextArea(aContent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
                                    aContent->getRectPx().width(), myRoot->scale(10));
@@ -51,7 +51,6 @@ void StGLAssignHotKey::create() {
                                 StGLTextFormatter::ST_ALIGN_Y_TOP);
     myHKeyLabel->setText("...\n");
     myHKeyLabel->setTextColor(getRoot()->getColorForElement(StGLRootWidget::Color_MessageText));
-    myHKeyLabel->setVisibility(true, true);
     myHKeyLabel->stglInitAutoHeight();
 
     const StGLVec3 aRed(1.0f, 0.0f, 0.0f);
@@ -61,7 +60,6 @@ void StGLAssignHotKey::create() {
                                     StGLTextFormatter::ST_ALIGN_Y_TOP);
     myConflictLabel->setText("");
     myConflictLabel->setTextColor(aRed);
-    myConflictLabel->setVisibility(true, true);
     myConflictLabel->stglInitAutoHeight();
 
     anAssignBtn->signals.onBtnClick = stSlot(this, &StGLAssignHotKey::doSave);

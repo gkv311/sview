@@ -193,7 +193,7 @@ void StGLScrollArea::stglDraw(unsigned int theView) {
     myProgram->use(aCtx, myRoot->getScreenDispX());
     myBarVertBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
 
-    myProgram->setColor(aCtx, myBarColor, GLfloat(opacityValue));
+    myProgram->setColor(aCtx, myBarColor, myOpacity);
     aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
     myBarVertBuf.unBindVertexAttrib(aCtx, myProgram->getVVertexLoc());

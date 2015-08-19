@@ -137,11 +137,8 @@ StCADViewerGUI::StCADViewerGUI(StCADViewer* thePlugin)
     createMainMenu();
 
     myMsgStack = new StGLMsgStack(this, myPlugin->getMessagesQueue());
-    myMsgStack->setVisibility(true, true);
-
     if(myPlugin->params.ToShowFps->getValue()) {
         myFpsWidget = new StGLFpsLabel(this);
-        myFpsWidget->setVisibility(true, true);
     }
 }
 
@@ -150,14 +147,12 @@ StCADViewerGUI::~StCADViewerGUI() {
 }
 
 void StCADViewerGUI::setVisibility(const StPointD_t& , bool ) {
-    // always visible
-    StGLRootWidget::setVisibility(true, true);
     if(myMenu0Root != NULL) {
-        myMenu0Root->setVisibility(myIsGUIVisible, false);
+        myMenu0Root->setOpacity(myIsGUIVisible ? 1.0f : 0.0f, false);
     }
 
     if(myMouseDescr != NULL) {
-        myMouseDescr->setVisibility(false, true);
+        myMouseDescr->setOpacity(0.0f, true);
     }
 }
 
@@ -212,7 +207,6 @@ void StCADViewerGUI::doAboutProgram(const size_t ) {
         + aVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr,
         512, 300);
     anAboutDialog->addButton("Close");
-    anAboutDialog->setVisibility(true, true);
     anAboutDialog->stglInit();
 }
 
@@ -228,6 +222,5 @@ void StCADViewerGUI::doShowFPS(const bool ) {
     }
 
     myFpsWidget = new StGLFpsLabel(this);
-    myFpsWidget->setVisibility(true, true);
     myFpsWidget->stglInit();
 }

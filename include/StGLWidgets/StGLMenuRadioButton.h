@@ -31,8 +31,6 @@ class StGLMenuRadioButton : public StGLMenuItem {
                                      const StHandle<StFloat32Param>& theTrackedValue,
                                      const float theOnValue);
 
-    ST_CPPEXPORT virtual void setVisibility(bool isVisible, bool isForce);
-
         private: //!< callback Slots (private overriders)
 
     ST_LOCAL void doItemClick(const size_t );

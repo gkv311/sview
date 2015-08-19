@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -34,7 +34,6 @@ bool StGLRangeFieldFloat32::stglInit() {
     myValueText = new StGLTextArea(this, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT), -myRoot->scale(1), myRoot->scale(10));
     onValueChange(0.0f);
     myValueText->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
-    myValueText->setVisibility(true, true);
     if(!myValueText->stglInitAutoHeightWidth()) {
         delete myValueText; myValueText = NULL;
         return false;
@@ -50,7 +49,6 @@ bool StGLRangeFieldFloat32::stglInit() {
     aButDec->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT));
     aButDec->setHeight(aHeight);
     aButDec->setWidth(myRoot->scale(15));
-    aButDec->setVisibility(true, true);
     aButDec->signals.onBtnClick += stSlot(this, &StGLRangeFieldFloat32::doDecrement);
 
     myValueText->changeRectPx().moveLeftTo(aButDec->getRectPx().right() - myRoot->scale(5));
@@ -59,7 +57,6 @@ bool StGLRangeFieldFloat32::stglInit() {
     aButInc->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT));
     aButInc->setHeight(aHeight);
     aButInc->setWidth(myRoot->scale(15));
-    aButInc->setVisibility(true, true);
     aButInc->signals.onBtnClick += stSlot(this, &StGLRangeFieldFloat32::doIncrement);
 
     changeRectPx().right()  = getRectPx().left() + aButInc->getRectPx().right();

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -21,14 +21,6 @@ StGLSwitchTextured::StGLSwitchTextured(StGLWidget* theParent,
 
 StGLSwitchTextured::~StGLSwitchTextured() {
     //
-}
-
-void StGLSwitchTextured::setVisibility(bool isVisible, bool isForce) {
-    // setup opacity
-    StGLWidget::setVisibility(isVisible, isForce);
-    for(StGLWidget* aChild = getChildren()->getStart(); aChild != NULL; aChild = aChild->getNext()) {
-        aChild->setVisibility(isVisible, isForce);
-    }
 }
 
 bool StGLSwitchTextured::stglInit() {

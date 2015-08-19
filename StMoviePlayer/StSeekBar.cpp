@@ -206,7 +206,7 @@ void StSeekBar::stglDraw(unsigned int ) {
 
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     aCtx.core20fwd->glEnable(GL_BLEND);
-    myProgram->use(aCtx, GLfloat(opacityValue), myRoot->getScreenDispX());
+    myProgram->use(aCtx, myOpacity, myRoot->getScreenDispX());
 
     myVertices.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
     myColors  .bindVertexAttrib(aCtx, myProgram->getVColorLoc());

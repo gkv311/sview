@@ -94,7 +94,6 @@ class StImageViewerGUI : public StGLRootWidget {
     ST_LOCAL virtual void stglResize(const StGLBoxPx& theRectPx);
     ST_LOCAL virtual void stglDraw(unsigned int theView);
 
-    using StGLRootWidget::setVisibility;
     ST_LOCAL void setVisibility(const StPointD_t& theCursor,
                                 bool              isMouseActive,
                                 bool              toForceHide);
@@ -192,6 +191,7 @@ class StImageViewerGUI : public StGLRootWidget {
     StWindow*           myWindow;           //!< link to the window instance
     StTranslations*     myLangMap;          //!< translated strings map
     StTimer             myVisibilityTimer;  //!< minimum visible delay
+    StGLAnimationLerp   myVisLerp;
 
     StGLImageRegion*    myImage;            //!< the main image
     StGLDescription*    myDescr;            //!< description text shown near mouse cursor

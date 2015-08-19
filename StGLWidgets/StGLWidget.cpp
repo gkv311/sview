@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -27,11 +27,7 @@ StGLWidget::StGLWidget(StGLWidget* theParent,
   userData(0),
   rectPx(theTop, theTop + theHeight, theLeft, theLeft + theWidth),
   myCorner(theCorner),
-  opacityValue(0.0),
-  opacityOnMs(2500.0),
-  opacityOffMs(5000.0),
-  opacityOnTimer(false),
-  opacityOffTimer(true),
+  myOpacity(1.0f),
   isResized(true),
   myHasFocus(false),
   myIsTopWidget(false) {
@@ -198,35 +194,40 @@ StPointD_t StGLWidget::getPointIn(const StPointD_t& thePointZo) const {
                       (aRectGl.top() - aPointGl.y())  / (aRectGl.top() - aRectGl.bottom()));
 }
 
-void StGLWidget::setVisibility(bool isVisible, bool isForce) {
-    if(isForce) {
-        opacityValue = isVisible ? 1.0 : 0.0;
+double StGLAnimationLerp::perform(bool theDirUp, bool theToForce) {
+    if(theToForce) {
+        myValue = theDirUp ? 1.0 : 0.0;
     }
-    if(isVisible && !opacityOnTimer.isOn()) {
-        // switch from opacity DOWN to UP
-        opacityOnTimer.restart(1000.0 * opacityValue * opacityOnMs);
-        opacityOffTimer.stop();
-    } else if(!isVisible && !opacityOffTimer.isOn()) {
-        // switch from opacity UP to DOWN
-        opacityOffTimer.restart(1000.0 * (opacityOffMs - opacityValue * opacityOffMs));
-        opacityOnTimer.stop();
+    if(theDirUp && !myOnTimer.isOn()) {
+        // switch from value DOWN to UP
+        myOnTimer.restart(1000.0 * myValue * myOnMs);
+        myOffTimer.stop();
+    } else if(!theDirUp && !myOffTimer.isOn()) {
+        // switch from value UP to DOWN
+        myOffTimer.restart(1000.0 * (myOffMs - myValue * myOffMs));
+        myOnTimer.stop();
     }
-    if(!isVisible && opacityValue > 0.0) {
-        // opacity DOWN
-        opacityValue = 1.0 - opacityOffTimer.getElapsedTimeInMilliSec() / opacityOffMs;
-        if(opacityValue < 0.0) {
-            opacityValue = 0.0;
+    if(!theDirUp && myValue > 0.0) {
+        // value DOWN
+        myValue = 1.0 - myOffTimer.getElapsedTimeInMilliSec() / myOffMs;
+        if(myValue < 0.0) {
+            myValue = 0.0;
         }
-    } else if(isVisible && opacityValue < 1.0) {
-        // opacity UP
-        opacityValue = opacityOnTimer.getElapsedTimeInMilliSec() / opacityOnMs;
-        if(opacityValue > 1.0) {
-            opacityValue = 1.0;
+    } else if(theDirUp && myValue < 1.0) {
+        // value UP
+        myValue = myOnTimer.getElapsedTimeInMilliSec() / myOnMs;
+        if(myValue > 1.0) {
+            myValue = 1.0;
         }
     }
+    return myValue;
 }
 
 void StGLWidget::stglUpdate(const StPointD_t& cursorZo) {
+    if(!isVisible()) {
+        return;
+    }
+
     for(StGLWidget *child(myChildren.getStart()), *childActive(NULL); child != NULL;) {
         childActive = child;
         child = child->getNext();
@@ -374,4 +375,14 @@ bool StGLContainer::tryUnClick(const StPointD_t& theCursorZo,
         aChildActive->tryUnClick(theCursorZo, theMouseBtn, theIsItemUnclicked);
     }
     return false;
+}
+
+void StGLWidget::setOpacity(const float theOpacity, bool theToSetChildren) {
+    myOpacity = theOpacity;
+    if(!theToSetChildren) {
+        return;
+    }
+    for(StGLWidget *aChildIter(myChildren.getStart()); aChildIter != NULL; aChildIter = aChildIter->getNext()) {
+        aChildIter->setOpacity(theOpacity, theToSetChildren);
+    }
 }

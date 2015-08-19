@@ -70,12 +70,12 @@ void StGLPlayList::updateList() {
         anItem->setClicked(ST_MOUSE_LEFT, false);
         if(size_t(anIter) < anUpperLimit) {
             anItem->setText(aList.getValue(anIter));
-            anItem->setVisibility(true, true);
+            anItem->setOpacity(1.0f, false);
             anItem->setFocus(size_t(anIter) == aCurrent);
             anItem->changeRectPx().right() = anItem->getRectPx().left() + myWidth;
         } else {
             anItem->setText("");
-            anItem->setVisibility(false, true);
+            anItem->setOpacity(0.0f, false);
             //anItem->changeRectPx().right() = anItem->getRectPx().left();
         }
     }
@@ -168,7 +168,7 @@ void StGLPlayList::stglResize() {
 
         if(size_t(anIter) < anUpperLimit) {
             anItem->setText(aList.getValue(anIter));
-            anItem->setVisibility(true, true);
+            anItem->setOpacity(1.0f, false);
         }
     }
 
@@ -240,7 +240,7 @@ void StGLPlayList::stglDrawScrollBar(unsigned int theView) {
     myProgram->use(aCtx, myRoot->getScreenDispX());
     myBarVertBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
 
-    myProgram->setColor(aCtx, myBarColor, GLfloat(opacityValue));
+    myProgram->setColor(aCtx, myBarColor, myOpacity);
     aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
     myBarVertBuf.unBindVertexAttrib(aCtx, myProgram->getVVertexLoc());

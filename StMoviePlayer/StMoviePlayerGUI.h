@@ -110,7 +110,6 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL virtual void stglDraw(unsigned int theView);
 
     using StGLRootWidget::stglUpdate;
-    using StGLRootWidget::setVisibility;
     ST_LOCAL void stglUpdate(const StPointD_t& thePointZo,
                              const GLfloat     theProgress,
                              const double      thePTS);
@@ -212,6 +211,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
     StWindow*           myWindow;           //!< link to the window instance
     StTranslations*     myLangMap;          //!< translated strings map
     StTimer             myVisibilityTimer;  //!< minimum visible delay
+    StGLAnimationLerp   myVisLerp;
 
     StGLImageRegion*    myImage;            //!< the main video frame
     StGLSubtitles*      mySubtitles;        //!< the subtitles

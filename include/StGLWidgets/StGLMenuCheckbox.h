@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -21,8 +21,6 @@ class StGLMenuCheckbox : public StGLMenuItem {
 
     ST_CPPEXPORT StGLMenuCheckbox(StGLMenu* theParent,
                                   const StHandle<StBoolParam>& theTrackedValue);
-
-    ST_CPPEXPORT virtual void setVisibility(bool isVisible, bool isForce);
 
         private: //!< callback Slots (private overriders)
 

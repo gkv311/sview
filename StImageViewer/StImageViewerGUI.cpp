@@ -63,7 +63,6 @@ StInfoDialog::~StInfoDialog() {
 void StImageViewerGUI::createDesktopUI() {
     if(myPlugin->params.ToShowFps->getValue()) {
         myFpsWidget = new StGLFpsLabel(this);
-        myFpsWidget->setVisibility(true, true);
     }
 
     createUpperToolbar();
@@ -373,7 +372,6 @@ StGLMenu* StImageViewerGUI::createImageAdjustMenu() {
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aRed);
-    aRange->setVisibility(true, true);
 
     anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_BRIGHTNESS));
     anItem->changeMargins().right = scale(100 + 16);
@@ -383,7 +381,6 @@ StGLMenu* StImageViewerGUI::createImageAdjustMenu() {
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aRed);
-    aRange->setVisibility(true, true);
 
     anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_SATURATION));
     anItem->changeMargins().right = scale(100 + 16);
@@ -394,7 +391,6 @@ StGLMenu* StImageViewerGUI::createImageAdjustMenu() {
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aRed);
-    aRange->setVisibility(true, true);
     return aMenu;
 }
 
@@ -446,7 +442,6 @@ void StImageViewerGUI::doAboutProgram(const size_t ) {
         + "\n \n" + tr(ABOUT_DESCRIPTION).format("2007-2015", "kirill@sview.ru", "www.sview.ru"),
         scale(512), scale(300));
     aDialog->addButton(tr(BUTTON_CLOSE));
-    aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
 
@@ -462,11 +457,9 @@ void StImageViewerGUI::doAboutSystem(const size_t ) {
     anInfo.add(StDictEntry("CPU cores", StString(StThread::countLogicalProcessors()) + StString(" logical processor(s)")));
     getContext().stglFullInfo(anInfo);
     StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
-    aTable->setVisibility(true, true);
     aTable->fillFromMap(anInfo, StGLVec3(1.0f, 1.0f, 1.0f), aDialog->getContent()->getRectPx().width(), aDialog->getContent()->getRectPx().width() / 2);
 
     aDialog->addButton(tr(BUTTON_CLOSE));
-    aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
 
@@ -500,7 +493,6 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
 
     StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
     aTable->setupTable(aNbRowsMax, 2);
-    aTable->setVisibility(true, true);
     aTable->fillFromMap(anExtraInfo->Info, StGLVec3(1.0f, 1.0f, 1.0f), aWidthMax, aWidthMax / 2);
 
     // add stereoscopic format info
@@ -514,7 +506,6 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
                                    StGLTextFormatter::ST_ALIGN_Y_TOP);
     aSrcFormatText->setText(StString("\n") + tr(BTN_SRC_FORMAT) + " " + trSrcFormat(anActiveSrcFormat));
     aSrcFormatText->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
-    aSrcFormatText->setVisibility(true, true);
     aSrcFormatText->stglInitAutoHeightWidth(aTextMaxWidth);
 
     // warn about wrong/missing stereoscopic format information
@@ -542,7 +533,6 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
                               StGLTextFormatter::ST_ALIGN_Y_TOP);
         aText->setText(aSrcInfo);
         aText->setTextColor(anExtraColor);
-        aText->setVisibility(true, true);
         aText->stglInitAutoHeightWidth(aTextMaxWidth);
     }
     aTable->updateLayout();
@@ -555,7 +545,6 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
     }
 
     aDialog->addButton(tr(BUTTON_CLOSE), true);
-    aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
 
@@ -642,7 +631,6 @@ void StImageViewerGUI::doListHotKeys(const size_t ) {
     aTable->changeItemMargins().top    = scale(4);
     aTable->changeItemMargins().bottom = scale(4);
     aTable->setupTable(anActionsMap.size(), 3);
-    aTable->setVisibility(true, true);
 
     StHandle< StSlot<void (const size_t )> > aSlot1 = new StSlotMethod<StImageViewerGUI, void (const size_t )>(this, &StImageViewerGUI::doChangeHotKey1);
     StHandle< StSlot<void (const size_t )> > aSlot2 = new StSlotMethod<StImageViewerGUI, void (const size_t )>(this, &StImageViewerGUI::doChangeHotKey2);
@@ -651,7 +639,6 @@ void StImageViewerGUI::doListHotKeys(const size_t ) {
 
     aDialog->addButton(tr(BUTTON_DEFAULTS), false)->signals.onBtnClick = stSlot(this, &StImageViewerGUI::doResetHotKeys);
     aDialog->addButton(tr(BUTTON_CLOSE),    true);
-    aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
 
@@ -689,11 +676,9 @@ void StImageViewerGUI::doMobileSettings(const size_t ) {
     aTable->changeItemMargins().top    = scale(4);
     aTable->changeItemMargins().bottom = scale(4);
     aTable->setupTable(aNbRowsMax, 2);
-    aTable->setVisibility(true, true);
     aTable->fillFromParams(aParams, StGLVec3(1.0f, 1.0f, 1.0f), aWidthMax);
 
     aDialog->addButton(tr(BUTTON_CLOSE), true);
-    aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
 
@@ -780,7 +765,6 @@ void StImageViewerGUI::createMobileUI() {
 
     if(myPlugin->params.ToShowFps->getValue()) {
         myFpsWidget = new StGLFpsLabel(this);
-        myFpsWidget->setVisibility(true, true);
     }
 }
 
@@ -882,7 +866,7 @@ void StImageViewerGUI::doShowMobileExMenu(const size_t ) {
         anExtraInfo.nullify();
     }
 
-    StGLMenu*     aMenu  = new StGLMenu(this, 0, aTop, StGLMenu::MENU_VERTICAL_COMPACT);
+    StGLMenu*     aMenu  = new StGLMenu(this, 0, aTop, StGLMenu::MENU_VERTICAL_COMPACT, true);
     StGLMenuItem* anItem = NULL;
     aMenu->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     aMenu->setContextual(true);
@@ -900,7 +884,6 @@ void StImageViewerGUI::doShowMobileExMenu(const size_t ) {
     anItem->signals.onItemClick += stSlot(this, &StImageViewerGUI::doMobileSettings);
     anItem = aMenu->addItem("Slideshow", myPlugin->getAction(StImageViewer::Action_SlideShow));
     anItem->setIcon(iconTexture(stCString("actionSlideShow"), anIconSize));
-    aMenu->setVisibility(true, true);
     aMenu->stglInit();
 }
 
@@ -963,7 +946,6 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
     }
 
     myMsgStack = new StGLMsgStack(this, myPlugin->getMessagesQueue());
-    myMsgStack->setVisibility(true, true);
 }
 
 StImageViewerGUI::~StImageViewerGUI() {
@@ -1021,37 +1003,24 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
     if(isMouseActive) {
         myVisibilityTimer.restart();
     }
-    const bool toShowAll = !myIsMinimalGUI && myIsVisibleGUI && !toForceHide;
-
-    // always visible
-    StGLRootWidget::setVisibility(true, true);
-    myImage->setVisibility(true, true);
+    const bool  toShowAll = !myIsMinimalGUI && myIsVisibleGUI && !toForceHide;
+    const float anOpacity = (float )myVisLerp.perform(toShowAll, toForceHide);
 
     if(myMenuRoot != NULL) {
-        myMenuRoot->setVisibility(toShowAll, false);
+        myMenuRoot->setOpacity(anOpacity, true);
     }
 
     if(myPanelUpper != NULL) {
-        const bool toShowUpper = hasUpperPanel && toShowAll;
-        myPanelUpper->setVisibility(toShowUpper);
-        for(StGLWidget* aChildIter = myPanelUpper->getChildren()->getStart();
-            aChildIter != NULL; aChildIter = aChildIter->getNext()) {
-            aChildIter->setVisibility(toShowUpper);
-        }
+        myPanelUpper->setOpacity(hasUpperPanel ? anOpacity : 0.0f, true);
     }
     if(myPanelBottom != NULL) {
-        const bool toShowBottom = hasBottomPanel && toShowAll;
-        myPanelBottom->setVisibility(toShowBottom);
-        for(StGLWidget* aChildIter = myPanelBottom->getChildren()->getStart();
-            aChildIter != NULL; aChildIter = aChildIter->getNext()) {
-            aChildIter->setVisibility(toShowBottom);
-        }
+        myPanelBottom->setOpacity(hasBottomPanel ? anOpacity : 0.0f, true);
     }
     if(myBtnPlayList != NULL) {
-        //myBtnPlayList->setVisibility(myIsMinimalGUI || toShowAll);
+        //myBtnPlayList->setOpacity(hasBottomPanel ? anOpacity : 0.0f, false);
     }
     if(myBtnFull != NULL) {
-        myBtnFull->setVisibility(myIsMinimalGUI || toShowAll);
+        myBtnFull->setOpacity(myIsMinimalGUI ? 1.0f : anOpacity, false);
     }
 
     StFormat aSrcFormat = (StFormat )myPlugin->params.srcFormat->getValue();
@@ -1066,9 +1035,12 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
     if(myBtnSrcFrmt != NULL) {
         myBtnSrcFrmt->setFaceId(aSrcFormat != StFormat_AUTO ? aSrcFormat : StFormat_Mono);
     }
+    if(myBtnSwapLR != NULL) {
+        myBtnSwapLR->setOpacity(aSrcFormat != StFormat_Mono ? myPanelUpper->getOpacity() : 0.0f, false);
+    }
 
     if(myDescr != NULL) {
-        myDescr->setVisibility(true, true);
+        myDescr->setOpacity(1.0f, true);
         if(::isPointIn(myBtnOpen, theCursor)) {
             myDescr->setText(tr(IMAGE_OPEN));
         } else if(::isPointIn(myBtnPrev, theCursor)) {
@@ -1087,7 +1059,7 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
         } else if(::isPointIn(myBtnSrcFrmt, theCursor)) {
             myDescr->setText(tr(BTN_SRC_FORMAT) + "\n" + trSrcFormat(aSrcFormat));
         } else {
-            myDescr->setVisibility(false, true);
+            myDescr->setOpacity(0.0f, true);
         }
     }
 }
@@ -1161,7 +1133,6 @@ void StImageViewerGUI::doShowFPS(const bool ) {
     }
 
     myFpsWidget = new StGLFpsLabel(this);
-    myFpsWidget->setVisibility(true, true);
     myFpsWidget->stglInit();
 }
 
@@ -1173,13 +1144,11 @@ void StImageViewerGUI::doAboutRenderer(const size_t ) {
 
     StGLMessageBox* aDialog = new StGLMessageBox(this, "", anAboutText, scale(512), scale(300));
     aDialog->addButton(tr(BUTTON_CLOSE));
-    aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
 
 void StImageViewerGUI::showUpdatesNotify() {
     StGLMessageBox* aDialog = new StGLMessageBox(this, "", tr(UPDATES_NOTIFY));
     aDialog->addButton(tr(BUTTON_CLOSE));
-    aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }

@@ -33,7 +33,6 @@ class StGLSwitchTextured : public StGLWidget {
      */
     ST_CPPEXPORT virtual ~StGLSwitchTextured();
 
-    ST_CPPEXPORT virtual void setVisibility(bool isVisible, bool isForce);
     ST_CPPEXPORT virtual bool stglInit();
 
     /**

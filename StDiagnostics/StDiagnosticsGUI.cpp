@@ -58,13 +58,6 @@ StDiagnosticsGUI::~StDiagnosticsGUI() {
 }
 
 void StDiagnosticsGUI::setVisibility(const StPointD_t& , bool ) {
-    // always visible
-    StGLRootWidget::setVisibility(true, true);
-    myGeomWidget->setVisibility(true, true);
-    myFpsWidget->setVisibility(true, true);
-    myCntWidgetLT->setVisibility(true, true);
-    myCntWidgetBR->setVisibility(true, true);
-
     myFpsWidget->update(myPlugin->getMainWindow()->isStereoOutput(),
                         myPlugin->getMainWindow()->getTargetFps());
 

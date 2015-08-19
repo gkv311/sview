@@ -22,11 +22,6 @@ StGLMenuCheckbox::StGLMenuCheckbox(StGLMenu* theParent,
     StGLMenuItem::signals.onItemClick.connect(this, &StGLMenuCheckbox::doItemClick);
 }
 
-void StGLMenuCheckbox::setVisibility(bool isVisible, bool isForce) {
-    StGLWidget::setVisibility(isVisible, isForce);
-    myCheckbox->setVisibility(isVisible, isForce);
-}
-
 void StGLMenuCheckbox::doItemClick(const size_t ) {
     myCheckbox->reverseValue();
 }

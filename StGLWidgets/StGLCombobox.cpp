@@ -53,7 +53,7 @@ StGLCombobox::ListBuilder::ListBuilder(StGLWidget* theParent)
         aTop  = int(aRoot->getCursorZo().y() * aRoot->getRectPx().height());
     }
 
-    myMenu = new StGLMenu(aMenuParent, aLeft, aTop, StGLMenu::MENU_VERTICAL);
+    myMenu = new StGLMenu(aMenuParent, aLeft, aTop, StGLMenu::MENU_VERTICAL, true);
     if(myBack != NULL) {
         myMenu->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
     }
@@ -62,11 +62,9 @@ StGLCombobox::ListBuilder::ListBuilder(StGLWidget* theParent)
 
 void StGLCombobox::ListBuilder::display() {
     if(myBack != NULL) {
-        myBack->setVisibility(true, true);
         myBack->stglInit();
     } else {
         StGLRootWidget* aRoot = myMenu->getRoot();
-        myMenu->setVisibility(true, true);
         myMenu->stglInit();
         StRectI_t aRect  = myMenu->getRectPxAbsolute();
         const int aRootX = aRoot->getRectPx().width();

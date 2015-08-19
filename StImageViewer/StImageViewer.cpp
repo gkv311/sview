@@ -680,20 +680,17 @@ void StImageViewer::doSaveImageInfoBegin(const size_t ) {
     aDialog->setText(aText);
 
     StHandle<StBoolParam> toOmitQuestion = new StBoolParam(false);
-    StGLCheckbox* aCheck = new StGLCheckbox(aDialog, toOmitQuestion, 32, -aDialog->getMarginBottom(), StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT));
-    aCheck->setVisibility(true, true);
+    new StGLCheckbox(aDialog, toOmitQuestion, 32, -aDialog->getMarginBottom(), StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT));
 
     StGLTextArea* aCheckText = new StGLTextArea(aDialog, 64, -aDialog->getMarginBottom(), StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT));
     aCheckText->setText("Do not ask again during 1 minute");
     aCheckText->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
-    aCheckText->setVisibility(true, true);
 
     StGLButton* aSaveBtn = aDialog->addButton(myLangMap->getValue(StImageViewerStrings::BUTTON_SAVE_METADATA), true);
     aSaveBtn->setUserData(1);
     aSaveBtn->signals.onBtnClick += stSlot(this, &StImageViewer::doSaveImageInfo);
 
     aDialog->addButton(myLangMap->getValue(StImageViewerStrings::BUTTON_CANCEL));
-    aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
 
@@ -716,7 +713,6 @@ void StImageViewer::doDeleteFileBegin(const size_t ) {
                                                  aText, myGUI->scale(512), myGUI->scale(256));
     aDialog->addButton(myLangMap->getValue(StImageViewerStrings::BUTTON_DELETE), true)->signals.onBtnClick += stSlot(this, &StImageViewer::doDeleteFileEnd);
     aDialog->addButton(myLangMap->getValue(StImageViewerStrings::BUTTON_CANCEL), false);
-    aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
 

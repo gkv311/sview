@@ -34,7 +34,6 @@ void StGLMsgStack::stglUpdate(const StPointD_t& thePointZo) {
     while(myMsgQueue->pop(myMsgTmp)) {
         StGLMessageBox* aMsgBox = new StGLMessageBox(this, "", *myMsgTmp.Text);
         aMsgBox->addButton("Close");
-        aMsgBox->setVisibility(true, true);
         aMsgBox->stglInit();
     }
 }

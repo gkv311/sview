@@ -34,11 +34,6 @@ StGLMenuRadioButton::StGLMenuRadioButton(StGLMenu* theParent,
     StGLMenuItem::signals.onItemClick.connect(this, &StGLMenuRadioButton::doItemClick);
 }
 
-void StGLMenuRadioButton::setVisibility(bool isVisible, bool isForce) {
-    StGLWidget::setVisibility(isVisible, isForce);
-    myRadio->setVisibility   (isVisible, isForce);
-}
-
 void StGLMenuRadioButton::doItemClick(const size_t ) {
     myRadio->setValue();
 }

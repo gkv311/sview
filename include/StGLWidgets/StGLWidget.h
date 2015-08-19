@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -22,6 +22,41 @@
 class  StGLRootWidget;
 class  StGLContext;
 struct StKeyEvent;
+
+/**
+ * Auxiliary class to perform linear animation.
+ */
+class StGLAnimationLerp {
+
+public:
+
+    /**
+     * Empty constructor, does not start animation.
+     */
+    ST_LOCAL StGLAnimationLerp()
+    : myValue(0.0),
+      myOnMs(2500.0),
+      myOffMs(5000.0),
+      myOnTimer(false),
+      myOffTimer(true) {}
+
+    /**
+     * Update animation value in accordance with trend.
+     * @param theDirUp   change value in specified direction (positive - till value 1.0; negative - till value 0.0)
+     * @param theToForce reset timers to switch value to 0.0/1.0 immediately
+     * @return updated value
+     */
+    ST_CPPEXPORT double perform(bool theDirUp, bool theToForce);
+
+private:
+
+    double  myValue;    //!< value within 0.0 - 1.0 range
+    double  myOnMs;     //!< time to increase value
+    double  myOffMs;    //!< time to decrease value
+    StTimer myOnTimer;  //!< timer
+    StTimer myOffTimer; //!< timer
+
+};
 
 /**
  * This is abstract class for active 2D elements (buttons, menues, bars...) representation
@@ -186,9 +221,21 @@ class StGLWidget {
     /**
      * @return true if opacity > 0.0
      */
-    inline bool isVisible() const {
-        return opacityValue > 0.0;
+    ST_LOCAL bool isVisible() const {
+        return myOpacity > 0.0f;
     }
+
+    /**
+     * Return opacity value.
+     */
+    ST_LOCAL float getOpacity() const {
+        return myOpacity;
+    }
+
+    /**
+     * Setup opacity value.
+     */
+    ST_CPPEXPORT virtual void setOpacity(const float theOpacity, bool theToSetChildren);
 
     /**
      * @return true if widget can process input events
@@ -196,13 +243,6 @@ class StGLWidget {
     inline bool isTopWidget() const {
         return myIsTopWidget;
     }
-
-    /**
-     * Modify opacity due to visibility flag and opacity timers.
-     * @param isVisible opacity UP/DOWN
-     * @param isForce   change opacity to 0 or 1 instantly
-     */
-    ST_CPPEXPORT virtual void setVisibility(bool isVisible, bool isForce = false);
 
     /**
      * Returns clicking state.
@@ -373,11 +413,7 @@ class StGLWidget {
         protected: //! @name fields available to inheritors
 
     StGLCorner      myCorner;        //!< corner (left / top / right / bottom) - relative to the parent widget
-    GLdouble        opacityValue;    // 1.0 means 100% visible
-    double          opacityOnMs;     // time to increase opacity
-    double          opacityOffMs;    // time to decrease opacity
-    StTimer         opacityOnTimer;  // timer
-    StTimer         opacityOffTimer; // timer
+    float           myOpacity;       //!< 1.0f means 100% visible (1.0f is default)
     bool            isResized;
     bool            myHasFocus;
     bool            myIsTopWidget;

@@ -105,7 +105,6 @@ void StGLMessageBox::create(const StString& theTitle,
         myTitle->setupStyle(StFTFont::Style_Bold);
         myTitle->setText(theTitle);
         myTitle->setTextColor(getRoot()->getColorForElement(StGLRootWidget::Color_MessageText));
-        myTitle->setVisibility(true, true);
         int aWidth = 0;
         myTitle->computeTextWidth(GLfloat(myTitle->getRectPx().width()), aWidth, aTitleHeight);
         myTitle->changeRectPx().bottom() = myTitle->getRectPx().top() + aTitleHeight;
@@ -128,7 +127,6 @@ void StGLMessageBox::create(const StString& theTitle,
     getRoot()->setFocus(this); // take input focus
 
     myBtnPanel = new StGLContainer(this, 0, aBtnBot, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER), 0, myRoot->scale(24));
-    myBtnPanel->setVisibility(true);
 }
 
 StGLMessageBox::~StGLMessageBox() {
@@ -155,7 +153,6 @@ void StGLMessageBox::setText(const StString& theText) {
                           StGLTextFormatter::ST_ALIGN_Y_TOP);
     aText->setText(theText);
     aText->setTextColor(getRoot()->getColorForElement(StGLRootWidget::Color_MessageText));
-    aText->setVisibility(true, true);
 }
 
 bool StGLMessageBox::doNextButton(const int theDir) {
@@ -263,8 +260,6 @@ StGLButton* StGLMessageBox::addButton(const StString& theTitle,
     StGLButton* aButton = new StGLButton(myBtnPanel, aRight, 0, theTitle);
     aButton->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
     aButton->setHeight(myRoot->scale(24));
-    aButton->setVisibility(true, true);
-
     if(theWidth > 0) {
         aButton->setWidth(theWidth);
     }
@@ -357,7 +352,7 @@ void StGLMessageBox::stglDraw(unsigned int theView) {
 
     myProgram.use(aCtx, getRoot()->getScreenDispX());
     myProgram.setProjMat(aCtx, getCamera()->getProjMatrix());
-    myProgram.setColor(aCtx, getRoot()->getColorForElement(StGLRootWidget::Color_MessageBox), GLfloat(opacityValue) * 0.8f);
+    myProgram.setColor(aCtx, getRoot()->getColorForElement(StGLRootWidget::Color_MessageBox), myOpacity * 0.8f);
 
         myVertexBuf.bindVertexAttrib(aCtx, myProgram.getVVertexLoc());
         aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -374,13 +369,6 @@ void StGLMessageBox::stglDraw(unsigned int theView) {
     StGLWidget::stglDraw(theView); // draw children
 
     aCtx.stglResetScissorRect();
-}
-
-void StGLMessageBox::setVisibility(bool isVisible, bool isForce) {
-    StGLWidget::setVisibility(isVisible, isForce);
-    for(StGLWidget* aChildIter = getChildren()->getStart(); aChildIter != NULL; aChildIter = aChildIter->getNext()) {
-        aChildIter->setVisibility(isVisible, isForce);
-    }
 }
 
 bool StGLMessageBox::tryClick(const StPointD_t& theCursorZo,

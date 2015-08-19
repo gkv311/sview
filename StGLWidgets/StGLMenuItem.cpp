@@ -95,8 +95,7 @@ void StGLMenuItem::setIcon(const StString* theImgPaths,
         myMargins.left += anIconMargin;
     }
     myIcon = new StGLIcon(this, myMargins.left - anIconMargin, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT), theCount);
-    myIcon->setColor(getRoot()->getColorForElement(StGLRootWidget::Color_MenuIcon));
-    myIcon->setVisibility(true, true);
+    myIcon->setColor(myRoot->getColorForElement(StGLRootWidget::Color_MenuIcon));
     myIcon->setTexturePath(theImgPaths, theCount);
 }
 
@@ -207,13 +206,13 @@ void StGLMenuItem::stglDrawArea(const StGLMenuItem::State theState,
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     aCtx.core20fwd->glEnable(GL_BLEND);
 
-    myProgram->use(aCtx, myBackColor[theState], GLfloat(opacityValue), getRoot()->getScreenDispX());
+    myProgram->use(aCtx, myBackColor[theState], myOpacity, getRoot()->getScreenDispX());
     if(!theIsOnlyArrow) {
         myBackVertexBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
         aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
     if(myArrowIcon != Arrow_None) {
-        myProgram->setColor(aCtx, myTextColor, GLfloat(opacityValue) * 0.5f);
+        myProgram->setColor(aCtx, myTextColor, myOpacity * 0.5f);
         myBackVertexBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
         aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 4, 3);
     }
@@ -268,7 +267,7 @@ void StGLMenuItem::setSelected(bool theToSelect) {
         }
     }
     if(mySubMenu != NULL) {
-        mySubMenu->setVisibility(theToSelect, true);
+        mySubMenu->setOpacity(theToSelect ? 1.0f : 0.0f, true);
     }
     myIsItemSelected = theToSelect;
 }

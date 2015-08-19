@@ -802,7 +802,6 @@ void StMoviePlayer::doDeleteFileBegin(const size_t ) {
                                                  aText, myGUI->scale(512), myGUI->scale(256));
     aDialog->addButton(myLangMap->getValue(StMoviePlayerStrings::BUTTON_DELETE), true)->signals.onBtnClick += stSlot(this, &StMoviePlayer::doDeleteFileEnd);
     aDialog->addButton(myLangMap->getValue(StMoviePlayerStrings::BUTTON_CANCEL), false);
-    aDialog->setVisibility(true, true);
     aDialog->stglInit();
 }
 
@@ -1471,7 +1470,7 @@ void StMoviePlayer::doShowPlayList(const bool theToShow) {
         return;
     }
 
-    myGUI->myPlayList->setVisibility(theToShow, true);
+    myGUI->myPlayList->setOpacity(theToShow ? 1.0f : 0.0f, false);
 }
 
 void StMoviePlayer::doPlayListReverse(const size_t ) {

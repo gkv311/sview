@@ -29,7 +29,7 @@ StGLTableItem::StGLTableItem(StGLTable* theParent)
              theParent->getRoot()->scale(32)),
   myColSpan(1),
   myRowSpan(1) {
-    setVisibility(true, true);
+    //
 }
 
 StGLTableItem::~StGLTableItem() {
@@ -114,7 +114,6 @@ void StGLTable::fillFromMap(const StDictionary& theMap,
         aText->setText(aPair.getName().isEmpty() ? aPair.getKey() : aPair.getName());
         aText->setTextColor(theTextColor);
         aText->setupStyle(StFTFont::Style_Bold);
-        aText->setVisibility(true, true);
         aText->stglInitAutoHeightWidth(aCol1MaxWidth);
         aCol1Width = stMax(aCol1Width, aText->getRectPx().width());
     }
@@ -140,7 +139,6 @@ void StGLTable::fillFromMap(const StDictionary& theMap,
                               StGLTextFormatter::ST_ALIGN_Y_TOP);
         aText->setText(aPair.getValue());
         aText->setTextColor(theTextColor);
-        aText->setVisibility(true, true);
         aText->stglInitAutoHeightWidth(aCol2MaxWidth);
     }
 
@@ -184,13 +182,11 @@ void StGLTable::fillFromParams(const StParamsList& theParams,
             aCheckBox->changeRectPx().right()  = aCheckBox->getRectPx().left() + anIconWidth;
             aCheckBox->changeRectPx().bottom() = aCheckBox->getRectPx().top()  + anIconWidth;
             aCheckBox->changeMargins() = aCheckMargins;
-            aCheckBox->setVisibility(true, true);
             aCol2Width = stMax(aCol2Width, aCheckBox->getRectPx().width());
         } else if(anEnum.downcastFrom(aParam)) {
             StGLCombobox* aButton = new StGLCombobox(&anItem, 0, 0, anEnum);
             aButton->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
             aButton->setHeight(myRoot->scale(24));
-            aButton->setVisibility(true, true);
 
             aCol2Width = stMax(aCol2Width, aButton->getRectPx().width());
             const StArrayList<StString>& aValues = anEnum->getValues();
@@ -242,7 +238,6 @@ void StGLTable::fillFromParams(const StParamsList& theParams,
         aText->setText(aLabelText);
         aText->setTextColor(theTextColor);
         aText->setupStyle(StFTFont::Style_Bold);
-        aText->setVisibility(true, true);
         aText->stglInitAutoHeightWidth(aCol1MaxWidth);
     }
 
@@ -292,11 +287,9 @@ void StGLTable::fillFromHotKeys(const std::map< int, StHandle<StAction> >&      
         aTextLab->setText(aDesc);
         aTextLab->setTextColor(THE_COLOR_WHITE);
         aTextLab->setupStyle(StFTFont::Style_Bold);
-        aTextLab->setVisibility(true, true);
         aTextLab->stglInitAutoHeightWidth(aCol1MaxWidth);
 
         StGLButton* aTextKey1 = new StGLButton(&anItemKey1, 0, 0, encodeHotKey(anAction->getHotKey1()));
-        aTextKey1->setVisibility(true, true);
         aTextKey1->getMenuItem()->setHilightText();
         aTextKey1->getMenuItem()->setHilightColor(THE_COLOR_HILIGHT);
         aTextKey1->getMenuItem()->setTextColor   (THE_COLOR_WHITE);
@@ -306,7 +299,6 @@ void StGLTable::fillFromHotKeys(const std::map< int, StHandle<StAction> >&      
         aCol2Width = stMax(aCol2Width, aTextKey1->getWidth());
 
         StGLButton* aTextKey2 = new StGLButton(&anItemKey2, 0, 0, encodeHotKey(anAction->getHotKey2()));
-        aTextKey2->setVisibility(true, true);
         aTextKey2->getMenuItem()->setHilightText();
         aTextKey2->getMenuItem()->setHilightColor(THE_COLOR_HILIGHT);
         aTextKey2->getMenuItem()->setTextColor   (THE_COLOR_WHITE);

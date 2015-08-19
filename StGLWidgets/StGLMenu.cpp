@@ -56,7 +56,8 @@ StGLMenu::StGLMenu(StGLWidget* theParent,
   myKeepActive(false),
   myIsInitialized(false),
   myToDrawBounds(false) {
-    //
+    myOpacity = theIsRootMenu || (myOrient == StGLMenu::MENU_ZERO)
+              ? 1.0f : 0.0f;
 }
 
 StGLMenu::~StGLMenu() {
@@ -64,11 +65,12 @@ StGLMenu::~StGLMenu() {
     myVertexBndBuf.release(getContext());
 }
 
-void StGLMenu::setVisibility(bool isVisible, bool isForce) {
-    StGLWidget::setVisibility(isVisible, isForce);
-    for(StGLWidget* aChild = getChildren()->getStart(); aChild != NULL; aChild = aChild->getNext()) {
-        aChild->setVisibility(isVisible, isForce);
-        if(!isVisible) {
+void StGLMenu::setOpacity(const float theOpacity, bool theToSetChildren) {
+    bool wasVisible = StGLMenu::isVisible();
+    StGLWidget::setOpacity(theOpacity, theToSetChildren);
+    if(!StGLMenu::isVisible()
+     && wasVisible) {
+        for(StGLWidget* aChild = getChildren()->getStart(); aChild != NULL; aChild = aChild->getNext()) {
             ((StGLMenuItem* )aChild)->setSelected(false);
         }
     }
@@ -164,7 +166,7 @@ bool StGLMenu::stglInit() {
     // already initialized?
     if(myVertexBuf.isValid()) {
         // synchronize menu items visibility
-        setVisibility(isVisible(), true);
+        setOpacity(myOpacity, true);
         return true;
     }
 
@@ -200,13 +202,13 @@ void StGLMenu::stglDraw(unsigned int theView) {
     aCtx.core20fwd->glEnable(GL_BLEND);
 
     if(myVertexBndBuf.isValid()) {
-        myProgram->use(aCtx, StGLVec4(0.0f, 0.0f, 0.0f, 1.0f), GLfloat(opacityValue), getRoot()->getScreenDispX());
+        myProgram->use(aCtx, StGLVec4(0.0f, 0.0f, 0.0f, 1.0f), myOpacity, getRoot()->getScreenDispX());
         myVertexBndBuf.bindVertexAttrib  (aCtx, myProgram->getVVertexLoc());
         aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         myVertexBndBuf.unBindVertexAttrib(aCtx, myProgram->getVVertexLoc());
     }
 
-    myProgram->use(aCtx, myColorVec, GLfloat(opacityValue), getRoot()->getScreenDispX());
+    myProgram->use(aCtx, myColorVec, myOpacity, getRoot()->getScreenDispX());
 
     myVertexBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
     aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);

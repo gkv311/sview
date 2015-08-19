@@ -46,7 +46,7 @@ class StGLMenu : public StGLWidget {
 
     ST_CPPEXPORT virtual ~StGLMenu();
 
-    ST_CPPEXPORT virtual void setVisibility(bool isVisible, bool isForce);
+    ST_CPPEXPORT virtual void setOpacity(const float theOpacity, bool theToSetChildren);
     ST_CPPEXPORT virtual void stglResize();
     ST_CPPEXPORT virtual bool stglInit();
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView);

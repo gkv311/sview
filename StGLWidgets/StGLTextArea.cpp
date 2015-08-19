@@ -448,8 +448,8 @@ void StGLTextArea::stglDraw(unsigned int theView) {
 
     StGLContext& aCtx = getContext();
     StGLVec4 aTextColor = myTextColor;
-    aTextColor.a()   *= (GLfloat )opacityValue;
-    myShadowColor.a() = myBackColor.a() = myBorderColor.a() = (GLfloat )opacityValue;
+    aTextColor.a()   *= myOpacity;
+    myShadowColor.a() = myBackColor.a() = myBorderColor.a() = myOpacity;
     formatText(aCtx);
 
     StRectI_t aTextRectPx = getRectPx();

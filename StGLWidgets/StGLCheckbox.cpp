@@ -145,10 +145,10 @@ void StGLCheckbox::stglDraw(unsigned int theView) {
     myProgram->use(aCtx, getRoot()->getScreenDispX());
     myVertBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
 
-    myProgram->setColor(aCtx, OUTER_COLORS[myFaceId], GLfloat(opacityValue));
+    myProgram->setColor(aCtx, OUTER_COLORS[myFaceId], myOpacity);
     aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-    myProgram->setColor(aCtx, INNER_COLORS[myFaceId], GLfloat(opacityValue));
+    myProgram->setColor(aCtx, INNER_COLORS[myFaceId], myOpacity);
     aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 4, 4);
 
     myVertBuf.unBindVertexAttrib(aCtx, myProgram->getVVertexLoc());

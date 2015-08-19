@@ -99,11 +99,6 @@ class ST_LOCAL StTimeBox : public StGLTextureButton {
              : StGLTextureButton::tryUnClick(theCursor, theMouseBtn, theIsItemUnclicked);
     }
 
-    virtual void setVisibility(bool isVisible, bool isForce) {
-        StGLTextureButton::setVisibility(isVisible, isForce);
-        myTextArea->setVisibility(isVisible, isForce);
-    }
-
     void setTime(const double theProgressSec,
                  const double theDurationSec) {
         myProgressSec = theProgressSec;

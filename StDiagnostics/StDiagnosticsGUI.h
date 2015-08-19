@@ -52,7 +52,6 @@ class StDiagnosticsGUI : public StGLRootWidget {
     ST_LOCAL virtual void stglUpdate(const StPointD_t& thePointZo);
     ST_LOCAL virtual void stglDraw(unsigned int theView);
 
-    using StGLRootWidget::setVisibility;
     ST_LOCAL void setVisibility(const StPointD_t& , bool );
 
 };

@@ -83,14 +83,14 @@ class StGLTextureButton::Program : public StGLProgram {
              const GLfloat   theTime,
              const double    theLightX,
              const double    theLightY,
-             const double    theOpacity,
+             const GLfloat   theOpacity,
              const bool      theIsClicked,
              const GLfloat   theDispX) {
         StGLProgram::use(theCtx);
         theCtx.core20fwd->glUniform4fv(uniColorLoc, 1, theColor);
         theCtx.core20fwd->glUniform1f(uniTimeLoc, theTime);
         theCtx.core20fwd->glUniform1i(uniClickedLoc, (theIsClicked ? 20 : 2));
-        theCtx.core20fwd->glUniform3f(uniParamsLoc, GLfloat(theLightX), GLfloat(theLightY), GLfloat(theOpacity));
+        theCtx.core20fwd->glUniform3f(uniParamsLoc, GLfloat(theLightX), GLfloat(theLightY), theOpacity);
         if(!stAreEqual(myDispX, theDispX, 0.0001f)) {
             myDispX = theDispX;
             theCtx.core20fwd->glUniform4fv(uniDispLoc,  1, StGLVec4(theDispX, 0.0f, 0.0f, 0.0f));
@@ -485,7 +485,7 @@ void StGLTextureButton::stglDraw(unsigned int ) {
                    myAnimTime,
                   (aMouseGl.x() - aRectGl.left()) /  aRectGl.width(),
                   (aRectGl.top()  - aMouseGl.y()) / -aRectGl.height(),
-                   opacityValue,
+                   myOpacity,
                    toShiftZ,
                    getRoot()->getScreenDispX());
 
