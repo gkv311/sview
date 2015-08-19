@@ -86,17 +86,19 @@ StGLMenuItem::~StGLMenuItem() {
     myBackVertexBuf.release(getContext());
 }
 
-void StGLMenuItem::setIcon(const StString* theImgPaths,
-                           const size_t    theCount) {
+StGLMenuItem* StGLMenuItem::setIcon(const StString* theImgPaths,
+                                    const size_t    theCount,
+                                    const bool      theToAddMargin) {
     const int anIconMargin = myRoot->scale(16 + 8);
     if(myIcon != NULL) {
         delete myIcon;
     } else {
-        myMargins.left += anIconMargin;
+        myMargins.left += theToAddMargin ? anIconMargin : 0;
     }
     myIcon = new StGLIcon(this, myMargins.left - anIconMargin, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT), theCount);
     myIcon->setColor(myRoot->getColorForElement(StGLRootWidget::Color_MenuIcon));
     myIcon->setTexturePath(theImgPaths, theCount);
+    return this;
 }
 
 void StGLMenuItem::setHilightText() {

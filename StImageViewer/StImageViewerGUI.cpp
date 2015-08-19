@@ -185,15 +185,18 @@ void StImageViewerGUI::createMainMenu() {
  * Root -> Media menu
  */
 StGLMenu* StImageViewerGUI::createMediaMenu() {
+    const IconSize anIconSize = scaleIcon(16);
     StGLMenu* aMenuMedia = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     StGLMenu* aMenuSrcFormat = createSrcFormatMenu(); // Root -> Media -> Source format menu
     StGLMenu* aMenuOpenImage = createOpenImageMenu(); // Root -> Media -> Open image menu
     StGLMenu* aMenuSaveImage = createSaveImageMenu(); // Root -> Media -> Save image menu
 
-    aMenuMedia->addItem(tr(MENU_MEDIA_OPEN_IMAGE),    aMenuOpenImage);
+    aMenuMedia->addItem(tr(MENU_MEDIA_OPEN_IMAGE),    aMenuOpenImage)
+              ->setIcon(iconTexture(stCString("actionOpen"), anIconSize), false);
     aMenuMedia->addItem(tr(MENU_MEDIA_SAVE_IMAGE_AS), aMenuSaveImage);
     aMenuMedia->addItem(tr(MENU_MEDIA_SRC_FORMAT),    aMenuSrcFormat);
-    aMenuMedia->addItem(tr(MENU_MEDIA_FILE_INFO),     myPlugin->getAction(StImageViewer::Action_FileInfo));
+    aMenuMedia->addItem(tr(MENU_MEDIA_FILE_INFO),     myPlugin->getAction(StImageViewer::Action_FileInfo))
+              ->setIcon(iconTexture(stCString("actionInfo"), anIconSize), false);
 
     if(myWindow->isMobile()) {
         aMenuMedia->addItem("Mobile UI", myPlugin->params.IsMobileUI);
@@ -398,6 +401,7 @@ StGLMenu* StImageViewerGUI::createImageAdjustMenu() {
  * Root -> Output menu
  */
 StGLMenu* StImageViewerGUI::createOutputMenu() {
+    const IconSize anIconSize = scaleIcon(16);
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
 
     StGLMenu* aMenuChangeDevice = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
@@ -410,6 +414,7 @@ StGLMenu* StImageViewerGUI::createOutputMenu() {
 
     aMenu->addItem(tr(MENU_CHANGE_DEVICE), aMenuChangeDevice);
     aMenu->addItem(tr(MENU_ABOUT_RENDERER))
+         ->setIcon(iconTexture(stCString("actionInfo"), anIconSize), false)
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doAboutRenderer);
     aMenu->addItem(tr(MENU_SHOW_FPS),      myPlugin->params.ToShowFps);
     aMenu->addItem(tr(MENU_VSYNC),         myPlugin->params.IsVSyncOn);
@@ -696,6 +701,7 @@ void StImageViewerGUI::doOpenLicense(const size_t ) {
  * Root -> Help menu
  */
 StGLMenu* StImageViewerGUI::createHelpMenu() {
+    const IconSize anIconSize = scaleIcon(16);
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     StGLMenu* aMenuScale        = createScaleMenu();        // Root -> Help -> Scale Interface menu
 #if !defined(ST_NO_UPDATES_CHECK)
@@ -704,6 +710,7 @@ StGLMenu* StImageViewerGUI::createHelpMenu() {
     StGLMenu* aMenuLanguage     = createLanguageMenu();     // Root -> Help -> Language menu
 
     aMenu->addItem(tr(MENU_HELP_ABOUT))
+         ->setIcon(iconTexture(stCString("actionInfo"), anIconSize), false)
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doAboutProgram);
     aMenu->addItem(tr(MENU_HELP_USERTIPS))
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doUserTips);
@@ -712,6 +719,7 @@ StGLMenu* StImageViewerGUI::createHelpMenu() {
     aMenu->addItem(tr(MENU_HELP_LICENSE))
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doOpenLicense);
     aMenu->addItem(tr(MENU_HELP_SYSINFO))
+         ->setIcon(iconTexture(stCString("actionInfo"), anIconSize), false)
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doAboutSystem);
     aMenu->addItem(tr(MENU_HELP_SCALE),   aMenuScale);
 #if !defined(ST_NO_UPDATES_CHECK)

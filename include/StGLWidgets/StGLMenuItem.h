@@ -94,14 +94,16 @@ class StGLMenuItem : public StGLTextArea {
     /**
      * Setup icon.
      */
-    ST_CPPEXPORT void setIcon(const StString* theImgPaths,
-                              const size_t    theCount);
+    ST_CPPEXPORT StGLMenuItem* setIcon(const StString* theImgPaths,
+                                       const size_t    theCount,
+                                       const bool      theToAddMargin);
 
     /**
      * Setup icon.
      */
-    ST_LOCAL void setIcon(const StString& theImgPath) {
-        setIcon(&theImgPath, 1);
+    ST_LOCAL StGLMenuItem* setIcon(const StString& theImgPath,
+                                   const bool      theToAddMargin = true) {
+        return setIcon(&theImgPath, 1, theToAddMargin);
     }
 
     /**

@@ -236,6 +236,7 @@ void StMoviePlayerGUI::createMainMenu() {
  * Root -> Media menu
  */
 StGLMenu* StMoviePlayerGUI::createMediaMenu() {
+    const IconSize anIconSize = scaleIcon(16);
     StGLMenu* aMenuMedia = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     myMenuRecent             = createRecentMenu();       // Root -> Media -> Recent files menu
 #ifdef ST_HAVE_MONGOOSE
@@ -247,13 +248,13 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
     StGLMenu* aMenuOpenImage = createOpenMovieMenu();    // Root -> Media -> Open movie menu
     StGLMenu* aMenuSaveImage = createSaveImageMenu();    // Root -> Media -> Save snapshot menu
 
-    aMenuMedia->addItem(tr(MENU_MEDIA_OPEN_MOVIE),       myPlugin->getAction(StMoviePlayer::Action_Open1File),    aMenuOpenImage);
+    aMenuMedia->addItem(tr(MENU_MEDIA_OPEN_MOVIE), myPlugin->getAction(StMoviePlayer::Action_Open1File),    aMenuOpenImage)
+              ->setIcon(iconTexture(stCString("actionOpen"), anIconSize), false);
     StGLMenuItem* anItem = aMenuMedia->addItem(tr(MENU_MEDIA_RECENT), myMenuRecent);
     anItem->setUserData(0);
     anItem->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doOpenRecent);
     aMenuMedia->addItem(tr(MENU_MEDIA_SAVE_SNAPSHOT_AS), myPlugin->getAction(StMoviePlayer::Action_SaveSnapshot), aMenuSaveImage);
     aMenuMedia->addItem(tr(MENU_MEDIA_SRC_FORMAT), aMenuSrcFormat);
-    aMenuMedia->addItem(tr(MENU_MEDIA_FILE_INFO),  myPlugin->getAction(StMoviePlayer::Action_FileInfo));
 
     if(myWindow->isMobile()) {
         aMenuMedia->addItem("Mobile UI", myPlugin->params.IsMobileUI);
@@ -705,6 +706,7 @@ StGLMenu* StMoviePlayerGUI::createSubtitlesMenu() {
  * Root -> Output menu
  */
 StGLMenu* StMoviePlayerGUI::createOutputMenu() {
+    const IconSize anIconSize = scaleIcon(16);
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
 
     StGLMenu* aMenuChangeDevice = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
@@ -718,6 +720,7 @@ StGLMenu* StMoviePlayerGUI::createOutputMenu() {
 
     aMenu->addItem(tr(MENU_CHANGE_DEVICE), aMenuChangeDevice);
     aMenu->addItem(tr(MENU_ABOUT_RENDERER))
+         ->setIcon(iconTexture(stCString("actionInfo"), anIconSize), false)
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAboutRenderer);
     aMenu->addItem(tr(MENU_FPS),           aMenuFpsControl);
 
@@ -938,6 +941,7 @@ void StMoviePlayerGUI::doOpenLicense(const size_t ) {
  * Root -> Help menu
  */
 StGLMenu* StMoviePlayerGUI::createHelpMenu() {
+    const IconSize anIconSize = scaleIcon(16);
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     StGLMenu* aMenuScale        = createScaleMenu();        // Root -> Help -> Scale Interface menu
     StGLMenu* aMenuBlockSleep   = createBlockSleepMenu();   // Root -> Help -> Block sleeping
@@ -947,6 +951,7 @@ StGLMenu* StMoviePlayerGUI::createHelpMenu() {
     StGLMenu* aMenuLanguage     = createLanguageMenu();     // Root -> Help -> Language menu
 
     aMenu->addItem(tr(MENU_HELP_ABOUT))
+         ->setIcon(iconTexture(stCString("actionInfo"), anIconSize), false)
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAboutProgram);
     aMenu->addItem(tr(MENU_HELP_USERTIPS))
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doUserTips);
@@ -955,6 +960,7 @@ StGLMenu* StMoviePlayerGUI::createHelpMenu() {
     aMenu->addItem(tr(MENU_HELP_LICENSE))
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doOpenLicense);
     aMenu->addItem(tr(MENU_HELP_SYSINFO))
+         ->setIcon(iconTexture(stCString("actionInfo"), anIconSize), false)
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAboutSystem);
     aMenu->addItem(tr(MENU_HELP_EXPERIMENTAL), myPlugin->params.ToShowExtra);
     aMenu->addItem(tr(MENU_HELP_SCALE),        aMenuScale);
