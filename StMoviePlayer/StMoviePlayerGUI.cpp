@@ -60,6 +60,7 @@
 
 // auxiliary pre-processor definition
 #define stCTexture(theString) getTexturePath(stCString(theString))
+#define stCMenuIcon(theString) iconTexture(stCString(theString), myMenuIconSize)
 
 using namespace StMoviePlayerStrings;
 
@@ -236,7 +237,6 @@ void StMoviePlayerGUI::createMainMenu() {
  * Root -> Media menu
  */
 StGLMenu* StMoviePlayerGUI::createMediaMenu() {
-    const IconSize anIconSize = scaleIcon(16);
     StGLMenu* aMenuMedia = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     myMenuRecent             = createRecentMenu();       // Root -> Media -> Recent files menu
 #ifdef ST_HAVE_MONGOOSE
@@ -249,12 +249,14 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
     StGLMenu* aMenuSaveImage = createSaveImageMenu();    // Root -> Media -> Save snapshot menu
 
     aMenuMedia->addItem(tr(MENU_MEDIA_OPEN_MOVIE), myPlugin->getAction(StMoviePlayer::Action_Open1File),    aMenuOpenImage)
-              ->setIcon(iconTexture(stCString("actionOpen"), anIconSize), false);
+              ->setIcon(stCMenuIcon("actionOpen"), false);
     StGLMenuItem* anItem = aMenuMedia->addItem(tr(MENU_MEDIA_RECENT), myMenuRecent);
     anItem->setUserData(0);
     anItem->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doOpenRecent);
-    aMenuMedia->addItem(tr(MENU_MEDIA_SAVE_SNAPSHOT_AS), myPlugin->getAction(StMoviePlayer::Action_SaveSnapshot), aMenuSaveImage);
-    aMenuMedia->addItem(tr(MENU_MEDIA_SRC_FORMAT), aMenuSrcFormat);
+    aMenuMedia->addItem(tr(MENU_MEDIA_SAVE_SNAPSHOT_AS), myPlugin->getAction(StMoviePlayer::Action_SaveSnapshot), aMenuSaveImage)
+              ->setIcon(stCMenuIcon("actionSave"), false);
+    aMenuMedia->addItem(tr(MENU_MEDIA_SRC_FORMAT), aMenuSrcFormat)
+              ->setIcon(stCMenuIcon("actionSourceFormat"), false);
 
     if(myWindow->isMobile()) {
         aMenuMedia->addItem("Mobile UI", myPlugin->params.IsMobileUI);
@@ -326,31 +328,30 @@ StGLMenu* StMoviePlayerGUI::createSrcFormatMenu() {
 }
 
 void StMoviePlayerGUI::fillSrcFormatMenu(StGLMenu* theMenu) {
-    const IconSize anIconSize = scaleIcon(16);
     theMenu->addItem(tr(MENU_SRC_FORMAT_AUTO),         myPlugin->params.srcFormat, StFormat_AUTO)
-           ->setIcon(iconTexture(stCString("menuAuto"), anIconSize));
+           ->setIcon(stCMenuIcon("menuAuto"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_MONO),         myPlugin->params.srcFormat, StFormat_Mono)
-           ->setIcon(iconTexture(stCString("menuMono"), anIconSize));
+           ->setIcon(stCMenuIcon("menuMono"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_PARALLEL),     myPlugin->params.srcFormat, StFormat_SideBySide_LR)
-           ->setIcon(iconTexture(stCString("menuSbsLR"), anIconSize));
+           ->setIcon(stCMenuIcon("menuSbsLR"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_CROSS_EYED),   myPlugin->params.srcFormat, StFormat_SideBySide_RL)
-           ->setIcon(iconTexture(stCString("menuSbsRL"), anIconSize));
+           ->setIcon(stCMenuIcon("menuSbsRL"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_LR), myPlugin->params.srcFormat, StFormat_TopBottom_LR)
-           ->setIcon(iconTexture(stCString("menuOverUnderLR"), anIconSize));
+           ->setIcon(stCMenuIcon("menuOverUnderLR"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_RL), myPlugin->params.srcFormat, StFormat_TopBottom_RL)
-           ->setIcon(iconTexture(stCString("menuOverUnderRL"), anIconSize));
+           ->setIcon(stCMenuIcon("menuOverUnderRL"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_INTERLACED),   myPlugin->params.srcFormat, StFormat_Rows)
-           ->setIcon(iconTexture(stCString("menuRowLR"), anIconSize));
+           ->setIcon(stCMenuIcon("menuRowLR"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RC),       myPlugin->params.srcFormat, StFormat_AnaglyphRedCyan)
-           ->setIcon(iconTexture(stCString("menuRedCyanLR"), anIconSize));
+           ->setIcon(stCMenuIcon("menuRedCyanLR"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RB),       myPlugin->params.srcFormat, StFormat_AnaglyphGreenMagenta)
-           ->setIcon(iconTexture(stCString("menuGreenMagentaLR"), anIconSize));
+           ->setIcon(stCMenuIcon("menuGreenMagentaLR"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_ANA_YB),       myPlugin->params.srcFormat, StFormat_AnaglyphYellowBlue)
-           ->setIcon(iconTexture(stCString("menuYellowBlueLR"), anIconSize));
+           ->setIcon(stCMenuIcon("menuYellowBlueLR"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_PAGEFLIP),     myPlugin->params.srcFormat, StFormat_FrameSequence)
-           ->setIcon(iconTexture(stCString("menuFrameSeqLR"), anIconSize));
+           ->setIcon(stCMenuIcon("menuFrameSeqLR"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_TILED_4X),     myPlugin->params.srcFormat, StFormat_Tiled4x)
-           ->setIcon(iconTexture(stCString("menuTiledLR"), anIconSize));
+           ->setIcon(stCMenuIcon("menuTiledLR"));
 }
 
 void StMoviePlayerGUI::doDisplayStereoFormatCombo(const size_t ) {
@@ -466,12 +467,16 @@ StGLMenu* StMoviePlayerGUI::createViewMenu() {
         aMenuView->addItem(tr(MENU_VIEW_FULLSCREEN),    myPlugin->params.isFullscreen);
     }
     aMenuView->addItem(tr(MENU_VIEW_RESET))
+             ->setIcon(stCMenuIcon("actionResetPlacement"), false)
              ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doReset);
     aMenuView->addItem(tr(MENU_VIEW_SWAP_LR),       myImage->params.swapLR);
-    aMenuView->addItem(tr(MENU_VIEW_DISPLAY_RATIO), aMenuDispRatio);
+    aMenuView->addItem(tr(MENU_VIEW_DISPLAY_RATIO), aMenuDispRatio)
+             ->setIcon(stCMenuIcon("actionDisplayRatio"), false);
     aMenuView->addItem(tr(MENU_VIEW_SURFACE),       aMenuSurface);
-    aMenuView->addItem(tr(MENU_VIEW_TEXFILTER),     aMenuTexFilter);
-    aMenuView->addItem(tr(MENU_VIEW_IMAGE_ADJUST),  aMenuImgAdjust);
+    aMenuView->addItem(tr(MENU_VIEW_TEXFILTER),     aMenuTexFilter)
+             ->setIcon(stCMenuIcon("actionInterpolation"), false);
+    aMenuView->addItem(tr(MENU_VIEW_IMAGE_ADJUST),  aMenuImgAdjust)
+             ->setIcon(stCMenuIcon("actionColorAdjust"), false);
     return aMenuView;
 }
 
@@ -498,21 +503,20 @@ StGLMenu* StMoviePlayerGUI::createDisplayRatioMenu() {
 }
 
 void StMoviePlayerGUI::fillDisplayRatioMenu(StGLMenu* theMenu) {
-    const IconSize anIconSize = scaleIcon(16);
     theMenu->addItem("Source", myImage->params.displayRatio, StGLImageRegion::RATIO_AUTO)
-           ->setIcon(iconTexture(stCString("menuAuto"), anIconSize));
+           ->setIcon(stCMenuIcon("menuAuto"));
     theMenu->addItem("2.21:1", myImage->params.displayRatio, StGLImageRegion::RATIO_221_1)
-           ->setIcon(iconTexture(stCString("menuRatio2_1_"), anIconSize));
+           ->setIcon(stCMenuIcon("menuRatio2_1_"));
     theMenu->addItem("16:9",   myImage->params.displayRatio, StGLImageRegion::RATIO_16_9)
-           ->setIcon(iconTexture(stCString("menuRatio16_9_"), anIconSize));
+           ->setIcon(stCMenuIcon("menuRatio16_9_"));
     theMenu->addItem("16:10",  myImage->params.displayRatio, StGLImageRegion::RATIO_16_10)
-           ->setIcon(iconTexture(stCString("menuRatio16_10_"), anIconSize));
+           ->setIcon(stCMenuIcon("menuRatio16_10_"));
     theMenu->addItem("4:3",    myImage->params.displayRatio, StGLImageRegion::RATIO_4_3)
-           ->setIcon(iconTexture(stCString("menuRatio4_3_"), anIconSize));
+           ->setIcon(stCMenuIcon("menuRatio4_3_"));
     theMenu->addItem("5:4",    myImage->params.displayRatio, StGLImageRegion::RATIO_5_4)
-           ->setIcon(iconTexture(stCString("menuRatio5_4_"), anIconSize));
+           ->setIcon(stCMenuIcon("menuRatio5_4_"));
     theMenu->addItem("1:1",    myImage->params.displayRatio, StGLImageRegion::RATIO_1_1)
-           ->setIcon(iconTexture(stCString("menuRatio1_1_"), anIconSize));
+           ->setIcon(stCMenuIcon("menuRatio1_1_"));
 }
 
 void StMoviePlayerGUI::doDisplayRatioCombo(const size_t ) {
@@ -552,7 +556,8 @@ StGLMenu* StMoviePlayerGUI::createSmoothFilterMenu() {
  */
 StGLMenu* StMoviePlayerGUI::createImageAdjustMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(tr(MENU_VIEW_ADJUST_RESET), myPlugin->getAction(StMoviePlayer::Action_ImageAdjustReset));
+    aMenu->addItem(tr(MENU_VIEW_ADJUST_RESET), myPlugin->getAction(StMoviePlayer::Action_ImageAdjustReset))
+         ->setIcon(stCMenuIcon("actionColorReset"), false);
 
     StGLMenuItem* anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_GAMMA));
     anItem->changeMargins().right = scale(100 + 16);
@@ -564,6 +569,7 @@ StGLMenu* StMoviePlayerGUI::createImageAdjustMenu() {
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aRed);
 
     anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_BRIGHTNESS));
+    anItem->setIcon(stCMenuIcon("actionBrightness"), false);
     anItem->changeMargins().right = scale(100 + 16);
     aRange = new StGLRangeFieldFloat32(anItem, myImage->params.brightness,
                                        -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
@@ -573,6 +579,7 @@ StGLMenu* StMoviePlayerGUI::createImageAdjustMenu() {
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aRed);
 
     anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_SATURATION));
+    anItem->setIcon(stCMenuIcon("actionSaturation"), false);
     anItem->changeMargins().right = scale(100 + 16);
     aRange = new StGLRangeFieldFloat32(anItem, myImage->params.saturation,
                                        -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
@@ -706,7 +713,6 @@ StGLMenu* StMoviePlayerGUI::createSubtitlesMenu() {
  * Root -> Output menu
  */
 StGLMenu* StMoviePlayerGUI::createOutputMenu() {
-    const IconSize anIconSize = scaleIcon(16);
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
 
     StGLMenu* aMenuChangeDevice = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
@@ -720,7 +726,7 @@ StGLMenu* StMoviePlayerGUI::createOutputMenu() {
 
     aMenu->addItem(tr(MENU_CHANGE_DEVICE), aMenuChangeDevice);
     aMenu->addItem(tr(MENU_ABOUT_RENDERER))
-         ->setIcon(iconTexture(stCString("actionInfo"), anIconSize), false)
+         ->setIcon(stCMenuIcon("actionHelp"), false)
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAboutRenderer);
     aMenu->addItem(tr(MENU_FPS),           aMenuFpsControl);
 
@@ -948,7 +954,6 @@ void StMoviePlayerGUI::doOpenLicense(const size_t ) {
  * Root -> Help menu
  */
 StGLMenu* StMoviePlayerGUI::createHelpMenu() {
-    const IconSize anIconSize = scaleIcon(16);
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     StGLMenu* aMenuScale        = createScaleMenu();        // Root -> Help -> Scale Interface menu
     StGLMenu* aMenuBlockSleep   = createBlockSleepMenu();   // Root -> Help -> Block sleeping
@@ -958,21 +963,25 @@ StGLMenu* StMoviePlayerGUI::createHelpMenu() {
     StGLMenu* aMenuLanguage     = createLanguageMenu();     // Root -> Help -> Language menu
 
     aMenu->addItem(tr(MENU_HELP_ABOUT))
-         ->setIcon(iconTexture(stCString("actionInfo"), anIconSize), false)
+         ->setIcon(stCMenuIcon("actionHelp"), false)
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAboutProgram);
     aMenu->addItem(tr(MENU_HELP_USERTIPS))
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doUserTips);
     aMenu->addItem(tr(MENU_HELP_HOTKEYS))
+         ->setIcon(stCMenuIcon("actionKeyboard"), false)
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doListHotKeys);
     aMenu->addItem(tr(MENU_HELP_LICENSE))
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doOpenLicense);
     aMenu->addItem(tr(MENU_HELP_EXPERIMENTAL), myPlugin->params.ToShowExtra);
-    aMenu->addItem(tr(MENU_HELP_SCALE),        aMenuScale);
-    aMenu->addItem(tr(MENU_HELP_BLOCKSLP),     aMenuBlockSleep);
+    aMenu->addItem(tr(MENU_HELP_SCALE),        aMenuScale)
+         ->setIcon(stCMenuIcon("actionFontSize"), false);
+    aMenu->addItem(tr(MENU_HELP_BLOCKSLP),     aMenuBlockSleep)
+         ->setIcon(stCMenuIcon("actionPower"), false);
 #if !defined(ST_NO_UPDATES_CHECK)
     aMenu->addItem(tr(MENU_HELP_UPDATES),      aMenuCheckUpdates);
 #endif
-    aMenu->addItem(tr(MENU_HELP_LANGS),        aMenuLanguage);
+    aMenu->addItem(tr(MENU_HELP_LANGS),        aMenuLanguage)
+         ->setIcon(stCMenuIcon("actionLanguage"), false);
     return aMenu;
 }
 
@@ -1152,7 +1161,6 @@ void StMoviePlayerGUI::createMobileBottomToolbar() {
 }
 
 void StMoviePlayerGUI::doShowMobileExMenu(const size_t ) {
-    const IconSize anIconSize = scaleIcon(16);
     const int aTop = scale(56);
 
     StHandle<StMovieInfo>&   anExtraInfo = myPlugin->myFileInfo;
@@ -1169,13 +1177,13 @@ void StMoviePlayerGUI::doShowMobileExMenu(const size_t ) {
     aMenu->setContextual(true);
     if(!anExtraInfo.isNull()) {
         anItem = aMenu->addItem(tr(BUTTON_DELETE), myPlugin->getAction(StMoviePlayer::Action_DeleteFile));
-        anItem->setIcon(iconTexture(stCString("actionDiscard"), anIconSize));
+        anItem->setIcon(stCMenuIcon("actionDiscard"));
 
         const StHandle< StArrayList<StString> >& anAudioStreams = myPlugin->myVideo->params.activeAudio->getList();
         if(!anAudioStreams.isNull()
         && !anAudioStreams->isEmpty()) {
             anItem = aMenu->addItem(tr(MENU_AUDIO));
-            anItem->setIcon(iconTexture(stCString("actionStreamAudio"), anIconSize));
+            anItem->setIcon(stCMenuIcon("actionStreamAudio"));
             anItem->signals.onItemClick += stSlot(this, &StMoviePlayerGUI::doAudioStreamsCombo);
         }
 
@@ -1183,24 +1191,24 @@ void StMoviePlayerGUI::doShowMobileExMenu(const size_t ) {
         if(!aSubsStreams.isNull()
         && !aSubsStreams->isEmpty()) {
             anItem = aMenu->addItem(tr(MENU_SUBTITLES));
-            anItem->setIcon(iconTexture(stCString("actionStreamSubtitles"), anIconSize));
+            anItem->setIcon(stCMenuIcon("actionStreamSubtitles"));
             anItem->signals.onItemClick += stSlot(this, &StMoviePlayerGUI::doSubtitlesStreamsCombo);
         }
 
         if(myPlugin->myVideo->hasVideoStream()) {
             anItem = aMenu->addItem(tr(MENU_VIEW_DISPLAY_RATIO));
-            anItem->setIcon(iconTexture(stCString("actionDisplayRatio"), anIconSize));
+            anItem->setIcon(stCMenuIcon("actionDisplayRatio"));
             anItem->signals.onItemClick += stSlot(this, &StMoviePlayerGUI::doDisplayRatioCombo);
         }
 
         anExtraInfo.nullify();
     }
     anItem = aMenu->addItem(tr(MENU_HELP_ABOUT));
-    anItem->setIcon(iconTexture(stCString("actionHelp"),      anIconSize));
+    anItem->setIcon(stCMenuIcon("actionHelp"));
     anItem->signals.onItemClick += stSlot(this, &StMoviePlayerGUI::doAboutProgram);
     //anItem = aMenu->addItem(myPlugin->StApplication::params.ActiveDevice->getActiveValue());
     anItem = aMenu->addItem("Settings");
-    anItem->setIcon(iconTexture(stCString("actionSettings"),  anIconSize));
+    anItem->setIcon(stCMenuIcon("actionSettings"));
     anItem->signals.onItemClick += stSlot(this, &StMoviePlayerGUI::doMobileSettings);
     aMenu->stglInit();
 }
@@ -1566,6 +1574,7 @@ void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StStri
             aDelayRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, StGLVec3(1.0f, 0.0f, 0.0f));
         }
         myMenuAudio->addItem(tr(MENU_AUDIO_ATTACH))
+                   ->setIcon(stCMenuIcon("actionOpen"), false)
                    ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doAddAudioStream);
     }
 
@@ -1615,6 +1624,7 @@ void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<St
     && !theStreamsList->isEmpty()) {
         //myMenuSubtitles->addSplitter();
         StGLMenuItem* anItem = myMenuSubtitles->addItem(tr(MENU_SUBTITLES_SIZE));
+        anItem->setIcon(stCMenuIcon("actionFontSize"), false);
         anItem->changeMargins().right = scale(100 + 16);
         StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.SubtitlesSize,
                                                                  -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
@@ -1635,10 +1645,12 @@ void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<St
         aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aBlack);
     }
 
-    myMenuSubtitles->addItem(tr(MENU_SUBTITLES_PARSER), aParserMenu);
+    myMenuSubtitles->addItem(tr(MENU_SUBTITLES_PARSER), aParserMenu)
+                   ->setIcon(stCMenuIcon("actionTextFormat"), false);
     if(theIsFilePlayed) {
         //myMenuSubtitles->addSplitter();
         myMenuSubtitles->addItem(tr(MENU_SUBTITLES_ATTACH))
+                       ->setIcon(stCMenuIcon("actionOpen"), false)
                        ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doAddSubtitleStream);
     }
 

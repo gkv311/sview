@@ -48,6 +48,7 @@
 
 // auxiliary pre-processor definition
 #define stCTexture(theString) getTexturePath(stCString(theString))
+#define stCMenuIcon(theString) iconTexture(stCString(theString), myMenuIconSize)
 
 using namespace StImageViewerStrings;
 
@@ -185,18 +186,19 @@ void StImageViewerGUI::createMainMenu() {
  * Root -> Media menu
  */
 StGLMenu* StImageViewerGUI::createMediaMenu() {
-    const IconSize anIconSize = scaleIcon(16);
     StGLMenu* aMenuMedia = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     StGLMenu* aMenuSrcFormat = createSrcFormatMenu(); // Root -> Media -> Source format menu
     StGLMenu* aMenuOpenImage = createOpenImageMenu(); // Root -> Media -> Open image menu
     StGLMenu* aMenuSaveImage = createSaveImageMenu(); // Root -> Media -> Save image menu
 
     aMenuMedia->addItem(tr(MENU_MEDIA_OPEN_IMAGE),    aMenuOpenImage)
-              ->setIcon(iconTexture(stCString("actionOpen"), anIconSize), false);
-    aMenuMedia->addItem(tr(MENU_MEDIA_SAVE_IMAGE_AS), aMenuSaveImage);
-    aMenuMedia->addItem(tr(MENU_MEDIA_SRC_FORMAT),    aMenuSrcFormat);
+              ->setIcon(stCMenuIcon("actionOpen"), false);
+    aMenuMedia->addItem(tr(MENU_MEDIA_SAVE_IMAGE_AS), aMenuSaveImage)
+              ->setIcon(stCMenuIcon("actionSave"), false);
+    aMenuMedia->addItem(tr(MENU_MEDIA_SRC_FORMAT),    aMenuSrcFormat)
+              ->setIcon(stCMenuIcon("actionSourceFormat"), false);
     aMenuMedia->addItem(tr(MENU_MEDIA_FILE_INFO),     myPlugin->getAction(StImageViewer::Action_FileInfo))
-              ->setIcon(iconTexture(stCString("actionInfo"), anIconSize), false);
+              ->setIcon(stCMenuIcon("actionInfo"), false);
 
     if(myWindow->isMobile()) {
         aMenuMedia->addItem("Mobile UI", myPlugin->params.IsMobileUI);
@@ -241,27 +243,26 @@ StGLMenu* StImageViewerGUI::createSrcFormatMenu() {
 }
 
 void StImageViewerGUI::fillSrcFormatMenu(StGLMenu* theMenu) {
-    const IconSize anIconSize = scaleIcon(16);
     theMenu->addItem(tr(MENU_SRC_FORMAT_AUTO),         myPlugin->params.srcFormat, StFormat_AUTO)
-           ->setIcon(iconTexture(stCString("menuAuto"), anIconSize));
+           ->setIcon(stCMenuIcon("menuAuto"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_MONO),         myPlugin->params.srcFormat, StFormat_Mono)
-           ->setIcon(iconTexture(stCString("menuMono"), anIconSize));
+           ->setIcon(stCMenuIcon("menuMono"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_PARALLEL),     myPlugin->params.srcFormat, StFormat_SideBySide_LR)
-           ->setIcon(iconTexture(stCString("menuSbsLR"), anIconSize));
+           ->setIcon(stCMenuIcon("menuSbsLR"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_CROSS_EYED),   myPlugin->params.srcFormat, StFormat_SideBySide_RL)
-           ->setIcon(iconTexture(stCString("menuSbsRL"), anIconSize));
+           ->setIcon(stCMenuIcon("menuSbsRL"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_LR), myPlugin->params.srcFormat, StFormat_TopBottom_LR)
-           ->setIcon(iconTexture(stCString("menuOverUnderLR"), anIconSize));
+           ->setIcon(stCMenuIcon("menuOverUnderLR"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_RL), myPlugin->params.srcFormat, StFormat_TopBottom_RL)
-           ->setIcon(iconTexture(stCString("menuOverUnderRL"), anIconSize));
+           ->setIcon(stCMenuIcon("menuOverUnderRL"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_INTERLACED),   myPlugin->params.srcFormat, StFormat_Rows)
-           ->setIcon(iconTexture(stCString("menuRowLR"), anIconSize));
+           ->setIcon(stCMenuIcon("menuRowLR"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RC),       myPlugin->params.srcFormat, StFormat_AnaglyphRedCyan)
-           ->setIcon(iconTexture(stCString("menuRedCyanLR"), anIconSize));
+           ->setIcon(stCMenuIcon("menuRedCyanLR"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RB),       myPlugin->params.srcFormat, StFormat_AnaglyphGreenMagenta)
-           ->setIcon(iconTexture(stCString("menuGreenMagentaLR"), anIconSize));
+           ->setIcon(stCMenuIcon("menuGreenMagentaLR"));
     theMenu->addItem(tr(MENU_SRC_FORMAT_ANA_YB),       myPlugin->params.srcFormat, StFormat_AnaglyphYellowBlue)
-           ->setIcon(iconTexture(stCString("menuYellowBlueLR"), anIconSize));
+           ->setIcon(stCMenuIcon("menuYellowBlueLR"));
 }
 
 void StImageViewerGUI::doDisplayStereoFormatCombo(const size_t ) {
@@ -286,12 +287,16 @@ StGLMenu* StImageViewerGUI::createViewMenu() {
         aMenuView->addItem(tr(MENU_VIEW_FULLSCREEN),    myPlugin->params.isFullscreen);
     }
     aMenuView->addItem(tr(MENU_VIEW_RESET))
+             ->setIcon(stCMenuIcon("actionResetPlacement"), false)
              ->signals.onItemClick.connect(myPlugin, &StImageViewer::doReset);
     aMenuView->addItem(tr(MENU_VIEW_SWAP_LR),       myImage->params.swapLR);
-    aMenuView->addItem(tr(MENU_VIEW_DISPLAY_RATIO), aMenuDispRatio);
+    aMenuView->addItem(tr(MENU_VIEW_DISPLAY_RATIO), aMenuDispRatio)
+             ->setIcon(stCMenuIcon("actionDisplayRatio"), false);
     aMenuView->addItem(tr(MENU_VIEW_SURFACE),       aMenuSurface);
-    aMenuView->addItem(tr(MENU_VIEW_TEXFILTER),     aMenuTexFilter);
-    aMenuView->addItem(tr(MENU_VIEW_IMAGE_ADJUST),  aMenuImgAdjust);
+    aMenuView->addItem(tr(MENU_VIEW_TEXFILTER),     aMenuTexFilter)
+             ->setIcon(stCMenuIcon("actionInterpolation"), false);
+    aMenuView->addItem(tr(MENU_VIEW_IMAGE_ADJUST),  aMenuImgAdjust)
+             ->setIcon(stCMenuIcon("actionColorAdjust"), false);
     return aMenuView;
 }
 
@@ -311,22 +316,21 @@ StGLMenu* StImageViewerGUI::createDisplayModeMenu() {
  * Root -> View menu -> Display Ratio
  */
 StGLMenu* StImageViewerGUI::createDisplayRatioMenu() {
-    const IconSize anIconSize = scaleIcon(16);
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     aMenu->addItem(tr(MENU_VIEW_DISPLAY_RATIO_SRC), myImage->params.displayRatio, StGLImageRegion::RATIO_AUTO)
-         ->setIcon(iconTexture(stCString("menuAuto"), anIconSize));
+         ->setIcon(stCMenuIcon("menuAuto"));
     aMenu->addItem("2.21:1", myImage->params.displayRatio, StGLImageRegion::RATIO_221_1)
-         ->setIcon(iconTexture(stCString("menuRatio2_1_"), anIconSize));
+         ->setIcon(stCMenuIcon("menuRatio2_1_"));
     aMenu->addItem("16:9",   myImage->params.displayRatio, StGLImageRegion::RATIO_16_9)
-         ->setIcon(iconTexture(stCString("menuRatio16_9_"), anIconSize));
+         ->setIcon(stCMenuIcon("menuRatio16_9_"));
     aMenu->addItem("16:10",  myImage->params.displayRatio, StGLImageRegion::RATIO_16_10)
-         ->setIcon(iconTexture(stCString("menuRatio16_10_"), anIconSize));
+         ->setIcon(stCMenuIcon("menuRatio16_10_"));
     aMenu->addItem("4:3",    myImage->params.displayRatio, StGLImageRegion::RATIO_4_3)
-         ->setIcon(iconTexture(stCString("menuRatio4_3_"), anIconSize));
+         ->setIcon(stCMenuIcon("menuRatio4_3_"));
     aMenu->addItem("5:4",    myImage->params.displayRatio, StGLImageRegion::RATIO_5_4)
-         ->setIcon(iconTexture(stCString("menuRatio5_4_"), anIconSize));
+         ->setIcon(stCMenuIcon("menuRatio5_4_"));
     aMenu->addItem("1:1",    myImage->params.displayRatio, StGLImageRegion::RATIO_1_1)
-         ->setIcon(iconTexture(stCString("menuRatio1_1_"), anIconSize));
+         ->setIcon(stCMenuIcon("menuRatio1_1_"));
     aMenu->addItem(tr(MENU_VIEW_KEEP_ON_RESTART),   myPlugin->params.toRestoreRatio);
     return aMenu;
 }
@@ -365,7 +369,8 @@ StGLMenu* StImageViewerGUI::createImageAdjustMenu() {
     const StGLVec3 aGreen(0.4f, 0.8f, 0.4f);
     const StGLVec3 aRed  (1.0f, 0.0f, 0.0f);
 
-    aMenu->addItem(tr(MENU_VIEW_ADJUST_RESET), myPlugin->getAction(StImageViewer::Action_ImageAdjustReset));
+    aMenu->addItem(tr(MENU_VIEW_ADJUST_RESET), myPlugin->getAction(StImageViewer::Action_ImageAdjustReset))
+         ->setIcon(stCMenuIcon("actionColorReset"), false);
 
     StGLMenuItem* anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_GAMMA));
     anItem->changeMargins().right = scale(100 + 16);
@@ -377,6 +382,7 @@ StGLMenu* StImageViewerGUI::createImageAdjustMenu() {
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aRed);
 
     anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_BRIGHTNESS));
+    anItem->setIcon(stCMenuIcon("actionBrightness"), false);
     anItem->changeMargins().right = scale(100 + 16);
     aRange = new StGLRangeFieldFloat32(anItem, myImage->params.brightness,
                                        -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
@@ -386,6 +392,7 @@ StGLMenu* StImageViewerGUI::createImageAdjustMenu() {
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aRed);
 
     anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_SATURATION));
+    anItem->setIcon(stCMenuIcon("actionSaturation"), false);
     anItem->changeMargins().right = scale(100 + 16);
     aRange = new StGLRangeFieldFloat32(anItem, myImage->params.saturation,
                                        -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
@@ -401,7 +408,6 @@ StGLMenu* StImageViewerGUI::createImageAdjustMenu() {
  * Root -> Output menu
  */
 StGLMenu* StImageViewerGUI::createOutputMenu() {
-    const IconSize anIconSize = scaleIcon(16);
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
 
     StGLMenu* aMenuChangeDevice = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
@@ -414,7 +420,7 @@ StGLMenu* StImageViewerGUI::createOutputMenu() {
 
     aMenu->addItem(tr(MENU_CHANGE_DEVICE), aMenuChangeDevice);
     aMenu->addItem(tr(MENU_ABOUT_RENDERER))
-         ->setIcon(iconTexture(stCString("actionInfo"), anIconSize), false)
+         ->setIcon(stCMenuIcon("actionHelp"), false)
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doAboutRenderer);
     aMenu->addItem(tr(MENU_SHOW_FPS),      myPlugin->params.ToShowFps);
     aMenu->addItem(tr(MENU_VSYNC),         myPlugin->params.IsVSyncOn);
@@ -708,7 +714,6 @@ void StImageViewerGUI::doOpenLicense(const size_t ) {
  * Root -> Help menu
  */
 StGLMenu* StImageViewerGUI::createHelpMenu() {
-    const IconSize anIconSize = scaleIcon(16);
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     StGLMenu* aMenuScale        = createScaleMenu();        // Root -> Help -> Scale Interface menu
 #if !defined(ST_NO_UPDATES_CHECK)
@@ -717,19 +722,22 @@ StGLMenu* StImageViewerGUI::createHelpMenu() {
     StGLMenu* aMenuLanguage     = createLanguageMenu();     // Root -> Help -> Language menu
 
     aMenu->addItem(tr(MENU_HELP_ABOUT))
-         ->setIcon(iconTexture(stCString("actionInfo"), anIconSize), false)
+         ->setIcon(stCMenuIcon("actionHelp"), false)
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doAboutProgram);
     aMenu->addItem(tr(MENU_HELP_USERTIPS))
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doUserTips);
     aMenu->addItem(tr(MENU_HELP_HOTKEYS))
+         ->setIcon(stCMenuIcon("actionKeyboard"), false)
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doListHotKeys);
     aMenu->addItem(tr(MENU_HELP_LICENSE))
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doOpenLicense);
-    aMenu->addItem(tr(MENU_HELP_SCALE),   aMenuScale);
+    aMenu->addItem(tr(MENU_HELP_SCALE),   aMenuScale)
+         ->setIcon(stCMenuIcon("actionFontSize"), false);
 #if !defined(ST_NO_UPDATES_CHECK)
     aMenu->addItem(tr(MENU_HELP_UPDATES), aMenuCheckUpdates);
 #endif
-    aMenu->addItem(tr(MENU_HELP_LANGS),   aMenuLanguage);
+    aMenu->addItem(tr(MENU_HELP_LANGS),   aMenuLanguage)
+         ->setIcon(stCMenuIcon("actionLanguage"), false);
     return aMenu;
 }
 
@@ -867,7 +875,6 @@ void StImageViewerGUI::createMobileBottomToolbar() {
 }
 
 void StImageViewerGUI::doShowMobileExMenu(const size_t ) {
-    const IconSize anIconSize = scaleIcon(16);
     const int aTop = scale(56);
 
     StHandle<StImageInfo>&   anExtraInfo = myPlugin->myFileInfo;
@@ -884,18 +891,18 @@ void StImageViewerGUI::doShowMobileExMenu(const size_t ) {
     aMenu->setContextual(true);
     if(!anExtraInfo.isNull()) {
         anItem = aMenu->addItem(tr(BUTTON_DELETE), myPlugin->getAction(StImageViewer::Action_DeleteFile));
-        anItem->setIcon(iconTexture(stCString("actionDiscard"), anIconSize));
+        anItem->setIcon(stCMenuIcon("actionDiscard"));
         anExtraInfo.nullify();
     }
     anItem = aMenu->addItem(tr(MENU_HELP_ABOUT));
-    anItem->setIcon(iconTexture(stCString("actionHelp"),      anIconSize));
+    anItem->setIcon(stCMenuIcon("actionHelp"));
     anItem->signals.onItemClick += stSlot(this, &StImageViewerGUI::doAboutProgram);
     //anItem = aMenu->addItem(myPlugin->StApplication::params.ActiveDevice->getActiveValue());
     anItem = aMenu->addItem("Settings");
-    anItem->setIcon(iconTexture(stCString("actionSettings"),  anIconSize));
+    anItem->setIcon(stCMenuIcon("actionSettings"));
     anItem->signals.onItemClick += stSlot(this, &StImageViewerGUI::doMobileSettings);
     anItem = aMenu->addItem("Slideshow", myPlugin->getAction(StImageViewer::Action_SlideShow));
-    anItem->setIcon(iconTexture(stCString("actionSlideShow"), anIconSize));
+    anItem->setIcon(stCMenuIcon("actionSlideShow"));
     aMenu->stglInit();
 }
 

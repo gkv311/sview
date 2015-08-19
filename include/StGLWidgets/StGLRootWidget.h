@@ -436,6 +436,10 @@ class StGLRootWidget : public StGLWidget {
 
     bool                      myIsMenuPressed; //!< global flag to perform navigation in menu after first item clicked
 
+        protected:
+
+    IconSize                  myMenuIconSize;  //!< scaled size of menu icon
+
 };
 
 #endif // __StGLRootWidget_h_
