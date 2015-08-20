@@ -42,7 +42,7 @@ void StMessageBox::Error(const StString& theMessage) {
     StLogger::GetDefault().write(theMessage, StLogger::ST_ERROR);
     StCocoaLocalPool aLocalPool;
     NSString* aMessage = [NSString stringWithUTF8String: theMessage.toCString()];
-    NSRunAlertPanel(@"Error", aMessage, @"OK", nil, nil);
+    NSRunAlertPanel(@"Error", @"%@", @"OK", nil, nil, aMessage);
 }
 
 bool StMessageBox::Question(const StString& theMessage) {
@@ -51,7 +51,7 @@ bool StMessageBox::Question(const StString& theMessage) {
     }
     StCocoaLocalPool aLocalPool;
     NSString* aMessage = [NSString stringWithUTF8String: theMessage.toCString()];
-    int aResult = NSRunAlertPanel(@"Question", aMessage, @"Yes", @"No", nil);
+    int aResult = NSRunAlertPanel(@"Question", @"%@", @"Yes", @"No", nil, aMessage);
     return aResult == NSAlertDefaultReturn;
 }
 
