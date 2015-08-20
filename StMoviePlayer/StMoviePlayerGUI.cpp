@@ -195,10 +195,14 @@ void StMoviePlayerGUI::createBottomToolbar() {
     myBtnNext->setDrawShadow(true);
     myBtnNext->changeMargins() = aButtonMargins;
 
+    const StString aListPaths[2] = {
+        iconTexture(stCString("actionVideoPlaylistOff"), anIconSize),
+        iconTexture(stCString("actionVideoPlaylist"),    anIconSize)
+    };
     myBtnList = new StGLTextureButton(myPanelBottom, -aLeft - myIconStep, aTop,
-                                      StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+                                      StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT), 2);
     myBtnList->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doPlayListReverse);
-    myBtnList->setTexturePath(iconTexture(stCString("actionVideoPlaylist"), anIconSize));
+    myBtnList->setTexturePath(aListPaths, 2);
     myBtnList->setDrawShadow(true);
     myBtnList->changeMargins() = aButtonMargins;
 
@@ -1149,9 +1153,13 @@ void StMoviePlayerGUI::createMobileBottomToolbar() {
     myBtnNext->changeMargins() = aButtonMargins;
 
     const StGLCorner aRightCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT);
-    myBtnList = new StGLTextureButton(myPanelBottom, (myBottomBarNbRight++) * (-myIconStep), 0, aRightCorner);
+    const StString aListPaths[2] = {
+        iconTexture(stCString("actionVideoPlaylistOff"), anIconSize),
+        iconTexture(stCString("actionVideoPlaylist"),    anIconSize)
+    };
+    myBtnList = new StGLTextureButton(myPanelBottom, (myBottomBarNbRight++) * (-myIconStep), 0, aRightCorner, 2);
     myBtnList->signals.onBtnClick += stSlot(myPlugin, &StMoviePlayer::doPlayListReverse);
-    myBtnList->setTexturePath(iconTexture(stCString("actionVideoPlaylist"), anIconSize));
+    myBtnList->setTexturePath(aListPaths, 2);
     myBtnList->setDrawShadow(true);
     myBtnList->changeMargins() = aButtonMargins;
 
@@ -1498,6 +1506,9 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
     }
     if(myBtnSrcFrmt != NULL) {
         myBtnSrcFrmt->setFaceId(aSrcFormat != StFormat_AUTO ? aSrcFormat : StFormat_Mono);
+    }
+    if(myBtnList != NULL) {
+        myBtnList->setFaceId(toShowPlayList ? 1 : 0);
     }
     if(myBtnFullScr != NULL) {
         myBtnFullScr->setFaceId(myPlugin->params.isFullscreen->getValue() ? 1 : 0);
