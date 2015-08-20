@@ -33,7 +33,7 @@ StGLPlayList::StGLPlayList(StGLWidget*                 theParent,
   myDragDone(0),
   myFlingAccel((double )myRoot->scale(200)),
   myFlingYSpeed(0.0) {
-    myMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+    myMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL_COMPACT);
 
     myMenu->setItemWidth(myRoot->scale(250));
     myMenu->setColor(StGLVec4(0.2f, 0.2f, 0.2f, 0.5f));
@@ -85,7 +85,7 @@ void StGLPlayList::updateList() {
             //anItem->changeRectPx().right() = anItem->getRectPx().left();
         }
     }
-    stglInit();
+    stglInitMenu();
 }
 
 void StGLPlayList::doResetList() {
@@ -148,9 +148,9 @@ void StGLPlayList::doMouseUnclick(const int theBtnId) {
 }
 
 void StGLPlayList::stglResize() {
-    const int aNewHeight = myRoot->getRectPx().height();
+    const int aNewHeight = myParent->getRectPx().height() - myFitMargins.top - myFitMargins.bottom - myMargins.top - myMargins.bottom;
     const int anItemsOld = myItemsNb;
-    myItemsNb = stMax(aNewHeight / myMenu->getItemHeight() - 6, 0);
+    myItemsNb = stMax(aNewHeight / myMenu->getItemHeight(), 0);
 
     StArrayList<StString> aList;
     myList->getSubList(aList, myFromId, myFromId + myItemsNb);
@@ -180,7 +180,7 @@ void StGLPlayList::stglResize() {
     }
 
     if(myItemsNb != anItemsOld) {
-        stglInit();
+        stglInitMenu();
     }
 
     int anItemWidth = myRoot->getRectPx().width() / 4;
@@ -193,6 +193,8 @@ void StGLPlayList::stglResize() {
 }
 
 void StGLPlayList::resizeWidth() {
+    changeRectPx().top()    = myFitMargins.top;
+    changeRectPx().bottom() = myParent->getRectPx().height() - myFitMargins.bottom;
     for(StGLWidget* aChild = myMenu->getChildren()->getStart(); aChild != NULL; aChild = aChild->getNext()) {
         StGLMenuItem* anItem = dynamic_cast<StGLMenuItem*>(aChild);
         if(anItem != NULL) {
@@ -202,20 +204,37 @@ void StGLPlayList::resizeWidth() {
     }
 
     myMenu->changeRectPx().right() = myMenu->getRectPx().left() + myMenu->getItemWidth();
+    myMenu->changeRectPx().bottom() = getRectPx().height();
     changeRectPx().right() = getRectPx().left() + myMenu->getRectPx().width();
 }
 
-bool StGLPlayList::stglInit() {
+bool StGLPlayList::stglInitMenu() {
+    changeRectPx().top()    = myFitMargins.top;
+    changeRectPx().bottom() = myParent->getRectPx().height() - myFitMargins.bottom;
     const int aWidth = myMenu->getItemWidth();
-    if(!StGLWidget::stglInit()) {
+    if(!myMenu->stglInit()) {
         return false;
     }
 
     myMenu->setItemWidth(aWidth);
+    //myMenu->changeRectPx().bottom() += myMargins.top + myMargins.bottom;
+    myMenu->changeRectPx().bottom() = getRectPx().height();
     changeRectPx().right()  = getRectPx().left() + myMenu->getRectPx().width();
-    changeRectPx().bottom() = getRectPx().top()  + myMenu->getRectPx().height();
     resizeWidth();
     return true;
+}
+
+bool StGLPlayList::stglInit() {
+    bool isOk = stglInitMenu();
+    for(StGLWidget *aChild(myChildren.getStart()), *aChildActive(NULL); aChild != NULL;) {
+        aChildActive = aChild;
+        aChild       = aChild->getNext();
+        if(aChild == myMenu) {
+            continue;
+        }
+        isOk = aChildActive->stglInit() && isOk;
+    }
+    return isOk;
 }
 
 void StGLPlayList::stglDrawScrollBar(unsigned int theView) {
@@ -227,7 +246,7 @@ void StGLPlayList::stglDrawScrollBar(unsigned int theView) {
     }
 
     if(theView != ST_DRAW_RIGHT) {
-        const int    aSizeY       = stMax(getRectPx().height(), 1);
+        const int    aSizeY       = stMax(getRectPx().height() - myMargins.top - myMargins.bottom, 1);
         const int    aContSizeY   = myList->getItemsCount() * myMenu->getItemHeight();
         const double aScaleY      = double(aSizeY) / double(aContSizeY);
         const int    aScrollSizeY = stMax(int(aScaleY * (double )aSizeY), myRoot->scale(4));

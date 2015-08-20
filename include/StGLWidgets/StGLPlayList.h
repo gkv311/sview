@@ -32,6 +32,20 @@ class StGLPlayList : public StGLWidget {
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo);
     ST_CPPEXPORT virtual void stglResize();
 
+    /**
+     * Return margins for auto-fit functionality.
+     */
+    ST_LOCAL const StMarginsI& getFitMarginY() const {
+        return myFitMargins;
+    }
+
+    /**
+     * Return margins for auto-fit functionality.
+     */
+    ST_LOCAL StMarginsI& changeFitMargins() {
+        return myFitMargins;
+    }
+
         public:  //! @name Signals
 
     struct {
@@ -55,10 +69,12 @@ class StGLPlayList : public StGLWidget {
 
     ST_LOCAL StGLMenuItem* addItem();
     ST_LOCAL void stglDrawScrollBar(unsigned int theView);
+    ST_LOCAL bool stglInitMenu();
 
         private:
 
     StGLMenu*            myMenu;         //!< menu with items
+    StMarginsI           myFitMargins;   //!< margin for auto-fit
 
     StGLVertexBuffer     myBarVertBuf;   //!< vertices buffer
     StGLVec4             myBarColor;     //!< color of scroll bar

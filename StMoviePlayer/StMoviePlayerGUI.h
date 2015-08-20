@@ -238,6 +238,8 @@ class StMoviePlayerGUI : public StGLRootWidget {
     StGLTextureButton*  myBtnPrev;
     StGLTextureButton*  myBtnNext;
     StGLTextureButton*  myBtnList;
+    StGLCheckboxTextured* myBtnShuffle;
+    StGLCheckboxTextured* myBtnLoop;
     StGLCheckboxTextured* myBtnFullScr;
     StGLFpsLabel*       myFpsWidget;
 

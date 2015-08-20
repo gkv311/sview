@@ -83,9 +83,29 @@ void StMoviePlayerGUI::createDesktopUI(const StHandle<StPlayList>& thePlayList) 
     myDescr = new StGLDescription(this);
 
     myPlayList = new StGLPlayList(this, thePlayList);
-    myPlayList->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+    myPlayList->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    myPlayList->changeFitMargins().top    = scale(110);
+    myPlayList->changeFitMargins().bottom = scale(110);
+    myPlayList->changeMargins().bottom    = scale(32);
     myPlayList->setOpacity(myPlugin->params.ToShowPlayList->getValue() ? 1.0f : 0.0f, false);
     myPlayList->signals.onOpenItem = stSlot(myPlugin, &StMoviePlayer::doFileNext);
+
+    StMarginsI aButtonMargins;
+    const IconSize anIconSize = scaleIcon(32, aButtonMargins);
+    aButtonMargins.extend(scale(8));
+    myBtnShuffle = new StGLCheckboxTextured(myPlayList, myPlugin->params.isShuffle,
+                                            iconTexture(stCString("actionVideoShuffle"), anIconSize),
+                                            iconTexture(stCString("actionVideoShuffle"), anIconSize),
+                                            scale(24), 0,
+                                            StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER));
+    myBtnShuffle->changeMargins() = aButtonMargins;
+
+    myBtnLoop = new StGLCheckboxTextured(myPlayList, myPlugin->params.ToLoopSingle,
+                                         iconTexture(stCString("actionVideoLoopSingle"), anIconSize),
+                                         iconTexture(stCString("actionVideoLoopSingle"), anIconSize),
+                                         -scale(24), 0,
+                                         StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER));
+    myBtnLoop->changeMargins() = aButtonMargins;
 
     // create main menu
     createMainMenu();
@@ -203,6 +223,15 @@ void StMoviePlayerGUI::createBottomToolbar() {
     myBtnList->setDrawShadow(true);
     myBtnList->changeMargins() = aButtonMargins;
 
+
+    myBtnNext = new StGLTextureButton(myPanelBottom, -aLeft - 2 * myIconStep, aTop,
+                                      StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    myBtnNext->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doListNext);
+    myBtnNext->setTexturePath(iconTexture(stCString("actionVideoNext"), anIconSize));
+    myBtnNext->setDrawShadow(true);
+    myBtnNext->changeMargins() = aButtonMargins;
+
+
     if(myWindow->hasFullscreenMode()) {
         myBtnFullScr = new StGLCheckboxTextured(myPanelBottom, myPlugin->params.isFullscreen,
                                                 iconTexture(stCString("actionVideoFullscreenOff"), anIconSize),
@@ -290,11 +319,6 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
     }
 #endif
 #endif
-
-    aMenuMedia->addItem(tr(MENU_MEDIA_SHUFFLE), myPlugin->params.isShuffle);
-    if(myPlugin->params.ToShowExtra->getValue()) {
-        aMenuMedia->addItem("Loop single item", myPlugin->params.ToLoopSingle);
-    }
 
 #ifdef ST_HAVE_MONGOOSE
     aMenuMedia->addItem(tr(MENU_MEDIA_WEBUI) + ":" + myPlugin->params.WebUIPort->getValue(), aMenuWebUI);
@@ -1052,9 +1076,29 @@ void StMoviePlayerGUI::createMobileUI(const StHandle<StPlayList>& thePlayList) {
     createMobileBottomToolbar();
 
     myPlayList = new StGLPlayList(this, thePlayList);
-    myPlayList->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+    myPlayList->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    myPlayList->changeFitMargins().top    = scale(56);
+    myPlayList->changeFitMargins().bottom = scale(100);
+    myPlayList->changeMargins().bottom    = scale(56);
     myPlayList->setOpacity(myPlugin->params.ToShowPlayList->getValue() ? 1.0f : 0.0f, false);
     myPlayList->signals.onOpenItem = stSlot(myPlugin, &StMoviePlayer::doFileNext);
+
+    StMarginsI aButtonMargins;
+    const IconSize anIconSize = scaleIcon(32, aButtonMargins);
+    aButtonMargins.extend(scale(12));
+    StGLCheckboxTextured* aBtnShuffle = new StGLCheckboxTextured(myPlayList, myPlugin->params.isShuffle,
+                                                                 iconTexture(stCString("actionVideoShuffle"), anIconSize),
+                                                                 iconTexture(stCString("actionVideoShuffle"), anIconSize),
+                                                                 scale(28), 0,
+                                                                 StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER));
+    aBtnShuffle->changeMargins() = aButtonMargins;
+
+    StGLCheckboxTextured* aBtnLoop = new StGLCheckboxTextured(myPlayList, myPlugin->params.ToLoopSingle,
+                                                              iconTexture(stCString("actionVideoLoopSingle"), anIconSize),
+                                                              iconTexture(stCString("actionVideoLoopSingle"), anIconSize),
+                                                              -scale(28), 0,
+                                                              StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER));
+    aBtnLoop->changeMargins() = aButtonMargins;
 }
 
 /**
@@ -1260,6 +1304,8 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
   myBtnPrev(NULL),
   myBtnNext(NULL),
   myBtnList(NULL),
+  myBtnShuffle(NULL),
+  myBtnLoop(NULL),
   myBtnFullScr(NULL),
   //
   myFpsWidget(NULL),
@@ -1383,6 +1429,9 @@ void StMoviePlayerGUI::stglResize(const StGLBoxPx& theRectPx) {
             const int aBoxWidth = myTimeBox->getRectPx().width();
 
             if(anXSpace >= scale(250)) {
+                if(myPlayList != NULL) {
+                    myPlayList->changeFitMargins().bottom = scale(56);
+                }
                 mySeekBar->changeRectPx().moveTopTo((aPanelSizeY - aSeekSizeY) / 2);
                 mySeekBar->changeRectPx().left()  = anXOffset + myBottomBarNbLeft * myIconStep;
                 mySeekBar->changeRectPx().right() = theRectPx.width() - anXOffset - myBottomBarNbRight * myIconStep;
@@ -1397,6 +1446,9 @@ void StMoviePlayerGUI::stglResize(const StGLBoxPx& theRectPx) {
                     myTimeBox->setOverlay(true);
                 }
             } else {
+                if(myPlayList != NULL) {
+                    myPlayList->changeFitMargins().bottom = scale(100);
+                }
                 mySeekBar->changeRectPx().moveTopTo(-aPanelSizeY + (aPanelSizeY - aSeekSizeY) / 2);
                 mySeekBar->changeRectPx().left()  = anXOffset;
                 mySeekBar->changeRectPx().right() = theRectPx.width() - anXOffset;
@@ -1525,6 +1577,10 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
             myDescr->setText(tr(VIDEO_LIST_NEXT));
         } else if(::isPointIn(myBtnList, theCursor)) {
             myDescr->setText(tr(VIDEO_LIST));
+        } else if(::isPointIn(myBtnShuffle, theCursor)) {
+            myDescr->setText(tr(MENU_MEDIA_SHUFFLE));
+        } else if(::isPointIn(myBtnLoop, theCursor)) {
+            myDescr->setText("Loop single item");
         } else if(::isPointIn(myBtnFullScr, theCursor)) {
             myDescr->setText(tr(FULLSCREEN));
         } else {
