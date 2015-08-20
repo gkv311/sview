@@ -84,6 +84,7 @@ void StGLCheckbox::stglResize() {
     aRectPx.bottom() -= myRoot->scale(4);
     getRoot()->getRectGl(aRectPx, aVertices, 4);
     myVertBuf.init(aCtx, aVertices);
+    myIsResized = false;
 }
 
 bool StGLCheckbox::stglInit() {
@@ -124,7 +125,6 @@ void StGLCheckbox::stglDraw(unsigned int theView) {
     StGLMenuProgram& aProgram = myRoot->getMenuProgram();
     if(myIsResized) {
         stglResize();
-        myIsResized = false;
     }
 
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

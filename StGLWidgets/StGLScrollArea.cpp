@@ -151,7 +151,6 @@ void StGLScrollArea::stglDraw(unsigned int theView) {
     StGLContext& aCtx = getContext();
     if(myIsResized) {
         stglResize();
-        myIsResized = false;
     }
 
     StGLBoxPx aScissorRect;

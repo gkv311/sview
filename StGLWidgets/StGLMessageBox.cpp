@@ -344,7 +344,6 @@ void StGLMessageBox::stglDraw(unsigned int theView) {
     StGLContext& aCtx = getContext();
     if(myIsResized) {
         stglResize();
-        myIsResized = false;
     }
 
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

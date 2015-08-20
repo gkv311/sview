@@ -438,7 +438,6 @@ void StGLTable::stglDraw(unsigned int theView) {
 
     if(myIsResized) {
         stglResize();
-        myIsResized = false;
     }
 
     StGLWidget::stglDraw(theView);

@@ -72,7 +72,12 @@ void StGLMenu::setOpacity(const float theOpacity, bool theToSetChildren) {
 }
 
 void StGLMenu::stglResize() {
-    StGLWidget::stglResize();
+    // Since all children should be StGLMenuItem implementing delayed resize,
+    // just postpone resize until items will be actually rendered.
+    //StGLWidget::stglResize();
+    for(StGLWidget* aChild = getChildren()->getStart(); aChild != NULL; aChild = aChild->getNext()) {
+        ((StGLMenuItem* )aChild)->changeRectPx();
+    }
 
     StGLContext& aCtx = getContext();
 
@@ -89,6 +94,7 @@ void StGLMenu::stglResize() {
         myRoot->getRectGl(aRectBnd, aVertices);
         myVertexBndBuf.init(aCtx, aVertices);
     }
+    myIsResized = false;
 }
 
 void StGLMenu::stglUpdateSubmenuLayout() {
@@ -159,12 +165,7 @@ bool StGLMenu::stglInit() {
         return true;
     }
 
-    // initialize GLSL program
-    StGLContext& aCtx = getContext();
-    StArray<StGLVec2> aDummyVert(4);
-    myVertexBuf.init(aCtx, aDummyVert);
     stglResize();
-
     return myIsInitialized;
 }
 
@@ -175,7 +176,6 @@ void StGLMenu::stglDraw(unsigned int theView) {
 
     if(myIsResized) {
         stglResize();
-        myIsResized = false;
     }
 
     StGLContext& aCtx = getContext();

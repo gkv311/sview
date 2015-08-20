@@ -223,7 +223,6 @@ void StGLMenuItem::stglDraw(unsigned int theView) {
 
     if(myIsResized) {
         stglResize();
-        myIsResized = false;
     }
 
     if(myToHilightText) {
