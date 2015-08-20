@@ -732,7 +732,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                     break;
                 }
             }
-            break;
+            return 0;
         }
     }
     // Pass All Unhandled Messages To DefWindowProc
