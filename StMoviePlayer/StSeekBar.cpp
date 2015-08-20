@@ -193,10 +193,11 @@ bool StSeekBar::stglInit() {
 
     stglUpdateVertices();
 
-    return myProgram->init(aCtx);
+    return myProgram->init(aCtx)
+        && StGLWidget::stglInit();
 }
 
-void StSeekBar::stglDraw(unsigned int ) {
+void StSeekBar::stglDraw(unsigned int theView) {
     StGLContext& aCtx = getContext();
 
     // need to update vertices buffer?
@@ -223,9 +224,12 @@ void StSeekBar::stglDraw(unsigned int ) {
 
     myProgram->unuse(aCtx);
     aCtx.core20fwd->glDisable(GL_BLEND);
+
+    StGLWidget::stglDraw(theView);
 }
 
 void StSeekBar::stglUpdate(const StPointD_t& theCursor) {
+    StGLWidget::stglUpdate(theCursor);
     if(!isClicked(ST_MOUSE_LEFT)) {
         return;
     }

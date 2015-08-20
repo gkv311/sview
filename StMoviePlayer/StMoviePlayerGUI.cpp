@@ -178,8 +178,9 @@ void StMoviePlayerGUI::createBottomToolbar() {
     const StMarginsI& aMargins = getRootMargins();
     const int aTop  = scale(DISPL_Y_REGION_BOTTOM);
     const int aLeft = scale(DISPL_X_REGION_BOTTOM);
-    StMarginsI aButtonMargins;
-    const IconSize anIconSize = scaleIcon(64, aButtonMargins);
+    StMarginsI aButtonMargins, aButtonMargins32;
+    const IconSize anIconSize   = scaleIcon(64, aButtonMargins);
+    const IconSize anIconSize32 = scaleIcon(32, aButtonMargins32);
 
     myPanelBottom = new StGLContainer(this, aMargins.left, -aMargins.bottom, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(128));
 
@@ -201,6 +202,32 @@ void StMoviePlayerGUI::createBottomToolbar() {
     myTimeBox->setSwitchOnClick(true);
     myTimeBox->changeRectPx().right()  = myTimeBox->getRectPx().left() + scale(256);//myIconStep * 2;
     myTimeBox->changeRectPx().bottom() = myTimeBox->getRectPx().top()  + scale(64);
+
+    myBtnVolume = new StGLCheckboxTextured(myPanelBottom, myPlugin->params.AudioMute,
+                                           iconTexture(stCString("actionVolume"),    anIconSize32),
+                                           iconTexture(stCString("actionVolumeOff"), anIconSize32),
+                                           -aLeft - 6 * myIconStep - scale(16), aTop + scale(16),
+                                           StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    myBtnVolume->setDrawShadow(true);
+    myBtnVolume->setFalseOpacity(1.0f);
+    myBtnVolume->setTrueOpacity(0.5f);
+    myBtnVolume->changeMargins() = aButtonMargins32;
+
+    myVolumeBar = new StSeekBar(myPanelBottom, 0, scale(4));
+    myVolumeBar->changeRectPx().left()  = -aLeft - 4 * myIconStep - scale(16);
+    myVolumeBar->changeRectPx().right() = myVolumeBar->getRectPx().left() + 2 * myIconStep;
+    myVolumeBar->changeRectPx().moveTopTo(aTop + (scale(64) - myVolumeBar->getRectPx().height()) / 2);
+    myVolumeBar->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    myVolumeBar->signals.onSeekClick = stSlot(this, &StMoviePlayerGUI::doAudioGain);
+
+    myVolumeLab = new StGLTextArea(myVolumeBar, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                                   myVolumeBar->getRectPx().width(), myVolumeBar->getRectPx().height(), StGLTextArea::SIZE_NORMAL);
+    myVolumeLab->setBorder(false);
+    myVolumeLab->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
+    myVolumeLab->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+                                StGLTextFormatter::ST_ALIGN_Y_CENTER);
+    myVolumeLab->setDrawShadow(true);
+
     myBtnPrev = new StGLTextureButton(myPanelBottom, -aLeft - 3 * myIconStep, aTop,
                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myBtnPrev->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doListPrev);
@@ -231,7 +258,6 @@ void StMoviePlayerGUI::createBottomToolbar() {
     myBtnNext->setDrawShadow(true);
     myBtnNext->changeMargins() = aButtonMargins;
 
-
     if(myWindow->hasFullscreenMode()) {
         myBtnFullScr = new StGLCheckboxTextured(myPanelBottom, myPlugin->params.isFullscreen,
                                                 iconTexture(stCString("actionVideoFullscreenOff"), anIconSize),
@@ -239,7 +265,7 @@ void StMoviePlayerGUI::createBottomToolbar() {
                                                 -aLeft, aTop,
                                                 StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
         myBtnFullScr->setDrawShadow(true);
-        myBtnFullScr->setOffOpacity(1.0f);
+        myBtnFullScr->setFalseOpacity(1.0f);
         myBtnFullScr->changeMargins() = aButtonMargins;
     }
 
@@ -281,7 +307,6 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
 #endif
     StGLMenu* aMenuSrcFormat = createSrcFormatMenu();    // Root -> Media -> Source format menu
     myMenuOpenAL             = createOpenALDeviceMenu(); // Root -> Media -> OpenAL Device
-    StGLMenu* aMenuVolume    = createAudioGainMenu();
     StGLMenu* aMenuOpenImage = createOpenMovieMenu();    // Root -> Media -> Open movie menu
     StGLMenu* aMenuSaveImage = createSaveImageMenu();    // Root -> Media -> Save snapshot menu
 
@@ -300,7 +325,6 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
     }
 
     aMenuMedia->addItem(tr(MENU_MEDIA_AL_DEVICE),  myMenuOpenAL);
-    aMenuMedia->addItem("Audio Volume",            aMenuVolume);
 
 #if defined(_WIN32)
     const StCString aGpuAcc = stCString(" (DXVA2)");
@@ -633,25 +657,6 @@ StGLMenu* StMoviePlayerGUI::createAudioMenu() {
 }
 
 /**
- * Root -> Audio menu -> Volume
- */
-StGLMenu* StMoviePlayerGUI::createAudioGainMenu() {
-    StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-
-    StGLMenuItem* anItem = aMenu->addItem("Volume");
-    anItem->changeMargins().right = scale(110 + 16);
-    StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.AudioGain,
-                                                              -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
-    aRange->setFormat(stCString("%+03.0f dB"));
-    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
-    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
-    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aRed);
-
-    aMenu->addItem("Mute", myPlugin->params.AudioMute);
-    return aMenu;
-}
-
-/**
  * Dialog for Audio/Video synchronization control.
  */
 class ST_LOCAL StDelayControl : public StGLMessageBox {
@@ -726,6 +731,27 @@ class ST_LOCAL StDelayControl : public StGLMessageBox {
     StGLRangeFieldFloat32* myRange;
 
 };
+
+void StMoviePlayerGUI::doAudioGain(const int    theMouseBtn,
+                                   const double theVolume) {
+    switch(theMouseBtn) {
+        case ST_MOUSE_LEFT: {
+            myPlugin->params.AudioGain->setValue(myPlugin->volumeToGain(myPlugin->params.AudioGain, GLfloat(theVolume)));
+            break;
+        }
+        case ST_MOUSE_SCROLL_V_UP: {
+            myPlugin->params.AudioGain->increment();
+            break;
+        }
+        case ST_MOUSE_SCROLL_V_DOWN: {
+            myPlugin->params.AudioGain->decrement();
+            break;
+        }
+        default: {
+            return;
+        }
+    }
+}
 
 void StMoviePlayerGUI::doAudioDelay(const size_t ) {
     StGLMessageBox* aDialog = new StDelayControl(this, myPlugin->params.AudioDelay);
@@ -1299,8 +1325,11 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
   // bottom toolbar
   myPanelBottom(NULL),
   mySeekBar(NULL),
+  myVolumeBar(NULL),
+  myVolumeLab(NULL),
   myBtnPlay(NULL),
   myTimeBox(NULL),
+  myBtnVolume(NULL),
   myBtnPrev(NULL),
   myBtnNext(NULL),
   myBtnList(NULL),
@@ -1365,6 +1394,12 @@ void StMoviePlayerGUI::stglUpdate(const StPointD_t& thePointZo,
     }
     if(mySeekBar != NULL) {
         mySeekBar->setProgress(theProgress);
+    }
+    if(myVolumeBar != NULL) {
+        char aBuff[128];
+        stsprintf(aBuff, 128, "%+03.0f dB", myPlugin->params.AudioGain->getValue());
+        myVolumeBar->setProgress(myPlugin->gainToVolume(myPlugin->params.AudioGain));
+        myVolumeLab->setText(aBuff);
     }
     if(myDescr != NULL) {
         myDescr->setPoint(thePointZo);
@@ -1569,6 +1604,8 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
             myDescr->setText(tr(aLngId));
         } else if(::isPointIn(myBtnSrcFrmt, theCursor)) {
             myDescr->setText(tr(BTN_SRC_FORMAT) + "\n" + trSrcFormat(aSrcFormat));
+        } else if(::isPointIn(myBtnVolume, theCursor)) {
+            myDescr->setText("Mute");
         } else if(::isPointIn(myBtnPlay, theCursor)) {
             myDescr->setText(tr(VIDEO_PLAYPAUSE));
         } else if(::isPointIn(myBtnPrev, theCursor)) {

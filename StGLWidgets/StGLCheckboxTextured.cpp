@@ -16,7 +16,8 @@ StGLCheckboxTextured::StGLCheckboxTextured(StGLWidget* theParent,
                                            const StGLCorner theCorner)
 : StGLTextureButton(theParent, theLeft, theTop, theCorner, 2),
   myTrackValue(theTrackedValue),
-  myOffOpacity(0.5f) {
+  myFalseOpacity(0.5f),
+  myTrueOpacity (1.0f) {
     StString aTextures[2] = { theTextureOffPath, theTextureOnPath };
     StGLTextureButton::setTexturePath(aTextures, 2);
     StGLTextureButton::signals.onBtnClick.connect(this, &StGLCheckboxTextured::doClick);
@@ -29,7 +30,7 @@ StGLCheckboxTextured::~StGLCheckboxTextured() {
 void StGLCheckboxTextured::stglUpdate(const StPointD_t& theCursorZo) {
     const bool isOn = myTrackValue->getValue();
     setFaceId(isOn ? 1 : 0);
-    myOpacityScale = isOn ? 1.0f : myOffOpacity;
+    myOpacityScale = isOn ? myTrueOpacity : myFalseOpacity;
     StGLTextureButton::stglUpdate(theCursorZo);
 }
 

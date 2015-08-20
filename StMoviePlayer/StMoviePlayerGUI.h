@@ -158,7 +158,6 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL StGLMenu* createSmoothFilterMenu(); // Root -> View   -> Smooth Filter
     ST_LOCAL StGLMenu* createImageAdjustMenu();  // Root -> View   -> Image Adjust
     ST_LOCAL StGLMenu* createAudioMenu();        // Root -> Audio menu
-    ST_LOCAL StGLMenu* createAudioGainMenu();    // Root -> Audio menu -> Volume
     ST_LOCAL StGLMenu* createSubtitlesMenu();    // Root -> Subtitles menu
     ST_LOCAL StGLMenu* createOutputMenu();       // Root -> Output menu
     ST_LOCAL StGLMenu* createFpsMenu();          // Root -> Output -> FPS Control
@@ -191,6 +190,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL void doOpenLicense  (const size_t );
     ST_LOCAL void doShowFPS(const bool );
     ST_LOCAL void doAboutRenderer(const size_t );
+    ST_LOCAL void doAudioGain    (const int theMouseBtn, const double theVolume);
     ST_LOCAL void doAudioDelay   (const size_t );
 
     ST_LOCAL void doListHotKeys(const size_t );
@@ -233,8 +233,11 @@ class StMoviePlayerGUI : public StGLRootWidget {
 
     StGLWidget*         myPanelBottom;      //!< bottom toolbar
     StSeekBar*          mySeekBar;
+    StSeekBar*          myVolumeBar;
+    StGLTextArea*       myVolumeLab;
     StGLTextureButton*  myBtnPlay;
     StTimeBox*          myTimeBox;
+    StGLCheckboxTextured* myBtnVolume;
     StGLTextureButton*  myBtnPrev;
     StGLTextureButton*  myBtnNext;
     StGLTextureButton*  myBtnList;

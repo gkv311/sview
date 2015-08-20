@@ -36,17 +36,31 @@ class StGLCheckboxTextured : public StGLTextureButton {
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo);
 
     /**
-     * Return opacity scale for OFF value, 0.5f by default.
+     * Return opacity scale for FALSE value, 0.5f by default.
      */
-    ST_LOCAL float getOffOpacity() const {
-        return myOffOpacity;
+    ST_LOCAL float getFalseOpacity() const {
+        return myFalseOpacity;
     }
 
     /**
-     * Setup opacity scale for OFF value.
+     * Setup opacity scale for FALSE value.
      */
-    ST_LOCAL void setOffOpacity(const float theValue) {
-        myOffOpacity = theValue;
+    ST_LOCAL void setFalseOpacity(const float theValue) {
+        myFalseOpacity = theValue;
+    }
+
+    /**
+     * Return opacity scale for TRUE value, 1.0f by default.
+     */
+    ST_LOCAL float getTrueOpacity() const {
+        return myTrueOpacity;
+    }
+
+    /**
+     * Setup opacity scale for TRUE value.
+     */
+    ST_LOCAL void setTrueOpacity(const float theValue) {
+        myTrueOpacity = theValue;
     }
 
         private: //!< callback Slots (private overriders)
@@ -55,8 +69,9 @@ class StGLCheckboxTextured : public StGLTextureButton {
 
         private:
 
-    StHandle<StBoolParam> myTrackValue; //!< handle to tracked value
-    float                 myOffOpacity; //!< opacity scale for button in OFF state
+    StHandle<StBoolParam> myTrackValue;   //!< handle to tracked value
+    float                 myFalseOpacity; //!< opacity scale for button in FALSE state
+    float                 myTrueOpacity;  //!< opacity scale for button in TRUE  state
 
 };
 

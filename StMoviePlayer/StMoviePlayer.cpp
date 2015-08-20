@@ -423,7 +423,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
                                           10.0f, // max amplification
                                            0.0f, // default
                                            1.0f, // step
-                                         1.e-3f);
+                                           0.1f);
     params.AudioGain->signals.onChanged = stSlot(this, &StMoviePlayer::doSetAudioVolume);
     params.AudioMute    = new StBoolParam(false);
     params.AudioMute->signals.onChanged = stSlot(this, &StMoviePlayer::doSetAudioMute);
@@ -1147,12 +1147,12 @@ void StMoviePlayer::doMouseUp(const StClickEvent& theEvent) {
                 }
             }
         }
-        case ST_MOUSE_SCROLL_V_UP:
+        /*case ST_MOUSE_SCROLL_V_UP:
         case ST_MOUSE_SCROLL_V_DOWN: {
             if(theEvent.PointY > 0.75) {
                 break;
             }
-        }
+        }*/
         default: {
             myGUI->tryUnClick(aPnt, theEvent.Button);
             break;
@@ -1689,7 +1689,11 @@ void StMoviePlayer::doSeekRight(const size_t ) {
     myVideo->pushPlayEvent(ST_PLAYEVENT_SEEK, aSeekPts);
 }
 
-void StMoviePlayer::doSeek(const int , const double theSeekX) {
+void StMoviePlayer::doSeek(const int theMouseBnt, const double theSeekX) {
+    if(theMouseBnt != ST_MOUSE_LEFT) {
+        return;
+    }
+
     double aSeekPts = myVideo->getDuration() * theSeekX;
     if(aSeekPts < 0.0) {
         aSeekPts = 0.0;
