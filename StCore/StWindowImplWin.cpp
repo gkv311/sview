@@ -489,9 +489,11 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 aNewRect.top()    = (int )(short )HIWORD(lParam);
                 aNewRect.right()  = aNewRect.left() + aWidth;
                 aNewRect.bottom() = aNewRect.top() + aHeight;
-
-                myRectNorm = aNewRect;
-                myIsUpdated = true;
+                if(myRectNorm.left() != aNewRect.left()
+                || myRectNorm.top()  != aNewRect.top()) {
+                    myRectNorm = aNewRect;
+                    myIsUpdated = true;
+                }
                 break;
             }
             // ignore GL subwindow resize messages!
@@ -501,10 +503,16 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
             if(attribs.IsFullScreen || myParentWin != NULL) {
                 break;
             } else if(theWin == myMaster.hWindow) {
-                int w = LOWORD(lParam);
-                int h = HIWORD(lParam);
-                myRectNorm.right()  = myRectNorm.left() + w;
-                myRectNorm.bottom() = myRectNorm.top()  + h;
+                const int aNewWidth  = LOWORD(lParam);
+                const int aNewHeight = HIWORD(lParam);
+                if(aNewWidth  == myRectNorm.width()
+                && aNewHeight == myRectNorm.height()) {
+                    // nothing has changed
+                    break;
+                }
+
+                myRectNorm.right()  = myRectNorm.left() + aNewWidth;
+                myRectNorm.bottom() = myRectNorm.top()  + aNewHeight;
 
                 myIsUpdated = true;
                 myStEvent.Type       = stEvent_Size;
@@ -583,14 +591,21 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                         myWinMonScaleId = aNewMonId;
                     }
                 }
+                const bool isMoved   = myRectNorm.left()   != aNewRect.left()
+                                    || myRectNorm.top()    != aNewRect.top();
+                const bool isResized = myRectNorm.width()  != aNewRect.width()
+                                    || myRectNorm.height() != aNewRect.height();
                 myRectNorm = aNewRect;
-                myIsUpdated = true;
-
-                myStEvent.Type       = stEvent_Size;
-                myStEvent.Size.Time  = getEventTime(myEvent.time);
-                myStEvent.Size.SizeX = myRectNorm.width();
-                myStEvent.Size.SizeY = myRectNorm.height();
-                myEventsBuffer.append(myStEvent);
+                if(isMoved || isResized) {
+                    myIsUpdated = true;
+                }
+                if(isResized) {
+                    myStEvent.Type       = stEvent_Size;
+                    myStEvent.Size.Time  = getEventTime(myEvent.time);
+                    myStEvent.Size.SizeX = myRectNorm.width();
+                    myStEvent.Size.SizeY = myRectNorm.height();
+                    myEventsBuffer.append(myStEvent);
+                }
                 break;
             }
             break;
