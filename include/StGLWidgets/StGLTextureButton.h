@@ -138,22 +138,23 @@ class StGLTextureButton : public StGLWidget {
 
         protected:
 
-    StGLVertexBuffer           myVertBuf;
-    StGLVertexBuffer           myTCrdBuf;
-    StGLVec4                   myColor;
-    StGLVec4                   myShadowColor;
-    StHandle<StGLTextureArray> myTextures;
-    size_t                     myFaceId;
+    StGLVertexBuffer           myVertBuf;      //!< vertices VBO
+    StGLVertexBuffer           myTCrdBuf;      //!< texture coordinates VBO
+    StGLVec4                   myColor;        //!< button color for alpha-textures
+    StGLVec4                   myShadowColor;  //!< shadow color for alpha-textures
+    StHandle<StGLTextureArray> myTextures;     //!< list of textures (button faces)
+    size_t                     myFaceId;       //!< active button face
+    float                      myOpacityScale; //!< scale factor to be applied to the widget opacity
 
-    StGLShare<ButtonPrograms>  myProgram;
-    ProgramIndex               myProgramIndex;
+    StGLShare<ButtonPrograms>  myProgram;      //!< button program
+    ProgramIndex               myProgramIndex; //!< active program index
 
-    StTimer                    myHoldTimer;
-    double                     myHoldDuration;
-    StTimer                    myWaveTimer;
-    float                      myAnimTime;
-    Animation                  myAnim;
-    bool                       myToDrawShadow;
+    StTimer                    myHoldTimer;    //!< timer to handle button hold event
+    double                     myHoldDuration; //!< button holding time saved within the last event
+    StTimer                    myWaveTimer;    //!< animation timer
+    float                      myAnimTime;     //!< animation time
+    Animation                  myAnim;         //!< active animation mode
+    bool                       myToDrawShadow; //!< flag to display shadows for alpha-textures
 
 };
 

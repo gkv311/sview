@@ -195,28 +195,22 @@ void StMoviePlayerGUI::createBottomToolbar() {
     myBtnNext->setDrawShadow(true);
     myBtnNext->changeMargins() = aButtonMargins;
 
-    const StString aListPaths[2] = {
-        iconTexture(stCString("actionVideoPlaylistOff"), anIconSize),
-        iconTexture(stCString("actionVideoPlaylist"),    anIconSize)
-    };
-    myBtnList = new StGLTextureButton(myPanelBottom, -aLeft - myIconStep, aTop,
-                                      StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT), 2);
-    myBtnList->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doPlayListReverse);
-    myBtnList->setTexturePath(aListPaths, 2);
+    myBtnList = new StGLCheckboxTextured(myPanelBottom, myPlugin->params.ToShowPlayList,
+                                            iconTexture(stCString("actionVideoPlaylistOff"), anIconSize),
+                                            iconTexture(stCString("actionVideoPlaylist"),    anIconSize),
+                                            -aLeft - myIconStep, aTop,
+                                            StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myBtnList->setDrawShadow(true);
     myBtnList->changeMargins() = aButtonMargins;
 
     if(myWindow->hasFullscreenMode()) {
-        const StString aFullscreenPaths[2] = {
-            iconTexture(stCString("actionVideoFullscreenOff"), anIconSize),
-            iconTexture(stCString("actionVideoFullscreenOn"),  anIconSize)
-        };
-
-        myBtnFullScr = new StGLTextureButton(myPanelBottom, -aLeft, aTop,
-                                             StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT), 2);
-        myBtnFullScr->signals.onBtnClick.connect(myPlugin->params.isFullscreen.operator->(), &StBoolParam::doReverse);
-        myBtnFullScr->setTexturePath(aFullscreenPaths, 2);
+        myBtnFullScr = new StGLCheckboxTextured(myPanelBottom, myPlugin->params.isFullscreen,
+                                                iconTexture(stCString("actionVideoFullscreenOff"), anIconSize),
+                                                iconTexture(stCString("actionVideoFullscreenOn"),  anIconSize),
+                                                -aLeft, aTop,
+                                                StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
         myBtnFullScr->setDrawShadow(true);
+        myBtnFullScr->setOffOpacity(1.0f);
         myBtnFullScr->changeMargins() = aButtonMargins;
     }
 
@@ -1153,13 +1147,11 @@ void StMoviePlayerGUI::createMobileBottomToolbar() {
     myBtnNext->changeMargins() = aButtonMargins;
 
     const StGLCorner aRightCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT);
-    const StString aListPaths[2] = {
-        iconTexture(stCString("actionVideoPlaylistOff"), anIconSize),
-        iconTexture(stCString("actionVideoPlaylist"),    anIconSize)
-    };
-    myBtnList = new StGLTextureButton(myPanelBottom, (myBottomBarNbRight++) * (-myIconStep), 0, aRightCorner, 2);
-    myBtnList->signals.onBtnClick += stSlot(myPlugin, &StMoviePlayer::doPlayListReverse);
-    myBtnList->setTexturePath(aListPaths, 2);
+    myBtnList = new StGLCheckboxTextured(myPanelBottom, myPlugin->params.ToShowPlayList,
+                                         iconTexture(stCString("actionVideoPlaylistOff"), anIconSize),
+                                         iconTexture(stCString("actionVideoPlaylist"),    anIconSize),
+                                         (myBottomBarNbRight++) * (-myIconStep), 0,
+                                         aRightCorner);
     myBtnList->setDrawShadow(true);
     myBtnList->changeMargins() = aButtonMargins;
 
@@ -1506,9 +1498,6 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
     }
     if(myBtnSrcFrmt != NULL) {
         myBtnSrcFrmt->setFaceId(aSrcFormat != StFormat_AUTO ? aSrcFormat : StFormat_Mono);
-    }
-    if(myBtnList != NULL) {
-        myBtnList->setFaceId(toShowPlayList ? 1 : 0);
     }
     if(myBtnFullScr != NULL) {
         myBtnFullScr->setFaceId(myPlugin->params.isFullscreen->getValue() ? 1 : 0);

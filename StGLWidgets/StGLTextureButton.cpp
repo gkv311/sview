@@ -277,6 +277,7 @@ StGLTextureButton::StGLTextureButton(StGLWidget*      theParent,
   myColor(getRoot()->getColorForElement(StGLRootWidget::Color_IconActive)),
   myShadowColor(0.0f, 0.0f, 0.0f, 1.0f),
   myFaceId(0),
+  myOpacityScale(1.0f),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
   myProgramIndex(StGLTextureButton::ProgramIndex_WaveRGB),
   myHoldTimer(false),
@@ -503,7 +504,7 @@ void StGLTextureButton::stglDraw(unsigned int ) {
                    myAnimTime,
                   (aMouseGl.x() - aRectGl.left()) /  aRectGl.width(),
                   (aRectGl.top()  - aMouseGl.y()) / -aRectGl.height(),
-                   myOpacity,
+                   myOpacity * myOpacityScale,
                    toShiftZ,
                    getRoot()->getScreenDispX());
 

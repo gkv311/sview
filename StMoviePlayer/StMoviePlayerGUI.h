@@ -40,6 +40,7 @@ class StGLPlayList;
 class StGLTable;
 class StGLTextArea;
 class StGLTextureButton;
+class StGLCheckboxTextured;
 class StPlayList;
 class StSeekBar;
 class StTimeBox;
@@ -237,7 +238,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
     StGLTextureButton*  myBtnPrev;
     StGLTextureButton*  myBtnNext;
     StGLTextureButton*  myBtnList;
-    StGLTextureButton*  myBtnFullScr;
+    StGLCheckboxTextured* myBtnFullScr;
     StGLFpsLabel*       myFpsWidget;
 
     StGLTable*          myHKeysTable;

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -12,6 +12,9 @@
 #include <StGLWidgets/StGLTextureButton.h>
 #include <StSettings/StParam.h>
 
+/**
+ * The textured button with two faces bound to boolean parameter.
+ */
 class StGLCheckboxTextured : public StGLTextureButton {
 
         public:
@@ -32,6 +35,20 @@ class StGLCheckboxTextured : public StGLTextureButton {
     ST_CPPEXPORT virtual ~StGLCheckboxTextured();
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo);
 
+    /**
+     * Return opacity scale for OFF value, 0.5f by default.
+     */
+    ST_LOCAL float getOffOpacity() const {
+        return myOffOpacity;
+    }
+
+    /**
+     * Setup opacity scale for OFF value.
+     */
+    ST_LOCAL void setOffOpacity(const float theValue) {
+        myOffOpacity = theValue;
+    }
+
         private: //!< callback Slots (private overriders)
 
     ST_LOCAL void doClick(const size_t );
@@ -39,6 +56,7 @@ class StGLCheckboxTextured : public StGLTextureButton {
         private:
 
     StHandle<StBoolParam> myTrackValue; //!< handle to tracked value
+    float                 myOffOpacity; //!< opacity scale for button in OFF state
 
 };
 

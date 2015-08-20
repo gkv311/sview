@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -15,8 +15,8 @@ StGLCheckboxTextured::StGLCheckboxTextured(StGLWidget* theParent,
                                            const int theLeft, const int theTop,
                                            const StGLCorner theCorner)
 : StGLTextureButton(theParent, theLeft, theTop, theCorner, 2),
-  myTrackValue(theTrackedValue) {
-    //
+  myTrackValue(theTrackedValue),
+  myOffOpacity(0.5f) {
     StString aTextures[2] = { theTextureOffPath, theTextureOnPath };
     StGLTextureButton::setTexturePath(aTextures, 2);
     StGLTextureButton::signals.onBtnClick.connect(this, &StGLCheckboxTextured::doClick);
@@ -27,7 +27,9 @@ StGLCheckboxTextured::~StGLCheckboxTextured() {
 }
 
 void StGLCheckboxTextured::stglUpdate(const StPointD_t& theCursorZo) {
-    setFaceId(myTrackValue->getValue() ? 1 : 0);
+    const bool isOn = myTrackValue->getValue();
+    setFaceId(isOn ? 1 : 0);
+    myOpacityScale = isOn ? 1.0f : myOffOpacity;
     StGLTextureButton::stglUpdate(theCursorZo);
 }
 
