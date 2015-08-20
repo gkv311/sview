@@ -122,9 +122,9 @@ void StGLCheckbox::stglDraw(unsigned int theView) {
 
     StGLContext&     aCtx     = getContext();
     StGLMenuProgram& aProgram = myRoot->getMenuProgram();
-    if(isResized) {
+    if(myIsResized) {
         stglResize();
-        isResized = false;
+        myIsResized = false;
     }
 
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

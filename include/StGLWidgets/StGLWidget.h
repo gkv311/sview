@@ -175,17 +175,24 @@ class StGLWidget {
      * Function returns <i>current</i> area rectangle (in pixels) relative to root area.
      * @return rectangle
      */
-    inline const StRectI_t& getRectPx() const {
+    ST_LOCAL const StRectI_t& getRectPx() const {
         return rectPx;
     }
 
-    inline void setRectPx(const StRectI_t& rectPx) {
-        isResized = true;
+    /**
+     * Assign new area rectangle for modification and set IsResized flag on.
+     */
+    ST_LOCAL void setRectPx(const StRectI_t& rectPx) {
+        myIsResized = true;
         this->rectPx = rectPx;
     }
 
-    inline StRectI_t& changeRectPx() {
-        isResized = true;
+    /**
+     * This function returns area rectangle for modification
+     * and sets IsResized flag on.
+     */
+    ST_LOCAL StRectI_t& changeRectPx() {
+        myIsResized = true;
         return rectPx;
     }
 
@@ -414,7 +421,7 @@ class StGLWidget {
 
     StGLCorner      myCorner;        //!< corner (left / top / right / bottom) - relative to the parent widget
     float           myOpacity;       //!< 1.0f means 100% visible (1.0f is default)
-    bool            isResized;
+    bool            myIsResized;
     bool            myHasFocus;
     bool            myIsTopWidget;
 

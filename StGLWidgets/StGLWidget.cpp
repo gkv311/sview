@@ -28,7 +28,7 @@ StGLWidget::StGLWidget(StGLWidget* theParent,
   rectPx(theTop, theTop + theHeight, theLeft, theLeft + theWidth),
   myCorner(theCorner),
   myOpacity(1.0f),
-  isResized(true),
+  myIsResized(true),
   myHasFocus(false),
   myIsTopWidget(false) {
     if(myParent != NULL) {
@@ -241,7 +241,7 @@ void StGLWidget::stglResize() {
         child = child->getNext();
         childActive->stglResize();
     }
-    isResized = false;
+    myIsResized = false;
 }
 
 bool StGLWidget::stglInit() {

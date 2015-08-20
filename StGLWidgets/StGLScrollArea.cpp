@@ -149,9 +149,9 @@ void StGLScrollArea::stglDraw(unsigned int theView) {
     }
 
     StGLContext& aCtx = getContext();
-    if(isResized) {
+    if(myIsResized) {
         stglResize();
-        isResized = false;
+        myIsResized = false;
     }
 
     StGLBoxPx aScissorRect;
@@ -202,7 +202,7 @@ bool StGLScrollArea::doScroll(const int  theDelta,
 
     aContent->changeRectPx().top()    += aDelta;
     aContent->changeRectPx().bottom() += aDelta;
-    isResized = true;
+    myIsResized = true;
     return true;
 }
 

@@ -221,9 +221,9 @@ void StGLMenuItem::stglDraw(unsigned int theView) {
         aState = StGLMenuItem::HIGHLIGHT;
     }
 
-    if(isResized) {
+    if(myIsResized) {
         stglResize();
-        isResized = false;
+        myIsResized = false;
     }
 
     if(myToHilightText) {

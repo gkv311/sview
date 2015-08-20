@@ -173,9 +173,9 @@ void StGLMenu::stglDraw(unsigned int theView) {
         return;
     }
 
-    if(isResized) {
+    if(myIsResized) {
         stglResize();
-        isResized = false;
+        myIsResized = false;
     }
 
     StGLContext& aCtx = getContext();
