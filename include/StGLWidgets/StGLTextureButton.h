@@ -109,9 +109,16 @@ class StGLTextureButton : public StGLWidget {
     struct {
         /**
          * Emit callback Slot on button click.
-         * @param theUserData (const size_t ) - user predefined data.
+         * @param theUserData (size_t ) user predefined data
          */
         StSignal<void (const size_t )> onBtnClick;
+
+        /**
+         * Emit callback Slot on holding button.
+         * @param theUserData (size_t ) user predefined data
+         * @param theProgress (double ) holding duration from last update in seconds
+         */
+        StSignal<void (const size_t , const double )> onBtnHold;
     } signals;
 
         private:   //! @name callback Slots (private overriders)
@@ -141,6 +148,8 @@ class StGLTextureButton : public StGLWidget {
     StGLShare<ButtonPrograms>  myProgram;
     ProgramIndex               myProgramIndex;
 
+    StTimer                    myHoldTimer;
+    double                     myHoldDuration;
     StTimer                    myWaveTimer;
     float                      myAnimTime;
     Animation                  myAnim;

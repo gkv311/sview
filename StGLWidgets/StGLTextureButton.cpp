@@ -279,6 +279,8 @@ StGLTextureButton::StGLTextureButton(StGLWidget*      theParent,
   myFaceId(0),
   myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
   myProgramIndex(StGLTextureButton::ProgramIndex_WaveRGB),
+  myHoldTimer(false),
+  myHoldDuration(0.0),
   myWaveTimer(false),
   myAnimTime(0.0f),
   myAnim(Anim_Wave),
@@ -443,6 +445,21 @@ void StGLTextureButton::stglUpdate(const StPointD_t& theCursorZo) {
         return;
     }
 
+    // handle hold button event
+    if(myHoldTimer.isOn()) {
+        const double anElapsed = myHoldTimer.getElapsedTime();
+        const double aProgress = anElapsed - myHoldDuration;
+        myHoldDuration = anElapsed;
+        signals.onBtnHold(getUserData(), aProgress);
+        if(!isClicked(ST_MOUSE_LEFT)) {
+            myHoldTimer.stop();
+        }
+    } else if(isClicked(ST_MOUSE_LEFT)) {
+        myHoldTimer.restart();
+        myHoldDuration = 0.0;
+    }
+
+    // update animation
     if(myAnim == Anim_Wave) {
         if(isPointIn(theCursorZo)) {
             if(!myWaveTimer.isOn()) {

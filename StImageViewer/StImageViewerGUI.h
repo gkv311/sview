@@ -168,6 +168,9 @@ class StImageViewerGUI : public StGLRootWidget {
 
         private: //! @name callback Slots
 
+    ST_LOCAL void doAction(const size_t theActionId,
+                           const double theDuration);
+
     ST_LOCAL void doAboutProgram(const size_t );
     ST_LOCAL void doUserTips    (const size_t );
     ST_LOCAL void doCheckUpdates(const size_t );

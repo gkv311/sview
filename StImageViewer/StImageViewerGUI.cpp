@@ -872,6 +872,23 @@ void StImageViewerGUI::createMobileBottomToolbar() {
     myBtnInfo->setTexturePath(iconTexture(stCString("actionInfo"),  anIconSize));
     myBtnInfo->setDrawShadow(true);
     myBtnInfo->changeMargins() = aButtonMargins;
+
+    aBtnIter = 0;
+    StGLTextureButton* aBtnZoomOut = new StGLTextureButton(myPanelBottom, (aBtnIter++) * (-anIconStep), 0,
+                                                           StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    aBtnZoomOut->changeMargins() = aButtonMargins;
+    aBtnZoomOut->setTexturePath(iconTexture(stCString("actionZoomOut"), anIconSize));
+    aBtnZoomOut->setDrawShadow(true);
+    aBtnZoomOut->setUserData(StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_ScaleOut);
+    aBtnZoomOut->signals.onBtnHold += stSlot(this, &StImageViewerGUI::doAction);
+
+    StGLTextureButton* aBtnZoomIn = new StGLTextureButton(myPanelBottom, (aBtnIter++) * (-anIconStep), 0,
+                                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    aBtnZoomIn->changeMargins() = aButtonMargins;
+    aBtnZoomIn->setTexturePath(iconTexture(stCString("actionZoomIn"), anIconSize));
+    aBtnZoomIn->setDrawShadow(true);
+    aBtnZoomIn->setUserData(StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_ScaleIn);
+    aBtnZoomIn->signals.onBtnHold += stSlot(this, &StImageViewerGUI::doAction);
 }
 
 void StImageViewerGUI::doShowMobileExMenu(const size_t ) {
@@ -1142,6 +1159,11 @@ void StImageViewerGUI::stglDraw(unsigned int theView) {
                             myPlugin->getMainWindow()->getTargetFps());
     }
     StGLRootWidget::stglDraw(theView);
+}
+
+void StImageViewerGUI::doAction(const size_t theActionId,
+                                const double theDuration) {
+    myPlugin->invokeAction((int )theActionId, theDuration);
 }
 
 void StImageViewerGUI::doShowFPS(const bool ) {
