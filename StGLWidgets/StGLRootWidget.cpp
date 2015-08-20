@@ -296,6 +296,9 @@ void StGLRootWidget::stglScissorRect(const StRectI_t& theRect,
 }
 
 void StGLRootWidget::stglResize(const StGLBoxPx& theRectPx) {
+    const bool isChanged = getRectPx().right()  != theRectPx.width()
+                        || getRectPx().bottom() != theRectPx.height();
+
     myProjCamera.resize(*myGlCtx, theRectPx.width(), theRectPx.height());
 
     changeRectPx().right()  = theRectPx.width();  // (left, top) forced to zero point (0, 0)
@@ -315,7 +318,9 @@ void StGLRootWidget::stglResize(const StGLBoxPx& theRectPx) {
     }
 
     // update all child widgets
-    StGLWidget::stglResize();
+    if(isChanged) {
+        StGLWidget::stglResize();
+    }
 }
 
 StRectD_t StGLRootWidget::getRectGl(const StRectI_t& theRectPx) const {
