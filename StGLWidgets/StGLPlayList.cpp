@@ -246,7 +246,7 @@ void StGLPlayList::stglDrawScrollBar(unsigned int theView) {
     }
 
     if(theView != ST_DRAW_RIGHT) {
-        const int    aSizeY       = stMax(getRectPx().height() - myMargins.top - myMargins.bottom, 1);
+        const int    aSizeY       = stMax(myItemsNb * myMenu->getItemHeight(), 1);
         const int    aContSizeY   = myList->getItemsCount() * myMenu->getItemHeight();
         const double aScaleY      = double(aSizeY) / double(aContSizeY);
         const int    aScrollSizeY = stMax(int(aScaleY * (double )aSizeY), myRoot->scale(4));
