@@ -316,7 +316,8 @@ void StGLTextureButton::setTexturePath(const StString* theTexturesPaths,
 }
 
 void StGLTextureButton::setFaceId(const size_t theId) {
-    if(myFaceId == theId) {
+    if(myFaceId == theId
+    || theId >= myTextures->size()) {
         return;
     }
 
