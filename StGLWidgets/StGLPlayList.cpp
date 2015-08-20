@@ -379,8 +379,7 @@ void StGLPlayList::stglDraw(unsigned int theView) {
     aCtx.stglSetScissorRect(aScissorRect, true);
 
     StGLWidget::stglDraw(theView);
+    stglDrawScrollBar(theView);
 
     aCtx.stglResetScissorRect();
-
-    stglDrawScrollBar(theView);
 }
