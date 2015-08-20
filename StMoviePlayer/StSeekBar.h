@@ -48,6 +48,10 @@ class ST_LOCAL StSeekBar : public StGLWidget {
         myProgress = theProgress;
     }
 
+    void setMoveTolerance(const int theTolerPx) {
+        myMoveTolerPx = theTolerPx;
+    }
+
     virtual void stglResize();
     virtual bool stglInit();
     virtual void stglUpdate(const StPointD_t& theCursor);
@@ -72,6 +76,7 @@ class ST_LOCAL StSeekBar : public StGLWidget {
         private: //! @name private methods
 
     void stglUpdateVertices();
+    double getPointInEx(const StPointD_t& thePointZo) const;
 
         private:
 
@@ -83,6 +88,7 @@ class ST_LOCAL StSeekBar : public StGLWidget {
     GLfloat               myProgress;   //!< current progress 0..1
     int                   myProgressPx; //!< current progress - width in pixels
     int                   myClickPos;
+    int                   myMoveTolerPx;
 
 };
 

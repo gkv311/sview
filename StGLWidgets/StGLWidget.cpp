@@ -187,13 +187,6 @@ bool StGLWidget::isPointIn(const StPointD_t& thePointZo) const {
         && aPointGl.y() < aRectGl.top();
 }
 
-StPointD_t StGLWidget::getPointIn(const StPointD_t& thePointZo) const {
-    const StRectD_t aRectGl = getRectGl();
-    StPointD_t aPointGl = getPointGl(thePointZo);
-    return StPointD_t((aPointGl.x() - aRectGl.left()) / (aRectGl.right() - aRectGl.left()),
-                      (aRectGl.top() - aPointGl.y())  / (aRectGl.top() - aRectGl.bottom()));
-}
-
 double StGLAnimationLerp::perform(bool theDirUp, bool theToForce) {
     if(theToForce) {
         myValue = theDirUp ? 1.0 : 0.0;

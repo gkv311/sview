@@ -112,7 +112,8 @@ StSeekBar::StSeekBar(StGLWidget* theParent,
   myProgram(new StProgramSB()),
   myProgress(0.0f),
   myProgressPx(0),
-  myClickPos(-1) {
+  myClickPos(-1),
+  myMoveTolerPx(myRoot->scale(myRoot->isMobile() ? 16 : 8)) {
     StGLWidget::signals.onMouseClick  .connect(this, &StSeekBar::doMouseClick);
     StGLWidget::signals.onMouseUnclick.connect(this, &StSeekBar::doMouseUnclick);
     myMargins.top    = theMargin;
@@ -149,6 +150,8 @@ void StSeekBar::stglUpdateVertices() {
     StRectI_t aRectPx(getRectPxAbsolute());
     aRectPx.top()    += myMargins.top;
     aRectPx.bottom() -= myMargins.bottom;
+    aRectPx.left()   += myMargins.left;
+    aRectPx.right()  -= myMargins.right;
 
     myRoot->getRectGl(aRectPx, aVertices, 0);
 
@@ -234,11 +237,10 @@ void StSeekBar::stglUpdate(const StPointD_t& theCursor) {
         return;
     }
 
-    const double aPos       = stMin(stMax(getPointIn(theCursor).x(), 0.0), 1.0);
-    const int    aTolerance = myRoot->scale(myRoot->isMobile() ? 16 : 8);
-    const int    aPosPx     = int(aPos * double(getRectPx().width()));
+    const double aPos   = stMin(stMax(getPointInEx(theCursor), 0.0), 1.0);
+    const int    aPosPx = int(aPos * double(getRectPx().width()));
     if(myClickPos >= 0
-    && std::abs(aPosPx - myClickPos) < aTolerance) {
+    && std::abs(aPosPx - myClickPos) < myMoveTolerPx) {
         return;
     }
 
@@ -246,12 +248,21 @@ void StSeekBar::stglUpdate(const StPointD_t& theCursor) {
     signals.onSeekClick(ST_MOUSE_LEFT, aPos);
 }
 
+double StSeekBar::getPointInEx(const StPointD_t& thePointZo) const {
+    StRectI_t aRectPx = getRectPxAbsolute();
+    aRectPx.left()  += myMargins.left;
+    aRectPx.right() -= myMargins.right;
+    const StRectD_t  aRectGl  = myRoot->getRectGl(aRectPx);;
+    const StPointD_t aPointGl = getPointGl(thePointZo);
+    return (aPointGl.x() - aRectGl.left()) / (aRectGl.right() - aRectGl.left());
+}
+
 void StSeekBar::doMouseClick(const int ) {
     //
 }
 
 void StSeekBar::doMouseUnclick(const int mouseBtn) {
-    const double aPos       = stMin(stMax(getPointIn(myRoot->getCursorZo()).x(), 0.0), 1.0);
+    const double aPos       = stMin(stMax(getPointInEx(myRoot->getCursorZo()), 0.0), 1.0);
     const int    aTolerance = myRoot->scale(1);
     const int    aPosPx     = int(aPos * double(getRectPx().width()));
     if(myClickPos >= 0
@@ -261,5 +272,5 @@ void StSeekBar::doMouseUnclick(const int mouseBtn) {
     }
 
     myClickPos = -1;
-    signals.onSeekClick(mouseBtn, getPointIn(myRoot->getCursorZo()).x());
+    signals.onSeekClick(mouseBtn, aPos);
 }

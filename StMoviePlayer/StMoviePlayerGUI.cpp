@@ -206,7 +206,7 @@ void StMoviePlayerGUI::createBottomToolbar() {
     myBtnVolume = new StGLCheckboxTextured(myPanelBottom, myPlugin->params.AudioMute,
                                            iconTexture(stCString("actionVolume"),    anIconSize32),
                                            iconTexture(stCString("actionVolumeOff"), anIconSize32),
-                                           -aLeft - 6 * myIconStep - scale(16), aTop + scale(16),
+                                           -aLeft - 6 * myIconStep - scale(32), aTop + scale(16),
                                            StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myBtnVolume->setDrawShadow(true);
     myBtnVolume->setFalseOpacity(1.0f);
@@ -219,6 +219,9 @@ void StMoviePlayerGUI::createBottomToolbar() {
     myVolumeBar->changeRectPx().moveTopTo(aTop + (scale(64) - myVolumeBar->getRectPx().height()) / 2);
     myVolumeBar->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myVolumeBar->signals.onSeekClick = stSlot(this, &StMoviePlayerGUI::doAudioGain);
+    myVolumeBar->setMoveTolerance(1);
+    myVolumeBar->changeMargins().left  = scale(4);
+    myVolumeBar->changeMargins().right = scale(4);
 
     myVolumeLab = new StGLTextArea(myVolumeBar, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
                                    myVolumeBar->getRectPx().width(), myVolumeBar->getRectPx().height(), StGLTextArea::SIZE_NORMAL);
