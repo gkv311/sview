@@ -14,7 +14,6 @@
 #include <StGL/StGLVertexBuffer.h>
 
 class StGLMenu;
-class StGLMenuProgram;
 class StGLIcon;
 
 /**
@@ -155,7 +154,6 @@ class StGLMenuItem : public StGLTextArea {
 
     StGLMenu*                  mySubMenu;        //!< child menu
     StGLIcon*                  myIcon;           //!< optional icon
-    StGLShare<StGLMenuProgram> myProgram;        //!< GLSL program
     StGLVertexBuffer           myBackVertexBuf;  //!< background vertices
     StGLVec4                   myBackColor[3];   //!< background color per state
     Arrow                      myArrowIcon;      //!< draw arrow

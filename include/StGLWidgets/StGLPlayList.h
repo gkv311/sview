@@ -16,7 +16,7 @@
 /**
  * PlayList widget.
  */
-class StGLPlayList : public StGLMenu {
+class StGLPlayList : public StGLWidget {
 
         public:
 
@@ -57,6 +57,8 @@ class StGLPlayList : public StGLMenu {
     ST_LOCAL void stglDrawScrollBar(unsigned int theView);
 
         private:
+
+    StGLMenu*            myMenu;         //!< menu with items
 
     StGLVertexBuffer     myBarVertBuf;   //!< vertices buffer
     StGLVec4             myBarColor;     //!< color of scroll bar

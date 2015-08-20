@@ -8,6 +8,8 @@
 
 #include <StGLWidgets/StGLRootWidget.h>
 
+#include <StGLWidgets/StGLMenuProgram.h>
+
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 #include <StFile/StFileNode.h>
@@ -46,6 +48,7 @@ StGLRootWidget::StGLRootWidget(const StHandle<StResourceManager>& theResMgr)
   myScrDispX(0.0f),
   myLensDist(0.0f),
   myScrDispXPx(0),
+  myMenuProgram(new StGLMenuProgram()),
   myIsMobile(false),
   myScaleGlX(1.0),
   myScaleGlY(1.0),
@@ -91,6 +94,8 @@ StGLRootWidget::~StGLRootWidget() {
     }
     delete[] myShareArray;
     if(!myGlCtx.isNull()) {
+        myMenuProgram->release(*myGlCtx);
+        myMenuProgram.nullify();
         if(!myCheckboxIcon.isNull()) {
             for(size_t aTexIter = 0; aTexIter < myCheckboxIcon->size(); ++aTexIter) {
                 myCheckboxIcon->changeValue(aTexIter).release(*myGlCtx);
@@ -215,6 +220,12 @@ bool StGLRootWidget::stglInit() {
             return false;
         }
     }
+
+    if(!myMenuProgram->isValid()
+    && !myMenuProgram->init(*myGlCtx)) {
+        return false;
+    }
+
     return StGLWidget::stglInit();
 }
 
@@ -296,6 +307,12 @@ void StGLRootWidget::stglResize(const StGLBoxPx& theRectPx) {
 
     myScrProjMat = myProjCamera.getProjMatrix();
     myScrProjMat.translate(StGLVec3(0.0f, 0.0f, -myProjCamera.getZScreen()));
+
+    if(myMenuProgram->isValid()) {
+        myMenuProgram->use(*myGlCtx);
+        myMenuProgram->setProjMat(*myGlCtx, getScreenProjection());
+        myMenuProgram->unuse(*myGlCtx);
+    }
 
     // update all child widgets
     StGLWidget::stglResize();

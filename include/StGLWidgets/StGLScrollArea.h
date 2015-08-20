@@ -11,9 +11,6 @@
 
 #include <StGLWidgets/StGLTextArea.h>
 
-// forward declarations
-class StGLMenuProgram;
-
 /**
  * Widget to display arbitrary number of objects inside specified area.
  * Clipping all children by own rectangle (activates scissor box)
@@ -59,9 +56,8 @@ class StGLScrollArea : public StGLWidget {
 
         protected:
 
-    StGLShare<StGLMenuProgram> myProgram;    //!< shared program
-    StGLVertexBuffer           myBarVertBuf; //!< vertices buffer
-    StGLVec4                   myBarColor;   //!< color of scroll bar
+    StGLVertexBuffer myBarVertBuf; //!< vertices buffer
+    StGLVec4         myBarColor;   //!< color of scroll bar
 
     StPointD_t myClickPntZo;  //!< remembered mouse click position
     StTimer    myDragTimer;   //!< timer between dragging animation

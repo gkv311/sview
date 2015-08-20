@@ -18,10 +18,6 @@
 
 #include <StSlots/StAction.h>
 
-namespace {
-    static const size_t SHARE_PROGRAM_ID = StGLRootWidget::generateShareId();
-}
-
 void StGLMenu::DeleteWithSubMenus(StGLMenu* theMenu) {
     if(theMenu == NULL) {
         return;
@@ -45,7 +41,6 @@ StGLMenu::StGLMenu(StGLWidget* theParent,
              StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
              theParent->getRoot()->scale(32),
              theParent->getRoot()->scale(32)),
-  myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
   myColorVec(getRoot()->getColorForElement(StGLRootWidget::Color_Menu)),
   myOrient(theOrient),
   myItemHeight(theParent->getRoot()->scale(theParent->getRoot()->isMobile() ? 40 : 32)),
@@ -93,12 +88,6 @@ void StGLMenu::stglResize() {
         aRectBnd.bottom() += 1;
         myRoot->getRectGl(aRectBnd, aVertices);
         myVertexBndBuf.init(aCtx, aVertices);
-    }
-
-    if(!myProgram.isNull()) {
-        myProgram->use(aCtx);
-        myProgram->setProjMat(aCtx, getRoot()->getScreenProjection());
-        myProgram->unuse(aCtx);
     }
 }
 
@@ -172,14 +161,6 @@ bool StGLMenu::stglInit() {
 
     // initialize GLSL program
     StGLContext& aCtx = getContext();
-    if(myProgram.isNull()) {
-        myProgram.create(getRoot()->getContextHandle(), new StGLMenuProgram());
-        if(!myProgram->init(aCtx)) {
-            myIsInitialized = false;
-            return myIsInitialized;
-        }
-    }
-
     StArray<StGLVec2> aDummyVert(4);
     myVertexBuf.init(aCtx, aDummyVert);
     stglResize();
@@ -201,20 +182,21 @@ void StGLMenu::stglDraw(unsigned int theView) {
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     aCtx.core20fwd->glEnable(GL_BLEND);
 
+    StGLMenuProgram& aProgram = myRoot->getMenuProgram();
     if(myVertexBndBuf.isValid()) {
-        myProgram->use(aCtx, StGLVec4(0.0f, 0.0f, 0.0f, 1.0f), myOpacity, getRoot()->getScreenDispX());
-        myVertexBndBuf.bindVertexAttrib  (aCtx, myProgram->getVVertexLoc());
+        aProgram.use(aCtx, StGLVec4(0.0f, 0.0f, 0.0f, 1.0f), myOpacity, myRoot->getScreenDispX());
+        myVertexBndBuf.bindVertexAttrib  (aCtx, aProgram.getVVertexLoc());
         aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        myVertexBndBuf.unBindVertexAttrib(aCtx, myProgram->getVVertexLoc());
+        myVertexBndBuf.unBindVertexAttrib(aCtx, aProgram.getVVertexLoc());
     }
 
-    myProgram->use(aCtx, myColorVec, myOpacity, getRoot()->getScreenDispX());
+    aProgram.use(aCtx, myColorVec, myOpacity, myRoot->getScreenDispX());
 
-    myVertexBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
+    myVertexBuf.bindVertexAttrib  (aCtx, aProgram.getVVertexLoc());
     aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    myVertexBuf.unBindVertexAttrib(aCtx, myProgram->getVVertexLoc());
+    myVertexBuf.unBindVertexAttrib(aCtx, aProgram.getVVertexLoc());
 
-    myProgram->unuse(aCtx);
+    aProgram.unuse(aCtx);
     aCtx.core20fwd->glDisable(GL_BLEND);
 
     StGLWidget::stglDraw(theView);

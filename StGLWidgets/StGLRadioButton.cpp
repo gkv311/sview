@@ -15,8 +15,6 @@
 
 namespace {
 
-    static const size_t SHARE_PROGRAM_ID = StGLRootWidget::generateShareId();
-
     static const StGLVec4 OUTER_COLORS[2] = {
         StGLVec4(0.0f, 0.0f, 0.0f, 0.5f), // off
         StGLVec4(0.0f, 0.0f, 0.0f, 0.5f)  // on
@@ -39,7 +37,6 @@ StGLRadioButton::StGLRadioButton(StGLWidget* theParent,
                     theCorner,
                     0),
   myTrackValue(theTrackedValue),
-  myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
   myValueOn(theOnValue) {
     myAnim = Anim_None;
     StGLWidget::signals.onMouseUnclick = stSlot(this, &StGLRadioButton::doMouseUnclick);
@@ -67,7 +64,7 @@ StGLRadioButton::~StGLRadioButton() {
 }
 
 void StGLRadioButton::stglResize() {
-    if(myProgram.isNull()) {
+    if(!myTextures.isNull()) {
         StGLTextureButton::stglResize();
         return;
     }
@@ -86,13 +83,6 @@ void StGLRadioButton::stglResize() {
     aRectPx.bottom() -= myRoot->scale(4);
     getRoot()->getRectGl(aRectPx, aVertices, 4);
     myVertBuf.init(aCtx, aVertices);
-
-    // update projection matrix
-    if(!myProgram.isNull()) {
-        myProgram->use(aCtx);
-        myProgram->setProjMat(aCtx, getRoot()->getScreenProjection());
-        myProgram->unuse(aCtx);
-    }
 }
 
 bool StGLRadioButton::stglInit() {
@@ -107,16 +97,12 @@ bool StGLRadioButton::stglInit() {
     }
 
     // initialize GLSL program
+    myTextures.nullify();
     StGLContext& aCtx = getContext();
-    if(myProgram.isNull()) {
-        myProgram.create(getRoot()->getContextHandle(), new StGLMenuProgram());
-        if(!myProgram->init(aCtx)) {
-            return false;
-        }
-    }
-
     StArray<StGLVec2> aDummyVert(8);
-    myVertBuf.init(aCtx, aDummyVert);
+    if(!myVertBuf.init(aCtx, aDummyVert)) {
+        return false;
+    }
 
     stglResize();
     return true;
@@ -132,12 +118,13 @@ void StGLRadioButton::stglDraw(unsigned int theView) {
     }
 
     myFaceId = isActiveState() ? 1 : 0;
-    if(myProgram.isNull()) {
+    if(!myTextures.isNull()) {
         StGLTextureButton::stglDraw(theView);
         return;
     }
 
-    StGLContext& aCtx = getContext();
+    StGLContext&     aCtx     = getContext();
+    StGLMenuProgram& aProgram = myRoot->getMenuProgram();
     if(isResized) {
         stglResize();
         isResized = false;
@@ -145,17 +132,17 @@ void StGLRadioButton::stglDraw(unsigned int theView) {
 
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     aCtx.core20fwd->glEnable(GL_BLEND);
-    myProgram->use(aCtx, getRoot()->getScreenDispX());
-    myVertBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
+    aProgram.use(aCtx, getRoot()->getScreenDispX());
+    myVertBuf.bindVertexAttrib  (aCtx, aProgram.getVVertexLoc());
 
-        myProgram->setColor(aCtx, OUTER_COLORS[myFaceId], myOpacity);
+        aProgram.setColor(aCtx, OUTER_COLORS[myFaceId], myOpacity);
         aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-        myProgram->setColor(aCtx, INNER_COLORS[myFaceId], myOpacity);
+        aProgram.setColor(aCtx, INNER_COLORS[myFaceId], myOpacity);
         aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 4, 4);
 
-    myVertBuf.unBindVertexAttrib(aCtx, myProgram->getVVertexLoc());
-    myProgram->unuse(aCtx);
+    myVertBuf.unBindVertexAttrib(aCtx, aProgram.getVVertexLoc());
+    aProgram.unuse(aCtx);
     aCtx.core20fwd->glDisable(GL_BLEND);
 }
 

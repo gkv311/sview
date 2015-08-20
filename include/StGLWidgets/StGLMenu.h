@@ -18,7 +18,6 @@ class StBoolParam;
 class StInt32Param;
 class StFloat32Param;
 class StGLMenuItem;
-class StGLMenuProgram;
 
 /**
  * Widget represents classical menu object.
@@ -96,8 +95,15 @@ class StGLMenu : public StGLWidget {
     /**
      * @return maximum width of item in this menu
      */
-    inline int getItemWidth() const {
+    ST_LOCAL int getItemWidth() const {
         return myWidth;
+    }
+
+    /**
+     * Setup maximum width of item in this menu.
+     */
+    ST_LOCAL void setItemWidth(const int theWidth) {
+        myWidth = theWidth;
     }
 
     /**
@@ -174,7 +180,6 @@ class StGLMenu : public StGLWidget {
 
         protected: //! @name protected fields
 
-    StGLShare<StGLMenuProgram> myProgram;
     StGLVertexBuffer           myVertexBuf;
     StGLVertexBuffer           myVertexBndBuf;
     StGLVec4                   myColorVec;

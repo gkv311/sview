@@ -17,6 +17,7 @@
 
 template<> inline void StArray<StGLNamedTexture>::sort() {}
 typedef StArray<StGLNamedTexture> StGLTextureArray;
+class StGLMenuProgram;
 
 /**
  * Full OpenGL-window widget, must be ROOT for other widgets.
@@ -99,6 +100,11 @@ class StGLRootWidget : public StGLWidget {
      * Root widget caches OpenGL state (like viewport).
      */
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
+
+    /**
+     * Get shared menu program instance.
+     */
+    ST_LOCAL StGLMenuProgram& getMenuProgram() { return *myMenuProgram; }
 
     /**
      * Return color of standard element.
@@ -420,6 +426,7 @@ class StGLRootWidget : public StGLWidget {
 
     StHandle<StGLTextureArray> myCheckboxIcon;
     StHandle<StGLTextureArray> myRadioIcon;
+    StHandle<StGLMenuProgram>  myMenuProgram;
 
     bool                      myIsMobile;      //!< flag indicating mobile device
     StMarginsI                myMarginsPx;     //!< active area margins in pixels

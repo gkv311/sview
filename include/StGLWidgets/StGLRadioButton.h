@@ -12,9 +12,6 @@
 #include <StGLWidgets/StGLTextureButton.h>
 #include <StSettings/StParam.h>
 
-// forward declarations
-class StGLMenuProgram;
-
 /**
  * Widget represents one classical radio button.
  * Radio button initialized with handle to tracked property
@@ -57,7 +54,6 @@ class StGLRadioButton : public StGLTextureButton {
         private:
 
     StHandle<StInt32Param>     myTrackValue; //!< handle to tracked value
-    StGLShare<StGLMenuProgram> myProgram;    //!< shared program
     StGLVertexBuffer           myVertBuf;    //!< vertices buffer
     int32_t                    myValueOn;    //!< value to turn radio button on
 

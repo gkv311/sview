@@ -12,9 +12,6 @@
 #include <StGLWidgets/StGLTextureButton.h>
 #include <StSettings/StParam.h>
 
-// forward declarations
-class StGLMenuProgram;
-
 /**
  * Widget represents classical checkbox.
  * Initialized with handle to tracked boolean property
@@ -53,9 +50,8 @@ class StGLCheckbox : public StGLTextureButton {
 
         private:
 
-    StHandle<StBoolParam>      myTrackValue; //!< handle to tracked value
-    StGLShare<StGLMenuProgram> myProgram;    //!< shared program
-    StGLVertexBuffer           myVertBuf;    //!< vertices buffer
+    StHandle<StBoolParam> myTrackValue; //!< handle to tracked value
+    StGLVertexBuffer      myVertBuf;    //!< vertices buffer
 
 };
 

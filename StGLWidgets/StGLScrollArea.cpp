@@ -13,16 +13,11 @@
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 
-namespace {
-    static const size_t SHARE_PROGRAM_ID = StGLRootWidget::generateShareId();
-}
-
 StGLScrollArea::StGLScrollArea(StGLWidget*      theParent,
                                const int        theLeft,  const int theTop,
                                const StGLCorner theCorner,
                                const int        theWidth, const int theHeight)
 : StGLWidget(theParent, theLeft, theTop, theCorner, theWidth, theHeight),
-  myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
   myBarColor(getRoot()->getColorForElement(StGLRootWidget::Color_ScrollBar)),
   myDragYDelta(0.0),
   myFlingAccel((double )myRoot->scale(200)),
@@ -48,15 +43,6 @@ bool StGLScrollArea::stglInit() {
         aText->changeRectPx().bottom() = aText->getRectPx().top() + aText->getTextHeight();
         if(aText->getRectPx().height() < getRectPx().height()) {
             aText->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT));
-        }
-    }
-
-    // initialize GLSL program
-    StGLContext& aCtx = getContext();
-    if(myProgram.isNull()) {
-        myProgram.create(myRoot->getContextHandle(), new StGLMenuProgram());
-        if(!myProgram->init(aCtx)) {
-            return false;
         }
     }
     return true;
@@ -92,13 +78,6 @@ void StGLScrollArea::stglResize() {
         myBarVertBuf.init(aCtx, aVertices);
     } else {
         myBarVertBuf.release(aCtx);
-    }
-
-    // update projection matrix
-    if(!myProgram.isNull()) {
-        myProgram->use(aCtx);
-        myProgram->setProjMat(aCtx, myRoot->getScreenProjection());
-        myProgram->unuse(aCtx);
     }
 
     StGLWidget::stglResize();
@@ -183,21 +162,21 @@ void StGLScrollArea::stglDraw(unsigned int theView) {
 
     aCtx.stglResetScissorRect();
 
-    if( myProgram.isNull()
-    || !myProgram->isValid()
+    StGLMenuProgram& aProgram = myRoot->getMenuProgram();
+    if(!aProgram.isValid()
     || !myBarVertBuf.isValid()) {
         return;
     }
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     aCtx.core20fwd->glEnable(GL_BLEND);
-    myProgram->use(aCtx, myRoot->getScreenDispX());
-    myBarVertBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
+    aProgram.use(aCtx, myRoot->getScreenDispX());
+    myBarVertBuf.bindVertexAttrib(aCtx, aProgram.getVVertexLoc());
 
-    myProgram->setColor(aCtx, myBarColor, myOpacity);
+    aProgram.setColor(aCtx, myBarColor, myOpacity);
     aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-    myBarVertBuf.unBindVertexAttrib(aCtx, myProgram->getVVertexLoc());
-    myProgram->unuse(aCtx);
+    myBarVertBuf.unBindVertexAttrib(aCtx, aProgram.getVVertexLoc());
+    aProgram.unuse(aCtx);
     aCtx.core20fwd->glDisable(GL_BLEND);
 }
 

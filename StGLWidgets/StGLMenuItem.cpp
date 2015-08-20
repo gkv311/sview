@@ -15,10 +15,6 @@
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 
-namespace {
-    static const size_t SHARE_PROGRAM_ID = StGLRootWidget::generateShareId();
-}
-
 void StGLMenuItem::DeleteWithSubMenus(StGLMenuItem* theMenuItem) {
     if(theMenuItem == NULL) {
         return;
@@ -40,7 +36,6 @@ StGLMenuItem::StGLMenuItem(StGLMenu* theParent,
                theParent->getItemHeight()),
   mySubMenu(theSubMenu),
   myIcon(NULL),
-  myProgram(getRoot()->getShare(SHARE_PROGRAM_ID)),
   myArrowIcon(Arrow_None),
   myIsItemSelected(false),
   myToHilightText(false) {
@@ -147,13 +142,6 @@ void StGLMenuItem::stglResize() {
     }
     myBackVertexBuf.init(aCtx, aVertices);
 
-    // update projection matrix
-    if(!myProgram.isNull()) {
-        myProgram->use(aCtx);
-        myProgram->setProjMat(aCtx, getRoot()->getScreenProjection());
-        myProgram->unuse(aCtx);
-    }
-
     StGLTextArea::stglResize();
 }
 
@@ -187,16 +175,11 @@ bool StGLMenuItem::stglInit() {
 
     // initialize GLSL program
     StGLContext& aCtx = getContext();
-    if(myProgram.isNull()) {
-        myProgram.create(getRoot()->getContextHandle(), new StGLMenuProgram());
-        if(!myProgram->init(aCtx)) {
-            myIsInitialized = false;
-            return myIsInitialized;
-        }
-    }
-
     StArray<StGLVec2> aDummyVert(myArrowIcon != Arrow_None ? 8 : 4);
-    myBackVertexBuf.init(aCtx, aDummyVert);
+    if(!myBackVertexBuf.init(aCtx, aDummyVert)) {
+        myIsInitialized = false;
+        return false;
+    }
 
     stglResize();
     return myIsInitialized;
@@ -208,19 +191,20 @@ void StGLMenuItem::stglDrawArea(const StGLMenuItem::State theState,
     aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     aCtx.core20fwd->glEnable(GL_BLEND);
 
-    myProgram->use(aCtx, myBackColor[theState], myOpacity, getRoot()->getScreenDispX());
+    StGLMenuProgram& aProgram = myRoot->getMenuProgram();
+    aProgram.use(aCtx, myBackColor[theState], myOpacity, getRoot()->getScreenDispX());
     if(!theIsOnlyArrow) {
-        myBackVertexBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
+        myBackVertexBuf.bindVertexAttrib(aCtx, aProgram.getVVertexLoc());
         aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
     if(myArrowIcon != Arrow_None) {
-        myProgram->setColor(aCtx, myTextColor, myOpacity * 0.5f);
-        myBackVertexBuf.bindVertexAttrib(aCtx, myProgram->getVVertexLoc());
+        aProgram.setColor(aCtx, myTextColor, myOpacity * 0.5f);
+        myBackVertexBuf.bindVertexAttrib(aCtx, aProgram.getVVertexLoc());
         aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 4, 3);
     }
-    myBackVertexBuf.unBindVertexAttrib(aCtx, myProgram->getVVertexLoc());
+    myBackVertexBuf.unBindVertexAttrib(aCtx, aProgram.getVVertexLoc());
 
-    myProgram->unuse(aCtx);
+    aProgram.unuse(aCtx);
     aCtx.core20fwd->glDisable(GL_BLEND);
 }
 
