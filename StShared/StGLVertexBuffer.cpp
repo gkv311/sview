@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -30,6 +30,7 @@ void StGLVertexBuffer::release(StGLContext& theCtx) {
     if(isValid()) {
         theCtx.core20fwd->glDeleteBuffers(1, &myBufferId);
         myBufferId = 0;
+        myElemSize = 0;
     }
 }
 
@@ -112,9 +113,17 @@ void StGLVertexBuffer::setData(StGLContext&   theCtx,
         return;
     }
 
+    const GLsizeiptr aSize = theElemsCount * theElemSize * sizeof(GLfloat);
+    if(myElemSize   == theElemSize
+    && myElemsCount == theElemsCount
+    && myDataType   == GL_FLOAT) {
+        theCtx.core20fwd->glBufferSubData(getTarget(), 0, aSize, theData);
+        return;
+    }
+
     myElemSize   = theElemSize;
     myElemsCount = theElemsCount;
-    theCtx.core20fwd->glBufferData(getTarget(), myElemsCount * myElemSize * sizeof(GLfloat), theData, GL_STATIC_DRAW);
+    theCtx.core20fwd->glBufferData(getTarget(), aSize, theData, GL_STATIC_DRAW);
     myDataType = GL_FLOAT;
 }
 
@@ -126,9 +135,17 @@ void StGLVertexBuffer::setData(StGLContext&   theCtx,
         return;
     }
 
+    const GLsizeiptr aSize = theElemsCount * theElemSize * sizeof(GLuint);
+    if(myElemSize   == theElemSize
+    && myElemsCount == theElemsCount
+    && myDataType   == GL_UNSIGNED_INT) {
+        theCtx.core20fwd->glBufferSubData(getTarget(), 0, aSize, theData);
+        return;
+    }
+
     myElemSize   = theElemSize;
     myElemsCount = theElemsCount;
-    theCtx.core20fwd->glBufferData(getTarget(), myElemsCount * myElemSize * sizeof(GLuint), theData, GL_STATIC_DRAW);
+    theCtx.core20fwd->glBufferData(getTarget(), aSize, theData, GL_STATIC_DRAW);
     myDataType = GL_UNSIGNED_INT;
 }
 
@@ -140,9 +157,17 @@ void StGLVertexBuffer::setData(StGLContext&   theCtx,
         return;
     }
 
+    const GLsizeiptr aSize = theElemsCount * theElemSize * sizeof(GLubyte);
+    if(myElemSize   == theElemSize
+    && myElemsCount == theElemsCount
+    && myDataType   == GL_UNSIGNED_BYTE) {
+        theCtx.core20fwd->glBufferSubData(getTarget(), 0, aSize, theData);
+        return;
+    }
+
     myElemSize   = theElemSize;
     myElemsCount = theElemsCount;
-    theCtx.core20fwd->glBufferData(getTarget(), myElemsCount * myElemSize * sizeof(GLubyte), theData, GL_STATIC_DRAW);
+    theCtx.core20fwd->glBufferData(getTarget(), aSize, theData, GL_STATIC_DRAW);
     myDataType = GL_UNSIGNED_BYTE;
 }
 
