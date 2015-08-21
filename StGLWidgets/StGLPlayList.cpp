@@ -97,6 +97,7 @@ void StGLPlayList::doChangeItem(const size_t ) {
 }
 
 void StGLPlayList::doMouseClick(const int theBtnId) {
+    const bool toAbort = myFlingTimer.isOn();
     myDragTimer .stop();
     myFlingTimer.stop();
     myClickPntZo = myRoot->getCursorZo();
@@ -111,10 +112,14 @@ void StGLPlayList::doMouseClick(const int theBtnId) {
     for(StGLWidget* aChild = myMenu->getChildren()->getStart(); aChild != NULL; aChild = aChild->getNext()) {
         StGLMenuItem* anItem = dynamic_cast<StGLMenuItem*>(aChild);
         if(anItem != NULL
+        //&& anItem->isClicked(theBtnId)) {
         && anItem->isPointIn(myClickPntZo)) {
             // stick to the center
             const StRectI_t aRect = anItem->getRectPxAbsolute();
             myClickPntZo.y() = double(aRect.top() + aRect.height() / 2) / double(myRoot->getRectPx().height());
+            if(toAbort) {
+                anItem->setClicked(theBtnId, false);
+            }
             break;
         }
     }
