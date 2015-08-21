@@ -397,6 +397,16 @@ class StStringUnicode : public StConstStringUnicode<Type> {
               .replace("{2}", theArg2);
     }
 
+    inline StStringUnicode format(const StStringUnicode& theArg0,
+                                  const StStringUnicode& theArg1,
+                                  const StStringUnicode& theArg2,
+                                  const StStringUnicode& theArg3) const {
+        return replace("{0}", theArg0)
+              .replace("{1}", theArg1)
+              .replace("{2}", theArg2)
+              .replace("{3}", theArg3);
+    }
+
     /**
      * Replace all substring occurrences within given replacement.
      * This is a low-level method and requires that substring and replacement has same size

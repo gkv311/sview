@@ -100,6 +100,7 @@ namespace {
                 return false;
             }
             myTrackedParams->ViewingMode = (StStereoParams::ViewMode )theValue;
+            signals.onChanged(theValue);
             return true;
         }
 
@@ -529,7 +530,14 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     // remember parameters to restore
     const GLfloat  aScaleBack = aParams->ScaleFactor;
     const StGLVec2 aPanBack   = aParams->PanCenter;
-    switch(aParams->ViewingMode) {
+
+    StStereoParams::ViewMode aViewMode = aParams->ViewingMode;
+    if(stFrameTexture.getPlane(0).getTarget() == GL_TEXTURE_CUBE_MAP) {
+        aViewMode = StStereoParams::PANORAMA_CUBEMAP;
+    } else if(aViewMode == StStereoParams::PANORAMA_CUBEMAP) {
+        aViewMode = StStereoParams::FLAT_IMAGE;
+    }
+    switch(aViewMode) {
         default:
         case StStereoParams::FLAT_IMAGE: {
             myProgramFlat.setColorScale(aColorScale); // apply de-anaglyph color filter
@@ -647,6 +655,52 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                                             -1.0f, 1.0f));
             myProgramFlat.getActiveProgram()->setProjMat (aCtx, stOrthoMat);
             myProgramFlat.getActiveProgram()->setModelMat(aCtx, stModelMat);
+
+            myQuad.draw(aCtx, *myProgramFlat.getActiveProgram());
+
+            myProgramFlat.getActiveProgram()->unuse(aCtx);
+
+            // restore changed parameters
+            aParams->ScaleFactor = aScaleBack;
+            aParams->PanCenter   = aPanBack;
+            break;
+        }
+        case StStereoParams::PANORAMA_CUBEMAP: {
+            myProgramFlat.setColorScale(aColorScale); // apply de-anaglyph color filter
+            StGLImageProgram::FragGetColor aColorGetter = StGLImageProgram::FragGetColor_Cubemap;
+            if(!myProgramFlat.init(aCtx, stFrameTexture.getColorModel(), stFrameTexture.getColorScale(), aColorGetter)) {
+                break;
+            }
+
+            myProgramFlat.getActiveProgram()->use(aCtx);
+
+            // setup data rectangle in the texture
+            myProgramFlat.setTextureSizePx      (aCtx, textureSizeVec);
+            myProgramFlat.setTextureMainDataSize(aCtx, dataClampVec);
+            myProgramFlat.setTextureUVDataSize  (aCtx, dataUVClampVec);
+
+            stModelMat.scale(aParams->ScaleFactor, aParams->ScaleFactor, 1.0f);
+
+            StGLVec2 mouseMove = getMouseMoveSphere();
+            stModelMat.rotate(         aParams->PanTheta + mouseMove.y(),  StGLVec3::DX());
+            stModelMat.rotate(90.0f - (aParams->PanPhi   + mouseMove.x()), StGLVec3::DY());
+
+            // apply rotations
+            if(theView == ST_DRAW_LEFT) {
+                stModelMat.rotate(aParams->getZRotate() - aParams->getSepRotation(), StGLVec3::DZ());
+            } else if(theView == ST_DRAW_RIGHT) {
+                stModelMat.rotate(aParams->getZRotate() + aParams->getSepRotation(), StGLVec3::DZ());
+            } else {
+                stModelMat.rotate(aParams->getZRotate(), StGLVec3::DZ());
+            }
+
+            StGLMatrix aMatModelInv, aMatProjInv;
+            stModelMat.inverted(aMatModelInv);
+            getCamera()->getProjMatrixMono().inverted(aMatProjInv);
+            myProgramFlat.getActiveProgram()->setProjMat (aCtx, StGLMatrix::multiply(aMatModelInv, aMatProjInv));
+            myProgramFlat.getActiveProgram()->setModelMat(aCtx, stModelMat);
+
+            ///glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
             myQuad.draw(aCtx, *myProgramFlat.getActiveProgram());
 
@@ -786,6 +840,7 @@ bool StGLImageRegion::tryUnClick(const StPointD_t& theCursorZo,
                 }
                 break;
             }
+            case StStereoParams::PANORAMA_CUBEMAP:
             case StStereoParams::PANORAMA_SPHERE: {
                 aParams->moveSphere(getMouseMoveSphere(myClickPntZo, theCursorZo));
                 break;
@@ -820,6 +875,7 @@ bool StGLImageRegion::tryUnClick(const StPointD_t& theCursorZo,
                     aParams->moveFlat(aVec, GLfloat(getRectPx().ratio()));
                     break;
                 }
+                case StStereoParams::PANORAMA_CUBEMAP:
                 case StStereoParams::PANORAMA_SPHERE: {
                     const StGLVec2 aVec = getMouseMoveSphere(aCenterCursor, theCursorZo) * (-SCALE_STEPS);
                     aParams->scaleIn(SCALE_STEPS);
@@ -848,6 +904,7 @@ bool StGLImageRegion::tryUnClick(const StPointD_t& theCursorZo,
                     aParams->scaleOut(SCALE_STEPS);
                     break;
                 }
+                case StStereoParams::PANORAMA_CUBEMAP:
                 case StStereoParams::PANORAMA_SPHERE: {
                     const StGLVec2 aVec = getMouseMoveSphere(aCenterCursor, theCursorZo) * SCALE_STEPS;
                     aParams->moveSphere(aVec);

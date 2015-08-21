@@ -590,6 +590,8 @@ StGLMenu* StMoviePlayerGUI::createSurfaceMenu() {
                    myImage->params.ViewMode, StStereoParams::FLAT_IMAGE);
     aMenu->addItem(tr(MENU_VIEW_SURFACE_SPHERE),
                    myImage->params.ViewMode, StStereoParams::PANORAMA_SPHERE);
+    aMenu->addItem("Cubemap",
+                   myImage->params.ViewMode, StStereoParams::PANORAMA_CUBEMAP);
     return aMenu;
 }
 

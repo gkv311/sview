@@ -979,6 +979,25 @@ void StImageViewer::doSwitchSrcFormat(const int32_t theSrcFormat) {
     myToSaveSrcFormat = true;
 }
 
+void StImageViewer::doSwitchViewMode(const int32_t theMode) {
+    if(myLoader.isNull()) {
+        return;
+    }
+
+    bool isChanged = false;
+    StGLFrameTextures& aTexture = myGUI->myImage->getTextureQueue()->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE);
+    if(aTexture.getPlane(0).getTarget() == GL_TEXTURE_CUBE_MAP) {
+        isChanged = (theMode != StStereoParams::PANORAMA_CUBEMAP);
+    } else {
+        isChanged = (theMode == StStereoParams::PANORAMA_CUBEMAP);
+    }
+
+    if(isChanged
+    && !myLoader->getPlayList().isEmpty()) {
+        myLoader->doLoadNext();
+    }
+}
+
 void StImageViewer::doOpen1FileDialog(const size_t ) {
     myOpenDialog->openDialog(1);
 }

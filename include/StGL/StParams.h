@@ -21,24 +21,28 @@ class StStereoParams {
 
         public:
 
-    typedef enum tagViewMode {
-        FLAT_IMAGE,        // flat image
-        PANORAMA_SPHERE,   // spherical panorama
-        PANORAMA_CYLINDER, // cylindrical panorama
-    } ViewMode;
+    enum ViewMode {
+        FLAT_IMAGE,        //!< normal 2D image
+        PANORAMA_CUBEMAP,  //!< cubemap texture
+        PANORAMA_SPHERE,   //!< spherical panorama
+        //PANORAMA_CYLINDER, //!< cylindrical panorama
+    };
 
     static const int THE_SEP_STEP_PX = 2; //!< separation inc/dec step
 
     static StString GET_VIEW_MODE_NAME(ViewMode theViewMode) {
         switch(theViewMode) {
-            case PANORAMA_SPHERE: return "sphere";
+            case PANORAMA_CUBEMAP: return "cubemap";
+            case PANORAMA_SPHERE:  return "sphere";
             case FLAT_IMAGE:
-            default:              return "flat";
+            default:               return "flat";
         }
     }
 
     static ViewMode GET_VIEW_MODE_FROM_STRING(const StString& theViewModeStr) {
-        if(theViewModeStr.isStartsWithIgnoreCase(stCString("sphere"))) {
+        if(theViewModeStr.isStartsWithIgnoreCase(stCString("cubemap"))) {
+            return PANORAMA_CUBEMAP;
+        } else if(theViewModeStr.isStartsWithIgnoreCase(stCString("sphere"))) {
             return PANORAMA_SPHERE;
         } else {
             return FLAT_IMAGE;
@@ -83,8 +87,8 @@ class StStereoParams {
     void nextViewMode() {
         switch(ViewingMode) {
             case FLAT_IMAGE:        ViewingMode = PANORAMA_SPHERE; break;
+            case PANORAMA_CUBEMAP:
             case PANORAMA_SPHERE:
-            case PANORAMA_CYLINDER:
             default:                ViewingMode = FLAT_IMAGE;
         }
     }
@@ -243,7 +247,7 @@ class StStereoParams {
     void moveToRight(const GLfloat theDuration = 0.02f) {
         switch(ViewingMode) {
             case PANORAMA_SPHERE:
-            case PANORAMA_CYLINDER: PanPhi += 100.0f * theDuration; break;
+            case PANORAMA_CUBEMAP: PanPhi += 100.0f * theDuration; break;
             case FLAT_IMAGE:
             default: PanCenter.x() += 0.5f * theDuration / ScaleFactor;
         }
@@ -252,7 +256,7 @@ class StStereoParams {
     void moveToLeft(const GLfloat theDuration = 0.02f) {
         switch(ViewingMode) {
             case PANORAMA_SPHERE:
-            case PANORAMA_CYLINDER: PanPhi -= 100.0f * theDuration; break;
+            case PANORAMA_CUBEMAP: PanPhi -= 100.0f * theDuration; break;
             case FLAT_IMAGE:
             default: PanCenter.x() -= 0.5f * theDuration / ScaleFactor;
         }
@@ -261,7 +265,7 @@ class StStereoParams {
     void moveToDown(const GLfloat theDuration = 0.02f) {
         switch(ViewingMode) {
             case PANORAMA_SPHERE:
-            case PANORAMA_CYLINDER: PanTheta -= 100.0f * theDuration; break;
+            case PANORAMA_CUBEMAP: PanTheta -= 100.0f * theDuration; break;
             case FLAT_IMAGE:
             default: PanCenter.y() -= 0.5f * theDuration / ScaleFactor;
         }
@@ -270,7 +274,7 @@ class StStereoParams {
     void moveToUp(const GLfloat theDuration = 0.02f) {
         switch(ViewingMode) {
             case PANORAMA_SPHERE:
-            case PANORAMA_CYLINDER: PanTheta += 100.0f * theDuration; break;
+            case PANORAMA_CUBEMAP: PanTheta += 100.0f * theDuration; break;
             case FLAT_IMAGE:
             default: PanCenter.y() += 0.5f * theDuration / ScaleFactor;
         }

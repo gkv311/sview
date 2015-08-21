@@ -56,7 +56,6 @@ StImageLoader::StImageLoader(const StImageFile::ImageClass     theImageLib,
   myPlayList(1),
   myLoadNextEvent(false),
   myStFormatByUser(StFormat_AUTO),
-  myCubemapByUser(StCubemap_AUTO),
   myMaxTexDim(theMaxTexDim),
   myTextureQueue(theTextureQueue),
   myMsgQueue(theMsgQueue),
@@ -163,7 +162,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
 
     StTimer aLoadTimer(true);
     StFormat  aSrcFormatCurr = myStFormatByUser;
-    StCubemap aSrcCubemap    = myCubemapByUser;
+    StCubemap aSrcCubemap    = theParams->ViewingMode == StStereoParams::PANORAMA_CUBEMAP ? StCubemap_Packed : StCubemap_OFF;
     if(anImgType == StImageFile::ST_TYPE_MPO
     || anImgType == StImageFile::ST_TYPE_JPEG
     || anImgType == StImageFile::ST_TYPE_JPS) {
@@ -299,25 +298,36 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     && anImgInfo->StInfoFileName != StFormat_AUTO) {
         aSrcFormatCurr = anImgInfo->StInfoFileName;
     }
-    if(aSrcCubemap == StCubemap_AUTO) {
-        aSrcCubemap = StCubemap_OFF;
-    }
 
     // scale down image if it does not fit texture limits
     size_t aSizeXLim = size_t(myMaxTexDim);
     size_t aSizeYLim = size_t(myMaxTexDim);
+    size_t aSizeX1 = 0;
+    size_t aSizeY1 = 0;
+    size_t aSizeX2 = 0;
+    size_t aSizeY2 = 0;
+    if(!anImageFileL->isNull()) {
+        aSizeX1 = anImageFileL->getSizeX();
+        aSizeY1 = anImageFileL->getSizeY();
+    }
+    if(!anImageFileR->isNull()) {
+        aSizeX2 = anImageFileR->getSizeX();
+        aSizeY2 = anImageFileR->getSizeY();
+    }
     if(anImageFileR->isNull()) {
         switch(aSrcFormatCurr) {
             case StFormat_SideBySide_LR:
             case StFormat_SideBySide_RL:
             case StFormat_Columns: {
                 aSizeXLim *= 2;
+                aSizeX1   /= 2;
                 break;
             }
             case StFormat_TopBottom_LR:
             case StFormat_TopBottom_RL:
             case StFormat_Rows: {
                 aSizeYLim *= 2;
+                aSizeY1   /= 2;
                 break;
             }
             default: break;
@@ -325,6 +335,17 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     }
     if(aSrcCubemap == StCubemap_Packed) {
         aSizeXLim *= 6;
+        bool isOk = aSizeX1 / 6 == aSizeY1;
+        if(!anImageFileR->isNull()
+        && (aSizeX1 != aSizeX2 || aSizeY1 != aSizeY2)) {
+            isOk = false;
+        }
+        if(!isOk) {
+            myMsgQueue->pushError(StString("Image(s) has unexpected dimensions: {0}x{1} ({2}x{3})\n"
+                                           "Cubemap should has 6 horizontally stacked squared images.")
+                       .format(aSizeX1, aSizeY1, anImageFileL->getSizeX(), anImageFileL->getSizeY()));
+            aSrcCubemap = StCubemap_OFF;
+        }
     }
 
     StHandle<StImage> anImageL = scaledImage(anImageFileL, aSizeXLim, aSizeYLim);

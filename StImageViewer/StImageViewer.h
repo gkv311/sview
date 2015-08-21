@@ -152,6 +152,7 @@ class StImageViewer : public StApplication {
     ST_LOCAL void doSwitchVSync(const bool theValue);
     ST_LOCAL void doFullscreen(const bool theIsFullscreen);
     ST_LOCAL void doSwitchSrcFormat(const int32_t theSrcFormat);
+    ST_LOCAL void doSwitchViewMode(const int32_t theMode);
 
         public:
 

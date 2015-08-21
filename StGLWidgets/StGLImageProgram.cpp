@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -12,6 +12,23 @@
 #include <StGLCore/StGLCore20.h>
 #include <StFile/StRawFile.h>
 
+namespace {
+    const char F_DEF_2D[] =
+        "#define stSampler sampler2D\n"
+        "#define stTexture(theSampler, theCoords) texture2D(theSampler, theCoords.xy)\n";
+    const char F_DEF_CUBEMAP[] =
+        "#define stSampler samplerCube\n"
+        "#define stTexture(theSampler, theCoords) textureCube(theSampler, theCoords)\n";
+}
+
+void StGLImageProgram::regToRgb(const int       thePartIndex,
+                                const StString& theText) {
+  registerFragmentShaderPart(FragSection_ToRgb, thePartIndex,
+                             StString(F_DEF_2D)      + theText);
+  registerFragmentShaderPart(FragSection_ToRgb, FragToRgb_CUBEMAP + thePartIndex,
+                             StString(F_DEF_CUBEMAP) + theText);
+}
+
 StGLImageProgram::StGLImageProgram(const StString& theTitle)
 : myColorScale(1.0f, 1.0f, 1.0f) {
     myTitle = theTitle;
@@ -21,20 +38,29 @@ StGLImageProgram::StGLImageProgram(const StString& theTitle)
        "uniform vec4 uTexData;\n"
        "uniform vec2 uTexelSize;\n"
 
-       "vec4 getColor(in vec2 texCoord) {\n"
+       "vec4 getColor(in vec3 texCoord) {\n"
        "    if(texCoord.y < (uTexData.y + uTexelSize.y)) {\n"
-       "        return texture2D(uTexture, texCoord);\n"
+       "        return texture2D(uTexture, texCoord.xy);\n"
        "    }\n"
-       "    return mix(texture2D(uTexture, texCoord - vec2(0.0, uTexelSize.y)),\n"
-       "               texture2D(uTexture, texCoord), 0.5);\n"
+       "    return mix(texture2D(uTexture, texCoord.xy - vec2(0.0, uTexelSize.y)),\n"
+       "               texture2D(uTexture, texCoord.xy), 0.5);\n"
        "}\n\n";
 
     registerFragmentShaderPart(FragSection_GetColor, FragGetColor_Normal,
         "uniform sampler2D uTexture;\n"
-        "vec4 getColor(in vec2 texCoord) {\n"
-        "    return texture2D(uTexture, texCoord);\n"
-        "}\n\n");
+        "vec4 getColor(in vec3 texCoord) {\n"
+        "    return texture2D(uTexture, texCoord.xy);\n"
+        "}\n\n"
+    );
+
     registerFragmentShaderPart(FragSection_GetColor, FragGetColor_Blend, F_SHADER_GET_COLOR_BLEND);
+
+    registerFragmentShaderPart(FragSection_GetColor, FragGetColor_Cubemap,
+        "uniform samplerCube uTexture;\n"
+        "vec4 getColor(in vec3 texCoord) {\n"
+        "    return textureCube(uTexture, texCoord);\n"
+        "}\n\n"
+    );
 
     registerFragmentShaderPart(FragSection_Correct, FragCorrect_Off,
         "void applyCorrection(inout vec4 color) {}\n\n");
@@ -53,10 +79,10 @@ StGLImageProgram::StGLImageProgram(const StString& theTitle)
         "}\n\n");
 
     registerFragmentShaderPart(FragSection_ToRgb, FragToRgb_FromRgb,
-        "void convertToRGB(inout vec4 color, in vec2 texCoord) {}\n\n");
+        "void convertToRGB(inout vec4 color, in vec3 texCoord) {}\n\n");
 
     registerFragmentShaderPart(FragSection_ToRgb, FragToRgb_FromRgba,
-        "void convertToRGB(inout vec4 color, in vec2 texCoord) {\n"
+        "void convertToRGB(inout vec4 color, in vec3 texCoord) {\n"
         "    vec4 backColor;\n"
         "    bool evenX = int(mod(floor(gl_FragCoord.x + 1.5), 16.0)) >= 8;\n" // just simple 8 pixels check-board
         "    bool evenY = int(mod(floor(gl_FragCoord.y + 1.5), 16.0)) >= 8;\n"
@@ -68,7 +94,7 @@ StGLImageProgram::StGLImageProgram(const StString& theTitle)
         "    color = mix(backColor, color, color.a);\n"
         "}\n\n");
     registerFragmentShaderPart(FragSection_ToRgb, FragToRgb_FromGray,
-        "void convertToRGB(inout vec4 color, in vec2 texCoord) {\n"
+        "void convertToRGB(inout vec4 color, in vec3 texCoord) {\n"
         "    color.r = color.a;\n" // gray scale stored in alpha
         "    color.g = color.a;\n"
         "    color.b = color.a;\n"
@@ -76,10 +102,10 @@ StGLImageProgram::StGLImageProgram(const StString& theTitle)
 
     // color conversion shaders
     const char F_SHADER_YUV2RGB_MPEG[] =
-       "uniform sampler2D uTextureU;\n"
-       "uniform sampler2D uTextureV;\n"
-       "void convertToRGB(inout vec4 color, in vec2 texCoordUV) {\n"
-       "    vec3 colorYUV = vec3(color.a, texture2D(uTextureU, texCoordUV).a, texture2D(uTextureV, texCoordUV).a);\n"
+       "uniform stSampler uTextureU;\n"
+       "uniform stSampler uTextureV;\n"
+       "void convertToRGB(inout vec4 color, in vec3 texCoordUV) {\n"
+       "    vec3 colorYUV = vec3(color.a, stTexture(uTextureU, texCoordUV).a, stTexture(uTextureV, texCoordUV).a);\n"
        "    colorYUV   *= TheRangeBits;\n"
        "    colorYUV.x  = 1.1643 * (colorYUV.x - 0.0625);\n"
        "    colorYUV.y -= 0.5;\n"
@@ -90,10 +116,10 @@ StGLImageProgram::StGLImageProgram(const StString& theTitle)
        "}\n\n";
 
     const char F_SHADER_YUV2RGB_FULL[] =
-       "uniform sampler2D uTextureU;\n"
-       "uniform sampler2D uTextureV;\n"
-       "void convertToRGB(inout vec4 color, in vec2 texCoordUV) {\n"
-       "    vec3 colorYUV = vec3(color.a, texture2D(uTextureU, texCoordUV).a, texture2D(uTextureV, texCoordUV).a);\n"
+       "uniform stSampler uTextureU;\n"
+       "uniform stSampler uTextureV;\n"
+       "void convertToRGB(inout vec4 color, in vec3 texCoordUV) {\n"
+       "    vec3 colorYUV = vec3(color.a, stTexture(uTextureU, texCoordUV).a, stTexture(uTextureV, texCoordUV).a);\n"
        "    colorYUV   *= TheRangeBits;\n"
        "    colorYUV.x  = colorYUV.x;\n"
        "    colorYUV.y -= 0.5;\n"
@@ -103,27 +129,27 @@ StGLImageProgram::StGLImageProgram(const StString& theTitle)
        "    color.b = colorYUV.x + 1.772 * colorYUV.y;\n"
        "}\n\n";
 
-    registerFragmentShaderPart(FragSection_ToRgb, FragToRgb_FromYuvFull, StString()
+    regToRgb(FragToRgb_FromYuvFull, StString()
         + "const float TheRangeBits = 1.0;\n"
         + F_SHADER_YUV2RGB_FULL);
 
-    registerFragmentShaderPart(FragSection_ToRgb, FragToRgb_FromYuvMpeg, StString()
+    regToRgb(FragToRgb_FromYuvMpeg, StString()
         + "const float TheRangeBits = 1.0;\n"
         + F_SHADER_YUV2RGB_MPEG);
 
-    registerFragmentShaderPart(FragSection_ToRgb, FragToRgb_FromYuv9Full, StString()
+    regToRgb(FragToRgb_FromYuv9Full, StString()
         + "const float TheRangeBits = 65535.0 / 511.0;\n"
         + F_SHADER_YUV2RGB_FULL);
 
-    registerFragmentShaderPart(FragSection_ToRgb, FragToRgb_FromYuv9Mpeg, StString()
+    regToRgb(FragToRgb_FromYuv9Mpeg, StString()
         + "const float TheRangeBits = 65535.0 / 511.0;\n"
         + F_SHADER_YUV2RGB_MPEG);
 
-    registerFragmentShaderPart(FragSection_ToRgb, FragToRgb_FromYuv10Full, StString()
+    regToRgb(FragToRgb_FromYuv10Full, StString()
         + "const float TheRangeBits = 65535.0 / 1023.0;\n"
         + F_SHADER_YUV2RGB_FULL);
 
-    registerFragmentShaderPart(FragSection_ToRgb, FragToRgb_FromYuv10Mpeg, StString()
+    regToRgb(FragToRgb_FromYuv10Mpeg, StString()
         + "const float TheRangeBits = 65535.0 / 1023.0;\n"
         + F_SHADER_YUV2RGB_MPEG);
 
@@ -213,14 +239,22 @@ bool StGLImageProgram::init(StGLContext&                 theCtx,
 
     // re-configure shader parts when required
     bool isChanged = myActiveProgram.isNull();
+    isChanged = setFragmentShaderPart(theCtx, FragSection_Main,    0) || isChanged;
     isChanged = setFragmentShaderPart(theCtx, FragSection_Gamma,
                                       stAreEqual(params.gamma->getValue(), 1.0f, 0.0001f) ? FragGamma_Off : FragGamma_On) || isChanged;
     isChanged = setFragmentShaderPart(theCtx, FragSection_Correct,
                                       params.brightness->isDefaultValue()
                                    && params.saturation->isDefaultValue()
                                    && hasNoColorScale() ? FragCorrect_Off : FragCorrect_On) || isChanged;
-    isChanged = setFragmentShaderPart(theCtx, FragSection_ToRgb, getColorShader(theColorModel, theColorScale)) || isChanged;
+    int aToRgb = getColorShader(theColorModel, theColorScale);
+    if(aToRgb >= FragToRgb_FromYuvFull
+    && theFilter == FragGetColor_Cubemap) {
+        aToRgb += FragToRgb_CUBEMAP;
+    }
+
+    isChanged = setFragmentShaderPart(theCtx, FragSection_ToRgb,    aToRgb) || isChanged;
     isChanged = setFragmentShaderPart(theCtx, FragSection_GetColor, theFilter) || isChanged;
+    isChanged = setVertexShaderPart  (theCtx, 0, theFilter == FragGetColor_Cubemap ? VertMain_Cubemap : VertMain_Normal) || isChanged;
     if(isChanged) {
         if(!initProgram(theCtx)) {
             return false;

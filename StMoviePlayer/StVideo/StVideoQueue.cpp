@@ -117,8 +117,7 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   myWasFlushed(false),
   myStFormatByUser(StFormat_AUTO),
   myStFormatByName(StFormat_AUTO),
-  myStFormatInStream(StFormat_AUTO),
-  myCubemapByUser(StCubemap_AUTO) {
+  myStFormatInStream(StFormat_AUTO) {
 
 #ifdef ST_USE64PTR
     myFrame.Frame->opaque = (void* )stAV::NOPTS_VALUE;
@@ -733,10 +732,7 @@ void StVideoQueue::decodeLoop() {
         }
         // override source format stored in metadata
         StFormat  aSrcFormat     = myStFormatByUser;
-        StCubemap aCubemapFormat = myCubemapByUser;
-        if(aCubemapFormat == StCubemap_AUTO) {
-            aCubemapFormat = StCubemap_OFF;
-        }
+        StCubemap aCubemapFormat = aPacket->getSource()->ViewingMode == StStereoParams::PANORAMA_CUBEMAP ? StCubemap_Packed : StCubemap_OFF;
         if(aSrcFormat == StFormat_AUTO) {
             // prefer info stored in the stream itself
             aSrcFormat = myStFormatInStream;

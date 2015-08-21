@@ -399,6 +399,15 @@ void StGLTextureData::updateData(const StImage&                  theDataL,
             break;
         }
     }
+    if(myCubemapFormat == StCubemap_Packed) {
+        if(!myDataL.isNull()
+         && myDataL.getSizeX() / 6 != myDataL.getSizeY()) {
+            myCubemapFormat = StCubemap_OFF;
+        } else if(!myDataR.isNull()
+                && myDataR.getSizeX() / 6 != myDataR.getSizeY()) {
+            myCubemapFormat = StCubemap_OFF;
+        }
+    }
 }
 
 void StGLTextureData::fillTexture(StGLContext&        theCtx,

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -30,6 +30,15 @@ class StGLImageProgram : public StGLProgramMatrix<1, 5, StGLMeshProgram> {
     } TextureFilter;
 
     /**
+     * Options for GLSL Vertex Shader.
+     */
+    enum VertMain {
+        VertMain_Normal = 0,
+        VertMain_Cubemap,
+        VertMain_NB
+    };
+
+    /**
      * Color conversion options in GLSL Fragment Shader.
      */
     enum FragSection {
@@ -47,6 +56,7 @@ class StGLImageProgram : public StGLProgramMatrix<1, 5, StGLMeshProgram> {
     enum FragGetColor {
         FragGetColor_Normal = 0,
         FragGetColor_Blend,
+        FragGetColor_Cubemap,
         FragGetColor_NB
     };
 
@@ -63,7 +73,8 @@ class StGLImageProgram : public StGLProgramMatrix<1, 5, StGLMeshProgram> {
         FragToRgb_FromYuv9Mpeg,
         FragToRgb_FromYuv10Full,
         FragToRgb_FromYuv10Mpeg,
-        FragToRgb_NB,
+        FragToRgb_CUBEMAP,
+        //FragToRgb_NB = FragToRgb_CUBEMAP * 2
     };
 
     /**
@@ -128,6 +139,8 @@ class StGLImageProgram : public StGLProgramMatrix<1, 5, StGLMeshProgram> {
         private: //!< callback Slots
 
     ST_LOCAL void setupCorrection(StGLContext& theCtx);
+    ST_LOCAL void regToRgb(const int       thePartIndex,
+                           const StString& theText);
 
         protected:
 

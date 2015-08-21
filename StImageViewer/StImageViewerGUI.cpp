@@ -344,6 +344,8 @@ StGLMenu* StImageViewerGUI::createSurfaceMenu() {
                    myImage->params.ViewMode, StStereoParams::FLAT_IMAGE);
     aMenu->addItem(tr(MENU_VIEW_SURFACE_SPHERE),
                    myImage->params.ViewMode, StStereoParams::PANORAMA_SPHERE);
+    aMenu->addItem("Cubemap",
+                   myImage->params.ViewMode, StStereoParams::PANORAMA_CUBEMAP);
     return aMenu;
 }
 
@@ -974,6 +976,7 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
     myImage->params.displayMode->changeValues()[StGLImageRegion::MODE_ONLY_RIGHT] = tr(MENU_VIEW_DISPLAY_MODE_RIGHT);
     myImage->params.displayMode->changeValues()[StGLImageRegion::MODE_PARALLEL]   = tr(MENU_VIEW_DISPLAY_MODE_PARALLEL);
     myImage->params.displayMode->changeValues()[StGLImageRegion::MODE_CROSSYED]   = tr(MENU_VIEW_DISPLAY_MODE_CROSSYED);
+    myImage->params.ViewMode->signals.onChanged += stSlot(myPlugin, &StImageViewer::doSwitchViewMode);
 
     if(isMobile()) {
         createMobileUI();

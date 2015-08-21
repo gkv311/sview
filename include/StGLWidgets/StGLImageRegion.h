@@ -201,7 +201,21 @@ class StGLImageRegion : public StGLWidget {
     }
 
     ST_LOCAL void doParamsModeNext(const size_t ) {
-        if(!params.stereoFile.isNull()) { params.stereoFile->nextViewMode(); }
+        const int aMode = params.ViewMode->getValue();
+        switch(aMode) {
+            case StStereoParams::FLAT_IMAGE: {
+                params.ViewMode->setValue(StStereoParams::PANORAMA_CUBEMAP);
+                return;
+            }
+            case StStereoParams::PANORAMA_CUBEMAP: {
+                params.ViewMode->setValue(StStereoParams::FLAT_IMAGE);
+                return;
+            }
+            case StStereoParams::PANORAMA_SPHERE: {
+                params.ViewMode->setValue(StStereoParams::FLAT_IMAGE);
+                return;
+            }
+        }
     }
 
     ST_LOCAL void doParamsPanLeft(const double theValue) {

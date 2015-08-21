@@ -126,15 +126,6 @@ class StImageLoader {
         myStFormatByUser = theSrcFormat;
     }
 
-    ST_LOCAL bool setCubemapFormat(const StCubemap theFormat) {
-        if(myCubemapByUser == theFormat) {
-            return false;
-        }
-
-        myCubemapByUser = theFormat;
-        return true;
-    }
-
     ST_LOCAL void setImageLib(const StImageFile::ImageClass theImageLib) {
         myImageLib = theImageLib;
     }
@@ -192,7 +183,6 @@ class StImageLoader {
     mutable StMutex            myLock;          //!< lock to access not thread-safe properties
     StCondition                myLoadNextEvent;
     StFormat                   myStFormatByUser;//!< target source format (auto-detect by default)
-    StCubemap                  myCubemapByUser; //!< target cubemap format
     GLint                      myMaxTexDim;     //!< value for GL_MAX_TEXTURE_SIZE
     StHandle<StGLTextureQueue> myTextureQueue;  //!< decoded frames queue
     StHandle<StImageInfo>      myImgInfo;       //!< info about currently loaded image

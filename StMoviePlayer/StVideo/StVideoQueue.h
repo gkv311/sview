@@ -123,17 +123,6 @@ class StVideoQueue : public StAVPacketQueue {
     }
 
     /**
-     * @return cubemap format specified by user
-     */
-    ST_LOCAL StCubemap getCubemapFormatByUser() const {
-        return myCubemapByUser;
-    }
-
-    ST_LOCAL void setCubemapFormatByUser(const StCubemap theFormat) {
-        myCubemapByUser = theFormat;
-    }
-
-    /**
      * @return source format detected from file name
      */
     ST_LOCAL StFormat getStereoFormatFromName() const {
@@ -287,7 +276,6 @@ class StVideoQueue : public StAVPacketQueue {
     volatile StFormat          myStFormatByUser;  //!< source format specified by user
     volatile StFormat          myStFormatByName;  //!< source format detected from file name
     volatile StFormat          myStFormatInStream;//!< source format information retrieved from stream
-    volatile StCubemap         myCubemapByUser;   //!< source cubemap format specified by user
 
 };
 

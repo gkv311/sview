@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -29,21 +29,21 @@ StGLImageSphereProgram::StGLImageSphereProgram()
        "attribute vec4 vVertex;\n"
        "attribute vec2 vTexCoord;\n"
 
-       "varying vec2 fTexCoord;\n"
-       "varying vec2 fTexUVCoord;\n"
+       "varying vec3 fTexCoord;\n"
+       "varying vec3 fTexUVCoord;\n"
 
        "void main(void) {\n"
-       "    fTexCoord   = uTexData.xy   + vTexCoord * uTexData.zw;\n"
-       "    fTexUVCoord = uTexUVData.xy + vTexCoord * uTexUVData.zw;\n"
+       "    fTexCoord   = vec3(uTexData.xy   + vTexCoord * uTexData.zw,   0.0);\n"
+       "    fTexUVCoord = vec3(uTexUVData.xy + vTexCoord * uTexUVData.zw, 0.0);\n"
        "    gl_Position = uProjMat * uModelMat * vVertex;\n"
        "}\n";
 
     const char F_SHADER[] =
-       "varying vec2 fTexCoord;\n"
-       "varying vec2 fTexUVCoord;\n"
+       "varying vec3 fTexCoord;\n"
+       "varying vec3 fTexUVCoord;\n"
 
-       "vec4 getColor(in vec2 texCoord);\n"
-       "void convertToRGB(inout vec4 color, in vec2 texUVCoord);\n"
+       "vec4 getColor(in vec3 texCoord);\n"
+       "void convertToRGB(inout vec4 color, in vec3 texUVCoord);\n"
        "void applyGamma(inout vec4 color);\n"
 
        "void main(void) {\n"
@@ -59,9 +59,9 @@ StGLImageSphereProgram::StGLImageSphereProgram()
        "uniform vec2 uTexelSize;\n"
        THE_UTEXT_DATA
 
-       "vec4 getColor(in vec2 texCoord) {\n"
-       "    vec2 txCoord_CC = floor(uTexSizePx * texCoord) / uTexSizePx;\n"
-       "    vec2 aDiff = (texCoord - txCoord_CC) * uTexSizePx;\n"
+       "vec4 getColor(in vec3 texCoord) {\n"
+       "    vec2 txCoord_CC = floor(uTexSizePx * texCoord.xy) / uTexSizePx;\n"
+       "    vec2 aDiff = (texCoord.xy - txCoord_CC) * uTexSizePx;\n"
        "    if(txCoord_CC.y >= (uTexData.w - uTexelSize.y)) {\n"
        "        aDiff.y = 0.0;\n"
        "    }\n"
@@ -86,7 +86,7 @@ StGLImageSphereProgram::StGLImageSphereProgram()
        "    return mix(colorXX1, colorXX2, diffAbs.y);\n"
        "}\n\n";
 
-    registerVertexShaderPart  (0,                    0, V_SHADER);
+    registerVertexShaderPart  (0,                    VertMain_Normal, V_SHADER);
     registerFragmentShaderPart(FragSection_Main,     0, F_SHADER);
     registerFragmentShaderPart(FragSection_GetColor, FragGetColor_Blend, F_SHADER_COLOR);
 }
