@@ -22,7 +22,7 @@ void StMessageBox::Info(const StString& theMessage) {
     StLogger::GetDefault().write(theMessage, StLogger::ST_INFO);
     StCocoaLocalPool aLocalPool;
     NSString* aMessage = [NSString stringWithUTF8String: theMessage.toCString()];
-    NSRunAlertPanel(@"Info", aMessage, @"OK", nil, nil);
+    NSRunAlertPanel(@"Info", @"%@", @"OK", nil, nil, aMessage);
 }
 
 void StMessageBox::Warn(const StString& theMessage) {
@@ -32,7 +32,7 @@ void StMessageBox::Warn(const StString& theMessage) {
     StLogger::GetDefault().write(theMessage, StLogger::ST_WARNING);
     StCocoaLocalPool aLocalPool;
     NSString* aMessage = [NSString stringWithUTF8String: theMessage.toCString()];
-    NSRunAlertPanel(@"Warning", aMessage, @"OK", nil, nil);
+    NSRunAlertPanel(@"Warning", @"%@", @"OK", nil, nil, aMessage);
 }
 
 void StMessageBox::Error(const StString& theMessage) {

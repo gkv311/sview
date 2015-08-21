@@ -44,8 +44,6 @@ StGLCombobox::ListBuilder::ListBuilder(StGLWidget* theParent)
         aMenuParent = myBack;
     }
 
-    const StRectI_t aRect = theParent->getRectPxAbsolute();
-
     int aLeft = 0;
     int aTop  = 0;
     if(myBack == NULL) {
