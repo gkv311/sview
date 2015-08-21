@@ -79,13 +79,13 @@ void StMoviePlayerGUI::createDesktopUI(const StHandle<StPlayList>& thePlayList) 
     createUpperToolbar();
     createBottomToolbar(64, 32);
 
-    mySeekBar = new StSeekBar(myPanelBottom, 0, scale(4));
+    mySeekBar = new StSeekBar(myPanelBottom, 0, scale(18));
     mySeekBar->signals.onSeekClick.connect(myPlugin, &StMoviePlayer::doSeek);
 
-    myTimeBox = new StTimeBox(myPanelBottom, myBottomBarNbLeft * myIconStep, 0,///aTop,
-                              StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    myTimeBox = new StTimeBox(myPanelBottom, myBottomBarNbLeft * myIconStep, 0,
+                              StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myTimeBox->setSwitchOnClick(true);
-    myTimeBox->changeRectPx().right()  = myTimeBox->getRectPx().left() + scale(256);//myIconStep * 2;
+    myTimeBox->changeRectPx().right()  = myTimeBox->getRectPx().left() + scale(128);
     myTimeBox->changeRectPx().bottom() = myTimeBox->getRectPx().top()  + scale(64);
 
     myDescr = new StGLDescription(this);
@@ -1457,45 +1457,47 @@ void StMoviePlayerGUI::stglResize(const StGLBoxPx& theRectPx) {
     if(mySeekBar != NULL
     && myPanelBottom != NULL) {
         const int aPanelSizeY = myPanelBottom->getRectPx().height();
+        const int aPanelSizeX = myPanelBottom->getRectPx().width();
         const int aSeekSizeY  = mySeekBar->getRectPx().height();
         const int aBoxWidth   = myTimeBox->getRectPx().width();
-        if(isMobile()) {
-            const int anXOffset = scale(24);
-            const int anXSpace  = theRectPx.width() - (myBottomBarNbLeft + myBottomBarNbRight) * myIconStep;
-            const int anXSpace2 = anXSpace - myBottomBarNbRight * myIconStep * 2;
-            if(anXSpace >= scale(250)) {
-                if(myPlayList != NULL) {
-                    myPlayList->changeFitMargins().bottom = scale(56);
-                }
-                mySeekBar->changeRectPx().moveTopTo((aPanelSizeY - aSeekSizeY) / 2);
-                mySeekBar->changeRectPx().left()  = anXOffset + myBottomBarNbLeft * myIconStep;
-                mySeekBar->changeRectPx().right() = theRectPx.width() - anXOffset - myBottomBarNbRight * myIconStep;
-                if(anXSpace2 >= scale(250)) {
-                    mySeekBar->changeRectPx().right() -= myIconStep * 2;
-                    myTimeBox->changeRectPx().moveTopTo(0);
-                    myTimeBox->changeRectPx().moveLeftTo(myBottomBarNbRight * (-myIconStep));
-                    myTimeBox->setOverlay(false);
-                } else {
-                    myTimeBox->changeRectPx().moveTopTo(0);
-                    myTimeBox->changeRectPx().moveLeftTo(myBottomBarNbRight * (-myIconStep) - anXSpace / 2 + aBoxWidth / 2);
-                    myTimeBox->setOverlay(true);
-                }
+        const int anXSpace    = aPanelSizeX - (myBottomBarNbLeft + myBottomBarNbRight) * myIconStep;
+        const int anXSpace2   = anXSpace - aBoxWidth;
+        const int anXOffset   = scale(isMobile() ? 24 : 12);
+        const int anMinXSpace = scale(isMobile() ? 250 : 400);
+        myTimeBox->changeRectPx().moveTopTo(0);
+        if(anXSpace >= anMinXSpace) {
+            // normal mode
+            if(myPlayList != NULL && isMobile()) {
+                myPlayList->changeFitMargins().bottom = scale(56);
+            }
+            mySeekBar->changeRectPx().moveTopTo((aPanelSizeY - aSeekSizeY) / 2);
+            mySeekBar->changeRectPx().left()  = anXOffset + myBottomBarNbLeft * myIconStep;
+            mySeekBar->changeRectPx().right() = aPanelSizeX - anXOffset - myBottomBarNbRight * myIconStep;
+            if(anXSpace2 >= anMinXSpace) {
+                // wide mode
+                mySeekBar->changeRectPx().right() -= myIconStep * 2;
+                myTimeBox->changeRectPx().moveLeftTo(myBottomBarNbRight * (-myIconStep));
+                myTimeBox->setOverlay(false);
             } else {
-                if(myPlayList != NULL) {
-                    myPlayList->changeFitMargins().bottom = scale(100);
-                }
-                mySeekBar->changeRectPx().moveTopTo(-aPanelSizeY + (aPanelSizeY - aSeekSizeY) / 2);
-                mySeekBar->changeRectPx().left()  = anXOffset;
-                mySeekBar->changeRectPx().right() = theRectPx.width() - anXOffset;
-                myTimeBox->changeRectPx().moveTopTo(-aPanelSizeY);
-                myTimeBox->changeRectPx().moveLeftTo(-theRectPx.width() / 2 + aBoxWidth / 2);
+                myTimeBox->changeRectPx().moveLeftTo(myBottomBarNbRight * (-myIconStep) - anXSpace / 2 + aBoxWidth / 2);
                 myTimeBox->setOverlay(true);
             }
         } else {
-            const int anXOffset = scale(12);
-            mySeekBar->changeRectPx().moveTopTo(-aPanelSizeY + scale(34));
+            // narrow mode
+            if(myPlayList != NULL && isMobile()) {
+                myPlayList->changeFitMargins().bottom = scale(100);
+            }
+            mySeekBar->changeRectPx().moveTopTo(-aSeekSizeY);
             mySeekBar->changeRectPx().left()  = anXOffset;
-            mySeekBar->changeRectPx().right() = myPanelBottom->getRectPx().width() - anXOffset;
+            mySeekBar->changeRectPx().right() = aPanelSizeX - anXOffset;
+            if(anXSpace2 >= 0) {
+                myTimeBox->changeRectPx().moveLeftTo(myBottomBarNbRight * (-myIconStep) - anXSpace / 2 + aBoxWidth / 2);
+                myTimeBox->setOverlay(false);
+            } else {
+                myTimeBox->changeRectPx().moveTopTo(-aPanelSizeY + (aPanelSizeY - aSeekSizeY) / 2);
+                myTimeBox->changeRectPx().moveLeftTo(-aPanelSizeX / 2 + aBoxWidth / 2);
+                myTimeBox->setOverlay(true);
+            }
         }
     }
 
