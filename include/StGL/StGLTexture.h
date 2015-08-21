@@ -82,6 +82,17 @@ class StGLTexture : public StGLResource {
     }
 
     /**
+     * Target - GL_TEXTURE_2D or GL_TEXTURE_CUBE_MAP.
+     * 2D texture by default.
+     */
+    ST_LOCAL GLenum getTarget() const { myTarget; }
+
+    /**
+     * Setup texture target, can be specified only for uninitialized texture!
+     */
+    ST_LOCAL void setTarget(const GLenum theTarget) { myTarget = theTarget; }
+
+    /**
      * Get texture format.
      */
     ST_LOCAL GLint getTextureFormat() const {
@@ -130,12 +141,10 @@ class StGLTexture : public StGLResource {
     ST_CPPEXPORT void bind(StGLContext& theCtx,
                            const GLenum theTextureUnit = GL_TEXTURE0);
 
-    inline void unbind(StGLContext& theCtx) const {
-        unbindGlobal(theCtx, myTextureUnit);
-    }
-
-    ST_CPPEXPORT static void unbindGlobal(StGLContext& theCtx,
-                                          const GLenum theTextureUnit = GL_TEXTURE0);
+    /**
+     * Unbind this texture.
+     */
+    ST_CPPEXPORT void unbind(StGLContext& theCtx);
 
     /**
      * @return texture width.
@@ -199,6 +208,7 @@ class StGLTexture : public StGLResource {
 
     GLsizei mySizeX;       //!< texture width
     GLsizei mySizeY;       //!< texture height
+    GLenum  myTarget;      //!< target - GL_TEXTURE_2D, GL_TEXTURE_CUBE_MAP, 2D texture by default
     GLint   myTextFormat;  //!< texture format - GL_RGB, GL_RGBA,...
     GLuint  myTextureId;   //!< GL texture ID
     GLenum  myTextureUnit; //!< texture unit

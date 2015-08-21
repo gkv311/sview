@@ -111,11 +111,11 @@ class StGLStereoTexture : public StGLResource {
         myTextures[RIGHT_TEXTURE].bind(theCtx, theTextureUnit);
     }
 
-    void unbindLeft(StGLContext& theCtx) const {
+    void unbindLeft(StGLContext& theCtx) {
         myTextures[LEFT_TEXTURE].unbind(theCtx);
     }
 
-    void unbindRight(StGLContext& theCtx) const {
+    void unbindRight(StGLContext& theCtx) {
         myTextures[RIGHT_TEXTURE].unbind(theCtx);
     }
 

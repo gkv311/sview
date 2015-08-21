@@ -307,6 +307,7 @@ static inline GLenum getDataFormat(const GLint theInternalFormat) {
 StGLTexture::StGLTexture()
 : mySizeX(0),
   mySizeY(0),
+  myTarget(GL_TEXTURE_2D),
   myTextFormat(GL_RGBA8),
   myTextureId(NO_TEXTURE),
   myTextureUnit(GL_TEXTURE0),
@@ -317,6 +318,7 @@ StGLTexture::StGLTexture()
 StGLTexture::StGLTexture(const GLint theTextureFormat)
 : mySizeX(0),
   mySizeY(0),
+  myTarget(GL_TEXTURE_2D),
   myTextFormat(theTextureFormat),
   myTextureId(NO_TEXTURE),
   myTextureUnit(GL_TEXTURE0),
@@ -340,13 +342,12 @@ void StGLTexture::bind(StGLContext& theCtx,
                        const GLenum theTextureUnit) {
     myTextureUnit = theTextureUnit;
     theCtx.core20fwd->glActiveTexture(theTextureUnit);
-    theCtx.core20fwd->glBindTexture(GL_TEXTURE_2D, myTextureId);
+    theCtx.core20fwd->glBindTexture(myTarget, myTextureId);
 }
 
-void StGLTexture::unbindGlobal(StGLContext& theCtx,
-                               const GLenum theTextureUnit) {
-    theCtx.core20fwd->glActiveTexture(theTextureUnit);
-    theCtx.core20fwd->glBindTexture(GL_TEXTURE_2D, NO_TEXTURE);
+void StGLTexture::unbind(StGLContext& theCtx) {
+    theCtx.core20fwd->glActiveTexture(myTextureUnit);
+    theCtx.core20fwd->glBindTexture(myTarget, NO_TEXTURE);
 }
 
 bool StGLTexture::init(StGLContext&   theCtx,
@@ -399,13 +400,14 @@ bool StGLTexture::isProxySuccess(StGLContext& theCtx) {
     return true; // unavailable on OpenGL ES
 #else
     // use proxy to check texture could be created or not
-    theCtx.core20fwd->glTexImage2D(GL_PROXY_TEXTURE_2D, 0, myTextFormat,
+    const GLenum aTarget = myTarget == GL_TEXTURE_CUBE_MAP ? GL_PROXY_TEXTURE_CUBE_MAP : GL_PROXY_TEXTURE_2D;
+    theCtx.core20fwd->glTexImage2D(aTarget, 0, myTextFormat,
                                    mySizeX, mySizeY, 0,
                                    GL_RGBA, GL_UNSIGNED_BYTE, NULL); // no mention (we check graphical RAM here)
     GLint aTestParamX = 0;
     GLint aTestParamY = 0;
-    theCtx.core20fwd->glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_WIDTH,  &aTestParamX);
-    theCtx.core20fwd->glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &aTestParamY);
+    theCtx.core20fwd->glGetTexLevelParameteriv(aTarget, 0, GL_TEXTURE_WIDTH,  &aTestParamX);
+    theCtx.core20fwd->glGetTexLevelParameteriv(aTarget, 0, GL_TEXTURE_HEIGHT, &aTestParamY);
     if(aTestParamX == 0 || aTestParamY == 0) {
         ST_DEBUG_LOG("Creation texture with size (" + mySizeX + " x " + mySizeY + ") FAILED!");
         return false;
@@ -427,10 +429,10 @@ bool StGLTexture::create(StGLContext&   theCtx,
     bind(theCtx);
 
     // texture interpolation parameters - could be overridden later
-    theCtx.core20fwd->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, myTextureFilt);
-    theCtx.core20fwd->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, myTextureFilt);
-    theCtx.core20fwd->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,     GL_CLAMP_TO_EDGE);
-    theCtx.core20fwd->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_CLAMP_TO_EDGE);
+    theCtx.core20fwd->glTexParameteri(myTarget, GL_TEXTURE_MAG_FILTER, myTextureFilt);
+    theCtx.core20fwd->glTexParameteri(myTarget, GL_TEXTURE_MIN_FILTER, myTextureFilt);
+    theCtx.core20fwd->glTexParameteri(myTarget, GL_TEXTURE_WRAP_S,     GL_CLAMP_TO_EDGE);
+    theCtx.core20fwd->glTexParameteri(myTarget, GL_TEXTURE_WRAP_T,     GL_CLAMP_TO_EDGE);
 
     if(!isProxySuccess(theCtx)) {
         release(theCtx);
@@ -449,7 +451,7 @@ bool StGLTexture::create(StGLContext&   theCtx,
     }
 #endif
 
-    theCtx.core20fwd->glTexImage2D(GL_TEXTURE_2D, 0, anInternalFormat,
+    theCtx.core20fwd->glTexImage2D(myTarget, 0, anInternalFormat,
                                    mySizeX, mySizeY, 0,
                                    theDataFormat, GL_UNSIGNED_BYTE, theData);
 #if defined(GL_ES_VERSION_2_0)
@@ -471,9 +473,9 @@ bool StGLTexture::create(StGLContext&   theCtx,
     GLint aResFormat = 0;
     GLint aResSizeX  = 0;
     GLint aResSizeY  = 0;
-    theCtx.core20fwd->glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH,           &aResSizeX);
-    theCtx.core20fwd->glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT,          &aResSizeY);
-    theCtx.core20fwd->glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &aResFormat);
+    theCtx.core20fwd->glGetTexLevelParameteriv(myTarget, 0, GL_TEXTURE_WIDTH,           &aResSizeX);
+    theCtx.core20fwd->glGetTexLevelParameteriv(myTarget, 0, GL_TEXTURE_HEIGHT,          &aResSizeY);
+    theCtx.core20fwd->glGetTexLevelParameteriv(myTarget, 0, GL_TEXTURE_INTERNAL_FORMAT, &aResFormat);
 #ifdef ST_DEBUG_TEXTURES
     ST_DEBUG_LOG("Created StGLTexture " + aResSizeX + " x "+ aResSizeY
                + " (format " + formatInternalFormat(aResFormat) + ')');
@@ -494,8 +496,8 @@ void StGLTexture::setMinMagFilter(StGLContext& theCtx,
     }
     myTextureFilt = theMinMagFilter;
     bind(theCtx);
-        theCtx.core20fwd->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, myTextureFilt);
-        theCtx.core20fwd->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, myTextureFilt);
+        theCtx.core20fwd->glTexParameteri(myTarget, GL_TEXTURE_MAG_FILTER, myTextureFilt);
+        theCtx.core20fwd->glTexParameteri(myTarget, GL_TEXTURE_MIN_FILTER, myTextureFilt);
     unbind(theCtx);
 }
 
@@ -564,7 +566,7 @@ bool StGLTexture::fill(StGLContext&        theCtx,
                 aBatchRows = aRowsRemain;
             }
 
-            theCtx.core20fwd->glTexSubImage2D(GL_TEXTURE_2D, 0, // 0 = LOD number
+            theCtx.core20fwd->glTexSubImage2D(myTarget, 0,      // 0 = LOD number
                                               0, aRow,          // a texel offset in the (x, y) direction
                                               aPatchWidth, aBatchRows,
                                               aPixelFormat,     // format of the pixel data
@@ -583,7 +585,7 @@ bool StGLTexture::fill(StGLContext&        theCtx,
 
         GLsizei aPatchWidth = stMin(GLsizei(theData.getSizeX()), getSizeX());
         for(GLsizei aRow = theRowFrom; aRow < aRowTo; ++aRow) {
-            theCtx.core20fwd->glTexSubImage2D(GL_TEXTURE_2D, 0, // 0 = LOD number
+            theCtx.core20fwd->glTexSubImage2D(myTarget, 0,      // 0 = LOD number
                                               0, aRow,          // a texel offset in the (x, y) direction
                                               aPatchWidth, 1,   // the (width, height) of the texture sub-image
                                               aPixelFormat,     // format of the pixel data
