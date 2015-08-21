@@ -204,7 +204,7 @@ void StSeekBar::stglDraw(unsigned int theView) {
     StGLContext& aCtx = getContext();
 
     // need to update vertices buffer?
-    if(myProgressPx != int(myProgress * GLfloat((getRectPx().width() - 2)))) {
+    if(myProgressPx != int(myProgress * GLfloat((getRectPx().width() - myMargins.left - myMargins.right - 2)))) {
         stglUpdateVertices();
     }
 
