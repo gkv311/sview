@@ -685,13 +685,18 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             stModelMat.rotate(         aParams->PanTheta + mouseMove.y(),  StGLVec3::DX());
             stModelMat.rotate(90.0f - (aParams->PanPhi   + mouseMove.x()), StGLVec3::DY());
 
-            // apply rotations
+            GLfloat aSepDeltaX = GLfloat(-aParams->getSeparationDx()) * 0.05f;
+            GLfloat aSepDeltaY = GLfloat(-aParams->getSeparationDy()) * 0.05f;
             if(theView == ST_DRAW_LEFT) {
-                stModelMat.rotate(aParams->getZRotate() - aParams->getSepRotation(), StGLVec3::DZ());
+                stModelMat.rotate( aSepDeltaX, StGLVec3::DY());
+                stModelMat.rotate(-aSepDeltaY, StGLVec3::DZ());
+                stModelMat.rotate(-aParams->getZRotate() + aParams->getSepRotation(), StGLVec3::DX());
             } else if(theView == ST_DRAW_RIGHT) {
-                stModelMat.rotate(aParams->getZRotate() + aParams->getSepRotation(), StGLVec3::DZ());
+                stModelMat.rotate(-aSepDeltaX, StGLVec3::DY());
+                stModelMat.rotate( aSepDeltaY, StGLVec3::DZ());
+                stModelMat.rotate(-aParams->getZRotate() - aParams->getSepRotation(), StGLVec3::DX());
             } else {
-                stModelMat.rotate(aParams->getZRotate(), StGLVec3::DZ());
+                stModelMat.rotate(-aParams->getZRotate(), StGLVec3::DX());
             }
 
             StGLMatrix aMatModelInv, aMatProjInv;
