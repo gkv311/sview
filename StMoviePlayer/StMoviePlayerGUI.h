@@ -141,7 +141,8 @@ class StMoviePlayerGUI : public StGLRootWidget {
      */
     ST_LOCAL void createDesktopUI(const StHandle<StPlayList>& thePlayList);
     ST_LOCAL void createUpperToolbar();
-    ST_LOCAL void createBottomToolbar();
+    ST_LOCAL void createBottomToolbar(const int theIconSize,
+                                      const int theIconSizeSmall);
 
     ST_LOCAL void      createMainMenu();         // Root (Main menu)
     ST_LOCAL StGLMenu* createMediaMenu();        // Root -> Media menu
