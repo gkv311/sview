@@ -334,7 +334,6 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         }
     }
     if(aSrcCubemap == StCubemap_Packed) {
-        aSizeXLim *= 6;
         bool isOk = aSizeX1 / 6 == aSizeY1;
         if(!anImageFileR->isNull()
         && (aSizeX1 != aSizeX2 || aSizeY1 != aSizeY2)) {
@@ -345,6 +344,8 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
                                            "Cubemap should has 6 horizontally stacked squared images.")
                        .format(aSizeX1, aSizeY1, anImageFileL->getSizeX(), anImageFileL->getSizeY()));
             aSrcCubemap = StCubemap_OFF;
+        } else {
+            aSizeXLim *= 6;
         }
     }
 
