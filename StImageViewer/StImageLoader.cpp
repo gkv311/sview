@@ -107,17 +107,18 @@ void StImageLoader::metadataFromExif(const StHandle<StExifDir>& theDir,
 }
 
 inline StHandle<StImage> scaledImage(StHandle<StImageFile>& theRef,
-                                     const size_t           theMaxSize) {
+                                     const size_t           theMaxSizeX,
+                                     const size_t           theMaxSizeY) {
     if(theRef->isNull()) {
         return theRef;
-    } else if(theRef->getSizeX() <= theMaxSize
-           && theRef->getSizeY() <= theMaxSize) {
+    } else if(theRef->getSizeX() <= theMaxSizeX
+           && theRef->getSizeY() <= theMaxSizeY) {
         return theRef;
     }
 
     StHandle<StImage> anImage = new StImage();
-    const size_t aSizeX = stMin(theRef->getSizeX(), theMaxSize);
-    const size_t aSizeY = stMin(theRef->getSizeY(), theMaxSize);
+    const size_t aSizeX = stMin(theRef->getSizeX(), theMaxSizeX);
+    const size_t aSizeY = stMin(theRef->getSizeY(), theMaxSizeY);
     if(!anImage->initTrashLimited(*theRef, aSizeX, aSizeY)
     || !StAVImage::resize(*theRef, *anImage)) {
         ST_ERROR_LOG("Scale failed!");
@@ -289,16 +290,6 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     }
     const double aLoadTimeMSec = aLoadTimer.getElapsedTimeInMilliSec();
 
-    // scale down image if it does not fit texture limits
-    StHandle<StImage> anImageL = scaledImage(anImageFileL, size_t(myMaxTexDim));
-    StHandle<StImage> anImageR = scaledImage(anImageFileR, size_t(myMaxTexDim));
-#ifdef ST_DEBUG
-    const double aScaleTimeMSec = aLoadTimer.getElapsedTimeInMilliSec() - aLoadTimeMSec;
-    if(anImageL != anImageFileL) {
-        ST_DEBUG_LOG("Image is downscaled to fit texture limits in " + aScaleTimeMSec + " ms!");
-    }
-#endif
-
     // detect information from file name
     bool isAnamorphByName = false;
     anImgInfo->StInfoFileName = st::formatFromName(aTitleString, isAnamorphByName);
@@ -307,11 +298,35 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         aSrcFormatCurr = anImgInfo->StInfoFileName;
     }
 
-    // try detection based on aspect ratio
-    /*if(aSrcFormatCurr == StFormat_AUTO
-    && !anImageL->isNull()) {
-        aSrcFormatCurr = st::formatFromRatio(anImageL->getRatio());
-    }*/
+    // scale down image if it does not fit texture limits
+    size_t aSizeXLim = size_t(myMaxTexDim);
+    size_t aSizeYLim = size_t(myMaxTexDim);
+    if(anImageFileR->isNull()) {
+        switch(aSrcFormatCurr) {
+            case StFormat_SideBySide_LR:
+            case StFormat_SideBySide_RL:
+            case StFormat_Columns: {
+                aSizeXLim *= 2;
+                break;
+            }
+            case StFormat_TopBottom_LR:
+            case StFormat_TopBottom_RL:
+            case StFormat_Rows: {
+                aSizeYLim *= 2;
+                break;
+            }
+            default: break;
+        }
+    }
+
+    StHandle<StImage> anImageL = scaledImage(anImageFileL, aSizeXLim, aSizeYLim);
+    StHandle<StImage> anImageR = scaledImage(anImageFileR, aSizeXLim, aSizeYLim);
+#ifdef ST_DEBUG
+    const double aScaleTimeMSec = aLoadTimer.getElapsedTimeInMilliSec() - aLoadTimeMSec;
+    if(anImageL != anImageFileL) {
+        ST_DEBUG_LOG("Image is downscaled to fit texture limits in " + aScaleTimeMSec + " ms!");
+    }
+#endif
 
 #ifdef ST_DEBUG
     if(!anImageFileL->isNull()) {
