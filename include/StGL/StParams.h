@@ -190,7 +190,7 @@ class StStereoParams {
      * Zoom out.
      */
     void scaleOut(const GLfloat theDuration = 0.02f) {
-        ScaleFactor /= (1.0f + theDuration);
+        ScaleFactor = stMax(ScaleFactor / (1.0f + theDuration), 0.05f);
     }
 
     void incSeparationDx() {

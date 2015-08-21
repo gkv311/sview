@@ -910,6 +910,9 @@ bool StGLImageRegion::tryUnClick(const StPointD_t& theCursorZo,
             switch(aParams->ViewingMode) {
                 default:
                 case StStereoParams::FLAT_IMAGE: {
+                    if(aParams->ScaleFactor <= 0.05f) {
+                        break;
+                    }
                     const StGLVec2 aVec = getMouseMoveFlat(aCenterCursor, theCursorZo) * SCALE_STEPS;
                     aParams->moveFlat(aVec, GLfloat(getRectPx().ratio()));
                     aParams->scaleOut(SCALE_STEPS);
@@ -917,6 +920,9 @@ bool StGLImageRegion::tryUnClick(const StPointD_t& theCursorZo,
                 }
                 case StStereoParams::PANORAMA_CUBEMAP:
                 case StStereoParams::PANORAMA_SPHERE: {
+                    if(aParams->ScaleFactor <= 0.24f) {
+                        break;
+                    }
                     const StGLVec2 aVec = getMouseMoveSphere(aCenterCursor, theCursorZo) * SCALE_STEPS;
                     aParams->moveSphere(aVec);
                     aParams->scaleOut(SCALE_STEPS);
