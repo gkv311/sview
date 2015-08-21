@@ -538,23 +538,31 @@ bool StGLTexture::fill(StGLContext&        theCtx,
     bind(theCtx);
 
     // setup the alignment
-    size_t anExtraBytes = theData.getRowExtraBytes();
     size_t anAligment = stMin(theData.getMaxRowAligment(), size_t(8)); // limit to 8 bytes for OpenGL
     theCtx.core20fwd->glPixelStorei(GL_UNPACK_ALIGNMENT, GLint(anAligment));
 
     bool toBatchCopy = theData.getSizeX() <= size_t(getSizeX())
                     && theBatchRows > 1;
+
+    size_t anExtraBytes       = theData.getRowExtraBytes();
+    size_t aPixelsWidth       = theData.getSizeRowBytes() / theData.getSizePixelBytes();
+    size_t aSizeRowBytesEstim = getAligned(theData.getSizePixelBytes() * aPixelsWidth, anAligment);
+    if(anExtraBytes < anAligment) {
+        aPixelsWidth = 0;
+    } else if(aSizeRowBytesEstim != theData.getSizeRowBytes()) {
+        aPixelsWidth = 0;
+        toBatchCopy  = false;
+    }
+
 #if defined(GL_ES_VERSION_2_0)
     if(anExtraBytes >= anAligment) {
         toBatchCopy = false;
     }
-#else
-    const GLsizei aPixelsWidth = GLsizei(theData.getSizeRowBytes() / theData.getSizePixelBytes());
 #endif
     if(toBatchCopy) {
     #if !defined(GL_ES_VERSION_2_0)
         // notice that GL_UNPACK_ROW_LENGTH is not available on OpenGL ES 2.0 without GL_EXT_unpack_subimage extension!
-        theCtx.core20fwd->glPixelStorei(GL_UNPACK_ROW_LENGTH, (anExtraBytes >= anAligment) ? aPixelsWidth : 0);
+        theCtx.core20fwd->glPixelStorei(GL_UNPACK_ROW_LENGTH, GLint(aPixelsWidth));
     #endif
 
         // do batch copy (more effective)
