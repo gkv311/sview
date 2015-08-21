@@ -115,7 +115,8 @@ namespace {
     };
 
     // we use negative scale factor to show sphere inside out!
-    static const GLfloat SPHERE_RADIUS = -10.0f;
+    static const GLfloat SPHERE_RADIUS     = -10.0f;
+    static const GLfloat PANORAMA_DEF_ZOOM = 0.45f;
 
 }
 
@@ -352,7 +353,7 @@ StGLVec2 StGLImageRegion::getMouseMoveSphere(const StPointD_t& theCursorZoFrom,
                                              const StPointD_t& theCursorZoTo) {
     /// TODO (Kirill Gavrilov#5) these computations are invalid
     StGLVec2 stVec = getMouseMoveFlat(theCursorZoFrom, theCursorZoTo);
-    GLfloat aSphereScale = SPHERE_RADIUS * getSource()->ScaleFactor;
+    GLfloat aSphereScale = SPHERE_RADIUS * PANORAMA_DEF_ZOOM * getSource()->ScaleFactor;
     StRectD_t zParams;
     getCamera()->getZParams(getCamera()->getZNear(), zParams);
     stVec.x() *= -90.0f * GLfloat(zParams.right() - zParams.left()) / aSphereScale;
@@ -679,7 +680,8 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             myProgramFlat.setTextureMainDataSize(aCtx, dataClampVec);
             myProgramFlat.setTextureUVDataSize  (aCtx, dataUVClampVec);
 
-            stModelMat.scale(aParams->ScaleFactor, aParams->ScaleFactor, 1.0f);
+            const GLfloat aScale = aParams->ScaleFactor * PANORAMA_DEF_ZOOM;
+            stModelMat.scale(aScale, aScale, 1.0f);
 
             StGLVec2 mouseMove = getMouseMoveSphere();
             stModelMat.rotate(         aParams->PanTheta + mouseMove.y(),  StGLVec3::DX());
@@ -725,25 +727,29 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                 break;
             }
 
-            /// TODO (Kirill Gavrilov#5) implement cross-eyed/parallel pair output
-            /// TODO (Kirill Gavrilov#5) apply separation
-
             // perform scaling
-            stModelMat.scale(SPHERE_RADIUS * aParams->ScaleFactor, SPHERE_RADIUS * aParams->ScaleFactor, SPHERE_RADIUS);
+            const GLfloat aScale = SPHERE_RADIUS * PANORAMA_DEF_ZOOM * aParams->ScaleFactor;
+            stModelMat.scale(aScale, aScale, SPHERE_RADIUS);
 
-            /// TODO (Kirill Gavrilov#5) fix horizontal movement direction after upside-downing
             // apply movements
             StGLVec2 mouseMove = getMouseMoveSphere();
             stModelMat.rotate(         aParams->PanTheta + mouseMove.y(),  StGLVec3::DX());
             stModelMat.rotate(90.0f - (aParams->PanPhi   + mouseMove.x()), StGLVec3::DY());
 
+            GLfloat aSepDeltaX = GLfloat(-aParams->getSeparationDx()) * 0.05f;
+            //GLfloat aSepDeltaY = GLfloat(-aParams->getSeparationDy()) * 0.05f;
+
             // apply rotations
             if(theView == ST_DRAW_LEFT) {
-                stModelMat.rotate(aParams->getZRotate() - aParams->getSepRotation(), StGLVec3::DZ());
+                stModelMat.rotate( aSepDeltaX, StGLVec3::DY());
+                //stModelMat.rotate(-aSepDeltaY, StGLVec3::DZ());
+                //stModelMat.rotate(aParams->getZRotate() - aParams->getSepRotation(), StGLVec3::DX());
             } else if(theView == ST_DRAW_RIGHT) {
-                stModelMat.rotate(aParams->getZRotate() + aParams->getSepRotation(), StGLVec3::DZ());
+                stModelMat.rotate(-aSepDeltaX, StGLVec3::DY());
+                //stModelMat.rotate( aSepDeltaY, StGLVec3::DZ());
+                //stModelMat.rotate(aParams->getZRotate() + aParams->getSepRotation(), StGLVec3::DX());
             } else {
-                stModelMat.rotate(aParams->getZRotate(), StGLVec3::DZ());
+                //stModelMat.rotate(aParams->getZRotate(), StGLVec3::DX());
             }
 
             // perform drawing
