@@ -278,9 +278,9 @@ void StSearchMonitors::findMonitorsWinAPI() {
                 if(getValue(mm).getGpuName() == getFirst().getGpuName()) {
                     StMonitor aCopy = getValue(m);
                     changeValue(m) = getValue(mm);
-                    changeValue(m).setId(m);
+                    changeValue(m) .setId((int )m);
                     changeValue(mm) = aCopy;
-                    changeValue(mm).setId(mm);
+                    changeValue(mm).setId((int )mm);
                 }
             }
         }

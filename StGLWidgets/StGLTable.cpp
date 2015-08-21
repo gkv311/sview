@@ -335,7 +335,7 @@ void StGLTable::updateHotKeys(const std::map< int, StHandle<StAction> >& theActi
                        "StGLTable::updateHotKeys() NULL button",
                        return);
 
-        std::map< int, StHandle<StAction> >::const_iterator anAction = theActions.find(aKey1->getUserData());
+        std::map< int, StHandle<StAction> >::const_iterator anAction = theActions.find((int )aKey1->getUserData());
         ST_ASSERT_SLIP(anAction != theActions.end(),
                        "StGLTable::updateHotKeys() NULL action",
                        return);

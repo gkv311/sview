@@ -650,7 +650,7 @@ void StImageViewerGUI::doListHotKeys(const size_t ) {
     StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
     aTable->changeItemMargins().top    = scale(4);
     aTable->changeItemMargins().bottom = scale(4);
-    aTable->setupTable(anActionsMap.size(), 3);
+    aTable->setupTable((int )anActionsMap.size(), 3);
 
     StHandle< StSlot<void (const size_t )> > aSlot1 = new StSlotMethod<StImageViewerGUI, void (const size_t )>(this, &StImageViewerGUI::doChangeHotKey1);
     StHandle< StSlot<void (const size_t )> > aSlot2 = new StSlotMethod<StImageViewerGUI, void (const size_t )>(this, &StImageViewerGUI::doChangeHotKey2);
@@ -663,13 +663,13 @@ void StImageViewerGUI::doListHotKeys(const size_t ) {
 }
 
 void StImageViewerGUI::doChangeHotKey1(const size_t theId) {
-    const StHandle<StAction>& anAction = myPlugin->getAction(theId);
+    const StHandle<StAction>& anAction = myPlugin->getAction((int )theId);
     StHotKeyControl* aKeyChanger = new StHotKeyControl(myPlugin, myHKeysTable, this, anAction, 1);
     aKeyChanger->stglInit();
 }
 
 void StImageViewerGUI::doChangeHotKey2(const size_t theId) {
-    const StHandle<StAction>& anAction = myPlugin->getAction(theId);
+    const StHandle<StAction>& anAction = myPlugin->getAction((int )theId);
     StHotKeyControl* aKeyChanger = new StHotKeyControl(myPlugin, myHKeysTable, this, anAction, 2);
     aKeyChanger->stglInit();
 }
