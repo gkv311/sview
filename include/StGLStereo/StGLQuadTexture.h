@@ -153,7 +153,8 @@ class StGLFrameTextures : public StGLResource {
                                    const size_t  thePlaneId,
                                    const GLsizei theSizeX,
                                    const GLsizei theizeY,
-                                   const GLint   theInternalFormat);
+                                   const GLint   theInternalFormat,
+                                   const GLenum  theTarget);
 
     /**
      * Change Min and Mag filter.

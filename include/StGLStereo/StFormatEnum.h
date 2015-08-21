@@ -32,6 +32,12 @@ enum StFormat {
     StFormat_NB
 };
 
+enum StCubemap {
+    StCubemap_AUTO = -1, //!< try to detect from metadata
+    StCubemap_OFF  =  0, //!< no cubemap data
+    StCubemap_Packed     //!< cubemap data packed into single image frame - 6 horizontally stacked planes
+};
+
 namespace st {
 
     /**

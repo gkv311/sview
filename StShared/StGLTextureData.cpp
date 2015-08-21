@@ -19,6 +19,7 @@ StGLTextureData::StGLTextureData()
   myStParams(),
   myPts(0.0),
   mySrcFormat(StFormat_AUTO),
+  myCubemapFormat(StCubemap_OFF),
   myFillFromRow(0),
   myFillRows(0) {
     //
@@ -303,11 +304,13 @@ void StGLTextureData::updateData(const StImage&                  theDataL,
                                  const StImage&                  theDataR,
                                  const StHandle<StStereoParams>& theStParams,
                                  const StFormat                  theFormat,
+                                 const StCubemap                 theCubemap,
                                  const double                    thePts) {
     // setup new stereo source
     myStParams  = theStParams;
     myPts       = thePts;
     mySrcFormat = theFormat != StFormat_AUTO ? theFormat : StFormat_Mono;
+    myCubemapFormat = theCubemap;
 
     // reset fill texture state
     myFillRows = myFillFromRow = 0;
@@ -404,7 +407,32 @@ void StGLTextureData::fillTexture(StGLContext&        theCtx,
     if(!theFrameTexture.isValid() || theData.isNull()) {
         return;
     }
-    theFrameTexture.fill(theCtx, theData, myFillFromRow, myFillFromRow + myFillRows);
+
+    if(myCubemapFormat != StCubemap_Packed) {
+        theFrameTexture.fillPatch(theCtx, theData, GL_TEXTURE_2D, myFillFromRow, myFillFromRow + myFillRows);
+        return;
+    }
+
+    size_t aPatchX = theData.getSizeX() / 6;
+    if(aPatchX < 2) {
+        return;
+    }
+
+    const GLenum aTargets[6] = { GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+                                 GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+                                 GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+                                 GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+                                 GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+                                 GL_TEXTURE_CUBE_MAP_NEGATIVE_Z };
+    for(size_t aTargetIter = 0; aTargetIter < 6; ++aTargetIter) {
+        StImagePlane aPlane;
+        if(!aPlane.initWrapper(theData.getFormat(), const_cast<GLubyte* >(theData.getData(0, aPatchX * aTargetIter)),
+                               aPatchX, theData.getSizeY(), theData.getSizeRowBytes())) {
+            ST_DEBUG_LOG("StGLTextureData::fillTexture(). wrapping failure");
+            continue;
+        }
+        theFrameTexture.fillPatch(theCtx, aPlane, aTargets[aTargetIter], myFillFromRow, myFillFromRow + myFillRows);
+    }
 }
 
 static void setupDataRectangle(const StImagePlane& theImagePlane,
@@ -437,26 +465,39 @@ void StGLTextureData::setupAttributes(StGLFrameTextures& stFrameTextures, const 
 
 static void prepareTextures(StGLContext&       theCtx,
                             const StImage&     theImage,
+                            const StCubemap    theCubemap,
                             StGLFrameTextures& theTextureFrame) {
     GLint anInternalFormat = GL_RGB8;
     theTextureFrame.setColorModel(theImage.getColorModel(),
                                   theImage.getColorScale());
     for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
         const StImagePlane& anImgPlane = theImage.getPlane(aPlaneId);
+        StGLFrameTexture&   aTexture   = theTextureFrame.getPlane(aPlaneId);
         if(anImgPlane.isNull()) {
-            theTextureFrame.getPlane(aPlaneId).release(theCtx);
+            aTexture.release(theCtx);
             continue;
         }
 
         if(!StGLTexture::getInternalFormat(theCtx, anImgPlane, anInternalFormat)) {
-            theTextureFrame.getPlane(aPlaneId).release(theCtx);
+            aTexture.release(theCtx);
+            continue;
+        }
+        GLenum  aTarget = GL_TEXTURE_2D;
+        GLsizei aSizeX  = (GLsizei )anImgPlane.getSizeX();
+        GLsizei aSizeY  = (GLsizei )anImgPlane.getSizeY();
+        if(theCubemap == StCubemap_Packed) {
+            aTarget = GL_TEXTURE_CUBE_MAP;
+            aSizeX  = aSizeX / 6;
+        }
+        if(aSizeX < 1) {
+            aTexture.release(theCtx);
             continue;
         }
         theTextureFrame.preparePlane(theCtx,
                                      aPlaneId,
-                                     (GLsizei )theImage.getPlane(aPlaneId).getSizeX(),
-                                     (GLsizei )theImage.getPlane(aPlaneId).getSizeY(),
-                                     anInternalFormat);
+                                     aSizeX, aSizeY,
+                                     anInternalFormat,
+                                     aTarget);
     }
 }
 
@@ -466,8 +507,8 @@ bool StGLTextureData::fillTexture(StGLContext&     theCtx,
     // setup rows count to be filled per fillTexture()
     if(myFillRows == 0 || myFillFromRow == 0) {
         // prepare textures for new data
-        prepareTextures(theCtx, myDataL, theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE));
-        prepareTextures(theCtx, myDataR, theQTexture.getBack(StGLQuadTexture::RIGHT_TEXTURE));
+        prepareTextures(theCtx, myDataL, myCubemapFormat, theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE));
+        prepareTextures(theCtx, myDataR, myCubemapFormat, theQTexture.getBack(StGLQuadTexture::RIGHT_TEXTURE));
 
         // remove links to old stereo parameters
         theQTexture.getBack(StGLQuadTexture::LEFT_TEXTURE).setSource(StHandle<StStereoParams>());

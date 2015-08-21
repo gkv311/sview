@@ -67,6 +67,7 @@ class StGLTextureQueue {
      * @param theSrcDataRight second INPUT data (NULL or Right)
      * @param theStParams     stereo parameters
      * @param theSrcFormat    source data format
+     * @param theSrcCubemap   format of cubemap
      * @param theSrcPTS       PTS (presentation timestamp)
      * @return true on success
      */
@@ -74,6 +75,7 @@ class StGLTextureQueue {
                            const StImage&     theSrcDataRight,
                            const StHandle<StStereoParams>& theStParams,
                            const StFormat     theSrcFormat,
+                           const StCubemap    theSrcCubemap,
                            const double       theSrcPTS);
 
     /**

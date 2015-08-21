@@ -56,6 +56,7 @@ StImageLoader::StImageLoader(const StImageFile::ImageClass     theImageLib,
   myPlayList(1),
   myLoadNextEvent(false),
   myStFormatByUser(StFormat_AUTO),
+  myCubemapByUser(StCubemap_AUTO),
   myMaxTexDim(theMaxTexDim),
   myTextureQueue(theTextureQueue),
   myMsgQueue(theMsgQueue),
@@ -161,7 +162,8 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     }
 
     StTimer aLoadTimer(true);
-    StFormat aSrcFormatCurr = myStFormatByUser;
+    StFormat  aSrcFormatCurr = myStFormatByUser;
+    StCubemap aSrcCubemap    = myCubemapByUser;
     if(anImgType == StImageFile::ST_TYPE_MPO
     || anImgType == StImageFile::ST_TYPE_JPEG
     || anImgType == StImageFile::ST_TYPE_JPS) {
@@ -297,6 +299,9 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     && anImgInfo->StInfoFileName != StFormat_AUTO) {
         aSrcFormatCurr = anImgInfo->StInfoFileName;
     }
+    if(aSrcCubemap == StCubemap_AUTO) {
+        aSrcCubemap = StCubemap_OFF;
+    }
 
     // scale down image if it does not fit texture limits
     size_t aSizeXLim = size_t(myMaxTexDim);
@@ -317,6 +322,9 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             }
             default: break;
         }
+    }
+    if(aSrcCubemap == StCubemap_Packed) {
+        aSizeXLim *= 6;
     }
 
     StHandle<StImage> anImageL = scaledImage(anImageFileL, aSizeXLim, aSizeYLim);
@@ -344,9 +352,9 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
 
     myTextureQueue->setConnectedStream(true);
     if(!anImageR->isNull()) {
-        myTextureQueue->push(*anImageL, *anImageR, theParams, StFormat_SeparateFrames, 0.0);
+        myTextureQueue->push(*anImageL, *anImageR, theParams, StFormat_SeparateFrames, aSrcCubemap, 0.0);
     } else {
-        myTextureQueue->push(*anImageL, *anImageR, theParams, aSrcFormatCurr, 0.0);
+        myTextureQueue->push(*anImageL, *anImageR, theParams, aSrcFormatCurr, aSrcCubemap, 0.0);
     }
 
     if(!stAreEqual(anImageFileL->getPixelRatio(), 1.0f, 0.001f)) {

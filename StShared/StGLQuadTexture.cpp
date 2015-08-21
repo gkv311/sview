@@ -84,15 +84,19 @@ void StGLFrameTextures::increaseSize(StGLContext&      theCtx,
 void StGLFrameTextures::preparePlane(StGLContext&  theCtx,
                                      const size_t  thePlaneId,
                                      const GLsizei theSizeX,
-                                     const GLsizei theizeY,
-                                     const GLint   theInternalFormat) {
+                                     const GLsizei theSizeY,
+                                     const GLint   theInternalFormat,
+                                     const GLenum  theTarget) {
 
-    if(myTextures[thePlaneId].getTextureFormat() != theInternalFormat) {
+    StGLFrameTexture& aPlane = myTextures[thePlaneId];
+    if(aPlane.getTextureFormat() != theInternalFormat
+    || aPlane.getTarget()        != theTarget) {
         // wrong texture format
-        myTextures[thePlaneId].release(theCtx);
-        myTextures[thePlaneId].setTextureFormat(theInternalFormat);
+        aPlane.release(theCtx);
+        aPlane.setTextureFormat(theInternalFormat);
+        aPlane.setTarget(theTarget);
     }
-    increaseSize(theCtx, myTextures[thePlaneId], theSizeX, theizeY);
+    increaseSize(theCtx, aPlane, theSizeX, theSizeY);
 }
 
 void StGLFrameTextures::setMinMagFilter(StGLContext& theCtx,

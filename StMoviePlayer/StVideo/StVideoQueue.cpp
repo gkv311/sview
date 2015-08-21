@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -117,7 +117,8 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   myWasFlushed(false),
   myStFormatByUser(StFormat_AUTO),
   myStFormatByName(StFormat_AUTO),
-  myStFormatInStream(StFormat_AUTO) {
+  myStFormatInStream(StFormat_AUTO),
+  myCubemapByUser(StCubemap_AUTO) {
 
 #ifdef ST_USE64PTR
     myFrame.Frame->opaque = (void* )stAV::NOPTS_VALUE;
@@ -520,6 +521,7 @@ void StVideoQueue::pushFrame(const StImage&     theSrcDataLeft,
                              const StImage&     theSrcDataRight,
                              const StHandle<StStereoParams>& theStParams,
                              const StFormat     theSrcFormat,
+                             const StCubemap    theCubemapFormat,
                              const double       theSrcPTS) {
     while(!myToFlush && myTextureQueue->isFull()) {
         StThread::sleep(10);
@@ -530,7 +532,7 @@ void StVideoQueue::pushFrame(const StImage&     theSrcDataLeft,
         return;
     }
 
-    myTextureQueue->push(theSrcDataLeft, theSrcDataRight, theStParams, theSrcFormat, theSrcPTS);
+    myTextureQueue->push(theSrcDataLeft, theSrcDataRight, theStParams, theSrcFormat, theCubemapFormat, theSrcPTS);
     myTextureQueue->setConnectedStream(true);
     if(myWasFlushed) {
         // force frame update after seeking regardless playback timer
@@ -730,7 +732,11 @@ void StVideoQueue::decodeLoop() {
             }
         }
         // override source format stored in metadata
-        StFormat aSrcFormat = myStFormatByUser;
+        StFormat  aSrcFormat     = myStFormatByUser;
+        StCubemap aCubemapFormat = myCubemapByUser;
+        if(aCubemapFormat == StCubemap_AUTO) {
+            aCubemapFormat = StCubemap_OFF;
+        }
         if(aSrcFormat == StFormat_AUTO) {
             // prefer info stored in the stream itself
             aSrcFormat = myStFormatInStream;
@@ -779,12 +785,12 @@ void StVideoQueue::decodeLoop() {
                         break;
                     }
 
-                    pushFrame(myDataAdp, *aSlaveData, aPacket->getSource(), StFormat_SeparateFrames, myFramePts);
+                    pushFrame(myDataAdp, *aSlaveData, aPacket->getSource(), StFormat_SeparateFrames, aCubemapFormat, myFramePts);
 
                     aSlaveData = NULL;
                     mySlave->unlockData();
                 } else {
-                    pushFrame(myDataAdp, anEmptyImg, aPacket->getSource(), aSrcFormat, myFramePts);
+                    pushFrame(myDataAdp, anEmptyImg, aPacket->getSource(), aSrcFormat, aCubemapFormat, myFramePts);
                 }
                 break;
             }
@@ -805,11 +811,11 @@ void StVideoQueue::decodeLoop() {
                 if(isOddNumber(myFramesCounter)) {
                     myCachedFrame.fill(myDataAdp);
                 } else {
-                    pushFrame(myCachedFrame, myDataAdp, aPacket->getSource(), StFormat_FrameSequence, myFramePts);
+                    pushFrame(myCachedFrame, myDataAdp, aPacket->getSource(), StFormat_FrameSequence, aCubemapFormat, myFramePts);
                 }
                 ++myFramesCounter;
             } else {
-                pushFrame(myDataAdp, anEmptyImg, aPacket->getSource(), aSrcFormat, myFramePts);
+                pushFrame(myDataAdp, anEmptyImg, aPacket->getSource(), aSrcFormat, aCubemapFormat, myFramePts);
             }
         }
 

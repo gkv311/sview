@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -123,6 +123,17 @@ class StVideoQueue : public StAVPacketQueue {
     }
 
     /**
+     * @return cubemap format specified by user
+     */
+    ST_LOCAL StCubemap getCubemapFormatByUser() const {
+        return myCubemapByUser;
+    }
+
+    ST_LOCAL void setCubemapFormatByUser(const StCubemap theFormat) {
+        myCubemapByUser = theFormat;
+    }
+
+    /**
      * @return source format detected from file name
      */
     ST_LOCAL StFormat getStereoFormatFromName() const {
@@ -225,6 +236,7 @@ class StVideoQueue : public StAVPacketQueue {
                             const StImage&     theSrcDataRight,
                             const StHandle<StStereoParams>& theStParams,
                             const StFormat     theSrcFormat,
+                            const StCubemap    theCubemapFormat,
                             const double       theSrcPTS);
 
         private:
@@ -275,6 +287,7 @@ class StVideoQueue : public StAVPacketQueue {
     volatile StFormat          myStFormatByUser;  //!< source format specified by user
     volatile StFormat          myStFormatByName;  //!< source format detected from file name
     volatile StFormat          myStFormatInStream;//!< source format information retrieved from stream
+    volatile StCubemap         myCubemapByUser;   //!< source cubemap format specified by user
 
 };
 

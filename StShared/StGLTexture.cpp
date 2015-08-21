@@ -451,9 +451,23 @@ bool StGLTexture::create(StGLContext&   theCtx,
     }
 #endif
 
-    theCtx.core20fwd->glTexImage2D(myTarget, 0, anInternalFormat,
-                                   mySizeX, mySizeY, 0,
-                                   theDataFormat, GL_UNSIGNED_BYTE, theData);
+    if(myTarget == GL_TEXTURE_CUBE_MAP) {
+        const GLenum aTargets[6] = { GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+                                     GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+                                     GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+                                     GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+                                     GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+                                     GL_TEXTURE_CUBE_MAP_NEGATIVE_Z };
+        for(int aTargetIter = 0; aTargetIter < 6; ++aTargetIter) {
+            theCtx.core20fwd->glTexImage2D(aTargets[aTargetIter], 0, anInternalFormat,
+                                       mySizeX, mySizeY, 0,
+                                       theDataFormat, GL_UNSIGNED_BYTE, theData);
+        }
+    } else {
+        theCtx.core20fwd->glTexImage2D(myTarget, 0, anInternalFormat,
+                                       mySizeX, mySizeY, 0,
+                                       theDataFormat, GL_UNSIGNED_BYTE, theData);
+    }
 #if defined(GL_ES_VERSION_2_0)
     // proxy texture is unavailable - check for errors
     GLenum anErr = theCtx.core20fwd->glGetError();
@@ -512,11 +526,15 @@ bool StGLTexture::init(StGLContext&        theCtx,
     return fill(theCtx, theData);
 }
 
-bool StGLTexture::fill(StGLContext&        theCtx,
-                       const StImagePlane& theData,
-                       const GLsizei       theRowFrom,
-                       const GLsizei       theRowTo,
-                       const GLsizei       theBatchRows) {
+bool StGLTexture::fillPatch(StGLContext&        theCtx,
+                            const StImagePlane& theData,
+                            GLenum              theTarget,
+                            const GLsizei       theRowFrom,
+                            const GLsizei       theRowTo,
+                            const GLsizei       theBatchRows) {
+    if(theTarget == 0) {
+        theTarget = myTarget;
+    }
     if(theData.isNull() || !isValid()) {
         return false;
     }
@@ -574,7 +592,7 @@ bool StGLTexture::fill(StGLContext&        theCtx,
                 aBatchRows = aRowsRemain;
             }
 
-            theCtx.core20fwd->glTexSubImage2D(myTarget, 0,      // 0 = LOD number
+            theCtx.core20fwd->glTexSubImage2D(theTarget, 0,     // 0 = LOD number
                                               0, aRow,          // a texel offset in the (x, y) direction
                                               aPatchWidth, aBatchRows,
                                               aPixelFormat,     // format of the pixel data
@@ -593,7 +611,7 @@ bool StGLTexture::fill(StGLContext&        theCtx,
 
         GLsizei aPatchWidth = stMin(GLsizei(theData.getSizeX()), getSizeX());
         for(GLsizei aRow = theRowFrom; aRow < aRowTo; ++aRow) {
-            theCtx.core20fwd->glTexSubImage2D(myTarget, 0,      // 0 = LOD number
+            theCtx.core20fwd->glTexSubImage2D(theTarget, 0,     // 0 = LOD number
                                               0, aRow,          // a texel offset in the (x, y) direction
                                               aPatchWidth, 1,   // the (width, height) of the texture sub-image
                                               aPixelFormat,     // format of the pixel data

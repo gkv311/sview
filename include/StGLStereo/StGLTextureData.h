@@ -65,8 +65,15 @@ class StGLTextureData {
     /**
      * @return format of source data
      */
-    inline StFormat getSourceFormat() const {
+    ST_LOCAL StFormat getSourceFormat() const {
         return mySrcFormat;
+    }
+
+    /**
+     * @return format of source data
+     */
+    ST_LOCAL StCubemap getCubemapFormat() const {
+        return myCubemapFormat;
     }
 
     /**
@@ -113,12 +120,14 @@ class StGLTextureData {
      * @param theDataR    frame which contains right view (optional)
      * @param theStParams handle to associated data
      * @param theFormat   stereo layout in data
+     * @param theCubemap  cubemap format
      * @param thePts      presentation timestamp
      */
     ST_CPPEXPORT void updateData(const StImage&                  theDataL,
                                  const StImage&                  theDataR,
                                  const StHandle<StStereoParams>& theStParams,
                                  const StFormat                  theFormat,
+                                 const StCubemap                 theCubemap,
                                  const double                    thePts);
 
     /**
@@ -164,6 +173,7 @@ class StGLTextureData {
     StHandle<StStereoParams> myStParams;
     double                   myPts;           //!< presentation timestamp
     StFormat                 mySrcFormat;
+    StCubemap                myCubemapFormat;
 
     GLsizei                  myFillFromRow;
     GLsizei                  myFillRows;

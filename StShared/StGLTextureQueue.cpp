@@ -54,6 +54,7 @@ bool StGLTextureQueue::push(const StImage&     theSrcDataLeft,
                             const StImage&     theSrcDataRight,
                             const StHandle<StStereoParams>& theStParams,
                             const StFormat     theSrcFormat,
+                            const StCubemap    theSrcCubemap,
                             const double       theSrcPTS) {
     if(isFull()) {
         return false;
@@ -66,6 +67,7 @@ bool StGLTextureQueue::push(const StImage&     theSrcDataLeft,
                            theSrcDataRight,
                            theStParams,
                            theSrcFormat,
+                           theSrcCubemap,
                            theSrcPTS);
     myMutexSrcFormat.lock();
         myCurrSrcFormat = myDataBack->getSourceFormat();

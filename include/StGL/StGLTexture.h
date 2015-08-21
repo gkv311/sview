@@ -85,7 +85,7 @@ class StGLTexture : public StGLResource {
      * Target - GL_TEXTURE_2D or GL_TEXTURE_CUBE_MAP.
      * 2D texture by default.
      */
-    ST_LOCAL GLenum getTarget() const { myTarget; }
+    ST_LOCAL GLenum getTarget() const { return myTarget; }
 
     /**
      * Setup texture target, can be specified only for uninitialized texture!
@@ -167,20 +167,27 @@ class StGLTexture : public StGLResource {
     ST_CPPEXPORT void setMinMagFilter(StGLContext& theCtx,
                                       const GLenum theMinMagFilter);
 
+    ST_LOCAL bool fill(StGLContext&        theCtx,
+                       const StImagePlane& theData) {
+        return fillPatch(theCtx, theData, myTarget, 0, 0);
+    }
+
     /**
      * Fill the texture with the image plane.
      * @param theCtx       current context
      * @param theData      the image plane to copy data from
+     * @param theTarget    texture target
      * @param theRowFrom   fill data from row (for both - input image plane and the texture!)
      * @param theRowTo     fill data up to the row (if zero - all rows)
      * @param theBatchRows maximal step for GL function call (greater - more effective)
      * @return true on success
      */
-    ST_CPPEXPORT bool fill(StGLContext&        theCtx,
-                           const StImagePlane& theData,
-                           const GLsizei       theRowFrom   = 0,
-                           const GLsizei       theRowTo     = 0,
-                           const GLsizei       theBatchRows = 128);
+    ST_CPPEXPORT bool fillPatch(StGLContext&        theCtx,
+                                const StImagePlane& theData,
+                                const GLenum        theTarget,
+                                const GLsizei       theRowFrom,
+                                const GLsizei       theRowTo,
+                                const GLsizei       theBatchRows = 128);
 
     /**
      * @return GL texture ID.
