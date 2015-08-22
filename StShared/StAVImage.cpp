@@ -564,7 +564,7 @@ bool StAVImage::save(const StString& theFilePath,
             myCodecCtx->height  = (int )anImage.getSizeY();
             myCodecCtx->time_base.num = 1;
             myCodecCtx->time_base.den = 1;
-            myCodecCtx->qmin = myCodecCtx->qmax = 10; // quality factor - lesser is better
+            myCodecCtx->qmin = myCodecCtx->qmax = 5; // quality factor - lesser is better
             break;
         }
         case ST_TYPE_NONE:
