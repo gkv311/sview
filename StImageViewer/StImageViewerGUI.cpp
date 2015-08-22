@@ -1129,7 +1129,7 @@ void StImageViewerGUI::stglResize(const StGLBoxPx& theRectPx) {
 
     if(myPanelUpper != NULL) {
         myPanelUpper->changeRectPx().right() = aSizeX;
-        myIsMinimalGUI = myWindow->isMovable() && !isMobile()
+        myIsMinimalGUI = (myWindow->isMovable() || myWindow->hasFullscreenMode()) && !isMobile()
                      && (aSizeY < scale(400) || aSizeX < scale(400));
     }
     if(myPanelBottom != NULL) {
