@@ -108,11 +108,62 @@ void StImageLoader::metadataFromExif(const StHandle<StExifDir>& theDir,
 
 inline StHandle<StImage> scaledImage(StHandle<StImageFile>& theRef,
                                      const size_t           theMaxSizeX,
-                                     const size_t           theMaxSizeY) {
+                                     const size_t           theMaxSizeY,
+                                     StCubemap              theCubemap,
+                                     StPairRatio            thePairRatio) {
     if(theRef->isNull()) {
         return theRef;
-    } else if(theRef->getSizeX() <= theMaxSizeX
-           && theRef->getSizeY() <= theMaxSizeY) {
+    }
+
+    if(theCubemap == StCubemap_Packed) {
+        size_t aSizesY[4] = {};
+        bool toResize = false;
+        size_t aMulX = (thePairRatio == StPairRatio_HalfWidth)  ? 2 : 1;
+        size_t aMulY = (thePairRatio == StPairRatio_HalfHeight) ? 2 : 1;
+        for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
+            const StImagePlane& aPlane = theRef->getPlane(aPlaneId);
+            aSizesY[aPlaneId] = stMin(aPlane.getSizeX() / (6 * aMulX), theMaxSizeY);
+            if(aSizesY[aPlaneId] != aPlane.getSizeY() * aMulY) {
+                const size_t aSizeAlt = stMin(aPlane.getSizeY(), theMaxSizeY) * aMulY;
+                aSizesY[aPlaneId] = stMax(aSizesY[aPlaneId], aSizeAlt);
+                toResize = true;
+            }
+        }
+        if(!toResize) {
+            return theRef;
+        }
+
+        StHandle<StImage> anImage = new StImage();
+        anImage->setColorModel(theRef->getColorModel());
+        anImage->setColorScale(theRef->getColorScale());
+
+        double aRatioX = double(aSizesY[0] * 6 * aMulX) / double(theRef->getSizeX());
+        double aRatioY = double(aSizesY[0]     * aMulY) / double(theRef->getSizeY());
+        anImage->setPixelRatio(float(double(theRef->getPixelRatio()) * aRatioY / aRatioX));
+        for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
+            const StImagePlane& aFromPlane = theRef->getPlane(aPlaneId);
+            if(aFromPlane.isNull()) {
+                continue;
+            }
+
+            if(!anImage->changePlane(aPlaneId).initTrash(aFromPlane.getFormat(),
+                                                         aSizesY[aPlaneId] * 6 * aMulX,
+                                                         aSizesY[aPlaneId]     * aMulY)) {
+                ST_ERROR_LOG("Scale failed!");
+                return theRef;
+            }
+        }
+
+        if(!StAVImage::resize(*theRef, *anImage)) {
+            ST_ERROR_LOG("Scale failed!");
+            return theRef;
+        }
+        theRef->close();
+        return anImage;
+    }
+
+    if(theRef->getSizeX() <= theMaxSizeX
+    && theRef->getSizeY() <= theMaxSizeY) {
         return theRef;
     }
 
@@ -314,23 +365,15 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         aSizeX2 = anImageFileR->getSizeX();
         aSizeY2 = anImageFileR->getSizeY();
     }
+    StPairRatio aPairRatio = StPairRatio_1;
     if(anImageFileR->isNull()) {
-        switch(aSrcFormatCurr) {
-            case StFormat_SideBySide_LR:
-            case StFormat_SideBySide_RL:
-            case StFormat_Columns: {
-                aSizeXLim *= 2;
-                aSizeX1   /= 2;
-                break;
-            }
-            case StFormat_TopBottom_LR:
-            case StFormat_TopBottom_RL:
-            case StFormat_Rows: {
-                aSizeYLim *= 2;
-                aSizeY1   /= 2;
-                break;
-            }
-            default: break;
+        aPairRatio = st::formatToPairRatio(aSrcFormatCurr);
+        if(aPairRatio == StPairRatio_HalfWidth) {
+            aSizeXLim *= 2;
+            aSizeX1   /= 2;
+        } else if(aPairRatio == StPairRatio_HalfHeight) {
+            aSizeYLim *= 2;
+            aSizeY1   /= 2;
         }
     }
     if(aSrcCubemap == StCubemap_Packed) {
@@ -349,8 +392,8 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         }
     }
 
-    StHandle<StImage> anImageL = scaledImage(anImageFileL, aSizeXLim, aSizeYLim);
-    StHandle<StImage> anImageR = scaledImage(anImageFileR, aSizeXLim, aSizeYLim);
+    StHandle<StImage> anImageL = scaledImage(anImageFileL, aSizeXLim, aSizeYLim, aSrcCubemap, aPairRatio);
+    StHandle<StImage> anImageR = scaledImage(anImageFileR, aSizeXLim, aSizeYLim, aSrcCubemap, aPairRatio);
 #ifdef ST_DEBUG
     const double aScaleTimeMSec = aLoadTimer.getElapsedTimeInMilliSec() - aLoadTimeMSec;
     if(anImageL != anImageFileL) {

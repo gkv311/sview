@@ -32,6 +32,12 @@ enum StFormat {
     StFormat_NB
 };
 
+enum StPairRatio {
+    StPairRatio_1,
+    StPairRatio_HalfWidth,
+    StPairRatio_HalfHeight,
+};
+
 enum StCubemap {
     StCubemap_AUTO = -1, //!< try to detect from metadata
     StCubemap_OFF  =  0, //!< no cubemap data
@@ -93,6 +99,21 @@ namespace st {
      * @return autodetected mono/stereo format
      */
     ST_CPPEXPORT StFormat formatFromRatio(const GLfloat theRatio);
+
+    ST_LOCAL inline StPairRatio formatToPairRatio(const StFormat theFormat) {
+        switch(theFormat) {
+            case StFormat_SideBySide_LR:
+            case StFormat_SideBySide_RL:
+            case StFormat_Columns:
+                return StPairRatio_HalfWidth;
+            case StFormat_TopBottom_LR:
+            case StFormat_TopBottom_RL:
+            case StFormat_Rows:
+                return StPairRatio_HalfHeight;
+            default:
+                return StPairRatio_1;
+        }
+    }
 
 };
 

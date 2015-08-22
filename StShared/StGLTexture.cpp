@@ -492,8 +492,11 @@ bool StGLTexture::create(StGLContext&   theCtx,
     theCtx.core20fwd->glGetTexLevelParameteriv(aTarget, 0, GL_TEXTURE_HEIGHT,          &aResSizeY);
     theCtx.core20fwd->glGetTexLevelParameteriv(aTarget, 0, GL_TEXTURE_INTERNAL_FORMAT, &aResFormat);
 #ifdef ST_DEBUG_TEXTURES
-    ST_DEBUG_LOG("Created StGLTexture " + aResSizeX + " x "+ aResSizeY
-               + " (format " + formatInternalFormat(aResFormat) + ')');
+    ST_DEBUG_LOG("Created StGLTexture "
+               + aResSizeX + " x "+ aResSizeY
+               + " (format " + formatInternalFormat(aResFormat)
+               + (myTarget == GL_TEXTURE_CUBE_MAP ? " [CUBEMAP]" : "")
+               + ")");
 #endif
 #endif
 

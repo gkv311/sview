@@ -400,12 +400,23 @@ void StGLTextureData::updateData(const StImage&                  theDataL,
         }
     }
     if(myCubemapFormat == StCubemap_Packed) {
-        if(!myDataL.isNull()
-         && myDataL.getSizeX() / 6 != myDataL.getSizeY()) {
-            myCubemapFormat = StCubemap_OFF;
-        } else if(!myDataR.isNull()
-                && myDataR.getSizeX() / 6 != myDataR.getSizeY()) {
-            myCubemapFormat = StCubemap_OFF;
+        if(!myDataL.isNull()) {
+            for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
+                const StImagePlane& aPlane = myDataL.getPlane(aPlaneId);
+                if(aPlane.getSizeX() / 6 != aPlane.getSizeY()) {
+                    myCubemapFormat = StCubemap_OFF;
+                    break;
+                }
+            }
+        }
+        if(!myDataR.isNull()) {
+            for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
+                const StImagePlane& aPlane = myDataR.getPlane(aPlaneId);
+                if(aPlane.getSizeX() / 6 != aPlane.getSizeY()) {
+                    myCubemapFormat = StCubemap_OFF;
+                    break;
+                }
+            }
         }
     }
 }
