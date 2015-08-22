@@ -201,7 +201,12 @@ class StGLProgramMatrix : public StGLResource {
             StArrayList< StHandle<StGLVertexShader> >& aShaders = myVShaderParts[aSectionIter];
             for(size_t aShaderIter = 0; aShaderIter < aSources.size(); ++aShaderIter) {
                 const StString& aSource = aSources[aShaderIter];
-                StHandle<StGLVertexShader> aShader = new StGLVertexShader(myTitle + "::VS" + aSectionIter + "::" + aShaderIter);
+                StHandle<StGLVertexShader> aShader;
+                if(aSource.isEmpty()) {
+                    aShaders.add(aShader);
+                    continue;
+                }
+                aShader = new StGLVertexShader(myTitle + "::VS" + aSectionIter + "::" + aShaderIter);
                 aShader->init(theCtx, aSource.toCString());
                 aShaders.add(aShader);
             }
@@ -223,7 +228,12 @@ class StGLProgramMatrix : public StGLResource {
             StArrayList< StHandle<StGLFragmentShader> >& aShaders = myFShaderParts[aSectionIter];
             for(size_t aShaderIter = 0; aShaderIter < aSources.size(); ++aShaderIter) {
                 const StString& aSource = aSources[aShaderIter];
-                StHandle<StGLFragmentShader> aShader = new StGLFragmentShader(myTitle + "::FS" + aSectionIter + "::" + aShaderIter);
+                StHandle<StGLFragmentShader> aShader;
+                if(aSource.isEmpty()) {
+                    aShaders.add(aShader);
+                    continue;
+                }
+                aShader = new StGLFragmentShader(myTitle + "::FS" + aSectionIter + "::" + aShaderIter);
                 aShader->init(theCtx, aSource.toCString());
                 aShaders.add(aShader);
             }

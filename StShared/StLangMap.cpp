@@ -60,10 +60,10 @@ bool StLangMap::read(const char* theContent,
             continue;
         }
 
-        bool isTemp = false;
+        //bool isTemp = false;
         if(*aCharIter == stUtf32_t('?')) {
             ++aCharIter; // skip TODO flag
-            isTemp = true;
+            //isTemp = true;
         }
 
         char* anEndPtr = NULL;
