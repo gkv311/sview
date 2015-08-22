@@ -18,17 +18,11 @@ aDebVersion=${YEAR}.${MONTH}-1
 aDebSrcRoot=temp/sview-${aDebVersion}
 aCurrentDate=`date --rfc-2822`
 
-# Ubuntu  8.04 LTS (Hardy Heron)
-# Ubuntu 10.04 LTS (Lucid Lynx)
-# Ubuntu 10.10     (Maverick Meerkat)
-# Ubuntu 11.04     (Natty Narwhal)
-# Ubuntu 11.10     (Oneiric Ocelot)
-# Ubuntu 12.04 LTS (Precise Pangolin)
-# Ubuntu 12.10     (Quantal Quetzal)
-# Ubuntu 13.04     (Raring Ringtail)
-# Ubuntu 13.10     (Saucy Salamander)
-#aDistribs=("lucid" "natty" "oneiric" "precise" "quantal" "raring")
-aDistribs=("lucid" "precise" "quantal" "raring")
+# Ubuntu 14.04 LTS (Trusty Tahr)
+# Ubuntu 15.04     (Vivid Vervet)
+# Ubuntu 15.10     (Wily Werewolf)
+#aDistribs=("trusty" "vivid" "wily")
+aDistribs=("trusty" "vivid")
 
 # Debian
 #aDistribs=("stable" "unstable" "testing-proposed-updates" "experimental")
@@ -38,6 +32,7 @@ rm -f temp/*.build
 rm -f temp/*.changes
 rm -f temp/*.dsc
 rm -f temp/*.tar.gz
+rm -f temp/*.tar.xz
 
 cd ${aDebSrcRoot}
 
@@ -55,6 +50,7 @@ do
   mv -f ../*.changes ../$aDistr
   mv -f ../*.dsc     ../$aDistr
   mv -f ../*.tar.gz  ../$aDistr
+  mv -f ../*.tar.xz  ../$aDistr
 done
 
 #for aDistr in "${aDistribs[@]}"
