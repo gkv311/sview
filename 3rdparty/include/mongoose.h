@@ -65,8 +65,6 @@ struct mg_callbacks {
   int  (*websocket_data)(struct mg_connection *);
   const char * (*open_file)(const struct mg_connection *,
                              const char *path, size_t *data_len);
-  void (*init_lua)(struct mg_connection *, void *lua_context);
-  void (*upload)(struct mg_connection *, const char *file_name);
 };
 
 // Start web server.
@@ -181,11 +179,6 @@ int mg_printf(struct mg_connection *,
 
 // Send contents of the entire file together with HTTP headers.
 void mg_send_file(struct mg_connection *conn, const char *path);
-
-
-// Read data from the remote end, return number of bytes read.
-int mg_read(struct mg_connection *, void *buf, size_t len);
-
 
 // Get the value of particular HTTP header.
 //
