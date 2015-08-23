@@ -190,7 +190,7 @@ typedef struct DIR {
 
 #ifndef HAS_POLL
 struct pollfd {
-  int fd;
+  intptr_t fd;
   short events;
   short revents;
 };
@@ -853,7 +853,7 @@ static const char *next_option(const char *list, struct vec *val,
   return list;
 }
 
-static int match_prefix(const char *pattern, int pattern_len, const char *str) {
+static int match_prefix(const char *pattern, size_t pattern_len, const char *str) {
   const char *or_str;
   int i, j, len, res;
 
@@ -1647,7 +1647,7 @@ int mg_get_var(const char *data, size_t data_len, const char *name,
         assert(s >= p);
 
         // Decode variable into destination buffer
-        len = url_decode(p, (size_t)(s - p), dst, dst_len, 1);
+        len = url_decode(p, (int )(s - p), dst, (int )dst_len, 1);
 
         // Redirect error code from -1 to -2 (destination buffer too small).
         if (len == -1) {
@@ -1688,7 +1688,7 @@ int mg_get_cookie(const struct mg_connection *conn, const char *cookie_name,
           p--;
         }
         if ((size_t) (p - s) < dst_size) {
-          len = p - s;
+          len = (int )(p - s);
           mg_strlcpy(dst, s, (size_t) len + 1);
         } else {
           len = -2;
@@ -2293,7 +2293,7 @@ static char *mg_fgets(char *buf, size_t size, struct file *filep, char **p) {
     *p = eof;
     return eof;
   } else if (filep->fp != NULL) {
-    return fgets(buf, size, filep->fp);
+    return fgets(buf, (int )size, filep->fp);
   } else {
     return NULL;
   }
@@ -2671,7 +2671,7 @@ static void send_file_data(struct mg_connection *conn, struct file *filep,
       }
 
       // Read from file, exit the loop on error
-      if ((num_read = fread(buf, 1, (size_t) to_read, filep->fp)) <= 0) {
+      if ((num_read = (int )fread(buf, 1, (size_t) to_read, filep->fp)) <= 0) {
         break;
       }
 
@@ -2930,7 +2930,7 @@ static int forward_body_data(struct mg_connection *conn, FILE *fp,
     }
 
     body = conn->buf + conn->request_len + conn->consumed_content;
-    buffered_len = &conn->buf[conn->data_len] - body;
+    buffered_len = (int )(&conn->buf[conn->data_len] - body);
     assert(buffered_len >= 0);
     assert(conn->consumed_content == 0);
 
@@ -3281,12 +3281,13 @@ done:
 static int put_dir(struct mg_connection *conn, const char *path) {
   char buf[PATH_MAX];
   const char *s, *p;
+  size_t len;
   struct file file = STRUCT_FILE_INITIALIZER;
-  int len, res = 1;
+  int res = 1;
 
   for (s = p = path + 2; (p = strchr(s, '/')) != NULL; s = ++p) {
     len = p - path;
-    if (len >= (int) sizeof(buf)) {
+    if (len >= sizeof(buf)) {
       res = -1;
       break;
     }
