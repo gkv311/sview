@@ -738,8 +738,9 @@ void StVideo::checkInitVideoStreams() {
 }
 
 void StVideo::packetsLoop() {
-    double aPts     = 0.0;
-    double aPtsbar  = 10.0; /// debug variable
+#ifdef ST_DEBUG
+    double aPtsbar  = 10.0;
+#endif
     double aSeekPts = 0.0;
     bool toSeekBack = false;
     StPlayEvent_t aPlayEvent = ST_PLAYEVENT_NONE;
@@ -988,12 +989,14 @@ void StVideo::packetsLoop() {
             StThread::sleep(2);
         }
 
-        aPts = getPts();
+    #ifdef ST_DEBUG
+        const double aPts = getPts();
         if(aPts > aPtsbar) {
             aPtsbar = aPts + 10.0;
             ST_DEBUG_LOG("Current position: " + StFormatTime::formatSeconds(aPts)
                       + " from "              + StFormatTime::formatSeconds(myDuration));
         }
+    #endif
 
         // All packets sent
         if(anEmptyQueues == myPlayCtxList.size()) {
