@@ -41,7 +41,6 @@ void StSubQueue::clear() {
 StHandle<StSubItem> StSubQueue::pop(const double thePTS) {
     myMutex.lock();
     for(QueueItem* anItem = myFront; anItem != NULL;) {
-        StHandle<StSubItem> aSubItem = anItem->myItem;
         if(anItem->myItem->TimeEnd < thePTS) {
             // remove outdated items
             myFront = myFront->myNext;

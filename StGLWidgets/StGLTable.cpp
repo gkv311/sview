@@ -260,10 +260,10 @@ void StGLTable::fillFromHotKeys(const std::map< int, StHandle<StAction> >&      
     }
 
     // fill table
-    int aRowIter = 0;
     int aCol2Width    = 0;
     int aCol1MaxWidth = theMaxWidth / 2 - myItemMargins.left - myItemMargins.right;
     const StGLCorner aCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT);
+    size_t aRowIter = 0;
     for(std::map< int, StHandle<StAction> >::const_iterator anActionIter = theActions.begin();
         anActionIter != theActions.end(); ++anActionIter, ++aRowIter) {
         const StHandle<StAction>& anAction   = anActionIter->second;
@@ -310,7 +310,7 @@ void StGLTable::fillFromHotKeys(const std::map< int, StHandle<StAction> >&      
 
     // adjust width of all elements
     const size_t aRowLast = theActions.size();
-    for(size_t aRowIter = 0; aRowIter < aRowLast; ++aRowIter) {
+    for(aRowIter = 0; aRowIter < aRowLast; ++aRowIter) {
         StGLTableItem& anItemLab = changeElement(theRowId + (int )aRowIter, theColId);
         anItemLab.getItem()->changeRectPx().right() = anItemLab.getItem()->getRectPx().left() + aCol1MaxWidth;
 

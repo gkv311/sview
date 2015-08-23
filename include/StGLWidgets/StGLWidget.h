@@ -182,9 +182,9 @@ class StGLWidget {
     /**
      * Assign new area rectangle for modification and set IsResized flag on.
      */
-    ST_LOCAL void setRectPx(const StRectI_t& rectPx) {
+    ST_LOCAL void setRectPx(const StRectI_t& theRectPx) {
         myIsResized = true;
-        this->rectPx = rectPx;
+        this->rectPx = theRectPx;
     }
 
     /**
@@ -347,8 +347,8 @@ class StGLWidget {
     /**
      * @param userData user-defined data
      */
-    inline void setUserData(const size_t userData) {
-        this->userData = userData;
+    inline void setUserData(const size_t theUserData) {
+        this->userData = theUserData;
     }
 
     /**

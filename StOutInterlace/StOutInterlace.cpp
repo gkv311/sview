@@ -276,8 +276,8 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
 #endif
 
     // detect connected displays
-    bool myIsMonReversed = false;
-    StHandle<StMonitor> aMonInterlaced = StOutInterlace::getHInterlaceMonitor(aMonitors, myIsMonReversed);
+    bool isDummyReversed= false;
+    StHandle<StMonitor> aMonInterlaced = StOutInterlace::getHInterlaceMonitor(aMonitors, isDummyReversed);
     if(!aMonInterlaced.isNull()) {
         aDevRow->Priority = ST_DEVICE_SUPPORT_PREFER;
     }
@@ -300,7 +300,7 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
         StMonitor aMonitor = aMonitors[aRect.center()];
         if(params.BindToMon->getValue()
         && !aMonInterlaced.isNull()
-        && !isInterlacedMonitor(aMonitor, myIsMonReversed)) {
+        && !isInterlacedMonitor(aMonitor, isDummyReversed)) {
             aMonitor = *aMonInterlaced;
         }
         if(isLoadedPosition) {
@@ -318,6 +318,13 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
             aRect = defaultRect(&aMonitor);
         }
         StWindow::setPlacement(aRect);
+    }
+
+    // setup myIsMonReversed value for actual placement
+    if(!aMonInterlaced.isNull()) {
+        myIsMonReversed = false;
+        StMonitor aMonitor = aMonitors[StWindow::getPlacement().center()];
+        isInterlacedMonitor(aMonitor, myIsMonReversed);
     }
 
     // load device settings
@@ -850,20 +857,21 @@ void StOutInterlace::doSetBindToMonitor(const bool theValue) {
     const StSearchMonitors& aMonitors = StWindow::getMonitors();
     StRectI_t aRect = StWindow::getPlacement();
     StMonitor aMon  = aMonitors[aRect.center()];
-    StHandle<StMonitor> anInterlacedMon = StOutInterlace::getHInterlaceMonitor(aMonitors, myIsMonReversed);
-
-    if(isMovable()) {
+    if(isInterlacedMonitor(aMon, myIsMonReversed)
+    || !isMovable()) {
         return;
     }
 
-    if(!anInterlacedMon.isNull()
-    && !isInterlacedMonitor(aMon, myIsMonReversed)) {
-        int aWidth  = aRect.width();
-        int aHeight = aRect.height();
-        aRect.left()   = anInterlacedMon->getVRect().left() + 256;
-        aRect.right()  = aRect.left() + aWidth;
-        aRect.top()    = anInterlacedMon->getVRect().top() + 256;
-        aRect.bottom() = aRect.top() + aHeight;
-        StWindow::setPlacement(aRect);
+    StHandle<StMonitor> anInterlacedMon = StOutInterlace::getHInterlaceMonitor(aMonitors, myIsMonReversed);
+    if(anInterlacedMon.isNull()) {
+        return;
     }
+
+    int aWidth  = aRect.width();
+    int aHeight = aRect.height();
+    aRect.left()   = anInterlacedMon->getVRect().left() + 256;
+    aRect.right()  = aRect.left() + aWidth;
+    aRect.top()    = anInterlacedMon->getVRect().top() + 256;
+    aRect.bottom() = aRect.top() + aHeight;
+    StWindow::setPlacement(aRect);
 }

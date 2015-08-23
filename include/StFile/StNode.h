@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -67,8 +67,8 @@ class StNode : public StArrayList<StNode*> {
         return subPath;
     }
 
-    virtual void setSubPath(const StString& subPath) {
-        this->subPath = subPath;
+    virtual void setSubPath(const StString& theSubPath) {
+        this->subPath = theSubPath;
     }
 
     virtual StString getPath() const {

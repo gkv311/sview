@@ -69,8 +69,8 @@ class StOpenInfo {
     /**
      * Automatically create formatted string from MIME.
      */
-    void setMIME(const StMIME& mime) {
-        this->mime = mime.toString();
+    void setMIME(const StMIME& theMime) {
+        this->mime = theMime.toString();
     }
 
     /**
@@ -90,8 +90,8 @@ class StOpenInfo {
     /**
      * Set path to open.
      */
-    void setPath(const StString& path) {
-        this->path = path;
+    void setPath(const StString& thePath) {
+        this->path = thePath;
     }
 
     /**
