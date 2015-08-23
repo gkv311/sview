@@ -238,6 +238,14 @@ class StGLWidget {
     }
 
     /**
+     * Check visibility of this widget taking into account visibility of parents.
+     */
+    ST_LOCAL bool isVisibleWithParents() const {
+        return myOpacity > 0.0f
+            && (myParent == NULL || myParent->isVisibleWithParents());
+    }
+
+    /**
      * Return opacity value.
      */
     ST_LOCAL float getOpacity() const {

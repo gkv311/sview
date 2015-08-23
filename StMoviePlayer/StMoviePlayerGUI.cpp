@@ -1539,7 +1539,7 @@ namespace {
     inline bool isPointIn(const StGLWidget* theWidget,
                           const StPointD_t& theCursorZo) {
         return theWidget != NULL
-            && theWidget->isVisible()
+            && theWidget->isVisibleWithParents()
             && theWidget->isPointIn(theCursorZo);
     }
 
