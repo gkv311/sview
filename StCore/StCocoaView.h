@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -62,6 +62,12 @@
          * This method should be called from main thread!
          */
         - (void ) goToWindowed: (id ) theSender;
+
+        /**
+         * Update window caption.
+         * This method should be called from main thread!
+         */
+        - (void ) updateTitle: (id ) theSender;
 
     @end
 #else

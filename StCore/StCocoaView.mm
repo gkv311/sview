@@ -25,6 +25,8 @@
 #include <StStrings/StLogger.h>
 #include <StTemplates/StRect.h>
 
+#include <StCocoa/StCocoaString.h>
+
 #if !defined(MAC_OS_X_VERSION_10_7) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_7)
 @interface NSOpenGLView (LionAPI)
     - (void )setWantsBestResolutionOpenGLSurface: (BOOL )theFlag;
@@ -449,6 +451,19 @@
         [aWin setLevel: NSNormalWindowLevel];
         [aWin setFrame: myRectWindowed display: YES];
         [aWin makeFirstResponder: self];
+
+        StCocoaString aTitle(myStWin->getTitle());
+        [aWin setTitle: aTitle.toStringNs()];
+    }
+
+    - (void ) updateTitle: (id ) theSender {
+        NSWindow* aWin = [self window];
+        if(aWin == NULL) {
+            return;
+        }
+
+        StCocoaString aTitle(myStWin->getTitle());
+        [aWin setTitle: aTitle.toStringNs()];
     }
 
     - (NSDragOperation ) draggingEntered: (id <NSDraggingInfo> ) theSender {

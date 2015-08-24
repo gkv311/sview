@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -59,6 +59,7 @@ class StWindowImpl {
                           const StNativeWin_t                theParentWindow);
     ST_LOCAL ~StWindowImpl();
     ST_LOCAL void close();
+    ST_LOCAL const StString& getTitle() const { return myWindowTitle; }
     ST_LOCAL void setTitle(const StString& theTitle);
     ST_LOCAL bool hasDepthBuffer() const { return attribs.GlDepthSize != 0; }
     ST_LOCAL void getAttributes(StWinAttr* theAttributes) const;

@@ -40,10 +40,16 @@
 
 void StWindowImpl::setTitle(const StString& theTitle) {
     myWindowTitle = theTitle;
-    if(myMaster.hWindow != NULL) {
-        StCocoaLocalPool aLocalPool;
-        StCocoaString aTitle(myWindowTitle);
-        [myMaster.hWindow setTitle: aTitle.toStringNs()];
+    if(myMaster.hViewGl == NULL) {
+        return;
+    }
+
+    if([NSThread isMainThread]) {
+        [myMaster.hViewGl updateTitle: NULL];
+    } else {
+        [myMaster.hViewGl performSelectorOnMainThread: @selector(updateTitle:)
+                                           withObject: NULL
+                                        waitUntilDone: YES];
     }
 }
 
@@ -429,11 +435,6 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
                                                    withObject: NULL
                                                 waitUntilDone: YES];
             }
-        }
-        if(myMaster.hWindow != NULL) {
-            StCocoaLocalPool aLocalPool;
-            StCocoaString aTitle(myWindowTitle);
-            [myMaster.hWindow setTitle: aTitle.toStringNs()];
         }
     }
 }
