@@ -1554,10 +1554,18 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
         || aParams.isNull()
         || myVisibilityTimer.getElapsedTime() < 2.0
         || (myPanelUpper  != NULL && myPanelUpper ->isPointIn(theCursor))
-        || (myPanelBottom != NULL && int(aRootSizeY * theCursor.y()) > (aRootSizeY - 2 * myPanelBottom->getRectPx().height()))
+        || (myPanelBottom != NULL && int(aRootSizeY * theCursor.y()) > (aRootSizeY - 2 * myPanelBottom->getRectPx().height())
+                                  && theCursor.y() < 1.0)
         || (mySeekBar     != NULL && mySeekBar    ->isPointIn(theCursor))
         || (myPlayList    != NULL && toShowPlayList && myPlayList->isPointIn(theCursor))
         || (myMenuRoot    != NULL && myMenuRoot->isActive());
+    if(!myIsVisibleGUI
+     && myBtnPlay != NULL
+     && myBtnPlay->getFaceId() == 0
+     && (theCursor.x() < 0.0 || theCursor.x() > 1.0
+      || theCursor.y() < 0.0 || theCursor.y() > 1.0)) {
+        myIsVisibleGUI = true;
+    }
     const float anOpacity = (float )myVisLerp.perform(myIsVisibleGUI, false);
     if(theIsMouseMoved) {
         myVisibilityTimer.restart();
