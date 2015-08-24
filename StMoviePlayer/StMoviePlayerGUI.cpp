@@ -1548,8 +1548,10 @@ namespace {
 void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
                                      bool              theIsMouseMoved) {
     const bool toShowPlayList = myPlugin->params.ToShowPlayList->getValue();
-    const int aRootSizeY = getRectPx().height();
+    const int  aRootSizeY     = getRectPx().height();
+    StHandle<StStereoParams> aParams = myImage->getSource();
     myIsVisibleGUI = theIsMouseMoved
+        || aParams.isNull()
         || myVisibilityTimer.getElapsedTime() < 2.0
         || (myPanelUpper  != NULL && myPanelUpper ->isPointIn(theCursor))
         || (myPanelBottom != NULL && int(aRootSizeY * theCursor.y()) > (aRootSizeY - 2 * myPanelBottom->getRectPx().height()))

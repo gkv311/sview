@@ -1033,7 +1033,9 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
     const bool hasBottomPanel =  toShowToolbar
                              &&  myPanelBottom != NULL;
 
+    StHandle<StStereoParams> aParams = myImage->getSource();
     myIsVisibleGUI = isMouseActive
+        || aParams.isNull()
         || myVisibilityTimer.getElapsedTime() < 2.0
         || (hasUpperPanel  && myPanelUpper ->isPointIn(theCursor))
         || (hasBottomPanel && myPanelBottom->isPointIn(theCursor))
