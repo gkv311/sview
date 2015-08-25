@@ -1388,15 +1388,15 @@ StMoviePlayerGUI::~StMoviePlayerGUI() {
 }
 
 void StMoviePlayerGUI::stglUpdate(const StPointD_t& thePointZo,
-                                  const GLfloat theProgress,
-                                  const double thePTS) {
+                                  bool              theIsMouseMoved) {
+    if(mySeekBar != NULL
+    && myPanelBottom != NULL
+    && myTimeBox->wasResized()) {
+        stglResizeSeekBar();
+    }
+
+    setVisibility(thePointZo, theIsMouseMoved);
     StGLRootWidget::stglUpdate(thePointZo);
-    if(mySubtitles != NULL) {
-        mySubtitles->setPTS(thePTS);
-    }
-    if(mySeekBar != NULL) {
-        mySeekBar->setProgress(theProgress);
-    }
     if(myVolumeBar != NULL) {
         char aBuff[128];
         stsprintf(aBuff, 128, "%+03.0f dB", myPlugin->params.AudioGain->getValue());
@@ -1456,6 +1456,11 @@ void StMoviePlayerGUI::stglResize(const StGLBoxPx& theRectPx) {
         }
     }
 
+    stglResizeSeekBar();
+    StGLRootWidget::stglResize(theRectPx);
+}
+
+void StMoviePlayerGUI::stglResizeSeekBar() {
     if(mySeekBar != NULL
     && myPanelBottom != NULL) {
         const int aPanelSizeY = myPanelBottom->getRectPx().height();
@@ -1477,7 +1482,7 @@ void StMoviePlayerGUI::stglResize(const StGLBoxPx& theRectPx) {
             mySeekBar->changeRectPx().right() = aPanelSizeX - anXOffset - myBottomBarNbRight * myIconStep;
             if(anXSpace2 >= anMinXSpace) {
                 // wide mode
-                mySeekBar->changeRectPx().right() -= myIconStep * 2;
+                mySeekBar->changeRectPx().right() -= aBoxWidth;
                 myTimeBox->changeRectPx().moveLeftTo(myBottomBarNbRight * (-myIconStep));
                 myTimeBox->setOverlay(false);
             } else {
@@ -1502,8 +1507,6 @@ void StMoviePlayerGUI::stglResize(const StGLBoxPx& theRectPx) {
             }
         }
     }
-
-    StGLRootWidget::stglResize(theRectPx);
 }
 
 bool StMoviePlayerGUI::toHideCursor() {

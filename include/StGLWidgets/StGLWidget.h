@@ -197,6 +197,11 @@ class StGLWidget {
     }
 
     /**
+     * Return true if widget has been marked resized, but not yet updated.
+     */
+    ST_LOCAL bool wasResized() const { return myIsResized; }
+
+    /**
      * Function returns <i>global</i> area rectangle (in pixels).
      * @return rectangle
      */

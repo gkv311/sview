@@ -50,8 +50,9 @@ class StGLTextArea : public StGLWidget {
 
     /**
      * @param theText new text to draw
+     * @return true if text has been changed
      */
-    ST_CPPEXPORT void setText(const StString& theText);
+    ST_CPPEXPORT bool setText(const StString& theText);
 
     /**
      * Setup alignment style.

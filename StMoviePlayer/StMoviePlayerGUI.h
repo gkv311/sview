@@ -112,8 +112,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
 
     using StGLRootWidget::stglUpdate;
     ST_LOCAL void stglUpdate(const StPointD_t& thePointZo,
-                             const GLfloat     theProgress,
-                             const double      thePTS);
+                             bool              theIsMouseMoved);
     ST_LOCAL void setVisibility(const StPointD_t& theCursor,
                                 bool              theIsMouseMoved);
 
@@ -124,6 +123,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
 
         public: //! @name menu update routines
 
+    ST_LOCAL void stglResizeSeekBar();
     ST_LOCAL void updateOpenALDeviceMenu();
     ST_LOCAL void updateAudioStreamsMenu    (const StHandle< StArrayList<StString> >& theStreamsList,
                                              const bool theHasVideo);

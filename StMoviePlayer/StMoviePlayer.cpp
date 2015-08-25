@@ -21,6 +21,7 @@
 #include "StMoviePlayerGUI.h"
 #include "StMoviePlayerStrings.h"
 #include "StVideo/StVideo.h"
+#include "StSeekBar.h"
 #include "StTimeBox.h"
 
 #include <StImage/StImageFile.h>
@@ -1272,6 +1273,23 @@ void StMoviePlayer::beforeDraw() {
         return;
     }
 
+    if(myVideo->isDisconnected() || myToUpdateALList) {
+        const StString aPrevDev = params.alDevice->getTitle();
+        params.alDevice->initList();
+        myGUI->updateOpenALDeviceMenu();
+        // switch audio device
+        if(!params.alDevice->init(aPrevDev)) {
+            // select first existing device if any
+            params.alDevice->init(params.alDevice->getTitle());
+        }
+        myVideo->switchAudioDevice(params.alDevice->getTitle());
+        myToUpdateALList = false;
+    }
+    if(myPlayList->isRecentChanged()) {
+        myGUI->updateRecentMenu();
+    }
+
+    // fetch Open File operation results
     if(myOpenDialog->hasResults()) {
         StHandle<StFileNode> aCurrFile = myPlayList->getCurrentFile();
         StString aFilePath;
@@ -1309,6 +1327,7 @@ void StMoviePlayer::beforeDraw() {
         myOpenDialog->resetResults();
     }
 
+    // re-create GUI when necessary
     const bool hasVideoStream = myVideo->hasVideoStream();
     if(params.ScaleHiDPI->setValue(myWindow->getScaleFactor())
     || myToRecreateMenu) {
@@ -1355,7 +1374,71 @@ void StMoviePlayer::beforeDraw() {
         }
         myToCheckUpdates = false;
     }
-    myGUI->setVisibility(myWindow->getMousePos(), isMouseMove || !hasVideoStream);
+
+    double aDuration = 0.0;
+    double aPts      = 0.0;
+    bool isVideoPlayed = false, isAudioPlayed = false;
+    const bool   isPlaying = myVideo->getPlaybackState(aDuration, aPts, isVideoPlayed, isAudioPlayed);
+    const double aPosition = (aDuration > 0.0) ? (aPts / aDuration) : 0.0;
+    if(myGUI->myBtnPlay != NULL) {
+        myGUI->myBtnPlay->setFaceId(isPlaying ? 1 : 0); // set play/pause
+    }
+    if(myGUI->myTimeBox != NULL) {
+        myGUI->myTimeBox->stglUpdateTime(aPts, aDuration);
+    }
+    if(myGUI->mySubtitles != NULL) {
+        myGUI->mySubtitles->setPTS(aPts);
+    }
+    if(myGUI->mySeekBar != NULL) {
+        myGUI->mySeekBar->setProgress(GLfloat(aPosition));
+    }
+    myGUI->stglUpdate(myWindow->getMousePos(), isMouseMove || !hasVideoStream);
+
+    // prevent display going to sleep
+    bool toBlockSleepDisplay = false;
+    bool toBlockSleepSystem  = false;
+    if(myIsBenchmark) {
+        toBlockSleepDisplay = true;
+        toBlockSleepSystem  = true;
+    } else {
+        switch(params.blockSleeping->getValue()) {
+            case BLOCK_SLEEP_NEVER: {
+                toBlockSleepDisplay = false;
+                toBlockSleepSystem  = false;
+                break;
+            }
+            case BLOCK_SLEEP_ALWAYS: {
+                toBlockSleepDisplay = true;
+                toBlockSleepSystem  = true;
+                break;
+            }
+            case BLOCK_SLEEP_PLAYBACK: {
+                toBlockSleepDisplay = isVideoPlayed;
+                toBlockSleepSystem  = isPlaying;
+                break;
+            }
+            case BLOCK_SLEEP_FULLSCREEN: {
+                toBlockSleepDisplay = myWindow->isFullScreen();;
+                toBlockSleepSystem  = toBlockSleepDisplay;
+                break;
+            }
+        }
+    }
+
+    const StWinAttr anAttribs[] = {
+        StWinAttr_ToBlockSleepSystem,  (StWinAttr )toBlockSleepSystem,
+        StWinAttr_ToBlockSleepDisplay, (StWinAttr )toBlockSleepDisplay,
+        StWinAttr_NULL
+    };
+    myWindow->setAttributes(anAttribs);
+    myWindow->showCursor(!myGUI->toHideCursor());
+
+    // check for mono state
+    StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
+    if(!aParams.isNull()) {
+        myWindow->setStereoOutput(!aParams->isMono()
+                            && (myGUI->myImage->params.displayMode->getValue() == StGLImageRegion::MODE_STEREO));
+    }
 }
 
 void StMoviePlayer::doUpdateOpenALDeviceList(const size_t ) {
@@ -1381,87 +1464,7 @@ void StMoviePlayer::stglDraw(unsigned int theView) {
         return;
     }
 
-    if(myVideo->isDisconnected() || myToUpdateALList) {
-        const StString aPrevDev = params.alDevice->getTitle();
-        params.alDevice->initList();
-        myGUI->updateOpenALDeviceMenu();
-        // switch audio device
-        if(!params.alDevice->init(aPrevDev)) {
-            // select first existing device if any
-            params.alDevice->init(params.alDevice->getTitle());
-        }
-        myVideo->switchAudioDevice(params.alDevice->getTitle());
-        myToUpdateALList = false;
-    }
-    if(myPlayList->isRecentChanged()) {
-        myGUI->updateRecentMenu();
-    }
-
     myGUI->getCamera()->setView(theView);
-    if(theView == ST_DRAW_LEFT
-    || theView == ST_DRAW_MONO) {
-        double aDuration = 0.0;
-        double aPts      = 0.0;
-        bool isVideoPlayed = false, isAudioPlayed = false;
-        bool isPlaying = myVideo->getPlaybackState(aDuration, aPts, isVideoPlayed, isAudioPlayed);
-        double aPosition = (aDuration > 0.0) ? (aPts / aDuration) : 0.0;
-        if(myGUI->myBtnPlay != NULL) {
-            myGUI->myBtnPlay->setFaceId(isPlaying ? 1 : 0); // set play/pause
-        }
-        if(myGUI->myTimeBox != NULL) {
-            myGUI->myTimeBox->setTime(aPts, aDuration);
-        }
-        myGUI->stglUpdate(myWindow->getMousePos(), GLfloat(aPosition), aPts);
-
-        // prevent display going to sleep
-        bool toBlockSleepDisplay = false;
-        bool toBlockSleepSystem  = false;
-        if(myIsBenchmark) {
-            toBlockSleepDisplay = true;
-            toBlockSleepSystem  = true;
-        } else {
-            switch(params.blockSleeping->getValue()) {
-                case BLOCK_SLEEP_NEVER: {
-                    toBlockSleepDisplay = false;
-                    toBlockSleepSystem  = false;
-                    break;
-                }
-                case BLOCK_SLEEP_ALWAYS: {
-                    toBlockSleepDisplay = true;
-                    toBlockSleepSystem  = true;
-                    break;
-                }
-                case BLOCK_SLEEP_PLAYBACK: {
-                    toBlockSleepDisplay = isVideoPlayed;
-                    toBlockSleepSystem  = isPlaying;
-                    break;
-                }
-                case BLOCK_SLEEP_FULLSCREEN: {
-                    toBlockSleepDisplay = myWindow->isFullScreen();;
-                    toBlockSleepSystem  = toBlockSleepDisplay;
-                    break;
-                }
-            }
-        }
-
-        const StWinAttr anAttribs[] = {
-            StWinAttr_ToBlockSleepSystem,  (StWinAttr )toBlockSleepSystem,
-            StWinAttr_ToBlockSleepDisplay, (StWinAttr )toBlockSleepDisplay,
-            StWinAttr_NULL
-        };
-        myWindow->setAttributes(anAttribs);
-
-        myWindow->showCursor(!myGUI->toHideCursor());
-
-        // check for mono state
-        StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
-        if(!aParams.isNull()) {
-            myWindow->setStereoOutput(!aParams->isMono()
-                                && (myGUI->myImage->params.displayMode->getValue() == StGLImageRegion::MODE_STEREO));
-        }
-    }
-
-    // draw GUI
     myGUI->stglDraw(theView);
 }
 

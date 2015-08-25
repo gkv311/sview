@@ -36,11 +36,13 @@ class ST_LOCAL StTimeBox : public StGLTextureButton {
               const StGLCorner& theCorner,
               const StGLTextArea::FontSize theSize = StGLTextArea::SIZE_NORMAL)
     : StGLTextureButton(theParent, theLeft, theTop, theCorner),
-      myProgressSec(0.0),
-      myDurationSec(0.0),
+      myProgressSec(-1.0),
+      myDurationSec(-1.0),
       myToShowElapsed(true),
       myIsOverlay(false) {
-        myTextArea = new StGLTextArea(this, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER),
+        myMargins.left  = myRoot->scale(8);
+        myMargins.right = myRoot->scale(8);
+        myTextArea = new StGLTextArea(this, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT),
                                       myRoot->scale(32), myRoot->scale(32), theSize);
         myTextArea->setBorder(false);
         myTextArea->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
@@ -69,18 +71,15 @@ class ST_LOCAL StTimeBox : public StGLTextureButton {
         bool isBtnInit = StGLTextureButton::stglInit();
         myTextArea->changeRectPx().right()  = getRectPx().width();
         myTextArea->changeRectPx().bottom() = getRectPx().height();
-        return isBtnInit && myTextArea->stglInit();
+        const bool isOk = isBtnInit && myTextArea->stglInit();
+        myTextArea->setTextWidth(-1);
+        return isOk;
     }
 
     virtual void stglDraw(unsigned int theView) {
-        if(myToShowElapsed) {
-            myTextArea->setText(StFormatTime::formatSeconds(myProgressSec) + " / "
-                              + StFormatTime::formatSeconds(myDurationSec));
-        } else {
-            myTextArea->setText(StFormatTime::formatSeconds(myProgressSec - myDurationSec));
-        }
         StGLTextureButton::stglDraw(theView);
         myTextArea->stglDraw(theView);
+        myIsResized = false;
     }
 
     virtual bool tryClick(const StPointD_t& theCursor,
@@ -99,10 +98,33 @@ class ST_LOCAL StTimeBox : public StGLTextureButton {
              : StGLTextureButton::tryUnClick(theCursor, theMouseBtn, theIsItemUnclicked);
     }
 
-    void setTime(const double theProgressSec,
-                 const double theDurationSec) {
+    void stglUpdateTime(const double theProgressSec,
+                        const double theDurationSec) {
+        if(std::abs(myDurationSec - theDurationSec) > 0.1
+        && (theDurationSec > 0.1 || myDurationSec < 0.0)) {
+            int aWidth  = 0;
+            int aHeight = 0;
+            myTextArea->computeTextWidth(StFormatTime::formatSeconds(theDurationSec) + " / "
+                                       + StFormatTime::formatSeconds(theDurationSec),
+                                        -1.0f, aWidth, aHeight);
+            const int aWidthNew = aWidth + myMargins.left + myMargins.right;
+            const int aWidthOld = getRectPx().width();
+            const int aToler    = myRoot->scale(4);
+            if(std::abs(aWidthNew - aWidthOld) > aToler) {
+                myTextArea->changeRectPx().right() = myTextArea->getRectPx().left() + aWidthNew;
+                myTextArea->setTextWidth(aWidthNew);
+                changeRectPx().right() = getRectPx().left() + aWidthNew;
+            }
+        }
+
         myProgressSec = theProgressSec;
         myDurationSec = theDurationSec;
+        if(myToShowElapsed) {
+            myTextArea->setText(StFormatTime::formatSeconds(myProgressSec) + " / "
+                              + StFormatTime::formatSeconds(myDurationSec));
+        } else {
+            myTextArea->setText(StFormatTime::formatSeconds(myProgressSec - myDurationSec));
+        }
     }
 
         public: //! @name callback Slots

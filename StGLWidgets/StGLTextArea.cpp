@@ -245,11 +245,13 @@ const StString& StGLTextArea::getText() const {
     return myText;
 }
 
-void StGLTextArea::setText(const StString& theText) {
+bool StGLTextArea::setText(const StString& theText) {
     if(myText != theText) {
         myText = theText;
         myToRecompute = true;
+        return true;
     }
+    return false;
 }
 
 void StGLTextArea::setTextWidth(const int theWidth) {
@@ -334,12 +336,15 @@ bool StGLTextArea::stglInitAutoHeightWidth(const int theMaxWidth) {
 }
 
 bool StGLTextArea::stglInit() {
+    StGLContext& aCtx = getContext();
     if(myIsInitialized) {
+        if(isVisible()) {
+            formatText(aCtx);
+        }
         return true;
     }
 
     // initialize GL resources for the font
-    StGLContext& aCtx = getContext();
     if(!myFont->wasInitialized()) {
         if( myFont->changeFont().isNull()
         ||  myFont->changeFont()->getFont().isNull()

@@ -169,6 +169,7 @@ void StSeekBar::stglUpdateVertices() {
     myRoot->getRectGl(aRectPx, aVertices, 8);
 
     myVertices.init(getContext(), aVertices);
+    myIsResized = false;
 }
 
 bool StSeekBar::stglInit() {
@@ -204,7 +205,8 @@ void StSeekBar::stglDraw(unsigned int theView) {
     StGLContext& aCtx = getContext();
 
     // need to update vertices buffer?
-    if(myProgressPx != int(myProgress * GLfloat((getRectPx().width() - myMargins.left - myMargins.right - 2)))) {
+    if(myIsResized
+    || myProgressPx != int(myProgress * GLfloat((getRectPx().width() - myMargins.left - myMargins.right - 2)))) {
         stglUpdateVertices();
     }
 
