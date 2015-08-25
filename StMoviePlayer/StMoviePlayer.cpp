@@ -1309,6 +1309,7 @@ void StMoviePlayer::beforeDraw() {
         myOpenDialog->resetResults();
     }
 
+    const bool hasVideoStream = myVideo->hasVideoStream();
     if(params.ScaleHiDPI->setValue(myWindow->getScaleFactor())
     || myToRecreateMenu) {
         StHandle<StGLTextureQueue> aTextureQueue;
@@ -1316,9 +1317,9 @@ void StMoviePlayer::beforeDraw() {
         createGui(aTextureQueue, aSubQueue);
 
         myGUI->updateAudioStreamsMenu(myVideo->params.activeAudio->getList(),
-                                      myVideo->hasVideoStream());
+                                      hasVideoStream);
         myGUI->updateSubtitlesStreamsMenu(myVideo->params.activeSubtitles->getList(),
-                                          myVideo->hasAudioStream() || myVideo->hasVideoStream());
+                                          myVideo->hasAudioStream() || hasVideoStream);
 
         myToRecreateMenu = false;
     }
@@ -1354,7 +1355,7 @@ void StMoviePlayer::beforeDraw() {
         }
         myToCheckUpdates = false;
     }
-    myGUI->setVisibility(myWindow->getMousePos(), isMouseMove);
+    myGUI->setVisibility(myWindow->getMousePos(), isMouseMove || !hasVideoStream);
 }
 
 void StMoviePlayer::doUpdateOpenALDeviceList(const size_t ) {
@@ -1541,11 +1542,12 @@ void StMoviePlayer::doUpdateStateLoaded() {
     } else {
         myWindow->setTitle(aFileToLoad + " - sView");
     }
+    const bool hasVideoStream = myVideo->hasVideoStream();
     myGUI->updateAudioStreamsMenu(myVideo->params.activeAudio->getList(),
-                                  myVideo->hasVideoStream());
+                                  hasVideoStream);
     params.audioStream->setValue(myVideo->params.activeAudio->getValue());
     myGUI->updateSubtitlesStreamsMenu(myVideo->params.activeSubtitles->getList(),
-                                      myVideo->hasAudioStream() || myVideo->hasVideoStream());
+                                      myVideo->hasAudioStream() || hasVideoStream);
     params.subtitlesStream->setValue(myVideo->params.activeSubtitles->getValue());
     if(mySeekOnLoad > 0.0) {
         myVideo->pushPlayEvent(ST_PLAYEVENT_SEEK, mySeekOnLoad);
