@@ -204,7 +204,7 @@ class StGLImageRegion : public StGLWidget {
         const int aMode = params.ViewMode->getValue();
         switch(aMode) {
             case StStereoParams::FLAT_IMAGE: {
-                params.ViewMode->setValue(StStereoParams::PANORAMA_CUBEMAP);
+                params.ViewMode->setValue(StStereoParams::PANORAMA_SPHERE);
                 return;
             }
             case StStereoParams::PANORAMA_CUBEMAP: {
@@ -212,7 +212,7 @@ class StGLImageRegion : public StGLWidget {
                 return;
             }
             case StStereoParams::PANORAMA_SPHERE: {
-                params.ViewMode->setValue(StStereoParams::FLAT_IMAGE);
+                params.ViewMode->setValue(StStereoParams::PANORAMA_CUBEMAP);
                 return;
             }
         }

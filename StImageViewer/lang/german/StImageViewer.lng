@@ -150,7 +150,7 @@
 6028="Um 90 Grad im Uhrzeigersinn drehen"
 6029="Drehen gegen den Uhrzeigersinn"
 6030="Im Uhrzeigersinn drehen"
-6031="Aktivieren / Deaktivieren der Panorama-Modus"
+?6031="Select next view mode"
 6032="Navigieren nach links"
 6033="Navigieren nach rechts"
 6034="Navigieren nach oben"
@@ -161,3 +161,4 @@
 6039="Y-Drehung - rechts"
 6040="X-Drehung - nach oben"
 6041="X-Drehung - nach unten"
+6042="Aktivieren / Deaktivieren der Panorama-Modus"

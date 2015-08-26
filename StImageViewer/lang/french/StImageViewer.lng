@@ -150,7 +150,7 @@
 6028="Faire pivoter un objet de 90 degrés vers la droite"
 6029="Sens inverse des aiguilles d’une montre"
 6030="Sens des aiguilles d’une montre"
-6031="Activer / désactiver le mode panorama"
+?6031="Select next view mode"
 6032="Naviguer vers la gauche"
 6033="Naviguer vers la droite"
 6034="Naviguer vers le haut"
@@ -161,3 +161,4 @@
 ?6039="Y Rotation - right"
 ?6040="X Rotation - up"
 ?6041="X Rotation - down"
+6042="Activer / désactiver le mode panorama"

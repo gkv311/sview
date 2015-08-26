@@ -179,6 +179,21 @@ inline StHandle<StImage> scaledImage(StHandle<StImageFile>& theRef,
     return anImage;
 }
 
+/**
+ * Auxiliary method to format image dimensions.
+ */
+inline StString formatSize(size_t theSizeX,
+                           size_t theSizeY,
+                           size_t theSrcSizeX,
+                           size_t theSrcSizeY) {
+    StString aText = StString() + theSizeX + " x " + theSizeY;
+    if(theSizeX != theSrcSizeX
+    || theSizeY != theSrcSizeY) {
+        aText += StString() + " [" + theSrcSizeX + " x " + theSrcSizeY + "]";
+    }
+    return aText;
+}
+
 bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
                               StHandle<StStereoParams>&   theParams) {
     const StString               aFilePath = theSource->getPath();
@@ -353,18 +368,14 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     // scale down image if it does not fit texture limits
     size_t aSizeXLim = size_t(myMaxTexDim);
     size_t aSizeYLim = size_t(myMaxTexDim);
-    size_t aSizeX1 = 0;
-    size_t aSizeY1 = 0;
-    size_t aSizeX2 = 0;
-    size_t aSizeY2 = 0;
-    if(!anImageFileL->isNull()) {
-        aSizeX1 = anImageFileL->getSizeX();
-        aSizeY1 = anImageFileL->getSizeY();
-    }
-    if(!anImageFileR->isNull()) {
-        aSizeX2 = anImageFileR->getSizeX();
-        aSizeY2 = anImageFileR->getSizeY();
-    }
+    size_t aSizeX1 = anImageFileL->getSizeX();
+    size_t aSizeY1 = anImageFileL->getSizeY();
+    size_t aSizeX2 = anImageFileR->getSizeX();
+    size_t aSizeY2 = anImageFileR->getSizeY();
+    theParams->Src1SizeX = aSizeX1;
+    theParams->Src1SizeY = aSizeY1;
+    theParams->Src2SizeX = aSizeX2;
+    theParams->Src2SizeY = aSizeY2;
     StPairRatio aPairRatio = StPairRatio_1;
     if(anImageFileR->isNull()) {
         aPairRatio = st::formatToPairRatio(aSrcFormatCurr);
@@ -428,9 +439,11 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     }
     const StString aModelL = anImageFileL->formatImgColorModel();
     if(!anImageFileR->isNull()) {
-        anImgInfo->Info.add(StArgument(tr(INFO_DIMENSIONS), StString()
-                                     + anImageFileL->getSizeX() + " x " + anImageFileL->getSizeY() + " " + tr(INFO_LEFT) + "\n"
-                                     + anImageFileR->getSizeX() + " x " + anImageFileR->getSizeY() + " " + tr(INFO_RIGHT)));
+        anImgInfo->Info.add(StArgument(tr(INFO_DIMENSIONS),
+                                       formatSize(anImageL->getSizeX(), anImageL->getSizeY(),
+                                                  theParams->Src1SizeX, theParams->Src1SizeY) + " " + tr(INFO_LEFT) + "\n"
+                                     + formatSize(anImageR->getSizeX(), anImageR->getSizeY(),
+                                                  theParams->Src2SizeX, theParams->Src2SizeY) + " " + tr(INFO_RIGHT)));
         const StString aModelR = anImageFileR->formatImgColorModel();
         if(aModelL == aModelR) {
             anImgInfo->Info.add(StArgument(tr(INFO_COLOR_MODEL), aModelL));
@@ -440,8 +453,9 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
                               + aModelR + " " + tr(INFO_RIGHT)));
         }
     } else {
-        anImgInfo->Info.add(StArgument(tr(INFO_DIMENSIONS), StString()
-                                     + anImageFileL->getSizeX() + " x " + anImageFileL->getSizeY()));
+        anImgInfo->Info.add(StArgument(tr(INFO_DIMENSIONS),
+                                       formatSize(anImageL->getSizeX(), anImageL->getSizeY(),
+                                                  theParams->Src1SizeX, theParams->Src1SizeY)));
         anImgInfo->Info.add(StArgument(tr(INFO_COLOR_MODEL),
                                        aModelL));
     }

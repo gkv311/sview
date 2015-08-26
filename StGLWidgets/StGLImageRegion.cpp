@@ -237,7 +237,6 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
     myActions.add(anAction);
 
     anAction = new StActionIntSlot(stCString("DoParamsModeNext"), stSlot(this, &StGLImageRegion::doParamsModeNext), 0);
-    anAction->setDefaultHotKey1(ST_VK_P);
     myActions.add(anAction);
 
     anAction = new StActionHoldSlot(stCString("DoParamsPanLeft"), stSlot(this, &StGLImageRegion::doParamsPanLeft));

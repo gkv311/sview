@@ -333,7 +333,7 @@ class StMoviePlayer : public StApplication {
         Action_ShowList,
         Action_ImageAdjustReset,
         Action_StereoParamsBegin,
-        Action_StereoParamsEnd = Action_StereoParamsBegin + StGLImageRegion::ActionsNb,
+        Action_StereoParamsEnd = Action_StereoParamsBegin + StGLImageRegion::ActionsNb - 1,
     };
 
         private: //! @name Web UI methods

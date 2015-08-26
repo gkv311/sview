@@ -380,7 +380,7 @@ void loadDefaults(StLangMap& theStrings) {
               "Rotate clockwise");
     addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_ModeNext,
               "DoParamsModeNext",
-              "Select next mode");
+              "Select next view mode");
     addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_PanLeft,
               "DoParamsPanLeft",
               "Panning - navigate to the left");
@@ -411,6 +411,11 @@ void loadDefaults(StLangMap& theStrings) {
     addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_RotXDown,
               "DoParamsRotXDown",
               "X Rotation - down");
+
+    // new actions
+    addAction(theStrings, StImageViewer::Action_PanoramaOnOff,
+              "DoPanoramaOnOff",
+              "Enable/disable panorama mode");
 }
 
 };

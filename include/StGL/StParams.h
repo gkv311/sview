@@ -54,8 +54,12 @@ class StStereoParams {
     /**
      * Main constructor - default parameters.
      */
-    StStereoParams(ViewMode theViewMode = FLAT_IMAGE)
-    : ViewingMode(theViewMode),
+    StStereoParams()
+    : Src1SizeX(0),
+      Src1SizeY(0),
+      Src2SizeX(0),
+      Src2SizeY(0),
+      ViewingMode(FLAT_IMAGE),
       Timestamp(0.0f),
       StereoFormat(StFormat_Mono),
       ToSwapLR(false),
@@ -314,6 +318,11 @@ class StStereoParams {
     }
 
         public:
+
+    size_t       Src1SizeX;        //!< width  of the 1st original image
+    size_t       Src1SizeY;        //!< height of the 1st original image
+    size_t       Src2SizeX;        //!< width  of the 2nd original image
+    size_t       Src2SizeY;        //!< height of the 2nd original image
 
     ViewMode     ViewingMode;      //!< viewing mode - panorama or flat image
     GLfloat      Timestamp;        //!< playback timestamp

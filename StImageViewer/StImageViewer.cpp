@@ -369,6 +369,9 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
 
     anAction = new StActionIntSlot(stCString("DoImageAdjustReset"), stSlot(this, &StImageViewer::doImageAdjustReset), 0);
     addAction(Action_ImageAdjustReset, anAction);
+
+    anAction = new StActionIntSlot(stCString("DoPanoramaOnOff"), stSlot(this, &StImageViewer::doPanoramaOnOff), 0);
+    addAction(Action_PanoramaOnOff, anAction, ST_VK_P);
 }
 
 bool StImageViewer::resetDevice() {
@@ -995,6 +998,40 @@ void StImageViewer::doSwitchViewMode(const int32_t theMode) {
     if(isChanged
     && !myLoader->getPlayList().isEmpty()) {
         myLoader->doLoadNext();
+    }
+}
+
+void StImageViewer::doPanoramaOnOff(const size_t ) {
+    if(myLoader.isNull()) {
+        return;
+    }
+
+    StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
+    if(aParams.isNull()
+    || aParams->Src1SizeX == 0
+    || aParams->Src1SizeY == 0) {
+        return;
+    }
+
+    int aMode = myGUI->myImage->params.ViewMode->getValue();
+    if(aMode != StStereoParams::FLAT_IMAGE) {
+        myGUI->myImage->params.ViewMode->setValue(StStereoParams::FLAT_IMAGE);
+        return;
+    }
+
+    StPairRatio aPairRatio = st::formatToPairRatio(aParams->StereoFormat);
+    size_t aSizeX = aParams->Src1SizeX;
+    size_t aSizeY = aParams->Src1SizeY;
+    if(aPairRatio == StPairRatio_HalfWidth) {
+        aSizeX /= 2;
+    } else if(aPairRatio == StPairRatio_HalfHeight) {
+        aSizeY /= 2;
+    }
+
+    if(aSizeX / 6 == aSizeY) {
+        myGUI->myImage->params.ViewMode->setValue(StStereoParams::PANORAMA_CUBEMAP);
+    } else {
+        myGUI->myImage->params.ViewMode->setValue(StStereoParams::PANORAMA_SPHERE);
     }
 }
 

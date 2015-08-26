@@ -153,6 +153,7 @@ class StImageViewer : public StApplication {
     ST_LOCAL void doFullscreen(const bool theIsFullscreen);
     ST_LOCAL void doSwitchSrcFormat(const int32_t theSrcFormat);
     ST_LOCAL void doSwitchViewMode(const int32_t theMode);
+    ST_LOCAL void doPanoramaOnOff(const size_t );
 
         public:
 
@@ -178,7 +179,8 @@ class StImageViewer : public StApplication {
         Action_DeleteFile,
         Action_ImageAdjustReset,
         Action_StereoParamsBegin,
-        Action_StereoParamsEnd = Action_StereoParamsBegin + StGLImageRegion::ActionsNb,
+        Action_StereoParamsEnd = Action_StereoParamsBegin + StGLImageRegion::ActionsNb - 1,
+        Action_PanoramaOnOff,
     };
 
         private:

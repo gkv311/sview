@@ -151,7 +151,7 @@
 ?6028="Rotate 90 degrees clockwise"
 ?6029="Rotate counterclockwise"
 ?6030="Rotate clockwise"
-?6031="Enable/disable panorama mode"
+?6031="Select next view mode"
 ?6032="Panning - navigate to the left"
 ?6033="Panning - navigate to the right"
 ?6034="Panning - navigate to the top"
@@ -162,3 +162,4 @@
 ?6039="Y Rotation - right"
 ?6040="X Rotation - up"
 ?6041="X Rotation - down"
+?6042="Enable/disable panorama mode"
