@@ -440,7 +440,7 @@ bool StOutInterlace::create() {
     if(!aShaderRow.init(*myContext,
                         ST_SHADER_TEMPLATE[0],
                         // drop odd horizontal line (starts from bottom)
-                        "if(int(mod(gl_FragCoord.y + 1.5, 2.0)) == 1) { discard; }\n",
+                        "if(int(mod(gl_FragCoord.y - 1023.5, 2.0)) != 1) { discard; }\n",
                         ST_SHADER_TEMPLATE[2])) {
         myMsgQueue->pushError(aShadersError);
         myIsBroken = true;
@@ -448,7 +448,7 @@ bool StOutInterlace::create() {
     } else if(!aShaderRowRev.init(*myContext,
                                   ST_SHADER_TEMPLATE[0],
               // drop even horizontal line (starts from bottom)
-              "if(int(mod(gl_FragCoord.y + 1.5, 2.0)) != 1) { discard; }\n",
+              "if(int(mod(gl_FragCoord.y - 1023.5, 2.0)) == 1) { discard; }\n",
               ST_SHADER_TEMPLATE[2])) {
         myMsgQueue->pushError(aShadersError);
         myIsBroken = true;
@@ -471,7 +471,7 @@ bool StOutInterlace::create() {
     if(!aShaderCol.init(*myContext,
                         ST_SHADER_TEMPLATE[0],
                         // drop odd column (starts from left)
-                        "if(int(mod(gl_FragCoord.x + 1.5, 2.0)) != 1) { discard; }\n",
+                        "if(int(mod(gl_FragCoord.x - 1023.5, 2.0)) == 1) { discard; }\n",
                         ST_SHADER_TEMPLATE[2])) {
         myMsgQueue->pushError(aShadersError);
         myIsBroken = true;
@@ -479,7 +479,7 @@ bool StOutInterlace::create() {
     } else if(!aShaderColRev.init(*myContext,
                                   ST_SHADER_TEMPLATE[0],
               // drop even column (starts from left)
-              "if(int(mod(gl_FragCoord.x + 1.5, 2.0)) == 1) { discard; }\n",
+              "if(int(mod(gl_FragCoord.x - 1023.5, 2.0)) != 1) { discard; }\n",
               ST_SHADER_TEMPLATE[2])) {
         myMsgQueue->pushError(aShadersError);
         myIsBroken = true;
@@ -501,8 +501,8 @@ bool StOutInterlace::create() {
     StGLAutoRelease aTmp7(*myContext, aShaderChessRev);
     if(!aShaderChess.init(*myContext,
                           ST_SHADER_TEMPLATE[0],
-                          "bool isEvenX = int(mod(floor(gl_FragCoord.x + 1.5), 2.0)) == 1;\n"
-                          "bool isEvenY = int(mod(floor(gl_FragCoord.y + 1.5), 2.0)) != 1;\n"
+                          "bool isEvenX = int(mod(floor(gl_FragCoord.x - 1023.5), 2.0)) != 1;\n"
+                          "bool isEvenY = int(mod(floor(gl_FragCoord.y - 1023.5), 2.0)) == 1;\n"
                           "if((isEvenX && isEvenY) || (!isEvenX && !isEvenY)) { discard; }\n",
                            ST_SHADER_TEMPLATE[2])) {
         myMsgQueue->pushError(aShadersError);
@@ -510,8 +510,8 @@ bool StOutInterlace::create() {
         return true;
     } else if(!aShaderChessRev.init(*myContext,
                                     ST_SHADER_TEMPLATE[0],
-              "bool isEvenX = int(mod(floor(gl_FragCoord.x + 1.5), 2.0)) == 1;\n"
-              "bool isEvenY = int(mod(floor(gl_FragCoord.y + 1.5), 2.0)) != 1;\n"
+              "bool isEvenX = int(mod(floor(gl_FragCoord.x - 1023.5), 2.0)) != 1;\n"
+              "bool isEvenY = int(mod(floor(gl_FragCoord.y - 1023.5), 2.0)) == 1;\n"
               "if(!((isEvenX && isEvenY) || (!isEvenX && !isEvenY))) { discard; }\n",
               ST_SHADER_TEMPLATE[2])) {
         myMsgQueue->pushError(aShadersError);
