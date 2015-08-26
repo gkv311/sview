@@ -3,8 +3,9 @@
 	<FileVersion major="1" minor="6" />
 	<Project>
 		<Option title="sViewMakefile" />
+		<Option makefile="$(PROJECT_DIRECTORY)../Makefile" />
 		<Option makefile_is_custom="1" />
-		<Option execution_dir="/home/kirill/develop/sview" />
+		<Option execution_dir="$(PROJECT_DIRECTORY).." />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
@@ -15,12 +16,12 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<MakeCommands>
-					<Build command="$make -f $makefile all" />
-					<CompileFile command="$make -f $makefile $file" />
-					<Clean command="$make -f $makefile clean" />
-					<DistClean command="$make -f $makefile distclean$target" />
-					<AskRebuildNeeded command="$make -q -f $makefile all" />
-					<SilentBuild command="$make -f $makefile all &gt; $(CMD_NULL)" />
+					<Build command="$make --directory=$(PROJECT_DIRECTORY).. -f $makefile all" />
+					<CompileFile command="$make --directory=$(PROJECT_DIRECTORY).. -f $makefile $file" />
+					<Clean command="$make --directory=$(PROJECT_DIRECTORY).. -f $makefile clean" />
+					<DistClean command="$make --directory=$(PROJECT_DIRECTORY).. -f $makefile distclean$target" />
+					<AskRebuildNeeded command="$make --directory=$(PROJECT_DIRECTORY).. -q -f $makefile all" />
+					<SilentBuild command="$make --directory=$(PROJECT_DIRECTORY).. -f $makefile all &gt; $(CMD_NULL)" />
 				</MakeCommands>
 			</Target>
 			<Target title="make_android">
@@ -28,12 +29,12 @@
 				<Option type="0" />
 				<Option compiler="gcc" />
 				<MakeCommands>
-					<Build command="$make -f $makefile android" />
-					<CompileFile command="$make -f $makefile $file" />
-					<Clean command="$make -f $makefile clean" />
-					<DistClean command="$make -f $makefile distclean$target" />
-					<AskRebuildNeeded command="$make -q -f $makefile android" />
-					<SilentBuild command="$make -f $makefile android &gt; $(CMD_NULL)" />
+					<Build command="$make --directory=$(PROJECT_DIRECTORY).. -f $makefile android" />
+					<CompileFile command="$make --directory=$(PROJECT_DIRECTORY).. -f $makefile $file" />
+					<Clean command="$make --directory=$(PROJECT_DIRECTORY).. -f $makefile clean" />
+					<DistClean command="$make --directory=$(PROJECT_DIRECTORY).. -f $makefile distclean$target" />
+					<AskRebuildNeeded command="$make --directory=$(PROJECT_DIRECTORY).. -q -f $makefile android" />
+					<SilentBuild command="$make --directory=$(PROJECT_DIRECTORY).. -f $makefile android &gt; $(CMD_NULL)" />
 				</MakeCommands>
 			</Target>
 		</Build>
