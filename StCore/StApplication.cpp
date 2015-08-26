@@ -350,9 +350,17 @@ void StApplication::registerHotKeys() {
         anIter != myActions.end(); ++anIter) {
         const StHandle<StAction>& anAction = anIter->second;
         if(anAction->getHotKey1() != 0) {
+            StHandle<StAction> anOldAction = getActionForKey(anAction->getHotKey1());
+            if(!anOldAction.isNull()) {
+                anOldAction->setHotKey1(0);
+            }
             myKeyActions[anAction->getHotKey1()] = anAction;
         }
         if(anAction->getHotKey2() != 0) {
+            StHandle<StAction> anOldAction = getActionForKey(anAction->getHotKey2());
+            if(!anOldAction.isNull()) {
+                anOldAction->setHotKey2(0);
+            }
             myKeyActions[anAction->getHotKey2()] = anAction;
         }
     }
