@@ -213,7 +213,6 @@
 		<Unit filename="StGLCombobox.cpp" />
 		<Unit filename="StGLDescription.cpp" />
 		<Unit filename="StGLFpsLabel.cpp" />
-		<Unit filename="StGLImageFlatProgram.cpp" />
 		<Unit filename="StGLImageProgram.cpp" />
 		<Unit filename="StGLImageRegion.cpp" />
 		<Unit filename="StGLMenu.cpp" />
@@ -253,7 +252,6 @@
 		<Unit filename="../include/StGLWidgets/StGLCorner.h" />
 		<Unit filename="../include/StGLWidgets/StGLDescription.h" />
 		<Unit filename="../include/StGLWidgets/StGLFpsLabel.h" />
-		<Unit filename="../include/StGLWidgets/StGLImageFlatProgram.h" />
 		<Unit filename="../include/StGLWidgets/StGLImageProgram.h" />
 		<Unit filename="../include/StGLWidgets/StGLImageRegion.h" />
 		<Unit filename="../include/StGLWidgets/StGLMenu.h" />

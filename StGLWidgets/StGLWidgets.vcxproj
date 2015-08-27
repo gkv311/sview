@@ -213,7 +213,6 @@
     <ClCompile Include="StGLCombobox.cpp" />
     <ClCompile Include="StGLDescription.cpp" />
     <ClCompile Include="StGLFpsLabel.cpp" />
-    <ClCompile Include="StGLImageFlatProgram.cpp" />
     <ClCompile Include="StGLImageProgram.cpp" />
     <ClCompile Include="StGLImageRegion.cpp" />
     <ClCompile Include="StGLMenu.cpp" />

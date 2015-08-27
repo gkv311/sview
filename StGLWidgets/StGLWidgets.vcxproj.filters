@@ -27,9 +27,6 @@
     <ClCompile Include="StGLFpsLabel.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="StGLImageFlatProgram.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="StGLImageProgram.cpp">
       <Filter>Source files</Filter>
     </ClCompile>

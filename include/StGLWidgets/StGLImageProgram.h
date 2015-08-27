@@ -97,7 +97,7 @@ class StGLImageProgram : public StGLProgramMatrix<1, 5, StGLMeshProgram> {
 
         public:
 
-    ST_CPPEXPORT StGLImageProgram(const StString& theTitle);
+    ST_CPPEXPORT StGLImageProgram();
 
     ST_CPPEXPORT virtual ~StGLImageProgram();
 
