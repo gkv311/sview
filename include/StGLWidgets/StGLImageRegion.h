@@ -266,7 +266,7 @@ class StGLImageRegion : public StGLWidget {
 
     StGLQuads                  myQuad;           //!< flat quad
     StGLUVSphere               myUVSphere;       //!< sphere output helper class
-    StGLImageProgram           myProgramFlat;    //!< GL program to draw flat image
+    StGLImageProgram           myProgram;        //!< GL program to draw flat image
     StHandle<StGLTextureQueue> myTextureQueue;   //!< shared texture queue
     StPointD_t                 myClickPntZo;     //!< remembered mouse click position
     StTimer                    myClickTimer;     //!< timer to delay dragging action

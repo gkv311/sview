@@ -112,9 +112,9 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
 
     params.displayRatio  = new StInt32Param(RATIO_AUTO);
     params.textureFilter = new StInt32Param(StGLImageProgram::FILTER_LINEAR);
-    params.gamma      = myProgramFlat.params.gamma;
-    params.brightness = myProgramFlat.params.brightness;
-    params.saturation = myProgramFlat.params.saturation;
+    params.gamma      = myProgram.params.gamma;
+    params.brightness = myProgram.params.brightness;
+    params.saturation = myProgram.params.saturation;
     params.swapLR   = new StSwapLRParam();
     params.ViewMode = new StViewModeParam();
 
@@ -256,7 +256,7 @@ StGLImageRegion::~StGLImageRegion() {
     myTextureQueue->getQTexture().release(aCtx);
     myQuad.release(aCtx);
     myUVSphere.release(aCtx);
-    myProgramFlat.release(aCtx);
+    myProgram.release(aCtx);
 }
 
 StHandle<StStereoParams> StGLImageRegion::getSource() {
@@ -283,7 +283,7 @@ bool StGLImageRegion::stglInit() {
     }
 
     StGLContext& aCtx = getContext();
-    if(!myProgramFlat.init(aCtx, StImage::ImgColor_RGB, StImage::ImgScale_Full, StGLImageProgram::FragGetColor_Normal)) {
+    if(!myProgram.init(aCtx, StImage::ImgColor_RGB, StImage::ImgScale_Full, StGLImageProgram::FragGetColor_Normal)) {
         return false;
     } else if(!myQuad.initScreen(aCtx)) {
         ST_DEBUG_LOG("Fail to init StGLQuad");
@@ -307,18 +307,19 @@ StGLVec2 StGLImageRegion::getMouseMoveFlat(const StPointD_t& theCursorZoFrom,
 
 StGLVec2 StGLImageRegion::getMouseMoveSphere(const StPointD_t& theCursorZoFrom,
                                              const StPointD_t& theCursorZoTo) {
-    /// TODO (Kirill Gavrilov#5) these computations are invalid
-    StGLVec2 stVec = getMouseMoveFlat(theCursorZoFrom, theCursorZoTo);
+    StGLVec2 aVec = getMouseMoveFlat(theCursorZoFrom, theCursorZoTo);
     GLfloat aSphereScale = SPHERE_RADIUS * PANORAMA_DEF_ZOOM * getSource()->ScaleFactor;
-    StRectD_t zParams;
-    getCamera()->getZParams(getCamera()->getZNear(), zParams);
-    stVec.x() *= -90.0f * GLfloat(zParams.right() - zParams.left()) / aSphereScale;
-    stVec.y() *=  90.0f * GLfloat(zParams.bottom() - zParams.top()) / aSphereScale;
-    return stVec;
+    StRectD_t aZParams;
+    getCamera()->getZParams(getCamera()->getZNear(), aZParams);
+    aVec.x() *= -90.0f * GLfloat(aZParams.right() - aZParams.left()) / aSphereScale;
+    aVec.y() *=  90.0f * GLfloat(aZParams.bottom() - aZParams.top()) / aSphereScale;
+    return aVec;
 }
 
 StGLVec2 StGLImageRegion::getMouseMoveSphere() {
-    return isClicked(ST_MOUSE_LEFT) ? getMouseMoveSphere(myClickPntZo, getRoot()->getCursorZo()) : StGLVec2();
+    return isClicked(ST_MOUSE_LEFT)
+         ? getMouseMoveSphere(myClickPntZo, getRoot()->getCursorZo())
+         : StGLVec2();
 }
 
 void StGLImageRegion::stglDraw(unsigned int theView) {
@@ -353,21 +354,20 @@ void StGLImageRegion::stglDraw(unsigned int theView) {
 }
 
 void StGLImageRegion::stglDrawView(unsigned int theView) {
-
-    StGLQuadTexture::LeftOrRight leftOrRight = StGLQuadTexture::LEFT_TEXTURE;
+    StGLQuadTexture::LeftOrRight aLeftOrRight = StGLQuadTexture::LEFT_TEXTURE;
     StHandle<StStereoParams> aParams = getSource();
     if(!myIsInitialized || aParams.isNull()) {
         return;
     }
 
     StGLContext& aCtx = getContext();
-    bool toShowRight = ( aParams->ToSwapLR && (theView == ST_DRAW_LEFT )) ||
-                       (!aParams->ToSwapLR && (theView == ST_DRAW_RIGHT));
+    bool toShowRight = ( aParams->ToSwapLR && (theView == ST_DRAW_LEFT ))
+                    || (!aParams->ToSwapLR && (theView == ST_DRAW_RIGHT));
     if(aParams->isMono()) {
-        leftOrRight = StGLQuadTexture::LEFT_TEXTURE;
+        aLeftOrRight = StGLQuadTexture::LEFT_TEXTURE;
     } else if(myTextureQueue->getQTexture().getFront(StGLQuadTexture::RIGHT_TEXTURE).isValid()) {
         if(toShowRight) {
-            leftOrRight = StGLQuadTexture::RIGHT_TEXTURE;
+            aLeftOrRight = StGLQuadTexture::RIGHT_TEXTURE;
         }
     }
 
@@ -408,45 +408,42 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
 
     aCtx.core20fwd->glDisable(GL_BLEND);
 
-    StGLFrameTextures& stFrameTexture = myTextureQueue->getQTexture().getFront(leftOrRight);
-    stFrameTexture.bind(aCtx);
+    StGLFrameTextures& aTextures = myTextureQueue->getQTexture().getFront(aLeftOrRight);
+    aTextures.bind(aCtx);
 
-    // our model matrix (identity)
-    StGLMatrix stModelMat;
-
-    StGLVec2 textureSizeVec(GLfloat(stFrameTexture.getPlane(0).getSizeX()),
-                            GLfloat(stFrameTexture.getPlane(0).getSizeY()));
-    StGLVec2 textureUVSizeVec(GLfloat(stFrameTexture.getPlane(1).getSizeX()),
-                              GLfloat(stFrameTexture.getPlane(1).getSizeY()));
-
+    StGLVec2 aTextureSize  (GLfloat(aTextures.getPlane(0).getSizeX()),
+                            GLfloat(aTextures.getPlane(0).getSizeY()));
+    StGLVec2 aTextureUVSize(GLfloat(aTextures.getPlane(1).getSizeX()),
+                            GLfloat(aTextures.getPlane(1).getSizeY()));
+    StGLMatrix aModelMat;
     // data rectangle in the texture
-    StGLVec4 dataClampVec;
-    StGLVec4 dataUVClampVec;
+    StGLVec4 aClampVec, aClampUV;
     if(params.textureFilter->getValue() == StGLImageProgram::FILTER_NEAREST) {
         myTextureQueue->getQTexture().setMinMagFilter(aCtx, GL_NEAREST);
         //
-        dataClampVec.x() = 0.0f;
-        dataClampVec.y() = 0.0f;
-        dataClampVec.z() = stFrameTexture.getPlane(0).getDataSize().x();
-        dataClampVec.w() = stFrameTexture.getPlane(0).getDataSize().y();
+        aClampVec.x() = 0.0f;
+        aClampVec.y() = 0.0f;
+        aClampVec.z() = aTextures.getPlane(0).getDataSize().x();
+        aClampVec.w() = aTextures.getPlane(0).getDataSize().y();
         // UV
-        dataUVClampVec.x() = 0.0f;
-        dataUVClampVec.y() = 0.0f;
-        dataUVClampVec.z() = stFrameTexture.getPlane(1).getDataSize().x();
-        dataUVClampVec.w() = stFrameTexture.getPlane(1).getDataSize().y();
+        aClampUV.x() = 0.0f;
+        aClampUV.y() = 0.0f;
+        aClampUV.z() = aTextures.getPlane(1).getDataSize().x();
+        aClampUV.w() = aTextures.getPlane(1).getDataSize().y();
     } else {
         myTextureQueue->getQTexture().setMinMagFilter(aCtx, GL_LINEAR);
         //
-        dataClampVec.x() = 0.5f / textureSizeVec.x();
-        dataClampVec.y() = 0.5f / textureSizeVec.y();
-        dataClampVec.z() = stFrameTexture.getPlane(0).getDataSize().x() - 2.0f * dataClampVec.x();
-        dataClampVec.w() = stFrameTexture.getPlane(0).getDataSize().y() - 2.0f * dataClampVec.y();
+        aClampVec.x() = 0.5f / aTextureSize.x();
+        aClampVec.y() = 0.5f / aTextureSize.y();
+        aClampVec.z() = aTextures.getPlane(0).getDataSize().x() - 2.0f * aClampVec.x();
+        aClampVec.w() = aTextures.getPlane(0).getDataSize().y() - 2.0f * aClampVec.y();
         // UV
-        if(textureUVSizeVec.x() > 0.0f && textureUVSizeVec.y() > 0.0f) {
-            dataUVClampVec.x() = 0.5f / textureUVSizeVec.x();
-            dataUVClampVec.y() = 0.5f / textureUVSizeVec.y(),
-            dataUVClampVec.z() = stFrameTexture.getPlane(1).getDataSize().x() - 2.0f * dataUVClampVec.x();
-            dataUVClampVec.w() = stFrameTexture.getPlane(1).getDataSize().y() - 2.0f * dataUVClampVec.y();
+        if(aTextureUVSize.x() > 0.0f
+        && aTextureUVSize.y() > 0.0f) {
+            aClampUV.x() = 0.5f / aTextureUVSize.x();
+            aClampUV.y() = 0.5f / aTextureUVSize.y(),
+            aClampUV.z() = aTextures.getPlane(1).getDataSize().x() - 2.0f * aClampUV.x();
+            aClampUV.w() = aTextures.getPlane(1).getDataSize().y() - 2.0f * aClampUV.y();
         }
     }
 
@@ -488,36 +485,36 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     const StGLVec2 aPanBack   = aParams->PanCenter;
 
     StStereoParams::ViewMode aViewMode = aParams->ViewingMode;
-    if(stFrameTexture.getPlane(0).getTarget() == GL_TEXTURE_CUBE_MAP) {
+    if(aTextures.getPlane(0).getTarget() == GL_TEXTURE_CUBE_MAP) {
         aViewMode = StStereoParams::PANORAMA_CUBEMAP;
     } else if(aViewMode == StStereoParams::PANORAMA_CUBEMAP) {
         aViewMode = StStereoParams::FLAT_IMAGE;
     }
 
-    myProgramFlat.setColorScale(aColorScale); // apply de-anaglyph color filter
+    myProgram.setColorScale(aColorScale); // apply de-anaglyph color filter
     StGLImageProgram::FragGetColor aColorGetter = params.textureFilter->getValue() == StGLImageProgram::FILTER_BLEND
                                                 ? StGLImageProgram::FragGetColor_Blend
                                                 : StGLImageProgram::FragGetColor_Normal;
     switch(aViewMode) {
         default:
         case StStereoParams::FLAT_IMAGE: {
-            if(!myProgramFlat.init(aCtx, stFrameTexture.getColorModel(), stFrameTexture.getColorScale(), aColorGetter)) {
+            if(!myProgram.init(aCtx, aTextures.getColorModel(), aTextures.getColorScale(), aColorGetter)) {
                 break;
             }
 
-            myProgramFlat.getActiveProgram()->use(aCtx);
+            myProgram.getActiveProgram()->use(aCtx);
 
             // setup data rectangle in the texture
-            myProgramFlat.setTextureSizePx      (aCtx, textureSizeVec);
-            myProgramFlat.setTextureMainDataSize(aCtx, dataClampVec);
-            myProgramFlat.setTextureUVDataSize  (aCtx, dataUVClampVec);
+            myProgram.setTextureSizePx      (aCtx, aTextureSize);
+            myProgram.setTextureMainDataSize(aCtx, aClampVec);
+            myProgram.setTextureUVDataSize  (aCtx, aClampUV);
 
             // lenses center correction
             const GLfloat aLestDisp = getRoot()->getLensDist() * GLfloat(getRoot()->getRectPx().ratio());
             if(theView == ST_DRAW_LEFT) {
-                stModelMat.translate(StGLVec3( aLestDisp, 0.0f, 0.0f));
+                aModelMat.translate(StGLVec3( aLestDisp, 0.0f, 0.0f));
             } else {
-                stModelMat.translate(StGLVec3(-aLestDisp, 0.0f, 0.0f));
+                aModelMat.translate(StGLVec3(-aLestDisp, 0.0f, 0.0f));
             }
 
             // handle dragging timer
@@ -562,60 +559,60 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             }
 
             // apply scale
-            stModelMat.scale(aParams->ScaleFactor, aParams->ScaleFactor, 1.0f);
+            aModelMat.scale(aParams->ScaleFactor, aParams->ScaleFactor, 1.0f);
 
             // apply position
-            stModelMat.translate(StGLVec3(aParams->PanCenter));
+            aModelMat.translate(StGLVec3(aParams->PanCenter));
 
             // apply rotations
             if(theView == ST_DRAW_LEFT) {
-                stModelMat.rotate(aParams->getZRotate() - aParams->getSepRotation(), StGLVec3::DZ());
+                aModelMat.rotate(aParams->getZRotate() - aParams->getSepRotation(), StGLVec3::DZ());
             } else if(theView == ST_DRAW_RIGHT) {
-                stModelMat.rotate(aParams->getZRotate() + aParams->getSepRotation(), StGLVec3::DZ());
+                aModelMat.rotate(aParams->getZRotate() + aParams->getSepRotation(), StGLVec3::DZ());
             } else {
-                stModelMat.rotate(aParams->getZRotate(), StGLVec3::DZ());
+                aModelMat.rotate(aParams->getZRotate(), StGLVec3::DZ());
             }
-            stModelMat.rotate(anXRotate, StGLVec3::DX());
-            stModelMat.rotate(anYRotate, StGLVec3::DY());
+            aModelMat.rotate(anXRotate, StGLVec3::DX());
+            aModelMat.rotate(anYRotate, StGLVec3::DY());
 
             /// TODO (Kirill Gavrilov#8) implement fit all for rotated image
 
             // check window ratio to fill whole image in normal zoom
-            GLfloat dispRatio = 1.0f;
+            GLfloat aDispRatio = 1.0f;
             switch(params.displayRatio->getValue()) {
-                case RATIO_1_1:   dispRatio = 1.0f;  break;
-                case RATIO_4_3:   dispRatio = 1.3333333333f; break;
-                case RATIO_16_9:  dispRatio = 1.7777777778f; break;
-                case RATIO_16_10: dispRatio = 1.6f;  break;
-                case RATIO_221_1: dispRatio = 2.21f; break;
-                case RATIO_5_4:   dispRatio = 1.25f; break;
+                case RATIO_1_1:   aDispRatio = 1.0f;  break;
+                case RATIO_4_3:   aDispRatio = 1.3333333333f; break;
+                case RATIO_16_9:  aDispRatio = 1.7777777778f; break;
+                case RATIO_16_10: aDispRatio = 1.6f;  break;
+                case RATIO_221_1: aDispRatio = 2.21f; break;
+                case RATIO_5_4:   aDispRatio = 1.25f; break;
                 case RATIO_AUTO:
-                default: dispRatio = stFrameTexture.getPlane().getDisplayRatio(); break;
+                default: aDispRatio = aTextures.getPlane().getDisplayRatio(); break;
             }
 
-            GLfloat rectRatio = GLfloat(aFrameRectPx.ratio());
-            StGLVec2 ratioScale = aParams->getRatioScale(rectRatio, dispRatio);
-            stModelMat.scale(ratioScale.x(), ratioScale.y(), 1.0f);
+            GLfloat  aRectRatio  = GLfloat(aFrameRectPx.ratio());
+            StGLVec2 aRatioScale = aParams->getRatioScale(aRectRatio, aDispRatio);
+            aModelMat.scale(aRatioScale.x(), aRatioScale.y(), 1.0f);
 
             // apply separation
-            GLfloat aSepDeltaX = (2.0f * aParams->getSeparationDx()) / (stFrameTexture.getPlane().getDataSize().x() * stFrameTexture.getPlane().getSizeX());
-            GLfloat aSepDeltaY = (2.0f * aParams->getSeparationDy()) / (stFrameTexture.getPlane().getDataSize().y() * stFrameTexture.getPlane().getSizeY());
+            GLfloat aSepDeltaX = (2.0f * aParams->getSeparationDx()) / (aTextures.getPlane().getDataSize().x() * aTextures.getPlane().getSizeX());
+            GLfloat aSepDeltaY = (2.0f * aParams->getSeparationDy()) / (aTextures.getPlane().getDataSize().y() * aTextures.getPlane().getSizeY());
             if(theView == ST_DRAW_LEFT) {
-                stModelMat.translate(StGLVec3(-aSepDeltaX * 0.5f, -aSepDeltaY * 0.5f, 0.0f));
+                aModelMat.translate(StGLVec3(-aSepDeltaX * 0.5f, -aSepDeltaY * 0.5f, 0.0f));
             } else if(theView == ST_DRAW_RIGHT) {
-                stModelMat.translate(StGLVec3( aSepDeltaX * 0.5f,  aSepDeltaY * 0.5f, 0.0f));
+                aModelMat.translate(StGLVec3( aSepDeltaX * 0.5f,  aSepDeltaY * 0.5f, 0.0f));
             }
 
-            StGLMatrix stOrthoMat;
-            stOrthoMat.initOrtho(StGLVolume(-rectRatio * aFrustrumL, rectRatio * aFrustrumR,
-                                            -1.0f      * aFrustrumB, 1.0f      * aFrustrumT,
+            StGLMatrix anOrthoMat;
+            anOrthoMat.initOrtho(StGLVolume(-aRectRatio * aFrustrumL, aRectRatio * aFrustrumR,
+                                            -1.0f       * aFrustrumB, 1.0f       * aFrustrumT,
                                             -1.0f, 1.0f));
-            myProgramFlat.getActiveProgram()->setProjMat (aCtx, stOrthoMat);
-            myProgramFlat.getActiveProgram()->setModelMat(aCtx, stModelMat);
+            myProgram.getActiveProgram()->setProjMat (aCtx, anOrthoMat);
+            myProgram.getActiveProgram()->setModelMat(aCtx, aModelMat);
 
-            myQuad.draw(aCtx, *myProgramFlat.getActiveProgram());
+            myQuad.draw(aCtx, *myProgram.getActiveProgram());
 
-            myProgramFlat.getActiveProgram()->unuse(aCtx);
+            myProgram.getActiveProgram()->unuse(aCtx);
 
             // restore changed parameters
             aParams->ScaleFactor = aScaleBack;
@@ -623,49 +620,49 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             break;
         }
         case StStereoParams::PANORAMA_CUBEMAP: {
-            if(!myProgramFlat.init(aCtx, stFrameTexture.getColorModel(), stFrameTexture.getColorScale(), StGLImageProgram::FragGetColor_Cubemap)) {
+            if(!myProgram.init(aCtx, aTextures.getColorModel(), aTextures.getColorScale(), StGLImageProgram::FragGetColor_Cubemap)) {
                 break;
             }
 
-            myProgramFlat.getActiveProgram()->use(aCtx);
+            myProgram.getActiveProgram()->use(aCtx);
 
             // setup data rectangle in the texture
-            myProgramFlat.setTextureSizePx      (aCtx, textureSizeVec);
-            myProgramFlat.setTextureMainDataSize(aCtx, dataClampVec);
-            myProgramFlat.setTextureUVDataSize  (aCtx, dataUVClampVec);
+            myProgram.setTextureSizePx      (aCtx, aTextureSize);
+            myProgram.setTextureMainDataSize(aCtx, aClampVec);
+            myProgram.setTextureUVDataSize  (aCtx, aClampUV);
 
             const GLfloat aScale = aParams->ScaleFactor * PANORAMA_DEF_ZOOM;
-            stModelMat.scale(aScale, aScale, 1.0f);
+            aModelMat.scale(aScale, aScale, 1.0f);
 
-            StGLVec2 mouseMove = getMouseMoveSphere();
-            stModelMat.rotate(         aParams->PanTheta + mouseMove.y(),  StGLVec3::DX());
-            stModelMat.rotate(90.0f - (aParams->PanPhi   + mouseMove.x()), StGLVec3::DY());
+            StGLVec2 aMouseMove = getMouseMoveSphere();
+            aModelMat.rotate(         aParams->PanTheta + aMouseMove.y(),  StGLVec3::DX());
+            aModelMat.rotate(90.0f - (aParams->PanPhi   + aMouseMove.x()), StGLVec3::DY());
 
             GLfloat aSepDeltaX = GLfloat(-aParams->getSeparationDx()) * 0.05f;
             GLfloat aSepDeltaY = GLfloat(-aParams->getSeparationDy()) * 0.05f;
             if(theView == ST_DRAW_LEFT) {
-                stModelMat.rotate( aSepDeltaX, StGLVec3::DY());
-                stModelMat.rotate(-aSepDeltaY, StGLVec3::DZ());
-                stModelMat.rotate(-aParams->getZRotate() + aParams->getSepRotation(), StGLVec3::DX());
+                aModelMat.rotate( aSepDeltaX, StGLVec3::DY());
+                aModelMat.rotate(-aSepDeltaY, StGLVec3::DZ());
+                aModelMat.rotate(-aParams->getZRotate() + aParams->getSepRotation(), StGLVec3::DX());
             } else if(theView == ST_DRAW_RIGHT) {
-                stModelMat.rotate(-aSepDeltaX, StGLVec3::DY());
-                stModelMat.rotate( aSepDeltaY, StGLVec3::DZ());
-                stModelMat.rotate(-aParams->getZRotate() - aParams->getSepRotation(), StGLVec3::DX());
+                aModelMat.rotate(-aSepDeltaX, StGLVec3::DY());
+                aModelMat.rotate( aSepDeltaY, StGLVec3::DZ());
+                aModelMat.rotate(-aParams->getZRotate() - aParams->getSepRotation(), StGLVec3::DX());
             } else {
-                stModelMat.rotate(-aParams->getZRotate(), StGLVec3::DX());
+                aModelMat.rotate(-aParams->getZRotate(), StGLVec3::DX());
             }
 
             StGLMatrix aMatModelInv, aMatProjInv;
-            stModelMat.inverted(aMatModelInv);
+            aModelMat.inverted(aMatModelInv);
             getCamera()->getProjMatrixMono().inverted(aMatProjInv);
-            myProgramFlat.getActiveProgram()->setProjMat (aCtx, StGLMatrix::multiply(aMatModelInv, aMatProjInv));
-            myProgramFlat.getActiveProgram()->setModelMat(aCtx, stModelMat);
+            myProgram.getActiveProgram()->setProjMat (aCtx, StGLMatrix::multiply(aMatModelInv, aMatProjInv));
+            myProgram.getActiveProgram()->setModelMat(aCtx, aModelMat);
 
             ///glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
-            myQuad.draw(aCtx, *myProgramFlat.getActiveProgram());
+            myQuad.draw(aCtx, *myProgram.getActiveProgram());
 
-            myProgramFlat.getActiveProgram()->unuse(aCtx);
+            myProgram.getActiveProgram()->unuse(aCtx);
 
             // restore changed parameters
             aParams->ScaleFactor = aScaleBack;
@@ -673,54 +670,54 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             break;
         }
         case StStereoParams::PANORAMA_SPHERE: {
-            if(!myProgramFlat.init(aCtx, stFrameTexture.getColorModel(), stFrameTexture.getColorScale(), aColorGetter)) {
+            if(!myProgram.init(aCtx, aTextures.getColorModel(), aTextures.getColorScale(), aColorGetter)) {
                 break;
             }
 
             // perform scaling
             const GLfloat aScale = SPHERE_RADIUS * PANORAMA_DEF_ZOOM * aParams->ScaleFactor;
-            stModelMat.scale(aScale, aScale, SPHERE_RADIUS);
+            aModelMat.scale(aScale, aScale, SPHERE_RADIUS);
 
             // apply movements
-            StGLVec2 mouseMove = getMouseMoveSphere();
-            stModelMat.rotate(         aParams->PanTheta + mouseMove.y(),  StGLVec3::DX());
-            stModelMat.rotate(90.0f - (aParams->PanPhi   + mouseMove.x()), StGLVec3::DY());
+            StGLVec2 aMouseMove = getMouseMoveSphere();
+            aModelMat.rotate(         aParams->PanTheta + aMouseMove.y(),  StGLVec3::DX());
+            aModelMat.rotate(90.0f - (aParams->PanPhi   + aMouseMove.x()), StGLVec3::DY());
 
             GLfloat aSepDeltaX = GLfloat(-aParams->getSeparationDx()) * 0.05f;
             //GLfloat aSepDeltaY = GLfloat(-aParams->getSeparationDy()) * 0.05f;
 
             // apply rotations
             if(theView == ST_DRAW_LEFT) {
-                stModelMat.rotate( aSepDeltaX, StGLVec3::DY());
-                //stModelMat.rotate(-aSepDeltaY, StGLVec3::DZ());
-                //stModelMat.rotate(aParams->getZRotate() - aParams->getSepRotation(), StGLVec3::DX());
+                aModelMat.rotate( aSepDeltaX, StGLVec3::DY());
+                //aModelMat.rotate(-aSepDeltaY, StGLVec3::DZ());
+                //aModelMat.rotate(aParams->getZRotate() - aParams->getSepRotation(), StGLVec3::DX());
             } else if(theView == ST_DRAW_RIGHT) {
-                stModelMat.rotate(-aSepDeltaX, StGLVec3::DY());
-                //stModelMat.rotate( aSepDeltaY, StGLVec3::DZ());
-                //stModelMat.rotate(aParams->getZRotate() + aParams->getSepRotation(), StGLVec3::DX());
+                aModelMat.rotate(-aSepDeltaX, StGLVec3::DY());
+                //aModelMat.rotate( aSepDeltaY, StGLVec3::DZ());
+                //aModelMat.rotate(aParams->getZRotate() + aParams->getSepRotation(), StGLVec3::DX());
             } else {
-                //stModelMat.rotate(aParams->getZRotate(), StGLVec3::DX());
+                //aModelMat.rotate(aParams->getZRotate(), StGLVec3::DX());
             }
 
             // perform drawing
-            myProgramFlat.getActiveProgram()->use(aCtx);
+            myProgram.getActiveProgram()->use(aCtx);
 
             // setup data rectangle in the texture
-            myProgramFlat.setTextureSizePx      (aCtx, textureSizeVec);
-            myProgramFlat.setTextureMainDataSize(aCtx, dataClampVec);
-            myProgramFlat.setTextureUVDataSize  (aCtx, dataUVClampVec);
+            myProgram.setTextureSizePx      (aCtx, aTextureSize);
+            myProgram.setTextureMainDataSize(aCtx, aClampVec);
+            myProgram.setTextureUVDataSize  (aCtx, aClampUV);
 
-            myProgramFlat.getActiveProgram()->setProjMat (aCtx, getCamera()->getProjMatrixMono());
-            myProgramFlat.getActiveProgram()->setModelMat(aCtx, stModelMat);
+            myProgram.getActiveProgram()->setProjMat (aCtx, getCamera()->getProjMatrixMono());
+            myProgram.getActiveProgram()->setModelMat(aCtx, aModelMat);
 
-            myUVSphere.draw(aCtx, *myProgramFlat.getActiveProgram());
+            myUVSphere.draw(aCtx, *myProgram.getActiveProgram());
 
-            myProgramFlat.getActiveProgram()->unuse(aCtx);
+            myProgram.getActiveProgram()->unuse(aCtx);
             break;
         }
     }
 
-    stFrameTexture.unbind(aCtx);
+    aTextures.unbind(aCtx);
 
     aCtx.stglResetScissorRect();
 }
