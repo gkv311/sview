@@ -14,7 +14,6 @@
 
 #include <StGLWidgets/StGLWidget.h>
 #include <StGLWidgets/StGLImageFlatProgram.h>
-#include <StGLWidgets/StGLImageSphereProgram.h>
 #include <StGLStereo/StGLTextureQueue.h>
 
 #include <StGL/StParams.h>
@@ -268,7 +267,6 @@ class StGLImageRegion : public StGLWidget {
     StGLQuads                  myQuad;           //!< flat quad
     StGLUVSphere               myUVSphere;       //!< sphere output helper class
     StGLImageFlatProgram       myProgramFlat;    //!< GL program to draw flat image
-    StGLImageSphereProgram     myProgramSphere;  //!< GL program to draw spheric panorama
     StHandle<StGLTextureQueue> myTextureQueue;   //!< shared texture queue
     StPointD_t                 myClickPntZo;     //!< remembered mouse click position
     StTimer                    myClickTimer;     //!< timer to delay dragging action

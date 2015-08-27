@@ -19,41 +19,6 @@
 
 namespace {
 
-    class ST_LOCAL StTrackedFloatParam : public StFloat32Param {
-
-            private:
-
-        StHandle<StFloat32Param> myTracked1;
-        StHandle<StFloat32Param> myTracked2;
-
-            public:
-
-        StTrackedFloatParam(const StHandle<StFloat32Param>& theTracked1,
-                            const StHandle<StFloat32Param>& theTracked2)
-        : StFloat32Param(theTracked1->getValue(),
-                         theTracked1->getMinValue(),
-                         theTracked1->getMaxValue(),
-                         theTracked1->getDefValue(),
-                         theTracked1->getStep(),
-                         theTracked1->getTolerance()),
-          myTracked1(theTracked1),
-          myTracked2(theTracked2) {}
-
-        virtual float getValue() const {
-            return myTracked1->getValue();
-        }
-
-        virtual bool setValue(const float theValue) {
-            if(myTracked1->setValue(theValue)
-            || myTracked2->setValue(theValue)) {
-                signals.onChanged(theValue);
-                return true;
-            }
-            return false;
-        }
-
-    };
-
     class ST_LOCAL StSwapLRParam : public StBoolParam {
 
             public:
@@ -127,7 +92,6 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
   myQuad(),
   myUVSphere(StGLVec3(0.0f, 0.0f, 0.0f), 1.0f, 64),
   myProgramFlat(),
-  myProgramSphere(),
   myTextureQueue(theTextureQueue),
   myClickPntZo(0.0, 0.0),
   myKeyFlags(ST_VF_NONE),
@@ -149,12 +113,9 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
 
     params.displayRatio  = new StInt32Param(RATIO_AUTO);
     params.textureFilter = new StInt32Param(StGLImageProgram::FILTER_LINEAR);
-    params.gamma      = new StTrackedFloatParam(myProgramFlat.params.gamma,
-                                                myProgramSphere.params.gamma);
-    params.brightness = new StTrackedFloatParam(myProgramFlat.params.brightness,
-                                                myProgramSphere.params.brightness);
-    params.saturation = new StTrackedFloatParam(myProgramFlat.params.saturation,
-                                                myProgramSphere.params.saturation);
+    params.gamma      = myProgramFlat.params.gamma;
+    params.brightness = myProgramFlat.params.brightness;
+    params.saturation = myProgramFlat.params.saturation;
     params.swapLR   = new StSwapLRParam();
     params.ViewMode = new StViewModeParam();
 
@@ -297,7 +258,6 @@ StGLImageRegion::~StGLImageRegion() {
     myQuad.release(aCtx);
     myUVSphere.release(aCtx);
     myProgramFlat.release(aCtx);
-    myProgramSphere.release(aCtx);
 }
 
 StHandle<StStereoParams> StGLImageRegion::getSource() {
@@ -325,8 +285,6 @@ bool StGLImageRegion::stglInit() {
 
     StGLContext& aCtx = getContext();
     if(!myProgramFlat.init(aCtx, StImage::ImgColor_RGB, StImage::ImgScale_Full, StGLImageProgram::FragGetColor_Normal)) {
-        return false;
-    } else if(!myProgramSphere.init(aCtx, StImage::ImgColor_RGB, StImage::ImgScale_Full, StGLImageProgram::FragGetColor_Normal)) {
         return false;
     } else if(!myQuad.initScreen(aCtx)) {
         ST_DEBUG_LOG("Fail to init StGLQuad");
@@ -465,8 +423,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     // data rectangle in the texture
     StGLVec4 dataClampVec;
     StGLVec4 dataUVClampVec;
-    if(params.textureFilter->getValue() == StGLImageProgram::FILTER_NEAREST
-    || aParams->ViewingMode == StStereoParams::PANORAMA_SPHERE) {
+    if(params.textureFilter->getValue() == StGLImageProgram::FILTER_NEAREST) {
         myTextureQueue->getQTexture().setMinMagFilter(aCtx, GL_NEAREST);
         //
         dataClampVec.x() = 0.0f;
@@ -537,13 +494,14 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     } else if(aViewMode == StStereoParams::PANORAMA_CUBEMAP) {
         aViewMode = StStereoParams::FLAT_IMAGE;
     }
+
+    myProgramFlat.setColorScale(aColorScale); // apply de-anaglyph color filter
+    StGLImageProgram::FragGetColor aColorGetter = params.textureFilter->getValue() == StGLImageProgram::FILTER_BLEND
+                                                ? StGLImageProgram::FragGetColor_Blend
+                                                : StGLImageProgram::FragGetColor_Normal;
     switch(aViewMode) {
         default:
         case StStereoParams::FLAT_IMAGE: {
-            myProgramFlat.setColorScale(aColorScale); // apply de-anaglyph color filter
-            StGLImageProgram::FragGetColor aColorGetter = params.textureFilter->getValue() == StGLImageProgram::FILTER_BLEND
-                                                        ? StGLImageProgram::FragGetColor_Blend
-                                                        : StGLImageProgram::FragGetColor_Normal;
             if(!myProgramFlat.init(aCtx, stFrameTexture.getColorModel(), stFrameTexture.getColorScale(), aColorGetter)) {
                 break;
             }
@@ -666,9 +624,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             break;
         }
         case StStereoParams::PANORAMA_CUBEMAP: {
-            myProgramFlat.setColorScale(aColorScale); // apply de-anaglyph color filter
-            StGLImageProgram::FragGetColor aColorGetter = StGLImageProgram::FragGetColor_Cubemap;
-            if(!myProgramFlat.init(aCtx, stFrameTexture.getColorModel(), stFrameTexture.getColorScale(), aColorGetter)) {
+            if(!myProgramFlat.init(aCtx, stFrameTexture.getColorModel(), stFrameTexture.getColorScale(), StGLImageProgram::FragGetColor_Cubemap)) {
                 break;
             }
 
@@ -718,11 +674,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             break;
         }
         case StStereoParams::PANORAMA_SPHERE: {
-            myProgramSphere.setColorScale(aColorScale); // apply de-anaglyph color filter
-            StGLImageProgram::FragGetColor aColorGetter = params.textureFilter->getValue() != StGLImageProgram::FILTER_NEAREST
-                                                        ? StGLImageProgram::FragGetColor_Blend
-                                                        : StGLImageProgram::FragGetColor_Normal;
-            if(!myProgramSphere.init(aCtx, stFrameTexture.getColorModel(), stFrameTexture.getColorScale(), aColorGetter)) {
+            if(!myProgramFlat.init(aCtx, stFrameTexture.getColorModel(), stFrameTexture.getColorScale(), aColorGetter)) {
                 break;
             }
 
@@ -752,19 +704,19 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             }
 
             // perform drawing
-            myProgramSphere.getActiveProgram()->use(aCtx);
+            myProgramFlat.getActiveProgram()->use(aCtx);
 
             // setup data rectangle in the texture
-            myProgramSphere.setTextureSizePx      (aCtx, textureSizeVec);
-            myProgramSphere.setTextureMainDataSize(aCtx, dataClampVec);
-            myProgramSphere.setTextureUVDataSize  (aCtx, dataUVClampVec);
+            myProgramFlat.setTextureSizePx      (aCtx, textureSizeVec);
+            myProgramFlat.setTextureMainDataSize(aCtx, dataClampVec);
+            myProgramFlat.setTextureUVDataSize  (aCtx, dataUVClampVec);
 
-            myProgramSphere.getActiveProgram()->setProjMat (aCtx, getCamera()->getProjMatrixMono());
-            myProgramSphere.getActiveProgram()->setModelMat(aCtx, stModelMat);
+            myProgramFlat.getActiveProgram()->setProjMat (aCtx, getCamera()->getProjMatrixMono());
+            myProgramFlat.getActiveProgram()->setModelMat(aCtx, stModelMat);
 
-            myUVSphere.draw(aCtx, *myProgramSphere.getActiveProgram());
+            myUVSphere.draw(aCtx, *myProgramFlat.getActiveProgram());
 
-            myProgramSphere.getActiveProgram()->unuse(aCtx);
+            myProgramFlat.getActiveProgram()->unuse(aCtx);
             break;
         }
     }

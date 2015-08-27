@@ -216,7 +216,6 @@
     <ClCompile Include="StGLImageFlatProgram.cpp" />
     <ClCompile Include="StGLImageProgram.cpp" />
     <ClCompile Include="StGLImageRegion.cpp" />
-    <ClCompile Include="StGLImageSphereProgram.cpp" />
     <ClCompile Include="StGLMenu.cpp" />
     <ClCompile Include="StGLMenuCheckbox.cpp" />
     <ClCompile Include="StGLMenuItem.cpp" />

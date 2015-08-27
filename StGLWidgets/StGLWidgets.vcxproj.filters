@@ -36,9 +36,6 @@
     <ClCompile Include="StGLImageRegion.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="StGLImageSphereProgram.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="StGLMenu.cpp">
       <Filter>Source files</Filter>
     </ClCompile>

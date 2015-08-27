@@ -216,7 +216,6 @@
 		<Unit filename="StGLImageFlatProgram.cpp" />
 		<Unit filename="StGLImageProgram.cpp" />
 		<Unit filename="StGLImageRegion.cpp" />
-		<Unit filename="StGLImageSphereProgram.cpp" />
 		<Unit filename="StGLMenu.cpp" />
 		<Unit filename="StGLMenuCheckbox.cpp" />
 		<Unit filename="StGLMenuItem.cpp" />
@@ -257,7 +256,6 @@
 		<Unit filename="../include/StGLWidgets/StGLImageFlatProgram.h" />
 		<Unit filename="../include/StGLWidgets/StGLImageProgram.h" />
 		<Unit filename="../include/StGLWidgets/StGLImageRegion.h" />
-		<Unit filename="../include/StGLWidgets/StGLImageSphereProgram.h" />
 		<Unit filename="../include/StGLWidgets/StGLMenu.h" />
 		<Unit filename="../include/StGLWidgets/StGLMenuCheckbox.h" />
 		<Unit filename="../include/StGLWidgets/StGLMenuItem.h" />
