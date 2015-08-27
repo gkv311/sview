@@ -855,7 +855,8 @@ static const char *next_option(const char *list, struct vec *val,
 
 static int match_prefix(const char *pattern, size_t pattern_len, const char *str) {
   const char *or_str;
-  int i, j, len, res;
+  int j, len, res;
+  size_t i;
 
   if ((or_str = (const char *) memchr(pattern, '|', pattern_len)) != NULL) {
     res = match_prefix(pattern, or_str - pattern, str);
@@ -863,7 +864,8 @@ static int match_prefix(const char *pattern, size_t pattern_len, const char *str
         match_prefix(or_str + 1, (pattern + pattern_len) - (or_str + 1), str);
   }
 
-  i = j = 0;
+  j = 0;
+  i = 0;
   res = -1;
   for (; i < pattern_len; i++, j++) {
     if (pattern[i] == '?' && str[j] != '\0') {
