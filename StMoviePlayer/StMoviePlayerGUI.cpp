@@ -180,17 +180,23 @@ void StMoviePlayerGUI::createUpperToolbar() {
     myBtnSwapLR->changeMargins() = aButtonMargins;
 
     // right buttons
-    myBtnSubs = new StGLTextureButton(myPanelUpper, (aNbBtnRight++) * (-anIconStep) - aLeft, aTop,
-                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
-    myBtnSubs->signals.onBtnClick += stSlot(this, &StMoviePlayerGUI::doSubtitlesStreamsCombo);
-    myBtnSubs->setTexturePath(iconTexture(stCString("actionStreamSubtitles"),  anIconSize));
+    StHandle<StBoolParam> aTrackedSubs = new StBoolParam(false);
+    myBtnSubs = new StGLCheckboxTextured(myPanelUpper, aTrackedSubs,
+                                         iconTexture(stCString("actionStreamSubtitles"), anIconSize),
+                                         iconTexture(stCString("actionStreamSubtitles"), anIconSize),
+                                         (aNbBtnRight++) * (-anIconStep) - aLeft, aTop,
+                                         StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    myBtnSubs->signals.onBtnClick = stSlot(this, &StMoviePlayerGUI::doSubtitlesStreamsCombo);
     myBtnSubs->setDrawShadow(true);
     myBtnSubs->changeMargins() = aButtonMargins;
 
-    myBtnAudio = new StGLTextureButton(myPanelUpper, (aNbBtnRight++) * (-anIconStep) - aLeft, aTop,
-                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
-    myBtnAudio->signals.onBtnClick += stSlot(this, &StMoviePlayerGUI::doAudioStreamsCombo);
-    myBtnAudio->setTexturePath(iconTexture(stCString("actionStreamAudio"),  anIconSize));
+    StHandle<StBoolParam> aTrackedAudio = new StBoolParam(false);
+    myBtnAudio = new StGLCheckboxTextured(myPanelUpper, aTrackedAudio,
+                                          iconTexture(stCString("actionStreamAudio"), anIconSize),
+                                          iconTexture(stCString("actionStreamAudio"), anIconSize),
+                                          (aNbBtnRight++) * (-anIconStep) - aLeft, aTop,
+                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    myBtnAudio->signals.onBtnClick = stSlot(this, &StMoviePlayerGUI::doAudioStreamsCombo);
     myBtnAudio->setDrawShadow(true);
     myBtnAudio->changeMargins() = aButtonMargins;
 }
@@ -1408,6 +1414,13 @@ void StMoviePlayerGUI::stglUpdate(const StPointD_t& thePointZo,
     && myPanelBottom != NULL
     && myTimeBox->wasResized()) {
         stglResizeSeekBar();
+    }
+
+    if(myBtnAudio != NULL) {
+        myBtnAudio->getTrackedValue()->setValue(myPlugin->params.audioStream->getValue() != -1);
+    }
+    if(myBtnSubs != NULL) {
+        myBtnSubs->getTrackedValue()->setValue(myPlugin->params.subtitlesStream->getValue() != -1);
     }
 
     setVisibility(thePointZo, theIsMouseMoved);

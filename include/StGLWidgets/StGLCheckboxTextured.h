@@ -36,6 +36,13 @@ class StGLCheckboxTextured : public StGLTextureButton {
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo);
 
     /**
+     * Return tracked value.
+     */
+    ST_LOCAL StHandle<StBoolParam>& getTrackedValue() {
+        return myTrackValue;
+    }
+
+    /**
      * Return opacity scale for FALSE value, 0.5f by default.
      */
     ST_LOCAL float getFalseOpacity() const {
