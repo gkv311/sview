@@ -72,6 +72,9 @@ namespace {
 
     static const char ST_SETTING_SCALE_ADJUST[]  = "scaleAdjust";
     static const char ST_SETTING_SCALE_FORCE2X[] = "scale2X";
+    static const char ST_SETTING_SUBTITLES_PLACE[]="subsPlace";
+    static const char ST_SETTING_SUBTITLES_TOPDY[]="subsTopDY";
+    static const char ST_SETTING_SUBTITLES_BOTTOMDY[]="subsBottomDY";
     static const char ST_SETTING_SUBTITLES_SIZE[]= "subsSize";
     static const char ST_SETTING_SUBTITLES_PARALLAX[] = "subsParallax";
     static const char ST_SETTING_SUBTITLES_PARSER[] = "subsParser";
@@ -403,6 +406,17 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.ScaleHiDPI2X     = new StBoolParam(false);
     mySettings->loadParam (ST_SETTING_SCALE_FORCE2X, params.ScaleHiDPI2X);
     params.ScaleHiDPI2X->signals.onChanged = stSlot(this, &StMoviePlayer::doScaleHiDPI);
+    params.SubtitlesPlace   = new StInt32Param(ST_VCORNER_BOTTOM);
+    params.SubtitlesTopDY   = new StFloat32Param(100.0f,      // initial value
+                                                 0.0f, 400.0f,// min, max values
+                                                 100.0f,      // default value
+                                                 5.0f,        // incremental step
+                                                 0.1f);       // equality tolerance
+    params.SubtitlesBottomDY= new StFloat32Param(100.0f,      // initial value
+                                                 0.0f, 400.0f,// min, max values
+                                                 100.0f,      // default value
+                                                 5.0f,        // incremental step
+                                                 0.1f);       // equality tolerance
     params.SubtitlesSize    = new StFloat32Param(28.0f,       // initial value
                                                  8.0f, 96.0f, // min, max values
                                                  28.0f,       // default value
@@ -474,6 +488,9 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (ST_SETTING_LOOP_SINGLE,        params.ToLoopSingle);
     mySettings->loadParam (ST_SETTING_GLOBAL_MKEYS,       params.areGlobalMKeys);
     mySettings->loadParam (ST_SETTING_SHOW_LIST,          params.ToShowPlayList);
+    mySettings->loadParam (ST_SETTING_SUBTITLES_PLACE,    params.SubtitlesPlace);
+    mySettings->loadParam (ST_SETTING_SUBTITLES_TOPDY,    params.SubtitlesTopDY);
+    mySettings->loadParam (ST_SETTING_SUBTITLES_BOTTOMDY, params.SubtitlesBottomDY);
     mySettings->loadParam (ST_SETTING_SUBTITLES_SIZE,     params.SubtitlesSize);
     mySettings->loadParam (ST_SETTING_SUBTITLES_PARALLAX, params.SubtitlesParallax);
     mySettings->loadParam (ST_SETTING_SUBTITLES_PARSER,   params.SubtitlesParser);
@@ -677,6 +694,9 @@ void StMoviePlayer::releaseDevice() {
     if(!myGUI.isNull()) {
         mySettings->saveParam (ST_SETTING_SCALE_ADJUST,       params.ScaleAdjust);
         mySettings->saveParam (ST_SETTING_SCALE_FORCE2X,      params.ScaleHiDPI2X);
+        mySettings->saveParam (ST_SETTING_SUBTITLES_PLACE,    params.SubtitlesPlace);
+        mySettings->saveParam (ST_SETTING_SUBTITLES_TOPDY,    params.SubtitlesTopDY);
+        mySettings->saveParam (ST_SETTING_SUBTITLES_BOTTOMDY, params.SubtitlesBottomDY);
         mySettings->saveParam (ST_SETTING_SUBTITLES_SIZE,     params.SubtitlesSize);
         mySettings->saveParam (ST_SETTING_SUBTITLES_PARALLAX, params.SubtitlesParallax);
         mySettings->saveParam (ST_SETTING_SUBTITLES_PARSER,   params.SubtitlesParser);

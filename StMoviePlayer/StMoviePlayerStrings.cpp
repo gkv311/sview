@@ -80,6 +80,12 @@ void loadDefaults(StLangMap& theStrings) {
                "Parallax");
     theStrings(MENU_SUBTITLES_PARSER,
                "Parser");
+    theStrings(MENU_SUBTITLES_PLACEMENT,
+               "Placement");
+    theStrings(MENU_SUBTITLES_TOP,
+               "Top");
+    theStrings(MENU_SUBTITLES_BOTTOM,
+               "Bottom");
     theStrings(MENU_SUBTITLES_PLAIN_TEXT,
                "Plain text");
     theStrings(MENU_SUBTITLES_LITE_HTML,

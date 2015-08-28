@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -62,6 +62,9 @@ class StGLSubtitles : public StGLTextArea {
 
     ST_CPPEXPORT StGLSubtitles(StGLWidget*                     theParent,
                                const StHandle<StSubQueue>&     theSubQueue,
+                               const StHandle<StInt32Param>&   thePlace,
+                               const StHandle<StFloat32Param>& theTopDY,
+                               const StHandle<StFloat32Param>& theBottomDY,
                                const StHandle<StFloat32Param>& theFontSize,
                                const StHandle<StFloat32Param>& theParallax,
                                const StHandle<StEnumParam>&    theParser);
@@ -83,6 +86,9 @@ class StGLSubtitles : public StGLTextArea {
 
         private:
 
+    StHandle<StInt32Param>   myPlace;     //!< placement
+    StHandle<StFloat32Param> myTopDY;     //!< displacement
+    StHandle<StFloat32Param> myBottomDY;  //!< displacement
     StHandle<StFloat32Param> myFontSize;  //!< font size parameter
     StHandle<StFloat32Param> myParallax;  //!< text parallax
     StHandle<StEnumParam>    myParser;    //!< text parser option

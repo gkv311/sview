@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -141,15 +141,25 @@ void StGLSubtitles::StSubShowItems::add(const StHandle<StSubItem>& theItem) {
     StArrayList<StHandle <StSubItem> >::add(theItem);
 }
 
+inline StGLVCorner parseCorner(int theVal) {
+    return (StGLVCorner )theVal;
+}
+
 StGLSubtitles::StGLSubtitles(StGLWidget*                     theParent,
                              const StHandle<StSubQueue>&     theSubQueue,
+                             const StHandle<StInt32Param>&   thePlace,
+                             const StHandle<StFloat32Param>& theTopDY,
+                             const StHandle<StFloat32Param>& theBottomDY,
                              const StHandle<StFloat32Param>& theFontSize,
                              const StHandle<StFloat32Param>& theParallax,
                              const StHandle<StEnumParam>&    theParser)
 : StGLTextArea(theParent,
-               0, -theParent->getRoot()->scale(100),
-               StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_CENTER),
+               0, 0,
+               StGLCorner(parseCorner(thePlace->getValue()), ST_HCORNER_CENTER),
                theParent->getRoot()->scale(800), theParent->getRoot()->scale(160)),
+  myPlace(thePlace),
+  myTopDY(theTopDY),
+  myBottomDY(theBottomDY),
   myFontSize(theFontSize),
   myParallax(theParallax),
   myParser(theParser),
@@ -223,6 +233,44 @@ void StGLSubtitles::stglUpdate(const StPointD_t& ) {
     for(StHandle<StSubItem> aNewSubItem = myQueue->pop(myPTS); !aNewSubItem.isNull(); aNewSubItem = myQueue->pop(myPTS)) {
         isChanged = true;
         myShowItems.add(aNewSubItem);
+    }
+
+    const StGLVCorner aCorner = parseCorner(myPlace->getValue());
+    bool toResize = myCorner.v != aCorner;
+    myCorner.v = aCorner;
+    switch(myCorner.v) {
+        case ST_VCORNER_TOP: {
+            const int aDisp = myRoot->scale(myTopDY->getValue());
+            if(getRectPx().top() != aDisp) {
+                toResize = true;
+                changeRectPx().moveTopTo(aDisp);
+            }
+            myFormatter.setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+                                       StGLTextFormatter::ST_ALIGN_Y_TOP);
+            break;
+        }
+        case ST_VCORNER_CENTER: {
+            if(getRectPx().top() != 0) {
+                toResize = true;
+                changeRectPx().moveTopTo(0);
+            }
+            myFormatter.setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+                                       StGLTextFormatter::ST_ALIGN_Y_CENTER);
+            break;
+        }
+        case ST_VCORNER_BOTTOM: {
+            const int aDisp = -myRoot->scale(myBottomDY->getValue());
+            if(getRectPx().top() != aDisp) {
+                toResize = true;
+                changeRectPx().moveTopTo(aDisp);
+            }
+            myFormatter.setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+                                       StGLTextFormatter::ST_ALIGN_Y_BOTTOM);
+            break;
+        }
+    }
+    if(toResize) {
+        stglResize();
     }
 
     StGLContext& aCtx = getContext();

@@ -195,6 +195,9 @@ class StMoviePlayer : public StApplication {
         StHandle<StInt32Param>    ScaleAdjust;      //!< adjust GUI size, see StGLRootWidget::ScaleAdjust
         StHandle<StFloat32Param>  ScaleHiDPI;       //!< adapt  GUI size for HiDPI resolution
         StHandle<StBoolParam>     ScaleHiDPI2X;     //!< option to set HiDPI resolution to 2.0
+        StHandle<StInt32Param>    SubtitlesPlace;   //!< subtitles placement
+        StHandle<StFloat32Param>  SubtitlesTopDY;   //!< subtitles vertical displacement
+        StHandle<StFloat32Param>  SubtitlesBottomDY;//!< subtitles vertical displacement
         StHandle<StFloat32Param>  SubtitlesSize;    //!< subtitles font size
         StHandle<StFloat32Param>  SubtitlesParallax;//!< subtitles parallax
         StHandle<StBoolParam>     ToSearchSubs;     //!< automatically search for additional subtitles/audio track files nearby video file
