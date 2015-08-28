@@ -124,6 +124,7 @@ void StMoviePlayerGUI::createDesktopUI(const StHandle<StPlayList>& thePlayList) 
  */
 void StMoviePlayerGUI::createUpperToolbar() {
     int aBtnIter = 0;
+    int aNbBtnRight = 0;
     const int aTop  = scale(DISPL_Y_REGION_UPPER);
     const int aLeft = scale(DISPL_X_REGION_UPPER);
     StMarginsI aButtonMargins;
@@ -177,6 +178,21 @@ void StMoviePlayerGUI::createUpperToolbar() {
                                            StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
     myBtnSwapLR->setDrawShadow(true);
     myBtnSwapLR->changeMargins() = aButtonMargins;
+
+    // right buttons
+    myBtnSubs = new StGLTextureButton(myPanelUpper, (aNbBtnRight++) * (-anIconStep) - aLeft, aTop,
+                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    myBtnSubs->signals.onBtnClick += stSlot(this, &StMoviePlayerGUI::doSubtitlesStreamsCombo);
+    myBtnSubs->setTexturePath(iconTexture(stCString("actionStreamSubtitles"),  anIconSize));
+    myBtnSubs->setDrawShadow(true);
+    myBtnSubs->changeMargins() = aButtonMargins;
+
+    myBtnAudio = new StGLTextureButton(myPanelUpper, (aNbBtnRight++) * (-anIconStep) - aLeft, aTop,
+                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    myBtnAudio->signals.onBtnClick += stSlot(this, &StMoviePlayerGUI::doAudioStreamsCombo);
+    myBtnAudio->setTexturePath(iconTexture(stCString("actionStreamAudio"),  anIconSize));
+    myBtnAudio->setDrawShadow(true);
+    myBtnAudio->changeMargins() = aButtonMargins;
 }
 
 /**
@@ -282,16 +298,12 @@ void StMoviePlayerGUI::createMainMenu() {
 
     StGLMenu* aMenuMedia   = createMediaMenu();     // Root -> Media menu
     StGLMenu* aMenuView    = createViewMenu();      // Root -> View menu
-              myMenuAudio  = createAudioMenu();     // Root -> Audio menu
-           myMenuSubtitles = createSubtitlesMenu(); // Root -> Subtitles menu
     StGLMenu* aDevicesMenu = createOutputMenu();    // Root -> Output menu
     StGLMenu* aMenuHelp    = createHelpMenu();      // Root -> Help menu
 
     // Attach sub menus to root
     myMenuRoot->addItem(tr(MENU_MEDIA),     aMenuMedia);
     myMenuRoot->addItem(tr(MENU_VIEW),      aMenuView);
-    myMenuRoot->addItem(tr(MENU_AUDIO),     myMenuAudio);
-    myMenuRoot->addItem(tr(MENU_SUBTITLES), myMenuSubtitles);
     myMenuRoot->addItem(myPlugin->StApplication::params.ActiveDevice->getActiveValue(), aDevicesMenu);
     myMenuRoot->addItem(tr(MENU_HELP),      aMenuHelp);
 }
@@ -1316,14 +1328,14 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
   myMenuRoot(NULL),
   myMenuOpenAL(NULL),
   myMenuRecent(NULL),
-  myMenuAudio(NULL),
-  myMenuSubtitles(NULL),
   // upper toolbar
   myPanelUpper(NULL),
   myBtnOpen(NULL),
   myBtnInfo(NULL),
   myBtnSwapLR(NULL),
   myBtnSrcFrmt(NULL),
+  myBtnAudio(NULL),
+  myBtnSubs(NULL),
   // bottom toolbar
   myPanelBottom(NULL),
   mySeekBar(NULL),
@@ -1625,6 +1637,10 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
             myDescr->setText(tr(aLngId));
         } else if(::isPointIn(myBtnSrcFrmt, theCursor)) {
             myDescr->setText(tr(BTN_SRC_FORMAT) + "\n" + trSrcFormat(aSrcFormat));
+        } else if(::isPointIn(myBtnAudio, theCursor)) {
+            myDescr->setText(tr(MENU_AUDIO));
+        } else if(::isPointIn(myBtnSubs, theCursor)) {
+            myDescr->setText(tr(MENU_SUBTITLES));
         } else if(::isPointIn(myBtnVolume, theCursor)) {
             myDescr->setText("Mute");
         } else if(::isPointIn(myBtnPlay, theCursor)) {
@@ -1660,102 +1676,70 @@ void StMoviePlayerGUI::doAudioStreamsCombo(const size_t ) {
             aBuilder.getMenu()->addItem(aStreams->getValue(aStreamId), myPlugin->params.audioStream, int32_t(aStreamId));
         }
     }
-    aBuilder.display();
-}
-
-void StMoviePlayerGUI::updateAudioStreamsMenu(const StHandle< StArrayList<StString> >& theStreamsList,
-                                              const bool theHasVideo) {
-    if(myMenuAudio == NULL) {
+    if(myWindow->isMobile()) {
+        aBuilder.display();
         return;
     }
-    for(StGLWidget* aChild = myMenuAudio->getChildren()->getStart(); aChild != NULL;) {
-        StGLWidget* anItem = aChild;
-        aChild = aChild->getNext();
-        delete anItem;
-    }
 
-    if(theHasVideo || theStreamsList.isNull() || theStreamsList->isEmpty()) {
-        myMenuAudio->addItem(tr(MENU_AUDIO_NONE), myPlugin->params.audioStream, -1);
-    }
-    if(!theStreamsList.isNull()) {
-        for(size_t aStreamId = 0; aStreamId < theStreamsList->size(); ++aStreamId) {
-            myMenuAudio->addItem(theStreamsList->getValue(aStreamId), myPlugin->params.audioStream, int32_t(aStreamId));
-        }
-    }
-
-    //myMenuAudio->addSplitter();
+    //aBuilder.getMenu()->addSplitter();
     StGLMenuItem* aDelayItem = NULL;
     StGLRangeFieldFloat32* aDelayRange = NULL;
-    if(theHasVideo) {
-        if(!theStreamsList.isNull()
-        && !theStreamsList->isEmpty()) {
-            aDelayItem = myMenuAudio->addItem(tr(MENU_AUDIO_DELAY));
+    if(hasVideo) {
+        if(!aStreams.isNull()
+        && !aStreams->isEmpty()) {
+            aDelayItem = aBuilder.getMenu()->addItem(tr(MENU_AUDIO_DELAY));
             aDelayItem->changeMargins().right = scale(100 + 16);
             aDelayItem->signals.onItemClick.connect(this, &StMoviePlayerGUI::doAudioDelay);
             aDelayRange = new StGLRangeFieldFloat32(aDelayItem, myPlugin->params.AudioDelay,
                                                     -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
-            aDelayRange->changeRectPx().bottom() = aDelayRange->getRectPx().top()  + myMenuAudio->getItemHeight();
+            aDelayRange->changeRectPx().bottom() = aDelayRange->getRectPx().top()  + aBuilder.getMenu()->getItemHeight();
             aDelayRange->setFormat(stCString("%+01.3f"));
             aDelayRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  StGLVec3(0.0f, 0.0f, 0.0f));
             aDelayRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, StGLVec3(0.4f, 0.8f, 0.4f));
             aDelayRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, StGLVec3(1.0f, 0.0f, 0.0f));
         }
-        myMenuAudio->addItem(tr(MENU_AUDIO_ATTACH))
-                   ->setIcon(stCMenuIcon("actionOpen"), false)
-                   ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doAddAudioStream);
+        aBuilder.getMenu()->addItem(tr(MENU_AUDIO_ATTACH))
+                          ->setIcon(stCMenuIcon("actionOpen"), false)
+                          ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doAddAudioStream);
     }
 
-    // update menu representation
-    myMenuAudio->stglInit();
+    aBuilder.display();
 }
 
 void StMoviePlayerGUI::doSubtitlesStreamsCombo(const size_t ) {
     const StHandle< StArrayList<StString> >& aStreams = myPlugin->myVideo->params.activeSubtitles->getList();
 
     StGLCombobox::ListBuilder aBuilder(this);
+
+    // create text parser menu
+    StGLMenu* aParserMenu = NULL;
+    if(!myWindow->isMobile()) {
+        aParserMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+        for(size_t anIter = 0; anIter < myPlugin->params.SubtitlesParser->getValues().size(); ++anIter) {
+            aParserMenu->addItem(myPlugin->params.SubtitlesParser->getValues()[anIter], myPlugin->params.SubtitlesParser, (int32_t )anIter);
+        }
+    }
+
     aBuilder.getMenu()->addItem(tr(MENU_SUBTITLES_NONE), myPlugin->params.subtitlesStream, -1);
     if(!aStreams.isNull()) {
         for(size_t aStreamId = 0; aStreamId < aStreams->size(); ++aStreamId) {
             aBuilder.getMenu()->addItem(aStreams->getValue(aStreamId), myPlugin->params.subtitlesStream, int32_t(aStreamId));
         }
     }
-    aBuilder.display();
-}
-
-void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<StString> >& theStreamsList,
-                                                  const bool theIsFilePlayed) {
-    if(myMenuSubtitles == NULL) {
+    if(myWindow->isMobile()) {
+        aBuilder.display();
         return;
     }
-    for(StGLWidget* aChild = myMenuSubtitles->getChildren()->getStart(); aChild != NULL;) {
-        StGLWidget* anItem = aChild;
-        aChild = aChild->getNext();
-        delete anItem;
-    }
 
-    // create text parser menu
-    StGLMenu* aParserMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    for(size_t anIter = 0; anIter < myPlugin->params.SubtitlesParser->getValues().size(); ++anIter) {
-        aParserMenu->addItem(myPlugin->params.SubtitlesParser->getValues()[anIter], myPlugin->params.SubtitlesParser, (int32_t )anIter);
-    }
-    aParserMenu->stglInit();
-
-    myMenuSubtitles->addItem(tr(MENU_SUBTITLES_NONE), myPlugin->params.subtitlesStream, -1);
-    if(!theStreamsList.isNull()) {
-        for(size_t aStreamId = 0; aStreamId < theStreamsList->size(); ++aStreamId) {
-            myMenuSubtitles->addItem(theStreamsList->getValue(aStreamId), myPlugin->params.subtitlesStream, int32_t(aStreamId));
-        }
-    }
-
-    if(!theStreamsList.isNull()
-    && !theStreamsList->isEmpty()) {
+    if(!aStreams.isNull()
+    && !aStreams->isEmpty()) {
         //myMenuSubtitles->addSplitter();
-        StGLMenuItem* anItem = myMenuSubtitles->addItem(tr(MENU_SUBTITLES_SIZE));
+        StGLMenuItem* anItem = aBuilder.getMenu()->addItem(tr(MENU_SUBTITLES_SIZE));
         anItem->setIcon(stCMenuIcon("actionFontSize"), false);
         anItem->changeMargins().right = scale(100 + 16);
         StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.SubtitlesSize,
                                                                  -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
-        aRange->changeRectPx().bottom() = aRange->getRectPx().top() + myMenuSubtitles->getItemHeight();
+        aRange->changeRectPx().bottom() = aRange->getRectPx().top() + aBuilder.getMenu()->getItemHeight();
         aRange->setFormat(stCString("%02.0f"));
         aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
         aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aBlack);
@@ -1767,7 +1751,7 @@ void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<St
         anItem->changeMargins().right  = scale(100 + 16);
         aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.SubtitlesTopDY,
                                           -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
-        aRange->changeRectPx().bottom() = aRange->getRectPx().top() + myMenuSubtitles->getItemHeight();
+        aRange->changeRectPx().bottom() = aRange->getRectPx().top() + aBuilder.getMenu()->getItemHeight();
         aRange->setFormat(stCString("%+03.0f"));
         aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
         aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
@@ -1777,7 +1761,7 @@ void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<St
         anItem->changeMargins().right  = scale(100 + 16);
         aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.SubtitlesBottomDY,
                                           -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
-        aRange->changeRectPx().bottom() = aRange->getRectPx().top() + myMenuSubtitles->getItemHeight();
+        aRange->changeRectPx().bottom() = aRange->getRectPx().top() + aBuilder.getMenu()->getItemHeight();
         aRange->setFormat(stCString("%+03.0f"));
         aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
         aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
@@ -1787,27 +1771,26 @@ void StMoviePlayerGUI::updateSubtitlesStreamsMenu(const StHandle< StArrayList<St
         anItem->changeMargins().right  = scale(100 + 16);
         aRange = new StGLRangeFieldFloat32(anItem, myPlugin->params.SubtitlesParallax,
                                           -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
-        aRange->changeRectPx().bottom() = aRange->getRectPx().top() + myMenuSubtitles->getItemHeight();
+        aRange->changeRectPx().bottom() = aRange->getRectPx().top() + aBuilder.getMenu()->getItemHeight();
         aRange->setFormat(stCString("%+03.0f"));
         aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
         aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aBlack);
         aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aBlack);
 
-        aPlaceMenu->stglInit();
-        anItem = myMenuSubtitles->addItem(tr(MENU_SUBTITLES_PLACEMENT), aPlaceMenu);
+        anItem = aBuilder.getMenu()->addItem(tr(MENU_SUBTITLES_PLACEMENT), aPlaceMenu);
     }
 
-    myMenuSubtitles->addItem(tr(MENU_SUBTITLES_PARSER), aParserMenu)
-                   ->setIcon(stCMenuIcon("actionTextFormat"), false);
-    if(theIsFilePlayed) {
-        //myMenuSubtitles->addSplitter();
-        myMenuSubtitles->addItem(tr(MENU_SUBTITLES_ATTACH))
-                       ->setIcon(stCMenuIcon("actionOpen"), false)
-                       ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doAddSubtitleStream);
+    aBuilder.getMenu()->addItem(tr(MENU_SUBTITLES_PARSER), aParserMenu)
+                      ->setIcon(stCMenuIcon("actionTextFormat"), false);
+    if(myPlugin->myVideo->hasAudioStream()
+    || myPlugin->myVideo->hasVideoStream()) {
+        //aBuilder.getMenu()->addSplitter();
+        aBuilder.getMenu()->addItem(tr(MENU_SUBTITLES_ATTACH))
+                          ->setIcon(stCMenuIcon("actionOpen"), false)
+                          ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doAddSubtitleStream);
     }
 
-    // update menu representation
-    myMenuSubtitles->stglInit();
+    aBuilder.display();
 }
 
 void StMoviePlayerGUI::stglDraw(unsigned int theView) {

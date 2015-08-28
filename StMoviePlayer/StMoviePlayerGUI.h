@@ -125,11 +125,6 @@ class StMoviePlayerGUI : public StGLRootWidget {
 
     ST_LOCAL void stglResizeSeekBar();
     ST_LOCAL void updateOpenALDeviceMenu();
-    ST_LOCAL void updateAudioStreamsMenu    (const StHandle< StArrayList<StString> >& theStreamsList,
-                                             const bool theHasVideo);
-    ST_LOCAL void updateSubtitlesStreamsMenu(const StHandle< StArrayList<StString> >& theStreamsList,
-                                             const bool theIsFilePlayed);
-
     ST_LOCAL void updateRecentMenu();
 
     ST_LOCAL void doAboutFile(const size_t );
@@ -223,14 +218,15 @@ class StMoviePlayerGUI : public StGLRootWidget {
     StGLMenu*           myMenuRoot;         //!< root of the main menu
     StGLMenu*           myMenuOpenAL;
     StGLMenu*           myMenuRecent;
-    StGLMenu*           myMenuAudio;
-    StGLMenu*           myMenuSubtitles;
 
     StGLWidget*         myPanelUpper;       //!< upper toolbar
     StGLTextureButton*  myBtnOpen;
     StGLTextureButton*  myBtnInfo;
     StGLTextureButton*  myBtnSwapLR;
     StGLTextureButton*  myBtnSrcFrmt;
+
+    StGLTextureButton*  myBtnAudio;
+    StGLTextureButton*  myBtnSubs;
 
     StGLWidget*         myPanelBottom;      //!< bottom toolbar
     StSeekBar*          mySeekBar;

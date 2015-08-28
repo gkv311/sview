@@ -51,7 +51,8 @@ StGLCombobox::ListBuilder::ListBuilder(StGLWidget* theParent)
         aTop  = int(aRoot->getCursorZo().y() * aRoot->getRectPx().height());
     }
 
-    myMenu = new StGLMenu(aMenuParent, aLeft, aTop, StGLMenu::MENU_VERTICAL, true);
+    myMenu = new StGLMenu(aMenuParent, aLeft, aTop, StGLMenu::MENU_VERTICAL, false);
+    myMenu->setOpacity(1.0f, false);
     if(myBack != NULL) {
         myMenu->setCorner(StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
     }
@@ -63,7 +64,7 @@ void StGLCombobox::ListBuilder::display() {
         myBack->stglInit();
     } else {
         StGLRootWidget* aRoot = myMenu->getRoot();
-        myMenu->stglInit();
+        myMenu->stglUpdateSubmenuLayout();
         StRectI_t aRect  = myMenu->getRectPxAbsolute();
         const int aRootX = aRoot->getRectPx().width();
         const int aRootY = aRoot->getRectPx().height();
@@ -76,6 +77,21 @@ void StGLCombobox::ListBuilder::display() {
             myMenu->changeRectPx().moveTopTo(0);
         } else if(aRect.bottom() > aRootY) {
             myMenu->changeRectPx().moveBottomTo(aRootY);
+        }
+
+        for(StGLWidget* aChild = myMenu->getChildren()->getStart(); aChild != NULL; aChild = aChild->getNext()) {
+            StGLMenuItem* anItem = (StGLMenuItem* )aChild;
+            if(anItem->getSubMenu() == NULL) {
+                continue;
+            }
+
+            const StRectI_t aSubRect = anItem->getSubMenu()->getRectPxAbsolute();
+            StRectI_t& aSubRectNew = anItem->getSubMenu()->changeRectPx();
+            if(aSubRect.width() >= aRootX) {
+                aSubRectNew.moveLeftTo(0);
+            } else if(aSubRect.right() > aRootX) {
+                aSubRectNew.moveRightTo(myMenu->getRectPxAbsolute().left() + aRoot->scale(10));
+            }
         }
     }
 }

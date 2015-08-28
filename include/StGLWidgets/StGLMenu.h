@@ -186,7 +186,7 @@ class StGLMenu : public StGLWidget {
     int                        myOrient;
     int                        myItemHeight;
     int                        myWidth;
-    bool                       myIsRootMenu;
+    bool                       myIsRootMenu;    //!< the root menu does not show sub-menus until first click
     bool                       myIsContextual;
     bool                       myIsActive;
     bool                       myKeepActive;
