@@ -717,6 +717,9 @@ void StVideo::checkInitVideoStreams() {
             }
             while(!myVideoMaster->isEmpty() || !myVideoMaster->isInDowntime()
                || !myVideoSlave->isEmpty()  || !myVideoSlave->isInDowntime()) {
+                if(toQuit) {
+                    break;
+                }
                 StThread::sleep(10);
             }
             myVideoMaster->deinit();
@@ -881,6 +884,9 @@ void StVideo::packetsLoop() {
             if(myAudio->isInitialized()) {
                 myAudio->pushEnd();
                 while(!myAudio->isEmpty() || !myAudio->isInDowntime()) {
+                    if(toQuit) {
+                        break;
+                    }
                     StThread::sleep(10);
                 }
                 myAudio->deinit();
@@ -934,6 +940,9 @@ void StVideo::packetsLoop() {
             if(mySubtitles->isInitialized()) {
                 mySubtitles->pushEnd();
                 while(!mySubtitles->isEmpty() || !mySubtitles->isInDowntime()) {
+                    if(toQuit) {
+                        break;
+                    }
                     StThread::sleep(10);
                 }
                 mySubtitles->deinit();
