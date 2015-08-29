@@ -240,7 +240,7 @@ void StGLSubtitles::stglUpdate(const StPointD_t& ) {
     myCorner.v = aCorner;
     switch(myCorner.v) {
         case ST_VCORNER_TOP: {
-            const int aDisp = myRoot->scale(myTopDY->getValue());
+            const int aDisp = myRoot->scale((int )myTopDY->getValue());
             if(getRectPx().top() != aDisp) {
                 toResize = true;
                 changeRectPx().moveTopTo(aDisp);
@@ -259,7 +259,7 @@ void StGLSubtitles::stglUpdate(const StPointD_t& ) {
             break;
         }
         case ST_VCORNER_BOTTOM: {
-            const int aDisp = -myRoot->scale(myBottomDY->getValue());
+            const int aDisp = -myRoot->scale((int )myBottomDY->getValue());
             if(getRectPx().top() != aDisp) {
                 toResize = true;
                 changeRectPx().moveTopTo(aDisp);
