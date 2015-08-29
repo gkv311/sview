@@ -182,8 +182,8 @@ void StMoviePlayerGUI::createUpperToolbar() {
     // right buttons
     StHandle<StBoolParam> aTrackedSubs = new StBoolParam(false);
     myBtnSubs = new StGLCheckboxTextured(myPanelUpper, aTrackedSubs,
-                                         iconTexture(stCString("actionStreamSubtitles"), anIconSize),
-                                         iconTexture(stCString("actionStreamSubtitles"), anIconSize),
+                                         iconTexture(stCString("actionStreamSubtitlesOff"), anIconSize),
+                                         iconTexture(stCString("actionStreamSubtitles"),    anIconSize),
                                          (aNbBtnRight++) * (-anIconStep) - aLeft, aTop,
                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myBtnSubs->signals.onBtnClick = stSlot(this, &StMoviePlayerGUI::doSubtitlesStreamsCombo);
@@ -192,8 +192,8 @@ void StMoviePlayerGUI::createUpperToolbar() {
 
     StHandle<StBoolParam> aTrackedAudio = new StBoolParam(false);
     myBtnAudio = new StGLCheckboxTextured(myPanelUpper, aTrackedAudio,
-                                          iconTexture(stCString("actionStreamAudio"), anIconSize),
-                                          iconTexture(stCString("actionStreamAudio"), anIconSize),
+                                          iconTexture(stCString("actionStreamAudioOff"), anIconSize),
+                                          iconTexture(stCString("actionStreamAudio"),    anIconSize),
                                           (aNbBtnRight++) * (-anIconStep) - aLeft, aTop,
                                           StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myBtnAudio->signals.onBtnClick = stSlot(this, &StMoviePlayerGUI::doAudioStreamsCombo);
