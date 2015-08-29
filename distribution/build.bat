@@ -26,6 +26,7 @@ if "%1"=="ST_RELEASE_CANDIDATE" (
 if exist "%~dp0env.bat" call "%~dp0env.bat"
 
 set YEAR=%date:~-2,4%
+set MONTH00=%date:~-7,2%
 set MONTH=%date:~-7,2%
 set DAY=%date:~0,2%
 
@@ -79,9 +80,9 @@ echo #ifndef SVIEW_SDK_VERSION>> "%SVIEW_BUILD_CONF%"
 echo   #define SVIEW_SDK_VERSION ^%YEAR%^, ^%MONTH%^, ^%SVIEW_VER_TYPE_NUM%^, ^%DAY%>> "%SVIEW_BUILD_CONF%"
 echo #endif>> "%SVIEW_BUILD_CONF%"
 
-echo     Version String="%YEAR%.%MONTH%%SVIEW_VER_TYPE%%DAY%"
+echo     Version String="%YEAR%.%MONTH00%%SVIEW_VER_TYPE%%DAY%"
 echo #ifndef SVIEW_SDK_VER_STRING>> "%SVIEW_BUILD_CONF%"
-echo   #define SVIEW_SDK_VER_STRING "%YEAR%.%MONTH%%SVIEW_VER_TYPE%%DAY%">> "%SVIEW_BUILD_CONF%"
+echo   #define SVIEW_SDK_VER_STRING "%YEAR%.%MONTH00%%SVIEW_VER_TYPE%%DAY%">> "%SVIEW_BUILD_CONF%"
 echo #endif>> "%SVIEW_BUILD_CONF%"
 
 rem Activate experimental WebP support
@@ -89,8 +90,8 @@ echo #define ST_HAVE_WEBP>> "%SVIEW_BUILD_CONF%"
 
 rem Create configuration for InnoSetup build script
 echo #define SVIEW_VER      "%YEAR%.%MONTH%.%SVIEW_VER_TYPE_NUM%.%DAY%"> config.iss
-echo #define SVIEW_VER_FULL "v.%YEAR%.%MONTH%%SVIEW_VER_TYPE%%DAY%">> config.iss
-echo #define SVIEW_VER_NAME "sView (version %YEAR%.%MONTH%%SVIEW_VER_TYPE%%DAY%)">> config.iss
+echo #define SVIEW_VER_FULL "v.%YEAR%.%MONTH00%%SVIEW_VER_TYPE%%DAY%">> config.iss
+echo #define SVIEW_VER_NAME "sView (version %YEAR%.%MONTH00%%SVIEW_VER_TYPE%%DAY%)">> config.iss
 echo #define SVIEW_DISTR_PATH_x86   "%SVIEW_DISTR_PATH_X86%">> config.iss
 echo #define SVIEW_DISTR_PATH_AMD64 "%SVIEW_DISTR_PATH_AMD64%">> config.iss
 
