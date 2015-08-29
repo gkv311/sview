@@ -27,6 +27,14 @@ class StFloat32Param : public StParam<float> {
         return myMinValue;
     }
 
+    bool hasMinValue() const {
+        return myMinValue != -1E+37f;
+    }
+
+    bool hasMaxValue() const {
+        return myMaxValue !=  1E+37f;
+    }
+
     float getMaxValue() const {
         return myMaxValue;
     }

@@ -32,7 +32,15 @@ bool StGLRangeFieldFloat32::stglInit() {
     }
 
     myValueText = new StGLTextArea(this, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT), -myRoot->scale(1), myRoot->scale(10));
-    onValueChange(0.0f);
+    float aLongVal = 0.0f;
+    if(myTrackValue->hasMaxValue()) {
+        aLongVal = myTrackValue->getMaxValue();
+    }
+    if(myTrackValue->hasMinValue()
+    && std::abs(myTrackValue->getMinValue()) >= aLongVal) {
+        aLongVal = myTrackValue->getMinValue();
+    }
+    onValueChange(aLongVal);
     myValueText->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
     if(!myValueText->stglInitAutoHeightWidth()) {
         delete myValueText; myValueText = NULL;

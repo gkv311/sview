@@ -154,17 +154,17 @@ StGLImageProgram::StGLImageProgram()
         + F_SHADER_YUV2RGB_MPEG);
 
     params.gamma = new StFloat32Param(   1.0f,         // initial value
-                                        0.05f, 100.0f, // min, max values
+                                        0.05f, 99.0f, // min, max values
                                          1.0f,         // default value
                                         0.05f,         // incremental step
                                       0.0001f);        // equality tolerance
     params.brightness = new StFloat32Param(   1.0f,         // initial value
-                                              0.0f, 100.0f, // min, max values
+                                              0.0f, 99.0f, // min, max values
                                               1.0f,         // default value
                                              0.05f,         // incremental step
                                            0.0001f);        // equality tolerance
     params.saturation = new StFloat32Param(   1.0f,         // initial value
-                                            -10.0f, 100.0f, // min, max values
+                                            -10.0f, 99.0f, // min, max values
                                               1.0f,         // default value
                                              0.05f,         // incremental step
                                            0.0001f);        // equality tolerance
