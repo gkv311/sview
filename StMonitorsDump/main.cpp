@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMonitorsDump program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -175,7 +175,12 @@ static void genInf(const StEDIDParser& theEdid,
 
 };
 
-int main(int , char** ) { // force console output
+#if defined(__APPLE__)
+int stMonitorsDump_main() {
+#else
+int main(int , char** ) {
+#endif
+
 #ifdef _WIN32
     setlocale(LC_ALL, ".OCP"); // we set default locale for console output (useful only for debug)
 #endif
@@ -270,7 +275,9 @@ int main(int , char** ) { // force console output
             }
             genInf(anInputEdid, anOutInfFilename + ".inf");
         }
+    #if !defined(__APPLE__)
         st::cout << stostream_text("Press any key to exit...") << st::SYS_PAUSE_EMPTY;
+    #endif
         return 0;
     }
 
@@ -331,7 +338,9 @@ int main(int , char** ) { // force console output
         aFileOut.open(aFileName.toCString());
         if(aFileOut.fail()) {
             st::cout << st::COLOR_FOR_RED << stostream_text("Couldn't open file \"stMonitorsDump.htm\"!\n") << st::COLOR_FOR_WHITE;
+        #if !defined(__APPLE__)
             st::cout << stostream_text("Press any key to exit...") << st::SYS_PAUSE_EMPTY;
+        #endif
             return -1;
         }
     }
@@ -343,7 +352,9 @@ int main(int , char** ) { // force console output
     st::cout << st::COLOR_FOR_GREEN << stostream_text("Dump stored to file \"stMonitorsDump.htm\"\n") << st::COLOR_FOR_WHITE;
 
     StProcess::openURL(aFileName);
+#if !defined(__APPLE__)
     st::cout << stostream_text("Press any key to exit...") << st::SYS_PAUSE_EMPTY;
+#endif
     if(isTmpFile) {
         StFileNode::removeFile(aFileName);
     }

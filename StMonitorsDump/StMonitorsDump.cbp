@@ -240,6 +240,12 @@
 			<Add directory="../bin/$(TARGET_NAME)" />
 		</Linker>
 		<Unit filename="main.cpp" />
+		<Unit filename="main_1.mm">
+			<Option compile="1" />
+			<Option link="1" />
+			<Option target="MAC_gcc" />
+			<Option target="MAC_gcc_DEBUG" />
+		</Unit>
 		<Extensions>
 			<code_completion />
 			<envvars />
