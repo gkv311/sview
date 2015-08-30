@@ -508,6 +508,16 @@ void StGLContext::stglFullInfo(StDictionary& theMap) const {
                    StString() + (aDedicatedFree / 1024)  + " MiB (from " + (aDedicated / 1024) + " MiB)"));
     }
 #endif
+
+#if !defined(GL_ES_VERSION_2_0) && !defined(__APPLE__) && !defined(_WIN32)
+    // GLX_RENDERER_VENDOR_ID_MESA
+    if(myFuncs->glXQueryCurrentRendererIntegerMESA != NULL) {
+        unsigned int aVMemMiB = 0;
+        if(myFuncs->glXQueryCurrentRendererIntegerMESA(GLX_RENDERER_VIDEO_MEMORY_MESA, &aVMemMiB) != False) {
+            theMap.add(StDictEntry("GPU memory", StString() + aVMemMiB  + " MiB"));
+        }
+    }
+#endif
 }
 
 void StGLContext::stglSyncState() {
@@ -696,6 +706,12 @@ bool StGLContext::stglInit() {
     }
     if(stglCheckExtension(aGlxExts, "GLX_SGI_swap_control")) {
         STGL_READ_FUNC(glXSwapIntervalSGI);
+    }
+    if(stglCheckExtension(aGlxExts, "GLX_MESA_query_renderer")) {
+        STGL_READ_FUNC(glXQueryRendererIntegerMESA);
+        STGL_READ_FUNC(glXQueryCurrentRendererIntegerMESA);
+        STGL_READ_FUNC(glXQueryRendererStringMESA);
+        STGL_READ_FUNC(glXQueryCurrentRendererStringMESA);
     }
     extSwapTear = stglCheckExtension(aGlxExts, "GLX_EXT_swap_control_tear");
 #endif
