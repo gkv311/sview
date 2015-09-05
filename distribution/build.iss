@@ -1,4 +1,4 @@
-
+﻿
 #include "temp\config.iss"
 
 ; Should be defined in config file
