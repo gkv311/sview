@@ -311,12 +311,16 @@ Root: HKCR; Subkey: sView Image\DefaultIcon;                   ValueType: string
 
 Root: HKCR; SubKey: .bmp;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
 Root: HKCR; SubKey: .jpg;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
+Root: HKCR; SubKey: .j2k;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
+Root: HKCR; SubKey: .jp2;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
 Root: HKCR; SubKey: .tga;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
 Root: HKCR; SubKey: .png;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
 Root: HKCR; SubKey: .exr;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
 Root: HKCR; SubKey: .hdr;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
 Root: HKCR; SubKey: .webp;                                     ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
 Root: HKCR; SubKey: .webpll;                                   ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
+Root: HKCR; SubKey: .tif;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
+Root: HKCR; SubKey: .tiff;                                     ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
 
 ; Associations Video
 Root: HKCR; SubKey: sView Video;                               ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
@@ -330,6 +334,14 @@ Root: HKCR; SubKey: .mk3d;                                     ValueType: string
 Root: HKCR; SubKey: .webm;                                     ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
 Root: HKCR; SubKey: .wmv;                                      ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
 Root: HKCR; SubKey: .ts;                                       ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
+Root: HKCR; SubKey: .vob;                                      ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
+Root: HKCR; SubKey: .mp4;                                      ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
+Root: HKCR; SubKey: .mpg;                                      ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
+Root: HKCR; SubKey: .flv;                                      ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
+Root: HKCR; SubKey: .mov;                                      ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
+Root: HKCR; SubKey: .ogm;                                      ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
+Root: HKCR; SubKey: .bik;                                      ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
+Root: HKCR; SubKey: .mj2;                                      ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
 
 ; Associations Audio
 Root: HKCR; SubKey: sView Audio;                               ValueType: string; ValueData: sView Audio;                   Tasks: flagAssocMusic;  Flags: uninsdeletekey
@@ -345,6 +357,7 @@ Root: HKCR; SubKey: .opus;                                     ValueType: string
 Root: HKCR; SubKey: .wav;                                      ValueType: string; ValueData: sView Audio;                   Tasks: flagAssocMusic;  Flags: uninsdeletekey
 Root: HKCR; SubKey: .flac;                                     ValueType: string; ValueData: sView Audio;                   Tasks: flagAssocMusic;  Flags: uninsdeletekey
 Root: HKCR; SubKey: .ape;                                      ValueType: string; ValueData: sView Audio;                   Tasks: flagAssocMusic;  Flags: uninsdeletekey
+Root: HKCR; SubKey: .mka;                                      ValueType: string; ValueData: sView Audio;                   Tasks: flagAssocMusic;  Flags: uninsdeletekey
 
 ; StCoreXX environment variables
 Root: HKLM32; SubKey: SYSTEM\CurrentControlSet\Control\Session Manager\Environment; ValueType: string; ValueName: StShare;  ValueData: {app}\; Flags: uninsdeletevalue

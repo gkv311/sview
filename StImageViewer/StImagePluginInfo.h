@@ -51,7 +51,7 @@
 
 /**
  *.jpg, *.jpeg, *.jpe - Joint Photographic Experts Group image file, lossy
- *.jp2 - JPEG 2000 image, lossy
+ *.jp2, *.j2k - JPEG 2000 image, lossy
  */
 #define ST_JPG_MIME "image/jpg"
 #define ST_JPG_EXT  "jpg"
@@ -62,7 +62,10 @@
 #define ST_JPEG_EXT  "jpeg"
 #define ST_JP2_MIME "image/x-jp2"
 #define ST_JP2_EXT  "jp2"
-#define ST_JP2_DESC "JP2 - JPEG 2000 image, lossy"
+#define ST_JP2_DESC "J2K - JPEG 2000 image, lossy"
+#define ST_J2K_MIME "image/x-j2k"
+#define ST_J2K_EXT  "j2k"
+#define ST_J2K_DESC "J2K - JPEG 2000 image, lossy"
 
 /**
  *.png - Portable Network Graphics image file, lossless
@@ -215,6 +218,7 @@ ST_JPG_MIME ":" ST_JPG_EXT ":" ST_JPEG_DESC ";" \
 ST_JPE_MIME ":" ST_JPE_EXT ":" ST_JPEG_DESC ";" \
 ST_JPEG_MIME ":" ST_JPEG_EXT ":" ST_JPEG_DESC ";" \
 ST_JP2_MIME ":" ST_JP2_EXT ":" ST_JP2_DESC ";" \
+ST_J2K_MIME ":" ST_J2K_EXT ":" ST_J2K_DESC ";" \
 ST_PNG_MIME ":" ST_PNG_EXT ":" ST_PNG_DESC ";" \
 ST_BMP_MIME ":" ST_BMP_EXT ":" ST_BMP_DESC ";" \
 ST_GIF_MIME ":" ST_GIF_EXT ":" ST_GIF_DESC ";" \
