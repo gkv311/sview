@@ -14,7 +14,7 @@
    height="16"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.3.1 r9886"
+   inkscape:version="0.48.5 r10040"
    sodipodi:docname="menuSrcFormat.svg"
    inkscape:export-filename="/home/menuSbsLR16.png"
    inkscape:export-xdpi="90"
@@ -210,16 +210,16 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="11.313708"
-     inkscape:cx="3.695895"
-     inkscape:cy="23.911929"
+     inkscape:zoom="31.999999"
+     inkscape:cx="8.3167614"
+     inkscape:cy="6.1548109"
      inkscape:document-units="px"
-     inkscape:current-layer="g4541"
+     inkscape:current-layer="layer8"
      showgrid="false"
      inkscape:window-width="1920"
-     inkscape:window-height="1109"
-     inkscape:window-x="0"
-     inkscape:window-y="0"
+     inkscape:window-height="1004"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
      inkscape:window-maximized="1"
      inkscape:snap-grids="true" />
   <metadata
@@ -230,7 +230,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -238,7 +238,8 @@
      inkscape:label="Rectangle"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-1036.3622)">
+     transform="translate(0,-1036.3622)"
+     sodipodi:insensitive="true">
     <rect
        style="fill:#c8c8c8;fill-opacity:1;stroke:#000000;stroke-width:0.99977112;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="rect2985"
@@ -979,9 +980,52 @@
   </g>
   <g
      inkscape:groupmode="layer"
+     id="layer8"
+     inkscape:label="DualStream">
+    <rect
+       y="2"
+       x="2"
+       height="8"
+       width="8"
+       id="rect4448-1"
+       style="fill:#808080;fill-opacity:1;stroke:none;display:inline" />
+    <text
+       xml:space="preserve"
+       style="font-size:8px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#fcfcfc;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="3.3710938"
+       y="8.8398438"
+       id="text3829-8"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3831-2"
+         x="3.3710938"
+         y="8.8398438"
+         style="font-weight:bold;-inkscape-font-specification:Sans Bold">L</tspan></text>
+    <rect
+       y="6"
+       x="6"
+       height="8"
+       width="8"
+       id="rect4448-2-9-0"
+       style="fill:#fcfcfc;fill-opacity:1;stroke:none;display:inline" />
+    <text
+       xml:space="preserve"
+       style="font-size:8px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="6.8398438"
+       y="12.863281"
+       id="text3835-4"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3837-5"
+         x="6.8398438"
+         y="12.863281"
+         style="font-weight:bold;-inkscape-font-specification:Sans Bold">R</tspan></text>
+  </g>
+  <g
+     inkscape:groupmode="layer"
      id="g4541"
      inkscape:label="Tiled720in1080"
-     style="display:inline">
+     style="display:none">
     <rect
        style="fill:#fcfcfc;fill-opacity:1;stroke:none;display:inline"
        id="rect4545"
@@ -991,7 +1035,7 @@
        y="2.9835343" />
     <text
        xml:space="preserve"
-       style="font-size:7.10074090999999985px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:url(#linearGradient4640);fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       style="font-size:7.10074091px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:url(#linearGradient4640);fill-opacity:1;stroke:none;display:inline;font-family:Sans"
        x="9.524538"
        y="9.9912825"
        id="text4046-0"
@@ -1001,7 +1045,7 @@
          id="tspan4048-7"
          x="9.524538"
          y="9.9912825"
-         style="font-weight:bold;-inkscape-font-specification:Sans Bold;fill-opacity:1;fill:url(#linearGradient4640)">R</tspan></text>
+         style="font-weight:bold;fill:url(#linearGradient4640);fill-opacity:1;-inkscape-font-specification:Sans Bold">R</tspan></text>
     <rect
        style="fill:#fcfcfc;fill-opacity:1;stroke:none;display:inline"
        id="rect4545-2"
