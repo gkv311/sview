@@ -67,7 +67,7 @@ void loadDefaults(StLangMap& theStrings) {
     theStrings(MENU_MEDIA_OPEN_IMAGE_2,
                "Left+Right files");
     theStrings(MENU_SRC_FORMAT_AUTO,
-               "Autodetection");
+               "Source");
     theStrings(MENU_SRC_FORMAT_MONO,
                "Mono");
     theStrings(MENU_SRC_FORMAT_CROSS_EYED,
