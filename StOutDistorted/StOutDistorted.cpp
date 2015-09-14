@@ -369,7 +369,7 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
     aDevDistorted->PluginId = ST_OUT_PLUGIN_NAME;
     aDevDistorted->DeviceId = "Distorted";
     aDevDistorted->Priority = ST_DEVICE_SUPPORT_NONE;
-    aDevDistorted->Name     = aLangMap.changeValueId(STTR_DISTORTED_NAME, "Parallel Pair");
+    aDevDistorted->Name     = aLangMap.changeValueId(STTR_DISTORTED_NAME, "TV (parallel pair)");
     aDevDistorted->Desc     = aLangMap.changeValueId(STTR_DISTORTED_DESC, "Distorted Output");
     myDevices.add(aDevDistorted);
 

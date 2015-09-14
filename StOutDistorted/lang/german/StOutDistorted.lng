@@ -1,7 +1,7 @@
 # German translation file for StOutDistorted library
 # @author Kirill Gavrilov
 --------
-1000="Parallel Pair"
+1000="TV (parallel pair)"
 1001="Distorted Output"
 1002="Oculus Rift"
 1003="Barrel distortion"
