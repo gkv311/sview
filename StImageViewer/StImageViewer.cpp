@@ -68,6 +68,7 @@ namespace {
     static const char ST_SETTING_TEXFILTER[]   = "viewTexFilter";
     static const char ST_SETTING_GAMMA[]       = "viewGamma";
     static const char ST_SETTING_RATIO[]       = "ratio";
+    static const char ST_SETTING_HEAL_ANAMORPHIC[]    = "toHealAnamorphic";
     static const char ST_SETTING_UPDATES_LAST_CHECK[] = "updatesLastCheck";
     static const char ST_SETTING_UPDATES_INTERVAL[]   = "updatesInterval";
     static const char ST_SETTING_IMAGELIB[]    = "imageLib";
@@ -396,6 +397,7 @@ void StImageViewer::saveGuiParams() {
 
     mySettings->saveParam(ST_SETTING_STEREO_MODE, myGUI->myImage->params.displayMode);
     mySettings->saveInt32(ST_SETTING_GAMMA, stRound(100.0f * myGUI->myImage->params.gamma->getValue()));
+    mySettings->saveParam(ST_SETTING_HEAL_ANAMORPHIC, myGUI->myImage->params.ToHealAnamorphicRatio);
     if(params.toRestoreRatio->getValue()) {
         mySettings->saveParam(ST_SETTING_RATIO, myGUI->myImage->params.displayRatio);
     } else {
@@ -459,6 +461,7 @@ bool StImageViewer::createGui() {
     mySettings->loadParam (ST_SETTING_STEREO_MODE,        myGUI->myImage->params.displayMode);
     mySettings->loadParam (ST_SETTING_TEXFILTER,          myGUI->myImage->params.textureFilter);
     mySettings->loadParam (ST_SETTING_RATIO,              myGUI->myImage->params.displayRatio);
+    mySettings->loadParam (ST_SETTING_HEAL_ANAMORPHIC,    myGUI->myImage->params.ToHealAnamorphicRatio);
     params.toRestoreRatio->setValue(myGUI->myImage->params.displayRatio->getValue() != StGLImageRegion::RATIO_AUTO);
     int32_t loadedGamma = 100; // 1.0f
         mySettings->loadInt32(ST_SETTING_GAMMA, loadedGamma);

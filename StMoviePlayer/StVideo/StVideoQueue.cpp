@@ -531,6 +531,21 @@ void StVideoQueue::pushFrame(const StImage&     theSrcDataLeft,
         return;
     }
 
+    if(!theSrcDataLeft.isNull()) {
+        theStParams->Src1SizeX = theSrcDataLeft.getSizeX();
+        theStParams->Src1SizeY = theSrcDataLeft.getSizeY();
+    } else {
+        theStParams->Src1SizeX = 0;
+        theStParams->Src1SizeY = 0;
+    }
+    if(!theSrcDataRight.isNull()) {
+        theStParams->Src2SizeX = theSrcDataRight.getSizeX();
+        theStParams->Src2SizeY = theSrcDataRight.getSizeY();
+    } else {
+        theStParams->Src2SizeX = 0;
+        theStParams->Src2SizeY = 0;
+    }
+
     myTextureQueue->push(theSrcDataLeft, theSrcDataRight, theStParams, theSrcFormat, theCubemapFormat, theSrcPTS);
     myTextureQueue->setConnectedStream(true);
     if(myWasFlushed) {

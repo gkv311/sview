@@ -173,16 +173,16 @@ class StHandle {
     /**
      * Cast handle to contained type
      */
-    inline Type* operator->() {
+    inline Type* operator->() const {
         return myEntity->myPointer;
     }
 
     /**
      * Cast handle to contained type
      */
-    inline const Type* operator->() const {
-        return myEntity->myPointer;
-    }
+    //inline const Type* operator->() const {
+    //    return myEntity->myPointer;
+    //}
 
     /**
      * Cast handle to contained type

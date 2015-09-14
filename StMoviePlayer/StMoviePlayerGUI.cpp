@@ -572,12 +572,13 @@ StGLMenu* StMoviePlayerGUI::createDisplayModeMenu() {
 StGLMenu* StMoviePlayerGUI::createDisplayRatioMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     fillDisplayRatioMenu(aMenu);
-    aMenu->addItem("Keep on restart", myPlugin->params.toRestoreRatio);
+    aMenu->addItem(tr(MENU_VIEW_RATIO_KEEP_ON_RESTART), myPlugin->params.toRestoreRatio);
+    aMenu->addItem(tr(MENU_VIEW_RATIO_HEAL_ANAMORPHIC), myImage->params.ToHealAnamorphicRatio);
     return aMenu;
 }
 
 void StMoviePlayerGUI::fillDisplayRatioMenu(StGLMenu* theMenu) {
-    theMenu->addItem("Source", myImage->params.displayRatio, StGLImageRegion::RATIO_AUTO)
+    theMenu->addItem(tr(MENU_VIEW_DISPLAY_RATIO_SRC), myImage->params.displayRatio, StGLImageRegion::RATIO_AUTO)
            ->setIcon(stCMenuIcon("menuAuto"));
     theMenu->addItem("2.21:1", myImage->params.displayRatio, StGLImageRegion::RATIO_221_1)
            ->setIcon(stCMenuIcon("menuRatio2_1_"));
@@ -596,6 +597,7 @@ void StMoviePlayerGUI::fillDisplayRatioMenu(StGLMenu* theMenu) {
 void StMoviePlayerGUI::doDisplayRatioCombo(const size_t ) {
     StGLCombobox::ListBuilder aBuilder(this);
     fillDisplayRatioMenu(aBuilder.getMenu());
+    aBuilder.getMenu()->addItem(tr(MENU_VIEW_RATIO_HEAL_ANAMORPHIC), myImage->params.ToHealAnamorphicRatio);
     aBuilder.display();
 }
 
@@ -1382,6 +1384,7 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
     myImage->params.displayMode->changeValues()[StGLImageRegion::MODE_ONLY_RIGHT] = tr(MENU_VIEW_DISPLAY_MODE_RIGHT);
     myImage->params.displayMode->changeValues()[StGLImageRegion::MODE_PARALLEL]   = tr(MENU_VIEW_DISPLAY_MODE_PARALLEL);
     myImage->params.displayMode->changeValues()[StGLImageRegion::MODE_CROSSYED]   = tr(MENU_VIEW_DISPLAY_MODE_CROSSYED);
+    myImage->params.ToHealAnamorphicRatio->setValue(true);
 
     mySubtitles = new StGLSubtitles  (this, theSubQueue,
                                       myPlugin->params.SubtitlesPlace,

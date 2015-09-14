@@ -331,7 +331,8 @@ StGLMenu* StImageViewerGUI::createDisplayRatioMenu() {
          ->setIcon(stCMenuIcon("menuRatio5_4_"));
     aMenu->addItem("1:1",    myImage->params.displayRatio, StGLImageRegion::RATIO_1_1)
          ->setIcon(stCMenuIcon("menuRatio1_1_"));
-    aMenu->addItem(tr(MENU_VIEW_KEEP_ON_RESTART),   myPlugin->params.toRestoreRatio);
+    aMenu->addItem(tr(MENU_VIEW_RATIO_KEEP_ON_RESTART), myPlugin->params.toRestoreRatio);
+    aMenu->addItem(tr(MENU_VIEW_RATIO_HEAL_ANAMORPHIC), myImage->params.ToHealAnamorphicRatio);
     return aMenu;
 }
 

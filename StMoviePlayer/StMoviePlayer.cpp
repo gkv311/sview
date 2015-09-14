@@ -88,6 +88,7 @@ namespace {
     static const char ST_SETTING_LOOP_SINGLE[]   = "loopSingle";
     static const char ST_SETTING_GLOBAL_MKEYS[]  = "globalMediaKeys";
     static const char ST_SETTING_RATIO[]         = "ratio";
+    static const char ST_SETTING_HEAL_ANAMORPHIC[] = "toHealAnamorphic";
     static const char ST_SETTING_UPDATES_LAST_CHECK[] = "updatesLastCheck";
     static const char ST_SETTING_UPDATES_INTERVAL[]   = "updatesInterval";
     static const char ST_SETTING_SAVE_IMG_TYPE[] = "snapImgType";
@@ -681,6 +682,7 @@ void StMoviePlayer::saveGuiParams() {
 
     mySettings->saveParam (ST_SETTING_STEREO_MODE, myGUI->myImage->params.displayMode);
     mySettings->saveInt32 (ST_SETTING_GAMMA,       stRound(100.0f * myGUI->myImage->params.gamma->getValue()));
+    mySettings->saveParam (ST_SETTING_HEAL_ANAMORPHIC, myGUI->myImage->params.ToHealAnamorphicRatio);
     if(params.toRestoreRatio->getValue()) {
         mySettings->saveParam(ST_SETTING_RATIO,    myGUI->myImage->params.displayRatio);
     } else {
@@ -771,6 +773,7 @@ bool StMoviePlayer::createGui(StHandle<StGLTextureQueue>& theTextureQueue,
     mySettings->loadParam (ST_SETTING_STEREO_MODE, myGUI->myImage->params.displayMode);
     mySettings->loadParam (ST_SETTING_TEXFILTER,   myGUI->myImage->params.textureFilter);
     mySettings->loadParam (ST_SETTING_RATIO,       myGUI->myImage->params.displayRatio);
+    mySettings->loadParam (ST_SETTING_HEAL_ANAMORPHIC, myGUI->myImage->params.ToHealAnamorphicRatio);
     params.toRestoreRatio->setValue(myGUI->myImage->params.displayRatio->getValue() != StGLImageRegion::RATIO_AUTO);
     int32_t loadedGamma = 100; // 1.0f
         mySettings->loadInt32(ST_SETTING_GAMMA, loadedGamma);

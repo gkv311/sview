@@ -130,8 +130,10 @@ void loadDefaults(StLangMap& theStrings) {
                "Cross-eyed pair");
     theStrings(MENU_VIEW_DISPLAY_RATIO_SRC,
                "Source");
-    theStrings(MENU_VIEW_KEEP_ON_RESTART,
+    theStrings(MENU_VIEW_RATIO_KEEP_ON_RESTART,
                "Keep on restart");
+    theStrings(MENU_VIEW_RATIO_HEAL_ANAMORPHIC,
+               "Heal anamorphic 1080p/720p");
     theStrings(MENU_VIEW_TEXFILTER_NEAREST,
                "Nearest");
     theStrings(MENU_VIEW_TEXFILTER_LINEAR,

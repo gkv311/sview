@@ -133,6 +133,7 @@ class StGLImageRegion : public StGLWidget {
 
         StHandle<StEnumParam>    displayMode;   //!< StGLImageRegion::DisplayMode    - display mode
         StHandle<StInt32Param>   displayRatio;  //!< StGLImageRegion::DisplayRatio   - display ratio
+        StHandle<StBoolParam>    ToHealAnamorphicRatio; //!< correct aspect ratio for 1080p/720p anamorphic pairs
         StHandle<StInt32Param>   textureFilter; //!< StGLImageProgram::TextureFilter - texture filter;
         StHandle<StFloat32Param> gamma;         //!< gamma correction coefficient
         StHandle<StFloat32Param> brightness;    //!< brightness level

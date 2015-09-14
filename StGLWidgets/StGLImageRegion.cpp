@@ -111,6 +111,7 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
     params.displayMode->changeValues().add("Cross-eyed");    // MODE_CROSSYED
 
     params.displayRatio  = new StInt32Param(RATIO_AUTO);
+    params.ToHealAnamorphicRatio = new StBoolParam(false);
     params.textureFilter = new StInt32Param(StGLImageProgram::FILTER_LINEAR);
     params.gamma      = myProgram.params.gamma;
     params.brightness = myProgram.params.brightness;
@@ -575,8 +576,6 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             aModelMat.rotate(anXRotate, StGLVec3::DX());
             aModelMat.rotate(anYRotate, StGLVec3::DY());
 
-            /// TODO (Kirill Gavrilov#8) implement fit all for rotated image
-
             // check window ratio to fill whole image in normal zoom
             GLfloat aDispRatio = 1.0f;
             switch(params.displayRatio->getValue()) {
@@ -587,7 +586,32 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                 case RATIO_221_1: aDispRatio = 2.21f; break;
                 case RATIO_5_4:   aDispRatio = 1.25f; break;
                 case RATIO_AUTO:
-                default: aDispRatio = aTextures.getPlane().getDisplayRatio(); break;
+                default: {
+                    aDispRatio = aTextures.getPlane().getDisplayRatio();
+                    if(params.ToHealAnamorphicRatio->getValue()
+                    && aParams->Src2SizeX == 0 && aParams->Src2SizeY == 0
+                    && ((aParams->Src1SizeX == 1920 && aParams->Src1SizeY >= 800 && aParams->Src1SizeY <= 1088)
+                     || (aParams->Src1SizeX == 1280 && aParams->Src1SizeY >= 530 && aParams->Src1SizeY <= 720))) {
+                        switch(aParams->StereoFormat) {
+                             case StFormat_SideBySide_LR:
+                             case StFormat_SideBySide_RL: {
+                                if(aDispRatio >= 0.85 && aDispRatio <= 1.18) {
+                                    aDispRatio *= 2.0;
+                                }
+                                break;
+                             }
+                             case StFormat_TopBottom_LR:
+                             case StFormat_TopBottom_RL: {
+                                if(aDispRatio >= 3.5 && aDispRatio <= 4.8) {
+                                    aDispRatio *= 0.5;
+                                }
+                                break;
+                             }
+                             default: break;
+                        }
+                    }
+                    break;
+                }
             }
 
             GLfloat  aRectRatio  = GLfloat(aFrameRectPx.ratio());
