@@ -265,6 +265,7 @@
 		<Unit filename="StAVFrame.cpp" />
 		<Unit filename="StAVImage.cpp" />
 		<Unit filename="StAVPacket.cpp" />
+		<Unit filename="StAVVideoMuxer.cpp" />
 		<Unit filename="StAction.cpp" />
 		<Unit filename="StBndBox.cpp" />
 		<Unit filename="StBndCameraBox.cpp" />
@@ -391,6 +392,7 @@
 		<Unit filename="../include/StAV/StAVFrame.h" />
 		<Unit filename="../include/StAV/StAVImage.h" />
 		<Unit filename="../include/StAV/StAVPacket.h" />
+		<Unit filename="../include/StAV/StAVVideoMuxer.h" />
 		<Unit filename="../include/StAV/stAV.h" />
 		<Unit filename="../include/StAlienData.h" />
 		<Unit filename="../include/StCocoa/StCocoaCoords.h">

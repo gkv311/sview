@@ -209,6 +209,7 @@
     <ClCompile Include="StAVFrame.cpp" />
     <ClCompile Include="StAVImage.cpp" />
     <ClCompile Include="StAVPacket.cpp" />
+    <ClCompile Include="StAVVideoMuxer.cpp" />
     <ClCompile Include="StAction.cpp" />
     <ClCompile Include="StBndBox.cpp" />
     <ClCompile Include="StBndCameraBox.cpp" />

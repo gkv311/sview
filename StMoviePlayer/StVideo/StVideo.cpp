@@ -205,6 +205,7 @@ void StVideo::close() {
         #endif
         }
     }
+    myFileList.clear();
     myCtxList.clear();
     myPlayCtxList.clear();
     mySlaveCtx    = NULL;
@@ -465,6 +466,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
     }
 
     myCtxList.add(aFormatCtx);
+    myFileList.add(theFileToLoad);
     return true;
 }
 

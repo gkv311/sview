@@ -384,6 +384,7 @@ class StVideo {
     StHandle<StThread>            myThread;      //!< main loop thread
     StHandle<StTranslations>      myLangMap;     //!< translations dictionary
 
+    StArrayList<StString>         myFileList;    //!< file list
     StArrayList<AVFormatContext*> myCtxList;     //!< format context for each file
     StArrayList<AVFormatContext*> myPlayCtxList; //!< currently played contexts
 
