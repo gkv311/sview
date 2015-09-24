@@ -300,6 +300,31 @@ inline size_t computeBufferSize(const StImage& theData) {
     return aBufferSize;
 }
 
+/**
+ * Determine packed cubemap format (6:1 or 3:2).
+ */
+inline bool checkCubeMap(const StImagePlane& thePlane,
+                         size_t&             theCoeffX,
+                         size_t&             theCoeffY) {
+    if(thePlane.isNull()) {
+        return true;
+    }
+
+    if(theCoeffX == 0) {
+        if(thePlane.getSizeX() / 6 == thePlane.getSizeY()) {
+            theCoeffX = 6;
+            theCoeffY = 1;
+            return true;
+        } else if(thePlane.getSizeX() / 3 == thePlane.getSizeY() / 2) {
+            theCoeffX = 3;
+            theCoeffY = 2;
+            return true;
+        }
+        return false;
+    }
+    return thePlane.getSizeX() / theCoeffX == thePlane.getSizeY() / theCoeffY;
+}
+
 void StGLTextureData::updateData(const StImage&                  theDataL,
                                  const StImage&                  theDataR,
                                  const StHandle<StStereoParams>& theStParams,
@@ -400,10 +425,11 @@ void StGLTextureData::updateData(const StImage&                  theDataL,
         }
     }
     if(myCubemapFormat == StCubemap_Packed) {
+        size_t aCoeffs[2] = {0, 0};
         if(!myDataL.isNull()) {
             for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
                 const StImagePlane& aPlane = myDataL.getPlane(aPlaneId);
-                if(aPlane.getSizeX() / 6 != aPlane.getSizeY()) {
+                if(!checkCubeMap(aPlane, aCoeffs[0], aCoeffs[1])) {
                     myCubemapFormat = StCubemap_OFF;
                     break;
                 }
@@ -412,7 +438,7 @@ void StGLTextureData::updateData(const StImage&                  theDataL,
         if(!myDataR.isNull()) {
             for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
                 const StImagePlane& aPlane = myDataR.getPlane(aPlaneId);
-                if(aPlane.getSizeX() / 6 != aPlane.getSizeY()) {
+                if(!checkCubeMap(aPlane, aCoeffs[0], aCoeffs[1])) {
                     myCubemapFormat = StCubemap_OFF;
                     break;
                 }
@@ -433,8 +459,13 @@ void StGLTextureData::fillTexture(StGLContext&        theCtx,
         return;
     }
 
-    size_t aPatchX = theData.getSizeX() / 6;
-    if(aPatchX < 2) {
+    size_t aCoeffs[2] = {0, 0};
+    if(!checkCubeMap(theData, aCoeffs[0], aCoeffs[1])) {
+        return;
+    }
+
+    const size_t aPatch = theData.getSizeX() / aCoeffs[0];
+    if(aPatch < 2) {
         return;
     }
 
@@ -446,8 +477,11 @@ void StGLTextureData::fillTexture(StGLContext&        theCtx,
                                  GL_TEXTURE_CUBE_MAP_NEGATIVE_Z };
     for(size_t aTargetIter = 0; aTargetIter < 6; ++aTargetIter) {
         StImagePlane aPlane;
-        if(!aPlane.initWrapper(theData.getFormat(), const_cast<GLubyte* >(theData.getData(0, aPatchX * aTargetIter)),
-                               aPatchX, theData.getSizeY(), theData.getSizeRowBytes())) {
+        const bool isSecondRow = (aCoeffs[1] == 2 && aTargetIter >= 3);
+        const size_t aLeft = isSecondRow ? (aPatch * (aTargetIter - 3)) : (aPatch * aTargetIter);
+        const size_t aTop  = isSecondRow ? aPatch : 0;
+        if(!aPlane.initWrapper(theData.getFormat(), const_cast<GLubyte* >(theData.getData(aTop, aLeft)),
+                               aPatch, aPatch, theData.getSizeRowBytes())) {
             ST_DEBUG_LOG("StGLTextureData::fillTexture(). wrapping failure");
             continue;
         }
@@ -506,8 +540,14 @@ static void prepareTextures(StGLContext&       theCtx,
         GLsizei aSizeX  = (GLsizei )anImgPlane.getSizeX();
         GLsizei aSizeY  = (GLsizei )anImgPlane.getSizeY();
         if(theCubemap == StCubemap_Packed) {
+            size_t aCoeffs[2] = {0, 0};
+            if(!checkCubeMap(anImgPlane, aCoeffs[0], aCoeffs[1])) {
+                aTexture.release(theCtx);
+                continue;
+            }
             aTarget = GL_TEXTURE_CUBE_MAP;
-            aSizeX  = aSizeX / 6;
+            aSizeX  = aSizeX / aCoeffs[0];
+            aSizeY  = aSizeY / aCoeffs[1];
         }
         if(aSizeX < 1) {
             aTexture.release(theCtx);

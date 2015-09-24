@@ -1031,7 +1031,8 @@ void StImageViewer::doPanoramaOnOff(const size_t ) {
         aSizeY /= 2;
     }
 
-    if(aSizeX / 6 == aSizeY) {
+    if(aSizeX / 6 == aSizeY
+    || aSizeX / 3 == aSizeY / 2) {
         myGUI->myImage->params.ViewMode->setValue(StStereoParams::PANORAMA_CUBEMAP);
     } else {
         myGUI->myImage->params.ViewMode->setValue(StStereoParams::PANORAMA_SPHERE);
