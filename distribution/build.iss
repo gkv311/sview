@@ -334,6 +334,9 @@ Root: HKCR; SubKey: .mk3d;                                     ValueType: string
 Root: HKCR; SubKey: .webm;                                     ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
 Root: HKCR; SubKey: .wmv;                                      ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
 Root: HKCR; SubKey: .ts;                                       ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
+Root: HKCR; SubKey: .mts;                                      ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
+Root: HKCR; SubKey: .m2ts;                                     ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
+Root: HKCR; SubKey: .mt2s;                                     ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
 Root: HKCR; SubKey: .vob;                                      ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
 Root: HKCR; SubKey: .mp4;                                      ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
 Root: HKCR; SubKey: .mpg;                                      ValueType: string; ValueData: sView Video;                   Tasks: flagAssocMovies; Flags: uninsdeletekey
