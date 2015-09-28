@@ -130,6 +130,7 @@ xcopy /Y ..\bin\WIN_vc_AMD64\*.exe          %SVIEW_DISTR_PATH_AMD64%\
 
 rem shared resources
 xcopy /Y ..\share\sView\demo\demo.jps       %SVIEW_DISTR_PATH_X86%\
+xcopy /Y ..\share\sView\demo\demo_robot.jps %SVIEW_DISTR_PATH_X86%\
 xcopy /S /Y ..\bin\WIN_vc_x86\lang\*        %SVIEW_DISTR_PATH_X86%\lang\
 xcopy /S /Y ..\bin\WIN_vc_x86\shaders\*     %SVIEW_DISTR_PATH_X86%\shaders\
 xcopy /Y ..\bin\WIN_vc_x86\textures\*       %SVIEW_DISTR_PATH_X86%\textures\

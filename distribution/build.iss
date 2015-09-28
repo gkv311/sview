@@ -224,6 +224,7 @@ Source: {#SVIEW_DISTR_PATH_x86}\lang\*StImageViewer.lng;       DestDir: {app}\la
 Source: {#SVIEW_DISTR_PATH_x86}\icons\sView_JPS.ico;           DestDir: {app}\icons;           Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer
 Source: {#SVIEW_DISTR_PATH_x86}\icons\sView_PNS.ico;           DestDir: {app}\icons;           Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer
 Source: {#SVIEW_DISTR_PATH_x86}\demo.jps;                      DestDir: {app};                 Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer
+Source: {#SVIEW_DISTR_PATH_x86}\demo_robot.jps;                DestDir: {app};                 Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer
 Source: {#SVIEW_DISTR_PATH_AMD64}\StImageViewer.dll;           DestDir: {app}\amd64;           Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 ; FreeImage library (should be optional)
 Source: {#SVIEW_DISTR_PATH_x86}\FreeImage.dll;                 DestDir: {app};                 Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer
