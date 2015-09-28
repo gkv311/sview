@@ -546,8 +546,8 @@ static void prepareTextures(StGLContext&       theCtx,
                 continue;
             }
             aTarget = GL_TEXTURE_CUBE_MAP;
-            aSizeX  = aSizeX / aCoeffs[0];
-            aSizeY  = aSizeY / aCoeffs[1];
+            aSizeX  = aSizeX / GLsizei(aCoeffs[0]);
+            aSizeY  = aSizeY / GLsizei(aCoeffs[1]);
         }
         if(aSizeX < 1) {
             aTexture.release(theCtx);

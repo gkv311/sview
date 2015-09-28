@@ -286,7 +286,7 @@ bool StAVVideoMuxer::save(const StString& theFile) {
 
     av_dump_format(aCtxOut.Context, 0, theFile.toCString(), 1);
     if(!(aCtxOut.Context->oformat->flags & AVFMT_NOFILE)) {
-        const int aState = avio_open(&aCtxOut.Context->pb, theFile.toCString(), AVIO_FLAG_WRITE);
+        const int aState = avio_open2(&aCtxOut.Context->pb, theFile.toCString(), AVIO_FLAG_WRITE, NULL, NULL);
         if(aState < 0) {
             signals.onError(StString("Could not open output file '") + theFile + "' (" + stAV::getAVErrorDescription(aState) + ")");
             return false;
@@ -330,7 +330,7 @@ bool StAVVideoMuxer::save(const StString& theFile) {
         #endif
             aPacket.pts      = av_rescale_q_rnd(aPacket.pts, aStreamIn->time_base, aStreamOut->time_base, aRoundParams);
             aPacket.dts      = av_rescale_q_rnd(aPacket.dts, aStreamIn->time_base, aStreamOut->time_base, aRoundParams);
-            aPacket.duration = av_rescale_q(aPacket.duration, aStreamIn->time_base, aStreamOut->time_base);
+            aPacket.duration = static_cast<int >(av_rescale_q(aPacket.duration, aStreamIn->time_base, aStreamOut->time_base));
             aPacket.pos      = -1;
 
             aState = av_interleaved_write_frame(aCtxOut.Context, &aPacket);
