@@ -1,0 +1,26 @@
+# Czech translation file for StOutPageFlip library
+# @author Kirill Gavrilov
+# @translator Marek Audy
+--------
+1000=Aktivní brýle (závěrkové)
+1001=Aktivní brýle (závěrkové)
+1002=Vuzix HMD
+1003=Vuzix HMD
+1102=Typ vícenásobného bufferingu
+1103=Nastavení brýlí
+1120=OpenGL emulovaný
+1122=OpenGL hardwarový
+1123=Direct3D (Celá obrazovka)
+1124=Direct3D (Nedostupné)
+1125=Direct3D AMD (Celá obrazovka)
+1126=Direct3D AMD (Nedostupné)
+1127=Direct3D NVIDIA (Celá obrazovka)
+1128=Direct3D NVIDIA (Vypnuto)
+1130=Bez ovládání
+1131=Modrá linka sync
+1132=Bílá linka sync
+1134=eDimensional auto on/off
+2000=sView - modul stereovýstupu pro aktivní závěrkové brýle
+2001=версия
+2002=© {0} Гаврилов Кирилл <{1}>\nОфициальный сайт: {2}\n\nБиблиотека распространяется на условиях LGPL3.0
+3001=OpenGL Hardware QuadBuffer není dostupný!

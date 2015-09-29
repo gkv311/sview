@@ -1,0 +1,17 @@
+# Czech translation file for StOutDistorted library
+# @author Kirill Gavrilov
+# @translator Marek Audy
+--------
+1000=Paralel vedle sebe
+1001=Deformovaný výstup
+1002=Oculus Rift
+1003=Soudková deformace
+1110=Uspořádání dvojice
+1111=Vedle sebe
+1112=Dvojice Nad/pod
+1120=Filtr
+1121=Žádný
+1123=Zobrazit mono ve stereu
+2000=sView - Modul deformace výstupu
+2001=verze
+2002=© {0} Гаврилов Кирилл <{1}>\nОфициальный сайт: {2}\n\nБиблиотека распространяется на условиях LGPL3.0

@@ -115,6 +115,7 @@ install_android:
 	mkdir -p sview/assets/lang/French
 	mkdir -p sview/assets/lang/English
 	mkdir -p sview/assets/lang/Russian
+	mkdir -p sview/assets/lang/Czech
 	mkdir -p sview/assets/shaders
 	mkdir -p sview/assets/textures
 	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStShared)       sview/libs/armeabi-v7a/$(aStShared)
@@ -130,6 +131,7 @@ install_android:
 	cp -f -r $(BUILD_ROOT)/lang/français/* sview/assets/lang/French/
 	cp -f -r $(BUILD_ROOT)/lang/English/*  sview/assets/lang/English/
 	cp -f -r $(BUILD_ROOT)/lang/русский/*  sview/assets/lang/Russian/
+	cp -f -r $(BUILD_ROOT)/lang/czech/*    sview/assets/lang/Czech/
 	cp -f -r $(BUILD_ROOT)/shaders/*       sview/assets/shaders/
 	cp -f -r $(BUILD_ROOT)/textures/*      sview/assets/textures/
 	cp -f    license-gpl-3.0.txt           sview/assets/info/license.txt
@@ -139,6 +141,7 @@ pre_all:
 	mkdir -p $(BUILD_ROOT)/lang/русский
 	mkdir -p $(BUILD_ROOT)/lang/français
 	mkdir -p $(BUILD_ROOT)/lang/Deutsch
+	mkdir -p $(BUILD_ROOT)/lang/Czech
 	mkdir -p $(BUILD_ROOT)/textures
 	mkdir -p $(BUILD_ROOT)/web
 	mkdir -p sview/libs/armeabi-v7a
@@ -189,6 +192,7 @@ pre_StOutAnaglyph:
 	cp -f -r StOutAnaglyph/lang/russian/* $(BUILD_ROOT)/lang/русский/
 	cp -f -r StOutAnaglyph/lang/french/*  $(BUILD_ROOT)/lang/français/
 	cp -f -r StOutAnaglyph/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
+	cp -f -r StOutAnaglyph/lang/czech/*   $(BUILD_ROOT)/lang/Czech/
 clean_StOutAnaglyph:
 	rm -f $(BUILD_ROOT)/$(aStOutAnaglyph)
 	rm -rf StOutAnaglyph/*.o
@@ -206,6 +210,7 @@ pre_StOutDual:
 	cp -f -r StOutDual/lang/russian/* $(BUILD_ROOT)/lang/русский/
 	cp -f -r StOutDual/lang/french/*  $(BUILD_ROOT)/lang/français/
 	cp -f -r StOutDual/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
+	cp -f -r StOutDual/lang/czech/*   $(BUILD_ROOT)/lang/Czech/
 clean_StOutDual:
 	rm -f $(BUILD_ROOT)/$(aStOutDual)
 	rm -rf StOutDual/*.o
@@ -224,6 +229,7 @@ pre_StOutIZ3D:
 	cp -f -r StOutIZ3D/lang/russian/* $(BUILD_ROOT)/lang/русский/
 	cp -f -r StOutIZ3D/lang/french/*  $(BUILD_ROOT)/lang/français/
 	cp -f -r StOutIZ3D/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
+	cp -f -r StOutIZ3D/lang/czech/*   $(BUILD_ROOT)/lang/Czech/
 clean_StOutIZ3D:
 	rm -f $(BUILD_ROOT)/$(aStOutIZ3D)
 	rm -rf StOutIZ3D/*.o
@@ -243,6 +249,7 @@ pre_StOutInterlace:
 	cp -f -r StOutInterlace/lang/russian/* $(BUILD_ROOT)/lang/русский/
 	cp -f -r StOutInterlace/lang/french/*  $(BUILD_ROOT)/lang/français/
 	cp -f -r StOutInterlace/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
+	cp -f -r StOutInterlace/lang/czech/*   $(BUILD_ROOT)/lang/Czech/
 clean_StOutInterlace:
 	rm -f $(BUILD_ROOT)/$(aStOutInterlace)
 	rm -rf StOutInterlace/*.o
@@ -260,6 +267,7 @@ pre_StOutPageFlip:
 	cp -f -r StOutPageFlip/lang/russian/* $(BUILD_ROOT)/lang/русский/
 	cp -f -r StOutPageFlip/lang/french/*  $(BUILD_ROOT)/lang/français/
 	cp -f -r StOutPageFlip/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
+	cp -f -r StOutPageFlip/lang/czech/*   $(BUILD_ROOT)/lang/Czech/
 clean_StOutPageFlip:
 	rm -f $(BUILD_ROOT)/$(aStOutPageFlip)
 	rm -rf StOutPageFlip/*.o
@@ -276,6 +284,7 @@ pre_StOutDistorted:
 	cp -f -r StOutDistorted/lang/russian/* $(BUILD_ROOT)/lang/русский/
 	cp -f -r StOutDistorted/lang/french/*  $(BUILD_ROOT)/lang/français/
 	cp -f -r StOutDistorted/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
+	cp -f -r StOutDistorted/lang/czech/*   $(BUILD_ROOT)/lang/Czech/
 clean_StOutDistorted:
 	rm -f $(BUILD_ROOT)/$(aStOutDistorted)
 	rm -rf StOutDistorted/*.o
@@ -292,6 +301,7 @@ pre_StImageViewer:
 	cp -f -r StImageViewer/lang/russian/* $(BUILD_ROOT)/lang/русский/
 	cp -f -r StImageViewer/lang/french/*  $(BUILD_ROOT)/lang/français/
 	cp -f -r StImageViewer/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
+	cp -f -r StImageViewer/lang/czech/*   $(BUILD_ROOT)/lang/Czech/
 clean_StImageViewer:
 	rm -f $(BUILD_ROOT)/$(aStImageViewer)
 	rm -rf StImageViewer/*.o
@@ -312,6 +322,7 @@ pre_StMoviePlayer:
 	cp -f -r StMoviePlayer/lang/russian/* $(BUILD_ROOT)/lang/русский/
 	cp -f -r StMoviePlayer/lang/french/*  $(BUILD_ROOT)/lang/français/
 	cp -f -r StMoviePlayer/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
+	cp -f -r StMoviePlayer/lang/czech/*   $(BUILD_ROOT)/lang/Czech/
 	cp -f -r StMoviePlayer/web/*          $(BUILD_ROOT)/web/
 clean_StMoviePlayer:
 	rm -f $(BUILD_ROOT)/$(aStMoviePlayer)
@@ -331,6 +342,7 @@ pre_StDiagnostics:
 	cp -f -r StDiagnostics/lang/russian/* $(BUILD_ROOT)/lang/русский/
 	cp -f -r StDiagnostics/lang/french/*  $(BUILD_ROOT)/lang/français/
 	cp -f -r StDiagnostics/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
+	cp -f -r StDiagnostics/lang/czech/*   $(BUILD_ROOT)/lang/Czech/
 clean_StDiagnostics:
 	rm -f $(BUILD_ROOT)/$(aStDiagnostics)
 	rm -rf StDiagnostics/*.o
@@ -350,6 +362,7 @@ pre_StCADViewer:
 	cp -f -r StCADViewer/lang/russian/* $(BUILD_ROOT)/lang/русский/
 	cp -f -r StCADViewer/lang/french/*  $(BUILD_ROOT)/lang/français/
 	cp -f -r StCADViewer/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
+	cp -f -r StCADViewer/lang/czech/*   $(BUILD_ROOT)/lang/Czech/
 clean_StCADViewer:
 	rm -f $(BUILD_ROOT)/$(aStCADViewer)
 	rm -rf StCADViewer/*.o

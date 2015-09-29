@@ -1,0 +1,21 @@
+# Czech translation file for StOutAnaglyph library
+# @author Kirill Gavrilov
+# @translator Marek Audy
+--------
+1000=Brýle anaglyf
+1001=Brýle s barevnými filtry
+1010=Typ brýlí
+1011=Červená-azurová
+1012=Žlutá-modrá
+1013=Zelená-purpurová
+1102=Červeno-azurový filtr
+1120=Jednoduchý
+1121=Optimalizovaný
+1122=Šedý
+1123=Tmavý
+1103=Žluto-modrý filtr
+1130=Jednoduchý
+1131=Dubios
+2000=sView - modul pro výstup anaglyf
+2001=verze
+2002=© {0} Гаврилов Кирилл <{1}>\nОфициальный сайт: {2}\n\nБиблиотека распространяется на условиях LGPL3.0

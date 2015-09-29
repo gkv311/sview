@@ -1,0 +1,26 @@
+# Czech translation file for StCADViewer
+# @author Kirill Gavrilov
+# @translator Marek Audy
+--------
+1200=Zobrazení
+1201=Typ projekce
+1202=Celá obrazovka
+1203=Zobrazit normálně
+1204=Zobrazit trihedron (průsečík xyz)
+1205=Dvě světla
+1206=Projekce
+1207=Režim výplň
+1208=Přidat soubor
+1240=Ortogonální
+1241=Perspektivní
+1242=Stereo
+1250=Síť
+1251=Stínování
+1252=Stínování + Síť
+1500=Pomoc
+1501=O aplikaci...
+1503=Licence
+1504=Language
+3000=sView - Aplikace pro zobrazení CAD modelů
+3001=Verze
+3002=Aplikace podporuje CAD soubory ve formátu IGES, STEP, BREP s využitím OpenCASCADE Technology.\n © 2011-2014 Гаврилов Кирилл (kirill@sview.ru).\nOficiální stránky: www.sview.ru

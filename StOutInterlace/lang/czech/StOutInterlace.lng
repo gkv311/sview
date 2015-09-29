@@ -1,0 +1,17 @@
+# Russian translation file for StOutInterlace library
+# @author Kirill Gavrilov
+# @translator Marek Audy
+--------
+1000=Prokládání řádků
+1001=Vodorovně prokládané monitory: Zalman, Hyundai, LG…
+1002=Prokládání sloupců
+1003=Svisle proklásané monitory
+1006=DLP TV (šachovnice)
+1007=DLP TV (šachovnice)
+1008=Prokládaný ED
+1009=EDimensional v prokládaném režimu
+1102=Přeskládat obráceně
+1103=Provázat s monitorem
+2000=sView - modul prokládaného zobrazování
+2001=verze
+2002=© {0} Гаврилов Кирилл <{1}>\noficiální strana: {2}\n\nБиблиотека распространяется на условиях LGPL3.0

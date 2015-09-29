@@ -169,6 +169,7 @@ Source: {#SVIEW_DISTR_PATH_AMD64}\StDiagnostics.dll; DestDir: {app}\amd64; Flags
 Source: {#SVIEW_DISTR_PATH_x86}\shaders\StGLWidgets\*;         DestDir: {app}\shaders\StGLWidgets;       Flags: 32bit ignoreversion; Components: StCore
 Source: {#SVIEW_DISTR_PATH_x86}\lang\Korean\language.lng;      DestDir: {app}\lang\Korean;               Flags: 32bit ignoreversion; Components: StCore
 Source: {#SVIEW_DISTR_PATH_x86}\lang\ChineseS\language.lng;    DestDir: {app}\lang\ChineseS;             Flags: 32bit ignoreversion; Components: StCore
+Source: {#SVIEW_DISTR_PATH_x86}\lang\Czech\language.lng;       DestDir: {app}\lang\Czech;                Flags: 32bit ignoreversion; Components: StCore
 ; MSVC C-Runtime libraries (mask compatible for vc100)
 Source: {#SVIEW_DISTR_PATH_x86}\msvc*.dll;        DestDir: {app};        Flags: 32bit ignoreversion; Components: StCore
 Source: {#SVIEW_DISTR_PATH_AMD64}\msvc*.dll;      DestDir: {app}\amd64;  Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
