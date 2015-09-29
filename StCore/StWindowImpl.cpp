@@ -79,6 +79,7 @@ StWindowImpl::StWindowImpl(const StHandle<StResourceManager>& theResMgr,
   myIsUpdated(false),
   myIsActive(false),
   myBlockSleep(BlockSleep_OFF),
+  myIsSystemLocked(false),
   myIsDispChanged(false),
   myLastEventsTime(0.0),
   myEventsThreaded(false),
@@ -453,7 +454,8 @@ void StWindowImpl::updateBlockSleep() {
     #ifndef ES_AWAYMODE_REQUIRED // for old MinGW
         #define ES_AWAYMODE_REQUIRED ((DWORD)0x00000040)
     #endif
-    if(attribs.ToBlockSleepDisplay) {
+    if(attribs.ToBlockSleepDisplay
+    && !myIsSystemLocked) {
         // prevent display sleep - call this periodically
         EXECUTION_STATE aState = ES_CONTINUOUS | ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED;
         if(myIsVistaPlus) {
@@ -616,7 +618,10 @@ void StWindowImpl::updateActiveState() {
 /*#if defined(__ANDROID__)
     myIsActive = (myMaster.eglSurface != EGL_NO_SURFACE);
 #else*/
-    if(attribs.IsFullScreen) {
+    if(myIsSystemLocked) {
+        myIsActive = false;
+        return;
+    } else if(attribs.IsFullScreen) {
         myIsActive = true;
         return;
     }

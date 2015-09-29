@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -22,6 +22,7 @@
 
 #include <StStrings/StLogger.h>
 #include <StThreads/StThread.h>
+#include <StLibrary.h>
 #include <StGL/StGLContext.h>
 
 #include <cmath>
@@ -208,6 +209,21 @@ bool StWindowImpl::wndCreateWindows() {
                      SWP_SHOWWINDOW);
     }
 
+    // register handler to track session lock state (WM_WTSSESSION_CHANGE)
+    myIsSystemLocked = false;
+    typedef BOOL (WINAPI *WTSRegisterSessionNotification_t  )(HWND hWnd, DWORD dwFlags);
+    typedef BOOL (WINAPI *WTSUnRegisterSessionNotification_t)(HWND hWnd);
+    WTSRegisterSessionNotification_t   aSessNotifSetProc   = NULL;
+    WTSUnRegisterSessionNotification_t aSessNotifUnsetProc = NULL;
+    StLibrary aWtsLib;
+    if(aWtsLib.loadSimple("Wtsapi32.dll")
+    && aWtsLib.find("WTSRegisterSessionNotification",   aSessNotifSetProc)
+    && aWtsLib.find("WTSUnRegisterSessionNotification", aSessNotifUnsetProc)) {
+        #define NOTIFY_FOR_ALL_SESSIONS 1
+        #define NOTIFY_FOR_THIS_SESSION 0
+        aSessNotifSetProc(myMaster.hWindowGl, NOTIFY_FOR_THIS_SESSION);
+    }
+
     // always wait for message thread exit before quit
     myMaster.EventMsgThread.reset();
 
@@ -244,6 +260,9 @@ bool StWindowImpl::wndCreateWindows() {
                     UnregisterHotKey(myMaster.hWindowGl, myMaster.myMKeyPlay);
                     UnregisterHotKey(myMaster.hWindowGl, myMaster.myMKeyPrev);
                     UnregisterHotKey(myMaster.hWindowGl, myMaster.myMKeyNext);
+                }
+                if(aSessNotifUnsetProc != NULL) {
+                    aSessNotifUnsetProc(myMaster.hWindowGl);
                 }
 
                 mySlave.close();  // close window handles
@@ -444,7 +463,14 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
             }
             break;
         }
-
+        case WM_WTSSESSION_CHANGE: {
+            if(wParam == WTS_SESSION_LOCK) {
+                myIsSystemLocked = true;
+            } else if(wParam == WTS_SESSION_UNLOCK) {
+                myIsSystemLocked = false;
+            }
+            break;
+        }
         case WM_CLOSE: {
             myStEvent.Type       = stEvent_Close;
             myStEvent.Close.Time = getEventTime(myEvent.time);
