@@ -131,7 +131,7 @@ install_android:
 	cp -f -r $(BUILD_ROOT)/lang/français/* sview/assets/lang/French/
 	cp -f -r $(BUILD_ROOT)/lang/English/*  sview/assets/lang/English/
 	cp -f -r $(BUILD_ROOT)/lang/русский/*  sview/assets/lang/Russian/
-	cp -f -r $(BUILD_ROOT)/lang/czech/*    sview/assets/lang/Czech/
+	cp -f -r $(BUILD_ROOT)/lang/Czech/*    sview/assets/lang/Czech/
 	cp -f -r $(BUILD_ROOT)/shaders/*       sview/assets/shaders/
 	cp -f -r $(BUILD_ROOT)/textures/*      sview/assets/textures/
 	cp -f    license-gpl-3.0.txt           sview/assets/info/license.txt

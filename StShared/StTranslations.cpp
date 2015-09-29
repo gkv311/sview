@@ -113,6 +113,11 @@ StTranslations::StTranslations(const StHandle<StResourceManager>& theResMgr,
                 params.language->setValue(int32_t(anIdInList));
                 isLangSet = true;
             }
+        } else if(aLang.isEqualsIgnoreCase(stCString("cs"))) {
+            if(myLangFolderList.contains(stCString("Čeština"), anIdInList)) {
+                params.language->setValue(int32_t(anIdInList));
+                isLangSet = true;
+            }
         }
     }
     if(!isLangSet) {
@@ -162,6 +167,8 @@ void StTranslations::updateLangCode(const int32_t theNewLang) {
         myLangCode = "kor";
     } else if(aLang == stCString("简体中文")) {
         myLangCode = "chi";
+    } else if(aLang == stCString("Čeština")) {
+        myLangCode = "cze";
     } else if(aLang == stCString("English")) {
         myLangCode = "eng";
     } else {
