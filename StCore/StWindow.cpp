@@ -353,3 +353,7 @@ void* StWindow::getNativeOglDC() const {
     return NULL;
 #endif
 }
+
+const StString& StWindow::getStatistics() const {
+    return myWin->myStatistics;
+}

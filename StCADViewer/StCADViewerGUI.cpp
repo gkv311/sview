@@ -192,7 +192,8 @@ void StCADViewerGUI::stglDraw(unsigned int theView) {
     if((theView == ST_DRAW_LEFT || theView == ST_DRAW_MONO)
     && myFpsWidget != NULL) {
         myFpsWidget->update(myPlugin->getMainWindow()->isStereoOutput(),
-                            myPlugin->getMainWindow()->getTargetFps());
+                            myPlugin->getMainWindow()->getTargetFps(),
+                            myPlugin->getMainWindow()->getStatistics());
     }
     StGLRootWidget::stglDraw(theView);
 }

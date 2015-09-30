@@ -277,6 +277,7 @@ class StWindowImpl {
 
     StString           myWindowTitle;     //!< window caption
     int                myInitState;       //!< initialization error code
+    StString           myStatistics;      //!< extra statistics
 
     StPointD_t         myMousePt;         //!< mouse coordinates to track activity
     StRectI_t          myRectNorm;        //!< master window coordinates in normal     state

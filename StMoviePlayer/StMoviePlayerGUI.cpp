@@ -1867,7 +1867,8 @@ void StMoviePlayerGUI::stglDraw(unsigned int theView) {
                                                  myFpsWidget->changePlayQueueLength(),
                                                  myFpsWidget->changePlayFps());
         myFpsWidget->update(myPlugin->getMainWindow()->isStereoOutput(),
-                            myPlugin->getMainWindow()->getTargetFps());
+                            myPlugin->getMainWindow()->getTargetFps(),
+                            myPlugin->getMainWindow()->getStatistics());
     }
     StGLRootWidget::stglDraw(theView);
 }

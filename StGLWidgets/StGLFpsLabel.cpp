@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru
+ * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -41,23 +41,31 @@ void StGLFpsLabel::doMouseUnclick(const int ) {
     signals.onBtnClick(getUserData());
 }
 
-void StGLFpsLabel::update(const bool   theIsStereo,
-                          const double theTargetFps) {
+void StGLFpsLabel::update(const bool      theIsStereo,
+                          const double    theTargetFps,
+                          const StString& theExtraInfo) {
     char aBuffer[128];
     const double aTime = myTimer.getElapsedTimeInSec();
-    if(aTime >= 1.0) {
-        myTimer.restart();
-        const double aFpsCurrent = double(myCounter) / aTime;
-        if(myPlayFps <= 0.0) {
-            stsprintf(aBuffer, 128, "%c %4.1f (%4.1f)",
-                      theIsStereo ? 'S' : 'M', aFpsCurrent, theTargetFps);
-        } else {
-            stsprintf(aBuffer, 128, "%c %4.1f (%4.1f)\n%d / %d [%4.1f]",
-                      theIsStereo ? 'S' : 'M', aFpsCurrent, theTargetFps,
-                      myPlayQueued, myPlayQueueLen, myPlayFps);
-        }
-        setText(aBuffer);
-        myCounter = 0;
+    if(aTime < 1.0) {
+        ++myCounter;
+        return;
     }
-    ++myCounter;
+
+    myTimer.restart();
+    const double aFpsCurrent = double(myCounter) / aTime;
+    if(myPlayFps <= 0.0) {
+        stsprintf(aBuffer, 128, "%c %4.1f (%4.1f)",
+                  theIsStereo ? 'S' : 'M', aFpsCurrent, theTargetFps);
+    } else {
+        stsprintf(aBuffer, 128, "%c %4.1f (%4.1f)\n%d / %d [%4.1f]",
+                  theIsStereo ? 'S' : 'M', aFpsCurrent, theTargetFps,
+                  myPlayQueued, myPlayQueueLen, myPlayFps);
+    }
+    StString aText(aBuffer);
+    if(!theExtraInfo.isEmpty()) {
+        aText += "\n";
+        aText += theExtraInfo;
+    }
+    setText(aText);
+    myCounter = 1;
 }

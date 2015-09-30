@@ -59,7 +59,8 @@ StDiagnosticsGUI::~StDiagnosticsGUI() {
 
 void StDiagnosticsGUI::setVisibility(const StPointD_t& , bool ) {
     myFpsWidget->update(myPlugin->getMainWindow()->isStereoOutput(),
-                        myPlugin->getMainWindow()->getTargetFps());
+                        myPlugin->getMainWindow()->getTargetFps(),
+                        myPlugin->getMainWindow()->getStatistics());
 
     char aBuffer[128];
     stsprintf(aBuffer, 128, "%04u", myFrameCounter++);

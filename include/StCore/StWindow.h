@@ -408,6 +408,11 @@ class StWindow {
     ST_CPPEXPORT void setTargetFps(const double theFPS);
 
     /**
+     * Return optional statistics for verbose output.
+     */
+    ST_CPPEXPORT const StString& getStatistics() const;
+
+    /**
      * Retrieve options list.
      */
     ST_CPPEXPORT virtual void getOptions(StParamsList& theList) const;
