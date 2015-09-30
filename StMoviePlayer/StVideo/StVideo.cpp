@@ -319,9 +319,9 @@ bool StVideo::addFile(const StString& theFileToLoad,
                     const int aCodedSizeX = myVideoMaster->getCodedSizeX();
                     const int aCodedSizeY = myVideoMaster->getCodedSizeY();
                     StString  aDimsStr    = StString() + aSizeX + " x " + aSizeY;
-                    if(aCodedSizeX != aSizeX
-                    || aCodedSizeY != aSizeY) {
-                        aDimsStr += StString(" (") + aCodedSizeX + " x " + aCodedSizeY + ")";
+                    if((aCodedSizeX != aSizeX && aCodedSizeX != 0)
+                    || (aCodedSizeY != aSizeY && aCodedSizeY != 0)) {
+                        aDimsStr += StString(" [") + aCodedSizeX + " x " + aCodedSizeY + "]";
                     }
 
                     StDictEntry& aDimInfo = myFileInfoTmp->Info.addChange(tr(INFO_DIMENSIONS));
@@ -345,9 +345,9 @@ bool StVideo::addFile(const StString& theFileToLoad,
                     const int aCodedSizeX = myVideoSlave->getCodedSizeX();
                     const int aCodedSizeY = myVideoSlave->getCodedSizeY();
                     StString  aDimsStr    = StString() + aSizeX + " x " + aSizeY;
-                    if(aCodedSizeX != aSizeX
-                    || aCodedSizeY != aSizeY) {
-                        aDimsStr += StString(" (") + aCodedSizeX + " x " + aCodedSizeY + ")";
+                    if((aCodedSizeX != aSizeX && aCodedSizeX != 0)
+                    || (aCodedSizeY != aSizeY && aCodedSizeY != 0)) {
+                        aDimsStr += StString(" [") + aCodedSizeX + " x " + aCodedSizeY + "]";
                     }
                     aDimsStr += " [2]";
 
