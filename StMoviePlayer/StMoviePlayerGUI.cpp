@@ -179,6 +179,16 @@ void StMoviePlayerGUI::createUpperToolbar() {
     myBtnSwapLR->setDrawShadow(true);
     myBtnSwapLR->changeMargins() = aButtonMargins;
 
+    StHandle<StBoolParam> aTrackedPano = new StBoolParam(false);
+    myBtnPanorama = new StGLCheckboxTextured(myPanelUpper, aTrackedPano,
+                                             iconTexture(stCString("actionPanoramaOff"), anIconSize),
+                                             iconTexture(stCString("actionPanorama"),    anIconSize),
+                                             aLeft + (aBtnIter++) * anIconStep, aTop,
+                                             StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    myBtnPanorama->signals.onBtnClick += stSlot(this, &StMoviePlayerGUI::doPanoramaCombo);
+    myBtnPanorama->setDrawShadow(true);
+    myBtnPanorama->changeMargins() = aButtonMargins;
+
     // right buttons
     StHandle<StBoolParam> aTrackedSubs = new StBoolParam(false);
     myBtnSubs = new StGLCheckboxTextured(myPanelUpper, aTrackedSubs,
@@ -532,7 +542,8 @@ StGLMenu* StMoviePlayerGUI::createViewMenu() {
     StGLMenu* aMenuView = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     StGLMenu* aMenuDispMode  = createDisplayModeMenu();
     StGLMenu* aMenuDispRatio = createDisplayRatioMenu();
-    StGLMenu* aMenuSurface   = createSurfaceMenu();
+    StGLMenu* aMenuPanorama  = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+    fillPanoramaMenu(aMenuPanorama);
     StGLMenu* aMenuTexFilter = createSmoothFilterMenu();
     StGLMenu* aMenuImgAdjust = createImageAdjustMenu();
 
@@ -546,7 +557,8 @@ StGLMenu* StMoviePlayerGUI::createViewMenu() {
     aMenuView->addItem(tr(MENU_VIEW_SWAP_LR),       myImage->params.swapLR);
     aMenuView->addItem(tr(MENU_VIEW_DISPLAY_RATIO), aMenuDispRatio)
              ->setIcon(stCMenuIcon("actionDisplayRatio"), false);
-    aMenuView->addItem(tr(MENU_VIEW_SURFACE),       aMenuSurface);
+    aMenuView->addItem(tr(MENU_VIEW_PANORAMA),      aMenuPanorama)
+             ->setIcon(stCMenuIcon("actionPanorama"), false);
     aMenuView->addItem(tr(MENU_VIEW_TEXFILTER),     aMenuTexFilter)
              ->setIcon(stCMenuIcon("actionInterpolation"), false);
     aMenuView->addItem(tr(MENU_VIEW_IMAGE_ADJUST),  aMenuImgAdjust)
@@ -601,18 +613,19 @@ void StMoviePlayerGUI::doDisplayRatioCombo(const size_t ) {
     aBuilder.display();
 }
 
-/**
- * Root -> View menu -> Surface
- */
-StGLMenu* StMoviePlayerGUI::createSurfaceMenu() {
-    StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(tr(MENU_VIEW_SURFACE_PLANE),
-                   myImage->params.ViewMode, StStereoParams::FLAT_IMAGE);
-    aMenu->addItem(tr(MENU_VIEW_SURFACE_SPHERE),
-                   myImage->params.ViewMode, StStereoParams::PANORAMA_SPHERE);
-    aMenu->addItem("Cubemap",
-                   myImage->params.ViewMode, StStereoParams::PANORAMA_CUBEMAP);
-    return aMenu;
+void StMoviePlayerGUI::fillPanoramaMenu(StGLMenu* theMenu) {
+    theMenu->addItem(tr(MENU_VIEW_SURFACE_PLANE),
+                     myImage->params.ViewMode, StStereoParams::FLAT_IMAGE);
+    theMenu->addItem(tr(MENU_VIEW_SURFACE_SPHERE),
+                     myImage->params.ViewMode, StStereoParams::PANORAMA_SPHERE);
+    theMenu->addItem(tr(MENU_VIEW_SURFACE_CUBEMAP),
+                     myImage->params.ViewMode, StStereoParams::PANORAMA_CUBEMAP);
+}
+
+void StMoviePlayerGUI::doPanoramaCombo(const size_t ) {
+    StGLCombobox::ListBuilder aBuilder(this);
+    fillPanoramaMenu(aBuilder.getMenu());
+    aBuilder.display();
 }
 
 /**
@@ -1193,6 +1206,16 @@ void StMoviePlayerGUI::createMobileUpperToolbar() {
     myBtnSwapLR->setDrawShadow(true);
     myBtnSwapLR->changeMargins() = aButtonMargins;
 
+    StHandle<StBoolParam> aTrackedPano = new StBoolParam(false);
+    myBtnPanorama = new StGLCheckboxTextured(myPanelUpper, aTrackedPano,
+                                             iconTexture(stCString("actionPanoramaOff"), anIconSize),
+                                             iconTexture(stCString("actionPanorama"),    anIconSize),
+                                             (aBtnIter++) * myIconStep, 0,
+                                             StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    myBtnPanorama->signals.onBtnClick += stSlot(this, &StMoviePlayerGUI::doPanoramaCombo);
+    myBtnPanorama->setDrawShadow(true);
+    myBtnPanorama->changeMargins() = aButtonMargins;
+
     aBtnIter = 0;
     StGLTextureButton* aBtnEx = new StGLTextureButton(myPanelUpper, (aBtnIter--) * (-myIconStep), 0,
                                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
@@ -1341,6 +1364,7 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
   myBtnOpen(NULL),
   myBtnInfo(NULL),
   myBtnSwapLR(NULL),
+  myBtnPanorama(NULL),
   myBtnSrcFrmt(NULL),
   myBtnAudio(NULL),
   myBtnSubs(NULL),
@@ -1583,6 +1607,7 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
                                      bool              theIsMouseMoved) {
     const bool toShowPlayList = myPlugin->params.ToShowPlayList->getValue();
     const int  aRootSizeY     = getRectPx().height();
+    const bool hasVideo       = myPlugin->myVideo->hasVideoStream();
     StHandle<StStereoParams> aParams = myImage->getSource();
     myIsVisibleGUI = theIsMouseMoved
         || aParams.isNull()
@@ -1625,10 +1650,10 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
 
     StFormat aSrcFormat = (StFormat )myPlugin->params.srcFormat->getValue();
     if(aSrcFormat == StFormat_AUTO
-    && !myImage->params.stereoFile.isNull()) {
-        aSrcFormat = myImage->params.stereoFile->StereoFormat;
+    && !aParams.isNull()) {
+        aSrcFormat = aParams->StereoFormat;
     }
-    if(!myImage->params.stereoFile.isNull()
+    if(!aParams.isNull()
      && myImage->params.swapLR->getValue()) {
         aSrcFormat = st::formatReversed(aSrcFormat);
     }
@@ -1642,6 +1667,23 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
         myBtnSwapLR->setOpacity(aSrcFormat != StFormat_Mono ? anOpacity : 0.0f, false);
     }
 
+    const StStereoParams::ViewMode aViewMode = hasVideo && !aParams.isNull()
+                                             ? aParams->ViewingMode
+                                             : StStereoParams::FLAT_IMAGE;
+    bool toShowPano = aViewMode != StStereoParams::FLAT_IMAGE;
+    if(!toShowPano
+    &&  hasVideo
+    && !aParams.isNull()
+    &&  st::probePanorama(aParams->StereoFormat,
+                          aParams->Src1SizeX, aParams->Src1SizeY,
+                          aParams->Src2SizeX, aParams->Src2SizeY) != StPanorama_OFF) {
+        toShowPano = true;
+    }
+    if(myBtnPanorama != NULL) {
+        myBtnPanorama->getTrackedValue()->setValue(aViewMode != StStereoParams::FLAT_IMAGE);
+        myBtnPanorama->setOpacity(toShowPano ? anOpacity : 0.0f, false);
+    }
+
     if(myDescr != NULL) {
         myDescr->setOpacity(1.0f, false);
         if(::isPointIn(myBtnOpen, theCursor)) {
@@ -1653,6 +1695,14 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
             myDescr->setText(tr(aLngId));
         } else if(::isPointIn(myBtnSrcFrmt, theCursor)) {
             myDescr->setText(tr(BTN_SRC_FORMAT) + "\n" + trSrcFormat(aSrcFormat));
+        } else if(::isPointIn(myBtnPanorama, theCursor)) {
+            size_t aTrPano = MENU_VIEW_SURFACE_PLANE;
+            switch(aViewMode) {
+                case StStereoParams::FLAT_IMAGE:       aTrPano = MENU_VIEW_SURFACE_PLANE;   break;
+                case StStereoParams::PANORAMA_SPHERE:  aTrPano = MENU_VIEW_SURFACE_SPHERE;  break;
+                case StStereoParams::PANORAMA_CUBEMAP: aTrPano = MENU_VIEW_SURFACE_CUBEMAP; break;
+            }
+            myDescr->setText(tr(MENU_VIEW_PANORAMA) + "\n" + tr(aTrPano));
         } else if(::isPointIn(myBtnAudio, theCursor)) {
             myDescr->setText(tr(MENU_AUDIO));
         } else if(::isPointIn(myBtnSubs, theCursor)) {

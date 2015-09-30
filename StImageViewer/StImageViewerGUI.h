@@ -27,6 +27,7 @@
 #include <StThreads/StCondition.h>
 
 // forward declarations
+class StGLCheckboxTextured;
 class StGLDescription;
 class StGLTextureButton;
 class StImageViewer;
@@ -145,7 +146,6 @@ class StImageViewerGUI : public StGLRootWidget {
     ST_LOCAL StGLMenu* createViewMenu();         // Root -> View menu
     ST_LOCAL StGLMenu* createDisplayModeMenu();  // Root -> View menu -> Output
     ST_LOCAL StGLMenu* createDisplayRatioMenu(); // Root -> View menu -> Display Ratio
-    ST_LOCAL StGLMenu* createSurfaceMenu();      // Root -> View   -> Surface
     ST_LOCAL StGLMenu* createSmoothFilterMenu(); // Root -> View menu -> Smooth Filter
     ST_LOCAL StGLMenu* createImageAdjustMenu();  // Root -> View menu -> Image Adjust
     ST_LOCAL StGLMenu* createOutputMenu();       // Root -> Output menu
@@ -155,6 +155,7 @@ class StImageViewerGUI : public StGLRootWidget {
     ST_LOCAL StGLMenu* createLanguageMenu();     // Root -> Help -> Language menu
 
     ST_LOCAL void fillSrcFormatMenu(StGLMenu* theMenu);
+    ST_LOCAL void fillPanoramaMenu (StGLMenu* theMenu);
 
         private: //! @name mobile interface creation routines
 
@@ -186,6 +187,7 @@ class StImageViewerGUI : public StGLRootWidget {
     ST_LOCAL void doShowMobileExMenu(const size_t );
     ST_LOCAL void doMobileSettings(const size_t );
     ST_LOCAL void doDisplayStereoFormatCombo(const size_t );
+    ST_LOCAL void doPanoramaCombo(const size_t );
 
         private: //! @name private fields
 
@@ -208,6 +210,7 @@ class StImageViewerGUI : public StGLRootWidget {
     StGLTextureButton*  myBtnNext;
     StGLTextureButton*  myBtnInfo;
     StGLTextureButton*  myBtnSwapLR;
+    StGLCheckboxTextured* myBtnPanorama;
     StGLTextureButton*  myBtnSrcFrmt;
     StGLTextureButton*  myBtnPlayList;
     StGLTextureButton*  myBtnFull;

@@ -1022,21 +1022,12 @@ void StImageViewer::doPanoramaOnOff(const size_t ) {
         return;
     }
 
-    StPairRatio aPairRatio = st::formatToPairRatio(aParams->StereoFormat);
-    size_t aSizeX = aParams->Src1SizeX;
-    size_t aSizeY = aParams->Src1SizeY;
-    if(aPairRatio == StPairRatio_HalfWidth) {
-        aSizeX /= 2;
-    } else if(aPairRatio == StPairRatio_HalfHeight) {
-        aSizeY /= 2;
-    }
-
-    if(aSizeX / 6 == aSizeY
-    || aSizeX / 3 == aSizeY / 2) {
-        myGUI->myImage->params.ViewMode->setValue(StStereoParams::PANORAMA_CUBEMAP);
-    } else {
-        myGUI->myImage->params.ViewMode->setValue(StStereoParams::PANORAMA_SPHERE);
-    }
+    StPanorama aPano = st::probePanorama(aParams->StereoFormat,
+                                         aParams->Src1SizeX, aParams->Src1SizeY,
+                                         aParams->Src2SizeX, aParams->Src2SizeY);
+    myGUI->myImage->params.ViewMode->setValue(aPano == StPanorama_Cubemap6_1 || aPano == StPanorama_Cubemap3_2
+                                            ? StStereoParams::PANORAMA_CUBEMAP
+                                            : StStereoParams::PANORAMA_SPHERE);
 }
 
 void StImageViewer::doOpen1FileDialog(const size_t ) {

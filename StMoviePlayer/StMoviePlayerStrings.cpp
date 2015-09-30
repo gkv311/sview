@@ -176,14 +176,16 @@ void loadDefaults(StLangMap& theStrings) {
                "Saturation");
     theStrings(MENU_VIEW_ADJUST_GAMMA,
                "Gamma");
-    theStrings(MENU_VIEW_SURFACE,
-               "Surface");
+    theStrings(MENU_VIEW_PANORAMA,
+               "Panorama");
     theStrings(MENU_VIEW_SURFACE_PLANE,
                "Plane");
     theStrings(MENU_VIEW_SURFACE_SPHERE,
                "Sphere");
     theStrings(MENU_VIEW_SURFACE_CYLINDER,
                "Cylinder");
+    theStrings(MENU_VIEW_SURFACE_CUBEMAP,
+               "Cubemap");
     theStrings(MENU_VIEW_DISPLAY_MODE_STEREO,
                "Stereo");
     theStrings(MENU_VIEW_DISPLAY_MODE_LEFT,
@@ -607,6 +609,11 @@ void loadDefaults(StLangMap& theStrings) {
     addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_RotXDown,
               "DoParamsRotXDown",
               "X Rotation - down");
+
+    // new actions
+    addAction(theStrings, StMoviePlayer::Action_PanoramaOnOff,
+              "DoPanoramaOnOff",
+              "Enable/disable panorama mode");
 }
 
 };

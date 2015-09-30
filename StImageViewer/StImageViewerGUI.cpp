@@ -161,6 +161,16 @@ void StImageViewerGUI::createUpperToolbar() {
                                            StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
     myBtnSwapLR->setDrawShadow(true);
     myBtnSwapLR->changeMargins() = aButtonMargins;
+
+    StHandle<StBoolParam> aTrackedPano = new StBoolParam(false);
+    myBtnPanorama = new StGLCheckboxTextured(myPanelUpper, aTrackedPano,
+                                             iconTexture(stCString("actionPanoramaOff"), anIconSize),
+                                             iconTexture(stCString("actionPanorama"),    anIconSize),
+                                             aLeft + (aBtnIter++) * anIconStep, aTop,
+                                             StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    myBtnPanorama->signals.onBtnClick += stSlot(this, &StImageViewerGUI::doPanoramaCombo);
+    myBtnPanorama->setDrawShadow(true);
+    myBtnPanorama->changeMargins() = aButtonMargins;
 }
 
 /**
@@ -278,7 +288,8 @@ StGLMenu* StImageViewerGUI::createViewMenu() {
     StGLMenu* aMenuView = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     StGLMenu* aMenuDispMode  = createDisplayModeMenu();
     StGLMenu* aMenuDispRatio = createDisplayRatioMenu();
-    StGLMenu* aMenuSurface   = createSurfaceMenu();
+    StGLMenu* aMenuPanorama  = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+    fillPanoramaMenu(aMenuPanorama);
     StGLMenu* aMenuTexFilter = createSmoothFilterMenu();
     StGLMenu* aMenuImgAdjust = createImageAdjustMenu();
 
@@ -292,7 +303,8 @@ StGLMenu* StImageViewerGUI::createViewMenu() {
     aMenuView->addItem(tr(MENU_VIEW_SWAP_LR),       myImage->params.swapLR);
     aMenuView->addItem(tr(MENU_VIEW_DISPLAY_RATIO), aMenuDispRatio)
              ->setIcon(stCMenuIcon("actionDisplayRatio"), false);
-    aMenuView->addItem(tr(MENU_VIEW_SURFACE),       aMenuSurface);
+    aMenuView->addItem(tr(MENU_VIEW_PANORAMA),      aMenuPanorama)
+             ->setIcon(stCMenuIcon("actionPanorama"), false);
     aMenuView->addItem(tr(MENU_VIEW_TEXFILTER),     aMenuTexFilter)
              ->setIcon(stCMenuIcon("actionInterpolation"), false);
     aMenuView->addItem(tr(MENU_VIEW_IMAGE_ADJUST),  aMenuImgAdjust)
@@ -336,18 +348,19 @@ StGLMenu* StImageViewerGUI::createDisplayRatioMenu() {
     return aMenu;
 }
 
-/**
- * Root -> View menu -> Surface
- */
-StGLMenu* StImageViewerGUI::createSurfaceMenu() {
-    StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(tr(MENU_VIEW_SURFACE_PLANE),
-                   myImage->params.ViewMode, StStereoParams::FLAT_IMAGE);
-    aMenu->addItem(tr(MENU_VIEW_SURFACE_SPHERE),
-                   myImage->params.ViewMode, StStereoParams::PANORAMA_SPHERE);
-    aMenu->addItem("Cubemap",
-                   myImage->params.ViewMode, StStereoParams::PANORAMA_CUBEMAP);
-    return aMenu;
+void StImageViewerGUI::fillPanoramaMenu(StGLMenu* theMenu) {
+    theMenu->addItem(tr(MENU_VIEW_SURFACE_PLANE),
+                     myImage->params.ViewMode, StStereoParams::FLAT_IMAGE);
+    theMenu->addItem(tr(MENU_VIEW_SURFACE_SPHERE),
+                     myImage->params.ViewMode, StStereoParams::PANORAMA_SPHERE);
+    theMenu->addItem(tr(MENU_VIEW_SURFACE_CUBEMAP),
+                     myImage->params.ViewMode, StStereoParams::PANORAMA_CUBEMAP);
+}
+
+void StImageViewerGUI::doPanoramaCombo(const size_t ) {
+    StGLCombobox::ListBuilder aBuilder(this);
+    fillPanoramaMenu(aBuilder.getMenu());
+    aBuilder.display();
 }
 
 /**
@@ -836,6 +849,16 @@ void StImageViewerGUI::createMobileUpperToolbar() {
     myBtnSwapLR->setDrawShadow(true);
     myBtnSwapLR->changeMargins() = aButtonMargins;
 
+    StHandle<StBoolParam> aTrackedPano = new StBoolParam(false);
+    myBtnPanorama = new StGLCheckboxTextured(myPanelUpper, aTrackedPano,
+                                             iconTexture(stCString("actionPanoramaOff"), anIconSize),
+                                             iconTexture(stCString("actionPanorama"),    anIconSize),
+                                             (aBtnIter++) * anIconStep, 0,
+                                             StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    myBtnPanorama->signals.onBtnClick += stSlot(this, &StImageViewerGUI::doPanoramaCombo);
+    myBtnPanorama->setDrawShadow(true);
+    myBtnPanorama->changeMargins() = aButtonMargins;
+
     aBtnIter = 0;
     StGLTextureButton* aBtnEx = new StGLTextureButton(myPanelUpper, (aBtnIter--) * (-anIconStep), 0,
                                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
@@ -949,6 +972,7 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
   myBtnNext(NULL),
   myBtnInfo(NULL),
   myBtnSwapLR(NULL),
+  myBtnPanorama(NULL),
   myBtnSrcFrmt(NULL),
   myBtnPlayList(NULL),
   myBtnFull(NULL),
@@ -1067,10 +1091,10 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
 
     StFormat aSrcFormat = (StFormat )myPlugin->params.srcFormat->getValue();
     if(aSrcFormat == StFormat_AUTO
-    && !myImage->params.stereoFile.isNull()) {
-        aSrcFormat = myImage->params.stereoFile->StereoFormat;
+    && !aParams.isNull()) {
+        aSrcFormat = aParams->StereoFormat;
     }
-    if(!myImage->params.stereoFile.isNull()
+    if(!aParams.isNull()
      && myImage->params.swapLR->getValue()) {
         aSrcFormat = st::formatReversed(aSrcFormat);
     }
@@ -1079,6 +1103,22 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
     }
     if(myBtnSwapLR != NULL) {
         myBtnSwapLR->setOpacity(aSrcFormat != StFormat_Mono ? myPanelUpper->getOpacity() : 0.0f, false);
+    }
+
+    const StStereoParams::ViewMode aViewMode = !aParams.isNull()
+                                             ? aParams->ViewingMode
+                                             : StStereoParams::FLAT_IMAGE;
+    bool toShowPano = aViewMode != StStereoParams::FLAT_IMAGE;
+    if(!toShowPano
+    && !aParams.isNull()
+    &&  st::probePanorama(aParams->StereoFormat,
+                          aParams->Src1SizeX, aParams->Src1SizeY,
+                          aParams->Src2SizeX, aParams->Src2SizeY) != StPanorama_OFF) {
+        toShowPano = true;
+    }
+    if(myBtnPanorama != NULL) {
+        myBtnPanorama->getTrackedValue()->setValue(aViewMode != StStereoParams::FLAT_IMAGE);
+        myBtnPanorama->setOpacity(toShowPano ? myPanelUpper->getOpacity() : 0.0f, false);
     }
 
     if(myDescr != NULL) {
@@ -1100,6 +1140,14 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
             myDescr->setText(tr(FULLSCREEN));
         } else if(::isPointIn(myBtnSrcFrmt, theCursor)) {
             myDescr->setText(tr(BTN_SRC_FORMAT) + "\n" + trSrcFormat(aSrcFormat));
+        } else if(::isPointIn(myBtnPanorama, theCursor)) {
+            size_t aTrPano = MENU_VIEW_SURFACE_PLANE;
+            switch(aViewMode) {
+                case StStereoParams::FLAT_IMAGE:       aTrPano = MENU_VIEW_SURFACE_PLANE;   break;
+                case StStereoParams::PANORAMA_SPHERE:  aTrPano = MENU_VIEW_SURFACE_SPHERE;  break;
+                case StStereoParams::PANORAMA_CUBEMAP: aTrPano = MENU_VIEW_SURFACE_CUBEMAP; break;
+            }
+            myDescr->setText(tr(MENU_VIEW_PANORAMA) + "\n" + tr(aTrPano));
         } else {
             myDescr->setOpacity(0.0f, true);
         }

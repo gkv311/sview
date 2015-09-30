@@ -105,6 +105,11 @@ class StGLImageRegion : public StGLWidget {
 
     ST_CPPEXPORT StHandle<StStereoParams> getSource();
 
+    /**
+     * Return true if there is any video stream.
+     */
+    ST_LOCAL bool hasVideoStream() { return myHasVideoStream; }
+
     const StArrayList< StHandle<StAction> >& getActions() const {
         return myActions;
     }

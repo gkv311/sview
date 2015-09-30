@@ -290,6 +290,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doSwitchLoopSingle(const bool theValue);
     ST_LOCAL void doFullscreen(const bool theIsFullscreen);
     ST_LOCAL void doSwitchSrcFormat(const int32_t theSrcFormat);
+    ST_LOCAL void doPanoramaOnOff(const size_t );
     ST_LOCAL void doSwitchAudioStream(const int32_t theStreamId);
     ST_LOCAL void doSwitchSubtitlesStream(const int32_t theStreamId);
     ST_LOCAL void doShowPlayList(const bool theToShow);
@@ -337,6 +338,7 @@ class StMoviePlayer : public StApplication {
         Action_ImageAdjustReset,
         Action_StereoParamsBegin,
         Action_StereoParamsEnd = Action_StereoParamsBegin + StGLImageRegion::ActionsNb - 1,
+        Action_PanoramaOnOff,
     };
 
         private: //! @name Web UI methods

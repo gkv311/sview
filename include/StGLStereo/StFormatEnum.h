@@ -44,6 +44,13 @@ enum StCubemap {
     StCubemap_Packed     //!< cubemap data packed into single image frame - 6 horizontally stacked planes
 };
 
+enum StPanorama {
+    StPanorama_OFF  =  0,  //!< no cubemap data
+    StPanorama_Sphere,     //!< spherical panorama
+    StPanorama_Cubemap6_1, //!< cubemap data packed into single image frame - 6:1
+    StPanorama_Cubemap3_2  //!< cubemap data packed into single image frame - 3:2
+};
+
 namespace st {
 
     /**
@@ -113,6 +120,38 @@ namespace st {
             default:
                 return StPairRatio_1;
         }
+    }
+
+    /**
+     * Probe panorama mode from image dimensions.
+     */
+    ST_LOCAL inline StPanorama probePanorama(StFormat theFormat,
+                                             size_t   theSrc1SizeX,
+                                             size_t   theSrc1SizeY,
+                                             size_t   theSrc2SizeX,
+                                             size_t   theSrc2SizeY) {
+        StPairRatio aPairRatio = st::formatToPairRatio(theFormat);
+        if(aPairRatio == StPairRatio_HalfWidth) {
+            theSrc1SizeX /= 2;
+        } else if(aPairRatio == StPairRatio_HalfHeight) {
+            theSrc1SizeY /= 2;
+        }
+        if(theSrc1SizeX < 8
+        || theSrc1SizeY < 8) {
+            return StPanorama_OFF;
+        }
+
+        if(theSrc1SizeX / 2 == theSrc1SizeY
+        && theSrc2SizeX / 2 == theSrc2SizeY) {
+            return StPanorama_Sphere;
+        } else if(theSrc1SizeX / 6 == theSrc1SizeY
+               && theSrc2SizeX / 6 == theSrc2SizeY) {
+            return StPanorama_Cubemap6_1;
+        } else if(theSrc1SizeX / 3 == theSrc1SizeY / 2
+               && theSrc2SizeX / 3 == theSrc2SizeY / 2) {
+            return StPanorama_Cubemap3_2;
+        }
+        return StPanorama_OFF;
     }
 
 };

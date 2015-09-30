@@ -69,6 +69,7 @@
 1280="平面"
 1281="球面"
 1282="圆筒"
+?1283="Cubemap"
 1300="音频"
 1301="无"
 1302="音/视频 延迟"
@@ -239,3 +240,4 @@
 ?6054="Y Rotation - right"
 ?6055="X Rotation - up"
 ?6056="X Rotation - down"
+?6057="Enable/disable panorama mode"

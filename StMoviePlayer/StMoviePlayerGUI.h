@@ -150,7 +150,6 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL StGLMenu* createViewMenu();         // Root -> View menu
     ST_LOCAL StGLMenu* createDisplayModeMenu();  // Root -> View   -> Output
     ST_LOCAL StGLMenu* createDisplayRatioMenu(); // Root -> View   -> Display Ratio
-    ST_LOCAL StGLMenu* createSurfaceMenu();      // Root -> View   -> Surface
     ST_LOCAL StGLMenu* createSmoothFilterMenu(); // Root -> View   -> Smooth Filter
     ST_LOCAL StGLMenu* createImageAdjustMenu();  // Root -> View   -> Image Adjust
     ST_LOCAL StGLMenu* createAudioMenu();        // Root -> Audio menu
@@ -167,6 +166,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL void fillRecentMenu(StGLMenu* theMenu);
     ST_LOCAL void fillDisplayRatioMenu(StGLMenu* theMenu);
     ST_LOCAL void fillSrcFormatMenu(StGLMenu* theMenu);
+    ST_LOCAL void fillPanoramaMenu (StGLMenu* theMenu);
 
         private: //! @name mobile interface creation routines
 
@@ -200,6 +200,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL void doSubtitlesStreamsCombo(const size_t );
     ST_LOCAL void doDisplayRatioCombo(const size_t );
     ST_LOCAL void doDisplayStereoFormatCombo(const size_t );
+    ST_LOCAL void doPanoramaCombo(const size_t );
 
         private: //! @name private fields
 
@@ -223,6 +224,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
     StGLTextureButton*  myBtnOpen;
     StGLTextureButton*  myBtnInfo;
     StGLTextureButton*  myBtnSwapLR;
+    StGLCheckboxTextured* myBtnPanorama;
     StGLTextureButton*  myBtnSrcFrmt;
 
     StGLCheckboxTextured* myBtnAudio;

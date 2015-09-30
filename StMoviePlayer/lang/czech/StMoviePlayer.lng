@@ -70,6 +70,7 @@
 1280=Plocha
 1281=Koule
 1282=Válec
+?1283=Cubemap
 1300=Zvuk
 1301=Vypnout zvuk
 1302=Zpoždění zvuku
@@ -240,3 +241,4 @@
 ?6054=Y Rotation - right
 ?6055=X Rotation - up
 ?6056=X Rotation - down
+?6057=Enable/disable panorama mode

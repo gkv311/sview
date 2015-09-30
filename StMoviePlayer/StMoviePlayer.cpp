@@ -658,6 +658,9 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
 
     anAction = new StActionIntSlot(stCString("DoImageAdjustReset"), stSlot(this, &StMoviePlayer::doImageAdjustReset), 0);
     addAction(Action_ImageAdjustReset, anAction);
+
+    anAction = new StActionIntSlot(stCString("DoPanoramaOnOff"), stSlot(this, &StMoviePlayer::doPanoramaOnOff), 0);
+    addAction(Action_PanoramaOnOff, anAction, ST_VK_P);
 }
 
 bool StMoviePlayer::resetDevice() {
@@ -1584,6 +1587,32 @@ void StMoviePlayer::doAboutFile(const size_t ) {
     if(!myGUI.isNull()) {
         myGUI->doAboutFile(0);
     }
+}
+
+void StMoviePlayer::doPanoramaOnOff(const size_t ) {
+    if(myVideo.isNull()) {
+        return;
+    }
+
+    StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
+    if(aParams.isNull()
+    || aParams->Src1SizeX == 0
+    || aParams->Src1SizeY == 0) {
+        return;
+    }
+
+    int aMode = myGUI->myImage->params.ViewMode->getValue();
+    if(aMode != StStereoParams::FLAT_IMAGE) {
+        myGUI->myImage->params.ViewMode->setValue(StStereoParams::FLAT_IMAGE);
+        return;
+    }
+
+    StPanorama aPano = st::probePanorama(aParams->StereoFormat,
+                                         aParams->Src1SizeX, aParams->Src1SizeY,
+                                         aParams->Src2SizeX, aParams->Src2SizeY);
+    myGUI->myImage->params.ViewMode->setValue(aPano == StPanorama_Cubemap6_1 || aPano == StPanorama_Cubemap3_2
+                                            ? StStereoParams::PANORAMA_CUBEMAP
+                                            : StStereoParams::PANORAMA_SPHERE);
 }
 
 void StMoviePlayer::doSwitchSrcFormat(const int32_t theSrcFormat) {
