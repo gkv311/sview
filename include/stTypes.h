@@ -525,8 +525,22 @@ inline int getEvenNumber(const int number) {
     return isOddNumber(number) ? (number + 1) : number;
 }
 
-#ifdef __cplusplus
-    #include <StTemplates/StTemplates.h> // include commonly-used templates
-#endif
+#include <StTemplates/StTemplates.h> // include commonly-used templates
+
+/**
+ * Convert degrees to radians.
+ */
+template<typename Type>
+inline Type stToRadians(const Type theDegrees) {
+    return Type(3.14159265358979323846) * theDegrees / Type(180.0);
+}
+
+/**
+ * Convert radians to degrees.
+ */
+template<typename Type>
+inline Type stToDegrees(const Type theRadians) {
+    return Type(180.0) * theRadians / Type(3.14159265358979323846);
+}
 
 #endif //__stTypes_h_

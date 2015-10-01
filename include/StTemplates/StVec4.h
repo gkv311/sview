@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -248,6 +248,20 @@ class StVec4 {
     StVec4 operator/(Element_t invFactor) {
         StVec4 result(*this);
         return result /= invFactor;
+    }
+
+    /**
+     * Computes the vector modulus (magnitude, length).
+     */
+    Element_t modulus() const {
+        return std::sqrt(x() * x() + y() * y() + z() * z() + w() * w());
+    }
+
+    /**
+     * Computes the square of vector modulus (magnitude, length).
+     */
+    Element_t squareModulus() const {
+        return x() * x() + y() * y() + z() * z() + w() * w();
     }
 
     StString toString() const {

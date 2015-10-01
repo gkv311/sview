@@ -13,11 +13,13 @@
 #include <StTemplates/StVec2.h>
 #include <StTemplates/StVec3.h>
 #include <StTemplates/StVec4.h>
+#include <StTemplates/StQuaternion.h>
 #include <StTemplates/StArrayList.h>
 
 typedef StVec2<GLfloat> StGLVec2;
 typedef StVec3<GLfloat> StGLVec3;
 typedef StVec4<GLfloat> StGLVec4;
+typedef StQuaternion<GLfloat> StGLQuaternion;
 
 /**
  * POD structure for OpenGL rectangle in window coordinates (y coordinates is from bottom corner).

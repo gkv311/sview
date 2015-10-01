@@ -413,6 +413,14 @@ class StWindow {
     ST_CPPEXPORT const StString& getStatistics() const;
 
     /**
+     * Return device orientation (for head-tracking) within right-handed coordinate system:
+     * - Y is positive in up direction (towards the sky, perpendicular to the ground).
+     * - X is positive to the right (tangential to the ground).
+     * - Z is positive heading backwards (tangential to the ground).
+     */
+    ST_CPPEXPORT virtual StQuaternion<double> getDeviceOrientation() const;
+
+    /**
      * Retrieve options list.
      */
     ST_CPPEXPORT virtual void getOptions(StParamsList& theList) const;

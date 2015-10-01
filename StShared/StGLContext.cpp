@@ -19,6 +19,8 @@
 #include <StStrings/StDictionary.h>
 #include <StStrings/StLogger.h>
 
+#include <StTemplates/StQuaternion.h>
+
 #include <stAssert.h>
 
 #if defined(__APPLE__)
@@ -1648,3 +1650,12 @@ bool StGLContext::stglInit() {
 
     return true;
 }
+
+template class StVec2<float>;
+template class StVec2<double>;
+template class StVec3<float>;
+template class StVec3<double>;
+template class StVec4<float>;
+template class StVec4<double>;
+template class StQuaternion<float>;
+template class StQuaternion<double>;

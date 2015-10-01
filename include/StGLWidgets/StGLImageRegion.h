@@ -86,6 +86,11 @@ class StGLImageRegion : public StGLWidget {
                                  const bool  theUsePanningKeys);
 
     /**
+     * Setup device orientation.
+     */
+    ST_LOCAL void setDeviceOrientation(const StGLQuaternion& theQ) { myDeviceQuat = theQ; }
+
+    /**
      * Dragging delay in milliseconds, 0.0 by default.
      */
     ST_LOCAL inline double getDragDelayMs() const {
@@ -276,6 +281,7 @@ class StGLImageRegion : public StGLWidget {
     StHandle<StGLTextureQueue> myTextureQueue;   //!< shared texture queue
     StPointD_t                 myClickPntZo;     //!< remembered mouse click position
     StTimer                    myClickTimer;     //!< timer to delay dragging action
+    StGLQuaternion             myDeviceQuat;     //!< device orientation
     StVirtFlags                myKeyFlags;       //!< active key flags
     double                     myDragDelayMs;    //!< dragging delay in milliseconds
     bool                       myIsClickAborted;

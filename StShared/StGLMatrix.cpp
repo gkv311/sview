@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2011 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -17,7 +17,7 @@ namespace {
         0.0f, 0.0f, 1.0f, 0.0f,
         0.0f, 0.0f, 0.0f, 1.0f
     };
-};
+}
 
 StGLMatrix::StGLMatrix() {
     initIdentity();
@@ -30,6 +30,29 @@ StGLMatrix::StGLMatrix(const StGLMatrix& copyMat) {
 const StGLMatrix& StGLMatrix::operator=(const StGLMatrix& copyMat) {
     stMemCpy(matrix, copyMat.matrix, sizeof(matrix));
     return *this;
+}
+
+StGLMatrix::StGLMatrix(const StGLQuaternion& theQ) {
+    initIdentity();
+
+    float wx, wy, wz, xx, yy, yz, xy, xz, zz, x2, y2, z2;
+    float s = 2.0f / theQ.vec4().squareModulus();
+    x2 = theQ.x() * s;    y2 = theQ.y() * s;    z2 = theQ.z() * s;
+    xx = theQ.x() * x2;   xy = theQ.x() * y2;   xz = theQ.x() * z2;
+    yy = theQ.y() * y2;   yz = theQ.y() * z2;   zz = theQ.z() * z2;
+    wx = theQ.w() * x2;   wy = theQ.w() * y2;   wz = theQ.w() * z2;
+
+    changeValue(0, 0) = 1.0f - (yy + zz);
+    changeValue(0, 1) = xy - wz;
+    changeValue(0, 2) = xz + wy;
+
+    changeValue(1, 0) = xy + wz;
+    changeValue(1, 1) = 1.0f - (xx + zz);
+    changeValue(1, 2) = yz - wx;
+
+    changeValue(2, 0) = xz - wy;
+    changeValue(2, 1) = yz + wx;
+    changeValue(2, 2) = 1.0f - (xx + yy);
 }
 
 StGLMatrix::~StGLMatrix() {

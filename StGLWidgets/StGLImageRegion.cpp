@@ -658,23 +658,33 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             const GLfloat aScale = aParams->ScaleFactor * PANORAMA_DEF_ZOOM;
             aModelMat.scale(aScale, aScale, 1.0f);
 
+            // compute orientation
             StGLVec2 aMouseMove = getMouseMoveSphere();
-            aModelMat.rotate(         aParams->PanTheta + aMouseMove.y(),  StGLVec3::DX());
-            aModelMat.rotate(90.0f - (aParams->PanPhi   + aMouseMove.x()), StGLVec3::DY());
+            float aYaw   = -stToRadians(aParams->PanPhi   + aMouseMove.x()) + stToRadians(90.0f);
+            float aPitch =  stToRadians(aParams->PanTheta + aMouseMove.y());
+            float aRoll  =  stToRadians(aParams->getZRotate());
 
-            GLfloat aSepDeltaX = GLfloat(-aParams->getSeparationDx()) * 0.05f;
-            GLfloat aSepDeltaY = GLfloat(-aParams->getSeparationDy()) * 0.05f;
+            // apply separation
+            const float aSepDeltaX = GLfloat(aParams->getSeparationDx()) * 0.05f;
+            const float aSepDeltaY = GLfloat(aParams->getSeparationDy()) * 0.05f;
             if(theView == ST_DRAW_LEFT) {
-                aModelMat.rotate( aSepDeltaX, StGLVec3::DY());
-                aModelMat.rotate(-aSepDeltaY, StGLVec3::DZ());
-                aModelMat.rotate(-aParams->getZRotate() + aParams->getSepRotation(), StGLVec3::DX());
+                aYaw   +=  stToRadians(aSepDeltaX);
+                aPitch += -stToRadians(aSepDeltaY);
+                aRoll  += -stToRadians(aParams->getSepRotation());
             } else if(theView == ST_DRAW_RIGHT) {
-                aModelMat.rotate(-aSepDeltaX, StGLVec3::DY());
-                aModelMat.rotate( aSepDeltaY, StGLVec3::DZ());
-                aModelMat.rotate(-aParams->getZRotate() - aParams->getSepRotation(), StGLVec3::DX());
-            } else {
-                aModelMat.rotate(-aParams->getZRotate(), StGLVec3::DX());
+                aYaw   += -stToRadians(aSepDeltaX);
+                aPitch +=  stToRadians(aSepDeltaY);
+                aRoll  +=  stToRadians(aParams->getSepRotation());
             }
+
+            const StGLQuaternion anOriYaw   = StGLQuaternion(StGLVec3::DY(), aYaw);
+            const StGLQuaternion anOriPitch = StGLQuaternion(StGLVec3::DX(), aPitch);
+            const StGLQuaternion anOriRoll  = StGLQuaternion(StGLVec3::DZ(), aRoll);
+            StGLQuaternion anOri = StGLQuaternion::multiply(anOriPitch, anOriYaw);
+            anOri = StGLQuaternion::multiply(anOriRoll,    anOri);
+            anOri = StGLQuaternion::multiply(myDeviceQuat, anOri);
+
+            aModelMat = StGLMatrix::multiply(aModelMat, StGLMatrix(anOri));
 
             StGLMatrix aMatModelInv, aMatProjInv;
             aModelMat.inverted(aMatModelInv);
@@ -702,26 +712,33 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             const GLfloat aScale = SPHERE_RADIUS * PANORAMA_DEF_ZOOM * aParams->ScaleFactor;
             aModelMat.scale(aScale, aScale, SPHERE_RADIUS);
 
-            // apply movements
+            // compute orientation
             StGLVec2 aMouseMove = getMouseMoveSphere();
-            aModelMat.rotate(         aParams->PanTheta + aMouseMove.y(),  StGLVec3::DX());
-            aModelMat.rotate(90.0f - (aParams->PanPhi   + aMouseMove.x()), StGLVec3::DY());
+            float aYaw   = -stToRadians(aParams->PanPhi   + aMouseMove.x()) + stToRadians(90.0f);
+            float aPitch =  stToRadians(aParams->PanTheta + aMouseMove.y());
+            float aRoll  =  stToRadians(aParams->getZRotate());
 
-            GLfloat aSepDeltaX = GLfloat(-aParams->getSeparationDx()) * 0.05f;
-            //GLfloat aSepDeltaY = GLfloat(-aParams->getSeparationDy()) * 0.05f;
-
-            // apply rotations
+            // apply separation
+            const float aSepDeltaX = GLfloat(aParams->getSeparationDx()) * 0.05f;
+            const float aSepDeltaY = GLfloat(aParams->getSeparationDy()) * 0.05f;
             if(theView == ST_DRAW_LEFT) {
-                aModelMat.rotate( aSepDeltaX, StGLVec3::DY());
-                //aModelMat.rotate(-aSepDeltaY, StGLVec3::DZ());
-                //aModelMat.rotate(aParams->getZRotate() - aParams->getSepRotation(), StGLVec3::DX());
+                aYaw   +=  stToRadians(aSepDeltaX);
+                aPitch += -stToRadians(aSepDeltaY);
+                aRoll  += -stToRadians(aParams->getSepRotation());
             } else if(theView == ST_DRAW_RIGHT) {
-                aModelMat.rotate(-aSepDeltaX, StGLVec3::DY());
-                //aModelMat.rotate( aSepDeltaY, StGLVec3::DZ());
-                //aModelMat.rotate(aParams->getZRotate() + aParams->getSepRotation(), StGLVec3::DX());
-            } else {
-                //aModelMat.rotate(aParams->getZRotate(), StGLVec3::DX());
+                aYaw   += -stToRadians(aSepDeltaX);
+                aPitch +=  stToRadians(aSepDeltaY);
+                aRoll  +=  stToRadians(aParams->getSepRotation());
             }
+
+            const StGLQuaternion anOriYaw   = StGLQuaternion(StGLVec3::DY(), aYaw);
+            const StGLQuaternion anOriPitch = StGLQuaternion(StGLVec3::DX(), aPitch);
+            const StGLQuaternion anOriRoll  = StGLQuaternion(StGLVec3::DZ(), aRoll);
+            StGLQuaternion anOri = StGLQuaternion::multiply(anOriPitch, anOriYaw);
+            anOri = StGLQuaternion::multiply(anOriRoll,    anOri);
+            anOri = StGLQuaternion::multiply(myDeviceQuat, anOri);
+
+            aModelMat = StGLMatrix::multiply(aModelMat, StGLMatrix(anOri));
 
             // perform drawing
             myProgram.getActiveProgram()->use(aCtx);

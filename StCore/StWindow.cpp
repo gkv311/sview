@@ -357,3 +357,7 @@ void* StWindow::getNativeOglDC() const {
 const StString& StWindow::getStatistics() const {
     return myWin->myStatistics;
 }
+
+StQuaternion<double> StWindow::getDeviceOrientation() const {
+    return myWin->myQuaternion;
+}

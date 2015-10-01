@@ -1120,6 +1120,8 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
         myBtnPanorama->getTrackedValue()->setValue(aViewMode != StStereoParams::FLAT_IMAGE);
         myBtnPanorama->setOpacity(toShowPano ? myPanelUpper->getOpacity() : 0.0f, false);
     }
+    StQuaternion<double> aQ = myWindow->getDeviceOrientation();
+    myImage->setDeviceOrientation(StGLQuaternion((float )aQ.x(), (float )aQ.y(), (float )aQ.z(), (float )aQ.w()));
 
     if(myDescr != NULL) {
         myDescr->setOpacity(1.0f, true);
