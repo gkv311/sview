@@ -187,9 +187,24 @@ void StAndroidGlue::start() {
         pthread_cond_wait(&myCond, &myMutex);
     }
     pthread_mutex_unlock(&myMutex);
+
+    // workaround NativeActivity design issues - notify Java StActivity class about C++ pointer to StAndroidGlue instance
+    JNIEnv* aJniEnv = myActivity->env;
+    jclass    aJClassActivity   = aJniEnv->GetObjectClass(myActivity->clazz);
+    jmethodID aJMet_setInstance = aJniEnv->GetMethodID(aJClassActivity, "setCppInstance", "(J)V");
+    aJniEnv->CallObjectMethod(myActivity->clazz, aJMet_setInstance, (jlong )this);
 }
 
 StAndroidGlue::~StAndroidGlue() {
+    // workaround NativeActivity design issues - notify Java StActivity class about C++ pointer to StAndroidGlue instance
+    if(myActivity != NULL
+    && myActivity->env != NULL) {
+        JNIEnv* aJniEnv = myActivity->env;
+        jclass    aJClassActivity   = aJniEnv->GetObjectClass(myActivity->clazz);
+        jmethodID aJMet_setInstance = aJniEnv->GetMethodID(aJClassActivity, "setCppInstance", "(J)V");
+        aJniEnv->CallObjectMethod(myActivity->clazz, aJMet_setInstance, (jlong )0);
+    }
+
     pthread_mutex_lock(&myMutex);
     writeCommand(CommandId_Destroy);
     pthread_mutex_unlock(&myMutex);

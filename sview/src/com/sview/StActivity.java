@@ -20,6 +20,8 @@ import android.widget.Toast;
  */
 public class StActivity extends NativeActivity {
 
+//region Native libraries loading routines
+
     /**
      * Auxiliary method to close activity on critical error
      */
@@ -50,17 +52,17 @@ public class StActivity extends NativeActivity {
             theErrors.append(theLibName);
             theErrors.append("\" has been loaded\n");
             return true;
-	    } catch(java.lang.UnsatisfiedLinkError theError) {
+        } catch(java.lang.UnsatisfiedLinkError theError) {
             theErrors.append("Error: native library \"");
             theErrors.append(theLibName);
             theErrors.append("\" is unavailable:\n  " + theError.getMessage());
             return false;
-	    } catch(SecurityException theError) {
+        } catch(SecurityException theError) {
             theErrors.append("Error: native library \"");
             theErrors.append(theLibName);
             theErrors.append("\" can not be loaded for security reasons:\n  " + theError.getMessage());
             return false;
-	    }
+        }
     }
 
     private static boolean wasNativesLoadCalled = false;
@@ -105,6 +107,10 @@ public class StActivity extends NativeActivity {
         return true;
     }
 
+//endregion
+
+//region Overridden methods of NativeActivity class
+
     /**
      * Create activity.
      */
@@ -129,15 +135,26 @@ public class StActivity extends NativeActivity {
         setIntent(theIntent);
     }
 
+//endregion
+
+//region Methods to be called from C++ level
+
+    /**
+     * Method is called when StAndroidGlue has been created or destroyed.
+     */
+    public void setCppInstance(long theCppInstance) {
+        myCppGlue = theCppInstance;
+    }
+
     /**
      * Auxiliary method to show temporary info message.
      */
     public void postToast(String theInfo) {
         final String aText = theInfo;
         this.runOnUiThread (new Runnable() { public void run() {
-			Context aCtx   = getApplicationContext();
-			Toast   aToast = Toast.makeText(aCtx, aText, Toast.LENGTH_SHORT);
-			aToast.show();
+            Context aCtx   = getApplicationContext();
+            Toast   aToast = Toast.makeText(aCtx, aText, Toast.LENGTH_SHORT);
+            aToast.show();
         }});
     }
 
@@ -165,6 +182,13 @@ public class StActivity extends NativeActivity {
         }});
     }
 
-    private ContextWrapper myContext;
+//endregion
+
+//region class fields
+
+    protected ContextWrapper myContext;
+    protected long           myCppGlue = 0; //!< pointer to c++ class StAndroidGlue instance
+
+//endregion
 
 }
