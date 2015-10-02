@@ -148,6 +148,7 @@ class StGLContext {
     bool            arbNPTW;    //!< GL_ARB_texture_non_power_of_two
     bool            arbTexRG;   //!< GL_ARB_texture_rg
     bool            arbTexClear;//!< GL_ARB_clear_texture
+    bool            hasUnpack;  //!< GL_PACK_ROW_LENGTH / GL_UNPACK_ROW_LENGTH can be used - OpenGL ES 3.0+ or any desktop
     bool            hasHighp;   //!< highp in GLSL ES fragment shader is supported
     bool            hasTexRGBA8;//!< always available on desktop; on OpenGL ES - since 3.0 or as extension GL_OES_rgb8_rgba8
     bool            extTexBGRA8;//!< GL_EXT_texture_format_BGRA8888 for OpenGL ES

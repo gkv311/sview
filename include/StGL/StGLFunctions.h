@@ -44,6 +44,14 @@
     #include <GLES2/gl2.h>
     ///#include <GLES3/gl3.h>
 
+    // in core since OpenGL ES 3.0
+    #define GL_UNPACK_ROW_LENGTH  0x0CF2
+    #define GL_UNPACK_SKIP_ROWS   0x0CF3
+    #define GL_UNPACK_SKIP_PIXELS 0x0CF4
+    #define GL_PACK_ROW_LENGTH    0x0D02
+    #define GL_PACK_SKIP_ROWS     0x0D03
+    #define GL_PACK_SKIP_PIXELS   0x0D04
+
     // in core since OpenGL ES 3.0, extension GL_EXT_texture_rg
     #define GL_RED   0x1903
     #define GL_R8    0x8229

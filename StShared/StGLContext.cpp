@@ -53,10 +53,12 @@ StGLContext::StGLContext(const StHandle<StResourceManager>& theResMgr)
   arbTexRG(false),
   arbTexClear(false),
 #if defined(GL_ES_VERSION_2_0)
+  hasUnpack(false),
   hasHighp(false),
   hasTexRGBA8(false),
   extTexBGRA8(false),
 #else
+  hasUnpack(true),
   hasHighp(true),
   hasTexRGBA8(true), // always available on desktop
   extTexBGRA8(true),
@@ -103,12 +105,14 @@ StGLContext::StGLContext(const bool theToInitialize)
   arbTexRG(false),
   arbTexClear(false),
 #if defined(GL_ES_VERSION_2_0)
+  hasUnpack(false),
   hasHighp(false),
   hasTexRGBA8(false),
   extTexBGRA8(false),
 #else
+  hasUnpack(true), // always available on desktop
   hasHighp(true),
-  hasTexRGBA8(true), // always available on desktop
+  hasTexRGBA8(true),
   extTexBGRA8(true),
 #endif
   extAll(NULL),
@@ -730,6 +734,7 @@ bool StGLContext::stglInit() {
                || stglCheckExtension("GL_EXT_texture_rg");
     const bool hasFBO = isGlGreaterEqual(2, 0)
                      || stglCheckExtension("GL_OES_framebuffer_object");
+    hasUnpack = isGlGreaterEqual(3, 0);
 
     if(isGlGreaterEqual(2, 0)) {
         // enable compatible functions
