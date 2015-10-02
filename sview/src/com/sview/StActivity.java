@@ -167,6 +167,18 @@ public class StActivity extends NativeActivity implements SensorEventListener {
        updateTrackOrientation(false);
     }
 
+    /**
+     * Redirect back button to C++ level.
+     */
+    @Override
+    public void onBackPressed() {
+        if(myCppGlue != 0) {
+            cppOnBackPressed(myCppGlue);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
 //endregion
 
 //region Implementation of SensorEventListener interface
@@ -299,6 +311,11 @@ public class StActivity extends NativeActivity implements SensorEventListener {
 //endregion
 
 //region Methods to call C++ code
+
+    /**
+     * Redirect back button to C++ level.
+     */
+    private native void cppOnBackPressed(long theCppPtr);
 
     /**
      * Define device orientation sensor.

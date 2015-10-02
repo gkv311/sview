@@ -283,6 +283,14 @@ void StWindowImpl::onAndroidCommand(int32_t theCommand) {
             onAndroidInitWindow();
             return;
         }
+        case StAndroidGlue::CommandId_BackPressed: {
+            myStEvent.Key.Time = getEventTime();
+            myStEvent.Key.VKey = ST_VK_ESCAPE;
+            myStEvent.Key.Char = 0;
+            postKeyDown(myStEvent);
+            postKeyUp  (myStEvent);
+            return;
+        }
         case StAndroidGlue::CommandId_Pause: {
             myStEvent.Type       = stEvent_Pause;
             myStEvent.Pause.Time = getEventTime();

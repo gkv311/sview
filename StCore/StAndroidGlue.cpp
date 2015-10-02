@@ -46,6 +46,7 @@ StCString StAndroidGlue::getCommandIdName(StAndroidGlue::CommandId theCmd) {
         case StAndroidGlue::CommandId_Pause:         return stCString("Pause");
         case StAndroidGlue::CommandId_Stop:          return stCString("Stop");
         case StAndroidGlue::CommandId_Destroy:       return stCString("Destroy");
+        case StAndroidGlue::CommandId_BackPressed:   return stCString("BackPressed");
     }
     return stCString("UNKNOWN");
 }
@@ -662,6 +663,10 @@ void StAndroidGlue::setOrientation(float theAzimuthDeg, float thePitchDeg, float
 
     StMutexAuto aLock(myFetchLock);
     myQuaternion = anOri;
+}
+
+jexp void JNICALL Java_com_sview_StActivity_cppOnBackPressed(JNIEnv* theEnv, jobject theObj, jlong theCppPtr) {
+    ((StAndroidGlue* )theCppPtr)->writeCommand(StAndroidGlue::CommandId_BackPressed);
 }
 
 jexp void JNICALL Java_com_sview_StActivity_cppDefineOrientationSensor(JNIEnv* theEnv, jobject theObj, jlong theCppPtr,

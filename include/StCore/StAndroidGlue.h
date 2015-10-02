@@ -81,6 +81,7 @@ class StAndroidGlue {
         CommandId_Pause,         //!< activity has been paused
         CommandId_Stop,          //!< activity has been stopped
         CommandId_Destroy,       //!< activity is being destroyed, and waiting for the application thread to clean up and exit before proceeding
+        CommandId_BackPressed,   //!< pressed special back button
     };
 
     /**
@@ -198,6 +199,11 @@ class StAndroidGlue {
      */
     ST_CPPEXPORT void postExit();
 
+    /**
+     * Low-level method to write command into queue.
+     */
+    ST_CPPEXPORT bool writeCommand(const int8_t theCmd);
+
         public:  //! @name Signals
 
     struct {
@@ -220,7 +226,6 @@ class StAndroidGlue {
 
     ST_CPPEXPORT void readOpenPath();
 
-    ST_CPPEXPORT bool writeCommand(const int8_t theCmd);
     ST_CPPEXPORT void printConfig();
     ST_CPPEXPORT void freeSavedState();
 
