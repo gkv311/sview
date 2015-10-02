@@ -35,7 +35,7 @@ class StMainGlue : public StAndroidGlue {
      * Choose and instantiate StApplication.
      */
     ST_LOCAL virtual void createApplication() override {
-        StMutexAuto aLock(myDndLock);
+        StMutexAuto aLock(myFetchLock);
         const StString aFileExtension = StFileNode::getExtension(myDndPath);
 
         StHandle<StOpenInfo> anInfo = new StOpenInfo();

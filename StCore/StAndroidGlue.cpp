@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2014-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -25,6 +25,9 @@
 #include <StTemplates/StHandle.h>
 #include <StThreads/StThread.h>
 #include <StStrings/StLogger.h>
+
+#include <jni.h>
+#define jexp extern "C" JNIEXPORT
 
 StCString StAndroidGlue::getCommandIdName(StAndroidGlue::CommandId theCmd) {
     switch(theCmd) {
@@ -163,19 +166,18 @@ void StAndroidGlue::readOpenPath() {
         aDataPath.fromUrl(aPath);
     }
 
-    StMutexAuto aLock(myDndLock);
+    StMutexAuto aLock(myFetchLock);
     myDndPath = aDataPath;
 }
 
-bool StAndroidGlue::popOpenNewFile(StString& theNewFile) {
-    StMutexAuto aLock(myDndLock);
-    if(myDndPath.isEmpty()) {
-        return false;
+void StAndroidGlue::fetchState(StString&             theNewFile,
+                               StQuaternion<double>& theQuaternion) {
+    StMutexAuto aLock(myFetchLock);
+    theQuaternion = myQuaternion;
+    if(!myDndPath.isEmpty()) {
+        theNewFile = myDndPath;
+        myDndPath.clear();
     }
-
-    theNewFile = myDndPath;
-    myDndPath.clear();
-    return true;
 }
 
 void StAndroidGlue::start() {
@@ -621,6 +623,41 @@ void* StAndroidGlue::saveInstanceState(size_t* theOutLen) {
 
     pthread_mutex_unlock(&myMutex);
     return aSavedState;
+}
+
+void StAndroidGlue::setQuaternion(const StQuaternion<float>& theQ, const float theScreenRotDeg) {
+    // do the magic - convert quaternion from Android coordinate system to sView coordinate system
+    const StQuaternion<double> anOriPitch = StQuaternion<double>(StVec3<double>::DX(), stToRadians(90.0));
+    const StQuaternion<double> anOriRoll  = StQuaternion<double>(StVec3<double>::DZ(), stToRadians(-270.0 + (double )theScreenRotDeg));
+    const StQuaternion<double> anOriAnd((double )theQ.y(), (double )theQ.z(), (double )theQ.x(), (double )theQ.w());
+    StQuaternion<double> anOri = StQuaternion<double>::multiply(anOriAnd, anOriPitch);
+    anOri = StQuaternion<double>::multiply(anOriRoll, anOri);
+
+    StMutexAuto aLock(myFetchLock);
+    myQuaternion = anOri;
+}
+
+void StAndroidGlue::setOrientation(float theAzimuthDeg, float thePitchDeg, float theRollDeg, float theScreenRotDeg) {
+    const StQuaternion<double> anOriYaw   = StQuaternion<double>(StVec3<double>::DY(), stToRadians((double )theAzimuthDeg));
+    const StQuaternion<double> anOriPitch = StQuaternion<double>(StVec3<double>::DX(), stToRadians(90.0 + (double )thePitchDeg));
+    const StQuaternion<double> anOriRoll  = StQuaternion<double>(StVec3<double>::DZ(), stToRadians((double )-theRollDeg + (double )theScreenRotDeg));
+    StQuaternion<double> anOri = StQuaternion<double>::multiply(anOriPitch, anOriYaw);
+    anOri = StQuaternion<double>::multiply(anOriRoll, anOri);
+
+    StMutexAuto aLock(myFetchLock);
+    myQuaternion = anOri;
+}
+
+jexp void JNICALL Java_com_sview_StActivity_cppSetQuaternion(JNIEnv* theEnv, jobject theObj, jlong theCppPtr,
+                                                             jfloat theX, jfloat theY, jfloat theZ, jfloat theW,
+                                                             jfloat theScreenRotDeg) {
+    ((StAndroidGlue* )theCppPtr)->setQuaternion(StQuaternion<float>(theX, theY, theZ, theW), theScreenRotDeg);
+}
+
+jexp void JNICALL Java_com_sview_StActivity_cppSetOrientation(JNIEnv* theEnv, jobject theObj, jlong theCppPtr,
+                                                              jfloat theAzimuthDeg, jfloat thePitchDeg, jfloat theRollDeg,
+                                                              jfloat theScreenRotDeg) {
+    ((StAndroidGlue* )theCppPtr)->setOrientation(theAzimuthDeg, thePitchDeg, theRollDeg, theScreenRotDeg);
 }
 
 #endif // __ANDROID__

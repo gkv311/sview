@@ -12,13 +12,17 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.widget.Toast;
 
 /**
  * Customize NativeActivity
  */
-public class StActivity extends NativeActivity {
+public class StActivity extends NativeActivity implements SensorEventListener {
 
 //region Native libraries loading routines
 
@@ -123,6 +127,18 @@ public class StActivity extends NativeActivity {
         myContext = new ContextWrapper(this);
         myContext.getExternalFilesDir(null);
 
+        mySensorMgr    = (SensorManager )getSystemService(Context.SENSOR_SERVICE);
+        mySensorRotVec = mySensorMgr.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        if(mySensorRotVec == null) {
+            mySensorOriOld = mySensorMgr.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+        }
+        if(mySensorRotVec != null) {
+            mySensorMgr.registerListener(this, mySensorRotVec, SensorManager.SENSOR_DELAY_FASTEST);
+        }
+        if(mySensorOriOld != null) {
+            mySensorMgr.registerListener(this, mySensorOriOld, SensorManager.SENSOR_DELAY_FASTEST);
+        }
+
         super.onCreate(theSavedInstanceState);
     }
 
@@ -133,6 +149,71 @@ public class StActivity extends NativeActivity {
     protected void onNewIntent(Intent theIntent) {
         super.onNewIntent(theIntent);
         setIntent(theIntent);
+    }
+
+    /**
+     * Handle resume event.
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(mySensorRotVec != null) {
+            mySensorMgr.registerListener(this, mySensorRotVec, SensorManager.SENSOR_DELAY_FASTEST);
+        }
+        if(mySensorOriOld != null) {
+            mySensorMgr.registerListener(this, mySensorOriOld, SensorManager.SENSOR_DELAY_FASTEST);
+        }
+    }
+
+    /**
+     * Handle pause event.
+     */
+    @Override
+    protected void onPause() {
+       super.onPause();
+       if(mySensorRotVec != null) {
+           mySensorMgr.unregisterListener(this);
+       }
+       else if(mySensorOriOld != null) {
+           mySensorMgr.unregisterListener(this);
+       }
+    }
+
+//endregion
+
+//region Implementation of SensorEventListener interface
+
+    @Override
+    public void onAccuracyChanged(Sensor theSensor, int theAccuracy) {}
+
+    /**
+     * Fetch new orientation quaternion.
+     */
+    @Override
+    public void onSensorChanged(SensorEvent theEvent) {
+        if(myCppGlue == 0) {
+            return;
+        }
+
+        float aScreenRot = 0.0f;
+        switch(getWindowManager().getDefaultDisplay().getRotation()) {
+            case android.view.Surface.ROTATION_0:   aScreenRot = 0.0f;   break;
+            case android.view.Surface.ROTATION_90:  aScreenRot = 90.0f;  break;
+            case android.view.Surface.ROTATION_180: aScreenRot = 180.0f; break;
+            case android.view.Surface.ROTATION_270: aScreenRot = 270.0f; break;
+        }
+
+        switch(theEvent.sensor.getType()) {
+            case Sensor.TYPE_ORIENTATION: {
+                cppSetOrientation(myCppGlue, theEvent.values[0], theEvent.values[1], theEvent.values[2], aScreenRot);
+                return;
+            }
+            case Sensor.TYPE_ROTATION_VECTOR: {
+                SensorManager.getQuaternionFromVector(myQuat, theEvent.values);
+                cppSetQuaternion(myCppGlue, myQuat[0], myQuat[1], myQuat[2], myQuat[3], aScreenRot);
+                return;
+            }
+        }
     }
 
 //endregion
@@ -184,9 +265,31 @@ public class StActivity extends NativeActivity {
 
 //endregion
 
+//region Methods to call C++ code
+
+    /**
+     * Define device orientation by quaternion.
+     */
+    private native void cppSetQuaternion(long theCppPtr,
+                                         float theX, float theY, float theZ, float theW,
+                                         float theScreenRotDeg);
+
+    /**
+     * Define device orientation using deprecated Android API.
+     */
+    private native void cppSetOrientation(long theCppPtr,
+                                          float theAzimuthDeg, float thePitchDeg, float theRollDeg,
+                                          float theScreenRotDeg);
+
+//endregion
+
 //region class fields
 
     protected ContextWrapper myContext;
+    protected SensorManager  mySensorMgr;
+    protected Sensor         mySensorRotVec;
+    protected Sensor         mySensorOriOld;
+    protected float          myQuat[] = { 0.0f, 0.0f, 0.0f, 1.0f };
     protected long           myCppGlue = 0; //!< pointer to c++ class StAndroidGlue instance
 
 //endregion

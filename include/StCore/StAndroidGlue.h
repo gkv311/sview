@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2014-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -25,6 +25,7 @@
 #include <StStrings/StString.h>
 #include <StThreads/StMutex.h>
 #include <StThreads/StThread.h>
+#include <StTemplates/StQuaternion.h>
 
 #include <android/configuration.h>
 #include <android/native_activity.h>
@@ -152,9 +153,12 @@ class StAndroidGlue {
     }
 
     /**
-     * Pop onNewIntent() open file event.
+     * Fetch current state:
+     * @param theNewFile pop onNewIntent() open file event
+     * @param theQuaternion device orientation
      */
-    ST_CPPEXPORT bool popOpenNewFile(StString& theNewFile);
+    ST_CPPEXPORT void fetchState(StString&             theNewFile,
+                                 StQuaternion<double>& theQuaternion);
 
     /**
      * Return device memory class.
@@ -226,6 +230,18 @@ class StAndroidGlue {
     }
 
     ST_CPPEXPORT void threadEntry();
+
+        public: //! @name StActivity callbacks
+
+    /**
+     * Define device orientation by quaternion.
+     */
+    ST_LOCAL void setQuaternion(const StQuaternion<float>& theQ, const float theScreenRotDeg);
+
+    /**
+     * Define device orientation using deprecated Android API.
+     */
+    ST_LOCAL void setOrientation(float theAzimuthDeg, float thePitchDeg, float theRollDeg, float theScreenRotDeg);
 
         private: //! @name ANativeActivity callbacks
 
@@ -335,8 +351,9 @@ class StAndroidGlue {
     StAndroidPollSource     myCmdPollSource;
     StAndroidPollSource     myInputPollSource;
 
-    StMutex                 myDndLock;           //!< Drag & Drop data lock
+    StMutex                 myFetchLock;         //!< fetch data lock
     StString                myDndPath;           //!< intent data string
+    StQuaternion<double>    myQuaternion;        //!< device orientation
 
     bool                    myIsRunning;
     bool                    myIsStateSaved;

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2014-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StCore library is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -43,11 +43,6 @@ bool StWindowImpl::create() {
     myParentWin->signals.onInputEvent += stSlot(this, &StWindowImpl::onAndroidInput);
     myParentWin->signals.onAppCmd     += stSlot(this, &StWindowImpl::onAndroidCommand);
 
-    // Prepare to monitor accelerometer
-    //mySensorManager       = ASensorManager_getInstance();
-    //myAccelerometerSensor = ASensorManager_getDefaultSensor(mySensorManager, ASENSOR_TYPE_ACCELEROMETER);
-    //mySensorEventQueue    = ASensorManager_createEventQueue(mySensorManager, myParentWin->getLooper(), LooperId_USER, NULL, NULL);
-
     /*if(myParentWin->getSavedState() != NULL) {
         // we are starting with a previous saved state; restore from it
         myState = *(StSavedState* )myParentWin->getSavedState();
@@ -67,6 +62,7 @@ bool StWindowImpl::create() {
         if(aSource != NULL) {
             aSource->process(myParentWin, aSource);
         }
+
         if(myToResetDevice || myParentWin->ToDestroy()) {
             //myToResetDevice = true;
             myStEvent.Type       = stEvent_Close;
@@ -303,16 +299,11 @@ void StWindowImpl::onAndroidCommand(int32_t theCommand) {
             return;
         }
         case StAndroidGlue::CommandId_FocusGained: {
-            /*if(myAccelerometerSensor != NULL) {
-                ASensorEventQueue_enableSensor(mySensorEventQueue, myAccelerometerSensor);
-                ASensorEventQueue_setEventRate(mySensorEventQueue, myAccelerometerSensor, (1000L / 60) * 1000);
-            }*/
+            //
             return;
         }
         case StAndroidGlue::CommandId_FocusLost: {
-            /*if(myAccelerometerSensor != NULL) {
-                ASensorEventQueue_disableSensor(mySensorEventQueue, myAccelerometerSensor);
-            }*/
+            //
             return;
         }
         case StAndroidGlue::CommandId_ConfigChanged: {
@@ -347,7 +338,8 @@ void StWindowImpl::processEvents() {
 
     // check onNewIntent event
     StString aDndFile;
-    if(myParentWin->popOpenNewFile(aDndFile)) {
+    myParentWin->fetchState(aDndFile, myQuaternion);
+    if(!aDndFile.isEmpty()) {
         myStEvent.Type = stEvent_FileDrop;
         myStEvent.DNDrop.Time = getEventTime();
         myStEvent.DNDrop.File = aDndFile.toCString();
@@ -368,15 +360,6 @@ void StWindowImpl::processEvents() {
         if(myToResetDevice) {
             break;
         }
-
-        /*if(aPollRes == LooperId_USER) {
-            if(anEngine.accelerometerSensor != NULL) {
-                ASensorEvent anEvent;
-                while(ASensorEventQueue_getEvents(anEngine.sensorEventQueue, &anEvent, 1) > 0) {
-                    anEvent.acceleration.x, anEvent.acceleration.y, anEvent.acceleration.z);
-                }
-            }
-        }*/
 
         // check if we are exiting
         if(myParentWin->ToDestroy()) {
