@@ -564,7 +564,7 @@ bool StGLTexture::fillPatch(StGLContext&        theCtx,
     theCtx.core20fwd->glPixelStorei(GL_UNPACK_ALIGNMENT, GLint(anAligment));
 
     bool toBatchCopy = theData.getSizeX() <= size_t(getSizeX())
-                    && theBatchRows > 1;
+                    && theBatchRows != 1;
 
     size_t anExtraBytes       = theData.getRowExtraBytes();
     size_t aPixelsWidth       = theData.getSizeRowBytes() / theData.getSizePixelBytes();
@@ -588,16 +588,17 @@ bool StGLTexture::fillPatch(StGLContext&        theCtx,
 
         // do batch copy (more effective)
         GLsizei aPatchWidth = GLsizei(theData.getSizeX());
-        GLsizei aBatchRows = theBatchRows;
-        for(GLsizei aRow(theRowFrom), aRowsRemain(aRowTo); aRow < aRowTo; aRow += theBatchRows) {
+        GLsizei aBatchRows  = theBatchRows >= 1 ? theBatchRows : (aRowTo - theRowFrom);
+        GLsizei aNbRows     = aBatchRows;
+        for(GLsizei aRow(theRowFrom), aRowsRemain(aRowTo); aRow < aRowTo; aRow += aBatchRows) {
             aRowsRemain = aRowTo - aRow;
-            if(aRowsRemain < aBatchRows) {
-                aBatchRows = aRowsRemain;
+            if(aNbRows > aRowsRemain) {
+                aNbRows = aRowsRemain;
             }
 
             theCtx.core20fwd->glTexSubImage2D(theTarget, 0,     // 0 = LOD number
                                               0, aRow,          // a texel offset in the (x, y) direction
-                                              aPatchWidth, aBatchRows,
+                                              aPatchWidth, aNbRows,
                                               aPixelFormat,     // format of the pixel data
                                               aDataType,        // data type of the pixel data
                                               theData.getData(aRow, 0));

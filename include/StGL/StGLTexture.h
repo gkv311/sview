@@ -178,8 +178,11 @@ class StGLTexture : public StGLResource {
      * @param theData      the image plane to copy data from
      * @param theTarget    texture target
      * @param theRowFrom   fill data from row (for both - input image plane and the texture!)
-     * @param theRowTo     fill data up to the row (if zero - all rows)
+     * @param theRowTo     fill data up to the row (0 means all rows)
      * @param theBatchRows maximal step for GL function call (greater - more effective)
+     *                     0 to copy in single batch
+     *                     1 to copy row-by-row
+     *                     N to copy in batches of specified number of rows
      * @return true on success
      */
     ST_CPPEXPORT bool fillPatch(StGLContext&        theCtx,
