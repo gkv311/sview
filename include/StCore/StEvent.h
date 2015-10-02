@@ -27,6 +27,7 @@
 enum StEventType {
     stEvent_None,       //!< StAnyEvent,    undefined event
     stEvent_Close,      //!< StCloseEvent,  window close requested
+    stEvent_Pause,      //!< StPauseEvent,  window can be closed at any moment
     stEvent_Size,       //!< StSizeEvent,   window resized
     stEvent_NewMonitor, //!< StSizeEvent,   window moved to another monitor
     stEvent_KeyDown,    //!< StKeyEvent,    keyboard key pressed
@@ -53,6 +54,16 @@ struct StAnyEvent {
  * Close window request.
  */
 struct StCloseEvent {
+
+    StEventType   Type;   //!< event type
+    double        Time;   //!< time in seconds when event was registered
+
+};
+
+/**
+ * Pause window request.
+ */
+struct StPauseEvent {
 
     StEventType   Type;   //!< event type
     double        Time;   //!< time in seconds when event was registered
@@ -150,6 +161,7 @@ union StEvent {
     StEventType   Type;     //!< event type
     StAnyEvent    Base;     //!< fields shared between all event
     StCloseEvent  Close;    //!< window close  event
+    StPauseEvent  Pause;    //!< window pause  event
     StSizeEvent   Size;     //!< window resize event
     StKeyEvent    Key;      //!< keyboard key down/up event
     StClickEvent  Button;   //!< mouse button down/up event

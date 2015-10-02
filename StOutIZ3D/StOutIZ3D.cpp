@@ -190,8 +190,11 @@ void StOutIZ3D::releaseResources() {
     StWindow::hide();
     if(isMovable()) {
         StWindow::setFullScreen(false);
-        mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
     }
+}
+
+void StOutIZ3D::beforeClose() {
+    mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
     mySettings->saveParam(ST_SETTING_TABLE, params.Glasses);
 }
 
@@ -202,6 +205,7 @@ StOutIZ3D::~StOutIZ3D() {
 
 void StOutIZ3D::close() {
     StWindow::params.VSyncMode->signals.onChanged -= stSlot(this, &StOutIZ3D::doSwitchVSync);
+    beforeClose();
     releaseResources();
     StWindow::close();
 }

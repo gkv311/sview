@@ -227,6 +227,11 @@ class StWindow {
     ST_CPPEXPORT StRectI_t getPlacement() const;
 
     /**
+     * Return GUI GL window placement in windowed state (ignores active full-screen placement).
+     */
+    ST_CPPEXPORT StRectI_t getWindowedPlacement() const;
+
+    /**
      * Return false if window position or dimensions can not be changes
      * (systems supports only full-screen mode, or window is embedded).
      */
@@ -480,6 +485,7 @@ class StWindow {
         StSignal<void (const unsigned int   )> onRedraw;
 
         StSignal<void (const StCloseEvent&  )> onClose;
+        StSignal<void (const StPauseEvent&  )> onPause;
         StSignal<void (const StSizeEvent&   )> onResize;
         StSignal<void (const StSizeEvent&   )> onAnotherMonitor;
         StSignal<void (const StKeyEvent&    )> onKeyUp;

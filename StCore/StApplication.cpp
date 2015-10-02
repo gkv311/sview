@@ -229,6 +229,7 @@ bool StApplication::open() {
         // connect slots
         myWindow->signals.onRedraw    = stSlot(this, &StApplication::doDrawProxy);
         myWindow->signals.onClose     = stSlot(this, &StApplication::doClose);
+        myWindow->signals.onPause     = stSlot(this, &StApplication::doPause);
         myWindow->signals.onResize    = stSlot(this, &StApplication::doResize);
         myWindow->signals.onAction    = stSlot(this, &StApplication::doAction);
         myWindow->signals.onKeyDown   = stSlot(this, &StApplication::doKeyDown);
@@ -316,6 +317,12 @@ bool StApplication::resetDevice() {
 
 void StApplication::doClose(const StCloseEvent& ) {
     exit(0);
+}
+
+void StApplication::doPause(const StPauseEvent& ) {
+    if(!myWindow.isNull()) {
+        myWindow->beforeClose();
+    }
 }
 
 const StHandle<StAction>& StApplication::getAction(const int theActionId) {

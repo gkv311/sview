@@ -410,7 +410,7 @@ void StImageViewer::saveGuiParams() {
     mySettings->saveParam(ST_SETTING_TEXFILTER, myGUI->myImage->params.textureFilter);
 }
 
-void StImageViewer::releaseDevice() {
+void StImageViewer::saveAllParams() {
     saveGuiParams();
     if(!myGUI.isNull()) {
         mySettings->saveParam (ST_SETTING_SCALE_ADJUST,  params.ScaleAdjust);
@@ -434,6 +434,10 @@ void StImageViewer::releaseDevice() {
             mySettings->saveHotKey(anIter->second);
         }
     }
+}
+
+void StImageViewer::releaseDevice() {
+    saveAllParams();
 
     // release GUI data and GL resources before closing the window
     myKeyActions.clear();
@@ -652,6 +656,11 @@ bool StImageViewer::open() {
 void StImageViewer::doChangeDevice(const int32_t theValue) {
     StApplication::doChangeDevice(theValue);
     // update menu
+}
+
+void StImageViewer::doPause(const StPauseEvent& theEvent) {
+    StApplication::doPause(theEvent);
+    saveAllParams();
 }
 
 void StImageViewer::doResize(const StSizeEvent& ) {

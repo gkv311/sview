@@ -52,11 +52,6 @@ class StOutPageFlipExt : public StOutPageFlip {
     ST_CPPEXPORT virtual bool create();
 
     /**
-     * Close the window.
-     */
-    ST_CPPEXPORT virtual void close();
-
-    /**
      * Extra routines to be processed before window close.
      */
     ST_CPPEXPORT virtual void beforeClose();

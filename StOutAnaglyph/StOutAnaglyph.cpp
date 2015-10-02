@@ -197,9 +197,11 @@ void StOutAnaglyph::releaseResources() {
     StWindow::hide(ST_WIN_MASTER);
     if(isMovable()) {
         StWindow::setFullScreen(false);
-        StRect<int32_t> savedRect = StWindow::getPlacement();
-        mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, savedRect);
     }
+}
+
+void StOutAnaglyph::beforeClose() {
+    mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
     mySettings->saveParam(ST_SETTING_GLASSES,   params.Glasses);
     mySettings->saveParam(ST_SETTING_REDCYAN,   params.RedCyan);
     mySettings->saveParam(ST_SETTING_AMBERBLUE, params.AmberBlue);
@@ -238,6 +240,7 @@ namespace {
 
 void StOutAnaglyph::close() {
     StWindow::params.VSyncMode->signals.onChanged -= stSlot(this, &StOutAnaglyph::doSwitchVSync);
+    beforeClose();
     releaseResources();
     StWindow::close();
 }

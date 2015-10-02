@@ -236,6 +236,7 @@ class StMoviePlayer : public StApplication {
         private: //! @name window events slots
 
     ST_LOCAL virtual void doChangeDevice(const int32_t theValue);
+    ST_LOCAL virtual void doPause    (const StPauseEvent&  theEvent);
     ST_LOCAL virtual void doResize   (const StSizeEvent&   theEvent);
     ST_LOCAL virtual void doKeyDown  (const StKeyEvent&    theEvent);
     ST_LOCAL virtual void doKeyHold  (const StKeyEvent&    theEvent);
@@ -252,6 +253,7 @@ class StMoviePlayer : public StApplication {
      */
     ST_LOCAL bool init();
     ST_LOCAL void saveGuiParams();
+    ST_LOCAL void saveAllParams();
     ST_LOCAL bool createGui(StHandle<StGLTextureQueue>& theTextureQueue,
                             StHandle<StSubQueue>&       theSubQueue);
 

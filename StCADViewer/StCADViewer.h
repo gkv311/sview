@@ -68,6 +68,7 @@ class StCADViewer : public StApplication {
 
         private: //! @name window events slots
 
+    ST_LOCAL virtual void doPause    (const StPauseEvent&  theEvent);
     ST_LOCAL virtual void doResize   (const StSizeEvent&   theEvent);
     ST_LOCAL virtual void doKeyDown  (const StKeyEvent&    theEvent);
     ST_LOCAL virtual void doKeyHold  (const StKeyEvent&    theEvent);
@@ -137,6 +138,7 @@ class StCADViewer : public StApplication {
      * Release GL resources.
      */
     ST_LOCAL void releaseDevice();
+    ST_LOCAL void saveAllParams();
 
         private: //!< private callback Slots
 

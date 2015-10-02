@@ -361,11 +361,7 @@ void StOutInterlace::releaseResources() {
     StWindow::hide();
     if(isMovable()) {
         StWindow::setFullScreen(false);
-        mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
     }
-    mySettings->saveParam(ST_SETTING_BIND_MONITOR, params.BindToMon);
-    mySettings->saveParam(ST_SETTING_REVERSE,      params.ToReverse);
-    mySettings->saveInt32(ST_SETTING_DEVICE_ID,    myDevice);
 }
 
 StOutInterlace::~StOutInterlace() {
@@ -381,6 +377,11 @@ void StOutInterlace::close() {
 }
 
 void StOutInterlace::beforeClose() {
+    mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
+    mySettings->saveParam(ST_SETTING_BIND_MONITOR, params.BindToMon);
+    mySettings->saveParam(ST_SETTING_REVERSE,      params.ToReverse);
+    mySettings->saveInt32(ST_SETTING_DEVICE_ID,    myDevice);
+
     // process exit from StApplication
     if((myDevice == DEVICE_HINTERLACE_ED) && myIsEDactive) {
         // disactivate eDimensional shuttered glasses

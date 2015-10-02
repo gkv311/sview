@@ -443,8 +443,11 @@ void StOutDistorted::releaseResources() {
     StWindow::hide();
     if(isMovable()) {
         StWindow::setFullScreen(false);
-        mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
     }
+}
+
+void StOutDistorted::beforeClose() {
+    mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
 
     StRectI_t aMargins;
     aMargins.left()   = myBarMargins.left;
@@ -473,6 +476,8 @@ StOutDistorted::~StOutDistorted() {
 }
 
 void StOutDistorted::close() {
+    beforeClose();
+
 #ifdef ST_HAVE_LIBOVR
     if(myOvrHmd != NULL) {
         ovrHmd_Destroy(myOvrHmd);

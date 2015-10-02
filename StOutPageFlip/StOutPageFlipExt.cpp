@@ -89,7 +89,6 @@ void StOutPageFlipExt::releaseResources() {
         myCodesLine.release(*myContext);
         myCodesEDOnOff.release(*myContext);
     }
-    mySettings->saveParam(ST_SETTING_DEV_CONTROL, params.ControlCode);
     StOutPageFlip::releaseResources();
 }
 
@@ -97,12 +96,9 @@ StOutPageFlipExt::~StOutPageFlipExt() {
     releaseResources();
 }
 
-void StOutPageFlipExt::close() {
-    beforeClose();
-    StOutPageFlip::close();
-}
-
 void StOutPageFlipExt::beforeClose() {
+    StOutPageFlip::beforeClose();
+    mySettings->saveParam(ST_SETTING_DEV_CONTROL, params.ControlCode);
     if(!StOutPageFlip::params.ToShowExtra->getValue()) {
         return;
     }

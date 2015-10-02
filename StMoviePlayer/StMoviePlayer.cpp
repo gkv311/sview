@@ -374,6 +374,11 @@ void StMoviePlayer::doChangeDevice(const int32_t theValue) {
     // update menu
 }
 
+void StMoviePlayer::doPause(const StPauseEvent& theEvent) {
+    StApplication::doPause(theEvent);
+    saveAllParams();
+}
+
 StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
                              const StNativeWin_t                theParentWin,
                              const StHandle<StOpenInfo>&        theOpenInfo)
@@ -698,7 +703,7 @@ void StMoviePlayer::saveGuiParams() {
     mySettings->saveParam (ST_SETTING_TEXFILTER,   myGUI->myImage->params.textureFilter);
 }
 
-void StMoviePlayer::releaseDevice() {
+void StMoviePlayer::saveAllParams() {
     saveGuiParams();
     if(!myGUI.isNull()) {
         mySettings->saveParam (ST_SETTING_SCALE_ADJUST,       params.ScaleAdjust);
@@ -739,6 +744,10 @@ void StMoviePlayer::releaseDevice() {
             mySettings->saveHotKey(anIter->second);
         }
     }
+}
+
+void StMoviePlayer::releaseDevice() {
+    saveAllParams();
 
     // release GUI data and GL resources before closing the window
     myKeyActions.clear();

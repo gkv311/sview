@@ -260,7 +260,7 @@ bool StCADViewer::resetDevice() {
     return open();
 }
 
-void StCADViewer::releaseDevice() {
+void StCADViewer::saveAllParams() {
     if(!myGUI.isNull()) {
         mySettings->saveParam(ST_PARAM_NORMALS,     params.toShowNormals);
         mySettings->saveParam(ST_PARAM_TRIHEDRON,   params.toShowTrihedron);
@@ -269,7 +269,10 @@ void StCADViewer::releaseDevice() {
         mySettings->saveInt32(ST_SETTING_FPSTARGET, params.TargetFps);
         mySettings->saveParam(ST_SETTING_SHOW_FPS,  params.ToShowFps);
     }
+}
 
+void StCADViewer::releaseDevice() {
+    saveAllParams();
     if(!myContext.isNull()) {
         if(myNormalsMesh != NULL) {
             myNormalsMesh->release(*myContext);
@@ -372,6 +375,11 @@ bool StCADViewer::open() {
     }
 
     return true;
+}
+
+void StCADViewer::doPause(const StPauseEvent& theEvent) {
+    StApplication::doPause(theEvent);
+    saveAllParams();
 }
 
 void StCADViewer::doResize(const StSizeEvent& ) {

@@ -196,6 +196,12 @@ class StApplication {
     ST_CPPEXPORT virtual void doClose(const StCloseEvent& theEvent);
 
     /**
+     * Process window pause event - application can be closed at any moment.
+     * Implementation should save the state to avoid data loss.
+     */
+    ST_CPPEXPORT virtual void doPause(const StPauseEvent& theEvent);
+
+    /**
      * Process window resize.
      */
     ST_CPPEXPORT virtual void doResize(const StSizeEvent& theEvent);

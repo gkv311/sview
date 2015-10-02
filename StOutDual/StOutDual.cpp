@@ -288,8 +288,11 @@ void StOutDual::releaseResources() {
     StWindow::hide();
     if(isMovable()) {
         StWindow::setFullScreen(false);
-        mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getPlacement());
     }
+}
+
+void StOutDual::beforeClose() {
+    mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
     mySettings->saveParam(ST_SETTING_SLAVE_ID,  params.SlaveMonId);
     mySettings->saveParam(ST_SETTING_MONOCLONE, params.MonoClone);
     mySettings->saveInt32(ST_SETTING_DEVICE_ID, myDevice);
@@ -302,6 +305,7 @@ StOutDual::~StOutDual() {
 
 void StOutDual::close() {
     StWindow::params.VSyncMode->signals.onChanged -= stSlot(this, &StOutDual::doSwitchVSync);
+    beforeClose();
     releaseResources();
     StWindow::close();
 }

@@ -283,6 +283,12 @@ void StWindowImpl::onAndroidCommand(int32_t theCommand) {
             onAndroidInitWindow();
             return;
         }
+        case StAndroidGlue::CommandId_Pause: {
+            myStEvent.Type       = stEvent_Pause;
+            myStEvent.Pause.Time = getEventTime();
+            signals.onPause->emit(myStEvent.Pause);
+            return;
+        }
         case StAndroidGlue::CommandId_Stop: {
             if(myParentWin->getMemoryClass() < 50) {
                 myStEvent.Type       = stEvent_Close;

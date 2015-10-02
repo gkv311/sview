@@ -99,6 +99,11 @@ class StOutDistorted : public StWindow {
     ST_CPPEXPORT virtual void close();
 
     /**
+     * Extra routines to be processed before window close.
+     */
+    ST_CPPEXPORT virtual void beforeClose();
+
+    /**
      * Process callback.
      */
     ST_CPPEXPORT virtual void processEvents();

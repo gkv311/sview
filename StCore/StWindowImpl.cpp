@@ -1012,6 +1012,9 @@ void StWindowImpl::swapEventsBuffers() {
             case stEvent_Close:
                 signals.onClose->emit(anEvent.Close);
                 break;
+            case stEvent_Pause:
+                signals.onPause->emit(anEvent.Pause);
+                break;
             case stEvent_Size:
                 signals.onResize->emit(anEvent.Size);
                 break;

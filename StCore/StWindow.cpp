@@ -28,6 +28,7 @@ void StWindow::copySignals() {
     params.VSyncMode->changeValues().add("Mixed");
 
     myWin->signals.onClose     = &signals.onClose;
+    myWin->signals.onPause     = &signals.onPause;
     myWin->signals.onResize    = &signals.onResize;
     myWin->signals.onAnotherMonitor = &signals.onAnotherMonitor;
     myWin->signals.onKeyUp     = &signals.onKeyUp;
@@ -171,6 +172,10 @@ void StWindow::setFullScreen(const bool theFullScreen) {
 
 StRectI_t StWindow::getPlacement() const {
     return myWin->getPlacement();
+}
+
+StRectI_t StWindow::getWindowedPlacement() const {
+    return myWin->myRectNorm;
 }
 
 bool StWindow::isMovable() const {
