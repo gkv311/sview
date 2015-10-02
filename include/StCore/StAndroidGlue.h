@@ -153,6 +153,22 @@ class StAndroidGlue {
     }
 
     /**
+     * Return true if device has orientation sensor.
+     */
+    ST_LOCAL bool hasOrientationSensor() const { return myHasOrientSensor; }
+
+    /**
+     * Return true if orientation sensor has poor quality.
+     */
+    ST_LOCAL bool isPoorOrientationSensor() const { return myIsPoorOrient; }
+
+    /**
+     * Turn orientation sensor on/off.
+     * Has no effect in case if sensor is unavailable.
+     */
+    ST_CPPEXPORT void setTrackOrientation(const bool theToTrack);
+
+    /**
      * Fetch current state:
      * @param theNewFile pop onNewIntent() open file event
      * @param theQuaternion device orientation
@@ -232,6 +248,17 @@ class StAndroidGlue {
     ST_CPPEXPORT void threadEntry();
 
         public: //! @name StActivity callbacks
+
+    /**
+     * Define device orientation sensor.
+     * @param theHasSensor flag indicating that device has orientation sensors
+     * @param theIsPoor    flag indicating that available orientation sensor provides imprecise values
+     */
+    ST_LOCAL void defineOrientationSensor(bool theHasSensor,
+                                          bool theIsPoor) {
+        myHasOrientSensor = theHasSensor;
+        myIsPoorOrient    = theIsPoor;
+    }
 
     /**
      * Define device orientation by quaternion.
@@ -354,6 +381,9 @@ class StAndroidGlue {
     StMutex                 myFetchLock;         //!< fetch data lock
     StString                myDndPath;           //!< intent data string
     StQuaternion<double>    myQuaternion;        //!< device orientation
+    bool                    myHasOrientSensor;   //!< flag indicating that device has orientation sensors
+    bool                    myIsPoorOrient;      //!< flag indicating that available orientation sensor provides imprecise values
+    bool                    myToTrackOrient;     //!< track device orientation
 
     bool                    myIsRunning;
     bool                    myIsStateSaved;

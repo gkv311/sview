@@ -1683,6 +1683,7 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
         myBtnPanorama->getTrackedValue()->setValue(aViewMode != StStereoParams::FLAT_IMAGE);
         myBtnPanorama->setOpacity(toShowPano ? anOpacity : 0.0f, false);
     }
+    myWindow->setTrackOrientation(aViewMode != StStereoParams::FLAT_IMAGE);
     StQuaternion<double> aQ = myWindow->getDeviceOrientation();
     myImage->setDeviceOrientation(StGLQuaternion((float )aQ.x(), (float )aQ.y(), (float )aQ.z(), (float )aQ.w()));
 

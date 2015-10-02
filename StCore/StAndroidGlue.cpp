@@ -68,6 +68,9 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
   myThJniEnv(NULL),
   myMsgRead(0),
   myMsgWrite(0),
+  myHasOrientSensor(false),
+  myIsPoorOrient(false),
+  myToTrackOrient(false),
   myIsRunning(false),
   myIsStateSaved(false),
   myToDestroy(false) {
@@ -157,7 +160,7 @@ void StAndroidGlue::readOpenPath() {
     aJniEnv->ReleaseStringUTFChars(aJString, aJStringStr);
 
     // reset intent in Activity
-    aJniEnv->CallObjectMethod(myActivity->clazz, aJMet_setIntent, NULL);
+    aJniEnv->CallVoidMethod(myActivity->clazz, aJMet_setIntent, NULL);
 
     const StString ST_FILE_PROTOCOL("file://");
     if(aDataPath.isStartsWith(ST_FILE_PROTOCOL)) {
@@ -181,6 +184,12 @@ void StAndroidGlue::fetchState(StString&             theNewFile,
 }
 
 void StAndroidGlue::start() {
+    // workaround NativeActivity design issues - notify Java StActivity class about C++ pointer to StAndroidGlue instance
+    JNIEnv* aJniEnv = myActivity->env;
+    jclass    aJClassActivity   = aJniEnv->GetObjectClass(myActivity->clazz);
+    jmethodID aJMet_setInstance = aJniEnv->GetMethodID(aJClassActivity, "setCppInstance", "(J)V");
+    aJniEnv->CallVoidMethod(myActivity->clazz, aJMet_setInstance, (jlong )this);
+
     myThread = new StThread(threadEntryWrapper, this, "StAndroidGlue");
 
     // Wait for thread to start
@@ -189,12 +198,6 @@ void StAndroidGlue::start() {
         pthread_cond_wait(&myCond, &myMutex);
     }
     pthread_mutex_unlock(&myMutex);
-
-    // workaround NativeActivity design issues - notify Java StActivity class about C++ pointer to StAndroidGlue instance
-    JNIEnv* aJniEnv = myActivity->env;
-    jclass    aJClassActivity   = aJniEnv->GetObjectClass(myActivity->clazz);
-    jmethodID aJMet_setInstance = aJniEnv->GetMethodID(aJClassActivity, "setCppInstance", "(J)V");
-    aJniEnv->CallObjectMethod(myActivity->clazz, aJMet_setInstance, (jlong )this);
 }
 
 StAndroidGlue::~StAndroidGlue() {
@@ -204,7 +207,7 @@ StAndroidGlue::~StAndroidGlue() {
         JNIEnv* aJniEnv = myActivity->env;
         jclass    aJClassActivity   = aJniEnv->GetObjectClass(myActivity->clazz);
         jmethodID aJMet_setInstance = aJniEnv->GetMethodID(aJClassActivity, "setCppInstance", "(J)V");
-        aJniEnv->CallObjectMethod(myActivity->clazz, aJMet_setInstance, (jlong )0);
+        aJniEnv->CallVoidMethod(myActivity->clazz, aJMet_setInstance, (jlong )0);
     }
 
     pthread_mutex_lock(&myMutex);
@@ -625,6 +628,19 @@ void* StAndroidGlue::saveInstanceState(size_t* theOutLen) {
     return aSavedState;
 }
 
+void StAndroidGlue::setTrackOrientation(const bool theToTrack) {
+    if(myToTrackOrient == theToTrack
+    || myActivity == NULL
+    || myThJniEnv == NULL) {
+        return;
+    }
+
+    jclass    aJClassActivity = myThJniEnv->GetObjectClass(myActivity->clazz);
+    jmethodID aJMet           = myThJniEnv->GetMethodID(aJClassActivity, "setTrackOrientation", "(Z)V");
+    myThJniEnv->CallVoidMethod(myActivity->clazz, aJMet, (jboolean )(theToTrack ? JNI_TRUE : JNI_FALSE));
+    myToTrackOrient = theToTrack;
+}
+
 void StAndroidGlue::setQuaternion(const StQuaternion<float>& theQ, const float theScreenRotDeg) {
     // do the magic - convert quaternion from Android coordinate system to sView coordinate system
     const StQuaternion<double> anOriPitch = StQuaternion<double>(StVec3<double>::DX(), stToRadians(90.0));
@@ -646,6 +662,11 @@ void StAndroidGlue::setOrientation(float theAzimuthDeg, float thePitchDeg, float
 
     StMutexAuto aLock(myFetchLock);
     myQuaternion = anOri;
+}
+
+jexp void JNICALL Java_com_sview_StActivity_cppDefineOrientationSensor(JNIEnv* theEnv, jobject theObj, jlong theCppPtr,
+                                                                       jboolean theHasOri, jboolean theIsPoorOri) {
+    ((StAndroidGlue* )theCppPtr)->defineOrientationSensor(theHasOri == JNI_TRUE, theIsPoorOri == JNI_TRUE);
 }
 
 jexp void JNICALL Java_com_sview_StActivity_cppSetQuaternion(JNIEnv* theEnv, jobject theObj, jlong theCppPtr,

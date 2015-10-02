@@ -413,6 +413,27 @@ class StWindow {
     ST_CPPEXPORT const StString& getStatistics() const;
 
     /**
+     * Return true if device has orientation sensor.
+     */
+    ST_CPPEXPORT virtual bool hasOrientationSensor() const;
+
+    /**
+     * Return true if orientation sensor has poor quality.
+     */
+    ST_CPPEXPORT virtual bool isPoorOrientationSensor() const;
+
+    /**
+     * Return true if orientation sensor has been enabled.
+     */
+    ST_CPPEXPORT virtual bool toTrackOrientation() const;
+
+    /**
+     * Turn orientation sensor on/off.
+     * Has no effect in case if sensor is unavailable.
+     */
+    ST_CPPEXPORT virtual void setTrackOrientation(const bool theToTrack);
+
+    /**
      * Return device orientation (for head-tracking) within right-handed coordinate system:
      * - Y is positive in up direction (towards the sky, perpendicular to the ground).
      * - X is positive to the right (tangential to the ground).

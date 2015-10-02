@@ -279,6 +279,9 @@ class StWindowImpl {
     int                myInitState;       //!< initialization error code
     StString           myStatistics;      //!< extra statistics
     StQuaternion<double> myQuaternion;    //!< device orientation
+    bool               myHasOrientSensor; //!< flag indicating that device has orientation sensors
+    bool               myIsPoorOrient;    //!< flag indicating that available orientation sensor provides imprecise values
+    bool               myToTrackOrient;   //!< track device orientation
 
     StPointD_t         myMousePt;         //!< mouse coordinates to track activity
     StRectI_t          myRectNorm;        //!< master window coordinates in normal     state

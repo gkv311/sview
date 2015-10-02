@@ -358,6 +358,28 @@ const StString& StWindow::getStatistics() const {
     return myWin->myStatistics;
 }
 
+bool StWindow::hasOrientationSensor() const {
+    return myWin->myHasOrientSensor;
+}
+
+bool StWindow::isPoorOrientationSensor() const {
+    return myWin->myIsPoorOrient;
+}
+
+bool StWindow::toTrackOrientation() const {
+    return myWin->myToTrackOrient;
+}
+
+void StWindow::setTrackOrientation(const bool theToTrack) {
+    if(myWin->myHasOrientSensor) {
+        myWin->myToTrackOrient = theToTrack;
+    }
+}
+
 StQuaternion<double> StWindow::getDeviceOrientation() const {
-    return myWin->myQuaternion;
+    if(myWin->myToTrackOrient
+    && myWin->myHasOrientSensor) {
+        return myWin->myQuaternion;
+    }
+    return StQuaternion<double>();
 }

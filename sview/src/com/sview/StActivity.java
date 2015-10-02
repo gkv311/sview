@@ -127,18 +127,14 @@ public class StActivity extends NativeActivity implements SensorEventListener {
         myContext = new ContextWrapper(this);
         myContext.getExternalFilesDir(null);
 
-        mySensorMgr    = (SensorManager )getSystemService(Context.SENSOR_SERVICE);
-        mySensorRotVec = mySensorMgr.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-        if(mySensorRotVec == null) {
-            mySensorOriOld = mySensorMgr.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+        mySensorMgr = (SensorManager )getSystemService(Context.SENSOR_SERVICE);
+        mySensorOri = mySensorMgr.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        if(mySensorOri == null) {
+            myIsPoorOri = true;
+            mySensorOri = mySensorMgr.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+        } else {
+            myIsPoorOri = mySensorMgr.getDefaultSensor(Sensor.TYPE_GYROSCOPE) == null;
         }
-        if(mySensorRotVec != null) {
-            mySensorMgr.registerListener(this, mySensorRotVec, SensorManager.SENSOR_DELAY_FASTEST);
-        }
-        if(mySensorOriOld != null) {
-            mySensorMgr.registerListener(this, mySensorOriOld, SensorManager.SENSOR_DELAY_FASTEST);
-        }
-
         super.onCreate(theSavedInstanceState);
     }
 
@@ -157,11 +153,8 @@ public class StActivity extends NativeActivity implements SensorEventListener {
     @Override
     protected void onResume() {
         super.onResume();
-        if(mySensorRotVec != null) {
-            mySensorMgr.registerListener(this, mySensorRotVec, SensorManager.SENSOR_DELAY_FASTEST);
-        }
-        if(mySensorOriOld != null) {
-            mySensorMgr.registerListener(this, mySensorOriOld, SensorManager.SENSOR_DELAY_FASTEST);
+        if(myToTrackOrient) {
+            updateTrackOrientation(true);
         }
     }
 
@@ -171,12 +164,7 @@ public class StActivity extends NativeActivity implements SensorEventListener {
     @Override
     protected void onPause() {
        super.onPause();
-       if(mySensorRotVec != null) {
-           mySensorMgr.unregisterListener(this);
-       }
-       else if(mySensorOriOld != null) {
-           mySensorMgr.unregisterListener(this);
-       }
+       updateTrackOrientation(false);
     }
 
 //endregion
@@ -218,13 +206,58 @@ public class StActivity extends NativeActivity implements SensorEventListener {
 
 //endregion
 
+//region Auxiliary methods
+
+    /**
+     * Wrapper to turn orientation sensor on/off (regardless off myToTrackOrient flag).
+     */
+    protected void updateTrackOrientation(boolean theToTrack) {
+        if(mySensorOri == null) {
+            return;
+        }
+
+        if(theToTrack) {
+            mySensorMgr.registerListener(this, mySensorOri, SensorManager.SENSOR_DELAY_FASTEST);
+        } else {
+            mySensorMgr.unregisterListener(this);
+        }
+    }
+
+//endregion
+
 //region Methods to be called from C++ level
 
     /**
-     * Method is called when StAndroidGlue has been created or destroyed.
+     * Method is called when StAndroidGlue has been created (BEFORE starting application thread!)
+     * or during destruction.
      */
     public void setCppInstance(long theCppInstance) {
         myCppGlue = theCppInstance;
+        if(myCppGlue != 0) {
+            cppDefineOrientationSensor(myCppGlue, mySensorOri != null, myIsPoorOri);
+            if(myToTrackOrient) {
+                updateTrackOrientation(true);
+            }
+        } else {
+            updateTrackOrientation(false);
+        }
+    }
+
+    /**
+     * Method to turn orientation sensor on/off.
+     */
+    public void setTrackOrientation(boolean theToTrack) {
+        final boolean toTrack = theToTrack;
+        this.runOnUiThread (new Runnable() { public void run() {
+            if(myToTrackOrient == toTrack
+            || mySensorOri     == null) {
+                myToTrackOrient = toTrack;
+                return;
+            }
+
+            myToTrackOrient = toTrack;
+            updateTrackOrientation(toTrack);
+        }});
     }
 
     /**
@@ -268,6 +301,13 @@ public class StActivity extends NativeActivity implements SensorEventListener {
 //region Methods to call C++ code
 
     /**
+     * Define device orientation sensor.
+     */
+    private native void cppDefineOrientationSensor(long theCppPtr,
+                                                   boolean theHasOri,
+                                                   boolean theIsPoorOri);
+
+    /**
      * Define device orientation by quaternion.
      */
     private native void cppSetQuaternion(long theCppPtr,
@@ -287,9 +327,10 @@ public class StActivity extends NativeActivity implements SensorEventListener {
 
     protected ContextWrapper myContext;
     protected SensorManager  mySensorMgr;
-    protected Sensor         mySensorRotVec;
-    protected Sensor         mySensorOriOld;
+    protected Sensor         mySensorOri;
     protected float          myQuat[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+    protected boolean        myIsPoorOri     = false;
+    protected boolean        myToTrackOrient = false;
     protected long           myCppGlue = 0; //!< pointer to c++ class StAndroidGlue instance
 
 //endregion

@@ -40,6 +40,10 @@ bool StWindowImpl::create() {
         return false;
     }
 
+    // retrieve fixed information
+    myHasOrientSensor = myParentWin->hasOrientationSensor();
+    myIsPoorOrient    = myParentWin->isPoorOrientationSensor();
+
     myParentWin->signals.onInputEvent += stSlot(this, &StWindowImpl::onAndroidInput);
     myParentWin->signals.onAppCmd     += stSlot(this, &StWindowImpl::onAndroidCommand);
 
@@ -338,6 +342,7 @@ void StWindowImpl::processEvents() {
 
     // check onNewIntent event
     StString aDndFile;
+    myParentWin->setTrackOrientation(myToTrackOrient);
     myParentWin->fetchState(aDndFile, myQuaternion);
     if(!aDndFile.isEmpty()) {
         myStEvent.Type = stEvent_FileDrop;
