@@ -229,7 +229,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
                              const StHandle<StOpenInfo>&        theOpenInfo,
                              const StString&                    theAppName)
 : StApplication(theResMgr, theParentWin, theOpenInfo),
-  myAppName(theAppName),
+  myAppName(!theAppName.isEmpty() ? theAppName : ST_DRAWER_PLUGIN_NAME),
   myEventLoaded(false),
   //
   mySlideShowTimer(false),
@@ -242,8 +242,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
   myEscNoQuit(false),
   myToHideUIFullScr(false),
   myToCheckPoorOrient(true) {
-    const StString& anAppName = !theAppName.isEmpty() ? theAppName : ST_DRAWER_PLUGIN_NAME;
-    mySettings = new StSettings(myResMgr, anAppName);
+    mySettings = new StSettings(myResMgr, myAppName);
     myLangMap  = new StTranslations(myResMgr, StImageViewer::ST_DRAWER_PLUGIN_NAME);
     myOpenDialog = new StOpenImage(this);
     StImageViewerStrings::loadDefaults(*myLangMap);
