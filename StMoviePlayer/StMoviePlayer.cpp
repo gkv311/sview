@@ -64,6 +64,7 @@ namespace {
     static const char ST_SETTING_OPENAL_DEVICE[] = "alDevice";
     static const char ST_SETTING_RECENT_FILES[]  = "recent";
     static const char ST_SETTING_SHOW_LIST[]     = "showPlaylist";
+    static const char ST_SETTING_TRACK_HEAD[]    = "toTrackHead";
     static const char ST_SETTING_SHOW_FPS[]      = "toShowFps";
     static const char ST_SETTING_MOBILE_UI[]     = "isMobileUI";
     static const char ST_SETTING_LIMIT_FPS[]     = "toLimitFps";
@@ -389,7 +390,8 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
   myToRecreateMenu(false),
   myToUpdateALList(false),
   myIsBenchmark(false),
-  myToCheckUpdates(true) {
+  myToCheckUpdates(true),
+  myToCheckPoorOrient(true) {
     mySettings = new StSettings(myResMgr, ST_DRAWER_PLUGIN_NAME);
     myLangMap  = new StTranslations(myResMgr, StMoviePlayer::ST_DRAWER_PLUGIN_NAME);
     myOpenDialog = new StOpenVideo(this);
@@ -457,6 +459,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.srcFormat->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchSrcFormat);
     params.ToShowPlayList   = new StBoolParam(false);
     params.ToShowPlayList->signals.onChanged = stSlot(this, &StMoviePlayer::doShowPlayList);
+    params.ToTrackHead = new StBoolParamNamed(true,  tr(MENU_VIEW_TRACK_HEAD));
     params.ToShowFps   = new StBoolParamNamed(false, tr(MENU_FPS_METER));
     params.IsMobileUI  = new StBoolParamNamed(StWindow::isMobile(), "Mobile UI");
     params.IsMobileUI->signals.onChanged = stSlot(this, &StMoviePlayer::doScaleHiDPI);
@@ -497,6 +500,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (ST_SETTING_SUBTITLES_PARSER,   params.SubtitlesParser);
     mySettings->loadParam (ST_SETTING_SEARCH_SUBS,        params.ToSearchSubs);
 
+    myToCheckPoorOrient = !mySettings->loadParam(ST_SETTING_TRACK_HEAD, params.ToTrackHead);
     mySettings->loadParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
     mySettings->loadParam (ST_SETTING_MOBILE_UI,          params.IsMobileUI);
     mySettings->loadParam (ST_SETTING_VSYNC,              params.IsVSyncOn);
@@ -716,6 +720,7 @@ void StMoviePlayer::releaseDevice() {
         mySettings->saveParam (ST_SETTING_GLOBAL_MKEYS,       params.areGlobalMKeys);
         mySettings->saveParam (ST_SETTING_SHOW_LIST,          params.ToShowPlayList);
 
+        mySettings->saveParam (ST_SETTING_TRACK_HEAD,         params.ToTrackHead);
         mySettings->saveParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
         mySettings->saveParam (ST_SETTING_MOBILE_UI,          params.IsMobileUI);
         mySettings->saveParam (ST_SETTING_VSYNC,              params.IsVSyncOn);
@@ -1005,6 +1010,13 @@ bool StMoviePlayer::open() {
     || !init()) {
         myMsgQueue->popAll();
         return false;
+    }
+
+    // disable head-tracking by default for poor sensors
+    if(myToCheckPoorOrient
+    && myWindow->isPoorOrientationSensor()) {
+        myToCheckPoorOrient = false;
+        params.ToTrackHead->setValue(false);
     }
 
     if(isReset) {

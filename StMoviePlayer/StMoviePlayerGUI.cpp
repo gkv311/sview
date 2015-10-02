@@ -620,6 +620,10 @@ void StMoviePlayerGUI::fillPanoramaMenu(StGLMenu* theMenu) {
                      myImage->params.ViewMode, StStereoParams::PANORAMA_SPHERE);
     theMenu->addItem(tr(MENU_VIEW_SURFACE_CUBEMAP),
                      myImage->params.ViewMode, StStereoParams::PANORAMA_CUBEMAP);
+    if(myWindow->hasOrientationSensor()) {
+        theMenu->addItem(tr(myWindow->isPoorOrientationSensor() ? MENU_VIEW_TRACK_HEAD_POOR : MENU_VIEW_TRACK_HEAD),
+                         myPlugin->params.ToTrackHead);
+    }
 }
 
 void StMoviePlayerGUI::doPanoramaCombo(const size_t ) {
@@ -1683,7 +1687,8 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
         myBtnPanorama->getTrackedValue()->setValue(aViewMode != StStereoParams::FLAT_IMAGE);
         myBtnPanorama->setOpacity(toShowPano ? anOpacity : 0.0f, false);
     }
-    myWindow->setTrackOrientation(aViewMode != StStereoParams::FLAT_IMAGE);
+    myWindow->setTrackOrientation(aViewMode != StStereoParams::FLAT_IMAGE
+                               && myPlugin->params.ToTrackHead->getValue());
     StQuaternion<double> aQ = myWindow->getDeviceOrientation();
     myImage->setDeviceOrientation(StGLQuaternion((float )aQ.x(), (float )aQ.y(), (float )aQ.z(), (float )aQ.w()));
 

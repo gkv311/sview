@@ -55,6 +55,8 @@
 1281="Sphère"
 1282="Cylindre"
 1283="Cubemap"
+?1285="Track orientation"
+?1286="Track orientation (poor)"
 1400="Changer la sortie"
 1401="A propos du Plugin..."
 1402="Voir I/S"

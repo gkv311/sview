@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -213,6 +213,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StBoolParam>     areGlobalMKeys;   //!< capture global multimedia keys
         StHandle<StInt32Param>    checkUpdatesDays; //!< days count between updates checks
         StHandle<StInt32Param>    srcFormat;        //!< source format
+        StHandle<StBoolParam>     ToTrackHead;      //!< enable/disable head-tracking
         StHandle<StBoolParam>     ToShowPlayList;   //!< display playlist
         StHandle<StBoolParam>     ToShowFps;        //!< display FPS meter
         StHandle<StBoolParam>     IsMobileUI;       //!< display mobile interface
@@ -377,6 +378,7 @@ class StMoviePlayer : public StApplication {
     bool                       myToUpdateALList;
     bool                       myIsBenchmark;
     bool                       myToCheckUpdates;
+    bool                       myToCheckPoorOrient; //!< switch off orientation sensor with poor quality
 
     friend class StMoviePlayerGUI;
 

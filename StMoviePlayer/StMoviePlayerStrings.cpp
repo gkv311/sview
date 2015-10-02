@@ -186,6 +186,10 @@ void loadDefaults(StLangMap& theStrings) {
                "Cylinder");
     theStrings(MENU_VIEW_SURFACE_CUBEMAP,
                "Cubemap");
+    theStrings(MENU_VIEW_TRACK_HEAD,
+               "Track orientation");
+    theStrings(MENU_VIEW_TRACK_HEAD_POOR,
+               "Track orientation (poor)");
     theStrings(MENU_VIEW_DISPLAY_MODE_STEREO,
                "Stereo");
     theStrings(MENU_VIEW_DISPLAY_MODE_LEFT,

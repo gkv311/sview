@@ -71,6 +71,8 @@
 ?1281="Sphere"
 ?1282="Cylinder"
 ?1283="Cubemap"
+?1285="Track orientation"
+?1286="Track orientation (poor)"
 ?1300="Audio"
 1301="없음"
 1302="오디오/비디오 지연시간"

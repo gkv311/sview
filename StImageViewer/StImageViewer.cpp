@@ -60,6 +60,7 @@ namespace {
     static const char ST_SETTING_SCALE_FORCE2X[] = "scale2X";
     static const char ST_SETTING_FULLSCREEN[]  = "fullscreen";
     static const char ST_SETTING_SLIDESHOW[]   = "slideshow";
+    static const char ST_SETTING_TRACK_HEAD[]  = "toTrackHead";
     static const char ST_SETTING_SHOW_FPS[]    = "toShowFps";
     static const char ST_SETTING_MOBILE_UI[]   = "isMobileUI";
     static const char ST_SETTING_VSYNC[]       = "vsync";
@@ -239,7 +240,8 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
   myToRecreateMenu(false),
   myToSaveSrcFormat(false),
   myEscNoQuit(false),
-  myToHideUIFullScr(false) {
+  myToHideUIFullScr(false),
+  myToCheckPoorOrient(true) {
     const StString& anAppName = !theAppName.isEmpty() ? theAppName : ST_DRAWER_PLUGIN_NAME;
     mySettings = new StSettings(myResMgr, anAppName);
     myLangMap  = new StTranslations(myResMgr, StImageViewer::ST_DRAWER_PLUGIN_NAME);
@@ -268,6 +270,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     params.checkUpdatesDays = new StInt32Param(7);
     params.srcFormat        = new StInt32Param(StFormat_AUTO);
     params.srcFormat->signals.onChanged.connect(this, &StImageViewer::doSwitchSrcFormat);
+    params.ToTrackHead   = new StBoolParamNamed(true,  tr(StImageViewerStrings::MENU_VIEW_TRACK_HEAD));
     params.ToShowFps     = new StBoolParamNamed(false, tr(StImageViewerStrings::MENU_SHOW_FPS));
     params.ToShowToolbar = new StBoolParamNamed(true, "Show toolbar");
     params.IsMobileUI = new StBoolParamNamed(StWindow::isMobile(), "Mobile UI");
@@ -283,6 +286,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadString(ST_SETTING_LAST_FOLDER,        params.lastFolder);
     mySettings->loadInt32 (ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
     mySettings->loadParam (ST_SETTING_UPDATES_INTERVAL,   params.checkUpdatesDays);
+    myToCheckPoorOrient = !mySettings->loadParam(ST_SETTING_TRACK_HEAD, params.ToTrackHead);
     mySettings->loadParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
     mySettings->loadParam (ST_SETTING_MOBILE_UI,          params.IsMobileUI);
     mySettings->loadParam (ST_SETTING_VSYNC,              params.IsVSyncOn);
@@ -416,6 +420,7 @@ void StImageViewer::releaseDevice() {
         mySettings->saveInt32(ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
         mySettings->saveParam(ST_SETTING_UPDATES_INTERVAL, params.checkUpdatesDays);
         mySettings->saveString(ST_SETTING_IMAGELIB,  StImageFile::imgLibToString(params.imageLib));
+        mySettings->saveParam (ST_SETTING_TRACK_HEAD,params.ToTrackHead);
         mySettings->saveParam (ST_SETTING_SHOW_FPS,  params.ToShowFps);
         mySettings->saveParam (ST_SETTING_MOBILE_UI, params.IsMobileUI);
         mySettings->saveParam (ST_SETTING_VSYNC,     params.IsVSyncOn);
@@ -598,6 +603,13 @@ bool StImageViewer::open() {
     || !init()) {
         myMsgQueue->popAll();
         return false;
+    }
+
+    // disable head-tracking by default for poor sensors
+    if(myToCheckPoorOrient
+    && myWindow->isPoorOrientationSensor()) {
+        myToCheckPoorOrient = false;
+        params.ToTrackHead->setValue(false);
     }
 
     if(isReset) {

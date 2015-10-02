@@ -55,6 +55,8 @@
 1281="Sphere"
 1282="Cylinder"
 1283="Cubemap"
+1285="Track orientation"
+1286="Track orientation (poor)"
 1400="Change device"
 1401="About Plugin..."
 1402="Show FPS"

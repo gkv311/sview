@@ -55,6 +55,8 @@
 1281="球面"
 1282="圆柱"
 ?1283="Cubemap"
+?1285="Track orientation"
+?1286="Track orientation (poor)"
 1400="改变设备->>"
 1401="关于插件..."
 1402="显示 FPS"

@@ -70,6 +70,8 @@
 1281="Kugel"
 1282="Zylinder"
 1283="Cubemap"
+?1285="Track orientation"
+?1286="Track orientation (poor)"
 1300="Audio"
 1301="keiner"
 1302="Audio/Video Verzögerung"

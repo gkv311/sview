@@ -128,6 +128,7 @@ class StImageViewer : public StApplication {
         StHandle<StBoolParam>    ScaleHiDPI2X;     //!< option to set HiDPI resolution to 2.0
         StHandle<StInt32Param>   checkUpdatesDays; //!< days count between updates checks
         StHandle<StInt32Param>   srcFormat;        //!< source format
+        StHandle<StBoolParam>    ToTrackHead;      //!< enable/disable head-tracking
         StHandle<StBoolParam>    ToShowToolbar;    //!< show/hide toolbar
         StHandle<StBoolParam>    ToShowFps;        //!< display FPS meter
         StHandle<StBoolParam>    IsMobileUI;       //!< display mobile interface
@@ -230,6 +231,7 @@ class StImageViewer : public StApplication {
     bool                       myToSaveSrcFormat; //!< indicates that active source format should be saved or not
     bool                       myEscNoQuit;       //!< if true then Escape will not quit application
     bool                       myToHideUIFullScr; //!< if true then GUI will be hidden in full-screen mode
+    bool                       myToCheckPoorOrient; //!< switch off orientation sensor with poor quality
 
         private:
 
