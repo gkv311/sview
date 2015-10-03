@@ -147,6 +147,7 @@ void StAndroidGlue::readOpenPath() {
     jclass      aJClassIntent       = aJniEnv->GetObjectClass(aJIntent);
     jmethodID   aJMet_getDataString = aJniEnv->GetMethodID(aJClassIntent, "getDataString", "()Ljava/lang/String;");
     jmethodID   aJMet_getType       = aJniEnv->GetMethodID(aJClassIntent, "getType",       "()Ljava/lang/String;");
+    jmethodID   aJMet_getFlags      = aJniEnv->GetMethodID(aJClassIntent, "getFlags",      "()I");
 
     // retrieve data path
     jstring     aJString      = (jstring )aJniEnv->CallObjectMethod(aJIntent, aJMet_getDataString);
@@ -155,6 +156,7 @@ void StAndroidGlue::readOpenPath() {
     aJniEnv->ReleaseStringUTFChars(aJString, aJStringStr);
 
     // retrieve data type
+    int aFlags    = aJniEnv->CallIntMethod(aJIntent, aJMet_getFlags);
     aJString      = (jstring )aJniEnv->CallObjectMethod(aJIntent, aJMet_getType);
     aJStringStr   = aJniEnv->GetStringUTFChars(aJString, 0);
     const StString aDataType = aJStringStr;
@@ -171,7 +173,14 @@ void StAndroidGlue::readOpenPath() {
     }
 
     StMutexAuto aLock(myFetchLock);
-    myDndPath = aDataPath;
+    if(myCreatePath.isEmpty()) {
+        myCreatePath = aDataPath;
+    }
+    // FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
+    // ignore outdated intent from history list - use C++ recent list instead
+    if((aFlags & 0x00100000) == 0) {
+        myDndPath = aDataPath;
+    }
 }
 
 void StAndroidGlue::fetchState(StString&             theNewFile,

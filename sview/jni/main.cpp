@@ -36,7 +36,7 @@ class StMainGlue : public StAndroidGlue {
      */
     ST_LOCAL virtual void createApplication() override {
         StMutexAuto aLock(myFetchLock);
-        const StString aFileExtension = StFileNode::getExtension(myDndPath);
+        const StString aFileExtension = StFileNode::getExtension(myCreatePath);
 
         StHandle<StOpenInfo> anInfo = new StOpenInfo();
         anInfo->setPath(myDndPath);
@@ -47,6 +47,7 @@ class StMainGlue : public StAndroidGlue {
         const StMIMEList aMimeImg(ST_IMAGE_PLUGIN_MIME_CHAR);
         for(size_t aMimeIter = 0; aMimeIter < aMimeImg.size(); ++aMimeIter) {
             if(aFileExtension.isEqualsIgnoreCase(aMimeImg[aMimeIter].getExtension())) {
+                anInfo->setPath(myCreatePath); // to be removed
                 myApp = new StImageViewer(aResMgr, this, anInfo);
                 return;
             }

@@ -385,6 +385,7 @@ class StAndroidGlue {
 
     StMutex                 myFetchLock;         //!< fetch data lock
     StString                myDndPath;           //!< intent data string
+    StString                myCreatePath;        //!< intent data string used to open this activity
     StQuaternion<double>    myQuaternion;        //!< device orientation
     bool                    myHasOrientSensor;   //!< flag indicating that device has orientation sensors
     bool                    myIsPoorOrient;      //!< flag indicating that available orientation sensor provides imprecise values
