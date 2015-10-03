@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2014 Kirill Gavrilov
+ * Copyright © 2007-2015 Kirill Gavrilov
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -8,22 +8,6 @@
 
 #include <StSettings/StSettings.h>
 
-/*#if defined(__ANDROID__)
-
-bool StSettings::load() { return true; }
-bool StSettings::save() { return false; }
-StSettings::StSettings(const StString& theSettingsSet) {}
-StSettings::~StSettings() {}
-bool StSettings::loadInt32 (const StString& ,
-                            int32_t&        ) { return false; }
-bool StSettings::saveInt32 (const StString& ,
-                            const int32_t&  ) { return false; }
-bool StSettings::loadString(const StString& ,
-                            StString&       ) { return false; }
-bool StSettings::saveString(const StString& ,
-                            const StString& ) { return false; }
-
-#elif !defined(_WIN32) && !defined(__APPLE__)*/
 #if !defined(_WIN32) && !defined(__APPLE__)
 
 #include <StStrings/StLogger.h>
@@ -36,17 +20,35 @@ bool StSettings::saveString(const StString& ,
 using namespace libconfig;
 
 bool StSettings::load() {
-    if(myIsLoaded) {
-        return true;
+    if(!myToLoad) {
+        return myIsLoaded;
+    }
+
+    myToLoad = false;
+    if(myFullFileName.isEmpty()
+    || !StFileNode::isFileExists(myFullFileName)) {
+        myIsLoaded = false;
+        ST_DEBUG_LOG("StSettings, file " + myFullFileName + " does not exist");
+        return false;
     }
 
     try {
-        myConfig->readFile(myFullFileName.toCString()); // load the configuration
+        myConfig->readFile(myFullFileName.toCString());
+        myIsLoaded = true;
+        return true;
     } catch(...) {
-        ST_DEBUG_LOG("StSettings, failed to parse " + myFullFileName);
+        //
+    }
+
+    // the only option to recover?
+    delete myConfig;
+    myConfig = new Config();
+    ST_ERROR_LOG("StSettings, failed to parse " + myFullFileName);
+    if(!StFileNode::removeFile(myFullFileName)) {
+        ST_ERROR_LOG("StSettings, file " + myFullFileName + " can not be removed");
         return false;
     }
-    return true;
+    return false;
 }
 
 bool StSettings::save() {
@@ -62,7 +64,8 @@ bool StSettings::save() {
 StSettings::StSettings(const StHandle<StResourceManager>& theResMgr,
                        const StString&                    theSettingsSet)
 : myConfig(new Config()),
-  myIsLoaded(false) {
+  myIsLoaded(false),
+  myToLoad(true) {
     myFullFileName = theResMgr->getSettingsFolder() + theSettingsSet + ".cfg";
 }
 

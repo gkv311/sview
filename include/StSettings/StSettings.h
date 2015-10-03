@@ -233,9 +233,10 @@ class StSettings {
     StString             myFilePath;
     NSMutableDictionary* myDict;
 #else
-    StString             myFullFileName;
-    libconfig::Config*   myConfig;
-    bool                 myIsLoaded;
+    StString             myFullFileName;  //!< path to the file
+    libconfig::Config*   myConfig;        //!< config instance
+    bool                 myIsLoaded;      //!< flag indicating last parsing state
+    bool                 myToLoad;        //!< flag to parse the settings file
 #endif
 
 };
