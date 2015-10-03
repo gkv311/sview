@@ -195,6 +195,12 @@ class StWindow {
     ST_CPPEXPORT bool isActive() const;
 
     /**
+     * Return true if window is in paused state (e.g. it is hidden and can be closed by system at any moment).
+     * Similar to !isActive() but more aggressive - application should consider destroying itself.
+     */
+    ST_CPPEXPORT bool isPaused() const;
+
+    /**
      * Show up the window.
      */
     ST_CPPEXPORT virtual void show();

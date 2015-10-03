@@ -94,6 +94,10 @@ bool StWindow::isActive() const {
     return myWin->isActive();
 }
 
+bool StWindow::isPaused() const {
+    return myWin->myIsPaused;
+}
+
 bool StWindow::isLostDevice() const {
     return myWin->myToResetDevice;
 }

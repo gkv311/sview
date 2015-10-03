@@ -1494,8 +1494,30 @@ void StMoviePlayer::stglDraw(unsigned int theView) {
          && myGUI->myImage != NULL) {
             myGUI->myImage->stglSkipFrames();
         }
+
+        if(theView == ST_DRAW_LEFT
+        || theView == ST_DRAW_MONO) {
+            if(myWindow->isPaused()) {
+                double aDuration = 0.0;
+                double aPts      = 0.0;
+                bool isVideoPlayed = false, isAudioPlayed = false;
+                const bool isPlaying = !myVideo.isNull()
+                                     && myVideo->getPlaybackState(aDuration, aPts, isVideoPlayed, isAudioPlayed);
+                if(!myInactivityTimer.isOn()) {
+                    myInactivityTimer.restart();
+                } else if(myInactivityTimer.getElapsedTimeInSec() > 60.0
+                      && !isPlaying) {
+                    // perform delayed destruction on long inactivity
+                    exit(0);
+                } else if(!isVideoPlayed) {
+                    // force deep sleeps
+                    StThread::sleep(100);
+                }
+            }
+        }
         return;
     }
+    myInactivityTimer.stop();
 
     if(myContext->core20fwd != NULL) {
         // clear the screen and the depth buffer

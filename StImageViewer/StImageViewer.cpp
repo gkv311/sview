@@ -990,8 +990,23 @@ void StImageViewer::beforeDraw() {
 void StImageViewer::stglDraw(unsigned int theView) {
     if( myContext.isNull()
     || !myContext->isBound()) {
+        if(theView == ST_DRAW_LEFT
+        || theView == ST_DRAW_MONO) {
+            if(myWindow->isPaused()) {
+                if(!myInactivityTimer.isOn()) {
+                    myInactivityTimer.restart();
+                } else if(myInactivityTimer.getElapsedTimeInSec() > 60.0) {
+                    // perform delayed destruction on long inactivity
+                    exit(0);
+                } else {
+                    // force deep sleeps
+                    StThread::sleep(100);
+                }
+            }
+        }
         return;
     }
+    myInactivityTimer.stop();
 
     if(myContext->core20fwd != NULL) {
         // clear the screen and the depth buffer

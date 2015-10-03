@@ -321,6 +321,7 @@ class StWindowImpl {
     bool               myToResetDevice;   //!< indicate device lost state
     bool               myIsUpdated;       //!< helper flag on window movements updates
     bool               myIsActive;        //!< window visible state
+    bool               myIsPaused;        //!< window is in background
     BlockSleep         myBlockSleep;      //!< indicates that display sleep was blocked or not
     bool               myIsSystemLocked;   //!< flag indicating that user session is in locked state
     volatile bool      myIsDispChanged;   //!< monitors reconfiguration event

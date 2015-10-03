@@ -185,6 +185,7 @@ void StWindowImpl::onAndroidInput(const AInputEvent* theEvent,
 }
 
 bool StWindowImpl::onAndroidInitWindow() {
+    myIsPaused = false;
     if(myParentWin->getWindow() == NULL) {
         return false;
     }
@@ -291,7 +292,12 @@ void StWindowImpl::onAndroidCommand(int32_t theCommand) {
             postKeyUp  (myStEvent);
             return;
         }
+        case StAndroidGlue::CommandId_Resume: {
+            myIsPaused = false;
+            return;
+        }
         case StAndroidGlue::CommandId_Pause: {
+            myIsPaused = true;
             myStEvent.Type       = stEvent_Pause;
             myStEvent.Pause.Time = getEventTime();
             signals.onPause->emit(myStEvent.Pause);

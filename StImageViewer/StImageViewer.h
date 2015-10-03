@@ -224,6 +224,7 @@ class StImageViewer : public StApplication {
     StString                   myAppName;         //!< name of customized application
 
     StCondition                myEventLoaded;     //!< indicate that new file was open
+    StTimer                    myInactivityTimer; //!< timer initialized when application goes into paused state
 
     StTimer                    mySlideShowTimer;  //!< slideshow stuff
     double                     mySlideShowDelay;

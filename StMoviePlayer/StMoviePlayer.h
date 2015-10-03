@@ -369,6 +369,7 @@ class StMoviePlayer : public StApplication {
     StHandle<StOpenVideo>      myOpenDialog;      //!< file open dialog
 
     StCondition                myEventLoaded;     //!< indicate that new file was open
+    StTimer                    myInactivityTimer; //!< timer initialized when application goes into paused state
     double                     mySeekOnLoad;      //!< seeking target
     int32_t                    myAudioOnLoad;     //!< audio     track on load
     int32_t                    mySubsOnLoad;      //!< subtitles track on load
