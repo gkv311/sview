@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2014 Kirill Gavrilov
+ * Copyright © 2007-2015 Kirill Gavrilov
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -56,12 +56,21 @@ struct StRegKey {
 StSettings::StSettings(const StHandle<StResourceManager>& /*theResMgr*/,
                        const StString&                    theSettingsSet)
 : mySettingsSet(theSettingsSet.toUtfWide()),
-  myRegisterPath(StStringUtfWide("SOFTWARE\\sView\\") + theSettingsSet.toUtfWide()) {
+  myRegisterPath(StStringUtfWide("SOFTWARE\\sView\\") + theSettingsSet.toUtfWide()),
+  myToFlush(false) {
     //
 }
 
 StSettings::~StSettings() {
     //
+}
+
+bool StSettings::load() {
+    return true; // has no effect
+}
+
+bool StSettings::flush() {
+    return true; // has no effect
 }
 
 bool StSettings::loadInt32(const StString& theParam,

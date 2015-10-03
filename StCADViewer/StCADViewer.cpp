@@ -269,6 +269,7 @@ void StCADViewer::saveAllParams() {
         mySettings->saveInt32(ST_SETTING_FPSTARGET, params.TargetFps);
         mySettings->saveParam(ST_SETTING_SHOW_FPS,  params.ToShowFps);
     }
+    mySettings->flush();
 }
 
 void StCADViewer::releaseDevice() {

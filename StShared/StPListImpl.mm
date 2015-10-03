@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2014 Kirill Gavrilov
+ * Copyright © 2011-2015 Kirill Gavrilov
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -35,25 +35,32 @@ bool StSettings::load() {
     return true;
 }
 
-bool StSettings::save() {
+bool StSettings::flush() {
+    if(!myToFlush) {
+        return true;
+    }
+
     StCocoaLocalPool aLocalPool;
     StCocoaString aPath(myFilePath);
     if([myDict writeToFile: aPath.toStringNs() atomically: NO] == NO) {
         ST_DEBUG_LOG("StConfig, failed write to " + myFilePath);
         return false;
     }
+
+    myToFlush = false;
     return true;
 }
 
 StSettings::StSettings(const StHandle<StResourceManager>& theResMgr,
                        const StString&                    theSettingsSet)
-: myDict(NULL){
+: myDict(NULL),
+  myToFlush(false) {
     myFilePath = theResMgr->getSettingsFolder() + theSettingsSet + ".plist";
     load();
 }
 
 StSettings::~StSettings() {
-    save();
+    flush();
     [myDict release];
 }
 
@@ -76,7 +83,8 @@ bool StSettings::saveInt32(const StString& theParamPath,
     NSNumber* aNumber = [[NSNumber alloc] initWithInt: theValue];
     [myDict setObject: aNumber forKey: aPath.toStringNs()];
     [aNumber release];
-    return save();
+    myToFlush = true;
+    return true;
 }
 
 bool StSettings::loadString(const StString& theParamPath,
@@ -98,7 +106,8 @@ bool StSettings::saveString(const StString& theParamPath,
     StCocoaString aPath(theParamPath);
     StCocoaString aValue(theValue);
     [myDict setObject: aValue.toStringNs() forKey: aPath.toStringNs()];
-    return save();
+    myToFlush = true;
+    return true;
 }
 
 #endif // __APPLE__

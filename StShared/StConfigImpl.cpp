@@ -20,11 +20,6 @@
 using namespace libconfig;
 
 bool StSettings::load() {
-    if(!myToLoad) {
-        return myIsLoaded;
-    }
-
-    myToLoad = false;
     if(myFullFileName.isEmpty()
     || !StFileNode::isFileExists(myFullFileName)) {
         myIsLoaded = false;
@@ -51,13 +46,19 @@ bool StSettings::load() {
     return false;
 }
 
-bool StSettings::save() {
+bool StSettings::flush() {
+    if(!myToFlush) {
+        return true;
+    }
+
     try {
         myConfig->writeFile(myFullFileName.toCString());
     } catch(...) {
         ST_DEBUG_LOG("StSettings, failed write to " + myFullFileName);
         return false;
     }
+
+    myToFlush = false;
     return true;
 }
 
@@ -65,17 +66,19 @@ StSettings::StSettings(const StHandle<StResourceManager>& theResMgr,
                        const StString&                    theSettingsSet)
 : myConfig(new Config()),
   myIsLoaded(false),
-  myToLoad(true) {
+  myToFlush(false) {
     myFullFileName = theResMgr->getSettingsFolder() + theSettingsSet + ".cfg";
+    load();
 }
 
 StSettings::~StSettings() {
+    flush();
     delete myConfig;
 }
 
 bool StSettings::loadInt32(const StString& theParamPath,
                            int32_t&        theValue) {
-    if(!load()) {
+    if(!myIsLoaded) {
         return false;
     }
     try {
@@ -108,9 +111,8 @@ inline bool groupName(const StString& theParamPath,
 
 bool StSettings::saveInt32(const StString& theParamPath,
                            const int32_t&  theValue) {
-    bool isLoaded = load(); // try to load config firstly
     try {
-        if(!isLoaded || !myConfig->exists(theParamPath.toCString())) {
+        if(!myConfig->exists(theParamPath.toCString())) {
             Setting& aRoot = myConfig->getRoot();
             StString aParamGroup, aParamName;
             if(groupName(theParamPath, aParamGroup, aParamName)) {
@@ -129,7 +131,6 @@ bool StSettings::saveInt32(const StString& theParamPath,
             );*/
         }
         myConfig->lookup(theParamPath.toCString()) = theValue;
-        save();
     } catch(ParseException& ex) {
         ST_DEBUG_LOG("StSettings, error on line " + ex.getLine() + ": " + ex.getError());
         return false;
@@ -140,12 +141,13 @@ bool StSettings::saveInt32(const StString& theParamPath,
         ST_DEBUG_LOG("StSettings[" + theParamPath + "], config exception!");
         return false;
     }
+    myToFlush = true;
     return true;
 }
 
 bool StSettings::loadString(const StString& theParamPath,
                             StString&       theValue) {
-    if(!load()) {
+    if(!myIsLoaded) {
         return false;
     }
     try {
@@ -164,9 +166,8 @@ bool StSettings::loadString(const StString& theParamPath,
 
 bool StSettings::saveString(const StString& theParamPath,
                             const StString& theValue) {
-    bool isLoaded = load(); // try to load config firstly
     try {
-        if(!isLoaded || !myConfig->exists(theParamPath.toCString())) {
+        if(!myConfig->exists(theParamPath.toCString())) {
             Setting& aRoot = myConfig->getRoot();
             StString aParamGroup, aParamName;
             if(groupName(theParamPath, aParamGroup, aParamName)) {
@@ -185,7 +186,6 @@ bool StSettings::saveString(const StString& theParamPath,
             );*/
         }
         myConfig->lookup(theParamPath.toCString()) = theValue.toCString();
-        save();
     } catch(ParseException& ex) {
         ST_DEBUG_LOG("StSettings, error on line " + ex.getLine() + ": " + ex.getError());
         return false;
@@ -196,6 +196,7 @@ bool StSettings::saveString(const StString& theParamPath,
         ST_DEBUG_LOG("StSettings[" + theParamPath + "], config exception!");
         return false;
     }
+    myToFlush = true;
     return true;
 }
 

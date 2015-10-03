@@ -296,6 +296,7 @@ void StOutDual::beforeClose() {
     mySettings->saveParam(ST_SETTING_SLAVE_ID,  params.SlaveMonId);
     mySettings->saveParam(ST_SETTING_MONOCLONE, params.MonoClone);
     mySettings->saveInt32(ST_SETTING_DEVICE_ID, myDevice);
+    mySettings->flush();
 }
 
 StOutDual::~StOutDual() {

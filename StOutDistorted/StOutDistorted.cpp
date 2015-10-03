@@ -464,6 +464,7 @@ void StOutDistorted::beforeClose() {
     if(myWasUsed) {
         mySettings->saveInt32(ST_SETTING_DEVICE_ID, myDevice);
     }
+    mySettings->flush();
 }
 
 StOutDistorted::~StOutDistorted() {

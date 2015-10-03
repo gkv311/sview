@@ -99,6 +99,7 @@ StOutPageFlipExt::~StOutPageFlipExt() {
 void StOutPageFlipExt::beforeClose() {
     StOutPageFlip::beforeClose();
     mySettings->saveParam(ST_SETTING_DEV_CONTROL, params.ControlCode);
+    mySettings->flush();
     if(!StOutPageFlip::params.ToShowExtra->getValue()) {
         return;
     }

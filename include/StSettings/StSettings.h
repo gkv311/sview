@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2014 Kirill Gavrilov
+ * Copyright © 2007-2015 Kirill Gavrilov
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -51,6 +51,18 @@ class StSettings {
      * Destructor.
      */
     ST_CPPEXPORT virtual ~StSettings();
+
+    /**
+     * Immediately write settings into external storage (e.g. file).
+     * Has no effect on implementations storing data on saving each individual parameter.
+     *
+     * Usually settings will be stored automatically within class destruction.
+     * This method can be used to perform this more frequently in environments
+     * where application can be destroyed in unsafe way.
+     *
+     * @return true if settings have been saved
+     */
+    ST_CPPEXPORT bool flush();
 
         public: //! @name persistence implementation
 
@@ -219,10 +231,11 @@ class StSettings {
 
         private:
 
-#ifndef _WIN32
+    /**
+     * Read settings from external storage.
+     * Called within main constructor.
+     */
     ST_LOCAL bool load();
-    ST_LOCAL bool save();
-#endif
 
         private:
 
@@ -236,8 +249,8 @@ class StSettings {
     StString             myFullFileName;  //!< path to the file
     libconfig::Config*   myConfig;        //!< config instance
     bool                 myIsLoaded;      //!< flag indicating last parsing state
-    bool                 myToLoad;        //!< flag to parse the settings file
 #endif
+    bool                 myToFlush;       //!< settings have been changed but not yet saved
 
 };
 

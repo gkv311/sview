@@ -381,6 +381,7 @@ void StOutInterlace::beforeClose() {
     mySettings->saveParam(ST_SETTING_BIND_MONITOR, params.BindToMon);
     mySettings->saveParam(ST_SETTING_REVERSE,      params.ToReverse);
     mySettings->saveInt32(ST_SETTING_DEVICE_ID,    myDevice);
+    mySettings->flush();
 
     // process exit from StApplication
     if((myDevice == DEVICE_HINTERLACE_ED) && myIsEDactive) {

@@ -578,12 +578,6 @@ void StOutPageFlip::releaseResources() {
     StWindow::hide();
     if(isMovable()) {
         StWindow::setFullScreen(false);
-        mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
-    }
-    mySettings->saveInt32(ST_SETTING_DEVICE_ID,  myDevice);
-    mySettings->saveParam(ST_SETTING_ADVANCED,   params.ToShowExtra);
-    if(myWasUsed) {
-        mySettings->saveParam(ST_SETTING_QUADBUFFER, params.QuadBuffer);
     }
 }
 
@@ -594,6 +588,7 @@ void StOutPageFlip::beforeClose() {
     if(myWasUsed) {
         mySettings->saveParam(ST_SETTING_QUADBUFFER, params.QuadBuffer);
     }
+    mySettings->flush();
 }
 
 StOutPageFlip::~StOutPageFlip() {

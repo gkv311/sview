@@ -746,6 +746,7 @@ void StMoviePlayer::saveAllParams() {
     }
     myPlayList->currentToRecent();
     mySettings->saveString(ST_SETTING_RECENT_FILES, myPlayList->dumpRecentList());
+    mySettings->flush();
 }
 
 void StMoviePlayer::releaseDevice() {

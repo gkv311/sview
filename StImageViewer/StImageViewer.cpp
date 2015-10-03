@@ -433,6 +433,7 @@ void StImageViewer::saveAllParams() {
             mySettings->saveHotKey(anIter->second);
         }
     }
+    mySettings->flush();
 }
 
 void StImageViewer::releaseDevice() {

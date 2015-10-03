@@ -205,6 +205,7 @@ void StOutAnaglyph::beforeClose() {
     mySettings->saveParam(ST_SETTING_GLASSES,   params.Glasses);
     mySettings->saveParam(ST_SETTING_REDCYAN,   params.RedCyan);
     mySettings->saveParam(ST_SETTING_AMBERBLUE, params.AmberBlue);
+    mySettings->flush();
 }
 
 StOutAnaglyph::~StOutAnaglyph() {
