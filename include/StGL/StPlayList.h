@@ -338,6 +338,12 @@ class StPlayList {
     ST_CPPEXPORT StString dumpRecentList() const;
 
     /**
+     * Set last recent file to the currently played file.
+     * Has effect only for playlist automatically generated from opened file (not folder).
+     */
+    ST_CPPEXPORT void currentToRecent();
+
+    /**
      * Open recent file at specified position.
      * @param theItemId Position in recent files list
      * @return saved parameters or NULL

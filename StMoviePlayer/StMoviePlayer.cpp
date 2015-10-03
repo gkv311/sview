@@ -744,6 +744,8 @@ void StMoviePlayer::saveAllParams() {
             mySettings->saveHotKey(anIter->second);
         }
     }
+    myPlayList->currentToRecent();
+    mySettings->saveString(ST_SETTING_RECENT_FILES, myPlayList->dumpRecentList());
 }
 
 void StMoviePlayer::releaseDevice() {
@@ -762,8 +764,6 @@ StMoviePlayer::~StMoviePlayer() {
     releaseDevice();
     // wait video playback thread to quit and release resources
     myVideo.nullify();
-
-    mySettings->saveString(ST_SETTING_RECENT_FILES, myPlayList->dumpRecentList());
 }
 
 bool StMoviePlayer::createGui(StHandle<StGLTextureQueue>& theTextureQueue,

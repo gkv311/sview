@@ -866,6 +866,16 @@ void StPlayList::getRecentList(StArrayList<StString>& theList) const {
     }
 }
 
+void StPlayList::currentToRecent() {
+    StMutexAuto anAutoLock(myMutex);
+    if( myCurrent == NULL
+    || !myPlsFile.isNull()) {
+        return;
+    }
+
+    addRecentFile(*myCurrent->getFileNode());
+}
+
 const StHandle<StPlayList::StRecentItem>& StPlayList::addRecentFile(const StFileNode& theFile,
                                                                     const bool        theToFront) {
     // remove duplicates
