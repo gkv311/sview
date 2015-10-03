@@ -245,7 +245,7 @@ class StStereoParams {
 
     void moveSphere(const StGLVec2& theMoveVec) {
         PanPhi   += theMoveVec.x();
-        PanTheta += theMoveVec.y();
+        PanTheta = clipPitch(PanTheta + theMoveVec.y());
     }
 
     void moveToRight(const GLfloat theDuration = 0.02f) {
@@ -266,21 +266,41 @@ class StStereoParams {
         }
     }
 
+    /**
+     * Clip pitch angle to the range [-90, 90] degrees.
+     */
+    static float clipPitch(const float thePitchDeg) {
+        if(thePitchDeg <= -90.0f) {
+            return -90.0f;
+        } else if(thePitchDeg >= 90.0f) {
+            return  90.0f;
+        }
+        return thePitchDeg;
+    }
+
     void moveToDown(const GLfloat theDuration = 0.02f) {
         switch(ViewingMode) {
             case PANORAMA_SPHERE:
-            case PANORAMA_CUBEMAP: PanTheta -= 100.0f * theDuration; break;
+            case PANORAMA_CUBEMAP:
+                PanTheta = clipPitch(PanTheta - 100.0f * theDuration);
+                break;
             case FLAT_IMAGE:
-            default: PanCenter.y() -= 0.5f * theDuration / ScaleFactor;
+            default:
+                PanCenter.y() -= 0.5f * theDuration / ScaleFactor;
+                break;
         }
     }
 
     void moveToUp(const GLfloat theDuration = 0.02f) {
         switch(ViewingMode) {
             case PANORAMA_SPHERE:
-            case PANORAMA_CUBEMAP: PanTheta += 100.0f * theDuration; break;
+            case PANORAMA_CUBEMAP:
+                PanTheta = clipPitch(PanTheta + 100.0f * theDuration);
+                break;
             case FLAT_IMAGE:
-            default: PanCenter.y() += 0.5f * theDuration / ScaleFactor;
+            default:
+                PanCenter.y() += 0.5f * theDuration / ScaleFactor;
+                break;
         }
     }
 

@@ -661,7 +661,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             // compute orientation
             StGLVec2 aMouseMove = getMouseMoveSphere();
             float aYaw   = -stToRadians(aParams->PanPhi   + aMouseMove.x()) + stToRadians(90.0f);
-            float aPitch =  stToRadians(aParams->PanTheta + aMouseMove.y());
+            float aPitch =  stToRadians(StStereoParams::clipPitch(aParams->PanTheta + aMouseMove.y()));
             float aRoll  =  stToRadians(aParams->getZRotate());
 
             // apply separation
@@ -715,7 +715,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             // compute orientation
             StGLVec2 aMouseMove = getMouseMoveSphere();
             float aYaw   = -stToRadians(aParams->PanPhi   + aMouseMove.x()) + stToRadians(90.0f);
-            float aPitch =  stToRadians(aParams->PanTheta + aMouseMove.y());
+            float aPitch =  stToRadians(StStereoParams::clipPitch(aParams->PanTheta + aMouseMove.y()));
             float aRoll  =  stToRadians(aParams->getZRotate());
 
             // apply separation
