@@ -1,7 +1,7 @@
 /**
  * This is source code for sView
  *
- * Copyright © Kirill Gavrilov, 2014
+ * Copyright © Kirill Gavrilov, 2014-2015
  */
 
 #if defined(__ANDROID__)
@@ -47,7 +47,12 @@ class StMainGlue : public StAndroidGlue {
         const StMIMEList aMimeImg(ST_IMAGE_PLUGIN_MIME_CHAR);
         for(size_t aMimeIter = 0; aMimeIter < aMimeImg.size(); ++aMimeIter) {
             if(aFileExtension.isEqualsIgnoreCase(aMimeImg[aMimeIter].getExtension())) {
-                anInfo->setPath(myCreatePath); // to be removed
+                StArgumentsMap anArgs = anInfo->getArgumentsMap();
+                if(anInfo->isEmpty()) {
+                    anArgs.set(StDictEntry("last",    "true"));
+                }
+                anArgs.set(StDictEntry("toSaveRecent","true"));
+                anInfo->setArgumentsMap(anArgs);
                 myApp = new StImageViewer(aResMgr, this, anInfo);
                 return;
             }

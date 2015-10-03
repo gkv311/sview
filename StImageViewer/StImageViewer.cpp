@@ -51,6 +51,9 @@ namespace {
     static const char ST_SETTING_FPSTARGET[]   = "fpsTarget";
     static const char ST_SETTING_SRCFORMAT[]   = "srcFormat";
     static const char ST_SETTING_LAST_FOLDER[] = "lastFolder";
+    static const char ST_SETTING_RECENT_L[]    = "recentL";
+    static const char ST_SETTING_RECENT_R[]    = "recentR";
+    static const char ST_SETTING_SAVE_RECENT[] = "toSaveRecent";
     static const char ST_SETTING_COMPRESS[]    = "toCompress";
     static const char ST_SETTING_ESCAPENOQUIT[]= "escNoQuit";
     static const char ST_SETTING_FULLSCREENUI[]= "fullScreenUI";
@@ -76,6 +79,7 @@ namespace {
 
     static const char ST_ARGUMENT_FILE_LEFT[]  = "left";
     static const char ST_ARGUMENT_FILE_RIGHT[] = "right";
+    static const char ST_ARGUMENT_FILE_LAST[]  = "last";
 
 }
 
@@ -277,6 +281,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     params.IsVSyncOn  = new StBoolParam(true);
     params.IsVSyncOn->signals.onChanged = stSlot(this, &StImageViewer::doSwitchVSync);
     StApplication::params.VSyncMode->setValue(StGLContext::VSync_ON);
+    params.ToSaveRecent = new StBoolParam(false);
 
     params.imageLib = StImageFile::ST_LIBAV,
     params.TargetFps = 0;
@@ -433,6 +438,20 @@ void StImageViewer::saveAllParams() {
             mySettings->saveHotKey(anIter->second);
         }
     }
+
+    StString aLastL, aLastR;
+    StHandle<StFileNode> aFile = myLoader->getPlayList().getCurrentFile();
+    if(params.ToSaveRecent->getValue()
+    && !aFile.isNull()) {
+        if(aFile->isEmpty()) {
+            aLastL = aFile->getPath();
+        } else if(aFile->size() == 2) {
+            aLastL = aFile->getValue(0)->getPath();
+            aLastR = aFile->getValue(1)->getPath();
+        }
+    }
+    mySettings->saveString(ST_SETTING_RECENT_L, aLastL);
+    mySettings->saveString(ST_SETTING_RECENT_R, aLastR);
     mySettings->flush();
 }
 
@@ -570,6 +589,7 @@ void StImageViewer::parseArguments(const StArgumentsMap& theArguments) {
     StArgument argEscNoQuit  = theArguments[ST_SETTING_ESCAPENOQUIT];
     StArgument argFullScreenUI = theArguments[ST_SETTING_FULLSCREENUI];
     StArgument argToolbar    = theArguments[ST_SETTING_SHOW_TOOLBAR];
+    StArgument argSaveRecent = theArguments[ST_SETTING_SAVE_RECENT];
     if(argToCompress.isValid()) {
         myLoader->setCompressMemory(!argToCompress.isValueOff());
     }
@@ -599,6 +619,9 @@ void StImageViewer::parseArguments(const StArgumentsMap& theArguments) {
         params.imageLib = StImageFile::imgLibFromString(argImgLibrary.getValue());
         myLoader->setImageLib(params.imageLib);
     }
+    if(argSaveRecent.isValid()) {
+        params.ToSaveRecent->setValue(!argSaveRecent.isValueOff());
+    }
 }
 
 bool StImageViewer::open() {
@@ -624,6 +647,27 @@ bool StImageViewer::open() {
     parseArguments(myOpenFileInfo->getArgumentsMap());
     const StMIME anOpenMIME = myOpenFileInfo->getMIME();
     if(myOpenFileInfo->getPath().isEmpty()) {
+        const StArgument anArgLast = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_LAST];
+        if(anArgLast.isValid() && !anArgLast.isValueOff()) {
+            StString aLastL, aLastR;
+            mySettings->loadString(ST_SETTING_RECENT_L, aLastL);
+            mySettings->loadString(ST_SETTING_RECENT_R, aLastR);
+            if(!aLastL.isEmpty()) {
+                if(!aLastR.isEmpty()) {
+                    myLoader->getPlayList().clear();
+                    myLoader->getPlayList().addOneFile(aLastL, aLastR);
+                } else {
+                    myLoader->getPlayList().open(aLastL);
+                }
+
+                if(!myLoader->getPlayList().isEmpty()) {
+                    doUpdateStateLoading();
+                    myLoader->doLoadNext();
+                }
+                return true;
+            }
+        }
+
         // open drawer without files
         return true;
     }

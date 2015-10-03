@@ -134,6 +134,7 @@ class StImageViewer : public StApplication {
         StHandle<StBoolParam>    ToShowFps;        //!< display FPS meter
         StHandle<StBoolParam>    IsMobileUI;       //!< display mobile interface
         StHandle<StBoolParam>    IsVSyncOn;        //!< flag to use VSync
+        StHandle<StBoolParam>    ToSaveRecent;     //!< load/save recent file
         StString                 lastFolder;       //!< laster folder used to open / save file
         StImageFile::ImageClass  imageLib;         //!< preferred image library
         int                      TargetFps;        //!< limit or not rendering FPS
