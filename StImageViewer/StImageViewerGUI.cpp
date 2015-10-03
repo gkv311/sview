@@ -703,8 +703,7 @@ void StImageViewerGUI::doMobileSettings(const size_t ) {
     aParams.add(myPlugin->params.IsMobileUI);
     myLangMap->params.language->setName(tr(MENU_HELP_LANGS));
 
-    const StString aTitle  = "Settings";
-    StInfoDialog*  aDialog = new StInfoDialog(myPlugin, this, aTitle, scale(512), scale(300));
+    StInfoDialog* aDialog = new StInfoDialog(myPlugin, this, tr(MENU_HELP_SETTINGS), scale(512), scale(300));
 
     const int aWidthMax  = aDialog->getContent()->getRectPx().width();
     int       aRowLast   = (int )aParams.size();
@@ -945,7 +944,7 @@ void StImageViewerGUI::doShowMobileExMenu(const size_t ) {
     anItem->setIcon(stCMenuIcon("actionHelp"));
     anItem->signals.onItemClick += stSlot(this, &StImageViewerGUI::doAboutProgram);
     //anItem = aMenu->addItem(myPlugin->StApplication::params.ActiveDevice->getActiveValue());
-    anItem = aMenu->addItem("Settings");
+    anItem = aMenu->addItem(tr(MENU_HELP_SETTINGS));
     anItem->setIcon(stCMenuIcon("actionSettings"));
     anItem->signals.onItemClick += stSlot(this, &StImageViewerGUI::doMobileSettings);
     anItem = aMenu->addItem("Slideshow", myPlugin->getAction(StImageViewer::Action_SlideShow));

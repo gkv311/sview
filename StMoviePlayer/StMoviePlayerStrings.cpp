@@ -283,6 +283,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Never");
     theStrings(MENU_HELP_HOTKEYS,
                "Hotkeys");
+    theStrings(MENU_HELP_SETTINGS,
+               "Settings");
     theStrings(FILE_VIDEO_OPEN,
                "Open another movie");
     theStrings(BTN_SRC_FORMAT,

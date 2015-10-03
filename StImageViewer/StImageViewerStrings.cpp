@@ -198,6 +198,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Never"),
     theStrings(MENU_HELP_HOTKEYS,
                "Hotkeys");
+    theStrings(MENU_HELP_SETTINGS,
+               "Settings");
     theStrings(IMAGE_OPEN,
                "Open another image");
     theStrings(IMAGE_PREVIOUS,

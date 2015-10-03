@@ -164,6 +164,7 @@ namespace StMoviePlayerStrings {
         MENU_HELP_SYSINFO = 1508,
         MENU_HELP_SCALE   = 1509,
         MENU_HELP_HOTKEYS = 1510,
+        MENU_HELP_SETTINGS= 1511,
 
         // Root -> Help -> Check for updates menu
         MENU_HELP_UPDATES_NOW   = 1520,
