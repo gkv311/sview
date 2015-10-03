@@ -526,8 +526,8 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                     const StPointD_t aCurr = getRoot()->getCursorZo();
                     const int aDx = int((aCurr.x() - myClickPntZo.x()) * double(getRectPx().width()));
                     const int aDy = int((aCurr.y() - myClickPntZo.y()) * double(getRectPx().height()));
-                    if(std::abs(aDx) > 1
-                    || std::abs(aDy) > 1) {
+                    if(std::abs(aDx) > myRoot->getClickThreshold()
+                    || std::abs(aDy) > myRoot->getClickThreshold()) {
                         myIsClickAborted = true;
                         myClickTimer.stop();
                     }

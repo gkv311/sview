@@ -19,7 +19,10 @@ StGLScrollArea::StGLScrollArea(StGLWidget*      theParent,
                                const int        theWidth, const int theHeight)
 : StGLWidget(theParent, theLeft, theTop, theCorner, theWidth, theHeight),
   myBarColor(getRoot()->getColorForElement(StGLRootWidget::Color_ScrollBar)),
+  myIsLeftClick(false),
+  myHasDragged(false),
   myDragYDelta(0.0),
+  myDragYCumul(0),
   myFlingAccel((double )myRoot->scale(200)),
   myFlingYSpeed(0.0),
   myFlingYDone(0) {
@@ -89,13 +92,20 @@ inline bool haveSameSign(const T1 theVal1, const T2 theVal2) {
         || (theVal1 <= T1(0) && theVal2 < T2(0));
 }
 
+inline void setClickedWithChildren(StGLWidgetList& theList, const int theMouseBtn, bool isClicked) {
+    for(StGLWidget* aChild = theList.getStart(); aChild != NULL; aChild = aChild->getNext()) {
+        aChild->setClicked(theMouseBtn, isClicked);
+        setClickedWithChildren(*aChild->getChildren(), theMouseBtn, isClicked);
+    }
+}
+
 void StGLScrollArea::stglUpdate(const StPointD_t& theCursorZo) {
     if(!isVisible()) {
         StGLWidget::stglUpdate(theCursorZo);
         return;
     }
 
-    if(isClicked(ST_MOUSE_LEFT)
+    if(myIsLeftClick
     && isScrollable()) {
         StPointD_t aDelta = myRoot->getCursorZo() - myClickPntZo;
         double aDeltaY = aDelta.y() * myRoot->getRectPx().height();
@@ -196,11 +206,28 @@ bool StGLScrollArea::doScroll(const int  theDelta,
     const int aTopNew = stMax(stMin(aMinLim, aTopOld + theDelta), aMaxLim);
     const int aDelta  = aTopNew - aTopOld;
     if(aDelta == 0) {
+        if(theIsFling) {
+            myFlingTimer.stop();
+        }
         return false;
     }
 
     aContent->changeRectPx().top()    += aDelta;
     aContent->changeRectPx().bottom() += aDelta;
+
+    if(myIsLeftClick) {
+        if(!theIsFling) {
+            myDragYCumul += aDelta;
+            if(std::abs(myDragYCumul) > myRoot->getClickThreshold()
+            && !myHasDragged) {
+                setClickedWithChildren(myChildren, ST_MOUSE_LEFT, false);
+                myHasDragged = true;
+            }
+        } else {
+            myDragYCumul = 0;
+        }
+    }
+
     myIsResized = true;
     return true;
 }
@@ -211,10 +238,31 @@ bool StGLScrollArea::tryClick(const StPointD_t& theCursorZo,
     if(!isVisible() || !isPointIn(theCursorZo)) {
         return false;
     }
-    if(StGLWidget::tryClick(theCursorZo, theMouseBtn, isItemClicked)) {
-        if(theMouseBtn == ST_MOUSE_LEFT) {
-            myClickPntZo = theCursorZo;
+    if( theMouseBtn == ST_MOUSE_LEFT
+    && !isItemClicked
+    &&  isScrollable()) {
+        myIsLeftClick = true;
+        myHasDragged  = false;
+        myClickPntZo  = theCursorZo;
+        myDragYCumul  = 0;
+
+        // abort flinging
+        if(myFlingTimer.isOn()) {
+            const double aTime  = myFlingTimer.getElapsedTime();
+            const double anA    = (myFlingYSpeed > 0.0 ? -1.0 : 1.0) * myFlingAccel;
+            const double aSpeed = myFlingYSpeed + anA * aTime;
+            if(std::abs(aSpeed) > myRoot->scale(300)) {
+                setClickedWithChildren(myChildren, ST_MOUSE_LEFT, false);
+                isItemClicked = true;
+                return true;
+            }
         }
+    } else {
+        myIsLeftClick = false;
+        myHasDragged  = false;
+    }
+
+    if(StGLWidget::tryClick(theCursorZo, theMouseBtn, isItemClicked)) {
         isItemClicked = true;
         return true;
     }
@@ -224,12 +272,13 @@ bool StGLScrollArea::tryClick(const StPointD_t& theCursorZo,
 bool StGLScrollArea::tryUnClick(const StPointD_t& theCursorZo,
                                 const int&        theMouseBtn,
                                 bool&             isItemUnclicked) {
-    if(isClicked(ST_MOUSE_LEFT)
+    if(myIsLeftClick
     && theMouseBtn == ST_MOUSE_LEFT) {
-        isItemUnclicked = true;
-        setClicked(ST_MOUSE_LEFT, false);
+        myIsLeftClick = false;
+        myHasDragged  = false;
         if(myDragTimer.isOn()) {
             myDragYDelta = 0.0;
+            myDragYCumul = 0;
             myDragTimer.stop();
             myFlingYDone = 0;
             if(std::abs(myFlingYSpeed) > 0.00001) {
@@ -238,7 +287,6 @@ bool StGLScrollArea::tryUnClick(const StPointD_t& theCursorZo,
                 myFlingTimer.stop();
             }
         }
-        return true;
     }
     if(StGLWidget::tryUnClick(theCursorZo, theMouseBtn, isItemUnclicked)) {
         switch(theMouseBtn) {

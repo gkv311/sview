@@ -59,9 +59,12 @@ class StGLScrollArea : public StGLWidget {
     StGLVertexBuffer myBarVertBuf; //!< vertices buffer
     StGLVec4         myBarColor;   //!< color of scroll bar
 
+    bool       myIsLeftClick; //!< flag to perform dragging - some item has been clicked (but not yet unclicked)
+    bool       myHasDragged;  //!< indicates that dragging has been confirmed
     StPointD_t myClickPntZo;  //!< remembered mouse click position
     StTimer    myDragTimer;   //!< timer between dragging animation
     double     myDragYDelta;  //!< last dragged distance
+    int        myDragYCumul;  //!< cumulative dragged distance
     double     myFlingAccel;  //!< (positive) fling acceleration
     StTimer    myFlingTimer;  //!< timer for dragging inertia
     double     myFlingYSpeed; //!< the dragging velocity for inertial scrolling

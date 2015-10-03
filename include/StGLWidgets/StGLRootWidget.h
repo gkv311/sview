@@ -185,6 +185,11 @@ class StGLRootWidget : public StGLWidget {
     }
 
     /**
+     * Cursor distance between click/unclick events to determine as clicking.
+     */
+    ST_LOCAL int getClickThreshold() const { return myClickThreshold; }
+
+    /**
      * @return scale factor for GUI elements (text, icons), 1.0 for normal displays
      */
     ST_LOCAL inline GLfloat getScale() const {
@@ -446,6 +451,7 @@ class StGLRootWidget : public StGLWidget {
         protected:
 
     IconSize                  myMenuIconSize;  //!< scaled size of menu icon
+    int                       myClickThreshold;//!< cursor distance between click/unclick events to determine as clicking
 
 };
 

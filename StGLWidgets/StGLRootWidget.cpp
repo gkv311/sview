@@ -57,7 +57,8 @@ StGLRootWidget::StGLRootWidget(const StHandle<StResourceManager>& theResMgr)
   cursorZo(0.0, 0.0),
   myFocusWidget(NULL),
   myIsMenuPressed(false),
-  myMenuIconSize(IconSize_16) {
+  myMenuIconSize(IconSize_16),
+  myClickThreshold(3) {
     // unify access
     StGLWidget::myRoot = this;
     myViewport[0] = 0;
@@ -209,7 +210,8 @@ void StGLRootWidget::setScale(const GLfloat     theScale,
     myScaleGUI   = aScale;
     myResolution = (unsigned int )(72.0f * aScale + 0.1f);
     myGlFontMgr->setResolution(myResolution);
-    myMenuIconSize = scaleIcon(16);
+    myMenuIconSize   = scaleIcon(16);
+    myClickThreshold = scale(3);
     setupTextures();
 }
 
