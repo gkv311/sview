@@ -121,7 +121,8 @@ void StGLOpenFile::addHotItem(const StString& theTarget,
     if(aName.isEmpty()) {
         aName = theTarget;
     }
-    if(aName.isEmpty()) {
+    if(aName.isEmpty()
+    || theTarget.isEmpty()) {
         return;
     }
     myHotPaths.add(theTarget);

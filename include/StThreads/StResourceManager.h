@@ -89,6 +89,19 @@ class StResourceManager {
         public:
 
     /**
+     * The list of standard folders.
+     */
+    enum FolderId {
+        FolderId_Downloads,
+        FolderId_Pictures,
+        FolderId_Music,
+        FolderId_Videos,
+        FolderId_NB
+    };
+
+        public:
+
+    /**
      * Main constructor.
      */
     ST_CPPEXPORT StResourceManager(const StString& theAppName = "sview");
@@ -105,6 +118,13 @@ class StResourceManager {
      * Destructor.
      */
     ST_CPPEXPORT virtual ~StResourceManager();
+
+    /**
+     * Return folder for specified task.
+     */
+    ST_LOCAL const StString& getFolder(const FolderId theId) const {
+        return myFolders[theId];
+    }
 
     /**
      * Folder containing user-specific application data.
@@ -152,6 +172,7 @@ class StResourceManager {
 
         protected:
 
+    StString       myFolders[FolderId_NB];
     StString       myAppName;        //!< application name - "sview" by default
     StString       myUserHomeFolder; //!< user home folder
     StString       myUserDataFolder; //!< folder for saving user-specific application data

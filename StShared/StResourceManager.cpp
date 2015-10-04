@@ -100,6 +100,11 @@ StResourceManager::StResourceManager(const StString& theAppName)
         const GUID THE_FOLDER_APPROA = { 0x3EB685DB, 0x65F9, 0x4CF6, {0xA0, 0x3A, 0xE3, 0xEF, 0x65, 0x72, 0x9F, 0x3D} }; // FOLDERID_RoamingAppData
         const GUID THE_FOLDER_DOCS   = { 0xFDD39AD0, 0x238F, 0x46AF, {0xAD, 0xB4, 0x6C, 0x85, 0x48, 0x03, 0x69, 0xC7} }; // FOLDERID_Documents
 
+        const GUID THE_FOLDER_DOWN   = { 0x374DE290, 0x123F, 0x4565, {0x91, 0x64, 0x39, 0xC4, 0x92, 0x5E, 0x46, 0x7B} }; // FOLDERID_Downloads
+        const GUID THE_FOLDER_PICS   = { 0x33E28130, 0x4E1E, 0x4676, {0x83, 0x5A, 0x98, 0x39, 0x5C, 0x3B, 0xC3, 0xBB} }; // FOLDERID_Pictures
+        const GUID THE_FOLDER_MUSIC  = { 0x4BD8D571, 0x6D19, 0x48D3, {0xBE, 0x97, 0x42, 0x22, 0x20, 0x08, 0x0E, 0x43} }; // FOLDERID_Music
+        const GUID THE_FOLDER_VIDS   = { 0x18989B1D, 0x99B5, 0x455B, {0x84, 0x1C, 0xAB, 0x7C, 0x74, 0xE4, 0xDD, 0xFC} }; // FOLDERID_Videos
+
         if(aGetFolder(&THE_FOLDER_APPLOC, 0, NULL, &aPath) == S_OK) {
             anAppDataLocal.fromUnicode(aPath);
             ::CoTaskMemFree(aPath);
@@ -115,6 +120,23 @@ StResourceManager::StResourceManager(const StString& theAppName)
         if(aGetFolder(&THE_FOLDER_DOCS, 0, NULL, &aPath) == S_OK) {
             myUserHomeFolder.fromUnicode(aPath);
             myUserHomeFolder += "\\";
+            ::CoTaskMemFree(aPath);
+        }
+
+        if(aGetFolder(&THE_FOLDER_DOWN, 0, NULL, &aPath) == S_OK) {
+            myFolders[FolderId_Downloads].fromUnicode(aPath);
+            ::CoTaskMemFree(aPath);
+        }
+        if(aGetFolder(&THE_FOLDER_PICS, 0, NULL, &aPath) == S_OK) {
+            myFolders[FolderId_Pictures].fromUnicode(aPath);
+            ::CoTaskMemFree(aPath);
+        }
+        if(aGetFolder(&THE_FOLDER_MUSIC, 0, NULL, &aPath) == S_OK) {
+            myFolders[FolderId_Music].fromUnicode(aPath);
+            ::CoTaskMemFree(aPath);
+        }
+        if(aGetFolder(&THE_FOLDER_VIDS, 0, NULL, &aPath) == S_OK) {
+            myFolders[FolderId_Videos].fromUnicode(aPath);
             ::CoTaskMemFree(aPath);
         }
     } else {
@@ -154,6 +176,12 @@ StResourceManager::StResourceManager(const StString& theAppName)
     myUserDataFolder = myUserHomeFolder + "Library/Application Support/" + myAppName + "/";
     mySettingsFolder = myUserHomeFolder + "Library/Preferences/"         + myAppName + "/";
     myCacheFolder    = myUserHomeFolder + "Library/Caches/"              + myAppName + "/";
+
+    myFolders[FolderId_Downloads] = myUserHomeFolder + "Downloads";
+    myFolders[FolderId_Pictures]  = myUserHomeFolder + "Pictures";
+    myFolders[FolderId_Music]     = myUserHomeFolder + "Music";
+    myFolders[FolderId_Videos]    = myUserHomeFolder + "Movies";
+
     // make sure parent paths are also exist (on broken home)
     StFolder::createFolder(myUserHomeFolder + "Library");
     StFolder::createFolder(myUserHomeFolder + "Library/Application Support");
@@ -164,6 +192,12 @@ StResourceManager::StResourceManager(const StString& theAppName)
     myUserDataFolder = myUserHomeFolder + ".local/share/" + myAppName + "/";
     mySettingsFolder = myUserHomeFolder + ".config/"      + myAppName + "/";
     myCacheFolder    = myUserHomeFolder + ".cache/"       + myAppName + "/";
+
+    myFolders[FolderId_Downloads] = myUserHomeFolder + "Downloads";
+    myFolders[FolderId_Pictures]  = myUserHomeFolder + "Pictures";
+    myFolders[FolderId_Music]     = myUserHomeFolder + "Music";
+    myFolders[FolderId_Videos]    = myUserHomeFolder + "Videos";
+
     // make sure parent paths are also exist (on broken home)
     StFolder::createFolder(myUserHomeFolder + ".local");
     StFolder::createFolder(myUserHomeFolder + ".local/share");
