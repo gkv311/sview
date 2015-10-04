@@ -9,8 +9,8 @@
 #ifndef __StGLOpenFile_h_
 #define __StGLOpenFile_h_
 
-#include <StGlWidgets/StGLMessageBox.h>
-#include <StGlWidgets/StGLRootWidget.h>
+#include <StGLWidgets/StGLMessageBox.h>
+#include <StGLWidgets/StGLRootWidget.h>
 #include <StFile/StMIMEList.h>
 
 class StGLMenu;
