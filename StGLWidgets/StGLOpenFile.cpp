@@ -124,7 +124,8 @@ void StGLOpenFile::addHotItem(const StString& theTarget,
         aName = theTarget;
     }
     if(aName.isEmpty()
-    || theTarget.isEmpty()) {
+    || theTarget.isEmpty()
+    || !StFileNode::isFileExists(theTarget)) {
         return;
     }
     myHotPaths.add(theTarget);
@@ -182,9 +183,9 @@ void StGLOpenFile::openFolder(const StString& theFolder) {
 
     myFolder = new StFolder(theFolder);
     myFolder->init(myExtensions, 1, true);
-    myCurrentPath->setText(StString("<b>Location:*</b>") + myFolder->getPath() + ST_FILE_SPLITTER);
+    StString aPath = myFolder->getPath();
+    myCurrentPath->setText(StString("<b>Location:*</b>") + aPath + (!aPath.isEmpty() ? ST_FILE_SPLITTER : ""));
 
-    StString aPath   = myFolder->getPath() + "";
     StString aPathUp = StFileNode::getFolderUp(aPath);
     if(!aPathUp.isEmpty()) {
         StGLMenuItem* anUpItem = new StGLPassiveMenuItem(myList);

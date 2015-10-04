@@ -43,6 +43,18 @@ class StMainGlue : public StAndroidGlue {
         myDndPath.clear();
 
         StHandle<StResourceManager> aResMgr = new StResourceManager(myActivity->assetManager);
+        aResMgr->setFolder(StResourceManager::FolderId_SdCard,
+                           getStoragePath(myThJniEnv, "sdcard"));
+        aResMgr->setFolder(StResourceManager::FolderId_Downloads,
+                           getStoragePath(myThJniEnv, "Download"));
+        aResMgr->setFolder(StResourceManager::FolderId_Pictures,
+                           getStoragePath(myThJniEnv, "Pictures"));
+        aResMgr->setFolder(StResourceManager::FolderId_Photos,
+                           getStoragePath(myThJniEnv, "DCIM"));
+        aResMgr->setFolder(StResourceManager::FolderId_Music,
+                           getStoragePath(myThJniEnv, "Music"));
+        aResMgr->setFolder(StResourceManager::FolderId_Videos,
+                           getStoragePath(myThJniEnv, "Movies"));
 
         const StMIMEList aMimeImg(ST_IMAGE_PLUGIN_MIME_CHAR);
         for(size_t aMimeIter = 0; aMimeIter < aMimeImg.size(); ++aMimeIter) {

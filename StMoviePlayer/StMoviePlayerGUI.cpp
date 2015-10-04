@@ -1304,6 +1304,12 @@ void StMoviePlayerGUI::doOpenFile(const size_t ) {
 
     StGLOpenFile* aDialog = new StGLOpenFile(this, tr(DIALOG_OPEN_FILE), tr(BUTTON_CLOSE));
     aDialog->setMimeList(myPlugin->myVideo->getMimeListVideo());
+#if defined(_WIN32)
+    //
+#else
+    aDialog->addHotItem("/", "Root");
+#endif
+    aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_SdCard));
     aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Downloads));
     aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Videos));
     aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Music));

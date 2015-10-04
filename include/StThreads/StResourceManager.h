@@ -92,8 +92,10 @@ class StResourceManager {
      * The list of standard folders.
      */
     enum FolderId {
+        FolderId_SdCard,
         FolderId_Downloads,
         FolderId_Pictures,
+        FolderId_Photos,
         FolderId_Music,
         FolderId_Videos,
         FolderId_NB
@@ -124,6 +126,14 @@ class StResourceManager {
      */
     ST_LOCAL const StString& getFolder(const FolderId theId) const {
         return myFolders[theId];
+    }
+
+    /**
+     * Assign folder.
+     */
+    ST_LOCAL void setFolder(const FolderId  theId,
+                            const StString& thePath) {
+        myFolders[theId] = thePath;
     }
 
     /**

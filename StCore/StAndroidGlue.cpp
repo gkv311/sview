@@ -51,6 +51,54 @@ StCString StAndroidGlue::getCommandIdName(StAndroidGlue::CommandId theCmd) {
     return stCString("UNKNOWN");
 }
 
+/**
+ * Read string from jstring.
+ */
+inline StString stStringFromJava(JNIEnv* theJEnv,
+                                 jstring theJString) {
+    if(theJString == NULL) {
+        return StString();
+    }
+
+    const char* aJStringStr = theJEnv->GetStringUTFChars(theJString, 0);
+    const StString aString = aJStringStr;
+    theJEnv->ReleaseStringUTFChars(theJString, aJStringStr);
+    return aString;
+}
+
+StString StAndroidGlue::getStoragePath(JNIEnv*     theJEnv,
+                                       const char* theType) {
+    jclass aJClass_Env  = theJEnv->FindClass("android/os/Environment");
+    jclass aJClass_File = theJEnv->FindClass("java/io/File");
+    if(aJClass_Env  == NULL
+    || aJClass_File == NULL) {
+        return StString();
+    }
+
+    jmethodID aJMet_getStorage = theJEnv->GetStaticMethodID(aJClass_Env,  "getExternalStoragePublicDirectory", "(Ljava/lang/String;)Ljava/io/File;");
+    jmethodID aJMet_getSdCard  = theJEnv->GetStaticMethodID(aJClass_Env,  "getExternalStorageDirectory",       "()Ljava/io/File;");
+    jmethodID aJMet_getPath    = theJEnv->GetMethodID      (aJClass_File, "getAbsolutePath",                   "()Ljava/lang/String;");
+    if(aJMet_getStorage == NULL
+    || aJMet_getSdCard  == NULL
+    || aJMet_getPath    == NULL) {
+        return StString();
+    }
+
+    StString aType  = theType;
+    jobject  aJFile = NULL;
+    if(aType == "sdcard") {
+        aJFile = theJEnv->CallStaticObjectMethod(aJClass_Env, aJMet_getSdCard);
+    } else {
+        jstring aJStr_Type = theJEnv->NewStringUTF(theType);
+        aJFile = theJEnv->CallStaticObjectMethod(aJClass_Env, aJMet_getStorage, aJStr_Type);
+        theJEnv->DeleteLocalRef(aJStr_Type);
+    }
+    if(aJFile == NULL) {
+        return StString();
+    }
+    return stStringFromJava(theJEnv, (jstring )theJEnv->CallObjectMethod(aJFile, aJMet_getPath));
+}
+
 StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
                              void*            theSavedState,
                              size_t           theSavedStateSize)
@@ -150,17 +198,10 @@ void StAndroidGlue::readOpenPath() {
     jmethodID   aJMet_getFlags      = aJniEnv->GetMethodID(aJClassIntent, "getFlags",      "()I");
 
     // retrieve data path
-    jstring     aJString      = (jstring )aJniEnv->CallObjectMethod(aJIntent, aJMet_getDataString);
-    const char* aJStringStr   = aJniEnv->GetStringUTFChars(aJString, 0);
-    StString aDataPath = aJStringStr;
-    aJniEnv->ReleaseStringUTFChars(aJString, aJStringStr);
-
+    StString aDataPath = stStringFromJava(aJniEnv, (jstring )aJniEnv->CallObjectMethod(aJIntent, aJMet_getDataString));
     // retrieve data type
-    int aFlags    = aJniEnv->CallIntMethod(aJIntent, aJMet_getFlags);
-    aJString      = (jstring )aJniEnv->CallObjectMethod(aJIntent, aJMet_getType);
-    aJStringStr   = aJniEnv->GetStringUTFChars(aJString, 0);
-    const StString aDataType = aJStringStr;
-    aJniEnv->ReleaseStringUTFChars(aJString, aJStringStr);
+    int aFlags = aJniEnv->CallIntMethod(aJIntent, aJMet_getFlags);
+    const StString aDataType = stStringFromJava(aJniEnv, (jstring )aJniEnv->CallObjectMethod(aJIntent, aJMet_getType));
 
     // reset intent in Activity
     aJniEnv->CallVoidMethod(myActivity->clazz, aJMet_setIntent, NULL);

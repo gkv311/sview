@@ -89,6 +89,12 @@ class StAndroidGlue {
      */
     static StCString getCommandIdName(StAndroidGlue::CommandId theCmd);
 
+    /**
+     * Retrieve path using android.os.Environment.getExternalStoragePublicDirectory().
+     */
+    static StString getStoragePath(JNIEnv*     theJEnv,
+                                   const char* theType);
+
         public: //! @name interface to implement
 
     /**
