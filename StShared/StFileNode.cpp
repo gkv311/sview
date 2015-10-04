@@ -182,7 +182,8 @@ StString StFileNode::getFolderUp(const StString& thePath) {
         }
     }
 
-    if(aLastSplit != thePath.getSize()) {
+    if(aLastSplit != size_t(-1)
+    && aLastSplit + 1 == thePath.getLength()) {
         aLastSplit = aPreSplit;
     }
     if(aLastSplit == size_t(-1)) {
