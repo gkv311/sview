@@ -106,6 +106,8 @@ class StGLOpenFile : public StGLMessageBox {
 
         protected: //! @name main file list settings
 
+    StGLVec4                   myHighlightColor;//!< item highlighting
+    StGLVec4                   myItemColor;     //!< color of icons and text labels for the list
     StGLVec4                   myFileColor;     //!< color of icons and text labels for the list
     StGLVec4                   myHotColor;      //!< color of icons and text labels for the hot-list
     int                        myHotSizeX;

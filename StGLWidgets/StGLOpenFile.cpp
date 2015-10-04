@@ -21,8 +21,10 @@ StGLOpenFile::StGLOpenFile(StGLWidget*     theParent,
   myCurrentPath(NULL),
   myHotList(NULL),
   myList(NULL),
-  myFileColor(1.0f, 1.0f, 1.0f, 1.0f),
-  myHotColor (1.0f, 1.0f, 1.0f, 1.0f),
+  myHighlightColor(0.5f, 0.5f, 0.5f, 1.0f),
+  myItemColor     (1.0f, 1.0f, 1.0f, 1.0f),
+  myFileColor     (0.7f, 0.7f, 0.7f, 1.0f),
+  myHotColor      (1.0f, 1.0f, 1.0f, 1.0f),
   myHotSizeX (theParent->getRoot()->scale(10)),
   myMarginX  (theParent->getRoot()->scale(8)),
   myIconSizeX(theParent->getRoot()->scale(16)) {
@@ -131,6 +133,7 @@ void StGLOpenFile::addHotItem(const StString& theTarget,
     setItemIcon(anItem, myHotColor, true);
     anItem->setText(aName);
     anItem->setTextColor(myHotColor);
+    anItem->setHilightColor(myHighlightColor);
     anItem->setUserData(myHotPaths.size() - 1);
     anItem->signals.onItemClick = stSlot(this, &StGLOpenFile::doHotItemClick);
 
@@ -186,7 +189,8 @@ void StGLOpenFile::openFolder(const StString& theFolder) {
     if(!aPathUp.isEmpty()) {
         StGLMenuItem* anUpItem = new StGLPassiveMenuItem(myList);
         anUpItem->setText("..");
-        anUpItem->setTextColor(myFileColor);
+        anUpItem->setTextColor(myItemColor);
+        anUpItem->setHilightColor(myHighlightColor);
         anUpItem->changeMargins().left = myMarginX + myIconSizeX + myMarginX;
         anUpItem->signals.onItemClick = stSlot(this, &StGLOpenFile::doFolderUpClick);
     }
@@ -196,10 +200,10 @@ void StGLOpenFile::openFolder(const StString& theFolder) {
         const StFileNode* aNode = myFolder->getValue(anItemIter);
         StString aName = aNode->getSubPath();
         StGLMenuItem* anItem = new StGLPassiveMenuItem(myList);
-        setItemIcon(anItem, myFileColor, aNode->isFolder());
+        setItemIcon(anItem, aNode->isFolder() ? myItemColor : myFileColor, aNode->isFolder());
         anItem->setText(aName);
-        anItem->setTextColor(myFileColor);
-
+        anItem->setTextColor(myItemColor);
+        anItem->setHilightColor(myHighlightColor);
         anItem->setUserData(anItemIter);
         anItem->signals.onItemClick = stSlot(this, &StGLOpenFile::doFileItemClick);
     }
