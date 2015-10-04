@@ -171,6 +171,23 @@ class StImageViewer::StOpenImage {
     ST_LOCAL const StString& getPathLeft()  const { return myPathLeft; }
 
     /**
+     * Set paths to open.
+     */
+    ST_LOCAL void setPaths(const StString& thePathLeft,
+                           const StString& thePathRight) {
+        StMutexAuto aLock(myMutex);
+        if(myState != StOpenImage::Dialog_Inactive) {
+            return;
+        }
+
+        myPathLeft  = thePathLeft;
+        myPathRight = thePathRight;
+        if(!myPathLeft.isEmpty()) {
+            myState = StOpenImage::Dialog_HasFiles;
+        }
+    }
+
+    /**
      * Return path to the right file.
      * Should NOT be called within Active state.
      */
@@ -1108,6 +1125,10 @@ void StImageViewer::doPanoramaOnOff(const size_t ) {
     myGUI->myImage->params.ViewMode->setValue(aPano == StPanorama_Cubemap6_1 || aPano == StPanorama_Cubemap3_2
                                             ? StStereoParams::PANORAMA_CUBEMAP
                                             : StStereoParams::PANORAMA_SPHERE);
+}
+
+void StImageViewer::doOpen1FileFromGui(StHandle<StString> thePath) {
+    myOpenDialog->setPaths(*thePath, "");
 }
 
 void StImageViewer::doOpen1FileDialog(const size_t ) {

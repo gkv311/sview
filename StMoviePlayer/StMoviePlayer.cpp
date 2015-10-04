@@ -277,6 +277,25 @@ class StMoviePlayer::StOpenVideo {
      */
     ST_LOCAL const StString& getPathSubtitles() const { return myPathSubs; }
 
+    /**
+     * Set paths to open.
+     */
+    ST_LOCAL void setPaths(const StString& thePathLeft,
+                           const StString& thePathRight) {
+        StMutexAuto aLock(myMutex);
+        if(myState != StOpenVideo::Dialog_Inactive) {
+            return;
+        }
+
+        myPathVideoL = thePathLeft;
+        myPathVideoR = thePathRight;
+        myPathAudio.clear();
+        myPathSubs .clear();
+        if(!myPathVideoL.isEmpty()) {
+            myState = StOpenVideo::Dialog_HasFiles;
+        }
+    }
+
         private:
 
     /**
@@ -1718,6 +1737,10 @@ void StMoviePlayer::doListLast(const size_t ) {
 
 void StMoviePlayer::doQuit(const size_t ) {
     StApplication::exit(0);
+}
+
+void StMoviePlayer::doOpen1FileFromGui(StHandle<StString> thePath) {
+    myOpenDialog->setPaths(*thePath, "");
 }
 
 void StMoviePlayer::doOpen1File(const size_t ) {

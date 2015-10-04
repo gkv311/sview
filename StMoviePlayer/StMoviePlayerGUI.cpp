@@ -47,6 +47,7 @@
 #include <StGLWidgets/StGLMenuItem.h>
 #include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLMsgStack.h>
+#include <StGLWidgets/StGLOpenFile.h>
 #include <StGLWidgets/StGLPlayList.h>
 #include <StGLWidgets/StGLRangeFieldFloat32.h>
 #include <StGLWidgets/StGLScrollArea.h>
@@ -1179,6 +1180,12 @@ void StMoviePlayerGUI::createMobileUpperToolbar() {
 
     int aBtnIter = 0;
 
+    myBtnOpen = new StGLTextureButton(myPanelUpper, (aBtnIter++) * myIconStep, 0);
+    myBtnOpen->signals.onBtnClick.connect(this, &StMoviePlayerGUI::doOpenFile);
+    myBtnOpen->setTexturePath(iconTexture(stCString("actionOpen"), anIconSize));
+    myBtnOpen->setDrawShadow(true);
+    myBtnOpen->changeMargins() = aButtonMargins;
+
     StGLTextureButton* aSrcBtn = new StGLTextureButton(myPanelUpper, (aBtnIter++) * myIconStep, 0,
                                                        StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), StFormat_NB);
     aSrcBtn->changeMargins() = aButtonMargins;
@@ -1287,6 +1294,28 @@ void StMoviePlayerGUI::createMobileBottomToolbar() {
     myTimeBox->setSwitchOnClick(true);
     myTimeBox->changeRectPx().right()  = myTimeBox->getRectPx().left() + myIconStep * 2;
     myTimeBox->changeRectPx().bottom() = myTimeBox->getRectPx().top()  + scale(56);
+}
+
+void StMoviePlayerGUI::doOpenFile(const size_t ) {
+    /*if(!isMobile()) {
+        myPlugin->doOpen1File();
+        return;
+    }*/
+
+    StGLOpenFile* aDialog = new StGLOpenFile(this, tr(DIALOG_OPEN_FILE), tr(BUTTON_CLOSE));
+    aDialog->setMimeList(myPlugin->myVideo->getMimeListVideo());
+    aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Downloads));
+    aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Videos));
+    aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Music));
+    aDialog->signals.onFileSelected = stSlot(myPlugin, &StMoviePlayer::doOpen1FileFromGui);
+
+    if(myPlugin->params.lastFolder.isEmpty()) {
+        StHandle<StFileNode> aCurrFile = myPlugin->myVideo->getPlayList().getCurrentFile();
+        if(!aCurrFile.isNull()) {
+            myPlugin->params.lastFolder = aCurrFile->isEmpty() ? aCurrFile->getFolderPath() : aCurrFile->getValue(0)->getFolderPath();
+        }
+    }
+    aDialog->openFolder(myPlugin->params.lastFolder);
 }
 
 void StMoviePlayerGUI::doShowMobileExMenu(const size_t ) {

@@ -184,6 +184,7 @@ class StImageViewerGUI : public StGLRootWidget {
     ST_LOCAL void doResetHotKeys(const size_t );
     ST_LOCAL void doListHotKeys(const size_t );
 
+    ST_LOCAL void doOpenFile(const size_t );
     ST_LOCAL void doShowMobileExMenu(const size_t );
     ST_LOCAL void doMobileSettings(const size_t );
     ST_LOCAL void doDisplayStereoFormatCombo(const size_t );

@@ -34,6 +34,7 @@
 #include <StGLWidgets/StGLMenu.h>
 #include <StGLWidgets/StGLMenuItem.h>
 #include <StGLWidgets/StGLMsgStack.h>
+#include <StGLWidgets/StGLOpenFile.h>
 #include <StGLWidgets/StGLRangeFieldFloat32.h>
 #include <StGLWidgets/StGLScrollArea.h>
 #include <StGLWidgets/StGLSwitchTextured.h>
@@ -821,6 +822,12 @@ void StImageViewerGUI::createMobileUpperToolbar() {
 
     int aBtnIter = 0;
 
+    myBtnOpen = new StGLTextureButton(myPanelUpper, (aBtnIter++) * anIconStep, 0);
+    myBtnOpen->signals.onBtnClick.connect(this, &StImageViewerGUI::doOpenFile);
+    myBtnOpen->setTexturePath(iconTexture(stCString("actionOpen"), anIconSize));
+    myBtnOpen->setDrawShadow(true);
+    myBtnOpen->changeMargins() = aButtonMargins;
+
     StGLTextureButton* aSrcBtn = new StGLTextureButton(myPanelUpper, (aBtnIter++) * anIconStep, 0,
                                                        StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), StFormat_NB);
     aSrcBtn->changeMargins() = aButtonMargins;
@@ -918,6 +925,27 @@ void StImageViewerGUI::createMobileBottomToolbar() {
     aBtnZoomOut->setDrawShadow(true);
     aBtnZoomOut->setUserData(StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_ScaleOut);
     aBtnZoomOut->signals.onBtnHold += stSlot(this, &StImageViewerGUI::doAction);
+}
+
+void StImageViewerGUI::doOpenFile(const size_t ) {
+    /*if(!isMobile()) {
+        myPlugin->doOpen1FileDialog();
+        return;
+    }*/
+
+    StGLOpenFile* aDialog = new StGLOpenFile(this, tr(DIALOG_OPEN_FILE), tr(BUTTON_CLOSE));
+    aDialog->setMimeList(myPlugin->myLoader->getMimeList());
+    aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Downloads));
+    aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Pictures));
+    aDialog->signals.onFileSelected = stSlot(myPlugin, &StImageViewer::doOpen1FileFromGui);
+
+    if(myPlugin->params.lastFolder.isEmpty()) {
+        StHandle<StFileNode> aCurrFile = myPlugin->myLoader->getPlayList().getCurrentFile();
+        if(!aCurrFile.isNull()) {
+            myPlugin->params.lastFolder = aCurrFile->isEmpty() ? aCurrFile->getFolderPath() : aCurrFile->getValue(0)->getFolderPath();
+        }
+    }
+    aDialog->openFolder(myPlugin->params.lastFolder);
 }
 
 void StImageViewerGUI::doShowMobileExMenu(const size_t ) {

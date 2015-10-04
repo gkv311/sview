@@ -92,6 +92,7 @@ class StImageViewer : public StApplication {
 
         public: //! @name callback Slots
 
+    ST_LOCAL void doOpen1FileFromGui(StHandle<StString> thePath);
     ST_LOCAL void doOpen1FileDialog(const size_t dummy = 0);
     ST_LOCAL void doOpen2FilesDialog(const size_t dummy = 0);
     ST_LOCAL void doSaveImageAs(const size_t theImgType) { myLoader->doSaveImageAs(theImgType); }
