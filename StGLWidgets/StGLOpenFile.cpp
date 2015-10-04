@@ -18,21 +18,31 @@ StGLOpenFile::StGLOpenFile(StGLWidget*     theParent,
                            const StString& theCloseText)
 : StGLMessageBox(theParent, theTitle, "",
                  theParent->getRoot()->scale(512), theParent->getRoot()->scale(400)),
+  myCurrentPath(NULL),
   myHotList(NULL),
   myList(NULL),
   myFileColor(1.0f, 1.0f, 1.0f, 1.0f),
-  myHotColor (1.0f, 1.0f, 1.0f, 1.0f) {
+  myHotColor (1.0f, 1.0f, 1.0f, 1.0f),
+  myHotSizeX (theParent->getRoot()->scale(10)),
+  myMarginX  (theParent->getRoot()->scale(8)),
+  myIconSizeX(theParent->getRoot()->scale(16)) {
     myToAdjustY = false;
-    myIconSize  = myRoot->scaleIcon(16, myIconMargins);
 
-    myHotSizeX = myRoot->scale(100);
+    int aMarginTop = myMarginTop + myRoot->scale(30);
+    myCurrentPath = new StGLTextArea(this, myMarginLeft, myMarginTop, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                                     myContent->getRectPx().width(), myContent->getRectPx().height());
+    myCurrentPath->setupAlignment(StGLTextFormatter::ST_ALIGN_X_LEFT,
+                                  StGLTextFormatter::ST_ALIGN_Y_TOP);
+    myCurrentPath->setTextColor(myRoot->getColorForElement(StGLRootWidget::Color_MessageText));
+
     myHotList = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL_COMPACT);
     myHotList->setOpacity(1.0f, true);
     myHotList->setItemWidth(myHotSizeX);
     myHotList->setColor(StGLVec4(0.0f, 0.0f, 0.0f, 0.0f));
-    myHotList->changeRectPx().top()   = myMarginTop;
+    myHotList->changeRectPx().top()   = aMarginTop;
     myHotList->changeRectPx().left()  = myMarginLeft;
     myHotList->changeRectPx().right() = myMarginLeft + myHotSizeX;
+    myContent->changeRectPx().top()   = aMarginTop;
     myContent->changeRectPx().left()  = myMarginLeft + myHotSizeX;
 
     myList = new StGLMenu(myContent, 0, 0, StGLMenu::MENU_VERTICAL_COMPACT);
@@ -73,6 +83,14 @@ void StGLOpenFile::doHotItemClick(const size_t theItemId) {
 void StGLOpenFile::doFileItemClick(const size_t theItemId) {
     const StFileNode* aNode = myFolder->getValue(theItemId);
     myItemToLoad = aNode->getPath();
+}
+
+void StGLOpenFile::doFolderUpClick(const size_t ) {
+    StString aPath   = myFolder->getPath();
+    StString aPathUp = StFileNode::getFolderUp(aPath);
+    if(!aPathUp.isEmpty()) {
+        myItemToLoad = aPathUp;
+    }
 }
 
 bool StGLOpenFile::tryUnClick(const StPointD_t& theCursorZo,
@@ -129,6 +147,7 @@ void StGLOpenFile::setItemIcon(StGLMenuItem*   theItem,
         return;
     }
 
+    theItem->changeMargins().left = myMarginX + myIconSizeX + myMarginX;
     if(myTextureFolder.isNull()) {
         const StString& anIcon0 = myRoot->getIcon(StGLRootWidget::IconImage_Folder);
         const StString& anIcon1 = myRoot->getIcon(StGLRootWidget::IconImage_File);
@@ -143,9 +162,7 @@ void StGLOpenFile::setItemIcon(StGLMenuItem*   theItem,
         }
     }
 
-    const int aMargin      = myRoot->scale(8);
-    const int anIconMargin = myRoot->scale(16 + 8);
-    StGLIcon* anIcon = new StGLIcon(theItem, aMargin, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT), 0);
+    StGLIcon* anIcon = new StGLIcon(theItem, myMarginX, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_LEFT), 0);
     anIcon->setColor(theColor);
     if(theisFolder) {
         anIcon->setExternalTextures(myTextureFolder);
@@ -153,7 +170,6 @@ void StGLOpenFile::setItemIcon(StGLMenuItem*   theItem,
         anIcon->setExternalTextures(myTextureFile);
     }
     theItem->setIcon(anIcon);
-    theItem->changeMargins().left = anIconMargin + aMargin;
 }
 
 void StGLOpenFile::openFolder(const StString& theFolder) {
@@ -162,6 +178,17 @@ void StGLOpenFile::openFolder(const StString& theFolder) {
 
     myFolder = new StFolder(theFolder);
     myFolder->init(myExtensions, 1, true);
+    myCurrentPath->setText(StString("<b>Location:*</b>") + myFolder->getPath() + ST_FILE_SPLITTER);
+
+    StString aPath   = myFolder->getPath() + "";
+    StString aPathUp = StFileNode::getFolderUp(aPath);
+    if(!aPathUp.isEmpty()) {
+        StGLMenuItem* anUpItem = new StGLPassiveMenuItem(myList);
+        anUpItem->setText("..");
+        anUpItem->setTextColor(myFileColor);
+        anUpItem->changeMargins().left = myMarginX + myIconSizeX + myMarginX;
+        anUpItem->signals.onItemClick = stSlot(this, &StGLOpenFile::doFolderUpClick);
+    }
 
     const size_t aNbItems = myFolder->size();
     for(size_t anItemIter = 0; anItemIter < aNbItems; ++anItemIter) {
@@ -174,7 +201,6 @@ void StGLOpenFile::openFolder(const StString& theFolder) {
 
         anItem->setUserData(anItemIter);
         anItem->signals.onItemClick = stSlot(this, &StGLOpenFile::doFileItemClick);
-
     }
     myList->stglInit();
     stglInit();

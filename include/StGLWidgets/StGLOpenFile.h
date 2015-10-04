@@ -80,6 +80,11 @@ class StGLOpenFile : public StGLMessageBox {
     ST_CPPEXPORT void doFileItemClick(const size_t theItemId);
 
     /**
+     * Handle folder-up event.
+     */
+    ST_CPPEXPORT void doFolderUpClick(const size_t );
+
+    /**
      * Override unclick to open new folder.
      */
     ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo,
@@ -90,6 +95,7 @@ class StGLOpenFile : public StGLMessageBox {
 
     StHandle<StGLTextureArray> myTextureFolder;
     StHandle<StGLTextureArray> myTextureFile;
+    StGLTextArea*              myCurrentPath;
     StGLMenu*                  myHotList;       //!< widget containing the list of predefined libraries
     StGLMenu*                  myList;          //!< widget containing the file list of currently opened folder
     StArrayList<StString>      myHotPaths;      //!< array of hot-links
@@ -102,10 +108,9 @@ class StGLOpenFile : public StGLMessageBox {
 
     StGLVec4                   myFileColor;     //!< color of icons and text labels for the list
     StGLVec4                   myHotColor;      //!< color of icons and text labels for the hot-list
-    int                        myItemSize;
-    StGLRootWidget::IconSize   myIconSize;      //!< icon size
-    StMarginsI                 myIconMargins;   //!< icon margins
     int                        myHotSizeX;
+    int                        myMarginX;
+    int                        myIconSizeX;
 
 };
 
