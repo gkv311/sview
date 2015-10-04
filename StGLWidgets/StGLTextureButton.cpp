@@ -551,8 +551,15 @@ StGLIcon::StGLIcon(StGLWidget*      theParent,
                    const int        theTop,
                    const StGLCorner theCorner,
                    const size_t     theFacesCount)
-: StGLTextureButton(theParent, theLeft, theTop, theCorner, theFacesCount) {
+: StGLTextureButton(theParent, theLeft, theTop, theCorner, theFacesCount),
+  myIsExternalTexture(false) {
     myAnim = Anim_None;
+}
+
+StGLIcon::~StGLIcon() {
+    if(myIsExternalTexture) {
+        myTextures.nullify();
+    }
 }
 
 bool StGLIcon::tryClick(const StPointD_t& , const int& , bool& ) {

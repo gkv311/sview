@@ -91,6 +91,18 @@ class StGLMenuItem : public StGLTextArea {
     ST_CPPEXPORT void setHilightText();
 
     /**
+     * Get assigned icon.
+     */
+    ST_LOCAL StGLIcon* getIcon() {
+        return myIcon;
+    }
+
+    /**
+     * Assign new icon.
+     */
+    ST_CPPEXPORT void setIcon(StGLIcon* theIcon);
+
+    /**
      * Setup icon.
      */
     ST_CPPEXPORT StGLMenuItem* setIcon(const StString* theImgPaths,

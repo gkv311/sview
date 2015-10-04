@@ -44,6 +44,7 @@ StGLMenu::StGLMenu(StGLWidget* theParent,
   myColorVec(getRoot()->getColorForElement(StGLRootWidget::Color_Menu)),
   myOrient(theOrient),
   myItemHeight(theParent->getRoot()->scale(theParent->getRoot()->isMobile() ? 40 : 32)),
+  myWidthMin(0),
   myWidth(0),
   myIsRootMenu(theIsRootMenu),
   myIsContextual(false),
@@ -141,15 +142,16 @@ bool StGLMenu::stglInit() {
         changeRectPx().right()  = getRectPx().left() + aChildLast->getRectPx().right();
         changeRectPx().bottom() = getRectPx().top()  + aChildLast->getRectPx().bottom();
     }
+    int aWidth = stMax(myWidthMin, myWidth);
     if(myOrient == MENU_VERTICAL
     || myOrient == MENU_VERTICAL_COMPACT) {
-        changeRectPx().right() = getRectPx().left() + myWidth;
+        changeRectPx().right() = getRectPx().left() + aWidth;
         int anItemCount = 0;
         for(StGLWidget* aChild = getChildren()->getStart(); aChild != NULL; aChild = aChild->getNext(), ++anItemCount) {
             StGLMenuItem* anItem = (StGLMenuItem* )aChild;
             anItem->changeRectPx().moveTopTo(anItemCount * myItemHeight);
-            anItem->changeRectPx().right() = anItem->getRectPx().left() + myWidth;
-            anItem->setTextWidth(myWidth);
+            anItem->changeRectPx().right() = anItem->getRectPx().left() + aWidth;
+            anItem->setTextWidth(aWidth);
             if(anItem->getSubMenu() != NULL) {
                 anItem->getSubMenu()->changeRectPx().moveTopLeftTo(getRectPxAbsolute().right() - myRoot->scale(10),
                                                                    anItem->getRectPxAbsolute().top());

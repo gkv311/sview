@@ -22,14 +22,25 @@ class StGLMessageBox : public StGLWidget {
 
         public:
 
+    /**
+     * Main constructor creating message box of size 384 x 200 (clipped by root widget size).
+     */
     ST_CPPEXPORT StGLMessageBox(StGLWidget*     theParent,
                                 const StString& theTitle,
                                 const StString& theText);
+
+    /**
+     * Main constructor creating message box of specified size (clipped by root widget size).
+     */
     ST_CPPEXPORT StGLMessageBox(StGLWidget*     theParent,
                                 const StString& theTitle,
                                 const StString& theText,
                                 const int       theWidth,
                                 const int       theHeight);
+
+    /**
+     * Destructor.
+     */
     ST_CPPEXPORT virtual ~StGLMessageBox();
     ST_CPPEXPORT virtual bool stglInit();
     ST_CPPEXPORT virtual void stglResize();
@@ -66,7 +77,7 @@ class StGLMessageBox : public StGLWidget {
     ST_CPPEXPORT void setTitle(const StString& theTitle);
 
     /**
-     * Set content to the plain text.
+     * Set content to the plain text (previous content will be discarded).
      */
     ST_CPPEXPORT void setText(const StString& theText);
 
@@ -84,6 +95,22 @@ class StGLMessageBox : public StGLWidget {
     ST_LOCAL int getMarginTop()    const { return myMarginTop; }
     ST_LOCAL int getMarginBottom() const { return myMarginBottom; }
 
+        protected:
+
+    /**
+     * Protected empty constructor (does not call create()).
+     */
+    ST_CPPEXPORT StGLMessageBox(StGLWidget* theParent);
+
+    /**
+     * Initializes the layout of the widget.
+     * Should be called once, in constructor.
+     */
+    ST_CPPEXPORT void create(const StString& theTitle,
+                             const StString& theText,
+                             const int       theWidth,
+                             const int       theHeight);
+
         private:   //! @name callback Slots (private overriders)
 
     ST_LOCAL void doMouseUnclick(const int theBtnId);
@@ -94,11 +121,6 @@ class StGLMessageBox : public StGLWidget {
      * @return true if next button is available
      */
     ST_LOCAL bool doNextButton(const int theDir);
-
-    ST_LOCAL void create(const StString& theTitle,
-                         const StString& theText,
-                         const int       theWidth,
-                         const int       theHeight);
 
         public:    //! @name Signals
 

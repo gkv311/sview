@@ -74,6 +74,8 @@ class StGLRootWidget : public StGLWidget {
         IconImage_CheckboxOn,
         IconImage_RadioButtonOff,
         IconImage_RadioButtonOn,
+        IconImage_Folder,
+        IconImage_File,
         IconImage_NB
     };
 

@@ -20,6 +20,23 @@ namespace {
     static const int OFFSET_PIXELS = 32;
 }
 
+StGLMessageBox::StGLMessageBox(StGLWidget* theParent)
+: StGLWidget(theParent, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER), 32, 32),
+  myContent(NULL),
+  myTitle(NULL),
+  myBtnPanel(NULL),
+  myDefaultBtn(NULL),
+  myButtonsNb(0),
+  myMarginLeft(0),
+  myMarginRight(0),
+  myMarginTop(0),
+  myMarginBottom(0),
+  myMinSizeY(0),
+  myToAdjustY(true),
+  myIsContextual(false) {
+    //
+}
+
 StGLMessageBox::StGLMessageBox(StGLWidget*     theParent,
                                const StString& theTitle,
                                const StString& theText,

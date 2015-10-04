@@ -222,6 +222,7 @@
     <ClCompile Include="StGLMenuRadioButton.cpp" />
     <ClCompile Include="StGLMessageBox.cpp" />
     <ClCompile Include="StGLMsgStack.cpp" />
+    <ClCompile Include="StGLOpenFile.cpp" />
     <ClCompile Include="StGLPlayList.cpp" />
     <ClCompile Include="StGLRadioButton.cpp" />
     <ClCompile Include="StGLRadioButtonFloat32.cpp" />

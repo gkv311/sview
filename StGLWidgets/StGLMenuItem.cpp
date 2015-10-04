@@ -96,6 +96,13 @@ StGLMenuItem* StGLMenuItem::setIcon(const StString* theImgPaths,
     return this;
 }
 
+void StGLMenuItem::setIcon(StGLIcon* theIcon) {
+    if(myIcon != NULL) {
+        delete myIcon;
+    }
+    myIcon = theIcon;
+}
+
 void StGLMenuItem::setHilightText() {
     myToHilightText = true;
 }

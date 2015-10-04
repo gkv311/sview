@@ -171,8 +171,22 @@ class StGLIcon : public StGLTextureButton {
                           const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
                           const size_t     theFacesCount = 1);
 
+    ST_CPPEXPORT virtual ~StGLIcon();
+
     ST_CPPEXPORT virtual bool tryClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemClicked);
     ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemUnclicked);
+
+    /**
+     * Define externally managed textures.
+     */
+    ST_LOCAL void setExternalTextures(const StHandle<StGLTextureArray>& theTextures) {
+        myTextures          = theTextures;
+        myIsExternalTexture = true;
+    }
+
+        protected:
+
+    bool myIsExternalTexture; //!< flag indicating that assigned texture should not be released
 
 };
 

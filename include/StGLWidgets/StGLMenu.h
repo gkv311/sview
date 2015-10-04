@@ -107,6 +107,20 @@ class StGLMenu : public StGLWidget {
     }
 
     /**
+     * Return minimum width of item in this menu.
+     */
+    ST_LOCAL int getItemWidthMin() const {
+        return myWidthMin;
+    }
+
+    /**
+     * Setup minimum width of item in this menu.
+     */
+    ST_LOCAL void setItemWidthMin(const int theWidth) {
+        myWidthMin = theWidth;
+    }
+
+    /**
      * Setup background color of menu.
      */
     inline void setColor(const StGLVec3& theColor) {
@@ -185,6 +199,7 @@ class StGLMenu : public StGLWidget {
     StGLVec4                   myColorVec;
     int                        myOrient;
     int                        myItemHeight;
+    int                        myWidthMin;
     int                        myWidth;
     bool                       myIsRootMenu;    //!< the root menu does not show sub-menus until first click
     bool                       myIsContextual;

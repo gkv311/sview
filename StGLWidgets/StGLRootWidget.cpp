@@ -127,11 +127,13 @@ void StGLRootWidget::setContext(const StHandle<StGLContext>& theCtx) {
 }
 
 void StGLRootWidget::setupTextures() {
-    const IconSize aCheckboxSize = scaleIcon(16);
-    myIcons[IconImage_CheckboxOff]    = iconTexture(StString("textures" ST_FILE_SPLITTER) + "checkboxOff",    aCheckboxSize);
-    myIcons[IconImage_CheckboxOn]     = iconTexture(StString("textures" ST_FILE_SPLITTER) + "checkboxOn",     aCheckboxSize);
-    myIcons[IconImage_RadioButtonOff] = iconTexture(StString("textures" ST_FILE_SPLITTER) + "radioButtonOff", aCheckboxSize);
-    myIcons[IconImage_RadioButtonOn]  = iconTexture(StString("textures" ST_FILE_SPLITTER) + "radioButtonOn",  aCheckboxSize);
+    const IconSize anIconSize = scaleIcon(16);
+    myIcons[IconImage_CheckboxOff]    = iconTexture(StString("textures" ST_FILE_SPLITTER) + "checkboxOff",    anIconSize);
+    myIcons[IconImage_CheckboxOn]     = iconTexture(StString("textures" ST_FILE_SPLITTER) + "checkboxOn",     anIconSize);
+    myIcons[IconImage_RadioButtonOff] = iconTexture(StString("textures" ST_FILE_SPLITTER) + "radioButtonOff", anIconSize);
+    myIcons[IconImage_RadioButtonOn]  = iconTexture(StString("textures" ST_FILE_SPLITTER) + "radioButtonOn",  anIconSize);
+    myIcons[IconImage_Folder]         = iconTexture(StString("textures" ST_FILE_SPLITTER) + "actionOpen",     anIconSize);
+    myIcons[IconImage_File]           = iconTexture(StString("textures" ST_FILE_SPLITTER) + "actionFile",     anIconSize);
 }
 
 StMarginsI StGLRootWidget::iconMargins(StGLRootWidget::IconSize theStdSize,
