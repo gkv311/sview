@@ -857,9 +857,9 @@ void StOutDistorted::stglDraw() {
     && myDevice != DEVICE_OCULUS) {
         switch(params.Layout->getValue()) {
             case LAYOUT_OVER_UNDER: {
-                aViewPortL.height() /= 2;
-                aViewPortR.height() = aViewPortL.height();
-                aViewPortR.y() += aViewPortL.height();
+                aViewPortR.height() /= 2;
+                aViewPortL.height() = aViewPortR.height();
+                aViewPortL.y() += aViewPortR.height();
                 break;
             }
             default:
