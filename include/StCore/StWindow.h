@@ -85,6 +85,8 @@ enum StWinSplit {
     StWinSlave_splitOff,         //!< do not split the window
     StWinSlave_splitHorizontal,  //!< split window horizontally
     StWinSlave_splitVertical,    //!< split window vertically
+    StWinSlave_splitVertHdmi720, //!< split window vertically (2x 1280x720  + 30 pixels between)
+    StWinSlave_splitVertHdmi1080 //!< split window vertically (2x 1920x1080 + 45 pixels between)
 };
 
 /**

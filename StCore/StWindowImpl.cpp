@@ -410,19 +410,39 @@ void StWindowImpl::setAttributes(const StWinAttr* theAttributes) {
             case StWinAttr_SplitCfg:
                 if(attribs.Split != (StWinSplit )anIter[1]
                 && attribs.IsFullScreen) {
-                    if(attribs.Split == StWinSlave_splitHorizontal) {
-                        myRectFull.right() += myRectFull.width();
-                    } else if(attribs.Split == StWinSlave_splitVertical) {
-                        myRectFull.bottom() += myRectFull.height();
+                    switch(attribs.Split) {
+                        case StWinSlave_splitHorizontal:   myRectFull.right()  += myRectFull.width();  break;
+                        case StWinSlave_splitVertical:     myRectFull.bottom() += myRectFull.height(); break;
+                        case StWinSlave_splitVertHdmi720:  myRectFull.bottom() += 720  + 30; break;
+                        case StWinSlave_splitVertHdmi1080: myRectFull.bottom() += 1080 + 45; break;
+                        default: break;
                     }
-                    if((StWinSplit )anIter[1] == StWinSlave_splitHorizontal) {
-                        myTiledCfg = TiledCfg_MasterSlaveX;
-                        myRectFull.right() -= myRectFull.width() / 2;
-                    } else if((StWinSplit )anIter[1] == StWinSlave_splitVertical) {
-                        myTiledCfg = TiledCfg_MasterSlaveY;
-                        myRectFull.bottom() -= myRectFull.height() / 2;
-                    } else {
-                        myTiledCfg = TiledCfg_Separate;
+
+                    switch((StWinSplit )anIter[1]) {
+                        case StWinSlave_splitHorizontal: {
+                            myTiledCfg = TiledCfg_MasterSlaveX;
+                            myRectFull.right() -= myRectFull.width() / 2;
+                            break;
+                        }
+                        case StWinSlave_splitVertical: {
+                            myTiledCfg = TiledCfg_MasterSlaveY;
+                            myRectFull.bottom() -= myRectFull.height() / 2;
+                            break;
+                        }
+                        case StWinSlave_splitVertHdmi720: {
+                            myTiledCfg = TiledCfg_VertHdmi720;
+                            myRectFull.bottom() -= (720 + 30);
+                            break;
+                        }
+                        case StWinSlave_splitVertHdmi1080: {
+                            myTiledCfg = TiledCfg_VertHdmi1080;
+                            myRectFull.bottom() -= (1080 + 45);
+                            break;
+                        }
+                        default: {
+                            myTiledCfg = TiledCfg_Separate;
+                            break;
+                        }
                     }
                     myStEventAux.Type       = stEvent_Size;
                     myStEventAux.Size.Time  = getEventTime();
@@ -832,6 +852,11 @@ void StWindowImpl::getTiledWinRect(StRectI_t& theRect) const {
             theRect.top()    -= theRect.height();
             return;
         }
+        case TiledCfg_VertHdmi720:
+        case TiledCfg_VertHdmi1080: {
+            // should not be used in this context
+            return;
+        }
         case TiledCfg_Separate:
         default: {
             return;
@@ -852,6 +877,8 @@ void StWindowImpl::correctTiledCursor(int& theLeft, int& theTop) const {
         }
         case TiledCfg_MasterSlaveX:
         case TiledCfg_MasterSlaveY:
+        case TiledCfg_VertHdmi720:
+        case TiledCfg_VertHdmi1080:
         case TiledCfg_Separate:
         default: {
             return;
@@ -888,6 +915,24 @@ StGLBoxPx StWindowImpl::stglViewport(const int& theWinId) const {
                 aRect.y() += aHeight;
             } else if(theWinId == ST_WIN_ALL) {
                 aRect.height() += aHeight;
+            }
+            convertRectToBacking(aRect, ST_WIN_MASTER);
+            return aRect;
+        }
+        case TiledCfg_VertHdmi720: {
+            if(theWinId == ST_WIN_MASTER) {
+                aRect.y()      += 720 + 30;
+            } else if(theWinId == ST_WIN_ALL) {
+                aRect.height() += 720 + 30;
+            }
+            convertRectToBacking(aRect, ST_WIN_MASTER);
+            return aRect;
+        }
+        case TiledCfg_VertHdmi1080: {
+            if(theWinId == ST_WIN_MASTER) {
+                aRect.y()      += 1080 + 45;
+            } else if(theWinId == ST_WIN_ALL) {
+                aRect.height() += 1080 + 45;
             }
             convertRectToBacking(aRect, ST_WIN_MASTER);
             return aRect;

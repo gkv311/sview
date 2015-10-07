@@ -336,7 +336,8 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
   myToShowCursor(true),
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false),
-  myIsStereoOn(false) {
+  myIsStereoOn(false),
+  myIsHdmiPack(false) {
 
 #ifdef ST_HAVE_LIBOVR
     ovr_Initialize();
@@ -354,13 +355,23 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
             + aDescr.format("2013-2015", "kirill@sview.ru", "www.sview.ru");
 
     // detect connected displays
-    int aSupportLevel = ST_DEVICE_SUPPORT_NONE;
+    int aSupportOculus   = ST_DEVICE_SUPPORT_NONE;
+    int aSupportParallel = ST_DEVICE_SUPPORT_NONE;
+    bool isHdmiPack = false;
     for(size_t aMonIter = 0; aMonIter < aMonitors.size(); ++aMonIter) {
         const StMonitor& aMon = aMonitors[aMonIter];
         if(aMon.getPnPId().isStartsWith(stCString("OVR"))) {
             // Oculus Rift
-            aSupportLevel = ST_DEVICE_SUPPORT_HIGHT;
+            aSupportOculus = ST_DEVICE_SUPPORT_HIGHT;
             break;
+        } else if(aMon.getVRect().width()  == 1920
+               && aMon.getVRect().height() == 2205) {
+            aSupportParallel = ST_DEVICE_SUPPORT_HIGHT;
+            isHdmiPack = true;
+        } else if(aMon.getVRect().width()  == 1280
+               && aMon.getVRect().height() == 1470) {
+            aSupportParallel = ST_DEVICE_SUPPORT_HIGHT;
+            isHdmiPack = true;
         }
     }
 
@@ -368,7 +379,7 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
     StHandle<StOutDevice> aDevDistorted = new StOutDevice();
     aDevDistorted->PluginId = ST_OUT_PLUGIN_NAME;
     aDevDistorted->DeviceId = "Distorted";
-    aDevDistorted->Priority = ST_DEVICE_SUPPORT_NONE;
+    aDevDistorted->Priority = aSupportParallel;
     aDevDistorted->Name     = aLangMap.changeValueId(STTR_DISTORTED_NAME, "TV (parallel pair)");
     aDevDistorted->Desc     = aLangMap.changeValueId(STTR_DISTORTED_DESC, "Distorted Output");
     myDevices.add(aDevDistorted);
@@ -376,7 +387,7 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
     StHandle<StOutDevice> aDevOculus = new StOutDevice();
     aDevOculus->PluginId = ST_OUT_PLUGIN_NAME;
     aDevOculus->DeviceId = "Oculus";
-    aDevOculus->Priority = aSupportLevel;
+    aDevOculus->Priority = aSupportOculus;
     aDevOculus->Name     = aLangMap.changeValueId(STTR_OCULUS_NAME, "Oculus Rift");
     aDevOculus->Desc     = aLangMap.changeValueId(STTR_OCULUS_DESC, "Distorted Output");
     myDevices.add(aDevOculus);
@@ -392,12 +403,12 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam(ST_SETTING_MONOCLONE, params.MonoClone);
 
     // Layout option
-    StHandle<StEnumParam> aLayoutParam = new StEnumParam(LAYOUT_SIDE_BY_SIDE_ANAMORPH,
+    StHandle<StEnumParam> aLayoutParam = new StEnumParam(isHdmiPack ? LAYOUT_OVER_UNDER : LAYOUT_SIDE_BY_SIDE_ANAMORPH,
                                                          aLangMap.changeValueId(STTR_PARAMETER_LAYOUT, "Layout"));
     aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_SBS_ANAMORPH,       "Side-by-Side (Anamorph)"));
     aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_OVERUNDER_ANAMORPH, "Top-and-Bottom (Anamorph)"));
     aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_SBS,                "Side-by-Side"));
-    aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_OVERUNDER,          "Top-and-Bottom"));
+    aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_OVERUNDER,          "Top-and-Bottom") + (isHdmiPack ? " [HDMI]" : ""));
     params.Layout = aLayoutParam;
     mySettings->loadParam(ST_SETTING_LAYOUT, params.Layout);
 
@@ -409,6 +420,7 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
         }
         StWindow::setPlacement(aRect, true);
     }
+    checkHdmiPack();
     StWindow::setTitle("sView - Distorted Renderer");
 
     StRectI_t aMargins;
@@ -701,7 +713,25 @@ GLfloat StOutDistorted::getScaleFactor() const {
     return 0.8f;
 }
 
+void StOutDistorted::checkHdmiPack() {
+    myIsHdmiPack = false;
+    if(!StWindow::isFullScreen()
+    || myDevice == DEVICE_OCULUS) {
+        return;
+    }
+
+    const StRectI_t aRect = StWindow::getPlacement();
+    if(aRect.width()  == 1920
+    && aRect.height() == 2205) {
+        myIsHdmiPack = true;
+    } else if(aRect.width()  == 1280
+           && aRect.height() == 1470) {
+        myIsHdmiPack = true;
+    }
+}
+
 void StOutDistorted::setFullScreen(const bool theFullScreen) {
+    bool wasFullscreen = StWindow::isFullScreen();
     if(!theFullScreen) {
         myMargins.left   = 0;
         myMargins.right  = 0;
@@ -709,6 +739,9 @@ void StOutDistorted::setFullScreen(const bool theFullScreen) {
         myMargins.bottom = 0;
     }
     StWindow::setFullScreen(theFullScreen);
+    if(!wasFullscreen) {
+        checkHdmiPack();
+    }
 }
 
 void StOutDistorted::stglDraw() {
@@ -736,16 +769,27 @@ void StOutDistorted::stglDraw() {
         myMargins.bottom = 0;
     }
 
-
+    StWinSplit aWinSplit = StWinSlave_splitOff;
     if(myIsStereoOn
     && (myDevice == DEVICE_OCULUS
      || params.Layout->getValue() == LAYOUT_SIDE_BY_SIDE
      || params.Layout->getValue() == LAYOUT_OVER_UNDER)) {
-        StWindow::setAttribute(StWinAttr_SplitCfg, (params.Layout->getValue() == LAYOUT_OVER_UNDER && myDevice != DEVICE_OCULUS)
-                                                 ? StWinSlave_splitVertical : StWinSlave_splitHorizontal);
-    } else {
-        StWindow::setAttribute(StWinAttr_SplitCfg, StWinSlave_splitOff);
+        aWinSplit = params.Layout->getValue() == LAYOUT_OVER_UNDER && myDevice != DEVICE_OCULUS
+                  ? StWinSlave_splitVertical
+                  : StWinSlave_splitHorizontal;
+        if(myDevice != DEVICE_OCULUS
+        && params.Layout->getValue() == LAYOUT_OVER_UNDER
+        && myIsHdmiPack) {
+            // detect special HDMI 3D modes
+            const StRectI_t aRect = StWindow::getPlacement();
+            if(aRect.width() == 1920) {
+                aWinSplit = StWinSlave_splitVertHdmi1080;
+            } else if(aRect.width() == 1280) {
+                aWinSplit = StWinSlave_splitVertHdmi720;
+            }
+        }
     }
+    StWindow::setAttribute(StWinAttr_SplitCfg, aWinSplit);
 
     if(!StWindow::stglMakeCurrent(ST_WIN_MASTER)) {
         StWindow::signals.onRedraw(ST_DRAW_MONO);

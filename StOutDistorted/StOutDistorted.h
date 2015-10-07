@@ -134,6 +134,11 @@ class StOutDistorted : public StWindow {
         private:
 
     /**
+     * Detect frame pack HMDI mode.
+     */
+    ST_LOCAL void checkHdmiPack();
+
+    /**
      * Release GL resources before window closing.
      */
     ST_LOCAL void releaseResources();
@@ -203,6 +208,7 @@ class StOutDistorted : public StWindow {
     bool                      myToCompressMem;   //!< reduce memory usage
     bool                      myIsBroken;        //!< special flag for broke state - when FBO can not be allocated
     bool                      myIsStereoOn;
+    bool                      myIsHdmiPack;      //!< "frame packed" mode in HDMI 1.4a
 
 };
 

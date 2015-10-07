@@ -167,6 +167,8 @@ class StWindowImpl {
         TiledCfg_SlaveMasterX, //!< Master at right  / Slave at left
         TiledCfg_MasterSlaveY, //!< Master at top    / Slave at bottom
         TiledCfg_SlaveMasterY, //!< Master at bottom / Slave at top
+        TiledCfg_VertHdmi720,
+        TiledCfg_VertHdmi1080,
     };
 
     ST_LOCAL void getTiledWinRect(StRectI_t& theRect) const;
