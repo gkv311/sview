@@ -160,14 +160,15 @@ class StOutDistorted : public StWindow {
     };
 
     enum Layout {
-        LAYOUT_SIDE_BY_SIDE = 0, //!< anamorph side by side
-        LAYOUT_OVER_UNDER   = 1, //!< anamorph over under
+        LAYOUT_SIDE_BY_SIDE_ANAMORPH = 0, //!< anamorph  side by side
+        LAYOUT_OVER_UNDER_ANAMORPH   = 1, //!< anamorph  over under
+        LAYOUT_SIDE_BY_SIDE          = 2, //!< full-size side by side
+        LAYOUT_OVER_UNDER            = 3, //!< full-size over under
     };
 
     struct {
 
         StHandle<StInt32Param> Layout;   //!< pair layout
-        StHandle<StBoolParam>  Anamorph; //!< anamorph filter
         StHandle<StBoolParam>  MonoClone;//!< display mono in stereo
 
     } params;

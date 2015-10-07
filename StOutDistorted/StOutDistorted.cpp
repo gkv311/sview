@@ -63,7 +63,6 @@ namespace {
     static const char ST_SETTING_DEVICE_ID[] = "deviceId";
     static const char ST_SETTING_WINDOWPOS[] = "windowPos";
     static const char ST_SETTING_LAYOUT[]    = "layout";
-    static const char ST_SETTING_ANAMORPH[]  = "anamorph";
     static const char ST_SETTING_MONOCLONE[] = "monoClone";
     static const char ST_SETTING_MARGINS[]   = "margins";
     static const char ST_SETTING_WARP_COEF[] = "warpCoef";
@@ -80,6 +79,8 @@ namespace {
         STTR_PARAMETER_LAYOUT     = 1110,
         STTR_PARAMETER_LAYOUT_SBS        = 1111,
         STTR_PARAMETER_LAYOUT_OVERUNDER  = 1112,
+        STTR_PARAMETER_LAYOUT_SBS_ANAMORPH = 1113,
+        STTR_PARAMETER_LAYOUT_OVERUNDER_ANAMORPH = 1114,
         STTR_PARAMETER_DISTORTION = 1120,
         STTR_PARAMETER_DISTORTION_OFF    = 1121,
         STTR_PARAMETER_MONOCLONE         = 1123,
@@ -312,7 +313,6 @@ void StOutDistorted::getDevices(StOutDevicesList& theList) const {
 void StOutDistorted::getOptions(StParamsList& theList) const {
     if(myDevice != DEVICE_OCULUS) {
         theList.add(params.Layout);
-        theList.add(params.Anamorph);
     }
     theList.add(params.MonoClone);
 }
@@ -388,16 +388,16 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
     }
 
     // Distortion parameters
-    params.Anamorph = new StBoolParamNamed(false, "Anamorph");
-    mySettings->loadParam(ST_SETTING_ANAMORPH, params.Anamorph);
     params.MonoClone = new StBoolParamNamed(false, aLangMap.changeValueId(STTR_PARAMETER_MONOCLONE, "Show Mono in Stereo"));
     mySettings->loadParam(ST_SETTING_MONOCLONE, params.MonoClone);
 
     // Layout option
-    StHandle<StEnumParam> aLayoutParam = new StEnumParam(LAYOUT_SIDE_BY_SIDE,
+    StHandle<StEnumParam> aLayoutParam = new StEnumParam(LAYOUT_SIDE_BY_SIDE_ANAMORPH,
                                                          aLangMap.changeValueId(STTR_PARAMETER_LAYOUT, "Layout"));
-    aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_SBS,       "Side-by-Side"));
-    aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_OVERUNDER, "Top-and-Bottom"));
+    aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_SBS_ANAMORPH,       "Side-by-Side (Anamorph)"));
+    aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_OVERUNDER_ANAMORPH, "Top-and-Bottom (Anamorph)"));
+    aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_SBS,                "Side-by-Side"));
+    aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_OVERUNDER,          "Top-and-Bottom"));
     params.Layout = aLayoutParam;
     mySettings->loadParam(ST_SETTING_LAYOUT, params.Layout);
 
@@ -456,7 +456,6 @@ void StOutDistorted::beforeClose() {
     aMargins.bottom() = myBarMargins.bottom;
 
     mySettings->saveParam(ST_SETTING_LAYOUT,     params.Layout);
-    mySettings->saveParam(ST_SETTING_ANAMORPH,   params.Anamorph);
     mySettings->saveParam(ST_SETTING_MONOCLONE,  params.MonoClone);
     mySettings->saveInt32Rect(ST_SETTING_MARGINS,   aMargins);
     mySettings->saveFloatVec4(ST_SETTING_WARP_COEF, myBarrelCoef);
@@ -644,12 +643,17 @@ void StOutDistorted::stglDrawCursor(const StPointD_t&  theCursorPos,
     const GLfloat aCurTop  = GLfloat( 1.0 - theCursorPos.y() * 2.0);
     GLfloat aCurWidth  = 2.0f * GLfloat(myCursor->getSizeX()) / GLfloat(myFrBuffer->getVPSizeX());
     GLfloat aCurHeight = 2.0f * GLfloat(myCursor->getSizeY()) / GLfloat(myFrBuffer->getVPSizeY());
-    if(params.Anamorph->getValue()
-    && myDevice != DEVICE_OCULUS) {
-        if(params.Layout->getValue() == LAYOUT_OVER_UNDER) {
-            aCurHeight *= 0.5;
-        } else {
-            aCurWidth  *= 0.5;
+    if(myDevice != DEVICE_OCULUS) {
+        switch(params.Layout->getValue()) {
+            case LAYOUT_SIDE_BY_SIDE_ANAMORPH:
+                aCurWidth  *= 0.5;
+                break;
+            case LAYOUT_OVER_UNDER_ANAMORPH:
+                aCurHeight *= 0.5;
+                break;
+            case LAYOUT_SIDE_BY_SIDE:
+            case LAYOUT_OVER_UNDER:
+                break;
         }
     }
     if(theView == ST_DRAW_LEFT) {
@@ -732,8 +736,11 @@ void StOutDistorted::stglDraw() {
         myMargins.bottom = 0;
     }
 
+
     if(myIsStereoOn
-    && (myDevice == DEVICE_OCULUS || !params.Anamorph->getValue())) {
+    && (myDevice == DEVICE_OCULUS
+     || params.Layout->getValue() == LAYOUT_SIDE_BY_SIDE
+     || params.Layout->getValue() == LAYOUT_OVER_UNDER)) {
         StWindow::setAttribute(StWinAttr_SplitCfg, (params.Layout->getValue() == LAYOUT_OVER_UNDER && myDevice != DEVICE_OCULUS)
                                                  ? StWinSlave_splitVertical : StWinSlave_splitHorizontal);
     } else {
@@ -853,20 +860,22 @@ void StOutDistorted::stglDraw() {
 
     StGLBoxPx aViewPortL = aVPMaster;
     StGLBoxPx aViewPortR = aVPSlave;
-    if(params.Anamorph->getValue()
-    && myDevice != DEVICE_OCULUS) {
+    if(myDevice != DEVICE_OCULUS) {
         switch(params.Layout->getValue()) {
-            case LAYOUT_OVER_UNDER: {
+            case LAYOUT_OVER_UNDER_ANAMORPH: {
                 aViewPortR.height() /= 2;
                 aViewPortL.height() = aViewPortR.height();
                 aViewPortL.y() += aViewPortR.height();
                 break;
             }
-            default:
-            case LAYOUT_SIDE_BY_SIDE: {
+            case LAYOUT_SIDE_BY_SIDE_ANAMORPH: {
                 aViewPortL.width() /= 2;
                 aViewPortR.width() = aViewPortL.width();
                 aViewPortR.x() += aViewPortL.width();
+                break;
+            }
+            case LAYOUT_SIDE_BY_SIDE:
+            case LAYOUT_OVER_UNDER: {
                 break;
             }
         }
