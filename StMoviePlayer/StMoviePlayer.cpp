@@ -1409,26 +1409,6 @@ void StMoviePlayer::beforeDraw() {
         doUpdateStateLoaded();
     }
 
-    if(myIsBenchmark
-    || !params.ToLimitFps->getValue()) {
-        // do not limit FPS
-        myWindow->setTargetFps(-1.0);
-    } else if(params.TargetFps >= 1
-           && params.TargetFps <= 3) {
-        // set rendering FPS to 2x averageFPS
-        double aTargetFps = myVideo->getAverFps();
-        if(aTargetFps < 17.0
-        || aTargetFps > 120.0) {
-            aTargetFps = 0.0;
-        } else if(aTargetFps < 40.0) {
-            aTargetFps *= double(params.TargetFps);
-        }
-        myWindow->setTargetFps(aTargetFps);
-    } else {
-        // set rendering FPS to set value in settings
-        myWindow->setTargetFps(double(params.TargetFps));
-    }
-
     if(myToCheckUpdates && !myUpdates.isNull() && myUpdates->isInitialized()) {
         if(myUpdates->isNeedUpdate()) {
             myGUI->showUpdatesNotify();
@@ -1479,7 +1459,7 @@ void StMoviePlayer::beforeDraw() {
                 break;
             }
             case BLOCK_SLEEP_FULLSCREEN: {
-                toBlockSleepDisplay = myWindow->isFullScreen();;
+                toBlockSleepDisplay = myWindow->isFullScreen();
                 toBlockSleepSystem  = toBlockSleepDisplay;
                 break;
             }
@@ -1500,6 +1480,33 @@ void StMoviePlayer::beforeDraw() {
         myWindow->setStereoOutput(!aParams->isMono()
                             && (myGUI->myImage->params.displayMode->getValue() == StGLImageRegion::MODE_STEREO));
     }
+
+    if(myIsBenchmark
+    || !params.ToLimitFps->getValue()) {
+        // do not limit FPS
+        myWindow->setTargetFps(-1.0);
+    } else if(params.TargetFps >= 1
+           && params.TargetFps <= 3) {
+        // set rendering FPS to 2x averageFPS
+        double aTargetFps = myVideo->getAverFps();
+        if(aTargetFps < 17.0
+        || aTargetFps > 120.0) {
+            aTargetFps = 0.0;
+        } else if(aTargetFps < 40.0) {
+            aTargetFps *= double(params.TargetFps);
+        }
+
+        if(myWindow->toTrackOrientation()) {
+            // do not limit FPS within head-tracking mode
+            aTargetFps = 0.0;
+        }
+
+        myWindow->setTargetFps(aTargetFps);
+    } else {
+        // set rendering FPS to set value in settings
+        myWindow->setTargetFps(double(params.TargetFps));
+    }
+
 }
 
 void StMoviePlayer::doUpdateOpenALDeviceList(const size_t ) {
