@@ -441,14 +441,10 @@ bool StGLTexture::create(StGLContext&   theCtx,
 
     GLint anInternalFormat = myTextFormat;
 #if defined(GL_ES_VERSION_2_0)
-    // sized formats are not supported here
-    if(anInternalFormat == GL_RGBA8) {
-        anInternalFormat = GL_RGBA;
-    } else if(anInternalFormat == GL_RGB8) {
-        anInternalFormat = GL_RGB;
-    } else if(anInternalFormat == GL_ALPHA8) {
-        anInternalFormat = GL_ALPHA;
-    }
+    //if(!theCtx.isGlGreaterEqual(3, 0)) {
+        // sized formats are not supported here
+        anInternalFormat = theDataFormat;
+    //}
 #endif
 
     if(myTarget == GL_TEXTURE_CUBE_MAP) {
@@ -473,13 +469,13 @@ bool StGLTexture::create(StGLContext&   theCtx,
     GLenum anErr = theCtx.core20fwd->glGetError();
     if(anErr != GL_NO_ERROR) {
         ST_ERROR_LOG("Creation texture with size (" + mySizeX + " x "+ mySizeY
-                   + " @" + formatInternalFormat(anInternalFormat) + " with data " + formatInternalFormat(theDataFormat) + ") FAILED: " + theCtx.stglErrorToString(anErr) + "!");
+                   + " @" + formatInternalFormat(myTextFormat) + " with data " + formatInternalFormat(theDataFormat) + ") FAILED: " + theCtx.stglErrorToString(anErr) + "!");
         release(theCtx);
         return false;
     }
 #ifdef ST_DEBUG_TEXTURES
     ST_DEBUG_LOG("Created StGLTexture " + mySizeX + " x "+ mySizeY
-               + " (format " + formatInternalFormat(anInternalFormat) + ')');
+               + " (format " + formatInternalFormat(myTextFormat) + ')');
 #endif
 
 #else
