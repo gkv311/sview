@@ -234,6 +234,8 @@
 		<Unit filename="StGLSwitchTextured.cpp" />
 		<Unit filename="StGLTable.cpp" />
 		<Unit filename="StGLTextArea.cpp" />
+		<Unit filename="StGLTextBorderProgram.cpp" />
+		<Unit filename="StGLTextProgram.cpp" />
 		<Unit filename="StGLTextureButton.cpp" />
 		<Unit filename="StGLWidget.cpp" />
 		<Unit filename="StGLWidgetList.cpp" />
@@ -275,6 +277,8 @@
 		<Unit filename="../include/StGLWidgets/StGLSwitchTextured.h" />
 		<Unit filename="../include/StGLWidgets/StGLTable.h" />
 		<Unit filename="../include/StGLWidgets/StGLTextArea.h" />
+		<Unit filename="../include/StGLWidgets/StGLTextBorderProgram.h" />
+		<Unit filename="../include/StGLWidgets/StGLTextProgram.h" />
 		<Unit filename="../include/StGLWidgets/StGLTextureButton.h" />
 		<Unit filename="../include/StGLWidgets/StGLWidget.h" />
 		<Unit filename="../include/StGLWidgets/StGLWidgetList.h" />

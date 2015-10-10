@@ -7,7 +7,10 @@
  */
 
 #include <StGLWidgets/StGLTextArea.h>
+
 #include <StGLWidgets/StGLRootWidget.h>
+#include <StGLWidgets/StGLTextProgram.h>
+#include <StGLWidgets/StGLTextBorderProgram.h>
 
 #include <StGL/StGLContext.h>
 #include <StGL/StGLProgram.h>
@@ -15,192 +18,6 @@
 
 #include <StFile/StFileNode.h>
 #include <StThreads/StProcess.h>
-
-class StGLTextArea::StTextProgram : public StGLProgram {
-
-        public:
-
-    StTextProgram()
-    : StGLProgram("StGLTextArea, Text Program") {
-        //
-    }
-
-    StGLVarLocation getVVertexLoc() const {
-        return atrVVertexLoc;
-    }
-
-    StGLVarLocation getVTexCoordLoc() const {
-        return atrVTexCoordLoc;
-    }
-
-    void setProjMat(StGLContext&      theCtx,
-                    const StGLMatrix& theProjMat) {
-        theCtx.core20fwd->glUniformMatrix4fv(uniProjMatLoc, 1, GL_FALSE, theProjMat);
-    }
-
-    void setModelMat(StGLContext&      theCtx,
-                     const StGLMatrix& theModelMat) {
-        theCtx.core20fwd->glUniformMatrix4fv(uniModelMatLoc, 1, GL_FALSE, theModelMat);
-    }
-
-    void setTextColor(StGLContext&    theCtx,
-                      const StGLVec4& theTextColorVec) {
-        theCtx.core20fwd->glUniform4fv(uniTextColorLoc, 1, theTextColorVec);
-    }
-
-    virtual bool init(StGLContext& theCtx) {
-        const char VERTEX_SHADER[] =
-           "uniform mat4 uProjMat; \
-            uniform mat4 uModelMat; \
-            attribute vec4 vVertex; \
-            attribute vec2 vTexCoord; \
-            varying vec2 fTexCoord; \
-            void main(void) { \
-                fTexCoord = vTexCoord; \
-                gl_Position = uProjMat * uModelMat * vVertex; \
-            }";
-
-        const char FRAGMENT_GET_RED[] =
-           "float getAlpha(void) { return texture2D(uTexture, fTexCoord).r; }";
-
-        const char FRAGMENT_GET_ALPHA[] =
-           "float getAlpha(void) { return texture2D(uTexture, fTexCoord).a; }";
-
-        const char FRAGMENT_SHADER[] =
-           "uniform sampler2D uTexture;"
-           "uniform vec4 uTextColor;"
-           "varying vec2 fTexCoord;"
-           "float getAlpha(void);"
-           "void main(void) {"
-           "     vec4 color = uTextColor;"
-           "     color.a *= getAlpha();"
-           "     gl_FragColor = color;"
-           "}";
-
-        StGLVertexShader aVertexShader(StGLProgram::getTitle());
-        aVertexShader.init(theCtx, VERTEX_SHADER);
-        StGLAutoRelease aTmp1(theCtx, aVertexShader);
-
-        StGLFragmentShader aFragmentShader(StGLProgram::getTitle());
-        aFragmentShader.init(theCtx, FRAGMENT_SHADER,
-                             theCtx.arbTexRG ? FRAGMENT_GET_RED : FRAGMENT_GET_ALPHA);
-        StGLAutoRelease aTmp2(theCtx, aFragmentShader);
-        if(!StGLProgram::create(theCtx)
-           .attachShader(theCtx, aVertexShader)
-           .attachShader(theCtx, aFragmentShader)
-           .link(theCtx)) {
-            return false;
-        }
-
-        uniProjMatLoc   = StGLProgram::getUniformLocation(theCtx, "uProjMat");
-        uniModelMatLoc  = StGLProgram::getUniformLocation(theCtx, "uModelMat");
-        uniTextColorLoc = StGLProgram::getUniformLocation(theCtx, "uTextColor");
-        atrVVertexLoc   = StGLProgram::getAttribLocation(theCtx, "vVertex");
-        atrVTexCoordLoc = StGLProgram::getAttribLocation(theCtx, "vTexCoord");
-
-        StGLVarLocation uniTextureLoc = StGLProgram::getUniformLocation(theCtx, "uTexture");
-        if(uniTextureLoc.isValid()) {
-            StGLProgram::use(theCtx);
-            theCtx.core20fwd->glUniform1i(uniTextureLoc, StGLProgram::TEXTURE_SAMPLE_0);
-            StGLProgram::unuse(theCtx);
-        }
-
-        return uniProjMatLoc.isValid()
-            && uniModelMatLoc.isValid()
-            && uniTextColorLoc.isValid()
-            && atrVVertexLoc.isValid()
-            && atrVTexCoordLoc.isValid()
-            && uniTextureLoc.isValid();
-    }
-
-        private:
-
-    StGLVarLocation uniProjMatLoc;
-    StGLVarLocation uniModelMatLoc;
-    StGLVarLocation uniTextColorLoc;
-
-    StGLVarLocation atrVVertexLoc;
-    StGLVarLocation atrVTexCoordLoc;
-
-};
-
-class StGLTextArea::StBorderProgram : public StGLProgram {
-
-        public:
-
-    StBorderProgram()
-    : StGLProgram("StGLTextArea, Border Program"),
-      uniProjMatLoc(),
-      uniModelMatLoc(),
-      uniColorLoc(),
-      atrVVertexLoc() {
-        //
-    }
-
-    StGLVarLocation getVVertexLoc() const {
-        return atrVVertexLoc;
-    }
-
-    void setProjMat(StGLContext&      theCtx,
-                    const StGLMatrix& theProjMat) {
-        theCtx.core20fwd->glUniformMatrix4fv(uniProjMatLoc, 1, GL_FALSE, theProjMat);
-    }
-
-    void setModelMat(StGLContext&      theCtx,
-                     const StGLMatrix& theModelMat) {
-        theCtx.core20fwd->glUniformMatrix4fv(uniModelMatLoc, 1, GL_FALSE, theModelMat);
-    }
-
-    void setColor(StGLContext&    theCtx,
-                  const StGLVec4& theColorVec) {
-        theCtx.core20fwd->glUniform4fv(uniColorLoc, 1, theColorVec);
-    }
-
-    virtual bool init(StGLContext& theCtx) {
-        const char VERTEX_SHADER[] =
-           "uniform mat4 uProjMat; \
-            uniform mat4 uModelMat; \
-            attribute vec4 vVertex; \
-            void main(void) { \
-                gl_Position = uProjMat * uModelMat * vVertex; \
-            }";
-
-        const char FRAGMENT_SHADER[] =
-           "uniform vec4 uColor; \
-            void main(void) { \
-                gl_FragColor = uColor; \
-            }";
-
-        StGLVertexShader aVertexShader(StGLProgram::getTitle());
-        aVertexShader.init(theCtx, VERTEX_SHADER);
-        StGLAutoRelease aTmp1(theCtx, aVertexShader);
-
-        StGLFragmentShader aFragmentShader(StGLProgram::getTitle());
-        aFragmentShader.init(theCtx, FRAGMENT_SHADER);
-        StGLAutoRelease aTmp2(theCtx, aFragmentShader);
-        if(!StGLProgram::create(theCtx)
-           .attachShader(theCtx, aVertexShader)
-           .attachShader(theCtx, aFragmentShader)
-           .link(theCtx)) {
-            return false;
-        }
-
-        uniProjMatLoc  = StGLProgram::getUniformLocation(theCtx, "uProjMat");
-        uniModelMatLoc = StGLProgram::getUniformLocation(theCtx, "uModelMat");
-        uniColorLoc    = StGLProgram::getUniformLocation(theCtx, "uColor");
-        atrVVertexLoc  = StGLProgram::getAttribLocation(theCtx, "vVertex");
-        return uniProjMatLoc.isValid() && uniModelMatLoc.isValid() && uniColorLoc.isValid() && atrVVertexLoc.isValid();
-    }
-
-        private:
-
-    StGLVarLocation uniProjMatLoc;
-    StGLVarLocation uniModelMatLoc;
-    StGLVarLocation uniColorLoc;
-
-    StGLVarLocation atrVVertexLoc;
-
-};
 
 namespace {
     static const size_t SHARE_TEXT_PROGRAM_ID   = StGLRootWidget::generateShareId();
@@ -362,7 +179,7 @@ bool StGLTextArea::stglInit() {
 
     // initialize text program
     if(myTextProgram.isNull()) {
-        myTextProgram.create(getRoot()->getContextHandle(), new StTextProgram());
+        myTextProgram.create(getRoot()->getContextHandle(), new StGLTextProgram());
         if(!myTextProgram->init(aCtx)) {
             return false;
         }
@@ -372,7 +189,7 @@ bool StGLTextArea::stglInit() {
 
     // initialize border program
     if(myBorderProgram.isNull()) {
-        myBorderProgram.create(getRoot()->getContextHandle(), new StBorderProgram());
+        myBorderProgram.create(getRoot()->getContextHandle(), new StGLTextBorderProgram());
         if(!myBorderProgram->init(aCtx)) {
             return false;
         }
@@ -505,7 +322,7 @@ void StGLTextArea::stglDraw(unsigned int theView) {
     myTextProgram->use(aCtx);
         myTextProgram->setProjMat(aCtx, getCamera()->getProjMatrix());
         myTextProgram->setModelMat(aCtx, aModelMat);
-        myTextProgram->setTextColor(aCtx, myToDrawShadow ? myShadowColor : aTextColor);
+        myTextProgram->setColor(aCtx, myToDrawShadow ? myShadowColor : aTextColor);
 
         drawText(aCtx);
 
@@ -521,7 +338,7 @@ void StGLTextArea::stglDraw(unsigned int theView) {
             aModelMat.scale(aSizeOut, aSizeOut, 0.0f);
 
             myTextProgram->setModelMat(aCtx, aModelMat);
-            myTextProgram->setTextColor(aCtx, aTextColor);
+            myTextProgram->setColor(aCtx, aTextColor);
 
             drawText(aCtx);
         }

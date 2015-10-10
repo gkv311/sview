@@ -87,6 +87,12 @@
     <ClCompile Include="StGLTextArea.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="StGLTextBorderProgram.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StGLTextProgram.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
     <ClCompile Include="StGLTextureButton.cpp">
       <Filter>Source files</Filter>
     </ClCompile>

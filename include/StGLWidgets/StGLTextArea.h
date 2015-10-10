@@ -17,6 +17,9 @@
 #include <StGLWidgets/StGLShare.h>
 #include <StGLWidgets/StGLWidget.h>
 
+class StGLTextProgram;
+class StGLTextBorderProgram;
+
 /**
  * Class implements basic text rendering widget.
  */
@@ -233,10 +236,8 @@ class StGLTextArea : public StGLWidget {
     StGLVertexBuffer     myBorderIVertBuf;
     StGLVertexBuffer     myBorderOVertBuf;
 
-    class StTextProgram;
-    class StBorderProgram;
-    StGLShare<StTextProgram>   myTextProgram;
-    StGLShare<StBorderProgram> myBorderProgram;
+    StGLShare<StGLTextProgram>       myTextProgram;
+    StGLShare<StGLTextBorderProgram> myBorderProgram;
 
         protected:
 

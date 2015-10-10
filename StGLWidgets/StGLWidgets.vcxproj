@@ -234,6 +234,8 @@
     <ClCompile Include="StGLSwitchTextured.cpp" />
     <ClCompile Include="StGLTable.cpp" />
     <ClCompile Include="StGLTextArea.cpp" />
+    <ClCompile Include="StGLTextBorderProgram.cpp" />
+    <ClCompile Include="StGLTextProgram.cpp" />
     <ClCompile Include="StGLTextureButton.cpp" />
     <ClCompile Include="StGLWidget.cpp" />
     <ClCompile Include="StGLWidgetList.cpp" />
