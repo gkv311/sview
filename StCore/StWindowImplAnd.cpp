@@ -19,6 +19,7 @@
 #if defined(__ANDROID__)
 
 #include "StWindowImpl.h"
+#include "stvkeysandroid.h" // Android NDK keys to VKEYs lookup array
 
 #include <StCore/StAndroidGlue.h>
 #include <StStrings/StLogger.h>
@@ -147,6 +148,25 @@ void StWindowImpl::onAndroidInput(const AInputEvent* theEvent,
     const int anEventType = AInputEvent_getType(theEvent);
     switch(anEventType) {
         case AINPUT_EVENT_TYPE_KEY: {
+            StVirtKey aVKeySt = ST_VK_NULL;
+            int32_t   aKeySym = AKeyEvent_getKeyCode(theEvent);
+            if(aKeySym < ST_ANDROID2ST_VK_SIZE) {
+                aVKeySt = (StVirtKey )ST_ANDROID2ST_VK[aKeySym];
+            }
+            if(aVKeySt == ST_VK_NULL) {
+                return;
+            }
+
+            myStEvent.Key.Time = getEventTime(); //AKeyEvent_getEventTime(theEvent);
+            myStEvent.Key.VKey = aVKeySt;
+            myStEvent.Key.Char = 0;
+
+            const int32_t aKeyAction = AKeyEvent_getAction(theEvent);
+            if(aKeyAction == AKEY_EVENT_ACTION_DOWN) {
+                postKeyDown(myStEvent);
+            } else if(aKeyAction == AKEY_EVENT_ACTION_UP) {
+                postKeyUp(myStEvent);
+            }// else if(aKeyAction == AKEY_EVENT_ACTION_MULTIPLE) {}
             return;
         }
         case AINPUT_EVENT_TYPE_MOTION: {
@@ -327,7 +347,7 @@ void StWindowImpl::onAndroidCommand(int32_t theCommand) {
             return;
         }
         case StAndroidGlue::CommandId_FocusLost: {
-            //
+            myKeysState.reset();
             return;
         }
         case StAndroidGlue::CommandId_ConfigChanged: {

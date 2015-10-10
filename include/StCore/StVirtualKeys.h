@@ -305,7 +305,7 @@ enum StVirtKey {
     ST_VK_COMMA      = 0xBC,   // 188 = VK_OEM_COMMA   | ',' any country
     ST_VK_OEM_MINUS  = 0xBD,   // 189 = VK_OEM_MINUS   | '-' any country
     ST_VK_PERIOD     = 0xBE,   // 190 = VK_OEM_PERIOD  | '.' any country
-    ///ST_VK_OEM_2       = 0xBF,  // 191 = VK_OEM_2       | '/?' for US
+    ST_VK_SLASH      = 0xBF,   // 191 = VK_OEM_2       | '/?' for US
     ///ST_VK_OEM_3       = 0xC0,  // 192 = VK_OEM_3       | '`~' for US*
 
     ST_VK_BRACKETLEFT  = 0xDB, // 219 = VK_OEM_4       | '[{' for US

@@ -354,6 +354,7 @@
 			<Option target="LINUX_gcc_DEBUG" />
 		</Unit>
 		<Unit filename="StXDisplay.h" />
+		<Unit filename="stvkeysandroid.h" />
 		<Unit filename="stvkeyscarbon.h">
 			<Option target="MAC_gcc" />
 			<Option target="MAC_gcc_DEBUG" />
@@ -361,6 +362,9 @@
 		<Unit filename="stvkeysxarray.h" />
 		<Unit filename="zerosarray256.h" />
 		<Unit filename="zerosarray4096.h" />
+		<Unit filename="../include/StCore/StAndroidGlue.h">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
 		<Unit filename="../include/StCore/StApplication.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>

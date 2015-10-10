@@ -112,7 +112,7 @@ bool StFileNode::openFileDialog(const StString& theFolder,
     }
     return false;
 #elif defined(__ANDROID__)
-    bool ST_NOT_IMPLEMENTED_FOR_ANDROID = true;
+    //bool ST_NOT_IMPLEMENTED_FOR_ANDROID = true;
     return false;
 #elif defined(__linux__)
     if(!StMessageBox::initGlobals()) {
