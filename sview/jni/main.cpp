@@ -32,6 +32,19 @@ class StMainGlue : public StAndroidGlue {
     }
 
     /**
+     * Determine StApplication class from file extension.
+     */
+    ST_LOCAL static StString getStAppClassFromExtension(const StString& theExtension) {
+        const StMIMEList aMimeImg(ST_IMAGE_PLUGIN_MIME_CHAR);
+        for(size_t aMimeIter = 0; aMimeIter < aMimeImg.size(); ++aMimeIter) {
+            if(theExtension.isEqualsIgnoreCase(aMimeImg[aMimeIter].getExtension())) {
+                return "image";
+            }
+        }
+        return "video";
+    }
+
+    /**
      * Choose and instantiate StApplication.
      */
     ST_LOCAL virtual void createApplication() override {
@@ -56,18 +69,19 @@ class StMainGlue : public StAndroidGlue {
         aResMgr->setFolder(StResourceManager::FolderId_Videos,
                            getStoragePath(myThJniEnv, "Movies"));
 
-        const StMIMEList aMimeImg(ST_IMAGE_PLUGIN_MIME_CHAR);
-        for(size_t aMimeIter = 0; aMimeIter < aMimeImg.size(); ++aMimeIter) {
-            if(aFileExtension.isEqualsIgnoreCase(aMimeImg[aMimeIter].getExtension())) {
-                StArgumentsMap anArgs = anInfo->getArgumentsMap();
-                if(anInfo->isEmpty()) {
-                    anArgs.set(StDictEntry("last",    "true"));
-                }
-                anArgs.set(StDictEntry("toSaveRecent","true"));
-                anInfo->setArgumentsMap(anArgs);
-                myApp = new StImageViewer(aResMgr, this, anInfo);
-                return;
+        if(myStAppClass.isEmpty()) {
+            myStAppClass = getStAppClassFromExtension(aFileExtension);
+        }
+
+        if(myStAppClass == "image") {
+            StArgumentsMap anArgs = anInfo->getArgumentsMap();
+            if(anInfo->isEmpty()) {
+                anArgs.set(StDictEntry("last",    "true"));
             }
+            anArgs.set(StDictEntry("toSaveRecent","true"));
+            anInfo->setArgumentsMap(anArgs);
+            myApp = new StImageViewer(aResMgr, this, anInfo);
+            return;
         }
 
         if(anInfo->isEmpty()) {

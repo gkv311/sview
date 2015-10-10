@@ -240,6 +240,13 @@ public class StActivity extends NativeActivity implements SensorEventListener {
 //region Methods to be called from C++ level
 
     /**
+     * Virtual method defining StApplication class.
+     */
+    public String getStAppClass() {
+        return null;
+    }
+
+    /**
      * Method is called when StAndroidGlue has been created (BEFORE starting application thread!)
      * or during destruction.
      */

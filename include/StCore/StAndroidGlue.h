@@ -390,6 +390,7 @@ class StAndroidGlue {
     StAndroidPollSource     myInputPollSource;
 
     StMutex                 myFetchLock;         //!< fetch data lock
+    StString                myStAppClass;        //!< application class name (e.g. image, video)
     StString                myDndPath;           //!< intent data string
     StString                myCreatePath;        //!< intent data string used to open this activity
     StQuaternion<double>    myQuaternion;        //!< device orientation

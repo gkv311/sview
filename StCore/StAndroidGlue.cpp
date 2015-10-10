@@ -140,6 +140,9 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
         myMemoryClassMiB = aJniEnv->CallIntMethod(aJActivityMgr, aJMet_getMemoryClass);
     }
 
+    jmethodID aJMet_getStAppClass = aJniEnv->GetMethodID(aJClass_Activity, "getStAppClass", "()Ljava/lang/String;");
+    myStAppClass = stStringFromJava(aJniEnv, (jstring )aJniEnv->CallObjectMethod(myActivity->clazz, aJMet_getStAppClass));
+
     readOpenPath();
 
     myCmdPollSource.id        = LooperId_MAIN;

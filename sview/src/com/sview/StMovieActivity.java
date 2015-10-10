@@ -13,6 +13,14 @@ import android.os.Bundle;
 public class StMovieActivity extends StActivity {
 
     /**
+     * Virtual method defining StApplication class.
+     */
+    @Override
+    public String getStAppClass() {
+        return "video";
+    }
+
+    /**
      * Create activity.
      */
     @Override

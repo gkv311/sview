@@ -13,6 +13,14 @@ import android.os.Bundle;
 public class StImageActivity extends StActivity {
 
     /**
+     * Virtual method defining StApplication class.
+     */
+    @Override
+    public String getStAppClass() {
+        return "image";
+    }
+
+    /**
      * Create activity.
      */
     @Override
