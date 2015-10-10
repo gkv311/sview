@@ -18,6 +18,8 @@
 template<> inline void StArray<StGLNamedTexture>::sort() {}
 typedef StArray<StGLNamedTexture> StGLTextureArray;
 class StGLMenuProgram;
+class StGLTextProgram;
+class StGLTextBorderProgram;
 
 /**
  * Full OpenGL-window widget, must be ROOT for other widgets.
@@ -107,6 +109,16 @@ class StGLRootWidget : public StGLWidget {
      * Get shared menu program instance.
      */
     ST_LOCAL StGLMenuProgram& getMenuProgram() { return *myMenuProgram; }
+
+    /**
+     * Get shared text program instance.
+     */
+    ST_LOCAL StGLTextProgram& getTextProgram() { return *myTextProgram; }
+
+    /**
+     * Get shared text border program instance.
+     */
+    ST_LOCAL StGLTextBorderProgram& getTextBorderProgram() { return *myTextBorderProgram; }
 
     /**
      * Return color of standard element.
@@ -434,6 +446,8 @@ class StGLRootWidget : public StGLWidget {
     StHandle<StGLTextureArray> myCheckboxIcon;
     StHandle<StGLTextureArray> myRadioIcon;
     StHandle<StGLMenuProgram>  myMenuProgram;
+    StHandle<StGLTextProgram>  myTextProgram;
+    StHandle<StGLTextBorderProgram> myTextBorderProgram;
 
     bool                      myIsMobile;      //!< flag indicating mobile device
     StMarginsI                myMarginsPx;     //!< active area margins in pixels

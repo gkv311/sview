@@ -236,9 +236,6 @@ class StGLTextArea : public StGLWidget {
     StGLVertexBuffer     myBorderIVertBuf;
     StGLVertexBuffer     myBorderOVertBuf;
 
-    StGLShare<StGLTextProgram>       myTextProgram;
-    StGLShare<StGLTextBorderProgram> myBorderProgram;
-
         protected:
 
     StHandle<StGLFont>   myFont;          //!< used font

@@ -19,19 +19,12 @@
 #include <StFile/StFileNode.h>
 #include <StThreads/StProcess.h>
 
-namespace {
-    static const size_t SHARE_TEXT_PROGRAM_ID   = StGLRootWidget::generateShareId();
-    static const size_t SHARE_BORDER_PROGRAM_ID = StGLRootWidget::generateShareId();
-}
-
 StGLTextArea::StGLTextArea(StGLWidget* theParent,
                            const int theLeft, const int theTop,
                            const StGLCorner theCorner,
                            const int theWidth, const int theHeight,
                            const FontSize theSize)
 : StGLWidget(theParent, theLeft, theTop, theCorner, theWidth, theHeight),
-  myTextProgram(getRoot()->getShare(SHARE_TEXT_PROGRAM_ID)),
-  myBorderProgram(getRoot()->getShare(SHARE_BORDER_PROGRAM_ID)),
   mySize(theSize),
   myTextColor(0.0f, 0.0f, 0.0f, 1.0f),
   myShadowColor(0.0f, 0.0f, 0.0f, 1.0f),
@@ -176,27 +169,6 @@ bool StGLTextArea::stglInit() {
     }
 
     myTextWidth = (GLfloat )getRectPx().width();
-
-    // initialize text program
-    if(myTextProgram.isNull()) {
-        myTextProgram.create(getRoot()->getContextHandle(), new StGLTextProgram());
-        if(!myTextProgram->init(aCtx)) {
-            return false;
-        }
-    } else if(!myTextProgram->isValid()) {
-        return false;
-    }
-
-    // initialize border program
-    if(myBorderProgram.isNull()) {
-        myBorderProgram.create(getRoot()->getContextHandle(), new StGLTextBorderProgram());
-        if(!myBorderProgram->init(aCtx)) {
-            return false;
-        }
-    } else if(!myBorderProgram->isValid()) {
-        return false;
-    }
-
     myIsInitialized = true;
 
     myBorderIVertBuf.init(aCtx);
@@ -245,6 +217,7 @@ void StGLTextArea::formatText(StGLContext& theCtx) {
 
 void StGLTextArea::drawText(StGLContext& theCtx) {
     theCtx.core20fwd->glActiveTexture(GL_TEXTURE0);
+    StGLTextProgram& aProgram = myRoot->getTextProgram();
     for(size_t aTextureIter = 0; aTextureIter < myTexturesList.size(); ++aTextureIter) {
         if(!myTextVertBuf[aTextureIter]->isValid() || myTextVertBuf[aTextureIter]->getElemsCount() < 1) {
             continue;
@@ -252,13 +225,13 @@ void StGLTextArea::drawText(StGLContext& theCtx) {
 
         theCtx.core20fwd->glBindTexture(GL_TEXTURE_2D, myTexturesList[aTextureIter]);
 
-        myTextVertBuf[aTextureIter]->bindVertexAttrib(theCtx, myTextProgram->getVVertexLoc());
-        myTextTCrdBuf[aTextureIter]->bindVertexAttrib(theCtx, myTextProgram->getVTexCoordLoc());
+        myTextVertBuf[aTextureIter]->bindVertexAttrib(theCtx, aProgram.getVVertexLoc());
+        myTextTCrdBuf[aTextureIter]->bindVertexAttrib(theCtx, aProgram.getVTexCoordLoc());
 
         theCtx.core20fwd->glDrawArrays(GL_TRIANGLES, 0, GLsizei(myTextVertBuf[aTextureIter]->getElemsCount()));
 
-        myTextTCrdBuf[aTextureIter]->unBindVertexAttrib(theCtx, myTextProgram->getVTexCoordLoc());
-        myTextVertBuf[aTextureIter]->unBindVertexAttrib(theCtx, myTextProgram->getVVertexLoc());
+        myTextTCrdBuf[aTextureIter]->unBindVertexAttrib(theCtx, aProgram.getVTexCoordLoc());
+        myTextVertBuf[aTextureIter]->unBindVertexAttrib(theCtx, aProgram.getVVertexLoc());
     }
     theCtx.core20fwd->glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -301,28 +274,28 @@ void StGLTextArea::stglDraw(unsigned int theView) {
             recomputeBorder(aCtx);
         }
 
-        myBorderProgram->use(aCtx);
-        myBorderProgram->setProjMat(aCtx, getCamera()->getProjMatrix());
-        myBorderProgram->setModelMat(aCtx, aModelMat);
+        StGLTextBorderProgram& aBorderProgram = myRoot->getTextBorderProgram();
+        aBorderProgram.use(aCtx);
+        aBorderProgram.setModelMat(aCtx, aModelMat);
 
-        myBorderProgram->setColor(aCtx, myBorderColor);
-        myBorderOVertBuf.bindVertexAttrib(aCtx, myBorderProgram->getVVertexLoc());
+        aBorderProgram.setColor(aCtx, myBorderColor);
+        myBorderOVertBuf.bindVertexAttrib(aCtx, aBorderProgram.getVVertexLoc());
         aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, GLsizei(myBorderOVertBuf.getElemsCount()));
-        myBorderOVertBuf.unBindVertexAttrib(aCtx, myBorderProgram->getVVertexLoc());
+        myBorderOVertBuf.unBindVertexAttrib(aCtx, aBorderProgram.getVVertexLoc());
 
-        myBorderProgram->setColor(aCtx, myBackColor);
-        myBorderIVertBuf.bindVertexAttrib(aCtx, myBorderProgram->getVVertexLoc());
+        aBorderProgram.setColor(aCtx, myBackColor);
+        myBorderIVertBuf.bindVertexAttrib(aCtx, aBorderProgram.getVVertexLoc());
         aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, GLsizei(myBorderIVertBuf.getElemsCount()));
-        myBorderIVertBuf.unBindVertexAttrib(aCtx, myBorderProgram->getVVertexLoc());
-        myBorderProgram->unuse(aCtx);
+        myBorderIVertBuf.unBindVertexAttrib(aCtx, aBorderProgram.getVVertexLoc());
+        aBorderProgram.unuse(aCtx);
     }
 
     // draw text
     aCtx.core20fwd->glActiveTexture(GL_TEXTURE0); // our shader is bound to first texture unit
-    myTextProgram->use(aCtx);
-        myTextProgram->setProjMat(aCtx, getCamera()->getProjMatrix());
-        myTextProgram->setModelMat(aCtx, aModelMat);
-        myTextProgram->setColor(aCtx, myToDrawShadow ? myShadowColor : aTextColor);
+    StGLTextProgram& aTextProgram = myRoot->getTextProgram();
+    aTextProgram.use(aCtx);
+        aTextProgram.setModelMat(aCtx, aModelMat);
+        aTextProgram.setColor(aCtx, myToDrawShadow ? myShadowColor : aTextColor);
 
         drawText(aCtx);
 
@@ -337,13 +310,13 @@ void StGLTextArea::stglDraw(unsigned int theView) {
                                          0.0f));
             aModelMat.scale(aSizeOut, aSizeOut, 0.0f);
 
-            myTextProgram->setModelMat(aCtx, aModelMat);
-            myTextProgram->setColor(aCtx, aTextColor);
+            aTextProgram.setModelMat(aCtx, aModelMat);
+            aTextProgram.setColor(aCtx, aTextColor);
 
             drawText(aCtx);
         }
 
-    myTextProgram->unuse(aCtx);
+    aTextProgram.unuse(aCtx);
 
     aCtx.core20fwd->glDisable(GL_BLEND);
 

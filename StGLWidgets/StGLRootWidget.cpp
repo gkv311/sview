@@ -9,6 +9,8 @@
 #include <StGLWidgets/StGLRootWidget.h>
 
 #include <StGLWidgets/StGLMenuProgram.h>
+#include <StGLWidgets/StGLTextProgram.h>
+#include <StGLWidgets/StGLTextBorderProgram.h>
 
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
@@ -49,6 +51,8 @@ StGLRootWidget::StGLRootWidget(const StHandle<StResourceManager>& theResMgr)
   myLensDist(0.0f),
   myScrDispXPx(0),
   myMenuProgram(new StGLMenuProgram()),
+  myTextProgram(new StGLTextProgram()),
+  myTextBorderProgram(new StGLTextBorderProgram()),
   myIsMobile(false),
   myScaleGlX(1.0),
   myScaleGlY(1.0),
@@ -97,6 +101,10 @@ StGLRootWidget::~StGLRootWidget() {
     if(!myGlCtx.isNull()) {
         myMenuProgram->release(*myGlCtx);
         myMenuProgram.nullify();
+        myTextProgram->release(*myGlCtx);
+        myTextProgram.nullify();
+        myTextBorderProgram->release(*myGlCtx);
+        myTextBorderProgram.nullify();
         if(!myCheckboxIcon.isNull()) {
             for(size_t aTexIter = 0; aTexIter < myCheckboxIcon->size(); ++aTexIter) {
                 myCheckboxIcon->changeValue(aTexIter).release(*myGlCtx);
@@ -228,6 +236,12 @@ bool StGLRootWidget::stglInit() {
     if(!myMenuProgram->isValid()
     && !myMenuProgram->init(*myGlCtx)) {
         return false;
+    } else if(!myTextProgram->isValid()
+           && !myTextProgram->init(*myGlCtx)) {
+        return false;
+    } else if(!myTextBorderProgram->isValid()
+           && !myTextBorderProgram->init(*myGlCtx)) {
+        return false;
     }
 
     return StGLWidget::stglInit();
@@ -251,6 +265,17 @@ void StGLRootWidget::stglDraw(unsigned int theView) {
             myScrDispX   = 0.0f;
             myScrDispXPx = 0;
             break;
+    }
+
+    if(myTextProgram->isValid()) {
+        myTextProgram->use(*myGlCtx);
+        myTextProgram->setProjMat(*myGlCtx,       myProjCamera.getProjMatrix());
+        myTextProgram->unuse(*myGlCtx);
+    }
+    if(myTextBorderProgram->isValid()) {
+        myTextBorderProgram->use(*myGlCtx);
+        myTextBorderProgram->setProjMat(*myGlCtx, myProjCamera.getProjMatrix());
+        myTextBorderProgram->unuse(*myGlCtx);
     }
 
     StGLWidget::stglDraw(theView);
