@@ -1,16 +1,16 @@
 # German translation file for StOutInterlace library
 # @author Kirill Gavrilov
 --------
-1000="Horizontal Interlaced"
-1001="Row interlaced displays: Zalman, Hyundai,..."
-1002="Vertikal Interlaced"
-1003="Column interlaced displays"
-1006="DLP TV (chessboard)"
-1007="DLP TV (chessboard)"
-1008="Interlaced ED"
-1009="EDimensional in interlaced mode"
-1102="Umgekehrte Reihenfolge"
-1103="Bind to supported monitor"
-2000="sView - Interlaced Ausgangsmodul"
-2001="Version"
-?2002="© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}"
+1000=Horizontal Interlaced
+1001=Row interlaced displays: Zalman, Hyundai,...
+1002=Vertikal Interlaced
+1003=Column interlaced displays
+1006=DLP TV (chessboard)
+1007=DLP TV (chessboard)
+1008=Interlaced ED
+1009=EDimensional in interlaced mode
+1102=Umgekehrte Reihenfolge
+1103=Bind to supported monitor
+2000=sView - Interlaced Ausgangsmodul
+2001=Version
+?2002=© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}

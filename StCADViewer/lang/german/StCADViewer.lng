@@ -1,25 +1,25 @@
 # German translation file for StCADViewer
 # @author Kirill Gavrilov
 --------
-1200="Ansicht"
-1201="Projection type"
-1202="Vollbild"
-1203="Normalen anzeigen"
-1204="Dreibein anzeigen"
-1205="Zwei einseitige Beleuchtung"
-1206="Projektion"
-1207="Füllmodus"
-1208="Fit ALL"
-1240="Orthogonal"
-1241="Perspektive"
-1242="Stereo"
-1250="Mesh"
-1251="Beschattet"
-1252="Beschattet + Mesh"
-1500="Hilfe"
-1501="Über..."
-1503="Lizenztext"
-1504="Language"
-3000="sView - winzig CAD Viewer"
-3001="Version"
-3002="CAD viewer allows you to view CAD files in formats IGES, STEP, BREP using OpenCASCADE Technology.\n © 2011-2014 Kirill Gavrilov (kirill@sview.ru).\nOfficial site: www.sview.ru"
+1200=Ansicht
+1201=Projection type
+1202=Vollbild
+1203=Normalen anzeigen
+1204=Dreibein anzeigen
+1205=Zwei einseitige Beleuchtung
+1206=Projektion
+1207=Füllmodus
+?1208=Fit ALL
+1240=Orthogonal
+1241=Perspektive
+1242=Stereo
+1250=Mesh
+1251=Beschattet
+1252=Beschattet + Mesh
+1500=Hilfe
+1501=Über...
+1503=Lizenztext
+1504=Language
+3000=sView - winzig CAD Viewer
+3001=Version
+3002=CAD viewer allows you to view CAD files in formats IGES, STEP, BREP using OpenCASCADE Technology.\n © 2011-2014 Kirill Gavrilov (kirill@sview.ru).\nOfficial site: www.sview.ru

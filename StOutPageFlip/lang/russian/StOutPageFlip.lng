@@ -1,25 +1,25 @@
 # Russian translation file for StOutPageFlip library
 # @author Kirill Gavrilov
 --------
-1000="Затворные очки"
-1001="Затворные очки"
-1002="Vuzix HMD"
-1003="Vuzix HMD"
-1102="Тип Квадробуфера"
-1103="Управление очками"
-1120="OpenGL эмуляция"
-1122="OpenGL аппаратный"
-1123="Direct3D (Fullscreen)"
-1124="Direct3D (Unavailable)"
-1125="Direct3D AMD (Fullscreen)"
-1126="Direct3D AMD (Unavailable)"
-1127="Direct3D NVIDIA (Fullscreen)"
-1128="Direct3D NVIDIA (Disabled)"
-1130="Без контроля"
-1131="Голубая линия"
-1132="Белая линия"
-1134="eDimensional авто вкл/выкл"
-2000="sView - модуль стереовывода для завторных очков"
-2001="версия"
-2002="© {0} Гаврилов Кирилл <{1}>\nОфициальный сайт: {2}"
-3001="OpenGL Hardware QuadBuffer не доступен!\n\nМожно попробовать другой тип квадробуфера в меню\n(включая эмулированный OpenGL в расширенном режиме)."
+1000=Затворные очки
+1001=Затворные очки
+1002=Vuzix HMD
+1003=Vuzix HMD
+1102=Тип Квадробуфера
+1103=Управление очками
+1120=OpenGL эмуляция
+1122=OpenGL аппаратный
+1123=Direct3D (Fullscreen)
+1124=Direct3D (Unavailable)
+1125=Direct3D AMD (Fullscreen)
+1126=Direct3D AMD (Unavailable)
+1127=Direct3D NVIDIA (Fullscreen)
+1128=Direct3D NVIDIA (Disabled)
+1130=Без контроля
+1131=Голубая линия
+1132=Белая линия
+1134=eDimensional авто вкл/выкл
+2000=sView - модуль стереовывода для завторных очков
+2001=версия
+2002=© {0} Гаврилов Кирилл <{1}>\nОфициальный сайт: {2}
+3001=OpenGL Hardware QuadBuffer не доступен!\n\nМожно попробовать другой тип квадробуфера в меню\n(включая эмулированный OpenGL в расширенном режиме).

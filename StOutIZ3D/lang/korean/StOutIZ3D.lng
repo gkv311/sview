@@ -1,12 +1,12 @@
 # English translation file for StOutIZ3D library
 # @author Kirill Gavrilov
 --------
-?1000="IZ3D Display"
-?1001="IZ3D Display"
-?1102="iZ3D glasses"
-?1120="Classic"
-?1121="Modern"
-?1122="Classic (fast)"
-?2000="sView - iZ3D Output module"
-?2001="version"
-?2002="© {0} Kirill Gavrilov <{1}>\n© 2007-2009 iZ3D LLC\nOfficial site: {2}\nSite iZ3D LLC: www.iz3d.com"
+?1000=IZ3D Display
+?1001=IZ3D Display
+?1102=iZ3D glasses
+?1120=Classic
+?1121=Modern
+?1122=Classic (fast)
+?2000=sView - iZ3D Output module
+?2001=version
+?2002=© {0} Kirill Gavrilov <{1}>\n© 2007-2009 iZ3D LLC\nOfficial site: {2}\nSite iZ3D LLC: www.iz3d.com

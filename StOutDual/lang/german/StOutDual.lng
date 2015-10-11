@@ -1,12 +1,12 @@
 # German translation file for StOutDual library
 # @author Kirill Gavrilov
 --------
-1000="Doppelausgang"
-1001="Stereo-device with dual input: some HMD, Mirrored Stereo monitors, Dual-Projectors"
-1002="Mirror Output"
-1003="Hand-make Mirrored Stereo monitors (mirror in X-direction)"
-1102="Slave Monitor"
-1103="Show Mono in Stereo"
-2000="sView - Dual Ausgangsmodul"
-2001="Version"
-2002="© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}"
+1000=Doppelausgang
+1001=Stereo-device with dual input: some HMD, Mirrored Stereo monitors, Dual-Projectors
+1002=Mirror Output
+1003=Hand-make Mirrored Stereo monitors (mirror in X-direction)
+1102=Slave Monitor
+1103=Show Mono in Stereo
+2000=sView - Dual Ausgangsmodul
+2001=Version
+2002=© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}

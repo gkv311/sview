@@ -1,20 +1,20 @@
 # German translation file for StOutAnaglyph library
 # @author Kirill Gavrilov
 --------
-1000="Anaglyphenbrillen"
-1001="Simple glasses with color-filters. Commonly used"
-1010="Brillenartiger"
-1011="Rot-Cyan (R+GB)"
-1012="Gelb-Blau (RG+B)"
-1013="Green-Magenta (G+RB)"
-1102="Rot-Cyan Filter"
-1120="Einfach"
-1121="Optimiert"
-1122="Grayed"
-1123="Dunkel"
-1103="Gelb-Blau Filter"
-1130="Einfach"
-1131="Dubios"
-2000="sView - Anaglyph Ausgangsmodul"
-2001="Version"
-2002="© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}"
+1000=Anaglyphenbrillen
+1001=Simple glasses with color-filters. Commonly used
+1010=Brillenartiger
+1011=Rot-Cyan (R+GB)
+1012=Gelb-Blau (RG+B)
+1013=Green-Magenta (G+RB)
+1102=Rot-Cyan Filter
+1120=Einfach
+1121=Optimiert
+1122=Grayed
+1123=Dunkel
+1103=Gelb-Blau Filter
+1130=Einfach
+1131=Dubios
+2000=sView - Anaglyph Ausgangsmodul
+2001=Version
+2002=© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}

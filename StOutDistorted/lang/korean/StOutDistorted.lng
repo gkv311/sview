@@ -1,18 +1,18 @@
 # English translation file for StOutDistorted library
 # @author Kirill Gavrilov
 --------
-?1000="TV (parallel pair)"
-?1001="Distorted Output"
-?1002="Oculus Rift"
-?1003="Barrel distortion"
-?1110="Layout"
-?1111="Side-by-Side"
-?1112="Top-and-Bottom"
-?1113="Side-by-Side (Anamorph)"
-?1114="Top-and-Bottom (Anamorph)"
-?1120="Distortion"
-?1121="None"
-?1123="Show Mono in Stereo"
-?2000="sView - Distorted Output module"
-?2001="version"
-?2002="© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}"
+?1000=TV (parallel pair)
+?1001=Distorted Output
+?1002=Oculus Rift
+?1003=Barrel distortion
+?1110=Layout
+?1111=Side-by-Side
+?1112=Top-and-Bottom
+?1113=Side-by-Side (Anamorph)
+?1114=Top-and-Bottom (Anamorph)
+?1120=Distortion
+?1121=None
+?1123=Show Mono in Stereo
+?2000=sView - Distorted Output module
+?2001=version
+?2002=© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}

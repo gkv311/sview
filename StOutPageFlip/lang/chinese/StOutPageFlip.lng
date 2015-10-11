@@ -1,25 +1,25 @@
 ﻿# Chinese translation file for StOutPageFlip library
 # @author YSC
 --------
-1000="快门眼镜"
-1001="快门眼镜"
-1002="Vuzix HMD"
-1003="Vuzix HMD"
-1102="缓冲类型"
-1103="眼镜控制编码"
-1120="OpenGL 跟踪"
-1122="OpenGL硬件"
-1123="Direct3D (全屏)"
-1124="Direct3D (未获得)"
-1125="Direct3D AMD (全屏)"
-1126="Direct3D AMD (未获得)"
-1127="Direct3D NVIDIA (全屏)"
-1128="Direct3D NVIDIA (失效)"
-1130="无编码"
-1131="蓝线同步"
-1132="白线同步"
-1134="空间自动开/关"
-2000="sView - 快门输出模式"
-2001="版本"
-?2002="© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}"
-?3001="OpenGL Hardware QuadBuffer is unavailable!\n\nYou can try another Quad Buffer type\n(including OpenGL emulated in Extra section)."
+1000=快门眼镜
+1001=快门眼镜
+1002=Vuzix HMD
+1003=Vuzix HMD
+1102=缓冲类型
+1103=眼镜控制编码
+1120=OpenGL 跟踪
+1122=OpenGL硬件
+1123=Direct3D (全屏)
+1124=Direct3D (未获得)
+1125=Direct3D AMD (全屏)
+1126=Direct3D AMD (未获得)
+1127=Direct3D NVIDIA (全屏)
+1128=Direct3D NVIDIA (失效)
+1130=无编码
+1131=蓝线同步
+1132=白线同步
+1134=空间自动开/关
+2000=sView - 快门输出模式
+2001=版本
+?2002=© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}
+?3001=OpenGL Hardware QuadBuffer is unavailable!\n\nYou can try another Quad Buffer type\n(including OpenGL emulated in Extra section).
