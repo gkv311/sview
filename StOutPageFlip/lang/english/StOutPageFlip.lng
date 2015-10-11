@@ -21,5 +21,5 @@
 1134="eDimensional auto on/off"
 2000="sView - PageFlip Output module"
 2001="version"
-2002="© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0"
+2002="© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}"
 3001="OpenGL Hardware QuadBuffer is unavailable!\n\nYou can try another Quad Buffer type\n(including OpenGL emulated in Extra section)."

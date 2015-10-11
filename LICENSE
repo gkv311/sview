@@ -1,11 +1,5 @@
 StShared,
-StGLWidget:
------------
-
-sources of these libraries are under Boost license. Read the file "license-boost.txt" for details.
-Notice that some sources are wrappers over other 3rd-parties
-and their licenses should be taken into account when used.
-
+StGLWidget,
 StCore,
 StOutAnaglyph,
 StOutDual,
@@ -14,8 +8,9 @@ StOutIZ3D,
 StOutPageFlip:
 --------------
 
-these libraries are under the GNU Lesser General Public License version 3.0 or later.
-Read the file "license-lgpl-3.0.txt" for details.
+sources of these libraries are under Boost license. Read the file "license-boost.txt" for details.
+Notice that some sources are wrappers over other 3rd-parties
+and their licenses should be taken into account when used.
 
 StImageViewer,
 StMoviePlayer,

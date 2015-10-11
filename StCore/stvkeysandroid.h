@@ -1,4 +1,5 @@
 /**
+ * StCore, window system independent C++ toolkit for writing OpenGL applications.
  * Copyright © 2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
