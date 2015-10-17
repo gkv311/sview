@@ -1645,18 +1645,23 @@ namespace {
 void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
                                      bool              theIsMouseMoved) {
     const bool toShowPlayList = myPlugin->params.ToShowPlayList->getValue();
+    const bool hasMainMenu    = myPlugin->params.ToShowMenu->getValue()
+                             && myMenuRoot != NULL;
+    const bool hasUpperPanel  = myPlugin->params.ToShowTopbar->getValue()
+                             && myPanelUpper != NULL;
+
     const int  aRootSizeY     = getRectPx().height();
     const bool hasVideo       = myPlugin->myVideo->hasVideoStream();
     StHandle<StStereoParams> aParams = myImage->getSource();
     myIsVisibleGUI = theIsMouseMoved
         || aParams.isNull()
         || myVisibilityTimer.getElapsedTime() < 2.0
-        || (myPanelUpper  != NULL && myPanelUpper ->isPointIn(theCursor))
+        || (hasUpperPanel && myPanelUpper->isPointIn(theCursor))
         || (myPanelBottom != NULL && int(aRootSizeY * theCursor.y()) > (aRootSizeY - 2 * myPanelBottom->getRectPx().height())
                                   && theCursor.y() < 1.0)
         || (mySeekBar     != NULL && mySeekBar    ->isPointIn(theCursor))
         || (myPlayList    != NULL && toShowPlayList && myPlayList->isPointIn(theCursor))
-        || (myMenuRoot    != NULL && myMenuRoot->isActive());
+        || (hasMainMenu           && myMenuRoot->isActive());
     if(!myIsVisibleGUI
      && myBtnPlay != NULL
      && myBtnPlay->getFaceId() == 0
@@ -1670,13 +1675,13 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
     }
 
     if(myMenuRoot != NULL) {
-        myMenuRoot->setOpacity(anOpacity, false);
+        myMenuRoot->setOpacity(hasMainMenu ? anOpacity : 0.0f, false);
+    }
+    if(myPanelUpper != NULL) {
+        myPanelUpper->setOpacity(hasUpperPanel ? anOpacity : 0.0f, true);
     }
     if(mySeekBar != NULL) {
         mySeekBar->setOpacity(anOpacity, false);
-    }
-    if(myPanelUpper != NULL) {
-        myPanelUpper->setOpacity(anOpacity, true);
     }
     if(myPanelBottom != NULL) {
         myPanelBottom->setOpacity(anOpacity, true);

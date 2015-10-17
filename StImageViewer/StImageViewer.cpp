@@ -57,7 +57,8 @@ namespace {
     static const char ST_SETTING_COMPRESS[]    = "toCompress";
     static const char ST_SETTING_ESCAPENOQUIT[]= "escNoQuit";
     static const char ST_SETTING_FULLSCREENUI[]= "fullScreenUI";
-    static const char ST_SETTING_SHOW_TOOLBAR[]= "toShowToolbar";
+    static const char ST_ARGUMENT_SHOW_MENU[]  = "toShowMenu";
+    static const char ST_ARGUMENT_SHOW_TOPBAR[]= "toShowTopbar";
 
     static const char ST_SETTING_SCALE_ADJUST[]  = "scaleAdjust";
     static const char ST_SETTING_SCALE_FORCE2X[] = "scale2X";
@@ -292,7 +293,8 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     params.srcFormat->signals.onChanged.connect(this, &StImageViewer::doSwitchSrcFormat);
     params.ToTrackHead   = new StBoolParamNamed(true,  tr(StImageViewerStrings::MENU_VIEW_TRACK_HEAD));
     params.ToShowFps     = new StBoolParamNamed(false, tr(StImageViewerStrings::MENU_SHOW_FPS));
-    params.ToShowToolbar = new StBoolParamNamed(true, "Show toolbar");
+    params.ToShowMenu    = new StBoolParamNamed(true, "Show main menu");
+    params.ToShowTopbar  = new StBoolParamNamed(true, "Show top toolbar");
     params.IsMobileUI = new StBoolParamNamed(StWindow::isMobile(), "Mobile UI");
     params.IsMobileUI->signals.onChanged = stSlot(this, &StImageViewer::doScaleHiDPI);
     params.IsVSyncOn  = new StBoolParam(true);
@@ -597,47 +599,52 @@ bool StImageViewer::init() {
 }
 
 void StImageViewer::parseArguments(const StArgumentsMap& theArguments) {
-    StArgument argFullscreen = theArguments[ST_SETTING_FULLSCREEN];
-    StArgument argSlideshow  = theArguments[ST_SETTING_SLIDESHOW];
-    StArgument argViewMode   = theArguments[ST_SETTING_VIEWMODE];
-    StArgument argSrcFormat  = theArguments[ST_SETTING_SRCFORMAT];
-    StArgument argImgLibrary = theArguments[ST_SETTING_IMAGELIB];
-    StArgument argToCompress = theArguments[ST_SETTING_COMPRESS];
-    StArgument argEscNoQuit  = theArguments[ST_SETTING_ESCAPENOQUIT];
-    StArgument argFullScreenUI = theArguments[ST_SETTING_FULLSCREENUI];
-    StArgument argToolbar    = theArguments[ST_SETTING_SHOW_TOOLBAR];
-    StArgument argSaveRecent = theArguments[ST_SETTING_SAVE_RECENT];
-    if(argToCompress.isValid()) {
-        myLoader->setCompressMemory(!argToCompress.isValueOff());
+    StArgument anArgFullscreen = theArguments[ST_SETTING_FULLSCREEN];
+    StArgument anArgSlideshow  = theArguments[ST_SETTING_SLIDESHOW];
+    StArgument anArgViewMode   = theArguments[ST_SETTING_VIEWMODE];
+    StArgument anArgSrcFormat  = theArguments[ST_SETTING_SRCFORMAT];
+    StArgument anArgImgLibrary = theArguments[ST_SETTING_IMAGELIB];
+    StArgument anArgToCompress = theArguments[ST_SETTING_COMPRESS];
+    StArgument anArgEscNoQuit  = theArguments[ST_SETTING_ESCAPENOQUIT];
+    StArgument anArgFullScreenUI = theArguments[ST_SETTING_FULLSCREENUI];
+    StArgument anArgShowMenu   = theArguments[ST_ARGUMENT_SHOW_MENU];
+    StArgument anArgShowTopbar = theArguments[ST_ARGUMENT_SHOW_TOPBAR];
+    StArgument anArgSaveRecent = theArguments[ST_SETTING_SAVE_RECENT];
+    if(anArgToCompress.isValid()) {
+        myLoader->setCompressMemory(!anArgToCompress.isValueOff());
     }
-    if(argEscNoQuit.isValid()) {
-        myEscNoQuit = !argEscNoQuit.isValueOff();
+    if(anArgEscNoQuit.isValid()) {
+        myEscNoQuit = !anArgEscNoQuit.isValueOff();
     }
-    if(argFullScreenUI.isValid()) {
-        myToHideUIFullScr = argFullScreenUI.isValueOff();
+    if(anArgFullScreenUI.isValid()) {
+        myToHideUIFullScr = anArgFullScreenUI.isValueOff();
     }
-    if(argToolbar.isValid()) {
-        params.ToShowToolbar->setValue(!argToolbar.isValueOff());
+    if(anArgShowMenu.isValid()) {
+        params.ToShowMenu->setValue(!anArgShowMenu.isValueOff());
     }
-    if(argFullscreen.isValid()) {
-        params.isFullscreen->setValue(!argFullscreen.isValueOff());
+    if(anArgShowTopbar.isValid()) {
+        params.ToShowTopbar->setValue(!anArgShowTopbar.isValueOff());
     }
-    if(argSlideshow.isValid() && !argSlideshow.isValueOff()) {
+    if(anArgFullscreen.isValid()) {
+        params.isFullscreen->setValue(!anArgFullscreen.isValueOff());
+    }
+    if( anArgSlideshow.isValid()
+    && !anArgSlideshow.isValueOff()) {
         doSlideShow();
     }
-    if(argViewMode.isValid()) {
-        myLoader->getPlayList().changeDefParams().ViewingMode = StStereoParams::GET_VIEW_MODE_FROM_STRING(argViewMode.getValue());
+    if(anArgViewMode.isValid()) {
+        myLoader->getPlayList().changeDefParams().ViewingMode = StStereoParams::GET_VIEW_MODE_FROM_STRING(anArgViewMode.getValue());
     }
-    if(argSrcFormat.isValid()) {
-        params.srcFormat->setValue(st::formatFromString(argSrcFormat.getValue()));
+    if(anArgSrcFormat.isValid()) {
+        params.srcFormat->setValue(st::formatFromString(anArgSrcFormat.getValue()));
         myToSaveSrcFormat = false; // this setting is temporary!
     }
-    if(argImgLibrary.isValid()) {
-        params.imageLib = StImageFile::imgLibFromString(argImgLibrary.getValue());
+    if(anArgImgLibrary.isValid()) {
+        params.imageLib = StImageFile::imgLibFromString(anArgImgLibrary.getValue());
         myLoader->setImageLib(params.imageLib);
     }
-    if(argSaveRecent.isValid()) {
-        params.ToSaveRecent->setValue(!argSaveRecent.isValueOff());
+    if(anArgSaveRecent.isValid()) {
+        params.ToSaveRecent->setValue(!anArgSaveRecent.isValueOff());
     }
 }
 

@@ -1090,11 +1090,12 @@ size_t StImageViewerGUI::trSrcFormatId(const StFormat theSrcFormat) {
 void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
                                      bool              isMouseActive,
                                      bool              toForceHide) {
-    const bool toShowToolbar  = !myIsMinimalGUI
-                             &&  myPlugin->params.ToShowToolbar->getValue();
-    const bool hasUpperPanel  =  toShowToolbar
+    const bool hasMainMenu    =  myPlugin->params.ToShowMenu->getValue()
+                             &&  myMenuRoot != NULL;
+    const bool hasUpperPanel  = !myIsMinimalGUI
+                             &&  myPlugin->params.ToShowTopbar->getValue()
                              &&  myPanelUpper  != NULL;
-    const bool hasBottomPanel =  toShowToolbar
+    const bool hasBottomPanel = !myIsMinimalGUI
                              &&  myPanelBottom != NULL;
 
     StHandle<StStereoParams> aParams = myImage->getSource();
@@ -1103,7 +1104,7 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
         || myVisibilityTimer.getElapsedTime() < 2.0
         || (hasUpperPanel  && myPanelUpper ->isPointIn(theCursor))
         || (hasBottomPanel && myPanelBottom->isPointIn(theCursor))
-        || (myMenuRoot != NULL && myMenuRoot->isActive());
+        || (hasMainMenu    && myMenuRoot->isActive());
 
     if(isMouseActive) {
         myVisibilityTimer.restart();
@@ -1112,9 +1113,8 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
     const float anOpacity = (float )myVisLerp.perform(toShowAll, toForceHide);
 
     if(myMenuRoot != NULL) {
-        myMenuRoot->setOpacity(anOpacity, true);
+        myMenuRoot->setOpacity(hasMainMenu ? anOpacity : 0.0f, true);
     }
-
     if(myPanelUpper != NULL) {
         myPanelUpper->setOpacity(hasUpperPanel ? anOpacity : 0.0f, true);
     }

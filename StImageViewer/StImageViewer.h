@@ -131,7 +131,8 @@ class StImageViewer : public StApplication {
         StHandle<StInt32Param>   checkUpdatesDays; //!< days count between updates checks
         StHandle<StInt32Param>   srcFormat;        //!< source format
         StHandle<StBoolParam>    ToTrackHead;      //!< enable/disable head-tracking
-        StHandle<StBoolParam>    ToShowToolbar;    //!< show/hide toolbar
+        StHandle<StBoolParam>    ToShowMenu;       //!< show main menu
+        StHandle<StBoolParam>    ToShowTopbar;     //!< show topbar
         StHandle<StBoolParam>    ToShowFps;        //!< display FPS meter
         StHandle<StBoolParam>    IsMobileUI;       //!< display mobile interface
         StHandle<StBoolParam>    IsVSyncOn;        //!< flag to use VSync

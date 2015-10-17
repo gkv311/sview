@@ -217,6 +217,8 @@ class StMoviePlayer : public StApplication {
         StHandle<StBoolParam>     ToTrackHead;      //!< enable/disable head-tracking
         StHandle<StBoolParam>     ToShowPlayList;   //!< display playlist
         StHandle<StBoolParam>     ToShowFps;        //!< display FPS meter
+        StHandle<StBoolParam>     ToShowMenu;       //!< show main menu
+        StHandle<StBoolParam>     ToShowTopbar;     //!< show topbar
         StHandle<StBoolParam>     IsMobileUI;       //!< display mobile interface
         StHandle<StBoolParam>     ToLimitFps;       //!< limit CPU usage or not
         StHandle<StBoolParam>     IsVSyncOn;        //!< flag to use VSync

@@ -21,6 +21,8 @@ static StString getAbout() {
         + "Usage: sView [options] - file\n"
         + "Available options:\n"
           "  --fullscreen         Open fullscreen\n"
+          "  --toShowMenu=off     Hide main menu\n"
+          "  --toShowTopbar=off   Hide top toolbar\n"
           "  --slideshow          Start slideshow\n"
           "  --last               Open last file\n"
           "  --paused             Open file in paused state\n"

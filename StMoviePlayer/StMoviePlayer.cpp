@@ -105,6 +105,8 @@ namespace {
     static const char ST_ARGUMENT_FILE_PAUSE[] = "pause";
     static const char ST_ARGUMENT_FILE_PAUSED[]= "paused";
     static const char ST_ARGUMENT_BENCHMARK[]  = "benchmark";
+    static const char ST_ARGUMENT_SHOW_MENU[]  = "toShowMenu";
+    static const char ST_ARGUMENT_SHOW_TOPBAR[]= "toShowTopbar";
 
 }
 
@@ -485,6 +487,8 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.ToShowPlayList->signals.onChanged = stSlot(this, &StMoviePlayer::doShowPlayList);
     params.ToTrackHead = new StBoolParamNamed(true,  tr(MENU_VIEW_TRACK_HEAD));
     params.ToShowFps   = new StBoolParamNamed(false, tr(MENU_FPS_METER));
+    params.ToShowMenu  = new StBoolParamNamed(true, "Show main menu");
+    params.ToShowTopbar= new StBoolParamNamed(true, "Show top toolbar");
     params.IsMobileUI  = new StBoolParamNamed(StWindow::isMobile(), "Mobile UI");
     params.IsMobileUI->signals.onChanged = stSlot(this, &StMoviePlayer::doScaleHiDPI);
     params.IsVSyncOn   = new StBoolParam(true);
@@ -1011,6 +1015,8 @@ void StMoviePlayer::parseArguments(const StArgumentsMap& theArguments) {
     StArgument anArgShuffle    = theArguments[ST_SETTING_SHUFFLE];
     StArgument anArgLoopSingle = theArguments[ST_SETTING_LOOP_SINGLE];
     StArgument anArgBenchmark  = theArguments[ST_ARGUMENT_BENCHMARK];
+    StArgument anArgShowMenu   = theArguments[ST_ARGUMENT_SHOW_MENU];
+    StArgument anArgShowTopbar = theArguments[ST_ARGUMENT_SHOW_TOPBAR];
 
     if(anArgFullscr.isValid()) {
         params.isFullscreen->setValue(!anArgFullscr.isValueOff());
@@ -1030,6 +1036,12 @@ void StMoviePlayer::parseArguments(const StArgumentsMap& theArguments) {
     if(anArgBenchmark.isValid()) {
         myIsBenchmark = !anArgBenchmark.isValueOff();
         myVideo->setBenchmark(myIsBenchmark);
+    }
+    if(anArgShowMenu.isValid()) {
+        params.ToShowMenu->setValue(!anArgShowMenu.isValueOff());
+    }
+    if(anArgShowTopbar.isValid()) {
+        params.ToShowTopbar->setValue(!anArgShowTopbar.isValueOff());
     }
 }
 
