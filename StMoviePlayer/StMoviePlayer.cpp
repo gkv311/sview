@@ -28,6 +28,7 @@
 #include <StSocket/StCheckUpdates.h>
 #include <StSettings/StSettings.h>
 #include <StStrings/StStringStream.h>
+#include <StCore/StSearchMonitors.h>
 
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
@@ -107,6 +108,7 @@ namespace {
     static const char ST_ARGUMENT_BENCHMARK[]  = "benchmark";
     static const char ST_ARGUMENT_SHOW_MENU[]  = "toShowMenu";
     static const char ST_ARGUMENT_SHOW_TOPBAR[]= "toShowTopbar";
+    static const char ST_ARGUMENT_MONITOR[]    = "monitorId";
 
 }
 
@@ -1017,7 +1019,21 @@ void StMoviePlayer::parseArguments(const StArgumentsMap& theArguments) {
     StArgument anArgBenchmark  = theArguments[ST_ARGUMENT_BENCHMARK];
     StArgument anArgShowMenu   = theArguments[ST_ARGUMENT_SHOW_MENU];
     StArgument anArgShowTopbar = theArguments[ST_ARGUMENT_SHOW_TOPBAR];
+    StArgument anArgMonitor    = theArguments[ST_ARGUMENT_MONITOR];
 
+    if(anArgMonitor.isValid()) {
+        const size_t    aMonId = (size_t )::atol(anArgMonitor.getValue().toCString());
+        StRect<int32_t> aRect  = myWindow->getWindowedPlacement();
+        const StMonitor& aMonOld = myWindow->getMonitors()[aRect.center()];
+        const StMonitor& aMonNew = myWindow->getMonitors()[aMonId];
+        if(aMonOld.getId() != aMonNew.getId()) {
+            const int aLeft = aRect.left() - aMonOld.getVRect().left();
+            const int aTop  = aRect.top()  - aMonOld.getVRect().top();
+            aRect.moveLeftTo(aMonNew.getVRect().left() + aLeft);
+            aRect.moveTopTo (aMonNew.getVRect().top()  + aTop);
+            myWindow->setPlacement(aRect, false);
+        }
+    }
     if(anArgFullscr.isValid()) {
         params.isFullscreen->setValue(!anArgFullscr.isValueOff());
     }

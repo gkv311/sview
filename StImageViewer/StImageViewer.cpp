@@ -33,6 +33,7 @@
 #include <StSocket/StCheckUpdates.h>
 #include <StThreads/StThread.h>
 #include <StImage/StImageFile.h>
+#include <StCore/StSearchMonitors.h>
 
 #include "../StOutAnaglyph/StOutAnaglyph.h"
 #include "../StOutDual/StOutDual.h"
@@ -57,8 +58,6 @@ namespace {
     static const char ST_SETTING_COMPRESS[]    = "toCompress";
     static const char ST_SETTING_ESCAPENOQUIT[]= "escNoQuit";
     static const char ST_SETTING_FULLSCREENUI[]= "fullScreenUI";
-    static const char ST_ARGUMENT_SHOW_MENU[]  = "toShowMenu";
-    static const char ST_ARGUMENT_SHOW_TOPBAR[]= "toShowTopbar";
 
     static const char ST_SETTING_SCALE_ADJUST[]  = "scaleAdjust";
     static const char ST_SETTING_SCALE_FORCE2X[] = "scale2X";
@@ -81,6 +80,10 @@ namespace {
     static const char ST_ARGUMENT_FILE_LEFT[]  = "left";
     static const char ST_ARGUMENT_FILE_RIGHT[] = "right";
     static const char ST_ARGUMENT_FILE_LAST[]  = "last";
+
+    static const char ST_ARGUMENT_SHOW_MENU[]  = "toShowMenu";
+    static const char ST_ARGUMENT_SHOW_TOPBAR[]= "toShowTopbar";
+    static const char ST_ARGUMENT_MONITOR[]    = "monitorId";
 
 }
 
@@ -609,12 +612,26 @@ void StImageViewer::parseArguments(const StArgumentsMap& theArguments) {
     StArgument anArgFullScreenUI = theArguments[ST_SETTING_FULLSCREENUI];
     StArgument anArgShowMenu   = theArguments[ST_ARGUMENT_SHOW_MENU];
     StArgument anArgShowTopbar = theArguments[ST_ARGUMENT_SHOW_TOPBAR];
+    StArgument anArgMonitor    = theArguments[ST_ARGUMENT_MONITOR];
     StArgument anArgSaveRecent = theArguments[ST_SETTING_SAVE_RECENT];
     if(anArgToCompress.isValid()) {
         myLoader->setCompressMemory(!anArgToCompress.isValueOff());
     }
     if(anArgEscNoQuit.isValid()) {
         myEscNoQuit = !anArgEscNoQuit.isValueOff();
+    }
+    if(anArgMonitor.isValid()) {
+        const size_t    aMonId = (size_t )::atol(anArgMonitor.getValue().toCString());
+        StRect<int32_t> aRect  = myWindow->getWindowedPlacement();
+        const StMonitor& aMonOld = myWindow->getMonitors()[aRect.center()];
+        const StMonitor& aMonNew = myWindow->getMonitors()[aMonId];
+        if(aMonOld.getId() != aMonNew.getId()) {
+            const int aLeft = aRect.left() - aMonOld.getVRect().left();
+            const int aTop  = aRect.top()  - aMonOld.getVRect().top();
+            aRect.moveLeftTo(aMonNew.getVRect().left() + aLeft);
+            aRect.moveTopTo (aMonNew.getVRect().top()  + aTop);
+            myWindow->setPlacement(aRect, false);
+        }
     }
     if(anArgFullScreenUI.isValid()) {
         myToHideUIFullScr = anArgFullScreenUI.isValueOff();

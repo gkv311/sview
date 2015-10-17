@@ -23,6 +23,7 @@ static StString getAbout() {
           "  --fullscreen         Open fullscreen\n"
           "  --toShowMenu=off     Hide main menu\n"
           "  --toShowTopbar=off   Hide top toolbar\n"
+          "  --monitorId=ID       open window on specified monitor\n"
           "  --slideshow          Start slideshow\n"
           "  --last               Open last file\n"
           "  --paused             Open file in paused state\n"
