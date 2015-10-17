@@ -985,6 +985,7 @@ void StImageViewerGUI::doShowMobileExMenu(const size_t ) {
     anItem = aMenu->addItem("Slideshow", myPlugin->getAction(StImageViewer::Action_SlideShow));
     anItem->setIcon(stCMenuIcon("actionSlideShow"));
     aMenu->stglInit();
+    setFocus(aMenu);
 }
 
 StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,

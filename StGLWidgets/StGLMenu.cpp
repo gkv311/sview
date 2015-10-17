@@ -17,6 +17,7 @@
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 
+#include <StCore/StEvent.h>
 #include <StSlots/StAction.h>
 
 void StGLMenu::DeleteWithSubMenus(StGLMenu* theMenu) {
@@ -71,6 +72,11 @@ void StGLMenu::setOpacity(const float theOpacity, bool theToSetChildren) {
             ((StGLMenuItem* )aChild)->setSelected(false);
         }
     }
+}
+
+void StGLMenu::setContextual(const bool theValue) {
+    myIsContextual = theValue;
+    myIsTopWidget  = theValue;
 }
 
 void StGLMenu::stglResize() {
@@ -203,6 +209,17 @@ void StGLMenu::stglDraw(unsigned int theView) {
     aCtx.core20fwd->glDisable(GL_BLEND);
 
     StGLWidget::stglDraw(theView);
+}
+
+bool StGLMenu::doKeyDown(const StKeyEvent& theEvent) {
+    switch(theEvent.VKey) {
+        case ST_VK_ESCAPE: {
+            destroyWithDelay(this);
+            return true;
+        }
+        default:
+            return false;
+    }
 }
 
 bool StGLMenu::tryUnClick(const StPointD_t& theCursorZo,

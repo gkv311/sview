@@ -50,15 +50,14 @@ class StGLMenu : public StGLWidget {
     ST_CPPEXPORT virtual void stglResize();
     ST_CPPEXPORT virtual bool stglInit();
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
+    ST_CPPEXPORT virtual bool doKeyDown(const StKeyEvent& theEvent);
     ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& theIsItemUnclicked);
 
     inline bool isRootMenu() const {
         return myIsRootMenu;
     }
 
-    void setContextual(const bool theValue) {
-        myIsContextual = theValue;
-    }
+    ST_CPPEXPORT void setContextual(const bool theValue);
 
     inline bool isActive() const {
         return myIsActive;

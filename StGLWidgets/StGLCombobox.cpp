@@ -94,6 +94,7 @@ void StGLCombobox::ListBuilder::display() {
                 aSubRectNew.moveRightTo(myMenu->getRectPxAbsolute().left() + aRoot->scale(10));
             }
         }
+        aRoot->setFocus(myMenu); // take input focus
     }
 }
 

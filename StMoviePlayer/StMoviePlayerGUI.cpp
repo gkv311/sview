@@ -1374,6 +1374,7 @@ void StMoviePlayerGUI::doShowMobileExMenu(const size_t ) {
     anItem->setIcon(stCMenuIcon("actionSettings"));
     anItem->signals.onItemClick += stSlot(this, &StMoviePlayerGUI::doMobileSettings);
     aMenu->stglInit();
+    setFocus(aMenu);
 }
 
 StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
