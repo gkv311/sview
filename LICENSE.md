@@ -49,3 +49,12 @@ This program is under the GNU General Public License version 3.0 or later.
 
 Some 3rd-parties may depend on other libraries and provide more license options.
 Please read license information for original projects.
+
+## Icons
+
+Images in folders [texturesSrc](texturesSrc) and [textures](textures)
+are available under the [license CC-BY 4.0](license-CC-BY-4.0.txt) (Creative Common Attribution 4.0 International License).
+Feel free to remix and re-share these icons in your products.
+
+Some of the images have been derived from Material Design icons shared by Google:<br/>
+https://github.com/google/material-design-icons

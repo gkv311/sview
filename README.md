@@ -2,6 +2,8 @@ sView - stereoscopic media player
 =================================
 
 sView is an easy to use cross-platform solution to view 3D stereoscopic videos and images.
+Please visit official site for more information:<br/>
+http://www.sview.ru
 
 ## Libraries
 
@@ -25,7 +27,8 @@ To get up-to-date sources please clone official git repository:
 ## Documentation
 
 Read the documentation in the **doc/** directory in git.
-Online help is available on official site http://www.sview.ru/en/sview/usertips/
+Online help is available on official site:<br/>
+http://www.sview.ru/en/sview/usertips/
 
 ## Licensing
 
