@@ -84,6 +84,10 @@ namespace {
     static const char ST_ARGUMENT_SHOW_MENU[]  = "toShowMenu";
     static const char ST_ARGUMENT_SHOW_TOPBAR[]= "toShowTopbar";
     static const char ST_ARGUMENT_MONITOR[]    = "monitorId";
+    static const char ST_ARGUMENT_WINLEFT[]    = "windowLeft";
+    static const char ST_ARGUMENT_WINTOP[]     = "windowTop";
+    static const char ST_ARGUMENT_WINWIDTH[]   = "windowWidth";
+    static const char ST_ARGUMENT_WINHEIGHT[]  = "windowHeight";
 
 }
 
@@ -602,7 +606,6 @@ bool StImageViewer::init() {
 }
 
 void StImageViewer::parseArguments(const StArgumentsMap& theArguments) {
-    StArgument anArgFullscreen = theArguments[ST_SETTING_FULLSCREEN];
     StArgument anArgSlideshow  = theArguments[ST_SETTING_SLIDESHOW];
     StArgument anArgViewMode   = theArguments[ST_SETTING_VIEWMODE];
     StArgument anArgSrcFormat  = theArguments[ST_SETTING_SRCFORMAT];
@@ -612,17 +615,18 @@ void StImageViewer::parseArguments(const StArgumentsMap& theArguments) {
     StArgument anArgFullScreenUI = theArguments[ST_SETTING_FULLSCREENUI];
     StArgument anArgShowMenu   = theArguments[ST_ARGUMENT_SHOW_MENU];
     StArgument anArgShowTopbar = theArguments[ST_ARGUMENT_SHOW_TOPBAR];
-    StArgument anArgMonitor    = theArguments[ST_ARGUMENT_MONITOR];
     StArgument anArgSaveRecent = theArguments[ST_SETTING_SAVE_RECENT];
-    if(anArgToCompress.isValid()) {
-        myLoader->setCompressMemory(!anArgToCompress.isValueOff());
-    }
-    if(anArgEscNoQuit.isValid()) {
-        myEscNoQuit = !anArgEscNoQuit.isValueOff();
-    }
+
+    StArgument anArgFullscreen = theArguments[ST_SETTING_FULLSCREEN];
+    StArgument anArgMonitor    = theArguments[ST_ARGUMENT_MONITOR];
+    StArgument anArgWinLeft    = theArguments[ST_ARGUMENT_WINLEFT];
+    StArgument anArgWinTop     = theArguments[ST_ARGUMENT_WINTOP];
+    StArgument anArgWinWidth   = theArguments[ST_ARGUMENT_WINWIDTH];
+    StArgument anArgWinHeight  = theArguments[ST_ARGUMENT_WINHEIGHT];
+    StRect<int32_t> aRect = myWindow->getWindowedPlacement();
+    bool toSetRect = false;
     if(anArgMonitor.isValid()) {
-        const size_t    aMonId = (size_t )::atol(anArgMonitor.getValue().toCString());
-        StRect<int32_t> aRect  = myWindow->getWindowedPlacement();
+        const size_t     aMonId  = (size_t )::atol(anArgMonitor.getValue().toCString());
         const StMonitor& aMonOld = myWindow->getMonitors()[aRect.center()];
         const StMonitor& aMonNew = myWindow->getMonitors()[aMonId];
         if(aMonOld.getId() != aMonNew.getId()) {
@@ -630,8 +634,37 @@ void StImageViewer::parseArguments(const StArgumentsMap& theArguments) {
             const int aTop  = aRect.top()  - aMonOld.getVRect().top();
             aRect.moveLeftTo(aMonNew.getVRect().left() + aLeft);
             aRect.moveTopTo (aMonNew.getVRect().top()  + aTop);
-            myWindow->setPlacement(aRect, false);
+            toSetRect = true;
         }
+    }
+    if(anArgWinLeft.isValid()) {
+        aRect.moveLeftTo(::atol(anArgWinLeft.getValue().toCString()));
+        toSetRect = true;
+    }
+    if(anArgWinTop.isValid()) {
+        aRect.moveTopTo(::atol(anArgWinTop.getValue().toCString()));
+        toSetRect = true;
+    }
+    if(anArgWinWidth.isValid()) {
+        aRect.right() = aRect.left() + ::atol(anArgWinWidth.getValue().toCString());
+        toSetRect = true;
+    }
+    if(anArgWinHeight.isValid()) {
+        aRect.bottom() = aRect.top() + ::atol(anArgWinHeight.getValue().toCString());
+        toSetRect = true;
+    }
+    if(toSetRect) {
+        myWindow->setPlacement(aRect, true);
+    }
+    if(anArgFullscreen.isValid()) {
+        params.isFullscreen->setValue(!anArgFullscreen.isValueOff());
+    }
+
+    if(anArgToCompress.isValid()) {
+        myLoader->setCompressMemory(!anArgToCompress.isValueOff());
+    }
+    if(anArgEscNoQuit.isValid()) {
+        myEscNoQuit = !anArgEscNoQuit.isValueOff();
     }
     if(anArgFullScreenUI.isValid()) {
         myToHideUIFullScr = anArgFullScreenUI.isValueOff();
@@ -641,9 +674,6 @@ void StImageViewer::parseArguments(const StArgumentsMap& theArguments) {
     }
     if(anArgShowTopbar.isValid()) {
         params.ToShowTopbar->setValue(!anArgShowTopbar.isValueOff());
-    }
-    if(anArgFullscreen.isValid()) {
-        params.isFullscreen->setValue(!anArgFullscreen.isValueOff());
     }
     if( anArgSlideshow.isValid()
     && !anArgSlideshow.isValueOff()) {
