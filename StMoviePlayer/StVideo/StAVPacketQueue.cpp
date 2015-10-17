@@ -247,6 +247,10 @@ void StAVPacketQueue::pushPlayEvent(const StPlayEvent_t theEventId,
             myIsPlaying = false;
             break;
         }
+        case ST_PLAYEVENT_NEXT:
+        case ST_PLAYEVENT_NONE: {
+            break;
+        }
     }
     myPlayEvent = theEventId;
     myEventMutex.unlock();
