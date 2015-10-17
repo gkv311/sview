@@ -321,9 +321,25 @@ const StHandle<StAction>& StApplication::getAction(const int theActionId) {
     //return myActions.at(theActionId);
 }
 
+int StApplication::getActionIdFromName(const StString& theActionName) const {
+    StString aNameLower = theActionName;
+    aNameLower.toLowerCase();
+    const std::string aName(aNameLower.toCString());
+    std::map< std::string, int >::const_iterator anAction = myActionLookup.find(aName);
+    return anAction != myActionLookup.end()
+         ? anAction->second
+         : -1;
+}
+
 void StApplication::addAction(const int                 theActionId,
                               const StHandle<StAction>& theAction) {
     myActions[theActionId] = theAction;
+    if(!theAction.isNull()) {
+        StString aNameLower = theAction->getName();
+        aNameLower.toLowerCase();
+        const std::string aName(aNameLower.toCString());
+        myActionLookup[aName] = theActionId;
+    }
 }
 
 void StApplication::addAction(const int           theActionId,

@@ -99,6 +99,7 @@ namespace {
     static const char ST_SETTING_WEBUI_ON[]      = "webuiOn";
     static const char ST_SETTING_WEBUI_PORT[]    = "webuiPort";
     static const char ST_SETTING_WEBUI_ERRORS[]  = "webuiShowErrors";
+    static const char ST_SETTING_WEBUI_CMDPORT[] = "webuiCmdPort";
 
     static const char ST_ARGUMENT_FILE_LEFT[]  = "left";
     static const char ST_ARGUMENT_FILE_RIGHT[] = "right";
@@ -506,6 +507,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.StartWebUI->changeValues().add(tr(MENU_MEDIA_WEBUI_ONCE));
     params.StartWebUI->changeValues().add(tr(MENU_MEDIA_WEBUI_ON));
     params.ToPrintWebErrors = new StBoolParam(true);
+    params.IsLocalWebUI     = new StBoolParam(false);
     params.WebUIPort        = new StInt32Param(8080);
     params.audioStream = new StInt32Param(-1);
     params.audioStream->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchAudioStream);
@@ -762,7 +764,9 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (ST_SETTING_GPU_DECODING,       params.UseGpu);
 
         mySettings->saveParam (ST_SETTING_WEBUI_ON,           params.StartWebUI);
-        mySettings->saveParam (ST_SETTING_WEBUI_PORT,         params.WebUIPort);
+        if(!params.IsLocalWebUI->getValue()) {
+            mySettings->saveParam (ST_SETTING_WEBUI_PORT,     params.WebUIPort);
+        }
         mySettings->saveParam (ST_SETTING_WEBUI_ERRORS,       params.ToPrintWebErrors);
         mySettings->saveParam (ST_SETTING_SAVE_IMG_TYPE,      params.SnapshotImgType);
         mySettings->saveParam (ST_SETTING_EXPERIMENTAL,       params.ToShowExtra);
@@ -906,7 +910,14 @@ void StMoviePlayer::doStartWebUI() {
     stMemZero(&aCallbacks, sizeof(aCallbacks));
     aCallbacks.begin_request = StMoviePlayer::beginRequestHandler;
     const StString aPort = params.WebUIPort->getValue();
-    const char* anOptions[] = { "listening_ports", aPort.toCString(), NULL };
+
+    StString aControlList = "+0.0.0.0/0";
+    if(params.IsLocalWebUI->getValue()) {
+        aControlList = "-0.0.0.0/0,+127.0.0.0/16";
+    }
+    const char* anOptions[] = { "listening_ports",     aPort.toCString(),
+                                "access_control_list", aControlList.toCString(),
+                                NULL };
     myWebCtx = mg_start(&aCallbacks, this, anOptions);
     if(myWebCtx == NULL
     && params.ToPrintWebErrors->getValue()) {
@@ -950,6 +961,17 @@ bool StMoviePlayer::init() {
 
     // load hot-keys
     if(!isReset) {
+    #ifdef ST_HAVE_MONGOOSE
+        // handle this argument in advance
+        if(!myOpenFileInfo.isNull()) {
+            StArgument anArgWebuiCmd = myOpenFileInfo->getArgumentsMap()[ST_SETTING_WEBUI_CMDPORT];
+            if(anArgWebuiCmd.isValid()) {
+                params.IsLocalWebUI->setValue(true);
+                params.WebUIPort->setValue(::atol(anArgWebuiCmd.getValue().toCString()));
+            }
+        }
+    #endif
+
         for(std::map< int, StHandle<StAction> >::iterator anIter = myActions.begin();
             anIter != myActions.end(); ++anIter) {
             mySettings->loadHotKey(anIter->second);
@@ -2008,6 +2030,18 @@ int StMoviePlayer::beginRequest(mg_connection*         theConnection,
                 } else {
                     break;
                 }
+            }
+        }
+    } else if(anURI.isEquals(stCString("/action"))) {
+        if(!params.IsLocalWebUI->getValue()) {
+            aContent = "Error: command interace is disabled!";
+        } else {
+            const int anActionId = getActionIdFromName(aQuery);
+            if(anActionId != -1) {
+                invokeAction(anActionId);
+                aContent = "Action has been invoked";
+            } else {
+                aContent = "Error: unknown action";
             }
         }
     } else {

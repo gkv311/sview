@@ -126,6 +126,11 @@ class StApplication {
      */
     ST_LOCAL const std::map< int, StHandle<StAction> >& getActions() const { return myActions; }
 
+    /**
+     * Find action ID for specified Action Name.
+     */
+    ST_CPPEXPORT int getActionIdFromName(const StString& theActionName) const;
+
         protected:
 
     /**
@@ -266,6 +271,8 @@ class StApplication {
     StHandle<StOpenInfo>  myOpenFileInfo;          //!< file to open
     std::map< int, StHandle<StAction> >
                           myActions;               //!< ID -> Action map
+    std::map< std::string, int >
+                          myActionLookup;          //!< lookup map ActionName -> ActionID
     std::map< unsigned int, StHandle<StAction> >
                           myKeyActions;            //!< Hot Key -> Action map
     StHandle<StEventsBuffer>

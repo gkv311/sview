@@ -224,6 +224,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StBoolParam>     IsVSyncOn;        //!< flag to use VSync
         StHandle<StEnumParam>     StartWebUI;       //!< to start Web UI or not
         StHandle<StBoolParam>     ToPrintWebErrors; //!< print Web UI starting errors
+        StHandle<StBoolParam>     IsLocalWebUI;     //!< restrict remote access to 127.0.0.0
         StHandle<StInt32Param>    WebUIPort;        //!< port to start Web UI
         StHandle<StInt32Param>    audioStream;      //!< active Audio stream
         StHandle<StInt32Param>    subtitlesStream;  //!< active Subtitles stream
