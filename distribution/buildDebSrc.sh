@@ -41,8 +41,10 @@ cp -f -r ../StShared       $aDebSrcRoot/
 cp -f -r ../sview          $aDebSrcRoot/
 cp -f -r ../textures       $aDebSrcRoot/
 cp -f    ../Makefile       $aDebSrcRoot/
-cp -f    ../README         $aDebSrcRoot/
-cp -f    ../LICENSE        $aDebSrcRoot/
+cp -f    ../README.md      $aDebSrcRoot/
+cp -f    ../README.md      $aDebSrcRoot/README
+cp -f    ../LICENSE.md     $aDebSrcRoot/
+cp -f    ../LICENSE.md     $aDebSrcRoot/LICENSE
 cp -f    ../license*.txt   $aDebSrcRoot/
 
 mkdir -p $aDebSrcRoot/3rdparty/include

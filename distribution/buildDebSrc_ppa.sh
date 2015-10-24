@@ -21,8 +21,7 @@ aCurrentDate=`date --rfc-2822`
 # Ubuntu 14.04 LTS (Trusty Tahr)
 # Ubuntu 15.04     (Vivid Vervet)
 # Ubuntu 15.10     (Wily Werewolf)
-#aDistribs=("trusty" "vivid" "wily")
-aDistribs=("trusty" "vivid")
+aDistribs=("trusty" "vivid" "wily")
 
 # Debian
 #aDistribs=("stable" "unstable" "testing-proposed-updates" "experimental")
