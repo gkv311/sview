@@ -512,13 +512,11 @@ bool stAV::meta::readTag(stAV::meta::Dict* theDict,
     return true;
 }
 
-bool stAV::meta::readTag(AVFrame*         theFrame,
-                         const StCString& theKey,
-                         StString&        theValue) {
+stAV::meta::Dict* stAV::meta::getFrameMetadata(AVFrame* theFrame) {
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 38, 100)) && !defined(ST_LIBAV_FORK)
-    return readTag(av_frame_get_metadata(theFrame), theKey, theValue);
+    return av_frame_get_metadata(theFrame);
 #else
-    return false;
+    return NULL;
 #endif
 }
 

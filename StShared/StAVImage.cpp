@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -180,6 +180,7 @@ bool StAVImage::resize(const StImage& theImageFrom,
 }
 
 void StAVImage::close() {
+    myMetadata.clear();
     if(myCodec != NULL && myCodecCtx != NULL) {
         avcodec_close(myCodecCtx); // close VIDEO codec
     }
@@ -208,6 +209,7 @@ bool StAVImage::load(const StString& theFilePath,
     StImage::nullify();
     setState();
     close();
+    myMetadata.clear();
 
     switch(theImageType) {
         case ST_TYPE_PNG:
@@ -373,6 +375,29 @@ bool StAVImage::load(const StString& theFilePath,
         mySrcFormat = StFormat_AUTO;
     }
 #endif
+
+    // it is unlikely that there would be any metadata from format...
+    // but lets try
+    if(myFormatCtx != NULL) {
+        for(stAV::meta::Tag* aTag = stAV::meta::findTag(myFormatCtx->metadata, "", NULL, stAV::meta::SEARCH_IGNORE_SUFFIX);
+            aTag != NULL;
+            aTag = stAV::meta::findTag(myFormatCtx->metadata, "", aTag, stAV::meta::SEARCH_IGNORE_SUFFIX)) {
+            myMetadata.add(StDictEntry(aTag->key, aTag->value));
+        }
+        for(stAV::meta::Tag* aTag = stAV::meta::findTag(myFormatCtx->streams[0]->metadata, "", NULL, stAV::meta::SEARCH_IGNORE_SUFFIX);
+            aTag != NULL;
+            aTag = stAV::meta::findTag(myFormatCtx->streams[0]->metadata, "", aTag, stAV::meta::SEARCH_IGNORE_SUFFIX)) {
+            myMetadata.add(StDictEntry(aTag->key, aTag->value));
+        }
+    }
+
+    // collect metadata from the frame
+    stAV::meta::Dict* aFrameMetadata = stAV::meta::getFrameMetadata(myFrame);
+    for(stAV::meta::Tag* aTag = stAV::meta::findTag(aFrameMetadata, "", NULL, stAV::meta::SEARCH_IGNORE_SUFFIX);
+        aTag != NULL;
+        aTag = stAV::meta::findTag(aFrameMetadata, "", aTag, stAV::meta::SEARCH_IGNORE_SUFFIX)) {
+        myMetadata.add(StDictEntry(aTag->key, aTag->value));
+    }
 
     stAV::dimYUV aDimsYUV;
     if(myCodecCtx->pix_fmt == stAV::PIX_FMT::RGB24) {

@@ -10,6 +10,7 @@
 #define __StImageFile_h_
 
 #include <StTemplates/StHandle.h>
+#include <StStrings/StDictionary.h>
 #include <StGLStereo/StFormatEnum.h>
 
 #include "StImage.h"
@@ -74,16 +75,30 @@ class StImageFile : public StImage {
     /**
      * @return the error description occured on load/save operations.
      */
-    inline const StString& getState() const {
+    ST_LOCAL const StString& getState() const {
         return myStateDescr;
     }
 
-    inline StString& changeState() {
+    ST_LOCAL StString& changeState() {
         return myStateDescr;
     }
 
-    inline void setState(const StString& theDescr = StString()) {
+    ST_LOCAL void setState(const StString& theDescr = StString()) {
         myStateDescr = theDescr;
+    }
+
+    /**
+     * Return metadata associated with image.
+     */
+    ST_LOCAL const StDictionary& getMetadata() const {
+        return myMetadata;
+    }
+
+    /**
+     * Assign new metadata.
+     */
+    ST_LOCAL void setMetadata(const StDictionary& theDict) {
+        myMetadata = theDict;
     }
 
     ST_LOCAL StFormat getFormat() const {
@@ -127,8 +142,9 @@ class StImageFile : public StImage {
 
         protected:
 
-    StString myStateDescr;
-    StFormat mySrcFormat;
+    StDictionary myMetadata;
+    StString     myStateDescr;
+    StFormat     mySrcFormat;
 
 };
 

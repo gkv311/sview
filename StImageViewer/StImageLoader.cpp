@@ -358,6 +358,12 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     }
     const double aLoadTimeMSec = aLoadTimer.getElapsedTimeInMilliSec();
 
+    // copy metadata
+    for(size_t aTagIter = 0; aTagIter < anImageFileL->getMetadata().size(); ++aTagIter) {
+        const StDictEntry& aTag = anImageFileL->getMetadata().getFromIndex(aTagIter);
+        anImgInfo->Info.add(aTag);
+    }
+
     // detect information from file name
     bool isAnamorphByName = false;
     anImgInfo->StInfoFileName = st::formatFromName(aTitleString, isAnamorphByName);

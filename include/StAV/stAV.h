@@ -342,7 +342,12 @@ namespace stAV {
     #endif
 
         /**
-         * Alias to av_dict_get.
+         * Alias for av_frame_get_metadata().
+         */
+        ST_CPPEXPORT Dict* getFrameMetadata(AVFrame* theFrame);
+
+        /**
+         * Alias for av_dict_get().
          */
         ST_CPPEXPORT Tag* findTag(Dict*       theDict,
                                   const char* theKey,
@@ -360,21 +365,32 @@ namespace stAV {
                                   const StCString& theKey,
                                   StString&        theValue);
 
+        /**
+         * Read tag from Format Context metadata.
+         */
         inline bool readTag(AVFormatContext* theFormatCtx,
                             const StCString& theKey,
                             StString&        theValue) {
             return readTag(theFormatCtx->metadata, theKey, theValue);
         }
 
+        /**
+         * Read tag from Stream metadata.
+         */
         inline bool readTag(AVStream*        theStream,
                             const StCString& theKey,
                             StString&        theValue) {
             return readTag(theStream->metadata, theKey, theValue);
         }
 
-        ST_CPPEXPORT bool readTag(AVFrame*         theFrame,
-                                  const StCString& theKey,
-                                  StString&        theValue);
+        /**
+         * Read tag from Frame metadata.
+         */
+        inline bool readTag(AVFrame*         theFrame,
+                            const StCString& theKey,
+                            StString&        theValue) {
+            return readTag(getFrameMetadata(theFrame), theKey, theValue);
+        }
 
     }
 
