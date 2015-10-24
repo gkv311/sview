@@ -173,7 +173,7 @@ class StGLTextureButton::ButtonPrograms : public StGLProgramMatrix<1, 2, StGLTex
            "    if(uClicked > 10) {\n"
            "        v.z = v.z - 0.25;\n"
            "    } else {\n"
-           "        v.z = v.z + sin(uTime * v.x + uTime) * cos(v.y + uTime) * 0.25;\n"
+           "        v.z = v.z + sin(uTime * v.x + uTime) * cos(v.y + uTime) * 0.1;\n"
            "    }\n"
            "    gl_Position = uProjMat * v;\n"
            "}\n";
