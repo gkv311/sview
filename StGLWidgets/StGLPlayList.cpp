@@ -16,10 +16,6 @@
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 
-namespace {
-    static const size_t SHARE_PROGRAM_ID = StGLRootWidget::generateShareId();
-}
-
 StGLPlayList::StGLPlayList(StGLWidget*                 theParent,
                            const StHandle<StPlayList>& theList)
 : StGLWidget(theParent, -theParent->getRoot()->scale(32), 0),
