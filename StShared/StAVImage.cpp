@@ -616,12 +616,15 @@ bool StAVImage::save(const StString& theFilePath,
     fillPointersAV(anImage, myFrame->data, myFrame->linesize);
 
 #ifdef ST_AV_NEWSTEREO
-    // currently it is unlikelly... but maybe in future?
-    AVStereo3DType anAvStereoType = stAV::stereo3dStToAv(theSrcFormat);
+    bool isReversed = false;
+    AVStereo3DType anAvStereoType = stAV::stereo3dStToAv(theSrcFormat, isReversed);
     if(anAvStereoType != (AVStereo3DType )-1) {
         AVStereo3D* aStereo = av_stereo3d_create_side_data(myFrame);
         if(aStereo != NULL) {
             aStereo->type = anAvStereoType;
+            if(isReversed) {
+                aStereo->flags |= AV_STEREO3D_FLAG_INVERT;
+            }
         }
     }
 #endif

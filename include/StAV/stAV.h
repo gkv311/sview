@@ -415,19 +415,32 @@ namespace stAV {
     /**
      * Convert stereo3d enumeration from sView to FFmpeg definition.
      */
-    ST_LOCAL inline AVStereo3DType stereo3dStToAv(const StFormat theType) {
+    ST_LOCAL inline AVStereo3DType stereo3dStToAv(const StFormat theType,
+                                                  bool&          theIsReversed) {
+        theIsReversed = false;
         switch(theType) {
             default:
-            case StFormat_AUTO:               return (AVStereo3DType )-1;
-            case StFormat_Mono:               return AV_STEREO3D_2D;
+            case StFormat_AUTO:
+                return (AVStereo3DType )-1;
+            case StFormat_Mono:
+                return AV_STEREO3D_2D;
+            case StFormat_SideBySide_RL:
+                theIsReversed = true;
+                return AV_STEREO3D_SIDEBYSIDE;
             case StFormat_SideBySide_LR:
-            case StFormat_SideBySide_RL:      return AV_STEREO3D_SIDEBYSIDE;
+                return AV_STEREO3D_SIDEBYSIDE;
+            case StFormat_TopBottom_RL:
+                theIsReversed = true;
+                return AV_STEREO3D_TOPBOTTOM;
             case StFormat_TopBottom_LR:
-            case StFormat_TopBottom_RL:       return AV_STEREO3D_TOPBOTTOM;
-            case StFormat_Rows:               return AV_STEREO3D_LINES;
-            case StFormat_Columns:            return AV_STEREO3D_COLUMNS;
+                return AV_STEREO3D_TOPBOTTOM;
+            case StFormat_Rows:
+                return AV_STEREO3D_LINES;
+            case StFormat_Columns:
+                return AV_STEREO3D_COLUMNS;
             //case StFormat_SeparateFrames:
-            case StFormat_FrameSequence:      return AV_STEREO3D_FRAMESEQUENCE;
+            case StFormat_FrameSequence:
+                return AV_STEREO3D_FRAMESEQUENCE;
             //case StFormat_AnaglyphRedCyan:
             //case StFormat_AnaglyphGreenMagenta:
             //case StFormat_AnaglyphYellowBlue:
