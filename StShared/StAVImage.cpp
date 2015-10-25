@@ -610,6 +610,9 @@ bool StAVImage::save(const StString& theFilePath,
     }
 
     // wrap own data into AVFrame
+    myFrame->format = myCodecCtx->pix_fmt;
+    myFrame->width  = myCodecCtx->width;
+    myFrame->height = myCodecCtx->height;
     fillPointersAV(anImage, myFrame->data, myFrame->linesize);
 
 #ifdef ST_AV_NEWSTEREO
