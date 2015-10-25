@@ -119,6 +119,12 @@ class StOutPageFlip : public StWindow {
      */
     ST_CPPEXPORT virtual void stglDraw();
 
+    /**
+     * Show/Hide mouse cursor.
+     * @param theToShow true to show cursor
+     */
+    ST_CPPEXPORT virtual void showCursor(const bool theToShow);
+
         protected:
 
     ST_LOCAL void setupDevice();

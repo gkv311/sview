@@ -1,6 +1,6 @@
 /**
  * StOutPageFlip, class providing stereoscopic output for Shutter Glasses displays using StCore toolkit.
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -42,6 +42,11 @@ class StDXNVWindow {
      * Destructor.
      */
     ~StDXNVWindow();
+
+    /**
+     * Post message to hide the cursor.
+     */
+    void showCursor(bool theToShow);
 
     /**
      * Specify if WGL <-> D3D interoperation extension should be used.
@@ -280,6 +285,9 @@ class StDXNVWindow {
     StCondition             myEventShow;
     StCondition             myEventHide;
     StCondition             myEventUpdate;
+    StCondition             myEventCursorShow; //!< event to show cursor
+    StCondition             myEventCursorHide; //!< event to hide cursor
+    bool                    myToHideCursor;
 
 };
 

@@ -788,6 +788,15 @@ void StOutPageFlip::dxDisactivate() {
 #endif
 }
 
+void StOutPageFlip::showCursor(const bool theToShow) {
+    StWindow::showCursor(theToShow);
+#ifdef _WIN32
+    if(!myOutD3d.DxWindow.isNull()) {
+        myOutD3d.DxWindow->showCursor(theToShow);
+    }
+#endif
+}
+
 bool StOutPageFlip::create() {
     StWindow::show();
 

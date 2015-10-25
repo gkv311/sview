@@ -1,6 +1,6 @@
 /**
  * StOutPageFlip, class providing stereoscopic output for Shutter Glasses displays using StCore toolkit.
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -41,7 +41,10 @@ StDXNVWindow::StDXNVWindow(const StHandle<StMsgQueue>& theMsgQueue,
   myEventQuit  (false),
   myEventShow  (false),
   myEventHide  (false),
-  myEventUpdate(false) {
+  myEventUpdate(false),
+  myEventCursorShow(false),
+  myEventCursorHide(false),
+  myToHideCursor(false) {
     stMemZero(myMouseState, sizeof(myMouseState));
     stMemZero(&myWinMsg,    sizeof(myWinMsg));
     stMemZero(myKeysMap,    sizeof(myKeysMap));
@@ -183,6 +186,19 @@ bool StDXNVWindow::initWinAPIWindow() {
     }
     ST_DEBUG_LOG_AT("StDXWindow, Created help window");
     return true;
+}
+
+void StDXNVWindow::showCursor(bool theToShow) {
+    if(myToHideCursor != theToShow) {
+        return;
+    }
+
+    if(theToShow) {
+        myEventCursorShow.set();
+    } else {
+        myEventCursorHide.set();
+    }
+    myToHideCursor = !theToShow;
 }
 
 void StDXNVWindow::dxShow() {
@@ -355,17 +371,22 @@ void StDXNVWindow::dxLoop() {
         StDXMsg_Show,
         StDXMsg_Hide,
         StDXMsg_Update,
-        StDXMsg_WINDOW
+        StDXMsg_CursorShow,
+        StDXMsg_CursorHide,
+        StDXMsg_WINDOW,
+        StDXMsg_NB = StDXMsg_WINDOW
     };
-    HANDLE aWaitEvents[4] = {};
-    aWaitEvents[StDXMsg_Quit]   = myEventQuit  .getHandle();
-    aWaitEvents[StDXMsg_Show]   = myEventShow  .getHandle();
-    aWaitEvents[StDXMsg_Hide]   = myEventHide  .getHandle();
-    aWaitEvents[StDXMsg_Update] = myEventUpdate.getHandle();
+    HANDLE aWaitEvents[StDXMsg_NB] = {};
+    aWaitEvents[StDXMsg_Quit]       = myEventQuit  .getHandle();
+    aWaitEvents[StDXMsg_Show]       = myEventShow  .getHandle();
+    aWaitEvents[StDXMsg_Hide]       = myEventHide  .getHandle();
+    aWaitEvents[StDXMsg_Update]     = myEventUpdate.getHandle();
+    aWaitEvents[StDXMsg_CursorShow] = myEventCursorShow.getHandle();
+    aWaitEvents[StDXMsg_CursorHide] = myEventCursorHide.getHandle();
 
     myEventReady.set();
     for(;;) {
-        switch(::MsgWaitForMultipleObjects(4, aWaitEvents, FALSE, INFINITE, QS_ALLINPUT)) {
+        switch(::MsgWaitForMultipleObjects(StDXMsg_NB, aWaitEvents, FALSE, INFINITE, QS_ALLINPUT)) {
             case WAIT_OBJECT_0 + StDXMsg_Quit: {
                 ST_DEBUG_LOG_AT("releaseDXWindow() [message thread]");
                 if(myIsThreadedDx) {
@@ -401,6 +422,16 @@ void StDXNVWindow::dxLoop() {
                 if(myIsThreadedDx) {
                     dxUpdate();
                 }
+                break;
+            }
+            case WAIT_OBJECT_0 + StDXMsg_CursorShow: {
+                ::ShowCursor(TRUE);
+                myEventCursorShow.reset();
+                break;
+            }
+            case WAIT_OBJECT_0 + StDXMsg_CursorHide: {
+                ::ShowCursor(FALSE);
+                myEventCursorHide.reset();
                 break;
             }
             case WAIT_OBJECT_0 + StDXMsg_WINDOW: {
