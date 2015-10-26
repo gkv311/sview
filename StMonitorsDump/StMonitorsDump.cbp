@@ -6,32 +6,6 @@
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
-			<Target title="WIN_gcc_x86">
-				<Option output="../bin/$(TARGET_NAME)/StMonitorsDump" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="../bin/$(TARGET_NAME)/" />
-				<Option object_output="obj/$(TARGET_NAME)/" />
-				<Option type="1" />
-				<Option compiler="gcc" />
-				<Compiler>
-					<Add option="-O3" />
-					<Add option="-std=c++0x" />
-					<Add option="-Wall" />
-					<Add option="-g" />
-					<Add option="-mmmx" />
-					<Add option="-msse" />
-					<Add option="-DUNICODE" />
-					<Add option="-D_WIN32_WINNT=0x0500" />
-					<Add option="-DST_DEBUG" />
-					<Add option="-DST_HAVE_STCONFIG" />
-				</Compiler>
-				<Linker>
-					<Add library="gdi32" />
-					<Add library="user32" />
-					<Add library="kernel32" />
-					<Add library="Version" />
-					<Add library="nvapi" />
-				</Linker>
-			</Target>
 			<Target title="WIN_vc_x86">
 				<Option output="../bin/$(TARGET_NAME)/StMonitorsDump" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="../bin/$(TARGET_NAME)/" />
@@ -62,12 +36,12 @@
 					<Add after='mt.exe /nologo /manifest &quot;$(TARGET_OUTPUT_FILE).manifest&quot; /manifest &quot;..\dpiAware.manifest&quot; /outputresource:&quot;$(TARGET_OUTPUT_FILE)&quot;;1' />
 				</ExtraCommands>
 			</Target>
-			<Target title="WIN_vc_x86_DEBUG">
+			<Target title="WIN_vc_AMD64_DEBUG">
 				<Option output="../bin/$(TARGET_NAME)/StMonitorsDump" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="../bin/$(TARGET_NAME)/" />
 				<Option object_output="obj/$(TARGET_NAME)/" />
 				<Option type="1" />
-				<Option compiler="msvc10" />
+				<Option compiler="windows_sdk_x86_64" />
 				<Compiler>
 					<Add option="/MDd" />
 					<Add option="/Od" />

@@ -59,7 +59,7 @@ Code::Blocks is an official way for building and development of sView.
 There are several building targets depending on platform
 (Mac OS X, Linux, Windows) and debugging possibilities:
 * `WIN_vc_x86`,        32-bit target using Visual Studio compiler
-* `WIN_vc_x86_DEBUG`,  32-bit target with debugging options
+* `WIN_vc_AMD64_DEBUG`,64-bit target with debugging options
 * `WIN_vc_AMD64`,      64-bit target using Visual Studio compiler
 * `LINUX_gcc`,         Linux target, g++ compiler
 * `LINUX_gcc_DEBUG`,   Linux target with debugging options
