@@ -2,15 +2,15 @@
 
 # This is helpful script to perform building of FFmpeg
 
-# MinGW tools for Ubuntu; http://ffmpeg.arrozcru.org/wiki/index.php?title=Aptrepository
-# Add gpg key to your system 
-#$ gpg --keyserver keyserver.ubuntu.com --recv-key 0x25E635F9
-#$ gpg --export --armor 0x25E635F9 | sudo apt-key add -
-#deb http://apt.arrozcru.org ./
-#deb-src http://apt.arrozcru.org ./
+# mingw for cross-compiling
+#sudo apt-get install binutils-mingw-w64-i686 binutils-mingw-w64-x86-64 g++-mingw-w64-i686 g++-mingw-w64-x86-64 gcc-mingw-w64 gcc-mingw-w64-base gcc-mingw-w64-i686 gcc-mingw-w64-x86-64
+#sudo apt-get install mingw-w64 mingw-w64-common mingw-w64-tools yasm p7zip-full git git-gui gitk
 
-#sudo apt-get install mingw32-w32api mingw32-runtime mingw32-gcc-4.4 mingw32-binutils mingw32-zlib mingw32-bzip2 mingw32-pthreads 
-#sudo apt-get install mingw-w64-w32api mingw-w64-runtime mingw-w64-gcc-4.4 mingw-w64-crt mingw-w64-binutils mingw-w64-headers mingw-w64-zlib mingw-w64-bzip2 mingw-w64-pthreads
+# avoid linkage with dynamic version of libwinpthread.dll
+#sudo mv /usr/x86_64-w64-mingw32/lib/libpthread.dll.a /usr/x86_64-w64-mingw32/lib/__libpthread.dll.a
+#sudo mv /usr/x86_64-w64-mingw32/lib/libwinpthread.dll.a /usr/x86_64-w64-mingw32/lib/__libwinpthread.dll.a
+#sudo mv /usr/i686-w64-mingw32/lib/libpthread.dll.a /usr/i686-w64-mingw32/lib/__libpthread.dll.a
+#sudo mv /usr/i686-w64-mingw32/lib/libwinpthread.dll.a /usr/i686-w64-mingw32/lib/__libwinpthread.dll.a
 
 rebuildTarget="FFmpeg"
 if [ "$1" != "" ]; then
@@ -35,10 +35,10 @@ else
 fi
 
 # build for Win32 x86
-#./rebuild.sh "$rebuildTarget" GPL  DEBUG   "i686-mingw32-"
-./rebuild.sh "$rebuildTarget" LGPL DEBUG   "i686-mingw32-"
-./rebuild.sh "$rebuildTarget" GPL  RELEASE "i686-mingw32-"
-./rebuild.sh "$rebuildTarget" LGPL RELEASE "i686-mingw32-"
+#./rebuild.sh "$rebuildTarget" GPL  DEBUG   "i686-w64-mingw32-"
+./rebuild.sh "$rebuildTarget" LGPL DEBUG   "i686-w64-mingw32-"
+./rebuild.sh "$rebuildTarget" GPL  RELEASE "i686-w64-mingw32-"
+./rebuild.sh "$rebuildTarget" LGPL RELEASE "i686-w64-mingw32-"
 
 # build for Win32 AMD64
 #./rebuild.sh "$rebuildTarget" GPL  DEBUG   "x86_64-w64-mingw32-"

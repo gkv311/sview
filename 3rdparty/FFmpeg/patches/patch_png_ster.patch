@@ -1,0 +1,94 @@
+From 104e5d8f212c46b9eedb932a6b6c717372ccdceb Mon Sep 17 00:00:00 2001
+From: Kirill Gavrilov <kirill@sview.ru>
+Date: Thu, 22 Oct 2015 23:36:52 +0300
+Subject: [PATCH 1/1] avcodec/png: read and write stereo3d frame side data
+ information
+
+Use optional sTER chunk defining side-by-side stereo pair
+within "Extensions to the PNG 1.2 Specification", version 1.3.0.
+---
+ libavcodec/pngdec.c | 16 ++++++++++++++++
+ libavcodec/pngenc.c | 19 +++++++++++++++++++
+ 2 files changed, 35 insertions(+)
+
+diff --git a/libavcodec/pngdec.c b/libavcodec/pngdec.c
+index 4cfdc58..99111d4 100644
+--- a/libavcodec/pngdec.c
++++ b/libavcodec/pngdec.c
+@@ -24,6 +24,7 @@
+ #include "libavutil/avassert.h"
+ #include "libavutil/bprint.h"
+ #include "libavutil/imgutils.h"
++#include "libavutil/stereo3d.h"
+ #include "avcodec.h"
+ #include "bytestream.h"
+ #include "internal.h"
+@@ -1164,6 +1165,21 @@ static int decode_frame_common(AVCodecContext *avctx, PNGDecContext *s,
+                 av_log(avctx, AV_LOG_WARNING, "Broken zTXt chunk\n");
+             bytestream2_skip(&s->gb, length + 4);
+             break;
++        case MKTAG('s', 'T', 'E', 'R'): {
++            AVStereo3D *stereo3d = av_stereo3d_create_side_data(p);
++            if (!stereo3d) {
++                goto fail;
++            } else if (*s->gb.buffer == 0) {
++                stereo3d->type  = AV_STEREO3D_SIDEBYSIDE;
++                stereo3d->flags = AV_STEREO3D_FLAG_INVERT;
++            } else if (*s->gb.buffer == 1) {
++                stereo3d->type  = AV_STEREO3D_SIDEBYSIDE;
++            } else {
++                 av_log(avctx, AV_LOG_WARNING, "Broken sTER chunk - unknown value\n");
++            }
++            bytestream2_skip(&s->gb, length + 4);
++            break;
++        }
+         case MKTAG('I', 'E', 'N', 'D'):
+             if (!(s->state & PNG_ALLIMAGE))
+                 av_log(avctx, AV_LOG_ERROR, "IEND without all image\n");
+diff --git a/libavcodec/pngenc.c b/libavcodec/pngenc.c
+index 4204df2..bc61f8f 100644
+--- a/libavcodec/pngenc.c
++++ b/libavcodec/pngenc.c
+@@ -31,6 +31,7 @@
+ #include "libavutil/libm.h"
+ #include "libavutil/opt.h"
+ #include "libavutil/color_utils.h"
++#include "libavutil/stereo3d.h"
+ 
+ #include <zlib.h>
+ 
+@@ -340,6 +341,7 @@ static int png_get_gama(enum AVColorTransferCharacteristic trc, uint8_t *buf)
+ 
+ static int encode_headers(AVCodecContext *avctx, const AVFrame *pict)
+ {
++    AVFrameSideData *side_data;
+     PNGEncContext *s = avctx->priv_data;
+ 
+     /* write png header */
+@@ -364,6 +366,23 @@ static int encode_headers(AVCodecContext *avctx, const AVFrame *pict)
+     }
+     png_write_chunk(&s->bytestream, MKTAG('p', 'H', 'Y', 's'), s->buf, 9);
+ 
++    /* write stereoscopic information */
++    side_data = av_frame_get_side_data(pict, AV_FRAME_DATA_STEREO3D);
++    if (side_data) {
++        AVStereo3D *stereo3d = (AVStereo3D *)side_data->data;
++        switch (stereo3d->type) {
++            case AV_STEREO3D_SIDEBYSIDE:
++                s->buf[0] = ((stereo3d->flags & AV_STEREO3D_FLAG_INVERT) == 0) ? 1 : 0;
++                png_write_chunk(&s->bytestream, MKTAG('s', 'T', 'E', 'R'), s->buf, 1);
++                break;
++            case AV_STEREO3D_2D:
++                break;
++            default:
++                av_log(avctx, AV_LOG_WARNING, "Only side-by-side stereo3d flag can be defined within sTER chunk\n");
++                break;
++        }
++    }
++
+     /* write colorspace information */
+     if (pict->color_primaries == AVCOL_PRI_BT709 &&
+         pict->color_trc == AVCOL_TRC_IEC61966_2_1) {
+-- 
+2.0.1
+
