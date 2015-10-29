@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -16,7 +16,7 @@
 #endif
 
 #include <StThreads/StCondition.h>
-#include <StThreads/StTimer.h> // for ST_HAVE_MONOTONIC_CLOCK
+#include <StThreads/StTimer.h>
 
 StCondition::StCondition()
 #ifdef _WIN32
@@ -93,18 +93,17 @@ bool StCondition::wait(const size_t theTimeMilliseconds) {
     bool isSignalled = true;
     pthread_mutex_lock(&myMutex);
     if(!myFlag) {
-        StTimer::stTimeCounter_t aNow;
-        struct timespec          aTimeout;
-        StTimer::fillCounter(aNow);
-        size_t aSeconds      = (theTimeMilliseconds / 1000);
-        size_t aMicroseconds = (theTimeMilliseconds - aSeconds * 1000) * 1000;
-    #if defined(ST_HAVE_MONOTONIC_CLOCK)
-        aTimeout.tv_sec  = aNow.tv_sec         + (time_t )aSeconds;
-        aTimeout.tv_nsec = aNow.tv_nsec        + (long   )aMicroseconds * 1000;
-    #else
-        aTimeout.tv_sec  = aNow.tv_sec         + (time_t )aSeconds;
-        aTimeout.tv_nsec = aNow.tv_usec * 1000 + (long   )aMicroseconds * 1000;
-    #endif
+        struct timespec aNow;
+        struct timespec aTimeout;
+        clock_gettime(CLOCK_REALTIME, &aNow);
+        aTimeout.tv_sec  = (theTimeMilliseconds / 1000);
+        aTimeout.tv_nsec = (theTimeMilliseconds - aTimeout.tv_sec * 1000) * 1000000;
+        if(aTimeout.tv_nsec > 1000000000) {
+            aTimeout.tv_sec  += 1;
+            aTimeout.tv_nsec -= 1000000000;
+        }
+        aTimeout.tv_sec  += aNow.tv_sec;
+        aTimeout.tv_nsec += aNow.tv_nsec;
         isSignalled = (pthread_cond_timedwait(&myCond, &myMutex, &aTimeout) != ETIMEDOUT);
     }
     pthread_mutex_unlock(&myMutex);
@@ -119,17 +118,11 @@ bool StCondition::check() {
     bool isSignalled = true;
     pthread_mutex_lock(&myMutex);
     if(!myFlag) {
-        StTimer::stTimeCounter_t aNow;
-        struct timespec          aTimeout;
-        StTimer::fillCounter(aNow);
-        // TODO (Kirill Gavrilov) which values must be here and need we this block here?
-    #if defined(ST_HAVE_MONOTONIC_CLOCK)
+        struct timespec aNow;
+        struct timespec aTimeout;
+        clock_gettime(CLOCK_REALTIME, &aNow);
         aTimeout.tv_sec  = aNow.tv_sec;
-        aTimeout.tv_nsec = aNow.tv_nsec        + 100;
-    #else
-        aTimeout.tv_sec  = aNow.tv_sec;
-        aTimeout.tv_nsec = aNow.tv_usec * 1000 + 100;
-    #endif
+        aTimeout.tv_nsec = aNow.tv_nsec + 100;
         isSignalled = (pthread_cond_timedwait(&myCond, &myMutex, &aTimeout) != ETIMEDOUT);
     }
     pthread_mutex_unlock(&myMutex);
@@ -146,16 +139,11 @@ bool StCondition::checkReset() {
     pthread_mutex_lock(&myMutex);
     bool wasSignalled = myFlag;
     if(!myFlag) {
-        StTimer::stTimeCounter_t aNow;
-        struct timespec          aTimeout;
-        StTimer::fillCounter(aNow);
-    #if defined(ST_HAVE_MONOTONIC_CLOCK)
+        struct timespec aNow;
+        struct timespec aTimeout;
+        clock_gettime(CLOCK_REALTIME, &aNow);
         aTimeout.tv_sec  = aNow.tv_sec;
-        aTimeout.tv_nsec = aNow.tv_nsec        + 100;
-    #else
-        aTimeout.tv_sec  = aNow.tv_sec;
-        aTimeout.tv_nsec = aNow.tv_usec * 1000 + 100;
-    #endif
+        aTimeout.tv_nsec = aNow.tv_nsec + 100;
         wasSignalled = (pthread_cond_timedwait(&myCond, &myMutex, &aTimeout) != ETIMEDOUT);
     }
     myFlag = false;
