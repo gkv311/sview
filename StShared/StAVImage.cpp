@@ -647,9 +647,7 @@ bool StAVImage::save(const StString& theFilePath,
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 2, 100))
     int isGotPacket = 0;
     int anEncSize   = avcodec_encode_video2(myCodecCtx, aPacket.getAVpkt(), myFrame, &isGotPacket);
-    if(anEncSize == 0 && isGotPacket != 0 && myCodecCtx->coded_frame) {
-        myCodecCtx->coded_frame->pts       = aPacket.getPts();
-        myCodecCtx->coded_frame->key_frame = aPacket.isKeyFrame() ? 1 : 0;
+    if(anEncSize == 0 && isGotPacket != 0) {
         anEncSize = aPacket.getSize();
     }
 #else
