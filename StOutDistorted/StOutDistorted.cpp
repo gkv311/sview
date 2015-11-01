@@ -450,7 +450,9 @@ void StOutDistorted::releaseResources() {
 }
 
 void StOutDistorted::beforeClose() {
-    mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
+    if(isMovable() && myWasUsed) {
+        mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
+    }
 
     StRectI_t aMargins;
     aMargins.left()   = myBarMargins.left;

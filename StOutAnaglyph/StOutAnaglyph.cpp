@@ -192,7 +192,9 @@ void StOutAnaglyph::releaseResources() {
 }
 
 void StOutAnaglyph::beforeClose() {
-    mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
+    if(isMovable() && myWasUsed) {
+        mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
+    }
     mySettings->saveParam(ST_SETTING_GLASSES,   params.Glasses);
     mySettings->saveParam(ST_SETTING_REDCYAN,   params.RedCyan);
     mySettings->saveParam(ST_SETTING_AMBERBLUE, params.AmberBlue);

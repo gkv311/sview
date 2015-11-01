@@ -368,7 +368,9 @@ void StOutInterlace::close() {
 }
 
 void StOutInterlace::beforeClose() {
-    mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
+    if(isMovable() && myWasUsed) {
+        mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
+    }
     mySettings->saveParam(ST_SETTING_BIND_MONITOR, params.BindToMon);
     mySettings->saveParam(ST_SETTING_REVERSE,      params.ToReverse);
     mySettings->saveInt32(ST_SETTING_DEVICE_ID,    myDevice);

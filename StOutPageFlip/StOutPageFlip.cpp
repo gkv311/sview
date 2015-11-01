@@ -573,7 +573,9 @@ void StOutPageFlip::releaseResources() {
 }
 
 void StOutPageFlip::beforeClose() {
-    mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
+    if(isMovable() && myWasUsed) {
+        mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
+    }
     mySettings->saveInt32(ST_SETTING_DEVICE_ID,  myDevice);
     mySettings->saveParam(ST_SETTING_ADVANCED,   params.ToShowExtra);
     if(myWasUsed) {

@@ -283,7 +283,9 @@ void StOutDual::releaseResources() {
 }
 
 void StOutDual::beforeClose() {
-    mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
+    if(isMovable() && myWasUsed) {
+        mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
+    }
     mySettings->saveParam(ST_SETTING_SLAVE_ID,  params.SlaveMonId);
     mySettings->saveParam(ST_SETTING_MONOCLONE, params.MonoClone);
     mySettings->saveInt32(ST_SETTING_DEVICE_ID, myDevice);

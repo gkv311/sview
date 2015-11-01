@@ -185,7 +185,9 @@ void StOutIZ3D::releaseResources() {
 }
 
 void StOutIZ3D::beforeClose() {
-    mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
+    if(isMovable() && myWasUsed) {
+        mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
+    }
     mySettings->saveParam(ST_SETTING_TABLE, params.Glasses);
     mySettings->flush();
 }
