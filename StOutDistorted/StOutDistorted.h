@@ -20,8 +20,9 @@ class StProgramFlat;
 class StGLFrameBuffer;
 class StGLTexture;
 
-struct ovrHmdDesc_;
-typedef const ovrHmdDesc_* ovrHmd;
+typedef struct ovrHmdStruct* ovrSession;
+typedef union ovrGLTexture_s ovrGLTexture;
+typedef struct ovrSwapTextureSet_ ovrSwapTextureSet;
 
 /**
  * This class implements stereoscopic rendering on displays
@@ -115,6 +116,16 @@ class StOutDistorted : public StWindow {
      */
     ST_CPPEXPORT virtual void showCursor(const bool theToShow);
 
+    /**
+     * Return true if device has orientation sensor.
+     */
+    ST_CPPEXPORT virtual bool hasOrientationSensor() const;
+
+    /**
+     * Get head orientation.
+     */
+    ST_CPPEXPORT virtual StQuaternion<double> getDeviceOrientation() const;
+
     ST_CPPEXPORT virtual GLfloat getLensDist() const;
 
     /**
@@ -192,7 +203,14 @@ class StOutDistorted : public StWindow {
 
     StMarginsI                myBarMargins;      //!< GUI margins
 
-    ovrHmd                    myOvrHmd;
+    ovrSession                myOvrHmd;
+    int                       myOvrSizeX;
+    int                       myOvrSizeY;
+    ovrSwapTextureSet*        myOvrSwapTexture;
+    GLuint                    myOvrSwapFbo[2];
+    ovrGLTexture*             myOvrMirrorTexture;
+    GLuint                    myOvrMirrorFbo;
+    StQuaternion<double>      myOvrOrient;
 
     bool                      myToReduceGui;     //!< scale down GUI
     bool                      myToShowCursor;    //!< cursor visibility flag

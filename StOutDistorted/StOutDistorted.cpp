@@ -13,6 +13,7 @@
 #include <StGL/StGLEnums.h>
 #include <StGL/StGLProgram.h>
 #include <StGL/StGLFrameBuffer.h>
+#include <StGL/StGLArbFbo.h>
 #include <StGLCore/StGLCore20.h>
 #include <StSettings/StSettings.h>
 #include <StSettings/StTranslations.h>
@@ -24,25 +25,10 @@
 #ifdef ST_HAVE_LIBOVR
 
 #include <OVR.h>
-//#include <OVR_CAPI_GL.h> // broken SDK
-#include <../Src/OVR_CAPI_GL.h>
+#include <OVR_CAPI_GL.h>
 
 #ifdef _MSC_VER
-    #ifdef _DEBUG
-        #if defined(_WIN64) || defined(__WIN64__)
-            #pragma comment(lib, "libovr64d.lib")
-        #else
-            #pragma comment(lib, "libovrd.lib")
-        #endif
-    #else
-        #if defined(_WIN64) || defined(__WIN64__)
-            #pragma comment(lib, "libovr64.lib")
-        #else
-            #pragma comment(lib, "libovr.lib")
-        #endif
-    #endif
-    #pragma comment(lib, "Winmm.lib")
-    #pragma comment(lib, "Ws2_32.lib") // requires Windows Vista+
+    #pragma comment(lib, "LibOVR.lib")
 #endif
 
 #endif
@@ -323,17 +309,19 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
   myChromAb(0.996f, -0.004f, 1.014f, 0.0f),
   //myChromAb(1.0f, 0.0f, 1.0f, 0.0f),
   myOvrHmd(NULL),
+  myOvrSizeX(0),
+  myOvrSizeY(0),
+  myOvrSwapTexture(NULL),
+  myOvrMirrorTexture(NULL),
+  myOvrMirrorFbo(0),
   myToReduceGui(false),
   myToShowCursor(true),
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false),
   myIsStereoOn(false),
   myIsHdmiPack(false) {
-
-#ifdef ST_HAVE_LIBOVR
-    ovr_Initialize();
-#endif
-
+    myOvrSwapFbo[0] = 0;
+    myOvrSwapFbo[1] = 0;
     const StSearchMonitors& aMonitors = StWindow::getMonitors();
     StTranslations aLangMap(getResourceManager(), ST_OUT_PLUGIN_NAME);
 
@@ -365,6 +353,15 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
             isHdmiPack = true;
         }
     }
+
+#ifdef ST_HAVE_LIBOVR
+    const ovrResult anOvrRes = ovr_Initialize(NULL);
+    if(!OVR_SUCCESS(anOvrRes)) {
+        ST_ERROR_LOG("StOutDistorted, OVR initialization has failed!");
+    } else {
+        aSupportOculus = ST_DEVICE_SUPPORT_HIGHT;
+    }
+#endif
 
     // devices list
     StHandle<StOutDevice> aDevDistorted = new StOutDevice();
@@ -431,6 +428,30 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
 
 void StOutDistorted::releaseResources() {
     if(!myContext.isNull()) {
+    #ifdef ST_HAVE_LIBOVR
+        if(myOvrSwapFbo[0] != 0) {
+            myContext->arbFbo->glDeleteFramebuffers(2, myOvrSwapFbo);
+            myOvrSwapFbo[0] = 0;
+            myOvrSwapFbo[1] = 0;
+        }
+        if(myOvrSwapTexture != NULL) {
+            ovr_DestroySwapTextureSet(myOvrHmd, myOvrSwapTexture);
+            myOvrSwapTexture = NULL;
+        }
+        if(myOvrMirrorFbo != 0) {
+            myContext->arbFbo->glDeleteFramebuffers(1, &myOvrMirrorFbo);
+            myOvrMirrorFbo = NULL;
+        }
+        if(myOvrMirrorTexture != NULL) {
+            ovr_DestroyMirrorTexture(myOvrHmd, &myOvrMirrorTexture->Texture);
+            myOvrMirrorTexture = NULL;
+        }
+        if(myOvrHmd != NULL) {
+            ovr_Destroy(myOvrHmd);
+            myOvrHmd = NULL;
+        }
+    #endif
+
         myProgramFlat->release(*myContext);
         myProgramBarrel->release(*myContext);
         myFrVertsBuf .release(*myContext);
@@ -482,14 +503,6 @@ StOutDistorted::~StOutDistorted() {
 
 void StOutDistorted::close() {
     beforeClose();
-
-#ifdef ST_HAVE_LIBOVR
-    if(myOvrHmd != NULL) {
-        ovrHmd_Destroy(myOvrHmd);
-        myOvrHmd = NULL;
-    }
-#endif
-
     StWindow::params.VSyncMode->signals.onChanged -= stSlot(this, &StOutDistorted::doSwitchVSync);
     myToResetDevice = false;
     releaseResources();
@@ -562,61 +575,65 @@ bool StOutDistorted::create() {
 
 #ifdef ST_HAVE_LIBOVR
     if(myDevice == DEVICE_OCULUS) {
-        myOvrHmd = ovrHmd_Create(0);
-        if(myOvrHmd == NULL) {
-            myMsgQueue->pushError(stCString("Oculus Rift is not connected!"));
-            myOvrHmd = ovrHmd_CreateDebug(ovrHmd_DK1);
-            //myOvrHmd = ovrHmd_CreateDebug(ovrHmd_DK2);
-            if(myOvrHmd == NULL) {
-                myMsgQueue->pushError(stCString("Can not create debug libOVR device!"));
-            }
+        ovrGraphicsLuid aLuid;
+        const ovrResult anOvrRes = ovr_Create(&myOvrHmd, &aLuid);
+        if(myOvrHmd == NULL
+        || !OVR_SUCCESS(anOvrRes)) {
+            myMsgQueue->pushError(stCString("StOutDistorted, Oculus Rift is not connected!"));
+            myOvrHmd = NULL;
+            myIsBroken = true;
+            return true;
         }
     }
 
     if(myOvrHmd != NULL) {
-        ovrGLConfig aCfg;
-        aCfg.OGL.Header.API              = ovrRenderAPI_OpenGL;
-        aCfg.OGL.Header.BackBufferSize.w = myOvrHmd->Resolution.w;
-        aCfg.OGL.Header.BackBufferSize.h = myOvrHmd->Resolution.h;
-        aCfg.OGL.Header.Multisample      = 1;
-    #ifdef _WIN32
-        aCfg.OGL.Window = (HWND )getNativeOglWin();
-        aCfg.OGL.DC     = (HDC  )getNativeOglDC();
-    #elif defined(__ANDROID__)
-        //
-    #elif defined(__linux__)
-        //aCfg.OGL.Disp = getNativeXDisplay();
-    #endif
-        ovrEyeRenderDesc anEyeRenderDesc[2];
-        if(!ovrHmd_ConfigureRendering(myOvrHmd, &aCfg.Config,
-                                      ovrDistortionCap_Chromatic | ovrDistortionCap_Vignette | ovrDistortionCap_TimeWarp | ovrDistortionCap_Overdrive,
-                                      myOvrHmd->DefaultEyeFov, anEyeRenderDesc)) {
-            myMsgQueue->pushError(stCString("ovrHmd_ConfigureRendering() FAILED"));
-        } else {
-        #ifdef _WIN32
-            if(!ovrHmd_AttachToWindow(myOvrHmd, aCfg.OGL.Window, NULL, NULL)) {
-                myMsgQueue->pushError(stCString("ovrHmd_AttachToWindow() FAILED!"));
-            } else {
-                ovrSizei aRecSizeL = ovrHmd_GetFovTextureSize(myOvrHmd, ovrEye_Left,
-                                                              myOvrHmd->DefaultEyeFov[0], 1.0f);
-                ovrSizei aRecSizeR = ovrHmd_GetFovTextureSize(myOvrHmd, ovrEye_Right,
-                                                              myOvrHmd->DefaultEyeFov[1], 1.0f);
+        ovrHmdDesc anHmdDesc = ovr_GetHmdDesc(myOvrHmd);
+        ovrSizei aWinSize = { anHmdDesc.Resolution.w / 2, anHmdDesc.Resolution.h / 2 };
 
-                //ovrHmd_SetEnabledCaps   (myOvrHmd, ovrHmdCap_LowPersistence | ovrHmdCap_DynamicPrediction);
-                //ovrHmd_ConfigureTracking(myOvrHmd, ovrTrackingCap_Orientation | ovrTrackingCap_MagYawCorrection | ovrTrackingCap_Position, 0);
-
-                ST_DEBUG_LOG("libOVR Resolution: " + myOvrHmd->Resolution.w + "x" + myOvrHmd->Resolution.h
-                            + "; eyeRectL= " + aRecSizeL.w + "x" + aRecSizeL.h
-                            + "; eyeRectR= " + aRecSizeR.w + "x" + aRecSizeR.h);
-                if(isMovable()) {
-                    StRect<int32_t> aRect = StWindow::getPlacement();
-                    aRect.right()  = aRect.left() + myOvrHmd->Resolution.w;
-                    aRect.bottom() = aRect.top()  + myOvrHmd->Resolution.h;
-                    StWindow::setPlacement(aRect, false);
-                }
-            }
-        #endif
+        ST_DEBUG_LOG("libOVR Resolution: " + anHmdDesc.Resolution.w + "x" + anHmdDesc.Resolution.h);
+        if(isMovable()) {
+            StRect<int32_t> aRect = StWindow::getPlacement();
+            aRect.right()  = aRect.left() + aWinSize.w;
+            aRect.bottom() = aRect.top()  + aWinSize.h;
+            StWindow::setPlacement(aRect, false);
         }
+
+        ovrResult anOvrRes = ovr_CreateMirrorTextureGL(myOvrHmd, GL_SRGB8_ALPHA8, aWinSize.w, aWinSize.h, (ovrTexture** )&myOvrMirrorTexture);
+        if(!OVR_SUCCESS(anOvrRes)) {
+            myMsgQueue->pushError(stCString("StOutDistorted, Failed to create mirror texture!"));
+            myIsBroken = true;
+            return true;
+        }
+
+        const GLuint anFboReadBack = myContext->stglFramebufferRead();
+        myContext->arbFbo->glGenFramebuffers(1, &myOvrMirrorFbo);
+        myContext->stglBindFramebufferRead(myOvrMirrorFbo);
+        myContext->arbFbo->glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, myOvrMirrorTexture->OGL.TexId, 0);
+        myContext->stglBindFramebufferRead(anFboReadBack);
+
+        ovrSizei anEyeSizes[2] = {
+            ovr_GetFovTextureSize(myOvrHmd, ovrEye_Left,  anHmdDesc.DefaultEyeFov[ovrEye_Left],  1),
+            ovr_GetFovTextureSize(myOvrHmd, ovrEye_Right, anHmdDesc.DefaultEyeFov[ovrEye_Right], 1)
+        };
+        myOvrSizeX = stMax(anEyeSizes[0].w, anEyeSizes[1].w);
+        myOvrSizeY = stMax(anEyeSizes[0].h, anEyeSizes[1].h);
+        anOvrRes = ovr_CreateSwapTextureSetGL(myOvrHmd, GL_SRGB8_ALPHA8, myOvrSizeX * 2, myOvrSizeY, &myOvrSwapTexture);
+        if(!OVR_SUCCESS(anOvrRes)
+         || myOvrSwapTexture->TextureCount < 2) {
+            myMsgQueue->pushError(stCString("StOutDistorted, Failed to create swap texture!"));
+            myIsBroken = true;
+            return true;
+        }
+
+        myOvrSwapTexture->CurrentIndex = 0;
+        myContext->arbFbo->glGenFramebuffers(2, myOvrSwapFbo);
+        myContext->stglBindFramebufferRead(myOvrSwapFbo[0]);
+        myContext->arbFbo->glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                                                  ((ovrGLTexture* )&myOvrSwapTexture->Textures[0])->OGL.TexId, 0);
+        myContext->stglBindFramebufferRead(myOvrSwapFbo[1]);
+        myContext->arbFbo->glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                                                  ((ovrGLTexture* )&myOvrSwapTexture->Textures[1])->OGL.TexId, 0);
+        myContext->stglBindFramebufferRead(anFboReadBack);
     }
 #endif
 
@@ -646,8 +663,11 @@ void StOutDistorted::stglDrawCursor(const StPointD_t&  theCursorPos,
     StArray<StGLVec4> aVerts(4);
     const GLfloat aCurLeft = GLfloat(-1.0 + theCursorPos.x() * 2.0);
     const GLfloat aCurTop  = GLfloat( 1.0 - theCursorPos.y() * 2.0);
-    GLfloat aCurWidth  = 2.0f * GLfloat(myCursor->getSizeX()) / GLfloat(myFrBuffer->getVPSizeX());
-    GLfloat aCurHeight = 2.0f * GLfloat(myCursor->getSizeY()) / GLfloat(myFrBuffer->getVPSizeY());
+    const int aVPSizeX = myOvrSizeX != 0 ? myOvrSizeX : myFrBuffer->getVPSizeX();
+    const int aVPSizeY = myOvrSizeY != 0 ? myOvrSizeY : myFrBuffer->getVPSizeY();
+
+    GLfloat aCurWidth  = 2.0f * GLfloat(myCursor->getSizeX()) / GLfloat(aVPSizeX);
+    GLfloat aCurHeight = 2.0f * GLfloat(myCursor->getSizeY()) / GLfloat(aVPSizeY);
     if(myDevice != DEVICE_OCULUS) {
         switch(params.Layout->getValue()) {
             case LAYOUT_SIDE_BY_SIDE_ANAMORPH:
@@ -690,6 +710,22 @@ void StOutDistorted::stglDrawCursor(const StPointD_t&  theCursorPos,
     myCursor->unbind(*myContext);
 
     myContext->core20fwd->glDisable(GL_BLEND);
+}
+
+bool StOutDistorted::hasOrientationSensor() const {
+    if(myOvrHmd != NULL) {
+        return true;
+    }
+    return StWindow::hasOrientationSensor();
+}
+
+StQuaternion<double> StOutDistorted::getDeviceOrientation() const {
+    if(StWindow::toTrackOrientation()
+    && myOvrHmd != NULL
+    && !myIsBroken) {
+        return myOvrOrient;
+    }
+    return StWindow::getDeviceOrientation();
 }
 
 GLfloat StOutDistorted::getLensDist() const {
@@ -813,83 +849,85 @@ void StOutDistorted::stglDraw() {
     const StPointD_t aCursorPos = StWindow::getMousePos();
 
 #ifdef ST_HAVE_LIBOVR
-    if(myOvrHmd != NULL) {
-        ovrSizei aRecSizeL = ovrHmd_GetFovTextureSize(myOvrHmd, ovrEye_Left,
-                                                      myOvrHmd->DefaultEyeFov[0], 1.0f);
-        ovrSizei aRecSizeR = ovrHmd_GetFovTextureSize(myOvrHmd, ovrEye_Right,
-                                                      myOvrHmd->DefaultEyeFov[1], 1.0f);
-        GLint aFrSizeX = aRecSizeL.w + aRecSizeR.w;
-        GLint aFrSizeY = stMax(aRecSizeL.h, aRecSizeR.h);
-        //aFrSizeX = aVPBoth.width();
-        //aFrSizeY = aVPBoth.height();
-        myToReduceGui = aFrSizeX <= 640;
-
-        if(!myFrBuffer->initLazy(*myContext, GL_RGBA8, aFrSizeX, aFrSizeY, StWindow::hasDepthBuffer())) {
-            myMsgQueue->pushError(stCString("Distorted output - critical error:\nFrame Buffer Object resize failed!"));
-            myIsBroken = true;
-            return;
-        }
+    if(myOvrHmd != NULL
+    && !myIsBroken) {
+        myToReduceGui = true;
+        ovrHmdDesc anHmdDesc = ovr_GetHmdDesc(myOvrHmd);
+        ovrEyeRenderDesc anEyeRenderDesc[2] = {
+            ovr_GetRenderDesc(myOvrHmd, ovrEye_Left,  anHmdDesc.DefaultEyeFov[0]),
+            ovr_GetRenderDesc(myOvrHmd, ovrEye_Right, anHmdDesc.DefaultEyeFov[1])
+        };
+        ovrViewScaleDesc aViewScaleDesc;
+        aViewScaleDesc.HmdSpaceToWorldScaleInMeters = 1.0f;
+        aViewScaleDesc.HmdToEyeViewOffset[0] = anEyeRenderDesc[0].HmdToEyeViewOffset;
+        aViewScaleDesc.HmdToEyeViewOffset[1] = anEyeRenderDesc[1].HmdToEyeViewOffset;
 
         const StGLBoxPx aViewPortL = {{ 0, 0,
-                                        myFrBuffer->getVPSizeX() / 2, myFrBuffer->getVPSizeY() }};
-        const StGLBoxPx aViewPortR = {{ (myFrBuffer->getVPSizeX() + 1) / 2, 0,
-                                        myFrBuffer->getVPSizeX() / 2, myFrBuffer->getVPSizeY() }};
+                                        myOvrSizeX, myOvrSizeY }};
+        const StGLBoxPx aViewPortR = {{ myOvrSizeX, 0,
+                                        myOvrSizeX, myOvrSizeY }};
 
-        ovrPosef     anOvrHeadPose[2] = {};
-        ovrGLTexture anOvrTextures[2] = {};
-
-        ovrHmd_BeginFrame(myOvrHmd, 0);
-        anOvrHeadPose[ovrEye_Left]  = ovrHmd_GetHmdPosePerEye(myOvrHmd, ovrEye_Left);
-        anOvrHeadPose[ovrEye_Right] = ovrHmd_GetHmdPosePerEye(myOvrHmd, ovrEye_Right);
+        ovrLayerEyeFov aLayerFov;
+        aLayerFov.Header.Type       = ovrLayerType_EyeFov;
+        aLayerFov.Header.Flags      = ovrLayerFlag_TextureOriginAtBottomLeft;
+        aLayerFov.ColorTexture[0]   = myOvrSwapTexture;
+        aLayerFov.ColorTexture[1]   = NULL;
+        aLayerFov.Viewport[0].Pos.x = aViewPortL.x();
+        aLayerFov.Viewport[0].Pos.y = aViewPortL.y();
+        aLayerFov.Viewport[0].Size.w= aViewPortL.width();
+        aLayerFov.Viewport[0].Size.h= aViewPortL.height();
+        aLayerFov.Viewport[1].Pos.x = aViewPortR.x();
+        aLayerFov.Viewport[1].Pos.y = aViewPortR.y();
+        aLayerFov.Viewport[1].Size.w= aViewPortR.width();
+        aLayerFov.Viewport[1].Size.h= aViewPortR.height();
+        aLayerFov.Fov[0]            = anHmdDesc.DefaultEyeFov[0];
+        aLayerFov.Fov[1]            = anHmdDesc.DefaultEyeFov[1];
+        aLayerFov.SensorSampleTime  = ovr_GetTimeInSeconds();
+        const double aPredictedTime = ovr_GetPredictedDisplayTime(myOvrHmd, 0);
+        ovrTrackingState anHmdState = ovr_GetTrackingState(myOvrHmd, aPredictedTime, ovrTrue);
+        ovr_CalcEyePoses(anHmdState.HeadPose.ThePose, aViewScaleDesc.HmdToEyeViewOffset, aLayerFov.RenderPose);
+        myOvrOrient = StQuaternion<double>((double )aLayerFov.RenderPose[0].Orientation.x,
+                                           (double )aLayerFov.RenderPose[0].Orientation.y,
+                                           (double )aLayerFov.RenderPose[0].Orientation.z,
+                                           (double )aLayerFov.RenderPose[0].Orientation.w);
 
         // draw Left View into virtual frame buffer
         myContext->stglResizeViewport(aViewPortL);
         myContext->stglSetScissorRect(aViewPortL, false);
-        myFrBuffer->bindBuffer(*myContext);
-            StWindow::signals.onRedraw(ST_DRAW_LEFT);
-            stglDrawCursor(aCursorPos, ST_DRAW_LEFT);
-        myFrBuffer->unbindBuffer(*myContext);
+        myContext->stglBindFramebuffer(myOvrSwapFbo[myOvrSwapTexture->CurrentIndex]);
+        StWindow::signals.onRedraw(ST_DRAW_LEFT);
+        stglDrawCursor(aCursorPos, ST_DRAW_LEFT);
 
         // draw Right View into virtual frame buffer
         myContext->stglResizeViewport(aViewPortR);
         myContext->stglSetScissorRect(aViewPortR, false);
-        myFrBuffer->bindBuffer(*myContext);
-            StWindow::signals.onRedraw(ST_DRAW_RIGHT);
-            stglDrawCursor(aCursorPos, ST_DRAW_RIGHT);
-        myFrBuffer->unbindBuffer(*myContext);
+        StWindow::signals.onRedraw(ST_DRAW_RIGHT);
+        stglDrawCursor(aCursorPos, ST_DRAW_RIGHT);
+        myContext->stglBindFramebuffer(StGLFrameBuffer::NO_FRAMEBUFFER);
+
+        ovrLayerHeader* aLayers = &aLayerFov.Header;
+        ovrResult anOvrRes = ovr_SubmitFrame(myOvrHmd, 0, &aViewScaleDesc, &aLayers, 1);
+        myOvrSwapTexture->CurrentIndex = myOvrSwapTexture->CurrentIndex == 0 ? 1 : 0;
+        if(!OVR_SUCCESS(anOvrRes)) {
+            myMsgQueue->pushError(stCString("StOutDistorted, Failed to submit swap texture!"));
+            myIsBroken = true;
+        }
 
         myContext->stglResizeViewport(aVPBoth);
         myContext->stglResetScissorRect();
         myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        anOvrTextures[0].OGL.Header.API            = ovrRenderAPI_OpenGL;
-        anOvrTextures[0].OGL.Header.TextureSize.w  = myFrBuffer->getSizeX();
-        anOvrTextures[0].OGL.Header.TextureSize.h  = myFrBuffer->getSizeY();
-        anOvrTextures[0].OGL.Header.RenderViewport.Pos.x  = aViewPortL.x();
-        anOvrTextures[0].OGL.Header.RenderViewport.Pos.y  = aViewPortL.y();
-        anOvrTextures[0].OGL.Header.RenderViewport.Size.w = aViewPortL.width();
-        anOvrTextures[0].OGL.Header.RenderViewport.Size.h = aViewPortL.height();
-        anOvrTextures[0].OGL.TexId = myFrBuffer->getTextureColor()->getTextureId();
-
-        anOvrTextures[1].OGL.Header.API            = ovrRenderAPI_OpenGL;
-        anOvrTextures[1].OGL.Header.TextureSize.w  = myFrBuffer->getSizeX();
-        anOvrTextures[1].OGL.Header.TextureSize.h  = myFrBuffer->getSizeY();
-        anOvrTextures[1].OGL.Header.RenderViewport.Pos.x  = aViewPortR.x();
-        anOvrTextures[1].OGL.Header.RenderViewport.Pos.y  = aViewPortR.y();
-        anOvrTextures[1].OGL.Header.RenderViewport.Size.w = aViewPortR.width();
-        anOvrTextures[1].OGL.Header.RenderViewport.Size.h = aViewPortR.height();
-        anOvrTextures[1].OGL.TexId = myFrBuffer->getTextureColor()->getTextureId();
-
-        ovrHmd_EndFrame(myOvrHmd, anOvrHeadPose, (ovrTexture* )anOvrTextures);
-
-        ovrHSWDisplayState aWarnDispState;
-        ovrHmd_GetHSWDisplayState(myOvrHmd, &aWarnDispState);
-        if(aWarnDispState.Displayed) {
-            ovrHmd_DismissHSWDisplay(myOvrHmd);
-        }
+        myContext->stglBindFramebufferRead(myOvrMirrorFbo);
+        myContext->stglBindFramebufferDraw(StGLFrameBuffer::NO_FRAMEBUFFER);
+        GLint aSrcSizeX = myOvrMirrorTexture->OGL.Header.TextureSize.w;
+        GLint aSrcSizeY = myOvrMirrorTexture->OGL.Header.TextureSize.h;
+        myContext->arbFbo->glBlitFramebuffer(0, aSrcSizeY, aSrcSizeX, 0,
+                                             0, 0, aVPBoth.width(), aVPBoth.height(),
+                                             GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        myContext->stglBindFramebufferRead(StGLFrameBuffer::NO_FRAMEBUFFER);
 
         myFPSControl.sleepToTarget(); // decrease FPS to target by thread sleeps
-        //StWindow::stglSwap(ST_WIN_ALL);
+        StWindow::stglSwap(ST_WIN_ALL);
         ++myFPSControl;
         return;
     }
