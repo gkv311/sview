@@ -96,7 +96,7 @@
       <PreprocessorDefinitions>ST_HAVE_STCONFIG;_CRT_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;OpenAL32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;libwebp.lib;StGLWidgets.lib;StShared.lib;StCore.lib;StOutAnaglyph.lib;StOutDual.lib;StOutIZ3D.lib;StOutInterlace.lib;StOutPageFlip.lib;StOutDistorted.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;OpenAL32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;Ole32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;libwebp.lib;StGLWidgets.lib;StShared.lib;StCore.lib;StOutAnaglyph.lib;StOutDual.lib;StOutIZ3D.lib;StOutInterlace.lib;StOutPageFlip.lib;StOutDistorted.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\3rdparty\lib\WIN_vc_x86;..\lib\WIN_vc_x86;$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
@@ -130,7 +130,7 @@
       <PreprocessorDefinitions>ST_HAVE_STCONFIG;_CRT_SECURE_NO_WARNINGS;_DEBUG;ST_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;OpenAL32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;libwebp.lib;StGLWidgets.lib;StShared.lib;StCore.lib;StOutAnaglyph.lib;StOutDual.lib;StOutIZ3D.lib;StOutInterlace.lib;StOutPageFlip.lib;StOutDistorted.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;OpenAL32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;Ole32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;libwebp.lib;StGLWidgets.lib;StShared.lib;StCore.lib;StOutAnaglyph.lib;StOutDual.lib;StOutIZ3D.lib;StOutInterlace.lib;StOutPageFlip.lib;StOutDistorted.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\3rdparty\lib\WIN_vc_x86_DEBUG;..\lib\WIN_vc_x86_DEBUG;$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -164,7 +164,7 @@
       <PreprocessorDefinitions>ST_HAVE_STCONFIG;_CRT_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;OpenAL32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;libwebp.lib;StGLWidgets.lib;StShared.lib;StCore.lib;StOutAnaglyph.lib;StOutDual.lib;StOutIZ3D.lib;StOutInterlace.lib;StOutPageFlip.lib;StOutDistorted.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;OpenAL32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;Ole32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;libwebp.lib;StGLWidgets.lib;StShared.lib;StCore.lib;StOutAnaglyph.lib;StOutDual.lib;StOutIZ3D.lib;StOutInterlace.lib;StOutPageFlip.lib;StOutDistorted.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\3rdparty\lib\WIN_vc_AMD64;..\lib\WIN_vc_AMD64;$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
@@ -198,7 +198,7 @@
       <PreprocessorDefinitions>ST_HAVE_STCONFIG;_CRT_SECURE_NO_WARNINGS;_DEBUG;ST_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;OpenAL32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;libwebp.lib;StGLWidgets.lib;StShared.lib;StCore.lib;StOutAnaglyph.lib;StOutDual.lib;StOutIZ3D.lib;StOutInterlace.lib;StOutPageFlip.lib;StOutDistorted.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;OpenAL32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;Ole32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;libwebp.lib;StGLWidgets.lib;StShared.lib;StCore.lib;StOutAnaglyph.lib;StOutDual.lib;StOutIZ3D.lib;StOutInterlace.lib;StOutPageFlip.lib;StOutDistorted.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\3rdparty\lib\WIN_vc_AMD64_DEBUG;..\lib\WIN_vc_AMD64_DEBUG;$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -214,6 +214,7 @@
     <ClCompile Include="StVideo\StSubtitleQueue.cpp" />
     <ClCompile Include="StVideo\StSubtitlesASS.cpp" />
     <ClCompile Include="StVideo\StVideo.cpp" />
+    <ClCompile Include="StVideo\StVideoDxva2.cpp" />
     <ClCompile Include="StVideo\StVideoQueue.cpp" />
     <ClCompile Include="StVideo\StVideoTimer.cpp" />
     <ClCompile Include="stMongoose.c" />

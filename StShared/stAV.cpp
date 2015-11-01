@@ -108,6 +108,7 @@ const PixelFormat stAV::PIX_FMT::YUV444P    = ST_AV_GETPIXFMT("yuv444p");
 const PixelFormat stAV::PIX_FMT::YUV410P    = ST_AV_GETPIXFMT("yuv410p");
 const PixelFormat stAV::PIX_FMT::YUV411P    = ST_AV_GETPIXFMT("yuv411p");
 const PixelFormat stAV::PIX_FMT::YUV440P    = ST_AV_GETPIXFMT("yuv440p");
+const PixelFormat stAV::PIX_FMT::NV12       = ST_AV_GETPIXFMT("nv12");
 const PixelFormat stAV::PIX_FMT::YUV420P9   = ST_AV_GETPIXFMT("yuv420p9");
 const PixelFormat stAV::PIX_FMT::YUV422P9   = ST_AV_GETPIXFMT("yuv422p9");
 const PixelFormat stAV::PIX_FMT::YUV444P9   = ST_AV_GETPIXFMT("yuv444p9");
@@ -123,6 +124,7 @@ const PixelFormat stAV::PIX_FMT::YUVJ444P   = ST_AV_GETPIXFMT("yuvj444p");
 const PixelFormat stAV::PIX_FMT::YUVJ440P   = ST_AV_GETPIXFMT("yuvj440p");
 const PixelFormat stAV::PIX_FMT::RGB24      = ST_AV_GETPIXFMT("rgb24");
 const PixelFormat stAV::PIX_FMT::BGR24      = ST_AV_GETPIXFMT("bgr24");
+const PixelFormat stAV::PIX_FMT::DXVA2_VLD  = ST_AV_GETPIXFMT("dxva2_vld");
 
 // TODO (Kirill Gavrilov#9) remove this stuff
 namespace {
@@ -189,6 +191,8 @@ StCString stAV::PIX_FMT::getString(const PixelFormat theFrmt) {
         return stCString("rgb24");
     } else if(theFrmt == stAV::PIX_FMT::BGR24) {
         return stCString("bgr24");
+    } else if(theFrmt == stAV::PIX_FMT::NV12) {
+        return stCString("nv12");
     } else {
         return stCString("unknown");
     }

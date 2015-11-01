@@ -30,6 +30,9 @@
     <ClCompile Include="StVideo\StVideo.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="StVideo\StVideoDxva2.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
     <ClCompile Include="StVideo\StVideoQueue.cpp">
       <Filter>Source files</Filter>
     </ClCompile>

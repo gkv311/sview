@@ -206,6 +206,7 @@ namespace stAV {
         ST_SHARED_CPPEXPORT PixelFormat YUV410P;   //!< planar YUV 4:1:0,  9bpp, (1 Cr & Cb sample per 4x4 Y samples)
         ST_SHARED_CPPEXPORT PixelFormat YUV411P;   //!< planar YUV 4:1:1, 12bpp, (1 Cr & Cb sample per 4x1 Y samples)
         ST_SHARED_CPPEXPORT PixelFormat YUV440P;   //!< planar YUV 4:4:0 (1 Cr & Cb sample per 1x2 Y samples)
+        ST_SHARED_CPPEXPORT PixelFormat NV12;      //!< YUV420, Y plane + interleaved UV plane oh half width and height
         // wide planar YUV formats (9,10,14,16 bits stored in 16 bits)
         ST_SHARED_CPPEXPORT PixelFormat YUV420P9;
         ST_SHARED_CPPEXPORT PixelFormat YUV422P9;
@@ -227,6 +228,8 @@ namespace stAV {
         ST_SHARED_CPPEXPORT PixelFormat BGR24;     //!< packed RGB 8:8:8, 24bpp, BGRBGR...
         ST_SHARED_CPPEXPORT PixelFormat RGBA32;
         ST_SHARED_CPPEXPORT PixelFormat BGRA32;
+        // HWAccel formats
+        ST_SHARED_CPPEXPORT PixelFormat DXVA2_VLD;
 
         ST_CPPEXPORT StCString getString(const PixelFormat theFrmt);
     }

@@ -704,10 +704,13 @@ void StVideo::checkInitVideoStreams() {
     const bool toUseGpu      = params.UseGpu->getValue();
     const bool toDecodeSlave = myVideoMaster->getStereoFormatByUser() == StFormat_AUTO
                             && mySlaveStream >= 0;
+    // keep failed flag
+    const bool isGpuFailed   = myVideoMaster->isGpuFailed()
+                           || (myVideoSlave->isInitialized() && myVideoSlave->isGpuFailed());
     if(toUseGpu      != myVideoMaster->toUseGpu()
-    || toDecodeSlave != myVideoSlave->isInitialized()) {
-        myVideoMaster->setUseGpu(toUseGpu);
-        myVideoSlave ->setUseGpu(toUseGpu);
+    || toDecodeSlave != myVideoSlave->isInitialized()
+    || myVideoMaster->toReinitilize()
+    || myVideoSlave ->toReinitilize()) {
         doFlush();
         if(myVideoMaster->isInitialized()) {
             const StString   aFileNameMaster = myVideoMaster->getFileName();
@@ -728,6 +731,9 @@ void StVideo::checkInitVideoStreams() {
             if(myVideoSlave->isInitialized()) {
                 myVideoSlave->deinit();
             }
+
+            myVideoMaster->setUseGpu(toUseGpu, isGpuFailed);
+            myVideoSlave ->setUseGpu(toUseGpu, isGpuFailed);
             myVideoMaster->init(aCtxMaster, aStreamIdMaster, aFileNameMaster);
             myVideoMaster->setSlave(NULL);
             if(toDecodeSlave) {
@@ -738,6 +744,9 @@ void StVideo::checkInitVideoStreams() {
             if(toDecodeSlave) {
                 myVideoSlave->pushStart();
             }
+        } else {
+            myVideoMaster->setUseGpu(toUseGpu);
+            myVideoSlave ->setUseGpu(toUseGpu);
         }
     }
 }

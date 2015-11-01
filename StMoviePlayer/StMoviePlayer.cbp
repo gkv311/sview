@@ -36,6 +36,7 @@
 					<Add library="Advapi32" />
 					<Add library="Comdlg32" />
 					<Add library="shell32" />
+					<Add library="Ole32" />
 					<Add library="Wsock32" />
 				</Linker>
 				<ExtraCommands>
@@ -77,6 +78,7 @@
 					<Add library="Advapi32" />
 					<Add library="Comdlg32" />
 					<Add library="shell32" />
+					<Add library="Ole32" />
 					<Add library="Wsock32" />
 					<Add library="Version" />
 				</Linker>
@@ -115,6 +117,7 @@
 					<Add library="Advapi32" />
 					<Add library="Comdlg32" />
 					<Add library="shell32" />
+					<Add library="Ole32" />
 					<Add library="Wsock32" />
 				</Linker>
 				<ExtraCommands>
@@ -304,6 +307,7 @@
 		<Unit filename="StVideo/StSubtitlesASS.h" />
 		<Unit filename="StVideo/StVideo.cpp" />
 		<Unit filename="StVideo/StVideo.h" />
+		<Unit filename="StVideo/StVideoDxva2.cpp" />
 		<Unit filename="StVideo/StVideoQueue.cpp" />
 		<Unit filename="StVideo/StVideoQueue.h" />
 		<Unit filename="StVideo/StVideoTimer.cpp" />

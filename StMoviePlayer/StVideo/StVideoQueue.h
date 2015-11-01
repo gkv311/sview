@@ -28,6 +28,53 @@
 class StVideoQueue;
 class StThread;
 
+/**
+ * Interface defining HWAccel context.
+ */
+class StHWAccelContext {
+
+        public:
+
+    /**
+     * Initialize the context.
+     */
+    virtual bool create(StVideoQueue& theVideo) = 0;
+
+    /**
+     * Destructor.
+     */
+    virtual ~StHWAccelContext() {}
+
+    /**
+     * Return true if context has been successfully initialized.
+     */
+    virtual bool isValid() const = 0;
+
+    /**
+     * Create decoder.
+     */
+    virtual bool decoderCreate(StVideoQueue&   theVideo,
+                               AVCodecContext* theCodecCtx) = 0;
+
+    /**
+     * Release decoder.
+     */
+    virtual void decoderDestroy() = 0;
+
+    /**
+     * AVFrame initialization callback.
+     */
+    virtual int getFrameBuffer(StVideoQueue& theVideo,
+                               AVFrame*      theFrame) = 0;
+
+    /**
+     * Fetch decoded results into specified frame.
+     */
+    virtual bool retrieveFrame(StVideoQueue& theVideo,
+                               AVFrame*      theFrame) = 0;
+
+};
+
 // define StHandle template specialization
 ST_DEFINE_HANDLE(StVideoQueue, StAVPacketQueue);
 
@@ -44,6 +91,21 @@ class StVideoQueue : public StAVPacketQueue {
 
         public:
 
+    AVCodecID CodecIdH264;
+    AVCodecID CodecIdHEVC;
+    AVCodecID CodecIdMPEG2;
+    AVCodecID CodecIdWMV3;
+    AVCodecID CodecIdVC1;
+
+        public:
+
+    /**
+     * Return true if codec should be reinitialized.
+     */
+    ST_LOCAL bool toReinitilize() const {
+        return myToReinit;
+    }
+
     /**
      * @return true if GPU usage is enabled
      */
@@ -52,10 +114,19 @@ class StVideoQueue : public StAVPacketQueue {
     }
 
     /**
+     * Return true if GPU usage has been requested but failed (e.g. decoder should be reinitialized).
+     */
+    ST_LOCAL bool isGpuFailed() const {
+        return myIsGpuFailed;
+    }
+
+    /**
      * Setup GPU usage. Requires re-initialization to take effect!
      */
-    ST_LOCAL void setUseGpu(const bool theToUseGpu) {
-        myUseGpu = theToUseGpu;
+    ST_LOCAL void setUseGpu(const bool theToUseGpu,
+                            const bool theIsGpuFailed = false) {
+        myUseGpu      = theToUseGpu;
+        myIsGpuFailed = theIsGpuFailed;
     }
 
     ST_LOCAL bool isInDowntime() {
@@ -77,10 +148,6 @@ class StVideoQueue : public StAVPacketQueue {
 
     ST_LOCAL void unlockData() {
         myHasDataState.reset();
-    }
-
-    ST_LOCAL int64_t getVideoPktPts() const {
-        return myVideoPktPts;
     }
 
     ST_LOCAL void setAClock(const double thePts) {
@@ -212,9 +279,58 @@ class StVideoQueue : public StAVPacketQueue {
         private:
 
     /**
+     * Select frame format from the list.
+     */
+    ST_LOCAL static AVPixelFormat stGetFrameFormat(AVCodecContext*      theCodecCtx,
+                                                   const AVPixelFormat* theFormats) {
+        StVideoQueue* aVideoQueue = (StVideoQueue* )theCodecCtx->opaque;
+        return aVideoQueue->getFrameFormat(theFormats);
+    }
+
+    /**
+     * Frame buffer allocation callback (deprecated form).
+     */
+    ST_LOCAL static int stGetFrameBuffer1(AVCodecContext* theCodecCtx,
+                                          AVFrame*        theFrame) {
+        StVideoQueue* aVideoQueue = (StVideoQueue* )theCodecCtx->opaque;
+        return aVideoQueue->getFrameBuffer(theFrame, 0);
+    }
+
+    /**
+     * Frame buffer allocation callback (wrapper).
+     */
+    ST_LOCAL static int stGetFrameBuffer2(AVCodecContext* theCodecCtx,
+                                          AVFrame*        theFrame,
+                                          int             theFlags) {
+        StVideoQueue* aVideoQueue = (StVideoQueue* )theCodecCtx->opaque;
+        return aVideoQueue->getFrameBuffer(theFrame, theFlags);
+    }
+
+        private:
+
+    /**
      * Initialize codec context.
      */
-    ST_LOCAL bool initCodec(AVCodec* theCodec);
+    ST_LOCAL bool initCodec(AVCodec*   theCodec,
+                            const bool theToUseGpu);
+
+    /**
+     * Select frame format from the list.
+     */
+    ST_LOCAL AVPixelFormat getFrameFormat(const AVPixelFormat* theFormats);
+
+    /**
+     * Frame buffer allocation callback.
+     */
+    ST_LOCAL int getFrameBuffer(AVFrame* theFrame,
+                                int      theFlags);
+
+    /**
+     * Initialize hardware accelerated decoder.
+     */
+    ST_LOCAL bool hwaccelInit();
+
+private:
 
     /**
      * Initialize adapter over AVframe or perform to RGB conversion.
@@ -239,13 +355,13 @@ class StVideoQueue : public StAVPacketQueue {
     StHandle<StVideoQueue>     mySlave;           //!< handle to Slave  decoding thread
 
 #if defined(_WIN32)
-    AVCodec*                   myCodecDxva264;    //!< DXVA2 codec (decoding on GPU in Windows)
-    AVCodec*                   myCodecDxvaWmv;    //!< DXVA2 codec (decoding on GPU in Windows)
-    AVCodec*                   myCodecDxvaVc1;    //!< DXVA2 codec (decoding on GPU in Windows)
+    StHandle<StHWAccelContext> myHWAccelCtx;
 #elif defined(__APPLE__)
     AVCodec*                   myCodecVda;        //!< VDA codec (decoding on GPU in OS X)
 #endif
     bool                       myUseGpu;          //!< activate decoding on GPU when possible
+    bool                       myIsGpuFailed;     //!< flag indicating that GPU decoder can not handle input data
+    bool                       myToReinit;        //!< request reinitialization
 
     StAVFrame                  myFrameRGB;        //!< frame, converted to RGB (soft)
     StImagePlane               myDataRGB;         //!< RGB buffer data (for swscale)

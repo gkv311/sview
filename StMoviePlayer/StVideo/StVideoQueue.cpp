@@ -38,36 +38,18 @@ namespace {
     }
 #endif
 
-#ifdef ST_AV_OLDSYNC
+#if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55, 0, 0))
     /**
-     * These are called whenever we allocate a frame
-     * buffer. We use this to store the global_pts in
-     * a frame at the time it is allocated.
+     * Release the frame buffer (old API).
      */
-    static int ourGetBuffer(AVCodecContext* theCodecCtx,
-                            AVFrame*        theFrame) {
-        StVideoQueue* aVideoQueue = (StVideoQueue* )theCodecCtx->opaque;
-        const int aResult = avcodec_default_get_buffer(theCodecCtx, theFrame);
-    #ifdef ST_USE64PTR
-        theFrame->opaque = (void* )aVideoQueue->getVideoPktPts();
-    #else
-        int64_t* aPts = new int64_t();
-        *aPts = aVideoQueue->getVideoPktPts();
-        theFrame->opaque = aPts;
-    #endif
-        return aResult;
-    }
-
-    static void ourReleaseBuffer(AVCodecContext* theCodecCtx,
-                                 AVFrame*        theFrame) {
+    static void stReleaseFrameBuffer(AVCodecContext* theCodecCtx,
+                                     AVFrame*        theFrame) {
+    #if defined(ST_AV_OLDSYNC) && !ST_USE64PTR
         if(theFrame != NULL) {
-        #ifdef ST_USE64PTR
-            theFrame->opaque = (void* )stAV::NOPTS_VALUE;
-        #else
             delete (int64_t* )theFrame->opaque;
             theFrame->opaque = NULL;
-        #endif
         }
+    #endif
         avcodec_default_release_buffer(theCodecCtx, theFrame);
     }
 #endif
@@ -81,23 +63,95 @@ namespace {
         return SV_THREAD_RETURN 0;
     }
 
-};
+}
+
+AVPixelFormat StVideoQueue::getFrameFormat(const AVPixelFormat* theFormats) {
+    if(!myUseGpu || myIsGpuFailed) {
+        return avcodec_default_get_format(myCodecCtx, theFormats);
+    }
+
+    for(const AVPixelFormat* aFormatIter = theFormats; *aFormatIter != -1; ++aFormatIter) {
+        /*const AVPixFmtDescriptor* aDesc = av_pix_fmt_desc_get(*aFormatIter);
+        if(!(aDesc->flags & AV_PIX_FMT_FLAG_HWACCEL)) {
+            return *aFormatIter;
+        }*/
+
+    #if defined(_WIN32)
+        if(*aFormatIter == stAV::PIX_FMT::DXVA2_VLD) {
+            if(!hwaccelInit()) {
+                myIsGpuFailed = true;
+                myToReinit    = true;
+                return avcodec_default_get_format(myCodecCtx, theFormats);
+            }
+            return *aFormatIter;
+        }
+    #endif
+    }
+
+    return *theFormats;
+}
+
+int StVideoQueue::getFrameBuffer(AVFrame* theFrame,
+                                 int      theFlags) {
+    int aResult = 0;
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
+    bool isDone = false;
+    #if defined(_WIN32)
+        if(theFrame->format == stAV::PIX_FMT::DXVA2_VLD) {
+            if(!myHWAccelCtx.isNull()) {
+                aResult = myHWAccelCtx->getFrameBuffer(*this, theFrame);
+            } else {
+                aResult = -1;
+            }
+            isDone  = true;
+        }
+    #endif
+        if(!isDone) {
+            aResult = avcodec_default_get_buffer2(myCodecCtx, theFrame, theFlags);
+        }
+#else
+    aResult = avcodec_default_get_buffer(myCodecCtx, theFrame);
+#endif
+
+#ifdef ST_AV_OLDSYNC
+#ifdef ST_USE64PTR
+    theFrame->opaque = (void* )myVideoPktPts;
+#else
+    int64_t* aPts = new int64_t();
+    *aPts = myVideoPktPts;
+    theFrame->opaque = aPts;
+#endif
+#endif
+    return aResult;
+}
+
+#if !defined(_WIN32)
+bool StVideoQueue::hwaccelInit() { return false; }
+#endif
+
+inline AVCodecID stFindCodecId(const char* theName) {
+    AVCodec* aCodec = avcodec_find_decoder_by_name(theName);
+    return aCodec != NULL ? aCodec->id : AV_CODEC_ID_NONE;
+}
 
 StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
                            const StHandle<StVideoQueue>&     theMaster)
 : StAVPacketQueue(512),
+  CodecIdH264 (stFindCodecId("h264")),
+  CodecIdHEVC (stFindCodecId("hevc")),
+  CodecIdMPEG2(stFindCodecId("mpeg2video")),
+  CodecIdWMV3 (stFindCodecId("wmv3")),
+  CodecIdVC1  (stFindCodecId("vc1")),
   myDowntimeState(true),
   myTextureQueue(theTextureQueue),
   myHasDataState(false),
   myMaster(theMaster),
-#if defined(_WIN32)
-  myCodecDxva264(avcodec_find_decoder_by_name("h264_dxva2")),
-  myCodecDxvaWmv(avcodec_find_decoder_by_name("wmv3_dxva2")),
-  myCodecDxvaVc1(avcodec_find_decoder_by_name("vc1_dxva2")),
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
   myCodecVda(avcodec_find_decoder_by_name("h264_vda")),
 #endif
   myUseGpu(false),
+  myIsGpuFailed(false),
+  myToReinit(false),
   //
   myToRgbCtx(NULL),
   myToRgbPixFmt(stAV::PIX_FMT::NONE),
@@ -118,7 +172,6 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   myStFormatByUser(StFormat_AUTO),
   myStFormatByName(StFormat_AUTO),
   myStFormatInStream(StFormat_AUTO) {
-
 #ifdef ST_USE64PTR
     myFrame.Frame->opaque = (void* )stAV::NOPTS_VALUE;
 #else
@@ -137,6 +190,7 @@ StVideoQueue::~StVideoQueue() {
     myThread.nullify();
 
     deinit();
+    myHWAccelCtx.nullify();
 }
 
 namespace {
@@ -173,9 +227,10 @@ namespace {
         {StFormat_AUTO, NULL}
     };
 
-};
+}
 
-bool StVideoQueue::initCodec(AVCodec* theCodec) {
+bool StVideoQueue::initCodec(AVCodec*   theCodec,
+                             const bool theToUseGpu) {
     // configure the codec
     myCodecCtx->codec_id = theCodec->id;
     //myCodecCtx->debug_mv = debug_mv;
@@ -189,10 +244,10 @@ bool StVideoQueue::initCodec(AVCodec* theCodec) {
     //myCodecCtx->skip_loop_filter= skip_loop_filter;
     //myCodecCtx->error_recognition= error_recognition;
     //myCodecCtx->error_concealment= error_concealment;
-    int threadsCount = StThread::countLogicalProcessors();
-    myCodecCtx->thread_count = threadsCount;
+    int aNbThreads = theToUseGpu ? 1 : StThread::countLogicalProcessors();
+    myCodecCtx->thread_count = aNbThreads;
 #if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(52, 112, 0))
-    avcodec_thread_init(myCodecCtx, threadsCount);
+    avcodec_thread_init(myCodecCtx, aNbThreads);
 #endif
 
     // open codec
@@ -206,7 +261,7 @@ bool StVideoQueue::initCodec(AVCodec* theCodec) {
 
     myCodec = theCodec;
     fillCodecInfo(theCodec);
-    ST_DEBUG_LOG("FFmpeg: Setup AVcodec to use " + threadsCount + " threads");
+    ST_DEBUG_LOG("FFmpeg: Setup AVcodec to use " + aNbThreads + " threads");
     return true;
 }
 
@@ -231,6 +286,15 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
 #endif
 
     // find the decoder for the video stream
+    myCodecCtx->opaque         = this;
+    myCodecCtx->get_format     = stGetFrameFormat;
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
+    myCodecCtx->get_buffer2    = stGetFrameBuffer2;
+#else
+    myCodecCtx->get_buffer     = stGetFrameBuffer1;
+    myCodecCtx->release_buffer = stReleaseFrameBuffer;
+#endif
+
     myCodecAuto = avcodec_find_decoder(myCodecCtx->codec_id);
     if(myCodecAuto == NULL) {
         signals.onError(stCString("FFmpeg: Video codec not found"));
@@ -238,43 +302,35 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
         return false;
     }
 
+    // open VIDEO codec
+#if defined(__APPLE__)
     bool isCodecOverridden = false;
     AVCodec* aCodecGpu = NULL;
-    if(myUseGpu) {
-    #if defined(_WIN32)
-        if(StString(myCodecAuto->name).isEquals(stCString("h264"))) {
-            aCodecGpu = myCodecDxva264;
-        } else if(StString(myCodecAuto->name).isEquals(stCString("wmv3"))) {
-            aCodecGpu = myCodecDxvaWmv;
-        } else if(StString(myCodecAuto->name).isEquals(stCString("vc1"))) {
-            aCodecGpu = myCodecDxvaVc1;
-        }
-    #elif defined(__APPLE__)
-        if(StString(myCodecAuto->name).isEquals(stCString("h264"))
-        && myCodecCtx->pix_fmt == stAV::PIX_FMT::YUV420P) {
-            aCodecGpu = myCodecVda;
-        }
-    #endif
+    if(myUseGpu
+    && StString(myCodecAuto->name).isEquals(stCString("h264"))
+    && myCodecCtx->pix_fmt == stAV::PIX_FMT::YUV420P) {
+        aCodecGpu = myCodecVda;
     }
 
     if(aCodecGpu != NULL) {
-    #if defined(__APPLE__)
         myCodecCtx->get_format = stGetFormatYUV420P;
-    #endif
-        isCodecOverridden = initCodec(aCodecGpu);
-    #if defined(__APPLE__)
+        isCodecOverridden = initCodec(aCodecGpu, myUseGpu);
         if(!isCodecOverridden) {
             myCodecCtx->get_format = myGetFrmtInit;
         }
-    #endif
     }
-
-    // open VIDEO codec
-    if(!isCodecOverridden && !initCodec(myCodecAuto)) {
+    if(!isCodecOverridden && !initCodec(myCodecAuto, false)) {
         signals.onError(stCString("FFmpeg: Could not open video codec"));
         deinit();
         return false;
     }
+#else
+    if(!initCodec(myCodecAuto, myUseGpu && !myIsGpuFailed)) {
+        signals.onError(stCString("FFmpeg: Could not open video codec"));
+        deinit();
+        return false;
+    }
+#endif
 
     // determine required myFrameRGB size and allocate it
     if(sizeX() == 0 || sizeY() == 0) {
@@ -348,17 +404,12 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
             myPixelRatio *= 0.5;
         }
     }
-
-#ifdef ST_AV_OLDSYNC
-    // override buffers' functions for getting true PTS rootines
-    myCodecCtx->opaque = this;
-    myCodecCtx->get_buffer = ourGetBuffer;
-    myCodecCtx->release_buffer = ourReleaseBuffer;
-#endif
     return true;
 }
 
 void StVideoQueue::deinit() {
+    myIsGpuFailed = false;
+    myToReinit    = false;
     if(myMaster.isNull()) {
         myTextureQueue->clear();
         myTextureQueue->setConnectedStream(false);
@@ -381,6 +432,12 @@ void StVideoQueue::deinit() {
         myCodecCtx->codec_id = myCodecAuto->id;
     }
     StAVPacketQueue::deinit();
+    if(myCodecCtx != NULL) {
+        myCodecCtx->hwaccel_context = NULL;
+    }
+    if(!myHWAccelCtx.isNull()) {
+        myHWAccelCtx->decoderDestroy();
+    }
 }
 
 #ifdef ST_AV_OLDSYNC
@@ -720,6 +777,11 @@ void StVideoQueue::decodeLoop() {
                     }
                 }
             }
+        }
+
+        // copy frame back from GPU to CPU memory
+        if(!myHWAccelCtx.isNull()) {
+            myHWAccelCtx->retrieveFrame(*this, myFrame.Frame);
         }
 
         // we currently allow to override source format stored in metadata
