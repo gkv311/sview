@@ -354,9 +354,8 @@ private:
     StHandle<StVideoQueue>     myMaster;          //!< handle to Master decoding thread
     StHandle<StVideoQueue>     mySlave;           //!< handle to Slave  decoding thread
 
-#if defined(_WIN32)
     StHandle<StHWAccelContext> myHWAccelCtx;
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     AVCodec*                   myCodecVda;        //!< VDA codec (decoding on GPU in OS X)
 #endif
     bool                       myUseGpu;          //!< activate decoding on GPU when possible

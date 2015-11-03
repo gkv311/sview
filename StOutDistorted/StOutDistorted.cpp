@@ -311,17 +311,21 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
   myOvrHmd(NULL),
   myOvrSizeX(0),
   myOvrSizeY(0),
+#ifdef ST_HAVE_LIBOVR
   myOvrSwapTexture(NULL),
   myOvrMirrorTexture(NULL),
   myOvrMirrorFbo(0),
+#endif
   myToReduceGui(false),
   myToShowCursor(true),
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false),
   myIsStereoOn(false),
   myIsHdmiPack(false) {
+#ifdef ST_HAVE_LIBOVR
     myOvrSwapFbo[0] = 0;
     myOvrSwapFbo[1] = 0;
+#endif
     const StSearchMonitors& aMonitors = StWindow::getMonitors();
     StTranslations aLangMap(getResourceManager(), ST_OUT_PLUGIN_NAME);
 

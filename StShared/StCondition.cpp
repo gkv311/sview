@@ -18,6 +18,24 @@
 #include <StThreads/StCondition.h>
 #include <StThreads/StTimer.h>
 
+namespace {
+
+    /**
+     * clock_gettime() wrapper.
+     */
+    inline void stGetRealTime(struct timespec& theTime) {
+    #if defined(__APPLE__)
+        struct timeval aTime;
+        gettimeofday(&aTime, NULL);
+        theTime.tv_sec  = aTime.tv_sec;
+        theTime.tv_nsec = aTime.tv_usec * 1000;
+    #else
+        clock_gettime(CLOCK_REALTIME, &theTime);
+    #endif
+    }
+
+}
+
 StCondition::StCondition()
 #ifdef _WIN32
 : myEvent((void* )CreateEvent(0, true, true, NULL))
@@ -95,7 +113,7 @@ bool StCondition::wait(const size_t theTimeMilliseconds) {
     if(!myFlag) {
         struct timespec aNow;
         struct timespec aTimeout;
-        clock_gettime(CLOCK_REALTIME, &aNow);
+        stGetRealTime(aNow);
         aTimeout.tv_sec  = (theTimeMilliseconds / 1000);
         aTimeout.tv_nsec = (theTimeMilliseconds - aTimeout.tv_sec * 1000) * 1000000;
         if(aTimeout.tv_nsec > 1000000000) {
@@ -120,7 +138,7 @@ bool StCondition::check() {
     if(!myFlag) {
         struct timespec aNow;
         struct timespec aTimeout;
-        clock_gettime(CLOCK_REALTIME, &aNow);
+        stGetRealTime(aNow);
         aTimeout.tv_sec  = aNow.tv_sec;
         aTimeout.tv_nsec = aNow.tv_nsec + 100;
         isSignalled = (pthread_cond_timedwait(&myCond, &myMutex, &aTimeout) != ETIMEDOUT);
@@ -141,7 +159,7 @@ bool StCondition::checkReset() {
     if(!myFlag) {
         struct timespec aNow;
         struct timespec aTimeout;
-        clock_gettime(CLOCK_REALTIME, &aNow);
+        stGetRealTime(aNow);
         aTimeout.tv_sec  = aNow.tv_sec;
         aTimeout.tv_nsec = aNow.tv_nsec + 100;
         wasSignalled = (pthread_cond_timedwait(&myCond, &myMutex, &aTimeout) != ETIMEDOUT);

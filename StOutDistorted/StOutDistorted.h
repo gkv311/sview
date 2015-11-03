@@ -206,11 +206,13 @@ class StOutDistorted : public StWindow {
     ovrSession                myOvrHmd;
     int                       myOvrSizeX;
     int                       myOvrSizeY;
+    StQuaternion<double>      myOvrOrient;
+#ifdef ST_HAVE_LIBOVR
     ovrSwapTextureSet*        myOvrSwapTexture;
     GLuint                    myOvrSwapFbo[2];
     ovrGLTexture*             myOvrMirrorTexture;
     GLuint                    myOvrMirrorFbo;
-    StQuaternion<double>      myOvrOrient;
+#endif
 
     bool                      myToReduceGui;     //!< scale down GUI
     bool                      myToShowCursor;    //!< cursor visibility flag
