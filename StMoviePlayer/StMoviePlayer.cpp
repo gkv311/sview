@@ -1395,19 +1395,87 @@ void StMoviePlayer::doFileDrop(const StDNDropEvent& theEvent) {
         return;
     }
 
-    const StString aFilePath = theEvent.Files[0];
-    if(myPlayList->checkExtension(aFilePath)) {
-        const size_t aRecent = myPlayList->findRecent(aFilePath);
-        if(aRecent != size_t(-1)) {
-            doOpenRecent(aRecent);
+    const StString aFile1 = theEvent.Files[0];
+    const StString aFile2 = theEvent.NbFiles > 1 ? theEvent.Files[1] : "";
+    const StString anExt1 = StFileNode::getExtension(aFile1);
+    if(theEvent.NbFiles == 1
+    || StFolder::isFolder(aFile1)) {
+        // attach subtitle to currently opened item
+        for(size_t anExtId = 0; anExtId < myVideo->getMimeListSubtitles().size(); ++anExtId) {
+            if(!anExt1.isEqualsIgnoreCase(myVideo->getMimeListSubtitles()[anExtId].getExtension())) {
+                continue;
+            }
+
+            StHandle<StFileNode> aCurrFile = myPlayList->getCurrentFile();
+            if(aCurrFile.isNull()) {
+                ST_ERROR_LOG("Can not attach subtitles");
+                return;
+            }
+
+            myPlayList->addToNode(aCurrFile, aFile1);
+            myAudioOnLoad = myVideo->params.activeAudio->getValue();
+            mySubsOnLoad  = myVideo->params.activeSubtitles->getListSize();
+            mySeekOnLoad  = myVideo->getPts();
+            doUpdateStateLoading();
+            myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
+            myVideo->doLoadNext();
             return;
         }
 
-        myPlayList->open(aFilePath);
-        doUpdateStateLoading();
-        myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
-        myVideo->doLoadNext();
+        // just open the path
+        if(myPlayList->checkExtension(aFile1)) {
+            const size_t aRecent = myPlayList->findRecent(aFile1);
+            if(aRecent != size_t(-1)) {
+                doOpenRecent(aRecent);
+                return;
+            }
+
+            myPlayList->open(aFile1);
+            doUpdateStateLoading();
+            myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
+            myVideo->doLoadNext();
+        }
+        return;
+    } else if(theEvent.NbFiles == 2
+          && !StFolder::isFolder(aFile2)
+          &&  myPlayList->checkExtension(aFile2)) {
+        // handle stereopair
+        StString anExt2 = StFileNode::getExtension(aFile2);
+        int aNbVideos = 0;
+        for(size_t anExtId = 0; anExtId < myVideo->getMimeListVideo().size(); ++anExtId) {
+            if(!anExt1.isEqualsIgnoreCase(myVideo->getMimeListVideo()[anExtId].getExtension())) {
+                ++aNbVideos;
+                break;
+            }
+        }
+        for(size_t anExtId = 0; anExtId < myVideo->getMimeListVideo().size(); ++anExtId) {
+            if(!anExt2.isEqualsIgnoreCase(myVideo->getMimeListVideo()[anExtId].getExtension())) {
+                ++aNbVideos;
+                break;
+            }
+        }
+
+        if(aNbVideos == 2) {
+            myVideo->getPlayList().clear();
+            myVideo->getPlayList().addOneFile(aFile1, aFile2);
+            doUpdateStateLoading();
+            myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
+            myVideo->doLoadNext();
+            return;
+        }
     }
+
+    myVideo->getPlayList().clear();
+    for(uint32_t aFileIter = 0; aFileIter < theEvent.NbFiles; ++aFileIter) {
+        StString aPath(theEvent.Files[aFileIter]);
+        if(!StFolder::isFolder(aPath)
+        && myPlayList->checkExtension(aPath)) {
+            myVideo->getPlayList().addOneFile(aPath, StMIME());
+        }
+    }
+    doUpdateStateLoading();
+    myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
+    myVideo->doLoadNext();
 }
 
 void StMoviePlayer::doNavigate(const StNavigEvent& theEvent) {
