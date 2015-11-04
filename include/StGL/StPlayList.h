@@ -114,6 +114,18 @@ class StPlayList {
         public:
 
     /**
+     * Enumeration identifying position of current item in the playlist.
+     */
+    enum CurrentPosition {
+        CurrentPosition_NONE,   //!< not       in the list
+        CurrentPosition_First,  //!< first     in the list
+        CurrentPosition_Last,   //!< last      in the list
+        CurrentPosition_Middle, //!< somewhere in the list
+    };
+
+        public:
+
+    /**
      * Main constructor.
      */
     ST_CPPEXPORT StPlayList(const int  theRecursionDeep,
@@ -147,6 +159,12 @@ class StPlayList {
      * @return item index for the current position in playlist (starting from 0)
      */
     ST_CPPEXPORT size_t getCurrentId() const;
+
+    /**
+     * Return item index for the current position in playlist
+     * and flags if it is last or first
+     */
+    ST_CPPEXPORT StPlayList::CurrentPosition getCurrentPosition() const;
 
     /**
      * Return title for the current position in playlist.
@@ -231,7 +249,7 @@ class StPlayList {
         return myItemsCount;
     }
 
-    inline bool isEmpty() const {
+    ST_LOCAL bool isEmpty() const {
         StMutexAuto anAutoLock(myMutex);
         return myFirst == NULL;
     }

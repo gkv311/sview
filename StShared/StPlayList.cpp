@@ -260,6 +260,18 @@ size_t StPlayList::getCurrentId() const {
     return (myCurrent != NULL) ? myCurrent->getPosition() : 0;
 }
 
+StPlayList::CurrentPosition StPlayList::getCurrentPosition() const {
+    StMutexAuto anAutoLock(myMutex);
+    if(myCurrent == NULL) {
+        return CurrentPosition_NONE;
+    } else if(myCurrent == myFirst) {
+        return CurrentPosition_First;
+    } else if(myCurrent == myLast) {
+        return CurrentPosition_Last;
+    }
+    return CurrentPosition_Middle;
+}
+
 StString StPlayList::getCurrentTitle() const {
     StMutexAuto anAutoLock(myMutex);
     return (myCurrent != NULL) ? myCurrent->getTitle() : StString();

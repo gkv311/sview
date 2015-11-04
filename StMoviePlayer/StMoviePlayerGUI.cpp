@@ -1702,6 +1702,19 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
         myPlayList->setOpacity(anOpacity, true);
     }
 
+    const StPlayList::CurrentPosition aCurrPos = myPlugin->myVideo->getPlayList().getCurrentPosition();
+    if(myBtnPrev != NULL) {
+        myBtnPrev->setOpacityScale(aCurrPos != StPlayList::CurrentPosition_First
+                                && aCurrPos != StPlayList::CurrentPosition_NONE ? 1.0f : 0.5f);
+    }
+    if(myBtnNext != NULL) {
+        myBtnNext->setOpacityScale(aCurrPos != StPlayList::CurrentPosition_Last
+                                && aCurrPos != StPlayList::CurrentPosition_NONE ? 1.0f : 0.5f);
+    }
+    if(myBtnPlay != NULL) {
+        myBtnPlay->setOpacityScale(aCurrPos != StPlayList::CurrentPosition_NONE ? 1.0f : 0.5f);
+    }
+
     StFormat aSrcFormat = (StFormat )myPlugin->params.srcFormat->getValue();
     if( aSrcFormat == StFormat_AUTO
     && !aParams.isNull()
