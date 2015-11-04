@@ -17,6 +17,7 @@
 #include <StGL/StGLContext.h>
 
 #include <cmath>
+#include <vector>
 
 void StWindowImpl::convertRectToBacking(StGLBoxPx& ,
                                         const int  ) const {
@@ -376,9 +377,12 @@ void StWindowImpl::processEvents() {
     myParentWin->setTrackOrientation(myToTrackOrient);
     myParentWin->fetchState(aDndFile, myQuaternion);
     if(!aDndFile.isEmpty()) {
+        std::vector<const char*> aDndList;
+        aDndList.push_back(aDndFile);
         myStEvent.Type = stEvent_FileDrop;
         myStEvent.DNDrop.Time = getEventTime();
-        myStEvent.DNDrop.File = aDndFile.toCString();
+        myStEvent.DNDrop.NbFiles = aDndList.size();
+        myStEvent.DNDrop.Files   = &aDndList[0];
         myEventsBuffer.append(myStEvent);
     }
 

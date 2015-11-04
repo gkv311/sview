@@ -589,7 +589,11 @@ void StCADViewer::doKeyUp(const StKeyEvent& theEvent) {
 }
 
 void StCADViewer::doFileDrop(const StDNDropEvent& theEvent) {
-    const StString aFilePath = theEvent.File;
+    if(theEvent.NbFiles == 0) {
+        return;
+    }
+
+    const StString aFilePath = theEvent.Files[0];
     if(myCADLoader->getPlayList().checkExtension(aFilePath)) {
         myCADLoader->getPlayList().open(aFilePath);
         doUpdateStateLoading();

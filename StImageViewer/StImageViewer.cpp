@@ -986,7 +986,11 @@ void StImageViewer::doMouseUp(const StClickEvent& theEvent) {
 }
 
 void StImageViewer::doFileDrop(const StDNDropEvent& theEvent) {
-    const StString aFilePath = theEvent.File;
+    if(theEvent.NbFiles == 0) {
+        return;
+    }
+
+    const StString aFilePath = theEvent.Files[0];
     if(myLoader->getPlayList().checkExtension(aFilePath)) {
         myLoader->getPlayList().open(aFilePath);
         doUpdateStateLoading();

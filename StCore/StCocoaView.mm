@@ -18,6 +18,8 @@
 
 #include <StCocoa/StCocoaString.h>
 
+#include <vector>
+
 #if !defined(MAC_OS_X_VERSION_10_7) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_7)
 @interface NSOpenGLView (LionAPI)
     - (void )setWantsBestResolutionOpenGLSurface: (BOOL )theFlag;
@@ -488,6 +490,7 @@
                 return NO;
             }
 
+            std::vector<StString> aPaths;
             for(NSUInteger aFileId = 0; aFileId < [aFiles count]; ++aFileId) {
                 NSString* aFilePathNs = (NSString* )[aFiles objectAtIndex: aFileId];
                 if(aFilePathNs == NULL
@@ -497,9 +500,18 @@
 
                 // automatically convert filenames from decomposed form used by Mac OS X file systems
                 const StString aFile = [[aFilePathNs precomposedStringWithCanonicalMapping] UTF8String];
+                aPaths.push_back(aFile);
+            }
+
+            std::vector<const char*> aDndList;
+            for(std::vector<StString>::const_iterator aFileIter = aPaths.begin(); aFileIter != aPaths.end(); ++aFileIter) {
+                aDndList.push_back(aFileIter->toCString());
+            }
+            if(!aDndList.empty()) {
                 myStEvent.Type = stEvent_FileDrop;
-                myStEvent.DNDrop.Time = myStWin->getEventTime();
-                myStEvent.DNDrop.File = aFile.toCString();
+                myStEvent.DNDrop.Time    = myStWin->getEventTime();
+                myStEvent.DNDrop.NbFiles = aDndList.size();
+                myStEvent.DNDrop.Files   = &aDndList[0];
                 if(myStWin->myEventsThreaded) {
                     myStWin->myEventsBuffer.append(myStEvent);
                 } else {

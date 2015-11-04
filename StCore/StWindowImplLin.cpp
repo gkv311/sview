@@ -20,6 +20,7 @@
 #include <X11/xpm.h>
 
 #include <cmath>
+#include <vector>
 
 #include "../share/sView/icons/menu.xpm"
 
@@ -705,12 +706,15 @@ void StWindowImpl::parseXDNDSelectionMsg() {
             } else {
                 aFile = aData;
             }
-            myStEvent.Type = stEvent_FileDrop;
-            myStEvent.DNDrop.Time = getEventTime(myXEvent.xselection.time);
-            myStEvent.DNDrop.File = aFile.toCString();
-            signals.onFileDrop->emit(myStEvent.DNDrop);
-
-            //ST_DEBUG_LOG(data);
+            std::vector<const char*> aDndList;
+            aDndList.push_back(aFile.toCString());
+            if(!aDndList.empty()) {
+                myStEvent.Type = stEvent_FileDrop;
+                myStEvent.DNDrop.Time = getEventTime(myXEvent.xselection.time);
+                myStEvent.DNDrop.NbFiles = aDndList.size();
+                myStEvent.DNDrop.Files   = &aDndList[0];
+                signals.onFileDrop->emit(myStEvent.DNDrop);
+            }
 
             // Reply OK
             XClientMessageEvent aMsg;

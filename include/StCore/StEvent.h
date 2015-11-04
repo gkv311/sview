@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -109,7 +109,8 @@ struct StDNDropEvent {
 
     StEventType   Type;   //!< event type
     double        Time;   //!< time in seconds when event was registered
-    const char*   File;   //!< file path
+    const char**  Files;  //!< file paths
+    uint32_t      NbFiles;//!< number of files
 
 };
 

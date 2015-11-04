@@ -17,6 +17,7 @@
 #include <StGL/StGLContext.h>
 
 #include <cmath>
+#include <vector>
 
 static SV_THREAD_FUNCTION threadCreateWindows(void* inStWin);
 
@@ -483,16 +484,26 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 break;
             }
 
+            // convert to UTF-8
+            std::vector<StString> aPaths;
             for(UINT aFileId = 0; aFileId < aFilesCount; ++aFileId) {
                 if(DragQueryFileW(aDrops, aFileId, aFileBuff, MAX_PATH) > 0) {
-                    const StString aFile(aFileBuff);
-                    myStEvent.Type = stEvent_FileDrop;
-                    myStEvent.DNDrop.Time = getEventTime(myEvent.time);
-                    myStEvent.DNDrop.File = aFile.toCString();
-                    myEventsBuffer.append(myStEvent);
+                    aPaths.push_back(StString(aFileBuff));
                 }
             }
-            DragFinish(aDrops); // do not forget
+            DragFinish(aDrops);
+
+            std::vector<const char*> aDndList;
+            for(std::vector<StString>::const_iterator aFileIter = aPaths.begin(); aFileIter != aPaths.end(); ++aFileIter) {
+                aDndList.push_back(aFileIter->toCString());
+            }
+            if(!aDndList.empty()) {
+                myStEvent.Type = stEvent_FileDrop;
+                myStEvent.DNDrop.Time    = getEventTime(myEvent.time);
+                myStEvent.DNDrop.NbFiles = aDndList.size();
+                myStEvent.DNDrop.Files   = &aDndList[0];
+                myEventsBuffer.append(myStEvent);
+            }
             break;
         }
         case WM_MOVE: {

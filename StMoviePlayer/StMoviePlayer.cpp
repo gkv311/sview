@@ -1391,7 +1391,11 @@ void StMoviePlayer::doFileNext() {
 }
 
 void StMoviePlayer::doFileDrop(const StDNDropEvent& theEvent) {
-    const StString aFilePath = theEvent.File;
+    if(theEvent.NbFiles == 0) {
+        return;
+    }
+
+    const StString aFilePath = theEvent.Files[0];
     if(myPlayList->checkExtension(aFilePath)) {
         const size_t aRecent = myPlayList->findRecent(aFilePath);
         if(aRecent != size_t(-1)) {

@@ -95,12 +95,32 @@ class StEventsBuffer {
         StEvent& anEvent = myEventsWrite[mySizeWrite++];
         anEvent = theEvent;
         if(theEvent.Type == stEvent_FileDrop) {
-            // copy buffer
-            const size_t aSize = std::strlen(theEvent.DNDrop.File);
-            char* aBuffer = new char[aSize + 1];
-            stMemCpy(aBuffer, theEvent.DNDrop.File, aSize);
-            aBuffer[aSize] = '\0';
-            anEvent.DNDrop.File = aBuffer;
+            if(theEvent.DNDrop.NbFiles == 0) {
+                anEvent.DNDrop.Files = NULL;
+                return;
+            }
+
+            // make a copy in C-style
+            anEvent.DNDrop.Files = stMemAlloc<const char**>(sizeof(const char* ) * theEvent.DNDrop.NbFiles);
+            if(anEvent.DNDrop.Files == NULL) {
+                anEvent.DNDrop.NbFiles = 0;
+                return;
+            }
+
+            stMemZero(anEvent.DNDrop.Files, sizeof(const char* ) * theEvent.DNDrop.NbFiles);
+            for(uint32_t aFileIter = 0; aFileIter < theEvent.DNDrop.NbFiles; ++aFileIter) {
+                const char*  aBufferSrc = theEvent.DNDrop.Files[aFileIter];
+                const size_t aSize      = std::strlen(aBufferSrc);
+                char*        aBufferDst = stMemAlloc<char*>(sizeof(char) * aSize + 1);
+                if(aBufferDst == NULL) {
+                    anEvent.DNDrop.NbFiles = aFileIter;
+                    return;
+                }
+
+                stMemCpy(aBufferDst, aBufferSrc, aSize);
+                aBufferDst[aSize] = '\0';
+                anEvent.DNDrop.Files[aFileIter] = aBufferDst;
+            }
         }
     }
 
@@ -112,8 +132,12 @@ class StEventsBuffer {
         for(size_t anIter = 0; anIter < mySizeRead; ++anIter) {
             StEvent& anEvent = myEventsRead[anIter];
             if(anEvent.Type == stEvent_FileDrop) {
-                delete[] anEvent.DNDrop.File;
-                anEvent.DNDrop.File = NULL;
+                for(uint32_t aFileIter = 0; aFileIter < anEvent.DNDrop.NbFiles; ++aFileIter) {
+                    stMemFree((void* )anEvent.DNDrop.Files[aFileIter]);
+                }
+                stMemFree(anEvent.DNDrop.Files);
+                anEvent.DNDrop.Files   = NULL;
+                anEvent.DNDrop.NbFiles = 0;
             }
         }
 
