@@ -1061,7 +1061,6 @@ void StImageViewer::beforeDraw() {
         myLoader->doLoadNext();
     }
 
-    const bool isMouseMove = myWindow->isMouseMoved();
     if(mySlideShowTimer.getElapsedTimeInSec() > mySlideShowDelay) {
         mySlideShowTimer.restart();
         doListNext();
@@ -1079,7 +1078,7 @@ void StImageViewer::beforeDraw() {
     }
 
     const bool isFullScreen = params.isFullscreen->getValue();
-    myGUI->setVisibility(myWindow->getMousePos(), isMouseMove, myToHideUIFullScr && isFullScreen);
+    myGUI->setVisibility(myWindow->getMousePos(), myToHideUIFullScr && isFullScreen);
     bool toHideCursor = isFullScreen && myGUI->toHideCursor();
     myWindow->showCursor(!toHideCursor);
 }

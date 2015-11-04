@@ -1088,7 +1088,6 @@ size_t StImageViewerGUI::trSrcFormatId(const StFormat theSrcFormat) {
 }
 
 void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
-                                     bool              isMouseActive,
                                      bool              toForceHide) {
     const bool hasMainMenu    =  myPlugin->params.ToShowMenu->getValue()
                              &&  myMenuRoot != NULL;
@@ -1097,11 +1096,13 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
                              &&  myPanelUpper  != NULL;
     const bool hasBottomPanel = !myIsMinimalGUI
                              &&  myPanelBottom != NULL;
+    const bool isMouseActive  = myWindow->isMouseMoved();
 
     StHandle<StStereoParams> aParams = myImage->getSource();
+    const double aStillTime = myVisibilityTimer.getElapsedTime();
     myIsVisibleGUI = isMouseActive
         || aParams.isNull()
-        || myVisibilityTimer.getElapsedTime() < 2.0
+        || aStillTime < 2.0
         || (hasUpperPanel  && myPanelUpper ->isPointIn(theCursor))
         || (hasBottomPanel && myPanelBottom->isPointIn(theCursor))
         || (hasMainMenu    && myMenuRoot->isActive());
@@ -1175,7 +1176,7 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
     myImage->setDeviceOrientation(StGLQuaternion((float )aQ.x(), (float )aQ.y(), (float )aQ.z(), (float )aQ.w()));
 
     if(myDescr != NULL) {
-        myDescr->setOpacity(1.0f, true);
+        bool wasEmpty = myDescr->getText().isEmpty();
         if(::isPointIn(myBtnOpen, theCursor)) {
             myDescr->setText(tr(IMAGE_OPEN));
         } else if(::isPointIn(myBtnPrev, theCursor)) {
@@ -1202,8 +1203,15 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
             }
             myDescr->setText(tr(MENU_VIEW_PANORAMA) + "\n" + tr(aTrPano));
         } else {
-            myDescr->setOpacity(0.0f, true);
+            myDescr->setText("");
         }
+
+        if(wasEmpty
+        && aStillTime < 1.0) {
+            myDescr->setText("");
+        }
+
+        myDescr->setOpacity(!myDescr->getText().isEmpty() ? 1.0f : 0.0f, true);
     }
 }
 

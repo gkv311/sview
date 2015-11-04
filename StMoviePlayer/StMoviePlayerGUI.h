@@ -111,10 +111,8 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL virtual void stglDraw(unsigned int theView);
 
     using StGLRootWidget::stglUpdate;
-    ST_LOCAL void stglUpdate(const StPointD_t& thePointZo,
-                             bool              theIsMouseMoved);
-    ST_LOCAL void setVisibility(const StPointD_t& theCursor,
-                                bool              theIsMouseMoved);
+    ST_LOCAL void stglUpdate(const StPointD_t& thePointZo);
+    ST_LOCAL void setVisibility(const StPointD_t& theCursor);
 
         public:
 

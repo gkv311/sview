@@ -1484,8 +1484,7 @@ StMoviePlayerGUI::~StMoviePlayerGUI() {
     //
 }
 
-void StMoviePlayerGUI::stglUpdate(const StPointD_t& thePointZo,
-                                  bool              theIsMouseMoved) {
+void StMoviePlayerGUI::stglUpdate(const StPointD_t& thePointZo) {
     if(mySeekBar != NULL
     && myPanelBottom != NULL
     && myTimeBox->wasResized()) {
@@ -1499,7 +1498,7 @@ void StMoviePlayerGUI::stglUpdate(const StPointD_t& thePointZo,
         myBtnSubs->getTrackedValue()->setValue(myPlugin->params.subtitlesStream->getValue() != -1);
     }
 
-    setVisibility(thePointZo, theIsMouseMoved);
+    setVisibility(thePointZo);
     StGLRootWidget::stglUpdate(thePointZo);
     if(myVolumeBar != NULL) {
         char aBuff[128];
@@ -1652,8 +1651,7 @@ namespace {
 
 }
 
-void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
-                                     bool              theIsMouseMoved) {
+void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor) {
     const bool toShowPlayList = myPlugin->params.ToShowPlayList->getValue();
     const bool hasMainMenu    = myPlugin->params.ToShowMenu->getValue()
                              && myMenuRoot != NULL;
@@ -1662,10 +1660,13 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
 
     const int  aRootSizeY     = getRectPx().height();
     const bool hasVideo       = myPlugin->myVideo->hasVideoStream();
+    const bool isMouseActive  = myWindow->isMouseMoved();
+    const double aStillTime   = myVisibilityTimer.getElapsedTime();
     StHandle<StStereoParams> aParams = myImage->getSource();
-    myIsVisibleGUI = theIsMouseMoved
+    myIsVisibleGUI = !hasVideo
+        || isMouseActive
         || aParams.isNull()
-        || myVisibilityTimer.getElapsedTime() < 2.0
+        || aStillTime < 2.0
         || (hasUpperPanel && myPanelUpper->isPointIn(theCursor))
         || (myPanelBottom != NULL && int(aRootSizeY * theCursor.y()) > (aRootSizeY - 2 * myPanelBottom->getRectPx().height())
                                   && theCursor.y() < 1.0)
@@ -1680,7 +1681,7 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
         myIsVisibleGUI = true;
     }
     const float anOpacity = (float )myVisLerp.perform(myIsVisibleGUI, false);
-    if(theIsMouseMoved) {
+    if(isMouseActive) {
         myVisibilityTimer.restart();
     }
 
@@ -1766,7 +1767,7 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
     myImage->setDeviceOrientation(StGLQuaternion((float )aQ.x(), (float )aQ.y(), (float )aQ.z(), (float )aQ.w()));
 
     if(myDescr != NULL) {
-        myDescr->setOpacity(1.0f, false);
+        bool wasEmpty = myDescr->getText().isEmpty();
         if(::isPointIn(myBtnOpen, theCursor)) {
             myDescr->setText(tr(FILE_VIDEO_OPEN));
         } else if(::isPointIn(myBtnInfo,   theCursor)) {
@@ -1805,8 +1806,15 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
         } else if(::isPointIn(myBtnFullScr, theCursor)) {
             myDescr->setText(tr(FULLSCREEN));
         } else {
-            myDescr->setOpacity(0.0f, false);
+            myDescr->setText("");
         }
+
+        if(wasEmpty
+        && aStillTime < 1.0) {
+            myDescr->setText("");
+        }
+
+        myDescr->setOpacity(!myDescr->getText().isEmpty() ? 1.0f : 0.0f, false);
     }
 }
 

@@ -1546,7 +1546,6 @@ void StMoviePlayer::beforeDraw() {
     }
 
     // re-create GUI when necessary
-    const bool hasVideoStream = myVideo->hasVideoStream();
     if(params.ScaleHiDPI->setValue(myWindow->getScaleFactor())
     || myToRecreateMenu) {
         StHandle<StGLTextureQueue> aTextureQueue;
@@ -1555,7 +1554,6 @@ void StMoviePlayer::beforeDraw() {
         myToRecreateMenu = false;
     }
 
-    const bool isMouseMove = myWindow->isMouseMoved();
     if(myEventLoaded.checkReset()) {
         doUpdateStateLoaded();
     }
@@ -1584,7 +1582,7 @@ void StMoviePlayer::beforeDraw() {
     if(myGUI->mySeekBar != NULL) {
         myGUI->mySeekBar->setProgress(GLfloat(aPosition));
     }
-    myGUI->stglUpdate(myWindow->getMousePos(), isMouseMove || !hasVideoStream);
+    myGUI->stglUpdate(myWindow->getMousePos());
 
     // prevent display going to sleep
     bool toBlockSleepDisplay = false;
