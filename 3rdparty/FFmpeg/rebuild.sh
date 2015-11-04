@@ -89,12 +89,12 @@ then
   fi
 fi
 
+#--enable-memalign-hack
 configArguments="\
  --extra-version=sView.ru \
  --enable-swscale \
  --enable-shared \
  --disable-static \
- --enable-memalign-hack \
  --enable-avfilter \
  --enable-hardcoded-tables \
  --enable-pthreads \
@@ -156,7 +156,7 @@ echo
 echo "  ./configure $configArguments"
 echo
 if [ "$rebuildAndroid" == "true" ]; then
-  ./configure $configArguments --disable-symver --extra-cflags='-fno-builtin-sin -fno-builtin-sinf' >$OUTPUT_FOLDER/config.log 2>&1
+  ./configure $configArguments --disable-symver --extra-cflags='-march=armv7-a -mfloat-abi=softfp -fno-builtin-sin -fno-builtin-sinf' >$OUTPUT_FOLDER/config.log 2>&1
 else
   ./configure $configArguments >$OUTPUT_FOLDER/config.log 2>&1
 fi
