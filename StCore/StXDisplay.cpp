@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -30,6 +30,7 @@ StXDisplay::StXDisplay()
   xDNDSelection(None),
   xDNDProxy(None),
   xDNDAware(None),
+  xDNDUriList(None),
   xDNDPlainText(None),
   xDNDPrimary(None),
   XA_TARGETS(None),
@@ -113,6 +114,7 @@ void StXDisplay::initAtoms() {
     xDNDSelection  = XInternAtom(hDisplay, "XdndSelection",    False);
     xDNDProxy      = XInternAtom(hDisplay, "XdndProxy",        False);
     xDNDAware      = XInternAtom(hDisplay, "XdndAware",        False);
+    xDNDUriList    = XInternAtom(hDisplay, "text/uri-list",    False);
     xDNDPlainText  = XInternAtom(hDisplay, "text/plain",       False);
     xDNDPrimary    = XInternAtom(hDisplay, "PRIMARY",          False);
     // This is a meta-format for data to be "pasted" in to.

@@ -614,7 +614,10 @@ void StWindowImpl::parseXDNDClientMsg() {
             Property aProperty = aDisplay->readProperty(aSrcWin, aDisplay->xDNDTypeList);
             Atom* anAtomList = (Atom* )aProperty.data;
             for(int anIter = 0; anIter < aProperty.nitems; ++anIter) {
-                if(anAtomList[anIter] == aDisplay->xDNDPlainText) {
+                if(anAtomList[anIter] == aDisplay->xDNDUriList) {
+                    myMaster.xDNDRequestType = aDisplay->xDNDUriList;
+                    break;
+                } else if(anAtomList[anIter] == aDisplay->xDNDPlainText) {
                     myMaster.xDNDRequestType = aDisplay->xDNDPlainText;
                     break;
                 }
@@ -670,13 +673,6 @@ void StWindowImpl::parseXDNDSelectionMsg() {
     const StXDisplayH& aDisplay = myMaster.stXDisplay;
     // myMaster.hWindow or myMaster.hWindowGl
     Window aWinReciever = ((XClientMessageEvent* )&myXEvent)->window;
-    /*ST_DEBUG_LOG(
-        "A selection notify has arrived!\n"
-        + "Requestor = 0x" + (int )myXEvent.xselectionrequest.requestor + "\n"
-        + "Selection atom = " + myMaster.getAtomName(myXEvent.xselection.selection) + "\n"
-        + "Target atom    = " + myMaster.getAtomName(aTarget) + "\n"
-        + "Property atom  = " + myMaster.getAtomName(myXEvent.xselection.property) + "\n"
-    );*/
     if(myXEvent.xselection.property == None) {
         return;
     } else {
@@ -686,28 +682,43 @@ void StWindowImpl::parseXDNDSelectionMsg() {
         if(aTarget == aDisplay->XA_TARGETS) {
             XConvertSelection(aDisplay->hDisplay, aSelection, XA_STRING, aSelection, aWinReciever, CurrentTime);
         } else if(aTarget == myMaster.xDNDRequestType) {
-            StString aData = StString((char* )aProperty.data);
+            std::vector<StString> aPaths;
+            const char* aCharFrom      = (const char* )aProperty.data;
+            size_t      aCharFromIndex = 0;
+            for(StUtf8Iter aCharIter(aCharFrom);; ++aCharIter) {
+                // cut filenames separated with CR/LF
+                if(*aCharIter == 0
+                || *aCharIter == stUtf32_t('\n')
+                || *aCharIter == stUtf32_t(13)) {
+                    size_t aLen = aCharIter.getIndex() - aCharFromIndex;
+                    if(stAreEqual(aCharFrom, "file://", 7)) {
+                        aCharFrom += 7;
+                        aLen      -= 7;
+                    }
 
-            size_t anEndChar = aData.getLength();
-            for(StUtf8Iter anIter = aData.iterator(); *anIter != 0; ++anIter) {
-                // cut only first filename, separated with CR/LF
-                if(*anIter == stUtf32_t('\n') || *anIter == stUtf32_t(13)) {
-                    anEndChar = anIter.getIndex();
-                    break;
+                    StString aData(aCharFrom, aLen);
+                    StString aFile;
+                    if(myMaster.xDNDRequestType != XA_STRING) {
+                        aFile.fromUrl(aData);
+                    } else {
+                        aFile = aData;
+                    }
+                    if(!aFile.isEmpty()) {
+                        aPaths.push_back(aFile);
+                    }
+
+                    aCharFromIndex = aCharIter.getIndex() + 1;
+                    aCharFrom      = aCharIter.getBufferHere() + 1;
+                    if(*aCharIter == 0) {
+                        break;
+                    }
                 }
             }
 
-            const StString ST_FILE_PROTOCOL("file://");
-            size_t aCutFrom = aData.isStartsWith(ST_FILE_PROTOCOL) ? ST_FILE_PROTOCOL.getLength() : 0;
-            aData = aData.subString(aCutFrom, anEndChar);
-            StString aFile;
-            if(myMaster.xDNDRequestType != XA_STRING) {
-                aFile.fromUrl(aData);
-            } else {
-                aFile = aData;
-            }
             std::vector<const char*> aDndList;
-            aDndList.push_back(aFile.toCString());
+            for(std::vector<StString>::const_iterator aFileIter = aPaths.begin(); aFileIter != aPaths.end(); ++aFileIter) {
+                aDndList.push_back(aFileIter->toCString());
+            }
             if(!aDndList.empty()) {
                 myStEvent.Type = stEvent_FileDrop;
                 myStEvent.DNDrop.Time = getEventTime(myXEvent.xselection.time);
