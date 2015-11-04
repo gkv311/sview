@@ -44,6 +44,16 @@ class StGLTextureButton : public StGLWidget {
     ST_CPPEXPORT virtual ~StGLTextureButton();
 
     /**
+     * Return scale factor to be applied to the widget opacity, 1.0 by default.
+     */
+    ST_LOCAL float getOpacityScale() const { return myOpacityScale; }
+
+    /**
+     * Setup scale factor to be applied to the widget opacity.
+     */
+    ST_LOCAL void setOpacityScale(const float theValue) { myOpacityScale = theValue; }
+
+    /**
      * Setup color for alpha texture.
      */
     ST_LOCAL void setColor(const StGLVec4& theColor) {

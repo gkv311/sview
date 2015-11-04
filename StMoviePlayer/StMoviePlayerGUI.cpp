@@ -150,10 +150,10 @@ void StMoviePlayerGUI::createUpperToolbar() {
     myBtnInfo->changeMargins() = aButtonMargins;
 
     StGLTextureButton* aSrcBtn = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop,
-                                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), StFormat_NB);
+                                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), StFormat_NB + 1);
     aSrcBtn->changeMargins() = aButtonMargins;
     aSrcBtn->signals.onBtnClick += stSlot(this, &StMoviePlayerGUI::doDisplayStereoFormatCombo);
-    const StString aSrcTextures[StFormat_NB] = {
+    const StString aSrcTextures[StFormat_NB + 1] = {
         iconTexture(stCString("menuMono"),           anIconSize),
         iconTexture(stCString("menuSbsLR"),          anIconSize),
         iconTexture(stCString("menuSbsRL"),          anIconSize),
@@ -166,9 +166,10 @@ void StMoviePlayerGUI::createUpperToolbar() {
         iconTexture(stCString("menuRedCyanLR"),      anIconSize),
         iconTexture(stCString("menuGreenMagentaLR"), anIconSize),
         iconTexture(stCString("menuYellowBlueLR"),   anIconSize),
-        iconTexture(stCString("menuTiledLR"),        anIconSize)
+        iconTexture(stCString("menuTiledLR"),        anIconSize),
+        iconTexture(stCString("menuAuto"),           anIconSize)
     };
-    aSrcBtn->setTexturePath(aSrcTextures, StFormat_NB);
+    aSrcBtn->setTexturePath(aSrcTextures, StFormat_NB + 1);
     aSrcBtn->setDrawShadow(true);
     myBtnSrcFrmt = aSrcBtn;
 
@@ -1195,10 +1196,10 @@ void StMoviePlayerGUI::createMobileUpperToolbar() {
     myBtnOpen->changeMargins() = aButtonMargins;
 
     StGLTextureButton* aSrcBtn = new StGLTextureButton(myPanelUpper, (aBtnIter++) * myIconStep, 0,
-                                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), StFormat_NB);
+                                                       StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), StFormat_NB + 1);
     aSrcBtn->changeMargins() = aButtonMargins;
     aSrcBtn->signals.onBtnClick += stSlot(this, &StMoviePlayerGUI::doDisplayStereoFormatCombo);
-    const StString aSrcTextures[StFormat_NB] = {
+    const StString aSrcTextures[StFormat_NB + 1] = {
         iconTexture(stCString("menuMono"),           anIconSize),
         iconTexture(stCString("menuSbsLR"),          anIconSize),
         iconTexture(stCString("menuSbsRL"),          anIconSize),
@@ -1211,9 +1212,10 @@ void StMoviePlayerGUI::createMobileUpperToolbar() {
         iconTexture(stCString("menuRedCyanLR"),      anIconSize),
         iconTexture(stCString("menuGreenMagentaLR"), anIconSize),
         iconTexture(stCString("menuYellowBlueLR"),   anIconSize),
-        iconTexture(stCString("menuTiledLR"),        anIconSize)
+        iconTexture(stCString("menuTiledLR"),        anIconSize),
+        iconTexture(stCString("menuAuto"),           anIconSize)
     };
-    aSrcBtn->setTexturePath(aSrcTextures, StFormat_NB);
+    aSrcBtn->setTexturePath(aSrcTextures, StFormat_NB + 1);
     aSrcBtn->setDrawShadow(true);
     myBtnSrcFrmt = aSrcBtn;
 
@@ -1701,22 +1703,32 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor,
     }
 
     StFormat aSrcFormat = (StFormat )myPlugin->params.srcFormat->getValue();
-    if(aSrcFormat == StFormat_AUTO
-    && !aParams.isNull()) {
+    if( aSrcFormat == StFormat_AUTO
+    && !aParams.isNull()
+    &&  hasVideo) {
         aSrcFormat = aParams->StereoFormat;
     }
     if(!aParams.isNull()
-     && myImage->params.swapLR->getValue()) {
+     && myImage->params.swapLR->getValue()
+     && hasVideo) {
         aSrcFormat = st::formatReversed(aSrcFormat);
     }
     if(myBtnSrcFrmt != NULL) {
-        myBtnSrcFrmt->setFaceId(aSrcFormat != StFormat_AUTO ? aSrcFormat : StFormat_Mono);
+        size_t aFaceId = aSrcFormat;
+        if(aSrcFormat == StFormat_AUTO) {
+            aFaceId = hasVideo ? StFormat_Mono : StFormat_NB;
+        }
+        myBtnSrcFrmt->setOpacityScale(hasVideo ? 1.0f : 0.5f);
+        myBtnSrcFrmt->setFaceId(aFaceId);
     }
     if(myBtnFullScr != NULL) {
         myBtnFullScr->setFaceId(myPlugin->params.isFullscreen->getValue() ? 1 : 0);
     }
     if(myBtnSwapLR != NULL) {
-        myBtnSwapLR->setOpacity(aSrcFormat != StFormat_Mono ? anOpacity : 0.0f, false);
+        const bool hasInput = hasVideo
+                           && aSrcFormat != StFormat_Mono
+                           && aSrcFormat != StFormat_AUTO;
+        myBtnSwapLR->setOpacity(hasInput ? anOpacity : 0.0f, false);
     }
 
     const StStereoParams::ViewMode aViewMode = hasVideo && !aParams.isNull()
