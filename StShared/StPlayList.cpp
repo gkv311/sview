@@ -265,6 +265,9 @@ StPlayList::CurrentPosition StPlayList::getCurrentPosition() const {
     if(myCurrent == NULL) {
         return CurrentPosition_NONE;
     } else if(myCurrent == myFirst) {
+        if(myCurrent == myLast) {
+            return CurrentPosition_NONE;
+        }
         return CurrentPosition_First;
     } else if(myCurrent == myLast) {
         return CurrentPosition_Last;
