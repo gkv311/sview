@@ -80,11 +80,13 @@ void StImageViewerGUI::createDesktopUI(const StHandle<StPlayList>& thePlayList) 
     const int aRight  = -scale(8);
     const int aBottom = -scale(8);
     if(myWindow->hasFullscreenMode()) {
-        // fullscreen button
-        myBtnFull = new StGLTextureButton(myPanelBottom, (aBottomBarNbRight++) * (-anIconStep) + aRight, aBottom,
-                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
-        myBtnFull->signals.onBtnClick.connect(myPlugin->params.isFullscreen.operator->(), &StBoolParam::doReverse);
-        myBtnFull->setTexturePath(iconTexture(stCString("fullScreen"), anIconSize));
+        myBtnFull = new StGLCheckboxTextured(myPanelBottom, myPlugin->params.isFullscreen,
+                                             iconTexture(stCString("actionVideoFullscreenOff"), anIconSize),
+                                             iconTexture(stCString("actionVideoFullscreenOn"),  anIconSize),
+                                             (aBottomBarNbRight++) * (-anIconStep) + aRight, aBottom,
+                                             StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+        myBtnFull->setDrawShadow(true);
+        myBtnFull->setFalseOpacity(1.0f);
         myBtnFull->changeMargins() = aButtonMargins;
     }
 

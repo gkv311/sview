@@ -217,7 +217,7 @@ class StImageViewerGUI : public StGLRootWidget {
     StGLCheckboxTextured* myBtnPanorama;
     StGLTextureButton*  myBtnSrcFrmt;
     StGLTextureButton*  myBtnList;
-    StGLTextureButton*  myBtnFull;
+    StGLCheckboxTextured* myBtnFull;
     StGLFpsLabel*       myFpsWidget;
 
     StGLTable*          myHKeysTable;
