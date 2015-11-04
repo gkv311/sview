@@ -70,9 +70,9 @@ namespace {
     static const int DISPL_X_REGION_UPPER  = 32;
     static const int DISPL_X_REGION_BOTTOM = 52;
 
-    static const StGLVec3 aBlack(0.0f, 0.0f, 0.0f);
-    static const StGLVec3 aGreen(0.4f, 0.8f, 0.4f);
-    static const StGLVec3 aRed  (1.0f, 0.0f, 0.0f);
+    static const StGLVec3 aBlack (0.0f, 0.0f, 0.0f);
+    static const StGLVec3 aGreen (0.0f, 0.6f, 0.4f);
+    static const StGLVec3 aRed   (1.0f, 0.0f, 0.0f);
 
 }
 
@@ -1853,9 +1853,9 @@ void StMoviePlayerGUI::doAudioStreamsCombo(const size_t ) {
                                                     -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
             aDelayRange->changeRectPx().bottom() = aDelayRange->getRectPx().top()  + aBuilder.getMenu()->getItemHeight();
             aDelayRange->setFormat(stCString("%+01.3f"));
-            aDelayRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  StGLVec3(0.0f, 0.0f, 0.0f));
-            aDelayRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, StGLVec3(0.4f, 0.8f, 0.4f));
-            aDelayRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, StGLVec3(1.0f, 0.0f, 0.0f));
+            aDelayRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
+            aDelayRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
+            aDelayRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aRed);
         }
         aBuilder.getMenu()->addItem(tr(MENU_AUDIO_ATTACH))
                           ->setIcon(stCMenuIcon("actionOpen"), false)
