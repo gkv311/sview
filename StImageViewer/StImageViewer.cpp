@@ -990,12 +990,34 @@ void StImageViewer::doFileDrop(const StDNDropEvent& theEvent) {
         return;
     }
 
-    const StString aFilePath = theEvent.Files[0];
-    if(myLoader->getPlayList().checkExtension(aFilePath)) {
-        myLoader->getPlayList().open(aFilePath);
+    const StString aFile1 = theEvent.Files[0];
+    if(!myLoader->getPlayList().checkExtension(aFile1)) {
+        return;
+    } else if(theEvent.NbFiles == 1) {
+        myLoader->getPlayList().open(aFile1);
         doUpdateStateLoading();
         myLoader->doLoadNext();
+        return;
+    } else if(theEvent.NbFiles == 2
+          && !StFolder::isFolder(aFile1)
+          && !StFolder::isFolder(StString(theEvent.Files[1]))) {
+        myLoader->getPlayList().clear();
+        myLoader->getPlayList().addOneFile(aFile1, StString(theEvent.Files[1]));
+        doUpdateStateLoading();
+        myLoader->doLoadNext();
+        return;
     }
+
+    myLoader->getPlayList().clear();
+    for(uint32_t aFileIter = 0; aFileIter < theEvent.NbFiles; ++aFileIter) {
+        StString aPath(theEvent.Files[aFileIter]);
+        if(!StFolder::isFolder(aPath)) {
+            myLoader->getPlayList().addOneFile(aPath, StMIME());
+        }
+    }
+
+    doUpdateStateLoading();
+    myLoader->doLoadNext();
 }
 
 void StImageViewer::doNavigate(const StNavigEvent& theEvent) {
