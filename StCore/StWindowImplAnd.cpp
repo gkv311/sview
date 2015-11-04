@@ -378,7 +378,7 @@ void StWindowImpl::processEvents() {
     myParentWin->fetchState(aDndFile, myQuaternion);
     if(!aDndFile.isEmpty()) {
         std::vector<const char*> aDndList;
-        aDndList.push_back(aDndFile);
+        aDndList.push_back(aDndFile.toCString());
         myStEvent.Type = stEvent_FileDrop;
         myStEvent.DNDrop.Time = getEventTime();
         myStEvent.DNDrop.NbFiles = aDndList.size();
