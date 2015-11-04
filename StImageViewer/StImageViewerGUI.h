@@ -37,6 +37,8 @@ class StGLImageRegion;
 class StGLMsgStack;
 class StGLFpsLabel;
 class StGLTable;
+class StGLPlayList;
+class StPlayList;
 class StWindow;
 
 /**
@@ -89,6 +91,7 @@ class StImageViewerGUI : public StGLRootWidget {
     ST_LOCAL StImageViewerGUI(StImageViewer*  thePlugin,
                               StWindow*       theWindow,
                               StTranslations* theLangMap,
+                              const StHandle<StPlayList>&       thePlayList,
                               const StHandle<StGLTextureQueue>& theTextureQueue);
     ST_LOCAL virtual ~StImageViewerGUI();
     ST_LOCAL virtual void stglUpdate(const StPointD_t& pointZo);
@@ -130,7 +133,7 @@ class StImageViewerGUI : public StGLRootWidget {
     /**
      * Create normal (desktop) interface.
      */
-    ST_LOCAL void createDesktopUI();
+    ST_LOCAL void createDesktopUI(const StHandle<StPlayList>& thePlayList);
 
     /**
      * Create upper tool-bar.
@@ -161,7 +164,7 @@ class StImageViewerGUI : public StGLRootWidget {
     /**
      * Create mobile interface.
      */
-    ST_LOCAL void      createMobileUI();
+    ST_LOCAL void      createMobileUI(const StHandle<StPlayList>& thePlayList);
 
     ST_LOCAL void      createMobileUpperToolbar();
     ST_LOCAL void      createMobileBottomToolbar();
@@ -200,6 +203,7 @@ class StImageViewerGUI : public StGLRootWidget {
     StGLImageRegion*    myImage;            //!< the main image
     StGLDescription*    myDescr;            //!< description text shown near mouse cursor
     StGLMsgStack*       myMsgStack;         //!< messages stack
+    StGLPlayList*       myPlayList;
 
     StGLMenu*           myMenuRoot;         //!< main menu
 
@@ -212,7 +216,7 @@ class StImageViewerGUI : public StGLRootWidget {
     StGLTextureButton*  myBtnSwapLR;
     StGLCheckboxTextured* myBtnPanorama;
     StGLTextureButton*  myBtnSrcFrmt;
-    StGLTextureButton*  myBtnPlayList;
+    StGLTextureButton*  myBtnList;
     StGLTextureButton*  myBtnFull;
     StGLFpsLabel*       myFpsWidget;
 

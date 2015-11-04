@@ -35,6 +35,7 @@
 #include <StGLWidgets/StGLMenuItem.h>
 #include <StGLWidgets/StGLMsgStack.h>
 #include <StGLWidgets/StGLOpenFile.h>
+#include <StGLWidgets/StGLPlayList.h>
 #include <StGLWidgets/StGLRangeFieldFloat32.h>
 #include <StGLWidgets/StGLScrollArea.h>
 #include <StGLWidgets/StGLSwitchTextured.h>
@@ -62,31 +63,48 @@ StInfoDialog::~StInfoDialog() {
     myPlugin->doSaveImageInfo(0);
 }
 
-void StImageViewerGUI::createDesktopUI() {
+void StImageViewerGUI::createDesktopUI(const StHandle<StPlayList>& thePlayList) {
     if(myPlugin->params.ToShowFps->getValue()) {
         myFpsWidget = new StGLFpsLabel(this);
     }
 
     createUpperToolbar();
 
-    const StMarginsI& aMargins = getRootMargins();
+    const StMarginsI& aRootMargins = getRootMargins();
     StMarginsI aButtonMargins;
     const IconSize anIconSize = scaleIcon(32, aButtonMargins);
-    /*myBtnPlayList = new StGLTextureButton(this, -aMargins.right - scale(8 + 8 + 32), -aMargins.bottom - scale(8),
-                                          StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_RIGHT));
-    myBtnPlayList->setTexturePath(iconTexture(stCString("playList"), anIconSize));
-    myBtnPlayList->changeMargins() = aButtonMargins;*/
+    const int      anIconStep = scale(32);
 
-    // fullscreen button
+    myPanelBottom = new StGLContainer(this, aRootMargins.left, -aRootMargins.bottom, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(32));
+    int aBottomBarNbRight = 0;
+    const int aRight  = -scale(8);
+    const int aBottom = -scale(8);
     if(myWindow->hasFullscreenMode()) {
-        myBtnFull = new StGLTextureButton(this, -aMargins.right - scale(8), -aMargins.bottom - scale(8),
-                                          StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_RIGHT));
+        // fullscreen button
+        myBtnFull = new StGLTextureButton(myPanelBottom, (aBottomBarNbRight++) * (-anIconStep) + aRight, aBottom,
+                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
         myBtnFull->signals.onBtnClick.connect(myPlugin->params.isFullscreen.operator->(), &StBoolParam::doReverse);
         myBtnFull->setTexturePath(iconTexture(stCString("fullScreen"), anIconSize));
         myBtnFull->changeMargins() = aButtonMargins;
     }
 
+    myBtnList = new StGLCheckboxTextured(myPanelBottom, myPlugin->params.ToShowPlayList,
+                                         iconTexture(stCString("actionVideoPlaylistOff"), anIconSize),
+                                         iconTexture(stCString("actionVideoPlaylist"),    anIconSize),
+                                         (aBottomBarNbRight++) * (-anIconStep) + aRight, aBottom,
+                                         StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    myBtnList->setDrawShadow(true);
+    myBtnList->changeMargins() = aButtonMargins;
+
     myDescr = new StGLDescription(this);
+
+    myPlayList = new StGLPlayList(this, thePlayList);
+    myPlayList->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    myPlayList->changeFitMargins().top    = scale(110);
+    myPlayList->changeFitMargins().bottom = scale(110);
+    //myPlayList->changeMargins().bottom    = scale(32);
+    myPlayList->setOpacity(myPlugin->params.ToShowPlayList->getValue() ? 1.0f : 0.0f, false);
+    myPlayList->signals.onOpenItem = stSlot(myPlugin, &StImageViewer::doFileNext);
 
     // create Main menu
     createMainMenu();
@@ -799,9 +817,17 @@ StGLMenu* StImageViewerGUI::createLanguageMenu() {
     return aMenu;
 }
 
-void StImageViewerGUI::createMobileUI() {
+void StImageViewerGUI::createMobileUI(const StHandle<StPlayList>& thePlayList) {
     createMobileUpperToolbar();
     createMobileBottomToolbar();
+
+    myPlayList = new StGLPlayList(this, thePlayList);
+    myPlayList->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    myPlayList->changeFitMargins().top    = scale(56);
+    myPlayList->changeFitMargins().bottom = scale(100);
+    //myPlayList->changeMargins().bottom    = scale(56);
+    myPlayList->setOpacity(myPlugin->params.ToShowPlayList->getValue() ? 1.0f : 0.0f, false);
+    myPlayList->signals.onOpenItem = stSlot(myPlugin, &StImageViewer::doFileNext);
 
     if(myPlugin->params.ToShowFps->getValue()) {
         myFpsWidget = new StGLFpsLabel(this);
@@ -925,6 +951,14 @@ void StImageViewerGUI::createMobileBottomToolbar() {
     aBtnZoomOut->setDrawShadow(true);
     aBtnZoomOut->setUserData(StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_ScaleOut);
     aBtnZoomOut->signals.onBtnHold += stSlot(this, &StImageViewerGUI::doAction);
+
+    myBtnList = new StGLCheckboxTextured(myPanelBottom, myPlugin->params.ToShowPlayList,
+                                         iconTexture(stCString("actionVideoPlaylistOff"), anIconSize),
+                                         iconTexture(stCString("actionVideoPlaylist"),    anIconSize),
+                                         (aBtnIter++) * (-anIconStep), 0,
+                                         StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    myBtnList->setDrawShadow(true);
+    myBtnList->changeMargins() = aButtonMargins;
 }
 
 void StImageViewerGUI::doOpenFile(const size_t ) {
@@ -991,6 +1025,7 @@ void StImageViewerGUI::doShowMobileExMenu(const size_t ) {
 StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
                                    StWindow*       theWindow,
                                    StTranslations* theLangMap,
+                                   const StHandle<StPlayList>&       thePlayList,
                                    const StHandle<StGLTextureQueue>& theTextureQueue)
 : StGLRootWidget(thePlugin->myResMgr),
   myPlugin(thePlugin),
@@ -1001,6 +1036,7 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
   myImage(NULL),
   myDescr(NULL),
   myMsgStack(NULL),
+  myPlayList(NULL),
   //
   myMenuRoot(NULL),
   //
@@ -1013,7 +1049,7 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
   myBtnSwapLR(NULL),
   myBtnPanorama(NULL),
   myBtnSrcFrmt(NULL),
-  myBtnPlayList(NULL),
+  myBtnList(NULL),
   myBtnFull(NULL),
   //
   myFpsWidget(NULL),
@@ -1043,9 +1079,9 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
     myImage->params.ViewMode->signals.onChanged += stSlot(myPlugin, &StImageViewer::doSwitchViewMode);
 
     if(isMobile()) {
-        createMobileUI();
+        createMobileUI(thePlayList);
     } else {
-        createDesktopUI();
+        createDesktopUI(thePlayList);
     }
 
     myMsgStack = new StGLMsgStack(this, myPlugin->getMessagesQueue());
@@ -1089,6 +1125,7 @@ size_t StImageViewerGUI::trSrcFormatId(const StFormat theSrcFormat) {
 
 void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
                                      bool              toForceHide) {
+    const bool toShowPlayList = myPlugin->params.ToShowPlayList->getValue();
     const bool hasMainMenu    =  myPlugin->params.ToShowMenu->getValue()
                              &&  myMenuRoot != NULL;
     const bool hasUpperPanel  = !myIsMinimalGUI
@@ -1105,6 +1142,7 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
         || aStillTime < 2.0
         || (hasUpperPanel  && myPanelUpper ->isPointIn(theCursor))
         || (hasBottomPanel && myPanelBottom->isPointIn(theCursor))
+        || (myPlayList != NULL && toShowPlayList && myPlayList->isPointIn(theCursor))
         || (hasMainMenu    && myMenuRoot->isActive());
 
     if(isMouseActive) {
@@ -1122,8 +1160,9 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
     if(myPanelBottom != NULL) {
         myPanelBottom->setOpacity(hasBottomPanel ? anOpacity : 0.0f, true);
     }
-    if(myBtnPlayList != NULL) {
-        //myBtnPlayList->setOpacity(hasBottomPanel ? anOpacity : 0.0f, false);
+    if(myPlayList != NULL
+    && toShowPlayList) {
+        myPlayList->setOpacity(anOpacity, true);
     }
     if(myBtnFull != NULL) {
         myBtnFull->setOpacity(myIsMinimalGUI ? 1.0f : anOpacity, false);
@@ -1188,7 +1227,7 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
         } else if(::isPointIn(myBtnSwapLR, theCursor)) {
             size_t aLngId = myImage->params.swapLR->getValue() ? SWAP_LR_ON : SWAP_LR_OFF;
             myDescr->setText(tr(aLngId));
-        } else if(::isPointIn(myBtnPlayList, theCursor)) {
+        } else if(::isPointIn(myBtnList, theCursor)) {
             myDescr->setText(tr(PLAYLIST));
         } else if(::isPointIn(myBtnFull, theCursor)) {
             myDescr->setText(tr(FULLSCREEN));

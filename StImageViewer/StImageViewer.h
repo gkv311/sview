@@ -133,6 +133,7 @@ class StImageViewer : public StApplication {
         StHandle<StBoolParam>    ToTrackHead;      //!< enable/disable head-tracking
         StHandle<StBoolParam>    ToShowMenu;       //!< show main menu
         StHandle<StBoolParam>    ToShowTopbar;     //!< show topbar
+        StHandle<StBoolParam>    ToShowPlayList;   //!< display playlist
         StHandle<StBoolParam>    ToShowFps;        //!< display FPS meter
         StHandle<StBoolParam>    IsMobileUI;       //!< display mobile interface
         StHandle<StBoolParam>    IsVSyncOn;        //!< flag to use VSync
@@ -159,6 +160,8 @@ class StImageViewer : public StApplication {
     ST_LOCAL void doSwitchSrcFormat(const int32_t theSrcFormat);
     ST_LOCAL void doSwitchViewMode(const int32_t theMode);
     ST_LOCAL void doPanoramaOnOff(const size_t );
+    ST_LOCAL void doShowPlayList(const bool theToShow);
+    ST_LOCAL void doFileNext();
 
         public:
 
@@ -217,6 +220,7 @@ class StImageViewer : public StApplication {
     StHandle<StGLContext>      myContext;
     StHandle<StSettings>       mySettings;        //!< settings manager for Image Viewer plugin
     StHandle<StTranslations>   myLangMap;         //!< translated strings map
+    StHandle<StPlayList>       myPlayList;        //!< play list
     StHandle<StImageViewerGUI> myGUI;             //!< GUI root widget
     StHandle<StImageLoader>    myLoader;          //!< main image loader class
     StHandle<StCheckUpdates>   myUpdates;         //!< check updates utility

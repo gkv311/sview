@@ -73,6 +73,7 @@ class StImageLoader {
     ST_LOCAL StImageLoader(const StImageFile::ImageClass     theImageLib,
                            const StHandle<StMsgQueue>&       theMsgQueue,
                            const StHandle<StLangMap>&        theLangMap,
+                           const StHandle<StPlayList>&       thePlayList,
                            const StHandle<StGLTextureQueue>& theTextureQueue,
                            const GLint                       theMaxTexDim);
     ST_LOCAL ~StImageLoader();
@@ -119,7 +120,7 @@ class StImageLoader {
     }
 
     ST_LOCAL StPlayList& getPlayList() {
-        return myPlayList;
+        return *myPlayList;
     }
 
     ST_LOCAL void setStereoFormat(const StFormat theSrcFormat) {
@@ -179,7 +180,7 @@ class StImageLoader {
     const StMIMEList           myMimeList;
     StHandle<StThread>         myThread;        //!< main loop thread
     StHandle<StLangMap>        myLangMap;       //!< translations dictionary
-    StPlayList                 myPlayList;      //!< play list
+    StHandle<StPlayList>       myPlayList;      //!< play list
     mutable StMutex            myLock;          //!< lock to access not thread-safe properties
     StCondition                myLoadNextEvent;
     StFormat                   myStFormatByUser;//!< target source format (auto-detect by default)

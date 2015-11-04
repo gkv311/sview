@@ -49,11 +49,12 @@ namespace {
 StImageLoader::StImageLoader(const StImageFile::ImageClass     theImageLib,
                              const StHandle<StMsgQueue>&       theMsgQueue,
                              const StHandle<StLangMap>&        theLangMap,
+                             const StHandle<StPlayList>&       thePlayList,
                              const StHandle<StGLTextureQueue>& theTextureQueue,
                              const GLint                       theMaxTexDim)
 : myMimeList(ST_IMAGES_MIME_STRING),
   myLangMap(theLangMap),
-  myPlayList(1),
+  myPlayList(thePlayList),
   myLoadNextEvent(false),
   myStFormatByUser(StFormat_AUTO),
   myMaxTexDim(theMaxTexDim),
@@ -61,7 +62,7 @@ StImageLoader::StImageLoader(const StImageFile::ImageClass     theImageLib,
   myMsgQueue(theMsgQueue),
   myImageLib(theImageLib),
   myAction(Action_NONE) {
-      myPlayList.setExtensions(myMimeList.getExtensionsList());
+      myPlayList->setExtensions(myMimeList.getExtensionsList());
       myThread = new StThread(threadFunction, (void* )this, "StImageLoader");
 }
 
@@ -645,7 +646,7 @@ void StImageLoader::mainLoop() {
                 myAction = Action_NONE;
                 myLoadNextEvent.reset();
                 // save current image (set as current in playlist)
-                if(myPlayList.getCurrentFile(aFileToLoad, aFileParams)) {
+                if(myPlayList->getCurrentFile(aFileToLoad, aFileParams)) {
                     saveImage(aFileToLoad, aFileParams, anImgType);
                 }
                 break;
@@ -666,7 +667,7 @@ void StImageLoader::mainLoop() {
             default: {
                 // load next image (set as current in playlist)
                 myLoadNextEvent.reset();
-                if(myPlayList.getCurrentFile(aFileToLoad, aFileParams)) {
+                if(myPlayList->getCurrentFile(aFileToLoad, aFileParams)) {
                     loadImage(aFileToLoad, aFileParams);
                 }
                 break;

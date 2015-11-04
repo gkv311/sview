@@ -29,6 +29,7 @@
 #include <StGLWidgets/StGLImageRegion.h>
 #include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLMsgStack.h>
+#include <StGLWidgets/StGLPlayList.h>
 #include <StSettings/StSettings.h>
 #include <StSocket/StCheckUpdates.h>
 #include <StThreads/StThread.h>
@@ -55,6 +56,7 @@ namespace {
     static const char ST_SETTING_RECENT_L[]    = "recentL";
     static const char ST_SETTING_RECENT_R[]    = "recentR";
     static const char ST_SETTING_SAVE_RECENT[] = "toSaveRecent";
+    static const char ST_SETTING_SHOW_LIST[]   = "showPlaylist";
     static const char ST_SETTING_COMPRESS[]    = "toCompress";
     static const char ST_SETTING_ESCAPENOQUIT[]= "escNoQuit";
     static const char ST_SETTING_FULLSCREENUI[]= "fullScreenUI";
@@ -258,6 +260,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
                              const StHandle<StOpenInfo>&        theOpenInfo,
                              const StString&                    theAppName)
 : StApplication(theResMgr, theParentWin, theOpenInfo),
+  myPlayList(new StPlayList(1, false)),
   myAppName(!theAppName.isEmpty() ? theAppName : ST_DRAWER_PLUGIN_NAME),
   myEventLoaded(false),
   //
@@ -298,6 +301,8 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     params.checkUpdatesDays = new StInt32Param(7);
     params.srcFormat        = new StInt32Param(StFormat_AUTO);
     params.srcFormat->signals.onChanged.connect(this, &StImageViewer::doSwitchSrcFormat);
+    params.ToShowPlayList   = new StBoolParam(false);
+    params.ToShowPlayList->signals.onChanged = stSlot(this, &StImageViewer::doShowPlayList);
     params.ToTrackHead   = new StBoolParamNamed(true,  tr(StImageViewerStrings::MENU_VIEW_TRACK_HEAD));
     params.ToShowFps     = new StBoolParamNamed(false, tr(StImageViewerStrings::MENU_SHOW_FPS));
     params.ToShowMenu    = new StBoolParamNamed(true, "Show main menu");
@@ -320,6 +325,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
     mySettings->loadParam (ST_SETTING_MOBILE_UI,          params.IsMobileUI);
     mySettings->loadParam (ST_SETTING_VSYNC,              params.IsVSyncOn);
+    mySettings->loadParam (ST_SETTING_SHOW_LIST,          params.ToShowPlayList);
 
     int32_t aSlideShowDelayInt = int32_t(mySlideShowDelay);
     mySettings->loadInt32 (ST_SETTING_SLIDESHOW_DELAY,    aSlideShowDelayInt);
@@ -454,6 +460,7 @@ void StImageViewer::saveAllParams() {
         mySettings->saveParam (ST_SETTING_SHOW_FPS,  params.ToShowFps);
         mySettings->saveParam (ST_SETTING_MOBILE_UI, params.IsMobileUI);
         mySettings->saveParam (ST_SETTING_VSYNC,     params.IsVSyncOn);
+        mySettings->saveParam (ST_SETTING_SHOW_LIST, params.ToShowPlayList);
         if(myToSaveSrcFormat) {
             mySettings->saveParam(ST_SETTING_SRCFORMAT, params.srcFormat);
         }
@@ -506,7 +513,7 @@ bool StImageViewer::createGui() {
 
     // create the GUI with default values
     params.ScaleHiDPI->setValue(myWindow->getScaleFactor());
-    myGUI = new StImageViewerGUI(this, myWindow.access(), myLangMap.access(),
+    myGUI = new StImageViewerGUI(this, myWindow.access(), myLangMap.access(), myPlayList,
                                  myLoader.isNull() ? NULL : myLoader->getTextureQueue());
     myGUI->setContext(myContext);
 
@@ -580,7 +587,7 @@ bool StImageViewer::init() {
     StString anImgLibStr;
     mySettings->loadString(ST_SETTING_IMAGELIB, anImgLibStr);
     params.imageLib = StImageFile::imgLibFromString(anImgLibStr);
-    myLoader = new StImageLoader(params.imageLib, myMsgQueue, myLangMap,
+    myLoader = new StImageLoader(params.imageLib, myMsgQueue, myLangMap, myPlayList,
                                  myGUI->myImage->getTextureQueue(), myContext->getMaxTextureSize());
     myLoader->signals.onLoaded.connect(this, &StImageViewer::doLoaded);
     myLoader->setCompressMemory(myWindow->isMobile());
@@ -1312,6 +1319,24 @@ void StImageViewer::doReset(const size_t ) {
 
 void StImageViewer::doLoaded() {
     myEventLoaded.set();
+}
+
+void StImageViewer::doShowPlayList(const bool theToShow) {
+    if(myGUI.isNull()
+    || myGUI->myPlayList == NULL) {
+        return;
+    }
+
+    myGUI->myPlayList->setOpacity(theToShow ? 1.0f : 0.0f, false);
+}
+
+void StImageViewer::doFileNext() {
+    if(myLoader.isNull()) {
+        return;
+    }
+
+    myLoader->doLoadNext();
+    doUpdateStateLoading();
 }
 
 bool StImageViewer::getCurrentFile(StHandle<StFileNode>&     theFileNode,
