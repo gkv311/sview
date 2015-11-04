@@ -500,7 +500,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
             if(!aDndList.empty()) {
                 myStEvent.Type = stEvent_FileDrop;
                 myStEvent.DNDrop.Time    = getEventTime(myEvent.time);
-                myStEvent.DNDrop.NbFiles = aDndList.size();
+                myStEvent.DNDrop.NbFiles = (uint32_t )aDndList.size();
                 myStEvent.DNDrop.Files   = &aDndList[0];
                 myEventsBuffer.append(myStEvent);
             }

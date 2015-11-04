@@ -20,6 +20,7 @@
 
 namespace {
 
+#ifndef _WIN32
     /**
      * clock_gettime() wrapper.
      */
@@ -33,6 +34,7 @@ namespace {
         clock_gettime(CLOCK_REALTIME, &theTime);
     #endif
     }
+#endif
 
 }
 
