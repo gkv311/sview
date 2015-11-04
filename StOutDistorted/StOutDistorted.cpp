@@ -522,6 +522,7 @@ bool StOutDistorted::create() {
     // initialize GL context
     myContext = StWindow::getContext();
     myContext->setMessagesQueue(myMsgQueue);
+    myIsBroken = false;
     if(!myContext->isGlGreaterEqual(2, 0)) {
         myMsgQueue->pushError(stCString("OpenGL 2.0 is required by Distorted Output"));
         myIsBroken = true;
@@ -585,7 +586,6 @@ bool StOutDistorted::create() {
         || !OVR_SUCCESS(anOvrRes)) {
             myMsgQueue->pushError(stCString("StOutDistorted, Oculus Rift is not connected!"));
             myOvrHmd = NULL;
-            myIsBroken = true;
             return true;
         }
     }
@@ -640,8 +640,6 @@ bool StOutDistorted::create() {
         myContext->stglBindFramebufferRead(anFboReadBack);
     }
 #endif
-
-    myIsBroken = false;
     return true;
 }
 
