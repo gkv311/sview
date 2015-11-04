@@ -1209,6 +1209,10 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
         if(wasEmpty
         && aStillTime < 1.0) {
             myDescr->setText("");
+        } else if(getFocus() != NULL
+               || (myMenuRoot != NULL && myMenuRoot->isActive())) {
+            // hide within active dialog - should be replaced by z-layer check
+            myDescr->setText("");
         }
 
         myDescr->setOpacity(!myDescr->getText().isEmpty() ? 1.0f : 0.0f, true);
