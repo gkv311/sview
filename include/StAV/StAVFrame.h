@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -27,6 +27,11 @@ class StAVFrame {
      * Destructor
      */
     ST_CPPEXPORT ~StAVFrame();
+
+    /**
+     * Return true if frame does not contain any data.
+     */
+    ST_LOCAL bool isEmpty() const { return Frame->format == -1; } // AV_PIX_FMT_NONE
 
     /**
      * Reset frame to default state (empty).

@@ -78,6 +78,11 @@ class StAVImage : public StImageFile {
 
     ST_LOCAL static int getAVPixelFormat(const StImage& theImage);
 
+    /**
+     * Close currently opened image context and release memory.
+     */
+    ST_LOCAL void closeAvCtx();
+
         private:
 
     AVInputFormat*   myImageFormat; //!< image format

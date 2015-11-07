@@ -170,6 +170,11 @@ bool StAVImage::resize(const StImage& theImageFrom,
 
 void StAVImage::close() {
     myMetadata.clear();
+    closeAvCtx();
+}
+
+void StAVImage::closeAvCtx() {
+    myFrame.reset();
     if(myCodec != NULL && myCodecCtx != NULL) {
         avcodec_close(myCodecCtx); // close VIDEO codec
     }
@@ -470,6 +475,8 @@ bool StAVImage::load(const StString& theFilePath,
                   myFrame.Frame->data, myFrame.Frame->linesize,
                   0, myCodecCtx->height,
                   rgbData, rgbLinesize);
+        // reset original data
+        closeAvCtx();
 
         sws_freeContext(pToRgbCtx);
     }
