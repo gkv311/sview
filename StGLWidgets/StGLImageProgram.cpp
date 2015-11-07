@@ -88,9 +88,9 @@ StGLImageProgram::StGLImageProgram()
         "    bool evenX = int(mod(floor(gl_FragCoord.x + 1.5), 16.0)) >= 8;\n" // just simple 8 pixels check-board
         "    bool evenY = int(mod(floor(gl_FragCoord.y + 1.5), 16.0)) >= 8;\n"
         "    if((evenX && evenY) || (!evenX && !evenY)) {\n"
-        "        backColor = vec4(0.2, 0.2, 0.2, 1.0);\n"
+        "        backColor = vec4(0.4, 0.4, 0.4, 1.0);\n"
         "    } else {\n"
-        "        backColor = vec4(1.0, 1.0, 1.0, 1.0);\n"
+        "        backColor = vec4(0.6, 0.6, 0.6, 1.0);\n"
         "    }\n"
         "    color = mix(backColor, color, color.a);\n"
         "}\n\n");
