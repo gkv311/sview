@@ -109,18 +109,28 @@ int StVideoQueue::getFrameBuffer(AVFrame* theFrame,
         if(!isDone) {
             aResult = avcodec_default_get_buffer2(myCodecCtx, theFrame, theFlags);
         }
+
+    #ifdef ST_AV_OLDSYNC
+    #ifdef ST_USE64PTR
+        theFrame->opaque = (void* )myVideoPktPts;
+    #else
+        AVFrameSideData* aSideDataSync = av_frame_new_side_data(theFrame, (AVFrameSideDataType )1000, sizeof(myVideoPktPts));
+        if(aSideDataSync != NULL) {
+            memcpy(aSideDataSync->data, &myVideoPktPts, sizeof(myVideoPktPts));
+        }
+    #endif
+    #endif
 #else
     aResult = avcodec_default_get_buffer(myCodecCtx, theFrame);
-#endif
-
-#ifdef ST_AV_OLDSYNC
-#ifdef ST_USE64PTR
-    theFrame->opaque = (void* )myVideoPktPts;
-#else
-    int64_t* aPts = new int64_t();
-    *aPts = myVideoPktPts;
-    theFrame->opaque = aPts;
-#endif
+    #ifdef ST_AV_OLDSYNC
+    #ifdef ST_USE64PTR
+        theFrame->opaque = (void* )myVideoPktPts;
+    #else
+        int64_t* aPts = new int64_t();
+        *aPts = myVideoPktPts;
+        theFrame->opaque = aPts;
+    #endif
+    #endif
 #endif
     return aResult;
 }
@@ -720,20 +730,22 @@ void StVideoQueue::decodeLoop() {
         // Save global pts to be stored in pFrame in first call
         myVideoPktPts = aPacket->getPts();
 
-    #ifdef ST_USE64PTR
-        if(aPacket->getDts() == stAV::NOPTS_VALUE
-        && (int64_t )myFrame.Frame->opaque != stAV::NOPTS_VALUE) {
-            myFramePts = double((int64_t )myFrame.Frame->opaque);
-    #else
-        if(aPacket->getDts() == stAV::NOPTS_VALUE
-        && myFrame.Frame->opaque != NULL
-        && *(int64_t* )myFrame.Frame->opaque != stAV::NOPTS_VALUE) {
-            myFramePts = double(*(int64_t* )myFrame.Frame->opaque);
-    #endif
-        } else if(aPacket->getDts() != stAV::NOPTS_VALUE) {
+        myFramePts = 0.0;
+        if(aPacket->getDts() != stAV::NOPTS_VALUE) {
             myFramePts = double(aPacket->getDts());
         } else {
-            myFramePts = 0.0;
+            int64_t aPktPtsSync = stAV::NOPTS_VALUE;
+        #ifdef ST_USE64PTR
+            aPktPtsSync = (int64_t )myFrame.Frame->opaque;
+        #else
+            AVFrameSideData* aSideDataSync = av_frame_get_side_data(myFrame.Frame, (AVFrameSideDataType )1000);
+            if(aSideDataSync != NULL) {
+                memcpy(&aPktPtsSync, &aSideDataSync->data, sizeof(myVideoPktPts));
+            }
+        #endif
+            if(aPktPtsSync != stAV::NOPTS_VALUE) {
+                myFramePts = double(aPktPtsSync);
+            }
         }
         myFramePts *= av_q2d(myStream->time_base);
         myFramePts -= myPtsStartBase; // normalize PTS
