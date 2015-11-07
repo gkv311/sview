@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -117,7 +117,8 @@ class StPlayList {
      * Enumeration identifying position of current item in the playlist.
      */
     enum CurrentPosition {
-        CurrentPosition_NONE,   //!< not       in the list
+        CurrentPosition_NONE,   //!< empty list
+        CurrentPosition_Single, //!< single item
         CurrentPosition_First,  //!< first     in the list
         CurrentPosition_Last,   //!< last      in the list
         CurrentPosition_Middle, //!< somewhere in the list

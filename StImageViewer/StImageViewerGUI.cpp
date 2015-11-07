@@ -1172,12 +1172,12 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
 
     const StPlayList::CurrentPosition aCurrPos = myPlugin->myLoader->getPlayList().getCurrentPosition();
     if(myBtnPrev != NULL) {
-        myBtnPrev->setOpacityScale(aCurrPos != StPlayList::CurrentPosition_First
-                                && aCurrPos != StPlayList::CurrentPosition_NONE ? 1.0f : 0.5f);
+        myBtnPrev->setOpacityScale(aCurrPos == StPlayList::CurrentPosition_Middle
+                                || aCurrPos == StPlayList::CurrentPosition_Last ? 1.0f : 0.5f);
     }
     if(myBtnNext != NULL) {
-        myBtnNext->setOpacityScale(aCurrPos != StPlayList::CurrentPosition_Last
-                                && aCurrPos != StPlayList::CurrentPosition_NONE ? 1.0f : 0.5f);
+        myBtnNext->setOpacityScale(aCurrPos == StPlayList::CurrentPosition_Middle
+                                || aCurrPos == StPlayList::CurrentPosition_First ? 1.0f : 0.5f);
     }
 
     StFormat aSrcFormat = (StFormat )myPlugin->params.srcFormat->getValue();

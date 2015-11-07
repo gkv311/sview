@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -266,7 +266,7 @@ StPlayList::CurrentPosition StPlayList::getCurrentPosition() const {
         return CurrentPosition_NONE;
     } else if(myCurrent == myFirst) {
         if(myCurrent == myLast) {
-            return CurrentPosition_NONE;
+            return CurrentPosition_Single;
         }
         return CurrentPosition_First;
     } else if(myCurrent == myLast) {
