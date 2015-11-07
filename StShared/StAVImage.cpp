@@ -22,24 +22,13 @@ StAVImage::StAVImage()
 : myImageFormat(NULL),
   myFormatCtx(NULL),
   myCodecCtx(NULL),
-  myCodec(NULL),
-  myFrame(NULL) {
+  myCodec(NULL) {
     StAVImage::init();
     myImageFormat = av_find_input_format("image2");
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 45, 101))
-    myFrame = av_frame_alloc();
-#else
-    myFrame = avcodec_alloc_frame();
-#endif
 }
 
 StAVImage::~StAVImage() {
     close();
-#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 45, 101))
-    av_frame_free(&myFrame);
-#else
-    av_free(myFrame);
-#endif
 }
 
 int StAVImage::getAVPixelFormat(const StImage& theImage) {
@@ -328,9 +317,9 @@ bool StAVImage::load(const StString& theFilePath,
     // decode one frame
     int isFrameFinished = 0;
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 23, 0))
-    avcodec_decode_video2(myCodecCtx, myFrame, &isFrameFinished, anAvPkt.getAVpkt());
+    avcodec_decode_video2(myCodecCtx, myFrame.Frame, &isFrameFinished, anAvPkt.getAVpkt());
 #else
-    avcodec_decode_video(myCodecCtx, myFrame, &isFrameFinished,
+    avcodec_decode_video(myCodecCtx, myFrame.Frame, &isFrameFinished,
                          theDataPtr, theDataSize);
 #endif
 
@@ -364,7 +353,7 @@ bool StAVImage::load(const StString& theFilePath,
 
 #ifdef ST_AV_NEWSTEREO
     // currently it is unlikelly... but maybe in future?
-    AVFrameSideData* aSideData = av_frame_get_side_data(myFrame, AV_FRAME_DATA_STEREO3D);
+    AVFrameSideData* aSideData = av_frame_get_side_data(myFrame.Frame, AV_FRAME_DATA_STEREO3D);
     if(aSideData != NULL) {
         AVStereo3D* aStereo = (AVStereo3D* )aSideData->data;
         mySrcFormat = stAV::stereo3dAvToSt(aStereo->type);
@@ -392,7 +381,7 @@ bool StAVImage::load(const StString& theFilePath,
     }
 
     // collect metadata from the frame
-    stAV::meta::Dict* aFrameMetadata = stAV::meta::getFrameMetadata(myFrame);
+    stAV::meta::Dict* aFrameMetadata = stAV::meta::getFrameMetadata(myFrame.Frame);
     for(stAV::meta::Tag* aTag = stAV::meta::findTag(aFrameMetadata, "", NULL, stAV::meta::SEARCH_IGNORE_SUFFIX);
         aTag != NULL;
         aTag = stAV::meta::findTag(aFrameMetadata, "", aTag, stAV::meta::SEARCH_IGNORE_SUFFIX)) {
@@ -402,34 +391,34 @@ bool StAVImage::load(const StString& theFilePath,
     stAV::dimYUV aDimsYUV;
     if(myCodecCtx->pix_fmt == stAV::PIX_FMT::RGB24) {
         setColorModel(StImage::ImgColor_RGB);
-        changePlane(0).initWrapper(StImagePlane::ImgRGB, myFrame->data[0],
+        changePlane(0).initWrapper(StImagePlane::ImgRGB, myFrame.getPlane(0),
                                    myCodecCtx->width, myCodecCtx->height,
-                                   myFrame->linesize[0]);
+                                   myFrame.getLineSize(0));
     } else if(myCodecCtx->pix_fmt == stAV::PIX_FMT::BGR24) {
         setColorModel(StImage::ImgColor_RGB);
-        changePlane(0).initWrapper(StImagePlane::ImgBGR, myFrame->data[0],
+        changePlane(0).initWrapper(StImagePlane::ImgBGR, myFrame.getPlane(0),
                                    myCodecCtx->width, myCodecCtx->height,
-                                   myFrame->linesize[0]);
+                                   myFrame.getLineSize(0));
     } else if(myCodecCtx->pix_fmt == stAV::PIX_FMT::RGBA32) {
         setColorModel(StImage::ImgColor_RGBA);
-        changePlane(0).initWrapper(StImagePlane::ImgRGBA, myFrame->data[0],
+        changePlane(0).initWrapper(StImagePlane::ImgRGBA, myFrame.getPlane(0),
                                    myCodecCtx->width, myCodecCtx->height,
-                                   myFrame->linesize[0]);
+                                   myFrame.getLineSize(0));
     } else if(myCodecCtx->pix_fmt == stAV::PIX_FMT::BGRA32) {
         setColorModel(StImage::ImgColor_RGBA);
-        changePlane(0).initWrapper(StImagePlane::ImgBGRA, myFrame->data[0],
+        changePlane(0).initWrapper(StImagePlane::ImgBGRA, myFrame.getPlane(0),
                                    myCodecCtx->width, myCodecCtx->height,
-                                   myFrame->linesize[0]);
+                                   myFrame.getLineSize(0));
     } else if(myCodecCtx->pix_fmt == stAV::PIX_FMT::GRAY8) {
         setColorModel(StImage::ImgColor_GRAY);
-        changePlane(0).initWrapper(StImagePlane::ImgGray, myFrame->data[0],
+        changePlane(0).initWrapper(StImagePlane::ImgGray, myFrame.getPlane(0),
                                    myCodecCtx->width, myCodecCtx->height,
-                                   myFrame->linesize[0]);
+                                   myFrame.getLineSize(0));
     } else if(myCodecCtx->pix_fmt == stAV::PIX_FMT::GRAY16) {
         setColorModel(StImage::ImgColor_GRAY);
-        changePlane(0).initWrapper(StImagePlane::ImgGray16, myFrame->data[0],
+        changePlane(0).initWrapper(StImagePlane::ImgGray16, myFrame.getPlane(0),
                                    myCodecCtx->width, myCodecCtx->height,
-                                   myFrame->linesize[0]);
+                                   myFrame.getLineSize(0));
     } else if(stAV::isFormatYUVPlanar(myCodecCtx, aDimsYUV)) {
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 29, 0))
         if(myCodecCtx->color_range == AVCOL_RANGE_JPEG) {
@@ -449,12 +438,12 @@ bool StAVImage::load(const StString& theFilePath,
             aPlaneFrmt = StImagePlane::ImgGray16;
         }
 
-        changePlane(0).initWrapper(aPlaneFrmt, myFrame->data[0],
-                                   size_t(aDimsYUV.widthY), size_t(aDimsYUV.heightY), myFrame->linesize[0]);
-        changePlane(1).initWrapper(aPlaneFrmt, myFrame->data[1],
-                                   size_t(aDimsYUV.widthU), size_t(aDimsYUV.heightU), myFrame->linesize[1]);
-        changePlane(2).initWrapper(aPlaneFrmt, myFrame->data[2],
-                                   size_t(aDimsYUV.widthV), size_t(aDimsYUV.heightV), myFrame->linesize[2]);
+        changePlane(0).initWrapper(aPlaneFrmt, myFrame.getPlane(0),
+                                   size_t(aDimsYUV.widthY), size_t(aDimsYUV.heightY), myFrame.getLineSize(0));
+        changePlane(1).initWrapper(aPlaneFrmt, myFrame.getPlane(1),
+                                   size_t(aDimsYUV.widthU), size_t(aDimsYUV.heightU), myFrame.getLineSize(1));
+        changePlane(2).initWrapper(aPlaneFrmt, myFrame.getPlane(2),
+                                   size_t(aDimsYUV.widthV), size_t(aDimsYUV.heightV), myFrame.getLineSize(2));
     } else {
         ///ST_DEBUG_LOG("StAVImage, perform conversion from Pixel format '" + avcodec_get_pix_fmt_name(myCodecCtx->pix_fmt) + "' to RGB");
         // initialize software scaler/converter
@@ -478,7 +467,7 @@ bool StAVImage::load(const StString& theFilePath,
         rgbLinesize[0] = (int )changePlane(0).getSizeRowBytes();
 
         sws_scale(pToRgbCtx,
-                  myFrame->data, myFrame->linesize,
+                  myFrame.Frame->data, myFrame.Frame->linesize,
                   0, myCodecCtx->height,
                   rgbData, rgbLinesize);
 
@@ -610,16 +599,16 @@ bool StAVImage::save(const StString& theFilePath,
     }
 
     // wrap own data into AVFrame
-    myFrame->format = myCodecCtx->pix_fmt;
-    myFrame->width  = myCodecCtx->width;
-    myFrame->height = myCodecCtx->height;
-    fillPointersAV(anImage, myFrame->data, myFrame->linesize);
+    myFrame.Frame->format = myCodecCtx->pix_fmt;
+    myFrame.Frame->width  = myCodecCtx->width;
+    myFrame.Frame->height = myCodecCtx->height;
+    fillPointersAV(anImage, myFrame.Frame->data, myFrame.Frame->linesize);
 
 #ifdef ST_AV_NEWSTEREO
     bool isReversed = false;
     AVStereo3DType anAvStereoType = stAV::stereo3dStToAv(theSrcFormat, isReversed);
     if(anAvStereoType != (AVStereo3DType )-1) {
-        AVStereo3D* aStereo = av_stereo3d_create_side_data(myFrame);
+        AVStereo3D* aStereo = av_stereo3d_create_side_data(myFrame.Frame);
         if(aStereo != NULL) {
             aStereo->type = anAvStereoType;
             if(isReversed) {
@@ -646,12 +635,12 @@ bool StAVImage::save(const StString& theFilePath,
     aPacket.getAVpkt()->size = aBuffSize;
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 2, 100))
     int isGotPacket = 0;
-    int anEncSize   = avcodec_encode_video2(myCodecCtx, aPacket.getAVpkt(), myFrame, &isGotPacket);
+    int anEncSize   = avcodec_encode_video2(myCodecCtx, aPacket.getAVpkt(), myFrame.Frame, &isGotPacket);
     if(anEncSize == 0 && isGotPacket != 0) {
         anEncSize = aPacket.getSize();
     }
 #else
-    int anEncSize = avcodec_encode_video(myCodecCtx, aPacket.changeData(), aPacket.getSize(), myFrame);
+    int anEncSize = avcodec_encode_video(myCodecCtx, aPacket.changeData(), aPacket.getSize(), myFrame.Frame);
 #endif
     if(anEncSize <= 0) {
         setState("AVCodec library, fail to encode the image");

@@ -10,12 +10,12 @@
 #define __StAVImage_h_
 
 #include <StImage/StImageFile.h>
+#include <StAV/StAVFrame.h>
 
 struct AVInputFormat;
 struct AVFormatContext;
 struct AVCodecContext;
 struct AVCodec;
-struct AVFrame;
 
 // define StHandle template specialization
 class StAVImage;
@@ -84,7 +84,7 @@ class StAVImage : public StImageFile {
     AVFormatContext* myFormatCtx;   //!< file context
     AVCodecContext*  myCodecCtx;    //!< codec context
     AVCodec*         myCodec;       //!< codec
-    AVFrame*         myFrame;
+    StAVFrame        myFrame;
 
 };
 
