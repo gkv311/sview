@@ -83,8 +83,12 @@ void StAVFrameCounter::createReference(StHandle<StBufferCounter>& theOther) cons
     }
 
     av_frame_unref(anAvRef->myFrame);
-    av_frame_ref(anAvRef->myFrame, myFrame);
-    av_frame_unref(myFrame);
+    if(myToRelease) {
+        av_frame_ref(anAvRef->myFrame, myFrame);
+    } else {
+        // just steal the reference
+        av_frame_move_ref(anAvRef->myFrame, myFrame);
+    }
 #else
     theOther.nullify();
 #endif
