@@ -58,18 +58,12 @@ StString StALContext::toStringExtensions() const {
     return extList;
 }
 
-bool StALContext::create(const StString& theDeviceName) {
-    if(theDeviceName.isEmpty()) {
+bool StALContext::create(const std::string& theDeviceName) {
+    if(theDeviceName.empty()) {
         // open default device
         hDevice = alcOpenDevice(NULL);
     } else {
-    #if defined(_WIN32)
-        char aBuffer[ST_MAX_PATH];
-        theDeviceName.toLocale(aBuffer, ST_MAX_PATH);
-        hDevice = alcOpenDevice(aBuffer);
-    #else
-        hDevice = alcOpenDevice(theDeviceName.toCString());
-    #endif
+        hDevice = alcOpenDevice(theDeviceName.c_str());
     }
     if(hDevice == NULL) {
         return false;

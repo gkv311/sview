@@ -37,7 +37,7 @@ namespace {
 
 const char* StVideo::ST_VIDEOS_MIME_STRING = ST_VIDEO_PLUGIN_MIME_CHAR;
 
-StVideo::StVideo(const StString&                   theALDeviceName,
+StVideo::StVideo(const std::string&                theALDeviceName,
                  const StHandle<StTranslations>&   theLangMap,
                  const StHandle<StPlayList>&       thePlayList,
                  const StHandle<StGLTextureQueue>& theTextureQueue,

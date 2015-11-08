@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,7 +105,7 @@ class StVideo {
     /**
      * Main constructor.
      */
-    ST_LOCAL StVideo(const StString&                   theALDeviceName,
+    ST_LOCAL StVideo(const std::string&                theALDeviceName,
                      const StHandle<StTranslations>&   theLangMap,
                      const StHandle<StPlayList>&       thePlayList,
                      const StHandle<StGLTextureQueue>& theTextureQueue,
@@ -188,7 +188,7 @@ class StVideo {
     /**
      * Switch audio device.
      */
-    ST_LOCAL void switchAudioDevice(const StString& theAlDeviceName) {
+    ST_LOCAL void switchAudioDevice(const std::string& theAlDeviceName) {
         myAudio->switchAudioDevice(theAlDeviceName);
     }
 

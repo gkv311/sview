@@ -46,7 +46,7 @@ class StAudioQueue : public StAVPacketQueue {
 
         public: //! @name public API
 
-    ST_LOCAL StAudioQueue(const StString& theAlDeviceName);
+    ST_LOCAL StAudioQueue(const std::string& theAlDeviceName);
     ST_LOCAL virtual ~StAudioQueue();
 
     ST_LOCAL bool isInDowntime() {
@@ -107,8 +107,9 @@ class StAudioQueue : public StAVPacketQueue {
     /**
      * Switch audio device.
      */
-    ST_LOCAL void switchAudioDevice(const StString& theAlDeviceName) {
-        myAlDeviceName = new StString(theAlDeviceName);
+    ST_LOCAL void switchAudioDevice(const std::string& theAlDeviceName) {
+        StMutexAuto aLock(mySwitchMutex);
+        myAlDeviceName = theAlDeviceName;
         myToSwitchDev  = true;
     }
 
@@ -277,12 +278,13 @@ class StAudioQueue : public StAVPacketQueue {
     StPCMBuffer        myBufferOut;     //!< output  PCM audio buffer
     StTimer            myLimitTimer;
     volatile IState_t  myIsAlValid;     //!< OpenAL initialization state
+    StMutex            mySwitchMutex;   //!< switch audio device lock
     volatile bool      myToSwitchDev;   //!< switch audio device flag
     volatile bool      myIsDisconnected;//!< audio device disconnection flag
 
         private: //! @name OpenAL items
 
-    StHandle<StString> myAlDeviceName;  //!< Output audio device name for OpenAL context initialization
+    std::string        myAlDeviceName;  //!< Output audio device name for OpenAL context initialization
     StALContext        myAlCtx;         //!< OpenAL context
     ALuint             myAlBuffers[NUM_AL_SOURCES][NUM_AL_BUFFERS]; //!< audio buffers
     ALuint             myAlSources[NUM_AL_SOURCES];                 //!< audio sources

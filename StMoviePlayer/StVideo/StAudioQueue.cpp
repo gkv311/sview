@@ -135,9 +135,14 @@ void StAudioQueue::stalConfigureSources7_1() {
 }
 
 bool StAudioQueue::stalInit() {
-    StHandle<StString> aDevName = myAlDeviceName;
-    if(!myAlCtx.create(*aDevName)) {
-        if(!myAlCtx.create()) {
+    std::string aDevName;
+    {
+        StMutexAuto aLock(mySwitchMutex);
+        aDevName = myAlDeviceName;
+    }
+    if(!myAlCtx.create(aDevName)) {
+        if(aDevName.empty()
+        || !myAlCtx.create("")) {
             // retry with default device
             return false;
         }
@@ -236,7 +241,7 @@ static SV_THREAD_FUNCTION threadFunction(void* audioQueue) {
     return SV_THREAD_RETURN 0;
 }
 
-StAudioQueue::StAudioQueue(const StString& theAlDeviceName)
+StAudioQueue::StAudioQueue(const std::string& theAlDeviceName)
 : StAVPacketQueue(512),
   myPlaybackTimer(false),
   myDowntimeEvent(true),
@@ -248,7 +253,7 @@ StAudioQueue::StAudioQueue(const StString& theAlDeviceName)
   myIsAlValid(ST_AL_INIT_NA),
   myToSwitchDev(false),
   myIsDisconnected(false),
-  myAlDeviceName(new StString(theAlDeviceName)),
+  myAlDeviceName(theAlDeviceName),
   myAlFormat(AL_FORMAT_STEREO16),
   myPrevFormat(AL_FORMAT_STEREO16),
   myPrevFrequency(0),
@@ -871,7 +876,7 @@ bool StAudioQueue::stalCheckConnected() {
         return true;
     }
 
-    myAlDeviceName = new StString();
+    myAlDeviceName.clear();
     stalDeinit(); // release OpenAL context
     myIsAlValid = (stalInit() ? ST_AL_INIT_OK : ST_AL_INIT_KO);
     myIsDisconnected = true;

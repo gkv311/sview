@@ -29,6 +29,8 @@
 
 #include <StGLWidgets/StGLImageRegion.h>
 
+#include <vector>
+
 // forward declarations
 class StCheckUpdates;
 class StFileNode;
@@ -56,9 +58,9 @@ class StALDeviceParam : public StInt32Param {
     ST_LOCAL StALDeviceParam();
 
     /**
-     * Desctructor.
+     * Destructor.
      */
-    ST_LOCAL ~StALDeviceParam();
+    ST_LOCAL virtual ~StALDeviceParam();
 
     ST_LOCAL void initList();
 
@@ -69,18 +71,24 @@ class StALDeviceParam : public StInt32Param {
     /**
      * Returns title for active AL device.
      */
-    ST_LOCAL StString getTitle() const;
+    ST_LOCAL StString getUtfTitle() const;
+
+    /**
+     * Returns title for active AL device.
+     */
+    ST_LOCAL std::string getCTitle() const;
 
     /**
      * Return list of available translations.
      */
     ST_LOCAL const StArrayList<StString>& getList() const {
-        return myDevicesList;
+        return myDevicesUtf;
     }
 
         private:
 
-    StArrayList<StString> myDevicesList;
+    std::vector<std::string> myDevicesLoc;
+    StArrayList<StString>    myDevicesUtf;
 
 };
 

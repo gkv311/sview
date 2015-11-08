@@ -115,6 +115,23 @@ namespace {
     static const char ST_ARGUMENT_WINWIDTH[]   = "windowWidth";
     static const char ST_ARGUMENT_WINHEIGHT[]  = "windowHeight";
 
+#ifdef _WIN32
+    inline void stFromLocaleOrUtf8(StString&   theStrResult,
+                                   const char* theStrInput) {
+        int aWideSize = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, theStrInput, -1, NULL, 0);
+        if(aWideSize == 0) {
+            theStrResult.fromLocale(theStrInput);
+            return;
+        }
+
+        wchar_t* aWideBuffer = new wchar_t[aWideSize + 1];
+        MultiByteToWideChar(CP_UTF8, 0, theStrInput, -1, aWideBuffer, aWideSize);
+        aWideBuffer[aWideSize] = L'\0';
+        theStrResult.fromUnicode(aWideBuffer);
+        delete[] aWideBuffer;
+    }
+#endif
+
 }
 
 StALDeviceParam::StALDeviceParam()
@@ -124,40 +141,47 @@ StALDeviceParam::StALDeviceParam()
 
 void StALDeviceParam::initList() {
     myValue = 0;
-    myDevicesList.clear();
+    myDevicesLoc.clear();
+    myDevicesUtf.clear();
     StString aName;
     if(alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT") != AL_TRUE) {
-        // ansient OpenAL implementations supports only single device (like from apples)
+        // ancient OpenAL implementations (like from apples) support only single device
         const ALchar* aDefDevice = alcGetString(NULL, ALC_DEFAULT_DEVICE_SPECIFIER);
     #ifdef _WIN32
-        aName.fromLocale(aDefDevice);
+        stFromLocaleOrUtf8(aName, aDefDevice);
     #else
         aName.fromUnicode(aDefDevice);
     #endif
-        myDevicesList.add(aName);
+        myDevicesUtf.add(aName);
+        myDevicesLoc.push_back(std::string(aDefDevice));
         return;
     }
 
     const ALchar* aDevicesNames = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
-    while(aDevicesNames && *aDevicesNames) {
+    while(aDevicesNames != NULL
+      && *aDevicesNames != '\0') {
+        std::string aCName(aDevicesNames);
     #ifdef _WIN32
-        aName.fromLocale(aDevicesNames);
+        stFromLocaleOrUtf8(aName, aDevicesNames);
     #else
         aName.fromUnicode(aDevicesNames);
     #endif
-        myDevicesList.add(aName);
-        aDevicesNames += strlen(aDevicesNames) + 1;
+        myDevicesUtf.add(aName);
+        myDevicesLoc.push_back(aCName);
+        aDevicesNames += aCName.length() + 1;
     }
-    if(myDevicesList.isEmpty()) {
-        myDevicesList.add("None"); // append dummy device
+    if(myDevicesUtf.isEmpty()) {
+        // append dummy device
+        myDevicesUtf.add("None");
+        myDevicesLoc.push_back("");
     }
 }
 
 StALDeviceParam::~StALDeviceParam() {}
 
 int32_t StALDeviceParam::getValueFromName(const StString& theName) {
-    for(size_t anId = 0; anId < myDevicesList.size(); ++anId) {
-        if(myDevicesList[anId] == theName) {
+    for(size_t anId = 0; anId < myDevicesUtf.size(); ++anId) {
+        if(myDevicesUtf[anId] == theName) {
             return int32_t(anId);
         }
     }
@@ -169,12 +193,22 @@ bool StALDeviceParam::init(const StString& theActive) {
     return myValue >= 0;
 }
 
-StString StALDeviceParam::getTitle() const {
-    if(myDevicesList.isEmpty()) {
+StString StALDeviceParam::getUtfTitle() const {
+    if(myDevicesUtf.isEmpty()) {
         return StString();
     }
+
     int32_t anActive = getValue();
-    return myDevicesList[(anActive >= 0 && size_t(anActive) < myDevicesList.size()) ? size_t(anActive) : 0];
+    return myDevicesUtf[(anActive >= 0 && size_t(anActive) < myDevicesUtf.size()) ? size_t(anActive) : 0];
+}
+
+std::string StALDeviceParam::getCTitle() const {
+    if(myDevicesUtf.isEmpty()) {
+        return std::string();
+    }
+
+    int32_t anActive = getValue();
+    return myDevicesLoc[(anActive >= 0 && size_t(anActive) < myDevicesUtf.size()) ? size_t(anActive) : 0];
 }
 
 /**
@@ -747,7 +781,7 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (ST_SETTING_SUBTITLES_PARSER,   params.SubtitlesParser);
         mySettings->saveParam (ST_SETTING_SEARCH_SUBS,        params.ToSearchSubs);
         mySettings->saveInt32 (ST_SETTING_FPSTARGET,          params.TargetFps);
-        mySettings->saveString(ST_SETTING_OPENAL_DEVICE,      params.alDevice->getTitle());
+        mySettings->saveString(ST_SETTING_OPENAL_DEVICE,      params.alDevice->getUtfTitle());
         mySettings->saveInt32 (ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
         mySettings->saveParam (ST_SETTING_UPDATES_INTERVAL,   params.checkUpdatesDays);
         mySettings->saveParam (ST_SETTING_SRCFORMAT,          params.srcFormat);
@@ -994,7 +1028,7 @@ bool StMoviePlayer::init() {
 
     // create the video playback thread
     if(!isReset) {
-        myVideo = new StVideo(params.alDevice->getTitle(), myLangMap, myPlayList, aTextureQueue, aSubQueue);
+        myVideo = new StVideo(params.alDevice->getCTitle(), myLangMap, myPlayList, aTextureQueue, aSubQueue);
         myVideo->signals.onError  = stSlot(myMsgQueue.access(), &StMsgQueue::doPushError);
         myVideo->signals.onLoaded = stSlot(this,                &StMoviePlayer::doLoaded);
         myVideo->params.UseGpu       = params.UseGpu;
@@ -1492,15 +1526,15 @@ void StMoviePlayer::beforeDraw() {
     }
 
     if(myVideo->isDisconnected() || myToUpdateALList) {
-        const StString aPrevDev = params.alDevice->getTitle();
+        const StString aPrevDev = params.alDevice->getUtfTitle();
         params.alDevice->initList();
         myGUI->updateOpenALDeviceMenu();
         // switch audio device
         if(!params.alDevice->init(aPrevDev)) {
             // select first existing device if any
-            params.alDevice->init(params.alDevice->getTitle());
+            params.alDevice->init(params.alDevice->getUtfTitle());
         }
-        myVideo->switchAudioDevice(params.alDevice->getTitle());
+        myVideo->switchAudioDevice(params.alDevice->getCTitle());
         myToUpdateALList = false;
     }
     if(myPlayList->isRecentChanged()) {
@@ -1738,7 +1772,7 @@ void StMoviePlayer::doSwitchVSync(const bool theValue) {
 
 void StMoviePlayer::doSwitchAudioDevice(const int32_t /*theDevId*/) {
     if(!myVideo.isNull()) {
-        myVideo->switchAudioDevice(params.alDevice->getTitle());
+        myVideo->switchAudioDevice(params.alDevice->getCTitle());
     }
 }
 
