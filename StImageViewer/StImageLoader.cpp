@@ -209,6 +209,9 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         return false;
     }
 
+    // clear active
+    myTextureQueue->clear();
+
     StHandle<StImageInfo> anImgInfo = new StImageInfo();
     anImgInfo->Id        = theParams;
     anImgInfo->Path      = aFilePath;
@@ -438,15 +441,27 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
 #endif
 
     // finally push image data in Texture Queue
-    while(myTextureQueue->isFull()) {
-        StThread::sleep(10);
-    }
-
     myTextureQueue->setConnectedStream(true);
+
     if(!anImageR->isNull()) {
-        myTextureQueue->push(*anImageL, *anImageR, theParams, StFormat_SeparateFrames, aSrcCubemap, 0.0);
+        aSrcFormatCurr = StFormat_SeparateFrames;
+    }
+    if(anImageL->isTopDown()
+    && anImageR->isTopDown()
+    && (aSrcFormatCurr == StFormat_SeparateFrames
+     || aSrcFormatCurr == StFormat_Mono
+     || aSrcFormatCurr == StFormat_AUTO)) {
+        StImage anImageRefL, anImageRefR;
+        StHandle<StBufferCounter> aRefL = new StImageFileCounter(anImageL);
+        anImageRefL.initReference(*anImageL, aRefL);
+        if(!anImageR->isNull()) {
+            StHandle<StBufferCounter> aRefR = new StImageFileCounter(anImageR);
+            anImageRefR.initReference(*anImageR, aRefR);
+        }
+
+        myTextureQueue->push(anImageRefL, anImageRefR, theParams, aSrcFormatCurr, aSrcCubemap, 0.0);
     } else {
-        myTextureQueue->push(*anImageL, *anImageR, theParams, aSrcFormatCurr, aSrcCubemap, 0.0);
+        myTextureQueue->push(*anImageL,   *anImageR,   theParams, aSrcFormatCurr, aSrcCubemap, 0.0);
     }
 
     if(!stAreEqual(anImageFileL->getPixelRatio(), 1.0f, 0.001f)) {

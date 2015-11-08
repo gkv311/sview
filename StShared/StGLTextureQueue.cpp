@@ -143,6 +143,8 @@ bool StGLTextureQueue::stglUpdateStTextures(StGLContext& theCtx) {
             myDataSnap  = myDataFront; myNewShotEvent.set();
             if(myToCompress) {
                 myDataFront->reset();
+            } else {
+                myDataFront->resetStParams();
             }
             myDataFront = myDataFront->getNext();
             ST_DEBUG_ASSERT(myQueueSize != 0); // critical error!

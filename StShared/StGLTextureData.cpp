@@ -335,10 +335,20 @@ void StGLTextureData::updateData(const StImage&                  theDataL,
     myStParams  = theStParams;
     myPts       = thePts;
     mySrcFormat = theFormat != StFormat_AUTO ? theFormat : StFormat_Mono;
-    myCubemapFormat = theCubemap;
 
     // reset fill texture state
     myFillRows = myFillFromRow = 0;
+
+    if(!theDataL.getBufferCounter().isNull()) {
+        reset();
+        myDataL.initReference(theDataL);
+        myDataR.initReference(theDataR);
+        validateCubemap(theCubemap);
+        return;
+    } else {
+        myDataL.setBufferCounter(NULL);
+        myDataR.setBufferCounter(NULL);
+    }
 
     // reallocate buffer if needed
     const size_t aNewSizeBytes = computeBufferSize(theDataL) + computeBufferSize(theDataR);
@@ -346,6 +356,7 @@ void StGLTextureData::updateData(const StImage&                  theDataL,
         // invalid data
         myDataL.nullify();
         myDataR.nullify();
+        myCubemapFormat = StCubemap_OFF;
         return;
     }
 
@@ -424,24 +435,32 @@ void StGLTextureData::updateData(const StImage&                  theDataL,
             break;
         }
     }
-    if(myCubemapFormat == StCubemap_Packed) {
-        size_t aCoeffs[2] = {0, 0};
-        if(!myDataL.isNull()) {
-            for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
-                const StImagePlane& aPlane = myDataL.getPlane(aPlaneId);
-                if(!checkCubeMap(aPlane, aCoeffs[0], aCoeffs[1])) {
-                    myCubemapFormat = StCubemap_OFF;
-                    break;
-                }
+    validateCubemap(theCubemap);
+}
+
+void StGLTextureData::validateCubemap(const StCubemap theCubemap) {
+    if(theCubemap != StCubemap_Packed) {
+        myCubemapFormat = StCubemap_OFF;
+        return;
+    }
+
+    myCubemapFormat = theCubemap;
+    size_t aCoeffs[2] = {0, 0};
+    if(!myDataL.isNull()) {
+        for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
+            const StImagePlane& aPlane = myDataL.getPlane(aPlaneId);
+            if(!checkCubeMap(aPlane, aCoeffs[0], aCoeffs[1])) {
+                myCubemapFormat = StCubemap_OFF;
+                return;
             }
         }
-        if(!myDataR.isNull()) {
-            for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
-                const StImagePlane& aPlane = myDataR.getPlane(aPlaneId);
-                if(!checkCubeMap(aPlane, aCoeffs[0], aCoeffs[1])) {
-                    myCubemapFormat = StCubemap_OFF;
-                    break;
-                }
+    }
+    if(!myDataR.isNull()) {
+        for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
+            const StImagePlane& aPlane = myDataR.getPlane(aPlaneId);
+            if(!checkCubeMap(aPlane, aCoeffs[0], aCoeffs[1])) {
+                myCubemapFormat = StCubemap_OFF;
+                return;
             }
         }
     }

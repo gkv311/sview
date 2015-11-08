@@ -21,6 +21,9 @@ struct AVCodec;
 class StAVImage;
 ST_DEFINE_HANDLE(StAVImage, StImageFile);
 
+class StAVFrameCounter;
+ST_DEFINE_HANDLE(StAVFrameCounter, StBufferCounter);
+
 /**
  * This class implements image load/save operation using libav* libraries.
  */
@@ -90,6 +93,47 @@ class StAVImage : public StImageFile {
     AVCodecContext*  myCodecCtx;    //!< codec context
     AVCodec*         myCodec;       //!< codec
     StAVFrame        myFrame;
+
+};
+
+/**
+ * Pass reference-counted AVFrame (e.g. AVBuffer) into StImage without data copying.
+ */
+class StAVFrameCounter : public StBufferCounter {
+
+        public:
+
+    /**
+     * Default constructor.
+     */
+    ST_CPPEXPORT StAVFrameCounter();
+
+    /**
+     * Wrapper constructor.
+     */
+    ST_CPPEXPORT StAVFrameCounter(AVFrame* theFrame);
+
+    /**
+     * Create the new reference (e.g. increment counter).
+     * If theOther has the same type, than the ref counter will be reused.
+     * Otherwise then new counter will be allocated.
+     */
+    ST_CPPEXPORT virtual void createReference(StHandle<StBufferCounter>& theOther) const;
+
+    /**
+     * Release current reference.
+     */
+    ST_CPPEXPORT virtual void releaseReference();
+
+    /**
+     * Release reference counter.
+     */
+    ST_CPPEXPORT virtual ~StAVFrameCounter();
+
+        private:
+
+    AVFrame* myFrame; //!< frame
+    bool     myToRelease;
 
 };
 

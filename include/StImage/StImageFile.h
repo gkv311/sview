@@ -21,6 +21,12 @@ class StMIME;
 class StImageFile;
 ST_DEFINE_HANDLE(StImageFile, StImage);
 
+class StImageFileCounter;
+ST_DEFINE_HANDLE(StImageFileCounter, StBufferCounter);
+
+/**
+ * Interface extending StImage with load/save capabilities.
+ */
 class StImageFile : public StImage {
 
         public:
@@ -145,6 +151,46 @@ class StImageFile : public StImage {
     StDictionary myMetadata;
     StString     myStateDescr;
     StFormat     mySrcFormat;
+
+};
+
+/**
+ * Define reference-counted StImageFile buffer for StImage.
+ */
+class StImageFileCounter : public StBufferCounter {
+
+        public:
+
+    /**
+     * Empty constructor.
+     */
+    ST_LOCAL StImageFileCounter() {}
+
+    /**
+     * Main constructor.
+     */
+    ST_LOCAL StImageFileCounter(const StHandle<StImage>& theImage) : myImageFile(theImage) {}
+
+    /**
+     * Create the new reference (e.g. increment counter).
+     * If theOther has the same type, than the ref counter will be reused.
+     * Otherwise then new counter will be allocated.
+     */
+    ST_CPPEXPORT virtual void createReference(StHandle<StBufferCounter>& theOther) const;
+
+    /**
+     * Release current reference.
+     */
+    ST_CPPEXPORT virtual void releaseReference();
+
+    /**
+     * Release reference counter.
+     */
+    ST_CPPEXPORT virtual ~StImageFileCounter();
+
+        private:
+
+    StHandle<StImage> myImageFile;
 
 };
 

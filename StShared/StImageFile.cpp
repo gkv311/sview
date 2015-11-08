@@ -15,6 +15,8 @@
 #include <StFile/StFileNode.h>
 #include <StFile/StMIME.h>
 
+#include <StStrings/StLogger.h>
+
 StImageFile::StImageFile()
 : mySrcFormat(StFormat_AUTO) {
     //
@@ -176,4 +178,19 @@ StHandle<StImageFile> StImageFile::create(StImageFile::ImageClass thePreferred,
         return new StAVImage();
     }
     return StHandle<StImageFile>();
+}
+
+StImageFileCounter::~StImageFileCounter() {}
+
+void StImageFileCounter::createReference(StHandle<StBufferCounter>& theOther) const {
+    StHandle<StImageFileCounter> anImgFileRef = StHandle<StImageFileCounter>::downcast(theOther);
+    if(anImgFileRef.isNull()) {
+        anImgFileRef = new StImageFileCounter();
+        theOther = anImgFileRef;
+    }
+    anImgFileRef->myImageFile = myImageFile;
+}
+
+void StImageFileCounter::releaseReference() {
+    myImageFile.nullify();
 }

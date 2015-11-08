@@ -77,6 +77,29 @@ bool StImage::initWrapper(const StImage& theCopy) {
     return true;
 }
 
+bool StImage::initReference(const StImage& theCopy) {
+    nullify();
+    if( theCopy.myBufCounter.isNull()
+    || !initWrapper(theCopy)) {
+        return false;
+    }
+
+    theCopy.myBufCounter->createReference(myBufCounter);
+    return true;
+}
+
+bool StImage::initReference(const StImage&                   theCopy,
+                            const StHandle<StBufferCounter>& theRef) {
+    nullify();
+    if( theRef.isNull()
+    || !initWrapper(theCopy)) {
+        return false;
+    }
+
+    theRef->createReference(myBufCounter);
+    return true;
+}
+
 bool StImage::initTrashLimited(const StImage& theRef,
                                const size_t   theSizeX,
                                const size_t   theSizeY) {
@@ -212,5 +235,8 @@ void StImage::nullify() {
     myPlanes[1].nullify();
     myPlanes[2].nullify();
     myPlanes[3].nullify();
+    if(!myBufCounter.isNull()) {
+        myBufCounter->releaseReference();
+    }
     myPAR = 1.0f;
 }

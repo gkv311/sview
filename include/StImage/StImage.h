@@ -11,6 +11,40 @@
 
 #include "StImagePlane.h"
 
+/**
+ * Interface to share arbitrary memory buffer using reference counter.
+ */
+class StBufferCounter {
+
+        public:
+
+    /**
+     * Empty constructor.
+     */
+    StBufferCounter() {}
+
+    /**
+     * Create the new reference (e.g. increment counter).
+     * If theOther has the same type, than the ref counter will be reused.
+     * Otherwise then new counter will be allocated.
+     */
+    virtual void createReference(StHandle<StBufferCounter>& theOther) const = 0;
+
+    /**
+     * Release current reference.
+     */
+    virtual void releaseReference() = 0;
+
+    /**
+     * Destructor.
+     */
+    virtual ~StBufferCounter() {}
+
+};
+
+/**
+ * Class defining 2D image consisting from one or more color planes.
+ */
 class StImage {
 
         public: //! @name enumerations
@@ -55,6 +89,17 @@ class StImage {
      * Initialize as wrapper (data will not be copied).
      */
     ST_CPPEXPORT bool initWrapper(const StImage& theCopy);
+
+    /**
+     * Initialize as reference to the shared buffer.
+     */
+    ST_CPPEXPORT bool initReference(const StImage& theCopy);
+
+    /**
+     * Initialize as reference to the shared buffer.
+     */
+    ST_CPPEXPORT bool initReference(const StImage&                   theCopy,
+                                    const StHandle<StBufferCounter>& theRef);
 
     /**
      * Initialize as wrapper of input data in RGB format
@@ -159,6 +204,13 @@ class StImage {
     }
 
     /**
+     * Return true if rows are packed in top-bottom order.
+     */
+    ST_LOCAL bool isTopDown() const {
+        return myPlanes[0].isTopDown();
+    }
+
+    /**
      * @return image width in pixels.
      */
     inline size_t getSizeX() const {
@@ -206,7 +258,20 @@ class StImage {
      */
     ST_CPPEXPORT bool isNull() const;
 
+    /**
+     * Release all color planes and reference counter.
+     */
     ST_CPPEXPORT void nullify();
+
+    /**
+     * Return reference counter for shared memory buffer.
+     */
+    ST_LOCAL const StHandle<StBufferCounter>& getBufferCounter() const { return myBufCounter; }
+
+    /**
+     * Dangerous method to assign reference counter for shared memory buffer.
+     */
+    ST_LOCAL void setBufferCounter(const StHandle<StBufferCounter>& theCounter) { myBufCounter = theCounter; }
 
         protected:
 
@@ -258,6 +323,8 @@ class StImage {
     GLfloat       myPAR;        //!< pixel aspect ratio
     ImgColorModel myColorModel; //!< color model (RGB/YUV...)
     ImgColorScale myColorScale; //!< color scale (range)
+    StHandle<StBufferCounter>
+                  myBufCounter; //!< reference counter for shared memory buffer
 
 };
 

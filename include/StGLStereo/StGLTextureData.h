@@ -51,8 +51,12 @@ class StGLTextureData {
         return myStParams;
     }
 
-    inline void resetStParams() {
+    ST_LOCAL void resetStParams() {
         myStParams.nullify();
+        if(!myDataL.getBufferCounter().isNull()
+        || !myDataR.getBufferCounter().isNull()) {
+            reset();
+        }
     }
 
     /**
@@ -150,6 +154,11 @@ class StGLTextureData {
 
 
     ST_LOCAL bool reAllocate(const size_t theSizeBytes);
+
+    /**
+     * Validate and setup packed cubemap flag.
+     */
+    ST_LOCAL void validateCubemap(const StCubemap theCubemap);
 
     /**
      * Fill the texture plane.
