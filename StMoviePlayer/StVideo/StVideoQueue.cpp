@@ -187,6 +187,11 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
 #else
     myFrame.Frame->opaque = NULL;
 #endif
+
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 45, 101))
+    myFrameBufRef = new StAVFrameCounter(myFrame.Frame);
+#endif
+
     myThread = new StThread(threadFunction, (void* )this, theMaster.isNull() ? "StVideoQueueM" : "StVideoQueueS");
 }
 
@@ -243,17 +248,11 @@ bool StVideoQueue::initCodec(AVCodec*   theCodec,
                              const bool theToUseGpu) {
     // configure the codec
     myCodecCtx->codec_id = theCodec->id;
-    //myCodecCtx->debug_mv = debug_mv;
-    //myCodecCtx->debug = debug;
-    //myCodecCtx->workaround_bugs = workaround_bugs;
-    //myCodecCtx->lowres = 1;
-    //if(lowres) myCodecCtx->flags |= CODEC_FLAG_EMU_EDGE;
-    //myCodecCtx->idct_algo= idct;
-    //if(fast) myCodecCtx->flags2 |= CODEC_FLAG2_FAST;
-    //myCodecCtx->skip_idct= skip_idct;
-    //myCodecCtx->skip_loop_filter= skip_loop_filter;
-    //myCodecCtx->error_recognition= error_recognition;
-    //myCodecCtx->error_concealment= error_concealment;
+    stAV::meta::Dict* anOpts = NULL;
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 45, 101))
+    av_dict_set(&anOpts, "refcounted_frames", "1", 0);
+#endif
+
     int aNbThreads = theToUseGpu ? 1 : StThread::countLogicalProcessors();
     myCodecCtx->thread_count = aNbThreads;
 #if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(52, 112, 0))
@@ -262,7 +261,7 @@ bool StVideoQueue::initCodec(AVCodec*   theCodec,
 
     // open codec
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 8, 0))
-    if(avcodec_open2(myCodecCtx, theCodec, NULL) < 0) {
+    if(avcodec_open2(myCodecCtx, theCodec, &anOpts) < 0) {
 #else
     if(avcodec_open(myCodecCtx, theCodec) < 0) {
 #endif
@@ -475,6 +474,7 @@ void StVideoQueue::prepareFrame(const StFormat theSrcFormat) {
     PixelFormat  aPixFmt     = stAV::PIX_FMT::NONE;
     stAV::dimYUV aDimsYUV;
     myFrame.getImageInfo(myCodecCtx, aFrameSizeX, aFrameSizeY, aPixFmt);
+    myDataAdp.setBufferCounter(NULL);
     if(aPixFmt == stAV::PIX_FMT::RGB24) {
         myDataAdp.setColorModel(StImage::ImgColor_RGB);
         myDataAdp.setColorScale(StImage::ImgScale_Full);
@@ -528,6 +528,12 @@ void StVideoQueue::prepareFrame(const StFormat theSrcFormat) {
                                              size_t(aDimsYUV.widthU), size_t(aDimsYUV.heightU), myFrame.getLineSize(1));
         myDataAdp.changePlane(2).initWrapper(aPlaneFrmt, myFrame.getPlane(2),
                                              size_t(aDimsYUV.widthV), size_t(aDimsYUV.heightV), myFrame.getLineSize(2));
+
+        if(theSrcFormat == StFormat_Mono
+        || theSrcFormat == StFormat_SeparateFrames
+        || theSrcFormat == StFormat_AUTO) {
+            myDataAdp.setBufferCounter(myFrameBufRef);
+        }
     } else if(!myToRgbIsBroken) {
         if(myToRgbCtx    == NULL
         || myToRgbPixFmt != aPixFmt
@@ -904,6 +910,7 @@ void StVideoQueue::decodeLoop() {
             }
         }
 
+        myFrame.reset();
         aPacket.nullify(); // and now packet finished
     }
 }

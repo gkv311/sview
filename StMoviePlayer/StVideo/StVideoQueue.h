@@ -22,7 +22,7 @@
 #include <StGLStereo/StGLTextureQueue.h>
 
 #include "StAVPacketQueue.h"
-#include <StAV/StAVFrame.h>
+#include <StAV/StAVImage.h>
 
 // forward declarations
 class StVideoQueue;
@@ -369,6 +369,7 @@ private:
     bool                       myToRgbIsBroken;   //!< indicates broke swscale context - to RGB conversion is impossible
 
     StAVFrame                  myFrame;           //!< original decoded video frame
+    StHandle<StAVFrameCounter> myFrameBufRef;
     StImage                    myDataAdp;         //!< buffer data adaptor
     AVDiscard                  myAvDiscard;       //!< discard parameter (to skip or not frames)
 
