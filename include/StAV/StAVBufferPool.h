@@ -47,7 +47,7 @@ class StAVBufferPool {
             myPool       = NULL;
             myBufferSize = 0;
          }
-    #endif        
+    #endif
     }
 
     /**
@@ -56,8 +56,10 @@ class StAVBufferPool {
     ST_LOCAL bool init(const int theBufferSize) {
         if(myBufferSize == theBufferSize) {
             return true;
-        } else if(theBufferSize == 0) {
-            release();
+        }
+
+        release();
+        if(theBufferSize == 0) {
             return true;
         }
 
