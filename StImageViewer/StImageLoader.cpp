@@ -446,11 +446,8 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     if(!anImageR->isNull()) {
         aSrcFormatCurr = StFormat_SeparateFrames;
     }
-    if(anImageL->isTopDown()
-    && anImageR->isTopDown()
-    && (aSrcFormatCurr == StFormat_SeparateFrames
-     || aSrcFormatCurr == StFormat_Mono
-     || aSrcFormatCurr == StFormat_AUTO)) {
+
+    {
         StImage anImageRefL, anImageRefR;
         StHandle<StBufferCounter> aRefL = new StImageFileCounter(anImageL);
         anImageRefL.initReference(*anImageL, aRefL);
@@ -460,8 +457,6 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         }
 
         myTextureQueue->push(anImageRefL, anImageRefR, theParams, aSrcFormatCurr, aSrcCubemap, 0.0);
-    } else {
-        myTextureQueue->push(*anImageL,   *anImageR,   theParams, aSrcFormatCurr, aSrcCubemap, 0.0);
     }
 
     if(!stAreEqual(anImageFileL->getPixelRatio(), 1.0f, 0.001f)) {

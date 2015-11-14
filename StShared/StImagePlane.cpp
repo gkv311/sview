@@ -129,12 +129,22 @@ bool StImagePlane::initZero(StImagePlane::ImgFormat thePixelFormat,
     return true;
 }
 
-bool StImagePlane::initCopy(const StImagePlane& theCopy) {
-    if(initTrash(theCopy.getFormat(), theCopy.getSizeX(), theCopy.getSizeY(), theCopy.getSizeRowBytes())) {
+bool StImagePlane::initCopy(const StImagePlane& theCopy,
+                            const bool          theIsCompact) {
+    if(!initTrash(theCopy.myImgFormat, theCopy.mySizeX, theCopy.mySizeY, theIsCompact ? 0 : theCopy.mySizeRowBytes)) {
+        return false;
+    }
+
+    if(mySizeRowBytes == theCopy.mySizeRowBytes) {
         stMemCpy(changeData(), theCopy.getData(), theCopy.getSizeBytes());
         return true;
     }
-    return false;
+
+    const size_t aCopyRowBytes = stMin(mySizeRowBytes, theCopy.mySizeRowBytes);
+    for(size_t aRow = 0; aRow < mySizeY; ++aRow, ++aRow) {
+        stMemCpy(changeData(aRow, 0), theCopy.getData(aRow, 0), aCopyRowBytes);
+    }
+    return true;
 }
 
 bool StImagePlane::initWrapper(const StImagePlane& theCopy) {
@@ -186,16 +196,19 @@ bool StImagePlane::initSideBySide(const StImagePlane& theImageL,
     return true;
 }
 
-bool StImagePlane::fill(const StImagePlane& theCopy) {
+bool StImagePlane::fill(const StImagePlane& theCopy,
+                        const bool          theIsCompact) {
     if(getSizeY()        != theCopy.getSizeY()
     || getSizeRowBytes() != theCopy.getSizeRowBytes()
     || getFormat()       != theCopy.getFormat()) {
-        return initCopy(theCopy);
+        return initCopy(theCopy, theIsCompact);
     }
+
+    const size_t aCopyRowBytes = stMin(mySizeRowBytes, theCopy.mySizeRowBytes);
     for(size_t row = 0; row < theCopy.getSizeY(); ++row) {
         stMemCpy(changeData(row, 0),
                  theCopy.getData(row, 0),
-                 theCopy.getSizeRowBytes());
+                 aCopyRowBytes);
     }
     return true;
 }

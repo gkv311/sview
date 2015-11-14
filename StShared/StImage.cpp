@@ -45,16 +45,18 @@ StImage::~StImage() {
     //
 }
 
-bool StImage::initCopy(const StImage& theCopy) {
+bool StImage::initCopy(const StImage& theCopy,
+                       const bool     theIsCompact) {
     nullify();
     setColorModel(theCopy.getColorModel());
     setColorScale(theCopy.getColorScale());
+    myPAR = theCopy.myPAR;
     for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
         const StImagePlane& aFromPlane = theCopy.getPlane(aPlaneId);
         if(aFromPlane.isNull()) {
             continue;
         }
-        if(!changePlane(aPlaneId).initCopy(aFromPlane)) {
+        if(!changePlane(aPlaneId).initCopy(aFromPlane, theIsCompact)) {
             return false;
         }
     }
@@ -65,6 +67,7 @@ bool StImage::initWrapper(const StImage& theCopy) {
     nullify();
     setColorModel(theCopy.getColorModel());
     setColorScale(theCopy.getColorScale());
+    myPAR = theCopy.myPAR;
     for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
         const StImagePlane& aFromPlane = theCopy.getPlane(aPlaneId);
         if(aFromPlane.isNull()) {
@@ -212,12 +215,13 @@ bool StImage::initSideBySide(const StImage& theImageL,
     return true;
 }
 
-bool StImage::fill(const StImage& theCopy) {
+bool StImage::fill(const StImage& theCopy,
+                   const bool     theIsCompact) {
     if(getColorModel() != theCopy.getColorModel()) {
-        return initCopy(theCopy);
+        return initCopy(theCopy, theIsCompact);
     }
     for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
-        if(!changePlane(aPlaneId).fill(theCopy.getPlane(aPlaneId))) {
+        if(!changePlane(aPlaneId).fill(theCopy.getPlane(aPlaneId), theIsCompact)) {
             nullify();
             return false;
         }

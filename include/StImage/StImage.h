@@ -83,7 +83,8 @@ class StImage {
     /**
      * Initialize as copy (data will be copied!).
      */
-    ST_CPPEXPORT bool initCopy(const StImage& theCopy);
+    ST_CPPEXPORT bool initCopy(const StImage& theCopy,
+                               const bool     theIsCompact);
 
     /**
      * Initialize as wrapper (data will not be copied).
@@ -115,7 +116,8 @@ class StImage {
                                      const int theSeparationDx,
                                      const int theSeparationDy);
 
-    ST_CPPEXPORT bool fill(const StImage& theCopy);
+    ST_CPPEXPORT bool fill(const StImage& theCopy,
+                           const bool     theIsCompact);
 
     /**
      * Advanced initializer for further scaling - creates an image from specified one with:

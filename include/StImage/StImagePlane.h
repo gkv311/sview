@@ -106,6 +106,14 @@ class StImagePlane {
         return &myDataPtr[mySizeRowBytes * theRow + mySizeBPP * theCol];
     }
 
+    /**
+     * @return data pointer to requested position.
+     */
+    inline GLubyte* accessData(const size_t theRow = 0, const size_t theCol = 0) const {
+        ST_DEBUG_ASSERT((myDataPtr != NULL) && (theRow < mySizeY) && (theCol < mySizeX));
+        return &myDataPtr[mySizeRowBytes * theRow + mySizeBPP * theCol];
+    }
+
     inline GLubyte getFirstByte(const size_t theRow, const size_t theCol) const {
         return *getData(theRow, theCol);
     }
@@ -240,7 +248,8 @@ class StImagePlane {
     /**
      * Initialize as copy (data will be copied!).
      */
-    ST_CPPEXPORT bool initCopy(const StImagePlane& theCopy);
+    ST_CPPEXPORT bool initCopy(const StImagePlane& theCopy,
+                               const bool          theIsCompact);
 
     /**
      * Initialize as wrapper (data will not be copied).
@@ -256,7 +265,8 @@ class StImagePlane {
                                      const int theSeparationDy = 0,
                                      const int theValue = 0);
 
-    ST_CPPEXPORT bool fill(const StImagePlane& theCopy);
+    ST_CPPEXPORT bool fill(const StImagePlane& theCopy,
+                           const bool          theIsCompact);
 
     /**
      * Smart method to correctly deallocate image plane.

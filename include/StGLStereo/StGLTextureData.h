@@ -53,7 +53,8 @@ class StGLTextureData {
 
     ST_LOCAL void resetStParams() {
         myStParams.nullify();
-        if(!myDataL.getBufferCounter().isNull()
+        if(!myDataPair.getBufferCounter().isNull()
+        || !myDataL.getBufferCounter().isNull()
         || !myDataR.getBufferCounter().isNull()) {
             reset();
         }
@@ -152,8 +153,10 @@ class StGLTextureData {
 
         private:
 
-
     ST_LOCAL bool reAllocate(const size_t theSizeBytes);
+
+    ST_LOCAL void copyProps(const StImage& theDataL,
+                            const StImage& theDataR);
 
     /**
      * Validate and setup packed cubemap flag.
@@ -176,6 +179,7 @@ class StGLTextureData {
 
     GLubyte*                 myDataPtr;       //!< data for left and right views
     size_t                   myDataSizeBytes; //!< allocated data size in bytes
+    StImage                  myDataPair;
     StImage                  myDataL;
     StImage                  myDataR;
 

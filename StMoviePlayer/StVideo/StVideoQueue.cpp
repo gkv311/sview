@@ -529,11 +529,7 @@ void StVideoQueue::prepareFrame(const StFormat theSrcFormat) {
         myDataAdp.changePlane(2).initWrapper(aPlaneFrmt, myFrame.getPlane(2),
                                              size_t(aDimsYUV.widthV), size_t(aDimsYUV.heightV), myFrame.getLineSize(2));
 
-        if(theSrcFormat == StFormat_Mono
-        || theSrcFormat == StFormat_SeparateFrames
-        || theSrcFormat == StFormat_AUTO) {
-            myDataAdp.setBufferCounter(myFrameBufRef);
-        }
+        myDataAdp.setBufferCounter(myFrameBufRef);
     } else if(!myToRgbIsBroken) {
         if(myToRgbCtx    == NULL
         || myToRgbPixFmt != aPixFmt
@@ -900,7 +896,7 @@ void StVideoQueue::decodeLoop() {
             // simple one-stream case
             if(aSrcFormat == StFormat_FrameSequence) {
                 if(isOddNumber(myFramesCounter)) {
-                    myCachedFrame.fill(myDataAdp);
+                    myCachedFrame.fill(myDataAdp, false);
                 } else {
                     pushFrame(myCachedFrame, myDataAdp, aPacket->getSource(), StFormat_FrameSequence, aCubemapFormat, myFramePts);
                 }

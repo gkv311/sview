@@ -30,6 +30,7 @@ StGLTextureData::~StGLTextureData() {
 }
 
 void StGLTextureData::reset() {
+    myDataPair.nullify();
     myDataL.nullify();
     myDataR.nullify();
     if(myDataPtr != NULL) {
@@ -325,6 +326,28 @@ inline bool checkCubeMap(const StImagePlane& thePlane,
     return thePlane.getSizeX() / theCoeffX == thePlane.getSizeY() / theCoeffY;
 }
 
+void StGLTextureData::copyProps(const StImage& theDataL,
+                                const StImage& theDataR) {
+    myDataPair.setColorModel(theDataL.getColorModel());
+    myDataPair.setColorScale(theDataL.getColorScale());
+    myDataPair.setPixelRatio(theDataL.getPixelRatio());
+    myDataL.setColorModel(theDataL.getColorModel());
+    myDataL.setColorScale(theDataL.getColorScale());
+    myDataL.setPixelRatio(theDataL.getPixelRatio());
+    myDataR.setColorModel(theDataR.isNull() ? theDataL.getColorModel() : theDataR.getColorModel());
+    myDataR.setColorScale(theDataR.isNull() ? theDataL.getColorScale() : theDataR.getColorScale());
+    myDataR.setPixelRatio(theDataR.isNull() ? theDataL.getPixelRatio() : theDataR.getPixelRatio());
+}
+
+inline bool canCopyReference(const StImage& theData) {
+    if(theData.isNull()) {
+        return true;
+    }
+
+    return !theData.getBufferCounter().isNull()
+        &&  theData.isTopDown();
+}
+
 void StGLTextureData::updateData(const StImage&                  theDataL,
                                  const StImage&                  theDataR,
                                  const StHandle<StStereoParams>& theStParams,
@@ -339,21 +362,122 @@ void StGLTextureData::updateData(const StImage&                  theDataL,
     // reset fill texture state
     myFillRows = myFillFromRow = 0;
 
-    if(!theDataL.getBufferCounter().isNull()) {
-        reset();
-        myDataL.initReference(theDataL);
-        myDataR.initReference(theDataR);
-        validateCubemap(theCubemap);
-        return;
-    } else {
-        myDataL.setBufferCounter(NULL);
-        myDataR.setBufferCounter(NULL);
+    if(canCopyReference(theDataL)
+    && canCopyReference(theDataR)) {
+        bool toCopy = false;
+        switch(mySrcFormat) {
+            case StFormat_SideBySide_LR:
+            case StFormat_SideBySide_RL: {
+                reset();
+                copyProps(theDataL, theDataR);
+                StImage& aDataL = (mySrcFormat == StFormat_SideBySide_LR)
+                                ? myDataL : myDataR;
+                StImage& aDataR = (mySrcFormat == StFormat_SideBySide_LR)
+                                ? myDataR : myDataL;
+                myDataPair.initReference(theDataL);
+                for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
+                    const StImagePlane& aFromPlane = myDataPair.getPlane(aPlaneId);
+                    if(aFromPlane.isNull()) {
+                        continue;
+                    }
+                    const size_t aSizeX = aFromPlane.getSizeX() / 2;
+                    aDataL.changePlane(aPlaneId).initWrapper(aFromPlane.getFormat(),
+                                                             aFromPlane.accessData(0, 0),
+                                                             aSizeX, aFromPlane.getSizeY(),
+                                                             aFromPlane.getSizeRowBytes());
+                    aDataR.changePlane(aPlaneId).initWrapper(aFromPlane.getFormat(),
+                                                             aFromPlane.accessData(0, aSizeX),
+                                                             aSizeX, aFromPlane.getSizeY(),
+                                                             aFromPlane.getSizeRowBytes());
+                }
+                break;
+            }
+            case StFormat_TopBottom_LR:
+            case StFormat_TopBottom_RL: {
+                reset();
+                copyProps(theDataL, theDataR);
+                StImage& aDataL = (mySrcFormat == StFormat_TopBottom_LR)
+                                ? myDataL : myDataR;
+                StImage& aDataR = (mySrcFormat == StFormat_TopBottom_LR)
+                                ? myDataR : myDataL;
+                myDataPair.initReference(theDataL);
+                for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
+                    const StImagePlane& aFromPlane = myDataPair.getPlane(aPlaneId);
+                    if(aFromPlane.isNull()) {
+                        continue;
+                    }
+                    const size_t aSizeY = aFromPlane.getSizeY() / 2;
+                    aDataL.changePlane(aPlaneId).initWrapper(aFromPlane.getFormat(),
+                                                             aFromPlane.accessData(0, 0),
+                                                             aFromPlane.getSizeX(), aSizeY,
+                                                             aFromPlane.getSizeRowBytes());
+                    aDataR.changePlane(aPlaneId).initWrapper(aFromPlane.getFormat(),
+                                                             aFromPlane.accessData(aSizeY, 0),
+                                                             aFromPlane.getSizeX(), aSizeY,
+                                                             aFromPlane.getSizeRowBytes());
+                }
+                break;
+            }
+            case StFormat_Rows: {
+                reset();
+                copyProps(theDataL, theDataR);
+                myDataL.setPixelRatio(theDataL.getPixelRatio() * 0.5f);
+                myDataR.setPixelRatio(theDataL.getPixelRatio() * 0.5f);
+                StImage& aDataL = myDataL;
+                StImage& aDataR = myDataR;
+                myDataPair.initReference(theDataL);
+                for(size_t aPlaneId = 0; aPlaneId < 4; ++aPlaneId) {
+                    const StImagePlane& aFromPlane = myDataPair.getPlane(aPlaneId);
+                    if(aFromPlane.isNull()) {
+                        continue;
+                    }
+                    const size_t aSizeY = aFromPlane.getSizeY() / 2;
+                    aDataL.changePlane(aPlaneId).initWrapper(aFromPlane.getFormat(),
+                                                             aFromPlane.accessData(0, 0),
+                                                             aFromPlane.getSizeX(), aSizeY,
+                                                             aFromPlane.getSizeRowBytes() * 2);
+                    aDataR.changePlane(aPlaneId).initWrapper(aFromPlane.getFormat(),
+                                                             aFromPlane.accessData(1, 0),
+                                                             aFromPlane.getSizeX(), aSizeY,
+                                                             aFromPlane.getSizeRowBytes() * 2);
+                }
+                break;
+            }
+            case StFormat_Columns:
+            case StFormat_Tiled4x: {
+                toCopy = true;
+                break;
+            }
+            case StFormat_Mono:
+            case StFormat_SeparateFrames:
+            case StFormat_FrameSequence:
+            case StFormat_AnaglyphRedCyan:
+            case StFormat_AnaglyphGreenMagenta:
+            case StFormat_AnaglyphYellowBlue:
+            case StFormat_AUTO: {
+                reset();
+                copyProps(theDataL, theDataR);
+                myDataL.initReference(theDataL);
+                myDataR.initReference(theDataR);
+                break;
+            }
+        }
+
+        if(!toCopy) {
+            validateCubemap(theCubemap);
+            return;
+        }
     }
+
+    myDataPair.setBufferCounter(NULL);
+    myDataL.setBufferCounter(NULL);
+    myDataR.setBufferCounter(NULL);
 
     // reallocate buffer if needed
     const size_t aNewSizeBytes = computeBufferSize(theDataL) + computeBufferSize(theDataR);
     if(aNewSizeBytes == 0) {
         // invalid data
+        myDataPair.nullify();
         myDataL.nullify();
         myDataR.nullify();
         myCubemapFormat = StCubemap_OFF;
@@ -361,12 +485,7 @@ void StGLTextureData::updateData(const StImage&                  theDataL,
     }
 
     reAllocate(aNewSizeBytes);
-    myDataL.setColorModel(theDataL.getColorModel());
-    myDataL.setColorScale(theDataL.getColorScale());
-    myDataR.setColorModel(theDataR.isNull() ? theDataL.getColorModel() : theDataR.getColorModel());
-    myDataR.setColorScale(theDataR.isNull() ? theDataL.getColorScale() : theDataR.getColorScale());
-    myDataL.setPixelRatio(theDataL.getPixelRatio());
-    myDataR.setPixelRatio(theDataL.getPixelRatio());
+    copyProps(theDataL, theDataR);
 
     switch(mySrcFormat) {
         case StFormat_SideBySide_LR:
@@ -649,9 +768,9 @@ bool StGLTextureData::fillTexture(StGLContext&     theCtx,
 void StGLTextureData::getCopy(StImage* theDataL,
                               StImage* theDataR) const {
     if(theDataL != NULL) {
-        theDataL->initCopy(myDataL);
+        theDataL->initCopy(myDataL, true);
     }
     if(theDataR != NULL) {
-        theDataR->initCopy(myDataR);
+        theDataR->initCopy(myDataR, true);
     }
 }

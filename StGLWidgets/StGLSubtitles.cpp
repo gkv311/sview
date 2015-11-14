@@ -120,7 +120,7 @@ bool StGLSubtitles::StSubShowItems::pop(const double thePTS) {
     // update active image
     const StImagePlane& anImage = getFirst()->Image;
     if(!anImage.isNull()) {
-        Image.initCopy(anImage);
+        Image.initCopy(anImage, false);
     } else {
         Image.nullify();
     }
@@ -136,7 +136,7 @@ void StGLSubtitles::StSubShowItems::add(const StHandle<StSubItem>& theItem) {
 
     const StImagePlane& anImage = theItem->Image;
     if(!anImage.isNull()) {
-        Image.initCopy(anImage);
+        Image.initCopy(anImage, false);
     }
 
     StArrayList<StHandle <StSubItem> >::add(theItem);
