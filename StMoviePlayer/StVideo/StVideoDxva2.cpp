@@ -132,6 +132,10 @@ class StDxva2Context : public StHWAccelContext {
      * Destroy decoder.
      */
     virtual void decoderDestroy() {
+        myPoolsTmp[0].release();
+        myPoolsTmp[1].release();
+        myPoolsTmp[2].release();
+
         if(myD3dSurfaces != NULL) {
             for(uint32_t aSurfIter = 0; aSurfIter < myNbSurfaces; ++aSurfIter) {
                 if(myD3dSurfaces[aSurfIter] != NULL) {
