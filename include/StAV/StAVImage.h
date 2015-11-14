@@ -109,11 +109,6 @@ class StAVFrameCounter : public StBufferCounter {
     ST_CPPEXPORT StAVFrameCounter();
 
     /**
-     * Wrapper constructor.
-     */
-    ST_CPPEXPORT StAVFrameCounter(AVFrame* theFrame);
-
-    /**
      * Create the new reference (e.g. increment counter).
      * If theOther has the same type, than the ref counter will be reused.
      * Otherwise then new counter will be allocated.
@@ -130,10 +125,15 @@ class StAVFrameCounter : public StBufferCounter {
      */
     ST_CPPEXPORT virtual ~StAVFrameCounter();
 
+    /**
+     * Initialize a proxy reference.
+     */
+    ST_CPPEXPORT void moveReferenceFrom(AVFrame* theFrame);
+
         private:
 
-    AVFrame* myFrame; //!< frame
-    bool     myToRelease;
+    AVFrame* myFrame;   //!< frame
+    bool     myIsProxy; //!< proxy reference to be moved, not copied
 
 };
 

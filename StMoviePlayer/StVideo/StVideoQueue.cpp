@@ -189,7 +189,7 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
 #endif
 
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 45, 101))
-    myFrameBufRef = new StAVFrameCounter(myFrame.Frame);
+    myFrameBufRef = new StAVFrameCounter();
 #endif
 
     myThread = new StThread(threadFunction, (void* )this, theMaster.isNull() ? "StVideoQueueM" : "StVideoQueueS");
@@ -529,6 +529,7 @@ void StVideoQueue::prepareFrame(const StFormat theSrcFormat) {
         myDataAdp.changePlane(2).initWrapper(aPlaneFrmt, myFrame.getPlane(2),
                                              size_t(aDimsYUV.widthV), size_t(aDimsYUV.heightV), myFrame.getLineSize(2));
 
+        myFrameBufRef->moveReferenceFrom(myFrame.Frame);
         myDataAdp.setBufferCounter(myFrameBufRef);
     } else if(!myToRgbIsBroken) {
         if(myToRgbCtx    == NULL

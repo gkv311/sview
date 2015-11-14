@@ -54,23 +54,15 @@ void StAVFrame::getImageInfo(const AVCodecContext* theCodecCtx,
 
 StAVFrameCounter::StAVFrameCounter()
 : myFrame(NULL),
-  myToRelease(true) {
+  myIsProxy(false) {
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 45, 101))
     myFrame = av_frame_alloc();
 #endif
 }
 
-StAVFrameCounter::StAVFrameCounter(AVFrame* theFrame)
-: myFrame(theFrame),
-  myToRelease(false) {
-    //
-}
-
 StAVFrameCounter::~StAVFrameCounter() {
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 45, 101))
-    if(myToRelease) {
-        av_frame_free(&myFrame);
-    }
+    av_frame_free(&myFrame);
 #endif
 }
 
@@ -83,11 +75,11 @@ void StAVFrameCounter::createReference(StHandle<StBufferCounter>& theOther) cons
     }
 
     av_frame_unref(anAvRef->myFrame);
-    if(myToRelease) {
-        av_frame_ref(anAvRef->myFrame, myFrame);
-    } else {
+    if(myIsProxy) {
         // just steal the reference
         av_frame_move_ref(anAvRef->myFrame, myFrame);
+    } else {
+        av_frame_ref(anAvRef->myFrame, myFrame);
     }
 #else
     theOther.nullify();
@@ -97,5 +89,15 @@ void StAVFrameCounter::createReference(StHandle<StBufferCounter>& theOther) cons
 void StAVFrameCounter::releaseReference() {
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 45, 101))
     av_frame_unref(myFrame);
+#endif
+}
+
+void StAVFrameCounter::moveReferenceFrom(AVFrame* theFrame) {
+    myIsProxy = true;
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 45, 101))
+    av_frame_unref(myFrame);
+    av_frame_move_ref(myFrame, theFrame);
+#else
+    (void )theFrame;
 #endif
 }
