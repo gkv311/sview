@@ -138,7 +138,8 @@ void StAVPacketQueue::deinit() {
     myIsAttachedPic = false;
 }
 
-void StAVPacketQueue::fillCodecInfo(AVCodec* theCodec) {
+void StAVPacketQueue::fillCodecInfo(const AVCodec*  theCodec,
+                                    const StString& theDescExtra) {
     StMutexAuto aLock(myMutexInfo);
     if(theCodec == NULL) {
         myCodecName.clear();
@@ -146,7 +147,7 @@ void StAVPacketQueue::fillCodecInfo(AVCodec* theCodec) {
         myCodecStr.clear();
     } else {
         myCodecName = theCodec->name;
-        myCodecDesc = theCodec->long_name;
+        myCodecDesc = theCodec->long_name + theDescExtra;
         myCodecStr  = StString("[") + myCodecName + stCString("] ") + myCodecDesc;
     }
 }

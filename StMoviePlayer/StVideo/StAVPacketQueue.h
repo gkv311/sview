@@ -171,7 +171,8 @@ class StAVPacketQueue {
     /**
      * Update codec description.
      */
-    ST_LOCAL void fillCodecInfo(AVCodec* theCodec);
+    ST_LOCAL void fillCodecInfo(const AVCodec*  theCodec,
+                                const StString& theDescExtra = "");
 
     /**
      * Get codec description.

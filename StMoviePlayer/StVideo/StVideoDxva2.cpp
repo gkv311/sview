@@ -687,7 +687,11 @@ bool StVideoQueue::hwaccelInit() {
         }
     }
 
-    return myHWAccelCtx->decoderCreate(*this, myCodecCtx);
+    if(!myHWAccelCtx->decoderCreate(*this, myCodecCtx)) {
+        return false;
+    }
+    fillCodecInfo(myCodecCtx->codec, " (DXVA2)");
+    return true;
 }
 
 #endif // _WIN32
