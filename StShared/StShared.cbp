@@ -355,6 +355,7 @@
 		<Unit filename="stAV.cpp" />
 		<Unit filename="stConsole.cpp" />
 		<Unit filename="stUtfTools.cpp" />
+		<Unit filename="../include/StAV/StAVBufferPool.h" />
 		<Unit filename="../include/StAV/StAVFrame.h" />
 		<Unit filename="../include/StAV/StAVImage.h" />
 		<Unit filename="../include/StAV/StAVPacket.h" />

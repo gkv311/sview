@@ -22,6 +22,7 @@
 
 #include <StAV/StAVPacket.h>
 #include <StAV/StAVFrame.h>
+#include <StAV/StAVBufferPool.h>
 #include <StLibrary.h>
 
 #include <vector>
@@ -215,6 +216,7 @@ class StDxva2Context : public StHWAccelContext {
     uint32_t                     myNbSurfaces;
     uint64_t                     mySurfaceAge;
 
+    StAVBufferPool               myPoolsTmp[3];
     AVFrame*                     myFrameTmp;
     dxva_context                 myDxvaCtxAV;
 
@@ -416,13 +418,38 @@ bool StDxva2Context::retrieveFrame(StVideoQueue& theVideo,
     D3DSURFACE_DESC    aSurfDesc;
     aSurface->GetDesc(&aSurfDesc);
 
+    av_frame_unref(myFrameTmp);
     myFrameTmp->width  = theFrame->width;
     myFrameTmp->height = theFrame->height;
     //myFrameTmp->format = stAV::PIX_FMT::NV12;
     myFrameTmp->format = stAV::PIX_FMT::YUV420P;
+    const int aHeightUV   = theFrame->height / 2;
+    const int aWidthUV    = theFrame->width  / 2;
 
-    int aRes = av_frame_get_buffer(myFrameTmp, 32);
-    if(aRes < 0) {
+    myFrameTmp->linesize[0] = (int )getAligned(theFrame->width, 32);
+    myFrameTmp->linesize[1] = (int )getAligned(aWidthUV,        32);
+    myFrameTmp->linesize[2] = (int )getAligned(aWidthUV,        32);
+
+    const int aBufSizeY   = myFrameTmp->linesize[0] * theFrame->height;
+    const int aBufSizeU   = myFrameTmp->linesize[1] * aHeightUV;
+    if(myPoolsTmp[0].init(aBufSizeY)
+    && myPoolsTmp[1].init(aBufSizeU)
+    && myPoolsTmp[2].init(aBufSizeU)) {
+        myFrameTmp->buf[0] = myPoolsTmp[0].getBuffer();
+        myFrameTmp->buf[1] = myPoolsTmp[1].getBuffer();
+        myFrameTmp->buf[2] = myPoolsTmp[2].getBuffer();
+        if(myFrameTmp->buf[0] == NULL
+        || myFrameTmp->buf[1] == NULL
+        || myFrameTmp->buf[2] == NULL) {
+            ST_ERROR_LOG("StDxva2Context: unable to allocate YUV420P frame buffers");
+            return false;
+        }
+
+        myFrameTmp->data[0] = myFrameTmp->buf[0]->data;
+        myFrameTmp->data[1] = myFrameTmp->buf[1]->data;
+        myFrameTmp->data[2] = myFrameTmp->buf[2]->data;
+    } else if(av_frame_get_buffer(myFrameTmp, 32) < 0) {
+        ST_ERROR_LOG("StDxva2Context: unable to allocate YUV420P frame buffers");
         return false;
     }
 
@@ -438,12 +465,8 @@ bool StDxva2Context::retrieveFrame(StVideoQueue& theVideo,
     //av_image_copy_plane(myFrameTmp->data[1], myFrameTmp->linesize[1],
     //                    (uint8_t* )aLockRect.pBits + aLockRect.Pitch * aSurfDesc.Height,
     //                    aLockRect.Pitch, theFrame->width, theFrame->height / 2);
-
-    int aHeithtUV = theFrame->height / 2;
-    int aWidthUV  = theFrame->width  / 2;
-    myFrameTmp->data[1];
     const uint8_t* aSrcPlaneUV = (const uint8_t* )aLockRect.pBits + aLockRect.Pitch * aSurfDesc.Height;
-    for(int aRow = 0; aRow < aHeithtUV; ++aRow) {
+    for(int aRow = 0; aRow < aHeightUV; ++aRow) {
         const uint8_t* aSrcRowUV = aSrcPlaneUV + aRow * aLockRect.Pitch;
         uint8_t*       aDstRowU  = myFrameTmp->data[1] + myFrameTmp->linesize[1] * aRow;
         uint8_t*       aDstRowV  = myFrameTmp->data[2] + myFrameTmp->linesize[2] * aRow;
@@ -456,7 +479,7 @@ bool StDxva2Context::retrieveFrame(StVideoQueue& theVideo,
 
     aSurface->UnlockRect();
 
-    aRes = av_frame_copy_props(myFrameTmp, theFrame);
+    int aRes = av_frame_copy_props(myFrameTmp, theFrame);
     if(aRes < 0) {
         av_frame_unref(myFrameTmp);
         return false;
