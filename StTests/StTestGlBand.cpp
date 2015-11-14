@@ -119,7 +119,7 @@ void StTestGlBand::testFrameCopyRAM(const GLsizei theFrameSizeX,
     st::cout << stostream_text("RGB Frame to Frame ") << theFrameSizeX << stostream_text(" x ") << theFrameSizeY << stostream_text(" (RAM)\n");
     myTimer.restart();
     for(size_t anIter = 0; anIter < TEST_ITERATIONS; ++anIter) {
-        if(!anImgPlaneDst.fill(anImgPlaneSrc)) {
+        if(!anImgPlaneDst.fill(anImgPlaneSrc, false)) {
             st::cout << stostream_text("Fail to fill the image plane...\n");
             return;
         }
