@@ -141,7 +141,7 @@ bool StImagePlane::initCopy(const StImagePlane& theCopy,
     }
 
     const size_t aCopyRowBytes = stMin(mySizeRowBytes, theCopy.mySizeRowBytes);
-    for(size_t aRow = 0; aRow < mySizeY; ++aRow, ++aRow) {
+    for(size_t aRow = 0; aRow < mySizeY; ++aRow) {
         stMemCpy(changeData(aRow, 0), theCopy.getData(aRow, 0), aCopyRowBytes);
     }
     return true;
