@@ -1167,6 +1167,10 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
         myPlayList->setOpacity(anOpacity, true);
     }
     if(myBtnFull != NULL) {
+        if(myIsMinimalGUI
+        && myPanelBottom != NULL) {
+            myPanelBottom->setOpacity(1.0f, false);
+        }
         myBtnFull->setOpacity(myIsMinimalGUI ? 1.0f : anOpacity, false);
     }
 
