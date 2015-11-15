@@ -143,8 +143,6 @@ bool StGLTextureQueue::stglUpdateStTextures(StGLContext& theCtx) {
             myDataSnap  = myDataFront; myNewShotEvent.set();
             if(myToCompress) {
                 myDataFront->reset();
-            } else {
-                myDataFront->resetStParams();
             }
             myDataFront = myDataFront->getNext();
             ST_DEBUG_ASSERT(myQueueSize != 0); // critical error!
@@ -173,6 +171,9 @@ void StGLTextureQueue::clear() {
         // reset queue
         myQueueSize     = 0;
         myDataBack      = myDataFront;
+        if(myDataSnap != NULL) {
+            myDataSnap->resetStParams();
+        }
         myDataSnap      = NULL;
         mySwapFBCount   = 0;
         myIsReadyToSwap = false; // invalidate currently uploaded image in back buffer
