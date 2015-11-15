@@ -217,6 +217,15 @@ bool StAVImage::load(const StString& theFilePath,
             myCodec = avcodec_find_decoder_by_name("mjpeg");
             break;
         }
+        case ST_TYPE_EXR: {
+            myCodec = avcodec_find_decoder_by_name("exr");
+            break;
+        }
+        case ST_TYPE_WEBP:
+        case ST_TYPE_WEBPLL: {
+            myCodec = avcodec_find_decoder_by_name("webp");
+            break;
+        }
         default: {
             break;
         }
