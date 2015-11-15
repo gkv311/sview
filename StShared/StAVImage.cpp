@@ -557,7 +557,7 @@ bool StAVImage::save(const StString& theFilePath,
                 anImage.initWrapper(*this);
             } else {
                 // convert to compatible pixel format
-                PixelFormat aPFrmtTarget = stAV::PIX_FMT::YUVJ422P;
+                PixelFormat aPFrmtTarget = aPFormatAV == stAV::PIX_FMT::YUV420P ? stAV::PIX_FMT::YUVJ420P : stAV::PIX_FMT::YUVJ422P;
                 anImage.setColorModel(StImage::ImgColor_YUV);
                 anImage.setColorScale(StImage::ImgScale_Mpeg);
                 anImage.changePlane(0).initTrash(StImagePlane::ImgGray, getSizeX(), getSizeY(), getAligned(getSizeX()));
