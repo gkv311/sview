@@ -334,7 +334,8 @@ bool StVideo::addFile(const StString& theFileToLoad,
                     myFileInfoTmp->Info.add(StArgument(tr(INFO_DURATION),
                         StFormatTime::formatSeconds(theInfo.Duration)));
                 }
-            } else if(!myVideoSlave->isInitialized()) {
+            } else if(!myVideoSlave->isInitialized()
+                   && !stAV::isAttachedPicture(aStream)) {
                 myVideoSlave->init(aFormatCtx, aStreamId, "");
                 if(myVideoSlave->isInitialized()) {
                     mySlaveCtx    = aFormatCtx;
@@ -665,11 +666,9 @@ bool StVideo::doSeekStream(AVFormatContext* theFormatCtx,
                            const bool       toSeekBack) {
     const int aFlags = toSeekBack ? AVSEEK_FLAG_BACKWARD : 0;
     AVStream* aStream = theFormatCtx->streams[theStreamId];
-#if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(54, 2, 100))
-    if((aStream->disposition & AV_DISPOSITION_ATTACHED_PIC) != 0) {
+    if(stAV::isAttachedPicture(aStream)) {
         return false;
     }
-#endif
 
     int64_t aSeekTarget = stAV::secondsToUnits(aStream, theSeekPts + stAV::unitsToSeconds(aStream, aStream->start_time));
     bool isSeekDone = av_seek_frame(theFormatCtx, theStreamId, aSeekTarget, aFlags) >= 0;

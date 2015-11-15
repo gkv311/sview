@@ -110,10 +110,7 @@ bool StAVPacketQueue::init(AVFormatContext*   theFormatCtx,
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
     myGetBuffInit    = myCodecCtx->get_buffer2;
 #endif
-#if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(54, 2, 100))
-    myIsAttachedPic = myStream != NULL
-                  && (myStream->disposition & AV_DISPOSITION_ATTACHED_PIC) != 0;
-#endif
+    myIsAttachedPic = stAV::isAttachedPicture(myStream);
     return true;
 }
 

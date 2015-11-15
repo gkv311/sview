@@ -285,6 +285,21 @@ namespace stAV {
 #endif
 
     /**
+     * Check is stream represents attached picture (e.g. NOT a video stream).
+     */
+    inline bool isAttachedPicture(const AVStream* theStream) {
+        if(theStream == NULL) {
+            return false;
+        }
+
+    #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(54, 2, 100))
+        return (theStream->disposition & AV_DISPOSITION_ATTACHED_PIC) != 0;
+    #else
+        return false;
+    #endif
+    }
+
+    /**
      * Audio functions
      */
     namespace audio {
