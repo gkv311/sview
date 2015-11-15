@@ -124,6 +124,10 @@ const PixelFormat stAV::PIX_FMT::YUVJ444P   = ST_AV_GETPIXFMT("yuvj444p");
 const PixelFormat stAV::PIX_FMT::YUVJ440P   = ST_AV_GETPIXFMT("yuvj440p");
 const PixelFormat stAV::PIX_FMT::RGB24      = ST_AV_GETPIXFMT("rgb24");
 const PixelFormat stAV::PIX_FMT::BGR24      = ST_AV_GETPIXFMT("bgr24");
+const PixelFormat stAV::PIX_FMT::RGB48      = ST_AV_GETPIXFMT("rgb48");
+const PixelFormat stAV::PIX_FMT::BGR48      = ST_AV_GETPIXFMT("bgr48");
+const PixelFormat stAV::PIX_FMT::RGBA64     = ST_AV_GETPIXFMT("rgba64");
+const PixelFormat stAV::PIX_FMT::BGRA64     = ST_AV_GETPIXFMT("bgra64");
 const PixelFormat stAV::PIX_FMT::DXVA2_VLD  = ST_AV_GETPIXFMT("dxva2_vld");
 
 // TODO (Kirill Gavrilov#9) remove this stuff

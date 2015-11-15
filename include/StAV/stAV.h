@@ -226,8 +226,12 @@ namespace stAV {
         // RGB formats
         ST_SHARED_CPPEXPORT PixelFormat RGB24;     //!< packed RGB 8:8:8, 24bpp, RGBRGB...
         ST_SHARED_CPPEXPORT PixelFormat BGR24;     //!< packed RGB 8:8:8, 24bpp, BGRBGR...
+        ST_SHARED_CPPEXPORT PixelFormat RGB48;
+        ST_SHARED_CPPEXPORT PixelFormat BGR48;
         ST_SHARED_CPPEXPORT PixelFormat RGBA32;
         ST_SHARED_CPPEXPORT PixelFormat BGRA32;
+        ST_SHARED_CPPEXPORT PixelFormat RGBA64;
+        ST_SHARED_CPPEXPORT PixelFormat BGRA64;
         // HWAccel formats
         ST_SHARED_CPPEXPORT PixelFormat DXVA2_VLD;
 

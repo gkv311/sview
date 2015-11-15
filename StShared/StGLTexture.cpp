@@ -45,6 +45,13 @@ bool StGLTexture::getInternalFormat(const StGLContext&  /*theCtx*/,
             theInternalFormat = GL_RGBA8;
         #endif
             return true;
+        case StImagePlane::ImgRGBA64:
+        #if defined(GL_ES_VERSION_2_0)
+            theInternalFormat = GL_RGBA;
+        #else
+            theInternalFormat = GL_RGBA16;
+        #endif
+            return true;
         case StImagePlane::ImgRGB:
         case StImagePlane::ImgBGR:
         case StImagePlane::ImgRGB32:
@@ -53,6 +60,13 @@ bool StGLTexture::getInternalFormat(const StGLContext&  /*theCtx*/,
             theInternalFormat = GL_RGB;
         #else
             theInternalFormat = GL_RGB8;
+        #endif
+            return true;
+        case StImagePlane::ImgRGB48:
+        #if defined(GL_ES_VERSION_2_0)
+            theInternalFormat = GL_RGB;
+        #else
+            theInternalFormat = GL_RGB16;
         #endif
             return true;
         case StImagePlane::ImgGrayF:
@@ -124,10 +138,20 @@ bool StGLTexture::getDataFormat(const StGLContext&  theCtx,
             return true;
         #endif
         }
+        case StImagePlane::ImgRGB48: {
+            thePixelFormat = GL_RGB;
+            theDataType    = GL_UNSIGNED_SHORT;
+            return true;
+        }
         case StImagePlane::ImgRGBA:
         case StImagePlane::ImgRGB32: {
             thePixelFormat = GL_RGBA;
             theDataType = GL_UNSIGNED_BYTE;
+            return true;
+        }
+        case StImagePlane::ImgRGBA64: {
+            thePixelFormat = GL_RGBA;
+            theDataType    = GL_UNSIGNED_SHORT;
             return true;
         }
         case StImagePlane::ImgBGRA:

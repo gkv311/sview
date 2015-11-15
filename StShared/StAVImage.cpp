@@ -433,6 +433,16 @@ bool StAVImage::load(const StString& theFilePath,
         changePlane(0).initWrapper(StImagePlane::ImgGray16, myFrame.getPlane(0),
                                    myCodecCtx->width, myCodecCtx->height,
                                    myFrame.getLineSize(0));
+    } else if(myCodecCtx->pix_fmt == stAV::PIX_FMT::RGB48) {
+        setColorModel(StImage::ImgColor_RGB);
+        changePlane(0).initWrapper(StImagePlane::ImgRGB48, myFrame.getPlane(0),
+                                   myCodecCtx->width, myCodecCtx->height,
+                                   myFrame.getLineSize(0));
+    } else if(myCodecCtx->pix_fmt == stAV::PIX_FMT::RGBA64) {
+        setColorModel(StImage::ImgColor_RGBA);
+        changePlane(0).initWrapper(StImagePlane::ImgRGBA64, myFrame.getPlane(0),
+                                   myCodecCtx->width, myCodecCtx->height,
+                                   myFrame.getLineSize(0));
     } else if(stAV::isFormatYUVPlanar(myCodecCtx, aDimsYUV)) {
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 29, 0))
         if(myCodecCtx->color_range == AVCOL_RANGE_JPEG) {

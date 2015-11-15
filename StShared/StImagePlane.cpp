@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -16,8 +16,10 @@ StString StImagePlane::formatImgFormat(ImgFormat theImgFormat) {
         case ImgBGR:     return "ImgBGR";
         case ImgRGB32:   return "ImgRGB32";
         case ImgBGR32:   return "ImgBGR32";
+        case ImgRGB48:   return "ImgRGB48";
         case ImgRGBA:    return "ImgRGBA";
         case ImgBGRA:    return "ImgBGRA";
+        case ImgRGBA64:  return "ImgRGBA64";
         case ImgGrayF:   return "ImgGrayF";
         case ImgRGBF:    return "ImgRGBF";
         case ImgBGRF:    return "ImgBGRF";
@@ -63,9 +65,15 @@ void StImagePlane::setFormat(StImagePlane::ImgFormat thePixelFormat) {
         case ImgBGRA:
             mySizeBPP = 4;
             break;
+        case ImgRGBA64:
+            mySizeBPP = 8;
+            break;
         case ImgRGB32:
         case ImgBGR32:
             mySizeBPP = 4;
+            break;
+        case ImgRGB48:
+            mySizeBPP = 6;
             break;
         case ImgRGB:
         case ImgBGR:

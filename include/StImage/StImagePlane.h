@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -30,8 +30,10 @@ class StImagePlane {
         ImgBGR,         //!< same as RGB but with different components order
         ImgRGB32,       //!< 4 bytes packed RGB image plane (1 byte is dummy)
         ImgBGR32,       //!< same as RGB but with different components order
+        ImgRGB48,       //!< 6 bytes packed RGB image plane
         ImgRGBA,        //!< 4 bytes packed RGBA image plane
         ImgBGRA,        //!< same as RGBA but with different components order
+        ImgRGBA64,      //!< 8 bytes packed RGBA image plane
         ImgGrayF,       //!< 1 float  (4-bytes) per pixel (1-component plane)
         ImgRGBF,        //!< 3 floats (12-bytes) RGB image plane
         ImgBGRF,        //!< same as RGBF but with different components order
