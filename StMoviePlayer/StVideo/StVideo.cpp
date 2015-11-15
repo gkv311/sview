@@ -708,9 +708,7 @@ void StVideo::checkInitVideoStreams() {
     const bool isGpuFailed   = myVideoMaster->isGpuFailed()
                            || (myVideoSlave->isInitialized() && myVideoSlave->isGpuFailed());
     if(toUseGpu      != myVideoMaster->toUseGpu()
-    || toDecodeSlave != myVideoSlave->isInitialized()
-    || myVideoMaster->toReinitilize()
-    || myVideoSlave ->toReinitilize()) {
+    || toDecodeSlave != myVideoSlave->isInitialized()) {
         doFlush();
         if(myVideoMaster->isInitialized()) {
             const StString   aFileNameMaster = myVideoMaster->getFileName();

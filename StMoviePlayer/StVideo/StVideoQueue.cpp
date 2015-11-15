@@ -80,7 +80,6 @@ AVPixelFormat StVideoQueue::getFrameFormat(const AVPixelFormat* theFormats) {
         if(*aFormatIter == stAV::PIX_FMT::DXVA2_VLD) {
             if(!hwaccelInit()) {
                 myIsGpuFailed = true;
-                myToReinit    = true;
                 return avcodec_default_get_format(myCodecCtx, theFormats);
             }
             return *aFormatIter;
@@ -161,7 +160,6 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
 #endif
   myUseGpu(false),
   myIsGpuFailed(false),
-  myToReinit(false),
   //
   myToRgbCtx(NULL),
   myToRgbPixFmt(stAV::PIX_FMT::NONE),
@@ -246,6 +244,13 @@ namespace {
 
 bool StVideoQueue::initCodec(AVCodec*   theCodec,
                              const bool theToUseGpu) {
+    // close previous codec
+    if(myCodec != NULL) {
+        avcodec_close(myCodecCtx);
+        fillCodecInfo(NULL);
+    }
+    myCodec = NULL;
+
     // configure the codec
     myCodecCtx->codec_id = theCodec->id;
     stAV::meta::Dict* anOpts = NULL;
@@ -311,6 +316,15 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
         return false;
     }
 
+#if defined(_WIN32)
+    myIsGpuFailed = myCodecCtx->codec_id != CodecIdMPEG2
+                 && myCodecCtx->codec_id != CodecIdH264
+                 && myCodecCtx->codec_id != CodecIdVC1
+                 && myCodecCtx->codec_id != CodecIdWMV3
+                 && myCodecCtx->codec_id != CodecIdVC1
+                 && myCodecCtx->codec_id != CodecIdHEVC;
+#endif
+
     // open VIDEO codec
 #if defined(__APPLE__)
     bool isCodecOverridden = false;
@@ -323,7 +337,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
 
     if(aCodecGpu != NULL) {
         myCodecCtx->get_format = stGetFormatYUV420P;
-        isCodecOverridden = initCodec(aCodecGpu, myUseGpu);
+        isCodecOverridden = initCodec(aCodecGpu, true);
         if(!isCodecOverridden) {
             myCodecCtx->get_format = myGetFrmtInit;
         }
@@ -418,7 +432,6 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
 
 void StVideoQueue::deinit() {
     myIsGpuFailed = false;
-    myToReinit    = false;
     if(myMaster.isNull()) {
         myTextureQueue->clear();
         myTextureQueue->setConnectedStream(false);
@@ -706,7 +719,19 @@ void StVideoQueue::decodeLoop() {
 
         // decode video frame
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 23, 0))
+        bool toTryGpu  = myUseGpu && !myIsGpuFailed;
         avcodec_decode_video2(myCodecCtx, myFrame.Frame, &isFrameFinished, aPacket->getAVpkt());
+        bool isGpuUsed = myUseGpu && !myIsGpuFailed;
+        if(isGpuUsed != toTryGpu) {
+            if(!initCodec(myCodecAuto, isGpuUsed)) {
+                signals.onError(stCString("FFmpeg: Could not re-open video codec"));
+                deinit();
+                aPacket.nullify();
+                continue;
+            }
+            isFrameFinished = 0;
+            avcodec_decode_video2(myCodecCtx, myFrame.Frame, &isFrameFinished, aPacket->getAVpkt());
+        }
     #else
         avcodec_decode_video(myCodecCtx, myFrame.Frame, &isFrameFinished,
                              aPacket->getData(), aPacket->getSize());

@@ -100,13 +100,6 @@ class StVideoQueue : public StAVPacketQueue {
         public:
 
     /**
-     * Return true if codec should be reinitialized.
-     */
-    ST_LOCAL bool toReinitilize() const {
-        return myToReinit;
-    }
-
-    /**
      * @return true if GPU usage is enabled
      */
     ST_LOCAL bool toUseGpu() const {
@@ -360,7 +353,6 @@ private:
 #endif
     bool                       myUseGpu;          //!< activate decoding on GPU when possible
     bool                       myIsGpuFailed;     //!< flag indicating that GPU decoder can not handle input data
-    bool                       myToReinit;        //!< request reinitialization
 
     StAVFrame                  myFrameRGB;        //!< frame, converted to RGB (soft)
     StImagePlane               myDataRGB;         //!< RGB buffer data (for swscale)
