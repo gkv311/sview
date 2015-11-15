@@ -157,6 +157,7 @@ void StALDeviceParam::initList() {
         return;
     }
 
+    const StString THE_ALSOFT_SUFFIX(" on OpenAL Soft");
     const ALchar* aDevicesNames = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
     while(aDevicesNames != NULL
       && *aDevicesNames != '\0') {
@@ -166,6 +167,12 @@ void StALDeviceParam::initList() {
     #else
         aName.fromUnicode(aDevicesNames);
     #endif
+        // cut-off redundant suffixes - the names are too long
+        if(aName.isEndsWithIgnoreCase(THE_ALSOFT_SUFFIX)) {
+            size_t anEnd = aName.getLength() - THE_ALSOFT_SUFFIX.getLength();
+            aName = aName.subString(0, anEnd);
+        }
+
         myDevicesUtf.add(aName);
         myDevicesLoc.push_back(aCName);
         aDevicesNames += aCName.length() + 1;
