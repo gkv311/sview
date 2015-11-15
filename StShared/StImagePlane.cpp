@@ -156,8 +156,12 @@ bool StImagePlane::initCopy(const StImagePlane& theCopy,
 }
 
 bool StImagePlane::initWrapper(const StImagePlane& theCopy) {
-    return initWrapper(theCopy.getFormat(), theCopy.myDataPtr,
-                       theCopy.getSizeX(), theCopy.getSizeY(), theCopy.getSizeRowBytes());
+    if(!initWrapper(theCopy.myImgFormat, theCopy.myDataPtr,
+                    theCopy.mySizeX, theCopy.mySizeY, theCopy.mySizeRowBytes)) {
+        return false;
+    }
+    myIsTopBottom = theCopy.myIsTopBottom;
+    return true;
 }
 
 bool StImagePlane::initSideBySide(const StImagePlane& theImageL,
