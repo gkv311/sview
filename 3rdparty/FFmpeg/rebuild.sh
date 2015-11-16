@@ -10,6 +10,8 @@ rebuildDebug="false"
 rebuildAndroid="false"
 compilerPrefix=""
 androidNdkRoot="~/develop/android-ndk-r10"
+aSystem=`uname -s`
+aPwdBack=$PWD
 
 for i in $*
 do
@@ -70,10 +72,16 @@ if [ "$rebuildDebug" == "true" ]; then
   OUTPUT_NAME="$OUTPUT_NAME-debug"
 fi
 OUTPUT_FOLDER="../$OUTPUT_NAME"
+OUTPUT_FOLDER_BIN="$OUTPUT_FOLDER/bin"
+OUTPUT_FOLDER_LIB="$OUTPUT_FOLDER/lib"
+if [ "$aSystem" == "Darwin" ]; then
+  OUTPUT_FOLDER_BIN="$OUTPUT_FOLDER/MacOS"
+  OUTPUT_FOLDER_LIB="$OUTPUT_FOLDER/Frameworks"
+fi
 rm -f -r $OUTPUT_FOLDER
 mkdir -p $OUTPUT_FOLDER
-mkdir -p $OUTPUT_FOLDER/bin
-mkdir -p $OUTPUT_FOLDER/lib
+mkdir -p $OUTPUT_FOLDER_BIN
+mkdir -p $OUTPUT_FOLDER_LIB
 
 echo "  make distclean"
 make distclean &>/dev/null
@@ -99,11 +107,11 @@ configArguments="\
  --enable-hardcoded-tables \
  --enable-pthreads \
  --disable-libopenjpeg \
+ --disable-doc \
  --enable-runtime-cpudetect"
 
-aSystem=`uname -s`
 if [ "$aSystem" == "Darwin" ]; then
-  configArguments="$configArguments --enable-vda"
+  configArguments="$configArguments --enable-vda --libdir=@executable_path/../Frameworks"
 fi
 
 #if [ "$gccMachine" != "$GCC_MACHINE_LINUX_64" ]; then
@@ -178,85 +186,88 @@ if [ -f libavcodec/avcodec.dll ]; then
   cp -f libavcodec/*.dll $OUTPUT_FOLDER
   cp -f libavcodec/*.lib $OUTPUT_FOLDER &>/dev/null
 elif [ -f libavcodec/libavcodec.dylib ]; then
-  cp -f -p libavcodec/*.dylib* $OUTPUT_FOLDER/lib
+  cp -f -p -R libavcodec/*.dylib* $OUTPUT_FOLDER_LIB
 else
-  cp -f -d libavcodec/*.so* $OUTPUT_FOLDER/lib
+  cp -f -d libavcodec/*.so* $OUTPUT_FOLDER_LIB
 fi
 
 if [ -f libavdevice/avdevice.dll ]; then
   cp -f libavdevice/*.dll $OUTPUT_FOLDER
   cp -f libavdevice/*.lib $OUTPUT_FOLDER &>/dev/null
 elif [ -f libavdevice/libavdevice.dylib ]; then
-  cp -f -p libavdevice/*.dylib* $OUTPUT_FOLDER/lib
+  cp -f -p -R libavdevice/*.dylib* $OUTPUT_FOLDER_LIB
 else
-  cp -f -d libavdevice/*.so* $OUTPUT_FOLDER/lib
+  cp -f -d libavdevice/*.so* $OUTPUT_FOLDER_LIB
 fi
 
 if [ -f libavfilter/avfilter.dll ]; then
   cp -f libavfilter/*.dll $OUTPUT_FOLDER
   cp -f libavfilter/*.lib $OUTPUT_FOLDER &>/dev/null
 elif [ -f libavfilter/libavfilter.dylib ]; then
-  cp -f -p libavfilter/*.dylib* $OUTPUT_FOLDER/lib
+  cp -f -p -R libavfilter/*.dylib* $OUTPUT_FOLDER_LIB
 else
-  cp -f -d libavfilter/*.so* $OUTPUT_FOLDER/lib
+  cp -f -d libavfilter/*.so* $OUTPUT_FOLDER_LIB
 fi
 
 if [ -f libavformat/avformat.dll ]; then
   cp -f libavformat/*.dll $OUTPUT_FOLDER
   cp -f libavformat/*.lib $OUTPUT_FOLDER &>/dev/null
 elif [ -f libavformat/libavformat.dylib ]; then
-  cp -f -p libavformat/*.dylib* $OUTPUT_FOLDER/lib
+  cp -f -p -R libavformat/*.dylib* $OUTPUT_FOLDER_LIB
 else
-  cp -f -d libavformat/*.so* $OUTPUT_FOLDER/lib
+  cp -f -d libavformat/*.so* $OUTPUT_FOLDER_LIB
 fi
 
 if [ -f libavutil/avutil.dll ]; then
   cp -f libavutil/*.dll $OUTPUT_FOLDER
   cp -f libavutil/*.lib $OUTPUT_FOLDER &>/dev/null
 elif [ -f libavutil/libavutil.dylib ]; then
-  cp -f -p libavutil/*.dylib* $OUTPUT_FOLDER/lib
+  cp -f -p -R libavutil/*.dylib* $OUTPUT_FOLDER_LIB
 else
-  cp -f -d libavutil/*.so* $OUTPUT_FOLDER/lib
+  cp -f -d libavutil/*.so* $OUTPUT_FOLDER_LIB
 fi
 
 if [ -f libswscale/swscale.dll ]; then
   cp -f libswscale/*.dll $OUTPUT_FOLDER
   cp -f libswscale/*.lib $OUTPUT_FOLDER &>/dev/null
 elif [ -f libswscale/libswscale.dylib ]; then
-  cp -f -p libswscale/*.dylib* $OUTPUT_FOLDER/lib
+  cp -f -p -R libswscale/*.dylib* $OUTPUT_FOLDER_LIB
 else
-  cp -f -d libswscale/*.so* $OUTPUT_FOLDER/lib
+  cp -f -d libswscale/*.so* $OUTPUT_FOLDER_LIB
 fi
 
 if [ -f libswresample/swresample.dll ]; then
   cp -f libswresample/*.dll $OUTPUT_FOLDER
   cp -f libswresample/*.lib $OUTPUT_FOLDER &>/dev/null
 elif [ -f libswresample/libswresample.dylib ]; then
-  cp -f -p libswresample/*.dylib* $OUTPUT_FOLDER/lib
+  cp -f -p -R libswresample/*.dylib* $OUTPUT_FOLDER_LIB
 else
-  cp -f -d libswresample/*.so* $OUTPUT_FOLDER/lib
+  cp -f -d libswresample/*.so* $OUTPUT_FOLDER_LIB
 fi
 
 cp -f *.exe      $OUTPUT_FOLDER &>/dev/null
-cp -f ffmpeg     $OUTPUT_FOLDER/bin &>/dev/null
-cp -f ffmpeg_g   $OUTPUT_FOLDER/bin &>/dev/null
-cp -f ffprobe    $OUTPUT_FOLDER/bin &>/dev/null
-cp -f ffprobe_g  $OUTPUT_FOLDER/bin &>/dev/null
-cp -f ffserver   $OUTPUT_FOLDER/bin &>/dev/null
-cp -f ffserver_g $OUTPUT_FOLDER/bin &>/dev/null
-cp -f ffplay     $OUTPUT_FOLDER/bin &>/dev/null
+cp -f ffmpeg     $OUTPUT_FOLDER_BIN &>/dev/null
+cp -f ffmpeg_g   $OUTPUT_FOLDER_BIN &>/dev/null
+cp -f ffprobe    $OUTPUT_FOLDER_BIN &>/dev/null
+cp -f ffprobe_g  $OUTPUT_FOLDER_BIN &>/dev/null
+cp -f ffserver   $OUTPUT_FOLDER_BIN &>/dev/null
+cp -f ffserver_g $OUTPUT_FOLDER_BIN &>/dev/null
+cp -f ffplay     $OUTPUT_FOLDER_BIN &>/dev/null
 
 # remove duplicates (only Windows)
 rm $OUTPUT_FOLDER/avcodec.dll $OUTPUT_FOLDER/swresample.dll $OUTPUT_FOLDER/avdevice.dll $OUTPUT_FOLDER/avfilter.dll $OUTPUT_FOLDER/avformat.dll $OUTPUT_FOLDER/avutil.dll $OUTPUT_FOLDER/swscale.dll &>/dev/null
 
 # create binaries archive
-if command -v 7za &>/dev/null
+if [ "$aSystem" == "Darwin" ]; then
+  rm $OUTPUT_FOLDER/../$OUTPUT_NAME.tar.gz &>/dev/null
+  cd $OUTPUT_FOLDER
+  tar -cvzf $OUTPUT_FOLDER/../$OUTPUT_NAME.tar.gz *
+elif command -v 7za &>/dev/null
 then
-  # binaries
   rm $OUTPUT_FOLDER/../$OUTPUT_NAME.7z &>/dev/null
   7za a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on $OUTPUT_FOLDER/../$OUTPUT_NAME.7z $OUTPUT_FOLDER
-  rm -f -r $OUTPUT_FOLDER
 fi
 
 # come back
-cd ..
+cd $aPwdBack
+#rm -f -r $OUTPUT_FOLDER
