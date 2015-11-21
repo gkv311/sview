@@ -461,6 +461,10 @@ void StGLTextureData::updateData(const StImage&                  theDataL,
                 myDataR.initReference(theDataR);
                 break;
             }
+            case StFormat_NB: {
+                reset();
+                return;
+            }
         }
 
         if(!toCopy) {
