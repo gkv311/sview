@@ -72,6 +72,7 @@ if [ "$rebuildDebug" == "true" ]; then
   OUTPUT_NAME="$OUTPUT_NAME-debug"
 fi
 OUTPUT_FOLDER="../$OUTPUT_NAME"
+OUTPUT_FOLDER_INC="$OUTPUT_FOLDER/include"
 OUTPUT_FOLDER_BIN="$OUTPUT_FOLDER/bin"
 OUTPUT_FOLDER_LIB="$OUTPUT_FOLDER/lib"
 if [ "$aSystem" == "Darwin" ]; then
@@ -82,6 +83,14 @@ rm -f -r $OUTPUT_FOLDER
 mkdir -p $OUTPUT_FOLDER
 mkdir -p $OUTPUT_FOLDER_BIN
 mkdir -p $OUTPUT_FOLDER_LIB
+mkdir -p $OUTPUT_FOLDER_INC
+mkdir -p $OUTPUT_FOLDER_INC/libavcodec
+mkdir -p $OUTPUT_FOLDER_INC/libavdevice
+mkdir -p $OUTPUT_FOLDER_INC/libavfilter
+mkdir -p $OUTPUT_FOLDER_INC/libavformat
+mkdir -p $OUTPUT_FOLDER_INC/libavutil
+mkdir -p $OUTPUT_FOLDER_INC/libswscale
+mkdir -p $OUTPUT_FOLDER_INC/libswresample
 
 echo "  make distclean"
 make distclean &>/dev/null
@@ -253,6 +262,14 @@ cp -f ffprobe_g  $OUTPUT_FOLDER_BIN &>/dev/null
 cp -f ffserver   $OUTPUT_FOLDER_BIN &>/dev/null
 cp -f ffserver_g $OUTPUT_FOLDER_BIN &>/dev/null
 cp -f ffplay     $OUTPUT_FOLDER_BIN &>/dev/null
+
+cp -f libavcodec/*.h    $OUTPUT_FOLDER_INC/libavcodec    &>/dev/null
+cp -f libavdevice/*.h   $OUTPUT_FOLDER_INC/libavdevice   &>/dev/null
+cp -f libavfilter/*.h   $OUTPUT_FOLDER_INC/libavfilter   &>/dev/null
+cp -f libavformat/*.h   $OUTPUT_FOLDER_INC/libavformat   &>/dev/null
+cp -f libavutil/*.h     $OUTPUT_FOLDER_INC/libavutil     &>/dev/null
+cp -f libswscale/*.h    $OUTPUT_FOLDER_INC/libswscale    &>/dev/null
+cp -f libswresample/*.h $OUTPUT_FOLDER_INC/libswresample &>/dev/null
 
 # remove duplicates (only Windows)
 rm $OUTPUT_FOLDER/avcodec.dll $OUTPUT_FOLDER/swresample.dll $OUTPUT_FOLDER/avdevice.dll $OUTPUT_FOLDER/avfilter.dll $OUTPUT_FOLDER/avformat.dll $OUTPUT_FOLDER/avutil.dll $OUTPUT_FOLDER/swscale.dll &>/dev/null
