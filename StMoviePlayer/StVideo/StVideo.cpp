@@ -59,7 +59,8 @@ StVideo::StVideo(const std::string&                theALDeviceName,
   myAudioDelayMSec(0),
   myIsBenchmark(false),
   toSave(StImageFile::ST_TYPE_NONE),
-  toQuit(false) {
+  toQuit(false),
+  myQuitEvent(false) {
     // initialize FFmpeg library if not yet performed
     stAV::init();
 
@@ -155,12 +156,21 @@ class ST_LOCAL StHangKiller {
 
 };
 
-StVideo::~StVideo() {
-    // stop the thread
+void StVideo::startDestruction() {
+    if(toQuit) {
+        return;
+    }
+
     toQuit = true;
     toSave = StImageFile::ST_TYPE_NONE;
     pushPlayEvent(ST_PLAYEVENT_NEXT);
     myTextureQueue->clear();
+    myQuitEvent.wait(1000);
+}
+
+StVideo::~StVideo() {
+    // stop the thread
+    startDestruction();
 
     // wait main thread is quit
     const char* THE_STATES[] = {
@@ -877,6 +887,10 @@ void StVideo::packetsLoop() {
                 }
 
                 myPlayList->updateRecent(myCurrPlsFile.isNull() ? myCurrNode : myCurrPlsFile, myCurrParams);
+                if(toQuit) {
+                    myQuitEvent.set();
+                }
+
                 doFlush();
                 if(myAudio->isInitialized()) {
                     myAudio->pushPlayEvent(ST_PLAYEVENT_SEEK, 0.0);
@@ -893,6 +907,7 @@ void StVideo::packetsLoop() {
                 myAudio->pushEnd();
                 while(!myAudio->isEmpty() || !myAudio->isInDowntime()) {
                     if(toQuit) {
+                        myQuitEvent.set();
                         break;
                     }
                     StThread::sleep(10);
@@ -949,6 +964,7 @@ void StVideo::packetsLoop() {
                 mySubtitles->pushEnd();
                 while(!mySubtitles->isEmpty() || !mySubtitles->isInDowntime()) {
                     if(toQuit) {
+                        myQuitEvent.set();
                         break;
                     }
                     StThread::sleep(10);
@@ -1210,6 +1226,7 @@ void StVideo::mainLoop() {
         // wait for initial message
         waitEvent();
         if(toQuit) {
+            myQuitEvent.set();
             return;
         }
 
@@ -1268,6 +1285,7 @@ void StVideo::mainLoop() {
                 myPlayList->walkToNext(false);
             }
             if(toQuit) {
+                myQuitEvent.set();
                 return;
             }
             isOpenSuccess = false;

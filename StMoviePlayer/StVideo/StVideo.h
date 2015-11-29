@@ -110,7 +110,16 @@ class StVideo {
                      const StHandle<StPlayList>&       thePlayList,
                      const StHandle<StGLTextureQueue>& theTextureQueue,
                      const StHandle<StSubQueue>&       theSubtitlesQueue);
+
+    /**
+     * Destructor.
+     */
     ST_LOCAL ~StVideo();
+
+    /**
+     * Start releasing this class. Should be following by destructor.
+     */
+    ST_LOCAL void startDestruction();
 
     ST_LOCAL inline const StHandle<StGLTextureQueue>& getTextureQueue() const {
         return myTextureQueue;
@@ -418,7 +427,8 @@ class StVideo {
     volatile int                  myAudioDelayMSec;//!< audio/video sync delay
     volatile bool                 myIsBenchmark;
     volatile StImageFile::ImageType toSave;
-    volatile bool                 toQuit;
+    volatile bool                 toQuit;         //!< flag indicating that all working threads should be closed
+    StCondition                   myQuitEvent;    //!< condition indicating that working thread has saved playback state to playlist
 
 };
 

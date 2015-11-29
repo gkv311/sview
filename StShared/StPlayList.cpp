@@ -843,6 +843,10 @@ StHandle<StStereoParams> StPlayList::openRecent(const size_t theItemId) {
 
 void StPlayList::updateRecent(const StHandle<StFileNode>&     theFile,
                               const StHandle<StStereoParams>& theParams) {
+    if(theFile.isNull()) {
+        return;
+    }
+
     StMutexAuto anAutoLock(myMutex);
     if(!myPlsFile.isNull()
      && myPlsFile->File == theFile) {
@@ -889,6 +893,7 @@ void StPlayList::currentToRecent() {
     }
 
     addRecentFile(*myCurrent->getFileNode());
+    updateRecent(myCurrent->getFileNode(), myCurrent->getParams());
 }
 
 const StHandle<StPlayList::StRecentItem>& StPlayList::addRecentFile(const StFileNode& theFile,

@@ -836,6 +836,10 @@ StMoviePlayer::~StMoviePlayer() {
     doStopWebUI();
 
     myUpdates.nullify();
+    if(!myVideo.isNull()) {
+        myVideo->startDestruction();
+    }
+
     releaseDevice();
     // wait video playback thread to quit and release resources
     myVideo.nullify();
