@@ -198,7 +198,7 @@ StString StProcess::getAbsolutePath(const StString& thePath) {
 StString StProcess::getWindowsFolder() {
     StString aWinFolder;
     stUtfWide_t aWndFldr[MAX_PATH];
-    GetWindowsDirectory(aWndFldr, MAX_PATH);
+    GetWindowsDirectoryW(aWndFldr, MAX_PATH);
     aWndFldr[MAX_PATH - 1] = L'\0';
     aWinFolder = StString(aWndFldr) + SYS_FS_SPLITTER;
     return aWinFolder;
@@ -302,7 +302,7 @@ bool StProcess::execProcess(const StString&          theExecutablePath,
         aCmdLineW += aSplitter;
     }
 
-    STARTUPINFO aStartInfo;
+    STARTUPINFOW aStartInfo;
     PROCESS_INFORMATION aProcessInfo;
     stMemSet(&aStartInfo, 0, sizeof(aStartInfo));
     aStartInfo.cb = sizeof(aStartInfo);

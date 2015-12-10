@@ -116,9 +116,8 @@ bool StFileNode::moveFile(const StCString& thePathFrom,
 
 StString StFileNode::getCompatibleName(const StString& theFileName) {
 #ifdef _WIN32
-    /// TODO (Kirill Gavrilov#1) if result is empty - not a filesystem element or no DOS-names enabled
     stUtfWide_t aShortNameWide[MAX_PATH];
-    GetShortPathName(theFileName.toUtfWide().toCString(), aShortNameWide, MAX_PATH);
+    GetShortPathNameW(theFileName.toUtfWide().toCString(), aShortNameWide, MAX_PATH);
     return *aShortNameWide != L'\0' ? StString(aShortNameWide) : theFileName;
 #else
     return theFileName;
