@@ -892,8 +892,8 @@ void StPlayList::currentToRecent() {
         return;
     }
 
-    addRecentFile(*myCurrent->getFileNode());
-    updateRecent(myCurrent->getFileNode(), myCurrent->getParams());
+    StHandle<StPlayList::StRecentItem> aRecent = addRecentFile(*myCurrent->getFileNode());
+    aRecent->Params = myCurrent->getParams();
 }
 
 const StHandle<StPlayList::StRecentItem>& StPlayList::addRecentFile(const StFileNode& theFile,
