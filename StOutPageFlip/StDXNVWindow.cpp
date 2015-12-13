@@ -120,8 +120,10 @@ LRESULT StDXNVWindow::wndProcFunction(HWND   theWnd,
             anEvent.Scroll.Time   = 0.0; //getEventTime(myEvent.time);
             anEvent.Scroll.PointX = aPnt.x();
             anEvent.Scroll.PointY = aPnt.y();
+            anEvent.Scroll.StepsX = 0;
+            anEvent.Scroll.StepsY = (zDelta > 0) ? 1 : -1;
             anEvent.Scroll.DeltaX = 0.0;
-            anEvent.Scroll.DeltaY = (zDelta > 0) ? 1.0 : -1.0;
+            anEvent.Scroll.DeltaY = 10.0f * anEvent.Scroll.StepsY;
             myStWin->post(anEvent);
         }
 

@@ -455,13 +455,13 @@ void StCADViewer::doScroll(const StScrollEvent& theEvent) {
         return;
     }
 
-    if(theEvent.DeltaY > 0.001) {
+    if(theEvent.StepsY >= 1) {
         if(myIsCtrlPressed) {
             myProjection.setZScreen(myProjection.getZScreen() + 1.1f);
         } else {
             myProjection.setZoom(myProjection.getZoom() * 0.9f);
         }
-    } else if(theEvent.DeltaY < -0.001) {
+    } else if(theEvent.StepsY <= -1) {
         if(myIsCtrlPressed) {
             myProjection.setZScreen(myProjection.getZScreen() - 1.1f);
         } else {

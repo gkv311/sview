@@ -279,9 +279,9 @@ void StSeekBar::doMouseUnclick(const int mouseBtn) {
 }
 
 bool StSeekBar::doScroll(const StScrollEvent& theEvent) {
-    if(theEvent.DeltaY > 0.001) {
+    if(theEvent.StepsY >= 1) {
         signals.onSeekScroll(1.0);
-    } else if(theEvent.DeltaY < -0.001) {
+    } else if(theEvent.StepsY <= -1) {
         signals.onSeekScroll(-1.0);
     }
     return true;

@@ -862,9 +862,9 @@ bool StGLImageRegion::doScroll(const StScrollEvent& theEvent) {
         return false;
     }
 
-    const GLfloat SCALE_STEPS = 0.16f;
+    const GLfloat SCALE_STEPS = fabs(theEvent.DeltaY) * 0.01f;
     StPointD_t aCenterCursor(0.5, 0.5);
-    if(theEvent.DeltaY > 0.001) {
+    if(theEvent.DeltaY > 0.001f) {
         if((myKeyFlags & ST_VF_CONTROL) == ST_VF_CONTROL) {
             if((myKeyFlags & ST_VF_SHIFT) == ST_VF_SHIFT) {
                 doParamsSepZDec(0.01);
@@ -893,7 +893,7 @@ bool StGLImageRegion::doScroll(const StScrollEvent& theEvent) {
                 break;
             }
         }
-    } else if(theEvent.DeltaY < -0.001) {
+    } else if(theEvent.DeltaY < -0.001f) {
         if((myKeyFlags & ST_VF_CONTROL) == ST_VF_CONTROL) {
             if((myKeyFlags & ST_VF_SHIFT) == ST_VF_SHIFT) {
                 doParamsSepZInc(0.01);

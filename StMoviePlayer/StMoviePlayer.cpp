@@ -1349,12 +1349,14 @@ void StMoviePlayer::doScroll(const StScrollEvent& theEvent) {
     }
 
     // limit seeking by scroll to lower corner
-    if(theEvent.PointY > 0.75) {
-        if(theEvent.DeltaX > 0.01) {
+    if(myGUI->mySeekBar != NULL
+    && myGUI->mySeekBar->isVisibleAndPointIn(aPnt)) {
+        if(theEvent.StepsX >= 1) {
             doSeekRight();
-        } else if(theEvent.DeltaX < -0.01) {
+        } else if(theEvent.StepsX <= -1) {
             doSeekLeft();
         }
+        return;
     }
     myGUI->doScroll(theEvent);
 }

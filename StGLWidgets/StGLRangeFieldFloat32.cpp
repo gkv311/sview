@@ -103,9 +103,9 @@ void StGLRangeFieldFloat32::doIncrement(const size_t ) {
 }
 
 bool StGLRangeFieldFloat32::doScroll(const StScrollEvent& theEvent) {
-    if(theEvent.DeltaY > 0.001) {
+    if(theEvent.StepsY >= 1) {
         myTrackValue->increment();
-    } else if(theEvent.DeltaY < -0.001) {
+    } else if(theEvent.StepsY <= -1) {
         myTrackValue->decrement();
     }
     return true;

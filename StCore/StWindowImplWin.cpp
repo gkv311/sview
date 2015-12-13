@@ -749,13 +749,15 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
             int aZDelta = GET_WHEEL_DELTA_WPARAM(wParam); // / WHEEL_DELTA;
             //if(GET_X_LPARAM(lParam) != 0)
 
-            myStEvent.Scroll.Time    = getEventTime(myEvent.time);
-            myStEvent.Scroll.PointX  = double(aMouseXPx) / double(aWinRect.width());
-            myStEvent.Scroll.PointY  = double(aMouseYPx) / double(aWinRect.height());
-            myStEvent.Scroll.DeltaX  = 0.0;
-            myStEvent.Scroll.DeltaY  = (aZDelta > 0) ? 1.0 : -1.0;
-
             myStEvent.Type = stEvent_Scroll;
+            myStEvent.Scroll.Time   = getEventTime(myEvent.time);
+            myStEvent.Scroll.PointX = double(aMouseXPx) / double(aWinRect.width());
+            myStEvent.Scroll.PointY = double(aMouseYPx) / double(aWinRect.height());
+            myStEvent.Scroll.StepsX = 0;
+            myStEvent.Scroll.StepsY = (aZDelta > 0) ? 1 : -1;
+            myStEvent.Scroll.DeltaX = 0.0;
+            myStEvent.Scroll.DeltaY = 10.0f * myStEvent.Scroll.StepsY;
+
             myEventsBuffer.append(myStEvent);
             return 0;
         }

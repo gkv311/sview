@@ -298,10 +298,11 @@ bool StGLScrollArea::doScroll(const StScrollEvent& theEvent) {
         return true;
     }
 
-    if(theEvent.DeltaY > 0.001) {
-        doScroll(myRoot->scale(10));
-    } else if(theEvent.DeltaY < -0.001) {
-        doScroll(-myRoot->scale(10));
+    int aDeltaY = (int )fabs(theEvent.DeltaY * 2.0f);
+    if(theEvent.DeltaY > 0.001f) {
+        doScroll( myRoot->scale(aDeltaY));
+    } else if(theEvent.DeltaY < -0.001f) {
+        doScroll(-myRoot->scale(aDeltaY));
     }
     return true;
 }

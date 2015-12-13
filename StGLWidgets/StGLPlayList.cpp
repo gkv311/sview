@@ -130,13 +130,13 @@ void StGLPlayList::doMouseUnclick(const int theBtnId) {
 }
 
 bool StGLPlayList::doScroll(const StScrollEvent& theEvent) {
-    if(theEvent.DeltaY > 0.001) {
+    if(theEvent.StepsY >= 1) {
         if(myFromId == 0) {
             return true;
         }
         --myFromId;
         updateList();
-    } else if(theEvent.DeltaY < -0.001) {
+    } else if(theEvent.StepsY <= -1) {
         if(myFromId + myItemsNb >= myList->getItemsCount()) {
             return true;
         }

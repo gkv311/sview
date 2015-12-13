@@ -969,8 +969,10 @@ void StWindowImpl::processEvents() {
                     myStEvent.Scroll.Time   = getEventTime(aBtnEvent->time);
                     myStEvent.Scroll.PointX = double(aPosX) / double(aRect.width());
                     myStEvent.Scroll.PointY = double(aPosY) / double(aRect.height());
+                    myStEvent.Scroll.StepsX = 0;
+                    myStEvent.Scroll.StepsY = aBtnEvent->button == 4 ? 1 : -1;
                     myStEvent.Scroll.DeltaX = 0.0;
-                    myStEvent.Scroll.DeltaY = aBtnEvent->button == 4 ? 1.0 : -1.0;
+                    myStEvent.Scroll.DeltaY = 10.0f * myStEvent.Scroll.StepsY;
                     signals.onScroll->emit(myStEvent.Scroll);
                     break;
                 }

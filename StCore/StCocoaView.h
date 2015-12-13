@@ -31,6 +31,7 @@
         bool          myIsFullscreen; //!< cached fullscreen state
         @public
         bool          myToHideCursor;
+        bool          myIsLionOS;
     }
 
         /**
