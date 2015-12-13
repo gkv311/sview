@@ -519,7 +519,7 @@ void StImageViewerGUI::doAboutProgram(const size_t ) {
 }
 
 void StImageViewerGUI::doUserTips(const size_t ) {
-    StProcess::openURL("http://sview.ru/sview2009/usertips");
+    StProcess::openURL("http://sview.ru/sview/usertips");
 }
 
 void StImageViewerGUI::doAboutImage(const size_t ) {
