@@ -36,7 +36,7 @@ class StGLCircle : public StGLMesh {
     /**
      * Compute the mesh using current configuration.
      */
-    ST_CPPEXPORT virtual bool computeMesh();
+    ST_CPPEXPORT virtual bool computeMesh() ST_ATTR_OVERRIDE;
 
     /**
      * Initialize the colors array with one specified color.

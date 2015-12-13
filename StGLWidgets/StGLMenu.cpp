@@ -223,7 +223,7 @@ bool StGLMenu::doKeyDown(const StKeyEvent& theEvent) {
 }
 
 bool StGLMenu::tryUnClick(const StPointD_t& theCursorZo,
-                          const int&        theMouseBtn,
+                          const int         theMouseBtn,
                           bool&             theIsItemUnclicked) {
     myKeepActive = false;
     bool wasSomeClickedBefore = theIsItemUnclicked;

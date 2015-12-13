@@ -1268,10 +1268,10 @@ void StMoviePlayer::doKeyDown(const StKeyEvent& theEvent) {
             } else if(theEvent.Flags == ST_VF_CONTROL) {
                 myGUI->myImage->params.brightness->decrement();
             } else {
-            #ifdef ST_DEBUG
+   ///         #ifdef ST_DEBUG
                 myIsBenchmark = !myIsBenchmark;
                 myVideo->setBenchmark(myIsBenchmark);
-            #endif
+   ///         #endif
             }
             return;
         }

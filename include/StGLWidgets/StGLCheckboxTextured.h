@@ -34,7 +34,7 @@ class StGLCheckboxTextured : public StGLTextureButton {
      * Destructor.
      */
     ST_CPPEXPORT virtual ~StGLCheckboxTextured();
-    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo);
+    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo) ST_ATTR_OVERRIDE;
 
     /**
      * Return tracked value.

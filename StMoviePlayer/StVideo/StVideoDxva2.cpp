@@ -121,17 +121,17 @@ class StDxva2Context : public StHWAccelContext {
     /**
      * Return true if DXVA2 has been successfully initialized.
      */
-    virtual bool isValid() const { return myDeviceHandle != INVALID_HANDLE_VALUE; }
+    virtual bool isValid() const ST_ATTR_OVERRIDE { return myDeviceHandle != INVALID_HANDLE_VALUE; }
 
     /**
      * Create context.
      */
-    virtual bool create(StVideoQueue& theVideo);
+    virtual bool create(StVideoQueue& theVideo) ST_ATTR_OVERRIDE;
 
     /**
      * Destroy decoder.
      */
-    virtual void decoderDestroy() {
+    virtual void decoderDestroy() ST_ATTR_OVERRIDE {
         myPoolsTmp[0].release();
         myPoolsTmp[1].release();
         myPoolsTmp[2].release();
@@ -158,19 +158,19 @@ class StDxva2Context : public StHWAccelContext {
      * Create decoder.
      */
     virtual bool decoderCreate(StVideoQueue&   theVideo,
-                               AVCodecContext* theCodecCtx);
+                               AVCodecContext* theCodecCtx) ST_ATTR_OVERRIDE;
 
     /**
      * AVFrame initialization callback.
      */
     virtual int getFrameBuffer(StVideoQueue& theVideo,
-                               AVFrame*      theFrame);
+                               AVFrame*      theFrame) ST_ATTR_OVERRIDE;
 
     /**
      * Fetch decoded results into specified frame.
      */
     virtual bool retrieveFrame(StVideoQueue& theVideo,
-                               AVFrame*      theFrame);
+                               AVFrame*      theFrame) ST_ATTR_OVERRIDE;
 
         private:
 

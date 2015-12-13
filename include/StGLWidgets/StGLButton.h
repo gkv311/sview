@@ -26,9 +26,9 @@ class StGLButton : public StGLMenu {
 
     ST_CPPEXPORT virtual ~StGLButton();
 
-    ST_CPPEXPORT virtual bool stglInit();
-    ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int& theMouseBtn, bool& theIsItemClicked);
-    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& theIsItemUnclicked);
+    ST_CPPEXPORT virtual bool stglInit() ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int theMouseBtn, bool& theIsItemClicked)   ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int theMouseBtn, bool& theIsItemUnclicked) ST_ATTR_OVERRIDE;
 
     /**
      * Change button text.

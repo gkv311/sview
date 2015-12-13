@@ -108,12 +108,12 @@ class StGLTextureButton : public StGLWidget {
     ST_CPPEXPORT void setTexturePath(const StString* theTexturesPaths,
                                      const size_t    theCount);
 
-    ST_CPPEXPORT virtual void stglResize();
-    ST_CPPEXPORT virtual bool stglInit();
-    ST_CPPEXPORT virtual void stglDraw  (unsigned int view);
-    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo);
-    ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int& theMouseBtn, bool& theIsItemClicked);
-    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& theIsItemUnclicked);
+    ST_CPPEXPORT virtual void stglResize() ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool stglInit() ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void stglDraw  (unsigned int theView) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int theMouseBtn, bool& theIsItemClicked)   ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int theMouseBtn, bool& theIsItemUnclicked) ST_ATTR_OVERRIDE;
 
         public:    //! @name Signals
 
@@ -184,8 +184,8 @@ class StGLIcon : public StGLTextureButton {
 
     ST_CPPEXPORT virtual ~StGLIcon();
 
-    ST_CPPEXPORT virtual bool tryClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemClicked);
-    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemUnclicked);
+    ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int theMouseBtn, bool& theIsItemClicked)   ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int theMouseBtn, bool& theIsItemUnclicked) ST_ATTR_OVERRIDE;
 
     /**
      * Define externally managed textures.

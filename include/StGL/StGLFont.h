@@ -36,7 +36,7 @@ class StGLFont : public StGLResource {
     /**
      * Release GL resources.
      */
-    ST_CPPEXPORT virtual void release(StGLContext& theCtx);
+    ST_CPPEXPORT virtual void release(StGLContext& theCtx) ST_ATTR_OVERRIDE;
 
     /**
      * @return textured font instance of specified Unicode subset

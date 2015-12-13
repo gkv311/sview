@@ -234,7 +234,7 @@ bool StGLScrollArea::doScroll(const int  theDelta,
 }
 
 bool StGLScrollArea::tryClick(const StPointD_t& theCursorZo,
-                              const int&        theMouseBtn,
+                              const int         theMouseBtn,
                               bool&             isItemClicked) {
     if(!isVisible() || !isPointIn(theCursorZo)) {
         return false;
@@ -271,7 +271,7 @@ bool StGLScrollArea::tryClick(const StPointD_t& theCursorZo,
 }
 
 bool StGLScrollArea::tryUnClick(const StPointD_t& theCursorZo,
-                                const int&        theMouseBtn,
+                                const int         theMouseBtn,
                                 bool&             isItemUnclicked) {
     if(myIsLeftClick
     && theMouseBtn == ST_MOUSE_LEFT) {

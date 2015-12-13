@@ -36,12 +36,12 @@ class StGLRadioButtonFloat32 : public StGLRadioButton {
     /**
      * Return true if radio button is in active state.
      */
-    ST_CPPEXPORT virtual bool isActiveState() const;
+    ST_CPPEXPORT virtual bool isActiveState() const ST_ATTR_OVERRIDE;
 
     /**
      * Set this radio button on.
      */
-    ST_CPPEXPORT virtual void setValue();
+    ST_CPPEXPORT virtual void setValue() ST_ATTR_OVERRIDE;
 
         private:
 

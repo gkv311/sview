@@ -30,7 +30,7 @@ class ST_LOCAL StTestGlBand : public StTest {
 
         public:
 
-    virtual void perform();
+    virtual void perform() ST_ATTR_OVERRIDE;
 
         private:
 

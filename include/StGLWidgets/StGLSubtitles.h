@@ -70,10 +70,10 @@ class StGLSubtitles : public StGLTextArea {
                                const StHandle<StFloat32Param>& theParallax,
                                const StHandle<StEnumParam>&    theParser);
     ST_CPPEXPORT virtual ~StGLSubtitles();
-    ST_CPPEXPORT virtual bool stglInit();
-    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& thePointZo);
-    ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
-    ST_CPPEXPORT virtual void stglResize();
+    ST_CPPEXPORT virtual bool stglInit() ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& thePointZo) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void stglResize() ST_ATTR_OVERRIDE;
 
     /**
      * Retrieve handle to the queue.

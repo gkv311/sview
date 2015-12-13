@@ -33,7 +33,7 @@ class StGLShader : public StGLResource {
      * Delete shader object and invalidate its id.
      * You should detach this shader from all programs before deleting!
      */
-    ST_CPPEXPORT virtual void release(StGLContext& theCtx);
+    ST_CPPEXPORT virtual void release(StGLContext& theCtx) ST_ATTR_OVERRIDE;
 
     /**
      * Implementations should define this method to return:

@@ -29,7 +29,7 @@ class StOutIZ3DShaders : public StGLResource {
 
     ST_LOCAL virtual ~StOutIZ3DShaders();
 
-    ST_LOCAL virtual void release(StGLContext& theCtx);
+    ST_LOCAL virtual void release(StGLContext& theCtx) ST_ATTR_OVERRIDE;
 
     ST_LOCAL const int getMode() const {
         return myMode;

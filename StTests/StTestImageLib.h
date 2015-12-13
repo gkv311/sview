@@ -34,7 +34,7 @@ class ST_LOCAL StTestImageLib : public StTest {
      */
     StTestImageLib(const StString& theFile);
 
-    virtual void perform();
+    virtual void perform() ST_ATTR_OVERRIDE;
 
         private:
 

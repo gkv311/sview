@@ -54,12 +54,12 @@ class StParamActiveStream : public StInt32Param {
     /**
      * Overridden thread-safe method.
      */
-    ST_LOCAL virtual int32_t getValue() const;
+    ST_LOCAL virtual int32_t getValue() const ST_ATTR_OVERRIDE;
 
     /**
      * Overridden thread-safe method.
      */
-    ST_LOCAL virtual bool setValue(const int32_t theValue);
+    ST_LOCAL virtual bool setValue(const int32_t theValue) ST_ATTR_OVERRIDE;
 
     /**
      * Switch to next value in list.

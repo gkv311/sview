@@ -95,7 +95,7 @@ class StProgramFlat : public StGLProgram {
     ST_LOCAL StGLVarLocation getVVertexLoc()   const { return atrVVertexLoc; }
     ST_LOCAL StGLVarLocation getVTexCoordLoc() const { return atrVTexCoordLoc; }
 
-    ST_LOCAL virtual bool init(StGLContext& theCtx) {
+    ST_LOCAL virtual bool init(StGLContext& theCtx) ST_ATTR_OVERRIDE {
         const char FRAGMENT_SHADER[] =
            "uniform sampler2D texR, texL;"
            "varying vec2 fTexCoord;"
@@ -135,7 +135,7 @@ class StProgramBarrel : public StGLProgram {
     ST_LOCAL StGLVarLocation getVVertexLoc()   const { return atrVVertexLoc; }
     ST_LOCAL StGLVarLocation getVTexCoordLoc() const { return atrVTexCoordLoc; }
 
-    ST_LOCAL virtual bool init(StGLContext& theCtx) {
+    ST_LOCAL virtual bool init(StGLContext& theCtx) ST_ATTR_OVERRIDE {
         const char FRAGMENT_SHADER[] =
            "uniform sampler2D texR, texL;"
            "varying vec2 fTexCoord;"

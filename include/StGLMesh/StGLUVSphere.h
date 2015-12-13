@@ -39,14 +39,14 @@ class StGLUVSphere : public StGLMesh {
     /**
      * Compute the mesh using current configuration.
      */
-    ST_CPPEXPORT virtual bool computeMesh();
+    ST_CPPEXPORT virtual bool computeMesh() ST_ATTR_OVERRIDE;
 
         protected:
 
     /**
      * Draw the primitives itself.
      */
-    ST_CPPEXPORT virtual void drawKernel(StGLContext& theCtx) const;
+    ST_CPPEXPORT virtual void drawKernel(StGLContext& theCtx) const ST_ATTR_OVERRIDE;
 
         private:
 

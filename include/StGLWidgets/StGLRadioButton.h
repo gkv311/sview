@@ -32,9 +32,9 @@ class StGLRadioButton : public StGLTextureButton {
                                  const int theLeft = 32, const int theTop = 32,
                                  const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
     ST_CPPEXPORT virtual ~StGLRadioButton();
-    ST_CPPEXPORT virtual void stglResize();
-    ST_CPPEXPORT virtual bool stglInit();
-    ST_CPPEXPORT virtual void stglDraw(unsigned int view);
+    ST_CPPEXPORT virtual void stglResize() ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool stglInit() ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
 
         public:
 

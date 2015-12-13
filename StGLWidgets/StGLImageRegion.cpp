@@ -790,7 +790,7 @@ void StGLImageRegion::doRightUnclick(const StPointD_t& theCursorZo) {
 }
 
 bool StGLImageRegion::tryClick(const StPointD_t& theCursorZo,
-                               const int&        theMouseBtn,
+                               const int         theMouseBtn,
                                bool&             isItemClicked) {
     StHandle<StStereoParams> aParams = getSource();
     if(!myIsInitialized || aParams.isNull()) {
@@ -814,7 +814,7 @@ bool StGLImageRegion::tryClick(const StPointD_t& theCursorZo,
 }
 
 bool StGLImageRegion::tryUnClick(const StPointD_t& theCursorZo,
-                                 const int&        theMouseBtn,
+                                 const int         theMouseBtn,
                                  bool&             isItemUnclicked) {
     StHandle<StStereoParams> aParams = getSource();
     if(!myIsInitialized || aParams.isNull()) {

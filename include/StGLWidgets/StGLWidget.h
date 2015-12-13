@@ -290,8 +290,8 @@ class StGLWidget {
      * @param theMouseBtn mouse button id
      */
     ST_CPPEXPORT virtual bool tryClick(const StPointD_t& theCursorZo,
-                                       const int&        theMouseBtn,
-                                       bool&             isItemClicked);
+                                       const int         theMouseBtn,
+                                       bool&             theIsItemClicked);
 
     /**
      * Function iterate children and self for unclicking state.
@@ -299,8 +299,8 @@ class StGLWidget {
      * @param theMouseBtn mouse button id
      */
     ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo,
-                                         const int&        theMouseBtn,
-                                         bool&             isItemUnclicked);
+                                         const int         theMouseBtn,
+                                         bool&             theIsItemUnclicked);
 
     /**
      * Process key down event. Default implementation do nothing.
@@ -460,8 +460,8 @@ class ST_LOCAL StGLContainer : public StGLWidget {
 
     ST_CPPEXPORT virtual ~StGLContainer();
 
-    ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int& theMouseBtn, bool& theIsItemClicked);
-    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& theIsItemUnclicked);
+    ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int theMouseBtn, bool& theIsItemClicked)   ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int theMouseBtn, bool& theIsItemUnclicked) ST_ATTR_OVERRIDE;
 
 };
 

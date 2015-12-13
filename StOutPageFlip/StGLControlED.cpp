@@ -39,7 +39,7 @@ class ST_LOCAL StGLControlED::StEDProgram : public StGLProgram {
         return atrVVertexLoc;
     }
 
-    virtual bool link(StGLContext& theCtx) {
+    virtual bool link(StGLContext& theCtx) ST_ATTR_OVERRIDE {
         if(!StGLProgram::link(theCtx)) {
             return false;
         }

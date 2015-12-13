@@ -40,7 +40,7 @@ class StGLRangeFieldFloat32 : public StGLWidget {
                                        const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
 
     ST_CPPEXPORT virtual ~StGLRangeFieldFloat32();
-    ST_CPPEXPORT virtual bool stglInit();
+    ST_CPPEXPORT virtual bool stglInit() ST_ATTR_OVERRIDE;
 
         public:
 

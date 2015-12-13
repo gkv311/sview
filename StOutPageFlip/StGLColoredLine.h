@@ -16,11 +16,11 @@ class StGLColoredLine : public StGLDeviceControl {
 
         public:
 
-    ST_LOCAL virtual int getSizeY() const {
+    ST_LOCAL virtual int getSizeY() const ST_ATTR_OVERRIDE {
         return 1;
     }
 
-    ST_LOCAL virtual int getSlaveId() const {
+    ST_LOCAL virtual int getSlaveId() const ST_ATTR_OVERRIDE {
         return SLAVE_HLINE_BOTTOM;
     }
 
@@ -34,12 +34,12 @@ class StGLColoredLine : public StGLDeviceControl {
 
     ST_LOCAL StGLColoredLine();
     ST_LOCAL virtual ~StGLColoredLine();
-    ST_LOCAL virtual void release(StGLContext& theCtx);
-    ST_LOCAL virtual bool stglInit(StGLContext& theCtx);
+    ST_LOCAL virtual void release (StGLContext& theCtx) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual bool stglInit(StGLContext& theCtx) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void stglDraw(StGLContext& theCtx,
                                    unsigned int theView,
                                    const int    theWinWidth,
-                                   const int );
+                                   const int ) ST_ATTR_OVERRIDE;
 
         private:
 

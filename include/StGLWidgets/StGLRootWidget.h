@@ -98,13 +98,13 @@ class StGLRootWidget : public StGLWidget {
      * Process initialization.
      * @return true on success
      */
-    ST_CPPEXPORT virtual bool stglInit();
+    ST_CPPEXPORT virtual bool stglInit() ST_ATTR_OVERRIDE;
 
     /**
      * Draw all children.
      * Root widget caches OpenGL state (like viewport).
      */
-    ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
+    ST_CPPEXPORT virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
 
     /**
      * Get shared menu program instance.
@@ -139,51 +139,51 @@ class StGLRootWidget : public StGLWidget {
      * @param theCursorZo point in Zero2One coordinates
      * @param theMouseBtn mouse button id
      */
-    inline bool tryClick(const StPointD_t& theCursorZo,
-                         const int&        theMouseBtn) {
+    ST_LOCAL bool tryClick(const StPointD_t& theCursorZo,
+                           const int         theMouseBtn) {
         bool isItemClicked = false;
         return tryClick(theCursorZo, theMouseBtn, isItemClicked);
     }
 
     ST_CPPEXPORT virtual bool tryClick(const StPointD_t& theCursorZo,
-                                       const int&        theMouseBtn,
-                                       bool&             theIsItemClicked);
+                                       const int         theMouseBtn,
+                                       bool&             theIsItemClicked) ST_ATTR_OVERRIDE;
 
     /**
      * Function iterate children and self for unclicking state.
      * @param theCursorZo point in Zero2One coordinates
      * @param theMouseBtn mouse button id
      */
-    inline bool tryUnClick(const StPointD_t& theCursorZo,
-                           const int&        theMouseBtn) {
+    ST_LOCAL bool tryUnClick(const StPointD_t& theCursorZo,
+                             const int         theMouseBtn) {
         bool isItemUnclicked = false;
         return tryUnClick(theCursorZo, theMouseBtn, isItemUnclicked);
     }
 
     ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo,
-                                         const int&        theMouseBtn,
-                                         bool&             theIsItemUnclicked);
+                                         const int         theMouseBtn,
+                                         bool&             theIsItemUnclicked) ST_ATTR_OVERRIDE;
 
     /**
      * Process key down event. Default implementation redirect event to widget in focus.
      * @param theEvent key event
      * @return true if event has been processed
      */
-    ST_CPPEXPORT virtual bool doKeyDown(const StKeyEvent& theEvent);
+    ST_CPPEXPORT virtual bool doKeyDown(const StKeyEvent& theEvent) ST_ATTR_OVERRIDE;
 
     /**
      * Process key hold event. Default implementation redirect event to widget in focus.
      * @param theEvent key event
      * @return true if event has been processed
      */
-    ST_CPPEXPORT virtual bool doKeyHold(const StKeyEvent& theEvent);
+    ST_CPPEXPORT virtual bool doKeyHold(const StKeyEvent& theEvent) ST_ATTR_OVERRIDE;
 
     /**
      * Process key up event. Default implementation redirect event to widget in focus.
      * @param theEvent key event
      * @return true if event has been processed
      */
-    ST_CPPEXPORT virtual bool doKeyUp  (const StKeyEvent& theEvent);
+    ST_CPPEXPORT virtual bool doKeyUp  (const StKeyEvent& theEvent) ST_ATTR_OVERRIDE;
 
     /**
      * Return true if interface should be adopted to mobile device.
@@ -379,7 +379,7 @@ class StGLRootWidget : public StGLWidget {
     }
 
     using StGLWidget::stglResize;
-    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& cursorZo);
+    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo) ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual void stglResize(const StGLBoxPx&  theRectPx);
 
     /**
@@ -403,7 +403,7 @@ class StGLRootWidget : public StGLWidget {
      * to prevent corruption during widgets iteration.
      * @param theWidget the widget to destroy
      */
-    ST_CPPEXPORT virtual void destroyWithDelay(StGLWidget* theWidget);
+    ST_CPPEXPORT virtual void destroyWithDelay(StGLWidget* theWidget) ST_ATTR_OVERRIDE;
 
     /**
      * Access global flag to perform navigation in menu after first item clicked.

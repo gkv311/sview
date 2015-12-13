@@ -30,7 +30,7 @@ class ST_LOCAL StTestGlStress : public StTest {
 
         public:
 
-    virtual void perform();
+    virtual void perform() ST_ATTR_OVERRIDE;
 
 };
 

@@ -70,7 +70,7 @@ class StGLFrameTextures : public StGLResource {
     /**
      * Release OpenGL texture objects.
      */
-    ST_CPPEXPORT virtual void release(StGLContext& theCtx);
+    ST_CPPEXPORT virtual void release(StGLContext& theCtx) ST_ATTR_OVERRIDE;
 
     inline StHandle<StStereoParams> getSource() const {
         return myParams;
@@ -201,7 +201,7 @@ class StGLQuadTexture : public StGLResource {
     /**
      * Release OpenGL texture objects.
      */
-    ST_CPPEXPORT virtual void release(StGLContext& theCtx);
+    ST_CPPEXPORT virtual void release(StGLContext& theCtx) ST_ATTR_OVERRIDE;
 
     /**
      * @return texture (StGLFrameTextures& ) - texture from front pair (for rendering).

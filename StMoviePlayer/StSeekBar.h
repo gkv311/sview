@@ -52,10 +52,10 @@ class ST_LOCAL StSeekBar : public StGLWidget {
         myMoveTolerPx = theTolerPx;
     }
 
-    virtual void stglResize();
-    virtual bool stglInit();
-    virtual void stglUpdate(const StPointD_t& theCursor);
-    virtual void stglDraw(unsigned int view);
+    virtual void stglResize() ST_ATTR_OVERRIDE;
+    virtual bool stglInit() ST_ATTR_OVERRIDE;
+    virtual void stglUpdate(const StPointD_t& theCursor) ST_ATTR_OVERRIDE;
+    virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
 
         public:  //!< Signals
 

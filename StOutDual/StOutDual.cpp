@@ -75,7 +75,7 @@ class StProgramMM : public StGLProgram {
         return atrVTexCoordLoc;
     }
 
-    virtual bool init(StGLContext& theCtx) {
+    virtual bool init(StGLContext& theCtx) ST_ATTR_OVERRIDE {
         const char VERTEX_SHADER[] =
            "attribute vec4 vVertex; \
             attribute vec2 vTexCoord; \

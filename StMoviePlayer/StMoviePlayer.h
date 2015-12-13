@@ -132,22 +132,22 @@ class StMoviePlayer : public StApplication {
     /**
      * Open application.
      */
-    ST_CPPEXPORT virtual bool open();
+    ST_CPPEXPORT virtual bool open() ST_ATTR_OVERRIDE;
 
     /**
      * Process callback.
      */
-    ST_CPPEXPORT virtual void beforeDraw();
+    ST_CPPEXPORT virtual void beforeDraw() ST_ATTR_OVERRIDE;
 
     /**
      * Draw frame for requested view.
      */
-    ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
+    ST_CPPEXPORT virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
 
     /**
      * Reset device - release GL resources in old window and re-create them in new window.
      */
-    ST_CPPEXPORT virtual bool resetDevice();
+    ST_CPPEXPORT virtual bool resetDevice() ST_ATTR_OVERRIDE;
 
         public: //! @name callback Slots
 
@@ -247,16 +247,16 @@ class StMoviePlayer : public StApplication {
 
         private: //! @name window events slots
 
-    ST_LOCAL virtual void doChangeDevice(const int32_t theValue);
-    ST_LOCAL virtual void doPause    (const StPauseEvent&  theEvent);
-    ST_LOCAL virtual void doResize   (const StSizeEvent&   theEvent);
-    ST_LOCAL virtual void doKeyDown  (const StKeyEvent&    theEvent);
-    ST_LOCAL virtual void doKeyHold  (const StKeyEvent&    theEvent);
-    ST_LOCAL virtual void doKeyUp    (const StKeyEvent&    theEvent);
-    ST_LOCAL virtual void doMouseDown(const StClickEvent&  theEvent);
-    ST_LOCAL virtual void doMouseUp  (const StClickEvent&  theEvent);
-    ST_LOCAL virtual void doFileDrop (const StDNDropEvent& theEvent);
-    ST_LOCAL virtual void doNavigate (const StNavigEvent&  theEvent);
+    ST_LOCAL virtual void doChangeDevice(const int32_t theValue)     ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void doPause    (const StPauseEvent&  theEvent) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void doResize   (const StSizeEvent&   theEvent) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void doKeyDown  (const StKeyEvent&    theEvent) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void doKeyHold  (const StKeyEvent&    theEvent) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void doKeyUp    (const StKeyEvent&    theEvent) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void doMouseDown(const StClickEvent&  theEvent) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void doMouseUp  (const StClickEvent&  theEvent) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void doFileDrop (const StDNDropEvent& theEvent) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void doNavigate (const StNavigEvent&  theEvent) ST_ATTR_OVERRIDE;
 
         private:
 

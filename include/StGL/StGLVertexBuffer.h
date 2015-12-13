@@ -45,7 +45,7 @@ class StGLVertexBuffer : public StGLResource {
     /**
      * Release GL resource.
      */
-    ST_CPPEXPORT virtual void release(StGLContext& theCtx);
+    ST_CPPEXPORT virtual void release(StGLContext& theCtx) ST_ATTR_OVERRIDE;
 
     /**
      * @return true if this VBO has valid ID (was created but not necessary initialized with valid data!).
@@ -195,7 +195,7 @@ class StGLIndexBuffer : public StGLVertexBuffer {
 
     ST_CPPEXPORT StGLIndexBuffer();
 
-    ST_CPPEXPORT virtual GLenum getTarget() const;
+    ST_CPPEXPORT virtual GLenum getTarget() const ST_ATTR_OVERRIDE;
 
     inline bool init(StGLContext&           theCtx,
                      const StArray<GLuint>& theArray) {

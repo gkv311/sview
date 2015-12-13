@@ -73,7 +73,7 @@ class StGLTextProgram : public StGLProgram {
      * @param theCtx active GL context
      * @return true if no error
      */
-    ST_CPPEXPORT virtual bool init(StGLContext& theCtx);
+    ST_CPPEXPORT virtual bool init(StGLContext& theCtx) ST_ATTR_OVERRIDE;
 
         private:
 

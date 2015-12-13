@@ -31,7 +31,7 @@ class StColorProgram : public StGLMeshProgram {
 
     ST_LOCAL StColorProgram();
 
-    ST_LOCAL virtual bool init(StGLContext& theCtx);
+    ST_LOCAL virtual bool init(StGLContext& theCtx) ST_ATTR_OVERRIDE;
 
     ST_LOCAL void setScaleTranslate(StGLContext&    theCtx,
                                     const StGLVec4& theScaleVec4,

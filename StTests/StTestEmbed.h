@@ -31,7 +31,7 @@ class ST_LOCAL StTestEmbed : public StTest {
 
         public:
 
-    virtual void perform();
+    virtual void perform() ST_ATTR_OVERRIDE;
 
         private:
 

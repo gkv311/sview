@@ -37,7 +37,7 @@ class StGLTextureButton::Program : public StGLProgram {
         theCtx.core20fwd->glUniformMatrix4fv(uniProjMatLoc, 1, GL_FALSE, theProjMat);
     }
 
-    virtual bool link(StGLContext& theCtx) {
+    virtual bool link(StGLContext& theCtx) ST_ATTR_OVERRIDE {
         if(!isValid()) {
             return false;
         }
@@ -206,7 +206,7 @@ class StGLTextureButton::ButtonPrograms : public StGLProgramMatrix<1, 2, StGLTex
     /**
      * Release OpenGL resources.
      */
-    ST_LOCAL virtual void release(StGLContext& theCtx) {
+    ST_LOCAL virtual void release(StGLContext& theCtx) ST_ATTR_OVERRIDE {
         StGLProgramMatrix<1, 2, StGLTextureButton::Program>::release(theCtx);
         for(int aProgIter = 0; aProgIter < StGLTextureButton::ProgramIndex_NB; ++aProgIter) {
             StHandle<StGLTextureButton::Program>& aProgram = myPrograms[aProgIter];
@@ -525,7 +525,7 @@ void StGLTextureButton::stglDraw(unsigned int ) {
     aCtx.core20fwd->glDisable(GL_BLEND);
 }
 
-bool StGLTextureButton::tryClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemClicked) {
+bool StGLTextureButton::tryClick(const StPointD_t& cursorZo, const int mouseBtn, bool& isItemClicked) {
     if(StGLWidget::tryClick(cursorZo, mouseBtn, isItemClicked)) {
         isItemClicked = true;
         return true;
@@ -533,7 +533,7 @@ bool StGLTextureButton::tryClick(const StPointD_t& cursorZo, const int& mouseBtn
     return false;
 }
 
-bool StGLTextureButton::tryUnClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemUnclicked) {
+bool StGLTextureButton::tryUnClick(const StPointD_t& cursorZo, const int mouseBtn, bool& isItemUnclicked) {
     if(StGLWidget::tryUnClick(cursorZo, mouseBtn, isItemUnclicked)) {
         isItemUnclicked = true;
         return true;
@@ -563,10 +563,10 @@ StGLIcon::~StGLIcon() {
     }
 }
 
-bool StGLIcon::tryClick(const StPointD_t& , const int& , bool& ) {
+bool StGLIcon::tryClick(const StPointD_t& , const int , bool& ) {
     return false;
 }
 
-bool StGLIcon::tryUnClick(const StPointD_t& , const int& , bool& ) {
+bool StGLIcon::tryUnClick(const StPointD_t& , const int , bool& ) {
     return false;
 }

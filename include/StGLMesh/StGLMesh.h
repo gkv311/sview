@@ -111,7 +111,7 @@ class StGLMesh : public StGLResource {
     /**
      * Invalidate current mesh buffers.
      */
-    ST_CPPEXPORT virtual void release(StGLContext& theCtx);
+    ST_CPPEXPORT virtual void release(StGLContext& theCtx) ST_ATTR_OVERRIDE;
 
     /**
      * Compute the mesh (in RAM) for this object.

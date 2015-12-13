@@ -51,7 +51,7 @@ class StGLStereoFrameBuffer : public StGLStereoTexture {
             return atrVTexCoordLoc;
         }
 
-        ST_CPPEXPORT virtual bool link(StGLContext& theCtx);
+        ST_CPPEXPORT virtual bool link(StGLContext& theCtx) ST_ATTR_OVERRIDE;
 
     };
 
@@ -77,7 +77,7 @@ class StGLStereoFrameBuffer : public StGLStereoTexture {
     /**
      * Release OpenGL objects related to this FBO.
      */
-    ST_CPPEXPORT virtual void release(StGLContext& theCtx);
+    ST_CPPEXPORT virtual void release(StGLContext& theCtx) ST_ATTR_OVERRIDE;
 
     inline const StGLVertexBuffer& getQuadVertices() const {
         return myVerticesBuf;

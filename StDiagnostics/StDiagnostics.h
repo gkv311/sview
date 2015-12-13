@@ -37,18 +37,18 @@ class StDiagnostics : public StApplication {
                                const StHandle<StOpenInfo>&        theOpenInfo  = NULL);
     ST_CPPEXPORT virtual ~StDiagnostics();
 
-    ST_CPPEXPORT virtual bool open();
-    ST_CPPEXPORT virtual void beforeDraw();
-    ST_CPPEXPORT virtual void stglDraw(unsigned int view);
+    ST_CPPEXPORT virtual bool open() ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void beforeDraw() ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
 
         private: //! @name window events slots
 
-    ST_LOCAL virtual void doResize   (const StSizeEvent&  theEvent);
-    ST_LOCAL virtual void doKeyDown  (const StKeyEvent&   theEvent);
-    ST_LOCAL virtual void doKeyHold  (const StKeyEvent&   theEvent);
-    ST_LOCAL virtual void doKeyUp    (const StKeyEvent&   theEvent);
-    ST_LOCAL virtual void doMouseDown(const StClickEvent& theEvent);
-    ST_LOCAL virtual void doMouseUp  (const StClickEvent& theEvent);
+    ST_LOCAL virtual void doResize   (const StSizeEvent&  theEvent) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void doKeyDown  (const StKeyEvent&   theEvent) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void doKeyHold  (const StKeyEvent&   theEvent) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void doKeyUp    (const StKeyEvent&   theEvent) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void doMouseDown(const StClickEvent& theEvent) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void doMouseUp  (const StClickEvent& theEvent) ST_ATTR_OVERRIDE;
 
         public: //! @name Properties
 

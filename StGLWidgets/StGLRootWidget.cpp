@@ -373,7 +373,7 @@ void StGLRootWidget::getRectGl(const StRectI_t& theRectPx,
 }
 
 bool StGLRootWidget::tryClick(const StPointD_t& theCursorZo,
-                              const int&        theMouseBtn,
+                              const int         theMouseBtn,
                               bool&             theIsItemClicked) {
     const StPointD_t aCursorBack = cursorZo;
     cursorZo = theCursorZo;
@@ -386,7 +386,7 @@ bool StGLRootWidget::tryClick(const StPointD_t& theCursorZo,
 }
 
 bool StGLRootWidget::tryUnClick(const StPointD_t& theCursorZo,
-                                const int&        theMouseBtn,
+                                const int         theMouseBtn,
                                 bool&             theIsItemUnclicked) {
     const StPointD_t aCursorBack = cursorZo;
     cursorZo = theCursorZo;

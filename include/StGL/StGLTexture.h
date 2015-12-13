@@ -68,7 +68,7 @@ class StGLTexture : public StGLResource {
     /**
      * Release GL resource.
      */
-    ST_CPPEXPORT virtual void release(StGLContext& theCtx);
+    ST_CPPEXPORT virtual void release(StGLContext& theCtx) ST_ATTR_OVERRIDE;
 
     bool operator==(const StGLTexture& theOther) const {
        return myTextureId == theOther.myTextureId;

@@ -52,9 +52,9 @@ class StGeometryTest : public StGLWidget {
     ST_LOCAL StGeometryTest(StGLWidget* parent);
     ST_LOCAL virtual ~StGeometryTest();
 
-    ST_LOCAL virtual void stglResize();
-    ST_LOCAL virtual bool stglInit();
-    ST_LOCAL virtual void stglDraw(unsigned int view);
+    ST_LOCAL virtual void stglResize() ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual bool stglInit() ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
 
 };
 

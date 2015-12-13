@@ -45,6 +45,16 @@
     #define ST_ATTR_DEPRECATED
 #endif
 
+#if defined(__cplusplus) && (__cplusplus >= 201100L)
+  // part of C++11 standard
+  #define ST_ATTR_OVERRIDE override
+#elif defined(_MSC_VER) && (_MSC_VER >= 1700)
+  // versions before VS2012 emits warning as MSVC-specific extension
+  #define ST_ATTR_OVERRIDE override
+#else
+  #define ST_ATTR_OVERRIDE
+#endif
+
 #include <cmath>       // fabs
 #include <cstddef>     // size_t, NULL
 #include <cstdlib>

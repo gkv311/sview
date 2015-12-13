@@ -61,7 +61,7 @@ void StGLSwitchTextured::stglDraw(unsigned int theView) {
 }
 
 
-bool StGLSwitchTextured::tryClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemClicked) {
+bool StGLSwitchTextured::tryClick(const StPointD_t& theCursorZo, const int theMouseBtn, bool& isItemClicked) {
     if(!isVisible()) {
         return false; // nothing to see - nothing to click...
     }
@@ -73,7 +73,7 @@ bool StGLSwitchTextured::tryClick(const StPointD_t& theCursorZo, const int& theM
     return false;
 }
 
-bool StGLSwitchTextured::tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemUnclicked) {
+bool StGLSwitchTextured::tryUnClick(const StPointD_t& theCursorZo, const int theMouseBtn, bool& isItemUnclicked) {
     if(!isVisible()) {
         return false; // nothing to see - nothing to click...
     }

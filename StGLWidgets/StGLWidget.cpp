@@ -276,7 +276,7 @@ void StGLWidget::setClicked(const int& mouseBtn, bool isClicked) {
     mouseClicked[mouseBtn] = isClicked;
 }
 
-bool StGLWidget::tryClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemClicked) {
+bool StGLWidget::tryClick(const StPointD_t& cursorZo, const int mouseBtn, bool& isItemClicked) {
     if(!isVisible()) {
         return false; // nothing to see - nothing to click... (all children too!)
     }
@@ -293,7 +293,7 @@ bool StGLWidget::tryClick(const StPointD_t& cursorZo, const int& mouseBtn, bool&
     return false;
 }
 
-bool StGLWidget::tryUnClick(const StPointD_t& cursorZo, const int& mouseBtn, bool& isItemUnclicked) {
+bool StGLWidget::tryUnClick(const StPointD_t& cursorZo, const int mouseBtn, bool& isItemUnclicked) {
     if(!isVisible()) {
         return false; // nothing to see - nothing to click... (all children too!)
     }
@@ -344,7 +344,7 @@ StGLContainer::StGLContainer(StGLWidget* theParent,
 StGLContainer::~StGLContainer() {}
 
 bool StGLContainer::tryClick(const StPointD_t& theCursorZo,
-                             const int&        theMouseBtn,
+                             const int         theMouseBtn,
                              bool&             theIsItemClicked) {
     if(!isVisible()) {
         return false;
@@ -358,7 +358,7 @@ bool StGLContainer::tryClick(const StPointD_t& theCursorZo,
 }
 
 bool StGLContainer::tryUnClick(const StPointD_t& theCursorZo,
-                               const int&        theMouseBtn,
+                               const int         theMouseBtn,
                                bool&             theIsItemUnclicked) {
     if(!isVisible()) {
         return false;

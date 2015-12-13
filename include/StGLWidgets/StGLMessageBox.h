@@ -43,11 +43,11 @@ class StGLMessageBox : public StGLWidget {
      * Destructor.
      */
     ST_CPPEXPORT virtual ~StGLMessageBox();
-    ST_CPPEXPORT virtual bool stglInit();
-    ST_CPPEXPORT virtual void stglResize();
-    ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
-    ST_CPPEXPORT virtual bool tryClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemClicked);
-    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& isItemUnclicked);
+    ST_CPPEXPORT virtual bool stglInit() ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void stglResize() ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int theMouseBtn, bool& isItemClicked)   ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int theMouseBtn, bool& isItemUnclicked) ST_ATTR_OVERRIDE;
 
         public:
 

@@ -107,11 +107,10 @@ class StMoviePlayerGUI : public StGLRootWidget {
                               const StHandle<StGLTextureQueue>& theTextureQueue,
                               const StHandle<StSubQueue>&       theSubQueue);
     ST_LOCAL virtual ~StMoviePlayerGUI();
-    ST_LOCAL virtual void stglResize(const StGLBoxPx& theRectPx);
-    ST_LOCAL virtual void stglDraw(unsigned int theView);
+    ST_LOCAL virtual void stglResize(const StGLBoxPx& theRectPx) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void stglUpdate(const StPointD_t& thePointZo) ST_ATTR_OVERRIDE;
 
-    using StGLRootWidget::stglUpdate;
-    ST_LOCAL void stglUpdate(const StPointD_t& thePointZo);
     ST_LOCAL void setVisibility(const StPointD_t& theCursor);
 
         public:

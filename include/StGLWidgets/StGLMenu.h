@@ -46,12 +46,12 @@ class StGLMenu : public StGLWidget {
 
     ST_CPPEXPORT virtual ~StGLMenu();
 
-    ST_CPPEXPORT virtual void setOpacity(const float theOpacity, bool theToSetChildren);
-    ST_CPPEXPORT virtual void stglResize();
-    ST_CPPEXPORT virtual bool stglInit();
-    ST_CPPEXPORT virtual void stglDraw(unsigned int theView);
-    ST_CPPEXPORT virtual bool doKeyDown(const StKeyEvent& theEvent);
-    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int& theMouseBtn, bool& theIsItemUnclicked);
+    ST_CPPEXPORT virtual void setOpacity(const float theOpacity, bool theToSetChildren) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void stglResize() ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool stglInit() ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool doKeyDown(const StKeyEvent& theEvent) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int theMouseBtn, bool& theIsItemUnclicked) ST_ATTR_OVERRIDE;
 
     inline bool isRootMenu() const {
         return myIsRootMenu;

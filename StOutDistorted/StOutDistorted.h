@@ -46,69 +46,69 @@ class StOutDistorted : public StWindow {
     /**
      * Renderer about string.
      */
-    ST_CPPEXPORT virtual StString getRendererAbout() const;
+    ST_CPPEXPORT virtual StString getRendererAbout() const ST_ATTR_OVERRIDE;
 
     /**
      * Renderer id.
      */
-    ST_CPPEXPORT virtual const char* getRendererId() const;
+    ST_CPPEXPORT virtual const char* getRendererId() const ST_ATTR_OVERRIDE;
 
     /**
      * Active Device id.
      */
-    ST_CPPEXPORT virtual const char* getDeviceId() const;
+    ST_CPPEXPORT virtual const char* getDeviceId() const ST_ATTR_OVERRIDE;
 
     /**
      * This methods returns device lost state.
      * @return true if rendering device requires reinitialization
      */
-    ST_CPPEXPORT virtual bool isLostDevice() const;
+    ST_CPPEXPORT virtual bool isLostDevice() const ST_ATTR_OVERRIDE;
 
     /**
      * Activate Device.
      */
-    ST_CPPEXPORT virtual bool setDevice(const StString& theDevice);
+    ST_CPPEXPORT virtual bool setDevice(const StString& theDevice) ST_ATTR_OVERRIDE;
 
     /**
      * Devices list.
      */
-    ST_CPPEXPORT virtual void getDevices(StOutDevicesList& theList) const;
+    ST_CPPEXPORT virtual void getDevices(StOutDevicesList& theList) const ST_ATTR_OVERRIDE;
 
     /**
      * Retrieve options list.
      */
-    ST_CPPEXPORT virtual void getOptions(StParamsList& theList) const;
+    ST_CPPEXPORT virtual void getOptions(StParamsList& theList) const ST_ATTR_OVERRIDE;
 
     /**
      * Create and show window.
      * @return false if any critical error appeared
      */
-    ST_CPPEXPORT virtual bool create();
+    ST_CPPEXPORT virtual bool create() ST_ATTR_OVERRIDE;
 
     /**
      * Close the window.
      */
-    ST_CPPEXPORT virtual void close();
+    ST_CPPEXPORT virtual void close() ST_ATTR_OVERRIDE;
 
     /**
      * Extra routines to be processed before window close.
      */
-    ST_CPPEXPORT virtual void beforeClose();
+    ST_CPPEXPORT virtual void beforeClose() ST_ATTR_OVERRIDE;
 
     /**
      * Process callback.
      */
-    ST_CPPEXPORT virtual void processEvents();
+    ST_CPPEXPORT virtual void processEvents() ST_ATTR_OVERRIDE;
 
     /**
      * @param theFullScreen fullscreen state
      */
-    ST_CPPEXPORT virtual void setFullScreen(const bool theFullScreen);
+    ST_CPPEXPORT virtual void setFullScreen(const bool theFullScreen) ST_ATTR_OVERRIDE;
 
     /**
      * Stereo renderer.
      */
-    ST_CPPEXPORT virtual void stglDraw();
+    ST_CPPEXPORT virtual void stglDraw() ST_ATTR_OVERRIDE;
 
     /**
      * Show/Hide mouse cursor.
@@ -119,19 +119,19 @@ class StOutDistorted : public StWindow {
     /**
      * Return true if device has orientation sensor.
      */
-    ST_CPPEXPORT virtual bool hasOrientationSensor() const;
+    ST_CPPEXPORT virtual bool hasOrientationSensor() const ST_ATTR_OVERRIDE;
 
     /**
      * Get head orientation.
      */
-    ST_CPPEXPORT virtual StQuaternion<double> getDeviceOrientation() const;
+    ST_CPPEXPORT virtual StQuaternion<double> getDeviceOrientation() const ST_ATTR_OVERRIDE;
 
-    ST_CPPEXPORT virtual GLfloat getLensDist() const;
+    ST_CPPEXPORT virtual GLfloat getLensDist() const ST_ATTR_OVERRIDE;
 
     /**
      * Downscale GUI for low-resolution Oculus Rift prototype
      */
-    ST_CPPEXPORT virtual GLfloat getScaleFactor() const;
+    ST_CPPEXPORT virtual GLfloat getScaleFactor() const ST_ATTR_OVERRIDE;
 
         private:
 

@@ -94,9 +94,9 @@ class StImageViewerGUI : public StGLRootWidget {
                               const StHandle<StPlayList>&       thePlayList,
                               const StHandle<StGLTextureQueue>& theTextureQueue);
     ST_LOCAL virtual ~StImageViewerGUI();
-    ST_LOCAL virtual void stglUpdate(const StPointD_t& pointZo);
-    ST_LOCAL virtual void stglResize(const StGLBoxPx& theRectPx);
-    ST_LOCAL virtual void stglDraw(unsigned int theView);
+    ST_LOCAL virtual void stglUpdate(const StPointD_t& thePointZo) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void stglResize(const StGLBoxPx& theRectPx) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
 
     ST_LOCAL void setVisibility(const StPointD_t& theCursor,
                                 bool              toForceHide);

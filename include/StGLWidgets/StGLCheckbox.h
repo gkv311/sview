@@ -34,9 +34,9 @@ class StGLCheckbox : public StGLTextureButton {
 
     ST_CPPEXPORT virtual ~StGLCheckbox();
 
-    ST_CPPEXPORT virtual void stglResize();
-    ST_CPPEXPORT virtual bool stglInit();
-    ST_CPPEXPORT virtual void stglDraw(unsigned int view);
+    ST_CPPEXPORT virtual void stglResize() ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool stglInit() ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
 
         public:
 

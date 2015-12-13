@@ -73,7 +73,7 @@ class StOutPageFlip::StProgramQuad : public StGLProgram {
     StGLVarLocation getVVertexLoc()   const { return atrVVertexLoc; }
     StGLVarLocation getVTexCoordLoc() const { return atrVTexCoordLoc; }
 
-    virtual bool init(StGLContext& theCtx) {
+    virtual bool init(StGLContext& theCtx) ST_ATTR_OVERRIDE {
         const char VERTEX_SHADER[] =
            "attribute vec4 vVertex; \
             attribute vec2 vTexCoord; \
@@ -258,7 +258,7 @@ class StOutPageFlip::StGLDXFrameBuffer {
         }
     }
 
-    virtual void release(StGLContext& theCtx) {
+    void release(StGLContext& theCtx) {
         releaseSurfaces(theCtx);
         if(myGlFboL != StGLFrameBuffer::NO_FRAMEBUFFER) {
             theCtx.extAll->glDeleteFramebuffers(1, &myGlFboL);

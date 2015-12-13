@@ -389,7 +389,7 @@ void StGLMessageBox::stglDraw(unsigned int theView) {
 }
 
 bool StGLMessageBox::tryClick(const StPointD_t& theCursorZo,
-                              const int&        theMouseBtn,
+                              const int         theMouseBtn,
                               bool&             isItemClicked) {
     if(isPointIn(theCursorZo)
     && StGLWidget::tryClick(theCursorZo, theMouseBtn, isItemClicked)) {
@@ -400,7 +400,7 @@ bool StGLMessageBox::tryClick(const StPointD_t& theCursorZo,
 }
 
 bool StGLMessageBox::tryUnClick(const StPointD_t& theCursorZo,
-                                const int&        theMouseBtn,
+                                const int         theMouseBtn,
                                 bool&             isItemUnclicked) {
     if(//isPointIn(theCursorZo) &&
        StGLWidget::tryUnClick(theCursorZo, theMouseBtn, isItemUnclicked)) {

@@ -39,7 +39,7 @@ class ST_LOCAL StCADModel : public StGLMesh {
     StCADModel(const TopoDS_Shape& theShape);
     virtual ~StCADModel();
 
-    virtual bool computeMesh();
+    virtual bool computeMesh() ST_ATTR_OVERRIDE;
 
 };
 

@@ -176,12 +176,12 @@ class StImageFileCounter : public StBufferCounter {
      * If theOther has the same type, than the ref counter will be reused.
      * Otherwise then new counter will be allocated.
      */
-    ST_CPPEXPORT virtual void createReference(StHandle<StBufferCounter>& theOther) const;
+    ST_CPPEXPORT virtual void createReference(StHandle<StBufferCounter>& theOther) const ST_ATTR_OVERRIDE;
 
     /**
      * Release current reference.
      */
-    ST_CPPEXPORT virtual void releaseReference();
+    ST_CPPEXPORT virtual void releaseReference() ST_ATTR_OVERRIDE;
 
     /**
      * Release reference counter.

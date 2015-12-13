@@ -32,13 +32,13 @@ class StWebPImage : public StImageFile {
     ST_CPPEXPORT StWebPImage();
     ST_CPPEXPORT virtual ~StWebPImage();
 
-    ST_CPPEXPORT virtual void close();
+    ST_CPPEXPORT virtual void close() ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool load(const StString& theFilePath,
                                    ImageType theImageType = ST_TYPE_NONE,
-                                   uint8_t* theDataPtr = NULL, int theDataSize = 0);
+                                   uint8_t* theDataPtr = NULL, int theDataSize = 0) ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool save(const StString& theFilePath,
                                    ImageType       theImageType,
-                                   StFormat        theSrcFormat);
+                                   StFormat        theSrcFormat) ST_ATTR_OVERRIDE;
 
         public:
 

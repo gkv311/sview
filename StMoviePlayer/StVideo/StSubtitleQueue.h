@@ -56,14 +56,14 @@ class StSubtitleQueue : public StAVPacketQueue {
      * @param streamId     stream id in video format context
      * @return true if no error
      */
-    ST_LOCAL bool init(AVFormatContext*   theFormatCtx,
-                       const unsigned int theStreamId,
-                       const StString&    theFileName);
+    ST_LOCAL virtual bool init(AVFormatContext*   theFormatCtx,
+                               const unsigned int theStreamId,
+                               const StString&    theFileName) ST_ATTR_OVERRIDE;
 
     /**
      * Clean function.
      */
-    ST_LOCAL void deinit();
+    ST_LOCAL virtual void deinit() ST_ATTR_OVERRIDE;
 
     /**
      * Main decoding loop.

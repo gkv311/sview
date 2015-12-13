@@ -165,7 +165,7 @@ class StActionBool : public StAction {
     /**
      * Execute action.
      */
-    ST_CPPEXPORT virtual void doTrigger(const StEvent* );
+    ST_CPPEXPORT virtual void doTrigger(const StEvent* ) ST_ATTR_OVERRIDE;
 
         protected:
 
@@ -198,7 +198,7 @@ class StActionIntValue : public StAction {
     /**
      * Execute action.
      */
-    ST_CPPEXPORT virtual void doTrigger(const StEvent* );
+    ST_CPPEXPORT virtual void doTrigger(const StEvent* ) ST_ATTR_OVERRIDE;
 
         protected:
 
@@ -240,7 +240,7 @@ class StActionIntSlot : public StAction {
     /**
      * Execute action.
      */
-    ST_CPPEXPORT virtual void doTrigger(const StEvent* );
+    ST_CPPEXPORT virtual void doTrigger(const StEvent* ) ST_ATTR_OVERRIDE;
 
         protected:
 
@@ -282,7 +282,7 @@ class StActionHoldSlot : public StAction {
     /**
      * Execute action.
      */
-    ST_CPPEXPORT virtual void doTrigger(const StEvent* );
+    ST_CPPEXPORT virtual void doTrigger(const StEvent* ) ST_ATTR_OVERRIDE;
 
         protected:
 

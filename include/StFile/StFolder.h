@@ -28,7 +28,7 @@ class StFolder : public StFileNode {
     /**
      * Override implementation to return TRUE.
      */
-    ST_CPPEXPORT virtual bool isFolder() const;
+    ST_CPPEXPORT virtual bool isFolder() const ST_ATTR_OVERRIDE;
 
     /**
      * Empty constructor.

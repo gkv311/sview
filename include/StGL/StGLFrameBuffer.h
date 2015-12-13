@@ -36,7 +36,7 @@ class StGLFrameBuffer : public StGLResource {
     /**
      * Release OpenGL objects related to this FBO.
      */
-    ST_CPPEXPORT virtual void release(StGLContext& theCtx);
+    ST_CPPEXPORT virtual void release(StGLContext& theCtx) ST_ATTR_OVERRIDE;
 
     /**
      * Returns true if FBO was initialized.

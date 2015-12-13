@@ -53,7 +53,7 @@ class StSeekBar::StProgramSB : public StGLProgram {
         }
     }
 
-    virtual bool init(StGLContext& theCtx) {
+    virtual bool init(StGLContext& theCtx) ST_ATTR_OVERRIDE {
         const char VERTEX_SHADER[] =
            "uniform mat4  uProjMatrix;\n"
            "uniform vec4  uDisp;\n"

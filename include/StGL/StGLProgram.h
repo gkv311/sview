@@ -44,7 +44,7 @@ class StGLProgram : public StGLResource {
      * All attached shaders will be automatically detached
      * thus you should just delete shaders to clean up its memory.
      */
-    ST_CPPEXPORT virtual void release(StGLContext& theCtx);
+    ST_CPPEXPORT virtual void release(StGLContext& theCtx) ST_ATTR_OVERRIDE;
 
     /**
      * @return true if program object is valid.

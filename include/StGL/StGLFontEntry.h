@@ -61,7 +61,7 @@ class StGLFontEntry : public StGLResource {
     /**
      * Release GL resources.
      */
-    ST_CPPEXPORT virtual void release(StGLContext& theCtx);
+    ST_CPPEXPORT virtual void release(StGLContext& theCtx) ST_ATTR_OVERRIDE;
 
     /**
      * @return FreeType font instance specified on construction.

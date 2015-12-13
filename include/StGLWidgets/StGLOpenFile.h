@@ -89,8 +89,8 @@ class StGLOpenFile : public StGLMessageBox {
      * Override unclick to open new folder.
      */
     ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo,
-                                         const int&        theMouseBtn,
-                                         bool&             isItemUnclicked);
+                                         const int         theMouseBtn,
+                                         bool&             isItemUnclicked) ST_ATTR_OVERRIDE;
 
         protected: //! @name class fields
 

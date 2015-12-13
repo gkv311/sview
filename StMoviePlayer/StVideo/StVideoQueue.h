@@ -165,7 +165,7 @@ class StVideoQueue : public StAVPacketQueue {
     }
 
     /**
-     * @return sterescopic information stored in file
+     * @return stereoscopic information stored in file
      */
     ST_LOCAL StFormat getStereoFormatFromStream() const {
         return myStFormatInStream;
@@ -201,12 +201,12 @@ class StVideoQueue : public StAVPacketQueue {
      */
     ST_LOCAL virtual bool init(AVFormatContext*   theFormatCtx,
                                const unsigned int theStreamId,
-                               const StString&    theFileName);
+                               const StString&    theFileName) ST_ATTR_OVERRIDE;
 
     /**
      * Clean function.
      */
-    ST_LOCAL virtual void deinit();
+    ST_LOCAL virtual void deinit() ST_ATTR_OVERRIDE;
 
 #ifdef ST_AV_OLDSYNC
     ST_LOCAL void syncVideo(AVFrame* srcFrame, double* pts);

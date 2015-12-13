@@ -40,22 +40,22 @@ class StOutPageFlipExt : public StOutPageFlip {
      * Create and show window.
      * @return false if any critical error appeared
      */
-    ST_CPPEXPORT virtual bool create();
+    ST_CPPEXPORT virtual bool create() ST_ATTR_OVERRIDE;
 
     /**
      * Extra routines to be processed before window close.
      */
-    ST_CPPEXPORT virtual void beforeClose();
+    ST_CPPEXPORT virtual void beforeClose() ST_ATTR_OVERRIDE;
 
     /**
      * Callback
      */
-    ST_CPPEXPORT virtual void processEvents();
+    ST_CPPEXPORT virtual void processEvents() ST_ATTR_OVERRIDE;
 
     /**
      * Retrieve options list.
      */
-    ST_CPPEXPORT virtual void getOptions(StParamsList& theList) const;
+    ST_CPPEXPORT virtual void getOptions(StParamsList& theList) const ST_ATTR_OVERRIDE;
 
         private:
 
@@ -69,7 +69,7 @@ class StOutPageFlipExt : public StOutPageFlip {
     /**
      * Release GL resources before window closing.
      */
-    ST_LOCAL virtual void releaseResources();
+    ST_LOCAL virtual void releaseResources() ST_ATTR_OVERRIDE;
 
         protected:
 
@@ -105,7 +105,7 @@ class StOutPageFlipExt : public StOutPageFlip {
     ST_LOCAL void doSetDeviceControl(const int32_t theValue);
     ST_LOCAL void setSlavePosition(int thePositionId);
 
-    ST_LOCAL virtual void stglDrawExtra(unsigned int theView, int theMode);
+    ST_LOCAL virtual void stglDrawExtra(unsigned int theView, int theMode) ST_ATTR_OVERRIDE;
 
 };
 

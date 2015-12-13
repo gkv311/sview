@@ -270,7 +270,7 @@ void StGLMenuItem::setFocus(const bool theValue) {
 }
 
 bool StGLMenuItem::tryClick(const StPointD_t& theCursorZo,
-                            const int&        theMouseBtn,
+                            const int         theMouseBtn,
                             bool&             theIsItemClicked) {
     const bool wasClicked = theIsItemClicked;
     if(StGLWidget::tryClick(theCursorZo, theMouseBtn, theIsItemClicked)) {
@@ -290,7 +290,7 @@ bool StGLMenuItem::tryClick(const StPointD_t& theCursorZo,
 }
 
 bool StGLMenuItem::tryUnClick(const StPointD_t& theCursorZo,
-                              const int&        theMouseBtn,
+                              const int         theMouseBtn,
                               bool&             theIsItemUnclicked) {
     const bool wasUnclicked = theIsItemUnclicked;
     if(StGLWidget::tryUnClick(theCursorZo, theMouseBtn, theIsItemUnclicked)) {

@@ -55,7 +55,7 @@ class StGLAssignHotKey : public StGLMessageBox {
     /**
      *
      */
-    ST_CPPEXPORT virtual bool doKeyDown(const StKeyEvent& theEvent);
+    ST_CPPEXPORT virtual bool doKeyDown(const StKeyEvent& theEvent) ST_ATTR_OVERRIDE;
 
         protected:
 

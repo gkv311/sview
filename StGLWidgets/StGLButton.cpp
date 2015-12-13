@@ -103,7 +103,7 @@ bool StGLButton::stglInit() {
 }
 
 bool StGLButton::tryClick(const StPointD_t& theCursorZo,
-                          const int&        theMouseBtn,
+                          const int         theMouseBtn,
                           bool&             theIsItemClicked) {
     if(theMouseBtn == ST_MOUSE_SCROLL_V_UP
     || theMouseBtn == ST_MOUSE_SCROLL_V_DOWN
@@ -115,7 +115,7 @@ bool StGLButton::tryClick(const StPointD_t& theCursorZo,
 }
 
 bool StGLButton::tryUnClick(const StPointD_t& theCursorZo,
-                            const int&        theMouseBtn,
+                            const int         theMouseBtn,
                             bool&             theIsItemUnclicked) {
     if(theMouseBtn == ST_MOUSE_SCROLL_V_UP
     || theMouseBtn == ST_MOUSE_SCROLL_V_DOWN

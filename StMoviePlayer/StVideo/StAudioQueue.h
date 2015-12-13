@@ -61,12 +61,12 @@ class StAudioQueue : public StAVPacketQueue {
      */
     ST_LOCAL virtual bool init(AVFormatContext*   theFormatCtx,
                                const unsigned int theStreamId,
-                               const StString&    theFileName);
+                               const StString&    theFileName) ST_ATTR_OVERRIDE;
 
     /**
      * Clean function.
      */
-    ST_LOCAL virtual void deinit();
+    ST_LOCAL virtual void deinit() ST_ATTR_OVERRIDE;
 
     /**
      * Main decoding and playback loop.
@@ -85,7 +85,7 @@ class StAudioQueue : public StAVPacketQueue {
         public: //!< @name playback control methods
 
     ST_LOCAL virtual void pushPlayEvent(const StPlayEvent_t theEventId,
-                                        const double        theSeekParam = 0.0);
+                                        const double        theSeekParam = 0.0) ST_ATTR_OVERRIDE;
 
     ST_LOCAL double getPts() const {
         myEventMutex.lock();
