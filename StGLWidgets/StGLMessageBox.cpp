@@ -418,6 +418,11 @@ bool StGLMessageBox::tryUnClick(const StPointD_t& theCursorZo,
     return false;
 }
 
+bool StGLMessageBox::doScroll(const StScrollEvent& theEvent) {
+    StGLWidget::doScroll(theEvent);
+    return true; // do not pass event further
+}
+
 void StGLMessageBox::doKillSelf(const size_t ) {
     destroyWithDelay(this);
 }

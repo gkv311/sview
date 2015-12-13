@@ -665,8 +665,6 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
         // mouse lookup
         //case WM_LBUTTONDBLCLK: // left double click
         //case WM_MBUTTONDBLCLK: // right double click
-        case WM_MOUSEWHEEL:    // vertical wheel
-        //case WM_MOUSEHWHEEL:   // horizontal wheel (only Vista+)
         case WM_LBUTTONUP:
         case WM_RBUTTONUP:
         case WM_MBUTTONUP:
@@ -678,26 +676,20 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
             int mouseXPx = int(short(LOWORD(lParam)));
             int mouseYPx = int(short(HIWORD(lParam)));
             const StRectI_t aWinRect = getPlacement();
-            if(uMsg == WM_MOUSEWHEEL) {
-                // special case - WinAPI give us position relative to screen!
-                mouseXPx -= aWinRect.left();
-                mouseYPx -= aWinRect.top();
-            } else {
-                switch(myTiledCfg) {
-                    case TiledCfg_SlaveMasterX: {
-                        mouseXPx -= aWinRect.width();
-                        break;
-                    }
-                    case TiledCfg_SlaveMasterY: {
-                        mouseYPx -= aWinRect.height();
-                        break;
-                    }
-                    case TiledCfg_MasterSlaveX:
-                    case TiledCfg_MasterSlaveY:
-                    case TiledCfg_Separate:
-                    default: {
-                        break;
-                    }
+            switch(myTiledCfg) {
+                case TiledCfg_SlaveMasterX: {
+                    mouseXPx -= aWinRect.width();
+                    break;
+                }
+                case TiledCfg_SlaveMasterY: {
+                    mouseYPx -= aWinRect.height();
+                    break;
+                }
+                case TiledCfg_MasterSlaveX:
+                case TiledCfg_MasterSlaveY:
+                case TiledCfg_Separate:
+                default: {
+                    break;
                 }
             }
 
@@ -713,12 +705,6 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 case WM_MBUTTONDOWN: aBtnId = ST_MOUSE_MIDDLE; break;
                 case WM_XBUTTONUP:
                 case WM_XBUTTONDOWN: aBtnId = (HIWORD(wParam) == XBUTTON1) ? ST_MOUSE_X1 : ST_MOUSE_X2; break;
-                case WM_MOUSEWHEEL: {
-                    int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
-                    //if(GET_X_LPARAM(lParam) != 0)
-                    aBtnId = (zDelta > 0) ? ST_MOUSE_SCROLL_V_UP : ST_MOUSE_SCROLL_V_DOWN;
-                    break;
-                }
             }
 
             myStEvent.Button.Time    = getEventTime(myEvent.time);
@@ -750,16 +736,27 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                     myEventsBuffer.append(myStEvent);
                     break;
                 }
-                case WM_MOUSEWHEEL: {
-                    // TODO (Kirill Gavrilov#9#) delta ignored
-                    //GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
-                    myStEvent.Type = stEvent_MouseDown;
-                    myEventsBuffer.append(myStEvent);
-                    myStEvent.Type = stEvent_MouseUp;
-                    myEventsBuffer.append(myStEvent);
-                    break;
-                }
             }
+            return 0;
+        }
+        case WM_MOUSEWHEEL:    // vertical wheel
+        //case WM_MOUSEHWHEEL:   // horizontal wheel (only Vista+)
+        {
+            const StRectI_t aWinRect = getPlacement();
+            int aMouseXPx = int(short(LOWORD(lParam))) - aWinRect.left();
+            int aMouseYPx = int(short(HIWORD(lParam))) - aWinRect.top();
+
+            int aZDelta = GET_WHEEL_DELTA_WPARAM(wParam); // / WHEEL_DELTA;
+            //if(GET_X_LPARAM(lParam) != 0)
+
+            myStEvent.Scroll.Time    = getEventTime(myEvent.time);
+            myStEvent.Scroll.PointX  = double(aMouseXPx) / double(aWinRect.width());
+            myStEvent.Scroll.PointY  = double(aMouseYPx) / double(aWinRect.height());
+            myStEvent.Scroll.DeltaX  = 0.0;
+            myStEvent.Scroll.DeltaY  = (aZDelta > 0) ? 1.0 : -1.0;
+
+            myStEvent.Type = stEvent_Scroll;
+            myEventsBuffer.append(myStEvent);
             return 0;
         }
     }

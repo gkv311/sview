@@ -445,25 +445,31 @@ void StCADViewer::doMouseUp(const StClickEvent& theEvent) {
             myIsMiddleHold = false;
             break;
         }
-        case ST_MOUSE_SCROLL_V_UP: {
-            if(myIsCtrlPressed) {
-                myProjection.setZScreen(myProjection.getZScreen() + 1.1f);
-            } else {
-                myProjection.setZoom(myProjection.getZoom() * 0.9f);
-            }
-            break;
-        }
-        case ST_MOUSE_SCROLL_V_DOWN: {
-            if(myIsCtrlPressed) {
-                myProjection.setZScreen(myProjection.getZScreen() - 1.1f);
-            } else {
-                myProjection.setZoom(myProjection.getZoom() * 1.1f);
-            }
-            break;
-        }
         default: break;
     }
     myGUI->tryUnClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
+}
+
+void StCADViewer::doScroll(const StScrollEvent& theEvent) {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    if(theEvent.DeltaY > 0.001) {
+        if(myIsCtrlPressed) {
+            myProjection.setZScreen(myProjection.getZScreen() + 1.1f);
+        } else {
+            myProjection.setZoom(myProjection.getZoom() * 0.9f);
+        }
+    } else if(theEvent.DeltaY < -0.001) {
+        if(myIsCtrlPressed) {
+            myProjection.setZScreen(myProjection.getZScreen() - 1.1f);
+        } else {
+            myProjection.setZoom(myProjection.getZoom() * 1.1f);
+        }
+    }
+
+    myGUI->doScroll(theEvent);
 }
 
 void StCADViewer::doKeyDown(const StKeyEvent& theEvent) {

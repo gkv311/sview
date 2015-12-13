@@ -22,6 +22,7 @@
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 #include <StGLWidgets/StGLRootWidget.h>
+#include <StCore/StEvent.h>
 
 class StSeekBar::StProgramSB : public StGLProgram {
 
@@ -275,4 +276,13 @@ void StSeekBar::doMouseUnclick(const int mouseBtn) {
 
     myClickPos = -1;
     signals.onSeekClick(mouseBtn, aPos);
+}
+
+bool StSeekBar::doScroll(const StScrollEvent& theEvent) {
+    if(theEvent.DeltaY > 0.001) {
+        signals.onSeekScroll(1.0);
+    } else if(theEvent.DeltaY < -0.001) {
+        signals.onSeekScroll(-1.0);
+    }
+    return true;
 }

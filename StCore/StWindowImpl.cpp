@@ -1079,6 +1079,9 @@ void StWindowImpl::swapEventsBuffers() {
             case stEvent_MouseUp:
                signals.onMouseUp->emit(anEvent.Button);
                break;
+            case stEvent_Scroll:
+               signals.onScroll->emit(anEvent.Scroll);
+               break;
             case stEvent_FileDrop:
                 signals.onFileDrop->emit(anEvent.DNDrop);
                 break;

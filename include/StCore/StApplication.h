@@ -239,6 +239,11 @@ class StApplication {
     ST_CPPEXPORT virtual void doMouseUp(const StClickEvent& theEvent);
 
     /**
+     * Process scrolling.
+     */
+    ST_CPPEXPORT virtual void doScroll (const StScrollEvent& theEvent);
+
+    /**
      * Process file Drag & Drop event.
      */
     ST_CPPEXPORT virtual void doFileDrop(const StDNDropEvent& theEvent);

@@ -23,6 +23,7 @@
 class  StGLRootWidget;
 class  StGLContext;
 struct StKeyEvent;
+struct StScrollEvent;
 
 /**
  * Auxiliary class to perform linear animation.
@@ -324,10 +325,32 @@ class StGLWidget {
     ST_CPPEXPORT virtual bool doKeyUp  (const StKeyEvent& theEvent);
 
     /**
+     * Process scroll event. Default implementation do nothing.
+     * @param theEvent scroll event
+     * @return true if event has been processed
+     */
+    ST_CPPEXPORT virtual bool doScroll(const StScrollEvent& theEvent);
+
+    /**
      * @param pointZo point in Zero2One coordinates
      * @return true if input pointer in area rectangle
      */
-    ST_CPPEXPORT virtual bool isPointIn(const StPointD_t& pointZo) const;
+    ST_LOCAL bool isPointIn(const StPointD_t& thePointZo) const {
+        const StRectD_t aRectGl = getRectGl();
+        StPointD_t aPointGl = getPointGl(thePointZo);
+        return aPointGl.x() > aRectGl.left()
+            && aPointGl.x() < aRectGl.right()
+            && aPointGl.y() > aRectGl.bottom()
+            && aPointGl.y() < aRectGl.top();
+    }
+
+    /**
+     * Return true if it is visible and specified point is within this element.
+     */
+    ST_LOCAL bool isVisibleAndPointIn(const StPointD_t& thePointZo) const {
+        return isVisible()
+            && isPointIn(thePointZo);
+    }
 
     /**
      * Update parameters.

@@ -67,7 +67,7 @@ class ST_LOCAL StTimeBox : public StGLTextureButton {
         return myTextArea;
     }
 
-    virtual bool stglInit() {
+    virtual bool stglInit() ST_ATTR_OVERRIDE {
         bool isBtnInit = StGLTextureButton::stglInit();
         myTextArea->changeRectPx().right()  = getRectPx().width();
         myTextArea->changeRectPx().bottom() = getRectPx().height();
@@ -76,23 +76,23 @@ class ST_LOCAL StTimeBox : public StGLTextureButton {
         return isOk;
     }
 
-    virtual void stglDraw(unsigned int theView) {
+    virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE {
         StGLTextureButton::stglDraw(theView);
         myTextArea->stglDraw(theView);
         myIsResized = false;
     }
 
     virtual bool tryClick(const StPointD_t& theCursor,
-                          const int&        theMouseBtn,
-                          bool&             theIsItemClicked) {
+                          const int         theMouseBtn,
+                          bool&             theIsItemClicked) ST_ATTR_OVERRIDE {
         return myIsOverlay
              ? false
              : StGLTextureButton::tryClick(theCursor, theMouseBtn, theIsItemClicked);
     }
 
     virtual bool tryUnClick(const StPointD_t& theCursor,
-                            const int&        theMouseBtn,
-                            bool&             theIsItemUnclicked) {
+                            const int         theMouseBtn,
+                            bool&             theIsItemUnclicked) ST_ATTR_OVERRIDE {
         return myIsOverlay
              ? false
              : StGLTextureButton::tryUnClick(theCursor, theMouseBtn, theIsItemUnclicked);

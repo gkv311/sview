@@ -353,6 +353,7 @@ class StWindowImpl {
         StSignal<void (const StKeyEvent&    )>* onKeyHold;
         StSignal<void (const StClickEvent&  )>* onMouseUp;
         StSignal<void (const StClickEvent&  )>* onMouseDown;
+        StSignal<void (const StScrollEvent& )>* onScroll;
         StSignal<void (const StDNDropEvent& )>* onFileDrop;
         StSignal<void (const StNavigEvent&  )>* onNavigate;
         StSignal<void (const StActionEvent& )>* onAction;

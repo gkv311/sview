@@ -165,6 +165,11 @@ class StGLRootWidget : public StGLWidget {
                                          bool&             theIsItemUnclicked) ST_ATTR_OVERRIDE;
 
     /**
+     * Handle scrollong event.
+     */
+    ST_CPPEXPORT virtual bool doScroll(const StScrollEvent& theEvent) ST_ATTR_OVERRIDE;
+
+    /**
      * Process key down event. Default implementation redirect event to widget in focus.
      * @param theEvent key event
      * @return true if event has been processed

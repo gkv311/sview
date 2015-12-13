@@ -26,6 +26,7 @@ enum StEventType {
     stEvent_KeyHold,    //!< StKeyEvent,    keyboard key holded
     stEvent_MouseDown,  //!< StClickEvent,  mouse button pressed
     stEvent_MouseUp,    //!< StClickEvent,  mouse button released
+    stEvent_Scroll,     //!< StScrollEvent, scrolling
     stEvent_FileDrop,   //!< StDNDropEvent, file Drag & Drop
     stEvent_Navigate,   //!< StNavigEvent,  navigation event
     stEvent_Action,     //!< StActionEvent, queued application event
@@ -103,6 +104,20 @@ struct StClickEvent {
 };
 
 /**
+ * Scroll event.
+ */
+struct StScrollEvent {
+
+    StEventType   Type;    //!< event type
+    double        Time;    //!< time in seconds when event was registered
+    double        PointX;  //!< mouse cursor point defined relative to window from top-left (0,0) to the bottom-right (1,1)
+    double        PointY;
+    double        DeltaX;  //!< delta for horizontal scroll
+    double        DeltaY;  //!< delta for vertical   scroll
+
+};
+
+/**
  * File Drag & Drop event.
  */
 struct StDNDropEvent {
@@ -157,6 +172,7 @@ union StEvent {
     StSizeEvent   Size;     //!< window resize event
     StKeyEvent    Key;      //!< keyboard key down/up event
     StClickEvent  Button;   //!< mouse button down/up event
+    StScrollEvent Scroll;   //!< scrolling event
     StDNDropEvent DNDrop;   //!< file Drag & Drop event
     StNavigEvent  Navigate; //!< navigation event
     StActionEvent Action;   //!< queued application action event

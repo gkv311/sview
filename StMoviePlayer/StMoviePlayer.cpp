@@ -1328,28 +1328,35 @@ void StMoviePlayer::doMouseUp(const StClickEvent& theEvent) {
             params.isFullscreen->reverse();
             break;
         }
-        case ST_MOUSE_SCROLL_LEFT:
-        case ST_MOUSE_SCROLL_RIGHT: {
-            // limit seeking by scroll to lower corner
-            if(theEvent.PointY > 0.75) {
-                if(theEvent.Button == ST_MOUSE_SCROLL_RIGHT) {
-                    doSeekRight();
-                } else {
-                    doSeekLeft();
-                }
-            }
-        }
-        /*case ST_MOUSE_SCROLL_V_UP:
-        case ST_MOUSE_SCROLL_V_DOWN: {
-            if(theEvent.PointY > 0.75) {
-                break;
-            }
-        }*/
         default: {
             myGUI->tryUnClick(aPnt, theEvent.Button);
             break;
         }
     }
+}
+
+void StMoviePlayer::doScroll(const StScrollEvent& theEvent) {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    const StPointD_t aPnt(theEvent.PointX, theEvent.PointY);
+    const bool isNeutral = myGUI->getFocus() == NULL
+                       || !myGUI->getFocus()->isPointIn(aPnt);
+    if(!isNeutral) {
+        myGUI->doScroll(theEvent);
+        return;
+    }
+
+    // limit seeking by scroll to lower corner
+    if(theEvent.PointY > 0.75) {
+        if(theEvent.DeltaX > 0.01) {
+            doSeekRight();
+        } else if(theEvent.DeltaX < -0.01) {
+            doSeekLeft();
+        }
+    }
+    myGUI->doScroll(theEvent);
 }
 
 void StMoviePlayer::doAudioVolume(size_t theDirection) {

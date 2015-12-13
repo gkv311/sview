@@ -254,6 +254,11 @@ bool StGLMenu::tryUnClick(const StPointD_t& theCursorZo,
     return isSelfClicked;
 }
 
+bool StGLMenu::doScroll(const StScrollEvent& theEvent) {
+    StGLWidget::doScroll(theEvent);
+    return true; // do not pass event further
+}
+
 StGLMenuItem* StGLMenu::addItem(const StString& theLabel,
                                 const size_t    theUserData) {
     StGLMenuItem* aNewItem = new StGLMenuItem(this, 0, 0);

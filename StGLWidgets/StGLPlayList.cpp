@@ -13,6 +13,7 @@
 #include <StGLWidgets/StGLMenuProgram.h>
 #include <StGLWidgets/StGLRootWidget.h>
 
+#include <StCore/StEvent.h>
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 
@@ -123,30 +124,27 @@ void StGLPlayList::doMouseClick(const int theBtnId) {
 }
 
 void StGLPlayList::doMouseUnclick(const int theBtnId) {
-    switch(theBtnId) {
-        case ST_MOUSE_LEFT: {
-            myIsLeftClick = false;
-            return;
-        }
-        case ST_MOUSE_SCROLL_V_UP: {
-            if(myFromId == 0) {
-                return;
-            }
-            --myFromId;
-            updateList();
-            return;
-        }
-        case ST_MOUSE_SCROLL_V_DOWN: {
-            if(myFromId + myItemsNb >= myList->getItemsCount()) {
-                return;
-            }
-            ++myFromId;
-
-            updateList();
-            return;
-        }
-        default: return;
+    if(theBtnId == ST_MOUSE_LEFT) {
+        myIsLeftClick = false;
     }
+}
+
+bool StGLPlayList::doScroll(const StScrollEvent& theEvent) {
+    if(theEvent.DeltaY > 0.001) {
+        if(myFromId == 0) {
+            return true;
+        }
+        --myFromId;
+        updateList();
+    } else if(theEvent.DeltaY < -0.001) {
+        if(myFromId + myItemsNb >= myList->getItemsCount()) {
+            return true;
+        }
+        ++myFromId;
+
+        updateList();
+    }
+    return true;
 }
 
 void StGLPlayList::stglResize() {

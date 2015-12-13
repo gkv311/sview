@@ -12,20 +12,22 @@
 
 #include <StStrings/StString.h>
 
+/**
+ * Mouse button.
+ */
 enum StVirtButton {
     ST_NOMOUSE = 0,
     ST_MOUSE_LEFT = 1,
     ST_MOUSE_RIGHT = 2,
     ST_MOUSE_MIDDLE = 3,
-    ST_MOUSE_SCROLL_V_UP = 4, // vertical scroll
-    ST_MOUSE_SCROLL_V_DOWN = 5,
     ST_MOUSE_X1, // win
     ST_MOUSE_X2,
-    ST_MOUSE_SCROLL_LEFT,     // horizontal scroll
-    ST_MOUSE_SCROLL_RIGHT,
-    ST_MOUSE_MAX_ID = ST_MOUSE_SCROLL_RIGHT,
+    ST_MOUSE_MAX_ID = ST_MOUSE_X2,
 };
 
+/**
+ * Key modifier.
+ */
 enum StVirtFlags {
     ST_VF_NONE     = 0,
     // we reserve first 8 bits to combine value with StVirtKey

@@ -75,6 +75,7 @@ class StCADViewer : public StApplication {
     ST_LOCAL virtual void doKeyUp    (const StKeyEvent&    theEvent) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void doMouseDown(const StClickEvent&  theEvent) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void doMouseUp  (const StClickEvent&  theEvent) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void doScroll   (const StScrollEvent& theEvent) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void doFileDrop (const StDNDropEvent& theEvent) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void doNavigate (const StNavigEvent&  theEvent) ST_ATTR_OVERRIDE;
 

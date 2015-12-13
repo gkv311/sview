@@ -13,6 +13,7 @@
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 
+#include <StCore/StEvent.h>
 #include <StStrings/StLogger.h>
 #include <StThreads/StMutex.h>
 
@@ -179,15 +180,6 @@ StPointD_t StGLWidget::getPointGl(const StPointD_t& thePointZo) const {
                       (0.5 - thePointZo.y()) * oglHeight);
 }
 
-bool StGLWidget::isPointIn(const StPointD_t& thePointZo) const {
-    const StRectD_t aRectGl = getRectGl();
-    StPointD_t aPointGl = getPointGl(thePointZo);
-    return aPointGl.x() > aRectGl.left()
-        && aPointGl.x() < aRectGl.right()
-        && aPointGl.y() > aRectGl.bottom()
-        && aPointGl.y() < aRectGl.top();
-}
-
 double StGLAnimationLerp::perform(bool theDirUp, bool theToForce) {
     if(theToForce) {
         myValue = theDirUp ? 1.0 : 0.0;
@@ -320,6 +312,23 @@ bool StGLWidget::doKeyHold(const StKeyEvent& ) {
 }
 
 bool StGLWidget::doKeyUp(const StKeyEvent& ) {
+    return false;
+}
+
+bool StGLWidget::doScroll(const StScrollEvent& theEvent) {
+    if(!isVisible()) {
+        return false;
+    }
+
+    StPointD_t aPnt(theEvent.PointX, theEvent.PointY);
+    for(StGLWidget *aChildIter(myChildren.getLast()), *aChildActive(NULL); aChildIter != NULL;) {
+        aChildActive = aChildIter;
+        aChildIter   = aChildIter->getPrev();
+        if(aChildActive->isVisibleAndPointIn(aPnt)
+        && aChildActive->doScroll(theEvent)) {
+            return true;
+        }
+    }
     return false;
 }
 

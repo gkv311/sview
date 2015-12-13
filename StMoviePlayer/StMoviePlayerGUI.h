@@ -184,6 +184,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL void doShowFPS(const bool );
     ST_LOCAL void doAboutRenderer(const size_t );
     ST_LOCAL void doAudioGain    (const int theMouseBtn, const double theVolume);
+    ST_LOCAL void doAudioGainScroll(const double theDelta);
     ST_LOCAL void doAudioDelay   (const size_t );
 
     ST_LOCAL void doListHotKeys(const size_t );

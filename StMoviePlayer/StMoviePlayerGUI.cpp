@@ -282,7 +282,8 @@ void StMoviePlayerGUI::createBottomToolbar(const int theIconSize,
     myVolumeBar->changeRectPx().right() = myVolumeBar->getRectPx().left() + 2 * anIconStep + scale(8);
     myVolumeBar->changeRectPx().moveTopTo(0 + (anIconStep - myVolumeBar->getRectPx().height()) / 2);
     myVolumeBar->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
-    myVolumeBar->signals.onSeekClick = stSlot(this, &StMoviePlayerGUI::doAudioGain);
+    myVolumeBar->signals.onSeekClick  = stSlot(this, &StMoviePlayerGUI::doAudioGain);
+    myVolumeBar->signals.onSeekScroll = stSlot(this, &StMoviePlayerGUI::doAudioGainScroll);
     myVolumeBar->setMoveTolerance(1);
     myVolumeBar->changeMargins().left  = scale(8);
     myVolumeBar->changeMargins().right = scale(8);
@@ -783,22 +784,16 @@ class ST_LOCAL StDelayControl : public StGLMessageBox {
 
 void StMoviePlayerGUI::doAudioGain(const int    theMouseBtn,
                                    const double theVolume) {
-    switch(theMouseBtn) {
-        case ST_MOUSE_LEFT: {
-            myPlugin->params.AudioGain->setValue(myPlugin->volumeToGain(myPlugin->params.AudioGain, GLfloat(theVolume)));
-            break;
-        }
-        case ST_MOUSE_SCROLL_V_UP: {
-            myPlugin->params.AudioGain->increment();
-            break;
-        }
-        case ST_MOUSE_SCROLL_V_DOWN: {
-            myPlugin->params.AudioGain->decrement();
-            break;
-        }
-        default: {
-            return;
-        }
+    if(theMouseBtn == ST_MOUSE_LEFT) {
+        myPlugin->params.AudioGain->setValue(myPlugin->volumeToGain(myPlugin->params.AudioGain, GLfloat(theVolume)));
+    }
+}
+
+void StMoviePlayerGUI::doAudioGainScroll(const double theDelta) {
+    if(theDelta > 0.001) {
+        myPlugin->params.AudioGain->increment();
+    } else if(theDelta < -0.001) {
+        myPlugin->params.AudioGain->decrement();
     }
 }
 

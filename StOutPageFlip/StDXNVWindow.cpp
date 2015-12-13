@@ -114,9 +114,15 @@ LRESULT StDXNVWindow::wndProcFunction(HWND   theWnd,
     if(myStWin->isFullScreen() && myStWin->isStereoOutput()) {
         if(theMsg == WM_MOUSEWHEEL) {
             int zDelta = GET_WHEEL_DELTA_WPARAM(theParamW);
-            int mbtn = (zDelta > 0) ? ST_MOUSE_SCROLL_V_UP : ST_MOUSE_SCROLL_V_DOWN;
-            updateMouseBtn(mbtn, true);  // emulate down
-            updateMouseBtn(mbtn, false); // emulate up
+            const StPointD_t aPnt = myStWin->getMousePos();
+            StEvent anEvent;
+            anEvent.Type = stEvent_Scroll;
+            anEvent.Scroll.Time   = 0.0; //getEventTime(myEvent.time);
+            anEvent.Scroll.PointX = aPnt.x();
+            anEvent.Scroll.PointY = aPnt.y();
+            anEvent.Scroll.DeltaX = 0.0;
+            anEvent.Scroll.DeltaY = (zDelta > 0) ? 1.0 : -1.0;
+            myStWin->post(anEvent);
         }
 
         updateMouseBtn(ST_MOUSE_LEFT,   GetAsyncKeyState(GetSystemMetrics(SM_SWAPBUTTON) == 0 ? VK_LBUTTON : VK_RBUTTON) != 0);

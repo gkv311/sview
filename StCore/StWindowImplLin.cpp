@@ -959,6 +959,22 @@ void StWindowImpl::processEvents() {
                 int aPosY = aBtnEvent->y;
                 correctTiledCursor(aPosX, aPosY);
                 const StRectI_t& aRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
+                if(aBtnEvent->button == 4
+                || aBtnEvent->button == 5) {
+                    if(myXEvent.type != ButtonPress) {
+                        break;
+                    }
+
+                    myStEvent.Type = stEvent_Scroll;
+                    myStEvent.Scroll.Time   = getEventTime(aBtnEvent->time);
+                    myStEvent.Scroll.PointX = double(aPosX) / double(aRect.width());
+                    myStEvent.Scroll.PointY = double(aPosY) / double(aRect.height());
+                    myStEvent.Scroll.DeltaX = 0.0;
+                    myStEvent.Scroll.DeltaY = aBtnEvent->button == 4 ? 1.0 : -1.0;
+                    signals.onScroll->emit(myStEvent.Scroll);
+                    break;
+                }
+
                 StVirtButton aMouseBtn = ST_NOMOUSE;
                 switch(aBtnEvent->button) {
                     case 1:  aMouseBtn = ST_MOUSE_LEFT;     break;

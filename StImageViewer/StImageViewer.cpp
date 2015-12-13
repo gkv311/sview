@@ -968,12 +968,6 @@ void StImageViewer::doMouseDown(const StClickEvent& theEvent) {
         return;
     }
 
-    if(myEscNoQuit
-    && !myWindow->isFullScreen()
-    && (theEvent.Button == ST_MOUSE_SCROLL_V_UP || theEvent.Button == ST_MOUSE_SCROLL_V_DOWN)) {
-        return; // ignore scrolling
-    }
-
     myGUI->tryClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
 }
 
@@ -984,12 +978,21 @@ void StImageViewer::doMouseUp(const StClickEvent& theEvent) {
 
     if(theEvent.Button == ST_MOUSE_MIDDLE) {
         params.isFullscreen->reverse();
-    } else if(myEscNoQuit
-           && !myWindow->isFullScreen()
-           && (theEvent.Button == ST_MOUSE_SCROLL_V_UP || theEvent.Button == ST_MOUSE_SCROLL_V_DOWN)) {
-        return; // ignore scrolling
     }
     myGUI->tryUnClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
+}
+
+void StImageViewer::doScroll(const StScrollEvent& theEvent) {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    if(myEscNoQuit
+    && !myWindow->isFullScreen()) {
+        return; // ignore scrolling
+    }
+
+    myGUI->doScroll(theEvent);
 }
 
 void StImageViewer::doFileDrop(const StDNDropEvent& theEvent) {

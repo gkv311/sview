@@ -132,6 +132,7 @@ class StGLImageRegion : public StGLWidget {
     ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int theMouseBtn, bool& isItemUnclicked) ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool doKeyDown (const StKeyEvent& theEvent) ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool doKeyUp   (const StKeyEvent& theEvent) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool doScroll  (const StScrollEvent& theEvent) ST_ATTR_OVERRIDE;
 
     /**
      * Auxiliary method to discard frames in the textures queue without bound OpenGL context.

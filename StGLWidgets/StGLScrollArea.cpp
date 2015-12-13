@@ -13,6 +13,7 @@
 #include <StGLWidgets/StGLRootWidget.h>
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
+#include <StCore/StEvent.h>
 
 StGLScrollArea::StGLScrollArea(StGLWidget*      theParent,
                                const int        theLeft,  const int theTop,
@@ -289,18 +290,18 @@ bool StGLScrollArea::tryUnClick(const StPointD_t& theCursorZo,
             }
         }
     }
-    if(StGLWidget::tryUnClick(theCursorZo, theMouseBtn, isItemUnclicked)) {
-        switch(theMouseBtn) {
-            case ST_MOUSE_SCROLL_V_UP: {
-                doScroll(myRoot->scale(10));
-                break;
-            }
-            case ST_MOUSE_SCROLL_V_DOWN: {
-                doScroll(-myRoot->scale(10));
-                break;
-            }
-        }
+    return StGLWidget::tryUnClick(theCursorZo, theMouseBtn, isItemUnclicked);
+}
+
+bool StGLScrollArea::doScroll(const StScrollEvent& theEvent) {
+    if(StGLWidget::doScroll(theEvent)) {
         return true;
     }
-    return false;
+
+    if(theEvent.DeltaY > 0.001) {
+        doScroll(myRoot->scale(10));
+    } else if(theEvent.DeltaY < -0.001) {
+        doScroll(-myRoot->scale(10));
+    }
+    return true;
 }

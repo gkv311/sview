@@ -56,16 +56,23 @@ class ST_LOCAL StSeekBar : public StGLWidget {
     virtual bool stglInit() ST_ATTR_OVERRIDE;
     virtual void stglUpdate(const StPointD_t& theCursor) ST_ATTR_OVERRIDE;
     virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
+    virtual bool doScroll(const StScrollEvent& theEvent) ST_ATTR_OVERRIDE;
 
         public:  //!< Signals
 
     struct {
         /**
          * Emit callback Slot on mouse click.
-         * @param theMouseBtnId (const int ) - mouse button id;
-         * @param theProgress (const double ) - current progress value.
+         * @param theMouseBtnId mouse button id
+         * @param theProgress   current progress value
          */
         StSignal<void (const int , const double )> onSeekClick;
+
+        /**
+         * Emit callback Slot on scrolling.
+         * @param theDelta scrolling direction
+         */
+        StSignal<void (const double )> onSeekScroll;
     } signals;
 
         private: //! @name callback Slots (private overriders)

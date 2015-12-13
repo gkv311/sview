@@ -851,77 +851,85 @@ bool StGLImageRegion::tryUnClick(const StPointD_t& theCursorZo,
         setClicked(ST_MOUSE_LEFT, false);
         return true;
     }
-    if(StGLWidget::tryUnClick(theCursorZo, theMouseBtn, isItemUnclicked)) {
-        const GLfloat SCALE_STEPS = 0.16f;
-        StPointD_t aCenterCursor(0.5, 0.5);
-        if(theMouseBtn == ST_MOUSE_SCROLL_V_UP) {
-            if((myKeyFlags & ST_VF_CONTROL) == ST_VF_CONTROL) {
-                if((myKeyFlags & ST_VF_SHIFT) == ST_VF_SHIFT) {
-                    doParamsSepZDec(0.01);
-                } else {
-                    doParamsSepX(size_t(-1));
-                }
-                return true;
-            } else if((myKeyFlags & ST_VF_SHIFT) == ST_VF_SHIFT) {
-                doParamsSepY(size_t(-1));
-                return true;
-            }
+    return StGLWidget::tryUnClick(theCursorZo, theMouseBtn, isItemUnclicked);
+}
 
-            switch(aParams->ViewingMode) {
-                default:
-                case StStereoParams::FLAT_IMAGE: {
-                    const StGLVec2 aVec = getMouseMoveFlat(aCenterCursor, theCursorZo) * (-SCALE_STEPS);
-                    aParams->scaleIn(SCALE_STEPS);
-                    aParams->moveFlat(aVec, GLfloat(getRectPx().ratio()));
-                    break;
-                }
-                case StStereoParams::PANORAMA_CUBEMAP:
-                case StStereoParams::PANORAMA_SPHERE: {
-                    const StGLVec2 aVec = getMouseMoveSphere(aCenterCursor, theCursorZo) * (-SCALE_STEPS);
-                    aParams->scaleIn(SCALE_STEPS);
-                    aParams->moveSphere(aVec);
-                    break;
-                }
-            }
-        } else if(theMouseBtn == ST_MOUSE_SCROLL_V_DOWN) {
-            if((myKeyFlags & ST_VF_CONTROL) == ST_VF_CONTROL) {
-                if((myKeyFlags & ST_VF_SHIFT) == ST_VF_SHIFT) {
-                    doParamsSepZInc(0.01);
-                } else {
-                    doParamsSepX(size_t(1));
-                }
-                return true;
-            } else if((myKeyFlags & ST_VF_SHIFT) == ST_VF_SHIFT) {
-                doParamsSepY(size_t(1));
-                return true;
-            }
+bool StGLImageRegion::doScroll(const StScrollEvent& theEvent) {
+    StHandle<StStereoParams> aParams = getSource();
+    StPointD_t aCursor(theEvent.PointX, theEvent.PointY);
+    if(!myIsInitialized
+    ||  aParams.isNull()) {
+        return false;
+    }
 
-            switch(aParams->ViewingMode) {
-                default:
-                case StStereoParams::FLAT_IMAGE: {
-                    if(aParams->ScaleFactor <= 0.05f) {
-                        break;
-                    }
-                    const StGLVec2 aVec = getMouseMoveFlat(aCenterCursor, theCursorZo) * SCALE_STEPS;
-                    aParams->moveFlat(aVec, GLfloat(getRectPx().ratio()));
-                    aParams->scaleOut(SCALE_STEPS);
-                    break;
-                }
-                case StStereoParams::PANORAMA_CUBEMAP:
-                case StStereoParams::PANORAMA_SPHERE: {
-                    if(aParams->ScaleFactor <= 0.24f) {
-                        break;
-                    }
-                    const StGLVec2 aVec = getMouseMoveSphere(aCenterCursor, theCursorZo) * SCALE_STEPS;
-                    aParams->moveSphere(aVec);
-                    aParams->scaleOut(SCALE_STEPS);
-                    break;
-                }
+    const GLfloat SCALE_STEPS = 0.16f;
+    StPointD_t aCenterCursor(0.5, 0.5);
+    if(theEvent.DeltaY > 0.001) {
+        if((myKeyFlags & ST_VF_CONTROL) == ST_VF_CONTROL) {
+            if((myKeyFlags & ST_VF_SHIFT) == ST_VF_SHIFT) {
+                doParamsSepZDec(0.01);
+            } else {
+                doParamsSepX(size_t(-1));
+            }
+            return true;
+        } else if((myKeyFlags & ST_VF_SHIFT) == ST_VF_SHIFT) {
+            doParamsSepY(size_t(-1));
+            return true;
+        }
+
+        switch(aParams->ViewingMode) {
+            default:
+            case StStereoParams::FLAT_IMAGE: {
+                const StGLVec2 aVec = getMouseMoveFlat(aCenterCursor, aCursor) * (-SCALE_STEPS);
+                aParams->scaleIn(SCALE_STEPS);
+                aParams->moveFlat(aVec, GLfloat(getRectPx().ratio()));
+                break;
+            }
+            case StStereoParams::PANORAMA_CUBEMAP:
+            case StStereoParams::PANORAMA_SPHERE: {
+                const StGLVec2 aVec = getMouseMoveSphere(aCenterCursor, aCursor) * (-SCALE_STEPS);
+                aParams->scaleIn(SCALE_STEPS);
+                aParams->moveSphere(aVec);
+                break;
             }
         }
-        return true;
+    } else if(theEvent.DeltaY < -0.001) {
+        if((myKeyFlags & ST_VF_CONTROL) == ST_VF_CONTROL) {
+            if((myKeyFlags & ST_VF_SHIFT) == ST_VF_SHIFT) {
+                doParamsSepZInc(0.01);
+            } else {
+                doParamsSepX(size_t(1));
+            }
+            return true;
+        } else if((myKeyFlags & ST_VF_SHIFT) == ST_VF_SHIFT) {
+            doParamsSepY(size_t(1));
+            return true;
+        }
+
+        switch(aParams->ViewingMode) {
+            default:
+            case StStereoParams::FLAT_IMAGE: {
+                if(aParams->ScaleFactor <= 0.05f) {
+                    break;
+                }
+                const StGLVec2 aVec = getMouseMoveFlat(aCenterCursor, aCursor) * SCALE_STEPS;
+                aParams->moveFlat(aVec, GLfloat(getRectPx().ratio()));
+                aParams->scaleOut(SCALE_STEPS);
+                break;
+            }
+            case StStereoParams::PANORAMA_CUBEMAP:
+            case StStereoParams::PANORAMA_SPHERE: {
+                if(aParams->ScaleFactor <= 0.24f) {
+                    break;
+                }
+                const StGLVec2 aVec = getMouseMoveSphere(aCenterCursor, aCursor) * SCALE_STEPS;
+                aParams->moveSphere(aVec);
+                aParams->scaleOut(SCALE_STEPS);
+                break;
+            }
+        }
     }
-    return false;
+    return true;
 }
 
 bool StGLImageRegion::doKeyDown(const StKeyEvent& theEvent) {

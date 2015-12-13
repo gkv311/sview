@@ -13,6 +13,7 @@
 #include <StGLWidgets/StGLTextProgram.h>
 #include <StGLWidgets/StGLTextBorderProgram.h>
 
+#include <StCore/StEvent.h>
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
 #include <StFile/StFileNode.h>
@@ -395,6 +396,16 @@ bool StGLRootWidget::tryUnClick(const StPointD_t& theCursorZo,
     }
 
     const bool aResult = StGLWidget::tryUnClick(theCursorZo, theMouseBtn, theIsItemUnclicked);
+    clearDestroyList();
+    cursorZo = aCursorBack;
+    return aResult;
+}
+
+bool StGLRootWidget::doScroll(const StScrollEvent& theEvent) {
+    const StPointD_t aCursorBack = cursorZo;
+    cursorZo = StPointD_t(theEvent.PointX, theEvent.PointY);
+
+    const bool aResult = StGLWidget::doScroll(theEvent);
     clearDestroyList();
     cursorZo = aCursorBack;
     return aResult;

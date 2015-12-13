@@ -41,6 +41,7 @@ class StGLRangeFieldFloat32 : public StGLWidget {
 
     ST_CPPEXPORT virtual ~StGLRangeFieldFloat32();
     ST_CPPEXPORT virtual bool stglInit() ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool doScroll(const StScrollEvent& theEvent) ST_ATTR_OVERRIDE;
 
         public:
 
@@ -60,7 +61,6 @@ class StGLRangeFieldFloat32 : public StGLWidget {
         private:
 
     ST_LOCAL void onValueChange(const float theValue);
-    ST_LOCAL void doMouseUnclick(const int theBtnId);
 
         private:
 

@@ -547,6 +547,11 @@ void StGLTextureButton::doMouseUnclick(const int theBtnId) {
     }
 }
 
+bool StGLTextureButton::doScroll(const StScrollEvent& theEvent) {
+    StGLWidget::doScroll(theEvent);
+    return true; // do not pass event further
+}
+
 StGLIcon::StGLIcon(StGLWidget*      theParent,
                    const int        theLeft,
                    const int        theTop,
