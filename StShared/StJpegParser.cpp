@@ -144,6 +144,7 @@ StJpegParser::StJpegParser(const StCString& theFilePath)
   myImages(NULL),
   myStFormat(StFormat_AUTO) {
     stMemZero(myOffsets, sizeof(myOffsets));
+    (void )markerString;
 }
 
 StJpegParser::~StJpegParser() {
