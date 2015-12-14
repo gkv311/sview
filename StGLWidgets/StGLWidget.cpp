@@ -268,36 +268,41 @@ void StGLWidget::setClicked(const int& mouseBtn, bool isClicked) {
     mouseClicked[mouseBtn] = isClicked;
 }
 
-bool StGLWidget::tryClick(const StPointD_t& cursorZo, const int mouseBtn, bool& isItemClicked) {
+bool StGLWidget::tryClick(const StClickEvent& theEvent,
+                          bool&               theIsItemClicked) {
     if(!isVisible()) {
-        return false; // nothing to see - nothing to click... (all children too!)
+        return false;
     }
-    for(StGLWidget *child(myChildren.getLast()), *childActive(NULL); child != NULL;) {
-        childActive = child;
-        child = child->getPrev();
-        childActive->tryClick(cursorZo, mouseBtn, isItemClicked);
+
+    for(StGLWidget *aChildIter(myChildren.getLast()), *aChildActive(NULL); aChildIter != NULL;) {
+        aChildActive = aChildIter;
+        aChildIter   = aChildIter->getPrev();
+        aChildActive->tryClick(theEvent, theIsItemClicked);
     }
-    if(!isItemClicked && isPointIn(cursorZo)) {
-        setClicked(mouseBtn, true);
-        isItemClicked = signals.onMouseClick(mouseBtn);
+    if(!theIsItemClicked && isPointIn(StPointD_t(theEvent.PointX, theEvent.PointY))) {
+        setClicked(theEvent.Button, true);
+        theIsItemClicked = signals.onMouseClick(theEvent.Button);
         return true;
     }
     return false;
 }
 
-bool StGLWidget::tryUnClick(const StPointD_t& cursorZo, const int mouseBtn, bool& isItemUnclicked) {
+bool StGLWidget::tryUnClick(const StClickEvent& theEvent,
+                            bool&               theIsItemUnclicked) {
     if(!isVisible()) {
-        return false; // nothing to see - nothing to click... (all children too!)
+        return false;
     }
-    for(StGLWidget *child(myChildren.getLast()), *childActive(NULL); child != NULL;) {
-        childActive = child;
-        child = child->getPrev();
-        childActive->tryUnClick(cursorZo, mouseBtn, isItemUnclicked);
+
+    for(StGLWidget *aChildIter(myChildren.getLast()), *aChildActive(NULL); aChildIter != NULL;) {
+        aChildActive = aChildIter;
+        aChildIter   = aChildIter->getPrev();
+        aChildActive->tryUnClick(theEvent, theIsItemUnclicked);
     }
-    bool selfClicked = isClicked(mouseBtn) && isPointIn(cursorZo);
-    setClicked(mouseBtn, false);
-    if(!isItemUnclicked && selfClicked) {
-        isItemUnclicked = signals.onMouseUnclick(mouseBtn);
+    bool selfClicked = isClicked(theEvent.Button)
+                    && isPointIn(StPointD_t(theEvent.PointX, theEvent.PointY));
+    setClicked(theEvent.Button, false);
+    if(!theIsItemUnclicked && selfClicked) {
+        theIsItemUnclicked = signals.onMouseUnclick(theEvent.Button);
         return true;
     }
     return false;
@@ -352,30 +357,28 @@ StGLContainer::StGLContainer(StGLWidget* theParent,
 
 StGLContainer::~StGLContainer() {}
 
-bool StGLContainer::tryClick(const StPointD_t& theCursorZo,
-                             const int         theMouseBtn,
-                             bool&             theIsItemClicked) {
+bool StGLContainer::tryClick(const StClickEvent& theEvent,
+                             bool&               theIsItemClicked) {
     if(!isVisible()) {
         return false;
     }
     for(StGLWidget *aChildIter(myChildren.getLast()), *aChildActive(NULL); aChildIter != NULL;) {
         aChildActive = aChildIter;
         aChildIter   = aChildIter->getPrev();
-        aChildActive->tryClick(theCursorZo, theMouseBtn, theIsItemClicked);
+        aChildActive->tryClick(theEvent, theIsItemClicked);
     }
     return false;
 }
 
-bool StGLContainer::tryUnClick(const StPointD_t& theCursorZo,
-                               const int         theMouseBtn,
-                               bool&             theIsItemUnclicked) {
+bool StGLContainer::tryUnClick(const StClickEvent& theEvent,
+                               bool&               theIsItemUnclicked) {
     if(!isVisible()) {
         return false;
     }
     for(StGLWidget *aChildIter(myChildren.getLast()), *aChildActive(NULL); aChildIter != NULL;) {
         aChildActive = aChildIter;
         aChildIter   = aChildIter->getPrev();
-        aChildActive->tryUnClick(theCursorZo, theMouseBtn, theIsItemUnclicked);
+        aChildActive->tryUnClick(theEvent, theIsItemUnclicked);
     }
     return false;
 }

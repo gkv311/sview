@@ -115,7 +115,7 @@ void StDiagnostics::doMouseDown(const StClickEvent& theEvent) {
         return;
     }
 
-    myGUI->tryClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
+    myGUI->tryClick(theEvent);
 }
 
 void StDiagnostics::doMouseUp(const StClickEvent& theEvent) {
@@ -126,7 +126,7 @@ void StDiagnostics::doMouseUp(const StClickEvent& theEvent) {
     if(theEvent.Button == ST_MOUSE_MIDDLE) {
         params.IsFullscreen->reverse();
     }
-    myGUI->tryUnClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
+    myGUI->tryUnClick(theEvent);
 }
 
 void StDiagnostics::doKeyDown(const StKeyEvent& theEvent) {

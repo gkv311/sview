@@ -222,12 +222,11 @@ bool StGLMenu::doKeyDown(const StKeyEvent& theEvent) {
     }
 }
 
-bool StGLMenu::tryUnClick(const StPointD_t& theCursorZo,
-                          const int         theMouseBtn,
-                          bool&             theIsItemUnclicked) {
+bool StGLMenu::tryUnClick(const StClickEvent& theEvent,
+                          bool&               theIsItemUnclicked) {
     myKeepActive = false;
     bool wasSomeClickedBefore = theIsItemUnclicked;
-    bool isSelfClicked = StGLWidget::tryUnClick(theCursorZo, theMouseBtn, theIsItemUnclicked);
+    bool isSelfClicked = StGLWidget::tryUnClick(theEvent, theIsItemUnclicked);
     bool isSelfItemClicked = !wasSomeClickedBefore && theIsItemUnclicked;
     if(myKeepActive) {
         return isSelfClicked;

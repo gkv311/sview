@@ -136,33 +136,25 @@ class StGLRootWidget : public StGLWidget {
 
     /**
      * Function iterate children and self to change clicking state.
-     * @param theCursorZo point in Zero2One coordinates
-     * @param theMouseBtn mouse button id
      */
-    ST_LOCAL bool tryClick(const StPointD_t& theCursorZo,
-                           const int         theMouseBtn) {
+    ST_LOCAL bool tryClick(const StClickEvent& theEvent) {
         bool isItemClicked = false;
-        return tryClick(theCursorZo, theMouseBtn, isItemClicked);
+        return tryClick(theEvent, isItemClicked);
     }
 
-    ST_CPPEXPORT virtual bool tryClick(const StPointD_t& theCursorZo,
-                                       const int         theMouseBtn,
-                                       bool&             theIsItemClicked) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool tryClick(const StClickEvent& theEvent,
+                                       bool&               theIsItemClicked) ST_ATTR_OVERRIDE;
 
     /**
      * Function iterate children and self for unclicking state.
-     * @param theCursorZo point in Zero2One coordinates
-     * @param theMouseBtn mouse button id
      */
-    ST_LOCAL bool tryUnClick(const StPointD_t& theCursorZo,
-                             const int         theMouseBtn) {
+    ST_LOCAL bool tryUnClick(const StClickEvent& theEvent) {
         bool isItemUnclicked = false;
-        return tryUnClick(theCursorZo, theMouseBtn, isItemUnclicked);
+        return tryUnClick(theEvent, isItemUnclicked);
     }
 
-    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo,
-                                         const int         theMouseBtn,
-                                         bool&             theIsItemUnclicked) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool tryUnClick(const StClickEvent& theEvent,
+                                         bool&               theIsItemUnclicked) ST_ATTR_OVERRIDE;
 
     /**
      * Handle scrollong event.

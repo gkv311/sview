@@ -234,18 +234,18 @@ bool StGLScrollArea::doScroll(const int  theDelta,
     return true;
 }
 
-bool StGLScrollArea::tryClick(const StPointD_t& theCursorZo,
-                              const int         theMouseBtn,
-                              bool&             isItemClicked) {
-    if(!isVisible() || !isPointIn(theCursorZo)) {
+bool StGLScrollArea::tryClick(const StClickEvent& theEvent,
+                              bool&               theIsItemClicked) {
+    if(!isVisibleAndPointIn(StPointD_t(theEvent.PointX, theEvent.PointY))) {
         return false;
     }
-    if( theMouseBtn == ST_MOUSE_LEFT
-    && !isItemClicked
+
+    if( theEvent.Button == ST_MOUSE_LEFT
+    && !theIsItemClicked
     &&  isScrollable()) {
         myIsLeftClick = true;
         myHasDragged  = false;
-        myClickPntZo  = theCursorZo;
+        myClickPntZo  = StPointD_t(theEvent.PointX, theEvent.PointY);
         myDragYCumul  = 0;
 
         // abort flinging
@@ -255,7 +255,7 @@ bool StGLScrollArea::tryClick(const StPointD_t& theCursorZo,
             const double aSpeed = myFlingYSpeed + anA * aTime;
             if(std::abs(aSpeed) > myRoot->scale(300)) {
                 setClickedWithChildren(myChildren, ST_MOUSE_LEFT, false);
-                isItemClicked = true;
+                theIsItemClicked = true;
                 return true;
             }
         }
@@ -264,18 +264,17 @@ bool StGLScrollArea::tryClick(const StPointD_t& theCursorZo,
         myHasDragged  = false;
     }
 
-    if(StGLWidget::tryClick(theCursorZo, theMouseBtn, isItemClicked)) {
-        isItemClicked = true;
+    if(StGLWidget::tryClick(theEvent, theIsItemClicked)) {
+        theIsItemClicked = true;
         return true;
     }
     return false;
 }
 
-bool StGLScrollArea::tryUnClick(const StPointD_t& theCursorZo,
-                                const int         theMouseBtn,
-                                bool&             isItemUnclicked) {
+bool StGLScrollArea::tryUnClick(const StClickEvent& theEvent,
+                                bool&               theIsItemUnclicked) {
     if(myIsLeftClick
-    && theMouseBtn == ST_MOUSE_LEFT) {
+    && theEvent.Button == ST_MOUSE_LEFT) {
         myIsLeftClick = false;
         myHasDragged  = false;
         if(myDragTimer.isOn()) {
@@ -290,7 +289,7 @@ bool StGLScrollArea::tryUnClick(const StPointD_t& theCursorZo,
             }
         }
     }
-    return StGLWidget::tryUnClick(theCursorZo, theMouseBtn, isItemUnclicked);
+    return StGLWidget::tryUnClick(theEvent, theIsItemUnclicked);
 }
 
 bool StGLScrollArea::doScroll(const StScrollEvent& theEvent) {

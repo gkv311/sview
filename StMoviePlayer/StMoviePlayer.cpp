@@ -1307,7 +1307,7 @@ void StMoviePlayer::doMouseDown(const StClickEvent& theEvent) {
         return;
     }
 
-    myGUI->tryClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
+    myGUI->tryClick(theEvent);
 }
 
 void StMoviePlayer::doMouseUp(const StClickEvent& theEvent) {
@@ -1319,7 +1319,7 @@ void StMoviePlayer::doMouseUp(const StClickEvent& theEvent) {
     const bool isNeutral = myGUI->getFocus() == NULL
                        || !myGUI->getFocus()->isPointIn(aPnt);
     if(!isNeutral) {
-        myGUI->tryUnClick(aPnt, theEvent.Button);
+        myGUI->tryUnClick(theEvent);
         return;
     }
 
@@ -1329,7 +1329,7 @@ void StMoviePlayer::doMouseUp(const StClickEvent& theEvent) {
             break;
         }
         default: {
-            myGUI->tryUnClick(aPnt, theEvent.Button);
+            myGUI->tryUnClick(theEvent);
             break;
         }
     }

@@ -46,8 +46,8 @@ class StGLMessageBox : public StGLWidget {
     ST_CPPEXPORT virtual bool stglInit() ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual void stglResize() ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
-    ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int theMouseBtn, bool& isItemClicked)   ST_ATTR_OVERRIDE;
-    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int theMouseBtn, bool& isItemUnclicked) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool tryClick  (const StClickEvent& theEvent, bool& theIsItemClicked)   ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool tryUnClick(const StClickEvent& theEvent, bool& theIsItemUnclicked) ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool doScroll(const StScrollEvent& theEvent) ST_ATTR_OVERRIDE;
 
         public:

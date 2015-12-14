@@ -968,7 +968,7 @@ void StImageViewer::doMouseDown(const StClickEvent& theEvent) {
         return;
     }
 
-    myGUI->tryClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
+    myGUI->tryClick(theEvent);
 }
 
 void StImageViewer::doMouseUp(const StClickEvent& theEvent) {
@@ -979,7 +979,7 @@ void StImageViewer::doMouseUp(const StClickEvent& theEvent) {
     if(theEvent.Button == ST_MOUSE_MIDDLE) {
         params.isFullscreen->reverse();
     }
-    myGUI->tryUnClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
+    myGUI->tryUnClick(theEvent);
 }
 
 void StImageViewer::doScroll(const StScrollEvent& theEvent) {

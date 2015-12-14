@@ -388,23 +388,21 @@ void StGLMessageBox::stglDraw(unsigned int theView) {
     aCtx.stglResetScissorRect();
 }
 
-bool StGLMessageBox::tryClick(const StPointD_t& theCursorZo,
-                              const int         theMouseBtn,
-                              bool&             isItemClicked) {
-    if(isPointIn(theCursorZo)
-    && StGLWidget::tryClick(theCursorZo, theMouseBtn, isItemClicked)) {
-        isItemClicked = true;
+bool StGLMessageBox::tryClick(const StClickEvent& theEvent,
+                              bool&               theIsItemClicked) {
+    if(isPointIn(StPointD_t(theEvent.PointX, theEvent.PointY))
+    && StGLWidget::tryClick(theEvent, theIsItemClicked)) {
+        theIsItemClicked = true;
         return true;
     }
     return false;
 }
 
-bool StGLMessageBox::tryUnClick(const StPointD_t& theCursorZo,
-                                const int         theMouseBtn,
-                                bool&             isItemUnclicked) {
-    if(//isPointIn(theCursorZo) &&
-       StGLWidget::tryUnClick(theCursorZo, theMouseBtn, isItemUnclicked)) {
-        isItemUnclicked = true;
+bool StGLMessageBox::tryUnClick(const StClickEvent& theEvent,
+                                bool&               theIsItemUnclicked) {
+    if(//isPointIn(StPointD_t(theEvent.PointX, theEvent.PointY)) &&
+       StGLWidget::tryUnClick(theEvent, theIsItemUnclicked)) {
+        theIsItemUnclicked = true;
 
         if(myIsContextual) {
             myRoot->destroyWithDelay(this);

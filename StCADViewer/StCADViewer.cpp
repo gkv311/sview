@@ -398,7 +398,7 @@ void StCADViewer::doMouseDown(const StClickEvent& theEvent) {
         return;
     }
 
-    myGUI->tryClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
+    myGUI->tryClick(theEvent);
 
     if(theEvent.Button == ST_MOUSE_LEFT) {
         myIsLeftHold = true; ///
@@ -447,7 +447,7 @@ void StCADViewer::doMouseUp(const StClickEvent& theEvent) {
         }
         default: break;
     }
-    myGUI->tryUnClick(StPointD_t(theEvent.PointX, theEvent.PointY), theEvent.Button);
+    myGUI->tryUnClick(theEvent);
 }
 
 void StCADViewer::doScroll(const StScrollEvent& theEvent) {

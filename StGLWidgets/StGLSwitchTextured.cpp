@@ -8,7 +8,9 @@
  */
 
 #include <StGLWidgets/StGLSwitchTextured.h>
+
 #include <StGLWidgets/StGLRadioButtonTextured.h>
+#include <StCore/StEvent.h>
 
 StGLSwitchTextured::StGLSwitchTextured(StGLWidget* theParent,
                                        const StHandle<StInt32Param>& theTrackedValue,
@@ -61,32 +63,36 @@ void StGLSwitchTextured::stglDraw(unsigned int theView) {
 }
 
 
-bool StGLSwitchTextured::tryClick(const StPointD_t& theCursorZo, const int theMouseBtn, bool& isItemClicked) {
+bool StGLSwitchTextured::tryClick(const StClickEvent& theEvent,
+                                  bool&               theIsItemClicked) {
     if(!isVisible()) {
         return false; // nothing to see - nothing to click...
     }
-    if(!isItemClicked && isPointIn(theCursorZo)) {
-        setClicked(theMouseBtn, true);
-        isItemClicked = true;
+
+    if(!theIsItemClicked && isPointIn(StPointD_t(theEvent.PointX, theEvent.PointY))) {
+        setClicked(theEvent.Button, true);
+        theIsItemClicked = true;
         return true;
     }
     return false;
 }
 
-bool StGLSwitchTextured::tryUnClick(const StPointD_t& theCursorZo, const int theMouseBtn, bool& isItemUnclicked) {
+bool StGLSwitchTextured::tryUnClick(const StClickEvent& theEvent,
+                                    bool&               theIsItemUnclicked) {
     if(!isVisible()) {
         return false; // nothing to see - nothing to click...
     }
-    bool isSelfClicked = isClicked(theMouseBtn) && isPointIn(theCursorZo);
-    setClicked(theMouseBtn, false);
-    if(!isItemUnclicked && isSelfClicked) {
-        isItemUnclicked = true;
+    bool isSelfClicked = isClicked(theEvent.Button)
+                      && isPointIn(StPointD_t(theEvent.PointX, theEvent.PointY));
+    setClicked(theEvent.Button, false);
+    if(!theIsItemUnclicked && isSelfClicked) {
+        theIsItemUnclicked = true;
 
         int32_t anActiveValue = myTrackValue->getValue();
         StGLRadioButtonTextured* aRadioBtn = NULL;
         for(StGLWidget* aChild = getChildren()->getStart(); aChild != NULL;) {
             /// TODO (Kirill Gavrilov#9) - adding children with another type is not allowed
-            ///                            hovewer not protected thus this cast is not thread-safe!
+            ///                            however not protected thus this cast is not thread-safe!
             aRadioBtn = (StGLRadioButtonTextured* )aChild;
             aChild = aChild->getNext();
 

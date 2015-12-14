@@ -52,7 +52,7 @@ class StGLMenu : public StGLWidget {
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool doKeyDown(const StKeyEvent& theEvent) ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool doScroll(const StScrollEvent& theEvent) ST_ATTR_OVERRIDE;
-    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int theMouseBtn, bool& theIsItemUnclicked) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool tryUnClick(const StClickEvent& theEvent, bool& theIsItemUnclicked) ST_ATTR_OVERRIDE;
 
     inline bool isRootMenu() const {
         return myIsRootMenu;

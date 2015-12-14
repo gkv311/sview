@@ -525,17 +525,19 @@ void StGLTextureButton::stglDraw(unsigned int ) {
     aCtx.core20fwd->glDisable(GL_BLEND);
 }
 
-bool StGLTextureButton::tryClick(const StPointD_t& cursorZo, const int mouseBtn, bool& isItemClicked) {
-    if(StGLWidget::tryClick(cursorZo, mouseBtn, isItemClicked)) {
-        isItemClicked = true;
+bool StGLTextureButton::tryClick(const StClickEvent& theEvent,
+                                 bool&               theIsItemClicked) {
+    if(StGLWidget::tryClick(theEvent, theIsItemClicked)) {
+        theIsItemClicked = true;
         return true;
     }
     return false;
 }
 
-bool StGLTextureButton::tryUnClick(const StPointD_t& cursorZo, const int mouseBtn, bool& isItemUnclicked) {
-    if(StGLWidget::tryUnClick(cursorZo, mouseBtn, isItemUnclicked)) {
-        isItemUnclicked = true;
+bool StGLTextureButton::tryUnClick(const StClickEvent& theEvent,
+                                   bool&               theIsItemUnclicked) {
+    if(StGLWidget::tryUnClick(theEvent, theIsItemUnclicked)) {
+        theIsItemUnclicked = true;
         return true;
     }
     return false;
@@ -568,10 +570,10 @@ StGLIcon::~StGLIcon() {
     }
 }
 
-bool StGLIcon::tryClick(const StPointD_t& , const int , bool& ) {
+bool StGLIcon::tryClick(const StClickEvent& , bool& ) {
     return false;
 }
 
-bool StGLIcon::tryUnClick(const StPointD_t& , const int , bool& ) {
+bool StGLIcon::tryUnClick(const StClickEvent& , bool& ) {
     return false;
 }

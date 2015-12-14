@@ -15,6 +15,7 @@
 
 #include <StGL/StGLContext.h>
 #include <StGLCore/StGLCore20.h>
+#include <StCore/StEvent.h>
 
 void StGLMenuItem::DeleteWithSubMenus(StGLMenuItem* theMenuItem) {
     if(theMenuItem == NULL) {
@@ -269,16 +270,15 @@ void StGLMenuItem::setFocus(const bool theValue) {
     myHasFocus = theValue;
 }
 
-bool StGLMenuItem::tryClick(const StPointD_t& theCursorZo,
-                            const int         theMouseBtn,
-                            bool&             theIsItemClicked) {
+bool StGLMenuItem::tryClick(const StClickEvent& theEvent,
+                            bool&               theIsItemClicked) {
     const bool wasClicked = theIsItemClicked;
-    if(StGLWidget::tryClick(theCursorZo, theMouseBtn, theIsItemClicked)) {
+    if(StGLWidget::tryClick(theEvent, theIsItemClicked)) {
         theIsItemClicked = true; // always clickable widget
         if(getParentMenu()->isRootMenu()) {
             getParentMenu()->setActive(true); // activate root menu
         }
-        if(theMouseBtn == ST_MOUSE_LEFT) {
+        if(theEvent.Button == ST_MOUSE_LEFT) {
             getRoot()->setMenuPressed(true);
         }
         return true;
@@ -289,11 +289,10 @@ bool StGLMenuItem::tryClick(const StPointD_t& theCursorZo,
     return false;
 }
 
-bool StGLMenuItem::tryUnClick(const StPointD_t& theCursorZo,
-                              const int         theMouseBtn,
-                              bool&             theIsItemUnclicked) {
+bool StGLMenuItem::tryUnClick(const StClickEvent& theEvent,
+                              bool&               theIsItemUnclicked) {
     const bool wasUnclicked = theIsItemUnclicked;
-    if(StGLWidget::tryUnClick(theCursorZo, theMouseBtn, theIsItemUnclicked)) {
+    if(StGLWidget::tryUnClick(theEvent, theIsItemUnclicked)) {
         theIsItemUnclicked = true; // always clickable widget
         return true;
     }

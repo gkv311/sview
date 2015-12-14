@@ -373,29 +373,27 @@ void StGLRootWidget::getRectGl(const StRectI_t& theRectPx,
     theVertices[theFromId + 3] = StGLVec2(GLfloat(aRectGl.left()),  GLfloat(aRectGl.bottom()));
 }
 
-bool StGLRootWidget::tryClick(const StPointD_t& theCursorZo,
-                              const int         theMouseBtn,
-                              bool&             theIsItemClicked) {
+bool StGLRootWidget::tryClick(const StClickEvent& theEvent,
+                              bool&               theIsItemClicked) {
     const StPointD_t aCursorBack = cursorZo;
-    cursorZo = theCursorZo;
-    if(isPointIn(theCursorZo)) {
-        setClicked(theMouseBtn, true);
+    cursorZo = StPointD_t(theEvent.PointX, theEvent.PointY);
+    if(isPointIn(cursorZo)) {
+        setClicked(theEvent.Button, true);
     }
-    const bool aResult = StGLWidget::tryClick(theCursorZo, theMouseBtn, theIsItemClicked);
+    const bool aResult = StGLWidget::tryClick(theEvent, theIsItemClicked);
     cursorZo = aCursorBack;
     return aResult;
 }
 
-bool StGLRootWidget::tryUnClick(const StPointD_t& theCursorZo,
-                                const int         theMouseBtn,
-                                bool&             theIsItemUnclicked) {
+bool StGLRootWidget::tryUnClick(const StClickEvent& theEvent,
+                                bool&               theIsItemUnclicked) {
     const StPointD_t aCursorBack = cursorZo;
-    cursorZo = theCursorZo;
-    if(isPointIn(theCursorZo)) {
-        setClicked(theMouseBtn, false);
+    cursorZo = StPointD_t(theEvent.PointX, theEvent.PointY);
+    if(isPointIn(cursorZo)) {
+        setClicked(theEvent.Button, false);
     }
 
-    const bool aResult = StGLWidget::tryUnClick(theCursorZo, theMouseBtn, theIsItemUnclicked);
+    const bool aResult = StGLWidget::tryUnClick(theEvent, theIsItemUnclicked);
     clearDestroyList();
     cursorZo = aCursorBack;
     return aResult;

@@ -96,10 +96,9 @@ void StGLOpenFile::doFolderUpClick(const size_t ) {
     }
 }
 
-bool StGLOpenFile::tryUnClick(const StPointD_t& theCursorZo,
-                              const int         theMouseBtn,
-                              bool&             isItemUnclicked) {
-    bool aRes = StGLMessageBox::tryUnClick(theCursorZo, theMouseBtn, isItemUnclicked);
+bool StGLOpenFile::tryUnClick(const StClickEvent& theEvent,
+                              bool&               theIsItemUnclicked) {
+    bool aRes = StGLMessageBox::tryUnClick(theEvent, theIsItemUnclicked);
     if(!myItemToLoad.isEmpty()) {
         StString aPath = myItemToLoad;
         myItemToLoad.clear();

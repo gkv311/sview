@@ -789,69 +789,68 @@ void StGLImageRegion::doRightUnclick(const StPointD_t& theCursorZo) {
     aParams->setYRotate(anYRotate);
 }
 
-bool StGLImageRegion::tryClick(const StPointD_t& theCursorZo,
-                               const int         theMouseBtn,
-                               bool&             isItemClicked) {
+bool StGLImageRegion::tryClick(const StClickEvent& theEvent,
+                               bool&               theIsItemClicked) {
     StHandle<StStereoParams> aParams = getSource();
     if(!myIsInitialized || aParams.isNull()) {
         return false;
     }
 
-    if(StGLWidget::tryClick(theCursorZo, theMouseBtn, isItemClicked)) {
-        if(theMouseBtn == ST_MOUSE_RIGHT
+    if(StGLWidget::tryClick(theEvent, theIsItemClicked)) {
+        if(theEvent.Button == ST_MOUSE_RIGHT
         && (myToRightRotate || (myKeyFlags & ST_VF_CONTROL) == ST_VF_CONTROL)) {
-            myClickPntZo = theCursorZo;
+            myClickPntZo = StPointD_t(theEvent.PointX, theEvent.PointY);
             myIsClickAborted = true;
-        } else if(theMouseBtn == ST_MOUSE_LEFT) {
-            myClickPntZo = theCursorZo;
+        } else if(theEvent.Button == ST_MOUSE_LEFT) {
+            myClickPntZo = StPointD_t(theEvent.PointX, theEvent.PointY);
             myClickTimer.restart();
             myIsClickAborted = false;
         }
-        isItemClicked = true;
+        theIsItemClicked = true;
         return true;
     }
     return false;
 }
 
-bool StGLImageRegion::tryUnClick(const StPointD_t& theCursorZo,
-                                 const int         theMouseBtn,
-                                 bool&             isItemUnclicked) {
+bool StGLImageRegion::tryUnClick(const StClickEvent& theEvent,
+                                 bool&               theIsItemUnclicked) {
     StHandle<StStereoParams> aParams = getSource();
     if(!myIsInitialized || aParams.isNull()) {
-        if(isClicked(theMouseBtn)) {
-            isItemUnclicked = true;
-            setClicked(theMouseBtn, false);
+        if(isClicked(theEvent.Button)) {
+            theIsItemUnclicked = true;
+            setClicked(theEvent.Button, false);
             return true;
         }
         return false;
     }
 
+    StPointD_t aCursor(theEvent.PointX, theEvent.PointY);
     if(isClicked(ST_MOUSE_RIGHT)
-    && theMouseBtn == ST_MOUSE_RIGHT
+    && theEvent.Button == ST_MOUSE_RIGHT
     && (myToRightRotate || (myKeyFlags & ST_VF_CONTROL) == ST_VF_CONTROL)) {
-        doRightUnclick(theCursorZo);
-    } else if(isClicked(ST_MOUSE_LEFT) && theMouseBtn == ST_MOUSE_LEFT) {
+        doRightUnclick(aCursor);
+    } else if(isClicked(ST_MOUSE_LEFT) && theEvent.Button == ST_MOUSE_LEFT) {
         // ignore out of window
         switch(aParams->ViewingMode) {
             default:
             case StStereoParams::FLAT_IMAGE: {
                 if(!myIsClickAborted) {
-                    aParams->moveFlat(getMouseMoveFlat(myClickPntZo, theCursorZo), GLfloat(getRectPx().ratio()));
+                    aParams->moveFlat(getMouseMoveFlat(myClickPntZo, aCursor), GLfloat(getRectPx().ratio()));
                 }
                 break;
             }
             case StStereoParams::PANORAMA_CUBEMAP:
             case StStereoParams::PANORAMA_SPHERE: {
-                aParams->moveSphere(getMouseMoveSphere(myClickPntZo, theCursorZo));
+                aParams->moveSphere(getMouseMoveSphere(myClickPntZo, aCursor));
                 break;
             }
 
         }
-        isItemUnclicked = true;
+        theIsItemUnclicked = true;
         setClicked(ST_MOUSE_LEFT, false);
         return true;
     }
-    return StGLWidget::tryUnClick(theCursorZo, theMouseBtn, isItemUnclicked);
+    return StGLWidget::tryUnClick(theEvent, theIsItemUnclicked);
 }
 
 bool StGLImageRegion::doScroll(const StScrollEvent& theEvent) {

@@ -50,8 +50,8 @@ class StGLMenuItem : public StGLTextArea {
     ST_CPPEXPORT virtual void stglResize() ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool stglInit() ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
-    ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int theMouseBtn, bool& theIsItemClicked) ST_ATTR_OVERRIDE;
-    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int theMouseBtn, bool& theIsItemUnclicked) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool tryClick  (const StClickEvent& theEvent, bool& theIsItemClicked)   ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool tryUnClick(const StClickEvent& theEvent, bool& theIsItemUnclicked) ST_ATTR_OVERRIDE;
 
     ST_LOCAL const int computeTextWidth() {
         int aWidth = 0, aHeight = 0;

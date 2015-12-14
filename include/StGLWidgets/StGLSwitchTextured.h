@@ -44,8 +44,8 @@ class StGLSwitchTextured : public StGLWidget {
     /**
      * Overrider that blocks children's clicking functionality and switch the values in cycle.
      */
-    ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int theMouseBtn, bool& isItemClicked)   ST_ATTR_OVERRIDE;
-    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int theMouseBtn, bool& isItemUnclicked) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool tryClick  (const StClickEvent& theEvent, bool& theIsItemClicked)   ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool tryUnClick(const StClickEvent& theEvent, bool& theIsItemUnclicked) ST_ATTR_OVERRIDE;
 
     /**
      * Append available value.

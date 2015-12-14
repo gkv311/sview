@@ -33,8 +33,8 @@ class StGLScrollArea : public StGLWidget {
     ST_CPPEXPORT virtual void stglResize() ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo) ST_ATTR_OVERRIDE;
-    ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int theMouseBtn, bool& isItemClicked)   ST_ATTR_OVERRIDE;
-    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int theMouseBtn, bool& isItemUnclicked) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool tryClick  (const StClickEvent& theEvent, bool& isItemClicked)   ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool tryUnClick(const StClickEvent& theEvent, bool& isItemUnclicked) ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool doScroll(const StScrollEvent& theEvent) ST_ATTR_OVERRIDE;
 
         public:

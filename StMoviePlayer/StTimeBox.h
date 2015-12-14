@@ -82,20 +82,18 @@ class ST_LOCAL StTimeBox : public StGLTextureButton {
         myIsResized = false;
     }
 
-    virtual bool tryClick(const StPointD_t& theCursor,
-                          const int         theMouseBtn,
-                          bool&             theIsItemClicked) ST_ATTR_OVERRIDE {
+    virtual bool tryClick(const StClickEvent& theEvent,
+                          bool&               theIsItemClicked) ST_ATTR_OVERRIDE {
         return myIsOverlay
              ? false
-             : StGLTextureButton::tryClick(theCursor, theMouseBtn, theIsItemClicked);
+             : StGLTextureButton::tryClick(theEvent, theIsItemClicked);
     }
 
-    virtual bool tryUnClick(const StPointD_t& theCursor,
-                            const int         theMouseBtn,
-                            bool&             theIsItemUnclicked) ST_ATTR_OVERRIDE {
+    virtual bool tryUnClick(const StClickEvent& theEvent,
+                            bool&               theIsItemUnclicked) ST_ATTR_OVERRIDE {
         return myIsOverlay
              ? false
-             : StGLTextureButton::tryUnClick(theCursor, theMouseBtn, theIsItemUnclicked);
+             : StGLTextureButton::tryUnClick(theEvent, theIsItemUnclicked);
     }
 
     void stglUpdateTime(const double theProgressSec,

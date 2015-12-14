@@ -22,6 +22,7 @@
 
 class  StGLRootWidget;
 class  StGLContext;
+struct StClickEvent;
 struct StKeyEvent;
 struct StScrollEvent;
 
@@ -287,21 +288,15 @@ class StGLWidget {
 
     /**
      * Function iterate children and self to change clicking state.
-     * @param theCursorZo point in Zero2One coordinates
-     * @param theMouseBtn mouse button id
      */
-    ST_CPPEXPORT virtual bool tryClick(const StPointD_t& theCursorZo,
-                                       const int         theMouseBtn,
-                                       bool&             theIsItemClicked);
+    ST_CPPEXPORT virtual bool tryClick(const StClickEvent& theEvent,
+                                       bool&               theIsItemClicked);
 
     /**
      * Function iterate children and self for unclicking state.
-     * @param theCursorZo point in Zero2One coordinates
-     * @param theMouseBtn mouse button id
      */
-    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo,
-                                         const int         theMouseBtn,
-                                         bool&             theIsItemUnclicked);
+    ST_CPPEXPORT virtual bool tryUnClick(const StClickEvent& theEvent,
+                                         bool&               theIsItemUnclicked);
 
     /**
      * Process key down event. Default implementation do nothing.
@@ -483,8 +478,8 @@ class ST_LOCAL StGLContainer : public StGLWidget {
 
     ST_CPPEXPORT virtual ~StGLContainer();
 
-    ST_CPPEXPORT virtual bool tryClick  (const StPointD_t& theCursorZo, const int theMouseBtn, bool& theIsItemClicked)   ST_ATTR_OVERRIDE;
-    ST_CPPEXPORT virtual bool tryUnClick(const StPointD_t& theCursorZo, const int theMouseBtn, bool& theIsItemUnclicked) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool tryClick  (const StClickEvent& theEvent, bool& theIsItemClicked)   ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool tryUnClick(const StClickEvent& theEvent, bool& theIsItemUnclicked) ST_ATTR_OVERRIDE;
 
 };
 
