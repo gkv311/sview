@@ -102,6 +102,10 @@ StWindowImpl::StWindowImpl(const StHandle<StResourceManager>& theResMgr,
     attribs.Split      = StWinSlave_splitOff;
     attribs.ToAlignEven = false;
 
+    myTouches.Type = stEvent_TouchCancel;
+    myTouches.Time = 0.0;
+    myTouches.clearTouches();
+
     myMonSlave.idMaster = 0;
     myMonSlave.idSlave  = 1; // second by default
     myMonSlave.xAdd = 1;
@@ -1041,6 +1045,37 @@ void StWindowImpl::stglSwap(const int& theWinId) {
     }
 }
 
+void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
+    signals.onTouch->emit(theTouches);
+
+    switch(theTouches.Type) {
+        case stEvent_TouchDown: {
+            for(int aTouchIter = 0; aTouchIter < theTouches.NbTouches; ++aTouchIter) {
+                myTouches.addTouch(theTouches.Touches[aTouchIter]);
+            }
+            break;
+        }
+        case stEvent_TouchUp: {
+            StTouchEvent aCopy = myTouches;
+            myTouches.clearTouches();
+            for(int aTouchIter = 0; aTouchIter < aCopy.NbTouches; ++aTouchIter) {
+                if(theTouches.findTouchById(aCopy.Touches[aTouchIter].Id).isDefined()) {
+                    myTouches.addTouch(aCopy.Touches[aTouchIter]);
+                }
+            }
+            break;
+        }
+        case stEvent_TouchCancel: {
+            myTouches.clearTouches();
+            break;
+        }
+        case stEvent_TouchMove:
+            break;
+        default:
+            break;
+    }
+}
+
 void StWindowImpl::swapEventsBuffers() {
     myEventsBuffer.swapBuffers();
     for(size_t anEventIter = 0; anEventIter < myEventsBuffer.getSize(); ++anEventIter) {
@@ -1077,11 +1112,17 @@ void StWindowImpl::swapEventsBuffers() {
                 signals.onMouseDown->emit(anEvent.Button);
                 break;
             case stEvent_MouseUp:
-               signals.onMouseUp->emit(anEvent.Button);
-               break;
+                signals.onMouseUp->emit(anEvent.Button);
+                break;
+            case stEvent_TouchDown:
+            case stEvent_TouchUp:
+            case stEvent_TouchMove:
+            case stEvent_TouchCancel:
+                doTouch(anEvent.Touch);
+                break;
             case stEvent_Scroll:
-               signals.onScroll->emit(anEvent.Scroll);
-               break;
+                signals.onScroll->emit(anEvent.Scroll);
+                break;
             case stEvent_FileDrop:
                 signals.onFileDrop->emit(anEvent.DNDrop);
                 break;

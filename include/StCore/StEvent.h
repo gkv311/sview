@@ -15,6 +15,45 @@
 #include <StThreads/StTimer.h>
 #include "StVirtualKeys.h"
 
+#define ST_MAX_TOUCHES 10
+#define ST_TOUCH_INVALID_ID (size_t(-1))
+
+/**
+ * Touch state.
+ */
+struct StTouch {
+
+    size_t Id;       //!< unique touch id
+    size_t DeviceId; //!< device id
+    float  PointX;   //!< touch position defined relative to window from top-left (0,0) to the bottom-right (1,1)
+    float  PointY;   //!< touchpad coordinates are mapped to the window as well, but has no direct meaning
+    bool   OnScreen; //!< flag indicating touchscreen (as alternative to touchpad)
+
+    /**
+     * Return true for defined touch.
+     */
+    bool isDefined() const {
+        return Id != ST_TOUCH_INVALID_ID;
+    }
+
+    /**
+     * Return definition of empty touch.
+     */
+    static StTouch Empty() {
+        StTouch aTouch;
+        aTouch.Id       = ST_TOUCH_INVALID_ID;
+        aTouch.DeviceId = ST_TOUCH_INVALID_ID;
+        aTouch.PointX   = 0.0f;
+        aTouch.PointY   = 0.0f;
+        aTouch.OnScreen = false;
+        return aTouch;
+    }
+
+};
+
+/**
+ * Event type.
+ */
 enum StEventType {
     stEvent_None,       //!< StAnyEvent,    undefined event
     stEvent_Close,      //!< StCloseEvent,  window close requested
@@ -26,6 +65,10 @@ enum StEventType {
     stEvent_KeyHold,    //!< StKeyEvent,    keyboard key holded
     stEvent_MouseDown,  //!< StClickEvent,  mouse button pressed
     stEvent_MouseUp,    //!< StClickEvent,  mouse button released
+    stEvent_TouchDown,  //!< StTouchEvent,  touch pressed
+    stEvent_TouchUp,    //!< StTouchEvent,  touch released
+    stEvent_TouchMove,  //!< StTouchEvent,  touch moved
+    stEvent_TouchCancel,//!< StTouchEvent,  touch cancelled
     stEvent_Scroll,     //!< StScrollEvent, scrolling
     stEvent_FileDrop,   //!< StDNDropEvent, file Drag & Drop
     stEvent_Navigate,   //!< StNavigEvent,  navigation event
@@ -120,6 +163,64 @@ struct StScrollEvent {
 };
 
 /**
+ * Scroll event.
+ */
+struct StTouchEvent {
+
+    StEventType   Type;      //!< event type
+    double        Time;      //!< time in seconds when event was registered
+    int           NbTouches; //!< active number of touches (including currently pressing/releasing)
+    StTouch       Touches[ST_MAX_TOUCHES];
+
+    /**
+     * Find the touch with specified id.
+     */
+    StTouch findTouchById(size_t theId) const {
+        if(theId == ST_TOUCH_INVALID_ID) {
+            return StTouch::Empty();
+        }
+
+        for(int aTouchIter = 0; aTouchIter < NbTouches; ++aTouchIter) {
+            if(Touches[aTouchIter].Id == theId) {
+                return Touches[aTouchIter];
+            }
+        }
+        return StTouch::Empty();
+    }
+
+    /**
+     * Add new touch only if not already exists.
+     */
+    bool addTouch(const StTouch& theTouch) {
+        if(theTouch.Id == ST_TOUCH_INVALID_ID) {
+            return false;
+        }
+
+        for(int aTouchIter = 0; aTouchIter < NbTouches; ++aTouchIter) {
+            if(Touches[aTouchIter].Id == theTouch.Id) {
+                return false;
+            }
+        }
+        if(NbTouches >= ST_MAX_TOUCHES) {
+            return false;
+        }
+        Touches[NbTouches++] = theTouch;
+        return true;
+    }
+
+    /**
+     * Reset the touch list.
+     */
+    void clearTouches() {
+        NbTouches = 0;
+        for(int aTouchIter = 0; aTouchIter < ST_MAX_TOUCHES; ++aTouchIter) {
+            Touches[aTouchIter] = StTouch::Empty();
+        }
+    }
+
+};
+
+/**
  * File Drag & Drop event.
  */
 struct StDNDropEvent {
@@ -174,6 +275,7 @@ union StEvent {
     StSizeEvent   Size;     //!< window resize event
     StKeyEvent    Key;      //!< keyboard key down/up event
     StClickEvent  Button;   //!< mouse button down/up event
+    StTouchEvent  Touch;    //!< multi-touch event
     StScrollEvent Scroll;   //!< scrolling event
     StDNDropEvent DNDrop;   //!< file Drag & Drop event
     StNavigEvent  Navigate; //!< navigation event

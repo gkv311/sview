@@ -108,6 +108,7 @@ class StWindowImpl {
     ST_LOCAL void updateWindowPos();
     ST_LOCAL void updateActiveState();
     ST_LOCAL void updateBlockSleep();
+    ST_LOCAL void doTouch(const StTouchEvent& theEvent);
 #if defined(__ANDROID__)
     ST_LOCAL void onAndroidInput(const AInputEvent* theEvent, bool& theIsProcessed);
     ST_LOCAL void onAndroidCommand(int32_t theCommand);
@@ -277,6 +278,7 @@ class StWindowImpl {
     bool               myToTrackOrient;   //!< track device orientation
 
     StPointD_t         myMousePt;         //!< mouse coordinates to track activity
+    StTouchEvent       myTouches;         //!< current state of touch screen
     StRectI_t          myRectNorm;        //!< master window coordinates in normal     state
     StRectI_t          myRectFull;        //!< master window coordinates in fullscreen state
     StRectI_t          myRectNormPrev;    //!< window rectangle to track changes
@@ -353,6 +355,7 @@ class StWindowImpl {
         StSignal<void (const StKeyEvent&    )>* onKeyHold;
         StSignal<void (const StClickEvent&  )>* onMouseUp;
         StSignal<void (const StClickEvent&  )>* onMouseDown;
+        StSignal<void (const StTouchEvent&  )>* onTouch;
         StSignal<void (const StScrollEvent& )>* onScroll;
         StSignal<void (const StDNDropEvent& )>* onFileDrop;
         StSignal<void (const StNavigEvent&  )>* onNavigate;

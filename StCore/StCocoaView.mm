@@ -80,6 +80,8 @@
 
         // make view as first responder in winow to capture all useful events
         [theNsWin makeFirstResponder: self];
+
+        [self setAcceptsTouchEvents: YES];
         return self;
     }
 
@@ -206,6 +208,105 @@
             } else {
                 myStWin->signals.onMouseUp->emit(myStEvent.Button);
             }
+        }
+    }
+
+    /**
+     * Initialize touches list.
+     */
+    - (void ) fillStTouches: (NSEvent* ) theEvent {
+
+        const StRectI_t  aWinRect  = myStWin->attribs.IsFullScreen ? myStWin->myRectFull : myStWin->myRectNorm;
+        const StMonitor& aMon      = myStWin->myMonMasterFull == -1
+                                   ? myStWin->myMonitors[myStWin->myRectNorm.center()]
+                                   : myStWin->myMonitors[myStWin->myMonMasterFull];
+        const StRectI_t  aMonRect  = aMon.getVRect();
+        const float      aMonSizeX = aMonRect.width();
+        const float      aMonSizeY = aMonRect.height();
+        const float      aWinSizeX = aWinRect.width();
+        const float      aWinSizeY = aWinRect.height();
+
+        NSSet*     aTouchSet = [theEvent touchesMatchingPhase: NSTouchPhaseTouching inView: self];
+        NSArray*   aTouches  = [aTouchSet allObjects];
+        for(size_t aTouchIter = 0; aTouchIter < ST_MAX_TOUCHES; ++aTouchIter) {
+            StTouch& aTouch = myStEvent.Touch.Touches[aTouchIter];
+            aTouch = StTouch::Empty();
+            if(aTouchIter >= aTouchSet.count) {
+                continue;
+            }
+
+            NSTouch* aTouchNs = [aTouches objectAtIndex: aTouchIter];
+            aTouch.Id       = (size_t )aTouchNs.identity;
+            aTouch.DeviceId = (size_t )aTouchNs.device;
+            aTouch.OnScreen = false;
+
+            // map from touchpad to the window
+            aTouch.PointX   = (        aTouchNs.normalizedPosition.x  * aMonSizeX - float(aWinRect.left())) / aWinSizeX;
+            aTouch.PointY   = ((1.0f - aTouchNs.normalizedPosition.y) * aMonSizeY - float(aWinRect.top()))  / aWinSizeY;
+
+            //aTouch.DevSizeX = aTouchNs.deviceSize.width;
+            //aTouch.DevSizeY = aTouchNs.deviceSize.height;
+        }
+        myStEvent.Touch.NbTouches = aTouchSet.count < ST_MAX_TOUCHES ? aTouchSet.count : ST_MAX_TOUCHES;
+    }
+
+    /**
+     * Handle new touches.
+     */
+    - (void ) touchesBeganWithEvent: (NSEvent* ) theEvent {
+        myStEvent.Type       = stEvent_TouchDown;
+        myStEvent.Touch.Time = [theEvent timestamp];
+        [self fillStTouches: theEvent];
+
+        if(myStWin->myEventsThreaded) {
+            myStWin->myEventsBuffer.append(myStEvent);
+        } else {
+            myStWin->doTouch(myStEvent.Touch);
+        }
+    }
+
+    /**
+     * Handle touches moves.
+     */
+    - (void ) touchesMovedWithEvent: (NSEvent* ) theEvent {
+        myStEvent.Type       = stEvent_TouchMove;
+        myStEvent.Touch.Time = [theEvent timestamp];
+        [self fillStTouches: theEvent];
+
+        if(myStWin->myEventsThreaded) {
+            myStWin->myEventsBuffer.append(myStEvent);
+        } else {
+            myStWin->doTouch(myStEvent.Touch);
+        }
+    }
+
+    /**
+     * Handle released touches.
+     */
+    - (void ) touchesEndedWithEvent: (NSEvent* ) theEvent {
+        myStEvent.Type       = stEvent_TouchUp;
+        myStEvent.Touch.Time = [theEvent timestamp];
+        [self fillStTouches: theEvent];
+
+        if(myStWin->myEventsThreaded) {
+            myStWin->myEventsBuffer.append(myStEvent);
+        } else {
+            myStWin->doTouch(myStEvent.Touch);
+        }
+    }
+
+    /**
+     * Handle cancelled touches.
+     */
+    - (void ) touchesCancelledWithEvent: (NSEvent* )theEvent {
+        myStEvent.Type       = stEvent_TouchCancel;
+        myStEvent.Touch.Time = [theEvent timestamp];
+        [self fillStTouches: theEvent];
+
+        if(myStWin->myEventsThreaded) {
+            myStWin->myEventsBuffer.append(myStEvent);
+        } else {
+            myStWin->doTouch(myStEvent.Touch);
         }
     }
 

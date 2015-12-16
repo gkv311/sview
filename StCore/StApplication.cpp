@@ -228,6 +228,7 @@ bool StApplication::open() {
         myWindow->signals.onKeyHold   = stSlot(this, &StApplication::doKeyHold);
         myWindow->signals.onMouseDown = stSlot(this, &StApplication::doMouseDown);
         myWindow->signals.onMouseUp   = stSlot(this, &StApplication::doMouseUp);
+        myWindow->signals.onTouch     = stSlot(this, &StApplication::doTouch);
         myWindow->signals.onScroll    = stSlot(this, &StApplication::doScroll);
         myWindow->signals.onFileDrop  = stSlot(this, &StApplication::doFileDrop);
         myWindow->signals.onNavigate  = stSlot(this, &StApplication::doNavigate);
@@ -418,6 +419,7 @@ void StApplication::doKeyUp    (const StKeyEvent&    ) {}
 void StApplication::doResize   (const StSizeEvent&   ) {}
 void StApplication::doMouseDown(const StClickEvent&  ) {}
 void StApplication::doMouseUp  (const StClickEvent&  ) {}
+void StApplication::doTouch    (const StTouchEvent&  ) {}
 void StApplication::doScroll   (const StScrollEvent& ) {}
 void StApplication::doFileDrop (const StDNDropEvent& ) {}
 void StApplication::doNavigate (const StNavigEvent&  ) {}
