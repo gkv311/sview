@@ -188,7 +188,7 @@ void StWindowImpl::onAndroidInput(const AInputEvent* theEvent,
                     bool isUp = anAction == AMOTION_EVENT_ACTION_UP
                              || anAction == AMOTION_EVENT_ACTION_POINTER_UP;
                     if(isUp) {
-                        myStEvent.Touch.NbTouches = std::max(myStEvent.Touch.NbTouches, 0);
+                        myStEvent.Touch.NbTouches = std::max(myStEvent.Touch.NbTouches - 1, 0);
                     }
                     for(size_t aTouchIter = 0; aTouchIter < ST_MAX_TOUCHES; ++aTouchIter) {
                         StTouch& aTouch = myStEvent.Touch.Touches[aTouchIter];
