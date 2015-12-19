@@ -164,33 +164,128 @@ void StWindowImpl::onAndroidInput(const AInputEvent* theEvent,
         case AINPUT_EVENT_TYPE_MOTION: {
             theIsProcessed = true;
 
-            //int32_t AInputEvent_getSource(theEvent);
-            //AINPUT_SOURCE_TOUCHSCREEN
-            //AINPUT_SOURCE_TRACKBALL
+            const int32_t aSource          = AInputEvent_getSource(theEvent);
+            const int32_t anActionPak      = AMotionEvent_getAction(theEvent);
+            const int32_t anAction         = anActionPak & AMOTION_EVENT_ACTION_MASK;
+            const size_t  anActionPntIndex = anActionPak & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK;
 
-            float aPosX = AMotionEvent_getX(theEvent, 0);
-            float aPosY = AMotionEvent_getY(theEvent, 0);
+            //const StRectI_t& aWinRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
+            const StRectI_t& aWinRect  = myRectNorm;
+            const float      aWinSizeX = aWinRect.width();
+            const float      aWinSizeY = aWinRect.height();
 
-            const StRectI_t& aRect = myRectNorm;
-            myMousePt.x() = double(aPosX) / double(aRect.width());
-            myMousePt.y() = double(aPosY) / double(aRect.height());
+            // at least single point is defined
+            StPointD_t aPos0(double(AMotionEvent_getX(theEvent, 0)) / double(aWinSizeX),
+                             double(AMotionEvent_getY(theEvent, 0)) / double(aWinSizeY));
+
+            myStEvent.Type      = stEvent_None;
+            myStEvent.Base.Time = getEventTime(); /// int64_t AMotionEvent_getEventTime(theEvent);
+            switch(aSource) {
+                case AINPUT_SOURCE_TOUCHSCREEN:
+                case AINPUT_SOURCE_TOUCHPAD: {
+                    const size_t aNbTouches = AMotionEvent_getPointerCount(theEvent);
+                    myStEvent.Touch.NbTouches = std::min(aNbTouches, (size_t )ST_MAX_TOUCHES);
+                    bool isUp = anAction == AMOTION_EVENT_ACTION_UP
+                             || anAction == AMOTION_EVENT_ACTION_POINTER_UP;
+                    if(isUp) {
+                        myStEvent.Touch.NbTouches = std::max(myStEvent.Touch.NbTouches, 0);
+                    }
+                    for(size_t aTouchIter = 0; aTouchIter < ST_MAX_TOUCHES; ++aTouchIter) {
+                        StTouch& aTouch = myStEvent.Touch.Touches[aTouchIter];
+                        aTouch = StTouch::Empty();
+                        if(aTouchIter == anActionPntIndex
+                        && isUp) {
+                            continue;
+                        }
+                        if(aTouchIter >= aNbTouches) {
+                            continue;
+                        }
+
+                        aTouch.Id       = AMotionEvent_getPointerId(theEvent, aTouchIter);
+                        aTouch.DeviceId = AInputEvent_getDeviceId(theEvent);
+                        aTouch.OnScreen = aSource == AINPUT_SOURCE_TOUCHSCREEN;
+
+                        const float aPosX = AMotionEvent_getX(theEvent, aTouchIter);
+                        const float aPosY = AMotionEvent_getY(theEvent, aTouchIter);
+                        aTouch.PointX = (aPosX - float(aWinRect.left())) / aWinSizeX;
+                        aTouch.PointY = (aPosY - float(aWinRect.top()))  / aWinSizeY;
+                    }
+
+                    switch(anAction) {
+                        case AMOTION_EVENT_ACTION_DOWN:
+                        case AMOTION_EVENT_ACTION_POINTER_DOWN: {
+                            myStEvent.Type = stEvent_TouchDown;
+                            doTouch(myStEvent.Touch);
+                            if(aNbTouches == 1) {
+                                // simulate mouse click
+                                myMousePt = aPos0;
+                                myStEvent.Type = stEvent_MouseDown;
+                                myStEvent.Button.Button  = ST_MOUSE_LEFT;
+                                myStEvent.Button.Buttons = 0;
+                                myStEvent.Button.PointX  = myMousePt.x();
+                                myStEvent.Button.PointY  = myMousePt.y();
+                                signals.onMouseDown->emit(myStEvent.Button);
+                            } else if(aNbTouches == 2) {
+                                // emit special event to cancel previously simulated click
+                                myStEvent.Type = stEvent_MouseCancel;
+                                myStEvent.Button.Button  = ST_MOUSE_LEFT;
+                                myStEvent.Button.Buttons = 0;
+                                myStEvent.Button.PointX  = myMousePt.x();
+                                myStEvent.Button.PointY  = myMousePt.y();
+                                signals.onMouseUp->emit(myStEvent.Button);
+                            }
+                            break;
+                        }
+                        case AMOTION_EVENT_ACTION_MOVE: {
+                            myStEvent.Type = stEvent_TouchMove;
+                            if(aNbTouches == 1) {
+                                // simulate mouse move
+                                myMousePt = aPos0;
+                            }
+                            doTouch(myStEvent.Touch);
+                            break;
+                        }
+                        case AMOTION_EVENT_ACTION_UP:
+                        case AMOTION_EVENT_ACTION_POINTER_UP: {
+                            myStEvent.Type = stEvent_TouchUp;
+                            doTouch(myStEvent.Touch);
+                            if(aNbTouches == 1) {
+                                // simulate mouse unclick
+                                myMousePt = aPos0;
+                                myStEvent.Type = stEvent_MouseUp;
+                                myStEvent.Button.Button  = ST_MOUSE_LEFT;
+                                myStEvent.Button.Buttons = 0;
+                                myStEvent.Button.PointX  = myMousePt.x();
+                                myStEvent.Button.PointY  = myMousePt.y();
+                                signals.onMouseUp->emit(myStEvent.Button);
+                            }
+                            break;
+                        }
+                        case AMOTION_EVENT_ACTION_CANCEL: {
+                            myStEvent.Type = stEvent_TouchCancel;
+                            doTouch(myStEvent.Touch);
+                            break;
+                        }
+                    }
+                    return;
+                }
+            }
+
+            myMousePt = aPos0;
 
             StVirtButton aMouseBtn = ST_MOUSE_LEFT;
-            myStEvent.Button.Time    = getEventTime(); /// int64_t AMotionEvent_getEventTime(theEvent);
             myStEvent.Button.Button  = aMouseBtn;
             myStEvent.Button.Buttons = 0;
             myStEvent.Button.PointX  = myMousePt.x();
             myStEvent.Button.PointY  = myMousePt.y();
 
-            int32_t anAction = AMotionEvent_getAction(theEvent);
-            if((anAction & AMOTION_EVENT_ACTION_MASK) == AMOTION_EVENT_ACTION_DOWN) {
+            if(anAction == AMOTION_EVENT_ACTION_DOWN) {
                 myStEvent.Type = stEvent_MouseDown;
                 signals.onMouseDown->emit(myStEvent.Button);
-            } else if((anAction & AMOTION_EVENT_ACTION_MASK) == AMOTION_EVENT_ACTION_UP) {
+            } else if(anAction == AMOTION_EVENT_ACTION_UP) {
                 myStEvent.Type = stEvent_MouseUp;
                 signals.onMouseUp->emit(myStEvent.Button);
             }
-
             return;
         }
     }

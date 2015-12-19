@@ -65,6 +65,7 @@ enum StEventType {
     stEvent_KeyHold,    //!< StKeyEvent,    keyboard key holded
     stEvent_MouseDown,  //!< StClickEvent,  mouse button pressed
     stEvent_MouseUp,    //!< StClickEvent,  mouse button released
+    stEvent_MouseCancel,//!< StClickEvent,  cancel simulated mouse button press event
     stEvent_TouchDown,  //!< StTouchEvent,  touch pressed
     stEvent_TouchUp,    //!< StTouchEvent,  touch released
     stEvent_TouchMove,  //!< StTouchEvent,  touch moved

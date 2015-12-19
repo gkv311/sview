@@ -302,7 +302,9 @@ bool StGLWidget::tryUnClick(const StClickEvent& theEvent,
                     && isPointIn(StPointD_t(theEvent.PointX, theEvent.PointY));
     setClicked(theEvent.Button, false);
     if(!theIsItemUnclicked && selfClicked) {
-        theIsItemUnclicked = signals.onMouseUnclick(theEvent.Button);
+        if(theEvent.Type != stEvent_MouseCancel) {
+            theIsItemUnclicked = signals.onMouseUnclick(theEvent.Button);
+        }
         return true;
     }
     return false;
