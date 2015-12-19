@@ -356,6 +356,7 @@ class StWindowImpl {
         StSignal<void (const StClickEvent&  )>* onMouseUp;
         StSignal<void (const StClickEvent&  )>* onMouseDown;
         StSignal<void (const StTouchEvent&  )>* onTouch;
+        StSignal<void (const StGestureEvent&)>* onGesture;
         StSignal<void (const StScrollEvent& )>* onScroll;
         StSignal<void (const StDNDropEvent& )>* onFileDrop;
         StSignal<void (const StNavigEvent&  )>* onNavigate;
@@ -454,6 +455,7 @@ class StWindowImpl {
     StSyncTimer    myEventsTimer;
     StEventsBuffer myEventsBuffer;     //!< window events double buffer
     StEvent        myStEvent;          //!< temporary event object (to be used in message loop thread)
+    StEvent        myStEvent2;         //!< temporary event object (to be used in message loop thread)
     StEvent        myStEventAux;       //!< extra temporary event object (to be used in StWindow creation thread)
     double         myLastEventsTime;   //!< time when processEvents() was last called
     bool           myEventsThreaded;

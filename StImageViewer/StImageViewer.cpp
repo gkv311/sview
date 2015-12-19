@@ -982,6 +982,13 @@ void StImageViewer::doMouseUp(const StClickEvent& theEvent) {
     myGUI->tryUnClick(theEvent);
 }
 
+void StImageViewer::doGesture(const StGestureEvent& theEvent) {
+    if(!myGUI.isNull()
+    &&  myGUI->myImage != NULL) {
+        myGUI->myImage->doGesture(theEvent);
+    }
+}
+
 void StImageViewer::doScroll(const StScrollEvent& theEvent) {
     if(myGUI.isNull()) {
         return;

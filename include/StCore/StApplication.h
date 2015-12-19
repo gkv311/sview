@@ -244,6 +244,11 @@ class StApplication {
     ST_CPPEXPORT virtual void doTouch(const StTouchEvent& theEvent);
 
     /**
+     * Process gesture.
+     */
+    ST_CPPEXPORT virtual void doGesture(const StGestureEvent& theEvent);
+
+    /**
      * Process scrolling.
      */
     ST_CPPEXPORT virtual void doScroll (const StScrollEvent& theEvent);

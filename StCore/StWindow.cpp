@@ -28,6 +28,7 @@ void StWindow::copySignals() {
     myWin->signals.onMouseUp   = &signals.onMouseUp;
     myWin->signals.onMouseDown = &signals.onMouseDown;
     myWin->signals.onTouch     = &signals.onTouch;
+    myWin->signals.onGesture   = &signals.onGesture;
     myWin->signals.onScroll    = &signals.onScroll;
     myWin->signals.onFileDrop  = &signals.onFileDrop;
     myWin->signals.onNavigate  = &signals.onNavigate;

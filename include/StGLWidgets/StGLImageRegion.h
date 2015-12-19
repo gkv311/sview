@@ -134,6 +134,8 @@ class StGLImageRegion : public StGLWidget {
     ST_CPPEXPORT virtual bool doKeyUp   (const StKeyEvent& theEvent) ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool doScroll  (const StScrollEvent& theEvent) ST_ATTR_OVERRIDE;
 
+    ST_CPPEXPORT bool doGesture(const StGestureEvent& theEvent);
+
     /**
      * Auxiliary method to discard frames in the textures queue without bound OpenGL context.
      */
@@ -268,6 +270,9 @@ class StGLImageRegion : public StGLWidget {
                                          const StPointD_t& theCursorZoTo);
     ST_LOCAL StGLVec2 getMouseMoveSphere();
 
+    ST_LOCAL void scaleAt(const StPointD_t& thePoint,
+                          const float       theStep);
+
     ST_LOCAL void doRightUnclick(const StPointD_t& theCursorZo);
 
     ST_LOCAL void stglDrawView(unsigned int theView);
@@ -286,6 +291,7 @@ class StGLImageRegion : public StGLWidget {
     StGLQuaternion             myDeviceQuat;     //!< device orientation
     StVirtFlags                myKeyFlags;       //!< active key flags
     double                     myDragDelayMs;    //!< dragging delay in milliseconds
+    float                      myRotAngle;       //!< rotation angle gesture progress
     bool                       myIsClickAborted;
     bool                       myToRightRotate;
     bool                       myIsInitialized;  //!< initialization state

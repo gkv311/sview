@@ -96,6 +96,7 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
   myClickPntZo(0.0, 0.0),
   myKeyFlags(ST_VF_NONE),
   myDragDelayMs(0.0),
+  myRotAngle(0.5f),
   myIsClickAborted(false),
 #ifdef ST_EXTRA_CONTROLS
   myToRightRotate(true),
@@ -862,7 +863,6 @@ bool StGLImageRegion::doScroll(const StScrollEvent& theEvent) {
     }
 
     const GLfloat SCALE_STEPS = fabs(theEvent.DeltaY) * 0.01f;
-    StPointD_t aCenterCursor(0.5, 0.5);
     if(theEvent.DeltaY > 0.001f) {
         if((myKeyFlags & ST_VF_CONTROL) == ST_VF_CONTROL) {
             if((myKeyFlags & ST_VF_SHIFT) == ST_VF_SHIFT) {
@@ -876,22 +876,7 @@ bool StGLImageRegion::doScroll(const StScrollEvent& theEvent) {
             return true;
         }
 
-        switch(aParams->ViewingMode) {
-            default:
-            case StStereoParams::FLAT_IMAGE: {
-                const StGLVec2 aVec = getMouseMoveFlat(aCenterCursor, aCursor) * (-SCALE_STEPS);
-                aParams->scaleIn(SCALE_STEPS);
-                aParams->moveFlat(aVec, GLfloat(getRectPx().ratio()));
-                break;
-            }
-            case StStereoParams::PANORAMA_CUBEMAP:
-            case StStereoParams::PANORAMA_SPHERE: {
-                const StGLVec2 aVec = getMouseMoveSphere(aCenterCursor, aCursor) * (-SCALE_STEPS);
-                aParams->scaleIn(SCALE_STEPS);
-                aParams->moveSphere(aVec);
-                break;
-            }
-        }
+        scaleAt(aCursor, SCALE_STEPS);
     } else if(theEvent.DeltaY < -0.001f) {
         if((myKeyFlags & ST_VF_CONTROL) == ST_VF_CONTROL) {
             if((myKeyFlags & ST_VF_SHIFT) == ST_VF_SHIFT) {
@@ -905,30 +890,103 @@ bool StGLImageRegion::doScroll(const StScrollEvent& theEvent) {
             return true;
         }
 
-        switch(aParams->ViewingMode) {
-            default:
-            case StStereoParams::FLAT_IMAGE: {
-                if(aParams->ScaleFactor <= 0.05f) {
-                    break;
-                }
-                const StGLVec2 aVec = getMouseMoveFlat(aCenterCursor, aCursor) * SCALE_STEPS;
-                aParams->moveFlat(aVec, GLfloat(getRectPx().ratio()));
-                aParams->scaleOut(SCALE_STEPS);
-                break;
-            }
-            case StStereoParams::PANORAMA_CUBEMAP:
-            case StStereoParams::PANORAMA_SPHERE: {
-                if(aParams->ScaleFactor <= 0.24f) {
-                    break;
-                }
-                const StGLVec2 aVec = getMouseMoveSphere(aCenterCursor, aCursor) * SCALE_STEPS;
-                aParams->moveSphere(aVec);
-                aParams->scaleOut(SCALE_STEPS);
-                break;
-            }
-        }
+        scaleAt(aCursor, -SCALE_STEPS);
     }
     return true;
+}
+
+void StGLImageRegion::scaleAt(const StPointD_t& thePoint,
+                              const float       theStep) {
+    StHandle<StStereoParams> aParams = getSource();
+    if(!myIsInitialized
+    ||  aParams.isNull()) {
+        return;
+    }
+
+    const StPointD_t aCenterCursor(0.5, 0.5);
+    switch(aParams->ViewingMode) {
+        default:
+        case StStereoParams::FLAT_IMAGE: {
+            if(theStep < 0.0f
+            && aParams->ScaleFactor <= 0.05f) {
+                break;
+            }
+
+            const StGLVec2 aVec = getMouseMoveFlat(aCenterCursor, thePoint) * (-theStep);
+            if(theStep > 0.0f) {
+                aParams->scaleIn(theStep);
+            } else {
+                aParams->scaleOut(std::abs(theStep));
+            }
+            aParams->moveFlat(aVec, GLfloat(getRectPx().ratio()));
+            break;
+        }
+        case StStereoParams::PANORAMA_CUBEMAP:
+        case StStereoParams::PANORAMA_SPHERE: {
+            if(theStep < 0.0f
+            && aParams->ScaleFactor <= 0.24f) {
+                break;
+            }
+
+            const StGLVec2 aVec = getMouseMoveSphere(aCenterCursor, thePoint) * (-theStep);
+            if(theStep > 0.0f) {
+                aParams->scaleIn(theStep);
+            } else {
+                aParams->scaleOut(std::abs(theStep));
+            }
+            aParams->moveSphere(aVec);
+            break;
+        }
+    }
+}
+
+bool StGLImageRegion::doGesture(const StGestureEvent& theEvent) {
+    StHandle<StStereoParams> aParams = getSource();
+    if(!myIsInitialized || aParams.isNull()) {
+        return false;
+    }
+
+    switch(theEvent.Type) {
+        case stEvent_GestureCancel: {
+            myRotAngle = 0.0f;
+            return false;
+        }
+        case stEvent_Gesture2Rotate: {
+            myRotAngle += theEvent.Value;
+            if(myRotAngle >= M_PI * 0.3) {
+                doParamsRotZ90(1);
+                myRotAngle -= M_PI * 0.3;
+            } else if(myRotAngle <= -M_PI * 0.3) {
+                doParamsRotZ90(size_t(-1));
+                myRotAngle += M_PI * 0.3;
+            }
+            return true;
+        }
+        case stEvent_Gesture2Move: {
+            if(!theEvent.OnScreen) {
+                // this gesture conflicts with scrolling on OS X
+                return true;
+            }
+            if(aParams->ViewingMode == StStereoParams::FLAT_IMAGE) {
+                StPointD_t aPntFrom(theEvent.Point1X, theEvent.Point1Y);
+                StPointD_t aPntTo  (theEvent.Point2X, theEvent.Point2Y);
+                aParams->moveFlat(getMouseMoveFlat(aPntFrom, aPntTo), GLfloat(getRectPx().ratio()));
+            }
+            return true;
+        }
+        case stEvent_Gesture2Pinch: {
+            StPointD_t aCursor((theEvent.Point1X + theEvent.Point2X) * 0.5,
+                               (theEvent.Point1Y + theEvent.Point2Y) * 0.5);
+            if(!theEvent.OnScreen) {
+                aCursor = myRoot->getCursorZo();
+            }
+            scaleAt(aCursor, theEvent.Value * 0.01f);
+            return true;
+        }
+        default: {
+            return false;
+        }
+    }
 }
 
 bool StGLImageRegion::doKeyDown(const StKeyEvent& theEvent) {

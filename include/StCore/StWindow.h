@@ -493,6 +493,7 @@ class StWindow {
         StSignal<void (const StClickEvent&  )> onMouseUp;
         StSignal<void (const StClickEvent&  )> onMouseDown;
         StSignal<void (const StTouchEvent&  )> onTouch;
+        StSignal<void (const StGestureEvent&)> onGesture;
         StSignal<void (const StScrollEvent& )> onScroll;
         StSignal<void (const StDNDropEvent& )> onFileDrop;
         StSignal<void (const StNavigEvent&  )> onNavigate;

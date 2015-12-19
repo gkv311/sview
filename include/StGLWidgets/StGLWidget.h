@@ -24,6 +24,7 @@ class  StGLRootWidget;
 class  StGLContext;
 struct StClickEvent;
 struct StKeyEvent;
+struct StGestureEvent;
 struct StScrollEvent;
 
 /**

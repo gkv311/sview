@@ -70,6 +70,10 @@ enum StEventType {
     stEvent_TouchUp,    //!< StTouchEvent,  touch released
     stEvent_TouchMove,  //!< StTouchEvent,  touch moved
     stEvent_TouchCancel,//!< StTouchEvent,  touch cancelled
+    stEvent_GestureCancel,  //!< StGestureEvent, abort the gestures
+    stEvent_Gesture2Move,   //!< StGestureEvent, 2 fingers moving in sync
+    stEvent_Gesture2Rotate, //!< StGestureEvent, 2 fingers rotating
+    stEvent_Gesture2Pinch,  //!< StGestureEvent, 2 fingers pinch
     stEvent_Scroll,     //!< StScrollEvent, scrolling
     stEvent_FileDrop,   //!< StDNDropEvent, file Drag & Drop
     stEvent_Navigate,   //!< StNavigEvent,  navigation event
@@ -164,7 +168,7 @@ struct StScrollEvent {
 };
 
 /**
- * Scroll event.
+ * Touch event.
  */
 struct StTouchEvent {
 
@@ -222,6 +226,34 @@ struct StTouchEvent {
 };
 
 /**
+ * Gesture event.
+ */
+struct StGestureEvent {
+
+    StEventType   Type;      //!< event type
+    double        Time;      //!< time in seconds when event was registered
+    float         Point1X;   //!< anchor point 1
+    float         Point1Y;
+    float         Point2X;   //!< anchor point 2
+    float         Point2Y;
+    float         Value;     //!< gesture value
+    bool          OnScreen;  //!< gesture comes from touchscreen
+
+    /**
+     * Reset the gesture.
+     */
+    void clearGesture() {
+        Point1X  = 0.0f;
+        Point1Y  = 0.0f;
+        Point2X  = 0.0f;
+        Point2Y  = 0.0f;
+        Value    = 0.0f;
+        OnScreen = false;
+    }
+
+};
+
+/**
  * File Drag & Drop event.
  */
 struct StDNDropEvent {
@@ -269,18 +301,19 @@ struct StActionEvent {
  */
 union StEvent {
 
-    StEventType   Type;     //!< event type
-    StAnyEvent    Base;     //!< fields shared between all event
-    StCloseEvent  Close;    //!< window close  event
-    StPauseEvent  Pause;    //!< window pause  event
-    StSizeEvent   Size;     //!< window resize event
-    StKeyEvent    Key;      //!< keyboard key down/up event
-    StClickEvent  Button;   //!< mouse button down/up event
-    StTouchEvent  Touch;    //!< multi-touch event
-    StScrollEvent Scroll;   //!< scrolling event
-    StDNDropEvent DNDrop;   //!< file Drag & Drop event
-    StNavigEvent  Navigate; //!< navigation event
-    StActionEvent Action;   //!< queued application action event
+    StEventType    Type;     //!< event type
+    StAnyEvent     Base;     //!< fields shared between all event
+    StCloseEvent   Close;    //!< window close  event
+    StPauseEvent   Pause;    //!< window pause  event
+    StSizeEvent    Size;     //!< window resize event
+    StKeyEvent     Key;      //!< keyboard key down/up event
+    StClickEvent   Button;   //!< mouse button down/up event
+    StTouchEvent   Touch;    //!< multi-touch event
+    StGestureEvent Gesture;  //!< gesture event
+    StScrollEvent  Scroll;   //!< scrolling event
+    StDNDropEvent  DNDrop;   //!< file Drag & Drop event
+    StNavigEvent   Navigate; //!< navigation event
+    StActionEvent  Action;   //!< queued application action event
 
 };
 

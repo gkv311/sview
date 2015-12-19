@@ -1335,6 +1335,13 @@ void StMoviePlayer::doMouseUp(const StClickEvent& theEvent) {
     }
 }
 
+void StMoviePlayer::doGesture(const StGestureEvent& theEvent) {
+    if(!myGUI.isNull()
+    &&  myGUI->myImage != NULL) {
+        myGUI->myImage->doGesture(theEvent);
+    }
+}
+
 void StMoviePlayer::doScroll(const StScrollEvent& theEvent) {
     if(myGUI.isNull()) {
         return;

@@ -1045,34 +1045,209 @@ void StWindowImpl::stglSwap(const int& theWinId) {
     }
 }
 
-void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
-    signals.onTouch->emit(theTouches);
+/**
+ * Gesture threshold.
+ */
+struct StGestThreshold {
+    float FromIdle;   //!< threshold to start gesture
+    float Update;     //!< threshold to update this gesture
+    float BreakOther; //!< threshold to start gesture breaking another
+};
 
+namespace {
+    static const StGestThreshold THE_THRESHOLD_PAN = {
+         4.0f,
+         4.0f,
+        20.0f
+    };
+    static const StGestThreshold THE_THRESHOLD_ZROT = {
+         2.0f * M_PI / 180.0f,
+         2.0f * M_PI / 180.0f,
+        20.0f * M_PI / 180.0f
+    };
+    static const StGestThreshold THE_THRESHOLD_ZOOM = {
+         6.0f,
+         6.0f,
+        20.0f
+    };
+}
+
+/**
+ * Auxiliary method to start new gesture.
+ */
+inline bool startGesture(const StTouchEvent&    theTouches,
+                         const StEventType      theGesture,
+                         const StGestThreshold& theThreshold,
+                         const float            theValue) {
+    if(theTouches.Type == stEvent_TouchCancel) {
+        return theValue >= theThreshold.FromIdle;
+    } else if(theTouches.Type == theGesture) {
+        return theValue >= theThreshold.Update;
+    }
+    return theValue >= theThreshold.BreakOther;
+}
+
+void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
+    const double aTime = theTouches.Time;
+    signals.onTouch->emit(theTouches);
     switch(theTouches.Type) {
         case stEvent_TouchDown: {
+            myTouches.Type = stEvent_TouchCancel;
+            myTouches.clearTouches();
             for(int aTouchIter = 0; aTouchIter < theTouches.NbTouches; ++aTouchIter) {
                 myTouches.addTouch(theTouches.Touches[aTouchIter]);
             }
+
+            myStEvent2.Type = stEvent_GestureCancel;
+            myStEvent2.Gesture.clearGesture();
+            myStEvent2.Gesture.Time = aTime;
+            signals.onGesture->emit(myStEvent2.Gesture);
             break;
         }
         case stEvent_TouchUp: {
             StTouchEvent aCopy = myTouches;
+            myTouches.Type = stEvent_TouchCancel;
             myTouches.clearTouches();
             for(int aTouchIter = 0; aTouchIter < aCopy.NbTouches; ++aTouchIter) {
                 if(theTouches.findTouchById(aCopy.Touches[aTouchIter].Id).isDefined()) {
                     myTouches.addTouch(aCopy.Touches[aTouchIter]);
                 }
             }
+
+            myStEvent2.Type = stEvent_GestureCancel;
+            myStEvent2.Gesture.clearGesture();
+            myStEvent2.Gesture.Time = aTime;
+            signals.onGesture->emit(myStEvent2.Gesture);
             break;
         }
         case stEvent_TouchCancel: {
+            myTouches.Type = stEvent_TouchCancel;
             myTouches.clearTouches();
+
+            myStEvent2.Type = stEvent_GestureCancel;
+            myStEvent2.Gesture.clearGesture();
+            myStEvent2.Gesture.Time = aTime;
+            signals.onGesture->emit(myStEvent2.Gesture);
             break;
         }
-        case stEvent_TouchMove:
+        case stEvent_TouchMove: {
             break;
+        }
         default:
             break;
+    }
+
+    if(theTouches.Type != stEvent_TouchMove) {
+        return;
+    }
+
+    // scale factor for conversion into dp (dencity-independent pixels) units
+    const StRectI_t  aWinRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
+    const StMonitor& aMon     = myMonitors[aWinRect.center()];
+    StGLVec2 aScale((float )aWinRect.width() / aMon.getScale(), (float )aWinRect.height() / aMon.getScale());
+
+    if(myTouches .NbTouches == 2
+    && theTouches.NbTouches == 2) {
+        StTouch aTFrom[2] = {
+            myTouches.Touches[0],
+            myTouches.Touches[1],
+        };
+        StTouch aTTo[2] = {
+            theTouches.findTouchById(aTFrom[0].Id),
+            theTouches.findTouchById(aTFrom[1].Id)
+        };
+
+        if(!aTTo[0].isDefined()
+        || !aTTo[1].isDefined()) {
+            return;
+        }
+
+        StGLVec2 aFrom[2] = {
+            StGLVec2(aTFrom[0].PointX, aTFrom[0].PointY) * aScale,
+            StGLVec2(aTFrom[1].PointX, aTFrom[1].PointY) * aScale
+        };
+        StGLVec2 aTo[2] = {
+            StGLVec2(aTTo[0].PointX, aTTo[0].PointY) * aScale,
+            StGLVec2(aTTo[1].PointX, aTTo[1].PointY) * aScale
+        };
+        StGLVec2 aCenterFrom  = (aFrom[0] + aFrom[1]) * 0.5;
+        StGLVec2 aCenterTo    = (  aTo[0] +   aTo[1]) * 0.5;
+        StGLVec2 aCenterDelta = aCenterTo - aCenterFrom;
+        float aDistFrom  = (aFrom[1] - aFrom[0]).modulus();
+        float aDistTo    = (aTo  [1] - aTo  [0]).modulus();
+        float aDistDelta = aDistTo - aDistFrom;
+        float aRotAngle  = 0.0f;
+        if(std::abs(aDistFrom) > 250.0f) {
+            const float A1 = aFrom[0].y() - aFrom[1].y();
+            const float B1 = aFrom[1].x() - aFrom[0].x();
+
+            const float A2 =   aTo[0].y() - aTo[1].y();
+            const float B2 =   aTo[1].x() - aTo[0].x();
+
+            const float aDenom = A1 * A2 + B1 * B2;
+            if(aDenom >= 0.00001f) {
+                const float aNumerator = A1 * B2 - A2 * B1;
+                aRotAngle = std::atan(aNumerator / aDenom);
+            }
+        }
+
+        myStEvent.Type = stEvent_None;
+        myStEvent.Gesture.clearGesture();
+        myStEvent.Gesture.Time = aTime;
+        myStEvent.Gesture.OnScreen = aTTo[0].OnScreen;
+        myStEvent.Gesture.Point1X  = (aTFrom[0].PointX + aTFrom[1].PointX) * 0.5;
+        myStEvent.Gesture.Point1Y  = (aTFrom[0].PointY + aTFrom[1].PointY) * 0.5;
+        myStEvent.Gesture.Point2X  = (  aTTo[0].PointX +   aTTo[1].PointX) * 0.5;
+        myStEvent.Gesture.Point2Y  = (  aTTo[0].PointY +   aTTo[1].PointY) * 0.5;
+        bool toUpdate = false;
+
+        if(startGesture(myTouches, stEvent_Gesture2Rotate,
+           THE_THRESHOLD_ZROT, std::abs(aRotAngle))) {
+            if(myTouches.Type != stEvent_GestureCancel
+            && myTouches.Type != stEvent_Gesture2Rotate) {
+                myStEvent2.Type = stEvent_GestureCancel;
+                myStEvent2.Gesture.clearGesture();
+                myStEvent2.Gesture.Time = aTime;
+                signals.onGesture->emit(myStEvent2.Gesture);
+            }
+            myTouches.Type = stEvent_Gesture2Rotate;
+            myStEvent.Type = stEvent_Gesture2Rotate;
+            myStEvent.Gesture.Value = aRotAngle;
+            signals.onGesture->emit(myStEvent.Gesture);
+            toUpdate = true;
+        } else if(startGesture(myTouches, stEvent_Gesture2Pinch,
+                  THE_THRESHOLD_ZOOM, std::abs(aDistDelta))) {
+            if(myTouches.Type != stEvent_GestureCancel
+            && myTouches.Type != stEvent_Gesture2Pinch) {
+                myStEvent2.Type = stEvent_GestureCancel;
+                myStEvent2.Gesture.clearGesture();
+                myStEvent2.Gesture.Time = aTime;
+                signals.onGesture->emit(myStEvent2.Gesture);
+            }
+            myTouches.Type = stEvent_Gesture2Pinch;
+            myStEvent.Type = stEvent_Gesture2Pinch;
+            myStEvent.Gesture.Value = aDistDelta;
+            signals.onGesture->emit(myStEvent.Gesture);
+            toUpdate = true;
+        } else if(startGesture(myTouches, stEvent_Gesture2Move,
+                  THE_THRESHOLD_PAN, std::abs(aCenterDelta.x()) + std::abs(aCenterDelta.y()))) {
+            if(myTouches.Type != stEvent_GestureCancel
+            && myTouches.Type != stEvent_Gesture2Move) {
+                myStEvent2.Type = stEvent_GestureCancel;
+                myStEvent2.Gesture.clearGesture();
+                myStEvent2.Gesture.Time = aTime;
+                signals.onGesture->emit(myStEvent2.Gesture);
+            }
+            myTouches.Type = stEvent_Gesture2Move;
+            myStEvent.Type = stEvent_Gesture2Move;
+            signals.onGesture->emit(myStEvent.Gesture);
+            toUpdate = true;
+        }
+
+        if(toUpdate) {
+            myTouches.Touches[0] = aTTo[0];
+            myTouches.Touches[1] = aTTo[1];
+        }
     }
 }
 
