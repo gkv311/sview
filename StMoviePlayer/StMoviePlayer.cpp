@@ -1337,7 +1337,8 @@ void StMoviePlayer::doMouseUp(const StClickEvent& theEvent) {
 
 void StMoviePlayer::doGesture(const StGestureEvent& theEvent) {
     if(!myGUI.isNull()
-    &&  myGUI->myImage != NULL) {
+    &&  myGUI->myImage != NULL
+    &&  myGUI->getFocus() == NULL) {
         myGUI->myImage->doGesture(theEvent);
     }
 }

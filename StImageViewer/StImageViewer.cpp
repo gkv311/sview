@@ -984,7 +984,8 @@ void StImageViewer::doMouseUp(const StClickEvent& theEvent) {
 
 void StImageViewer::doGesture(const StGestureEvent& theEvent) {
     if(!myGUI.isNull()
-    &&  myGUI->myImage != NULL) {
+    &&  myGUI->myImage != NULL
+    &&  myGUI->getFocus() == NULL) {
         myGUI->myImage->doGesture(theEvent);
     }
 }

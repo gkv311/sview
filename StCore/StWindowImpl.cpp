@@ -51,6 +51,7 @@ StWindowImpl::StWindowImpl(const StHandle<StResourceManager>& theResMgr,
   myIsPoorOrient(false),
   myToTrackOrient(false),
   myMousePt(0.5, 0.5),
+  myNbTouchesMax(0),
   myRectNorm(128, 512, 128, 512),
   myRectFull(128, 512, 128, 512),
   myRectNormPrev(0, 1, 0, 1),
@@ -105,6 +106,10 @@ StWindowImpl::StWindowImpl(const StHandle<StResourceManager>& theResMgr,
     myTouches.Type = stEvent_TouchCancel;
     myTouches.Time = 0.0;
     myTouches.clearTouches();
+
+    myTap1Touch.Type = stEvent_TouchCancel;
+    myTap1Touch.Time = 0.0;
+    myTap1Touch.clearTouches();
 
     myMonSlave.idMaster = 0;
     myMonSlave.idSlave  = 1; // second by default
@@ -1055,6 +1060,11 @@ struct StGestThreshold {
 };
 
 namespace {
+    static const StGestThreshold THE_THRESHOLD_TAP = {
+        16.0f,
+        16.0f,
+        16.0f
+    };
     static const StGestThreshold THE_THRESHOLD_PAN = {
          4.0f,
          4.0f,
@@ -1090,6 +1100,12 @@ inline bool startGesture(const StTouchEvent&    theTouches,
 void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
     const double aTime = theTouches.Time;
     signals.onTouch->emit(theTouches);
+
+    // scale factor for conversion into dp (dencity-independent pixels) units
+    const StRectI_t  aWinRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
+    const StMonitor& aMon     = myMonitors[aWinRect.center()];
+    StGLVec2 aScale((float )aWinRect.width() / aMon.getScale(), (float )aWinRect.height() / aMon.getScale());
+
     switch(theTouches.Type) {
         case stEvent_TouchDown: {
             myTouches.Type = stEvent_TouchCancel;
@@ -1097,6 +1113,10 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
             for(int aTouchIter = 0; aTouchIter < theTouches.NbTouches; ++aTouchIter) {
                 myTouches.addTouch(theTouches.Touches[aTouchIter]);
             }
+            if(myNbTouchesMax == 0) {
+                myTouches.Time = aTime;
+            }
+            myNbTouchesMax = std::max(myNbTouchesMax, theTouches.NbTouches);
 
             myStEvent2.Type = stEvent_GestureCancel;
             myStEvent2.Gesture.clearGesture();
@@ -1118,12 +1138,40 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
             myStEvent2.Gesture.clearGesture();
             myStEvent2.Gesture.Time = aTime;
             signals.onGesture->emit(myStEvent2.Gesture);
+
+            if(theTouches.NbTouches == 0) {
+                if(myNbTouchesMax == 1) {
+                    if(myTap1Touch.Type != stEvent_TouchCancel
+                    && (aTime - myTap1Touch.Time) < 0.5) {
+                        StGLVec2 aDelta(myTap1Touch.Touches[0].PointX - aCopy.Touches[0].PointX,
+                                        myTap1Touch.Touches[0].PointY - aCopy.Touches[0].PointY);
+                        aDelta *= aScale;
+                        if(aDelta.modulus() <= THE_THRESHOLD_TAP.FromIdle) {
+                            myStEvent2.Type = stEvent_Gesture1DoubleTap;
+                            myStEvent2.Gesture.clearGesture();
+                            myStEvent2.Gesture.Time = aTime;
+                            myStEvent2.Gesture.Point1X = aCopy.Touches[0].PointX;
+                            myStEvent2.Gesture.Point1Y = aCopy.Touches[0].PointY;
+                            signals.onGesture->emit(myStEvent2.Gesture);
+                        }
+                        myTap1Touch.Type = stEvent_TouchCancel;
+                    } else if(aTime - aCopy.Time < 0.5) {
+                        myTap1Touch = aCopy;
+                        myTap1Touch.Type = stEvent_TouchUp;
+                        myTap1Touch.Time = aTime;
+                    }
+                } else {
+                    myTap1Touch.Type = stEvent_TouchCancel;
+                }
+                myNbTouchesMax = 0;
+            }
             break;
         }
         case stEvent_TouchCancel: {
             myTouches.Type = stEvent_TouchCancel;
             myTouches.clearTouches();
 
+            myNbTouchesMax = 0;
             myStEvent2.Type = stEvent_GestureCancel;
             myStEvent2.Gesture.clearGesture();
             myStEvent2.Gesture.Time = aTime;
@@ -1140,11 +1188,6 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
     if(theTouches.Type != stEvent_TouchMove) {
         return;
     }
-
-    // scale factor for conversion into dp (dencity-independent pixels) units
-    const StRectI_t  aWinRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
-    const StMonitor& aMon     = myMonitors[aWinRect.center()];
-    StGLVec2 aScale((float )aWinRect.width() / aMon.getScale(), (float )aWinRect.height() / aMon.getScale());
 
     if(myTouches .NbTouches == 2
     && theTouches.NbTouches == 2) {

@@ -951,6 +951,11 @@ bool StGLImageRegion::doGesture(const StGestureEvent& theEvent) {
             myRotAngle = 0.0f;
             return false;
         }
+        case stEvent_Gesture1DoubleTap: {
+            doParamsReset(0);
+            //aParams->ScaleFactor = 1.0f;
+            return true;
+        }
         case stEvent_Gesture2Rotate: {
             myRotAngle += theEvent.Value;
             if(myRotAngle >= M_PI * 0.3) {

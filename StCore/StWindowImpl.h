@@ -279,6 +279,8 @@ class StWindowImpl {
 
     StPointD_t         myMousePt;         //!< mouse coordinates to track activity
     StTouchEvent       myTouches;         //!< current state of touch screen
+    StTouchEvent       myTap1Touch;       //!< previous tap touch
+    int                myNbTouchesMax;    //!< maximum touches within current sequence
     StRectI_t          myRectNorm;        //!< master window coordinates in normal     state
     StRectI_t          myRectFull;        //!< master window coordinates in fullscreen state
     StRectI_t          myRectNormPrev;    //!< window rectangle to track changes

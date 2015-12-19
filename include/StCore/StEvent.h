@@ -70,10 +70,11 @@ enum StEventType {
     stEvent_TouchUp,    //!< StTouchEvent,  touch released
     stEvent_TouchMove,  //!< StTouchEvent,  touch moved
     stEvent_TouchCancel,//!< StTouchEvent,  touch cancelled
-    stEvent_GestureCancel,  //!< StGestureEvent, abort the gestures
-    stEvent_Gesture2Move,   //!< StGestureEvent, 2 fingers moving in sync
-    stEvent_Gesture2Rotate, //!< StGestureEvent, 2 fingers rotating
-    stEvent_Gesture2Pinch,  //!< StGestureEvent, 2 fingers pinch
+    stEvent_GestureCancel,     //!< StGestureEvent, abort the gestures
+    stEvent_Gesture1DoubleTap, //!< StGestureEvent, 1 finger  double tap
+    stEvent_Gesture2Move,      //!< StGestureEvent, 2 fingers moving in sync
+    stEvent_Gesture2Rotate,    //!< StGestureEvent, 2 fingers rotating
+    stEvent_Gesture2Pinch,     //!< StGestureEvent, 2 fingers pinch
     stEvent_Scroll,     //!< StScrollEvent, scrolling
     stEvent_FileDrop,   //!< StDNDropEvent, file Drag & Drop
     stEvent_Navigate,   //!< StNavigEvent,  navigation event
