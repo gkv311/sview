@@ -1080,6 +1080,11 @@ namespace {
          6.0f,
         20.0f
     };
+    static const StGestThreshold THE_THRESHOLD_SWIPE = {
+        150.0f,
+        150.0f,
+        150.0f
+    };
 }
 
 /**
@@ -1189,11 +1194,12 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
         return;
     }
 
+    bool toUpdate = false;
     if(myTouches .NbTouches == 2
     && theTouches.NbTouches == 2) {
         StTouch aTFrom[2] = {
             myTouches.Touches[0],
-            myTouches.Touches[1],
+            myTouches.Touches[1]
         };
         StTouch aTTo[2] = {
             theTouches.findTouchById(aTFrom[0].Id),
@@ -1242,10 +1248,9 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
         myStEvent.Gesture.Point1Y  = (aTFrom[0].PointY + aTFrom[1].PointY) * 0.5;
         myStEvent.Gesture.Point2X  = (  aTTo[0].PointX +   aTTo[1].PointX) * 0.5;
         myStEvent.Gesture.Point2Y  = (  aTTo[0].PointY +   aTTo[1].PointY) * 0.5;
-        bool toUpdate = false;
 
         if(startGesture(myTouches, stEvent_Gesture2Rotate,
-           THE_THRESHOLD_ZROT, std::abs(aRotAngle))) {
+                        THE_THRESHOLD_ZROT, std::abs(aRotAngle))) {
             if(myTouches.Type != stEvent_GestureCancel
             && myTouches.Type != stEvent_Gesture2Rotate) {
                 myStEvent2.Type = stEvent_GestureCancel;
@@ -1259,7 +1264,7 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
             signals.onGesture->emit(myStEvent.Gesture);
             toUpdate = true;
         } else if(startGesture(myTouches, stEvent_Gesture2Pinch,
-                  THE_THRESHOLD_ZOOM, std::abs(aDistDelta))) {
+                               THE_THRESHOLD_ZOOM, std::abs(aDistDelta))) {
             if(myTouches.Type != stEvent_GestureCancel
             && myTouches.Type != stEvent_Gesture2Pinch) {
                 myStEvent2.Type = stEvent_GestureCancel;
@@ -1273,7 +1278,7 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
             signals.onGesture->emit(myStEvent.Gesture);
             toUpdate = true;
         } else if(startGesture(myTouches, stEvent_Gesture2Move,
-                  THE_THRESHOLD_PAN, std::abs(aCenterDelta.x()) + std::abs(aCenterDelta.y()))) {
+                               THE_THRESHOLD_PAN, std::abs(aCenterDelta.x()) + std::abs(aCenterDelta.y()))) {
             if(myTouches.Type != stEvent_GestureCancel
             && myTouches.Type != stEvent_Gesture2Move) {
                 myStEvent2.Type = stEvent_GestureCancel;
@@ -1290,6 +1295,63 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
         if(toUpdate) {
             myTouches.Touches[0] = aTTo[0];
             myTouches.Touches[1] = aTTo[1];
+        }
+    } else if(myTouches .NbTouches == 3
+           && theTouches.NbTouches == 3) {
+        StTouch aTFrom[3] = {
+            myTouches.Touches[0],
+            myTouches.Touches[1],
+            myTouches.Touches[2]
+        };
+        StTouch aTTo[3] = {
+            theTouches.findTouchById(aTFrom[0].Id),
+            theTouches.findTouchById(aTFrom[1].Id),
+            theTouches.findTouchById(aTFrom[2].Id)
+        };
+
+        if(!aTTo[0].isDefined()
+        || !aTTo[1].isDefined()
+        || !aTTo[2].isDefined()) {
+            return;
+        }
+
+        StGLVec2 aFrom[3] = {
+            StGLVec2(aTFrom[0].PointX, aTFrom[0].PointY) * aScale,
+            StGLVec2(aTFrom[1].PointX, aTFrom[1].PointY) * aScale,
+            StGLVec2(aTFrom[2].PointX, aTFrom[2].PointY) * aScale
+        };
+        StGLVec2 aTo[3] = {
+            StGLVec2(aTTo[0].PointX, aTTo[0].PointY) * aScale,
+            StGLVec2(aTTo[1].PointX, aTTo[1].PointY) * aScale,
+            StGLVec2(aTTo[2].PointX, aTTo[2].PointY) * aScale
+        };
+        StGLVec2 aCenterFrom  = (aFrom[0] + aFrom[1] + aFrom[2]) * (1.0f / 3.0f);
+        StGLVec2 aCenterTo    = (  aTo[0] +   aTo[1] +   aTo[2]) * (1.0f / 3.0f);
+        StGLVec2 aCenterDelta = aCenterTo - aCenterFrom;
+        if(aCenterDelta.y() < 50.0f
+        && std::abs(aCenterDelta.x()) >= THE_THRESHOLD_SWIPE.FromIdle) {
+            myStEvent.Type = stEvent_Navigate;
+            myStEvent.Navigate.Time = aTime;
+            myStEvent.Navigate.Target = aCenterDelta.x() < 0.0
+                                      ? stNavigate_Backward
+                                      : stNavigate_Forward;
+            signals.onNavigate->emit(myStEvent.Navigate);
+            toUpdate = true;
+        } else if(aCenterDelta.x() < 50.0f
+               && std::abs(aCenterDelta.y()) >= THE_THRESHOLD_SWIPE.FromIdle) {
+            myStEvent.Type = stEvent_Navigate;
+            myStEvent.Navigate.Time = aTime;
+            myStEvent.Navigate.Target = aCenterDelta.y() < 0.0
+                                      ? stNavigate_Top
+                                      : stNavigate_Bottom;
+            signals.onNavigate->emit(myStEvent.Navigate);
+            toUpdate = true;
+        }
+
+        if(toUpdate) {
+            myTouches.Touches[0] = aTTo[0];
+            myTouches.Touches[1] = aTTo[1];
+            myTouches.Touches[2] = aTTo[2];
         }
     }
 }

@@ -353,7 +353,7 @@
     /**
      * 3-fingers swipe.
      */
-    - (void ) swipeWithEvent: (NSEvent* ) theEvent {
+    /*- (void ) swipeWithEvent: (NSEvent* ) theEvent {
         const CGFloat aDeltaX = [theEvent deltaX];
         const CGFloat aDeltaY = [theEvent deltaY];
         myStEvent.Type = stEvent_Navigate;
@@ -379,7 +379,7 @@
                 myStWin->signals.onNavigate->emit(myStEvent.Navigate);
             }
         }
-    }
+    }*/
 
     /**
      * Keyboard shortcuts event.
