@@ -1061,13 +1061,13 @@ struct StGestThreshold {
 
 namespace {
     static const StGestThreshold THE_THRESHOLD_TAP = {
-        16.0f,
-        16.0f,
-        16.0f
+        20.0f,
+        20.0f,
+        20.0f
     };
     static const StGestThreshold THE_THRESHOLD_PAN = {
          4.0f,
-         4.0f,
+         1.0f,
         20.0f
     };
     static const StGestThreshold THE_THRESHOLD_ZROT = {
@@ -1077,7 +1077,7 @@ namespace {
     };
     static const StGestThreshold THE_THRESHOLD_ZOOM = {
          6.0f,
-         6.0f,
+         1.0f,
         20.0f
     };
     static const StGestThreshold THE_THRESHOLD_SWIPE = {
@@ -1219,14 +1219,12 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
             StGLVec2(aTTo[0].PointX, aTTo[0].PointY) * aScale,
             StGLVec2(aTTo[1].PointX, aTTo[1].PointY) * aScale
         };
-        StGLVec2 aCenterFrom  = (aFrom[0] + aFrom[1]) * 0.5;
-        StGLVec2 aCenterTo    = (  aTo[0] +   aTo[1]) * 0.5;
-        StGLVec2 aCenterDelta = aCenterTo - aCenterFrom;
+
         float aDistFrom  = (aFrom[1] - aFrom[0]).modulus();
         float aDistTo    = (aTo  [1] - aTo  [0]).modulus();
         float aDistDelta = aDistTo - aDistFrom;
         float aRotAngle  = 0.0f;
-        if(std::abs(aDistFrom) > 250.0f) {
+        if(std::abs(aDistFrom) > 50.0f) {
             const float A1 = aFrom[0].y() - aFrom[1].y();
             const float B1 = aFrom[1].x() - aFrom[0].x();
 
@@ -1238,6 +1236,23 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
                 const float aNumerator = A1 * B2 - A2 * B1;
                 aRotAngle = std::atan(aNumerator / aDenom);
             }
+        }
+
+        StGLVec2 aCenterFrom  = (aFrom[0] + aFrom[1]) * 0.5;
+        StGLVec2 aCenterTo    = (  aTo[0] +   aTo[1]) * 0.5;
+        StGLVec2 aCenterDelta = aCenterTo - aCenterFrom;
+
+        // take minimum delta between fingers
+        StGLVec2 aDeltas[2] = {
+            aTo[0] - aFrom[0],
+            aTo[1] - aFrom[1]
+        };
+        StGLVec2 aMoveDelta = aDeltas[0];
+        if(aDeltas[1].squareModulus()   < aMoveDelta.squareModulus()) {
+            aMoveDelta = aDeltas[1];
+        }
+        if(aCenterDelta.squareModulus() < aMoveDelta.squareModulus()) {
+            aMoveDelta = aCenterDelta;
         }
 
         myStEvent.Type = stEvent_None;
@@ -1263,7 +1278,8 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
             myStEvent.Gesture.Value = aRotAngle;
             signals.onGesture->emit(myStEvent.Gesture);
             toUpdate = true;
-        } else if(startGesture(myTouches, stEvent_Gesture2Pinch,
+        } else if(//std::abs(aRotAngle) < 5.0f * M_PI / 180.0f &&
+                  startGesture(myTouches, stEvent_Gesture2Pinch,
                                THE_THRESHOLD_ZOOM, std::abs(aDistDelta))) {
             if(myTouches.Type != stEvent_GestureCancel
             && myTouches.Type != stEvent_Gesture2Pinch) {
@@ -1278,7 +1294,7 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
             signals.onGesture->emit(myStEvent.Gesture);
             toUpdate = true;
         } else if(startGesture(myTouches, stEvent_Gesture2Move,
-                               THE_THRESHOLD_PAN, std::abs(aCenterDelta.x()) + std::abs(aCenterDelta.y()))) {
+                               THE_THRESHOLD_PAN, aMoveDelta.modulus())) {
             if(myTouches.Type != stEvent_GestureCancel
             && myTouches.Type != stEvent_Gesture2Move) {
                 myStEvent2.Type = stEvent_GestureCancel;
