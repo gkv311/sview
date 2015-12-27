@@ -96,7 +96,7 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
   myClickPntZo(0.0, 0.0),
   myKeyFlags(ST_VF_NONE),
   myDragDelayMs(0.0),
-  myRotAngle(0.5f),
+  myRotAngle(0.0f),
   myIsClickAborted(false),
 #ifdef ST_EXTRA_CONTROLS
   myToRightRotate(true),
@@ -958,12 +958,12 @@ bool StGLImageRegion::doGesture(const StGestureEvent& theEvent) {
         }
         case stEvent_Gesture2Rotate: {
             myRotAngle += theEvent.Value;
-            if(myRotAngle >= M_PI * 0.3) {
+            if(myRotAngle >= 0.3f * M_PI) {
                 doParamsRotZ90(1);
-                myRotAngle -= M_PI * 0.3;
-            } else if(myRotAngle <= -M_PI * 0.3) {
+                myRotAngle -= 0.3f * float(M_PI);
+            } else if(myRotAngle <= -0.3f * float(M_PI)) {
                 doParamsRotZ90(size_t(-1));
-                myRotAngle += M_PI * 0.3;
+                myRotAngle += 0.3f * float(M_PI);
             }
             return true;
         }

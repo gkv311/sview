@@ -55,6 +55,11 @@
   #define ST_ATTR_OVERRIDE
 #endif
 
+#if defined(_MSC_VER)
+    // M_PI on old MSVC
+    #define _USE_MATH_DEFINES
+#endif
+
 #include <cmath>       // fabs
 #include <cstddef>     // size_t, NULL
 #include <cstdlib>

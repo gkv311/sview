@@ -1071,9 +1071,9 @@ namespace {
         20.0f
     };
     static const StGestThreshold THE_THRESHOLD_ZROT = {
-         2.0f * M_PI / 180.0f,
-         2.0f * M_PI / 180.0f,
-        20.0f * M_PI / 180.0f
+        float( 2.0 * M_PI / 180.0),
+        float( 2.0 * M_PI / 180.0),
+        float(20.0 * M_PI / 180.0)
     };
     static const StGestThreshold THE_THRESHOLD_ZOOM = {
          6.0f,
@@ -1121,7 +1121,7 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
             if(myNbTouchesMax == 0) {
                 myTouches.Time = aTime;
             }
-            myNbTouchesMax = std::max(myNbTouchesMax, theTouches.NbTouches);
+            myNbTouchesMax = stMax(myNbTouchesMax, theTouches.NbTouches);
 
             myStEvent2.Type = stEvent_GestureCancel;
             myStEvent2.Gesture.clearGesture();
@@ -1259,10 +1259,10 @@ void StWindowImpl::doTouch(const StTouchEvent& theTouches) {
         myStEvent.Gesture.clearGesture();
         myStEvent.Gesture.Time = aTime;
         myStEvent.Gesture.OnScreen = aTTo[0].OnScreen;
-        myStEvent.Gesture.Point1X  = (aTFrom[0].PointX + aTFrom[1].PointX) * 0.5;
-        myStEvent.Gesture.Point1Y  = (aTFrom[0].PointY + aTFrom[1].PointY) * 0.5;
-        myStEvent.Gesture.Point2X  = (  aTTo[0].PointX +   aTTo[1].PointX) * 0.5;
-        myStEvent.Gesture.Point2Y  = (  aTTo[0].PointY +   aTTo[1].PointY) * 0.5;
+        myStEvent.Gesture.Point1X  = (aTFrom[0].PointX + aTFrom[1].PointX) * 0.5f;
+        myStEvent.Gesture.Point1Y  = (aTFrom[0].PointY + aTFrom[1].PointY) * 0.5f;
+        myStEvent.Gesture.Point2X  = (  aTTo[0].PointX +   aTTo[1].PointX) * 0.5f;
+        myStEvent.Gesture.Point2Y  = (  aTTo[0].PointY +   aTTo[1].PointY) * 0.5f;
 
         if(startGesture(myTouches, stEvent_Gesture2Rotate,
                         THE_THRESHOLD_ZROT, std::abs(aRotAngle))) {
