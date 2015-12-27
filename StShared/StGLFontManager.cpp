@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -10,6 +10,13 @@
 
 #include <StStrings/StLogger.h>
 #include <stAssert.h>
+
+namespace {
+
+    // fallback font
+    #include "StDejaVuSerif.ttf.h"
+
+}
 
 StGLFontManager::StGLFontManager(const unsigned int theResolution)
 : myFTLib(new StFTLibrary()),
@@ -69,6 +76,24 @@ StHandle<StGLFontEntry> StGLFontManager::findCreate(const StString& theName,
     return aFontGl;
 }
 
+StHandle<StGLFontEntry> StGLFontManager::findCreateFallback(unsigned int theSize) {
+    const StString aName = "ST_DejaVuSerif_ttf";
+    StHandle<StGLFontEntry>& aFontGl = myFonts[StGLFontKey(aName, theSize)];
+    if(!aFontGl.isNull()) {
+        return aFontGl;
+    }
+
+    ST_ERROR_LOG("StGLFontManager, fallback font is used!");
+    StHandle<StFTFont> aFontFt = new StFTFont(myFTLib);
+    aFontFt->loadInternal("DejaVuSerif_internal.ttf",
+                          THE_DejaVuSerif_ttf_DATA,
+                          THE_DejaVuSerif_ttf_LEN,
+                          StFTFont::Style_Regular);
+    aFontFt->init(theSize, myResolution);
+    aFontGl = new StGLFontEntry(aFontFt);
+    return aFontGl;
+}
+
 const StHandle<StGLFont>& StGLFontManager::findCreate(const StFTFont::Typeface theType,
                                                       unsigned int             theSize) {
     StHandle<StGLFont>& aFont = myFontTypes[StGLFontTypeKey(theType, theSize)];
@@ -78,8 +103,13 @@ const StHandle<StGLFont>& StGLFontManager::findCreate(const StFTFont::Typeface t
 
     aFont = new StGLFont();
     const StFTFontPack& aPack = myRegistry->getTypeface(theType);
-    aFont->changeFont(StFTFont::Subset_General) = findCreate(aPack.Western.FamilyName, theSize);
+    StHandle<StGLFontEntry>& aGenFont = aFont->changeFont(StFTFont::Subset_General);
+    aGenFont                                    = findCreate(aPack.Western.FamilyName, theSize);
     aFont->changeFont(StFTFont::Subset_CJK)     = findCreate(aPack.CJK    .FamilyName, theSize);
     aFont->changeFont(StFTFont::Subset_Korean)  = findCreate(aPack.Korean .FamilyName, theSize);
+
+    if(aGenFont.isNull()) {
+        aGenFont = findCreateFallback(theSize);
+    }
     return aFont;
 }

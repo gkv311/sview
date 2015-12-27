@@ -154,6 +154,20 @@ class StFTFont {
                            const StFTFont::Style theStyle);
 
     /**
+     * Load the font from data array.
+     * This array should NOT be released until font destruction!
+     * @param theFontName font name
+     * @param theFontData font data
+     * @param theDataLen  data length
+     * @param theStyle    the font style
+     * @return true on success
+     */
+    ST_CPPEXPORT bool loadInternal(const StString&       theFontName,
+                                   const unsigned char*  theFontData,
+                                   const int             theDataLen,
+                                   const StFTFont::Style theStyle);
+
+    /**
      * Re-initialize the font.
      * @param thePointSize  the face size in points (1/72 inch)
      * @param theResolution the resolution of the target device
@@ -324,6 +338,14 @@ class StFTFont {
      * Load glyph without rendering it.
      */
     ST_CPPEXPORT bool loadGlyph(const stUtf32_t theUChar);
+
+        private:
+
+    /**
+     * Complete loading the face.
+     */
+    ST_LOCAL bool loadCharmap(const StString& theFontName,
+                              FT_Face&         theFace);
 
         protected:
 

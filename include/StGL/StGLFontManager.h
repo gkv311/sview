@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -93,6 +93,11 @@ class StGLFontManager : public StGLResource {
      */
     ST_CPPEXPORT StHandle<StGLFontEntry> findCreate(const StString& theName,
                                                     unsigned int    theSize);
+
+    /**
+     * Find fallback font for specified size, and create it if not already created.
+     */
+    ST_CPPEXPORT StHandle<StGLFontEntry> findCreateFallback(unsigned int theSize);
 
     /**
      * @return handle to the FT library object

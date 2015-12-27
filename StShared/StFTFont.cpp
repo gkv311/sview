@@ -125,18 +125,54 @@ bool StFTFont::load(const StString&       theFontPath,
         FT_Done_Face(aFace);
         aFace = NULL;
         return false;
-    } else if(FT_Select_Charmap(aFace, ft_encoding_unicode) != 0) {
-        ST_DEBUG_LOG("Font '" + aFontPath + "' doesn't contain Unicode charmap!");
+    }
+    return loadCharmap(aFontPath, aFace);
+}
+
+bool StFTFont::loadInternal(const StString&       theFontName,
+                            const unsigned char*  theFontData,
+                            const int             theDataLen,
+                            const StFTFont::Style theStyle) {
+    if(!myFTLib->isValid()
+    || theStyle <  Style_Regular
+    || theStyle >= StylesNB
+    || theFontData == NULL
+    || theDataLen  < 1) {
+        return false;
+    }
+    myUChar  = 0;
+    myFTFace = NULL;
+    myGlyphImg.nullify();
+    myFontPaths[theStyle] = theFontName;
+
+    FT_Face& aFace = myFTFaces[theStyle];
+    if(aFace != NULL) {
+        FT_Done_Face(aFace);
+    }
+
+    if(FT_New_Memory_Face(myFTLib->getInstance(), theFontData, theDataLen, 0, &aFace) != 0) {
+        ST_DEBUG_LOG("Font '" + theFontName + "' fail to load!");
         FT_Done_Face(aFace);
         aFace = NULL;
+        return false;
+    }
+    return loadCharmap(theFontName, aFace);
+}
+
+bool StFTFont::loadCharmap(const StString& theFontName,
+                           FT_Face&        theFace) {
+    if(FT_Select_Charmap(theFace, ft_encoding_unicode) != 0) {
+        ST_DEBUG_LOG("Font '" + theFontName + "' doesn't contain Unicode charmap!");
+        FT_Done_Face(theFace);
+        theFace = NULL;
         return false;
     }
 
     // test Unicode subsets
     mySubsets[Subset_General] = true;
-    mySubsets[Subset_Korean]  = FT_Get_Char_Index(aFace, 0x0B371) != 0
-                             && FT_Get_Char_Index(aFace, 0x0D130) != 0;
-    mySubsets[Subset_CJK]     = FT_Get_Char_Index(aFace, 0x06F22) != 0;
+    mySubsets[Subset_Korean]  = FT_Get_Char_Index(theFace, 0x0B371) != 0
+                             && FT_Get_Char_Index(theFace, 0x0D130) != 0;
+    mySubsets[Subset_CJK]     = FT_Get_Char_Index(theFace, 0x06F22) != 0;
 
 //if(mySubsets[Subset_Korean]) { std::cerr << "  found Korean in " << myFontPath << "\n"; }
 //if(mySubsets[Subset_CJK])    { std::cerr << "  found CJK    in " << myFontPath << "\n"; }
