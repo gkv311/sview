@@ -37,7 +37,7 @@ StGLTextArea::StGLTextArea(StGLWidget* theParent,
   myToShowBorder(false),
   myToDrawShadow(false),
   myIsInitialized(false) {
-    myFont = getRoot()->getFontManager()->findCreate(StFTFont::Typeface_SansSerif, getFontSize());
+    myFont = myRoot->getFontManager()->findCreate(StFTFont::Typeface_SansSerif, getFontSize());
 }
 
 StGLTextArea::~StGLTextArea() {
@@ -70,14 +70,29 @@ void StGLTextArea::setTextWidth(const int theWidth) {
     myToRecompute = true;
 }
 
+void StGLTextArea::computeTextWidthFake(const StString& theText,
+                                        int&            theWidth,
+                                        int&            theHeight) {
+    theWidth  = myRoot->scale(int(10 * (theText.getLength() + 2)));
+    theHeight = myRoot->scale(16);
+}
+
 void StGLTextArea::computeTextWidth(const StString& theText,
                                     const GLfloat   theWidthMax,
                                     int&            theWidth,
                                     int&            theHeight) {
-    StHandle<StFTFont>& aFontGen = myFont->changeFont()->getFont();
+    if(myFont.isNull()) {
+        computeTextWidthFake(theText, theWidth, theHeight);
+        return;
+    }
+    StHandle<StGLFontEntry>& aFontGenEntry = myFont->changeFont();
+    if(aFontGenEntry.isNull()) {
+        computeTextWidthFake(theText, theWidth, theHeight);
+        return;
+    }
+    StHandle<StFTFont>& aFontGen = aFontGenEntry->getFont();
     if(aFontGen.isNull() || !aFontGen->isValid()) {
-        theWidth  = myRoot->scale(int(10 * (theText.getLength() + 2)));
-        theHeight = myRoot->scale(16);
+        computeTextWidthFake(theText, theWidth, theHeight);
         return;
     }
 
@@ -156,7 +171,9 @@ bool StGLTextArea::stglInit() {
     }
 
     // initialize GL resources for the font
-    if(!myFont->wasInitialized()) {
+    if(myFont.isNull()) {
+        return false; // critical error
+    } else if(!myFont->wasInitialized()) {
         if( myFont->changeFont().isNull()
         ||  myFont->changeFont()->getFont().isNull()
         || !myFont->changeFont()->getFont()->isValid()) {

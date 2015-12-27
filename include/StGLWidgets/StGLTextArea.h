@@ -228,6 +228,10 @@ class StGLTextArea : public StGLWidget {
 
     ST_LOCAL void recomputeBorder(StGLContext& theCtx);
 
+    ST_LOCAL void computeTextWidthFake(const StString& theText,
+                                       int&            theWidth,
+                                       int&            theHeight);
+
         private:
 
     StArrayList<GLuint>                       myTexturesList;
