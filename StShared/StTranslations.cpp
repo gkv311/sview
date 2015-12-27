@@ -69,6 +69,10 @@ StTranslations::StTranslations(const StHandle<StResourceManager>& theResMgr,
             params.language->changeValues().add("한국어");
             myLangFolderList.add("Korean");
         }
+        if(myResMgr->isResourceExist(StString("lang" ST_FILE_SPLITTER "ChineseS" ST_FILE_SPLITTER) + myModuleName + StTranslations::DEFAULT_SUFFIX)) {
+            params.language->changeValues().add("简体中文");
+            myLangFolderList.add("ChineseS");
+        }
         if(myResMgr->isResourceExist(StString("lang" ST_FILE_SPLITTER "Czech"  ST_FILE_SPLITTER) + myModuleName + StTranslations::DEFAULT_SUFFIX)) {
             params.language->changeValues().add("Čeština");
             myLangFolderList.add("Czech");

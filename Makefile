@@ -122,6 +122,8 @@ install_android:
 	mkdir -p sview/assets/lang/English
 	mkdir -p sview/assets/lang/Russian
 	mkdir -p sview/assets/lang/Czech
+	mkdir -p sview/assets/lang/ChineseS
+	mkdir -p sview/assets/lang/Korean
 	mkdir -p sview/assets/shaders
 	mkdir -p sview/assets/textures
 	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStShared)       sview/libs/armeabi-v7a/$(aStShared)
@@ -138,6 +140,8 @@ install_android:
 	cp -f -r $(BUILD_ROOT)/lang/English/*  sview/assets/lang/English/
 	cp -f -r $(BUILD_ROOT)/lang/русский/*  sview/assets/lang/Russian/
 	cp -f -r $(BUILD_ROOT)/lang/Czech/*    sview/assets/lang/Czech/
+	cp -f -r $(BUILD_ROOT)/lang/ChineseS/* sview/assets/lang/ChineseS/
+	cp -f -r $(BUILD_ROOT)/lang/Korean/*   sview/assets/lang/Korean/
 	cp -f -r $(BUILD_ROOT)/shaders/*       sview/assets/shaders/
 	cp -f -r $(BUILD_ROOT)/textures/*      sview/assets/textures/
 	cp -f    license-gpl-3.0.txt           sview/assets/info/license.txt
@@ -148,6 +152,8 @@ pre_all:
 	mkdir -p $(BUILD_ROOT)/lang/français
 	mkdir -p $(BUILD_ROOT)/lang/Deutsch
 	mkdir -p $(BUILD_ROOT)/lang/Czech
+	mkdir -p $(BUILD_ROOT)/lang/ChineseS
+	mkdir -p $(BUILD_ROOT)/lang/Korean
 	mkdir -p $(BUILD_ROOT)/textures
 	mkdir -p $(BUILD_ROOT)/web
 	mkdir -p sview/libs/armeabi-v7a
@@ -199,6 +205,8 @@ pre_StOutAnaglyph:
 	cp -f -r StOutAnaglyph/lang/french/*  $(BUILD_ROOT)/lang/français/
 	cp -f -r StOutAnaglyph/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
 	cp -f -r StOutAnaglyph/lang/czech/*   $(BUILD_ROOT)/lang/Czech/
+	cp -f -r StOutAnaglyph/lang/chinese/* $(BUILD_ROOT)/lang/ChineseS/
+	cp -f -r StOutAnaglyph/lang/korean/*  $(BUILD_ROOT)/lang/Korean/
 clean_StOutAnaglyph:
 	rm -f $(BUILD_ROOT)/$(aStOutAnaglyph)
 	rm -rf StOutAnaglyph/*.o
@@ -217,6 +225,8 @@ pre_StOutDual:
 	cp -f -r StOutDual/lang/french/*  $(BUILD_ROOT)/lang/français/
 	cp -f -r StOutDual/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
 	cp -f -r StOutDual/lang/czech/*   $(BUILD_ROOT)/lang/Czech/
+	cp -f -r StOutDual/lang/chinese/* $(BUILD_ROOT)/lang/ChineseS/
+	cp -f -r StOutDual/lang/korean/*  $(BUILD_ROOT)/lang/Korean/
 clean_StOutDual:
 	rm -f $(BUILD_ROOT)/$(aStOutDual)
 	rm -rf StOutDual/*.o
@@ -236,6 +246,8 @@ pre_StOutIZ3D:
 	cp -f -r StOutIZ3D/lang/french/*  $(BUILD_ROOT)/lang/français/
 	cp -f -r StOutIZ3D/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
 	cp -f -r StOutIZ3D/lang/czech/*   $(BUILD_ROOT)/lang/Czech/
+	cp -f -r StOutIZ3D/lang/chinese/* $(BUILD_ROOT)/lang/ChineseS/
+	cp -f -r StOutIZ3D/lang/korean/*  $(BUILD_ROOT)/lang/Korean/
 clean_StOutIZ3D:
 	rm -f $(BUILD_ROOT)/$(aStOutIZ3D)
 	rm -rf StOutIZ3D/*.o
@@ -256,6 +268,8 @@ pre_StOutInterlace:
 	cp -f -r StOutInterlace/lang/french/*  $(BUILD_ROOT)/lang/français/
 	cp -f -r StOutInterlace/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
 	cp -f -r StOutInterlace/lang/czech/*   $(BUILD_ROOT)/lang/Czech/
+	cp -f -r StOutInterlace/lang/chinese/* $(BUILD_ROOT)/lang/ChineseS/
+	cp -f -r StOutInterlace/lang/korean/*  $(BUILD_ROOT)/lang/Korean/
 clean_StOutInterlace:
 	rm -f $(BUILD_ROOT)/$(aStOutInterlace)
 	rm -rf StOutInterlace/*.o
@@ -274,6 +288,8 @@ pre_StOutPageFlip:
 	cp -f -r StOutPageFlip/lang/french/*  $(BUILD_ROOT)/lang/français/
 	cp -f -r StOutPageFlip/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
 	cp -f -r StOutPageFlip/lang/czech/*   $(BUILD_ROOT)/lang/Czech/
+	cp -f -r StOutPageFlip/lang/chinese/* $(BUILD_ROOT)/lang/ChineseS/
+	cp -f -r StOutPageFlip/lang/korean/*  $(BUILD_ROOT)/lang/Korean/
 clean_StOutPageFlip:
 	rm -f $(BUILD_ROOT)/$(aStOutPageFlip)
 	rm -rf StOutPageFlip/*.o
@@ -291,6 +307,8 @@ pre_StOutDistorted:
 	cp -f -r StOutDistorted/lang/french/*  $(BUILD_ROOT)/lang/français/
 	cp -f -r StOutDistorted/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
 	cp -f -r StOutDistorted/lang/czech/*   $(BUILD_ROOT)/lang/Czech/
+	cp -f -r StOutDistorted/lang/chinese/* $(BUILD_ROOT)/lang/ChineseS/
+	cp -f -r StOutDistorted/lang/korean/*  $(BUILD_ROOT)/lang/Korean/
 clean_StOutDistorted:
 	rm -f $(BUILD_ROOT)/$(aStOutDistorted)
 	rm -rf StOutDistorted/*.o
@@ -308,6 +326,8 @@ pre_StImageViewer:
 	cp -f -r StImageViewer/lang/french/*  $(BUILD_ROOT)/lang/français/
 	cp -f -r StImageViewer/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
 	cp -f -r StImageViewer/lang/czech/*   $(BUILD_ROOT)/lang/Czech/
+	cp -f -r StImageViewer/lang/chinese/* $(BUILD_ROOT)/lang/ChineseS/
+	cp -f -r StImageViewer/lang/korean/*  $(BUILD_ROOT)/lang/Korean/
 clean_StImageViewer:
 	rm -f $(BUILD_ROOT)/$(aStImageViewer)
 	rm -rf StImageViewer/*.o
@@ -329,6 +349,8 @@ pre_StMoviePlayer:
 	cp -f -r StMoviePlayer/lang/french/*  $(BUILD_ROOT)/lang/français/
 	cp -f -r StMoviePlayer/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
 	cp -f -r StMoviePlayer/lang/czech/*   $(BUILD_ROOT)/lang/Czech/
+	cp -f -r StMoviePlayer/lang/chinese/* $(BUILD_ROOT)/lang/ChineseS/
+	cp -f -r StMoviePlayer/lang/korean/*  $(BUILD_ROOT)/lang/Korean/
 	cp -f -r StMoviePlayer/web/*          $(BUILD_ROOT)/web/
 clean_StMoviePlayer:
 	rm -f $(BUILD_ROOT)/$(aStMoviePlayer)
@@ -349,6 +371,8 @@ pre_StDiagnostics:
 	cp -f -r StDiagnostics/lang/french/*  $(BUILD_ROOT)/lang/français/
 	cp -f -r StDiagnostics/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
 	cp -f -r StDiagnostics/lang/czech/*   $(BUILD_ROOT)/lang/Czech/
+	cp -f -r StDiagnostics/lang/chinese/* $(BUILD_ROOT)/lang/ChineseS/
+	cp -f -r StDiagnostics/lang/korean/*  $(BUILD_ROOT)/lang/Korean/
 clean_StDiagnostics:
 	rm -f $(BUILD_ROOT)/$(aStDiagnostics)
 	rm -rf StDiagnostics/*.o
@@ -369,6 +393,8 @@ pre_StCADViewer:
 	cp -f -r StCADViewer/lang/french/*  $(BUILD_ROOT)/lang/français/
 	cp -f -r StCADViewer/lang/german/*  $(BUILD_ROOT)/lang/Deutsch/
 	cp -f -r StCADViewer/lang/czech/*   $(BUILD_ROOT)/lang/Czech/
+	cp -f -r StCADViewer/lang/chinese/* $(BUILD_ROOT)/lang/ChineseS/
+	cp -f -r StCADViewer/lang/korean/*  $(BUILD_ROOT)/lang/Korean/
 clean_StCADViewer:
 	rm -f $(BUILD_ROOT)/$(aStCADViewer)
 	rm -rf StCADViewer/*.o
