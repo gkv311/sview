@@ -21,6 +21,7 @@ StFTFontRegistry::StFTFontRegistry() {
     myFTLib = new StFTLibrary();
     myExtensions.add("ttf");
     myExtensions.add("ttc");
+    myExtensions.add("otf");
 
 #ifdef _WIN32
     myFolders.add(StProcess::getWindowsFolder() + "fonts");
@@ -71,21 +72,38 @@ StFTFontRegistry::StFTFontRegistry() {
     myFolders.add(stCString("/system/fonts"));
 
     // western
-    myFilesMajor.add(stCString("DroidSerif-Regular.ttf"));
-    myFilesMajor.add(stCString("DroidSerif-Bold.ttf"));
-    myFilesMajor.add(stCString("DroidSerif-Italic.ttf"));
-    myFilesMajor.add(stCString("DroidSerif-BoldItalic.ttf"));
+
+    // Android 6
+    myFilesMajor.add(stCString("NotoSerif-Regular.ttf"));
+    myFilesMajor.add(stCString("NotoSerif-Bold.ttf"));
+    myFilesMajor.add(stCString("NotoSerif-Italic.ttf"));
+    myFilesMajor.add(stCString("NotoSerif-BoldItalic.ttf"));
+
+    // Android 4
+    myFilesMinor.add(stCString("DroidSerif-Regular.ttf"));
+    myFilesMinor.add(stCString("DroidSerif-Bold.ttf"));
+    myFilesMinor.add(stCString("DroidSerif-Italic.ttf"));
+    myFilesMinor.add(stCString("DroidSerif-BoldItalic.ttf"));
+
     myFilesMajor.add(stCString("DroidSans.ttf"));
     myFilesMajor.add(stCString("DroidSans-Bold.ttf"));
     myFilesMajor.add(stCString("DroidSansMono.ttf"));
 
-    // following have been found on recent plates, but not on old smartphones - so mark them optional
+    // not all phones have the following fonts
 
-    // korean
+    // Korean
     myFilesMinor.add(stCString("NanumGothic.ttf"));
+    myFilesMinor.add(stCString("NotoSansKR-Regular.otf"));
 
-    // chinese
+    // Simplified Chinese
     myFilesMinor.add(stCString("DroidSansFallback.ttf"));
+    myFilesMinor.add(stCString("NotoSansSC-Regular.otf"));
+
+    // Traditional Chinese
+    //myFilesMinor.add(stCString("NotoSansTC-Regular.otf"));
+
+    // Japanese
+    //myFilesMinor.add(stCString("NotoSansJP-Regular.otf"));
 #else
     myFolders.add(stCString("/usr/share/fonts"));
     myFolders.add(stCString("/usr/local/share/fonts"));
@@ -222,15 +240,28 @@ void StFTFontRegistry::init(const bool theToSearchAll) {
     aSans .CJK     = findFont(stCString("STFangsong"));
     aMono .CJK     = findFont(stCString("STFangsong"));
 #elif defined(__ANDROID__)
-    aSerif.Western = findFont(stCString("Droid Serif"));
-    aSans .Western = findFont(stCString("Roboto"));
+    aSerif.Western = findFont(stCString("Noto Serif"));
+    if(aSerif.Western.FamilyName.isEmpty()) {
+        aSerif.Western = findFont(stCString("Droid Serif"));
+    }
+    aSans .Western = findFont(stCString("Roboto")); // actually DroidSans.ttf
     aMono .Western = findFont(stCString("Droid Sans Mono"));
     aSerif.Korean  = findFont(stCString("NanumGothic")); // no serif
     aSans .Korean  = findFont(stCString("NanumGothic"));
     aMono .Korean  = findFont(stCString("NanumGothic"));
+    if(aSerif.Korean.FamilyName.isEmpty()) {
+        aSerif.Korean = findFont(stCString("Noto Sans KR"));
+        aSans .Korean = findFont(stCString("Noto Sans KR"));
+        aMono .Korean = findFont(stCString("Noto Sans KR"));
+    }
     aSerif.CJK     = findFont(stCString("Droid Sans Fallback"));
     aSans .CJK     = findFont(stCString("Droid Sans Fallback"));
     aMono .CJK     = findFont(stCString("Droid Sans Fallback"));
+    if(aSerif.CJK.FamilyName.isEmpty()) {
+        aSerif.CJK = findFont(stCString("Noto Sans SC"));
+        aSans .CJK = findFont(stCString("Noto Sans SC"));
+        aMono .CJK = findFont(stCString("Noto Sans SC"));
+    }
 #else
     aSerif.Western = findFont(stCString("FreeSerif"));
     aSans .Western = findFont(stCString("FreeSans"));
