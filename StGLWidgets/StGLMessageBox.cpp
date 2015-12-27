@@ -364,20 +364,22 @@ void StGLMessageBox::stglDraw(unsigned int theView) {
         stglResize();
     }
 
-    aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    aCtx.core20fwd->glEnable(GL_BLEND);
+    if(myProgram.isValid()) {
+        aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        aCtx.core20fwd->glEnable(GL_BLEND);
 
-    myProgram.use(aCtx, getRoot()->getScreenDispX());
-    myProgram.setProjMat(aCtx, getCamera()->getProjMatrix());
-    myProgram.setColor(aCtx, getRoot()->getColorForElement(StGLRootWidget::Color_MessageBox), myOpacity * 0.8f);
+        myProgram.use(aCtx, getRoot()->getScreenDispX());
+        myProgram.setProjMat(aCtx, getCamera()->getProjMatrix());
+        myProgram.setColor(aCtx, getRoot()->getColorForElement(StGLRootWidget::Color_MessageBox), myOpacity * 0.8f);
 
-        myVertexBuf.bindVertexAttrib(aCtx, myProgram.getVVertexLoc());
-        aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-        myVertexBuf.unBindVertexAttrib(aCtx, myProgram.getVVertexLoc());
+            myVertexBuf.bindVertexAttrib(aCtx, myProgram.getVVertexLoc());
+            aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+            myVertexBuf.unBindVertexAttrib(aCtx, myProgram.getVVertexLoc());
 
-    myProgram.unuse(aCtx);
+        myProgram.unuse(aCtx);
 
-    aCtx.core20fwd->glDisable(GL_BLEND);
+        aCtx.core20fwd->glDisable(GL_BLEND);
+    }
 
     StGLBoxPx aScissorRect;
     stglScissorRect(aScissorRect);
