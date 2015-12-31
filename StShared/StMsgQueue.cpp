@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -29,7 +29,7 @@ void StMsgQueue::popAll() {
         aText += *aMsg.Text;
         isFirst = false;
 
-        if(aMsg.Type == StLogger::ST_ERROR) {
+        if(aMsg.Level == StLogger::ST_ERROR) {
             hasErrors = true;
         }
         myQueue.pop_front();
@@ -67,32 +67,32 @@ void StMsgQueue::doPush(const StMsg& theMessage) {
 
 void StMsgQueue::pushInfo(const StHandle<StString>& theMessage) {
     StMsg aMsg;
-    aMsg.Type = StLogger::ST_INFO;
-    aMsg.Text = theMessage;
+    aMsg.Level = StLogger::ST_INFO;
+    aMsg.Text  = theMessage;
     //ST_DEBUG_LOG(*theMessage);
     doPush(aMsg);
 }
 
 void StMsgQueue::pushError(const StHandle<StString>& theMessage) {
     StMsg aMsg;
-    aMsg.Type = StLogger::ST_ERROR;
-    aMsg.Text = theMessage;
+    aMsg.Level = StLogger::ST_ERROR;
+    aMsg.Text  = theMessage;
     //ST_ERROR_LOG(*theMessage);
     doPush(aMsg);
 }
 
 void StMsgQueue::doPushInfo(const StCString& theMessage) {
     StMsg aMsg;
-    aMsg.Type = StLogger::ST_INFO;
-    aMsg.Text = new StString(theMessage);
+    aMsg.Level = StLogger::ST_INFO;
+    aMsg.Text  = new StString(theMessage);
     //ST_DEBUG_LOG(*theMessage);
     doPush(aMsg);
 }
 
 void StMsgQueue::doPushError(const StCString& theMessage) {
     StMsg aMsg;
-    aMsg.Type = StLogger::ST_ERROR;
-    aMsg.Text = new StString(theMessage);
+    aMsg.Level = StLogger::ST_ERROR;
+    aMsg.Text  = new StString(theMessage);
     //ST_ERROR_LOG(*theMessage);
     doPush(aMsg);
 }

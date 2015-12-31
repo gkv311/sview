@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -16,8 +16,8 @@
 
 struct StMsg {
 
-    StHandle<StString> Text; //!< message text
-    StLogger::Level    Type; //!< message type
+    StHandle<StString> Text;  //!< message text
+    StLogger::Level    Level; //!< message level
 
 };
 
