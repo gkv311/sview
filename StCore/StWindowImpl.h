@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -295,6 +295,21 @@ class StWindowImpl {
     TiledCfg           myTiledCfg;        //!< tiles configuration (multiple viewports within the same window)
 
 #ifdef _WIN32
+    // available since Win7 (not in Vista!)
+    typedef BOOL (WINAPI *RegisterTouchWindow_t)(HWND hwnd, ULONG ulFlags);
+    typedef BOOL (WINAPI *UnregisterTouchWindow_t)(HWND hwnd);
+    typedef BOOL (WINAPI *GetTouchInputInfo_t)(HTOUCHINPUT hTouchInput,
+                                               UINT cInputs,
+                                               PTOUCHINPUT pInputs,
+                                               int         cbSize);
+    typedef BOOL (WINAPI *CloseTouchInputHandle_t)(HTOUCHINPUT hTouchInput);
+    RegisterTouchWindow_t   myRegisterTouchWindow;
+    UnregisterTouchWindow_t myUnregisterTouchWindow;
+    GetTouchInputInfo_t     myGetTouchInputInfo;
+    CloseTouchInputHandle_t myCloseTouchInputHandle;
+    TOUCHINPUT*             myTmpTouches;
+    int                     myNbTmpTouches;
+
     StSearchMonitors   myMsgMonitors;     //!< available monitors, accessed from message thread
     POINT              myPointTest;       //!< temporary point object to verify cached window position
     StHandle<StThread> myMsgThread;       //!< dedicated thread for window message loop

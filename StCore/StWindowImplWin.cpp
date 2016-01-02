@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -214,6 +214,11 @@ bool StWindowImpl::wndCreateWindows() {
         #define NOTIFY_FOR_ALL_SESSIONS 1
         #define NOTIFY_FOR_THIS_SESSION 0
         aSessNotifSetProc(myMaster.hWindowGl, NOTIFY_FOR_THIS_SESSION);
+    }
+
+    // recieve WM_TOUCH events
+    if(myRegisterTouchWindow != NULL) {
+        //myRegisterTouchWindow(myMaster.hWindowGl, TWF_FINETOUCH);
     }
 
     // always wait for message thread exit before quit
@@ -760,6 +765,66 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
 
             myEventsBuffer.append(myStEvent);
             return 0;
+        }
+        case WM_TOUCH: {
+            int aNbTouches = LOWORD(wParam);
+            //ST_DEBUG_LOG(" @@ WM_TOUCH " + aNbTouches);
+            if(aNbTouches < 1
+            || myGetTouchInputInfo == NULL) {
+                break;
+            }
+
+            if(aNbTouches > myNbTmpTouches) {
+                stMemFree(myTmpTouches);
+                myNbTmpTouches = stMax(aNbTouches, 8);
+                myTmpTouches   = stMemAlloc<TOUCHINPUT*>(sizeof(TOUCHINPUT) * myNbTmpTouches);
+            }
+            if(myTmpTouches == NULL) {
+                break;
+            }
+
+            if(!myGetTouchInputInfo((HTOUCHINPUT )lParam, aNbTouches, myTmpTouches, sizeof(TOUCHINPUT))) {
+                break;
+            }
+
+            const StRectI_t aWinRect  = getPlacement();
+            const float     aWinSizeX = float(aWinRect.width());
+            const float     aWinSizeY = float(aWinRect.height());
+            myStEvent.Touch.NbTouches = 0;
+            myStEvent.Type = stEvent_TouchMove;
+            for(size_t aTouchIter = 0; aTouchIter < ST_MAX_TOUCHES; ++aTouchIter) {
+                StTouch& aTouch = myStEvent.Touch.Touches[aTouchIter];
+                aTouch = StTouch::Empty();
+                if(aTouchIter >= aNbTouches) {
+                    continue;
+                }
+
+                const TOUCHINPUT& aTouchSrc = myTmpTouches[aTouchIter];
+                if((aTouchSrc.dwFlags & TOUCHEVENTF_UP) == TOUCHEVENTF_UP) {
+                    myStEvent.Type = stEvent_TouchUp;
+                    continue;
+                } else if((aTouchSrc.dwFlags & TOUCHEVENTF_DOWN) == TOUCHEVENTF_DOWN) {
+                    myStEvent.Type = stEvent_TouchDown;
+                }
+
+                ++myStEvent.Touch.NbTouches;
+                aTouch.Id       = aTouchSrc.dwID;
+                aTouch.DeviceId = (size_t )aTouchSrc.hSource;
+                aTouch.OnScreen = true; // how to test?
+
+                const float aPosX = float(aTouchSrc.x) * 0.01f;
+                const float aPosY = float(aTouchSrc.y) * 0.01f;
+                aTouch.PointX = (aPosX - float(aWinRect.left())) / aWinSizeX;
+                aTouch.PointY = (aPosY - float(aWinRect.top()))  / aWinSizeY;
+            }
+
+            myCloseTouchInputHandle((HTOUCHINPUT )lParam);
+            myEventsBuffer.append(myStEvent);
+            return 0;
+        }
+        case WM_GESTURE: {
+            //ST_DEBUG_LOG("WM_GESTURE");
+            break;
         }
     }
     // Pass All Unhandled Messages To DefWindowProc

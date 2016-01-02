@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -61,6 +61,12 @@ StWindowImpl::StWindowImpl(const StHandle<StResourceManager>& theResMgr,
   myWinMonScaleId(0),
   myTiledCfg(TiledCfg_Separate),
 #ifdef _WIN32
+  myRegisterTouchWindow(NULL),
+  myUnregisterTouchWindow(NULL),
+  myGetTouchInputInfo(NULL),
+  myCloseTouchInputHandle(NULL),
+  myTmpTouches(NULL),
+  myNbTmpTouches(0),
   myEventInitWin(false),
   myEventInitGl(false),
   myEventQuit(false),
@@ -119,7 +125,16 @@ StWindowImpl::StWindowImpl(const StHandle<StResourceManager>& theResMgr,
     myMonSlave.ySub = 0;
 
 #ifdef _WIN32
-    myEventsThreaded  = true; // events loop is always performed in dedicated thread
+    myEventsThreaded = true; // events loop is always performed in dedicated thread
+
+    HMODULE aUser32Module = GetModuleHandleW(L"User32");
+    if(aUser32Module != NULL) {
+        // User32 should be already loaded
+        myRegisterTouchWindow   = (RegisterTouchWindow_t   )GetProcAddress(aUser32Module, "RegisterTouchWindow");
+        myUnregisterTouchWindow = (UnregisterTouchWindow_t )GetProcAddress(aUser32Module, "UnregisterTouchWindow");
+        myGetTouchInputInfo     = (GetTouchInputInfo_t     )GetProcAddress(aUser32Module, "GetTouchInputInfo");
+        myCloseTouchInputHandle = (CloseTouchInputHandle_t )GetProcAddress(aUser32Module, "CloseTouchInputHandle");
+    }
 
     // Adjust system timer
     // By default Windows2K+ timer has ugly precision
@@ -226,6 +241,8 @@ StWindowImpl::~StWindowImpl() {
     } else {
         timeEndPeriod(1);
     }
+    stMemFree(myTmpTouches);
+    myTmpTouches = NULL;
 #endif
 
 #ifdef __APPLE__
