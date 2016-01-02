@@ -98,6 +98,13 @@ class StGLContext {
 
         public:
 
+    enum GlVendor {
+        GlVendor_UNKNOWN,
+        GlVendor_NVIDIA,
+        GlVendor_AMD,
+        GlVendor_Intel
+    };
+
     enum GPU_Name {
         GPU_UNKNOWN,
         GPU_GEFORCE,
@@ -410,6 +417,7 @@ class StGLContext {
     StHandle<StResourceManager>
                             myResMgr;             //!< file resources manager
     StHandle<StMsgQueue>    myMsgQueue;           //!< messages queue
+    GlVendor                myGlVendor;           //!< driver vendor
     GPU_Name                myGpuName;            //!< GPU name
     GLint                   myVerMajor;           //!< cached GL version major number
     GLint                   myVerMinor;           //!< cached GL version minor number

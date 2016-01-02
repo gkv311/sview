@@ -67,6 +67,7 @@ StGLContext::StGLContext(const StHandle<StResourceManager>& theResMgr)
   extSwapTear(false),
   myFuncs(new StGLFunctions()),
   myResMgr(theResMgr),
+  myGlVendor(GlVendor_UNKNOWN),
   myGpuName(GPU_UNKNOWN),
   myVerMajor(0),
   myVerMinor(0),
@@ -118,6 +119,7 @@ StGLContext::StGLContext(const bool theToInitialize)
   extAll(NULL),
   extSwapTear(false),
   myFuncs(new StGLFunctions()),
+  myGlVendor(GlVendor_UNKNOWN),
   myGpuName(GPU_UNKNOWN),
   myVerMajor(0),
   myVerMinor(0),
@@ -185,6 +187,13 @@ void StGLContext::stglDebugCallback(unsigned int theSource,
                                     unsigned int theSeverity,
                                     int          /*theLength*/,
                                     const char*  theMessage) {
+  if(myGlVendor == GlVendor_NVIDIA) {
+      // filter too verbose messages
+      if(theId == 131185) {
+          return;
+      }
+  }
+
 #ifdef GL_DEBUG_SOURCE_API_ARB
     const StCString& aSrc = (theSource >= GL_DEBUG_SOURCE_API_ARB
                           && theSource <= GL_DEBUG_SOURCE_OTHER_ARB)
@@ -1496,6 +1505,15 @@ bool StGLContext::stglInit() {
          && STGL_READ_FUNC(glBindVertexBuffers);
 
 #endif // OpenGL desktop or ES
+
+    const StString aGlVendor((const char* )core11fwd->glGetString(GL_VENDOR));
+    if(aGlVendor.isContains(stCString("NVIDIA"))) {
+        myGlVendor = GlVendor_NVIDIA;
+    } else if(aGlVendor.isContains(stCString("ATI Technologies"))) {
+        myGlVendor = GlVendor_AMD;
+    } else if(aGlVendor.isContains(stCString("Intel"))) {
+        myGlVendor = GlVendor_Intel;
+    }
 
     const StString aGlRenderer((const char* )core11fwd->glGetString(GL_RENDERER));
     if(aGlRenderer.isContains(stCString("GeForce"))) {
