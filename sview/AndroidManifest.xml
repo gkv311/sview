@@ -6,6 +6,7 @@
     <application android:label="@string/app_name"
                  android:hasCode="true"
                  android:icon="@drawable/ic_launcher">
+        <uses-library android:name="com.s3dv.s3dvsurface" android:required="false" />
         <!-- Movie Player -->
         <activity android:name="com.sview.StMovieActivity"
                   android:label="@string/app_movie_name"

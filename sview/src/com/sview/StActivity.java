@@ -17,6 +17,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.view.SurfaceHolder;
 import android.widget.Toast;
 
 /**
@@ -177,6 +178,13 @@ public class StActivity extends NativeActivity implements SensorEventListener {
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder theHolder) {
+        super.surfaceCreated(theHolder);
+        //myS3dvSurf = new StS3dvSurface(theHolder);
+        //myS3dvSurf.setStereo(true);
     }
 
 //endregion
@@ -356,6 +364,8 @@ public class StActivity extends NativeActivity implements SensorEventListener {
     protected boolean        myIsPoorOri     = false;
     protected boolean        myToTrackOrient = false;
     protected long           myCppGlue = 0; //!< pointer to c++ class StAndroidGlue instance
+
+    protected StS3dvSurface  myS3dvSurf = null;
 
 //endregion
 
