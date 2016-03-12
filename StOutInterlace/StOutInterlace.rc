@@ -15,7 +15,7 @@ BEGIN
     BEGIN
       VALUE "FileDescription", "Interlace Renderer library\000"
       VALUE "FileVersion",     SVIEW_SDK_VER_STRING "\000"
-      VALUE "LegalCopyright",  "\251 2009-2015 Kirill Gavrilov\000"
+      VALUE "LegalCopyright",  "\251 2009-2016 Kirill Gavrilov\000"
       VALUE "ProductName",     "StOutInterlace\000"
       VALUE "ProductVersion",  SVIEW_SDK_VER_STRING "\000"
       VALUE "OfficialSite",    "www.sview.ru\000"
