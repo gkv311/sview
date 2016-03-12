@@ -207,6 +207,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="StOutDistorted.cpp" />
+    <ClCompile Include="StProgramBarrel.cpp" />
+    <ClCompile Include="StProgramFlat.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="StOutDistorted.rc" />

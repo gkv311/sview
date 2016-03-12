@@ -226,6 +226,10 @@
 			<Option target="WIN_vc_AMD64_DEBUG" />
 			<Option target="WIN_vc_AMD64" />
 		</Unit>
+		<Unit filename="StProgramBarrel.cpp" />
+		<Unit filename="StProgramBarrel.h" />
+		<Unit filename="StProgramFlat.cpp" />
+		<Unit filename="StProgramFlat.h" />
 		<Unit filename="lang/chinese/language.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>

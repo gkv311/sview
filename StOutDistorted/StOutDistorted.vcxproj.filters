@@ -9,6 +9,12 @@
     <ClCompile Include="StOutDistorted.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="StProgramBarrel.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="StProgramFlat.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="StOutDistorted.rc" />

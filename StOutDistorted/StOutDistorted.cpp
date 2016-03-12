@@ -1,6 +1,6 @@
 /**
  * StOutDistorted, class providing stereoscopic output in anamorph side by side format using StCore toolkit.
- * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -8,6 +8,9 @@
  */
 
 #include "StOutDistorted.h"
+
+#include "StProgramBarrel.h"
+#include "StProgramFlat.h"
 
 #include <StGL/StGLContext.h>
 #include <StGL/StGLEnums.h>
@@ -68,181 +71,7 @@ namespace {
         STTR_PLUGIN_DESCRIPTION = 2002,
     };
 
-    static const char VERTEX_SHADER[] =
-       "attribute vec4 vVertex;"
-       "attribute vec2 vTexCoord;"
-       "varying vec2 fTexCoord;"
-       "void main(void) {"
-       "    fTexCoord = vTexCoord;"
-       "    gl_Position = vVertex;"
-       "}";
-
 }
-
-/**
- * Flat GLSL program.
- */
-class StProgramFlat : public StGLProgram {
-
-        private:
-
-    StGLVarLocation atrVVertexLoc;
-    StGLVarLocation atrVTexCoordLoc;
-
-        public:
-
-    ST_LOCAL StProgramFlat() : StGLProgram("StProgramFlat") {}
-    ST_LOCAL StGLVarLocation getVVertexLoc()   const { return atrVVertexLoc; }
-    ST_LOCAL StGLVarLocation getVTexCoordLoc() const { return atrVTexCoordLoc; }
-
-    ST_LOCAL virtual bool init(StGLContext& theCtx) ST_ATTR_OVERRIDE {
-        const char FRAGMENT_SHADER[] =
-           "uniform sampler2D texR, texL;"
-           "varying vec2 fTexCoord;"
-           "void main(void) {"
-           "    gl_FragColor = texture2D(texR, fTexCoord);"
-           "}";
-
-        StGLVertexShader aVertexShader(StGLProgram::getTitle());
-        StGLAutoRelease aTmp1(theCtx, aVertexShader);
-        aVertexShader.init(theCtx, VERTEX_SHADER);
-
-        StGLFragmentShader aFragmentShader(StGLProgram::getTitle());
-        StGLAutoRelease aTmp2(theCtx, aFragmentShader);
-        aFragmentShader.init(theCtx, FRAGMENT_SHADER);
-        if(!StGLProgram::create(theCtx)
-           .attachShader(theCtx, aVertexShader)
-           .attachShader(theCtx, aFragmentShader)
-           .link(theCtx)) {
-            return false;
-        }
-
-        atrVVertexLoc   = StGLProgram::getAttribLocation(theCtx, "vVertex");
-        atrVTexCoordLoc = StGLProgram::getAttribLocation(theCtx, "vTexCoord");
-        return atrVVertexLoc.isValid() && atrVTexCoordLoc.isValid();
-    }
-
-};
-
-/**
- * Distortion GLSL program.
- */
-class StProgramBarrel : public StGLProgram {
-
-        public:
-
-    ST_LOCAL StProgramBarrel() : StGLProgram("StProgramBarrel") {}
-    ST_LOCAL StGLVarLocation getVVertexLoc()   const { return atrVVertexLoc; }
-    ST_LOCAL StGLVarLocation getVTexCoordLoc() const { return atrVTexCoordLoc; }
-
-    ST_LOCAL virtual bool init(StGLContext& theCtx) ST_ATTR_OVERRIDE {
-        const char FRAGMENT_SHADER[] =
-           "uniform sampler2D texR, texL;"
-           "varying vec2 fTexCoord;"
-
-           "uniform vec4 uChromAb;"
-           "uniform vec4 uWarpCoef;"
-           "uniform vec2 uLensCenter;"
-           "uniform vec2 uScale;"
-           "uniform vec2 uScaleIn;"
-
-           "void main(void) {"
-           "    vec2 aTheta = (fTexCoord - uLensCenter) * uScaleIn;" // scales to [-1, 1]
-           "    float rSq = aTheta.x * aTheta.x + aTheta.y * aTheta.y;"
-           "    vec2 aTheta1 = aTheta * (uWarpCoef.x + uWarpCoef.y * rSq +"
-           "                             uWarpCoef.z * rSq * rSq +"
-           "                             uWarpCoef.w * rSq * rSq * rSq);"
-           "    vec2 aThetaBlue = aTheta1 * (uChromAb.z + uChromAb.w * rSq);"
-           "    vec2 aTCrdsBlue = uLensCenter + uScale * aThetaBlue;"
-           "    if(any(bvec2(clamp(aTCrdsBlue, vec2(0.0, 0.0), vec2(1.0, 1.0)) - aTCrdsBlue))) {"
-           "        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);"
-           "        return;"
-           "    }"
-
-           "    vec2 aTCrdsGreen = uLensCenter + uScale * aTheta1;"
-           "    vec2 aThetaRed = aTheta1 * (uChromAb.x + uChromAb.y * rSq);"
-           "    vec2 aTCrdsRed = uLensCenter + uScale * aThetaRed;"
-           "    gl_FragColor = vec4(texture2D(texR, aTCrdsRed  ).r,"
-           "                        texture2D(texR, aTCrdsGreen).g,"
-           "                        texture2D(texR, aTCrdsBlue ).b, 1.0);"
-           "}";
-
-        StGLVertexShader aVertexShader(StGLProgram::getTitle());
-        StGLAutoRelease aTmp1(theCtx, aVertexShader);
-        aVertexShader.init(theCtx, VERTEX_SHADER);
-
-        StGLFragmentShader aFragmentShader(StGLProgram::getTitle());
-        StGLAutoRelease aTmp2(theCtx, aFragmentShader);
-        aFragmentShader.init(theCtx, FRAGMENT_SHADER);
-        if(!StGLProgram::create(theCtx)
-           .attachShader(theCtx, aVertexShader)
-           .attachShader(theCtx, aFragmentShader)
-           .link(theCtx)) {
-            return false;
-        }
-
-        atrVVertexLoc    = StGLProgram::getAttribLocation (theCtx, "vVertex");
-        atrVTexCoordLoc  = StGLProgram::getAttribLocation (theCtx, "vTexCoord");
-        uniChromAbLoc    = StGLProgram::getUniformLocation(theCtx, "uChromAb");
-        uniWarpCoeffLoc  = StGLProgram::getUniformLocation(theCtx, "uWarpCoef");
-        uniLensCenterLoc = StGLProgram::getUniformLocation(theCtx, "uLensCenter");
-        uniScaleLoc      = StGLProgram::getUniformLocation(theCtx, "uScale");
-        uniScaleInLoc    = StGLProgram::getUniformLocation(theCtx, "uScaleIn");
-        return atrVVertexLoc.isValid() && atrVTexCoordLoc.isValid();
-    }
-
-    /**
-     * Setup distortion coefficients.
-     */
-    ST_LOCAL void setupCoeff(StGLContext&    theCtx,
-                             const StGLVec4& theVec) {
-        use(theCtx);
-        theCtx.core20fwd->glUniform4fv(uniWarpCoeffLoc, 1, theVec);
-        unuse(theCtx);
-    }
-
-    /**
-     * Setup Chrome coefficients.
-     */
-    ST_LOCAL void setupChrome(StGLContext&    theCtx,
-                              const StGLVec4& theVec) {
-        use(theCtx);
-        theCtx.core20fwd->glUniform4fv(uniChromAbLoc, 1, theVec);
-        unuse(theCtx);
-    }
-
-    ST_LOCAL void setLensCenter(StGLContext&    theCtx,
-                                const StGLVec2& theVec) {
-        use(theCtx);
-        theCtx.core20fwd->glUniform2fv(uniLensCenterLoc, 1, theVec);
-        unuse(theCtx);
-    }
-
-    ST_LOCAL void setScale(StGLContext&    theCtx,
-                           const StGLVec2& theVec) {
-        use(theCtx);
-        theCtx.core20fwd->glUniform2fv(uniScaleLoc, 1, theVec);
-        unuse(theCtx);
-    }
-
-    ST_LOCAL void setScaleIn(StGLContext&    theCtx,
-                             const StGLVec2& theVec) {
-        use(theCtx);
-        theCtx.core20fwd->glUniform2fv(uniScaleInLoc, 1, theVec);
-        unuse(theCtx);
-    }
-
-        private:
-
-    StGLVarLocation atrVVertexLoc;
-    StGLVarLocation atrVTexCoordLoc;
-    StGLVarLocation uniChromAbLoc;
-    StGLVarLocation uniWarpCoeffLoc;
-    StGLVarLocation uniLensCenterLoc;
-    StGLVarLocation uniScaleLoc;
-    StGLVarLocation uniScaleInLoc;
-
-};
 
 StAtomic<int32_t> StOutDistorted::myInstancesNb(0);
 

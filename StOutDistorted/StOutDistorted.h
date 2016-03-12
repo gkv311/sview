@@ -1,6 +1,6 @@
 /**
  * StOutDistorted, class providing stereoscopic output in anamorph side by side format using StCore toolkit.
- * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
