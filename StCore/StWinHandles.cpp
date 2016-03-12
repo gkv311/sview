@@ -159,8 +159,15 @@ StWinGlrc::~StWinGlrc() {
 }
 
 bool StWinGlrc::makeCurrent(EGLSurface theSurface) {
-    return myRC != EGL_NO_CONTEXT
-        && eglMakeCurrent(myDisplay, theSurface, theSurface, myRC) == EGL_TRUE;
+    if(myRC == EGL_NO_CONTEXT) {
+        return false;
+    }
+
+    // some drivers crash when trying to make current EGL_NO_SURFACE within proper EGLContext
+    EGLContext aCtx = theSurface != EGL_NO_SURFACE
+                    ? myRC
+                    : EGL_NO_CONTEXT;
+    return eglMakeCurrent(myDisplay, theSurface, theSurface, aCtx) == EGL_TRUE;
 }
 
 #elif defined(_WIN32)
