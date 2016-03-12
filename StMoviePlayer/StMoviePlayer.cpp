@@ -1687,11 +1687,14 @@ void StMoviePlayer::beforeDraw() {
     myWindow->showCursor(!myGUI->toHideCursor());
 
     // check for mono state
+    bool hasStereoSource = false;
     StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
     if(!aParams.isNull()) {
-        myWindow->setStereoOutput(!aParams->isMono()
-                            && (myGUI->myImage->params.displayMode->getValue() == StGLImageRegion::MODE_STEREO));
+        hasStereoSource =!aParams->isMono()
+                       && myGUI->myImage->hasVideoStream()
+                       && myGUI->myImage->params.displayMode->getValue() == StGLImageRegion::MODE_STEREO;
     }
+    myWindow->setStereoOutput(hasStereoSource);
 
     if(myIsBenchmark
     || !params.ToLimitFps->getValue()) {

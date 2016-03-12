@@ -1146,11 +1146,14 @@ void StImageViewer::stglDraw(unsigned int theView) {
         myGUI->stglUpdate(myWindow->getMousePos());
 
         // check for mono state
+        bool hasStereoSource = false;
         StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
         if(!aParams.isNull()) {
-            myWindow->setStereoOutput(!aParams->isMono() && myWindow->isActive()
-                                   && (myGUI->myImage->params.displayMode->getValue() == StGLImageRegion::MODE_STEREO));
+            hasStereoSource =!aParams->isMono()
+                           && myGUI->myImage->hasVideoStream()
+                           && myGUI->myImage->params.displayMode->getValue() == StGLImageRegion::MODE_STEREO;
         }
+        myWindow->setStereoOutput(hasStereoSource);
     }
 
     // draw GUI
