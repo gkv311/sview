@@ -19,6 +19,12 @@
 *.so
 *.zip
 *.7z
+*.gz
+*.bz2
+*.xz
+*.dmg
+custom.bat
+custom.sh
 Doxygen/
 distribution/repository/
 distribution/temp/
@@ -31,6 +37,8 @@ distribution/temp/
 3rdparty/include/freetype
 3rdparty/include/lib*
 3rdparty/include/ft2build.h
+3rdparty/include/OVR*
+3rdparty/include/Extras/OVR*
 build/
 bin/
 lib/
