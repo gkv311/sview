@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2014-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2014-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -108,6 +108,7 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
   myThJniEnv(NULL),
   myMsgRead(0),
   myMsgWrite(0),
+  myToEnableStereoHW(false),
   myHasOrientSensor(false),
   myIsPoorOrient(false),
   myToTrackOrient(false),
@@ -133,6 +134,9 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
 
     jmethodID aJMet_getStAppClass = aJniEnv->GetMethodID(aJClass_Activity, "getStAppClass", "()Ljava/lang/String;");
     myStAppClass = stStringFromJava(aJniEnv, (jstring )aJniEnv->CallObjectMethod(myActivity->clazz, aJMet_getStAppClass));
+
+    jmethodID aJMet_getStereoApiInfo = aJniEnv->GetMethodID(aJClass_Activity, "getStereoApiInfo", "()Ljava/lang/String;");
+    myStereoApiId = stStringFromJava(aJniEnv, (jstring )aJniEnv->CallObjectMethod(myActivity->clazz, aJMet_getStereoApiInfo));
 
     readOpenPath();
 
@@ -281,6 +285,9 @@ void StAndroidGlue::updateMonitors() {
 
     StMonitor aMon;
     aMon.setId(0);
+    if(myStereoApiId == "S3DV") {
+        aMon.setPnPId("ST@S3DV");
+    }
     aMon.changeVRect().top()    = 0;
     aMon.changeVRect().left()   = 0;
     aMon.changeVRect().right()  = (int )(0.5 + double(aWidthDp ) * (double(aDpi) / 160.0));
@@ -671,6 +678,19 @@ void* StAndroidGlue::saveInstanceState(size_t* theOutLen) {
 
     pthread_mutex_unlock(&myMutex);
     return aSavedState;
+}
+
+void StAndroidGlue::setHardwareStereoOn(const bool theToEnable) {
+    if(myToEnableStereoHW == theToEnable
+    || myStereoApiId.isEmpty()
+    || myThJniEnv == NULL) {
+        return;
+    }
+
+    jclass    aJClassActivity = myThJniEnv->GetObjectClass(myActivity->clazz);
+    jmethodID aJMet           = myThJniEnv->GetMethodID(aJClassActivity, "setHardwareStereoOn", "(Z)V");
+    myThJniEnv->CallVoidMethod(myActivity->clazz, aJMet, (jboolean )(theToEnable ? JNI_TRUE : JNI_FALSE));
+    myToEnableStereoHW = theToEnable;
 }
 
 void StAndroidGlue::setTrackOrientation(const bool theToTrack) {

@@ -23,6 +23,25 @@ public class StS3dvSurface {
     public boolean isValid() { return mySurf != null; }
 
     /**
+     * Check library availability without instantiation.
+     */
+    public static boolean isApiAvailable() {
+        ClassLoader aClassLoader = StS3dvSurface.class.getClassLoader();
+        try {
+            Class<?> anS3dvClass = aClassLoader.loadClass("com.s3dv.s3dvsurface.S3DVSurface");
+            anS3dvClass.getConstructor(SurfaceHolder.class);
+            anS3dvClass.getMethod("SetV3DType", int.class, int.class, int.class);
+            return true;
+        } catch(ClassNotFoundException theEx) {
+            return false;
+        } catch(NoSuchMethodException theEx) {
+            return false;
+        } catch(IllegalArgumentException theEx) {
+            return false;
+        }
+    }
+
+    /**
      * Main constructor.
      */
     public StS3dvSurface(SurfaceHolder theHolder) {
@@ -33,7 +52,7 @@ public class StS3dvSurface {
             mySetV3DType = anS3dvClass.getMethod("SetV3DType", int.class, int.class, int.class);
             mySurf       = anS3dvConstr.newInstance(theHolder);
         } catch(ClassNotFoundException theEx) {
-            theEx.printStackTrace();
+            //theEx.printStackTrace();
         } catch(NoSuchMethodException theEx) {
             theEx.printStackTrace();
         } catch(IllegalArgumentException theEx) {

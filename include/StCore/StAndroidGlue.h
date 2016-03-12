@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2014-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2014-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -149,6 +149,11 @@ class StAndroidGlue {
         mySavedState     = theSavedState;
         mySavedStateSize = theSavedStateSize;
     }
+
+    /**
+     * Turn stereo output on using device-specific API.
+     */
+    ST_CPPEXPORT void setHardwareStereoOn(const bool theToEnable);
 
     /**
      * Return true if device has orientation sensor.
@@ -382,6 +387,8 @@ class StAndroidGlue {
 
     StMutex                 myFetchLock;         //!< fetch data lock
     StString                myStAppClass;        //!< application class name (e.g. image, video)
+    StString                myStereoApiId;       //!< stereo API identifier
+    bool                    myToEnableStereoHW;  //!< on/off state of stereo API
     StString                myDndPath;           //!< intent data string
     StString                myCreatePath;        //!< intent data string used to open this activity
     StQuaternion<double>    myQuaternion;        //!< device orientation

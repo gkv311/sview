@@ -361,6 +361,10 @@ const StString& StWindow::getStatistics() const {
     return myWin->myStatistics;
 }
 
+void StWindow::setHardwareStereoOn(const bool theToEnable) {
+    myWin->myToEnableStereoHW = theToEnable;
+}
+
 bool StWindow::hasOrientationSensor() const {
     return myWin->myHasOrientSensor;
 }

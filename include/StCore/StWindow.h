@@ -417,6 +417,11 @@ class StWindow {
     ST_CPPEXPORT const StString& getStatistics() const;
 
     /**
+     * Turn hardware stereo on/off, when appropriate API is available.
+     */
+    ST_CPPEXPORT virtual void setHardwareStereoOn(const bool theToEnable);
+
+    /**
      * Return true if device has orientation sensor.
      */
     ST_CPPEXPORT virtual bool hasOrientationSensor() const;

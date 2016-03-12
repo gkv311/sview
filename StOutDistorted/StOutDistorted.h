@@ -169,6 +169,7 @@ class StOutDistorted : public StWindow {
         DEVICE_AUTO         =-1,
         DEVICE_DISTORTED    = 0, //!< general output
         DEVICE_OCULUS       = 1, //!< Oculus Rift
+        DEVICE_S3DV         = 2, //!< S3DV
         DEVICE_NB,
     };
 
@@ -178,6 +179,21 @@ class StOutDistorted : public StWindow {
         LAYOUT_SIDE_BY_SIDE          = 2, //!< full-size side by side
         LAYOUT_OVER_UNDER            = 3, //!< full-size over under
     };
+
+    /**
+     * Return current layout.
+     */
+    Layout getPairLayout() const {
+        switch(myDevice) {
+            case DEVICE_OCULUS:
+                return LAYOUT_SIDE_BY_SIDE;
+            case DEVICE_S3DV:
+                return LAYOUT_SIDE_BY_SIDE_ANAMORPH;
+            default:
+            case DEVICE_DISTORTED:
+                return (Layout )params.Layout->getValue();
+        }
+    }
 
     struct {
 

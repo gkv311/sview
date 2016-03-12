@@ -272,6 +272,7 @@ class StWindowImpl {
     StString           myWindowTitle;     //!< window caption
     int                myInitState;       //!< initialization error code
     StString           myStatistics;      //!< extra statistics
+    bool               myToEnableStereoHW;//!< hardware stereo enable state
     StQuaternion<double> myQuaternion;    //!< device orientation
     bool               myHasOrientSensor; //!< flag indicating that device has orientation sensors
     bool               myIsPoorOrient;    //!< flag indicating that available orientation sensor provides imprecise values

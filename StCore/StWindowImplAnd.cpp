@@ -469,6 +469,7 @@ void StWindowImpl::processEvents() {
 
     // check onNewIntent event
     StString aDndFile;
+    myParentWin->setHardwareStereoOn(myToEnableStereoHW);
     myParentWin->setTrackOrientation(myToTrackOrient);
     myParentWin->fetchState(aDndFile, myQuaternion);
     if(!aDndFile.isEmpty()) {

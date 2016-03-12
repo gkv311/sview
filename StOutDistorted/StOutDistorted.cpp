@@ -54,6 +54,8 @@ namespace {
         STTR_DISTORTED_DESC     = 1001,
         STTR_OCULUS_NAME        = 1002,
         STTR_OCULUS_DESC        = 1003,
+        STTR_S3DV_NAME          = 1004,
+        STTR_S3DV_DESC          = 1005,
 
         // parameters
         STTR_PARAMETER_LAYOUT     = 1110,
@@ -86,6 +88,7 @@ const char* StOutDistorted::getRendererId() const {
 const char* StOutDistorted::getDeviceId() const {
     switch(myDevice) {
         case DEVICE_OCULUS:    return "Oculus";
+        case DEVICE_S3DV:      return "S3DV";
         case DEVICE_DISTORTED:
         default:               return "Distorted";
     }
@@ -101,6 +104,11 @@ bool StOutDistorted::setDevice(const StString& theDevice) {
             myToResetDevice = true;
         }
         myDevice = DEVICE_OCULUS;
+    } else if(theDevice == "S3DV") {
+        if(myDevice != DEVICE_S3DV) {
+            myToResetDevice = true;
+        }
+        myDevice = DEVICE_S3DV;
     } else if(theDevice == "Distorted") {
         if(myDevice != DEVICE_DISTORTED) {
             myToResetDevice = true;
@@ -117,7 +125,8 @@ void StOutDistorted::getDevices(StOutDevicesList& theList) const {
 }
 
 void StOutDistorted::getOptions(StParamsList& theList) const {
-    if(myDevice != DEVICE_OCULUS) {
+    if(myDevice != DEVICE_DISTORTED
+    && myDevice != DEVICE_S3DV) {
         theList.add(params.Layout);
     }
     theList.add(params.MonoClone);
@@ -169,12 +178,16 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
     // detect connected displays
     int aSupportOculus   = ST_DEVICE_SUPPORT_NONE;
     int aSupportParallel = ST_DEVICE_SUPPORT_NONE;
+    int aSupportS3DV     = ST_DEVICE_SUPPORT_NONE;
     bool isHdmiPack = false;
     for(size_t aMonIter = 0; aMonIter < aMonitors.size(); ++aMonIter) {
         const StMonitor& aMon = aMonitors[aMonIter];
         if(aMon.getPnPId().isStartsWith(stCString("OVR"))) {
             // Oculus Rift
             aSupportOculus = ST_DEVICE_SUPPORT_HIGHT;
+            break;
+        } else if(aMon.getPnPId().isEquals(stCString("ST@S3DV"))) {
+            aSupportS3DV = ST_DEVICE_SUPPORT_PREFER;
             break;
         } else if(aMon.getVRect().width()  == 1920
                && aMon.getVRect().height() == 2205) {
@@ -213,10 +226,23 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
     aDevOculus->Desc     = aLangMap.changeValueId(STTR_OCULUS_DESC, "Distorted Output");
     myDevices.add(aDevOculus);
 
+    if(aSupportS3DV != ST_DEVICE_SUPPORT_NONE) {
+        StHandle<StOutDevice> aDevS3dv = new StOutDevice();
+        aDevS3dv->PluginId = ST_OUT_PLUGIN_NAME;
+        aDevS3dv->DeviceId = "S3DV";
+        aDevS3dv->Priority = aSupportS3DV;
+        aDevS3dv->Name     = "S3DV";             //aLangMap.changeValueId(STTR_S3DV_NAME, "S3DV");
+        aDevS3dv->Desc     = "Distorted Output"; //aLangMap.changeValueId(STTR_S3DV_DESC, "Distorted Output");
+        myDevices.add(aDevS3dv);
+    }
+
     // load device settings
     mySettings->loadInt32(ST_SETTING_DEVICE_ID, myDevice);
     if(myDevice == DEVICE_AUTO) {
         myDevice = DEVICE_DISTORTED;
+        if(aSupportS3DV != ST_DEVICE_SUPPORT_NONE) {
+            myDevice = DEVICE_S3DV;
+        }
     }
 
     // Distortion parameters
@@ -500,7 +526,7 @@ void StOutDistorted::stglDrawCursor(const StPointD_t&  theCursorPos,
     GLfloat aCurWidth  = 2.0f * GLfloat(myCursor->getSizeX()) / GLfloat(aVPSizeX);
     GLfloat aCurHeight = 2.0f * GLfloat(myCursor->getSizeY()) / GLfloat(aVPSizeY);
     if(myDevice != DEVICE_OCULUS) {
-        switch(params.Layout->getValue()) {
+        switch(getPairLayout()) {
             case LAYOUT_SIDE_BY_SIDE_ANAMORPH:
                 aCurWidth  *= 0.5;
                 break;
@@ -720,15 +746,16 @@ void StOutDistorted::stglDraw() {
     }
 
     StWinSplit aWinSplit = StWinSlave_splitOff;
+    const Layout aPairLayout = getPairLayout();
     if(myIsStereoOn
     && (myDevice == DEVICE_OCULUS
-     || params.Layout->getValue() == LAYOUT_SIDE_BY_SIDE
-     || params.Layout->getValue() == LAYOUT_OVER_UNDER)) {
-        aWinSplit = params.Layout->getValue() == LAYOUT_OVER_UNDER && myDevice != DEVICE_OCULUS
+     || aPairLayout == LAYOUT_SIDE_BY_SIDE
+     || aPairLayout == LAYOUT_OVER_UNDER)) {
+        aWinSplit = aPairLayout == LAYOUT_OVER_UNDER && myDevice != DEVICE_OCULUS
                   ? StWinSlave_splitVertical
                   : StWinSlave_splitHorizontal;
         if(myDevice != DEVICE_OCULUS
-        && params.Layout->getValue() == LAYOUT_OVER_UNDER
+        && aPairLayout == LAYOUT_OVER_UNDER
         && myIsHdmiPack) {
             // detect special HDMI 3D modes
             const StRectI_t aRect = StWindow::getPlacement();
@@ -740,6 +767,9 @@ void StOutDistorted::stglDraw() {
         }
     }
     StWindow::setAttribute(StWinAttr_SplitCfg, aWinSplit);
+    if(myDevice == DEVICE_S3DV) {
+        StWindow::setHardwareStereoOn(myIsStereoOn);
+    }
 
     if(!StWindow::stglMakeCurrent(ST_WIN_MASTER)) {
         StWindow::signals.onRedraw(ST_DRAW_MONO);
@@ -779,7 +809,7 @@ void StOutDistorted::stglDraw() {
     StGLBoxPx aViewPortL = aVPMaster;
     StGLBoxPx aViewPortR = aVPSlave;
     if(myDevice != DEVICE_OCULUS) {
-        switch(params.Layout->getValue()) {
+        switch(aPairLayout) {
             case LAYOUT_OVER_UNDER_ANAMORPH: {
                 aViewPortR.height() /= 2;
                 aViewPortL.height() = aViewPortR.height();

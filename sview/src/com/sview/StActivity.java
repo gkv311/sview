@@ -183,8 +183,12 @@ public class StActivity extends NativeActivity implements SensorEventListener {
     @Override
     public void surfaceCreated(SurfaceHolder theHolder) {
         super.surfaceCreated(theHolder);
-        //myS3dvSurf = new StS3dvSurface(theHolder);
-        //myS3dvSurf.setStereo(true);
+        myS3dvSurf = new StS3dvSurface(theHolder);
+        if(!myS3dvSurf.isValid()) {
+            myS3dvSurf = null;
+        } else if(myToEnableStereoHW) {
+            myS3dvSurf.setStereo(true);
+        }
     }
 
 //endregion
@@ -252,6 +256,32 @@ public class StActivity extends NativeActivity implements SensorEventListener {
      */
     public String getStAppClass() {
         return null;
+    }
+
+    /**
+     * Method returning identifier of stereo API available on Android device.
+     */
+    public String getStereoApiInfo() {
+        if(StS3dvSurface.isApiAvailable()) {
+            return "S3DV";
+        }
+        return null;
+    }
+
+    /**
+     * Method to turn stereo output on or off.
+     */
+    public void setHardwareStereoOn(boolean theToEnable) {
+        final boolean toEnable = theToEnable;
+        this.runOnUiThread (new Runnable() { public void run() {
+            if(myToEnableStereoHW == toEnable) {
+                return;
+            }
+            myToEnableStereoHW = toEnable;
+            if(myS3dvSurf != null) {
+                myS3dvSurf.setStereo(toEnable);
+            }
+        }});
     }
 
     /**
@@ -366,6 +396,7 @@ public class StActivity extends NativeActivity implements SensorEventListener {
     protected long           myCppGlue = 0; //!< pointer to c++ class StAndroidGlue instance
 
     protected StS3dvSurface  myS3dvSurf = null;
+    protected boolean        myToEnableStereoHW = false;
 
 //endregion
 
