@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -117,10 +117,6 @@ class StImageLoader {
         StHandle<StImageInfo> anInfo = myImgInfo;
         myLock.unlock();
         return (!anInfo.isNull() && anInfo->Id == theParams) ? anInfo : NULL;
-    }
-
-    ST_LOCAL StPlayList& getPlayList() {
-        return *myPlayList;
     }
 
     ST_LOCAL void setStereoFormat(const StFormat theSrcFormat) {

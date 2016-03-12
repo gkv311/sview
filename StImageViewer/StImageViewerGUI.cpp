@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -983,7 +983,7 @@ void StImageViewerGUI::doOpenFile(const size_t ) {
     aDialog->signals.onFileSelected = stSlot(myPlugin, &StImageViewer::doOpen1FileFromGui);
 
     if(myPlugin->params.lastFolder.isEmpty()) {
-        StHandle<StFileNode> aCurrFile = myPlugin->myLoader->getPlayList().getCurrentFile();
+        StHandle<StFileNode> aCurrFile = myPlugin->myPlayList->getCurrentFile();
         if(!aCurrFile.isNull()) {
             myPlugin->params.lastFolder = aCurrFile->isEmpty() ? aCurrFile->getFolderPath() : aCurrFile->getValue(0)->getFolderPath();
         }
@@ -1174,7 +1174,7 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
         myBtnFull->setOpacity(myIsMinimalGUI ? 1.0f : anOpacity, false);
     }
 
-    const StPlayList::CurrentPosition aCurrPos = myPlugin->myLoader->getPlayList().getCurrentPosition();
+    const StPlayList::CurrentPosition aCurrPos = myPlugin->myPlayList->getCurrentPosition();
     if(myBtnPrev != NULL) {
         myBtnPrev->setOpacityScale(aCurrPos == StPlayList::CurrentPosition_Middle
                                 || aCurrPos == StPlayList::CurrentPosition_Last ? 1.0f : 0.5f);

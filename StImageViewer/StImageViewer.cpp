@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -135,7 +135,7 @@ class StImageViewer::StOpenImage {
         }
 
         if(myPlugin->params.lastFolder.isEmpty()) {
-            StHandle<StFileNode> aCurrFile = myPlugin->myLoader->getPlayList().getCurrentFile();
+            StHandle<StFileNode> aCurrFile = myPlugin->myPlayList->getCurrentFile();
             if(!aCurrFile.isNull()) {
                 myPlugin->params.lastFolder = aCurrFile->isEmpty() ? aCurrFile->getFolderPath() : aCurrFile->getValue(0)->getFolderPath();
             }
@@ -473,7 +473,7 @@ void StImageViewer::saveAllParams() {
     }
 
     StString aLastL, aLastR;
-    StHandle<StFileNode> aFile = myLoader->getPlayList().getCurrentFile();
+    StHandle<StFileNode> aFile = myPlayList->getCurrentFile();
     if(params.ToSaveRecent->getValue()
     && !aFile.isNull()) {
         if(aFile->isEmpty()) {
@@ -687,7 +687,7 @@ void StImageViewer::parseArguments(const StArgumentsMap& theArguments) {
         doSlideShow();
     }
     if(anArgViewMode.isValid()) {
-        myLoader->getPlayList().changeDefParams().ViewingMode = StStereoParams::GET_VIEW_MODE_FROM_STRING(anArgViewMode.getValue());
+        myPlayList->changeDefParams().ViewingMode = StStereoParams::GET_VIEW_MODE_FROM_STRING(anArgViewMode.getValue());
     }
     if(anArgSrcFormat.isValid()) {
         params.srcFormat->setValue(st::formatFromString(anArgSrcFormat.getValue()));
@@ -732,13 +732,13 @@ bool StImageViewer::open() {
             mySettings->loadString(ST_SETTING_RECENT_R, aLastR);
             if(!aLastL.isEmpty()) {
                 if(!aLastR.isEmpty()) {
-                    myLoader->getPlayList().clear();
-                    myLoader->getPlayList().addOneFile(aLastL, aLastR);
+                    myPlayList->clear();
+                    myPlayList->addOneFile(aLastL, aLastR);
                 } else {
-                    myLoader->getPlayList().open(aLastL);
+                    myPlayList->open(aLastL);
                 }
 
-                if(!myLoader->getPlayList().isEmpty()) {
+                if(!myPlayList->isEmpty()) {
                     doUpdateStateLoading();
                     myLoader->doLoadNext();
                 }
@@ -751,7 +751,7 @@ bool StImageViewer::open() {
     }
 
     // clear playlist first
-    myLoader->getPlayList().clear();
+    myPlayList->clear();
 
     //StArgument argFile1     = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE + 1]; // playlist?
     StArgument argFileLeft  = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_LEFT];
@@ -759,16 +759,16 @@ bool StImageViewer::open() {
     if(argFileLeft.isValid() && argFileRight.isValid()) {
         // meta-file
         /// TODO (Kirill Gavrilov#4) we should use MIME type!
-        myLoader->getPlayList().addOneFile(argFileLeft.getValue(), argFileRight.getValue());
+        myPlayList->addOneFile(argFileLeft.getValue(), argFileRight.getValue());
     } else if(!anOpenMIME.isEmpty()) {
         // create just one-file playlist
-        myLoader->getPlayList().addOneFile(myOpenFileInfo->getPath(), anOpenMIME);
+        myPlayList->addOneFile(myOpenFileInfo->getPath(), anOpenMIME);
     } else {
         // create playlist from file's folder
-        myLoader->getPlayList().open(myOpenFileInfo->getPath());
+        myPlayList->open(myOpenFileInfo->getPath());
     }
 
-    if(!myLoader->getPlayList().isEmpty()) {
+    if(!myPlayList->isEmpty()) {
         doUpdateStateLoading();
         myLoader->doLoadNext();
     }
@@ -848,7 +848,7 @@ void StImageViewer::doDeleteFileBegin(const size_t ) {
     //    return;
     //}
 
-    myFileToDelete = myLoader->getPlayList().getCurrentFile();
+    myFileToDelete = myPlayList->getCurrentFile();
     if(myFileToDelete.isNull()
     || myFileToDelete->size() != 0) {
         myFileToDelete.nullify();
@@ -871,8 +871,8 @@ void StImageViewer::doDeleteFileEnd(const size_t ) {
         return;
     }
 
-    myLoader->getPlayList().removePhysically(myFileToDelete);
-    if(!myLoader->getPlayList().isEmpty()) {
+    myPlayList->removePhysically(myFileToDelete);
+    if(!myPlayList->isEmpty()) {
         doUpdateStateLoading();
         myLoader->doLoadNext();
     }
@@ -1009,28 +1009,28 @@ void StImageViewer::doFileDrop(const StDNDropEvent& theEvent) {
     }
 
     const StString aFile1 = theEvent.Files[0];
-    if(!myLoader->getPlayList().checkExtension(aFile1)) {
+    if(!myPlayList->checkExtension(aFile1)) {
         return;
     } else if(theEvent.NbFiles == 1) {
-        myLoader->getPlayList().open(aFile1);
+        myPlayList->open(aFile1);
         doUpdateStateLoading();
         myLoader->doLoadNext();
         return;
     } else if(theEvent.NbFiles == 2
           && !StFolder::isFolder(aFile1)
           && !StFolder::isFolder(StString(theEvent.Files[1]))) {
-        myLoader->getPlayList().clear();
-        myLoader->getPlayList().addOneFile(aFile1, StString(theEvent.Files[1]));
+        myPlayList->clear();
+        myPlayList->addOneFile(aFile1, StString(theEvent.Files[1]));
         doUpdateStateLoading();
         myLoader->doLoadNext();
         return;
     }
 
-    myLoader->getPlayList().clear();
+    myPlayList->clear();
     for(uint32_t aFileIter = 0; aFileIter < theEvent.NbFiles; ++aFileIter) {
         StString aPath(theEvent.Files[aFileIter]);
         if(!StFolder::isFolder(aPath)) {
-            myLoader->getPlayList().addOneFile(aPath, StMIME());
+            myPlayList->addOneFile(aPath, StMIME());
         }
     }
 
@@ -1054,10 +1054,10 @@ void StImageViewer::beforeDraw() {
     if(myOpenDialog->hasResults()) {
         if(!myOpenDialog->getPathRight().isEmpty()) {
             // meta-file
-            myLoader->getPlayList().clear();
-            myLoader->getPlayList().addOneFile(myOpenDialog->getPathLeft(), myOpenDialog->getPathRight());
+            myPlayList->clear();
+            myPlayList->addOneFile(myOpenDialog->getPathLeft(), myOpenDialog->getPathRight());
         } else {
-            myLoader->getPlayList().open(myOpenDialog->getPathLeft());
+            myPlayList->open(myOpenDialog->getPathLeft());
         }
 
         doUpdateStateLoading();
@@ -1173,7 +1173,7 @@ void StImageViewer::doSwitchSrcFormat(const int32_t theSrcFormat) {
     }
 
     myLoader->setStereoFormat(StFormat(theSrcFormat));
-    if(!myLoader->getPlayList().isEmpty()) {
+    if(!myPlayList->isEmpty()) {
         myLoader->doLoadNext();
     }
     myToSaveSrcFormat = true;
@@ -1193,7 +1193,7 @@ void StImageViewer::doSwitchViewMode(const int32_t theMode) {
     }
 
     if(isChanged
-    && !myLoader->getPlayList().isEmpty()) {
+    && !myPlayList->isEmpty()) {
         myLoader->doLoadNext();
     }
 }
@@ -1237,7 +1237,7 @@ void StImageViewer::doOpen2FilesDialog(const size_t ) {
 }
 
 void StImageViewer::doUpdateStateLoading() {
-    const StString aFileToLoad = myLoader->getPlayList().getCurrentTitle();
+    const StString aFileToLoad = myPlayList->getCurrentTitle();
     if(aFileToLoad.isEmpty()) {
         myWindow->setTitle(myTitle);
     } else {
@@ -1246,7 +1246,7 @@ void StImageViewer::doUpdateStateLoading() {
 }
 
 void StImageViewer::doUpdateStateLoaded() {
-    const StString aFileToLoad = myLoader->getPlayList().getCurrentTitle();
+    const StString aFileToLoad = myPlayList->getCurrentTitle();
     if(aFileToLoad.isEmpty()) {
         myWindow->setTitle(myTitle);
     } else {
@@ -1270,21 +1270,21 @@ void StImageViewer::doSaveImageInfo(const size_t theToSave) {
 }
 
 void StImageViewer::doListFirst(const size_t ) {
-    if(myLoader->getPlayList().walkToFirst()) {
+    if(myPlayList->walkToFirst()) {
         myLoader->doLoadNext();
         doUpdateStateLoading();
     }
 }
 
 void StImageViewer::doListPrev(const size_t ) {
-    if(myLoader->getPlayList().walkToPrev()) {
+    if(myPlayList->walkToPrev()) {
         myLoader->doLoadNext();
         doUpdateStateLoading();
     }
 }
 
 void StImageViewer::doListNext(const size_t ) {
-    if(myLoader->getPlayList().walkToNext()) {
+    if(myPlayList->walkToNext()) {
         myLoader->doLoadNext();
         doUpdateStateLoading();
     }
@@ -1293,15 +1293,15 @@ void StImageViewer::doListNext(const size_t ) {
 void StImageViewer::doSlideShow(const size_t ) {
     if(mySlideShowTimer.getElapsedTimeInSec() > 0.0) {
         mySlideShowTimer.stop();
-        myLoader->getPlayList().setLoop(false);
+        myPlayList->setLoop(false);
     } else {
         mySlideShowTimer.restart();
-        myLoader->getPlayList().setLoop(true);
+        myPlayList->setLoop(true);
     }
 }
 
 void StImageViewer::doListLast(const size_t ) {
-    if(myLoader->getPlayList().walkToLast()) {
+    if(myPlayList->walkToLast()) {
         myLoader->doLoadNext();
         doUpdateStateLoading();
     }
@@ -1354,7 +1354,7 @@ bool StImageViewer::getCurrentFile(StHandle<StFileNode>&     theFileNode,
                                    StHandle<StStereoParams>& theParams,
                                    StHandle<StImageInfo>&    theInfo) {
     theInfo.nullify();
-    if(!myLoader->getPlayList().getCurrentFile(theFileNode, theParams)) {
+    if(!myPlayList->getCurrentFile(theFileNode, theParams)) {
         return false;
     }
     theInfo = myLoader->getFileInfo(theParams);
