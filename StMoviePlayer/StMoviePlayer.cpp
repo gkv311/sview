@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -262,7 +262,7 @@ class StMoviePlayer::StOpenVideo {
         }
 
         if(myPlugin->params.lastFolder.isEmpty()) {
-            StHandle<StFileNode> aCurrFile = myPlugin->myVideo->getPlayList().getCurrentFile();
+            StHandle<StFileNode> aCurrFile = myPlugin->myPlayList->getCurrentFile();
             if(!aCurrFile.isNull()) {
                 myPlugin->params.lastFolder = aCurrFile->isEmpty() ? aCurrFile->getFolderPath() : aCurrFile->getValue(0)->getFolderPath();
             }
@@ -908,7 +908,7 @@ void StMoviePlayer::doDeleteFileBegin(const size_t ) {
     //    return;
     //}
 
-    myFileToDelete = myVideo->getPlayList().getCurrentFile();
+    myFileToDelete = myPlayList->getCurrentFile();
     if(myFileToDelete.isNull()
     || myFileToDelete->size() != 0) {
         myFileToDelete.nullify();
@@ -1518,8 +1518,8 @@ void StMoviePlayer::doFileDrop(const StDNDropEvent& theEvent) {
         }
 
         if(aNbVideos == 2) {
-            myVideo->getPlayList().clear();
-            myVideo->getPlayList().addOneFile(aFile1, aFile2);
+            myPlayList->clear();
+            myPlayList->addOneFile(aFile1, aFile2);
             doUpdateStateLoading();
             myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
             myVideo->doLoadNext();
@@ -1527,12 +1527,12 @@ void StMoviePlayer::doFileDrop(const StDNDropEvent& theEvent) {
         }
     }
 
-    myVideo->getPlayList().clear();
+    myPlayList->clear();
     for(uint32_t aFileIter = 0; aFileIter < theEvent.NbFiles; ++aFileIter) {
         StString aPath(theEvent.Files[aFileIter]);
         if(!StFolder::isFolder(aPath)
         && myPlayList->checkExtension(aPath)) {
-            myVideo->getPlayList().addOneFile(aPath, StMIME());
+            myPlayList->addOneFile(aPath, StMIME());
         }
     }
     doUpdateStateLoading();
@@ -1588,11 +1588,11 @@ void StMoviePlayer::beforeDraw() {
         } else if(!myOpenDialog->getPathRight().isEmpty()) {
             // meta-file
             aFilePath = myOpenDialog->getPathLeft();
-            myVideo->getPlayList().clear();
-            myVideo->getPlayList().addOneFile(myOpenDialog->getPathLeft(), myOpenDialog->getPathRight());
+            myPlayList->clear();
+            myPlayList->addOneFile(myOpenDialog->getPathLeft(), myOpenDialog->getPathRight());
         } else {
             aFilePath = myOpenDialog->getPathLeft();
-            myVideo->getPlayList().open(myOpenDialog->getPathLeft());
+            myPlayList->open(myOpenDialog->getPathLeft());
         }
 
         doUpdateStateLoading();
