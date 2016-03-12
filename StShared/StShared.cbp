@@ -385,6 +385,7 @@
 		<Unit filename="../include/StFile/StRawFile.h" />
 		<Unit filename="../include/StGL/StGLBrightnessMatrix.h" />
 		<Unit filename="../include/StGL/StGLContext.h" />
+		<Unit filename="../include/StGL/StGLDeviceCaps.h" />
 		<Unit filename="../include/StGL/StGLEnums.h" />
 		<Unit filename="../include/StGL/StGLFont.h" />
 		<Unit filename="../include/StGL/StGLFontEntry.h" />

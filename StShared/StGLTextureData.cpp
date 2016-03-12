@@ -348,7 +348,8 @@ inline bool canCopyReference(const StImage& theData) {
         &&  theData.isTopDown();
 }
 
-void StGLTextureData::updateData(const StImage&                  theDataL,
+void StGLTextureData::updateData(const StGLDeviceCaps&           theDeviceCaps,
+                                 const StImage&                  theDataL,
                                  const StImage&                  theDataR,
                                  const StHandle<StStereoParams>& theStParams,
                                  const StFormat                  theFormat,
@@ -368,6 +369,12 @@ void StGLTextureData::updateData(const StImage&                  theDataL,
         switch(mySrcFormat) {
             case StFormat_SideBySide_LR:
             case StFormat_SideBySide_RL: {
+                if(!theDeviceCaps.hasUnpack) {
+                    // slow copying to GPU memory
+                    toCopy = true;
+                    break;
+                }
+
                 reset();
                 copyProps(theDataL, theDataR);
                 StImage& aDataL = (mySrcFormat == StFormat_SideBySide_LR)
@@ -394,6 +401,13 @@ void StGLTextureData::updateData(const StImage&                  theDataL,
             }
             case StFormat_TopBottom_LR:
             case StFormat_TopBottom_RL: {
+                if(!theDeviceCaps.hasUnpack
+                &&  theCubemap != StCubemap_OFF) {
+                    // slow copying to GPU memory
+                    toCopy = true;
+                    break;
+                }
+
                 reset();
                 copyProps(theDataL, theDataR);
                 StImage& aDataL = (mySrcFormat == StFormat_TopBottom_LR)
@@ -419,6 +433,12 @@ void StGLTextureData::updateData(const StImage&                  theDataL,
                 break;
             }
             case StFormat_Rows: {
+                if(!theDeviceCaps.hasUnpack) {
+                    // slow copying to GPU memory
+                    toCopy = true;
+                    break;
+                }
+
                 reset();
                 copyProps(theDataL, theDataR);
                 myDataL.setPixelRatio(theDataL.getPixelRatio() * 0.5f);
@@ -455,6 +475,13 @@ void StGLTextureData::updateData(const StImage&                  theDataL,
             case StFormat_AnaglyphGreenMagenta:
             case StFormat_AnaglyphYellowBlue:
             case StFormat_AUTO: {
+                if(!theDeviceCaps.hasUnpack
+                &&  theCubemap != StCubemap_OFF) {
+                    // slow copying to GPU memory
+                    toCopy = true;
+                    break;
+                }
+
                 reset();
                 copyProps(theDataL, theDataR);
                 myDataL.initReference(theDataL);

@@ -516,6 +516,10 @@ bool StImageViewer::createGui() {
     myGUI = new StImageViewerGUI(this, myWindow.access(), myLangMap.access(), myPlayList,
                                  myLoader.isNull() ? NULL : myLoader->getTextureQueue());
     myGUI->setContext(myContext);
+    StGLDeviceCaps aDevCaps = myContext->getDeviceCaps();
+    // better slow-down GPU memory copy but avoid extra memory usage
+    aDevCaps.hasUnpack = true;
+    myGUI->myImage->getTextureQueue()->setDeviceCaps(aDevCaps);
 
     // load settings
     myWindow->setTargetFps(double(params.TargetFps));

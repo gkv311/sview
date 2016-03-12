@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -63,7 +63,8 @@ bool StGLTextureQueue::push(const StImage&     theSrcDataLeft,
     myMutexPush.lock();
     myDataBack = isEmpty() ? myDataFront : myDataBack->getNext();
 
-    myDataBack->updateData(theSrcDataLeft,
+    myDataBack->updateData(myDeviceCaps,
+                           theSrcDataLeft,
                            theSrcDataRight,
                            theStParams,
                            theSrcFormat,

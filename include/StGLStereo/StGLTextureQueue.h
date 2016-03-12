@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -12,6 +12,8 @@
 #include <StThreads/StCondition.h>
 #include <StThreads/StFPSMeter.h>
 #include <StThreads/StMutex.h>
+
+#include <StGL/StGLDeviceCaps.h>
 
 #include "StGLQuadTexture.h"
 #include "StGLTextureData.h"
@@ -40,23 +42,32 @@ class StGLTextureQueue {
     ST_CPPEXPORT ~StGLTextureQueue();
 
     /**
+     * Set device capabilities.
+     */
+    ST_LOCAL void setDeviceCaps(const StGLDeviceCaps& theCaps) {
+        myMutexPush.lock();
+        myDeviceCaps = theCaps;
+        myMutexPush.unlock();
+    }
+
+    /**
      * @return quad texture
      */
-    inline StGLQuadTexture& getQTexture() {
+    ST_LOCAL StGLQuadTexture& getQTexture() {
         return myQTexture;
     }
 
     /**
      * @return input stream connection state
      */
-    inline bool hasConnectedStream() const {
+    ST_LOCAL bool hasConnectedStream() const {
         return myHasStream || !isEmpty();
     }
 
     /**
      * Setup input stream connection state.
      */
-    inline void setConnectedStream(const bool theHasStream) {
+    ST_LOCAL void setConnectedStream(const bool theHasStream) {
         myHasStream = theHasStream;
     }
 
@@ -108,7 +119,7 @@ class StGLTextureQueue {
      */
     ST_CPPEXPORT bool stglUpdateStTextures(StGLContext& theCtx);
 
-    inline size_t getSize() const {
+    ST_LOCAL size_t getSize() const {
         myMutexSize.lock();
             const size_t aResult = myQueueSize;
         myMutexSize.unlock();
@@ -118,7 +129,7 @@ class StGLTextureQueue {
     /**
      * @return true if queue is EMPTY.
      */
-    inline bool isEmpty() const {
+    ST_LOCAL bool isEmpty() const {
         myMutexSize.lock();
             const bool aResult = (myQueueSize == 0);
         myMutexSize.unlock();
@@ -128,7 +139,7 @@ class StGLTextureQueue {
     /**
      * @return true if queue is FULL.
      */
-    inline bool isFull() const {
+    ST_LOCAL bool isFull() const {
         myMutexSize.lock();
             const bool aResult = ((myQueueSize + 1) == myQueueSizeMax);
         myMutexSize.unlock();
@@ -138,7 +149,7 @@ class StGLTextureQueue {
     /**
      * @return presentation timestamp of currently shown frame (or -1 if none).
      */
-    inline double getPTSCurr() const {
+    ST_LOCAL double getPTSCurr() const {
         myMutexSize.lock();
             const double aPts = (myHasStream || myQueueSize != 0)
                               ? myCurrPts : -1.0;
@@ -150,7 +161,7 @@ class StGLTextureQueue {
      * @param thePts - next (front) stereo frame PTS (presentation timestamp);
      * @return false if next PTS not available.
      */
-    inline bool popPTSNext(double& thePts) {
+    ST_LOCAL bool popPTSNext(double& thePts) {
         bool aRes = false;
         myMutexPop.lock();
         myMutexPush.lock();
@@ -173,7 +184,7 @@ class StGLTextureQueue {
      * @param theLimit - swap counter limit;
      * @return true if swap counter increased.
      */
-    inline bool stglSwapFB(const size_t theLimit) {
+    ST_LOCAL bool stglSwapFB(const size_t theLimit) {
         mySwapFBMutex.lock();
         if(theLimit == 0 || mySwapFBCount < theLimit) {
             ++mySwapFBCount;
@@ -204,7 +215,7 @@ class StGLTextureQueue {
      * Function used to get current showed source format.
      * At this moment function used just for stereo/mono recognizing.
      */
-    inline int getSrcFormat() {
+    ST_LOCAL int getSrcFormat() {
         myMutexSrcFormat.lock();
             // TODO (Kirill Gavrilov#4#) source format should be defined like front PTS to prevent early changes
             const int aSrcFrmt = myCurrSrcFormat;
@@ -263,6 +274,8 @@ class StGLTextureQueue {
     bool             myIsReadyToSwap;
     bool             myToCompress;     //!< release unused memory as fast as possible
     volatile bool    myHasStream;      //!< flag indicates that some stream connected to this queue
+
+    StGLDeviceCaps   myDeviceCaps;     //!< device capabilities
 
 };
 

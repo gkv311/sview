@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,6 +11,7 @@
 
 #include <StImage/StImage.h>
 #include <StGLStereo/StGLQuadTexture.h>
+#include <StGL/StGLDeviceCaps.h>
 
 /**
  * This class represents stereo data for textures
@@ -121,6 +122,7 @@ class StGLTextureData {
 
     /**
      * Setup new data.
+     * @param theDevCaps  device capabilities
      * @param theDataL    frame which contains left view or left+right views
      * @param theDataR    frame which contains right view (optional)
      * @param theStParams handle to associated data
@@ -128,7 +130,8 @@ class StGLTextureData {
      * @param theCubemap  cubemap format
      * @param thePts      presentation timestamp
      */
-    ST_CPPEXPORT void updateData(const StImage&                  theDataL,
+    ST_CPPEXPORT void updateData(const StGLDeviceCaps&           theDevCaps,
+                                 const StImage&                  theDataL,
                                  const StImage&                  theDataR,
                                  const StHandle<StStereoParams>& theStParams,
                                  const StFormat                  theFormat,

@@ -864,6 +864,7 @@ bool StMoviePlayer::createGui(StHandle<StGLTextureQueue>& theTextureQueue,
     params.ScaleHiDPI->setValue(myWindow->getScaleFactor());
     myGUI = new StMoviePlayerGUI(this, myWindow.access(), myLangMap.access(), myPlayList, theTextureQueue, theSubQueue);
     myGUI->setContext(myContext);
+    theTextureQueue->setDeviceCaps(myContext->getDeviceCaps());
 
     // load settings
     mySettings->loadParam (ST_SETTING_STEREO_MODE, myGUI->myImage->params.displayMode);

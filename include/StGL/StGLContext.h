@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -12,6 +12,7 @@
 #include <StTemplates/StHandle.h>
 #include <StTemplates/StRect.h>
 
+#include <StGL/StGLDeviceCaps.h>
 #include <StGL/StGLVec.h>
 
 #include <StStrings/StMsgQueue.h>
@@ -229,28 +230,38 @@ class StGLContext {
     /**
      * @return true if detected GL version is greater or equal to requested one.
      */
-    inline bool isGlGreaterEqual(const GLint theMajor,
-                                 const GLint theMinor) {
+    ST_LOCAL bool isGlGreaterEqual(const GLint theMajor,
+                                   const GLint theMinor) const {
         return (myVerMajor >  theMajor)
             || (myVerMajor == theMajor && myVerMinor >= theMinor);
     }
 
-    inline GLint getVersionMajor() const {
+    /**
+     * Return capabilities of currently active device.
+     */
+    ST_LOCAL StGLDeviceCaps getDeviceCaps() const {
+        StGLDeviceCaps aCaps;
+        aCaps.maxTexDim = myMaxTexDim;
+        aCaps.hasUnpack = hasUnpack;
+        return aCaps;
+    }
+
+    ST_LOCAL GLint getVersionMajor() const {
         return myVerMajor;
     }
 
-    inline GLint getVersionMinor() const {
+    ST_LOCAL GLint getVersionMinor() const {
         return myVerMinor;
     }
 
-    inline GPU_Name getGPUName() const {
+    ST_LOCAL GPU_Name getGPUName() const {
         return myGpuName;
     }
 
     /**
      * @return value for GL_MAX_TEXTURE_SIZE.
      */
-    inline GLint getMaxTextureSize() const {
+    ST_LOCAL GLint getMaxTextureSize() const {
         return myMaxTexDim;
     }
 
