@@ -96,19 +96,38 @@ bool StGLShader::init(StGLContext&       theCtx,
     // check compile success
     if(!isCompiled(theCtx)) {
         StString aSrc;
+        StString aSrcNumbered;
+        GLsizei aPartFrom = 0;
+        char aNumBuff[128];
+
     #if defined(GL_ES_VERSION_2_0)
         if(myShaderType == GL_FRAGMENT_SHADER) {
-            aSrc += theCtx.hasHighp ? THE_FRAG_PREC_HIGH : THE_FRAG_PREC_LOW;
+            aPartFrom = 1;
+            StString aLine = theCtx.hasHighp ? THE_FRAG_PREC_HIGH : THE_FRAG_PREC_LOW;
+            aSrc += aLine;
+            stsprintf(aNumBuff, 127, "%d:%03d ", 0, 1);
+            aSrcNumbered += StString(aNumBuff) + aLine.subString(0, aLine.getLength() - 1);
         }
     #endif
         for(GLsizei aPartIter = 0; aPartIter < theNbParts; ++aPartIter) {
-            aSrc += theSrcParts[aPartIter];
+            StString aPartSrc = theSrcParts[aPartIter];
+            aSrc += aPartSrc;
+
+            StHandle <StArrayList<StString> > anArray = aPartSrc.split('\n');
+            for(size_t aLineIter = 0; aLineIter < anArray->size(); ++aLineIter) {
+                stsprintf(aNumBuff, 127, "%d:%03d ", aPartFrom + aPartIter, int(aLineIter + 1));
+                StString aLine = StString(aNumBuff) + anArray->getValue(aLineIter);
+                if(!aSrcNumbered.isEmpty()) {
+                    aSrcNumbered += "\n";
+                }
+                aSrcNumbered += aLine;
+            }
         }
 
         theCtx.pushError(StString("Compilation of the ") + getTypeString() + " '" + myTitle
                        + "' failed!\n" + getCompileInfo(theCtx)
                        + "\n=== Source code ===\n"
-                       + aSrc
+                       + aSrcNumbered
                        + "\n==================="
         );
         release(theCtx);
