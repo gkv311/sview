@@ -199,7 +199,7 @@ class StAVPacketQueue {
      */
     ST_LOCAL bool isPlaying() const {
         myEventMutex.lock();
-            bool aRes = myIsPlaying;
+            bool aRes = myIsPlaying && isInitialized();
         myEventMutex.unlock();
         return aRes;
     }
