@@ -418,6 +418,7 @@ void StWindowImpl::onAndroidCommand(int32_t theCommand) {
             }
             break;
         }
+        case StAndroidGlue::CommandId_WindowChanged:
         case StAndroidGlue::CommandId_WindowTerm: {
             if(!myMaster.hRC.isNull()) {
                 myMaster.hRC->makeCurrent(EGL_NO_SURFACE);
@@ -427,6 +428,9 @@ void StWindowImpl::onAndroidCommand(int32_t theCommand) {
                 }
             }
             myMaster.hWindowGl = NULL;
+            if(theCommand == StAndroidGlue::CommandId_WindowChanged) {
+                onAndroidInitWindow();
+            }
             return;
         }
         case StAndroidGlue::CommandId_FocusGained: {

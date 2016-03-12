@@ -44,12 +44,37 @@ public class StS3dvSurface {
     /**
      * Main constructor.
      */
-    public StS3dvSurface(SurfaceHolder theHolder) {
+    public StS3dvSurface() {
+        ClassLoader aClassLoader = StS3dvSurface.class.getClassLoader();
+        try {
+            Class<?> anS3dvClass = aClassLoader.loadClass("com.s3dv.s3dvsurface.S3DVSurface");
+            mySetV3DType = anS3dvClass.getMethod("SetV3DType", int.class, int.class, int.class);
+        } catch(ClassNotFoundException theEx) {
+            //theEx.printStackTrace();
+        } catch(NoSuchMethodException theEx) {
+            theEx.printStackTrace();
+        } catch(IllegalArgumentException theEx) {
+            theEx.printStackTrace();
+        }
+    }
+
+    /**
+     * Setup surface.
+     */
+    public void setSurface(SurfaceHolder theHolder) {
+        if(mySetV3DType == null) {
+            return;
+        }
+
+        if(mySurf != null && myStereoIsOn) {
+            setStereo(false);
+        }
+        mySurf = null;
+
         ClassLoader aClassLoader = StS3dvSurface.class.getClassLoader();
         try {
             Class<?> anS3dvClass = aClassLoader.loadClass("com.s3dv.s3dvsurface.S3DVSurface");
             Constructor<?> anS3dvConstr = anS3dvClass.getConstructor(SurfaceHolder.class);
-            mySetV3DType = anS3dvClass.getMethod("SetV3DType", int.class, int.class, int.class);
             mySurf       = anS3dvConstr.newInstance(theHolder);
         } catch(ClassNotFoundException theEx) {
             //theEx.printStackTrace();
@@ -64,12 +89,17 @@ public class StS3dvSurface {
         } catch(InvocationTargetException theEx) {
             theEx.printStackTrace();
         }
+
+        if(myStereoIsOn) {
+            setStereo(true);
+        }
     }
 
     /**
      * Setup stereo input.
      */
     void setStereo(boolean theIsOn) {
+        myStereoIsOn = theIsOn;
         if(mySurf == null) {
             return;
         }
@@ -90,7 +120,8 @@ public class StS3dvSurface {
         }
     }
 
-    Object mySurf       = null;
-    Method mySetV3DType = null;
+    Object  mySurf       = null;
+    Method  mySetV3DType = null;
+    boolean myStereoIsOn = false;
 
 }

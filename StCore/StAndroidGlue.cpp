@@ -38,6 +38,7 @@ StCString StAndroidGlue::getCommandIdName(StAndroidGlue::CommandId theCmd) {
         case StAndroidGlue::CommandId_Stop:          return stCString("Stop");
         case StAndroidGlue::CommandId_Destroy:       return stCString("Destroy");
         case StAndroidGlue::CommandId_BackPressed:   return stCString("BackPressed");
+        case StAndroidGlue::CommandId_WindowChanged: return stCString("WindowChanged");
     }
     return stCString("UNKNOWN");
 }
@@ -100,6 +101,7 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
   myInputQueuePending(NULL),
   myWindow(NULL),
   myWindowPending(NULL),
+  myIsChangingSurface(false),
   myActivityState(0),
   myMemoryClassMiB(0),
   mySavedState(NULL),
@@ -559,6 +561,7 @@ void StAndroidGlue::processCommand() {
             pthread_mutex_unlock(&myMutex);
             break;
         }
+        case CommandId_WindowChanged:
         case CommandId_WindowInit: {
             pthread_mutex_lock(&myMutex);
             myWindow = myWindowPending;
@@ -603,6 +606,13 @@ void StAndroidGlue::processCommand() {
             pthread_mutex_unlock(&myMutex);
             break;
         }
+        case CommandId_WindowChanged: {
+            pthread_mutex_lock(&myMutex);
+            myWindowPending = NULL;
+            pthread_cond_broadcast(&myCond);
+            pthread_mutex_unlock(&myMutex);
+            break;
+        }
         case CommandId_SaveState: {
             pthread_mutex_lock(&myMutex);
             myIsStateSaved = true;
@@ -627,9 +637,31 @@ void StAndroidGlue::setInput(AInputQueue* theInputQueue) {
     pthread_mutex_unlock(&myMutex);
 }
 
+void StAndroidGlue::setChangingSurface(bool theIsChanging) {
+    pthread_mutex_lock(&myMutex);
+    myIsChangingSurface = theIsChanging;
+    pthread_mutex_unlock(&myMutex);
+}
+
 void StAndroidGlue::setWindow(ANativeWindow* theWindow) {
     pthread_mutex_lock(&myMutex);
-    if(myWindowPending != NULL) {
+    if(myIsChangingSurface) {
+        if(theWindow == NULL) {
+            pthread_mutex_unlock(&myMutex);
+            return;
+        }
+
+        myWindowPending = theWindow;
+        writeCommand(CommandId_WindowChanged);
+        while(myWindowPending != NULL) {
+            pthread_cond_wait(&myCond, &myMutex);
+        }
+        myIsChangingSurface = false;
+        pthread_mutex_unlock(&myMutex);
+        return;
+    }
+
+    if(myWindow != NULL) {
         writeCommand(CommandId_WindowTerm);
     }
     myWindowPending = theWindow;
@@ -639,6 +671,8 @@ void StAndroidGlue::setWindow(ANativeWindow* theWindow) {
     while(myWindow != myWindowPending) {
         pthread_cond_wait(&myCond, &myMutex);
     }
+    myWindowPending = NULL;
+    myIsChangingSurface = false;
     pthread_mutex_unlock(&myMutex);
 }
 
@@ -731,6 +765,10 @@ void StAndroidGlue::setOrientation(float theAzimuthDeg, float thePitchDeg, float
 
 jexp void JNICALL Java_com_sview_StActivity_cppOnBackPressed(JNIEnv* theEnv, jobject theObj, jlong theCppPtr) {
     ((StAndroidGlue* )theCppPtr)->writeCommand(StAndroidGlue::CommandId_BackPressed);
+}
+
+jexp void JNICALL Java_com_sview_StActivity_cppOnBeforeSurfaceChanged(JNIEnv* theEnv, jobject theObj, jlong theCppPtr, jboolean theIsBefore) {
+    ((StAndroidGlue* )theCppPtr)->setChangingSurface(theIsBefore == JNI_TRUE);
 }
 
 jexp void JNICALL Java_com_sview_StActivity_cppDefineOrientationSensor(JNIEnv* theEnv, jobject theObj, jlong theCppPtr,

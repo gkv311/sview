@@ -136,6 +136,7 @@ public class StActivity extends NativeActivity implements SensorEventListener {
         } else {
             myIsPoorOri = mySensorMgr.getDefaultSensor(Sensor.TYPE_GYROSCOPE) == null;
         }
+        myS3dvSurf = new StS3dvSurface();
         super.onCreate(theSavedInstanceState);
     }
 
@@ -183,12 +184,29 @@ public class StActivity extends NativeActivity implements SensorEventListener {
     @Override
     public void surfaceCreated(SurfaceHolder theHolder) {
         super.surfaceCreated(theHolder);
-        myS3dvSurf = new StS3dvSurface(theHolder);
-        if(!myS3dvSurf.isValid()) {
-            myS3dvSurf = null;
-        } else if(myToEnableStereoHW) {
-            myS3dvSurf.setStereo(true);
+        myS3dvSurf.setSurface(theHolder);
+        myS3dvSurf.setStereo(myToEnableStereoHW);
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder theHolder, int theFormat, int theWidth, int theHeight) {
+        if(myCppGlue != 0) {
+            cppOnBeforeSurfaceChanged(myCppGlue, true);
         }
+        super.surfaceChanged(theHolder, theFormat, theWidth, theHeight);
+        if(myCppGlue != 0) {
+            cppOnBeforeSurfaceChanged(myCppGlue, false);
+        }
+    }
+
+    @Override
+    public void surfaceRedrawNeeded(SurfaceHolder theHolder) {
+        super.surfaceRedrawNeeded(theHolder);
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder theHolder) {
+        super.surfaceDestroyed(theHolder);
     }
 
 //endregion
@@ -278,9 +296,7 @@ public class StActivity extends NativeActivity implements SensorEventListener {
                 return;
             }
             myToEnableStereoHW = toEnable;
-            if(myS3dvSurf != null) {
-                myS3dvSurf.setStereo(toEnable);
-            }
+            myS3dvSurf.setStereo(toEnable);
         }});
     }
 
@@ -361,6 +377,12 @@ public class StActivity extends NativeActivity implements SensorEventListener {
      * Redirect back button to C++ level.
      */
     private native void cppOnBackPressed(long theCppPtr);
+
+    /**
+     * Called within surfaceChanged() call before passing to NativeActivity.
+     */
+    private native void cppOnBeforeSurfaceChanged(long theCppPtr,
+                                                  boolean theIsBefore);
 
     /**
      * Define device orientation sensor.

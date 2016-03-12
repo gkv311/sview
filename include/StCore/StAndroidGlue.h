@@ -73,6 +73,7 @@ class StAndroidGlue {
         CommandId_Stop,          //!< activity has been stopped
         CommandId_Destroy,       //!< activity is being destroyed, and waiting for the application thread to clean up and exit before proceeding
         CommandId_BackPressed,   //!< pressed special back button
+        CommandId_WindowChanged, //!< the current ANativeWindow has been changed
     };
 
     /**
@@ -257,6 +258,12 @@ class StAndroidGlue {
         public: //! @name StActivity callbacks
 
     /**
+     * Setup surfaceChanging flag to workaround NativeActivity API issue
+     * causing two events setWindow() being called instead of a one.
+     */
+    ST_CPPEXPORT void setChangingSurface(bool theIsChanging);
+
+    /**
      * Define device orientation sensor.
      * @param theHasSensor flag indicating that device has orientation sensors
      * @param theIsPoor    flag indicating that available orientation sensor provides imprecise values
@@ -367,6 +374,7 @@ class StAndroidGlue {
     AInputQueue*            myInputQueuePending;
     ANativeWindow*          myWindow;            //!< native window to draw into
     ANativeWindow*          myWindowPending;
+    bool                    myIsChangingSurface; //!< flag indicating surface changing state
     int                     myActivityState;     //!< Current state of the app's activity (APP_CMD_START, APP_CMD_RESUME, APP_CMD_PAUSE, or APP_CMD_STOP)
     int                     myMemoryClassMiB;    //!< device memory class
 
