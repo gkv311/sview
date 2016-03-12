@@ -153,6 +153,12 @@ class StOutDistorted : public StWindow {
     ST_LOCAL void stglDrawCursor(const StPointD_t&  theCursorPos,
                                  const unsigned int theView);
 
+    /**
+     * Draw stereo-pair using libOVR.
+     * To be called from stglDraw().
+     */
+    ST_LOCAL void stglDrawLibOVR();
+
         private:
 
     static StAtomic<int32_t> myInstancesNb; //!< shared counter for all instances

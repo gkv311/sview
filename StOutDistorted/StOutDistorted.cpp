@@ -494,8 +494,8 @@ void StOutDistorted::stglDrawCursor(const StPointD_t&  theCursorPos,
     StArray<StGLVec4> aVerts(4);
     const GLfloat aCurLeft = GLfloat(-1.0 + theCursorPos.x() * 2.0);
     const GLfloat aCurTop  = GLfloat( 1.0 - theCursorPos.y() * 2.0);
-    const int aVPSizeX = myOvrSizeX != 0 ? myOvrSizeX : myFrBuffer->getVPSizeX();
-    const int aVPSizeY = myOvrSizeY != 0 ? myOvrSizeY : myFrBuffer->getVPSizeY();
+    const int aVPSizeX = myContext->stglViewport().width();
+    const int aVPSizeY = myContext->stglViewport().height();
 
     GLfloat aCurWidth  = 2.0f * GLfloat(myCursor->getSizeX()) / GLfloat(aVPSizeX);
     GLfloat aCurHeight = 2.0f * GLfloat(myCursor->getSizeY()) / GLfloat(aVPSizeY);
@@ -604,6 +604,96 @@ void StOutDistorted::setFullScreen(const bool theFullScreen) {
     }
 }
 
+void StOutDistorted::stglDrawLibOVR() {
+#ifdef ST_HAVE_LIBOVR
+    const StGLBoxPx  aVPBoth    = StWindow::stglViewport(ST_WIN_ALL);
+    const StPointD_t aCursorPos = StWindow::getMousePos();
+    if(myOvrHmd == NULL
+    || myIsBroken) {
+        return;
+    }
+
+    myToReduceGui = true;
+    ovrHmdDesc anHmdDesc = ovr_GetHmdDesc(myOvrHmd);
+    ovrEyeRenderDesc anEyeRenderDesc[2] = {
+        ovr_GetRenderDesc(myOvrHmd, ovrEye_Left,  anHmdDesc.DefaultEyeFov[0]),
+        ovr_GetRenderDesc(myOvrHmd, ovrEye_Right, anHmdDesc.DefaultEyeFov[1])
+    };
+    ovrViewScaleDesc aViewScaleDesc;
+    aViewScaleDesc.HmdSpaceToWorldScaleInMeters = 1.0f;
+    aViewScaleDesc.HmdToEyeViewOffset[0] = anEyeRenderDesc[0].HmdToEyeViewOffset;
+    aViewScaleDesc.HmdToEyeViewOffset[1] = anEyeRenderDesc[1].HmdToEyeViewOffset;
+
+    const StGLBoxPx aViewPortL = {{ 0, 0,
+                                    myOvrSizeX, myOvrSizeY }};
+    const StGLBoxPx aViewPortR = {{ myOvrSizeX, 0,
+                                    myOvrSizeX, myOvrSizeY }};
+
+    ovrLayerEyeFov aLayerFov;
+    aLayerFov.Header.Type       = ovrLayerType_EyeFov;
+    aLayerFov.Header.Flags      = ovrLayerFlag_TextureOriginAtBottomLeft;
+    aLayerFov.ColorTexture[0]   = myOvrSwapTexture;
+    aLayerFov.ColorTexture[1]   = NULL;
+    aLayerFov.Viewport[0].Pos.x = aViewPortL.x();
+    aLayerFov.Viewport[0].Pos.y = aViewPortL.y();
+    aLayerFov.Viewport[0].Size.w= aViewPortL.width();
+    aLayerFov.Viewport[0].Size.h= aViewPortL.height();
+    aLayerFov.Viewport[1].Pos.x = aViewPortR.x();
+    aLayerFov.Viewport[1].Pos.y = aViewPortR.y();
+    aLayerFov.Viewport[1].Size.w= aViewPortR.width();
+    aLayerFov.Viewport[1].Size.h= aViewPortR.height();
+    aLayerFov.Fov[0]            = anHmdDesc.DefaultEyeFov[0];
+    aLayerFov.Fov[1]            = anHmdDesc.DefaultEyeFov[1];
+    aLayerFov.SensorSampleTime  = ovr_GetTimeInSeconds();
+    const double aPredictedTime = ovr_GetPredictedDisplayTime(myOvrHmd, 0);
+    ovrTrackingState anHmdState = ovr_GetTrackingState(myOvrHmd, aPredictedTime, ovrTrue);
+    ovr_CalcEyePoses(anHmdState.HeadPose.ThePose, aViewScaleDesc.HmdToEyeViewOffset, aLayerFov.RenderPose);
+    myOvrOrient = StQuaternion<double>((double )aLayerFov.RenderPose[0].Orientation.x,
+                                       (double )aLayerFov.RenderPose[0].Orientation.y,
+                                       (double )aLayerFov.RenderPose[0].Orientation.z,
+                                       (double )aLayerFov.RenderPose[0].Orientation.w);
+
+    // draw Left View into virtual frame buffer
+    myContext->stglResizeViewport(aViewPortL);
+    myContext->stglSetScissorRect(aViewPortL, false);
+    myContext->stglBindFramebuffer(myOvrSwapFbo[myOvrSwapTexture->CurrentIndex]);
+    StWindow::signals.onRedraw(ST_DRAW_LEFT);
+    stglDrawCursor(aCursorPos, ST_DRAW_LEFT);
+
+    // draw Right View into virtual frame buffer
+    myContext->stglResizeViewport(aViewPortR);
+    myContext->stglSetScissorRect(aViewPortR, false);
+    StWindow::signals.onRedraw(ST_DRAW_RIGHT);
+    stglDrawCursor(aCursorPos, ST_DRAW_RIGHT);
+    myContext->stglBindFramebuffer(StGLFrameBuffer::NO_FRAMEBUFFER);
+
+    ovrLayerHeader* aLayers = &aLayerFov.Header;
+    ovrResult anOvrRes = ovr_SubmitFrame(myOvrHmd, 0, &aViewScaleDesc, &aLayers, 1);
+    myOvrSwapTexture->CurrentIndex = myOvrSwapTexture->CurrentIndex == 0 ? 1 : 0;
+    if(!OVR_SUCCESS(anOvrRes)) {
+        myMsgQueue->pushError(stCString("StOutDistorted, Failed to submit swap texture!"));
+        myIsBroken = true;
+    }
+
+    myContext->stglResizeViewport(aVPBoth);
+    myContext->stglResetScissorRect();
+    myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    myContext->stglBindFramebufferRead(myOvrMirrorFbo);
+    myContext->stglBindFramebufferDraw(StGLFrameBuffer::NO_FRAMEBUFFER);
+    GLint aSrcSizeX = myOvrMirrorTexture->OGL.Header.TextureSize.w;
+    GLint aSrcSizeY = myOvrMirrorTexture->OGL.Header.TextureSize.h;
+    myContext->arbFbo->glBlitFramebuffer(0, aSrcSizeY, aSrcSizeX, 0,
+                                         0, 0, aVPBoth.width(), aVPBoth.height(),
+                                         GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    myContext->stglBindFramebufferRead(StGLFrameBuffer::NO_FRAMEBUFFER);
+
+    myFPSControl.sleepToTarget(); // decrease FPS to target by thread sleeps
+    StWindow::stglSwap(ST_WIN_ALL);
+    ++myFPSControl;
+#endif
+}
+
 void StOutDistorted::stglDraw() {
     myFPSControl.setTargetFPS(StWindow::getTargetFps());
 
@@ -675,95 +765,17 @@ void StOutDistorted::stglDraw() {
         return;
     }
 
-    const StGLBoxPx  aVPSlave   = StWindow::stglViewport(ST_WIN_SLAVE);
-    const StGLBoxPx  aVPBoth    = StWindow::stglViewport(ST_WIN_ALL);
-    const StPointD_t aCursorPos = StWindow::getMousePos();
-
 #ifdef ST_HAVE_LIBOVR
     if(myOvrHmd != NULL
     && !myIsBroken) {
-        myToReduceGui = true;
-        ovrHmdDesc anHmdDesc = ovr_GetHmdDesc(myOvrHmd);
-        ovrEyeRenderDesc anEyeRenderDesc[2] = {
-            ovr_GetRenderDesc(myOvrHmd, ovrEye_Left,  anHmdDesc.DefaultEyeFov[0]),
-            ovr_GetRenderDesc(myOvrHmd, ovrEye_Right, anHmdDesc.DefaultEyeFov[1])
-        };
-        ovrViewScaleDesc aViewScaleDesc;
-        aViewScaleDesc.HmdSpaceToWorldScaleInMeters = 1.0f;
-        aViewScaleDesc.HmdToEyeViewOffset[0] = anEyeRenderDesc[0].HmdToEyeViewOffset;
-        aViewScaleDesc.HmdToEyeViewOffset[1] = anEyeRenderDesc[1].HmdToEyeViewOffset;
-
-        const StGLBoxPx aViewPortL = {{ 0, 0,
-                                        myOvrSizeX, myOvrSizeY }};
-        const StGLBoxPx aViewPortR = {{ myOvrSizeX, 0,
-                                        myOvrSizeX, myOvrSizeY }};
-
-        ovrLayerEyeFov aLayerFov;
-        aLayerFov.Header.Type       = ovrLayerType_EyeFov;
-        aLayerFov.Header.Flags      = ovrLayerFlag_TextureOriginAtBottomLeft;
-        aLayerFov.ColorTexture[0]   = myOvrSwapTexture;
-        aLayerFov.ColorTexture[1]   = NULL;
-        aLayerFov.Viewport[0].Pos.x = aViewPortL.x();
-        aLayerFov.Viewport[0].Pos.y = aViewPortL.y();
-        aLayerFov.Viewport[0].Size.w= aViewPortL.width();
-        aLayerFov.Viewport[0].Size.h= aViewPortL.height();
-        aLayerFov.Viewport[1].Pos.x = aViewPortR.x();
-        aLayerFov.Viewport[1].Pos.y = aViewPortR.y();
-        aLayerFov.Viewport[1].Size.w= aViewPortR.width();
-        aLayerFov.Viewport[1].Size.h= aViewPortR.height();
-        aLayerFov.Fov[0]            = anHmdDesc.DefaultEyeFov[0];
-        aLayerFov.Fov[1]            = anHmdDesc.DefaultEyeFov[1];
-        aLayerFov.SensorSampleTime  = ovr_GetTimeInSeconds();
-        const double aPredictedTime = ovr_GetPredictedDisplayTime(myOvrHmd, 0);
-        ovrTrackingState anHmdState = ovr_GetTrackingState(myOvrHmd, aPredictedTime, ovrTrue);
-        ovr_CalcEyePoses(anHmdState.HeadPose.ThePose, aViewScaleDesc.HmdToEyeViewOffset, aLayerFov.RenderPose);
-        myOvrOrient = StQuaternion<double>((double )aLayerFov.RenderPose[0].Orientation.x,
-                                           (double )aLayerFov.RenderPose[0].Orientation.y,
-                                           (double )aLayerFov.RenderPose[0].Orientation.z,
-                                           (double )aLayerFov.RenderPose[0].Orientation.w);
-
-        // draw Left View into virtual frame buffer
-        myContext->stglResizeViewport(aViewPortL);
-        myContext->stglSetScissorRect(aViewPortL, false);
-        myContext->stglBindFramebuffer(myOvrSwapFbo[myOvrSwapTexture->CurrentIndex]);
-        StWindow::signals.onRedraw(ST_DRAW_LEFT);
-        stglDrawCursor(aCursorPos, ST_DRAW_LEFT);
-
-        // draw Right View into virtual frame buffer
-        myContext->stglResizeViewport(aViewPortR);
-        myContext->stglSetScissorRect(aViewPortR, false);
-        StWindow::signals.onRedraw(ST_DRAW_RIGHT);
-        stglDrawCursor(aCursorPos, ST_DRAW_RIGHT);
-        myContext->stglBindFramebuffer(StGLFrameBuffer::NO_FRAMEBUFFER);
-
-        ovrLayerHeader* aLayers = &aLayerFov.Header;
-        ovrResult anOvrRes = ovr_SubmitFrame(myOvrHmd, 0, &aViewScaleDesc, &aLayers, 1);
-        myOvrSwapTexture->CurrentIndex = myOvrSwapTexture->CurrentIndex == 0 ? 1 : 0;
-        if(!OVR_SUCCESS(anOvrRes)) {
-            myMsgQueue->pushError(stCString("StOutDistorted, Failed to submit swap texture!"));
-            myIsBroken = true;
-        }
-
-        myContext->stglResizeViewport(aVPBoth);
-        myContext->stglResetScissorRect();
-        myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        myContext->stglBindFramebufferRead(myOvrMirrorFbo);
-        myContext->stglBindFramebufferDraw(StGLFrameBuffer::NO_FRAMEBUFFER);
-        GLint aSrcSizeX = myOvrMirrorTexture->OGL.Header.TextureSize.w;
-        GLint aSrcSizeY = myOvrMirrorTexture->OGL.Header.TextureSize.h;
-        myContext->arbFbo->glBlitFramebuffer(0, aSrcSizeY, aSrcSizeX, 0,
-                                             0, 0, aVPBoth.width(), aVPBoth.height(),
-                                             GL_COLOR_BUFFER_BIT, GL_NEAREST);
-        myContext->stglBindFramebufferRead(StGLFrameBuffer::NO_FRAMEBUFFER);
-
-        myFPSControl.sleepToTarget(); // decrease FPS to target by thread sleeps
-        StWindow::stglSwap(ST_WIN_ALL);
-        ++myFPSControl;
+        stglDrawLibOVR();
         return;
     }
 #endif
 
+    const StGLBoxPx  aVPSlave   = StWindow::stglViewport(ST_WIN_SLAVE);
+    const StGLBoxPx  aVPBoth    = StWindow::stglViewport(ST_WIN_ALL);
+    const StPointD_t aCursorPos = StWindow::getMousePos();
     StGLBoxPx aViewPortL = aVPMaster;
     StGLBoxPx aViewPortR = aVPSlave;
     if(myDevice != DEVICE_OCULUS) {
@@ -785,6 +797,30 @@ void StOutDistorted::stglDraw() {
                 break;
             }
         }
+    }
+
+    // simple rendering without FBO
+    if(myDevice != DEVICE_OCULUS) {
+        myContext->stglResizeViewport(aVPBoth);
+        myContext->stglSetScissorRect(aVPBoth, false);
+        myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        myContext->stglResizeViewport(aViewPortL);
+        myContext->stglSetScissorRect(aViewPortL, false);
+        StWindow::signals.onRedraw(ST_DRAW_LEFT);
+        stglDrawCursor(aCursorPos, ST_DRAW_LEFT);
+        myContext->stglResetScissorRect();
+
+        myContext->stglResizeViewport(aViewPortR);
+        myContext->stglSetScissorRect(aViewPortR, false);
+        StWindow::signals.onRedraw(ST_DRAW_RIGHT);
+        stglDrawCursor(aCursorPos, ST_DRAW_RIGHT);
+        myContext->stglResetScissorRect();
+
+        myFPSControl.sleepToTarget();
+        StWindow::stglSwap(ST_WIN_ALL);
+        ++myFPSControl;
+        return;
     }
 
     // resize FBO
