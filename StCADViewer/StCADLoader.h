@@ -51,10 +51,9 @@ class StCADLoader {
 
         private:
 
-#ifdef ST_HAVE_OCCT
     ST_LOCAL TopoDS_Shape loadIGES(const StString& theFileToLoadPath);
     ST_LOCAL TopoDS_Shape loadSTEP(const StString& theFileToLoadPath);
-#endif
+
     ST_LOCAL StHandle<StGLMesh> loadOBJ(const StString& theFileToLoadPath);
     ST_LOCAL bool loadModel(const StHandle<StFileNode>& theSource);
     ST_LOCAL bool computeMesh();

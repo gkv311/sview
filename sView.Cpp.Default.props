@@ -21,5 +21,16 @@
     <PlatformToolset>v140</PlatformToolset>
     <StVcVer>vc14</StVcVer>
   </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <StOcctInc>$(SolutionDir)3rdparty\occt\inc</StOcctInc>
+    <StOcctLib32>$(SolutionDir)3rdparty\occt\win32\$(StVcVer)\lib</StOcctLib32>
+    <StOcctLib64>$(SolutionDir)3rdparty\occt\win64\$(StVcVer)\lib</StOcctLib64>
+    <StOcctLib32d>$(SolutionDir)3rdparty\occt\win32\$(StVcVer)\libd</StOcctLib32d>
+    <StOcctLib64d>$(SolutionDir)3rdparty\occt\win64\$(StVcVer)\libd</StOcctLib64d>
+    <StOcctBin32>$(SolutionDir)3rdparty\occt\win32\$(StVcVer)\bin</StOcctBin32>
+    <StOcctBin64>$(SolutionDir)3rdparty\occt\win64\$(StVcVer)\bin</StOcctBin64>
+    <StOcctBin32d>$(SolutionDir)3rdparty\occt\win32\$(StVcVer)\bind</StOcctBin32d>
+    <StOcctBin64d>$(SolutionDir)3rdparty\occt\win64\$(StVcVer)\bind</StOcctBin64d>
+  </PropertyGroup>
   <Import Condition="Exists('$(SolutionDir)sView.Cpp.Custom.props')" Project="$(SolutionDir)sView.Cpp.Custom.props" />
 </Project>

@@ -11,16 +11,11 @@
     #include <stconfig.conf>
 #endif
 
-#ifdef ST_HAVE_OCCT
-
-// OCCT stuff
-#include <TopoDS_Shape.hxx>
+#include <TopoDS_Face.hxx>
+#include <TColgp_Array1OfPnt2d.hxx>
 
 #include <StGLMesh/StGLMesh.h>
 #include <StGLMesh/StBndSphere.h>
-
-class TopoDS_Face;
-class TColgp_Array1OfPnt2d;
 
 class ST_LOCAL StCADModel : public StGLMesh {
 
@@ -43,5 +38,4 @@ class ST_LOCAL StCADModel : public StGLMesh {
 
 };
 
-#endif // ST_HAVE_OCCT
 #endif // __StCADModel_h_

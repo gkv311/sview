@@ -8,7 +8,6 @@
     #include <stconfig.conf>
 #endif
 
-#ifdef ST_HAVE_OCCT
     #include <BRep_Tool.hxx>
     #include <BRep_Builder.hxx>
     #include <BRepTools.hxx>          // BREP reader
@@ -22,7 +21,6 @@
     #include <TopoDS.hxx>
     #include <TopoDS_Shape.hxx>
     #include <TopExp_Explorer.hxx>
-#endif
 
 #include "StCADLoader.h"
 #include "StCADPluginInfo.h"
@@ -49,10 +47,6 @@ StCADLoader::StCADLoader(const StHandle<StLangMap>& theLangMap)
   myIsLoaded(false),
   myToQuit(false) {
     myPlayList.setExtensions(ST_CAD_EXTENSIONS_LIST);
-    /// force thread-safe OCCT memory management
-#ifdef ST_HAVE_OCCT
-    Standard::SetReentrant(Standard_True);
-#endif
     myThread = new StThread(threadFunction, (void* )this);
 }
 
@@ -72,7 +66,6 @@ static StString formatError(const StString& theFilePath,
     return StString("Can not load CAD model from file\n\"") + aFileName + "\"\n" + theLibDescr;
 }
 
-#ifdef ST_HAVE_OCCT
 TopoDS_Shape StCADLoader::loadIGES(const StString& theFileToLoadPath) {
     TopoDS_Shape aShape;
     IGESControl_Reader aReader;
@@ -154,7 +147,6 @@ TopoDS_Shape StCADLoader::loadSTEP(const StString& theFileToLoadPath) {
     aReader.TransferRoots();
     return aReader.OneShape();
 }
-#endif
 
 StHandle<StGLMesh> StCADLoader::loadOBJ(const StString& theFileToLoadPath) {
     StMeshFileOBJ anOBJReader;
@@ -172,7 +164,6 @@ bool StCADLoader::loadModel(const StHandle<StFileNode>& theSource) {
     const StString anExt = !stMIMEType.isEmpty() ? stMIMEType.getExtension() : StFileNode::getExtension(aFileToLoadPath);
 
     StHandle<StGLMesh> aMesh;
-#ifdef ST_HAVE_OCCT
     TopoDS_Shape aShape;
     if(anExt.isEqualsIgnoreCase(stCString(ST_IGS_EXT)) || anExt.isEqualsIgnoreCase(stCString(ST_IGES_EXT))) {
         aShape = loadIGES(aFileToLoadPath);
@@ -187,20 +178,17 @@ bool StCADLoader::loadModel(const StHandle<StFileNode>& theSource) {
             signals.onError(formatError(aFileToLoadPath, "No shapes found in the BREP file"));
         }
     } else
-#endif
     if(anExt.isEqualsIgnoreCase(stCString(ST_OBJ_EXT))) {
         ///signals.onError(formatError(aFileToLoadPath, "OBJ import not yet implemented!"));
         aMesh = StCADLoader::loadOBJ(aFileToLoadPath);
     } else {
         signals.onError(formatError(aFileToLoadPath, "Format doesn't supported"));
     }
-#ifdef ST_HAVE_OCCT
+
     bool hasShape = !aShape.IsNull();
-#endif
 
     // setup new output shape
     myShapeLock.lock();
-    #ifdef ST_HAVE_OCCT
         if(!aShape.IsNull()) {
             myMesh = new StCADModel(aShape);
             computeMesh();
@@ -208,17 +196,10 @@ bool StCADLoader::loadModel(const StHandle<StFileNode>& theSource) {
         } else {
             myMesh = aMesh;
         }
-    #else
-        myMesh = aMesh;
-    #endif
         myIsLoaded = true;
     myShapeLock.unlock();
 
-#ifdef ST_HAVE_OCCT
     return hasShape;
-#else
-    return false;
-#endif
 }
 
 bool StCADLoader::computeMesh() {
