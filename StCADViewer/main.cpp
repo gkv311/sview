@@ -55,6 +55,13 @@ int main(int , char** ) {
         StProcess::setEnv("StShare", aProcessUpPath);
     }
 
+    StString aResDir = StProcess::getStShareFolder();
+    StProcess::setEnv("CSF_UnitsLexicon",          aResDir + "UnitsAPI" ST_FILE_SPLITTER "Lexi_Expr.dat");
+    StProcess::setEnv("CSF_UnitsDefinition",       aResDir + "UnitsAPI" ST_FILE_SPLITTER "Units.dat");
+    StProcess::setEnv("CSF_ShadersDirectory",      aResDir + "shaders" ST_FILE_SPLITTER "StCADViewer");
+    StProcess::setEnv("CSF_SHMessage",             aResDir + "lang");
+    StProcess::setEnv("CSF_MDTVTexturesDirectory", aResDir + "textures");
+
     StHandle<StOpenInfo> anInfo;
     if(anInfo.isNull()
     || (!anInfo->hasPath() && !anInfo->hasArgs())) {

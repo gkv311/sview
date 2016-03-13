@@ -12,16 +12,13 @@
     <ClCompile Include="StCADLoader.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="StCADModel.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
     <ClCompile Include="StCADViewer.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
     <ClCompile Include="StCADViewerGUI.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
-    <ClCompile Include="StMeshFileOBJ.cpp">
+    <ClCompile Include="StCADFrameBuffer.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
   </ItemGroup>

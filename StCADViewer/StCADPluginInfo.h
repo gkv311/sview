@@ -43,10 +43,10 @@
 /**
  *.obj - simplest triangulation exchange format
  */
-#define ST_OBJ_MIME "model/obj"
+/*#define ST_OBJ_MIME "model/obj"
 #define ST_OBJ_EXT  "obj"
 #define ST_OBJ_DESC "OBJ - triangulation exchange format"
-#define ST_OBJ_MIME_STRING ST_OBJ_MIME ":" ST_OBJ_EXT  ":" ST_OBJ_DESC
+#define ST_OBJ_MIME_STRING ST_OBJ_MIME ":" ST_OBJ_EXT  ":" ST_OBJ_DESC*/
 
 /**
  *.ply - triangulation file
@@ -70,7 +70,6 @@
 #define ST_CAD_PLUGIN_MIME_CHAR ST_IGS_MIME_STRING ";" ST_IGES_MIME_STRING ";" \
 ST_STP_MIME_STRING  ";" ST_STEP_MIME_STRING ";" \
 ST_BREP_MIME_STRING ";" ST_RLE_MIME_STRING  ";" \
-ST_OBJ_MIME_STRING \
 "\000"
 
 #endif //__StCADPluginInfo_h_

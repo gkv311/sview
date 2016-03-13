@@ -306,6 +306,17 @@ class StGLContext {
     }
 
     /**
+     * @return true if scissor test was activated
+     */
+    ST_LOCAL bool stglScissorRect(StGLBoxPx& theRect) const {
+        if(myScissorStack.empty()) {
+            return false;
+        }
+        theRect = myScissorStack.top();
+        return true;
+    }
+
+    /**
      * Setup viewport.
      */
     ST_CPPEXPORT void stglResizeViewport(const StGLBoxPx& theRect);

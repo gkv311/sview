@@ -568,8 +568,11 @@ class StWindow {
      */
     ST_CPPEXPORT StRectI_t defaultRect(const StMonitor* theMon = NULL) const;
 
+        public:
+
     ST_CPPEXPORT void* getNativeOglWin() const;
     ST_CPPEXPORT void* getNativeOglDC()  const;
+    ST_CPPEXPORT void* getNativeOglRC()  const;
 
         private: //! @name private fields
 

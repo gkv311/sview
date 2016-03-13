@@ -23,6 +23,7 @@
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
     <StOcctInc>$(SolutionDir)3rdparty\occt\inc</StOcctInc>
+    <StOcctRes>$(SolutionDir)3rdparty\occt\src</StOcctRes>
     <StOcctLib32>$(SolutionDir)3rdparty\occt\win32\$(StVcVer)\lib</StOcctLib32>
     <StOcctLib64>$(SolutionDir)3rdparty\occt\win64\$(StVcVer)\lib</StOcctLib64>
     <StOcctLib32d>$(SolutionDir)3rdparty\occt\win32\$(StVcVer)\libd</StOcctLib32d>

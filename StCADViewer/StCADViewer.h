@@ -1,11 +1,17 @@
 /**
  * This source is a part of sView program.
  *
- * Copyright © Kirill Gavrilov, 2011-2013
+ * Copyright © Kirill Gavrilov, 2011-2016
  */
 
 #ifndef __StCADViewer_h_
 #define __StCADViewer_h_
+
+#include <AIS_InteractiveContext.hxx>
+#include <AIS_InteractiveObject.hxx>
+#include <V3d_View.hxx>
+#include <XCAFApp_Application.hxx>
+#include <TDocStd_Document.hxx>
 
 #include <StCore/StApplication.h>
 #include <StGLMesh/StGLMesh.h>
@@ -122,9 +128,7 @@ class StCADViewer : public StApplication {
 
         StHandle<StBoolParam>  isFullscreen;    //!< fullscreen state
         StHandle<StBoolParam>  ToShowFps;       //!< display FPS meter
-        StHandle<StBoolParam>  toShowNormals;   //!< show normals flag
         StHandle<StBoolParam>  toShowTrihedron; //!< show trihedron flag
-        StHandle<StBoolParam>  isLightTwoSides; //!< if on both sides of the triangle will be enlighted
         StHandle<StInt32Param> projectMode;     //!< projection mode
         StHandle<StInt32Param> fillMode;        //!< fill mode
         int                    TargetFps;       //!< limit or not rendering FPS
@@ -133,6 +137,14 @@ class StCADViewer : public StApplication {
 
         private:
 
+    /**
+     * Initialize the OCCT viewer.
+     */
+    ST_LOCAL bool initOcctViewer();
+
+    /**
+     * Perform initialization.
+     */
     ST_LOCAL bool init();
 
     /**
@@ -144,7 +156,6 @@ class StCADViewer : public StApplication {
         private: //!< private callback Slots
 
     ST_LOCAL void doFullscreen(const bool theIsFullscreen);
-    ST_LOCAL void doShowNormals(const bool toShow);
     ST_LOCAL void doChangeProjection(const int32_t theProj);
 
         private:
@@ -153,14 +164,19 @@ class StCADViewer : public StApplication {
     StHandle<StSettings>     mySettings;      //!< current plugin local settings
     StHandle<StCADViewerGUI> myGUI;           //!< GUI elements
     StHandle<StCADLoader>    myCADLoader;     //!< dedicated threaded class for load/save operations
-    StHandle<StGLMesh>       myModel;         //!< current drawn CAD model
     StGLProjCamera           myProjection;    //!< projection setup
     StPointD_t               myPrevMouse;     //!< previous mouse click
     bool                     myIsLeftHold;
     bool                     myIsRightHold;
     bool                     myIsMiddleHold;
     bool                     myIsCtrlPressed;
-    bool                     myIsCamIterative;
+
+    Handle(V3d_Viewer)             myViewer;     //!< main viewer
+    Handle(V3d_View)               myView;       //!< main view
+    Handle(AIS_InteractiveContext) myAisContext; //!< interactive context containing displayed objects
+
+    Handle(XCAFApp_Application)    myXCafApp;    //!< OCAF application instance
+    Handle(TDocStd_Document)       myXCafDoc;    //!< OCAF document    instance
 
         private:
 

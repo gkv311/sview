@@ -264,8 +264,6 @@
 		</Linker>
 		<Unit filename="StCADLoader.cpp" />
 		<Unit filename="StCADLoader.h" />
-		<Unit filename="StCADModel.cpp" />
-		<Unit filename="StCADModel.h" />
 		<Unit filename="StCADPluginInfo.h" />
 		<Unit filename="StCADViewer.cpp" />
 		<Unit filename="StCADViewer.h" />
@@ -278,8 +276,6 @@
 		<Unit filename="StCADViewerGUI.cpp" />
 		<Unit filename="StCADViewerGUI.h" />
 		<Unit filename="StCADViewerStrings.h" />
-		<Unit filename="StMeshFileOBJ.cpp" />
-		<Unit filename="StMeshFileOBJ.h" />
 		<Unit filename="lang/english/StCADViewer.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>

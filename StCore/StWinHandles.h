@@ -90,6 +90,21 @@ class StWinGlrc {
      * EGL configuration
      */
     ST_LOCAL EGLConfig  getConfig()  const { return myConfig;  }
+
+    /**
+     * EGL rendering context.
+     */
+    ST_LOCAL EGLContext getRenderContext() const { return myRC; }
+#elif defined(_WIN32)
+    /**
+     * WinAPI Rendering Context handle.
+     */
+    ST_LOCAL HGLRC getRenderContext() const { return myRC; }
+#else
+    /**
+     * X-GLX rendering context.
+     */
+    ST_LOCAL GLXContext getRenderContext() const { return myRC; }
 #endif
 
         private:

@@ -357,6 +357,17 @@ void* StWindow::getNativeOglDC() const {
 #endif
 }
 
+void* StWindow::getNativeOglRC() const {
+#ifdef _WIN32
+    if(myWin->myMaster.hRC.isNull()) {
+        return NULL;
+    }
+    return (void* )myWin->myMaster.hRC->getRenderContext();
+#else
+    return NULL;
+#endif
+}
+
 const StString& StWindow::getStatistics() const {
     return myWin->myStatistics;
 }

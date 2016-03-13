@@ -1,11 +1,15 @@
 /**
  * This source is a part of sView program.
  *
- * Copyright © Kirill Gavrilov, 2011-2013
+ * Copyright © Kirill Gavrilov, 2011-2016
  */
 
 #ifndef __StCADLoader_h_
 #define __StCADLoader_h_
+
+#include <AIS_InteractiveObject.hxx>
+#include <NCollection_Sequence.hxx>
+#include <TopoDS_Shape.hxx>
 
 #include <StStrings/StString.h>
 #include <StFile/StMIMEList.h>
@@ -33,7 +37,7 @@ class StCADLoader {
         myEvLoadNext.set();
     }
 
-    ST_LOCAL bool getNextShape(StHandle<StGLMesh>& theMesh);
+    ST_LOCAL bool getNextShape(NCollection_Sequence<Handle(AIS_InteractiveObject)>& thePrsList);
 
     ST_LOCAL StPlayList& getPlayList() {
         return myPlayList;
@@ -54,9 +58,8 @@ class StCADLoader {
     ST_LOCAL TopoDS_Shape loadIGES(const StString& theFileToLoadPath);
     ST_LOCAL TopoDS_Shape loadSTEP(const StString& theFileToLoadPath);
 
-    ST_LOCAL StHandle<StGLMesh> loadOBJ(const StString& theFileToLoadPath);
     ST_LOCAL bool loadModel(const StHandle<StFileNode>& theSource);
-    ST_LOCAL bool computeMesh();
+    ST_LOCAL bool computeMesh(const TopoDS_Shape& theShape);
 
         private:
 
@@ -64,7 +67,7 @@ class StCADLoader {
     StHandle<StLangMap> myLangMap;
     StPlayList          myPlayList;
     StCondition         myEvLoadNext;
-    StHandle<StGLMesh>  myMesh;
+    TopoDS_Shape        myShape;
     StMutex             myShapeLock;
     volatile bool       myIsLoaded;
     volatile bool       myToQuit;

@@ -1,18 +1,19 @@
 /**
  * This source is a part of sView program.
  *
- * Copyright © Kirill Gavrilov, 2011-2013
+ * Copyright © Kirill Gavrilov, 2011-2016
  */
 
-#include "StCADModel.h"
 #include "StCADViewer.h"
+
 #include "StCADViewerGUI.h"
 #include "StCADLoader.h"
+#include "StCADWindow.h"
+#include "StCADFrameBuffer.h"
 
-#include <StGLMesh/StGLMesh.h>
-#include <StGLMesh/StGLPrism.h>
-#include <StGLMesh/StGLUVSphere.h>
-#include <StGLMesh/StBndCameraBox.h>
+#include <OpenGl_GraphicDriver.hxx>
+#include <V3d_DirectionalLight.hxx>
+#include <V3d_AmbientLight.hxx>
 
 #include <StGLCore/StGLCore20.h>
 #include <StGLWidgets/StGLMsgStack.h>
@@ -35,170 +36,6 @@ namespace {
     static const StString ST_PARAM_FILLMODE  = "fillMode";
 }
 
-class ST_LOCAL StGLCamera {
-
-        private:
-
-    StGLVec3   myEye;        //!< eye position
-    StGLVec3   myCenter;     //!< look to center
-    StGLDir3   myUp;         //!< camera up direction
-    StGLMatrix myViewMatrix; //!< model view matrix
-
-        public:
-
-    StGLCamera()
-    : ///myEye(StGLVec3::DZ()),
-      myEye(0.0f, 0.0f, 10.0f),
-      myCenter(0.0f, 0.0f, 0.0f),
-      myUp(StGLVec3::DY()),
-      myViewMatrix() {
-        updateMatrix();
-    }
-
-    ~StGLCamera() {}
-
-    const StGLVec3& getEye() const {
-        return myEye;
-    }
-
-    void setEye(const StGLVec3& theEye) {
-        myEye = theEye;
-        updateMatrix();
-    }
-
-    const StGLVec3& getCenter() const {
-        return myCenter;
-    }
-
-    void setCenter(const StGLVec3& theCenter) {
-        myCenter = theCenter;
-        updateMatrix();
-    }
-
-    const StGLVec3& getUp() const {
-        return myUp;
-    }
-
-    void setUp(const StGLVec3& theUp) {
-        myUp = theUp;
-        updateMatrix();
-    }
-
-    StGLDir3 getForward() const {
-        return myCenter - myEye;
-    }
-
-    StGLDir3 getSide() const {
-        // side = forward x up
-        return StGLVec3::cross(getForward(), myUp);
-    }
-
-    void updateMatrix() {
-        // recompute up as: up = side x forward
-        //myUp = StGLVec3::cross(getSide(), getForward());
-        myViewMatrix.initIdentity();
-        myViewMatrix.lookAt(myEye, myCenter, myUp);
-    }
-
-    void rotateX(GLfloat theAngleDegrees) {
-        StGLMatrix aRotMat;
-        aRotMat.translate(myCenter);
-        aRotMat.rotate(theAngleDegrees, myUp);
-        aRotMat.translate(-myCenter);
-        StGLVec4 aVec = aRotMat * StGLVec4(myEye, 1.0f);
-        myEye = aVec.xyz();
-        updateMatrix();
-    }
-
-    void rotateY(GLfloat theAngleDegrees) {
-        StGLMatrix aRotMat;
-        StGLVec3 anEyeDir = myCenter - myEye;
-        GLfloat anEyeMagnitude = anEyeDir.modulus();
-        anEyeDir.normalize();
-
-        StGLVec3 aRotVec = StGLVec3::cross(myUp, anEyeDir);
-        aRotVec.normalize();
-
-        aRotMat.rotate(theAngleDegrees, aRotVec);
-        StGLVec4 aVec = aRotMat * StGLVec4(myUp, 1.0f);
-        myUp = aVec.xyz();
-        aVec = aRotMat * StGLVec4(anEyeDir, 1.0f);
-        myEye = aVec.xyz();
-        myEye *= anEyeMagnitude;
-        myEye = myCenter - myEye;
-        updateMatrix();
-    }
-
-    void rotateZ(GLfloat theAngleDegrees) {
-        StGLMatrix aRotMat;
-        StGLVec3 aFrontVec = myEye - myCenter;
-        aFrontVec.normalize();
-        aRotMat.rotate(theAngleDegrees, aFrontVec);
-        StGLVec4 aVec = aRotMat * StGLVec4(myUp, 1.0f);
-        myUp = aVec.xyz();
-        updateMatrix();
-    }
-
-    operator const StGLMatrix&() const { return myViewMatrix; }
-    operator const GLfloat*() const { return myViewMatrix; }
-
-};
-
-
-/**
- * Special class to render the normals arrays.
- */
-class ST_LOCAL StGLNormalsMesh : public StGLMesh {
-
-        public:
-
-    StGLNormalsMesh()
-    : StGLMesh(GL_LINES) {}
-
-    virtual ~StGLNormalsMesh() {}
-
-    /**
-     * Will extract vertices and normals from the mesh.
-     */
-    bool init(StGLContext&    theCtx,
-              const StGLMesh& theMesh) {
-        // reset current state
-        clearRAM();
-        clearVRAM(theCtx);
-
-        // verify input mesh
-        const StArrayList<StGLVec3>& aVertices = theMesh.getVertices();
-        const StArrayList<StGLVec3>& aNormals  = theMesh.getNormals();
-        if(aVertices.isEmpty() || aVertices.size() != aNormals.size()) {
-            return false;
-        }
-
-        // compute normals scale factor (length)
-        GLfloat aScaleFactor = 1.0f;
-        StBndBox aBndBox;
-        aBndBox.enlarge(aVertices);
-        aScaleFactor = (aBndBox.getDX()+ aBndBox.getDY() + aBndBox.getDZ()) * 0.333f * 0.01f;
-
-        myVertices.initList(aVertices.size() * 2);
-        for(size_t aVertId = 0; aVertId < aVertices.size(); ++aVertId) {
-            const StGLVec3& aNode   = aVertices.getValue(aVertId);
-            const StGLVec3& aNormal = aNormals.getValue(aVertId);
-            myVertices.add(aNode);
-            myVertices.add(aNode + aNormal * aScaleFactor);
-        }
-        myVertexBuf.init(theCtx, myVertices);
-
-        // no need to store this list in RAM
-        //clearRAM();
-        return true;
-    }
-
-};
-
-static StGLCamera myCam; /// TODO move to...
-static StGLPrism myPrism; /// debug bnd box
-static StGLNormalsMesh* myNormalsMesh = NULL; /// TODO move to...
-
 const StString StCADViewer::ST_DRAWER_PLUGIN_NAME = "StCADViewer";
 
 StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
@@ -208,8 +45,7 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
   myIsLeftHold(false),
   myIsRightHold(false),
   myIsMiddleHold(false),
-  myIsCtrlPressed(false),
-  myIsCamIterative(false) {
+  myIsCtrlPressed(false) {
     mySettings = new StSettings(myResMgr, ST_DRAWER_PLUGIN_NAME);
 
     myTitle = "sView - CAD Viewer";
@@ -217,10 +53,7 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
     params.isFullscreen = new StBoolParam(false);
     params.isFullscreen->signals.onChanged.connect(this, &StCADViewer::doFullscreen);
     params.ToShowFps = new StBoolParam(false);
-    params.toShowNormals = new StBoolParam(false);
-    params.toShowNormals->signals.onChanged.connect(this, &StCADViewer::doShowNormals);
     params.toShowTrihedron = new StBoolParam(true);
-    params.isLightTwoSides = new StBoolParam(true);
     params.projectMode = new StInt32Param(ST_PROJ_STEREO);
     params.projectMode->signals.onChanged.connect(this, &StCADViewer::doChangeProjection);
     params.fillMode = new StInt32Param(ST_FILL_MESH);
@@ -262,7 +95,6 @@ bool StCADViewer::resetDevice() {
 
 void StCADViewer::saveAllParams() {
     if(!myGUI.isNull()) {
-        mySettings->saveParam(ST_PARAM_NORMALS,     params.toShowNormals);
         mySettings->saveParam(ST_PARAM_TRIHEDRON,   params.toShowTrihedron);
         mySettings->saveParam(ST_PARAM_PROJMODE,    params.projectMode);
         mySettings->saveParam(ST_PARAM_FILLMODE,    params.fillMode);
@@ -275,15 +107,11 @@ void StCADViewer::saveAllParams() {
 void StCADViewer::releaseDevice() {
     saveAllParams();
     if(!myContext.isNull()) {
-        if(myNormalsMesh != NULL) {
-            myNormalsMesh->release(*myContext);
-            delete myNormalsMesh;
-            myNormalsMesh = NULL;
+        if(!myAisContext.IsNull()) {
+            myAisContext.Nullify();
+            myView.Nullify();
+            myViewer.Nullify();
         }
-        if(!myModel.isNull()) {
-            myModel->release(*myContext);
-        }
-        myPrism.release(*myContext);
     }
 
     // release GUI data and GL resources before closing the window
@@ -295,6 +123,125 @@ StCADViewer::~StCADViewer() {
     releaseDevice();
     // wait working threads to quit and release resources
     myCADLoader.nullify();
+}
+
+bool StCADViewer::initOcctViewer() {
+#ifdef __ANDROID__
+    int aWidth = 2, aHeight = 2;
+    EGLint aCfgId = 0;
+    EGLDisplay anEglDisplay = eglGetCurrentDisplay();
+    EGLContext anEglContext = eglGetCurrentContext();
+    EGLSurface anEglSurf    = eglGetCurrentSurface(EGL_DRAW);
+    if(anEglDisplay == EGL_NO_DISPLAY
+    || anEglContext == EGL_NO_CONTEXT
+    || anEglSurf    == EGL_NO_SURFACE) {
+        myMsgQueue->pushError(stCString("Critical error:\nNo active EGL context!"));
+        return false;
+    }
+
+    eglQuerySurface(anEglDisplay, anEglSurf, EGL_WIDTH,     &aWidth);
+    eglQuerySurface(anEglDisplay, anEglSurf, EGL_HEIGHT,    &aHeight);
+    eglQuerySurface(anEglDisplay, anEglSurf, EGL_CONFIG_ID, &aCfgId);
+
+    const EGLint aConfigAttribs[] = { EGL_CONFIG_ID, aCfgId, EGL_NONE };
+    EGLint       aNbConfigs = 0;
+    void*        anEglConfig = NULL;
+
+    if(eglChooseConfig(anEglDisplay, aConfigAttribs, &anEglConfig, 1, &aNbConfigs) != EGL_TRUE) {
+        myMsgQueue->pushError(stCString("Critical error:\nEGL does not provide compatible configurations!"));
+        return false;
+    }
+
+    if(!myViewer.IsNull()) {
+        Handle(OpenGl_GraphicDriver) aDriver = Handle(OpenGl_GraphicDriver)::DownCast(myViewer->Driver());
+        Handle(StCADWindow)          aWindow = Handle(StCADWindow)::DownCast(myView->Window());
+        if(!aDriver->InitEglContext(anEglDisplay, anEglContext, anEglConfig)) {
+            myMsgQueue->pushError(stCString("Critical error:\nOpenGl_GraphicDriver can not be initialized!"));
+            return false;
+        }
+
+        aWindow->SetSize(aWidth, aHeight);
+        myView->SetWindow(aWindow, (Aspect_RenderingContext )anEglContext);
+        return true;
+    }
+
+#elif defined(_WIN32)
+    HWND  aWinHandle = (HWND  )myWindow->getNativeOglWin();
+    HDC   aWindowDC  = (HDC   )myWindow->getNativeOglDC();
+    HGLRC aRendCtx   = (HGLRC )myWindow->getNativeOglRC();
+    if(aWinHandle == NULL
+    || aWindowDC  == NULL
+    || aRendCtx   == NULL) {
+        myMsgQueue->pushError(stCString("Critical error:\nNo active WGL context!"));
+        return false;
+    }
+
+    if(!myViewer.IsNull()) {
+        Handle(StCADWindow) aWindow = new StCADWindow(aWinHandle);
+        myView->SetWindow(aWindow, (Aspect_RenderingContext )aRendCtx);
+        return true;
+    }
+#endif
+
+    Handle(OpenGl_GraphicDriver) aDriver = new OpenGl_GraphicDriver(NULL, Standard_False);
+    aDriver->ChangeOptions().ffpEnable     = Standard_False;
+    aDriver->ChangeOptions().buffersNoSwap = Standard_True;
+#ifdef ST_DEBUG_GL
+    aDriver->ChangeOptions().contextDebug  = Standard_True;
+#else
+    aDriver->ChangeOptions().contextDebug  = Standard_False;
+#endif
+#ifdef ST_DEBUG_SHADERS
+    aDriver->ChangeOptions().glslWarnings  = Standard_True;
+#else
+    aDriver->ChangeOptions().glslWarnings  = Standard_False;
+#endif
+
+#ifdef __ANDROID__
+    if(!aDriver->InitEglContext(anEglDisplay, anEglContext, anEglConfig)) {
+        myMsgQueue->pushError(stCString("Critical error:\nOpenGl_GraphicDriver can not be initialized!!"));
+        return false;
+    }
+#endif
+
+    myViewer = new V3d_Viewer(aDriver, TCollection_ExtendedString("Viewer").ToExtString(), "", 1000.0,
+                              V3d_XposYnegZpos, Quantity_NOC_BLACK, V3d_ZBUFFER, V3d_GOURAUD, V3d_WAIT,
+                              Standard_True, Standard_False);
+    Handle(V3d_DirectionalLight) aLightDir = new V3d_DirectionalLight(myViewer, V3d_Zneg, Quantity_NOC_WHITE, Standard_True);
+    Handle(V3d_AmbientLight)     aLightAmb = new V3d_AmbientLight(myViewer);
+    aLightDir->SetDirection ( 1.0, -2.0, -10.0);
+    myViewer->SetLightOn (aLightDir);
+    myViewer->SetLightOn (aLightAmb);
+
+    myAisContext = new AIS_InteractiveContext(myViewer);
+    myAisContext->SetDisplayMode(AIS_Shaded);
+    myAisContext->SetAutoActivateSelection(Standard_False);
+    myAisContext->SetHilightColor(Quantity_NOC_CYAN1);
+    myAisContext->SelectionColor (Quantity_NOC_WHITE);
+    const Handle(Prs3d_Drawer)& aDrawer = myAisContext->DefaultDrawer();
+    aDrawer->SetAutoTriangulation (Standard_False);
+#ifdef __ANDROID__
+    Handle(StCADWindow) aWindow = new StCADWindow();
+    aWindow->SetSize(aWidth, aHeight);
+#elif defined(_WIN32)
+    Handle(StCADWindow) aWindow = new StCADWindow(aWinHandle);
+#endif
+
+    myView = myViewer->CreateView();
+    myView->Camera()->SetProjectionType(myProjection.isPerspective()
+                                      ? Graphic3d_Camera::Projection_Perspective
+                                      : Graphic3d_Camera::Projection_Orthographic);
+    myView->SetImmediateUpdate(Standard_False);
+
+#ifdef __ANDROID__
+    myView->SetWindow(aWindow, (Aspect_RenderingContext )anEglContext);
+#else
+    myView->SetWindow(aWindow, (Aspect_RenderingContext )aRendCtx);
+#endif
+
+    myView->TriedronDisplay(Aspect_TOTP_RIGHT_LOWER, Quantity_NOC_WHITE, 0.08, V3d_ZBUFFER);
+    myView->SetSurfaceDetail(V3d_TEX_ALL);
+    return true;
 }
 
 bool StCADViewer::init() {
@@ -316,6 +263,10 @@ bool StCADViewer::init() {
     myWindow->setTargetFps(double(params.TargetFps));
     myWindow->setStereoOutput(params.projectMode->getValue() == ST_PROJ_STEREO);
 
+    if(!initOcctViewer()) {
+        //
+    }
+
     myGUI->setContext(myContext);
     if(!myGUI->stglInit()) {
         myMsgQueue->pushError(stCString("CAD Viewer - GUI initialization failed!"));
@@ -332,7 +283,6 @@ bool StCADViewer::init() {
     }
 
     // load settings
-    mySettings->loadParam(ST_PARAM_NORMALS,   params.toShowNormals);
     mySettings->loadParam(ST_PARAM_TRIHEDRON, params.toShowTrihedron);
     mySettings->loadParam(ST_PARAM_PROJMODE,  params.projectMode);
     mySettings->loadParam(ST_PARAM_FILLMODE,  params.fillMode);
@@ -408,6 +358,11 @@ void StCADViewer::doMouseDown(const StClickEvent& theEvent) {
         myIsRightHold = true; ///
         myPrevMouse.x() = theEvent.PointX;
         myPrevMouse.y() = theEvent.PointY;
+        if(myIsCtrlPressed && !myView.IsNull()) {
+            StRectI_t aWinRect = myWindow->getPlacement();
+            myView->StartRotation(int(double(aWinRect.width())  * theEvent.PointX),
+                                  int(double(aWinRect.height()) * theEvent.PointY));
+        }
     } else if(theEvent.Button == ST_MOUSE_MIDDLE) {
         myIsMiddleHold = true; ///
         myPrevMouse.x() = theEvent.PointX;
@@ -426,15 +381,6 @@ void StCADViewer::doMouseUp(const StClickEvent& theEvent) {
             break;
         }
         case ST_MOUSE_RIGHT: {
-            if(myIsRightHold && myIsCtrlPressed) {
-                // rotate
-                StPointD_t aPt = myWindow->getMousePos();
-                StGLVec2 aFlatMove( 2.0f * GLfloat(aPt.x() - myPrevMouse.x()),
-                                   -2.0f * GLfloat(aPt.y() - myPrevMouse.y()));
-
-                myCam.rotateX(-aFlatMove.x() * 90.0f);
-                myCam.rotateY(-aFlatMove.y() * 90.0f);
-            }
             myIsRightHold = false;
             break;
         }
@@ -457,14 +403,34 @@ void StCADViewer::doScroll(const StScrollEvent& theEvent) {
 
     if(theEvent.StepsY >= 1) {
         if(myIsCtrlPressed) {
+            if(!myView.IsNull()) {
+                Standard_Real aFocus = myView->Camera()->ZFocus() + 0.05;
+                if(aFocus > 0.2
+                && aFocus < 2.0) {
+                  myView->Camera()->SetZFocus(myView->Camera()->ZFocusType(), aFocus);
+                }
+            }
             myProjection.setZScreen(myProjection.getZScreen() + 1.1f);
         } else {
+            if(!myView.IsNull()) {
+                myView->Zoom(0, 0, 10, 10);
+            }
             myProjection.setZoom(myProjection.getZoom() * 0.9f);
         }
     } else if(theEvent.StepsY <= -1) {
         if(myIsCtrlPressed) {
+            if(!myView.IsNull()) {
+                Standard_Real aFocus = myView->Camera()->ZFocus() - 0.05;
+                if(aFocus > 0.2
+                && aFocus < 2.0) {
+                  myView->Camera()->SetZFocus(myView->Camera()->ZFocusType(), aFocus);
+                }
+            }
             myProjection.setZScreen(myProjection.getZScreen() - 1.1f);
         } else {
+            if(!myView.IsNull()) {
+                myView->Zoom(0, 0, -10, -10);
+            }
             myProjection.setZoom(myProjection.getZoom() * 1.1f);
         }
     }
@@ -516,38 +482,28 @@ void StCADViewer::doKeyDown(const StKeyEvent& theEvent) {
             }
             return;
 
-        case ST_VK_C:
-            myIsCamIterative = !myIsCamIterative;
-            ST_DEBUG_LOG("Iterative camera " + (myIsCamIterative ? "ON" : "OFF"));
-            return;
-
         case ST_VK_LEFT:
-            myCam.rotateX(-1.0f);
+            ///myCam.rotateX(-1.0f);
             return;
         case ST_VK_RIGHT:
-            myCam.rotateX(1.0f);
+            ///myCam.rotateX(1.0f);
             return;
         case ST_VK_UP:
-            myCam.rotateY(-1.0f);
+            ///myCam.rotateY(-1.0f);
             return;
         case ST_VK_DOWN:
-            myCam.rotateY(1.0f);
+            ///myCam.rotateY(1.0f);
             return;
         case ST_VK_Q:
-            myCam.rotateZ(-1.0f);
+            ///myCam.rotateZ(-1.0f);
             return;
         case ST_VK_W:
-            myCam.rotateZ(1.0f);
+            ///myCam.rotateZ(1.0f);
             return;
 
         // call fit all
         case ST_VK_F:
             doFitALL();
-            return;
-
-        // show normals
-        case ST_VK_N:
-            params.toShowNormals->reverse();
             return;
 
         // playlist navigation
@@ -621,219 +577,117 @@ void StCADViewer::beforeDraw() {
     }
 
     myIsCtrlPressed = myWindow->getKeysState().isKeyDown(ST_VK_CONTROL);
-    if(myIsMiddleHold && myIsCtrlPressed) {
+    Handle(Graphic3d_Camera) aCam = !myView.IsNull()
+                                  ?  myView->Camera()
+                                  : Handle(Graphic3d_Camera)();
+    if(myIsMiddleHold && myIsCtrlPressed && !aCam.IsNull()) {
         // move
         StPointD_t aPt = myWindow->getMousePos();
-        StGLVec2 aFlatMove( 2.0f * GLfloat(aPt.x() - myPrevMouse.x()),
-                           -2.0f * GLfloat(aPt.y() - myPrevMouse.y()));
+        gp_Vec2d aFlatMove( 2.0 * (aPt.x() - myPrevMouse.x()),
+                           -2.0 * (aPt.y() - myPrevMouse.y()));
 
-        StRectD_t aSect;
-        myProjection.getZParams(aSect);
+        const gp_Dir aSide    = aCam->Direction().Crossed(aCam->Up());
+        const gp_Pnt aViewDim = aCam->ViewDimensions();
+        const gp_Vec aMoveSide = gp_Vec(aSide)      * 0.5 * aFlatMove.X() * aViewDim.X();
+        const gp_Vec aMoveUp   = gp_Vec(aCam->Up()) * 0.5 * aFlatMove.Y() * aViewDim.Y();
 
-        StGLVec3 aCenter   = myCam.getCenter();
-        StGLVec3 anEye     = myCam.getEye();
-        StGLVec3 aMoveSide = StGLVec3(myCam.getSide()) * 1.0f * aFlatMove.x() * GLfloat(aSect.right());
-        StGLVec3 aMoveUp   = myCam.getUp() * 1.0f * aFlatMove.y() * GLfloat(aSect.top());
+        gp_Pnt aCenter = aCam->Center();
+        gp_Pnt anEye   = aCam->Eye();
+        aCenter.Translate(-aMoveSide);
+        anEye  .Translate(-aMoveSide);
+        aCenter.Translate(-aMoveUp);
+        anEye  .Translate(-aMoveUp);
 
-        aCenter -= aMoveSide;
-        anEye   -= aMoveSide;
-        aCenter -= aMoveUp;
-        anEye   -= aMoveUp;
-
-        myCam.setCenter(aCenter);
-        myCam.setEye(anEye);
+        aCam->SetCenter(aCenter);
+        aCam->SetEye(anEye);
 
         myPrevMouse = aPt;
     }
+    if(myIsRightHold && myIsCtrlPressed) {
+        const StPointD_t aPt = myWindow->getMousePos();
+        StRectI_t aWinRect = myWindow->getPlacement();
+        myView->Rotation(int(double(aWinRect.width())  * aPt.x()),
+                         int(double(aWinRect.height()) * aPt.y()));
+    }
 
-    StHandle<StGLMesh> aNewMesh;
-    if(myCADLoader->getNextShape(aNewMesh)) {
-        if(!aNewMesh.isNull()) {
-            if(!myModel.isNull()) {
-                myModel->release(*myContext);
+    if(!myAisContext.IsNull()) {
+        NCollection_Sequence<Handle(AIS_InteractiveObject)> aNewPrsList;
+        if(myCADLoader->getNextShape(aNewPrsList)) {
+            myAisContext->RemoveAll(Standard_False);
+            for(NCollection_Sequence<Handle(AIS_InteractiveObject)>::Iterator aPrsIter(aNewPrsList); aPrsIter.More(); aPrsIter.Next()) {
+                myAisContext->Display(aPrsIter.Value(), 1, 0, Standard_False);
             }
-            myModel = aNewMesh;
 
-            ST_DEBUG_LOG(myContext->stglFullInfo()); ///
-            myModel->initVBOs(*myContext);
-            ST_DEBUG_LOG(myContext->stglFullInfo()); ///
-
-            // update normals representation
-            if(params.toShowNormals->getValue()) {
-                if(myNormalsMesh == NULL) {
-                    myNormalsMesh = new StGLNormalsMesh();
-                }
-                myNormalsMesh->init(*myContext, *myModel);
-            }
-            // call fit all
             doFitALL();
+            doUpdateStateLoaded(!aNewPrsList.IsEmpty());
         }
-        doUpdateStateLoaded(!aNewMesh.isNull());
     }
 
     myGUI->setVisibility(myWindow->getMousePos(), true);
+    myGUI->stglUpdate(myWindow->getMousePos());
 }
 
 void StCADViewer::stglDraw(unsigned int theView) {
-    if(!myContext.isNull()
-    && myContext->core20fwd != NULL) {
-        // clear the screen and the depth buffer
-        myContext->core11fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    }
-
     if(myGUI.isNull()) {
         return;
     }
 
+    if(!myView.IsNull()) {
+        Graphic3d_Camera::Projection aProj = Graphic3d_Camera::Projection_Orthographic;
+        if(myProjection.isPerspective()) {
+            switch(theView) {
+                case ST_DRAW_LEFT:  aProj = Graphic3d_Camera::Projection_MonoLeftEye;  break;
+                case ST_DRAW_RIGHT: aProj = Graphic3d_Camera::Projection_MonoRightEye; break;
+                case ST_DRAW_MONO:  aProj = Graphic3d_Camera::Projection_Perspective;  break;
+            }
+        }
+
+        // Do the magic:
+        // - define default FBO for OCCT from StGLContext
+        // - resize virtual window without OCCT viewer redraw
+        // - copy viewport restore it back
+        // What does not handled:
+        // - Dual Output, OCCT makes OpenGL context always on master window
+        // - scissor test is likely incorrectly applied
+        // - MSAA blitting might use incorrect viewport
+        Handle(OpenGl_GraphicDriver) aDriver = Handle(OpenGl_GraphicDriver)::DownCast(myViewer->Driver());
+        Handle(OpenGl_Context) aCtx = aDriver->GetSharedContext();
+        Handle(StCADFrameBuffer) anFboWrapper = Handle(StCADFrameBuffer)::DownCast(aCtx->DefaultFrameBuffer());
+        if(anFboWrapper.IsNull()) {
+            anFboWrapper = new StCADFrameBuffer();
+        }
+        anFboWrapper->wrapFbo(*myContext);
+        aCtx->SetDefaultFrameBuffer(anFboWrapper);
+        myContext->stglBindFramebuffer(0);
+
+        Handle(StCADWindow) aWindow = Handle(StCADWindow)::DownCast(myView->Window());
+        if(anFboWrapper->GetVPSizeX() > 0
+        && anFboWrapper->GetVPSizeY() > 0
+        && aWindow->SetSize(anFboWrapper->GetVPSizeX(), anFboWrapper->GetVPSizeY())) {
+            Standard_Real aRatio = double(anFboWrapper->GetVPSizeX()) / double(anFboWrapper->GetVPSizeY());
+            myView->Camera()->SetAspect(aRatio);
+            myView->View()->Resized();
+        }
+
+        StGLBoxPx aVPort = myContext->stglViewport();
+        StGLBoxPx aScissRect;
+        bool toSetScissorRect = myContext->stglScissorRect(aScissRect);
+
+        myView->Camera()->SetProjectionType(aProj);
+        myView->Redraw();
+
+        myContext->stglResizeViewport(aVPort);
+        if(toSetScissorRect) {
+            myContext->stglSetScissorRect(aScissRect, false);
+        }
+    } else if(!myContext.isNull()
+            && myContext->core20fwd != NULL) {
+        // clear the screen and the depth buffer
+        myContext->core11fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
     myGUI->getCamera()->setView(theView);
     myProjection.setView(theView);
-    if(theView == ST_DRAW_LEFT
-    || theView == ST_DRAW_MONO) {
-        myGUI->stglUpdate(myWindow->getMousePos());
-    }
-
-/// setup the projection matrix
-    myProjection.updateFrustum(); ///
-    myProjection.setupFixed(*myContext);
-
-/// draw tunnel
-    /*glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-
-    glColor3f(1.0f, 1.0f, 1.0f);
-    StGLPrism stTunnel;
-    stTunnel.setWireframe(0, 0, 10);
-    stTunnel.setVisibilityZ(false, false);
-    const GLfloat aPrecision = 0.001f;
-    GLfloat aZDelta =  myProjection.getZFar() - myProjection.getZNear() - aPrecision;
-    GLfloat aZ0  = -myProjection.getZNear();
-    GLfloat aZ1  =  aZ0 - aZDelta;
-    GLfloat aX0 = myProjection.getMonoFrustrum()->xLeft;
-    GLfloat aX1 = myProjection.getMonoFrustrum()->xRight - aPrecision;
-    GLfloat aY0 = myProjection.getMonoFrustrum()->yTop   - aPrecision;
-    GLfloat aY1 = myProjection.getMonoFrustrum()->yBottom;
-    stTunnel.init(StGLVec3(aX0, aY0, aZ0), // rectangle in near Z plane
-                  StGLVec3(aX1, aY0, aZ0),
-                  StGLVec3(aX1, aY1, aZ0),
-                  StGLVec3(aX0, aY1, aZ0),
-                  StGLVec3(aX0, aY0, aZ1), // rectangle in far Z plane
-                  StGLVec3(aX1, aY0, aZ1),
-                  StGLVec3(aX1, aY1, aZ1),
-                  StGLVec3(aX0, aY1, aZ1));
-    stTunnel.drawFixed();*/
-///
-
-    /// setup the camera
-    StGLCamera aCam = myCam;
-    if(myIsRightHold && myIsCtrlPressed) {
-        // rotation preview
-        const StPointD_t aPt = myWindow->getMousePos();
-        StGLVec2 aFlatMove( 2.0f * GLfloat(aPt.x() - myPrevMouse.x()),
-                           -2.0f * GLfloat(aPt.y() - myPrevMouse.y()));
-
-        aCam.rotateX(-aFlatMove.x() * 90.0f);
-        aCam.rotateY(-aFlatMove.y() * 90.0f);
-
-        if(myIsCamIterative) {
-            myCam = aCam;
-            myPrevMouse = aPt;
-        }
-    }
-
-#if !defined(GL_ES_VERSION_2_0)
-    myContext->core11->glMatrixMode(GL_MODELVIEW);
-    myContext->core11->glLoadIdentity();
-    myContext->core11->glMultMatrixf(aCam);
-
-    /// draw boxes
-    /*StGLPrism aBox111, aBox011, aBox211, aBox001, aBox112, aBox110;
-    aBox011.init(StGLVec3(-2.0f,  0.0f,  0.0f), 1.0f, 1.0f, 1.0f); aBox011.drawFixed();
-    aBox211.init(StGLVec3( 2.0f,  0.0f,  0.0f), 1.0f, 1.0f, 1.0f); aBox211.drawFixed();
-    aBox112.init(StGLVec3( 0.0f,  0.0f,  2.0f), 1.0f, 1.0f, 1.0f); aBox112.drawFixed();
-    aBox110.init(StGLVec3( 0.0f,  0.0f, -2.0f), 1.0f, 1.0f, 1.0f); aBox110.drawFixed();*/
-
-    /// draw the model
-    if(!myModel.isNull()) {
-        GLfloat mat_shininess[] = { 50.0 };
-        glMaterialfv(GL_FRONT, GL_SPECULAR, StGLVec4(1.0f, 1.0f, 1.0f, 1.0f));
-        glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
-        StGLVec4 aLightPos = StGLVec4(aCam.getEye(), 1.0f);
-        glLightfv(GL_LIGHT0, GL_POSITION, aLightPos);
-        glEnable(GL_LIGHTING);
-        glEnable(GL_LIGHT0);
-        GLint aLModel = params.isLightTwoSides->getValue() ? 1 : 0; glLightModeliv(GL_LIGHT_MODEL_TWO_SIDE, &aLModel); // light both sides
-        glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-        glEnable(GL_COLOR_MATERIAL);
-
-        glEnable(GL_DEPTH_TEST);
-
-        glColor3f(1.0f, 0.84314f, 0.0f); // golden
-        if(params.fillMode->getValue() == ST_FILL_SHADING
-        || params.fillMode->getValue() == ST_FILL_SHADED_MESH) {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            myModel->drawFixed(*myContext);
-        }
-        if(params.fillMode->getValue() == ST_FILL_MESH
-        || params.fillMode->getValue() == ST_FILL_WIREFRAME) {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            myModel->drawFixed(*myContext);
-        }
-        glDisable(GL_LIGHT0);
-        glDisable(GL_LIGHTING);
-
-        if(params.fillMode->getValue() == ST_FILL_SHADED_MESH) {
-            glColor3f(1.0f, 1.0f, 1.0f); // white
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            myModel->drawFixed(*myContext);
-        }
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-        if(myNormalsMesh != NULL) {
-            glColor3f(1.0f, 1.0f, 1.0f); // white
-            myNormalsMesh->drawFixed(*myContext);
-        }
-
-/// draw bnd box+
-/*        glColor3f(1.0f, 0.0f, 1.0f);
-        StGLPrism aBndBox;
-        aBndBox.init(myModel->myBndBox);
-        aBndBox.drawFixed();*/
-/// draw bnd box2
-/*        glColor3f(0.0f, 1.0f, 1.0f);
-        myPrism.drawFixed();*/
-/// draw bnd sphere
-/*        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            StGLUVSphere sBndSphere;
-            sBndSphere.init(myModel->myBndSphere, 20);
-            sBndSphere.drawFixed();
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);*/
-///
-    }
-
-    /// draw trihedron
-    myContext->core11fwd->glDisable(GL_DEPTH_TEST);
-    if(params.toShowTrihedron->getValue()) {
-        StRectD_t aCurrSect; myProjection.getZParams(myProjection.getZScreen(), aCurrSect);
-        GLfloat aLineLen = GLfloat(std::abs(aCurrSect.top()) * 0.2);
-        StGLVec3 aTrihCenter = aCam.getCenter();
-        aTrihCenter -= aCam.getSide() * ((GLfloat )std::abs(aCurrSect.left()) * 1.0f - aLineLen); // move to left
-        aTrihCenter -= aCam.getUp()   * ((GLfloat )std::abs(aCurrSect.top())  * 1.0f - aLineLen); // move to bottom
-        glBegin(GL_LINES);
-            // DX
-            glColor3f(1.0f, 0.0f, 0.0f);
-            glVertex3fv(aTrihCenter);
-            glVertex3fv(aTrihCenter + StGLVec3::DX() * aLineLen);
-            // DY
-            glColor3f(0.0f, 1.0f, 0.0f);
-            glVertex3fv(aTrihCenter);
-            glVertex3fv(aTrihCenter + StGLVec3::DY() * aLineLen);
-            // DZ
-            glColor3f(0.0f, 0.0f, 1.0f);
-            glVertex3fv(aTrihCenter);
-            glVertex3fv(aTrihCenter + StGLVec3::DZ() * aLineLen);
-        glEnd();
-    }
-#endif
 
     // draw GUI
     myContext->core11fwd->glDisable(GL_DEPTH_TEST);
@@ -893,65 +747,8 @@ void StCADViewer::doListLast(const size_t ) {
 }
 
 void StCADViewer::doFitALL(const size_t ) {
-    if(myModel.isNull() || myModel->getBndSphere().isVoid()) {
-        return;
-    }
-
-    // remember current camera direction
-    StGLVec3 anEyeDir = myCam.getCenter() - myCam.getEye();
-    anEyeDir.normalize();
-
-    // got the boundary sphere for first fit all approximation
-    StGLVec3 aFitCenter = myModel->getBndSphere().getCenter();
-    GLfloat aFitRadius  = myModel->getBndSphere().getRadius();
-
-    // aim the camera to the boundary sphere center
-    myCam.setCenter(aFitCenter);
-    // move camera out to avoid clipping by nearest Z-clipping plane
-    anEyeDir *= 2.0f * aFitRadius;
-    StGLVec3 anEye = myCam.getCenter() - anEyeDir;
-    myCam.setEye(anEye);
-
-    // setup the save far Z-clipping plane
-    myProjection.setZScreen(2.0f * aFitRadius);
-    myProjection.setZFar(4.0f * aFitRadius); // limit important for orthogonal projection!
-    myProjection.updateFrustum();
-
-    StBndCameraBox aCamBox(myCam);
-    aCamBox.enlarge(myModel->getVertices());
-    aCamBox.getPrism(*myContext, myPrism);
-
-    GLdouble aZScr = anEyeDir.modulus() - aCamBox.getDZ() * 0.5f;
-    StRectD_t aCurrSect; myProjection.getZParams(aZScr, aCurrSect);
-    GLfloat aCurrDY = 2.0f * GLfloat(aCurrSect.top()) / myProjection.getZoom();
-
-    // enlarge the rectangle to fit sphere
-    GLfloat anAspect = myProjection.getAspect();
-    GLfloat aNewDX = aCamBox.getDX();
-    GLfloat aNewDY = aCamBox.getDY();
-    // apply camera aspect ratio
-    if(anAspect * aNewDY > aNewDX) {
-        aNewDX = anAspect * aNewDY;
-    } else {
-        aNewDY = aNewDX / anAspect;
-    }
-    // compute linear scale factor
-    myProjection.setZoom(aNewDY / aCurrDY);
-    // move camera center to the boundary box center
-    myCam.setCenter(aCamBox.getCenterGlobal());
-    // move camera out from the boundary sphere center to avoid clipping by nearest Z-clipping plane
-    anEye = myCam.getCenter() - anEyeDir;
-    myCam.setEye(anEye);
-}
-
-void StCADViewer::doShowNormals(const bool toShow) {
-    if(toShow && myNormalsMesh == NULL && !myModel.isNull()) {
-        myNormalsMesh = new StGLNormalsMesh();
-        myNormalsMesh->init(*myContext, *myModel);
-    } else if(!toShow && myNormalsMesh != NULL) {
-        myNormalsMesh->release(*myContext);
-        delete myNormalsMesh;
-        myNormalsMesh = NULL;
+    if(!myView.IsNull()) {
+        myView->FitAll(0.01, Standard_False);
     }
 }
 
@@ -964,16 +761,25 @@ void StCADViewer::doChangeProjection(const int32_t theProj) {
         case ST_PROJ_ORTHO: {
             myWindow->setStereoOutput(false);
             myProjection.setPerspective(false);
+            if(!myView.IsNull()) {
+                myView->Camera()->SetProjectionType(Graphic3d_Camera::Projection_Orthographic);
+            }
             break;
         }
         case ST_PROJ_PERSP: {
             myWindow->setStereoOutput(false);
             myProjection.setPerspective(true);
+            if(!myView.IsNull()) {
+                myView->Camera()->SetProjectionType(Graphic3d_Camera::Projection_Perspective);
+            }
             break;
         }
         case ST_PROJ_STEREO: {
             myWindow->setStereoOutput(true);
             myProjection.setPerspective(true);
+            if(!myView.IsNull()) {
+                myView->Camera()->SetProjectionType(Graphic3d_Camera::Projection_Perspective);
+            }
             break;
         }
     }

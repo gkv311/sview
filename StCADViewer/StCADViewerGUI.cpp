@@ -49,12 +49,8 @@ StGLMenu* StCADViewerGUI::createViewMenu() {
     aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_FULLSCREEN, "Fullscreen"),
                    myPlugin->params.isFullscreen);
 #endif
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_NORMALS,    "Show Normals"),
-                   myPlugin->params.toShowNormals);
     aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_TRIHEDRON,  "Show Trihedron"),
                    myPlugin->params.toShowTrihedron);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_TWOSIDES,   "Two sides lighting"),
-                   myPlugin->params.isLightTwoSides);
     aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_PROJECTION, "Projection"), aMenuProj);
     aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_FILLMODE,   "Fill Mode"),  aMenuFill);
     aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_FITALL,     "Fit ALL"))

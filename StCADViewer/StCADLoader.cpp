@@ -1,31 +1,33 @@
 /**
  * This source is a part of sView program.
  *
- * Copyright © Kirill Gavrilov, 2011-2013
+ * Copyright © Kirill Gavrilov, 2011-2016
  */
 
 #ifdef ST_HAVE_STCONFIG
     #include <stconfig.conf>
 #endif
 
-    #include <BRep_Tool.hxx>
-    #include <BRep_Builder.hxx>
-    #include <BRepTools.hxx>          // BREP reader
-    #include <BRepBuilderAPI_Sewing.hxx>
-    #include <BRepMesh.hxx>
-    #include <BRepLProp_SLProps.hxx>
-    #include <IGESControl_Reader.hxx> // IGES reader
-    #include <STEPControl_Reader.hxx> // STEP reader
-    #include <XSControl_WorkSession.hxx>
-    #include <ShapeFix_Shape.hxx>
-    #include <TopoDS.hxx>
-    #include <TopoDS_Shape.hxx>
-    #include <TopExp_Explorer.hxx>
+#include <AIS_Shape.hxx>
+#include <BRep_Tool.hxx>
+#include <BRep_Builder.hxx>
+#include <BRepTools.hxx>
+#include <BRepBuilderAPI_Sewing.hxx>
+#include <BRepMesh_IncrementalMesh.hxx>
+#include <BRepMesh.hxx>
+#include <BRepLProp_SLProps.hxx>
+#include <IGESControl_Reader.hxx>
+#include <STEPControl_Reader.hxx>
+#include <XSControl_WorkSession.hxx>
+#include <ShapeFix_Shape.hxx>
+
+#include <Prs3d.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopExp_Explorer.hxx>
 
 #include "StCADLoader.h"
 #include "StCADPluginInfo.h"
-#include "StCADModel.h"
-#include "StMeshFileOBJ.h" // OBJ reader
 
 #include <StStrings/StLangMap.h>
 #include <StThreads/StThread.h>
@@ -148,16 +150,6 @@ TopoDS_Shape StCADLoader::loadSTEP(const StString& theFileToLoadPath) {
     return aReader.OneShape();
 }
 
-StHandle<StGLMesh> StCADLoader::loadOBJ(const StString& theFileToLoadPath) {
-    StMeshFileOBJ anOBJReader;
-    if(!anOBJReader.load(theFileToLoadPath)) {
-        /// description?
-        return StHandle<StGLMesh>();
-    }
-    StHandle<StGLMesh> aMesh = anOBJReader.getResult();
-    return aMesh;
-}
-
 bool StCADLoader::loadModel(const StHandle<StFileNode>& theSource) {
     const StMIME stMIMEType = theSource->getMIME();
     const StString aFileToLoadPath = theSource->getPath();
@@ -177,45 +169,48 @@ bool StCADLoader::loadModel(const StHandle<StFileNode>& theSource) {
         } else if(aShape.IsNull()) {
             signals.onError(formatError(aFileToLoadPath, "No shapes found in the BREP file"));
         }
-    } else
-    if(anExt.isEqualsIgnoreCase(stCString(ST_OBJ_EXT))) {
-        ///signals.onError(formatError(aFileToLoadPath, "OBJ import not yet implemented!"));
-        aMesh = StCADLoader::loadOBJ(aFileToLoadPath);
     } else {
         signals.onError(formatError(aFileToLoadPath, "Format doesn't supported"));
     }
 
     bool hasShape = !aShape.IsNull();
+    computeMesh(aShape);
 
     // setup new output shape
     myShapeLock.lock();
-        if(!aShape.IsNull()) {
-            myMesh = new StCADModel(aShape);
-            computeMesh();
-            aShape.Nullify();
-        } else {
-            myMesh = aMesh;
-        }
+        myShape = aShape;
+        aShape.Nullify();
         myIsLoaded = true;
     myShapeLock.unlock();
-
     return hasShape;
 }
 
-bool StCADLoader::computeMesh() {
-    /// TODO (Kirill Gavrilov#9)
-    if(!myMesh.isNull()) {
-        return myMesh->computeMesh();
+bool StCADLoader::computeMesh(const TopoDS_Shape& theShape) {
+    if(theShape.IsNull()) {
+        return false;
     }
-    return false;
+
+    Handle(Prs3d_Drawer) aDrawer = new Prs3d_Drawer();
+    Standard_Real aDeflection = Prs3d::GetDeflection(theShape, aDrawer);
+    if(!BRepTools::Triangulation(theShape, aDeflection)) {
+        BRepMesh_IncrementalMesh anAlgo;
+        anAlgo.ChangeParameters().Deflection = aDeflection;
+        anAlgo.ChangeParameters().Angle      = aDrawer->HLRAngle();
+        anAlgo.ChangeParameters().InParallel = Standard_True;
+        anAlgo.SetShape(theShape);
+        anAlgo.Perform();
+    }
+    return true;
 }
 
-bool StCADLoader::getNextShape(StHandle<StGLMesh>& theMesh) {
+bool StCADLoader::getNextShape(NCollection_Sequence<Handle(AIS_InteractiveObject)>& thePrsList) {
     bool hasNewShape = false;
     if(myShapeLock.tryLock()) {
         if(myIsLoaded) {
-            theMesh = myMesh;
-            myMesh.nullify();
+            if(!myShape.IsNull()) {
+                thePrsList.Append(new AIS_Shape(myShape));
+            }
+            myShape.Nullify();
             hasNewShape = true;
             myIsLoaded = false;
         }
