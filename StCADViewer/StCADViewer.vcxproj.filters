@@ -6,6 +6,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
     <ClCompile Include="StCADLoader.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
