@@ -17,7 +17,7 @@
 static StString getAbout() {
     StString anAboutString =
         StString("sView ") + StVersionInfo::getSDKVersionString() + '\n'
-        + "Copyright (C) 2007-2015 Kirill Gavrilov (kirill@sview.ru).\n"
+        + "Copyright (C) 2007-2016 Kirill Gavrilov (kirill@sview.ru).\n"
         + "Usage: sView [options] - file\n"
         + "Available options:\n"
           "  --fullscreen         Open fullscreen\n"
@@ -31,7 +31,7 @@ static StString getAbout() {
           "  --slideshow          Start slideshow\n"
           "  --last               Open last file\n"
           "  --paused             Open file in paused state\n"
-          "  --in=image,video     Application to open (predefined values: image, video, diag, cad)\n"
+          "  --in=image,video     Application to open (predefined values: image, video, diag)\n"
           "  --out=RENDERER       Stereoscopic output module (auto, StOutAnaglyph, StOutDual,...)\n"
           "  --imageLib=IMGLIB    Setup 3rd-party library for image processing (FFmpeg, FreeImage, DevIL)\n"
           "  --viewMode=MODE      View mode (flat, sphere)\n"
