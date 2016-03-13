@@ -28,4 +28,7 @@
   <ItemGroup>
     <ResourceCompile Include="StCADViewer.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="..\dpiAware.manifest" />
+  </ItemGroup>
 </Project>
