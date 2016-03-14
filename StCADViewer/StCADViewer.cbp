@@ -262,8 +262,11 @@
 			<Add directory="../lib/$(TARGET_NAME)" />
 			<Add directory="../bin/$(TARGET_NAME)" />
 		</Linker>
+		<Unit filename="main.cpp" />
 		<Unit filename="StCADLoader.cpp" />
 		<Unit filename="StCADLoader.h" />
+		<Unit filename="StCADMsgPrinter.cpp" />
+		<Unit filename="StCADMsgPrinter.h" />
 		<Unit filename="StCADPluginInfo.h" />
 		<Unit filename="StCADViewer.cpp" />
 		<Unit filename="StCADViewer.h" />

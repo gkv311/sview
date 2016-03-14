@@ -273,6 +273,7 @@ xcopy /Y "$(StOcctRes)\XmlOcafResource\*.*" "$(TargetDir)\res\"
     <ClCompile Include="main.cpp" />
     <ClCompile Include="StCADFrameBuffer.cpp" />
     <ClCompile Include="StCADLoader.cpp" />
+    <ClCompile Include="StCADMsgPrinter.cpp" />
     <ClCompile Include="StCADViewer.cpp" />
     <ClCompile Include="StCADViewerGUI.cpp" />
   </ItemGroup>

@@ -10,7 +10,10 @@
 #include "StCADLoader.h"
 #include "StCADWindow.h"
 #include "StCADFrameBuffer.h"
+#include "StCADMsgPrinter.h"
 
+#include <Message_Messenger.hxx>
+#include <Message_PrinterOStream.hxx>
 #include <OpenGl_GraphicDriver.hxx>
 #include <V3d_DirectionalLight.hxx>
 #include <V3d_AmbientLight.hxx>
@@ -26,6 +29,10 @@
 #include "../StOutInterlace/StOutInterlace.h"
 #include "../StOutPageFlip/StOutPageFlipExt.h"
 #include "../StOutDistorted/StOutDistorted.h"
+
+#ifdef __ANDROID__
+    #include <EGL/egl.h>
+#endif
 
 namespace {
     static const char ST_SETTING_FPSTARGET[] = "fpsTarget";
@@ -126,6 +133,11 @@ StCADViewer::~StCADViewer() {
 }
 
 bool StCADViewer::initOcctViewer() {
+    Message::DefaultMessenger()->RemovePrinters(STANDARD_TYPE(StCADMsgPrinter));
+    Message::DefaultMessenger()->RemovePrinters(STANDARD_TYPE(Message_PrinterOStream));
+    Handle(StCADMsgPrinter) aPrinter = new StCADMsgPrinter(myMsgQueue);
+    Message::DefaultMessenger()->AddPrinter(aPrinter);
+
 #ifdef __ANDROID__
     int aWidth = 2, aHeight = 2;
     EGLint aCfgId = 0;

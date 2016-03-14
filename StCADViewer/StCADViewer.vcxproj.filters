@@ -12,6 +12,9 @@
     <ClCompile Include="StCADLoader.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="StCADMsgPrinter.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
     <ClCompile Include="StCADViewer.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
