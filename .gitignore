@@ -56,6 +56,9 @@ StImageViewer/obj/
 StMoviePlayer/obj/
 StDiagnostics/obj/
 StCADViewer/obj/
+StCADViewer/gen/
+StCADViewer/.settings/
+StCADViewer/assets/
 StBrowserPlugin/obj/
 sview/obj/
 sview/gen/

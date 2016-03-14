@@ -3,7 +3,6 @@
 WORKDIR = `pwd`
 
 LBITS := $(shell getconf LONG_BIT)
-#WITH_OCCT := yes
 HAVE_MONGOOSE := -DST_HAVE_MONGOOSE
 
 #ANDROID_NDK = /home/kirill/develop/android-ndk-r10
@@ -12,7 +11,8 @@ BUILD_ROOT = build
 LIB_PTHREAD = -lpthread
 LIB_GLX = -lGL -lX11 -lXext
 LIB_GTK = `pkg-config gtk+-2.0 --libs` -lgthread-2.0 -ldl
-LIB_OCCT = -lTKBRep -lTKIGES -lTKSTEP -lTKSTEP209 -lTKSTEPAttr -lTKSTEPBase -lTKMesh -lTKMath -lTKG3d -lTKTopAlgo -lTKShHealing -lTKXSBase -lTKBO -lTKBool -lTKPrim -lTKGeomBase -lTKGeomAlgo -lTKG2d -lTKG3d -lTKernel
+LIB_OCCT  = -lTKMeshVS -lTKXDESTEP -lTKSTEP -lTKSTEPAttr -lTKSTEP209 -lTKSTEPBase -lTKXDEIGES -lTKIGES -lTKXSBase -lTKOpenGl -lTKXCAF -lTKCAF -lTKV3d -lTKHLR -lTKMesh -lTKService -lTKOffset -lTKFillet -lTKShHealing
+LIB_OCCT += -lTKBool -lTKBO -lTKPrim -lTKTopAlgo -lTKGeomAlgo -lTKBRep -lTKGeomBase -lTKG3d -lTKG2d -lTKMath -lTKLCAF -lTKCDF -lTKernel
 LIB_XLIB = -lXrandr -lXpm
 LIB_CONFIG = -lconfig++
 LIB_ANDROID =
@@ -56,9 +56,6 @@ endif
 INC =  -I3rdparty/include -Iinclude
 CFLAGS   = -fPIC $(HAVE_MONGOOSE) $(INC) $(EXTRA_CFLAGS)
 CXXFLAGS = -O3 -std=c++0x -Wall -fPIC $(HAVE_MONGOOSE) $(INC) $(EXTRA_CXXFLAGS)
-ifdef WITH_OCCT
-CXXFLAGS += -DST_HAVE_OCCT
-endif
 LIBDIR = -L$(BUILD_ROOT)
 LIB =
 LDFLAGS = $(LDSTRIP) -z defs $(EXTRA_LDFLAGS)
@@ -78,13 +75,18 @@ aStImageViewer  := libStImageViewer.so
 aStMoviePlayer  := libStMoviePlayer.so
 aStDiagnostics  := libStDiagnostics.so
 aStCADViewer    := libStCADViewer.so
+sViewAndroidCad := libsviewcad.so
 sView           := sView
 sViewAndroid    := libsview.so
 
-all:       pre_all $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) $(aStOutDual) $(aStOutInterlace) $(aStOutPageFlip) $(aStOutIZ3D) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(aStDiagnostics) $(aStCADViewer) $(sView)
-android:   pre_all $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) $(aStOutInterlace) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(sViewAndroid) install_android
-clean:     clean_StShared clean_StGLWidgets clean_StCore clean_sView clean_StOutAnaglyph clean_StOutDual clean_StOutInterlace clean_StOutPageFlip clean_StOutIZ3D clean_StOutDistorted clean_StImageViewer clean_StMoviePlayer clean_StDiagnostics clean_StCADViewer clean_sViewAndroid
-distclean: clean
+aDestAndroid    := sview
+
+all:         pre_all $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) $(aStOutDual) $(aStOutInterlace) $(aStOutPageFlip) $(aStOutIZ3D) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(aStDiagnostics) $(sView)
+android_cad: aDestAndroid = StCADViewer
+android_cad: pre_all $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) $(aStOutInterlace) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(sViewAndroidCad) install_android install_android_cad_libs
+android:     pre_all $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) $(aStOutInterlace) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(sViewAndroid)    install_android install_android_libs
+clean:       clean_StShared clean_StGLWidgets clean_StCore clean_sView clean_StOutAnaglyph clean_StOutDual clean_StOutInterlace clean_StOutPageFlip clean_StOutIZ3D clean_StOutDistorted clean_StImageViewer clean_StMoviePlayer clean_StDiagnostics clean_StCADViewer clean_sViewAndroid
+distclean:   clean
 
 ifdef ANDROID_NDK
 outputs_all: $(aStOutAnaglyph) $(aStOutInterlace) $(aStOutDistorted)
@@ -116,35 +118,46 @@ install:
 	rm -f    $(DESTDIR)/usr/$(USR_LIB)/sView/*.a
 
 install_android:
-	mkdir -p sview/assets/info
-	mkdir -p sview/assets/lang/German
-	mkdir -p sview/assets/lang/French
-	mkdir -p sview/assets/lang/English
-	mkdir -p sview/assets/lang/Russian
-	mkdir -p sview/assets/lang/Czech
-	mkdir -p sview/assets/lang/ChineseS
-	mkdir -p sview/assets/lang/Korean
-	mkdir -p sview/assets/shaders
-	mkdir -p sview/assets/textures
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStShared)       sview/libs/armeabi-v7a/$(aStShared)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStGLWidgets)    sview/libs/armeabi-v7a/$(aStGLWidgets)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStCore)         sview/libs/armeabi-v7a/$(aStCore)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutAnaglyph)  sview/libs/armeabi-v7a/$(aStOutAnaglyph)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutInterlace) sview/libs/armeabi-v7a/$(aStOutInterlace)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutDistorted) sview/libs/armeabi-v7a/$(aStOutDistorted)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStImageViewer)  sview/libs/armeabi-v7a/$(aStImageViewer)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStMoviePlayer)  sview/libs/armeabi-v7a/$(aStMoviePlayer)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(sViewAndroid)    sview/libs/armeabi-v7a/$(sViewAndroid)
-	cp -f -r $(BUILD_ROOT)/lang/Deutsch/*  sview/assets/lang/German/
-	cp -f -r $(BUILD_ROOT)/lang/français/* sview/assets/lang/French/
-	cp -f -r $(BUILD_ROOT)/lang/English/*  sview/assets/lang/English/
-	cp -f -r $(BUILD_ROOT)/lang/русский/*  sview/assets/lang/Russian/
-	cp -f -r $(BUILD_ROOT)/lang/Czech/*    sview/assets/lang/Czech/
-	cp -f -r $(BUILD_ROOT)/lang/ChineseS/* sview/assets/lang/ChineseS/
-	cp -f -r $(BUILD_ROOT)/lang/Korean/*   sview/assets/lang/Korean/
-	cp -f -r $(BUILD_ROOT)/shaders/*       sview/assets/shaders/
-	cp -f -r $(BUILD_ROOT)/textures/*      sview/assets/textures/
-	cp -f    license-gpl-3.0.txt           sview/assets/info/license.txt
+	mkdir -p $(aDestAndroid)/assets/info
+	mkdir -p $(aDestAndroid)/assets/lang/German
+	mkdir -p $(aDestAndroid)/assets/lang/French
+	mkdir -p $(aDestAndroid)/assets/lang/English
+	mkdir -p $(aDestAndroid)/assets/lang/Russian
+	mkdir -p $(aDestAndroid)/assets/lang/Czech
+	mkdir -p $(aDestAndroid)/assets/lang/ChineseS
+	mkdir -p $(aDestAndroid)/assets/lang/Korean
+	mkdir -p $(aDestAndroid)/assets/shaders
+	mkdir -p $(aDestAndroid)/assets/textures
+	cp -f -r $(BUILD_ROOT)/lang/Deutsch/*  $(aDestAndroid)/assets/lang/German/
+	cp -f -r $(BUILD_ROOT)/lang/français/* $(aDestAndroid)/assets/lang/French/
+	cp -f -r $(BUILD_ROOT)/lang/English/*  $(aDestAndroid)/assets/lang/English/
+	cp -f -r $(BUILD_ROOT)/lang/русский/*  $(aDestAndroid)/assets/lang/Russian/
+	cp -f -r $(BUILD_ROOT)/lang/Czech/*    $(aDestAndroid)/assets/lang/Czech/
+	cp -f -r $(BUILD_ROOT)/lang/ChineseS/* $(aDestAndroid)/assets/lang/ChineseS/
+	cp -f -r $(BUILD_ROOT)/lang/Korean/*   $(aDestAndroid)/assets/lang/Korean/
+	cp -f -r $(BUILD_ROOT)/shaders/*       $(aDestAndroid)/assets/shaders/
+	cp -f -r $(BUILD_ROOT)/textures/*      $(aDestAndroid)/assets/textures/
+	cp -f    license-gpl-3.0.txt           $(aDestAndroid)/assets/info/license.txt
+
+install_android_libs:
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStShared)       $(aDestAndroid)/libs/armeabi-v7a/$(aStShared)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStGLWidgets)    $(aDestAndroid)/libs/armeabi-v7a/$(aStGLWidgets)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStCore)         $(aDestAndroid)/libs/armeabi-v7a/$(aStCore)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutAnaglyph)  $(aDestAndroid)/libs/armeabi-v7a/$(aStOutAnaglyph)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutInterlace) $(aDestAndroid)/libs/armeabi-v7a/$(aStOutInterlace)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutDistorted) $(aDestAndroid)/libs/armeabi-v7a/$(aStOutDistorted)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStImageViewer)  $(aDestAndroid)/libs/armeabi-v7a/$(aStImageViewer)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStMoviePlayer)  $(aDestAndroid)/libs/armeabi-v7a/$(aStMoviePlayer)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(sViewAndroid)    $(aDestAndroid)/libs/armeabi-v7a/$(sViewAndroid)
+
+install_android_cad_libs:
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStShared)       $(aDestAndroid)/libs/armeabi-v7a/$(aStShared)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStGLWidgets)    $(aDestAndroid)/libs/armeabi-v7a/$(aStGLWidgets)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStCore)         $(aDestAndroid)/libs/armeabi-v7a/$(aStCore)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutAnaglyph)  $(aDestAndroid)/libs/armeabi-v7a/$(aStOutAnaglyph)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutInterlace) $(aDestAndroid)/libs/armeabi-v7a/$(aStOutInterlace)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutDistorted) $(aDestAndroid)/libs/armeabi-v7a/$(aStOutDistorted)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(sViewAndroidCad) $(aDestAndroid)/libs/armeabi-v7a/$(sViewAndroid)
 
 pre_all:
 	mkdir -p $(BUILD_ROOT)/lang/English
@@ -157,6 +170,7 @@ pre_all:
 	mkdir -p $(BUILD_ROOT)/textures
 	mkdir -p $(BUILD_ROOT)/web
 	mkdir -p sview/libs/armeabi-v7a
+	mkdir -p StCADViewer/libs/armeabi-v7a
 	cp -f -r textures/* $(BUILD_ROOT)/textures/
 
 # StShared static shared library
@@ -378,13 +392,22 @@ clean_StDiagnostics:
 	rm -rf StDiagnostics/*.o
 	rm -rf $(BUILD_ROOT)/lang/*/StDiagnostics.lng
 
+# sView CAD Android JNI executable
+sViewAndroidCad_SRCS := $(wildcard StCADViewer/*.cpp)
+sViewAndroidCad_OBJS := ${sViewAndroidCad_SRCS:.cpp=.o}
+sViewAndroidCad_LIB  := $(LIB) -lStGLWidgets -lStShared -lStCore $(LIB_OUTPUTS) $(LIB_OCCT) -lfreetype -llog -landroid -lEGL -lGLESv2 -lc
+$(sViewAndroidCad) : pre_StCADViewer $(aStGLWidgets) outputs_all $(sViewAndroidCad_OBJS)
+	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(sViewAndroidCad_OBJS) $(sViewAndroidCad_LIB) -o $(BUILD_ROOT)/$(sViewAndroidCad)
+clean_sViewAndroidCad:
+	rm -f $(BUILD_ROOT)/$(sViewAndroidCad)
+	rm -rf StCADViewer/*.o
+	rm -rf $(BUILD_ROOT)/lang/*/StCADViewer.lng
+
 # StCADViewer library
 aStCADViewer_SRCS := $(wildcard StCADViewer/*.cpp)
 aStCADViewer_OBJS := ${aStCADViewer_SRCS:.cpp=.o}
 aStCADViewer_LIB  := $(LIB) -lStGLWidgets -lStShared -lStCore $(LIB_OUTPUTS) $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
-ifdef WITH_OCCT
 aStCADViewer_LIB  += $(LIB_OCCT)
-endif
 $(aStCADViewer) : pre_StCADViewer $(aStGLWidgets) outputs_all $(aStCADViewer_OBJS)
 	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStCADViewer_OBJS) $(aStCADViewer_LIB) -o $(BUILD_ROOT)/$(aStCADViewer)
 pre_StCADViewer:
@@ -414,9 +437,6 @@ clean_sViewAndroid:
 sView_SRCS := $(wildcard sview/*.cpp)
 sView_OBJS := ${sView_SRCS:.cpp=.o}
 sView_LIB  := $(LIB) -lStGLWidgets -lStShared -lStCore -lStImageViewer -lStMoviePlayer -lStDiagnostics $(LIB_OUTPUTS) $(LIB_GTK) -lX11 -ldl -lgthread-2.0 $(LIB_PTHREAD)
-ifdef WITH_OCCT
-sView_LIB += $(LIB_OCCT)
-endif
 $(sView) : $(aStImageViewer) $(aStMoviePlayer) $(aStDiagnostics) $(sView_OBJS)
 	$(LD) $(LDFLAGS) $(LIBDIR) $(sView_OBJS) $(sView_LIB) -o $(BUILD_ROOT)/$(sView)
 clean_sView:

@@ -4,7 +4,79 @@
  * Copyright © Kirill Gavrilov, 2016
  */
 
-#ifndef __APPLE__
+#if defined(__APPLE__)
+    //
+#elif defined(__ANDROID__)
+
+#include <jni.h>
+#include <StCore/StAndroidGlue.h>
+#include "../StCADViewer/StCADViewer.h"
+
+/**
+ * Viewer glue.
+ */
+class StCADViewerGlue : public StAndroidGlue {
+
+        public:
+
+    /**
+     * Main constructor.
+     */
+    ST_LOCAL StCADViewerGlue(ANativeActivity* theActivity,
+                             void*            theSavedState,
+                             size_t           theSavedStateSize)
+    : StAndroidGlue(theActivity, theSavedState, theSavedStateSize) {}
+
+    /**
+     * Instantiate StApplication.
+     */
+    ST_LOCAL virtual void createApplication() override {
+        StMutexAuto aLock(myFetchLock);
+        const StString aFileExtension = StFileNode::getExtension(myCreatePath);
+
+        StHandle<StOpenInfo> anInfo = new StOpenInfo();
+        anInfo->setPath(myDndPath);
+        myDndPath.clear();
+
+        StHandle<StResourceManager> aResMgr = new StResourceManager(myActivity->assetManager);
+        aResMgr->setFolder(StResourceManager::FolderId_SdCard,
+                           getStoragePath(myThJniEnv, "sdcard"));
+        aResMgr->setFolder(StResourceManager::FolderId_Downloads,
+                           getStoragePath(myThJniEnv, "Download"));
+        aResMgr->setFolder(StResourceManager::FolderId_Pictures,
+                           getStoragePath(myThJniEnv, "Pictures"));
+        aResMgr->setFolder(StResourceManager::FolderId_Photos,
+                           getStoragePath(myThJniEnv, "DCIM"));
+
+        if(myStAppClass.isEmpty()) {
+            myStAppClass = "cad";
+        }
+
+        if(anInfo->isEmpty()) {
+            // open recent file by default
+            StArgumentsMap anArgs = anInfo->getArgumentsMap();
+            anArgs.set(StDictEntry("last", "true"));
+            anArgs.set(StDictEntry("toSaveRecent","true"));
+            anInfo->setArgumentsMap(anArgs);
+        }
+
+        myApp = new StCADViewer(aResMgr, this, anInfo);
+    }
+
+};
+
+/**
+ * Main entry point - called from Java on creation.
+ * This function defines JNI callbacks and creates dedicated thread for main application code.
+ */
+ST_CEXPORT void ANativeActivity_onCreate(ANativeActivity* theActivity,
+                                         void*            theSavedState,
+                                         size_t           theSavedStateSize) {
+    StCADViewerGlue* anApp = new StCADViewerGlue(theActivity, theSavedState, theSavedStateSize);
+    anApp->start();
+}
+
+#else
 
 #include <StVersion.h>
 #include <StFile/StFolder.h>
@@ -72,7 +144,7 @@ int main(int , char** ) {
         StString aShowHelpString = getAbout();
         st::cout << aShowHelpString;
         stInfo(aShowHelpString);
-        return NULL;
+        return 0;
     }
 
     StHandle<StResourceManager> aResMgr = new StResourceManager();

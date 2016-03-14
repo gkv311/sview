@@ -37,6 +37,19 @@
 					<SilentBuild command="$make --directory=$(PROJECT_DIRECTORY).. -f $makefile android &gt; $(CMD_NULL)" />
 				</MakeCommands>
 			</Target>
+			<Target title="make_android_cad">
+				<Option output="sViewAndroidCad" prefix_auto="1" extension_auto="1" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<MakeCommands>
+					<Build command="$make -j6 --directory=$(PROJECT_DIRECTORY).. -f $makefile android_cad" />
+					<CompileFile command="$make --directory=$(PROJECT_DIRECTORY).. -f $makefile $file" />
+					<Clean command="$make --directory=$(PROJECT_DIRECTORY).. -f $makefile clean" />
+					<DistClean command="$make --directory=$(PROJECT_DIRECTORY).. -f $makefile distclean$target" />
+					<AskRebuildNeeded command="$make -j6 --directory=$(PROJECT_DIRECTORY).. -q -f $makefile android_cad" />
+					<SilentBuild command="$make --directory=$(PROJECT_DIRECTORY).. -f $makefile android_cad &gt; $(CMD_NULL)" />
+				</MakeCommands>
+			</Target>
 		</Build>
 		<Unit filename="../Makefile" />
 		<Extensions>
