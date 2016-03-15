@@ -401,6 +401,11 @@ void StCADViewer::doMouseDown(const StClickEvent& theEvent) {
         myIsLeftHold = true; ///
         myPrevMouse.x() = theEvent.PointX;
         myPrevMouse.y() = theEvent.PointY;
+        if(!myIsCtrlPressed && !myView.IsNull()) {
+            StRectI_t aWinRect = myWindow->getPlacement();
+            myView->StartRotation(int(double(aWinRect.width())  * theEvent.PointX),
+                                  int(double(aWinRect.height()) * theEvent.PointY));
+        }
     } else if(theEvent.Button == ST_MOUSE_RIGHT) {
         myIsRightHold = true; ///
         myPrevMouse.x() = theEvent.PointX;
@@ -441,6 +446,59 @@ void StCADViewer::doMouseUp(const StClickEvent& theEvent) {
         default: break;
     }
     myGUI->tryUnClick(theEvent);
+}
+
+void StCADViewer::doGesture(const StGestureEvent& theEvent) {
+    if(!myGUI.isNull()
+    &&  myGUI->getFocus() != NULL) {
+        return;
+    }
+
+    StRectI_t aWinRect = myWindow->getPlacement();
+    switch(theEvent.Type) {
+        case stEvent_GestureCancel: {
+            return;
+        }
+        case stEvent_Gesture1DoubleTap: {
+            doFitALL();
+            return;
+        }
+        case stEvent_Gesture2Rotate: {
+            return;
+        }
+        case stEvent_Gesture2Move: {
+            if(!theEvent.OnScreen) {
+                // this gesture conflicts with scrolling on OS X
+                return;
+            }
+            StPointD_t aPntFrom(theEvent.Point1X, theEvent.Point1Y);
+            StPointD_t aPntTo  (theEvent.Point2X, theEvent.Point2Y);
+            int aDeltaX =  int(double(aWinRect.width())  * (theEvent.Point2X - theEvent.Point1X));
+            int aDeltaY = -int(double(aWinRect.height()) * (theEvent.Point2Y - theEvent.Point1Y));
+            if(!myView.IsNull()) {
+                myView->Pan(aDeltaX, aDeltaY);
+            }
+            return;
+        }
+        case stEvent_Gesture2Pinch: {
+            StPointD_t aCursor((theEvent.Point1X + theEvent.Point2X) * 0.5,
+                               (theEvent.Point1Y + theEvent.Point2Y) * 0.5);
+            if(!theEvent.OnScreen) {
+                aCursor = myGUI->getCursorZo();
+            }
+            if(!myView.IsNull()) {
+                int aDeltaX = int(theEvent.Value);
+                //myView->StartZoomAtPoint(int(aCursor.x() * double(aWinRect.width())),
+                //                         int(aCursor.y() * double(aWinRect.height())));
+                //myView->ZoomAtPoint(0, 0, aDeltaX, aDeltaX);
+                myView->Zoom(0, 0, aDeltaX, aDeltaX);
+            }
+            return;
+        }
+        default: {
+            return;
+        }
+    }
 }
 
 void StCADViewer::doScroll(const StScrollEvent& theEvent) {
@@ -650,7 +708,8 @@ void StCADViewer::beforeDraw() {
 
         myPrevMouse = aPt;
     }
-    if(myIsRightHold && myIsCtrlPressed) {
+    if((myIsRightHold &&  myIsCtrlPressed)
+    || (myIsLeftHold  && !myIsCtrlPressed)) {
         const StPointD_t aPt = myWindow->getMousePos();
         StRectI_t aWinRect = myWindow->getPlacement();
         myView->Rotation(int(double(aWinRect.width())  * aPt.x()),

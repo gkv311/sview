@@ -51,6 +51,7 @@
     #define GL_PACK_ROW_LENGTH    0x0D02
     #define GL_PACK_SKIP_ROWS     0x0D03
     #define GL_PACK_SKIP_PIXELS   0x0D04
+    #define GL_DEPTH24_STENCIL8   0x88F0
 
     // in core since OpenGL ES 3.0, extension GL_EXT_texture_rg
     #define GL_RED   0x1903
