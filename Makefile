@@ -7,6 +7,8 @@ HAVE_MONGOOSE := -DST_HAVE_MONGOOSE
 
 #ANDROID_NDK = /home/kirill/develop/android-ndk-r10
 BUILD_ROOT = build
+# folder containing OCCT resources ($CASROOT/src)
+OCCT_RES =
 
 LIB_PTHREAD = -lpthread
 LIB_GLX = -lGL -lX11 -lXext
@@ -160,6 +162,19 @@ install_android_cad_libs:
 	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStImageViewer)  $(aDestAndroid)/libs/armeabi-v7a/$(aStImageViewer)
 	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStMoviePlayer)  $(aDestAndroid)/libs/armeabi-v7a/$(aStMoviePlayer)
 	ln --force --symbolic ../../../$(BUILD_ROOT)/$(sViewAndroidCad) $(aDestAndroid)/libs/armeabi-v7a/$(sViewAndroid)
+	mkdir -p $(aDestAndroid)/assets/shaders
+	mkdir -p $(aDestAndroid)/assets/shaders/occt
+	mkdir -p $(aDestAndroid)/assets/res
+	mkdir -p $(aDestAndroid)/assets/lang
+	cp -f $(OCCT_RES)/Shaders/Declarations.glsl     $(aDestAndroid)/assets/shaders/occt/
+	cp -f $(OCCT_RES)/Shaders/DeclarationsImpl.glsl $(aDestAndroid)/assets/shaders/occt/
+	cp -f $(OCCT_RES)/UnitsAPI/Lexi_Expr.dat        $(aDestAndroid)/assets/res/
+	cp -f $(OCCT_RES)/UnitsAPI/Units.dat            $(aDestAndroid)/assets/res/
+	cp -f $(OCCT_RES)/SHMessage/*.*                 $(aDestAndroid)/assets/lang/
+	cp -f $(OCCT_RES)/XSMessage/*.*                 $(aDestAndroid)/assets/lang/
+	cp -f $(OCCT_RES)/TObj/*.msg                    $(aDestAndroid)/assets/lang/
+	cp -f $(OCCT_RES)/StdResource/*                 $(aDestAndroid)/assets/res/
+	cp -f $(OCCT_RES)/XSTEPResource/*               $(aDestAndroid)/assets/res/
 
 pre_all:
 	mkdir -p $(BUILD_ROOT)/lang/English

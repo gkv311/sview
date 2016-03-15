@@ -10,6 +10,7 @@
 
 #include <jni.h>
 #include <StCore/StAndroidGlue.h>
+#include <StFile/StRawFile.h>
 #include "../StCADViewer/StCADViewer.h"
 
 /**
@@ -28,6 +29,34 @@ class StCADViewerGlue : public StAndroidGlue {
     : StAndroidGlue(theActivity, theSavedState, theSavedStateSize) {}
 
     /**
+     * Copy OCCT resource file.
+     */
+    ST_LOCAL bool copyResource(const StHandle<StResourceManager>& theResMgr,
+                               const StString& theResFolder,
+                               const StString& theDestFolder,
+                               const StString& theFileName) {
+        StString aFileResPath = theResFolder + SYS_FS_SPLITTER + theFileName;
+        StHandle<StResource> aRes = theResMgr->getResource(aFileResPath);
+        if( aRes.isNull()
+        || !aRes->read()) {
+            ST_ERROR_LOG(StString("Can not read resource file ") + aFileResPath);
+            return false;
+        }
+
+        StRawFile aFileOut;
+        StString  aFileOutPath = theDestFolder + SYS_FS_SPLITTER + theFileName;
+        if(!aFileOut.openFile(StRawFile::WRITE, aFileOutPath)) {
+            ST_ERROR_LOG(StString("Can not create resource file ") + aFileOutPath);
+            return false;
+        }
+        if(!aFileOut.write((const char* )aRes->getData(), aRes->getSize()) != aRes->getSize()) {
+            ST_ERROR_LOG(StString("Can not write resource file ") + aFileOutPath);
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Instantiate StApplication.
      */
     ST_LOCAL virtual void createApplication() override {
@@ -39,6 +68,7 @@ class StCADViewerGlue : public StAndroidGlue {
         myDndPath.clear();
 
         StHandle<StResourceManager> aResMgr = new StResourceManager(myActivity->assetManager);
+        //StHandle<StResourceManager> aResMgr = new StResourceManager(myActivity->assetManager"com.sview.cad");
         aResMgr->setFolder(StResourceManager::FolderId_SdCard,
                            getStoragePath(myThJniEnv, "sdcard"));
         aResMgr->setFolder(StResourceManager::FolderId_Downloads,
@@ -47,6 +77,33 @@ class StCADViewerGlue : public StAndroidGlue {
                            getStoragePath(myThJniEnv, "Pictures"));
         aResMgr->setFolder(StResourceManager::FolderId_Photos,
                            getStoragePath(myThJniEnv, "DCIM"));
+
+        StString anOcctResFolder = aResMgr->getUserDataFolder();
+        copyResource(aResMgr, "lang", anOcctResFolder, "IGES.us");
+        copyResource(aResMgr, "lang", anOcctResFolder, "IGES.fr");
+        copyResource(aResMgr, "lang", anOcctResFolder, "SHAPE.us");
+        copyResource(aResMgr, "lang", anOcctResFolder, "SHAPE.fr");
+        copyResource(aResMgr, "lang", anOcctResFolder, "XSTEP.us");
+        copyResource(aResMgr, "lang", anOcctResFolder, "XSTEP.fr");
+        copyResource(aResMgr, "lang", anOcctResFolder, "TObj.msg");
+
+        copyResource(aResMgr, "res",  anOcctResFolder, "Units.dat");
+        copyResource(aResMgr, "res",  anOcctResFolder, "Lexi_Expr.dat");
+        copyResource(aResMgr, "res",  anOcctResFolder, "IGES");
+        copyResource(aResMgr, "res",  anOcctResFolder, "STEP");
+        //copyResource(aResMgr, "res",  anOcctResFolder, "TObj");
+        //copyResource(aResMgr, "res",  anOcctResFolder, "XCAF");
+        //copyResource(aResMgr, "res",  anOcctResFolder, "Plugin");
+        //copyResource(aResMgr, "res",  anOcctResFolder, "Standard");
+        //copyResource(aResMgr, "res",  anOcctResFolder, "StandardLite");
+
+        copyResource(aResMgr, "shaders/occt", anOcctResFolder, "Declarations.glsl");
+        copyResource(aResMgr, "shaders/occt", anOcctResFolder, "DeclarationsImpl.glsl");
+
+        StProcess::setEnv("CSF_UnitsLexicon",     anOcctResFolder + "/Lexi_Expr.dat");
+        StProcess::setEnv("CSF_UnitsDefinition",  anOcctResFolder + "/Units.dat");
+        StProcess::setEnv("CSF_ShadersDirectory", anOcctResFolder);
+        StProcess::setEnv("CSF_SHMessage",        anOcctResFolder);
 
         if(myStAppClass.isEmpty()) {
             myStAppClass = "cad";
