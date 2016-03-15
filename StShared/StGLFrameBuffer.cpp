@@ -128,8 +128,10 @@ bool StGLFrameBuffer::init(StGLContext&  theCtx,
         if(myGLDepthRBId == NO_RENDERBUFFER) {
             theCtx.arbFbo->glGenRenderbuffers(1, &myGLDepthRBId);
         }
+
+        const GLint aDepthFormat = theCtx.isGlGreaterEqual(3, 0) ? GL_DEPTH24_STENCIL8 : GL_DEPTH_COMPONENT16;
         theCtx.arbFbo->glBindRenderbuffer(GL_RENDERBUFFER, myGLDepthRBId);
-        theCtx.arbFbo->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT,
+        theCtx.arbFbo->glRenderbufferStorage(GL_RENDERBUFFER, aDepthFormat,
                                              theColorTexture->getSizeX(), theColorTexture->getSizeY());
     } else if(myGLDepthRBId != NO_RENDERBUFFER) {
         theCtx.arbFbo->glDeleteRenderbuffers(1, &myGLDepthRBId);
