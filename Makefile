@@ -157,6 +157,8 @@ install_android_cad_libs:
 	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutAnaglyph)  $(aDestAndroid)/libs/armeabi-v7a/$(aStOutAnaglyph)
 	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutInterlace) $(aDestAndroid)/libs/armeabi-v7a/$(aStOutInterlace)
 	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutDistorted) $(aDestAndroid)/libs/armeabi-v7a/$(aStOutDistorted)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStImageViewer)  $(aDestAndroid)/libs/armeabi-v7a/$(aStImageViewer)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStMoviePlayer)  $(aDestAndroid)/libs/armeabi-v7a/$(aStMoviePlayer)
 	ln --force --symbolic ../../../$(BUILD_ROOT)/$(sViewAndroidCad) $(aDestAndroid)/libs/armeabi-v7a/$(sViewAndroid)
 
 pre_all:

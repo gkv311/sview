@@ -138,6 +138,11 @@ class StCADViewer : public StApplication {
         private:
 
     /**
+     * Initialize GUI.
+     */
+    ST_LOCAL bool createGui();
+
+    /**
      * Initialize the OCCT viewer.
      */
     ST_LOCAL bool initOcctViewer();
@@ -151,6 +156,7 @@ class StCADViewer : public StApplication {
      * Release GL resources.
      */
     ST_LOCAL void releaseDevice();
+    ST_LOCAL void saveGuiParams();
     ST_LOCAL void saveAllParams();
 
         private: //!< private callback Slots

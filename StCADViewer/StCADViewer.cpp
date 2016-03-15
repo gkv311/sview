@@ -69,8 +69,6 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadInt32 (ST_SETTING_FPSTARGET, params.TargetFps);
     mySettings->loadParam (ST_SETTING_SHOW_FPS,  params.ToShowFps);
 
-    myGUI = new StCADViewerGUI(this);
-
 #if defined(__ANDROID__)
     addRenderer(new StOutInterlace  (myResMgr, theParentWin));
     addRenderer(new StOutAnaglyph   (myResMgr, theParentWin));
@@ -100,30 +98,32 @@ bool StCADViewer::resetDevice() {
     return open();
 }
 
-void StCADViewer::saveAllParams() {
-    if(!myGUI.isNull()) {
-        mySettings->saveParam(ST_PARAM_TRIHEDRON,   params.toShowTrihedron);
-        mySettings->saveParam(ST_PARAM_PROJMODE,    params.projectMode);
-        mySettings->saveParam(ST_PARAM_FILLMODE,    params.fillMode);
-        mySettings->saveInt32(ST_SETTING_FPSTARGET, params.TargetFps);
-        mySettings->saveParam(ST_SETTING_SHOW_FPS,  params.ToShowFps);
+void StCADViewer::saveGuiParams() {
+    if(myGUI.isNull()) {
+        return;
     }
+
+    mySettings->saveParam(ST_PARAM_TRIHEDRON,   params.toShowTrihedron);
+    mySettings->saveParam(ST_PARAM_PROJMODE,    params.projectMode);
+    mySettings->saveParam(ST_PARAM_FILLMODE,    params.fillMode);
+    mySettings->saveInt32(ST_SETTING_FPSTARGET, params.TargetFps);
+    mySettings->saveParam(ST_SETTING_SHOW_FPS,  params.ToShowFps);
+}
+
+void StCADViewer::saveAllParams() {
+    saveGuiParams();
     mySettings->flush();
 }
 
 void StCADViewer::releaseDevice() {
     saveAllParams();
-    if(!myContext.isNull()) {
-        if(!myAisContext.IsNull()) {
-            myAisContext.Nullify();
-            myView.Nullify();
-            myViewer.Nullify();
-        }
-    }
 
     // release GUI data and GL resources before closing the window
     myGUI.nullify();
     myContext.nullify();
+    myAisContext.Nullify();
+    myView.Nullify();
+    myViewer.Nullify();
 }
 
 StCADViewer::~StCADViewer() {
@@ -256,6 +256,31 @@ bool StCADViewer::initOcctViewer() {
     return true;
 }
 
+bool StCADViewer::createGui() {
+    if(!myGUI.isNull()) {
+        saveGuiParams();
+        myGUI.nullify();
+        myKeyActions.clear();
+    }
+
+    // create the GUI with default values
+    //params.ScaleHiDPI->setValue(myWindow->getScaleFactor());
+    myGUI = new StCADViewerGUI(this);
+    myGUI->setContext(myContext);
+
+    // load settings
+    myWindow->setTargetFps(double(params.TargetFps));
+    mySettings->loadParam(ST_PARAM_TRIHEDRON, params.toShowTrihedron);
+    mySettings->loadParam(ST_PARAM_PROJMODE,  params.projectMode);
+    mySettings->loadParam(ST_PARAM_FILLMODE,  params.fillMode);
+
+    myGUI->stglInit();
+    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER));
+
+    registerHotKeys();
+    return true;
+}
+
 bool StCADViewer::init() {
     const bool isReset = !myCADLoader.isNull();
     if(!myContext.isNull()
@@ -279,13 +304,22 @@ bool StCADViewer::init() {
         //
     }
 
-    myGUI->setContext(myContext);
-    if(!myGUI->stglInit()) {
+    // load hot-keys
+    if(!isReset) {
+        for(std::map< int, StHandle<StAction> >::iterator anIter = myActions.begin();
+            anIter != myActions.end(); ++anIter) {
+            mySettings->loadHotKey(anIter->second);
+        }
+    }
+
+    // create the GUI with default values
+    if(!createGui()) {
         myMsgQueue->pushError(stCString("CAD Viewer - GUI initialization failed!"));
         myMsgQueue->popAll();
         myGUI.nullify();
         return false;
     }
+
     myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER));
 
     // create working threads
@@ -293,11 +327,6 @@ bool StCADViewer::init() {
         myCADLoader = new StCADLoader(StHandle<StLangMap>::downcast(myGUI->myLangMap));
         myCADLoader->signals.onError = stSlot(myMsgQueue.access(), &StMsgQueue::doPushError);
     }
-
-    // load settings
-    mySettings->loadParam(ST_PARAM_TRIHEDRON, params.toShowTrihedron);
-    mySettings->loadParam(ST_PARAM_PROJMODE,  params.projectMode);
-    mySettings->loadParam(ST_PARAM_FILLMODE,  params.fillMode);
     return true;
 }
 

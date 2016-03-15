@@ -125,6 +125,14 @@ StCADViewerGUI::StCADViewerGUI(StCADViewer* thePlugin)
   myMenu0Root(NULL),
   myFpsWidget(NULL),
   myIsGUIVisible(true) {
+    //const GLfloat aScale = myPlugin->params.ScaleHiDPI2X->getValue() ? 2.0f : myPlugin->params.ScaleHiDPI ->getValue();
+    //setScale(aScale, (StGLRootWidget::ScaleAdjust )myPlugin->params.ScaleAdjust->getValue());
+    //setMobile(myPlugin->params.IsMobileUI->getValue());
+    const GLfloat aScale = myPlugin->myWindow->getScaleFactor();
+    setScale(aScale, StGLRootWidget::ScaleAdjust_Normal);
+    setMobile(StWindow::isMobile());
+    changeRootMargins() = myPlugin->myWindow->getMargins();
+
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StCADViewerGUI::doShowFPS);
 
     myMouseDescr = new StGLDescription(this);
