@@ -32,7 +32,7 @@ void StCADMsgPrinter::Send(const TCollection_AsciiString& theString,
 
 void StCADMsgPrinter::send(const StString&        theString,
                            const Message_Gravity  theGravity,
-                           const Standard_Boolean theToPutEndl) const {
+                           const Standard_Boolean /*theToPutEndl*/) const {
     if(theGravity < myTraceLevel) {
         ST_DEBUG_LOG(theString);
         return;

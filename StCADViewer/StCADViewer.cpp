@@ -705,7 +705,8 @@ void StCADViewer::stglDraw(unsigned int theView) {
         if(anFboWrapper->GetVPSizeX() > 0
         && anFboWrapper->GetVPSizeY() > 0
         && aWindow->SetSize(anFboWrapper->GetVPSizeX(), anFboWrapper->GetVPSizeY())) {
-            Standard_Real aRatio = double(anFboWrapper->GetVPSizeX()) / double(anFboWrapper->GetVPSizeY());
+            StRectI_t aWinRect = myWindow->getPlacement();
+            Standard_Real aRatio = double(aWinRect.width()) / double(aWinRect.height());
             myView->Camera()->SetAspect(aRatio);
             myView->View()->Resized();
         }
