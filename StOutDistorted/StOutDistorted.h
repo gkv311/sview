@@ -44,6 +44,13 @@ class StOutDistorted : public StWindow {
     ST_CPPEXPORT virtual ~StOutDistorted();
 
     /**
+     * Use FBO even when rendering can be done by simple viewport adjustment.
+     */
+    ST_LOCAL void setForcedFboUsage(const bool theIsForcesFboUsage) {
+        myIsForcedFboUsage = theIsForcesFboUsage;
+    }
+
+    /**
      * Renderer about string.
      */
     ST_CPPEXPORT virtual StString getRendererAbout() const ST_ATTR_OVERRIDE;
@@ -242,6 +249,7 @@ class StOutDistorted : public StWindow {
     bool                      myIsBroken;        //!< special flag for broke state - when FBO can not be allocated
     bool                      myIsStereoOn;
     bool                      myIsHdmiPack;      //!< "frame packed" mode in HDMI 1.4a
+    bool                      myIsForcedFboUsage;//!< use FBO even when rendering can be done by simple viewport adjustment
 
 };
 

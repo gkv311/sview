@@ -69,16 +69,22 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadInt32 (ST_SETTING_FPSTARGET, params.TargetFps);
     mySettings->loadParam (ST_SETTING_SHOW_FPS,  params.ToShowFps);
 
+    // workaround current limitations of OCCT - no support of viewport with offset
+    const bool toForceFboUsage = true;
 #if defined(__ANDROID__)
     addRenderer(new StOutInterlace  (myResMgr, theParentWin));
     addRenderer(new StOutAnaglyph   (myResMgr, theParentWin));
-    addRenderer(new StOutDistorted  (myResMgr, theParentWin));
+    StOutDistorted* aDistOut = new StOutDistorted  (myResMgr, theParentWin);
+    aDistOut->setForcedFboUsage(toForceFboUsage);
+    addRenderer(aDistOut);
 #else
     addRenderer(new StOutAnaglyph   (myResMgr, theParentWin));
     addRenderer(new StOutDual       (myResMgr, theParentWin));
     addRenderer(new StOutIZ3D       (myResMgr, theParentWin));
     addRenderer(new StOutInterlace  (myResMgr, theParentWin));
-    addRenderer(new StOutDistorted  (myResMgr, theParentWin));
+    StOutDistorted* aDistOut = new StOutDistorted  (myResMgr, theParentWin);
+    aDistOut->setForcedFboUsage(toForceFboUsage);
+    addRenderer(aDistOut);
     addRenderer(new StOutPageFlipExt(myResMgr, theParentWin));
 #endif
 }

@@ -159,7 +159,8 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false),
   myIsStereoOn(false),
-  myIsHdmiPack(false) {
+  myIsHdmiPack(false),
+  myIsForcedFboUsage(false) {
 #ifdef ST_HAVE_LIBOVR
     myOvrSwapFbo[0] = 0;
     myOvrSwapFbo[1] = 0;
@@ -830,7 +831,8 @@ void StOutDistorted::stglDraw() {
     }
 
     // simple rendering without FBO
-    if(myDevice != DEVICE_OCULUS) {
+    if(myDevice != DEVICE_OCULUS
+    && !myIsForcedFboUsage) {
         myContext->stglResizeViewport(aVPBoth);
         myContext->stglSetScissorRect(aVPBoth, false);
         myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
