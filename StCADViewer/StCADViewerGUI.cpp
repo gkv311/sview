@@ -88,7 +88,7 @@ void StCADViewerGUI::createToolbarOnBottom() {
       aBtnZoomOut->changeMargins() = aButtonMargins;
       aBtnZoomOut->setTexturePath(iconTexture(stCString("actionZoomOut"), anIconSize));
       aBtnZoomOut->setDrawShadow(true);
-      aBtnZoomOut->setUserData(StCADViewer::Action_ZoomIn);
+      aBtnZoomOut->setUserData(StCADViewer::Action_ZoomOut);
       aBtnZoomOut->signals.onBtnHold += stSlot(this, &StCADViewerGUI::doAction);
 
       /*StGLCheckboxTextured* aBtnList = new StGLCheckboxTextured(myPanelBottom, myPlugin->params.ToShowPlayList,

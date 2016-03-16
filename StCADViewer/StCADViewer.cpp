@@ -450,10 +450,14 @@ void StCADViewer::doMouseDown(const StClickEvent& theEvent) {
         return;
     }
 
-    myGUI->tryClick(theEvent);
+    bool isItemClicked = false;
+    myGUI->tryClick(theEvent, isItemClicked);
+    if(isItemClicked) {
+        return;
+    }
 
     if(theEvent.Button == ST_MOUSE_LEFT) {
-        myIsLeftHold = true; ///
+        myIsLeftHold = true;
         myPrevMouse.x() = theEvent.PointX;
         myPrevMouse.y() = theEvent.PointY;
         if(!myIsCtrlPressed && !myView.IsNull()) {
@@ -462,7 +466,7 @@ void StCADViewer::doMouseDown(const StClickEvent& theEvent) {
                                   int(double(aWinRect.height()) * theEvent.PointY));
         }
     } else if(theEvent.Button == ST_MOUSE_RIGHT) {
-        myIsRightHold = true; ///
+        myIsRightHold = true;
         myPrevMouse.x() = theEvent.PointX;
         myPrevMouse.y() = theEvent.PointY;
         if(myIsCtrlPressed && !myView.IsNull()) {
@@ -471,7 +475,7 @@ void StCADViewer::doMouseDown(const StClickEvent& theEvent) {
                                   int(double(aWinRect.height()) * theEvent.PointY));
         }
     } else if(theEvent.Button == ST_MOUSE_MIDDLE) {
-        myIsMiddleHold = true; ///
+        myIsMiddleHold = true;
         myPrevMouse.x() = theEvent.PointX;
         myPrevMouse.y() = theEvent.PointY;
     }
@@ -482,6 +486,8 @@ void StCADViewer::doMouseUp(const StClickEvent& theEvent) {
         return;
     }
 
+    bool isItemUnclicked = false;
+    myGUI->tryUnClick(theEvent, isItemUnclicked);
     switch(theEvent.Button) {
         case ST_MOUSE_LEFT: {
             myIsLeftHold = false;
@@ -492,7 +498,7 @@ void StCADViewer::doMouseUp(const StClickEvent& theEvent) {
             break;
         }
         case ST_MOUSE_MIDDLE: {
-            if(!myIsCtrlPressed) {
+            if(!myIsCtrlPressed && !isItemUnclicked) {
                 params.isFullscreen->reverse();
             }
             myIsMiddleHold = false;
@@ -500,7 +506,6 @@ void StCADViewer::doMouseUp(const StClickEvent& theEvent) {
         }
         default: break;
     }
-    myGUI->tryUnClick(theEvent);
 }
 
 void StCADViewer::doGesture(const StGestureEvent& theEvent) {
@@ -560,6 +565,9 @@ void StCADViewer::doScroll(const StScrollEvent& theEvent) {
     if(myGUI.isNull()) {
         return;
     }
+    if(myGUI->doScroll(theEvent)) {
+        return;
+    }
 
     if(theEvent.StepsY >= 1) {
         if(myIsCtrlPressed) {
@@ -574,8 +582,6 @@ void StCADViewer::doScroll(const StScrollEvent& theEvent) {
             doZoomOut(0.1);
         }
     }
-
-    myGUI->doScroll(theEvent);
 }
 
 void StCADViewer::doKeyDown(const StKeyEvent& theEvent) {
