@@ -16,6 +16,7 @@
 #include <StGL/StPlayList.h>
 #include <StGLMesh/StGLMesh.h>
 #include <StSlots/StSignal.h>
+#include <StThreads/StThread.h>
 
 class StLangMap;
 class StThread;
@@ -29,7 +30,8 @@ class StCADLoader {
     static const StArrayList<StString> ST_CAD_EXTENSIONS_LIST;
 
     ST_LOCAL StCADLoader(const StHandle<StLangMap>&  theLangMap,
-                         const StHandle<StPlayList>& thePlayList);
+                         const StHandle<StPlayList>& thePlayList,
+                         const bool                  theToStartThread = true);
     ST_LOCAL virtual ~StCADLoader();
 
     ST_LOCAL void mainLoop();
@@ -57,6 +59,12 @@ class StCADLoader {
 
     ST_LOCAL virtual bool loadModel(const StHandle<StFileNode>& theSource);
     ST_LOCAL virtual bool computeMesh(const TopoDS_Shape& theShape);
+
+    static SV_THREAD_FUNCTION threadFunction(void* theLoader) {
+        StCADLoader* aCADLoader = (StCADLoader* )theLoader;
+        aCADLoader->mainLoop();
+        return SV_THREAD_RETURN 0;
+    }
 
         protected:
 

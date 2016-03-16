@@ -30,27 +30,23 @@
 #include "StCADPluginInfo.h"
 
 #include <StStrings/StLangMap.h>
-#include <StThreads/StThread.h>
 
 const StString StCADLoader::ST_CAD_MIME_STRING(ST_CAD_PLUGIN_MIME_CHAR);
 const StMIMEList StCADLoader::ST_CAD_MIME_LIST(StCADLoader::ST_CAD_MIME_STRING);
 const StArrayList<StString> StCADLoader::ST_CAD_EXTENSIONS_LIST(StCADLoader::ST_CAD_MIME_LIST.getExtensionsList());
 
-static SV_THREAD_FUNCTION threadFunction(void* theLoader) {
-    StCADLoader* aCADLoader = (StCADLoader* )theLoader;
-    aCADLoader->mainLoop();
-    return SV_THREAD_RETURN 0;
-}
-
 StCADLoader::StCADLoader(const StHandle<StLangMap>&  theLangMap,
-                         const StHandle<StPlayList>& thePlayList)
+                         const StHandle<StPlayList>& thePlayList,
+                         const bool                  theToStartThread)
 : myLangMap(theLangMap),
   myPlayList(thePlayList),
   myEvLoadNext(false),
   myIsLoaded(false),
   myToQuit(false) {
     myPlayList->setExtensions(ST_CAD_EXTENSIONS_LIST);
-    myThread = new StThread(threadFunction, (void* )this);
+    if(theToStartThread) {
+        myThread = new StThread(threadFunction, (void* )this);
+    }
 }
 
 StCADLoader::~StCADLoader() {
