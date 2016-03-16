@@ -198,6 +198,14 @@ bool StAVImage::load(const StString& theFilePath,
                      ImageType       theImageType,
                      uint8_t*        theDataPtr,
                      int             theDataSize) {
+    return loadExtra(theFilePath, theImageType, theDataPtr, theDataSize, false);
+}
+
+bool StAVImage::loadExtra(const StString& theFilePath,
+                          ImageType       theImageType,
+                          uint8_t*        theDataPtr,
+                          int             theDataSize,
+                          bool            theIsOnlyRGB) {
 
     // reset current data
     StImage::nullify();
@@ -443,7 +451,7 @@ bool StAVImage::load(const StString& theFilePath,
         changePlane(0).initWrapper(StImagePlane::ImgRGBA64, myFrame.getPlane(0),
                                    myCodecCtx->width, myCodecCtx->height,
                                    myFrame.getLineSize(0));
-    } else if(stAV::isFormatYUVPlanar(myCodecCtx, aDimsYUV)) {
+    } else if(stAV::isFormatYUVPlanar(myCodecCtx, aDimsYUV) && !theIsOnlyRGB) {
     #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 29, 0))
         if(myCodecCtx->color_range == AVCOL_RANGE_JPEG) {
             aDimsYUV.isFullScale = true;

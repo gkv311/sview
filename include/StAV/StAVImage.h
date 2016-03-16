@@ -70,6 +70,12 @@ class StAVImage : public StImageFile {
                                    ImageType       theImageType = ST_TYPE_NONE,
                                    uint8_t* theDataPtr = NULL, int theDataSize = 0);
 
+    ST_CPPEXPORT bool loadExtra(const StString& theFilePath,
+                                ImageType       theImageType,
+                                uint8_t*        theDataPtr,
+                                int             theDataSize,
+                                bool            theIsOnlyRGB);
+
     /**
      * Save image to specified path.
      */
