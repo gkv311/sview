@@ -747,7 +747,7 @@ void StCADViewer::beforeDraw() {
 
     if(!myAisContext.IsNull()) {
         NCollection_Sequence<Handle(AIS_InteractiveObject)> aNewPrsList;
-        if(myCADLoader->getNextShape(aNewPrsList)) {
+        if(myCADLoader->getNextResult(aNewPrsList)) {
             myAisContext->RemoveAll(Standard_False);
             for(NCollection_Sequence<Handle(AIS_InteractiveObject)>::Iterator aPrsIter(aNewPrsList); aPrsIter.More(); aPrsIter.Next()) {
                 myAisContext->Display(aPrsIter.Value(), 1, 0, Standard_False);

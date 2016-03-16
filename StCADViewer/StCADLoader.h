@@ -30,7 +30,7 @@ class StCADLoader {
 
     ST_LOCAL StCADLoader(const StHandle<StLangMap>&  theLangMap,
                          const StHandle<StPlayList>& thePlayList);
-    ST_LOCAL ~StCADLoader();
+    ST_LOCAL virtual ~StCADLoader();
 
     ST_LOCAL void mainLoop();
 
@@ -38,7 +38,7 @@ class StCADLoader {
         myEvLoadNext.set();
     }
 
-    ST_LOCAL bool getNextShape(NCollection_Sequence<Handle(AIS_InteractiveObject)>& thePrsList);
+    ST_LOCAL virtual bool getNextResult(NCollection_Sequence<Handle(AIS_InteractiveObject)>& thePrsList);
 
         public:  //!< Signals
 
@@ -50,22 +50,22 @@ class StCADLoader {
         StSignal<void (const StCString& )> onError;
     } signals;
 
-        private:
+        protected:
 
     ST_LOCAL TopoDS_Shape loadIGES(const StString& theFileToLoadPath);
     ST_LOCAL TopoDS_Shape loadSTEP(const StString& theFileToLoadPath);
 
-    ST_LOCAL bool loadModel(const StHandle<StFileNode>& theSource);
-    ST_LOCAL bool computeMesh(const TopoDS_Shape& theShape);
+    ST_LOCAL virtual bool loadModel(const StHandle<StFileNode>& theSource);
+    ST_LOCAL virtual bool computeMesh(const TopoDS_Shape& theShape);
 
-        private:
+        protected:
 
     StHandle<StThread>   myThread;
     StHandle<StLangMap>  myLangMap;
     StHandle<StPlayList> myPlayList;
     StCondition          myEvLoadNext;
-    TopoDS_Shape         myShape;
-    StMutex              myShapeLock;
+    NCollection_Sequence<Handle(AIS_InteractiveObject)> myPrsList;
+    StMutex              myResultLock;
     volatile bool        myIsLoaded;
     volatile bool        myToQuit;
 

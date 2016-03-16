@@ -176,13 +176,14 @@ bool StCADLoader::loadModel(const StHandle<StFileNode>& theSource) {
 
     bool hasShape = !aShape.IsNull();
     computeMesh(aShape);
+    Handle(AIS_Shape) aShapePrs = new AIS_Shape(aShape);
 
     // setup new output shape
-    myShapeLock.lock();
-        myShape = aShape;
+    myResultLock.lock();
+        myPrsList.Append(aShapePrs);
         aShape.Nullify();
         myIsLoaded = true;
-    myShapeLock.unlock();
+    myResultLock.unlock();
     return hasShape;
 }
 
@@ -204,19 +205,19 @@ bool StCADLoader::computeMesh(const TopoDS_Shape& theShape) {
     return true;
 }
 
-bool StCADLoader::getNextShape(NCollection_Sequence<Handle(AIS_InteractiveObject)>& thePrsList) {
-    bool hasNewShape = false;
-    if(myShapeLock.tryLock()) {
-        if(myIsLoaded) {
-            if(!myShape.IsNull()) {
-                thePrsList.Append(new AIS_Shape(myShape));
-            }
-            myShape.Nullify();
-            hasNewShape = true;
-            myIsLoaded = false;
-        }
-        myShapeLock.unlock();
+bool StCADLoader::getNextResult(NCollection_Sequence<Handle(AIS_InteractiveObject)>& thePrsList) {
+    if(!myResultLock.tryLock()) {
+        return false;
     }
+
+    bool hasNewShape = false;
+    if(myIsLoaded) {
+        thePrsList.Append(myPrsList);
+        myPrsList.Clear();
+        hasNewShape = true;
+        myIsLoaded = false;
+    }
+    myResultLock.unlock();
     return hasNewShape;
 }
 
