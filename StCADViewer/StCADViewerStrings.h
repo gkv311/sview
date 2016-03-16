@@ -38,6 +38,9 @@ namespace StCADViewerStrings {
         MENU_HELP_HOTKEYS = 1510,
         MENU_HELP_SETTINGS= 1511,
 
+        // Open/Save dialogs
+        DIALOG_OPEN_FILE       = 2000,
+
         // About dialog
         ABOUT_DPLUGIN_NAME     = 3000,
         ABOUT_VERSION          = 3001,

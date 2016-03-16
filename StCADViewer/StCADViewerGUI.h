@@ -99,6 +99,11 @@ class StCADViewerGUI : public StGLRootWidget {
     ST_LOCAL void doMobileSettings(const size_t );
 
     /**
+     * Show open file dialog.
+     */
+    ST_LOCAL void doOpenFile(const size_t );
+
+    /**
      * Show context menu.
      */
     ST_LOCAL void doShowMobileExMenu(const size_t );

@@ -36,6 +36,7 @@
 #endif
 
 namespace {
+    static const char ST_SETTING_LAST_FOLDER[] = "lastFolder";
     static const char ST_SETTING_FPSTARGET[] = "fpsTarget";
     static const char ST_SETTING_SHOW_FPS[]  = "toShowFps";
     static const StString ST_PARAM_TRIHEDRON = "showTrihedron";
@@ -69,8 +70,9 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
     params.ProjectMode->signals.onChanged.connect(this, &StCADViewer::doChangeProjection);
     params.TargetFps = 0;
 
-    mySettings->loadInt32 (ST_SETTING_FPSTARGET, params.TargetFps);
-    mySettings->loadParam (ST_SETTING_SHOW_FPS,  params.ToShowFps);
+    mySettings->loadString(ST_SETTING_LAST_FOLDER, params.LastFolder);
+    mySettings->loadInt32 (ST_SETTING_FPSTARGET,   params.TargetFps);
+    mySettings->loadParam (ST_SETTING_SHOW_FPS,    params.ToShowFps);
 
     // workaround current limitations of OCCT - no support of viewport with offset
     const bool toForceFboUsage = true;
@@ -162,6 +164,7 @@ void StCADViewer::saveGuiParams() {
         return;
     }
 
+    mySettings->saveString(ST_SETTING_LAST_FOLDER, params.LastFolder);
     mySettings->saveParam(ST_PARAM_TRIHEDRON,   params.ToShowTrihedron);
     mySettings->saveParam(ST_PARAM_PROJMODE,    params.ProjectMode);
     mySettings->saveInt32(ST_SETTING_FPSTARGET, params.TargetFps);
@@ -644,6 +647,20 @@ void StCADViewer::doKeyUp(const StKeyEvent& theEvent) {
     && myGUI->getFocus() != NULL) {
         myGUI->doKeyUp(theEvent);
     }
+}
+
+void StCADViewer::doOpen1FileFromGui(StHandle<StString> thePath) {
+    if(thePath.isNull()) {
+        return;
+    }
+
+    StDNDropEvent anEvent;
+    anEvent.Type = stEvent_FileDrop;
+    anEvent.Time = 0.0;
+    const char* aFiles[1] = { thePath->toCString() };
+    anEvent.NbFiles = 1;
+    anEvent.Files   = aFiles;
+    doFileDrop(anEvent);
 }
 
 void StCADViewer::doFileDrop(const StDNDropEvent& theEvent) {

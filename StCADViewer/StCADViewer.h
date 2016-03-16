@@ -134,6 +134,7 @@ class StCADViewer : public StApplication {
         StHandle<StBoolParam>  ToShowFps;       //!< display FPS meter
         StHandle<StBoolParam>  ToShowTrihedron; //!< show trihedron flag
         StHandle<StEnumParam>  ProjectMode;     //!< projection mode
+        StString               LastFolder;      //!< laster folder used to open / save file
         int                    TargetFps;       //!< limit or not rendering FPS
 
     } params;
@@ -179,6 +180,7 @@ class StCADViewer : public StApplication {
     ST_LOCAL void doStereoZFocusFarther(const double theValue);
     ST_LOCAL void doStereoIODDec(const double theValue);
     ST_LOCAL void doStereoIODInc(const double theValue);
+    ST_LOCAL void doOpen1FileFromGui(StHandle<StString> thePath);
 
         public:
 

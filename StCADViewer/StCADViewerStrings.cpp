@@ -68,6 +68,9 @@ void loadDefaults(StLangMap& theStrings) {
     theStrings(MENU_HELP_SETTINGS,
                "Settings");
 
+    theStrings(DIALOG_OPEN_FILE,
+               "Choose the CAD file to open");
+
     theStrings(ABOUT_DPLUGIN_NAME,
                "sView - Tiny CAD Viewer");
     theStrings(ABOUT_VERSION,

@@ -5,7 +5,9 @@
  */
 
 #include "StCADViewerGUI.h"
+
 #include "StCADViewer.h"
+#include "StCADLoader.h"
 
 #include <StGLWidgets/StGLDescription.h>
 #include <StGLWidgets/StGLFpsLabel.h>
@@ -13,6 +15,7 @@
 #include <StGLWidgets/StGLMenuItem.h>
 #include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLMsgStack.h>
+#include <StGLWidgets/StGLOpenFile.h>
 #include <StGLWidgets/StGLScrollArea.h>
 #include <StGLWidgets/StGLTable.h>
 #include <StGLWidgets/StGLTextureButton.h>
@@ -43,7 +46,7 @@ void StCADViewerGUI::createToolbarOnTop() {
     {
         int aBtnIter = 0;
         StGLTextureButton* aBtnOpen = new StGLTextureButton(myPanelUpper, (aBtnIter++) * anIconStep, 0);
-        ///aBtnOpen->signals.onBtnClick.connect(this, &StCADViewerGUI::doOpenFile);
+        aBtnOpen->signals.onBtnClick.connect(this, &StCADViewerGUI::doOpenFile);
         aBtnOpen->setTexturePath(iconTexture(stCString("actionOpen"), anIconSize));
         aBtnOpen->setDrawShadow(true);
         aBtnOpen->changeMargins() = aButtonMargins;
@@ -215,6 +218,29 @@ void StCADViewerGUI::doMobileSettings(const size_t ) {
 
     aDialog->addButton(tr(BUTTON_CLOSE), true);
     aDialog->stglInit();
+}
+
+void StCADViewerGUI::doOpenFile(const size_t ) {
+    StGLOpenFile* aDialog = new StGLOpenFile(this, tr(DIALOG_OPEN_FILE), tr(BUTTON_CLOSE));
+    aDialog->setMimeList(StCADLoader::ST_CAD_MIME_LIST);
+#if defined(_WIN32)
+    //
+#else
+    aDialog->addHotItem("/", "Root");
+#endif
+    aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_SdCard));
+    aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Downloads));
+    aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Pictures));
+    aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Photos));
+    aDialog->signals.onFileSelected = stSlot(myPlugin, &StCADViewer::doOpen1FileFromGui);
+
+    if(myPlugin->params.LastFolder.isEmpty()) {
+        StHandle<StFileNode> aCurrFile = myPlugin->myCADLoader->getPlayList().getCurrentFile();
+        if(!aCurrFile.isNull()) {
+            myPlugin->params.LastFolder = aCurrFile->isEmpty() ? aCurrFile->getFolderPath() : aCurrFile->getValue(0)->getFolderPath();
+        }
+    }
+    aDialog->openFolder(myPlugin->params.LastFolder);
 }
 
 void StCADViewerGUI::doShowMobileExMenu(const size_t ) {
