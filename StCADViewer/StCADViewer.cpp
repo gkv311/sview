@@ -39,6 +39,7 @@ namespace {
     static const char ST_SETTING_LAST_FOLDER[] = "lastFolder";
     static const char ST_SETTING_FPSTARGET[] = "fpsTarget";
     static const char ST_SETTING_SHOW_FPS[]  = "toShowFps";
+    static const char ST_SETTING_SHOW_LIST[] = "showPlaylist";
     static const StString ST_PARAM_TRIHEDRON = "showTrihedron";
     static const StString ST_PARAM_PROJMODE  = "projMode";
 }
@@ -49,6 +50,7 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
                          const StNativeWin_t                theParentWin,
                          const StHandle<StOpenInfo>&        theOpenInfo)
 : StApplication(theResMgr, theParentWin, theOpenInfo),
+  myPlayList(new StPlayList(1, false)),
   myIsLeftHold(false),
   myIsRightHold(false),
   myIsMiddleHold(false),
@@ -61,6 +63,8 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
     //
     params.IsFullscreen = new StBoolParam(false);
     params.IsFullscreen->signals.onChanged.connect(this, &StCADViewer::doFullscreen);
+    params.ToShowPlayList   = new StBoolParam(false);
+    ///params.ToShowPlayList->signals.onChanged = stSlot(this, &StCADViewer::doShowPlayList);
     params.ToShowFps     = new StBoolParamNamed(false, tr(StCADViewerStrings::MENU_SHOW_FPS));
     params.ToShowTrihedron = new StBoolParam(true);
     params.ProjectMode = new StEnumParam(ST_PROJ_STEREO, tr(StCADViewerStrings::MENU_VIEW_PROJECTION));
@@ -73,6 +77,7 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadString(ST_SETTING_LAST_FOLDER, params.LastFolder);
     mySettings->loadInt32 (ST_SETTING_FPSTARGET,   params.TargetFps);
     mySettings->loadParam (ST_SETTING_SHOW_FPS,    params.ToShowFps);
+    mySettings->loadParam (ST_SETTING_SHOW_LIST,   params.ToShowPlayList);
 
     // workaround current limitations of OCCT - no support of viewport with offset
     const bool toForceFboUsage = true;
@@ -169,6 +174,7 @@ void StCADViewer::saveGuiParams() {
     mySettings->saveParam(ST_PARAM_PROJMODE,    params.ProjectMode);
     mySettings->saveInt32(ST_SETTING_FPSTARGET, params.TargetFps);
     mySettings->saveParam(ST_SETTING_SHOW_FPS,  params.ToShowFps);
+    mySettings->saveParam(ST_SETTING_SHOW_LIST, params.ToShowPlayList);
 }
 
 void StCADViewer::saveAllParams() {
@@ -333,7 +339,7 @@ bool StCADViewer::createGui() {
 
     // create the GUI with default values
     //params.ScaleHiDPI->setValue(myWindow->getScaleFactor());
-    myGUI = new StCADViewerGUI(this, myLangMap.access());
+    myGUI = new StCADViewerGUI(this, myLangMap.access(), myPlayList);
     myGUI->setContext(myContext);
 
     // load settings
@@ -391,7 +397,7 @@ bool StCADViewer::init() {
 
     // create working threads
     if(!isReset) {
-        myCADLoader = new StCADLoader(myLangMap);
+        myCADLoader = new StCADLoader(myLangMap, myPlayList);
         myCADLoader->signals.onError = stSlot(myMsgQueue.access(), &StMsgQueue::doPushError);
     }
     return true;
@@ -418,17 +424,17 @@ bool StCADViewer::open() {
     }
 
     // clear playlist first
-    myCADLoader->getPlayList().clear();
+    myPlayList->clear();
 
     if(!anOpenMIME.isEmpty()) {
         // create just one-file playlist
-        myCADLoader->getPlayList().addOneFile(myOpenFileInfo->getPath(), anOpenMIME);
+        myPlayList->addOneFile(myOpenFileInfo->getPath(), anOpenMIME);
     } else {
         // create playlist from file's folder
-        myCADLoader->getPlayList().open(myOpenFileInfo->getPath());
+        myPlayList->open(myOpenFileInfo->getPath());
     }
 
-    if(!myCADLoader->getPlayList().isEmpty()) {
+    if(!myPlayList->isEmpty()) {
         doUpdateStateLoading();
         myCADLoader->doLoadNext();
     }
@@ -661,6 +667,9 @@ void StCADViewer::doOpen1FileFromGui(StHandle<StString> thePath) {
     anEvent.NbFiles = 1;
     anEvent.Files   = aFiles;
     doFileDrop(anEvent);
+
+    StString aDummy;
+    StFileNode::getFolderAndFile(*thePath, params.LastFolder, aDummy);
 }
 
 void StCADViewer::doFileDrop(const StDNDropEvent& theEvent) {
@@ -669,8 +678,8 @@ void StCADViewer::doFileDrop(const StDNDropEvent& theEvent) {
     }
 
     const StString aFilePath = theEvent.Files[0];
-    if(myCADLoader->getPlayList().checkExtension(aFilePath)) {
-        myCADLoader->getPlayList().open(aFilePath);
+    if(myPlayList->checkExtension(aFilePath)) {
+        myPlayList->open(aFilePath);
         doUpdateStateLoading();
         myCADLoader->doLoadNext();
     }
@@ -816,7 +825,7 @@ void StCADViewer::stglDraw(unsigned int theView) {
 }
 
 void StCADViewer::doUpdateStateLoading() {
-    const StString aFileToLoad = myCADLoader->getPlayList().getCurrentTitle();
+    const StString aFileToLoad = myPlayList->getCurrentTitle();
     if(aFileToLoad.isEmpty()) {
         myWindow->setTitle("sView - CAD Viewer");
     } else {
@@ -825,7 +834,7 @@ void StCADViewer::doUpdateStateLoading() {
 }
 
 void StCADViewer::doUpdateStateLoaded(bool isSuccess) {
-    const StString aFileLoaded = myCADLoader->getPlayList().getCurrentTitle();
+    const StString aFileLoaded = myPlayList->getCurrentTitle();
     if(aFileLoaded.isEmpty()) {
         myWindow->setTitle("sView - CAD Viewer");
     } else {
@@ -840,31 +849,40 @@ void StCADViewer::doFullscreen(const bool theIsFullscreen) {
 }
 
 void StCADViewer::doListFirst(const size_t ) {
-    if(myCADLoader->getPlayList().walkToFirst()) {
+    if(myPlayList->walkToFirst()) {
         myCADLoader->doLoadNext();
         doUpdateStateLoading();
     }
 }
 
 void StCADViewer::doListPrev(const size_t ) {
-    if(myCADLoader->getPlayList().walkToPrev()) {
+    if(myPlayList->walkToPrev()) {
         myCADLoader->doLoadNext();
         doUpdateStateLoading();
     }
 }
 
 void StCADViewer::doListNext(const size_t ) {
-    if(myCADLoader->getPlayList().walkToNext()) {
+    if(myPlayList->walkToNext()) {
         myCADLoader->doLoadNext();
         doUpdateStateLoading();
     }
 }
 
 void StCADViewer::doListLast(const size_t ) {
-    if(myCADLoader->getPlayList().walkToLast()) {
+    if(myPlayList->walkToLast()) {
         myCADLoader->doLoadNext();
         doUpdateStateLoading();
     }
+}
+
+void StCADViewer::doFileNext() {
+    if(myCADLoader.isNull()) {
+        return;
+    }
+
+    myCADLoader->doLoadNext();
+    doUpdateStateLoading();
 }
 
 void StCADViewer::doFitAll(const size_t ) {

@@ -14,6 +14,7 @@
 #include <TDocStd_Document.hxx>
 
 #include <StCore/StApplication.h>
+#include <StGL/StPlayList.h>
 #include <StGLMesh/StGLMesh.h>
 #include <StGLStereo/StGLProjCamera.h>
 #include <StSettings/StParam.h>
@@ -122,6 +123,11 @@ class StCADViewer : public StApplication {
     ST_LOCAL void doListLast(const size_t dummy = 0);
 
     /**
+     * load next file in the playlist.
+     */
+    ST_LOCAL void doFileNext();
+
+    /**
      * Fit ALL.
      */
     ST_LOCAL void doFitAll(const size_t dummy = 0);
@@ -131,6 +137,7 @@ class StCADViewer : public StApplication {
     struct {
 
         StHandle<StBoolParam>  IsFullscreen;    //!< fullscreen state
+        StHandle<StBoolParam>  ToShowPlayList;  //!< display playlist
         StHandle<StBoolParam>  ToShowFps;       //!< display FPS meter
         StHandle<StBoolParam>  ToShowTrihedron; //!< show trihedron flag
         StHandle<StEnumParam>  ProjectMode;     //!< projection mode
@@ -213,6 +220,7 @@ class StCADViewer : public StApplication {
     StHandle<StGLContext>    myContext;
     StHandle<StSettings>     mySettings;      //!< current plugin local settings
     StHandle<StTranslations> myLangMap;       //!< translated strings map
+    StHandle<StPlayList>     myPlayList;      //!< play list
     StHandle<StCADViewerGUI> myGUI;           //!< GUI elements
     StHandle<StCADLoader>    myCADLoader;     //!< dedicated threaded class for load/save operations
     StGLProjCamera           myProjection;    //!< projection setup

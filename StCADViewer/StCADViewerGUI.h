@@ -7,6 +7,7 @@
 #ifndef __StCADViewerGUI_h_
 #define __StCADViewerGUI_h_
 
+#include <StGL/StPlayList.h>
 #include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLRootWidget.h>
 #include <StSettings/StTranslations.h>
@@ -16,6 +17,7 @@ class StGLDescription;
 class StGLFpsLabel;
 class StGLMenu;
 class StGLMenuItem;
+class StGLPlayList;
 class StGLTextureButton;
 class StGLMsgStack;
 
@@ -48,7 +50,8 @@ class StCADViewerGUI : public StGLRootWidget {
         public: //!< StGLWidget overrides
 
     ST_LOCAL StCADViewerGUI(StCADViewer*    thePlugin,
-                            StTranslations* theLangMap);
+                            StTranslations* theLangMap,
+                            const StHandle<StPlayList>& thePlayList);
     ST_LOCAL virtual ~StCADViewerGUI();
     ST_LOCAL virtual void stglUpdate(const StPointD_t& theCursorZo) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void stglResize(const StGLBoxPx&  theRectPx) ST_ATTR_OVERRIDE;
@@ -133,6 +136,7 @@ class StCADViewerGUI : public StGLRootWidget {
 
     StGLDescription*  myMouseDescr;   //!< description shown near mouse cursor
     StGLMsgStack*     myMsgStack;     //!< messages stack
+    StGLPlayList*     myPlayList;     //!< playlist widget
     StGLMenu*         myMenu0Root;    //!< main menu
     StGLWidget*       myPanelUpper;   //!< upper  toolbar
     StGLWidget*       myPanelBottom;  //!< bottom toolbar

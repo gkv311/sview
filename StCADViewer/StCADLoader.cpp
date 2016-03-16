@@ -42,13 +42,14 @@ static SV_THREAD_FUNCTION threadFunction(void* theLoader) {
     return SV_THREAD_RETURN 0;
 }
 
-StCADLoader::StCADLoader(const StHandle<StLangMap>& theLangMap)
+StCADLoader::StCADLoader(const StHandle<StLangMap>&  theLangMap,
+                         const StHandle<StPlayList>& thePlayList)
 : myLangMap(theLangMap),
-  myPlayList(1),
+  myPlayList(thePlayList),
   myEvLoadNext(false),
   myIsLoaded(false),
   myToQuit(false) {
-    myPlayList.setExtensions(ST_CAD_EXTENSIONS_LIST);
+    myPlayList->setExtensions(ST_CAD_EXTENSIONS_LIST);
     myThread = new StThread(threadFunction, (void* )this);
 }
 
@@ -230,7 +231,7 @@ void StCADLoader::mainLoop() {
         } else {
             // load next model (set as current in playlist)
             myEvLoadNext.reset();
-            if(myPlayList.getCurrentFile(aFileToLoad, aFileParams)) {
+            if(myPlayList->getCurrentFile(aFileToLoad, aFileParams)) {
                 loadModel(aFileToLoad);
             }
         }

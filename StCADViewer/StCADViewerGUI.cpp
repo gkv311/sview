@@ -9,6 +9,7 @@
 #include "StCADViewer.h"
 #include "StCADLoader.h"
 
+#include <StGLWidgets/StGLCheckboxTextured.h>
 #include <StGLWidgets/StGLDescription.h>
 #include <StGLWidgets/StGLFpsLabel.h>
 #include <StGLWidgets/StGLMenu.h>
@@ -16,6 +17,7 @@
 #include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLMsgStack.h>
 #include <StGLWidgets/StGLOpenFile.h>
+#include <StGLWidgets/StGLPlayList.h>
 #include <StGLWidgets/StGLScrollArea.h>
 #include <StGLWidgets/StGLTable.h>
 #include <StGLWidgets/StGLTextureButton.h>
@@ -106,13 +108,13 @@ void StCADViewerGUI::createToolbarOnBottom() {
       aBtnFitAll->setUserData(StCADViewer::Action_FitAll);
       aBtnFitAll->signals.onBtnHold += stSlot(this, &StCADViewerGUI::doAction);
 
-      /*StGLCheckboxTextured* aBtnList = new StGLCheckboxTextured(myPanelBottom, myPlugin->params.ToShowPlayList,
+      StGLCheckboxTextured* aBtnList = new StGLCheckboxTextured(myPanelBottom, myPlugin->params.ToShowPlayList,
                                            iconTexture(stCString("actionVideoPlaylistOff"), anIconSize),
                                            iconTexture(stCString("actionVideoPlaylist"),    anIconSize),
                                            (aBtnIter++) * (-anIconStep), 0,
                                            StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
       aBtnList->setDrawShadow(true);
-      aBtnList->changeMargins() = aButtonMargins;*/
+      aBtnList->changeMargins() = aButtonMargins;
     }
 }
 
@@ -235,7 +237,7 @@ void StCADViewerGUI::doOpenFile(const size_t ) {
     aDialog->signals.onFileSelected = stSlot(myPlugin, &StCADViewer::doOpen1FileFromGui);
 
     if(myPlugin->params.LastFolder.isEmpty()) {
-        StHandle<StFileNode> aCurrFile = myPlugin->myCADLoader->getPlayList().getCurrentFile();
+        StHandle<StFileNode> aCurrFile = myPlugin->myPlayList->getCurrentFile();
         if(!aCurrFile.isNull()) {
             myPlugin->params.LastFolder = aCurrFile->isEmpty() ? aCurrFile->getFolderPath() : aCurrFile->getValue(0)->getFolderPath();
         }
@@ -263,12 +265,14 @@ void StCADViewerGUI::doShowMobileExMenu(const size_t ) {
 }
 
 StCADViewerGUI::StCADViewerGUI(StCADViewer*    thePlugin,
-                               StTranslations* theLangMap)
+                               StTranslations* theLangMap,
+                               const StHandle<StPlayList>& thePlayList)
 : StGLRootWidget(thePlugin->myResMgr),
   myPlugin(thePlugin),
   myLangMap(theLangMap),
   myMouseDescr(NULL),
   myMsgStack(NULL),
+  myPlayList(NULL),
   myMenu0Root(NULL),
   myPanelUpper(NULL),
   myPanelBottom(NULL),
@@ -292,6 +296,14 @@ StCADViewerGUI::StCADViewerGUI(StCADViewer*    thePlugin,
     createToolbarOnTop();
     createToolbarOnBottom();
 
+    myPlayList = new StGLPlayList(this, thePlayList);
+    myPlayList->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    myPlayList->changeFitMargins().top    = scale(56);
+    myPlayList->changeFitMargins().bottom = scale(100);
+    //myPlayList->changeMargins().bottom    = scale(56);
+    myPlayList->setOpacity(myPlugin->params.ToShowPlayList->getValue() ? 1.0f : 0.0f, false);
+    myPlayList->signals.onOpenItem = stSlot(myPlugin, &StCADViewer::doFileNext);
+
     myMsgStack = new StGLMsgStack(this, myPlugin->getMessagesQueue());
     if(myPlugin->params.ToShowFps->getValue()) {
         myFpsWidget = new StGLFpsLabel(this);
@@ -303,6 +315,7 @@ StCADViewerGUI::~StCADViewerGUI() {
 }
 
 void StCADViewerGUI::setVisibility(const StPointD_t& , bool ) {
+    const bool toShowPlayList = myPlugin->params.ToShowPlayList->getValue();
     //const float anOpacity = (float )myVisLerp.perform(toShowAll, toForceHide);
     const float anOpacity = myIsGUIVisible ? 1.0f : 0.0f;
 
@@ -314,6 +327,9 @@ void StCADViewerGUI::setVisibility(const StPointD_t& , bool ) {
     }
     if(myPanelBottom != NULL) {
         myPanelBottom->setOpacity(anOpacity, true);
+    }
+    if(myPlayList != NULL) {
+        myPlayList->setOpacity(toShowPlayList ? anOpacity : 0.0f, true);
     }
 
     if(myMouseDescr != NULL) {

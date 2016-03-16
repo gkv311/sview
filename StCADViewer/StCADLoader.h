@@ -28,7 +28,8 @@ class StCADLoader {
     static const StMIMEList ST_CAD_MIME_LIST;
     static const StArrayList<StString> ST_CAD_EXTENSIONS_LIST;
 
-    ST_LOCAL StCADLoader(const StHandle<StLangMap>& theLangMap);
+    ST_LOCAL StCADLoader(const StHandle<StLangMap>&  theLangMap,
+                         const StHandle<StPlayList>& thePlayList);
     ST_LOCAL ~StCADLoader();
 
     ST_LOCAL void mainLoop();
@@ -38,10 +39,6 @@ class StCADLoader {
     }
 
     ST_LOCAL bool getNextShape(NCollection_Sequence<Handle(AIS_InteractiveObject)>& thePrsList);
-
-    ST_LOCAL StPlayList& getPlayList() {
-        return myPlayList;
-    }
 
         public:  //!< Signals
 
@@ -63,14 +60,14 @@ class StCADLoader {
 
         private:
 
-    StHandle<StThread>  myThread;
-    StHandle<StLangMap> myLangMap;
-    StPlayList          myPlayList;
-    StCondition         myEvLoadNext;
-    TopoDS_Shape        myShape;
-    StMutex             myShapeLock;
-    volatile bool       myIsLoaded;
-    volatile bool       myToQuit;
+    StHandle<StThread>   myThread;
+    StHandle<StLangMap>  myLangMap;
+    StHandle<StPlayList> myPlayList;
+    StCondition          myEvLoadNext;
+    TopoDS_Shape         myShape;
+    StMutex              myShapeLock;
+    volatile bool        myIsLoaded;
+    volatile bool        myToQuit;
 
 };
 
