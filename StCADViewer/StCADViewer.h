@@ -17,6 +17,9 @@
 #include <StGLMesh/StGLMesh.h>
 #include <StGLStereo/StGLProjCamera.h>
 #include <StSettings/StParam.h>
+#include <StSettings/StTranslations.h>
+
+//#include "StCADViewerGUI.h"
 
 enum {
     ST_PROJ_ORTHO,  //!< orthogonal projection matrix
@@ -121,7 +124,7 @@ class StCADViewer : public StApplication {
     /**
      * Fit ALL.
      */
-    ST_LOCAL void doFitALL(const size_t dummy = 0);
+    ST_LOCAL void doFitAll(const size_t dummy = 0);
 
         public: //!< Properties
 
@@ -131,7 +134,6 @@ class StCADViewer : public StApplication {
         StHandle<StBoolParam>  ToShowFps;       //!< display FPS meter
         StHandle<StBoolParam>  toShowTrihedron; //!< show trihedron flag
         StHandle<StInt32Param> projectMode;     //!< projection mode
-        StHandle<StInt32Param> fillMode;        //!< fill mode
         int                    TargetFps;       //!< limit or not rendering FPS
 
     } params;
@@ -164,11 +166,40 @@ class StCADViewer : public StApplication {
 
     ST_LOCAL void doFullscreen(const bool theIsFullscreen);
     ST_LOCAL void doChangeProjection(const int32_t theProj);
+    ST_LOCAL void doStereoZFocusCloser(const double theValue);
+    ST_LOCAL void doStereoZFocusFarther(const double theValue);
+    ST_LOCAL void doStereoIODDec(const double theValue);
+    ST_LOCAL void doStereoIODInc(const double theValue);
+
+        public:
+
+    /**
+     * Actions identifiers.
+     */
+    enum ActionId {
+        Action_Fullscreen,
+        Action_ShowFps,
+        Action_FileInfo,
+        Action_ListFirst,
+        Action_ListLast,
+        Action_ListPrev,
+        Action_ListNext,
+        //Action_DeleteFile,
+        Action_FitAll,
+        Action_ProjOrthogonal,
+        Action_ProjPerspective,
+        Action_ProjStereo,
+        Action_StereoZFocusCloser,
+        Action_StereoZFocusFarther,
+        Action_StereoIODDec,
+        Action_StereoIODInc,
+    };
 
         private:
 
     StHandle<StGLContext>    myContext;
     StHandle<StSettings>     mySettings;      //!< current plugin local settings
+    StHandle<StTranslations> myLangMap;       //!< translated strings map
     StHandle<StCADViewerGUI> myGUI;           //!< GUI elements
     StHandle<StCADLoader>    myCADLoader;     //!< dedicated threaded class for load/save operations
     StGLProjCamera           myProjection;    //!< projection setup

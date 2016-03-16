@@ -9,6 +9,10 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
+    <Filter Include="Translation Files">
+      <UniqueIdentifier>{51ccb8c8-e9c1-4b2b-b6d3-117ff8928d17}</UniqueIdentifier>
+      <Extensions>lng</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="StCADViewer.rc" />

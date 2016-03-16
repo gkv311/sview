@@ -278,6 +278,7 @@
 		</Unit>
 		<Unit filename="StCADViewerGUI.cpp" />
 		<Unit filename="StCADViewerGUI.h" />
+		<Unit filename="StCADViewerStrings.cpp" />
 		<Unit filename="StCADViewerStrings.h" />
 		<Unit filename="lang/english/StCADViewer.lng">
 			<Option target="&lt;{~None~}&gt;" />

@@ -1,11 +1,15 @@
 /**
  * This source is a part of sView program.
  *
- * Copyright © Kirill Gavrilov, 2011
+ * Copyright © Kirill Gavrilov, 2011-2016
  */
 
 #ifndef __StCADViewerStrings_h_
 #define __StCADViewerStrings_h_
+
+#include <stTypes.h>
+
+class StLangMap;
 
 namespace StCADViewerStrings {
 
@@ -13,24 +17,15 @@ namespace StCADViewerStrings {
     enum {
         // Root -> View menu
         MENU_VIEW = 1200,
-        MENU_VIEW_DISPLAY_MODE = 1201,
         MENU_VIEW_FULLSCREEN   = 1202,
-        MENU_VIEW_NORMALS      = 1203,
         MENU_VIEW_TRIHEDRON    = 1204,
-        MENU_VIEW_TWOSIDES     = 1205,
         MENU_VIEW_PROJECTION   = 1206,
-        MENU_VIEW_FILLMODE     = 1207,
         MENU_VIEW_FITALL       = 1208,
 
         // Root -> View menu -> Projection
         MENU_VIEW_PROJ_ORTHO   = 1240,
         MENU_VIEW_PROJ_PERSP   = 1241,
         MENU_VIEW_PROJ_STEREO  = 1242,
-
-        // Root -> View menu -> Fill Mode
-        MENU_VIEW_FILL_MESH        = 1250,
-        MENU_VIEW_FILL_SHADED      = 1251,
-        MENU_VIEW_FILL_SHADED_MESH = 1252,
 
         // Root -> Help menu
         MENU_HELP         = 1500,
@@ -42,8 +37,24 @@ namespace StCADViewerStrings {
         ABOUT_DPLUGIN_NAME     = 3000,
         ABOUT_VERSION          = 3001,
         ABOUT_DESCRIPTION      = 3002,
+        ABOUT_SYSTEM           = 3004,
+
+        BUTTON_CLOSE           = 4000,
+        BUTTON_CANCEL          = 4001,
+        BUTTON_DELETE          = 4007,
+        BUTTON_DEFAULT         = 4008,
+        BUTTON_DEFAULTS        = 4009,
+        BUTTON_ASSIGN          = 4010,
+
+        // keys reserved for actions (see StCADViewer::ActionId)
+        ACTIONS_FROM           = 6000,
 
     };
+
+    /**
+     * Load default strings for entries not found in language file.
+     */
+    ST_LOCAL void loadDefaults(StLangMap& theStrings);
 
 };
 

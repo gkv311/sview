@@ -7,6 +7,7 @@
 #include "StCADViewer.h"
 
 #include "StCADViewerGUI.h"
+#include "StCADViewerStrings.h"
 #include "StCADLoader.h"
 #include "StCADWindow.h"
 #include "StCADFrameBuffer.h"
@@ -37,10 +38,8 @@
 namespace {
     static const char ST_SETTING_FPSTARGET[] = "fpsTarget";
     static const char ST_SETTING_SHOW_FPS[]  = "toShowFps";
-    static const StString ST_PARAM_NORMALS   = "showNormals";
     static const StString ST_PARAM_TRIHEDRON = "showTrihedron";
     static const StString ST_PARAM_PROJMODE  = "projMode";
-    static const StString ST_PARAM_FILLMODE  = "fillMode";
 }
 
 const StString StCADViewer::ST_DRAWER_PLUGIN_NAME = "StCADViewer";
@@ -54,6 +53,8 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
   myIsMiddleHold(false),
   myIsCtrlPressed(false) {
     mySettings = new StSettings(myResMgr, ST_DRAWER_PLUGIN_NAME);
+    myLangMap  = new StTranslations(myResMgr, ST_DRAWER_PLUGIN_NAME);
+    StCADViewerStrings::loadDefaults(*myLangMap);
 
     myTitle = "sView - CAD Viewer";
     //
@@ -63,7 +64,6 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
     params.toShowTrihedron = new StBoolParam(true);
     params.projectMode = new StInt32Param(ST_PROJ_STEREO);
     params.projectMode->signals.onChanged.connect(this, &StCADViewer::doChangeProjection);
-    params.fillMode = new StInt32Param(ST_FILL_MESH);
     params.TargetFps = 0;
 
     mySettings->loadInt32 (ST_SETTING_FPSTARGET, params.TargetFps);
@@ -87,6 +87,50 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
     addRenderer(aDistOut);
     addRenderer(new StOutPageFlipExt(myResMgr, theParentWin));
 #endif
+
+    // create actions
+    StHandle<StAction> anAction;
+    anAction = new StActionBool(stCString("DoFullscreen"), params.isFullscreen);
+    addAction(Action_Fullscreen, anAction, ST_VK_RETURN);
+
+    anAction = new StActionBool(stCString("DoShowFPS"), params.ToShowFps);
+    addAction(Action_ShowFps, anAction, ST_VK_F12);
+
+    anAction = new StActionIntSlot(stCString("DoListFirst"), stSlot(this, &StCADViewer::doListFirst), 0);
+    addAction(Action_ListFirst, anAction, ST_VK_HOME);
+
+    anAction = new StActionIntSlot(stCString("DoListLast"), stSlot(this, &StCADViewer::doListLast), 0);
+    addAction(Action_ListLast, anAction, ST_VK_END);
+
+    anAction = new StActionIntSlot(stCString("DoListPrev"), stSlot(this, &StCADViewer::doListPrev), 0);
+    addAction(Action_ListPrev, anAction, ST_VK_PRIOR);
+
+    anAction = new StActionIntSlot(stCString("DoListNext"), stSlot(this, &StCADViewer::doListNext), 0);
+    addAction(Action_ListNext, anAction, ST_VK_NEXT);
+
+    anAction = new StActionIntSlot(stCString("DoFitAll"), stSlot(this, &StCADViewer::doFitAll), 0);
+    addAction(Action_FitAll, anAction, ST_VK_F);
+
+    anAction = new StActionIntValue(stCString("DoProjOrthogonal"),  params.projectMode, ST_PROJ_ORTHO);
+    addAction(Action_ProjOrthogonal, anAction, ST_VK_O);
+
+    anAction = new StActionIntValue(stCString("DoProjPerspective"), params.projectMode, ST_PROJ_PERSP);
+    addAction(Action_ProjPerspective, anAction, ST_VK_M, ST_VK_P);
+
+    anAction = new StActionIntValue(stCString("DoProjStereo"),      params.projectMode, ST_PROJ_STEREO);
+    addAction(Action_ProjStereo, anAction, ST_VK_S);
+
+    anAction = new StActionHoldSlot(stCString("DoStereoZFocusCloser"),  stSlot(this, &StCADViewer::doStereoZFocusCloser));
+    addAction(Action_StereoZFocusCloser, anAction, ST_VK_DIVIDE | ST_VF_CONTROL);
+
+    anAction = new StActionHoldSlot(stCString("DoStereoZFocusFarther"), stSlot(this, &StCADViewer::doStereoZFocusFarther));
+    addAction(Action_StereoZFocusFarther, anAction, ST_VK_MULTIPLY | ST_VF_CONTROL);
+
+    anAction = new StActionHoldSlot(stCString("DoStereoIODDec"),  stSlot(this, &StCADViewer::doStereoIODDec));
+    addAction(Action_StereoIODDec, anAction, ST_VK_DIVIDE);
+
+    anAction = new StActionHoldSlot(stCString("DoStereoIODInc"), stSlot(this, &StCADViewer::doStereoIODInc));
+    addAction(Action_StereoIODInc, anAction, ST_VK_MULTIPLY);
 }
 
 bool StCADViewer::resetDevice() {
@@ -111,13 +155,20 @@ void StCADViewer::saveGuiParams() {
 
     mySettings->saveParam(ST_PARAM_TRIHEDRON,   params.toShowTrihedron);
     mySettings->saveParam(ST_PARAM_PROJMODE,    params.projectMode);
-    mySettings->saveParam(ST_PARAM_FILLMODE,    params.fillMode);
     mySettings->saveInt32(ST_SETTING_FPSTARGET, params.TargetFps);
     mySettings->saveParam(ST_SETTING_SHOW_FPS,  params.ToShowFps);
 }
 
 void StCADViewer::saveAllParams() {
     saveGuiParams();
+    if(!myGUI.isNull()) {
+        // store hot-keys
+        for(std::map< int, StHandle<StAction> >::iterator anIter = myActions.begin();
+            anIter != myActions.end(); ++anIter) {
+            mySettings->saveHotKey(anIter->second);
+        }
+    }
+
     mySettings->flush();
 }
 
@@ -257,7 +308,6 @@ bool StCADViewer::initOcctViewer() {
     myView->SetWindow(aWindow, (Aspect_RenderingContext )aRendCtx);
 #endif
 
-    myView->TriedronDisplay(Aspect_TOTP_RIGHT_LOWER, Quantity_NOC_WHITE, 0.08, V3d_ZBUFFER);
     myView->SetSurfaceDetail(V3d_TEX_ALL);
     return true;
 }
@@ -271,14 +321,13 @@ bool StCADViewer::createGui() {
 
     // create the GUI with default values
     //params.ScaleHiDPI->setValue(myWindow->getScaleFactor());
-    myGUI = new StCADViewerGUI(this);
+    myGUI = new StCADViewerGUI(this, myLangMap.access());
     myGUI->setContext(myContext);
 
     // load settings
     myWindow->setTargetFps(double(params.TargetFps));
     mySettings->loadParam(ST_PARAM_TRIHEDRON, params.toShowTrihedron);
     mySettings->loadParam(ST_PARAM_PROJMODE,  params.projectMode);
-    mySettings->loadParam(ST_PARAM_FILLMODE,  params.fillMode);
 
     myGUI->stglInit();
     myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER));
@@ -330,7 +379,7 @@ bool StCADViewer::init() {
 
     // create working threads
     if(!isReset) {
-        myCADLoader = new StCADLoader(StHandle<StLangMap>::downcast(myGUI->myLangMap));
+        myCADLoader = new StCADLoader(myLangMap);
         myCADLoader->signals.onError = stSlot(myMsgQueue.access(), &StMsgQueue::doPushError);
     }
     return true;
@@ -460,7 +509,7 @@ void StCADViewer::doGesture(const StGestureEvent& theEvent) {
             return;
         }
         case stEvent_Gesture1DoubleTap: {
-            doFitALL();
+            doFitAll();
             return;
         }
         case stEvent_Gesture2Rotate: {
@@ -508,14 +557,7 @@ void StCADViewer::doScroll(const StScrollEvent& theEvent) {
 
     if(theEvent.StepsY >= 1) {
         if(myIsCtrlPressed) {
-            if(!myView.IsNull()) {
-                Standard_Real aFocus = myView->Camera()->ZFocus() + 0.05;
-                if(aFocus > 0.2
-                && aFocus < 2.0) {
-                  myView->Camera()->SetZFocus(myView->Camera()->ZFocusType(), aFocus);
-                }
-            }
-            myProjection.setZScreen(myProjection.getZScreen() + 1.1f);
+            doStereoZFocusCloser(0.05);
         } else {
             if(!myView.IsNull()) {
                 myView->Zoom(0, 0, 10, 10);
@@ -524,14 +566,7 @@ void StCADViewer::doScroll(const StScrollEvent& theEvent) {
         }
     } else if(theEvent.StepsY <= -1) {
         if(myIsCtrlPressed) {
-            if(!myView.IsNull()) {
-                Standard_Real aFocus = myView->Camera()->ZFocus() - 0.05;
-                if(aFocus > 0.2
-                && aFocus < 2.0) {
-                  myView->Camera()->SetZFocus(myView->Camera()->ZFocusType(), aFocus);
-                }
-            }
-            myProjection.setZScreen(myProjection.getZScreen() - 1.1f);
+            doStereoZFocusFarther(0.05);
         } else {
             if(!myView.IsNull()) {
                 myView->Zoom(0, 0, -10, -10);
@@ -553,38 +588,10 @@ void StCADViewer::doKeyDown(const StKeyEvent& theEvent) {
         return;
     }
 
+    StApplication::doKeyDown(theEvent);
     switch(theEvent.VKey) {
         case ST_VK_ESCAPE:
             StApplication::exit(0);
-            return;
-        case ST_VK_RETURN:
-            params.isFullscreen->reverse();
-            return;
-
-        // switch projection matrix
-        case ST_VK_M:
-            params.projectMode->setValue(ST_PROJ_PERSP);
-            return;
-        case ST_VK_S:
-            params.projectMode->setValue(ST_PROJ_STEREO);
-            return;
-        case ST_VK_O:
-            params.projectMode->setValue(ST_PROJ_ORTHO);
-            return;
-
-        // separation
-        case ST_VK_MULTIPLY: {
-            if(theEvent.Flags == ST_VF_NONE) {
-                myProjection.setIOD(myProjection.getIOD() + 0.1f);
-                ST_DEBUG_LOG("Sep. inc, " + myProjection.toString());
-            }
-            return;
-        }
-        case ST_VK_DIVIDE:
-            if(theEvent.Flags == ST_VF_NONE) {
-                myProjection.setIOD(myProjection.getIOD() - 0.1f);
-                ST_DEBUG_LOG("Sep. dec, " + myProjection.toString());
-            }
             return;
 
         case ST_VK_LEFT:
@@ -606,45 +613,20 @@ void StCADViewer::doKeyDown(const StKeyEvent& theEvent) {
             ///myCam.rotateZ(1.0f);
             return;
 
-        // call fit all
-        case ST_VK_F:
-            doFitALL();
-            return;
-
-        // playlist navigation
-        case ST_VK_PRIOR:
-            doListPrev();
-            return;
-        case ST_VK_NEXT:
-            doListNext();
-            return;
-        case ST_VK_HOME:
-            doListFirst();
-            return;
-        case ST_VK_END:
-            doListLast();
-            return;
-
-        // shading mode
-        case ST_VK_1:
-            params.fillMode->setValue(ST_FILL_MESH);
-            return;
-        case ST_VK_2:
-            params.fillMode->setValue(ST_FILL_SHADING);
-            return;
-        case ST_VK_3:
-            params.fillMode->setValue(ST_FILL_SHADED_MESH);
-            return;
-
         default:
             break;
     }
 }
 
 void StCADViewer::doKeyHold(const StKeyEvent& theEvent) {
-    if(!myGUI.isNull()
-    && myGUI->getFocus() != NULL) {
+    if(myGUI.isNull()) {
+        return;
+    }
+
+    if(myGUI->getFocus() != NULL) {
         myGUI->doKeyHold(theEvent);
+    } else {
+        StApplication::doKeyHold(theEvent);
     }
 }
 
@@ -724,7 +706,7 @@ void StCADViewer::beforeDraw() {
                 myAisContext->Display(aPrsIter.Value(), 1, 0, Standard_False);
             }
 
-            doFitALL();
+            doFitAll();
             doUpdateStateLoaded(!aNewPrsList.IsEmpty());
         }
     }
@@ -746,6 +728,12 @@ void StCADViewer::stglDraw(unsigned int theView) {
                 case ST_DRAW_RIGHT: aProj = Graphic3d_Camera::Projection_MonoRightEye; break;
                 case ST_DRAW_MONO:  aProj = Graphic3d_Camera::Projection_Perspective;  break;
             }
+        }
+
+        if(params.toShowTrihedron->getValue()) {
+          myView->TriedronDisplay(Aspect_TOTP_RIGHT_LOWER, Quantity_NOC_WHITE, 0.08, V3d_ZBUFFER);
+        } else {
+          myView->TriedronErase();
         }
 
         // Do the magic:
@@ -853,7 +841,7 @@ void StCADViewer::doListLast(const size_t ) {
     }
 }
 
-void StCADViewer::doFitALL(const size_t ) {
+void StCADViewer::doFitAll(const size_t ) {
     if(!myView.IsNull()) {
         myView->FitAll(0.01, Standard_False);
     }
@@ -890,4 +878,54 @@ void StCADViewer::doChangeProjection(const int32_t theProj) {
             break;
         }
     }
+}
+
+void StCADViewer::doStereoZFocusCloser(const double theValue) {
+  if(myView.IsNull()
+  || params.projectMode->getValue() != ST_PROJ_STEREO) {
+      return;
+  }
+
+  Standard_Real aFocus = myView->Camera()->ZFocus() - theValue * 0.5;
+  if(aFocus > 0.2
+  && aFocus < 2.0) {
+    myView->Camera()->SetZFocus(myView->Camera()->ZFocusType(), aFocus);
+    //myProjection.setZScreen(myProjection.getZScreen() - 1.1f);
+  }
+}
+
+void StCADViewer::doStereoZFocusFarther(const double theValue) {
+  if(myView.IsNull()
+  || params.projectMode->getValue() != ST_PROJ_STEREO) {
+      return;
+  }
+
+  Standard_Real aFocus = myView->Camera()->ZFocus() + theValue * 0.5;
+  if(aFocus > 0.2
+  && aFocus < 2.0) {
+    myView->Camera()->SetZFocus(myView->Camera()->ZFocusType(), aFocus);
+    //myProjection.setZScreen(myProjection.getZScreen() + 1.1f);
+  }
+}
+
+void StCADViewer::doStereoIODDec(const double theValue) {
+  if(myView.IsNull()
+  || params.projectMode->getValue() != ST_PROJ_STEREO) {
+      return;
+  }
+
+  double anIOD = stMax(myView->Camera()->IOD() - theValue * 0.1, 0.01);
+  myView->Camera()->SetIOD (myView->Camera()->GetIODType(), anIOD);
+  //myProjection.setIOD(myProjection.getIOD() - 0.1f);
+}
+
+void StCADViewer::doStereoIODInc(const double theValue) {
+  if(myView.IsNull()
+  || params.projectMode->getValue() != ST_PROJ_STEREO) {
+      return;
+  }
+
+  double anIOD = stMin(myView->Camera()->IOD() + theValue * 0.1, 0.3);
+  myView->Camera()->SetIOD (myView->Camera()->GetIODType(), anIOD);
+  //myProjection.setIOD(myProjection.getIOD() + 0.1f);
 }

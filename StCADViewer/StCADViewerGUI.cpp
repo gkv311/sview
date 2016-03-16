@@ -1,7 +1,7 @@
 /**
  * This source is a part of sView program.
  *
- * Copyright © Kirill Gavrilov, 2011-2013
+ * Copyright © Kirill Gavrilov, 2011-2016
  */
 
 #include "StCADViewerGUI.h"
@@ -12,8 +12,10 @@
 #include <StGLWidgets/StGLMenu.h>
 #include <StGLWidgets/StGLMenuItem.h>
 #include <StGLWidgets/StGLMessageBox.h>
-#include <StGLWidgets/StGLTextureButton.h>
 #include <StGLWidgets/StGLMsgStack.h>
+#include <StGLWidgets/StGLScrollArea.h>
+#include <StGLWidgets/StGLTable.h>
+#include <StGLWidgets/StGLTextureButton.h>
 
 #include <StVersion.h>
 
@@ -30,10 +32,8 @@ void StCADViewerGUI::createMainMenu() {
     StGLMenu* aMenuHelp = createHelpMenu(); // Root -> Help menu
 
     // Attach sub menus to root
-    myMenu0Root->addItem(myLangMap->changeValueId(MENU_VIEW,
-                         "View"), aMenuView);
-    myMenu0Root->addItem(myLangMap->changeValueId(MENU_HELP,
-                         "Help"), aMenuHelp);
+    myMenu0Root->addItem(tr(MENU_VIEW), aMenuView);
+    myMenu0Root->addItem(tr(MENU_HELP), aMenuHelp);
 }
 
 /**
@@ -43,18 +43,13 @@ StGLMenu* StCADViewerGUI::createViewMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
 
     StGLMenu* aMenuProj = createProjMenu(); // Root -> View menu -> Projection
-    StGLMenu* aMenuFill = createFillMenu(); // Root -> View menu -> Fill Mode
 
 #if !defined(__ANDROID__)
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_FULLSCREEN, "Fullscreen"),
-                   myPlugin->params.isFullscreen);
+    aMenu->addItem(tr(MENU_VIEW_FULLSCREEN), myPlugin->params.isFullscreen);
 #endif
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_TRIHEDRON,  "Show Trihedron"),
-                   myPlugin->params.toShowTrihedron);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_PROJECTION, "Projection"), aMenuProj);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_FILLMODE,   "Fill Mode"),  aMenuFill);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_FITALL,     "Fit ALL"))
-              ->signals.onItemClick.connect(myPlugin, &StCADViewer::doFitALL);
+    aMenu->addItem(tr(MENU_VIEW_TRIHEDRON),  myPlugin->params.toShowTrihedron);
+    aMenu->addItem(tr(MENU_VIEW_PROJECTION), aMenuProj);
+    aMenu->addItem(tr(MENU_VIEW_FITALL), myPlugin->getAction(StCADViewer::Action_FitAll));
     return aMenu;
 }
 
@@ -63,26 +58,12 @@ StGLMenu* StCADViewerGUI::createViewMenu() {
  */
 StGLMenu* StCADViewerGUI::createProjMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_PROJ_ORTHO,  "Orthogonal"),
+    aMenu->addItem(tr(MENU_VIEW_PROJ_ORTHO),
                    myPlugin->params.projectMode, ST_PROJ_ORTHO);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_PROJ_PERSP,  "Perspective"),
+    aMenu->addItem(tr(MENU_VIEW_PROJ_PERSP),
                    myPlugin->params.projectMode, ST_PROJ_PERSP);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_PROJ_STEREO, "Stereo"),
+    aMenu->addItem(tr(MENU_VIEW_PROJ_STEREO),
                    myPlugin->params.projectMode, ST_PROJ_STEREO);
-    return aMenu;
-}
-
-/**
- * Root -> View menu -> Fill Mode
- */
-StGLMenu* StCADViewerGUI::createFillMenu() {
-    StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_FILL_MESH,        "Mesh"),
-                   myPlugin->params.fillMode, ST_FILL_MESH);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_FILL_SHADED,      "Shaded"),
-                   myPlugin->params.fillMode, ST_FILL_SHADING);
-    aMenu->addItem(myLangMap->changeValueId(MENU_VIEW_FILL_SHADED_MESH, "Shaded + Mesh"),
-                   myPlugin->params.fillMode, ST_FILL_SHADED_MESH);
     return aMenu;
 }
 
@@ -93,15 +74,15 @@ StGLMenu* StCADViewerGUI::createHelpMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     StGLMenu* aLangMenu = createLanguageMenu(); // Root -> Help -> Language menu
 
-    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_ABOUT,   "About..."))
+    aMenu->addItem(tr(MENU_HELP_ABOUT))
          ->signals.onItemClick.connect(this, &StCADViewerGUI::doAboutProgram);
 
-    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_LICENSE, "License text"))
+    aMenu->addItem(tr(MENU_HELP_LICENSE))
          ->signals.onItemClick.connect(this, &StCADViewerGUI::doOpenLicense);
 
     aMenu->addItem("Show FPS", myPlugin->params.ToShowFps);
 
-    aMenu->addItem(myLangMap->changeValueId(MENU_HELP_LANGS,   "Language"), aLangMenu);
+    aMenu->addItem(tr(MENU_HELP_LANGS), aLangMenu);
     return aMenu;
 }
 
@@ -116,10 +97,11 @@ StGLMenu* StCADViewerGUI::createLanguageMenu() {
     return aMenu;
 }
 
-StCADViewerGUI::StCADViewerGUI(StCADViewer* thePlugin)
+StCADViewerGUI::StCADViewerGUI(StCADViewer*    thePlugin,
+                               StTranslations* theLangMap)
 : StGLRootWidget(thePlugin->myResMgr),
   myPlugin(thePlugin),
-  myLangMap(new StTranslations(thePlugin->myResMgr, StCADViewer::ST_DRAWER_PLUGIN_NAME)),
+  myLangMap(theLangMap),
   myMouseDescr(NULL),
   myMsgStack(NULL),
   myMenu0Root(NULL),
@@ -203,16 +185,34 @@ void StCADViewerGUI::stglDraw(unsigned int theView) {
 }
 
 void StCADViewerGUI::doAboutProgram(const size_t ) {
-    const StString& aTitle     = myLangMap->changeValueId(ABOUT_DPLUGIN_NAME, "sView - Tiny CAD Viewer");
-    const StString& aVerString = myLangMap->changeValueId(ABOUT_VERSION,      "version");
-    const StString& aDescr     = myLangMap->changeValueId(ABOUT_DESCRIPTION,
-        "CAD viewer allows you to view CAD files in formats IGES, STEP, BREP using OCCT.\n"
-        "(C) 2011-2015 Kirill Gavrilov (kirill@sview.ru).\nOfficial site: www.sview.ru");
-    StGLMessageBox* anAboutDialog = new StGLMessageBox(this, "", aTitle + '\n'
-        + aVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n" + aDescr,
-        512, 300);
-    anAboutDialog->addButton("Close");
-    anAboutDialog->stglInit();
+    const StGLVec3 THE_WHITE(1.0f, 1.0f, 1.0f);
+    const StString anAbout = tr(ABOUT_DPLUGIN_NAME) + '\n'
+                           + tr(ABOUT_VERSION) + " " + StVersionInfo::getSDKVersionString()
+                           + "\n \n" + tr(ABOUT_DESCRIPTION).format("2011-2016", "kirill@sview.ru", "www.sview.ru");
+
+    StArgumentsMap anInfo;
+    anInfo.add(StDictEntry("CPU cores", StString(StThread::countLogicalProcessors()) + StString(" logical processor(s)")));
+    getContext().stglFullInfo(anInfo);
+
+    StGLMessageBox* aDialog = new StGLMessageBox(this, tr(MENU_HELP_ABOUT), "", scale(512), scale(300));
+    StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
+    aTable->setupTable((int )anInfo.size() + 1, 2);
+
+    const int aTextMaxWidth = aDialog->getContent()->getRectPx().width() - 2 * (aTable->getItemMargins().left + aTable->getItemMargins().right);
+    StGLTableItem& anAboutItem = aTable->changeElement(0, 0); anAboutItem.setColSpan(2);
+    StGLTextArea*  anAboutLab  = new StGLTextArea(&anAboutItem, 0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_CENTER));
+    anAboutLab->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+                               StGLTextFormatter::ST_ALIGN_Y_TOP);
+    anAboutLab->setText(anAbout + "\n\n<b><i>" + tr(ABOUT_SYSTEM) + "</i></b>\n");
+    anAboutLab->setTextColor(THE_WHITE);
+    anAboutLab->stglInitAutoHeightWidth(aTextMaxWidth);
+
+    aTable->fillFromMap(anInfo, THE_WHITE,
+                        aDialog->getContent()->getRectPx().width(),
+                        aDialog->getContent()->getRectPx().width() / 2, 1);
+
+    aDialog->addButton(tr(BUTTON_CLOSE));
+    aDialog->stglInit();
 }
 
 void StCADViewerGUI::doOpenLicense(const size_t ) {

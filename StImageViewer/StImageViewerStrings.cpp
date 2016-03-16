@@ -158,7 +158,7 @@ void loadDefaults(StLangMap& theStrings) {
                "version");
     theStrings(ABOUT_DESCRIPTION,
                "Image viewer allows you to open stereoscopic images in formats JPEG, PNG, MPO and others.\n"
-               "(C) 2007-2015 Kirill Gavrilov <kirill@sview.ru>\n"
+               "(C) 2007-2016 Kirill Gavrilov <kirill@sview.ru>\n"
                "Official site: www.sview.ru\n"
                "\n"
                "This program is distributed under GPL3.0");

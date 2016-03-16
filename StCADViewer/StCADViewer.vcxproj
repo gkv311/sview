@@ -276,6 +276,7 @@ xcopy /Y "$(StOcctRes)\XmlOcafResource\*.*" "$(TargetDir)\res\"
     <ClCompile Include="StCADMsgPrinter.cpp" />
     <ClCompile Include="StCADViewer.cpp" />
     <ClCompile Include="StCADViewerGUI.cpp" />
+    <ClCompile Include="StCADViewerStrings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StCADFrameBuffer.h" />
@@ -292,6 +293,17 @@ xcopy /Y "$(StOcctRes)\XmlOcafResource\*.*" "$(TargetDir)\res\"
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="..\dpiAware.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="lang\chinese\language.lng" />
+    <None Include="lang\chinese\StCADViewer.lng" />
+    <None Include="lang\czech\language.lng" />
+    <None Include="lang\czech\StCADViewer.lng" />
+    <None Include="lang\english\StCADViewer.lng" />
+    <None Include="lang\french\StCADViewer.lng" />
+    <None Include="lang\german\StCADViewer.lng" />
+    <None Include="lang\korean\StCADViewer.lng" />
+    <None Include="lang\russian\StCADViewer.lng" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
