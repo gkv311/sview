@@ -242,6 +242,44 @@
     <ClCompile Include="StSubQueue.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="../include/StGLWidgets/StGLAssignHotKey.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLButton.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLCheckbox.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLCheckboxTextured.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLCombobox.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLCorner.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLDescription.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLFpsLabel.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLImageProgram.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLImageRegion.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLMenu.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLMenuCheckbox.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLMenuItem.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLMenuProgram.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLMenuRadioButton.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLMessageBox.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLMsgStack.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLOpenFile.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLPlayList.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLRadioButton.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLRadioButtonFloat32.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLRadioButtonTextured.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLRangeFieldFloat32.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLRootWidget.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLScrollArea.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLShare.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLSubtitles.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLSwitchTextured.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLTable.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLTextArea.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLTextBorderProgram.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLTextProgram.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLTextureButton.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLWidget.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLWidgetList.h" />
+    <ClInclude Include="../include/StGLWidgets/StSubQueue.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ResourceCompile Include="StGLWidgets.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

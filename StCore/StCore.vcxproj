@@ -220,6 +220,30 @@
     <ClCompile Include="StXDisplay.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\StCore\StAndroidGlue.h" />
+    <ClInclude Include="..\include\StCore\StApplication.h" />
+    <ClInclude Include="..\include\StCore\StEDIDParser.h" />
+    <ClInclude Include="..\include\StCore\StEvent.h" />
+    <ClInclude Include="..\include\StCore\StKeysState.h" />
+    <ClInclude Include="..\include\StCore\StMonitor.h" />
+    <ClInclude Include="..\include\StCore\StNativeWin_t.h" />
+    <ClInclude Include="..\include\StCore\StOpenInfo.h" />
+    <ClInclude Include="..\include\StCore\StSearchMonitors.h" />
+    <ClInclude Include="..\include\StCore\StVirtualKeys.h" />
+    <ClInclude Include="..\include\StCore\StWindow.h" />
+    <ClInclude Include="..\include\StCore\StWinErrorCodes.h" />
+    <ClInclude Include="StADLsdk.h" />
+    <ClInclude Include="StCocoaView.h" />
+    <ClInclude Include="StCocoaWin.h" />
+    <ClInclude Include="StEventsBuffer.h" />
+    <ClInclude Include="stvkeysandroid.h" />
+    <ClInclude Include="stvkeyscarbon.h" />
+    <ClInclude Include="stvkeysxarray.h" />
+    <ClInclude Include="StWindowImpl.h" />
+    <ClInclude Include="StWinHandles.h" />
+    <ClInclude Include="StXDisplay.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ResourceCompile Include="StCore.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

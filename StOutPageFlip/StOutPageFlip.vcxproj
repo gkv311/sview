@@ -217,6 +217,21 @@
     <ClCompile Include="StQuadBufferCheck.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="StDXAqbsControl.h" />
+    <ClInclude Include="StDXInfo.h" />
+    <ClInclude Include="StDXManager.h" />
+    <ClInclude Include="StDXNVSurface.h" />
+    <ClInclude Include="StDXNVWindow.h" />
+    <ClInclude Include="StGLColoredLine.h" />
+    <ClInclude Include="StGLControlED.h" />
+    <ClInclude Include="StGLDeviceControl.h" />
+    <ClInclude Include="StOutPageFlip.h" />
+    <ClInclude Include="StOutPageFlipExt.h" />
+    <ClInclude Include="StOutPageFlipStrings.h" />
+    <ClInclude Include="StQuadBufferCheck.h" />
+    <ClInclude Include="StVuzixSDK.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ResourceCompile Include="StOutPageFlip.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

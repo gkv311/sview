@@ -211,6 +211,11 @@
     <ClCompile Include="StProgramFlat.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="StOutDistorted.h" />
+    <ClInclude Include="StProgramBarrel.h" />
+    <ClInclude Include="StProgramFlat.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ResourceCompile Include="StOutDistorted.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

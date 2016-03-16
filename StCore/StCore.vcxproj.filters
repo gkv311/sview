@@ -1,47 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source files">
-      <UniqueIdentifier>{CACACF6C-18DA-13DF-148A-3C969CC3F588}</UniqueIdentifier>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;m;mm;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="StADLsdk.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="StAndroidGlue.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="StApplication.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="StKeysState.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="StSearchMonitors.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="StWindow.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="StWindowImpl.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="StWindowImplAnd.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="StWindowImplLin.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="StWindowImplWin.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="StWinHandles.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
-    <ClCompile Include="StXDisplay.cpp">
-      <Filter>Source files</Filter>
-    </ClCompile>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="StCore.rc" />

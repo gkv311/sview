@@ -209,6 +209,9 @@
     <ClCompile Include="StOutAnaglyph.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="StOutAnaglyph.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ResourceCompile Include="StOutAnaglyph.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -209,6 +209,9 @@
     <ClCompile Include="StOutInterlace.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="StOutInterlace.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ResourceCompile Include="StOutInterlace.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -210,6 +210,10 @@
     <ClCompile Include="StOutIZ3DShaders.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="StOutIZ3D.h" />
+    <ClInclude Include="StOutIZ3DShaders.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ResourceCompile Include="StOutIZ3D.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -212,6 +212,13 @@
     <ClCompile Include="StImageViewerStrings.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="StImageLoader.h" />
+    <ClInclude Include="StImagePluginInfo.h" />
+    <ClInclude Include="StImageViewer.h" />
+    <ClInclude Include="StImageViewerGUI.h" />
+    <ClInclude Include="StImageViewerStrings.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ResourceCompile Include="StImageViewer.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

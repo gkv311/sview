@@ -222,6 +222,10 @@
     <ClCompile Include="StMultiApp.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="StAppResponder.h" />
+    <ClInclude Include="StMultiApp.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ResourceCompile Include="sview.rc" />
   </ItemGroup>
   <ItemGroup>

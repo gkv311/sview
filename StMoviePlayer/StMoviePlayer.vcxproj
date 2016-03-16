@@ -224,6 +224,24 @@
     <ClCompile Include="StSeekBar.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="StVideo\StALContext.h" />
+    <ClInclude Include="StVideo\StAudioQueue.h" />
+    <ClInclude Include="StVideo\StAVPacketQueue.h" />
+    <ClInclude Include="StVideo\StParamActiveStream.h" />
+    <ClInclude Include="StVideo\StPCMBuffer.h" />
+    <ClInclude Include="StVideo\StSubtitleQueue.h" />
+    <ClInclude Include="StVideo\StSubtitlesASS.h" />
+    <ClInclude Include="StVideo\StVideo.h" />
+    <ClInclude Include="StVideo\StVideoQueue.h" />
+    <ClInclude Include="StVideo\StVideoTimer.h" />
+    <ClInclude Include="StMoviePlayer.h" />
+    <ClInclude Include="StMoviePlayerGUI.h" />
+    <ClInclude Include="StMoviePlayerInfo.h" />
+    <ClInclude Include="StMoviePlayerStrings.h" />
+    <ClInclude Include="StSeekBar.h" />
+    <ClInclude Include="StTimeBox.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ResourceCompile Include="StMoviePlayer.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
