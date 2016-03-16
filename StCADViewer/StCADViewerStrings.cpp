@@ -60,6 +60,10 @@ void loadDefaults(StLangMap& theStrings) {
                "License text");
     theStrings(MENU_HELP_LANGS,
                "Language");
+    theStrings(MENU_HELP_HOTKEYS,
+               "Hotkeys");
+    theStrings(MENU_HELP_SETTINGS,
+               "Settings");
 
     theStrings(ABOUT_DPLUGIN_NAME,
                "sView - Tiny CAD Viewer");

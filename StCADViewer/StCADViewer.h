@@ -166,6 +166,8 @@ class StCADViewer : public StApplication {
 
     ST_LOCAL void doFullscreen(const bool theIsFullscreen);
     ST_LOCAL void doChangeProjection(const int32_t theProj);
+    ST_LOCAL void doZoomIn (const double theValue);
+    ST_LOCAL void doZoomOut(const double theValue);
     ST_LOCAL void doStereoZFocusCloser(const double theValue);
     ST_LOCAL void doStereoZFocusFarther(const double theValue);
     ST_LOCAL void doStereoIODDec(const double theValue);
@@ -189,6 +191,8 @@ class StCADViewer : public StApplication {
         Action_ProjOrthogonal,
         Action_ProjPerspective,
         Action_ProjStereo,
+        Action_ZoomIn,
+        Action_ZoomOut,
         Action_StereoZFocusCloser,
         Action_StereoZFocusFarther,
         Action_StereoIODDec,

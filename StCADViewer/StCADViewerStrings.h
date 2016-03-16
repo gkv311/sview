@@ -32,6 +32,8 @@ namespace StCADViewerStrings {
         MENU_HELP_ABOUT   = 1501,
         MENU_HELP_LICENSE = 1503,
         MENU_HELP_LANGS   = 1504,
+        MENU_HELP_HOTKEYS = 1510,
+        MENU_HELP_SETTINGS= 1511,
 
         // About dialog
         ABOUT_DPLUGIN_NAME     = 3000,

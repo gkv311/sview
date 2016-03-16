@@ -120,6 +120,12 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
     anAction = new StActionIntValue(stCString("DoProjStereo"),      params.projectMode, ST_PROJ_STEREO);
     addAction(Action_ProjStereo, anAction, ST_VK_S);
 
+    anAction = new StActionHoldSlot(stCString("DoZoomIn"),  stSlot(this, &StCADViewer::doZoomIn));
+    addAction(Action_ZoomIn,  anAction, ST_VK_OEM_PLUS,  ST_VK_ADD);
+
+    anAction = new StActionHoldSlot(stCString("DoZoomOut"), stSlot(this, &StCADViewer::doZoomOut));
+    addAction(Action_ZoomOut, anAction, ST_VK_OEM_MINUS, ST_VK_SUBTRACT);
+
     anAction = new StActionHoldSlot(stCString("DoStereoZFocusCloser"),  stSlot(this, &StCADViewer::doStereoZFocusCloser));
     addAction(Action_StereoZFocusCloser, anAction, ST_VK_DIVIDE | ST_VF_CONTROL);
 
@@ -559,19 +565,13 @@ void StCADViewer::doScroll(const StScrollEvent& theEvent) {
         if(myIsCtrlPressed) {
             doStereoZFocusCloser(0.05);
         } else {
-            if(!myView.IsNull()) {
-                myView->Zoom(0, 0, 10, 10);
-            }
-            myProjection.setZoom(myProjection.getZoom() * 0.9f);
+            doZoomIn(0.1);
         }
     } else if(theEvent.StepsY <= -1) {
         if(myIsCtrlPressed) {
             doStereoZFocusFarther(0.05);
         } else {
-            if(!myView.IsNull()) {
-                myView->Zoom(0, 0, -10, -10);
-            }
-            myProjection.setZoom(myProjection.getZoom() * 1.1f);
+            doZoomOut(0.1);
         }
     }
 
@@ -878,6 +878,24 @@ void StCADViewer::doChangeProjection(const int32_t theProj) {
             break;
         }
     }
+}
+
+void StCADViewer::doZoomIn(const double theValue) {
+  if(myView.IsNull()) {
+      return;
+  }
+
+  myView->SetZoom(1.0 + theValue, Standard_True);
+  //myProjection.setZoom(myProjection.getZoom() * 1.1f);
+}
+
+void StCADViewer::doZoomOut(const double theValue) {
+  if(myView.IsNull()) {
+      return;
+  }
+
+  myView->SetZoom(1.0 - theValue, Standard_True);
+  //myProjection.setZoom(myProjection.getZoom() * 0.9f);
 }
 
 void StCADViewer::doStereoZFocusCloser(const double theValue) {

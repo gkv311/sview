@@ -22,6 +22,85 @@
 #include "StCADViewerStrings.h"
 using namespace StCADViewerStrings;
 
+// auxiliary pre-processor definition
+#define stCTexture(theString) getTexturePath(stCString(theString))
+#define stCMenuIcon(theString) iconTexture(stCString(theString), myMenuIconSize)
+
+void StCADViewerGUI::createToolbarOnTop() {
+    StMarginsI aButtonMargins;
+    const IconSize anIconSize = scaleIcon(32, aButtonMargins);
+    const int      anIconStep = scale(56);
+    aButtonMargins.extend(scale(12));
+
+    const StMarginsI& aRootMargins = getRootMargins();
+    myPanelUpper = new StGLContainer(this, aRootMargins.left, aRootMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(56));
+
+    // left side
+    {
+        int aBtnIter = 0;
+        StGLTextureButton* aBtnOpen = new StGLTextureButton(myPanelUpper, (aBtnIter++) * anIconStep, 0);
+        ///aBtnOpen->signals.onBtnClick.connect(this, &StCADViewerGUI::doOpenFile);
+        aBtnOpen->setTexturePath(iconTexture(stCString("actionOpen"), anIconSize));
+        aBtnOpen->setDrawShadow(true);
+        aBtnOpen->changeMargins() = aButtonMargins;
+     }
+
+    // right side
+    {
+        int aBtnIter = 0;
+        StGLTextureButton* aBtnEx = new StGLTextureButton(myPanelUpper, (aBtnIter--) * (-anIconStep), 0,
+                                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+        aBtnEx->changeMargins() = aButtonMargins;
+        aBtnEx->setTexturePath(iconTexture(stCString("actionOverflow"), anIconSize));
+        aBtnEx->setDrawShadow(true);
+        aBtnEx->signals.onBtnClick += stSlot(this, &StCADViewerGUI::doShowMobileExMenu);
+    }
+}
+
+void StCADViewerGUI::createToolbarOnBottom() {
+    StMarginsI aButtonMargins;
+    const IconSize anIconSize = scaleIcon(32, aButtonMargins);
+    const int      anIconStep = scale(56);
+    aButtonMargins.extend(scale(12));
+
+    const StMarginsI& aRootMargins = getRootMargins();
+    myPanelBottom = new StGLContainer(this, aRootMargins.left, -aRootMargins.bottom, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(56));
+
+    // left side
+    {
+      //int aBtnIter = 0;
+      //myBtnPrev = new StGLTextureButton(myPanelBottom, (aBtnIter++) * anIconStep, 0);
+    }
+
+    // right side
+    {
+      int aBtnIter = 0;
+      StGLTextureButton* aBtnZoomIn = new StGLTextureButton(myPanelBottom, (aBtnIter++) * (-anIconStep), 0,
+                                                            StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+      aBtnZoomIn->changeMargins() = aButtonMargins;
+      aBtnZoomIn->setTexturePath(iconTexture(stCString("actionZoomIn"), anIconSize));
+      aBtnZoomIn->setDrawShadow(true);
+      aBtnZoomIn->setUserData(StCADViewer::Action_ZoomIn);
+      aBtnZoomIn->signals.onBtnHold += stSlot(this, &StCADViewerGUI::doAction);
+
+      StGLTextureButton* aBtnZoomOut = new StGLTextureButton(myPanelBottom, (aBtnIter++) * (-anIconStep), 0,
+          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+      aBtnZoomOut->changeMargins() = aButtonMargins;
+      aBtnZoomOut->setTexturePath(iconTexture(stCString("actionZoomOut"), anIconSize));
+      aBtnZoomOut->setDrawShadow(true);
+      aBtnZoomOut->setUserData(StCADViewer::Action_ZoomIn);
+      aBtnZoomOut->signals.onBtnHold += stSlot(this, &StCADViewerGUI::doAction);
+
+      /*StGLCheckboxTextured* aBtnList = new StGLCheckboxTextured(myPanelBottom, myPlugin->params.ToShowPlayList,
+                                           iconTexture(stCString("actionVideoPlaylistOff"), anIconSize),
+                                           iconTexture(stCString("actionVideoPlaylist"),    anIconSize),
+                                           (aBtnIter++) * (-anIconStep), 0,
+                                           StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+      aBtnList->setDrawShadow(true);
+      aBtnList->changeMargins() = aButtonMargins;*/
+    }
+}
+
 /**
  * Main menu
  */
@@ -97,6 +176,29 @@ StGLMenu* StCADViewerGUI::createLanguageMenu() {
     return aMenu;
 }
 
+void StCADViewerGUI::doMobileSettings(const size_t ) {
+
+}
+
+void StCADViewerGUI::doShowMobileExMenu(const size_t ) {
+    const int aTop = scale(56);
+
+    StGLMenu*     aMenu  = new StGLMenu(this, 0, aTop, StGLMenu::MENU_VERTICAL_COMPACT, true);
+    StGLMenuItem* anItem = NULL;
+    aMenu->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+    aMenu->setContextual(true);
+
+    anItem = aMenu->addItem(tr(MENU_HELP_ABOUT));
+    anItem->setIcon(stCMenuIcon("actionHelp"));
+    anItem->signals.onItemClick += stSlot(this, &StCADViewerGUI::doAboutProgram);
+    //anItem = aMenu->addItem(myPlugin->StApplication::params.ActiveDevice->getActiveValue());
+    anItem = aMenu->addItem(tr(MENU_HELP_SETTINGS));
+    anItem->setIcon(stCMenuIcon("actionSettings"));
+    anItem->signals.onItemClick += stSlot(this, &StCADViewerGUI::doMobileSettings);
+    aMenu->stglInit();
+    setFocus(aMenu);
+}
+
 StCADViewerGUI::StCADViewerGUI(StCADViewer*    thePlugin,
                                StTranslations* theLangMap)
 : StGLRootWidget(thePlugin->myResMgr),
@@ -105,6 +207,8 @@ StCADViewerGUI::StCADViewerGUI(StCADViewer*    thePlugin,
   myMouseDescr(NULL),
   myMsgStack(NULL),
   myMenu0Root(NULL),
+  myPanelUpper(NULL),
+  myPanelBottom(NULL),
   myFpsWidget(NULL),
   myIsGUIVisible(true) {
     //const GLfloat aScale = myPlugin->params.ScaleHiDPI2X->getValue() ? 2.0f : myPlugin->params.ScaleHiDPI ->getValue();
@@ -122,6 +226,9 @@ StCADViewerGUI::StCADViewerGUI(StCADViewer*    thePlugin,
     // create Main menu
     createMainMenu();
 
+    createToolbarOnTop();
+    createToolbarOnBottom();
+
     myMsgStack = new StGLMsgStack(this, myPlugin->getMessagesQueue());
     if(myPlugin->params.ToShowFps->getValue()) {
         myFpsWidget = new StGLFpsLabel(this);
@@ -133,8 +240,17 @@ StCADViewerGUI::~StCADViewerGUI() {
 }
 
 void StCADViewerGUI::setVisibility(const StPointD_t& , bool ) {
+    //const float anOpacity = (float )myVisLerp.perform(toShowAll, toForceHide);
+    const float anOpacity = myIsGUIVisible ? 1.0f : 0.0f;
+
     if(myMenu0Root != NULL) {
-        myMenu0Root->setOpacity(myIsGUIVisible ? 1.0f : 0.0f, false);
+        myMenu0Root->setOpacity(anOpacity, false);
+    }
+    if(myPanelUpper != NULL) {
+        myPanelUpper->setOpacity(anOpacity, true);
+    }
+    if(myPanelBottom != NULL) {
+        myPanelBottom->setOpacity(anOpacity, true);
     }
 
     if(myMouseDescr != NULL) {
@@ -156,13 +272,28 @@ void StCADViewerGUI::stglUpdate(const StPointD_t& theCursorZo) {
 }
 
 void StCADViewerGUI::stglResize(const StGLBoxPx& theRectPx) {
+    const int aSizeX = theRectPx.width();
     const StMarginsI& aMargins = myPlugin->getMainWindow()->getMargins();
     const bool areNewMargins = aMargins != getRootMargins();
     if(areNewMargins) {
         changeRootMargins() = aMargins;
     }
 
+    if(myPanelUpper != NULL) {
+        myPanelUpper->changeRectPx().right() = aSizeX;
+    }
+    if(myPanelBottom != NULL) {
+        myPanelBottom->changeRectPx().right() = aSizeX;
+    }
     if(areNewMargins) {
+        if(myPanelUpper != NULL) {
+            myPanelUpper->changeRectPx().left() = aMargins.left;
+            myPanelUpper->changeRectPx().top()  = aMargins.top;
+        }
+        if(myPanelBottom != NULL) {
+            myPanelBottom->changeRectPx().left() = aMargins.left;
+            myPanelBottom->changeRectPx().top()  = aMargins.top;
+        }
         if(myMenu0Root != NULL) {
             myMenu0Root->changeRectPx().left() = aMargins.left;
             myMenu0Root->changeRectPx().top()  = aMargins.top;
@@ -217,6 +348,11 @@ void StCADViewerGUI::doAboutProgram(const size_t ) {
 
 void StCADViewerGUI::doOpenLicense(const size_t ) {
     StProcess::openURL(StProcess::getStShareFolder() + "info" + SYS_FS_SPLITTER + "license.txt");
+}
+
+void StCADViewerGUI::doAction(const size_t theActionId,
+                              const double theDuration) {
+    myPlugin->invokeAction((int )theActionId, theDuration);
 }
 
 void StCADViewerGUI::doShowFPS(const bool ) {
