@@ -35,12 +35,38 @@ const StString StCADLoader::ST_CAD_MIME_STRING(ST_CAD_PLUGIN_MIME_CHAR);
 const StMIMEList StCADLoader::ST_CAD_MIME_LIST(StCADLoader::ST_CAD_MIME_STRING);
 const StArrayList<StString> StCADLoader::ST_CAD_EXTENSIONS_LIST(StCADLoader::ST_CAD_MIME_LIST.getExtensionsList());
 
+StCADDocument::StCADDocument()
+: myXCAFApp(XCAFApp_Application::GetApplication()) {
+    reset();
+}
+
+void StCADDocument::reset() {
+    // close old document
+    if(!myXCAFDoc.IsNull()) {
+        if(myXCAFDoc->HasOpenCommand()) {
+            myXCAFDoc->AbortCommand();
+        }
+
+        myXCAFDoc->Main().Root().ForgetAllAttributes(Standard_True);
+        myXCAFApp->Close(myXCAFDoc);
+        myXCAFDoc.Nullify();
+    }
+
+    // create new document
+    myXCAFApp->NewDocument(TCollection_ExtendedString("BinXCAF"), myXCAFDoc);
+    if(!myXCAFDoc.IsNull()) {
+        // Set the maximum number of available "undo" actions
+        myXCAFDoc->SetUndoLimit(10);
+    }
+}
+
 StCADLoader::StCADLoader(const StHandle<StLangMap>&  theLangMap,
                          const StHandle<StPlayList>& thePlayList,
                          const bool                  theToStartThread)
 : myLangMap(theLangMap),
   myPlayList(thePlayList),
   myEvLoadNext(false),
+  myDefaultMat(Graphic3d_NOM_SILVER),
   myIsLoaded(false),
   myToQuit(false) {
     myPlayList->setExtensions(ST_CAD_EXTENSIONS_LIST);
@@ -201,7 +227,8 @@ bool StCADLoader::computeMesh(const TopoDS_Shape& theShape) {
     return true;
 }
 
-bool StCADLoader::getNextResult(NCollection_Sequence<Handle(AIS_InteractiveObject)>& thePrsList) {
+bool StCADLoader::getNextDoc(NCollection_Sequence<Handle(AIS_InteractiveObject)>& thePrsList,
+                             StHandle<StCADDocument>& theDoc) {
     if(!myResultLock.tryLock()) {
         return false;
     }
@@ -209,7 +236,9 @@ bool StCADLoader::getNextResult(NCollection_Sequence<Handle(AIS_InteractiveObjec
     bool hasNewShape = false;
     if(myIsLoaded) {
         thePrsList.Append(myPrsList);
+        theDoc = myDoc;
         myPrsList.Clear();
+        myDoc.nullify();
         hasNewShape = true;
         myIsLoaded = false;
     }

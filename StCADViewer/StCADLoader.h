@@ -10,6 +10,8 @@
 #include <AIS_InteractiveObject.hxx>
 #include <NCollection_Sequence.hxx>
 #include <TopoDS_Shape.hxx>
+#include <TDocStd_Document.hxx>
+#include <XCAFApp_Application.hxx>
 
 #include <StStrings/StString.h>
 #include <StFile/StMIMEList.h>
@@ -20,6 +22,24 @@
 
 class StLangMap;
 class StThread;
+
+class StCADDocument {
+
+        public:
+
+    ST_LOCAL StCADDocument();
+    ST_LOCAL void reset();
+
+    const Handle(XCAFApp_Application)& getXCAFApp() const { return myXCAFApp; }
+    const Handle(TDocStd_Document)&    getXCAFDoc() const { return myXCAFDoc; }
+    Handle(TDocStd_Document)&          changeXCAFDoc()    { return myXCAFDoc; }
+
+        protected:
+
+    Handle(XCAFApp_Application) myXCAFApp;
+    Handle(TDocStd_Document)    myXCAFDoc;
+
+};
 
 class StCADLoader {
 
@@ -40,7 +60,8 @@ class StCADLoader {
         myEvLoadNext.set();
     }
 
-    ST_LOCAL virtual bool getNextResult(NCollection_Sequence<Handle(AIS_InteractiveObject)>& thePrsList);
+    ST_LOCAL virtual bool getNextDoc(NCollection_Sequence<Handle(AIS_InteractiveObject)>& thePrsList,
+                                     StHandle<StCADDocument>& theDoc);
 
         public:  //!< Signals
 
@@ -72,7 +93,9 @@ class StCADLoader {
     StHandle<StLangMap>  myLangMap;
     StHandle<StPlayList> myPlayList;
     StCondition          myEvLoadNext;
+    StHandle<StCADDocument>  myDoc;
     NCollection_Sequence<Handle(AIS_InteractiveObject)> myPrsList;
+    Graphic3d_MaterialAspect myDefaultMat;
     StMutex              myResultLock;
     volatile bool        myIsLoaded;
     volatile bool        myToQuit;

@@ -40,7 +40,10 @@ void StCADMsgPrinter::send(const StString&        theString,
 
     switch(theGravity) {
         case Message_Trace:
-        case Message_Info:
+        case Message_Info: {
+            ST_DEBUG_LOG(theString);
+            break;
+        }
         case Message_Warning: {
             myMsgQueue->pushInfo(theString);
             break;

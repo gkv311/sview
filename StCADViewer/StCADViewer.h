@@ -32,6 +32,7 @@ enum {
 class StSettings;
 class StCADViewerGUI;
 class StCADLoader;
+class StCADDocument;
 
 /**
  * CAD Viewer application.
@@ -236,8 +237,7 @@ class StCADViewer : public StApplication {
     Handle(V3d_View)               myView;       //!< main view
     Handle(AIS_InteractiveContext) myAisContext; //!< interactive context containing displayed objects
 
-    Handle(XCAFApp_Application)    myXCafApp;    //!< OCAF application instance
-    Handle(TDocStd_Document)       myXCafDoc;    //!< OCAF document    instance
+    StHandle<StCADDocument>        myDoc;
 
         private:
 

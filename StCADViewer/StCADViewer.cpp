@@ -13,6 +13,7 @@
 #include "StCADFrameBuffer.h"
 #include "StCADMsgPrinter.h"
 
+#include <AIS_ConnectedInteractive.hxx>
 #include <Message_Messenger.hxx>
 #include <Message_PrinterOStream.hxx>
 #include <OpenGl_GraphicDriver.hxx>
@@ -747,10 +748,21 @@ void StCADViewer::beforeDraw() {
 
     if(!myAisContext.IsNull()) {
         NCollection_Sequence<Handle(AIS_InteractiveObject)> aNewPrsList;
-        if(myCADLoader->getNextResult(aNewPrsList)) {
+        if(myCADLoader->getNextDoc(aNewPrsList, myDoc)) {
             myAisContext->RemoveAll(Standard_False);
             for(NCollection_Sequence<Handle(AIS_InteractiveObject)>::Iterator aPrsIter(aNewPrsList); aPrsIter.More(); aPrsIter.Next()) {
-                myAisContext->Display(aPrsIter.Value(), 1, 0, Standard_False);
+                Handle(AIS_Shape)                aShapePrs     = Handle(AIS_Shape)::DownCast (aPrsIter.Value());
+                Handle(AIS_ConnectedInteractive) aConnectedPrs = Handle(AIS_ConnectedInteractive)::DownCast (aPrsIter.Value());
+                if(!aConnectedPrs.IsNull()) {
+                    aShapePrs = Handle(AIS_Shape)::DownCast (aConnectedPrs->ConnectedTo());
+                }
+                if(!aShapePrs.IsNull()) {
+                    aShapePrs->SetDisplayMode(1);
+                    if(!aConnectedPrs.IsNull()) {
+                        aConnectedPrs->SetDisplayMode(1);
+                    }
+                }
+                myAisContext->Display(aPrsIter.Value(), aPrsIter.Value()->DisplayMode(), 0, Standard_False);
             }
 
             doFitAll();
