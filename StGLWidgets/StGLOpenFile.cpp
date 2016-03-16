@@ -181,7 +181,16 @@ void StGLOpenFile::openFolder(const StString& theFolder) {
     myItemToLoad.clear();
     myList->destroyChildren();
 
-    myFolder = new StFolder(theFolder);
+    StString aFolder = theFolder;
+    if(aFolder.isEmpty()) {
+    #ifdef _WIN32
+        aFolder = "C:\\";
+    #else
+        aFolder = "//";
+    #endif
+    }
+
+    myFolder = new StFolder(aFolder);
     myFolder->init(myExtensions, 1, true);
     StString aPath = myFolder->getPath();
     myCurrentPath->setText(StString("<b>Location:*</b>") + aPath + (!aPath.isEmpty() ? ST_FILE_SPLITTER : ""));
