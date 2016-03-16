@@ -118,6 +118,7 @@ xcopy /Y "$(StOcctRes)\TObj\*.msg" "$(TargetDir)\lang\"
 xcopy /Y "$(StOcctRes)\StdResource\*" "$(TargetDir)\res\"
 xcopy /Y "$(StOcctRes)\XSTEPResource\*" "$(TargetDir)\res\"
 xcopy /Y "$(StOcctRes)\XmlOcafResource\*.*" "$(TargetDir)\res\"
+cmd /c call ..\copy_res.bat $(TargetDir) $(TargetName)
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -168,6 +169,7 @@ xcopy /Y "$(StOcctRes)\TObj\*.msg" "$(TargetDir)\lang\"
 xcopy /Y "$(StOcctRes)\StdResource\*" "$(TargetDir)\res\"
 xcopy /Y "$(StOcctRes)\XSTEPResource\*" "$(TargetDir)\res\"
 xcopy /Y "$(StOcctRes)\XmlOcafResource\*.*" "$(TargetDir)\res\"
+cmd /c call ..\copy_res.bat $(TargetDir) $(TargetName)
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -216,6 +218,7 @@ xcopy /Y "$(StOcctRes)\TObj\*.msg" "$(TargetDir)\lang\"
 xcopy /Y "$(StOcctRes)\StdResource\*" "$(TargetDir)\res\"
 xcopy /Y "$(StOcctRes)\XSTEPResource\*" "$(TargetDir)\res\"
 xcopy /Y "$(StOcctRes)\XmlOcafResource\*.*" "$(TargetDir)\res\"
+cmd /c call ..\copy_res.bat $(TargetDir) $(TargetName)
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -266,6 +269,7 @@ xcopy /Y "$(StOcctRes)\TObj\*.msg" "$(TargetDir)\lang\"
 xcopy /Y "$(StOcctRes)\StdResource\*" "$(TargetDir)\res\"
 xcopy /Y "$(StOcctRes)\XSTEPResource\*" "$(TargetDir)\res\"
 xcopy /Y "$(StOcctRes)\XmlOcafResource\*.*" "$(TargetDir)\res\"
+cmd /c call ..\copy_res.bat $(TargetDir) $(TargetName)
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

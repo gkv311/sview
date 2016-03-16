@@ -101,6 +101,9 @@
       <AdditionalLibraryDirectories>..\3rdparty\lib\WIN_vc_x86;..\lib\WIN_vc_x86;$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
     </Link>
+    <PostBuildEvent>
+      <Command>cmd /c call ..\copy_res.bat $(TargetDir) $(TargetName)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
@@ -136,6 +139,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
     </Link>
+    <PostBuildEvent>
+      <Command>cmd /c call ..\copy_res.bat $(TargetDir) $(TargetName)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
@@ -169,6 +175,9 @@
       <AdditionalLibraryDirectories>..\3rdparty\lib\WIN_vc_AMD64;..\lib\WIN_vc_AMD64;$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
     </Link>
+    <PostBuildEvent>
+      <Command>cmd /c call ..\copy_res.bat $(TargetDir) $(TargetName)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>
@@ -204,6 +213,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
     </Link>
+    <PostBuildEvent>
+      <Command>cmd /c call ..\copy_res.bat $(TargetDir) $(TargetName)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="StColorProgram.cpp" />
