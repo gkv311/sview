@@ -288,8 +288,6 @@
 		<Unit filename="StMoviePlayerInfo.h" />
 		<Unit filename="StMoviePlayerStrings.cpp" />
 		<Unit filename="StMoviePlayerStrings.h" />
-		<Unit filename="StSeekBar.cpp" />
-		<Unit filename="StSeekBar.h" />
 		<Unit filename="StTimeBox.h" />
 		<Unit filename="StVideo/StALContext.cpp" />
 		<Unit filename="StVideo/StALContext.h" />

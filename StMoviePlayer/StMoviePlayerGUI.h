@@ -42,7 +42,7 @@ class StGLTextArea;
 class StGLTextureButton;
 class StGLCheckboxTextured;
 class StPlayList;
-class StSeekBar;
+class StGLSeekBar;
 class StTimeBox;
 class StUtfLangMap;
 class StWindow;
@@ -230,8 +230,8 @@ class StMoviePlayerGUI : public StGLRootWidget {
     StGLCheckboxTextured* myBtnSubs;
 
     StGLWidget*         myPanelBottom;      //!< bottom toolbar
-    StSeekBar*          mySeekBar;
-    StSeekBar*          myVolumeBar;
+    StGLSeekBar*        mySeekBar;
+    StGLSeekBar*        myVolumeBar;
     StGLTextArea*       myVolumeLab;
     StGLTextureButton*  myBtnPlay;
     StTimeBox*          myTimeBox;

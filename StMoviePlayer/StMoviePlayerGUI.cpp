@@ -28,7 +28,6 @@
 #endif
 
 #include "StMoviePlayer.h"
-#include "StSeekBar.h"
 #include "StTimeBox.h"
 
 #include "StVideo/StVideo.h"
@@ -50,6 +49,7 @@
 #include <StGLWidgets/StGLOpenFile.h>
 #include <StGLWidgets/StGLPlayList.h>
 #include <StGLWidgets/StGLRangeFieldFloat32.h>
+#include <StGLWidgets/StGLSeekBar.h>
 #include <StGLWidgets/StGLScrollArea.h>
 #include <StGLWidgets/StGLSubtitles.h>
 #include <StGLWidgets/StGLSwitchTextured.h>
@@ -80,7 +80,7 @@ void StMoviePlayerGUI::createDesktopUI(const StHandle<StPlayList>& thePlayList) 
     createUpperToolbar();
     createBottomToolbar(64, 32);
 
-    mySeekBar = new StSeekBar(myPanelBottom, 0, scale(18));
+    mySeekBar = new StGLSeekBar(myPanelBottom, 0, scale(18));
     mySeekBar->signals.onSeekClick.connect(myPlugin, &StMoviePlayer::doSeek);
 
     myTimeBox = new StTimeBox(myPanelBottom, myBottomBarNbLeft * myIconStep, 0,
@@ -277,7 +277,7 @@ void StMoviePlayerGUI::createBottomToolbar(const int theIconSize,
     myBtnPrev->setDrawShadow(true);
     myBtnPrev->changeMargins() = aButtonMargins;
 
-    myVolumeBar = new StSeekBar(myPanelBottom, 0, scale(4));
+    myVolumeBar = new StGLSeekBar(myPanelBottom, 0, scale(4));
     myVolumeBar->changeRectPx().left()  = (myBottomBarNbRight++) * (-anIconStep) - scale(8);
     myVolumeBar->changeRectPx().right() = myVolumeBar->getRectPx().left() + 2 * anIconStep + scale(8);
     myVolumeBar->changeRectPx().moveTopTo(0 + (anIconStep - myVolumeBar->getRectPx().height()) / 2);
@@ -1292,7 +1292,7 @@ void StMoviePlayerGUI::createMobileBottomToolbar() {
     aBtnInfo->setDrawShadow(true);
     aBtnInfo->changeMargins() = aButtonMargins;
 
-    mySeekBar = new StSeekBar(myPanelBottom, 0, scale(18));
+    mySeekBar = new StGLSeekBar(myPanelBottom, 0, scale(18));
     mySeekBar->signals.onSeekClick.connect(myPlugin, &StMoviePlayer::doSeek);
 
     myTimeBox = new StTimeBox(myPanelBottom, myBottomBarNbRight * (-myIconStep), 0, aRightCorner, StGLTextArea::SIZE_SMALL);

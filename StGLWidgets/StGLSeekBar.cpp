@@ -1,22 +1,13 @@
 /**
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
+ * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
  *
- * StMoviePlayer program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * StMoviePlayer program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this program.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Distributed under the Boost Software License, Version 1.0.
+ * See accompanying file license-boost.txt or copy at
+ * http://www.boost.org/LICENSE_1_0.txt
  */
 
-#include "StSeekBar.h"
+#include <StGLWidgets/StGLSeekBar.h>
 
 #include <StGL/StGLProgram.h>
 #include <StGL/StGLContext.h>
@@ -24,11 +15,11 @@
 #include <StGLWidgets/StGLRootWidget.h>
 #include <StCore/StEvent.h>
 
-class StSeekBar::StProgramSB : public StGLProgram {
+class StGLSeekBar::StProgramSB : public StGLProgram {
 
         public:
 
-    StProgramSB() : StGLProgram("StSeekBar") {}
+    StProgramSB() : StGLProgram("StGLSeekBar") {}
 
     StGLVarLocation getVVertexLoc() const { return StGLVarLocation(0); }
     StGLVarLocation getVColorLoc()  const { return StGLVarLocation(1); }
@@ -104,9 +95,9 @@ class StSeekBar::StProgramSB : public StGLProgram {
 
 };
 
-StSeekBar::StSeekBar(StGLWidget* theParent,
-                     const int   theTop,
-                     const int   theMargin)
+StGLSeekBar::StGLSeekBar(StGLWidget* theParent,
+                         const int   theTop,
+                         const int   theMargin)
 : StGLWidget(theParent, 0, theTop, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
              theParent->getRoot()->scale(512),
              theParent->getRoot()->scale(12) + theMargin * 2),
@@ -115,13 +106,13 @@ StSeekBar::StSeekBar(StGLWidget* theParent,
   myProgressPx(0),
   myClickPos(-1),
   myMoveTolerPx(myRoot->scale(myRoot->isMobile() ? 16 : 8)) {
-    StGLWidget::signals.onMouseClick  .connect(this, &StSeekBar::doMouseClick);
-    StGLWidget::signals.onMouseUnclick.connect(this, &StSeekBar::doMouseUnclick);
+    StGLWidget::signals.onMouseClick  .connect(this, &StGLSeekBar::doMouseClick);
+    StGLWidget::signals.onMouseUnclick.connect(this, &StGLSeekBar::doMouseUnclick);
     myMargins.top    = theMargin;
     myMargins.bottom = theMargin;
 }
 
-StSeekBar::~StSeekBar() {
+StGLSeekBar::~StGLSeekBar() {
     StGLContext& aCtx = getContext();
     if(!myProgram.isNull()) {
         myProgram->release(aCtx);
@@ -130,7 +121,7 @@ StSeekBar::~StSeekBar() {
     myColors.release(aCtx);
 }
 
-void StSeekBar::stglResize() {
+void StGLSeekBar::stglResize() {
     StGLWidget::stglResize();
     StGLContext& aCtx = getContext();
 
@@ -144,7 +135,7 @@ void StSeekBar::stglResize() {
     }
 }
 
-void StSeekBar::stglUpdateVertices() {
+void StGLSeekBar::stglUpdateVertices() {
     StArray<StGLVec2> aVertices(12);
 
     // black border quad
@@ -173,7 +164,7 @@ void StSeekBar::stglUpdateVertices() {
     myIsResized = false;
 }
 
-bool StSeekBar::stglInit() {
+bool StGLSeekBar::stglInit() {
     StGLContext& aCtx = getContext();
     const GLfloat COLORS[4 * 12] = {
         // black border colors
@@ -202,7 +193,7 @@ bool StSeekBar::stglInit() {
         && StGLWidget::stglInit();
 }
 
-void StSeekBar::stglDraw(unsigned int theView) {
+void StGLSeekBar::stglDraw(unsigned int theView) {
     StGLContext& aCtx = getContext();
 
     // need to update vertices buffer?
@@ -234,7 +225,7 @@ void StSeekBar::stglDraw(unsigned int theView) {
     StGLWidget::stglDraw(theView);
 }
 
-void StSeekBar::stglUpdate(const StPointD_t& theCursor) {
+void StGLSeekBar::stglUpdate(const StPointD_t& theCursor) {
     StGLWidget::stglUpdate(theCursor);
     if(!isClicked(ST_MOUSE_LEFT)) {
         return;
@@ -251,7 +242,7 @@ void StSeekBar::stglUpdate(const StPointD_t& theCursor) {
     signals.onSeekClick(ST_MOUSE_LEFT, aPos);
 }
 
-double StSeekBar::getPointInEx(const StPointD_t& thePointZo) const {
+double StGLSeekBar::getPointInEx(const StPointD_t& thePointZo) const {
     StRectI_t aRectPx = getRectPxAbsolute();
     aRectPx.left()  += myMargins.left;
     aRectPx.right() -= myMargins.right;
@@ -260,11 +251,11 @@ double StSeekBar::getPointInEx(const StPointD_t& thePointZo) const {
     return (aPointGl.x() - aRectGl.left()) / (aRectGl.right() - aRectGl.left());
 }
 
-void StSeekBar::doMouseClick(const int ) {
+void StGLSeekBar::doMouseClick(const int ) {
     //
 }
 
-void StSeekBar::doMouseUnclick(const int mouseBtn) {
+void StGLSeekBar::doMouseUnclick(const int mouseBtn) {
     const double aPos       = stMin(stMax(getPointInEx(myRoot->getCursorZo()), 0.0), 1.0);
     const int    aTolerance = myRoot->scale(1);
     const int    aPosPx     = int(aPos * double(getRectPx().width()));
@@ -278,7 +269,7 @@ void StSeekBar::doMouseUnclick(const int mouseBtn) {
     signals.onSeekClick(mouseBtn, aPos);
 }
 
-bool StSeekBar::doScroll(const StScrollEvent& theEvent) {
+bool StGLSeekBar::doScroll(const StScrollEvent& theEvent) {
     if(theEvent.StepsY >= 1) {
         signals.onSeekScroll(1.0);
     } else if(theEvent.StepsY <= -1) {

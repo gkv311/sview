@@ -207,6 +207,7 @@
 		<Unit filename="StGLRangeFieldFloat32.cpp" />
 		<Unit filename="StGLRootWidget.cpp" />
 		<Unit filename="StGLScrollArea.cpp" />
+		<Unit filename="StGLSeekBar.cpp" />
 		<Unit filename="StGLSubtitles.cpp" />
 		<Unit filename="StGLSwitchTextured.cpp" />
 		<Unit filename="StGLTable.cpp" />
@@ -248,6 +249,7 @@
 		<Unit filename="../include/StGLWidgets/StGLRangeFieldFloat32.h" />
 		<Unit filename="../include/StGLWidgets/StGLRootWidget.h" />
 		<Unit filename="../include/StGLWidgets/StGLScrollArea.h" />
+		<Unit filename="../include/StGLWidgets/StGLSeekBar.h" />
 		<Unit filename="../include/StGLWidgets/StGLShare.h" />
 		<Unit filename="../include/StGLWidgets/StGLSubtitles.h" />
 		<Unit filename="../include/StGLWidgets/StGLSwitchTextured.h" />

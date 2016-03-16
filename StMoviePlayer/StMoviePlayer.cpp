@@ -21,7 +21,6 @@
 #include "StMoviePlayerGUI.h"
 #include "StMoviePlayerStrings.h"
 #include "StVideo/StVideo.h"
-#include "StSeekBar.h"
 #include "StTimeBox.h"
 
 #include <StImage/StImageFile.h>
@@ -37,6 +36,7 @@
 #include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLMsgStack.h>
 #include <StGLWidgets/StGLPlayList.h>
+#include <StGLWidgets/StGLSeekBar.h>
 #include <StGLWidgets/StGLSubtitles.h>
 #include <StGLWidgets/StGLTextureButton.h>
 

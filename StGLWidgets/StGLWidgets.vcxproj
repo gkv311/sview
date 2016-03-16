@@ -230,6 +230,7 @@
     <ClCompile Include="StGLRangeFieldFloat32.cpp" />
     <ClCompile Include="StGLRootWidget.cpp" />
     <ClCompile Include="StGLScrollArea.cpp" />
+    <ClCompile Include="StGLSeekBar.cpp" />
     <ClCompile Include="StGLSubtitles.cpp" />
     <ClCompile Include="StGLSwitchTextured.cpp" />
     <ClCompile Include="StGLTable.cpp" />
@@ -267,6 +268,7 @@
     <ClInclude Include="../include/StGLWidgets/StGLRangeFieldFloat32.h" />
     <ClInclude Include="../include/StGLWidgets/StGLRootWidget.h" />
     <ClInclude Include="../include/StGLWidgets/StGLScrollArea.h" />
+    <ClInclude Include="../include/StGLWidgets/StGLSeekBar.h" />
     <ClInclude Include="../include/StGLWidgets/StGLShare.h" />
     <ClInclude Include="../include/StGLWidgets/StGLSubtitles.h" />
     <ClInclude Include="../include/StGLWidgets/StGLSwitchTextured.h" />
