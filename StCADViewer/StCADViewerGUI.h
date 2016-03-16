@@ -18,6 +18,7 @@ class StGLFpsLabel;
 class StGLMenu;
 class StGLMenuItem;
 class StGLPlayList;
+class StGLSeekBar;
 class StGLTextureButton;
 class StGLMsgStack;
 
@@ -111,6 +112,28 @@ class StCADViewerGUI : public StGLRootWidget {
      */
     ST_LOCAL void doShowMobileExMenu(const size_t );
 
+    /**
+     * Change ZFocus on mouse click.
+     */
+    ST_LOCAL void doZFocusSet(const int    theMouseBtn,
+                              const double theValue);
+
+    /**
+     * Change ZFocus on mouse scroll.
+     */
+    ST_LOCAL void doZFocusScroll(const double theDelta);
+
+    /**
+     * Change IOD on mouse click.
+     */
+    ST_LOCAL void doStereoIODSet(const int    theMouseBtn,
+                                 const double theValue);
+
+    /**
+     * Change IOD on mouse scroll.
+     */
+    ST_LOCAL void doStereoIODScroll(const double theDelta);
+
         private: //!< menus creation routines
 
     ST_LOCAL void      createMainMenu();         //!< Root (Main menu)
@@ -140,6 +163,10 @@ class StCADViewerGUI : public StGLRootWidget {
     StGLMenu*         myMenu0Root;    //!< main menu
     StGLWidget*       myPanelUpper;   //!< upper  toolbar
     StGLWidget*       myPanelBottom;  //!< bottom toolbar
+    StGLSeekBar*      myStereoIODBar; //!< stereo IOD control
+    StGLTextArea*     myStereoIODLab; //!< stereo IOD value label
+    StGLSeekBar*      myZFocusBar;    //!< stereo ZFocus control
+    StGLTextArea*     myZFocusLab;    //!< stereo ZFocus value label
     StGLFpsLabel*     myFpsWidget;    //!< FPS meter
 
     bool              myIsGUIVisible;

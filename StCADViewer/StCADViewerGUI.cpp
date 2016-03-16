@@ -18,6 +18,7 @@
 #include <StGLWidgets/StGLMsgStack.h>
 #include <StGLWidgets/StGLOpenFile.h>
 #include <StGLWidgets/StGLPlayList.h>
+#include <StGLWidgets/StGLSeekBar.h>
 #include <StGLWidgets/StGLScrollArea.h>
 #include <StGLWidgets/StGLTable.h>
 #include <StGLWidgets/StGLTextureButton.h>
@@ -276,6 +277,10 @@ StCADViewerGUI::StCADViewerGUI(StCADViewer*    thePlugin,
   myMenu0Root(NULL),
   myPanelUpper(NULL),
   myPanelBottom(NULL),
+  myStereoIODBar(NULL),
+  myStereoIODLab(NULL),
+  myZFocusBar(NULL),
+  myZFocusLab(NULL),
   myFpsWidget(NULL),
   myIsGUIVisible(true) {
     //const GLfloat aScale = myPlugin->params.ScaleHiDPI2X->getValue() ? 2.0f : myPlugin->params.ScaleHiDPI ->getValue();
@@ -295,6 +300,48 @@ StCADViewerGUI::StCADViewerGUI(StCADViewer*    thePlugin,
 
     createToolbarOnTop();
     createToolbarOnBottom();
+
+    StMarginsI aButtonMargins;
+    const int  anIconStep = scale(56);
+    aButtonMargins.extend(scale(12));
+
+    myZFocusBar = new StGLSeekBar(this, 0, scale(4));
+    myZFocusBar->changeRectPx().left()  = scale(8);
+    myZFocusBar->changeRectPx().right() = myZFocusBar->getRectPx().left() + 4 * anIconStep + scale(8);
+    myZFocusBar->changeRectPx().moveTopTo(-(anIconStep - myZFocusBar->getRectPx().height()) / 2);
+    myZFocusBar->setCorner(StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT));
+    myZFocusBar->signals.onSeekClick  = stSlot(this, &StCADViewerGUI::doZFocusSet);
+    myZFocusBar->signals.onSeekScroll = stSlot(this, &StCADViewerGUI::doZFocusScroll);
+    myZFocusBar->setMoveTolerance(1);
+    myZFocusBar->changeMargins().left  = scale(8);
+    myZFocusBar->changeMargins().right = scale(8);
+
+    myZFocusLab = new StGLTextArea(myZFocusBar, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                                   myZFocusBar->getRectPx().width(), myZFocusBar->getRectPx().height(), StGLTextArea::SIZE_NORMAL);
+    myZFocusLab->setBorder(false);
+    myZFocusLab->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
+    myZFocusLab->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+                                StGLTextFormatter::ST_ALIGN_Y_CENTER);
+    myZFocusLab->setDrawShadow(true);
+
+    myStereoIODBar = new StGLSeekBar(this, 0, scale(4));
+    myStereoIODBar->changeRectPx().left()  = scale(8);
+    myStereoIODBar->changeRectPx().right() = myStereoIODBar->getRectPx().left() + 4 * anIconStep + scale(8);
+    myStereoIODBar->changeRectPx().moveTopTo(-(anIconStep * 2 - myStereoIODBar->getRectPx().height()) / 2);
+    myStereoIODBar->setCorner(StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT));
+    myStereoIODBar->signals.onSeekClick  = stSlot(this, &StCADViewerGUI::doStereoIODSet);
+    myStereoIODBar->signals.onSeekScroll = stSlot(this, &StCADViewerGUI::doStereoIODScroll);
+    myStereoIODBar->setMoveTolerance(1);
+    myStereoIODBar->changeMargins().left  = scale(8);
+    myStereoIODBar->changeMargins().right = scale(8);
+
+    myStereoIODLab = new StGLTextArea(myStereoIODBar, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                                      myStereoIODBar->getRectPx().width(), myStereoIODBar->getRectPx().height(), StGLTextArea::SIZE_NORMAL);
+    myStereoIODLab->setBorder(false);
+    myStereoIODLab->setTextColor(StGLVec3(1.0f, 1.0f, 1.0f));
+    myStereoIODLab->setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
+                                   StGLTextFormatter::ST_ALIGN_Y_CENTER);
+    myStereoIODLab->setDrawShadow(true);
 
     myPlayList = new StGLPlayList(this, thePlayList);
     myPlayList->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
@@ -347,6 +394,20 @@ void StCADViewerGUI::stglUpdate(const StPointD_t& theCursorZo) {
         createMainMenu();
         myMenu0Root->stglUpdateSubmenuLayout();
         myLangMap->resetReloaded();
+    }
+    if(myZFocusBar != NULL) {
+        char aBuff[128];
+        stsprintf(aBuff, 128, "ZFocus: %3.0f%%", 100.0f * myPlugin->params.ZFocus->getNormalizedValue());
+        myZFocusBar->setProgress(myPlugin->params.ZFocus->getNormalizedValue());
+        myZFocusLab->setText(aBuff);
+        myZFocusBar->setOpacity(myPlugin->params.ProjectMode->getValue() == ST_PROJ_STEREO ? 1.0f : 0.0f, false);
+    }
+    if(myStereoIODBar != NULL) {
+        char aBuff[128];
+        stsprintf(aBuff, 128, "IOD: %3.0f%%", 100.0f * myPlugin->params.StereoIOD->getNormalizedValue());
+        myStereoIODBar->setProgress(myPlugin->params.StereoIOD->getNormalizedValue());
+        myStereoIODLab->setText(aBuff);
+        myStereoIODBar->setOpacity(myPlugin->params.ProjectMode->getValue() == ST_PROJ_STEREO ? 1.0f : 0.0f, false);
     }
 }
 
@@ -443,4 +504,34 @@ void StCADViewerGUI::doShowFPS(const bool ) {
 
     myFpsWidget = new StGLFpsLabel(this);
     myFpsWidget->stglInit();
+}
+
+void StCADViewerGUI::doZFocusSet(const int    theMouseBtn,
+                                 const double theValue) {
+    if(theMouseBtn == ST_MOUSE_LEFT) {
+        myPlugin->params.ZFocus->setNormalizedValue((float )theValue);
+    }
+}
+
+void StCADViewerGUI::doZFocusScroll(const double theDelta) {
+    if(theDelta > 0.001) {
+        myPlugin->params.ZFocus->increment();
+    } else if(theDelta < -0.001) {
+        myPlugin->params.ZFocus->decrement();
+    }
+}
+
+void StCADViewerGUI::doStereoIODSet(const int    theMouseBtn,
+                                    const double theValue) {
+    if(theMouseBtn == ST_MOUSE_LEFT) {
+        myPlugin->params.StereoIOD->setNormalizedValue((float )theValue);
+    }
+}
+
+void StCADViewerGUI::doStereoIODScroll(const double theDelta) {
+    if(theDelta > 0.001) {
+        myPlugin->params.StereoIOD->increment();
+    } else if(theDelta < -0.001) {
+        myPlugin->params.StereoIOD->decrement();
+    }
 }

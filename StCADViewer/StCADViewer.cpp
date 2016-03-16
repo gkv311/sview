@@ -72,6 +72,18 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
     params.ProjectMode->changeValues().add(tr(StCADViewerStrings::MENU_VIEW_PROJ_PERSP));  // ST_PROJ_PERSP
     params.ProjectMode->changeValues().add(tr(StCADViewerStrings::MENU_VIEW_PROJ_STEREO)); // ST_PROJ_STEREO
     params.ProjectMode->signals.onChanged.connect(this, &StCADViewer::doChangeProjection);
+
+    params.ZFocus = new StFloat32Param(1.0f,       // current value
+                                       0.2f, 2.0f, // min/max
+                                       1.0f,       // default
+                                       0.025f,     // step
+                                       0.001f);
+    params.StereoIOD = new StFloat32Param(0.05f,       // current value
+                                          0.01f, 0.3f, // min/max
+                                          0.05f,       // default
+                                          0.005f,      // step
+                                          0.0001f);
+
     params.TargetFps = 0;
 
     mySettings->loadString(ST_SETTING_LAST_FOLDER, params.LastFolder);
@@ -804,6 +816,9 @@ void StCADViewer::stglDraw(unsigned int theView) {
         bool toSetScissorRect = myContext->stglScissorRect(aScissRect);
 
         myView->Camera()->SetProjectionType(aProj);
+        myView->Camera()->SetZFocus(Graphic3d_Camera::FocusType_Relative, params.ZFocus->getValue());
+        myView->Camera()->SetIOD   (Graphic3d_Camera::IODType_Relative,   params.StereoIOD->getValue());
+
         myView->Redraw();
 
         myContext->stglResizeViewport(aVPort);
@@ -925,69 +940,59 @@ void StCADViewer::doChangeProjection(const int32_t theProj) {
 }
 
 void StCADViewer::doZoomIn(const double theValue) {
-  if(myView.IsNull()) {
-      return;
-  }
+    if(myView.IsNull()) {
+        return;
+    }
 
-  myView->SetZoom(1.0 + theValue, Standard_True);
-  //myProjection.setZoom(myProjection.getZoom() * 1.1f);
+    myView->SetZoom(1.0 + theValue, Standard_True);
+    //myProjection.setZoom(myProjection.getZoom() * 1.1f);
 }
 
 void StCADViewer::doZoomOut(const double theValue) {
-  if(myView.IsNull()) {
-      return;
-  }
+    if(myView.IsNull()) {
+        return;
+    }
 
-  myView->SetZoom(1.0 - theValue, Standard_True);
-  //myProjection.setZoom(myProjection.getZoom() * 0.9f);
+    myView->SetZoom(1.0 - theValue, Standard_True);
+    //myProjection.setZoom(myProjection.getZoom() * 0.9f);
 }
 
 void StCADViewer::doStereoZFocusCloser(const double theValue) {
-  if(myView.IsNull()
-  || params.ProjectMode->getValue() != ST_PROJ_STEREO) {
-      return;
-  }
+    if(myView.IsNull()
+    || params.ProjectMode->getValue() != ST_PROJ_STEREO) {
+        return;
+    }
 
-  Standard_Real aFocus = myView->Camera()->ZFocus() - theValue * 0.5;
-  if(aFocus > 0.2
-  && aFocus < 2.0) {
-    myView->Camera()->SetZFocus(myView->Camera()->ZFocusType(), aFocus);
-    //myProjection.setZScreen(myProjection.getZScreen() - 1.1f);
-  }
+    float aFocus = params.ZFocus->getValue() - float(theValue * 0.5);
+    params.ZFocus->setValue(aFocus);
 }
 
 void StCADViewer::doStereoZFocusFarther(const double theValue) {
-  if(myView.IsNull()
-  || params.ProjectMode->getValue() != ST_PROJ_STEREO) {
-      return;
-  }
+    if(myView.IsNull()
+    || params.ProjectMode->getValue() != ST_PROJ_STEREO) {
+        return;
+    }
 
-  Standard_Real aFocus = myView->Camera()->ZFocus() + theValue * 0.5;
-  if(aFocus > 0.2
-  && aFocus < 2.0) {
-    myView->Camera()->SetZFocus(myView->Camera()->ZFocusType(), aFocus);
-    //myProjection.setZScreen(myProjection.getZScreen() + 1.1f);
-  }
+    float aFocus = params.ZFocus->getValue() + float(theValue * 0.5);
+    params.ZFocus->setValue(aFocus);
 }
 
 void StCADViewer::doStereoIODDec(const double theValue) {
-  if(myView.IsNull()
-  || params.ProjectMode->getValue() != ST_PROJ_STEREO) {
-      return;
-  }
+    if(myView.IsNull()
+    || params.ProjectMode->getValue() != ST_PROJ_STEREO) {
+        return;
+    }
 
-  double anIOD = stMax(myView->Camera()->IOD() - theValue * 0.1, 0.01);
-  myView->Camera()->SetIOD (myView->Camera()->GetIODType(), anIOD);
-  //myProjection.setIOD(myProjection.getIOD() - 0.1f);
+    float aDist = params.StereoIOD->getValue() - float(theValue * 0.1);
+    params.StereoIOD->setValue(aDist);
 }
 
 void StCADViewer::doStereoIODInc(const double theValue) {
-  if(myView.IsNull()
-  || params.ProjectMode->getValue() != ST_PROJ_STEREO) {
-      return;
-  }
+    if(myView.IsNull()
+    || params.ProjectMode->getValue() != ST_PROJ_STEREO) {
+        return;
+    }
 
-  double anIOD = stMin(myView->Camera()->IOD() + theValue * 0.1, 0.3);
-  myView->Camera()->SetIOD (myView->Camera()->GetIODType(), anIOD);
-  //myProjection.setIOD(myProjection.getIOD() + 0.1f);
+    float aDist = params.StereoIOD->getValue() + float(theValue * 0.1);
+    params.StereoIOD->setValue(aDist);
 }

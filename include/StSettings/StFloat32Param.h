@@ -160,6 +160,20 @@ class StFloat32Param : public StParam<float> {
         return ::stAreEqual(theFirst, theSecond, myTolerance);
     }
 
+    /**
+     * Return value within 0..1 range (taking into account min/max values).
+     */
+    float getNormalizedValue() const {
+        return (getValue() - myMinValue) / (myMaxValue - myMinValue);
+    }
+
+    /**
+     * Setup value within 0..1 range (to be scaled according to min/max values).
+     */
+    bool setNormalizedValue(const float theValue) {
+        return setValue(myMinValue + theValue * (myMaxValue - myMinValue));
+    }
+
 };
 
 #endif //__StFloat32Param_h_

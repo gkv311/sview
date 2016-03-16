@@ -17,7 +17,7 @@
 #include <StGL/StPlayList.h>
 #include <StGLMesh/StGLMesh.h>
 #include <StGLStereo/StGLProjCamera.h>
-#include <StSettings/StParam.h>
+#include <StSettings/StFloat32Param.h>
 #include <StSettings/StTranslations.h>
 
 //#include "StCADViewerGUI.h"
@@ -136,13 +136,15 @@ class StCADViewer : public StApplication {
 
     struct {
 
-        StHandle<StBoolParam>  IsFullscreen;    //!< fullscreen state
-        StHandle<StBoolParam>  ToShowPlayList;  //!< display playlist
-        StHandle<StBoolParam>  ToShowFps;       //!< display FPS meter
-        StHandle<StBoolParam>  ToShowTrihedron; //!< show trihedron flag
-        StHandle<StEnumParam>  ProjectMode;     //!< projection mode
-        StString               LastFolder;      //!< laster folder used to open / save file
-        int                    TargetFps;       //!< limit or not rendering FPS
+        StHandle<StBoolParam>    IsFullscreen;    //!< fullscreen state
+        StHandle<StBoolParam>    ToShowPlayList;  //!< display playlist
+        StHandle<StBoolParam>    ToShowFps;       //!< display FPS meter
+        StHandle<StBoolParam>    ToShowTrihedron; //!< show trihedron flag
+        StHandle<StEnumParam>    ProjectMode;     //!< projection mode
+        StHandle<StFloat32Param> ZFocus;          //!< stereoscopic ZFocus value
+        StHandle<StFloat32Param> StereoIOD;       //!< stereoscopic IOD value
+        StString                 LastFolder;      //!< laster folder used to open / save file
+        int                      TargetFps;       //!< limit or not rendering FPS
 
     } params;
 
