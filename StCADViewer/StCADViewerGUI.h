@@ -7,7 +7,7 @@
 #ifndef __StCADViewerGUI_h_
 #define __StCADViewerGUI_h_
 
-#include <StGLWidgets/StGLWidget.h>
+#include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLRootWidget.h>
 #include <StSettings/StTranslations.h>
 
@@ -18,6 +18,27 @@ class StGLMenu;
 class StGLMenuItem;
 class StGLTextureButton;
 class StGLMsgStack;
+
+/**
+ * Customized message box.
+ */
+class ST_LOCAL StInfoDialog : public StGLMessageBox {
+
+        public:
+
+    ST_LOCAL StInfoDialog(StCADViewer*    thePlugin,
+                          StGLWidget*     theParent,
+                          const StString& theTitle,
+                          const int       theWidth,
+                          const int       theHeight)
+    : StGLMessageBox(theParent, theTitle, "", theWidth, theHeight), myPlugin(thePlugin) {}
+    ST_LOCAL virtual ~StInfoDialog();
+
+        private:
+
+    StCADViewer* myPlugin;
+
+};
 
 /**
  * Root GUI widget for Tiny CAD Viewer application.

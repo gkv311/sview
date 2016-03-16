@@ -27,6 +27,9 @@ namespace StCADViewerStrings {
         MENU_VIEW_PROJ_PERSP   = 1241,
         MENU_VIEW_PROJ_STEREO  = 1242,
 
+        // Root -> Output -> Change Device menu
+        MENU_SHOW_FPS       = 1402,
+
         // Root -> Help menu
         MENU_HELP         = 1500,
         MENU_HELP_ABOUT   = 1501,

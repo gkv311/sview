@@ -58,12 +58,15 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
 
     myTitle = "sView - CAD Viewer";
     //
-    params.isFullscreen = new StBoolParam(false);
-    params.isFullscreen->signals.onChanged.connect(this, &StCADViewer::doFullscreen);
-    params.ToShowFps = new StBoolParam(false);
-    params.toShowTrihedron = new StBoolParam(true);
-    params.projectMode = new StInt32Param(ST_PROJ_STEREO);
-    params.projectMode->signals.onChanged.connect(this, &StCADViewer::doChangeProjection);
+    params.IsFullscreen = new StBoolParam(false);
+    params.IsFullscreen->signals.onChanged.connect(this, &StCADViewer::doFullscreen);
+    params.ToShowFps     = new StBoolParamNamed(false, tr(StCADViewerStrings::MENU_SHOW_FPS));
+    params.ToShowTrihedron = new StBoolParam(true);
+    params.ProjectMode = new StEnumParam(ST_PROJ_STEREO, tr(StCADViewerStrings::MENU_VIEW_PROJECTION));
+    params.ProjectMode->changeValues().add(tr(StCADViewerStrings::MENU_VIEW_PROJ_ORTHO));  // ST_PROJ_ORTHO
+    params.ProjectMode->changeValues().add(tr(StCADViewerStrings::MENU_VIEW_PROJ_PERSP));  // ST_PROJ_PERSP
+    params.ProjectMode->changeValues().add(tr(StCADViewerStrings::MENU_VIEW_PROJ_STEREO)); // ST_PROJ_STEREO
+    params.ProjectMode->signals.onChanged.connect(this, &StCADViewer::doChangeProjection);
     params.TargetFps = 0;
 
     mySettings->loadInt32 (ST_SETTING_FPSTARGET, params.TargetFps);
@@ -90,7 +93,7 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
 
     // create actions
     StHandle<StAction> anAction;
-    anAction = new StActionBool(stCString("DoFullscreen"), params.isFullscreen);
+    anAction = new StActionBool(stCString("DoFullscreen"), params.IsFullscreen);
     addAction(Action_Fullscreen, anAction, ST_VK_RETURN);
 
     anAction = new StActionBool(stCString("DoShowFPS"), params.ToShowFps);
@@ -111,13 +114,13 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
     anAction = new StActionIntSlot(stCString("DoFitAll"), stSlot(this, &StCADViewer::doFitAll), 0);
     addAction(Action_FitAll, anAction, ST_VK_F);
 
-    anAction = new StActionIntValue(stCString("DoProjOrthogonal"),  params.projectMode, ST_PROJ_ORTHO);
+    anAction = new StActionIntValue(stCString("DoProjOrthogonal"),  params.ProjectMode, ST_PROJ_ORTHO);
     addAction(Action_ProjOrthogonal, anAction, ST_VK_O);
 
-    anAction = new StActionIntValue(stCString("DoProjPerspective"), params.projectMode, ST_PROJ_PERSP);
+    anAction = new StActionIntValue(stCString("DoProjPerspective"), params.ProjectMode, ST_PROJ_PERSP);
     addAction(Action_ProjPerspective, anAction, ST_VK_M, ST_VK_P);
 
-    anAction = new StActionIntValue(stCString("DoProjStereo"),      params.projectMode, ST_PROJ_STEREO);
+    anAction = new StActionIntValue(stCString("DoProjStereo"),      params.ProjectMode, ST_PROJ_STEREO);
     addAction(Action_ProjStereo, anAction, ST_VK_S);
 
     anAction = new StActionHoldSlot(stCString("DoZoomIn"),  stSlot(this, &StCADViewer::doZoomIn));
@@ -159,8 +162,8 @@ void StCADViewer::saveGuiParams() {
         return;
     }
 
-    mySettings->saveParam(ST_PARAM_TRIHEDRON,   params.toShowTrihedron);
-    mySettings->saveParam(ST_PARAM_PROJMODE,    params.projectMode);
+    mySettings->saveParam(ST_PARAM_TRIHEDRON,   params.ToShowTrihedron);
+    mySettings->saveParam(ST_PARAM_PROJMODE,    params.ProjectMode);
     mySettings->saveInt32(ST_SETTING_FPSTARGET, params.TargetFps);
     mySettings->saveParam(ST_SETTING_SHOW_FPS,  params.ToShowFps);
 }
@@ -332,8 +335,8 @@ bool StCADViewer::createGui() {
 
     // load settings
     myWindow->setTargetFps(double(params.TargetFps));
-    mySettings->loadParam(ST_PARAM_TRIHEDRON, params.toShowTrihedron);
-    mySettings->loadParam(ST_PARAM_PROJMODE,  params.projectMode);
+    mySettings->loadParam(ST_PARAM_TRIHEDRON, params.ToShowTrihedron);
+    mySettings->loadParam(ST_PARAM_PROJMODE,  params.ProjectMode);
 
     myGUI->stglInit();
     myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER));
@@ -359,7 +362,7 @@ bool StCADViewer::init() {
     }
 
     myWindow->setTargetFps(double(params.TargetFps));
-    myWindow->setStereoOutput(params.projectMode->getValue() == ST_PROJ_STEREO);
+    myWindow->setStereoOutput(params.ProjectMode->getValue() == ST_PROJ_STEREO);
 
     if(!initOcctViewer()) {
         //
@@ -499,7 +502,7 @@ void StCADViewer::doMouseUp(const StClickEvent& theEvent) {
         }
         case ST_MOUSE_MIDDLE: {
             if(!myIsCtrlPressed && !isItemUnclicked) {
-                params.isFullscreen->reverse();
+                params.IsFullscreen->reverse();
             }
             myIsMiddleHold = false;
             break;
@@ -736,7 +739,7 @@ void StCADViewer::stglDraw(unsigned int theView) {
             }
         }
 
-        if(params.toShowTrihedron->getValue()) {
+        if(params.ToShowTrihedron->getValue()) {
           myView->TriedronDisplay(Aspect_TOTP_RIGHT_LOWER, Quantity_NOC_WHITE, 0.08, V3d_ZBUFFER);
         } else {
           myView->TriedronErase();
@@ -906,7 +909,7 @@ void StCADViewer::doZoomOut(const double theValue) {
 
 void StCADViewer::doStereoZFocusCloser(const double theValue) {
   if(myView.IsNull()
-  || params.projectMode->getValue() != ST_PROJ_STEREO) {
+  || params.ProjectMode->getValue() != ST_PROJ_STEREO) {
       return;
   }
 
@@ -920,7 +923,7 @@ void StCADViewer::doStereoZFocusCloser(const double theValue) {
 
 void StCADViewer::doStereoZFocusFarther(const double theValue) {
   if(myView.IsNull()
-  || params.projectMode->getValue() != ST_PROJ_STEREO) {
+  || params.ProjectMode->getValue() != ST_PROJ_STEREO) {
       return;
   }
 
@@ -934,7 +937,7 @@ void StCADViewer::doStereoZFocusFarther(const double theValue) {
 
 void StCADViewer::doStereoIODDec(const double theValue) {
   if(myView.IsNull()
-  || params.projectMode->getValue() != ST_PROJ_STEREO) {
+  || params.ProjectMode->getValue() != ST_PROJ_STEREO) {
       return;
   }
 
@@ -945,7 +948,7 @@ void StCADViewer::doStereoIODDec(const double theValue) {
 
 void StCADViewer::doStereoIODInc(const double theValue) {
   if(myView.IsNull()
-  || params.projectMode->getValue() != ST_PROJ_STEREO) {
+  || params.ProjectMode->getValue() != ST_PROJ_STEREO) {
       return;
   }
 

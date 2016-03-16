@@ -54,6 +54,9 @@ void loadDefaults(StLangMap& theStrings) {
     theStrings(MENU_VIEW_PROJ_STEREO,
                "Stereo");
 
+    theStrings(MENU_SHOW_FPS,
+               "Show FPS");
+
     theStrings(MENU_HELP_ABOUT,
                "About...");
     theStrings(MENU_HELP_LICENSE,

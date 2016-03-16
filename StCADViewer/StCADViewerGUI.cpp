@@ -26,6 +26,10 @@ using namespace StCADViewerStrings;
 #define stCTexture(theString) getTexturePath(stCString(theString))
 #define stCMenuIcon(theString) iconTexture(stCString(theString), myMenuIconSize)
 
+StInfoDialog::~StInfoDialog() {
+    //myPlugin->doSaveImageInfo(0);
+}
+
 void StCADViewerGUI::createToolbarOnTop() {
     StMarginsI aButtonMargins;
     const IconSize anIconSize = scaleIcon(32, aButtonMargins);
@@ -132,9 +136,9 @@ StGLMenu* StCADViewerGUI::createViewMenu() {
     StGLMenu* aMenuProj = createProjMenu(); // Root -> View menu -> Projection
 
 #if !defined(__ANDROID__)
-    aMenu->addItem(tr(MENU_VIEW_FULLSCREEN), myPlugin->params.isFullscreen);
+    aMenu->addItem(tr(MENU_VIEW_FULLSCREEN), myPlugin->params.IsFullscreen);
 #endif
-    aMenu->addItem(tr(MENU_VIEW_TRIHEDRON),  myPlugin->params.toShowTrihedron);
+    aMenu->addItem(tr(MENU_VIEW_TRIHEDRON),  myPlugin->params.ToShowTrihedron);
     aMenu->addItem(tr(MENU_VIEW_PROJECTION), aMenuProj);
     aMenu->addItem(tr(MENU_VIEW_FITALL), myPlugin->getAction(StCADViewer::Action_FitAll));
     return aMenu;
@@ -146,11 +150,11 @@ StGLMenu* StCADViewerGUI::createViewMenu() {
 StGLMenu* StCADViewerGUI::createProjMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     aMenu->addItem(tr(MENU_VIEW_PROJ_ORTHO),
-                   myPlugin->params.projectMode, ST_PROJ_ORTHO);
+                   myPlugin->params.ProjectMode, ST_PROJ_ORTHO);
     aMenu->addItem(tr(MENU_VIEW_PROJ_PERSP),
-                   myPlugin->params.projectMode, ST_PROJ_PERSP);
+                   myPlugin->params.ProjectMode, ST_PROJ_PERSP);
     aMenu->addItem(tr(MENU_VIEW_PROJ_STEREO),
-                   myPlugin->params.projectMode, ST_PROJ_STEREO);
+                   myPlugin->params.ProjectMode, ST_PROJ_STEREO);
     return aMenu;
 }
 
@@ -185,7 +189,32 @@ StGLMenu* StCADViewerGUI::createLanguageMenu() {
 }
 
 void StCADViewerGUI::doMobileSettings(const size_t ) {
+    const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
+    StParamsList aParams;
+    aParams.add(myPlugin->StApplication::params.ActiveDevice);
+    aRend->getOptions(aParams);
+    aParams.add(myPlugin->params.ToShowFps);
+    aParams.add(myLangMap->params.language);
+    //aParams.add(myPlugin->params.IsMobileUI);
+    aParams.add(myPlugin->params.ToShowTrihedron);
+    aParams.add(myPlugin->params.ProjectMode);
 
+    myLangMap->params.language->setName(tr(MENU_HELP_LANGS));
+
+    StInfoDialog* aDialog = new StInfoDialog(myPlugin, this, tr(MENU_HELP_SETTINGS), scale(512), scale(300));
+
+    const int aWidthMax  = aDialog->getContent()->getRectPx().width();
+    int       aRowLast   = (int )aParams.size();
+    const int aNbRowsMax = aRowLast + 2;
+
+    StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
+    aTable->changeItemMargins().top    = scale(4);
+    aTable->changeItemMargins().bottom = scale(4);
+    aTable->setupTable(aNbRowsMax, 2);
+    aTable->fillFromParams(aParams, StGLVec3(1.0f, 1.0f, 1.0f), aWidthMax);
+
+    aDialog->addButton(tr(BUTTON_CLOSE), true);
+    aDialog->stglInit();
 }
 
 void StCADViewerGUI::doShowMobileExMenu(const size_t ) {
@@ -232,7 +261,7 @@ StCADViewerGUI::StCADViewerGUI(StCADViewer*    thePlugin,
     myMouseDescr = new StGLDescription(this);
 
     // create Main menu
-    createMainMenu();
+    //createMainMenu();
 
     createToolbarOnTop();
     createToolbarOnBottom();

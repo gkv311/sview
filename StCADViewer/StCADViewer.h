@@ -130,10 +130,10 @@ class StCADViewer : public StApplication {
 
     struct {
 
-        StHandle<StBoolParam>  isFullscreen;    //!< fullscreen state
+        StHandle<StBoolParam>  IsFullscreen;    //!< fullscreen state
         StHandle<StBoolParam>  ToShowFps;       //!< display FPS meter
-        StHandle<StBoolParam>  toShowTrihedron; //!< show trihedron flag
-        StHandle<StInt32Param> projectMode;     //!< projection mode
+        StHandle<StBoolParam>  ToShowTrihedron; //!< show trihedron flag
+        StHandle<StEnumParam>  ProjectMode;     //!< projection mode
         int                    TargetFps;       //!< limit or not rendering FPS
 
     } params;
@@ -161,6 +161,13 @@ class StCADViewer : public StApplication {
     ST_LOCAL void releaseDevice();
     ST_LOCAL void saveGuiParams();
     ST_LOCAL void saveAllParams();
+
+    /**
+     * Get translation.
+     */
+    ST_LOCAL const StString& tr(const size_t theId) const {
+        return myLangMap->getValue(theId);
+    }
 
         private: //!< private callback Slots
 
