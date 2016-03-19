@@ -332,6 +332,8 @@ bool StCADViewer::initOcctViewer() {
                                       ? Graphic3d_Camera::Projection_Perspective
                                       : Graphic3d_Camera::Projection_Orthographic);
     myView->SetImmediateUpdate(Standard_False);
+    //
+    myView->View()->SetImmediateModeDrawToFront(Standard_False);
 
 #ifdef __ANDROID__
     myView->SetWindow(aWindow, (Aspect_RenderingContext )anEglContext);
