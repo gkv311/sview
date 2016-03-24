@@ -17,7 +17,6 @@
 #include <StThreads/StThread.h>
 #include <StStrings/StLogger.h>
 
-#include <jni.h>
 #define jexp extern "C" JNIEXPORT
 
 StCString StAndroidGlue::getCommandIdName(StAndroidGlue::CommandId theCmd) {
@@ -140,6 +139,10 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
     jmethodID aJMet_getStereoApiInfo = aJniEnv->GetMethodID(aJClass_Activity, "getStereoApiInfo", "()Ljava/lang/String;");
     myStereoApiId = stStringFromJava(aJniEnv, (jstring )aJniEnv->CallObjectMethod(myActivity->clazz, aJMet_getStereoApiInfo));
 
+    // workaround NativeActivity design issues - notify Java StActivity class about C++ pointer to StAndroidGlue instance
+    jmethodID aJMet_setCppInstance = aJniEnv->GetMethodID(aJClass_Activity, "setCppInstance", "(J)V");
+    aJniEnv->CallVoidMethod(myActivity->clazz, aJMet_setCppInstance, (jlong )this);
+
     readOpenPath();
 
     myCmdPollSource.id        = LooperId_MAIN;
@@ -182,45 +185,34 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
 }
 
 void StAndroidGlue::readOpenPath() {
+    JNIEnv*   aJniEnv = myActivity->env;
+    jclass    aJClass_Activity   = aJniEnv->GetObjectClass(myActivity->clazz);
+    jmethodID aJMet_readOpenPath = aJniEnv->GetMethodID(aJClass_Activity, "readOpenPath", "()V");
+    aJniEnv->CallVoidMethod(myActivity->clazz, aJMet_readOpenPath);
+}
+
+void StAndroidGlue::setOpenPath(const jstring  theOpenPath,
+                                const jstring  theMimeType,
+                                const jboolean theIsLaunchedFromHistory) {
     JNIEnv* aJniEnv = myActivity->env;
-
-    jclass      aJClassActivity = aJniEnv->GetObjectClass(myActivity->clazz);
-    jmethodID   aJMet_getIntent = aJniEnv->GetMethodID(aJClassActivity, "getIntent", "()Landroid/content/Intent;");
-    jmethodID   aJMet_setIntent = aJniEnv->GetMethodID(aJClassActivity, "setIntent", "(Landroid/content/Intent;)V");
-    jobject     aJIntent        = aJniEnv->CallObjectMethod(myActivity->clazz, aJMet_getIntent);
-    if(aJIntent == NULL) {
-        return;
-    }
-
-    jclass      aJClassIntent       = aJniEnv->GetObjectClass(aJIntent);
-    jmethodID   aJMet_getDataString = aJniEnv->GetMethodID(aJClassIntent, "getDataString", "()Ljava/lang/String;");
-    jmethodID   aJMet_getType       = aJniEnv->GetMethodID(aJClassIntent, "getType",       "()Ljava/lang/String;");
-    jmethodID   aJMet_getFlags      = aJniEnv->GetMethodID(aJClassIntent, "getFlags",      "()I");
-
-    // retrieve data path
-    StString aDataPath = stStringFromJava(aJniEnv, (jstring )aJniEnv->CallObjectMethod(aJIntent, aJMet_getDataString));
-    // retrieve data type
-    int aFlags = aJniEnv->CallIntMethod(aJIntent, aJMet_getFlags);
-    const StString aDataType = stStringFromJava(aJniEnv, (jstring )aJniEnv->CallObjectMethod(aJIntent, aJMet_getType));
-
-    // reset intent in Activity
-    aJniEnv->CallVoidMethod(myActivity->clazz, aJMet_setIntent, NULL);
+    StString anOpenPath = stStringFromJava(aJniEnv, theOpenPath);
+    StString aMimeType  = stStringFromJava(aJniEnv, theMimeType);
 
     const StString ST_FILE_PROTOCOL("file://");
-    if(aDataPath.isStartsWith(ST_FILE_PROTOCOL)) {
+    if(anOpenPath.isStartsWith(ST_FILE_PROTOCOL)) {
         const size_t   aCutFrom = ST_FILE_PROTOCOL.getLength();
-        const StString aPath    = aDataPath.subString(aCutFrom, (size_t )-1);
-        aDataPath.fromUrl(aPath);
+        const StString aPath    = anOpenPath.subString(aCutFrom, (size_t )-1);
+        anOpenPath.fromUrl(aPath);
     }
 
     StMutexAuto aLock(myFetchLock);
     if(myCreatePath.isEmpty()) {
-        myCreatePath = aDataPath;
+        myCreatePath = anOpenPath;
     }
-    // FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
+
     // ignore outdated intent from history list - use C++ recent list instead
-    if((aFlags & 0x00100000) == 0) {
-        myDndPath = aDataPath;
+    if(!theIsLaunchedFromHistory) {
+        myDndPath = anOpenPath;
     }
 }
 
@@ -235,12 +227,6 @@ void StAndroidGlue::fetchState(StString&             theNewFile,
 }
 
 void StAndroidGlue::start() {
-    // workaround NativeActivity design issues - notify Java StActivity class about C++ pointer to StAndroidGlue instance
-    JNIEnv* aJniEnv = myActivity->env;
-    jclass    aJClassActivity   = aJniEnv->GetObjectClass(myActivity->clazz);
-    jmethodID aJMet_setInstance = aJniEnv->GetMethodID(aJClassActivity, "setCppInstance", "(J)V");
-    aJniEnv->CallVoidMethod(myActivity->clazz, aJMet_setInstance, (jlong )this);
-
     myThread = new StThread(threadEntryWrapper, this, "StAndroidGlue");
 
     // Wait for thread to start
@@ -761,6 +747,11 @@ void StAndroidGlue::setOrientation(float theAzimuthDeg, float thePitchDeg, float
 
     StMutexAuto aLock(myFetchLock);
     myQuaternion = anOri;
+}
+
+jexp void JNICALL Java_com_sview_StActivity_cppSetOpenPath(JNIEnv* theEnv, jobject theObj, jlong theCppPtr,
+                                                           jstring theOpenPath, jstring theMimeType, jboolean theIsLaunchedFromHistory) {
+    ((StAndroidGlue* )theCppPtr)->setOpenPath(theOpenPath, theMimeType, theIsLaunchedFromHistory);
 }
 
 jexp void JNICALL Java_com_sview_StActivity_cppOnBackPressed(JNIEnv* theEnv, jobject theObj, jlong theCppPtr) {

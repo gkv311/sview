@@ -227,6 +227,10 @@ class StAndroidGlue {
 
         protected: //! @name low-level implementation
 
+    /**
+     * Read the open file from currently set intent.
+     * The method calls the Java method readOpenPath() of StActivity which will call setOpenPath().
+     */
     ST_CPPEXPORT void readOpenPath();
 
     ST_CPPEXPORT void printConfig();
@@ -256,6 +260,13 @@ class StAndroidGlue {
     ST_CPPEXPORT void threadEntry();
 
         public: //! @name StActivity callbacks
+
+    /**
+     * Setup new open file from Java class.
+     */
+    ST_CPPEXPORT void setOpenPath(const jstring  theOpenPath,
+                                  const jstring  theMimeType,
+                                  const jboolean theIsLaunchedFromHistory);
 
     /**
      * Setup surfaceChanging flag to workaround NativeActivity API issue

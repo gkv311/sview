@@ -1,9 +1,12 @@
 /**
  * This is source code for sView
  *
- * Copyright © Kirill Gavrilov, 2014
+ * Copyright © Kirill Gavrilov, 2014-2016
  */
 package com.sview;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -251,6 +254,51 @@ public class StActivity extends NativeActivity implements SensorEventListener {
 //region Auxiliary methods
 
     /**
+     * Read the open path from current intent and nullify it.
+     */
+    protected void readOpenPath() {
+        if(myCppGlue == 0) {
+            return;
+        }
+
+        Intent anIntent = getIntent();
+        setIntent(null);
+        if(anIntent == null) {
+            cppSetOpenPath(myCppGlue, "", "", false);
+            return;
+        }
+
+        String anOpenPath = anIntent.getDataString();
+        String anOpenMime = anIntent.getType();
+        boolean isLaunchedFromHistory = (anIntent.getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0;
+        if("content".equals(anIntent.getScheme())) {
+            android.net.Uri anUri = anIntent.getData();
+            android.content.ContentResolver aContentResolver = getContentResolver();
+            try {
+                // Resolve the real file path from symlink in /proc.
+                // The full path is much simpler to handle within C++ level
+                // and allows to fill playlist from folder content.
+                android.os.ParcelFileDescriptor aParcelFile = aContentResolver.openFileDescriptor(anUri, "r");
+                String aFilePathInProc = "/proc/self/fd/" + aParcelFile.getFd();
+                java.io.File aFileSymLink = new java.io.File(aFilePathInProc);
+                String aCanonicalPath = aFileSymLink.getCanonicalPath();
+                java.io.File aFileCanonical = new java.io.File(aCanonicalPath);
+                if(aFileCanonical.canRead()) {
+                    // take the real file when it is accessible by process
+                    anOpenPath = aCanonicalPath;
+                }
+                // otherwise file should be read using opened file descriptor
+            } catch(FileNotFoundException e) {
+                //e.printStackTrace();
+            } catch(IOException e) {
+                //e.printStackTrace();
+            }
+        }
+
+        cppSetOpenPath(myCppGlue, anOpenPath, anOpenMime, isLaunchedFromHistory);
+    }
+
+    /**
      * Wrapper to turn orientation sensor on/off (regardless off myToTrackOrient flag).
      */
     protected void updateTrackOrientation(boolean theToTrack) {
@@ -372,6 +420,14 @@ public class StActivity extends NativeActivity implements SensorEventListener {
 //endregion
 
 //region Methods to call C++ code
+
+    /**
+     * Setup open path.
+     */
+    private native void cppSetOpenPath(long theCppPtr,
+                                       String theOpenPath,
+                                       String theMimeType,
+                                       boolean theIsLaunchedFromHistory);
 
     /**
      * Redirect back button to C++ level.
