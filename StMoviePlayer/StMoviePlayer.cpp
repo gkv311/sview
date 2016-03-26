@@ -1040,7 +1040,7 @@ bool StMoviePlayer::init() {
 
     // create the video playback thread
     if(!isReset) {
-        myVideo = new StVideo(params.alDevice->getCTitle(), myLangMap, myPlayList, aTextureQueue, aSubQueue);
+        myVideo = new StVideo(params.alDevice->getCTitle(), myResMgr, myLangMap, myPlayList, aTextureQueue, aSubQueue);
         myVideo->signals.onError  = stSlot(myMsgQueue.access(), &StMsgQueue::doPushError);
         myVideo->signals.onLoaded = stSlot(this,                &StMoviePlayer::doLoaded);
         myVideo->params.UseGpu       = params.UseGpu;

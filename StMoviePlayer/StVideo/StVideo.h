@@ -25,6 +25,7 @@
 #include "StVideoTimer.h"   // video refresher class
 #include "StParamActiveStream.h"
 
+#include <StAV/StAVIOFileContext.h>
 #include <StFile/StMIMEList.h>
 #include <StThreads/StProcess.h>
 #include <StThreads/StThread.h>
@@ -51,6 +52,7 @@ struct StMovieInfo {
 };
 
 template<> inline void StArray< StHandle<StFileNode> >::sort() {}
+template<> inline void StArray< StHandle<StAVIOContext> >::sort() {}
 
 /**
  * Auxiliary structure.
@@ -105,11 +107,12 @@ class StVideo {
     /**
      * Main constructor.
      */
-    ST_LOCAL StVideo(const std::string&                theALDeviceName,
-                     const StHandle<StTranslations>&   theLangMap,
-                     const StHandle<StPlayList>&       thePlayList,
-                     const StHandle<StGLTextureQueue>& theTextureQueue,
-                     const StHandle<StSubQueue>&       theSubtitlesQueue);
+    ST_LOCAL StVideo(const std::string&                 theALDeviceName,
+                     const StHandle<StResourceManager>& theResMgr,
+                     const StHandle<StTranslations>&    theLangMap,
+                     const StHandle<StPlayList>&        thePlayList,
+                     const StHandle<StGLTextureQueue>&  theTextureQueue,
+                     const StHandle<StSubQueue>&        theSubtitlesQueue);
 
     /**
      * Destructor.
@@ -384,10 +387,13 @@ class StVideo {
     StMIMEList                    myMimesAudio;
     StMIMEList                    myMimesSubs;
     StHandle<StThread>            myThread;      //!< main loop thread
+    StHandle<StResourceManager>   myResMgr;      //!< resource manager
     StHandle<StTranslations>      myLangMap;     //!< translations dictionary
 
     StArrayList<StString>         myFileList;    //!< file list
     StArrayList<AVFormatContext*> myCtxList;     //!< format context for each file
+    StArrayList< StHandle<StAVIOContext> >
+                                  myFileIOList;  //!< associated IO context
     StArrayList<AVFormatContext*> myPlayCtxList; //!< currently played contexts
 
     StHandle<StVideoQueue>        myVideoMaster;  //!< Master video decoding thread

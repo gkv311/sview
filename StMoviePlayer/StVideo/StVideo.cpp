@@ -37,14 +37,16 @@ namespace {
 
 const char* StVideo::ST_VIDEOS_MIME_STRING = ST_VIDEO_PLUGIN_MIME_CHAR;
 
-StVideo::StVideo(const std::string&                theALDeviceName,
-                 const StHandle<StTranslations>&   theLangMap,
-                 const StHandle<StPlayList>&       thePlayList,
-                 const StHandle<StGLTextureQueue>& theTextureQueue,
-                 const StHandle<StSubQueue>&       theSubtitlesQueue)
+StVideo::StVideo(const std::string&                 theALDeviceName,
+                 const StHandle<StResourceManager>& theResMgr,
+                 const StHandle<StTranslations>&    theLangMap,
+                 const StHandle<StPlayList>&        thePlayList,
+                 const StHandle<StGLTextureQueue>&  theTextureQueue,
+                 const StHandle<StSubQueue>&        theSubtitlesQueue)
 : myMimesVideo(ST_VIDEOS_MIME_STRING),
   myMimesAudio(ST_AUDIOS_MIME_STRING),
   myMimesSubs(ST_SUBTIT_MIME_STRING),
+  myResMgr(theResMgr),
   myLangMap(theLangMap),
   mySlaveCtx(NULL),
   mySlaveStream(-1),
@@ -217,6 +219,7 @@ void StVideo::close() {
     }
     myFileList.clear();
     myCtxList.clear();
+    myFileIOList.clear();
     myPlayCtxList.clear();
     mySlaveCtx    = NULL;
     mySlaveStream = -1;
@@ -243,11 +246,24 @@ void StVideo::setAudioDelay(const float theDelaySec) {
 
 bool StVideo::addFile(const StString& theFileToLoad,
                       StStreamsInfo&  theInfo) {
+    // open video file
     StString aFileName, aDummy;
     StFileNode::getFolderAndFile(theFileToLoad, aDummy, aFileName);
-
-    // open video file
     AVFormatContext* aFormatCtx = NULL;
+
+    StHandle<StAVIOContext> anIOContext;
+    if(theFileToLoad.isStartsWith(stCString("content://"))) {
+        int aFileDescriptor = myResMgr->openFileDescriptor(theFileToLoad);
+        if(aFileDescriptor != -1) {
+            StHandle<StAVIOFileContext> aFileCtx = new StAVIOFileContext();
+            if(aFileCtx->openFromDescriptor(aFileDescriptor, "rb")) {
+                aFormatCtx = avformat_alloc_context();
+                aFormatCtx->pb = aFileCtx->getAvioContext();
+                anIOContext = aFileCtx;
+            }
+        }
+    }
+
 #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 2, 0))
     int avErrCode = avformat_open_input(&aFormatCtx, theFileToLoad.toCString(), NULL, NULL);
 #else
@@ -476,6 +492,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
         }
     }
 
+    myFileIOList.add(anIOContext);
     myCtxList.add(aFormatCtx);
     myFileList.add(theFileToLoad);
     return true;
