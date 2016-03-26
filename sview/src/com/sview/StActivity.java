@@ -272,14 +272,24 @@ public class StActivity extends NativeActivity implements SensorEventListener {
         String anOpenPath = anIntent.getDataString();
         String anOpenMime = anIntent.getType();
         boolean isLaunchedFromHistory = (anIntent.getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0;
+        android.net.Uri aContentUri = null;
         if("content".equals(anIntent.getScheme())) {
-            android.net.Uri anUri = anIntent.getData();
+            aContentUri = anIntent.getData();
+        }
+        if(Intent.ACTION_SEND.equals(anIntent.getAction())) {
+            aContentUri = anIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+            if(aContentUri != null) {
+                anOpenPath = aContentUri.toString();
+            }
+        }
+
+        if(aContentUri != null) {
             android.content.ContentResolver aContentResolver = getContentResolver();
             try {
                 // Resolve the real file path from symlink in /proc.
                 // The full path is much simpler to handle within C++ level
                 // and allows to fill playlist from folder content.
-                android.os.ParcelFileDescriptor aParcelFile = aContentResolver.openFileDescriptor(anUri, "r");
+                android.os.ParcelFileDescriptor aParcelFile = aContentResolver.openFileDescriptor(aContentUri, "r");
                 String aFilePathInProc = "/proc/self/fd/" + aParcelFile.getFd();
                 java.io.File aFileSymLink = new java.io.File(aFilePathInProc);
                 String aCanonicalPath = aFileSymLink.getCanonicalPath();
