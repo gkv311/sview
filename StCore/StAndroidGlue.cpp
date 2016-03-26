@@ -19,6 +19,56 @@
 
 #define jexp extern "C" JNIEXPORT
 
+StJNIEnv::StJNIEnv(JavaVM* theJavaVM)
+: myJavaVM(theJavaVM),
+  myJniEnv(NULL),
+  myToDetach(false) {
+    if(myJavaVM == NULL) {
+        return;
+    }
+
+    void* aJniEnv = NULL;
+    switch(myJavaVM->GetEnv(&aJniEnv, JNI_VERSION_1_6)) {
+        case JNI_EDETACHED: {
+            if(myJavaVM->AttachCurrentThread(&myJniEnv, NULL) < 0) {
+                myJniEnv = NULL;
+                ST_ERROR_LOG("Failed to attach working thread to Java VM");
+                return;
+            }
+            myToDetach = true;
+            break;
+        }
+        case JNI_OK: {
+            myJniEnv   = (JNIEnv* )aJniEnv;
+            myToDetach = false;
+            break;
+        }
+        case JNI_EVERSION: {
+            ST_ERROR_LOG("Failed to attach working thread to Java VM - JNI version is not supported");
+            break;
+        }
+        default: {
+            ST_ERROR_LOG("Failed to attach working thread to Java VM");
+            break;
+        }
+    }
+}
+
+StJNIEnv::~StJNIEnv() {
+    detach();
+}
+
+void StJNIEnv::detach() {
+    if(myJavaVM != NULL
+    && myJniEnv != NULL
+    && myToDetach) {
+        myJavaVM->DetachCurrentThread();
+    }
+
+    myJniEnv   = NULL;
+    myToDetach = false;
+}
+
 StCString StAndroidGlue::getCommandIdName(StAndroidGlue::CommandId theCmd) {
     switch(theCmd) {
         case StAndroidGlue::CommandId_InputChanged:  return stCString("InputChanged");
