@@ -188,8 +188,11 @@
 
                 <data android:pathPattern=".*\\.mpo" />
                 <data android:pathPattern=".*\\.jps" />
+                <data android:pathPattern=".*\\.j2k" />
+                <data android:pathPattern=".*\\.jp2" />
                 <data android:pathPattern=".*\\.pns" />
                 <data android:pathPattern=".*\\.webp" />
+                <data android:pathPattern=".*\\.webpll" />
             </intent-filter>
         </activity>
         <!-- <activity android:name="com.sview.MainActivity" android:label="@string/app_name" android:configChanges="orientation|keyboardHidden"><intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter></activity> -->
