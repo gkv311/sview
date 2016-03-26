@@ -1013,9 +1013,9 @@ void StImageViewer::doFileDrop(const StDNDropEvent& theEvent) {
     }
 
     const StString aFile1 = theEvent.Files[0];
-    if(!myPlayList->checkExtension(aFile1)) {
+    /*if(!myPlayList->checkExtension(aFile1)) {
         return;
-    } else if(theEvent.NbFiles == 1) {
+    } else */if(theEvent.NbFiles == 1) {
         myPlayList->open(aFile1);
         doUpdateStateLoading();
         myLoader->doLoadNext();

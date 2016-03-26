@@ -1486,7 +1486,7 @@ void StMoviePlayer::doFileDrop(const StDNDropEvent& theEvent) {
         }
 
         // just open the path
-        if(myPlayList->checkExtension(aFile1)) {
+        //if(myPlayList->checkExtension(aFile1)) {
             const size_t aRecent = myPlayList->findRecent(aFile1);
             if(aRecent != size_t(-1)) {
                 doOpenRecent(aRecent);
@@ -1497,7 +1497,7 @@ void StMoviePlayer::doFileDrop(const StDNDropEvent& theEvent) {
             doUpdateStateLoading();
             myVideo->pushPlayEvent(ST_PLAYEVENT_RESUME);
             myVideo->doLoadNext();
-        }
+        //}
         return;
     } else if(theEvent.NbFiles == 2
           && !StFolder::isFolder(aFile2)
