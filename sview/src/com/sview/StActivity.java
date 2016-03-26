@@ -135,7 +135,7 @@ public class StActivity extends NativeActivity implements SensorEventListener {
         mySensorOri = mySensorMgr.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
         if(mySensorOri == null) {
             myIsPoorOri = true;
-            mySensorOri = mySensorMgr.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+            mySensorOri = mySensorMgr.getDefaultSensor(Sensor_TYPE_ORIENTATION_DEPRECATED);
         } else {
             myIsPoorOri = mySensorMgr.getDefaultSensor(Sensor.TYPE_GYROSCOPE) == null;
         }
@@ -237,7 +237,7 @@ public class StActivity extends NativeActivity implements SensorEventListener {
         }
 
         switch(theEvent.sensor.getType()) {
-            case Sensor.TYPE_ORIENTATION: {
+            case Sensor_TYPE_ORIENTATION_DEPRECATED: {
                 cppSetOrientation(myCppGlue, theEvent.values[0], theEvent.values[1], theEvent.values[2], aScreenRot);
                 return;
             }
@@ -462,6 +462,9 @@ public class StActivity extends NativeActivity implements SensorEventListener {
                                           float theScreenRotDeg);
 
 //endregion
+
+    @SuppressWarnings("deprecation")
+    protected static final int Sensor_TYPE_ORIENTATION_DEPRECATED = Sensor.TYPE_ORIENTATION;
 
 //region class fields
 
