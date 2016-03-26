@@ -151,6 +151,16 @@
                 <data android:pathPattern=".*\\.WAV" />
                 <data android:pathPattern=".*\\.WMA" />
             </intent-filter>
+            <!--  Filter for all unknown files (e.g. GMAIL attachments) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:mimeType="application/octet-stream"/>
+                <data android:scheme="file"/>
+                <data android:scheme="content"/>
+                <data android:host="*"/>
+            </intent-filter>
         </activity>
         <!-- Image Viewer -->
         <activity android:name="com.sview.StImageActivity"
@@ -193,6 +203,16 @@
                 <data android:pathPattern=".*\\.pns" />
                 <data android:pathPattern=".*\\.webp" />
                 <data android:pathPattern=".*\\.webpll" />
+            </intent-filter>
+            <!--  Filter for all unknown files (e.g. GMAIL attachments) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:mimeType="application/octet-stream"/>
+                <data android:scheme="file"/>
+                <data android:scheme="content"/>
+                <data android:host="*"/>
             </intent-filter>
         </activity>
         <!-- <activity android:name="com.sview.MainActivity" android:label="@string/app_name" android:configChanges="orientation|keyboardHidden"><intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter></activity> -->
