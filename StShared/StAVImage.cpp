@@ -269,6 +269,7 @@ bool StAVImage::loadExtra(const StString& theFilePath,
             }
 
             if(theDataPtr != NULL) {
+                aMemIoCtx = new StAVIOMemContext();
                 aMemIoCtx->wrapBuffer(theDataPtr, theDataSize);
                 myFormatCtx = avformat_alloc_context();
                 myFormatCtx->pb = aMemIoCtx->getAvioContext();

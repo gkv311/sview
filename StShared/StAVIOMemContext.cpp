@@ -7,6 +7,11 @@
  */
 
 #include <StAV/StAVIOMemContext.h>
+#include <StStrings/StLogger.h>
+
+extern "C" {
+    #include <libavutil/error.h>
+};
 
 StAVIOMemContext::StAVIOMemContext()
 : mySrcBuffer(NULL),
@@ -38,13 +43,17 @@ int StAVIOMemContext::read(uint8_t* theBuf,
     || theBufSize <= 0
     || mySrcBuffer == NULL
     || mySrcSize == 0) {
-        return 0;
+        return -1;
     }
 
     int aNbRead = theBufSize;
     if(myPosition + theBufSize > mySrcSize) {
         aNbRead = mySrcSize - myPosition;
     }
+    if(aNbRead == 0) {
+        return AVERROR_EOF;
+    }
+
     stMemCpy(theBuf, mySrcBuffer + myPosition, aNbRead);
     myPosition += aNbRead;
     return aNbRead;
@@ -56,13 +65,17 @@ int StAVIOMemContext::write(uint8_t* theBuf,
     || theBufSize <= 0
     || mySrcBuffer == NULL
     || mySrcSize == 0) {
-        return 0;
+        return -1;
     }
 
     int aNbWritten = theBufSize;
     if(myPosition + theBufSize > mySrcSize) {
         aNbWritten = mySrcSize - myPosition;
     }
+    if(aNbWritten == 0) {
+        return AVERROR_EOF;
+    }
+
     stMemCpy(mySrcBuffer + myPosition, theBuf, aNbWritten);
     myPosition += aNbWritten;
     return aNbWritten;

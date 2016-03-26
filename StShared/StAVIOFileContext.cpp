@@ -8,6 +8,10 @@
 
 #include <StAV/StAVIOFileContext.h>
 
+extern "C" {
+    #include <libavutil/error.h>
+};
+
 StAVIOFileContext::StAVIOFileContext()
 : myFile(NULL) {
     //
@@ -37,18 +41,26 @@ bool StAVIOFileContext::openFromDescriptor(int theFD, const char* theMode) {
 int StAVIOFileContext::read(uint8_t* theBuf,
                             int      theBufSize) {
 
-    int aNbRead = myFile != NULL
-                ? (int )::fread(theBuf, 1, theBufSize, myFile)
-                : 0;
+    if(myFile == NULL) {
+        return -1;
+    }
+
+    int aNbRead = (int )::fread(theBuf, 1, theBufSize, myFile);
+    if(aNbRead == 0
+    && feof(myFile) != 0) {
+        return AVERROR_EOF;
+    }
+
     return aNbRead;
 }
 
 int StAVIOFileContext::write(uint8_t* theBuf,
                              int      theBufSize) {
-    int aNbWritten = myFile != NULL
-                   ? (int )::fwrite(theBuf, 1, theBufSize, myFile)
-                   : 0;
-    return aNbWritten;
+    if(myFile == NULL) {
+        return -1;
+    }
+
+    return (int )::fwrite(theBuf, 1, theBufSize, myFile);
 }
 
 int64_t StAVIOFileContext::seek(int64_t theOffset,
