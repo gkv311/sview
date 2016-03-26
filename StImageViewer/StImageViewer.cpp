@@ -483,6 +483,15 @@ void StImageViewer::saveAllParams() {
             aLastR = aFile->getValue(1)->getPath();
         }
     }
+
+    // skip temporary URLs
+    if(StFileNode::isContentProtocolPath(aLastL)) {
+        aLastL.clear();
+        aLastR.clear();
+    } else if(StFileNode::isContentProtocolPath(aLastR)) {
+        aLastR.clear();
+    }
+
     mySettings->saveString(ST_SETTING_RECENT_L, aLastL);
     mySettings->saveString(ST_SETTING_RECENT_R, aLastR);
     mySettings->flush();

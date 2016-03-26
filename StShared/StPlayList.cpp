@@ -912,7 +912,12 @@ const StHandle<StPlayList::StRecentItem>& StPlayList::addRecentFile(const StFile
     }
 
     StHandle<StRecentItem> aNewRecent = new StRecentItem();
-    aNewRecent->File = theFile.detach();
+    if(StFileNode::isContentProtocolPath(theFile.getPath())) {
+        // ignore temporary URLs
+        aNewRecent->File = new StFileNode();
+    } else {
+        aNewRecent->File = theFile.detach();
+    }
     if(theToFront) {
         myRecent.push_front(aNewRecent);
     } else {
