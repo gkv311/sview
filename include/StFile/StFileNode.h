@@ -113,7 +113,7 @@ class StFileNode : public StNode {
      *   C:\folder\file
      * @return true if DOS path syntax detected.
      */
-    static bool isDosPath(const StCString& thePath) {
+    ST_LOCAL static bool isDosPath(const StCString& thePath) {
         return thePath[0] != stUtf32_t('\0') && thePath[1] == stUtf32_t(':');
     }
 
@@ -124,7 +124,7 @@ class StFileNode : public StNode {
      *   \\?\D:\very long path
      * @return true if extended-length NT path syntax detected.
      */
-    static bool isNtExtendedPath(const StCString& thePath) {
+    ST_LOCAL static bool isNtExtendedPath(const StCString& thePath) {
         return thePath.isStartsWith(stCString("\\\\?\\"));
     }
 
@@ -134,7 +134,7 @@ class StFileNode : public StNode {
      *   \\sever\share\file
      * @return true if UNC path syntax detected.
      */
-    static bool isUncPath(const StCString& thePath) {
+    ST_LOCAL static bool isUncPath(const StCString& thePath) {
         return thePath.isStartsWith(stCString("\\\\"));
     }
 
@@ -144,7 +144,7 @@ class StFileNode : public StNode {
      *   \\?\UNC\server\share
      * @return true if extended-length UNC path syntax detected.
      */
-    static bool isUncExtendedPath(const StCString& thePath) {
+    ST_LOCAL static bool isUncExtendedPath(const StCString& thePath) {
         return thePath.isStartsWith(stCString("\\\\?\\UNC\\"));
     }
 
@@ -154,8 +154,18 @@ class StFileNode : public StNode {
      *   /media/cdrom/file
      * @return true if UNIX path syntax detected.
      */
-    static bool isUnixPath(const StCString& thePath) {
+    ST_LOCAL static bool isUnixPath(const StCString& thePath) {
         return thePath[0] == stUtf32_t('/') && thePath[1] != stUtf32_t('/');
+    }
+
+    /**
+     * Detect special URLs on Android platform.
+     * Sample path:
+     *   content://filename
+     * @return true if content path syntax detected
+     */
+    ST_LOCAL static bool isContentProtocolPath(const StCString& thePath) {
+        return thePath.isStartsWith(stCString("content://"));
     }
 
     /**

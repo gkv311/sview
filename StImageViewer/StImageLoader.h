@@ -28,6 +28,7 @@
 #include <StSlots/StSignal.h>
 #include <StStrings/StLangMap.h>
 #include <StThreads/StProcess.h>
+#include <StThreads/StResourceManager.h>
 
 class StThread;
 
@@ -70,12 +71,13 @@ class StImageLoader {
         return myMimeList;
     }
 
-    ST_LOCAL StImageLoader(const StImageFile::ImageClass     theImageLib,
-                           const StHandle<StMsgQueue>&       theMsgQueue,
-                           const StHandle<StLangMap>&        theLangMap,
-                           const StHandle<StPlayList>&       thePlayList,
-                           const StHandle<StGLTextureQueue>& theTextureQueue,
-                           const GLint                       theMaxTexDim);
+    ST_LOCAL StImageLoader(const StImageFile::ImageClass      theImageLib,
+                           const StHandle<StResourceManager>& theResMgr,
+                           const StHandle<StMsgQueue>&        theMsgQueue,
+                           const StHandle<StLangMap>&         theLangMap,
+                           const StHandle<StPlayList>&        thePlayList,
+                           const StHandle<StGLTextureQueue>&  theTextureQueue,
+                           const GLint                        theMaxTexDim);
     ST_LOCAL ~StImageLoader();
 
     ST_LOCAL inline const StHandle<StGLTextureQueue>& getTextureQueue() const {
@@ -173,18 +175,19 @@ class StImageLoader {
 
         private:
 
-    const StMIMEList           myMimeList;
-    StHandle<StThread>         myThread;        //!< main loop thread
-    StHandle<StLangMap>        myLangMap;       //!< translations dictionary
-    StHandle<StPlayList>       myPlayList;      //!< play list
-    mutable StMutex            myLock;          //!< lock to access not thread-safe properties
-    StCondition                myLoadNextEvent;
-    StFormat                   myStFormatByUser;//!< target source format (auto-detect by default)
-    GLint                      myMaxTexDim;     //!< value for GL_MAX_TEXTURE_SIZE
-    StHandle<StGLTextureQueue> myTextureQueue;  //!< decoded frames queue
-    StHandle<StImageInfo>      myImgInfo;       //!< info about currently loaded image
-    StHandle<StImageInfo>      myInfoToSave;    //!< modified info to be saved
-    StHandle<StMsgQueue>       myMsgQueue;      //!< messages queue
+    const StMIMEList            myMimeList;
+    StHandle<StThread>          myThread;        //!< main loop thread
+    StHandle<StResourceManager> myResMgr;        //!< resource manager
+    StHandle<StLangMap>         myLangMap;       //!< translations dictionary
+    StHandle<StPlayList>        myPlayList;      //!< play list
+    mutable StMutex             myLock;          //!< lock to access not thread-safe properties
+    StCondition                 myLoadNextEvent;
+    StFormat                    myStFormatByUser;//!< target source format (auto-detect by default)
+    GLint                       myMaxTexDim;     //!< value for GL_MAX_TEXTURE_SIZE
+    StHandle<StGLTextureQueue>  myTextureQueue;  //!< decoded frames queue
+    StHandle<StImageInfo>       myImgInfo;       //!< info about currently loaded image
+    StHandle<StImageInfo>       myInfoToSave;    //!< modified info to be saved
+    StHandle<StMsgQueue>        myMsgQueue;      //!< messages queue
 
     volatile StImageFile::ImageClass myImageLib;
     volatile Action            myAction;

@@ -591,7 +591,7 @@ bool StImageViewer::init() {
     StString anImgLibStr;
     mySettings->loadString(ST_SETTING_IMAGELIB, anImgLibStr);
     params.imageLib = StImageFile::imgLibFromString(anImgLibStr);
-    myLoader = new StImageLoader(params.imageLib, myMsgQueue, myLangMap, myPlayList,
+    myLoader = new StImageLoader(params.imageLib, myResMgr, myMsgQueue, myLangMap, myPlayList,
                                  myGUI->myImage->getTextureQueue(), myContext->getMaxTextureSize());
     myLoader->signals.onLoaded.connect(this, &StImageViewer::doLoaded);
     myLoader->setCompressMemory(myWindow->isMobile());

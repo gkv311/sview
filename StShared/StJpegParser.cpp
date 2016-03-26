@@ -162,9 +162,10 @@ void StJpegParser::reset() {
     stMemZero(myOffsets, sizeof(myOffsets));
 }
 
-bool StJpegParser::readFile(const StCString& theFilePath) {
+bool StJpegParser::readFile(const StCString& theFilePath,
+                            const int        theOpenedFd) {
     reset();
-    if(!StRawFile::readFile(theFilePath)) {
+    if(!StRawFile::readFile(theFilePath, theOpenedFd)) {
         return false;
     }
 

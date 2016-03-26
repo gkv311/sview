@@ -46,13 +46,15 @@ namespace {
 
 }
 
-StImageLoader::StImageLoader(const StImageFile::ImageClass     theImageLib,
-                             const StHandle<StMsgQueue>&       theMsgQueue,
-                             const StHandle<StLangMap>&        theLangMap,
-                             const StHandle<StPlayList>&       thePlayList,
-                             const StHandle<StGLTextureQueue>& theTextureQueue,
-                             const GLint                       theMaxTexDim)
+StImageLoader::StImageLoader(const StImageFile::ImageClass      theImageLib,
+                             const StHandle<StResourceManager>& theResMgr,
+                             const StHandle<StMsgQueue>&        theMsgQueue,
+                             const StHandle<StLangMap>&         theLangMap,
+                             const StHandle<StPlayList>&        thePlayList,
+                             const StHandle<StGLTextureQueue>&  theTextureQueue,
+                             const GLint                        theMaxTexDim)
 : myMimeList(ST_IMAGES_MIME_STRING),
+  myResMgr(theResMgr),
   myLangMap(theLangMap),
   myPlayList(thePlayList),
   myLoadNextEvent(false),
@@ -237,10 +239,15 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
     if(anImgType == StImageFile::ST_TYPE_MPO
     || anImgType == StImageFile::ST_TYPE_JPEG
     || anImgType == StImageFile::ST_TYPE_JPS) {
+        int aFileDescriptor = -1;
+        if(StFileNode::isContentProtocolPath(aFilePath)) {
+            aFileDescriptor = myResMgr->openFileDescriptor(aFilePath);
+        }
+
         // special procedure to divide MPO (Multi Picture Object)
         StJpegParser aParser;
         double anHParallax = 0.0; // parallax in percents
-        const bool isParsed = aParser.readFile(aFilePath);
+        const bool isParsed = aParser.readFile(aFilePath, aFileDescriptor);
 
         StHandle<StJpegParser::Image> anImg1, anImg2;
         size_t aMaxSizeX = 0;
@@ -341,16 +348,33 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         const StString aFilePathRight = theSource->getValue(1)->getPath();
 
         // loading image with format autodetection
-        if(!anImageFileL->load(aFilePathLeft)) {
+        StRawFile aRawFileL;
+        if(StFileNode::isContentProtocolPath(aFilePathLeft)) {
+            int aFileDescriptor = myResMgr->openFileDescriptor(aFilePathLeft);
+            aRawFileL.readFile(aFilePathLeft, aFileDescriptor);
+        }
+        if(!anImageFileL->load(aFilePathLeft, anImgType, (uint8_t* )aRawFileL.getBuffer(), (int )aRawFileL.getSize())) {
             processLoadFail(formatError(aFilePathLeft, anImageFileL->getState()));
             return false;
         }
-        if(!anImageFileR->load(aFilePathRight)) {
+        aRawFileL.freeBuffer();
+
+        StRawFile aRawFileR;
+        if(StFileNode::isContentProtocolPath(aFilePathRight)) {
+            int aFileDescriptor = myResMgr->openFileDescriptor(aFilePathRight);
+            aRawFileR.readFile(aFilePathRight, aFileDescriptor);
+        }
+        if(!anImageFileR->load(aFilePathRight, anImgType, (uint8_t* )aRawFileR.getBuffer(), (int )aRawFileR.getSize())) {
             processLoadFail(formatError(aFilePathRight, anImageFileR->getState()));
             return false;
         }
     } else {
-        if(!anImageFileL->load(aFilePath, anImgType)) {
+        StRawFile aRawFile;
+        if(StFileNode::isContentProtocolPath(aFilePath)) {
+            int aFileDescriptor = myResMgr->openFileDescriptor(aFilePath);
+            aRawFile.readFile(aFilePath, aFileDescriptor);
+        }
+        if(!anImageFileL->load(aFilePath, anImgType, (uint8_t* )aRawFile.getBuffer(), (int )aRawFile.getSize())) {
             processLoadFail(formatError(aFilePath, anImageFileL->getState()));
             return false;
         }

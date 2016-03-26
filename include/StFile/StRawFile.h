@@ -82,9 +82,13 @@ class StRawFile : public StFileNode {
 
     /**
      * Open the file handle for read or write operation.
+     * @param theFlags    read/write flags
+     * @param theFilePath file path to open (when empty, the path specified in constructor will be used)
+     * @param theOpenedFd when specified, already opened file descriptor will be used; passed descriptor will be automatically closed
      */
     ST_CPPEXPORT bool openFile(StRawFile::ReadWrite theFlags,
-                               const StCString&     theFilePath = stCString(""));
+                               const StCString&     theFilePath = stCString(""),
+                               const int            theOpenedFd = -1);
 
     /**
      * Close file handle
@@ -113,16 +117,20 @@ class StRawFile : public StFileNode {
     /**
      * Fill the buffer with file content.
      * @param theFilePath the file path
+     * @param theOpenedFd when specified, already opened file descriptor will be used; passed descriptor will be automatically closed
      * @return true if file was read
      */
-    ST_CPPEXPORT virtual bool readFile(const StCString& theFilePath = stCString(""));
+    ST_CPPEXPORT virtual bool readFile(const StCString& theFilePath = stCString(""),
+                                       const int        theOpenedFd = -1);
 
     /**
      * Write the buffer into the file.
      * @param theFilePath the file path
+     * @param theOpenedFd when specified, already opened file descriptor will be used; passed descriptor will be automatically closed
      * @return true if file was stored
      */
-    ST_CPPEXPORT bool saveFile(const StCString& theFilePath = stCString(""));
+    ST_CPPEXPORT bool saveFile(const StCString& theFilePath = stCString(""),
+                               const int        theOpenedFd = -1);
 
     /**
      * Read the text file and return it as a string.

@@ -118,7 +118,8 @@ class StJpegParser : public StRawFile {
     /**
      * Read the file content.
      */
-    ST_CPPEXPORT virtual bool readFile(const StCString& theFilePath);
+    ST_CPPEXPORT virtual bool readFile(const StCString& theFilePath,
+                                       const int        theOpenedFd = -1) ST_ATTR_OVERRIDE;
 
     /**
      * Determines images count.

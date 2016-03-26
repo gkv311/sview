@@ -13,6 +13,7 @@
 #include <StFile/StRawFile.h>
 #include <StImage/StJpegParser.h>
 #include <StStrings/StLogger.h>
+#include <StAV/StAVIOMemContext.h>
 
 bool StAVImage::init() {
     return stAV::init();
@@ -239,8 +240,16 @@ bool StAVImage::loadExtra(const StString& theFilePath,
         }
     }
 
+    StHandle<StAVIOMemContext> aMemIoCtx;
     if(theImageType == ST_TYPE_NONE
     || (theDataPtr == NULL && !StFileNode::isFileExists(theFilePath))) {
+        if(theDataPtr != NULL) {
+            aMemIoCtx = new StAVIOMemContext();
+            aMemIoCtx->wrapBuffer(theDataPtr, theDataSize);
+            myFormatCtx = avformat_alloc_context();
+            myFormatCtx->pb = aMemIoCtx->getAvioContext();
+        }
+
         // open image file and detect its type, its could be non local file!
     #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 2, 0))
         int avErrCode = avformat_open_input(&myFormatCtx, theFilePath.toCString(), myImageFormat, NULL);
@@ -259,6 +268,11 @@ bool StAVImage::loadExtra(const StString& theFilePath,
             #endif
             }
 
+            if(theDataPtr != NULL) {
+                aMemIoCtx->wrapBuffer(theDataPtr, theDataSize);
+                myFormatCtx = avformat_alloc_context();
+                myFormatCtx->pb = aMemIoCtx->getAvioContext();
+            }
         #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 2, 0))
             avErrCode = avformat_open_input(&myFormatCtx, theFilePath.toCString(), NULL, NULL);
         #else

@@ -252,7 +252,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
     AVFormatContext* aFormatCtx = NULL;
 
     StHandle<StAVIOContext> anIOContext;
-    if(theFileToLoad.isStartsWith(stCString("content://"))) {
+    if(StFileNode::isContentProtocolPath(theFileToLoad)) {
         int aFileDescriptor = myResMgr->openFileDescriptor(theFileToLoad);
         if(aFileDescriptor != -1) {
             StHandle<StAVIOFileContext> aFileCtx = new StAVIOFileContext();

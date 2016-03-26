@@ -44,12 +44,22 @@ StRawFile::~StRawFile() {
 }
 
 bool StRawFile::openFile(StRawFile::ReadWrite theFlags,
-                         const StCString&     theFilePath) {
+                         const StCString&     theFilePath,
+                         const int            theOpenedFd) {
     // close previously opened file handle if any
     closeFile();
 
     if(!theFilePath.isEmpty()) {
         setSubPath(theFilePath);
+    }
+
+    if(theOpenedFd != -1) {
+    #ifdef _WIN32
+        myFileHandle = ::_fdopen(theOpenedFd, (theFlags == StRawFile::WRITE) ?  "wb" :  "rb");
+    #else
+        myFileHandle =  ::fdopen(theOpenedFd, (theFlags == StRawFile::WRITE) ?  "wb" :  "rb");
+    #endif
+        return myFileHandle != NULL;
     }
 
     StString aFilePath = getPath();
@@ -112,10 +122,11 @@ void StRawFile::freeBuffer() {
     myBuffSize = 0;
 }
 
-bool StRawFile::readFile(const StCString& theFilePath) {
+bool StRawFile::readFile(const StCString& theFilePath,
+                         const int        theOpenedFd) {
     freeBuffer();
 
-    if(!openFile(StRawFile::READ, theFilePath)) {
+    if(!openFile(StRawFile::READ, theFilePath, theOpenedFd)) {
         return false;
     }
 
@@ -222,8 +233,9 @@ bool StRawFile::readFile(const StCString& theFilePath) {
     return true;
 }
 
-bool StRawFile::saveFile(const StCString& theFilePath) {
-    if(!openFile(StRawFile::WRITE, theFilePath)) {
+bool StRawFile::saveFile(const StCString& theFilePath,
+                         const int        theOpenedFd) {
+    if(!openFile(StRawFile::WRITE, theFilePath, theOpenedFd)) {
         return false;
     }
 
