@@ -232,6 +232,8 @@
 		</Linker>
 		<Unit filename="StAVFrame.cpp" />
 		<Unit filename="StAVImage.cpp" />
+		<Unit filename="StAVIOContext.cpp" />
+		<Unit filename="StAVIOFileContext.cpp" />
 		<Unit filename="StAVPacket.cpp" />
 		<Unit filename="StAVVideoMuxer.cpp" />
 		<Unit filename="StAction.cpp" />
@@ -358,6 +360,8 @@
 		<Unit filename="../include/StAV/StAVBufferPool.h" />
 		<Unit filename="../include/StAV/StAVFrame.h" />
 		<Unit filename="../include/StAV/StAVImage.h" />
+		<Unit filename="../include/StAV/StAVIOContext.h" />
+		<Unit filename="../include/StAV/StAVIOFileContext.h" />
 		<Unit filename="../include/StAV/StAVPacket.h" />
 		<Unit filename="../include/StAV/StAVVideoMuxer.h" />
 		<Unit filename="../include/StAV/stAV.h" />
