@@ -10,6 +10,7 @@
 #if defined(__ANDROID__)
 
 #include <StCore/StAndroidGlue.h>
+#include <StCore/StAndroidResourceManager.h>
 
 #include <StCore/StApplication.h>
 #include <StCore/StSearchMonitors.h>
@@ -67,6 +68,21 @@ void StJNIEnv::detach() {
 
     myJniEnv   = NULL;
     myToDetach = false;
+}
+
+StAndroidResourceManager::StAndroidResourceManager(StAndroidGlue*  theGlueApp,
+                                                   const StString& theAppName)
+: StResourceManager(theGlueApp->getActivity()->assetManager, theAppName),
+  myGlueApp(theGlueApp) {
+    //
+}
+
+StAndroidResourceManager::~StAndroidResourceManager() {
+    //
+}
+
+int StAndroidResourceManager::openFileDescriptor(const StString& thePath) const {
+    return myGlueApp->openFileDescriptor(thePath);
 }
 
 StCString StAndroidGlue::getCommandIdName(StAndroidGlue::CommandId theCmd) {
@@ -274,6 +290,30 @@ void StAndroidGlue::fetchState(StString&             theNewFile,
         theNewFile = myDndPath;
         myDndPath.clear();
     }
+}
+
+int StAndroidGlue::openFileDescriptor(const StString& thePath) {
+    if(myJavaVM == NULL) {
+        return -1;
+    }
+
+    StJNIEnv aJniEnv(myJavaVM);
+    if(aJniEnv.isNull()) {
+        return -1;
+    }
+
+    jclass    aJClass_Activity = aJniEnv->GetObjectClass(myActivity->clazz);
+    jmethodID aJMet_openFileDescriptor = aJniEnv->GetMethodID(aJClass_Activity, "openFileDescriptor", "(Ljava/lang/String;)I");
+    if(aJMet_openFileDescriptor == NULL) {
+        ST_ERROR_LOG("StAndroidGlue::openFileDescriptor() - method is unavailable!");
+        return -1;
+    }
+
+    jstring aJStr = aJniEnv->NewStringUTF(thePath.toCString());
+    int aFileDesc = aJniEnv->CallIntMethod(myActivity->clazz, aJMet_openFileDescriptor, aJStr);
+    aJniEnv->DeleteLocalRef(aJStr);
+
+    return aFileDesc;
 }
 
 void StAndroidGlue::start() {

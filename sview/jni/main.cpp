@@ -1,7 +1,7 @@
 /**
  * This is source code for sView
  *
- * Copyright © Kirill Gavrilov, 2014-2015
+ * Copyright © Kirill Gavrilov, 2014-2016
  */
 
 #if defined(__ANDROID__)
@@ -9,6 +9,7 @@
 #include <jni.h>
 
 #include <StCore/StAndroidGlue.h>
+#include <StCore/StAndroidResourceManager.h>
 
 #include "../../StImageViewer/StImageViewer.h"
 #include "../StImageViewer/StImagePluginInfo.h"
@@ -55,7 +56,7 @@ class StMainGlue : public StAndroidGlue {
         anInfo->setPath(myDndPath);
         myDndPath.clear();
 
-        StHandle<StResourceManager> aResMgr = new StResourceManager(myActivity->assetManager);
+        StHandle<StResourceManager> aResMgr = new StAndroidResourceManager(this);
         aResMgr->setFolder(StResourceManager::FolderId_SdCard,
                            getStoragePath(myThJniEnv, "sdcard"));
         aResMgr->setFolder(StResourceManager::FolderId_Downloads,

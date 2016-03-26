@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2014-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -321,6 +321,10 @@ void StResourceManager::listSubFolders(const StString&        theFolder,
     if(aFileDir.size() != 0) {
         return;
     }
+}
+
+int StResourceManager::openFileDescriptor(const StString& thePath) const {
+    return -1;
 }
 
 StResource::StResource(const StString& theName,

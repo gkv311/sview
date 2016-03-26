@@ -1,5 +1,5 @@
 /**
- * Copyright © 2014-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2014-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -179,6 +179,11 @@ class StResourceManager {
      */
     ST_CPPEXPORT void listSubFolders(const StString&        theFolder,
                                      StArrayList<StString>& theSubFolder) const;
+
+    /**
+     * Access resource with specified name.
+     */
+    ST_CPPEXPORT virtual int openFileDescriptor(const StString& thePath) const;
 
         protected:
 

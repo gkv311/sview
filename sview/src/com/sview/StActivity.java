@@ -255,6 +255,7 @@ public class StActivity extends NativeActivity implements SensorEventListener {
 
     /**
      * Read the open path from current intent and nullify it.
+     * This method is called by StAndroidGlue from C++.
      */
     protected void readOpenPath() {
         if(myCppGlue == 0) {
@@ -292,10 +293,36 @@ public class StActivity extends NativeActivity implements SensorEventListener {
                 //e.printStackTrace();
             } catch(IOException e) {
                 //e.printStackTrace();
+            } catch(SecurityException e) {
+                //e.printStackTrace();
             }
         }
 
         cppSetOpenPath(myCppGlue, anOpenPath, anOpenMime, isLaunchedFromHistory);
+    }
+
+    /**
+     * Open file descriptor for specified path, including content:// URLs.
+     * This method is called by StAndroidGlue from C++.
+     * @return file descriptor, which should be closed by caller, or -1 on error
+     */
+    protected int openFileDescriptor(String thePath) {
+        if(thePath.isEmpty()) {
+            return -1;
+        }
+
+        android.content.ContentResolver aContentResolver = getContentResolver();
+        android.net.Uri anUri = android.net.Uri.parse(thePath);
+        try {
+            android.os.ParcelFileDescriptor aParcelFile = aContentResolver.openFileDescriptor(anUri, "r");
+            return aParcelFile.detachFd();
+        } catch(FileNotFoundException e) {
+            //e.printStackTrace();
+        } catch(SecurityException e) {
+            //e.printStackTrace();
+        }
+
+        return -1;
     }
 
     /**

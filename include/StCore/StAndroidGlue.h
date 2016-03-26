@@ -229,6 +229,12 @@ class StAndroidGlue {
      */
     ST_LOCAL int getMemoryClass() const { return myMemoryClassMiB; }
 
+    /**
+     * Open file descriptor for specified path using contentResolver, including content:// URLs.
+     * @return file descriptor, which should be closed by caller, or -1 on error
+     */
+    ST_CPPEXPORT int openFileDescriptor(const StString& thePath);
+
         public:
 
     /**
