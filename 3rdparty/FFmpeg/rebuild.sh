@@ -79,6 +79,9 @@ if [ "$aSystem" == "Darwin" ]; then
   OUTPUT_FOLDER_BIN="$OUTPUT_FOLDER/MacOS"
   OUTPUT_FOLDER_LIB="$OUTPUT_FOLDER/Frameworks"
 fi
+if [ "$rebuildAndroid" == "true" ]; then
+  OUTPUT_FOLDER_LIB="$OUTPUT_FOLDER/libs/armeabi-v7a"
+fi
 rm -f -r $OUTPUT_FOLDER
 mkdir -p $OUTPUT_FOLDER
 mkdir -p $OUTPUT_FOLDER_BIN
