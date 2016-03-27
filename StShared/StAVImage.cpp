@@ -49,7 +49,9 @@ int StAVImage::getAVPixelFormat(const StImage& theImage) {
         case StImage::ImgColor_YUV: {
             size_t aDelimX = (theImage.getPlane(1).getSizeX() > 0) ? (aPlane0.getSizeX() / theImage.getPlane(1).getSizeX()) : 1;
             size_t aDelimY = (theImage.getPlane(1).getSizeY() > 0) ? (aPlane0.getSizeY() / theImage.getPlane(1).getSizeY()) : 1;
-            if(aDelimX == 1 && aDelimY == 1) {
+            if(theImage.getPlane(1).getFormat() == StImagePlane::ImgUV) {
+                return stAV::PIX_FMT::NV12;
+            } else if(aDelimX == 1 && aDelimY == 1) {
                 switch(theImage.getColorScale()) {
                     case StImage::ImgScale_Mpeg:
                         return aPlane0.getFormat() == StImagePlane::ImgGray16

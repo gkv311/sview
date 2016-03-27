@@ -67,6 +67,8 @@ class StImage {
         ImgScale_Mpeg10,  //!< YUV 10 bits in 16 bits    Y   64..940;   U and V   64..960
         ImgScale_Jpeg9,   //!< 9  bits in 16 bits 0...511
         ImgScale_Jpeg10,  //!< 10 bits in 16 bits 0..1023
+        ImgScale_NvFull,  //!< full range (use all bits)
+        ImgScale_NvMpeg,  //!< YUV  8 bits per component Y   16..235;   U and V   16..240
     } ImgColorScale;
 
     ST_CPPEXPORT static StString formatImgColorModel(ImgColorModel theColorModel);

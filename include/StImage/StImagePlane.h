@@ -39,6 +39,7 @@ class StImagePlane {
         ImgBGRF,        //!< same as RGBF but with different components order
         ImgRGBAF,       //!< 4 floats (16-bytes) RGBA image plane
         ImgBGRAF,       //!< same as RGBAF but with different components order
+        ImgUV,          //!< 2 bytes packed UV image plane
     } ImgFormat;
 
     ST_CPPEXPORT static StString formatImgFormat(ImgFormat theImgFormat);

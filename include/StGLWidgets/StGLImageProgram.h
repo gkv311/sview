@@ -74,6 +74,8 @@ class StGLImageProgram : public StGLProgramMatrix<1, 5, StGLMeshProgram> {
         FragToRgb_FromYuv9Mpeg,
         FragToRgb_FromYuv10Full,
         FragToRgb_FromYuv10Mpeg,
+        FragToRgb_FromYuvNvFull,
+        FragToRgb_FromYuvNvMpeg,
         FragToRgb_CUBEMAP,
         //FragToRgb_NB = FragToRgb_CUBEMAP * 2
     };

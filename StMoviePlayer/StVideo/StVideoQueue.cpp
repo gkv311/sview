@@ -546,6 +546,24 @@ void StVideoQueue::prepareFrame(const StFormat theSrcFormat) {
 
         myFrameBufRef->moveReferenceFrom(myFrame.Frame);
         myDataAdp.setBufferCounter(myFrameBufRef);
+    } else if(aPixFmt == stAV::PIX_FMT::NV12) {
+        aDimsYUV.isFullScale = false;
+    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(52, 29, 0))
+        if(myCodecCtx->color_range == AVCOL_RANGE_JPEG) {
+            // there no color range information in the AVframe (yet)
+            aDimsYUV.isFullScale = true;
+        }
+    #endif
+        myDataAdp.setColorScale(aDimsYUV.isFullScale ? StImage::ImgScale_NvFull : StImage::ImgScale_NvMpeg);
+        myDataAdp.setColorModel(StImage::ImgColor_YUV);
+        myDataAdp.setPixelRatio(getPixelRatio());
+        myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgGray, myFrame.getPlane(0),
+                                             size_t(aFrameSizeX), size_t(aFrameSizeY), myFrame.getLineSize(0));
+        myDataAdp.changePlane(1).initWrapper(StImagePlane::ImgUV, myFrame.getPlane(1),
+                                             size_t(aFrameSizeX / 2), size_t(aFrameSizeY / 2), myFrame.getLineSize(1));
+
+        myFrameBufRef->moveReferenceFrom(myFrame.Frame);
+        myDataAdp.setBufferCounter(myFrameBufRef);
     } else if(!myToRgbIsBroken) {
         if(myToRgbCtx    == NULL
         || myToRgbPixFmt != aPixFmt

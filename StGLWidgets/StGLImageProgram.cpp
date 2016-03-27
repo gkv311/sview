@@ -130,6 +130,32 @@ StGLImageProgram::StGLImageProgram()
        "    color.b = colorYUV.x + 1.772 * colorYUV.y;\n"
        "}\n\n";
 
+    const char F_SHADER_YUVNV2RGB_MPEG[] =
+       "uniform stSampler uTextureU;\n"
+       "void convertToRGB(inout vec4 color, in vec3 texCoordUV) {\n"
+       "    vec3 colorYUV = vec3(color.a, stTexture(uTextureU, texCoordUV).r, stTexture(uTextureU, texCoordUV).a);\n"
+       "    colorYUV   *= TheRangeBits;\n"
+       "    colorYUV.x  = 1.1643 * (colorYUV.x - 0.0625);\n"
+       "    colorYUV.y -= 0.5;\n"
+       "    colorYUV.z -= 0.5;\n"
+       "    color.r = colorYUV.x +  1.5958 * colorYUV.z;\n"
+       "    color.g = colorYUV.x - 0.39173 * colorYUV.y - 0.81290 * colorYUV.z;\n"
+       "    color.b = colorYUV.x +   2.017 * colorYUV.y;\n"
+       "}\n\n";
+
+    const char F_SHADER_YUVNV2RGB_FULL[] =
+       "uniform stSampler uTextureU;\n"
+       "void convertToRGB(inout vec4 color, in vec3 texCoordUV) {\n"
+       "    vec3 colorYUV = vec3(color.a, stTexture(uTextureU, texCoordUV).r, stTexture(uTextureU, texCoordUV).a);\n"
+       "    colorYUV   *= TheRangeBits;\n"
+       "    colorYUV.x  = colorYUV.x;\n"
+       "    colorYUV.y -= 0.5;\n"
+       "    colorYUV.z -= 0.5;\n"
+       "    color.r = colorYUV.x + 1.402 * colorYUV.z;\n"
+       "    color.g = colorYUV.x - 0.344 * colorYUV.y - 0.714 * colorYUV.z;\n"
+       "    color.b = colorYUV.x + 1.772 * colorYUV.y;\n"
+       "}\n\n";
+
     regToRgb(FragToRgb_FromYuvFull, StString()
         + "const float TheRangeBits = 1.0;\n"
         + F_SHADER_YUV2RGB_FULL);
@@ -153,6 +179,14 @@ StGLImageProgram::StGLImageProgram()
     regToRgb(FragToRgb_FromYuv10Mpeg, StString()
         + "const float TheRangeBits = 65535.0 / 1023.0;\n"
         + F_SHADER_YUV2RGB_MPEG);
+
+    regToRgb(FragToRgb_FromYuvNvFull, StString()
+        + "const float TheRangeBits = 1.0;\n"
+        + F_SHADER_YUVNV2RGB_FULL);
+
+    regToRgb(FragToRgb_FromYuvNvMpeg, StString()
+        + "const float TheRangeBits = 1.0;\n"
+        + F_SHADER_YUVNV2RGB_MPEG);
 
     params.gamma = new StFloat32Param(   1.0f,         // initial value
                                         0.05f, 99.0f, // min, max values
@@ -286,6 +320,8 @@ static inline StGLImageProgram::FragToRgb getColorShader(const StImage::ImgColor
                 case StImage::ImgScale_Jpeg10: return StGLImageProgram::FragToRgb_FromYuv10Full;
                 case StImage::ImgScale_Mpeg:   return StGLImageProgram::FragToRgb_FromYuvMpeg;
                 case StImage::ImgScale_Full:   return StGLImageProgram::FragToRgb_FromYuvFull;
+                case StImage::ImgScale_NvMpeg: return StGLImageProgram::FragToRgb_FromYuvNvMpeg;
+                case StImage::ImgScale_NvFull: return StGLImageProgram::FragToRgb_FromYuvNvFull;
             }
             return StGLImageProgram::FragToRgb_FromYuvFull;
         }

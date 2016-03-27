@@ -25,6 +25,7 @@ StString StImagePlane::formatImgFormat(ImgFormat theImgFormat) {
         case ImgBGRF:    return "ImgBGRF";
         case ImgRGBAF:   return "ImgRGBAF";
         case ImgBGRAF:   return "ImgBGRAF";
+        case ImgUV:      return "ImgUV";
         case ImgUNKNOWN:
         default:         return "ImgUNKNOWN";
     }
@@ -80,6 +81,9 @@ void StImagePlane::setFormat(StImagePlane::ImgFormat thePixelFormat) {
             mySizeBPP = 3;
             break;
         case ImgGray16:
+            mySizeBPP = 2;
+            break;
+        case ImgUV:
             mySizeBPP = 2;
             break;
         case ImgGray:

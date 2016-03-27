@@ -95,6 +95,11 @@ bool StGLTexture::getInternalFormat(const StGLContext&  /*theCtx*/,
             theInternalFormat = GL_ALPHA8; // backward compatibility
         #endif
             return true;
+        case StImagePlane::ImgUV:
+            // this texture format is deprecated with OpenGL3+, use GL_R8 (GL_RED) instead
+            //theInternalFormat = GL_RG8;   // OpenGL3+ hardware
+            theInternalFormat = GL_LUMINANCE_ALPHA;
+            return true;
         default:
             return false;
     }
@@ -122,6 +127,12 @@ bool StGLTexture::getDataFormat(const StGLContext&  theCtx,
             //thePixelFormat = GL_RED;
             thePixelFormat = GL_ALPHA;
             theDataType = GL_UNSIGNED_SHORT;
+            return true;
+        }
+        case StImagePlane::ImgUV: {
+            //thePixelFormat = GL_RG;
+            thePixelFormat = GL_LUMINANCE_ALPHA;
+            theDataType = GL_UNSIGNED_BYTE;
             return true;
         }
         case StImagePlane::ImgRGB: {
@@ -281,6 +292,7 @@ ST_LOCAL inline StString formatInternalFormat(const GLint theInternalFormat) {
         case GL_ALPHA8:    return "GL_ALPHA8";
         case GL_ALPHA16:   return "GL_ALPHA16";
         case GL_LUMINANCE: return "GL_LUMINANCE";
+        case GL_LUMINANCE_ALPHA: return "GL_LUMINANCE_ALPHA";
         // unknown...
         default:          return StString("GL_? (") + theInternalFormat + ')';
     }
@@ -322,6 +334,8 @@ static inline GLenum getDataFormat(const GLint theInternalFormat) {
             return GL_ALPHA;
         case GL_LUMINANCE:
             return GL_LUMINANCE;
+        case GL_LUMINANCE_ALPHA:
+            return GL_LUMINANCE_ALPHA;
         // unknown...
         default:
             return GL_RGBA;
