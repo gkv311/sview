@@ -557,7 +557,18 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.blockSleeping = new StInt32Param(StMoviePlayer::BLOCK_SLEEP_PLAYBACK);
     params.ToShowExtra   = new StBoolParam(false);
     params.TargetFps = 2; // set rendering FPS as twice as average video FPS
-    params.UseGpu = new StBoolParam(false);
+
+#if defined(_WIN32)
+    const StCString aGpuAcc = stCString(" (DXVA2)");
+#elif defined(__APPLE__)
+    const StCString aGpuAcc = stCString(" (VDA)");
+#elif defined(__ANDROID__)
+    const StCString aGpuAcc = stCString(""); //stCString(" (Android Media Codec)");
+#else
+    const StCString aGpuAcc = stCString("");
+#endif
+    params.UseGpu = new StBoolParamNamed(false, tr(MENU_MEDIA_GPU_DECODING) + aGpuAcc);
+
     params.SnapshotImgType = new StInt32Param(StImageFile::ST_TYPE_JPEG);
 
     // load settings

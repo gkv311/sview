@@ -348,8 +348,8 @@ private:
     StHandle<StVideoQueue>     mySlave;           //!< handle to Slave  decoding thread
 
     StHandle<StHWAccelContext> myHWAccelCtx;
-#if defined(__APPLE__)
-    AVCodec*                   myCodecVda;        //!< VDA codec (decoding on GPU in OS X)
+#if defined(__APPLE__) || defined(__ANDROID__)
+    AVCodec*                   myCodecH264HW;     //!< h264 decoder using dedicated hardware (VDA codec on OS X; Android Media Codec)
 #endif
     bool                       myUseGpu;          //!< activate decoding on GPU when possible
     bool                       myIsGpuFailed;     //!< flag indicating that GPU decoder can not handle input data

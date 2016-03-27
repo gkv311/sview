@@ -304,6 +304,11 @@ namespace stAV {
     }
 
     /**
+     * av_jni_set_java_vm wrapper.
+     */
+    ST_CPPEXPORT bool setJavaVM(void* theJavaVM);
+
+    /**
      * Audio functions
      */
     namespace audio {

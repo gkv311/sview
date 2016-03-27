@@ -18,6 +18,8 @@
 #include <StThreads/StThread.h>
 #include <StStrings/StLogger.h>
 
+#include <StAV/stAV.h>
+
 #include <android/window.h>
 
 #define jexp extern "C" JNIEXPORT
@@ -187,6 +189,9 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
   myToDestroy(false) {
     theActivity->instance = this;
     theActivity->env->GetJavaVM(&myJavaVM);
+
+    // allow FFmpeg to use JNI calls
+    stAV::setJavaVM(myJavaVM);
 
     JNIEnv* aJniEnv = myActivity->env;
 

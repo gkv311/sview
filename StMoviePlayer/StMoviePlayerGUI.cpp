@@ -356,20 +356,11 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
     }
 
     aMenuMedia->addItem(tr(MENU_MEDIA_AL_DEVICE),  myMenuOpenAL);
-
-#if defined(_WIN32)
-    const StCString aGpuAcc = stCString(" (DXVA2)");
-#elif defined(__APPLE__)
-    const StCString aGpuAcc = stCString(" (VDA)");
-#else
-    //const StCString aGpuAcc = stCString("");
-#endif
-
-#if defined(_WIN32) || defined(__APPLE__)
+#if defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__)
 #if defined(_WIN32)
     if(myPlugin->params.ToShowExtra->getValue()) {
 #endif
-        aMenuMedia->addItem(tr(MENU_MEDIA_GPU_DECODING) + aGpuAcc, myPlugin->params.UseGpu);
+        aMenuMedia->addItem(myPlugin->params.UseGpu->getName(), myPlugin->params.UseGpu);
 #if defined(_WIN32)
     }
 #endif
@@ -2102,6 +2093,7 @@ void StMoviePlayerGUI::doMobileSettings(const size_t ) {
     aParams.add(myImage->params.displayMode);
     aRend->getOptions(aParams);
     aParams.add(myPlugin->params.ToShowFps);
+    aParams.add(myPlugin->params.UseGpu);
     aParams.add(myLangMap->params.language);
     aParams.add(myPlugin->params.IsMobileUI);
     myLangMap->params.language->setName(tr(MENU_HELP_LANGS));

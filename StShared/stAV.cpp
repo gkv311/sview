@@ -21,6 +21,10 @@ extern "C" {
     // #include <libavresample/avresample.h>
     #include <libavutil/channel_layout.h>
 #endif
+
+#if defined(__ANDROID__)
+    #include <libavcodec/jni.h>
+#endif
 };
 
 #ifdef ST_LIBAV_FORK
@@ -546,4 +550,13 @@ int64_t stAV::secondsToUnits(const AVRational& theTimeBase,
 
 int64_t stAV::secondsToUnits(const double theTimeSeconds) {
     return int64_t(theTimeSeconds / ST_AV_TIME_BASE_D);
+}
+
+bool stAV::setJavaVM(void* theJavaVM) {
+#if defined(__ANDROID__)
+    return av_jni_set_java_vm(theJavaVM, NULL) == 0;
+#else
+    (void )theJavaVM;
+    return false;
+#endif
 }

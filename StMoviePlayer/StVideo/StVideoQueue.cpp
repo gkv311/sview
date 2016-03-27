@@ -28,7 +28,7 @@
 
 namespace {
 
-#ifdef  __APPLE__
+#if defined(__APPLE__) || defined(__ANDROID__)
     /**
      * Override pixel format.
      */
@@ -156,7 +156,9 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   myHasDataState(false),
   myMaster(theMaster),
 #if defined(__APPLE__)
-  myCodecVda(avcodec_find_decoder_by_name("h264_vda")),
+  myCodecH264HW(avcodec_find_decoder_by_name("h264_vda")),
+#elif defined(__ANDROID__)
+  myCodecH264HW(avcodec_find_decoder_by_name("h264_mediacodec")),
 #endif
   myUseGpu(false),
   myIsGpuFailed(false),
@@ -326,13 +328,13 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
 #endif
 
     // open VIDEO codec
-#if defined(__APPLE__)
+#if defined(__APPLE__) || defined(__ANDROID__)
     bool isCodecOverridden = false;
     AVCodec* aCodecGpu = NULL;
     if(myUseGpu
     && StString(myCodecAuto->name).isEquals(stCString("h264"))
     && myCodecCtx->pix_fmt == stAV::PIX_FMT::YUV420P) {
-        aCodecGpu = myCodecVda;
+        aCodecGpu = myCodecH264HW;
     }
 
     if(aCodecGpu != NULL) {
