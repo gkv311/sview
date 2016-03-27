@@ -146,6 +146,8 @@ elif [ "$rebuildAndroid" == "true" ]; then
   targetFlags="--cross-prefix=$compilerPrefix --sysroot=${androidNdkRoot}/platforms/android-15/arch-arm --arch=arm"
   configArguments="$configArguments --target-os=linux $targetFlags"
   #configArguments="$configArguments --extra-cflags='-fno-builtin-sin -fno-builtin-sinf'"
+
+  configArguments="$configArguments --enable-jni --enable-mediacodec"
 fi
 
 # More options
