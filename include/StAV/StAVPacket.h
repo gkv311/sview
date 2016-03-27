@@ -89,11 +89,15 @@ class StAVPacket {
         return myPacket.dts;
     }
 
-    inline int64_t getConvergenceDuration() const {
+    ST_LOCAL int64_t getConvergenceDuration() const {
+    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 24, 0))
+        return myPacket.duration;
+    #else
         return myPacket.convergence_duration;
+    #endif
     }
 
-    inline int getDuration() const {
+    ST_LOCAL int64_t getDuration() const {
         return myPacket.duration;
     }
 
