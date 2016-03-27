@@ -324,6 +324,7 @@ void StResourceManager::listSubFolders(const StString&        theFolder,
 }
 
 int StResourceManager::openFileDescriptor(const StString& thePath) const {
+    (void )thePath;
     return -1;
 }
 

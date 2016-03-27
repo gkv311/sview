@@ -161,6 +161,7 @@ bool StFTFont::loadInternal(const StString&       theFontName,
 
 bool StFTFont::loadCharmap(const StString& theFontName,
                            FT_Face&        theFace) {
+    (void )theFontName;
     if(FT_Select_Charmap(theFace, ft_encoding_unicode) != 0) {
         ST_DEBUG_LOG("Font '" + theFontName + "' doesn't contain Unicode charmap!");
         FT_Done_Face(theFace);

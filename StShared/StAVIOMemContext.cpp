@@ -48,7 +48,7 @@ int StAVIOMemContext::read(uint8_t* theBuf,
 
     int aNbRead = theBufSize;
     if(myPosition + theBufSize > mySrcSize) {
-        aNbRead = mySrcSize - myPosition;
+        aNbRead = int(mySrcSize - myPosition);
     }
     if(aNbRead == 0) {
         return AVERROR_EOF;
@@ -70,7 +70,7 @@ int StAVIOMemContext::write(uint8_t* theBuf,
 
     int aNbWritten = theBufSize;
     if(myPosition + theBufSize > mySrcSize) {
-        aNbWritten = mySrcSize - myPosition;
+        aNbWritten = int(mySrcSize - myPosition);
     }
     if(aNbWritten == 0) {
         return AVERROR_EOF;

@@ -795,7 +795,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
             for(size_t aTouchIter = 0; aTouchIter < ST_MAX_TOUCHES; ++aTouchIter) {
                 StTouch& aTouch = myStEvent.Touch.Touches[aTouchIter];
                 aTouch = StTouch::Empty();
-                if(aTouchIter >= aNbTouches) {
+                if(aTouchIter >= size_t(aNbTouches)) {
                     continue;
                 }
 
