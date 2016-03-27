@@ -482,10 +482,10 @@ void StVideoQueue::syncVideo(AVFrame* theSrcFrame,
 #endif
 
 void StVideoQueue::prepareFrame(const StFormat theSrcFormat) {
-    int          aFrameSizeX = 0;
-    int          aFrameSizeY = 0;
-    PixelFormat  aPixFmt     = stAV::PIX_FMT::NONE;
-    stAV::dimYUV aDimsYUV;
+    int           aFrameSizeX = 0;
+    int           aFrameSizeY = 0;
+    AVPixelFormat aPixFmt     = stAV::PIX_FMT::NONE;
+    stAV::dimYUV  aDimsYUV;
     myFrame.getImageInfo(myCodecCtx, aFrameSizeX, aFrameSizeY, aPixFmt);
     myDataAdp.setBufferCounter(NULL);
     if(aPixFmt == stAV::PIX_FMT::RGB24) {

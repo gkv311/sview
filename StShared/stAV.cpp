@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -91,60 +91,60 @@ class StFFMpegLocker {
 const int64_t stAV::NOPTS_VALUE = 0x8000000000000000LL;
 
 /**
- * Reproduced PixelFormat enumeration.
+ * Reproduced AVPixelFormat enumeration.
  */
 #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(50, 8, 0))
     #define ST_AV_GETPIXFMT(theName) av_get_pix_fmt(theName)
 #else
     #define ST_AV_GETPIXFMT(theName) avcodec_get_pix_fmt(theName)
 #endif
-const PixelFormat stAV::PIX_FMT::NONE       = PixelFormat(-1);
-const PixelFormat stAV::PIX_FMT::YUV420P    = PixelFormat( 0);
-const PixelFormat stAV::PIX_FMT::PAL8       = ST_AV_GETPIXFMT("pal8");
-const PixelFormat stAV::PIX_FMT::GRAY8      = ST_AV_GETPIXFMT("gray");
-const PixelFormat stAV::PIX_FMT::GRAY16     = ST_AV_GETPIXFMT("gray16");
-const PixelFormat stAV::PIX_FMT::YUV422P    = ST_AV_GETPIXFMT("yuv422p");
-const PixelFormat stAV::PIX_FMT::YUV444P    = ST_AV_GETPIXFMT("yuv444p");
-const PixelFormat stAV::PIX_FMT::YUV410P    = ST_AV_GETPIXFMT("yuv410p");
-const PixelFormat stAV::PIX_FMT::YUV411P    = ST_AV_GETPIXFMT("yuv411p");
-const PixelFormat stAV::PIX_FMT::YUV440P    = ST_AV_GETPIXFMT("yuv440p");
-const PixelFormat stAV::PIX_FMT::NV12       = ST_AV_GETPIXFMT("nv12");
-const PixelFormat stAV::PIX_FMT::YUV420P9   = ST_AV_GETPIXFMT("yuv420p9");
-const PixelFormat stAV::PIX_FMT::YUV422P9   = ST_AV_GETPIXFMT("yuv422p9");
-const PixelFormat stAV::PIX_FMT::YUV444P9   = ST_AV_GETPIXFMT("yuv444p9");
-const PixelFormat stAV::PIX_FMT::YUV420P10  = ST_AV_GETPIXFMT("yuv420p10");
-const PixelFormat stAV::PIX_FMT::YUV422P10  = ST_AV_GETPIXFMT("yuv422p10");
-const PixelFormat stAV::PIX_FMT::YUV444P10  = ST_AV_GETPIXFMT("yuv444p10");
-const PixelFormat stAV::PIX_FMT::YUV420P16  = ST_AV_GETPIXFMT("yuv420p16");
-const PixelFormat stAV::PIX_FMT::YUV422P16  = ST_AV_GETPIXFMT("yuv422p16");
-const PixelFormat stAV::PIX_FMT::YUV444P16  = ST_AV_GETPIXFMT("yuv444p16");
-const PixelFormat stAV::PIX_FMT::YUVJ420P   = ST_AV_GETPIXFMT("yuvj420p");
-const PixelFormat stAV::PIX_FMT::YUVJ422P   = ST_AV_GETPIXFMT("yuvj422p");
-const PixelFormat stAV::PIX_FMT::YUVJ444P   = ST_AV_GETPIXFMT("yuvj444p");
-const PixelFormat stAV::PIX_FMT::YUVJ440P   = ST_AV_GETPIXFMT("yuvj440p");
-const PixelFormat stAV::PIX_FMT::RGB24      = ST_AV_GETPIXFMT("rgb24");
-const PixelFormat stAV::PIX_FMT::BGR24      = ST_AV_GETPIXFMT("bgr24");
-const PixelFormat stAV::PIX_FMT::RGB48      = ST_AV_GETPIXFMT("rgb48");
-const PixelFormat stAV::PIX_FMT::BGR48      = ST_AV_GETPIXFMT("bgr48");
-const PixelFormat stAV::PIX_FMT::RGBA64     = ST_AV_GETPIXFMT("rgba64");
-const PixelFormat stAV::PIX_FMT::BGRA64     = ST_AV_GETPIXFMT("bgra64");
-const PixelFormat stAV::PIX_FMT::DXVA2_VLD  = ST_AV_GETPIXFMT("dxva2_vld");
+const AVPixelFormat stAV::PIX_FMT::NONE       = AVPixelFormat(-1);
+const AVPixelFormat stAV::PIX_FMT::YUV420P    = AVPixelFormat( 0);
+const AVPixelFormat stAV::PIX_FMT::PAL8       = ST_AV_GETPIXFMT("pal8");
+const AVPixelFormat stAV::PIX_FMT::GRAY8      = ST_AV_GETPIXFMT("gray");
+const AVPixelFormat stAV::PIX_FMT::GRAY16     = ST_AV_GETPIXFMT("gray16");
+const AVPixelFormat stAV::PIX_FMT::YUV422P    = ST_AV_GETPIXFMT("yuv422p");
+const AVPixelFormat stAV::PIX_FMT::YUV444P    = ST_AV_GETPIXFMT("yuv444p");
+const AVPixelFormat stAV::PIX_FMT::YUV410P    = ST_AV_GETPIXFMT("yuv410p");
+const AVPixelFormat stAV::PIX_FMT::YUV411P    = ST_AV_GETPIXFMT("yuv411p");
+const AVPixelFormat stAV::PIX_FMT::YUV440P    = ST_AV_GETPIXFMT("yuv440p");
+const AVPixelFormat stAV::PIX_FMT::NV12       = ST_AV_GETPIXFMT("nv12");
+const AVPixelFormat stAV::PIX_FMT::YUV420P9   = ST_AV_GETPIXFMT("yuv420p9");
+const AVPixelFormat stAV::PIX_FMT::YUV422P9   = ST_AV_GETPIXFMT("yuv422p9");
+const AVPixelFormat stAV::PIX_FMT::YUV444P9   = ST_AV_GETPIXFMT("yuv444p9");
+const AVPixelFormat stAV::PIX_FMT::YUV420P10  = ST_AV_GETPIXFMT("yuv420p10");
+const AVPixelFormat stAV::PIX_FMT::YUV422P10  = ST_AV_GETPIXFMT("yuv422p10");
+const AVPixelFormat stAV::PIX_FMT::YUV444P10  = ST_AV_GETPIXFMT("yuv444p10");
+const AVPixelFormat stAV::PIX_FMT::YUV420P16  = ST_AV_GETPIXFMT("yuv420p16");
+const AVPixelFormat stAV::PIX_FMT::YUV422P16  = ST_AV_GETPIXFMT("yuv422p16");
+const AVPixelFormat stAV::PIX_FMT::YUV444P16  = ST_AV_GETPIXFMT("yuv444p16");
+const AVPixelFormat stAV::PIX_FMT::YUVJ420P   = ST_AV_GETPIXFMT("yuvj420p");
+const AVPixelFormat stAV::PIX_FMT::YUVJ422P   = ST_AV_GETPIXFMT("yuvj422p");
+const AVPixelFormat stAV::PIX_FMT::YUVJ444P   = ST_AV_GETPIXFMT("yuvj444p");
+const AVPixelFormat stAV::PIX_FMT::YUVJ440P   = ST_AV_GETPIXFMT("yuvj440p");
+const AVPixelFormat stAV::PIX_FMT::RGB24      = ST_AV_GETPIXFMT("rgb24");
+const AVPixelFormat stAV::PIX_FMT::BGR24      = ST_AV_GETPIXFMT("bgr24");
+const AVPixelFormat stAV::PIX_FMT::RGB48      = ST_AV_GETPIXFMT("rgb48");
+const AVPixelFormat stAV::PIX_FMT::BGR48      = ST_AV_GETPIXFMT("bgr48");
+const AVPixelFormat stAV::PIX_FMT::RGBA64     = ST_AV_GETPIXFMT("rgba64");
+const AVPixelFormat stAV::PIX_FMT::BGRA64     = ST_AV_GETPIXFMT("bgra64");
+const AVPixelFormat stAV::PIX_FMT::DXVA2_VLD  = ST_AV_GETPIXFMT("dxva2_vld");
 
 // TODO (Kirill Gavrilov#9) remove this stuff
 namespace {
-    static const PixelFormat AvPixFmtRGBA  = ST_AV_GETPIXFMT("rgba");
-    static const PixelFormat AvPixFmtBGRA  = ST_AV_GETPIXFMT("bgra");
-    static const PixelFormat AvPixFmtRGB32 = ST_AV_GETPIXFMT("rgb32"); // compatibility with old FFmpeg
-    static const PixelFormat AvPixFmtBGR32 = ST_AV_GETPIXFMT("bgr32"); // compatibility with old FFmpeg
+    static const AVPixelFormat AvPixFmtRGBA  = ST_AV_GETPIXFMT("rgba");
+    static const AVPixelFormat AvPixFmtBGRA  = ST_AV_GETPIXFMT("bgra");
+    static const AVPixelFormat AvPixFmtRGB32 = ST_AV_GETPIXFMT("rgb32"); // compatibility with old FFmpeg
+    static const AVPixelFormat AvPixFmtBGR32 = ST_AV_GETPIXFMT("bgr32"); // compatibility with old FFmpeg
 
     static const AVRational ST_AV_TIME_BASE_Q = {1, AV_TIME_BASE};
     static const double     ST_AV_TIME_BASE_D = av_q2d(ST_AV_TIME_BASE_Q);
 };
 
-const PixelFormat stAV::PIX_FMT::RGBA32 = (AvPixFmtRGBA != stAV::PIX_FMT::NONE) ? AvPixFmtRGBA : AvPixFmtBGR32;
-const PixelFormat stAV::PIX_FMT::BGRA32 = (AvPixFmtBGRA != stAV::PIX_FMT::NONE) ? AvPixFmtBGRA : AvPixFmtRGB32;
+const AVPixelFormat stAV::PIX_FMT::RGBA32 = (AvPixFmtRGBA != stAV::PIX_FMT::NONE) ? AvPixFmtRGBA : AvPixFmtBGR32;
+const AVPixelFormat stAV::PIX_FMT::BGRA32 = (AvPixFmtBGRA != stAV::PIX_FMT::NONE) ? AvPixFmtBGRA : AvPixFmtRGB32;
 
-StCString stAV::PIX_FMT::getString(const PixelFormat theFrmt) {
+StCString stAV::PIX_FMT::getString(const AVPixelFormat theFrmt) {
     if(theFrmt == stAV::PIX_FMT::NONE) {
         return stCString("none");
     } else if(theFrmt == stAV::PIX_FMT::YUV420P) {
@@ -259,10 +259,10 @@ bool stAV::isFormatYUVPlanar(const AVCodecContext* theCtx) {
         || theCtx->pix_fmt == stAV::PIX_FMT::YUV444P16;
 }
 
-bool stAV::isFormatYUVPlanar(const PixelFormat thePixFmt,
-                             const int         theWidth,
-                             const int         theHeight,
-                             dimYUV&           theDims) {
+bool stAV::isFormatYUVPlanar(const AVPixelFormat thePixFmt,
+                             const int           theWidth,
+                             const int           theHeight,
+                             dimYUV&             theDims) {
     if(thePixFmt == stAV::PIX_FMT::NONE) {
         return false;
     } else if(thePixFmt == stAV::PIX_FMT::YUV420P

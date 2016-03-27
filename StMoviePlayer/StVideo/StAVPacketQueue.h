@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -239,8 +239,8 @@ class StAVPacketQueue {
     AVCodecContext*  myCodecCtx;       //!< codec context
     AVCodec*         myCodec;          //!< codec
     AVCodec*         myCodecAuto;      //!< original codec (autodetected - before overriding)
-    typedef PixelFormat (*aGetFrmt_t)(AVCodecContext* , const PixelFormat* );
-    typedef int         (*aGetBuf2_t)(AVCodecContext* , AVFrame* frame, int );
+    typedef AVPixelFormat (*aGetFrmt_t)(AVCodecContext* , const AVPixelFormat* );
+    typedef int           (*aGetBuf2_t)(AVCodecContext* , AVFrame* frame, int );
     aGetFrmt_t       myGetFrmtInit;
     aGetBuf2_t       myGetBuffInit;
     double           myPtsStartBase;   //!< starting PTS in context

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -194,48 +194,48 @@ namespace stAV {
      *  - MPEG, 16 bits:            4096..60160 for Y, 4096..61440 for U and V
      */
     namespace PIX_FMT {
-        ST_SHARED_CPPEXPORT PixelFormat NONE;
-        ST_SHARED_CPPEXPORT PixelFormat PAL8;      //!< palette
+        ST_SHARED_CPPEXPORT AVPixelFormat NONE;
+        ST_SHARED_CPPEXPORT AVPixelFormat PAL8;      //!< palette
 
-        ST_SHARED_CPPEXPORT PixelFormat GRAY8;     //!< Y,  8bpp
-        ST_SHARED_CPPEXPORT PixelFormat GRAY16;    //!< Y, 16bpp
+        ST_SHARED_CPPEXPORT AVPixelFormat GRAY8;     //!< Y,  8bpp
+        ST_SHARED_CPPEXPORT AVPixelFormat GRAY16;    //!< Y, 16bpp
         // planar YUV formats
-        ST_SHARED_CPPEXPORT PixelFormat YUV420P;   //!< planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)
-        ST_SHARED_CPPEXPORT PixelFormat YUV422P;   //!< planar YUV 4:2:2, 16bpp, (1 Cr & Cb sample per 2x1 Y samples)
-        ST_SHARED_CPPEXPORT PixelFormat YUV444P;   //!< planar YUV 4:4:4, 24bpp, (1 Cr & Cb sample per 1x1 Y samples)
-        ST_SHARED_CPPEXPORT PixelFormat YUV410P;   //!< planar YUV 4:1:0,  9bpp, (1 Cr & Cb sample per 4x4 Y samples)
-        ST_SHARED_CPPEXPORT PixelFormat YUV411P;   //!< planar YUV 4:1:1, 12bpp, (1 Cr & Cb sample per 4x1 Y samples)
-        ST_SHARED_CPPEXPORT PixelFormat YUV440P;   //!< planar YUV 4:4:0 (1 Cr & Cb sample per 1x2 Y samples)
-        ST_SHARED_CPPEXPORT PixelFormat NV12;      //!< YUV420, Y plane + interleaved UV plane oh half width and height
+        ST_SHARED_CPPEXPORT AVPixelFormat YUV420P;   //!< planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)
+        ST_SHARED_CPPEXPORT AVPixelFormat YUV422P;   //!< planar YUV 4:2:2, 16bpp, (1 Cr & Cb sample per 2x1 Y samples)
+        ST_SHARED_CPPEXPORT AVPixelFormat YUV444P;   //!< planar YUV 4:4:4, 24bpp, (1 Cr & Cb sample per 1x1 Y samples)
+        ST_SHARED_CPPEXPORT AVPixelFormat YUV410P;   //!< planar YUV 4:1:0,  9bpp, (1 Cr & Cb sample per 4x4 Y samples)
+        ST_SHARED_CPPEXPORT AVPixelFormat YUV411P;   //!< planar YUV 4:1:1, 12bpp, (1 Cr & Cb sample per 4x1 Y samples)
+        ST_SHARED_CPPEXPORT AVPixelFormat YUV440P;   //!< planar YUV 4:4:0 (1 Cr & Cb sample per 1x2 Y samples)
+        ST_SHARED_CPPEXPORT AVPixelFormat NV12;      //!< YUV420, Y plane + interleaved UV plane oh half width and height
         // wide planar YUV formats (9,10,14,16 bits stored in 16 bits)
-        ST_SHARED_CPPEXPORT PixelFormat YUV420P9;
-        ST_SHARED_CPPEXPORT PixelFormat YUV422P9;
-        ST_SHARED_CPPEXPORT PixelFormat YUV444P9;
-        ST_SHARED_CPPEXPORT PixelFormat YUV420P10;
-        ST_SHARED_CPPEXPORT PixelFormat YUV422P10;
-        ST_SHARED_CPPEXPORT PixelFormat YUV444P10;
-        ST_SHARED_CPPEXPORT PixelFormat YUV420P16;
-        ST_SHARED_CPPEXPORT PixelFormat YUV422P16;
-        ST_SHARED_CPPEXPORT PixelFormat YUV444P16;
-        //extern const PixelFormat YUVA420P; ///< planar YUV 4:2:0, 20bpp, (1 Cr & Cb sample per 2x2 Y & A samples)
+        ST_SHARED_CPPEXPORT AVPixelFormat YUV420P9;
+        ST_SHARED_CPPEXPORT AVPixelFormat YUV422P9;
+        ST_SHARED_CPPEXPORT AVPixelFormat YUV444P9;
+        ST_SHARED_CPPEXPORT AVPixelFormat YUV420P10;
+        ST_SHARED_CPPEXPORT AVPixelFormat YUV422P10;
+        ST_SHARED_CPPEXPORT AVPixelFormat YUV444P10;
+        ST_SHARED_CPPEXPORT AVPixelFormat YUV420P16;
+        ST_SHARED_CPPEXPORT AVPixelFormat YUV422P16;
+        ST_SHARED_CPPEXPORT AVPixelFormat YUV444P16;
+        //extern const AVPixelFormat YUVA420P; ///< planar YUV 4:2:0, 20bpp, (1 Cr & Cb sample per 2x2 Y & A samples)
         // fullscale YUV formats (deprecated?)
-        ST_SHARED_CPPEXPORT PixelFormat YUVJ420P;  //!< planar YUV 4:2:0, 12bpp, full scale (JPEG)
-        ST_SHARED_CPPEXPORT PixelFormat YUVJ422P;  //!< planar YUV 4:2:2, 16bpp, full scale (JPEG)
-        ST_SHARED_CPPEXPORT PixelFormat YUVJ444P;  //!< planar YUV 4:4:4, 24bpp, full scale (JPEG)
-        ST_SHARED_CPPEXPORT PixelFormat YUVJ440P;  //!< planar YUV 4:4:0 full scale (JPEG)
+        ST_SHARED_CPPEXPORT AVPixelFormat YUVJ420P;  //!< planar YUV 4:2:0, 12bpp, full scale (JPEG)
+        ST_SHARED_CPPEXPORT AVPixelFormat YUVJ422P;  //!< planar YUV 4:2:2, 16bpp, full scale (JPEG)
+        ST_SHARED_CPPEXPORT AVPixelFormat YUVJ444P;  //!< planar YUV 4:4:4, 24bpp, full scale (JPEG)
+        ST_SHARED_CPPEXPORT AVPixelFormat YUVJ440P;  //!< planar YUV 4:4:0 full scale (JPEG)
         // RGB formats
-        ST_SHARED_CPPEXPORT PixelFormat RGB24;     //!< packed RGB 8:8:8, 24bpp, RGBRGB...
-        ST_SHARED_CPPEXPORT PixelFormat BGR24;     //!< packed RGB 8:8:8, 24bpp, BGRBGR...
-        ST_SHARED_CPPEXPORT PixelFormat RGB48;
-        ST_SHARED_CPPEXPORT PixelFormat BGR48;
-        ST_SHARED_CPPEXPORT PixelFormat RGBA32;
-        ST_SHARED_CPPEXPORT PixelFormat BGRA32;
-        ST_SHARED_CPPEXPORT PixelFormat RGBA64;
-        ST_SHARED_CPPEXPORT PixelFormat BGRA64;
+        ST_SHARED_CPPEXPORT AVPixelFormat RGB24;     //!< packed RGB 8:8:8, 24bpp, RGBRGB...
+        ST_SHARED_CPPEXPORT AVPixelFormat BGR24;     //!< packed RGB 8:8:8, 24bpp, BGRBGR...
+        ST_SHARED_CPPEXPORT AVPixelFormat RGB48;
+        ST_SHARED_CPPEXPORT AVPixelFormat BGR48;
+        ST_SHARED_CPPEXPORT AVPixelFormat RGBA32;
+        ST_SHARED_CPPEXPORT AVPixelFormat BGRA32;
+        ST_SHARED_CPPEXPORT AVPixelFormat RGBA64;
+        ST_SHARED_CPPEXPORT AVPixelFormat BGRA64;
         // HWAccel formats
-        ST_SHARED_CPPEXPORT PixelFormat DXVA2_VLD;
+        ST_SHARED_CPPEXPORT AVPixelFormat DXVA2_VLD;
 
-        ST_CPPEXPORT StCString getString(const PixelFormat theFrmt);
+        ST_CPPEXPORT StCString getString(const AVPixelFormat theFrmt);
     }
 
     /**
@@ -254,21 +254,21 @@ namespace stAV {
 
     /**
      * Auxiliary function to check that frame is in one of the YUV planar pixel format.
-     * @return true if PixelFormat is planar YUV
+     * @return true if AVPixelFormat is planar YUV
      */
     ST_CPPEXPORT bool isFormatYUVPlanar(const AVCodecContext* theCtx);
 
     /**
      * Same as above but provide width/height information per component's plane.
-     * @return true if PixelFormat is planar YUV
+     * @return true if AVPixelFormat is planar YUV
      */
-    ST_CPPEXPORT bool isFormatYUVPlanar(const PixelFormat thePixFmt,
-                                        const int         theWidth,
-                                        const int         theHeight,
-                                        dimYUV&           theDims);
+    ST_CPPEXPORT bool isFormatYUVPlanar(const AVPixelFormat thePixFmt,
+                                        const int           theWidth,
+                                        const int           theHeight,
+                                        dimYUV&             theDims);
 
     /**
-     * @return true if PixelFormat is planar YUV
+     * @return true if AVPixelFormat is planar YUV
      */
     inline bool isFormatYUVPlanar(const AVCodecContext* theCtx,
                                   dimYUV&               theDims) {
@@ -281,7 +281,7 @@ namespace stAV {
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 5, 0))
     inline bool isFormatYUVPlanar(const AVFrame* theFrame,
                                   dimYUV&        theDims) {
-        return isFormatYUVPlanar((PixelFormat )theFrame->format,
+        return isFormatYUVPlanar((AVPixelFormat )theFrame->format,
                                  theFrame->width,
                                  theFrame->height,
                                  theDims);

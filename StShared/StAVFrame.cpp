@@ -37,14 +37,14 @@ void StAVFrame::reset() {
 }
 
 void StAVFrame::getImageInfo(const AVCodecContext* theCodecCtx,
-                             int&         theSizeX,
-                             int&         theSizeY,
-                             PixelFormat& thePixFmt) const {
+                             int&           theSizeX,
+                             int&           theSizeY,
+                             AVPixelFormat& thePixFmt) const {
 #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(53, 5, 0))
     (void )theCodecCtx;
     theSizeX  = Frame->width;
     theSizeY  = Frame->height;
-    thePixFmt = (PixelFormat )Frame->format;
+    thePixFmt = (AVPixelFormat )Frame->format;
 #else
     theSizeX  = theCodecCtx->width;
     theSizeY  = theCodecCtx->height;

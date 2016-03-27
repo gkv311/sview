@@ -43,9 +43,9 @@ class StAVFrame {
      * from this frame or codec context.
      */
     ST_CPPEXPORT void getImageInfo(const AVCodecContext* theCodecCtx,
-                                   int&         theSizeX,
-                                   int&         theSizeY,
-                                   PixelFormat& thePixFmt) const;
+                                   int&           theSizeX,
+                                   int&           theSizeY,
+                                   AVPixelFormat& thePixFmt) const;
 
     /**
      * Access data plane for specified Id.
