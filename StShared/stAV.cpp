@@ -208,6 +208,43 @@ StCString stAV::PIX_FMT::getString(const AVPixelFormat theFrmt) {
 
 namespace {
 
+#if defined(ST_DEBUG_FFMPEG) || defined(ST_DEBUG_FFMPEG_VERBOSE)
+    /**
+     * Logger callback.
+     */
+    static void stAvLogCallback(void* thePtr, int theLevel, const char* theFormat, va_list theArgs) {
+    #if !defined(ST_DEBUG_FFMPEG_VERBOSE)
+        if(theLevel > AV_LOG_INFO) {
+            return;
+        }
+    #endif
+
+        //static int aPrintPrefix = 1;
+        int aPrintPrefix = 1;
+        char aLine[1024];
+        av_log_format_line(thePtr, theLevel, theFormat, theArgs,
+                           aLine, sizeof(aLine), &aPrintPrefix);
+
+        StLogger::Level aLevelSt = StLogger::ST_TRACE;
+        switch(theLevel) {
+            case AV_LOG_QUIET:   aLevelSt = StLogger::ST_QUIET;   break;
+            case AV_LOG_PANIC:   aLevelSt = StLogger::ST_PANIC;   break;
+            case AV_LOG_FATAL:   aLevelSt = StLogger::ST_FATAL;   break;
+            case AV_LOG_ERROR:   aLevelSt = StLogger::ST_ERROR;   break;
+            case AV_LOG_WARNING: aLevelSt = StLogger::ST_WARNING; break;
+            case AV_LOG_INFO:    aLevelSt = StLogger::ST_INFO;    break;
+            case AV_LOG_VERBOSE: aLevelSt = StLogger::ST_VERBOSE; break;
+            case AV_LOG_DEBUG:
+        #ifdef AV_LOG_TRACE
+            case AV_LOG_TRACE:
+        #endif
+            default: aLevelSt = StLogger::ST_TRACE; break;
+        }
+
+        StLogger::GetDefault().write(StString(aLine), aLevelSt);
+    }
+#endif
+
     static bool initOnce() {
         // register own mutex to prevent multithreading errors
         // while using FFmpeg functions
@@ -224,6 +261,10 @@ namespace {
         avformat_network_init();
     #endif
         ST_DEBUG_LOG("FFmpeg initialized:");
+
+    #if defined(ST_DEBUG_FFMPEG) || defined(ST_DEBUG_FFMPEG_VERBOSE)
+        av_log_set_callback(stAvLogCallback);
+    #endif
 
         // show up information about dynamically linked libraries
         ST_DEBUG_LOG("  libavutil\t"   + stAV::Version::libavutil().toString());
