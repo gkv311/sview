@@ -67,7 +67,8 @@ public class StS3dvSurface {
         }
 
         if(mySurf != null && myStereoIsOn) {
-            setStereo(false);
+            // we don't care about old surface
+            //setStereo(false);
         }
         mySurf = null;
 

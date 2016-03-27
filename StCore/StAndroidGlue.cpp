@@ -18,6 +18,8 @@
 #include <StThreads/StThread.h>
 #include <StStrings/StLogger.h>
 
+#include <android/window.h>
+
 #define jexp extern "C" JNIEXPORT
 
 StJNIEnv::StJNIEnv(JavaVM* theJavaVM)
@@ -167,6 +169,7 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
   myWindow(NULL),
   myWindowPending(NULL),
   myIsChangingSurface(false),
+  myWindowFlags(0),
   myActivityState(0),
   myMemoryClassMiB(0),
   mySavedState(NULL),
@@ -788,6 +791,37 @@ void* StAndroidGlue::saveInstanceState(size_t* theOutLen) {
 
     pthread_mutex_unlock(&myMutex);
     return aSavedState;
+}
+
+inline void addOrRemoveFlag(int& theFlagsToAdd,
+                            int& theFlagsToRemove,
+                            int  theFlagsOld,
+                            int  theFlagsNew,
+                            int  theFlag) {
+    if((theFlagsNew & theFlag) != 0) {
+        if((theFlagsOld & theFlag) == 0) {
+            theFlagsToAdd    |= theFlag;
+        }
+    } else {
+        if((theFlagsOld & theFlag) != 0) {
+            theFlagsToRemove |= theFlag;
+        }
+    }
+}
+
+void StAndroidGlue::setWindowFlags(const int theFlags) {
+    if(myWindowFlags == theFlags) {
+        return;
+    }
+
+    int aFlagsToAdd    = 0;
+    int aFlagsToRemove = 0;
+    addOrRemoveFlag(aFlagsToAdd, aFlagsToRemove,
+                    myWindowFlags, theFlags,
+                    AWINDOW_FLAG_KEEP_SCREEN_ON);
+    myWindowFlags = theFlags;
+
+    ANativeActivity_setWindowFlags(myActivity, aFlagsToAdd, aFlagsToRemove);
 }
 
 void StAndroidGlue::setHardwareStereoOn(const bool theToEnable) {

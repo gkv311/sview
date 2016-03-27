@@ -200,6 +200,8 @@ public class StActivity extends NativeActivity implements SensorEventListener {
         if(myCppGlue != 0) {
             cppOnBeforeSurfaceChanged(myCppGlue, false);
         }
+        myS3dvSurf.setSurface(theHolder);
+        myS3dvSurf.setStereo(myToEnableStereoHW);
     }
 
     @Override

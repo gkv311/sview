@@ -584,33 +584,15 @@ void StWindowImpl::updateBlockSleep() {
         myBlockSleep = BlockSleep_OFF;
     }
 #elif defined(__ANDROID__)
-    int aFlagsToAdd    = 0;
-    int aFlagsToRemove = 0;
-    if(attribs.ToBlockSleepDisplay
-    //|| attribs.ToBlockSleepSystem
-    ) {
-        if(myBlockSleep == BlockSleep_DISPLAY) {
-            return;
-        }
-
-        aFlagsToAdd  = AWINDOW_FLAG_KEEP_SCREEN_ON;
+    int aFlags = 0;
+    if(attribs.ToBlockSleepDisplay) {
+        aFlags |= AWINDOW_FLAG_KEEP_SCREEN_ON;
         myBlockSleep = BlockSleep_DISPLAY;
-    } else if(myBlockSleep != BlockSleep_OFF) {
-        aFlagsToRemove = AWINDOW_FLAG_KEEP_SCREEN_ON;
-        myBlockSleep   = BlockSleep_OFF;
+    } else {
+        myBlockSleep = BlockSleep_OFF;
     }
-
-    if(aFlagsToAdd    == 0
-    && aFlagsToRemove == 0) {
-        return;
-    } else if(myParentWin == NULL) {
-        return;
-    }
-
-    ANativeActivity_setWindowFlags(myParentWin->getActivity(), aFlagsToAdd, aFlagsToRemove);
-    if(aFlagsToAdd != 0) {
-        // workaround font corruption on Nexus 7
-        StThread::sleep(100);
+    if(myParentWin != NULL) {
+        myParentWin->setWindowFlags(aFlags);
     }
 #elif defined(__linux__)
     if(attribs.ToBlockSleepDisplay) { // || attribs.ToBlockSleepSystem
