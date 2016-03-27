@@ -9,6 +9,9 @@ HAVE_MONGOOSE := -DST_HAVE_MONGOOSE
 BUILD_ROOT = build
 # folder containing OCCT resources ($CASROOT/src)
 OCCT_RES =
+FFMPEG_ROOT =
+FREETYPE_ROOT =
+OPENAL_ROOT =
 
 LIB_PTHREAD = -lpthread
 LIB_GLX = -lGL -lX11 -lXext
@@ -47,9 +50,13 @@ EXTRA_LDFLAGS  =
 #LDSTRIP =
 
 ifdef ANDROID_NDK
+ANDROID_EABI = armeabi-v7a
 EXTRA_CFLAGS   += --sysroot=$(ANDROID_NDK)/platforms/android-15/arch-arm -march=armv7-a -mfloat-abi=softfp
-EXTRA_CXXFLAGS += --sysroot=$(ANDROID_NDK)/platforms/android-15/arch-arm -march=armv7-a -mfloat-abi=softfp -I$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.8/include -I$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi-v7a/include -DST_HAVE_EGL -DST_NO_UPDATES_CHECK
-EXTRA_LDFLAGS  += --sysroot=$(ANDROID_NDK)/platforms/android-15/arch-arm -L$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi-v7a -lstdc++ -lgnustl_shared
+EXTRA_CXXFLAGS += --sysroot=$(ANDROID_NDK)/platforms/android-15/arch-arm -march=armv7-a -mfloat-abi=softfp -I$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.8/include -I$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.8/libs/$(ANDROID_EABI)/include -DST_HAVE_EGL -DST_NO_UPDATES_CHECK
+EXTRA_LDFLAGS  += --sysroot=$(ANDROID_NDK)/platforms/android-15/arch-arm -L$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.8/libs/$(ANDROID_EABI) -lstdc++ -lgnustl_shared
+
+EXTRA_CXXFLAGS += -I$(FREETYPE_ROOT)/include -I$(OPENAL_ROOT)/include -I$(FFMPEG_ROOT)/include
+EXTRA_LDFLAGS  += -L$(FREETYPE_ROOT)/libs/$(ANDROID_EABI) -L$(OPENAL_ROOT)/libs/$(ANDROID_EABI) -L$(FFMPEG_ROOT)/libs/$(ANDROID_EABI)
 else
 EXTRA_CFLAGS   += -mmmx -msse
 EXTRA_CXXFLAGS += -mmmx -msse `pkg-config gtk+-2.0 --cflags`
@@ -142,26 +149,42 @@ install_android:
 	cp -f    license-gpl-3.0.txt           $(aDestAndroid)/assets/info/license.txt
 
 install_android_libs:
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStShared)       $(aDestAndroid)/libs/armeabi-v7a/$(aStShared)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStGLWidgets)    $(aDestAndroid)/libs/armeabi-v7a/$(aStGLWidgets)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStCore)         $(aDestAndroid)/libs/armeabi-v7a/$(aStCore)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutAnaglyph)  $(aDestAndroid)/libs/armeabi-v7a/$(aStOutAnaglyph)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutInterlace) $(aDestAndroid)/libs/armeabi-v7a/$(aStOutInterlace)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutDistorted) $(aDestAndroid)/libs/armeabi-v7a/$(aStOutDistorted)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStImageViewer)  $(aDestAndroid)/libs/armeabi-v7a/$(aStImageViewer)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStMoviePlayer)  $(aDestAndroid)/libs/armeabi-v7a/$(aStMoviePlayer)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(sViewAndroid)    $(aDestAndroid)/libs/armeabi-v7a/$(sViewAndroid)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStShared)       $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStShared)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStGLWidgets)    $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStGLWidgets)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStCore)         $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStCore)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutAnaglyph)  $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStOutAnaglyph)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutInterlace) $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStOutInterlace)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutDistorted) $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStOutDistorted)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStImageViewer)  $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStImageViewer)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStMoviePlayer)  $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStMoviePlayer)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(sViewAndroid)    $(aDestAndroid)/libs/$(ANDROID_EABI)/$(sViewAndroid)
+	cp -f $(FREETYPE_ROOT)/libs/$(ANDROID_EABI)/libfreetype.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(OPENAL_ROOT)/libs/$(ANDROID_EABI)/libopenal.so          $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavcodec-*.so       $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavdevice-*.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavformat-*.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavutil-*.so        $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswresample-*.so    $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswscale-*.so       $(aDestAndroid)/libs/$(ANDROID_EABI)/
 
 install_android_cad_libs:
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStShared)       $(aDestAndroid)/libs/armeabi-v7a/$(aStShared)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStGLWidgets)    $(aDestAndroid)/libs/armeabi-v7a/$(aStGLWidgets)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStCore)         $(aDestAndroid)/libs/armeabi-v7a/$(aStCore)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutAnaglyph)  $(aDestAndroid)/libs/armeabi-v7a/$(aStOutAnaglyph)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutInterlace) $(aDestAndroid)/libs/armeabi-v7a/$(aStOutInterlace)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutDistorted) $(aDestAndroid)/libs/armeabi-v7a/$(aStOutDistorted)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStImageViewer)  $(aDestAndroid)/libs/armeabi-v7a/$(aStImageViewer)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStMoviePlayer)  $(aDestAndroid)/libs/armeabi-v7a/$(aStMoviePlayer)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(sViewAndroidCad) $(aDestAndroid)/libs/armeabi-v7a/$(sViewAndroid)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStShared)       $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStShared)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStGLWidgets)    $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStGLWidgets)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStCore)         $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStCore)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutAnaglyph)  $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStOutAnaglyph)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutInterlace) $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStOutInterlace)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutDistorted) $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStOutDistorted)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStImageViewer)  $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStImageViewer)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStMoviePlayer)  $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStMoviePlayer)
+	ln --force --symbolic ../../../$(BUILD_ROOT)/$(sViewAndroidCad) $(aDestAndroid)/libs/$(ANDROID_EABI)/$(sViewAndroid)
+	cp -f $(FREETYPE_ROOT)/libs/$(ANDROID_EABI)/libfreetype.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(OPENAL_ROOT)/libs/$(ANDROID_EABI)/libopenal.so          $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavcodec-*.so       $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavdevice-*.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavformat-*.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavutil-*.so        $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswresample-*.so    $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswscale-*.so       $(aDestAndroid)/libs/$(ANDROID_EABI)/
 	mkdir -p $(aDestAndroid)/assets/shaders
 	mkdir -p $(aDestAndroid)/assets/shaders/occt
 	mkdir -p $(aDestAndroid)/assets/res
@@ -186,8 +209,8 @@ pre_all:
 	mkdir -p $(BUILD_ROOT)/lang/Korean
 	mkdir -p $(BUILD_ROOT)/textures
 	mkdir -p $(BUILD_ROOT)/web
-	mkdir -p sview/libs/armeabi-v7a
-	mkdir -p StCADViewer/libs/armeabi-v7a
+	mkdir -p sview/libs/$(ANDROID_EABI)
+	mkdir -p StCADViewer/libs/$(ANDROID_EABI)
 	cp -f -r textures/* $(BUILD_ROOT)/textures/
 
 # StShared static shared library
