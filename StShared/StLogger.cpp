@@ -69,8 +69,17 @@ StLogger::StLogger(const StString&       theLogFile,
   myFileHandle(NULL),
   myFilter(theFilter),
   myToLogCout(theOptions & StLogger::ST_OPT_COUT),
+#ifdef ST_DEBUG_SYSLOG
+  myToLogToSystem(true),
+#else
   myToLogToSystem(false),
-  myToLogThreadId(false) {
+#endif
+#ifdef ST_DEBUG_THREADID
+  myToLogThreadId(true)
+#else
+  myToLogThreadId(false)
+#endif
+{
     //
 }
 
