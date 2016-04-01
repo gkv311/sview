@@ -197,8 +197,8 @@ echo "  Now copy result files into $OUTPUT_FOLDER"
 "$compilerPrefix"gcc --version > $OUTPUT_FOLDER/gccInfo.log
 
 if [ -f libavcodec/avcodec.dll ]; then
-  cp -f libavcodec/*.dll $OUTPUT_FOLDER
-  cp -f libavcodec/*.lib $OUTPUT_FOLDER &>/dev/null
+  cp -f libavcodec/*.dll $OUTPUT_FOLDER_BIN
+  cp -f libavcodec/*.lib $OUTPUT_FOLDER_LIB &>/dev/null
 elif [ -f libavcodec/libavcodec.dylib ]; then
   cp -f -p -R libavcodec/*.dylib* $OUTPUT_FOLDER_LIB
 else
@@ -206,8 +206,8 @@ else
 fi
 
 if [ -f libavdevice/avdevice.dll ]; then
-  cp -f libavdevice/*.dll $OUTPUT_FOLDER
-  cp -f libavdevice/*.lib $OUTPUT_FOLDER &>/dev/null
+  cp -f libavdevice/*.dll $OUTPUT_FOLDER_BIN
+  cp -f libavdevice/*.lib $OUTPUT_FOLDER_LIB &>/dev/null
 elif [ -f libavdevice/libavdevice.dylib ]; then
   cp -f -p -R libavdevice/*.dylib* $OUTPUT_FOLDER_LIB
 else
@@ -215,8 +215,8 @@ else
 fi
 
 if [ -f libavfilter/avfilter.dll ]; then
-  cp -f libavfilter/*.dll $OUTPUT_FOLDER
-  cp -f libavfilter/*.lib $OUTPUT_FOLDER &>/dev/null
+  cp -f libavfilter/*.dll $OUTPUT_FOLDER_BIN
+  cp -f libavfilter/*.lib $OUTPUT_FOLDER_LIB &>/dev/null
 elif [ -f libavfilter/libavfilter.dylib ]; then
   cp -f -p -R libavfilter/*.dylib* $OUTPUT_FOLDER_LIB
 else
@@ -224,8 +224,8 @@ else
 fi
 
 if [ -f libavformat/avformat.dll ]; then
-  cp -f libavformat/*.dll $OUTPUT_FOLDER
-  cp -f libavformat/*.lib $OUTPUT_FOLDER &>/dev/null
+  cp -f libavformat/*.dll $OUTPUT_FOLDER_BIN
+  cp -f libavformat/*.lib $OUTPUT_FOLDER_LIB &>/dev/null
 elif [ -f libavformat/libavformat.dylib ]; then
   cp -f -p -R libavformat/*.dylib* $OUTPUT_FOLDER_LIB
 else
@@ -233,8 +233,8 @@ else
 fi
 
 if [ -f libavutil/avutil.dll ]; then
-  cp -f libavutil/*.dll $OUTPUT_FOLDER
-  cp -f libavutil/*.lib $OUTPUT_FOLDER &>/dev/null
+  cp -f libavutil/*.dll $OUTPUT_FOLDER_BIN
+  cp -f libavutil/*.lib $OUTPUT_FOLDER_LIB &>/dev/null
 elif [ -f libavutil/libavutil.dylib ]; then
   cp -f -p -R libavutil/*.dylib* $OUTPUT_FOLDER_LIB
 else
@@ -242,8 +242,8 @@ else
 fi
 
 if [ -f libswscale/swscale.dll ]; then
-  cp -f libswscale/*.dll $OUTPUT_FOLDER
-  cp -f libswscale/*.lib $OUTPUT_FOLDER &>/dev/null
+  cp -f libswscale/*.dll $OUTPUT_FOLDER_BIN
+  cp -f libswscale/*.lib $OUTPUT_FOLDER_LIB &>/dev/null
 elif [ -f libswscale/libswscale.dylib ]; then
   cp -f -p -R libswscale/*.dylib* $OUTPUT_FOLDER_LIB
 else
@@ -251,15 +251,15 @@ else
 fi
 
 if [ -f libswresample/swresample.dll ]; then
-  cp -f libswresample/*.dll $OUTPUT_FOLDER
-  cp -f libswresample/*.lib $OUTPUT_FOLDER &>/dev/null
+  cp -f libswresample/*.dll $OUTPUT_FOLDER_BIN
+  cp -f libswresample/*.lib $OUTPUT_FOLDER_LIB &>/dev/null
 elif [ -f libswresample/libswresample.dylib ]; then
   cp -f -p -R libswresample/*.dylib* $OUTPUT_FOLDER_LIB
 else
   cp -f -d libswresample/*.so* $OUTPUT_FOLDER_LIB
 fi
 
-cp -f *.exe      $OUTPUT_FOLDER &>/dev/null
+cp -f *.exe      $OUTPUT_FOLDER_BIN &>/dev/null
 cp -f ffmpeg     $OUTPUT_FOLDER_BIN &>/dev/null
 cp -f ffmpeg_g   $OUTPUT_FOLDER_BIN &>/dev/null
 cp -f ffprobe    $OUTPUT_FOLDER_BIN &>/dev/null
@@ -277,7 +277,7 @@ cp -f libswscale/*.h    $OUTPUT_FOLDER_INC/libswscale    &>/dev/null
 cp -f libswresample/*.h $OUTPUT_FOLDER_INC/libswresample &>/dev/null
 
 # remove duplicates (only Windows)
-rm $OUTPUT_FOLDER/avcodec.dll $OUTPUT_FOLDER/swresample.dll $OUTPUT_FOLDER/avdevice.dll $OUTPUT_FOLDER/avfilter.dll $OUTPUT_FOLDER/avformat.dll $OUTPUT_FOLDER/avutil.dll $OUTPUT_FOLDER/swscale.dll &>/dev/null
+rm $OUTPUT_FOLDER_BIN/avcodec.dll $OUTPUT_FOLDER_BIN/swresample.dll $OUTPUT_FOLDER_BIN/avdevice.dll $OUTPUT_FOLDER_BIN/avfilter.dll $OUTPUT_FOLDER_BIN/avformat.dll $OUTPUT_FOLDER_BIN/avutil.dll $OUTPUT_FOLDER_BIN/swscale.dll &>/dev/null
 
 # create binaries archive
 if [ "$aSystem" == "Darwin" ]; then
