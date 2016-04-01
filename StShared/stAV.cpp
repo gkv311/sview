@@ -618,3 +618,19 @@ bool stAV::setJavaVM(void* theJavaVM) {
     return false;
 #endif
 }
+
+StString stAV::getVersionInfo() {
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 24, 0))
+    return av_version_info();
+#else
+    return "";
+#endif
+}
+
+StString stAV::getLicenseInfo() {
+#if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 24, 0))
+    return avutil_license();
+#else
+    return "";
+#endif
+}

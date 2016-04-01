@@ -32,6 +32,7 @@
 
 #include "StVideo/StVideo.h"
 
+#include <StCore/StSearchMonitors.h>
 #include <StImage/StImageFile.h>
 #include <StSettings/StEnumParam.h>
 
@@ -859,11 +860,16 @@ void StMoviePlayerGUI::doAboutProgram(const size_t ) {
     const StGLVec3 THE_WHITE(1.0f, 1.0f, 1.0f);
     const StString anAbout = tr(ABOUT_DPLUGIN_NAME) + '\n'
                            + tr(ABOUT_VERSION) + " " + StVersionInfo::getSDKVersionString()
-                           + "\n \n" + tr(ABOUT_DESCRIPTION).format("2007-2016", "kirill@sview.ru", "www.sview.ru");
+                           + "\n \n" + tr(ABOUT_DESCRIPTION).format("2007-2016", "kirill@sview.ru", "www.sview.ru")
+                           + "\n\n<b><i>Used projects</i></b>"
+                           + "\n \nFFmpeg " + stAV::getVersionInfo() + " (" + stAV::getLicenseInfo() + ")\nhttps://ffmpeg.org/"
+                           + "\n \nOpenAL Soft (LGPL)\nhttp://kcat.strangesoft.net/openal.html"
+                           + "\n \nFreeType \nhttp://freetype.org/";
 
     StArgumentsMap anInfo;
     anInfo.add(StDictEntry("CPU cores", StString(StThread::countLogicalProcessors()) + StString(" logical processor(s)")));
     getContext().stglFullInfo(anInfo);
+    anInfo.add(StDictEntry("Display Scale", StString(myWindow->getMonitors()[myWindow->getPlacement().center()].getScale()) + "x"));
 
     StGLMessageBox* aDialog = new StGLMessageBox(this, tr(MENU_HELP_ABOUT), "", scale(512), scale(300));
     StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));

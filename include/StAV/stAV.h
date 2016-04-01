@@ -306,7 +306,17 @@ namespace stAV {
     }
 
     /**
-     * av_jni_set_java_vm wrapper.
+     * av_version_info() wrapper; return FFmpeg version info.
+     */
+    ST_CPPEXPORT StString getVersionInfo();
+
+    /**
+     * avutil_license() wrapper; return FFmpeg license info.
+     */
+    ST_CPPEXPORT StString getLicenseInfo();
+
+    /**
+     * av_jni_set_java_vm() wrapper.
      */
     ST_CPPEXPORT bool setJavaVM(void* theJavaVM);
 
