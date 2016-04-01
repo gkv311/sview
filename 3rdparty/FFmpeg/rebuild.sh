@@ -133,6 +133,9 @@ if [ "$gccMachine" == "$GCC_MACHINE_MINGW_32" ] || [ "$gccMachine" == "$GCC_MACH
   # you should use with --enable-pthreads instead to enable full multithreading support!
   #configArguments="$configArguments --enable-w32threads"
   configArguments="$configArguments --enable-avisynth"
+
+  # avoid dynamic linkage with libgcc_s_sjlj-1.dll
+  configArguments="$configArguments --extra-ldflags=-static-libgcc"
 fi
 
 # cross-compiling options
