@@ -132,6 +132,7 @@ const AVPixelFormat stAV::PIX_FMT::RGB48      = ST_AV_GETPIXFMT("rgb48");
 const AVPixelFormat stAV::PIX_FMT::BGR48      = ST_AV_GETPIXFMT("bgr48");
 const AVPixelFormat stAV::PIX_FMT::RGBA64     = ST_AV_GETPIXFMT("rgba64");
 const AVPixelFormat stAV::PIX_FMT::BGRA64     = ST_AV_GETPIXFMT("bgra64");
+const AVPixelFormat stAV::PIX_FMT::XYZ12      = ST_AV_GETPIXFMT("xyz12");
 const AVPixelFormat stAV::PIX_FMT::DXVA2_VLD  = ST_AV_GETPIXFMT("dxva2_vld");
 
 // TODO (Kirill Gavrilov#9) remove this stuff
@@ -199,8 +200,24 @@ StCString stAV::PIX_FMT::getString(const AVPixelFormat theFrmt) {
         return stCString("rgb24");
     } else if(theFrmt == stAV::PIX_FMT::BGR24) {
         return stCString("bgr24");
+    } else if(theFrmt == stAV::PIX_FMT::RGB48) {
+        return stCString("rgb48");
+    } else if(theFrmt == stAV::PIX_FMT::BGR48) {
+        return stCString("bgr48");
+    } else if(theFrmt == stAV::PIX_FMT::RGBA32) {
+        return stCString("rgba32");
+    } else if(theFrmt == stAV::PIX_FMT::BGRA32) {
+        return stCString("bgra32");
+    } else if(theFrmt == stAV::PIX_FMT::RGBA64) {
+        return stCString("rgba64");
+    } else if(theFrmt == stAV::PIX_FMT::BGRA64) {
+        return stCString("bgra64");
     } else if(theFrmt == stAV::PIX_FMT::NV12) {
         return stCString("nv12");
+    } else if(theFrmt == stAV::PIX_FMT::XYZ12) {
+        return stCString("xyz12");
+    } else if(theFrmt == stAV::PIX_FMT::DXVA2_VLD) {
+        return stCString("dxva2_vld");
     } else {
         return stCString("unknown");
     }
