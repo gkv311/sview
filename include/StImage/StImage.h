@@ -54,6 +54,7 @@ class StImage {
         ImgColor_RGBA,    //!< same as RGB but has Alpha channel to perform color blending with background
         ImgColor_GRAY,    //!< just gray scale
         ImgColor_YUV,     //!< luma/brightness (Y) + chrominance (UV color plane) - widely used in cinema
+        ImgColor_XYZ,     //!< XYZ
         ImgColor_CMYK,    //!< Cyan, Magenta, Yellow and Black - generally used in printing process
         ImgColor_HSV,     //!< Hue, Saturation, Value (also known as HSB - Hue, Saturation, Brightness)
         ImgColor_HSL,     //!< Hue, Saturation, Lightness/Luminance (also known as HLS or HSI - Hue, Saturation, Intensity))

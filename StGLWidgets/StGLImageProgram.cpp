@@ -102,6 +102,21 @@ StGLImageProgram::StGLImageProgram()
         "}\n\n");
 
     // color conversion shaders
+    registerFragmentShaderPart(FragSection_ToRgb, FragToRgb_FromXyz,
+       // XYZ to sRGB matrix
+       "mat4 THE_XYZ2RGB_MAT = mat4(3.2404542, -0.9692660,  0.0556434, 0.0,"
+       "                           -1.5371385,  1.8760108, -0.2040259, 0.0,"
+       "                           -0.4985314,  0.0415560,  1.0572252, 0.0,"
+       "                                  0.0,        0.0,        0.0, 1.0);"
+       "vec4 THE_GAMMA_XYZ =       vec4(2.6, 2.6, 2.6, 1.0);"
+       "vec4 THE_GAMMA_RGB = 1.0 / vec4(2.2, 2.2, 2.2, 1.0);"
+       "void convertToRGB(inout vec4 theColor, in vec3 texCoord) {\n"
+       "    vec4 aColor = pow(theColor, THE_GAMMA_XYZ);"
+       "    aColor = THE_XYZ2RGB_MAT * aColor;\n"
+       "    aColor = pow(aColor, THE_GAMMA_RGB);"
+       "    theColor = aColor;"
+       "}\n\n");
+
     const char F_SHADER_YUV2RGB_MPEG[] =
        "uniform stSampler uTextureU;\n"
        "uniform stSampler uTextureV;\n"
@@ -312,6 +327,7 @@ static inline StGLImageProgram::FragToRgb getColorShader(const StImage::ImgColor
         case StImage::ImgColor_RGB:  return StGLImageProgram::FragToRgb_FromRgb;
         case StImage::ImgColor_RGBA: return StGLImageProgram::FragToRgb_FromRgba;
         case StImage::ImgColor_GRAY: return StGLImageProgram::FragToRgb_FromGray;
+        case StImage::ImgColor_XYZ:  return StGLImageProgram::FragToRgb_FromXyz;
         case StImage::ImgColor_YUV: {
             switch(theColorScale) {
                 case StImage::ImgScale_Mpeg9:  return StGLImageProgram::FragToRgb_FromYuv9Mpeg;

@@ -490,7 +490,14 @@ void StVideoQueue::prepareFrame(const StFormat theSrcFormat) {
     stAV::dimYUV  aDimsYUV;
     myFrame.getImageInfo(myCodecCtx, aFrameSizeX, aFrameSizeY, aPixFmt);
     myDataAdp.setBufferCounter(NULL);
-    if(aPixFmt == stAV::PIX_FMT::RGB24) {
+    if(aPixFmt == stAV::PIX_FMT::XYZ12) {
+        myDataAdp.setColorModel(StImage::ImgColor_XYZ);
+        myDataAdp.setColorScale(StImage::ImgScale_Full);
+        myDataAdp.setPixelRatio(getPixelRatio());
+        myDataAdp.changePlane(0).initWrapper(StImagePlane::ImgRGB48, myFrame.getPlane(0),
+                                             size_t(aFrameSizeX), size_t(aFrameSizeY),
+                                             myFrame.getLineSize(0));
+    } else if(aPixFmt == stAV::PIX_FMT::RGB24) {
         myDataAdp.setColorModel(StImage::ImgColor_RGB);
         myDataAdp.setColorScale(StImage::ImgScale_Full);
         myDataAdp.setPixelRatio(getPixelRatio());
