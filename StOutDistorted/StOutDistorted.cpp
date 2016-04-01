@@ -505,10 +505,17 @@ void StOutDistorted::processEvents() {
 
 void StOutDistorted::showCursor(const bool theToShow) {
     myToShowCursor = theToShow;
+    if(myDevice == DEVICE_S3DV) {
+        StWindow::showCursor(theToShow);
+    }
 }
 
 void StOutDistorted::stglDrawCursor(const StPointD_t&  theCursorPos,
                                     const unsigned int theView) {
+    if(myDevice == DEVICE_S3DV) {
+        return;
+    }
+
     StWindow::showCursor(false);
     if(!myToShowCursor
     || !myCursor->isValid()) {
