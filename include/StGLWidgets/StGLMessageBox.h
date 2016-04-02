@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,7 +11,6 @@
 #define __StGLMessageBox_h_
 
 #include <StGLWidgets/StGLTextArea.h>
-#include <StGLWidgets/StGLMenuProgram.h>
 
 class StGLButton;
 class StGLScrollArea;
@@ -144,7 +143,6 @@ class StGLMessageBox : public StGLWidget {
     StGLTextArea*     myTitle;        //!< window title
     StGLWidget*       myBtnPanel;     //!< panel for buttons
     StGLButton*       myDefaultBtn;   //!< default button to redirect Enter
-    StGLMenuProgram   myProgram;      //!< GLSL program
     StGLVertexBuffer  myVertexBuf;    //!< vertices VBO
     int               myButtonsNb;    //!< number of buttons added to this message box
 

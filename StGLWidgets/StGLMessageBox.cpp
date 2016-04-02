@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru
+ * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -8,7 +8,9 @@
  */
 
 #include <StGLWidgets/StGLMessageBox.h>
+
 #include <StGLWidgets/StGLButton.h>
+#include <StGLWidgets/StGLMenuProgram.h>
 #include <StGLWidgets/StGLRootWidget.h>
 #include <StGLWidgets/StGLScrollArea.h>
 
@@ -150,7 +152,6 @@ void StGLMessageBox::create(const StString& theTitle,
 StGLMessageBox::~StGLMessageBox() {
     StGLContext& aCtx = getContext();
     myVertexBuf.release(aCtx);
-    myProgram.release(aCtx);
 }
 
 void StGLMessageBox::setTitle(const StString& theTitle) {
@@ -304,19 +305,7 @@ bool StGLMessageBox::stglInit() {
         return false;
     }
 
-    StGLContext& aCtx = getContext();
-    const GLfloat QUAD_VERTICES[4 * 4] = {
-         1.0f, -1.0f, 0.0f, 1.0f, // top-right
-         1.0f,  1.0f, 0.0f, 1.0f, // bottom-right
-        -1.0f, -1.0f, 0.0f, 1.0f, // top-left
-        -1.0f,  1.0f, 0.0f, 1.0f  // bottom-left
-    };
-    myVertexBuf.init(aCtx, 4, 4, QUAD_VERTICES);
     stglResize();
-
-    if(!myProgram.init(aCtx)) {
-        return false;
-    }
     return true;
 }
 
@@ -342,16 +331,10 @@ void StGLMessageBox::stglResize() {
     }
 
     StGLWidget::stglResize();
-    GLfloat toZScreen = -getCamera()->getZScreen();
 
-    StRectD_t aRectGl = getRectGl();
-    const GLfloat aQuadVertices[4 * 4] = {
-        GLfloat(aRectGl.right()), GLfloat(aRectGl.top()),    toZScreen, 1.0f, // top-right
-        GLfloat(aRectGl.right()), GLfloat(aRectGl.bottom()), toZScreen, 1.0f, // bottom-right
-        GLfloat(aRectGl.left()),  GLfloat(aRectGl.top()),    toZScreen, 1.0f, // top-left
-        GLfloat(aRectGl.left()),  GLfloat(aRectGl.bottom()), toZScreen, 1.0f  // bottom-left
-    };
-    myVertexBuf.init(getContext(), 4, 4, aQuadVertices);
+    StArray<StGLVec2> aVertices(4);
+    getRectGl(aVertices);
+    myVertexBuf.init(getContext(), aVertices);
 }
 
 void StGLMessageBox::stglDraw(unsigned int theView) {
@@ -364,19 +347,19 @@ void StGLMessageBox::stglDraw(unsigned int theView) {
         stglResize();
     }
 
-    if(myProgram.isValid()) {
+    StGLMenuProgram& aProgram = myRoot->getMenuProgram();
+    if(aProgram.isValid()) {
         aCtx.core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         aCtx.core20fwd->glEnable(GL_BLEND);
 
-        myProgram.use(aCtx, getRoot()->getScreenDispX());
-        myProgram.setProjMat(aCtx, getCamera()->getProjMatrix());
-        myProgram.setColor(aCtx, getRoot()->getColorForElement(StGLRootWidget::Color_MessageBox), myOpacity * 0.8f);
+        aProgram.use(aCtx, getRoot()->getScreenDispX());
+        aProgram.setColor(aCtx, getRoot()->getColorForElement(StGLRootWidget::Color_MessageBox), myOpacity * 0.8f);
 
-            myVertexBuf.bindVertexAttrib(aCtx, myProgram.getVVertexLoc());
+            myVertexBuf.bindVertexAttrib(aCtx, aProgram.getVVertexLoc());
             aCtx.core20fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-            myVertexBuf.unBindVertexAttrib(aCtx, myProgram.getVVertexLoc());
+            myVertexBuf.unBindVertexAttrib(aCtx, aProgram.getVVertexLoc());
 
-        myProgram.unuse(aCtx);
+        aProgram.unuse(aCtx);
 
         aCtx.core20fwd->glDisable(GL_BLEND);
     }
