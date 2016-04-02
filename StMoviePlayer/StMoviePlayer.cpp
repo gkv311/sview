@@ -70,6 +70,7 @@ namespace {
     static const char ST_SETTING_MOBILE_UI[]     = "isMobileUI";
     static const char ST_SETTING_LIMIT_FPS[]     = "toLimitFps";
     static const char ST_SETTING_GPU_DECODING[]  = "gpuDecoding";
+    static const char ST_SETTING_OPENJPEG[]      = "openJpeg";
     static const char ST_SETTING_VSYNC[]         = "vsync";
 
     static const char ST_SETTING_SCALE_ADJUST[]  = "scaleAdjust";
@@ -568,6 +569,8 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     const StCString aGpuAcc = stCString("");
 #endif
     params.UseGpu = new StBoolParamNamed(false, tr(MENU_MEDIA_GPU_DECODING) + aGpuAcc);
+    // OpenJPEG seems to be faster then built-in jpeg2000 decoder
+    params.UseOpenJpeg = new StBoolParamNamed(true, "Use OpenJPEG instead of jpeg2000");
 
     params.SnapshotImgType = new StInt32Param(StImageFile::ST_TYPE_JPEG);
 
@@ -594,6 +597,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (ST_SETTING_VSYNC,              params.IsVSyncOn);
     mySettings->loadParam (ST_SETTING_LIMIT_FPS,          params.ToLimitFps);
     mySettings->loadParam (ST_SETTING_GPU_DECODING,       params.UseGpu);
+    mySettings->loadParam (ST_SETTING_OPENJPEG,           params.UseOpenJpeg);
 
     mySettings->loadParam (ST_SETTING_WEBUI_ON,           params.StartWebUI);
     mySettings->loadParam (ST_SETTING_WEBUI_PORT,         params.WebUIPort);
@@ -814,6 +818,7 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (ST_SETTING_VSYNC,              params.IsVSyncOn);
         mySettings->saveParam (ST_SETTING_LIMIT_FPS,          params.ToLimitFps);
         mySettings->saveParam (ST_SETTING_GPU_DECODING,       params.UseGpu);
+        mySettings->saveParam (ST_SETTING_OPENJPEG,           params.UseOpenJpeg);
 
         mySettings->saveParam (ST_SETTING_WEBUI_ON,           params.StartWebUI);
         if(!params.IsLocalWebUI->getValue()) {
@@ -1055,6 +1060,7 @@ bool StMoviePlayer::init() {
         myVideo->signals.onError  = stSlot(myMsgQueue.access(), &StMsgQueue::doPushError);
         myVideo->signals.onLoaded = stSlot(this,                &StMoviePlayer::doLoaded);
         myVideo->params.UseGpu       = params.UseGpu;
+        myVideo->params.UseOpenJpeg  = params.UseOpenJpeg;
         myVideo->params.ToSearchSubs = params.ToSearchSubs;
 
     #ifdef ST_HAVE_MONGOOSE

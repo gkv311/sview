@@ -146,11 +146,12 @@ inline AVCodecID stFindCodecId(const char* theName) {
 StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
                            const StHandle<StVideoQueue>&     theMaster)
 : StAVPacketQueue(512),
-  CodecIdH264 (stFindCodecId("h264")),
-  CodecIdHEVC (stFindCodecId("hevc")),
-  CodecIdMPEG2(stFindCodecId("mpeg2video")),
-  CodecIdWMV3 (stFindCodecId("wmv3")),
-  CodecIdVC1  (stFindCodecId("vc1")),
+  CodecIdH264  (stFindCodecId("h264")),
+  CodecIdHEVC  (stFindCodecId("hevc")),
+  CodecIdMPEG2 (stFindCodecId("mpeg2video")),
+  CodecIdWMV3  (stFindCodecId("wmv3")),
+  CodecIdVC1   (stFindCodecId("vc1")),
+  CodecIdJpeg2K(stFindCodecId("jpeg2000")),
   myDowntimeState(true),
   myTextureQueue(theTextureQueue),
   myHasDataState(false),
@@ -160,8 +161,10 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
 #elif defined(__ANDROID__)
   myCodecH264HW(avcodec_find_decoder_by_name("h264_mediacodec")),
 #endif
+  myCodecOpenJpeg(avcodec_find_decoder_by_name("libopenjpeg")),
   myUseGpu(false),
   myIsGpuFailed(false),
+  myUseOpenJpeg(false),
   //
   myToRgbCtx(NULL),
   myToRgbPixFmt(stAV::PIX_FMT::NONE),
@@ -327,9 +330,15 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
                  && myCodecCtx->codec_id != CodecIdHEVC;
 #endif
 
+    bool isCodecOverridden = false;
+    if(myUseOpenJpeg
+    && myCodecCtx->codec_id == CodecIdJpeg2K
+    && myCodecOpenJpeg != NULL) {
+        isCodecOverridden = initCodec(myCodecOpenJpeg, false);
+    }
+
     // open VIDEO codec
 #if defined(__APPLE__) || defined(__ANDROID__)
-    bool isCodecOverridden = false;
     AVCodec* aCodecGpu = NULL;
     if(myUseGpu
     && StString(myCodecAuto->name).isEquals(stCString("h264"))
@@ -350,7 +359,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
         return false;
     }
 #else
-    if(!initCodec(myCodecAuto, myUseGpu && !myIsGpuFailed)) {
+    if(!isCodecOverridden && !initCodec(myCodecAuto, myUseGpu && !myIsGpuFailed)) {
         signals.onError(stCString("FFmpeg: Could not open video codec"));
         deinit();
         return false;

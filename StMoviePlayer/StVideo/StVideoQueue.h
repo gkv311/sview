@@ -96,6 +96,7 @@ class StVideoQueue : public StAVPacketQueue {
     AVCodecID CodecIdMPEG2;
     AVCodecID CodecIdWMV3;
     AVCodecID CodecIdVC1;
+    AVCodecID CodecIdJpeg2K;
 
         public:
 
@@ -120,6 +121,13 @@ class StVideoQueue : public StAVPacketQueue {
                             const bool theIsGpuFailed = false) {
         myUseGpu      = theToUseGpu;
         myIsGpuFailed = theIsGpuFailed;
+    }
+
+    /**
+     * Setup OpenJPEG usage. Requires re-initialization to take effect!
+     */
+    ST_LOCAL void setUseOpenJpeg(const bool theToUseOpenJpeg) {
+        myUseOpenJpeg = theToUseOpenJpeg;
     }
 
     ST_LOCAL bool isInDowntime() {
@@ -351,8 +359,10 @@ private:
 #if defined(__APPLE__) || defined(__ANDROID__)
     AVCodec*                   myCodecH264HW;     //!< h264 decoder using dedicated hardware (VDA codec on OS X; Android Media Codec)
 #endif
+    AVCodec*                   myCodecOpenJpeg;   //!< libopenjpeg decoder
     bool                       myUseGpu;          //!< activate decoding on GPU when possible
     bool                       myIsGpuFailed;     //!< flag indicating that GPU decoder can not handle input data
+    bool                       myUseOpenJpeg;     //!< use OpenJPEG (libopenjpeg) instead of built-in jpeg2000 decoder
 
     StAVFrame                  myFrameRGB;        //!< frame, converted to RGB (soft)
     StImagePlane               myDataRGB;         //!< RGB buffer data (for swscale)

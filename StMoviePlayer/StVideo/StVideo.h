@@ -218,6 +218,7 @@ class StVideo {
     struct {
 
         StHandle<StBoolParam>         UseGpu;          //!< use video decoding on GPU when available
+        StHandle<StBoolParam>         UseOpenJpeg;     //!< use OpenJPEG (libopenjpeg) instead of built-in jpeg2000 decoder
         StHandle<StBoolParam>         ToSearchSubs;    //!< automatically search for additional subtitles/audio track files nearby video file
         StHandle<StParamActiveStream> activeAudio;     //!< active Audio stream
         StHandle<StParamActiveStream> activeSubtitles; //!< active Subtitles stream

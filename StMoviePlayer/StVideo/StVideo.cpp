@@ -74,6 +74,7 @@ StVideo::StVideo(const std::string&                 theALDeviceName,
     }
 
     params.UseGpu          = new StBoolParam(false);
+    params.UseOpenJpeg     = new StBoolParam(false);
     params.activeAudio     = new StParamActiveStream();
     params.activeSubtitles = new StParamActiveStream();
 
@@ -504,9 +505,12 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
     // just for safe - close previously opened video
     close();
 
-    const bool toUseGpu = params.UseGpu->getValue();
+    const bool toUseGpu      = params.UseGpu->getValue();
+    const bool toUseOpenJpeg = params.UseOpenJpeg->getValue();
     myVideoMaster->setUseGpu(toUseGpu);
     myVideoSlave ->setUseGpu(toUseGpu);
+    myVideoMaster->setUseOpenJpeg(toUseOpenJpeg);
+    myVideoSlave ->setUseOpenJpeg(toUseOpenJpeg);
 
     myFileInfoTmp = new StMovieInfo();
 

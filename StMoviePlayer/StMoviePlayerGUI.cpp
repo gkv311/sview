@@ -2100,6 +2100,11 @@ void StMoviePlayerGUI::doMobileSettings(const size_t ) {
     aRend->getOptions(aParams);
     aParams.add(myPlugin->params.ToShowFps);
     aParams.add(myPlugin->params.UseGpu);
+
+    if(avcodec_find_decoder_by_name("libopenjpeg") != NULL) {
+        aParams.add(myPlugin->params.UseOpenJpeg);
+    }
+
     aParams.add(myLangMap->params.language);
     aParams.add(myPlugin->params.IsMobileUI);
     myLangMap->params.language->setName(tr(MENU_HELP_LANGS));

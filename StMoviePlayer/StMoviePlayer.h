@@ -242,6 +242,7 @@ class StMoviePlayer : public StApplication {
         StString                  lastFolder;       //!< laster folder used to open / save file
         int                       TargetFps;        //!< rendering FPS limit (0 - max FPS with less CPU, 1,2,3 - adjust to video FPS)
         StHandle<StBoolParamNamed> UseGpu;          //!< use video decoding on GPU when available
+        StHandle<StBoolParamNamed> UseOpenJpeg;     //!< use OpenJPEG (libopenjpeg) instead of built-in jpeg2000 decoder
 
     } params;
 
