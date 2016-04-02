@@ -355,6 +355,11 @@ class StWindow {
         public: //! @name renderer properties
 
     /**
+     * Handle language change (update strings).
+     */
+    ST_CPPEXPORT virtual void doChangeLanguage();
+
+    /**
      * Renderer about string.
      */
     ST_CPPEXPORT virtual StString getRendererAbout() const;

@@ -1272,11 +1272,6 @@ void StImageViewerGUI::stglUpdate(const StPointD_t& pointZo) {
     if(myDescr != NULL) {
         myDescr->setPoint(pointZo);
     }
-    if(myLangMap->wasReloaded()) {
-        myPlugin->myToRecreateMenu = true;
-        myLangMap->resetReloaded();
-        StImageViewerStrings::loadDefaults(*myLangMap);
-    }
 }
 
 void StImageViewerGUI::stglResize(const StGLBoxPx& theRectPx) {

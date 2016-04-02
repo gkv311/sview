@@ -140,6 +140,11 @@ class StOutDistorted : public StWindow {
      */
     ST_CPPEXPORT virtual GLfloat getScaleFactor() const ST_ATTR_OVERRIDE;
 
+    /**
+     * Update strings.
+     */
+    ST_LOCAL virtual void doChangeLanguage() ST_ATTR_OVERRIDE { updateStrings(); }
+
         private:
 
     /**
@@ -151,6 +156,11 @@ class StOutDistorted : public StWindow {
      * Release GL resources before window closing.
      */
     ST_LOCAL void releaseResources();
+
+    /**
+     * Update strings.
+     */
+    ST_LOCAL void updateStrings();
 
     /**
      * On/off VSync callback.
@@ -248,6 +258,7 @@ class StOutDistorted : public StWindow {
     bool                      myToCompressMem;   //!< reduce memory usage
     bool                      myIsBroken;        //!< special flag for broke state - when FBO can not be allocated
     bool                      myIsStereoOn;
+    bool                      myCanHdmiPack;
     bool                      myIsHdmiPack;      //!< "frame packed" mode in HDMI 1.4a
     bool                      myIsForcedFboUsage;//!< use FBO even when rendering can be done by simple viewport adjustment
 

@@ -1,6 +1,6 @@
 /**
  * StOutDual, class providing stereoscopic output for Dual Input hardware using StCore toolkit.
- * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -93,6 +93,11 @@ class StOutDual : public StWindow {
      */
     ST_CPPEXPORT virtual void stglDraw() ST_ATTR_OVERRIDE;
 
+    /**
+     * Update strings.
+     */
+    ST_LOCAL virtual void doChangeLanguage() ST_ATTR_OVERRIDE { updateStrings(); }
+
         private:
 
     typedef enum tagDeviceEnum {
@@ -112,6 +117,11 @@ class StOutDual : public StWindow {
     ST_LOCAL void releaseResources();
 
     /**
+     * Update strings.
+     */
+    ST_LOCAL void updateStrings();
+
+    /**
      * On/off VSync callback.
      */
     ST_LOCAL void doSwitchVSync(const int32_t theValue);
@@ -129,7 +139,7 @@ class StOutDual : public StWindow {
 
     struct {
 
-        StHandle<StInt32ParamNamed> SlaveMonId; //!< slave window position
+        StHandle<StEnumParam>       SlaveMonId; //!< slave window position
         StHandle<StBoolParamNamed>  MonoClone;  //!< display mono in stereo
 
     } params;

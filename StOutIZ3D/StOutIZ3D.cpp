@@ -1,6 +1,6 @@
 /**
  * StOutInterlace, class providing stereoscopic output for iZ3D monitors using StCore toolkit.
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -100,15 +100,16 @@ void StOutIZ3D::getOptions(StParamsList& theList) const {
     theList.add(params.Glasses);
 }
 
-StOutIZ3D::StOutIZ3D(const StHandle<StResourceManager>& theResMgr,
-                     const StNativeWin_t                theParentWindow)
-: StWindow(theResMgr, theParentWindow),
-  mySettings(new StSettings(theResMgr, ST_OUT_PLUGIN_NAME)),
-  myFrBuffer(new StGLStereoFrameBuffer()),
-  myToCompressMem(myInstancesNb.increment() > 1),
-  myIsBroken(false) {
-    const StSearchMonitors& aMonitors = StWindow::getMonitors();
+void StOutIZ3D::updateStrings() {
     StTranslations aLangMap(getResourceManager(), ST_OUT_PLUGIN_NAME);
+
+    myDevices[0]->Name = aLangMap.changeValueId(STTR_IZ3D_NAME, "IZ3D Display");
+    myDevices[0]->Desc = aLangMap.changeValueId(STTR_IZ3D_DESC, "IZ3D Display");
+
+    params.Glasses->setName(aLangMap.changeValueId(STTR_PARAMETER_GLASSES, "iZ3D glasses"));
+    params.Glasses->defineOption(StOutIZ3DShaders::IZ3D_TABLE_OLD, aLangMap.changeValueId(STTR_PARAMETER_GLASSES_CLASSIC,      "Classic"));
+    params.Glasses->defineOption(StOutIZ3DShaders::IZ3D_TABLE_NEW, aLangMap.changeValueId(STTR_PARAMETER_GLASSES_MODERN,       "Modern"));
+    params.Glasses->defineOption(StOutIZ3DShaders::IZ3D_CLASSIC,   aLangMap.changeValueId(STTR_PARAMETER_GLASSES_CLASSIC_FAST, "Classic (fast)"));
 
     // about string
     StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - iZ3D Output module");
@@ -117,6 +118,16 @@ StOutIZ3D::StOutIZ3D(const StHandle<StResourceManager>& theResMgr,
         "(C) {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0");
     myAbout = aTitle + '\n' + aVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n"
             + aDescr.format("2009-2016", "kirill@sview.ru", "www.sview.ru");
+}
+
+StOutIZ3D::StOutIZ3D(const StHandle<StResourceManager>& theResMgr,
+                     const StNativeWin_t                theParentWindow)
+: StWindow(theResMgr, theParentWindow),
+  mySettings(new StSettings(theResMgr, ST_OUT_PLUGIN_NAME)),
+  myFrBuffer(new StGLStereoFrameBuffer()),
+  myToCompressMem(myInstancesNb.increment() > 1),
+  myIsBroken(false) {
+    const StSearchMonitors& aMonitors = StWindow::getMonitors();
 
     // detect connected displays
     int aSupportLevel = ST_DEVICE_SUPPORT_NONE;
@@ -135,20 +146,14 @@ StOutIZ3D::StOutIZ3D(const StHandle<StResourceManager>& theResMgr,
     // devices list
     StHandle<StOutDevice> aDevice = new StOutDevice();
     aDevice->PluginId = ST_OUT_PLUGIN_NAME;
-    aDevice->DeviceId = "iZ3D";
+    aDevice->DeviceId = stCString("iZ3D");
     aDevice->Priority = aSupportLevel;
-    aDevice->Name     = aLangMap.changeValueId(STTR_IZ3D_NAME, "IZ3D Display");
-    aDevice->Desc     = aLangMap.changeValueId(STTR_IZ3D_DESC, "IZ3D Display");
+    aDevice->Name     = stCString("IZ3D Display");
     myDevices.add(aDevice);
 
     // shader switch option
-    StHandle<StEnumParam> aGlasses = new StEnumParam(myShaders.getMode(), stCString("tableId"),
-                                                     aLangMap.changeValueId(STTR_PARAMETER_GLASSES, "iZ3D glasses"));
-    aGlasses->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_GLASSES_CLASSIC,      "Classic"));
-    aGlasses->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_GLASSES_MODERN,       "Modern"));
-    aGlasses->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_GLASSES_CLASSIC_FAST, "Classic (fast)"));
-    aGlasses->signals.onChanged.connect(&myShaders, &StOutIZ3DShaders::doSetMode);
-    params.Glasses = aGlasses;
+    params.Glasses = new StEnumParam(myShaders.getMode(), stCString("tableId"), stCString("tableId"));
+    params.Glasses->signals.onChanged.connect(&myShaders, &StOutIZ3DShaders::doSetMode);
 
     // load window position
     if(isMovable()) {
@@ -158,6 +163,7 @@ StOutIZ3D::StOutIZ3D(const StHandle<StResourceManager>& theResMgr,
         }
         StWindow::setPlacement(aRect, true);
     }
+    updateStrings();
     StWindow::setTitle("sView - iZ3D Renderer");
 
     // load parameters

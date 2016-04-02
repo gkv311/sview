@@ -1,6 +1,6 @@
 /**
  * StOutInterlace, class providing stereoscopic output in row interlaced format using StCore toolkit.
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -148,23 +148,23 @@ const char* StOutInterlace::getRendererId() const {
 
 const char* StOutInterlace::getDeviceId() const {
     switch(myDevice) {
-        case DEVICE_VINTERLACE:    return "Col";
-        case DEVICE_CHESSBOARD:    return "Chess";
-        case DEVICE_HINTERLACE_ED: return "RowED";
-        case DEVICE_HINTERLACE:
-        default:                   return "Row";
+        case DEVICE_COL_INTERLACED:    return "Col";
+        case DEVICE_CHESSBOARD:        return "Chess";
+        case DEVICE_ROW_INTERLACED_ED: return "RowED";
+        case DEVICE_ROW_INTERLACED:
+        default:                       return "Row";
     }
 }
 
 bool StOutInterlace::setDevice(const StString& theDevice) {
     if(theDevice == "Row") {
-        myDevice = DEVICE_HINTERLACE;
+        myDevice = DEVICE_ROW_INTERLACED;
     } else if(theDevice == "Col") {
-        myDevice = DEVICE_VINTERLACE;
+        myDevice = DEVICE_COL_INTERLACED;
     } else if(theDevice == "Chess") {
         myDevice = DEVICE_CHESSBOARD;
     } else if(theDevice == "RowED") {
-        myDevice = DEVICE_HINTERLACE_ED;
+        myDevice = DEVICE_ROW_INTERLACED_ED;
     }
     return false;
 }
@@ -180,6 +180,30 @@ void StOutInterlace::getOptions(StParamsList& theList) const {
 #if !defined(__ANDROID__)
     theList.add(params.BindToMon);
 #endif
+}
+
+void StOutInterlace::updateStrings() {
+    StTranslations aLangMap(getResourceManager(), ST_OUT_PLUGIN_NAME);
+    myDevices[DEVICE_ROW_INTERLACED]   ->Name = aLangMap.changeValueId(STTR_HINTERLACE_NAME,    "Row Interlaced");
+    myDevices[DEVICE_ROW_INTERLACED]   ->Desc = aLangMap.changeValueId(STTR_HINTERLACE_DESC,    "Row interlaced displays: Zalman, Hyundai,...");
+    myDevices[DEVICE_COL_INTERLACED]   ->Name = aLangMap.changeValueId(STTR_VINTERLACE_NAME,    "Column Interlaced");
+    myDevices[DEVICE_COL_INTERLACED]   ->Desc = aLangMap.changeValueId(STTR_VINTERLACE_DESC,    "Column interlaced displays");
+#if !defined(__ANDROID__)
+    myDevices[DEVICE_CHESSBOARD]       ->Name = aLangMap.changeValueId(STTR_CHESSBOARD_NAME,    "DLP TV (chessboard)");
+    myDevices[DEVICE_CHESSBOARD]       ->Desc = aLangMap.changeValueId(STTR_CHESSBOARD_DESC,    "DLP TV (chessboard)");
+    myDevices[DEVICE_ROW_INTERLACED_ED]->Name = aLangMap.changeValueId(STTR_HINTERLACE_ED_NAME, "Interlaced ED");
+    myDevices[DEVICE_ROW_INTERLACED_ED]->Desc = aLangMap.changeValueId(STTR_HINTERLACE_ED_DESC, "EDimensional in interlaced mode");
+#endif
+    params.ToReverse->setName(aLangMap.changeValueId(STTR_PARAMETER_REVERSE,  "Reverse Order"));
+    params.BindToMon->setName(aLangMap.changeValueId(STTR_PARAMETER_BIND_MON, "Bind To Supported Monitor"));
+
+    // about string
+    StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - Interlaced Output library");
+    StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
+    StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
+        "(C) {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0");
+    myAbout = aTitle + '\n' + aVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n"
+            + aDescr.format("2009-2016", "kirill@sview.ru", "www.sview.ru");
 }
 
 StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
@@ -210,58 +234,44 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     StWindow::signals.onAnotherMonitor = stSlot(this, &StOutInterlace::doNewMonitor);
 
     const StSearchMonitors& aMonitors = StWindow::getMonitors();
-    StTranslations aLangMap(getResourceManager(), ST_OUT_PLUGIN_NAME);
+    myGlPrograms[DEVICE_ROW_INTERLACED]       = new StProgramFB("Row Interlace");
+    myGlPrograms[DEVICE_COL_INTERLACED]       = new StProgramFB("Column Interlace");
+    myGlPrograms[DEVICE_CHESSBOARD]           = new StProgramFB("Chessboard");
+    myGlPrograms[DEVICE_ROW_INTERLACED_ED]    = myGlPrograms[DEVICE_ROW_INTERLACED];
 
-    myGlPrograms[DEVICE_HINTERLACE] = new StProgramFB("Row Interlace");
-    myGlPrograms[DEVICE_VINTERLACE] = new StProgramFB("Column Interlace");
-    myGlPrograms[DEVICE_CHESSBOARD] = new StProgramFB("Chessboard");
-    myGlPrograms[DEVICE_HINTERLACE_ED] = myGlPrograms[DEVICE_HINTERLACE];
-
-    myGlProgramsRev[DEVICE_HINTERLACE] = new StProgramFB("Row Interlace Inversed");
-    myGlProgramsRev[DEVICE_VINTERLACE] = new StProgramFB("Column Interlace Inversed");
-    myGlProgramsRev[DEVICE_CHESSBOARD] = new StProgramFB("Chessboard Inversed");
-    myGlProgramsRev[DEVICE_HINTERLACE_ED] = myGlProgramsRev[DEVICE_HINTERLACE];
-
-    // about string
-    StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - Interlaced Output library");
-    StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
-    StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
-        "(C) {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0");
-    myAbout = aTitle + '\n' + aVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n"
-            + aDescr.format("2009-2016", "kirill@sview.ru", "www.sview.ru");
+    myGlProgramsRev[DEVICE_ROW_INTERLACED]    = new StProgramFB("Row Interlace Inversed");
+    myGlProgramsRev[DEVICE_COL_INTERLACED]    = new StProgramFB("Column Interlace Inversed");
+    myGlProgramsRev[DEVICE_CHESSBOARD]        = new StProgramFB("Chessboard Inversed");
+    myGlProgramsRev[DEVICE_ROW_INTERLACED_ED] = myGlProgramsRev[DEVICE_ROW_INTERLACED];
 
     // devices list
     StHandle<StOutDevice> aDevRow = new StOutDevice();
     aDevRow->PluginId = ST_OUT_PLUGIN_NAME;
-    aDevRow->DeviceId = "Row";
+    aDevRow->DeviceId = stCString("Row");
     aDevRow->Priority = ST_DEVICE_SUPPORT_NONE;
-    aDevRow->Name     = aLangMap.changeValueId(STTR_HINTERLACE_NAME, "Row Interlaced");
-    aDevRow->Desc     = aLangMap.changeValueId(STTR_HINTERLACE_DESC, "Row interlaced displays: Zalman, Hyundai,...");
+    aDevRow->Name     = stCString("Row Interlaced");
     myDevices.add(aDevRow);
 
     StHandle<StOutDevice> aDevCol = new StOutDevice();
     aDevCol->PluginId = ST_OUT_PLUGIN_NAME;
-    aDevCol->DeviceId = "Col";
+    aDevCol->DeviceId = stCString("Col");
     aDevCol->Priority = ST_DEVICE_SUPPORT_NONE;
-    aDevCol->Name     = aLangMap.changeValueId(STTR_VINTERLACE_NAME, "Column Interlaced");
-    aDevCol->Desc     = aLangMap.changeValueId(STTR_VINTERLACE_DESC, "Column interlaced displays");
+    aDevCol->Name     = stCString("Column Interlaced");
     myDevices.add(aDevCol);
 
 #if !defined(__ANDROID__)
     StHandle<StOutDevice> aDevChess = new StOutDevice();
     aDevChess->PluginId = ST_OUT_PLUGIN_NAME;
-    aDevChess->DeviceId = "Chess";
+    aDevChess->DeviceId = stCString("Chess");
     aDevChess->Priority = ST_DEVICE_SUPPORT_NONE;
-    aDevChess->Name     = aLangMap.changeValueId(STTR_CHESSBOARD_NAME, "DLP TV (chessboard)");
-    aDevChess->Desc     = aLangMap.changeValueId(STTR_CHESSBOARD_DESC, "DLP TV (chessboard)");
+    aDevChess->Name     = stCString("DLP TV (chessboard)");
     myDevices.add(aDevChess);
 
     StHandle<StOutDevice> aDevED = new StOutDevice();
     aDevED->PluginId = ST_OUT_PLUGIN_NAME;
-    aDevED->DeviceId = "RowED";
+    aDevED->DeviceId = stCString("RowED");
     aDevED->Priority = ST_DEVICE_SUPPORT_NONE;
-    aDevED->Name     = aLangMap.changeValueId(STTR_HINTERLACE_ED_NAME, "Interlaced ED");
-    aDevED->Desc     = aLangMap.changeValueId(STTR_HINTERLACE_ED_DESC, "EDimensional in interlaced mode");
+    aDevED->Name     = stCString("Interlaced ED");
     myDevices.add(aDevED);
 #endif
 
@@ -273,12 +283,13 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     }
 
     // options
-    params.ToReverse = new StBoolParamNamed(false, stCString("reverse"),     aLangMap.changeValueId(STTR_PARAMETER_REVERSE,  "Reverse Order"));
-    params.BindToMon = new StBoolParamNamed(true,  stCString("bindMonitor"), aLangMap.changeValueId(STTR_PARAMETER_BIND_MON, "Bind To Supported Monitor"));
+    params.ToReverse = new StBoolParamNamed(false, stCString("reverse"),     stCString("reverse"));
+    params.BindToMon = new StBoolParamNamed(true,  stCString("bindMonitor"), stCString("bindMonitor"));
     mySettings->loadParam(params.ToReverse);
     mySettings->loadParam(params.BindToMon);
 
     params.BindToMon->signals.onChanged.connect(this, &StOutInterlace::doSetBindToMonitor);
+    updateStrings();
 
     // load window position
     if(isMovable()) {
@@ -320,7 +331,7 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     // load device settings
     mySettings->loadInt32(ST_SETTING_DEVICE_ID, myDevice);
     if(myDevice == DEVICE_AUTO) {
-        myDevice = DEVICE_HINTERLACE;
+        myDevice = DEVICE_ROW_INTERLACED;
     }
 
     // request slave window
@@ -376,7 +387,7 @@ void StOutInterlace::beforeClose() {
     mySettings->flush();
 
     // process exit from StApplication
-    if((myDevice == DEVICE_HINTERLACE_ED) && myIsEDactive) {
+    if((myDevice == DEVICE_ROW_INTERLACED_ED) && myIsEDactive) {
         // disactivate eDimensional shuttered glasses
         myEDTimer.restart();
         myIsEDactive = false;
@@ -427,8 +438,8 @@ bool StOutInterlace::create() {
     }
 
     // row interlaced
-    StGLFragmentShader aShaderRow(myGlPrograms[DEVICE_HINTERLACE]->getTitle());
-    StGLFragmentShader aShaderRowRev(myGlProgramsRev[DEVICE_HINTERLACE]->getTitle());
+    StGLFragmentShader aShaderRow(myGlPrograms[DEVICE_ROW_INTERLACED]->getTitle());
+    StGLFragmentShader aShaderRowRev(myGlProgramsRev[DEVICE_ROW_INTERLACED]->getTitle());
     StGLAutoRelease aTmp2(*myContext, aShaderRow);
     StGLAutoRelease aTmp3(*myContext, aShaderRowRev);
     if(!aShaderRow.init(*myContext,
@@ -448,18 +459,18 @@ bool StOutInterlace::create() {
         myIsBroken = true;
         return true;
     }
-    myGlPrograms   [DEVICE_HINTERLACE]->create(*myContext)
+    myGlPrograms[DEVICE_ROW_INTERLACED]->create(*myContext)
                                        .attachShader(*myContext, aVertexShader)
                                        .attachShader(*myContext, aShaderRow)
                                        .link(*myContext);
-    myGlProgramsRev[DEVICE_HINTERLACE]->create(*myContext)
+    myGlProgramsRev[DEVICE_ROW_INTERLACED]->create(*myContext)
                                        .attachShader(*myContext, aVertexShader)
                                        .attachShader(*myContext, aShaderRowRev)
                                        .link(*myContext);
 
     // column interlaced
-    StGLFragmentShader aShaderCol(myGlPrograms[DEVICE_VINTERLACE]->getTitle());
-    StGLFragmentShader aShaderColRev(myGlProgramsRev[DEVICE_VINTERLACE]->getTitle());
+    StGLFragmentShader aShaderCol   (myGlPrograms   [DEVICE_COL_INTERLACED]->getTitle());
+    StGLFragmentShader aShaderColRev(myGlProgramsRev[DEVICE_COL_INTERLACED]->getTitle());
     StGLAutoRelease aTmp4(*myContext, aShaderCol);
     StGLAutoRelease aTmp5(*myContext, aShaderColRev);
     if(!aShaderCol.init(*myContext,
@@ -479,11 +490,11 @@ bool StOutInterlace::create() {
         myIsBroken = true;
         return true;
     }
-    myGlPrograms   [DEVICE_VINTERLACE]->create(*myContext)
+    myGlPrograms[DEVICE_COL_INTERLACED]->create(*myContext)
                                        .attachShader(*myContext, aVertexShader)
                                        .attachShader(*myContext, aShaderCol)
                                        .link(*myContext);
-    myGlProgramsRev[DEVICE_VINTERLACE]->create(*myContext)
+    myGlProgramsRev[DEVICE_COL_INTERLACED]->create(*myContext)
                                        .attachShader(*myContext, aVertexShader)
                                        .attachShader(*myContext, aShaderColRev)
                                        .link(*myContext);
@@ -559,7 +570,7 @@ bool StOutInterlace::create() {
     myVpSizeYOnLoc  = myEDIntelaceOn->getUniformLocation(*myContext, "vpSizeY");
     myVpSizeYOffLoc = myEDOff       ->getUniformLocation(*myContext, "vpSizeY");
 
-    if(myDevice == DEVICE_HINTERLACE_ED) {
+    if(myDevice == DEVICE_ROW_INTERLACED_ED) {
         // could be eDimensional shuttered glasses
         myEDTimer.restart(2000000.0);
     }
@@ -603,13 +614,13 @@ void StOutInterlace::processEvents() {
 
     const StKeysState& aKeys = StWindow::getKeysState();
     if(aKeys.isKeyDown(ST_VK_F1)) {
-        myDevice = DEVICE_HINTERLACE;
+        myDevice = DEVICE_ROW_INTERLACED;
     } else if(aKeys.isKeyDown(ST_VK_F2)) {
-        myDevice = DEVICE_VINTERLACE;
+        myDevice = DEVICE_COL_INTERLACED;
     } else if(aKeys.isKeyDown(ST_VK_F3)) {
         myDevice = DEVICE_CHESSBOARD;
     } else if(aKeys.isKeyDown(ST_VK_F4)) {
-        myDevice = DEVICE_HINTERLACE_ED;
+        myDevice = DEVICE_ROW_INTERLACED_ED;
     }
 
     // resize ED rectangle
@@ -697,7 +708,7 @@ void StOutInterlace::stglDraw() {
             myFrmBuffer->release(*myContext);
         }
 
-        if(myDevice == DEVICE_HINTERLACE_ED) {
+        if(myDevice == DEVICE_ROW_INTERLACED_ED) {
             // EDimensional deactivation
             if(myIsEDCodeFinished) {
                 if(myIsStereo) {
@@ -741,11 +752,11 @@ void StOutInterlace::stglDraw() {
     // handle portrait orientation
     if(myIsMonPortrait) {
         switch(myDevice) {
-            case DEVICE_HINTERLACE:
-                aDevice = DEVICE_VINTERLACE;
+            case DEVICE_ROW_INTERLACED:
+                aDevice = DEVICE_COL_INTERLACED;
                 break;
-            case DEVICE_VINTERLACE:
-                aDevice = DEVICE_HINTERLACE;
+            case DEVICE_COL_INTERLACED:
+                aDevice = DEVICE_ROW_INTERLACED;
                 break;
         }
     }
@@ -754,8 +765,8 @@ void StOutInterlace::stglDraw() {
     if(!StWindow::isFullScreen() && (aBackStore.y() + aBackStore.height()) % 2 == 1) {
         switch(aDevice) {
             case DEVICE_CHESSBOARD:
-            case DEVICE_HINTERLACE:
-            case DEVICE_HINTERLACE_ED:
+            case DEVICE_ROW_INTERLACED:
+            case DEVICE_ROW_INTERLACED_ED:
                 isPixelReverse = !isPixelReverse; break;
         }
     }
@@ -764,7 +775,7 @@ void StOutInterlace::stglDraw() {
     if(!StWindow::isFullScreen() && aBackStore.x() % 2 == 1) {
         switch(aDevice) {
             case DEVICE_CHESSBOARD:
-            case DEVICE_VINTERLACE:
+            case DEVICE_COL_INTERLACED:
                 isPixelReverse = !isPixelReverse; break;
         }
     }
@@ -812,7 +823,7 @@ void StOutInterlace::stglDraw() {
     aProgram->unuse(*myContext);
     myFrmBuffer->unbindTexture(*myContext);
 
-    if(myDevice == DEVICE_HINTERLACE_ED) {
+    if(myDevice == DEVICE_ROW_INTERLACED_ED) {
         // EDimensional activation
         if(myIsEDCodeFinished) {
             if(!myIsStereo) {

@@ -18,7 +18,6 @@
 #include <StGLMesh/StGLMesh.h>
 #include <StGLStereo/StGLProjCamera.h>
 #include <StSettings/StFloat32Param.h>
-#include <StSettings/StTranslations.h>
 
 //#include "StCADViewerGUI.h"
 
@@ -173,15 +172,9 @@ class StCADViewer : public StApplication {
     ST_LOCAL void saveGuiParams();
     ST_LOCAL void saveAllParams();
 
-    /**
-     * Get translation.
-     */
-    ST_LOCAL const StString& tr(const size_t theId) const {
-        return myLangMap->getValue(theId);
-    }
-
         private: //!< private callback Slots
 
+    ST_LOCAL virtual void doChangeLanguage(const int32_t theNewLang) ST_ATTR_OVERRIDE;
     ST_LOCAL void doFullscreen(const bool theIsFullscreen);
     ST_LOCAL void doChangeProjection(const int32_t theProj);
     ST_LOCAL void doZoomIn (const double theValue);
@@ -222,7 +215,6 @@ class StCADViewer : public StApplication {
 
     StHandle<StGLContext>    myContext;
     StHandle<StSettings>     mySettings;      //!< current plugin local settings
-    StHandle<StTranslations> myLangMap;       //!< translated strings map
     StHandle<StPlayList>     myPlayList;      //!< play list
     StHandle<StCADViewerGUI> myGUI;           //!< GUI elements
     StHandle<StCADLoader>    myCADLoader;     //!< dedicated threaded class for load/save operations

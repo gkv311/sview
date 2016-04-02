@@ -1,6 +1,6 @@
 /**
  * StOutAnaglyph, class providing stereoscopic output in Anaglyph format using StCore toolkit.
- * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -88,6 +88,11 @@ class StOutAnaglyph : public StWindow {
      */
     ST_CPPEXPORT virtual void stglDraw() ST_ATTR_OVERRIDE;
 
+    /**
+     * Update strings.
+     */
+    ST_LOCAL virtual void doChangeLanguage() ST_ATTR_OVERRIDE { updateStrings(); }
+
         private:
 
     enum {
@@ -130,6 +135,11 @@ class StOutAnaglyph : public StWindow {
      */
     ST_LOCAL void releaseResources();
 
+    /**
+     * Update strings.
+     */
+    ST_LOCAL void updateStrings();
+
         private:
 
     static StAtomic<int32_t> myInstancesNb; //!< shared counter for all instances
@@ -138,9 +148,9 @@ class StOutAnaglyph : public StWindow {
 
     struct {
 
-        StHandle<StInt32ParamNamed> Glasses;   //!< glasses type
-        StHandle<StInt32ParamNamed> RedCyan;   //!< Red-Cyan   filter
-        StHandle<StInt32ParamNamed> AmberBlue; //!< Amber-Blue filter
+        StHandle<StEnumParam> Glasses;   //!< glasses type
+        StHandle<StEnumParam> RedCyan;   //!< Red-Cyan   filter
+        StHandle<StEnumParam> AmberBlue; //!< Amber-Blue filter
 
     } params;
 

@@ -130,6 +130,35 @@ void StOutDistorted::getOptions(StParamsList& theList) const {
     theList.add(params.MonoClone);
 }
 
+void StOutDistorted::updateStrings() {
+    StTranslations aLangMap(getResourceManager(), ST_OUT_PLUGIN_NAME);
+
+    myDevices[DEVICE_DISTORTED]->Name = aLangMap.changeValueId(STTR_DISTORTED_NAME, "TV (parallel pair)");
+    myDevices[DEVICE_DISTORTED]->Desc = aLangMap.changeValueId(STTR_DISTORTED_DESC, "Distorted Output");
+    myDevices[DEVICE_OCULUS]   ->Name = aLangMap.changeValueId(STTR_OCULUS_NAME, "Oculus Rift");
+    myDevices[DEVICE_OCULUS]   ->Desc = aLangMap.changeValueId(STTR_OCULUS_DESC, "Distorted Output");
+    if(myDevices.size() > DEVICE_S3DV) {
+        myDevices[DEVICE_S3DV] ->Name = "S3DV";             //aLangMap.changeValueId(STTR_S3DV_NAME, "S3DV");
+        myDevices[DEVICE_S3DV] ->Desc = "Distorted Output"; //aLangMap.changeValueId(STTR_S3DV_DESC, "Distorted Output");
+    }
+
+    params.MonoClone->setName(aLangMap.changeValueId(STTR_PARAMETER_MONOCLONE, "Show Mono in Stereo"));
+
+    params.Layout->setName(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT, "Layout"));
+    params.Layout->defineOption(LAYOUT_SIDE_BY_SIDE_ANAMORPH, aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_SBS_ANAMORPH,       "Side-by-Side (Anamorph)"));
+    params.Layout->defineOption(LAYOUT_OVER_UNDER_ANAMORPH,   aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_OVERUNDER_ANAMORPH, "Top-and-Bottom (Anamorph)"));
+    params.Layout->defineOption(LAYOUT_SIDE_BY_SIDE,          aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_SBS,                "Side-by-Side"));
+    params.Layout->defineOption(LAYOUT_OVER_UNDER,            aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_OVERUNDER,          "Top-and-Bottom") + (myCanHdmiPack ? " [HDMI]" : ""));
+
+    // about string
+    StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - Distorted Output module");
+    StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
+    StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
+        "(C) {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0");
+    myAbout = aTitle + '\n' + aVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n"
+            + aDescr.format("2013-2016", "kirill@sview.ru", "www.sview.ru");
+}
+
 StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
                                const StNativeWin_t                theParentWindow)
 : StWindow(theResMgr, theParentWindow),
@@ -157,6 +186,7 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false),
   myIsStereoOn(false),
+  myCanHdmiPack(false),
   myIsHdmiPack(false),
   myIsForcedFboUsage(false) {
 #ifdef ST_HAVE_LIBOVR
@@ -164,21 +194,11 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
     myOvrSwapFbo[1] = 0;
 #endif
     const StSearchMonitors& aMonitors = StWindow::getMonitors();
-    StTranslations aLangMap(getResourceManager(), ST_OUT_PLUGIN_NAME);
-
-    // about string
-    StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - Distorted Output module");
-    StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
-    StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
-        "(C) {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0");
-    myAbout = aTitle + '\n' + aVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n"
-            + aDescr.format("2013-2016", "kirill@sview.ru", "www.sview.ru");
 
     // detect connected displays
     int aSupportOculus   = ST_DEVICE_SUPPORT_NONE;
     int aSupportParallel = ST_DEVICE_SUPPORT_NONE;
     int aSupportS3DV     = ST_DEVICE_SUPPORT_NONE;
-    bool isHdmiPack = false;
     for(size_t aMonIter = 0; aMonIter < aMonitors.size(); ++aMonIter) {
         const StMonitor& aMon = aMonitors[aMonIter];
         if(aMon.getPnPId().isStartsWith(stCString("OVR"))) {
@@ -191,11 +211,11 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
         } else if(aMon.getVRect().width()  == 1920
                && aMon.getVRect().height() == 2205) {
             aSupportParallel = ST_DEVICE_SUPPORT_HIGHT;
-            isHdmiPack = true;
+            myCanHdmiPack = true;
         } else if(aMon.getVRect().width()  == 1280
                && aMon.getVRect().height() == 1470) {
             aSupportParallel = ST_DEVICE_SUPPORT_HIGHT;
-            isHdmiPack = true;
+            myCanHdmiPack = true;
         }
     }
 
@@ -211,27 +231,24 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
     // devices list
     StHandle<StOutDevice> aDevDistorted = new StOutDevice();
     aDevDistorted->PluginId = ST_OUT_PLUGIN_NAME;
-    aDevDistorted->DeviceId = "Distorted";
+    aDevDistorted->DeviceId = stCString("Distorted");
     aDevDistorted->Priority = aSupportParallel;
-    aDevDistorted->Name     = aLangMap.changeValueId(STTR_DISTORTED_NAME, "TV (parallel pair)");
-    aDevDistorted->Desc     = aLangMap.changeValueId(STTR_DISTORTED_DESC, "Distorted Output");
+    aDevDistorted->Name     = stCString("TV (parallel pair)");
     myDevices.add(aDevDistorted);
 
     StHandle<StOutDevice> aDevOculus = new StOutDevice();
     aDevOculus->PluginId = ST_OUT_PLUGIN_NAME;
-    aDevOculus->DeviceId = "Oculus";
+    aDevOculus->DeviceId = stCString("Oculus");
     aDevOculus->Priority = aSupportOculus;
-    aDevOculus->Name     = aLangMap.changeValueId(STTR_OCULUS_NAME, "Oculus Rift");
-    aDevOculus->Desc     = aLangMap.changeValueId(STTR_OCULUS_DESC, "Distorted Output");
+    aDevOculus->Name     = stCString("Oculus Rift");
     myDevices.add(aDevOculus);
 
     if(aSupportS3DV != ST_DEVICE_SUPPORT_NONE) {
         StHandle<StOutDevice> aDevS3dv = new StOutDevice();
         aDevS3dv->PluginId = ST_OUT_PLUGIN_NAME;
-        aDevS3dv->DeviceId = "S3DV";
+        aDevS3dv->DeviceId = stCString("S3DV");
         aDevS3dv->Priority = aSupportS3DV;
-        aDevS3dv->Name     = "S3DV";             //aLangMap.changeValueId(STTR_S3DV_NAME, "S3DV");
-        aDevS3dv->Desc     = "Distorted Output"; //aLangMap.changeValueId(STTR_S3DV_DESC, "Distorted Output");
+        aDevS3dv->Name     = stCString("S3DV");
         myDevices.add(aDevS3dv);
     }
 
@@ -245,19 +262,9 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
     }
 
     // Distortion parameters
-    params.MonoClone = new StBoolParamNamed(false, stCString("monoClone"), aLangMap.changeValueId(STTR_PARAMETER_MONOCLONE, "Show Mono in Stereo"));
-    mySettings->loadParam(params.MonoClone);
-
+    params.MonoClone = new StBoolParamNamed(false, stCString("monoClone"), stCString("monoClone"));
     // Layout option
-    StHandle<StEnumParam> aLayoutParam = new StEnumParam(isHdmiPack ? LAYOUT_OVER_UNDER : LAYOUT_SIDE_BY_SIDE_ANAMORPH, stCString("layout"),
-                                                         aLangMap.changeValueId(STTR_PARAMETER_LAYOUT, "Layout"));
-    aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_SBS_ANAMORPH,       "Side-by-Side (Anamorph)"));
-    aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_OVERUNDER_ANAMORPH, "Top-and-Bottom (Anamorph)"));
-    aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_SBS,                "Side-by-Side"));
-    aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_OVERUNDER,          "Top-and-Bottom") + (isHdmiPack ? " [HDMI]" : ""));
-    params.Layout = aLayoutParam;
-    mySettings->loadParam(params.Layout);
-
+    params.Layout = new StEnumParam(myCanHdmiPack ? LAYOUT_OVER_UNDER : LAYOUT_SIDE_BY_SIDE_ANAMORPH, stCString("layout"), stCString("layout"));
     // load window position
     if(isMovable()) {
         StRect<int32_t> aRect;
@@ -266,7 +273,10 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
         }
         StWindow::setPlacement(aRect, true);
     }
+    mySettings->loadParam(params.MonoClone);
+    mySettings->loadParam(params.Layout);
     checkHdmiPack();
+    updateStrings();
     StWindow::setTitle("sView - Distorted Renderer");
 
     StRectI_t aMargins;

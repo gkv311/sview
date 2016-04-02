@@ -1,6 +1,6 @@
 /**
  * StOutAnaglyph, class providing stereoscopic output in Anaglyph format using StCore toolkit.
- * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -88,6 +88,36 @@ void StOutAnaglyph::getOptions(StParamsList& theList) const {
     theList.add(params.AmberBlue);
 }
 
+void StOutAnaglyph::updateStrings() {
+    StTranslations aLangMap(getResourceManager(), ST_OUT_PLUGIN_NAME);
+
+    myDevices[DEVICE_ANAGLYPH]->Name = aLangMap.changeValueId(STTR_ANAGLYPH_NAME, "Anaglyph glasses");
+    myDevices[DEVICE_ANAGLYPH]->Desc = aLangMap.changeValueId(STTR_ANAGLYPH_DESC, "Simple glasses with color-filters");
+
+    params.Glasses->setName(aLangMap.changeValueId(STTR_ANAGLYPH_GLASSES, "Glasses type"));
+    params.Glasses->defineOption(GLASSES_TYPE_REDCYAN, aLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN, "Red-cyan"));
+    params.Glasses->defineOption(GLASSES_TYPE_YELLOW,  aLangMap.changeValueId(STTR_ANAGLYPH_YELLOW,  "Yellow-Blue"));
+    params.Glasses->defineOption(GLASSES_TYPE_GREEN,   aLangMap.changeValueId(STTR_ANAGLYPH_GREEN,   "Green-Magenta"));
+
+    params.RedCyan->setName(aLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_MENU, "Red-Cyan filter"));
+    params.RedCyan->defineOption(REDCYAN_MODE_SIMPLE, aLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_SIMPLE, "Simple"));
+    params.RedCyan->defineOption(REDCYAN_MODE_OPTIM,  aLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_OPTIM,  "Optimized"));
+    params.RedCyan->defineOption(REDCYAN_MODE_GRAY,   aLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_GRAY,   "Grayed"));
+    params.RedCyan->defineOption(REDCYAN_MODE_DARK,   aLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_DARK,   "Dark"));
+
+    params.AmberBlue->setName(aLangMap.changeValueId(STTR_ANAGLYPH_AMBERBLUE_MENU, "Yellow filter"));
+    params.AmberBlue->defineOption(AMBERBLUE_MODE_SIMPLE, aLangMap.changeValueId(STTR_ANAGLYPH_AMBERBLUE_SIMPLE, "Simple"));
+    params.AmberBlue->defineOption(AMBERBLUE_MODE_DUBOIS, aLangMap.changeValueId(STTR_ANAGLYPH_AMBERBLUE_DUBIOS, "Dubios"));
+
+    // about string
+    StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - Anaglyph Output module");
+    StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
+    StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
+        "(C) {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0");
+    myAbout = aTitle + '\n' + aVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n"
+            + aDescr.format("2007-2016", "kirill@sview.ru", "www.sview.ru");
+}
+
 StOutAnaglyph::StOutAnaglyph(const StHandle<StResourceManager>& theResMgr,
                              const StNativeWin_t                theParentWindow)
 : StWindow(theResMgr, theParentWindow),
@@ -103,53 +133,27 @@ StOutAnaglyph::StOutAnaglyph(const StHandle<StResourceManager>& theResMgr,
   myGreenAnaglyph("Anaglyph Green"),
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false) {
-    StTranslations aLangMap(getResourceManager(), ST_OUT_PLUGIN_NAME);
-
     myStereoProgram = &mySimpleAnaglyph;
-
-    // about string
-    StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - Anaglyph Output module");
-    StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
-    StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
-        "(C) {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0");
-    myAbout = aTitle + '\n' + aVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n"
-            + aDescr.format("2007-2016", "kirill@sview.ru", "www.sview.ru");
 
     // devices list
     StHandle<StOutDevice> aDevice = new StOutDevice();
     aDevice->PluginId = ST_OUT_PLUGIN_NAME;
-    aDevice->DeviceId = "Anaglyph";
+    aDevice->DeviceId = stCString("Anaglyph");
     aDevice->Priority = ST_DEVICE_SUPPORT_LOW; // anaglyph could be run on every display...
-    aDevice->Name     = aLangMap.changeValueId(STTR_ANAGLYPH_NAME, "Anaglyph glasses");
-    aDevice->Desc     = aLangMap.changeValueId(STTR_ANAGLYPH_DESC, "Simple glasses with color-filters");
+    aDevice->Name     = stCString("Anaglyph glasses");
     myDevices.add(aDevice);
 
     // Glasses switch option
-    StHandle<StEnumParam> aGlasses = new StEnumParam(GLASSES_TYPE_REDCYAN, stCString("glasses"),
-                                                     aLangMap.changeValueId(STTR_ANAGLYPH_GLASSES, "Glasses type"));
-    aGlasses->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN, "Red-cyan"));
-    aGlasses->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_YELLOW,  "Yellow-Blue"));
-    aGlasses->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_GREEN,   "Green-Magenta"));
-    aGlasses->signals.onChanged.connect(this, &StOutAnaglyph::doSetShader);
-    params.Glasses = aGlasses;
+    params.Glasses = new StEnumParam(GLASSES_TYPE_REDCYAN, stCString("glasses"), stCString("glasses"));
+    params.Glasses->signals.onChanged.connect(this, &StOutAnaglyph::doSetShader);
 
     // Red-cyan filter switch option
-    StHandle<StEnumParam> aFilterRC = new StEnumParam(REDCYAN_MODE_SIMPLE, stCString("optionRedCyan"),
-                                                      aLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_MENU, "Red-Cyan filter"));
-    aFilterRC->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_SIMPLE, "Simple"));
-    aFilterRC->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_OPTIM,  "Optimized"));
-    aFilterRC->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_GRAY,   "Grayed"));
-    aFilterRC->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_DARK,   "Dark"));
-    aFilterRC->signals.onChanged.connect(this, &StOutAnaglyph::doSetShader);
-    params.RedCyan = aFilterRC;
+    params.RedCyan = new StEnumParam(REDCYAN_MODE_SIMPLE, stCString("optionRedCyan"), stCString("optionRedCyan"));
+    params.RedCyan->signals.onChanged.connect(this, &StOutAnaglyph::doSetShader);
 
     // Amber-Blue filter switch option
-    StHandle<StEnumParam> aFilterAB = new StEnumParam(AMBERBLUE_MODE_SIMPLE, stCString("optionAmberBlue"),
-                                                      aLangMap.changeValueId(STTR_ANAGLYPH_AMBERBLUE_MENU, "Yellow filter"));
-    aFilterAB->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_AMBERBLUE_SIMPLE, "Simple"));
-    aFilterAB->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_AMBERBLUE_DUBIOS, "Dubios"));
-    aFilterAB->signals.onChanged.connect(this, &StOutAnaglyph::doSetShader);
-    params.AmberBlue = aFilterAB;
+    params.AmberBlue = new StEnumParam(AMBERBLUE_MODE_SIMPLE, stCString("optionAmberBlue"), stCString("optionAmberBlue"));
+    params.AmberBlue->signals.onChanged.connect(this, &StOutAnaglyph::doSetShader);
 
     // load window position
     if(isMovable()) {
@@ -159,6 +163,7 @@ StOutAnaglyph::StOutAnaglyph(const StHandle<StResourceManager>& theResMgr,
         }
         StWindow::setPlacement(aRect, true);
     }
+    updateStrings();
     StWindow::setTitle("sView - Anaglyph Renderer");
 
     // load glasses settings

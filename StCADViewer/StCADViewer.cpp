@@ -56,6 +56,7 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
     mySettings = new StSettings(myResMgr, ST_DRAWER_PLUGIN_NAME);
     myLangMap  = new StTranslations(myResMgr, ST_DRAWER_PLUGIN_NAME);
     StCADViewerStrings::loadDefaults(*myLangMap);
+    myLangMap->params.language->signals.onChanged += stSlot(this, &StCADViewer::doChangeLanguage);
 
     myTitle = "sView - CAD Viewer";
     //
@@ -363,6 +364,11 @@ bool StCADViewer::createGui() {
 
     registerHotKeys();
     return true;
+}
+
+void StCADViewer::doChangeLanguage(const int32_t theNewLang) {
+    StApplication::doChangeLanguage(theNewLang);
+    StCADViewerStrings::loadDefaults(*myLangMap);
 }
 
 bool StCADViewer::init() {
@@ -770,6 +776,12 @@ void StCADViewer::beforeDraw() {
 
     myGUI->setVisibility(myWindow->getMousePos(), true);
     myGUI->stglUpdate(myWindow->getMousePos());
+
+    // recreate menu event
+    if(myToRecreateMenu) {
+        createGui();
+        myToRecreateMenu = false;
+    }
 }
 
 void StCADViewer::stglDraw(unsigned int theView) {

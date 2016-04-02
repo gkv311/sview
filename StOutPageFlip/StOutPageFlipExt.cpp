@@ -50,6 +50,14 @@ void StOutPageFlipExt::getOptions(StParamsList& theList) const {
     }
 }
 
+void StOutPageFlipExt::updateStringsExt() {
+    params.ControlCode->setName(myLangMap.changeValueId(STTR_PARAMETER_CONTROL_CODE, "Glasses control codes"));
+    params.ControlCode->defineOption(DEVICE_CONTROL_NONE,      myLangMap.changeValueId(STTR_PARAMETER_CONTROL_NO,        "No codes"));
+    params.ControlCode->defineOption(DEVICE_CONTROL_BLUELINE,  myLangMap.changeValueId(STTR_PARAMETER_CONTROL_BLUELINE,  "Blue line sync"));
+    params.ControlCode->defineOption(DEVICE_CONTROL_WHITELINE, myLangMap.changeValueId(STTR_PARAMETER_CONTROL_WHITELINE, "White line sync"));
+    params.ControlCode->defineOption(DEVICE_CONTROL_ED_ON_OFF, myLangMap.changeValueId(STTR_PARAMETER_CONTROL_ED,        "eDimensional auto on/off"));
+}
+
 StOutPageFlipExt::StOutPageFlipExt(const StHandle<StResourceManager>& theResMgr,
                                    const StNativeWin_t                theParentWindow)
 : StOutPageFlip(theResMgr, theParentWindow),
@@ -62,15 +70,15 @@ StOutPageFlipExt::StOutPageFlipExt(const StHandle<StResourceManager>& theResMgr,
     myWinRect.bottom() = 0;
 
     // Control Code option
-    params.ControlCode = new StEnumParam(DEVICE_CONTROL_NONE, stCString("deviceControl"),
-                                         myLangMap.changeValueId(STTR_PARAMETER_CONTROL_CODE, "Glasses control codes"));
-    params.ControlCode->changeValues().add(myLangMap.changeValueId(STTR_PARAMETER_CONTROL_NO,        "No codes"));
-    params.ControlCode->changeValues().add(myLangMap.changeValueId(STTR_PARAMETER_CONTROL_BLUELINE,  "Blue line sync"));
-    params.ControlCode->changeValues().add(myLangMap.changeValueId(STTR_PARAMETER_CONTROL_WHITELINE, "White line sync"));
-    params.ControlCode->changeValues().add(myLangMap.changeValueId(STTR_PARAMETER_CONTROL_ED,        "eDimensional auto on/off"));
+    params.ControlCode = new StEnumParam(DEVICE_CONTROL_NONE, stCString("deviceControl"), stCString("deviceControl"));
+    params.ControlCode->defineOption(DEVICE_CONTROL_NONE,      stCString("noCodes"));
+    params.ControlCode->defineOption(DEVICE_CONTROL_BLUELINE,  stCString("blueLine"));
+    params.ControlCode->defineOption(DEVICE_CONTROL_WHITELINE, stCString("whiteLine"));
+    params.ControlCode->defineOption(DEVICE_CONTROL_ED_ON_OFF, stCString("eD"));
     params.ControlCode->signals.onChanged.connect(this, &StOutPageFlipExt::doSetDeviceControl);
 
     // load shutter glasses controller
+    updateStringsExt();
     mySettings->loadParam(params.ControlCode);
     myToResetDevice = false;
 }

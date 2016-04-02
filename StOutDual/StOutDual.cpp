@@ -1,6 +1,6 @@
 /**
  * StOutDual, class providing stereoscopic output for Dual Input hardware using StCore toolkit.
- * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -167,6 +167,26 @@ void StOutDual::getOptions(StParamsList& theList) const {
     theList.add(params.MonoClone);
 }
 
+void StOutDual::updateStrings() {
+    StTranslations aLangMap(getResourceManager(), ST_OUT_PLUGIN_NAME);
+
+    myDevices[DUALMODE_SIMPLE] ->Name = aLangMap.changeValueId(STTR_DUAL_NAME,   "Dual Output");
+    myDevices[DUALMODE_SIMPLE] ->Desc = aLangMap.changeValueId(STTR_DUAL_DESC,   "Stereo-device with dual input: some HMD, Mirrored Stereo monitors, Dual-Projectors");
+    myDevices[DUALMODE_XMIRROW]->Name = aLangMap.changeValueId(STTR_MIRROR_NAME, "Mirror Output");
+    myDevices[DUALMODE_XMIRROW]->Desc = aLangMap.changeValueId(STTR_MIRROR_DESC, "Hand-make Mirrored Stereo monitors (mirror in X-direction)");
+
+    params.SlaveMonId->setName(aLangMap.changeValueId(STTR_PARAMETER_SLAVE_ID,  "Slave Monitor"));
+    params.MonoClone ->setName(aLangMap.changeValueId(STTR_PARAMETER_MONOCLONE, "Show Mono in Stereo"));
+
+    // about string
+    StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - Dual Output module");
+    StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
+    StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
+        "(C) {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0");
+    myAbout = aTitle + '\n' + aVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n"
+            + aDescr.format("2007-2016", "kirill@sview.ru", "www.sview.ru");
+}
+
 StOutDual::StOutDual(const StHandle<StResourceManager>& theResMgr,
                      const StNativeWin_t                theParentWindow)
 : StWindow(theResMgr, theParentWindow),
@@ -177,15 +197,6 @@ StOutDual::StOutDual(const StHandle<StResourceManager>& theResMgr,
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false) {
     const StSearchMonitors& aMonitors = StWindow::getMonitors();
-    StTranslations aLangMap(getResourceManager(), ST_OUT_PLUGIN_NAME);
-
-    // about string
-    StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - Dual Output module");
-    StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
-    StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
-        "(C) {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0");
-    myAbout = aTitle + '\n' + aVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n"
-            + aDescr.format("2007-2016", "kirill@sview.ru", "www.sview.ru");
 
     // detect connected displays
     int aSupportLevel = ST_DEVICE_SUPPORT_NONE;
@@ -202,24 +213,22 @@ StOutDual::StOutDual(const StHandle<StResourceManager>& theResMgr,
     // devices list
     StHandle<StOutDevice> aDevDual = new StOutDevice();
     aDevDual->PluginId = ST_OUT_PLUGIN_NAME;
-    aDevDual->DeviceId = "Dual";
+    aDevDual->DeviceId = stCString("Dual");
     aDevDual->Priority = aSupportLevel;
-    aDevDual->Name     = aLangMap.changeValueId(STTR_DUAL_NAME, "Dual Output");
-    aDevDual->Desc     = aLangMap.changeValueId(STTR_DUAL_DESC, "Stereo-device with dual input: some HMD, Mirrored Stereo monitors, Dual-Projectors");
+    aDevDual->Name     = stCString("Dual Output");
     myDevices.add(aDevDual);
 
     StHandle<StOutDevice> aDevMirr = new StOutDevice();
     aDevMirr->PluginId = ST_OUT_PLUGIN_NAME;
-    aDevMirr->DeviceId = "Mirror";
+    aDevMirr->DeviceId = stCString("Mirror");
     aDevMirr->Priority = aSupportLevel;
-    aDevMirr->Name     = aLangMap.changeValueId(STTR_MIRROR_NAME, "Mirror Output");
-    aDevMirr->Desc     = aLangMap.changeValueId(STTR_MIRROR_DESC, "Hand-make Mirrored Stereo monitors (mirror in X-direction)");
+    aDevMirr->Name     = stCString("Mirror Output");
     myDevices.add(aDevMirr);
 
     // Slave Monitor option
-    StHandle<StEnumParam> aSlaveMon = new StEnumParam(1, stCString("slaveId"), aLangMap.changeValueId(STTR_PARAMETER_SLAVE_ID, "Slave Monitor"));
-    mySettings->loadParam(aSlaveMon);
-    size_t aMonCount = stMax(aMonitors.size(), size_t(2), size_t(aSlaveMon->getValue() + 1));
+    params.SlaveMonId = new StEnumParam(1, stCString("slaveId"), stCString("slaveId"));
+    mySettings->loadParam(params.SlaveMonId);
+    size_t aMonCount = stMax(aMonitors.size(), size_t(2), size_t(params.SlaveMonId->getValue() + 1));
     for(size_t aMonId = 0; aMonId < aMonCount; ++aMonId) {
         StString aName = StString("Monitor #") + aMonId;
         if(aMonId < aMonitors.size()) {
@@ -227,12 +236,11 @@ StOutDual::StOutDual(const StHandle<StResourceManager>& theResMgr,
         } else {
             aName += " (disconnected)";
         }
-        aSlaveMon->changeValues().add(aName);
+        params.SlaveMonId->changeValues().add(aName);
     }
-    aSlaveMon->signals.onChanged.connect(this, &StOutDual::doSlaveMon);
-    params.SlaveMonId = aSlaveMon;
+    params.SlaveMonId->signals.onChanged.connect(this, &StOutDual::doSlaveMon);
 
-    params.MonoClone = new StBoolParamNamed(false, stCString("monoClone"), aLangMap.changeValueId(STTR_PARAMETER_MONOCLONE, "Show Mono in Stereo"));
+    params.MonoClone = new StBoolParamNamed(false, stCString("monoClone"), stCString("monoClone"));
     mySettings->loadParam(params.MonoClone);
 
     // load window position
@@ -243,6 +251,7 @@ StOutDual::StOutDual(const StHandle<StResourceManager>& theResMgr,
         }
         StWindow::setPlacement(aRect, true);
     }
+    updateStrings();
     StWindow::setTitle("sView - Dual Renderer");
 
     // load device settings

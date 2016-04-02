@@ -21,7 +21,6 @@
 
 #include <StCore/StApplication.h>
 
-#include <StSettings/StTranslations.h>
 #include <StSettings/StFloat32Param.h>
 #include <StGLStereo/StFormatEnum.h>
 #include <StThreads/StCondition.h>
@@ -282,10 +281,6 @@ class StMoviePlayer : public StApplication {
      */
     ST_LOCAL void releaseDevice();
 
-    ST_LOCAL const StString& tr(const size_t theId) const {
-        return myLangMap->getValue(theId);
-    }
-
     ST_LOCAL static GLfloat gainToVolume(const StHandle<StFloat32Param>& theGain) {
         return (theGain->getMinValue() - theGain->getValue()) / theGain->getMinValue();
     }
@@ -297,6 +292,7 @@ class StMoviePlayer : public StApplication {
 
         private: //! @name private callback Slots
 
+    ST_LOCAL virtual void doChangeLanguage(const int32_t theNewLang) ST_ATTR_OVERRIDE;
     ST_LOCAL void doScaleGui(const int32_t );
     ST_LOCAL void doScaleHiDPI(const bool );
     ST_LOCAL void doSwitchVSync(const bool theValue);
@@ -374,7 +370,6 @@ class StMoviePlayer : public StApplication {
 
     StHandle<StGLContext>      myContext;
     StHandle<StSettings>       mySettings;        //!< settings manager for Image Viewer plugin
-    StHandle<StTranslations>   myLangMap;         //!< translated strings map
     StHandle<StPlayList>       myPlayList;        //!< play list
     StHandle<StMoviePlayerGUI> myGUI;             //!< GUI root widget
     StHandle<StVideo>          myVideo;           //!< main video playback class
@@ -392,7 +387,6 @@ class StMoviePlayer : public StApplication {
     mg_context*                myWebCtx;          //!< web UI context
 
     int32_t                    myLastUpdateDay;
-    bool                       myToRecreateMenu;
     bool                       myToUpdateALList;
     bool                       myIsBenchmark;
     bool                       myToCheckUpdates;

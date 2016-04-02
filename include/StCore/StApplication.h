@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -13,6 +13,7 @@
 #include <StCore/StWindow.h>
 #include <StCore/StOpenInfo.h>
 #include <StSettings/StEnumParam.h>
+#include <StSettings/StTranslations.h>
 #include <StSlots/StAction.h>
 
 #include <map>
@@ -179,6 +180,11 @@ class StApplication {
     ST_CPPEXPORT void invokeAction(const int    theActionId,
                                    const double theProgress = 0.0);
 
+    /**
+     * Language change slot.
+     */
+    ST_CPPEXPORT virtual void doChangeLanguage(const int32_t );
+
         protected: //! @name window events slots
 
     /**
@@ -263,6 +269,15 @@ class StApplication {
      */
     ST_CPPEXPORT virtual void doNavigate(const StNavigEvent& theEvent);
 
+        public:
+
+    /**
+     * Find translation for the string with specified id.
+     */
+    ST_LOCAL const StString& tr(const size_t theId) const {
+        return myLangMap->getValue(theId);
+    }
+
         public: //! @name public parameters
 
     struct {
@@ -281,6 +296,7 @@ class StApplication {
 
     StArrayList< StHandle<StWindow> > myRenderers; //!< list of registered renderers
     StHandle<StResourceManager>       myResMgr;    //!< resources manager
+    StHandle<StTranslations>          myLangMap;   //!< translated strings map
     StHandle<StMsgQueue>  myMsgQueue;              //!< messages queue
     StHandle<StWindow>    myWindow;                //!< active renderer and main application window
     StHandle<StWindow>    mySwitchTo;              //!< new renderer to switch to
@@ -302,6 +318,7 @@ class StApplication {
     bool                  myGlDebug;               //!< request debug OpenGL context
     bool                  myIsOpened;              //!< application execution state
     bool                  myToQuit;                //!< request for application termination
+    bool                  myToRecreateMenu;        //!< flag to recreate the menu
 
         private: //! @name no copies, please
 

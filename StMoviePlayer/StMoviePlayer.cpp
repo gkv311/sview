@@ -430,7 +430,6 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
   myWebCtx(NULL),
   //
   myLastUpdateDay(0),
-  myToRecreateMenu(false),
   myToUpdateALList(false),
   myIsBenchmark(false),
   myToCheckUpdates(true),
@@ -439,6 +438,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     myLangMap  = new StTranslations(myResMgr, StMoviePlayer::ST_DRAWER_PLUGIN_NAME);
     myOpenDialog = new StOpenVideo(this);
     StMoviePlayerStrings::loadDefaults(*myLangMap);
+    myLangMap->params.language->signals.onChanged += stSlot(this, &StMoviePlayer::doChangeLanguage);
     myTitle = "sView - Movie Player";
 
     params.ScaleAdjust = new StEnumParam(StGLRootWidget::ScaleAdjust_Normal, stCString("scaleAdjust"), tr(MENU_HELP_SCALE));
@@ -878,6 +878,11 @@ bool StMoviePlayer::createGui(StHandle<StGLTextureQueue>& theTextureQueue,
     }
     registerHotKeys();
     return true;
+}
+
+void StMoviePlayer::doChangeLanguage(const int32_t theNewLang) {
+    StApplication::doChangeLanguage(theNewLang);
+    StMoviePlayerStrings::loadDefaults(*myLangMap);
 }
 
 void StMoviePlayer::doImageAdjustReset(const size_t ) {

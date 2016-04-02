@@ -28,6 +28,11 @@ StTranslations::StTranslations(const StHandle<StResourceManager>& theResMgr,
   myModuleName(theModuleName),
   myWasReloaded(false) {
     params.language = new StEnumParam(0, stCString("language"), stCString("Language"));
+    reload();
+}
+
+void StTranslations::reload() {
+    params.language->changeValues().clear();
 
     // detect available translations
     StArrayList<StString> aFolders;

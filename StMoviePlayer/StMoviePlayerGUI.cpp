@@ -1505,15 +1505,10 @@ void StMoviePlayerGUI::stglUpdate(const StPointD_t& thePointZo) {
         myDescr->setPoint(thePointZo);
     }
 
-    if(myLangMap->wasReloaded()) {
-        myPlugin->myToRecreateMenu = true;
-        myLangMap->resetReloaded();
-        StMoviePlayerStrings::loadDefaults(*myLangMap);
-    } else if(myIsExperimental != myPlugin->params.ToShowExtra->getValue()) {
+    if(myIsExperimental != myPlugin->params.ToShowExtra->getValue()) {
         StGLMenu::DeleteWithSubMenus(myMenuRoot); myMenuRoot = NULL;
         createMainMenu();
         myMenuRoot->stglUpdateSubmenuLayout();
-        myLangMap->resetReloaded();
         myIsExperimental = myPlugin->params.ToShowExtra->getValue();
         // turn back topmost position
         getChildren()->moveToTop(myMsgStack);

@@ -36,6 +36,11 @@ class StTranslations : public StLangMap {
     ST_CPPEXPORT virtual ~StTranslations();
 
     /**
+     * Reload translation.
+     */
+    ST_CPPEXPORT void reload();
+
+    /**
      * Returns active translation.
      */
     ST_CPPEXPORT const StString& getLanguage() const;

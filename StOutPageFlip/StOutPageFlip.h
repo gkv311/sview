@@ -1,6 +1,6 @@
 /**
  * StOutPageFlip, class providing stereoscopic output for Shutter Glasses displays using StCore toolkit.
- * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -125,6 +125,11 @@ class StOutPageFlip : public StWindow {
      */
     ST_CPPEXPORT virtual void showCursor(const bool theToShow) ST_ATTR_OVERRIDE;
 
+    /**
+     * Update strings.
+     */
+    ST_LOCAL virtual void doChangeLanguage() ST_ATTR_OVERRIDE;
+
         protected:
 
     ST_LOCAL void setupDevice();
@@ -144,6 +149,11 @@ class StOutPageFlip : public StWindow {
      * Release GL resources before window closing.
      */
     ST_LOCAL virtual void releaseResources();
+
+    /**
+     * Update strings.
+     */
+    ST_LOCAL void updateStrings();
 
     /**
      * Switch quad buffer callback.

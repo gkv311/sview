@@ -140,6 +140,10 @@ void StWindow::setTargetFps(const double theFPS) {
     myTargetFps = theFPS;
 }
 
+void StWindow::doChangeLanguage() {
+    //
+}
+
 void StWindow::show() {
     myWin->show(ST_WIN_ALL);
 }

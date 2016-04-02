@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -58,7 +58,8 @@ StApplication::StApplication(const StHandle<StResourceManager>& theResMgr,
   myExitCode(0),
   myGlDebug(false),
   myIsOpened(false),
-  myToQuit(false) {
+  myToQuit(false),
+  myToRecreateMenu(false) {
     stApplicationInit(theOpenInfo);
 }
 
@@ -547,4 +548,18 @@ StHandle<StOpenInfo> StApplication::parseProcessArguments() {
 
     anInfo->setArgumentsMap(anOpenFileArgs);
     return anInfo;
+}
+
+void StApplication::doChangeLanguage(const int32_t ) {
+    myToRecreateMenu = true;
+    myLangMap->resetReloaded();
+
+    for(size_t aRendIter = 0; aRendIter < myRenderers.size(); ++aRendIter) {
+        StHandle<StWindow>& aRend = myRenderers[aRendIter];
+        aRend->doChangeLanguage();
+    }
+
+    for(size_t aDevIter = 0; aDevIter < myDevices.size(); ++aDevIter) {
+        params.ActiveDevice->defineOption((int32_t )aDevIter, myDevices[aDevIter]->Name);
+    }
 }

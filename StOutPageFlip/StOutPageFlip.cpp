@@ -1,6 +1,6 @@
 /**
  * StOutPageFlip, class providing stereoscopic output for Shutter Glasses displays using StCore toolkit.
- * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -414,6 +414,53 @@ void StOutPageFlip::initGlobalsAsync() {
 #endif
 }
 
+void StOutPageFlip::doChangeLanguage() {
+    myLangMap.reload();
+    updateStrings();
+}
+
+void StOutPageFlip::updateStrings() {
+    StTranslations aLangMap(getResourceManager(), ST_OUT_PLUGIN_NAME);
+
+    myDevices[DEVICE_SHUTTERS]->Name = myLangMap.changeValueId(STTR_PAGEFLIP_NAME, "Shutter glasses");
+    myDevices[DEVICE_SHUTTERS]->Desc = myLangMap.changeValueId(STTR_PAGEFLIP_DESC, "Shutter glasses");
+    myDevices[DEVICE_VUZIX]   ->Name = myLangMap.changeValueId(STTR_VUZIX_NAME, "Vuzix HMD");
+    myDevices[DEVICE_VUZIX]   ->Desc = myLangMap.changeValueId(STTR_VUZIX_DESC, "Vuzix HMD");
+
+    params.QuadBuffer->setName(myLangMap.changeValueId(STTR_PARAMETER_QBUFFER_TYPE, "Quad Buffer type"));
+    params.QuadBuffer->defineOption(QUADBUFFER_HARD_OPENGL, myLangMap.changeValueId(STTR_PARAMETER_QB_HARDWARE, "OpenGL Hardware"));
+#ifdef _WIN32
+    StString aDxDesc;
+    if(myDxInfo.hasAqbsSupport && myDxInfo.hasNvStereoSupport) {
+        aDxDesc = myLangMap.changeValueId(STTR_PARAMETER_QB_D3D_ANY,     "Direct3D (Fullscreen)");
+    } else if(myDxInfo.hasAqbsSupport) {
+        aDxDesc = myLangMap.changeValueId(STTR_PARAMETER_QB_D3D_AMD,     "Direct3D AMD (Fullscreen)");
+    } else if(myDxInfo.hasNvStereoSupport) {
+        aDxDesc = myLangMap.changeValueId(STTR_PARAMETER_QB_D3D_NV,      "Direct3D NVIDIA (Fullscreen)");
+    } else if(myDxInfo.hasAmdAdapter) {
+        aDxDesc = myLangMap.changeValueId(STTR_PARAMETER_QB_D3D_AMD_OFF, "Direct3D AMD (Unavailable)");
+    } else if(myDxInfo.hasNvAdapter) {
+        aDxDesc = myLangMap.changeValueId(STTR_PARAMETER_QB_D3D_NV_OFF,  "Direct3D NVIDIA (Disabled)");
+    } else {
+        aDxDesc = myLangMap.changeValueId(STTR_PARAMETER_QB_D3D_OFF,     "Direct3D (Unavailable)");
+    }
+    params.QuadBuffer->defineOption(QUADBUFFER_HARD_D3D_ANY, aDxDesc);
+#endif
+    if(params.QuadBuffer->getValues().size() > QUADBUFFER_SOFT) {
+        params.QuadBuffer->defineOption(QUADBUFFER_SOFT, myLangMap.changeValueId(STTR_PARAMETER_QB_EMULATED, "OpenGL Emulated"));
+    }
+
+    params.ToShowExtra->setName(stCString("Show Extra Options"));
+
+    // about string
+    StString& aTitle     = myLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - PageFlip Output module");
+    StString& aVerString = myLangMap.changeValueId(STTR_VERSION_STRING, "version");
+    StString& aDescr     = myLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
+        "(C) {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0");
+    myAbout = aTitle + '\n' + aVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n"
+            + aDescr.format("2007-2016", "kirill@sview.ru", "www.sview.ru");
+}
+
 StOutPageFlip::StOutPageFlip(const StHandle<StResourceManager>& theResMgr,
                              const StNativeWin_t                theParentWindow)
 : StWindow(theResMgr, theParentWindow),
@@ -427,14 +474,6 @@ StOutPageFlip::StOutPageFlip(const StHandle<StResourceManager>& theResMgr,
   myToResetDevice(false) {
     StWindow::signals.onAnotherMonitor = stSlot(this, &StOutPageFlip::doNewMonitor);
     const StSearchMonitors& aMonitors = StWindow::getMonitors();
-
-    // about string
-    StString& aTitle     = myLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - PageFlip Output module");
-    StString& aVerString = myLangMap.changeValueId(STTR_VERSION_STRING, "version");
-    StString& aDescr     = myLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
-        "(C) {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0");
-    myAbout = aTitle + '\n' + aVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n"
-            + aDescr.format("2007-2016", "kirill@sview.ru", "www.sview.ru");
 
     // detect connected displays
     bool hasQuadBufferGl  = false;
@@ -461,18 +500,16 @@ StOutPageFlip::StOutPageFlip(const StHandle<StResourceManager>& theResMgr,
     // devices list
     StHandle<StOutDevice> aDevShutters = new StOutDevice();
     aDevShutters->PluginId = ST_OUT_PLUGIN_NAME;
-    aDevShutters->DeviceId = "Shutters";
+    aDevShutters->DeviceId = stCString("Shutters");
     aDevShutters->Priority = aSupportLevelShutters;
-    aDevShutters->Name     = myLangMap.changeValueId(STTR_PAGEFLIP_NAME, "Shutter glasses");
-    aDevShutters->Desc     = myLangMap.changeValueId(STTR_PAGEFLIP_DESC, "Shutter glasses");
+    aDevShutters->Name     = stCString("Shutter glasses");
     myDevices.add(aDevShutters);
 
     StHandle<StOutDevice> aDevVuzix = new StOutDevice();
     aDevVuzix->PluginId = ST_OUT_PLUGIN_NAME;
-    aDevVuzix->DeviceId = "Vuzix";
+    aDevVuzix->DeviceId = stCString("Vuzix");
     aDevVuzix->Priority = aSupportLevelVuzix;
-    aDevVuzix->Name     = myLangMap.changeValueId(STTR_VUZIX_NAME, "Vuzix HMD");
-    aDevVuzix->Desc     = myLangMap.changeValueId(STTR_VUZIX_DESC, "Vuzix HMD");
+    aDevVuzix->Name     = stCString("Vuzix HMD");
     myDevices.add(aDevVuzix);
 
     // load window position
@@ -506,33 +543,18 @@ StOutPageFlip::StOutPageFlip(const StHandle<StResourceManager>& theResMgr,
     }
 
     // Quad Buffer type option
-    params.QuadBuffer = new StEnumParam(QUADBUFFER_HARD_OPENGL, stCString("quadBufferType"),
-                                        myLangMap.changeValueId(STTR_PARAMETER_QBUFFER_TYPE, "Quad Buffer type"));
+    params.QuadBuffer = new StEnumParam(QUADBUFFER_HARD_OPENGL, stCString("quadBufferType"), stCString("quadBufferType"));
     params.QuadBuffer->signals.onChanged.connect(this, &StOutPageFlip::doSetQuadBuffer);
-    params.QuadBuffer->changeValues().add(myLangMap.changeValueId(STTR_PARAMETER_QB_HARDWARE, "OpenGL Hardware"));
+    params.QuadBuffer->defineOption(QUADBUFFER_HARD_OPENGL,  stCString("OpenGL Hardware"));
 #ifdef _WIN32
-    StString aDxDesc;
-    if(myDxInfo.hasAqbsSupport && myDxInfo.hasNvStereoSupport) {
-        aDxDesc = myLangMap.changeValueId(STTR_PARAMETER_QB_D3D_ANY,     "Direct3D (Fullscreen)");
-    } else if(myDxInfo.hasAqbsSupport) {
-        aDxDesc = myLangMap.changeValueId(STTR_PARAMETER_QB_D3D_AMD,     "Direct3D AMD (Fullscreen)");
-    } else if(myDxInfo.hasNvStereoSupport) {
-        aDxDesc = myLangMap.changeValueId(STTR_PARAMETER_QB_D3D_NV,      "Direct3D NVIDIA (Fullscreen)");
-    } else if(myDxInfo.hasAmdAdapter) {
-        aDxDesc = myLangMap.changeValueId(STTR_PARAMETER_QB_D3D_AMD_OFF, "Direct3D AMD (Unavailable)");
-    } else if(myDxInfo.hasNvAdapter) {
-        aDxDesc = myLangMap.changeValueId(STTR_PARAMETER_QB_D3D_NV_OFF,  "Direct3D NVIDIA (Disabled)");
-    } else {
-        aDxDesc = myLangMap.changeValueId(STTR_PARAMETER_QB_D3D_OFF,     "Direct3D (Unavailable)");
-    }
-    params.QuadBuffer->changeValues().add(aDxDesc);
-
+    params.QuadBuffer->defineOption(QUADBUFFER_HARD_D3D_ANY, stCString("D3D"));
     myOutD3d.Program = new StProgramQuad();
 #endif
 
     // Show Extra option
-    params.ToShowExtra = new StBoolParamNamed(false, stCString("advanced"), stCString("Show Extra Options"));
+    params.ToShowExtra = new StBoolParamNamed(false, stCString("advanced"), stCString("advanced"));
     params.ToShowExtra->signals.onChanged.connect(this, &StOutPageFlip::doShowExtra);
+    updateStrings();
     mySettings->loadParam(params.ToShowExtra);
 
     // load Quad Buffer type
@@ -1257,7 +1279,7 @@ void StOutPageFlip::doSetQuadBuffer(const int32_t ) {
 void StOutPageFlip::doShowExtra(const bool theValue) {
     myToResetDevice = true;
     if(theValue) {
-        params.QuadBuffer->changeValues().add(myLangMap.changeValueId(STTR_PARAMETER_QB_EMULATED, "OpenGL Emulated"));
+        params.QuadBuffer->defineOption(QUADBUFFER_SOFT, myLangMap.changeValueId(STTR_PARAMETER_QB_EMULATED, "OpenGL Emulated"));
     } else {
         params.QuadBuffer->changeValues().remove(params.QuadBuffer->getValues().size() - 1);
         if(params.QuadBuffer->getValue() == QUADBUFFER_SOFT) {

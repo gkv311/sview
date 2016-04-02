@@ -155,6 +155,7 @@ class StImageViewer : public StApplication {
 
         private: //! @name private callback Slots
 
+    ST_LOCAL virtual void doChangeLanguage(const int32_t ) ST_ATTR_OVERRIDE;
     ST_LOCAL void doScaleGui(const int32_t );
     ST_LOCAL void doScaleHiDPI(const bool );
     ST_LOCAL void doSwitchVSync(const bool theValue);
@@ -213,15 +214,10 @@ class StImageViewer : public StApplication {
      */
     ST_LOCAL void releaseDevice();
 
-    ST_LOCAL const StString& tr(const size_t theId) const {
-        return myLangMap->getValue(theId);
-    }
-
         private: //! @name private fields
 
     StHandle<StGLContext>      myContext;
     StHandle<StSettings>       mySettings;        //!< settings manager for Image Viewer plugin
-    StHandle<StTranslations>   myLangMap;         //!< translated strings map
     StHandle<StPlayList>       myPlayList;        //!< play list
     StHandle<StImageViewerGUI> myGUI;             //!< GUI root widget
     StHandle<StImageLoader>    myLoader;          //!< main image loader class
@@ -239,7 +235,6 @@ class StImageViewer : public StApplication {
 
     int32_t                    myLastUpdateDay;
     bool                       myToCheckUpdates;
-    bool                       myToRecreateMenu;
     bool                       myToSaveSrcFormat; //!< indicates that active source format should be saved or not
     bool                       myEscNoQuit;       //!< if true then Escape will not quit application
     bool                       myToHideUIFullScr; //!< if true then GUI will be hidden in full-screen mode

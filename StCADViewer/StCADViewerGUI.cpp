@@ -389,12 +389,6 @@ void StCADViewerGUI::stglUpdate(const StPointD_t& theCursorZo) {
     if(myMouseDescr != NULL) {
         myMouseDescr->setPoint(theCursorZo);
     }
-    if(myLangMap->wasReloaded()) {
-        StGLMenu::DeleteWithSubMenus(myMenu0Root); myMenu0Root = NULL;
-        createMainMenu();
-        myMenu0Root->stglUpdateSubmenuLayout();
-        myLangMap->resetReloaded();
-    }
     if(myZFocusBar != NULL) {
         char aBuff[128];
         stsprintf(aBuff, 128, "ZFocus: %3.0f%%", 100.0f * myPlugin->params.ZFocus->getNormalizedValue());

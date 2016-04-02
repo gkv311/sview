@@ -1,6 +1,6 @@
 /**
  * StOutInterlace, class providing stereoscopic output in row interlaced format using StCore toolkit.
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -110,14 +110,19 @@ class StOutInterlace : public StWindow {
      */
     ST_CPPEXPORT virtual void stglDraw() ST_ATTR_OVERRIDE;
 
+    /**
+     * Update strings.
+     */
+    ST_LOCAL virtual void doChangeLanguage() ST_ATTR_OVERRIDE { updateStrings(); }
+
         private:
 
     enum {
-        DEVICE_AUTO          =-1,
-        DEVICE_HINTERLACE    = 0, //!< interlace (horizontal 1xPixel lines, full color from R or L)
-        DEVICE_VINTERLACE    = 1, //!< interlace (vertical 1xPixel lines, full color from R or L)
-        DEVICE_CHESSBOARD    = 2, //!< 1xPixel chessboard (some DLP devices)
-        DEVICE_HINTERLACE_ED = 3, //!< interlace (horizontal 1xPixel lines) + EDimensional onscreen codes
+        DEVICE_AUTO              =-1,
+        DEVICE_ROW_INTERLACED    = 0, //!< interlace (horizontal 1xPixel lines, full color from R or L)
+        DEVICE_COL_INTERLACED    = 1, //!< interlace (vertical 1xPixel lines, full color from R or L)
+        DEVICE_CHESSBOARD        = 2, //!< 1xPixel chessboard (some DLP devices)
+        DEVICE_ROW_INTERLACED_ED = 3, //!< interlace (horizontal 1xPixel lines) + EDimensional onscreen codes
 
         DEVICE_NB,
     };
@@ -133,6 +138,11 @@ class StOutInterlace : public StWindow {
      * Release GL resources before window closing.
      */
     ST_LOCAL void releaseResources();
+
+    /**
+     * Update strings.
+     */
+    ST_LOCAL void updateStrings();
 
     /**
      * On/off VSync callback.

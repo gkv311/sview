@@ -251,7 +251,6 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
   //
   myLastUpdateDay(0),
   myToCheckUpdates(true),
-  myToRecreateMenu(false),
   myToSaveSrcFormat(false),
   myEscNoQuit(false),
   myToHideUIFullScr(false),
@@ -260,6 +259,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     myLangMap  = new StTranslations(myResMgr, StImageViewer::ST_DRAWER_PLUGIN_NAME);
     myOpenDialog = new StOpenImage(this);
     StImageViewerStrings::loadDefaults(*myLangMap);
+    myLangMap->params.language->signals.onChanged += stSlot(this, &StImageViewer::doChangeLanguage);
 
     myTitle = "sView - Image Viewer";
     if(!theAppName.isEmpty()) {
@@ -543,6 +543,11 @@ bool StImageViewer::createGui() {
     }
     registerHotKeys();
     return true;
+}
+
+void StImageViewer::doChangeLanguage(const int32_t theNewLang) {
+    StApplication::doChangeLanguage(theNewLang);
+    StImageViewerStrings::loadDefaults(*myLangMap);
 }
 
 bool StImageViewer::init() {
