@@ -769,6 +769,9 @@ StGLMenu* StImageViewerGUI::createHelpMenu() {
     aMenu->addItem(tr(MENU_HELP_HOTKEYS))
          ->setIcon(stCMenuIcon("actionKeyboard"), false)
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doListHotKeys);
+    aMenu->addItem(tr(MENU_HELP_SETTINGS))
+         ->setIcon(stCMenuIcon("actionSettings"), false)
+         ->signals.onItemClick.connect(this, &StImageViewerGUI::doMobileSettings);
     aMenu->addItem(tr(MENU_HELP_LICENSE))
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doOpenLicense);
     aMenu->addItem(tr(MENU_HELP_SCALE),   aMenuScale)
