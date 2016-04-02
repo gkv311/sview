@@ -50,41 +50,23 @@ const char* StImageViewer::ST_DRAWER_PLUGIN_NAME = "StImageViewer";
 namespace {
 
     static const char ST_SETTING_SLIDESHOW_DELAY[] = "slideShowDelay";
-    static const char ST_SETTING_FPSTARGET[]   = "fpsTarget";
-    static const char ST_SETTING_SRCFORMAT[]   = "srcFormat";
     static const char ST_SETTING_LAST_FOLDER[] = "lastFolder";
     static const char ST_SETTING_RECENT_L[]    = "recentL";
     static const char ST_SETTING_RECENT_R[]    = "recentR";
-    static const char ST_SETTING_SAVE_RECENT[] = "toSaveRecent";
-    static const char ST_SETTING_SHOW_LIST[]   = "showPlaylist";
     static const char ST_SETTING_COMPRESS[]    = "toCompress";
     static const char ST_SETTING_ESCAPENOQUIT[]= "escNoQuit";
     static const char ST_SETTING_FULLSCREENUI[]= "fullScreenUI";
 
-    static const char ST_SETTING_SCALE_ADJUST[]  = "scaleAdjust";
-    static const char ST_SETTING_SCALE_FORCE2X[] = "scale2X";
-    static const char ST_SETTING_FULLSCREEN[]  = "fullscreen";
     static const char ST_SETTING_SLIDESHOW[]   = "slideshow";
-    static const char ST_SETTING_TRACK_HEAD[]  = "toTrackHead";
-    static const char ST_SETTING_SHOW_FPS[]    = "toShowFps";
-    static const char ST_SETTING_MOBILE_UI[]   = "isMobileUI";
-    static const char ST_SETTING_VSYNC[]       = "vsync";
     static const char ST_SETTING_VIEWMODE[]    = "viewMode";
-    static const char ST_SETTING_STEREO_MODE[] = "viewStereoMode";
-    static const char ST_SETTING_TEXFILTER[]   = "viewTexFilter";
     static const char ST_SETTING_GAMMA[]       = "viewGamma";
-    static const char ST_SETTING_RATIO[]       = "ratio";
-    static const char ST_SETTING_HEAL_ANAMORPHIC[]    = "toHealAnamorphic";
     static const char ST_SETTING_UPDATES_LAST_CHECK[] = "updatesLastCheck";
-    static const char ST_SETTING_UPDATES_INTERVAL[]   = "updatesInterval";
     static const char ST_SETTING_IMAGELIB[]    = "imageLib";
 
     static const char ST_ARGUMENT_FILE_LEFT[]  = "left";
     static const char ST_ARGUMENT_FILE_RIGHT[] = "right";
     static const char ST_ARGUMENT_FILE_LAST[]  = "last";
 
-    static const char ST_ARGUMENT_SHOW_MENU[]  = "toShowMenu";
-    static const char ST_ARGUMENT_SHOW_TOPBAR[]= "toShowTopbar";
     static const char ST_ARGUMENT_MONITOR[]    = "monitorId";
     static const char ST_ARGUMENT_WINLEFT[]    = "windowLeft";
     static const char ST_ARGUMENT_WINTOP[]     = "windowTop";
@@ -284,48 +266,52 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
         myTitle = theAppName;
     }
     //
-    params.isFullscreen = new StBoolParam(false);
-    params.isFullscreen->signals.onChanged.connect(this, &StImageViewer::doFullscreen);
-    params.toRestoreRatio   = new StBoolParam(false);
-    params.ScaleAdjust      = new StInt32Param(StGLRootWidget::ScaleAdjust_Normal);
-    mySettings->loadParam (ST_SETTING_SCALE_ADJUST, params.ScaleAdjust);
+    using namespace StImageViewerStrings;
+    params.IsFullscreen = new StBoolParamNamed(false, stCString("fullscreen"), tr(MENU_VIEW_FULLSCREEN));
+    params.IsFullscreen->signals.onChanged.connect(this, &StImageViewer::doFullscreen);
+    params.ToRestoreRatio = new StBoolParamNamed(false, stCString("toRestoreRatio"), tr(MENU_VIEW_RATIO_KEEP_ON_RESTART));
+    params.ScaleAdjust = new StEnumParam(StGLRootWidget::ScaleAdjust_Normal, stCString("scaleAdjust"), tr(MENU_HELP_SCALE));
+    params.ScaleAdjust->defineOption(StGLRootWidget::ScaleAdjust_Small,  stCString("Small"));
+    params.ScaleAdjust->defineOption(StGLRootWidget::ScaleAdjust_Normal, stCString("Normal"));
+    params.ScaleAdjust->defineOption(StGLRootWidget::ScaleAdjust_Big,    stCString("Big"));
+    mySettings->loadParam(params.ScaleAdjust);
     params.ScaleAdjust->signals.onChanged = stSlot(this, &StImageViewer::doScaleGui);
     params.ScaleHiDPI       = new StFloat32Param(1.0f,       // initial value
                                                  0.5f, 3.0f, // min, max values
                                                  1.0f,       // default value
                                                  1.0f,       // incremental step
                                                  0.001f);    // equality tolerance
-    params.ScaleHiDPI2X     = new StBoolParam(false);
-    mySettings->loadParam (ST_SETTING_SCALE_FORCE2X, params.ScaleHiDPI2X);
+    params.ScaleHiDPI2X     = new StBoolParamNamed(false, stCString("scale2X"), tr(MENU_HELP_SCALE_HIDPI2X));
+    mySettings->loadParam (params.ScaleHiDPI2X);
     params.ScaleHiDPI2X->signals.onChanged = stSlot(this, &StImageViewer::doScaleHiDPI);
-    params.checkUpdatesDays = new StInt32Param(7);
-    params.srcFormat        = new StInt32Param(StFormat_AUTO);
-    params.srcFormat->signals.onChanged.connect(this, &StImageViewer::doSwitchSrcFormat);
-    params.ToShowPlayList   = new StBoolParam(false);
+    params.CheckUpdatesDays = new StInt32ParamNamed(7, stCString("updatesInterval"), tr(MENU_HELP_UPDATES));
+    params.SrcStereoFormat  = new StInt32ParamNamed(StFormat_AUTO, stCString("srcFormat"), tr(MENU_MEDIA_SRC_FORMAT));
+    params.SrcStereoFormat->signals.onChanged.connect(this, &StImageViewer::doSwitchSrcFormat);
+    params.ToShowPlayList   = new StBoolParamNamed(false, stCString("showPlaylist"), tr(PLAYLIST));
     params.ToShowPlayList->signals.onChanged = stSlot(this, &StImageViewer::doShowPlayList);
-    params.ToTrackHead   = new StBoolParamNamed(true,  tr(StImageViewerStrings::MENU_VIEW_TRACK_HEAD));
-    params.ToShowFps     = new StBoolParamNamed(false, tr(StImageViewerStrings::MENU_SHOW_FPS));
-    params.ToShowMenu    = new StBoolParamNamed(true, "Show main menu");
-    params.ToShowTopbar  = new StBoolParamNamed(true, "Show top toolbar");
-    params.IsMobileUI = new StBoolParamNamed(StWindow::isMobile(), "Mobile UI");
+    params.ToTrackHead   = new StBoolParamNamed(true,  stCString("toTrackHead"),  tr(MENU_VIEW_TRACK_HEAD));
+    params.ToShowFps     = new StBoolParamNamed(false, stCString("toShowFps"),    tr(MENU_SHOW_FPS));
+    params.ToShowMenu    = new StBoolParamNamed(true,  stCString("toShowMenu"),   stCString("Show main menu"));
+    params.ToShowTopbar  = new StBoolParamNamed(true,  stCString("toShowTopbar"), stCString("Show top toolbar"));
+    params.IsMobileUI    = new StBoolParamNamed(StWindow::isMobile(), stCString("isMobileUI"), stCString("Mobile UI"));
     params.IsMobileUI->signals.onChanged = stSlot(this, &StImageViewer::doScaleHiDPI);
-    params.IsVSyncOn  = new StBoolParam(true);
+    params.IsVSyncOn     = new StBoolParamNamed(true,  stCString("vsync"),        tr(MENU_VSYNC));
     params.IsVSyncOn->signals.onChanged = stSlot(this, &StImageViewer::doSwitchVSync);
     StApplication::params.VSyncMode->setValue(StGLContext::VSync_ON);
-    params.ToSaveRecent = new StBoolParam(false);
+    params.ToSaveRecent = new StBoolParamNamed(false, stCString("toSaveRecent"), stCString("Remember recent file"));
 
     params.imageLib = StImageFile::ST_LIBAV,
-    params.TargetFps = 0;
+    params.TargetFps = new StInt32ParamNamed(0, stCString("fpsTarget"), stCString("FPS Target"));
 
-    mySettings->loadInt32 (ST_SETTING_FPSTARGET,          params.TargetFps);
+    mySettings->loadParam (params.TargetFps);
     mySettings->loadString(ST_SETTING_LAST_FOLDER,        params.lastFolder);
     mySettings->loadInt32 (ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
-    mySettings->loadParam (ST_SETTING_UPDATES_INTERVAL,   params.checkUpdatesDays);
-    myToCheckPoorOrient = !mySettings->loadParam(ST_SETTING_TRACK_HEAD, params.ToTrackHead);
-    mySettings->loadParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
-    mySettings->loadParam (ST_SETTING_MOBILE_UI,          params.IsMobileUI);
-    mySettings->loadParam (ST_SETTING_VSYNC,              params.IsVSyncOn);
-    mySettings->loadParam (ST_SETTING_SHOW_LIST,          params.ToShowPlayList);
+    mySettings->loadParam (params.CheckUpdatesDays);
+    myToCheckPoorOrient = !mySettings->loadParam(params.ToTrackHead);
+    mySettings->loadParam (params.ToShowFps);
+    mySettings->loadParam (params.IsMobileUI);
+    mySettings->loadParam (params.IsVSyncOn);
+    mySettings->loadParam (params.ToShowPlayList);
 
     int32_t aSlideShowDelayInt = int32_t(mySlideShowDelay);
     mySettings->loadInt32 (ST_SETTING_SLIDESHOW_DELAY,    aSlideShowDelayInt);
@@ -356,22 +342,22 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
 
     // create actions
     StHandle<StAction> anAction;
-    anAction = new StActionBool(stCString("DoFullscreen"), params.isFullscreen);
+    anAction = new StActionBool(stCString("DoFullscreen"), params.IsFullscreen);
     addAction(Action_Fullscreen, anAction, ST_VK_F, ST_VK_RETURN);
 
     anAction = new StActionBool(stCString("DoShowFPS"), params.ToShowFps);
     addAction(Action_ShowFps, anAction, ST_VK_F12);
 
-    anAction = new StActionIntValue(stCString("DoSrcAuto"), params.srcFormat, StFormat_AUTO);
+    anAction = new StActionIntValue(stCString("DoSrcAuto"), params.SrcStereoFormat, StFormat_AUTO);
     addAction(Action_SrcAuto, anAction, ST_VK_A);
 
-    anAction = new StActionIntValue(stCString("DoSrcMono"), params.srcFormat, StFormat_Mono);
+    anAction = new StActionIntValue(stCString("DoSrcMono"), params.SrcStereoFormat, StFormat_Mono);
     addAction(Action_SrcMono, anAction, ST_VK_M);
 
-    anAction = new StActionIntValue(stCString("DoSrcOverUnder"), params.srcFormat, StFormat_TopBottom_LR);
+    anAction = new StActionIntValue(stCString("DoSrcOverUnder"), params.SrcStereoFormat, StFormat_TopBottom_LR);
     addAction(Action_SrcOverUnderLR, anAction, ST_VK_O);
 
-    anAction = new StActionIntValue(stCString("DoSrcSideBySide"), params.srcFormat, StFormat_SideBySide_RL);
+    anAction = new StActionIntValue(stCString("DoSrcSideBySide"), params.SrcStereoFormat, StFormat_SideBySide_RL);
     addAction(Action_SrcSideBySideRL, anAction, ST_VK_S);
 
     anAction = new StActionIntSlot(stCString("DoFileInfo"), stSlot(this, &StImageViewer::doAboutImage), 0);
@@ -435,34 +421,33 @@ void StImageViewer::saveGuiParams() {
         return;
     }
 
-    mySettings->saveParam(ST_SETTING_STEREO_MODE, myGUI->myImage->params.displayMode);
+    mySettings->saveParam(myGUI->myImage->params.DisplayMode);
     mySettings->saveInt32(ST_SETTING_GAMMA, stRound(100.0f * myGUI->myImage->params.gamma->getValue()));
-    mySettings->saveParam(ST_SETTING_HEAL_ANAMORPHIC, myGUI->myImage->params.ToHealAnamorphicRatio);
-    if(params.toRestoreRatio->getValue()) {
-        mySettings->saveParam(ST_SETTING_RATIO, myGUI->myImage->params.displayRatio);
-    } else {
-        mySettings->saveInt32(ST_SETTING_RATIO, StGLImageRegion::RATIO_AUTO);
-    }
-    mySettings->saveParam(ST_SETTING_TEXFILTER, myGUI->myImage->params.textureFilter);
+    mySettings->saveParam(myGUI->myImage->params.ToHealAnamorphicRatio);
+    mySettings->saveInt32(myGUI->myImage->params.DisplayRatio->getKey(),
+                          params.ToRestoreRatio->getValue()
+                        ? myGUI->myImage->params.DisplayRatio->getValue()
+                        : StGLImageRegion::RATIO_AUTO);
+    mySettings->saveParam(myGUI->myImage->params.TextureFilter);
 }
 
 void StImageViewer::saveAllParams() {
     saveGuiParams();
     if(!myGUI.isNull()) {
-        mySettings->saveParam (ST_SETTING_SCALE_ADJUST,  params.ScaleAdjust);
-        mySettings->saveParam (ST_SETTING_SCALE_FORCE2X, params.ScaleHiDPI2X);
-        mySettings->saveInt32(ST_SETTING_FPSTARGET, params.TargetFps);
+        mySettings->saveParam (params.ScaleAdjust);
+        mySettings->saveParam (params.ScaleHiDPI2X);
+        mySettings->saveParam (params.TargetFps);
         mySettings->saveInt32(ST_SETTING_SLIDESHOW_DELAY, int(mySlideShowDelay));
         mySettings->saveInt32(ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
-        mySettings->saveParam(ST_SETTING_UPDATES_INTERVAL, params.checkUpdatesDays);
+        mySettings->saveParam(params.CheckUpdatesDays);
         mySettings->saveString(ST_SETTING_IMAGELIB,  StImageFile::imgLibToString(params.imageLib));
-        mySettings->saveParam (ST_SETTING_TRACK_HEAD,params.ToTrackHead);
-        mySettings->saveParam (ST_SETTING_SHOW_FPS,  params.ToShowFps);
-        mySettings->saveParam (ST_SETTING_MOBILE_UI, params.IsMobileUI);
-        mySettings->saveParam (ST_SETTING_VSYNC,     params.IsVSyncOn);
-        mySettings->saveParam (ST_SETTING_SHOW_LIST, params.ToShowPlayList);
+        mySettings->saveParam (params.ToTrackHead);
+        mySettings->saveParam (params.ToShowFps);
+        mySettings->saveParam (params.IsMobileUI);
+        mySettings->saveParam (params.IsVSyncOn);
+        mySettings->saveParam (params.ToShowPlayList);
         if(myToSaveSrcFormat) {
-            mySettings->saveParam(ST_SETTING_SRCFORMAT, params.srcFormat);
+            mySettings->saveParam(params.SrcStereoFormat);
         }
 
         // store hot-keys
@@ -531,12 +516,12 @@ bool StImageViewer::createGui() {
     myGUI->myImage->getTextureQueue()->setDeviceCaps(aDevCaps);
 
     // load settings
-    myWindow->setTargetFps(double(params.TargetFps));
-    mySettings->loadParam (ST_SETTING_STEREO_MODE,        myGUI->myImage->params.displayMode);
-    mySettings->loadParam (ST_SETTING_TEXFILTER,          myGUI->myImage->params.textureFilter);
-    mySettings->loadParam (ST_SETTING_RATIO,              myGUI->myImage->params.displayRatio);
-    mySettings->loadParam (ST_SETTING_HEAL_ANAMORPHIC,    myGUI->myImage->params.ToHealAnamorphicRatio);
-    params.toRestoreRatio->setValue(myGUI->myImage->params.displayRatio->getValue() != StGLImageRegion::RATIO_AUTO);
+    myWindow->setTargetFps(double(params.TargetFps->getValue()));
+    mySettings->loadParam (myGUI->myImage->params.DisplayMode);
+    mySettings->loadParam (myGUI->myImage->params.TextureFilter);
+    mySettings->loadParam (myGUI->myImage->params.DisplayRatio);
+    mySettings->loadParam (myGUI->myImage->params.ToHealAnamorphicRatio);
+    params.ToRestoreRatio->setValue(myGUI->myImage->params.DisplayRatio->getValue() != StGLImageRegion::RATIO_AUTO);
     int32_t loadedGamma = 100; // 1.0f
         mySettings->loadInt32(ST_SETTING_GAMMA, loadedGamma);
         myGUI->myImage->params.gamma->setValue(0.01f * loadedGamma);
@@ -606,7 +591,7 @@ bool StImageViewer::init() {
     myLoader->setCompressMemory(myWindow->isMobile());
 
     // load this parameter AFTER image thread creation
-    mySettings->loadParam(ST_SETTING_SRCFORMAT, params.srcFormat);
+    mySettings->loadParam(params.SrcStereoFormat);
 
 #if !defined(ST_NO_UPDATES_CHECK)
     // read the current time
@@ -614,8 +599,8 @@ bool StImageViewer::init() {
     time(&aRawtime);
     struct tm* aTimeinfo = localtime(&aRawtime);
     int32_t aCurrentDayInYear = aTimeinfo->tm_yday;
-    if(params.checkUpdatesDays->getValue() > 0
-    && std::abs(aCurrentDayInYear - myLastUpdateDay) > params.checkUpdatesDays->getValue()) {
+    if(params.CheckUpdatesDays->getValue() > 0
+    && std::abs(aCurrentDayInYear - myLastUpdateDay) > params.CheckUpdatesDays->getValue()) {
         myUpdates = new StCheckUpdates();
         myUpdates->init();
         myLastUpdateDay = aCurrentDayInYear;
@@ -628,16 +613,16 @@ bool StImageViewer::init() {
 void StImageViewer::parseArguments(const StArgumentsMap& theArguments) {
     StArgument anArgSlideshow  = theArguments[ST_SETTING_SLIDESHOW];
     StArgument anArgViewMode   = theArguments[ST_SETTING_VIEWMODE];
-    StArgument anArgSrcFormat  = theArguments[ST_SETTING_SRCFORMAT];
+    StArgument anArgSrcFormat  = theArguments[params.SrcStereoFormat->getKey()];
     StArgument anArgImgLibrary = theArguments[ST_SETTING_IMAGELIB];
     StArgument anArgToCompress = theArguments[ST_SETTING_COMPRESS];
     StArgument anArgEscNoQuit  = theArguments[ST_SETTING_ESCAPENOQUIT];
     StArgument anArgFullScreenUI = theArguments[ST_SETTING_FULLSCREENUI];
-    StArgument anArgShowMenu   = theArguments[ST_ARGUMENT_SHOW_MENU];
-    StArgument anArgShowTopbar = theArguments[ST_ARGUMENT_SHOW_TOPBAR];
-    StArgument anArgSaveRecent = theArguments[ST_SETTING_SAVE_RECENT];
+    StArgument anArgShowMenu   = theArguments[params.ToShowMenu->getKey()];
+    StArgument anArgShowTopbar = theArguments[params.ToShowTopbar->getKey()];
+    StArgument anArgSaveRecent = theArguments[params.ToSaveRecent->getKey()];
 
-    StArgument anArgFullscreen = theArguments[ST_SETTING_FULLSCREEN];
+    StArgument anArgFullscreen = theArguments[params.IsFullscreen->getKey()];
     StArgument anArgMonitor    = theArguments[ST_ARGUMENT_MONITOR];
     StArgument anArgWinLeft    = theArguments[ST_ARGUMENT_WINLEFT];
     StArgument anArgWinTop     = theArguments[ST_ARGUMENT_WINTOP];
@@ -677,7 +662,7 @@ void StImageViewer::parseArguments(const StArgumentsMap& theArguments) {
         myWindow->setPlacement(aRect, true);
     }
     if(anArgFullscreen.isValid()) {
-        params.isFullscreen->setValue(!anArgFullscreen.isValueOff());
+        params.IsFullscreen->setValue(!anArgFullscreen.isValueOff());
     }
 
     if(anArgToCompress.isValid()) {
@@ -703,7 +688,7 @@ void StImageViewer::parseArguments(const StArgumentsMap& theArguments) {
         myPlayList->changeDefParams().ViewingMode = StStereoParams::GET_VIEW_MODE_FROM_STRING(anArgViewMode.getValue());
     }
     if(anArgSrcFormat.isValid()) {
-        params.srcFormat->setValue(st::formatFromString(anArgSrcFormat.getValue()));
+        params.SrcStereoFormat->setValue(st::formatFromString(anArgSrcFormat.getValue()));
         myToSaveSrcFormat = false; // this setting is temporary!
     }
     if(anArgImgLibrary.isValid()) {
@@ -909,7 +894,7 @@ void StImageViewer::doKeyDown(const StKeyEvent& theEvent) {
             if(!myEscNoQuit) {
                 StApplication::exit(0);
             } else if(myWindow->isFullScreen()) {
-                params.isFullscreen->setValue(false);
+                params.IsFullscreen->setValue(false);
             }
             return;
         }
@@ -990,7 +975,7 @@ void StImageViewer::doMouseUp(const StClickEvent& theEvent) {
     }
 
     if(theEvent.Button == ST_MOUSE_MIDDLE) {
-        params.isFullscreen->reverse();
+        params.IsFullscreen->reverse();
     }
     myGUI->tryUnClick(theEvent);
 }
@@ -1108,7 +1093,7 @@ void StImageViewer::beforeDraw() {
         myToCheckUpdates = false;
     }
 
-    const bool isFullScreen = params.isFullscreen->getValue();
+    const bool isFullScreen = params.IsFullscreen->getValue();
     myGUI->setVisibility(myWindow->getMousePos(), myToHideUIFullScr && isFullScreen);
     bool toHideCursor = isFullScreen && myGUI->toHideCursor();
     myWindow->showCursor(!toHideCursor);
@@ -1160,7 +1145,7 @@ void StImageViewer::stglDraw(unsigned int theView) {
         if(!aParams.isNull()) {
             hasStereoSource =!aParams->isMono()
                            && myGUI->myImage->hasVideoStream()
-                           && myGUI->myImage->params.displayMode->getValue() == StGLImageRegion::MODE_STEREO;
+                           && myGUI->myImage->params.DisplayMode->getValue() == StGLImageRegion::MODE_STEREO;
         }
         myWindow->setStereoOutput(hasStereoSource);
     }

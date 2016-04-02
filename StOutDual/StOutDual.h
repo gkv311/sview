@@ -129,8 +129,8 @@ class StOutDual : public StWindow {
 
     struct {
 
-        StHandle<StInt32Param> SlaveMonId; //!< slave window position
-        StHandle<StBoolParam>  MonoClone;  //!< display mono in stereo
+        StHandle<StInt32ParamNamed> SlaveMonId; //!< slave window position
+        StHandle<StBoolParamNamed>  MonoClone;  //!< display mono in stereo
 
     } params;
 

@@ -40,10 +40,6 @@
 namespace {
     static const char ST_SETTING_LAST_FOLDER[] = "lastFolder";
     static const char ST_SETTING_FPSTARGET[] = "fpsTarget";
-    static const char ST_SETTING_SHOW_FPS[]  = "toShowFps";
-    static const char ST_SETTING_SHOW_LIST[] = "showPlaylist";
-    static const StString ST_PARAM_TRIHEDRON = "showTrihedron";
-    static const StString ST_PARAM_PROJMODE  = "projMode";
 }
 
 const StString StCADViewer::ST_DRAWER_PLUGIN_NAME = "StCADViewer";
@@ -63,13 +59,12 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
 
     myTitle = "sView - CAD Viewer";
     //
-    params.IsFullscreen = new StBoolParam(false);
+    params.IsFullscreen    = new StBoolParamNamed(false, stCString("isFullscreen"),  tr(StCADViewerStrings::MENU_VIEW_FULLSCREEN));
     params.IsFullscreen->signals.onChanged.connect(this, &StCADViewer::doFullscreen);
-    params.ToShowPlayList   = new StBoolParam(false);
-    ///params.ToShowPlayList->signals.onChanged = stSlot(this, &StCADViewer::doShowPlayList);
-    params.ToShowFps     = new StBoolParamNamed(false, tr(StCADViewerStrings::MENU_SHOW_FPS));
-    params.ToShowTrihedron = new StBoolParam(true);
-    params.ProjectMode = new StEnumParam(ST_PROJ_STEREO, tr(StCADViewerStrings::MENU_VIEW_PROJECTION));
+    params.ToShowPlayList  = new StBoolParamNamed(false, stCString("showPlaylist"),  stCString("Show Playlist"));
+    params.ToShowFps       = new StBoolParamNamed(false, stCString("toShowFps"),     tr(StCADViewerStrings::MENU_SHOW_FPS));
+    params.ToShowTrihedron = new StBoolParamNamed(true,  stCString("showTrihedron"), tr(StCADViewerStrings::MENU_VIEW_TRIHEDRON));
+    params.ProjectMode = new StEnumParam(ST_PROJ_STEREO, stCString("projMode"), tr(StCADViewerStrings::MENU_VIEW_PROJECTION));
     params.ProjectMode->changeValues().add(tr(StCADViewerStrings::MENU_VIEW_PROJ_ORTHO));  // ST_PROJ_ORTHO
     params.ProjectMode->changeValues().add(tr(StCADViewerStrings::MENU_VIEW_PROJ_PERSP));  // ST_PROJ_PERSP
     params.ProjectMode->changeValues().add(tr(StCADViewerStrings::MENU_VIEW_PROJ_STEREO)); // ST_PROJ_STEREO
@@ -90,8 +85,8 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
 
     mySettings->loadString(ST_SETTING_LAST_FOLDER, params.LastFolder);
     mySettings->loadInt32 (ST_SETTING_FPSTARGET,   params.TargetFps);
-    mySettings->loadParam (ST_SETTING_SHOW_FPS,    params.ToShowFps);
-    mySettings->loadParam (ST_SETTING_SHOW_LIST,   params.ToShowPlayList);
+    mySettings->loadParam (params.ToShowFps);
+    mySettings->loadParam (params.ToShowPlayList);
 
     // workaround current limitations of OCCT - no support of viewport with offset
     const bool toForceFboUsage = true;
@@ -184,11 +179,11 @@ void StCADViewer::saveGuiParams() {
     }
 
     mySettings->saveString(ST_SETTING_LAST_FOLDER, params.LastFolder);
-    mySettings->saveParam(ST_PARAM_TRIHEDRON,   params.ToShowTrihedron);
-    mySettings->saveParam(ST_PARAM_PROJMODE,    params.ProjectMode);
+    mySettings->saveParam(params.ToShowTrihedron);
+    mySettings->saveParam(params.ProjectMode);
     mySettings->saveInt32(ST_SETTING_FPSTARGET, params.TargetFps);
-    mySettings->saveParam(ST_SETTING_SHOW_FPS,  params.ToShowFps);
-    mySettings->saveParam(ST_SETTING_SHOW_LIST, params.ToShowPlayList);
+    mySettings->saveParam(params.ToShowFps);
+    mySettings->saveParam(params.ToShowPlayList);
 }
 
 void StCADViewer::saveAllParams() {
@@ -360,8 +355,8 @@ bool StCADViewer::createGui() {
 
     // load settings
     myWindow->setTargetFps(double(params.TargetFps));
-    mySettings->loadParam(ST_PARAM_TRIHEDRON, params.ToShowTrihedron);
-    mySettings->loadParam(ST_PARAM_PROJMODE,  params.ProjectMode);
+    mySettings->loadParam(params.ToShowTrihedron);
+    mySettings->loadParam(params.ProjectMode);
 
     myGUI->stglInit();
     myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER));

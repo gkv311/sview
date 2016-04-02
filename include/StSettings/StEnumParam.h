@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov
+ * Copyright © 2013-2016 Kirill Gavrilov
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -16,17 +16,17 @@
  * It is Integer value within 0...N
  * Each value has associated name to create appropriate control in GUI.
  */
-class StEnumParam : public StInt32Param {
+class StEnumParam : public StInt32ParamNamed {
 
         public:
 
     /**
      * Simple constructor.
      */
-    StEnumParam(const int32_t   theValue,
-                const StString& theParamName = "")
-    : StInt32Param(theValue),
-      myParamName(theParamName) {
+    ST_LOCAL StEnumParam(const int32_t    theValue,
+                         const StCString& theParamKey,
+                         const StCString& theParamName)
+    : StInt32ParamNamed(theValue, theParamKey, theParamName) {
         //
     }
 
@@ -35,7 +35,7 @@ class StEnumParam : public StInt32Param {
      * @param theValue new value
      * @return true if value was changed
      */
-    inline virtual bool setValue(const int32_t theValue) {
+    ST_LOCAL virtual bool setValue(const int32_t theValue) {
         if(theValue < 0
         || size_t(theValue) >= myList.size()) {
             return false; // prevent out-of-range
@@ -44,23 +44,9 @@ class StEnumParam : public StInt32Param {
     }
 
     /**
-     * @return parameter label
-     */
-    ST_LOCAL StString getName() const {
-        return myParamName;
-    }
-
-    /**
-     * @return parameter label
-     */
-    ST_LOCAL void setName(const StString& theName) {
-        myParamName = theName;
-    }
-
-    /**
      * Returns title for active value.
      */
-    ST_LOCAL inline StString getActiveValue() const {
+    ST_LOCAL StString getActiveValue() const {
         if(myList.isEmpty()) {
             return "";
         }
@@ -69,24 +55,48 @@ class StEnumParam : public StInt32Param {
     }
 
     /**
-     * Return list of available options.
+     * Return the list of available options.
      */
-    ST_LOCAL inline const StArrayList<StString>& getValues() const {
+    ST_LOCAL const StArrayList<StString>& getValues() const {
         return myList;
     }
 
-    ST_LOCAL inline StArrayList<StString>& changeValues() {
+    /**
+     * Modify the list of available options.
+     */
+    ST_LOCAL StArrayList<StString>& changeValues() {
         return myList;
+    }
+
+    /**
+     * Return option label.
+     */
+    ST_LOCAL const StString& getOptionLabel(const int32_t theValue) const {
+        return myList.getValue(theValue);
+    }
+
+    /**
+     * Setup option in the list.
+     */
+    ST_LOCAL void defineOption(const int32_t    theValue,
+                               const StCString& theName) {
+        if(theValue < 0) {
+            return;
+        }
+
+        while(myList.size() <= theValue) {
+            myList.add(stCString(""));
+        }
+        myList.changeValue(theValue) = theName;
     }
 
         protected:
 
     StArrayList<StString> myList;
-    StString              myParamName;
 
 };
 
 // define StHandle template specialization
-ST_DEFINE_HANDLE(StEnumParam, StInt32Param);
+ST_DEFINE_HANDLE(StEnumParam, StInt32ParamNamed);
 
 #endif // __StEnumParam_h_

@@ -109,7 +109,7 @@ class StOutIZ3D : public StWindow {
 
     struct {
 
-        StHandle<StInt32Param> Glasses; //!< glasses filter
+        StHandle<StInt32ParamNamed> Glasses; //!< glasses filter
 
     } params;
 

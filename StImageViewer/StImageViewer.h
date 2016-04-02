@@ -125,24 +125,24 @@ class StImageViewer : public StApplication {
 
     struct {
 
-        StHandle<StBoolParam>    isFullscreen;     //!< fullscreen state
-        StHandle<StBoolParam>    toRestoreRatio;   //!< restore ratio on restart
-        StHandle<StInt32Param>   ScaleAdjust;      //!< adjust GUI size, see StGLRootWidget::ScaleAdjust
-        StHandle<StFloat32Param> ScaleHiDPI;       //!< adapt  GUI size for HiDPI resolution
-        StHandle<StBoolParam>    ScaleHiDPI2X;     //!< option to set HiDPI resolution to 2.0
-        StHandle<StInt32Param>   checkUpdatesDays; //!< days count between updates checks
-        StHandle<StInt32Param>   srcFormat;        //!< source format
-        StHandle<StBoolParam>    ToTrackHead;      //!< enable/disable head-tracking
-        StHandle<StBoolParam>    ToShowMenu;       //!< show main menu
-        StHandle<StBoolParam>    ToShowTopbar;     //!< show topbar
-        StHandle<StBoolParam>    ToShowPlayList;   //!< display playlist
-        StHandle<StBoolParam>    ToShowFps;        //!< display FPS meter
-        StHandle<StBoolParam>    IsMobileUI;       //!< display mobile interface
-        StHandle<StBoolParam>    IsVSyncOn;        //!< flag to use VSync
-        StHandle<StBoolParam>    ToSaveRecent;     //!< load/save recent file
-        StString                 lastFolder;       //!< laster folder used to open / save file
-        StImageFile::ImageClass  imageLib;         //!< preferred image library
-        int                      TargetFps;        //!< limit or not rendering FPS
+        StHandle<StBoolParamNamed>    IsFullscreen;     //!< fullscreen state
+        StHandle<StBoolParamNamed>    ToRestoreRatio;   //!< restore ratio on restart
+        StHandle<StEnumParam>         ScaleAdjust;      //!< adjust GUI size, see StGLRootWidget::ScaleAdjust
+        StHandle<StFloat32Param>      ScaleHiDPI;       //!< adapt  GUI size for HiDPI resolution
+        StHandle<StBoolParamNamed>    ScaleHiDPI2X;     //!< option to set HiDPI resolution to 2.0
+        StHandle<StInt32ParamNamed>   CheckUpdatesDays; //!< days count between updates checks
+        StHandle<StInt32ParamNamed>   SrcStereoFormat;  //!< source format
+        StHandle<StBoolParamNamed>    ToTrackHead;      //!< enable/disable head-tracking
+        StHandle<StBoolParamNamed>    ToShowMenu;       //!< show main menu
+        StHandle<StBoolParamNamed>    ToShowTopbar;     //!< show topbar
+        StHandle<StBoolParamNamed>    ToShowPlayList;   //!< display playlist
+        StHandle<StBoolParamNamed>    ToShowFps;        //!< display FPS meter
+        StHandle<StBoolParamNamed>    IsMobileUI;       //!< display mobile interface
+        StHandle<StBoolParamNamed>    IsVSyncOn;        //!< flag to use VSync
+        StHandle<StBoolParamNamed>    ToSaveRecent;     //!< load/save recent file
+        StString                      lastFolder;       //!< laster folder used to open / save file
+        StImageFile::ImageClass       imageLib;         //!< preferred image library
+        StHandle<StInt32ParamNamed>   TargetFps;        //!< limit or not rendering FPS
 
     } params;
 

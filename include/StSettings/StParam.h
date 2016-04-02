@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov
+ * Copyright © 2011-2016 Kirill Gavrilov
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -149,22 +149,39 @@ class StBoolParamNamed : public StBoolParam {
     /**
      * Main constructor.
      */
-    inline StBoolParamNamed(const bool      theValue,
-                            const StString& theParamName = "")
+    ST_LOCAL StBoolParamNamed(const bool       theValue,
+                              const StCString& theParamKey,
+                              const StCString& theParamName)
     : StBoolParam(theValue),
+      myParamKey(theParamKey),
       myParamName(theParamName) {
         //
     }
 
     /**
+     * @return parameter key
+     */
+    ST_LOCAL const StString& getKey() const {
+        return myParamKey;
+    }
+
+    /**
      * @return parameter label
      */
-    ST_LOCAL inline StString getName() const {
+    ST_LOCAL const StString& getName() const {
         return myParamName;
+    }
+
+    /**
+     * Set new parameter label.
+     */
+    ST_LOCAL void setName(const StString& theName) {
+        myParamName = theName;
     }
 
         private:
 
+    StString myParamKey;
     StString myParamName;
 
 };
@@ -172,4 +189,54 @@ class StBoolParamNamed : public StBoolParam {
 // define StHandle template specialization
 ST_DEFINE_HANDLE(StBoolParamNamed, StBoolParam);
 
-#endif //__StParam_h_
+/**
+ * Named integer parameter.
+ */
+class StInt32ParamNamed : public StInt32Param {
+
+        public:
+
+    /**
+     * Main constructor.
+     */
+    ST_LOCAL StInt32ParamNamed(const int32_t    theValue,
+                               const StCString& theParamKey,
+                               const StCString& theParamName)
+    : StInt32Param(theValue),
+      myParamKey(theParamKey),
+      myParamName(theParamName) {
+        //
+    }
+
+    /**
+     * @return parameter key
+     */
+    ST_LOCAL const StString& getKey() const {
+        return myParamKey;
+    }
+
+    /**
+     * @return parameter label
+     */
+    ST_LOCAL const StString& getName() const {
+        return myParamName;
+    }
+
+    /**
+     * Set new parameter label.
+     */
+    ST_LOCAL void setName(const StString& theName) {
+        myParamName = theName;
+    }
+
+        private:
+
+    StString myParamKey;
+    StString myParamName;
+
+};
+
+// define StHandle template specialization
+ST_DEFINE_HANDLE(StInt32ParamNamed, StInt32Param);
+
+#endif // __StParam_h_

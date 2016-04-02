@@ -20,7 +20,6 @@
 #include <StSettings/StTranslations.h>
 
 namespace {
-    static const StString ST_SETTING_DEV_CONTROL = "deviceControl";
     static const StString ST_SETTING_ADVANCED    = "advanced";
     static const StString ST_OUT_PLUGIN_NAME_EXT = "StOutPageFlip";
 }
@@ -63,7 +62,8 @@ StOutPageFlipExt::StOutPageFlipExt(const StHandle<StResourceManager>& theResMgr,
     myWinRect.bottom() = 0;
 
     // Control Code option
-    params.ControlCode = new StEnumParam(DEVICE_CONTROL_NONE, myLangMap.changeValueId(STTR_PARAMETER_CONTROL_CODE, "Glasses control codes"));
+    params.ControlCode = new StEnumParam(DEVICE_CONTROL_NONE, stCString("deviceControl"),
+                                         myLangMap.changeValueId(STTR_PARAMETER_CONTROL_CODE, "Glasses control codes"));
     params.ControlCode->changeValues().add(myLangMap.changeValueId(STTR_PARAMETER_CONTROL_NO,        "No codes"));
     params.ControlCode->changeValues().add(myLangMap.changeValueId(STTR_PARAMETER_CONTROL_BLUELINE,  "Blue line sync"));
     params.ControlCode->changeValues().add(myLangMap.changeValueId(STTR_PARAMETER_CONTROL_WHITELINE, "White line sync"));
@@ -71,7 +71,7 @@ StOutPageFlipExt::StOutPageFlipExt(const StHandle<StResourceManager>& theResMgr,
     params.ControlCode->signals.onChanged.connect(this, &StOutPageFlipExt::doSetDeviceControl);
 
     // load shutter glasses controller
-    mySettings->loadParam(ST_SETTING_DEV_CONTROL, params.ControlCode);
+    mySettings->loadParam(params.ControlCode);
     myToResetDevice = false;
 }
 
@@ -89,7 +89,7 @@ StOutPageFlipExt::~StOutPageFlipExt() {
 
 void StOutPageFlipExt::beforeClose() {
     StOutPageFlip::beforeClose();
-    mySettings->saveParam(ST_SETTING_DEV_CONTROL, params.ControlCode);
+    mySettings->saveParam(params.ControlCode);
     mySettings->flush();
     if(!StOutPageFlip::params.ToShowExtra->getValue()) {
         return;

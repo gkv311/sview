@@ -138,9 +138,9 @@ class StOutAnaglyph : public StWindow {
 
     struct {
 
-        StHandle<StInt32Param> Glasses;   //!< glasses type
-        StHandle<StInt32Param> RedCyan;   //!< Red-Cyan   filter
-        StHandle<StInt32Param> AmberBlue; //!< Amber-Blue filter
+        StHandle<StInt32ParamNamed> Glasses;   //!< glasses type
+        StHandle<StInt32ParamNamed> RedCyan;   //!< Red-Cyan   filter
+        StHandle<StInt32ParamNamed> AmberBlue; //!< Amber-Blue filter
 
     } params;
 

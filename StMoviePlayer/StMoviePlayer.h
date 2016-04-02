@@ -48,7 +48,7 @@ struct mg_context;
 struct mg_connection;
 struct mg_request_info;
 
-class StALDeviceParam : public StInt32Param {
+class StALDeviceParam : public StInt32ParamNamed {
 
         public:
 
@@ -201,48 +201,48 @@ class StMoviePlayer : public StApplication {
 
     struct {
 
-        StHandle<StInt32Param>    ScaleAdjust;      //!< adjust GUI size, see StGLRootWidget::ScaleAdjust
-        StHandle<StFloat32Param>  ScaleHiDPI;       //!< adapt  GUI size for HiDPI resolution
-        StHandle<StBoolParam>     ScaleHiDPI2X;     //!< option to set HiDPI resolution to 2.0
-        StHandle<StInt32Param>    SubtitlesPlace;   //!< subtitles placement
-        StHandle<StFloat32Param>  SubtitlesTopDY;   //!< subtitles vertical displacement
-        StHandle<StFloat32Param>  SubtitlesBottomDY;//!< subtitles vertical displacement
-        StHandle<StFloat32Param>  SubtitlesSize;    //!< subtitles font size
-        StHandle<StFloat32Param>  SubtitlesParallax;//!< subtitles parallax
-        StHandle<StBoolParam>     ToSearchSubs;     //!< automatically search for additional subtitles/audio track files nearby video file
-        StHandle<StEnumParam>     SubtitlesParser;  //!< subtitles parser
-        StHandle<StALDeviceParam> alDevice;         //!< active OpenAL device
-        StHandle<StFloat32Param>  AudioGain;        //!< volume factor
-        StHandle<StBoolParam>     AudioMute;        //!< volume mute flag
-        StHandle<StFloat32Param>  AudioDelay;       //!< audio/video synchronization delay
-        StHandle<StBoolParam>     isFullscreen;     //!< fullscreen state
-        StHandle<StBoolParam>     toRestoreRatio;   //!< restore ratio on restart
-        StHandle<StBoolParam>     isShuffle;        //!< shuffle playback order
-        StHandle<StBoolParam>     ToLoopSingle;     //!< play single playlist item in loop
-        StHandle<StBoolParam>     areGlobalMKeys;   //!< capture global multimedia keys
-        StHandle<StInt32Param>    checkUpdatesDays; //!< days count between updates checks
-        StHandle<StInt32Param>    srcFormat;        //!< source format
-        StHandle<StBoolParam>     ToTrackHead;      //!< enable/disable head-tracking
-        StHandle<StBoolParam>     ToShowPlayList;   //!< display playlist
-        StHandle<StBoolParam>     ToShowFps;        //!< display FPS meter
-        StHandle<StBoolParam>     ToShowMenu;       //!< show main menu
-        StHandle<StBoolParam>     ToShowTopbar;     //!< show topbar
-        StHandle<StBoolParam>     IsMobileUI;       //!< display mobile interface
-        StHandle<StBoolParam>     ToLimitFps;       //!< limit CPU usage or not
-        StHandle<StBoolParam>     IsVSyncOn;        //!< flag to use VSync
-        StHandle<StEnumParam>     StartWebUI;       //!< to start Web UI or not
-        StHandle<StBoolParam>     ToPrintWebErrors; //!< print Web UI starting errors
-        StHandle<StBoolParam>     IsLocalWebUI;     //!< restrict remote access to 127.0.0.0
-        StHandle<StInt32Param>    WebUIPort;        //!< port to start Web UI
-        StHandle<StInt32Param>    audioStream;      //!< active Audio stream
-        StHandle<StInt32Param>    subtitlesStream;  //!< active Subtitles stream
-        StHandle<StInt32Param>    blockSleeping;    //!< active Audio stream
-        StHandle<StBoolParam>     ToShowExtra;      //!< show experimental menu items
-        StHandle<StInt32Param>    SnapshotImgType;  //!< default snapshot image type
-        StString                  lastFolder;       //!< laster folder used to open / save file
-        int                       TargetFps;        //!< rendering FPS limit (0 - max FPS with less CPU, 1,2,3 - adjust to video FPS)
-        StHandle<StBoolParamNamed> UseGpu;          //!< use video decoding on GPU when available
-        StHandle<StBoolParamNamed> UseOpenJpeg;     //!< use OpenJPEG (libopenjpeg) instead of built-in jpeg2000 decoder
+        StHandle<StEnumParam>         ScaleAdjust;       //!< adjust GUI size, see StGLRootWidget::ScaleAdjust
+        StHandle<StFloat32Param>      ScaleHiDPI;        //!< adapt  GUI size for HiDPI resolution
+        StHandle<StBoolParamNamed>    ScaleHiDPI2X;      //!< option to set HiDPI resolution to 2.0
+        StHandle<StInt32ParamNamed>   SubtitlesPlace;    //!< subtitles placement
+        StHandle<StFloat32Param>      SubtitlesTopDY;    //!< subtitles vertical displacement
+        StHandle<StFloat32Param>      SubtitlesBottomDY; //!< subtitles vertical displacement
+        StHandle<StFloat32Param>      SubtitlesSize;     //!< subtitles font size
+        StHandle<StFloat32Param>      SubtitlesParallax; //!< subtitles parallax
+        StHandle<StBoolParamNamed>    ToSearchSubs;      //!< automatically search for additional subtitles/audio track files nearby video file
+        StHandle<StEnumParam>         SubtitlesParser;   //!< subtitles parser
+        StHandle<StALDeviceParam>     alDevice;          //!< active OpenAL device
+        StHandle<StFloat32Param>      AudioGain;         //!< volume factor
+        StHandle<StBoolParamNamed>    AudioMute;         //!< volume mute flag
+        StHandle<StFloat32Param>      AudioDelay;        //!< audio/video synchronization delay
+        StHandle<StBoolParamNamed>    IsFullscreen;      //!< fullscreen state
+        StHandle<StBoolParamNamed>    ToRestoreRatio;    //!< restore ratio on restart
+        StHandle<StBoolParamNamed>    IsShuffle;         //!< shuffle playback order
+        StHandle<StBoolParamNamed>    ToLoopSingle;      //!< play single playlist item in loop
+        StHandle<StBoolParamNamed>    AreGlobalMKeys;    //!< capture global multimedia keys
+        StHandle<StInt32ParamNamed>   CheckUpdatesDays;  //!< days count between updates checks
+        StHandle<StInt32ParamNamed>   SrcStereoFormat;   //!< source format
+        StHandle<StBoolParamNamed>    ToTrackHead;       //!< enable/disable head-tracking
+        StHandle<StBoolParamNamed>    ToShowPlayList;    //!< display playlist
+        StHandle<StBoolParamNamed>    ToShowFps;         //!< display FPS meter
+        StHandle<StBoolParamNamed>    ToShowMenu;        //!< show main menu
+        StHandle<StBoolParamNamed>    ToShowTopbar;      //!< show topbar
+        StHandle<StBoolParamNamed>    IsMobileUI;        //!< display mobile interface
+        StHandle<StBoolParamNamed>    ToLimitFps;        //!< limit CPU usage or not
+        StHandle<StBoolParamNamed>    IsVSyncOn;         //!< flag to use VSync
+        StHandle<StEnumParam>         StartWebUI;        //!< to start Web UI or not
+        StHandle<StBoolParamNamed>    ToPrintWebErrors;  //!< print Web UI starting errors
+        StHandle<StBoolParamNamed>    IsLocalWebUI;      //!< restrict remote access to 127.0.0.0
+        StHandle<StInt32ParamNamed>   WebUIPort;         //!< port to start Web UI
+        StHandle<StInt32Param>        audioStream;       //!< active Audio stream
+        StHandle<StInt32Param>        subtitlesStream;   //!< active Subtitles stream
+        StHandle<StInt32Param>        blockSleeping;     //!< active Audio stream
+        StHandle<StBoolParamNamed>    ToShowExtra;       //!< show experimental menu items
+        StHandle<StInt32ParamNamed>   SnapshotImgType;   //!< default snapshot image type
+        StString                      lastFolder;        //!< laster folder used to open / save file
+        StHandle<StInt32ParamNamed>   TargetFps;         //!< rendering FPS limit (0 - max FPS with less CPU, 1,2,3 - adjust to video FPS)
+        StHandle<StBoolParamNamed>    UseGpu;            //!< use video decoding on GPU when available
+        StHandle<StBoolParamNamed>    UseOpenJpeg;       //!< use OpenJPEG (libopenjpeg) instead of built-in jpeg2000 decoder
 
     } params;
 

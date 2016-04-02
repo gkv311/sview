@@ -145,18 +145,18 @@ class StGLImageRegion : public StGLWidget {
 
     struct {
 
-        StHandle<StEnumParam>    displayMode;   //!< StGLImageRegion::DisplayMode    - display mode
-        StHandle<StInt32Param>   displayRatio;  //!< StGLImageRegion::DisplayRatio   - display ratio
-        StHandle<StBoolParam>    ToHealAnamorphicRatio; //!< correct aspect ratio for 1080p/720p anamorphic pairs
-        StHandle<StInt32Param>   textureFilter; //!< StGLImageProgram::TextureFilter - texture filter;
-        StHandle<StFloat32Param> gamma;         //!< gamma correction coefficient
-        StHandle<StFloat32Param> brightness;    //!< brightness level
-        StHandle<StFloat32Param> saturation;    //!< saturation value
+        StHandle<StEnumParam>         DisplayMode;           //!< StGLImageRegion::DisplayMode    - display mode
+        StHandle<StEnumParam>         DisplayRatio;          //!< StGLImageRegion::DisplayRatio   - display ratio
+        StHandle<StBoolParamNamed>    ToHealAnamorphicRatio; //!< correct aspect ratio for 1080p/720p anamorphic pairs
+        StHandle<StEnumParam>         TextureFilter;         //!< StGLImageProgram::TextureFilter - texture filter;
+        StHandle<StFloat32Param>      gamma;                 //!< gamma correction coefficient
+        StHandle<StFloat32Param>      brightness;            //!< brightness level
+        StHandle<StFloat32Param>      saturation;            //!< saturation value
 
         // per file parameters
-        StHandle<StStereoParams> stereoFile;
-        StHandle<StBoolParam>    swapLR;        //!< reversion flag
-        StHandle<StInt32Param>   ViewMode;      //!< StStereoParams::ViewMode
+        StHandle<StStereoParams>      stereoFile;
+        StHandle<StBoolParamNamed>    SwapLR;                //!< reversion flag
+        StHandle<StInt32ParamNamed>   ViewMode;              //!< StStereoParams::ViewMode
 
     } params;
 

@@ -20,11 +20,11 @@
 
 namespace {
 
-    class ST_LOCAL StSwapLRParam : public StBoolParam {
+    class ST_LOCAL StSwapLRParam : public StBoolParamNamed {
 
             public:
 
-        StSwapLRParam() : StBoolParam(false) {}
+        StSwapLRParam() : StBoolParamNamed(false, stCString("swapLR"), stCString("SwapLR")) {}
 
         virtual bool getValue() const {
             return !myTrackedParams.isNull()
@@ -50,11 +50,11 @@ namespace {
 
     };
 
-    class ST_LOCAL StViewModeParam : public StInt32Param {
+    class ST_LOCAL StViewModeParam : public StInt32ParamNamed {
 
             public:
 
-        StViewModeParam() : StInt32Param(0) {}
+        StViewModeParam() : StInt32ParamNamed(0, stCString("viewMode"), stCString("View Mode")) {}
 
         virtual int32_t getValue() const {
             return myTrackedParams.isNull() ? 0 : myTrackedParams->ViewingMode;
@@ -105,20 +105,32 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
 #endif
   myIsInitialized(false),
   myHasVideoStream(false) {
-    params.displayMode = new StEnumParam(MODE_STEREO, "Stereo Output");
-    params.displayMode->changeValues().add("Stereo");        // MODE_STEREO
-    params.displayMode->changeValues().add("Left View");     // MODE_ONLY_LEFT
-    params.displayMode->changeValues().add("Right View");    // MODE_ONLY_RIGHT
-    params.displayMode->changeValues().add("Parallel Pair"); // MODE_PARALLEL
-    params.displayMode->changeValues().add("Cross-eyed");    // MODE_CROSSYED
+    params.DisplayMode = new StEnumParam(MODE_STEREO, stCString("viewStereoMode"), stCString("Stereo Output"));
+    params.DisplayMode->defineOption(MODE_STEREO,     stCString("Stereo"));
+    params.DisplayMode->defineOption(MODE_ONLY_LEFT,  stCString("Left View"));
+    params.DisplayMode->defineOption(MODE_ONLY_RIGHT, stCString("Right View"));
+    params.DisplayMode->defineOption(MODE_PARALLEL,   stCString("Parallel Pair"));
+    params.DisplayMode->defineOption(MODE_CROSSYED,   stCString("Cross-eyed"));
 
-    params.displayRatio  = new StInt32Param(RATIO_AUTO);
-    params.ToHealAnamorphicRatio = new StBoolParam(false);
-    params.textureFilter = new StInt32Param(StGLImageProgram::FILTER_LINEAR);
+    params.DisplayRatio = new StEnumParam(RATIO_AUTO, stCString("ratio"), stCString("Display Ratio"));
+    params.DisplayRatio->defineOption(RATIO_AUTO,  stCString("Auto"));
+    params.DisplayRatio->defineOption(RATIO_1_1,   stCString("1:1"));
+    params.DisplayRatio->defineOption(RATIO_4_3,   stCString("4:3"));
+    params.DisplayRatio->defineOption(RATIO_16_9,  stCString("16:9"));
+    params.DisplayRatio->defineOption(RATIO_16_10, stCString("16:10"));
+    params.DisplayRatio->defineOption(RATIO_221_1, stCString("2.21:1"));
+    params.DisplayRatio->defineOption(RATIO_5_4,   stCString("5:4"));
+
+    params.ToHealAnamorphicRatio = new StBoolParamNamed(false, stCString("toHealAnamorphic"), stCString("Heal Anamorphic Ratio"));
+    params.TextureFilter = new StEnumParam(StGLImageProgram::FILTER_LINEAR, stCString("viewTexFilter"), stCString("Texture Filter"));
+    params.TextureFilter->defineOption(StGLImageProgram::FILTER_NEAREST, stCString("Nearest"));
+    params.TextureFilter->defineOption(StGLImageProgram::FILTER_LINEAR,  stCString("Linear"));
+    params.TextureFilter->defineOption(StGLImageProgram::FILTER_BLEND,   stCString("Blend"));
+
     params.gamma      = myProgram.params.gamma;
     params.brightness = myProgram.params.brightness;
     params.saturation = myProgram.params.saturation;
-    params.swapLR   = new StSwapLRParam();
+    params.SwapLR   = new StSwapLRParam();
     params.ViewMode = new StViewModeParam();
 
 #ifdef ST_EXTRA_CONTROLS
@@ -131,7 +143,7 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
     anAction->setDefaultHotKey1(ST_VK_BACK);
     myActions.add(anAction);
 
-    anAction = new StActionBool(stCString("DoParamsSwapLR"), params.swapLR);
+    anAction = new StActionBool(stCString("DoParamsSwapLR"), params.SwapLR);
     anAction->setDefaultHotKey1(ST_VK_W);
     myActions.add(anAction);
 
@@ -275,7 +287,7 @@ void StGLImageRegion::stglUpdate(const StPointD_t& pointZo) {
     if(myIsInitialized) {
         myHasVideoStream = myTextureQueue->stglUpdateStTextures(getContext()) || myTextureQueue->hasConnectedStream();
         params.stereoFile = myTextureQueue->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE).getSource();
-        ((StSwapLRParam*   )params.swapLR  .access())->setTrackedHandle(params.stereoFile);
+        ((StSwapLRParam*   )params.SwapLR  .access())->setTrackedHandle(params.stereoFile);
         ((StViewModeParam* )params.ViewMode.access())->setTrackedHandle(params.stereoFile);
     }
 }
@@ -296,7 +308,7 @@ bool StGLImageRegion::stglInit() {
     }
 
     // setup texture filter
-    myTextureQueue->getQTexture().setMinMagFilter(aCtx, params.textureFilter->getValue() == StGLImageProgram::FILTER_NEAREST ? GL_NEAREST : GL_LINEAR);
+    myTextureQueue->getQTexture().setMinMagFilter(aCtx, params.TextureFilter->getValue() == StGLImageProgram::FILTER_NEAREST ? GL_NEAREST : GL_LINEAR);
 
     myIsInitialized = true;
     return myIsInitialized;
@@ -338,7 +350,7 @@ void StGLImageRegion::stglDraw(unsigned int theView) {
         aParams->setSwapLR(false);
     }
 
-    switch(params.displayMode->getValue()) {
+    switch(params.DisplayMode->getValue()) {
         case MODE_PARALLEL:
         case MODE_CROSSYED:
             stglDrawView(ST_DRAW_LEFT);
@@ -379,7 +391,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     StRectI_t aFrameRectPx = getRectPx();
 
     if(!aParams->isMono()) {
-        switch(params.displayMode->getValue()) {
+        switch(params.DisplayMode->getValue()) {
             case MODE_PARALLEL: {
                 if(theView == ST_DRAW_LEFT) {
                     aFrameRectPx.right() /= 2;
@@ -421,7 +433,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     StGLMatrix aModelMat;
     // data rectangle in the texture
     StGLVec4 aClampVec, aClampUV;
-    if(params.textureFilter->getValue() == StGLImageProgram::FILTER_NEAREST) {
+    if(params.TextureFilter->getValue() == StGLImageProgram::FILTER_NEAREST) {
         myTextureQueue->getQTexture().setMinMagFilter(aCtx, GL_NEAREST);
         //
         aClampVec.x() = 0.0f;
@@ -495,7 +507,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     }
 
     myProgram.setColorScale(aColorScale); // apply de-anaglyph color filter
-    StGLImageProgram::FragGetColor aColorGetter = params.textureFilter->getValue() == StGLImageProgram::FILTER_BLEND
+    StGLImageProgram::FragGetColor aColorGetter = params.TextureFilter->getValue() == StGLImageProgram::FILTER_BLEND
                                                 ? StGLImageProgram::FragGetColor_Blend
                                                 : StGLImageProgram::FragGetColor_Normal;
     switch(aViewMode) {
@@ -580,7 +592,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
 
             // check window ratio to fill whole image in normal zoom
             GLfloat aDispRatio = 1.0f;
-            switch(params.displayRatio->getValue()) {
+            switch(params.DisplayRatio->getValue()) {
                 case RATIO_1_1:   aDispRatio = 1.0f;  break;
                 case RATIO_4_3:   aDispRatio = 1.3333333333f; break;
                 case RATIO_16_9:  aDispRatio = 1.7777777778f; break;

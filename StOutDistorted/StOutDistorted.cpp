@@ -42,8 +42,6 @@ namespace {
 
     static const char ST_SETTING_DEVICE_ID[] = "deviceId";
     static const char ST_SETTING_WINDOWPOS[] = "windowPos";
-    static const char ST_SETTING_LAYOUT[]    = "layout";
-    static const char ST_SETTING_MONOCLONE[] = "monoClone";
     static const char ST_SETTING_MARGINS[]   = "margins";
     static const char ST_SETTING_WARP_COEF[] = "warpCoef";
     static const char ST_SETTING_CHROME_AB[] = "chromeAb";
@@ -247,18 +245,18 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
     }
 
     // Distortion parameters
-    params.MonoClone = new StBoolParamNamed(false, aLangMap.changeValueId(STTR_PARAMETER_MONOCLONE, "Show Mono in Stereo"));
-    mySettings->loadParam(ST_SETTING_MONOCLONE, params.MonoClone);
+    params.MonoClone = new StBoolParamNamed(false, stCString("monoClone"), aLangMap.changeValueId(STTR_PARAMETER_MONOCLONE, "Show Mono in Stereo"));
+    mySettings->loadParam(params.MonoClone);
 
     // Layout option
-    StHandle<StEnumParam> aLayoutParam = new StEnumParam(isHdmiPack ? LAYOUT_OVER_UNDER : LAYOUT_SIDE_BY_SIDE_ANAMORPH,
+    StHandle<StEnumParam> aLayoutParam = new StEnumParam(isHdmiPack ? LAYOUT_OVER_UNDER : LAYOUT_SIDE_BY_SIDE_ANAMORPH, stCString("layout"),
                                                          aLangMap.changeValueId(STTR_PARAMETER_LAYOUT, "Layout"));
     aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_SBS_ANAMORPH,       "Side-by-Side (Anamorph)"));
     aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_OVERUNDER_ANAMORPH, "Top-and-Bottom (Anamorph)"));
     aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_SBS,                "Side-by-Side"));
     aLayoutParam->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_OVERUNDER,          "Top-and-Bottom") + (isHdmiPack ? " [HDMI]" : ""));
     params.Layout = aLayoutParam;
-    mySettings->loadParam(ST_SETTING_LAYOUT, params.Layout);
+    mySettings->loadParam(params.Layout);
 
     // load window position
     if(isMovable()) {
@@ -341,8 +339,8 @@ void StOutDistorted::beforeClose() {
     aMargins.top()    = myBarMargins.top;
     aMargins.bottom() = myBarMargins.bottom;
 
-    mySettings->saveParam(ST_SETTING_LAYOUT,     params.Layout);
-    mySettings->saveParam(ST_SETTING_MONOCLONE,  params.MonoClone);
+    mySettings->saveParam(params.Layout);
+    mySettings->saveParam(params.MonoClone);
     mySettings->saveInt32Rect(ST_SETTING_MARGINS,   aMargins);
     mySettings->saveFloatVec4(ST_SETTING_WARP_COEF, myBarrelCoef);
     mySettings->saveFloatVec4(ST_SETTING_CHROME_AB, myChromAb);

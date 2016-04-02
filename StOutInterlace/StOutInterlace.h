@@ -157,8 +157,8 @@ class StOutInterlace : public StWindow {
 
     struct {
 
-        StHandle<StBoolParam> ToReverse; //!< configurable flag to reverse rows order
-        StHandle<StBoolParam> BindToMon; //!< flag to bind to monitor
+        StHandle<StBoolParamNamed> ToReverse; //!< configurable flag to reverse rows order
+        StHandle<StBoolParamNamed> BindToMon; //!< flag to bind to monitor
 
     } params;
 

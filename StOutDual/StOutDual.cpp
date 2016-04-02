@@ -26,8 +26,6 @@ namespace {
 
     static const char ST_SETTING_DEVICE_ID[] = "deviceId";
     static const char ST_SETTING_WINDOWPOS[] = "windowPos";
-    static const char ST_SETTING_SLAVE_ID[]  = "slaveId";
-    static const char ST_SETTING_MONOCLONE[] = "monoClone";
 
     // translation resources
     enum {
@@ -219,8 +217,8 @@ StOutDual::StOutDual(const StHandle<StResourceManager>& theResMgr,
     myDevices.add(aDevMirr);
 
     // Slave Monitor option
-    StHandle<StEnumParam> aSlaveMon = new StEnumParam(1, aLangMap.changeValueId(STTR_PARAMETER_SLAVE_ID, "Slave Monitor"));
-    mySettings->loadParam(ST_SETTING_SLAVE_ID, aSlaveMon);
+    StHandle<StEnumParam> aSlaveMon = new StEnumParam(1, stCString("slaveId"), aLangMap.changeValueId(STTR_PARAMETER_SLAVE_ID, "Slave Monitor"));
+    mySettings->loadParam(aSlaveMon);
     size_t aMonCount = stMax(aMonitors.size(), size_t(2), size_t(aSlaveMon->getValue() + 1));
     for(size_t aMonId = 0; aMonId < aMonCount; ++aMonId) {
         StString aName = StString("Monitor #") + aMonId;
@@ -234,8 +232,8 @@ StOutDual::StOutDual(const StHandle<StResourceManager>& theResMgr,
     aSlaveMon->signals.onChanged.connect(this, &StOutDual::doSlaveMon);
     params.SlaveMonId = aSlaveMon;
 
-    params.MonoClone = new StBoolParamNamed(false, aLangMap.changeValueId(STTR_PARAMETER_MONOCLONE, "Show Mono in Stereo"));
-    mySettings->loadParam(ST_SETTING_MONOCLONE, params.MonoClone);
+    params.MonoClone = new StBoolParamNamed(false, stCString("monoClone"), aLangMap.changeValueId(STTR_PARAMETER_MONOCLONE, "Show Mono in Stereo"));
+    mySettings->loadParam(params.MonoClone);
 
     // load window position
     if(isMovable()) {
@@ -286,8 +284,8 @@ void StOutDual::beforeClose() {
     if(isMovable() && myWasUsed) {
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
     }
-    mySettings->saveParam(ST_SETTING_SLAVE_ID,  params.SlaveMonId);
-    mySettings->saveParam(ST_SETTING_MONOCLONE, params.MonoClone);
+    mySettings->saveParam(params.SlaveMonId);
+    mySettings->saveParam(params.MonoClone);
     mySettings->saveInt32(ST_SETTING_DEVICE_ID, myDevice);
     mySettings->flush();
 }

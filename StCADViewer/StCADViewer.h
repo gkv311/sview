@@ -137,15 +137,15 @@ class StCADViewer : public StApplication {
 
     struct {
 
-        StHandle<StBoolParam>    IsFullscreen;    //!< fullscreen state
-        StHandle<StBoolParam>    ToShowPlayList;  //!< display playlist
-        StHandle<StBoolParam>    ToShowFps;       //!< display FPS meter
-        StHandle<StBoolParam>    ToShowTrihedron; //!< show trihedron flag
-        StHandle<StEnumParam>    ProjectMode;     //!< projection mode
-        StHandle<StFloat32Param> ZFocus;          //!< stereoscopic ZFocus value
-        StHandle<StFloat32Param> StereoIOD;       //!< stereoscopic IOD value
-        StString                 LastFolder;      //!< laster folder used to open / save file
-        int                      TargetFps;       //!< limit or not rendering FPS
+        StHandle<StBoolParamNamed>    IsFullscreen;    //!< fullscreen state
+        StHandle<StBoolParamNamed>    ToShowPlayList;  //!< display playlist
+        StHandle<StBoolParamNamed>    ToShowFps;       //!< display FPS meter
+        StHandle<StBoolParamNamed>    ToShowTrihedron; //!< show trihedron flag
+        StHandle<StEnumParam>         ProjectMode;     //!< projection mode
+        StHandle<StFloat32Param>      ZFocus;          //!< stereoscopic ZFocus value
+        StHandle<StFloat32Param>      StereoIOD;       //!< stereoscopic IOD value
+        StString                      LastFolder;      //!< laster folder used to open / save file
+        int                           TargetFps;       //!< limit or not rendering FPS
 
     } params;
 

@@ -30,10 +30,8 @@ namespace {
 
     static const char ST_OUT_PLUGIN_NAME[] = "StOutPageFlip";
 
-    static const char ST_SETTING_ADVANCED[]   = "advanced";
     static const char ST_SETTING_WINDOWPOS[]  = "windowPos";
     static const char ST_SETTING_DEVICE_ID[]  = "deviceId";
-    static const char ST_SETTING_QUADBUFFER[] = "quadBufferType";
 }
 
 StOutPageFlip::StOutDirect3D::StOutDirect3D()
@@ -508,7 +506,8 @@ StOutPageFlip::StOutPageFlip(const StHandle<StResourceManager>& theResMgr,
     }
 
     // Quad Buffer type option
-    params.QuadBuffer = new StEnumParam(QUADBUFFER_HARD_OPENGL, myLangMap.changeValueId(STTR_PARAMETER_QBUFFER_TYPE, "Quad Buffer type"));
+    params.QuadBuffer = new StEnumParam(QUADBUFFER_HARD_OPENGL, stCString("quadBufferType"),
+                                        myLangMap.changeValueId(STTR_PARAMETER_QBUFFER_TYPE, "Quad Buffer type"));
     params.QuadBuffer->signals.onChanged.connect(this, &StOutPageFlip::doSetQuadBuffer);
     params.QuadBuffer->changeValues().add(myLangMap.changeValueId(STTR_PARAMETER_QB_HARDWARE, "OpenGL Hardware"));
 #ifdef _WIN32
@@ -532,12 +531,12 @@ StOutPageFlip::StOutPageFlip(const StHandle<StResourceManager>& theResMgr,
 #endif
 
     // Show Extra option
-    params.ToShowExtra = new StBoolParamNamed(false, "Show Extra Options");
+    params.ToShowExtra = new StBoolParamNamed(false, stCString("advanced"), stCString("Show Extra Options"));
     params.ToShowExtra->signals.onChanged.connect(this, &StOutPageFlip::doShowExtra);
-    mySettings->loadParam(ST_SETTING_ADVANCED, params.ToShowExtra);
+    mySettings->loadParam(params.ToShowExtra);
 
     // load Quad Buffer type
-    if(!mySettings->loadParam(ST_SETTING_QUADBUFFER, params.QuadBuffer)) {
+    if(!mySettings->loadParam(params.QuadBuffer)) {
     #ifdef _WIN32
         if(!hasQuadBufferGl
          && hasQuadBufferD3D) {
@@ -577,9 +576,9 @@ void StOutPageFlip::beforeClose() {
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
     }
     mySettings->saveInt32(ST_SETTING_DEVICE_ID,  myDevice);
-    mySettings->saveParam(ST_SETTING_ADVANCED,   params.ToShowExtra);
+    mySettings->saveParam(params.ToShowExtra);
     if(myWasUsed) {
-        mySettings->saveParam(ST_SETTING_QUADBUFFER, params.QuadBuffer);
+        mySettings->saveParam(params.QuadBuffer);
     }
     mySettings->flush();
 }

@@ -59,47 +59,17 @@ using namespace StMoviePlayerStrings;
 
 namespace {
 
-    static const char ST_SETTING_FPSTARGET[]     = "fpsTarget";
-    static const char ST_SETTING_SRCFORMAT[]     = "srcFormat";
     static const char ST_SETTING_LAST_FOLDER[]   = "lastFolder";
-    static const char ST_SETTING_OPENAL_DEVICE[] = "alDevice";
     static const char ST_SETTING_RECENT_FILES[]  = "recent";
-    static const char ST_SETTING_SHOW_LIST[]     = "showPlaylist";
-    static const char ST_SETTING_TRACK_HEAD[]    = "toTrackHead";
-    static const char ST_SETTING_SHOW_FPS[]      = "toShowFps";
-    static const char ST_SETTING_MOBILE_UI[]     = "isMobileUI";
-    static const char ST_SETTING_LIMIT_FPS[]     = "toLimitFps";
-    static const char ST_SETTING_GPU_DECODING[]  = "gpuDecoding";
-    static const char ST_SETTING_OPENJPEG[]      = "openJpeg";
-    static const char ST_SETTING_VSYNC[]         = "vsync";
 
-    static const char ST_SETTING_SCALE_ADJUST[]  = "scaleAdjust";
-    static const char ST_SETTING_SCALE_FORCE2X[] = "scale2X";
-    static const char ST_SETTING_SUBTITLES_PLACE[]="subsPlace";
     static const char ST_SETTING_SUBTITLES_TOPDY[]="subsTopDY";
     static const char ST_SETTING_SUBTITLES_BOTTOMDY[]="subsBottomDY";
     static const char ST_SETTING_SUBTITLES_SIZE[]= "subsSize";
     static const char ST_SETTING_SUBTITLES_PARALLAX[] = "subsParallax";
-    static const char ST_SETTING_SUBTITLES_PARSER[] = "subsParser";
-    static const char ST_SETTING_SEARCH_SUBS[]   = "toSearchSubs";
-    static const char ST_SETTING_FULLSCREEN[]    = "fullscreen";
     static const char ST_SETTING_VIEWMODE[]      = "viewMode";
-    static const char ST_SETTING_STEREO_MODE[]   = "viewStereoMode";
-    static const char ST_SETTING_TEXFILTER[]     = "viewTexFilter";
     static const char ST_SETTING_GAMMA[]         = "viewGamma";
-    static const char ST_SETTING_SHUFFLE[]       = "shuffle";
-    static const char ST_SETTING_LOOP_SINGLE[]   = "loopSingle";
-    static const char ST_SETTING_GLOBAL_MKEYS[]  = "globalMediaKeys";
-    static const char ST_SETTING_RATIO[]         = "ratio";
-    static const char ST_SETTING_HEAL_ANAMORPHIC[] = "toHealAnamorphic";
     static const char ST_SETTING_UPDATES_LAST_CHECK[] = "updatesLastCheck";
-    static const char ST_SETTING_UPDATES_INTERVAL[]   = "updatesInterval";
-    static const char ST_SETTING_SAVE_IMG_TYPE[] = "snapImgType";
-    static const char ST_SETTING_EXPERIMENTAL[]  = "experimental";
 
-    static const char ST_SETTING_WEBUI_ON[]      = "webuiOn";
-    static const char ST_SETTING_WEBUI_PORT[]    = "webuiPort";
-    static const char ST_SETTING_WEBUI_ERRORS[]  = "webuiShowErrors";
     static const char ST_SETTING_WEBUI_CMDPORT[] = "webuiCmdPort";
 
     static const char ST_ARGUMENT_FILE_LEFT[]  = "left";
@@ -108,8 +78,6 @@ namespace {
     static const char ST_ARGUMENT_FILE_PAUSE[] = "pause";
     static const char ST_ARGUMENT_FILE_PAUSED[]= "paused";
     static const char ST_ARGUMENT_BENCHMARK[]  = "benchmark";
-    static const char ST_ARGUMENT_SHOW_MENU[]  = "toShowMenu";
-    static const char ST_ARGUMENT_SHOW_TOPBAR[]= "toShowTopbar";
     static const char ST_ARGUMENT_MONITOR[]    = "monitorId";
     static const char ST_ARGUMENT_WINLEFT[]    = "windowLeft";
     static const char ST_ARGUMENT_WINTOP[]     = "windowTop";
@@ -136,7 +104,7 @@ namespace {
 }
 
 StALDeviceParam::StALDeviceParam()
-: StInt32Param(0) {
+: StInt32ParamNamed(0, stCString("alDevice"), stCString("OpenAL Device")) {
     initList();
 }
 
@@ -473,18 +441,21 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     StMoviePlayerStrings::loadDefaults(*myLangMap);
     myTitle = "sView - Movie Player";
 
-    params.ScaleAdjust      = new StInt32Param(StGLRootWidget::ScaleAdjust_Normal);
-    mySettings->loadParam (ST_SETTING_SCALE_ADJUST, params.ScaleAdjust);
+    params.ScaleAdjust = new StEnumParam(StGLRootWidget::ScaleAdjust_Normal, stCString("scaleAdjust"), tr(MENU_HELP_SCALE));
+    params.ScaleAdjust->defineOption(StGLRootWidget::ScaleAdjust_Small,  stCString("Small"));
+    params.ScaleAdjust->defineOption(StGLRootWidget::ScaleAdjust_Normal, stCString("Normal"));
+    params.ScaleAdjust->defineOption(StGLRootWidget::ScaleAdjust_Big,    stCString("Big"));
+    mySettings->loadParam(params.ScaleAdjust);
     params.ScaleAdjust->signals.onChanged = stSlot(this, &StMoviePlayer::doScaleGui);
     params.ScaleHiDPI       = new StFloat32Param(1.0f,       // initial value
                                                  0.5f, 3.0f, // min, max values
                                                  1.0f,       // default value
                                                  1.0f,       // incremental step
                                                  0.001f);    // equality tolerance
-    params.ScaleHiDPI2X     = new StBoolParam(false);
-    mySettings->loadParam (ST_SETTING_SCALE_FORCE2X, params.ScaleHiDPI2X);
+    params.ScaleHiDPI2X     = new StBoolParamNamed(false, stCString("scale2X"), tr(MENU_HELP_SCALE_HIDPI2X));
+    mySettings->loadParam(params.ScaleHiDPI2X);
     params.ScaleHiDPI2X->signals.onChanged = stSlot(this, &StMoviePlayer::doScaleHiDPI);
-    params.SubtitlesPlace   = new StInt32Param(ST_VCORNER_BOTTOM);
+    params.SubtitlesPlace   = new StInt32ParamNamed(ST_VCORNER_BOTTOM, stCString("subsPlace"), stCString("Subtitles Placement"));
     params.SubtitlesTopDY   = new StFloat32Param(100.0f,      // initial value
                                                  0.0f, 400.0f,// min, max values
                                                  100.0f,      // default value
@@ -505,8 +476,8 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
                                                  0.0f,        // default value
                                                  1.0f,        // incremental step
                                                  0.1f);       // equality tolerance
-    params.ToSearchSubs = new StBoolParam(true);
-    params.SubtitlesParser = new StEnumParam(1, tr(MENU_SUBTITLES_PARSER));
+    params.ToSearchSubs = new StBoolParamNamed(true, stCString("toSearchSubs"), stCString("Search additional tracks"));
+    params.SubtitlesParser = new StEnumParam(1, stCString("subsParser"), tr(MENU_SUBTITLES_PARSER));
     params.SubtitlesParser->changeValues().add(tr(MENU_SUBTITLES_PLAIN_TEXT));
     params.SubtitlesParser->changeValues().add(tr(MENU_SUBTITLES_LITE_HTML));
 
@@ -518,46 +489,47 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
                                            1.0f, // step
                                            0.1f);
     params.AudioGain->signals.onChanged = stSlot(this, &StMoviePlayer::doSetAudioVolume);
-    params.AudioMute    = new StBoolParam(false);
+    params.AudioMute    = new StBoolParamNamed(false, stCString("muteAudio"), stCString("Mute Audio"));
     params.AudioMute->signals.onChanged = stSlot(this, &StMoviePlayer::doSetAudioMute);
     params.AudioDelay   = new StFloat32Param(0.0f, -5.0f, 5.0f, 0.0f, 0.100f);
     params.AudioDelay->signals.onChanged = stSlot(this, &StMoviePlayer::doSetAudioDelay);
 
-    params.isFullscreen = new StBoolParam(false);
-    params.isFullscreen->signals.onChanged = stSlot(this, &StMoviePlayer::doFullscreen);
-    params.toRestoreRatio   = new StBoolParam(false);
-    params.isShuffle        = new StBoolParam(false);
-    params.ToLoopSingle     = new StBoolParam(false);
-    params.areGlobalMKeys   = new StBoolParam(true);
-    params.checkUpdatesDays = new StInt32Param(7);
-    params.srcFormat        = new StInt32Param(StFormat_AUTO);
-    params.srcFormat->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchSrcFormat);
-    params.ToShowPlayList   = new StBoolParam(false);
+    params.IsFullscreen     = new StBoolParamNamed(false, stCString("fullscreen"),      tr(MENU_VIEW_FULLSCREEN));
+    params.IsFullscreen->signals.onChanged = stSlot(this, &StMoviePlayer::doFullscreen);
+    params.ToRestoreRatio   = new StBoolParamNamed(false, stCString("toRestoreRatio"),  tr(MENU_VIEW_RATIO_KEEP_ON_RESTART));
+    params.IsShuffle        = new StBoolParamNamed(false, stCString("shuffle"),         tr(MENU_MEDIA_SHUFFLE));
+    params.ToLoopSingle     = new StBoolParamNamed(false, stCString("loopSingle"),      stCString("Loop single item"));
+    params.AreGlobalMKeys   = new StBoolParamNamed(true,  stCString("globalMediaKeys"), stCString("Use Multimedia Keys"));
+    params.CheckUpdatesDays = new StInt32ParamNamed(7, stCString("updatesInterval"), tr(MENU_HELP_UPDATES));
+    params.SrcStereoFormat  = new StInt32ParamNamed(StFormat_AUTO, stCString("srcFormat"), tr(MENU_MEDIA_SRC_FORMAT));
+    params.SrcStereoFormat->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchSrcFormat);
+    params.ToShowPlayList   = new StBoolParamNamed(false, stCString("showPlaylist"), tr(VIDEO_LIST));
     params.ToShowPlayList->signals.onChanged = stSlot(this, &StMoviePlayer::doShowPlayList);
-    params.ToTrackHead = new StBoolParamNamed(true,  tr(MENU_VIEW_TRACK_HEAD));
-    params.ToShowFps   = new StBoolParamNamed(false, tr(MENU_FPS_METER));
-    params.ToShowMenu  = new StBoolParamNamed(true, "Show main menu");
-    params.ToShowTopbar= new StBoolParamNamed(true, "Show top toolbar");
-    params.IsMobileUI  = new StBoolParamNamed(StWindow::isMobile(), "Mobile UI");
+    params.ToTrackHead = new StBoolParamNamed(true,  stCString("toTrackHead"),  tr(MENU_VIEW_TRACK_HEAD));
+    params.ToShowFps   = new StBoolParamNamed(false, stCString("toShowFps"),    tr(MENU_FPS_METER));
+    params.ToShowMenu  = new StBoolParamNamed(true,  stCString("toShowMenu"),   stCString("Show main menu"));
+    params.ToShowTopbar= new StBoolParamNamed(true,  stCString("toShowTopbar"), stCString("Show top toolbar"));
+    params.IsMobileUI  = new StBoolParamNamed(StWindow::isMobile(), stCString("isMobileUI"), stCString("Mobile UI"));
     params.IsMobileUI->signals.onChanged = stSlot(this, &StMoviePlayer::doScaleHiDPI);
-    params.IsVSyncOn   = new StBoolParam(true);
+    params.IsVSyncOn   = new StBoolParamNamed(true, stCString("vsync"),         tr(MENU_FPS_VSYNC));
     params.IsVSyncOn->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchVSync);
     StApplication::params.VSyncMode->setValue(StGLContext::VSync_ON);
-    params.ToLimitFps       = new StBoolParam(true);
-    params.StartWebUI       = new StEnumParam(WEBUI_OFF, "Web UI start option");
+    params.ToLimitFps       = new StBoolParamNamed(true, stCString("toLimitFps"), tr(MENU_FPS_BOUND));
+    params.StartWebUI       = new StEnumParam(WEBUI_OFF, stCString("webuiOn"), stCString("Web UI start option"));
     params.StartWebUI->changeValues().add(tr(MENU_MEDIA_WEBUI_OFF));
     params.StartWebUI->changeValues().add(tr(MENU_MEDIA_WEBUI_ONCE));
     params.StartWebUI->changeValues().add(tr(MENU_MEDIA_WEBUI_ON));
-    params.ToPrintWebErrors = new StBoolParam(true);
-    params.IsLocalWebUI     = new StBoolParam(false);
-    params.WebUIPort        = new StInt32Param(8080);
+    params.ToPrintWebErrors = new StBoolParamNamed(true,  stCString("webuiShowErrors"), tr(MENU_MEDIA_WEBUI_SHOW_ERRORS));
+    params.IsLocalWebUI     = new StBoolParamNamed(false, stCString("isLocalWebUI"), stCString("Local WebUI"));
+    params.WebUIPort        = new StInt32ParamNamed(8080, stCString("webuiPort"), stCString("WebUI Port"));
     params.audioStream = new StInt32Param(-1);
     params.audioStream->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchAudioStream);
     params.subtitlesStream = new StInt32Param(-1);
     params.subtitlesStream->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchSubtitlesStream);
     params.blockSleeping = new StInt32Param(StMoviePlayer::BLOCK_SLEEP_PLAYBACK);
-    params.ToShowExtra   = new StBoolParam(false);
-    params.TargetFps = 2; // set rendering FPS as twice as average video FPS
+    params.ToShowExtra   = new StBoolParamNamed(false, stCString("experimental"), tr(MENU_HELP_EXPERIMENTAL));
+    // set rendering FPS as twice as average video FPS
+    params.TargetFps = new StInt32ParamNamed(2, stCString("fpsTarget"), stCString("FPS Target"));
 
 #if defined(_WIN32)
     const StCString aGpuAcc = stCString(" (DXVA2)");
@@ -568,52 +540,52 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
 #else
     const StCString aGpuAcc = stCString("");
 #endif
-    params.UseGpu = new StBoolParamNamed(false, tr(MENU_MEDIA_GPU_DECODING) + aGpuAcc);
+    params.UseGpu = new StBoolParamNamed(false, stCString("gpuDecoding"), tr(MENU_MEDIA_GPU_DECODING) + aGpuAcc);
     // OpenJPEG seems to be faster then built-in jpeg2000 decoder
-    params.UseOpenJpeg = new StBoolParamNamed(true, "Use OpenJPEG instead of jpeg2000");
+    params.UseOpenJpeg = new StBoolParamNamed(true, stCString("openJpeg"), stCString("Use OpenJPEG instead of jpeg2000"));
 
-    params.SnapshotImgType = new StInt32Param(StImageFile::ST_TYPE_JPEG);
+    params.SnapshotImgType = new StInt32ParamNamed(StImageFile::ST_TYPE_JPEG, stCString("snapImgType"), stCString("Snapshot Image Format"));
 
     // load settings
-    mySettings->loadInt32 (ST_SETTING_FPSTARGET,          params.TargetFps);
+    mySettings->loadParam (params.TargetFps);
     mySettings->loadString(ST_SETTING_LAST_FOLDER,        params.lastFolder);
     mySettings->loadInt32 (ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
-    mySettings->loadParam (ST_SETTING_UPDATES_INTERVAL,   params.checkUpdatesDays);
-    mySettings->loadParam (ST_SETTING_SHUFFLE,            params.isShuffle);
-    mySettings->loadParam (ST_SETTING_LOOP_SINGLE,        params.ToLoopSingle);
-    mySettings->loadParam (ST_SETTING_GLOBAL_MKEYS,       params.areGlobalMKeys);
-    mySettings->loadParam (ST_SETTING_SHOW_LIST,          params.ToShowPlayList);
-    mySettings->loadParam (ST_SETTING_SUBTITLES_PLACE,    params.SubtitlesPlace);
+    mySettings->loadParam (params.CheckUpdatesDays);
+    mySettings->loadParam (params.IsShuffle);
+    mySettings->loadParam (params.ToLoopSingle);
+    mySettings->loadParam (params.AreGlobalMKeys);
+    mySettings->loadParam (params.ToShowPlayList);
+    mySettings->loadParam (params.SubtitlesPlace);
     mySettings->loadParam (ST_SETTING_SUBTITLES_TOPDY,    params.SubtitlesTopDY);
     mySettings->loadParam (ST_SETTING_SUBTITLES_BOTTOMDY, params.SubtitlesBottomDY);
     mySettings->loadParam (ST_SETTING_SUBTITLES_SIZE,     params.SubtitlesSize);
     mySettings->loadParam (ST_SETTING_SUBTITLES_PARALLAX, params.SubtitlesParallax);
-    mySettings->loadParam (ST_SETTING_SUBTITLES_PARSER,   params.SubtitlesParser);
-    mySettings->loadParam (ST_SETTING_SEARCH_SUBS,        params.ToSearchSubs);
+    mySettings->loadParam (params.SubtitlesParser);
+    mySettings->loadParam (params.ToSearchSubs);
 
-    myToCheckPoorOrient = !mySettings->loadParam(ST_SETTING_TRACK_HEAD, params.ToTrackHead);
-    mySettings->loadParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
-    mySettings->loadParam (ST_SETTING_MOBILE_UI,          params.IsMobileUI);
-    mySettings->loadParam (ST_SETTING_VSYNC,              params.IsVSyncOn);
-    mySettings->loadParam (ST_SETTING_LIMIT_FPS,          params.ToLimitFps);
-    mySettings->loadParam (ST_SETTING_GPU_DECODING,       params.UseGpu);
-    mySettings->loadParam (ST_SETTING_OPENJPEG,           params.UseOpenJpeg);
+    myToCheckPoorOrient = !mySettings->loadParam(params.ToTrackHead);
+    mySettings->loadParam (params.ToShowFps);
+    mySettings->loadParam (params.IsMobileUI);
+    mySettings->loadParam (params.IsVSyncOn);
+    mySettings->loadParam (params.ToLimitFps);
+    mySettings->loadParam (params.UseGpu);
+    mySettings->loadParam (params.UseOpenJpeg);
 
-    mySettings->loadParam (ST_SETTING_WEBUI_ON,           params.StartWebUI);
-    mySettings->loadParam (ST_SETTING_WEBUI_PORT,         params.WebUIPort);
-    mySettings->loadParam (ST_SETTING_WEBUI_ERRORS,       params.ToPrintWebErrors);
-    mySettings->loadParam (ST_SETTING_SAVE_IMG_TYPE,      params.SnapshotImgType);
-    mySettings->loadParam (ST_SETTING_EXPERIMENTAL,       params.ToShowExtra);
+    mySettings->loadParam (params.StartWebUI);
+    mySettings->loadParam (params.WebUIPort);
+    mySettings->loadParam (params.ToPrintWebErrors);
+    mySettings->loadParam (params.SnapshotImgType);
+    mySettings->loadParam (params.ToShowExtra);
     if(params.StartWebUI->getValue() == WEBUI_ONCE) {
         params.StartWebUI->setValue(WEBUI_OFF);
     }
     params.StartWebUI->signals.onChanged += stSlot(this, &StMoviePlayer::doSwitchWebUI);
 
     StString aSavedALDevice;
-    mySettings->loadString(ST_SETTING_OPENAL_DEVICE,      aSavedALDevice);
+    mySettings->loadString(params.alDevice->getKey(), aSavedALDevice);
     params.alDevice->init(aSavedALDevice);
 
-    params.isShuffle   ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchShuffle);
+    params.IsShuffle   ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchShuffle);
     params.ToLoopSingle->signals.onChanged.connect(this, &StMoviePlayer::doSwitchLoopSingle);
     params.alDevice    ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchAudioDevice);
 
@@ -646,22 +618,22 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     anAction = new StActionIntSlot(stCString("DoQuit"), stSlot(this, &StMoviePlayer::doQuit), 0);
     addAction(Action_Quit, anAction, ST_VK_ESCAPE);
 
-    anAction = new StActionBool(stCString("DoFullscreen"), params.isFullscreen);
+    anAction = new StActionBool(stCString("DoFullscreen"), params.IsFullscreen);
     addAction(Action_Fullscreen, anAction, ST_VK_F, ST_VK_RETURN);
 
     anAction = new StActionBool(stCString("DoShowFPS"), params.ToShowFps);
     addAction(Action_ShowFps, anAction, ST_VK_F12);
 
-    anAction = new StActionIntValue(stCString("DoSrcAuto"), params.srcFormat, StFormat_AUTO);
+    anAction = new StActionIntValue(stCString("DoSrcAuto"), params.SrcStereoFormat, StFormat_AUTO);
     addAction(Action_SrcAuto, anAction, ST_VK_A);
 
-    anAction = new StActionIntValue(stCString("DoSrcMono"), params.srcFormat, StFormat_Mono);
+    anAction = new StActionIntValue(stCString("DoSrcMono"), params.SrcStereoFormat, StFormat_Mono);
     addAction(Action_SrcMono, anAction, ST_VK_M);
 
-    anAction = new StActionIntValue(stCString("DoSrcOverUnder"), params.srcFormat, StFormat_TopBottom_LR);
+    anAction = new StActionIntValue(stCString("DoSrcOverUnder"), params.SrcStereoFormat, StFormat_TopBottom_LR);
     addAction(Action_SrcOverUnderLR, anAction, ST_VK_O);
 
-    anAction = new StActionIntValue(stCString("DoSrcSideBySide"), params.srcFormat, StFormat_SideBySide_RL);
+    anAction = new StActionIntValue(stCString("DoSrcSideBySide"), params.SrcStereoFormat, StFormat_SideBySide_RL);
     addAction(Action_SrcSideBySideRL, anAction, ST_VK_S);
 
     anAction = new StActionIntSlot(stCString("DoFileInfo"), stSlot(this, &StMoviePlayer::doAboutFile), 0);
@@ -779,54 +751,53 @@ void StMoviePlayer::saveGuiParams() {
         return;
     }
 
-    mySettings->saveParam (ST_SETTING_STEREO_MODE, myGUI->myImage->params.displayMode);
+    mySettings->saveParam (myGUI->myImage->params.DisplayMode);
     mySettings->saveInt32 (ST_SETTING_GAMMA,       stRound(100.0f * myGUI->myImage->params.gamma->getValue()));
-    mySettings->saveParam (ST_SETTING_HEAL_ANAMORPHIC, myGUI->myImage->params.ToHealAnamorphicRatio);
-    if(params.toRestoreRatio->getValue()) {
-        mySettings->saveParam(ST_SETTING_RATIO,    myGUI->myImage->params.displayRatio);
-    } else {
-        mySettings->saveInt32(ST_SETTING_RATIO,    StGLImageRegion::RATIO_AUTO);
-    }
-    mySettings->saveParam (ST_SETTING_TEXFILTER,   myGUI->myImage->params.textureFilter);
+    mySettings->saveParam (myGUI->myImage->params.ToHealAnamorphicRatio);
+    mySettings->saveInt32(myGUI->myImage->params.DisplayRatio->getKey(),
+                          params.ToRestoreRatio->getValue()
+                        ? myGUI->myImage->params.DisplayRatio->getValue()
+                        : StGLImageRegion::RATIO_AUTO);
+    mySettings->saveParam (myGUI->myImage->params.TextureFilter);
 }
 
 void StMoviePlayer::saveAllParams() {
     saveGuiParams();
     if(!myGUI.isNull()) {
-        mySettings->saveParam (ST_SETTING_SCALE_ADJUST,       params.ScaleAdjust);
-        mySettings->saveParam (ST_SETTING_SCALE_FORCE2X,      params.ScaleHiDPI2X);
-        mySettings->saveParam (ST_SETTING_SUBTITLES_PLACE,    params.SubtitlesPlace);
+        mySettings->saveParam (params.ScaleAdjust);
+        mySettings->saveParam (params.ScaleHiDPI2X);
+        mySettings->saveParam (params.SubtitlesPlace);
         mySettings->saveParam (ST_SETTING_SUBTITLES_TOPDY,    params.SubtitlesTopDY);
         mySettings->saveParam (ST_SETTING_SUBTITLES_BOTTOMDY, params.SubtitlesBottomDY);
         mySettings->saveParam (ST_SETTING_SUBTITLES_SIZE,     params.SubtitlesSize);
         mySettings->saveParam (ST_SETTING_SUBTITLES_PARALLAX, params.SubtitlesParallax);
-        mySettings->saveParam (ST_SETTING_SUBTITLES_PARSER,   params.SubtitlesParser);
-        mySettings->saveParam (ST_SETTING_SEARCH_SUBS,        params.ToSearchSubs);
-        mySettings->saveInt32 (ST_SETTING_FPSTARGET,          params.TargetFps);
-        mySettings->saveString(ST_SETTING_OPENAL_DEVICE,      params.alDevice->getUtfTitle());
+        mySettings->saveParam (params.SubtitlesParser);
+        mySettings->saveParam (params.ToSearchSubs);
+        mySettings->saveParam (params.TargetFps);
+        mySettings->saveString(params.alDevice->getKey(),     params.alDevice->getUtfTitle());
         mySettings->saveInt32 (ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
-        mySettings->saveParam (ST_SETTING_UPDATES_INTERVAL,   params.checkUpdatesDays);
-        mySettings->saveParam (ST_SETTING_SRCFORMAT,          params.srcFormat);
-        mySettings->saveParam (ST_SETTING_SHUFFLE,            params.isShuffle);
-        mySettings->saveParam (ST_SETTING_LOOP_SINGLE,        params.ToLoopSingle);
-        mySettings->saveParam (ST_SETTING_GLOBAL_MKEYS,       params.areGlobalMKeys);
-        mySettings->saveParam (ST_SETTING_SHOW_LIST,          params.ToShowPlayList);
+        mySettings->saveParam (params.CheckUpdatesDays);
+        mySettings->saveParam (params.SrcStereoFormat);
+        mySettings->saveParam (params.IsShuffle);
+        mySettings->saveParam (params.ToLoopSingle);
+        mySettings->saveParam (params.AreGlobalMKeys);
+        mySettings->saveParam (params.ToShowPlayList);
 
-        mySettings->saveParam (ST_SETTING_TRACK_HEAD,         params.ToTrackHead);
-        mySettings->saveParam (ST_SETTING_SHOW_FPS,           params.ToShowFps);
-        mySettings->saveParam (ST_SETTING_MOBILE_UI,          params.IsMobileUI);
-        mySettings->saveParam (ST_SETTING_VSYNC,              params.IsVSyncOn);
-        mySettings->saveParam (ST_SETTING_LIMIT_FPS,          params.ToLimitFps);
-        mySettings->saveParam (ST_SETTING_GPU_DECODING,       params.UseGpu);
-        mySettings->saveParam (ST_SETTING_OPENJPEG,           params.UseOpenJpeg);
+        mySettings->saveParam (params.ToTrackHead);
+        mySettings->saveParam (params.ToShowFps);
+        mySettings->saveParam (params.IsMobileUI);
+        mySettings->saveParam (params.IsVSyncOn);
+        mySettings->saveParam (params.ToLimitFps);
+        mySettings->saveParam (params.UseGpu);
+        mySettings->saveParam (params.UseOpenJpeg);
 
-        mySettings->saveParam (ST_SETTING_WEBUI_ON,           params.StartWebUI);
+        mySettings->saveParam (params.StartWebUI);
         if(!params.IsLocalWebUI->getValue()) {
-            mySettings->saveParam (ST_SETTING_WEBUI_PORT,     params.WebUIPort);
+            mySettings->saveParam(params.WebUIPort);
         }
-        mySettings->saveParam (ST_SETTING_WEBUI_ERRORS,       params.ToPrintWebErrors);
-        mySettings->saveParam (ST_SETTING_SAVE_IMG_TYPE,      params.SnapshotImgType);
-        mySettings->saveParam (ST_SETTING_EXPERIMENTAL,       params.ToShowExtra);
+        mySettings->saveParam (params.ToPrintWebErrors);
+        mySettings->saveParam (params.SnapshotImgType);
+        mySettings->saveParam (params.ToShowExtra);
 
         // store hot-keys
         for(std::map< int, StHandle<StAction> >::iterator anIter = myActions.begin();
@@ -883,11 +854,11 @@ bool StMoviePlayer::createGui(StHandle<StGLTextureQueue>& theTextureQueue,
     theTextureQueue->setDeviceCaps(myContext->getDeviceCaps());
 
     // load settings
-    mySettings->loadParam (ST_SETTING_STEREO_MODE, myGUI->myImage->params.displayMode);
-    mySettings->loadParam (ST_SETTING_TEXFILTER,   myGUI->myImage->params.textureFilter);
-    mySettings->loadParam (ST_SETTING_RATIO,       myGUI->myImage->params.displayRatio);
-    mySettings->loadParam (ST_SETTING_HEAL_ANAMORPHIC, myGUI->myImage->params.ToHealAnamorphicRatio);
-    params.toRestoreRatio->setValue(myGUI->myImage->params.displayRatio->getValue() != StGLImageRegion::RATIO_AUTO);
+    mySettings->loadParam (myGUI->myImage->params.DisplayMode);
+    mySettings->loadParam (myGUI->myImage->params.TextureFilter);
+    mySettings->loadParam (myGUI->myImage->params.DisplayRatio);
+    mySettings->loadParam (myGUI->myImage->params.ToHealAnamorphicRatio);
+    params.ToRestoreRatio->setValue(myGUI->myImage->params.DisplayRatio->getValue() != StGLImageRegion::RATIO_AUTO);
     int32_t loadedGamma = 100; // 1.0f
         mySettings->loadInt32(ST_SETTING_GAMMA, loadedGamma);
         myGUI->myImage->params.gamma->setValue(0.01f * loadedGamma);
@@ -1052,7 +1023,7 @@ bool StMoviePlayer::init() {
     }
 
     // capture multimedia keys even without window focus
-    myWindow->setAttribute(StWinAttr_GlobalMediaKeys, params.areGlobalMKeys->getValue());
+    myWindow->setAttribute(StWinAttr_GlobalMediaKeys, params.AreGlobalMKeys->getValue());
 
     // create the video playback thread
     if(!isReset) {
@@ -1068,7 +1039,7 @@ bool StMoviePlayer::init() {
     #endif
     }
 
-    myPlayList->setShuffle   (params.isShuffle   ->getValue());
+    myPlayList->setShuffle   (params.IsShuffle   ->getValue());
     myPlayList->setLoopSingle(params.ToLoopSingle->getValue());
 
     StString aRecentList;
@@ -1080,7 +1051,7 @@ bool StMoviePlayer::init() {
     }
 
     // load this parameter AFTER video thread creation
-    mySettings->loadParam(ST_SETTING_SRCFORMAT, params.srcFormat);
+    mySettings->loadParam(params.SrcStereoFormat);
 
 #if !defined(ST_NO_UPDATES_CHECK)
     // read the current time
@@ -1088,8 +1059,8 @@ bool StMoviePlayer::init() {
     time(&aRawtime);
     struct tm* aTimeinfo = localtime(&aRawtime);
     int32_t aCurrentDayInYear = aTimeinfo->tm_yday;
-    if(params.checkUpdatesDays->getValue() > 0
-    && std::abs(aCurrentDayInYear - myLastUpdateDay) > params.checkUpdatesDays->getValue()) {
+    if(params.CheckUpdatesDays->getValue() > 0
+    && std::abs(aCurrentDayInYear - myLastUpdateDay) > params.CheckUpdatesDays->getValue()) {
         myUpdates = new StCheckUpdates();
         myUpdates->init();
         myLastUpdateDay = aCurrentDayInYear;
@@ -1101,14 +1072,14 @@ bool StMoviePlayer::init() {
 
 void StMoviePlayer::parseArguments(const StArgumentsMap& theArguments) {
     StArgument anArgViewMode   = theArguments[ST_SETTING_VIEWMODE];
-    StArgument anArgSrcFormat  = theArguments[ST_SETTING_SRCFORMAT];
-    StArgument anArgShuffle    = theArguments[ST_SETTING_SHUFFLE];
-    StArgument anArgLoopSingle = theArguments[ST_SETTING_LOOP_SINGLE];
+    StArgument anArgSrcFormat  = theArguments[params.SrcStereoFormat->getKey()];
+    StArgument anArgShuffle    = theArguments[params.IsShuffle->getKey()];
+    StArgument anArgLoopSingle = theArguments[params.ToLoopSingle->getKey()];
     StArgument anArgBenchmark  = theArguments[ST_ARGUMENT_BENCHMARK];
-    StArgument anArgShowMenu   = theArguments[ST_ARGUMENT_SHOW_MENU];
-    StArgument anArgShowTopbar = theArguments[ST_ARGUMENT_SHOW_TOPBAR];
+    StArgument anArgShowMenu   = theArguments[params.ToShowMenu->getKey()];
+    StArgument anArgShowTopbar = theArguments[params.ToShowTopbar->getKey()];
 
-    StArgument anArgFullscreen = theArguments[ST_SETTING_FULLSCREEN];
+    StArgument anArgFullscreen = theArguments[params.IsFullscreen->getKey()];
     StArgument anArgMonitor    = theArguments[ST_ARGUMENT_MONITOR];
     StArgument anArgWinLeft    = theArguments[ST_ARGUMENT_WINLEFT];
     StArgument anArgWinTop     = theArguments[ST_ARGUMENT_WINTOP];
@@ -1148,17 +1119,17 @@ void StMoviePlayer::parseArguments(const StArgumentsMap& theArguments) {
         myWindow->setPlacement(aRect, true);
     }
     if(anArgFullscreen.isValid()) {
-        params.isFullscreen->setValue(!anArgFullscreen.isValueOff());
+        params.IsFullscreen->setValue(!anArgFullscreen.isValueOff());
     }
 
     if(anArgViewMode.isValid()) {
         myPlayList->changeDefParams().ViewingMode = StStereoParams::GET_VIEW_MODE_FROM_STRING(anArgViewMode.getValue());
     }
     if(anArgSrcFormat.isValid()) {
-        params.srcFormat->setValue(st::formatFromString(anArgSrcFormat.getValue()));
+        params.SrcStereoFormat->setValue(st::formatFromString(anArgSrcFormat.getValue()));
     }
     if(anArgShuffle.isValid()) {
-        params.isShuffle->setValue(!anArgShuffle.isValueOff());
+        params.IsShuffle->setValue(!anArgShuffle.isValueOff());
     }
     if(anArgLoopSingle.isValid()) {
         params.ToLoopSingle->setValue(!anArgLoopSingle.isValueOff());
@@ -1343,7 +1314,7 @@ void StMoviePlayer::doMouseUp(const StClickEvent& theEvent) {
 
     switch(theEvent.Button) {
         case ST_MOUSE_MIDDLE: {
-            params.isFullscreen->reverse();
+            params.IsFullscreen->reverse();
             break;
         }
         default: {
@@ -1709,7 +1680,7 @@ void StMoviePlayer::beforeDraw() {
     if(!aParams.isNull()) {
         hasStereoSource =!aParams->isMono()
                        && myGUI->myImage->hasVideoStream()
-                       && myGUI->myImage->params.displayMode->getValue() == StGLImageRegion::MODE_STEREO;
+                       && myGUI->myImage->params.DisplayMode->getValue() == StGLImageRegion::MODE_STEREO;
     }
     myWindow->setStereoOutput(hasStereoSource);
 
@@ -1717,15 +1688,15 @@ void StMoviePlayer::beforeDraw() {
     || !params.ToLimitFps->getValue()) {
         // do not limit FPS
         myWindow->setTargetFps(-1.0);
-    } else if(params.TargetFps >= 1
-           && params.TargetFps <= 3) {
+    } else if(params.TargetFps->getValue() >= 1
+           && params.TargetFps->getValue() <= 3) {
         // set rendering FPS to 2x averageFPS
         double aTargetFps = myVideo->getAverFps();
         if(aTargetFps < 17.0
         || aTargetFps > 120.0) {
             aTargetFps = 0.0;
         } else if(aTargetFps < 40.0) {
-            aTargetFps *= double(params.TargetFps);
+            aTargetFps *= double(params.TargetFps->getValue());
         }
 
         if(myWindow->toTrackOrientation()) {
@@ -1736,7 +1707,7 @@ void StMoviePlayer::beforeDraw() {
         myWindow->setTargetFps(aTargetFps);
     } else {
         // set rendering FPS to set value in settings
-        myWindow->setTargetFps(double(params.TargetFps));
+        myWindow->setTargetFps(double(params.TargetFps->getValue()));
     }
 
 }

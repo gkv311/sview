@@ -188,8 +188,8 @@ class StOutPageFlip : public StWindow {
 
     struct {
 
-        StHandle<StBoolParam> ToShowExtra; //!< show extra options
-        StHandle<StEnumParam> QuadBuffer;  //!< quad buffer option
+        StHandle<StBoolParamNamed> ToShowExtra; //!< show extra options
+        StHandle<StEnumParam>      QuadBuffer;  //!< quad buffer option
 
     } params;
 

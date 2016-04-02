@@ -30,9 +30,6 @@ namespace {
 
     static const char ST_OUT_PLUGIN_NAME[] = "StOutAnaglyph";
 
-    static const char ST_SETTING_GLASSES[]   = "glasses";
-    static const char ST_SETTING_REDCYAN[]   = "optionRedCyan";
-    static const char ST_SETTING_AMBERBLUE[] = "optionAmberBlue";
     static const char ST_SETTING_WINDOWPOS[] = "windowPos";
 
     // translation resources
@@ -128,7 +125,7 @@ StOutAnaglyph::StOutAnaglyph(const StHandle<StResourceManager>& theResMgr,
     myDevices.add(aDevice);
 
     // Glasses switch option
-    StHandle<StEnumParam> aGlasses = new StEnumParam(GLASSES_TYPE_REDCYAN,
+    StHandle<StEnumParam> aGlasses = new StEnumParam(GLASSES_TYPE_REDCYAN, stCString("glasses"),
                                                      aLangMap.changeValueId(STTR_ANAGLYPH_GLASSES, "Glasses type"));
     aGlasses->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN, "Red-cyan"));
     aGlasses->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_YELLOW,  "Yellow-Blue"));
@@ -137,7 +134,7 @@ StOutAnaglyph::StOutAnaglyph(const StHandle<StResourceManager>& theResMgr,
     params.Glasses = aGlasses;
 
     // Red-cyan filter switch option
-    StHandle<StEnumParam> aFilterRC = new StEnumParam(REDCYAN_MODE_SIMPLE,
+    StHandle<StEnumParam> aFilterRC = new StEnumParam(REDCYAN_MODE_SIMPLE, stCString("optionRedCyan"),
                                                       aLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_MENU, "Red-Cyan filter"));
     aFilterRC->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_SIMPLE, "Simple"));
     aFilterRC->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_REDCYAN_OPTIM,  "Optimized"));
@@ -147,7 +144,7 @@ StOutAnaglyph::StOutAnaglyph(const StHandle<StResourceManager>& theResMgr,
     params.RedCyan = aFilterRC;
 
     // Amber-Blue filter switch option
-    StHandle<StEnumParam> aFilterAB = new StEnumParam(AMBERBLUE_MODE_SIMPLE,
+    StHandle<StEnumParam> aFilterAB = new StEnumParam(AMBERBLUE_MODE_SIMPLE, stCString("optionAmberBlue"),
                                                       aLangMap.changeValueId(STTR_ANAGLYPH_AMBERBLUE_MENU, "Yellow filter"));
     aFilterAB->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_AMBERBLUE_SIMPLE, "Simple"));
     aFilterAB->changeValues().add(aLangMap.changeValueId(STTR_ANAGLYPH_AMBERBLUE_DUBIOS, "Dubios"));
@@ -165,9 +162,9 @@ StOutAnaglyph::StOutAnaglyph(const StHandle<StResourceManager>& theResMgr,
     StWindow::setTitle("sView - Anaglyph Renderer");
 
     // load glasses settings
-    mySettings->loadParam(ST_SETTING_GLASSES,   params.Glasses);
-    mySettings->loadParam(ST_SETTING_REDCYAN,   params.RedCyan);
-    mySettings->loadParam(ST_SETTING_AMBERBLUE, params.AmberBlue);
+    mySettings->loadParam(params.Glasses);
+    mySettings->loadParam(params.RedCyan);
+    mySettings->loadParam(params.AmberBlue);
 }
 
 void StOutAnaglyph::releaseResources() {
@@ -195,9 +192,9 @@ void StOutAnaglyph::beforeClose() {
     if(isMovable() && myWasUsed) {
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
     }
-    mySettings->saveParam(ST_SETTING_GLASSES,   params.Glasses);
-    mySettings->saveParam(ST_SETTING_REDCYAN,   params.RedCyan);
-    mySettings->saveParam(ST_SETTING_AMBERBLUE, params.AmberBlue);
+    mySettings->saveParam(params.Glasses);
+    mySettings->saveParam(params.RedCyan);
+    mySettings->saveParam(params.AmberBlue);
     mySettings->flush();
 }
 

@@ -103,7 +103,7 @@ void StMoviePlayerGUI::createDesktopUI(const StHandle<StPlayList>& thePlayList) 
     StMarginsI aButtonMargins;
     const IconSize anIconSize = scaleIcon(32, aButtonMargins);
     aButtonMargins.extend(scale(8));
-    myBtnShuffle = new StGLCheckboxTextured(myPlayList, myPlugin->params.isShuffle,
+    myBtnShuffle = new StGLCheckboxTextured(myPlayList, myPlugin->params.IsShuffle,
                                             iconTexture(stCString("actionVideoShuffle"), anIconSize),
                                             iconTexture(stCString("actionVideoShuffle"), anIconSize),
                                             scale(24), 0,
@@ -174,7 +174,7 @@ void StMoviePlayerGUI::createUpperToolbar() {
     aSrcBtn->setDrawShadow(true);
     myBtnSrcFrmt = aSrcBtn;
 
-    myBtnSwapLR = new StGLCheckboxTextured(myPanelUpper, myImage->params.swapLR,
+    myBtnSwapLR = new StGLCheckboxTextured(myPanelUpper, myImage->params.SwapLR,
                                            iconTexture(stCString("actionSwapLROff"), anIconSize),
                                            iconTexture(stCString("actionSwapLROn"),  anIconSize),
                                            aLeft + (aBtnIter++) * anIconStep, aTop,
@@ -246,7 +246,7 @@ void StMoviePlayerGUI::createBottomToolbar(const int theIconSize,
     myBtnPlay->changeMargins() = aButtonMargins;
 
     if(myWindow->hasFullscreenMode()) {
-        myBtnFullScr = new StGLCheckboxTextured(myPanelBottom, myPlugin->params.isFullscreen,
+        myBtnFullScr = new StGLCheckboxTextured(myPanelBottom, myPlugin->params.IsFullscreen,
                                                 iconTexture(stCString("actionVideoFullscreenOff"), anIconSize),
                                                 iconTexture(stCString("actionVideoFullscreenOn"),  anIconSize),
                                                 (myBottomBarNbRight++) * (-anIconStep), 0,
@@ -411,29 +411,29 @@ StGLMenu* StMoviePlayerGUI::createSrcFormatMenu() {
 }
 
 void StMoviePlayerGUI::fillSrcFormatMenu(StGLMenu* theMenu) {
-    theMenu->addItem(tr(MENU_SRC_FORMAT_AUTO),         myPlugin->params.srcFormat, StFormat_AUTO)
+    theMenu->addItem(tr(MENU_SRC_FORMAT_AUTO),         myPlugin->params.SrcStereoFormat, StFormat_AUTO)
            ->setIcon(stCMenuIcon("menuAuto"));
-    theMenu->addItem(tr(MENU_SRC_FORMAT_MONO),         myPlugin->params.srcFormat, StFormat_Mono)
+    theMenu->addItem(tr(MENU_SRC_FORMAT_MONO),         myPlugin->params.SrcStereoFormat, StFormat_Mono)
            ->setIcon(stCMenuIcon("menuMono"));
-    theMenu->addItem(tr(MENU_SRC_FORMAT_PARALLEL),     myPlugin->params.srcFormat, StFormat_SideBySide_LR)
+    theMenu->addItem(tr(MENU_SRC_FORMAT_PARALLEL),     myPlugin->params.SrcStereoFormat, StFormat_SideBySide_LR)
            ->setIcon(stCMenuIcon("menuSbsLR"));
-    theMenu->addItem(tr(MENU_SRC_FORMAT_CROSS_EYED),   myPlugin->params.srcFormat, StFormat_SideBySide_RL)
+    theMenu->addItem(tr(MENU_SRC_FORMAT_CROSS_EYED),   myPlugin->params.SrcStereoFormat, StFormat_SideBySide_RL)
            ->setIcon(stCMenuIcon("menuSbsRL"));
-    theMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_LR), myPlugin->params.srcFormat, StFormat_TopBottom_LR)
+    theMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_LR), myPlugin->params.SrcStereoFormat, StFormat_TopBottom_LR)
            ->setIcon(stCMenuIcon("menuOverUnderLR"));
-    theMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_RL), myPlugin->params.srcFormat, StFormat_TopBottom_RL)
+    theMenu->addItem(tr(MENU_SRC_FORMAT_OVERUNDER_RL), myPlugin->params.SrcStereoFormat, StFormat_TopBottom_RL)
            ->setIcon(stCMenuIcon("menuOverUnderRL"));
-    theMenu->addItem(tr(MENU_SRC_FORMAT_INTERLACED),   myPlugin->params.srcFormat, StFormat_Rows)
+    theMenu->addItem(tr(MENU_SRC_FORMAT_INTERLACED),   myPlugin->params.SrcStereoFormat, StFormat_Rows)
            ->setIcon(stCMenuIcon("menuRowLR"));
-    theMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RC),       myPlugin->params.srcFormat, StFormat_AnaglyphRedCyan)
+    theMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RC),       myPlugin->params.SrcStereoFormat, StFormat_AnaglyphRedCyan)
            ->setIcon(stCMenuIcon("menuRedCyanLR"));
-    theMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RB),       myPlugin->params.srcFormat, StFormat_AnaglyphGreenMagenta)
+    theMenu->addItem(tr(MENU_SRC_FORMAT_ANA_RB),       myPlugin->params.SrcStereoFormat, StFormat_AnaglyphGreenMagenta)
            ->setIcon(stCMenuIcon("menuGreenMagentaLR"));
-    theMenu->addItem(tr(MENU_SRC_FORMAT_ANA_YB),       myPlugin->params.srcFormat, StFormat_AnaglyphYellowBlue)
+    theMenu->addItem(tr(MENU_SRC_FORMAT_ANA_YB),       myPlugin->params.SrcStereoFormat, StFormat_AnaglyphYellowBlue)
            ->setIcon(stCMenuIcon("menuYellowBlueLR"));
-    theMenu->addItem(tr(MENU_SRC_FORMAT_PAGEFLIP),     myPlugin->params.srcFormat, StFormat_FrameSequence)
+    theMenu->addItem(tr(MENU_SRC_FORMAT_PAGEFLIP),     myPlugin->params.SrcStereoFormat, StFormat_FrameSequence)
            ->setIcon(stCMenuIcon("menuFrameSeqLR"));
-    theMenu->addItem(tr(MENU_SRC_FORMAT_TILED_4X),     myPlugin->params.srcFormat, StFormat_Tiled4x)
+    theMenu->addItem(tr(MENU_SRC_FORMAT_TILED_4X),     myPlugin->params.SrcStereoFormat, StFormat_Tiled4x)
            ->setIcon(stCMenuIcon("menuTiledLR"));
 }
 
@@ -552,12 +552,12 @@ StGLMenu* StMoviePlayerGUI::createViewMenu() {
 
     aMenuView->addItem(tr(MENU_VIEW_DISPLAY_MODE),  aMenuDispMode);
     if(myWindow->hasFullscreenMode()) {
-        aMenuView->addItem(tr(MENU_VIEW_FULLSCREEN),    myPlugin->params.isFullscreen);
+        aMenuView->addItem(tr(MENU_VIEW_FULLSCREEN),    myPlugin->params.IsFullscreen);
     }
     aMenuView->addItem(tr(MENU_VIEW_RESET))
              ->setIcon(stCMenuIcon("actionResetPlacement"), false)
              ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doReset);
-    aMenuView->addItem(tr(MENU_VIEW_SWAP_LR),       myImage->params.swapLR);
+    aMenuView->addItem(tr(MENU_VIEW_SWAP_LR),       myImage->params.SwapLR);
     aMenuView->addItem(tr(MENU_VIEW_DISPLAY_RATIO), aMenuDispRatio)
              ->setIcon(stCMenuIcon("actionDisplayRatio"), false);
     aMenuView->addItem(tr(MENU_VIEW_PANORAMA),      aMenuPanorama)
@@ -574,9 +574,9 @@ StGLMenu* StMoviePlayerGUI::createViewMenu() {
  */
 StGLMenu* StMoviePlayerGUI::createDisplayModeMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    const StArrayList<StString>& aValuesList = myImage->params.displayMode->getValues();
+    const StArrayList<StString>& aValuesList = myImage->params.DisplayMode->getValues();
     for(size_t aValIter = 0; aValIter < aValuesList.size(); ++aValIter) {
-        aMenu->addItem(aValuesList[aValIter], myImage->params.displayMode, int32_t(aValIter));
+        aMenu->addItem(aValuesList[aValIter], myImage->params.DisplayMode, int32_t(aValIter));
     }
     return aMenu;
 }
@@ -587,25 +587,25 @@ StGLMenu* StMoviePlayerGUI::createDisplayModeMenu() {
 StGLMenu* StMoviePlayerGUI::createDisplayRatioMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     fillDisplayRatioMenu(aMenu);
-    aMenu->addItem(tr(MENU_VIEW_RATIO_KEEP_ON_RESTART), myPlugin->params.toRestoreRatio);
+    aMenu->addItem(tr(MENU_VIEW_RATIO_KEEP_ON_RESTART), myPlugin->params.ToRestoreRatio);
     aMenu->addItem(tr(MENU_VIEW_RATIO_HEAL_ANAMORPHIC), myImage->params.ToHealAnamorphicRatio);
     return aMenu;
 }
 
 void StMoviePlayerGUI::fillDisplayRatioMenu(StGLMenu* theMenu) {
-    theMenu->addItem(tr(MENU_VIEW_DISPLAY_RATIO_SRC), myImage->params.displayRatio, StGLImageRegion::RATIO_AUTO)
+    theMenu->addItem(tr(MENU_VIEW_DISPLAY_RATIO_SRC), myImage->params.DisplayRatio, StGLImageRegion::RATIO_AUTO)
            ->setIcon(stCMenuIcon("menuAuto"));
-    theMenu->addItem("2.21:1", myImage->params.displayRatio, StGLImageRegion::RATIO_221_1)
+    theMenu->addItem("2.21:1", myImage->params.DisplayRatio, StGLImageRegion::RATIO_221_1)
            ->setIcon(stCMenuIcon("menuRatio2_1_"));
-    theMenu->addItem("16:9",   myImage->params.displayRatio, StGLImageRegion::RATIO_16_9)
+    theMenu->addItem("16:9",   myImage->params.DisplayRatio, StGLImageRegion::RATIO_16_9)
            ->setIcon(stCMenuIcon("menuRatio16_9_"));
-    theMenu->addItem("16:10",  myImage->params.displayRatio, StGLImageRegion::RATIO_16_10)
+    theMenu->addItem("16:10",  myImage->params.DisplayRatio, StGLImageRegion::RATIO_16_10)
            ->setIcon(stCMenuIcon("menuRatio16_10_"));
-    theMenu->addItem("4:3",    myImage->params.displayRatio, StGLImageRegion::RATIO_4_3)
+    theMenu->addItem("4:3",    myImage->params.DisplayRatio, StGLImageRegion::RATIO_4_3)
            ->setIcon(stCMenuIcon("menuRatio4_3_"));
-    theMenu->addItem("5:4",    myImage->params.displayRatio, StGLImageRegion::RATIO_5_4)
+    theMenu->addItem("5:4",    myImage->params.DisplayRatio, StGLImageRegion::RATIO_5_4)
            ->setIcon(stCMenuIcon("menuRatio5_4_"));
-    theMenu->addItem("1:1",    myImage->params.displayRatio, StGLImageRegion::RATIO_1_1)
+    theMenu->addItem("1:1",    myImage->params.DisplayRatio, StGLImageRegion::RATIO_1_1)
            ->setIcon(stCMenuIcon("menuRatio1_1_"));
 }
 
@@ -641,11 +641,11 @@ void StMoviePlayerGUI::doPanoramaCombo(const size_t ) {
 StGLMenu* StMoviePlayerGUI::createSmoothFilterMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     aMenu->addItem(tr(MENU_VIEW_TEXFILTER_NEAREST),
-                   myImage->params.textureFilter, StGLImageProgram::FILTER_NEAREST);
+                   myImage->params.TextureFilter, StGLImageProgram::FILTER_NEAREST);
     aMenu->addItem(tr(MENU_VIEW_TEXFILTER_LINEAR),
-                   myImage->params.textureFilter, StGLImageProgram::FILTER_LINEAR);
+                   myImage->params.TextureFilter, StGLImageProgram::FILTER_LINEAR);
     aMenu->addItem(tr(MENU_VIEW_TEXFILTER_BLEND),
-                   myImage->params.textureFilter, StGLImageProgram::FILTER_BLEND);
+                   myImage->params.TextureFilter, StGLImageProgram::FILTER_BLEND);
     return aMenu;
 }
 
@@ -1093,7 +1093,7 @@ StGLMenu* StMoviePlayerGUI::createScaleMenu() {
     aMenu->addItem(tr(MENU_HELP_SCALE_NORMAL),  myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Normal);
     aMenu->addItem(tr(MENU_HELP_SCALE_BIG),     myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Big);
     aMenu->addItem(tr(MENU_HELP_SCALE_HIDPI2X), myPlugin->params.ScaleHiDPI2X);
-    aMenu->addItem("Mobile UI",                 myPlugin->params.IsMobileUI);
+    aMenu->addItem(myPlugin->params.IsMobileUI->getName(), myPlugin->params.IsMobileUI);
     return aMenu;
 }
 
@@ -1120,10 +1120,10 @@ StGLMenu* StMoviePlayerGUI::createCheckUpdatesMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     aMenu->addItem(tr(MENU_HELP_UPDATES_NOW))
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doCheckUpdates);
-    aMenu->addItem(tr(MENU_HELP_UPDATES_DAY),   myPlugin->params.checkUpdatesDays, 1);
-    aMenu->addItem(tr(MENU_HELP_UPDATES_WEEK),  myPlugin->params.checkUpdatesDays, 7);
-    aMenu->addItem(tr(MENU_HELP_UPDATES_YEAR),  myPlugin->params.checkUpdatesDays, 355);
-    aMenu->addItem(tr(MENU_HELP_UPDATES_NEVER), myPlugin->params.checkUpdatesDays, 0);
+    aMenu->addItem(tr(MENU_HELP_UPDATES_DAY),   myPlugin->params.CheckUpdatesDays, 1);
+    aMenu->addItem(tr(MENU_HELP_UPDATES_WEEK),  myPlugin->params.CheckUpdatesDays, 7);
+    aMenu->addItem(tr(MENU_HELP_UPDATES_YEAR),  myPlugin->params.CheckUpdatesDays, 355);
+    aMenu->addItem(tr(MENU_HELP_UPDATES_NEVER), myPlugin->params.CheckUpdatesDays, 0);
     return aMenu;
 }
 
@@ -1153,7 +1153,7 @@ void StMoviePlayerGUI::createMobileUI(const StHandle<StPlayList>& thePlayList) {
     StMarginsI aButtonMargins;
     const IconSize anIconSize = scaleIcon(32, aButtonMargins);
     aButtonMargins.extend(scale(12));
-    StGLCheckboxTextured* aBtnShuffle = new StGLCheckboxTextured(myPlayList, myPlugin->params.isShuffle,
+    StGLCheckboxTextured* aBtnShuffle = new StGLCheckboxTextured(myPlayList, myPlugin->params.IsShuffle,
                                                                  iconTexture(stCString("actionVideoShuffle"), anIconSize),
                                                                  iconTexture(stCString("actionVideoShuffle"), anIconSize),
                                                                  scale(28), 0,
@@ -1211,7 +1211,7 @@ void StMoviePlayerGUI::createMobileUpperToolbar() {
     aSrcBtn->setDrawShadow(true);
     myBtnSrcFrmt = aSrcBtn;
 
-    myBtnSwapLR = new StGLCheckboxTextured(myPanelUpper, myImage->params.swapLR,
+    myBtnSwapLR = new StGLCheckboxTextured(myPanelUpper, myImage->params.SwapLR,
                                            iconTexture(stCString("actionSwapLROff"), anIconSize),
                                            iconTexture(stCString("actionSwapLROn"),  anIconSize),
                                            (aBtnIter++) * myIconStep, 0,
@@ -1443,12 +1443,12 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
 
     myImage = new StGLImageRegion(this, theTextureQueue, false);
     myImage->setDragDelayMs(500.0);
-    myImage->params.displayMode->setName(tr(MENU_VIEW_DISPLAY_MODE));
-    myImage->params.displayMode->changeValues()[StGLImageRegion::MODE_STEREO]     = tr(MENU_VIEW_DISPLAY_MODE_STEREO);
-    myImage->params.displayMode->changeValues()[StGLImageRegion::MODE_ONLY_LEFT]  = tr(MENU_VIEW_DISPLAY_MODE_LEFT);
-    myImage->params.displayMode->changeValues()[StGLImageRegion::MODE_ONLY_RIGHT] = tr(MENU_VIEW_DISPLAY_MODE_RIGHT);
-    myImage->params.displayMode->changeValues()[StGLImageRegion::MODE_PARALLEL]   = tr(MENU_VIEW_DISPLAY_MODE_PARALLEL);
-    myImage->params.displayMode->changeValues()[StGLImageRegion::MODE_CROSSYED]   = tr(MENU_VIEW_DISPLAY_MODE_CROSSYED);
+    myImage->params.DisplayMode->setName(tr(MENU_VIEW_DISPLAY_MODE));
+    myImage->params.DisplayMode->changeValues()[StGLImageRegion::MODE_STEREO]     = tr(MENU_VIEW_DISPLAY_MODE_STEREO);
+    myImage->params.DisplayMode->changeValues()[StGLImageRegion::MODE_ONLY_LEFT]  = tr(MENU_VIEW_DISPLAY_MODE_LEFT);
+    myImage->params.DisplayMode->changeValues()[StGLImageRegion::MODE_ONLY_RIGHT] = tr(MENU_VIEW_DISPLAY_MODE_RIGHT);
+    myImage->params.DisplayMode->changeValues()[StGLImageRegion::MODE_PARALLEL]   = tr(MENU_VIEW_DISPLAY_MODE_PARALLEL);
+    myImage->params.DisplayMode->changeValues()[StGLImageRegion::MODE_CROSSYED]   = tr(MENU_VIEW_DISPLAY_MODE_CROSSYED);
     myImage->params.ToHealAnamorphicRatio->setValue(true);
 
     mySubtitles = new StGLSubtitles  (this, theSubQueue,
@@ -1708,14 +1708,14 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor) {
         myBtnPlay->setOpacityScale(aCurrPos != StPlayList::CurrentPosition_NONE ? 1.0f : 0.5f);
     }
 
-    StFormat aSrcFormat = (StFormat )myPlugin->params.srcFormat->getValue();
+    StFormat aSrcFormat = (StFormat )myPlugin->params.SrcStereoFormat->getValue();
     if( aSrcFormat == StFormat_AUTO
     && !aParams.isNull()
     &&  hasVideo) {
         aSrcFormat = aParams->StereoFormat;
     }
     if(!aParams.isNull()
-     && myImage->params.swapLR->getValue()
+     && myImage->params.SwapLR->getValue()
      && hasVideo) {
         aSrcFormat = st::formatReversed(aSrcFormat);
     }
@@ -1728,7 +1728,7 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor) {
         myBtnSrcFrmt->setFaceId(aFaceId);
     }
     if(myBtnFullScr != NULL) {
-        myBtnFullScr->setFaceId(myPlugin->params.isFullscreen->getValue() ? 1 : 0);
+        myBtnFullScr->setFaceId(myPlugin->params.IsFullscreen->getValue() ? 1 : 0);
     }
     if(myBtnSwapLR != NULL) {
         const bool hasInput = hasVideo
@@ -1765,7 +1765,7 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor) {
         } else if(::isPointIn(myBtnInfo,   theCursor)) {
             myDescr->setText(tr(MENU_MEDIA_FILE_INFO));
         } else if(::isPointIn(myBtnSwapLR, theCursor)) {
-            size_t aLngId = myImage->params.swapLR->getValue() ? SWAP_LR_ON : SWAP_LR_OFF;
+            size_t aLngId = myImage->params.SwapLR->getValue() ? SWAP_LR_ON : SWAP_LR_OFF;
             myDescr->setText(tr(aLngId));
         } else if(::isPointIn(myBtnSrcFrmt, theCursor)) {
             myDescr->setText(tr(BTN_SRC_FORMAT) + "\n" + trSrcFormat(aSrcFormat));
@@ -2053,7 +2053,7 @@ void StMoviePlayerGUI::doListHotKeys(const size_t ) {
     const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
     StParamsList aParams;
     aParams.add(myPlugin->StApplication::params.ActiveDevice);
-    aParams.add(myImage->params.displayMode);
+    aParams.add(myImage->params.DisplayMode);
     aRend->getOptions(aParams);
     aParams.add(myPlugin->params.ToShowFps);
     aParams.add(myLangMap->params.language);
@@ -2096,7 +2096,7 @@ void StMoviePlayerGUI::doMobileSettings(const size_t ) {
     const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
     StParamsList aParams;
     aParams.add(myPlugin->StApplication::params.ActiveDevice);
-    aParams.add(myImage->params.displayMode);
+    aParams.add(myImage->params.DisplayMode);
     aRend->getOptions(aParams);
     aParams.add(myPlugin->params.ToShowFps);
     aParams.add(myPlugin->params.UseGpu);

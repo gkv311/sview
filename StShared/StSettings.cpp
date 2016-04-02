@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -102,6 +102,19 @@ bool StSettings::saveFloatVec4(const StString&      theLabel,
         && saveFloat(theLabel + ".w", theValue.w());
 }
 
+bool StSettings::loadParam(StHandle<StInt32ParamNamed>& theInt32Param) {
+    int32_t aValue = theInt32Param->getValue();
+    if(loadInt32(theInt32Param->getKey(), aValue)) {
+        theInt32Param->setValue(aValue);
+        return true;
+    }
+    return false;
+}
+
+bool StSettings::saveParam(const StHandle<StInt32ParamNamed>& theInt32Param) {
+    return saveInt32(theInt32Param->getKey(), theInt32Param->getValue());
+}
+
 bool StSettings::loadParam(const StString&         theLabel,
                            StHandle<StInt32Param>& theInt32Param) {
     int32_t aValue = theInt32Param->getValue();
@@ -115,6 +128,19 @@ bool StSettings::loadParam(const StString&         theLabel,
 bool StSettings::saveParam(const StString&               theLabel,
                            const StHandle<StInt32Param>& theInt32Param) {
     return saveInt32(theLabel, theInt32Param->getValue());
+}
+
+bool StSettings::loadParam(StHandle<StBoolParamNamed>& theBoolParam) {
+    bool aValue = theBoolParam->getValue();
+    if(loadBool(theBoolParam->getKey(), aValue)) {
+        theBoolParam->setValue(aValue);
+        return true;
+    }
+    return false;
+}
+
+bool StSettings::saveParam(const StHandle<StBoolParamNamed>& theBoolParam) {
+    return saveBool(theBoolParam->getKey(), theBoolParam->getValue());
 }
 
 bool StSettings::loadParam(const StString&        theLabel,

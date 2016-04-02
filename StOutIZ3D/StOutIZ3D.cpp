@@ -27,7 +27,6 @@ namespace {
 
     // settings
     static const char ST_SETTING_WINDOWPOS[]      = "windowPos";
-    static const char ST_SETTING_TABLE[]          = "tableId";
 
     // iZ3D monitor's models for autodetect
     // old model have not strong back/front separation
@@ -143,7 +142,7 @@ StOutIZ3D::StOutIZ3D(const StHandle<StResourceManager>& theResMgr,
     myDevices.add(aDevice);
 
     // shader switch option
-    StHandle<StEnumParam> aGlasses = new StEnumParam(myShaders.getMode(),
+    StHandle<StEnumParam> aGlasses = new StEnumParam(myShaders.getMode(), stCString("tableId"),
                                                      aLangMap.changeValueId(STTR_PARAMETER_GLASSES, "iZ3D glasses"));
     aGlasses->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_GLASSES_CLASSIC,      "Classic"));
     aGlasses->changeValues().add(aLangMap.changeValueId(STTR_PARAMETER_GLASSES_MODERN,       "Modern"));
@@ -162,7 +161,7 @@ StOutIZ3D::StOutIZ3D(const StHandle<StResourceManager>& theResMgr,
     StWindow::setTitle("sView - iZ3D Renderer");
 
     // load parameters
-    mySettings->loadParam(ST_SETTING_TABLE, params.Glasses);
+    mySettings->loadParam(params.Glasses);
 
     // request slave window
     StWindow::setAttribute(StWinAttr_SlaveCfg, StWinSlave_slaveSync);
@@ -188,7 +187,7 @@ void StOutIZ3D::beforeClose() {
     if(isMovable() && myWasUsed) {
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
     }
-    mySettings->saveParam(ST_SETTING_TABLE, params.Glasses);
+    mySettings->saveParam(params.Glasses);
     mySettings->flush();
 }
 

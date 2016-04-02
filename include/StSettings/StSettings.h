@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2015 Kirill Gavrilov
+ * Copyright © 2007-2016 Kirill Gavrilov
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -163,6 +163,20 @@ class StSettings {
 
     /**
      * Method to load int32_t parameter.
+     * @param theInt32Param handle to the parameter
+     * @return true if parameter was loaded
+     */
+    ST_CPPEXPORT bool loadParam(StHandle<StInt32ParamNamed>& theInt32Param);
+
+    /**
+     * Method to save int32_t parameter.
+     * @param theInt32Param handle to the parameter
+     * @return true if parameter was saved
+     */
+    ST_CPPEXPORT bool saveParam(const StHandle<StInt32ParamNamed>& theInt32Param);
+
+    /**
+     * Method to load int32_t parameter.
      * @param theLabel      parameter label (should be unique)
      * @param theInt32Param handle to the parameter
      * @return true if parameter was loaded
@@ -178,6 +192,20 @@ class StSettings {
      */
     ST_CPPEXPORT bool saveParam(const StString&               theLabel,
                                 const StHandle<StInt32Param>& theInt32Param);
+
+    /**
+     * Method to load boolean parameter.
+     * @param theBoolParam handle to the parameter
+     * @return true if parameter was loaded
+     */
+    ST_CPPEXPORT bool loadParam(StHandle<StBoolParamNamed>& theBoolParam);
+
+    /**
+     * Method to save boolean parameter.
+     * @param theBoolParam handle to the parameter
+     * @return true if parameter was saved
+     */
+    ST_CPPEXPORT bool saveParam(const StHandle<StBoolParamNamed>& theBoolParam);
 
     /**
      * Method to load boolean parameter.

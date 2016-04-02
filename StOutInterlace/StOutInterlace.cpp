@@ -31,7 +31,6 @@ namespace {
     static const char ST_SETTING_DEVICE_ID[]    = "deviceId";
     static const char ST_SETTING_WINDOWPOS[]    = "windowPos";
     static const char ST_SETTING_BIND_MONITOR[] = "bindMonitor";
-    static const char ST_SETTING_REVERSE[]      = "reverse";
 
     struct StMonInterlacedInfo_t {
         const stUtf8_t* pnpid;
@@ -274,10 +273,10 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     }
 
     // options
-    params.ToReverse = new StBoolParamNamed(false, aLangMap.changeValueId(STTR_PARAMETER_REVERSE,  "Reverse Order"));
-    params.BindToMon = new StBoolParamNamed(true,  aLangMap.changeValueId(STTR_PARAMETER_BIND_MON, "Bind To Supported Monitor"));
-    mySettings->loadParam(ST_SETTING_REVERSE,      params.ToReverse);
-    mySettings->loadParam(ST_SETTING_BIND_MONITOR, params.BindToMon);
+    params.ToReverse = new StBoolParamNamed(false, stCString("reverse"),     aLangMap.changeValueId(STTR_PARAMETER_REVERSE,  "Reverse Order"));
+    params.BindToMon = new StBoolParamNamed(true,  stCString("bindMonitor"), aLangMap.changeValueId(STTR_PARAMETER_BIND_MON, "Bind To Supported Monitor"));
+    mySettings->loadParam(params.ToReverse);
+    mySettings->loadParam(params.BindToMon);
 
     params.BindToMon->signals.onChanged.connect(this, &StOutInterlace::doSetBindToMonitor);
 
@@ -371,8 +370,8 @@ void StOutInterlace::beforeClose() {
     if(isMovable() && myWasUsed) {
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
     }
-    mySettings->saveParam(ST_SETTING_BIND_MONITOR, params.BindToMon);
-    mySettings->saveParam(ST_SETTING_REVERSE,      params.ToReverse);
+    mySettings->saveParam(params.BindToMon);
+    mySettings->saveParam(params.ToReverse);
     mySettings->saveInt32(ST_SETTING_DEVICE_ID,    myDevice);
     mySettings->flush();
 

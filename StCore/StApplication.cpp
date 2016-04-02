@@ -70,10 +70,10 @@ void StApplication::stApplicationInit(const StHandle<StOpenInfo>& theOpenInfo) {
     myGlDebug = true;
 #endif
     StSettings aGlobalSettings(myResMgr, "sview");
-    params.ActiveDevice = new StEnumParam(0, "Change device");
+    params.ActiveDevice = new StEnumParam(0, stCString("activeDevice"), stCString("Change device"));
     params.ActiveDevice->signals.onChanged.connect(this, &StApplication::doChangeDevice);
 
-    params.VSyncMode = new StEnumParam(0, "VSync mode");
+    params.VSyncMode = new StEnumParam(0, stCString("vsyncMode"), stCString("VSync mode"));
     params.VSyncMode->changeValues().add("Off");
     params.VSyncMode->changeValues().add("On");
     params.VSyncMode->changeValues().add("Mixed");

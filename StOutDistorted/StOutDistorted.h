@@ -204,8 +204,8 @@ class StOutDistorted : public StWindow {
 
     struct {
 
-        StHandle<StInt32Param> Layout;   //!< pair layout
-        StHandle<StBoolParam>  MonoClone;//!< display mono in stereo
+        StHandle<StEnumParam>      Layout;   //!< pair layout
+        StHandle<StBoolParamNamed> MonoClone;//!< display mono in stereo
 
     } params;
 
