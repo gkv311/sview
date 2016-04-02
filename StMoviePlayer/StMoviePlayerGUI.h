@@ -155,8 +155,6 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL StGLMenu* createFpsMenu();          // Root -> Output -> FPS Control
     ST_LOCAL StGLMenu* createHelpMenu();         // Root -> Help menu
     ST_LOCAL StGLMenu* createScaleMenu();        // Root -> Scale Interface menu
-    ST_LOCAL StGLMenu* createBlockSleepMenu();   // Root -> Help   -> Block sleeping
-    ST_LOCAL StGLMenu* createCheckUpdatesMenu(); // Root -> Help   -> Check updates menu
     ST_LOCAL StGLMenu* createLanguageMenu();     // Root -> Help   -> Language menu
 
     ST_LOCAL void fillOpenALDeviceMenu(StGLMenu* theMenu);

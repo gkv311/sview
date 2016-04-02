@@ -22,6 +22,31 @@ class StCheckUpdates {
 
         public:
 
+   /**
+    * Update check interval.
+    */
+    enum UpdateInteval {
+        UpdateInteval_Never      = 0,
+        UpdateInteval_EveryDay   = 1,
+        UpdateInteval_EveryWeek  = 2,
+        UpdateInteval_EveryYear  = 3,
+    };
+
+    /**
+     * Return interval in days.
+     */
+    static int getNbDaysFromInterval(UpdateInteval theValue) {
+        switch(theValue) {
+            case UpdateInteval_Never:     return  -1;
+            case UpdateInteval_EveryDay:  return   1;
+            case UpdateInteval_EveryWeek: return   7;
+            case UpdateInteval_EveryYear: return 355;
+        }
+        return -1;
+    }
+
+        public:
+
     StCheckUpdates()
     : myIsInitialized(false),
       myToUpdate(false) {

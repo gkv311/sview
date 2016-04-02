@@ -353,19 +353,10 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
               ->setIcon(stCMenuIcon("actionSourceFormat"), false);
 
     if(myWindow->isMobile()) {
-        aMenuMedia->addItem("Mobile UI", myPlugin->params.IsMobileUI);
+        aMenuMedia->addItem(myPlugin->params.IsMobileUI);
     }
 
     aMenuMedia->addItem(tr(MENU_MEDIA_AL_DEVICE),  myMenuOpenAL);
-#if defined(_WIN32) || defined(__APPLE__) || defined(__ANDROID__)
-#if defined(_WIN32)
-    if(myPlugin->params.ToShowExtra->getValue()) {
-#endif
-        aMenuMedia->addItem(myPlugin->params.UseGpu->getName(), myPlugin->params.UseGpu);
-#if defined(_WIN32)
-    }
-#endif
-#endif
 
 #ifdef ST_HAVE_MONGOOSE
     StString aWebUiItem = tr(MENU_MEDIA_WEBUI) + ":" + myPlugin->params.WebUIPort->getValue();
@@ -519,7 +510,7 @@ StGLMenu* StMoviePlayerGUI::createWebUIMenu() {
         }
         aMenu->addItem(myPlugin->params.StartWebUI->getValues()[anIter], myPlugin->params.StartWebUI, (int32_t )anIter);
     }
-    aMenu->addItem(tr(MENU_MEDIA_WEBUI_SHOW_ERRORS), myPlugin->params.ToPrintWebErrors);
+    aMenu->addItem(myPlugin->params.ToPrintWebErrors);
     return aMenu;
 }
 
@@ -552,7 +543,7 @@ StGLMenu* StMoviePlayerGUI::createViewMenu() {
 
     aMenuView->addItem(tr(MENU_VIEW_DISPLAY_MODE),  aMenuDispMode);
     if(myWindow->hasFullscreenMode()) {
-        aMenuView->addItem(tr(MENU_VIEW_FULLSCREEN),    myPlugin->params.IsFullscreen);
+        aMenuView->addItem(myPlugin->params.IsFullscreen);
     }
     aMenuView->addItem(tr(MENU_VIEW_RESET))
              ->setIcon(stCMenuIcon("actionResetPlacement"), false)
@@ -587,7 +578,7 @@ StGLMenu* StMoviePlayerGUI::createDisplayModeMenu() {
 StGLMenu* StMoviePlayerGUI::createDisplayRatioMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     fillDisplayRatioMenu(aMenu);
-    aMenu->addItem(tr(MENU_VIEW_RATIO_KEEP_ON_RESTART), myPlugin->params.ToRestoreRatio);
+    aMenu->addItem(myPlugin->params.ToRestoreRatio);
     aMenu->addItem(tr(MENU_VIEW_RATIO_HEAL_ANAMORPHIC), myImage->params.ToHealAnamorphicRatio);
     return aMenu;
 }
@@ -850,9 +841,9 @@ StGLMenu* StMoviePlayerGUI::createOutputMenu() {
  */
 StGLMenu* StMoviePlayerGUI::createFpsMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(tr(MENU_FPS_VSYNC), myPlugin->params.IsVSyncOn);
-    aMenu->addItem(tr(MENU_FPS_METER), myPlugin->params.ToShowFps);
-    aMenu->addItem(tr(MENU_FPS_BOUND), myPlugin->params.ToLimitFps);
+    aMenu->addItem(myPlugin->params.IsVSyncOn);
+    aMenu->addItem(myPlugin->params.ToShowFps);
+    aMenu->addItem(myPlugin->params.ToLimitFps);
     return aMenu;
 }
 
@@ -888,7 +879,8 @@ void StMoviePlayerGUI::doAboutProgram(const size_t ) {
                         aDialog->getContent()->getRectPx().width(),
                         aDialog->getContent()->getRectPx().width() / 2, 1);
 
-    aDialog->addButton(tr(BUTTON_CLOSE));
+    aDialog->addButton(stCString("Website"))->signals.onBtnClick += stSlot(this, &StMoviePlayerGUI::doCheckUpdates);
+    aDialog->addButton(tr(BUTTON_CLOSE), true);
     aDialog->stglInit();
 }
 
@@ -1055,10 +1047,6 @@ void StMoviePlayerGUI::doOpenLicense(const size_t ) {
 StGLMenu* StMoviePlayerGUI::createHelpMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     StGLMenu* aMenuScale        = createScaleMenu();        // Root -> Help -> Scale Interface menu
-    StGLMenu* aMenuBlockSleep   = createBlockSleepMenu();   // Root -> Help -> Block sleeping
-#if !defined(ST_NO_UPDATES_CHECK)
-    StGLMenu* aMenuCheckUpdates = createCheckUpdatesMenu(); // Root -> Help -> Check updates menu
-#endif
     StGLMenu* aMenuLanguage     = createLanguageMenu();     // Root -> Help -> Language menu
 
     aMenu->addItem(tr(MENU_HELP_ABOUT))
@@ -1074,14 +1062,8 @@ StGLMenu* StMoviePlayerGUI::createHelpMenu() {
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doMobileSettings);
     aMenu->addItem(tr(MENU_HELP_LICENSE))
          ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doOpenLicense);
-    aMenu->addItem(tr(MENU_HELP_EXPERIMENTAL), myPlugin->params.ToShowExtra);
     aMenu->addItem(tr(MENU_HELP_SCALE),        aMenuScale)
          ->setIcon(stCMenuIcon("actionFontSize"), false);
-    aMenu->addItem(tr(MENU_HELP_BLOCKSLP),     aMenuBlockSleep)
-         ->setIcon(stCMenuIcon("actionPower"), false);
-#if !defined(ST_NO_UPDATES_CHECK)
-    aMenu->addItem(tr(MENU_HELP_UPDATES),      aMenuCheckUpdates);
-#endif
     aMenu->addItem(tr(MENU_HELP_LANGS),        aMenuLanguage)
          ->setIcon(stCMenuIcon("actionLanguage"), false);
     return aMenu;
@@ -1092,41 +1074,11 @@ StGLMenu* StMoviePlayerGUI::createHelpMenu() {
  */
 StGLMenu* StMoviePlayerGUI::createScaleMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(tr(MENU_HELP_SCALE_SMALL),   myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Small);
-    aMenu->addItem(tr(MENU_HELP_SCALE_NORMAL),  myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Normal);
-    aMenu->addItem(tr(MENU_HELP_SCALE_BIG),     myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Big);
-    aMenu->addItem(tr(MENU_HELP_SCALE_HIDPI2X), myPlugin->params.ScaleHiDPI2X);
-    aMenu->addItem(myPlugin->params.IsMobileUI->getName(), myPlugin->params.IsMobileUI);
-    return aMenu;
-}
-
-/**
- * Root -> Help -> Block sleeping
- */
-StGLMenu* StMoviePlayerGUI::createBlockSleepMenu() {
-    StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(tr(MENU_HELP_BLOCKSLP_NEVER),
-                   myPlugin->params.blockSleeping, StMoviePlayer::BLOCK_SLEEP_NEVER);
-    aMenu->addItem(tr(MENU_HELP_BLOCKSLP_PLAYBACK),
-                   myPlugin->params.blockSleeping, StMoviePlayer::BLOCK_SLEEP_PLAYBACK);
-    aMenu->addItem(tr(MENU_HELP_BLOCKSLP_FULLSCR),
-                   myPlugin->params.blockSleeping, StMoviePlayer::BLOCK_SLEEP_FULLSCREEN);
-    aMenu->addItem(tr(MENU_HELP_BLOCKSLP_ALWAYS),
-                   myPlugin->params.blockSleeping, StMoviePlayer::BLOCK_SLEEP_ALWAYS);
-    return aMenu;
-}
-
-/**
- * Root -> Help -> Check updates menu
- */
-StGLMenu* StMoviePlayerGUI::createCheckUpdatesMenu() {
-    StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(tr(MENU_HELP_UPDATES_NOW))
-         ->signals.onItemClick.connect(this, &StMoviePlayerGUI::doCheckUpdates);
-    aMenu->addItem(tr(MENU_HELP_UPDATES_DAY),   myPlugin->params.CheckUpdatesDays, 1);
-    aMenu->addItem(tr(MENU_HELP_UPDATES_WEEK),  myPlugin->params.CheckUpdatesDays, 7);
-    aMenu->addItem(tr(MENU_HELP_UPDATES_YEAR),  myPlugin->params.CheckUpdatesDays, 355);
-    aMenu->addItem(tr(MENU_HELP_UPDATES_NEVER), myPlugin->params.CheckUpdatesDays, 0);
+    aMenu->addItem(myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Small);
+    aMenu->addItem(myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Normal);
+    aMenu->addItem(myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Big);
+    aMenu->addItem(myPlugin->params.ScaleHiDPI2X);
+    aMenu->addItem(myPlugin->params.IsMobileUI);
     return aMenu;
 }
 
@@ -2056,7 +2008,6 @@ void StMoviePlayerGUI::doListHotKeys(const size_t ) {
     aParams.add(myPlugin->params.ToShowFps);
     aParams.add(myLangMap->params.language);
     aParams.add(myPlugin->params.IsMobileUI);
-    myLangMap->params.language->setName(tr(MENU_HELP_LANGS));
 
     const StString aTitle  = tr(MENU_HELP_HOTKEYS);
     StInfoDialog*  aDialog = new StInfoDialog(myPlugin, this, aTitle, scale(650), scale(300));
@@ -2105,9 +2056,15 @@ void StMoviePlayerGUI::doMobileSettings(const size_t ) {
 
     aParams.add(myLangMap->params.language);
     aParams.add(myPlugin->params.IsMobileUI);
-    myLangMap->params.language->setName(tr(MENU_HELP_LANGS));
+    //aParams.add(myPlugin->params.ToShowExtra);
+    if(!isMobile()) {
+        aParams.add(myPlugin->params.BlockSleeping);
+    }
+#if !defined(ST_NO_UPDATES_CHECK)
+    aParams.add(myPlugin->params.CheckUpdatesDays);
+#endif
 
-    StInfoDialog* aDialog = new StInfoDialog(myPlugin, this, tr(MENU_HELP_SETTINGS), scale(512), scale(300));
+    StInfoDialog* aDialog = new StInfoDialog(myPlugin, this, tr(MENU_HELP_SETTINGS), scale(768), scale(300));
 
     const int aWidthMax  = aDialog->getContent()->getRectPx().width();
     int       aRowLast   = (int )aParams.size();

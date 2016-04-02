@@ -21,12 +21,21 @@ class StEnumParam : public StInt32ParamNamed {
         public:
 
     /**
-     * Simple constructor.
+     * Main constructor.
      */
     ST_LOCAL StEnumParam(const int32_t    theValue,
                          const StCString& theParamKey,
                          const StCString& theParamName)
     : StInt32ParamNamed(theValue, theParamKey, theParamName) {
+        //
+    }
+
+    /**
+     * Main constructor.
+     */
+    ST_LOCAL StEnumParam(const int32_t    theValue,
+                         const StCString& theParamKey)
+    : StInt32ParamNamed(theValue, theParamKey) {
         //
     }
 

@@ -60,7 +60,6 @@ namespace {
     static const char ST_SETTING_SLIDESHOW[]   = "slideshow";
     static const char ST_SETTING_VIEWMODE[]    = "viewMode";
     static const char ST_SETTING_GAMMA[]       = "viewGamma";
-    static const char ST_SETTING_UPDATES_LAST_CHECK[] = "updatesLastCheck";
     static const char ST_SETTING_IMAGELIB[]    = "imageLib";
 
     static const char ST_ARGUMENT_FILE_LEFT[]  = "left";
@@ -237,6 +236,34 @@ class StImageViewer::StOpenImage {
 
 };
 
+void StImageViewer::updateStrings() {
+    using namespace StImageViewerStrings;
+    params.IsFullscreen->setName(tr(MENU_VIEW_FULLSCREEN));
+    params.ToRestoreRatio->setName(tr(MENU_VIEW_RATIO_KEEP_ON_RESTART));
+    params.ScaleAdjust->setName(tr(MENU_HELP_SCALE));
+    params.ScaleAdjust->defineOption(StGLRootWidget::ScaleAdjust_Small,  tr(MENU_HELP_SCALE_SMALL));
+    params.ScaleAdjust->defineOption(StGLRootWidget::ScaleAdjust_Normal, tr(MENU_HELP_SCALE_NORMAL));
+    params.ScaleAdjust->defineOption(StGLRootWidget::ScaleAdjust_Big,    tr(MENU_HELP_SCALE_BIG));
+    params.ScaleHiDPI2X->setName(tr(MENU_HELP_SCALE_HIDPI2X));
+    params.CheckUpdatesDays->setName(tr(MENU_HELP_UPDATES));
+    params.CheckUpdatesDays->defineOption(StCheckUpdates::UpdateInteval_Never,     tr(MENU_HELP_UPDATES_NEVER));
+    params.CheckUpdatesDays->defineOption(StCheckUpdates::UpdateInteval_EveryDay,  tr(MENU_HELP_UPDATES_DAY));
+    params.CheckUpdatesDays->defineOption(StCheckUpdates::UpdateInteval_EveryWeek, tr(MENU_HELP_UPDATES_WEEK));
+    params.CheckUpdatesDays->defineOption(StCheckUpdates::UpdateInteval_EveryYear, tr(MENU_HELP_UPDATES_YEAR));
+    params.LastUpdateDay->setName(tr(MENU_HELP_UPDATES));
+    params.SrcStereoFormat->setName(tr(MENU_MEDIA_SRC_FORMAT));
+    params.ToShowPlayList->setName(tr(PLAYLIST));
+    params.ToTrackHead->setName(tr(MENU_VIEW_TRACK_HEAD));
+    params.ToShowFps->setName(tr(MENU_SHOW_FPS));
+    params.ToShowMenu->setName(stCString("Show main menu"));
+    params.ToShowTopbar->setName(stCString("Show top toolbar"));
+    params.IsMobileUI->setName(stCString("Mobile UI"));
+    params.IsVSyncOn->setName(tr(MENU_VSYNC));
+    params.ToSaveRecent->setName(stCString("Remember recent file"));
+    params.TargetFps->setName(stCString("FPS Target"));
+    myLangMap->params.language->setName(tr(MENU_HELP_LANGS));
+}
+
 StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
                              const StNativeWin_t                theParentWin,
                              const StHandle<StOpenInfo>&        theOpenInfo,
@@ -249,7 +276,6 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
   mySlideShowTimer(false),
   mySlideShowDelay(4.0),
   //
-  myLastUpdateDay(0),
   myToCheckUpdates(true),
   myToSaveSrcFormat(false),
   myEscNoQuit(false),
@@ -266,46 +292,43 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
         myTitle = theAppName;
     }
     //
-    using namespace StImageViewerStrings;
-    params.IsFullscreen = new StBoolParamNamed(false, stCString("fullscreen"), tr(MENU_VIEW_FULLSCREEN));
+    params.IsFullscreen = new StBoolParamNamed(false, stCString("fullscreen"));
     params.IsFullscreen->signals.onChanged.connect(this, &StImageViewer::doFullscreen);
-    params.ToRestoreRatio = new StBoolParamNamed(false, stCString("toRestoreRatio"), tr(MENU_VIEW_RATIO_KEEP_ON_RESTART));
-    params.ScaleAdjust = new StEnumParam(StGLRootWidget::ScaleAdjust_Normal, stCString("scaleAdjust"), tr(MENU_HELP_SCALE));
-    params.ScaleAdjust->defineOption(StGLRootWidget::ScaleAdjust_Small,  stCString("Small"));
-    params.ScaleAdjust->defineOption(StGLRootWidget::ScaleAdjust_Normal, stCString("Normal"));
-    params.ScaleAdjust->defineOption(StGLRootWidget::ScaleAdjust_Big,    stCString("Big"));
-    mySettings->loadParam(params.ScaleAdjust);
-    params.ScaleAdjust->signals.onChanged = stSlot(this, &StImageViewer::doScaleGui);
+    params.ToRestoreRatio = new StBoolParamNamed(false, stCString("toRestoreRatio"));
+    params.ScaleAdjust = new StEnumParam(StGLRootWidget::ScaleAdjust_Normal, stCString("scaleAdjust"));
     params.ScaleHiDPI       = new StFloat32Param(1.0f,       // initial value
                                                  0.5f, 3.0f, // min, max values
                                                  1.0f,       // default value
                                                  1.0f,       // incremental step
                                                  0.001f);    // equality tolerance
-    params.ScaleHiDPI2X     = new StBoolParamNamed(false, stCString("scale2X"), tr(MENU_HELP_SCALE_HIDPI2X));
-    mySettings->loadParam (params.ScaleHiDPI2X);
-    params.ScaleHiDPI2X->signals.onChanged = stSlot(this, &StImageViewer::doScaleHiDPI);
-    params.CheckUpdatesDays = new StInt32ParamNamed(7, stCString("updatesInterval"), tr(MENU_HELP_UPDATES));
-    params.SrcStereoFormat  = new StInt32ParamNamed(StFormat_AUTO, stCString("srcFormat"), tr(MENU_MEDIA_SRC_FORMAT));
+    params.ScaleHiDPI2X     = new StBoolParamNamed(false, stCString("scale2X"));
+    params.CheckUpdatesDays = new StEnumParam(StCheckUpdates::UpdateInteval_EveryWeek, stCString("updatesIntervalEnum"));
+    params.LastUpdateDay    = new StInt32ParamNamed(0, stCString("updatesLastCheck"));
+    params.SrcStereoFormat  = new StInt32ParamNamed(StFormat_AUTO, stCString("srcFormat"));
     params.SrcStereoFormat->signals.onChanged.connect(this, &StImageViewer::doSwitchSrcFormat);
-    params.ToShowPlayList   = new StBoolParamNamed(false, stCString("showPlaylist"), tr(PLAYLIST));
+    params.ToShowPlayList   = new StBoolParamNamed(false, stCString("showPlaylist"));
     params.ToShowPlayList->signals.onChanged = stSlot(this, &StImageViewer::doShowPlayList);
-    params.ToTrackHead   = new StBoolParamNamed(true,  stCString("toTrackHead"),  tr(MENU_VIEW_TRACK_HEAD));
-    params.ToShowFps     = new StBoolParamNamed(false, stCString("toShowFps"),    tr(MENU_SHOW_FPS));
-    params.ToShowMenu    = new StBoolParamNamed(true,  stCString("toShowMenu"),   stCString("Show main menu"));
-    params.ToShowTopbar  = new StBoolParamNamed(true,  stCString("toShowTopbar"), stCString("Show top toolbar"));
-    params.IsMobileUI    = new StBoolParamNamed(StWindow::isMobile(), stCString("isMobileUI"), stCString("Mobile UI"));
+    params.ToTrackHead   = new StBoolParamNamed(true,  stCString("toTrackHead"));
+    params.ToShowFps     = new StBoolParamNamed(false, stCString("toShowFps"));
+    params.ToShowMenu    = new StBoolParamNamed(true,  stCString("toShowMenu"));
+    params.ToShowTopbar  = new StBoolParamNamed(true,  stCString("toShowTopbar"));
+    params.IsMobileUI    = new StBoolParamNamed(StWindow::isMobile(), stCString("isMobileUI"));
     params.IsMobileUI->signals.onChanged = stSlot(this, &StImageViewer::doScaleHiDPI);
-    params.IsVSyncOn     = new StBoolParamNamed(true,  stCString("vsync"),        tr(MENU_VSYNC));
+    params.IsVSyncOn     = new StBoolParamNamed(true,  stCString("vsync"));
     params.IsVSyncOn->signals.onChanged = stSlot(this, &StImageViewer::doSwitchVSync);
     StApplication::params.VSyncMode->setValue(StGLContext::VSync_ON);
-    params.ToSaveRecent = new StBoolParamNamed(false, stCString("toSaveRecent"), stCString("Remember recent file"));
-
+    params.ToSaveRecent = new StBoolParamNamed(false, stCString("toSaveRecent"));
     params.imageLib = StImageFile::ST_LIBAV,
-    params.TargetFps = new StInt32ParamNamed(0, stCString("fpsTarget"), stCString("FPS Target"));
+    params.TargetFps = new StInt32ParamNamed(0, stCString("fpsTarget"));
+    updateStrings();
 
+    mySettings->loadParam(params.ScaleAdjust);
+    params.ScaleAdjust->signals.onChanged  = stSlot(this, &StImageViewer::doScaleGui);
+    mySettings->loadParam (params.ScaleHiDPI2X);
+    params.ScaleHiDPI2X->signals.onChanged = stSlot(this, &StImageViewer::doScaleHiDPI);
     mySettings->loadParam (params.TargetFps);
     mySettings->loadString(ST_SETTING_LAST_FOLDER,        params.lastFolder);
-    mySettings->loadInt32 (ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
+    mySettings->loadParam (params.LastUpdateDay);
     mySettings->loadParam (params.CheckUpdatesDays);
     myToCheckPoorOrient = !mySettings->loadParam(params.ToTrackHead);
     mySettings->loadParam (params.ToShowFps);
@@ -438,7 +461,7 @@ void StImageViewer::saveAllParams() {
         mySettings->saveParam (params.ScaleHiDPI2X);
         mySettings->saveParam (params.TargetFps);
         mySettings->saveInt32(ST_SETTING_SLIDESHOW_DELAY, int(mySlideShowDelay));
-        mySettings->saveInt32(ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
+        mySettings->saveParam(params.LastUpdateDay);
         mySettings->saveParam(params.CheckUpdatesDays);
         mySettings->saveString(ST_SETTING_IMAGELIB,  StImageFile::imgLibToString(params.imageLib));
         mySettings->saveParam (params.ToTrackHead);
@@ -548,6 +571,7 @@ bool StImageViewer::createGui() {
 void StImageViewer::doChangeLanguage(const int32_t theNewLang) {
     StApplication::doChangeLanguage(theNewLang);
     StImageViewerStrings::loadDefaults(*myLangMap);
+    updateStrings();
 }
 
 bool StImageViewer::init() {
@@ -604,12 +628,14 @@ bool StImageViewer::init() {
     time(&aRawtime);
     struct tm* aTimeinfo = localtime(&aRawtime);
     int32_t aCurrentDayInYear = aTimeinfo->tm_yday;
-    if(params.CheckUpdatesDays->getValue() > 0
-    && std::abs(aCurrentDayInYear - myLastUpdateDay) > params.CheckUpdatesDays->getValue()) {
+
+    const int aNbDays = StCheckUpdates::getNbDaysFromInterval((StCheckUpdates::UpdateInteval )params.CheckUpdatesDays->getValue());
+    if(aNbDays > 0
+    && std::abs(aCurrentDayInYear - params.LastUpdateDay->getValue()) > aNbDays) {
         myUpdates = new StCheckUpdates();
         myUpdates->init();
-        myLastUpdateDay = aCurrentDayInYear;
-        mySettings->saveInt32(ST_SETTING_UPDATES_LAST_CHECK, myLastUpdateDay);
+        params.LastUpdateDay->setValue(aCurrentDayInYear);
+        mySettings->saveParam(params.LastUpdateDay);
     }
 #endif
     return true;

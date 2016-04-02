@@ -15,7 +15,9 @@
 
 // forward declarations
 class StAction;
+class StEnumParam;
 class StBoolParam;
+class StBoolParamNamed;
 class StInt32Param;
 class StFloat32Param;
 class StGLMenuItem;
@@ -162,6 +164,13 @@ class StGLMenu : public StGLWidget {
                                        const StHandle<StBoolParam>& theTrackedValue);
 
     /**
+     * Append checkbox menu item.
+     * @param theTrackedValue tracked boolean value
+     * @return created menu item widget
+     */
+    ST_CPPEXPORT StGLMenuItem* addItem(const StHandle<StBoolParamNamed>& theTrackedValue);
+
+    /**
      * Append radio button menu item.
      * @param theLabel        menu item text
      * @param theTrackedValue tracked integer (enumeration) value
@@ -171,6 +180,15 @@ class StGLMenu : public StGLWidget {
     ST_CPPEXPORT StGLMenuItem* addItem(const StString&               theLabel,
                                        const StHandle<StInt32Param>& theTrackedValue,
                                        const int32_t                 theOnValue);
+
+    /**
+     * Append radio button menu item.
+     * @param theTrackedValue tracked integer (enumeration) value
+     * @param theOnValue      associated integer (enumeration) value for this radio button
+     * @return created menu item widget
+     */
+    ST_CPPEXPORT StGLMenuItem* addItem(const StHandle<StEnumParam>& theTrackedValue,
+                                       const int32_t                theOnValue);
 
     /**
      * Append radio button menu item.

@@ -159,6 +159,17 @@ class StBoolParamNamed : public StBoolParam {
     }
 
     /**
+     * Main constructor.
+     */
+    ST_LOCAL StBoolParamNamed(const bool       theValue,
+                              const StCString& theParamKey)
+    : StBoolParam(theValue),
+      myParamKey(theParamKey),
+      myParamName(theParamKey) {
+        //
+    }
+
+    /**
      * @return parameter key
      */
     ST_LOCAL const StString& getKey() const {
@@ -205,6 +216,17 @@ class StInt32ParamNamed : public StInt32Param {
     : StInt32Param(theValue),
       myParamKey(theParamKey),
       myParamName(theParamName) {
+        //
+    }
+
+    /**
+     * Main constructor.
+     */
+    ST_LOCAL StInt32ParamNamed(const int32_t    theValue,
+                               const StCString& theParamKey)
+    : StInt32Param(theValue),
+      myParamKey(theParamKey),
+      myParamName(theParamKey) {
         //
     }
 

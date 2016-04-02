@@ -219,7 +219,8 @@ class StMoviePlayer : public StApplication {
         StHandle<StBoolParamNamed>    IsShuffle;         //!< shuffle playback order
         StHandle<StBoolParamNamed>    ToLoopSingle;      //!< play single playlist item in loop
         StHandle<StBoolParamNamed>    AreGlobalMKeys;    //!< capture global multimedia keys
-        StHandle<StInt32ParamNamed>   CheckUpdatesDays;  //!< days count between updates checks
+        StHandle<StEnumParam>         CheckUpdatesDays;  //!< days count between updates checks
+        StHandle<StInt32ParamNamed>   LastUpdateDay;     //!< the last time update has been checked
         StHandle<StInt32ParamNamed>   SrcStereoFormat;   //!< source format
         StHandle<StBoolParamNamed>    ToTrackHead;       //!< enable/disable head-tracking
         StHandle<StBoolParamNamed>    ToShowPlayList;    //!< display playlist
@@ -235,7 +236,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StInt32ParamNamed>   WebUIPort;         //!< port to start Web UI
         StHandle<StInt32Param>        audioStream;       //!< active Audio stream
         StHandle<StInt32Param>        subtitlesStream;   //!< active Subtitles stream
-        StHandle<StInt32Param>        blockSleeping;     //!< active Audio stream
+        StHandle<StEnumParam>         BlockSleeping;     //!< active Audio stream
         StHandle<StBoolParamNamed>    ToShowExtra;       //!< show experimental menu items
         StHandle<StInt32ParamNamed>   SnapshotImgType;   //!< default snapshot image type
         StString                      lastFolder;        //!< laster folder used to open / save file
@@ -266,6 +267,7 @@ class StMoviePlayer : public StApplication {
      * Initialization routines.
      */
     ST_LOCAL bool init();
+    ST_LOCAL void updateStrings();
     ST_LOCAL void saveGuiParams();
     ST_LOCAL void saveAllParams();
     ST_LOCAL bool createGui(StHandle<StGLTextureQueue>& theTextureQueue,
@@ -386,7 +388,6 @@ class StMoviePlayer : public StApplication {
 
     mg_context*                myWebCtx;          //!< web UI context
 
-    int32_t                    myLastUpdateDay;
     bool                       myToUpdateALList;
     bool                       myIsBenchmark;
     bool                       myToCheckUpdates;

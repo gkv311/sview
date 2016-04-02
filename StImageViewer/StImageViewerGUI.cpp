@@ -232,7 +232,7 @@ StGLMenu* StImageViewerGUI::createMediaMenu() {
               ->setIcon(stCMenuIcon("actionInfo"), false);
 
     if(myWindow->isMobile()) {
-        aMenuMedia->addItem("Mobile UI", myPlugin->params.IsMobileUI);
+        aMenuMedia->addItem(myPlugin->params.IsMobileUI);
     }
 
     aMenuMedia->addItem(tr(MENU_MEDIA_QUIT))
@@ -316,7 +316,7 @@ StGLMenu* StImageViewerGUI::createViewMenu() {
 
     aMenuView->addItem(tr(MENU_VIEW_DISPLAY_MODE),  aMenuDispMode);
     if(myWindow->hasFullscreenMode()) {
-        aMenuView->addItem(tr(MENU_VIEW_FULLSCREEN),    myPlugin->params.IsFullscreen);
+        aMenuView->addItem(myPlugin->params.IsFullscreen);
     }
     aMenuView->addItem(tr(MENU_VIEW_RESET))
              ->setIcon(stCMenuIcon("actionResetPlacement"), false)
@@ -364,7 +364,7 @@ StGLMenu* StImageViewerGUI::createDisplayRatioMenu() {
          ->setIcon(stCMenuIcon("menuRatio5_4_"));
     aMenu->addItem("1:1",    myImage->params.DisplayRatio, StGLImageRegion::RATIO_1_1)
          ->setIcon(stCMenuIcon("menuRatio1_1_"));
-    aMenu->addItem(tr(MENU_VIEW_RATIO_KEEP_ON_RESTART), myPlugin->params.ToRestoreRatio);
+    aMenu->addItem(myPlugin->params.ToRestoreRatio);
     aMenu->addItem(tr(MENU_VIEW_RATIO_HEAL_ANAMORPHIC), myImage->params.ToHealAnamorphicRatio);
     return aMenu;
 }
@@ -463,8 +463,8 @@ StGLMenu* StImageViewerGUI::createOutputMenu() {
     aMenu->addItem(tr(MENU_ABOUT_RENDERER))
          ->setIcon(stCMenuIcon("actionHelp"), false)
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doAboutRenderer);
-    aMenu->addItem(tr(MENU_SHOW_FPS),      myPlugin->params.ToShowFps);
-    aMenu->addItem(tr(MENU_VSYNC),         myPlugin->params.IsVSyncOn);
+    aMenu->addItem(myPlugin->params.ToShowFps);
+    aMenu->addItem(myPlugin->params.IsVSyncOn);
 
     const StHandle<StWindow>& aRend = myPlugin->getMainWindow();
     StParamsList aParams;
@@ -514,7 +514,8 @@ void StImageViewerGUI::doAboutProgram(const size_t ) {
                         aDialog->getContent()->getRectPx().width(),
                         aDialog->getContent()->getRectPx().width() / 2, 1);
 
-    aDialog->addButton(tr(BUTTON_CLOSE));
+    aDialog->addButton(stCString("Website"))->signals.onBtnClick += stSlot(this, &StImageViewerGUI::doCheckUpdates);
+    aDialog->addButton(tr(BUTTON_CLOSE), true);
     aDialog->stglInit();
 }
 
@@ -679,7 +680,6 @@ void StImageViewerGUI::doListHotKeys(const size_t ) {
     aParams.add(myPlugin->params.ToShowFps);
     aParams.add(myLangMap->params.language);
     aParams.add(myPlugin->params.IsMobileUI);
-    myLangMap->params.language->setName(tr(MENU_HELP_LANGS));
 
     const StString aTitle  = tr(MENU_HELP_HOTKEYS);
     StInfoDialog*  aDialog = new StInfoDialog(myPlugin, this, aTitle, scale(650), scale(300));
@@ -722,7 +722,9 @@ void StImageViewerGUI::doMobileSettings(const size_t ) {
     aParams.add(myPlugin->params.ToShowFps);
     aParams.add(myLangMap->params.language);
     aParams.add(myPlugin->params.IsMobileUI);
-    myLangMap->params.language->setName(tr(MENU_HELP_LANGS));
+#if !defined(ST_NO_UPDATES_CHECK)
+    aParams.add(myPlugin->params.CheckUpdatesDays);
+#endif
 
     StInfoDialog* aDialog = new StInfoDialog(myPlugin, this, tr(MENU_HELP_SETTINGS), scale(512), scale(300));
 
@@ -756,9 +758,6 @@ void StImageViewerGUI::doOpenLicense(const size_t ) {
 StGLMenu* StImageViewerGUI::createHelpMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     StGLMenu* aMenuScale        = createScaleMenu();        // Root -> Help -> Scale Interface menu
-#if !defined(ST_NO_UPDATES_CHECK)
-    StGLMenu* aMenuCheckUpdates = createCheckUpdatesMenu(); // Root -> Help -> Check updates menu
-#endif
     StGLMenu* aMenuLanguage     = createLanguageMenu();     // Root -> Help -> Language menu
 
     aMenu->addItem(tr(MENU_HELP_ABOUT))
@@ -776,9 +775,6 @@ StGLMenu* StImageViewerGUI::createHelpMenu() {
          ->signals.onItemClick.connect(this, &StImageViewerGUI::doOpenLicense);
     aMenu->addItem(tr(MENU_HELP_SCALE),   aMenuScale)
          ->setIcon(stCMenuIcon("actionFontSize"), false);
-#if !defined(ST_NO_UPDATES_CHECK)
-    aMenu->addItem(tr(MENU_HELP_UPDATES), aMenuCheckUpdates);
-#endif
     aMenu->addItem(tr(MENU_HELP_LANGS),   aMenuLanguage)
          ->setIcon(stCMenuIcon("actionLanguage"), false);
     return aMenu;
@@ -789,25 +785,11 @@ StGLMenu* StImageViewerGUI::createHelpMenu() {
  */
 StGLMenu* StImageViewerGUI::createScaleMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(tr(MENU_HELP_SCALE_SMALL),   myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Small);
-    aMenu->addItem(tr(MENU_HELP_SCALE_NORMAL),  myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Normal);
-    aMenu->addItem(tr(MENU_HELP_SCALE_BIG),     myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Big);
-    aMenu->addItem(tr(MENU_HELP_SCALE_HIDPI2X), myPlugin->params.ScaleHiDPI2X);
-    aMenu->addItem(myPlugin->params.IsMobileUI->getName(), myPlugin->params.IsMobileUI);
-    return aMenu;
-}
-
-/**
- * Root -> Help -> Check updates menu
- */
-StGLMenu* StImageViewerGUI::createCheckUpdatesMenu() {
-    StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(tr(MENU_HELP_UPDATES_NOW))
-         ->signals.onItemClick.connect(this, &StImageViewerGUI::doCheckUpdates);
-    aMenu->addItem(tr(MENU_HELP_UPDATES_DAY),   myPlugin->params.CheckUpdatesDays, 1);
-    aMenu->addItem(tr(MENU_HELP_UPDATES_WEEK),  myPlugin->params.CheckUpdatesDays, 7);
-    aMenu->addItem(tr(MENU_HELP_UPDATES_YEAR),  myPlugin->params.CheckUpdatesDays, 355);
-    aMenu->addItem(tr(MENU_HELP_UPDATES_NEVER), myPlugin->params.CheckUpdatesDays, 0);
+    aMenu->addItem(myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Small);
+    aMenu->addItem(myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Normal);
+    aMenu->addItem(myPlugin->params.ScaleAdjust,  StGLRootWidget::ScaleAdjust_Big);
+    aMenu->addItem(myPlugin->params.ScaleHiDPI2X);
+    aMenu->addItem(myPlugin->params.IsMobileUI);
     return aMenu;
 }
 

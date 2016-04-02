@@ -130,7 +130,8 @@ class StImageViewer : public StApplication {
         StHandle<StEnumParam>         ScaleAdjust;      //!< adjust GUI size, see StGLRootWidget::ScaleAdjust
         StHandle<StFloat32Param>      ScaleHiDPI;       //!< adapt  GUI size for HiDPI resolution
         StHandle<StBoolParamNamed>    ScaleHiDPI2X;     //!< option to set HiDPI resolution to 2.0
-        StHandle<StInt32ParamNamed>   CheckUpdatesDays; //!< days count between updates checks
+        StHandle<StEnumParam>         CheckUpdatesDays; //!< days count between updates checks
+        StHandle<StInt32ParamNamed>   LastUpdateDay;    //!< the last time update has been checked
         StHandle<StInt32ParamNamed>   SrcStereoFormat;  //!< source format
         StHandle<StBoolParamNamed>    ToTrackHead;      //!< enable/disable head-tracking
         StHandle<StBoolParamNamed>    ToShowMenu;       //!< show main menu
@@ -200,6 +201,7 @@ class StImageViewer : public StApplication {
      * Initialization routines.
      */
     ST_LOCAL bool init();
+    ST_LOCAL void updateStrings();
     ST_LOCAL bool createGui();
     ST_LOCAL void saveGuiParams();
     ST_LOCAL void saveAllParams();
@@ -233,7 +235,6 @@ class StImageViewer : public StApplication {
     StTimer                    mySlideShowTimer;  //!< slideshow stuff
     double                     mySlideShowDelay;
 
-    int32_t                    myLastUpdateDay;
     bool                       myToCheckUpdates;
     bool                       myToSaveSrcFormat; //!< indicates that active source format should be saved or not
     bool                       myEscNoQuit;       //!< if true then Escape will not quit application

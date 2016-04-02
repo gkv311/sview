@@ -18,6 +18,7 @@
 #include <StGLCore/StGLCore20.h>
 
 #include <StCore/StEvent.h>
+#include <StSettings/StEnumParam.h>
 #include <StSlots/StAction.h>
 
 void StGLMenu::DeleteWithSubMenus(StGLMenu* theMenu) {
@@ -280,11 +281,24 @@ StGLMenuItem* StGLMenu::addItem(const StString&              theLabel,
     return aNewItem;
 }
 
+StGLMenuItem* StGLMenu::addItem(const StHandle<StBoolParamNamed>& theTrackedValue) {
+    StGLMenuItem* aNewItem = new StGLMenuCheckbox(this, theTrackedValue);
+    aNewItem->setText(theTrackedValue->getName());
+    return aNewItem;
+}
+
 StGLMenuItem* StGLMenu::addItem(const StString&               theLabel,
                                 const StHandle<StInt32Param>& theTrackedValue,
                                 const int32_t                 theOnValue) {
     StGLMenuItem* aNewItem = new StGLMenuRadioButton(this, theTrackedValue, theOnValue);
     aNewItem->setText(theLabel);
+    return aNewItem;
+}
+
+StGLMenuItem* StGLMenu::addItem(const StHandle<StEnumParam>& theTrackedValue,
+                                const int32_t                theOnValue) {
+    StGLMenuItem* aNewItem = new StGLMenuRadioButton(this, theTrackedValue, theOnValue);
+    aNewItem->setText(theTrackedValue->getOptionLabel(theOnValue));
     return aNewItem;
 }
 
