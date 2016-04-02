@@ -44,6 +44,19 @@ namespace {
 
 const StString StCADViewer::ST_DRAWER_PLUGIN_NAME = "StCADViewer";
 
+void StCADViewer::updateStrings() {
+    using namespace StCADViewerStrings;
+    params.IsFullscreen->setName(tr(MENU_VIEW_FULLSCREEN));
+    params.ToShowPlayList->setName(stCString("Show Playlist"));
+    params.ToShowFps->setName(tr(MENU_SHOW_FPS));
+    params.ToShowTrihedron->setName(tr(MENU_VIEW_TRIHEDRON));
+    params.ProjectMode->setName(tr(MENU_VIEW_PROJECTION));
+    params.ProjectMode->defineOption(ST_PROJ_ORTHO,  tr(MENU_VIEW_PROJ_ORTHO));
+    params.ProjectMode->defineOption(ST_PROJ_PERSP,  tr(MENU_VIEW_PROJ_PERSP));
+    params.ProjectMode->defineOption(ST_PROJ_STEREO, tr(MENU_VIEW_PROJ_STEREO));
+    myLangMap->params.language->setName(tr(MENU_HELP_LANGS));
+}
+
 StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
                          const StNativeWin_t                theParentWin,
                          const StHandle<StOpenInfo>&        theOpenInfo)
@@ -60,15 +73,12 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
 
     myTitle = "sView - CAD Viewer";
     //
-    params.IsFullscreen    = new StBoolParamNamed(false, stCString("isFullscreen"),  tr(StCADViewerStrings::MENU_VIEW_FULLSCREEN));
+    params.IsFullscreen    = new StBoolParamNamed(false, stCString("isFullscreen"));
     params.IsFullscreen->signals.onChanged.connect(this, &StCADViewer::doFullscreen);
-    params.ToShowPlayList  = new StBoolParamNamed(false, stCString("showPlaylist"),  stCString("Show Playlist"));
-    params.ToShowFps       = new StBoolParamNamed(false, stCString("toShowFps"),     tr(StCADViewerStrings::MENU_SHOW_FPS));
-    params.ToShowTrihedron = new StBoolParamNamed(true,  stCString("showTrihedron"), tr(StCADViewerStrings::MENU_VIEW_TRIHEDRON));
-    params.ProjectMode = new StEnumParam(ST_PROJ_STEREO, stCString("projMode"), tr(StCADViewerStrings::MENU_VIEW_PROJECTION));
-    params.ProjectMode->changeValues().add(tr(StCADViewerStrings::MENU_VIEW_PROJ_ORTHO));  // ST_PROJ_ORTHO
-    params.ProjectMode->changeValues().add(tr(StCADViewerStrings::MENU_VIEW_PROJ_PERSP));  // ST_PROJ_PERSP
-    params.ProjectMode->changeValues().add(tr(StCADViewerStrings::MENU_VIEW_PROJ_STEREO)); // ST_PROJ_STEREO
+    params.ToShowPlayList  = new StBoolParamNamed(false, stCString("showPlaylist"));
+    params.ToShowFps       = new StBoolParamNamed(false, stCString("toShowFps"));
+    params.ToShowTrihedron = new StBoolParamNamed(true,  stCString("showTrihedron"));
+    params.ProjectMode = new StEnumParam(ST_PROJ_STEREO, stCString("projMode"));
     params.ProjectMode->signals.onChanged.connect(this, &StCADViewer::doChangeProjection);
 
     params.ZFocus = new StFloat32Param(1.0f,       // current value
@@ -83,6 +93,7 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
                                           0.0001f);
 
     params.TargetFps = 0;
+    updateStrings();
 
     mySettings->loadString(ST_SETTING_LAST_FOLDER, params.LastFolder);
     mySettings->loadInt32 (ST_SETTING_FPSTARGET,   params.TargetFps);
@@ -369,6 +380,7 @@ bool StCADViewer::createGui() {
 void StCADViewer::doChangeLanguage(const int32_t theNewLang) {
     StApplication::doChangeLanguage(theNewLang);
     StCADViewerStrings::loadDefaults(*myLangMap);
+    updateStrings();
 }
 
 bool StCADViewer::init() {

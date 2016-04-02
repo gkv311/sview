@@ -142,9 +142,9 @@ StGLMenu* StCADViewerGUI::createViewMenu() {
     StGLMenu* aMenuProj = createProjMenu(); // Root -> View menu -> Projection
 
 #if !defined(__ANDROID__)
-    aMenu->addItem(tr(MENU_VIEW_FULLSCREEN), myPlugin->params.IsFullscreen);
+    aMenu->addItem(myPlugin->params.IsFullscreen);
 #endif
-    aMenu->addItem(tr(MENU_VIEW_TRIHEDRON),  myPlugin->params.ToShowTrihedron);
+    aMenu->addItem(myPlugin->params.ToShowTrihedron);
     aMenu->addItem(tr(MENU_VIEW_PROJECTION), aMenuProj);
     aMenu->addItem(tr(MENU_VIEW_FITALL), myPlugin->getAction(StCADViewer::Action_FitAll));
     return aMenu;
@@ -155,12 +155,9 @@ StGLMenu* StCADViewerGUI::createViewMenu() {
  */
 StGLMenu* StCADViewerGUI::createProjMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(tr(MENU_VIEW_PROJ_ORTHO),
-                   myPlugin->params.ProjectMode, ST_PROJ_ORTHO);
-    aMenu->addItem(tr(MENU_VIEW_PROJ_PERSP),
-                   myPlugin->params.ProjectMode, ST_PROJ_PERSP);
-    aMenu->addItem(tr(MENU_VIEW_PROJ_STEREO),
-                   myPlugin->params.ProjectMode, ST_PROJ_STEREO);
+    aMenu->addItem(myPlugin->params.ProjectMode, ST_PROJ_ORTHO);
+    aMenu->addItem(myPlugin->params.ProjectMode, ST_PROJ_PERSP);
+    aMenu->addItem(myPlugin->params.ProjectMode, ST_PROJ_STEREO);
     return aMenu;
 }
 
@@ -177,7 +174,7 @@ StGLMenu* StCADViewerGUI::createHelpMenu() {
     aMenu->addItem(tr(MENU_HELP_LICENSE))
          ->signals.onItemClick.connect(this, &StCADViewerGUI::doOpenLicense);
 
-    aMenu->addItem("Show FPS", myPlugin->params.ToShowFps);
+    aMenu->addItem(myPlugin->params.ToShowFps);
 
     aMenu->addItem(tr(MENU_HELP_LANGS), aLangMenu);
     return aMenu;
@@ -204,8 +201,6 @@ void StCADViewerGUI::doMobileSettings(const size_t ) {
     //aParams.add(myPlugin->params.IsMobileUI);
     aParams.add(myPlugin->params.ToShowTrihedron);
     aParams.add(myPlugin->params.ProjectMode);
-
-    myLangMap->params.language->setName(tr(MENU_HELP_LANGS));
 
     StInfoDialog* aDialog = new StInfoDialog(myPlugin, this, tr(MENU_HELP_SETTINGS), scale(512), scale(300));
 

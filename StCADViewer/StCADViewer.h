@@ -151,6 +151,11 @@ class StCADViewer : public StApplication {
         private:
 
     /**
+     * Update strings.
+     */
+    ST_LOCAL void updateStrings();
+
+    /**
      * Initialize GUI.
      */
     ST_LOCAL bool createGui();
