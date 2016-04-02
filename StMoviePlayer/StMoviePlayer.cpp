@@ -1942,6 +1942,15 @@ void StMoviePlayer::doPanoramaOnOff(const size_t ) {
 
 void StMoviePlayer::doSwitchSrcFormat(const int32_t theSrcFormat) {
     myVideo->setStereoFormat(StFormat(theSrcFormat));
+    double aDuration = 0.0;
+    double aPts = 0.0;
+    bool   isVideoPlayed = false;
+    bool   isAudioPlayed = false;
+    bool   isPlaying = myVideo->getPlaybackState(aDuration, aPts, isVideoPlayed, isAudioPlayed);
+    StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
+    if(!isPlaying && !aParams.isNull() && myGUI->myImage->hasVideoStream()) {
+        myVideo->pushPlayEvent(ST_PLAYEVENT_SEEK, aPts - 0.01);
+    }
 }
 
 void StMoviePlayer::doReset(const size_t ) {
