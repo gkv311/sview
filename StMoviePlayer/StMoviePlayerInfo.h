@@ -189,6 +189,14 @@
 #define ST_M2TS_MIME_STRING ST_M2TS_MIME ":" ST_M2TS_EXT ":" ST_M2TS_DESC
 
 /**
+ *.mxf - Material eXchange Format (MXF)
+ */
+#define ST_MXF_MIME "application/mxf"
+#define ST_MXF_EXT  "mxf"
+#define ST_MXF_DESC "MXF - Material eXchange Format"
+#define ST_MXF_MIME_STRING ST_MXF_MIME ":" ST_MXF_EXT ":" ST_MXF_DESC
+
+/**
  *.bik - BINK video (games)
  */
 #define ST_BIK_MIME "video/x-bik"
@@ -323,6 +331,7 @@ ST_AOB_MIME_STRING ";" \
 ST_TS_MIME_STRING ";" \
 ST_MTS_MIME_STRING ";" \
 ST_M2TS_MIME_STRING ";" \
+ST_MXF_MIME_STRING ";" \
 ST_BIK_MIME_STRING ";" \
 ST_FLAC_MIME_STRING ";" \
 ST_APE_MIME_STRING ";" \
