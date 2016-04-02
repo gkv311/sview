@@ -597,8 +597,11 @@ bool StImageLoader::saveImage(const StHandle<StFileNode>&     theSource,
         }
     }
 
-    StString aFileToSave;
-    if(StFileNode::openFileDialog(theSource->getFolderPath(), aTitle, aFilter, aFileToSave, true)) {
+    StString aFileNameSrc, aFolderSrc, aNameSrc, anExtSrc;
+    StFileNode::getFolderAndFile(theSource->getPath(), aFolderSrc, aFileNameSrc);
+    StFileNode::getNameAndExtension(aFileNameSrc, aNameSrc, anExtSrc);
+    StString aFileToSave = (!aFolderSrc.isEmpty() ? aFolderSrc : "") + ST_FILE_SPLITTER + aNameSrc;
+    if(StFileNode::openFileDialog(aFolderSrc, aTitle, aFilter, aFileToSave, true)) {
         if(StFileNode::getExtension(aFileToSave) != aSaveExt) {
             aFileToSave += StString('.') + aSaveExt;
         }

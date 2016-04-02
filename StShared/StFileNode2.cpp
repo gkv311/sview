@@ -85,8 +85,13 @@ bool StFileNode::openFileDialog(const StString& theFolder,
         }
     }
 
-    stUtfWide_t aFilePath[MAX_PATH];  aFilePath[0]  = L'\0';
-    stUtfWide_t aFileTitle[MAX_PATH]; aFileTitle[0] = L'\0';
+    stUtfWide_t aFilePath [4096]; aFilePath[0]  = L'\0';
+    stUtfWide_t aFileTitle[4096]; aFileTitle[0] = L'\0';
+    StStringUtfWide aFilePathIn(theFilePath.toCString());
+    if(!aFilePathIn.isEmpty()
+     && aFilePathIn.getSize() < 4096) {
+        stMemCpy(aFilePath, aFilePathIn.toCString(), (aFilePathIn.getSize() + 1) * sizeof(wchar_t));
+    }
     OPENFILENAMEW anOpenStruct; stMemSet(&anOpenStruct, 0, sizeof(OPENFILENAMEW));
     anOpenStruct.lStructSize     = sizeof(OPENFILENAMEW);
     anOpenStruct.hwndOwner       = NULL;
@@ -124,6 +129,9 @@ bool StFileNode::openFileDialog(const StString& theFolder,
                                                      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, (toSave ? GTK_STOCK_SAVE : GTK_STOCK_OPEN),
                                                      GTK_RESPONSE_ACCEPT, NULL);
     gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(aDialog), theFolder.toCString());
+    if(!theFilePath.isEmpty()) {
+        gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(aDialog), theFilePath.toCString());
+    }
 
     GtkFileFilter* gtkFilter = gtk_file_filter_new();
     for(size_t aMimeId = 0; aMimeId < theFilter.size(); ++aMimeId) {

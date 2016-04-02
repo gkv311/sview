@@ -20,6 +20,7 @@
         NSMutableArray* myFilter;
         NSString*       myTitle;
         NSString*       myFolder;
+        NSString*       myInitFileName;
         @public
         StString        myResult;
         bool            myToSave;
@@ -30,6 +31,7 @@
     - (id ) init: (NSMutableArray* ) theFilter
        withTitle: (NSString* )       theTitle
       withFolder: (NSString* )       theFolder
+        withFile: (NSString* )       theInitFileName
           toSave: (bool )            theToSave;
 
     - (void ) doDialog: (id ) theSender;
@@ -40,6 +42,7 @@
     - (id ) init: (NSMutableArray* ) theFilter
        withTitle: (NSString* )       theTitle
       withFolder: (NSString* )       theFolder
+        withFile: (NSString* )       theInitFileName
           toSave: (bool )            theToSave {
         self = [super init];
         if(self == NULL) {
@@ -48,6 +51,7 @@
         myFilter = theFilter;
         myTitle  = theTitle;
         myFolder = theFolder;
+        myInitFileName = theInitFileName;
         myToSave = theToSave;
         myIsFileSelected = false;
         return self;
@@ -57,6 +61,7 @@
         StCocoaLocalPool aLocalPool;
         NSSavePanel* aFilePanel = myToSave ? [NSSavePanel savePanel] : [NSOpenPanel openPanel];
         [aFilePanel setTitle: myTitle];
+        [aFilePanel setNameFieldStringValue: myInitFileName];
         [aFilePanel setDirectoryURL: [NSURL fileURLWithPath: myFolder]];
 
         if(myFilter != NULL) {
@@ -82,9 +87,13 @@ bool StFileNode::openFileDialog(const StString& theFolder,
         return false;
     }
 
+    StString aFolderSrc, aFileNameSrc;
+    StFileNode::getFolderAndFile(theFilePath, aFolderSrc, aFileNameSrc);
+
     StCocoaLocalPool aLocalPool;
-    NSString* aTitle  = [NSString stringWithUTF8String: theTitle.toCString()];
-    NSString* aFolder = [NSString stringWithUTF8String: theFolder.toCString()];
+    NSString* aTitle     = [NSString stringWithUTF8String: theTitle.toCString()];
+    NSString* aFolder    = [NSString stringWithUTF8String: theFolder.toCString()];
+    NSString* anInitFile = [NSString stringWithUTF8String: aFileNameSrc.toCString()];
     NSMutableArray* aFilter = NULL;
     if(!theFilter.isEmpty()) {
         aFilter = [NSMutableArray arrayWithCapacity: theFilter.size()];
@@ -97,6 +106,7 @@ bool StFileNode::openFileDialog(const StString& theFolder,
     StOpenFileInfo* anOpenFile = [[StOpenFileInfo alloc] init: aFilter
                                                     withTitle: aTitle
                                                    withFolder: aFolder
+                                                     withFile: anInitFile
                                                        toSave: toSave];
     if([NSThread isMainThread]) {
         [anOpenFile doDialog: NULL];
