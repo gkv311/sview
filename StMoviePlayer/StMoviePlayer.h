@@ -210,7 +210,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StFloat32Param>      SubtitlesParallax; //!< subtitles parallax
         StHandle<StBoolParamNamed>    ToSearchSubs;      //!< automatically search for additional subtitles/audio track files nearby video file
         StHandle<StEnumParam>         SubtitlesParser;   //!< subtitles parser
-        StHandle<StALDeviceParam>     alDevice;          //!< active OpenAL device
+        StHandle<StALDeviceParam>     AudioAlDevice;     //!< active OpenAL device
         StHandle<StFloat32Param>      AudioGain;         //!< volume factor
         StHandle<StBoolParamNamed>    AudioMute;         //!< volume mute flag
         StHandle<StFloat32Param>      AudioDelay;        //!< audio/video synchronization delay
@@ -234,8 +234,8 @@ class StMoviePlayer : public StApplication {
         StHandle<StBoolParamNamed>    ToPrintWebErrors;  //!< print Web UI starting errors
         StHandle<StBoolParamNamed>    IsLocalWebUI;      //!< restrict remote access to 127.0.0.0
         StHandle<StInt32ParamNamed>   WebUIPort;         //!< port to start Web UI
-        StHandle<StInt32Param>        audioStream;       //!< active Audio stream
-        StHandle<StInt32Param>        subtitlesStream;   //!< active Subtitles stream
+        StHandle<StInt32Param>        AudioStream;       //!< active Audio stream
+        StHandle<StInt32Param>        SubtitlesStream;   //!< active Subtitles stream
         StHandle<StEnumParam>         BlockSleeping;     //!< active Audio stream
         StHandle<StBoolParamNamed>    ToShowExtra;       //!< show experimental menu items
         StHandle<StInt32ParamNamed>   SnapshotImgType;   //!< default snapshot image type

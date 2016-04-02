@@ -444,7 +444,7 @@ StGLMenu* StMoviePlayerGUI::createOpenALDeviceMenu() {
 }
 
 void StMoviePlayerGUI::fillOpenALDeviceMenu(StGLMenu* theMenu) {
-    const StArrayList<StString>& aDevList = myPlugin->params.alDevice->getList();
+    const StArrayList<StString>& aDevList = myPlugin->params.AudioAlDevice->getList();
 
     theMenu->addItem("Refresh list...")
            ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doUpdateOpenALDeviceList);
@@ -457,7 +457,7 @@ void StMoviePlayerGUI::fillOpenALDeviceMenu(StGLMenu* theMenu) {
     aLen += 2;
     for(size_t devId = 0; devId < aDevList.size(); ++devId) {
         StGLMenuItem* anItem = theMenu->addItem(aDevList[devId],
-                                                StHandle<StInt32Param>::downcast(myPlugin->params.alDevice), int32_t(devId));
+                                                StHandle<StInt32Param>::downcast(myPlugin->params.AudioAlDevice), int32_t(devId));
         anItem->changeRectPx().right() = anItem->getRectPx().left() + scale(10 * int(aLen));
     }
 }
@@ -685,7 +685,7 @@ StGLMenu* StMoviePlayerGUI::createImageAdjustMenu() {
  */
 StGLMenu* StMoviePlayerGUI::createAudioMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(tr(MENU_AUDIO_NONE), myPlugin->params.audioStream, -1);
+    aMenu->addItem(tr(MENU_AUDIO_NONE), myPlugin->params.AudioStream, -1);
     return aMenu;
 }
 
@@ -790,7 +790,7 @@ void StMoviePlayerGUI::doAudioDelay(const size_t ) {
  */
 StGLMenu* StMoviePlayerGUI::createSubtitlesMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-    aMenu->addItem(tr(MENU_SUBTITLES_NONE), myPlugin->params.subtitlesStream, -1);
+    aMenu->addItem(tr(MENU_SUBTITLES_NONE), myPlugin->params.SubtitlesStream, -1);
     return aMenu;
 }
 
@@ -1439,10 +1439,10 @@ void StMoviePlayerGUI::stglUpdate(const StPointD_t& thePointZo) {
     }
 
     if(myBtnAudio != NULL) {
-        myBtnAudio->getTrackedValue()->setValue(myPlugin->params.audioStream->getValue() != -1);
+        myBtnAudio->getTrackedValue()->setValue(myPlugin->params.AudioStream->getValue() != -1);
     }
     if(myBtnSubs != NULL) {
-        myBtnSubs->getTrackedValue()->setValue(myPlugin->params.subtitlesStream->getValue() != -1);
+        myBtnSubs->getTrackedValue()->setValue(myPlugin->params.SubtitlesStream->getValue() != -1);
     }
 
     setVisibility(thePointZo);
@@ -1770,11 +1770,11 @@ void StMoviePlayerGUI::doAudioStreamsCombo(const size_t ) {
 
     StGLCombobox::ListBuilder aBuilder(this);
     if(hasVideo || aStreams.isNull() || aStreams->isEmpty()) {
-        aBuilder.getMenu()->addItem(tr(MENU_AUDIO_NONE), myPlugin->params.audioStream, -1);
+        aBuilder.getMenu()->addItem(tr(MENU_AUDIO_NONE), myPlugin->params.AudioStream, -1);
     }
     if(!aStreams.isNull()) {
         for(size_t aStreamId = 0; aStreamId < aStreams->size(); ++aStreamId) {
-            aBuilder.getMenu()->addItem(aStreams->getValue(aStreamId), myPlugin->params.audioStream, int32_t(aStreamId));
+            aBuilder.getMenu()->addItem(aStreams->getValue(aStreamId), myPlugin->params.AudioStream, int32_t(aStreamId));
         }
     }
     if(myWindow->isMobile()) {
@@ -1821,10 +1821,10 @@ void StMoviePlayerGUI::doSubtitlesStreamsCombo(const size_t ) {
         }
     }
 
-    aBuilder.getMenu()->addItem(tr(MENU_SUBTITLES_NONE), myPlugin->params.subtitlesStream, -1);
+    aBuilder.getMenu()->addItem(tr(MENU_SUBTITLES_NONE), myPlugin->params.SubtitlesStream, -1);
     if(!aStreams.isNull()) {
         for(size_t aStreamId = 0; aStreamId < aStreams->size(); ++aStreamId) {
-            aBuilder.getMenu()->addItem(aStreams->getValue(aStreamId), myPlugin->params.subtitlesStream, int32_t(aStreamId));
+            aBuilder.getMenu()->addItem(aStreams->getValue(aStreamId), myPlugin->params.SubtitlesStream, int32_t(aStreamId));
         }
     }
     if(myWindow->isMobile()) {

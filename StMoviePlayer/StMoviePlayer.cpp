@@ -531,7 +531,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
                                                  0.1f);       // equality tolerance
     params.ToSearchSubs = new StBoolParamNamed(true, stCString("toSearchSubs"));
     params.SubtitlesParser = new StEnumParam(1, stCString("subsParser"));
-    params.alDevice = new StALDeviceParam();
+    params.AudioAlDevice = new StALDeviceParam();
     params.AudioGain = new StFloat32Param( 0.0f, // sound is unattenuated
                                          -50.0f, // almost mute
                                           10.0f, // max amplification
@@ -570,10 +570,10 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.ToPrintWebErrors = new StBoolParamNamed(true,  stCString("webuiShowErrors"));
     params.IsLocalWebUI     = new StBoolParamNamed(false, stCString("isLocalWebUI"));
     params.WebUIPort        = new StInt32ParamNamed(8080, stCString("webuiPort"));
-    params.audioStream = new StInt32Param(-1);
-    params.audioStream->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchAudioStream);
-    params.subtitlesStream = new StInt32Param(-1);
-    params.subtitlesStream->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchSubtitlesStream);
+    params.AudioStream = new StInt32Param(-1);
+    params.AudioStream->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchAudioStream);
+    params.SubtitlesStream = new StInt32Param(-1);
+    params.SubtitlesStream->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchSubtitlesStream);
     params.BlockSleeping = new StEnumParam(StMoviePlayer::BLOCK_SLEEP_PLAYBACK, stCString("blockSleep"));
     params.ToShowExtra   = new StBoolParamNamed(false, stCString("experimental"));
     // set rendering FPS as twice as average video FPS
@@ -626,12 +626,12 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.StartWebUI->signals.onChanged += stSlot(this, &StMoviePlayer::doSwitchWebUI);
 
     StString aSavedALDevice;
-    mySettings->loadString(params.alDevice->getKey(), aSavedALDevice);
-    params.alDevice->init(aSavedALDevice);
+    mySettings->loadString(params.AudioAlDevice->getKey(), aSavedALDevice);
+    params.AudioAlDevice->init(aSavedALDevice);
 
-    params.IsShuffle   ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchShuffle);
-    params.ToLoopSingle->signals.onChanged.connect(this, &StMoviePlayer::doSwitchLoopSingle);
-    params.alDevice    ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchAudioDevice);
+    params.IsShuffle    ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchShuffle);
+    params.ToLoopSingle ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchLoopSingle);
+    params.AudioAlDevice->signals.onChanged.connect(this, &StMoviePlayer::doSwitchAudioDevice);
 
 #if defined(__ANDROID__)
     addRenderer(new StOutInterlace  (myResMgr, theParentWin));
@@ -818,7 +818,7 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (params.SubtitlesParser);
         mySettings->saveParam (params.ToSearchSubs);
         mySettings->saveParam (params.TargetFps);
-        mySettings->saveString(params.alDevice->getKey(),     params.alDevice->getUtfTitle());
+        mySettings->saveString(params.AudioAlDevice->getKey(), params.AudioAlDevice->getUtfTitle());
         mySettings->saveParam (params.LastUpdateDay);
         mySettings->saveParam (params.CheckUpdatesDays);
         mySettings->saveParam (params.SrcStereoFormat);
@@ -1078,7 +1078,7 @@ bool StMoviePlayer::init() {
 
     // create the video playback thread
     if(!isReset) {
-        myVideo = new StVideo(params.alDevice->getCTitle(), myResMgr, myLangMap, myPlayList, aTextureQueue, aSubQueue);
+        myVideo = new StVideo(params.AudioAlDevice->getCTitle(), myResMgr, myLangMap, myPlayList, aTextureQueue, aSubQueue);
         myVideo->signals.onError  = stSlot(myMsgQueue.access(), &StMsgQueue::doPushError);
         myVideo->signals.onLoaded = stSlot(this,                &StMoviePlayer::doLoaded);
         myVideo->params.UseGpu       = params.UseGpu;
@@ -1428,7 +1428,7 @@ void StMoviePlayer::doAudioNext(size_t theDirection) {
     }
 
     const int32_t aValue = myVideo->params.activeAudio->nextValue(theDirection == 1 ? 1 : -1);
-    params.audioStream->setValue(aValue);
+    params.AudioStream->setValue(aValue);
 }
 
 void StMoviePlayer::doSubtitlesNext(size_t theDirection) {
@@ -1437,7 +1437,7 @@ void StMoviePlayer::doSubtitlesNext(size_t theDirection) {
     }
 
     const int32_t aValue = myVideo->params.activeSubtitles->nextValue(theDirection == 1 ? 1 : -1);
-    params.subtitlesStream->setValue(aValue);
+    params.SubtitlesStream->setValue(aValue);
 }
 
 void StMoviePlayer::doSubtitlesCopy(size_t ) {
@@ -1595,15 +1595,15 @@ void StMoviePlayer::beforeDraw() {
     }
 
     if(myVideo->isDisconnected() || myToUpdateALList) {
-        const StString aPrevDev = params.alDevice->getUtfTitle();
-        params.alDevice->initList();
+        const StString aPrevDev = params.AudioAlDevice->getUtfTitle();
+        params.AudioAlDevice->initList();
         myGUI->updateOpenALDeviceMenu();
         // switch audio device
-        if(!params.alDevice->init(aPrevDev)) {
+        if(!params.AudioAlDevice->init(aPrevDev)) {
             // select first existing device if any
-            params.alDevice->init(params.alDevice->getUtfTitle());
+            params.AudioAlDevice->init(params.AudioAlDevice->getUtfTitle());
         }
-        myVideo->switchAudioDevice(params.alDevice->getCTitle());
+        myVideo->switchAudioDevice(params.AudioAlDevice->getCTitle());
         myToUpdateALList = false;
     }
     if(myPlayList->isRecentChanged()) {
@@ -1844,7 +1844,7 @@ void StMoviePlayer::doSwitchVSync(const bool theValue) {
 
 void StMoviePlayer::doSwitchAudioDevice(const int32_t /*theDevId*/) {
     if(!myVideo.isNull()) {
-        myVideo->switchAudioDevice(params.alDevice->getCTitle());
+        myVideo->switchAudioDevice(params.AudioAlDevice->getCTitle());
     }
 }
 
@@ -1890,20 +1890,20 @@ void StMoviePlayer::doUpdateStateLoaded() {
     } else {
         myWindow->setTitle(aFileToLoad + " - sView");
     }
-    params.audioStream    ->setValue(myVideo->params.activeAudio->getValue());
-    params.subtitlesStream->setValue(myVideo->params.activeSubtitles->getValue());
+    params.AudioStream    ->setValue(myVideo->params.activeAudio->getValue());
+    params.SubtitlesStream->setValue(myVideo->params.activeSubtitles->getValue());
     if(mySeekOnLoad > 0.0) {
         myVideo->pushPlayEvent(ST_PLAYEVENT_SEEK, mySeekOnLoad);
         mySeekOnLoad = -1.0;
     }
     if(myAudioOnLoad >= 0) {
         myVideo->params.activeAudio->setValue(myAudioOnLoad);
-        params.audioStream->setValue(myAudioOnLoad);
+        params.AudioStream->setValue(myAudioOnLoad);
         myAudioOnLoad = -1;
     }
     if(mySubsOnLoad >= 0) {
         myVideo->params.activeSubtitles->setValue(mySubsOnLoad);
-        params.subtitlesStream->setValue(mySubsOnLoad);
+        params.SubtitlesStream->setValue(mySubsOnLoad);
         mySubsOnLoad = -1;
     }
 }
