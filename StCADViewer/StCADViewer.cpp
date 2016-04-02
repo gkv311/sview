@@ -14,6 +14,7 @@
 #include "StCADMsgPrinter.h"
 
 #include <AIS_ConnectedInteractive.hxx>
+#include <AIS_Shape.hxx>
 #include <Message_Messenger.hxx>
 #include <Message_PrinterOStream.hxx>
 #include <OpenGl_GraphicDriver.hxx>
