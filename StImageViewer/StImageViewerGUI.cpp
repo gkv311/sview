@@ -517,6 +517,7 @@ void StImageViewerGUI::doAboutProgram(const size_t ) {
     aDialog->addButton(stCString("Website"))->signals.onBtnClick += stSlot(this, &StImageViewerGUI::doCheckUpdates);
     aDialog->addButton(tr(BUTTON_CLOSE), true);
     aDialog->stglInit();
+    setModalDialog(aDialog);
 }
 
 void StImageViewerGUI::doUserTips(const size_t ) {
@@ -525,17 +526,17 @@ void StImageViewerGUI::doUserTips(const size_t ) {
 
 void StImageViewerGUI::doAboutImage(const size_t ) {
     StHandle<StImageInfo>& anExtraInfo = myPlugin->myFileInfo;
-    if(!anExtraInfo.isNull()) {
-        return; // already opened
-    }
+    anExtraInfo.nullify();
 
     StHandle<StFileNode>     aFileNode;
     StHandle<StStereoParams> aParams;
     if(!myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo)
     ||  anExtraInfo.isNull()) {
-        StHandle<StMsgQueue> aQueue = myPlugin->getMessagesQueue();
-        aQueue->pushInfo(tr(DIALOG_FILE_NOINFO));
         anExtraInfo.nullify();
+        StGLMessageBox* aMsgBox = new StGLMessageBox(this, tr(DIALOG_FILE_INFO), tr(DIALOG_FILE_NOINFO));
+        aMsgBox->addButton(tr(BUTTON_CLOSE), true);
+        aMsgBox->stglInit();
+        setModalDialog(aMsgBox);
         return;
     }
 
@@ -606,6 +607,7 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
 
     aDialog->addButton(tr(BUTTON_CLOSE), true);
     aDialog->stglInit();
+    setModalDialog(aDialog);
 }
 
 /**
@@ -699,6 +701,7 @@ void StImageViewerGUI::doListHotKeys(const size_t ) {
     aDialog->addButton(tr(BUTTON_DEFAULTS), false)->signals.onBtnClick = stSlot(this, &StImageViewerGUI::doResetHotKeys);
     aDialog->addButton(tr(BUTTON_CLOSE),    true);
     aDialog->stglInit();
+    setModalDialog(aDialog);
 }
 
 void StImageViewerGUI::doChangeHotKey1(const size_t theId) {
@@ -726,7 +729,7 @@ void StImageViewerGUI::doMobileSettings(const size_t ) {
     aParams.add(myPlugin->params.CheckUpdatesDays);
 #endif
 
-    StInfoDialog* aDialog = new StInfoDialog(myPlugin, this, tr(MENU_HELP_SETTINGS), scale(512), scale(300));
+    StInfoDialog* aDialog = new StInfoDialog(myPlugin, this, tr(MENU_HELP_SETTINGS), scale(768), scale(300));
 
     const int aWidthMax  = aDialog->getContent()->getRectPx().width();
     int       aRowLast   = (int )aParams.size();
@@ -740,6 +743,7 @@ void StImageViewerGUI::doMobileSettings(const size_t ) {
 
     aDialog->addButton(tr(BUTTON_CLOSE), true);
     aDialog->stglInit();
+    setModalDialog(aDialog);
 }
 
 void StImageViewerGUI::doCheckUpdates(const size_t ) {
@@ -974,6 +978,7 @@ void StImageViewerGUI::doOpenFile(const size_t ) {
         }
     }
     aDialog->openFolder(myPlugin->params.lastFolder);
+    setModalDialog(aDialog);
 }
 
 void StImageViewerGUI::doShowMobileExMenu(const size_t ) {
@@ -1331,6 +1336,7 @@ void StImageViewerGUI::doAboutRenderer(const size_t ) {
     StGLMessageBox* aDialog = new StGLMessageBox(this, "", anAboutText, scale(512), scale(300));
     aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->stglInit();
+    setModalDialog(aDialog);
 }
 
 void StImageViewerGUI::showUpdatesNotify() {

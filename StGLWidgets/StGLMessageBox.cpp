@@ -150,6 +150,10 @@ void StGLMessageBox::create(const StString& theTitle,
 }
 
 StGLMessageBox::~StGLMessageBox() {
+    if(myRoot->getModalDialog() == this) {
+        myRoot->setModalDialog(NULL, false);
+    }
+
     StGLContext& aCtx = getContext();
     myVertexBuf.release(aCtx);
 }

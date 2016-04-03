@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -19,6 +19,7 @@
 template<> inline void StArray<StGLNamedTexture>::sort() {}
 typedef StArray<StGLNamedTexture> StGLTextureArray;
 class StGLMenuProgram;
+class StGLMessageBox;
 class StGLTextProgram;
 class StGLTextBorderProgram;
 
@@ -302,14 +303,14 @@ class StGLRootWidget : public StGLWidget {
      */
     ST_CPPEXPORT static size_t generateShareId();
 
-    inline StGLProjCamera* getCamera() {
+    ST_LOCAL StGLProjCamera* getCamera() {
         return &myProjCamera;
     }
 
     /**
      * @return widget in focus
      */
-    inline StGLWidget* getFocus() {
+    ST_LOCAL StGLWidget* getFocus() const {
         return myFocusWidget;
     }
 
@@ -318,6 +319,21 @@ class StGLRootWidget : public StGLWidget {
      * @return previous widget focus
      */
     ST_CPPEXPORT StGLWidget* setFocus(StGLWidget* theWidget);
+
+    /**
+     * Return active modal dialog.
+     */
+    ST_LOCAL StGLMessageBox* getModalDialog() const {
+        return myModalDialog;
+    }
+
+    /**
+     * Assign new modal dialog.
+     * @param theWidget       new modal dialog
+     * @param theToReleaseOld flag to release the previous modal dialog
+     */
+    ST_CPPEXPORT void setModalDialog(StGLMessageBox* theWidget,
+                                     const bool      theToReleaseOld = true);
 
     /**
      * @return OpenGL context.
@@ -459,6 +475,7 @@ class StGLRootWidget : public StGLWidget {
 
     StArrayList<StGLWidget*>  myDestroyList;   //!< list of widgets to be destroyed
     StGLWidget*               myFocusWidget;   //!< widget currently in focus
+    StGLMessageBox*           myModalDialog;   //!< active dialog
 
     bool                      myIsMenuPressed; //!< global flag to perform navigation in menu after first item clicked
 

@@ -882,6 +882,7 @@ void StMoviePlayerGUI::doAboutProgram(const size_t ) {
     aDialog->addButton(stCString("Website"))->signals.onBtnClick += stSlot(this, &StMoviePlayerGUI::doCheckUpdates);
     aDialog->addButton(tr(BUTTON_CLOSE), true);
     aDialog->stglInit();
+    setModalDialog(aDialog);
 }
 
 void StMoviePlayerGUI::doUserTips(const size_t ) {
@@ -915,17 +916,17 @@ class ST_LOCAL StInfoDialog : public StGLMessageBox {
 
 void StMoviePlayerGUI::doAboutFile(const size_t ) {
     StHandle<StMovieInfo>& anExtraInfo = myPlugin->myFileInfo;
-    if(!anExtraInfo.isNull()) {
-        return; // already opened
-    }
+    anExtraInfo.nullify();
 
     StHandle<StFileNode>     aFileNode;
     StHandle<StStereoParams> aParams;
     if(!myPlugin->getCurrentFile(aFileNode, aParams, anExtraInfo)
     ||  anExtraInfo.isNull()) {
-        StHandle<StMsgQueue> aQueue = myPlugin->getMessagesQueue();
-        aQueue->pushInfo(tr(DIALOG_FILE_NOINFO));
         anExtraInfo.nullify();
+        StGLMessageBox* aMsgBox = new StGLMessageBox(this, tr(DIALOG_FILE_INFO), tr(DIALOG_FILE_NOINFO));
+        aMsgBox->addButton(tr(BUTTON_CLOSE), true);
+        aMsgBox->stglInit();
+        setModalDialog(aMsgBox);
         return;
     }
 
@@ -1029,6 +1030,7 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
 
     aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->stglInit();
+    setModalDialog(aDialog);
 }
 
 void StMoviePlayerGUI::doCheckUpdates(const size_t ) {
@@ -1279,6 +1281,7 @@ void StMoviePlayerGUI::doOpenFile(const size_t ) {
         }
     }
     aDialog->openFolder(myPlugin->params.lastFolder);
+    setModalDialog(aDialog);
 }
 
 void StMoviePlayerGUI::doShowMobileExMenu(const size_t ) {
@@ -1928,6 +1931,7 @@ void StMoviePlayerGUI::doAboutRenderer(const size_t ) {
     StGLMessageBox* aDialog = new StGLMessageBox(this, "", anAboutText, scale(512), scale(300));
     aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->stglInit();
+    setModalDialog(aDialog);
 }
 
 void StMoviePlayerGUI::showUpdatesNotify() {
@@ -2027,6 +2031,7 @@ void StMoviePlayerGUI::doListHotKeys(const size_t ) {
     aDialog->addButton(tr(BUTTON_DEFAULTS), false)->signals.onBtnClick = stSlot(this, &StMoviePlayerGUI::doResetHotKeys);
     aDialog->addButton(tr(BUTTON_CLOSE), true);
     aDialog->stglInit();
+    setModalDialog(aDialog);
 }
 
 void StMoviePlayerGUI::doChangeHotKey1(const size_t theId) {
@@ -2078,4 +2083,5 @@ void StMoviePlayerGUI::doMobileSettings(const size_t ) {
 
     aDialog->addButton(tr(BUTTON_CLOSE), true);
     aDialog->stglInit();
+    setModalDialog(aDialog);
 }

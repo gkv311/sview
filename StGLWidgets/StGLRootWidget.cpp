@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -10,6 +10,7 @@
 #include <StGLWidgets/StGLRootWidget.h>
 
 #include <StGLWidgets/StGLMenuProgram.h>
+#include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLTextProgram.h>
 #include <StGLWidgets/StGLTextBorderProgram.h>
 
@@ -62,6 +63,7 @@ StGLRootWidget::StGLRootWidget(const StHandle<StResourceManager>& theResMgr)
   myResolution(72),
   cursorZo(0.0, 0.0),
   myFocusWidget(NULL),
+  myModalDialog(NULL),
   myIsMenuPressed(false),
   myMenuIconSize(IconSize_16),
   myClickThreshold(3) {
@@ -437,6 +439,10 @@ bool StGLRootWidget::doKeyUp(const StKeyEvent& theEvent) {
 }
 
 void StGLRootWidget::destroyWithDelay(StGLWidget* theWidget) {
+    if(theWidget == NULL) {
+        return;
+    }
+
     for(size_t anIter = 0; anIter < myDestroyList.size(); ++anIter) {
         if(theWidget == myDestroyList[anIter]) {
             return; // already appended
@@ -480,4 +486,16 @@ StGLWidget* StGLRootWidget::setFocus(StGLWidget* theWidget) {
         myFocusWidget->myHasFocus = true;
     }
     return aPrevWidget;
+}
+
+void StGLRootWidget::setModalDialog(StGLMessageBox* theWidget,
+                                    const bool      theToReleaseOld) {
+    if(myModalDialog == theWidget) {
+        return;
+    }
+
+    if(theToReleaseOld && myModalDialog != NULL) {
+        destroyWithDelay(myModalDialog);
+    }
+    myModalDialog = theWidget;
 }

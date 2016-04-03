@@ -239,6 +239,7 @@ void StCADViewerGUI::doOpenFile(const size_t ) {
         }
     }
     aDialog->openFolder(myPlugin->params.LastFolder);
+    setModalDialog(aDialog);
 }
 
 void StCADViewerGUI::doShowMobileExMenu(const size_t ) {
@@ -473,6 +474,7 @@ void StCADViewerGUI::doAboutProgram(const size_t ) {
 
     aDialog->addButton(tr(BUTTON_CLOSE));
     aDialog->stglInit();
+    setModalDialog(aDialog);
 }
 
 void StCADViewerGUI::doOpenLicense(const size_t ) {
