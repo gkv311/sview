@@ -275,6 +275,8 @@
 			<Add directory="../lib/$(TARGET_NAME)" />
 			<Add directory="../bin/$(TARGET_NAME)" />
 		</Linker>
+		<Unit filename="StALDeviceParam.cpp" />
+		<Unit filename="StALDeviceParam.h" />
 		<Unit filename="StMovieOpenDialog.cpp" />
 		<Unit filename="StMovieOpenDialog.h" />
 		<Unit filename="StMoviePlayer.cpp" />

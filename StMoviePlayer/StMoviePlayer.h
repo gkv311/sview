@@ -31,6 +31,7 @@
 #include <vector>
 
 // forward declarations
+class StALDeviceParam;
 class StCheckUpdates;
 class StFileNode;
 class StGLContext;
@@ -47,50 +48,6 @@ struct StMovieInfo;
 struct mg_context;
 struct mg_connection;
 struct mg_request_info;
-
-class StALDeviceParam : public StInt32ParamNamed {
-
-        public:
-
-    /**
-     * Main constructor.
-     */
-    ST_LOCAL StALDeviceParam();
-
-    /**
-     * Destructor.
-     */
-    ST_LOCAL virtual ~StALDeviceParam();
-
-    ST_LOCAL void initList();
-
-    ST_LOCAL bool init(const StString& theActive);
-
-    ST_LOCAL int32_t getValueFromName(const StString& theName);
-
-    /**
-     * Returns title for active AL device.
-     */
-    ST_LOCAL StString getUtfTitle() const;
-
-    /**
-     * Returns title for active AL device.
-     */
-    ST_LOCAL std::string getCTitle() const;
-
-    /**
-     * Return list of available translations.
-     */
-    ST_LOCAL const StArrayList<StString>& getList() const {
-        return myDevicesUtf;
-    }
-
-        private:
-
-    std::vector<std::string> myDevicesLoc;
-    StArrayList<StString>    myDevicesUtf;
-
-};
 
 /**
  * Movie Player application.

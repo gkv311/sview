@@ -18,18 +18,11 @@
 
 #include "StMoviePlayerGUI.h"
 
-// OpenAL headers
-#if defined(__APPLE__)
-    #include <OpenAL/al.h>
-    #include <OpenAL/alc.h>
-#else
-    #include <AL/al.h>
-    #include <AL/alc.h>
-#endif
-
+#include "StALDeviceParam.h"
 #include "StMoviePlayer.h"
 #include "StTimeBox.h"
 
+#include "StVideo/StALContext.h"
 #include "StVideo/StVideo.h"
 
 #include <StCore/StSearchMonitors.h>

@@ -218,6 +218,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="StALDeviceParam.cpp" />
     <ClCompile Include="StMovieOpenDialog.cpp" />
     <ClCompile Include="StVideo\StALContext.cpp" />
     <ClCompile Include="StVideo\StAudioQueue.cpp" />
@@ -236,6 +237,7 @@
     <ClCompile Include="StMoviePlayerStrings.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="StALDeviceParam.h" />
     <ClInclude Include="StMovieOpenDialog.h" />
     <ClInclude Include="StVideo\StALContext.h" />
     <ClInclude Include="StVideo\StAudioQueue.h" />
