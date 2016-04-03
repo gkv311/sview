@@ -645,7 +645,7 @@ StGLMenu* StMoviePlayerGUI::createImageAdjustMenu() {
 
     StGLMenuItem* anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_GAMMA));
     anItem->changeMargins().right = scale(100 + 16);
-    StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, myImage->params.gamma,
+    StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(anItem, myImage->params.Gamma,
                                                               -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->setFormat(stCString("%+01.2f"));
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
@@ -655,7 +655,7 @@ StGLMenu* StMoviePlayerGUI::createImageAdjustMenu() {
     anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_BRIGHTNESS));
     anItem->setIcon(stCMenuIcon("actionBrightness"), false);
     anItem->changeMargins().right = scale(100 + 16);
-    aRange = new StGLRangeFieldFloat32(anItem, myImage->params.brightness,
+    aRange = new StGLRangeFieldFloat32(anItem, myImage->params.Brightness,
                                        -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->setFormat(stCString("%+01.2f"));
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
@@ -665,7 +665,7 @@ StGLMenu* StMoviePlayerGUI::createImageAdjustMenu() {
     anItem = aMenu->addItem(tr(MENU_VIEW_ADJUST_SATURATION));
     anItem->setIcon(stCMenuIcon("actionSaturation"), false);
     anItem->changeMargins().right = scale(100 + 16);
-    aRange = new StGLRangeFieldFloat32(anItem, myImage->params.saturation,
+    aRange = new StGLRangeFieldFloat32(anItem, myImage->params.Saturation,
                                        -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->changeRectPx().bottom() = aRange->getRectPx().top() + aMenu->getItemHeight();
     aRange->setFormat(stCString("%+01.2f"));

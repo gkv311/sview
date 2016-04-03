@@ -247,9 +247,9 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
     params.TextureFilter->defineOption(StGLImageProgram::FILTER_LINEAR,  stCString("Linear"));
     params.TextureFilter->defineOption(StGLImageProgram::FILTER_BLEND,   stCString("Blend"));
 
-    params.gamma         = myProgram.params.gamma;
-    params.brightness    = myProgram.params.brightness;
-    params.saturation    = myProgram.params.saturation;
+    params.Gamma         = myProgram.params.gamma;
+    params.Brightness    = myProgram.params.brightness;
+    params.Saturation    = myProgram.params.saturation;
     params.SwapLR        = new StSwapLRParam(this);
     params.ViewMode      = new StViewModeParam(this);
     params.SeparationDX  = new StFloat32StereoParam(this, StFloat32StereoParam::StereoParamId_SepDX,  stCString("sepDX"));

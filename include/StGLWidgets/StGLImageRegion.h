@@ -149,9 +149,9 @@ class StGLImageRegion : public StGLWidget {
         StHandle<StEnumParam>         DisplayRatio;          //!< StGLImageRegion::DisplayRatio   - display ratio
         StHandle<StBoolParamNamed>    ToHealAnamorphicRatio; //!< correct aspect ratio for 1080p/720p anamorphic pairs
         StHandle<StEnumParam>         TextureFilter;         //!< StGLImageProgram::TextureFilter - texture filter;
-        StHandle<StFloat32Param>      gamma;                 //!< gamma correction coefficient
-        StHandle<StFloat32Param>      brightness;            //!< brightness level
-        StHandle<StFloat32Param>      saturation;            //!< saturation value
+        StHandle<StFloat32Param>      Gamma;                 //!< gamma correction coefficient
+        StHandle<StFloat32Param>      Brightness;            //!< brightness level
+        StHandle<StFloat32Param>      Saturation;            //!< saturation value
 
         // per file parameters
         StHandle<StStereoParams>      stereoFile;
@@ -174,7 +174,7 @@ class StGLImageRegion : public StGLWidget {
 
     ST_LOCAL void doParamsGamma(const size_t theDir) {
         if(!params.stereoFile.isNull()) {
-            theDir == 1 ? params.gamma->increment() : params.gamma->decrement();
+            theDir == 1 ? params.Gamma->increment() : params.Gamma->decrement();
         }
     }
 

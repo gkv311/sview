@@ -473,7 +473,7 @@ void StMoviePlayer::saveGuiParams() {
     }
 
     mySettings->saveParam (myGUI->myImage->params.DisplayMode);
-    mySettings->saveInt32 (ST_SETTING_GAMMA,       stRound(100.0f * myGUI->myImage->params.gamma->getValue()));
+    mySettings->saveInt32 (ST_SETTING_GAMMA,       stRound(100.0f * myGUI->myImage->params.Gamma->getValue()));
     mySettings->saveParam (myGUI->myImage->params.ToHealAnamorphicRatio);
     mySettings->saveInt32(myGUI->myImage->params.DisplayRatio->getKey(),
                           params.ToRestoreRatio->getValue()
@@ -583,7 +583,7 @@ bool StMoviePlayer::createGui(StHandle<StGLTextureQueue>& theTextureQueue,
     params.ToRestoreRatio->setValue(myGUI->myImage->params.DisplayRatio->getValue() != StGLImageRegion::RATIO_AUTO);
     int32_t loadedGamma = 100; // 1.0f
         mySettings->loadInt32(ST_SETTING_GAMMA, loadedGamma);
-        myGUI->myImage->params.gamma->setValue(0.01f * loadedGamma);
+        myGUI->myImage->params.Gamma->setValue(0.01f * loadedGamma);
 
     // initialize frame region early to show dedicated error description
     if(!myGUI->myImage->stglInit()) {
@@ -613,9 +613,9 @@ void StMoviePlayer::doImageAdjustReset(const size_t ) {
         return;
     }
 
-    myGUI->myImage->params.gamma     ->reset();
-    myGUI->myImage->params.brightness->reset();
-    myGUI->myImage->params.saturation->reset();
+    myGUI->myImage->params.Gamma     ->reset();
+    myGUI->myImage->params.Brightness->reset();
+    myGUI->myImage->params.Saturation->reset();
 }
 
 
@@ -982,9 +982,9 @@ void StMoviePlayer::doKeyDown(const StKeyEvent& theEvent) {
         // post process keys
         case ST_VK_B: {
             if(theEvent.Flags == ST_VF_SHIFT) {
-                myGUI->myImage->params.brightness->increment();
+                myGUI->myImage->params.Brightness->increment();
             } else if(theEvent.Flags == ST_VF_CONTROL) {
-                myGUI->myImage->params.brightness->decrement();
+                myGUI->myImage->params.Brightness->decrement();
             } else {
    ///         #ifdef ST_DEBUG
                 myIsBenchmark = !myIsBenchmark;
