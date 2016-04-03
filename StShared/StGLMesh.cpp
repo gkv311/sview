@@ -71,7 +71,8 @@ void StGLMesh::bindFixed(StGLContext& theCtx) const {
         theCtx.core11->glDisableClientState(GL_VERTEX_ARRAY);
     }
     if(myNormalBuf.isValid()) {
-        //ST_DEBUG_ASSERT(myNormalBuf.getElemSize() == 3);
+        //ST_ASSERT(myNormalBuf.getElemSize() == 3,
+        // "StGLMesh::bindFixed() - normal buffer has wrong number of components");
         myNormalBuf.bind(theCtx);
         theCtx.core11->glEnableClientState(GL_NORMAL_ARRAY);
         theCtx.core11->glNormalPointer(myNormalBuf.getDataType(), 0, NULL);
@@ -87,7 +88,8 @@ void StGLMesh::bindFixed(StGLContext& theCtx) const {
     }
     if(myColorsBuf.isValid()) {
         myColorsBuf.bind(theCtx);
-        //ST_DEBUG_ASSERT(myColorsBuf.getElemSize() == 3 || myColorsBuf.getElemSize() == 4);
+        //ST_ASSERT(myColorsBuf.getElemSize() == 3 || myColorsBuf.getElemSize() == 4,
+        // "StGLMesh::bindFixed() - color buffer has wrong number of components");
         theCtx.core11->glEnableClientState(GL_COLOR_ARRAY);
         theCtx.core11->glColorPointer(GLint(myColorsBuf.getElemSize()), myColorsBuf.getDataType(), 0, NULL);
     } else {
@@ -222,7 +224,7 @@ void StGLMesh::clearVRAM(StGLContext& theCtx) {
 }
 
 bool StGLMesh::computeNormals(size_t theDelta) {
-    ST_DEBUG_ASSERT(theDelta > 0);
+    ST_ASSERT(theDelta > 0, "StGLMesh::computeNormals() - wrong delta");
     myNormals.initArray(myVertices.size());
     if(myVertices.isEmpty()) {
         return false;

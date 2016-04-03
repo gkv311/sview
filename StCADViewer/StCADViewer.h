@@ -7,6 +7,13 @@
 #ifndef __StCADViewer_h_
 #define __StCADViewer_h_
 
+#if defined(_WIN32)
+    #include <windows.h>
+    #ifdef AddPrinter
+        #undef AddPrinter
+    #endif
+#endif
+
 #include <AIS_InteractiveContext.hxx>
 #include <AIS_InteractiveObject.hxx>
 #include <V3d_View.hxx>

@@ -119,7 +119,7 @@ class StGLFrameTextures : public StGLResource {
      * Access to texture plane using id.
      */
     inline StGLFrameTexture& getPlane(size_t thePlaneId = 0) {
-        ST_DEBUG_ASSERT(thePlaneId < 4);
+        ST_ASSERT(thePlaneId < 4, "StGLFrameTextures::getPlane() - out of range access");
         return myTextures[thePlaneId];
     }
 

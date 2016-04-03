@@ -24,7 +24,7 @@ StGLTextureQueue::StGLTextureQueue(const size_t theQueueSizeMax)
   myIsReadyToSwap(false),
   myToCompress(false),
   myHasStream(false) {
-    ST_DEBUG_ASSERT(myQueueSizeMax >= 2);
+    ST_ASSERT(myQueueSizeMax >= 2, "StGLTextureQueue() - queue size limit should be >= 2");
 
     // we create 'empty' queue
     myDataFront = new StGLTextureData();
@@ -146,7 +146,7 @@ bool StGLTextureQueue::stglUpdateStTextures(StGLContext& theCtx) {
                 myDataFront->reset();
             }
             myDataFront = myDataFront->getNext();
-            ST_DEBUG_ASSERT(myQueueSize != 0); // critical error!
+            ST_ASSERT(myQueueSize != 0, "StGLTextureQueue::stglUpdateStTextures() - critical error!");
             --myQueueSize;
         myMutexSize.unlock();
         myIsInUpdTexture = false;

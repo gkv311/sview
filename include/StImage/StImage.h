@@ -233,7 +233,7 @@ class StImage {
      * Access to the image plane by ID (from 0 to 3).
      */
     inline const StImagePlane& getPlane(const size_t theId = 0) const {
-        ST_DEBUG_ASSERT(theId < 4);
+        ST_ASSERT(theId < 4, "StImage::getPlane() - Out of range access");
         return myPlanes[theId];
     }
 
@@ -241,7 +241,7 @@ class StImage {
      * Access to the image plane by ID (from 0 to 3).
      */
     inline StImagePlane& changePlane(const size_t theId = 0) {
-        ST_DEBUG_ASSERT(theId < 4);
+        ST_ASSERT(theId < 4, "StImage::changePlane() - Out of range access");
         return myPlanes[theId];
     }
 

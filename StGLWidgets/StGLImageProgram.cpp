@@ -343,7 +343,7 @@ static inline StGLImageProgram::FragToRgb getColorShader(const StImage::ImgColor
         }
         default: {
             ST_DEBUG_LOG("No GLSL shader for this color model = " + theColorModel);
-            ST_DEBUG_ASSERT(false);
+            ST_ASSERT(false, "StGLImageProgram::getColorShader() - unsupported color model!");
         }
     }
     return StGLImageProgram::FragToRgb_FromRgb;

@@ -1,6 +1,6 @@
 /**
  * This is a header for dynamic library wrappers.
- * Copyright © 2008-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2008-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,11 +11,11 @@
 #define __StLibrary_h_
 
 #include "StVersion.h" // header for version structure
-#if (defined(_WIN32) || defined(__WIN32__))
+#if defined(_WIN32)
     #include <windows.h> // needed for mingw
     static const stUtf8_t ST_DLIB_SUFFIX[]   = ".dll";
     static const stUtf8_t ST_DLIB_EXTENSION[] = "dll";
-#elif (defined(__APPLE__))
+#elif defined(__APPLE__)
     #include <dlfcn.h>
     #define HMODULE void*
     static const stUtf8_t ST_DLIB_SUFFIX[]   = ".dylib";

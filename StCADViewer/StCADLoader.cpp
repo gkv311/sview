@@ -8,6 +8,11 @@
     #include <stconfig.conf>
 #endif
 
+#include "StCADLoader.h"
+#include "StCADPluginInfo.h"
+
+#include <StStrings/StLangMap.h>
+
 #include <AIS_Shape.hxx>
 #include <BRep_Tool.hxx>
 #include <BRep_Builder.hxx>
@@ -25,11 +30,6 @@
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopExp_Explorer.hxx>
-
-#include "StCADLoader.h"
-#include "StCADPluginInfo.h"
-
-#include <StStrings/StLangMap.h>
 
 const StString StCADLoader::ST_CAD_MIME_STRING(ST_CAD_PLUGIN_MIME_CHAR);
 const StMIMEList StCADLoader::ST_CAD_MIME_LIST(StCADLoader::ST_CAD_MIME_STRING);

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2008-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2008-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -7,6 +7,8 @@
  */
 
 #include <StLibrary.h>
+
+#include <stAssert.h>
 
 #ifdef _WIN32
 StString StLibrary::DLibGetVersion(const StStringUtfWide& theLibPath) {
@@ -48,7 +50,7 @@ const StString& StLibrary::getPath() const {
 
 bool StLibrary::load(const StString& thePath) {
     // this is probably some logical error in the code if close() wasn't explicitly called before!
-    ST_DEBUG_ASSERT(!isOpened());
+    ST_ASSERT(!isOpened(), "StLibrary::load() - library is already opened!");
     close();
     StString aDinLibExt = StString(ST_DLIB_SUFFIX);
     if(thePath.isEndsWithIgnoreCase(aDinLibExt)) {
@@ -70,7 +72,7 @@ bool StLibrary::load(const StString& thePath) {
 
 bool StLibrary::loadSimple(const StString& thePath) {
     // this is probably some logical error in the code if close() wasn't explicitly called before!
-    ST_DEBUG_ASSERT(!isOpened());
+    ST_ASSERT(!isOpened(), "StLibrary::load() - library is already opened!");
     close();
     myPath = thePath;
     myLibH = DLibLoadFull(myPath);

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -10,6 +10,7 @@
 #define __StImagePlane_h_
 
 #include <StStrings/StString.h>
+#include <stAssert.h>
 #include "StPixelRGB.h"
 
 /**
@@ -97,7 +98,8 @@ class StImagePlane {
      * Could be used as general method to copy data from one buffer to another.
      */
     inline const GLubyte* getData(const size_t theRow = 0, const size_t theCol = 0) const {
-        ST_DEBUG_ASSERT((myDataPtr != NULL) && (theRow < mySizeY) && (theCol < mySizeX));
+        ST_ASSERT((myDataPtr != NULL) && (theRow < mySizeY) && (theCol < mySizeX),
+                  "StImagePlane::getData() - Out of range access");
         return &myDataPtr[mySizeRowBytes * theRow + mySizeBPP * theCol];
     }
 
@@ -105,7 +107,8 @@ class StImagePlane {
      * @return data pointer to requested position.
      */
     inline GLubyte* changeData(const size_t theRow = 0, const size_t theCol = 0) {
-        ST_DEBUG_ASSERT((myDataPtr != NULL) && (theRow < mySizeY) && (theCol < mySizeX));
+        ST_ASSERT((myDataPtr != NULL) && (theRow < mySizeY) && (theCol < mySizeX),
+                  "StImagePlane::changeData() - Out of range access");
         return &myDataPtr[mySizeRowBytes * theRow + mySizeBPP * theCol];
     }
 
@@ -113,7 +116,8 @@ class StImagePlane {
      * @return data pointer to requested position.
      */
     inline GLubyte* accessData(const size_t theRow = 0, const size_t theCol = 0) const {
-        ST_DEBUG_ASSERT((myDataPtr != NULL) && (theRow < mySizeY) && (theCol < mySizeX));
+        ST_ASSERT((myDataPtr != NULL) && (theRow < mySizeY) && (theCol < mySizeX),
+                  "StImagePlane::accessData() - Out of range access");
         return &myDataPtr[mySizeRowBytes * theRow + mySizeBPP * theCol];
     }
 

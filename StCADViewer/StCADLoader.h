@@ -7,6 +7,10 @@
 #ifndef __StCADLoader_h_
 #define __StCADLoader_h_
 
+#if defined(_WIN32)
+    #include <windows.h>
+#endif
+
 #include <AIS_InteractiveObject.hxx>
 #include <NCollection_Sequence.hxx>
 #include <TopoDS_Shape.hxx>

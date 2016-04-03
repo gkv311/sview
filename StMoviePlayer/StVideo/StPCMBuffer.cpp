@@ -330,7 +330,7 @@ template<typename sampleSrc_t, typename sampleOut_t>
 bool StPCMBuffer::addConvert(const StPCMBuffer& theBuffer) {
     if(myPlanesNb > 1 && myPlanesNb != myChMap.count) {
         // currently only split into mono sources supported
-        ST_DEBUG_ASSERT(false);
+        ST_ASSERT(false, "StPCMBuffer::addConvert() - Unsupported configuration");
         return false;
     } else if(theBuffer.myPlaneSize * theBuffer.myPlanesNb < theBuffer.mySampleSize * myPlanesNb) {
         // just ignore
@@ -438,7 +438,7 @@ bool StPCMBuffer::addData(const StPCMBuffer& theBuffer) {
         return false;
     } else if(myChMap.count != theBuffer.myChMap.count) {
         // currently not supported
-        ST_DEBUG_ASSERT(false);
+        ST_ASSERT(false, "StPCMBuffer::addData() - channels count should be equal");
         return false;
     }
 
@@ -499,7 +499,7 @@ bool StPCMBuffer::addData(const StPCMBuffer& theBuffer) {
         myPlaneSize += theBuffer.getPlaneSize();
         return true;
     } else {
-        ST_DEBUG_ASSERT(false);
+        ST_ASSERT(false, "StPCMBuffer::addData() - unsupported input");
         return false;
     }
 }
