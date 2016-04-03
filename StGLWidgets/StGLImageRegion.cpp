@@ -425,25 +425,26 @@ void StGLImageRegion::stglUpdate(const StPointD_t& pointZo) {
 }
 
 bool StGLImageRegion::stglInit() {
+    bool isInit = StGLWidget::stglInit();
     if(myIsInitialized) {
-        return true;
+        return isInit;
     }
 
     StGLContext& aCtx = getContext();
     if(!myProgram.init(aCtx, StImage::ImgColor_RGB, StImage::ImgScale_Full, StGLImageProgram::FragGetColor_Normal)) {
         return false;
     } else if(!myQuad.initScreen(aCtx)) {
-        ST_DEBUG_LOG("Fail to init StGLQuad");
+        ST_ERROR_LOG("Fail to init StGLQuad");
         return false;
     } else if(!myUVSphere.initVBOs(aCtx)) {
-        ST_DEBUG_LOG("Fail to init StGLUVSphere");
+        ST_ERROR_LOG("Fail to init StGLUVSphere");
     }
 
     // setup texture filter
     myTextureQueue->getQTexture().setMinMagFilter(aCtx, params.TextureFilter->getValue() == StGLImageProgram::FILTER_NEAREST ? GL_NEAREST : GL_LINEAR);
 
     myIsInitialized = true;
-    return myIsInitialized;
+    return myIsInitialized && isInit;
 }
 
 StGLVec2 StGLImageRegion::getMouseMoveFlat(const StPointD_t& theCursorZoFrom,
@@ -474,6 +475,7 @@ void StGLImageRegion::stglDraw(unsigned int theView) {
     if(!myIsInitialized || !isVisible() || aParams.isNull()
     || !myTextureQueue->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE).isValid()
     || !myHasVideoStream) {
+        StGLWidget::stglDraw(theView);
         return;
     }
 
@@ -498,6 +500,7 @@ void StGLImageRegion::stglDraw(unsigned int theView) {
             stglDrawView(theView);
             break;
     }
+    StGLWidget::stglDraw(theView);
 }
 
 void StGLImageRegion::stglDrawView(unsigned int theView) {

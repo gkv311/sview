@@ -1449,7 +1449,7 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
     myImage->params.DisplayMode->changeValues()[StGLImageRegion::MODE_CROSSYED]   = tr(MENU_VIEW_DISPLAY_MODE_CROSSYED);
     myImage->params.ToHealAnamorphicRatio->setValue(true);
 
-    mySubtitles = new StGLSubtitles  (this, theSubQueue,
+    mySubtitles = new StGLSubtitles  (myImage, theSubQueue,
                                       myPlugin->params.SubtitlesPlace,
                                       myPlugin->params.SubtitlesTopDY,
                                       myPlugin->params.SubtitlesBottomDY,

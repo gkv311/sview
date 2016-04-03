@@ -1050,10 +1050,20 @@ void StMoviePlayer::doMouseUp(const StClickEvent& theEvent) {
 }
 
 void StMoviePlayer::doGesture(const StGestureEvent& theEvent) {
-    if(!myGUI.isNull()
-    &&  myGUI->myImage != NULL
-    &&  myGUI->getFocus() == NULL) {
-        myGUI->myImage->doGesture(theEvent);
+    if(myGUI.isNull()
+    || myGUI->myImage == NULL) {
+        return;
+    }
+
+    for(StGLWidget *aChildIter(myGUI->getChildren()->getLast()), *aChildActive(NULL); aChildIter != NULL;) {
+        aChildActive = aChildIter;
+        aChildIter   = aChildIter->getPrev();
+        if(aChildActive->isVisibleAndPointIn(myGUI->getCursorZo())) {
+            if(aChildActive == myGUI->myImage) {
+                myGUI->myImage->doGesture(theEvent);
+            }
+            break;
+        }
     }
 }
 

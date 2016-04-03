@@ -15,7 +15,8 @@ StGLMsgStack::StGLMsgStack(StGLWidget*                 theParent,
                            const StHandle<StMsgQueue>& theMsgQueue)
 : StGLContainer(theParent, 0, 0),
   myMsgQueue(theMsgQueue) {
-    //
+    changeRectPx().bottom() = 1;
+    changeRectPx().right()  = 1;
 }
 
 StGLMsgStack::~StGLMsgStack() {
@@ -23,8 +24,8 @@ StGLMsgStack::~StGLMsgStack() {
 }
 
 void StGLMsgStack::stglResize() {
-    changeRectPx().bottom() = myRoot->getRectPx().height();
-    changeRectPx().right()  = myRoot->getRectPx().width();
+    //changeRectPx().bottom() = myRoot->getRectPx().height();
+    //changeRectPx().right()  = myRoot->getRectPx().width();
     StGLWidget::stglResize();
 }
 
