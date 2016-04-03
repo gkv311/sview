@@ -235,6 +235,13 @@ class StSettings {
                                 StHandle<StFloat32Param>& theFloatParam);
 
     /**
+     * Method to load float parameter.
+     * @param theFloatParam handle to the parameter
+     * @return true if parameter was loaded
+     */
+    ST_CPPEXPORT bool loadParam(StHandle<StFloat32Param>& theFloatParam);
+
+    /**
      * Method to save float parameter.
      * @param theLabel      parameter label (should be unique)
      * @param theFloatParam handle to the parameter
@@ -242,6 +249,13 @@ class StSettings {
      */
     ST_CPPEXPORT bool saveParam(const StString&                 theLabel,
                                 const StHandle<StFloat32Param>& theFloatParam);
+
+    /**
+     * Method to save float parameter.
+     * @param theFloatParam handle to the parameter
+     * @return true if parameter was saved
+     */
+    ST_CPPEXPORT bool saveParam(const StHandle<StFloat32Param>& theFloatParam);
 
     /**
      * Method to load hot key for action triggering.

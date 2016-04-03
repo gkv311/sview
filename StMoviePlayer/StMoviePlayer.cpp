@@ -64,10 +64,6 @@ namespace {
     static const char ST_SETTING_LAST_FOLDER[]   = "lastFolder";
     static const char ST_SETTING_RECENT_FILES[]  = "recent";
 
-    static const char ST_SETTING_SUBTITLES_TOPDY[]="subsTopDY";
-    static const char ST_SETTING_SUBTITLES_BOTTOMDY[]="subsBottomDY";
-    static const char ST_SETTING_SUBTITLES_SIZE[]= "subsSize";
-    static const char ST_SETTING_SUBTITLES_PARALLAX[] = "subsParallax";
     static const char ST_SETTING_VIEWMODE[]      = "viewMode";
     static const char ST_SETTING_GAMMA[]         = "viewGamma";
 
@@ -180,36 +176,36 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     myOpenDialog = new StMovieOpenDialog(this);
     StMoviePlayerStrings::loadDefaults(*myLangMap);
     myLangMap->params.language->signals.onChanged += stSlot(this, &StMoviePlayer::doChangeLanguage);
-    myTitle = "sView - Movie Player";
+    myTitle = stCString("sView - Movie Player");
 
     params.ScaleAdjust = new StEnumParam(StGLRootWidget::ScaleAdjust_Normal, stCString("scaleAdjust"));
-    params.ScaleHiDPI       = new StFloat32Param(1.0f,       // initial value
-                                                 0.5f, 3.0f, // min, max values
-                                                 1.0f,       // default value
-                                                 1.0f,       // incremental step
-                                                 0.001f);    // equality tolerance
+    params.ScaleHiDPI  = new StFloat32Param(1.0f, stCString("scaleHiDPI"));
+    params.ScaleHiDPI->setMinMaxValues(0.5f, 3.0f);
+    params.ScaleHiDPI->setDefValue(1.0f);
+    params.ScaleHiDPI->setStep(1.0f);
+    params.ScaleHiDPI->setTolerance(0.001f);
     params.ScaleHiDPI2X     = new StBoolParamNamed(false, stCString("scale2X"));
     params.SubtitlesPlace   = new StInt32ParamNamed(ST_VCORNER_BOTTOM, stCString("subsPlace"));
-    params.SubtitlesTopDY   = new StFloat32Param(100.0f,      // initial value
-                                                 0.0f, 400.0f,// min, max values
-                                                 100.0f,      // default value
-                                                 5.0f,        // incremental step
-                                                 0.1f);       // equality tolerance
-    params.SubtitlesBottomDY= new StFloat32Param(100.0f,      // initial value
-                                                 0.0f, 400.0f,// min, max values
-                                                 100.0f,      // default value
-                                                 5.0f,        // incremental step
-                                                 0.1f);       // equality tolerance
-    params.SubtitlesSize    = new StFloat32Param(28.0f,       // initial value
-                                                 8.0f, 96.0f, // min, max values
-                                                 28.0f,       // default value
-                                                 1.0f,        // incremental step
-                                                 0.1f);       // equality tolerance
-    params.SubtitlesParallax= new StFloat32Param(0.0f,        // initial value
-                                                -90.0f, 90.0f,// min, max values
-                                                 0.0f,        // default value
-                                                 1.0f,        // incremental step
-                                                 0.1f);       // equality tolerance
+    params.SubtitlesTopDY   = new StFloat32Param(100.0f, stCString("subsTopDY"));
+    params.SubtitlesTopDY->setMinMaxValues(0.0f, 400.0f);
+    params.SubtitlesTopDY->setDefValue(100.0f);
+    params.SubtitlesTopDY->setStep(5.0f);
+    params.SubtitlesTopDY->setTolerance(0.1f);
+    params.SubtitlesBottomDY= new StFloat32Param(100.0f, stCString("subsBottomDY"));
+    params.SubtitlesBottomDY->setMinMaxValues(0.0f, 400.0f);
+    params.SubtitlesBottomDY->setDefValue(100.0f);
+    params.SubtitlesBottomDY->setStep(5.0f);
+    params.SubtitlesBottomDY->setTolerance(0.1f);
+    params.SubtitlesSize    = new StFloat32Param(28.0f, stCString("subsSize"));
+    params.SubtitlesSize->setMinMaxValues(8.0f, 96.0f);
+    params.SubtitlesSize->setDefValue(28.0f);
+    params.SubtitlesSize->setStep(1.0f);
+    params.SubtitlesSize->setTolerance(0.1f);
+    params.SubtitlesParallax= new StFloat32Param(0.0f, stCString("subsParallax"));
+    params.SubtitlesParallax->setMinMaxValues(-90.0f, 90.0f);
+    params.SubtitlesParallax->setDefValue(0.0f);
+    params.SubtitlesParallax->setStep(1.0f);
+    params.SubtitlesParallax->setTolerance(0.1f);
     params.ToSearchSubs = new StBoolParamNamed(true, stCString("toSearchSubs"));
     params.SubtitlesParser = new StEnumParam(1, stCString("subsParser"));
     params.AudioAlDevice = new StALDeviceParam();
@@ -280,10 +276,10 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (params.AreGlobalMKeys);
     mySettings->loadParam (params.ToShowPlayList);
     mySettings->loadParam (params.SubtitlesPlace);
-    mySettings->loadParam (ST_SETTING_SUBTITLES_TOPDY,    params.SubtitlesTopDY);
-    mySettings->loadParam (ST_SETTING_SUBTITLES_BOTTOMDY, params.SubtitlesBottomDY);
-    mySettings->loadParam (ST_SETTING_SUBTITLES_SIZE,     params.SubtitlesSize);
-    mySettings->loadParam (ST_SETTING_SUBTITLES_PARALLAX, params.SubtitlesParallax);
+    mySettings->loadParam (params.SubtitlesTopDY);
+    mySettings->loadParam (params.SubtitlesBottomDY);
+    mySettings->loadParam (params.SubtitlesSize);
+    mySettings->loadParam (params.SubtitlesParallax);
     mySettings->loadParam (params.SubtitlesParser);
     mySettings->loadParam (params.ToSearchSubs);
 
@@ -492,10 +488,10 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (params.ScaleAdjust);
         mySettings->saveParam (params.ScaleHiDPI2X);
         mySettings->saveParam (params.SubtitlesPlace);
-        mySettings->saveParam (ST_SETTING_SUBTITLES_TOPDY,    params.SubtitlesTopDY);
-        mySettings->saveParam (ST_SETTING_SUBTITLES_BOTTOMDY, params.SubtitlesBottomDY);
-        mySettings->saveParam (ST_SETTING_SUBTITLES_SIZE,     params.SubtitlesSize);
-        mySettings->saveParam (ST_SETTING_SUBTITLES_PARALLAX, params.SubtitlesParallax);
+        mySettings->saveParam (params.SubtitlesTopDY);
+        mySettings->saveParam (params.SubtitlesBottomDY);
+        mySettings->saveParam (params.SubtitlesSize);
+        mySettings->saveParam (params.SubtitlesParallax);
         mySettings->saveParam (params.SubtitlesParser);
         mySettings->saveParam (params.ToSearchSubs);
         mySettings->saveParam (params.TargetFps);

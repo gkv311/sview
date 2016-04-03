@@ -126,7 +126,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     StImageViewerStrings::loadDefaults(*myLangMap);
     myLangMap->params.language->signals.onChanged += stSlot(this, &StImageViewer::doChangeLanguage);
 
-    myTitle = "sView - Image Viewer";
+    myTitle = stCString("sView - Image Viewer");
     if(!theAppName.isEmpty()) {
         myTitle = theAppName;
     }
@@ -135,11 +135,11 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     params.IsFullscreen->signals.onChanged.connect(this, &StImageViewer::doFullscreen);
     params.ToRestoreRatio = new StBoolParamNamed(false, stCString("toRestoreRatio"));
     params.ScaleAdjust = new StEnumParam(StGLRootWidget::ScaleAdjust_Normal, stCString("scaleAdjust"));
-    params.ScaleHiDPI       = new StFloat32Param(1.0f,       // initial value
-                                                 0.5f, 3.0f, // min, max values
-                                                 1.0f,       // default value
-                                                 1.0f,       // incremental step
-                                                 0.001f);    // equality tolerance
+    params.ScaleHiDPI       = new StFloat32Param(1.0f, stCString("scaleHiDPI"));
+    params.ScaleHiDPI->setMinMaxValues(0.5f, 3.0f);
+    params.ScaleHiDPI->setDefValue(1.0f);
+    params.ScaleHiDPI->setStep(1.0f);
+    params.ScaleHiDPI->setTolerance(0.001f);
     params.ScaleHiDPI2X     = new StBoolParamNamed(false, stCString("scale2X"));
     params.CheckUpdatesDays = new StEnumParam(StCheckUpdates::UpdateInteval_EveryWeek, stCString("updatesIntervalEnum"));
     params.LastUpdateDay    = new StInt32ParamNamed(0, stCString("updatesLastCheck"));

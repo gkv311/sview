@@ -129,6 +129,15 @@ class StFloat32Param : public StParam<float> {
     }
 
     /**
+     * Set minimum and maximum allowed values.
+     */
+    ST_LOCAL void setMinMaxValues(float theMinValue,
+                                  float theMaxValue) {
+        myMinValue = theMinValue;
+        myMaxValue = theMaxValue;
+    }
+
+    /**
      * Return default value.
      */
     ST_LOCAL float getDefValue() const {
