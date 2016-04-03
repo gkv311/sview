@@ -55,8 +55,14 @@
 using namespace StImageViewerStrings;
 
 namespace {
+
     static const int DISPL_Y_REGION_UPPER = 32;
     static const int DISPL_X_REGION_UPPER = 32;
+
+    static const StGLVec3 aBlack (0.0f, 0.0f, 0.0f);
+    static const StGLVec3 aGreen (0.0f, 0.6f, 0.4f);
+    static const StGLVec3 aRed   (1.0f, 0.0f, 0.0f);
+
 }
 
 StInfoDialog::~StInfoDialog() {
@@ -409,10 +415,6 @@ StGLMenu* StImageViewerGUI::createSmoothFilterMenu() {
 StGLMenu* StImageViewerGUI::createImageAdjustMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
 
-    const StGLVec3 aBlack(0.0f, 0.0f, 0.0f);
-    const StGLVec3 aGreen(0.0f, 0.6f, 0.4f);
-    const StGLVec3 aRed  (1.0f, 0.0f, 0.0f);
-
     aMenu->addItem(tr(MENU_VIEW_ADJUST_RESET), myPlugin->getAction(StImageViewer::Action_ImageAdjustReset))
          ->setIcon(stCMenuIcon("actionColorReset"), false);
 
@@ -453,10 +455,6 @@ StGLMenu* StImageViewerGUI::createImageAdjustMenu() {
  */
 StGLMenu* StImageViewerGUI::create3dAdjustMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-
-    const StGLVec3 aBlack(0.0f, 0.0f, 0.0f);
-    const StGLVec3 aGreen(0.0f, 0.6f, 0.4f);
-    const StGLVec3 aRed  (1.0f, 0.0f, 0.0f);
 
     StGLMenuItem* anItem = NULL;
     StGLRangeFieldFloat32* aRange = NULL;

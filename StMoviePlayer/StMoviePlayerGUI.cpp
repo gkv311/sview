@@ -60,6 +60,7 @@
 using namespace StMoviePlayerStrings;
 
 namespace {
+
     static const int DISPL_Y_REGION_UPPER  = 32;
     static const int DISPL_X_REGION_UPPER  = 32;
     static const int DISPL_X_REGION_BOTTOM = 52;
@@ -358,6 +359,11 @@ StGLMenu* StMoviePlayerGUI::createMediaMenu() {
     }
     aMenuMedia->addItem(aWebUiItem, aMenuWebUI);
 #endif
+
+    if(myPlugin->params.ToShowExtra->getValue()) {
+        aMenuMedia->addItem(myPlugin->params.Benchmark->getName(), myPlugin->params.Benchmark);
+    }
+
     aMenuMedia->addItem(tr(MENU_MEDIA_QUIT), myPlugin->getAction(StMoviePlayer::Action_Quit));
     return aMenuMedia;
 }
@@ -680,10 +686,6 @@ StGLMenu* StMoviePlayerGUI::createImageAdjustMenu() {
  */
 StGLMenu* StMoviePlayerGUI::create3dAdjustMenu() {
     StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
-
-    const StGLVec3 aBlack(0.0f, 0.0f, 0.0f);
-    const StGLVec3 aGreen(0.0f, 0.6f, 0.4f);
-    const StGLVec3 aRed  (1.0f, 0.0f, 0.0f);
 
     StGLMenuItem* anItem = NULL;
     StGLRangeFieldFloat32* aRange = NULL;
@@ -2099,7 +2101,9 @@ void StMoviePlayerGUI::doMobileSettings(const size_t ) {
 
     aParams.add(myLangMap->params.language);
     aParams.add(myPlugin->params.IsMobileUI);
-    //aParams.add(myPlugin->params.ToShowExtra);
+    if(!isMobile()) {
+        aParams.add(myPlugin->params.ToShowExtra);
+    }
     if(!isMobile()) {
         aParams.add(myPlugin->params.BlockSleeping);
     }

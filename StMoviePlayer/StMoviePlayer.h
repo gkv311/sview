@@ -199,6 +199,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StInt32ParamNamed>   TargetFps;         //!< rendering FPS limit (0 - max FPS with less CPU, 1,2,3 - adjust to video FPS)
         StHandle<StBoolParamNamed>    UseGpu;            //!< use video decoding on GPU when available
         StHandle<StBoolParamNamed>    UseOpenJpeg;       //!< use OpenJPEG (libopenjpeg) instead of built-in jpeg2000 decoder
+        StHandle<StBoolParamNamed>    Benchmark;         //!< benchmark flag
 
     } params;
 
@@ -269,6 +270,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doUpdateStateLoading();
     ST_LOCAL void doUpdateStateLoaded();
     ST_LOCAL void doImageAdjustReset(const size_t dummy = 0);
+    ST_LOCAL void doSetBenchmark(const bool theValue);
 
         public:
 
@@ -345,7 +347,6 @@ class StMoviePlayer : public StApplication {
     mg_context*                 myWebCtx;          //!< web UI context
 
     bool                        myToUpdateALList;
-    bool                        myIsBenchmark;
     bool                        myToCheckUpdates;
     bool                        myToCheckPoorOrient; //!< switch off orientation sensor with poor quality
 

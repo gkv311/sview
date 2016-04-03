@@ -74,7 +74,6 @@ namespace {
     static const char ST_ARGUMENT_FILE_LAST[]  = "last";
     static const char ST_ARGUMENT_FILE_PAUSE[] = "pause";
     static const char ST_ARGUMENT_FILE_PAUSED[]= "paused";
-    static const char ST_ARGUMENT_BENCHMARK[]  = "benchmark";
     static const char ST_ARGUMENT_MONITOR[]    = "monitorId";
     static const char ST_ARGUMENT_WINLEFT[]    = "windowLeft";
     static const char ST_ARGUMENT_WINTOP[]     = "windowTop";
@@ -152,6 +151,7 @@ void StMoviePlayer::updateStrings() {
     params.UseGpu->setName(tr(MENU_MEDIA_GPU_DECODING) + aGpuAcc);
     params.UseOpenJpeg->setName(stCString("Use OpenJPEG instead of jpeg2000"));
     params.SnapshotImgType->setName(stCString("Snapshot Image Format"));
+    params.Benchmark->setName(stCString("Benchmark"));
     myLangMap->params.language->setName(tr(MENU_HELP_LANGS));
 }
 
@@ -168,7 +168,6 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
   myWebCtx(NULL),
   //
   myToUpdateALList(false),
-  myIsBenchmark(false),
   myToCheckUpdates(true),
   myToCheckPoorOrient(true) {
     mySettings = new StSettings(myResMgr, ST_DRAWER_PLUGIN_NAME);
@@ -259,6 +258,9 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     // OpenJPEG seems to be faster then built-in jpeg2000 decoder
     params.UseOpenJpeg = new StBoolParamNamed(true, stCString("openJpeg"));
     params.SnapshotImgType = new StInt32ParamNamed(StImageFile::ST_TYPE_JPEG, stCString("snapImgType"));
+    params.Benchmark = new StBoolParamNamed(false, stCString("benchmark"));
+    params.Benchmark->signals.onChanged = stSlot(this, &StMoviePlayer::doSetBenchmark);
+
     updateStrings();
 
     // load settings
@@ -804,7 +806,7 @@ void StMoviePlayer::parseArguments(const StArgumentsMap& theArguments) {
     StArgument anArgSrcFormat  = theArguments[params.SrcStereoFormat->getKey()];
     StArgument anArgShuffle    = theArguments[params.IsShuffle->getKey()];
     StArgument anArgLoopSingle = theArguments[params.ToLoopSingle->getKey()];
-    StArgument anArgBenchmark  = theArguments[ST_ARGUMENT_BENCHMARK];
+    StArgument anArgBenchmark  = theArguments[params.Benchmark->getKey()];
     StArgument anArgShowMenu   = theArguments[params.ToShowMenu->getKey()];
     StArgument anArgShowTopbar = theArguments[params.ToShowTopbar->getKey()];
 
@@ -864,8 +866,7 @@ void StMoviePlayer::parseArguments(const StArgumentsMap& theArguments) {
         params.ToLoopSingle->setValue(!anArgLoopSingle.isValueOff());
     }
     if(anArgBenchmark.isValid()) {
-        myIsBenchmark = !anArgBenchmark.isValueOff();
-        myVideo->setBenchmark(myIsBenchmark);
+        params.Benchmark->setValue(!anArgBenchmark.isValueOff());
     }
     if(anArgShowMenu.isValid()) {
         params.ToShowMenu->setValue(!anArgShowMenu.isValueOff());
@@ -985,11 +986,6 @@ void StMoviePlayer::doKeyDown(const StKeyEvent& theEvent) {
                 myGUI->myImage->params.Brightness->increment();
             } else if(theEvent.Flags == ST_VF_CONTROL) {
                 myGUI->myImage->params.Brightness->decrement();
-            } else {
-   ///         #ifdef ST_DEBUG
-                myIsBenchmark = !myIsBenchmark;
-                myVideo->setBenchmark(myIsBenchmark);
-   ///         #endif
             }
             return;
         }
@@ -1367,7 +1363,7 @@ void StMoviePlayer::beforeDraw() {
     // prevent display going to sleep
     bool toBlockSleepDisplay = false;
     bool toBlockSleepSystem  = false;
-    if(myIsBenchmark) {
+    if(params.Benchmark->getValue()) {
         toBlockSleepDisplay = true;
         toBlockSleepSystem  = true;
     } else {
@@ -1413,7 +1409,7 @@ void StMoviePlayer::beforeDraw() {
     }
     myWindow->setStereoOutput(hasStereoSource);
 
-    if(myIsBenchmark
+    if(params.Benchmark->getValue()
     || !params.ToLimitFps->getValue()) {
         // do not limit FPS
         myWindow->setTargetFps(-1.0);
@@ -1788,6 +1784,14 @@ void StMoviePlayer::doSnapshot(const size_t theImgType) {
         params.SnapshotImgType->setValue((int32_t )theImgType);
     }
     myVideo->doSaveSnapshotAs(aType);
+}
+
+void StMoviePlayer::doSetBenchmark(const bool theValue) {
+    if(myVideo.isNull()) {
+        return;
+    }
+
+    myVideo->setBenchmark(theValue);
 }
 
 bool StMoviePlayer::getCurrentFile(StHandle<StFileNode>&     theFileNode,
