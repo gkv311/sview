@@ -93,7 +93,7 @@ class StEnumParam : public StInt32ParamNamed {
             return;
         }
 
-        while(myList.size() <= theValue) {
+        while(myList.size() <= (size_t )theValue) {
             myList.add(stCString(""));
         }
         myList.changeValue(theValue) = theName;
