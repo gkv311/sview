@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -8,6 +8,7 @@
  */
 
 #include <StGLWidgets/StGLMenu.h>
+
 #include <StGLWidgets/StGLMenuCheckbox.h>
 #include <StGLWidgets/StGLMenuItem.h>
 #include <StGLWidgets/StGLMenuProgram.h>
@@ -20,6 +21,7 @@
 #include <StCore/StEvent.h>
 #include <StSettings/StEnumParam.h>
 #include <StSlots/StAction.h>
+#include <stAssert.h>
 
 void StGLMenu::DeleteWithSubMenus(StGLMenu* theMenu) {
     if(theMenu == NULL) {
@@ -322,6 +324,7 @@ class StGLMenuActionItem : public StGLMenuItem {
                                 StGLMenu*                 theSubMenu)
     : StGLMenuItem(theParent, 0, 0, theSubMenu),
       myAction(theAction) {
+        ST_ASSERT(!theAction.isNull(), "StGLMenuActionItem - Unexpected empty action makes no sense!");
         StGLMenuItem::signals.onItemClick.connect(this, &StGLMenuActionItem::doItemClick);
     }
 
@@ -330,7 +333,9 @@ class StGLMenuActionItem : public StGLMenuItem {
         private:
 
     ST_LOCAL void doItemClick(const size_t ) {
-        myAction->doTrigger(NULL);
+        if(!myAction.isNull()) {
+            myAction->doTrigger(NULL);
+        }
     }
 
         private:
