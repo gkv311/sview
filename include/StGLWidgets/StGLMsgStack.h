@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at

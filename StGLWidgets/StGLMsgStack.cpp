@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2011-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -33,7 +33,10 @@ void StGLMsgStack::stglUpdate(const StPointD_t& thePointZo) {
 
     // check messages stack
     while(myMsgQueue->pop(myMsgTmp)) {
-        StGLMessageBox* aMsgBox = new StGLMessageBox(this, "", *myMsgTmp.Text);
+        // always create message boxes in root widget
+        // so that StGLRootWidget::setFocus() logic work as expected
+        //StGLMessageBox* aMsgBox = new StGLMessageBox(this, "", *myMsgTmp.Text);
+        StGLMessageBox* aMsgBox = new StGLMessageBox(myRoot, "", *myMsgTmp.Text);
         aMsgBox->addButton("Close");
         aMsgBox->stglInit();
     }
