@@ -30,7 +30,6 @@ namespace {
 
     static const char ST_SETTING_DEVICE_ID[]    = "deviceId";
     static const char ST_SETTING_WINDOWPOS[]    = "windowPos";
-    static const char ST_SETTING_BIND_MONITOR[] = "bindMonitor";
 
     struct StMonInterlacedInfo_t {
         const stUtf8_t* pnpid;

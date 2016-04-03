@@ -503,6 +503,9 @@ bool StOutDistorted::create() {
                                                   ((ovrGLTexture* )&myOvrSwapTexture->Textures[1])->OGL.TexId, 0);
         myContext->stglBindFramebufferRead(anFboReadBack);
     }
+#else
+    (void )myOvrSizeX;
+    (void )myOvrSizeY;
 #endif
     return true;
 }
