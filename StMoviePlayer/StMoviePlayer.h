@@ -185,7 +185,6 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doSeek(const int mouseBtn, const double seekX);
     ST_LOCAL void doPlayPause(const size_t dummy = 0);
     ST_LOCAL void doStop(const size_t dummy = 0);
-    ST_LOCAL void doReset(const size_t dummy = 0);
 
     ST_LOCAL void doSnapshot(const size_t theImgType);
     ST_LOCAL void doAboutFile(const size_t dummy = 0);

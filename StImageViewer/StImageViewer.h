@@ -111,7 +111,6 @@ class StImageViewer : public StApplication {
     ST_LOCAL void doQuit(const size_t dummy = 0);
 
     ST_LOCAL void doImageAdjustReset(const size_t dummy = 0);
-    ST_LOCAL void doReset(const size_t dummy = 0);
 
     ST_LOCAL void doUpdateStateLoading();
     ST_LOCAL void doUpdateStateLoaded();

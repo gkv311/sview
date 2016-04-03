@@ -28,8 +28,6 @@ class StStereoParams {
         //PANORAMA_CYLINDER, //!< cylindrical panorama
     };
 
-    static const int THE_SEP_STEP_PX = 2; //!< separation inc/dec step
-
     static StString GET_VIEW_MODE_NAME(ViewMode theViewMode) {
         switch(theViewMode) {
             case PANORAMA_CUBEMAP: return "cubemap";
@@ -106,6 +104,13 @@ class StStereoParams {
     }
 
     /**
+     * Set horizontal separation in pixels.
+     */
+    void setSeparationDx(const GLint theValue) {
+        mySepDxPx = theValue - mySepDxZeroPx;
+    }
+
+    /**
      * Setup neutral point.
      */
     void setSeparationNeutral(const GLint theSepDx = 0) {
@@ -121,10 +126,24 @@ class StStereoParams {
     }
 
     /**
+     * Set vertical separation in pixels.
+     */
+    void setSeparationDy(const GLint theValue) {
+        mySepDyPx = theValue;
+    }
+
+    /**
      * @return angular separation between views in degrees.
      */
     GLfloat getSepRotation() const {
         return mySepRotDegrees;
+    }
+
+    /**
+     * @return angular separation between views in degrees.
+     */
+    void setSepRotation(GLfloat theValue) {
+        mySepRotDegrees = theValue;
     }
 
     /**
@@ -195,30 +214,6 @@ class StStereoParams {
      */
     void scaleOut(const GLfloat theDuration = 0.02f) {
         ScaleFactor = stMax(ScaleFactor / (1.0f + theDuration), 0.05f);
-    }
-
-    void incSeparationDx() {
-        mySepDxPx += THE_SEP_STEP_PX;
-    }
-
-    void decSeparationDx() {
-        mySepDxPx -= THE_SEP_STEP_PX;
-    }
-
-    void incSeparationDy() {
-        mySepDyPx += THE_SEP_STEP_PX;
-    }
-
-    void decSeparationDy() {
-        mySepDyPx -= THE_SEP_STEP_PX;
-    }
-
-    void incSepRotation(const GLfloat theDuration = 0.02f) {
-        mySepRotDegrees += 5.0f * theDuration;
-    }
-
-    void decSepRotation(const GLfloat theDuration = 0.02f) {
-        mySepRotDegrees -= 5.0f * theDuration;
     }
 
     /**

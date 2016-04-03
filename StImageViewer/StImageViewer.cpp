@@ -1353,13 +1353,6 @@ void StImageViewer::doFullscreen(const bool theIsFullscreen) {
     }
 }
 
-void StImageViewer::doReset(const size_t ) {
-    StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
-    if(!aParams.isNull()) {
-        aParams->reset();
-    }
-}
-
 void StImageViewer::doLoaded() {
     myEventLoaded.set();
 }

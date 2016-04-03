@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="32"
+   height="32"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.5 r10040"
+   sodipodi:docname="actionStereo3dSettings.svg"
+   inkscape:export-filename="actionStereo3dSettings.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="1"
+     inkscape:pageshadow="2"
+     inkscape:zoom="16"
+     inkscape:cx="24.392341"
+     inkscape:cy="17.431687"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1471"
+     inkscape:window-height="990"
+     inkscape:window-x="2685"
+     inkscape:window-y="6"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-1020.3622)">
+    <path
+       d="m 0,1020.3622 h 32 v 32 H 0 z"
+       id="path6"
+       inkscape:connector-curvature="0"
+       style="fill:none" />
+    <path
+       d="M 25.333333,1024.3622 H 6.666667 C 5.2,1024.3622 4,1025.5622 4,1027.0289 v 18.6666 c 0,1.4667 1.2,2.6667 2.666667,2.6667 H 25.333333 C 26.8,1048.3622 28,1047.1622 28,1045.6955 v -18.6666 c 0,-1.4667 -1.2,-2.6667 -2.666667,-2.6667 z m -18,6 H 10 v -2.6667 h 2 v 2.6667 h 2.666667 v 2 H 12 v 2.6667 h -2 v -2.6667 H 7.333333 v -2 z m 18,15.3333 H 6.666667 l 18.666666,-18.6666 v 18.6666 z m -2.666666,-2.6666 v -2 H 16 v 2 h 6.666667 z"
+       id="path6-7"
+       inkscape:connector-curvature="0"
+       style="fill:#000000;fill-opacity:1;stroke:none" />
+  </g>
+</svg>

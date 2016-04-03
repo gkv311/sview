@@ -1953,13 +1953,6 @@ void StMoviePlayer::doSwitchSrcFormat(const int32_t theSrcFormat) {
     }
 }
 
-void StMoviePlayer::doReset(const size_t ) {
-    StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
-    if(!aParams.isNull()) {
-        aParams->reset();
-    }
-}
-
 void StMoviePlayer::doScaleGui(const int32_t ) {
     if(myGUI.isNull()) {
         return;

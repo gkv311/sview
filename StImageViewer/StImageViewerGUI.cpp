@@ -313,14 +313,15 @@ StGLMenu* StImageViewerGUI::createViewMenu() {
     fillPanoramaMenu(aMenuPanorama);
     StGLMenu* aMenuTexFilter = createSmoothFilterMenu();
     StGLMenu* aMenuImgAdjust = createImageAdjustMenu();
+    StGLMenu* aMenu3dAdjust  = create3dAdjustMenu();
 
     aMenuView->addItem(tr(MENU_VIEW_DISPLAY_MODE),  aMenuDispMode);
     if(myWindow->hasFullscreenMode()) {
         aMenuView->addItem(myPlugin->params.IsFullscreen);
     }
-    aMenuView->addItem(tr(MENU_VIEW_RESET))
-             ->setIcon(stCMenuIcon("actionResetPlacement"), false)
-             ->signals.onItemClick.connect(myPlugin, &StImageViewer::doReset);
+
+    aMenuView->addItem(tr(MENU_VIEW_RESET), myImage->getActions()[StGLImageRegion::Action_Reset])
+             ->setIcon(stCMenuIcon("actionResetPlacement"), false);
     aMenuView->addItem(tr(MENU_VIEW_SWAP_LR),       myImage->params.SwapLR);
     aMenuView->addItem(tr(MENU_VIEW_DISPLAY_RATIO), aMenuDispRatio)
              ->setIcon(stCMenuIcon("actionDisplayRatio"), false);
@@ -330,6 +331,8 @@ StGLMenu* StImageViewerGUI::createViewMenu() {
              ->setIcon(stCMenuIcon("actionInterpolation"), false);
     aMenuView->addItem(tr(MENU_VIEW_IMAGE_ADJUST),  aMenuImgAdjust)
              ->setIcon(stCMenuIcon("actionColorAdjust"), false);
+    aMenuView->addItem("3D Stereo",  aMenu3dAdjust)
+             ->setIcon(stCMenuIcon("actionStereo3dSettings"), false);
     return aMenuView;
 }
 
@@ -438,6 +441,48 @@ StGLMenu* StImageViewerGUI::createImageAdjustMenu() {
     aRange = new StGLRangeFieldFloat32(anItem, myImage->params.saturation,
                                        -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->changeRectPx().bottom() = aRange->getRectPx().top() + aMenu->getItemHeight();
+    aRange->setFormat(stCString("%+01.2f"));
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aRed);
+    return aMenu;
+}
+
+/**
+ * Root -> View menu -> Stereo 3D Adjust
+ */
+StGLMenu* StImageViewerGUI::create3dAdjustMenu() {
+    StGLMenu* aMenu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
+
+    const StGLVec3 aBlack(0.0f, 0.0f, 0.0f);
+    const StGLVec3 aGreen(0.0f, 0.6f, 0.4f);
+    const StGLVec3 aRed  (1.0f, 0.0f, 0.0f);
+
+    StGLMenuItem* anItem = NULL;
+    StGLRangeFieldFloat32* aRange = NULL;
+
+    anItem = aMenu->addItem("DX separation");
+    anItem->changeMargins().right = scale(100 + 16);
+    aRange = new StGLRangeFieldFloat32(anItem, myImage->params.SeparationDX,
+                                       -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+    aRange->setFormat(stCString("%+01.2f"));
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aRed);
+
+    anItem = aMenu->addItem("DY separation");
+    anItem->changeMargins().right = scale(100 + 16);
+    aRange = new StGLRangeFieldFloat32(anItem, myImage->params.SeparationDY,
+                                       -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
+    aRange->setFormat(stCString("%+01.2f"));
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);
+    aRange->setColor(StGLRangeFieldFloat32::FieldColor_Negative, aRed);
+
+    anItem = aMenu->addItem("Angular separation");
+    anItem->changeMargins().right = scale(100 + 16);
+    aRange = new StGLRangeFieldFloat32(anItem, myImage->params.SeparationRot,
+                                       -scale(16), 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT));
     aRange->setFormat(stCString("%+01.2f"));
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Default,  aBlack);
     aRange->setColor(StGLRangeFieldFloat32::FieldColor_Positive, aGreen);

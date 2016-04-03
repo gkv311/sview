@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2013 Kirill Gavrilov
+ * Copyright © 2011-2016 Kirill Gavrilov
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,50 +11,33 @@
 
 #include <StSettings/StParam.h>
 
+/**
+ * Parameter holding float number.
+ */
 class StFloat32Param : public StParam<float> {
-
-        protected:
-
-    float myMinValue;
-    float myMaxValue;
-    float myDefValue;
-    float myValueStep;
-    float myTolerance;
 
         public:
 
-    float getMinValue() const {
-        return myMinValue;
-    }
-
-    bool hasMinValue() const {
-        return myMinValue != -1E+37f;
-    }
-
-    bool hasMaxValue() const {
-        return myMaxValue !=  1E+37f;
-    }
-
-    float getMaxValue() const {
-        return myMaxValue;
-    }
-
-    float getDefValue() const {
-        return myDefValue;
-    }
-
-    float getStep() const {
-        return myValueStep;
-    }
-
-    float getTolerance() const {
-        return myTolerance;
+    /**
+     * Main constructor.
+     */
+    ST_LOCAL StFloat32Param(const float      theValue,
+                            const StCString& theParamKey)
+    : StParam<float>(theValue),
+      myMinValue(-1E+37f),
+      myMaxValue( 1E+37f),
+      myDefValue(0.0f),
+      myValueStep(1.0f),
+      myTolerance(0.0001f),
+      myParamKey (theParamKey),
+      myParamName(theParamKey) {
+        //
     }
 
     /**
      * Simple constructor.
      */
-    StFloat32Param(const float theValue)
+    ST_LOCAL StFloat32Param(const float theValue)
     : StParam<float>(theValue),
       myMinValue(-1E+37f),
       myMaxValue( 1E+37f),
@@ -67,12 +50,12 @@ class StFloat32Param : public StParam<float> {
     /**
      * Main constructor.
      */
-    StFloat32Param(const float theValue,
-                   const float theMinValue,
-                   const float theMaxValue,
-                   const float theDefValue,
-                   const float theStep,
-                   const float theTolerance = 0.0001f)
+    ST_LOCAL StFloat32Param(const float theValue,
+                            const float theMinValue,
+                            const float theMaxValue,
+                            const float theDefValue,
+                            const float theStep,
+                            const float theTolerance = 0.0001f)
     : StParam<float>(theValue),
       myMinValue(theMinValue),
       myMaxValue(theMaxValue),
@@ -83,31 +66,137 @@ class StFloat32Param : public StParam<float> {
     }
 
     /**
+     * @return parameter key
+     */
+    ST_LOCAL const StString& getKey() const {
+        return myParamKey;
+    }
+
+    /**
+     * @return parameter label
+     */
+    ST_LOCAL const StString& getName() const {
+        return myParamName;
+    }
+
+    /**
+     * Set new parameter label.
+     */
+    ST_LOCAL void setName(const StString& theName) {
+        myParamName = theName;
+    }
+
+    /**
+     * Return true if parameter defines minimum value limit.
+     */
+    ST_LOCAL bool hasMinValue() const {
+        return myMinValue != -1E+37f;
+    }
+
+    /**
+     * Return minimum allowed value.
+     */
+    ST_LOCAL float getMinValue() const {
+        return myMinValue;
+    }
+
+    /**
+     * Set minimum allowed value.
+     */
+    ST_LOCAL void setMinValue(float theValue) {
+        myMinValue = theValue;
+    }
+
+    /**
+     * Return true if parameter defines maximum value limit.
+     */
+    ST_LOCAL bool hasMaxValue() const {
+        return myMaxValue != 1E+37f;
+    }
+
+    /**
+     * Return maximum allowed value.
+     */
+    ST_LOCAL float getMaxValue() const {
+        return myMaxValue;
+    }
+
+    /**
+     * Set maximum allowed value.
+     */
+    ST_LOCAL void setMaxValue(float theValue) {
+        myMaxValue = theValue;
+    }
+
+    /**
+     * Return default value.
+     */
+    ST_LOCAL float getDefValue() const {
+        return myDefValue;
+    }
+
+    /**
+     * Set default value.
+     */
+    ST_LOCAL void setDefValue(float theValue) {
+        myDefValue = theValue;
+    }
+
+    /**
+     * Return increment step.
+     */
+    ST_LOCAL float getStep() const {
+        return myValueStep;
+    }
+
+    /**
+     * Set increment step.
+     */
+    ST_LOCAL void setStep(float theStep) {
+        myValueStep = theStep;
+    }
+
+    /**
+     * Return tolerance value for equality check.
+     */
+    ST_LOCAL float getTolerance() const {
+        return myTolerance;
+    }
+
+    /**
+     * Set tolerance value for equality check.
+     */
+    ST_LOCAL void setTolerance(float theTol) {
+        myTolerance = theTol;
+    }
+
+    /**
      * @return true if currently set value is default
      */
-    inline bool isDefaultValue() const {
+    ST_LOCAL bool isDefaultValue() const {
         return areEqual(getValue(), myDefValue);
     }
 
     /**
      * @return true if currently set value is maximum
      */
-    inline bool isMaxValue() const {
+    ST_LOCAL bool isMaxValue() const {
         return areEqual(getValue(), myMaxValue);
     }
 
     /**
      * @return true if currently set value is minimum
      */
-    inline bool isMinValue() const {
+    ST_LOCAL bool isMinValue() const {
         return areEqual(getValue(), myMinValue);
     }
 
     /**
      * Change the value.
-     * @param theValue (const float ) - new value.
+     * @param theValue new value
+     * @return true if value has been changed
      */
-    virtual bool setValue(const float theValue) {
+    ST_LOCAL virtual bool setValue(const float theValue) {
         const float anOldValue = getValue();
         const float anNewValue
             =  ((theValue + myTolerance) > myMaxValue) ? myMaxValue
@@ -124,22 +213,28 @@ class StFloat32Param : public StParam<float> {
     /**
      * Reset value to default.
      */
-    void reset() {
+    ST_LOCAL void reset() {
         setValue(myDefValue);
     }
 
-    void increment() {
-        setValue(getValue() + myValueStep);
+    /**
+     * Increase value using default step.
+     */
+    ST_LOCAL bool increment() {
+        return setValue(getValue() + myValueStep);
     }
 
-    void decrement() {
-        setValue(getValue() - myValueStep);
+    /**
+     * Decrease value using default step.
+     */
+    ST_LOCAL bool decrement() {
+        return setValue(getValue() - myValueStep);
     }
 
     /**
      * Prefix ++
      */
-    StParam<float>& operator++() {
+    ST_LOCAL StParam<float>& operator++() {
         setValue(getValue() + myValueStep);
         return (*this);
     }
@@ -147,7 +242,7 @@ class StFloat32Param : public StParam<float> {
     /**
      * Prefix --
      */
-    StParam<float>& operator--() {
+    ST_LOCAL StParam<float>& operator--() {
         setValue(getValue() - myValueStep);
         return (*this);
     }
@@ -155,25 +250,36 @@ class StFloat32Param : public StParam<float> {
     /**
      * Compare two float values using configured tolerance.
      */
-    bool areEqual(const float theFirst,
-                  const float theSecond) const {
+    ST_LOCAL bool areEqual(const float theFirst,
+                           const float theSecond) const {
         return ::stAreEqual(theFirst, theSecond, myTolerance);
     }
 
     /**
      * Return value within 0..1 range (taking into account min/max values).
      */
-    float getNormalizedValue() const {
+    ST_LOCAL float getNormalizedValue() const {
         return (getValue() - myMinValue) / (myMaxValue - myMinValue);
     }
 
     /**
      * Setup value within 0..1 range (to be scaled according to min/max values).
      */
-    bool setNormalizedValue(const float theValue) {
+    ST_LOCAL bool setNormalizedValue(const float theValue) {
         return setValue(myMinValue + theValue * (myMaxValue - myMinValue));
     }
 
+        protected:
+
+    float    myMinValue;  //!< minimal allowed value
+    float    myMaxValue;  //!< maximal allowed value
+    float    myDefValue;  //!< default value
+    float    myValueStep; //!< default increment step
+    float    myTolerance; //!< tolerance for equality check
+
+    StString myParamKey;  //!< parameter key (id)
+    StString myParamName; //!< parameter name (label)
+
 };
 
-#endif //__StFloat32Param_h_
+#endif // __StFloat32Param_h_

@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -24,29 +24,32 @@ namespace {
 
             public:
 
-        StSwapLRParam() : StBoolParamNamed(false, stCString("swapLR"), stCString("SwapLR")) {}
+        StSwapLRParam(StGLImageRegion* theWidget)
+        : StBoolParamNamed(false, stCString("swapLR"), stCString("SwapLR")), myWidget(theWidget) {}
 
-        virtual bool getValue() const {
-            return !myTrackedParams.isNull()
-                 && myTrackedParams->ToSwapLR;
+        void invalidateWidget() {
+            myWidget = NULL;
         }
 
-        virtual bool setValue(const bool theValue) {
-            if(myTrackedParams.isNull()
-            || myTrackedParams->ToSwapLR == theValue) {
+        virtual bool getValue() const ST_ATTR_OVERRIDE {
+            const StHandle<StStereoParams>& aParams = myWidget->params.stereoFile;
+            return !aParams.isNull()
+                 && aParams->ToSwapLR;
+        }
+
+        virtual bool setValue(const bool theValue) ST_ATTR_OVERRIDE {
+            const StHandle<StStereoParams>& aParams = myWidget->params.stereoFile;
+            if(aParams.isNull()
+            || aParams->ToSwapLR == theValue) {
                 return false;
             }
-            myTrackedParams->setSwapLR(theValue);
+            aParams->setSwapLR(theValue);
             return true;
-        }
-
-        void setTrackedHandle(const StHandle<StStereoParams>& theTrackedParams) {
-            myTrackedParams = theTrackedParams;
         }
 
             private:
 
-        StHandle<StStereoParams> myTrackedParams;
+        StGLImageRegion* myWidget;  //!< parent widget holding image parameters
 
     };
 
@@ -54,29 +57,146 @@ namespace {
 
             public:
 
-        StViewModeParam() : StInt32ParamNamed(0, stCString("viewMode"), stCString("View Mode")) {}
+        StViewModeParam(StGLImageRegion* theWidget)
+        : StInt32ParamNamed(0, stCString("viewMode"), stCString("View Mode")), myWidget(theWidget) {}
 
-        virtual int32_t getValue() const {
-            return myTrackedParams.isNull() ? 0 : myTrackedParams->ViewingMode;
+        void invalidateWidget() {
+            myWidget = NULL;
         }
 
-        virtual bool setValue(const int32_t theValue) {
-            if(myTrackedParams.isNull()
-            || myTrackedParams->ViewingMode == theValue) {
+        virtual int32_t getValue() const ST_ATTR_OVERRIDE {
+            const StHandle<StStereoParams>& aParams = myWidget->params.stereoFile;
+            return aParams.isNull() ? 0 : aParams->ViewingMode;
+        }
+
+        virtual bool setValue(const int32_t theValue) ST_ATTR_OVERRIDE {
+            const StHandle<StStereoParams>& aParams = myWidget->params.stereoFile;
+            if(aParams.isNull()
+            || aParams->ViewingMode == theValue) {
                 return false;
             }
-            myTrackedParams->ViewingMode = (StStereoParams::ViewMode )theValue;
+            aParams->ViewingMode = (StStereoParams::ViewMode )theValue;
             signals.onChanged(theValue);
             return true;
         }
 
-        void setTrackedHandle(const StHandle<StStereoParams>& theTrackedParams) {
-            myTrackedParams = theTrackedParams;
+            private:
+
+        StGLImageRegion* myWidget;  //!< parent widget holding image parameters
+
+    };
+
+    /**
+     * Parameter interface tracking parameter value within active file.
+     */
+    class ST_LOCAL StFloat32StereoParam : public StFloat32Param {
+
+            public:
+
+        enum StereoParamId {
+            StereoParamId_SepDX,
+            StereoParamId_SepDY,
+            StereoParamId_SepRot,
+        };
+
+            public:
+
+        /**
+         * Main constructor.
+         */
+        StFloat32StereoParam(StGLImageRegion*    theWidget,
+                             const StereoParamId theParamId,
+                             const StCString&    theParamKey)
+        : StFloat32Param(0.0f, theParamKey), myWidget(theWidget), myParamId(theParamId) {
+            const float THE_SEP_STEP_PX = 2.0f;
+            switch(myParamId) {
+                case StereoParamId_SepDX: {
+                    setMinValue(-100.0f);
+                    setMaxValue( 100.0f);
+                    setStep(THE_SEP_STEP_PX);
+                    setTolerance(0.5f);
+                    break;
+                }
+                case StereoParamId_SepDY: {
+                    setMinValue(-100.0f);
+                    setMaxValue( 100.0f);
+                    setStep(THE_SEP_STEP_PX);
+                    setTolerance(0.5f);
+                    break;
+                }
+                case StereoParamId_SepRot: {
+                    setMinValue(-180.0f);
+                    setMaxValue( 180.0f);
+                    setStep(0.1f);
+                    setTolerance(0.001f);
+                    break;
+                }
+            }
+        }
+
+        void invalidateWidget() {
+            myWidget = NULL;
+        }
+
+        virtual float getValue() const ST_ATTR_OVERRIDE {
+            const StHandle<StStereoParams>& aParams = myWidget->params.stereoFile;
+            if(aParams.isNull()) {
+                return 0.0f;
+            }
+            switch(myParamId) {
+                case StereoParamId_SepDX:  return (float )aParams->getSeparationDx();
+                case StereoParamId_SepDY:  return (float )aParams->getSeparationDy();
+                case StereoParamId_SepRot: return aParams->getSepRotation();
+            }
+            return 0.0f;
+        }
+
+        virtual bool setValue(const float theValue) ST_ATTR_OVERRIDE {
+            const StHandle<StStereoParams>& aParams = myWidget->params.stereoFile;
+            if(aParams.isNull()) {
+                return false;
+            }
+
+            switch(myParamId) {
+                case StereoParamId_SepDX: {
+                    int32_t aValue = int32_t(theValue >= 0.0f ? (theValue + 0.5f) : (theValue - 0.5f));
+                    if(aParams->getSeparationDx() == aValue) {
+                        return false;
+                    }
+                    aParams->setSeparationDx(aValue);
+                    break;
+                 }
+                case StereoParamId_SepDY: {
+                    int32_t aValue = int32_t(theValue >= 0.0f ? (theValue + 0.5f) : (theValue - 0.5f));
+                    if(aParams->getSeparationDy() == aValue) {
+                        return false;
+                    }
+                    aParams->setSeparationDy(aValue);
+                    break;
+                 }
+                 case StereoParamId_SepRot: {
+                     float aValue = theValue;
+                     while(aValue >= 360.0f) {
+                        aValue -= 360.0f;
+                     }
+                     while(aValue <= -360.0f) {
+                        aValue += 360.0f;
+                     }
+                     if(StFloat32Param::areEqual(aParams->getSepRotation(), aValue)) {
+                        return false;
+                     }
+                     aParams->setSepRotation(aValue);
+                 }
+            }
+
+            signals.onChanged(theValue);
+            return true;
         }
 
             private:
 
-        StHandle<StStereoParams> myTrackedParams;
+        StGLImageRegion* myWidget;  //!< parent widget holding image parameters
+        StereoParamId    myParamId; //!< active parameter to be tracked
 
     };
 
@@ -127,11 +247,14 @@ StGLImageRegion::StGLImageRegion(StGLWidget* theParent,
     params.TextureFilter->defineOption(StGLImageProgram::FILTER_LINEAR,  stCString("Linear"));
     params.TextureFilter->defineOption(StGLImageProgram::FILTER_BLEND,   stCString("Blend"));
 
-    params.gamma      = myProgram.params.gamma;
-    params.brightness = myProgram.params.brightness;
-    params.saturation = myProgram.params.saturation;
-    params.SwapLR   = new StSwapLRParam();
-    params.ViewMode = new StViewModeParam();
+    params.gamma         = myProgram.params.gamma;
+    params.brightness    = myProgram.params.brightness;
+    params.saturation    = myProgram.params.saturation;
+    params.SwapLR        = new StSwapLRParam(this);
+    params.ViewMode      = new StViewModeParam(this);
+    params.SeparationDX  = new StFloat32StereoParam(this, StFloat32StereoParam::StereoParamId_SepDX,  stCString("sepDX"));
+    params.SeparationDY  = new StFloat32StereoParam(this, StFloat32StereoParam::StereoParamId_SepDY,  stCString("sepDY"));
+    params.SeparationRot = new StFloat32StereoParam(this, StFloat32StereoParam::StereoParamId_SepRot, stCString("sepRot"));
 
 #ifdef ST_EXTRA_CONTROLS
     theUsePanningKeys = false;
@@ -272,6 +395,13 @@ StGLImageRegion::~StGLImageRegion() {
     myQuad.release(aCtx);
     myUVSphere.release(aCtx);
     myProgram.release(aCtx);
+
+    // simplify debugging - nullify pointer to this widget
+    ((StSwapLRParam*        )params.SwapLR       .access())->invalidateWidget();
+    ((StViewModeParam*      )params.ViewMode     .access())->invalidateWidget();
+    ((StFloat32StereoParam* )params.SeparationDX .access())->invalidateWidget();
+    ((StFloat32StereoParam* )params.SeparationDY .access())->invalidateWidget();
+    ((StFloat32StereoParam* )params.SeparationRot.access())->invalidateWidget();
 }
 
 StHandle<StStereoParams> StGLImageRegion::getSource() {
@@ -286,9 +416,11 @@ void StGLImageRegion::stglUpdate(const StPointD_t& pointZo) {
     StGLWidget::stglUpdate(pointZo);
     if(myIsInitialized) {
         myHasVideoStream = myTextureQueue->stglUpdateStTextures(getContext()) || myTextureQueue->hasConnectedStream();
-        params.stereoFile = myTextureQueue->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE).getSource();
-        ((StSwapLRParam*   )params.SwapLR  .access())->setTrackedHandle(params.stereoFile);
-        ((StViewModeParam* )params.ViewMode.access())->setTrackedHandle(params.stereoFile);
+        StHandle<StStereoParams> aFileParams = myTextureQueue->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE).getSource();
+        if(params.stereoFile != aFileParams) {
+            params.stereoFile = aFileParams;
+            onParamsChanged();
+        }
     }
 }
 
@@ -1089,4 +1221,19 @@ void StGLImageRegion::doParamsRotXDown(const double ) {
         anXRotate += 360.0f;
     }
     params.stereoFile->setXRotate(anXRotate);
+}
+
+void StGLImageRegion::doParamsReset(const size_t ) {
+    if(!params.stereoFile.isNull()) {
+        params.stereoFile->reset();
+        onParamsChanged();
+    }
+}
+
+void StGLImageRegion::onParamsChanged() {
+    params.SwapLR       ->signals.onChanged(params.SwapLR->getValue());
+    params.ViewMode     ->signals.onChanged(params.ViewMode->getValue());
+    params.SeparationDX ->signals.onChanged(params.SeparationDX->getValue());
+    params.SeparationDY ->signals.onChanged(params.SeparationDY->getValue());
+    params.SeparationRot->signals.onChanged(params.SeparationRot->getValue());
 }

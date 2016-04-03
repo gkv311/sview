@@ -149,6 +149,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
     ST_LOCAL StGLMenu* createDisplayRatioMenu(); // Root -> View   -> Display Ratio
     ST_LOCAL StGLMenu* createSmoothFilterMenu(); // Root -> View   -> Smooth Filter
     ST_LOCAL StGLMenu* createImageAdjustMenu();  // Root -> View   -> Image Adjust
+    ST_LOCAL StGLMenu* create3dAdjustMenu();     // Root -> View   -> Stereo 3D Adjust
     ST_LOCAL StGLMenu* createAudioMenu();        // Root -> Audio menu
     ST_LOCAL StGLMenu* createSubtitlesMenu();    // Root -> Subtitles menu
     ST_LOCAL StGLMenu* createOutputMenu();       // Root -> Output menu

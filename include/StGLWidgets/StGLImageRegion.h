@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -157,14 +157,20 @@ class StGLImageRegion : public StGLWidget {
         StHandle<StStereoParams>      stereoFile;
         StHandle<StBoolParamNamed>    SwapLR;                //!< reversion flag
         StHandle<StInt32ParamNamed>   ViewMode;              //!< StStereoParams::ViewMode
+        StHandle<StFloat32Param>      SeparationDX;          //!< DX separation
+        StHandle<StFloat32Param>      SeparationDY;          //!< DY separation
+        StHandle<StFloat32Param>      SeparationRot;         //!< angle separation
 
     } params;
 
         private:
 
-    ST_LOCAL void doParamsReset(const size_t ) {
-        if(!params.stereoFile.isNull()) { params.stereoFile->reset(); }
-    }
+    /**
+     * Call bound callbacks bound to parameters.
+     */
+    ST_LOCAL void onParamsChanged();
+
+    ST_LOCAL void doParamsReset(const size_t );
 
     ST_LOCAL void doParamsGamma(const size_t theDir) {
         if(!params.stereoFile.isNull()) {
@@ -174,13 +180,13 @@ class StGLImageRegion : public StGLWidget {
 
     ST_LOCAL void doParamsSepX(const size_t theDir) {
         if(!params.stereoFile.isNull()) {
-            theDir == 1 ? params.stereoFile->incSeparationDx() : params.stereoFile->decSeparationDx();
+            theDir == 1 ? params.SeparationDX->increment() : params.SeparationDX->decrement();
         }
     }
 
     ST_LOCAL void doParamsSepY(const size_t theDir) {
         if(!params.stereoFile.isNull()) {
-            theDir == 1 ? params.stereoFile->incSeparationDy() : params.stereoFile->decSeparationDy();
+            theDir == 1 ? params.SeparationDY->increment() : params.SeparationDY->decrement();
         }
     }
 
@@ -203,15 +209,13 @@ class StGLImageRegion : public StGLWidget {
     }
 
     ST_LOCAL void doParamsSepZDec(const double theValue) {
-        if(!params.stereoFile.isNull()) {
-            params.stereoFile->decSepRotation((GLfloat )theValue);
-        }
+        float aValue = params.SeparationRot->getValue() - 5.0f * float(theValue);
+        params.SeparationRot->setValue(aValue);
     }
 
     ST_LOCAL void doParamsSepZInc(const double theValue) {
-        if(!params.stereoFile.isNull()) {
-            params.stereoFile->incSepRotation((GLfloat )theValue);
-        }
+        float aValue = params.SeparationRot->getValue() + 5.0f * float(theValue);
+        params.SeparationRot->setValue(aValue);
     }
 
     ST_LOCAL void doParamsModeNext(const size_t ) {
