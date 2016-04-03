@@ -783,6 +783,7 @@ void StMoviePlayerGUI::doAudioGainScroll(const double theDelta) {
 void StMoviePlayerGUI::doAudioDelay(const size_t ) {
     StGLMessageBox* aDialog = new StDelayControl(this, myPlugin->params.AudioDelay);
     aDialog->stglInit();
+    setModalDialog(aDialog);
 }
 
 /**
