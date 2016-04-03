@@ -29,14 +29,12 @@
 class StGLContext;
 class StCheckUpdates;
 class StWindow;
+class StImageOpenDialog;
 
 /**
  * Image Viewer application.
  */
 class StImageViewer : public StApplication {
-
-    friend class StImageViewGUI;
-    class StOpenImage;
 
         public:
 
@@ -217,32 +215,33 @@ class StImageViewer : public StApplication {
 
         private: //! @name private fields
 
-    StHandle<StGLContext>      myContext;
-    StHandle<StSettings>       mySettings;        //!< settings manager for Image Viewer plugin
-    StHandle<StPlayList>       myPlayList;        //!< play list
-    StHandle<StImageViewerGUI> myGUI;             //!< GUI root widget
-    StHandle<StImageLoader>    myLoader;          //!< main image loader class
-    StHandle<StCheckUpdates>   myUpdates;         //!< check updates utility
-    StHandle<StFileNode>       myFileToDelete;    //!< file node for removal
-    StHandle<StImageInfo>      myFileInfo;        //!< file info for opened dialog
-    StHandle<StOpenImage>      myOpenDialog;      //!< file open dialog
-    StString                   myAppName;         //!< name of customized application
+    StHandle<StGLContext>       myContext;
+    StHandle<StSettings>        mySettings;        //!< settings manager for Image Viewer plugin
+    StHandle<StPlayList>        myPlayList;        //!< play list
+    StHandle<StImageViewerGUI>  myGUI;             //!< GUI root widget
+    StHandle<StImageLoader>     myLoader;          //!< main image loader class
+    StHandle<StCheckUpdates>    myUpdates;         //!< check updates utility
+    StHandle<StFileNode>        myFileToDelete;    //!< file node for removal
+    StHandle<StImageInfo>       myFileInfo;        //!< file info for opened dialog
+    StHandle<StImageOpenDialog> myOpenDialog;      //!< file open dialog
+    StString                    myAppName;         //!< name of customized application
 
-    StCondition                myEventLoaded;     //!< indicate that new file was open
-    StTimer                    myInactivityTimer; //!< timer initialized when application goes into paused state
+    StCondition                 myEventLoaded;     //!< indicate that new file was open
+    StTimer                     myInactivityTimer; //!< timer initialized when application goes into paused state
 
-    StTimer                    mySlideShowTimer;  //!< slideshow stuff
-    double                     mySlideShowDelay;
+    StTimer                     mySlideShowTimer;  //!< slideshow stuff
+    double                      mySlideShowDelay;
 
-    bool                       myToCheckUpdates;
-    bool                       myToSaveSrcFormat; //!< indicates that active source format should be saved or not
-    bool                       myEscNoQuit;       //!< if true then Escape will not quit application
-    bool                       myToHideUIFullScr; //!< if true then GUI will be hidden in full-screen mode
-    bool                       myToCheckPoorOrient; //!< switch off orientation sensor with poor quality
+    bool                        myToCheckUpdates;
+    bool                        myToSaveSrcFormat; //!< indicates that active source format should be saved or not
+    bool                        myEscNoQuit;       //!< if true then Escape will not quit application
+    bool                        myToHideUIFullScr; //!< if true then GUI will be hidden in full-screen mode
+    bool                        myToCheckPoorOrient; //!< switch off orientation sensor with poor quality
 
         private:
 
     friend class StImageViewerGUI;
+    friend class StImageOpenDialog;
 
 };
 

@@ -241,6 +241,8 @@
 		</Linker>
 		<Unit filename="StImageLoader.cpp" />
 		<Unit filename="StImageLoader.h" />
+		<Unit filename="StImageOpenDialog.cpp" />
+		<Unit filename="StImageOpenDialog.h" />
 		<Unit filename="StImagePluginInfo.h" />
 		<Unit filename="StImageViewer.cpp" />
 		<Unit filename="StImageViewer.h" />

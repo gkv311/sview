@@ -18,6 +18,7 @@
 
 #include "StMoviePlayer.h"
 
+#include "StMovieOpenDialog.h"
 #include "StMoviePlayerGUI.h"
 #include "StMoviePlayerStrings.h"
 #include "StVideo/StVideo.h"
@@ -186,226 +187,6 @@ std::string StALDeviceParam::getCTitle() const {
     return myDevicesLoc[(anActive >= 0 && size_t(anActive) < myDevicesUtf.size()) ? size_t(anActive) : 0];
 }
 
-/**
- * Auxiliary class to create standard non-blocking open file dialog in dedicated thread.
- */
-class StMoviePlayer::StOpenVideo {
-
-        public:
-
-    enum DialogState {
-        Dialog_Inactive,    //!< dialog is not opened
-        Dialog_SingleMovie, //!< dialog is opened and waiting for user input (one video file)
-        Dialog_DoubleMovie, //!< dialog is opened and waiting for user input (two video files)
-        Dialog_Audio,       //!< dialog is opened and waiting for user input (audio file)
-        Dialog_Subtitles,   //!< dialog is opened and waiting for user input (subtitles file)
-        Dialog_HasFiles,    //!< dialog has been closed and waiting for processing results
-    };
-
-        public:
-
-    /**
-     * Main constructor.
-     */
-    ST_LOCAL StOpenVideo(StMoviePlayer* thePlugin)
-    : myPlugin(thePlugin),
-      myState(StOpenVideo::Dialog_Inactive) {}
-
-    /**
-     * Destructor.
-     */
-    ST_LOCAL ~StOpenVideo() {
-        if(!myThread.isNull()) {
-            myThread->wait();
-        }
-    }
-
-    /**
-     * Create open file dialog.
-     */
-    bool openDialog(const StOpenVideo::DialogState theMode) {
-        StMutexAuto aLock(myMutex);
-        if(myState != StOpenVideo::Dialog_Inactive) {
-            return false;
-        }
-
-        if(myPlugin->params.lastFolder.isEmpty()) {
-            StHandle<StFileNode> aCurrFile = myPlugin->myPlayList->getCurrentFile();
-            if(!aCurrFile.isNull()) {
-                myPlugin->params.lastFolder = aCurrFile->isEmpty() ? aCurrFile->getFolderPath() : aCurrFile->getValue(0)->getFolderPath();
-            }
-        }
-
-        myFolder = myPlugin->params.lastFolder;
-        myState  = theMode;
-        myThread = new StThread(openDialogThread, this);
-        return true;
-    }
-
-    /**
-     * Return true for Dialog_HasFiles state.
-     */
-    ST_LOCAL bool hasResults() {
-        StMutexAuto aLock(myMutex);
-        return myState == StOpenVideo::Dialog_HasFiles;
-    }
-
-    /**
-     * Reset results.
-     */
-    ST_LOCAL void resetResults() {
-        StMutexAuto aLock(myMutex);
-        if(myState != StOpenVideo::Dialog_HasFiles) {
-            return;
-        }
-
-        if(!myThread.isNull()) {
-            myThread->wait();
-            myThread.nullify();
-        }
-
-        myState = Dialog_Inactive;
-        myPathVideoL.clear();
-        myPathVideoR.clear();
-        myPathAudio .clear();
-        myPathSubs  .clear();
-    }
-
-    /**
-     * Return path to the left file.
-     * Should NOT be called within Active state.
-     */
-    ST_LOCAL const StString& getPathLeft()  const { return myPathVideoL; }
-
-    /**
-     * Return path to the right file.
-     * Should NOT be called within Active state.
-     */
-    ST_LOCAL const StString& getPathRight() const { return myPathVideoR; }
-
-    /**
-     * Return path to the audio file.
-     * Should NOT be called within Active state.
-     */
-    ST_LOCAL const StString& getPathAudio() const { return myPathAudio; }
-
-    /**
-     * Return path to the subtitles file.
-     * Should NOT be called within Active state.
-     */
-    ST_LOCAL const StString& getPathSubtitles() const { return myPathSubs; }
-
-    /**
-     * Set paths to open.
-     */
-    ST_LOCAL void setPaths(const StString& thePathLeft,
-                           const StString& thePathRight) {
-        StMutexAuto aLock(myMutex);
-        if(myState != StOpenVideo::Dialog_Inactive) {
-            return;
-        }
-
-        myPathVideoL = thePathLeft;
-        myPathVideoR = thePathRight;
-        myPathAudio.clear();
-        myPathSubs .clear();
-        if(!myPathVideoL.isEmpty()) {
-            myState = StOpenVideo::Dialog_HasFiles;
-        }
-    }
-
-        private:
-
-    /**
-     * Thread function wrapper.
-     */
-    static SV_THREAD_FUNCTION openDialogThread(void* theArg) {
-        StOpenVideo* aHandler = (StOpenVideo* )theArg;
-        aHandler->dialogLoop();
-        return SV_THREAD_RETURN 0;
-    }
-
-    /**
-     * Thread function.
-     */
-    ST_LOCAL void dialogLoop() {
-        myPathVideoL.clear();
-        myPathVideoR.clear();
-        myPathAudio .clear();
-        myPathSubs  .clear();
-
-        StString aTitle;
-        const StMIMEList* aMimeList = &myPlugin->myVideo->getMimeListVideo();
-        switch(myState) {
-            case Dialog_DoubleMovie:
-                aTitle = myPlugin->myLangMap->getValue(DIALOG_OPEN_LEFT);
-                break;
-            case Dialog_Audio:
-                aTitle    = "Choose audio file to attach";
-                aMimeList = &myPlugin->myVideo->getMimeListAudio();
-                break;
-            case Dialog_Subtitles:
-                aTitle    = "Choose subtitles file to attach";
-                aMimeList = &myPlugin->myVideo->getMimeListSubtitles();
-                break;
-            case Dialog_SingleMovie:
-            default:
-                aTitle = myPlugin->myLangMap->getValue(DIALOG_OPEN_FILE);
-                break;
-        }
-
-        StString aFilePath, aDummy;
-        if(!StFileNode::openFileDialog(myFolder, aTitle, *aMimeList, aFilePath, false)) {
-            StMutexAuto aLock(myMutex);
-            myState = StOpenVideo::Dialog_Inactive;
-            return;
-        }
-
-        switch(myState) {
-            case Dialog_DoubleMovie: {
-                aTitle =  myPlugin->myLangMap->getValue(DIALOG_OPEN_RIGHT);
-                StFileNode::getFolderAndFile(aFilePath, myFolder, aDummy);
-                myPathVideoL = aFilePath;
-                if(!StFileNode::openFileDialog(myFolder, aTitle, *aMimeList, myPathVideoR, false)) {
-                    StMutexAuto aLock(myMutex);
-                    myState = StOpenVideo::Dialog_Inactive;
-                    return;
-                }
-                break;
-            }
-            case Dialog_Audio: {
-                myPathAudio = aFilePath;
-                break;
-            }
-            case Dialog_Subtitles: {
-                myPathSubs = aFilePath;
-                break;
-            }
-            case Dialog_SingleMovie:
-            default: {
-                myPathVideoL = aFilePath;
-                break;
-            }
-        }
-
-        StMutexAuto aLock(myMutex);
-        myState = StOpenVideo::Dialog_HasFiles;
-    }
-
-        private:
-
-    StMoviePlayer*     myPlugin;
-    StHandle<StThread> myThread;
-    StMutex            myMutex;
-    StString           myFolder;
-    StString           myPathVideoL;
-    StString           myPathVideoR;
-    StString           myPathAudio;
-    StString           myPathSubs;
-    DialogState        myState;
-
-};
-
 void StMoviePlayer::doChangeDevice(const int32_t theValue) {
     StApplication::doChangeDevice(theValue);
     // update menu
@@ -496,7 +277,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
   myToCheckPoorOrient(true) {
     mySettings = new StSettings(myResMgr, ST_DRAWER_PLUGIN_NAME);
     myLangMap  = new StTranslations(myResMgr, StMoviePlayer::ST_DRAWER_PLUGIN_NAME);
-    myOpenDialog = new StOpenVideo(this);
+    myOpenDialog = new StMovieOpenDialog(this);
     StMoviePlayerStrings::loadDefaults(*myLangMap);
     myLangMap->params.language->signals.onChanged += stSlot(this, &StMoviePlayer::doChangeLanguage);
     myTitle = "sView - Movie Player";
@@ -2008,11 +1789,11 @@ void StMoviePlayer::doOpen1FileFromGui(StHandle<StString> thePath) {
 }
 
 void StMoviePlayer::doOpen1File(const size_t ) {
-    myOpenDialog->openDialog(StOpenVideo::Dialog_SingleMovie);
+    myOpenDialog->openDialog(StMovieOpenDialog::Dialog_SingleMovie);
 }
 
 void StMoviePlayer::doOpen2Files(const size_t ) {
-    myOpenDialog->openDialog(StOpenVideo::Dialog_DoubleMovie);
+    myOpenDialog->openDialog(StMovieOpenDialog::Dialog_DoubleMovie);
 }
 
 void StMoviePlayer::doSaveFileInfo(const size_t theToSave) {
@@ -2043,11 +1824,11 @@ void StMoviePlayer::doClearRecent(const size_t ) {
 }
 
 void StMoviePlayer::doAddAudioStream(const size_t ) {
-    myOpenDialog->openDialog(StOpenVideo::Dialog_Audio);
+    myOpenDialog->openDialog(StMovieOpenDialog::Dialog_Audio);
 }
 
 void StMoviePlayer::doAddSubtitleStream(const size_t ) {
-    myOpenDialog->openDialog(StOpenVideo::Dialog_Subtitles);
+    myOpenDialog->openDialog(StMovieOpenDialog::Dialog_Subtitles);
 }
 
 void StMoviePlayer::doSeekLeft(const size_t ) {

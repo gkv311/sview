@@ -34,6 +34,7 @@
 class StCheckUpdates;
 class StFileNode;
 class StGLContext;
+class StMovieOpenDialog;
 class StMoviePlayerGUI;
 class StPlayList;
 class StSettings;
@@ -99,7 +100,6 @@ class StMoviePlayer : public StApplication {
         public:
 
     static const StString ST_DRAWER_PLUGIN_NAME;
-    class StOpenVideo;
 
     enum {
         BLOCK_SLEEP_NEVER      = 0,
@@ -369,30 +369,31 @@ class StMoviePlayer : public StApplication {
 
         private: //! @name private fields
 
-    StHandle<StGLContext>      myContext;
-    StHandle<StSettings>       mySettings;        //!< settings manager for Image Viewer plugin
-    StHandle<StPlayList>       myPlayList;        //!< play list
-    StHandle<StMoviePlayerGUI> myGUI;             //!< GUI root widget
-    StHandle<StVideo>          myVideo;           //!< main video playback class
-    StHandle<StCheckUpdates>   myUpdates;         //!< check updates utility
-    StHandle<StFileNode>       myFileToDelete;    //!< file node for removal
-    StHandle<StMovieInfo>      myFileInfo;        //!< file info for opened dialog
-    StHandle<StOpenVideo>      myOpenDialog;      //!< file open dialog
+    StHandle<StGLContext>       myContext;
+    StHandle<StSettings>        mySettings;        //!< settings manager for Image Viewer plugin
+    StHandle<StPlayList>        myPlayList;        //!< play list
+    StHandle<StMoviePlayerGUI>  myGUI;             //!< GUI root widget
+    StHandle<StVideo>           myVideo;           //!< main video playback class
+    StHandle<StCheckUpdates>    myUpdates;         //!< check updates utility
+    StHandle<StFileNode>        myFileToDelete;    //!< file node for removal
+    StHandle<StMovieInfo>       myFileInfo;        //!< file info for opened dialog
+    StHandle<StMovieOpenDialog> myOpenDialog;      //!< file open dialog
 
-    StCondition                myEventLoaded;     //!< indicate that new file was open
-    StTimer                    myInactivityTimer; //!< timer initialized when application goes into paused state
-    double                     mySeekOnLoad;      //!< seeking target
-    int32_t                    myAudioOnLoad;     //!< audio     track on load
-    int32_t                    mySubsOnLoad;      //!< subtitles track on load
+    StCondition                 myEventLoaded;     //!< indicate that new file was open
+    StTimer                     myInactivityTimer; //!< timer initialized when application goes into paused state
+    double                      mySeekOnLoad;      //!< seeking target
+    int32_t                     myAudioOnLoad;     //!< audio     track on load
+    int32_t                     mySubsOnLoad;      //!< subtitles track on load
 
-    mg_context*                myWebCtx;          //!< web UI context
+    mg_context*                 myWebCtx;          //!< web UI context
 
-    bool                       myToUpdateALList;
-    bool                       myIsBenchmark;
-    bool                       myToCheckUpdates;
-    bool                       myToCheckPoorOrient; //!< switch off orientation sensor with poor quality
+    bool                        myToUpdateALList;
+    bool                        myIsBenchmark;
+    bool                        myToCheckUpdates;
+    bool                        myToCheckPoorOrient; //!< switch off orientation sensor with poor quality
 
     friend class StMoviePlayerGUI;
+    friend class StMovieOpenDialog;
 
 };
 
