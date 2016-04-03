@@ -301,7 +301,7 @@ StCADViewerGUI::StCADViewerGUI(StCADViewer*    thePlugin,
     const int  anIconStep = scale(56);
     aButtonMargins.extend(scale(12));
 
-    myZFocusBar = new StGLSeekBar(this, 0, scale(4));
+    myZFocusBar = new StGLSeekBar(this, 0, scale(18));
     myZFocusBar->changeRectPx().left()  = scale(8);
     myZFocusBar->changeRectPx().right() = myZFocusBar->getRectPx().left() + 4 * anIconStep + scale(8);
     myZFocusBar->changeRectPx().moveTopTo(-(anIconStep - myZFocusBar->getRectPx().height()) / 2);
