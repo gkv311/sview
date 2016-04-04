@@ -90,6 +90,9 @@ void StMoviePlayer::doChangeDevice(const int32_t theValue) {
 void StMoviePlayer::doPause(const StPauseEvent& theEvent) {
     StApplication::doPause(theEvent);
     saveAllParams();
+    if(!myVideo.isNull()) {
+        myVideo->pushPlayEvent(ST_PLAYEVENT_PAUSE);
+    }
 }
 
 void StMoviePlayer::updateStrings() {
