@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2014-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2014-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -326,6 +326,8 @@ bool StWindowImpl::onAndroidInitWindow() {
         const EGLint aWidth  = ANativeWindow_getWidth (myMaster.hWindowGl);
         const EGLint aHeight = ANativeWindow_getHeight(myMaster.hWindowGl);
 
+        const bool isResized = myRectNorm.width()  != aWidth
+                            || myRectNorm.height() != aHeight;
         myRectNorm.left()   = 0;
         myRectNorm.top()    = 0;
         myRectNorm.right()  = myRectNorm.left() + aWidth;
@@ -333,6 +335,13 @@ bool StWindowImpl::onAndroidInitWindow() {
         myRectFull = myRectNorm;
 
         myInitState = STWIN_INIT_SUCCESS;
+        if(isResized) {
+            myStEvent.Type       = stEvent_Size;
+            myStEvent.Size.Time  = getEventTime();
+            myStEvent.Size.SizeX = myRectNorm.width();
+            myStEvent.Size.SizeY = myRectNorm.height();
+            signals.onResize->emit(myStEvent.Size);
+        }
         return true;
     }
 
