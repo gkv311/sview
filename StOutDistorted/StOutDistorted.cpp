@@ -123,7 +123,7 @@ void StOutDistorted::getDevices(StOutDevicesList& theList) const {
 }
 
 void StOutDistorted::getOptions(StParamsList& theList) const {
-    if(myDevice != DEVICE_DISTORTED
+    if(myDevice != DEVICE_OCULUS
     && myDevice != DEVICE_S3DV) {
         theList.add(params.Layout);
     }
