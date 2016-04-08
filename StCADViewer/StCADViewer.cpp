@@ -429,6 +429,13 @@ bool StCADViewer::init() {
         myCADLoader = new StCADLoader(myLangMap, myPlayList);
         myCADLoader->signals.onError = stSlot(myMsgQueue.access(), &StMsgQueue::doPushError);
     }
+
+    if(isReset) {
+        if(params.IsFullscreen->getValue()) {
+            myWindow->setFullScreen(true);
+        }
+    }
+
     return true;
 }
 

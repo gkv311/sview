@@ -447,6 +447,9 @@ bool StImageViewer::init() {
 
     // create the image loader thread
     if(isReset) {
+        if(params.IsFullscreen->getValue()) {
+            myWindow->setFullScreen(true);
+        }
         return true;
     }
 

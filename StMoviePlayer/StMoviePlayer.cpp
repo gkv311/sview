@@ -780,6 +780,9 @@ bool StMoviePlayer::init() {
     myPlayList->loadRecentList(aRecentList);
 
     if(isReset) {
+        if(params.IsFullscreen->getValue()) {
+            myWindow->setFullScreen(true);
+        }
         return true;
     }
 
