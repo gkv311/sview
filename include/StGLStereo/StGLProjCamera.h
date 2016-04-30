@@ -195,11 +195,18 @@ class StGLProjCamera {
     }
 
     /**
-     * Update GL viewport and recompute projection matrix.
+     * Recompute projection matrix.
      */
-    ST_CPPEXPORT void resize(StGLContext&  theCtx,
-                             const GLsizei theSizeX,
-                             const GLsizei theSizeY);
+    ST_CPPEXPORT void resize(const GLfloat theAspect);
+
+    /**
+     * Recompute projection matrix.
+     */
+    ST_LOCAL void resize(const GLsizei theSizeX,
+                         const GLsizei theSizeY) {
+        const GLsizei aSizeY = (theSizeY > 0) ? theSizeY : 1;
+        resize(GLfloat(theSizeX) / GLfloat(aSizeY));
+    }
 
     /**
      * Setup projection frustum.

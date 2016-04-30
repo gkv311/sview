@@ -84,13 +84,8 @@ void StGLProjCamera::setPerspective(const bool theIsPerspective) {
     updateFrustum();
 }
 
-void StGLProjCamera::resize(StGLContext&  theCtx,
-                            const GLsizei theSizeX,
-                            const GLsizei theSizeY) {
-    const GLsizei aSizeY = (theSizeY > 0) ? theSizeY : 1;
-    myAspect = GLfloat(theSizeX) / GLfloat(aSizeY);
-
-    theCtx.stglResizeViewport(theSizeX, aSizeY); // reset the current viewport
+void StGLProjCamera::resize(const GLfloat theAspect) {
+    myAspect = theAspect;
     updateFrustum();
 }
 

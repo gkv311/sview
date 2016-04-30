@@ -332,7 +332,7 @@ void StGLRootWidget::stglResize(const StGLBoxPx& theRectPx) {
     const bool isChanged = getRectPx().right()  != theRectPx.width()
                         || getRectPx().bottom() != theRectPx.height();
 
-    myProjCamera.resize(*myGlCtx, theRectPx.width(), theRectPx.height());
+    myProjCamera.resize(theRectPx.width(), theRectPx.height());
 
     changeRectPx().right()  = theRectPx.width();  // (left, top) forced to zero point (0, 0)
     changeRectPx().bottom() = theRectPx.height();
