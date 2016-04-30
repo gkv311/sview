@@ -524,27 +524,26 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     // retrieve viewport size for correct scissor rectangle computation
     GLfloat aFrustrumL = 1.0f, aFrustrumR = 1.0f, aFrustrumT = 1.0f, aFrustrumB = 1.0f;
     StRectI_t aFrameRectPx = getRectPx();
-
+    float aCameraAspect = getCamera()->getAspect();
+    const StGLBoxPx aViewportBack = aCtx.stglViewport();
     if(!aParams->isMono()) {
         switch(params.DisplayMode->getValue()) {
             case MODE_PARALLEL: {
                 if(theView == ST_DRAW_LEFT) {
                     aFrameRectPx.right() /= 2;
-                    aFrustrumR = 3.0f;
                 } else {
                     aFrameRectPx.left() += aFrameRectPx.width() / 2;
-                    aFrustrumL = 3.0f;
                 }
+                aCameraAspect *= 0.5f;
                 break;
             }
             case MODE_CROSSYED: {
                 if(theView == ST_DRAW_RIGHT) {
                     aFrameRectPx.right() /= 2;
-                    aFrustrumR = 3.0f;
                 } else {
                     aFrameRectPx.left() += aFrameRectPx.width() / 2;
-                    aFrustrumL = 3.0f;
                 }
+                aCameraAspect *= 0.5f;
                 break;
             }
         }
@@ -555,6 +554,8 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     const StRectI_t aFrameRectAbs = getAbsolute(aFrameRectPx);
     getRoot()->stglScissorRect(aFrameRectAbs, aScissorBox);
     aCtx.stglSetScissorRect(aScissorBox, true);
+    aCtx.stglResizeViewport(aScissorBox);
+    myProjCam.resize(aCameraAspect);
 
     aCtx.core20fwd->glDisable(GL_BLEND);
 
@@ -837,7 +838,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
 
             StGLMatrix aMatModelInv, aMatProjInv;
             aModelMat.inverted(aMatModelInv);
-            getCamera()->getProjMatrixMono().inverted(aMatProjInv);
+            myProjCam.getProjMatrixMono().inverted(aMatProjInv);
             myProgram.getActiveProgram()->setProjMat (aCtx, StGLMatrix::multiply(aMatModelInv, aMatProjInv));
             myProgram.getActiveProgram()->setModelMat(aCtx, aModelMat);
 
@@ -897,7 +898,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             myProgram.setTextureMainDataSize(aCtx, aClampVec);
             myProgram.setTextureUVDataSize  (aCtx, aClampUV);
 
-            myProgram.getActiveProgram()->setProjMat (aCtx, getCamera()->getProjMatrixMono());
+            myProgram.getActiveProgram()->setProjMat (aCtx, myProjCam.getProjMatrixMono());
             myProgram.getActiveProgram()->setModelMat(aCtx, aModelMat);
 
             myUVSphere.draw(aCtx, *myProgram.getActiveProgram());
@@ -910,6 +911,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     aTextures.unbind(aCtx);
 
     aCtx.stglResetScissorRect();
+    aCtx.stglResizeViewport(aViewportBack);
 }
 
 void StGLImageRegion::doRightUnclick(const StPointD_t& theCursorZo) {
