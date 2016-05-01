@@ -1,4 +1,75 @@
-== sView 14.01 ==
+== sView 16.04 ==
+
+16.04 (2016-04-05)
+  + Update FFmpeg to 3.0.1.
+  + Android, handle multi-touch input.
+  + Android, improve compatibility with file managers and mail clients.
+  + Android, add experimental hardware-accelerated video decoding (disabled by default).
+  + Movie Player - implement GPU-accelerated conversion of NV12 and XYZ12 formats.
+  + Image Viewer - put original filename into save file dialog.
+  * Movie Player - fix saving playback time of recent file.
+  * Movie Player - fix tracking playback state for keeping screen on.
+  * Android, fix crash when closing application on some devices.
+  * Improve language change without application restart.
+  * Prevent creation of multiple modal dialogs.
+
+15.11 (2015-11-22)
+  + Movie Player - support extended remote control from command line.
+  + Image Viewer - read/write sTER chunk in PNG files identifying side-by-side format.
+  + Image Viewer - show metadata read by FFmpeg.
+  + Support list of files within Drag & Drop. Two files are handled as stereo pair.
+  + Android, handle keyboard input.
+  + Update OpenAL Soft to 1.17.
+  + Update FFmpeg to 2.8.2.
+  + Port code onto Oculus Rift SDK 0.8.
+  * Reduce peak memory usage, improve performance using reference-counted frames.
+  * Windows, update experimental DXVA2 decoder (supports more codecs).
+  * Windows, fix cursor hiding within NVIDIA 3D Vision output (Direct3D).
+  * Android, fix compatibility with some OpenGL ES 2.0 drivers supporting GL_EXT_texture_rg extension.
+  * Handle Esc key within any context menu.
+
+15.10 (2015-10-04)
+  + Support reading cubemaps in format 3:2 (two rows per 3 quad sides).
+  + Add button to activate 360 panorama view (from cubemap or spherical panorama videos and images) on toolbar.
+  + Add Czech translation files.
+  + Android, implement device orientation tracking within panorama mode (requires precise sensors).
+  + Android, handle device back button to close active dialog.
+  + Add option to automatically workaround aspect ratio of anamorphic 1080p and 720p videos (turned on by default).
+  * Windows, turn off screen sleep blocking when user session has been locked.
+  * Improve handling of recent files when file has been selected within automatically generated playlist.
+  * Android, improve handling of last opened file and settings storage.
+  * Improve settings processing on Linux and Android - eliminate redundant file store/restore operations and add recovery for broken files.
+
+15.08 (2015-08-29)
+  + Cubemap images support (6 sides of the cube stacked horizontally).
+  + Added hot-keys configuration dialog.
+  + Added volume bar and shuffle/loop buttons to Media Player.
+  * Fixed issue with HiDPI displays within multi-monitor configurations on Windows 8.1+.
+  * Updated User Interface - more compact interface, new icons in menu, add scrollbars, improved HiDPI support.
+  * Improved integration into Ubuntu - fixed missing icons on taskbar.
+  * Improved touch-screens support.
+  * Many minor corrections.
+
+14.11 (2014-11-30)
+  + Porting to FFmpeg 2.5.
+  + Windows, 3D Vision output using Direct3D - use WGL_NV_DX_interop extension when available to improve performance.
+  + Preliminary support of Android platform.
+  + Added Chinese (simplified) translation.
+  + Movie Player - prefer audio stream for active GUI language.
+  + Movie Player - add support for 3.0 audio streams.
+  * Windows - fix window resize issues on monitors re-configuration.
+  * OS X - restore window title when switch from fullscreen mode.
+  * Movie Player - improve shuffle playback.
+  * Movie Player - improve m3u playlist support.
+  * Movie Player - fix seeking of mp3 files with attached image.
+  * Movie Player - fix issues on audio streams with unsupported / broken configuration.
+  * Image Viewer - downscale big images which do not fit into texture limits.
+  * Image Viewer - fix issue reading some broken JPEG files.
+
+14.02 (2014-03-01)
+  + Movie Player - restore playback position on re-opening of big audio/video files.
+  + Movie Player, Image Viewer - detect stereoscopic format detection from file name using keywords abq/lrq/halfou/halfsbs (if file doesn't contain appropriate information).
+  - Movie Player, Image Viewer - disable ambiguous side-by-side stereoscopic format detection from aspect ratio.
 
 14.01 (2014.01.30)
   + Windows 8.1 - adjust dimensions when window moved to monitor with another scale factor.
