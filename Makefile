@@ -121,6 +121,13 @@ endif
 ifeq ($(TARGET_OS),osx)
 # todo
 LDSTRIP =
+
+# workaround homebrew
+HAS_PKGCONF := $(shell command -v pkg-config 2> /dev/null)
+ifdef HAS_PKGCONF
+EXTRA_CXXFLAGS += $(shell pkg-config --silence-errors freetype2 --cflags)
+endif
+
 endif
 
 ifneq ($(FREETYPE_ROOT),)

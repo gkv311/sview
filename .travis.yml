@@ -5,11 +5,21 @@ compiler:
 
 os:
   - linux
-  #- osx
+  - osx
 
 env:
   - MY_TARGET=linux
   - MY_TARGET=android
+  - MY_TARGET=osx
+
+matrix:
+  exclude:
+    - os: osx
+      env: MY_TARGET=linux
+    - os: osx
+      env: MY_TARGET=android
+    - os: linux
+      env: MY_TARGET=osx
 
 # require Ubuntu 14.04 Trusty Tahr
 sudo: required
@@ -32,9 +42,13 @@ addons:
       - libavutil-dev
       - libswscale-dev
 
-before_install: true
+before_install:
+  - if [[ "$MY_TARGET" == "osx" ]]; then brew update; fi
+  - if [[ "$MY_TARGET" == "osx" ]]; then brew install freetype ffmpeg; fi
+
 install: true
 
 script:
-  - if [[ "$MY_TARGET" == "linux"   && "$TRAVIS_OS_NAME" == "linux" ]]; then ./contentiousIntegration/build_sview_linux.sh;   else echo "Skipping step for current target..."; fi
-  - if [[ "$MY_TARGET" == "android" && "$TRAVIS_OS_NAME" == "linux" ]]; then ./contentiousIntegration/build_sview_android.sh; else echo "Skipping step for current target..."; fi
+  - if [[ "$MY_TARGET" == "linux"   ]]; then ./contentiousIntegration/build_sview_linux.sh;   else echo "Skipping step for current target..."; fi
+  - if [[ "$MY_TARGET" == "android" ]]; then ./contentiousIntegration/build_sview_android.sh; else echo "Skipping step for current target..."; fi
+  - if [[ "$MY_TARGET" == "osx"     ]]; then ./contentiousIntegration/build_sview_osx.sh;     else echo "Skipping step for current target..."; fi
