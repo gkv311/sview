@@ -193,8 +193,12 @@ const char* formatToMetadata(const StFormat theFormat) {
 }
 
 bool StAVVideoMuxer::addStream(AVFormatContext* theContext,
-                               const AVStream*  theStream) {
+                               AVStream*        theStream) {
+#if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(57, 0, 0))
     AVStream* aStreamOut = avformat_new_stream(theContext, theStream->codec->codec);
+#else
+    AVStream* aStreamOut = avformat_new_stream(theContext, (AVCodec* )theStream->codec->codec);
+#endif
     if(aStreamOut == NULL) {
         signals.onError(StString("Failed allocating output stream."));
         return false;

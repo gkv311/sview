@@ -90,7 +90,7 @@ class StAVVideoMuxer {
      * Create output stream from input stream.
      */
     ST_CPPEXPORT bool addStream(AVFormatContext* theContext,
-                                const AVStream*  theStream);
+                                AVStream*        theStream);
 
         private:
 

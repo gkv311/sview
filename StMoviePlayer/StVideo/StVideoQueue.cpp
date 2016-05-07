@@ -44,7 +44,7 @@ namespace {
      */
     static void stReleaseFrameBuffer(AVCodecContext* theCodecCtx,
                                      AVFrame*        theFrame) {
-    #if defined(ST_AV_OLDSYNC) && !ST_USE64PTR
+    #if defined(ST_AV_OLDSYNC) && !defined(ST_USE64PTR)
         if(theFrame != NULL) {
             delete (int64_t* )theFrame->opaque;
             theFrame->opaque = NULL;

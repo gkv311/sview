@@ -10,6 +10,7 @@
 *.sh        eol=lf
 *.workspace eol=lf
 *.cbp       eol=lf
+*.yml       eol=lf
 *.vcxproj*  eol=crlf
 *.filters   eol=crlf
 *.sln       eol=crlf
