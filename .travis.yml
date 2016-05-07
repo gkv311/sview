@@ -7,15 +7,21 @@ os:
   - linux
   #- osx
 
+env:
+  - MY_TARGET=linux
+  - MY_TARGET=android
+
 # require Ubuntu 14.04 Trusty Tahr
 sudo: required
 dist: trusty
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get update  -qq; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -qq g++ libgtk2.0-dev libopenal-dev libgl1-mesa-dev libwebp-dev libconfig++-dev libconfig-dev libxpm-dev; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -qq libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev; fi
+  - if [[ "$MY_TARGET" == "linux"   && "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get update  -qq; fi
+  - if [[ "$MY_TARGET" == "linux"   && "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -qq g++ libgtk2.0-dev libopenal-dev libgl1-mesa-dev libwebp-dev libconfig++-dev libconfig-dev libxpm-dev; fi
+  - if [[ "$MY_TARGET" == "linux"   && "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -qq libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev libswscale-dev; fi
 
 install: true
 
-script: $CXX --version && make
+script:
+  - if [[ "$MY_TARGET" == "linux"   && "$TRAVIS_OS_NAME" == "linux" ]]; then $CXX --version && make; fi
+  - if [[ "$MY_TARGET" == "android" && "$TRAVIS_OS_NAME" == "linux" ]]; then ./contentiousIntegration/build_sview_android.sh; fi

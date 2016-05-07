@@ -15,6 +15,7 @@ OCCT_RES =
 FFMPEG_ROOT =
 FREETYPE_ROOT =
 OPENAL_ROOT =
+LIBCONFIG_ROOT =
 
 LIB_PTHREAD = -lpthread
 LIB_GLX = -lGL -lX11 -lXext
@@ -61,8 +62,8 @@ EXTRA_CFLAGS   += --sysroot=$(ANDROID_NDK)/platforms/android-15/arch-arm -march=
 EXTRA_CXXFLAGS += --sysroot=$(ANDROID_NDK)/platforms/android-15/arch-arm -march=armv7-a -mfloat-abi=softfp -I$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.8/include -I$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.8/libs/$(ANDROID_EABI)/include -DST_HAVE_EGL -DST_NO_UPDATES_CHECK
 EXTRA_LDFLAGS  += --sysroot=$(ANDROID_NDK)/platforms/android-15/arch-arm -L$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.8/libs/$(ANDROID_EABI) -lstdc++ -lgnustl_shared
 
-EXTRA_CXXFLAGS += -I$(FREETYPE_ROOT)/include -I$(OPENAL_ROOT)/include -I$(FFMPEG_ROOT)/include
-EXTRA_LDFLAGS  += -L$(FREETYPE_ROOT)/libs/$(ANDROID_EABI) -L$(OPENAL_ROOT)/libs/$(ANDROID_EABI) -L$(FFMPEG_ROOT)/libs/$(ANDROID_EABI)
+EXTRA_CXXFLAGS += -I$(FREETYPE_ROOT)/include -I$(OPENAL_ROOT)/include -I$(FFMPEG_ROOT)/include -I$(LIBCONFIG_ROOT)/include
+EXTRA_LDFLAGS  += -L$(FREETYPE_ROOT)/libs/$(ANDROID_EABI) -L$(OPENAL_ROOT)/libs/$(ANDROID_EABI) -L$(FFMPEG_ROOT)/libs/$(ANDROID_EABI) -L$(LIBCONFIG_ROOT)/libs/$(ANDROID_EABI)
 else
 EXTRA_CFLAGS   += -mmmx -msse
 EXTRA_CXXFLAGS += -mmmx -msse `pkg-config gtk+-2.0 --cflags`
