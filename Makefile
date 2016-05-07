@@ -8,7 +8,30 @@ $(info SRCDIR=$(SRCDIR))
 LBITS := $(shell getconf LONG_BIT)
 HAVE_MONGOOSE := -DST_HAVE_MONGOOSE
 
+# The following lines are required because standard make does not recognize the Objective-C++ .mm suffix
+.SUFFIXES: .o .mm
+.mm.o:
+	$(CXX) -c $(CXXFLAGS) $< -o $@
+
+TARGET_OS = linux
+
 #ANDROID_NDK = /home/kirill/develop/android-ndk-r10
+ifeq ($(OS),Windows_NT)
+TARGET_OS = wnt
+else
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+TARGET_OS = linux
+endif
+ifeq ($(UNAME_S),Darwin)
+TARGET_OS = osx
+endif
+endif
+
+ifdef ANDROID_NDK
+TARGET_OS = android
+endif
+
 BUILD_ROOT = build
 # folder containing OCCT resources ($CASROOT/src)
 OCCT_RES =
@@ -16,18 +39,41 @@ FFMPEG_ROOT =
 FREETYPE_ROOT =
 OPENAL_ROOT =
 LIBCONFIG_ROOT =
+LIBSUBFOLDER = lib
+LIBSUFFIX = so
 
+LIB_PTHREAD =
+LIB_GLX =
+LIB_GTK =
+LIB_OCCT  = -lTKMeshVS -lTKXDESTEP -lTKSTEP -lTKSTEPAttr -lTKSTEP209 -lTKSTEPBase -lTKXDEIGES -lTKIGES -lTKXSBase -lTKOpenGl -lTKXCAF -lTKVCAF -lTKCAF -lTKV3d -lTKHLR -lTKMesh -lTKService -lTKOffset -lTKFillet -lTKShHealing
+LIB_OCCT += -lTKBool -lTKBO -lTKPrim -lTKTopAlgo -lTKGeomAlgo -lTKBRep -lTKGeomBase -lTKG3d -lTKG2d -lTKMath -lTKLCAF -lTKCDF -lTKernel
+LIB_XLIB =
+LIB_CONFIG =
+LIB_ANDROID =
+LIB_IOKIT =
+LIB_OPENAL = -lopenal
+LIB_OUTPUTS = -lStOutAnaglyph -lStOutDual -lStOutInterlace -lStOutPageFlip -lStOutIZ3D -lStOutDistorted
+TOOLCHAIN =
+
+# Linux libraries
+ifeq ($(TARGET_OS),linux)
 LIB_PTHREAD = -lpthread
 LIB_GLX = -lGL -lX11 -lXext
 LIB_GTK = `pkg-config gtk+-2.0 --libs` -lgthread-2.0 -ldl
-LIB_OCCT  = -lTKMeshVS -lTKXDESTEP -lTKSTEP -lTKSTEPAttr -lTKSTEP209 -lTKSTEPBase -lTKXDEIGES -lTKIGES -lTKXSBase -lTKOpenGl -lTKXCAF -lTKVCAF -lTKCAF -lTKV3d -lTKHLR -lTKMesh -lTKService -lTKOffset -lTKFillet -lTKShHealing
-LIB_OCCT += -lTKBool -lTKBO -lTKPrim -lTKTopAlgo -lTKGeomAlgo -lTKBRep -lTKGeomBase -lTKG3d -lTKG2d -lTKMath -lTKLCAF -lTKCDF -lTKernel
 LIB_XLIB = -lXrandr -lXpm
 LIB_CONFIG = -lconfig++
-LIB_ANDROID =
-LIB_OUTPUTS = -lStOutAnaglyph -lStOutDual -lStOutInterlace -lStOutPageFlip -lStOutIZ3D -lStOutDistorted
+endif
 
-TOOLCHAIN =
+# OS X libraries
+ifeq ($(TARGET_OS),osx)
+LIBSUFFIX = dylib
+LIB_PTHREAD = -lobjc
+LIB_GLX = -framework OpenGL -framework Appkit
+LIB_IOKIT = -framework IOKit
+LIB_OPENAL = -framework OpenAL
+endif
+
+# Android libraries
 ifdef ANDROID_NDK
 TOOLCHAIN = $(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/linux-x86_64/arm-linux-androideabi/bin/
 HAVE_MONGOOSE =
@@ -35,6 +81,7 @@ LIB_PTHREAD = -lc
 LIB_GLX = -lEGL -lGLESv2
 LIB_GTK = -llog
 LIB_XLIB =
+LIB_CONFIG = -lconfig++
 LIB_ANDROID = -landroid
 LIB_OUTPUTS = -lStOutAnaglyph -lStOutInterlace -lStOutDistorted
 endif
@@ -44,10 +91,14 @@ CXX = $(TOOLCHAIN)g++
 AR  = $(TOOLCHAIN)ar
 LD  = $(TOOLCHAIN)g++
 
-LDSTRIP = -s -z defs
+LDSTRIP = -s
+LDZDEF = -z defs
 EXTRA_CFLAGS   =
 EXTRA_CXXFLAGS =
 EXTRA_LDFLAGS  =
+ifeq ($(TARGET_OS),osx)
+LDZDEF =
+endif
 
 # to activate debug build
 #EXTRA_CXXFLAGS = -DST_DEBUG_LOG_TO_FILE=\"/sdcard/Android/data/com.sview/files/sview.log\" -DST_DEBUG
@@ -58,15 +109,42 @@ EXTRA_LDFLAGS  =
 
 ifdef ANDROID_NDK
 ANDROID_EABI = armeabi-v7a
+LIBSUBFOLDER = libs/$(ANDROID_EABI)
 EXTRA_CFLAGS   += --sysroot=$(ANDROID_NDK)/platforms/android-15/arch-arm -march=armv7-a -mfloat-abi=softfp
 EXTRA_CXXFLAGS += --sysroot=$(ANDROID_NDK)/platforms/android-15/arch-arm -march=armv7-a -mfloat-abi=softfp -I$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.8/include -I$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.8/libs/$(ANDROID_EABI)/include -DST_HAVE_EGL -DST_NO_UPDATES_CHECK
 EXTRA_LDFLAGS  += --sysroot=$(ANDROID_NDK)/platforms/android-15/arch-arm -L$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.8/libs/$(ANDROID_EABI) -lstdc++ -lgnustl_shared
-
-EXTRA_CXXFLAGS += -I$(FREETYPE_ROOT)/include -I$(OPENAL_ROOT)/include -I$(FFMPEG_ROOT)/include -I$(LIBCONFIG_ROOT)/include
-EXTRA_LDFLAGS  += -L$(FREETYPE_ROOT)/libs/$(ANDROID_EABI) -L$(OPENAL_ROOT)/libs/$(ANDROID_EABI) -L$(FFMPEG_ROOT)/libs/$(ANDROID_EABI) -L$(LIBCONFIG_ROOT)/libs/$(ANDROID_EABI)
 else
 EXTRA_CFLAGS   += -mmmx -msse
-EXTRA_CXXFLAGS += -mmmx -msse `pkg-config gtk+-2.0 --cflags`
+EXTRA_CXXFLAGS += -mmmx -msse
+endif
+
+ifeq ($(TARGET_OS),osx)
+# todo
+LDSTRIP =
+endif
+
+ifneq ($(FREETYPE_ROOT),)
+EXTRA_CXXFLAGS += -I$(FREETYPE_ROOT)/include
+EXTRA_LDFLAGS  += -L$(FREETYPE_ROOT)/$(LIBSUBFOLDER)
+endif
+
+ifneq ($(FFMPEG_ROOT),)
+EXTRA_CXXFLAGS += -I$(FFMPEG_ROOT)/include
+EXTRA_LDFLAGS  += -L$(FFMPEG_ROOT)/$(LIBSUBFOLDER)
+endif
+
+ifneq ($(OPENAL_ROOT),)
+EXTRA_CXXFLAGS += -I$(OPENAL_ROOT)/include
+EXTRA_LDFLAGS  += -L$(OPENAL_ROOT)/$(LIBSUBFOLDER)
+endif
+
+ifneq ($(LIBCONFIG_ROOT),)
+EXTRA_CXXFLAGS += -I$(LIBCONFIG_ROOT)/include
+EXTRA_LDFLAGS  += -L$(LIBCONFIG_ROOT)/$(LIBSUBFOLDER)
+endif
+
+ifeq ($(TARGET_OS),linux)
+EXTRA_CXXFLAGS += `pkg-config gtk+-2.0 --cflags`
 endif
 
 INC =  -I$(SRCDIR)/3rdparty/include -I$(SRCDIR)/include
@@ -74,26 +152,26 @@ CFLAGS   = -fPIC $(HAVE_MONGOOSE) $(INC) $(EXTRA_CFLAGS)
 CXXFLAGS = -O3 -std=c++0x -Wall -fPIC $(HAVE_MONGOOSE) $(INC) $(EXTRA_CXXFLAGS)
 LIBDIR = -L$(BUILD_ROOT)
 LIB =
-LDFLAGS = $(LDSTRIP) -z defs $(EXTRA_LDFLAGS)
+LDFLAGS = $(LDSTRIP) $(LDZDEF) $(EXTRA_LDFLAGS)
 BUILD_ROOT = build
 USR_LIB = lib
 
-aStShared       := libStShared.so
-aStGLWidgets    := libStGLWidgets.so
-aStCore         := libStCore.so
-aStOutAnaglyph  := libStOutAnaglyph.so
-aStOutDual      := libStOutDual.so
-aStOutInterlace := libStOutInterlace.so
-aStOutPageFlip  := libStOutPageFlip.so
-aStOutIZ3D      := libStOutIZ3D.so
-aStOutDistorted := libStOutDistorted.so
-aStImageViewer  := libStImageViewer.so
-aStMoviePlayer  := libStMoviePlayer.so
-aStDiagnostics  := libStDiagnostics.so
-aStCADViewer    := libStCADViewer.so
-sViewAndroidCad := libsviewcad.so
+aStShared       := libStShared.$(LIBSUFFIX)
+aStGLWidgets    := libStGLWidgets.$(LIBSUFFIX)
+aStCore         := libStCore.$(LIBSUFFIX)
+aStOutAnaglyph  := libStOutAnaglyph.$(LIBSUFFIX)
+aStOutDual      := libStOutDual.$(LIBSUFFIX)
+aStOutInterlace := libStOutInterlace.$(LIBSUFFIX)
+aStOutPageFlip  := libStOutPageFlip.$(LIBSUFFIX)
+aStOutIZ3D      := libStOutIZ3D.$(LIBSUFFIX)
+aStOutDistorted := libStOutDistorted.$(LIBSUFFIX)
+aStImageViewer  := libStImageViewer.$(LIBSUFFIX)
+aStMoviePlayer  := libStMoviePlayer.$(LIBSUFFIX)
+aStDiagnostics  := libStDiagnostics.$(LIBSUFFIX)
+aStCADViewer    := libStCADViewer.$(LIBSUFFIX)
+sViewAndroidCad := libsviewcad.$(LIBSUFFIX)
 sView           := sView
-sViewAndroid    := libsview.so
+sViewAndroid    := libsview.$(LIBSUFFIX)
 
 aDestAndroid    := sview
 
@@ -127,7 +205,7 @@ install:
 	cp -f -r $(BUILD_ROOT)/textures/*    $(DESTDIR)/usr/share/sView/textures/
 	cp -f -r $(BUILD_ROOT)/web/*         $(DESTDIR)/usr/share/sView/web/
 	cp -f    license-gpl-3.0.txt         $(DESTDIR)/usr/share/sView/info/license.txt
-	cp -f -r $(BUILD_ROOT)/*.so          $(DESTDIR)/usr/$(USR_LIB)/
+	cp -f -r $(BUILD_ROOT)/*.$(LIBSUFFIX) $(DESTDIR)/usr/$(USR_LIB)/
 	cp -f    $(BUILD_ROOT)/sView         $(DESTDIR)/usr/$(USR_LIB)/sView/sView
 	ln --force --symbolic ../$(USR_LIB)/sView/sView       $(DESTDIR)/usr/bin/sView
 	ln --force --symbolic ../../share/sView/demo/demo.jps $(DESTDIR)/usr/$(USR_LIB)/sView/demo.jps
@@ -220,17 +298,23 @@ pre_all:
 	mkdir -p StCADViewer/libs/$(ANDROID_EABI)
 	cp -f -r textures/* $(BUILD_ROOT)/textures/
 
-# StShared static shared library
-aStShared_SRCS := $(wildcard $(SRCDIR)/StShared/*.cpp)
-aStShared_OBJS := ${aStShared_SRCS:.cpp=.o}
+# StShared shared library
+aStShared_SRCS1 := $(wildcard $(SRCDIR)/StShared/*.cpp)
+aStShared_OBJS1 := ${aStShared_SRCS1:.cpp=.o}
+aStShared_SRCS2 :=
+aStShared_OBJS2 :=
+ifeq ($(TARGET_OS),osx)
+aStShared_SRCS2 := $(wildcard $(SRCDIR)/StShared/*.mm)
+aStShared_OBJS2 := ${aStShared_SRCS2:.mm=.o}
+endif
 aStShared_LIB  := $(LIB) $(LIB_GLX) $(LIB_GTK) $(LIB_ANDROID) -lavutil -lavformat -lavcodec -lswscale -lfreetype $(LIB_CONFIG) $(LIB_PTHREAD)
-$(aStShared) : $(aStShared_OBJS)
-	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStShared_OBJS) $(aStShared_LIB) -o $(BUILD_ROOT)/$(aStShared)
+$(aStShared) : $(aStShared_OBJS1) $(aStShared_OBJS2)
+	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStShared_OBJS1) $(aStShared_OBJS2) $(aStShared_LIB) -o $(BUILD_ROOT)/$(aStShared)
 clean_StShared:
 	rm -f $(BUILD_ROOT)/$(aStShared)
 	rm -rf StShared/*.o
 
-# StGLWidgets static shared library
+# StGLWidgets shared library
 aStGLWidgets_SRCS := $(wildcard $(SRCDIR)/StGLWidgets/*.cpp)
 aStGLWidgets_OBJS := ${aStGLWidgets_SRCS:.cpp=.o}
 aStGLWidgets_LIB  := $(LIB) -lStShared $(LIB_GLX)
@@ -243,11 +327,17 @@ clean_StGLWidgets:
 	rm -rf StGLWidgets/*.o
 
 # StCore library
-aStCore_SRCS := $(wildcard $(SRCDIR)/StCore/*.cpp)
-aStCore_OBJS := ${aStCore_SRCS:.cpp=.o}
-aStCore_LIB  := $(LIB) -lStShared $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD) $(LIB_XLIB) $(LIB_ANDROID)
-$(aStCore) : $(aStShared) $(aStCore_OBJS)
-	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStCore_OBJS) $(aStCore_LIB) -o $(BUILD_ROOT)/$(aStCore)
+aStCore_SRCS1 := $(wildcard $(SRCDIR)/StCore/*.cpp)
+aStCore_OBJS1 := ${aStCore_SRCS1:.cpp=.o}
+aStCore_SRCS2 :=
+aStCore_OBJS2 :=
+ifeq ($(TARGET_OS),osx)
+aStCore_SRCS2 := $(wildcard $(SRCDIR)/StCore/*.mm)
+aStCore_OBJS2 := ${aStCore_SRCS2:.mm=.o}
+endif
+aStCore_LIB  := $(LIB) -lStShared $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD) $(LIB_XLIB) $(LIB_ANDROID) $(LIB_IOKIT)
+$(aStCore) : $(aStShared) $(aStCore_OBJS1) $(aStCore_OBJS2)
+	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStCore_OBJS1) $(aStCore_OBJS2) $(aStCore_LIB) -o $(BUILD_ROOT)/$(aStCore)
 clean_StCore:
 	rm -f $(BUILD_ROOT)/$(aStCore)
 	rm -rf StCore/*.o
@@ -338,11 +428,17 @@ clean_StOutInterlace:
 	rm -rf $(BUILD_ROOT)/lang/*/StOutInterlace.lng
 
 # StOutPageFlip library (Shutter glasses output)
-aStOutPageFlip_SRCS := $(wildcard $(SRCDIR)/StOutPageFlip/*.cpp)
-aStOutPageFlip_OBJS := ${aStOutPageFlip_SRCS:.cpp=.o}
+aStOutPageFlip_SRCS1 := $(wildcard $(SRCDIR)/StOutPageFlip/*.cpp)
+aStOutPageFlip_OBJS1 := ${aStOutPageFlip_SRCS1:.cpp=.o}
+aStOutPageFlip_SRCS2 :=
+aStOutPageFlip_OBJS2 :=
+ifeq ($(TARGET_OS),osx)
+aStOutPageFlip_SRCS2 := $(wildcard $(SRCDIR)/StOutPageFlip/*.mm)
+aStOutPageFlip_OBJS2 := ${aStOutPageFlip_SRCS2:.mm=.o}
+endif
 aStOutPageFlip_LIB  := $(LIB) -lStShared -lStCore $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
-$(aStOutPageFlip) : pre_StOutPageFlip $(aStCore) $(aStOutPageFlip_OBJS)
-	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStOutPageFlip_OBJS) $(aStOutPageFlip_LIB) -o $(BUILD_ROOT)/$(aStOutPageFlip)
+$(aStOutPageFlip) : pre_StOutPageFlip $(aStCore) $(aStOutPageFlip_OBJS1) $(aStOutPageFlip_OBJS2)
+	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStOutPageFlip_OBJS1) $(aStOutPageFlip_OBJS2) $(aStOutPageFlip_LIB) -o $(BUILD_ROOT)/$(aStOutPageFlip)
 pre_StOutPageFlip:
 	cp -f -r StOutPageFlip/lang/english/* $(BUILD_ROOT)/lang/English/
 	cp -f -r StOutPageFlip/lang/russian/* $(BUILD_ROOT)/lang/русский/
@@ -401,7 +497,7 @@ aStMoviePlayer_SRCS2 := $(wildcard $(SRCDIR)/StMoviePlayer/StVideo/*.cpp)
 aStMoviePlayer_OBJS2 := ${aStMoviePlayer_SRCS2:.cpp=.o}
 aStMoviePlayer_SRCS3 := $(wildcard $(SRCDIR)/StMoviePlayer/*.c)
 aStMoviePlayer_OBJS3 := ${aStMoviePlayer_SRCS3:.c=.o}
-aStMoviePlayer_LIB   := $(LIB) -lStGLWidgets -lStShared -lStCore $(LIB_OUTPUTS) $(LIB_GLX) $(LIB_GTK) -lavutil -lavformat -lavcodec -lswscale -lopenal $(LIB_PTHREAD)
+aStMoviePlayer_LIB   := $(LIB) -lStGLWidgets -lStShared -lStCore $(LIB_OUTPUTS) $(LIB_GLX) $(LIB_GTK) -lavutil -lavformat -lavcodec -lswscale $(LIB_OPENAL) $(LIB_PTHREAD)
 $(aStMoviePlayer) : pre_StMoviePlayer $(aStGLWidgets) outputs_all $(aStMoviePlayer_OBJS1) $(aStMoviePlayer_OBJS2) $(aStMoviePlayer_OBJS3)
 	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStMoviePlayer_OBJS1) $(aStMoviePlayer_OBJS2) $(aStMoviePlayer_OBJS3) $(aStMoviePlayer_LIB) -o $(BUILD_ROOT)/$(aStMoviePlayer)
 pre_StMoviePlayer:
@@ -481,11 +577,19 @@ clean_sViewAndroid:
 	rm -rf sview/jni/*.o
 
 # sView executable
-sView_SRCS := $(wildcard $(SRCDIR)/sview/*.cpp)
-sView_OBJS := ${sView_SRCS:.cpp=.o}
-sView_LIB  := $(LIB) -lStGLWidgets -lStShared -lStCore -lStImageViewer -lStMoviePlayer -lStDiagnostics $(LIB_OUTPUTS) $(LIB_GTK) -lX11 -ldl -lgthread-2.0 $(LIB_PTHREAD)
-$(sView) : $(aStImageViewer) $(aStMoviePlayer) $(aStDiagnostics) $(sView_OBJS)
-	$(LD) $(LDFLAGS) $(LIBDIR) $(sView_OBJS) $(sView_LIB) -o $(BUILD_ROOT)/$(sView)
+sView_SRCS1 := $(wildcard $(SRCDIR)/sview/*.cpp)
+sView_OBJS1 := ${sView_SRCS1:.cpp=.o}
+sView_SRCS2 :=
+sView_OBJS2 :=
+sView_LIB_DEPS = -lX11 -ldl -lgthread-2.0
+ifeq ($(TARGET_OS),osx)
+sView_SRCS2 := $(wildcard $(SRCDIR)/sview/*.mm)
+sView_OBJS2 := ${sView_SRCS2:.mm=.o}
+sView_LIB_DEPS = -framework Appkit
+endif
+sView_LIB  := $(LIB) -lStGLWidgets -lStShared -lStCore -lStImageViewer -lStMoviePlayer -lStDiagnostics $(LIB_OUTPUTS) $(LIB_GTK) $(sView_LIB_DEPS) $(LIB_PTHREAD)
+$(sView) : $(aStImageViewer) $(aStMoviePlayer) $(aStDiagnostics) $(sView_OBJS1) $(sView_OBJS2)
+	$(LD) $(LDFLAGS) $(LIBDIR) $(sView_OBJS1) $(sView_OBJS2) $(sView_LIB) -o $(BUILD_ROOT)/$(sView)
 clean_sView:
 	rm -f $(BUILD_ROOT)/$(sView)
 	rm -rf sview/*.o
