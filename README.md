@@ -37,3 +37,10 @@ See the [LICENSE](LICENSE.md) file.
 ## Build and Install
 
 See the [docs/INSTALL](docs/INSTALL.md) file.
+
+## Contentious Integration
+
+Building state of master branch (of this git repository https://github.com/gkv311/sview.git).
+
+Linux/Android [![Build status from Travis CI](https://travis-ci.org/gkv311/sview.svg?branch=master)](https://travis-ci.org/gkv311/sview)
+Windows       [![Build status from AppVeyor](https://ci.appveyor.com/api/projects/status/github/gkv311/sview)](https://ci.appveyor.com/project/gkv311/sview/build/messages)
