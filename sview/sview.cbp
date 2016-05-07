@@ -260,7 +260,7 @@
 			<Option target="LINUX_gcc" />
 			<Option target="LINUX_gcc_DEBUG" />
 		</Unit>
-		<Unit filename="main.mm">
+		<Unit filename="main.ObjC.mm">
 			<Option compile="1" />
 			<Option link="1" />
 			<Option target="MAC_gcc" />

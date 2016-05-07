@@ -273,7 +273,7 @@
 			<Option target="LINUX_gcc" />
 			<Option target="LINUX_gcc_DEBUG" />
 		</Unit>
-		<Unit filename="StFileNode2.mm">
+		<Unit filename="StFileNode.ObjC.mm">
 			<Option compile="1" />
 			<Option link="1" />
 			<Option target="MAC_gcc" />
