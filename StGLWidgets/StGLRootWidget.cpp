@@ -171,12 +171,18 @@ StGLRootWidget::IconSize StGLRootWidget::scaleIcon(const int theSize) const {
         return IconSize_24;
     } else if(anIconSize < 42) {
         return IconSize_32;
-    } else if(anIconSize < 60) {
+    } else if(anIconSize < 62) {
         return IconSize_48;
-    } else if(anIconSize < 110) {
+    } else if(anIconSize < 70) {
         return IconSize_64;
-    } else if(anIconSize < 180) {
+    } else if(anIconSize < 94) {
+        return IconSize_72;
+    } else if(anIconSize < 126) {
+        return IconSize_96;
+    } else if(anIconSize < 140) {
         return IconSize_128;
+    } else if(anIconSize < 190) {
+        return IconSize_144;
     } else if(anIconSize < 240) {
         return IconSize_192;
     } else {
