@@ -42,6 +42,12 @@ LIBCONFIG_ROOT =
 LIBSUBFOLDER = lib
 LIBSUFFIX = so
 
+# function defining library install_name to @executable_path on OS X
+libinstname =
+ifeq ($(TARGET_OS),osx)
+libinstname = -Wl,-install_name,@executable_path/$(1)
+endif
+
 LIB_PTHREAD =
 LIB_GLX =
 LIB_GTK =
@@ -316,7 +322,7 @@ aStShared_OBJS2 := ${aStShared_SRCS2:.mm=.o}
 endif
 aStShared_LIB  := $(LIB) $(LIB_GLX) $(LIB_GTK) $(LIB_ANDROID) -lavutil -lavformat -lavcodec -lswscale -lfreetype $(LIB_CONFIG) $(LIB_PTHREAD)
 $(aStShared) : $(aStShared_OBJS1) $(aStShared_OBJS2)
-	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStShared_OBJS1) $(aStShared_OBJS2) $(aStShared_LIB) -o $(BUILD_ROOT)/$(aStShared)
+	$(LD) -shared $(call libinstname,$@) $(LDFLAGS) $(LIBDIR) $(aStShared_OBJS1) $(aStShared_OBJS2) $(aStShared_LIB) -o $(BUILD_ROOT)/$@
 clean_StShared:
 	rm -f $(BUILD_ROOT)/$(aStShared)
 	rm -rf StShared/*.o
@@ -326,7 +332,7 @@ aStGLWidgets_SRCS := $(wildcard $(SRCDIR)/StGLWidgets/*.cpp)
 aStGLWidgets_OBJS := ${aStGLWidgets_SRCS:.cpp=.o}
 aStGLWidgets_LIB  := $(LIB) -lStShared $(LIB_GLX)
 $(aStGLWidgets) : pre_StGLWidgets $(aStShared) $(aStGLWidgets_OBJS)
-	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStGLWidgets_OBJS) $(aStGLWidgets_LIB) -o $(BUILD_ROOT)/$(aStGLWidgets)
+	$(LD) -shared $(call libinstname,$@) $(LDFLAGS) $(LIBDIR) $(aStGLWidgets_OBJS) $(aStGLWidgets_LIB) -o $(BUILD_ROOT)/$@
 pre_StGLWidgets:
 
 clean_StGLWidgets:
@@ -344,7 +350,7 @@ aStCore_OBJS2 := ${aStCore_SRCS2:.mm=.o}
 endif
 aStCore_LIB  := $(LIB) -lStShared $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD) $(LIB_XLIB) $(LIB_ANDROID) $(LIB_IOKIT)
 $(aStCore) : $(aStShared) $(aStCore_OBJS1) $(aStCore_OBJS2)
-	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStCore_OBJS1) $(aStCore_OBJS2) $(aStCore_LIB) -o $(BUILD_ROOT)/$(aStCore)
+	$(LD) -shared $(call libinstname,$@) $(LDFLAGS) $(LIBDIR) $(aStCore_OBJS1) $(aStCore_OBJS2) $(aStCore_LIB) -o $(BUILD_ROOT)/$@
 clean_StCore:
 	rm -f $(BUILD_ROOT)/$(aStCore)
 	rm -rf StCore/*.o
@@ -354,7 +360,7 @@ aStOutAnaglyph_SRCS := $(wildcard $(SRCDIR)/StOutAnaglyph/*.cpp)
 aStOutAnaglyph_OBJS := ${aStOutAnaglyph_SRCS:.cpp=.o}
 aStOutAnaglyph_LIB  := $(LIB) -lStShared -lStCore $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
 $(aStOutAnaglyph) : pre_StOutAnaglyph $(aStCore) $(aStOutAnaglyph_OBJS)
-	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStOutAnaglyph_OBJS) $(aStOutAnaglyph_LIB) -o $(BUILD_ROOT)/$(aStOutAnaglyph)
+	$(LD) -shared $(call libinstname,$@) $(LDFLAGS) $(LIBDIR) $(aStOutAnaglyph_OBJS) $(aStOutAnaglyph_LIB) -o $(BUILD_ROOT)/$@
 pre_StOutAnaglyph:
 	mkdir -p $(BUILD_ROOT)/shaders/StOutAnaglyph/
 	cp -f -r StOutAnaglyph/shaders/*      $(BUILD_ROOT)/shaders/StOutAnaglyph/
@@ -376,7 +382,7 @@ aStOutDual_SRCS := $(wildcard $(SRCDIR)/StOutDual/*.cpp)
 aStOutDual_OBJS := ${aStOutDual_SRCS:.cpp=.o}
 aStOutDual_LIB  := $(LIB) -lStShared -lStCore $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
 $(aStOutDual) : pre_StOutDual $(aStCore) $(aStOutDual_OBJS)
-	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStOutDual_OBJS) $(aStOutDual_LIB) -o $(BUILD_ROOT)/$(aStOutDual)
+	$(LD) -shared $(call libinstname,$@) $(LDFLAGS) $(LIBDIR) $(aStOutDual_OBJS) $(aStOutDual_LIB) -o $(BUILD_ROOT)/$@
 pre_StOutDual:
 	cp -f -r StOutDual/lang/english/* $(BUILD_ROOT)/lang/English/
 	cp -f -r StOutDual/lang/russian/* $(BUILD_ROOT)/lang/русский/
@@ -395,7 +401,7 @@ aStOutIZ3D_SRCS := $(wildcard $(SRCDIR)/StOutIZ3D/*.cpp)
 aStOutIZ3D_OBJS := ${aStOutIZ3D_SRCS:.cpp=.o}
 aStOutIZ3D_LIB  := $(LIB) -lStShared -lStCore $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
 $(aStOutIZ3D) : pre_StOutIZ3D $(aStCore) $(aStOutIZ3D_OBJS)
-	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStOutIZ3D_OBJS) $(aStOutIZ3D_LIB) -o $(BUILD_ROOT)/$(aStOutIZ3D)
+	$(LD) -shared $(call libinstname,$@) $(LDFLAGS) $(LIBDIR) $(aStOutIZ3D_OBJS) $(aStOutIZ3D_LIB) -o $(BUILD_ROOT)/$@
 pre_StOutIZ3D:
 	mkdir -p $(BUILD_ROOT)/shaders/StOutIZ3D/
 	cp -f -r StOutIZ3D/shaders/*      $(BUILD_ROOT)/shaders/StOutIZ3D/
@@ -417,7 +423,7 @@ aStOutInterlace_SRCS := $(wildcard $(SRCDIR)/StOutInterlace/*.cpp)
 aStOutInterlace_OBJS := ${aStOutInterlace_SRCS:.cpp=.o}
 aStOutInterlace_LIB  := $(LIB) -lStShared -lStCore $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
 $(aStOutInterlace) : pre_StOutInterlace $(aStCore) $(aStOutInterlace_OBJS)
-	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStOutInterlace_OBJS) $(aStOutInterlace_LIB) -o $(BUILD_ROOT)/$(aStOutInterlace)
+	$(LD) -shared $(call libinstname,$@) $(LDFLAGS) $(LIBDIR) $(aStOutInterlace_OBJS) $(aStOutInterlace_LIB) -o $(BUILD_ROOT)/$@
 pre_StOutInterlace:
 	mkdir -p $(BUILD_ROOT)/shaders/StOutInterlace/
 	cp -f -r StOutInterlace/shaders/*      $(BUILD_ROOT)/shaders/StOutInterlace/
@@ -445,7 +451,7 @@ aStOutPageFlip_OBJS2 := ${aStOutPageFlip_SRCS2:.mm=.o}
 endif
 aStOutPageFlip_LIB  := $(LIB) -lStShared -lStCore $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
 $(aStOutPageFlip) : pre_StOutPageFlip $(aStCore) $(aStOutPageFlip_OBJS1) $(aStOutPageFlip_OBJS2)
-	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStOutPageFlip_OBJS1) $(aStOutPageFlip_OBJS2) $(aStOutPageFlip_LIB) -o $(BUILD_ROOT)/$(aStOutPageFlip)
+	$(LD) -shared $(call libinstname,$@) $(LDFLAGS) $(LIBDIR) $(aStOutPageFlip_OBJS1) $(aStOutPageFlip_OBJS2) $(aStOutPageFlip_LIB) -o $(BUILD_ROOT)/$@
 pre_StOutPageFlip:
 	cp -f -r StOutPageFlip/lang/english/* $(BUILD_ROOT)/lang/English/
 	cp -f -r StOutPageFlip/lang/russian/* $(BUILD_ROOT)/lang/русский/
@@ -464,7 +470,7 @@ aStOutDistorted_SRCS := $(wildcard $(SRCDIR)/StOutDistorted/*.cpp)
 aStOutDistorted_OBJS := ${aStOutDistorted_SRCS:.cpp=.o}
 aStOutDistorted_LIB  := $(LIB) -lStShared -lStCore $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
 $(aStOutDistorted) : pre_StOutDistorted $(aStCore) $(aStOutDistorted_OBJS)
-	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStOutDistorted_OBJS) $(aStOutDistorted_LIB) -o $(BUILD_ROOT)/$(aStOutDistorted)
+	$(LD) -shared $(call libinstname,$@) $(LDFLAGS) $(LIBDIR) $(aStOutDistorted_OBJS) $(aStOutDistorted_LIB) -o $(BUILD_ROOT)/$@
 pre_StOutDistorted:
 	cp -f -r StOutDistorted/lang/english/* $(BUILD_ROOT)/lang/English/
 	cp -f -r StOutDistorted/lang/russian/* $(BUILD_ROOT)/lang/русский/
@@ -483,7 +489,7 @@ aStImageViewer_SRCS := $(wildcard $(SRCDIR)/StImageViewer/*.cpp)
 aStImageViewer_OBJS := ${aStImageViewer_SRCS:.cpp=.o}
 aStImageViewer_LIB  := $(LIB) -lStGLWidgets -lStShared -lStCore $(LIB_OUTPUTS) $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
 $(aStImageViewer) : pre_StImageViewer $(aStGLWidgets) outputs_all $(aStImageViewer_OBJS)
-	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStImageViewer_OBJS) $(aStImageViewer_LIB) -o $(BUILD_ROOT)/$(aStImageViewer)
+	$(LD) -shared $(call libinstname,$@) $(LDFLAGS) $(LIBDIR) $(aStImageViewer_OBJS) $(aStImageViewer_LIB) -o $(BUILD_ROOT)/$@
 pre_StImageViewer:
 	cp -f -r StImageViewer/lang/english/* $(BUILD_ROOT)/lang/English/
 	cp -f -r StImageViewer/lang/russian/* $(BUILD_ROOT)/lang/русский/
@@ -506,7 +512,7 @@ aStMoviePlayer_SRCS3 := $(wildcard $(SRCDIR)/StMoviePlayer/*.c)
 aStMoviePlayer_OBJS3 := ${aStMoviePlayer_SRCS3:.c=.o}
 aStMoviePlayer_LIB   := $(LIB) -lStGLWidgets -lStShared -lStCore $(LIB_OUTPUTS) $(LIB_GLX) $(LIB_GTK) -lavutil -lavformat -lavcodec -lswscale $(LIB_OPENAL) $(LIB_PTHREAD)
 $(aStMoviePlayer) : pre_StMoviePlayer $(aStGLWidgets) outputs_all $(aStMoviePlayer_OBJS1) $(aStMoviePlayer_OBJS2) $(aStMoviePlayer_OBJS3)
-	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStMoviePlayer_OBJS1) $(aStMoviePlayer_OBJS2) $(aStMoviePlayer_OBJS3) $(aStMoviePlayer_LIB) -o $(BUILD_ROOT)/$(aStMoviePlayer)
+	$(LD) -shared $(call libinstname,$@) $(LDFLAGS) $(LIBDIR) $(aStMoviePlayer_OBJS1) $(aStMoviePlayer_OBJS2) $(aStMoviePlayer_OBJS3) $(aStMoviePlayer_LIB) -o $(BUILD_ROOT)/$@
 pre_StMoviePlayer:
 	cp -f -r StMoviePlayer/lang/english/* $(BUILD_ROOT)/lang/English/
 	cp -f -r StMoviePlayer/lang/russian/* $(BUILD_ROOT)/lang/русский/
@@ -528,7 +534,7 @@ aStDiagnostics_SRCS := $(wildcard $(SRCDIR)/StDiagnostics/*.cpp)
 aStDiagnostics_OBJS := ${aStDiagnostics_SRCS:.cpp=.o}
 aStDiagnostics_LIB  := $(LIB) -lStGLWidgets -lStShared -lStCore $(LIB_OUTPUTS) $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
 $(aStDiagnostics) : pre_StDiagnostics $(aStGLWidgets) outputs_all $(aStDiagnostics_OBJS)
-	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStDiagnostics_OBJS) $(aStDiagnostics_LIB) -o $(BUILD_ROOT)/$(aStDiagnostics)
+	$(LD) -shared $(call libinstname,$@) $(LDFLAGS) $(LIBDIR) $(aStDiagnostics_OBJS) $(aStDiagnostics_LIB) -o $(BUILD_ROOT)/$@
 pre_StDiagnostics:
 	cp -f -r StDiagnostics/lang/english/* $(BUILD_ROOT)/lang/English/
 	cp -f -r StDiagnostics/lang/russian/* $(BUILD_ROOT)/lang/русский/
@@ -559,7 +565,7 @@ aStCADViewer_OBJS := ${aStCADViewer_SRCS:.cpp=.o}
 aStCADViewer_LIB  := $(LIB) -lStGLWidgets -lStShared -lStCore $(LIB_OUTPUTS) $(LIB_GLX) $(LIB_GTK) $(LIB_PTHREAD)
 aStCADViewer_LIB  += $(LIB_OCCT)
 $(aStCADViewer) : pre_StCADViewer $(aStGLWidgets) outputs_all $(aStCADViewer_OBJS)
-	$(LD) -shared $(LDFLAGS) $(LIBDIR) $(aStCADViewer_OBJS) $(aStCADViewer_LIB) -o $(BUILD_ROOT)/$(aStCADViewer)
+	$(LD) -shared $(call libinstname,$@) $(LDFLAGS) $(LIBDIR) $(aStCADViewer_OBJS) $(aStCADViewer_LIB) -o $(BUILD_ROOT)/$@
 pre_StCADViewer:
 	cp -f -r StCADViewer/lang/english/* $(BUILD_ROOT)/lang/English/
 	cp -f -r StCADViewer/lang/russian/* $(BUILD_ROOT)/lang/русский/
