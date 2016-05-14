@@ -172,7 +172,6 @@
 				<Linker>
 					<Add directory="$(TARGET_OUTPUT_DIR)" />
 					<Add option="-Wl,-install_name,@executable_path/$(TARGET_OUTPUT_BASENAME).dylib" />
-					<Add option="-s" />
 					<Add option="-framework Appkit" />
 					<Add option="-framework OpenGL" />
 					<Add library="objc" />

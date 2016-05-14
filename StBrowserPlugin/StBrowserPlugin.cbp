@@ -186,7 +186,6 @@
 				</Compiler>
 				<Linker>
 					<Add directory="$(TARGET_OUTPUT_DIR)" />
-					<Add option="-s" />
 					<Add option="-framework Appkit" />
 					<Add library="objc" />
 				</Linker>
