@@ -183,16 +183,14 @@
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
+					<Add directory="$(TARGET_OUTPUT_DIR)" />
+					<Add option="-Wl,-install_name,@executable_path/$(TARGET_OUTPUT_BASENAME).dylib" />
 					<Add option="-s" />
 					<Add option="-framework Appkit" />
 					<Add option="-framework OpenGL" />
 					<Add option="-framework IOKit" />
 					<Add library="objc" />
 				</Linker>
-				<ExtraCommands>
-					<Add after='install_name_tool -id @executable_path/$(TARGET_OUTPUT_BASENAME).dylib &quot;$(TARGET_OUTPUT_FILE)&quot;' />
-					<Add after='ln -f -s &quot;../$(TARGET_OUTPUT_FILE)&quot; ../lib/$(TARGET_NAME)' />
-				</ExtraCommands>
 			</Target>
 			<Target title="MAC_gcc_DEBUG">
 				<Option output="../bin/$(TARGET_NAME)/sView.app/Contents/MacOS/libStCore" prefix_auto="1" extension_auto="1" />
@@ -209,15 +207,13 @@
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
+					<Add directory="$(TARGET_OUTPUT_DIR)" />
+					<Add option="-Wl,-install_name,@executable_path/$(TARGET_OUTPUT_BASENAME).dylib" />
 					<Add option="-framework Appkit" />
 					<Add option="-framework OpenGL" />
 					<Add option="-framework IOKit" />
 					<Add library="objc" />
 				</Linker>
-				<ExtraCommands>
-					<Add after='install_name_tool -id @executable_path/$(TARGET_OUTPUT_BASENAME).dylib &quot;$(TARGET_OUTPUT_FILE)&quot;' />
-					<Add after='ln -f -s &quot;../$(TARGET_OUTPUT_FILE)&quot; ../lib/$(TARGET_NAME)' />
-				</ExtraCommands>
 			</Target>
 		</Build>
 		<Compiler>

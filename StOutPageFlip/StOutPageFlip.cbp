@@ -175,6 +175,8 @@
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
+					<Add directory="$(TARGET_OUTPUT_DIR)" />
+					<Add option="-Wl,-install_name,@executable_path/$(TARGET_OUTPUT_BASENAME).dylib" />
 					<Add option="-s" />
 					<Add option="-framework Appkit" />
 					<Add option="-framework OpenGL" />
@@ -182,8 +184,6 @@
 				</Linker>
 				<ExtraCommands>
 					<Add before='bash ../copy_res.sh $(TARGET_OUTPUT_DIR) $(PROJECT_NAME)' />
-					<Add after='install_name_tool -id @executable_path/$(TARGET_OUTPUT_BASENAME).dylib &quot;$(TARGET_OUTPUT_FILE)&quot;' />
-					<Add after='ln -f -s &quot;../$(TARGET_OUTPUT_FILE)&quot; ../lib/$(TARGET_NAME)' />
 				</ExtraCommands>
 			</Target>
 			<Target title="MAC_gcc_DEBUG">
@@ -200,14 +200,14 @@
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
+					<Add directory="$(TARGET_OUTPUT_DIR)" />
+					<Add option="-Wl,-install_name,@executable_path/$(TARGET_OUTPUT_BASENAME).dylib" />
 					<Add option="-framework Appkit" />
 					<Add option="-framework OpenGL" />
 					<Add library="objc" />
 				</Linker>
 				<ExtraCommands>
 					<Add before='bash ../copy_res.sh $(TARGET_OUTPUT_DIR) $(PROJECT_NAME)' />
-					<Add after='install_name_tool -id @executable_path/$(TARGET_OUTPUT_BASENAME).dylib &quot;$(TARGET_OUTPUT_FILE)&quot;' />
-					<Add after='ln -f -s &quot;../$(TARGET_OUTPUT_FILE)&quot; ../lib/$(TARGET_NAME)' />
 				</ExtraCommands>
 			</Target>
 		</Build>

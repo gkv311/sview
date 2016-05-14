@@ -176,6 +176,7 @@
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
+					<Add directory="$(TARGET_OUTPUT_DIR)" />
 					<Add option="-s" />
 					<Add option="-framework Appkit" />
 					<Add option="-framework OpenGL" />
@@ -196,6 +197,7 @@
 					<Add option="-DST_HAVE_STCONFIG" />
 				</Compiler>
 				<Linker>
+					<Add directory="$(TARGET_OUTPUT_DIR)" />
 					<Add option="-framework Appkit" />
 					<Add option="-framework OpenGL" />
 					<Add library="objc" />
