@@ -32,7 +32,14 @@ ifdef ANDROID_NDK
 TARGET_OS = android
 endif
 
+BUILD_ROOT_BUNDLE = build
 BUILD_ROOT = build
+USR_LIB = lib
+ifeq ($(TARGET_OS),osx)
+BUILD_ROOT_BUNDLE = build/sView.app
+BUILD_ROOT = $(BUILD_ROOT_BUNDLE)/Contents/MacOS
+endif
+
 # folder containing OCCT resources ($CASROOT/src)
 OCCT_RES =
 FFMPEG_ROOT =
@@ -166,8 +173,6 @@ CXXFLAGS = -O3 -std=c++0x -Wall -fPIC $(HAVE_MONGOOSE) $(INC) $(EXTRA_CXXFLAGS)
 LIBDIR = -L$(BUILD_ROOT)
 LIB =
 LDFLAGS = $(LDSTRIP) $(LDZDEF) $(EXTRA_LDFLAGS)
-BUILD_ROOT = build
-USR_LIB = lib
 
 aStShared       := libStShared.$(LIBSUFFIX)
 aStGLWidgets    := libStGLWidgets.$(LIBSUFFIX)
@@ -603,6 +608,31 @@ endif
 sView_LIB  := $(LIB) -lStGLWidgets -lStShared -lStCore -lStImageViewer -lStMoviePlayer -lStDiagnostics $(LIB_OUTPUTS) $(LIB_GTK) $(sView_LIB_DEPS) $(LIB_PTHREAD)
 $(sView) : $(aStImageViewer) $(aStMoviePlayer) $(aStDiagnostics) $(sView_OBJS1) $(sView_OBJS2)
 	$(LD) $(LDFLAGS) $(LIBDIR) $(sView_OBJS1) $(sView_OBJS2) $(sView_LIB) -o $(BUILD_ROOT)/$(sView)
+ifeq ($(TARGET_OS),osx)
+	mkdir -p $(BUILD_ROOT_BUNDLE)/Contents/Frameworks/
+	mkdir -p $(BUILD_ROOT_BUNDLE)/Contents/Resources/English.lproj/
+	cp -f -r sview/Contents/*                 $(BUILD_ROOT_BUNDLE)/Contents/
+	cp -f    sview/Resources/sView.icns       $(BUILD_ROOT_BUNDLE)/Contents/Resources/
+	cp -f    sview/Resources/sView_Media.icns $(BUILD_ROOT_BUNDLE)/Contents/Resources/
+	ibtool --compile $(BUILD_ROOT_BUNDLE)/Contents/Resources/English.lproj/MainMenu.nib sview/Resources/English.lproj/MainMenu.xib
+ifneq ($(FREETYPE_ROOT),)
+	cp -R -f $(FREETYPE_ROOT)/$(LIBSUBFOLDER)/libfreetype*.dylib $(BUILD_ROOT_BUNDLE)/Contents/Frameworks
+endif
+ifneq ($(FFMPEG_ROOT),)
+	cp -R -f $(FFMPEG_ROOT)/$(LIBSUBFOLDER)/libavcodec*.dylib    $(BUILD_ROOT_BUNDLE)/Contents/Frameworks
+	cp -R -f $(FFMPEG_ROOT)/$(LIBSUBFOLDER)/libavdevice*.dylib   $(BUILD_ROOT_BUNDLE)/Contents/Frameworks
+	cp -R -f $(FFMPEG_ROOT)/$(LIBSUBFOLDER)/libavformat*.dylib   $(BUILD_ROOT_BUNDLE)/Contents/Frameworks
+	cp -R -f $(FFMPEG_ROOT)/$(LIBSUBFOLDER)/libavutil*.dylib     $(BUILD_ROOT_BUNDLE)/Contents/Frameworks
+	cp -R -f $(FFMPEG_ROOT)/$(LIBSUBFOLDER)/libswresample*.dylib $(BUILD_ROOT_BUNDLE)/Contents/Frameworks
+	cp -R -f $(FFMPEG_ROOT)/$(LIBSUBFOLDER)/libswscale*.dylib    $(BUILD_ROOT_BUNDLE)/Contents/Frameworks
+endif
+ifneq ($(OPENAL_ROOT),)
+	cp -R -f $(OPENAL_ROOT)/$(LIBSUBFOLDER)/libopenal*.dylib     $(BUILD_ROOT_BUNDLE)/Contents/Frameworks
+endif
+endif
+	@echo sView building is DONE
+
+
 clean_sView:
 	rm -f $(BUILD_ROOT)/$(sView)
 	rm -rf sview/*.o
