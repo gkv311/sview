@@ -157,14 +157,15 @@ struct StClickEvent {
  */
 struct StScrollEvent {
 
-    StEventType   Type;    //!< event type
-    double        Time;    //!< time in seconds when event was registered
-    double        PointX;  //!< mouse cursor point defined relative to window from top-left (0,0) to the bottom-right (1,1)
+    StEventType   Type;             //!< event type
+    double        Time;             //!< time in seconds when event was registered
+    double        PointX;           //!< mouse cursor point defined relative to window from top-left (0,0) to the bottom-right (1,1)
     double        PointY;
-    int           StepsX; //!< discrete steps for horizontal scroll
-    int           StepsY; //!< discrete steps for vertical   scroll
-    float         DeltaX; //!< precise  delta for horizontal scroll
-    float         DeltaY; //!< precise  delta for vertical   scroll
+    int           StepsX;           //!< discrete steps for horizontal scroll
+    int           StepsY;           //!< discrete steps for vertical   scroll
+    float         DeltaX;           //!< precise  delta for horizontal scroll
+    float         DeltaY;           //!< precise  delta for vertical   scroll
+    bool          IsFromMultiTouch; //!< when true, scrolling is simulated from multi-touch gesture by system (OS X) and touches will come in parallel
 
 };
 

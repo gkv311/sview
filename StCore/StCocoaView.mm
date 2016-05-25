@@ -25,10 +25,23 @@
     - (void )setWantsBestResolutionOpenGLSurface: (BOOL )theFlag;
 @end
 
+enum {
+    NSEventPhaseNone        = 0,
+    NSEventPhaseBegan       = 0x1 << 0,
+    NSEventPhaseStationary  = 0x1 << 1,
+    NSEventPhaseChanged     = 0x1 << 2,
+    NSEventPhaseEnded       = 0x1 << 3,
+    NSEventPhaseCancelled   = 0x1 << 4,
+    NSEventPhaseMayBegin    = 0x1 << 5
+};
+typedef NSUInteger NSEventPhase;
+
 @interface NSEvent (LionAPI)
     @property(readonly) BOOL    hasPreciseScrollingDeltas;
     @property(readonly) CGFloat scrollingDeltaX;
     @property(readonly) CGFloat scrollingDeltaY;
+    @property(readonly) NSEventPhase phase;
+    @property(readonly) NSEventPhase momentumPhase;
 @end
 #endif
 
@@ -314,6 +327,10 @@
      * Mouse scroll.
      */
     - (void ) scrollWheel: (NSEvent* ) theEvent {
+        // NSMouseEventSubtype comes only from PC mouse
+        // NSTabletPointEventSubtype comes from touchpad and from Apple mouse (even without multitouch!)
+        // NSTabletProximityEventSubtype and NSTouchEventSubtype - unknown
+
         const StPointD_t aPnt    = myStWin->getMousePos();
         myStEvent.Type           = stEvent_Scroll;
         myStEvent.Scroll.Time    = [theEvent timestamp];
@@ -323,6 +340,9 @@
         myStEvent.Scroll.StepsY  = 0;
         myStEvent.Scroll.DeltaX  = 0.0f;
         myStEvent.Scroll.DeltaY  = 0.0f;
+        myStEvent.Scroll.IsFromMultiTouch = !myIsLionOS
+                                         || [theEvent momentumPhase] != NSEventPhaseNone
+                                         || [theEvent phase]         != NSEventPhaseNone;
 
         CGFloat aDeltaX = [theEvent deltaX];
         CGFloat aDeltaY = [theEvent deltaY];

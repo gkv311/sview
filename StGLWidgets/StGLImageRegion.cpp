@@ -1007,7 +1007,8 @@ bool StGLImageRegion::doScroll(const StScrollEvent& theEvent) {
     StHandle<StStereoParams> aParams = getSource();
     StPointD_t aCursor(theEvent.PointX, theEvent.PointY);
     if(!myIsInitialized
-    ||  aParams.isNull()) {
+    ||  aParams.isNull()
+    ||  theEvent.IsFromMultiTouch) {
         return false;
     }
 
@@ -1117,10 +1118,10 @@ bool StGLImageRegion::doGesture(const StGestureEvent& theEvent) {
             return true;
         }
         case stEvent_Gesture2Move: {
-            if(!theEvent.OnScreen) {
+            //if(!theEvent.OnScreen) {
                 // this gesture conflicts with scrolling on OS X
-                return true;
-            }
+                //return true;
+            //}
             if(aParams->ViewingMode == StStereoParams::FLAT_IMAGE) {
                 StPointD_t aPntFrom(theEvent.Point1X, theEvent.Point1Y);
                 StPointD_t aPntTo  (theEvent.Point2X, theEvent.Point2Y);

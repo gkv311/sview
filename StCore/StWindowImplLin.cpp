@@ -973,6 +973,7 @@ void StWindowImpl::processEvents() {
                     myStEvent.Scroll.StepsY = aBtnEvent->button == 4 ? 1 : -1;
                     myStEvent.Scroll.DeltaX = 0.0;
                     myStEvent.Scroll.DeltaY = 10.0f * myStEvent.Scroll.StepsY;
+                    myStEvent.Scroll.IsFromMultiTouch = false;
                     signals.onScroll->emit(myStEvent.Scroll);
                     break;
                 }

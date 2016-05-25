@@ -124,6 +124,7 @@ LRESULT StDXNVWindow::wndProcFunction(HWND   theWnd,
             anEvent.Scroll.StepsY = (zDelta > 0) ? 1 : -1;
             anEvent.Scroll.DeltaX = 0.0;
             anEvent.Scroll.DeltaY = 10.0f * anEvent.Scroll.StepsY;
+            anEvent.Scroll.IsFromMultiTouch = false;
             myStWin->post(anEvent);
         }
 

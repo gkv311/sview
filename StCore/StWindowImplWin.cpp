@@ -762,6 +762,7 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
             myStEvent.Scroll.StepsY = (aZDelta > 0) ? 1 : -1;
             myStEvent.Scroll.DeltaX = 0.0;
             myStEvent.Scroll.DeltaY = 10.0f * myStEvent.Scroll.StepsY;
+            myStEvent.Scroll.IsFromMultiTouch = false;
 
             myEventsBuffer.append(myStEvent);
             return 0;
