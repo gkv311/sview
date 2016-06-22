@@ -162,8 +162,10 @@ bool StWindowImpl::wndCreateWindows() {
         mySlave.hWindowGl = CreateWindowExW(WS_EX_TOOLWINDOW | WS_EX_WINDOWEDGE | WS_EX_NOACTIVATE,
                                             mySlave.ClassGL.toCString(),
                                             L"Slave window",
-                                            WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_DISABLED, // slave is always disabled (hasn't input focus)!
-                                            aRect.left, aRect.top, // initialize slave window at same screen as master to workaround bugs in drivers that may prevent GL context sharing
+                                            // slave is always disabled (hasn't input focus)!
+                                            WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_DISABLED,
+                                            // initialize slave window at same screen as master to workaround bugs in drivers that may prevent GL context sharing
+                                            myRectNorm.left(),  myRectNorm.top(),
                                             myRectNorm.width(), myRectNorm.height(),
                                             NULL, NULL, hInstance, NULL);
         if(mySlave.hWindowGl == NULL) {
