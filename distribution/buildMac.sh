@@ -2,7 +2,7 @@
 
 # This script generates the DMG package.
 #
-# Copyright © Kirill Gavrilov, 2011-2013
+# Copyright © Kirill Gavrilov, 2011-2016
 
 # go to the script directory
 aScriptPath=${BASH_SOURCE%/*}
@@ -38,11 +38,10 @@ cp -f info/changelog.txt     $buildRoot/sView.app/Contents/MacOS/info/
 cp -f ../license-gpl-3.0.txt $buildRoot/sView.app/Contents/MacOS/info/license.txt
 
 # copy sView compiled files
-mv -f ../bin/MAC_gcc/build.log $buildRoot/
+if [ -e ../bin/MAC_gcc/build.log ]; then
+  mv -f ../bin/MAC_gcc/build.log $buildRoot/
+fi
 cp -f -R ../bin/MAC_gcc/sView.app/* $buildRoot/sView.app/
-
-# rename buggy name
-mv -f "$buildRoot/sView.app/Contents/MacOS/lang/fran%E7ais" "$buildRoot/sView.app/Contents/MacOS/lang/français"
 
 # create symlink to Applications
 ln -f -s /Applications "$buildRoot/"
@@ -63,7 +62,7 @@ aFinalDMGName="sViewSetup_v.${aDmgVersion}.dmg"
 # Create a R/W DMG; it must be larger than the result will be
 rm -f ${aTmpDmg}
 hdiutil create -srcfolder "${buildRoot}" -volname "${aTitle}" -fs HFS+ \
-               -fsargs "-c c=64,a=16,e=16" -format UDRW -size 40000k ${aTmpDmg}
+               -fsargs "-c c=64,a=16,e=16" -format UDRW -size 50000k ${aTmpDmg}
 
 # Mount the disk image, and store the device name
 # (we may need to use sleep for a few seconds after this operation)
