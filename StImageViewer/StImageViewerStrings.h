@@ -127,6 +127,13 @@ namespace StImageViewerStrings {
         MENU_HELP_SCALE_BIG     = 1592,
         MENU_HELP_SCALE_HIDPI2X = 1593,
 
+        // Settings -> Options
+        OPTION_EXIT_ON_ESCAPE              = 1701,
+        OPTION_EXIT_ON_ESCAPE_NEVER        = 1702,
+        OPTION_EXIT_ON_ESCAPE_ONE_CLICK    = 1703,
+        OPTION_EXIT_ON_ESCAPE_DOUBLE_CLICK = 1704,
+        OPTION_EXIT_ON_ESCAPE_WINDOWED     = 1705,
+
         // Open/Save dialogs
         DIALOG_OPEN_FILE       = 2000,
         DIALOG_OPEN_LEFT       = 2001,

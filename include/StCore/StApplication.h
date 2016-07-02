@@ -27,14 +27,26 @@ class StSettings;
  */
 class StApplication {
 
-         public:
+        protected:
+
+    /**
+     * Action to be performed on escape.
+     */
+    enum ActionOnEscape {
+        ActionOnEscape_Nothing,              //!< do not exit application
+        ActionOnEscape_ExitOneClick,         //!< exit on single click
+        ActionOnEscape_ExitDoubleClick,      //!< exit on double click
+        ActionOnEscape_ExitOneClickWindowed, //!< exit on single click in windowed mode
+    };
+
+        public:
 
     /**
      * Parse process arguments.
      */
     ST_CPPEXPORT static StHandle<StOpenInfo> parseProcessArguments();
 
-         public:
+        public:
 
     /**
      * Main constructor.
@@ -269,6 +281,11 @@ class StApplication {
      */
     ST_CPPEXPORT virtual void doNavigate(const StNavigEvent& theEvent);
 
+    /**
+     * Exit on escape.
+     */
+    ST_CPPEXPORT bool doExitOnEscape(StApplication::ActionOnEscape theAction);
+
         public:
 
     /**
@@ -319,6 +336,7 @@ class StApplication {
     bool                  myIsOpened;              //!< application execution state
     bool                  myToQuit;                //!< request for application termination
     bool                  myToRecreateMenu;        //!< flag to recreate the menu
+    StTimer               myExitTimer;             //!< double click exit timer
 
         private: //! @name no copies, please
 

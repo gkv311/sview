@@ -768,6 +768,7 @@ void StImageViewerGUI::doMobileSettings(const size_t ) {
     aParams.add(myPlugin->params.ToShowFps);
     aParams.add(myLangMap->params.language);
     aParams.add(myPlugin->params.IsMobileUI);
+    aParams.add(myPlugin->params.ExitOnEscape);
 #if !defined(ST_NO_UPDATES_CHECK)
     aParams.add(myPlugin->params.CheckUpdatesDays);
 #endif

@@ -81,6 +81,11 @@
 1591=보통Normal
 1592=크게 Big
 1593=HiDPI 2X로
+?1701=Exit sView on escape
+?1702=Do not exit
+?1703=On one click
+?1704=On double click
+?1705=On one click windowed mode
 2000=열어볼 이미지 파일 선택
 2001=왼쪽 이미지 선택
 2002=오른쪽 이미지 선택

@@ -123,6 +123,11 @@
 1591=보통
 1592=크게
 1593=HiDPI 2X 로
+?1701=Exit sView on escape
+?1702=Do not exit
+?1703=On one click
+?1704=On double click
+?1705=On one click windowed mode
 2000=재생할 비디오 파일을 선택하시오
 2001=좌안 비디오 파일을 선택하시오
 2002=우안 비디오 파일을 선택하시오

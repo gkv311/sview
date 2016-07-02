@@ -285,6 +285,18 @@ void loadDefaults(StLangMap& theStrings) {
                "Hotkeys");
     theStrings(MENU_HELP_SETTINGS,
                "Settings");
+
+    theStrings(OPTION_EXIT_ON_ESCAPE,
+               "Exit sView on Escape");
+    theStrings(OPTION_EXIT_ON_ESCAPE_NEVER,
+               "Never");
+    theStrings(OPTION_EXIT_ON_ESCAPE_ONE_CLICK,
+               "One click");
+    theStrings(OPTION_EXIT_ON_ESCAPE_DOUBLE_CLICK,
+               "Double click");
+    theStrings(OPTION_EXIT_ON_ESCAPE_WINDOWED,
+               "When windowed");
+
     theStrings(FILE_VIDEO_OPEN,
                "Open another movie");
     theStrings(BTN_SRC_FORMAT,

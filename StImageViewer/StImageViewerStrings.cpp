@@ -213,6 +213,18 @@ void loadDefaults(StLangMap& theStrings) {
                "fullscreen/windowed");
     theStrings(BTN_SRC_FORMAT,
                "Source format:");
+
+    theStrings(OPTION_EXIT_ON_ESCAPE,
+               "Exit sView on Escape");
+    theStrings(OPTION_EXIT_ON_ESCAPE_NEVER,
+               "Never");
+    theStrings(OPTION_EXIT_ON_ESCAPE_ONE_CLICK,
+               "One click");
+    theStrings(OPTION_EXIT_ON_ESCAPE_DOUBLE_CLICK,
+               "Double click");
+    theStrings(OPTION_EXIT_ON_ESCAPE_WINDOWED,
+               "When windowed");
+
     theStrings(UPDATES_NOTIFY,
                "A new version of sView is available on the official site www.sview.ru.\n"
                "Please update your program.");

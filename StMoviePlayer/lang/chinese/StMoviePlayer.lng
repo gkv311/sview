@@ -122,6 +122,11 @@
 1591=正常
 1592=大
 1593=强制高解析 2X
+?1701=Exit sView on escape
+?1702=Do not exit
+?1703=On one click
+?1704=On double click
+?1705=On one click windowed mode
 2000=选择视频文件打开
 2001=选择左视频文件打开
 2002=选择右视频文件打开

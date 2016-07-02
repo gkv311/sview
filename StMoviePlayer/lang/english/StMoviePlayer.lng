@@ -122,6 +122,11 @@
 1591=Normal
 1592=Big
 1593=Force HiDPI 2X
+1701=Exit sView on escape
+1702=Do not exit
+1703=On one click
+1704=On double click
+1705=On one click in windowed mode
 2000=Choose the video file to open
 2001=Choose LEFT video file to open
 2002=Choose RIGHT video file to open

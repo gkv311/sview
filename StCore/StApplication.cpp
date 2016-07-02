@@ -563,3 +563,39 @@ void StApplication::doChangeLanguage(const int32_t ) {
         params.ActiveDevice->defineOption((int32_t )aDevIter, myDevices[aDevIter]->Name);
     }
 }
+
+bool StApplication::doExitOnEscape(StApplication::ActionOnEscape theAction) {
+    const bool isFullscreen = myWindow->hasFullscreenMode()
+                           && myWindow->isFullScreen();
+    switch(theAction) {
+        case ActionOnEscape_Nothing: {
+            return false;
+        }
+        case ActionOnEscape_ExitOneClick: {
+            StApplication::exit(0);
+            return true;
+        }
+        case ActionOnEscape_ExitDoubleClick: {
+            if(isFullscreen) {
+                return false;
+            }
+
+            const double aTimeSec = myExitTimer.getElapsedTimeInSec();
+            if(myExitTimer.isOn()
+            && aTimeSec < 0.5) {
+                StApplication::exit(0);
+                return true;
+            }
+            myExitTimer.restart();
+            return false;
+        }
+        case ActionOnEscape_ExitOneClickWindowed: {
+            if(isFullscreen) {
+                return false;
+            }
+            StApplication::exit(0);
+            return true;
+        }
+    }
+    return false;
+}

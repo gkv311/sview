@@ -171,6 +171,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StBoolParamNamed>    AudioMute;         //!< volume mute flag
         StHandle<StFloat32Param>      AudioDelay;        //!< audio/video synchronization delay
         StHandle<StBoolParamNamed>    IsFullscreen;      //!< fullscreen state
+        StHandle<StEnumParam>         ExitOnEscape;     //!< exit action on escape
         StHandle<StBoolParamNamed>    ToRestoreRatio;    //!< restore ratio on restart
         StHandle<StBoolParamNamed>    IsShuffle;         //!< shuffle playback order
         StHandle<StBoolParamNamed>    ToLoopSingle;      //!< play single playlist item in loop

@@ -78,7 +78,15 @@ namespace {
 void StImageViewer::updateStrings() {
     using namespace StImageViewerStrings;
     params.IsFullscreen->setName(tr(MENU_VIEW_FULLSCREEN));
+
+    params.ExitOnEscape->setName(tr(OPTION_EXIT_ON_ESCAPE));
+    params.ExitOnEscape->defineOption(ActionOnEscape_Nothing,              tr(OPTION_EXIT_ON_ESCAPE_NEVER));
+    params.ExitOnEscape->defineOption(ActionOnEscape_ExitOneClick,         tr(OPTION_EXIT_ON_ESCAPE_ONE_CLICK));
+    params.ExitOnEscape->defineOption(ActionOnEscape_ExitDoubleClick,      tr(OPTION_EXIT_ON_ESCAPE_DOUBLE_CLICK));
+    params.ExitOnEscape->defineOption(ActionOnEscape_ExitOneClickWindowed, tr(OPTION_EXIT_ON_ESCAPE_WINDOWED));
+
     params.ToRestoreRatio->setName(tr(MENU_VIEW_RATIO_KEEP_ON_RESTART));
+
     params.ScaleAdjust->setName(tr(MENU_HELP_SCALE));
     params.ScaleAdjust->defineOption(StGLRootWidget::ScaleAdjust_Small,  tr(MENU_HELP_SCALE_SMALL));
     params.ScaleAdjust->defineOption(StGLRootWidget::ScaleAdjust_Normal, tr(MENU_HELP_SCALE_NORMAL));
@@ -133,6 +141,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     //
     params.IsFullscreen = new StBoolParamNamed(false, stCString("fullscreen"));
     params.IsFullscreen->signals.onChanged.connect(this, &StImageViewer::doFullscreen);
+    params.ExitOnEscape = new StEnumParam(ActionOnEscape_ExitOneClick, stCString("exitOnEscape"));
     params.ToRestoreRatio = new StBoolParamNamed(false, stCString("toRestoreRatio"));
     params.ScaleAdjust = new StEnumParam(StGLRootWidget::ScaleAdjust_Normal, stCString("scaleAdjust"));
     params.ScaleHiDPI       = new StFloat32Param(1.0f, stCString("scaleHiDPI"));
@@ -161,6 +170,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     params.TargetFps = new StInt32ParamNamed(0, stCString("fpsTarget"));
     updateStrings();
 
+    mySettings->loadParam(params.ExitOnEscape);
     mySettings->loadParam(params.ScaleAdjust);
     params.ScaleAdjust->signals.onChanged  = stSlot(this, &StImageViewer::doScaleGui);
     mySettings->loadParam (params.ScaleHiDPI2X);
@@ -296,6 +306,7 @@ void StImageViewer::saveGuiParams() {
 void StImageViewer::saveAllParams() {
     saveGuiParams();
     if(!myGUI.isNull()) {
+        mySettings->saveParam (params.ExitOnEscape);
         mySettings->saveParam (params.ScaleAdjust);
         mySettings->saveParam (params.ScaleHiDPI2X);
         mySettings->saveParam (params.TargetFps);
@@ -764,10 +775,11 @@ void StImageViewer::doKeyDown(const StKeyEvent& theEvent) {
     StApplication::doKeyDown(theEvent);
     switch(theEvent.VKey) {
         case ST_VK_ESCAPE: {
-            if(!myEscNoQuit) {
-                StApplication::exit(0);
-            } else if(myWindow->isFullScreen()) {
-                params.IsFullscreen->setValue(false);
+            if(!doExitOnEscape(!myEscNoQuit ? (ActionOnEscape )params.ExitOnEscape->getValue() : ActionOnEscape_Nothing)) {
+                if(myWindow->hasFullscreenMode()
+                && myWindow->isFullScreen()) {
+                    params.IsFullscreen->setValue(false);
+                }
             }
             return;
         }

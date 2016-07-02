@@ -108,6 +108,13 @@ void StMoviePlayer::updateStrings() {
     params.SubtitlesParser->defineOption(1, tr(MENU_SUBTITLES_LITE_HTML));
     params.AudioMute->setName(stCString("Mute Audio"));
     params.IsFullscreen->setName(tr(MENU_VIEW_FULLSCREEN));
+
+    params.ExitOnEscape->setName(tr(OPTION_EXIT_ON_ESCAPE));
+    params.ExitOnEscape->defineOption(ActionOnEscape_Nothing,              tr(OPTION_EXIT_ON_ESCAPE_NEVER));
+    params.ExitOnEscape->defineOption(ActionOnEscape_ExitOneClick,         tr(OPTION_EXIT_ON_ESCAPE_ONE_CLICK));
+    params.ExitOnEscape->defineOption(ActionOnEscape_ExitDoubleClick,      tr(OPTION_EXIT_ON_ESCAPE_DOUBLE_CLICK));
+    params.ExitOnEscape->defineOption(ActionOnEscape_ExitOneClickWindowed, tr(OPTION_EXIT_ON_ESCAPE_WINDOWED));
+
     params.ToRestoreRatio->setName(tr(MENU_VIEW_RATIO_KEEP_ON_RESTART));
     params.IsShuffle->setName(tr(MENU_MEDIA_SHUFFLE));
     params.ToLoopSingle->setName(stCString("Loop single item"));
@@ -225,6 +232,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
 
     params.IsFullscreen     = new StBoolParamNamed(false, stCString("fullscreen"));
     params.IsFullscreen->signals.onChanged = stSlot(this, &StMoviePlayer::doFullscreen);
+    params.ExitOnEscape     = new StEnumParam(ActionOnEscape_ExitOneClick, stCString("exitOnEscape"));
     params.ToRestoreRatio   = new StBoolParamNamed(false, stCString("toRestoreRatio"));
     params.IsShuffle        = new StBoolParamNamed(false, stCString("shuffle"));
     params.ToLoopSingle     = new StBoolParamNamed(false, stCString("loopSingle"));
@@ -267,6 +275,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     updateStrings();
 
     // load settings
+    mySettings->loadParam(params.ExitOnEscape);
     mySettings->loadParam(params.ScaleAdjust);
     params.ScaleAdjust->signals.onChanged  = stSlot(this, &StMoviePlayer::doScaleGui);
     mySettings->loadParam(params.ScaleHiDPI2X);
@@ -342,7 +351,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     StHandle<StAction> anAction;
 
     anAction = new StActionIntSlot(stCString("DoQuit"), stSlot(this, &StMoviePlayer::doQuit), 0);
-    addAction(Action_Quit, anAction, ST_VK_ESCAPE);
+    addAction(Action_Quit, anAction, 0);
 
     anAction = new StActionBool(stCString("DoFullscreen"), params.IsFullscreen);
     addAction(Action_Fullscreen, anAction, ST_VK_F, ST_VK_RETURN);
@@ -490,6 +499,7 @@ void StMoviePlayer::saveGuiParams() {
 void StMoviePlayer::saveAllParams() {
     saveGuiParams();
     if(!myGUI.isNull()) {
+        mySettings->saveParam (params.ExitOnEscape);
         mySettings->saveParam (params.ScaleAdjust);
         mySettings->saveParam (params.ScaleHiDPI2X);
         mySettings->saveParam (params.SubtitlesPlace);
@@ -986,7 +996,15 @@ void StMoviePlayer::doKeyDown(const StKeyEvent& theEvent) {
 
     StApplication::doKeyDown(theEvent);
     switch(theEvent.VKey) {
-        // post process keys
+        case ST_VK_ESCAPE: {
+            if(!doExitOnEscape((ActionOnEscape )params.ExitOnEscape->getValue())) {
+                if(myWindow->hasFullscreenMode()
+                && myWindow->isFullScreen()) {
+                    params.IsFullscreen->setValue(false);
+                }
+            }
+            return;
+        }
         case ST_VK_B: {
             if(theEvent.Flags == ST_VF_SHIFT) {
                 myGUI->myImage->params.Brightness->increment();

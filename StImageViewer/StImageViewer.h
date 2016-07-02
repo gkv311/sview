@@ -123,6 +123,7 @@ class StImageViewer : public StApplication {
     struct {
 
         StHandle<StBoolParamNamed>    IsFullscreen;     //!< fullscreen state
+        StHandle<StEnumParam>         ExitOnEscape;     //!< exit action on escape
         StHandle<StBoolParamNamed>    ToRestoreRatio;   //!< restore ratio on restart
         StHandle<StEnumParam>         ScaleAdjust;      //!< adjust GUI size, see StGLRootWidget::ScaleAdjust
         StHandle<StFloat32Param>      ScaleHiDPI;       //!< adapt  GUI size for HiDPI resolution
