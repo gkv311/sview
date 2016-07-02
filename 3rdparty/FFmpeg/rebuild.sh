@@ -9,7 +9,8 @@ rebuildLicense="LGPL"
 rebuildDebug="false"
 rebuildAndroid="false"
 compilerPrefix=""
-androidNdkRoot="~/develop/android-ndk-r10"
+androidTarget=""
+androidNdkRoot="$HOME/develop/android-ndk-r12b"
 aSystem=`uname -s`
 aPwdBack=$PWD
 
@@ -32,6 +33,13 @@ do
   fi
 done
 
+if [ "$rebuildAndroid" == "true" ]; then
+  if [ "$androidTarget" == "" ]; then
+    androidTarget="arm"
+    #androidTarget="arm64"
+  fi
+fi
+
 # cross-compilers prefixes
 GCC_MACHINE_MINGW_32="i686-w64-mingw32"
 GCC_MACHINE_MINGW_32_1="i686-mingw32"
@@ -41,7 +49,16 @@ GCC_MACHINE_MINGW_64_1="x86_64-pc-mingw32"
 GCC_MACHINE_LINUX_64="x86_64-linux-gnu"
 
 if [ "$rebuildAndroid" == "true" ]; then
-  compilerPrefix="${androidNdkRoot}/toolchains/arm-linux-androideabi-4.8/prebuilt/linux-x86_64/arm-linux-androideabi/bin/"
+  if [ "$androidTarget" == "arm64" ]; then
+    aPrefixShort="aarch64-linux-android"
+  else
+    aPrefixShort="arm-linux-androideabi"
+  fi
+
+  compilerPrefix="${androidNdkRoot}/toolchains/${aPrefixShort}-4.8/prebuilt/linux-x86_64/bin/${aPrefixShort}-"
+  if [ -x "${androidNdkRoot}/toolchains/${aPrefixShort}-4.9" ]; then
+    compilerPrefix="${androidNdkRoot}/toolchains/${aPrefixShort}-4.9/prebuilt/linux-x86_64/bin/${aPrefixShort}-"
+  fi
 fi
 
 if [ "$compilerPrefix" != "" ]; then
@@ -79,9 +96,12 @@ if [ "$aSystem" == "Darwin" ]; then
   OUTPUT_FOLDER_BIN="$OUTPUT_FOLDER/MacOS"
   OUTPUT_FOLDER_LIB="$OUTPUT_FOLDER/Frameworks"
 fi
-if [ "$rebuildAndroid" == "true" ]; then
+if [ "$androidTarget" == "arm64" ]; then
+  OUTPUT_FOLDER_LIB="$OUTPUT_FOLDER/libs/arm64-v8a"
+elif [ "$androidTarget" == "arm" ]; then
   OUTPUT_FOLDER_LIB="$OUTPUT_FOLDER/libs/armeabi-v7a"
 fi
+
 rm -f -r $OUTPUT_FOLDER
 mkdir -p $OUTPUT_FOLDER
 mkdir -p $OUTPUT_FOLDER_BIN
@@ -147,8 +167,13 @@ elif [ "$gccMachine" == "$GCC_MACHINE_MINGW_64" ] || [ "$gccMachine" == "$GCC_MA
   targetFlags="--cross-prefix=$compilerPrefix --arch=x86_64 --extra-cflags=-Dstrtod=__strtod"
   configArguments="$configArguments --enable-cross-compile --target-os=mingw32 $targetFlags"
 elif [ "$rebuildAndroid" == "true" ]; then
-  targetFlags="--cross-prefix=$compilerPrefix --sysroot=${androidNdkRoot}/platforms/android-15/arch-arm --arch=arm"
-  configArguments="$configArguments --target-os=linux $targetFlags"
+  if [ "$androidTarget" == "arm64" ]; then
+    targetFlags="--cross-prefix=$compilerPrefix --sysroot=${androidNdkRoot}/platforms/android-21/arch-arm64 --arch=aarch64"
+  else
+    targetFlags="--cross-prefix=$compilerPrefix --sysroot=${androidNdkRoot}/platforms/android-15/arch-arm --arch=arm"
+  fi
+
+  configArguments="$configArguments --enable-cross-compile --target-os=linux $targetFlags"
   #configArguments="$configArguments --extra-cflags='-fno-builtin-sin -fno-builtin-sinf'"
 
   configArguments="$configArguments --enable-jni --enable-mediacodec"
@@ -187,7 +212,11 @@ echo
 echo "  ./configure $configArguments"
 echo
 if [ "$rebuildAndroid" == "true" ]; then
-  ./configure $configArguments --disable-symver --extra-cflags='-march=armv7-a -mfloat-abi=softfp -fno-builtin-sin -fno-builtin-sinf' | tee $OUTPUT_FOLDER/config.log
+  if [ "$androidTarget" == "arm64" ]; then
+    ./configure $configArguments --disable-symver --extra-cflags='-march=armv8-a' 2>&1 | tee $OUTPUT_FOLDER/config.log
+  else
+    ./configure $configArguments --disable-symver --extra-cflags='-march=armv7-a -mfloat-abi=softfp -fno-builtin-sin -fno-builtin-sinf' 2>&1 | tee $OUTPUT_FOLDER/config.log
+  fi
 else
   ./configure $configArguments 2>&1 | tee -a $OUTPUT_FOLDER/config.log
 fi
