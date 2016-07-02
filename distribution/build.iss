@@ -147,7 +147,7 @@ Name: StRenderers\StOutDistorted; Description: "{cm:StOutDistorted}";   Types: c
 
 [Tasks]
 Name: desktopicon;           Description: "{cm:CreateDesktopIcon}";     GroupDescription: "{cm:AdditionalIcons}";  Flags: unchecked
-Name: quicklaunchicon;       Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}";  Flags: unchecked
+Name: quicklaunchicon;       Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}";  Flags: unchecked; OnlyBelowVersion: 0,6.1
 Name: flagOpenAL51;          Description: "{cm:OpenALSoft51}";          GroupDescription: "{cm:AdditionalIcons}" ; Components: StDrawers\StMoviePlayer; Flags: unchecked
 Name: flagAssocStereoImages; Description: "{cm:AssocStereoImages}";     GroupDescription: "{cm:FileAssociations}"; Components: StDrawers\StImageViewer
 Name: flagAssocImages;       Description: "{cm:AssocImages}";           GroupDescription: "{cm:FileAssociations}"; Components: StDrawers\StImageViewer; Flags: unchecked
