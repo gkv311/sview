@@ -123,6 +123,7 @@ configArguments="\
  --enable-runtime-cpudetect"
 
 if [ "$aSystem" == "Darwin" ]; then
+  configArguments="$configArguments --disable-audiotoolbox --disable-hwaccel=xvmc"
   configArguments="$configArguments --enable-vda --libdir=@executable_path/../Frameworks"
 fi
 
