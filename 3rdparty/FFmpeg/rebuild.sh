@@ -177,24 +177,26 @@ if [ "$rebuildLicense" == "GPL" ]; then
   #configArguments="$configArguments --enable-postproc"
 fi
 
+# redirect error state from tee
+set -i pipefail
+
+aNbJobs="$(getconf _NPROCESSORS_ONLN)"
+
 echo
 echo "  ./configure $configArguments"
 echo
 if [ "$rebuildAndroid" == "true" ]; then
-  ./configure $configArguments --disable-symver --extra-cflags='-march=armv7-a -mfloat-abi=softfp -fno-builtin-sin -fno-builtin-sinf' >$OUTPUT_FOLDER/config.log 2>&1
+  ./configure $configArguments --disable-symver --extra-cflags='-march=armv7-a -mfloat-abi=softfp -fno-builtin-sin -fno-builtin-sinf' | tee $OUTPUT_FOLDER/config.log
 else
-  ./configure $configArguments >$OUTPUT_FOLDER/config.log 2>&1
+  ./configure $configArguments 2>&1 | tee -a $OUTPUT_FOLDER/config.log
 fi
+aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
 
-
-cat $OUTPUT_FOLDER/config.log
-echo
-
-make -j8 2>$OUTPUT_FOLDER/make.log
-cat $OUTPUT_FOLDER/make.log | grep -i -w 'ошибка'
-echo
+make -j $aNbJobs 2>&1 | tee -a $OUTPUT_FOLDER/make.log
+aResult=$?; if [[ $aResult != 0 ]]; then exit $aResult; fi
 
 # Now copy result files
+echo
 echo "  Now copy result files into $OUTPUT_FOLDER"
 
 "$compilerPrefix"gcc --version > $OUTPUT_FOLDER/gccInfo.log
