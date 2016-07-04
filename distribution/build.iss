@@ -316,8 +316,8 @@ Root: HKCR; Subkey: sView Image\DefaultIcon;                   ValueType: string
 
 Root: HKCR; SubKey: .bmp;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
 Root: HKCR; SubKey: .jpg;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
-Root: HKCR; SubKey: .jpeg                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
-Root: HKCR; SubKey: .jpe                                       ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
+Root: HKCR; SubKey: .jpeg;                                     ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
+Root: HKCR; SubKey: .jpe;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
 Root: HKCR; SubKey: .j2k;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
 Root: HKCR; SubKey: .jp2;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
 Root: HKCR; SubKey: .tga;                                      ValueType: string; ValueData: sView Image;                   Tasks: flagAssocImages;       Flags: uninsdeletekey
