@@ -13,14 +13,14 @@
  * The NTSC weights are only applicable to RGB colors in a gamma 2.2 color space.
  * For linear RGB colors the values above are better.
  */
-mat4 multL = mat4(0.3086,      0,      0,      0,
-                  0.6094,      0,      0,      0,
-                  0.0820,      0,      0,      0,
-                       0,      0,      0,      0);
-mat4 multR = mat4(     0, 0.3086, 0.3086,      0,
-                       0, 0.6094, 0.6094,      0,
-                       0, 0.0820, 0.0820,      0,
-                       0,      0,      0,      0);
+const mat4 multL = mat4(0.3086,      0,      0,      0,
+                        0.6094,      0,      0,      0,
+                        0.0820,      0,      0,      0,
+                             0,      0,      0,      0);
+const mat4 multR = mat4(     0, 0.3086, 0.3086,      0,
+                             0, 0.6094, 0.6094,      0,
+                             0, 0.0820, 0.0820,      0,
+                             0,      0,      0,      0);
 
 uniform sampler2D texL, texR;
 varying vec2 fTexCoord;
