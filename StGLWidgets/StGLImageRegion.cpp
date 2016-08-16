@@ -434,6 +434,7 @@ bool StGLImageRegion::stglInit() {
     if(!myProgram.init(aCtx, StImage::ImgColor_RGB, StImage::ImgScale_Full, StGLImageProgram::FragGetColor_Normal)) {
         return false;
     } else if(!myQuad.initScreen(aCtx)) {
+        aCtx.pushError(StString("Fail to init StGLQuad"));
         ST_ERROR_LOG("Fail to init StGLQuad");
         return false;
     } else if(!myUVSphere.initVBOs(aCtx)) {

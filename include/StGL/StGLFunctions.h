@@ -61,6 +61,31 @@
     #define GL_RGBA8 0x8058
     // GL_EXT_texture_format_BGRA8888
     #define GL_BGRA_EXT 0x80E1 // same as GL_BGRA on desktop
+
+    // debug ARB extension
+    #define GL_DEBUG_OUTPUT                   0x92E0
+    #define GL_DEBUG_OUTPUT_SYNCHRONOUS       0x8242
+    #define GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH 0x8243
+    #define GL_DEBUG_CALLBACK_FUNCTION        0x8244
+    #define GL_DEBUG_CALLBACK_USER_PARAM      0x8245
+    #define GL_DEBUG_SOURCE_API               0x8246
+    #define GL_DEBUG_SOURCE_WINDOW_SYSTEM     0x8247
+    #define GL_DEBUG_SOURCE_SHADER_COMPILER   0x8248
+    #define GL_DEBUG_SOURCE_THIRD_PARTY       0x8249
+    #define GL_DEBUG_SOURCE_APPLICATION       0x824A
+    #define GL_DEBUG_SOURCE_OTHER             0x824B
+    #define GL_DEBUG_TYPE_ERROR               0x824C
+    #define GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR 0x824D
+    #define GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR  0x824E
+    #define GL_DEBUG_TYPE_PORTABILITY         0x824F
+    #define GL_DEBUG_TYPE_PERFORMANCE         0x8250
+    #define GL_DEBUG_TYPE_OTHER               0x8251
+    #define GL_MAX_DEBUG_MESSAGE_LENGTH       0x9143
+    #define GL_MAX_DEBUG_LOGGED_MESSAGES      0x9144
+    #define GL_DEBUG_LOGGED_MESSAGES          0x9145
+    #define GL_DEBUG_SEVERITY_HIGH            0x9146
+    #define GL_DEBUG_SEVERITY_MEDIUM          0x9147
+    #define GL_DEBUG_SEVERITY_LOW             0x9148
 #else
     #include <GL/gl.h>
 #endif
@@ -613,6 +638,27 @@ struct StGLFunctions {
             ::glDrawElements(theMode, theCount[aBatchIter], theType, theIndices[aBatchIter]);
         }
     }
+
+        public: //! @name GL_KHR_debug (optional)
+
+    typedef void   (APIENTRY  *GLDEBUGPROCARB)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
+
+    typedef void   (APIENTRYP glDebugMessageControl_t ) (GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint* ids, GLboolean enabled);
+    typedef void   (APIENTRYP glDebugMessageInsert_t  ) (GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* buf);
+    typedef void   (APIENTRYP glDebugMessageCallback_t) (GLDEBUGPROCARB callback, const void* userParam);
+    typedef GLuint (APIENTRYP glGetDebugMessageLog_t  ) (GLuint   count,
+                                                         GLsizei  bufSize,
+                                                         GLenum*  sources,
+                                                         GLenum*  types,
+                                                         GLuint*  ids,
+                                                         GLenum*  severities,
+                                                         GLsizei* lengths,
+                                                         GLchar*  messageLog);
+
+    glDebugMessageControl_t  glDebugMessageControl;
+    glDebugMessageInsert_t   glDebugMessageInsert;
+    glDebugMessageCallback_t glDebugMessageCallback;
+    glGetDebugMessageLog_t   glGetDebugMessageLog;
 
 #else
 
@@ -1302,13 +1348,6 @@ struct StGLFunctions {
     PFNGLBINDSAMPLERSPROC      glBindSamplers;
     PFNGLBINDIMAGETEXTURESPROC glBindImageTextures;
     PFNGLBINDVERTEXBUFFERSPROC glBindVertexBuffers;
-
-        public: //! @name GL_ARB_debug_output (optional)
-
-    PFNGLDEBUGMESSAGECONTROLARBPROC  glDebugMessageControlARB;
-    PFNGLDEBUGMESSAGEINSERTARBPROC   glDebugMessageInsertARB;
-    PFNGLDEBUGMESSAGECALLBACKARBPROC glDebugMessageCallbackARB;
-    PFNGLGETDEBUGMESSAGELOGARBPROC   glGetDebugMessageLogARB;
 
 #if defined(_WIN32)
         public: //! @name wgl extensions

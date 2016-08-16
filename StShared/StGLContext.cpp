@@ -145,41 +145,39 @@ StGLContext::~StGLContext() {
     //
 }
 
-#if !defined(GL_ES_VERSION_2_0)
 static void APIENTRY debugCallbackWrap(unsigned int theSource,
                                        unsigned int theType,
                                        unsigned int theId,
                                        unsigned int theSeverity,
-                                       int                 theLength,
-                                       const char*   theMessage,
-                                       const void*   theUserParam) {
+                                       int          theLength,
+                                       const char*  theMessage,
+                                       const void*  theUserParam) {
     ((StGLContext* )theUserParam)->stglDebugCallback(theSource, theType, theId, theSeverity, theLength, theMessage);
 }
-#endif
 
 static const StCString THE_DBGMSG_SOURCE_UNKNOWN = stCString("UNKNOWN");
 static const StCString THE_DBGMSG_SOURCES[] = {
-    stCString("OpenGL"),          // GL_DEBUG_SOURCE_API_ARB
-    stCString("Window System"),   // GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB
-    stCString("Shader Compiler"), // GL_DEBUG_SOURCE_SHADER_COMPILER_ARB
-    stCString("Third Party"),     // GL_DEBUG_SOURCE_THIRD_PARTY_ARB
-    stCString("Application"),     // GL_DEBUG_SOURCE_APPLICATION_ARB
-    stCString("Other"),           // GL_DEBUG_SOURCE_OTHER_ARB
+    stCString("OpenGL"),          // GL_DEBUG_SOURCE_API
+    stCString("Window System"),   // GL_DEBUG_SOURCE_WINDOW_SYSTEM
+    stCString("Shader Compiler"), // GL_DEBUG_SOURCE_SHADER_COMPILER
+    stCString("Third Party"),     // GL_DEBUG_SOURCE_THIRD_PARTY
+    stCString("Application"),     // GL_DEBUG_SOURCE_APPLICATION
+    stCString("Other"),           // GL_DEBUG_SOURCE_OTHER
 };
 
 static const StCString THE_DBGMSG_TYPE_UNKNOWN = stCString("UNKNOWN");
 static const StCString THE_DBGMSG_TYPES[] = {
-    stCString("Error"),              // GL_DEBUG_TYPE_ERROR_ARB
-    stCString("Deprecated"),         // GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB
-    stCString("Undefined behavior"), // GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB
-    stCString("Portability"),        // GL_DEBUG_TYPE_PORTABILITY_ARB
-    stCString("Performance"),        // GL_DEBUG_TYPE_PERFORMANCE_ARB
-    stCString("Other"),              // GL_DEBUG_TYPE_OTHER_ARB
+    stCString("Error"),              // GL_DEBUG_TYPE_ERROR
+    stCString("Deprecated"),         // GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR
+    stCString("Undefined behavior"), // GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR
+    stCString("Portability"),        // GL_DEBUG_TYPE_PORTABILITY
+    stCString("Performance"),        // GL_DEBUG_TYPE_PERFORMANCE
+    stCString("Other"),              // GL_DEBUG_TYPE_OTHER
 };
 
-static const StCString THE_DBGMSG_SEV_HIGH   = stCString("High");   // GL_DEBUG_SEVERITY_HIGH_ARB
-static const StCString THE_DBGMSG_SEV_MEDIUM = stCString("Medium"); // GL_DEBUG_SEVERITY_MEDIUM_ARB
-static const StCString THE_DBGMSG_SEV_LOW    = stCString("Low");    // GL_DEBUG_SEVERITY_LOW_ARB
+static const StCString THE_DBGMSG_SEV_HIGH   = stCString("High");   // GL_DEBUG_SEVERITY_HIGH
+static const StCString THE_DBGMSG_SEV_MEDIUM = stCString("Medium"); // GL_DEBUG_SEVERITY_MEDIUM
+static const StCString THE_DBGMSG_SEV_LOW    = stCString("Low");    // GL_DEBUG_SEVERITY_LOW
 
 void StGLContext::stglDebugCallback(unsigned int theSource,
                                     unsigned int theType,
@@ -187,46 +185,36 @@ void StGLContext::stglDebugCallback(unsigned int theSource,
                                     unsigned int theSeverity,
                                     int          /*theLength*/,
                                     const char*  theMessage) {
-  if(myGlVendor == GlVendor_NVIDIA) {
-      // filter too verbose messages
-      if(theId == 131185) {
-          return;
-      }
-  }
+    if(myGlVendor == GlVendor_NVIDIA) {
+        // filter too verbose messages
+        if(theId == 131185) {
+            return;
+        }
+    }
 
-#ifdef GL_DEBUG_SOURCE_API_ARB
-    const StCString& aSrc = (theSource >= GL_DEBUG_SOURCE_API_ARB
-                          && theSource <= GL_DEBUG_SOURCE_OTHER_ARB)
-                          ? THE_DBGMSG_SOURCES[theSource - GL_DEBUG_SOURCE_API_ARB]
+    const StCString& aSrc = (theSource >= GL_DEBUG_SOURCE_API
+                          && theSource <= GL_DEBUG_SOURCE_OTHER)
+                          ? THE_DBGMSG_SOURCES[theSource - GL_DEBUG_SOURCE_API]
                           : THE_DBGMSG_SOURCE_UNKNOWN;
-    const StCString& aType = (theType >= GL_DEBUG_TYPE_ERROR_ARB
-                           && theType <= GL_DEBUG_TYPE_OTHER_ARB)
-                           ? THE_DBGMSG_TYPES[theType - GL_DEBUG_TYPE_ERROR_ARB]
+    const StCString& aType = (theType >= GL_DEBUG_TYPE_ERROR
+                           && theType <= GL_DEBUG_TYPE_OTHER)
+                           ? THE_DBGMSG_TYPES[theType - GL_DEBUG_TYPE_ERROR]
                            : THE_DBGMSG_TYPE_UNKNOWN;
-    const StCString& aSev = theSeverity == GL_DEBUG_SEVERITY_HIGH_ARB
+    const StCString& aSev = theSeverity == GL_DEBUG_SEVERITY_HIGH
                           ? THE_DBGMSG_SEV_HIGH
-                          : (theSeverity == GL_DEBUG_SEVERITY_MEDIUM_ARB
+                          : (theSeverity == GL_DEBUG_SEVERITY_MEDIUM
                            ? THE_DBGMSG_SEV_MEDIUM
                            : THE_DBGMSG_SEV_LOW);
     StString aMsg = StString("Source:")   + aSrc
-                + StString(" | Type:")     + aType
-                + StString(" | ID:")       + theId
-                + StString(" | Severity:") + aSev
-                + StString(" | Message:\n  ") + theMessage + "\n";
+               + StString(" | Type:")     + aType
+               + StString(" | ID:")       + theId
+               + StString(" | Severity:") + aSev
+               + StString(" | Message:\n  ") + theMessage + "\n";
     StLogger::GetDefault().write(aMsg,
-        theType == GL_DEBUG_TYPE_ERROR_ARB ? StLogger::ST_ERROR : StLogger::ST_WARNING);
+        theType == GL_DEBUG_TYPE_ERROR ? StLogger::ST_ERROR : StLogger::ST_WARNING);
     //if(!myMsgQueue.isNull()) {
-    //    theType == GL_DEBUG_TYPE_ERROR_ARB ? myMsgQueue->pushError(aMsg) : myMsgQueue->pushInfo (aMsg);
+    //    theType == GL_DEBUG_TYPE_ERROR ? myMsgQueue->pushError(aMsg) : myMsgQueue->pushInfo (aMsg);
     //}
-#else
-    // need GL_KHR_debug
-    StString aMsg = StString("Source:")         + theSource
-                  + StString(" | Type:")        + theType
-                  + StString(" | ID:")          + theId
-                  + StString(" | Severity:")    + theSeverity
-                  + StString(" | Message:\n  ") + theMessage + "\n";
-    StLogger::GetDefault().write(aMsg, StLogger::ST_WARNING);
-#endif
 }
 
 void StGLContext::setMessagesQueue(const StHandle<StMsgQueue>& theQueue) {
@@ -314,9 +302,17 @@ StString StGLContext::stglErrorToString(const GLenum theError) {
 }
 
 void StGLContext::stglResetErrors() {
-    GLenum anErr = glGetError();
-    for(int aLimit = 1000; (anErr != GL_NO_ERROR) && (aLimit > 0); --aLimit, anErr = glGetError()) {
+    GLenum aPrevErr = GL_NO_ERROR;
+    for(GLenum anErr = glGetError(); anErr != GL_NO_ERROR; anErr = glGetError()) {
+        if(anErr == aPrevErr) {
+            if(aPrevErr != GL_NO_ERROR) {
+                ST_DEBUG_LOG("GL error cannot be released - broken GL context?");
+            }
+            return;
+        }
+
         ST_DEBUG_LOG("Unhandled GL error (" + stglErrorToString(anErr) + ")");
+        aPrevErr = anErr;
     }
 }
 
@@ -759,26 +755,35 @@ bool StGLContext::stglInit() {
         hasHighp = true;
     }
 
+#if defined(ST_DEBUG_GL)
+    // this extension is buggy on OpenGL ES - enable it only for debug builds
+    if(stglCheckExtension("GL_KHR_debug")) {
+        // According to GL_KHR_debug spec, all functions should have KHR suffix.
+        // However, some implementations can export these functions without suffix.
+        stglFindProc("glDebugMessageControlKHR",  myFuncs->glDebugMessageControl);
+        stglFindProc("glDebugMessageInsertKHR",   myFuncs->glDebugMessageInsert);
+        stglFindProc("glDebugMessageCallbackKHR", myFuncs->glDebugMessageCallback);
+        stglFindProc("glGetDebugMessageLogKHR",   myFuncs->glGetDebugMessageLog);
+        if(myFuncs->glDebugMessageCallback != NULL) {
+            // setup default callback
+            myFuncs->glDebugMessageCallback(debugCallbackWrap, this);
+            core11fwd->glEnable(GL_DEBUG_OUTPUT);
+            // note that some broken implementations (e.g. simulators) might generate error message on this call
+            core11fwd->glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        } else {
+            pushError(stCString("GL_KHR_debug is broken!"));
+        }
+    }
+#else
+    (void )debugCallbackWrap;
+#endif
+
     //ST_DEBUG_LOG("glGetString(GL_EXTENSIONS)=\n" + (const char* )glGetString(GL_EXTENSIONS));
 #else
     hasTexRGBA8 = true;
     extTexBGRA8 = true;
     arbNPTW     = stglCheckExtension("GL_ARB_texture_non_power_of_two");
     arbTexRG    = stglCheckExtension("GL_ARB_texture_rg");
-
-    if(stglCheckExtension("GL_ARB_debug_output")) {
-        STGL_READ_FUNC(glDebugMessageControlARB);
-        STGL_READ_FUNC(glDebugMessageInsertARB);
-        STGL_READ_FUNC(glDebugMessageCallbackARB);
-        STGL_READ_FUNC(glGetDebugMessageLogARB);
-        if(myFuncs->glDebugMessageCallbackARB != NULL) {
-            // setup default callback
-            myFuncs->glDebugMessageCallbackARB(debugCallbackWrap, this);
-        #if defined(ST_DEBUG) || defined(ST_DEBUG_GL)
-            core11fwd->glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
-        #endif
-        }
-    }
 
     // load OpenGL 1.2 new functions
     has12 = isGlGreaterEqual(1, 2)
@@ -1503,6 +1508,25 @@ bool StGLContext::stglInit() {
          && STGL_READ_FUNC(glBindSamplers)
          && STGL_READ_FUNC(glBindImageTextures)
          && STGL_READ_FUNC(glBindVertexBuffers);
+
+    if(stglCheckExtension("GL_ARB_debug_output")) {
+        if(!has43) {
+            stglFindProc("glDebugMessageControlARB",  myFuncs->glDebugMessageControl);
+            stglFindProc("glDebugMessageInsertARB",   myFuncs->glDebugMessageInsert);
+            stglFindProc("glDebugMessageCallbackARB", myFuncs->glDebugMessageCallback);
+            stglFindProc("glGetDebugMessageLogARB",   myFuncs->glGetDebugMessageLog);
+        }
+        if(myFuncs->glDebugMessageCallback != NULL) {
+            // setup default callback
+            myFuncs->glDebugMessageCallback(debugCallbackWrap, this);
+        #if defined(ST_DEBUG) || defined(ST_DEBUG_GL)
+            if(has43) {
+                core11fwd->glEnable(GL_DEBUG_OUTPUT);
+            }
+            core11fwd->glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        #endif
+        }
+    }
 
 #endif // OpenGL desktop or ES
 
