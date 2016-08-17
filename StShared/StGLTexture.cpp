@@ -16,9 +16,10 @@
 #include <StStrings/StLogger.h>
 #include <stAssert.h>
 
-bool StGLTexture::getInternalFormat(const StGLContext&  /*theCtx*/,
+bool StGLTexture::getInternalFormat(const StGLContext&  theCtx,
                                     const StImagePlane& theData,
                                     GLint&              theInternalFormat) {
+    (void )theCtx;
     // sized formats are not supported by OpenGL ES
     switch(theData.getFormat()) {
         case StImagePlane::ImgRGBAF:
@@ -52,12 +53,36 @@ bool StGLTexture::getInternalFormat(const StGLContext&  /*theCtx*/,
             theInternalFormat = GL_RGBA16;
         #endif
             return true;
-        case StImagePlane::ImgRGB:
-        case StImagePlane::ImgBGR:
-        case StImagePlane::ImgRGB32:
+        case StImagePlane::ImgRGB: {
+            theInternalFormat = GL_RGB8;
+            return true;
+        }
+        case StImagePlane::ImgRGB32: {
+        #if defined(GL_ES_VERSION_2_0)
+            theInternalFormat = GL_RGBA8;
+        #else
+            theInternalFormat = GL_RGB8;
+        #endif
+            return true;
+        }
+        case StImagePlane::ImgBGR: {
+            theInternalFormat = GL_RGB8;
+        #if defined(GL_ES_VERSION_2_0)
+            return false;
+        #else
+            return true;
+        #endif
+        }
         case StImagePlane::ImgBGR32:
         #if defined(GL_ES_VERSION_2_0)
-            theInternalFormat = GL_RGB;
+            theInternalFormat = GL_RGB8;
+            if(!theCtx.extTexBGRA8) {
+                return false;
+            }
+
+            // GL_EXT_texture_format_BGRA8888 has been introduced for OpenGL ES 1.0
+            // and does not defined sized format supported by OpenGL ES 3.0+
+            theInternalFormat = GL_BGRA_EXT;
         #else
             theInternalFormat = GL_RGB8;
         #endif
@@ -287,6 +312,8 @@ ST_LOCAL inline StString formatInternalFormat(const GLint theInternalFormat) {
         case GL_RGBA16:   return "GL_RGBA16";
         case GL_RGBA16F:  return "GL_RGBA16F"; // half-float
         case GL_RGBA32F:  return "GL_RGBA32F"; // float
+        //
+        case GL_BGRA_EXT:  return "GL_BGRA";
         // ALPHA variations (deprecated)
         case GL_ALPHA:     return "GL_ALPHA";
         case GL_ALPHA8:    return "GL_ALPHA8";
@@ -327,6 +354,8 @@ static inline GLenum getDataFormat(const GLint theInternalFormat) {
         case GL_RGBA16F:
         case GL_RGBA32F:
             return GL_RGBA;
+        case GL_BGRA_EXT:
+            return GL_BGRA_EXT;
         // ALPHA variations (deprecated)
         case GL_ALPHA:
         case GL_ALPHA8:
@@ -479,10 +508,10 @@ bool StGLTexture::create(StGLContext&   theCtx,
 
     GLint anInternalFormat = myTextFormat;
 #if defined(GL_ES_VERSION_2_0)
-    //if(!theCtx.isGlGreaterEqual(3, 0)) {
+    if(!theCtx.isGlGreaterEqual(3, 0)) {
         // sized formats are not supported here
         anInternalFormat = theDataFormat;
-    //}
+    }
 #endif
 
     if(myTarget == GL_TEXTURE_CUBE_MAP) {

@@ -179,7 +179,7 @@ bool StGLTextArea::stglInit() {
         || !myFont->changeFont()->getFont()->isValid()) {
             return false; // critical error
         } else if(!myFont->stglInit(aCtx)) {
-            ST_ERROR_LOG("Could not initialize OpenGL resources for font");
+            aCtx.pushError(StString("Could not initialize OpenGL resources for font"));
             return false;
         }
     } else if(!myFont->changeFont()->isValid()) {
