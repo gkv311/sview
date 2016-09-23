@@ -27,7 +27,9 @@
  */
 #if defined(_MSC_VER) && (_MSC_VER >= 1400)
     //#define _USE_ATTRIBUTES_FOR_SAL 1 // doesn't work without /analyze option!
-    #include <CodeAnalysis/SourceAnnotations.h>
+    #if (_MSC_VER < 1900)
+      #include <CodeAnalysis/SourceAnnotations.h>
+    #endif
     //#define ST_ATTR_CHECK_RETURN [returnvalue:vc_attributes::Post(MustCheck=vc_attributes::Yes)]
     //#include <sal.h>
     #define ST_ATTR_CHECK_RETURN _Check_return_
