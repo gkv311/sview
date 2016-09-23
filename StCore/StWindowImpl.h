@@ -475,6 +475,10 @@ class StWindowImpl {
     StEvent        myStEvent;          //!< temporary event object (to be used in message loop thread)
     StEvent        myStEvent2;         //!< temporary event object (to be used in message loop thread)
     StEvent        myStEventAux;       //!< extra temporary event object (to be used in StWindow creation thread)
+    int            myAlignDL;          //!< extra window shift applied for alignment (left)
+    int            myAlignDR;          //!< extra window shift applied for alignment (right)
+    int            myAlignDT;          //!< extra window shift applied for alignment (top)
+    int            myAlignDB;          //!< extra window shift applied for alignment (bottom)
     double         myLastEventsTime;   //!< time when processEvents() was last called
     bool           myEventsThreaded;
     bool           myIsMouseMoved;

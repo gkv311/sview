@@ -712,6 +712,20 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
             aNewRect.bottom() = aDragRect->bottom - myDecMargins.bottom;
             const StRectI_t aPrevRect = myRectNorm;
             if(attribs.ToAlignEven) {
+                // revert extra shift applied on the previous step
+                aNewRect.left()   -= myAlignDL;
+                aDragRect->left   -= myAlignDL;
+                aNewRect.right()  -= myAlignDR;
+                aDragRect->right  -= myAlignDR;
+                aNewRect.top()    -= myAlignDT;
+                aDragRect->top    -= myAlignDT;
+                aNewRect.bottom() -= myAlignDB;
+                aDragRect->bottom -= myAlignDB;
+                myAlignDL = 0;
+                myAlignDR = 0;
+                myAlignDT = 0;
+                myAlignDB = 0;
+
                 // adjust window position to ensure alignment
                 const int aDL = getDirNorm(aPrevRect.left(),   aNewRect.left());
                 const int aDR = getDirNorm(aPrevRect.right(),  aNewRect.right());
@@ -720,18 +734,22 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 if(isOddNumber(aNewRect.left())) {
                     aNewRect.left() += aDL;
                     aDragRect->left += aDL;
+                    myAlignDL = aDL;
                 }
                 if(isEvenNumber(aNewRect.right())) {
                     aNewRect.right() += aDR;
                     aDragRect->right += aDR;
+                    myAlignDR = aDR;
                 }
                 if(isOddNumber(aNewRect.top())) {
                     aNewRect.top() += aDT;
                     aDragRect->top += aDT;
+                    myAlignDT = aDT;
                 }
                 if(isEvenNumber(aNewRect.bottom())) {
                     aNewRect.bottom() += aDB;
                     aDragRect->bottom += aDB;
+                    myAlignDB = aDB;
                 }
             }
 
