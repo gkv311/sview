@@ -314,7 +314,6 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     if(params.StartWebUI->getValue() == WEBUI_ONCE) {
         params.StartWebUI->setValue(WEBUI_OFF);
     }
-    params.StartWebUI->signals.onChanged += stSlot(this, &StMoviePlayer::doSwitchWebUI);
 
     StString aSavedALDevice;
     mySettings->loadString(params.AudioAlDevice->getKey(), aSavedALDevice);
@@ -526,10 +525,9 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (params.ToLimitFps);
         mySettings->saveParam (params.UseGpu);
         mySettings->saveParam (params.UseOpenJpeg);
-
-        mySettings->saveParam (params.StartWebUI);
         if(!params.IsLocalWebUI->getValue()) {
             mySettings->saveParam(params.WebUIPort);
+            mySettings->saveParam(params.StartWebUI);
         }
         mySettings->saveParam (params.ToPrintWebErrors);
         mySettings->saveParam (params.SnapshotImgType);
@@ -744,6 +742,7 @@ bool StMoviePlayer::init() {
             if(anArgWebuiCmd.isValid()) {
                 params.IsLocalWebUI->setValue(true);
                 params.WebUIPort->setValue(::atol(anArgWebuiCmd.getValue().toCString()));
+                params.StartWebUI->setValue(WEBUI_ONCE);
             }
         }
     #endif
@@ -779,6 +778,7 @@ bool StMoviePlayer::init() {
 
     #ifdef ST_HAVE_MONGOOSE
         doStartWebUI();
+        params.StartWebUI->signals.onChanged += stSlot(this, &StMoviePlayer::doSwitchWebUI);
     #endif
     }
 
@@ -1927,7 +1927,7 @@ int StMoviePlayer::beginRequest(mg_connection*         theConnection,
         }
     } else if(anURI.isEquals(stCString("/action"))) {
         if(!params.IsLocalWebUI->getValue()) {
-            aContent = "Error: command interace is disabled!";
+            aContent = "Error: command interface is disabled!";
         } else {
             const int anActionId = getActionIdFromName(aQuery);
             if(anActionId != -1) {
