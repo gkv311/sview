@@ -22,6 +22,7 @@
 #include <StCore/StSearchMonitors.h>
 #include <StSettings/StSettings.h>
 #include <StSettings/StTranslations.h>
+#include <StThreads/StCondition.h>
 #include <StAV/StAVImage.h>
 #include <StSys/StSys.h>
 #include <stAssert.h>
@@ -407,10 +408,34 @@ void StOutPageFlip::getOptions(StParamsList& theList) const {
     theList.add(params.ToShowExtra);
 }
 
+namespace {
+#if !defined(__APPLE__)
+    static StCondition   THE_QB_INIT_EVENT(true);
+    static volatile bool IS_QB_SUPPORTED = false;
+    static StHandle<StThread> THE_QB_THREAD;
+
+    SV_THREAD_FUNCTION testQBThreadFunction(void* ) {
+        IS_QB_SUPPORTED = StQuadBufferCheck::testQuadBufferSupport();
+    #ifdef _WIN32
+        StDXInfo anInfo;
+        StDXManager::getInfo(anInfo, true);
+    #endif
+        THE_QB_INIT_EVENT.set();
+        return SV_THREAD_RETURN 0;
+    }
+#endif
+}
+
+
 void StOutPageFlip::initGlobalsAsync() {
-    StQuadBufferCheck::initAsync();
-#ifdef _WIN32
-    StDXManager::initInfoAsync();
+#if !defined(__APPLE__)
+    if(!THE_QB_INIT_EVENT.check()) {
+        return; // already called
+    }
+
+    // start and detach thread
+    THE_QB_INIT_EVENT.reset();
+    THE_QB_THREAD = new StThread(testQBThreadFunction, NULL);
 #endif
 }
 
@@ -481,14 +506,19 @@ StOutPageFlip::StOutPageFlip(const StHandle<StResourceManager>& theResMgr,
     if(aMon.getFreqMax() >= 110) {
         aSupportLevelShutters = ST_DEVICE_SUPPORT_HIGHT;
     }
-#ifndef __APPLE__
-    // actually almost always available on mac but... is it useful?
-    hasQuadBufferGl = StQuadBufferCheck::isSupported();
-#endif
 
-#ifdef _WIN32
-    hasQuadBufferD3D = StDXManager::getInfo(myDxInfo) // && !hasQuadBufferGl
-                    && (myDxInfo.hasNvStereoSupport || myDxInfo.hasAqbsSupport);
+#if !defined(__APPLE__)
+    // actually almost always available on mac but... is it useful?
+    if(THE_QB_INIT_EVENT.wait(5000)) {
+        THE_QB_THREAD.nullify();
+        hasQuadBufferGl = IS_QB_SUPPORTED;
+    #if defined(_WIN32)
+        hasQuadBufferD3D = StDXManager::getInfo(myDxInfo) // && !hasQuadBufferGl
+                        && (myDxInfo.hasNvStereoSupport || myDxInfo.hasAqbsSupport);
+    #endif
+    } else {
+        stError("OpenGL driver was not responded in a reasonable time");
+    }
 #endif
     if(hasQuadBufferGl || hasQuadBufferD3D) {
         aSupportLevelShutters = ST_DEVICE_SUPPORT_FULL;

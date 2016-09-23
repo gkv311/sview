@@ -1,6 +1,6 @@
 /**
  * StOutPageFlip, class providing stereoscopic output for Shutter Glasses displays using StCore toolkit.
- * Copyright © 2009-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -10,7 +10,6 @@
 #include "StQuadBufferCheck.h"
 
 #include <StStrings/StLogger.h>
-#include <StThreads/StCondition.h>
 #include <StThreads/StThread.h>
 
 #ifdef _WIN32
@@ -55,7 +54,7 @@ bool StQuadBufferCheck::testQuadBufferSupport() {
     HWND aWindow = CreateWindowExW(WS_EX_TOOLWINDOW | WS_EX_WINDOWEDGE | WS_EX_NOACTIVATE,
                                    QUAD_TEST_CLASS.toCString(),
                                    L"GL Quad Buffer test",
-                                   WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
+                                   WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_DISABLED,
                                    32, 32, 32, 32,
                                    NULL, NULL, anAppInst, NULL);
     if(aWindow == NULL) {
@@ -116,31 +115,3 @@ bool StQuadBufferCheck::testQuadBufferSupport() {
 }
 
 #endif // !__APPLE__
-
-namespace {
-
-    static StCondition   THE_QB_INIT_EVENT(true);
-    static volatile bool IS_QB_SUPPORTED = false;
-
-    SV_THREAD_FUNCTION testQBThreadFunction(void* ) {
-        IS_QB_SUPPORTED = StQuadBufferCheck::testQuadBufferSupport();
-        THE_QB_INIT_EVENT.set();
-        return SV_THREAD_RETURN 0;
-    }
-
-};
-
-bool StQuadBufferCheck::isSupported() {
-    THE_QB_INIT_EVENT.wait();
-    return IS_QB_SUPPORTED;
-}
-
-void StQuadBufferCheck::initAsync() {
-    if(!THE_QB_INIT_EVENT.check()) {
-        return; // already called
-    }
-
-    // start and detach thread
-    THE_QB_INIT_EVENT.reset();
-    StThread aTestThread(testQBThreadFunction, NULL);
-}

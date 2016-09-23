@@ -30,11 +30,6 @@ class StDXManager {
 
         public:
 
-    /**
-     * Launch test in other thread.
-     */
-    static void initInfoAsync();
-
     static bool getInfo(StDXInfo&  theInfo,
                         const bool theForced = false);
 

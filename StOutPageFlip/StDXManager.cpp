@@ -444,33 +444,14 @@ namespace {
         return DefWindowProcW(in_hWnd, uMsg, wParam, lParam);
     }
 
-    static StCondition   THE_DX_INIT_EVENT(true);
     static volatile bool ST_DX_HAS_CACHED_INFO = false;
     static StDXInfo      ST_DX_CACHED_INFO;
 
-    SV_THREAD_FUNCTION getInfoThreadFunction(void* ) {
-        StDXInfo anInfo;
-        StDXManager::getInfo(anInfo, true);
-        THE_DX_INIT_EVENT.set();
-        return SV_THREAD_RETURN 0;
-    }
-
-}
-
-void StDXManager::initInfoAsync() {
-    if(!THE_DX_INIT_EVENT.check()) {
-        return; // already called
-    }
-
-    // start and detach thread
-    THE_DX_INIT_EVENT.reset();
-    StThread aTestThread(getInfoThreadFunction, NULL);
 }
 
 bool StDXManager::getInfo(StDXInfo&  theInfo,
                           const bool theForced) {
     if(!theForced) {
-        THE_DX_INIT_EVENT.wait();
         if(ST_DX_HAS_CACHED_INFO) {
             theInfo = ST_DX_CACHED_INFO;
             return true;
