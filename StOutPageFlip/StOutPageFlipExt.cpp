@@ -121,14 +121,8 @@ bool StOutPageFlipExt::create() {
 
     // request slave
     if(params.ControlCode->getValue() != DEVICE_CONTROL_NONE) {
-#ifdef _WIN32
-    if(myIsVistaPlus) {
-#endif
         StWindow::setAttribute(StWinAttr_SlaveCfg, StWinSlave_slaveHLineTop);
         StWindow::hide(ST_WIN_SLAVE);
-#ifdef _WIN32
-    }
-#endif
     }
     if(!StOutPageFlip::create()) {
         return false;
@@ -160,11 +154,7 @@ void StOutPageFlipExt::processEvents() {
             return;
         }
 
-        if(!StWindow::isFullScreen()
-    #ifdef _WIN32
-        && myIsVistaPlus
-    #endif
-        ) {
+        if(!StWindow::isFullScreen()) {
             const StSearchMonitors& aMonitors = StWindow::getMonitors();
             if(myMonitor.isNull()) {
                 myMonitor = new StMonitor(aMonitors[aRect.center()]);
@@ -195,11 +185,7 @@ void StOutPageFlipExt::stglDrawExtra(unsigned int theView,
         return;
     }
 
-    const bool toDrawWindowed = !StWindow::isFullScreen()
-#ifdef _WIN32
-        && myIsVistaPlus
-#endif
-    ;
+    const bool toDrawWindowed = !StWindow::isFullScreen();
     if(!toDrawWindowed) {
         StWindow::hide(ST_WIN_SLAVE);
     }

@@ -61,14 +61,11 @@ StDXNVSurface::StDXNVSurface(const size_t theSizeX,
     // those sizes only used for mono (stereo driver off / windowed;
     // otherwise NVIDIA driver will ignore them and will use header in surface itself)
     // we should used downsized values to prevent render fail
-    if(StSys::isVistaPlus()) {
-        // only one view shown if we set width/2 here as for WinXP way
-        mySrcRect.left = 0; mySrcRect.right = (LONG )theSizeX * 2;
-    } else {
-        // picture showed with wrong ratio (width/4) in other (like Vista+) way
-        mySrcRect.left = 0; mySrcRect.right = (LONG )theSizeX;
-    }
-    mySrcRect.top = 0; mySrcRect.bottom = (LONG )theSizeY;
+
+    // only one view shown if we set width/2 here as for WinXP way
+    //mySrcRect.left = 0; mySrcRect.right = (LONG )theSizeX; // WinXP
+    mySrcRect.left = 0; mySrcRect.right  = (LONG )theSizeX * 2;
+    mySrcRect.top  = 0; mySrcRect.bottom = (LONG )theSizeY;
 }
 
 StDXNVSurface::~StDXNVSurface() {
@@ -111,14 +108,14 @@ bool StDXNVSurface::create(StDXManager& theD3d,
     if(theHasWglDx) {
         if(theD3d.getDevice()->CreateTexture((UINT )mySizeX, (UINT )mySizeY, 0, 0,
                                              aFormat, D3DPOOL_DEFAULT,
-                                             &myTextureL, theD3d.isD3dEx() ? &myTextureLShare : NULL) != D3D_OK
+                                             &myTextureL, &myTextureLShare) != D3D_OK
         || myTextureL->GetSurfaceLevel(0, &mySurfaceL) != D3D_OK) {
             release();
             return false;
         }
         if(theD3d.getDevice()->CreateTexture((UINT )mySizeX, (UINT )mySizeY, 0, 0,
                                              aFormat, D3DPOOL_DEFAULT,
-                                             &myTextureR, theD3d.isD3dEx() ? &myTextureRShare : NULL) != D3D_OK
+                                             &myTextureR, &myTextureRShare) != D3D_OK
         || myTextureR->GetSurfaceLevel(0, &mySurfaceR) != D3D_OK) {
             release();
             return false;

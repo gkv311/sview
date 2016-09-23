@@ -468,9 +468,6 @@ StOutPageFlip::StOutPageFlip(const StHandle<StResourceManager>& theResMgr,
   myLangMap(theResMgr, ST_OUT_PLUGIN_NAME),
   myDevice(DEVICE_AUTO),
   myToDrawStereo(false),
-#ifdef _WIN32
-  myIsVistaPlus(StSys::isVistaPlus()),
-#endif
   myToResetDevice(false) {
     StWindow::signals.onAnotherMonitor = stSlot(this, &StOutPageFlip::doNewMonitor);
     const StSearchMonitors& aMonitors = StWindow::getMonitors();

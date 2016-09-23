@@ -158,6 +158,12 @@ class StThread {
     ST_CPPEXPORT bool wait();
 
     /**
+     * Wait for thread return with specified timeout.
+     * Warning - timeout is supported only on Windows!
+     */
+    ST_CPPEXPORT bool wait(const int theTimeMilliseconds);
+
+    /**
      *  This is a dangerous function that should only be used in the most extreme case!
      */
     ST_CPPEXPORT void kill();

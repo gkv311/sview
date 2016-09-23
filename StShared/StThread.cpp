@@ -121,6 +121,15 @@ bool StThread::wait() {
 #endif
 }
 
+bool StThread::wait(const int theTimeMilliseconds) {
+#ifdef _WIN32
+    return isValid() && (WaitForSingleObject((HANDLE )myThread, (DWORD )theTimeMilliseconds) != WAIT_TIMEOUT);
+#else
+    (void )theTimeMilliseconds;
+    return isValid() && (pthread_join(myThread, NULL) == 0);
+#endif
+}
+
 void StThread::kill() {
     if(isValid()) {
     #ifdef _WIN32
@@ -146,21 +155,7 @@ void StThread::detach() {
 }
 
 namespace {
-#ifdef _WIN32
-    // for a 64-bit app running under 64-bit Windows, this is FALSE
-    static bool isWow64() {
-        typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE , PBOOL );
-        BOOL bIsWow64 = FALSE;
-        HMODULE aKern32Module = GetModuleHandleW(L"kernel32");
-        LPFN_ISWOW64PROCESS aFunIsWow64 = aKern32Module == NULL
-                                        ? (LPFN_ISWOW64PROCESS )NULL
-                                        : (LPFN_ISWOW64PROCESS )GetProcAddress(aKern32Module, "IsWow64Process");
-        return aFunIsWow64 != NULL
-            && aFunIsWow64(GetCurrentProcess(), &bIsWow64)
-            && bIsWow64 != FALSE;
-    }
-
-#elif defined(__ANDROID__)
+#if defined(__ANDROID__)
 
     /**
      * Simple number parser.
@@ -257,21 +252,8 @@ int StThread::countLogicalProcessors() {
         return aNumLogicalProcessors;
     }
 
-    // GetSystemInfo() will return the number of processors in a data field in a SYSTEM_INFO structure.
     SYSTEM_INFO aSysInfo;
-    if(isWow64()) {
-        typedef BOOL (WINAPI *LPFN_GSI)(LPSYSTEM_INFO );
-        HMODULE aKern32 = GetModuleHandleW(L"kernel32");
-        LPFN_GSI aFuncSysInfo = (LPFN_GSI )GetProcAddress(aKern32, "GetNativeSystemInfo");
-        // So, they suggest 32-bit apps should call this instead of the other in WOW64
-        if(aFuncSysInfo != NULL) {
-            aFuncSysInfo(&aSysInfo);
-        } else {
-            GetSystemInfo(&aSysInfo);
-        }
-    } else {
-        GetSystemInfo(&aSysInfo);
-    }
+    ::GetNativeSystemInfo(&aSysInfo);
     aNumLogicalProcessors = aSysInfo.dwNumberOfProcessors;
     return aNumLogicalProcessors;
 #else

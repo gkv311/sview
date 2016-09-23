@@ -73,7 +73,6 @@ StWindowImpl::StWindowImpl(const StHandle<StResourceManager>& theResMgr,
   myEventQuit(false),
   myEventCursorShow(false),
   myEventCursorHide(false),
-  myIsVistaPlus(StSys::isVistaPlus()),
 #elif (defined(__APPLE__))
   mySleepAssert(0),
 #endif
@@ -132,15 +131,6 @@ StWindowImpl::StWindowImpl(const StHandle<StResourceManager>& theResMgr,
 #ifdef _WIN32
     myEventsThreaded = true; // events loop is always performed in dedicated thread
 
-    HMODULE aUser32Module = GetModuleHandleW(L"User32");
-    if(aUser32Module != NULL) {
-        // User32 should be already loaded
-        myRegisterTouchWindow   = (RegisterTouchWindow_t   )GetProcAddress(aUser32Module, "RegisterTouchWindow");
-        myUnregisterTouchWindow = (UnregisterTouchWindow_t )GetProcAddress(aUser32Module, "UnregisterTouchWindow");
-        myGetTouchInputInfo     = (GetTouchInputInfo_t     )GetProcAddress(aUser32Module, "GetTouchInputInfo");
-        myCloseTouchInputHandle = (CloseTouchInputHandle_t )GetProcAddress(aUser32Module, "CloseTouchInputHandle");
-    }
-
     // Adjust system timer
     // By default Windows2K+ timer has ugly precision
     // Thus - Sleep(1) may be long 14ms!
@@ -168,19 +158,13 @@ StWindowImpl::StWindowImpl(const StHandle<StResourceManager>& theResMgr,
 
 void StWindowImpl::StSyncTimer::initUpTime() {
 #if defined(_WIN32)
-    myGetTick64 = NULL;
-    if(StSys::isVistaPlus()) {
-        HMODULE aKern32 = GetModuleHandleW(L"kernel32");
-        myGetTick64 = (GetTickCount64_t )GetProcAddress(aKern32, "GetTickCount64");
-    }
-
     // Spin waiting for a change in system time (should take up to 15 ms on modern systems).
     // Alternatively timeGetTime() might be used instead which handle time in 1 ms precision
     // when used in combination with timeBeginPeriod(1).
-    const uint64_t anUptime0 = (myGetTick64 != NULL) ? myGetTick64() : (uint64_t )GetTickCount();
+    const uint64_t anUptime0 = GetTickCount64();
     uint64_t anUptime1 = 0;
     do {
-        anUptime1 = (myGetTick64 != NULL) ? myGetTick64() : (uint64_t )GetTickCount();
+        anUptime1 = GetTickCount64();
         fillCounter(myCounterStart);
     } while(anUptime0 == anUptime1);
     myTimeInMicroSec = anUptime1 * 1000.0; // convert to microseconds
@@ -199,11 +183,11 @@ void StWindowImpl::StSyncTimer::initUpTime() {
 void StWindowImpl::StSyncTimer::resyncUpTime() {
 #if defined(_WIN32)
     // spin waiting for a change in system time (should take up to 15 ms on modern systems)
-    const uint64_t anUptime0 = (myGetTick64 != NULL) ? myGetTick64() : (uint64_t )GetTickCount();
+    const uint64_t anUptime0 = GetTickCount64();
     uint64_t anUptime1 = 0;
     double aTimerValue = 0.0;
     do {
-        anUptime1   = (myGetTick64 != NULL) ? myGetTick64() : (uint64_t )GetTickCount();
+        anUptime1   = GetTickCount64();
         aTimerValue = getElapsedTimeInMicroSec();
     } while(anUptime0 == anUptime1);
     mySyncMicroSec     = float(anUptime1 * 1000.0 - aTimerValue);
@@ -503,10 +487,8 @@ void StWindowImpl::updateBlockSleep() {
     if(attribs.ToBlockSleepDisplay
     && !myIsSystemLocked) {
         // prevent display sleep - call this periodically
-        EXECUTION_STATE aState = ES_CONTINUOUS | ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED;
-        if(myIsVistaPlus) {
-            aState = aState | ES_AWAYMODE_REQUIRED;
-        }
+        EXECUTION_STATE aState = ES_CONTINUOUS | ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED
+                               | ES_AWAYMODE_REQUIRED;
         SetThreadExecutionState(aState);
 
         if(myBlockSleep == BlockSleep_DISPLAY) {
@@ -527,10 +509,8 @@ void StWindowImpl::updateBlockSleep() {
         myBlockSleep = BlockSleep_DISPLAY;
     } else if(attribs.ToBlockSleepSystem) {
         // prevent system sleep - call this periodically
-        EXECUTION_STATE aState = ES_CONTINUOUS | ES_SYSTEM_REQUIRED;
-        if(myIsVistaPlus) {
-            aState = aState | ES_AWAYMODE_REQUIRED;
-        }
+        EXECUTION_STATE aState = ES_CONTINUOUS | ES_SYSTEM_REQUIRED
+                               | ES_AWAYMODE_REQUIRED;
         SetThreadExecutionState(aState);
 
         if(myBlockSleep == BlockSleep_SYSTEM) {

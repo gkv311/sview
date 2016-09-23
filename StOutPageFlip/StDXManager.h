@@ -58,13 +58,6 @@ class StDXManager {
     virtual ~StDXManager();
 
     /**
-     * @return true if IDirect3DDevice9Ex device has been created
-     */
-    bool isD3dEx() const {
-        return myIsD3dEx;
-    }
-
-    /**
      * Access Direct3D device instance.
      */
     IDirect3DDevice9* getDevice() const {
@@ -149,12 +142,11 @@ class StDXManager {
 
         protected:
 
-    IDirect3D9*           myD3dLib;      //!< Direct3D library instance
+    IDirect3D9Ex*         myD3dLib;      //!< Direct3D library instance
     IDirect3DDevice9*     myD3dDevice;   //!< Direct3D device object
     D3DPRESENT_PARAMETERS myD3dParams;   //!< parameters for created Direct3D device
     D3DDISPLAYMODE        myCurrMode;    //!< temporary variable
     UINT                  myRefreshRate;
-    bool                  myIsD3dEx;
     bool                  myWithAqbs;    //!< indicates that device was created with AQBS flags
 
 };

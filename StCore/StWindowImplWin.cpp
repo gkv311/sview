@@ -62,6 +62,17 @@ void StWindowImpl::convertRectToBacking(StGLBoxPx& /*theRect*/,
 }
 
 bool StWindowImpl::create() {
+    if(myRegisterTouchWindow == NULL) {
+        HMODULE aUser32Module = GetModuleHandleW(L"User32");
+        if(aUser32Module != NULL) {
+            // User32 should be already loaded
+            myRegisterTouchWindow   = (RegisterTouchWindow_t   )GetProcAddress(aUser32Module, "RegisterTouchWindow");
+            myUnregisterTouchWindow = (UnregisterTouchWindow_t )GetProcAddress(aUser32Module, "UnregisterTouchWindow");
+            myGetTouchInputInfo     = (GetTouchInputInfo_t     )GetProcAddress(aUser32Module, "GetTouchInputInfo");
+            myCloseTouchInputHandle = (CloseTouchInputHandle_t )GetProcAddress(aUser32Module, "CloseTouchInputHandle");
+        }
+    }
+
     myKeysState.reset();
     myInitState = STWIN_INITNOTSTART;
 

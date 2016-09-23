@@ -216,9 +216,6 @@ class StOutPageFlip : public StWindow {
     StDXInfo              myDxInfo;
     StFPSControl          myFPSControl;
     bool                  myToDrawStereo;
-#ifdef _WIN32
-    bool                  myIsVistaPlus;
-#endif
     bool                  myToResetDevice;
 
     class StGLDXFrameBuffer;

@@ -94,10 +94,6 @@ class ST_LOCAL StSys {
     }
 
 #if defined(_WIN32)
-    static bool isVistaPlus() {
-        return getSystemVersionWin() >= SystemVersion_Vista;
-    }
-
     static bool isWin8Plus() {
         return getSystemVersionWin() >= SystemVersion_Win8;
     }

@@ -320,7 +320,6 @@ class StWindowImpl {
     StCondition        myEventCursorShow;
     StCondition        myEventCursorHide;
     MSG                myEvent;           //!< message for windows' message loop
-    bool               myIsVistaPlus;     //!< system is Vista+
 #elif defined(__APPLE__)
     StCocoaCoords      myCocoaCoords;
     IOPMAssertionLevel mySleepAssert;     //!< prevent system going to sleep
@@ -392,9 +391,7 @@ class StWindowImpl {
         : StTimer(),
           myLastSyncMicroSec(0.0),
           mySyncMicroSec(0.0f) {
-        #if defined(_WIN32)
-            myGetTick64 = NULL;
-        #elif defined(__APPLE__)
+        #if defined(__APPLE__)
             (void )::mach_timebase_info(&myTimebaseInfo);
         #endif
         }
@@ -444,7 +441,7 @@ class StWindowImpl {
          */
         ST_LOCAL double getUpTimeFromSystem() const {
         #ifdef _WIN32
-            const uint64_t anUptime = (myGetTick64 != NULL) ? myGetTick64() : (uint64_t )GetTickCount();
+            const uint64_t anUptime = GetTickCount64();
             return double(anUptime) * 0.001;
         #elif defined(__APPLE__)
             // use function from CoreServices to retrieve system uptime
@@ -458,10 +455,7 @@ class StWindowImpl {
         #endif
         }
 
-    #ifdef _WIN32
-        typedef ULONGLONG (WINAPI *GetTickCount64_t)();
-        GetTickCount64_t   myGetTick64;
-    #elif defined(__APPLE__)
+    #if defined(__APPLE__)
         mach_timebase_info_data_t myTimebaseInfo;
     #endif
         double             myLastSyncMicroSec; //!< timestamp of last synchronization
