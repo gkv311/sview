@@ -444,16 +444,6 @@ void StWindowImpl::updateChildRect() {
     }
 }
 
-/**
- * @return normalized delta (-1 or 0 or +1)
- */
-inline int getDirNorm(const int theFrom,
-                      const int theTo) {
-    return theFrom > theTo
-         ? -1
-         : (theFrom < theTo ? 1 : 0);
-}
-
 LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch(uMsg) {                 // Check For Windows Messages
         case WM_ACTIVATE: {        // Watch For Window Activate Message
@@ -738,29 +728,44 @@ LRESULT StWindowImpl::stWndProc(HWND theWin, UINT uMsg, WPARAM wParam, LPARAM lP
                 myAlignDB = 0;
 
                 // adjust window position to ensure alignment
-                const int aDL = getDirNorm(aPrevRect.left(),   aNewRect.left());
-                const int aDR = getDirNorm(aPrevRect.right(),  aNewRect.right());
-                const int aDT = getDirNorm(aPrevRect.top(),    aNewRect.top());
-                const int aDB = getDirNorm(aPrevRect.bottom(), aNewRect.bottom());
-                if(isOddNumber(aNewRect.left())) {
-                    aNewRect.left() += aDL;
-                    aDragRect->left += aDL;
-                    myAlignDL = aDL;
+                if(!isOddNumber(aNewRect.bottom())) {
+                    if(isOddNumber(aPrevRect.bottom())) {
+                        myAlignDB = 1;
+                    }
+                    aNewRect.bottom() += 1;
+                    aDragRect->bottom += 1;
                 }
-                if(isEvenNumber(aNewRect.right())) {
-                    aNewRect.right() += aDR;
-                    aDragRect->right += aDR;
-                    myAlignDR = aDR;
+                if(uMsg == WM_MOVING) {
+                    int aNewTop = aNewRect.bottom() - aPrevRect.height();
+                    myAlignDT = aNewTop - aNewRect.top();
+                    aNewRect.top() += myAlignDT;
+                    aDragRect->top += myAlignDT;
+                } else if(!isEvenNumber(aNewRect.top())) {
+                    if(isEvenNumber(aPrevRect.top())) {
+                        myAlignDT = 1;
+                    }
+                    aNewRect.top() += 1;
+                    aDragRect->top += 1;
                 }
-                if(isOddNumber(aNewRect.top())) {
-                    aNewRect.top() += aDT;
-                    aDragRect->top += aDT;
-                    myAlignDT = aDT;
+
+                if(!isEvenNumber(aNewRect.left())) {
+                    if(isEvenNumber(aPrevRect.left())) {
+                        myAlignDL = 1;
+                    }
+                    aNewRect.left() += 1;
+                    aDragRect->left += 1;
                 }
-                if(isEvenNumber(aNewRect.bottom())) {
-                    aNewRect.bottom() += aDB;
-                    aDragRect->bottom += aDB;
-                    myAlignDB = aDB;
+                if(uMsg == WM_MOVING) {
+                    int aNewRight = aNewRect.left() + aPrevRect.width();
+                    myAlignDR = aNewRight - aNewRect.right();
+                    aNewRect.right() += myAlignDR;
+                    aDragRect->right += myAlignDR;
+                } else if(!isOddNumber(aNewRect.right())) {
+                    if(isOddNumber(aPrevRect.right())) {
+                        myAlignDR = 1;
+                    }
+                    aNewRect.right() += 1;
+                    aDragRect->right += 1;
                 }
             }
 
