@@ -361,6 +361,7 @@ int StWinHandles::glCreateContext(StWinHandles*    theSlave,
                                   const int        theDepthSize,
                                   const bool       theIsQuadStereo,
                                   const bool       theDebugCtx) {
+    (void )theRect;
 #ifdef _WIN32
     ThreadGL = StThread::getCurrentThreadId();
     ST_DEBUG_LOG("WinAPI, glCreateContext, ThreadGL= " + ThreadGL + ", ThreadWnd= " + ThreadWnd);
@@ -374,95 +375,104 @@ int StWinHandles::glCreateContext(StWinHandles*    theSlave,
                           "WinAPI, Can't create Slave GL Device Context");
     }
 
-    PIXELFORMATDESCRIPTOR aPixFrmtDesc = THE_PIXELFRMT_DOUBLE;
-    aPixFrmtDesc.cDepthBits = (BYTE )theDepthSize;
-    if(theIsQuadStereo) {
-        aPixFrmtDesc.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_GDI | PFD_SUPPORT_OPENGL
-                             | PFD_DOUBLEBUFFER | PFD_STEREO;
-    }
-    int aPixFrmtId = ChoosePixelFormat(hDC, &aPixFrmtDesc);
-    ST_GL_ERROR_CHECK(aPixFrmtId != 0, STWIN_ERROR_WIN32_PIXELFORMATF,
-                      "WinAPI, Can't find a suitable PixelFormat for Master");
-    if(theSlave != NULL
-    && ChoosePixelFormat(theSlave->hDC, &aPixFrmtDesc) != aPixFrmtId) {
-        ST_ERROR_LOG("Slave window returns another pixel format! Try to ignore...");
-    }
-
-    if(theIsQuadStereo) {
-        DescribePixelFormat(hDC, aPixFrmtId, sizeof(PIXELFORMATDESCRIPTOR), &aPixFrmtDesc);
-        if((aPixFrmtDesc.dwFlags & PFD_STEREO) == 0) {
-            ST_ERROR_LOG("WinAPI, Quad Buffered stereo not supported");
-        } else {
-            //bool isWin8Plus  = StSys::isWin8Plus();
-            ///myNeedsFullscr
-        }
-    }
-
-    HMODULE aModule = GetModuleHandleW(NULL);
-    hWinTmp = CreateWindowExW(WS_EX_TOOLWINDOW | WS_EX_WINDOWEDGE | WS_EX_NOACTIVATE,
-                              ClassTmp.toCString(), L"TmpWnd",
-                              WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_DISABLED,
-                              theRect.left() + 2, theRect.top() + 2, 4, 4,
-                              NULL, NULL, aModule, NULL);
-    ST_GL_ERROR_CHECK(hWinTmp != NULL, STWIN_ERROR_WIN32_GLDC,
-                      "WinAPI, Temporary window creation error");
-
-    HDC aDevCtxTmp = GetDC(hWinTmp);
-    ST_GL_ERROR_CHECK(aPixFrmtId != 0, STWIN_ERROR_WIN32_PIXELFORMATF,
-                      "WinAPI, Can't find a suitable PixelFormat for Tmp");
-
-    ST_GL_ERROR_CHECK(SetPixelFormat(aDevCtxTmp, aPixFrmtId, &aPixFrmtDesc),
-                      STWIN_ERROR_WIN32_PIXELFORMATS, "WinAPI, Can't set the PixelFormat for Master");
-    StWinGlrcH aRendCtxTmp = new StWinGlrc(aDevCtxTmp, NULL);
-    ST_GL_ERROR_CHECK(aRendCtxTmp->isValid(),
-                      STWIN_ERROR_WIN32_GLRC_CREATE, "WinAPI, Can't create GL Rendering Context");
-    ST_GL_ERROR_CHECK(aRendCtxTmp->makeCurrent(aDevCtxTmp),
-                      STWIN_ERROR_WIN32_GLRC_ACTIVATE, "WinAPI, Can't activate Tmp GL Rendering Context");
-
-    StGLContext aCtx(false);
-    ST_GL_ERROR_CHECK(aCtx.stglInit(),
-                      STWIN_ERROR_WIN32_GLRC_ACTIVATE, "WinAPI, Broken Tmp GL Rendering Context");
-
-    if(aCtx.extAll->wglChoosePixelFormatARB != NULL) {
-        const int aPixAttribs[] = {
-            WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
-            WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
-            WGL_DOUBLE_BUFFER_ARB,  GL_TRUE,
-            WGL_STEREO_ARB,         theIsQuadStereo ? GL_TRUE : GL_FALSE,
-            WGL_PIXEL_TYPE_ARB,     WGL_TYPE_RGBA_ARB,
-            //WGL_SAMPLE_BUFFERS_ARB, 1,
-            //WGL_SAMPLES_ARB,        8,
-            // WGL_CONTEXT_ROBUST_ACCESS_BIT_ARB       0x00000004
-            WGL_COLOR_BITS_ARB,     24,
-            WGL_DEPTH_BITS_ARB,     theDepthSize,
-            WGL_STENCIL_BITS_ARB,   0,
-            0, 0,
-        };
-        unsigned int aFrmtsNb = 0;
-        aCtx.extAll->wglChoosePixelFormatARB(hDC, aPixAttribs, NULL, 1, &aPixFrmtId, &aFrmtsNb);
-    }
-    ST_GL_ERROR_CHECK(SetPixelFormat(hDC, aPixFrmtId, &aPixFrmtDesc),
-                      STWIN_ERROR_WIN32_PIXELFORMATS, "WinAPI, Can't set the PixelFormat for Master");
-    ST_GL_ERROR_CHECK(theSlave == NULL || SetPixelFormat(theSlave->hDC, aPixFrmtId, &aPixFrmtDesc),
-                      STWIN_ERROR_WIN32_PIXELFORMATS, "WinAPI, Can't set the PixelFormat for Slave");
-
     HGLRC aRendCtx = NULL;
-    if(aCtx.extAll->wglCreateContextAttribsARB != NULL) {
-        // Beware! NVIDIA drivers reject context creation when WGL_CONTEXT_PROFILE_MASK_ARB are specified
-        // but not WGL_CONTEXT_MAJOR_VERSION_ARB/WGL_CONTEXT_MINOR_VERSION_ARB
-        int aCtxAttribs[] = {
-            //WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-            //WGL_CONTEXT_MINOR_VERSION_ARB, 2,
-            //WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB, //WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-            WGL_CONTEXT_FLAGS_ARB,         theDebugCtx ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
-            0, 0
-        };
+    {
+      PIXELFORMATDESCRIPTOR aPixFrmtDesc = THE_PIXELFRMT_DOUBLE;
+      aPixFrmtDesc.cDepthBits = (BYTE )theDepthSize;
+      if(theIsQuadStereo) {
+          aPixFrmtDesc.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_GDI | PFD_SUPPORT_OPENGL
+                               | PFD_DOUBLEBUFFER | PFD_STEREO;
+      }
 
-        aRendCtx = aCtx.extAll->wglCreateContextAttribsARB(hDC, NULL, aCtxAttribs);
+      HMODULE aModule = GetModuleHandleW(NULL);
+      hWinTmp = CreateWindowExW(WS_EX_TOOLWINDOW | WS_EX_WINDOWEDGE | WS_EX_NOACTIVATE,
+                                ClassTmp.toCString(), L"TmpWnd",
+                                WS_POPUP | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_DISABLED,
+                                // always create temporary window on main screen
+                                // to workaround sporadic bugs (access violation) in AMD Catalyst drivers
+                                2, 2, 4, 4, //theRect.left() + 2, theRect.top() + 2, 4, 4,
+                                NULL, NULL, aModule, NULL);
+      ST_GL_ERROR_CHECK(hWinTmp != NULL, STWIN_ERROR_WIN32_GLDC,
+                        "WinAPI, Temporary window creation error");
+
+      HDC aDevCtxTmp = GetDC(hWinTmp);
+      int aPixFrmtIdTmp = ChoosePixelFormat(aDevCtxTmp, &aPixFrmtDesc);
+      ST_GL_ERROR_CHECK(aPixFrmtIdTmp != 0, STWIN_ERROR_WIN32_PIXELFORMATF,
+                        "WinAPI, Can't find a suitable PixelFormat for Tmp");
+
+      ST_GL_ERROR_CHECK(SetPixelFormat(aDevCtxTmp, aPixFrmtIdTmp, &aPixFrmtDesc),
+                        STWIN_ERROR_WIN32_PIXELFORMATS, "WinAPI, Can't set the PixelFormat for Master");
+      StWinGlrcH aRendCtxTmp = new StWinGlrc(aDevCtxTmp, NULL);
+      ST_GL_ERROR_CHECK(aRendCtxTmp->isValid(),
+                        STWIN_ERROR_WIN32_GLRC_CREATE, "WinAPI, Can't create GL Rendering Context");
+      ST_GL_ERROR_CHECK(aRendCtxTmp->makeCurrent(aDevCtxTmp),
+                        STWIN_ERROR_WIN32_GLRC_ACTIVATE, "WinAPI, Can't activate Tmp GL Rendering Context");
+
+      StGLContext aCtx(false);
+      ST_GL_ERROR_CHECK(aCtx.stglInit(),
+                        STWIN_ERROR_WIN32_GLRC_ACTIVATE, "WinAPI, Broken Tmp GL Rendering Context");
+
+      int aPixFrmtId = 0;
+      if(aCtx.extAll->wglChoosePixelFormatARB != NULL) {
+          const int aPixAttribs[] = {
+              WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
+              WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
+              WGL_DOUBLE_BUFFER_ARB,  GL_TRUE,
+              WGL_STEREO_ARB,         theIsQuadStereo ? GL_TRUE : GL_FALSE,
+              WGL_PIXEL_TYPE_ARB,     WGL_TYPE_RGBA_ARB,
+              //WGL_SAMPLE_BUFFERS_ARB, 1,
+              //WGL_SAMPLES_ARB,        8,
+              // WGL_CONTEXT_ROBUST_ACCESS_BIT_ARB       0x00000004
+              WGL_COLOR_BITS_ARB,     24,
+              WGL_DEPTH_BITS_ARB,     theDepthSize,
+              WGL_STENCIL_BITS_ARB,   0,
+              0, 0,
+          };
+          unsigned int aFrmtsNb = 0;
+          aCtx.extAll->wglChoosePixelFormatARB(hDC, aPixAttribs, NULL, 1, &aPixFrmtId, &aFrmtsNb);
+          if(theSlave != NULL) {
+              int aPixFrmtIdSlave = 0;
+              aCtx.extAll->wglChoosePixelFormatARB(theSlave->hDC, aPixAttribs, NULL, 1, &aPixFrmtIdSlave, &aFrmtsNb);
+              if(aPixFrmtIdSlave != aPixFrmtId) {
+                  ST_ERROR_LOG("Slave window returns another pixel format! Try to ignore...");
+              }
+          }
+      } else {
+          aPixFrmtId = ChoosePixelFormat(hDC, &aPixFrmtDesc);
+          if(theSlave != NULL
+          && ChoosePixelFormat(theSlave->hDC, &aPixFrmtDesc) != aPixFrmtId) {
+              ST_ERROR_LOG("Slave window returns another pixel format! Try to ignore...");
+          }
+      }
+      ST_GL_ERROR_CHECK(aPixFrmtId != 0, STWIN_ERROR_WIN32_PIXELFORMATF,
+                        "WinAPI, Can't find a suitable PixelFormat for Master");
+      DescribePixelFormat(hDC, aPixFrmtId, sizeof(PIXELFORMATDESCRIPTOR), &aPixFrmtDesc);
+      if(theIsQuadStereo) {
+          if((aPixFrmtDesc.dwFlags & PFD_STEREO) == 0) {
+              ST_ERROR_LOG("WinAPI, Quad Buffered stereo is not supported");
+          }
+      }
+      ST_GL_ERROR_CHECK(SetPixelFormat(hDC, aPixFrmtId, &aPixFrmtDesc),
+                        STWIN_ERROR_WIN32_PIXELFORMATS, "WinAPI, Can't set the PixelFormat for Master");
+      ST_GL_ERROR_CHECK(theSlave == NULL || SetPixelFormat(theSlave->hDC, aPixFrmtId, &aPixFrmtDesc),
+                        STWIN_ERROR_WIN32_PIXELFORMATS, "WinAPI, Can't set the PixelFormat for Slave");
+      if(aCtx.extAll->wglCreateContextAttribsARB != NULL) {
+          // Beware! NVIDIA drivers reject context creation when WGL_CONTEXT_PROFILE_MASK_ARB are specified
+          // but not WGL_CONTEXT_MAJOR_VERSION_ARB/WGL_CONTEXT_MINOR_VERSION_ARB
+          int aCtxAttribs[] = {
+              //WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+              //WGL_CONTEXT_MINOR_VERSION_ARB, 2,
+              //WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB, //WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+              WGL_CONTEXT_FLAGS_ARB,         theDebugCtx ? WGL_CONTEXT_DEBUG_BIT_ARB : 0,
+              0, 0
+          };
+
+          aRendCtx = aCtx.extAll->wglCreateContextAttribsARB(hDC, NULL, aCtxAttribs);
+      }
+
+      aRendCtxTmp.nullify();
+      destroyWindow(hWinTmp);
     }
-
-    aRendCtxTmp.nullify();
-    destroyWindow(hWinTmp);
 
     hRC = new StWinGlrc(hDC, aRendCtx);
     ST_GL_ERROR_CHECK(hRC->isValid(),
@@ -622,7 +632,10 @@ bool StWinHandles::close() {
 
 namespace {
     static StAtomic<int32_t> ST_CLASS_COUNTER(0);
-};
+    static LRESULT CALLBACK wndProcDummy(HWND theWin, UINT theMsg, WPARAM theParamW, LPARAM theParamL) {
+        return DefWindowProcW(theWin, theMsg, theParamW, theParamL);
+    }
+}
 
 StStringUtfWide StWinHandles::getNewClassName() {
     return StStringUtfWide(L"StWindowClass") + StStringUtfWide(ST_CLASS_COUNTER.increment());
@@ -666,7 +679,7 @@ bool StWinHandles::registerClasses(StWinHandles* theSlave,
     }
     ClassGL = aNameGl;
 
-    if(!registerClass(aNameTmp, theProc)) {
+    if(!registerClass(aNameTmp, wndProcDummy)) {
         return false;
     }
     ClassTmp = aNameTmp;
