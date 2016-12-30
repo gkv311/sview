@@ -21,10 +21,13 @@
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <BRepMesh.hxx>
 #include <BRepLProp_SLProps.hxx>
+#include <STEPControl_Controller.hxx>
 #include <IGESControl_Reader.hxx>
+#include <IGESControl_Controller.hxx>
 #include <STEPControl_Reader.hxx>
 #include <XSControl_WorkSession.hxx>
 #include <ShapeFix_Shape.hxx>
+#include <Interface_Static.hxx>
 
 #include <Prs3d.hxx>
 #include <TopoDS.hxx>
@@ -249,6 +252,29 @@ bool StCADLoader::getNextDoc(NCollection_Sequence<Handle(AIS_InteractiveObject)>
 void StCADLoader::mainLoop() {
     StHandle<StFileNode> aFileToLoad;
     StHandle<StStereoParams> aFileParams;
+
+    STEPControl_Controller::Init();
+    IGESControl_Controller::Init();
+    // STEP import
+    Interface_Static::SetIVal("read.step.assembly.level", 2);
+    Interface_Static::SetIVal("read.step.product.mode", 0);
+    Interface_Static::SetIVal("read.surfacecurve.mode", 0);
+    Interface_Static::SetIVal("read.step.shape.repr", 1);
+    Interface_Static::SetIVal("read.step.product.context", 1);
+    Interface_Static::SetIVal("read.step.shape.aspect", true);
+    Interface_Static::SetIVal("read.step.shape.relationship", true);
+    // STEP export
+    Interface_Static::SetCVal("write.step.schema", "AP214IS");
+    Interface_Static::SetIVal("write.surfacecurve.mode", 1);
+    Interface_Static::SetIVal("write.step.unit", 6); // meters
+    // IGES import
+    Interface_Static::SetIVal("read.iges.bspline.continuity", 0);
+    Interface_Static::SetIVal("read.surfacecurve.mode", 0);
+    Interface_Static::SetIVal("read.iges.onlyvisible", 0);
+    // IGES export
+    Interface_Static::SetIVal("write.iges.unit", 6); // meters
+    Interface_Static::SetIVal("write.iges.brep.mode", 0); // V5_1
+
     for(;;) {
         myEvLoadNext.wait();
         if(myToQuit) {

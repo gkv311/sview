@@ -97,6 +97,7 @@ StWindowImpl::StWindowImpl(const StHandle<StResourceManager>& theResMgr,
     attribs.IsGlStereo     = false;
     attribs.IsGlDebug      = false;
     attribs.GlDepthSize    = 16;
+    attribs.GlStencilSize  = 0;
 #if defined(__ANDROID__)
     attribs.IsFullScreen   = true;
 #else
@@ -351,6 +352,9 @@ void StWindowImpl::getAttributes(StWinAttr* theAttributes) const {
             case StWinAttr_GlDepthSize:
                 anIter[1] = (StWinAttr )attribs.GlDepthSize;
                 break;
+            case StWinAttr_GlStencilSize:
+                anIter[1] = (StWinAttr )attribs.GlStencilSize;
+                break;
             case StWinAttr_ToBlockSleepSystem:
                 anIter[1] = (StWinAttr )attribs.ToBlockSleepSystem;
                 break;
@@ -395,6 +399,9 @@ void StWindowImpl::setAttributes(const StWinAttr* theAttributes) {
                 break;
             case StWinAttr_GlDepthSize:
                 attribs.GlDepthSize = (int8_t )anIter[1];
+                break;
+            case StWinAttr_GlStencilSize:
+                attribs.GlStencilSize = (int8_t )anIter[1];
                 break;
             case StWinAttr_ToBlockSleepSystem:
                 attribs.ToBlockSleepSystem = (anIter[1] == 1);

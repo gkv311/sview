@@ -21,7 +21,8 @@
 
 StWinGlrc::StWinGlrc(EGLDisplay theDisplay,
                      const bool theDebugCtx,
-                     int8_t     theGlDepthSize)
+                     int8_t     theGlDepthSize,
+                     int8_t     theGlStencilSize)
 : myDisplay(theDisplay),
   myConfig(NULL),
   myRC(EGL_NO_CONTEXT) {
@@ -41,12 +42,13 @@ StWinGlrc::StWinGlrc(EGLDisplay theDisplay,
                + "  Client APIs: " + eglQueryString(myDisplay, EGL_CLIENT_APIS) + "\n"
                + "  Extensions:  " + eglQueryString(myDisplay, EGL_EXTENSIONS));
 
-    const EGLint aConfigAttribs[] = {
+    EGLint aConfigAttribs[] = {
         EGL_RED_SIZE,   8,
         EGL_GREEN_SIZE, 8,
         EGL_BLUE_SIZE,  8,
         EGL_ALPHA_SIZE, 0,
-        EGL_DEPTH_SIZE, theGlDepthSize,
+        EGL_DEPTH_SIZE,   theGlDepthSize,
+        EGL_STENCIL_SIZE, theGlStencilSize,
     #if defined(GL_ES_VERSION_2_0)
         EGL_CONFORMANT,      EGL_OPENGL_ES2_BIT,
         EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
@@ -58,9 +60,21 @@ StWinGlrc::StWinGlrc(EGLDisplay theDisplay,
     };
 
     EGLint aNbConfigs = 0;
-    if(eglChooseConfig(myDisplay, aConfigAttribs, &myConfig, 1, &aNbConfigs) != EGL_TRUE) {
-        ST_ERROR_LOG("EGL, eglChooseConfig FAILED");
-        return;
+    if(eglChooseConfig(myDisplay, aConfigAttribs, &myConfig, 1, &aNbConfigs) != EGL_TRUE
+    || myConfig == NULL) {
+        if(theGlDepthSize <= 16) {
+            ST_ERROR_LOG("EGL, eglChooseConfig FAILED");
+            return;
+        }
+
+        eglGetError();
+        aConfigAttribs[4 * 2 + 1] = 16; // try config with smaller depth buffer
+        aConfigAttribs[5 * 2 + 1] = 0;
+        if(eglChooseConfig(myDisplay, aConfigAttribs, &myConfig, 1, &aNbConfigs) != EGL_TRUE
+        || myConfig == NULL) {
+            ST_ERROR_LOG("EGL, eglChooseConfig FAILED");
+            return;
+        }
     }
 
     /*EGLenum aEglApi = eglQueryAPI();
@@ -359,6 +373,7 @@ bool StWinHandles::glMakeCurrent() {
 int StWinHandles::glCreateContext(StWinHandles*    theSlave,
                                   const StRectI_t& theRect,
                                   const int        theDepthSize,
+                                  const int        theStencilSize,
                                   const bool       theIsQuadStereo,
                                   const bool       theDebugCtx) {
     (void )theRect;
@@ -378,7 +393,8 @@ int StWinHandles::glCreateContext(StWinHandles*    theSlave,
     HGLRC aRendCtx = NULL;
     {
       PIXELFORMATDESCRIPTOR aPixFrmtDesc = THE_PIXELFRMT_DOUBLE;
-      aPixFrmtDesc.cDepthBits = (BYTE )theDepthSize;
+      aPixFrmtDesc.cDepthBits   = (BYTE )theDepthSize;
+      aPixFrmtDesc.cStencilBits = (BYTE )theStencilSize;
       if(theIsQuadStereo) {
           aPixFrmtDesc.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_GDI | PFD_SUPPORT_OPENGL
                                | PFD_DOUBLEBUFFER | PFD_STEREO;
@@ -425,7 +441,7 @@ int StWinHandles::glCreateContext(StWinHandles*    theSlave,
               // WGL_CONTEXT_ROBUST_ACCESS_BIT_ARB       0x00000004
               WGL_COLOR_BITS_ARB,     24,
               WGL_DEPTH_BITS_ARB,     theDepthSize,
-              WGL_STENCIL_BITS_ARB,   0,
+              WGL_STENCIL_BITS_ARB,   theStencilSize,
               0, 0,
           };
           unsigned int aFrmtsNb = 0;

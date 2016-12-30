@@ -348,6 +348,7 @@ class StWindowImpl {
         bool       IsGlStereo;         //!< request OpenGL hardware accelerated QuadBuffer
         bool       IsGlDebug;          //!< request OpenGL debug context
         int8_t     GlDepthSize;        //!< OpenGL Depth Buffer size
+        int8_t     GlStencilSize;      //!< OpenGL Stencil Buffer size
         bool       IsFullScreen;       //!< to show in fullscreen mode
         bool       IsExclusiveFullScr; //!< use exclusive fullscreen mode (improve performance, prevent other applications)
         bool       IsHidden;           //!< to hide the window

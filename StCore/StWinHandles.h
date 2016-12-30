@@ -46,7 +46,8 @@ class StWinGlrc {
 #if defined(ST_HAVE_EGL) || defined(__ANDROID__)
     ST_LOCAL StWinGlrc(EGLDisplay theDisplay,
                        const bool theDebugCtx,
-                       int8_t     theGlDepthSize);
+                       int8_t     theGlDepthSize,
+                       int8_t     theGlStencilSize);
 #elif defined(_WIN32)
     ST_LOCAL StWinGlrc(HDC theDC, HGLRC theRC);
 #else
@@ -161,6 +162,7 @@ class StWinHandles {
     ST_LOCAL int glCreateContext(StWinHandles*    theSlave,
                                  const StRectI_t& theRect,
                                  const int        theDepthSize,
+                                 const int        theStencilSize,
                                  const bool       theIsQuadStereo,
                                  const bool       theDebugCtx);
 

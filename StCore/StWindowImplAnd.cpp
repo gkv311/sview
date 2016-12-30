@@ -345,7 +345,7 @@ bool StWindowImpl::onAndroidInitWindow() {
         return true;
     }
 
-    myMaster.hRC = new StWinGlrc(eglGetDisplay(EGL_DEFAULT_DISPLAY), attribs.IsGlDebug, attribs.GlDepthSize);
+    myMaster.hRC = new StWinGlrc(eglGetDisplay(EGL_DEFAULT_DISPLAY), attribs.IsGlDebug, attribs.GlDepthSize, attribs.GlStencilSize);
     if(!myMaster.hRC->isValid()) {
         myMaster.close();
         mySlave.close();
@@ -354,7 +354,7 @@ bool StWindowImpl::onAndroidInitWindow() {
     }
 
     myMaster.hWindowGl = myParentWin->getWindow();
-    myInitState = myMaster.glCreateContext(NULL, myRectNorm, attribs.GlDepthSize, attribs.IsGlStereo, attribs.IsGlDebug);
+    myInitState = myMaster.glCreateContext(NULL, myRectNorm, attribs.GlDepthSize, attribs.GlStencilSize, attribs.IsGlStereo, attribs.IsGlDebug);
     if(myInitState != STWIN_INIT_SUCCESS) {
         return false;
     }

@@ -338,7 +338,8 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
 
     // no need in Depth buffer
     const StWinAttr anAttribs[] = {
-        StWinAttr_GlDepthSize, (StWinAttr )0,
+        StWinAttr_GlDepthSize,   (StWinAttr )0,
+        StWinAttr_GlStencilSize, (StWinAttr )0,
         StWinAttr_NULL
     };
     for(size_t aRendIter = 0; aRendIter < myRenderers.size(); ++aRendIter) {

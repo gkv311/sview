@@ -119,6 +119,17 @@ StCADViewer::StCADViewer(const StHandle<StResourceManager>& theResMgr,
     addRenderer(new StOutPageFlipExt(myResMgr, theParentWin));
 #endif
 
+    // need Depth buffer
+    const StWinAttr anAttribs[] = {
+        StWinAttr_GlDepthSize,   (StWinAttr )24,
+        StWinAttr_GlStencilSize, (StWinAttr )8,
+        StWinAttr_NULL
+    };
+    for(size_t aRendIter = 0; aRendIter < myRenderers.size(); ++aRendIter) {
+        StHandle<StWindow>& aRend = myRenderers[aRendIter];
+        aRend->setAttributes(anAttribs);
+    }
+
     // create actions
     StHandle<StAction> anAction;
     anAction = new StActionBool(stCString("DoFullscreen"), params.IsFullscreen);
@@ -613,17 +624,18 @@ void StCADViewer::doScroll(const StScrollEvent& theEvent) {
         return;
     }
 
+    const StPointD_t aCursor(theEvent.PointX, theEvent.PointY);
     if(theEvent.StepsY >= 1) {
         if(myIsCtrlPressed) {
             doStereoZFocusCloser(0.05);
         } else {
-            doZoomIn(0.1);
+            scaleAt(aCursor, 10);
         }
     } else if(theEvent.StepsY <= -1) {
         if(myIsCtrlPressed) {
             doStereoZFocusFarther(0.05);
         } else {
-            doZoomOut(0.1);
+            scaleAt(aCursor, -10);
         }
     }
 }
@@ -974,6 +986,21 @@ void StCADViewer::doChangeProjection(const int32_t theProj) {
             break;
         }
     }
+}
+
+void StCADViewer::scaleAt(const StPointD_t& thePoint,
+                          const float       theStep) {
+    if(myView.IsNull()) {
+        return;
+    }
+
+    int aWinSizeX = 0;
+    int aWinSizeY = 0;
+    myView->Window()->Size(aWinSizeX, aWinSizeY);
+
+    myView->StartZoomAtPoint(int(thePoint.x() * aWinSizeX),
+                             int(thePoint.y() * aWinSizeY));
+    myView->ZoomAtPoint(0, 0, (int )theStep, (int )theStep);
 }
 
 void StCADViewer::doZoomIn(const double theValue) {

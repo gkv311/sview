@@ -109,7 +109,7 @@ bool StWindowImpl::create() {
     Display* hDisplay = stXDisplay->hDisplay;
 
 #if defined(ST_HAVE_EGL)
-    myMaster.hRC = new StWinGlrc(eglGetDisplay(hDisplay), attribs.IsGlDebug, attribs.GlDepthSize);
+    myMaster.hRC = new StWinGlrc(eglGetDisplay(hDisplay), attribs.IsGlDebug, attribs.GlDepthSize, attribs.GlStencilSize);
     if(!myMaster.hRC->isValid()) {
         myMaster.close();
         mySlave.close();
@@ -153,7 +153,7 @@ bool StWindowImpl::create() {
         GLX_BLUE_SIZE,     8,
         GLX_ALPHA_SIZE,    0,
         GLX_DEPTH_SIZE,    attribs.GlDepthSize,
-        GLX_STENCIL_SIZE,  0,
+        GLX_STENCIL_SIZE,  attribs.GlStencilSize,
         GLX_DOUBLEBUFFER,  True,
         //GLX_SAMPLE_BUFFERS, 1,
         //GLX_SAMPLES,        4,
@@ -320,6 +320,7 @@ bool StWindowImpl::create() {
     int isGlCtx = myMaster.glCreateContext(attribs.Slave != StWinSlave_slaveOff ? &mySlave : NULL,
                                            myRectNorm,
                                            attribs.GlDepthSize,
+                                           attribs.GlStencilSize,
                                            attribs.IsGlStereo,
                                            attribs.IsGlDebug);
     if(isGlCtx != STWIN_INIT_SUCCESS) {

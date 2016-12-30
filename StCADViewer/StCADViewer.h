@@ -189,6 +189,8 @@ class StCADViewer : public StApplication {
     ST_LOCAL virtual void doChangeLanguage(const int32_t theNewLang) ST_ATTR_OVERRIDE;
     ST_LOCAL void doFullscreen(const bool theIsFullscreen);
     ST_LOCAL void doChangeProjection(const int32_t theProj);
+    ST_LOCAL void scaleAt(const StPointD_t& thePoint,
+                          const float       theStep);
     ST_LOCAL void doZoomIn (const double theValue);
     ST_LOCAL void doZoomOut(const double theValue);
     ST_LOCAL void doStereoZFocusCloser(const double theValue);
