@@ -1,10 +1,14 @@
 *.o
 *.obj
 *.a
+*.vcxproj.user
+sView.Cpp.Custom.props
 *.pdb
 *.suo
 *.sdf
 *.opensdf
+*.VC.db
+*.VC.opendb
 *.ipch
 *.depend
 *.layout
