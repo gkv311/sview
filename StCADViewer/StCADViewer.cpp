@@ -312,9 +312,8 @@ bool StCADViewer::initOcctViewer() {
     }
 #endif
 
-    myViewer = new V3d_Viewer(aDriver, TCollection_ExtendedString("Viewer").ToExtString(), "", 1000.0,
-                              V3d_XposYnegZpos, Quantity_NOC_BLACK, V3d_ZBUFFER, V3d_GOURAUD, V3d_WAIT,
-                              Standard_True, Standard_False);
+    myViewer = new V3d_Viewer(aDriver);
+    myViewer->SetDefaultBackgroundColor(Quantity_NOC_BLACK);
     Handle(V3d_DirectionalLight) aLightDir = new V3d_DirectionalLight(myViewer, V3d_Zneg, Quantity_NOC_WHITE, Standard_True);
     Handle(V3d_AmbientLight)     aLightAmb = new V3d_AmbientLight(myViewer);
     aLightDir->SetDirection ( 1.0, -2.0, -10.0);
@@ -324,8 +323,6 @@ bool StCADViewer::initOcctViewer() {
     myAisContext = new AIS_InteractiveContext(myViewer);
     myAisContext->SetDisplayMode(AIS_Shaded);
     myAisContext->SetAutoActivateSelection(Standard_False);
-    myAisContext->SetHilightColor(Quantity_NOC_CYAN1);
-    myAisContext->SelectionColor (Quantity_NOC_WHITE);
     const Handle(Prs3d_Drawer)& aDrawer = myAisContext->DefaultDrawer();
     aDrawer->SetAutoTriangulation (Standard_False);
 #ifdef __ANDROID__
@@ -349,7 +346,6 @@ bool StCADViewer::initOcctViewer() {
     myView->SetWindow(aWindow, (Aspect_RenderingContext )aRendCtx);
 #endif
 
-    myView->SetSurfaceDetail(V3d_TEX_ALL);
     return true;
 }
 
@@ -490,7 +486,7 @@ void StCADViewer::doResize(const StSizeEvent& ) {
 
     const StGLBoxPx aWinRect = myWindow->stglViewport(ST_WIN_MASTER);
     myGUI->stglResize(aWinRect);
-    myProjection.resize(*myContext, aWinRect.width(), aWinRect.height());
+    myProjection.resize(aWinRect.width(), aWinRect.height());
 }
 
 void StCADViewer::doMouseDown(const StClickEvent& theEvent) {
@@ -819,7 +815,7 @@ void StCADViewer::stglDraw(unsigned int theView) {
         }
 
         if(params.ToShowTrihedron->getValue()) {
-          myView->TriedronDisplay(Aspect_TOTP_RIGHT_LOWER, Quantity_NOC_WHITE, 0.08, V3d_ZBUFFER);
+          myView->TriedronDisplay(Aspect_TOTP_RIGHT_LOWER, Quantity_NOC_WHITE, 0.1, V3d_ZBUFFER);
         } else {
           myView->TriedronErase();
         }

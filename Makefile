@@ -290,18 +290,7 @@ install_android_cad_libs:
 	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswresample-*.so    $(aDestAndroid)/libs/$(ANDROID_EABI)/
 	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswscale-*.so       $(aDestAndroid)/libs/$(ANDROID_EABI)/
 	mkdir -p $(aDestAndroid)/assets/shaders
-	mkdir -p $(aDestAndroid)/assets/shaders/occt
-	mkdir -p $(aDestAndroid)/assets/res
 	mkdir -p $(aDestAndroid)/assets/lang
-	cp -f $(OCCT_RES)/Shaders/Declarations.glsl     $(aDestAndroid)/assets/shaders/occt/
-	cp -f $(OCCT_RES)/Shaders/DeclarationsImpl.glsl $(aDestAndroid)/assets/shaders/occt/
-	cp -f $(OCCT_RES)/UnitsAPI/Lexi_Expr.dat        $(aDestAndroid)/assets/res/
-	cp -f $(OCCT_RES)/UnitsAPI/Units.dat            $(aDestAndroid)/assets/res/
-	cp -f $(OCCT_RES)/SHMessage/*.*                 $(aDestAndroid)/assets/lang/
-	cp -f $(OCCT_RES)/XSMessage/*.*                 $(aDestAndroid)/assets/lang/
-	cp -f $(OCCT_RES)/TObj/*.msg                    $(aDestAndroid)/assets/lang/
-	cp -f $(OCCT_RES)/StdResource/*                 $(aDestAndroid)/assets/res/
-	cp -f $(OCCT_RES)/XSTEPResource/*               $(aDestAndroid)/assets/res/
 
 pre_all:
 	mkdir -p $(BUILD_ROOT)/lang/English

@@ -109,16 +109,7 @@
       <EnableDpiAwareness>false</EnableDpiAwareness>
     </Manifest>
     <PostBuildEvent>
-      <Command>xcopy /Y "$(StOcctRes)\UnitsAPI\Lexi_Expr.dat" "$(TargetDir)\res\"
-xcopy /Y "$(StOcctRes)\UnitsAPI\Units.dat" "$(TargetDir)\res\"
-xcopy /Y "$(StOcctRes)\SHMessage\*.*" "$(TargetDir)\lang\"
-xcopy /Y "$(StOcctRes)\XSMessage\*.*" "$(TargetDir)\lang\"
-xcopy /Y "$(StOcctRes)\Shaders\*.*" "$(TargetDir)\shaders\StCADViewer\"
-xcopy /Y "$(StOcctRes)\TObj\*.msg" "$(TargetDir)\lang\"
-xcopy /Y "$(StOcctRes)\StdResource\*" "$(TargetDir)\res\"
-xcopy /Y "$(StOcctRes)\XSTEPResource\*" "$(TargetDir)\res\"
-xcopy /Y "$(StOcctRes)\XmlOcafResource\*.*" "$(TargetDir)\res\"
-cmd /c call ..\copy_res.bat $(TargetDir) $(TargetName)
+      <Command>cmd /c call ..\copy_res.bat $(TargetDir) $(TargetName)
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -160,16 +151,7 @@ cmd /c call ..\copy_res.bat $(TargetDir) $(TargetName)
       <EnableDpiAwareness>false</EnableDpiAwareness>
     </Manifest>
     <PostBuildEvent>
-      <Command>xcopy /Y "$(StOcctRes)\UnitsAPI\Lexi_Expr.dat" "$(TargetDir)\res\"
-xcopy /Y "$(StOcctRes)\UnitsAPI\Units.dat" "$(TargetDir)\res\"
-xcopy /Y "$(StOcctRes)\SHMessage\*.*" "$(TargetDir)\lang\"
-xcopy /Y "$(StOcctRes)\XSMessage\*.*" "$(TargetDir)\lang\"
-xcopy /Y "$(StOcctRes)\Shaders\*.*" "$(TargetDir)\shaders\StCADViewer\"
-xcopy /Y "$(StOcctRes)\TObj\*.msg" "$(TargetDir)\lang\"
-xcopy /Y "$(StOcctRes)\StdResource\*" "$(TargetDir)\res\"
-xcopy /Y "$(StOcctRes)\XSTEPResource\*" "$(TargetDir)\res\"
-xcopy /Y "$(StOcctRes)\XmlOcafResource\*.*" "$(TargetDir)\res\"
-cmd /c call ..\copy_res.bat $(TargetDir) $(TargetName)
+      <Command>cmd /c call ..\copy_res.bat $(TargetDir) $(TargetName)
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -209,16 +191,7 @@ cmd /c call ..\copy_res.bat $(TargetDir) $(TargetName)
       <EnableDpiAwareness>false</EnableDpiAwareness>
     </Manifest>
     <PostBuildEvent>
-      <Command>xcopy /Y "$(StOcctRes)\UnitsAPI\Lexi_Expr.dat" "$(TargetDir)\res\"
-xcopy /Y "$(StOcctRes)\UnitsAPI\Units.dat" "$(TargetDir)\res\"
-xcopy /Y "$(StOcctRes)\SHMessage\*.*" "$(TargetDir)\lang\"
-xcopy /Y "$(StOcctRes)\XSMessage\*.*" "$(TargetDir)\lang\"
-xcopy /Y "$(StOcctRes)\Shaders\*.*" "$(TargetDir)\shaders\StCADViewer\"
-xcopy /Y "$(StOcctRes)\TObj\*.msg" "$(TargetDir)\lang\"
-xcopy /Y "$(StOcctRes)\StdResource\*" "$(TargetDir)\res\"
-xcopy /Y "$(StOcctRes)\XSTEPResource\*" "$(TargetDir)\res\"
-xcopy /Y "$(StOcctRes)\XmlOcafResource\*.*" "$(TargetDir)\res\"
-cmd /c call ..\copy_res.bat $(TargetDir) $(TargetName)
+      <Command>cmd /c call ..\copy_res.bat $(TargetDir) $(TargetName)
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -260,16 +233,7 @@ cmd /c call ..\copy_res.bat $(TargetDir) $(TargetName)
       <EnableDpiAwareness>false</EnableDpiAwareness>
     </Manifest>
     <PostBuildEvent>
-      <Command>xcopy /Y "$(StOcctRes)\UnitsAPI\Lexi_Expr.dat" "$(TargetDir)\res\"
-xcopy /Y "$(StOcctRes)\UnitsAPI\Units.dat" "$(TargetDir)\res\"
-xcopy /Y "$(StOcctRes)\SHMessage\*.*" "$(TargetDir)\lang\"
-xcopy /Y "$(StOcctRes)\XSMessage\*.*" "$(TargetDir)\lang\"
-xcopy /Y "$(StOcctRes)\Shaders\*.*" "$(TargetDir)\shaders\StCADViewer\"
-xcopy /Y "$(StOcctRes)\TObj\*.msg" "$(TargetDir)\lang\"
-xcopy /Y "$(StOcctRes)\StdResource\*" "$(TargetDir)\res\"
-xcopy /Y "$(StOcctRes)\XSTEPResource\*" "$(TargetDir)\res\"
-xcopy /Y "$(StOcctRes)\XmlOcafResource\*.*" "$(TargetDir)\res\"
-cmd /c call ..\copy_res.bat $(TargetDir) $(TargetName)
+      <Command>cmd /c call ..\copy_res.bat $(TargetDir) $(TargetName)
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
