@@ -16,6 +16,14 @@
 #include <fstream>
 #include <limits>
 
+#if defined(_WIN32)
+    #define ftell64(a)     _ftelli64(a)
+    #define fseek64(a,b,c) _fseeki64(a,b,c)
+#else
+    #define ftell64(a)     ftello(a)
+    #define fseek64(a,b,c) fseeko(a,b,c)
+#endif
+
 #ifdef max
     #undef max
 #endif
@@ -123,7 +131,8 @@ void StRawFile::freeBuffer() {
 }
 
 bool StRawFile::readFile(const StCString& theFilePath,
-                         const int        theOpenedFd) {
+                         const int        theOpenedFd,
+                         const size_t     theReadMax) {
     freeBuffer();
 
     if(!openFile(StRawFile::READ, theFilePath, theOpenedFd)) {
@@ -134,8 +143,17 @@ bool StRawFile::readFile(const StCString& theFilePath,
         int64_t aFileLen = avio_size(myContextIO);
         if(aFileLen > 0) {
             // stream of known size - create a buffer and read the data
-            initBuffer(aFileLen <= int64_t(std::numeric_limits<ptrdiff_t>::max()) ? size_t(aFileLen) : 0);
-            if(myBuffSize != size_t(aFileLen)) {
+            size_t aReadLen = 0;
+            if(aFileLen <= int64_t(std::numeric_limits<ptrdiff_t>::max())) {
+                aReadLen = theReadMax != 0 ? (size_t )stMin(int64_t(theReadMax), aFileLen) : size_t(aFileLen);
+            } else if(theReadMax != 0) {
+                aReadLen = theReadMax;
+            } else {
+                return false;
+            }
+
+            initBuffer(aReadLen);
+            if(myBuffSize != aReadLen) {
                 return false;
             }
 
@@ -180,13 +198,18 @@ bool StRawFile::readFile(const StCString& theFilePath,
                 break;
             }
 
-            if(uint64_t(aFileLen) + 4096 > uint64_t(std::numeric_limits<ptrdiff_t>::max())) {
+            const uint64_t aReadLen = uint64_t(aFileLen) + uint64_t(aReadBytes);
+            if(aReadLen > uint64_t(std::numeric_limits<ptrdiff_t>::max())) {
                 isOk = false;
                 break;
             }
 
             aFileLen += aReadBytes;
             aChunks.add(aChunk);
+            if(theReadMax != 0
+            && aReadLen >= uint64_t(theReadMax)) {
+                break;
+            }
         }
         closeFile();
 
@@ -214,18 +237,28 @@ bool StRawFile::readFile(const StCString& theFilePath,
     }
 
     // determine length of file
-    fseek(myFileHandle, 0, SEEK_END);
-    long aFileLen = ftell(myFileHandle);
+    fseek64(myFileHandle, 0, SEEK_END);
+    int64_t aFileLen = ftell64(myFileHandle);
     if(aFileLen <= 0L) {
         closeFile();
         return false;
     }
 
-    // create a buffer and read the data
-    initBuffer(size_t(aFileLen));
+    size_t aReadLen = 0;
+    if(aFileLen <= int64_t(std::numeric_limits<ptrdiff_t>::max())) {
+        aReadLen = theReadMax != 0 ? (size_t )stMin(int64_t(theReadMax), aFileLen) : size_t(aFileLen);
+    } else if(theReadMax != 0) {
+        aReadLen = theReadMax;
+    } else {
+        closeFile();
+        return false;
+    }
 
-    fseek(myFileHandle, 0, SEEK_SET);
-    if(myBuffSize == size_t(aFileLen)) {
+    // create a buffer and read the data
+    initBuffer(aReadLen);
+
+    fseek64(myFileHandle, 0, SEEK_SET);
+    if(myBuffSize == aReadLen) {
         size_t aCountRead = fread(myBuffer, 1, myBuffSize, myFileHandle);
         (void )aCountRead;
     }

@@ -163,9 +163,10 @@ void StJpegParser::reset() {
 }
 
 bool StJpegParser::readFile(const StCString& theFilePath,
-                            const int        theOpenedFd) {
+                            const int        theOpenedFd,
+                            const size_t     theReadMax) {
     reset();
-    if(!StRawFile::readFile(theFilePath, theOpenedFd)) {
+    if(!StRawFile::readFile(theFilePath, theOpenedFd, theReadMax)) {
         return false;
     }
 

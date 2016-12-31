@@ -118,10 +118,12 @@ class StRawFile : public StFileNode {
      * Fill the buffer with file content.
      * @param theFilePath the file path
      * @param theOpenedFd when specified, already opened file descriptor will be used; passed descriptor will be automatically closed
+     * @param theReadMax  limit reading by specified number of bytes (0 means full file)
      * @return true if file was read
      */
     ST_CPPEXPORT virtual bool readFile(const StCString& theFilePath = stCString(""),
-                                       const int        theOpenedFd = -1);
+                                       const int        theOpenedFd = -1,
+                                       const size_t     theReadMax  = 0);
 
     /**
      * Write the buffer into the file.
