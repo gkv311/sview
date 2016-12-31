@@ -119,6 +119,27 @@ class StVec3 {
     operator Element_t*() { return v; }
 
     /**
+     * Check this vector with another vector for equality (without tolerance!).
+     */
+    bool isEqual(const StVec3& theOther) const {
+        return v[0] == theOther.v[0]
+            && v[1] == theOther.v[1]
+            && v[2] == theOther.v[2];
+    }
+
+    /**
+     * Check this vector with another vector for equality (without tolerance!).
+     */
+    bool operator==(const StVec3& theOther)       { return isEqual(theOther); }
+    bool operator==(const StVec3& theOther) const { return isEqual(theOther); }
+
+    /**
+     * Check this vector with another vector for non-equality (without tolerance!).
+     */
+    bool operator!=(const StVec3& theOther)       { return !isEqual(theOther); }
+    bool operator!=(const StVec3& theOther) const { return !isEqual(theOther); }
+
+    /**
      * Compute per-component summary.
      */
     StVec3& operator+=(const StVec3& add) {
