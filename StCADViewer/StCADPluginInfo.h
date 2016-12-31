@@ -41,6 +41,14 @@
 #define ST_RLE_MIME_STRING  ST_RLE_MIME  ":" ST_RLE_EXT  ":" ST_BREP_DESC
 
 /**
+ *.xbf - OCAF Binary model file
+ */
+#define ST_XBF_MIME "model/xbf"
+#define ST_XBF_EXT  "xbf"
+#define ST_XBF_DESC "XBF - CAD model file (OCCT framework)"
+#define ST_XBF_MIME_STRING ST_XBF_MIME ":" ST_XBF_EXT ":" ST_XBF_DESC
+
+/**
  *.obj - simplest triangulation exchange format
  */
 /*#define ST_OBJ_MIME "model/obj"
@@ -70,6 +78,7 @@
 #define ST_CAD_PLUGIN_MIME_CHAR ST_IGS_MIME_STRING ";" ST_IGES_MIME_STRING ";" \
 ST_STP_MIME_STRING  ";" ST_STEP_MIME_STRING ";" \
 ST_BREP_MIME_STRING ";" ST_RLE_MIME_STRING  ";" \
+ST_XBF_MIME_STRING ";" \
 "\000"
 
 #endif //__StCADPluginInfo_h_

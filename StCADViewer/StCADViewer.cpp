@@ -332,7 +332,7 @@ bool StCADViewer::initOcctViewer() {
     myViewer->SetLightOn (aLightAmb);
 
     myAisContext = new AIS_InteractiveContext(myViewer);
-    myAisContext->SetDisplayMode(AIS_Shaded);
+    myAisContext->SetDisplayMode(0);
     myAisContext->SetAutoActivateSelection(Standard_False);
     const Handle(Prs3d_Drawer)& aDrawer = myAisContext->DefaultDrawer();
     aDrawer->SetAutoTriangulation (Standard_False);
@@ -554,7 +554,7 @@ void StCADViewer::doMouseUp(const StClickEvent& theEvent) {
         }
         case ST_MOUSE_MIDDLE: {
             if(!myIsCtrlPressed && !isItemUnclicked) {
-                params.IsFullscreen->reverse();
+                //params.IsFullscreen->reverse();
             }
             myIsMiddleHold = false;
             break;
@@ -722,11 +722,11 @@ void StCADViewer::doFileDrop(const StDNDropEvent& theEvent) {
     }
 
     const StString aFilePath = theEvent.Files[0];
-    if(myPlayList->checkExtension(aFilePath)) {
+    //if(myPlayList->checkExtension(aFilePath)) {
         myPlayList->open(aFilePath);
         doUpdateStateLoading();
         myCADLoader->doLoadNext();
-    }
+    //}
 }
 
 void StCADViewer::doNavigate(const StNavigEvent& theEvent) {
@@ -746,7 +746,8 @@ void StCADViewer::beforeDraw() {
     Handle(Graphic3d_Camera) aCam = !myView.IsNull()
                                   ?  myView->Camera()
                                   : Handle(Graphic3d_Camera)();
-    if(myIsMiddleHold && myIsCtrlPressed && !aCam.IsNull()) {
+    //if(myIsMiddleHold && myIsCtrlPressed && !aCam.IsNull()) {
+    if(myIsMiddleHold && !aCam.IsNull()) {
         // move
         StPointD_t aPt = myWindow->getMousePos();
         gp_Vec2d aFlatMove( 2.0 * (aPt.x() - myPrevMouse.x()),
@@ -780,20 +781,9 @@ void StCADViewer::beforeDraw() {
     if(!myAisContext.IsNull()) {
         NCollection_Sequence<Handle(AIS_InteractiveObject)> aNewPrsList;
         if(myCADLoader->getNextDoc(aNewPrsList, myDoc)) {
-            myAisContext->RemoveAll(Standard_False);
+            myAisContext->RemoveAll(false);
             for(NCollection_Sequence<Handle(AIS_InteractiveObject)>::Iterator aPrsIter(aNewPrsList); aPrsIter.More(); aPrsIter.Next()) {
-                Handle(AIS_Shape)                aShapePrs     = Handle(AIS_Shape)::DownCast (aPrsIter.Value());
-                Handle(AIS_ConnectedInteractive) aConnectedPrs = Handle(AIS_ConnectedInteractive)::DownCast (aPrsIter.Value());
-                if(!aConnectedPrs.IsNull()) {
-                    aShapePrs = Handle(AIS_Shape)::DownCast (aConnectedPrs->ConnectedTo());
-                }
-                if(!aShapePrs.IsNull()) {
-                    aShapePrs->SetDisplayMode(1);
-                    if(!aConnectedPrs.IsNull()) {
-                        aConnectedPrs->SetDisplayMode(1);
-                    }
-                }
-                myAisContext->Display(aPrsIter.Value(), aPrsIter.Value()->DisplayMode(), 0, Standard_False);
+                myAisContext->Display(aPrsIter.Value(), aPrsIter.Value()->DisplayMode(), -1, false);
             }
 
             doFitAll();

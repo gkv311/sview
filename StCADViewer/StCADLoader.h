@@ -13,9 +13,6 @@
 
 #include <AIS_InteractiveObject.hxx>
 #include <NCollection_Sequence.hxx>
-#include <TopoDS_Shape.hxx>
-#include <TDocStd_Document.hxx>
-#include <XCAFApp_Application.hxx>
 
 #include <StStrings/StString.h>
 #include <StFile/StMIMEList.h>
@@ -24,26 +21,10 @@
 #include <StSlots/StSignal.h>
 #include <StThreads/StThread.h>
 
+#include "StAssetDocument.h"
+
 class StLangMap;
 class StThread;
-
-class StCADDocument {
-
-        public:
-
-    ST_LOCAL StCADDocument();
-    ST_LOCAL void reset();
-
-    const Handle(XCAFApp_Application)& getXCAFApp() const { return myXCAFApp; }
-    const Handle(TDocStd_Document)&    getXCAFDoc() const { return myXCAFDoc; }
-    Handle(TDocStd_Document)&          changeXCAFDoc()    { return myXCAFDoc; }
-
-        protected:
-
-    Handle(XCAFApp_Application) myXCAFApp;
-    Handle(TDocStd_Document)    myXCAFDoc;
-
-};
 
 class StCADLoader {
 
@@ -65,7 +46,7 @@ class StCADLoader {
     }
 
     ST_LOCAL virtual bool getNextDoc(NCollection_Sequence<Handle(AIS_InteractiveObject)>& thePrsList,
-                                     StHandle<StCADDocument>& theDoc);
+                                     Handle(StAssetDocument)& theDoc);
 
         public:  //!< Signals
 
@@ -79,11 +60,14 @@ class StCADLoader {
 
         protected:
 
-    ST_LOCAL TopoDS_Shape loadIGES(const StString& theFileToLoadPath);
-    ST_LOCAL TopoDS_Shape loadSTEP(const StString& theFileToLoadPath);
-
     ST_LOCAL virtual bool loadModel(const StHandle<StFileNode>& theSource);
-    ST_LOCAL virtual bool computeMesh(const TopoDS_Shape& theShape);
+
+    /**
+     * Just redirect callback slot.
+     */
+    ST_LOCAL void doOnErrorRedirect(const StCString& theMsgText) {
+        signals.onError(theMsgText);
+    }
 
     static SV_THREAD_FUNCTION threadFunction(void* theLoader) {
         StCADLoader* aCADLoader = (StCADLoader* )theLoader;
@@ -97,7 +81,7 @@ class StCADLoader {
     StHandle<StLangMap>  myLangMap;
     StHandle<StPlayList> myPlayList;
     StCondition          myEvLoadNext;
-    StHandle<StCADDocument>  myDoc;
+    Handle(StAssetDocument) myDoc;
     NCollection_Sequence<Handle(AIS_InteractiveObject)> myPrsList;
     Graphic3d_MaterialAspect myDefaultMat;
     StMutex              myResultLock;

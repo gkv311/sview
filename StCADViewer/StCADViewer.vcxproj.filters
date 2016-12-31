@@ -20,4 +20,103 @@
   <ItemGroup>
     <Manifest Include="..\dpiAware.manifest" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StCADFrameBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StCADLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StCADMsgPrinter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StCADViewer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StCADViewerGUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StCADViewerStrings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StAssetPresentation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StAssetImportShape.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StAssetDocument.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="StCADFrameBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StCADLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StCADMsgPrinter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StCADPluginInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StCADViewer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StCADViewerGUI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StCADViewerStrings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StCADWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StAssetPresentation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StAssetImportShape.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StAssetDocument.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StAssetNodeIterator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="lang\chinese\language.lng">
+      <Filter>Translation Files</Filter>
+    </None>
+    <None Include="lang\chinese\StCADViewer.lng">
+      <Filter>Translation Files</Filter>
+    </None>
+    <None Include="lang\czech\language.lng">
+      <Filter>Translation Files</Filter>
+    </None>
+    <None Include="lang\czech\StCADViewer.lng">
+      <Filter>Translation Files</Filter>
+    </None>
+    <None Include="lang\english\StCADViewer.lng">
+      <Filter>Translation Files</Filter>
+    </None>
+    <None Include="lang\french\StCADViewer.lng">
+      <Filter>Translation Files</Filter>
+    </None>
+    <None Include="lang\german\StCADViewer.lng">
+      <Filter>Translation Files</Filter>
+    </None>
+    <None Include="lang\korean\StCADViewer.lng">
+      <Filter>Translation Files</Filter>
+    </None>
+    <None Include="lang\russian\StCADViewer.lng">
+      <Filter>Translation Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

@@ -262,6 +262,13 @@
 			<Add directory="../bin/$(TARGET_NAME)" />
 		</Linker>
 		<Unit filename="main.cpp" />
+		<Unit filename="StAssetDocument.cpp" />
+		<Unit filename="StAssetDocument.h" />
+		<Unit filename="StAssetImportShape.cpp" />
+		<Unit filename="StAssetImportShape.h" />
+		<Unit filename="StAssetNodeIterator.h" />
+		<Unit filename="StAssetPresentation.cpp" />
+		<Unit filename="StAssetPresentation.h" />
 		<Unit filename="StCADLoader.cpp" />
 		<Unit filename="StCADLoader.h" />
 		<Unit filename="StCADMsgPrinter.cpp" />

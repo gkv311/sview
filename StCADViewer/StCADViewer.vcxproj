@@ -100,7 +100,7 @@
       <PreprocessorDefinitions>ST_HAVE_STCONFIG;_CRT_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;StGLWidgets.lib;StShared.lib;StCore.lib;StOutAnaglyph.lib;StOutDual.lib;StOutIZ3D.lib;StOutInterlace.lib;StOutPageFlip.lib;StOutDistorted.lib;TKMeshVS.lib;TKXDESTEP.lib;TKSTEP.lib;TKSTEPAttr.lib;TKSTEP209.lib;TKSTEPBase.lib;TKXDEIGES.lib;TKIGES.lib;TKXSBase.lib;TKOpenGl.lib;TKXCAF.lib;TKCAF.lib;TKV3d.lib;TKHLR.lib;TKMesh.lib;TKService.lib;TKOffset.lib;TKFillet.lib;TKShHealing.lib;TKBool.lib;TKBO.lib;TKPrim.lib;TKTopAlgo.lib;TKGeomAlgo.lib;TKBRep.lib;TKGeomBase.lib;TKG3d.lib;TKG2d.lib;TKMath.lib;TKLCAF.lib;TKCDF.lib;TKernel.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;StGLWidgets.lib;StShared.lib;StCore.lib;StOutAnaglyph.lib;StOutDual.lib;StOutIZ3D.lib;StOutInterlace.lib;StOutPageFlip.lib;StOutDistorted.lib;TKBinXCAF.lib;TKMeshVS.lib;TKXDESTEP.lib;TKSTEP.lib;TKSTEPAttr.lib;TKSTEP209.lib;TKSTEPBase.lib;TKXDEIGES.lib;TKIGES.lib;TKXSBase.lib;TKOpenGl.lib;TKXCAF.lib;TKCAF.lib;TKV3d.lib;TKHLR.lib;TKMesh.lib;TKService.lib;TKOffset.lib;TKFillet.lib;TKShHealing.lib;TKBool.lib;TKBO.lib;TKPrim.lib;TKTopAlgo.lib;TKGeomAlgo.lib;TKBRep.lib;TKGeomBase.lib;TKG3d.lib;TKG2d.lib;TKMath.lib;TKLCAF.lib;TKCDF.lib;TKernel.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\3rdparty\lib\WIN_vc_x86;..\lib\WIN_vc_x86;$(StOcctLib32);$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
@@ -141,7 +141,7 @@
       <PreprocessorDefinitions>ST_HAVE_STCONFIG;_CRT_SECURE_NO_WARNINGS;_DEBUG;ST_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;StGLWidgets.lib;StShared.lib;StCore.lib;StOutAnaglyph.lib;StOutDual.lib;StOutIZ3D.lib;StOutInterlace.lib;StOutPageFlip.lib;StOutDistorted.lib;TKMeshVS.lib;TKXDESTEP.lib;TKSTEP.lib;TKSTEPAttr.lib;TKSTEP209.lib;TKSTEPBase.lib;TKXDEIGES.lib;TKIGES.lib;TKXSBase.lib;TKOpenGl.lib;TKXCAF.lib;TKCAF.lib;TKV3d.lib;TKHLR.lib;TKMesh.lib;TKService.lib;TKOffset.lib;TKFillet.lib;TKShHealing.lib;TKBool.lib;TKBO.lib;TKPrim.lib;TKTopAlgo.lib;TKGeomAlgo.lib;TKBRep.lib;TKGeomBase.lib;TKG3d.lib;TKG2d.lib;TKMath.lib;TKLCAF.lib;TKCDF.lib;TKernel.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;StGLWidgets.lib;StShared.lib;StCore.lib;StOutAnaglyph.lib;StOutDual.lib;StOutIZ3D.lib;StOutInterlace.lib;StOutPageFlip.lib;StOutDistorted.lib;TKBinXCAF.lib;TKMeshVS.lib;TKXDESTEP.lib;TKSTEP.lib;TKSTEPAttr.lib;TKSTEP209.lib;TKSTEPBase.lib;TKXDEIGES.lib;TKIGES.lib;TKXSBase.lib;TKOpenGl.lib;TKXCAF.lib;TKCAF.lib;TKV3d.lib;TKHLR.lib;TKMesh.lib;TKService.lib;TKOffset.lib;TKFillet.lib;TKShHealing.lib;TKBool.lib;TKBO.lib;TKPrim.lib;TKTopAlgo.lib;TKGeomAlgo.lib;TKBRep.lib;TKGeomBase.lib;TKG3d.lib;TKG2d.lib;TKMath.lib;TKLCAF.lib;TKCDF.lib;TKernel.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\3rdparty\lib\WIN_vc_x86_DEBUG;..\lib\WIN_vc_x86_DEBUG;$(StOcctLib32d);$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -182,7 +182,7 @@
       <PreprocessorDefinitions>ST_HAVE_STCONFIG;_CRT_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;StGLWidgets.lib;StShared.lib;StCore.lib;StOutAnaglyph.lib;StOutDual.lib;StOutIZ3D.lib;StOutInterlace.lib;StOutPageFlip.lib;StOutDistorted.lib;TKMeshVS.lib;TKXDESTEP.lib;TKSTEP.lib;TKSTEPAttr.lib;TKSTEP209.lib;TKSTEPBase.lib;TKXDEIGES.lib;TKIGES.lib;TKXSBase.lib;TKOpenGl.lib;TKXCAF.lib;TKCAF.lib;TKV3d.lib;TKHLR.lib;TKMesh.lib;TKService.lib;TKOffset.lib;TKFillet.lib;TKShHealing.lib;TKBool.lib;TKBO.lib;TKPrim.lib;TKTopAlgo.lib;TKGeomAlgo.lib;TKBRep.lib;TKGeomBase.lib;TKG3d.lib;TKG2d.lib;TKMath.lib;TKLCAF.lib;TKCDF.lib;TKernel.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;StGLWidgets.lib;StShared.lib;StCore.lib;StOutAnaglyph.lib;StOutDual.lib;StOutIZ3D.lib;StOutInterlace.lib;StOutPageFlip.lib;StOutDistorted.lib;TKBinXCAF.lib;TKMeshVS.lib;TKXDESTEP.lib;TKSTEP.lib;TKSTEPAttr.lib;TKSTEP209.lib;TKSTEPBase.lib;TKXDEIGES.lib;TKIGES.lib;TKXSBase.lib;TKOpenGl.lib;TKXCAF.lib;TKCAF.lib;TKV3d.lib;TKHLR.lib;TKMesh.lib;TKService.lib;TKOffset.lib;TKFillet.lib;TKShHealing.lib;TKBool.lib;TKBO.lib;TKPrim.lib;TKTopAlgo.lib;TKGeomAlgo.lib;TKBRep.lib;TKGeomBase.lib;TKG3d.lib;TKG2d.lib;TKMath.lib;TKLCAF.lib;TKCDF.lib;TKernel.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\3rdparty\lib\WIN_vc_AMD64;..\lib\WIN_vc_AMD64;$(StOcctLib64);$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
@@ -223,7 +223,7 @@
       <PreprocessorDefinitions>ST_HAVE_STCONFIG;_CRT_SECURE_NO_WARNINGS;_DEBUG;ST_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;StGLWidgets.lib;StShared.lib;StCore.lib;StOutAnaglyph.lib;StOutDual.lib;StOutIZ3D.lib;StOutInterlace.lib;StOutPageFlip.lib;StOutDistorted.lib;TKMeshVS.lib;TKXDESTEP.lib;TKSTEP.lib;TKSTEPAttr.lib;TKSTEP209.lib;TKSTEPBase.lib;TKXDEIGES.lib;TKIGES.lib;TKXSBase.lib;TKOpenGl.lib;TKXCAF.lib;TKCAF.lib;TKV3d.lib;TKHLR.lib;TKMesh.lib;TKService.lib;TKOffset.lib;TKFillet.lib;TKShHealing.lib;TKBool.lib;TKBO.lib;TKPrim.lib;TKTopAlgo.lib;TKGeomAlgo.lib;TKBRep.lib;TKGeomBase.lib;TKG3d.lib;TKG2d.lib;TKMath.lib;TKLCAF.lib;TKCDF.lib;TKernel.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;user32.lib;gdi32.lib;Advapi32.lib;Comdlg32.lib;Shell32.lib;avutil.lib;avformat.lib;avcodec.lib;swscale.lib;freetype.lib;StGLWidgets.lib;StShared.lib;StCore.lib;StOutAnaglyph.lib;StOutDual.lib;StOutIZ3D.lib;StOutInterlace.lib;StOutPageFlip.lib;StOutDistorted.lib;TKBinXCAF.lib;TKMeshVS.lib;TKXDESTEP.lib;TKSTEP.lib;TKSTEPAttr.lib;TKSTEP209.lib;TKSTEPBase.lib;TKXDEIGES.lib;TKIGES.lib;TKXSBase.lib;TKOpenGl.lib;TKXCAF.lib;TKCAF.lib;TKV3d.lib;TKHLR.lib;TKMesh.lib;TKService.lib;TKOffset.lib;TKFillet.lib;TKShHealing.lib;TKBool.lib;TKBO.lib;TKPrim.lib;TKTopAlgo.lib;TKGeomAlgo.lib;TKBRep.lib;TKGeomBase.lib;TKG3d.lib;TKG2d.lib;TKMath.lib;TKLCAF.lib;TKCDF.lib;TKernel.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>..\3rdparty\lib\WIN_vc_AMD64_DEBUG;..\lib\WIN_vc_AMD64_DEBUG;$(StOcctLib64d);$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -239,6 +239,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="StAssetImportShape.cpp" />
+    <ClCompile Include="StAssetPresentation.cpp" />
+    <ClCompile Include="StAssetDocument.cpp" />
     <ClCompile Include="StCADFrameBuffer.cpp" />
     <ClCompile Include="StCADLoader.cpp" />
     <ClCompile Include="StCADMsgPrinter.cpp" />
@@ -247,6 +250,10 @@
     <ClCompile Include="StCADViewerStrings.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="StAssetImportShape.h" />
+    <ClInclude Include="StAssetNodeIterator.h" />
+    <ClInclude Include="StAssetPresentation.h" />
+    <ClInclude Include="StAssetDocument.h" />
     <ClInclude Include="StCADFrameBuffer.h" />
     <ClInclude Include="StCADLoader.h" />
     <ClInclude Include="StCADMsgPrinter.h" />
