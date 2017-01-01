@@ -377,9 +377,9 @@ void StAssetImportGltf::gltfParseMaterials() {
     }
 }
 
-bool StAssetImportGltf::gltfParseStdMaterial (StGLMaterial& theMat,
-                                              const GenericValue& theMatNode) {
-    //const GenericValue* aTechVal = findObjectMember(theMatNode, "technique");
+bool StAssetImportGltf::gltfParseStdMaterial(StGLMaterial& theMat,
+                                             const GenericValue& theMatNode) {
+    const GenericValue* aTechVal = findObjectMember(theMatNode, "technique");
     const GenericValue* aValues  = findObjectMember(theMatNode, "values");
     if(aValues == NULL) {
         return false;
@@ -425,6 +425,12 @@ bool StAssetImportGltf::gltfParseStdMaterial (StGLMaterial& theMat,
             theMat.ChangeShine() = (float )stMin(aSpecular / 1000.0, 1.0);
         }
     }
+
+    gltfParseTechnique(theMat,
+                       aTechVal != NULL && aTechVal->IsString()
+                     ? aTechVal->GetString()
+                     : NULL);
+
     return true;
 }
 
@@ -443,6 +449,56 @@ bool StAssetImportGltf::gltfParseCommonMaterial(StGLMaterial& theMat,
     if(!gltfParseStdMaterial(theMat, *aMatCommon)) {
         return false;
     }
+    return true;
+}
+
+bool StAssetImportGltf::gltfParseTechnique(StGLMaterial& theMat,
+                                           const char* theTechniqueId) {
+    // default values
+    if(theTechniqueId == NULL) {
+        return true;
+    } else if(IsEqual(theTechniqueId, "PHONG")
+           || IsEqual(theTechniqueId, "BLINN")
+           || IsEqual(theTechniqueId, "LAMBERT")) {
+        // KHR_materials_common extension - actually does NOT specify states!
+        theMat.SetCullBackFaces(true);
+        return true;
+    }
+
+    const GenericValue* aTechNode = findObjectMember(*myGltfRoots[GltfRootElement_Techniques], theTechniqueId);
+    if(aTechNode == NULL) {
+        signals.onError(formatSyntaxError(myFileName, StString("Technique node '") + theTechniqueId + "' is not found."));
+        return false;
+    }
+
+    const GenericValue* aStatesVal = findObjectMember(*aTechNode, "states");
+    if(aStatesVal != NULL) {
+        const GenericValue* aStatesOnVal = findObjectMember(*aStatesVal, "enable");
+        if(aStatesOnVal != NULL
+        && aStatesOnVal->IsArray()) {
+            theMat.SetCullBackFaces(false);
+            const int aNbStates = aStatesOnVal->Size();
+            for(int aStateIter = 0; aStateIter < aNbStates; ++aStateIter) {
+                const GenericValue& aGenVal = (*aStatesOnVal)[aStateIter];
+                if(!aGenVal.IsInt()) {
+                    continue;
+                }
+                const int aStateId = aGenVal.GetInt();
+                switch(aStateId) {
+                    case 2884:  // CULL_FACE
+                        theMat.SetCullBackFaces(true);
+                        break;
+                    case 3042:  // BLEND
+                    case 2929:  // DEPTH_TEST
+                    case 32823: // POLYGON_OFFSET_FILL
+                    case 32926: // SAMPLE_ALPHA_TO_COVERAGE
+                    case 3089:  // SCISSOR_TEST
+                        break;
+                }
+            }
+        }
+    }
+
     return true;
 }
 

@@ -232,6 +232,12 @@ class StAssetImportGltf : public rapidjson::Document {
                                   const GenericValue& theMatNode);
 
     /**
+     * Parse material technique.
+     */
+    bool gltfParseTechnique(StGLMaterial& theMat,
+                            const char* theTechniqueId);
+
+    /**
      * Parse texture definition.
      */
     bool gltfParseTexture (StGLMaterial& theMat,

@@ -20,6 +20,7 @@
 #include <Prs3d.hxx>
 #include <STEPCAFControl_Reader.hxx>
 #include <STEPControl_Controller.hxx>
+#include <StdPrs_ShadedShape.hxx>
 #include <TDF_Tool.hxx>
 #include <TDF_ChildIterator.hxx>
 #include <TDataStd_Name.hxx>
@@ -335,132 +336,143 @@ bool StAssetImportShape::addMeshNode(const Handle(StDocNode)& theParentTreeItem,
         }
     }
 
+    TopoDS_Compound anOpened, aClosed;
+    BRep_Builder aBuilder;
+    aBuilder.MakeCompound(aClosed);
+    aBuilder.MakeCompound(anOpened);
+    StdPrs_ShadedShape::ExploreSolids(aShape, aBuilder, aClosed, anOpened, true);
+
     TopLoc_Location aFaceLoc;
     Handle(StDocMeshNode) aMeshNode = new StDocMeshNode();
     theParentTreeItem->ChangeChildren().Append(aMeshNode);
     BRepLProp_SLProps anSLProps(1, 1e-12);
     BRepAdaptor_Surface aFaceAdaptor;
-    for(TopExp_Explorer aFaceIter(aShape, TopAbs_FACE); aFaceIter.More(); aFaceIter.Next()) {
-        const TopoDS_Face& aFace = TopoDS::Face(aFaceIter.Current());
-        const Handle(Poly_Triangulation)& aPolyTri = BRep_Tool::Triangulation(aFace, aFaceLoc);
-        if(aPolyTri.IsNull()
-        || aPolyTri->NbTriangles() < 1) {
-            continue;
-        }
-
-        Handle(StPrimArray) aPrimAttribs = new StPrimArray();
-        const TColgp_Array1OfPnt& aNodes = aPolyTri->Nodes();
-        const int aNbNodes = aNodes.Size();
-        aPrimAttribs->Trsf = aFaceLoc.Transformation();
-        aPrimAttribs->Positions.resize(aNbNodes);
-        aPrimAttribs->Normals  .resize(aNbNodes);
-        aPrimAttribs->Indices  .resize(aPolyTri->NbTriangles() * 3);
-        {
-            const int aNodeLower = aNodes.Lower();
-            const int aNodeUpper = aNodes.Upper();
-            for(int aNodeIter = aNodeLower; aNodeIter <= aNodeUpper; ++aNodeIter) {
-                const gp_Pnt& aSrcPos = aNodes.Value(aNodeIter);
-                StGLVec3& aPos = aPrimAttribs->Positions[aNodeIter - aNodeLower];
-                aPos.x() = (float )aSrcPos.X();
-                aPos.y() = (float )aSrcPos.Y();
-                aPos.z() = (float )aSrcPos.Z();
+    for(int aTypeIter = 0; aTypeIter < 2; ++aTypeIter) {
+        const bool isClosed = aTypeIter == 0;
+        const TopoDS_Compound& aComp = isClosed ? aClosed : anOpened;
+        for(TopExp_Explorer aFaceIter(aComp, TopAbs_FACE); aFaceIter.More(); aFaceIter.Next()) {
+            const TopoDS_Face& aFace = TopoDS::Face(aFaceIter.Current());
+            const Handle(Poly_Triangulation)& aPolyTri = BRep_Tool::Triangulation(aFace, aFaceLoc);
+            if(aPolyTri.IsNull()
+            || aPolyTri->NbTriangles() < 1) {
+                continue;
             }
-        }
 
-        const bool isMirrored = aPrimAttribs->Trsf.Form() != gp_Identity
-                             && aPrimAttribs->Trsf.VectorialPart().Determinant() < 0.0;
-        const bool isReversed = aFace.Orientation() == TopAbs_REVERSED;
-        const bool toSwapIndices = isReversed ^ isMirrored;
-        {
-            const Poly_Array1OfTriangle& aTriangles = aPolyTri->Triangles();
-            const int aNodeLower = aNodes.Lower();
-            const int aTriLower = aTriangles.Lower();
-            const int aTriUpper = aTriangles.Upper();
-            int aTriIndices[3] = {0, 0, 0};
-            int anIndexIter = 0;
-            for(int aTriIter = aTriLower; aTriIter <= aTriUpper; ++aTriIter, anIndexIter += 3) {
-                aTriangles.Value(aTriIter).Get(aTriIndices[0], aTriIndices[1], aTriIndices[2]);
-                if(toSwapIndices) {
-                    std::swap(aTriIndices[1], aTriIndices[2]);
+            Handle(StPrimArray) aPrimAttribs = new StPrimArray();
+            const TColgp_Array1OfPnt& aNodes = aPolyTri->Nodes();
+            const int aNbNodes = aNodes.Size();
+            aPrimAttribs->Trsf = aFaceLoc.Transformation();
+            aPrimAttribs->Positions.resize(aNbNodes);
+            aPrimAttribs->Normals  .resize(aNbNodes);
+            aPrimAttribs->Indices  .resize(aPolyTri->NbTriangles() * 3);
+            {
+                const int aNodeLower = aNodes.Lower();
+                const int aNodeUpper = aNodes.Upper();
+                for(int aNodeIter = aNodeLower; aNodeIter <= aNodeUpper; ++aNodeIter) {
+                    const gp_Pnt& aSrcPos = aNodes.Value(aNodeIter);
+                    StGLVec3& aPos = aPrimAttribs->Positions[aNodeIter - aNodeLower];
+                    aPos.x() = (float )aSrcPos.X();
+                    aPos.y() = (float )aSrcPos.Y();
+                    aPos.z() = (float )aSrcPos.Z();
                 }
-                aPrimAttribs->Indices[anIndexIter + 0] = aTriIndices[0] - aNodeLower;
-                aPrimAttribs->Indices[anIndexIter + 1] = aTriIndices[1] - aNodeLower;
-                aPrimAttribs->Indices[anIndexIter + 2] = aTriIndices[2] - aNodeLower;
             }
-        }
 
-        if(aPolyTri->HasNormals()
-        && (aPolyTri->Normals().Size() / 3) == aPolyTri->Nodes().Size()) {
-            const TShort_Array1OfShortReal& aNormals = aPolyTri->Normals();
-            const int aNormLower = aNormals.Lower();
-            const int aNormUpper = aNormals.Upper();
-            for(int aNodeIter = 0; aNodeIter < aNbNodes; ++aNodeIter) {
-                StGLVec3& aNorm = aPrimAttribs->Normals[aNodeIter];
-                aNorm.x() = aNormals.Value(aNormLower + aNodeIter * 3);
-                aNorm.y() = aNormals.Value(aNormLower + aNodeIter * 3 + 1);
-                aNorm.z() = aNormals.Value(aNormLower + aNodeIter * 3 + 2);
-                if(aNorm.modulus() != 0.0f) {
-                    aNorm.normalize();
-                    if(isReversed) {
-                        aNorm = -aNorm;
+            const bool isMirrored = aPrimAttribs->Trsf.Form() != gp_Identity
+                                 && aPrimAttribs->Trsf.VectorialPart().Determinant() < 0.0;
+            const bool isReversed = aFace.Orientation() == TopAbs_REVERSED;
+            const bool toSwapIndices = isReversed ^ isMirrored;
+            {
+                const Poly_Array1OfTriangle& aTriangles = aPolyTri->Triangles();
+                const int aNodeLower = aNodes.Lower();
+                const int aTriLower = aTriangles.Lower();
+                const int aTriUpper = aTriangles.Upper();
+                int aTriIndices[3] = {0, 0, 0};
+                int anIndexIter = 0;
+                for(int aTriIter = aTriLower; aTriIter <= aTriUpper; ++aTriIter, anIndexIter += 3) {
+                    aTriangles.Value(aTriIter).Get(aTriIndices[0], aTriIndices[1], aTriIndices[2]);
+                    if(toSwapIndices) {
+                        std::swap(aTriIndices[1], aTriIndices[2]);
                     }
-                } else {
-                    aNorm.x() = 0.0f;
-                    aNorm.y() = 0.0f;
-                    aNorm.z() = 1.0f;
+                    aPrimAttribs->Indices[anIndexIter + 0] = aTriIndices[0] - aNodeLower;
+                    aPrimAttribs->Indices[anIndexIter + 1] = aTriIndices[1] - aNodeLower;
+                    aPrimAttribs->Indices[anIndexIter + 2] = aTriIndices[2] - aNodeLower;
                 }
             }
-        } else if(aPolyTri->HasUVNodes()
-               && aPolyTri->UVNodes().Size() == aPolyTri->Nodes().Size()) {
-            TopoDS_Face aFaceFwd = TopoDS::Face(aFace.Oriented(TopAbs_FORWARD));
-            aFaceFwd.Location(TopLoc_Location());
-            aFaceAdaptor.Initialize(aFaceFwd, false);
-            anSLProps.SetSurface(aFaceAdaptor);
 
-            const TColgp_Array1OfPnt2d& anUVNodes = aPolyTri->UVNodes();
-            const int aNodeLower = anUVNodes.Lower();
-            const int aNodeUpper = anUVNodes.Upper();
-            for(int aNodeIter = aNodeLower; aNodeIter <= aNodeUpper; ++aNodeIter) {
-                StGLVec3& aNorm = aPrimAttribs->Normals[aNodeIter - aNodeLower];
-                const gp_Pnt2d& anUV = anUVNodes.Value(aNodeIter);
-                anSLProps.SetParameters(anUV.X(), anUV.Y());
-                if(anSLProps.IsNormalDefined()) {
-                    gp_Dir aSurfNorm = anSLProps.Normal();
-                    if(isReversed) {
-                        aSurfNorm.Reverse();
+            if(aPolyTri->HasNormals()
+            && (aPolyTri->Normals().Size() / 3) == aPolyTri->Nodes().Size()) {
+                const TShort_Array1OfShortReal& aNormals = aPolyTri->Normals();
+                const int aNormLower = aNormals.Lower();
+                const int aNormUpper = aNormals.Upper();
+                for(int aNodeIter = 0; aNodeIter < aNbNodes; ++aNodeIter) {
+                    StGLVec3& aNorm = aPrimAttribs->Normals[aNodeIter];
+                    aNorm.x() = aNormals.Value(aNormLower + aNodeIter * 3);
+                    aNorm.y() = aNormals.Value(aNormLower + aNodeIter * 3 + 1);
+                    aNorm.z() = aNormals.Value(aNormLower + aNodeIter * 3 + 2);
+                    if(aNorm.modulus() != 0.0f) {
+                        aNorm.normalize();
+                        if(isReversed) {
+                            aNorm = -aNorm;
+                        }
+                    } else {
+                        aNorm.x() = 0.0f;
+                        aNorm.y() = 0.0f;
+                        aNorm.z() = 1.0f;
                     }
-                    aNorm.x() = (float )aSurfNorm.X();
-                    aNorm.y() = (float )aSurfNorm.Y();
-                    aNorm.z() = (float )aSurfNorm.Z();
-                } else {
-                    aNorm.x() = 0.0f;
-                    aNorm.y() = 0.0f;
-                    aNorm.z() = 1.0f;
                 }
+            } else if(aPolyTri->HasUVNodes()
+                   && aPolyTri->UVNodes().Size() == aPolyTri->Nodes().Size()) {
+                TopoDS_Face aFaceFwd = TopoDS::Face(aFace.Oriented(TopAbs_FORWARD));
+                aFaceFwd.Location(TopLoc_Location());
+                aFaceAdaptor.Initialize(aFaceFwd, false);
+                anSLProps.SetSurface(aFaceAdaptor);
+
+                const TColgp_Array1OfPnt2d& anUVNodes = aPolyTri->UVNodes();
+                const int aNodeLower = anUVNodes.Lower();
+                const int aNodeUpper = anUVNodes.Upper();
+                for(int aNodeIter = aNodeLower; aNodeIter <= aNodeUpper; ++aNodeIter) {
+                    StGLVec3& aNorm = aPrimAttribs->Normals[aNodeIter - aNodeLower];
+                    const gp_Pnt2d& anUV = anUVNodes.Value(aNodeIter);
+                    anSLProps.SetParameters(anUV.X(), anUV.Y());
+                    if(anSLProps.IsNormalDefined()) {
+                        gp_Dir aSurfNorm = anSLProps.Normal();
+                        if(isReversed) {
+                            aSurfNorm.Reverse();
+                        }
+                        aNorm.x() = (float )aSurfNorm.X();
+                        aNorm.y() = (float )aSurfNorm.Y();
+                        aNorm.z() = (float )aSurfNorm.Z();
+                    } else {
+                        aNorm.x() = 0.0f;
+                        aNorm.y() = 0.0f;
+                        aNorm.z() = 1.0f;
+                    }
+                }
+            } else {
+                // reconstruct missing normals
+                aPrimAttribs->reconstructNormals();
             }
-        } else {
-            // reconstruct missing normals
-            aPrimAttribs->reconstructNormals();
+
+            XCAFPrs_Style aStyle = theParentStyle;
+            if(!aStyles1.Find(aFace, aStyle)) {
+                aStyles2.Find(aFace, aStyle);
+            }
+
+            const Graphic3d_Vec3 aColor = aStyle.GetColorSurf();
+            aPrimAttribs->Material = new StGLMaterial();
+            aPrimAttribs->Material->DiffuseColor.r() = aColor.r();
+            aPrimAttribs->Material->DiffuseColor.g() = aColor.g();
+            aPrimAttribs->Material->DiffuseColor.b() = aColor.b();
+            aPrimAttribs->Material->AmbientColor.r() = aColor.r() * 0.25f;
+            aPrimAttribs->Material->AmbientColor.g() = aColor.g() * 0.25f;
+            aPrimAttribs->Material->AmbientColor.b() = aColor.b() * 0.25f;
+            aPrimAttribs->Material->SpecularColor = StGLVec4(0.95f, 0.93f, 0.88f, 1.0f);
+            aPrimAttribs->Material->EmissiveColor = StGLVec4(0.0f,  0.0f,  0.0f,  0.0f);
+            aPrimAttribs->Material->ChangeShine() = 0.75f;
+            aPrimAttribs->Material->SetCullBackFaces(isClosed);
+
+            aMeshNode->ChangePrimitiveArrays().Append(aPrimAttribs);
         }
-
-        XCAFPrs_Style aStyle = theParentStyle;
-        if(!aStyles1.Find(aFace, aStyle)) {
-            aStyles2.Find(aFace, aStyle);
-        }
-
-        const Graphic3d_Vec3 aColor = aStyle.GetColorSurf();
-        aPrimAttribs->Material = new StGLMaterial();
-        aPrimAttribs->Material->DiffuseColor.r() = aColor.r();
-        aPrimAttribs->Material->DiffuseColor.g() = aColor.g();
-        aPrimAttribs->Material->DiffuseColor.b() = aColor.b();
-        aPrimAttribs->Material->AmbientColor.r() = aColor.r() * 0.25f;
-        aPrimAttribs->Material->AmbientColor.g() = aColor.g() * 0.25f;
-        aPrimAttribs->Material->AmbientColor.b() = aColor.b() * 0.25f;
-        aPrimAttribs->Material->SpecularColor = StGLVec4(0.95f, 0.93f, 0.88f, 1.0f);
-        aPrimAttribs->Material->EmissiveColor = StGLVec4(0.0f,  0.0f,  0.0f,  0.0f);
-        aPrimAttribs->Material->ChangeShine() = 0.75f;
-
-        aMeshNode->ChangePrimitiveArrays().Append(aPrimAttribs);
     }
 
     return true;

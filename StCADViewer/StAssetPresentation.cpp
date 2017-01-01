@@ -131,10 +131,15 @@ void StAssetPresentation::Compute (const Handle(PrsMgr_PresentationManager3d)& t
         }
 
         Handle(Graphic3d_AspectFillArea3d) anAspect = new Graphic3d_AspectFillArea3d(Aspect_IS_SOLID, aMat.Color(), aMat.Color(), Aspect_TOL_EMPTY, 1.0, aMat, aMat);
-        if(!anStMat.IsNull()
-        && !anStMat->Texture.IsNull()) {
-            anAspect->SetTextureMap(anStMat->Texture);
-            anAspect->SetTextureMapOn();
+        if(!anStMat.IsNull()) {
+            if(!anStMat->Texture.IsNull()) {
+                anAspect->SetTextureMap(anStMat->Texture);
+                anAspect->SetTextureMapOn();
+            }
+            anAspect->SetSuppressBackFaces(anStMat->ToCullBackFaces());
+            if(anStMat->ToCullBackFaces()) {
+                aGroup->SetClosed(true);
+            }
         }
 
         aGroup->SetGroupPrimitivesAspect(anAspect);

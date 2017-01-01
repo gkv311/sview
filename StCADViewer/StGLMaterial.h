@@ -37,6 +37,9 @@ class StGLMaterial : public Standard_Transient {
     float  Transparency() const { return Params.y(); }
     float& ChangeTransparency() { return Params.y(); }
 
+    bool ToCullBackFaces() const { return Params.z() != 0.0f; }
+    void SetCullBackFaces(bool theToCull) { Params.z() = theToCull ? 1.0f : 0.0f; }
+
     StGLMaterial()
     : DiffuseColor (0.8f, 0.8f, 0.8f, 1.0f),
       AmbientColor (0.1f, 0.1f, 0.1f, 1.0f),
