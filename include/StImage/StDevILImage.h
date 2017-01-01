@@ -47,9 +47,11 @@ class StDevILImage : public StImageFile {
     ST_CPPEXPORT virtual ~StDevILImage();
 
     ST_CPPEXPORT virtual void close() ST_ATTR_OVERRIDE;
-    ST_CPPEXPORT virtual bool load(const StString& theFilePath,
-                                   ImageType theImageType = ST_TYPE_NONE,
-                                   uint8_t* theDataPtr = NULL, int theDataSize = 0) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual bool loadExtra(const StString& theFilePath,
+                                        ImageType       theImageType,
+                                        uint8_t*        theDataPtr,
+                                        int             theDataSize,
+                                        bool            theIsOnlyRGB) ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool save(const StString& theFilePath,
                                    ImageType       theImageType,
                                    StFormat        theSrcFormat) ST_ATTR_OVERRIDE;

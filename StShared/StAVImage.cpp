@@ -197,13 +197,6 @@ void StAVImage::closeAvCtx() {
     }
 }
 
-bool StAVImage::load(const StString& theFilePath,
-                     ImageType       theImageType,
-                     uint8_t*        theDataPtr,
-                     int             theDataSize) {
-    return loadExtra(theFilePath, theImageType, theDataPtr, theDataSize, false);
-}
-
 bool StAVImage::loadExtra(const StString& theFilePath,
                           ImageType       theImageType,
                           uint8_t*        theDataPtr,

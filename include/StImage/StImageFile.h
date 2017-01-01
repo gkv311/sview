@@ -117,16 +117,31 @@ class StImageFile : public StImage {
     ///virtual size_t getFramesCount() const = 0;
 
     /**
-     * This virtual function should be implemented by inheritors.
-     * @param theFilePath (const StString& ) path to the file;
-     * @param theImageType (int ) image type, should be set for files with undefined extension (mpo/jps/pns...);
-     * @param theDataPtr (uint8_t* ) data in the memory, image will be read from file if this data empty;
-     * @param theDataSize (int ) size of data in memory;
-     * @return true on success.
+     * Load the image from specified source.
+     * @param theFilePath  path to the file
+     * @param theImageType image type, should be set for files with undefined extension (mpo/jps/pns...)
+     * @param theDataPtr   data in the memory, image will be read from file if this data empty
+     * @param theDataSize  size of data in memory
+     * @return true on success
      */
-    virtual bool load(const StString& theFilePath,
-                      ImageType theImageType = ST_TYPE_NONE,
-                      uint8_t* theDataPtr = NULL, int theDataSize = 0) = 0;
+    bool load(const StString& theFilePath,
+              ImageType theImageType = ST_TYPE_NONE,
+              uint8_t* theDataPtr = NULL, int theDataSize = 0) { return loadExtra(theFilePath, theImageType, theDataPtr, theDataSize, false); }
+
+    /**
+     * This virtual function should be implemented by inheritors.
+     * @param theFilePath  path to the file
+     * @param theImageType image type, should be set for files with undefined extension (mpo/jps/pns...)
+     * @param theDataPtr   data in the memory, image will be read from file if this data empty
+     * @param theDataSize  size of data in memory
+     * @param theIsOnlyRGB option to convert YUV image data into RGB format
+     * @return true on success
+     */
+    virtual bool loadExtra(const StString& theFilePath,
+                           ImageType       theImageType,
+                           uint8_t*        theDataPtr,
+                           int             theDataSize,
+                           bool            theIsOnlyRGB) = 0;
 
     /**
      * Close the file after it was opened with read() method.

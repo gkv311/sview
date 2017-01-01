@@ -264,6 +264,8 @@
 		<Unit filename="main.cpp" />
 		<Unit filename="StAssetDocument.cpp" />
 		<Unit filename="StAssetDocument.h" />
+		<Unit filename="StAssetTexture.cpp" />
+		<Unit filename="StAssetTexture.h" />
 		<Unit filename="StAssetImportGltf.cpp" />
 		<Unit filename="StAssetImportGltf.h" />
 		<Unit filename="StAssetImportShape.cpp" />
@@ -288,6 +290,10 @@
 		<Unit filename="StCADViewerGUI.h" />
 		<Unit filename="StCADViewerStrings.cpp" />
 		<Unit filename="StCADViewerStrings.h" />
+		<Unit filename="StGLMaterial.h" />
+		<Unit filename="StImageOcct.cpp" />
+		<Unit filename="StImageOcct.h" />
+		<Unit filename="StPrimArray.h" />
 		<Unit filename="lang/english/StCADViewer.lng">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>

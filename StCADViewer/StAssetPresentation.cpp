@@ -28,8 +28,9 @@ struct StPrsPart {
     NCollection_Sequence<StLocatedPrimArray> PrimArrays;
     size_t NbNodes;
     size_t NbTris;
+    bool   HasTexCoord0;
 
-    StPrsPart() : NbNodes(0), NbTris(0) {}
+    StPrsPart() : NbNodes(0), NbTris(0), HasTexCoord0(false) {}
 };
 
 void StAssetPresentation::Compute (const Handle(PrsMgr_PresentationManager3d)& thePrsMgr,
@@ -52,13 +53,14 @@ void StAssetPresentation::Compute (const Handle(PrsMgr_PresentationManager3d)& t
             StPrsPart& aPrsPart = aStyleMap.ChangeFromIndex(anIndex);
             aPrsPart.NbNodes += aPrims->Positions.size();
             aPrsPart.NbTris  += aPrims->Indices.size() / 3;
+            aPrsPart.HasTexCoord0 = aPrsPart.HasTexCoord0 || !aPrims->TexCoords0.empty();
             aPrsPart.PrimArrays.Append(StLocatedPrimArray(aPrims, aMeshTrsf));
         }
     }
 
     for(NCollection_IndexedDataMap<Handle(StGLMaterial), StPrsPart, StGLMaterial>::Iterator aStyleIter(aStyleMap); aStyleIter.More(); aStyleIter.Next()) {
         const StPrsPart& aPrsPart = aStyleIter.Value();
-        Handle(Graphic3d_ArrayOfTriangles) aTris = new Graphic3d_ArrayOfTriangles(int(aPrsPart.NbNodes), int(aPrsPart.NbTris * 3), true);
+        Handle(Graphic3d_ArrayOfTriangles) aTris = new Graphic3d_ArrayOfTriangles(int(aPrsPart.NbNodes), int(aPrsPart.NbTris * 3), true, false, aPrsPart.HasTexCoord0);
         for(NCollection_Sequence<StLocatedPrimArray>::Iterator aPrimIter(aPrsPart.PrimArrays); aPrimIter.More(); aPrimIter.Next()) {
             const Handle(StPrimArray)& aPrims = aPrimIter.Value().PrimArray;
             const gp_Trsf& aMeshTrsf = aPrimIter.Value().NodeTrsf;
@@ -93,6 +95,14 @@ void StAssetPresentation::Compute (const Handle(PrsMgr_PresentationManager3d)& t
                 }
             }
 
+            if(aPrsPart.HasTexCoord0
+            && aPrims->TexCoords0.size() == aPrims->Positions.size()) {
+                for(size_t aNodeIter = 0; aNodeIter < aNbPrimNodes; ++aNodeIter) {
+                    const StGLVec2& aTexCoord = aPrims->TexCoords0[aNodeIter];
+                    aTris->SetVertexTexel(aLowerVertex + int(aNodeIter), aTexCoord.x(), aTexCoord.y());
+                }
+            }
+
             const size_t aNbPrimIndices = aPrims->Indices.size();
             for(size_t anIndexIter = 0; anIndexIter < aNbPrimIndices; ++anIndexIter) {
                 aTris->AddEdge(aLowerVertex + aPrims->Indices[anIndexIter]);
@@ -104,19 +114,29 @@ void StAssetPresentation::Compute (const Handle(PrsMgr_PresentationManager3d)& t
         const Handle(StGLMaterial)& anStMat = aStyleIter.Key();
         if(!anStMat.IsNull()) {
             aMat = Graphic3d_MaterialAspect();
+            aMat.SetMaterialType(Graphic3d_MATERIAL_PHYSIC);
             aMat.SetDiffuse (1.0f);
             aMat.SetAmbient (1.0f);
             aMat.SetSpecular(1.0f);
             aMat.SetEmissive(1.0f);
-            aMat.SetMaterialType (Graphic3d_MATERIAL_PHYSIC);
+            if(anStMat->EmissiveColor.rgb() != StGLVec3(0.0f, 0.0f, 0.0f)) {
+                aMat.SetReflectionModeOn(Graphic3d_TOR_EMISSION);
+            }
             aMat.SetDiffuseColor (Quantity_Color(anStMat->DiffuseColor.r(),  anStMat->DiffuseColor.g(),  anStMat->DiffuseColor.b(),  Quantity_TOC_RGB));
             aMat.SetAmbientColor (Quantity_Color(anStMat->AmbientColor.r(),  anStMat->AmbientColor.g(),  anStMat->AmbientColor.b(),  Quantity_TOC_RGB));
             aMat.SetSpecularColor(Quantity_Color(anStMat->SpecularColor.r(), anStMat->SpecularColor.g(), anStMat->SpecularColor.b(), Quantity_TOC_RGB));
             aMat.SetEmissiveColor(Quantity_Color(anStMat->EmissiveColor.r(), anStMat->EmissiveColor.g(), anStMat->EmissiveColor.b(), Quantity_TOC_RGB));
             aMat.SetShininess(anStMat->Shine());
+            aMat.SetMaterialName(anStMat->Name.toCString());
         }
 
         Handle(Graphic3d_AspectFillArea3d) anAspect = new Graphic3d_AspectFillArea3d(Aspect_IS_SOLID, aMat.Color(), aMat.Color(), Aspect_TOL_EMPTY, 1.0, aMat, aMat);
+        if(!anStMat.IsNull()
+        && !anStMat->Texture.IsNull()) {
+            anAspect->SetTextureMap(anStMat->Texture);
+            anAspect->SetTextureMapOn();
+        }
+
         aGroup->SetGroupPrimitivesAspect(anAspect);
         aGroup->AddPrimitiveArray(aTris);
     }

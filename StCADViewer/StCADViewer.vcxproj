@@ -243,12 +243,14 @@
     <ClCompile Include="StAssetImportShape.cpp" />
     <ClCompile Include="StAssetPresentation.cpp" />
     <ClCompile Include="StAssetDocument.cpp" />
+    <ClCompile Include="StAssetTexture.cpp" />
     <ClCompile Include="StCADFrameBuffer.cpp" />
     <ClCompile Include="StCADLoader.cpp" />
     <ClCompile Include="StCADMsgPrinter.cpp" />
     <ClCompile Include="StCADViewer.cpp" />
     <ClCompile Include="StCADViewerGUI.cpp" />
     <ClCompile Include="StCADViewerStrings.cpp" />
+    <ClCompile Include="StImageOcct.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StAssetImportGltf.h" />
@@ -256,6 +258,7 @@
     <ClInclude Include="StAssetNodeIterator.h" />
     <ClInclude Include="StAssetPresentation.h" />
     <ClInclude Include="StAssetDocument.h" />
+    <ClInclude Include="StAssetTexture.h" />
     <ClInclude Include="StCADFrameBuffer.h" />
     <ClInclude Include="StCADLoader.h" />
     <ClInclude Include="StCADMsgPrinter.h" />
@@ -264,6 +267,9 @@
     <ClInclude Include="StCADViewerGUI.h" />
     <ClInclude Include="StCADViewerStrings.h" />
     <ClInclude Include="StCADWindow.h" />
+    <ClInclude Include="StGLMaterial.h" />
+    <ClInclude Include="StImageOcct.h" />
+    <ClInclude Include="StPrimArray.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="StCADViewer.rc" />

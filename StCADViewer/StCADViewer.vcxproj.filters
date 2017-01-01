@@ -54,6 +54,12 @@
     <ClCompile Include="StAssetImportGltf.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="StImageOcct.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="StAssetTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StCADFrameBuffer.h">
@@ -93,6 +99,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="StAssetImportGltf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StImageOcct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StAssetTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StGLMaterial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StPrimArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

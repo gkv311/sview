@@ -309,8 +309,13 @@ void StDevILImage::close() {
     }
 }
 
-bool StDevILImage::load(const StString& theFilePath, ImageType theImageType,
-                        uint8_t* theDataPtr, int theDataSize) {
+bool StDevILImage::loadExtra(const StString& theFilePath,
+                             ImageType       theImageType,
+                             uint8_t*        theDataPtr,
+                             int             theDataSize,
+                             bool            theIsOnlyRGB) {
+    (void )theIsOnlyRGB;
+
     // DevIL is not thread-safe! Lock for whole function
     StMutexAuto stTempLock(stDevILMutex);
     if(!StDevILImage::init()) {

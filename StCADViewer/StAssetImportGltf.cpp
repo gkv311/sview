@@ -6,6 +6,8 @@
 
 #include "StAssetImportGltf.h"
 
+#include "StImageOcct.h"
+
 #include <StStrings/StLogger.h>
 #include <StTemplates/StArrayStreamBuffer.h>
 
@@ -115,6 +117,113 @@ namespace
     }
 
 }
+
+/**
+ * Image texture embedded into binary glTF file.
+ */
+class StGltfBinTexture : public StAssetTexture {
+
+    DEFINE_STANDARD_RTTI_INLINE(StGltfBinTexture, StAssetTexture)
+
+        public:
+
+    /**
+     * Constructor.
+     */
+    StGltfBinTexture(const StString& theUri,
+                     const StString& theMime,
+                     const int64_t theStart,
+                     const int theLen)
+    : StAssetTexture(theUri),
+      myStart(theStart),
+      myLen(theLen),
+      myMime(theMime) {
+        if(!theUri.isEmpty()) {
+            const StString anId = StString("texture://") + theUri + "@offset=" + StString(theStart) + "@len=" + StString(theLen);
+            myTexId = anId.toCString();
+        }
+    }
+
+    /**
+     * Constructor.
+     */
+    StGltfBinTexture(const StString& theUri,
+                     const StString& theMime,
+                     const Handle(NCollection_Buffer)& theBuffer)
+    : StAssetTexture(theUri),
+      myStart(0),
+      myLen(0),
+      myBuffer(theBuffer),
+      myMime(theMime) {
+        if(!theUri.isEmpty()) {
+            const StString anId = StString("texture://") + theUri + "@base64";
+            myTexId = anId.toCString();
+        }
+    }
+
+    /**
+     * Image getter.
+     */
+    virtual Handle(Image_PixMap) GetImage() const Standard_OVERRIDE {
+        Handle(Image_PixMap) anImage;
+        if(!myBuffer.IsNull()) {
+            Handle(StImageOcct) anStImage = new StImageOcct();
+            if(anStImage->Load(myImageUri, StMIME(myMime, StString(), StString()), myBuffer->ChangeData(), (int )myBuffer->Size())) {
+                anImage = anStImage;
+            }
+        } else {
+            std::ifstream aFile;
+            OSD_OpenStream(aFile, myImageUri.toCString(), std::ios::in | std::ios::binary);
+            if(!aFile.is_open() || !aFile.good()) {
+                ST_ERROR_LOG(StString() + "Texture points to non existing file '" + myImageUri.toCString() + "'");
+                return false;
+            }
+
+            aFile.seekg(myStart, std::ios_base::beg);
+            if(!aFile.good()) {
+                aFile.close();
+                ST_ERROR_LOG(StString() + "Texture refers to non-existing location");
+                return false;
+            }
+
+            Handle(NCollection_Buffer) aData = new NCollection_Buffer(NCollection_BaseAllocator::CommonBaseAllocator());
+            if(!aData->Allocate(myLen)) {
+                ST_ERROR_LOG("Fail to allocate memory.");
+                return false;
+            }
+
+            if(!aFile.read((char* )aData->ChangeData(), myLen)) {
+                ST_ERROR_LOG(StString() + "Texture refers to non-existing location");
+                return false;
+            }
+
+            Handle(StImageOcct) anStImage = new StImageOcct();
+            if(anStImage->Load(myImageUri, StMIME(myMime, StString(), StString()), aData->ChangeData(), myLen)) {
+                anImage = anStImage;
+            }
+        }
+
+        if(anImage.IsNull()) {
+            return Handle(Image_PixMap)();
+        }
+        return anImage;
+    }
+
+    /**
+     * Compare with another texture.
+     */
+    virtual bool isEqual(const StAssetTexture& theOther) const {
+        return myTexId == theOther.GetId();
+    }
+
+        private:
+
+    int64_t myStart;
+    int     myLen;
+    Handle(NCollection_Buffer) myBuffer;
+    StString myMime;
+
+};
 
 StString StAssetImportGltf::formatSyntaxError(const StString& theFilePath,
                                               const StString& theLibDescr) {
@@ -260,7 +369,9 @@ void StAssetImportGltf::gltfParseMaterials() {
         }
 
         if(aNameVal != NULL && aNameVal->IsString()) {
-            //
+            aMat->Name = aNameVal->GetString();
+        } else {
+            aMat->Name = aMatId.GetString();
         }
         myMaterials.Bind(aMatId.GetString(), aMat);
     }
@@ -291,12 +402,14 @@ bool StAssetImportGltf::gltfParseStdMaterial (StGLMaterial& theMat,
     if(anAmbVal != NULL && anAmbVal->IsString()) {
         // ambient texture
         gltfParseTexture(theMat, anAmbVal->GetString());
+        theMat.AmbientColor = StGLVec4(1.0f, 1.0f, 1.0f, 1.0f);
     } else if(gltfReadVec4(anAmb, anAmbVal) && validateColor4(anAmb)) {
         theMat.AmbientColor = anAmb;
     }
     if(aDiffVal != NULL && aDiffVal->IsString()) {
         // diffuse texture
         gltfParseTexture(theMat, aDiffVal->GetString());
+        theMat.DiffuseColor = StGLVec4(1.0f, 1.0f, 1.0f, 1.0f);
     } else if(gltfReadVec4(aDiff, aDiffVal) && validateColor4(aDiff)) {
         theMat.DiffuseColor = aDiff;
     }
@@ -322,7 +435,7 @@ bool StAssetImportGltf::gltfParseCommonMaterial(StGLMaterial& theMat,
         return false;
     }
 
-    const GenericValue* aMatCommon = findObjectMember (*anExtVal, THE_KHR_materials_common);
+    const GenericValue* aMatCommon = findObjectMember(*anExtVal, THE_KHR_materials_common);
     if(aMatCommon == NULL) {
         return false;
     }
@@ -374,88 +487,83 @@ bool StAssetImportGltf::gltfParseTexture(StGLMaterial& theMat,
 
     if(myIsBinary) {
         const GenericValue* anExtVal = findObjectMember(*anImgNode, "extensions");
-        if (anExtVal != NULL)
-        {
-          const GenericValue* aBinVal = findObjectMember(*anExtVal, THE_KHR_binary_glTF);
-          if (aBinVal != NULL)
-          {
-            const GenericValue* aBufferViewName = findObjectMember(*aBinVal, "bufferView");
-            //const GenericValue* aMimeTypeVal    = findObjectMember(*aBinVal, "mimeType");
-            //const GenericValue* aWidthVal       = findObjectMember(*aBinVal, "width");
-            //const GenericValue* aHeightVal      = findObjectMember(*aBinVal, "height");
-            if(aBufferViewName == NULL || !aBufferViewName->IsString()) {
-                signals.onError(formatSyntaxError(myFileName, StString("Invalid texture node '") + theTextureId + "' points to invalid data source."));
-                return false;
-            }
+        if(anExtVal != NULL) {
+            const GenericValue* aBinVal = findObjectMember(*anExtVal, THE_KHR_binary_glTF);
+            if(aBinVal != NULL) {
+                const GenericValue* aBufferViewName = findObjectMember(*aBinVal, "bufferView");
+                const GenericValue* aMimeTypeVal    = findObjectMember(*aBinVal, "mimeType");
+                //const GenericValue* aWidthVal       = findObjectMember(*aBinVal, "width");
+                //const GenericValue* aHeightVal      = findObjectMember(*aBinVal, "height");
+                if(aBufferViewName == NULL || !aBufferViewName->IsString()) {
+                    signals.onError(formatSyntaxError(myFileName, StString("Invalid texture node '") + theTextureId + "' points to invalid data source."));
+                    return false;
+                }
 
-            const GenericValue* aBufferView = findObjectMember (*myGltfRoots[GltfRootElement_BufferViews], *aBufferViewName);
-            if(aBufferView == NULL || !aBufferView->IsObject()) {
-              signals.onError(formatSyntaxError(myFileName, StString("Invalid texture node '") + theTextureId
-                                                          + "' points to invalid buffer view '" + aBufferViewName->GetString() + "'."));
-              return false;
-            }
+                const GenericValue* aBufferView = findObjectMember(*myGltfRoots[GltfRootElement_BufferViews], *aBufferViewName);
+                if(aBufferView == NULL || !aBufferView->IsObject()) {
+                  signals.onError(formatSyntaxError(myFileName, StString("Invalid texture node '") + theTextureId
+                                                              + "' points to invalid buffer view '" + aBufferViewName->GetString() + "'."));
+                  return false;
+                }
 
-            const GenericValue* aBufferName = findObjectMember (*aBufferView, "buffer");
-            const GenericValue* aByteLength = findObjectMember (*aBufferView, "byteLength");
-            const GenericValue* aByteOffset = findObjectMember (*aBufferView, "byteOffset");
-            if(aBufferName != NULL &&  aBufferName->IsString()
-            && !IsEqual(aBufferName->GetString(), "binary_glTF")) {
-                signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + aBufferViewName->GetString()
-                                                                  + "' does not define binary_glTF buffer."));
-                return false;
-            } else if(aByteOffset == NULL || !aByteOffset->IsInt()) {
-                signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + aBufferViewName->GetString()
-                                                                  + "' does not define byteOffset."));
-                return false;
-            }
+                const GenericValue* aBufferName = findObjectMember(*aBufferView, "buffer");
+                const GenericValue* aByteLength = findObjectMember(*aBufferView, "byteLength");
+                const GenericValue* aByteOffset = findObjectMember(*aBufferView, "byteOffset");
+                if(aBufferName != NULL &&  aBufferName->IsString()
+                && !IsEqual(aBufferName->GetString(), "binary_glTF")) {
+                    signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + aBufferViewName->GetString()
+                                                                      + "' does not define binary_glTF buffer."));
+                    return false;
+                } else if(aByteOffset == NULL || !aByteOffset->IsInt()) {
+                    signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + aBufferViewName->GetString()
+                                                                      + "' does not define byteOffset."));
+                    return false;
+                }
 
-            GltfBufferView aBuffView;
-            aBuffView.ByteOffset = aByteOffset->GetInt();
-            aBuffView.ByteLength = aByteLength != NULL && aByteLength->IsInt()
-                                 ? aByteLength->GetInt()
-                                 : 0;
-            if(aBuffView.ByteLength < 0) {
-                signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + aBufferViewName->GetString()
-                                                                  + "' defines invalid byteLength."));
-                return false;
-            } else if(aBuffView.ByteOffset < 0) {
-                signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + aBufferViewName->GetString()
-                                                                  + "' defines invalid byteOffset."));
-                return false;
-            }
+                GltfBufferView aBuffView;
+                aBuffView.ByteOffset = aByteOffset->GetInt();
+                aBuffView.ByteLength = aByteLength != NULL && aByteLength->IsInt()
+                                     ? aByteLength->GetInt()
+                                     : 0;
+                if(aBuffView.ByteLength < 0) {
+                    signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + aBufferViewName->GetString()
+                                                                      + "' defines invalid byteLength."));
+                    return false;
+                } else if(aBuffView.ByteOffset < 0) {
+                    signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + aBufferViewName->GetString()
+                                                                      + "' defines invalid byteOffset."));
+                    return false;
+                }
 
-            std::ifstream aFile;
-            OSD_OpenStream(aFile, myFileName.toCString(), std::ios::in | std::ios::binary);
-            if(!aFile.is_open() || !aFile.good()) {
-                signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + aBufferViewName->GetString()
-                                               + "' refers to non-existing file '" + myFileName + "'."));
-                return false;
+                const int64_t anOffset = myBinBodyOffset + aBuffView.ByteOffset;
+                StString aMime;
+                if(aMimeTypeVal != NULL && aMimeTypeVal->IsString()) {
+                    aMime = aMimeTypeVal->GetString();
+                }
+                theMat.Texture = new StGltfBinTexture(myFileName, aMime, anOffset, aBuffView.ByteLength);
+                return true;
             }
-
-            const int64_t anOffset = myBinBodyOffset + aBuffView.ByteOffset;
-            aFile.seekg (anOffset, std::ios_base::beg);
-            if(!aFile.good()) {
-                aFile.close();
-                signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + aBufferViewName->GetString()
-                                               + " refers to non-existing location."));
-                return false;
-            }
-
-            // TODO read embedded image
-            ST_DEBUG_LOG("glTF reader - embedded image has been skipped");
-            return false;
-          }
         }
     }
 
     const char* anUriData = anUriVal->GetString();
-    if(::strncmp (anUriData, "data:", 5) == 0) { // data:image/png;base64
-        // TODO decode base64
-        ST_DEBUG_LOG("glTF reader - embedded image has been skipped");
+    if(::strncmp(anUriData, "data:", 5) == 0) { // data:image/png;base64,DATA
+        const char* aDataStart = anUriData + 5;
+        for(const char* aDataIter = aDataStart; aDataIter != '\0'; ++aDataIter) {
+            if(stAreEqual(aDataIter, ";base64,", 8)) {
+                const char* aBase64End  = anUriData + anUriVal->GetStringLength();
+                const char* aBase64Data = aDataIter + 8;
+                const int aBase64Len = int(aBase64End - aBase64Data);
+                const StString aMime(aDataStart, aDataIter - aDataStart);
+                Handle(NCollection_Buffer) aData = decodeBase64((const stUByte_t* )aBase64Data, aBase64Len);
+                theMat.Texture = new StGltfBinTexture(myFileName + "@" + aSrcVal->GetString(), aMime, aData);
+                return true;
+            }
+        }
         return false;
     }
 
-    //theMat.Texture = myFolder + anUriVal->GetString();
+    theMat.Texture = new StAssetTexture(myFolder + anUriVal->GetString());
     return true;
 }
 
@@ -1079,8 +1187,6 @@ bool StAssetImportGltf::gltfReadBuffer(const Handle(StPrimArray)& thePrimArray,
             for(int aVertIter = 0; aVertIter < theAccessor.Count; ++aVertIter) {
                 theStream.read((char* )aVec2.getData(), sizeof(StGLVec2));
 
-                // Y should be flipped (relative to image layout used by OCCT)
-                aVec2.y() = 1.0f - aVec2.y();
                 thePrimArray->TexCoords0[aVertIter] = aVec2;
                 if(aNbSkipBytes != 0) {
                     theStream.seekg(aNbSkipBytes, std::ios_base::cur);

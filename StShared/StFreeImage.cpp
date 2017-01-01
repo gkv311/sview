@@ -306,8 +306,12 @@ static FREE_IMAGE_FORMAT convertToFIF(StImageFile::ImageType theImageType) {
     }
 }
 
-bool StFreeImage::load(const StString& theFilePath, ImageType theImageType,
-                       uint8_t* theDataPtr, int theDataSize) {
+bool StFreeImage::loadExtra(const StString& theFilePath,
+                            ImageType       theImageType,
+                            uint8_t*        theDataPtr,
+                            int             theDataSize,
+                            bool            theIsOnlyRGB) {
+    (void )theIsOnlyRGB;
     if(!StFreeImage::init()) {
         setState("FreeImage library is not initialized");
         return false;

@@ -66,15 +66,11 @@ class StAVImage : public StImageFile {
     /**
      * Decode image from specified file or memory pointer.
      */
-    ST_CPPEXPORT virtual bool load(const StString& theFilePath,
-                                   ImageType       theImageType = ST_TYPE_NONE,
-                                   uint8_t* theDataPtr = NULL, int theDataSize = 0);
-
-    ST_CPPEXPORT bool loadExtra(const StString& theFilePath,
-                                ImageType       theImageType,
-                                uint8_t*        theDataPtr,
-                                int             theDataSize,
-                                bool            theIsOnlyRGB);
+    ST_CPPEXPORT virtual bool loadExtra(const StString& theFilePath,
+                                        ImageType       theImageType,
+                                        uint8_t*        theDataPtr,
+                                        int             theDataSize,
+                                        bool            theIsOnlyRGB) ST_ATTR_OVERRIDE;
 
     /**
      * Save image to specified path.

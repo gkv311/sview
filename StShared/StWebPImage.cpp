@@ -161,10 +161,11 @@ bool StWebPImage::loadInternal(const StString& theFilePath,
 #endif
 }
 
-bool StWebPImage::load(const StString& theFilePath,
-                       ImageType       theImageType,
-                       uint8_t*        theDataPtr,
-                       int             theDataSize) {
+bool StWebPImage::loadExtra(const StString& theFilePath,
+                            ImageType       theImageType,
+                            uint8_t*        theDataPtr,
+                            int             theDataSize,
+                            bool            theIsOnlyRGB) {
 #ifndef ST_HAVE_WEBP
     setState("WebP library is not initialized");
     return false;
@@ -193,7 +194,7 @@ bool StWebPImage::load(const StString& theFilePath,
     switch(theImageType) {
         case ST_TYPE_NONE:
         case ST_TYPE_WEBP: {
-            return loadInternal(theFilePath, theDataPtr, theDataSize, false);
+            return loadInternal(theFilePath, theDataPtr, theDataSize, theIsOnlyRGB);
         }
         case ST_TYPE_WEBPLL: {
             return loadInternal(theFilePath, theDataPtr, theDataSize, true);
