@@ -51,6 +51,9 @@
     <ClCompile Include="StAssetDocument.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="StAssetImportGltf.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="StCADFrameBuffer.h">
@@ -87,6 +90,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="StAssetNodeIterator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StAssetImportGltf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

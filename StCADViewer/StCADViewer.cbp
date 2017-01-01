@@ -264,6 +264,8 @@
 		<Unit filename="main.cpp" />
 		<Unit filename="StAssetDocument.cpp" />
 		<Unit filename="StAssetDocument.h" />
+		<Unit filename="StAssetImportGltf.cpp" />
+		<Unit filename="StAssetImportGltf.h" />
 		<Unit filename="StAssetImportShape.cpp" />
 		<Unit filename="StAssetImportShape.h" />
 		<Unit filename="StAssetNodeIterator.h" />

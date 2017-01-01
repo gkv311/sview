@@ -239,6 +239,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="StAssetImportGltf.cpp" />
     <ClCompile Include="StAssetImportShape.cpp" />
     <ClCompile Include="StAssetPresentation.cpp" />
     <ClCompile Include="StAssetDocument.cpp" />
@@ -250,6 +251,7 @@
     <ClCompile Include="StCADViewerStrings.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="StAssetImportGltf.h" />
     <ClInclude Include="StAssetImportShape.h" />
     <ClInclude Include="StAssetNodeIterator.h" />
     <ClInclude Include="StAssetPresentation.h" />

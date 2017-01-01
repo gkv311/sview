@@ -4,6 +4,8 @@
  * Copyright © Kirill Gavrilov, 2011-2016
  */
 
+#include "StAssetImportGltf.h"
+
 #ifdef ST_HAVE_STCONFIG
     #include <stconfig.conf>
 #endif
@@ -48,20 +50,30 @@ bool StCADLoader::loadModel(const StHandle<StFileNode>& theSource) {
     const StMIME stMIMEType = theSource->getMIME();
     const StString aFileToLoadPath = theSource->getPath();
     const StString anExt = !stMIMEType.isEmpty() ? stMIMEType.getExtension() : StFileNode::getExtension(aFileToLoadPath);
+    bool isGltf = false;
     StAssetImportShape::FileFormat aShapeFormat = StAssetImportShape::FileFormat_UNKNOWN;
     {
       StRawFile aRawFile;
       if(aRawFile.readFile(aFileToLoadPath, -1, 2048)) {
           aShapeFormat = StAssetImportShape::probeFormatFromHeader((const char* )aRawFile.getBuffer(), anExt);
       }
+      isGltf = StAssetImportGltf::probeFormatFromHeader((const char* )aRawFile.getBuffer(), anExt);
     }
 
-    StHandle<StAssetImportShape> aShapeImport = new StAssetImportShape();
-    aShapeImport->signals.onError.connect(this, &StCADLoader::doOnErrorRedirect);
-
     myDoc = new StAssetDocument();
+    bool isRead = false;
+    if(isGltf) {
+        StAssetImportGltf aReader;
+        aReader.signals.onError.connect(this, &StCADLoader::doOnErrorRedirect);
+        isRead = aReader.load(myDoc, aFileToLoadPath);
+    } else {
+        StAssetImportShape aReader;
+        aReader.signals.onError.connect(this, &StCADLoader::doOnErrorRedirect);
+        isRead = aReader.load(myDoc, aFileToLoadPath, aShapeFormat);
+    }
+
     NCollection_Sequence<Handle(AIS_InteractiveObject)> aPrsList;
-    if(aShapeImport->load(myDoc, aFileToLoadPath, aShapeFormat)) {
+    if(isRead) {
         Handle(StAssetPresentation) aShapePrs = new StAssetPresentation();
         for(StAssetNodeIterator aMeshNodeIter(myDoc, StDocNodeType_Mesh); aMeshNodeIter.more(); aMeshNodeIter.next()) {
             Handle(StDocMeshNode) aMeshNode = Handle(StDocMeshNode)::DownCast(aMeshNodeIter.value());

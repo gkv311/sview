@@ -68,7 +68,9 @@ class StGLMaterial : public Standard_Transient {
 
     static int HashCode(const Handle(StGLMaterial)& theKey,
                         const int theUpper) {
-        return ::HashCode(::HashCodes((Standard_CString )theKey.get(), sizeof(StGLVec4) * 5), theUpper);
+        return !theKey.IsNull()
+             ? ::HashCode(::HashCodes((Standard_CString )theKey.get(), sizeof(StGLVec4) * 5), theUpper)
+             : 0;
     }
 
     static bool IsEqual(const Handle(StGLMaterial)& theKey1,
