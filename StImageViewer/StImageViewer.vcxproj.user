@@ -3,6 +3,6 @@
   <PropertyGroup>
     <LocalDebuggerCommand>$(OutDir)\sView.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>--in=image ..\share\sView\demo\demo.jps</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>--in=image "c:\Storage\My Movies\Panorama\PanoramaFULL.jps"</LocalDebuggerCommandArguments>
   </PropertyGroup>
 </Project>
