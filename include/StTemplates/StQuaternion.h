@@ -85,6 +85,53 @@ class StQuaternion {
                             theQ1.w() * theQ2.w() - theQ1.x() * theQ2.x() - theQ1.y() * theQ2.y() - theQ1.z() * theQ2.z());
     }
 
+    /**
+     * Initialize the quaternion from 3x3 rotation matrix.
+     */
+    void setMatrix(const Element_t theMat[3][3]) {
+        Element_t aTrace = theMat[0][0] + theMat[1][1] + theMat[2][2];
+        if(aTrace > 0.0) {
+            // if trace positive than "w" is biggest component
+            myV.x() = theMat[1][2] - theMat[2][1];
+            myV.y() = theMat[2][0] - theMat[0][2];
+            myV.z() = theMat[0][1] - theMat[1][0];
+            myV.w() = aTrace + Element_t(1);
+            scale(Element_t(0.5) / std::sqrt(w())); // "w" contain the "norm * 4"
+        } else if((theMat[0][0] > theMat[1][1])
+               && (theMat[0][0] > theMat[2][2])) {
+            // some of vector components is bigger
+            myV.x() = Element_t(1) + theMat[0][0] - theMat[1][1] - theMat[2][2];
+            myV.y() = theMat[1][0] + theMat[0][1];
+            myV.z() = theMat[2][0] + theMat[0][2];
+            myV.w() = theMat[1][2] - theMat[2][1];
+            scale(Element_t(0.5) / std::sqrt(x()));
+        } else if(theMat[1][1] > theMat[2][2]) {
+            myV.x() = theMat[1][0] + theMat[0][1];
+            myV.y() = Element_t(1) + theMat[1][1] - theMat[0][0] - theMat[2][2];
+            myV.z() = theMat[2][1] + theMat[1][2];
+            myV.w() = theMat[2][0] - theMat[0][2];
+            scale(Element_t(0.5) / std::sqrt(y()));
+        } else {
+            myV.x() = theMat[2][0] + theMat[0][2];
+            myV.y() = theMat[2][1] + theMat[1][2];
+            myV.z() = Element_t(1) + theMat[2][2] - theMat[0][0] - theMat[1][1];
+            myV.w() = theMat[0][1] - theMat[1][0];
+            scale(Element_t(0.5) / std::sqrt(z()));
+        }
+    }
+
+        private:
+
+    /**
+     * Apply scale factor.
+     */
+    inline void scale(const Element_t theScale) {
+        myV.x() *= theScale;
+        myV.y() *= theScale;
+        myV.z() *= theScale;
+        myV.w() *= theScale;
+    }
+
         private:
 
     StVec4<Element_t> myV;

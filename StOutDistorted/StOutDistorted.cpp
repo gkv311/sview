@@ -1,6 +1,6 @@
 /**
  * StOutDistorted, class providing stereoscopic output in anamorph side by side format using StCore toolkit.
- * Copyright © 2013-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -25,15 +25,19 @@
 #include <StVersion.h>
 #include <StAV/StAVImage.h>
 
-#ifdef ST_HAVE_LIBOVR
+#ifdef ST_HAVE_OPENVR
+    #include <openvr.h>
 
-#include <OVR.h>
-#include <OVR_CAPI_GL.h>
+    #ifdef _MSC_VER
+        #pragma comment(lib, "openvr_api.lib")
+    #endif
+#elif defined(ST_HAVE_LIBOVR)
+    #include <OVR.h>
+    #include <OVR_CAPI_GL.h>
 
-#ifdef _MSC_VER
-    #pragma comment(lib, "LibOVR.lib")
-#endif
-
+    #ifdef _MSC_VER
+        #pragma comment(lib, "LibOVR.lib")
+    #endif
 #endif
 
 namespace {
@@ -50,8 +54,8 @@ namespace {
     enum {
         STTR_DISTORTED_NAME     = 1000,
         STTR_DISTORTED_DESC     = 1001,
-        STTR_OCULUS_NAME        = 1002,
-        STTR_OCULUS_DESC        = 1003,
+        STTR_OPENVR_NAME        = 1002,
+        STTR_OPENVR_DESC        = 1003,
         STTR_S3DV_NAME          = 1004,
         STTR_S3DV_DESC          = 1005,
 
@@ -71,6 +75,56 @@ namespace {
         STTR_PLUGIN_DESCRIPTION = 2002,
     };
 
+#ifdef ST_HAVE_OPENVR
+    static StString getVrTrackedDeviceString(vr::IVRSystem* theHmd,
+                                             vr::TrackedDeviceIndex_t theDevice,
+                                             vr::TrackedDeviceProperty theProperty,
+                                             vr::TrackedPropertyError* theError = NULL) {
+      const uint32_t aBuffLen = theHmd->GetStringTrackedDeviceProperty(theDevice, theProperty, NULL, 0, theError);
+      if(aBuffLen == 0) {
+          return StString();
+      }
+
+      char* aBuffer = new char[aBuffLen + 1];
+      theHmd->GetStringTrackedDeviceProperty(theDevice, theProperty, aBuffer, aBuffLen, theError);
+      aBuffer[aBuffLen] = '\0';
+      const StString aResult(aBuffer);
+      delete[] aBuffer;
+      return aResult;
+    }
+
+    /**
+     * Print OpenVR compositor error.
+     */
+    StString getVRCompositorError(vr::EVRCompositorError theVRError) {
+        switch(theVRError) {
+            case vr::VRCompositorError_None:
+              return "None";
+            case vr::VRCompositorError_RequestFailed:
+              return "Compositor Error: Request Failed";
+            case vr::VRCompositorError_IncompatibleVersion:
+              return "Compositor Error: Incompatible Version";
+            case vr::VRCompositorError_DoNotHaveFocus:
+              return "Compositor Error: Do not have focus";
+            case vr::VRCompositorError_InvalidTexture:
+              return "Compositor Error: Invalid Texture";
+            case vr::VRCompositorError_IsNotSceneApplication:
+              return "Compositor Error: Is not scene application";
+            case vr::VRCompositorError_TextureIsOnWrongDevice:
+              return "Compositor Error: Texture is on wrong device";
+            case vr::VRCompositorError_TextureUsesUnsupportedFormat:
+              return "Compositor Error: Texture uses unsupported format";
+            case vr::VRCompositorError_SharedTexturesNotSupported:
+              return "Compositor Error: Shared textures not supported";
+            case vr::VRCompositorError_IndexOutOfRange:
+              return "Compositor Error: Index out of range";
+            case vr::VRCompositorError_AlreadySubmitted:
+              return "Compositor Error: Already submitted";
+        }
+        return StString("Compositor Error: UNKNOWN #") + int(theVRError);
+    }
+#endif
+
 }
 
 StAtomic<int32_t> StOutDistorted::myInstancesNb(0);
@@ -85,7 +139,7 @@ const char* StOutDistorted::getRendererId() const {
 
 const char* StOutDistorted::getDeviceId() const {
     switch(myDevice) {
-        case DEVICE_OCULUS:    return "Oculus";
+        case DEVICE_HMD:       return "OpenVR";
         case DEVICE_S3DV:      return "S3DV";
         case DEVICE_DISTORTED:
         default:               return "Distorted";
@@ -97,11 +151,11 @@ bool StOutDistorted::isLostDevice() const {
 }
 
 bool StOutDistorted::setDevice(const StString& theDevice) {
-    if(theDevice == "Oculus") {
-        if(myDevice != DEVICE_OCULUS) {
+    if(theDevice == "OpenVR") {
+        if(myDevice != DEVICE_HMD) {
             myToResetDevice = true;
         }
-        myDevice = DEVICE_OCULUS;
+        myDevice = DEVICE_HMD;
     } else if(theDevice == "S3DV") {
         if(myDevice != DEVICE_S3DV) {
             myToResetDevice = true;
@@ -123,7 +177,7 @@ void StOutDistorted::getDevices(StOutDevicesList& theList) const {
 }
 
 void StOutDistorted::getOptions(StParamsList& theList) const {
-    if(myDevice != DEVICE_OCULUS
+    if(myDevice != DEVICE_HMD
     && myDevice != DEVICE_S3DV) {
         theList.add(params.Layout);
     }
@@ -135,8 +189,8 @@ void StOutDistorted::updateStrings() {
 
     myDevices[DEVICE_DISTORTED]->Name = aLangMap.changeValueId(STTR_DISTORTED_NAME, "TV (parallel pair)");
     myDevices[DEVICE_DISTORTED]->Desc = aLangMap.changeValueId(STTR_DISTORTED_DESC, "Distorted Output");
-    myDevices[DEVICE_OCULUS]   ->Name = aLangMap.changeValueId(STTR_OCULUS_NAME, "Oculus Rift");
-    myDevices[DEVICE_OCULUS]   ->Desc = aLangMap.changeValueId(STTR_OCULUS_DESC, "Distorted Output");
+    myDevices[DEVICE_HMD]->Name       = aLangMap.changeValueId(STTR_OPENVR_NAME,    "OpenVR HMD");
+    myDevices[DEVICE_HMD]->Desc       = aLangMap.changeValueId(STTR_OPENVR_DESC,    "Distorted Output");
     if(myDevices.size() > DEVICE_S3DV) {
         myDevices[DEVICE_S3DV] ->Name = "S3DV";             //aLangMap.changeValueId(STTR_S3DV_NAME, "S3DV");
         myDevices[DEVICE_S3DV] ->Desc = "Distorted Output"; //aLangMap.changeValueId(STTR_S3DV_DESC, "Distorted Output");
@@ -151,12 +205,17 @@ void StOutDistorted::updateStrings() {
     params.Layout->defineOption(LAYOUT_OVER_UNDER,            aLangMap.changeValueId(STTR_PARAMETER_LAYOUT_OVERUNDER,          "Top-and-Bottom") + (myCanHdmiPack ? " [HDMI]" : ""));
 
     // about string
-    StString& aTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - Distorted Output module");
-    StString& aVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
-    StString& aDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
-        "(C) {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0");
-    myAbout = aTitle + '\n' + aVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n"
-            + aDescr.format("2013-2016", "kirill@sview.ru", "www.sview.ru");
+    myAboutTitle     = aLangMap.changeValueId(STTR_PLUGIN_TITLE,   "sView - Distorted Output module");
+    myAboutVerString = aLangMap.changeValueId(STTR_VERSION_STRING, "version");
+    myAboutDescr     = aLangMap.changeValueId(STTR_PLUGIN_DESCRIPTION,
+                                              "(C) {0} Kirill Gavrilov <{1}>\nOfficial site: {2}\n\nThis library is distributed under LGPL3.0");
+    updateAbout();
+}
+
+void StOutDistorted::updateAbout() {
+    myAbout = myAboutTitle + '\n' + myAboutVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n"
+            + (!myAboutVrDevice.isEmpty() ? ("Connected hardware: " + myAboutVrDevice + "\n \n") : "")
+            + myAboutDescr.format("2013-2017", "kirill@sview.ru", "www.sview.ru");
 }
 
 StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
@@ -173,10 +232,14 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
   //myBarrelCoef(1.0f, 0.18f, 0.115f, 0.0387f),
   myChromAb(0.996f, -0.004f, 1.014f, 0.0f),
   //myChromAb(1.0f, 0.0f, 1.0f, 0.0f),
-  myOvrHmd(NULL),
-  myOvrSizeX(0),
-  myOvrSizeY(0),
-#ifdef ST_HAVE_LIBOVR
+  myVrRendSizeX(0),
+  myVrRendSizeY(0),
+  myVrTrackOrient(false),
+#ifdef ST_HAVE_OPENVR
+  myVrHmd(NULL),
+  myVrTrackedPoses(new vr::TrackedDevicePose_t[vr::k_unMaxTrackedDeviceCount]),
+#elif defined(ST_HAVE_LIBOVR)
+  myVrHmd(NULL),
   myOvrSwapTexture(NULL),
   myOvrMirrorTexture(NULL),
   myOvrMirrorFbo(0),
@@ -236,12 +299,12 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
     aDevDistorted->Name     = stCString("TV (parallel pair)");
     myDevices.add(aDevDistorted);
 
-    StHandle<StOutDevice> aDevOculus = new StOutDevice();
-    aDevOculus->PluginId = ST_OUT_PLUGIN_NAME;
-    aDevOculus->DeviceId = stCString("Oculus");
-    aDevOculus->Priority = aSupportOculus;
-    aDevOculus->Name     = stCString("Oculus Rift");
-    myDevices.add(aDevOculus);
+    StHandle<StOutDevice> aDevVR = new StOutDevice();
+    aDevVR->PluginId = ST_OUT_PLUGIN_NAME;
+    aDevVR->DeviceId = stCString("OpenVR");
+    aDevVR->Priority = aSupportOculus;
+    aDevVR->Name     = stCString("OpenVR");
+    myDevices.add(aDevVR);
 
     if(aSupportS3DV != ST_DEVICE_SUPPORT_NONE) {
         StHandle<StOutDevice> aDevS3dv = new StOutDevice();
@@ -280,11 +343,12 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
     StWindow::setTitle("sView - Distorted Renderer");
 
     StRectI_t aMargins;
-    aMargins.left()   = 64;
-    aMargins.right()  = 64;
-    aMargins.top()    = 160;
-    aMargins.bottom() = 160;
-    mySettings->loadInt32Rect(ST_SETTING_MARGINS,   aMargins);
+    aMargins.left()   = 160 * 2;
+    aMargins.right()  = 160 * 2;
+    aMargins.top()    = 160 * 2;
+    aMargins.bottom() = 160 * 2;
+
+    ///mySettings->loadInt32Rect(ST_SETTING_MARGINS,   aMargins);
     mySettings->loadFloatVec4(ST_SETTING_WARP_COEF, myBarrelCoef);
     mySettings->loadFloatVec4(ST_SETTING_CHROME_AB, myChromAb);
 
@@ -296,14 +360,19 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
 
 void StOutDistorted::releaseResources() {
     if(!myContext.isNull()) {
-    #ifdef ST_HAVE_LIBOVR
+    #ifdef ST_HAVE_OPENVR
+        if(myVrHmd != NULL) {
+            vr::VR_Shutdown();
+            myVrHmd = NULL;
+        }
+    #elif defined(ST_HAVE_LIBOVR)
         if(myOvrSwapFbo[0] != 0) {
             myContext->arbFbo->glDeleteFramebuffers(2, myOvrSwapFbo);
             myOvrSwapFbo[0] = 0;
             myOvrSwapFbo[1] = 0;
         }
         if(myOvrSwapTexture != NULL) {
-            ovr_DestroySwapTextureSet(myOvrHmd, myOvrSwapTexture);
+            ovr_DestroySwapTextureSet(myVrHmd, myOvrSwapTexture);
             myOvrSwapTexture = NULL;
         }
         if(myOvrMirrorFbo != 0) {
@@ -311,12 +380,12 @@ void StOutDistorted::releaseResources() {
             myOvrMirrorFbo = NULL;
         }
         if(myOvrMirrorTexture != NULL) {
-            ovr_DestroyMirrorTexture(myOvrHmd, &myOvrMirrorTexture->Texture);
+            ovr_DestroyMirrorTexture(myVrHmd, &myOvrMirrorTexture->Texture);
             myOvrMirrorTexture = NULL;
         }
-        if(myOvrHmd != NULL) {
-            ovr_Destroy(myOvrHmd);
-            myOvrHmd = NULL;
+        if(myVrHmd != NULL) {
+            ovr_Destroy(myVrHmd);
+            myVrHmd = NULL;
         }
     #endif
 
@@ -364,7 +433,9 @@ StOutDistorted::~StOutDistorted() {
     myInstancesNb.decrement();
     releaseResources();
 
-#ifdef ST_HAVE_LIBOVR
+#ifdef ST_HAVE_OPENVR
+    delete[] myVrTrackedPoses;
+#elif defined(ST_HAVE_LIBOVR)
     ovr_Shutdown();
 #endif
 }
@@ -438,24 +509,56 @@ bool StOutDistorted::create() {
         aDataSize = aCursorRes->getSize();
     }
     if(aCursorImg.load(!aCursorRes.isNull() ? aCursorRes->getPath() : StString(), StImageFile::ST_TYPE_PNG, aData, aDataSize)) {
-        //myCursor->setMinMagFilter(*myContext, GL_NEAREST);
         myCursor->init(*myContext, aCursorImg.getPlane());
     }
 
-#ifdef ST_HAVE_LIBOVR
-    if(myDevice == DEVICE_OCULUS) {
+#ifdef ST_HAVE_OPENVR
+    if(myDevice == DEVICE_HMD) {
+        vr::EVRInitError aVrError = vr::VRInitError_None;
+        myVrHmd = vr::VR_Init(&aVrError, vr::VRApplication_Scene);
+        if(aVrError != vr::VRInitError_None) {
+            myVrHmd = NULL;
+            myMsgQueue->pushError(StString("Unable to init VR runtime: ") + vr::VR_GetVRInitErrorAsEnglishDescription(aVrError));
+        }
+
+        if(myVrHmd != NULL) {
+            /*vr::IVRRenderModels* aRenderModels = (vr::IVRRenderModels* )vr::VR_GetGenericInterface(vr::IVRRenderModels_Version, &aVrError);
+            if(aRenderModels == NULL) {
+                myMsgQueue->pushError(StString("Unable to get render model interface: ") + vr::VR_GetVRInitErrorAsEnglishDescription(aVrError));
+            }*/
+        }
+    }
+
+    myAboutVrDevice.clear();
+    if(myVrHmd != NULL) {
+        const StString aVrManuf   = getVrTrackedDeviceString(myVrHmd, vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_ManufacturerName_String);
+        const StString aVrDriver  = getVrTrackedDeviceString(myVrHmd, vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_TrackingSystemName_String);
+        const StString aVrDisplay = getVrTrackedDeviceString(myVrHmd, vr::k_unTrackedDeviceIndex_Hmd, vr::Prop_SerialNumber_String);
+
+        uint32_t aRenderSizeX = 0;
+        uint32_t aRenderSizeY = 0;
+        myVrHmd->GetRecommendedRenderTargetSize(&aRenderSizeX, &aRenderSizeY);
+        myAboutVrDevice = aVrManuf + " " + aVrDriver + "\n"
+                        + aVrDisplay + " [" + aRenderSizeX + "x" + aRenderSizeY + "]";
+        myVrRendSizeX = int(aRenderSizeX);
+        myVrRendSizeY = int(aRenderSizeY);
+        updateAbout();
+    }
+
+#elif defined(ST_HAVE_LIBOVR)
+    if(myDevice == DEVICE_HMD) {
         ovrGraphicsLuid aLuid;
-        const ovrResult anOvrRes = ovr_Create(&myOvrHmd, &aLuid);
-        if(myOvrHmd == NULL
+        const ovrResult anOvrRes = ovr_Create(&myVrHmd, &aLuid);
+        if(myVrHmd == NULL
         || !OVR_SUCCESS(anOvrRes)) {
             myMsgQueue->pushError(stCString("StOutDistorted, Oculus Rift is not connected!"));
-            myOvrHmd = NULL;
+            myVrHmd = NULL;
             return true;
         }
     }
 
-    if(myOvrHmd != NULL) {
-        ovrHmdDesc anHmdDesc = ovr_GetHmdDesc(myOvrHmd);
+    if(myVrHmd != NULL) {
+        ovrHmdDesc anHmdDesc = ovr_GetHmdDesc(myVrHmd);
         ovrSizei aWinSize = { anHmdDesc.Resolution.w / 2, anHmdDesc.Resolution.h / 2 };
 
         ST_DEBUG_LOG("libOVR Resolution: " + anHmdDesc.Resolution.w + "x" + anHmdDesc.Resolution.h);
@@ -466,7 +569,7 @@ bool StOutDistorted::create() {
             StWindow::setPlacement(aRect, false);
         }
 
-        ovrResult anOvrRes = ovr_CreateMirrorTextureGL(myOvrHmd, GL_SRGB8_ALPHA8, aWinSize.w, aWinSize.h, (ovrTexture** )&myOvrMirrorTexture);
+        ovrResult anOvrRes = ovr_CreateMirrorTextureGL(myVrHmd, GL_SRGB8_ALPHA8, aWinSize.w, aWinSize.h, (ovrTexture** )&myOvrMirrorTexture);
         if(!OVR_SUCCESS(anOvrRes)) {
             myMsgQueue->pushError(stCString("StOutDistorted, Failed to create mirror texture!"));
             myIsBroken = true;
@@ -480,12 +583,12 @@ bool StOutDistorted::create() {
         myContext->stglBindFramebufferRead(anFboReadBack);
 
         ovrSizei anEyeSizes[2] = {
-            ovr_GetFovTextureSize(myOvrHmd, ovrEye_Left,  anHmdDesc.DefaultEyeFov[ovrEye_Left],  1),
-            ovr_GetFovTextureSize(myOvrHmd, ovrEye_Right, anHmdDesc.DefaultEyeFov[ovrEye_Right], 1)
+            ovr_GetFovTextureSize(myVrHmd, ovrEye_Left,  anHmdDesc.DefaultEyeFov[ovrEye_Left],  1),
+            ovr_GetFovTextureSize(myVrHmd, ovrEye_Right, anHmdDesc.DefaultEyeFov[ovrEye_Right], 1)
         };
-        myOvrSizeX = stMax(anEyeSizes[0].w, anEyeSizes[1].w);
-        myOvrSizeY = stMax(anEyeSizes[0].h, anEyeSizes[1].h);
-        anOvrRes = ovr_CreateSwapTextureSetGL(myOvrHmd, GL_SRGB8_ALPHA8, myOvrSizeX * 2, myOvrSizeY, &myOvrSwapTexture);
+        myVrRendSizeX = stMax(anEyeSizes[0].w, anEyeSizes[1].w);
+        myVrRendSizeY = stMax(anEyeSizes[0].h, anEyeSizes[1].h);
+        anOvrRes = ovr_CreateSwapTextureSetGL(myVrHmd, GL_SRGB8_ALPHA8, myVrRendSizeX * 2, myVrRendSizeY, &myOvrSwapTexture);
         if(!OVR_SUCCESS(anOvrRes)
          || myOvrSwapTexture->TextureCount < 2) {
             myMsgQueue->pushError(stCString("StOutDistorted, Failed to create swap texture!"));
@@ -503,15 +606,45 @@ bool StOutDistorted::create() {
                                                   ((ovrGLTexture* )&myOvrSwapTexture->Textures[1])->OGL.TexId, 0);
         myContext->stglBindFramebufferRead(anFboReadBack);
     }
-#else
-    (void )myOvrSizeX;
-    (void )myOvrSizeY;
 #endif
     return true;
 }
 
 void StOutDistorted::processEvents() {
     StWindow::processEvents();
+
+#ifdef ST_HAVE_OPENVR
+    if(myVrHmd == NULL) {
+        return;
+    }
+
+    // process OpenVR events
+    for(vr::VREvent_t aVREvent; myVrHmd->PollNextEvent(&aVREvent, sizeof(aVREvent));) {
+        switch(aVREvent.eventType) {
+            case vr::VREvent_TrackedDeviceActivated: {
+                // setupVrRenderModel(aVREvent.trackedDeviceIndex);
+                ST_DEBUG_LOG("Device " + aVREvent.trackedDeviceIndex + " attached. Setting up render model")
+                break;
+            }
+            case vr::VREvent_TrackedDeviceDeactivated: {
+                ST_DEBUG_LOG("Device " + aVREvent.trackedDeviceIndex + " detached")
+                break;
+            }
+            case vr::VREvent_TrackedDeviceUpdated: {
+                ST_DEBUG_LOG("Device " + aVREvent.trackedDeviceIndex + " updated")
+                break;
+            }
+        }
+    }
+
+    // process OpenVR controller state
+    for(vr::TrackedDeviceIndex_t aDevIter = 0; aDevIter < vr::k_unMaxTrackedDeviceCount; ++aDevIter) {
+        vr::VRControllerState_t aCtrlState;
+        if(myVrHmd->GetControllerState(aDevIter, &aCtrlState, sizeof(aCtrlState))) {
+            // aCtrlState.ulButtonPressed == 0;
+        }
+    }
+#endif
 }
 
 void StOutDistorted::showCursor(const bool theToShow) {
@@ -544,7 +677,7 @@ void StOutDistorted::stglDrawCursor(const StPointD_t&  theCursorPos,
 
     GLfloat aCurWidth  = 2.0f * GLfloat(myCursor->getSizeX()) / GLfloat(aVPSizeX);
     GLfloat aCurHeight = 2.0f * GLfloat(myCursor->getSizeY()) / GLfloat(aVPSizeY);
-    if(myDevice != DEVICE_OCULUS) {
+    if(myDevice != DEVICE_HMD) {
         switch(getPairLayout()) {
             case LAYOUT_SIDE_BY_SIDE_ANAMORPH:
                 aCurWidth  *= 0.5;
@@ -589,29 +722,55 @@ void StOutDistorted::stglDrawCursor(const StPointD_t&  theCursorPos,
 }
 
 bool StOutDistorted::hasOrientationSensor() const {
-    if(myOvrHmd != NULL) {
+#if defined(ST_HAVE_OPENVR) || defined(ST_HAVE_LIBOVR)
+    if(myVrHmd != NULL) {
         return true;
     }
+#endif
     return StWindow::hasOrientationSensor();
 }
 
+bool StOutDistorted::toTrackOrientation() const {
+#if defined(ST_HAVE_OPENVR) || defined(ST_HAVE_LIBOVR)
+    if(myVrHmd != NULL) {
+        return myVrTrackOrient;
+    }
+#endif
+    return StWindow::toTrackOrientation();
+}
+
+void StOutDistorted::setTrackOrientation(const bool theToTrack) {
+#if defined(ST_HAVE_OPENVR) || defined(ST_HAVE_LIBOVR)
+    if(myVrHmd != NULL) {
+        myVrTrackOrient = theToTrack;
+        return;
+    }
+#endif
+
+    myVrTrackOrient = false;
+    StWindow::setTrackOrientation(theToTrack);
+}
+
 StQuaternion<double> StOutDistorted::getDeviceOrientation() const {
-    if(StWindow::toTrackOrientation()
-    && myOvrHmd != NULL
+    if(myVrTrackOrient
     && !myIsBroken) {
-        return myOvrOrient;
+    #if defined(ST_HAVE_OPENVR) || defined(ST_HAVE_LIBOVR)
+        if(myVrHmd != NULL) {
+            return myVrOrient;
+        }
+    #endif
     }
     return StWindow::getDeviceOrientation();
 }
 
 GLfloat StOutDistorted::getLensDist() const {
-    return (myIsStereoOn && myDevice == DEVICE_OCULUS) ? 0.1453f : 0.0f;
+    return (myIsStereoOn && myDevice == DEVICE_HMD) ? 0.1453f : 0.0f;
 }
 
 GLfloat StOutDistorted::getScaleFactor() const {
     if(!myToReduceGui
     || !myIsStereoOn
-    ||  myDevice != DEVICE_OCULUS) {
+    ||  myDevice != DEVICE_HMD) {
         return StWindow::getScaleFactor();
     }
 
@@ -621,7 +780,7 @@ GLfloat StOutDistorted::getScaleFactor() const {
 void StOutDistorted::checkHdmiPack() {
     myIsHdmiPack = false;
     if(!StWindow::isFullScreen()
-    || myDevice == DEVICE_OCULUS) {
+    || myDevice == DEVICE_HMD) {
         return;
     }
 
@@ -649,20 +808,106 @@ void StOutDistorted::setFullScreen(const bool theFullScreen) {
     }
 }
 
-void StOutDistorted::stglDrawLibOVR() {
-#ifdef ST_HAVE_LIBOVR
+void StOutDistorted::stglDrawVR() {
+#ifdef ST_HAVE_OPENVR
     const StGLBoxPx  aVPBoth    = StWindow::stglViewport(ST_WIN_ALL);
     const StPointD_t aCursorPos = StWindow::getMousePos();
-    if(myOvrHmd == NULL
+    bool hasComposError = false;
+    if(myVrHmd == NULL
+    || myIsBroken) {
+        return;
+    }
+
+    const StGLBoxPx aViewPortL = {{ 0, 0,
+                                    myVrRendSizeX, myVrRendSizeY }};
+    const StGLBoxPx aViewPortR = {{ myVrRendSizeX, 0,
+                                    myVrRendSizeX, myVrRendSizeY }};
+
+    if(!myFrBuffer->initLazy(*myContext, GL_RGBA8, myVrRendSizeX, myVrRendSizeY, StWindow::hasDepthBuffer())) {
+        myIsBroken = true;
+        myMsgQueue->pushError(stCString("OpenVR output - critical error:\nFrame Buffer Object resize failed!"));
+        vr::VR_Shutdown();
+        myVrHmd = NULL;
+        return;
+    }
+
+    // draw into virtual frame buffers (textures)
+    myFrBuffer->setupViewPort(*myContext);       // we set TEXTURE sizes here
+    {
+        myFrBuffer->bindBuffer(*myContext);
+        StWindow::signals.onRedraw(ST_DRAW_LEFT);
+        stglDrawCursor(aCursorPos, ST_DRAW_LEFT);
+
+        vr::Texture_t aVRTexture = { (void* )(size_t )myFrBuffer->getTextureColor()->getTextureId(),  vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
+        const vr::EVRCompositorError aVRError = vr::VRCompositor()->Submit(vr::Eye_Left, &aVRTexture);
+        if(aVRError != vr::VRCompositorError_None) {
+            //myMsgQueue->pushError(getVRCompositorError(aVRError));
+            ST_ERROR_LOG(getVRCompositorError(aVRError));
+            hasComposError = true;
+        }
+        myFrBuffer->unbindBuffer(*myContext);
+    }
+    {
+        myFrBuffer->bindBuffer(*myContext);
+        StWindow::signals.onRedraw(ST_DRAW_RIGHT);
+        stglDrawCursor(aCursorPos, ST_DRAW_RIGHT);
+
+        vr::Texture_t aVRTexture = { (void* )(size_t )myFrBuffer->getTextureColor()->getTextureId(),  vr::TextureType_OpenGL, vr::ColorSpace_Gamma };
+        const vr::EVRCompositorError aVRError = vr::VRCompositor()->Submit(vr::Eye_Right, &aVRTexture);
+        if(aVRError != vr::VRCompositorError_None) {
+            //myMsgQueue->pushError(getVRCompositorError(aVRError));
+            ST_ERROR_LOG(getVRCompositorError(aVRError));
+            hasComposError = true;
+        }
+        myFrBuffer->unbindBuffer(*myContext);
+    }
+    glFinish();
+
+    {
+        const vr::EVRCompositorError aVRError = vr::VRCompositor()->WaitGetPoses(myVrTrackedPoses, vr::k_unMaxTrackedDeviceCount, NULL, 0 );
+        if(aVRError != vr::VRCompositorError_None) {
+            //myMsgQueue->pushError(getVRCompositorError(aVRError));
+            ST_ERROR_LOG(getVRCompositorError(aVRError));
+            hasComposError = true;
+        }
+
+	      if(myVrTrackedPoses[vr::k_unTrackedDeviceIndex_Hmd].bPoseIsValid) {
+            const vr::HmdMatrix34_t& aHeadPos = myVrTrackedPoses[vr::k_unTrackedDeviceIndex_Hmd].mDeviceToAbsoluteTracking;
+            double aRotMat[3][3];
+            for(int aRow = 0; aRow < 3; ++aRow) {
+                for(int aCol = 0; aCol < 3; ++aCol) {
+                    aRotMat[aCol][aRow] = aHeadPos.m[aCol][aRow];
+                }
+            }
+            myVrOrient.setMatrix(aRotMat);
+	      }
+    }
+
+    // real screen buffer
+    myContext->stglBindFramebuffer(StGLFrameBuffer::NO_FRAMEBUFFER);
+
+    if(hasComposError) {
+        myContext->stglResizeViewport(aVPBoth);
+        myContext->stglResetScissorRect();
+        myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        myFPSControl.sleepToTarget(); // decrease FPS to target by thread sleeps
+        StWindow::stglSwap(ST_WIN_ALL);
+        ++myFPSControl;
+    }
+#elif defined(ST_HAVE_LIBOVR)
+    const StGLBoxPx  aVPBoth    = StWindow::stglViewport(ST_WIN_ALL);
+    const StPointD_t aCursorPos = StWindow::getMousePos();
+    if(myVrHmd == NULL
     || myIsBroken) {
         return;
     }
 
     myToReduceGui = true;
-    ovrHmdDesc anHmdDesc = ovr_GetHmdDesc(myOvrHmd);
+    ovrHmdDesc anHmdDesc = ovr_GetHmdDesc(myVrHmd);
     ovrEyeRenderDesc anEyeRenderDesc[2] = {
-        ovr_GetRenderDesc(myOvrHmd, ovrEye_Left,  anHmdDesc.DefaultEyeFov[0]),
-        ovr_GetRenderDesc(myOvrHmd, ovrEye_Right, anHmdDesc.DefaultEyeFov[1])
+        ovr_GetRenderDesc(myVrHmd, ovrEye_Left,  anHmdDesc.DefaultEyeFov[0]),
+        ovr_GetRenderDesc(myVrHmd, ovrEye_Right, anHmdDesc.DefaultEyeFov[1])
     };
     ovrViewScaleDesc aViewScaleDesc;
     aViewScaleDesc.HmdSpaceToWorldScaleInMeters = 1.0f;
@@ -670,9 +915,9 @@ void StOutDistorted::stglDrawLibOVR() {
     aViewScaleDesc.HmdToEyeViewOffset[1] = anEyeRenderDesc[1].HmdToEyeViewOffset;
 
     const StGLBoxPx aViewPortL = {{ 0, 0,
-                                    myOvrSizeX, myOvrSizeY }};
-    const StGLBoxPx aViewPortR = {{ myOvrSizeX, 0,
-                                    myOvrSizeX, myOvrSizeY }};
+                                    myVrRendSizeX, myVrRendSizeY }};
+    const StGLBoxPx aViewPortR = {{ myVrRendSizeX, 0,
+                                    myVrRendSizeX, myVrRendSizeY }};
 
     ovrLayerEyeFov aLayerFov;
     aLayerFov.Header.Type       = ovrLayerType_EyeFov;
@@ -690,13 +935,13 @@ void StOutDistorted::stglDrawLibOVR() {
     aLayerFov.Fov[0]            = anHmdDesc.DefaultEyeFov[0];
     aLayerFov.Fov[1]            = anHmdDesc.DefaultEyeFov[1];
     aLayerFov.SensorSampleTime  = ovr_GetTimeInSeconds();
-    const double aPredictedTime = ovr_GetPredictedDisplayTime(myOvrHmd, 0);
-    ovrTrackingState anHmdState = ovr_GetTrackingState(myOvrHmd, aPredictedTime, ovrTrue);
+    const double aPredictedTime = ovr_GetPredictedDisplayTime(myVrHmd, 0);
+    ovrTrackingState anHmdState = ovr_GetTrackingState(myVrHmd, aPredictedTime, ovrTrue);
     ovr_CalcEyePoses(anHmdState.HeadPose.ThePose, aViewScaleDesc.HmdToEyeViewOffset, aLayerFov.RenderPose);
-    myOvrOrient = StQuaternion<double>((double )aLayerFov.RenderPose[0].Orientation.x,
-                                       (double )aLayerFov.RenderPose[0].Orientation.y,
-                                       (double )aLayerFov.RenderPose[0].Orientation.z,
-                                       (double )aLayerFov.RenderPose[0].Orientation.w);
+    myVrOrient = StQuaternion<double>((double )aLayerFov.RenderPose[0].Orientation.x,
+                                      (double )aLayerFov.RenderPose[0].Orientation.y,
+                                      (double )aLayerFov.RenderPose[0].Orientation.z,
+                                      (double )aLayerFov.RenderPose[0].Orientation.w);
 
     // draw Left View into virtual frame buffer
     myContext->stglResizeViewport(aViewPortL);
@@ -713,7 +958,7 @@ void StOutDistorted::stglDrawLibOVR() {
     myContext->stglBindFramebuffer(StGLFrameBuffer::NO_FRAMEBUFFER);
 
     ovrLayerHeader* aLayers = &aLayerFov.Header;
-    ovrResult anOvrRes = ovr_SubmitFrame(myOvrHmd, 0, &aViewScaleDesc, &aLayers, 1);
+    ovrResult anOvrRes = ovr_SubmitFrame(myVrHmd, 0, &aViewScaleDesc, &aLayers, 1);
     myOvrSwapTexture->CurrentIndex = myOvrSwapTexture->CurrentIndex == 0 ? 1 : 0;
     if(!OVR_SUCCESS(anOvrRes)) {
         myMsgQueue->pushError(stCString("StOutDistorted, Failed to submit swap texture!"));
@@ -746,8 +991,8 @@ void StOutDistorted::stglDraw() {
     myIsStereoOn = isStereoSource
                 && StWindow::isFullScreen()
                 && !myIsBroken;
-#ifdef ST_HAVE_LIBOVR
-    if(myOvrHmd != NULL) {
+#if defined(ST_HAVE_OPENVR) || defined(ST_HAVE_LIBOVR)
+    if(myVrHmd != NULL) {
         myIsStereoOn = isStereoSource
                     && !myIsBroken;
     }
@@ -755,7 +1000,7 @@ void StOutDistorted::stglDraw() {
 
     myIsForcedStereo = myIsStereoOn && params.MonoClone->getValue();
     if(myIsStereoOn
-    && myDevice == DEVICE_OCULUS) {
+    && myDevice == DEVICE_HMD) {
         myMargins = myBarMargins;
     } else {
         myMargins.left   = 0;
@@ -767,13 +1012,13 @@ void StOutDistorted::stglDraw() {
     StWinSplit aWinSplit = StWinSlave_splitOff;
     const Layout aPairLayout = getPairLayout();
     if(myIsStereoOn
-    && (myDevice == DEVICE_OCULUS
+    && (myDevice == DEVICE_HMD
      || aPairLayout == LAYOUT_SIDE_BY_SIDE
      || aPairLayout == LAYOUT_OVER_UNDER)) {
-        aWinSplit = aPairLayout == LAYOUT_OVER_UNDER && myDevice != DEVICE_OCULUS
+        aWinSplit = aPairLayout == LAYOUT_OVER_UNDER && myDevice != DEVICE_HMD
                   ? StWinSlave_splitVertical
                   : StWinSlave_splitHorizontal;
-        if(myDevice != DEVICE_OCULUS
+        if(myDevice != DEVICE_HMD
         && aPairLayout == LAYOUT_OVER_UNDER
         && myIsHdmiPack) {
             // detect special HDMI 3D modes
@@ -814,10 +1059,10 @@ void StOutDistorted::stglDraw() {
         return;
     }
 
-#ifdef ST_HAVE_LIBOVR
-    if(myOvrHmd != NULL
+#if defined(ST_HAVE_OPENVR) || defined(ST_HAVE_LIBOVR)
+    if(myVrHmd != NULL
     && !myIsBroken) {
-        stglDrawLibOVR();
+        stglDrawVR();
         return;
     }
 #endif
@@ -827,7 +1072,7 @@ void StOutDistorted::stglDraw() {
     const StPointD_t aCursorPos = StWindow::getMousePos();
     StGLBoxPx aViewPortL = aVPMaster;
     StGLBoxPx aViewPortR = aVPSlave;
-    if(myDevice != DEVICE_OCULUS) {
+    if(myDevice != DEVICE_HMD) {
         switch(aPairLayout) {
             case LAYOUT_OVER_UNDER_ANAMORPH: {
                 aViewPortR.height() /= 2;
@@ -849,7 +1094,7 @@ void StOutDistorted::stglDraw() {
     }
 
     // simple rendering without FBO
-    if(myDevice != DEVICE_OCULUS
+    if(myDevice != DEVICE_HMD
     && !myIsForcedFboUsage) {
         myContext->stglResizeViewport(aVPBoth);
         myContext->stglSetScissorRect(aVPBoth, false);
@@ -876,7 +1121,7 @@ void StOutDistorted::stglDraw() {
     // resize FBO
     GLint aFrSizeX = aViewPortL.width();
     GLint aFrSizeY = aViewPortL.height();
-    if(myDevice == DEVICE_OCULUS) {
+    if(myDevice == DEVICE_HMD) {
         myToReduceGui = aFrSizeX <= 640;
         aFrSizeX = int(std::ceil(double(aFrSizeX) * 1.25) + 0.5);
         aFrSizeY = int(std::ceil(double(aFrSizeY) * 1.25) + 0.5);
@@ -920,7 +1165,7 @@ void StOutDistorted::stglDraw() {
     StGLProgram*    aProgram   = myProgramFlat.access();
     StGLVarLocation aVertexLoc = myProgramFlat->getVVertexLoc();
     StGLVarLocation aTexCrdLoc = myProgramFlat->getVTexCoordLoc();
-    if(myDevice == DEVICE_OCULUS) {
+    if(myDevice == DEVICE_HMD) {
         aProgram   = myProgramBarrel.access();
         aVertexLoc = myProgramBarrel->getVVertexLoc();
         aTexCrdLoc = myProgramBarrel->getVTexCoordLoc();

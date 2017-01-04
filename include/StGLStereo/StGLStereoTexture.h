@@ -143,6 +143,20 @@ class StGLStereoTexture : public StGLResource {
         myTextures[RIGHT_TEXTURE].setMinMagFilter(theCtx, theMinMagFilter);
     }
 
+    /**
+     * Return the left texture object.
+     */
+    const StGLTexture& getTextureLeft() const {
+        return myTextures[LEFT_TEXTURE];
+    }
+
+    /**
+     * Return the right texture object.
+     */
+    const StGLTexture& getTextureRight() const {
+        return myTextures[RIGHT_TEXTURE];
+    }
+
         protected:
 
     StGLTexture myTextures[2];

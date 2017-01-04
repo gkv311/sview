@@ -1,6 +1,6 @@
 /**
  * StOutDistorted, class providing stereoscopic output in anamorph side by side format using StCore toolkit.
- * Copyright © 2013-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -14,11 +14,18 @@
 #include <StGL/StGLVertexBuffer.h>
 #include <StThreads/StFPSControl.h>
 
+//#define ST_HAVE_OPENVR
+
 class StSettings;
 class StProgramBarrel;
 class StProgramFlat;
 class StGLFrameBuffer;
 class StGLTexture;
+
+namespace vr {
+    class IVRSystem;
+    struct TrackedDevicePose_t;
+}
 
 typedef struct ovrHmdStruct* ovrSession;
 typedef union ovrGLTexture_s ovrGLTexture;
@@ -26,7 +33,7 @@ typedef struct ovrSwapTextureSet_ ovrSwapTextureSet;
 
 /**
  * This class implements stereoscopic rendering on displays
- * wich require software distortion correction.
+ * which require software distortion correction.
  */
 class StOutDistorted : public StWindow {
 
@@ -129,6 +136,16 @@ class StOutDistorted : public StWindow {
     ST_CPPEXPORT virtual bool hasOrientationSensor() const ST_ATTR_OVERRIDE;
 
     /**
+     * Return TRUE if orientation tracking has been activated.
+     */
+    ST_CPPEXPORT virtual bool toTrackOrientation() const ST_ATTR_OVERRIDE;
+
+    /**
+     * Setup flag indicating that orientation tracking should be enabled
+     */
+    ST_CPPEXPORT virtual void setTrackOrientation(const bool theToTrack) ST_ATTR_OVERRIDE;
+
+    /**
      * Get head orientation.
      */
     ST_CPPEXPORT virtual StQuaternion<double> getDeviceOrientation() const ST_ATTR_OVERRIDE;
@@ -163,6 +180,11 @@ class StOutDistorted : public StWindow {
     ST_LOCAL void updateStrings();
 
     /**
+     * Update about text.
+     */
+    ST_LOCAL void updateAbout();
+
+    /**
      * On/off VSync callback.
      */
     ST_LOCAL void doSwitchVSync(const int32_t theValue);
@@ -171,10 +193,10 @@ class StOutDistorted : public StWindow {
                                  const unsigned int theView);
 
     /**
-     * Draw stereo-pair using libOVR.
+     * Draw stereo-pair for VR.
      * To be called from stglDraw().
      */
-    ST_LOCAL void stglDrawLibOVR();
+    ST_LOCAL void stglDrawVR();
 
         private:
 
@@ -185,7 +207,7 @@ class StOutDistorted : public StWindow {
     enum {
         DEVICE_AUTO         =-1,
         DEVICE_DISTORTED    = 0, //!< general output
-        DEVICE_OCULUS       = 1, //!< Oculus Rift
+        DEVICE_HMD          = 1, //!< VR HMD
         DEVICE_S3DV         = 2, //!< S3DV
         DEVICE_NB,
     };
@@ -202,7 +224,7 @@ class StOutDistorted : public StWindow {
      */
     Layout getPairLayout() const {
         switch(myDevice) {
-            case DEVICE_OCULUS:
+            case DEVICE_HMD:
                 return LAYOUT_SIDE_BY_SIDE;
             case DEVICE_S3DV:
                 return LAYOUT_SIDE_BY_SIDE_ANAMORPH;
@@ -224,6 +246,10 @@ class StOutDistorted : public StWindow {
     StOutDevicesList          myDevices;
     StHandle<StSettings>      mySettings;
     StString                  myAbout;           //!< about string
+    StString                  myAboutTitle;      //!< title for About dialog
+    StString                  myAboutVerString;  //!< version string for About dialog
+    StString                  myAboutDescr;      //!< description for About dialog
+    StString                  myAboutVrDevice;   //!< HMD info for About dialog
 
     int                       myDevice;          //!< currently active device
     bool                      myToResetDevice;
@@ -242,11 +268,15 @@ class StOutDistorted : public StWindow {
 
     StMarginsI                myBarMargins;      //!< GUI margins
 
-    ovrSession                myOvrHmd;
-    int                       myOvrSizeX;
-    int                       myOvrSizeY;
-    StQuaternion<double>      myOvrOrient;
-#ifdef ST_HAVE_LIBOVR
+    StQuaternion<double>      myVrOrient;        //!< HMD (head) orientation, excluding translation vector
+    int                       myVrRendSizeX;     //!< FBO width  for rendering into VR (can be greater then actual HMD resolution to compensate distortion)
+    int                       myVrRendSizeY;     //!< FBO height for rendering into VR
+    bool                      myVrTrackOrient;   //!< track orientation flag
+#ifdef ST_HAVE_OPENVR
+    vr::IVRSystem*            myVrHmd;           //!< OpenVR session object
+    vr::TrackedDevicePose_t*  myVrTrackedPoses;  //!< array of tracked devices poses
+#elif defined(ST_HAVE_LIBOVR)
+    ovrSession                myVrHmd;
     ovrSwapTextureSet*        myOvrSwapTexture;
     GLuint                    myOvrSwapFbo[2];
     ovrGLTexture*             myOvrMirrorTexture;

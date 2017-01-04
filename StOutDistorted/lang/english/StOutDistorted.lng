@@ -3,7 +3,7 @@
 --------
 1000=TV (parallel pair)
 1001=Distorted Output
-1002=Oculus Rift
+1002=OpenVR HMD
 1003=Barrel distortion
 1110=Layout
 1111=Side-by-Side
