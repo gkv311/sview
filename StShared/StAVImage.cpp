@@ -573,6 +573,8 @@ bool StAVImage::save(const StString& theFilePath,
             myCodecCtx->pix_fmt = aPFormatAV;
             myCodecCtx->width   = (int )anImage.getSizeX();
             myCodecCtx->height  = (int )anImage.getSizeY();
+            myCodecCtx->time_base.num = 1;
+            myCodecCtx->time_base.den = 1;
             myCodecCtx->compression_level = 9; // 0..9
             break;
         }
