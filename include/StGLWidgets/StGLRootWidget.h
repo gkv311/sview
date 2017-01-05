@@ -408,7 +408,7 @@ class StGLRootWidget : public StGLWidget {
      * Returns mouse cursor position in GL coordinates.
      */
     ST_LOCAL const StPointD_t& getCursorZo() const {
-        return cursorZo;
+        return myCursorZo;
     }
 
     using StGLWidget::stglResize;
@@ -501,7 +501,7 @@ class StGLRootWidget : public StGLWidget {
     GLdouble                  myScaleGlY;      //!< scale factor to optimize convertion from Pixels -> GL coordinates
     GLfloat                   myScaleGUI;      //!< scale factor for GUI elements (text, icons), 1.0 by default
     unsigned int              myResolution;    //!< resolution in DPI (for text rendering), 72 by default, stored with myScaleGUI applied
-    StPointD_t                cursorZo;        //!< mouse cursor position
+    StPointD_t                myCursorZo;      //!< mouse cursor position
     GLint                     myViewport[4];   //!< cached GL viewport
 
     StArrayList<StGLWidget*>  myDestroyList;   //!< list of widgets to be destroyed

@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -26,8 +26,8 @@ StGLWidget::StGLWidget(StGLWidget* theParent,
   myChildren(),
   myPrev(NULL),
   myNext(NULL),
-  userData(0),
-  rectPx(theTop, theTop + theHeight, theLeft, theLeft + theWidth),
+  myUserData(0),
+  myRectPx(theTop, theTop + theHeight, theLeft, theLeft + theWidth),
   myCorner(theCorner),
   myOpacity(1.0f),
   myIsResized(true),
@@ -36,7 +36,7 @@ StGLWidget::StGLWidget(StGLWidget* theParent,
     if(myParent != NULL) {
         myParent->getChildren()->add(this);
     }
-    stMemSet(mouseClicked, 0, sizeof(mouseClicked));
+    stMemSet(myMouseClicked, 0, sizeof(myMouseClicked));
 }
 
 StGLWidget::~StGLWidget() {
@@ -54,10 +54,10 @@ StGLWidget::~StGLWidget() {
 
 void StGLWidget::destroyChildren() {
     // remove own children
-    for(StGLWidget *child(myChildren.getStart()), *deleteChild(NULL); child != NULL;) {
-        deleteChild = child;
-        child = child->getNext();
-        delete deleteChild;
+    for(StGLWidget* aChildIter = myChildren.getStart(); aChildIter != NULL;) {
+        const StGLWidget* aDeleteChild = aChildIter;
+        aChildIter = aChildIter->getNext();
+        delete aDeleteChild;
     }
 }
 
@@ -118,10 +118,10 @@ StRectD_t StGLWidget::getRectGl() const {
 
 /**
  * Helper function to convert relative coordinates to absolute.
- * @param theParentRect (const StRectI_t& ) - parent widget absolute position;
- * @param theChildRect  (const StRectI_t& ) - child widget position relative to parent;
- * @param theCorner     (const StGLCorner ) - corner modifier for child widget relative to parent;
- * @return child widget absolute position.
+ * @param theParentRect parent widget absolute position
+ * @param theChildRect  child widget position relative to parent
+ * @param theCorner     corner modifier for child widget relative to parent
+ * @return child widget absolute position
  */
 inline StRectI_t computeAbsolutePos(const StRectI_t& theParentRect,
                                     const StRectI_t& theChildRect,
@@ -157,9 +157,9 @@ void StGLWidget::getRectGl(StArray<StGLVec2>& theVertices) const {
 
 StRectI_t StGLWidget::getRectPxAbsolute() const {
     if(myParent == NULL) {
-        return rectPx;
+        return myRectPx;
     }
-    return computeAbsolutePos(myParent->getRectPxAbsolute(), rectPx, myCorner);
+    return computeAbsolutePos(myParent->getRectPxAbsolute(), myRectPx, myCorner);
 }
 
 StRectI_t StGLWidget::getAbsolute(const StRectI_t& theRectPx) const {
@@ -209,63 +209,63 @@ double StGLAnimationLerp::perform(bool theDirUp, bool theToForce) {
     return myValue;
 }
 
-void StGLWidget::stglUpdate(const StPointD_t& cursorZo) {
+void StGLWidget::stglUpdate(const StPointD_t& theCursorZo) {
     if(!isVisible()) {
         return;
     }
 
-    for(StGLWidget *child(myChildren.getStart()), *childActive(NULL); child != NULL;) {
-        childActive = child;
-        child = child->getNext();
-        childActive->stglUpdate(cursorZo);
+    for(StGLWidget* aChildIter = myChildren.getStart(); aChildIter != NULL;) {
+        StGLWidget* aChildActive = aChildIter;
+        aChildIter = aChildIter->getNext();
+        aChildActive->stglUpdate(theCursorZo);
     }
 }
 
 void StGLWidget::stglResize() {
-    for(StGLWidget *child(myChildren.getStart()), *childActive(NULL); child != NULL;) {
-        childActive = child;
-        child = child->getNext();
-        childActive->stglResize();
+    for(StGLWidget* aChildIter = myChildren.getStart(); aChildIter != NULL;) {
+        StGLWidget* aChildActive = aChildIter;
+        aChildIter = aChildIter->getNext();
+        aChildActive->stglResize();
     }
     myIsResized = false;
 }
 
 bool StGLWidget::stglInit() {
-    bool success = true;
-    for(StGLWidget *child(myChildren.getStart()), *childActive(NULL); child != NULL;) {
-        childActive = child;
-        child = child->getNext();
-        success = childActive->stglInit() && success;
+    bool isSuccess = true;
+    for(StGLWidget* aChildIter = myChildren.getStart(); aChildIter != NULL;) {
+        StGLWidget* aChildActive = aChildIter;
+        aChildIter = aChildIter->getNext();
+        isSuccess = aChildActive->stglInit() && isSuccess;
     }
-    return success;
+    return isSuccess;
 }
 
-void StGLWidget::stglDraw(unsigned int view) {
+void StGLWidget::stglDraw(unsigned int theView) {
     if(!isVisible()) {
         return;
     }
-    for(StGLWidget *child(myChildren.getStart()), *childActive(NULL); child != NULL;) {
-        childActive = child;
-        child = child->getNext();
-        childActive->stglDraw(view);
+    for(StGLWidget* aChildIter = myChildren.getStart(); aChildIter != NULL;) {
+        StGLWidget* aChildActive = aChildIter;
+        aChildIter = aChildIter->getNext();
+        aChildActive->stglDraw(theView);
     }
 }
 
-bool StGLWidget::isClicked(const int& mouseBtn) const {
-    if(mouseBtn > ST_MOUSE_MAX_ID) {
+bool StGLWidget::isClicked(int theMouseBtn) const {
+    if(theMouseBtn > ST_MOUSE_MAX_ID) {
         // ignore out of range buttons
         return false;
     }
-    return mouseClicked[mouseBtn];
+    return myMouseClicked[theMouseBtn];
 }
 
-void StGLWidget::setClicked(const int& mouseBtn, bool isClicked) {
-    if(mouseBtn > ST_MOUSE_MAX_ID) {
+void StGLWidget::setClicked(int theMouseBtn, bool theIsClicked) {
+    if(theMouseBtn > ST_MOUSE_MAX_ID) {
         // ignore out of range buttons
-        ST_DEBUG_LOG("StGLWidget, mouse button click #" + mouseBtn + " ignored!");
+        ST_DEBUG_LOG("StGLWidget, mouse button click #" + theMouseBtn + " ignored!");
         return;
     }
-    mouseClicked[mouseBtn] = isClicked;
+    myMouseClicked[theMouseBtn] = theIsClicked;
 }
 
 bool StGLWidget::tryClick(const StClickEvent& theEvent,
@@ -274,9 +274,9 @@ bool StGLWidget::tryClick(const StClickEvent& theEvent,
         return false;
     }
 
-    for(StGLWidget *aChildIter(myChildren.getLast()), *aChildActive(NULL); aChildIter != NULL;) {
-        aChildActive = aChildIter;
-        aChildIter   = aChildIter->getPrev();
+    for(StGLWidget* aChildIter = myChildren.getLast(); aChildIter != NULL;) {
+        StGLWidget* aChildActive = aChildIter;
+        aChildIter = aChildIter->getPrev();
         aChildActive->tryClick(theEvent, theIsItemClicked);
     }
     if(!theIsItemClicked && isPointIn(StPointD_t(theEvent.PointX, theEvent.PointY))) {
@@ -293,8 +293,8 @@ bool StGLWidget::tryUnClick(const StClickEvent& theEvent,
         return false;
     }
 
-    for(StGLWidget *aChildIter(myChildren.getLast()), *aChildActive(NULL); aChildIter != NULL;) {
-        aChildActive = aChildIter;
+    for(StGLWidget* aChildIter = myChildren.getLast(); aChildIter != NULL;) {
+        StGLWidget* aChildActive = aChildIter;
         aChildIter   = aChildIter->getPrev();
         aChildActive->tryUnClick(theEvent, theIsItemUnclicked);
     }
@@ -328,9 +328,9 @@ bool StGLWidget::doScroll(const StScrollEvent& theEvent) {
     }
 
     StPointD_t aPnt(theEvent.PointX, theEvent.PointY);
-    for(StGLWidget *aChildIter(myChildren.getLast()), *aChildActive(NULL); aChildIter != NULL;) {
-        aChildActive = aChildIter;
-        aChildIter   = aChildIter->getPrev();
+    for(StGLWidget* aChildIter = myChildren.getLast(); aChildIter != NULL;) {
+        StGLWidget* aChildActive = aChildIter;
+        aChildIter = aChildIter->getPrev();
         if(aChildActive->isVisibleAndPointIn(aPnt)
         && aChildActive->doScroll(theEvent)) {
             return true;
@@ -352,9 +352,9 @@ void StGLWidget::destroyWithDelay(StGLWidget* theWidget) {
 }
 
 StGLContainer::StGLContainer(StGLWidget* theParent,
-                             const int theLeft,  const int theTop,
-                             const StGLCorner theCorner,
-                             const int theWidth, const int theHeight)
+                             int theLeft, int theTop,
+                             StGLCorner theCorner,
+                             int theWidth, int theHeight)
 : StGLWidget(theParent, theLeft, theTop, theCorner, theWidth, theHeight) {}
 
 StGLContainer::~StGLContainer() {}
@@ -364,9 +364,9 @@ bool StGLContainer::tryClick(const StClickEvent& theEvent,
     if(!isVisible()) {
         return false;
     }
-    for(StGLWidget *aChildIter(myChildren.getLast()), *aChildActive(NULL); aChildIter != NULL;) {
-        aChildActive = aChildIter;
-        aChildIter   = aChildIter->getPrev();
+    for(StGLWidget* aChildIter = myChildren.getLast(); aChildIter != NULL;) {
+        StGLWidget* aChildActive = aChildIter;
+        aChildIter = aChildIter->getPrev();
         aChildActive->tryClick(theEvent, theIsItemClicked);
     }
     return false;
@@ -377,9 +377,9 @@ bool StGLContainer::tryUnClick(const StClickEvent& theEvent,
     if(!isVisible()) {
         return false;
     }
-    for(StGLWidget *aChildIter(myChildren.getLast()), *aChildActive(NULL); aChildIter != NULL;) {
-        aChildActive = aChildIter;
-        aChildIter   = aChildIter->getPrev();
+    for(StGLWidget* aChildIter = myChildren.getLast(); aChildIter != NULL;) {
+        StGLWidget* aChildActive = aChildIter;
+        aChildIter = aChildIter->getPrev();
         aChildActive->tryUnClick(theEvent, theIsItemUnclicked);
     }
     return false;
@@ -390,7 +390,7 @@ void StGLWidget::setOpacity(const float theOpacity, bool theToSetChildren) {
     if(!theToSetChildren) {
         return;
     }
-    for(StGLWidget *aChildIter(myChildren.getStart()); aChildIter != NULL; aChildIter = aChildIter->getNext()) {
+    for(StGLWidget* aChildIter = myChildren.getStart(); aChildIter != NULL; aChildIter = aChildIter->getNext()) {
         aChildIter->setOpacity(theOpacity, theToSetChildren);
     }
 }

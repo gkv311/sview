@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -83,18 +83,18 @@ class StGLWidget {
     /**
      * @return root (absolute parent) widget
      */
-    inline StGLRootWidget* getRoot() {
+    ST_LOCAL StGLRootWidget* getRoot() {
         return myRoot;
     }
 
     /**
      * @return parent widget (one level up)
      */
-    inline StGLWidget* getParent() {
+    ST_LOCAL StGLWidget* getParent() {
         return myParent;
     }
 
-    inline StGLWidgetList* getChildren() {
+    ST_LOCAL StGLWidgetList* getChildren() {
         return &myChildren;
     }
 
@@ -109,7 +109,7 @@ class StGLWidget {
     /**
      * @return link to previous item in the list
      */
-    inline StGLWidget* getPrev() {
+    ST_LOCAL StGLWidget* getPrev() {
         return myPrev;
     }
 
@@ -121,7 +121,7 @@ class StGLWidget {
     /**
      * @return link to next item in the list
      */
-    inline StGLWidget* getNext() {
+    ST_LOCAL StGLWidget* getNext() {
         return myNext;
     }
 
@@ -133,14 +133,14 @@ class StGLWidget {
     /**
      * @return true if this item not first in the list
      */
-    inline bool hasPrev() const {
+    ST_LOCAL bool hasPrev() const {
         return myPrev != NULL;
     }
 
     /**
      * @return true if this item not last in the list
      */
-    inline bool hasNext() const {
+    ST_LOCAL bool hasNext() const {
         return myNext != NULL;
     }
 
@@ -180,7 +180,7 @@ class StGLWidget {
      * @return rectangle
      */
     ST_LOCAL const StRectI_t& getRectPx() const {
-        return rectPx;
+        return myRectPx;
     }
 
     /**
@@ -188,7 +188,7 @@ class StGLWidget {
      */
     ST_LOCAL void setRectPx(const StRectI_t& theRectPx) {
         myIsResized = true;
-        this->rectPx = theRectPx;
+        myRectPx = theRectPx;
     }
 
     /**
@@ -197,7 +197,7 @@ class StGLWidget {
      */
     ST_LOCAL StRectI_t& changeRectPx() {
         myIsResized = true;
-        return rectPx;
+        return myRectPx;
     }
 
     /**
@@ -269,7 +269,7 @@ class StGLWidget {
     /**
      * @return true if widget can process input events
      */
-    inline bool isTopWidget() const {
+    ST_LOCAL bool isTopWidget() const {
         return myIsTopWidget;
     }
 
@@ -278,14 +278,14 @@ class StGLWidget {
      * @param theMouseBtn mouse button id
      * @return isClicked
      */
-    ST_CPPEXPORT bool isClicked(const int& theMouseBtn) const;
+    ST_CPPEXPORT bool isClicked(int theMouseBtn) const;
 
     /**
      * Change clicking state.
      * @param theMouseBtn mouse button id
      * @param isClicked.
      */
-    ST_CPPEXPORT void setClicked(const int& theMouseBtn, bool isClicked);
+    ST_CPPEXPORT void setClicked(int theMouseBtn, bool isClicked);
 
     /**
      * Function iterate children and self to change clicking state.
@@ -373,15 +373,15 @@ class StGLWidget {
     /**
      * @return user-defined data
      */
-    inline size_t getUserData() const {
-        return userData;
+    ST_LOCAL size_t getUserData() const {
+        return myUserData;
     }
 
     /**
      * @param userData user-defined data
      */
-    inline void setUserData(const size_t theUserData) {
-        this->userData = theUserData;
+    ST_LOCAL void setUserData(const size_t theUserData) {
+        myUserData = theUserData;
     }
 
     /**
@@ -450,10 +450,10 @@ class StGLWidget {
     StGLWidget*     myPrev;          //!< previous item in array
     StGLWidget*     myNext;          //!< next item in array
 
-    size_t          userData;        //!< user-defined data
-    StRectI_t       rectPx;          //!< area coordinates in pixels
+    size_t          myUserData;      //!< user-defined data
+    StRectI_t       myRectPx;        //!< area coordinates in pixels
     StMarginsI      myMargins;       //!< extra margins before main content of the widget (text, image, etc.)
-    bool mouseClicked[ST_MOUSE_MAX_ID + 1]; // mouse clicking state
+    bool myMouseClicked[ST_MOUSE_MAX_ID + 1]; //!< mouse clicking state
 
         protected: //! @name fields available to inheritors
 
@@ -473,9 +473,9 @@ class ST_LOCAL StGLContainer : public StGLWidget {
         public: //! @name public methods
 
     ST_CPPEXPORT StGLContainer(StGLWidget* theParent,
-                               const int   theLeft = 32, const int    theTop = 32,
-                               const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
-                               const int  theWidth = 32, const int theHeight = 32);
+                               int theLeft = 32,  int theTop = 32,
+                               StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                               int theWidth = 32, int theHeight = 32);
 
     ST_CPPEXPORT virtual ~StGLContainer();
 

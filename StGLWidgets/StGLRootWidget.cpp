@@ -61,7 +61,7 @@ StGLRootWidget::StGLRootWidget(const StHandle<StResourceManager>& theResMgr)
   myScaleGlY(1.0),
   myScaleGUI(1.0f),
   myResolution(72),
-  cursorZo(0.0, 0.0),
+  myCursorZo(0.0, 0.0),
   myFocusWidget(NULL),
   myModalDialog(NULL),
   myIsMenuPressed(false),
@@ -309,7 +309,7 @@ StGLSharePointer* StGLRootWidget::getShare(const size_t theResId) {
 }
 
 void StGLRootWidget::stglUpdate(const StPointD_t& theCursorZo) {
-    cursorZo = theCursorZo;
+    myCursorZo = theCursorZo;
     StGLWidget::stglUpdate(theCursorZo);
 }
 
@@ -397,37 +397,37 @@ void StGLRootWidget::getRectGl(const StRectI_t& theRectPx,
 
 bool StGLRootWidget::tryClick(const StClickEvent& theEvent,
                               bool&               theIsItemClicked) {
-    const StPointD_t aCursorBack = cursorZo;
-    cursorZo = StPointD_t(theEvent.PointX, theEvent.PointY);
-    if(isPointIn(cursorZo)) {
+    const StPointD_t aCursorBack = myCursorZo;
+    myCursorZo = StPointD_t(theEvent.PointX, theEvent.PointY);
+    if(isPointIn(myCursorZo)) {
         setClicked(theEvent.Button, true);
     }
     const bool aResult = StGLWidget::tryClick(theEvent, theIsItemClicked);
-    cursorZo = aCursorBack;
+    myCursorZo = aCursorBack;
     return aResult;
 }
 
 bool StGLRootWidget::tryUnClick(const StClickEvent& theEvent,
                                 bool&               theIsItemUnclicked) {
-    const StPointD_t aCursorBack = cursorZo;
-    cursorZo = StPointD_t(theEvent.PointX, theEvent.PointY);
-    if(isPointIn(cursorZo)) {
+    const StPointD_t aCursorBack = myCursorZo;
+    myCursorZo = StPointD_t(theEvent.PointX, theEvent.PointY);
+    if(isPointIn(myCursorZo)) {
         setClicked(theEvent.Button, false);
     }
 
     const bool aResult = StGLWidget::tryUnClick(theEvent, theIsItemUnclicked);
     clearDestroyList();
-    cursorZo = aCursorBack;
+    myCursorZo = aCursorBack;
     return aResult;
 }
 
 bool StGLRootWidget::doScroll(const StScrollEvent& theEvent) {
-    const StPointD_t aCursorBack = cursorZo;
-    cursorZo = StPointD_t(theEvent.PointX, theEvent.PointY);
+    const StPointD_t aCursorBack = myCursorZo;
+    myCursorZo = StPointD_t(theEvent.PointX, theEvent.PointY);
 
     const bool aResult = StGLWidget::doScroll(theEvent);
     clearDestroyList();
-    cursorZo = aCursorBack;
+    myCursorZo = aCursorBack;
     return aResult;
 }
 
