@@ -201,8 +201,8 @@ namespace {
     };
 
     // we use negative scale factor to show sphere inside out!
-    static const GLfloat SPHERE_RADIUS     = -10.0f;
-    static const GLfloat PANORAMA_DEF_ZOOM = 0.45f;
+    static const float THE_SPHERE_RADIUS     = -10.0f;
+    static const float THE_PANORAMA_DEF_ZOOM = 0.45f;
 
 }
 
@@ -451,20 +451,21 @@ bool StGLImageRegion::stglInit() {
 StGLVec2 StGLImageRegion::getMouseMoveFlat(const StPointD_t& theCursorZoFrom,
                                            const StPointD_t& theCursorZoTo) {
     // apply scale factor in case of working area margins
-    const double aScaleX = double(myRoot->getRectPx().width())  / double(myRoot->getRootFullSizeX());
-    const double aScaleY = double(myRoot->getRectPx().height()) / double(myRoot->getRootFullSizeY());
-    return StGLVec2(float( 2.0 * double(theCursorZoTo.x() - theCursorZoFrom.x()) * aScaleX),
-                    float(-2.0 * double(theCursorZoTo.y() - theCursorZoFrom.y()) * aScaleY));
+    const double aVrScale = 1.0 / myRoot->getVrZoomOut();
+    const double aScaleX  = double(myRoot->getRectPx().width())  / double(myRoot->getRootFullSizeX());
+    const double aScaleY  = double(myRoot->getRectPx().height()) / double(myRoot->getRootFullSizeY());
+    return StGLVec2(float( 2.0 * double(theCursorZoTo.x() - theCursorZoFrom.x()) * aScaleX * aVrScale),
+                    float(-2.0 * double(theCursorZoTo.y() - theCursorZoFrom.y()) * aScaleY * aVrScale));
 }
 
 StGLVec2 StGLImageRegion::getMouseMoveSphere(const StPointD_t& theCursorZoFrom,
                                              const StPointD_t& theCursorZoTo) {
     StGLVec2 aVec = getMouseMoveFlat(theCursorZoFrom, theCursorZoTo);
-    GLfloat aSphereScale = SPHERE_RADIUS * PANORAMA_DEF_ZOOM * getSource()->ScaleFactor;
+    float aSphereScale = THE_SPHERE_RADIUS * THE_PANORAMA_DEF_ZOOM * getSource()->ScaleFactor;
     StRectD_t aZParams;
     getCamera()->getZParams(getCamera()->getZNear(), aZParams);
-    aVec.x() *= -90.0f * GLfloat(aZParams.right() - aZParams.left()) / aSphereScale;
-    aVec.y() *=  90.0f * GLfloat(aZParams.bottom() - aZParams.top()) / aSphereScale;
+    aVec.x() *= -90.0f * float(aZParams.right() - aZParams.left()) / aSphereScale;
+    aVec.y() *=  90.0f * float(aZParams.bottom() - aZParams.top()) / aSphereScale;
     return aVec;
 }
 
@@ -639,6 +640,8 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
     const GLfloat  aScaleBack = aParams->ScaleFactor;
     const StGLVec2 aPanBack   = aParams->PanCenter;
 
+    const float aVrScale = float(myRoot->getVrZoomOut());
+
     StStereoParams::ViewMode aViewMode = aParams->ViewingMode;
     if(aTextures.getPlane(0).getTarget() == GL_TEXTURE_CUBE_MAP) {
         aViewMode = StStereoParams::PANORAMA_CUBEMAP;
@@ -706,7 +709,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             }
 
             // apply scale
-            aModelMat.scale(aParams->ScaleFactor, aParams->ScaleFactor, 1.0f);
+            aModelMat.scale(aParams->ScaleFactor * aVrScale, aParams->ScaleFactor * aVrScale, 1.0f);
 
             // apply position
             aModelMat.translate(StGLVec3(aParams->PanCenter));
@@ -801,7 +804,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             myProgram.setTextureMainDataSize(aCtx, aClampVec);
             myProgram.setTextureUVDataSize  (aCtx, aClampUV);
 
-            const GLfloat aScale = aParams->ScaleFactor * PANORAMA_DEF_ZOOM;
+            const float aScale = THE_PANORAMA_DEF_ZOOM * aParams->ScaleFactor * aVrScale;
             aModelMat.scale(aScale, aScale, 1.0f);
 
             // compute orientation
@@ -855,8 +858,8 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             }
 
             // perform scaling
-            const GLfloat aScale = SPHERE_RADIUS * PANORAMA_DEF_ZOOM * aParams->ScaleFactor;
-            aModelMat.scale(aScale, aScale, SPHERE_RADIUS);
+            const float aScale = THE_SPHERE_RADIUS * THE_PANORAMA_DEF_ZOOM * aParams->ScaleFactor * aVrScale;
+            aModelMat.scale(aScale, aScale, THE_SPHERE_RADIUS);
 
             // compute orientation
             StGLVec2 aMouseMove = getMouseMoveSphere();

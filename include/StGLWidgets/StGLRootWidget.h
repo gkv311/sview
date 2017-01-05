@@ -301,6 +301,16 @@ class StGLRootWidget : public StGLWidget {
     }
 
     /**
+     * Return scale factor to downscale the main image for VR (e.g. with HMD having great FOV),
+     * or 1.0 for normal displays.
+     */
+    ST_LOCAL double getVrZoomOut() const {
+        return myMarginsPx.top != 0
+             ? 0.74 //1.0 - double(myMarginsPx.top) / double(getRootFullSizeY())
+             : 1.0;
+    }
+
+    /**
      * Convert pixel coordinates (absolute) into GL coordinates.
      */
     ST_CPPEXPORT StRectD_t getRectGl(const StRectI_t& theRectPx) const;
