@@ -241,6 +241,8 @@ StOutDual::StOutDual(const StHandle<StResourceManager>& theResMgr,
     params.SlaveMonId->signals.onChanged.connect(this, &StOutDual::doSlaveMon);
 
     params.MonoClone = new StBoolParamNamed(false, stCString("monoClone"), stCString("monoClone"));
+    updateStrings();
+
     mySettings->loadParam(params.MonoClone);
 
     // load window position
@@ -251,7 +253,6 @@ StOutDual::StOutDual(const StHandle<StResourceManager>& theResMgr,
         }
         StWindow::setPlacement(aRect, true);
     }
-    updateStrings();
     StWindow::setTitle("sView - Dual Renderer");
 
     // load device settings

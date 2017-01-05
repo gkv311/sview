@@ -330,6 +330,8 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
     params.MonoClone = new StBoolParamNamed(false, stCString("monoClone"), stCString("monoClone"));
     // Layout option
     params.Layout = new StEnumParam(myCanHdmiPack ? LAYOUT_OVER_UNDER : LAYOUT_SIDE_BY_SIDE_ANAMORPH, stCString("layout"), stCString("layout"));
+    updateStrings();
+
     // load window position
     if(isMovable()) {
         StRect<int32_t> aRect;
@@ -341,7 +343,6 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam(params.MonoClone);
     mySettings->loadParam(params.Layout);
     checkHdmiPack();
-    updateStrings();
     StWindow::setTitle("sView - Distorted Renderer");
 
     mySettings->loadFloatVec4(ST_SETTING_WARP_COEF, myBarrelCoef);

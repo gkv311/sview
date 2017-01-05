@@ -154,6 +154,7 @@ StOutIZ3D::StOutIZ3D(const StHandle<StResourceManager>& theResMgr,
     // shader switch option
     params.Glasses = new StEnumParam(myShaders.getMode(), stCString("tableId"), stCString("tableId"));
     params.Glasses->signals.onChanged.connect(&myShaders, &StOutIZ3DShaders::doSetMode);
+    updateStrings();
 
     // load window position
     if(isMovable()) {
@@ -163,7 +164,7 @@ StOutIZ3D::StOutIZ3D(const StHandle<StResourceManager>& theResMgr,
         }
         StWindow::setPlacement(aRect, true);
     }
-    updateStrings();
+
     StWindow::setTitle("sView - iZ3D Renderer");
 
     // load parameters

@@ -284,11 +284,11 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     // options
     params.ToReverse = new StBoolParamNamed(false, stCString("reverse"),     stCString("reverse"));
     params.BindToMon = new StBoolParamNamed(true,  stCString("bindMonitor"), stCString("bindMonitor"));
+    updateStrings();
+
     mySettings->loadParam(params.ToReverse);
     mySettings->loadParam(params.BindToMon);
-
     params.BindToMon->signals.onChanged.connect(this, &StOutInterlace::doSetBindToMonitor);
-    updateStrings();
 
     // load window position
     if(isMovable()) {
