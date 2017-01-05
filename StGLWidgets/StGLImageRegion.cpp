@@ -664,14 +664,6 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             myProgram.setTextureMainDataSize(aCtx, aClampVec);
             myProgram.setTextureUVDataSize  (aCtx, aClampUV);
 
-            // lenses center correction
-            const GLfloat aLestDisp = getRoot()->getLensDist() * GLfloat(getRoot()->getRectPx().ratio());
-            if(theView == ST_DRAW_LEFT) {
-                aModelMat.translate(StGLVec3( aLestDisp, 0.0f, 0.0f));
-            } else {
-                aModelMat.translate(StGLVec3(-aLestDisp, 0.0f, 0.0f));
-            }
-
             // handle dragging timer
             if( isClicked(ST_MOUSE_LEFT)
             && !myIsClickAborted
