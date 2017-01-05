@@ -267,14 +267,14 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
     const StSearchMonitors& aMonitors = StWindow::getMonitors();
 
     // detect connected displays
-    int aSupportOculus   = ST_DEVICE_SUPPORT_NONE;
+    int aSupportOpenVr   = ST_DEVICE_SUPPORT_NONE;
     int aSupportParallel = ST_DEVICE_SUPPORT_NONE;
     int aSupportS3DV     = ST_DEVICE_SUPPORT_NONE;
     for(size_t aMonIter = 0; aMonIter < aMonitors.size(); ++aMonIter) {
         const StMonitor& aMon = aMonitors[aMonIter];
         if(aMon.getPnPId().isStartsWith(stCString("OVR"))) {
             // Oculus Rift
-            aSupportOculus = ST_DEVICE_SUPPORT_HIGHT;
+            aSupportOpenVr = ST_DEVICE_SUPPORT_HIGHT;
             break;
         } else if(aMon.getPnPId().isEquals(stCString("ST@S3DV"))) {
             aSupportS3DV = ST_DEVICE_SUPPORT_PREFER;
@@ -290,12 +290,16 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
         }
     }
 
-#ifdef ST_HAVE_LIBOVR
+#ifdef ST_HAVE_OPENVR
+    if(vr::VR_IsHmdPresent()) {
+        aSupportOpenVr = ST_DEVICE_SUPPORT_PREFER;
+    }
+#elif defined(ST_HAVE_LIBOVR)
     const ovrResult anOvrRes = ovr_Initialize(NULL);
     if(!OVR_SUCCESS(anOvrRes)) {
         ST_ERROR_LOG("StOutDistorted, OVR initialization has failed!");
     } else {
-        aSupportOculus = ST_DEVICE_SUPPORT_HIGHT;
+        aSupportOpenVr = ST_DEVICE_SUPPORT_HIGHT;
     }
 #endif
 
@@ -310,7 +314,7 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
     StHandle<StOutDevice> aDevVR = new StOutDevice();
     aDevVR->PluginId = ST_OUT_PLUGIN_NAME;
     aDevVR->DeviceId = stCString("OpenVR");
-    aDevVR->Priority = aSupportOculus;
+    aDevVR->Priority = aSupportOpenVr;
     aDevVR->Name     = stCString("OpenVR");
     myDevices.add(aDevVR);
 
