@@ -1125,7 +1125,12 @@ void StImageViewer::doOpen1FileFromGui(StHandle<StString> thePath) {
     myOpenDialog->setPaths(*thePath, "");
 }
 
-void StImageViewer::doOpen1FileDialog(const size_t ) {
+void StImageViewer::doOpen1FileAction(const size_t ) {
+    if(!myGUI.isNull() && (myWindow->isFullScreen() || myGUI->isMobile())) {
+        myGUI->doOpenFile(0);
+        return;
+    }
+
     myOpenDialog->openDialog(1);
 }
 

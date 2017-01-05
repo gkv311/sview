@@ -132,7 +132,7 @@ void StMoviePlayerGUI::createUpperToolbar() {
 
     // append the textured buttons
     myBtnOpen = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop);
-    myBtnOpen->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doOpen1File);
+    myBtnOpen->signals.onBtnClick.connect(myPlugin, &StMoviePlayer::doOpen1FileAction);
     myBtnOpen->setTexturePath(iconTexture(stCString("actionOpen"), anIconSize));
     myBtnOpen->setDrawShadow(true);
     myBtnOpen->changeMargins() = aButtonMargins;
@@ -1290,11 +1290,6 @@ void StMoviePlayerGUI::createMobileBottomToolbar() {
 }
 
 void StMoviePlayerGUI::doOpenFile(const size_t ) {
-    /*if(!isMobile()) {
-        myPlugin->doOpen1File();
-        return;
-    }*/
-
     StGLOpenFile* aDialog = new StGLOpenFile(this, tr(DIALOG_OPEN_FILE), tr(BUTTON_CLOSE));
     aDialog->setMimeList(myPlugin->myVideo->getMimeListVideo());
 #if defined(_WIN32)

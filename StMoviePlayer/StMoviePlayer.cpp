@@ -404,7 +404,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     anAction = new StActionIntSlot(stCString("DoSeekRight"), stSlot(this, &StMoviePlayer::doSeekRight), 0);
     addAction(Action_SeekRight5, anAction, ST_VK_RIGHT);
 
-    anAction = new StActionIntSlot(stCString("DoOpen1File"), stSlot(this, &StMoviePlayer::doOpen1File), 0);
+    anAction = new StActionIntSlot(stCString("DoOpen1File"), stSlot(this, &StMoviePlayer::doOpen1FileAction), 0);
 #ifdef __APPLE__
     addAction(Action_Open1File, anAction, ST_VK_O | ST_VF_CONTROL, ST_VK_O | ST_VF_COMMAND);
 #else
@@ -1715,7 +1715,11 @@ void StMoviePlayer::doOpen1FileFromGui(StHandle<StString> thePath) {
     myOpenDialog->setPaths(*thePath, "");
 }
 
-void StMoviePlayer::doOpen1File(const size_t ) {
+void StMoviePlayer::doOpen1FileAction(const size_t ) {
+    if(!myGUI.isNull() && (myWindow->isFullScreen() || myGUI->isMobile())) {
+        myGUI->doOpenFile(0);
+        return;
+    }
     myOpenDialog->openDialog(StMovieOpenDialog::Dialog_SingleMovie);
 }
 

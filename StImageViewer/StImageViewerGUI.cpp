@@ -133,7 +133,7 @@ void StImageViewerGUI::createUpperToolbar() {
 
     // append textured buttons
     myBtnOpen   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop);
-    myBtnOpen->signals.onBtnClick.connect(myPlugin, &StImageViewer::doOpen1FileDialog);
+    myBtnOpen->signals.onBtnClick.connect(myPlugin, &StImageViewer::doOpen1FileAction);
     myBtnOpen->setTexturePath(iconTexture(stCString("actionOpen"), anIconSize));
     myBtnOpen->setDrawShadow(true);
     myBtnOpen->changeMargins() = aButtonMargins;
@@ -249,7 +249,7 @@ StGLMenu* StImageViewerGUI::createMediaMenu() {
 StGLMenu* StImageViewerGUI::createOpenImageMenu() {
     StGLMenu* menu = new StGLMenu(this, 0, 0, StGLMenu::MENU_VERTICAL);
     menu->addItem(tr(MENU_MEDIA_OPEN_IMAGE_1), 1)
-        ->signals.onItemClick.connect(myPlugin, &StImageViewer::doOpen1FileDialog);
+        ->signals.onItemClick.connect(myPlugin, &StImageViewer::doOpen1FileAction);
     menu->addItem(tr(MENU_MEDIA_OPEN_IMAGE_2), 2)
         ->signals.onItemClick.connect(myPlugin, &StImageViewer::doOpen2FilesDialog);
     return menu;
@@ -992,11 +992,6 @@ void StImageViewerGUI::createMobileBottomToolbar() {
 }
 
 void StImageViewerGUI::doOpenFile(const size_t ) {
-    /*if(!isMobile()) {
-        myPlugin->doOpen1FileDialog();
-        return;
-    }*/
-
     StGLOpenFile* aDialog = new StGLOpenFile(this, tr(DIALOG_OPEN_FILE), tr(BUTTON_CLOSE));
     aDialog->setMimeList(myPlugin->myLoader->getMimeList());
 #if defined(_WIN32)
