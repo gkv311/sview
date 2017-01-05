@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -128,8 +128,7 @@ void StMoviePlayerGUI::createUpperToolbar() {
     const int      anIconStep = scale(48);
     aButtonMargins.extend(scale(8));
 
-    const StMarginsI& aMargins = getRootMargins();
-    myPanelUpper = new StGLContainer(this, aMargins.left, aMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(128));
+    myPanelUpper = new StGLContainer(this, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(128));
 
     // append the textured buttons
     myBtnOpen = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop);
@@ -213,7 +212,6 @@ void StMoviePlayerGUI::createUpperToolbar() {
  */
 void StMoviePlayerGUI::createBottomToolbar(const int theIconSize,
                                            const int theIconSizeSmall) {
-    const StMarginsI& aMargins = getRootMargins();
     StMarginsI aButtonMargins, aButtonMarginsSmall;
     const IconSize anIconSize      = scaleIcon(theIconSize,      aButtonMargins);
     const IconSize anIconSizeSmall = scaleIcon(theIconSizeSmall, aButtonMarginsSmall);
@@ -221,9 +219,7 @@ void StMoviePlayerGUI::createBottomToolbar(const int theIconSize,
 
     myBottomBarNbLeft  = 0;
     myBottomBarNbRight = 0;
-    myPanelBottom = new StGLContainer(this,
-                                       aMargins.left   + scale(DISPL_X_REGION_BOTTOM),
-                                      -aMargins.bottom,
+    myPanelBottom = new StGLContainer(this, scale(DISPL_X_REGION_BOTTOM), 0,
                                       StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT),
                                       scale(4096), anIconStep);
 
@@ -307,8 +303,7 @@ void StMoviePlayerGUI::createBottomToolbar(const int theIconSize,
  * Main menu
  */
 void StMoviePlayerGUI::createMainMenu() {
-    const StMarginsI& aMargins = getRootMargins();
-    myMenuRoot = new StGLMenu(this, aMargins.left, aMargins.top, StGLMenu::MENU_HORIZONTAL, true);
+    myMenuRoot = new StGLMenu(this, 0, 0, StGLMenu::MENU_HORIZONTAL, true);
 
     StGLMenu* aMenuMedia   = createMediaMenu();     // Root -> Media menu
     StGLMenu* aMenuView    = createViewMenu();      // Root -> View menu
@@ -1173,8 +1168,7 @@ void StMoviePlayerGUI::createMobileUpperToolbar() {
     const IconSize anIconSize = scaleIcon(32, aButtonMargins);
     aButtonMargins.extend(scale(12));
 
-    const StMarginsI& aRootMargins = getRootMargins();
-    myPanelUpper = new StGLContainer(this, aRootMargins.left, aRootMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(56));
+    myPanelUpper = new StGLContainer(this, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(56));
 
     int aBtnIter = 0;
 
@@ -1245,8 +1239,8 @@ void StMoviePlayerGUI::createMobileBottomToolbar() {
     StMarginsI aButtonMargins;
     const IconSize anIconSize = scaleIcon(32, aButtonMargins);
     aButtonMargins.extend(scale(12));
-    const StMarginsI& aRootMargins = getRootMargins();
-    myPanelBottom = new StGLContainer(this, aRootMargins.left, -aRootMargins.bottom, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(56));
+
+    myPanelBottom = new StGLContainer(this, 0, 0, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(56));
 
     const StGLCorner aLeftCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT);
     myBtnPrev = new StGLTextureButton(myPanelBottom, (myBottomBarNbLeft++) * myIconStep, 0);
@@ -1436,7 +1430,6 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
 
     myIconStep = isMobile() ? scale(56) : scale(64);
 
-    changeRootMargins() = myWindow->getMargins();
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StMoviePlayerGUI::doShowFPS);
 
     myImage = new StGLImageRegion(this, theTextureQueue, false);
@@ -1510,42 +1503,28 @@ void StMoviePlayerGUI::stglUpdate(const StPointD_t& thePointZo) {
     }
 }
 
-void StMoviePlayerGUI::stglResize(const StGLBoxPx& theRectPx) {
-    myImage->changeRectPx().bottom() = theRectPx.height();
-    myImage->changeRectPx().right()  = theRectPx.width();
+void StMoviePlayerGUI::stglResize(const StGLBoxPx& theViewPort,
+                                  const StMarginsI& theMargins,
+                                  float theAspect) {
+    const int aNewSizeX = theViewPort.width();
+    const int aNewSizeY = theViewPort.height();
 
-    const StMarginsI& aMargins = myWindow->getMargins();
-    const bool areNewMargins = aMargins != getRootMargins();
-    if(areNewMargins) {
-        changeRootMargins() = aMargins;
-    }
+    // image should fit entire view
+    myImage->changeRectPx().top()    = -theMargins.top;
+    myImage->changeRectPx().bottom() = -theMargins.top + aNewSizeY;
+    myImage->changeRectPx().left()   = -theMargins.left;
+    myImage->changeRectPx().right()  = -theMargins.left + aNewSizeX;
 
     if(myPanelUpper != NULL) {
-        myPanelUpper->changeRectPx().right()  = stMax(theRectPx.width() - aMargins.right, 2);
+        myPanelUpper->changeRectPx().right()  = stMax(aNewSizeX - theMargins.right - theMargins.left, 2);
     }
     if(myPanelBottom != NULL) {
         const int aGapX = myPanelBottom->changeRectPx().left();
-        myPanelBottom->changeRectPx().right() = aGapX + stMax(theRectPx.width() - 2 * aGapX, 2);
-    }
-
-    if(areNewMargins) {
-        if(myPanelUpper != NULL) {
-            myPanelUpper->changeRectPx().left() = aMargins.left;
-            myPanelUpper->changeRectPx().moveTopTo(aMargins.top);
-        }
-        if(myPanelBottom != NULL) {
-            myPanelBottom->changeRectPx().left() =  aMargins.left;
-            myPanelBottom->changeRectPx().moveTopTo(-aMargins.bottom);
-        }
-        if(myMenuRoot != NULL) {
-            myMenuRoot->changeRectPx().left() = aMargins.left;
-            myMenuRoot->changeRectPx().top()  = aMargins.top;
-            myMenuRoot->stglUpdateSubmenuLayout();
-        }
+        myPanelBottom->changeRectPx().right() = aGapX + stMax(aNewSizeX - theMargins.right - theMargins.left - 2 * aGapX, 2);
     }
 
     stglResizeSeekBar();
-    StGLRootWidget::stglResize(theRectPx);
+    StGLRootWidget::stglResize(theViewPort, theMargins, theAspect);
 }
 
 void StMoviePlayerGUI::stglResizeSeekBar() {

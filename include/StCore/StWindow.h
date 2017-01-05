@@ -258,11 +258,11 @@ class StWindow {
     /**
      * @return GUI margins
      */
-    ST_CPPEXPORT const StMarginsI& getMargins() const;
+    ST_CPPEXPORT virtual StMarginsI getMargins() const;
 
     /**
      * @return point relative to window mouse position
-     * (0,0) - is top left of the window and (1,1) right buttom.
+     * (0,0) - is top left of the window and (1,1) right bottom.
      */
     ST_CPPEXPORT StPointD_t getMousePos() const;
 
@@ -335,6 +335,11 @@ class StWindow {
      * Swap dual-buffered GL context. Notice that stglDraw will automatically call it.
      */
     ST_CPPEXPORT void stglSwap();
+
+    /**
+     * Return window aspect ratio (width / height in normal case).
+     */
+    ST_CPPEXPORT double stglAspectRatio() const;
 
     /**
      * Get viewport for specified subwindow (to handle tiled presentation).
@@ -574,6 +579,12 @@ class StWindow {
      */
     ST_CPPEXPORT StRectI_t defaultRect(const StMonitor* theMon = NULL) const;
 
+    /**
+     * Setup forced window aspect ratio.
+     * When negative value is given (default is -1), aspect ratio will be automatically computed as window (width/height).
+     */
+    ST_CPPEXPORT void setForcedAspect(double theAspect);
+
         public:
 
     ST_CPPEXPORT void* getNativeOglWin() const;
@@ -588,7 +599,6 @@ class StWindow {
         protected:
 
     StHandle<StMsgQueue>        myMsgQueue;       //!< messages queue
-    StMarginsI                  myMargins;        //!< GUI margins
     bool                        myWasUsed;        //!< flag indicates that window has been actually used (created)
     bool                        myIsForcedStereo; //!< flag to force stereo output for mono sources
 

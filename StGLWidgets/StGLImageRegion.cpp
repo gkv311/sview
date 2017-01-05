@@ -450,8 +450,11 @@ bool StGLImageRegion::stglInit() {
 
 StGLVec2 StGLImageRegion::getMouseMoveFlat(const StPointD_t& theCursorZoFrom,
                                            const StPointD_t& theCursorZoTo) {
-    return StGLVec2( 2.0f * GLfloat(theCursorZoTo.x() - theCursorZoFrom.x()),
-                    -2.0f * GLfloat(theCursorZoTo.y() - theCursorZoFrom.y()));
+    // apply scale factor in case of working area margins
+    const double aScaleX = double(myRoot->getRectPx().width())  / double(myRoot->getRootFullSizeX());
+    const double aScaleY = double(myRoot->getRectPx().height()) / double(myRoot->getRootFullSizeY());
+    return StGLVec2(float( 2.0 * double(theCursorZoTo.x() - theCursorZoFrom.x()) * aScaleX),
+                    float(-2.0 * double(theCursorZoTo.y() - theCursorZoFrom.y()) * aScaleY));
 }
 
 StGLVec2 StGLImageRegion::getMouseMoveSphere(const StPointD_t& theCursorZoFrom,

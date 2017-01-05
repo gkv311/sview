@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -67,6 +67,8 @@ StGLRootWidget::StGLRootWidget(const StHandle<StResourceManager>& theResMgr)
   myIsMenuPressed(false),
   myMenuIconSize(IconSize_16),
   myClickThreshold(3) {
+    myRectPxFull = getRectPx();
+
     // unify access
     StGLWidget::myRoot = this;
     myViewport[0] = 0;
@@ -315,8 +317,8 @@ void StGLRootWidget::stglScissorRect(const StRectI_t& theRect,
                                      StGLBoxPx&       theScissorRect) const {
     const GLint aVPortWidth  = myViewport[2];
     const GLint aVPortHeight = myViewport[3];
-    const GLint aRootWidth   = getRectPx().width();
-    const GLint aRootHeight  = getRectPx().height();
+    const GLint aRootWidth   = myRectPxFull.width();
+    const GLint aRootHeight  = myRectPxFull.height();
     if(aRootWidth <= 0 || aRootHeight <= 0) {
         // just prevent division by zero - should never happen
         stMemZero(&theScissorRect, sizeof(StGLBoxPx));
@@ -334,18 +336,30 @@ void StGLRootWidget::stglScissorRect(const StRectI_t& theRect,
     theScissorRect.height() = GLint(aHeightFactor * GLdouble(theRect.height()));
 }
 
-void StGLRootWidget::stglResize(const StGLBoxPx& theRectPx) {
-    const bool isChanged = getRectPx().right()  != theRectPx.width()
-                        || getRectPx().bottom() != theRectPx.height();
+void StGLRootWidget::stglResize(const StGLBoxPx& theViewPort,
+                                const StMarginsI& theMargins,
+                                float theAspect) {
+    const int  aNewSizeX = theViewPort.width();
+    const int  aNewSizeY = theViewPort.height();
+    const bool isChanged = myRectPxFull.right()  != aNewSizeX
+                        || myRectPxFull.bottom() != aNewSizeY
+                        || myMarginsPx != theMargins
+                        || myProjCamera.getAspect() != theAspect;
+    myMarginsPx = theMargins;
+    myProjCamera.resize(theAspect);
+    myRectPxFull.right()  = aNewSizeX; // (left, top) forced to zero point (0, 0)
+    myRectPxFull.bottom() = aNewSizeY;
 
-    myProjCamera.resize(theRectPx.width(), theRectPx.height());
-
-    changeRectPx().right()  = theRectPx.width();  // (left, top) forced to zero point (0, 0)
-    changeRectPx().bottom() = theRectPx.height();
+    // define working area (shift by margins)
+    changeRectPx().left()   = myMarginsPx.left;
+    changeRectPx().right()  = aNewSizeX - myMarginsPx.right;
+    changeRectPx().top()    = myMarginsPx.top;
+    changeRectPx().bottom() = aNewSizeY - myMarginsPx.bottom;
 
     myProjCamera.getZParams(myRectGl);
-    myScaleGlX = (myRectGl.right() - myRectGl.left()) / GLdouble(getRectPx().width());
-    myScaleGlY = (myRectGl.top() - myRectGl.bottom()) / GLdouble(getRectPx().height());
+    myScaleGlX = (myRectGl.right() - myRectGl.left()) / GLdouble(aNewSizeX);
+    myScaleGlY = (myRectGl.top() - myRectGl.bottom()) / GLdouble(aNewSizeY);
+    myRectWorkGl = getRectGl(getRectPx());
 
     myScrProjMat = myProjCamera.getProjMatrix();
     myScrProjMat.translate(StGLVec3(0.0f, 0.0f, -myProjCamera.getZScreen()));

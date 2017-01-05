@@ -114,7 +114,7 @@ void StGLPlayList::doMouseClick(const int theBtnId) {
         && anItem->isPointIn(myClickPntZo)) {
             // stick to the center
             const StRectI_t aRect = anItem->getRectPxAbsolute();
-            myClickPntZo.y() = double(aRect.top() + aRect.height() / 2) / double(myRoot->getRectPx().height());
+            myClickPntZo.y() = double(aRect.top() + aRect.height() / 2 - myRoot->getRectPx().top()) / double(myRoot->getRectPx().height());
             if(toAbort) {
                 anItem->setClicked(theBtnId, false);
             }

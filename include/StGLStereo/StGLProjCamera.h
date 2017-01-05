@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -197,15 +197,14 @@ class StGLProjCamera {
     /**
      * Recompute projection matrix.
      */
-    ST_CPPEXPORT void resize(const GLfloat theAspect);
+    ST_CPPEXPORT void resize(const float theAspect);
 
     /**
      * Recompute projection matrix.
      */
-    ST_LOCAL void resize(const GLsizei theSizeX,
-                         const GLsizei theSizeY) {
-        const GLsizei aSizeY = (theSizeY > 0) ? theSizeY : 1;
-        resize(GLfloat(theSizeX) / GLfloat(aSizeY));
+    ST_LOCAL void resize(int theSizeX,
+                         int theSizeY) {
+        resize(float(theSizeX) / float(theSizeY > 0 ? theSizeY : 1));
     }
 
     /**

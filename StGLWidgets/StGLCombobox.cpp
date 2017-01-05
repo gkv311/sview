@@ -13,6 +13,25 @@
 #include <StGLWidgets/StGLMessageBox.h>
 #include <StGLWidgets/StGLRootWidget.h>
 
+/**
+ * Auxiliary widget covering entire screen.
+ */
+class StGLContextBackground : public StGLMessageBox {
+
+        public:
+
+    StGLContextBackground(StGLRootWidget* theParent)
+    : StGLMessageBox(theParent) {
+        myIsContextual = true;
+        const int aWidth  = myRoot->getRootFullSizeX();
+        const int aHeight = myRoot->getRootFullSizeY();
+        changeRectPx().right()  = aWidth;
+        changeRectPx().bottom() = aHeight;
+        create(StString(), StString(), aWidth, aHeight);
+    }
+
+};
+
 StGLCombobox::StGLCombobox(StGLWidget* theParent,
                            const int   theLeft,
                            const int   theTop,
@@ -39,9 +58,7 @@ StGLCombobox::ListBuilder::ListBuilder(StGLWidget* theParent)
     StGLRootWidget* aRoot       = theParent->getRoot();
     StGLWidget*     aMenuParent = aRoot;
     if(aRoot->isMobile()) {
-        myBack = new StGLMessageBox(aRoot, "", "",
-                                    aRoot->getRectPx().width(), aRoot->getRectPx().height());
-        myBack->setContextual(true);
+        myBack = new StGLContextBackground(aRoot);
         aMenuParent = myBack;
     }
 
@@ -71,12 +88,12 @@ void StGLCombobox::ListBuilder::display() {
         const int aRootY = aRoot->getRectPx().height();
         if(aRect.width()  >= aRootX) {
             myMenu->changeRectPx().moveLeftTo(0);
-        } else if(aRect.right() > aRootX) {
+        } else if(aRect.right() > aRoot->getRectPx().right()) {
             myMenu->changeRectPx().moveRightTo(aRootX);
         }
         if(aRect.height() >= aRootY) {
             myMenu->changeRectPx().moveTopTo(0);
-        } else if(aRect.bottom() > aRootY) {
+        } else if(aRect.bottom() > aRoot->getRectPx().bottom()) {
             myMenu->changeRectPx().moveBottomTo(aRootY);
         }
 
@@ -90,8 +107,8 @@ void StGLCombobox::ListBuilder::display() {
             StRectI_t& aSubRectNew = anItem->getSubMenu()->changeRectPx();
             if(aSubRect.width() >= aRootX) {
                 aSubRectNew.moveLeftTo(0);
-            } else if(aSubRect.right() > aRootX) {
-                aSubRectNew.moveRightTo(myMenu->getRectPxAbsolute().left() + aRoot->scale(10));
+            } else if(aSubRect.right() > aRoot->getRectPx().right()) {
+                aSubRectNew.moveRightTo(myMenu->getRectPx().left() + aRoot->scale(10));
             }
         }
         aRoot->setFocus(myMenu); // take input focus

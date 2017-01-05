@@ -1,7 +1,7 @@
 /**
  * This source is a part of sView program.
  *
- * Copyright © Kirill Gavrilov, 2011-2016
+ * Copyright © Kirill Gavrilov, 2011-2017
  */
 
 #include "StCADViewerGUI.h"
@@ -42,8 +42,7 @@ void StCADViewerGUI::createToolbarOnTop() {
     const int      anIconStep = scale(56);
     aButtonMargins.extend(scale(12));
 
-    const StMarginsI& aRootMargins = getRootMargins();
-    myPanelUpper = new StGLContainer(this, aRootMargins.left, aRootMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(56));
+    myPanelUpper = new StGLContainer(this, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(56));
 
     // left side
     {
@@ -73,8 +72,7 @@ void StCADViewerGUI::createToolbarOnBottom() {
     const int      anIconStep = scale(56);
     aButtonMargins.extend(scale(12));
 
-    const StMarginsI& aRootMargins = getRootMargins();
-    myPanelBottom = new StGLContainer(this, aRootMargins.left, -aRootMargins.bottom, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(56));
+    myPanelBottom = new StGLContainer(this, 0, 0, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(56));
 
     // left side
     {
@@ -285,7 +283,6 @@ StCADViewerGUI::StCADViewerGUI(StCADViewer*    thePlugin,
     const GLfloat aScale = myPlugin->myWindow->getScaleFactor();
     setScale(aScale, StGLRootWidget::ScaleAdjust_Normal);
     setMobile(StWindow::isMobile());
-    changeRootMargins() = myPlugin->myWindow->getMargins();
 
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StCADViewerGUI::doShowFPS);
 
@@ -401,37 +398,18 @@ void StCADViewerGUI::stglUpdate(const StPointD_t& theCursorZo) {
     }
 }
 
-void StCADViewerGUI::stglResize(const StGLBoxPx& theRectPx) {
-    const int aSizeX = theRectPx.width();
-    const StMarginsI& aMargins = myPlugin->getMainWindow()->getMargins();
-    const bool areNewMargins = aMargins != getRootMargins();
-    if(areNewMargins) {
-        changeRootMargins() = aMargins;
-    }
-
+void StCADViewerGUI::stglResize(const StGLBoxPx&  theViewPort,
+                                const StMarginsI& theMargins,
+                                float theAspect) {
+    const int aNewSizeX  = theViewPort.width();
+    const int aWorkRight = stMax(aNewSizeX - theMargins.right, 2);
     if(myPanelUpper != NULL) {
-        myPanelUpper->changeRectPx().right() = aSizeX;
+        myPanelUpper->changeRectPx().right() = aWorkRight;
     }
     if(myPanelBottom != NULL) {
-        myPanelBottom->changeRectPx().right() = aSizeX;
+        myPanelBottom->changeRectPx().right() = aWorkRight;
     }
-    if(areNewMargins) {
-        if(myPanelUpper != NULL) {
-            myPanelUpper->changeRectPx().left() = aMargins.left;
-            myPanelUpper->changeRectPx().top()  = aMargins.top;
-        }
-        if(myPanelBottom != NULL) {
-            myPanelBottom->changeRectPx().left() = aMargins.left;
-            myPanelBottom->changeRectPx().top()  = aMargins.top;
-        }
-        if(myMenu0Root != NULL) {
-            myMenu0Root->changeRectPx().left() = aMargins.left;
-            myMenu0Root->changeRectPx().top()  = aMargins.top;
-            myMenu0Root->stglUpdateSubmenuLayout();
-        }
-    }
-
-    StGLRootWidget::stglResize(theRectPx);
+    StGLRootWidget::stglResize(theViewPort, theMargins, theAspect);
 }
 
 void StCADViewerGUI::stglDraw(unsigned int theView) {

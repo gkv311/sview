@@ -274,7 +274,7 @@ void StGLTextArea::stglDraw(unsigned int theView) {
 
     // size corrector for FTGL
     StRectD_t zparams; getCamera()->getZParams(zparams);
-    GLfloat aSizeOut = 2.0f * GLfloat(zparams.top()) / GLfloat(getRoot()->getRectPx().height());
+    GLfloat aSizeOut = 2.0f * GLfloat(zparams.top()) / GLfloat(getRoot()->getRootFullSizeY());
 
     StGLMatrix aModelMat;
     aModelMat.translate(StGLVec3(getRoot()->getScreenDispX() + myTextDX, 0.0f, -getCamera()->getZScreen()));

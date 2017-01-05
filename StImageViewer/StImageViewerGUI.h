@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -95,7 +95,9 @@ class StImageViewerGUI : public StGLRootWidget {
                               const StHandle<StGLTextureQueue>& theTextureQueue);
     ST_LOCAL virtual ~StImageViewerGUI();
     ST_LOCAL virtual void stglUpdate(const StPointD_t& thePointZo) ST_ATTR_OVERRIDE;
-    ST_LOCAL virtual void stglResize(const StGLBoxPx& theRectPx) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void stglResize(const StGLBoxPx& theViewPort,
+                                     const StMarginsI& theMargins,
+                                     float theAspect) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
 
     ST_LOCAL void setVisibility(const StPointD_t& theCursor,

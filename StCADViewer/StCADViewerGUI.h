@@ -1,7 +1,7 @@
 /**
  * This source is a part of sView program.
  *
- * Copyright © Kirill Gavrilov, 2011-2016
+ * Copyright © Kirill Gavrilov, 2011-2017
  */
 
 #ifndef __StCADViewerGUI_h_
@@ -55,7 +55,9 @@ class StCADViewerGUI : public StGLRootWidget {
                             const StHandle<StPlayList>& thePlayList);
     ST_LOCAL virtual ~StCADViewerGUI();
     ST_LOCAL virtual void stglUpdate(const StPointD_t& theCursorZo) ST_ATTR_OVERRIDE;
-    ST_LOCAL virtual void stglResize(const StGLBoxPx&  theRectPx) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void stglResize(const StGLBoxPx&  theViewPort,
+                                     const StMarginsI& theMargins,
+                                     float theAspect) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
 
     ST_LOCAL void setVisibility(const StPointD_t& theCursorZo, bool );

@@ -137,13 +137,14 @@ bool StGLMenu::stglInit() {
         } else {
             myWidth = stMax(myWidth, anItemW);
         }
-        if(anItem->getSubMenu() != NULL) {
+        if(StGLMenu* aSubMenu = anItem->getSubMenu()) {
             if(myOrient == MENU_HORIZONTAL) {
-                anItem->getSubMenu()->changeRectPx().moveTopLeftTo(anItem->getRectPxAbsolute().left(), anItem->getRectPxAbsolute().bottom());
+                aSubMenu->changeRectPx().moveTopLeftTo(anItem->getRectPxAbsolute().left()   - myRoot->getRectPx().left(),
+                                                       anItem->getRectPxAbsolute().bottom() - myRoot->getRectPx().top());
             } else if(myOrient == MENU_VERTICAL
                    || myOrient == MENU_VERTICAL_COMPACT) {
-                anItem->getSubMenu()->changeRectPx().moveTopLeftTo(anItem->getRectPxAbsolute().right() - myRoot->scale(10),
-                                                                   anItem->getRectPxAbsolute().top());
+                aSubMenu->changeRectPx().moveTopLeftTo(anItem->getRectPxAbsolute().right() - myRoot->scale(10) - myRoot->getRectPx().left(),
+                                                       anItem->getRectPxAbsolute().top() - myRoot->getRectPx().top());
             }
         }
     }
@@ -163,8 +164,8 @@ bool StGLMenu::stglInit() {
             anItem->changeRectPx().right() = anItem->getRectPx().left() + aWidth;
             anItem->setTextWidth(aWidth);
             if(anItem->getSubMenu() != NULL) {
-                anItem->getSubMenu()->changeRectPx().moveTopLeftTo(getRectPxAbsolute().right() - myRoot->scale(10),
-                                                                   anItem->getRectPxAbsolute().top());
+                anItem->getSubMenu()->changeRectPx().moveTopLeftTo(getRectPxAbsolute().right() - myRoot->scale(10) - myRoot->getRectPx().left(),
+                                                                   anItem->getRectPxAbsolute().top() - myRoot->getRectPx().top());
             }
         }
         changeRectPx().bottom() = getRectPx().top() + anItemCount * myItemHeight;

@@ -150,6 +150,11 @@ class StOutDistorted : public StWindow {
      */
     ST_CPPEXPORT virtual StQuaternion<double> getDeviceOrientation() const ST_ATTR_OVERRIDE;
 
+    /**
+     * Return margins for working area.
+     */
+    ST_CPPEXPORT virtual StMarginsI getMargins() const ST_ATTR_OVERRIDE;
+
     ST_CPPEXPORT virtual GLfloat getLensDist() const ST_ATTR_OVERRIDE;
 
     /**
@@ -197,6 +202,11 @@ class StOutDistorted : public StWindow {
      * To be called from stglDraw().
      */
     ST_LOCAL void stglDrawVR();
+
+    ST_LOCAL bool isHmdOutput() const {
+        return myIsStereoOn
+            && myDevice == DEVICE_HMD;
+    }
 
         private:
 
@@ -266,9 +276,11 @@ class StOutDistorted : public StWindow {
     StGLVec4                  myBarrelCoef;      //!< Barrel distortion coefficients
     StGLVec4                  myChromAb;         //!< chrome coefficients
 
-    StMarginsI                myBarMargins;      //!< GUI margins
-
     StQuaternion<double>      myVrOrient;        //!< HMD (head) orientation, excluding translation vector
+    double                    myVrMarginsTop;
+    double                    myVrMarginsBottom;
+    double                    myVrMarginsLeft;
+    double                    myVrMarginsRight;
     int                       myVrRendSizeX;     //!< FBO width  for rendering into VR (can be greater then actual HMD resolution to compensate distortion)
     int                       myVrRendSizeY;     //!< FBO height for rendering into VR
     bool                      myVrTrackOrient;   //!< track orientation flag
@@ -283,7 +295,6 @@ class StOutDistorted : public StWindow {
     GLuint                    myOvrMirrorFbo;
 #endif
 
-    bool                      myToReduceGui;     //!< scale down GUI
     bool                      myToShowCursor;    //!< cursor visibility flag
     bool                      myToCompressMem;   //!< reduce memory usage
     bool                      myIsBroken;        //!< special flag for broke state - when FBO can not be allocated

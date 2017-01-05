@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -427,10 +427,7 @@ void StWindowImpl::updateChildRect() {
             myIsUpdated    = true;
 
             const StRectI_t& aRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
-            myStEvent.Type       = stEvent_Size;
-            myStEvent.Size.Time  = getEventTime();
-            myStEvent.Size.SizeX = aRect.width();
-            myStEvent.Size.SizeY = aRect.height();
+            myStEvent.Size.init(getEventTime(), aRect.width(), aRect.height(), myForcedAspect);
             signals.onResize->emit(myStEvent.Size);
         }
     }
@@ -585,10 +582,7 @@ void StWindowImpl::setFullScreen(bool theFullscreen) {
     XSetInputFocus(hDisplay, myMaster.hWindowGl, RevertToParent, CurrentTime);
 
     const StRectI_t& aRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
-    myStEvent.Type       = stEvent_Size;
-    myStEvent.Size.Time  = getEventTime();
-    myStEvent.Size.SizeX = aRect.width();
-    myStEvent.Size.SizeY = aRect.height();
+    myStEvent.Size.init(getEventTime(), aRect.width(), aRect.height(), myForcedAspect);
     signals.onResize->emit(myStEvent.Size);
 
     // flushes the output buffer, most client apps needn't use this cause buffer is automatically flushed as needed by calls to XNextEvent()...
@@ -787,10 +781,7 @@ void StWindowImpl::updateWindowPos() {
     }
 
     const StRectI_t& aRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
-    myStEvent.Type       = stEvent_Size;
-    myStEvent.Size.Time  = getEventTime();
-    myStEvent.Size.SizeX = aRect.width();
-    myStEvent.Size.SizeY = aRect.height();
+    myStEvent.Size.init(getEventTime(), aRect.width(), aRect.height(), myForcedAspect);
     signals.onResize->emit(myStEvent.Size);
 
     // force input focus to Master
@@ -800,10 +791,8 @@ void StWindowImpl::updateWindowPos() {
     if(!attribs.IsFullScreen && myMonitors.size() > 1) {
         int aNewMonId = myMonitors[myRectNorm.center()].getId();
         if(myWinOnMonitorId != aNewMonId) {
-            myStEventAux.Type  = stEvent_NewMonitor;
-            myStEventAux.Size.Time  = getEventTime();
-            myStEventAux.Size.SizeX = myRectNorm.width();
-            myStEventAux.Size.SizeY = myRectNorm.height();
+            myStEventAux.Size.init(getEventTime(), myRectNorm.width(), myRectNorm.height(), myForcedAspect);
+            myStEventAux.Type = stEvent_NewMonitor;
             myWinOnMonitorId = aNewMonId;
             signals.onAnotherMonitor->emit(myStEventAux.Size);
         }

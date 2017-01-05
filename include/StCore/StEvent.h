@@ -118,8 +118,27 @@ struct StSizeEvent {
 
     StEventType   Type;    //!< event type
     double        Time;    //!< time in seconds when event was registered
-    unsigned int  SizeX;   //!< new window rectangle in pixels
-    unsigned int  SizeY;
+    unsigned int  SizeX;   //!< new window width  in pixels
+    unsigned int  SizeY;   //!< new window height in pixels
+    double        Aspect;  //!< new window aspect ratio (width / height)
+
+    /**
+     * Initialize size event.
+     */
+    void init(double theTime,
+              unsigned int theSizeX,
+              unsigned int theSizeY,
+              double theForcedAspect) {
+        Type  = stEvent_Size;
+        Time  = theTime;
+        SizeX = theSizeX;
+        SizeY = theSizeY;
+        if(theForcedAspect > 0.0) {
+            Aspect = theForcedAspect;
+        } else {
+            Aspect = double(theSizeX != 0 ? theSizeX : 1) / double(theSizeY != 0 ? theSizeY : 1);
+        }
+    }
 
 };
 

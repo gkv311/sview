@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -448,10 +448,8 @@ void StWindowImpl::updateWindowPos() {
     if(!attribs.IsFullScreen && myMonitors.size() > 1) {
         int aNewMonId = myMonitors[myRectNorm.center()].getId();
         if(myWinOnMonitorId != aNewMonId) {
-            myStEventAux.Type  = stEvent_NewMonitor;
-            myStEventAux.Size.Time  = getEventTime();
-            myStEventAux.Size.SizeX = myRectNorm.width();
-            myStEventAux.Size.SizeY = myRectNorm.height();
+            myStEventAux.Size.init(getEventTime(), myRectNorm.width(), myRectNorm.height(), myForcedAspect);
+            myStEventAux.Type = stEvent_NewMonitor;
             myWinOnMonitorId = aNewMonId;
             signals.onAnotherMonitor->emit(myStEventAux.Size);
         }
@@ -475,10 +473,7 @@ void StWindowImpl::processEvents() {
             myRectNormPrev = myRectFull;
             myIsUpdated    = true;
 
-            myStEvent.Type       = stEvent_Size;
-            myStEvent.Size.Time  = getEventTime();
-            myStEvent.Size.SizeX = myRectFull.width();
-            myStEvent.Size.SizeY = myRectFull.height();
+            myStEvent.Size.init(getEventTime(), myRectFull.width(), myRectFull.height(), myForcedAspect);
             signals.onResize->emit(myStEvent.Size);
         }
     } else {
@@ -488,10 +483,7 @@ void StWindowImpl::processEvents() {
             myRectNormPrev = aWinRectNew;
             myIsUpdated    = true;
 
-            myStEvent.Type       = stEvent_Size;
-            myStEvent.Size.Time  = getEventTime();
-            myStEvent.Size.SizeX = myRectNorm.width();
-            myStEvent.Size.SizeY = myRectNorm.height();
+            myStEvent.Size.init(getEventTime(), myRectNorm.width(), myRectNorm.height(), myForcedAspect);
             signals.onResize->emit(myStEvent.Size);
         }
     }

@@ -46,7 +46,6 @@ namespace {
 
     static const char ST_SETTING_DEVICE_ID[] = "deviceId";
     static const char ST_SETTING_WINDOWPOS[] = "windowPos";
-    static const char ST_SETTING_MARGINS[]   = "margins";
     static const char ST_SETTING_WARP_COEF[] = "warpCoef";
     static const char ST_SETTING_CHROME_AB[] = "chromeAb";
 
@@ -232,6 +231,10 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
   //myBarrelCoef(1.0f, 0.18f, 0.115f, 0.0387f),
   myChromAb(0.996f, -0.004f, 1.014f, 0.0f),
   //myChromAb(1.0f, 0.0f, 1.0f, 0.0f),
+  myVrMarginsTop(0.35),
+  myVrMarginsBottom(0.35),
+  myVrMarginsLeft(0.33),
+  myVrMarginsRight(0.33),
   myVrRendSizeX(0),
   myVrRendSizeY(0),
   myVrTrackOrient(false),
@@ -244,7 +247,6 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
   myOvrMirrorTexture(NULL),
   myOvrMirrorFbo(0),
 #endif
-  myToReduceGui(false),
   myToShowCursor(true),
   myToCompressMem(myInstancesNb.increment() > 1),
   myIsBroken(false),
@@ -342,20 +344,8 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
     updateStrings();
     StWindow::setTitle("sView - Distorted Renderer");
 
-    StRectI_t aMargins;
-    aMargins.left()   = 160 * 2;
-    aMargins.right()  = 160 * 2;
-    aMargins.top()    = 160 * 2;
-    aMargins.bottom() = 160 * 2;
-
-    ///mySettings->loadInt32Rect(ST_SETTING_MARGINS,   aMargins);
     mySettings->loadFloatVec4(ST_SETTING_WARP_COEF, myBarrelCoef);
     mySettings->loadFloatVec4(ST_SETTING_CHROME_AB, myChromAb);
-
-    myBarMargins.left   = aMargins.left();
-    myBarMargins.right  = aMargins.right();
-    myBarMargins.top    = aMargins.top();
-    myBarMargins.bottom = aMargins.bottom();
 }
 
 void StOutDistorted::releaseResources() {
@@ -412,15 +402,8 @@ void StOutDistorted::beforeClose() {
         mySettings->saveInt32Rect(ST_SETTING_WINDOWPOS, StWindow::getWindowedPlacement());
     }
 
-    StRectI_t aMargins;
-    aMargins.left()   = myBarMargins.left;
-    aMargins.right()  = myBarMargins.right;
-    aMargins.top()    = myBarMargins.top;
-    aMargins.bottom() = myBarMargins.bottom;
-
     mySettings->saveParam(params.Layout);
     mySettings->saveParam(params.MonoClone);
-    mySettings->saveInt32Rect(ST_SETTING_MARGINS,   aMargins);
     mySettings->saveFloatVec4(ST_SETTING_WARP_COEF, myBarrelCoef);
     mySettings->saveFloatVec4(ST_SETTING_CHROME_AB, myChromAb);
     if(myWasUsed) {
@@ -666,17 +649,34 @@ void StOutDistorted::stglDrawCursor(const StPointD_t&  theCursorPos,
         return;
     }
 
-    const GLfloat aLensDisp = getLensDist() * 0.5f;
+    const float aLensDisp = getLensDist() * 0.5f;
+    double aGlLeft  = -1.0;
+    double aGlTop   =  1.0;
+    double aGlSizeX =  2.0;
+    double aGlSizeY =  2.0;
+    if(isHmdOutput()) {
+        aGlLeft  = -1.0 + myVrMarginsLeft * 2.0;
+        aGlTop   =  1.0 - myVrMarginsTop  * 2.0;
+        aGlSizeX =  2.0 - (myVrMarginsLeft + myVrMarginsRight) * 2.0;
+        aGlSizeY =  2.0 - (myVrMarginsTop + myVrMarginsBottom) * 2.0;
+    }
 
     // compute cursor position
     StArray<StGLVec4> aVerts(4);
-    const GLfloat aCurLeft = GLfloat(-1.0 + theCursorPos.x() * 2.0);
-    const GLfloat aCurTop  = GLfloat( 1.0 - theCursorPos.y() * 2.0);
+    const float aCurLeft = float(aGlLeft + theCursorPos.x() * aGlSizeX);
+    const float aCurTop  = float(aGlTop  - theCursorPos.y() * aGlSizeY);
+    if(isHmdOutput()) {
+        if(aCurLeft < float(aGlLeft) || aCurLeft > float( 1.0 - myVrMarginsRight  * 2.0)
+        || aCurTop  > float(aGlTop)  || aCurTop  < float(-1.0 + myVrMarginsBottom * 2.0)) {
+            return;
+        }
+    }
+
     const int aVPSizeX = myContext->stglViewport().width();
     const int aVPSizeY = myContext->stglViewport().height();
 
-    GLfloat aCurWidth  = 2.0f * GLfloat(myCursor->getSizeX()) / GLfloat(aVPSizeX);
-    GLfloat aCurHeight = 2.0f * GLfloat(myCursor->getSizeY()) / GLfloat(aVPSizeY);
+    float aCurWidth  = 2.0f * float(myCursor->getSizeX()) / float(aVPSizeX);
+    float aCurHeight = 2.0f * float(myCursor->getSizeY()) / float(aVPSizeY);
     if(myDevice != DEVICE_HMD) {
         switch(getPairLayout()) {
             case LAYOUT_SIDE_BY_SIDE_ANAMORPH:
@@ -763,17 +763,32 @@ StQuaternion<double> StOutDistorted::getDeviceOrientation() const {
     return StWindow::getDeviceOrientation();
 }
 
+StMarginsI StOutDistorted::getMargins() const {
+    if(isHmdOutput()) {
+        const StGLBoxPx aViewPort = StWindow::stglViewport(ST_WIN_MASTER);
+        const int aSizeX = aViewPort.width();
+        const int aSizeY = aViewPort.height();
+        StMarginsI aMargins;
+        aMargins.left   = int(double(aSizeX) * myVrMarginsLeft);
+        aMargins.right  = int(double(aSizeX) * myVrMarginsRight);
+        aMargins.top    = int(double(aSizeY) * myVrMarginsTop);
+        aMargins.bottom = int(double(aSizeY) * myVrMarginsBottom);
+        return aMargins;
+    }
+    return StMarginsI();
+}
+
 GLfloat StOutDistorted::getLensDist() const {
-    return (myIsStereoOn && myDevice == DEVICE_HMD) ? 0.1453f : 0.0f;
+    return isHmdOutput() ? 0.1453f : 0.0f;
 }
 
 GLfloat StOutDistorted::getScaleFactor() const {
-    if(!myToReduceGui
-    || !myIsStereoOn
-    ||  myDevice != DEVICE_HMD) {
+    if(!isHmdOutput()) {
         return StWindow::getScaleFactor();
     }
 
+    // within direct rendering mode HMD is not visible to the system and thus is not registered as StMonitor,
+    // therefore we need to override scale factor here to avoid incorrect scaling
     return 0.8f;
 }
 
@@ -797,10 +812,8 @@ void StOutDistorted::checkHdmiPack() {
 void StOutDistorted::setFullScreen(const bool theFullScreen) {
     bool wasFullscreen = StWindow::isFullScreen();
     if(!theFullScreen) {
-        myMargins.left   = 0;
-        myMargins.right  = 0;
-        myMargins.top    = 0;
-        myMargins.bottom = 0;
+        StWindow::setForcedAspect(-1.0);
+        myIsStereoOn = false;
     }
     StWindow::setFullScreen(theFullScreen);
     if(!wasFullscreen) {
@@ -811,17 +824,12 @@ void StOutDistorted::setFullScreen(const bool theFullScreen) {
 void StOutDistorted::stglDrawVR() {
 #ifdef ST_HAVE_OPENVR
     const StGLBoxPx  aVPBoth    = StWindow::stglViewport(ST_WIN_ALL);
-    const StPointD_t aCursorPos = StWindow::getMousePos();
+    const StPointD_t aCursorPos = getMousePos();
     bool hasComposError = false;
     if(myVrHmd == NULL
     || myIsBroken) {
         return;
     }
-
-    const StGLBoxPx aViewPortL = {{ 0, 0,
-                                    myVrRendSizeX, myVrRendSizeY }};
-    const StGLBoxPx aViewPortR = {{ myVrRendSizeX, 0,
-                                    myVrRendSizeX, myVrRendSizeY }};
 
     if(!myFrBuffer->initLazy(*myContext, GL_RGBA8, myVrRendSizeX, myVrRendSizeY, StWindow::hasDepthBuffer())) {
         myIsBroken = true;
@@ -897,13 +905,12 @@ void StOutDistorted::stglDrawVR() {
     }
 #elif defined(ST_HAVE_LIBOVR)
     const StGLBoxPx  aVPBoth    = StWindow::stglViewport(ST_WIN_ALL);
-    const StPointD_t aCursorPos = StWindow::getMousePos();
+    const StPointD_t aCursorPos = getMousePos();
     if(myVrHmd == NULL
     || myIsBroken) {
         return;
     }
 
-    myToReduceGui = true;
     ovrHmdDesc anHmdDesc = ovr_GetHmdDesc(myVrHmd);
     ovrEyeRenderDesc anEyeRenderDesc[2] = {
         ovr_GetRenderDesc(myVrHmd, ovrEye_Left,  anHmdDesc.DefaultEyeFov[0]),
@@ -991,22 +998,14 @@ void StOutDistorted::stglDraw() {
     myIsStereoOn = isStereoSource
                 && StWindow::isFullScreen()
                 && !myIsBroken;
-#if defined(ST_HAVE_OPENVR) || defined(ST_HAVE_LIBOVR)
-    if(myVrHmd != NULL) {
-        myIsStereoOn = isStereoSource
-                    && !myIsBroken;
-    }
-#endif
 
     myIsForcedStereo = myIsStereoOn && params.MonoClone->getValue();
-    if(myIsStereoOn
-    && myDevice == DEVICE_HMD) {
-        myMargins = myBarMargins;
-    } else {
-        myMargins.left   = 0;
-        myMargins.right  = 0;
-        myMargins.top    = 0;
-        myMargins.bottom = 0;
+
+    double aForcedAspect = -1.0;
+    if(isHmdOutput()) {
+        if(myVrRendSizeX != 0 && myVrRendSizeY != 0) {
+            aForcedAspect = double(myVrRendSizeX) / double(myVrRendSizeY);
+        }
     }
 
     StWinSplit aWinSplit = StWinSlave_splitOff;
@@ -1030,6 +1029,7 @@ void StOutDistorted::stglDraw() {
             }
         }
     }
+    StWindow::setForcedAspect(aForcedAspect);
     StWindow::setAttribute(StWinAttr_SplitCfg, aWinSplit);
     if(myDevice == DEVICE_S3DV) {
         StWindow::setHardwareStereoOn(myIsStereoOn);
@@ -1069,7 +1069,7 @@ void StOutDistorted::stglDraw() {
 
     const StGLBoxPx  aVPSlave   = StWindow::stglViewport(ST_WIN_SLAVE);
     const StGLBoxPx  aVPBoth    = StWindow::stglViewport(ST_WIN_ALL);
-    const StPointD_t aCursorPos = StWindow::getMousePos();
+    const StPointD_t aCursorPos = getMousePos();
     StGLBoxPx aViewPortL = aVPMaster;
     StGLBoxPx aViewPortR = aVPSlave;
     if(myDevice != DEVICE_HMD) {
@@ -1122,7 +1122,6 @@ void StOutDistorted::stglDraw() {
     GLint aFrSizeX = aViewPortL.width();
     GLint aFrSizeY = aViewPortL.height();
     if(myDevice == DEVICE_HMD) {
-        myToReduceGui = aFrSizeX <= 640;
         aFrSizeX = int(std::ceil(double(aFrSizeX) * 1.25) + 0.5);
         aFrSizeY = int(std::ceil(double(aFrSizeY) * 1.25) + 0.5);
     }

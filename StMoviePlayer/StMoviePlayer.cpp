@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -605,7 +605,7 @@ bool StMoviePlayer::createGui(StHandle<StGLTextureQueue>& theTextureQueue,
     }
 
     myGUI->stglInit();
-    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER));
+    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER), myWindow->getMargins(), (float )myWindow->stglAspectRatio());
 
     for(size_t anIter = 0; anIter < myGUI->myImage->getActions().size(); ++anIter) {
         StHandle<StAction>& anAction = myGUI->myImage->changeActions()[anIter];
@@ -981,7 +981,7 @@ void StMoviePlayer::doResize(const StSizeEvent& ) {
         return;
     }
 
-    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER));
+    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER), myWindow->getMargins(), (float )myWindow->stglAspectRatio());
 }
 
 void StMoviePlayer::doKeyDown(const StKeyEvent& theEvent) {

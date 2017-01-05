@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -268,15 +268,35 @@ class StGLRootWidget : public StGLWidget {
         return myScaleGlY;
     }
 
-    inline StRectD_t getRootRectGl() const {
+    /**
+     * Return the full width of the window (including non-working area)
+     */
+    ST_LOCAL int getRootFullSizeX() const {
+        return myRectPxFull.width();
+    }
+
+    /**
+     * Return the full height of the window (including non-working area)
+     */
+    ST_LOCAL int getRootFullSizeY() const {
+        return myRectPxFull.height();
+    }
+
+    /**
+     * Return GL coordinates for entire root widget (including non-working area).
+     */
+    ST_LOCAL StRectD_t getRootRectGl() const {
         return myRectGl;
     }
 
-    ST_LOCAL const StMarginsI& getRootMargins() const {
-        return myMarginsPx;
+    /**
+     * Return GL coordinates for working area within root widget.
+     */
+    ST_LOCAL StRectD_t getRootWorkRectGl() const {
+        return myRectWorkGl;
     }
 
-    ST_LOCAL StMarginsI& changeRootMargins() {
+    ST_LOCAL const StMarginsI& getRootMargins() const {
         return myMarginsPx;
     }
 
@@ -393,7 +413,16 @@ class StGLRootWidget : public StGLWidget {
 
     using StGLWidget::stglResize;
     ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo) ST_ATTR_OVERRIDE;
-    ST_CPPEXPORT virtual void stglResize(const StGLBoxPx&  theRectPx);
+
+    /**
+     * Resize root widget in sync with window.
+     * @param theViewPort new viewport (width and height)
+     * @param theMargins  new margins defining a working area
+     * @param theAspect   new aspect ratio (normally width / height)
+     */
+    ST_CPPEXPORT virtual void stglResize(const StGLBoxPx& theViewPort,
+                                         const StMarginsI& theMargins,
+                                         float theAspect);
 
     /**
      * @return viewport dimensions from bound GL context (4-indices array)
@@ -466,6 +495,8 @@ class StGLRootWidget : public StGLWidget {
     bool                      myIsMobile;      //!< flag indicating mobile device
     StMarginsI                myMarginsPx;     //!< active area margins in pixels
     StRectD_t                 myRectGl;        //!< rectangle in GL coordinates
+    StRectD_t                 myRectWorkGl;    //!< rectangle of working area in GL coordinates
+    StRectI_t                 myRectPxFull;    //!< full rectangle (including non-working area)
     GLdouble                  myScaleGlX;      //!< scale factor to optimize convertion from Pixels -> GL coordinates
     GLdouble                  myScaleGlY;      //!< scale factor to optimize convertion from Pixels -> GL coordinates
     GLfloat                   myScaleGUI;      //!< scale factor for GUI elements (text, icons), 1.0 by default

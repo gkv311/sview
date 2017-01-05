@@ -205,8 +205,8 @@ void StWindow::setPlacement(const StRectI_t& theRect,
     myWin->setPlacement(theRect, theMoveToScreen);
 }
 
-const StMarginsI& StWindow::getMargins() const {
-    return myMargins;
+StMarginsI StWindow::getMargins() const {
+    return StMarginsI();
 }
 
 StPointD_t StWindow::getMousePos() const {
@@ -337,6 +337,19 @@ StRectI_t StWindow::defaultRect(const StMonitor* theMon) const {
     aRect.top()    = aMon.getVRect().top()  + 256;
     aRect.bottom() = aRect.top()  + int32_t(aMon.getScale() * 512.0f);
     return aRect;
+}
+
+double StWindow::stglAspectRatio() const {
+    if(myWin->myForcedAspect > 0.0) {
+        return myWin->myForcedAspect;
+    }
+
+    const StGLBoxPx aVPMaster = StWindow::stglViewport(ST_WIN_MASTER);
+    return double(aVPMaster.width() != 0 ? aVPMaster.width() : 1) / double(aVPMaster.height() != 0 ? aVPMaster.height() : 1);
+}
+
+void StWindow::setForcedAspect(double theAspect) {
+    myWin->myForcedAspect = theAspect;
 }
 
 void* StWindow::getNativeOglWin() const {

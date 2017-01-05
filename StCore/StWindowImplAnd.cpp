@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2014-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2014-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -88,10 +88,7 @@ void StWindowImpl::updateChildRect() {
             myIsUpdated    = true;
 
             const StRectI_t& aRect = attribs.IsFullScreen ? myRectFull : myRectNorm;
-            myStEvent.Type       = stEvent_Size;
-            myStEvent.Size.Time  = getEventTime();
-            myStEvent.Size.SizeX = aRect.width();
-            myStEvent.Size.SizeY = aRect.height();
+            myStEvent.Size.init(getEventTime(), aRect.width(), aRect.height(), myForcedAspect);
             signals.onResize->emit(myStEvent.Size);
         }
     }
@@ -128,10 +125,7 @@ void StWindowImpl::updateWindowPos() {
     myRectNorm.bottom() = myRectNorm.top()  + aHeight;
     myRectFull = myRectNorm;
 
-    myStEvent.Type       = stEvent_Size;
-    myStEvent.Size.Time  = getEventTime();
-    myStEvent.Size.SizeX = myRectNorm.width();
-    myStEvent.Size.SizeY = myRectNorm.height();
+    myStEvent.Size.init(getEventTime(), myRectNorm.width(), myRectNorm.height(), myForcedAspect);
     signals.onResize->emit(myStEvent.Size);
 }
 
@@ -336,10 +330,7 @@ bool StWindowImpl::onAndroidInitWindow() {
 
         myInitState = STWIN_INIT_SUCCESS;
         if(isResized) {
-            myStEvent.Type       = stEvent_Size;
-            myStEvent.Size.Time  = getEventTime();
-            myStEvent.Size.SizeX = myRectNorm.width();
-            myStEvent.Size.SizeY = myRectNorm.height();
+            myStEvent.Size.init(getEventTime(), myRectNorm.width(), myRectNorm.height(), myForcedAspect);
             signals.onResize->emit(myStEvent.Size);
         }
         return true;
@@ -454,10 +445,8 @@ void StWindowImpl::onAndroidCommand(int32_t theCommand) {
             // do not handle resize event here - screen might be not yet resized
             updateMonitors();
 
+            myStEvent.Size.init(getEventTime(), myRectNorm.width(), myRectNorm.height(), myForcedAspect);
             myStEvent.Type  = stEvent_NewMonitor;
-            myStEvent.Size.Time  = getEventTime();
-            myStEvent.Size.SizeX = myRectNorm.width();
-            myStEvent.Size.SizeY = myRectNorm.height();
             //myWinOnMonitorId = 0;
             signals.onAnotherMonitor->emit(myStEvent.Size);
             return;

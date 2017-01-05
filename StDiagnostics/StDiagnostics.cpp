@@ -97,7 +97,8 @@ bool StDiagnostics::open() {
         myGUI.nullify();
         return false;
     }
-    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER));
+    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER), myWindow->getMargins(), (float )myWindow->stglAspectRatio());
+
     registerHotKeys();
     return true;
 }
@@ -107,7 +108,7 @@ void StDiagnostics::doResize(const StSizeEvent& ) {
         return;
     }
 
-    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER));
+    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER), myWindow->getMargins(), (float )myWindow->stglAspectRatio());
 }
 
 void StDiagnostics::doMouseDown(const StClickEvent& theEvent) {

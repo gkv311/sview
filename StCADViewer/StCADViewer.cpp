@@ -378,7 +378,7 @@ bool StCADViewer::createGui() {
     mySettings->loadParam(params.ProjectMode);
 
     myGUI->stglInit();
-    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER));
+    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER), myWindow->getMargins(), (float )myWindow->stglAspectRatio());
 
     registerHotKeys();
     return true;
@@ -428,8 +428,7 @@ bool StCADViewer::init() {
         myGUI.nullify();
         return false;
     }
-
-    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER));
+    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER), myWindow->getMargins(), (float )myWindow->stglAspectRatio());
 
     // create working threads
     if(!isReset) {
@@ -495,9 +494,9 @@ void StCADViewer::doResize(const StSizeEvent& ) {
         return;
     }
 
-    const StGLBoxPx aWinRect = myWindow->stglViewport(ST_WIN_MASTER);
-    myGUI->stglResize(aWinRect);
-    myProjection.resize(aWinRect.width(), aWinRect.height());
+    const double anAspect = myWindow->stglAspectRatio();
+    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER), myWindow->getMargins(), (float )anAspect);
+    myProjection.resize((float )anAspect);
 }
 
 void StCADViewer::doMouseDown(const StClickEvent& theEvent) {
@@ -844,8 +843,7 @@ void StCADViewer::stglDraw(unsigned int theView) {
         if(anFboWrapper->GetVPSizeX() > 0
         && anFboWrapper->GetVPSizeY() > 0
         && aWindow->SetSize(anFboWrapper->GetVPSizeX(), anFboWrapper->GetVPSizeY())) {
-            StRectI_t aWinRect = myWindow->getPlacement();
-            Standard_Real aRatio = double(aWinRect.width()) / double(aWinRect.height());
+            const double aRatio = myWindow->stglAspectRatio();
             myView->Camera()->SetAspect(aRatio);
             myView->View()->Resized();
         }

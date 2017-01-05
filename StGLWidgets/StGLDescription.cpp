@@ -10,7 +10,7 @@
 #include <StGLWidgets/StGLDescription.h>
 #include <StGLWidgets/StGLRootWidget.h>
 
-StGLDescription::StGLDescription(StGLWidget* theParent)
+StGLDescription::StGLDescription(StGLRootWidget* theParent)
 : StGLTextArea(theParent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
                theParent->getRoot()->scale(256),
                theParent->getRoot()->scale(96)) {
@@ -19,8 +19,8 @@ StGLDescription::StGLDescription(StGLWidget* theParent)
     setBorder(true);
 }
 
-StGLDescription::StGLDescription(StGLWidget* theParent,
-                                 const int   theWidth)
+StGLDescription::StGLDescription(StGLRootWidget* theParent,
+                                 const int theWidth)
 : StGLTextArea(theParent, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
                theWidth,
                theParent->getRoot()->scale(96)) {
@@ -34,28 +34,29 @@ StGLDescription::~StGLDescription() {
 }
 
 void StGLDescription::setPoint(const StPointD_t& thePointZo) {
-    const StRectI_t& aRootRectPx = StGLWidget::getParent()->getRectPx();
-    const int aRootSizeX = aRootRectPx.width();
-    const int aRootSizeY = aRootRectPx.height();
+    const StRectI_t& aRootRectPx = myRoot->getRectPx();
     const int aSizeX = StGLWidget::getRectPx().width();
     const int aSizeY = StGLWidget::getRectPx().height();
 
+    const int aPntInRootX = int(thePointZo.x() * (double )myRoot->getRectPx().width());
+    const int aPntInRootY = int(thePointZo.y() * (double )myRoot->getRectPx().height());
+
     StRectI_t aRect;
-    aRect.left()   = int(thePointZo.x() * (double )aRootSizeX) + 16;
+    aRect.left()   = aPntInRootX + 16;
     aRect.right()  = aRect.left() + aSizeX;
-    aRect.top()    = int(thePointZo.y() * (double )aRootSizeY) + 16;
+    aRect.top()    = aPntInRootY + 16;
     aRect.bottom() = aRect.top()  + aSizeY;
 
     StGLVCorner aCornerY = ST_VCORNER_TOP;
     StGLHCorner aCornerX = ST_HCORNER_LEFT;
     if(aRect.right() > aRootRectPx.width()) {
-        aRect.left()  -= aRootSizeX + 32;
-        aRect.right() -= aRootSizeX + 32;
+        aRect.left()  -= aRootRectPx.width() + 32;
+        aRect.right() -= aRootRectPx.width() + 32;
         aCornerX = ST_HCORNER_RIGHT;
     }
     if(aRect.bottom() > aRootRectPx.height()) {
-        aRect.top()    -= aRootSizeY + 32;
-        aRect.bottom() -= aRootSizeY + 32;
+        aRect.top()    -= aRootRectPx.height() + 32;
+        aRect.bottom() -= aRootRectPx.height() + 32;
         myFormatter.setupAlignment(StGLTextFormatter::ST_ALIGN_X_CENTER,
                                    StGLTextFormatter::ST_ALIGN_Y_BOTTOM);
         aCornerY = ST_VCORNER_BOTTOM;

@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2007-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -284,6 +284,7 @@ class StWindowImpl {
     int                myNbTouchesMax;    //!< maximum touches within current sequence
     StRectI_t          myRectNorm;        //!< master window coordinates in normal     state
     StRectI_t          myRectFull;        //!< master window coordinates in fullscreen state
+    StRectI_t          myRectFullInit;    //!< fullscreen rectangle before applying tiling
     StRectI_t          myRectNormPrev;    //!< window rectangle to track changes
     StMarginsI         myDecMargins;      //!< decoration margins
 
@@ -294,6 +295,7 @@ class StWindowImpl {
     int                myWinOnMonitorId;  //!< monitor id where window is placed
     int                myWinMonScaleId;   //!< monitor id from which scale factor is applied
     TiledCfg           myTiledCfg;        //!< tiles configuration (multiple viewports within the same window)
+    double             myForcedAspect;    //!< forced window aspect ratio (negative number if not forced)
 
 #ifdef _WIN32
     // available since Win7 (not in Vista!)

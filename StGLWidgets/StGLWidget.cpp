@@ -174,8 +174,8 @@ void StGLWidget::stglScissorRect(StGLBoxPx& theScissorRect) const {
 }
 
 StPointD_t StGLWidget::getPointGl(const StPointD_t& thePointZo) const {
-    double oglWidth  = myRoot->getRootRectGl().right() - myRoot->getRootRectGl().left();
-    double oglHeight = myRoot->getRootRectGl().top() - myRoot->getRootRectGl().bottom();
+    double oglWidth  = myRoot->getRootWorkRectGl().right() - myRoot->getRootWorkRectGl().left();
+    double oglHeight = myRoot->getRootWorkRectGl().top() - myRoot->getRootWorkRectGl().bottom();
     return StPointD_t((thePointZo.x() - 0.5) * oglWidth,
                       (0.5 - thePointZo.y()) * oglHeight);
 }

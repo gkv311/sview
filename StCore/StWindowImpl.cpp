@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2007-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -61,6 +61,7 @@ StWindowImpl::StWindowImpl(const StHandle<StResourceManager>& theResMgr,
   myWinOnMonitorId(0),
   myWinMonScaleId(0),
   myTiledCfg(TiledCfg_Separate),
+  myForcedAspect(-1.0),
 #ifdef _WIN32
   myRegisterTouchWindow(NULL),
   myUnregisterTouchWindow(NULL),
@@ -424,17 +425,39 @@ void StWindowImpl::setAttributes(const StWinAttr* theAttributes) {
                 if(attribs.Split != (StWinSplit )anIter[1]
                 && attribs.IsFullScreen) {
                     switch(attribs.Split) {
-                        case StWinSlave_splitHorizontal:   myRectFull.right()  += myRectFull.width();  break;
-                        case StWinSlave_splitVertical:     myRectFull.bottom() += myRectFull.height(); break;
-                        case StWinSlave_splitVertHdmi720:  myRectFull.bottom() += 720  + 30; break;
-                        case StWinSlave_splitVertHdmi1080: myRectFull.bottom() += 1080 + 45; break;
-                        default: break;
+                        case StWinSlave_splitHorizontal:
+                        case StWinSlave_splitVertical:
+                        case StWinSlave_splitVertHdmi720:
+                        case StWinSlave_splitVertHdmi1080: {
+                            if(myRectFullInit.width() != 0) {
+                                // restore rectangle
+                                myRectFull = myRectFullInit;
+                            }
+                            break;
+                        }
+                        case StWinSlave_splitOff: {
+                            // remember rectangle
+                            myRectFullInit = myRectFull;
+                            break;
+                        }
                     }
 
                     switch((StWinSplit )anIter[1]) {
                         case StWinSlave_splitHorizontal: {
                             myTiledCfg = TiledCfg_MasterSlaveX;
-                            myRectFull.right() -= myRectFull.width() / 2;
+                            if(myForcedAspect > 0.0) {
+                                const int aNewSizeY = int(double(myRectFull.width()) / myForcedAspect);
+                                const int aDY       = aNewSizeY - myRectFull.height();
+                                if(aDY <= 0) {
+                                    myRectFull.bottom() += aDY;
+                                } else {
+                                    const int aNewSizeX = int(double(myRectFull.height()) * myForcedAspect);
+                                    const int aDX       = aNewSizeX - myRectFull.width();
+                                    myRectFull.right() += aDX;
+                                }
+                            } else {
+                                myRectFull.right() -= myRectFull.width() / 2;
+                            }
                             break;
                         }
                         case StWinSlave_splitVertical: {
@@ -457,10 +480,7 @@ void StWindowImpl::setAttributes(const StWinAttr* theAttributes) {
                             break;
                         }
                     }
-                    myStEventAux.Type       = stEvent_Size;
-                    myStEventAux.Size.Time  = getEventTime();
-                    myStEventAux.Size.SizeX = myRectFull.width();
-                    myStEventAux.Size.SizeY = myRectFull.height();
+                    myStEventAux.Size.init(getEventTime(), myRectFull.width(), myRectFull.height(), myForcedAspect);
                     signals.onResize->emit(myStEventAux.Size);
                 }
                 attribs.Split = (StWinSplit )anIter[1];

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,12 +76,11 @@ void StImageViewerGUI::createDesktopUI(const StHandle<StPlayList>& thePlayList) 
 
     createUpperToolbar();
 
-    const StMarginsI& aRootMargins = getRootMargins();
     StMarginsI aButtonMargins;
     const IconSize anIconSize = scaleIcon(32, aButtonMargins);
     const int      anIconStep = scale(32);
 
-    myPanelBottom = new StGLContainer(this, aRootMargins.left, -aRootMargins.bottom, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(32));
+    myPanelBottom = new StGLContainer(this, 0, 0, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(32));
     int aBottomBarNbRight = 0;
     const int aRight  = -scale(8);
     const int aBottom = -scale(8);
@@ -130,8 +129,7 @@ void StImageViewerGUI::createUpperToolbar() {
     const int      anIconStep = scale(48);
     aButtonMargins.extend(scale(8));
 
-    const StMarginsI& aMargins = getRootMargins();
-    myPanelUpper = new StGLContainer(this, aMargins.left, aMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(128));
+    myPanelUpper = new StGLContainer(this, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(128));
 
     // append textured buttons
     myBtnOpen   = new StGLTextureButton(myPanelUpper, aLeft + (aBtnIter++) * anIconStep, aTop);
@@ -204,8 +202,7 @@ void StImageViewerGUI::createUpperToolbar() {
  * Main menu
  */
 void StImageViewerGUI::createMainMenu() {
-    const StMarginsI& aMargins = getRootMargins();
-    myMenuRoot = new StGLMenu(this, aMargins.left, aMargins.top, StGLMenu::MENU_HORIZONTAL, true);
+    myMenuRoot = new StGLMenu(this, 0, 0, StGLMenu::MENU_HORIZONTAL, true);
 
     StGLMenu* aMenuMedia   = createMediaMenu();  // Root -> Media  menu
     StGLMenu* aMenuView    = createViewMenu();   // Root -> View   menu
@@ -878,8 +875,7 @@ void StImageViewerGUI::createMobileUpperToolbar() {
     const int      anIconStep = scale(56);
     aButtonMargins.extend(scale(12));
 
-    const StMarginsI& aRootMargins = getRootMargins();
-    myPanelUpper = new StGLContainer(this, aRootMargins.left, aRootMargins.top, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(56));
+    myPanelUpper = new StGLContainer(this, 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT), scale(4096), scale(56));
 
     int aBtnIter = 0;
 
@@ -948,8 +944,7 @@ void StImageViewerGUI::createMobileBottomToolbar() {
     const int      anIconStep = scale(56);
     aButtonMargins.extend(scale(12));
 
-    const StMarginsI& aRootMargins = getRootMargins();
-    myPanelBottom = new StGLContainer(this, aRootMargins.left, -aRootMargins.bottom, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(56));
+    myPanelBottom = new StGLContainer(this, 0, 0, StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT), scale(4096), scale(56));
 
     int aBtnIter = 0;
     myBtnPrev = new StGLTextureButton(myPanelBottom, (aBtnIter++) * anIconStep, 0);
@@ -1097,7 +1092,6 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
     setScale(aScale, (StGLRootWidget::ScaleAdjust )myPlugin->params.ScaleAdjust->getValue());
     setMobile(myPlugin->params.IsMobileUI->getValue());
 
-    changeRootMargins() = myWindow->getMargins();
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StImageViewerGUI::doShowFPS);
 
     StHandle<StGLTextureQueue> aTextureQueue = theTextureQueue;
@@ -1298,50 +1292,35 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
     }
 }
 
-void StImageViewerGUI::stglUpdate(const StPointD_t& pointZo) {
-    StGLRootWidget::stglUpdate(pointZo);
+void StImageViewerGUI::stglUpdate(const StPointD_t& thePointZo) {
+    StGLRootWidget::stglUpdate(thePointZo);
     if(myDescr != NULL) {
-        myDescr->setPoint(pointZo);
+        myDescr->setPoint(thePointZo);
     }
 }
 
-void StImageViewerGUI::stglResize(const StGLBoxPx& theRectPx) {
-    const int aSizeX = theRectPx.width();
-    const int aSizeY = theRectPx.height();
-    myImage->changeRectPx().bottom() = aSizeY;
-    myImage->changeRectPx().right()  = aSizeX;
+void StImageViewerGUI::stglResize(const StGLBoxPx&  theViewPort,
+                                  const StMarginsI& theMargins,
+                                  float theAspect) {
+    const int aNewSizeX  = theViewPort.width();
+    const int aNewSizeY  = theViewPort.height();
+    const int aWorkRight = stMax(aNewSizeX - theMargins.right - theMargins.left, 2);
 
-    const StMarginsI& aMargins = myWindow->getMargins();
-    const bool areNewMargins = aMargins != getRootMargins();
-    if(areNewMargins) {
-        changeRootMargins() = aMargins;
-    }
+    // image should fit entire view
+    myImage->changeRectPx().top()    = -theMargins.top;
+    myImage->changeRectPx().bottom() = -theMargins.top + aNewSizeY;
+    myImage->changeRectPx().left()   = -theMargins.left;
+    myImage->changeRectPx().right()  = -theMargins.left + aNewSizeX;
 
     if(myPanelUpper != NULL) {
-        myPanelUpper->changeRectPx().right() = aSizeX;
+        myPanelUpper->changeRectPx().right() = aWorkRight;
         myIsMinimalGUI = (myWindow->isMovable() || myWindow->hasFullscreenMode()) && !isMobile()
-                     && (aSizeY < scale(400) || aSizeX < scale(400));
+                     && (aNewSizeY < scale(400) || aNewSizeX < scale(400));
     }
     if(myPanelBottom != NULL) {
-        myPanelBottom->changeRectPx().right() = aSizeX;
+        myPanelBottom->changeRectPx().right() = aWorkRight;
     }
-    if(areNewMargins) {
-        if(myPanelUpper != NULL) {
-            myPanelUpper->changeRectPx().left() = aMargins.left;
-            myPanelUpper->changeRectPx().top()  = aMargins.top;
-        }
-        if(myPanelBottom != NULL) {
-            myPanelBottom->changeRectPx().left() = aMargins.left;
-            myPanelBottom->changeRectPx().top()  = aMargins.top;
-        }
-        if(myMenuRoot != NULL) {
-            myMenuRoot->changeRectPx().left() = aMargins.left;
-            myMenuRoot->changeRectPx().top()  = aMargins.top;
-            myMenuRoot->stglUpdateSubmenuLayout();
-        }
-    }
-
-    StGLRootWidget::stglResize(theRectPx);
+    StGLRootWidget::stglResize(theViewPort, theMargins, theAspect);
 }
 
 void StImageViewerGUI::stglDraw(unsigned int theView) {
