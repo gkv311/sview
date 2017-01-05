@@ -215,6 +215,12 @@ void StOutDistorted::updateAbout() {
     myAbout = myAboutTitle + '\n' + myAboutVerString + " " + StVersionInfo::getSDKVersionString() + "\n \n"
             + (!myAboutVrDevice.isEmpty() ? ("Connected hardware: " + myAboutVrDevice + "\n \n") : "")
             + myAboutDescr.format("2013-2017", "kirill@sview.ru", "www.sview.ru");
+#ifdef ST_HAVE_OPENVR
+    myAbout = myAbout + "\n \n"
+            + "This software uses OpenVR library:\n"
+            + "https://github.com/ValveSoftware/openvr\n"
+            + "\xC2\xA9 2015 Valve Corporation";
+#endif
 }
 
 StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
