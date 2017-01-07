@@ -971,6 +971,21 @@ void StImageViewerGUI::createMobileBottomToolbar() {
     myBtnInfo->changeMargins() = aButtonMargins;
 
     aBtnIter = 0;
+    if(myWindow->hasFullscreenMode()) {
+        myBtnFull = new StGLTextureButton(myPanelBottom, (aBtnIter++) * (-anIconStep), 0,
+                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT), 4);
+        myBtnFull->setAction(myPlugin->getAction(StImageViewer::Action_Fullscreen));
+        const StString aSrcTextures[4] = {
+            iconTexture(stCString("actionVideoFullscreenOff"),   anIconSize),
+            iconTexture(stCString("actionVideoFullscreenOn"),    anIconSize),
+            iconTexture(stCString("actionVideoFullscreen3dOff"), anIconSize),
+            iconTexture(stCString("actionVideoFullscreen3dOn"),  anIconSize)
+        };
+        myBtnFull->setTexturePath(aSrcTextures, 4);
+        myBtnFull->setDrawShadow(true);
+        myBtnFull->changeMargins() = aButtonMargins;
+    }
+
     StGLTextureButton* aBtnZoomIn = new StGLTextureButton(myPanelBottom, (aBtnIter++) * (-anIconStep), 0,
                                                           StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     aBtnZoomIn->changeMargins() = aButtonMargins;

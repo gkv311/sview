@@ -1270,6 +1270,21 @@ void StMoviePlayerGUI::createMobileBottomToolbar() {
     myBtnNext->changeMargins() = aButtonMargins;
 
     const StGLCorner aRightCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT);
+    if(myWindow->hasFullscreenMode()) {
+        myBtnFullScr = new StGLTextureButton(myPanelBottom, (myBottomBarNbRight++) * (-myIconStep), 0,
+                                             aRightCorner, 4);
+        myBtnFullScr->setAction(myPlugin->getAction(StMoviePlayer::Action_Fullscreen));
+        const StString aSrcTextures[4] = {
+            iconTexture(stCString("actionVideoFullscreenOff"),   anIconSize),
+            iconTexture(stCString("actionVideoFullscreenOn"),    anIconSize),
+            iconTexture(stCString("actionVideoFullscreen3dOff"), anIconSize),
+            iconTexture(stCString("actionVideoFullscreen3dOn"),  anIconSize)
+        };
+        myBtnFullScr->setTexturePath(aSrcTextures, 4);
+        myBtnFullScr->setDrawShadow(true);
+        myBtnFullScr->changeMargins() = aButtonMargins;
+    }
+
     myBtnList = new StGLCheckboxTextured(myPanelBottom, myPlugin->params.ToShowPlayList,
                                          iconTexture(stCString("actionVideoPlaylistOff"), anIconSize),
                                          iconTexture(stCString("actionVideoPlaylist"),    anIconSize),
