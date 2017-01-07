@@ -181,7 +181,9 @@ void StOutDistorted::getOptions(StParamsList& theList) const {
     && myDevice != DEVICE_S3DV) {
         theList.add(params.Layout);
     }
-    theList.add(params.MonoClone);
+    if(myDevice != DEVICE_HMD) {
+        theList.add(params.MonoClone);
+    }
 }
 
 void StOutDistorted::updateStrings() {
@@ -1047,12 +1049,14 @@ void StOutDistorted::stglDrawVR() {
 void StOutDistorted::stglDraw() {
     myFPSControl.setTargetFPS(StWindow::getTargetFps());
 
-    const bool isStereoSource = (StWindow::isStereoSource() || params.MonoClone->getValue());
+    const bool isStereoSource = StWindow::isStereoSource()
+                             || myDevice == DEVICE_HMD
+                             || params.MonoClone->getValue();
     myIsStereoOn = isStereoSource
                 && StWindow::isFullScreen()
                 && !myIsBroken;
 
-    myIsForcedStereo = myIsStereoOn && params.MonoClone->getValue();
+    myIsForcedStereo = myIsStereoOn && (myDevice == DEVICE_HMD || params.MonoClone->getValue());
 
     double aForcedAspect = -1.0;
     if(isHmdOutput()) {
