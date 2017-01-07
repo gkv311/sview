@@ -154,6 +154,21 @@ class StMoviePlayer : public StApplication {
 
     ST_LOCAL void getRecentList(StArrayList<StString>& theList);
 
+    /**
+     * Return true if mobile UI should be enabled considering user option and window margins.
+     */
+    ST_LOCAL bool toUseMobileUI() const {
+        return toUseMobileUI(!myWindow.isNull() ? myWindow->getMargins() : StMarginsI());
+    }
+
+    /**
+     * Return true if mobile UI should be enabled considering user option and window margins.
+     */
+    ST_LOCAL bool toUseMobileUI(const StMarginsI& theMargins) const {
+        return params.IsMobileUI->getValue()
+            || theMargins.top > 0;
+    }
+
     struct {
 
         StHandle<StEnumParam>         ScaleAdjust;       //!< adjust GUI size, see StGLRootWidget::ScaleAdjust
@@ -184,7 +199,8 @@ class StMoviePlayer : public StApplication {
         StHandle<StBoolParamNamed>    ToShowFps;         //!< display FPS meter
         StHandle<StBoolParamNamed>    ToShowMenu;        //!< show main menu
         StHandle<StBoolParamNamed>    ToShowTopbar;      //!< show topbar
-        StHandle<StBoolParamNamed>    IsMobileUI;        //!< display mobile interface
+        StHandle<StBoolParamNamed>    IsMobileUI;        //!< display mobile interface (user option)
+        StHandle<StBoolParam>         IsMobileUISwitch;  //!< display mobile interface (actual value)
         StHandle<StBoolParamNamed>    ToLimitFps;        //!< limit CPU usage or not
         StHandle<StBoolParamNamed>    IsVSyncOn;         //!< flag to use VSync
         StHandle<StEnumParam>         StartWebUI;        //!< to start Web UI or not
@@ -254,6 +270,7 @@ class StMoviePlayer : public StApplication {
 
     ST_LOCAL virtual void doChangeLanguage(const int32_t theNewLang) ST_ATTR_OVERRIDE;
     ST_LOCAL void doScaleGui(const int32_t );
+    ST_LOCAL void doChangeMobileUI(const bool );
     ST_LOCAL void doScaleHiDPI(const bool );
     ST_LOCAL void doSwitchVSync(const bool theValue);
     ST_LOCAL void doSwitchAudioDevice(const int32_t theDevId);

@@ -161,7 +161,9 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     params.ToShowMenu    = new StBoolParamNamed(true,  stCString("toShowMenu"));
     params.ToShowTopbar  = new StBoolParamNamed(true,  stCString("toShowTopbar"));
     params.IsMobileUI    = new StBoolParamNamed(StWindow::isMobile(), stCString("isMobileUI"));
-    params.IsMobileUI->signals.onChanged = stSlot(this, &StImageViewer::doScaleHiDPI);
+    params.IsMobileUI->signals.onChanged = stSlot(this, &StImageViewer::doChangeMobileUI);
+    params.IsMobileUISwitch = new StBoolParam(params.IsMobileUI->getValue());
+    params.IsMobileUISwitch->signals.onChanged = stSlot(this, &StImageViewer::doScaleHiDPI);
     params.IsVSyncOn     = new StBoolParamNamed(true,  stCString("vsync"));
     params.IsVSyncOn->signals.onChanged = stSlot(this, &StImageViewer::doSwitchVSync);
     StApplication::params.VSyncMode->setValue(StGLContext::VSync_ON);
@@ -390,6 +392,7 @@ bool StImageViewer::createGui() {
     myGUI->myImage->getTextureQueue()->setDeviceCaps(aDevCaps);
 
     // load settings
+    doChangeMobileUI(params.IsMobileUI->getValue());
     myWindow->setTargetFps(double(params.TargetFps->getValue()));
     mySettings->loadParam (myGUI->myImage->params.DisplayMode);
     mySettings->loadParam (myGUI->myImage->params.TextureFilter);
@@ -673,7 +676,14 @@ void StImageViewer::doResize(const StSizeEvent& ) {
         return;
     }
 
-    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER), myWindow->getMargins(), (float )myWindow->stglAspectRatio());
+    const StMarginsI& aMargins = myWindow->getMargins();
+    const bool wasMobileGui = myGUI->isMobile();
+    const bool toMobileGui  = toUseMobileUI(aMargins);
+    if(toMobileGui != wasMobileGui) {
+        doChangeMobileUI(params.IsMobileUI->getValue());
+    } else {
+        myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER), myWindow->getMargins(), (float )myWindow->stglAspectRatio());
+    }
 }
 
 void StImageViewer::doImageAdjustReset(const size_t ) {
@@ -1055,6 +1065,10 @@ void StImageViewer::doScaleGui(const int32_t ) {
         return;
     }
     myToRecreateMenu = true;
+}
+
+void StImageViewer::doChangeMobileUI(const bool ) {
+    params.IsMobileUISwitch->setValue(toUseMobileUI());
 }
 
 void StImageViewer::doScaleHiDPI(const bool ) {

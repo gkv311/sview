@@ -1421,7 +1421,7 @@ StMoviePlayerGUI::StMoviePlayerGUI(StMoviePlayer*  thePlugin,
   myBottomBarNbRight(0) {
     const GLfloat aScale = myPlugin->params.ScaleHiDPI2X->getValue() ? 2.0f : myPlugin->params.ScaleHiDPI ->getValue();
     setScale(aScale, (StGLRootWidget::ScaleAdjust )myPlugin->params.ScaleAdjust->getValue());
-    setMobile(myPlugin->params.IsMobileUI->getValue());
+    setMobile(myPlugin->params.IsMobileUISwitch->getValue());
 
     myIconStep = isMobile() ? scale(56) : scale(64);
 

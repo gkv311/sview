@@ -1085,7 +1085,7 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
   myIsMinimalGUI(true) {
     const GLfloat aScale = myPlugin->params.ScaleHiDPI2X->getValue() ? 2.0f : myPlugin->params.ScaleHiDPI ->getValue();
     setScale(aScale, (StGLRootWidget::ScaleAdjust )myPlugin->params.ScaleAdjust->getValue());
-    setMobile(myPlugin->params.IsMobileUI->getValue());
+    setMobile(myPlugin->params.IsMobileUISwitch->getValue());
 
     myPlugin->params.ToShowFps->signals.onChanged.connect(this, &StImageViewerGUI::doShowFPS);
 

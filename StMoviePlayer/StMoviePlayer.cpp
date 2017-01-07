@@ -248,7 +248,9 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.ToShowMenu  = new StBoolParamNamed(true,  stCString("toShowMenu"));
     params.ToShowTopbar= new StBoolParamNamed(true,  stCString("toShowTopbar"));
     params.IsMobileUI  = new StBoolParamNamed(StWindow::isMobile(), stCString("isMobileUI"));
-    params.IsMobileUI->signals.onChanged = stSlot(this, &StMoviePlayer::doScaleHiDPI);
+    params.IsMobileUI->signals.onChanged = stSlot(this, &StMoviePlayer::doChangeMobileUI);
+    params.IsMobileUISwitch = new StBoolParam(params.IsMobileUI->getValue());
+    params.IsMobileUISwitch->signals.onChanged = stSlot(this, &StMoviePlayer::doScaleHiDPI);
     params.IsVSyncOn   = new StBoolParamNamed(true, stCString("vsync"));
     params.IsVSyncOn->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchVSync);
     StApplication::params.VSyncMode->setValue(StGLContext::VSync_ON);
@@ -585,6 +587,7 @@ bool StMoviePlayer::createGui(StHandle<StGLTextureQueue>& theTextureQueue,
     }
 
     params.ScaleHiDPI->setValue(myWindow->getScaleFactor());
+    doChangeMobileUI(params.IsMobileUI->getValue());
     myGUI = new StMoviePlayerGUI(this, myWindow.access(), myLangMap.access(), myPlayList, theTextureQueue, theSubQueue);
     myGUI->setContext(myContext);
     theTextureQueue->setDeviceCaps(myContext->getDeviceCaps());
@@ -981,7 +984,14 @@ void StMoviePlayer::doResize(const StSizeEvent& ) {
         return;
     }
 
-    myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER), myWindow->getMargins(), (float )myWindow->stglAspectRatio());
+    const StMarginsI& aMargins = myWindow->getMargins();
+    const bool wasMobileGui = myGUI->isMobile();
+    const bool toMobileGui  = toUseMobileUI(aMargins);
+    if(toMobileGui != wasMobileGui) {
+        doChangeMobileUI(params.IsMobileUI->getValue());
+    } else {
+        myGUI->stglResize(myWindow->stglViewport(ST_WIN_MASTER), myWindow->getMargins(), (float )myWindow->stglAspectRatio());
+    }
 }
 
 void StMoviePlayer::doKeyDown(const StKeyEvent& theEvent) {
@@ -1666,6 +1676,10 @@ void StMoviePlayer::doScaleGui(const int32_t ) {
         return;
     }
     myToRecreateMenu = true;
+}
+
+void StMoviePlayer::doChangeMobileUI(const bool ) {
+    params.IsMobileUISwitch->setValue(toUseMobileUI());
 }
 
 void StMoviePlayer::doScaleHiDPI(const bool ) {
