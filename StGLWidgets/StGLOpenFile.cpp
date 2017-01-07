@@ -53,9 +53,9 @@ StGLOpenFile::StGLOpenFile(StGLWidget*     theParent,
     myList->setColor(StGLVec4(0.0f, 0.0f, 0.0f, 0.0f));
     myList->setItemWidthMin(myContent->getRectPx().width());
 
-    if(!myRoot->isMobile()) {
+    //if(!myRoot->isMobile()) {
         addButton(theCloseText);
-    }
+    //}
 }
 
 StGLOpenFile::~StGLOpenFile() {
