@@ -1,6 +1,6 @@
 /**
  * StOutPageFlip, class providing stereoscopic output for Shutter Glasses displays using StCore toolkit.
- * Copyright © 2007-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -24,6 +24,7 @@ class StSettings;
 class StWindow;
 class StVuzixSDK;
 class StGLFrameBuffer;
+class StGLTextureQuad;
 class StDXNVWindow;
 
 /**
@@ -180,7 +181,6 @@ class StOutPageFlip : public StWindow {
      */
     ST_LOCAL void doSwitchVSync(const int32_t theValue);
 
-    ST_LOCAL         void stglDrawWarning();
     ST_LOCAL virtual void stglDrawExtra(unsigned int theView, int theMode);
 
         protected:
@@ -215,7 +215,7 @@ class StOutPageFlip : public StWindow {
     StString              myAbout;      //!< about string
     StHandle<StGLContext> myContext;
     StHandle<StVuzixSDK>  myVuzixSDK;   //!< Vuzix HMD control
-    StHandle<StGLTexture> myWarning;
+    StHandle<StGLTextureQuad> myWarning;
     StTranslations        myLangMap;
     DeviceEnum            myDevice;
     StDXInfo              myDxInfo;

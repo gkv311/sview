@@ -18,6 +18,7 @@
 #include <StGL/StGLFrameBuffer.h>
 #include <StGL/StGLArbFbo.h>
 #include <StGLCore/StGLCore20.h>
+#include <StGLMesh/StGLTextureQuad.h>
 #include <StSettings/StSettings.h>
 #include <StSettings/StTranslations.h>
 #include <StSettings/StEnumParam.h>
@@ -244,6 +245,7 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
   myVrRendSizeX(0),
   myVrRendSizeY(0),
   myVrTrackOrient(false),
+  myVrToDrawMsg(false),
 #ifdef ST_HAVE_OPENVR
   myVrHmd(NULL),
   myVrTrackedPoses(new vr::TrackedDevicePose_t[vr::k_unMaxTrackedDeviceCount]),
@@ -361,6 +363,10 @@ StOutDistorted::StOutDistorted(const StHandle<StResourceManager>& theResMgr,
 
 void StOutDistorted::releaseResources() {
     if(!myContext.isNull()) {
+        if(!myVrFullscreenMsg.isNull()) {
+            myVrFullscreenMsg->release(*myContext);
+            myVrFullscreenMsg.nullify();
+        }
     #ifdef ST_HAVE_OPENVR
         if(myVrHmd != NULL) {
             vr::VR_Shutdown();
@@ -492,18 +498,20 @@ bool StOutDistorted::create() {
     myCurTCrdsBuf.init(*myContext, 2, 4, QUAD_TEXCOORD);
 
     // cursor texture
-    StAVImage aCursorImg;
-    StHandle<StResource> aCursorRes = getResourceManager()->getResource(StString("textures") + SYS_FS_SPLITTER + "cursor.png");
-    uint8_t* aData     = NULL;
-    int      aDataSize = 0;
-    if(!aCursorRes.isNull()
-    && !aCursorRes->isFile()
-    &&  aCursorRes->read()) {
-        aData     = (uint8_t* )aCursorRes->getData();
-        aDataSize = aCursorRes->getSize();
-    }
-    if(aCursorImg.load(!aCursorRes.isNull() ? aCursorRes->getPath() : StString(), StImageFile::ST_TYPE_PNG, aData, aDataSize)) {
-        myCursor->init(*myContext, aCursorImg.getPlane());
+    {
+        StAVImage aCursorImg;
+        StHandle<StResource> aCursorRes = getResourceManager()->getResource(StString("textures") + SYS_FS_SPLITTER + "cursor.png");
+        uint8_t* aData     = NULL;
+        int      aDataSize = 0;
+        if(!aCursorRes.isNull()
+        && !aCursorRes->isFile()
+        &&  aCursorRes->read()) {
+            aData     = (uint8_t* )aCursorRes->getData();
+            aDataSize = aCursorRes->getSize();
+        }
+        if(aCursorImg.load(!aCursorRes.isNull() ? aCursorRes->getPath() : StString(), StImageFile::ST_TYPE_PNG, aData, aDataSize)) {
+            myCursor->init(*myContext, aCursorImg.getPlane());
+        }
     }
 
 #ifdef ST_HAVE_OPENVR
@@ -601,6 +609,30 @@ bool StOutDistorted::create() {
         myContext->stglBindFramebufferRead(anFboReadBack);
     }
 #endif
+
+    if(myDevice == DEVICE_HMD) {
+        StAVImage anImage;
+        StHandle<StResource> aWarnRes = getResourceManager()->getResource(StString("textures") + SYS_FS_SPLITTER + "hmd_exit_fullscreen.png");
+        uint8_t* aData     = NULL;
+        int      aDataSize = 0;
+        if(!aWarnRes.isNull()
+        && !aWarnRes->isFile()
+        &&  aWarnRes->read()) {
+            aData     = (uint8_t* )aWarnRes->getData();
+            aDataSize = aWarnRes->getSize();
+        }
+        if(anImage.load(!aWarnRes.isNull() ? aWarnRes->getPath() : StString(), StImageFile::ST_TYPE_PNG, aData, aDataSize)) {
+            myVrFullscreenMsg = new StGLTextureQuad();
+            if(!myVrFullscreenMsg->init(*myContext, anImage.getPlane())) {
+                ST_ERROR_LOG(ST_OUT_PLUGIN_NAME + " Plugin, Texture can not be initialized!");
+                myVrFullscreenMsg->release(*myContext);
+                myVrFullscreenMsg.nullify();
+            }
+        } else {
+            ST_ERROR_LOG(ST_OUT_PLUGIN_NAME + " Plugin, Texture missed: " + anImage.getState());
+        }
+    }
+
     return true;
 }
 
@@ -909,14 +941,20 @@ void StOutDistorted::stglDrawVR() {
     // real screen buffer
     myContext->stglBindFramebuffer(StGLFrameBuffer::NO_FRAMEBUFFER);
 
-    if(hasComposError) {
+    if(hasComposError || myVrToDrawMsg || myVrMsgTimer.getElapsedTimeInSec() > 2.0) {
         myContext->stglResizeViewport(aVPBoth);
         myContext->stglResetScissorRect();
         myContext->core20fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        myFPSControl.sleepToTarget(); // decrease FPS to target by thread sleeps
+        if(!myVrFullscreenMsg.isNull()) {
+            myVrFullscreenMsg->stglDraw(*myContext);
+        }
         StWindow::stglSwap(ST_WIN_ALL);
-        ++myFPSControl;
+        if(myVrToDrawMsg) {
+            myVrToDrawMsg = false;
+            myVrMsgTimer.restart();
+        } else if(!hasComposError) {
+            myVrMsgTimer.stop();
+        }
     }
 #elif defined(ST_HAVE_LIBOVR)
     const StGLBoxPx  aVPBoth    = StWindow::stglViewport(ST_WIN_ALL);
@@ -1058,6 +1096,7 @@ void StOutDistorted::stglDraw() {
 
     const StGLBoxPx aVPMaster = StWindow::stglViewport(ST_WIN_MASTER);
     if(!myIsStereoOn) {
+        myVrToDrawMsg = true;
         if(myToCompressMem) {
             myFrBuffer->release(*myContext);
         }

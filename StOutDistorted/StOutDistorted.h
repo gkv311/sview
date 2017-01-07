@@ -21,6 +21,7 @@ class StProgramBarrel;
 class StProgramFlat;
 class StGLFrameBuffer;
 class StGLTexture;
+class StGLTextureQuad;
 
 namespace vr {
     class IVRSystem;
@@ -289,6 +290,9 @@ class StOutDistorted : public StWindow {
     int                       myVrRendSizeX;     //!< FBO width  for rendering into VR (can be greater then actual HMD resolution to compensate distortion)
     int                       myVrRendSizeY;     //!< FBO height for rendering into VR
     bool                      myVrTrackOrient;   //!< track orientation flag
+    bool                      myVrToDrawMsg;
+    StHandle<StGLTextureQuad> myVrFullscreenMsg;
+    StTimer                   myVrMsgTimer;
 #ifdef ST_HAVE_OPENVR
     vr::IVRSystem*            myVrHmd;           //!< OpenVR session object
     vr::TrackedDevicePose_t*  myVrTrackedPoses;  //!< array of tracked devices poses

@@ -1,6 +1,6 @@
 /**
  * StOutPageFlip, class providing stereoscopic output for Shutter Glasses displays using StCore toolkit.
- * Copyright © 2007-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -17,6 +17,7 @@
 #include <StGL/StGLEnums.h>
 #include <StGL/StGLContext.h>
 #include <StGL/StGLArbFbo.h>
+#include <StGLMesh/StGLTextureQuad.h>
 #include <StGLCore/StGLCore20.h>
 #include <StGLStereo/StGLStereoFrameBuffer.h>
 #include <StCore/StSearchMonitors.h>
@@ -897,7 +898,7 @@ bool StOutPageFlip::create() {
         aDataSize = aWarnRes->getSize();
     }
     if(anImage.load(!aWarnRes.isNull() ? aWarnRes->getPath() : StString(), StImageFile::ST_TYPE_PNG, aData, aDataSize)) {
-        myWarning = new StGLTexture(GL_RGBA8);
+        myWarning = new StGLTextureQuad();
         if(!myWarning->init(*myContext, anImage.getPlane())) {
             ST_ERROR_LOG(ST_OUT_PLUGIN_NAME + " Plugin, Texture can not be initialized!");
             myWarning->release(*myContext);
@@ -1003,58 +1004,6 @@ void StOutPageFlip::dxDraw(unsigned int view) {
 #endif
 }
 
-void StOutPageFlip::stglDrawWarning() {
-    if(myWarning.isNull()) {
-        return;
-    }
-
-#if !defined(GL_ES_VERSION_2_0)
-    myContext->core20fwd->glDisable(GL_DEPTH_TEST);
-    myContext->core20fwd->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    myContext->core20fwd->glEnable(GL_BLEND);
-    myContext->core11->glEnable(GL_TEXTURE_2D);
-
-    myWarning->bind(*myContext);
-
-    const StGLBoxPx aVPort = StWindow::stglViewport(ST_WIN_MASTER);
-    const int aWinSizeX = aVPort.width();
-    const int aWinSizeY = aVPort.height();
-    const GLfloat aWidth  = (aWinSizeX > 0) ?        GLfloat(myWarning->getSizeX()) / GLfloat(aWinSizeX) : 1.0f;
-    const GLfloat aBottom = (aWinSizeY > 0) ? 100.0f / GLfloat(aWinSizeY) : 0.0f;
-    const GLfloat aHeight = (aWinSizeY > 0) ? 2.0f * GLfloat(myWarning->getSizeY()) / GLfloat(aWinSizeY) : 1.0f;
-
-    const GLfloat aVerts[] = {
-         aWidth, -1.0f + aBottom + aHeight,
-         aWidth, -1.0f + aBottom,
-        -aWidth, -1.0f + aBottom + aHeight,
-        -aWidth, -1.0f + aBottom,
-    };
-
-    const GLfloat aTCrds[] = {
-        1.0f, 0.0f, // top-right
-        1.0f, 1.0f, // bottom-right
-        0.0f, 0.0f, // top-left
-        0.0f, 1.0f  // bottom-left
-    };
-
-    myContext->core11->glLoadIdentity();
-
-    myContext->core11->glEnableClientState(GL_VERTEX_ARRAY);
-    myContext->core11->glVertexPointer(2, GL_FLOAT, 0, aVerts);
-    myContext->core11->glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    myContext->core11->glTexCoordPointer(2, GL_FLOAT, 0, aTCrds);
-
-    myContext->core11fwd->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-    myContext->core11->glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    myContext->core11->glDisableClientState(GL_VERTEX_ARRAY);
-
-    myWarning->unbind(*myContext);
-    myContext->core11->glDisable(GL_TEXTURE_2D);
-    myContext->core20fwd->glDisable(GL_BLEND);
-#endif
-}
-
 bool StOutPageFlip::isStereoFullscreenOnly() const {
 #ifdef _WIN32
     return params.QuadBuffer->getValue() == QUADBUFFER_HARD_D3D_ANY;
@@ -1141,7 +1090,9 @@ void StOutPageFlip::stglDraw() {
             #endif
                 StWindow::signals.onRedraw(ST_DRAW_RIGHT);
                 StWindow::signals.onRedraw(ST_DRAW_LEFT);
-                stglDrawWarning();
+                if(!myWarning.isNull()) {
+                    myWarning->stglDraw(*myContext);
+                }
             } else {
             #if !defined(GL_ES_VERSION_2_0)
                 myContext->core20fwd->glDrawBuffer(GL_BACK_LEFT);
@@ -1264,7 +1215,9 @@ void StOutPageFlip::stglDraw() {
                 StWindow::signals.onRedraw(ST_DRAW_RIGHT); // reverse order to avoid non-smooth mono->stereo transition
                 StWindow::signals.onRedraw(ST_DRAW_LEFT);
 
-                stglDrawWarning();
+                if(!myWarning.isNull()) {
+                    myWarning->stglDraw(*myContext);
+                }
 
                 myFPSControl.sleepToTarget();
                 StWindow::stglSwap(ST_WIN_MASTER);
