@@ -120,6 +120,11 @@ class StOutDistorted : public StWindow {
     ST_CPPEXPORT virtual void setFullScreen(const bool theFullScreen) ST_ATTR_OVERRIDE;
 
     /**
+     * Return true if 3D output requires fullscreen mode.
+     */
+    ST_CPPEXPORT virtual bool isStereoFullscreenOnly() const ST_ATTR_OVERRIDE;
+
+    /**
      * Stereo renderer.
      */
     ST_CPPEXPORT virtual void stglDraw() ST_ATTR_OVERRIDE;

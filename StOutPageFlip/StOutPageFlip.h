@@ -130,6 +130,11 @@ class StOutPageFlip : public StWindow {
      */
     ST_LOCAL virtual void doChangeLanguage() ST_ATTR_OVERRIDE;
 
+    /**
+     * Return true if 3D output requires fullscreen mode.
+     */
+    ST_CPPEXPORT virtual bool isStereoFullscreenOnly() const ST_ATTR_OVERRIDE;
+
         protected:
 
     ST_LOCAL void setupDevice();

@@ -85,13 +85,18 @@ void StImageViewerGUI::createDesktopUI(const StHandle<StPlayList>& thePlayList) 
     const int aRight  = -scale(8);
     const int aBottom = -scale(8);
     if(myWindow->hasFullscreenMode()) {
-        myBtnFull = new StGLCheckboxTextured(myPanelBottom, myPlugin->params.IsFullscreen,
-                                             iconTexture(stCString("actionVideoFullscreenOff"), anIconSize),
-                                             iconTexture(stCString("actionVideoFullscreenOn"),  anIconSize),
-                                             (aBottomBarNbRight++) * (-anIconStep) + aRight, aBottom,
-                                             StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+        myBtnFull = new StGLTextureButton(myPanelBottom, (aBottomBarNbRight++) * (-anIconStep) + aRight, aBottom,
+                                          StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT), 4);
+        myBtnFull->setAction(myPlugin->getAction(StImageViewer::Action_Fullscreen));
+        const StString aSrcTextures[4] = {
+            iconTexture(stCString("actionVideoFullscreenOff"),   anIconSize),
+            iconTexture(stCString("actionVideoFullscreenOn"),    anIconSize),
+            iconTexture(stCString("actionVideoFullscreen3dOff"), anIconSize),
+            iconTexture(stCString("actionVideoFullscreen3dOn"),  anIconSize)
+        };
+        myBtnFull->setTexturePath(aSrcTextures, 4);
+
         myBtnFull->setDrawShadow(true);
-        myBtnFull->setFalseOpacity(1.0f);
         myBtnFull->changeMargins() = aButtonMargins;
     }
 
@@ -1194,6 +1199,12 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
         && myPanelBottom != NULL) {
             myPanelBottom->setOpacity(1.0f, false);
         }
+
+        int aFirstFace = 0;
+        if(myWindow->isStereoFullscreenOnly() && myWindow->isStereoOutput()) {
+            aFirstFace = 2;
+        }
+        myBtnFull->setFaceId(aFirstFace + (myPlugin->params.IsFullscreen->getValue() ? 1 : 0));
         myBtnFull->setOpacity(myIsMinimalGUI ? 1.0f : anOpacity, false);
     }
 

@@ -820,6 +820,10 @@ void StOutDistorted::checkHdmiPack() {
     }
 }
 
+bool StOutDistorted::isStereoFullscreenOnly() const {
+    return StWindow::hasFullscreenMode();
+}
+
 void StOutDistorted::setFullScreen(const bool theFullScreen) {
     bool wasFullscreen = StWindow::isFullScreen();
     if(!theFullScreen) {

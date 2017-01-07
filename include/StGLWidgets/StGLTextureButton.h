@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -14,6 +14,8 @@
 
 #include <StGL/StGLVertexBuffer.h>
 #include <StGL/StGLTexture.h>
+
+class StAction;
 
 /**
  * Widget of the clickable button with image face.
@@ -42,6 +44,16 @@ class StGLTextureButton : public StGLWidget {
      * Destructor.
      */
     ST_CPPEXPORT virtual ~StGLTextureButton();
+
+    /**
+     * Return action to be triggered on button click.
+     */
+    ST_LOCAL const StHandle<StAction>& getAction() const { return myAction; }
+
+    /**
+     * Set action to be triggered on button click.
+     */
+    ST_CPPEXPORT void setAction(const StHandle<StAction>& theAction);
 
     /**
      * Return scale factor to be applied to the widget opacity, 1.0 by default.
@@ -150,6 +162,7 @@ class StGLTextureButton : public StGLWidget {
 
         protected:
 
+    StHandle<StAction>         myAction;       //!< action on button click
     StGLVertexBuffer           myVertBuf;      //!< vertices VBO
     StGLVertexBuffer           myTCrdBuf;      //!< texture coordinates VBO
     StGLVec4                   myColor;        //!< button color for alpha-textures

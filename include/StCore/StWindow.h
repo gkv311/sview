@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2007-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -398,6 +398,11 @@ class StWindow {
      * Devices list.
      */
     ST_CPPEXPORT virtual void getDevices(StOutDevicesList& theList) const;
+
+    /**
+     * Return true if 3D output requires fullscreen mode.
+     */
+    ST_CPPEXPORT virtual bool isStereoFullscreenOnly() const;
 
     /**
      * @return true if stereo output enabled

@@ -1055,6 +1055,14 @@ void StOutPageFlip::stglDrawWarning() {
 #endif
 }
 
+bool StOutPageFlip::isStereoFullscreenOnly() const {
+#ifdef _WIN32
+    return params.QuadBuffer->getValue() == QUADBUFFER_HARD_D3D_ANY;
+#else
+    return false;
+#endif
+}
+
 void StOutPageFlip::stglDraw() {
     myFPSControl.setTargetFPS(StWindow::getTargetFps());
 

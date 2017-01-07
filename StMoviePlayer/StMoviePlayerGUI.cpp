@@ -236,13 +236,17 @@ void StMoviePlayerGUI::createBottomToolbar(const int theIconSize,
     myBtnPlay->changeMargins() = aButtonMargins;
 
     if(myWindow->hasFullscreenMode()) {
-        myBtnFullScr = new StGLCheckboxTextured(myPanelBottom, myPlugin->params.IsFullscreen,
-                                                iconTexture(stCString("actionVideoFullscreenOff"), anIconSize),
-                                                iconTexture(stCString("actionVideoFullscreenOn"),  anIconSize),
-                                                (myBottomBarNbRight++) * (-anIconStep), 0,
-                                                StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
+        myBtnFullScr = new StGLTextureButton(myPanelBottom, (myBottomBarNbRight++) * (-anIconStep), 0,
+                                             StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT), 4);
+        myBtnFullScr->setAction(myPlugin->getAction(StMoviePlayer::Action_Fullscreen));
+        const StString aSrcTextures[4] = {
+            iconTexture(stCString("actionVideoFullscreenOff"),   anIconSize),
+            iconTexture(stCString("actionVideoFullscreenOn"),    anIconSize),
+            iconTexture(stCString("actionVideoFullscreen3dOff"), anIconSize),
+            iconTexture(stCString("actionVideoFullscreen3dOn"),  anIconSize)
+        };
+        myBtnFullScr->setTexturePath(aSrcTextures, 4);
         myBtnFullScr->setDrawShadow(true);
-        myBtnFullScr->setFalseOpacity(1.0f);
         myBtnFullScr->changeMargins() = aButtonMargins;
     }
 
@@ -1695,7 +1699,11 @@ void StMoviePlayerGUI::setVisibility(const StPointD_t& theCursor) {
         myBtnSrcFrmt->setFaceId(aFaceId);
     }
     if(myBtnFullScr != NULL) {
-        myBtnFullScr->setFaceId(myPlugin->params.IsFullscreen->getValue() ? 1 : 0);
+        int aFirstFace = 0;
+        if(myWindow->isStereoFullscreenOnly() && myWindow->isStereoOutput()) {
+            aFirstFace = 2;
+        }
+        myBtnFullScr->setFaceId(aFirstFace + (myPlugin->params.IsFullscreen->getValue() ? 1 : 0));
     }
     if(myBtnSwapLR != NULL) {
         const bool hasInput = hasVideo

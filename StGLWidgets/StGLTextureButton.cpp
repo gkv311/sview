@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -16,6 +16,7 @@
 #include <StGLCore/StGLCore20.h>
 
 #include <StAV/StAVImage.h>
+#include <StSlots/StAction.h>
 #include <StThreads/StProcess.h>
 
 /**
@@ -304,6 +305,10 @@ StGLTextureButton::~StGLTextureButton() {
     }
 }
 
+void StGLTextureButton::setAction(const StHandle<StAction>& theAction) {
+    myAction = theAction;
+}
+
 void StGLTextureButton::setTexturePath(const StString* theTexturesPaths,
                                        const size_t    theCount) {
     const size_t aNbTextures = (theCount > myTextures->size()) ? myTextures->size() : theCount;
@@ -545,6 +550,9 @@ bool StGLTextureButton::tryUnClick(const StClickEvent& theEvent,
 
 void StGLTextureButton::doMouseUnclick(const int theBtnId) {
     if(theBtnId == ST_MOUSE_LEFT) {
+        if(!myAction.isNull()) {
+            myAction->doTrigger(NULL);
+        }
         signals.onBtnClick(getUserData());
     }
 }
