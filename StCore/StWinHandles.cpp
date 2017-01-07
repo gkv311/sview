@@ -430,28 +430,35 @@ int StWinHandles::glCreateContext(StWinHandles*    theSlave,
 
       int aPixFrmtId = 0;
       if(aCtx.extAll->wglChoosePixelFormatARB != NULL) {
-          const int aPixAttribs[] = {
-              WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
-              WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
-              WGL_DOUBLE_BUFFER_ARB,  GL_TRUE,
-              WGL_STEREO_ARB,         theIsQuadStereo ? GL_TRUE : GL_FALSE,
-              WGL_PIXEL_TYPE_ARB,     WGL_TYPE_RGBA_ARB,
-              //WGL_SAMPLE_BUFFERS_ARB, 1,
-              //WGL_SAMPLES_ARB,        8,
-              // WGL_CONTEXT_ROBUST_ACCESS_BIT_ARB       0x00000004
-              WGL_COLOR_BITS_ARB,     24,
-              WGL_DEPTH_BITS_ARB,     theDepthSize,
-              WGL_STENCIL_BITS_ARB,   theStencilSize,
-              0, 0,
-          };
-          unsigned int aFrmtsNb = 0;
-          aCtx.extAll->wglChoosePixelFormatARB(hDC, aPixAttribs, NULL, 1, &aPixFrmtId, &aFrmtsNb);
-          if(theSlave != NULL) {
-              int aPixFrmtIdSlave = 0;
-              aCtx.extAll->wglChoosePixelFormatARB(theSlave->hDC, aPixAttribs, NULL, 1, &aPixFrmtIdSlave, &aFrmtsNb);
-              if(aPixFrmtIdSlave != aPixFrmtId) {
-                  ST_ERROR_LOG("Slave window returns another pixel format! Try to ignore...");
+          for(bool toTryQuadBuffer = theIsQuadStereo;;) {
+              const int aPixAttribs[] = {
+                  WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
+                  WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
+                  WGL_DOUBLE_BUFFER_ARB,  GL_TRUE,
+                  WGL_STEREO_ARB,         toTryQuadBuffer ? GL_TRUE : GL_FALSE,
+                  WGL_PIXEL_TYPE_ARB,     WGL_TYPE_RGBA_ARB,
+                  //WGL_SAMPLE_BUFFERS_ARB, 1,
+                  //WGL_SAMPLES_ARB,        8,
+                  // WGL_CONTEXT_ROBUST_ACCESS_BIT_ARB       0x00000004
+                  WGL_COLOR_BITS_ARB,     24,
+                  WGL_DEPTH_BITS_ARB,     theDepthSize,
+                  WGL_STENCIL_BITS_ARB,   theStencilSize,
+                  0, 0,
+              };
+              unsigned int aFrmtsNb = 0;
+              aCtx.extAll->wglChoosePixelFormatARB(hDC, aPixAttribs, NULL, 1, &aPixFrmtId, &aFrmtsNb);
+              if(toTryQuadBuffer && aPixFrmtId == 0) {
+                  toTryQuadBuffer = false;
+                  continue;
               }
+              if(theSlave != NULL) {
+                  int aPixFrmtIdSlave = 0;
+                  aCtx.extAll->wglChoosePixelFormatARB(theSlave->hDC, aPixAttribs, NULL, 1, &aPixFrmtIdSlave, &aFrmtsNb);
+                  if(aPixFrmtIdSlave != aPixFrmtId) {
+                      ST_ERROR_LOG("Slave window returns another pixel format! Try to ignore...");
+                  }
+              }
+              break;
           }
       } else {
           aPixFrmtId = ChoosePixelFormat(hDC, &aPixFrmtDesc);
