@@ -183,7 +183,7 @@ void StDiagnostics::stglDraw(unsigned int theView) {
         return;
     }
 
-    myGUI->getCamera()->setView(theView);
+    myGUI->changeCamera()->setView(theView);
     if(theView == ST_DRAW_LEFT
     || theView == ST_DRAW_MONO) {
         myGUI->stglUpdate(myWindow->getMousePos());

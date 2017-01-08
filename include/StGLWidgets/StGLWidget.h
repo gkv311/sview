@@ -434,7 +434,12 @@ class StGLWidget {
     /**
      * Returns link to the projection camera from root widget.
      */
-    ST_CPPEXPORT StGLProjCamera* getCamera();
+    ST_CPPEXPORT const StGLProjCamera* getCamera() const;
+
+    /**
+     * Returns link to the projection camera from root widget.
+     */
+    ST_CPPEXPORT StGLProjCamera* changeCamera();
 
     /**
      * @return OpenGL context from root widget.

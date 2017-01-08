@@ -1527,7 +1527,7 @@ void StMoviePlayer::stglDraw(unsigned int theView) {
         return;
     }
 
-    myGUI->getCamera()->setView(theView);
+    myGUI->changeCamera()->setView(theView);
     myGUI->stglDraw(theView);
 }
 

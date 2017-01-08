@@ -868,7 +868,7 @@ void StCADViewer::stglDraw(unsigned int theView) {
         myContext->core11fwd->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    myGUI->getCamera()->setView(theView);
+    myGUI->changeCamera()->setView(theView);
     myProjection.setView(theView);
 
     // draw GUI

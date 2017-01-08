@@ -339,8 +339,12 @@ bool StGLWidget::doScroll(const StScrollEvent& theEvent) {
     return false;
 }
 
-StGLProjCamera* StGLWidget::getCamera() {
+const StGLProjCamera* StGLWidget::getCamera() const {
     return myRoot->StGLRootWidget::getCamera();
+}
+
+StGLProjCamera* StGLWidget::changeCamera() {
+    return myRoot->StGLRootWidget::changeCamera();
 }
 
 StGLContext& StGLWidget::getContext() {

@@ -75,6 +75,24 @@ class StQuaternion {
     Element_t w() const { return myV.w(); }
 
     /**
+     * Rotate vector by quaternion as rotation operator.
+     */
+    StVec3<Element_t> multiply(const StVec3<Element_t>& theVec) const {
+        StQuaternion aRot(theVec.x() * w() + theVec.z() * y() - theVec.y() * z(),
+                          theVec.y() * w() + theVec.x() * z() - theVec.z() * x(),
+                          theVec.z() * w() + theVec.y() * x() - theVec.x() * y(),
+                          theVec.x() * x() + theVec.y() * y() + theVec.z() * z());
+        return StVec3<Element_t>(w() * aRot.x() + x() * aRot.w() + y() * aRot.z() - z() * aRot.y(),
+                                 w() * aRot.y() + y() * aRot.w() + z() * aRot.x() - x() * aRot.z(),
+                                 w() * aRot.z() + z() * aRot.w() + x() * aRot.y() - y() * aRot.x()) * (Element_t(1) / squareNorm());
+    }
+
+    /**
+     * Rotate vector by quaternion as rotation operator.
+     */
+    StVec3<Element_t> operator*(const StVec3<Element_t>& theVec) const { return multiply(theVec); }
+
+    /**
      * Multiply two quaternions (e.g. rotate object by theQ2 and then by theQ1 - order is important!).
      */
     static StQuaternion multiply(const StQuaternion& theQ1,
@@ -118,6 +136,20 @@ class StQuaternion {
             myV.w() = theMat[0][1] - theMat[1][0];
             scale(Element_t(0.5) / std::sqrt(z()));
         }
+    }
+
+    /**
+     * Return square norm of quaternion.
+     */
+    Element_t squareNorm() const {
+        return x() * x() + y() * y() + z() * z() + w() * w();
+    }
+
+    /**
+     * Return norm of quaternion.
+     */
+    Element_t norm() const {
+        return std::sqrt(squareNorm());
     }
 
         private:

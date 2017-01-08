@@ -112,6 +112,14 @@ class StGLImageRegion : public StGLWidget {
     ST_CPPEXPORT StHandle<StStereoParams> getSource();
 
     /**
+     * Compute the head orientation.
+     * @param theView view identifier (to apply stereo separation)
+     * @param theToApplyDefShift if TRUE the default transformation will be applied (stored in the file + 90 degrees Yaw shift)
+     */
+    ST_CPPEXPORT StGLQuaternion getHeadOrientation(unsigned int theView,
+                                                   const bool theToApplyDefShift) const;
+
+    /**
      * Return true if there is any video stream.
      */
     ST_LOCAL bool hasVideoStream() { return myHasVideoStream; }
@@ -269,10 +277,10 @@ class StGLImageRegion : public StGLWidget {
 
 
     ST_LOCAL StGLVec2 getMouseMoveFlat(const StPointD_t& theCursorZoFrom,
-                                       const StPointD_t& theCursorZoTo);
+                                       const StPointD_t& theCursorZoTo) const;
     ST_LOCAL StGLVec2 getMouseMoveSphere(const StPointD_t& theCursorZoFrom,
-                                         const StPointD_t& theCursorZoTo);
-    ST_LOCAL StGLVec2 getMouseMoveSphere();
+                                         const StPointD_t& theCursorZoTo) const;
+    ST_LOCAL StGLVec2 getMouseMoveSphere() const;
 
     ST_LOCAL void scaleAt(const StPointD_t& thePoint,
                           const float       theStep);

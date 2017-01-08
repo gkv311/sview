@@ -449,7 +449,7 @@ bool StGLImageRegion::stglInit() {
 }
 
 StGLVec2 StGLImageRegion::getMouseMoveFlat(const StPointD_t& theCursorZoFrom,
-                                           const StPointD_t& theCursorZoTo) {
+                                           const StPointD_t& theCursorZoTo) const {
     // apply scale factor in case of working area margins
     const double aVrScale = 1.0 / myRoot->getVrZoomOut();
     const double aScaleX  = double(myRoot->getRectPx().width())  / double(myRoot->getRootFullSizeX());
@@ -459,9 +459,9 @@ StGLVec2 StGLImageRegion::getMouseMoveFlat(const StPointD_t& theCursorZoFrom,
 }
 
 StGLVec2 StGLImageRegion::getMouseMoveSphere(const StPointD_t& theCursorZoFrom,
-                                             const StPointD_t& theCursorZoTo) {
+                                             const StPointD_t& theCursorZoTo) const {
     StGLVec2 aVec = getMouseMoveFlat(theCursorZoFrom, theCursorZoTo);
-    float aSphereScale = THE_SPHERE_RADIUS * THE_PANORAMA_DEF_ZOOM * getSource()->ScaleFactor;
+    float aSphereScale = THE_SPHERE_RADIUS * THE_PANORAMA_DEF_ZOOM * params.stereoFile->ScaleFactor;
     StRectD_t aZParams;
     getCamera()->getZParams(getCamera()->getZNear(), aZParams);
     aVec.x() *= -90.0f * float(aZParams.right() - aZParams.left()) / aSphereScale;
@@ -469,10 +469,45 @@ StGLVec2 StGLImageRegion::getMouseMoveSphere(const StPointD_t& theCursorZoFrom,
     return aVec;
 }
 
-StGLVec2 StGLImageRegion::getMouseMoveSphere() {
+StGLVec2 StGLImageRegion::getMouseMoveSphere() const {
     return isClicked(ST_MOUSE_LEFT)
-         ? getMouseMoveSphere(myClickPntZo, getRoot()->getCursorZo())
+         ? getMouseMoveSphere(myClickPntZo, myRoot->getCursorZo())
          : StGLVec2();
+}
+
+StGLQuaternion StGLImageRegion::getHeadOrientation(unsigned int theView,
+                                                   const bool theToApplyDefShift) const {
+    StHandle<StStereoParams> aParams = params.stereoFile;
+    if(aParams.isNull()) {
+        return StGLQuaternion();
+    }
+
+    const float aYawShift = theToApplyDefShift ? stToRadians(90.0f) : 0.0f;
+    StGLVec2 aMouseMove = getMouseMoveSphere();
+    float aYaw   = -stToRadians(aParams->PanPhi   + aMouseMove.x()) + aYawShift;
+    float aPitch =  stToRadians(StStereoParams::clipPitch(aParams->PanTheta + aMouseMove.y()));
+    float aRoll  =  stToRadians(aParams->getZRotate());
+
+    // apply separation
+    const float aSepDeltaX = GLfloat(aParams->getSeparationDx()) * 0.05f;
+    const float aSepDeltaY = GLfloat(aParams->getSeparationDy()) * 0.05f;
+    if(theView == ST_DRAW_LEFT) {
+        aYaw   +=  stToRadians(aSepDeltaX);
+        aPitch += -stToRadians(aSepDeltaY);
+        aRoll  += -stToRadians(aParams->getSepRotation());
+    } else if(theView == ST_DRAW_RIGHT) {
+        aYaw   += -stToRadians(aSepDeltaX);
+        aPitch +=  stToRadians(aSepDeltaY);
+        aRoll  +=  stToRadians(aParams->getSepRotation());
+    }
+
+    const StGLQuaternion anOriYaw   = StGLQuaternion(StGLVec3::DY(), aYaw);
+    const StGLQuaternion anOriPitch = StGLQuaternion(StGLVec3::DX(), aPitch);
+    const StGLQuaternion anOriRoll  = StGLQuaternion(StGLVec3::DZ(), aRoll);
+    StGLQuaternion anOri = StGLQuaternion::multiply(anOriPitch, anOriYaw);
+    anOri = StGLQuaternion::multiply(anOriRoll,    anOri);
+    anOri = StGLQuaternion::multiply(myDeviceQuat, anOri);
+    return anOri;
 }
 
 void StGLImageRegion::stglDraw(unsigned int theView) {
@@ -808,31 +843,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             aModelMat.scale(aScale, aScale, 1.0f);
 
             // compute orientation
-            StGLVec2 aMouseMove = getMouseMoveSphere();
-            float aYaw   = -stToRadians(aParams->PanPhi   + aMouseMove.x()) + stToRadians(90.0f);
-            float aPitch =  stToRadians(StStereoParams::clipPitch(aParams->PanTheta + aMouseMove.y()));
-            float aRoll  =  stToRadians(aParams->getZRotate());
-
-            // apply separation
-            const float aSepDeltaX = GLfloat(aParams->getSeparationDx()) * 0.05f;
-            const float aSepDeltaY = GLfloat(aParams->getSeparationDy()) * 0.05f;
-            if(theView == ST_DRAW_LEFT) {
-                aYaw   +=  stToRadians(aSepDeltaX);
-                aPitch += -stToRadians(aSepDeltaY);
-                aRoll  += -stToRadians(aParams->getSepRotation());
-            } else if(theView == ST_DRAW_RIGHT) {
-                aYaw   += -stToRadians(aSepDeltaX);
-                aPitch +=  stToRadians(aSepDeltaY);
-                aRoll  +=  stToRadians(aParams->getSepRotation());
-            }
-
-            const StGLQuaternion anOriYaw   = StGLQuaternion(StGLVec3::DY(), aYaw);
-            const StGLQuaternion anOriPitch = StGLQuaternion(StGLVec3::DX(), aPitch);
-            const StGLQuaternion anOriRoll  = StGLQuaternion(StGLVec3::DZ(), aRoll);
-            StGLQuaternion anOri = StGLQuaternion::multiply(anOriPitch, anOriYaw);
-            anOri = StGLQuaternion::multiply(anOriRoll,    anOri);
-            anOri = StGLQuaternion::multiply(myDeviceQuat, anOri);
-
+            const StGLQuaternion anOri = getHeadOrientation(theView, true);
             aModelMat = StGLMatrix::multiply(aModelMat, StGLMatrix(anOri));
 
             StGLMatrix aMatModelInv, aMatProjInv;
@@ -862,31 +873,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             aModelMat.scale(aScale, aScale, THE_SPHERE_RADIUS);
 
             // compute orientation
-            StGLVec2 aMouseMove = getMouseMoveSphere();
-            float aYaw   = -stToRadians(aParams->PanPhi   + aMouseMove.x()) + stToRadians(90.0f);
-            float aPitch =  stToRadians(StStereoParams::clipPitch(aParams->PanTheta + aMouseMove.y()));
-            float aRoll  =  stToRadians(aParams->getZRotate());
-
-            // apply separation
-            const float aSepDeltaX = GLfloat(aParams->getSeparationDx()) * 0.05f;
-            const float aSepDeltaY = GLfloat(aParams->getSeparationDy()) * 0.05f;
-            if(theView == ST_DRAW_LEFT) {
-                aYaw   +=  stToRadians(aSepDeltaX);
-                aPitch += -stToRadians(aSepDeltaY);
-                aRoll  += -stToRadians(aParams->getSepRotation());
-            } else if(theView == ST_DRAW_RIGHT) {
-                aYaw   += -stToRadians(aSepDeltaX);
-                aPitch +=  stToRadians(aSepDeltaY);
-                aRoll  +=  stToRadians(aParams->getSepRotation());
-            }
-
-            const StGLQuaternion anOriYaw   = StGLQuaternion(StGLVec3::DY(), aYaw);
-            const StGLQuaternion anOriPitch = StGLQuaternion(StGLVec3::DX(), aPitch);
-            const StGLQuaternion anOriRoll  = StGLQuaternion(StGLVec3::DZ(), aRoll);
-            StGLQuaternion anOri = StGLQuaternion::multiply(anOriPitch, anOriYaw);
-            anOri = StGLQuaternion::multiply(anOriRoll,    anOri);
-            anOri = StGLQuaternion::multiply(myDeviceQuat, anOri);
-
+            const StGLQuaternion anOri = getHeadOrientation(theView, true);
             aModelMat = StGLMatrix::multiply(aModelMat, StGLMatrix(anOri));
 
             // perform drawing

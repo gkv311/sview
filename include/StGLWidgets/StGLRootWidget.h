@@ -333,7 +333,11 @@ class StGLRootWidget : public StGLWidget {
      */
     ST_CPPEXPORT static size_t generateShareId();
 
-    ST_LOCAL StGLProjCamera* getCamera() {
+    ST_LOCAL const StGLProjCamera* getCamera() const {
+        return &myProjCamera;
+    }
+
+    ST_LOCAL StGLProjCamera* changeCamera() {
         return &myProjCamera;
     }
 
