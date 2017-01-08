@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -218,8 +218,8 @@ class StAudioQueue : public StAVPacketQueue {
 
     // This constant sets count of OpenAL buffers, used in loop
     // for gapless playback
-    #define NUM_AL_BUFFERS 4
-    #define NUM_AL_SOURCES 8
+    #define THE_NUM_AL_BUFFERS 4
+    #define THE_NUM_AL_SOURCES 8
 
     /**
      * This is help class, used to store buffer-sizes
@@ -230,7 +230,7 @@ class StAudioQueue : public StAVPacketQueue {
             public:
 
         ST_LOCAL DataLoop()
-        : myLast(NUM_AL_BUFFERS - 1) {
+        : myLast(THE_NUM_AL_BUFFERS - 1) {
             stMemSet(myDataSizes, 0, sizeof(myDataSizes));
         }
 
@@ -240,7 +240,7 @@ class StAudioQueue : public StAVPacketQueue {
 
         ST_LOCAL void push(const size_t theDataSize) {
             ++myLast;
-            if(myLast >= NUM_AL_BUFFERS) {
+            if(myLast >= THE_NUM_AL_BUFFERS) {
                myLast = 0;
             }
             myDataSizes[myLast] = theDataSize;
@@ -248,7 +248,7 @@ class StAudioQueue : public StAVPacketQueue {
 
         ST_LOCAL size_t summ() const {
             size_t aSumm = 0;
-            for(size_t aBuffIter = 0; aBuffIter < NUM_AL_BUFFERS; ++aBuffIter) {
+            for(size_t aBuffIter = 0; aBuffIter < THE_NUM_AL_BUFFERS; ++aBuffIter) {
                 aSumm += myDataSizes[aBuffIter];
             }
             return aSumm;
@@ -256,7 +256,7 @@ class StAudioQueue : public StAVPacketQueue {
 
             private:
 
-        size_t myDataSizes[NUM_AL_BUFFERS];
+        size_t myDataSizes[THE_NUM_AL_BUFFERS];
         size_t myLast;
 
     } myAlDataLoop;
@@ -286,8 +286,8 @@ class StAudioQueue : public StAVPacketQueue {
 
     std::string        myAlDeviceName;  //!< Output audio device name for OpenAL context initialization
     StALContext        myAlCtx;         //!< OpenAL context
-    ALuint             myAlBuffers[NUM_AL_SOURCES][NUM_AL_BUFFERS]; //!< audio buffers
-    ALuint             myAlSources[NUM_AL_SOURCES];                 //!< audio sources
+    ALuint             myAlBuffers[THE_NUM_AL_SOURCES][THE_NUM_AL_BUFFERS]; //!< audio buffers
+    ALuint             myAlSources[THE_NUM_AL_SOURCES];                     //!< audio sources
     ALenum             myAlFormat;      //!< buffer data internal format
     ALenum             myPrevFormat;    //!< previous format (to correctly reinitialize AL buffer on change)
     ALsizei            myPrevFrequency; //!< previous audio frequency

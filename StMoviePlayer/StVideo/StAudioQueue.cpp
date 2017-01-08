@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,37 +21,44 @@
 #include <StGL/StGLVec.h>
 #include <StThreads/StThread.h>
 
-/**
- * Check OpenAL state.
- */
-bool stalCheckErrors(const StString& ST_DEBUG_VAR(theProcedure)) {
-    ALenum anError = alGetError();
-    switch(anError) {
-        case AL_NO_ERROR: return true; // alright
-        case AL_INVALID_NAME:      ST_DEBUG_LOG(theProcedure + ": AL_INVALID_NAME");      return false;
-        case AL_INVALID_ENUM:      ST_DEBUG_LOG(theProcedure + ": AL_INVALID_ENUM");      return false;
-        case AL_INVALID_VALUE:     ST_DEBUG_LOG(theProcedure + ": AL_INVALID_VALUE");     return false;
-        case AL_INVALID_OPERATION: ST_DEBUG_LOG(theProcedure + ": AL_INVALID_OPERATION"); return false;
-        case AL_OUT_OF_MEMORY:     ST_DEBUG_LOG(theProcedure + ": AL_OUT_OF_MEMORY");     return false;
-        default:                   ST_DEBUG_LOG(theProcedure + ": OpenAL unknown error"); return false;
+namespace {
+
+    /**
+     * Check OpenAL state.
+     */
+    bool stalCheckErrors(const StString& ST_DEBUG_VAR(theProcedure)) {
+        ALenum anError = alGetError();
+        switch(anError) {
+            case AL_NO_ERROR: return true; // alright
+            case AL_INVALID_NAME:      ST_DEBUG_LOG(theProcedure + ": AL_INVALID_NAME");      return false;
+            case AL_INVALID_ENUM:      ST_DEBUG_LOG(theProcedure + ": AL_INVALID_ENUM");      return false;
+            case AL_INVALID_VALUE:     ST_DEBUG_LOG(theProcedure + ": AL_INVALID_VALUE");     return false;
+            case AL_INVALID_OPERATION: ST_DEBUG_LOG(theProcedure + ": AL_INVALID_OPERATION"); return false;
+            case AL_OUT_OF_MEMORY:     ST_DEBUG_LOG(theProcedure + ": AL_OUT_OF_MEMORY");     return false;
+            default:                   ST_DEBUG_LOG(theProcedure + ": OpenAL unknown error"); return false;
+        }
     }
+
+    static const StGLVec3 THE_POSITION_LEFT         (-1.0f, 0.0f,  0.0f);
+    static const StGLVec3 THE_POSITION_RIGHT        ( 1.0f, 0.0f,  0.0f);
+
+    static const StGLVec3 THE_POSITION_CENTER       ( 0.0f, 0.0f,  0.0f);
+    static const StGLVec3 THE_POSITION_FRONT_LEFT   (-1.0f, 0.0f, -1.0f);
+    static const StGLVec3 THE_POSITION_FRONT_CENTER ( 0.0f, 0.0f, -1.0f);
+    static const StGLVec3 THE_POSITION_FRONT_RIGHT  ( 1.0f, 0.0f, -1.0f);
+    static const StGLVec3 THE_POSITION_LFE          ( 0.0f, 0.0f,  0.0f);
+    static const StGLVec3 THE_POSITION_REAR_LEFT    (-1.0f, 0.0f,  1.0f);
+    static const StGLVec3 THE_POSITION_REAR_RIGHT   ( 1.0f, 0.0f,  1.0f);
+
+    static const StGLVec3 THE_POSITION_REAR_LEFT71  (-1.0f, 0.0f,  1.0f);
+    static const StGLVec3 THE_POSITION_REAR_RIGHT71 ( 1.0f, 0.0f,  1.0f);
+    static const StGLVec3 THE_POSITION_SIDE_LEFT71  (-1.0f, 0.0f,  0.0f);
+    static const StGLVec3 THE_POSITION_SIDE_RIGHT71 ( 1.0f, 0.0f,  0.0f);
+
+    static const StGLVec3 THE_LISTENER_FORWARD      ( 0.0f, 0.0f, -1.0f);
+    static const StGLVec3 THE_LISTENER_UP           ( 0.0f, 1.0f,  0.0f);
+
 }
-
-static const StGLVec3 POSITION_LEFT         (-1.0f, 0.0f,  0.0f);
-static const StGLVec3 POSITION_RIGHT        ( 1.0f, 0.0f,  0.0f);
-
-static const StGLVec3 POSITION_CENTER       ( 0.0f, 0.0f,  0.0f);
-static const StGLVec3 POSITION_FRONT_LEFT   (-1.0f, 0.0f, -1.0f);
-static const StGLVec3 POSITION_FRONT_CENTER ( 0.0f, 0.0f, -1.0f);
-static const StGLVec3 POSITION_FRONT_RIGHT  ( 1.0f, 0.0f, -1.0f);
-static const StGLVec3 POSITION_LFE          ( 0.0f, 0.0f,  0.0f);
-static const StGLVec3 POSITION_REAR_LEFT    (-1.0f, 0.0f,  1.0f);
-static const StGLVec3 POSITION_REAR_RIGHT   ( 1.0f, 0.0f,  1.0f);
-
-static const StGLVec3 POSITION_REAR_LEFT71  (-1.0f, 0.0f,  1.0f);
-static const StGLVec3 POSITION_REAR_RIGHT71 ( 1.0f, 0.0f,  1.0f);
-static const StGLVec3 POSITION_SIDE_LEFT71  (-1.0f, 0.0f,  0.0f);
-static const StGLVec3 POSITION_SIDE_RIGHT71 ( 1.0f, 0.0f,  0.0f);
 
 #if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(53, 0, 0))
 /**
@@ -78,59 +85,59 @@ inline bool isReoderingNeeded() {
 #endif
 
 void StAudioQueue::stalConfigureSources1() {
-    alSourcefv(myAlSources[0], AL_POSITION, POSITION_CENTER);
+    alSourcefv(myAlSources[0], AL_POSITION, THE_POSITION_CENTER);
     stalCheckErrors("alSource*1.0");
 }
 
 void StAudioQueue::stalConfigureSources2_0() {
-    alSourcefv(myAlSources[0], AL_POSITION, POSITION_LEFT);
-    alSourcefv(myAlSources[1], AL_POSITION, POSITION_RIGHT);
+    alSourcefv(myAlSources[0], AL_POSITION, THE_POSITION_LEFT);
+    alSourcefv(myAlSources[1], AL_POSITION, THE_POSITION_RIGHT);
     stalCheckErrors("alSource*2.0");
 }
 
 void StAudioQueue::stalConfigureSources3_0() {
-    alSourcefv(myAlSources[0], AL_POSITION, POSITION_LEFT);
-    alSourcefv(myAlSources[1], AL_POSITION, POSITION_RIGHT);
-    alSourcefv(myAlSources[2], AL_POSITION, POSITION_CENTER);
+    alSourcefv(myAlSources[0], AL_POSITION, THE_POSITION_LEFT);
+    alSourcefv(myAlSources[1], AL_POSITION, THE_POSITION_RIGHT);
+    alSourcefv(myAlSources[2], AL_POSITION, THE_POSITION_CENTER);
     stalCheckErrors("alSource*3.0");
 }
 
 void StAudioQueue::stalConfigureSources4_0() {
-    alSourcefv(myAlSources[0], AL_POSITION, POSITION_FRONT_LEFT);
-    alSourcefv(myAlSources[1], AL_POSITION, POSITION_FRONT_RIGHT);
-    alSourcefv(myAlSources[2], AL_POSITION, POSITION_REAR_LEFT);
-    alSourcefv(myAlSources[3], AL_POSITION, POSITION_REAR_RIGHT);
+    alSourcefv(myAlSources[0], AL_POSITION, THE_POSITION_FRONT_LEFT);
+    alSourcefv(myAlSources[1], AL_POSITION, THE_POSITION_FRONT_RIGHT);
+    alSourcefv(myAlSources[2], AL_POSITION, THE_POSITION_REAR_LEFT);
+    alSourcefv(myAlSources[3], AL_POSITION, THE_POSITION_REAR_RIGHT);
     stalCheckErrors("alSource*4.0");
 }
 
 void StAudioQueue::stalConfigureSources5_0() {
-    alSourcefv(myAlSources[0], AL_POSITION, POSITION_FRONT_LEFT);
-    alSourcefv(myAlSources[1], AL_POSITION, POSITION_FRONT_RIGHT);
-    alSourcefv(myAlSources[2], AL_POSITION, POSITION_FRONT_CENTER);
-    alSourcefv(myAlSources[3], AL_POSITION, POSITION_REAR_LEFT);
-    alSourcefv(myAlSources[4], AL_POSITION, POSITION_REAR_RIGHT);
+    alSourcefv(myAlSources[0], AL_POSITION, THE_POSITION_FRONT_LEFT);
+    alSourcefv(myAlSources[1], AL_POSITION, THE_POSITION_FRONT_RIGHT);
+    alSourcefv(myAlSources[2], AL_POSITION, THE_POSITION_FRONT_CENTER);
+    alSourcefv(myAlSources[3], AL_POSITION, THE_POSITION_REAR_LEFT);
+    alSourcefv(myAlSources[4], AL_POSITION, THE_POSITION_REAR_RIGHT);
     stalCheckErrors("alSource*5.0");
 }
 
 void StAudioQueue::stalConfigureSources5_1() {
-    alSourcefv(myAlSources[0], AL_POSITION, POSITION_FRONT_LEFT);
-    alSourcefv(myAlSources[1], AL_POSITION, POSITION_FRONT_RIGHT);
-    alSourcefv(myAlSources[2], AL_POSITION, POSITION_FRONT_CENTER);
-    alSourcefv(myAlSources[3], AL_POSITION, POSITION_LFE);
-    alSourcefv(myAlSources[4], AL_POSITION, POSITION_REAR_LEFT);
-    alSourcefv(myAlSources[5], AL_POSITION, POSITION_REAR_RIGHT);
+    alSourcefv(myAlSources[0], AL_POSITION, THE_POSITION_FRONT_LEFT);
+    alSourcefv(myAlSources[1], AL_POSITION, THE_POSITION_FRONT_RIGHT);
+    alSourcefv(myAlSources[2], AL_POSITION, THE_POSITION_FRONT_CENTER);
+    alSourcefv(myAlSources[3], AL_POSITION, THE_POSITION_LFE);
+    alSourcefv(myAlSources[4], AL_POSITION, THE_POSITION_REAR_LEFT);
+    alSourcefv(myAlSources[5], AL_POSITION, THE_POSITION_REAR_RIGHT);
     stalCheckErrors("alSource*5.1");
 }
 
 void StAudioQueue::stalConfigureSources7_1() {
-    alSourcefv(myAlSources[0], AL_POSITION, POSITION_FRONT_LEFT);
-    alSourcefv(myAlSources[1], AL_POSITION, POSITION_FRONT_RIGHT);
-    alSourcefv(myAlSources[2], AL_POSITION, POSITION_FRONT_CENTER);
-    alSourcefv(myAlSources[3], AL_POSITION, POSITION_LFE);
-    alSourcefv(myAlSources[4], AL_POSITION, POSITION_REAR_LEFT71);
-    alSourcefv(myAlSources[5], AL_POSITION, POSITION_REAR_RIGHT71);
-    alSourcefv(myAlSources[6], AL_POSITION, POSITION_SIDE_LEFT71);
-    alSourcefv(myAlSources[7], AL_POSITION, POSITION_SIDE_RIGHT71);
+    alSourcefv(myAlSources[0], AL_POSITION, THE_POSITION_FRONT_LEFT);
+    alSourcefv(myAlSources[1], AL_POSITION, THE_POSITION_FRONT_RIGHT);
+    alSourcefv(myAlSources[2], AL_POSITION, THE_POSITION_FRONT_CENTER);
+    alSourcefv(myAlSources[3], AL_POSITION, THE_POSITION_LFE);
+    alSourcefv(myAlSources[4], AL_POSITION, THE_POSITION_REAR_LEFT71);
+    alSourcefv(myAlSources[5], AL_POSITION, THE_POSITION_REAR_RIGHT71);
+    alSourcefv(myAlSources[6], AL_POSITION, THE_POSITION_SIDE_LEFT71);
+    alSourcefv(myAlSources[7], AL_POSITION, THE_POSITION_SIDE_RIGHT71);
     stalCheckErrors("alSource*7.1");
 }
 
@@ -152,30 +159,29 @@ bool StAudioQueue::stalInit() {
     alGetError(); // clear error code
 
     // generate the buffers
-    for(size_t srcId = 0; srcId < NUM_AL_SOURCES; ++srcId) {
-        alGenBuffers(NUM_AL_BUFFERS, &myAlBuffers[srcId][0]);
-        stalCheckErrors(StString("alGenBuffers") + srcId);
+    for(size_t aSrcId = 0; aSrcId < THE_NUM_AL_SOURCES; ++aSrcId) {
+        alGenBuffers(THE_NUM_AL_BUFFERS, &myAlBuffers[aSrcId][0]);
+        stalCheckErrors(StString("alGenBuffers") + aSrcId);
     }
 
     // generate the sources
-    alGenSources(NUM_AL_SOURCES, myAlSources);
+    alGenSources(THE_NUM_AL_SOURCES, myAlSources);
     stalCheckErrors("alGenSources");
 
     // configure sources
     const StGLVec3 aZeroVec(0.0f);
-    for(size_t srcId = 0; srcId < NUM_AL_SOURCES; ++srcId) {
-        alSourcefv(myAlSources[srcId], AL_POSITION,        aZeroVec);
-        alSourcefv(myAlSources[srcId], AL_VELOCITY,        aZeroVec);
-        alSourcefv(myAlSources[srcId], AL_DIRECTION,       aZeroVec);
-        alSourcef (myAlSources[srcId], AL_ROLLOFF_FACTOR,  0.0f);
-        alSourcei (myAlSources[srcId], AL_SOURCE_RELATIVE, AL_TRUE);
-        alSourcef (myAlSources[srcId], AL_GAIN,            1.0f);
-        stalCheckErrors(StString("alSource*") + srcId);
+    for(size_t aSrcId = 0; aSrcId < THE_NUM_AL_SOURCES; ++aSrcId) {
+        alSourcefv(myAlSources[aSrcId], AL_POSITION,        aZeroVec);
+        alSourcefv(myAlSources[aSrcId], AL_VELOCITY,        aZeroVec);
+        alSourcefv(myAlSources[aSrcId], AL_DIRECTION,       aZeroVec);
+        alSourcef (myAlSources[aSrcId], AL_ROLLOFF_FACTOR,  0.0f);
+        alSourcei (myAlSources[aSrcId], AL_SOURCE_RELATIVE, AL_TRUE);
+        alSourcef (myAlSources[aSrcId], AL_GAIN,            1.0f);
+        stalCheckErrors(StString("alSource*") + aSrcId);
     }
 
     // configure listener
-    const StGLVec3 aListenerOri[2] = { -StGLVec3::DZ(),    // forward
-                                        StGLVec3::DY()  }; // up
+    const StGLVec3 aListenerOri[2] = { THE_LISTENER_FORWARD, THE_LISTENER_UP };
     alListenerfv(AL_POSITION,    aZeroVec);
     alListenerfv(AL_VELOCITY,    aZeroVec);
     alListenerfv(AL_ORIENTATION, (const ALfloat* )aListenerOri);
@@ -186,14 +192,14 @@ bool StAudioQueue::stalInit() {
 void StAudioQueue::stalDeinit() {
     // clear buffers
     stalEmpty();
-    alSourceStopv(NUM_AL_SOURCES, myAlSources);
+    alSourceStopv(THE_NUM_AL_SOURCES, myAlSources);
 
-    alDeleteSources(NUM_AL_SOURCES, myAlSources);
+    alDeleteSources(THE_NUM_AL_SOURCES, myAlSources);
     stalCheckErrors("alDeleteSources");
 
-    for(size_t srcId = 0; srcId < NUM_AL_SOURCES; ++srcId) {
-        alDeleteBuffers(NUM_AL_BUFFERS, &myAlBuffers[srcId][0]);
-        stalCheckErrors(StString("alDeleteBuffers") + srcId);
+    for(size_t aSrcId = 0; aSrcId < THE_NUM_AL_SOURCES; ++aSrcId) {
+        alDeleteBuffers(THE_NUM_AL_BUFFERS, &myAlBuffers[aSrcId][0]);
+        stalCheckErrors(StString("alDeleteBuffers") + aSrcId);
     }
 
     // close device
@@ -201,11 +207,11 @@ void StAudioQueue::stalDeinit() {
 }
 
 void StAudioQueue::stalEmpty() {
-    alSourceStopv(NUM_AL_SOURCES, myAlSources);
+    alSourceStopv(THE_NUM_AL_SOURCES, myAlSources);
 
     ALint aBufQueued = 0;
     ALuint alBuffIdToUnqueue = 0;
-    for(size_t aSrcId = 0; aSrcId < NUM_AL_SOURCES; ++aSrcId) {
+    for(size_t aSrcId = 0; aSrcId < THE_NUM_AL_SOURCES; ++aSrcId) {
         alGetSourcei(myAlSources[aSrcId], AL_BUFFERS_QUEUED, &aBufQueued);
         for(ALint aBufIter = 0; aBufIter < aBufQueued; ++aBufIter) {
             alSourceUnqueueBuffers(myAlSources[aSrcId], 1, &alBuffIdToUnqueue);
@@ -213,7 +219,7 @@ void StAudioQueue::stalEmpty() {
         }
         alSourcei(myAlSources[aSrcId], AL_BUFFER, 0);
     }
-    ///alSourceRewindv(NUM_AL_SOURCES, myAlSources);
+    ///alSourceRewindv(THE_NUM_AL_SOURCES, myAlSources);
 }
 
 ALenum StAudioQueue::stalGetSourceState() {
@@ -718,12 +724,12 @@ bool StAudioQueue::parseEvents() {
         }
         case ST_PLAYEVENT_PAUSE: {
             playTimerPause();
-            alSourcePausev(NUM_AL_SOURCES, myAlSources);
+            alSourcePausev(THE_NUM_AL_SOURCES, myAlSources);
             return false;
         }
         case ST_PLAYEVENT_RESUME: {
             playTimerResume();
-            alSourcePlayv(NUM_AL_SOURCES, myAlSources);
+            alSourcePlayv(THE_NUM_AL_SOURCES, myAlSources);
             return false;
         }
         case ST_PLAYEVENT_SEEK: {
@@ -751,7 +757,7 @@ bool StAudioQueue::stalQueue(const double thePts) {
 #ifdef ST_DEBUG
     if(myDbgPrevQueued != aQueued) {
         ST_DEBUG_LOG("OpenAL buffers: " + aQueued + " queued + "
-            + aProcessed + " processed from " + NUM_AL_BUFFERS
+            + aProcessed + " processed from " + THE_NUM_AL_BUFFERS
         );
     }
     myDbgPrevQueued = aQueued;
@@ -768,7 +774,7 @@ bool StAudioQueue::stalQueue(const double thePts) {
     if(myPrevFormat    != myAlFormat
     || myPrevFrequency != myBufferOut.getFreq()
     || (aState  == AL_STOPPED
-     && aQueued == NUM_AL_BUFFERS)) {
+     && aQueued == THE_NUM_AL_BUFFERS)) {
         ST_DEBUG_LOG("AL, reinitialize buffers per source , plane size= " + myBufferOut.getPlaneSize()
                             + "; freq= " + myBufferOut.getFreq());
         stalEmpty();
@@ -779,7 +785,7 @@ bool StAudioQueue::stalQueue(const double thePts) {
 
     bool toTryToPlay = false;
     bool isQueued = false;
-    if(aProcessed == 0 && aQueued < NUM_AL_BUFFERS) {
+    if(aProcessed == 0 && aQueued < THE_NUM_AL_BUFFERS) {
         if(myBufferOut.isEmpty()) {
             ST_DEBUG_LOG(" EMPTY BUFFER ");
             return true;
@@ -797,7 +803,7 @@ bool StAudioQueue::stalQueue(const double thePts) {
             alSourceQueueBuffers(myAlSources[aSrcId], 1, &myAlBuffers[aSrcId][aQueued]);
             stalCheckErrors("alSourceQueueBuffers");
         }
-        toTryToPlay = ((aQueued + 1) == NUM_AL_BUFFERS);
+        toTryToPlay = ((aQueued + 1) == THE_NUM_AL_BUFFERS);
         isQueued = true;
     } else if(aProcessed != 0
            && (aState == AL_PLAYING
@@ -854,7 +860,7 @@ bool StAudioQueue::stalQueue(const double thePts) {
         } else {
             playTimerStart(0.0);
         }
-        alSourcePlayv(NUM_AL_SOURCES, myAlSources);
+        alSourcePlayv(THE_NUM_AL_SOURCES, myAlSources);
         if(stalCheckConnected()) {
             ST_DEBUG_LOG("!!! OpenAL was in stopped state, now resume playback from " + (thePts - diffSecs));
         }
@@ -864,7 +870,7 @@ bool StAudioQueue::stalQueue(const double thePts) {
         const bool toPause = !myIsPlaying;
         myEventMutex.unlock();
         if(toPause) {
-            alSourcePausev(NUM_AL_SOURCES, myAlSources);
+            alSourcePausev(THE_NUM_AL_SOURCES, myAlSources);
         }
     }
 
@@ -910,7 +916,7 @@ void StAudioQueue::stalFillBuffers(const double thePts,
             } else {
                 playTimerStart(0.0);
             }
-            alSourcePlayv(NUM_AL_SOURCES, myAlSources);
+            alSourcePlayv(THE_NUM_AL_SOURCES, myAlSources);
             if(stalCheckConnected()) {
                 ST_DEBUG_LOG("!!! OpenAL was in stopped state, now resume playback from " + (thePts - diffSecs));
             }
