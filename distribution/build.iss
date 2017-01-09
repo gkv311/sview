@@ -216,8 +216,10 @@ Source: {#SVIEW_DISTR_PATH_x86}\lang\*StOutPageFlip.lng;          DestDir: {app}
 Source: {#SVIEW_DISTR_PATH_AMD64}\StOutPageFlip.dll;              DestDir: {app}\amd64;                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutPageFlip; Check: IsWin64
 ; StRenderers -> StOutDistorted
 Source: {#SVIEW_DISTR_PATH_x86}\StOutDistorted.dll;               DestDir: {app};                              Flags: 32bit ignoreversion;                Components: StRenderers\StOutDistorted
+Source: {#SVIEW_DISTR_PATH_x86}\openvr_api.dll;                   DestDir: {app};                              Flags: 32bit ignoreversion;                Components: StRenderers\StOutDistorted
 Source: {#SVIEW_DISTR_PATH_x86}\lang\*StOutDistorted.lng;         DestDir: {app}\lang;                         Flags: 32bit ignoreversion recursesubdirs; Components: StRenderers\StOutDistorted
 Source: {#SVIEW_DISTR_PATH_AMD64}\StOutDistorted.dll;             DestDir: {app}\amd64;                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutDistorted; Check: IsWin64
+Source: {#SVIEW_DISTR_PATH_AMD64}\openvr_api.dll;                 DestDir: {app}\amd64;                        Flags: 64bit ignoreversion;                Components: StRenderers\StOutDistorted; Check: IsWin64
 
 ; StDrawers
 Source: {#SVIEW_DISTR_PATH_x86}\textures\*;                    DestDir: {app}\textures;        Flags: 32bit ignoreversion; Components: StDrawers\StImageViewer or StDrawers\StMoviePlayer or StBrowserPlugins or StActiveXPlugin
