@@ -211,7 +211,7 @@
 					<Add option="-Wl,-install_name,@executable_path/$(TARGET_OUTPUT_BASENAME).dylib" />
 					<Add option="-framework Appkit" />
 					<Add option="-framework OpenGL" />
-					<Add option="-framework OpenAL" />
+					<Add library="openal" />
 					<Add library="objc" />
 				</Linker>
 				<ExtraCommands>
@@ -239,7 +239,7 @@
 					<Add option="-Wl,-install_name,@executable_path/$(TARGET_OUTPUT_BASENAME).dylib" />
 					<Add option="-framework Appkit" />
 					<Add option="-framework OpenGL" />
-					<Add option="-framework OpenAL" />
+					<Add library="openal" />
 					<Add library="objc" />
 				</Linker>
 				<ExtraCommands>
