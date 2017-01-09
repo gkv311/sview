@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #ifndef __StALContext_h_
 #define __StALContext_h_
 
-#include <StStrings/StString.h>
+#include <StStrings/StDictionary.h>
 
 // OpenAL headers
 #if (defined(__APPLE__))
@@ -31,6 +31,36 @@
     #include <AL/alc.h>
     #include <AL/alext.h>
 #endif
+
+namespace {
+    // Accepted as part of the <attrList> parameter of alcCreateContext and alcDeviceResetSOFT(), and as the <paramName> parameter of alcGetIntegerv()
+    #define ALC_HRTF_SOFT                            0x1992
+
+    // Accepted as part of the <attrList> parameter of alcCreateContext() and alcDeviceResetSOFT()
+    #define ALC_HRTF_ID_SOFT                         0x1996
+
+    // Accepted as part of the <attrList> parameter of alcCreateContext() and alcDeviceResetSOFT(), for the ALC_HRTF_SOFT attribute.
+    #define ALC_DONT_CARE_SOFT                       0x0002
+
+    // Accepted as the <paramName> parameter of alcGetIntegerv()
+    #define ALC_HRTF_STATUS_SOFT                     0x1993
+    #define ALC_NUM_HRTF_SPECIFIERS_SOFT             0x1994
+
+    // Accepted as the <paramName> parameter of alcGetString() and alcGetStringiSOFT()
+    #define ALC_HRTF_SPECIFIER_SOFT                  0x1995
+
+    // Possible results from a ALC_HRTF_STATUS_SOFT query
+    #define ALC_HRTF_DISABLED_SOFT                   0x0000
+
+    #define ALC_HRTF_ENABLED_SOFT                    0x0001
+    #define ALC_HRTF_DENIED_SOFT                     0x0002
+    #define ALC_HRTF_REQUIRED_SOFT                   0x0003
+    #define ALC_HRTF_HEADPHONES_DETECTED_SOFT        0x0004
+    #define ALC_HRTF_UNSUPPORTED_FORMAT_SOFT         0x0005
+
+    typedef const ALCchar* (ALC_APIENTRY* alcGetStringiSOFT_t )(ALCdevice* device, ALCenum paramName, ALCsizei index);
+    typedef ALCboolean     (ALC_APIENTRY* alcResetDeviceSOFT_t)(ALCdevice* device, const ALCint* attrList);
+}
 
 /**
  * Wrapper over C-interface to OpenAL library.
@@ -45,6 +75,10 @@ class StALContext {
     bool hasExtFloat64;      //!< has 64bit float formats
     bool hasExtMultiChannel; //!< has multichannel formats
     bool hasExtDisconnect;   //!< ALC_EXT_disconnect
+    bool hasExtSoftHrtf;     //!< ALC_SOFT_HRTF
+
+    alcGetStringiSOFT_t  alcGetStringiSOFT;
+    alcResetDeviceSOFT_t alcResetDeviceSOFT;
 
         public:
 
@@ -62,6 +96,11 @@ class StALContext {
      * @return human-readable list of available extensions.
      */
     ST_CPPEXPORT StString toStringExtensions() const;
+
+    /**
+     * Retrieve info from OpenAL context.
+     */
+    ST_CPPEXPORT void fullInfo(StDictionary& theMap) const;
 
     /**
      * Creates the AL device with specified name.
@@ -84,10 +123,20 @@ class StALContext {
      */
     ST_CPPEXPORT bool isConnected() const;
 
+    /**
+     * Return OpenAL device.
+     */
+    ST_LOCAL ALCdevice* getAlDevice() { return myAlDevice; }
+
+    /**
+     * Return OpenAL context.
+     */
+    ST_LOCAL ALCcontext* getAlContext() { return myAlContext; }
+
         private: //!< private fields
 
-    ALCdevice*  hDevice;
-    ALCcontext* hContext;
+    ALCdevice*  myAlDevice;
+    ALCcontext* myAlContext;
 
 };
 

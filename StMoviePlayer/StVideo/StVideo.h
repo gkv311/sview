@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -108,6 +108,7 @@ class StVideo {
      * Main constructor.
      */
     ST_LOCAL StVideo(const std::string&                 theALDeviceName,
+                     StAudioQueue::StAlHrtfRequest      theAlHrtf,
                      const StHandle<StResourceManager>& theResMgr,
                      const StHandle<StTranslations>&    theLangMap,
                      const StHandle<StPlayList>&        thePlayList,
@@ -198,6 +199,20 @@ class StVideo {
     }
 
     /**
+     * Return TRUE if OpenAL implementation provides HRTF mixing feature.
+     */
+    ST_LOCAL bool hasAlHrtf() const {
+        return myAudio->hasAlHrtf();
+    }
+
+    /**
+     * Setup OpenAL HRTF mixing.
+     */
+    ST_LOCAL void setAlHrtfRequest(StAudioQueue::StAlHrtfRequest theAlHrt) {
+        myAudio->setAlHrtfRequest(theAlHrt);
+    }
+
+    /**
      * @return true if device was disconnected and OpenAL should be re-initialized
      */
     ST_LOCAL bool isDisconnected() const {
@@ -219,6 +234,13 @@ class StVideo {
     }
 
     ST_LOCAL void setAudioDelay(const float theDelaySec);
+
+    /**
+     * Return OpenAL info.
+     */
+    ST_LOCAL void getAlInfo(StDictionary& theInfo) {
+        myAudio->getAlInfo(theInfo);
+    }
 
         public: //! @name Properties
 

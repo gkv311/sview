@@ -44,9 +44,18 @@ ST_DEFINE_HANDLE(StAudioQueue, StAVPacketQueue);
  */
 class StAudioQueue : public StAVPacketQueue {
 
+        public:
+
+    enum StAlHrtfRequest {
+        StAlHrtfRequest_Auto     = 0,
+        StAlHrtfRequest_ForceOn  = 1,
+        StAlHrtfRequest_ForceOff = 2,
+    };
+
         public: //! @name public API
 
-    ST_LOCAL StAudioQueue(const std::string& theAlDeviceName);
+    ST_LOCAL StAudioQueue(const std::string& theAlDeviceName,
+                          StAudioQueue::StAlHrtfRequest theAlHrtf);
     ST_LOCAL virtual ~StAudioQueue();
 
     ST_LOCAL bool isInDowntime() {
@@ -98,6 +107,13 @@ class StAudioQueue : public StAVPacketQueue {
     }
 
     /**
+     * Setup OpenAL HRTF mixing.
+     */
+    ST_LOCAL void setAlHrtfRequest(StAlHrtfRequest theAlHrt) {
+        myAlHrtf = theAlHrt;
+    }
+
+    /**
      * Set audio gain.
      */
     ST_LOCAL void setAudioVolume(const float theGain) {
@@ -135,10 +151,27 @@ class StAudioQueue : public StAVPacketQueue {
     }
 
     /**
+     * Return TRUE if OpenAL implementation provides HRTF mixing feature.
+     */
+    ST_LOCAL bool hasAlHrtf() const {
+        return myAlCtx.hasExtSoftHrtf;
+    }
+
+    /**
      * @return true if device was disconnected and OpenAL should be re-initialized
      */
     ST_LOCAL bool isDisconnected() const {
         return myIsDisconnected;
+    }
+
+    /**
+     * Return OpenAL info.
+     */
+    ST_LOCAL void getAlInfo(StDictionary& theInfo) {
+        StMutexAuto aLock(myAlInfoMutex);
+        for(size_t aPairIter = 0; aPairIter < myAlInfo.size(); ++aPairIter) {
+            theInfo.add(myAlInfo.getFromIndex(aPairIter));
+        }
     }
 
         private: //! @name private methods
@@ -148,6 +181,7 @@ class StAudioQueue : public StAVPacketQueue {
     ST_LOCAL bool stalInit();
     ST_LOCAL void stalDeinit();
     ST_LOCAL void stalReinitialize();
+    ST_LOCAL void stalResetHrtf();
     ST_LOCAL void stalOrientListener();
 
     ST_LOCAL void stalConfigureSources1();
@@ -313,6 +347,8 @@ class StAudioQueue : public StAVPacketQueue {
         private: //! @name OpenAL items
 
     std::string        myAlDeviceName;  //!< Output audio device name for OpenAL context initialization
+    StDictionary       myAlInfo;        //!< OpenAL info
+    StMutex            myAlInfoMutex;
     StALContext        myAlCtx;         //!< OpenAL context
     ALuint             myAlBuffers[THE_NUM_AL_SOURCES][THE_NUM_AL_BUFFERS]; //!< audio buffers
     ALuint             myAlSources[THE_NUM_AL_SOURCES];                     //!< audio sources
@@ -323,6 +359,8 @@ class StAudioQueue : public StAVPacketQueue {
     ALfloat            myAlGainPrev;    //!< volume factor (currently active)
     bool               myAlSoftLayout;  //!< flag indicating soft multichannel layout
     bool               myAlIsListOrient;//!< flag indicating that listener orientation is not identity
+    StAlHrtfRequest    myAlHrtf;
+    StAlHrtfRequest    myAlHrtfPrev;
 
         private: //! @name debug items
 

@@ -38,6 +38,7 @@ namespace {
 const char* StVideo::ST_VIDEOS_MIME_STRING = ST_VIDEO_PLUGIN_MIME_CHAR;
 
 StVideo::StVideo(const std::string&                 theALDeviceName,
+                 StAudioQueue::StAlHrtfRequest      theAlHrtf,
                  const StHandle<StResourceManager>& theResMgr,
                  const StHandle<StTranslations>&    theLangMap,
                  const StHandle<StPlayList>&        thePlayList,
@@ -84,7 +85,7 @@ StVideo::StVideo(const std::string&                 theALDeviceName,
     myVideoSlave  = new StVideoQueue(myTextureQueue, myVideoMaster);
     myVideoSlave->signals.onError.connect(this, &StVideo::doOnErrorRedirect);
 
-    myAudio = new StAudioQueue(theALDeviceName);
+    myAudio = new StAudioQueue(theALDeviceName, theAlHrtf);
     myAudio->signals.onError.connect(this, &StVideo::doOnErrorRedirect);
 
     mySubtitles = new StSubtitleQueue(theSubtitlesQueue);

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,14 +23,34 @@
     #define ALC_CONNECTED 0x313 // undefined on mac os
 #endif
 
+namespace {
+    /**
+     * Return string for the status.
+     */
+    const char* hrtfStatusToString(ALCint theStatus) {
+        switch(theStatus) {
+            case ALC_HRTF_DISABLED_SOFT:            return "Disabled";
+            case ALC_HRTF_ENABLED_SOFT:             return "Enabled";
+            case ALC_HRTF_DENIED_SOFT:              return "Denied";
+            case ALC_HRTF_REQUIRED_SOFT:            return "Required";
+            case ALC_HRTF_HEADPHONES_DETECTED_SOFT: return "Headphones detected";
+            case ALC_HRTF_UNSUPPORTED_FORMAT_SOFT:  return "Unsupported format";
+        }
+        return "UNKNOWN";
+    }
+}
+
 StALContext::StALContext()
 : hasExtEAX2(false),
   hasExtFloat32(false),
   hasExtFloat64(false),
   hasExtMultiChannel(false),
   hasExtDisconnect(false),
-  hDevice(NULL),
-  hContext(NULL) {
+  hasExtSoftHrtf(false),
+  alcGetStringiSOFT(NULL),
+  alcResetDeviceSOFT(NULL),
+  myAlDevice(NULL),
+  myAlContext(NULL) {
     //
 }
 
@@ -39,36 +59,41 @@ StALContext::~StALContext() {
 }
 
 StString StALContext::toStringExtensions() const {
-    StString extList = "OpenAL extensions:\n";
+    StString anExtList = "OpenAL extensions:\n";
     if(hasExtEAX2) {
-        extList += " - EAX2.0;\n";
+        anExtList += " - EAX2.0\n";
     }
     if(hasExtFloat32) {
-        extList += " - float32 mono/stereo formats;\n";
+        anExtList += " - float32 mono/stereo formats\n";
     }
     if(hasExtFloat64) {
-        extList += " - float64 mono/stereo formats;\n";
+        anExtList += " - float64 mono/stereo formats\n";
     }
     if(hasExtMultiChannel) {
-        extList += " - multi-channel formats;\n";
+        anExtList += " - multi-channel formats\n";
     }
     if(hasExtDisconnect) {
-        extList += " - ALC_EXT_disconnect;\n";
+        anExtList += " - ALC_EXT_disconnect\n";
     }
-    return extList;
+    if(hasExtSoftHrtf) {
+        ALCint aHrtfStatus = ALC_HRTF_DISABLED_SOFT;
+        alcGetIntegerv(myAlDevice, ALC_HRTF_STATUS_SOFT, 1, &aHrtfStatus);
+        anExtList += StString(" - ALC_SOFT_HRTF [") + hrtfStatusToString(aHrtfStatus) + "]\n";
+    }
+    return anExtList;
 }
 
 bool StALContext::create(const std::string& theDeviceName) {
     if(theDeviceName.empty()) {
         // open default device
-        hDevice = alcOpenDevice(NULL);
+        myAlDevice = alcOpenDevice(NULL);
     } else {
-        hDevice = alcOpenDevice(theDeviceName.c_str());
+        myAlDevice = alcOpenDevice(theDeviceName.c_str());
     }
-    if(hDevice == NULL) {
+    if(myAlDevice == NULL) {
         return false;
     }
-    hContext = alcCreateContext(hDevice, NULL);
+    myAlContext = alcCreateContext(myAlDevice, NULL);
     makeCurrent();
 
     // check extensions
@@ -76,7 +101,13 @@ bool StALContext::create(const std::string& theDeviceName) {
     hasExtFloat32      = alIsExtensionPresent("AL_EXT_float32")   == AL_TRUE;
     hasExtFloat64      = alIsExtensionPresent("AL_EXT_double")    == AL_TRUE;
     hasExtMultiChannel = alIsExtensionPresent("AL_EXT_MCFORMATS") == AL_TRUE;
-    hasExtDisconnect   = alcIsExtensionPresent(hDevice, "ALC_EXT_disconnect") == AL_TRUE;
+    hasExtDisconnect   = alcIsExtensionPresent(myAlDevice, "ALC_EXT_disconnect") == AL_TRUE;
+    if(alcIsExtensionPresent(myAlDevice, "ALC_SOFT_HRTF") == AL_TRUE) {
+        alcGetStringiSOFT  = (alcGetStringiSOFT_t  )alcGetProcAddress(myAlDevice, "alcGetStringiSOFT");
+        alcResetDeviceSOFT = (alcResetDeviceSOFT_t )alcGetProcAddress(myAlDevice, "alcResetDeviceSOFT");
+        hasExtSoftHrtf = alcGetStringiSOFT  != NULL
+                      && alcResetDeviceSOFT != NULL;
+    }
 
     // debug info
     ST_DEBUG_LOG(toStringExtensions());
@@ -84,35 +115,65 @@ bool StALContext::create(const std::string& theDeviceName) {
     return true;
 }
 
+void StALContext::fullInfo(StDictionary& theMap) const {
+    StString anExtensions, aHrtfState;
+    if(hasExtFloat32) {
+        anExtensions += "AL_EXT_float32 ";
+    }
+    if(hasExtFloat64) {
+        anExtensions += "AL_EXT_double ";
+    }
+    if(hasExtMultiChannel) {
+        anExtensions += "AL_EXT_MCFORMATS ";
+    }
+    if(hasExtDisconnect) {
+        anExtensions += "ALC_EXT_disconnect ";
+    }
+    if(hasExtSoftHrtf) {
+        ALCint aHrtfStatus = ALC_HRTF_DISABLED_SOFT;
+        alcGetIntegerv(myAlDevice, ALC_HRTF_STATUS_SOFT, 1, &aHrtfStatus);
+        aHrtfState = hrtfStatusToString(aHrtfStatus);
+    }
+
+    theMap.add(StDictEntry("ALvendor",    (const char* )alGetString(AL_VENDOR)));
+    theMap.add(StDictEntry("ALrenderer",  (const char* )alGetString(AL_RENDERER)));
+    theMap.add(StDictEntry("ALversion",   (const char* )alGetString(AL_VERSION)));
+    theMap.add(StDictEntry("OpenAL extensions", anExtensions));
+    theMap.add(StDictEntry("OpenAL HRTF mixing", !aHrtfState.isEmpty() ? aHrtfState : "Not implemented"));
+}
+
 void StALContext::destroy() {
     alcMakeContextCurrent(NULL);
-    if(hContext != NULL && hDevice != NULL) {
-        alcDestroyContext(hContext);
-        alcCloseDevice(hDevice);
+    if(myAlContext != NULL && myAlDevice != NULL) {
+        alcDestroyContext(myAlContext);
+        alcCloseDevice(myAlDevice);
     }
-    hContext = NULL;
-    hDevice = NULL;
+    myAlContext = NULL;
+    myAlDevice = NULL;
 
     // remove extensions
     hasExtEAX2 = false;
     hasExtFloat32 = false;
     hasExtFloat64 = false;
     hasExtMultiChannel = false;
-    hasExtDisconnect = false;
+    hasExtDisconnect   = false;
+    hasExtSoftHrtf     = false;
+    alcGetStringiSOFT  = NULL;
+    alcResetDeviceSOFT = NULL;
 }
 
 bool StALContext::makeCurrent() {
-    return alcMakeContextCurrent(hContext) == AL_TRUE;
+    return alcMakeContextCurrent(myAlContext) == AL_TRUE;
 }
 
 bool StALContext::isConnected() const {
-    if(hDevice == NULL) {
+    if(myAlDevice == NULL) {
         return false;
     } else if(!hasExtDisconnect) {
         return true;
     }
 
     ALint aConnected = AL_FALSE;
-    alcGetIntegerv(hDevice, ALC_CONNECTED, 1, &aConnected);
+    alcGetIntegerv(myAlDevice, ALC_CONNECTED, 1, &aConnected);
     return aConnected == AL_TRUE;
 }

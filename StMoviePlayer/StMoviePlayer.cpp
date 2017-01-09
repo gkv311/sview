@@ -106,6 +106,10 @@ void StMoviePlayer::updateStrings() {
     params.SubtitlesParser->setName(tr(MENU_SUBTITLES_PARSER));
     params.SubtitlesParser->defineOption(0, tr(MENU_SUBTITLES_PLAIN_TEXT));
     params.SubtitlesParser->defineOption(1, tr(MENU_SUBTITLES_LITE_HTML));
+    params.AudioAlHrtf->setName(stCString("Audio HRTF mixing"));
+    params.AudioAlHrtf->defineOption(0, stCString("Auto"));
+    params.AudioAlHrtf->defineOption(1, stCString("Forced ON"));
+    params.AudioAlHrtf->defineOption(2, stCString("Forced OFF"));
     params.AudioMute->setName(stCString("Mute Audio"));
     params.IsFullscreen->setName(tr(MENU_VIEW_FULLSCREEN));
 
@@ -219,6 +223,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.ToSearchSubs = new StBoolParamNamed(true, stCString("toSearchSubs"));
     params.SubtitlesParser = new StEnumParam(1, stCString("subsParser"));
     params.AudioAlDevice = new StALDeviceParam();
+    params.AudioAlHrtf   = new StEnumParam(0, stCString("alHrtfRequest"));
     params.AudioGain = new StFloat32Param( 0.0f, // sound is unattenuated
                                          -50.0f, // almost mute
                                           10.0f, // max amplification
@@ -303,6 +308,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
 
     myToCheckPoorOrient = !mySettings->loadParam(params.ToTrackHead);
     mySettings->loadParam (params.ToTrackHeadAudio);
+    mySettings->loadParam (params.AudioAlHrtf);
     mySettings->loadParam (params.ToShowFps);
     mySettings->loadParam (params.IsMobileUI);
     mySettings->loadParam (params.IsVSyncOn);
@@ -327,6 +333,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.IsShuffle    ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchShuffle);
     params.ToLoopSingle ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchLoopSingle);
     params.AudioAlDevice->signals.onChanged.connect(this, &StMoviePlayer::doSwitchAudioDevice);
+    params.AudioAlHrtf  ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchAudioAlHrtf);
 
 #if defined(__ANDROID__)
     addRenderer(new StOutInterlace  (myResMgr, theParentWin));
@@ -516,6 +523,7 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (params.ToSearchSubs);
         mySettings->saveParam (params.TargetFps);
         mySettings->saveString(params.AudioAlDevice->getKey(), params.AudioAlDevice->getUtfTitle());
+        mySettings->saveParam (params.AudioAlHrtf);
         mySettings->saveParam (params.LastUpdateDay);
         mySettings->saveParam (params.CheckUpdatesDays);
         mySettings->saveParam (params.SrcStereoFormat);
@@ -777,7 +785,8 @@ bool StMoviePlayer::init() {
 
     // create the video playback thread
     if(!isReset) {
-        myVideo = new StVideo(params.AudioAlDevice->getCTitle(), myResMgr, myLangMap, myPlayList, aTextureQueue, aSubQueue);
+        myVideo = new StVideo(params.AudioAlDevice->getCTitle(), (StAudioQueue::StAlHrtfRequest )params.AudioAlHrtf->getValue(),
+                              myResMgr, myLangMap, myPlayList, aTextureQueue, aSubQueue);
         myVideo->signals.onError  = stSlot(myMsgQueue.access(), &StMsgQueue::doPushError);
         myVideo->signals.onLoaded = stSlot(this,                &StMoviePlayer::doLoaded);
         myVideo->params.UseGpu       = params.UseGpu;
@@ -1573,6 +1582,17 @@ void StMoviePlayer::doSwitchVSync(const bool theValue) {
 void StMoviePlayer::doSwitchAudioDevice(const int32_t /*theDevId*/) {
     if(!myVideo.isNull()) {
         myVideo->switchAudioDevice(params.AudioAlDevice->getCTitle());
+    }
+}
+
+bool StMoviePlayer::hasAlHrtf() const {
+    return !myVideo.isNull()
+         && myVideo->hasAlHrtf();
+}
+
+void StMoviePlayer::doSwitchAudioAlHrtf(const int32_t theValue) {
+    if(!myVideo.isNull()) {
+        myVideo->setAlHrtfRequest((StAudioQueue::StAlHrtfRequest )theValue);
     }
 }
 

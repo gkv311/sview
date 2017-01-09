@@ -155,6 +155,12 @@ bool StAudioQueue::stalInit() {
         }
     }
     myAlCtx.makeCurrent();
+    stalResetHrtf();
+    {
+        StMutexAuto aLock(myAlInfoMutex);
+        myAlInfo.clear();
+        myAlCtx.fullInfo(myAlInfo);
+    }
 
     alGetError(); // clear error code
 
@@ -212,6 +218,30 @@ void StAudioQueue::stalReinitialize() {
 
     myIsDisconnected = false;
     myToSwitchDev    = false;
+}
+
+void StAudioQueue::stalResetHrtf() {
+    const bool wasChanged = myAlHrtf != myAlHrtfPrev;
+    myAlHrtfPrev = myAlHrtf;
+    if(!myAlCtx.hasExtSoftHrtf) {
+        return;
+    }
+
+    ALCint aHrtfVal = ALC_DONT_CARE_SOFT;
+    if(myAlHrtf == StAlHrtfRequest_ForceOn) {
+        aHrtfVal = ALC_TRUE;
+    } else if(myAlHrtf == StAlHrtfRequest_ForceOff) {
+        aHrtfVal = ALC_FALSE;
+    }
+    ALCint anAttrs[] = {
+        ALC_HRTF_SOFT, aHrtfVal,
+        0
+    };
+    myAlCtx.alcResetDeviceSOFT(myAlCtx.getAlDevice(), anAttrs);
+    if(wasChanged) {
+        (void )wasChanged;
+        ST_DEBUG_LOG(myAlCtx.toStringExtensions())
+    }
 }
 
 void StAudioQueue::stalOrientListener() {
@@ -280,7 +310,8 @@ static SV_THREAD_FUNCTION threadFunction(void* audioQueue) {
     return SV_THREAD_RETURN 0;
 }
 
-StAudioQueue::StAudioQueue(const std::string& theAlDeviceName)
+StAudioQueue::StAudioQueue(const std::string& theAlDeviceName,
+                           StAudioQueue::StAlHrtfRequest theAlHrtf)
 : StAVPacketQueue(512),
   myPlaybackTimer(false),
   myDowntimeEvent(true),
@@ -301,6 +332,8 @@ StAudioQueue::StAudioQueue(const std::string& theAlDeviceName)
   myAlGainPrev(1.0f),
   myAlSoftLayout(true),
   myAlIsListOrient(false),
+  myAlHrtf(theAlHrtf),
+  myAlHrtfPrev(theAlHrtf),
   myDbgPrevQueued(-1),
   myDbgPrevSrcState(-1) {
     stMemSet(myAlSources, 0, sizeof(myAlSources));
@@ -764,6 +797,11 @@ bool StAudioQueue::parseEvents() {
     if(myToSwitchDev) {
         stalReinitialize();
         return true;
+    } else if(myAlHrtf != myAlHrtfPrev) {
+        stalResetHrtf();
+        StMutexAuto aLock(myAlInfoMutex);
+        myAlInfo.clear();
+        myAlCtx.fullInfo(myAlInfo);
     }
 
     if(myToOrientListener) {

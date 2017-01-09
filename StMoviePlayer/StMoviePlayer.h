@@ -169,6 +169,11 @@ class StMoviePlayer : public StApplication {
             || theMargins.top > 0;
     }
 
+    /**
+     * Return TRUE if OpenAL implementation provides HRTF mixing feature.
+     */
+    ST_CPPEXPORT bool hasAlHrtf() const;
+
     struct {
 
         StHandle<StEnumParam>         ScaleAdjust;       //!< adjust GUI size, see StGLRootWidget::ScaleAdjust
@@ -182,6 +187,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StBoolParamNamed>    ToSearchSubs;      //!< automatically search for additional subtitles/audio track files nearby video file
         StHandle<StEnumParam>         SubtitlesParser;   //!< subtitles parser
         StHandle<StALDeviceParam>     AudioAlDevice;     //!< active OpenAL device
+        StHandle<StEnumParam>         AudioAlHrtf;       //!< OpenAL HRTF flag
         StHandle<StFloat32Param>      AudioGain;         //!< volume factor
         StHandle<StBoolParamNamed>    AudioMute;         //!< volume mute flag
         StHandle<StFloat32Param>      AudioDelay;        //!< audio/video synchronization delay
@@ -275,6 +281,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doScaleHiDPI(const bool );
     ST_LOCAL void doSwitchVSync(const bool theValue);
     ST_LOCAL void doSwitchAudioDevice(const int32_t theDevId);
+    ST_LOCAL void doSwitchAudioAlHrtf(const int32_t theValue);
     ST_LOCAL void doSetAudioVolume(const float theGain);
     ST_LOCAL void doSetAudioMute(const bool theToMute);
     ST_LOCAL void doSetAudioDelay(const float theDelaySec);

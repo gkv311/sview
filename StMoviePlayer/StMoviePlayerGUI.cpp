@@ -898,10 +898,13 @@ void StMoviePlayerGUI::doAboutProgram(const size_t ) {
                            + "\n \nOpenAL Soft (LGPL)\nhttp://kcat.strangesoft.net/openal.html"
                            + "\n \nFreeType \nhttp://freetype.org/";
 
-    StArgumentsMap anInfo;
+    StDictionary anInfo;
     anInfo.add(StDictEntry("CPU cores", StString(StThread::countLogicalProcessors()) + StString(" logical processor(s)")));
     getContext().stglFullInfo(anInfo);
     anInfo.add(StDictEntry("Display Scale", StString(myWindow->getMonitors()[myWindow->getPlacement().center()].getScale()) + "x"));
+
+    // OpenAL info
+    myPlugin->myVideo->getAlInfo(anInfo);
 
     StGLMessageBox* aDialog = new StGLMessageBox(this, tr(MENU_HELP_ABOUT), "", scale(512), scale(300));
     StGLTable* aTable = new StGLTable(aDialog->getContent(), 0, 0, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_CENTER));
@@ -2093,6 +2096,9 @@ void StMoviePlayerGUI::doMobileSettings(const size_t ) {
     aRend->getOptions(aParams);
     aParams.add(myPlugin->params.ToShowFps);
     aParams.add(myPlugin->params.UseGpu);
+    if(myPlugin->hasAlHrtf()) {
+        aParams.add(myPlugin->params.AudioAlHrtf);
+    }
 
     if(avcodec_find_decoder_by_name("libopenjpeg") != NULL) {
         aParams.add(myPlugin->params.UseOpenJpeg);
