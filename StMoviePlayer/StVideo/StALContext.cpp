@@ -17,7 +17,9 @@
  */
 
 #include "StALContext.h"
+
 #include <StStrings/StLogger.h>
+#include <StThreads/StProcess.h>
 
 #ifndef ALC_CONNECTED
     #define ALC_CONNECTED 0x313 // undefined on mac os
@@ -38,6 +40,30 @@ namespace {
         }
         return "UNKNOWN";
     }
+
+    /**
+     * Initialize OpenAL resources.
+     */
+    bool stalGlobalInit() {
+    #ifdef __APPLE__
+        static bool isFirstCall = true;
+        if(!isFirstCall) {
+            return true;
+        }
+        isFirstCall = false;
+
+        // append sView resources folder to OpenAL search path
+        // so that we can put default hrtf tables into OS X application bundle
+        const StString anStResFolder = StProcess::getStShareFolder();
+        StString aDataDirs = StProcess::getEnv("XDG_DATA_DIRS");
+        if(aDataDirs.isEmpty()) {
+            aDataDirs = "/usr/local/share/:/usr/share/";
+        }
+        aDataDirs = aDataDirs + ":" + anStResFolder;
+        StProcess::setEnv("XDG_DATA_DIRS", aDataDirs);
+    #endif
+        return true;
+    }
 }
 
 StALContext::StALContext()
@@ -51,7 +77,7 @@ StALContext::StALContext()
   alcResetDeviceSOFT(NULL),
   myAlDevice(NULL),
   myAlContext(NULL) {
-    //
+    stalGlobalInit();
 }
 
 StALContext::~StALContext() {
