@@ -247,6 +247,7 @@ Source: {#SVIEW_DISTR_PATH_x86}\lang\*StMoviePlayer.lng;       DestDir: {app}\la
 Source: {#SVIEW_DISTR_PATH_x86}\web\*.htm;                     DestDir: {app}\web;             Flags: 32bit ignoreversion recursesubdirs; Components: StDrawers\StMoviePlayer
 Source: {#SVIEW_DISTR_PATH_x86}\OpenAL32.dll;                  DestDir: {app};                 Flags: 32bit ignoreversion; Components: StCore
 Source: alsoft51.ini;                                          DestDir: {userappdata};   DestName: "alsoft.ini";     Tasks: flagOpenAL51; Components: StCore
+Source: openal\hrtf\*;                                         DestDir: {commonappdata}\openal\hrtf; Components: StCore
 Source: {#SVIEW_DISTR_PATH_AMD64}\StMoviePlayer.dll;           DestDir: {app}\amd64;           Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 Source: {#SVIEW_DISTR_PATH_AMD64}\OpenAL32.dll;                DestDir: {app}\amd64;           Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 
