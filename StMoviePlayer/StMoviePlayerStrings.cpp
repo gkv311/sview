@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -190,6 +190,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Track orientation");
     theStrings(MENU_VIEW_TRACK_HEAD_POOR,
                "Track orientation (poor)");
+    theStrings(MENU_VIEW_TRACK_HEAD_AUDIO,
+               "Orient audio");
     theStrings(MENU_VIEW_DISPLAY_MODE_STEREO,
                "Stereo");
     theStrings(MENU_VIEW_DISPLAY_MODE_LEFT,

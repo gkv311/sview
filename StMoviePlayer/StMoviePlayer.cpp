@@ -128,6 +128,7 @@ void StMoviePlayer::updateStrings() {
     params.SrcStereoFormat->setName(tr(MENU_MEDIA_SRC_FORMAT));
     params.ToShowPlayList->setName(tr(VIDEO_LIST));
     params.ToTrackHead->setName(tr(MENU_VIEW_TRACK_HEAD));
+    params.ToTrackHeadAudio->setName(tr(MENU_VIEW_TRACK_HEAD_AUDIO));
     params.ToShowFps->setName(tr(MENU_FPS_METER));
     params.ToShowMenu->setName(stCString("Show main menu"));
     params.ToShowTopbar->setName(stCString("Show top toolbar"));
@@ -243,7 +244,8 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.SrcStereoFormat->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchSrcFormat);
     params.ToShowPlayList   = new StBoolParamNamed(false, stCString("showPlaylist"));
     params.ToShowPlayList->signals.onChanged = stSlot(this, &StMoviePlayer::doShowPlayList);
-    params.ToTrackHead = new StBoolParamNamed(true,  stCString("toTrackHead"));
+    params.ToTrackHead      = new StBoolParamNamed(true,  stCString("toTrackHead"));
+    params.ToTrackHeadAudio = new StBoolParamNamed(true,  stCString("toTrackHeadAudio"));
     params.ToShowFps   = new StBoolParamNamed(false, stCString("toShowFps"));
     params.ToShowMenu  = new StBoolParamNamed(true,  stCString("toShowMenu"));
     params.ToShowTopbar= new StBoolParamNamed(true,  stCString("toShowTopbar"));
@@ -300,6 +302,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (params.ToSearchSubs);
 
     myToCheckPoorOrient = !mySettings->loadParam(params.ToTrackHead);
+    mySettings->loadParam (params.ToTrackHeadAudio);
     mySettings->loadParam (params.ToShowFps);
     mySettings->loadParam (params.IsMobileUI);
     mySettings->loadParam (params.IsVSyncOn);
@@ -522,6 +525,7 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (params.ToShowPlayList);
 
         mySettings->saveParam (params.ToTrackHead);
+        mySettings->saveParam (params.ToTrackHeadAudio);
         mySettings->saveParam (params.ToShowFps);
         mySettings->saveParam (params.IsMobileUI);
         mySettings->saveParam (params.IsVSyncOn);
@@ -779,6 +783,7 @@ bool StMoviePlayer::init() {
         myVideo->params.UseGpu       = params.UseGpu;
         myVideo->params.UseOpenJpeg  = params.UseOpenJpeg;
         myVideo->params.ToSearchSubs = params.ToSearchSubs;
+        myVideo->params.ToTrackHeadAudio = params.ToTrackHeadAudio;
 
     #ifdef ST_HAVE_MONGOOSE
         doStartWebUI();
@@ -1449,7 +1454,8 @@ void StMoviePlayer::beforeDraw() {
     StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
     if(!aParams.isNull()) {
         StGLQuaternion aHeadOrient;
-        const bool toTrackHead = myGUI->myImage->getHeadOrientation(aHeadOrient, ST_DRAW_MONO, false);
+        const bool toTrackHead = params.ToTrackHeadAudio->getValue()
+                              && myGUI->myImage->getHeadOrientation(aHeadOrient, ST_DRAW_MONO, false);
         myVideo->setHeadOrientation(aHeadOrient, toTrackHead);
 
         hasStereoSource =!aParams->isMono()

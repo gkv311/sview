@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -342,7 +342,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
                 myVideoMaster->setSlave(NULL);
 
                 if(myVideoMaster->isInitialized()) {
-                    myAudio->setTrackHeadOrientation(theNewParams->ViewingMode != StViewSurface_Plain);
+                    myAudio->setTrackHeadOrientation(params.ToTrackHeadAudio->getValue() && theNewParams->ViewingMode != StViewSurface_Plain);
 
                     const int aSizeX      = myVideoMaster->sizeX();
                     const int aSizeY      = myVideoMaster->sizeY();

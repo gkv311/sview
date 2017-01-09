@@ -227,6 +227,7 @@ class StVideo {
         StHandle<StBoolParam>         UseGpu;          //!< use video decoding on GPU when available
         StHandle<StBoolParam>         UseOpenJpeg;     //!< use OpenJPEG (libopenjpeg) instead of built-in jpeg2000 decoder
         StHandle<StBoolParam>         ToSearchSubs;    //!< automatically search for additional subtitles/audio track files nearby video file
+        StHandle<StBoolParamNamed>    ToTrackHeadAudio;//!< enable/disable head-tracking for audio listener
         StHandle<StParamActiveStream> activeAudio;     //!< active Audio stream
         StHandle<StParamActiveStream> activeSubtitles; //!< active Subtitles stream
 
@@ -416,7 +417,7 @@ class StVideo {
     StHandle<StMovieInfo>         myFileInfo;     //!< info about currently loaded file
     StHandle<StMovieInfo>         myFileInfoTmp;
     StHandle<StFileNode>          myCurrNode;     //!< active (played) file node
-    StHandle<StStereoParams>      myCurrParams;   //!< paramters for active file node
+    StHandle<StStereoParams>      myCurrParams;   //!< parameters for active file node
     StHandle<StFileNode>          myCurrPlsFile;  //!< active playlist file node
     StHandle<StGLTextureQueue>    myTextureQueue; //!< decoded frames queue
 

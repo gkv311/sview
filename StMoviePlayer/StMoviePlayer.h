@@ -195,6 +195,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StInt32ParamNamed>   LastUpdateDay;     //!< the last time update has been checked
         StHandle<StInt32ParamNamed>   SrcStereoFormat;   //!< source format
         StHandle<StBoolParamNamed>    ToTrackHead;       //!< enable/disable head-tracking
+        StHandle<StBoolParamNamed>    ToTrackHeadAudio;  //!< enable/disable head-tracking for audio listener
         StHandle<StBoolParamNamed>    ToShowPlayList;    //!< display playlist
         StHandle<StBoolParamNamed>    ToShowFps;         //!< display FPS meter
         StHandle<StBoolParamNamed>    ToShowMenu;        //!< show main menu

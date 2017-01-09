@@ -618,6 +618,8 @@ void StMoviePlayerGUI::fillPanoramaMenu(StGLMenu* theMenu) {
         theMenu->addItem(tr(myWindow->isPoorOrientationSensor() ? MENU_VIEW_TRACK_HEAD_POOR : MENU_VIEW_TRACK_HEAD),
                          myPlugin->params.ToTrackHead);
     }
+    theMenu->addItem(tr(MENU_VIEW_TRACK_HEAD_AUDIO),
+                     myPlugin->params.ToTrackHeadAudio);
 }
 
 void StMoviePlayerGUI::doPanoramaCombo(const size_t ) {
