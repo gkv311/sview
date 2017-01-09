@@ -885,7 +885,7 @@ void StVideoQueue::decodeLoop() {
         }
         // override source format stored in metadata
         StFormat  aSrcFormat     = myStFormatByUser;
-        StCubemap aCubemapFormat = aPacket->getSource()->ViewingMode == StStereoParams::PANORAMA_CUBEMAP ? StCubemap_Packed : StCubemap_OFF;
+        StCubemap aCubemapFormat = aPacket->getSource()->ViewingMode == StViewSurface_Cubemap ? StCubemap_Packed : StCubemap_OFF;
         if(aSrcFormat == StFormat_AUTO) {
             // prefer info stored in the stream itself
             aSrcFormat = myStFormatInStream;

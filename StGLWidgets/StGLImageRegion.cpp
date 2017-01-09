@@ -75,7 +75,7 @@ namespace {
             || aParams->ViewingMode == theValue) {
                 return false;
             }
-            aParams->ViewingMode = (StStereoParams::ViewMode )theValue;
+            aParams->ViewingMode = (StViewSurface )theValue;
             signals.onChanged(theValue);
             return true;
         }
@@ -475,11 +475,14 @@ StGLVec2 StGLImageRegion::getMouseMoveSphere() const {
          : StGLVec2();
 }
 
-StGLQuaternion StGLImageRegion::getHeadOrientation(unsigned int theView,
-                                                   const bool theToApplyDefShift) const {
+bool StGLImageRegion::getHeadOrientation(StGLQuaternion& theOrient,
+                                         unsigned int theView,
+                                         const bool theToApplyDefShift) const {
     StHandle<StStereoParams> aParams = params.stereoFile;
-    if(aParams.isNull()) {
-        return StGLQuaternion();
+    if(aParams.isNull()
+    || aParams->ViewingMode == StViewSurface_Plain) {
+        theOrient = StGLQuaternion();
+        return false;
     }
 
     const float aYawShift = theToApplyDefShift ? stToRadians(90.0f) : 0.0f;
@@ -507,7 +510,8 @@ StGLQuaternion StGLImageRegion::getHeadOrientation(unsigned int theView,
     StGLQuaternion anOri = StGLQuaternion::multiply(anOriPitch, anOriYaw);
     anOri = StGLQuaternion::multiply(anOriRoll,    anOri);
     anOri = StGLQuaternion::multiply(myDeviceQuat, anOri);
-    return anOri;
+    theOrient = anOri;
+    return true;
 }
 
 void StGLImageRegion::stglDraw(unsigned int theView) {
@@ -677,11 +681,11 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
 
     const float aVrScale = float(myRoot->getVrZoomOut());
 
-    StStereoParams::ViewMode aViewMode = aParams->ViewingMode;
+    StViewSurface aViewMode = aParams->ViewingMode;
     if(aTextures.getPlane(0).getTarget() == GL_TEXTURE_CUBE_MAP) {
-        aViewMode = StStereoParams::PANORAMA_CUBEMAP;
-    } else if(aViewMode == StStereoParams::PANORAMA_CUBEMAP) {
-        aViewMode = StStereoParams::FLAT_IMAGE;
+        aViewMode = StViewSurface_Cubemap;
+    } else if(aViewMode == StViewSurface_Cubemap) {
+        aViewMode = StViewSurface_Plain;
     }
 
     myProgram.setColorScale(aColorScale); // apply de-anaglyph color filter
@@ -689,8 +693,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
                                                 ? StGLImageProgram::FragGetColor_Blend
                                                 : StGLImageProgram::FragGetColor_Normal;
     switch(aViewMode) {
-        default:
-        case StStereoParams::FLAT_IMAGE: {
+        case StViewSurface_Plain: {
             if(!myProgram.init(aCtx, aTextures.getColorModel(), aTextures.getColorScale(), aColorGetter)) {
                 break;
             }
@@ -827,7 +830,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             aParams->PanCenter   = aPanBack;
             break;
         }
-        case StStereoParams::PANORAMA_CUBEMAP: {
+        case StViewSurface_Cubemap: {
             if(!myProgram.init(aCtx, aTextures.getColorModel(), aTextures.getColorScale(), StGLImageProgram::FragGetColor_Cubemap)) {
                 break;
             }
@@ -863,7 +866,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             aParams->PanCenter   = aPanBack;
             break;
         }
-        case StStereoParams::PANORAMA_SPHERE: {
+        case StViewSurface_Sphere: {
             if(!myProgram.init(aCtx, aTextures.getColorModel(), aTextures.getColorScale(), aColorGetter)) {
                 break;
             }
@@ -903,7 +906,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
 void StGLImageRegion::doRightUnclick(const StPointD_t& theCursorZo) {
     StHandle<StStereoParams> aParams = getSource();
     if(!myIsInitialized || aParams.isNull()
-     || aParams->ViewingMode != StStereoParams::FLAT_IMAGE) {
+     || aParams->ViewingMode != StViewSurface_Plain) {
         return;
     }
 
@@ -968,19 +971,17 @@ bool StGLImageRegion::tryUnClick(const StClickEvent& theEvent,
     } else if(isClicked(ST_MOUSE_LEFT) && theEvent.Button == ST_MOUSE_LEFT) {
         // ignore out of window
         switch(aParams->ViewingMode) {
-            default:
-            case StStereoParams::FLAT_IMAGE: {
+            case StViewSurface_Plain: {
                 if(!myIsClickAborted) {
                     aParams->moveFlat(getMouseMoveFlat(myClickPntZo, aCursor), GLfloat(getRectPx().ratio()));
                 }
                 break;
             }
-            case StStereoParams::PANORAMA_CUBEMAP:
-            case StStereoParams::PANORAMA_SPHERE: {
+            case StViewSurface_Cubemap:
+            case StViewSurface_Sphere: {
                 aParams->moveSphere(getMouseMoveSphere(myClickPntZo, aCursor));
                 break;
             }
-
         }
         theIsItemUnclicked = true;
         setClicked(ST_MOUSE_LEFT, false);
@@ -1041,8 +1042,7 @@ void StGLImageRegion::scaleAt(const StPointD_t& thePoint,
 
     const StPointD_t aCenterCursor(0.5, 0.5);
     switch(aParams->ViewingMode) {
-        default:
-        case StStereoParams::FLAT_IMAGE: {
+        case StViewSurface_Plain: {
             if(theStep < 0.0f
             && aParams->ScaleFactor <= 0.05f) {
                 break;
@@ -1057,8 +1057,8 @@ void StGLImageRegion::scaleAt(const StPointD_t& thePoint,
             aParams->moveFlat(aVec, GLfloat(getRectPx().ratio()));
             break;
         }
-        case StStereoParams::PANORAMA_CUBEMAP:
-        case StStereoParams::PANORAMA_SPHERE: {
+        case StViewSurface_Cubemap:
+        case StViewSurface_Sphere: {
             if(theStep < 0.0f
             && aParams->ScaleFactor <= 0.24f) {
                 break;
@@ -1108,7 +1108,7 @@ bool StGLImageRegion::doGesture(const StGestureEvent& theEvent) {
                 // this gesture conflicts with scrolling on OS X
                 //return true;
             //}
-            if(aParams->ViewingMode == StStereoParams::FLAT_IMAGE) {
+            if(aParams->ViewingMode == StViewSurface_Plain) {
                 StPointD_t aPntFrom(theEvent.Point1X, theEvent.Point1Y);
                 StPointD_t aPntTo  (theEvent.Point2X, theEvent.Point2Y);
                 aParams->moveFlat(getMouseMoveFlat(aPntFrom, aPntTo), GLfloat(getRectPx().ratio()));
@@ -1165,7 +1165,7 @@ bool StGLImageRegion::doKeyUp(const StKeyEvent& theEvent) {
 
 void StGLImageRegion::doParamsRotYLeft(const double ) {
     if(params.stereoFile.isNull()
-    || params.stereoFile->ViewingMode != StStereoParams::FLAT_IMAGE) {
+    || params.stereoFile->ViewingMode != StViewSurface_Plain) {
         return;
     }
 
@@ -1178,7 +1178,7 @@ void StGLImageRegion::doParamsRotYLeft(const double ) {
 
 void StGLImageRegion::doParamsRotYRight(const double ) {
     if(params.stereoFile.isNull()
-    || params.stereoFile->ViewingMode != StStereoParams::FLAT_IMAGE) {
+    || params.stereoFile->ViewingMode != StViewSurface_Plain) {
         return;
     }
 
@@ -1191,7 +1191,7 @@ void StGLImageRegion::doParamsRotYRight(const double ) {
 
 void StGLImageRegion::doParamsRotXUp(const double ) {
     if(params.stereoFile.isNull()
-    || params.stereoFile->ViewingMode != StStereoParams::FLAT_IMAGE) {
+    || params.stereoFile->ViewingMode != StViewSurface_Plain) {
         return;
     }
 
@@ -1204,7 +1204,7 @@ void StGLImageRegion::doParamsRotXUp(const double ) {
 
 void StGLImageRegion::doParamsRotXDown(const double ) {
     if(params.stereoFile.isNull()
-    || params.stereoFile->ViewingMode != StStereoParams::FLAT_IMAGE) {
+    || params.stereoFile->ViewingMode != StViewSurface_Plain) {
         return;
     }
 

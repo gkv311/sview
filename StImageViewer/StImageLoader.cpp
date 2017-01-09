@@ -235,7 +235,7 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
 
     StTimer aLoadTimer(true);
     StFormat  aSrcFormatCurr = myStFormatByUser;
-    StCubemap aSrcCubemap    = theParams->ViewingMode == StStereoParams::PANORAMA_CUBEMAP ? StCubemap_Packed : StCubemap_OFF;
+    StCubemap aSrcCubemap    = theParams->ViewingMode == StViewSurface_Cubemap ? StCubemap_Packed : StCubemap_OFF;
     if(anImgType == StImageFile::ST_TYPE_MPO
     || anImgType == StImageFile::ST_TYPE_JPEG
     || anImgType == StImageFile::ST_TYPE_JPS) {

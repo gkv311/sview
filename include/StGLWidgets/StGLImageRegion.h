@@ -116,8 +116,21 @@ class StGLImageRegion : public StGLWidget {
      * @param theView view identifier (to apply stereo separation)
      * @param theToApplyDefShift if TRUE the default transformation will be applied (stored in the file + 90 degrees Yaw shift)
      */
-    ST_CPPEXPORT StGLQuaternion getHeadOrientation(unsigned int theView,
-                                                   const bool theToApplyDefShift) const;
+    ST_LOCAL StGLQuaternion getHeadOrientation(unsigned int theView,
+                                               const bool theToApplyDefShift) const {
+        StGLQuaternion anOri;
+        getHeadOrientation(anOri, theView, theToApplyDefShift);
+        return anOri;
+    }
+
+    /**
+     * Compute the head orientation.
+     * @param theView view identifier (to apply stereo separation)
+     * @param theToApplyDefShift if TRUE the default transformation will be applied (stored in the file + 90 degrees Yaw shift)
+     */
+    ST_CPPEXPORT bool getHeadOrientation(StGLQuaternion& theOrient,
+                                         unsigned int theView,
+                                         const bool theToApplyDefShift) const;
 
     /**
      * Return true if there is any video stream.
@@ -229,16 +242,16 @@ class StGLImageRegion : public StGLWidget {
     ST_LOCAL void doParamsModeNext(const size_t ) {
         const int aMode = params.ViewMode->getValue();
         switch(aMode) {
-            case StStereoParams::FLAT_IMAGE: {
-                params.ViewMode->setValue(StStereoParams::PANORAMA_SPHERE);
+            case StViewSurface_Plain: {
+                params.ViewMode->setValue(StViewSurface_Sphere);
                 return;
             }
-            case StStereoParams::PANORAMA_CUBEMAP: {
-                params.ViewMode->setValue(StStereoParams::FLAT_IMAGE);
+            case StViewSurface_Cubemap: {
+                params.ViewMode->setValue(StViewSurface_Plain);
                 return;
             }
-            case StStereoParams::PANORAMA_SPHERE: {
-                params.ViewMode->setValue(StStereoParams::PANORAMA_CUBEMAP);
+            case StViewSurface_Sphere: {
+                params.ViewMode->setValue(StViewSurface_Cubemap);
                 return;
             }
         }

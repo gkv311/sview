@@ -1448,6 +1448,10 @@ void StMoviePlayer::beforeDraw() {
     bool hasStereoSource = false;
     StHandle<StStereoParams> aParams = myGUI->myImage->getSource();
     if(!aParams.isNull()) {
+        StGLQuaternion aHeadOrient;
+        const bool toTrackHead = myGUI->myImage->getHeadOrientation(aHeadOrient, ST_DRAW_MONO, false);
+        myVideo->setHeadOrientation(aHeadOrient, toTrackHead);
+
         hasStereoSource =!aParams->isMono()
                        && myGUI->myImage->hasVideoStream()
                        && myGUI->myImage->params.DisplayMode->getValue() == StGLImageRegion::MODE_STEREO;
@@ -1645,8 +1649,8 @@ void StMoviePlayer::doPanoramaOnOff(const size_t ) {
     }
 
     int aMode = myGUI->myImage->params.ViewMode->getValue();
-    if(aMode != StStereoParams::FLAT_IMAGE) {
-        myGUI->myImage->params.ViewMode->setValue(StStereoParams::FLAT_IMAGE);
+    if(aMode != StViewSurface_Plain) {
+        myGUI->myImage->params.ViewMode->setValue(StViewSurface_Plain);
         return;
     }
 
@@ -1654,8 +1658,8 @@ void StMoviePlayer::doPanoramaOnOff(const size_t ) {
                                          aParams->Src1SizeX, aParams->Src1SizeY,
                                          aParams->Src2SizeX, aParams->Src2SizeY);
     myGUI->myImage->params.ViewMode->setValue(aPano == StPanorama_Cubemap6_1 || aPano == StPanorama_Cubemap3_2
-                                            ? StStereoParams::PANORAMA_CUBEMAP
-                                            : StStereoParams::PANORAMA_SPHERE);
+                                            ? StViewSurface_Cubemap
+                                            : StViewSurface_Sphere);
 }
 
 void StMoviePlayer::doSwitchSrcFormat(const int32_t theSrcFormat) {

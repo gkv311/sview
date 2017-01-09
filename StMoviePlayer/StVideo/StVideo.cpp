@@ -246,6 +246,7 @@ void StVideo::setAudioDelay(const float theDelaySec) {
 }
 
 bool StVideo::addFile(const StString& theFileToLoad,
+                      const StHandle<StStereoParams>& theNewParams,
                       StStreamsInfo&  theInfo) {
     // open video file
     StString aFileName, aDummy;
@@ -341,6 +342,8 @@ bool StVideo::addFile(const StString& theFileToLoad,
                 myVideoMaster->setSlave(NULL);
 
                 if(myVideoMaster->isInitialized()) {
+                    myAudio->setTrackHeadOrientation(theNewParams->ViewingMode != StViewSurface_Plain);
+
                     const int aSizeX      = myVideoMaster->sizeX();
                     const int aSizeY      = myVideoMaster->sizeY();
                     const int aCodedSizeX = myVideoMaster->getCodedSizeX();
@@ -511,6 +514,7 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
     myVideoSlave ->setUseGpu(toUseGpu);
     myVideoMaster->setUseOpenJpeg(toUseOpenJpeg);
     myVideoSlave ->setUseOpenJpeg(toUseOpenJpeg);
+    myAudio->setTrackHeadOrientation(false);
 
     myFileInfoTmp = new StMovieInfo();
 
@@ -520,14 +524,14 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
     if(!theNewSource->isEmpty()) {
         bool isLoaded = false;
         for(size_t aNode = 0; aNode < theNewSource->size(); ++aNode) {
-            isLoaded = addFile(theNewSource->getValue(aNode)->getPath(), aStreamsInfo) || isLoaded;
+            isLoaded = addFile(theNewSource->getValue(aNode)->getPath(), theNewParams, aStreamsInfo) || isLoaded;
         }
         if(!isLoaded) {
             return false;
         }
     } else {
         const StString aFullPath = theNewSource->getPath();
-        if(!addFile(aFullPath, aStreamsInfo)) {
+        if(!addFile(aFullPath, theNewParams, aStreamsInfo)) {
             return false;
         }
 
@@ -553,7 +557,7 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
                     && aTrackName.isStartsWithIgnoreCase(aName)) {
                         //myPlayList->addToNode(aCurrFile, aFilePath);
                         //myPlayList->getCurrentFile(theNewSource, theNewParams)
-                        addFile(aNode->getPath(), aStreamsInfo);
+                        addFile(aNode->getPath(), theNewParams, aStreamsInfo);
                     }
                 }
             }

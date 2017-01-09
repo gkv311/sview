@@ -152,6 +152,61 @@ class StQuaternion {
         return std::sqrt(squareNorm());
     }
 
+    /**
+     * Scale quaternion that its norm goes to 1.
+     * The appearing of 0 magnitude or near is a error, so we can be sure that can divide by magnitude
+     */
+    void normalize() {
+        Element_t aMagn = norm();
+        if(aMagn == Element_t(0)) {
+            stabilizeLength();
+            aMagn = norm();
+        }
+        scale(Element_t(1) / aMagn);
+    }
+
+    /**
+     * Stabilize quaternion length within 1 - 1/4.
+     * This operation is a faster than normalization and preserve length goes to 0 or infinity.
+     */
+    void stabilizeLength() {
+        Element_t aCs = std::abs(x()) + std::abs(y()) + std::abs(z()) + std::abs(w());
+        if(aCs > Element_t(0)) {
+            myV.x() /= aCs;
+            myV.y() /= aCs;
+            myV.z() /= aCs;
+            myV.w() /= aCs;
+        } else {
+            setIdent();
+        }
+    }
+
+    /**
+     * Make identity quaternion (zero-rotation).
+     */
+    void setIdent() {
+        myV.x() = myV.y() = myV.z() = Element_t(0);
+        myV.w() = Element_t(1);
+    }
+
+    /**
+     * Reverse direction of rotation (conjugate quaternion)
+     */
+    void reverse() {
+        myV.x() = -myV.x();
+        myV.y() = -myV.y();
+        myV.z() = -myV.z();
+    }
+
+    /**
+     * Return rotation with reversed direction (conjugated quaternion)
+     */
+    StQuaternion reversed() const {
+        StQuaternion aCopy(*this);
+        aCopy.reverse();
+        return aCopy;
+    }
+
         private:
 
     /**

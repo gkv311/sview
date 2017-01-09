@@ -105,6 +105,27 @@ class StAudioQueue : public StAVPacketQueue {
     }
 
     /**
+     * Set head orientation.
+     */
+    ST_LOCAL void setHeadOrientation(const StGLQuaternion& theOrient, bool theToTrack) {
+        if(!theToTrack) {
+            myToOrientListener = false;
+            return;
+        }
+
+        StMutexAuto aLock(mySwitchMutex);
+        myHeadOrient = theOrient;
+        myToOrientListener = true;
+    }
+
+    /**
+     * Turn ON/OFF listener head orientation tracking.
+     */
+    ST_LOCAL void setTrackHeadOrientation(bool theToTrack) {
+        myToOrientListener = theToTrack;
+    }
+
+    /**
      * Switch audio device.
      */
     ST_LOCAL void switchAudioDevice(const std::string& theAlDeviceName) {
@@ -126,6 +147,8 @@ class StAudioQueue : public StAVPacketQueue {
 
     ST_LOCAL bool stalInit();
     ST_LOCAL void stalDeinit();
+    ST_LOCAL void stalReinitialize();
+    ST_LOCAL void stalOrientListener();
 
     ST_LOCAL void stalConfigureSources1();
     ST_LOCAL void stalConfigureSources2_0();
@@ -166,6 +189,9 @@ class StAudioQueue : public StAVPacketQueue {
 
     //! Initialize 2-channels stream.
     ST_LOCAL bool initOutStereo(const bool theIsPlanar);
+
+    //! Initialize 2.0 stream by configuring 2 sources in 3D.
+    ST_LOCAL bool initOut20Soft(const bool theIsPlanar);
 
     //! Initialize 3.0 stream by configuring 3 sources in 3D.
     ST_LOCAL bool initOut30Soft(const bool theIsPlanar);
@@ -281,6 +307,8 @@ class StAudioQueue : public StAVPacketQueue {
     StMutex            mySwitchMutex;   //!< switch audio device lock
     volatile bool      myToSwitchDev;   //!< switch audio device flag
     volatile bool      myIsDisconnected;//!< audio device disconnection flag
+    volatile bool      myToOrientListener; //!< track listener orientation
+    StGLQuaternion     myHeadOrient;    //!< head orientation
 
         private: //! @name OpenAL items
 
@@ -293,6 +321,8 @@ class StAudioQueue : public StAVPacketQueue {
     ALsizei            myPrevFrequency; //!< previous audio frequency
     ALfloat            myAlGain;        //!< volume factor
     ALfloat            myAlGainPrev;    //!< volume factor (currently active)
+    bool               myAlSoftLayout;  //!< flag indicating soft multichannel layout
+    bool               myAlIsListOrient;//!< flag indicating that listener orientation is not identity
 
         private: //! @name debug items
 

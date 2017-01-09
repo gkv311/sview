@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -15,35 +15,38 @@
 #include <StTemplates/StHandle.h>
 
 /**
+ * Surface to map image onto.
+ */
+enum StViewSurface {
+    StViewSurface_Plain,   //!< normal 2D image
+    StViewSurface_Cubemap, //!< cubemap texture
+    StViewSurface_Sphere,  //!< spherical panorama
+    //StViewSurface_Cylinder, //!< cylindrical panorama
+};
+
+/**
  * Common parameters for stereo image representation.
  */
 class StStereoParams {
 
         public:
 
-    enum ViewMode {
-        FLAT_IMAGE,        //!< normal 2D image
-        PANORAMA_CUBEMAP,  //!< cubemap texture
-        PANORAMA_SPHERE,   //!< spherical panorama
-        //PANORAMA_CYLINDER, //!< cylindrical panorama
-    };
-
-    static StString GET_VIEW_MODE_NAME(ViewMode theViewMode) {
+    static StString GET_VIEW_MODE_NAME(StViewSurface theViewMode) {
         switch(theViewMode) {
-            case PANORAMA_CUBEMAP: return "cubemap";
-            case PANORAMA_SPHERE:  return "sphere";
-            case FLAT_IMAGE:
-            default:               return "flat";
+            case StViewSurface_Cubemap: return "cubemap";
+            case StViewSurface_Sphere:  return "sphere";
+            case StViewSurface_Plain:   return "flat";
         }
+        return "flat";
     }
 
-    static ViewMode GET_VIEW_MODE_FROM_STRING(const StString& theViewModeStr) {
+    static StViewSurface GET_VIEW_MODE_FROM_STRING(const StString& theViewModeStr) {
         if(theViewModeStr.isStartsWithIgnoreCase(stCString("cubemap"))) {
-            return PANORAMA_CUBEMAP;
+            return StViewSurface_Cubemap;
         } else if(theViewModeStr.isStartsWithIgnoreCase(stCString("sphere"))) {
-            return PANORAMA_SPHERE;
+            return StViewSurface_Sphere;
         } else {
-            return FLAT_IMAGE;
+            return StViewSurface_Plain;
         }
     }
 
@@ -57,7 +60,7 @@ class StStereoParams {
       Src1SizeY(0),
       Src2SizeX(0),
       Src2SizeY(0),
-      ViewingMode(FLAT_IMAGE),
+      ViewingMode(StViewSurface_Plain),
       Timestamp(0.0f),
       StereoFormat(StFormat_Mono),
       ToSwapLR(false),
@@ -81,18 +84,6 @@ class StStereoParams {
      */
     bool isMono() const {
         return StereoFormat == StFormat_Mono;
-    }
-
-    /**
-     * Switch to the next viewing mode.
-     */
-    void nextViewMode() {
-        switch(ViewingMode) {
-            case FLAT_IMAGE:        ViewingMode = PANORAMA_SPHERE; break;
-            case PANORAMA_CUBEMAP:
-            case PANORAMA_SPHERE:
-            default:                ViewingMode = FLAT_IMAGE;
-        }
     }
 
     /**
@@ -243,21 +234,27 @@ class StStereoParams {
         PanTheta = clipPitch(PanTheta + theMoveVec.y());
     }
 
-    void moveToRight(const GLfloat theDuration = 0.02f) {
+    void moveToRight(const float theDuration = 0.02f) {
         switch(ViewingMode) {
-            case PANORAMA_SPHERE:
-            case PANORAMA_CUBEMAP: PanPhi += 100.0f * theDuration; break;
-            case FLAT_IMAGE:
-            default: PanCenter.x() += 0.5f * theDuration / ScaleFactor;
+            case StViewSurface_Sphere:
+            case StViewSurface_Cubemap:
+                PanPhi += 100.0f * theDuration;
+                break;
+            case StViewSurface_Plain:
+                PanCenter.x() += 0.5f * theDuration / ScaleFactor;
+                break;
         }
     }
 
-    void moveToLeft(const GLfloat theDuration = 0.02f) {
+    void moveToLeft(const float theDuration = 0.02f) {
         switch(ViewingMode) {
-            case PANORAMA_SPHERE:
-            case PANORAMA_CUBEMAP: PanPhi -= 100.0f * theDuration; break;
-            case FLAT_IMAGE:
-            default: PanCenter.x() -= 0.5f * theDuration / ScaleFactor;
+            case StViewSurface_Sphere:
+            case StViewSurface_Cubemap:
+                PanPhi -= 100.0f * theDuration;
+                break;
+            case StViewSurface_Plain:
+                PanCenter.x() -= 0.5f * theDuration / ScaleFactor;
+                break;
         }
     }
 
@@ -273,27 +270,25 @@ class StStereoParams {
         return thePitchDeg;
     }
 
-    void moveToDown(const GLfloat theDuration = 0.02f) {
+    void moveToDown(const float theDuration = 0.02f) {
         switch(ViewingMode) {
-            case PANORAMA_SPHERE:
-            case PANORAMA_CUBEMAP:
+            case StViewSurface_Sphere:
+            case StViewSurface_Cubemap:
                 PanTheta = clipPitch(PanTheta - 100.0f * theDuration);
                 break;
-            case FLAT_IMAGE:
-            default:
+            case StViewSurface_Plain:
                 PanCenter.y() -= 0.5f * theDuration / ScaleFactor;
                 break;
         }
     }
 
-    void moveToUp(const GLfloat theDuration = 0.02f) {
+    void moveToUp(const float theDuration = 0.02f) {
         switch(ViewingMode) {
-            case PANORAMA_SPHERE:
-            case PANORAMA_CUBEMAP:
+            case StViewSurface_Sphere:
+            case StViewSurface_Cubemap:
                 PanTheta = clipPitch(PanTheta + 100.0f * theDuration);
                 break;
-            case FLAT_IMAGE:
-            default:
+            case StViewSurface_Plain:
                 PanCenter.y() += 0.5f * theDuration / ScaleFactor;
                 break;
         }
@@ -339,7 +334,7 @@ class StStereoParams {
     size_t       Src2SizeX;        //!< width  of the 2nd original image
     size_t       Src2SizeY;        //!< height of the 2nd original image
 
-    ViewMode     ViewingMode;      //!< viewing mode - panorama or flat image
+    StViewSurface ViewingMode;     //!< viewing mode - panorama or flat image
     GLfloat      Timestamp;        //!< playback timestamp
 
     StFormat     StereoFormat;     //!< stereoscopic format

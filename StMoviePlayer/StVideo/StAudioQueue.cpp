@@ -175,17 +175,17 @@ bool StAudioQueue::stalInit() {
         alSourcefv(myAlSources[aSrcId], AL_VELOCITY,        aZeroVec);
         alSourcefv(myAlSources[aSrcId], AL_DIRECTION,       aZeroVec);
         alSourcef (myAlSources[aSrcId], AL_ROLLOFF_FACTOR,  0.0f);
-        alSourcei (myAlSources[aSrcId], AL_SOURCE_RELATIVE, AL_TRUE);
+        //alSourcei(myAlSources[aSrcId], AL_SOURCE_RELATIVE, myToOrientListener ? AL_FALSE : AL_TRUE);
+        alSourcei (myAlSources[aSrcId], AL_SOURCE_RELATIVE, AL_FALSE);
         alSourcef (myAlSources[aSrcId], AL_GAIN,            1.0f);
         stalCheckErrors(StString("alSource*") + aSrcId);
     }
 
     // configure listener
-    const StGLVec3 aListenerOri[2] = { THE_LISTENER_FORWARD, THE_LISTENER_UP };
-    alListenerfv(AL_POSITION,    aZeroVec);
-    alListenerfv(AL_VELOCITY,    aZeroVec);
-    alListenerfv(AL_ORIENTATION, (const ALfloat* )aListenerOri);
-    alListenerf (AL_GAIN,        myAlGain); // apply gain to all sources at-once
+    alListenerfv(AL_POSITION, aZeroVec);
+    alListenerfv(AL_VELOCITY, aZeroVec);
+    alListenerf (AL_GAIN,     myAlGain); // apply gain to all sources at-once
+    stalOrientListener();
     return true;
 }
 
@@ -204,6 +204,39 @@ void StAudioQueue::stalDeinit() {
 
     // close device
     myAlCtx.destroy();
+}
+
+void StAudioQueue::stalReinitialize() {
+    stalDeinit(); // release OpenAL context
+    myIsAlValid = (stalInit() ? ST_AL_INIT_OK : ST_AL_INIT_KO);
+
+    myIsDisconnected = false;
+    myToSwitchDev    = false;
+}
+
+void StAudioQueue::stalOrientListener() {
+    if(myToOrientListener) {
+        StGLQuaternion aHeadOrient;
+        {
+            StMutexAuto aLock(mySwitchMutex);
+            aHeadOrient = myHeadOrient;
+            aHeadOrient.reverse();
+            aHeadOrient.normalize();
+        }
+
+        const StGLVec3 aFwdVec = aHeadOrient.multiply(THE_LISTENER_FORWARD);
+        const StGLVec3 anUpVec = aHeadOrient.multiply(THE_LISTENER_UP);
+        const StGLVec3 aListenerOri[2] = { aFwdVec, anUpVec };
+
+        //static StGLVec3 aPrev; if(aFwdVec != aPrev) { aPrev = aFwdVec; ST_DEBUG_LOG("FWD: " + aFwdVec.toString() + "\n[UP: " + anUpVec.toString() + "]\n") }
+
+        alListenerfv(AL_ORIENTATION, (const ALfloat* )aListenerOri);
+        myAlIsListOrient = true;
+    } else if(myAlIsListOrient) {
+        const StGLVec3 aListenerOri[2] = { THE_LISTENER_FORWARD, THE_LISTENER_UP };
+        alListenerfv(AL_ORIENTATION, (const ALfloat* )aListenerOri);
+        myAlIsListOrient = false;
+    }
 }
 
 void StAudioQueue::stalEmpty() {
@@ -259,12 +292,15 @@ StAudioQueue::StAudioQueue(const std::string& theAlDeviceName)
   myIsAlValid(ST_AL_INIT_NA),
   myToSwitchDev(false),
   myIsDisconnected(false),
+  myToOrientListener(false),
   myAlDeviceName(theAlDeviceName),
   myAlFormat(AL_FORMAT_STEREO16),
   myPrevFormat(AL_FORMAT_STEREO16),
   myPrevFrequency(0),
   myAlGain(1.0f),
   myAlGainPrev(1.0f),
+  myAlSoftLayout(true),
+  myAlIsListOrient(false),
   myDbgPrevQueued(-1),
   myDbgPrevSrcState(-1) {
     stMemSet(myAlSources, 0, sizeof(myAlSources));
@@ -325,6 +361,17 @@ bool StAudioQueue::initOutMono() {
     myBufferSrc.setupChannels(StChannelMap::CH10, StChannelMap::PCM, 1);
     myBufferOut.setupChannels(StChannelMap::CH10, StChannelMap::PCM, 1);
     stalConfigureSources1();
+    return true;
+}
+
+bool StAudioQueue::initOut20Soft(const bool theIsPlanar) {
+    if(!setupOutMonoFormat()) {
+        return false;
+    }
+
+    myBufferOut.setupChannels(StChannelMap::CH20, StChannelMap::PCM, 2);
+    myBufferSrc.setupChannels(StChannelMap::CH20, StChannelMap::PCM, theIsPlanar ? myCodecCtx->channels : 1);
+    stalConfigureSources2_0();
     return true;
 }
 
@@ -548,40 +595,58 @@ bool StAudioQueue::initOutChannels() {
 
     switch(myCodecCtx->channels) {
         case 1: {
+            myAlSoftLayout = true; // just unsupported
             return initOutMono();
         }
         case 2: {
-            return initOutStereo(isPlanar);
+            if(!myToOrientListener) {
+                myAlSoftLayout = false;
+                return initOutStereo(isPlanar);
+            } else {
+                myAlSoftLayout = true;
+                return initOut20Soft(isPlanar);
+            }
         }
         case 3: {
+            myAlSoftLayout = true;
             return initOut30Soft(isPlanar);
         }
         case 4: {
-            if(myAlCtx.hasExtMultiChannel) {
+            if(myAlCtx.hasExtMultiChannel && !myToOrientListener) {
+                myAlSoftLayout = false;
                 return initOut40Ext(isPlanar);
             }
             ST_DEBUG_LOG("OpenAL: multichannel extension (AL_FORMAT_QUAD16) is unavailable");
+            myAlSoftLayout = true;
             return initOut40Soft(isPlanar);
         }
         case 5: {
+            myAlSoftLayout = true;
             return initOut50Soft(isPlanar);
         }
         case 6: {
-            if(myAlCtx.hasExtMultiChannel) {
+            if(myAlCtx.hasExtMultiChannel && !myToOrientListener) {
+                myAlSoftLayout = false;
                 return initOut51Ext(isPlanar);
             }
             ST_DEBUG_LOG("OpenAL: multichannel extension (AL_FORMAT_51CHN16) is unavailable");
+            myAlSoftLayout = true;
             return initOut51Soft(isPlanar);
         }
         case 8: {
-            if(myAlCtx.hasExtMultiChannel) {
+            if(myAlCtx.hasExtMultiChannel && !myToOrientListener) {
+                myAlSoftLayout = false;
                 return initOut71Ext(isPlanar);
             }
 
             ST_DEBUG_LOG("OpenAL: multichannel extension (AL_FORMAT_71CHN16) is unavailable");
+            myAlSoftLayout = true;
             return initOut71Soft(isPlanar);
         }
-        default: return false;
+        default: {
+            myAlSoftLayout = true;
+            return false;
+        }
     }
 }
 
@@ -689,6 +754,7 @@ void StAudioQueue::deinit() {
     myAvSrcFormat  = -1;
     myAvSampleRate = -1;
     myAvNbChannels = -1;
+    myAlSoftLayout = true;
     StAVPacketQueue::deinit();
 }
 
@@ -696,12 +762,21 @@ bool StAudioQueue::parseEvents() {
     double aPtsSeek = 0.0;
 
     if(myToSwitchDev) {
-        stalDeinit(); // release OpenAL context
-        myIsAlValid = (stalInit() ? ST_AL_INIT_OK : ST_AL_INIT_KO);
-
-        myIsDisconnected = false;
-        myToSwitchDev    = false;
+        stalReinitialize();
         return true;
+    }
+
+    if(myToOrientListener) {
+        if(!myAlSoftLayout) {
+            myBufferSrc.clear();
+            myBufferOut.clear();
+            initBuffers();
+            return true;
+        }
+
+        stalOrientListener();
+    } else if(myAlIsListOrient) {
+        stalOrientListener();
     }
 
     if(!stAreEqual(myAlGain, myAlGainPrev, 1.e-7f)) {

@@ -382,11 +382,11 @@ StGLMenu* StImageViewerGUI::createDisplayRatioMenu() {
 
 void StImageViewerGUI::fillPanoramaMenu(StGLMenu* theMenu) {
     theMenu->addItem(tr(MENU_VIEW_SURFACE_PLANE),
-                     myImage->params.ViewMode, StStereoParams::FLAT_IMAGE);
+                     myImage->params.ViewMode, StViewSurface_Plain);
     theMenu->addItem(tr(MENU_VIEW_SURFACE_SPHERE),
-                     myImage->params.ViewMode, StStereoParams::PANORAMA_SPHERE);
+                     myImage->params.ViewMode, StViewSurface_Sphere);
     theMenu->addItem(tr(MENU_VIEW_SURFACE_CUBEMAP),
-                     myImage->params.ViewMode, StStereoParams::PANORAMA_CUBEMAP);
+                     myImage->params.ViewMode, StViewSurface_Cubemap);
     if(myWindow->hasOrientationSensor()) {
         theMenu->addItem(tr(myWindow->isPoorOrientationSensor() ? MENU_VIEW_TRACK_HEAD_POOR : MENU_VIEW_TRACK_HEAD),
                          myPlugin->params.ToTrackHead);
@@ -1249,10 +1249,10 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
         myBtnSwapLR->setOpacity(aSrcFormat != StFormat_Mono ? myPanelUpper->getOpacity() : 0.0f, false);
     }
 
-    const StStereoParams::ViewMode aViewMode = !aParams.isNull()
-                                             ? aParams->ViewingMode
-                                             : StStereoParams::FLAT_IMAGE;
-    bool toShowPano = aViewMode != StStereoParams::FLAT_IMAGE;
+    const StViewSurface aViewMode = !aParams.isNull()
+                                  ? aParams->ViewingMode
+                                  : StViewSurface_Plain;
+    bool toShowPano = aViewMode != StViewSurface_Plain;
     if(!toShowPano
     && !aParams.isNull()
     &&  st::probePanorama(aParams->StereoFormat,
@@ -1261,10 +1261,10 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
         toShowPano = true;
     }
     if(myBtnPanorama != NULL) {
-        myBtnPanorama->getTrackedValue()->setValue(aViewMode != StStereoParams::FLAT_IMAGE);
+        myBtnPanorama->getTrackedValue()->setValue(aViewMode != StViewSurface_Plain);
         myBtnPanorama->setOpacity(toShowPano ? myPanelUpper->getOpacity() : 0.0f, false);
     }
-    myWindow->setTrackOrientation(aViewMode != StStereoParams::FLAT_IMAGE
+    myWindow->setTrackOrientation(aViewMode != StViewSurface_Plain
                                && myPlugin->params.ToTrackHead->getValue());
     StQuaternion<double> aQ = myWindow->getDeviceOrientation();
     myImage->setDeviceOrientation(StGLQuaternion((float )aQ.x(), (float )aQ.y(), (float )aQ.z(), (float )aQ.w()));
@@ -1291,9 +1291,9 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
         } else if(::isPointIn(myBtnPanorama, theCursor)) {
             size_t aTrPano = MENU_VIEW_SURFACE_PLANE;
             switch(aViewMode) {
-                case StStereoParams::FLAT_IMAGE:       aTrPano = MENU_VIEW_SURFACE_PLANE;   break;
-                case StStereoParams::PANORAMA_SPHERE:  aTrPano = MENU_VIEW_SURFACE_SPHERE;  break;
-                case StStereoParams::PANORAMA_CUBEMAP: aTrPano = MENU_VIEW_SURFACE_CUBEMAP; break;
+                case StViewSurface_Plain:   aTrPano = MENU_VIEW_SURFACE_PLANE;   break;
+                case StViewSurface_Sphere:  aTrPano = MENU_VIEW_SURFACE_SPHERE;  break;
+                case StViewSurface_Cubemap: aTrPano = MENU_VIEW_SURFACE_CUBEMAP; break;
             }
             myDescr->setText(tr(MENU_VIEW_PANORAMA) + "\n" + tr(aTrPano));
         } else {

@@ -1098,9 +1098,9 @@ void StImageViewer::doSwitchViewMode(const int32_t theMode) {
     bool isChanged = false;
     StGLFrameTextures& aTexture = myGUI->myImage->getTextureQueue()->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE);
     if(aTexture.getPlane(0).getTarget() == GL_TEXTURE_CUBE_MAP) {
-        isChanged = (theMode != StStereoParams::PANORAMA_CUBEMAP);
+        isChanged = (theMode != StViewSurface_Cubemap);
     } else {
-        isChanged = (theMode == StStereoParams::PANORAMA_CUBEMAP);
+        isChanged = (theMode == StViewSurface_Cubemap);
     }
 
     if(isChanged
@@ -1122,8 +1122,8 @@ void StImageViewer::doPanoramaOnOff(const size_t ) {
     }
 
     int aMode = myGUI->myImage->params.ViewMode->getValue();
-    if(aMode != StStereoParams::FLAT_IMAGE) {
-        myGUI->myImage->params.ViewMode->setValue(StStereoParams::FLAT_IMAGE);
+    if(aMode != StViewSurface_Plain) {
+        myGUI->myImage->params.ViewMode->setValue(StViewSurface_Plain);
         return;
     }
 
@@ -1131,8 +1131,8 @@ void StImageViewer::doPanoramaOnOff(const size_t ) {
                                          aParams->Src1SizeX, aParams->Src1SizeY,
                                          aParams->Src2SizeX, aParams->Src2SizeY);
     myGUI->myImage->params.ViewMode->setValue(aPano == StPanorama_Cubemap6_1 || aPano == StPanorama_Cubemap3_2
-                                            ? StStereoParams::PANORAMA_CUBEMAP
-                                            : StStereoParams::PANORAMA_SPHERE);
+                                            ? StViewSurface_Cubemap
+                                            : StViewSurface_Sphere);
 }
 
 void StImageViewer::doOpen1FileFromGui(StHandle<StString> thePath) {

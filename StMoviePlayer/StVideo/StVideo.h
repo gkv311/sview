@@ -211,6 +211,13 @@ class StVideo {
         myAudio->setAudioVolume(theGain);
     }
 
+    /**
+     * Set head orientation.
+     */
+    ST_LOCAL void setHeadOrientation(const StGLQuaternion& theOrient, bool theToTrack) {
+        myAudio->setHeadOrientation(theOrient, theToTrack);
+    }
+
     ST_LOCAL void setAudioDelay(const float theDelaySec);
 
         public: //! @name Properties
@@ -312,6 +319,7 @@ class StVideo {
      * Private method to append one format context (one file).
      */
     ST_LOCAL bool addFile(const StString& theFileToLoad,
+                          const StHandle<StStereoParams>& theNewParams,
                           StStreamsInfo&  theInfo);
 
     ST_LOCAL bool openSource(const StHandle<StFileNode>&     theNewSource,
