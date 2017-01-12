@@ -133,6 +133,7 @@ void StMoviePlayer::updateStrings() {
     params.ToShowPlayList->setName(tr(VIDEO_LIST));
     params.ToTrackHead->setName(tr(MENU_VIEW_TRACK_HEAD));
     params.ToTrackHeadAudio->setName(tr(MENU_VIEW_TRACK_HEAD_AUDIO));
+    params.ToForceBFormat->setName(stCString("Force B-Format"));
     params.ToShowFps->setName(tr(MENU_FPS_METER));
     params.ToShowMenu->setName(stCString("Show main menu"));
     params.ToShowTopbar->setName(stCString("Show top toolbar"));
@@ -251,6 +252,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.ToShowPlayList->signals.onChanged = stSlot(this, &StMoviePlayer::doShowPlayList);
     params.ToTrackHead      = new StBoolParamNamed(true,  stCString("toTrackHead"));
     params.ToTrackHeadAudio = new StBoolParamNamed(true,  stCString("toTrackHeadAudio"));
+    params.ToForceBFormat   = new StBoolParamNamed(false, stCString("toForceBFormat"));
     params.ToShowFps   = new StBoolParamNamed(false, stCString("toShowFps"));
     params.ToShowMenu  = new StBoolParamNamed(true,  stCString("toShowMenu"));
     params.ToShowTopbar= new StBoolParamNamed(true,  stCString("toShowTopbar"));
@@ -308,6 +310,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
 
     myToCheckPoorOrient = !mySettings->loadParam(params.ToTrackHead);
     mySettings->loadParam (params.ToTrackHeadAudio);
+    mySettings->loadParam (params.ToForceBFormat);
     mySettings->loadParam (params.AudioAlHrtf);
     mySettings->loadParam (params.ToShowFps);
     mySettings->loadParam (params.IsMobileUI);
@@ -334,6 +337,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.ToLoopSingle ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchLoopSingle);
     params.AudioAlDevice->signals.onChanged.connect(this, &StMoviePlayer::doSwitchAudioDevice);
     params.AudioAlHrtf  ->signals.onChanged.connect(this, &StMoviePlayer::doSwitchAudioAlHrtf);
+    params.ToForceBFormat->signals.onChanged = stSlot(this, &StMoviePlayer::doSetForceBFormat);
 
 #if defined(__ANDROID__)
     addRenderer(new StOutInterlace  (myResMgr, theParentWin));
@@ -534,6 +538,7 @@ void StMoviePlayer::saveAllParams() {
 
         mySettings->saveParam (params.ToTrackHead);
         mySettings->saveParam (params.ToTrackHeadAudio);
+        mySettings->saveParam (params.ToForceBFormat);
         mySettings->saveParam (params.ToShowFps);
         mySettings->saveParam (params.IsMobileUI);
         mySettings->saveParam (params.IsVSyncOn);
@@ -793,6 +798,7 @@ bool StMoviePlayer::init() {
         myVideo->params.UseOpenJpeg  = params.UseOpenJpeg;
         myVideo->params.ToSearchSubs = params.ToSearchSubs;
         myVideo->params.ToTrackHeadAudio = params.ToTrackHeadAudio;
+        myVideo->setForceBFormat(params.ToForceBFormat->getValue());
 
     #ifdef ST_HAVE_MONGOOSE
         doStartWebUI();
@@ -1593,6 +1599,12 @@ bool StMoviePlayer::hasAlHrtf() const {
 void StMoviePlayer::doSwitchAudioAlHrtf(const int32_t theValue) {
     if(!myVideo.isNull()) {
         myVideo->setAlHrtfRequest((StAudioQueue::StAlHrtfRequest )theValue);
+    }
+}
+
+void StMoviePlayer::doSetForceBFormat(const bool theValue) {
+    if(!myVideo.isNull()) {
+        myVideo->setForceBFormat(theValue);
     }
 }
 

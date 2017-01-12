@@ -93,11 +93,12 @@ class StChannelMap {
         CH71
     } Channels;
 
-    typedef enum tagOrderRules {
-        PCM, //!< used PCM channel order rules
-        AC3, //!< used AC3 channel order rules
-        OGG  //!< used OGG Vorbis channel order rules
-    } OrderRules;
+    enum OrderRules {
+        PCM,  //!< used PCM channel order rules
+        AC3,  //!< used AC3 channel order rules
+        OGG,  //!< used OGG Vorbis channel order rules
+        WYZX, //!< YouTube spatial B-Format audio (4 channels)
+    };
 
         public: //!< fields are public for simple access
 

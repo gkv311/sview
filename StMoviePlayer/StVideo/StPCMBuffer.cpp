@@ -51,10 +51,23 @@ StChannelMap::StChannelMap(const StChannelMap::Channels   theChannels,
             return;
         case StChannelMap::CH40:
             count = 4;
-            FL = 0;
-            FR = 1;
-            RL = 2;
-            RR = 3;
+            if(theRules == StChannelMap::WYZX) {
+                // WYZX -> WXYZ
+                Order[0] = 0;
+                Order[1] = 3;
+                Order[2] = 1;
+                Order[3] = 2;
+                FL = Order[0];
+                FR = Order[1];
+                RL = Order[2];
+                RR = Order[3];
+            } else {
+                FL = 0;
+                FR = 1;
+                RL = 2;
+                RR = 3;
+            }
+
             FC = LFE = SL = SR = 0;
             return;
         case StChannelMap::CH50:
@@ -70,6 +83,8 @@ StChannelMap::StChannelMap(const StChannelMap::Channels   theChannels,
             count = 6;
             SL = SR = 0;
             switch(theRules) {
+                case StChannelMap::WYZX:
+                    // error
                 case StChannelMap::PCM: {
                     FL  = 0;
                     FR  = 1;

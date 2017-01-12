@@ -74,6 +74,7 @@ class StALContext {
     bool hasExtFloat32;      //!< has 32bit float formats
     bool hasExtFloat64;      //!< has 64bit float formats
     bool hasExtMultiChannel; //!< has multichannel formats
+    bool hasExtBFormat;      //!< AL_EXT_BFORMAT
     bool hasExtDisconnect;   //!< ALC_EXT_disconnect
     bool hasExtSoftHrtf;     //!< ALC_SOFT_HRTF
 

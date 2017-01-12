@@ -142,6 +142,13 @@ class StAudioQueue : public StAVPacketQueue {
     }
 
     /**
+     * Set forcing B-Format.
+     */
+    ST_LOCAL void setForceBFormat(bool theToForce) {
+        myToForceBFormat = theToForce;
+    }
+
+    /**
      * Switch audio device.
      */
     ST_LOCAL void switchAudioDevice(const std::string& theAlDeviceName) {
@@ -235,6 +242,9 @@ class StAudioQueue : public StAVPacketQueue {
 
     //! Initialize 4.0 stream using extension (AL_FORMAT_QUAD).
     ST_LOCAL bool initOut40Ext(const bool theIsPlanar);
+
+    //! Initialize 4.0 Ambisonics WXYZ stream using extension (AL_FORMAT_BFORMAT3D).
+    ST_LOCAL bool initOut40BFormat(const bool theIsPlanar);
 
     //! Initialize 5.0 stream by configuring 5 sources in 3D.
     ST_LOCAL bool initOut50Soft(const bool theIsPlanar);
@@ -342,6 +352,7 @@ class StAudioQueue : public StAVPacketQueue {
     volatile bool      myToSwitchDev;   //!< switch audio device flag
     volatile bool      myIsDisconnected;//!< audio device disconnection flag
     volatile bool      myToOrientListener; //!< track listener orientation
+    volatile bool      myToForceBFormat;//!< force using B-Format for any 4-channels input
     StGLQuaternion     myHeadOrient;    //!< head orientation
 
         private: //! @name OpenAL items
@@ -359,6 +370,9 @@ class StAudioQueue : public StAVPacketQueue {
     ALfloat            myAlGainPrev;    //!< volume factor (currently active)
     bool               myAlSoftLayout;  //!< flag indicating soft multichannel layout
     bool               myAlIsListOrient;//!< flag indicating that listener orientation is not identity
+    bool               myAlCanBFormat;  //!< flag indicating that B-Format can be forced (e.g. 4-channels input and extension is available)
+    bool               myAlIsBFormat;   //!< flag indicating that using B-Format is enabled (forcibly) for 4-channels input
+
     StAlHrtfRequest    myAlHrtf;
     StAlHrtfRequest    myAlHrtfPrev;
 

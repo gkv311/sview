@@ -324,6 +324,7 @@ StAudioQueue::StAudioQueue(const std::string& theAlDeviceName,
   myToSwitchDev(false),
   myIsDisconnected(false),
   myToOrientListener(false),
+  myToForceBFormat(false),
   myAlDeviceName(theAlDeviceName),
   myAlFormat(AL_FORMAT_STEREO16),
   myPrevFormat(AL_FORMAT_STEREO16),
@@ -332,6 +333,8 @@ StAudioQueue::StAudioQueue(const std::string& theAlDeviceName,
   myAlGainPrev(1.0f),
   myAlSoftLayout(true),
   myAlIsListOrient(false),
+  myAlCanBFormat(false),
+  myAlIsBFormat(false),
   myAlHrtf(theAlHrtf),
   myAlHrtfPrev(theAlHrtf),
   myDbgPrevQueued(-1),
@@ -496,6 +499,34 @@ bool StAudioQueue::initOut40Ext(const bool theIsPlanar) {
     return true;
 }
 
+bool StAudioQueue::initOut40BFormat(const bool theIsPlanar) {
+    switch(myBufferSrc.getFormat()) {
+        case StPcmFormat_Int32:
+        case StPcmFormat_Float32:
+        case StPcmFormat_Float64: {
+            myAlFormat = alGetEnumValue("AL_FORMAT_BFORMAT3D_FLOAT32");
+            myBufferOut.setFormat(StPcmFormat_Float32);
+            break;
+        }
+        case StPcmFormat_Int16: {
+            myAlFormat = alGetEnumValue("AL_FORMAT_BFORMAT3D_16");
+            myBufferOut.setFormat(StPcmFormat_Int16);
+            break;
+        }
+        case StPcmFormat_UInt8: {
+            myAlFormat = alGetEnumValue("AL_FORMAT_BFORMAT3D_8");
+            myBufferOut.setFormat(StPcmFormat_UInt8);
+            break;
+        }
+        default: return false;
+    }
+
+    myBufferSrc.setupChannels(StChannelMap::CH40, StChannelMap::WYZX, theIsPlanar ? myCodecCtx->channels : 1);
+    myBufferOut.setupChannels(StChannelMap::CH40, StChannelMap::PCM, 1);
+    stalConfigureSources1();
+    return true;
+}
+
 bool StAudioQueue::initOut50Soft(const bool theIsPlanar) {
     if(!setupOutMonoFormat()) {
         return false;
@@ -626,6 +657,8 @@ bool StAudioQueue::initOutChannels() {
         false;
     #endif
 
+    myAlCanBFormat = false;
+    myAlIsBFormat  = false;
     switch(myCodecCtx->channels) {
         case 1: {
             myAlSoftLayout = true; // just unsupported
@@ -645,6 +678,12 @@ bool StAudioQueue::initOutChannels() {
             return initOut30Soft(isPlanar);
         }
         case 4: {
+            myAlCanBFormat = myAlCtx.hasExtBFormat;
+            if(myToForceBFormat && myAlCtx.hasExtBFormat) {
+                myAlSoftLayout = true;
+                myAlIsBFormat  = true;
+                return initOut40BFormat(isPlanar);
+            }
             if(myAlCtx.hasExtMultiChannel && !myToOrientListener) {
                 myAlSoftLayout = false;
                 return initOut40Ext(isPlanar);
@@ -788,12 +827,15 @@ void StAudioQueue::deinit() {
     myAvSampleRate = -1;
     myAvNbChannels = -1;
     myAlSoftLayout = true;
+    myAlCanBFormat = false;
+    myAlIsBFormat  = false;
     StAVPacketQueue::deinit();
 }
 
 bool StAudioQueue::parseEvents() {
     double aPtsSeek = 0.0;
 
+    bool toResetBuffers = false;
     if(myToSwitchDev) {
         stalReinitialize();
         return true;
@@ -802,19 +844,26 @@ bool StAudioQueue::parseEvents() {
         StMutexAuto aLock(myAlInfoMutex);
         myAlInfo.clear();
         myAlCtx.fullInfo(myAlInfo);
+    } else if(myAlIsBFormat != myToForceBFormat
+           && myAlCanBFormat) {
+        toResetBuffers = true;
     }
 
     if(myToOrientListener) {
         if(!myAlSoftLayout) {
-            myBufferSrc.clear();
-            myBufferOut.clear();
-            initBuffers();
-            return true;
+            toResetBuffers = true;
+        } else {
+            stalOrientListener();
         }
-
-        stalOrientListener();
     } else if(myAlIsListOrient) {
         stalOrientListener();
+    }
+
+    if(toResetBuffers) {
+        myBufferSrc.clear();
+        myBufferOut.clear();
+        initBuffers();
+        return true;
     }
 
     if(!stAreEqual(myAlGain, myAlGainPrev, 1.e-7f)) {

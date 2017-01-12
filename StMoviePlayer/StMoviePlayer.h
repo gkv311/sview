@@ -202,6 +202,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StInt32ParamNamed>   SrcStereoFormat;   //!< source format
         StHandle<StBoolParamNamed>    ToTrackHead;       //!< enable/disable head-tracking
         StHandle<StBoolParamNamed>    ToTrackHeadAudio;  //!< enable/disable head-tracking for audio listener
+        StHandle<StBoolParamNamed>    ToForceBFormat;    //!< force B-Format for any 4-channels audio stream
         StHandle<StBoolParamNamed>    ToShowPlayList;    //!< display playlist
         StHandle<StBoolParamNamed>    ToShowFps;         //!< display FPS meter
         StHandle<StBoolParamNamed>    ToShowMenu;        //!< show main menu
@@ -282,6 +283,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doSwitchVSync(const bool theValue);
     ST_LOCAL void doSwitchAudioDevice(const int32_t theDevId);
     ST_LOCAL void doSwitchAudioAlHrtf(const int32_t theValue);
+    ST_LOCAL void doSetForceBFormat(const bool theToForce);
     ST_LOCAL void doSetAudioVolume(const float theGain);
     ST_LOCAL void doSetAudioMute(const bool theToMute);
     ST_LOCAL void doSetAudioDelay(const float theDelaySec);

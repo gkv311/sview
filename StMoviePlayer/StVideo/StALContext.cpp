@@ -71,6 +71,7 @@ StALContext::StALContext()
   hasExtFloat32(false),
   hasExtFloat64(false),
   hasExtMultiChannel(false),
+  hasExtBFormat(false),
   hasExtDisconnect(false),
   hasExtSoftHrtf(false),
   alcGetStringiSOFT(NULL),
@@ -85,26 +86,29 @@ StALContext::~StALContext() {
 }
 
 StString StALContext::toStringExtensions() const {
-    StString anExtList = "OpenAL extensions:\n";
+    StString anExtList = "OpenAL extensions: ";
     if(hasExtEAX2) {
-        anExtList += " - EAX2.0\n";
+        anExtList += "EAX2.0 ";
     }
     if(hasExtFloat32) {
-        anExtList += " - float32 mono/stereo formats\n";
+        anExtList += "float32 ";
     }
     if(hasExtFloat64) {
-        anExtList += " - float64 mono/stereo formats\n";
+        anExtList += "float64 ";
     }
     if(hasExtMultiChannel) {
-        anExtList += " - multi-channel formats\n";
+        anExtList += "multi-channel ";
+    }
+    if(hasExtBFormat) {
+        anExtList += "B-Format ";
     }
     if(hasExtDisconnect) {
-        anExtList += " - ALC_EXT_disconnect\n";
+        anExtList += "ALC_EXT_disconnect ";
     }
     if(hasExtSoftHrtf) {
         ALCint aHrtfStatus = ALC_HRTF_DISABLED_SOFT;
         alcGetIntegerv(myAlDevice, ALC_HRTF_STATUS_SOFT, 1, &aHrtfStatus);
-        anExtList += StString(" - ALC_SOFT_HRTF [") + hrtfStatusToString(aHrtfStatus) + "]\n";
+        anExtList += StString("ALC_SOFT_HRTF [") + hrtfStatusToString(aHrtfStatus) + "] ";
     }
     return anExtList;
 }
@@ -127,6 +131,7 @@ bool StALContext::create(const std::string& theDeviceName) {
     hasExtFloat32      = alIsExtensionPresent("AL_EXT_float32")   == AL_TRUE;
     hasExtFloat64      = alIsExtensionPresent("AL_EXT_double")    == AL_TRUE;
     hasExtMultiChannel = alIsExtensionPresent("AL_EXT_MCFORMATS") == AL_TRUE;
+    hasExtBFormat      = alIsExtensionPresent("AL_EXT_BFORMAT")   == AL_TRUE;
     hasExtDisconnect   = alcIsExtensionPresent(myAlDevice, "ALC_EXT_disconnect") == AL_TRUE;
     if(alcIsExtensionPresent(myAlDevice, "ALC_SOFT_HRTF") == AL_TRUE) {
         alcGetStringiSOFT  = (alcGetStringiSOFT_t  )alcGetProcAddress(myAlDevice, "alcGetStringiSOFT");
@@ -151,6 +156,9 @@ void StALContext::fullInfo(StDictionary& theMap) const {
     }
     if(hasExtMultiChannel) {
         anExtensions += "AL_EXT_MCFORMATS ";
+    }
+    if(hasExtBFormat) {
+        anExtensions += "AL_EXT_BFORMAT ";
     }
     if(hasExtDisconnect) {
         anExtensions += "ALC_EXT_disconnect ";
@@ -182,6 +190,7 @@ void StALContext::destroy() {
     hasExtFloat32 = false;
     hasExtFloat64 = false;
     hasExtMultiChannel = false;
+    hasExtBFormat      = false;
     hasExtDisconnect   = false;
     hasExtSoftHrtf     = false;
     alcGetStringiSOFT  = NULL;

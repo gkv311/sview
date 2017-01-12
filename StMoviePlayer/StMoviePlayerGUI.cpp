@@ -1818,8 +1818,16 @@ void StMoviePlayerGUI::doAudioStreamsCombo(const size_t ) {
         aBuilder.getMenu()->addItem(tr(MENU_AUDIO_NONE), myPlugin->params.AudioStream, -1);
     }
     if(!aStreams.isNull()) {
+        bool hasQuadAudio = false;
         for(size_t aStreamId = 0; aStreamId < aStreams->size(); ++aStreamId) {
-            aBuilder.getMenu()->addItem(aStreams->getValue(aStreamId), myPlugin->params.AudioStream, int32_t(aStreamId));
+            const StString& aStreamName = aStreams->getValue(aStreamId);
+            aBuilder.getMenu()->addItem(aStreamName, myPlugin->params.AudioStream, int32_t(aStreamId));
+            hasQuadAudio = hasQuadAudio
+                        || aStreamName.isContains(stCString("quad,"))
+                        || aStreamName.isContains(stCString("4.0,"));
+        }
+        if(hasQuadAudio) {
+            aBuilder.getMenu()->addItem(myPlugin->params.ToForceBFormat);
         }
     }
     if(myWindow->isMobile()) {

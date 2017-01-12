@@ -233,6 +233,13 @@ class StVideo {
         myAudio->setHeadOrientation(theOrient, theToTrack);
     }
 
+    /**
+     * Set forcing B-Format.
+     */
+    ST_LOCAL void setForceBFormat(bool theToForce) {
+        myAudio->setForceBFormat(theToForce);
+    }
+
     ST_LOCAL void setAudioDelay(const float theDelaySec);
 
     /**
