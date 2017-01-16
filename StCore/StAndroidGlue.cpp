@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2014-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2014-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -184,6 +184,7 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
   myHasOrientSensor(false),
   myIsPoorOrient(false),
   myToTrackOrient(false),
+  myToSwapEyesHW(false),
   myIsRunning(false),
   myIsStateSaved(false),
   myToDestroy(false) {
@@ -291,9 +292,11 @@ void StAndroidGlue::setOpenPath(const jstring  theOpenPath,
 }
 
 void StAndroidGlue::fetchState(StString&             theNewFile,
-                               StQuaternion<double>& theQuaternion) {
+                               StQuaternion<double>& theQuaternion,
+                               bool&                 theToSwapEyes) {
     StMutexAuto aLock(myFetchLock);
     theQuaternion = myQuaternion;
+    theToSwapEyes = myToSwapEyesHW;
     if(!myDndPath.isEmpty()) {
         theNewFile = myDndPath;
         myDndPath.clear();
@@ -878,6 +881,11 @@ void StAndroidGlue::setOrientation(float theAzimuthDeg, float thePitchDeg, float
     myQuaternion = anOri;
 }
 
+void StAndroidGlue::setSwapEyes(bool theToSwapLR) {
+    StMutexAuto aLock(myFetchLock);
+    myToSwapEyesHW = theToSwapLR;
+}
+
 jexp void JNICALL Java_com_sview_StActivity_cppSetOpenPath(JNIEnv* theEnv, jobject theObj, jlong theCppPtr,
                                                            jstring theOpenPath, jstring theMimeType, jboolean theIsLaunchedFromHistory) {
     ((StAndroidGlue* )theCppPtr)->setOpenPath(theOpenPath, theMimeType, theIsLaunchedFromHistory);
@@ -906,6 +914,11 @@ jexp void JNICALL Java_com_sview_StActivity_cppSetOrientation(JNIEnv* theEnv, jo
                                                               jfloat theAzimuthDeg, jfloat thePitchDeg, jfloat theRollDeg,
                                                               jfloat theScreenRotDeg) {
     ((StAndroidGlue* )theCppPtr)->setOrientation(theAzimuthDeg, thePitchDeg, theRollDeg, theScreenRotDeg);
+}
+
+jexp void JNICALL Java_com_sview_StActivity_cppSetSwapEyes(JNIEnv* theEnv, jobject theObj, jlong theCppPtr,
+                                                           jboolean theToSwap) {
+    ((StAndroidGlue* )theCppPtr)->setSwapEyes(theToSwap == JNI_TRUE);
 }
 
 #endif // __ANDROID__

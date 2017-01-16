@@ -467,6 +467,11 @@ class StWindow {
     ST_CPPEXPORT virtual StQuaternion<double> getDeviceOrientation() const;
 
     /**
+     * Return TRUE if Left/Right eyes should be swapped by external event.
+     */
+    ST_CPPEXPORT virtual bool toSwapEyesHW() const;
+
+    /**
      * Retrieve options list.
      */
     ST_CPPEXPORT virtual void getOptions(StParamsList& theList) const;

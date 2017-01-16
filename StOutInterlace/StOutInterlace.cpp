@@ -784,6 +784,11 @@ void StOutInterlace::stglDraw() {
         isPixelReverse = !isPixelReverse;
     }
 
+    // reversed by external event
+    if(StWindow::toSwapEyesHW()) {
+        isPixelReverse = !isPixelReverse;
+    }
+
     // reversed by user?
     if(params.ToReverse->getValue()) {
         isPixelReverse = !isPixelReverse;

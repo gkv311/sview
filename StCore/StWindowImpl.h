@@ -277,6 +277,7 @@ class StWindowImpl {
     bool               myHasOrientSensor; //!< flag indicating that device has orientation sensors
     bool               myIsPoorOrient;    //!< flag indicating that available orientation sensor provides imprecise values
     bool               myToTrackOrient;   //!< track device orientation
+    bool               myToSwapEyesHW;    //!< flag to swap LR views on external event
 
     StPointD_t         myMousePt;         //!< mouse coordinates to track activity
     StTouchEvent       myTouches;         //!< current state of touch screen

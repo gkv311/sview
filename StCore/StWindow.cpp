@@ -422,3 +422,7 @@ StQuaternion<double> StWindow::getDeviceOrientation() const {
     }
     return StQuaternion<double>();
 }
+
+bool StWindow::toSwapEyesHW() const {
+    return myWin->myToSwapEyesHW;
+}

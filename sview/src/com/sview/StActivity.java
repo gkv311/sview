@@ -1,7 +1,7 @@
 /**
  * This is source code for sView
  *
- * Copyright © Kirill Gavrilov, 2014-2016
+ * Copyright © Kirill Gavrilov, 2014-2017
  */
 package com.sview;
 
@@ -113,6 +113,16 @@ public class StActivity extends NativeActivity implements SensorEventListener {
         }
         areNativeLoaded = false;
         return true;
+    }
+
+    /**
+     * Define device Left/Right eyes swap flag.
+     * Considering this flag depends on device output implementation.
+     */
+    public void setSwapEyes(boolean theToSwap) {
+        if(myCppGlue != 0) {
+            cppSetSwapEyes(myCppGlue, theToSwap);
+        }
     }
 
 //endregion
@@ -499,6 +509,12 @@ public class StActivity extends NativeActivity implements SensorEventListener {
     private native void cppSetOrientation(long theCppPtr,
                                           float theAzimuthDeg, float thePitchDeg, float theRollDeg,
                                           float theScreenRotDeg);
+
+    /**
+     * Define device Left/Right eyes swap flag.
+     */
+    private native void cppSetSwapEyes(long theCppPtr,
+                                       boolean theToSwap);
 
 //endregion
 

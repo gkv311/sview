@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2014-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2014-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -225,9 +225,11 @@ class StAndroidGlue {
      * Fetch current state:
      * @param theNewFile pop onNewIntent() open file event
      * @param theQuaternion device orientation
+     * @param theToSwapEyes swap left/right views
      */
     ST_CPPEXPORT void fetchState(StString&             theNewFile,
-                                 StQuaternion<double>& theQuaternion);
+                                 StQuaternion<double>& theQuaternion,
+                                 bool&                 theToSwapEyes);
 
     /**
      * Return device memory class.
@@ -350,6 +352,11 @@ class StAndroidGlue {
      */
     ST_LOCAL void setOrientation(float theAzimuthDeg, float thePitchDeg, float theRollDeg, float theScreenRotDeg);
 
+    /**
+     * Define device Left/Right eyes swap flag.
+     */
+    ST_LOCAL void setSwapEyes(bool theToSwapLR);
+
         private: //! @name ANativeActivity callbacks
 
     ST_LOCAL static void processInputWrapper(StAndroidGlue*       theApp,
@@ -470,6 +477,7 @@ class StAndroidGlue {
     bool                    myHasOrientSensor;   //!< flag indicating that device has orientation sensors
     bool                    myIsPoorOrient;      //!< flag indicating that available orientation sensor provides imprecise values
     bool                    myToTrackOrient;     //!< track device orientation
+    bool                    myToSwapEyesHW;      //!< flag to swap LR views on external event
 
     bool                    myIsRunning;
     bool                    myIsStateSaved;
