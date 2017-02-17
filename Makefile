@@ -40,8 +40,6 @@ BUILD_ROOT_BUNDLE = build/sView.app
 BUILD_ROOT = $(BUILD_ROOT_BUNDLE)/Contents/MacOS
 endif
 
-# folder containing OCCT resources ($CASROOT/src)
-OCCT_RES =
 FFMPEG_ROOT =
 FREETYPE_ROOT =
 OPENAL_ROOT =
@@ -103,6 +101,8 @@ CC  = $(TOOLCHAIN)gcc
 CXX = $(TOOLCHAIN)g++
 AR  = $(TOOLCHAIN)ar
 LD  = $(TOOLCHAIN)g++
+STRIP = $(TOOLCHAIN)strip
+STRIPFLAGS = --strip-unneeded
 
 LDSTRIP = -s
 LDZDEF = -z defs
@@ -120,6 +120,7 @@ endif
 #EXTRA_CXXFLAGS += -DST_DEBUG_SYSLOG
 #EXTRA_CXXFLAGS += -DST_DEBUG_THREADID
 #LDSTRIP =
+#STRIPFLAGS = --info
 
 ifdef ANDROID_NDK
 ANDROID_EABI = armeabi-v7a
@@ -262,6 +263,8 @@ install_android_libs:
 	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStImageViewer)  $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStImageViewer)
 	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStMoviePlayer)  $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStMoviePlayer)
 	ln --force --symbolic ../../../$(BUILD_ROOT)/$(sViewAndroid)    $(aDestAndroid)/libs/$(ANDROID_EABI)/$(sViewAndroid)
+	cp -f $(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.9/libs/$(ANDROID_EABI)/libgnustl_shared.so $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	$(STRIP) $(STRIPFLAGS) $(aDestAndroid)/libs/$(ANDROID_EABI)/libgnustl_shared.so
 	cp -f $(FREETYPE_ROOT)/libs/$(ANDROID_EABI)/libfreetype.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
 	cp -f $(OPENAL_ROOT)/libs/$(ANDROID_EABI)/libopenal.so          $(aDestAndroid)/libs/$(ANDROID_EABI)/
 	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavcodec-*.so       $(aDestAndroid)/libs/$(ANDROID_EABI)/
