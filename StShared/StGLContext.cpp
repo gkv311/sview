@@ -518,6 +518,20 @@ void StGLContext::stglFullInfo(StDictionary& theMap) const {
         theMap.add(StDictEntry("Free GPU memory",
                    StString() + (aDedicatedFree / 1024)  + " MiB (from " + (aDedicated / 1024) + " MiB)"));
     }
+#if defined(_WIN32)
+    else if(myFuncs->wglGetGPUInfoAMD != NULL
+         && myFuncs->wglGetContextGPUIDAMD != NULL) {
+        GLuint aVMemMiB = 0;
+        HGLRC aGlRc = wglGetCurrentContext();
+        if(aGlRc != NULL) {
+            UINT anAmdId = myFuncs->wglGetContextGPUIDAMD(aGlRc);
+            if(anAmdId != 0
+            && myFuncs->wglGetGPUInfoAMD(anAmdId, WGL_GPU_RAM_AMD, GL_UNSIGNED_INT, sizeof(aVMemMiB), &aVMemMiB) > 0) {
+                theMap.add(StDictEntry("GPU memory", StString() + aVMemMiB  + " MiB"));
+            }
+        }
+    }
+#endif
 #endif
 
 #if !defined(GL_ES_VERSION_2_0) && !defined(__APPLE__) && !defined(_WIN32)
@@ -705,6 +719,11 @@ bool StGLContext::stglInit() {
             STGL_READ_FUNC(wglDXObjectAccessNV);
             STGL_READ_FUNC(wglDXLockObjectsNV);
             STGL_READ_FUNC(wglDXUnlockObjectsNV);
+        }
+        if(stglCheckExtension(aWglExts, "WGL_AMD_gpu_association")) {
+            STGL_READ_FUNC(wglGetGPUIDsAMD);
+            STGL_READ_FUNC(wglGetGPUInfoAMD);
+            STGL_READ_FUNC(wglGetContextGPUIDAMD);
         }
     }
 #elif defined(__APPLE__)
