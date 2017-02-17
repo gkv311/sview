@@ -15,7 +15,7 @@ HAVE_MONGOOSE := -DST_HAVE_MONGOOSE
 
 TARGET_OS = linux
 
-#ANDROID_NDK = /home/kirill/develop/android-ndk-r10
+#ANDROID_NDK = $(HOME)/develop/android-ndk-r12b
 ifeq ($(OS),Windows_NT)
 TARGET_OS = wnt
 else
@@ -88,7 +88,7 @@ endif
 
 # Android libraries
 ifdef ANDROID_NDK
-TOOLCHAIN = $(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.8/prebuilt/linux-x86_64/arm-linux-androideabi/bin/
+TOOLCHAIN = $(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/arm-linux-androideabi-
 HAVE_MONGOOSE =
 LIB_PTHREAD = -lc
 LIB_GLX = -lEGL -lGLESv2
@@ -125,8 +125,8 @@ ifdef ANDROID_NDK
 ANDROID_EABI = armeabi-v7a
 LIBSUBFOLDER = libs/$(ANDROID_EABI)
 EXTRA_CFLAGS   += --sysroot=$(ANDROID_NDK)/platforms/android-15/arch-arm -march=armv7-a -mfloat-abi=softfp
-EXTRA_CXXFLAGS += --sysroot=$(ANDROID_NDK)/platforms/android-15/arch-arm -march=armv7-a -mfloat-abi=softfp -I$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.8/include -I$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.8/libs/$(ANDROID_EABI)/include -DST_HAVE_EGL -DST_NO_UPDATES_CHECK
-EXTRA_LDFLAGS  += --sysroot=$(ANDROID_NDK)/platforms/android-15/arch-arm -L$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.8/libs/$(ANDROID_EABI) -lstdc++ -lgnustl_shared
+EXTRA_CXXFLAGS += --sysroot=$(ANDROID_NDK)/platforms/android-15/arch-arm -march=armv7-a -mfloat-abi=softfp -I$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.9/include -I$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.9/libs/$(ANDROID_EABI)/include -DST_HAVE_EGL -DST_NO_UPDATES_CHECK
+EXTRA_LDFLAGS  += --sysroot=$(ANDROID_NDK)/platforms/android-15/arch-arm -L$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.9/libs/$(ANDROID_EABI) -lstdc++ -lgnustl_shared
 else
 EXTRA_CFLAGS   += -mmmx -msse
 EXTRA_CXXFLAGS += -mmmx -msse
