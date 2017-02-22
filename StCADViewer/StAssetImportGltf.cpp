@@ -93,22 +93,6 @@ namespace
      * Find member of the object in a safe way.
      */
     static const rapidjson::Document::GenericValue* findObjectMember(const rapidjson::Document::GenericValue& theObject,
-                                                                     const rapidjson::Document::GenericValue& theName) {
-        if(!theObject.IsObject()
-        || !theName.IsString()) {
-            return NULL;
-        }
-
-        rapidjson::Document::ConstMemberIterator anIter = theObject.FindMember(theName);
-        return anIter != theObject.MemberEnd()
-             ? &anIter->value
-             : NULL;
-    }
-
-    /**
-     * Find member of the object in a safe way.
-     */
-    static const rapidjson::Document::GenericValue* findObjectMember(const rapidjson::Document::GenericValue& theObject,
                                                                      const char*  theName) {
         if(!theObject.IsObject()) {
             return NULL;
@@ -229,6 +213,26 @@ class StGltfBinTexture : public StAssetTexture {
 
 };
 
+void StAssetImportGltf::GltfElementMap::init(const TCollection_AsciiString& theRootName,
+                                             const GenericValue* theRoot) {
+    myRoot = theRoot;
+    myChildren.Clear();
+    if(theRoot == NULL || !theRoot->IsObject()) {
+        return;
+    }
+
+    for(ConstMemberIterator aChildIter = theRoot->MemberBegin(); aChildIter != theRoot->MemberEnd(); ++aChildIter) {
+        if(!aChildIter->name.IsString()) {
+            continue;
+        }
+
+        const TCollection_AsciiString aKey(aChildIter->name.GetString());
+        if(!myChildren.Bind(aKey, &aChildIter->value)) {
+            ST_DEBUG_LOG("Warning! Invalid glTF syntax - key '" + aKey.ToCString() + "' is already defined in '" + theRootName.ToCString() + "'.");
+        }
+    }
+}
+
 StString StAssetImportGltf::formatSyntaxError(const StString& theFilePath,
                                               const StString& theLibDescr) {
     StString aFileName, aFolderName;
@@ -251,7 +255,7 @@ bool StAssetImportGltf::probeFormatFromExtension(const StString& theExt) {
 StAssetImportGltf::StAssetImportGltf()
 : myBinBodyOffset(0),
   myIsBinary(false) {
-    memset(myGltfRoots, 0, sizeof(myGltfRoots));
+    //
 }
 
 bool StAssetImportGltf::load(const Handle(StDocNode)& theParentNode,
@@ -319,17 +323,17 @@ bool StAssetImportGltf::gltfParseRoots() {
 
     for(ConstMemberIterator aRootIter = MemberBegin(); aRootIter != MemberEnd(); ++aRootIter) {
         for(int aRootNameIter = 0; aRootNameIter < GltfRootElement_NB; ++aRootNameIter) {
-            if(myGltfRoots[aRootNameIter] == NULL
+            if(myGltfRoots[aRootNameIter].isNull()
                  && aNames[aRootNameIter] == aRootIter->name) {
                 // we will not modify JSON document, thus it is OK to keep the pointers
-                myGltfRoots[aRootNameIter] = &aRootIter->value;
+                myGltfRoots[aRootNameIter].init(GltfRootElementNames[aRootNameIter], &aRootIter->value);
                 break;
             }
         }
     }
 
     for(int aRootNameIter = 0; aRootNameIter < GltfRootElement_NB_MANDATORY; ++aRootNameIter) {
-        if(myGltfRoots[aRootNameIter] == NULL) {
+        if(myGltfRoots[aRootNameIter].isNull()) {
             signals.onError(formatSyntaxError(myFileName, StString("Member '") + GltfRootElementNames[aRootNameIter] + "' is not found."));
             return false;
         }
@@ -338,7 +342,7 @@ bool StAssetImportGltf::gltfParseRoots() {
 }
 
 void StAssetImportGltf::gltfParseAsset() {
-    const GenericValue* anAsset = myGltfRoots[GltfRootElement_Asset];
+    const GenericValue* anAsset = myGltfRoots[GltfRootElement_Asset].getRoot();
     if(anAsset == NULL) {
         return;
     }
@@ -356,7 +360,7 @@ void StAssetImportGltf::gltfParseAsset() {
 }
 
 void StAssetImportGltf::gltfParseMaterials() {
-    const GenericValue* aMatList = myGltfRoots[GltfRootElement_Materials];
+    const GenericValue* aMatList = myGltfRoots[GltfRootElement_Materials].getRoot();
     if(aMatList == NULL) {
         return;
     }
@@ -469,7 +473,7 @@ bool StAssetImportGltf::gltfParseTechnique(StGLMaterial& theMat,
         return true;
     }
 
-    const GenericValue* aTechNode = findObjectMember(*myGltfRoots[GltfRootElement_Techniques], theTechniqueId);
+    const GenericValue* aTechNode = myGltfRoots[GltfRootElement_Techniques].findChild(theTechniqueId);
     if(aTechNode == NULL) {
         signals.onError(formatSyntaxError(myFileName, StString("Technique node '") + theTechniqueId + "' is not found."));
         return false;
@@ -510,12 +514,12 @@ bool StAssetImportGltf::gltfParseTexture(StGLMaterial& theMat,
                                          const char* theTextureId) {
     if( theTextureId == NULL
     || *theTextureId == '\0'
-    ||  myGltfRoots[GltfRootElement_Textures] == NULL
-    ||  myGltfRoots[GltfRootElement_Images]   == NULL) {
+    ||  myGltfRoots[GltfRootElement_Textures].isNull()
+    ||  myGltfRoots[GltfRootElement_Images].isNull()) {
         return false;
     }
 
-    const GenericValue* aTexNode = findObjectMember(*myGltfRoots[GltfRootElement_Textures], theTextureId);
+    const GenericValue* aTexNode = myGltfRoots[GltfRootElement_Textures].findChild(theTextureId);
     if(aTexNode == NULL) {
         signals.onError(formatSyntaxError(myFileName, StString("Texture node '") + theTextureId + "' is not found."));
         return false;
@@ -533,7 +537,7 @@ bool StAssetImportGltf::gltfParseTexture(StGLMaterial& theMat,
         return false;
     }
 
-    const GenericValue* anImgNode = findObjectMember(*myGltfRoots[GltfRootElement_Images], aSrcVal->GetString());
+    const GenericValue* anImgNode = myGltfRoots[GltfRootElement_Images].findChild(aSrcVal->GetString());
     if(anImgNode == NULL) {
         signals.onError(formatSyntaxError(myFileName, StString("Invalid texture node '") + theTextureId
                                                     + "' points to non-existing image '" + aSrcVal->GetString() + "'."));
@@ -559,7 +563,7 @@ bool StAssetImportGltf::gltfParseTexture(StGLMaterial& theMat,
                     return false;
                 }
 
-                const GenericValue* aBufferView = findObjectMember(*myGltfRoots[GltfRootElement_BufferViews], *aBufferViewName);
+                const GenericValue* aBufferView = myGltfRoots[GltfRootElement_BufferViews].findChild(*aBufferViewName);
                 if(aBufferView == NULL || !aBufferView->IsObject()) {
                   signals.onError(formatSyntaxError(myFileName, StString("Invalid texture node '") + theTextureId
                                                               + "' points to invalid buffer view '" + aBufferViewName->GetString() + "'."));
@@ -630,7 +634,7 @@ bool StAssetImportGltf::gltfParseTexture(StGLMaterial& theMat,
 
 bool StAssetImportGltf::gltfParseScene(const Handle(StDocNode)& theParentNode) {
     // search default scene
-    const GenericValue* aDefScene = findObjectMember(*myGltfRoots[GltfRootElement_Scenes], *myGltfRoots[GltfRootElement_Scene]);
+    const GenericValue* aDefScene = myGltfRoots[GltfRootElement_Scenes].findChild(*myGltfRoots[GltfRootElement_Scene].getRoot());
     if(aDefScene == NULL) {
         signals.onError(formatSyntaxError(myFileName, "Default scene is not found."));
         return false;
@@ -639,7 +643,7 @@ bool StAssetImportGltf::gltfParseScene(const Handle(StDocNode)& theParentNode) {
     const GenericValue* aSceneNodes = findObjectMember(*aDefScene, "nodes");
     if(aSceneNodes == NULL || !aSceneNodes->IsArray()) {
         signals.onError(formatSyntaxError(myFileName, StString() + "Empty scene '"
-                                                    + myGltfRoots[GltfRootElement_Scene]->GetString() + "'."));
+                                                    + myGltfRoots[GltfRootElement_Scene].getRoot()->GetString() + "'."));
         return false;
     }
 
@@ -655,7 +659,7 @@ bool StAssetImportGltf::gltfParseSceneNodes(const Handle(StDocNode)& theParentNo
 
     for(rapidjson::Value::ConstValueIterator aSceneNodeIter = theSceneNodes.Begin();
         aSceneNodeIter != theSceneNodes.End(); ++aSceneNodeIter) {
-        const GenericValue* aSceneNode = findObjectMember(*myGltfRoots[GltfRootElement_Nodes], *aSceneNodeIter);
+        const GenericValue* aSceneNode = myGltfRoots[GltfRootElement_Nodes].findChild(*aSceneNodeIter);
         if(aSceneNode == NULL) {
             signals.onError(formatSyntaxError(myFileName, "Scene refers to non-existing node."));
             return false;
@@ -810,7 +814,7 @@ bool StAssetImportGltf::gltfParseSceneNode(const Handle(StDocNode)& theParentNod
 
     if(aMeshes != NULL && aMeshes->IsArray()) {
         for(rapidjson::Value::ConstValueIterator aMeshIter = aMeshes->Begin(); aMeshIter != aMeshes->End(); ++aMeshIter) {
-            const GenericValue* aMesh = findObjectMember(*myGltfRoots[GltfRootElement_Meshes], *aMeshIter);
+            const GenericValue* aMesh = myGltfRoots[GltfRootElement_Meshes].findChild(*aMeshIter);
             if(aMesh == NULL) {
                 pushSceneNodeError(theSceneNodeName, "refers to non-existing mesh");
                 return false;
@@ -906,7 +910,7 @@ bool StAssetImportGltf::gltfParsePrimArray(const Handle(StDocMeshNode)& theMeshN
             continue;
         }
 
-        const GenericValue* anAccessor = findObjectMember(*myGltfRoots[GltfRootElement_Accessors], anAttribIter->value);
+        const GenericValue* anAccessor = myGltfRoots[GltfRootElement_Accessors].findChild(anAttribIter->value);
         if(anAccessor == NULL || !anAccessor->IsObject()) {
             signals.onError(formatSyntaxError(myFileName, StString("Primitive array attribute accessor key '") + anAttribIter->value.GetString()
                                                                  + "' points to non-existing object."));
@@ -930,7 +934,7 @@ bool StAssetImportGltf::gltfParsePrimArray(const Handle(StDocMeshNode)& theMeshN
             return false;
         }
 
-        const GenericValue* anAccessor = findObjectMember (*myGltfRoots[GltfRootElement_Accessors], *anIndices);
+        const GenericValue* anAccessor = myGltfRoots[GltfRootElement_Accessors].findChild(*anIndices);
         if(anAccessor == NULL || !anAccessor->IsObject()) {
             signals.onError(formatSyntaxError(myFileName, StString("Primitive array indices accessor key '") + anIndices->GetString()
                                                                 + "' points to non-existing object."));
@@ -1013,7 +1017,7 @@ bool StAssetImportGltf::gltfParseAccessor(const Handle(StPrimArray)& thePrimArra
 
     //const GenericValue* aMax = findObjectMember(theAccessor, "max");
     //const GenericValue* aMin = findObjectMember(theAccessor, "min");
-    const GenericValue* aBufferView = findObjectMember(*myGltfRoots[GltfRootElement_BufferViews], *aBufferViewName);
+    const GenericValue* aBufferView = myGltfRoots[GltfRootElement_BufferViews].findChild(*aBufferViewName);
     if(aBufferView == NULL || !aBufferView->IsObject()) {
         signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName + "' refers to non-existing bufferView."));
         return false;
@@ -1062,7 +1066,7 @@ bool StAssetImportGltf::gltfParseBufferView(const Handle(StPrimArray)& thePrimAr
         return false;
     }
 
-    const GenericValue* aBuffer = findObjectMember (*myGltfRoots[GltfRootElement_Buffers], *aBufferName);
+    const GenericValue* aBuffer = myGltfRoots[GltfRootElement_Buffers].findChild(*aBufferName);
     if(aBuffer == NULL || !aBuffer->IsObject()) {
         signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + theName + "' refers to non-existing buffer."));
         return false;

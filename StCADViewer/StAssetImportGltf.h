@@ -427,6 +427,67 @@ protected:
         signals.onError(formatSyntaxError(myFileName, StString("Scene node '") + theSceneNode + "' " + theError + "."));
     }
 
+        protected:
+
+    /**
+     * Auxiliary structure for fast look-up of document sub-nodes of specified node.
+     */
+    class GltfElementMap {
+
+            public:
+
+        /**
+          * Empty constructor.
+          */
+        GltfElementMap() : myRoot (NULL) {}
+
+        /**
+          * Return TRUE if this element is NULL.
+          */
+        bool isNull() const { return myRoot == NULL; }
+
+        /**
+          * Access this node.
+          */
+        const GenericValue* getRoot() const { return myRoot; }
+
+        /**
+          * Find the child node with specified key.
+          */
+        const GenericValue* findChild(const TCollection_AsciiString& theKey) {
+            const GenericValue* aNode = NULL;
+            return myChildren.Find(theKey, aNode)
+                 ? aNode
+                 : NULL;
+        }
+
+        /**
+          * Find the child node with specified key.
+          */
+        const GenericValue* findChild(const rapidjson::Document::GenericValue& theKey) {
+            if(!theKey.IsString()) {
+                return NULL;
+            }
+
+            const GenericValue* aNode = NULL;
+            return myChildren.Find(theKey.GetString(), aNode)
+                  ? aNode
+                  : NULL;
+        }
+
+        /**
+          * Initialize the element.
+          */
+        void init(const TCollection_AsciiString& theRootName,
+                  const GenericValue* theRoot);
+
+            private:
+
+        NCollection_DataMap<TCollection_AsciiString, const GenericValue*, TCollection_AsciiString> myChildren;
+        const GenericValue* myRoot;
+
+    };
+
         public:
 
     struct {
@@ -446,7 +507,7 @@ protected:
     int64_t  myBinBodyOffset;  //!< offset to binary body
     bool     myIsBinary;       //!< binary document
 
-    const GenericValue* myGltfRoots[GltfRootElement_NB]; //!< glTF format root elements
+    GltfElementMap myGltfRoots[GltfRootElement_NB]; //!< glTF format root elements
     StString myFileName;
     StString myFolder;
 
