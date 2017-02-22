@@ -115,6 +115,7 @@ enum GltfAccessorCompType {
     GltfAccessorCompType_UInt8   = 5121, //!< GL_UNSIGNED_BYTE
     GltfAccessorCompType_Int16   = 5122, //!< GL_SHORT
     GltfAccessorCompType_UInt16  = 5123, //!< GL_UNSIGNED_SHORT
+    GltfAccessorCompType_UInt32  = 5125, //!< GL_UNSIGNED_INT
     GltfAccessorCompType_Float32 = 5126, //!< GL_FLOAT
 };
 
@@ -131,9 +132,9 @@ enum GltfBufferViewTarget {
  * Accessor structure.
  */
 struct GltfAccessor {
-    int                  ByteOffset;
-    int                  ByteStride;
-    int                  Count;
+    int64_t              ByteOffset;
+    int32_t              ByteStride; // [0, 255]
+    int64_t              Count;
     GltfAccessorLayout   Type;
     GltfAccessorCompType ComponentType;
 
@@ -144,8 +145,8 @@ struct GltfAccessor {
  * BufferView structure.
  */
 struct GltfBufferView {
-    int ByteOffset;
-    int ByteLength;
+    int64_t ByteOffset;
+    int64_t ByteLength;
     GltfBufferViewTarget Target;
 
     GltfBufferView() : ByteOffset(0), ByteLength(0), Target(GltfBufferViewTarget_UNKNOWN) {}

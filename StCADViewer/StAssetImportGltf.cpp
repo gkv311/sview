@@ -4,6 +4,10 @@
  * Copyright © Kirill Gavrilov, 2016
  */
 
+#ifdef _WIN32
+    #define NOMINMAX
+#endif
+
 #include "StAssetImportGltf.h"
 
 #include "StImageOcct.h"
@@ -570,18 +574,19 @@ bool StAssetImportGltf::gltfParseTexture(StGLMaterial& theMat,
                     signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + aBufferViewName->GetString()
                                                                       + "' does not define binary_glTF buffer."));
                     return false;
-                } else if(aByteOffset == NULL || !aByteOffset->IsInt()) {
+                } else if(aByteOffset == NULL || !aByteOffset->IsNumber()) {
                     signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + aBufferViewName->GetString()
                                                                       + "' does not define byteOffset."));
                     return false;
                 }
 
                 GltfBufferView aBuffView;
-                aBuffView.ByteOffset = aByteOffset->GetInt();
-                aBuffView.ByteLength = aByteLength != NULL && aByteLength->IsInt()
-                                     ? aByteLength->GetInt()
+                aBuffView.ByteOffset = (int64_t )aByteOffset->GetDouble();
+                aBuffView.ByteLength = aByteLength != NULL && aByteLength->IsNumber()
+                                     ? (int64_t )aByteLength->GetDouble()
                                      : 0;
-                if(aBuffView.ByteLength < 0) {
+                if(aBuffView.ByteLength < 0
+                || aBuffView.ByteLength > std::numeric_limits<int>::max()) {
                     signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + aBufferViewName->GetString()
                                                                       + "' defines invalid byteLength."));
                     return false;
@@ -596,7 +601,7 @@ bool StAssetImportGltf::gltfParseTexture(StGLMaterial& theMat,
                 if(aMimeTypeVal != NULL && aMimeTypeVal->IsString()) {
                     aMime = aMimeTypeVal->GetString();
                 }
-                theMat.Texture = new StGltfBinTexture(myFileName, aMime, anOffset, aBuffView.ByteLength);
+                theMat.Texture = new StGltfBinTexture(myFileName, aMime, anOffset, (int )aBuffView.ByteLength);
                 return true;
             }
         }
@@ -964,7 +969,7 @@ bool StAssetImportGltf::gltfParseAccessor(const Handle(StPrimArray)& thePrimArra
         signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName + "' does not define bufferView."));
         return false;
     }
-    if(aByteOffset == NULL || !aByteOffset->IsInt()) {
+    if(aByteOffset == NULL || !aByteOffset->IsNumber()) {
         signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName + "' does not define byteOffset."));
         return false;
     }
@@ -977,21 +982,22 @@ bool StAssetImportGltf::gltfParseAccessor(const Handle(StPrimArray)& thePrimArra
     && aStruct.ComponentType != GltfAccessorCompType_UInt8
     && aStruct.ComponentType != GltfAccessorCompType_Int16
     && aStruct.ComponentType != GltfAccessorCompType_UInt16
+    && aStruct.ComponentType != GltfAccessorCompType_UInt32
     && aStruct.ComponentType != GltfAccessorCompType_Float32) {
         signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName + "' defines invalid componentType value."));
         return false;
     }
 
-    if(aCount == NULL || !aCount->IsInt()) {
+    if(aCount == NULL || !aCount->IsNumber()) {
         signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName + "' does not define count."));
         return false;
     }
 
-    aStruct.ByteOffset = aByteOffset->GetInt();
+    aStruct.ByteOffset = (int64_t )aByteOffset->GetDouble();
     aStruct.ByteStride = aByteStride != NULL && aByteStride->IsInt()
                        ? aByteStride->GetInt()
                        : 0;
-    aStruct.Count = aCount->GetInt();
+    aStruct.Count = (int64_t )aCount->GetDouble();
 
     if(aStruct.ByteOffset < 0) {
         signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName + "' defines invalid byteOffset."));
@@ -1030,14 +1036,14 @@ bool StAssetImportGltf::gltfParseBufferView(const Handle(StPrimArray)& thePrimAr
     if(aBufferName == NULL || !aBufferName->IsString()) {
         signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + theName + "' does not define buffer."));
         return false;
-    } else if(aByteOffset == NULL || !aByteOffset->IsInt()) {
+    } else if(aByteOffset == NULL || !aByteOffset->IsNumber()) {
         signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + theName + "' does not define byteOffset."));
         return false;
     }
 
-    aBuffView.ByteOffset = aByteOffset->GetInt();
-    aBuffView.ByteLength = aByteLength != NULL && aByteLength->IsInt()
-                         ? aByteLength->GetInt()
+    aBuffView.ByteOffset = (int64_t )aByteOffset->GetDouble();
+    aBuffView.ByteLength = aByteLength != NULL && aByteLength->IsNumber()
+                         ? (int64_t )aByteLength->GetDouble()
                          : 0;
     if(aTarget != NULL && aTarget->IsInt()) {
         aBuffView.Target = (GltfBufferViewTarget )aTarget->GetInt();
@@ -1147,58 +1153,102 @@ bool StAssetImportGltf::gltfReadBuffer(const Handle(StPrimArray)& thePrimArray,
 
     switch(theType) {
         case GltfArrayType_Indices: {
-            if(theAccessor.ComponentType != GltfAccessorCompType_UInt16
-            || theAccessor.Type != GltfAccessorLayout_Scalar) {
+            if(theAccessor.Type != GltfAccessorLayout_Scalar
+            || theAccessor.Count <= 0) {
+                break;
+            } else if((theAccessor.Count / 3) > std::numeric_limits<int>::max()) {
+                signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName + "' defines too big array."));
+                return false;
+            }
+
+            const size_t aNbTris = size_t(theAccessor.Count / 3);
+            if(theAccessor.ComponentType == GltfAccessorCompType_UInt16) {
+                StVec3<uint16_t> aVec3_16u;
+                const int aNbSkipBytes = theAccessor.ByteStride != 0
+                                       ? (theAccessor.ByteStride - sizeof(uint16_t))
+                                       : 0;
+                thePrimArray->Indices.resize(aNbTris * 3);
+                for(size_t aTriIter = 0; aTriIter < aNbTris; ++aTriIter) {
+                    theStream.read((char* )&aVec3_16u[0], sizeof(uint16_t));
+                    if(aNbSkipBytes != 0) {
+                        theStream.seekg(aNbSkipBytes, std::ios_base::cur);
+                    }
+
+                    theStream.read((char* )&aVec3_16u[1], sizeof(uint16_t));
+                    if(aNbSkipBytes != 0) {
+                        theStream.seekg(aNbSkipBytes, std::ios_base::cur);
+                    }
+
+                    theStream.read((char* )&aVec3_16u[2], sizeof(uint16_t));
+                    if(aNbSkipBytes != 0) {
+                        theStream.seekg(aNbSkipBytes, std::ios_base::cur);
+                    }
+
+                    if((size_t )aVec3_16u[0] >= thePrimArray->Positions.size()
+                    || (size_t )aVec3_16u[1] >= thePrimArray->Positions.size()
+                    || (size_t )aVec3_16u[2] >= thePrimArray->Positions.size()) {
+                        signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName + "' refers to invalid indices."));
+                        return false;
+                    }
+
+                    thePrimArray->Indices[aTriIter * 3 + 0] = aVec3_16u[0];
+                    thePrimArray->Indices[aTriIter * 3 + 1] = aVec3_16u[1];
+                    thePrimArray->Indices[aTriIter * 3 + 2] = aVec3_16u[2];
+                }
+            } else if(theAccessor.ComponentType == GltfAccessorCompType_UInt32) {
+                StVec3<uint32_t> aVec3_32u;
+                const int aNbSkipBytes = theAccessor.ByteStride != 0
+                                       ? (theAccessor.ByteStride - sizeof(uint32_t))
+                                       : 0;
+                thePrimArray->Indices.resize(aNbTris * 3);
+                for(size_t aTriIter = 0; aTriIter < aNbTris; ++aTriIter) {
+                    theStream.read((char* )&aVec3_32u[0], sizeof(uint32_t));
+                    if(aNbSkipBytes != 0) {
+                        theStream.seekg(aNbSkipBytes, std::ios_base::cur);
+                    }
+
+                    theStream.read((char* )&aVec3_32u[1], sizeof(uint32_t));
+                    if(aNbSkipBytes != 0) {
+                        theStream.seekg(aNbSkipBytes, std::ios_base::cur);
+                    }
+
+                    theStream.read((char* )&aVec3_32u[2], sizeof(uint32_t));
+                    if(aNbSkipBytes != 0) {
+                        theStream.seekg(aNbSkipBytes, std::ios_base::cur);
+                    }
+
+                    if((size_t )aVec3_32u[0] >= thePrimArray->Positions.size()
+                    || (size_t )aVec3_32u[1] >= thePrimArray->Positions.size()
+                    || (size_t )aVec3_32u[2] >= thePrimArray->Positions.size()) {
+                        signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName + "' refers to invalid indices."));
+                        return false;
+                    }
+
+                    thePrimArray->Indices[aTriIter * 3 + 0] = aVec3_32u[0];
+                    thePrimArray->Indices[aTriIter * 3 + 1] = aVec3_32u[1];
+                    thePrimArray->Indices[aTriIter * 3 + 2] = aVec3_32u[2];
+                }
+            } else {
                 break;
             }
-
-            StVec3<uint16_t> aVec3_16u;
-            const int aNbSkipBytes = theAccessor.ByteStride != 0
-                                   ? (theAccessor.ByteStride - sizeof(uint16_t))
-                                   : 0;
-            thePrimArray->Indices.resize(theAccessor.Count);
-            for(int anIndexIter = 0; anIndexIter < theAccessor.Count; anIndexIter += 3) {
-                theStream.read((char* )&aVec3_16u[0], sizeof(uint16_t));
-                if(aNbSkipBytes != 0) {
-                    theStream.seekg(aNbSkipBytes, std::ios_base::cur);
-                }
-
-                theStream.read((char* )&aVec3_16u[1], sizeof(uint16_t));
-                if(aNbSkipBytes != 0) {
-                    theStream.seekg(aNbSkipBytes, std::ios_base::cur);
-                }
-
-                theStream.read((char* )&aVec3_16u[2], sizeof(uint16_t));
-                if(aNbSkipBytes != 0) {
-                    theStream.seekg(aNbSkipBytes, std::ios_base::cur);
-                }
-
-                if(aVec3_16u[0] < 0 || (size_t )aVec3_16u[0] >= thePrimArray->Positions.size()
-                || aVec3_16u[1] < 0 || (size_t )aVec3_16u[1] >= thePrimArray->Positions.size()
-                || aVec3_16u[2] < 0 || (size_t )aVec3_16u[2] >= thePrimArray->Positions.size()) {
-                    signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName + "' refers to invalid indices."));
-                    return false;
-                }
-
-                thePrimArray->Indices[anIndexIter + 0] = aVec3_16u[0];
-                thePrimArray->Indices[anIndexIter + 1] = aVec3_16u[1];
-                thePrimArray->Indices[anIndexIter + 2] = aVec3_16u[2];
-            }
-
             break;
         }
         case GltfArrayType_Position: {
             if(theAccessor.ComponentType != GltfAccessorCompType_Float32
             || theAccessor.Type != GltfAccessorLayout_Vec3) {
                 break;
+            } else if(theAccessor.Count > std::numeric_limits<int>::max()) {
+                signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName + "' defines too big array."));
+                return false;
             }
 
+            const size_t aNbNodes = size_t(theAccessor.Count);
             StGLVec4 aVec4(0.0f, 0.0f, 0.0f, 1.0f);
             const int aNbSkipBytes = theAccessor.ByteStride != 0
                                    ? (theAccessor.ByteStride - sizeof(StGLVec3))
                                    : 0;
-            thePrimArray->Positions.resize(theAccessor.Count);
-            for(int aVertIter = 0; aVertIter < theAccessor.Count; ++aVertIter) {
+            thePrimArray->Positions.resize(aNbNodes);
+            for(size_t aVertIter = 0; aVertIter < aNbNodes; ++aVertIter) {
                 theStream.read((char* )aVec4.getData(), sizeof(StGLVec3));
                 thePrimArray->Positions[aVertIter] = aVec4.xyz();
                 if(aNbSkipBytes != 0) {
@@ -1212,14 +1262,18 @@ bool StAssetImportGltf::gltfReadBuffer(const Handle(StPrimArray)& thePrimArray,
             if(theAccessor.ComponentType != GltfAccessorCompType_Float32
             || theAccessor.Type != GltfAccessorLayout_Vec3) {
                 break;
+            } else if(theAccessor.Count > std::numeric_limits<int>::max()) {
+                signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName + "' defines too big array."));
+                return false;
             }
 
+            const size_t aNbNodes = size_t(theAccessor.Count);
             StGLVec4 aVec4(0.0f, 0.0f, 0.0f, 0.0f);
             const int aNbSkipBytes = theAccessor.ByteStride != 0
                                    ? (theAccessor.ByteStride - sizeof(StGLVec3))
                                    : 0;
-            thePrimArray->Normals.resize(theAccessor.Count);
-            for(int aVertIter = 0; aVertIter < theAccessor.Count; ++aVertIter) {
+            thePrimArray->Normals.resize(aNbNodes);
+            for(size_t aVertIter = 0; aVertIter < aNbNodes; ++aVertIter) {
                 theStream.read((char* )aVec4.getData(), sizeof(StGLVec3));
                 thePrimArray->Normals[aVertIter] = aVec4.xyz();
                 if(aNbSkipBytes != 0) {
@@ -1233,14 +1287,18 @@ bool StAssetImportGltf::gltfReadBuffer(const Handle(StPrimArray)& thePrimArray,
             if(theAccessor.ComponentType != GltfAccessorCompType_Float32
             || theAccessor.Type != GltfAccessorLayout_Vec2) {
                 break;
+            } else if(theAccessor.Count > std::numeric_limits<int>::max()) {
+                signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName + "' defines too big array."));
+                return false;
             }
 
+            const size_t aNbNodes = size_t(theAccessor.Count);
             StGLVec2 aVec2(0.0f, 0.0f);
             const int aNbSkipBytes = theAccessor.ByteStride != 0
                                    ? (theAccessor.ByteStride - sizeof(StGLVec2))
                                    : 0;
-            thePrimArray->TexCoords0.resize(theAccessor.Count);
-            for(int aVertIter = 0; aVertIter < theAccessor.Count; ++aVertIter) {
+            thePrimArray->TexCoords0.resize(aNbNodes);
+            for(size_t aVertIter = 0; aVertIter < aNbNodes; ++aVertIter) {
                 theStream.read((char* )aVec2.getData(), sizeof(StGLVec2));
 
                 thePrimArray->TexCoords0[aVertIter] = aVec2;
