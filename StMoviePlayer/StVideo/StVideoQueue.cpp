@@ -173,6 +173,8 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   myAvDiscard(AVDISCARD_DEFAULT),
   myFramePts(0.0),
   myPixelRatio(1.0f),
+  myHParallax(0),
+  myRotateDeg(0),
   //
   myVideoClock(0.0),
   //
@@ -217,6 +219,8 @@ namespace {
         StFormat    stID;
         const char* name;
     };
+
+    static const StCString THE_ROTATE_KEY       = stCString("rotate");
 
     static const StCString THE_SRC_MODE_KEY     = stCString("STEREO_MODE");
     static const StCString THE_SRC_MODE_KEY_WMV = stCString("StereoscopicLayout");
@@ -407,6 +411,22 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
         StCLocale aCLocale;
         myHParallax = (int )stStringToLong(aValue.toCString(), 10, aCLocale);
     }
+
+    // we can read information from Display Matrix in side data or from metadata key
+    myRotateDeg = 0;
+#if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
+    if(const uint8_t* aDispMatrix = av_stream_get_side_data(myStream, AV_PKT_DATA_DISPLAYMATRIX, NULL)) {
+        const double aRotDeg = -av_display_rotation_get((const int32_t* )aDispMatrix);
+        if(!st::isNaN(aRotDeg)) {
+            myRotateDeg = -int(aRotDeg - 360 * std::floor(aRotDeg / 360 + 0.9 / 360));
+        }
+    }
+#else
+    if(stAV::meta::readTag(myStream, THE_ROTATE_KEY, aValue)) {
+        StCLocale aCLocale;
+        myRotateDeg = (int )-stStringToLong(aValue.toCString(), 10, aCLocale);
+    }
+#endif
 
     // stereoscopic mode tags
     myStFormatInStream = is720in1080 ? StFormat_Tiled4x : StFormat_AUTO;
@@ -862,12 +882,21 @@ void StVideoQueue::decodeLoop() {
 
         // we currently allow to override source format stored in metadata
     #ifdef ST_AV_NEWSTEREO
-        AVFrameSideData* aSideData = av_frame_get_side_data(myFrame.Frame, AV_FRAME_DATA_STEREO3D);
-        if(aSideData != NULL) {
-            AVStereo3D* aStereo = (AVStereo3D* )aSideData->data;
+        if(AVFrameSideData* aSideDataS3d = av_frame_get_side_data(myFrame.Frame, AV_FRAME_DATA_STEREO3D)) {
+            AVStereo3D* aStereo = (AVStereo3D* )aSideDataS3d->data;
             myStFormatInStream = stAV::stereo3dAvToSt(aStereo->type);
             if(aStereo->flags & AV_STEREO3D_FLAG_INVERT) {
                 myStFormatInStream = st::formatReversed(myStFormatInStream);
+            }
+        }
+    #endif
+    #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
+        if(const AVFrameSideData* aSideDataRot = av_frame_get_side_data(myFrame.Frame, AV_FRAME_DATA_DISPLAYMATRIX)) {
+            if(aSideDataRot->size >= 9 * sizeof(int32_t)) {
+                const double aRotDeg = -av_display_rotation_get((const int32_t* )aSideDataRot->data);
+                if(!st::isNaN(aRotDeg)) {
+                    myRotateDeg = -int(aRotDeg - 360 * std::floor(aRotDeg / 360 + 0.9 / 360));
+                }
             }
         }
     #endif
@@ -907,6 +936,7 @@ void StVideoQueue::decodeLoop() {
                 StHandle<StStereoParams> aParams = aPacket->getSource();
                 if(!aParams.isNull()) {
                     aParams->setSeparationNeutral(myHParallax);
+                    aParams->setZRotateZero((float )myRotateDeg);
                 }
                 isStarted = false;
             }
@@ -951,6 +981,7 @@ void StVideoQueue::decodeLoop() {
                 StHandle<StStereoParams> aParams = aPacket->getSource();
                 if(!aParams.isNull()) {
                     aParams->setSeparationNeutral(myHParallax);
+                    aParams->setZRotateZero((float )myRotateDeg);
                 }
                 isStarted = false;
             }

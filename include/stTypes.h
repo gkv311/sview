@@ -63,6 +63,7 @@
 #endif
 
 #include <cmath>       // fabs
+#include <cfloat>
 #include <cstddef>     // size_t, NULL
 #include <cstdlib>
 #include <cstring>     // for memcpy
@@ -540,6 +541,19 @@ inline bool isEvenNumber(const int number) {
 
 inline int getEvenNumber(const int number) {
     return isOddNumber(number) ? (number + 1) : number;
+}
+
+namespace st {
+    /**
+     * Return true for NaN.
+     */
+    inline bool isNaN(double theValue) {
+    #if defined(_MSC_VER)
+        return ::_isnan(theValue) != 0;
+    #else
+        return std::isnan(theValue);
+    #endif
+    }
 }
 
 #include <StTemplates/StTemplates.h> // include commonly-used templates

@@ -32,6 +32,10 @@ extern "C" {
     #include <libavutil/stereo3d.h>
 #endif
 
+#if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
+    #include <libavutil/display.h>
+#endif
+
 #ifdef _MSC_VER
     #pragma warning(default : 4244)
 #endif

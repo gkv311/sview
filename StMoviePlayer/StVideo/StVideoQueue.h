@@ -378,6 +378,7 @@ private:
     double                     myFramePts;
     GLfloat                    myPixelRatio;      //!< pixel aspect ratio
     int                        myHParallax;       //!< horizontal parallax in pixels stored in metadata
+    int                        myRotateDeg;       //!< rotate angle in degrees
 
     double                     myVideoClock;      //!< synchronization variable
 
