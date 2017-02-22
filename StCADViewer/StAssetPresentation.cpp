@@ -123,6 +123,7 @@ void StAssetPresentation::Compute (const Handle(PrsMgr_PresentationManager3d)& t
                 aMat.SetReflectionModeOn(Graphic3d_TOR_EMISSION);
             }
             aMat.SetDiffuseColor (Quantity_Color(anStMat->DiffuseColor.r(),  anStMat->DiffuseColor.g(),  anStMat->DiffuseColor.b(),  Quantity_TOC_RGB));
+            aMat.SetTransparency (float(1.0 - anStMat->DiffuseColor.a()));
             aMat.SetAmbientColor (Quantity_Color(anStMat->AmbientColor.r(),  anStMat->AmbientColor.g(),  anStMat->AmbientColor.b(),  Quantity_TOC_RGB));
             aMat.SetSpecularColor(Quantity_Color(anStMat->SpecularColor.r(), anStMat->SpecularColor.g(), anStMat->SpecularColor.b(), Quantity_TOC_RGB));
             aMat.SetEmissiveColor(Quantity_Color(anStMat->EmissiveColor.r(), anStMat->EmissiveColor.g(), anStMat->EmissiveColor.b(), Quantity_TOC_RGB));
