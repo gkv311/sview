@@ -332,7 +332,7 @@ bool StCADViewer::initOcctViewer() {
     myViewer->SetLightOn (aLightAmb);
 
     myAisContext = new AIS_InteractiveContext(myViewer);
-    myAisContext->SetDisplayMode(0);
+    myAisContext->SetDisplayMode(0, false);
     myAisContext->SetAutoActivateSelection(Standard_False);
     const Handle(Prs3d_Drawer)& aDrawer = myAisContext->DefaultDrawer();
     aDrawer->SetAutoTriangulation (Standard_False);
