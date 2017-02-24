@@ -1,7 +1,7 @@
 /**
  * This source is a part of sView program.
  *
- * Copyright © Kirill Gavrilov, 2016
+ * Copyright © Kirill Gavrilov, 2016-2017
  */
 
 #ifndef __StAssetImportGltf_h_
@@ -233,16 +233,22 @@ class StAssetImportGltf : public rapidjson::Document {
                                   const GenericValue& theMatNode);
 
     /**
+     * Parse pbrMetallicRoughness material.
+     */
+    bool gltfParsePbrMaterial(StGLMaterial& theMat,
+                              const GenericValue& theMatNode);
+
+    /**
      * Parse material technique.
      */
     bool gltfParseTechnique(StGLMaterial& theMat,
-                            const char* theTechniqueId);
+                            const GenericValue* theTechniqueId);
 
     /**
      * Parse texture definition.
      */
-    bool gltfParseTexture (StGLMaterial& theMat,
-                           const char* theTextureId);
+    bool gltfParseTexture(StGLMaterial& theMat,
+                          const GenericValue* theTextureId);
 
         protected:
 
@@ -256,14 +262,14 @@ class StAssetImportGltf : public rapidjson::Document {
      * Parse scene node recursively.
      */
     bool gltfParseSceneNode(const Handle(StDocNode)& theParentNode,
-                            const char* theSceneNodeName,
+                            const TCollection_AsciiString& theSceneNodeName,
                             const GenericValue& theSceneNode);
 
     /**
      * Parse mesh element.
      */
     bool gltfParseMesh(const Handle(StDocNode)& theParentNode,
-                       const char* theMeshName,
+                       const TCollection_AsciiString& theMeshName,
                        const GenericValue& theMesh);
 
     /**
@@ -292,7 +298,7 @@ class StAssetImportGltf : public rapidjson::Document {
      * Parse primitive array.
      */
     bool gltfParsePrimArray(const Handle(StDocMeshNode)& theMeshNode,
-                            const char* theMeshName,
+                            const TCollection_AsciiString& theMeshName,
                             const GenericValue& thePrimArray);
 
     /**
@@ -321,7 +327,7 @@ class StAssetImportGltf : public rapidjson::Document {
      * Parse accessor.
      */
     bool gltfParseAccessor(const Handle(StPrimArray)& thePrimArray,
-                           const char*             theName,
+                           const TCollection_AsciiString& theName,
                            const GenericValue&     theAccessor,
                            const GltfArrayType     theType,
                            const GltfPrimitiveMode theMode);
@@ -330,7 +336,7 @@ class StAssetImportGltf : public rapidjson::Document {
      * Parse buffer view.
      */
     bool gltfParseBufferView(const Handle(StPrimArray)& thePrimArray,
-                             const char*             theName,
+                             const TCollection_AsciiString& theName,
                              const GenericValue&     theBufferView,
                              const GltfAccessor&     theAccessor,
                              const GltfArrayType     theType,
@@ -340,7 +346,7 @@ class StAssetImportGltf : public rapidjson::Document {
      * Parse buffer.
      */
     bool gltfParseBuffer(const Handle(StPrimArray)& thePrimArray,
-                         const char*             theName,
+                         const TCollection_AsciiString& theName,
                          const GenericValue&     theBuffer,
                          const GltfAccessor&     theAccessor,
                          const GltfBufferView&   theView,
@@ -351,7 +357,7 @@ class StAssetImportGltf : public rapidjson::Document {
      * Read buffer.
      */
     bool gltfReadBuffer(const Handle(StPrimArray)& thePrimArray,
-                        const char*             theName,
+                        const TCollection_AsciiString& theName,
                         const GltfAccessor&     theAccessor,
                         std::istream&           theStream,
                         const GltfArrayType     theType,
@@ -386,6 +392,34 @@ protected:
             && theVec.g() >= 0.0f && theVec.g() <= 1.0f
             && theVec.b() >= 0.0f && theVec.b() <= 1.0f
             && theVec.a() >= 0.0f && theVec.a() <= 1.0f;
+    }
+
+    /**
+     * Read vec3 from specified item.
+     */
+    static bool gltfReadVec3(StGLVec3& theVec3,
+                             const GenericValue* theVal) {
+        if(theVal == NULL || !theVal->IsArray() || theVal->Size() != 3) {
+            return false;
+        }
+
+        for(int aCompIter = 0; aCompIter < 3; ++aCompIter) {
+            const GenericValue& aGenVal = (*theVal)[aCompIter];
+            if(!aGenVal.IsNumber()) {
+                return false;
+            }
+            theVec3[aCompIter] = aGenVal.GetFloat();
+        }
+        return true;
+    }
+
+    /**
+     * Validate color
+     */
+    static bool validateColor3(const StGLVec3& theVec) {
+        return theVec.r() >= 0.0f && theVec.r() <= 1.0f
+            && theVec.g() >= 0.0f && theVec.g() <= 1.0f
+            && theVec.b() >= 0.0f && theVec.b() <= 1.0f;
     }
 
         protected:
@@ -427,6 +461,18 @@ protected:
         signals.onError(formatSyntaxError(myFileName, StString("Scene node '") + theSceneNode + "' " + theError + "."));
     }
 
+    /**
+     * Return the string representation of the key in the document - either string key (glTF 1.0) or integer index within array (glTF 2.0).
+     */
+    static TCollection_AsciiString getKeyString(const rapidjson::Document::GenericValue& theValue) {
+        if(theValue.IsString()) {
+            return TCollection_AsciiString(theValue.GetString());
+        } else if(theValue.IsInt()) {
+            return TCollection_AsciiString(theValue.GetInt());
+        }
+        return TCollection_AsciiString();
+    }
+
         protected:
 
     /**
@@ -454,23 +500,14 @@ protected:
         /**
           * Find the child node with specified key.
           */
-        const GenericValue* findChild(const TCollection_AsciiString& theKey) {
-            const GenericValue* aNode = NULL;
-            return myChildren.Find(theKey, aNode)
-                 ? aNode
-                 : NULL;
-        }
-
-        /**
-          * Find the child node with specified key.
-          */
         const GenericValue* findChild(const rapidjson::Document::GenericValue& theKey) {
-            if(!theKey.IsString()) {
+            const TCollection_AsciiString aKey = getKeyString(theKey);
+            if(aKey.IsEmpty()) {
                 return NULL;
             }
 
             const GenericValue* aNode = NULL;
-            return myChildren.Find(theKey.GetString(), aNode)
+            return myChildren.Find(aKey, aNode)
                   ? aNode
                   : NULL;
         }
@@ -505,6 +542,7 @@ protected:
     NCollection_DataMap<TCollection_AsciiString, Handle(StGLMaterial)>    myMaterials;
 
     int64_t  myBinBodyOffset;  //!< offset to binary body
+    int64_t  myBinBodyLen;     //!< binary body length
     bool     myIsBinary;       //!< binary document
 
     GltfElementMap myGltfRoots[GltfRootElement_NB]; //!< glTF format root elements

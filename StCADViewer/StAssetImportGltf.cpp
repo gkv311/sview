@@ -1,7 +1,7 @@
 /**
  * This source is a part of sView program.
  *
- * Copyright © Kirill Gavrilov, 2016
+ * Copyright © Kirill Gavrilov, 2016-2017
  */
 
 #ifdef _WIN32
@@ -217,18 +217,27 @@ void StAssetImportGltf::GltfElementMap::init(const TCollection_AsciiString& theR
                                              const GenericValue* theRoot) {
     myRoot = theRoot;
     myChildren.Clear();
-    if(theRoot == NULL || !theRoot->IsObject()) {
+    if(theRoot == NULL) {
         return;
     }
 
-    for(ConstMemberIterator aChildIter = theRoot->MemberBegin(); aChildIter != theRoot->MemberEnd(); ++aChildIter) {
-        if(!aChildIter->name.IsString()) {
-            continue;
-        }
+    if(theRoot->IsObject()) {
+        // glTF 1.0
+        for(ConstMemberIterator aChildIter = theRoot->MemberBegin(); aChildIter != theRoot->MemberEnd(); ++aChildIter) {
+            if(!aChildIter->name.IsString()) {
+                continue;
+            }
 
-        const TCollection_AsciiString aKey(aChildIter->name.GetString());
-        if(!myChildren.Bind(aKey, &aChildIter->value)) {
-            ST_DEBUG_LOG("Warning! Invalid glTF syntax - key '" + aKey.ToCString() + "' is already defined in '" + theRootName.ToCString() + "'.");
+            const TCollection_AsciiString aKey(aChildIter->name.GetString());
+            if(!myChildren.Bind(aKey, &aChildIter->value)) {
+                ST_DEBUG_LOG("Warning! Invalid glTF syntax - key '" + aKey.ToCString() + "' is already defined in '" + theRootName.ToCString() + "'.");
+            }
+        }
+    } else if(theRoot->IsArray()) {
+        // glTF 2.0
+        int aChildIndex = 0;
+        for(rapidjson::Value::ConstValueIterator aChildIter = theRoot->Begin(); aChildIter != theRoot->End(); ++aChildIter, ++aChildIndex) {
+            myChildren.Bind(TCollection_AsciiString(aChildIndex), aChildIter);
         }
     }
 }
@@ -254,6 +263,7 @@ bool StAssetImportGltf::probeFormatFromExtension(const StString& theExt) {
 
 StAssetImportGltf::StAssetImportGltf()
 : myBinBodyOffset(0),
+  myBinBodyLen(0),
   myIsBinary(false) {
     //
 }
@@ -274,19 +284,66 @@ bool StAssetImportGltf::load(const Handle(StDocNode)& theParentNode,
         return false;
     }
 
-    char aHeader[20];
-    aFile.read(aHeader, sizeof(aHeader));
-    if(::strncmp(aHeader, "glTF", 4) == 0) {
+    char aGlbHeader[12] = {};
+    aFile.read(aGlbHeader, sizeof(aGlbHeader));
+    int64_t aJsonBodyOffset = 0;
+    int64_t aJsonBodyLen    = 0;
+    if(::strncmp(aGlbHeader, "glTF", 4) == 0) {
         myIsBinary = true;
-        //const uint32_t* aVer         = (const uint32_t* )(aHeader + 4);
-        //const uint32_t* aLen         = (const uint32_t* )(aHeader + 8);
-        const uint32_t* aSceneLen    = (const uint32_t* )(aHeader + 12);
-        const uint32_t* aSceneFormat = (const uint32_t* )(aHeader + 16);
-        //*aVer == 1
-        myBinBodyOffset = (int64_t )sizeof(aHeader) + *aSceneLen;
-        if(*aSceneFormat != 0) {
-            signals.onError(formatSyntaxError(myFileName, StString("File '") + theFile + "' is written using unsupported Scene format!"));
-            return false;
+        const uint32_t* aVer = (const uint32_t* )(aGlbHeader + 4);
+        const uint32_t* aLen = (const uint32_t* )(aGlbHeader + 8);
+        if(*aVer == 1) {
+            if(*aLen < 20) {
+                signals.onError(formatSyntaxError(myFileName, StString("File '") + theFile + "' has broken glTF format!"));
+                return false;
+            }
+
+            char aHeader1[8] = {};
+            aFile.read(aHeader1, sizeof(aHeader1));
+
+            const uint32_t* aSceneLen    = (const uint32_t* )(aHeader1 + 0);
+            const uint32_t* aSceneFormat = (const uint32_t* )(aHeader1 + 4);
+            aJsonBodyOffset = 20;
+            aJsonBodyLen    = int64_t(*aSceneLen);
+
+            myBinBodyOffset = aJsonBodyOffset + aJsonBodyLen;
+            myBinBodyLen    = int64_t(*aLen) - myBinBodyOffset;
+            if(*aSceneFormat != 0) {
+                signals.onError(formatSyntaxError(myFileName, StString("File '") + theFile + "' is written using unsupported Scene format!"));
+                return false;
+            }
+        } else { //if (*aVer == 2) {
+            if(*aVer != 2) {
+                //signals.onError(formatSyntaxError(myFileName, StString("File '") + theFile + "' is written using unknown version " + int(*aVer) + "!"));
+            }
+
+            for(int aChunkIter = 0; !aFile.eof() && aChunkIter < 2; ++aChunkIter) {
+                char aChunkHeader2[8] = {};
+                if(int64_t(aFile.tellg()) + int64_t(sizeof(aChunkHeader2)) > int64_t(aLen)) {
+                    break;
+                }
+
+                aFile.read(aChunkHeader2, sizeof(aChunkHeader2));
+                if(!aFile.good()) {
+                    signals.onError(formatSyntaxError(myFileName, StString("File '") + theFile + "' is written using unsupported format!"));
+                    return false;
+                }
+
+                const uint32_t* aChunkLen  = (const uint32_t* )(aChunkHeader2 + 0);
+                const uint32_t* aChunkType = (const uint32_t* )(aChunkHeader2 + 4);
+                if(*aChunkType == 0x4E4F534A) {
+                    aJsonBodyOffset = int64_t(aFile.tellg());
+                    aJsonBodyLen    = int64_t(*aChunkLen);
+                } else if(*aChunkType == 0x004E4942) {
+                    myBinBodyOffset = int64_t(aFile.tellg());
+                    myBinBodyLen    = int64_t(*aChunkLen);
+                }
+                if(*aChunkLen != 0) {
+                    aFile.seekg(*aChunkLen, std::ios_base::cur);
+                }
+            }
+
+            aFile.seekg(aJsonBodyOffset, std::ios_base::beg);
         }
     } else {
         aFile.seekg(0, std::ios_base::beg);
@@ -363,25 +420,46 @@ void StAssetImportGltf::gltfParseMaterials() {
     const GenericValue* aMatList = myGltfRoots[GltfRootElement_Materials].getRoot();
     if(aMatList == NULL) {
         return;
-    }
+    } else if(aMatList->IsObject()) {
+        // glTF 1.0
+        for(ConstMemberIterator aMatIter = aMatList->MemberBegin(); aMatIter != aMatList->MemberEnd(); ++aMatIter) {
+            Handle(StGLMaterial) aMat = new StGLMaterial();
+            const GenericValue& aMatNode = aMatIter->value;
+            const GenericValue& aMatId   = aMatIter->name;
+            const GenericValue* aNameVal = findObjectMember (aMatNode, "name");
+            if(!gltfParseCommonMaterial(*aMat, aMatNode)) {
+                if(!gltfParseStdMaterial(*aMat, aMatNode)) {
+                    continue;
+                }
+            }
 
-    for(ConstMemberIterator aMatIter = aMatList->MemberBegin(); aMatIter != aMatList->MemberEnd(); ++aMatIter) {
-        Handle(StGLMaterial) aMat = new StGLMaterial();
-        const GenericValue& aMatNode = aMatIter->value;
-        const GenericValue& aMatId   = aMatIter->name;
-        const GenericValue* aNameVal = findObjectMember (aMatNode, "name");
-        if(!gltfParseCommonMaterial(*aMat, aMatNode)) {
-            if(!gltfParseStdMaterial(*aMat, aMatNode)) {
+            if(aNameVal != NULL && aNameVal->IsString()) {
+                aMat->Name = aNameVal->GetString();
+            } else {
+                aMat->Name = aMatId.GetString();
+            }
+            myMaterials.Bind(aMatId.GetString(), aMat);
+        }
+    } else if(aMatList->IsArray()) {
+        // glTF 2.0
+        int aMatIndex = 0;
+        for(rapidjson::Value::ConstValueIterator aMatIter = aMatList->Begin(); aMatIter != aMatList->End(); ++aMatIter, ++aMatIndex) {
+            Handle(StGLMaterial) aMat = new StGLMaterial();
+            const GenericValue& aMatNode = *aMatIter;
+            const GenericValue* aNameVal = findObjectMember(aMatNode, "name");
+            if(!gltfParsePbrMaterial   (*aMat, aMatNode)
+            && !gltfParseCommonMaterial(*aMat, aMatNode)
+            && !gltfParseStdMaterial   (*aMat, aMatNode)) {
                 continue;
             }
-        }
 
-        if(aNameVal != NULL && aNameVal->IsString()) {
-            aMat->Name = aNameVal->GetString();
-        } else {
-            aMat->Name = aMatId.GetString();
+            if(aNameVal != NULL && aNameVal->IsString()) {
+                aMat->Name = aNameVal->GetString();
+            } else {
+                aMat->Name = StString("mat_") + aMatIndex;
+            }
+            myMaterials.Bind(TCollection_AsciiString(aMatIndex), aMat);
         }
-        myMaterials.Bind(aMatId.GetString(), aMat);
     }
 }
 
@@ -409,14 +487,14 @@ bool StAssetImportGltf::gltfParseStdMaterial(StGLMaterial& theMat,
     StGLVec4 anAmb, aDiff, anEmi, aSpec;
     if(anAmbVal != NULL && anAmbVal->IsString()) {
         // ambient texture
-        gltfParseTexture(theMat, anAmbVal->GetString());
+        gltfParseTexture(theMat, anAmbVal);
         theMat.AmbientColor = StGLVec4(1.0f, 1.0f, 1.0f, 1.0f);
     } else if(gltfReadVec4(anAmb, anAmbVal) && validateColor4(anAmb)) {
         theMat.AmbientColor = anAmb;
     }
     if(aDiffVal != NULL && aDiffVal->IsString()) {
         // diffuse texture
-        gltfParseTexture(theMat, aDiffVal->GetString());
+        gltfParseTexture(theMat, aDiffVal);
         theMat.DiffuseColor = StGLVec4(1.0f, 1.0f, 1.0f, 1.0f);
     } else if(gltfReadVec4(aDiff, aDiffVal) && validateColor4(aDiff)) {
         theMat.DiffuseColor = aDiff;
@@ -434,11 +512,7 @@ bool StAssetImportGltf::gltfParseStdMaterial(StGLMaterial& theMat,
         }
     }
 
-    gltfParseTechnique(theMat,
-                       aTechVal != NULL && aTechVal->IsString()
-                     ? aTechVal->GetString()
-                     : NULL);
-
+    gltfParseTechnique(theMat, aTechVal);
     return true;
 }
 
@@ -460,22 +534,69 @@ bool StAssetImportGltf::gltfParseCommonMaterial(StGLMaterial& theMat,
     return true;
 }
 
+// =======================================================================
+// function : gltfParsePbrMaterial
+// purpose  :
+// =======================================================================
+bool StAssetImportGltf::gltfParsePbrMaterial(StGLMaterial& theMat,
+                                             const GenericValue& theMatNode) {
+    const GenericValue* aMetalRoughVal    = findObjectMember(theMatNode, "pbrMetallicRoughness");
+    //const GenericValue* aNormTexVal       = findObjectMember(theMatNode, "normalTexture");
+    const GenericValue* anEmissFactorVal  = findObjectMember(theMatNode, "emissiveFactor");
+    //const GenericValue* anEmissTexVal     = findObjectMember(theMatNode, "emissiveTexture");
+    //const GenericValue* anOcclusionTexVal = findObjectMember(theMatNode, "occlusionTexture");
+    if(aMetalRoughVal == NULL) {
+        return false;
+    }
+
+    /*if(const GenericValue* anExtVal = findObjectMember(theMatNode, "extensions")) {
+        if(const GenericValue* anExtDefVal = findObjectMember(*anExtVal, "KHR_materials_pbrSpecularGlossiness")) {
+            const GenericValue* aDiffTexVal = findObjectMember(*anExtDefVal, "diffuseTexture");
+            const GenericValue* aSpecTexVal = findObjectMember(*anExtDefVal, "specularGlossinessTexture");
+        }
+    }*/
+
+    const GenericValue* aBaseColorFactorVal = findObjectMember(*aMetalRoughVal, "baseColorFactor");
+    const GenericValue* aBaseColorTexVal    = findObjectMember(*aMetalRoughVal, "baseColorTexture");
+    //const GenericValue* aMetalRoughTexVal   = findObjectMember(*aMetalRoughVal, "metallicRoughnessTexture");
+
+    StGLVec4 aBaseColorFactor;
+    StGLVec3 anEmissiveFactor;
+    if(gltfReadVec4(aBaseColorFactor, aBaseColorFactorVal) && validateColor4(aBaseColorFactor)) {
+        //
+    }
+    if(gltfReadVec3(anEmissiveFactor, anEmissFactorVal) && validateColor3(anEmissiveFactor)) {
+        //
+    }
+    if(aBaseColorTexVal != NULL && aBaseColorTexVal->IsObject()) {
+        const GenericValue* aBaseColorTexIndexVal = findObjectMember(*aBaseColorTexVal, "index");
+        if(aBaseColorTexIndexVal != NULL) {
+            gltfParseTexture(theMat, aBaseColorTexIndexVal);
+        }
+    }
+
+    return true;
+}
+
 bool StAssetImportGltf::gltfParseTechnique(StGLMaterial& theMat,
-                                           const char* theTechniqueId) {
+                                           const GenericValue* theTechniqueId) {
     // default values
     if(theTechniqueId == NULL) {
         return true;
-    } else if(IsEqual(theTechniqueId, "PHONG")
-           || IsEqual(theTechniqueId, "BLINN")
-           || IsEqual(theTechniqueId, "LAMBERT")) {
+    }
+
+    const TCollection_AsciiString aTechId = getKeyString(*theTechniqueId);
+    if(aTechId.IsEqual("PHONG")
+    || aTechId.IsEqual("BLINN")
+    || aTechId.IsEqual("LAMBERT")) {
         // KHR_materials_common extension - actually does NOT specify states!
         theMat.SetCullBackFaces(true);
         return true;
     }
 
-    const GenericValue* aTechNode = myGltfRoots[GltfRootElement_Techniques].findChild(theTechniqueId);
+    const GenericValue* aTechNode = myGltfRoots[GltfRootElement_Techniques].findChild(*theTechniqueId);
     if(aTechNode == NULL) {
-        signals.onError(formatSyntaxError(myFileName, StString("Technique node '") + theTechniqueId + "' is not found."));
+        signals.onError(formatSyntaxError(myFileName, StString("Technique node '") + aTechId.ToCString() + "' is not found."));
         return false;
     }
 
@@ -511,24 +632,24 @@ bool StAssetImportGltf::gltfParseTechnique(StGLMaterial& theMat,
 }
 
 bool StAssetImportGltf::gltfParseTexture(StGLMaterial& theMat,
-                                         const char* theTextureId) {
-    if( theTextureId == NULL
-    || *theTextureId == '\0'
-    ||  myGltfRoots[GltfRootElement_Textures].isNull()
-    ||  myGltfRoots[GltfRootElement_Images].isNull()) {
+                                         const GenericValue* theTextureId) {
+    if(theTextureId == NULL
+    || myGltfRoots[GltfRootElement_Textures].isNull()
+    || myGltfRoots[GltfRootElement_Images].isNull()) {
         return false;
     }
 
-    const GenericValue* aTexNode = myGltfRoots[GltfRootElement_Textures].findChild(theTextureId);
+    const StString aTextureId = getKeyString(*theTextureId).ToCString();
+    const GenericValue* aTexNode = myGltfRoots[GltfRootElement_Textures].findChild(*theTextureId);
     if(aTexNode == NULL) {
-        signals.onError(formatSyntaxError(myFileName, StString("Texture node '") + theTextureId + "' is not found."));
+        signals.onError(formatSyntaxError(myFileName, StString("Texture node '") + aTextureId + "' is not found."));
         return false;
     }
 
     const GenericValue* aSrcVal  = findObjectMember(*aTexNode, "source");
     const GenericValue* aTargVal = findObjectMember(*aTexNode, "target");
-    if(aSrcVal == NULL || !aSrcVal->IsString()) {
-        signals.onError(formatSyntaxError(myFileName, StString("Invalid texture node '") + theTextureId + "' without a 'source' property."));
+    if(aSrcVal == NULL) {
+        signals.onError(formatSyntaxError(myFileName, StString("Invalid texture node '") + aTextureId + "' without a 'source' property."));
         return false;
     }
     if(aTargVal != NULL
@@ -537,78 +658,74 @@ bool StAssetImportGltf::gltfParseTexture(StGLMaterial& theMat,
         return false;
     }
 
-    const GenericValue* anImgNode = myGltfRoots[GltfRootElement_Images].findChild(aSrcVal->GetString());
+    const GenericValue* anImgNode = myGltfRoots[GltfRootElement_Images].findChild(*aSrcVal);
     if(anImgNode == NULL) {
-        signals.onError(formatSyntaxError(myFileName, StString("Invalid texture node '") + theTextureId
-                                                    + "' points to non-existing image '" + aSrcVal->GetString() + "'."));
+        signals.onError(formatSyntaxError(myFileName, StString("Invalid texture node '") + aTextureId
+                                                    + "' points to non-existing image '" + getKeyString(*aSrcVal).ToCString() + "'."));
         return false;
     }
 
     const GenericValue* anUriVal = findObjectMember(*anImgNode, "uri");
-    if(anUriVal == NULL || !anUriVal->IsString()) {
-        return false;
-    }
-
     if(myIsBinary) {
-        const GenericValue* anExtVal = findObjectMember(*anImgNode, "extensions");
-        if(anExtVal != NULL) {
-            const GenericValue* aBinVal = findObjectMember(*anExtVal, THE_KHR_binary_glTF);
-            if(aBinVal != NULL) {
-                const GenericValue* aBufferViewName = findObjectMember(*aBinVal, "bufferView");
-                const GenericValue* aMimeTypeVal    = findObjectMember(*aBinVal, "mimeType");
-                //const GenericValue* aWidthVal       = findObjectMember(*aBinVal, "width");
-                //const GenericValue* aHeightVal      = findObjectMember(*aBinVal, "height");
-                if(aBufferViewName == NULL || !aBufferViewName->IsString()) {
-                    signals.onError(formatSyntaxError(myFileName, StString("Invalid texture node '") + theTextureId + "' points to invalid data source."));
-                    return false;
-                }
-
-                const GenericValue* aBufferView = myGltfRoots[GltfRootElement_BufferViews].findChild(*aBufferViewName);
-                if(aBufferView == NULL || !aBufferView->IsObject()) {
-                  signals.onError(formatSyntaxError(myFileName, StString("Invalid texture node '") + theTextureId
-                                                              + "' points to invalid buffer view '" + aBufferViewName->GetString() + "'."));
-                  return false;
-                }
-
-                const GenericValue* aBufferName = findObjectMember(*aBufferView, "buffer");
-                const GenericValue* aByteLength = findObjectMember(*aBufferView, "byteLength");
-                const GenericValue* aByteOffset = findObjectMember(*aBufferView, "byteOffset");
-                if(aBufferName != NULL &&  aBufferName->IsString()
-                && !IsEqual(aBufferName->GetString(), "binary_glTF")) {
-                    signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + aBufferViewName->GetString()
-                                                                      + "' does not define binary_glTF buffer."));
-                    return false;
-                } else if(aByteOffset == NULL || !aByteOffset->IsNumber()) {
-                    signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + aBufferViewName->GetString()
-                                                                      + "' does not define byteOffset."));
-                    return false;
-                }
-
-                GltfBufferView aBuffView;
-                aBuffView.ByteOffset = (int64_t )aByteOffset->GetDouble();
-                aBuffView.ByteLength = aByteLength != NULL && aByteLength->IsNumber()
-                                     ? (int64_t )aByteLength->GetDouble()
-                                     : 0;
-                if(aBuffView.ByteLength < 0
-                || aBuffView.ByteLength > std::numeric_limits<int>::max()) {
-                    signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + aBufferViewName->GetString()
-                                                                      + "' defines invalid byteLength."));
-                    return false;
-                } else if(aBuffView.ByteOffset < 0) {
-                    signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + aBufferViewName->GetString()
-                                                                      + "' defines invalid byteOffset."));
-                    return false;
-                }
-
-                const int64_t anOffset = myBinBodyOffset + aBuffView.ByteOffset;
-                StString aMime;
-                if(aMimeTypeVal != NULL && aMimeTypeVal->IsString()) {
-                    aMime = aMimeTypeVal->GetString();
-                }
-                theMat.Texture = new StGltfBinTexture(myFileName, aMime, anOffset, (int )aBuffView.ByteLength);
-                return true;
+        const GenericValue* aBinVal = anImgNode;
+        if(const GenericValue* anExtVal = findObjectMember(*anImgNode, "extensions")) {
+            const GenericValue* aBinValExt = findObjectMember(*anExtVal, THE_KHR_binary_glTF);
+            if(aBinValExt != NULL) {
+                aBinVal = aBinValExt;
             }
         }
+
+        const GenericValue* aBufferViewName = findObjectMember(*aBinVal, "bufferView");
+        const GenericValue* aMimeTypeVal    = findObjectMember(*aBinVal, "mimeType");
+        //const GenericValue* aWidthVal       = findObjectMember(*aBinVal, "width");
+        //const GenericValue* aHeightVal      = findObjectMember(*aBinVal, "height");
+        if(aBufferViewName != NULL) {
+            const StString aBufferViewNameStr(getKeyString(*aBufferViewName).ToCString());
+            const GenericValue* aBufferView = myGltfRoots[GltfRootElement_BufferViews].findChild(*aBufferViewName);
+            if(aBufferView == NULL || !aBufferView->IsObject()) {
+                signals.onError(formatSyntaxError(myFileName, StString("Invalid texture node '") + aTextureId
+                                                            + "' points to invalid buffer view '" + aBufferViewNameStr + "'."));
+                return false;
+            }
+
+            const GenericValue* aBufferName = findObjectMember(*aBufferView, "buffer");
+            const GenericValue* aByteLength = findObjectMember(*aBufferView, "byteLength");
+            const GenericValue* aByteOffset = findObjectMember(*aBufferView, "byteOffset");
+            if(aBufferName != NULL &&  aBufferName->IsString()
+            && !IsEqual(aBufferName->GetString(), "binary_glTF")) {
+                signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + aBufferViewNameStr + "' does not define binary_glTF buffer."));
+                return false;
+            } else if(aByteOffset == NULL || !aByteOffset->IsNumber()) {
+                signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + aBufferViewNameStr + "' does not define byteOffset."));
+                return false;
+            }
+
+            GltfBufferView aBuffView;
+            aBuffView.ByteOffset = (int64_t )aByteOffset->GetDouble();
+            aBuffView.ByteLength = aByteLength != NULL && aByteLength->IsNumber()
+                                  ? (int64_t )aByteLength->GetDouble()
+                                  : 0;
+            if(aBuffView.ByteLength < 0
+            || aBuffView.ByteLength > std::numeric_limits<int>::max()) {
+                signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + aBufferViewNameStr + "' defines invalid byteLength."));
+                return false;
+            } else if(aBuffView.ByteOffset < 0) {
+                signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + aBufferViewNameStr + "' defines invalid byteOffset."));
+                return false;
+            }
+
+            const int64_t anOffset = myBinBodyOffset + aBuffView.ByteOffset;
+            StString aMime;
+            if(aMimeTypeVal != NULL && aMimeTypeVal->IsString()) {
+                aMime = aMimeTypeVal->GetString();
+            }
+            theMat.Texture = new StGltfBinTexture(myFileName, aMime, anOffset, (int )aBuffView.ByteLength);
+            return true;
+        }
+    }
+
+    if(anUriVal == NULL || !anUriVal->IsString()) {
+        return false;
     }
 
     const char* anUriData = anUriVal->GetString();
@@ -643,7 +760,7 @@ bool StAssetImportGltf::gltfParseScene(const Handle(StDocNode)& theParentNode) {
     const GenericValue* aSceneNodes = findObjectMember(*aDefScene, "nodes");
     if(aSceneNodes == NULL || !aSceneNodes->IsArray()) {
         signals.onError(formatSyntaxError(myFileName, StString() + "Empty scene '"
-                                                    + myGltfRoots[GltfRootElement_Scene].getRoot()->GetString() + "'."));
+                                                    + getKeyString(*myGltfRoots[GltfRootElement_Scene].getRoot()).ToCString() + "'."));
         return false;
     }
 
@@ -661,11 +778,11 @@ bool StAssetImportGltf::gltfParseSceneNodes(const Handle(StDocNode)& theParentNo
         aSceneNodeIter != theSceneNodes.End(); ++aSceneNodeIter) {
         const GenericValue* aSceneNode = myGltfRoots[GltfRootElement_Nodes].findChild(*aSceneNodeIter);
         if(aSceneNode == NULL) {
-            signals.onError(formatSyntaxError(myFileName, "Scene refers to non-existing node."));
-            return false;
+            signals.onError(formatSyntaxError(myFileName, StString("Scene refers to non-existing node '") + getKeyString(*aSceneNodeIter).ToCString() + "'."));
+            return true;
         }
 
-        if(!gltfParseSceneNode(theParentNode, aSceneNodeIter->GetString(), *aSceneNode)) {
+        if(!gltfParseSceneNode(theParentNode, getKeyString(*aSceneNodeIter), *aSceneNode)) {
             return false;
         }
     }
@@ -673,12 +790,13 @@ bool StAssetImportGltf::gltfParseSceneNodes(const Handle(StDocNode)& theParentNo
 }
 
 bool StAssetImportGltf::gltfParseSceneNode(const Handle(StDocNode)& theParentNode,
-                                           const char* theSceneNodeName,
+                                           const TCollection_AsciiString& theSceneNodeName,
                                            const GenericValue& theSceneNode) {
     const GenericValue* aName         = findObjectMember(theSceneNode, "name");
     //const GenericValue* aJointName    = findObjectMember(theSceneNode, "jointName");
     const GenericValue* aChildren     = findObjectMember(theSceneNode, "children");
     const GenericValue* aMeshes       = findObjectMember(theSceneNode, "meshes");
+    const GenericValue* aMesh         = findObjectMember(theSceneNode, "mesh");
     //const GenericValue* aCamera       = findObjectMember(theSceneNode, "camera");
     const GenericValue* aTrsfMatVal   = findObjectMember(theSceneNode, "matrix");
     const GenericValue* aTrsfRotVal   = findObjectMember(theSceneNode, "rotation");
@@ -700,11 +818,11 @@ bool StAssetImportGltf::gltfParseSceneNode(const Handle(StDocNode)& theParentNod
     const bool hasTrs = aTrsfRotVal != NULL || aTrsfScaleVal != NULL || aTrsfTransVal != NULL;
     if(aTrsfMatVal != NULL) {
         if(hasTrs) {
-            pushSceneNodeError(theSceneNodeName, "defines ambiguous transformation");
+            pushSceneNodeError(theSceneNodeName.ToCString(), "defines ambiguous transformation");
             return false;
         }
         else if(!aTrsfMatVal->IsArray() || aTrsfMatVal->Size() != 16) {
-            pushSceneNodeError(theSceneNodeName, "defines invalid transformation matrix array");
+            pushSceneNodeError(theSceneNodeName.ToCString(), "defines invalid transformation matrix array");
             return false;
         }
 
@@ -713,7 +831,7 @@ bool StAssetImportGltf::gltfParseSceneNode(const Handle(StDocNode)& theParentNod
             for(int aRowIter = 0; aRowIter < 4; ++aRowIter) {
                 const GenericValue& aGenVal = (*aTrsfMatVal)[aColIter * 4 + aRowIter];
                 if(!aGenVal.IsNumber()) {
-                    pushSceneNodeError(theSceneNodeName, "defines invalid transformation matrix");
+                    pushSceneNodeError(theSceneNodeName.ToCString(), "defines invalid transformation matrix");
                     return false;
                 }
                 aMat4.SetValue(aRowIter, aColIter, aGenVal.GetDouble());
@@ -733,7 +851,7 @@ bool StAssetImportGltf::gltfParseSceneNode(const Handle(StDocNode)& theParentNod
         gp_Trsf aTrsf;
         if(aTrsfRotVal != NULL) {
             if(!aTrsfRotVal->IsArray() || aTrsfRotVal->Size() != 4) {
-                pushSceneNodeError(theSceneNodeName, "defines invalid rotation quaternion");
+                pushSceneNodeError(theSceneNodeName.ToCString(), "defines invalid rotation quaternion");
                 return false;
             }
 
@@ -741,7 +859,7 @@ bool StAssetImportGltf::gltfParseSceneNode(const Handle(StDocNode)& theParentNod
             for(int aCompIter = 0; aCompIter < 4; ++aCompIter) {
                 const GenericValue& aGenVal = (*aTrsfRotVal)[aCompIter];
                 if(!aGenVal.IsNumber()) {
-                    pushSceneNodeError(theSceneNodeName, "defines invalid rotation");
+                    pushSceneNodeError(theSceneNodeName.ToCString(), "defines invalid rotation");
                     return false;
                 }
                 aRotVec4[aCompIter] = aGenVal.GetDouble();
@@ -757,7 +875,7 @@ bool StAssetImportGltf::gltfParseSceneNode(const Handle(StDocNode)& theParentNod
 
         if(aTrsfTransVal != NULL) {
             if(!aTrsfTransVal->IsArray() || aTrsfTransVal->Size() != 3) {
-                pushSceneNodeError(theSceneNodeName, "defines invalid translation vector");
+                pushSceneNodeError(theSceneNodeName.ToCString(), "defines invalid translation vector");
                 return false;
             }
 
@@ -765,7 +883,7 @@ bool StAssetImportGltf::gltfParseSceneNode(const Handle(StDocNode)& theParentNod
             for(int aCompIter = 0; aCompIter < 3; ++aCompIter) {
                 const GenericValue& aGenVal = (*aTrsfTransVal)[aCompIter];
                 if(!aGenVal.IsNumber()) {
-                    pushSceneNodeError(theSceneNodeName, "defines invalid translation");
+                    pushSceneNodeError(theSceneNodeName.ToCString(), "defines invalid translation");
                     return false;
                 }
                 aTransVec.SetCoord(aCompIter + 1, aGenVal.GetDouble());
@@ -776,18 +894,18 @@ bool StAssetImportGltf::gltfParseSceneNode(const Handle(StDocNode)& theParentNod
         if(aTrsfScaleVal != NULL) {
             Graphic3d_Vec3d aScaleVec;
             if(!aTrsfScaleVal->IsArray() || aTrsfScaleVal->Size() != 3) {
-                pushSceneNodeError(theSceneNodeName, "defines invalid scale vector");
+                pushSceneNodeError(theSceneNodeName.ToCString(), "defines invalid scale vector");
                 return false;
             }
             for(int aCompIter = 0; aCompIter < 3; ++aCompIter) {
                 const GenericValue& aGenVal = (*aTrsfScaleVal)[aCompIter];
                 if(!aGenVal.IsNumber()) {
-                    pushSceneNodeError(theSceneNodeName, "defines invalid scale");
+                    pushSceneNodeError(theSceneNodeName.ToCString(), "defines invalid scale");
                     return false;
                 }
                 aScaleVec[aCompIter] = aGenVal.GetDouble();
                 if(Abs(aScaleVec[aCompIter]) <= gp::Resolution()) {
-                    pushSceneNodeError(theSceneNodeName, "defines invalid scale");
+                    pushSceneNodeError(theSceneNodeName.ToCString(), "defines invalid scale");
                     return false;
                 }
             }
@@ -795,7 +913,7 @@ bool StAssetImportGltf::gltfParseSceneNode(const Handle(StDocNode)& theParentNod
             && Abs(aScaleVec.y() - aScaleVec.z()) > Precision::Confusion()
             && Abs(aScaleVec.x() - aScaleVec.z()) > Precision::Confusion()) {
                 ST_DEBUG_LOG("glTF reader, scene node '"
-                            + theSceneNodeName + "' defines unsupported scaling "
+                            + theSceneNodeName.ToCString() + "' defines unsupported scaling "
                             + aScaleVec.x() + " " + aScaleVec.y() + " " + aScaleVec.z());
             }
             if(Abs (aScaleVec.x() - 1.0) > Precision::Confusion()) {
@@ -814,28 +932,41 @@ bool StAssetImportGltf::gltfParseSceneNode(const Handle(StDocNode)& theParentNod
 
     if(aMeshes != NULL && aMeshes->IsArray()) {
         for(rapidjson::Value::ConstValueIterator aMeshIter = aMeshes->Begin(); aMeshIter != aMeshes->End(); ++aMeshIter) {
-            const GenericValue* aMesh = myGltfRoots[GltfRootElement_Meshes].findChild(*aMeshIter);
-            if(aMesh == NULL) {
-                pushSceneNodeError(theSceneNodeName, "refers to non-existing mesh");
+            const GenericValue* aMeshItem = myGltfRoots[GltfRootElement_Meshes].findChild(*aMeshIter);
+            if(aMeshItem == NULL) {
+                pushSceneNodeError(theSceneNodeName.ToCString(), "refers to non-existing mesh");
                 return false;
             }
 
-            if(!gltfParseMesh(aNewNode, aMeshIter->GetString(), *aMesh)) {
+            if(!gltfParseMesh(aNewNode, getKeyString(*aMeshIter), *aMeshItem)) {
                 return false;
             }
         }
     }
+    if(aMesh != NULL) {
+        // glTF 2.0
+        const GenericValue* aMeshItem = myGltfRoots[GltfRootElement_Meshes].findChild(*aMesh);
+        if(aMeshItem == NULL) {
+            pushSceneNodeError(theSceneNodeName.ToCString(), "refers to non-existing mesh");
+            return false;
+        }
+
+        if(!gltfParseMesh(aNewNode, getKeyString(*aMesh), *aMeshItem)) {
+            return false;
+        }
+    }
+
     return true;
 }
 
 bool StAssetImportGltf::gltfParseMesh(const Handle(StDocNode)& theParentNode,
-                                      const char* theMeshName,
+                                      const TCollection_AsciiString& theMeshName,
                                       const GenericValue& theMesh) {
     const GenericValue* aName  = findObjectMember(theMesh, "name");
     const GenericValue* aPrims = findObjectMember(theMesh, "primitives");
     if(!aPrims->IsArray()) {
         signals.onError(formatSyntaxError(myFileName, StString("Primitive array attributes within Mesh '")
-                                                             + theMeshName + "' is not an array."));
+                                                             + theMeshName.ToCString() + "' is not an array."));
         return false;
     }
 
@@ -860,7 +991,7 @@ bool StAssetImportGltf::gltfParseMesh(const Handle(StDocNode)& theParentNode,
 }
 
 bool StAssetImportGltf::gltfParsePrimArray(const Handle(StDocMeshNode)& theMeshNode,
-                                           const char* theMeshName,
+                                           const TCollection_AsciiString& theMeshName,
                                            const GenericValue& thePrimArray) {
     const GenericValue* anAttribs = findObjectMember(thePrimArray, "attributes");
     const GenericValue* anIndices = findObjectMember(thePrimArray, "indices");
@@ -869,7 +1000,7 @@ bool StAssetImportGltf::gltfParsePrimArray(const Handle(StDocMeshNode)& theMeshN
     GltfPrimitiveMode aMode = GltfPrimitiveMode_Triangles;
     if(anAttribs == NULL || !anAttribs->IsObject()) {
         signals.onError(formatSyntaxError(myFileName, StString("Primitive array within Mesh '")
-                                                             + theMeshName + "' defines no attributes."));
+                                                             + theMeshName.ToCString() + "' defines no attributes."));
         return false;
     }
     else if(aModeVal != NULL) {
@@ -880,27 +1011,28 @@ bool StAssetImportGltf::gltfParsePrimArray(const Handle(StDocMeshNode)& theMeshN
         if(aMode < GltfPrimitiveMode_Points
         || aMode > GltfPrimitiveMode_TriangleFan) {
             signals.onError(formatSyntaxError(myFileName, StString("Primitive array within Mesh '")
-                                                                 + theMeshName + "' has unknown mode."));
+                                                                 + theMeshName.ToCString() + "' has unknown mode."));
             return false;
         }
     }
     if(aMode != GltfPrimitiveMode_Triangles) {
-        ST_DEBUG_LOG("Primitive array within Mesh '" + theMeshName + "' skipped due to unsupported mode.");
+        ST_DEBUG_LOG("Primitive array within Mesh '" + theMeshName.ToCString() + "' skipped due to unsupported mode.");
         return true;
     }
 
     Handle(StPrimArray) aPrimArray = new StPrimArray();
     theMeshNode->ChangePrimitiveArrays().Append(aPrimArray);
-    if(aMaterial != NULL && aMaterial->IsString()) {
+    if(aMaterial != NULL) {
         // assign material
-        myMaterials.Find(aMaterial->GetString(), aPrimArray->Material);
+        myMaterials.Find(getKeyString(*aMaterial), aPrimArray->Material);
     }
 
     bool hasPositions = false;
     for(rapidjson::Value::ConstMemberIterator anAttribIter = anAttribs->MemberBegin(); anAttribIter != anAttribs->MemberEnd(); ++anAttribIter) {
-        if(!anAttribIter->value.IsString()) {
+        const TCollection_AsciiString anAttribId = getKeyString(anAttribIter->value);
+        if(anAttribId.IsEmpty()) {
             signals.onError(formatSyntaxError(myFileName, StString("Primitive array attribute accessor key within Mesh '")
-                                                                 + theMeshName + "' is not a string."));
+                                                                 + theMeshName.ToCString() + "' is not a string."));
             return false;
         }
 
@@ -912,10 +1044,10 @@ bool StAssetImportGltf::gltfParsePrimArray(const Handle(StDocMeshNode)& theMeshN
 
         const GenericValue* anAccessor = myGltfRoots[GltfRootElement_Accessors].findChild(anAttribIter->value);
         if(anAccessor == NULL || !anAccessor->IsObject()) {
-            signals.onError(formatSyntaxError(myFileName, StString("Primitive array attribute accessor key '") + anAttribIter->value.GetString()
+            signals.onError(formatSyntaxError(myFileName, StString("Primitive array attribute accessor key '") + anAttribId.ToCString()
                                                                  + "' points to non-existing object."));
             return false;
-        } else if(!gltfParseAccessor(aPrimArray, anAttribIter->value.GetString(), *anAccessor, aType, aMode)) {
+        } else if(!gltfParseAccessor(aPrimArray, anAttribId, *anAccessor, aType, aMode)) {
             return false;
         } else if(aType == GltfArrayType_Position) {
             hasPositions = true;
@@ -923,23 +1055,24 @@ bool StAssetImportGltf::gltfParsePrimArray(const Handle(StDocMeshNode)& theMeshN
     }
     if(!hasPositions) {
         signals.onError(formatSyntaxError(myFileName, StString("Primitive array within Mesh '")
-                                                             + theMeshName + "' does not define vertex positions."));
+                                                             + theMeshName.ToCString() + "' does not define vertex positions."));
         return false;
     }
 
     if(anIndices != NULL) {
-        if(!anIndices->IsString()) {
+        const TCollection_AsciiString anIndicesId = getKeyString(*anIndices);
+        if(anIndicesId.IsEmpty()) {
             signals.onError(formatSyntaxError(myFileName, StString("Primitive array indices accessor key within Mesh '")
-                                                                 + theMeshName + "' is not a string."));
+                                                                 + theMeshName.ToCString() + "' is not a string."));
             return false;
         }
 
         const GenericValue* anAccessor = myGltfRoots[GltfRootElement_Accessors].findChild(*anIndices);
         if(anAccessor == NULL || !anAccessor->IsObject()) {
-            signals.onError(formatSyntaxError(myFileName, StString("Primitive array indices accessor key '") + anIndices->GetString()
+            signals.onError(formatSyntaxError(myFileName, StString("Primitive array indices accessor key '") + anIndicesId.ToCString()
                                                                 + "' points to non-existing object."));
             return false;
-        } else if(!gltfParseAccessor(aPrimArray, anIndices->GetString(), *anAccessor, GltfArrayType_Indices, aMode)) {
+        } else if(!gltfParseAccessor(aPrimArray, anIndicesId, *anAccessor, GltfArrayType_Indices, aMode)) {
             return false;
         }
     }
@@ -948,7 +1081,7 @@ bool StAssetImportGltf::gltfParsePrimArray(const Handle(StDocMeshNode)& theMeshN
 }
 
 bool StAssetImportGltf::gltfParseAccessor(const Handle(StPrimArray)& thePrimArray,
-                                          const char*             theName,
+                                          const TCollection_AsciiString& theName,
                                           const GenericValue&     theAccessor,
                                           const GltfArrayType     theType,
                                           const GltfPrimitiveMode theMode) {
@@ -960,25 +1093,25 @@ bool StAssetImportGltf::gltfParseAccessor(const Handle(StPrimArray)& thePrimArra
     const GenericValue* aCompType       = findObjectMember(theAccessor, "componentType");
     const GenericValue* aCount          = findObjectMember(theAccessor, "count");
     if(aTypeStr == NULL || !aTypeStr->IsString()) {
-        signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName + "' does not define type."));
+        signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName.ToCString() + "' does not define type."));
         return false;
     }
     aStruct.Type = gltfParseAccessorType(aTypeStr->GetString());
     if(aStruct.Type == GltfAccessorLayout_UNKNOWN) {
-        signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName + "' has invalid type."));
+        signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName.ToCString() + "' has invalid type."));
         return false;
     }
 
-    if(aBufferViewName == NULL || !aBufferViewName->IsString()) {
-        signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName + "' does not define bufferView."));
+    if(aBufferViewName == NULL) {
+        signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName.ToCString() + "' does not define bufferView."));
         return false;
     }
     if(aByteOffset == NULL || !aByteOffset->IsNumber()) {
-        signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName + "' does not define byteOffset."));
+        signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName.ToCString() + "' does not define byteOffset."));
         return false;
     }
     if(aCompType == NULL || !aCompType->IsInt()) {
-        signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName + "' does not define componentType."));
+        signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName.ToCString() + "' does not define componentType."));
         return false;
     }
     aStruct.ComponentType = (GltfAccessorCompType )aCompType->GetInt();
@@ -988,12 +1121,12 @@ bool StAssetImportGltf::gltfParseAccessor(const Handle(StPrimArray)& thePrimArra
     && aStruct.ComponentType != GltfAccessorCompType_UInt16
     && aStruct.ComponentType != GltfAccessorCompType_UInt32
     && aStruct.ComponentType != GltfAccessorCompType_Float32) {
-        signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName + "' defines invalid componentType value."));
+        signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName.ToCString() + "' defines invalid componentType value."));
         return false;
     }
 
     if(aCount == NULL || !aCount->IsNumber()) {
-        signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName + "' does not define count."));
+        signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName.ToCString() + "' does not define count."));
         return false;
     }
 
@@ -1004,14 +1137,14 @@ bool StAssetImportGltf::gltfParseAccessor(const Handle(StPrimArray)& thePrimArra
     aStruct.Count = (int64_t )aCount->GetDouble();
 
     if(aStruct.ByteOffset < 0) {
-        signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName + "' defines invalid byteOffset."));
+        signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName.ToCString() + "' defines invalid byteOffset."));
         return false;
     } else if(aStruct.ByteStride < 0
            || aStruct.ByteStride > 255) {
-        signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName + "' defines invalid byteStride."));
+        signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName.ToCString() + "' defines invalid byteStride."));
         return false;
     } else if(aStruct.Count < 1) {
-        signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName + "' defines invalid count."));
+        signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName.ToCString() + "' defines invalid count."));
         return false;
     }
 
@@ -1019,15 +1152,15 @@ bool StAssetImportGltf::gltfParseAccessor(const Handle(StPrimArray)& thePrimArra
     //const GenericValue* aMin = findObjectMember(theAccessor, "min");
     const GenericValue* aBufferView = myGltfRoots[GltfRootElement_BufferViews].findChild(*aBufferViewName);
     if(aBufferView == NULL || !aBufferView->IsObject()) {
-        signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName + "' refers to non-existing bufferView."));
+        signals.onError(formatSyntaxError(myFileName, StString("Accessor '") + theName.ToCString() + "' refers to non-existing bufferView."));
         return false;
     }
 
-    return gltfParseBufferView(thePrimArray, aBufferViewName->GetString(), *aBufferView, aStruct, theType, theMode);
+    return gltfParseBufferView(thePrimArray, getKeyString(*aBufferViewName), *aBufferView, aStruct, theType, theMode);
 }
 
 bool StAssetImportGltf::gltfParseBufferView(const Handle(StPrimArray)& thePrimArray,
-                                            const char*             theName,
+                                            const TCollection_AsciiString& theName,
                                             const GenericValue&     theBufferView,
                                             const GltfAccessor&     theAccessor,
                                             const GltfArrayType     theType,
@@ -1037,11 +1170,11 @@ bool StAssetImportGltf::gltfParseBufferView(const Handle(StPrimArray)& thePrimAr
     const GenericValue* aByteLength = findObjectMember(theBufferView, "byteLength");
     const GenericValue* aByteOffset = findObjectMember(theBufferView, "byteOffset");
     const GenericValue* aTarget     = findObjectMember(theBufferView, "target");
-    if(aBufferName == NULL || !aBufferName->IsString()) {
-        signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + theName + "' does not define buffer."));
+    if(aBufferName == NULL) {
+        signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + theName.ToCString() + "' does not define buffer."));
         return false;
     } else if(aByteOffset == NULL || !aByteOffset->IsNumber()) {
-        signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + theName + "' does not define byteOffset."));
+        signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + theName.ToCString() + "' does not define byteOffset."));
         return false;
     }
 
@@ -1053,30 +1186,30 @@ bool StAssetImportGltf::gltfParseBufferView(const Handle(StPrimArray)& thePrimAr
         aBuffView.Target = (GltfBufferViewTarget )aTarget->GetInt();
         if(aBuffView.Target != GltfBufferViewTarget_ARRAY_BUFFER
         && aBuffView.Target != GltfBufferViewTarget_ELEMENT_ARRAY_BUFFER) {
-            signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + theName + "' defines invalid target."));
+            signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + theName.ToCString() + "' defines invalid target."));
             return false;
         }
     }
 
     if(aBuffView.ByteLength < 0) {
-        signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + theName + "' defines invalid byteLength."));
+        signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + theName.ToCString() + "' defines invalid byteLength."));
         return false;
     } else if(aBuffView.ByteOffset < 0) {
-        signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + theName + "' defines invalid byteOffset."));
+        signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + theName.ToCString() + "' defines invalid byteOffset."));
         return false;
     }
 
     const GenericValue* aBuffer = myGltfRoots[GltfRootElement_Buffers].findChild(*aBufferName);
     if(aBuffer == NULL || !aBuffer->IsObject()) {
-        signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + theName + "' refers to non-existing buffer."));
+        signals.onError(formatSyntaxError(myFileName, StString("BufferView '") + theName.ToCString() + "' refers to non-existing buffer."));
         return false;
     }
 
-    return gltfParseBuffer(thePrimArray, aBufferName->GetString(), *aBuffer, theAccessor, aBuffView, theType, theMode);
+    return gltfParseBuffer(thePrimArray, getKeyString(*aBufferName), *aBuffer, theAccessor, aBuffView, theType, theMode);
 }
 
 bool StAssetImportGltf::gltfParseBuffer(const Handle(StPrimArray)& thePrimArray,
-                                        const char*             theName,
+                                        const TCollection_AsciiString& theName,
                                         const GenericValue&     theBuffer,
                                         const GltfAccessor&     theAccessor,
                                         const GltfBufferView&   theView,
@@ -1087,11 +1220,17 @@ bool StAssetImportGltf::gltfParseBuffer(const Handle(StPrimArray)& thePrimArray,
     const GenericValue* anUriVal      = findObjectMember(theBuffer, "uri");
 
     int64_t anOffset = theView.ByteOffset + theAccessor.ByteOffset;
-    if(myIsBinary && IsEqual("binary_glTF", theName)) {
+    bool isBinary = false;
+    if(myIsBinary) {
+        isBinary = theName.IsEqual("binary_glTF") // glTF 1.0
+                || anUriVal == NULL;              // glTF 2.0
+    }
+
+    if(isBinary) {
         std::ifstream aFile;
         OSD_OpenStream(aFile, myFileName.toCString(), std::ios::in | std::ios::binary);
         if(!aFile.is_open() || !aFile.good()) {
-            signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName + "' refers to non-existing file '" + myFileName + "'."));
+            signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName.ToCString() + "' refers to non-existing file '" + myFileName + "'."));
             return false;
         }
 
@@ -1099,7 +1238,7 @@ bool StAssetImportGltf::gltfParseBuffer(const Handle(StPrimArray)& thePrimArray,
         aFile.seekg(anOffset, std::ios_base::beg);
         if(!aFile.good()) {
             aFile.close();
-            signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName + "' refers to non-existing location."));
+            signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName.ToCString() + "' refers to non-existing location."));
             return false;
         }
 
@@ -1107,7 +1246,7 @@ bool StAssetImportGltf::gltfParseBuffer(const Handle(StPrimArray)& thePrimArray,
     }
 
     if(anUriVal == NULL || !anUriVal->IsString()) {
-        signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName + "' does not define uri."));
+        signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName.ToCString() + "' does not define uri."));
         return false;
     }
 
@@ -1121,7 +1260,7 @@ bool StAssetImportGltf::gltfParseBuffer(const Handle(StPrimArray)& thePrimArray,
     } else {
         StString anUri = anUriData;
         if(anUri.isEmpty()) {
-            signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName + "' does not define uri."));
+            signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName.ToCString() + "' does not define uri."));
             return false;
         }
 
@@ -1129,14 +1268,14 @@ bool StAssetImportGltf::gltfParseBuffer(const Handle(StPrimArray)& thePrimArray,
         StString aPath = myFolder + anUri;
         OSD_OpenStream(aFile, aPath.toCString(), std::ios::in | std::ios::binary);
         if(!aFile.is_open() || !aFile.good()) {
-            signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName + "' refers to non-existing file '" + anUri + "'."));
+            signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName.ToCString() + "' refers to non-existing file '" + anUri + "'."));
             return false;
         }
 
         aFile.seekg(anOffset, std::ios_base::beg);
         if(!aFile.good()) {
             aFile.close();
-            signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName + "' refers to invalid location."));
+            signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName.ToCString() + "' refers to invalid location."));
             return false;
         }
 
@@ -1145,13 +1284,13 @@ bool StAssetImportGltf::gltfParseBuffer(const Handle(StPrimArray)& thePrimArray,
 }
 
 bool StAssetImportGltf::gltfReadBuffer(const Handle(StPrimArray)& thePrimArray,
-                                       const char*             theName,
+                                       const TCollection_AsciiString& theName,
                                        const GltfAccessor&     theAccessor,
                                        std::istream&           theStream,
                                        const GltfArrayType     theType,
                                        const GltfPrimitiveMode theMode) {
     if(theMode != GltfPrimitiveMode_Triangles) {
-        ST_DEBUG_LOG("Buffer '" + theName + "' skipped unsupported primitive array.");
+        ST_DEBUG_LOG("Buffer '" + theName.ToCString() + "' skipped unsupported primitive array.");
         return true;
     }
 
@@ -1161,7 +1300,7 @@ bool StAssetImportGltf::gltfReadBuffer(const Handle(StPrimArray)& thePrimArray,
             || theAccessor.Count <= 0) {
                 break;
             } else if((theAccessor.Count / 3) > std::numeric_limits<int>::max()) {
-                signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName + "' defines too big array."));
+                signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName.ToCString() + "' defines too big array."));
                 return false;
             }
 
@@ -1191,7 +1330,7 @@ bool StAssetImportGltf::gltfReadBuffer(const Handle(StPrimArray)& thePrimArray,
                     if((size_t )aVec3_16u[0] >= thePrimArray->Positions.size()
                     || (size_t )aVec3_16u[1] >= thePrimArray->Positions.size()
                     || (size_t )aVec3_16u[2] >= thePrimArray->Positions.size()) {
-                        signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName + "' refers to invalid indices."));
+                        signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName.ToCString() + "' refers to invalid indices."));
                         return false;
                     }
 
@@ -1224,7 +1363,7 @@ bool StAssetImportGltf::gltfReadBuffer(const Handle(StPrimArray)& thePrimArray,
                     if((size_t )aVec3_32u[0] >= thePrimArray->Positions.size()
                     || (size_t )aVec3_32u[1] >= thePrimArray->Positions.size()
                     || (size_t )aVec3_32u[2] >= thePrimArray->Positions.size()) {
-                        signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName + "' refers to invalid indices."));
+                        signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName.ToCString() + "' refers to invalid indices."));
                         return false;
                     }
 
@@ -1242,7 +1381,7 @@ bool StAssetImportGltf::gltfReadBuffer(const Handle(StPrimArray)& thePrimArray,
             || theAccessor.Type != GltfAccessorLayout_Vec3) {
                 break;
             } else if(theAccessor.Count > std::numeric_limits<int>::max()) {
-                signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName + "' defines too big array."));
+                signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName.ToCString() + "' defines too big array."));
                 return false;
             }
 
@@ -1267,7 +1406,7 @@ bool StAssetImportGltf::gltfReadBuffer(const Handle(StPrimArray)& thePrimArray,
             || theAccessor.Type != GltfAccessorLayout_Vec3) {
                 break;
             } else if(theAccessor.Count > std::numeric_limits<int>::max()) {
-                signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName + "' defines too big array."));
+                signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName.ToCString() + "' defines too big array."));
                 return false;
             }
 
@@ -1292,7 +1431,7 @@ bool StAssetImportGltf::gltfReadBuffer(const Handle(StPrimArray)& thePrimArray,
             || theAccessor.Type != GltfAccessorLayout_Vec2) {
                 break;
             } else if(theAccessor.Count > std::numeric_limits<int>::max()) {
-                signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName + "' defines too big array."));
+                signals.onError(formatSyntaxError(myFileName, StString("Buffer '") + theName.ToCString() + "' defines too big array."));
                 return false;
             }
 
