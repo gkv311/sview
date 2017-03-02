@@ -129,6 +129,11 @@ static bool convert(const StImage& theImageFrom, AVPixelFormat theFormatFrom,
                           StImage& theImageTo,   AVPixelFormat theFormatTo) {
     ST_DEBUG_LOG("StAVImage, convert from " + stAV::PIX_FMT::getString(theFormatFrom) + " " + theImageFrom.getSizeX() + "x" + theImageFrom.getSizeY()
                + " to " + stAV::PIX_FMT::getString(theFormatTo) + " " + theImageTo.getSizeX() + "x" + theImageTo.getSizeY());
+    if(theFormatFrom == stAV::PIX_FMT::NONE
+    || theFormatTo   == stAV::PIX_FMT::NONE) {
+        return false;
+    }
+
     SwsContext* aCtxToRgb = sws_getContext((int )theImageFrom.getSizeX(), (int )theImageFrom.getSizeY(), theFormatFrom, // source
                                            (int )theImageTo.getSizeX(),   (int )theImageTo.getSizeY(),   theFormatTo,   // destination
                                            SWS_BICUBIC, NULL, NULL, NULL);
@@ -537,6 +542,11 @@ bool StAVImage::save(const StString& theFilePath,
     }
 
     AVPixelFormat aPFormatAV = (AVPixelFormat )getAVPixelFormat(*this);
+    if(aPFormatAV == stAV::PIX_FMT::NONE) {
+        setState("Specific pixel format convertion is not supported");
+        return false;
+    }
+
     StImage anImage;
     switch(theImageType) {
         case ST_TYPE_PNG:
