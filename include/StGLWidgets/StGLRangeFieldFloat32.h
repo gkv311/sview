@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,16 +11,21 @@
 #define __StGLRangeFieldFloat32_h_
 
 #include <StSettings/StFloat32Param.h>
-#include <StGLWidgets/StGLWidget.h>
+#include <StGLWidgets/StGLSeekBar.h>
 
 class StGLTextArea;
 
 /**
  * This is radio button for float value.
  */
-class StGLRangeFieldFloat32 : public StGLWidget {
+class StGLRangeFieldFloat32 : public StGLSeekBar {
 
         public:
+
+    enum RangeStyle {
+        RangeStyle_PlusMinus,
+        RangeStyle_Seekbar,
+    };
 
     enum FieldColor {
         FieldColor_Default,
@@ -36,11 +41,15 @@ class StGLRangeFieldFloat32 : public StGLWidget {
      */
     ST_CPPEXPORT StGLRangeFieldFloat32(StGLWidget* theParent,
                                        const StHandle<StFloat32Param>& theTrackedValue,
-                                       const int theLeft = 0, const int theTop = 0,
-                                       const StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+                                       int theLeft = 0, int theTop = 0,
+                                       StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                                       RangeStyle theStyle = RangeStyle_PlusMinus,
+                                       int theMargin = 0);
 
     ST_CPPEXPORT virtual ~StGLRangeFieldFloat32();
     ST_CPPEXPORT virtual bool stglInit() ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void stglResize() ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool doScroll(const StScrollEvent& theEvent) ST_ATTR_OVERRIDE;
 
         public:
@@ -58,6 +67,9 @@ class StGLRangeFieldFloat32 : public StGLWidget {
     ST_CPPEXPORT void doDecrement(const size_t );
     ST_CPPEXPORT void doIncrement(const size_t );
 
+    ST_CPPEXPORT void doSeekClick(const int    theMouseBtn,
+                                  const double theValue);
+
         private:
 
     ST_LOCAL void onValueChange(const float theValue);
@@ -68,6 +80,7 @@ class StGLRangeFieldFloat32 : public StGLWidget {
     StGLVec3                 myColors[FieldColorNb];
     StGLTextArea*            myValueText;  //!< text area
     StString                 myFormat;     //!< value format
+    RangeStyle               myRangeStyle;
 
 };
 

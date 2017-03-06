@@ -131,6 +131,7 @@ void StMoviePlayer::updateStrings() {
     params.LastUpdateDay->setName(tr(MENU_HELP_UPDATES));
     params.SrcStereoFormat->setName(tr(MENU_MEDIA_SRC_FORMAT));
     params.ToShowPlayList->setName(tr(VIDEO_LIST));
+    params.ToShowAdjustImage->setName(tr(MENU_VIEW_IMAGE_ADJUST));
     params.ToTrackHead->setName(tr(MENU_VIEW_TRACK_HEAD));
     params.ToTrackHeadAudio->setName(tr(MENU_VIEW_TRACK_HEAD_AUDIO));
     params.ToForceBFormat->setName(stCString("Force B-Format"));
@@ -250,6 +251,8 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.SrcStereoFormat->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchSrcFormat);
     params.ToShowPlayList   = new StBoolParamNamed(false, stCString("showPlaylist"));
     params.ToShowPlayList->signals.onChanged = stSlot(this, &StMoviePlayer::doShowPlayList);
+    params.ToShowAdjustImage = new StBoolParamNamed(false, stCString("showAdjustImage"));
+    params.ToShowAdjustImage->signals.onChanged = stSlot(this, &StMoviePlayer::doShowAdjustImage);
     params.ToTrackHead      = new StBoolParamNamed(true,  stCString("toTrackHead"));
     params.ToTrackHeadAudio = new StBoolParamNamed(true,  stCString("toTrackHeadAudio"));
     params.ToForceBFormat   = new StBoolParamNamed(false, stCString("toForceBFormat"));
@@ -300,6 +303,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (params.ToLoopSingle);
     mySettings->loadParam (params.AreGlobalMKeys);
     mySettings->loadParam (params.ToShowPlayList);
+    mySettings->loadParam (params.ToShowAdjustImage);
     mySettings->loadParam (params.SubtitlesPlace);
     mySettings->loadParam (params.SubtitlesTopDY);
     mySettings->loadParam (params.SubtitlesBottomDY);
@@ -535,6 +539,7 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (params.ToLoopSingle);
         mySettings->saveParam (params.AreGlobalMKeys);
         mySettings->saveParam (params.ToShowPlayList);
+        mySettings->saveParam (params.ToShowAdjustImage);
 
         mySettings->saveParam (params.ToTrackHead);
         mySettings->saveParam (params.ToTrackHeadAudio);
@@ -1563,6 +1568,15 @@ void StMoviePlayer::doShowPlayList(const bool theToShow) {
     }
 
     myGUI->myPlayList->setOpacity(theToShow ? 1.0f : 0.0f, false);
+}
+
+void StMoviePlayer::doShowAdjustImage(const bool theToShow) {
+    if(myGUI.isNull()
+    || myGUI->myAdjustOverlay == NULL) {
+        return;
+    }
+
+    myGUI->myAdjustOverlay->setOpacity(theToShow ? 1.0f : 0.0f, false);
 }
 
 void StMoviePlayer::doPlayListReverse(const size_t ) {

@@ -100,6 +100,7 @@ void StImageViewer::updateStrings() {
     params.LastUpdateDay->setName(tr(MENU_HELP_UPDATES));
     params.SrcStereoFormat->setName(tr(MENU_MEDIA_SRC_FORMAT));
     params.ToShowPlayList->setName(tr(PLAYLIST));
+    params.ToShowAdjustImage->setName(tr(MENU_VIEW_IMAGE_ADJUST));
     params.ToTrackHead->setName(tr(MENU_VIEW_TRACK_HEAD));
     params.ToShowFps->setName(tr(MENU_SHOW_FPS));
     params.ToShowMenu->setName(stCString("Show main menu"));
@@ -156,6 +157,8 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     params.SrcStereoFormat->signals.onChanged.connect(this, &StImageViewer::doSwitchSrcFormat);
     params.ToShowPlayList   = new StBoolParamNamed(false, stCString("showPlaylist"));
     params.ToShowPlayList->signals.onChanged = stSlot(this, &StImageViewer::doShowPlayList);
+    params.ToShowAdjustImage = new StBoolParamNamed(false, stCString("showAdjustImage"));
+    params.ToShowAdjustImage->signals.onChanged = stSlot(this, &StImageViewer::doShowAdjustImage);
     params.ToTrackHead   = new StBoolParamNamed(true,  stCString("toTrackHead"));
     params.ToShowFps     = new StBoolParamNamed(false, stCString("toShowFps"));
     params.ToShowMenu    = new StBoolParamNamed(true,  stCString("toShowMenu"));
@@ -186,6 +189,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (params.IsMobileUI);
     mySettings->loadParam (params.IsVSyncOn);
     mySettings->loadParam (params.ToShowPlayList);
+    mySettings->loadParam (params.ToShowAdjustImage);
 
     int32_t aSlideShowDelayInt = int32_t(mySlideShowDelay);
     mySettings->loadInt32 (ST_SETTING_SLIDESHOW_DELAY,    aSlideShowDelayInt);
@@ -322,6 +326,7 @@ void StImageViewer::saveAllParams() {
         mySettings->saveParam (params.IsMobileUI);
         mySettings->saveParam (params.IsVSyncOn);
         mySettings->saveParam (params.ToShowPlayList);
+        mySettings->saveParam (params.ToShowAdjustImage);
         if(myToSaveSrcFormat) {
             mySettings->saveParam(params.SrcStereoFormat);
         }
@@ -1248,6 +1253,15 @@ void StImageViewer::doShowPlayList(const bool theToShow) {
     }
 
     myGUI->myPlayList->setOpacity(theToShow ? 1.0f : 0.0f, false);
+}
+
+void StImageViewer::doShowAdjustImage(const bool theToShow) {
+    if(myGUI.isNull()
+    || myGUI->myAdjustOverlay == NULL) {
+        return;
+    }
+
+    myGUI->myAdjustOverlay->setOpacity(theToShow ? 1.0f : 0.0f, false);
 }
 
 void StImageViewer::doFileNext() {

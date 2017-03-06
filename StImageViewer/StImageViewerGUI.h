@@ -38,6 +38,7 @@ class StGLMsgStack;
 class StGLFpsLabel;
 class StGLTable;
 class StGLPlayList;
+class StGLRangeFieldFloat32;
 class StPlayList;
 class StWindow;
 
@@ -171,6 +172,7 @@ class StImageViewerGUI : public StGLRootWidget {
 
     ST_LOCAL void      createMobileUpperToolbar();
     ST_LOCAL void      createMobileBottomToolbar();
+    ST_LOCAL void      createImageAdjustments();
 
         private: //! @name callback Slots
 
@@ -212,10 +214,20 @@ class StImageViewerGUI : public StGLRootWidget {
 
     StGLWidget*         myPanelUpper;       //!< upper  toolbar
     StGLWidget*         myPanelBottom;      //!< bottom toolbar
+
+    StGLWidget*         myAdjustOverlay;    //!< image adjustments control
+    StGLRangeFieldFloat32* myBtnSepDx;
+    StGLRangeFieldFloat32* myBtnSepDy;
+    StGLRangeFieldFloat32* myBtnSepRot;
+    StGLTextureButton*     myBtnReset3d;
+    StGLTextureButton*     myBtnResetColor1;
+    StGLTextureButton*     myBtnResetColor2;
+
     StGLTextureButton*  myBtnOpen;
     StGLTextureButton*  myBtnPrev;
     StGLTextureButton*  myBtnNext;
     StGLTextureButton*  myBtnInfo;
+    StGLTextureButton*  myBtnAdjust;
     StGLTextureButton*  myBtnSwapLR;
     StGLCheckboxTextured* myBtnPanorama;
     StGLTextureButton*  myBtnSrcFrmt;

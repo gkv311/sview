@@ -111,22 +111,22 @@ namespace {
             const float THE_SEP_STEP_PX = 2.0f;
             switch(myParamId) {
                 case StereoParamId_SepDX: {
-                    setMinValue(-100.0f);
-                    setMaxValue( 100.0f);
+                    setMinMaxValues(-500.0f, 500.0f);
+                    setEffectiveMinMaxValues(-100.0f, 100.0f);
                     setStep(THE_SEP_STEP_PX);
                     setTolerance(0.5f);
                     break;
                 }
                 case StereoParamId_SepDY: {
-                    setMinValue(-100.0f);
-                    setMaxValue( 100.0f);
+                    setMinMaxValues(-500.0f, 500.0f);
+                    setEffectiveMinMaxValues(-100.0f, 100.0f);
                     setStep(THE_SEP_STEP_PX);
                     setTolerance(0.5f);
                     break;
                 }
                 case StereoParamId_SepRot: {
-                    setMinValue(-180.0f);
-                    setMaxValue( 180.0f);
+                    setMinMaxValues(-180.0f, 180.0f);
+                    setEffectiveMinMaxValues(-5.0f, 5.0f);
                     setStep(0.1f);
                     setTolerance(0.001f);
                     break;

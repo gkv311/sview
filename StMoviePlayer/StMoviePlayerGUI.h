@@ -177,6 +177,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
 
     ST_LOCAL void createMobileUpperToolbar();
     ST_LOCAL void createMobileBottomToolbar();
+    ST_LOCAL void createImageAdjustments();
 
         private: //! @name callback Slots
 
@@ -225,6 +226,7 @@ class StMoviePlayerGUI : public StGLRootWidget {
     StGLWidget*         myPanelUpper;       //!< upper toolbar
     StGLTextureButton*  myBtnOpen;
     StGLTextureButton*  myBtnInfo;
+    StGLTextureButton*  myBtnAdjust;
     StGLTextureButton*  myBtnSwapLR;
     StGLCheckboxTextured* myBtnPanorama;
     StGLTextureButton*  myBtnSrcFrmt;
@@ -246,6 +248,14 @@ class StMoviePlayerGUI : public StGLRootWidget {
     StGLCheckboxTextured* myBtnLoop;
     StGLTextureButton*  myBtnFullScr;
     StGLFpsLabel*       myFpsWidget;
+
+    StGLWidget*            myAdjustOverlay; //!< image adjustments control
+    StGLRangeFieldFloat32* myBtnSepDx;
+    StGLRangeFieldFloat32* myBtnSepDy;
+    StGLRangeFieldFloat32* myBtnSepRot;
+    StGLTextureButton*     myBtnReset3d;
+    StGLTextureButton*     myBtnResetColor1;
+    StGLTextureButton*     myBtnResetColor2;
 
     StGLTable*          myHKeysTable;
 

@@ -26,6 +26,8 @@ class StFloat32Param : public StParam<float> {
     : StParam<float>(theValue),
       myMinValue(-1E+37f),
       myMaxValue( 1E+37f),
+      myEffMinValue(-1E+37f),
+      myEffMaxValue(-1E+37f),
       myDefValue(0.0f),
       myValueStep(1.0f),
       myTolerance(0.0001f),
@@ -41,6 +43,8 @@ class StFloat32Param : public StParam<float> {
     : StParam<float>(theValue),
       myMinValue(-1E+37f),
       myMaxValue( 1E+37f),
+      myEffMinValue(-1E+37f),
+      myEffMaxValue(-1E+37f),
       myDefValue(0.0f),
       myValueStep(1.0f),
       myTolerance(0.0001f) {
@@ -59,6 +63,8 @@ class StFloat32Param : public StParam<float> {
     : StParam<float>(theValue),
       myMinValue(theMinValue),
       myMaxValue(theMaxValue),
+      myEffMinValue(theMinValue),
+      myEffMaxValue(theMaxValue),
       myDefValue(theDefValue),
       myValueStep(theStep),
       myTolerance(theTolerance) {
@@ -105,6 +111,7 @@ class StFloat32Param : public StParam<float> {
      */
     ST_LOCAL void setMinValue(float theValue) {
         myMinValue = theValue;
+        myEffMinValue = theValue;
     }
 
     /**
@@ -126,6 +133,7 @@ class StFloat32Param : public StParam<float> {
      */
     ST_LOCAL void setMaxValue(float theValue) {
         myMaxValue = theValue;
+        myEffMaxValue = theValue;
     }
 
     /**
@@ -135,6 +143,31 @@ class StFloat32Param : public StParam<float> {
                                   float theMaxValue) {
         myMinValue = theMinValue;
         myMaxValue = theMaxValue;
+        myEffMinValue = theMinValue;
+        myEffMaxValue = theMaxValue;
+    }
+
+    /**
+     * Return minimum effective value (can be greater then minimum allowed value).
+     */
+    ST_LOCAL float getEffectiveMinValue() const {
+        return myEffMinValue;
+    }
+
+    /**
+     * Return maximum effective value (can be less then maximum allowed value).
+     */
+    ST_LOCAL float getEffectiveMaxValue() const {
+        return myEffMaxValue;
+    }
+
+    /**
+     * Set effective minimum and maximum allowed values.
+     */
+    ST_LOCAL void setEffectiveMinMaxValues(float theMinValue,
+                                           float theMaxValue) {
+        myEffMinValue = theMinValue;
+        myEffMaxValue = theMaxValue;
     }
 
     /**
@@ -268,26 +301,35 @@ class StFloat32Param : public StParam<float> {
      * Return value within 0..1 range (taking into account min/max values).
      */
     ST_LOCAL float getNormalizedValue() const {
-        return (getValue() - myMinValue) / (myMaxValue - myMinValue);
+        return (getValue() - myEffMinValue) / (myEffMaxValue - myEffMinValue);
     }
 
     /**
      * Setup value within 0..1 range (to be scaled according to min/max values).
      */
-    ST_LOCAL bool setNormalizedValue(const float theValue) {
-        return setValue(myMinValue + theValue * (myMaxValue - myMinValue));
+    ST_LOCAL bool setNormalizedValue(float theValue,
+                                     bool  theToRoundToStep = false) {
+        float aValue = myEffMinValue + theValue * (myEffMaxValue - myEffMinValue);
+        if(theToRoundToStep) {
+            aValue = aValue >= 0.0
+                   ? (std::floor(aValue / myValueStep + 0.5f) * myValueStep)
+                   : (std::ceil (aValue / myValueStep + 0.5f) * myValueStep);
+        }
+        return setValue(aValue);
     }
 
         protected:
 
-    float    myMinValue;  //!< minimal allowed value
-    float    myMaxValue;  //!< maximal allowed value
-    float    myDefValue;  //!< default value
-    float    myValueStep; //!< default increment step
-    float    myTolerance; //!< tolerance for equality check
+    float    myMinValue;    //!< minimal allowed value
+    float    myMaxValue;    //!< maximal allowed value
+    float    myEffMinValue; //!< effective minimal allowed value
+    float    myEffMaxValue; //!< effective maximal allowed value
+    float    myDefValue;    //!< default value
+    float    myValueStep;   //!< default increment step
+    float    myTolerance;   //!< tolerance for equality check
 
-    StString myParamKey;  //!< parameter key (id)
-    StString myParamName; //!< parameter name (label)
+    StString myParamKey;    //!< parameter key (id)
+    StString myParamName;   //!< parameter name (label)
 
 };
 

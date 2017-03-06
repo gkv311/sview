@@ -135,6 +135,7 @@ class StImageViewer : public StApplication {
         StHandle<StBoolParamNamed>    ToShowMenu;       //!< show main menu
         StHandle<StBoolParamNamed>    ToShowTopbar;     //!< show topbar
         StHandle<StBoolParamNamed>    ToShowPlayList;   //!< display playlist
+        StHandle<StBoolParamNamed>    ToShowAdjustImage;//!< display image adjustment overlay
         StHandle<StBoolParamNamed>    ToShowFps;        //!< display FPS meter
         StHandle<StBoolParamNamed>    IsMobileUI;       //!< display mobile interface (user option)
         StHandle<StBoolParam>         IsMobileUISwitch; //!< display mobile interface (actual value)
@@ -180,6 +181,7 @@ class StImageViewer : public StApplication {
     ST_LOCAL void doSwitchViewMode(const int32_t theMode);
     ST_LOCAL void doPanoramaOnOff(const size_t );
     ST_LOCAL void doShowPlayList(const bool theToShow);
+    ST_LOCAL void doShowAdjustImage(const bool theToShow);
     ST_LOCAL void doFileNext();
 
         public:

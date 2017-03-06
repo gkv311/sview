@@ -203,21 +203,26 @@ StGLImageProgram::StGLImageProgram()
         + "const float TheRangeBits = 1.0;\n"
         + F_SHADER_YUVNV2RGB_MPEG);
 
-    params.gamma = new StFloat32Param(   1.0f,         // initial value
-                                        0.05f, 99.0f, // min, max values
-                                         1.0f,         // default value
-                                        0.05f,         // incremental step
-                                      0.0001f);        // equality tolerance
-    params.brightness = new StFloat32Param(   1.0f,         // initial value
-                                              0.0f, 99.0f, // min, max values
-                                              1.0f,         // default value
-                                             0.05f,         // incremental step
-                                           0.0001f);        // equality tolerance
-    params.saturation = new StFloat32Param(   1.0f,         // initial value
-                                            -10.0f, 99.0f, // min, max values
-                                              1.0f,         // default value
-                                             0.05f,         // incremental step
-                                           0.0001f);        // equality tolerance
+    params.gamma = new StFloat32Param(1.0f);
+    params.gamma->setMinMaxValues(0.05f, 99.0f);
+    params.gamma->setEffectiveMinMaxValues(0.05f, 2.0f);
+    params.gamma->setDefValue(1.0f);
+    params.gamma->setStep(0.05f);
+    params.gamma->setTolerance(0.0001f);
+
+    params.brightness = new StFloat32Param(1.0f);
+    params.brightness->setMinMaxValues(0.0f, 99.0f);
+    params.brightness->setDefValue(1.0f);
+    params.brightness->setEffectiveMinMaxValues(0.0f, 5.0f);
+    params.brightness->setStep(0.05f);
+    params.brightness->setTolerance(0.0001f);
+
+    params.saturation = new StFloat32Param(1.0f);
+    params.saturation->setMinMaxValues(-10.0f, 99.0f);
+    params.saturation->setEffectiveMinMaxValues(0.0f, 2.0f);
+    params.saturation->setDefValue(1.0f);
+    params.saturation->setStep(0.05f);
+    params.saturation->setTolerance(0.0001f);
 
     // main shader parts
     const char V_SHADER_FLAT[] =

@@ -204,6 +204,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StBoolParamNamed>    ToTrackHeadAudio;  //!< enable/disable head-tracking for audio listener
         StHandle<StBoolParamNamed>    ToForceBFormat;    //!< force B-Format for any 4-channels audio stream
         StHandle<StBoolParamNamed>    ToShowPlayList;    //!< display playlist
+        StHandle<StBoolParamNamed>    ToShowAdjustImage; //!< display image adjustment overlay
         StHandle<StBoolParamNamed>    ToShowFps;         //!< display FPS meter
         StHandle<StBoolParamNamed>    ToShowMenu;        //!< show main menu
         StHandle<StBoolParamNamed>    ToShowTopbar;      //!< show topbar
@@ -295,6 +296,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doSwitchAudioStream(const int32_t theStreamId);
     ST_LOCAL void doSwitchSubtitlesStream(const int32_t theStreamId);
     ST_LOCAL void doShowPlayList(const bool theToShow);
+    ST_LOCAL void doShowAdjustImage(const bool theToShow);
     ST_LOCAL void doUpdateStateLoading();
     ST_LOCAL void doUpdateStateLoaded();
     ST_LOCAL void doImageAdjustReset(const size_t dummy = 0);

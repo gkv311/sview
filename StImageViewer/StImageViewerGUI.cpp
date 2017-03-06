@@ -74,6 +74,7 @@ void StImageViewerGUI::createDesktopUI(const StHandle<StPlayList>& thePlayList) 
         myFpsWidget = new StGLFpsLabel(this);
     }
 
+    createImageAdjustments();
     createUpperToolbar();
 
     StMarginsI aButtonMargins;
@@ -201,6 +202,14 @@ void StImageViewerGUI::createUpperToolbar() {
     myBtnPanorama->signals.onBtnClick += stSlot(this, &StImageViewerGUI::doPanoramaCombo);
     myBtnPanorama->setDrawShadow(true);
     myBtnPanorama->changeMargins() = aButtonMargins;
+
+    myBtnAdjust = new StGLCheckboxTextured(myPanelUpper, myPlugin->params.ToShowAdjustImage,
+                                           iconTexture(stCString("actionColorAdjustOff"), anIconSize),
+                                           iconTexture(stCString("actionColorAdjust"),    anIconSize),
+                                           aLeft + (aBtnIter++) * anIconStep, aTop,
+                                           StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    myBtnAdjust->setDrawShadow(true);
+    myBtnAdjust->changeMargins() = aButtonMargins;
 }
 
 /**
@@ -855,6 +864,7 @@ StGLMenu* StImageViewerGUI::createLanguageMenu() {
 }
 
 void StImageViewerGUI::createMobileUI(const StHandle<StPlayList>& thePlayList) {
+    createImageAdjustments();
     createMobileUpperToolbar();
     createMobileBottomToolbar();
 
@@ -930,6 +940,14 @@ void StImageViewerGUI::createMobileUpperToolbar() {
     myBtnPanorama->signals.onBtnClick += stSlot(this, &StImageViewerGUI::doPanoramaCombo);
     myBtnPanorama->setDrawShadow(true);
     myBtnPanorama->changeMargins() = aButtonMargins;
+
+    myBtnAdjust = new StGLCheckboxTextured(myPanelUpper, myPlugin->params.ToShowAdjustImage,
+                                           iconTexture(stCString("actionColorAdjustOff"), anIconSize),
+                                           iconTexture(stCString("actionColorAdjust"),    anIconSize),
+                                           (aBtnIter++) * anIconStep, 0,
+                                           StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    myBtnAdjust->setDrawShadow(true);
+    myBtnAdjust->changeMargins() = aButtonMargins;
 
     aBtnIter = 0;
     StGLTextureButton* aBtnEx = new StGLTextureButton(myPanelUpper, (aBtnIter--) * (-anIconStep), 0,
@@ -1011,6 +1029,108 @@ void StImageViewerGUI::createMobileBottomToolbar() {
     myBtnList->changeMargins() = aButtonMargins;
 }
 
+/**
+ * Create image adjustments control
+ */
+void StImageViewerGUI::createImageAdjustments() {
+    StMarginsI aButtonMargins;
+    const IconSize anIconSize = scaleIcon(32, aButtonMargins);
+    const int      anIconStep = scale(isMobile() ? 56 : 48);
+    const int      aCtrlStep  = scale(36);
+    const int      aSlideWidth = anIconStep * 4;
+    aButtonMargins.extend(scale(isMobile() ? 12 : 8));
+
+    myAdjustOverlay = new StGLContainer(this,
+                                        isMobile() ? anIconStep / 2 : scale(DISPL_X_REGION_UPPER),
+                                        isMobile() ? scale(56) : scale(72),
+                                        StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                                        scale(4096), aCtrlStep * 6 + anIconStep);
+    myAdjustOverlay->setOpacity(myPlugin->params.ToShowAdjustImage->getValue() ? 1.0f : 0.0f, false);
+
+    int aBtnIter = 0;
+    {
+        StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(myAdjustOverlay, myImage->params.Gamma,
+                                                                  0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT),
+                                                                  StGLRangeFieldFloat32::RangeStyle_Seekbar, scale(18));
+        aRange->changeRectPx().right() = aRange->getRectPx().left() + aSlideWidth;
+        aRange->changeRectPx().moveTopTo(aCtrlStep * (aBtnIter++));
+        aRange->changeMargins().left   = scale(8);
+        aRange->changeMargins().right  = scale(8);
+        aRange->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+        aRange->setFormat(tr(MENU_VIEW_ADJUST_GAMMA) + ": %+01.2f");
+    }
+    {
+        StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(myAdjustOverlay, myImage->params.Brightness,
+                                                                  0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT),
+                                                                  StGLRangeFieldFloat32::RangeStyle_Seekbar, scale(18));
+        aRange->changeRectPx().right() = aRange->getRectPx().left() + aSlideWidth;
+        aRange->changeRectPx().moveTopTo(aCtrlStep * (aBtnIter++));
+        aRange->changeMargins().left   = scale(8);
+        aRange->changeMargins().right  = scale(8);
+        aRange->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+        aRange->setFormat(tr(MENU_VIEW_ADJUST_BRIGHTNESS) + ": %+01.2f");
+    }
+    {
+        StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(myAdjustOverlay, myImage->params.Saturation,
+                                                                  0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT),
+                                                                  StGLRangeFieldFloat32::RangeStyle_Seekbar, scale(18));
+        aRange->changeRectPx().right() = aRange->getRectPx().left() + aSlideWidth;
+        aRange->changeRectPx().moveTopTo(aCtrlStep * (aBtnIter++));
+        aRange->changeMargins().left   = scale(8);
+        aRange->changeMargins().right  = scale(8);
+        aRange->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+        aRange->setFormat(tr(MENU_VIEW_ADJUST_SATURATION) + ": %+01.2f");
+    }
+    myBtnResetColor1 = new StGLTextureButton(myAdjustOverlay, anIconStep * 1, aCtrlStep * aBtnIter);
+    myBtnResetColor1->setAction(myPlugin->getAction(StImageViewer::Action_ImageAdjustReset));
+    myBtnResetColor1->setTexturePath(iconTexture(stCString("actionColorReset"), anIconSize));
+    myBtnResetColor1->setDrawShadow(true);
+    myBtnResetColor1->changeMargins() = aButtonMargins;
+    myBtnResetColor1->setOpacity(0.0f, false);
+
+    myBtnSepDx = new StGLRangeFieldFloat32(myAdjustOverlay, myImage->params.SeparationDX,
+                                           0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT),
+                                           StGLRangeFieldFloat32::RangeStyle_Seekbar, scale(18));
+    myBtnSepDx->changeRectPx().right() = myBtnSepDx->getRectPx().left() + aSlideWidth;
+    myBtnSepDx->changeRectPx().moveTopTo(aCtrlStep * (aBtnIter++));
+    myBtnSepDx->changeMargins().left   = scale(8);
+    myBtnSepDx->changeMargins().right  = scale(8);
+    myBtnSepDx->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    myBtnSepDx->setFormat(stCString("DX Separation: %+01.0f"));
+
+    myBtnSepDy = new StGLRangeFieldFloat32(myAdjustOverlay, myImage->params.SeparationDY,
+                                           0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT),
+                                           StGLRangeFieldFloat32::RangeStyle_Seekbar, scale(18));
+    myBtnSepDy->changeRectPx().right() = myBtnSepDy->getRectPx().left() + aSlideWidth;
+    myBtnSepDy->changeRectPx().moveTopTo(aCtrlStep * (aBtnIter++));
+    myBtnSepDy->changeMargins().left   = scale(8);
+    myBtnSepDy->changeMargins().right  = scale(8);
+    myBtnSepDy->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    myBtnSepDy->setFormat(stCString("DY Separation: %+01.0f"));
+
+    myBtnSepRot = new StGLRangeFieldFloat32(myAdjustOverlay, myImage->params.SeparationRot,
+                                                              0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT),
+                                                              StGLRangeFieldFloat32::RangeStyle_Seekbar, scale(18));
+    myBtnSepRot->changeRectPx().right() = myBtnSepRot->getRectPx().left() + aSlideWidth;
+    myBtnSepRot->changeRectPx().moveTopTo(aCtrlStep * (aBtnIter++));
+    myBtnSepRot->changeMargins().left   = scale(8);
+    myBtnSepRot->changeMargins().right  = scale(8);
+    myBtnSepRot->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+    myBtnSepRot->setFormat(stCString("Angular Sep.: %+01.2f"));
+
+    myBtnResetColor2 = new StGLTextureButton(myAdjustOverlay, anIconStep * 1, aCtrlStep * aBtnIter);
+    myBtnResetColor2->setAction(myPlugin->getAction(StImageViewer::Action_ImageAdjustReset));
+    myBtnResetColor2->setTexturePath(iconTexture(stCString("actionColorReset"), anIconSize));
+    myBtnResetColor2->setDrawShadow(true);
+    myBtnResetColor2->changeMargins() = aButtonMargins;
+
+    myBtnReset3d = new StGLTextureButton(myAdjustOverlay, anIconStep * 2, aCtrlStep * aBtnIter);
+    myBtnReset3d->setAction(myImage->getActions()[StGLImageRegion::Action_Reset]);
+    myBtnReset3d->setTexturePath(iconTexture(stCString("actionResetPlacement"), anIconSize));
+    myBtnReset3d->setDrawShadow(true);
+    myBtnReset3d->changeMargins() = aButtonMargins;
+}
+
 void StImageViewerGUI::doOpenFile(const size_t ) {
     StGLOpenFile* aDialog = new StGLOpenFile(this, tr(DIALOG_OPEN_FILE), tr(BUTTON_CLOSE));
     aDialog->setMimeList(myPlugin->myLoader->getMimeList());
@@ -1088,10 +1208,18 @@ StImageViewerGUI::StImageViewerGUI(StImageViewer*  thePlugin,
   //
   myPanelUpper(NULL),
   myPanelBottom(NULL),
+  myAdjustOverlay(NULL),
+  myBtnSepDx(NULL),
+  myBtnSepDy(NULL),
+  myBtnSepRot(NULL),
+  myBtnReset3d(NULL),
+  myBtnResetColor1(NULL),
+  myBtnResetColor2(NULL),
   myBtnOpen(NULL),
   myBtnPrev(NULL),
   myBtnNext(NULL),
   myBtnInfo(NULL),
+  myBtnAdjust(NULL),
   myBtnSwapLR(NULL),
   myBtnPanorama(NULL),
   myBtnSrcFrmt(NULL),
@@ -1170,6 +1298,7 @@ size_t StImageViewerGUI::trSrcFormatId(const StFormat theSrcFormat) {
 
 void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
                                      bool              toForceHide) {
+    const bool toShowAdjust   = myPlugin->params.ToShowAdjustImage->getValue();
     const bool toShowPlayList = myPlugin->params.ToShowPlayList->getValue();
     const bool hasMainMenu    =  myPlugin->params.ToShowMenu->getValue()
                              &&  myMenuRoot != NULL;
@@ -1181,6 +1310,16 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
     const bool isMouseActive  = myWindow->isMouseMoved();
 
     StHandle<StStereoParams> aParams = myImage->getSource();
+    StFormat aSrcFormat = (StFormat )myPlugin->params.SrcStereoFormat->getValue();
+    if(aSrcFormat == StFormat_AUTO
+    && !aParams.isNull()) {
+        aSrcFormat = aParams->StereoFormat;
+    }
+    if(!aParams.isNull()
+     && myImage->params.SwapLR->getValue()) {
+        aSrcFormat = st::formatReversed(aSrcFormat);
+    }
+
     const double aStillTime = myVisibilityTimer.getElapsedTime();
     myIsVisibleGUI = isMouseActive
         || aParams.isNull()
@@ -1204,6 +1343,19 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
     }
     if(myPanelBottom != NULL) {
         myPanelBottom->setOpacity(hasBottomPanel ? anOpacity : 0.0f, true);
+    }
+    if(myAdjustOverlay != NULL
+    && toShowAdjust) {
+        myAdjustOverlay->setOpacity(anOpacity, true);
+        if(aSrcFormat == StFormat_Mono) {
+            myBtnSepDx  ->setOpacity(0.0f, false);
+            myBtnSepDy  ->setOpacity(0.0f, false);
+            myBtnSepRot ->setOpacity(0.0f, false);
+            myBtnReset3d->setOpacity(0.0f, false);
+            myBtnResetColor2->setOpacity(0.0f, false);
+        } else {
+            myBtnResetColor1->setOpacity(0.0f, false);
+        }
     }
     if(myPlayList != NULL
     && toShowPlayList) {
@@ -1233,15 +1385,6 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
                                 || aCurrPos == StPlayList::CurrentPosition_First ? 1.0f : 0.5f);
     }
 
-    StFormat aSrcFormat = (StFormat )myPlugin->params.SrcStereoFormat->getValue();
-    if(aSrcFormat == StFormat_AUTO
-    && !aParams.isNull()) {
-        aSrcFormat = aParams->StereoFormat;
-    }
-    if(!aParams.isNull()
-     && myImage->params.SwapLR->getValue()) {
-        aSrcFormat = st::formatReversed(aSrcFormat);
-    }
     if(myBtnSrcFrmt != NULL) {
         myBtnSrcFrmt->setFaceId(aSrcFormat != StFormat_AUTO ? aSrcFormat : StFormat_Mono);
     }
@@ -1288,6 +1431,8 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
             myDescr->setText(tr(FULLSCREEN));
         } else if(::isPointIn(myBtnSrcFrmt, theCursor)) {
             myDescr->setText(tr(BTN_SRC_FORMAT) + "\n" + trSrcFormat(aSrcFormat));
+        } else if(::isPointIn(myBtnAdjust, theCursor)) {
+            myDescr->setText(tr(MENU_VIEW_IMAGE_ADJUST));
         } else if(::isPointIn(myBtnPanorama, theCursor)) {
             size_t aTrPano = MENU_VIEW_SURFACE_PLANE;
             switch(aViewMode) {
