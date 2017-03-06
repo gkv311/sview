@@ -27,6 +27,8 @@
 
                 <data android:mimeType="model/iges"/>
                 <data android:mimeType="model/step"/>
+                <data android:mimeType="model/gltf+json"/>
+                <data android:mimeType="model/gltf.binary"/>
 
                 <data android:mimeType="application/iges"/>
                 <data android:mimeType="application/step"/>
@@ -56,6 +58,19 @@
                 <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.BREP"/>
                 <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.brep"/>
                 <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.BREP"/>
+
+                <data android:pathPattern=".*\\.xbf"/>
+                <data android:pathPattern=".*\\.XBF"/>
+                <data android:pathPattern=".*\\..*\\.xbf"/>
+                <data android:pathPattern=".*\\..*\\.XBF"/>
+                <data android:pathPattern=".*\\..*\\..*\\.xbf"/>
+                <data android:pathPattern=".*\\..*\\..*\\.XBF"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.xbf"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.XBF"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.xbf"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.XBF"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.xbf"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.XBF"/>
 
                 <data android:pathPattern=".*\\.rle"/>
                 <data android:pathPattern=".*\\.RLE"/>
@@ -121,6 +136,32 @@
                 <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.IGES"/>
                 <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.iges"/>
                 <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.IGES"/>
+
+                <data android:pathPattern=".*\\.gltf"/>
+                <data android:pathPattern=".*\\.GLTF"/>
+                <data android:pathPattern=".*\\..*\\.gltf"/>
+                <data android:pathPattern=".*\\..*\\.GLTF"/>
+                <data android:pathPattern=".*\\..*\\..*\\.gltf"/>
+                <data android:pathPattern=".*\\..*\\..*\\.GLTF"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.gltf"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.GLTF"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.gltf"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.GLTF"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.gltf"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.GLTF"/>
+
+                <data android:pathPattern=".*\\.glb"/>
+                <data android:pathPattern=".*\\.GLB"/>
+                <data android:pathPattern=".*\\..*\\.glb"/>
+                <data android:pathPattern=".*\\..*\\.GLB"/>
+                <data android:pathPattern=".*\\..*\\..*\\.glb"/>
+                <data android:pathPattern=".*\\..*\\..*\\.GLB"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.glb"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.GLB"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.glb"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.GLB"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.glb"/>
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.GLB"/>
             </intent-filter>
         </activity>
     </application>
