@@ -236,7 +236,7 @@ void StGLSeekBar::stglUpdate(const StPointD_t& theCursor,
     const double aPos   = stMin(stMax(getPointInEx(theCursor), 0.0), 1.0);
     const int    aPosPx = int(aPos * double(getRectPx().width()));
 
-    const int aMoveTolerPx = myMoveTolerPx > 0 ? myMoveTolerPx : myRoot->scale(theIsPreciseInput ? 1 : 16);
+    const int aMoveTolerPx = myMoveTolerPx > 0 ? myMoveTolerPx : myRoot->scale(theIsPreciseInput ? 1 : 2);
     if(myClickPos >= 0
     && std::abs(aPosPx - myClickPos) < aMoveTolerPx) {
         return;
