@@ -191,6 +191,7 @@ namespace StMoviePlayerStrings {
         OPTION_EXIT_ON_ESCAPE_ONE_CLICK    = 1703,
         OPTION_EXIT_ON_ESCAPE_DOUBLE_CLICK = 1704,
         OPTION_EXIT_ON_ESCAPE_WINDOWED     = 1705,
+        OPTION_HIDE_NAVIGATION_BAR         = 1710,
 
         // Open/Save dialogs
         DIALOG_OPEN_FILE       = 2000,

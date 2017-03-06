@@ -2264,6 +2264,10 @@ void StMoviePlayerGUI::doMobileSettings(const size_t ) {
 
     aParams.add(myLangMap->params.language);
     aParams.add(myPlugin->params.IsMobileUI);
+    if(isMobile()) {
+        //aParams.add(myPlugin->params.ToHideStatusBar);
+        aParams.add(myPlugin->params.ToHideNavBar);
+    }
     aParams.add(myPlugin->params.ExitOnEscape);
     if(!isMobile()) {
         aParams.add(myPlugin->params.ToShowExtra);

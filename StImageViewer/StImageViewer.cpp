@@ -106,6 +106,8 @@ void StImageViewer::updateStrings() {
     params.ToShowMenu->setName(stCString("Show main menu"));
     params.ToShowTopbar->setName(stCString("Show top toolbar"));
     params.IsMobileUI->setName(stCString("Mobile UI"));
+    params.ToHideStatusBar->setName("Hide system status bar");
+    params.ToHideNavBar   ->setName(tr(OPTION_HIDE_NAVIGATION_BAR));
     params.IsVSyncOn->setName(tr(MENU_VSYNC));
     params.ToSaveRecent->setName(stCString("Remember recent file"));
     params.TargetFps->setName(stCString("FPS Target"));
@@ -167,6 +169,10 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     params.IsMobileUI->signals.onChanged = stSlot(this, &StImageViewer::doChangeMobileUI);
     params.IsMobileUISwitch = new StBoolParam(params.IsMobileUI->getValue());
     params.IsMobileUISwitch->signals.onChanged = stSlot(this, &StImageViewer::doScaleHiDPI);
+    params.ToHideStatusBar = new StBoolParamNamed(true, stCString("toHideStatusBar"));
+    params.ToHideStatusBar->signals.onChanged = stSlot(this, &StImageViewer::doHideSystemBars);
+    params.ToHideNavBar    = new StBoolParamNamed(true, stCString("toHideNavBar"));
+    params.ToHideNavBar   ->signals.onChanged = stSlot(this, &StImageViewer::doHideSystemBars);
     params.IsVSyncOn     = new StBoolParamNamed(true,  stCString("vsync"));
     params.IsVSyncOn->signals.onChanged = stSlot(this, &StImageViewer::doSwitchVSync);
     StApplication::params.VSyncMode->setValue(StGLContext::VSync_ON);
@@ -187,6 +193,8 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     myToCheckPoorOrient = !mySettings->loadParam(params.ToTrackHead);
     mySettings->loadParam (params.ToShowFps);
     mySettings->loadParam (params.IsMobileUI);
+    mySettings->loadParam (params.ToHideStatusBar);
+    mySettings->loadParam (params.ToHideNavBar);
     mySettings->loadParam (params.IsVSyncOn);
     mySettings->loadParam (params.ToShowPlayList);
     mySettings->loadParam (params.ToShowAdjustImage);
@@ -324,6 +332,8 @@ void StImageViewer::saveAllParams() {
         mySettings->saveParam (params.ToTrackHead);
         mySettings->saveParam (params.ToShowFps);
         mySettings->saveParam (params.IsMobileUI);
+        mySettings->saveParam (params.ToHideStatusBar);
+        mySettings->saveParam (params.ToHideNavBar);
         mySettings->saveParam (params.IsVSyncOn);
         mySettings->saveParam (params.ToShowPlayList);
         mySettings->saveParam (params.ToShowAdjustImage);
@@ -466,6 +476,7 @@ bool StImageViewer::init() {
     }
 
     // create the image loader thread
+    myWindow->setHideSystemBars(params.ToHideStatusBar->getValue(), params.ToHideNavBar->getValue());
     if(isReset) {
         if(params.IsFullscreen->getValue()) {
             myWindow->setFullScreen(true);
@@ -1074,6 +1085,14 @@ void StImageViewer::doScaleGui(const int32_t ) {
 
 void StImageViewer::doChangeMobileUI(const bool ) {
     params.IsMobileUISwitch->setValue(toUseMobileUI());
+}
+
+void StImageViewer::doHideSystemBars(const bool ) {
+    if(myWindow.isNull()) {
+        return;
+    }
+
+    myWindow->setHideSystemBars(params.ToHideStatusBar->getValue(), params.ToHideNavBar->getValue());
 }
 
 void StImageViewer::doScaleHiDPI(const bool ) {

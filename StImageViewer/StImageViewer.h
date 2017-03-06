@@ -139,6 +139,8 @@ class StImageViewer : public StApplication {
         StHandle<StBoolParamNamed>    ToShowFps;        //!< display FPS meter
         StHandle<StBoolParamNamed>    IsMobileUI;       //!< display mobile interface (user option)
         StHandle<StBoolParam>         IsMobileUISwitch; //!< display mobile interface (actual value)
+        StHandle<StBoolParamNamed>    ToHideStatusBar;  //!< hide system-provided status bar
+        StHandle<StBoolParamNamed>    ToHideNavBar;     //!< hide system-provided navigation bar
         StHandle<StBoolParamNamed>    IsVSyncOn;        //!< flag to use VSync
         StHandle<StBoolParamNamed>    ToSaveRecent;     //!< load/save recent file
         StString                      lastFolder;       //!< laster folder used to open / save file
@@ -174,6 +176,7 @@ class StImageViewer : public StApplication {
     ST_LOCAL virtual void doChangeLanguage(const int32_t ) ST_ATTR_OVERRIDE;
     ST_LOCAL void doScaleGui(const int32_t );
     ST_LOCAL void doChangeMobileUI(const bool theIsOn);
+    ST_LOCAL void doHideSystemBars(const bool theToHide);
     ST_LOCAL void doScaleHiDPI(const bool );
     ST_LOCAL void doSwitchVSync(const bool theValue);
     ST_LOCAL void doFullscreen(const bool theIsFullscreen);

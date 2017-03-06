@@ -219,6 +219,8 @@ class StMoviePlayer : public StApplication {
         StHandle<StInt32Param>        AudioStream;       //!< active Audio stream
         StHandle<StInt32Param>        SubtitlesStream;   //!< active Subtitles stream
         StHandle<StEnumParam>         BlockSleeping;     //!< active Audio stream
+        StHandle<StBoolParamNamed>    ToHideStatusBar;   //!< hide system-provided status bar
+        StHandle<StBoolParamNamed>    ToHideNavBar;      //!< hide system-provided navigation bar
         StHandle<StBoolParamNamed>    ToShowExtra;       //!< show experimental menu items
         StHandle<StInt32ParamNamed>   SnapshotImgType;   //!< default snapshot image type
         StString                      lastFolder;        //!< laster folder used to open / save file
@@ -300,6 +302,7 @@ class StMoviePlayer : public StApplication {
     ST_LOCAL void doUpdateStateLoading();
     ST_LOCAL void doUpdateStateLoaded();
     ST_LOCAL void doImageAdjustReset(const size_t dummy = 0);
+    ST_LOCAL void doHideSystemBars(const bool theToHide);
     ST_LOCAL void doSetBenchmark(const bool theValue);
 
         public:

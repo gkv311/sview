@@ -477,6 +477,7 @@ void StWindowImpl::processEvents() {
     StString aDndFile;
     myParentWin->setHardwareStereoOn(myToEnableStereoHW);
     myParentWin->setTrackOrientation(myToTrackOrient);
+    myParentWin->setHideSystemBars(myToHideStatusBar, myToHideNavBar);
     myParentWin->fetchState(aDndFile, myQuaternion, myToSwapEyesHW);
     if(!aDndFile.isEmpty()) {
         std::vector<const char*> aDndList;

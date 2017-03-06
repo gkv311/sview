@@ -153,6 +153,8 @@ void StMoviePlayer::updateStrings() {
     params.BlockSleeping->defineOption(BLOCK_SLEEP_ALWAYS,     tr(MENU_HELP_BLOCKSLP_ALWAYS));
     params.BlockSleeping->defineOption(BLOCK_SLEEP_PLAYBACK,   tr(MENU_HELP_BLOCKSLP_PLAYBACK));
     params.BlockSleeping->defineOption(BLOCK_SLEEP_FULLSCREEN, tr(MENU_HELP_BLOCKSLP_FULLSCR));
+    params.ToHideStatusBar->setName("Hide system status bar");
+    params.ToHideNavBar   ->setName(tr(OPTION_HIDE_NAVIGATION_BAR));
     params.ToShowExtra->setName(tr(MENU_HELP_EXPERIMENTAL));
     params.TargetFps->setName(stCString("FPS Target"));
 
@@ -276,6 +278,10 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.SubtitlesStream = new StInt32Param(-1);
     params.SubtitlesStream->signals.onChanged = stSlot(this, &StMoviePlayer::doSwitchSubtitlesStream);
     params.BlockSleeping = new StEnumParam(StMoviePlayer::BLOCK_SLEEP_PLAYBACK, stCString("blockSleep"));
+    params.ToHideStatusBar = new StBoolParamNamed(true, stCString("toHideStatusBar"));
+    params.ToHideStatusBar->signals.onChanged = stSlot(this, &StMoviePlayer::doHideSystemBars);
+    params.ToHideNavBar    = new StBoolParamNamed(true, stCString("toHideNavBar"));
+    params.ToHideNavBar   ->signals.onChanged = stSlot(this, &StMoviePlayer::doHideSystemBars);
     params.ToShowExtra   = new StBoolParamNamed(false, stCString("experimental"));
     // set rendering FPS as twice as average video FPS
     params.TargetFps = new StInt32ParamNamed(2, stCString("fpsTarget"));
@@ -328,6 +334,8 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (params.ToPrintWebErrors);
     mySettings->loadParam (params.SnapshotImgType);
     mySettings->loadParam (params.BlockSleeping);
+    mySettings->loadParam (params.ToHideStatusBar);
+    mySettings->loadParam (params.ToHideNavBar);
     mySettings->loadParam (params.ToShowExtra);
     if(params.StartWebUI->getValue() == WEBUI_ONCE) {
         params.StartWebUI->setValue(WEBUI_OFF);
@@ -557,6 +565,8 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (params.ToPrintWebErrors);
         mySettings->saveParam (params.SnapshotImgType);
         mySettings->saveParam (params.BlockSleeping);
+        mySettings->saveParam (params.ToHideStatusBar);
+        mySettings->saveParam (params.ToHideNavBar);
         mySettings->saveParam (params.ToShowExtra);
 
         // store hot-keys
@@ -792,6 +802,7 @@ bool StMoviePlayer::init() {
 
     // capture multimedia keys even without window focus
     myWindow->setAttribute(StWinAttr_GlobalMediaKeys, params.AreGlobalMKeys->getValue());
+    myWindow->setHideSystemBars(params.ToHideStatusBar->getValue(), params.ToHideNavBar->getValue());
 
     // create the video playback thread
     if(!isReset) {
@@ -1893,6 +1904,14 @@ void StMoviePlayer::doSnapshot(const size_t theImgType) {
         params.SnapshotImgType->setValue((int32_t )theImgType);
     }
     myVideo->doSaveSnapshotAs(aType);
+}
+
+void StMoviePlayer::doHideSystemBars(const bool ) {
+    if(myWindow.isNull()) {
+        return;
+    }
+
+    myWindow->setHideSystemBars(params.ToHideStatusBar->getValue(), params.ToHideNavBar->getValue());
 }
 
 void StMoviePlayer::doSetBenchmark(const bool theValue) {

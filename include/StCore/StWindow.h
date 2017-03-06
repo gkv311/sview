@@ -464,6 +464,12 @@ class StWindow {
     ST_CPPEXPORT virtual void setTrackOrientation(const bool theToTrack);
 
     /**
+     * Setup visibility of system bars.
+     */
+    ST_CPPEXPORT void setHideSystemBars(bool theToHideStatusBar,
+                                        bool theToHideNavBar);
+
+    /**
      * Return device orientation (for head-tracking) within right-handed coordinate system:
      * - Y is positive in up direction (towards the sky, perpendicular to the ground).
      * - X is positive to the right (tangential to the ground).

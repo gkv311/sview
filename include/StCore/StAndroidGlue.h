@@ -219,7 +219,13 @@ class StAndroidGlue {
      * Turn orientation sensor on/off.
      * Has no effect in case if sensor is unavailable.
      */
-    ST_CPPEXPORT void setTrackOrientation(const bool theToTrack);
+    ST_CPPEXPORT void setTrackOrientation(bool theToTrack);
+
+    /**
+     * Setup visibility of system bars.
+     */
+    ST_CPPEXPORT void setHideSystemBars(bool theToHideStatusBar,
+                                        bool theToHideNavBar);
 
     /**
      * Fetch current state:
@@ -477,6 +483,8 @@ class StAndroidGlue {
     bool                    myHasOrientSensor;   //!< flag indicating that device has orientation sensors
     bool                    myIsPoorOrient;      //!< flag indicating that available orientation sensor provides imprecise values
     bool                    myToTrackOrient;     //!< track device orientation
+    bool                    myToHideStatusBar;   //!< hide system-provided status bar
+    bool                    myToHideNavBar;      //!< hide system-provided navigation bar
     bool                    myToSwapEyesHW;      //!< flag to swap LR views on external event
 
     bool                    myIsRunning;

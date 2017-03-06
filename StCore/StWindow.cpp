@@ -419,6 +419,12 @@ void StWindow::setTrackOrientation(const bool theToTrack) {
     }
 }
 
+void StWindow::setHideSystemBars(bool theToHideStatusBar,
+                                 bool theToHideNavBar) {
+    myWin->myToHideStatusBar = theToHideStatusBar;
+    myWin->myToHideNavBar    = theToHideNavBar;
+}
+
 StQuaternion<double> StWindow::getDeviceOrientation() const {
     if(myWin->myToTrackOrient
     && myWin->myHasOrientSensor) {

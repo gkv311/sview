@@ -224,6 +224,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Double click");
     theStrings(OPTION_EXIT_ON_ESCAPE_WINDOWED,
                "When windowed");
+    theStrings(OPTION_HIDE_NAVIGATION_BAR,
+               "Hide system navigation bar");
 
     theStrings(UPDATES_NOTIFY,
                "A new version of sView is available on the official site www.sview.ru.\n"

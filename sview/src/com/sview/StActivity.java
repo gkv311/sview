@@ -151,6 +151,7 @@ public class StActivity extends NativeActivity implements SensorEventListener {
         }
         myS3dvSurf = new StS3dvSurface();
         super.onCreate(theSavedInstanceState);
+        updateHideSystemBars(myToHideStatusBar, myToHideNavBar);
     }
 
     /**
@@ -171,6 +172,15 @@ public class StActivity extends NativeActivity implements SensorEventListener {
         if(myToTrackOrient) {
             updateTrackOrientation(true);
         }
+        updateHideSystemBars(myToHideStatusBar, myToHideNavBar);
+
+        android.os.Handler aHandler = new android.os.Handler();
+        aHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                updateHideSystemBars(myToHideStatusBar, myToHideNavBar);
+            }
+        }, 500);
     }
 
     /**
@@ -362,6 +372,37 @@ public class StActivity extends NativeActivity implements SensorEventListener {
         }
     }
 
+    /**
+     * Wrapper to show/hide navigation bar.
+     */
+    protected void updateHideSystemBars(boolean theToHideStatusBar,
+                                        boolean theToHideNavBar) {
+        if(android.os.Build.VERSION.SDK_INT < 19) {
+            return;
+        }
+
+        int anOptions = 0;
+
+        // Status bar can not be restored by these flags if
+        // "@android:style/Theme.NoTitleBar.Fullscreen" is set in manifest!
+        if(theToHideStatusBar) {
+            anOptions = anOptions
+                      | 0x00000004  // SYSTEM_UI_FLAG_FULLSCREEN
+                      | 0x00001000  // SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                      | 0x00000100; // SYSTEM_UI_FLAG_LAYOUT_STABLE
+        }
+        if(theToHideNavBar) {
+            anOptions = anOptions
+                      | android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                      | 0x00001000  // SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                      | 0x00000200  // SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                      | 0x00000100; // SYSTEM_UI_FLAG_LAYOUT_STABLE
+        }
+
+        final android.view.View aDecorView = getWindow().getDecorView();
+        aDecorView.setSystemUiVisibility(anOptions);
+    }
+
 //endregion
 
 //region Methods to be called from C++ level
@@ -427,6 +468,29 @@ public class StActivity extends NativeActivity implements SensorEventListener {
 
             myToTrackOrient = toTrack;
             updateTrackOrientation(toTrack);
+        }});
+    }
+
+    /**
+     * Method to show/hide navigation bar.
+     */
+    public void setHideSystemBars(boolean theToHideStatusBar,
+                                  boolean theToHideNavBar) {
+        if(android.os.Build.VERSION.SDK_INT < 19) {
+            return;
+        }
+
+        final boolean toHideStatusBar = theToHideStatusBar;
+        final boolean toHideNavBar    = theToHideNavBar;
+        this.runOnUiThread (new Runnable() { public void run() {
+            if(myToHideStatusBar == toHideStatusBar
+            && myToHideNavBar    == toHideNavBar) {
+                return;
+            }
+
+            myToHideStatusBar = toHideStatusBar;
+            myToHideNavBar    = toHideNavBar;
+            updateHideSystemBars(toHideStatusBar, toHideNavBar);
         }});
     }
 
@@ -527,8 +591,10 @@ public class StActivity extends NativeActivity implements SensorEventListener {
     protected SensorManager  mySensorMgr;
     protected Sensor         mySensorOri;
     protected float          myQuat[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-    protected boolean        myIsPoorOri     = false;
-    protected boolean        myToTrackOrient = false;
+    protected boolean        myIsPoorOri       = false;
+    protected boolean        myToTrackOrient   = false;
+    protected boolean        myToHideStatusBar = true;
+    protected boolean        myToHideNavBar    = true;
     protected long           myCppGlue = 0; //!< pointer to c++ class StAndroidGlue instance
 
     protected StS3dvSurface  myS3dvSurf = null;

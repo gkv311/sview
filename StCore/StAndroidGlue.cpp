@@ -184,6 +184,8 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
   myHasOrientSensor(false),
   myIsPoorOrient(false),
   myToTrackOrient(false),
+  myToHideStatusBar(true),
+  myToHideNavBar(true),
   myToSwapEyesHW(false),
   myIsRunning(false),
   myIsStateSaved(false),
@@ -856,6 +858,23 @@ void StAndroidGlue::setTrackOrientation(const bool theToTrack) {
     jmethodID aJMet           = myThJniEnv->GetMethodID(aJClassActivity, "setTrackOrientation", "(Z)V");
     myThJniEnv->CallVoidMethod(myActivity->clazz, aJMet, (jboolean )(theToTrack ? JNI_TRUE : JNI_FALSE));
     myToTrackOrient = theToTrack;
+}
+
+void StAndroidGlue::setHideSystemBars(bool theToHideStatusBar,
+                                      bool theToHideNavBar) {
+    if((myToHideStatusBar == theToHideStatusBar && myToHideNavBar == theToHideNavBar)
+    || myActivity == NULL
+    || myThJniEnv == NULL) {
+        return;
+    }
+
+    jclass    aJClassActivity = myThJniEnv->GetObjectClass(myActivity->clazz);
+    jmethodID aJMet           = myThJniEnv->GetMethodID(aJClassActivity, "setHideSystemBars", "(ZZ)V");
+    myThJniEnv->CallVoidMethod(myActivity->clazz, aJMet,
+                               (jboolean )(theToHideStatusBar ? JNI_TRUE : JNI_FALSE),
+                               (jboolean )(theToHideNavBar    ? JNI_TRUE : JNI_FALSE));
+    myToHideStatusBar = theToHideStatusBar;
+    myToHideNavBar    = theToHideNavBar;
 }
 
 void StAndroidGlue::setQuaternion(const StQuaternion<float>& theQ, const float theScreenRotDeg) {
