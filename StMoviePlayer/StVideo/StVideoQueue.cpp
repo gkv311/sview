@@ -892,7 +892,7 @@ void StVideoQueue::decodeLoop() {
     #endif
     #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
         if(const AVFrameSideData* aSideDataRot = av_frame_get_side_data(myFrame.Frame, AV_FRAME_DATA_DISPLAYMATRIX)) {
-            if(aSideDataRot->size >= 9 * sizeof(int32_t)) {
+            if(aSideDataRot->size >= int(9 * sizeof(int32_t))) {
                 const double aRotDeg = -av_display_rotation_get((const int32_t* )aSideDataRot->data);
                 if(!st::isNaN(aRotDeg)) {
                     myRotateDeg = -int(aRotDeg - 360 * std::floor(aRotDeg / 360 + 0.9 / 360));
