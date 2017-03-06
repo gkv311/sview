@@ -96,16 +96,17 @@ class StGLSeekBar::StProgramSB : public StGLProgram {
 };
 
 StGLSeekBar::StGLSeekBar(StGLWidget* theParent,
-                         const int   theTop,
-                         const int   theMargin)
-: StGLWidget(theParent, 0, theTop, StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT),
+                         int theTop,
+                         int theMargin,
+                         StGLCorner theCorner)
+: StGLWidget(theParent, 0, theTop, theCorner,
              theParent->getRoot()->scale(512),
              theParent->getRoot()->scale(12) + theMargin * 2),
   myProgram(new StProgramSB()),
   myProgress(0.0f),
   myProgressPx(0),
   myClickPos(-1),
-  myMoveTolerPx(myRoot->scale(myRoot->isMobile() ? 16 : 8)) {
+  myMoveTolerPx(0) {
     StGLWidget::signals.onMouseClick  .connect(this, &StGLSeekBar::doMouseClick);
     StGLWidget::signals.onMouseUnclick.connect(this, &StGLSeekBar::doMouseUnclick);
     myMargins.top    = theMargin;
@@ -225,16 +226,19 @@ void StGLSeekBar::stglDraw(unsigned int theView) {
     StGLWidget::stglDraw(theView);
 }
 
-void StGLSeekBar::stglUpdate(const StPointD_t& theCursor) {
-    StGLWidget::stglUpdate(theCursor);
+void StGLSeekBar::stglUpdate(const StPointD_t& theCursor,
+                             bool theIsPreciseInput) {
+    StGLWidget::stglUpdate(theCursor, theIsPreciseInput);
     if(!isClicked(ST_MOUSE_LEFT)) {
         return;
     }
 
     const double aPos   = stMin(stMax(getPointInEx(theCursor), 0.0), 1.0);
     const int    aPosPx = int(aPos * double(getRectPx().width()));
+
+    const int aMoveTolerPx = myMoveTolerPx > 0 ? myMoveTolerPx : myRoot->scale(theIsPreciseInput ? 1 : 16);
     if(myClickPos >= 0
-    && std::abs(aPosPx - myClickPos) < myMoveTolerPx) {
+    && std::abs(aPosPx - myClickPos) < aMoveTolerPx) {
         return;
     }
 

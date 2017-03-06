@@ -24,7 +24,8 @@ class ST_LOCAL StGLMsgStack : public StGLContainer {
                               const StHandle<StMsgQueue>& theMsgQueue);
     ST_CPPEXPORT virtual ~StGLMsgStack();
     ST_CPPEXPORT virtual void stglResize() ST_ATTR_OVERRIDE;
-    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& thePointZo) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& thePointZo,
+                                         bool theIsPreciseInput) ST_ATTR_OVERRIDE;
 
         private:
 

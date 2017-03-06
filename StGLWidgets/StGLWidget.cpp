@@ -209,7 +209,8 @@ double StGLAnimationLerp::perform(bool theDirUp, bool theToForce) {
     return myValue;
 }
 
-void StGLWidget::stglUpdate(const StPointD_t& theCursorZo) {
+void StGLWidget::stglUpdate(const StPointD_t& theCursorZo,
+                            bool theIsPreciseInput) {
     if(!isVisible()) {
         return;
     }
@@ -217,7 +218,7 @@ void StGLWidget::stglUpdate(const StPointD_t& theCursorZo) {
     for(StGLWidget* aChildIter = myChildren.getStart(); aChildIter != NULL;) {
         StGLWidget* aChildActive = aChildIter;
         aChildIter = aChildIter->getNext();
-        aChildActive->stglUpdate(theCursorZo);
+        aChildActive->stglUpdate(theCursorZo, theIsPreciseInput);
     }
 }
 

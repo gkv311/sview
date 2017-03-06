@@ -305,7 +305,6 @@ StCADViewerGUI::StCADViewerGUI(StCADViewer*    thePlugin,
     myZFocusBar->setCorner(StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT));
     myZFocusBar->signals.onSeekClick  = stSlot(this, &StCADViewerGUI::doZFocusSet);
     myZFocusBar->signals.onSeekScroll = stSlot(this, &StCADViewerGUI::doZFocusScroll);
-    myZFocusBar->setMoveTolerance(1);
     myZFocusBar->changeMargins().left  = scale(8);
     myZFocusBar->changeMargins().right = scale(8);
 
@@ -324,7 +323,6 @@ StCADViewerGUI::StCADViewerGUI(StCADViewer*    thePlugin,
     myStereoIODBar->setCorner(StGLCorner(ST_VCORNER_BOTTOM, ST_HCORNER_LEFT));
     myStereoIODBar->signals.onSeekClick  = stSlot(this, &StCADViewerGUI::doStereoIODSet);
     myStereoIODBar->signals.onSeekScroll = stSlot(this, &StCADViewerGUI::doStereoIODScroll);
-    myStereoIODBar->setMoveTolerance(1);
     myStereoIODBar->changeMargins().left  = scale(8);
     myStereoIODBar->changeMargins().right = scale(8);
 
@@ -377,8 +375,9 @@ void StCADViewerGUI::setVisibility(const StPointD_t& , bool ) {
     }
 }
 
-void StCADViewerGUI::stglUpdate(const StPointD_t& theCursorZo) {
-    StGLRootWidget::stglUpdate(theCursorZo);
+void StCADViewerGUI::stglUpdate(const StPointD_t& theCursorZo,
+                                bool theIsPreciseInput) {
+    StGLRootWidget::stglUpdate(theCursorZo, theIsPreciseInput);
     if(myMouseDescr != NULL) {
         myMouseDescr->setPoint(theCursorZo);
     }

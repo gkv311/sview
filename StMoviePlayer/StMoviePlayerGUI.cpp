@@ -76,6 +76,7 @@ void StMoviePlayerGUI::createDesktopUI(const StHandle<StPlayList>& thePlayList) 
     createBottomToolbar(64, 32);
 
     mySeekBar = new StGLSeekBar(myPanelBottom, 0, scale(18));
+    mySeekBar->setMoveTolerance(scale(isMobile() ? 16 : 8));
     mySeekBar->signals.onSeekClick.connect(myPlugin, &StMoviePlayer::doSeek);
 
     myTimeBox = new StTimeBox(myPanelBottom, myBottomBarNbLeft * myIconStep, 0,
@@ -279,7 +280,6 @@ void StMoviePlayerGUI::createBottomToolbar(const int theIconSize,
     myVolumeBar->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_RIGHT));
     myVolumeBar->signals.onSeekClick  = stSlot(this, &StMoviePlayerGUI::doAudioGain);
     myVolumeBar->signals.onSeekScroll = stSlot(this, &StMoviePlayerGUI::doAudioGainScroll);
-    myVolumeBar->setMoveTolerance(1);
     myVolumeBar->changeMargins().left  = scale(8);
     myVolumeBar->changeMargins().right = scale(8);
 
@@ -1305,6 +1305,7 @@ void StMoviePlayerGUI::createMobileBottomToolbar() {
     aBtnInfo->changeMargins() = aButtonMargins;
 
     mySeekBar = new StGLSeekBar(myPanelBottom, 0, scale(18));
+    mySeekBar->setMoveTolerance(scale(isMobile() ? 16 : 8));
     mySeekBar->signals.onSeekClick.connect(myPlugin, &StMoviePlayer::doSeek);
 
     myTimeBox = new StTimeBox(myPanelBottom, myBottomBarNbRight * (-myIconStep), 0, aRightCorner, StGLTextArea::SIZE_SMALL);
@@ -1486,7 +1487,8 @@ StMoviePlayerGUI::~StMoviePlayerGUI() {
     //
 }
 
-void StMoviePlayerGUI::stglUpdate(const StPointD_t& thePointZo) {
+void StMoviePlayerGUI::stglUpdate(const StPointD_t& thePointZo,
+                                  bool theIsPreciseInput) {
     if(mySeekBar != NULL
     && myPanelBottom != NULL
     && myTimeBox->wasResized()) {
@@ -1501,7 +1503,7 @@ void StMoviePlayerGUI::stglUpdate(const StPointD_t& thePointZo) {
     }
 
     setVisibility(thePointZo);
-    StGLRootWidget::stglUpdate(thePointZo);
+    StGLRootWidget::stglUpdate(thePointZo, theIsPreciseInput);
     if(myVolumeBar != NULL) {
         char aBuff[128];
         stsprintf(aBuff, 128, "%+03.0f dB", myPlugin->params.AudioGain->getValue());

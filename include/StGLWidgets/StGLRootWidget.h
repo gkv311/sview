@@ -426,7 +426,8 @@ class StGLRootWidget : public StGLWidget {
     }
 
     using StGLWidget::stglResize;
-    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo,
+                                         bool theIsPreciseInput) ST_ATTR_OVERRIDE;
 
     /**
      * Resize root widget in sync with window.

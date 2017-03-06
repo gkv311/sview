@@ -1313,8 +1313,9 @@ void StImageViewerGUI::setVisibility(const StPointD_t& theCursor,
     }
 }
 
-void StImageViewerGUI::stglUpdate(const StPointD_t& thePointZo) {
-    StGLRootWidget::stglUpdate(thePointZo);
+void StImageViewerGUI::stglUpdate(const StPointD_t& thePointZo,
+                                  bool theIsPreciseInput) {
+    StGLRootWidget::stglUpdate(thePointZo, theIsPreciseInput);
     if(myDescr != NULL) {
         myDescr->setPoint(thePointZo);
     }

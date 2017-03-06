@@ -791,7 +791,7 @@ void StCADViewer::beforeDraw() {
     }
 
     myGUI->setVisibility(myWindow->getMousePos(), true);
-    myGUI->stglUpdate(myWindow->getMousePos());
+    myGUI->stglUpdate(myWindow->getMousePos(), myWindow->isPreciseCursor());
 
     // recreate menu event
     if(myToRecreateMenu) {

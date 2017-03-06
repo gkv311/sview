@@ -67,6 +67,7 @@ class StWindowImpl {
     ST_LOCAL void setPlacement(const StRectI_t& theRect,
                                const bool       theMoveToScreen);
     ST_LOCAL StPointD_t getMousePos();
+    ST_LOCAL bool isPreciseCursor() const { return myIsPreciseCursor; }
     ST_LOCAL bool create();
     ST_LOCAL void stglSwap(const int& theWinId);
     ST_LOCAL bool stglMakeCurrent(const int theWinId);
@@ -280,6 +281,7 @@ class StWindowImpl {
     bool               myToSwapEyesHW;    //!< flag to swap LR views on external event
 
     StPointD_t         myMousePt;         //!< mouse coordinates to track activity
+    bool               myIsPreciseCursor; //!< flag indicating that last mouse cursor position was updated by precise input device
     StTouchEvent       myTouches;         //!< current state of touch screen
     StTouchEvent       myTap1Touch;       //!< previous tap touch
     int                myNbTouchesMax;    //!< maximum touches within current sequence

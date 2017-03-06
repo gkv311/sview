@@ -278,9 +278,10 @@ void StGLPlayList::stglDrawScrollBar(unsigned int theView) {
     aCtx.core20fwd->glDisable(GL_BLEND);
 }
 
-void StGLPlayList::stglUpdate(const StPointD_t& theCursorZo) {
+void StGLPlayList::stglUpdate(const StPointD_t& theCursorZo,
+                              bool theIsPreciseInput) {
     if(!isVisible()) {
-        StGLWidget::stglUpdate(theCursorZo);
+        StGLWidget::stglUpdate(theCursorZo, theIsPreciseInput);
         return;
     }
 
@@ -345,7 +346,7 @@ void StGLPlayList::stglUpdate(const StPointD_t& theCursorZo) {
         }
     }
 
-    StGLWidget::stglUpdate(theCursorZo);
+    StGLWidget::stglUpdate(theCursorZo, theIsPreciseInput);
 }
 
 void StGLPlayList::stglDraw(unsigned int theView) {

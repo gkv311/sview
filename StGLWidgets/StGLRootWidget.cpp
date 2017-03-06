@@ -308,9 +308,10 @@ StGLSharePointer* StGLRootWidget::getShare(const size_t theResId) {
     return myShareArray[theResId];
 }
 
-void StGLRootWidget::stglUpdate(const StPointD_t& theCursorZo) {
+void StGLRootWidget::stglUpdate(const StPointD_t& theCursorZo,
+                                bool theIsPreciseInput) {
     myCursorZo = theCursorZo;
-    StGLWidget::stglUpdate(theCursorZo);
+    StGLWidget::stglUpdate(theCursorZo, theIsPreciseInput);
 }
 
 void StGLRootWidget::stglScissorRect(const StRectI_t& theRect,

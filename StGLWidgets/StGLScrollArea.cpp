@@ -101,9 +101,10 @@ inline void setClickedWithChildren(StGLWidgetList& theList, const int theMouseBt
     }
 }
 
-void StGLScrollArea::stglUpdate(const StPointD_t& theCursorZo) {
+void StGLScrollArea::stglUpdate(const StPointD_t& theCursorZo,
+                                bool theIsPreciseInput) {
     if(!isVisible()) {
-        StGLWidget::stglUpdate(theCursorZo);
+        StGLWidget::stglUpdate(theCursorZo, theIsPreciseInput);
         return;
     }
 
@@ -152,7 +153,7 @@ void StGLScrollArea::stglUpdate(const StPointD_t& theCursorZo) {
         }
     }
 
-    StGLWidget::stglUpdate(theCursorZo);
+    StGLWidget::stglUpdate(theCursorZo, theIsPreciseInput);
 }
 
 void StGLScrollArea::stglDraw(unsigned int theView) {

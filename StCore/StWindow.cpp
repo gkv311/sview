@@ -217,6 +217,10 @@ StPointD_t StWindow::getMousePos() const {
     return myWin->getMousePos();
 }
 
+bool StWindow::isPreciseCursor() const {
+    return myWin->isPreciseCursor();
+}
+
 bool StWindow::create() {
     myWasUsed = true;
     return myWin->create();

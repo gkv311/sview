@@ -29,8 +29,9 @@ void StGLMsgStack::stglResize() {
     StGLWidget::stglResize();
 }
 
-void StGLMsgStack::stglUpdate(const StPointD_t& thePointZo) {
-    StGLWidget::stglUpdate(thePointZo);
+void StGLMsgStack::stglUpdate(const StPointD_t& thePointZo,
+                              bool theIsPreciseInput) {
+    StGLWidget::stglUpdate(thePointZo, theIsPreciseInput);
 
     // check messages stack
     while(myMsgQueue->pop(myMsgTmp)) {

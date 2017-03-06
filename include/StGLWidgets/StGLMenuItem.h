@@ -46,7 +46,8 @@ class StGLMenuItem : public StGLTextArea {
 
     ST_CPPEXPORT virtual ~StGLMenuItem();
 
-    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo,
+                                         bool theIsPreciseInput) ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual void stglResize() ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool stglInit() ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
@@ -148,8 +149,9 @@ class StGLMenuItem : public StGLTextArea {
 
         protected:
 
-    ST_LOCAL void stglUpdateTextArea(const StPointD_t& theCursorZo) {
-        StGLTextArea::stglUpdate(theCursorZo);
+    ST_LOCAL void stglUpdateTextArea(const StPointD_t& theCursorZo,
+                                     bool theIsPreciseInput) {
+        StGLTextArea::stglUpdate(theCursorZo, theIsPreciseInput);
     }
 
         private: //! @name private methods
@@ -183,7 +185,8 @@ class StGLPassiveMenuItem : public StGLMenuItem {
         public:
 
     ST_CPPEXPORT StGLPassiveMenuItem(StGLMenu* theParent);
-    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo,
+                                         bool theIsPreciseInput) ST_ATTR_OVERRIDE;
 
 };
 

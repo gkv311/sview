@@ -1043,7 +1043,7 @@ void StImageViewer::stglDraw(unsigned int theView) {
             StThread::sleep(200);
         }
 
-        myGUI->stglUpdate(myWindow->getMousePos());
+        myGUI->stglUpdate(myWindow->getMousePos(), myWindow->isPreciseCursor());
 
         // check for mono state
         bool hasStereoSource = false;

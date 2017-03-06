@@ -49,7 +49,8 @@ class StDiagnosticsGUI : public StGLRootWidget {
 
     ST_LOCAL StDiagnosticsGUI(StDiagnostics* thePlugin);
     ST_LOCAL virtual ~StDiagnosticsGUI();
-    ST_LOCAL virtual void stglUpdate(const StPointD_t& thePointZo) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void stglUpdate(const StPointD_t& thePointZo,
+                                     bool theIsPreciseInput) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
 
     ST_LOCAL void setVisibility(const StPointD_t& , bool );

@@ -267,6 +267,11 @@ class StWindow {
     ST_CPPEXPORT StPointD_t getMousePos() const;
 
     /**
+     * @return TRUE if last mouse cursor position was updated by precise input device (e.g. mouse)
+     */
+    ST_CPPEXPORT bool isPreciseCursor() const;
+
+    /**
      * Function creates a GL window.
      * @return true on success
      */

@@ -352,7 +352,8 @@ class StGLWidget {
      * Update parameters.
      * @param theCursorZo mouse cursor
      */
-    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo);
+    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo,
+                                         bool theIsPreciseInput);
 
     /**
      * Update widget and sub-widgets according to new backing store dimensions.

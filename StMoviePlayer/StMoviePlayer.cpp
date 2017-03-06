@@ -1423,7 +1423,7 @@ void StMoviePlayer::beforeDraw() {
     if(myGUI->mySeekBar != NULL) {
         myGUI->mySeekBar->setProgress(GLfloat(aPosition));
     }
-    myGUI->stglUpdate(myWindow->getMousePos());
+    myGUI->stglUpdate(myWindow->getMousePos(), myWindow->isPreciseCursor());
 
     // prevent display going to sleep
     bool toBlockSleepDisplay = false;

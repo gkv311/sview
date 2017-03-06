@@ -94,7 +94,8 @@ class StImageViewerGUI : public StGLRootWidget {
                               const StHandle<StPlayList>&       thePlayList,
                               const StHandle<StGLTextureQueue>& theTextureQueue);
     ST_LOCAL virtual ~StImageViewerGUI();
-    ST_LOCAL virtual void stglUpdate(const StPointD_t& thePointZo) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void stglUpdate(const StPointD_t& thePointZo,
+                                     bool theIsPreciseInput) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void stglResize(const StGLBoxPx& theViewPort,
                                      const StMarginsI& theMargins,
                                      float theAspect) ST_ATTR_OVERRIDE;

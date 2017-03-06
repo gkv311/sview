@@ -154,8 +154,9 @@ void StGLMenuItem::stglResize() {
     StGLTextArea::stglResize();
 }
 
-void StGLMenuItem::stglUpdate(const StPointD_t& theCursorZo) {
-    StGLTextArea::stglUpdate(theCursorZo);
+void StGLMenuItem::stglUpdate(const StPointD_t& theCursorZo,
+                              bool theIsPreciseInput) {
+    StGLTextArea::stglUpdate(theCursorZo, theIsPreciseInput);
     if(!myIsInitialized || !isVisible()) {
         return;
     }
@@ -324,8 +325,9 @@ StGLPassiveMenuItem::StGLPassiveMenuItem(StGLMenu* theParent)
     //
 }
 
-void StGLPassiveMenuItem::stglUpdate(const StPointD_t& theCursorZo) {
-    stglUpdateTextArea(theCursorZo);
+void StGLPassiveMenuItem::stglUpdate(const StPointD_t& theCursorZo,
+                                     bool theIsPreciseInput) {
+    stglUpdateTextArea(theCursorZo, theIsPreciseInput);
     if(!myIsInitialized || !isVisible()) {
         return;
     }

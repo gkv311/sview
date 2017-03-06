@@ -28,11 +28,12 @@ StGLCheckboxTextured::~StGLCheckboxTextured() {
     //
 }
 
-void StGLCheckboxTextured::stglUpdate(const StPointD_t& theCursorZo) {
+void StGLCheckboxTextured::stglUpdate(const StPointD_t& theCursorZo,
+                                      bool theIsPreciseInput) {
     const bool isOn = myTrackValue->getValue();
     setFaceId(isOn ? 1 : 0);
     myOpacityScale = isOn ? myTrueOpacity : myFalseOpacity;
-    StGLTextureButton::stglUpdate(theCursorZo);
+    StGLTextureButton::stglUpdate(theCursorZo, theIsPreciseInput);
 }
 
 void StGLCheckboxTextured::doClick(const size_t ) {

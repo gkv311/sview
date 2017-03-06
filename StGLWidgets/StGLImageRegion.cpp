@@ -412,8 +412,9 @@ void StGLImageRegion::stglSkipFrames() {
     myTextureQueue->stglUpdateStTextures(getContext());
 }
 
-void StGLImageRegion::stglUpdate(const StPointD_t& pointZo) {
-    StGLWidget::stglUpdate(pointZo);
+void StGLImageRegion::stglUpdate(const StPointD_t& thePointZo,
+                                 bool theIsPreciseInput) {
+    StGLWidget::stglUpdate(thePointZo, theIsPreciseInput);
     if(myIsInitialized) {
         myHasVideoStream = myTextureQueue->stglUpdateStTextures(getContext()) || myTextureQueue->hasConnectedStream();
         StHandle<StStereoParams> aFileParams = myTextureQueue->getQTexture().getFront(StGLQuadTexture::LEFT_TEXTURE).getSource();

@@ -24,8 +24,9 @@ class StGLSeekBar : public StGLWidget {
      * Default constructor.
      */
     ST_CPPEXPORT StGLSeekBar(StGLWidget* theParent,
-                             const int   theTop,
-                             const int   theMargin);
+                             int theTop,
+                             int theMargin,
+                             StGLCorner theCorner = StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
 
     /**
      * Destructor.
@@ -45,7 +46,8 @@ class StGLSeekBar : public StGLWidget {
 
     ST_CPPEXPORT virtual void stglResize() ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool stglInit() ST_ATTR_OVERRIDE;
-    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursor) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursor,
+                                         bool theIsPreciseInput) ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool doScroll(const StScrollEvent& theEvent) ST_ATTR_OVERRIDE;
 

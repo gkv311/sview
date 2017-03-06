@@ -213,6 +213,7 @@ void StWindowImpl::onAndroidInput(const AInputEvent* theEvent,
                             if(aNbTouches == 1) {
                                 // simulate mouse click
                                 myMousePt = aPos0;
+                                myIsPreciseCursor = false;
                                 myStEvent.Type = stEvent_MouseDown;
                                 myStEvent.Button.Button  = ST_MOUSE_LEFT;
                                 myStEvent.Button.Buttons = 0;
@@ -235,6 +236,7 @@ void StWindowImpl::onAndroidInput(const AInputEvent* theEvent,
                             if(aNbTouches == 1) {
                                 // simulate mouse move
                                 myMousePt = aPos0;
+                                myIsPreciseCursor = false;
                             }
                             doTouch(myStEvent.Touch);
                             break;
@@ -246,6 +248,7 @@ void StWindowImpl::onAndroidInput(const AInputEvent* theEvent,
                             if(aNbTouches == 1) {
                                 // simulate mouse unclick
                                 myMousePt = aPos0;
+                                myIsPreciseCursor = false;
                                 myStEvent.Type = stEvent_MouseUp;
                                 myStEvent.Button.Button  = ST_MOUSE_LEFT;
                                 myStEvent.Button.Buttons = 0;
@@ -266,6 +269,7 @@ void StWindowImpl::onAndroidInput(const AInputEvent* theEvent,
             }
 
             myMousePt = aPos0;
+            myIsPreciseCursor = aSource == AINPUT_SOURCE_MOUSE; // || AINPUT_SOURCE_STYLUS
 
             StVirtButton aMouseBtn = ST_MOUSE_LEFT;
             myStEvent.Button.Button  = aMouseBtn;

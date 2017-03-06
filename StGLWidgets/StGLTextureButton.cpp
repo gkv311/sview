@@ -448,7 +448,8 @@ bool StGLTextureButton::stglInit() {
     return true;
 }
 
-void StGLTextureButton::stglUpdate(const StPointD_t& theCursorZo) {
+void StGLTextureButton::stglUpdate(const StPointD_t& theCursorZo,
+                                   bool theIsPreciseInput) {
     if(!isVisible()) {
         return;
     }
@@ -479,7 +480,7 @@ void StGLTextureButton::stglUpdate(const StPointD_t& theCursorZo) {
             myAnimTime = 0.0f;
         }
     }
-    StGLWidget::stglUpdate(theCursorZo);
+    StGLWidget::stglUpdate(theCursorZo, theIsPreciseInput);
 }
 
 void StGLTextureButton::stglDraw(unsigned int ) {

@@ -30,7 +30,8 @@ class StGLPlayList : public StGLWidget {
     ST_CPPEXPORT virtual ~StGLPlayList();
     ST_CPPEXPORT virtual bool stglInit() ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
-    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& theCursorZo,
+                                         bool theIsPreciseInput) ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual void stglResize() ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual bool doScroll(const StScrollEvent& theEvent) ST_ATTR_OVERRIDE;
 

@@ -71,7 +71,8 @@ class StGLSubtitles : public StGLTextArea {
                                const StHandle<StEnumParam>&    theParser);
     ST_CPPEXPORT virtual ~StGLSubtitles();
     ST_CPPEXPORT virtual bool stglInit() ST_ATTR_OVERRIDE;
-    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& thePointZo) ST_ATTR_OVERRIDE;
+    ST_CPPEXPORT virtual void stglUpdate(const StPointD_t& thePointZo,
+                                         bool theIsPreciseInput) ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual void stglDraw(unsigned int theView) ST_ATTR_OVERRIDE;
     ST_CPPEXPORT virtual void stglResize() ST_ATTR_OVERRIDE;
 

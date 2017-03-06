@@ -54,7 +54,8 @@ class StCADViewerGUI : public StGLRootWidget {
                             StTranslations* theLangMap,
                             const StHandle<StPlayList>& thePlayList);
     ST_LOCAL virtual ~StCADViewerGUI();
-    ST_LOCAL virtual void stglUpdate(const StPointD_t& theCursorZo) ST_ATTR_OVERRIDE;
+    ST_LOCAL virtual void stglUpdate(const StPointD_t& theCursorZo,
+                                     bool theIsPreciseInput) ST_ATTR_OVERRIDE;
     ST_LOCAL virtual void stglResize(const StGLBoxPx&  theViewPort,
                                      const StMarginsI& theMargins,
                                      float theAspect) ST_ATTR_OVERRIDE;

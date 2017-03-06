@@ -229,7 +229,8 @@ bool StGLSubtitles::stglInit() {
     return StGLTextArea::stglInit();
 }
 
-void StGLSubtitles::stglUpdate(const StPointD_t& ) {
+void StGLSubtitles::stglUpdate(const StPointD_t& ,
+                               bool ) {
     bool isChanged = myShowItems.pop(myPTS);
     for(StHandle<StSubItem> aNewSubItem = myQueue->pop(myPTS); !aNewSubItem.isNull(); aNewSubItem = myQueue->pop(myPTS)) {
         isChanged = true;

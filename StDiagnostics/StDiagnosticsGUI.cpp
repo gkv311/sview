@@ -73,8 +73,9 @@ void StDiagnosticsGUI::setVisibility(const StPointD_t& , bool ) {
     myCntWidgetBR->setText(aCntString);
 }
 
-void StDiagnosticsGUI::stglUpdate(const StPointD_t& thePointZo) {
-    StGLRootWidget::stglUpdate(thePointZo);
+void StDiagnosticsGUI::stglUpdate(const StPointD_t& thePointZo,
+                                  bool theIsPreciseInput) {
+    StGLRootWidget::stglUpdate(thePointZo, theIsPreciseInput);
 }
 
 void StDiagnosticsGUI::stglDraw(unsigned int theView) {
