@@ -49,14 +49,17 @@
 #define ST_XBF_MIME_STRING ST_XBF_MIME ":" ST_XBF_EXT ":" ST_XBF_DESC
 
 /**
- *.gltf - glTF mesh format
+ *.gltf, *.glb - glTF mesh format
  */
 #define ST_GLTF_MIME "model/gltf+json"
 #define ST_GLTF_DESC "glTF - GL Transmission Format"
 #define ST_GLTF_EXT  "gltf"
-#define ST_GLB_EXT   "glb"
 #define ST_GLTF_MIME_STRING ST_GLTF_MIME ":" ST_GLTF_EXT ":" ST_GLTF_DESC
-#define ST_GLB_MIME_STRING  ST_GLTF_MIME ":" ST_GLB_EXT  ":" ST_GLTF_DESC
+
+#define ST_GLB_MIME "model/gltf.binary"
+#define ST_GLB_DESC "glTF - GL Transmission Format (Binary)"
+#define ST_GLB_EXT  "glb"
+#define ST_GLB_MIME_STRING  ST_GLB_MIME ":" ST_GLB_EXT  ":" ST_GLB_DESC
 
 /**
  *.obj - simplest triangulation exchange format
