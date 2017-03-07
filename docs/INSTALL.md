@@ -38,11 +38,11 @@ rpm -Uvh http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-stabl
 yum install ffmpeg-devel
 ~~~~~
 
-On Windows and Mac OS X please refer to official documentation for each project.
-Notice that DevIL and FreeImage libraries are optional and need not for building sView
+On Windows and macOS please refer to official documentation for each project.
+Notice that DevIL and FreeImage libraries are optional and are not required for building sView
 (libraries are loaded dynamically if available).
 
-## II. Makefile on Linux
+## II. Makefile (Linux, macOS, Android)
 
 Current Makefile has been written only for DEB/RPM source packages
 and lacks configuration flexibility (means there NO any ./configure and so on).
@@ -52,6 +52,23 @@ All you need is to install dependencies and to execute traditional commands:
 ~~~~~
   make && make install
 ~~~~~
+
+### Android
+
+sView for Android is build in two steps:
+
+* Building native libraries using UNIX Makefile.
+  Paths to NDK and 3rd-party libraries can be specified through command-line options to **make** or by editing Makefile itself.
+  sView does not provide .mk files - it uses UNIX Makefile for building native code.
+~~~~~
+  make android ANDROID_NDK=$SVIEW_NDK FFMPEG_ROOT=$SVIEW_FFMPEG FREETYPE_ROOT=$SVIEW_FREETYPE OPENAL_ROOT=$SVIEW_OPENAL LIBCONFIG_ROOT=$SVIEW_LIBCONFIG
+~~~~~
+* Compiling Java classes and putting everything into APK file using Eclipse.
+  Eclipse performs building automatically (by default), but APK file is not created by this action.
+  APK export can be started from context menu on project sView (in the tree) -> Export -> Android -> Export Android Application.
+  Android Studio is currently can not be used for this purpose (not tested).
+
+This instruction has been tested only on Linux host.
 
 ## III. Code::Blocks
 
