@@ -86,7 +86,22 @@ endif
 
 # Android libraries
 ifdef ANDROID_NDK
-TOOLCHAIN = $(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/arm-linux-androideabi-
+ANDROID_EABI = armeabi-v7a
+ifeq ($(ANDROID_EABI),arm64-v8a)
+  TOOLCHAIN = $(ANDROID_NDK)/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64/bin/aarch64-linux-android-
+  ANDROID_SYSROOT = --sysroot=$(ANDROID_NDK)/platforms/android-21/arch-arm64
+  ANDROID_MARCH   = -march=armv8-a
+else ifeq ($(ANDROID_EABI),x86)
+  TOOLCHAIN = $(ANDROID_NDK)/toolchains/i686-linux-android-4.9/prebuilt/linux-x86_64/bin/i686-linux-android-
+  ANDROID_SYSROOT = --sysroot=$(ANDROID_NDK)/platforms/android-15/arch-x86
+  ANDROID_MARCH   = -march=i686 -mtune=intel -mssse3 -mfpmath=sse -m32
+else
+  # armeabi-v7a
+  TOOLCHAIN = $(ANDROID_NDK)/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/arm-linux-androideabi-
+  ANDROID_SYSROOT = --sysroot=$(ANDROID_NDK)/platforms/android-15/arch-arm
+  ANDROID_MARCH   = -march=armv7-a -mfloat-abi=softfp
+endif
+
 HAVE_MONGOOSE =
 LIB_PTHREAD = -lc
 LIB_GLX = -lEGL -lGLESv2
@@ -123,11 +138,11 @@ endif
 #STRIPFLAGS = --info
 
 ifdef ANDROID_NDK
-ANDROID_EABI = armeabi-v7a
 LIBSUBFOLDER = libs/$(ANDROID_EABI)
-EXTRA_CFLAGS   += --sysroot=$(ANDROID_NDK)/platforms/android-15/arch-arm -march=armv7-a -mfloat-abi=softfp
-EXTRA_CXXFLAGS += --sysroot=$(ANDROID_NDK)/platforms/android-15/arch-arm -march=armv7-a -mfloat-abi=softfp -I$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.9/include -I$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.9/libs/$(ANDROID_EABI)/include -DST_HAVE_EGL -DST_NO_UPDATES_CHECK
-EXTRA_LDFLAGS  += --sysroot=$(ANDROID_NDK)/platforms/android-15/arch-arm -L$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.9/libs/$(ANDROID_EABI) -lstdc++ -lgnustl_shared
+EXTRA_CFLAGS   += $(ANDROID_SYSROOT) $(ANDROID_MARCH)
+EXTRA_CXXFLAGS += $(ANDROID_SYSROOT) $(ANDROID_MARCH)
+EXTRA_CXXFLAGS += -I$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.9/include -I$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.9/libs/$(ANDROID_EABI)/include -DST_HAVE_EGL -DST_NO_UPDATES_CHECK
+EXTRA_LDFLAGS  += $(ANDROID_SYSROOT) -L$(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.9/libs/$(ANDROID_EABI) -lstdc++ -lgnustl_shared
 else
 EXTRA_CFLAGS   += -mmmx -msse
 EXTRA_CXXFLAGS += -mmmx -msse
@@ -253,16 +268,16 @@ install_android:
 	cp -f -r $(BUILD_ROOT)/textures/*      $(aDestAndroid)/assets/textures/
 	cp -f    license-gpl-3.0.txt           $(aDestAndroid)/assets/info/license.txt
 
-install_android_libs:
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStShared)       $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStShared)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStGLWidgets)    $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStGLWidgets)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStCore)         $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStCore)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutAnaglyph)  $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStOutAnaglyph)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutInterlace) $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStOutInterlace)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutDistorted) $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStOutDistorted)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStImageViewer)  $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStImageViewer)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStMoviePlayer)  $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStMoviePlayer)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(sViewAndroid)    $(aDestAndroid)/libs/$(ANDROID_EABI)/$(sViewAndroid)
+install_android_libs: $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) $(aStOutInterlace) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(sViewAndroid)
+	cp -f $(BUILD_ROOT)/$(aStShared)       $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStGLWidgets)    $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStCore)         $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStOutAnaglyph)  $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStOutInterlace) $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStOutDistorted) $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStImageViewer)  $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStMoviePlayer)  $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(sViewAndroid)    $(aDestAndroid)/libs/$(ANDROID_EABI)/
 	cp -f $(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.9/libs/$(ANDROID_EABI)/libgnustl_shared.so $(aDestAndroid)/libs/$(ANDROID_EABI)/
 	$(STRIP) $(STRIPFLAGS) $(aDestAndroid)/libs/$(ANDROID_EABI)/libgnustl_shared.so
 	cp -f $(FREETYPE_ROOT)/libs/$(ANDROID_EABI)/libfreetype.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
@@ -274,16 +289,16 @@ install_android_libs:
 	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswresample-*.so    $(aDestAndroid)/libs/$(ANDROID_EABI)/
 	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswscale-*.so       $(aDestAndroid)/libs/$(ANDROID_EABI)/
 
-install_android_cad_libs:
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStShared)       $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStShared)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStGLWidgets)    $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStGLWidgets)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStCore)         $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStCore)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutAnaglyph)  $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStOutAnaglyph)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutInterlace) $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStOutInterlace)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStOutDistorted) $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStOutDistorted)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStImageViewer)  $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStImageViewer)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(aStMoviePlayer)  $(aDestAndroid)/libs/$(ANDROID_EABI)/$(aStMoviePlayer)
-	ln --force --symbolic ../../../$(BUILD_ROOT)/$(sViewAndroidCad) $(aDestAndroid)/libs/$(ANDROID_EABI)/$(sViewAndroid)
+install_android_cad_libs: $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) $(aStOutInterlace) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(sViewAndroidCad)
+	cp -f $(BUILD_ROOT)/$(aStShared)       $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStGLWidgets)    $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStCore)         $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStOutAnaglyph)  $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStOutInterlace) $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStOutDistorted) $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStImageViewer)  $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(aStMoviePlayer)  $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(BUILD_ROOT)/$(sViewAndroidCad) $(aDestAndroid)/libs/$(ANDROID_EABI)/
 	cp -f $(FREETYPE_ROOT)/libs/$(ANDROID_EABI)/libfreetype.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
 	cp -f $(OPENAL_ROOT)/libs/$(ANDROID_EABI)/libopenal.so          $(aDestAndroid)/libs/$(ANDROID_EABI)/
 	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavcodec-*.so       $(aDestAndroid)/libs/$(ANDROID_EABI)/

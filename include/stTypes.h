@@ -67,7 +67,7 @@
 #include <cstddef>     // size_t, NULL
 #include <cstdlib>
 #include <cstring>     // for memcpy
-#if !defined(__arm__) && !defined(__arm__)
+#if defined(__i386) || defined(__x86_64) || defined(_M_IX86) || defined(_M_X64) || defined(_M_AMD64)
     #include <xmmintrin.h> // for memory alignment
 #endif
 #include <stdio.h>     // for _snprintf on MinGW
@@ -134,7 +134,7 @@ typedef uint64_t stUInt64_t;
 #endif
 
 /**
- * Mordern compilers provide fixed-size primitives like int32_t.
+ * Modern compilers provide fixed-size primitives like int32_t.
  * Some developers can use these types in function overloads
  * to logically cover all variations depending on primitive size.
  * However some language primitives can recall to the same
@@ -431,8 +431,8 @@ inline int stRound(const float theNumber) {
  *  - ST_CIMPORT   Import symbol, C-style
  *  - ST_CPPEXPORT Export symbol, C++-style (with name decorations)
  *  - ST_CPPIMPORT Import symbol, C++-style
- *  - ST_EXPORT    Depricated macro, alias to ST_CEXPORT
- *  - ST_IMPORT    Depricated macro, alias to ST_CIXPORT
+ *  - ST_EXPORT    Deprecated macro, alias to ST_CEXPORT
+ *  - ST_IMPORT    Deprecated macro, alias to ST_CIXPORT
  *
  * Notice that function/class definition without extra specifiers
  * leads to different behaviour on different platforms!
@@ -440,7 +440,7 @@ inline int stRound(const float theNumber) {
  *  - On Linux (and others), symbol considered for export
  *
  * On Windows exported and imported symbols should be marked with different specifiers
- * which leads to extra comlications in library headers
+ * which leads to extra complications in library headers
  * (library should be build with export specifier whilst
  * application based on it should see import specifier).
  * However C++ method could be marked as "exported" in both cases.
