@@ -403,7 +403,22 @@ bool StGLRootWidget::tryClick(const StClickEvent& theEvent,
     if(isPointIn(myCursorZo)) {
         setClicked(theEvent.Button, true);
     }
-    const bool aResult = StGLWidget::tryClick(theEvent, theIsItemClicked);
+
+    bool toIgnore = false;
+    if(theEvent.Button == ST_MOUSE_LEFT // && theEvent.IsSynthesized
+    && myIsMobile) {
+        StPointI_t aCursorPx(myRoot->getRectPx().width()  * theEvent.PointX,
+                             myRoot->getRectPx().height() * theEvent.PointY);
+        const int aToler = myRoot->scale(8);
+        if(aCursorPx.x() < aToler || aCursorPx.x() > (myRoot->getRectPx().width()  - aToler)
+        || aCursorPx.y() < aToler || aCursorPx.y() > (myRoot->getRectPx().height() - aToler)) {
+            // disallow clicks at the very front of mobile screens;
+            // this area is usually handled by special system gestures (e.g. to reveal system bars)
+            toIgnore = true;
+        }
+    }
+
+    const bool aResult = !toIgnore ? StGLWidget::tryClick(theEvent, theIsItemClicked) : false;
     myCursorZo = aCursorBack;
     return aResult;
 }
