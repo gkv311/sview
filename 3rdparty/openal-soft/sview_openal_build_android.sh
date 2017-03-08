@@ -10,6 +10,12 @@ aNbJobs="$(getconf _NPROCESSORS_ONLN)"
 anNdkPath=$HOME/develop/android-ndk-r12b
 aToolchain=$HOME/develop/android-cmake/android.toolchain.cmake
 
+# remove SO version from library - unsupported by Android
+if grep -q PROPERTIES\ VERSION $anOpenAlSrc/CMakeLists.txt; then
+  cp -f $anOpenAlSrc/CMakeLists.txt $anOpenAlSrc/CMakeLists.bak.txt
+  sed -i '/PROPERTIES\ VERSION/,+1 d' CMakeLists.txt
+fi
+
 cmakeBuildOpenAl() {
   anApi="$1"
   anAbi="$2"
