@@ -47,6 +47,11 @@ public class StActivity extends NativeActivity implements SensorEventListener {
         });
         AlertDialog aDialog = aBuilder.create();
         aDialog.show();
+
+        Intent anIntent = new Intent(theActivity, CrashReportActivity.class);
+        anIntent.putExtra(CrashReportActivity.THE_ERROR_REPORT_ID, theError);
+        anIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        theActivity.startActivity(anIntent);
     }
 
     /**
@@ -150,7 +155,20 @@ public class StActivity extends NativeActivity implements SensorEventListener {
             myIsPoorOri = mySensorMgr.getDefaultSensor(Sensor.TYPE_GYROSCOPE) == null;
         }
         myS3dvSurf = new StS3dvSurface();
-        super.onCreate(theSavedInstanceState);
+
+        try {
+            super.onCreate(theSavedInstanceState);
+        } catch(java.lang.UnsatisfiedLinkError theError) {
+            anInfo.append("Error: native library is unavailable:\n  " + theError.getMessage());
+            StActivity.exitWithError(this, "Broken apk?\n" + anInfo);
+        } catch(SecurityException theError) {
+            anInfo.append("Error: native library can not be loaded for security reasons:\n  " + theError.getMessage());
+            StActivity.exitWithError(this, "Broken apk?\n" + anInfo);
+        } catch(Exception theError) {
+            anInfo.append("Error: unhandled exception:\n  " + theError.getMessage());
+            StActivity.exitWithError(this, "Broken apk?\n" + anInfo);
+        }
+
         updateHideSystemBars(myToHideStatusBar, myToHideNavBar);
     }
 
