@@ -600,7 +600,12 @@ void StImageViewerGUI::doAboutImage(const size_t ) {
     // translate known metadata tag names
     for(size_t aMapIter = 0; aMapIter < anExtraInfo->Info.size(); ++aMapIter) {
         StDictEntry& anEntry = anExtraInfo->Info.changeValue(aMapIter);
+        const size_t aSize = anEntry.getValue().getSize();
         anEntry.changeName() = myLangMap->getValue(anEntry.getKey());
+        if(aSize > 16384) {
+            // cut too long strings
+            anEntry.changeValue() = anEntry.getValue().subString(0, 128) + "\n...[" + (aSize / 1024) + " KiB]";
+        }
     }
     const int aWidthMax  = aDialog->getContent()->getRectPx().width();
     int       aRowLast   = (int )anExtraInfo->Info.size();

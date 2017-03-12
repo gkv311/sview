@@ -992,7 +992,12 @@ void StMoviePlayerGUI::doAboutFile(const size_t ) {
     for(size_t aMapIter = 0; aMapIter < anExtraInfo->Info.size(); ++aMapIter) {
         StDictEntry& anEntry = anExtraInfo->Info.changeValue(aMapIter);
         StString     aKey    = anEntry.getKey().lowerCased();
+        const size_t aSize = anEntry.getValue().getSize();
         anEntry.changeName() = myLangMap->getValue(aKey);
+        if(aSize > 16384) {
+            // cut too long strings
+            anEntry.changeValue() = anEntry.getValue().subString(0, 128) + "\n...[" + (aSize / 1024) + " KiB]";
+        }
     }
 
     const StGLVec3 aWhite(1.0f, 1.0f, 1.0f);
