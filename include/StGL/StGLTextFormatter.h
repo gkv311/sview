@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -10,6 +10,8 @@
 #define __StGLTextFormatter_h_
 
 #include <StGL/StGLFont.h>
+
+#include <vector>
 
 class StGLVertexBuffer;
 
@@ -125,15 +127,15 @@ class StGLTextFormatter {
     /**
      * Retrieve formatting results.
      */
-    ST_CPPEXPORT void getResult(StArrayList<GLuint>&                               theTextures,
-                                StArrayList< StHandle <StArrayList <StGLVec2> > >& theVertsPerTexture,
-                                StArrayList< StHandle <StArrayList <StGLVec2> > >& theTCrdsPerTexture) const;
+    ST_CPPEXPORT void getResult(std::vector<GLuint>&                               theTextures,
+                                std::vector< StHandle < std::vector<StGLVec2> > >& theVertsPerTexture,
+                                std::vector< StHandle < std::vector<StGLVec2> > >& theTCrdsPerTexture) const;
 
     /**
      * Retrieve formatting results.
      */
     ST_CPPEXPORT void getResult(StGLContext&                                theCtx,
-                                StArrayList<GLuint>&                        theTextures,
+                                std::vector<GLuint>&                        theTextures,
                                 StArrayList< StHandle <StGLVertexBuffer> >& theVertsPerTexture,
                                 StArrayList< StHandle <StGLVertexBuffer> >& theTCrdsPerTexture) const;
 
@@ -186,7 +188,7 @@ class StGLTextFormatter {
 
     StString              myString;        //!< currently rendered text
     StGLVec2              myPen;           //!< current pen position
-    StArrayList<StGLTile> myRects;         //!< glyphs rectangles
+    std::vector<StGLTile> myRects;         //!< glyphs rectangles
     size_t                myRectsNb;       //!< rectangles number
     GLfloat               myLineSpacing;   //!< line spacing (computed as maximum of all fonts involved in text formatting)
     GLfloat               myAscender;      //!<

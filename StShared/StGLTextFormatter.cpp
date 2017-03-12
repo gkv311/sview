@@ -1,5 +1,5 @@
 /**
- * Copyright © 2012-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2012-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -13,7 +13,7 @@
 /**
  * Auxiliary function to translate rectangles by the vector.
  */
-inline void move(StArray<StGLTile>& theRects,
+inline void move(std::vector<StGLTile>& theRects,
                  const StGLVec2&    theMoveVec,
                  size_t             theCharFrom,
                  const size_t       theCharTo) {
@@ -26,7 +26,7 @@ inline void move(StArray<StGLTile>& theRects,
 /**
  * Auxiliary function to translate rectangles in horizontal direction.
  */
-inline void moveX(StArray<StGLTile>& theRects,
+inline void moveX(std::vector<StGLTile>& theRects,
                   const GLfloat      theMoveVec,
                   size_t             theCharFrom,
                   const size_t       theCharTo) {
@@ -39,7 +39,7 @@ inline void moveX(StArray<StGLTile>& theRects,
 /**
  * Auxiliary function to translate rectangles in vertical direction.
  */
-inline void moveY(StArray<StGLTile>& theRects,
+inline void moveY(std::vector<StGLTile>& theRects,
                   const GLfloat      theMoveVec,
                   size_t             theCharFrom,
                   const size_t       theCharTo) {
@@ -97,13 +97,42 @@ inline StGLVec2& floor(StGLVec2& theVec) {
     return theVec;
 }
 
-void StGLTextFormatter::getResult(StArrayList<GLuint>&                               theTextures,
-                                  StArrayList< StHandle <StArrayList <StGLVec2> > >& theVertsPerTexture,
-                                  StArrayList< StHandle <StArrayList <StGLVec2> > >& theTCrdsPerTexture) const {
+void StGLTextFormatter::getResult(std::vector<GLuint>&                               theTextures,
+                                  std::vector< StHandle <std::vector <StGLVec2> > >& theVertsPerTexture,
+                                  std::vector< StHandle <std::vector <StGLVec2> > >& theTCrdsPerTexture) const {
     StGLVec2 aVec(0.0f, 0.0f);
     theTextures.clear();
     theVertsPerTexture.clear();
     theTCrdsPerTexture.clear();
+
+    std::vector<size_t> aNbRectPerTexture;
+    for(size_t aRectIter = 0; aRectIter < myRectsNb; ++aRectIter) {
+        const GLuint aTexture = myRects[aRectIter].texture;
+
+        size_t aListId = 0;
+        for(aListId = 0; aListId < theTextures.size(); ++aListId) {
+            if(theTextures[aListId] == aTexture) {
+                break;
+            }
+        }
+        if(aListId >= theTextures.size()) {
+            theTextures.push_back(aTexture);
+            theVertsPerTexture.push_back(new std::vector<StGLVec2>());
+            theTCrdsPerTexture.push_back(new std::vector<StGLVec2>());
+            aNbRectPerTexture.push_back(0);
+        }
+
+        ++aNbRectPerTexture[aListId];
+    }
+
+    for(size_t aTexIter = 0; aTexIter < theTextures.size(); ++aTexIter) {
+        const size_t aNbTexTris = aNbRectPerTexture[aTexIter] * 6;
+        std::vector<StGLVec2>& aVerts = *theVertsPerTexture[aTexIter];
+        std::vector<StGLVec2>& aTCrds = *theTCrdsPerTexture[aTexIter];
+        aVerts.reserve(aNbTexTris);
+        aTCrds.reserve(aNbTexTris);
+    }
+
     for(size_t aRectIter = 0; aRectIter < myRectsNb; ++aRectIter) {
         const StGLRect& aRect    = myRects[aRectIter].px;
         const StGLRect& aRectUV  = myRects[aRectIter].uv;
@@ -115,39 +144,34 @@ void StGLTextFormatter::getResult(StArrayList<GLuint>&                          
                 break;
             }
         }
-        if(aListId >= theTextures.size()) {
-            theTextures.add(aTexture);
-            theVertsPerTexture.add(new StArrayList<StGLVec2>());
-            theTCrdsPerTexture.add(new StArrayList<StGLVec2>());
-        }
 
-        StArrayList<StGLVec2>& aVerts = *theVertsPerTexture.changeValue(aListId);
-        StArrayList<StGLVec2>& aTCrds = *theTCrdsPerTexture.changeValue(aListId);
+        std::vector<StGLVec2>& aVerts = *theVertsPerTexture[aListId];
+        std::vector<StGLVec2>& aTCrds = *theTCrdsPerTexture[aListId];
 
         // apply floor on position to avoid blurring issues
         // due to cross-pixel coordinates
-        aVerts.add(floor(aRect.getBottomLeft(aVec)));
-        aVerts.add(floor(aRect.getTopLeft(aVec)));
-        aVerts.add(floor(aRect.getTopRight(aVec)));
-        aTCrds.add(aRectUV.getBottomLeft(aVec));
-        aTCrds.add(aRectUV.getTopLeft(aVec));
-        aTCrds.add(aRectUV.getTopRight(aVec));
+        aVerts.push_back(floor(aRect.getBottomLeft(aVec)));
+        aVerts.push_back(floor(aRect.getTopLeft(aVec)));
+        aVerts.push_back(floor(aRect.getTopRight(aVec)));
+        aTCrds.push_back(aRectUV.getBottomLeft(aVec));
+        aTCrds.push_back(aRectUV.getTopLeft(aVec));
+        aTCrds.push_back(aRectUV.getTopRight(aVec));
 
-        aVerts.add(floor(aRect.getBottomLeft(aVec)));
-        aVerts.add(floor(aRect.getTopRight(aVec)));
-        aVerts.add(floor(aRect.getBottomRight(aVec)));
-        aTCrds.add(aRectUV.getBottomLeft(aVec));
-        aTCrds.add(aRectUV.getTopRight(aVec));
-        aTCrds.add(aRectUV.getBottomRight(aVec));
+        aVerts.push_back(floor(aRect.getBottomLeft(aVec)));
+        aVerts.push_back(floor(aRect.getTopRight(aVec)));
+        aVerts.push_back(floor(aRect.getBottomRight(aVec)));
+        aTCrds.push_back(aRectUV.getBottomLeft(aVec));
+        aTCrds.push_back(aRectUV.getTopRight(aVec));
+        aTCrds.push_back(aRectUV.getBottomRight(aVec));
     }
 }
 
 void StGLTextFormatter::getResult(StGLContext&                                theCtx,
-                                  StArrayList<GLuint>&                        theTextures,
+                                  std::vector<GLuint>&                        theTextures,
                                   StArrayList< StHandle <StGLVertexBuffer> >& theVertsPerTexture,
                                   StArrayList< StHandle <StGLVertexBuffer> >& theTCrdsPerTexture) const {
-    StArrayList< StHandle <StArrayList <StGLVec2> > > aVertsPerTexture;
-    StArrayList< StHandle <StArrayList <StGLVec2> > > aTCrdsPerTexture;
+    std::vector< StHandle < std::vector<StGLVec2> > > aVertsPerTexture;
+    std::vector< StHandle < std::vector<StGLVec2> > > aTCrdsPerTexture;
     getResult(theTextures, aVertsPerTexture, aTCrdsPerTexture);
 
     if(theVertsPerTexture.size() != theTextures.size()) {
@@ -169,8 +193,8 @@ void StGLTextFormatter::getResult(StGLContext&                                th
     }
 
     for(size_t aTextureIter = 0; aTextureIter < theTextures.size(); ++aTextureIter) {
-        const StArrayList<StGLVec2>& aVerts = *aVertsPerTexture[aTextureIter];
-        const StArrayList<StGLVec2>& aTCrds = *aTCrdsPerTexture[aTextureIter];
+        const std::vector<StGLVec2>& aVerts = *aVertsPerTexture[aTextureIter];
+        const std::vector<StGLVec2>& aTCrds = *aTCrdsPerTexture[aTextureIter];
         theVertsPerTexture[aTextureIter]->init(theCtx, aVerts);
         theTCrdsPerTexture[aTextureIter]->init(theCtx, aTCrds);
     }
@@ -222,7 +246,7 @@ void StGLTextFormatter::append(StGLContext&          theCtx,
         theFont.renderGlyph(theCtx,
                             aCharThis, aCharNext,
                             aTile, myPen);
-        myRects.add(aTile);
+        myRects.push_back(aTile);
 
         ++myRectsNb;
     }

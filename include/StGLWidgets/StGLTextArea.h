@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -234,7 +234,7 @@ class StGLTextArea : public StGLWidget {
 
         private:
 
-    StArrayList<GLuint>                       myTexturesList;
+    std::vector<GLuint>                       myTexturesList;
     StArrayList< StHandle<StGLVertexBuffer> > myTextVertBuf;
     StArrayList< StHandle<StGLVertexBuffer> > myTextTCrdBuf;
 

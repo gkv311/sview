@@ -14,6 +14,8 @@
 #include <StGL/StGLVec.h>
 #include <StGL/StGLResource.h>
 
+#include <vector>
+
 /**
  * Enumeration indicates the data stored in VBO.
  */
@@ -103,6 +105,21 @@ class StGLVertexBuffer : public StGLResource {
     inline bool init(StGLContext&             theCtx,
                      const StArray<StGLVec4>& theArray) {
         return init(theCtx, 4, GLsizeiptr(theArray.size()), theArray.getFirst().getData());
+    }
+
+    ST_LOCAL bool init(StGLContext& theCtx,
+                       const std::vector<StGLVec2>& theArray) {
+        return init(theCtx, 2, GLsizeiptr(theArray.size()), theArray.front().getData());
+    }
+
+    ST_LOCAL bool init(StGLContext& theCtx,
+                       const std::vector<StGLVec3>& theArray) {
+        return init(theCtx, 3, GLsizeiptr(theArray.size()), theArray.front().getData());
+    }
+
+    ST_LOCAL bool init(StGLContext& theCtx,
+                       const std::vector<StGLVec4>& theArray) {
+        return init(theCtx, 4, GLsizeiptr(theArray.size()), theArray.front().getData());
     }
 
     ST_CPPEXPORT bool init(StGLContext&   theCtx,

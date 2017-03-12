@@ -407,8 +407,8 @@ bool StGLRootWidget::tryClick(const StClickEvent& theEvent,
     bool toIgnore = false;
     if(theEvent.Button == ST_MOUSE_LEFT // && theEvent.IsSynthesized
     && myIsMobile) {
-        StPointI_t aCursorPx(myRoot->getRectPx().width()  * theEvent.PointX,
-                             myRoot->getRectPx().height() * theEvent.PointY);
+        StPointI_t aCursorPx(int(myRoot->getRectPx().width()  * theEvent.PointX),
+                             int(myRoot->getRectPx().height() * theEvent.PointY));
         const int aToler = myRoot->scale(8);
         if(aCursorPx.x() < aToler || aCursorPx.x() > (myRoot->getRectPx().width()  - aToler)
         || aCursorPx.y() < aToler || aCursorPx.y() > (myRoot->getRectPx().height() - aToler)) {
