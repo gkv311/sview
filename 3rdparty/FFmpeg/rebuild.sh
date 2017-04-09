@@ -153,7 +153,12 @@ if [ "$gccMachine" == "$GCC_MACHINE_MINGW_32" ] || [ "$gccMachine" == "$GCC_MACH
   # WinAPI threads are used only partially in FFmpeg
   # you should use with --enable-pthreads instead to enable full multithreading support!
   #configArguments="$configArguments --enable-w32threads"
-  configArguments="$configArguments --enable-avisynth"
+  configArguments="$configArguments --disable-w32threads"
+  if [ "$rebuildLicense" == "GPL" ]; then
+    configArguments="$configArguments --enable-avisynth"
+  fi
+
+  configArguments="$configArguments --enable-libopenjpeg"
 
   # avoid dynamic linkage with libgcc_s_sjlj-1.dll
   configArguments="$configArguments --extra-ldflags=-static-libgcc"
@@ -173,7 +178,7 @@ elif [ "$rebuildAndroid" == "true" ]; then
     targetFlags="--cross-prefix=$compilerPrefix --sysroot=${androidNdkRoot}/platforms/android-15/arch-arm --arch=arm"
   fi
 
-  configArguments="$configArguments --enable-cross-compile --target-os=linux $targetFlags"
+  configArguments="$configArguments --enable-cross-compile --target-os=android $targetFlags"
   #configArguments="$configArguments --extra-cflags='-fno-builtin-sin -fno-builtin-sinf'"
 
   configArguments="$configArguments --enable-jni --enable-mediacodec"
@@ -204,7 +209,7 @@ if [ "$rebuildLicense" == "GPL" ]; then
 fi
 
 # redirect error state from tee
-set -i pipefail
+set -o pipefail
 
 aNbJobs="$(getconf _NPROCESSORS_ONLN)"
 
