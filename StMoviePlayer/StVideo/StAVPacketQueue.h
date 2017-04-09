@@ -59,13 +59,6 @@ class StAVPacketQueue {
     ST_LOCAL void clear();
 
     /**
-     * Open stream.
-     */
-    ST_LOCAL virtual bool init(AVFormatContext*   theFormatCtx,
-                               const unsigned int theStreamId,
-                               const StString&    theFileName);
-
-    /**
      * Close stream.
      */
     ST_LOCAL virtual void deinit();
@@ -230,6 +223,15 @@ class StAVPacketQueue {
          */
         StSignal<void (const StCString& )> onError;
     } signals;
+
+        protected:
+
+    /**
+     * Open stream.
+     */
+    ST_LOCAL virtual bool init(AVFormatContext*   theFormatCtx,
+                               const unsigned int theStreamId,
+                               const StString&    theFileName);
 
         protected: //! @name Fields should be full-controlled by heirs
 

@@ -488,8 +488,8 @@ bool StGLImageRegion::getHeadOrientation(StGLQuaternion& theOrient,
 
     const float aYawShift = theToApplyDefShift ? stToRadians(90.0f) : 0.0f;
     StGLVec2 aMouseMove = getMouseMoveSphere();
-    float aYaw   = -stToRadians(aParams->PanPhi   + aMouseMove.x()) + aYawShift;
-    float aPitch =  stToRadians(StStereoParams::clipPitch(aParams->PanTheta + aMouseMove.y()));
+    float aYaw   = -stToRadians(aParams->getPanYaw() + aMouseMove.x()) + aYawShift;
+    float aPitch =  stToRadians(StStereoParams::clipPitch(aParams->getPanPitch() + aMouseMove.y()));
     float aRoll  =  stToRadians(aParams->getZRotate());
 
     // apply separation

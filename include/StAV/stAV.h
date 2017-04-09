@@ -36,6 +36,11 @@ extern "C" {
     #include <libavutil/display.h>
 #endif
 
+#if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(55, 57, 100))
+    #define ST_AV_NEWSPHERICAL
+    #include <libavutil/spherical.h>
+#endif
+
 #ifdef _MSC_VER
     #pragma warning(default : 4244)
 #endif

@@ -290,7 +290,8 @@ bool StVideoQueue::initCodec(AVCodec*   theCodec,
 
 bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
                         const unsigned int theStreamId,
-                        const StString&    theFileName) {
+                        const StString&    theFileName,
+                        const StHandle<StStereoParams>& theNewParams) {
     if(!StAVPacketQueue::init(theFormatCtx, theStreamId, theFileName)
     || myCodecCtx->codec_type != AVMEDIA_TYPE_VIDEO) {
         signals.onError(stCString("FFmpeg: invalid stream"));
@@ -414,6 +415,36 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
 
     // we can read information from Display Matrix in side data or from metadata key
     myRotateDeg = 0;
+
+#ifdef ST_AV_NEWSPHERICAL
+    if(const AVSphericalMapping* aSpherical = (AVSphericalMapping* )av_stream_get_side_data(myStream, AV_PKT_DATA_SPHERICAL, NULL)) {
+        switch(aSpherical->projection) {
+            case AV_SPHERICAL_EQUIRECTANGULAR: {
+                theNewParams->ViewingMode = StViewSurface_Sphere;
+                break;
+            }
+            case AV_SPHERICAL_CUBEMAP: {
+                theNewParams->ViewingMode = StViewSurface_Cubemap;
+                //spherical->padding
+                break;
+            }
+            case AV_SPHERICAL_EQUIRECTANGULAR_TILE: {
+                // unsupported
+                //av_spherical_tile_bounds(aSpherical, par->width, par->height, &l, &t, &r, &b);
+                break;
+            }
+        }
+        if(theNewParams->ViewingMode != StViewSurface_Plain
+        && theNewParams->isZeroRotate()) {
+            const double aYaw   = (double )aSpherical->yaw   / (1 << 16);
+            const double aPitch = (double )aSpherical->pitch / (1 << 16);
+            const double aRoll  = (double )aSpherical->roll  / (1 << 16);
+            myRotateDeg = (int )-aRoll;
+            theNewParams->setRotateZero((float )-aYaw, (float )aPitch, myRotateDeg);
+        }
+    }
+#endif
+
 #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
     if(const uint8_t* aDispMatrix = av_stream_get_side_data(myStream, AV_PKT_DATA_DISPLAYMATRIX, NULL)) {
         const double aRotDeg = -av_display_rotation_get((const int32_t* )aDispMatrix);

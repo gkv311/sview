@@ -65,8 +65,6 @@ class StStereoParams {
       StereoFormat(StFormat_Mono),
       ToSwapLR(false),
       PanCenter(0.0f, 0.0f),
-      PanTheta(0.0f),
-      PanPhi(0.0f),
       ScaleFactor(1.0f),
       mySepDxPx(0),
       mySepDxZeroPx(0),
@@ -75,6 +73,10 @@ class StStereoParams {
       myXRotateDegrees(0.0f),
       myYRotateDegrees(0.0f),
       myZRotateDegrees(0.0f),
+      myPanYaw(0.0f),
+      myPanPitch(0.0f),
+      myPanYawZero(0.0f),
+      myPanPitchZero(0.0f),
       myZRotateZero(0.0f) {
         //
     }
@@ -90,21 +92,21 @@ class StStereoParams {
      * @return horizontal separation in pixels.
      * This number means delta between views.
      */
-    GLint getSeparationDx() const {
+    int getSeparationDx() const {
         return mySepDxZeroPx + mySepDxPx;
     }
 
     /**
      * Set horizontal separation in pixels.
      */
-    void setSeparationDx(const GLint theValue) {
+    void setSeparationDx(int theValue) {
         mySepDxPx = theValue - mySepDxZeroPx;
     }
 
     /**
      * Setup neutral point.
      */
-    void setSeparationNeutral(const GLint theSepDx = 0) {
+    void setSeparationNeutral(int theSepDx = 0) {
         mySepDxZeroPx = theSepDx;
     }
 
@@ -119,64 +121,96 @@ class StStereoParams {
     /**
      * Set vertical separation in pixels.
      */
-    void setSeparationDy(const GLint theValue) {
+    void setSeparationDy(int theValue) {
         mySepDyPx = theValue;
     }
 
     /**
      * @return angular separation between views in degrees.
      */
-    GLfloat getSepRotation() const {
+    float getSepRotation() const {
         return mySepRotDegrees;
     }
 
     /**
      * @return angular separation between views in degrees.
      */
-    void setSepRotation(GLfloat theValue) {
+    void setSepRotation(float theValue) {
         mySepRotDegrees = theValue;
+    }
+
+    /**
+     * @return angle for panorama view
+     */
+    float getPanYaw() const {
+        return myPanYawZero + myPanYaw;
+    }
+
+    /**
+     * @return angle for panorama view
+     */
+    float getPanPitch() const {
+        return myPanPitchZero + myPanPitch;
     }
 
     /**
      * @return rotation angle in degrees.
      */
-    GLfloat getXRotate() const {
+    float getXRotate() const {
         return myXRotateDegrees;
     }
 
     /**
      * Change rotation angle in degrees.
      */
-    void setXRotate(const GLfloat theValue) {
+    void setXRotate(float theValue) {
         myXRotateDegrees = theValue;
     }
 
     /**
      * @return rotation angle in degrees.
      */
-    GLfloat getYRotate() const {
+    float getYRotate() const {
         return myYRotateDegrees;
     }
 
     /**
      * Change rotation angle in degrees.
      */
-    void setYRotate(const GLfloat theValue) {
+    void setYRotate(float theValue) {
         myYRotateDegrees = theValue;
     }
 
     /**
      * @return rotation angle in degrees.
      */
-    GLfloat getZRotate() const {
+    float getZRotate() const {
         return myZRotateZero + myZRotateDegrees;
     }
 
     /**
      * @param theAngleDegrees - rotation angle in degrees.
      */
-    void setZRotateZero(const GLfloat theAngleDegrees) {
+    void setZRotateZero(float theAngleDegrees) {
         myZRotateZero = theAngleDegrees;
+    }
+
+    /**
+     * Setup default rotation.
+     */
+    void setRotateZero(float theYaw, float thePitch, float theRoll) {
+        myPanYawZero   = theYaw;
+        myPanPitchZero = thePitch;
+        myZRotateZero  = theRoll;
+    }
+
+    /**
+     * @return true if rotation is not modified
+     */
+    bool isZeroRotate() const {
+        return myPanYaw == 0.0f
+            && myPanPitch == 0.0f
+            && myZRotateDegrees == 0.0f;
     }
 
     /**
@@ -230,15 +264,15 @@ class StStereoParams {
     }
 
     void moveSphere(const StGLVec2& theMoveVec) {
-        PanPhi   += theMoveVec.x();
-        PanTheta = clipPitch(PanTheta + theMoveVec.y());
+        myPanYaw += theMoveVec.x();
+        myPanPitch = clipPitch(myPanPitch + theMoveVec.y());
     }
 
     void moveToRight(const float theDuration = 0.02f) {
         switch(ViewingMode) {
             case StViewSurface_Sphere:
             case StViewSurface_Cubemap:
-                PanPhi += 100.0f * theDuration;
+                myPanYaw += 100.0f * theDuration;
                 break;
             case StViewSurface_Plain:
                 PanCenter.x() += 0.5f * theDuration / ScaleFactor;
@@ -250,7 +284,7 @@ class StStereoParams {
         switch(ViewingMode) {
             case StViewSurface_Sphere:
             case StViewSurface_Cubemap:
-                PanPhi -= 100.0f * theDuration;
+                myPanYaw -= 100.0f * theDuration;
                 break;
             case StViewSurface_Plain:
                 PanCenter.x() -= 0.5f * theDuration / ScaleFactor;
@@ -274,7 +308,7 @@ class StStereoParams {
         switch(ViewingMode) {
             case StViewSurface_Sphere:
             case StViewSurface_Cubemap:
-                PanTheta = clipPitch(PanTheta - 100.0f * theDuration);
+                myPanPitch = clipPitch(myPanPitch - 100.0f * theDuration);
                 break;
             case StViewSurface_Plain:
                 PanCenter.y() -= 0.5f * theDuration / ScaleFactor;
@@ -286,7 +320,7 @@ class StStereoParams {
         switch(ViewingMode) {
             case StViewSurface_Sphere:
             case StViewSurface_Cubemap:
-                PanTheta = clipPitch(PanTheta + 100.0f * theDuration);
+                myPanPitch = clipPitch(myPanPitch + 100.0f * theDuration);
                 break;
             case StViewSurface_Plain:
                 PanCenter.y() += 0.5f * theDuration / ScaleFactor;
@@ -321,8 +355,8 @@ class StStereoParams {
         myZRotateDegrees = 0.0f;
         PanCenter.x() = 0.0f;
         PanCenter.y() = 0.0f;
-        PanTheta      = 0.0f;
-        PanPhi        = 0.0f;
+        myPanPitch    = 0.0f;
+        myPanYaw      = 0.0f;
         ScaleFactor   = 1.0f;
         ToSwapLR      = false;
     }
@@ -341,21 +375,22 @@ class StStereoParams {
     bool         ToSwapLR;         //!< reverse left/right views
 
     StGLVec2     PanCenter;        //!< relative position
-    GLfloat      PanTheta;         //!< angle for panorama view
-    GLfloat      PanPhi;           //!< angle for panorama view
-
     GLfloat      ScaleFactor;      //!< scaling factor
 
         private:
 
-    GLint        mySepDxPx;        //!< horizontal    separation in pixels
-    GLint        mySepDxZeroPx;    //!< zero-parallax separation in pixels
-    GLint        mySepDyPx;        //!< vertical      separation in pixels
-    GLfloat      mySepRotDegrees;  //!< angular separation in degrees
-    GLfloat      myXRotateDegrees; //!< rotation angle in degrees
-    GLfloat      myYRotateDegrees; //!< rotation angle in degrees
-    GLfloat      myZRotateDegrees; //!< rotation angle in degrees
-    GLfloat      myZRotateZero;    //!< zero-rotation angle in degrees
+    int   mySepDxPx;        //!< horizontal    separation in pixels
+    int   mySepDxZeroPx;    //!< zero-parallax separation in pixels
+    int   mySepDyPx;        //!< vertical      separation in pixels
+    float mySepRotDegrees;  //!< angular separation in degrees
+    float myXRotateDegrees; //!< rotation angle in degrees
+    float myYRotateDegrees; //!< rotation angle in degrees
+    float myZRotateDegrees; //!< rotation angle in degrees
+    float myPanYaw;         //!< angle for panorama view
+    float myPanPitch;       //!< angle for panorama view
+    float myPanYawZero;     //!< zero-rotation angle in degrees
+    float myPanPitchZero;   //!< zero-rotation angle in degrees
+    float myZRotateZero;    //!< zero-rotation angle in degrees
 
 };
 

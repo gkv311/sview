@@ -339,7 +339,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
         if(aStream->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
             // video track
             if(!myVideoMaster->isInitialized()) {
-                myVideoMaster->init(aFormatCtx, aStreamId, aTitleString);
+                myVideoMaster->init(aFormatCtx, aStreamId, aTitleString, theNewParams);
                 myVideoMaster->setSlave(NULL);
 
                 if(myVideoMaster->isInitialized()) {
@@ -367,7 +367,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
                 }
             } else if(!myVideoSlave->isInitialized()
                    && !stAV::isAttachedPicture(aStream)) {
-                myVideoSlave->init(aFormatCtx, aStreamId, "");
+                myVideoSlave->init(aFormatCtx, aStreamId, "", theNewParams);
                 if(myVideoSlave->isInitialized()) {
                     mySlaveCtx    = aFormatCtx;
                     mySlaveStream = aStreamId;
@@ -767,10 +767,10 @@ void StVideo::checkInitVideoStreams() {
 
             myVideoMaster->setUseGpu(toUseGpu, isGpuFailed);
             myVideoSlave ->setUseGpu(toUseGpu, isGpuFailed);
-            myVideoMaster->init(aCtxMaster, aStreamIdMaster, aFileNameMaster);
+            myVideoMaster->init(aCtxMaster, aStreamIdMaster, aFileNameMaster, myCurrParams);
             myVideoMaster->setSlave(NULL);
             if(toDecodeSlave) {
-                myVideoSlave->init(mySlaveCtx, mySlaveStream, "");
+                myVideoSlave->init(mySlaveCtx, mySlaveStream, "", myCurrParams);
                 myVideoMaster->setSlave(myVideoSlave);
             }
             myVideoMaster->pushStart();
