@@ -11,6 +11,7 @@
 1009=EDimensional in interlaced mode
 1102=Reverse Order
 1103=Bind to supported monitor
+1104=Use texture mask (compatibility)
 2000=sView - Interlaced Output module
 2001=version
 2002=© {0} Kirill Gavrilov <{1}>\nOfficial site: {2}

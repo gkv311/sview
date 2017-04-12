@@ -103,7 +103,9 @@ class StGLContext {
         GlVendor_UNKNOWN,
         GlVendor_NVIDIA,
         GlVendor_AMD,
-        GlVendor_Intel
+        GlVendor_Intel,
+        GlVendor_Qualcomm,
+        GlVendor_ImaginationTechnologies,
     };
 
     enum GPU_Name {
@@ -112,6 +114,8 @@ class StGLContext {
         GPU_QUADRO,
         GPU_RADEON,
         GPU_FIREGL,
+        GPU_Adreno,
+        GPU_PowerVR,
     };
 
     enum VSync_Mode {

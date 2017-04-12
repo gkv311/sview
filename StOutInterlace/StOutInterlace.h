@@ -1,6 +1,6 @@
 /**
  * StOutInterlace, class providing stereoscopic output in row interlaced format using StCore toolkit.
- * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -135,6 +135,14 @@ class StOutInterlace : public StWindow {
     ST_LOCAL void stglDrawEDCodes();
 
     /**
+     * Initialize texture mask.
+     */
+    ST_LOCAL bool initTextureMask(int  theDevice,
+                                  bool theToReverse,
+                                  int  theSizeX,
+                                  int  theSizeY);
+
+    /**
      * Release GL resources before window closing.
      */
     ST_LOCAL void releaseResources();
@@ -169,6 +177,7 @@ class StOutInterlace : public StWindow {
 
         StHandle<StBoolParamNamed> ToReverse; //!< configurable flag to reverse rows order
         StHandle<StBoolParamNamed> BindToMon; //!< flag to bind to monitor
+        StHandle<StBoolParamNamed> ToUseMask; //!< use mask texture instead of straightforward discard shader
 
     } params;
 
@@ -181,6 +190,12 @@ class StOutInterlace : public StWindow {
     StHandle<StGLFrameBuffer> myFrmBuffer;                //!< OpenGL frame buffer object
     StHandle<StProgramFB>     myGlPrograms[DEVICE_NB];    //!< GLSL programs
     StHandle<StProgramFB>     myGlProgramsRev[DEVICE_NB]; //!< GLSL programs with reversed left/right condition
+
+    StHandle<StProgramFB>     myGlProgramMask;            //!< universal GLSL program which uses mask texture
+    StHandle<StGLTexture>     myTextureMask;              //!< texture holding mask for discarding pixels
+    int                       myTexMaskDevice;            //!< texture mask device
+    bool                      myTexMaskReversed;          //!< texture mask is initialized in reversed state
+
     StGLVertexBuffer          myQuadVertBuf;
     StGLVertexBuffer          myQuadTexCoordBuf;
     int                       myDevice;
@@ -202,6 +217,7 @@ class StOutInterlace : public StWindow {
     bool                      myIsEDactive;
     bool                      myIsEDCodeFinished;
     bool                      myToCompressMem;            //!< reduce memory usage
+    bool                      myIsFirstDraw;              //!< first frame draw
     bool                      myIsBroken;                 //!< special flag for broke state - when FBO can not be allocated
 
 };

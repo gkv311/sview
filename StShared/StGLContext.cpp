@@ -1556,6 +1556,10 @@ bool StGLContext::stglInit() {
         myGlVendor = GlVendor_AMD;
     } else if(aGlVendor.isContains(stCString("Intel"))) {
         myGlVendor = GlVendor_Intel;
+    } else if(aGlVendor.isContains(stCString("Qualcomm"))) {
+        myGlVendor = GlVendor_Qualcomm;
+    } else if(aGlVendor.isContains(stCString("Imagination Technologies"))) {
+        myGlVendor = GlVendor_ImaginationTechnologies;
     }
 
     const StString aGlRenderer((const char* )core11fwd->glGetString(GL_RENDERER));
@@ -1568,6 +1572,10 @@ bool StGLContext::stglInit() {
         myGpuName = GPU_RADEON;
     } else if(aGlRenderer.isContains(stCString("FireGL"))) {
         myGpuName = GPU_FIREGL;
+    } else if(aGlRenderer.isContains(stCString("Adreno"))) {
+        myGpuName = GPU_Adreno;
+    } else if(aGlRenderer.isContains(stCString("PowerVR"))) {
+        myGpuName = GPU_PowerVR;
     } else {
         myGpuName = GPU_UNKNOWN;
     }
