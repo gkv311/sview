@@ -132,6 +132,7 @@ void StMoviePlayer::updateStrings() {
     params.SrcStereoFormat->setName(tr(MENU_MEDIA_SRC_FORMAT));
     params.ToShowPlayList->setName(tr(VIDEO_LIST));
     params.ToShowAdjustImage->setName(tr(MENU_VIEW_IMAGE_ADJUST));
+    params.ToStickPanorama->setName(tr(MENU_VIEW_STICK_PANORAMA360));
     params.ToTrackHead->setName(tr(MENU_VIEW_TRACK_HEAD));
     params.ToTrackHeadAudio->setName(tr(MENU_VIEW_TRACK_HEAD_AUDIO));
     params.ToForceBFormat->setName(stCString("Force B-Format"));
@@ -255,6 +256,8 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.ToShowPlayList->signals.onChanged = stSlot(this, &StMoviePlayer::doShowPlayList);
     params.ToShowAdjustImage = new StBoolParamNamed(false, stCString("showAdjustImage"));
     params.ToShowAdjustImage->signals.onChanged = stSlot(this, &StMoviePlayer::doShowAdjustImage);
+    params.ToStickPanorama  = new StBoolParamNamed(false, stCString("toStickPano360"));
+    params.ToStickPanorama->signals.onChanged = stSlot(this, &StMoviePlayer::doChangeStickPano360);
     params.ToTrackHead      = new StBoolParamNamed(true,  stCString("toTrackHead"));
     params.ToTrackHeadAudio = new StBoolParamNamed(true,  stCString("toTrackHeadAudio"));
     params.ToForceBFormat   = new StBoolParamNamed(false, stCString("toForceBFormat"));
@@ -319,6 +322,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (params.ToSearchSubs);
 
     myToCheckPoorOrient = !mySettings->loadParam(params.ToTrackHead);
+    mySettings->loadParam (params.ToStickPanorama);
     mySettings->loadParam (params.ToTrackHeadAudio);
     mySettings->loadParam (params.ToForceBFormat);
     mySettings->loadParam (params.AudioAlHrtf);
@@ -549,6 +553,7 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (params.ToShowPlayList);
         mySettings->saveParam (params.ToShowAdjustImage);
 
+        mySettings->saveParam (params.ToStickPanorama);
         mySettings->saveParam (params.ToTrackHead);
         mySettings->saveParam (params.ToTrackHeadAudio);
         mySettings->saveParam (params.ToForceBFormat);
@@ -814,6 +819,7 @@ bool StMoviePlayer::init() {
         myVideo->params.UseOpenJpeg  = params.UseOpenJpeg;
         myVideo->params.ToSearchSubs = params.ToSearchSubs;
         myVideo->params.ToTrackHeadAudio = params.ToTrackHeadAudio;
+        myVideo->setStickPano360(params.ToStickPanorama->getValue());
         myVideo->setForceBFormat(params.ToForceBFormat->getValue());
 
     #ifdef ST_HAVE_MONGOOSE
@@ -1723,6 +1729,14 @@ void StMoviePlayer::doPanoramaOnOff(const size_t ) {
     myGUI->myImage->params.ViewMode->setValue(aPano == StPanorama_Cubemap6_1 || aPano == StPanorama_Cubemap3_2
                                             ? StViewSurface_Cubemap
                                             : StViewSurface_Sphere);
+}
+
+void StMoviePlayer::doChangeStickPano360(const bool ) {
+    if(myVideo.isNull()) {
+        return;
+    }
+
+    myVideo->setStickPano360(params.ToStickPanorama->getValue());
 }
 
 void StMoviePlayer::doSwitchSrcFormat(const int32_t theSrcFormat) {

@@ -73,6 +73,7 @@
 ?1285=Track orientation
 ?1286=Track orientation (poor)
 ?1287=Orient audio
+?1288=Stick at panorama 360°
 1300=Audio
 1301=keiner
 1302=Audio/Video Verzögerung
@@ -235,8 +236,8 @@
 6039=DY Trennung - erhöhen
 6040=Winkelabstand - verringern
 6041=Winkelabstand - erhöhen
-6042=Um 90 Grad gegen Uhrzeigersinn drehen
-6043=Um 90 Grad im Uhrzeigersinn drehen
+6042=Um 90° gegen Uhrzeigersinn drehen
+6043=Um 90° im Uhrzeigersinn drehen
 6044=Drehen gegen den Uhrzeigersinn
 6045=Im Uhrzeigersinn drehen
 6046=Aktivieren / Deaktivieren der Panorama-Modus

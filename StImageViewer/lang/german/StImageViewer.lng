@@ -57,6 +57,7 @@
 1283=Cubemap
 ?1285=Track orientation
 ?1286=Track orientation (poor)
+?1288=Stick at panorama 360°
 ?1291=Cubemap 6x1 - flip Z
 ?1292=Cubemap 3x2 - flip Z
 1400=Gerät ändern
@@ -159,8 +160,8 @@
 6024=DY Trennung - erhöhen
 6025=Winkelabstand - verringern
 6026=Winkelabstand - erhöhen
-6027=Um 90 Grad gegen Uhrzeigersinn drehen
-6028=Um 90 Grad im Uhrzeigersinn drehen
+6027=Um 90° gegen Uhrzeigersinn drehen
+6028=Um 90° im Uhrzeigersinn drehen
 6029=Drehen gegen den Uhrzeigersinn
 6030=Im Uhrzeigersinn drehen
 ?6031=Select next view mode

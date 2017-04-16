@@ -131,6 +131,7 @@ class StImageViewer : public StApplication {
         StHandle<StEnumParam>         CheckUpdatesDays; //!< days count between updates checks
         StHandle<StInt32ParamNamed>   LastUpdateDay;    //!< the last time update has been checked
         StHandle<StInt32ParamNamed>   SrcStereoFormat;  //!< source format
+        StHandle<StBoolParamNamed>    ToStickPanorama;  //!< force panorama input for all files
         StHandle<StBoolParamNamed>    ToFlipCubeZ6x1;   //!< flip Z coordinate within Cube map 6x1
         StHandle<StBoolParamNamed>    ToFlipCubeZ3x2;   //!< flip Z coordinate within Cube map 3x2
         StHandle<StBoolParamNamed>    ToTrackHead;      //!< enable/disable head-tracking
@@ -185,6 +186,7 @@ class StImageViewer : public StApplication {
     ST_LOCAL void doSwitchSrcFormat(const int32_t theSrcFormat);
     ST_LOCAL void doSwitchViewMode(const int32_t theMode);
     ST_LOCAL void doPanoramaOnOff(const size_t );
+    ST_LOCAL void doChangeStickPano360(const bool );
     ST_LOCAL void doChangeFlipCubeZ(const bool );
     ST_LOCAL void doShowPlayList(const bool theToShow);
     ST_LOCAL void doShowAdjustImage(const bool theToShow);

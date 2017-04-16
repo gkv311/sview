@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,9 @@
 
 #include "StImageViewer.h"
 #include <StStrings/StLangMap.h>
+
+// Degree sign in UTF-8 encoding.
+#define THE_DEGREE_SIGN "\xC2\xB0"
 
 namespace StImageViewerStrings {
 
@@ -124,6 +127,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Track orientation");
     theStrings(MENU_VIEW_TRACK_HEAD_POOR,
                "Track orientation (poor)");
+    theStrings(MENU_VIEW_STICK_PANORAMA360,
+               "Stick at panorama 360" THE_DEGREE_SIGN);
     theStrings(MENU_VIEW_FLIPZ_CUBE6x1,
                "Cubemap 6x1 - flip Z");
     theStrings(MENU_VIEW_FLIPZ_CUBE3x2,
@@ -396,10 +401,10 @@ void loadDefaults(StLangMap& theStrings) {
               "Angular separation - increase");
     addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_Rot90Counter,
               "DoParamsRotZ90Dec",
-              "Rotate 90 degrees counterclockwise");
+              "Rotate 90" THE_DEGREE_SIGN " counterclockwise");
     addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_Rot90Clockwise,
               "DoParamsRotZ90Inc",
-              "Rotate 90 degrees clockwise");
+              "Rotate 90" THE_DEGREE_SIGN " clockwise");
     addAction(theStrings, StImageViewer::Action_StereoParamsBegin + StGLImageRegion::Action_RotCounter,
               "DoParamsRotZDec",
               "Rotate counterclockwise");

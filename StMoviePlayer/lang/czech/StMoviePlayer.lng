@@ -74,6 +74,7 @@
 ?1285=Track orientation
 ?1286=Track orientation (poor)
 ?1287=Orient audio
+?1288=Stick at panorama 360°
 1300=Zvuk
 1301=Vypnout zvuk
 1302=Zpoždění zvuku
@@ -236,8 +237,8 @@
 ?6039=DY separation - increase
 ?6040=Angular separation - decrease
 ?6041=Angular separation - increase
-?6042=Rotate 90 degrees counterclockwise
-?6043=Rotate 90 degrees clockwise
+?6042=Rotate 90° counterclockwise
+?6043=Rotate 90° clockwise
 ?6044=Rotate counterclockwise
 ?6045=Rotate clockwise
 ?6046=Enable/disable panorama mode

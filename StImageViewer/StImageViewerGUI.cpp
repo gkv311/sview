@@ -400,6 +400,7 @@ void StImageViewerGUI::fillPanoramaMenu(StGLMenu* theMenu) {
         theMenu->addItem(tr(myWindow->isPoorOrientationSensor() ? MENU_VIEW_TRACK_HEAD_POOR : MENU_VIEW_TRACK_HEAD),
                          myPlugin->params.ToTrackHead);
     }
+    theMenu->addItem(myPlugin->params.ToStickPanorama);
 }
 
 void StImageViewerGUI::doPanoramaCombo(const size_t ) {
@@ -781,6 +782,7 @@ void StImageViewerGUI::doMobileSettings(const size_t ) {
     aParams.add(myPlugin->StApplication::params.ActiveDevice);
     aParams.add(myImage->params.DisplayMode);
     aRend->getOptions(aParams);
+    aParams.add(myPlugin->params.ToStickPanorama);
     aParams.add(myPlugin->params.ToFlipCubeZ6x1);
     aParams.add(myPlugin->params.ToFlipCubeZ3x2);
     aParams.add(myPlugin->params.ToShowFps);

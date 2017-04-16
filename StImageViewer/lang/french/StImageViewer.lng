@@ -57,6 +57,7 @@
 1283=Cubemap
 ?1285=Track orientation
 ?1286=Track orientation (poor)
+?1288=Stick at panorama 360°
 ?1291=Cubemap 6x1 - flip Z
 ?1292=Cubemap 3x2 - flip Z
 1400=Changer la sortie
@@ -159,8 +160,8 @@
 ?6024=DY separation - increase
 ?6025=Angular separation - decrease
 ?6026=Angular separation - increase
-6027=Faire pivoter un objet de 90 degrés vers la gauche
-6028=Faire pivoter un objet de 90 degrés vers la droite
+6027=Faire pivoter un objet de 90° vers la gauche
+6028=Faire pivoter un objet de 90° vers la droite
 6029=Sens inverse des aiguilles d’une montre
 6030=Sens des aiguilles d’une montre
 ?6031=Select next view mode

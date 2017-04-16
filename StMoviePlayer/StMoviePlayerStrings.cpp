@@ -21,6 +21,9 @@
 #include "StMoviePlayer.h"
 #include <StStrings/StLangMap.h>
 
+// Degree sign in UTF-8 encoding.
+#define THE_DEGREE_SIGN "\xC2\xB0"
+
 namespace StMoviePlayerStrings {
 
 inline void addAction(StLangMap&              theStrings,
@@ -192,6 +195,8 @@ void loadDefaults(StLangMap& theStrings) {
                "Track orientation (poor)");
     theStrings(MENU_VIEW_TRACK_HEAD_AUDIO,
                "Orient audio");
+    theStrings(MENU_VIEW_STICK_PANORAMA360,
+               "Stick at panorama 360" THE_DEGREE_SIGN);
     theStrings(MENU_VIEW_DISPLAY_MODE_STEREO,
                "Stereo");
     theStrings(MENU_VIEW_DISPLAY_MODE_LEFT,
@@ -588,10 +593,10 @@ void loadDefaults(StLangMap& theStrings) {
               "Angular separation - increase");
     addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_Rot90Counter,
               "DoParamsRotZ90Dec",
-              "Rotate 90 degrees counterclockwise");
+              "Rotate 90" THE_DEGREE_SIGN " counterclockwise");
     addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_Rot90Clockwise,
               "DoParamsRotZ90Inc",
-              "Rotate 90 degrees clockwise");
+              "Rotate 90" THE_DEGREE_SIGN " clockwise");
     addAction(theStrings, StMoviePlayer::Action_StereoParamsBegin + StGLImageRegion::Action_RotCounter,
               "DoParamsRotZDec",
               "Rotate counterclockwise");

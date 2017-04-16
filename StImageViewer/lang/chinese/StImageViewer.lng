@@ -57,6 +57,7 @@
 ?1283=Cubemap
 ?1285=Track orientation
 ?1286=Track orientation (poor)
+?1288=Stick at panorama 360°
 ?1291=Cubemap 6x1 - flip Z
 ?1292=Cubemap 3x2 - flip Z
 1400=改变设备
@@ -159,8 +160,8 @@
 ?6024=DY separation - increase
 ?6025=Angular separation - decrease
 ?6026=Angular separation - increase
-?6027=Rotate 90 degrees counterclockwise
-?6028=Rotate 90 degrees clockwise
+?6027=Rotate 90° counterclockwise
+?6028=Rotate 90° clockwise
 ?6029=Rotate counterclockwise
 ?6030=Rotate clockwise
 ?6031=Select next view mode

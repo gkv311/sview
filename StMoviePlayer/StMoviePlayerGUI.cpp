@@ -629,6 +629,7 @@ void StMoviePlayerGUI::fillPanoramaMenu(StGLMenu* theMenu) {
     }
     theMenu->addItem(tr(MENU_VIEW_TRACK_HEAD_AUDIO),
                      myPlugin->params.ToTrackHeadAudio);
+    theMenu->addItem(myPlugin->params.ToStickPanorama);
 }
 
 void StMoviePlayerGUI::doPanoramaCombo(const size_t ) {
@@ -2256,6 +2257,7 @@ void StMoviePlayerGUI::doMobileSettings(const size_t ) {
     StParamsList aParams;
     aParams.add(myPlugin->StApplication::params.ActiveDevice);
     aParams.add(myImage->params.DisplayMode);
+    aParams.add(myPlugin->params.ToStickPanorama);
     aRend->getOptions(aParams);
     aParams.add(myPlugin->params.ToShowFps);
     aParams.add(myPlugin->params.UseGpu);

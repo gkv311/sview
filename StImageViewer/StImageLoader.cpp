@@ -64,6 +64,7 @@ StImageLoader::StImageLoader(const StImageFile::ImageClass      theImageLib,
   myMsgQueue(theMsgQueue),
   myImageLib(theImageLib),
   myAction(Action_NONE),
+  myToStickPano360(false),
   myToFlipCubeZ6x1(false),
   myToFlipCubeZ3x2(false) {
       myPlayList->setExtensions(myMimeList.getExtensionsList());
@@ -237,7 +238,6 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
 
     StTimer aLoadTimer(true);
     StFormat  aSrcFormatCurr = myStFormatByUser;
-    StCubemap aSrcCubemap    = theParams->ViewingMode == StViewSurface_Cubemap ? StCubemap_Packed : StCubemap_OFF;
     if(anImgType == StImageFile::ST_TYPE_MPO
     || anImgType == StImageFile::ST_TYPE_JPEG
     || anImgType == StImageFile::ST_TYPE_JPS) {
@@ -424,6 +424,22 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
             aSizeY1   /= 2;
         }
     }
+
+    if(!anImageFileR->isNull()) {
+        aSrcFormatCurr = StFormat_SeparateFrames;
+    }
+
+    if(myToStickPano360
+    && theParams->ViewingMode == StViewSurface_Plain) {
+        StPanorama aPano = st::probePanorama(aSrcFormatCurr,
+                                             theParams->Src1SizeX, theParams->Src1SizeY,
+                                             theParams->Src2SizeX, theParams->Src2SizeY);
+        theParams->ViewingMode = (aPano == StPanorama_Cubemap6_1 || aPano == StPanorama_Cubemap3_2)
+                               ? StViewSurface_Cubemap
+                               : StViewSurface_Sphere;
+    }
+    StCubemap aSrcCubemap = theParams->ViewingMode == StViewSurface_Cubemap ? StCubemap_Packed : StCubemap_OFF;
+
     size_t aCubeCoeffs[2] = {0, 0};
     if(aSrcCubemap == StCubemap_Packed) {
         if(aSizeX1 / 6 == aSizeY1) {
@@ -470,10 +486,6 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
 
     // finally push image data in Texture Queue
     myTextureQueue->setConnectedStream(true);
-
-    if(!anImageR->isNull()) {
-        aSrcFormatCurr = StFormat_SeparateFrames;
-    }
 
     {
         StImage anImageRefL, anImageRefR;

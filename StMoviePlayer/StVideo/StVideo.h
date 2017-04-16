@@ -165,6 +165,13 @@ class StVideo {
     }
 
     /**
+     * Stick to panorama 360 mode.
+     */
+    ST_LOCAL void setStickPano360(bool theToStick) {
+        myVideoMaster->setStickPano360(theToStick);
+    }
+
+    /**
      * Retrieve information about currently played file.
      */
     ST_LOCAL StHandle<StMovieInfo> getFileInfo(const StHandle<StStereoParams>& theParams) const;

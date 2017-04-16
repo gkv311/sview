@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -195,6 +195,13 @@ class StVideoQueue : public StAVPacketQueue {
      */
     ST_LOCAL StFormat getStereoFormatFromName() const {
         return myStFormatByName;
+    }
+
+    /**
+     * Stick to panorama 360 mode.
+     */
+    ST_LOCAL void setStickPano360(bool theToStick) {
+        myToStickPano360 = theToStick;
     }
 
     ST_LOCAL StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
@@ -396,6 +403,7 @@ private:
     volatile StFormat          myStFormatByUser;  //!< source format specified by user
     volatile StFormat          myStFormatByName;  //!< source format detected from file name
     volatile StFormat          myStFormatInStream;//!< source format information retrieved from stream
+    volatile bool              myToStickPano360;  //!< stick to panorama 360 mode
 
 };
 

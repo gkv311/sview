@@ -135,6 +135,13 @@ class StImageLoader {
     ST_LOCAL void setCompressMemory(const bool theToCompress);
 
     /**
+     * Stick to panorama 360 mode.
+     */
+    ST_LOCAL void setStickPano360(bool theToStick) {
+        myToStickPano360 = theToStick;
+    }
+
+    /**
      * Flip Z within 6x1 cubemap input.
      */
     ST_LOCAL void setFlipCubeZ6x1(bool theToFlip) {
@@ -205,8 +212,9 @@ class StImageLoader {
 
     volatile StImageFile::ImageClass myImageLib;
     volatile Action            myAction;
-    volatile bool              myToFlipCubeZ6x1; //!< Flip Z within 6x1 cubemap input.
-    volatile bool              myToFlipCubeZ3x2; //!< Flip Z within 3x2 cubemap input.
+    volatile bool              myToStickPano360; //!< stick to panorama 360 mode
+    volatile bool              myToFlipCubeZ6x1; //!< flip Z within 6x1 cubemap input
+    volatile bool              myToFlipCubeZ3x2; //!< flip Z within 3x2 cubemap input
 
         private: //! @name no copies, please
 

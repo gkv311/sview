@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * StMoviePlayer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -186,7 +186,8 @@ StVideoQueue::StVideoQueue(const StHandle<StGLTextureQueue>& theTextureQueue,
   myWasFlushed(false),
   myStFormatByUser(StFormat_AUTO),
   myStFormatByName(StFormat_AUTO),
-  myStFormatInStream(StFormat_AUTO) {
+  myStFormatInStream(StFormat_AUTO),
+  myToStickPano360(false) {
 #ifdef ST_USE64PTR
     myFrame.Frame->opaque = (void* )stAV::NOPTS_VALUE;
 #else
@@ -714,6 +715,16 @@ void StVideoQueue::pushFrame(const StImage&     theSrcDataLeft,
     } else {
         theStParams->Src2SizeX = 0;
         theStParams->Src2SizeY = 0;
+    }
+
+    if(myToStickPano360
+    && theStParams->ViewingMode == StViewSurface_Plain) {
+        StPanorama aPano = st::probePanorama(theSrcFormat,
+                                             theStParams->Src1SizeX, theStParams->Src1SizeY,
+                                             theStParams->Src2SizeX, theStParams->Src2SizeY);
+        theStParams->ViewingMode = (aPano == StPanorama_Cubemap6_1 || aPano == StPanorama_Cubemap3_2)
+                                 ? StViewSurface_Cubemap
+                                 : StViewSurface_Sphere;
     }
 
     myTextureQueue->push(theSrcDataLeft, theSrcDataRight, theStParams, theSrcFormat, theCubemapFormat, theSrcPTS);
