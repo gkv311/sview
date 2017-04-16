@@ -1047,14 +1047,15 @@ void StImageViewer::beforeDraw() {
 }
 
 void StImageViewer::stglDraw(unsigned int theView) {
-    if( myContext.isNull()
-    || !myContext->isBound()) {
+    const bool hasCtx = !myContext.isNull() && myContext->isBound();
+    if(!hasCtx || myWindow->isPaused()) {
         if(theView == ST_DRAW_LEFT
         || theView == ST_DRAW_MONO) {
             if(myWindow->isPaused()) {
+                const double aTimeout = hasCtx ? 300.0 : 60.0;
                 if(!myInactivityTimer.isOn()) {
                     myInactivityTimer.restart();
-                } else if(myInactivityTimer.getElapsedTimeInSec() > 60.0) {
+                } else if(myInactivityTimer.getElapsedTimeInSec() > aTimeout) {
                     // perform delayed destruction on long inactivity
                     exit(0);
                 } else {

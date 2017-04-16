@@ -1541,8 +1541,8 @@ void StMoviePlayer::doUpdateOpenALDeviceList(const size_t ) {
 }
 
 void StMoviePlayer::stglDraw(unsigned int theView) {
-    if( myContext.isNull()
-    || !myContext->isBound()) {
+    const bool hasCtx = !myContext.isNull() && myContext->isBound();
+    if(!hasCtx || myWindow->isPaused()) {
         if(!myGUI.isNull()
          && myGUI->myImage != NULL) {
             myGUI->myImage->stglSkipFrames();
@@ -1556,9 +1556,10 @@ void StMoviePlayer::stglDraw(unsigned int theView) {
                 bool isVideoPlayed = false, isAudioPlayed = false;
                 const bool isPlaying = !myVideo.isNull()
                                      && myVideo->getPlaybackState(aDuration, aPts, isVideoPlayed, isAudioPlayed);
+                const double aTimeout = hasCtx ? 300.0 : 60.0;
                 if(!myInactivityTimer.isOn()) {
                     myInactivityTimer.restart();
-                } else if(myInactivityTimer.getElapsedTimeInSec() > 60.0
+                } else if(myInactivityTimer.getElapsedTimeInSec() > aTimeout
                       && !isPlaying) {
                     // perform delayed destruction on long inactivity
                     exit(0);
