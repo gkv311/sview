@@ -791,6 +791,8 @@ void StImageViewerGUI::doMobileSettings(const size_t ) {
     if(isMobile()) {
         //aParams.add(myPlugin->params.ToHideStatusBar);
         aParams.add(myPlugin->params.ToHideNavBar);
+    } else {
+        aParams.add(myPlugin->params.ToOpenLast);
     }
     aParams.add(myPlugin->params.ExitOnEscape);
 #if !defined(ST_NO_UPDATES_CHECK)

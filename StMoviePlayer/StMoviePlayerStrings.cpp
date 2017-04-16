@@ -305,6 +305,8 @@ void loadDefaults(StLangMap& theStrings) {
                "When windowed");
     theStrings(OPTION_HIDE_NAVIGATION_BAR,
                "Hide system navigation bar");
+    theStrings(OPTION_OPEN_LAST_ON_STARTUP,
+               "Open last played file on startup");
 
     theStrings(FILE_VIDEO_OPEN,
                "Open another movie");

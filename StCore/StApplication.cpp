@@ -499,6 +499,7 @@ StHandle<StOpenInfo> StApplication::parseProcessArguments() {
     const StString ARGUMENT_FILE              = "file";
     const StString ARGUMENT_LEFT_VIEW         = "left";
     const StString ARGUMENT_RIGHT_VIEW        = "right";
+    const StString ARGUMENT_DEMO              = "demo";
     // parse extra parameters
     for(size_t aParamIter = 1; aParamIter < anArguments.size(); ++aParamIter) {
         StString aParam = anArguments[aParamIter];
@@ -531,6 +532,11 @@ StHandle<StOpenInfo> StApplication::parseProcessArguments() {
                 if(!anInfo->hasPath()) {
                     anInfo->setPath(anArg.getValue());
                 }
+            } else if(anArg.getKey().isEqualsIgnoreCase(ARGUMENT_DEMO)) {
+                StString aFilePath = StProcess::getAbsolutePath(anArg.getValue());
+                anArg.setValue(aFilePath);
+                anInfo->setPath(aFilePath);
+                anOpenFileArgs.add(anArg);
             } else {
                 // pass argument unchanged
                 anOpenFileArgs.add(anArg);

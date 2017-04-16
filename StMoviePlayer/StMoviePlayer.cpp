@@ -72,6 +72,7 @@ namespace {
     static const char ST_ARGUMENT_FILE_LEFT[]  = "left";
     static const char ST_ARGUMENT_FILE_RIGHT[] = "right";
     static const char ST_ARGUMENT_FILE_LAST[]  = "last";
+    static const char ST_ARGUMENT_FILE_DEMO[]  = "demo";
     static const char ST_ARGUMENT_FILE_PAUSE[] = "pause";
     static const char ST_ARGUMENT_FILE_PAUSED[]= "paused";
     static const char ST_ARGUMENT_MONITOR[]    = "monitorId";
@@ -156,6 +157,7 @@ void StMoviePlayer::updateStrings() {
     params.BlockSleeping->defineOption(BLOCK_SLEEP_FULLSCREEN, tr(MENU_HELP_BLOCKSLP_FULLSCR));
     params.ToHideStatusBar->setName("Hide system status bar");
     params.ToHideNavBar   ->setName(tr(OPTION_HIDE_NAVIGATION_BAR));
+    params.ToOpenLast     ->setName(tr(OPTION_OPEN_LAST_ON_STARTUP));
     params.ToShowExtra->setName(tr(MENU_HELP_EXPERIMENTAL));
     params.TargetFps->setName(stCString("FPS Target"));
 
@@ -285,6 +287,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     params.ToHideStatusBar->signals.onChanged = stSlot(this, &StMoviePlayer::doHideSystemBars);
     params.ToHideNavBar    = new StBoolParamNamed(true, stCString("toHideNavBar"));
     params.ToHideNavBar   ->signals.onChanged = stSlot(this, &StMoviePlayer::doHideSystemBars);
+    params.ToOpenLast    = new StBoolParamNamed(false, stCString("toOpenLast"));
     params.ToShowExtra   = new StBoolParamNamed(false, stCString("experimental"));
     // set rendering FPS as twice as average video FPS
     params.TargetFps = new StInt32ParamNamed(2, stCString("fpsTarget"));
@@ -340,6 +343,7 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (params.BlockSleeping);
     mySettings->loadParam (params.ToHideStatusBar);
     mySettings->loadParam (params.ToHideNavBar);
+    mySettings->loadParam (params.ToOpenLast);
     mySettings->loadParam (params.ToShowExtra);
     if(params.StartWebUI->getValue() == WEBUI_ONCE) {
         params.StartWebUI->setValue(WEBUI_OFF);
@@ -572,6 +576,7 @@ void StMoviePlayer::saveAllParams() {
         mySettings->saveParam (params.BlockSleeping);
         mySettings->saveParam (params.ToHideStatusBar);
         mySettings->saveParam (params.ToHideNavBar);
+        mySettings->saveParam (params.ToOpenLast);
         mySettings->saveParam (params.ToShowExtra);
 
         // store hot-keys
@@ -963,12 +968,14 @@ bool StMoviePlayer::open() {
     const StMIME     anOpenMIME  = myOpenFileInfo->getMIME();
     const StArgument anArgPause  = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_PAUSE];
     const StArgument anArgPaused = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_PAUSED];
+    const StArgument anArgLast   = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_LAST];
+    const StArgument anArgFileDemo = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_DEMO];
     const bool       isPaused    = (anArgPause .isValid() && !anArgPause .isValueOff())
                                 || (anArgPaused.isValid() && !anArgPaused.isValueOff());
-    if(myOpenFileInfo->getPath().isEmpty()) {
+    const bool toOpenLast = anArgLast.isValid() ? !anArgLast.isValueOff() : params.ToOpenLast->getValue();
+    if(myOpenFileInfo->getPath().isEmpty() || (toOpenLast && anArgFileDemo.isValid())) {
         // open drawer without files
-        const StArgument anArgLast = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_LAST];
-        if(anArgLast.isValid() && !anArgLast.isValueOff()) {
+        if(toOpenLast) {
             doOpenRecent(0); // open last opened file
             if(isPaused) {
                 myVideo->pushPlayEvent(ST_PLAYEVENT_PAUSE);

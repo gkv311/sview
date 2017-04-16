@@ -256,8 +256,8 @@ Source: {#SVIEW_DISTR_PATH_AMD64}\OpenAL32.dll;                DestDir: {app}\am
 ;Source: {#SVIEW_DISTR_PATH_AMD64}\StCADViewer.exe;             DestDir: {app}\amd64;           Flags: 64bit ignoreversion; Components: StCore; Check: IsWin64
 
 [Icons]
-Name: {group}\sView - Image Viewer; Filename: {app}\{#SVIEW_EXE_NAME};       Components: StDrawers\StImageViewer; IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: "{cm:StImageViewer}";  IconIndex: 0; Parameters: "--in=image - ""{app}\demo.jps"""; Check: not IsWin64
-Name: {group}\sView - Image Viewer; Filename: {app}\amd64\{#SVIEW_EXE_NAME}; Components: StDrawers\StImageViewer; IconFilename: {app}\amd64\{#SVIEW_EXE_NAME}; Comment: "{cm:StImageViewer}";  IconIndex: 0; Parameters: "--in=image - ""{app}\demo.jps"""; Check: IsWin64
+Name: {group}\sView - Image Viewer; Filename: {app}\{#SVIEW_EXE_NAME};       Components: StDrawers\StImageViewer; IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: "{cm:StImageViewer}";  IconIndex: 0; Parameters: "--in=image --demo=""{app}\demo.jps"""; Check: not IsWin64
+Name: {group}\sView - Image Viewer; Filename: {app}\amd64\{#SVIEW_EXE_NAME}; Components: StDrawers\StImageViewer; IconFilename: {app}\amd64\{#SVIEW_EXE_NAME}; Comment: "{cm:StImageViewer}";  IconIndex: 0; Parameters: "--in=image --demo=""{app}\demo.jps"""; Check: IsWin64
 Name: {group}\sView - Movie Player; Filename: {app}\{#SVIEW_EXE_NAME};       Components: StDrawers\StMoviePlayer; IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: "{cm:StMoviePlayer}";  IconIndex: 0; Parameters: "--in=video"; Check: not IsWin64
 Name: {group}\sView - Movie Player; Filename: {app}\amd64\{#SVIEW_EXE_NAME}; Components: StDrawers\StMoviePlayer; IconFilename: {app}\amd64\{#SVIEW_EXE_NAME}; Comment: "{cm:StMoviePlayer}";  IconIndex: 0; Parameters: "--in=video"; Check: IsWin64
 Name: {group}\Extras\sView - Failsafe;                    Filename: {app}\{#SVIEW_EXE_NAME};       Components: StDrawers\StImageViewer and StRenderers\StOutAnaglyph; IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: Failsafe sView launch; IconIndex: 0; Parameters: --out=StOutAnaglyph --in=image
@@ -272,10 +272,10 @@ Name: {group}\Extras\Monitors Dump;                       Filename: {app}\amd64\
 
 ;Name: {group}\user manual;          Filename: {app}\info\manual.pdf;         Comment: User manual; Tasks: ; Languages:
 Name: {group}\{cm:UninstallProgram,{#SVIEW_NAME}}; Filename: {uninstallexe}
-Name: {commondesktop}\{#SVIEW_NAME};Filename: {app}\{#SVIEW_EXE_NAME};       Tasks: desktopicon; Components: StDrawers\StImageViewer; IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: "{cm:StImageViewer}"; IconIndex: 0; Parameters: "--in=image - ""{app}\demo.jps"""; Check: not IsWin64
-Name: {commondesktop}\{#SVIEW_NAME};Filename: {app}\amd64\{#SVIEW_EXE_NAME}; Tasks: desktopicon; Components: StDrawers\StImageViewer; IconFilename: {app}\amd64\{#SVIEW_EXE_NAME}; Comment: "{cm:StImageViewer}"; IconIndex: 0; Parameters: "--in=image - ""{app}\demo.jps"""; Check: IsWin64
-Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\{#SVIEW_NAME}; Filename: {app}\{#SVIEW_EXE_NAME};       Tasks: quicklaunchicon; Components: StDrawers\StImageViewer; IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: "{cm:StImageViewer}"; IconIndex: 0; Parameters: "--in=image - ""{app}\demo.jps"""; Check: not IsWin64
-Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\{#SVIEW_NAME}; Filename: {app}\amd64\{#SVIEW_EXE_NAME}; Tasks: quicklaunchicon; Components: StDrawers\StImageViewer; IconFilename: {app}\amd64\{#SVIEW_EXE_NAME}; Comment: "{cm:StImageViewer}"; IconIndex: 0; Parameters: "--in=image - ""{app}\demo.jps"""; Check: IsWin64
+Name: {commondesktop}\{#SVIEW_NAME};Filename: {app}\{#SVIEW_EXE_NAME};       Tasks: desktopicon; Components: StDrawers\StImageViewer; IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: "{cm:StImageViewer}"; IconIndex: 0; Parameters: "--in=image --demo=""{app}\demo.jps"""; Check: not IsWin64
+Name: {commondesktop}\{#SVIEW_NAME};Filename: {app}\amd64\{#SVIEW_EXE_NAME}; Tasks: desktopicon; Components: StDrawers\StImageViewer; IconFilename: {app}\amd64\{#SVIEW_EXE_NAME}; Comment: "{cm:StImageViewer}"; IconIndex: 0; Parameters: "--in=image --demo=""{app}\demo.jps"""; Check: IsWin64
+Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\{#SVIEW_NAME}; Filename: {app}\{#SVIEW_EXE_NAME};       Tasks: quicklaunchicon; Components: StDrawers\StImageViewer; IconFilename: {app}\{#SVIEW_EXE_NAME};       Comment: "{cm:StImageViewer}"; IconIndex: 0; Parameters: "--in=image --demo=""{app}\demo.jps"""; Check: not IsWin64
+Name: {userappdata}\Microsoft\Internet Explorer\Quick Launch\{#SVIEW_NAME}; Filename: {app}\amd64\{#SVIEW_EXE_NAME}; Tasks: quicklaunchicon; Components: StDrawers\StImageViewer; IconFilename: {app}\amd64\{#SVIEW_EXE_NAME}; Comment: "{cm:StImageViewer}"; IconIndex: 0; Parameters: "--in=image --demo=""{app}\demo.jps"""; Check: IsWin64
 
 [Run]
 ;Filename: {app}\{#SVIEW_EXE_NAME}; WorkingDir: {app}; Components: StDrawers\StImageViewer; Description: {cm:LaunchProgram,{#SVIEW_NAME}}; Parameters: --in=image - demo.jps; Flags: nowait postinstall skipifsilent

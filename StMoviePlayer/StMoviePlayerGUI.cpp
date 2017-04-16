@@ -497,6 +497,7 @@ void StMoviePlayerGUI::fillRecentMenu(StGLMenu* theMenu) {
     StArrayList<StString> aList;
     myPlugin->getRecentList(aList);
 
+    theMenu->addItem(myPlugin->params.ToOpenLast);
     theMenu->addItem(tr(MENU_MEDIA_RECENT_CLEAR))
            ->signals.onItemClick.connect(myPlugin, &StMoviePlayer::doClearRecent);
     for(size_t anIter = 0; anIter < aList.size(); ++anIter) {
@@ -2281,6 +2282,7 @@ void StMoviePlayerGUI::doMobileSettings(const size_t ) {
     }
     if(!isMobile()) {
         aParams.add(myPlugin->params.BlockSleeping);
+        aParams.add(myPlugin->params.ToOpenLast);
     }
 #if !defined(ST_NO_UPDATES_CHECK)
     aParams.add(myPlugin->params.CheckUpdatesDays);

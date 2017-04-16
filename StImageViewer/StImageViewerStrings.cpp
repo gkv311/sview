@@ -235,6 +235,8 @@ void loadDefaults(StLangMap& theStrings) {
                "When windowed");
     theStrings(OPTION_HIDE_NAVIGATION_BAR,
                "Hide system navigation bar");
+    theStrings(OPTION_OPEN_LAST_ON_STARTUP,
+               "Open last viewed file on startup");
 
     theStrings(UPDATES_NOTIFY,
                "A new version of sView is available on the official site www.sview.ru.\n"

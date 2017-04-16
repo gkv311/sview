@@ -66,6 +66,7 @@ namespace {
     static const char ST_ARGUMENT_FILE_LEFT[]  = "left";
     static const char ST_ARGUMENT_FILE_RIGHT[] = "right";
     static const char ST_ARGUMENT_FILE_LAST[]  = "last";
+    static const char ST_ARGUMENT_FILE_DEMO[]  = "demo";
 
     static const char ST_ARGUMENT_MONITOR[]    = "monitorId";
     static const char ST_ARGUMENT_WINLEFT[]    = "windowLeft";
@@ -112,6 +113,7 @@ void StImageViewer::updateStrings() {
     params.ToHideStatusBar->setName("Hide system status bar");
     params.ToHideNavBar   ->setName(tr(OPTION_HIDE_NAVIGATION_BAR));
     params.IsVSyncOn->setName(tr(MENU_VSYNC));
+    params.ToOpenLast->setName(tr(OPTION_OPEN_LAST_ON_STARTUP));
     params.ToSaveRecent->setName(stCString("Remember recent file"));
     params.TargetFps->setName(stCString("FPS Target"));
     myLangMap->params.language->setName(tr(MENU_HELP_LANGS));
@@ -185,6 +187,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     params.IsVSyncOn     = new StBoolParamNamed(true,  stCString("vsync"));
     params.IsVSyncOn->signals.onChanged = stSlot(this, &StImageViewer::doSwitchVSync);
     StApplication::params.VSyncMode->setValue(StGLContext::VSync_ON);
+    params.ToOpenLast   = new StBoolParamNamed(false, stCString("toOpenLast"));
     params.ToSaveRecent = new StBoolParamNamed(false, stCString("toSaveRecent"));
     params.imageLib = StImageFile::ST_LIBAV,
     params.TargetFps = new StInt32ParamNamed(0, stCString("fpsTarget"));
@@ -207,6 +210,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (params.IsMobileUI);
     mySettings->loadParam (params.ToHideStatusBar);
     mySettings->loadParam (params.ToHideNavBar);
+    mySettings->loadParam (params.ToOpenLast);
     mySettings->loadParam (params.IsVSyncOn);
     mySettings->loadParam (params.ToShowPlayList);
     mySettings->loadParam (params.ToShowAdjustImage);
@@ -349,6 +353,7 @@ void StImageViewer::saveAllParams() {
         mySettings->saveParam (params.IsMobileUI);
         mySettings->saveParam (params.ToHideStatusBar);
         mySettings->saveParam (params.ToHideNavBar);
+        mySettings->saveParam (params.ToOpenLast);
         mySettings->saveParam (params.IsVSyncOn);
         mySettings->saveParam (params.ToShowPlayList);
         mySettings->saveParam (params.ToShowAdjustImage);
@@ -365,7 +370,7 @@ void StImageViewer::saveAllParams() {
 
     StString aLastL, aLastR;
     StHandle<StFileNode> aFile = myPlayList->getCurrentFile();
-    if(params.ToSaveRecent->getValue()
+    if((params.ToSaveRecent->getValue() || params.ToOpenLast->getValue())
     && !aFile.isNull()) {
         if(aFile->isEmpty()) {
             aLastL = aFile->getPath();
@@ -644,9 +649,11 @@ bool StImageViewer::open() {
 
     parseArguments(myOpenFileInfo->getArgumentsMap());
     const StMIME anOpenMIME = myOpenFileInfo->getMIME();
-    if(myOpenFileInfo->getPath().isEmpty()) {
-        const StArgument anArgLast = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_LAST];
-        if(anArgLast.isValid() && !anArgLast.isValueOff()) {
+    const StArgument anArgLast     = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_LAST];
+    const StArgument anArgFileDemo = myOpenFileInfo->getArgumentsMap()[ST_ARGUMENT_FILE_DEMO];
+    const bool toOpenLast = anArgLast.isValid() ? !anArgLast.isValueOff() : params.ToOpenLast->getValue();
+    if(myOpenFileInfo->getPath().isEmpty() || (toOpenLast && anArgFileDemo.isValid())) {
+        if(toOpenLast) {
             StString aLastL, aLastR;
             mySettings->loadString(ST_SETTING_RECENT_L, aLastL);
             mySettings->loadString(ST_SETTING_RECENT_R, aLastR);

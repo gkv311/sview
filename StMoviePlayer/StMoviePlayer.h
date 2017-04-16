@@ -222,6 +222,7 @@ class StMoviePlayer : public StApplication {
         StHandle<StEnumParam>         BlockSleeping;     //!< active Audio stream
         StHandle<StBoolParamNamed>    ToHideStatusBar;   //!< hide system-provided status bar
         StHandle<StBoolParamNamed>    ToHideNavBar;      //!< hide system-provided navigation bar
+        StHandle<StBoolParamNamed>    ToOpenLast;        //!< option to open last file from recent list by default
         StHandle<StBoolParamNamed>    ToShowExtra;       //!< show experimental menu items
         StHandle<StInt32ParamNamed>   SnapshotImgType;   //!< default snapshot image type
         StString                      lastFolder;        //!< laster folder used to open / save file
