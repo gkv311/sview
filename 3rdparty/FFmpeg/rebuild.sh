@@ -241,6 +241,8 @@ if [ -f libavcodec/avcodec.dll ]; then
   cp -f libavcodec/*.lib $OUTPUT_FOLDER_LIB &>/dev/null
 elif [ -f libavcodec/libavcodec.dylib ]; then
   cp -f -p -R libavcodec/*.dylib* $OUTPUT_FOLDER_LIB
+elif [ "$rebuildAndroid" == "true" ]; then
+  cp -f -L libavcodec/*.so $OUTPUT_FOLDER_LIB
 else
   cp -f -d libavcodec/*.so* $OUTPUT_FOLDER_LIB
 fi
@@ -250,6 +252,8 @@ if [ -f libavdevice/avdevice.dll ]; then
   cp -f libavdevice/*.lib $OUTPUT_FOLDER_LIB &>/dev/null
 elif [ -f libavdevice/libavdevice.dylib ]; then
   cp -f -p -R libavdevice/*.dylib* $OUTPUT_FOLDER_LIB
+elif [ "$rebuildAndroid" == "true" ]; then
+  cp -f -L libavdevice/*.so $OUTPUT_FOLDER_LIB
 else
   cp -f -d libavdevice/*.so* $OUTPUT_FOLDER_LIB
 fi
@@ -259,6 +263,8 @@ if [ -f libavfilter/avfilter.dll ]; then
   cp -f libavfilter/*.lib $OUTPUT_FOLDER_LIB &>/dev/null
 elif [ -f libavfilter/libavfilter.dylib ]; then
   cp -f -p -R libavfilter/*.dylib* $OUTPUT_FOLDER_LIB
+elif [ "$rebuildAndroid" == "true" ]; then
+  cp -f -L libavfilter/*.so $OUTPUT_FOLDER_LIB
 else
   cp -f -d libavfilter/*.so* $OUTPUT_FOLDER_LIB
 fi
@@ -268,6 +274,8 @@ if [ -f libavformat/avformat.dll ]; then
   cp -f libavformat/*.lib $OUTPUT_FOLDER_LIB &>/dev/null
 elif [ -f libavformat/libavformat.dylib ]; then
   cp -f -p -R libavformat/*.dylib* $OUTPUT_FOLDER_LIB
+elif [ "$rebuildAndroid" == "true" ]; then
+  cp -f -L libavformat/*.so $OUTPUT_FOLDER_LIB
 else
   cp -f -d libavformat/*.so* $OUTPUT_FOLDER_LIB
 fi
@@ -277,6 +285,8 @@ if [ -f libavutil/avutil.dll ]; then
   cp -f libavutil/*.lib $OUTPUT_FOLDER_LIB &>/dev/null
 elif [ -f libavutil/libavutil.dylib ]; then
   cp -f -p -R libavutil/*.dylib* $OUTPUT_FOLDER_LIB
+elif [ "$rebuildAndroid" == "true" ]; then
+  cp -f -L libavutil/*.so $OUTPUT_FOLDER_LIB
 else
   cp -f -d libavutil/*.so* $OUTPUT_FOLDER_LIB
 fi
@@ -286,6 +296,8 @@ if [ -f libswscale/swscale.dll ]; then
   cp -f libswscale/*.lib $OUTPUT_FOLDER_LIB &>/dev/null
 elif [ -f libswscale/libswscale.dylib ]; then
   cp -f -p -R libswscale/*.dylib* $OUTPUT_FOLDER_LIB
+elif [ "$rebuildAndroid" == "true" ]; then
+  cp -f -L libswscale/*.so $OUTPUT_FOLDER_LIB
 else
   cp -f -d libswscale/*.so* $OUTPUT_FOLDER_LIB
 fi
@@ -295,6 +307,8 @@ if [ -f libswresample/swresample.dll ]; then
   cp -f libswresample/*.lib $OUTPUT_FOLDER_LIB &>/dev/null
 elif [ -f libswresample/libswresample.dylib ]; then
   cp -f -p -R libswresample/*.dylib* $OUTPUT_FOLDER_LIB
+elif [ "$rebuildAndroid" == "true" ]; then
+  cp -f -L libswresample/*.so $OUTPUT_FOLDER_LIB
 else
   cp -f -d libswresample/*.so* $OUTPUT_FOLDER_LIB
 fi

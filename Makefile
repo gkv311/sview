@@ -280,14 +280,14 @@ install_android_libs: $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) 
 	cp -f $(BUILD_ROOT)/$(sViewAndroid)    $(aDestAndroid)/libs/$(ANDROID_EABI)/
 	cp -f $(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/4.9/libs/$(ANDROID_EABI)/libgnustl_shared.so $(aDestAndroid)/libs/$(ANDROID_EABI)/
 	$(STRIP) $(STRIPFLAGS) $(aDestAndroid)/libs/$(ANDROID_EABI)/libgnustl_shared.so
-	cp -f $(FREETYPE_ROOT)/libs/$(ANDROID_EABI)/libfreetype.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(OPENAL_ROOT)/libs/$(ANDROID_EABI)/libopenal.so          $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavcodec-*.so       $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavdevice-*.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavformat-*.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavutil-*.so        $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswresample-*.so    $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswscale-*.so       $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FREETYPE_ROOT)/libs/$(ANDROID_EABI)/libfreetype.so    $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(OPENAL_ROOT)/libs/$(ANDROID_EABI)/libopenal.so        $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavcodec.so       $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavdevice.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavformat.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavutil.so        $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswresample.so    $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswscale.so       $(aDestAndroid)/libs/$(ANDROID_EABI)/
 
 install_android_cad_libs: $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnaglyph) $(aStOutInterlace) $(aStOutDistorted) $(aStImageViewer) $(aStMoviePlayer) $(sViewAndroidCad)
 	cp -f $(BUILD_ROOT)/$(aStShared)       $(aDestAndroid)/libs/$(ANDROID_EABI)/
@@ -299,14 +299,14 @@ install_android_cad_libs: $(aStShared) $(aStGLWidgets) $(aStCore) $(aStOutAnagly
 	cp -f $(BUILD_ROOT)/$(aStImageViewer)  $(aDestAndroid)/libs/$(ANDROID_EABI)/
 	cp -f $(BUILD_ROOT)/$(aStMoviePlayer)  $(aDestAndroid)/libs/$(ANDROID_EABI)/
 	cp -f $(BUILD_ROOT)/$(sViewAndroidCad) $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FREETYPE_ROOT)/libs/$(ANDROID_EABI)/libfreetype.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(OPENAL_ROOT)/libs/$(ANDROID_EABI)/libopenal.so          $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavcodec-*.so       $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavdevice-*.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavformat-*.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavutil-*.so        $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswresample-*.so    $(aDestAndroid)/libs/$(ANDROID_EABI)/
-	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswscale-*.so       $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FREETYPE_ROOT)/libs/$(ANDROID_EABI)/libfreetype.so    $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(OPENAL_ROOT)/libs/$(ANDROID_EABI)/libopenal.so        $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavcodec.so       $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavdevice.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavformat.so      $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libavutil.so        $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswresample.so    $(aDestAndroid)/libs/$(ANDROID_EABI)/
+	cp -f $(FFMPEG_ROOT)/libs/$(ANDROID_EABI)/libswscale.so       $(aDestAndroid)/libs/$(ANDROID_EABI)/
 	mkdir -p $(aDestAndroid)/assets/shaders
 	mkdir -p $(aDestAndroid)/assets/lang
 
