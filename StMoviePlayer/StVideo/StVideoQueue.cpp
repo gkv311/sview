@@ -440,7 +440,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
             const double aPitch = (double )aSpherical->pitch / (1 << 16);
             const double aRoll  = (double )aSpherical->roll  / (1 << 16);
             myRotateDeg = (int )-aRoll;
-            theNewParams->setRotateZero((float )-aYaw, (float )aPitch, myRotateDeg);
+            theNewParams->setRotateZero((float )-aYaw, (float )aPitch, (float )myRotateDeg);
         }
     }
 #endif

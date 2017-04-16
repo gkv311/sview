@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -114,6 +114,9 @@ class StGLImageProgram : public StGLProgramMatrix<1, 5, StGLMeshProgram> {
     ST_CPPEXPORT void setTextureUVDataSize(StGLContext&    theCtx,
                                            const StGLVec4& theTexDataVec4);
 
+    ST_CPPEXPORT void setCubeTextureFlipZ(StGLContext&    theCtx,
+                                          bool theToFlip);
+
     ST_LOCAL void setColorScale(const StGLVec3& theScale) {
         myColorScale = theScale;
     }
@@ -160,6 +163,7 @@ class StGLImageProgram : public StGLProgramMatrix<1, 5, StGLMeshProgram> {
     StGLVarLocation uniTexUVDataLoc;
     StGLVarLocation uniTexSizePxLoc;
     StGLVarLocation uniTexelSizePxLoc;
+    StGLVarLocation uniTexCubeFlipZLoc;
     StGLVarLocation uniColorProcessingLoc;
     StGLVarLocation uniGammaLoc;
 

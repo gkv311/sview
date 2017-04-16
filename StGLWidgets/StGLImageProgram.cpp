@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2010-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -248,6 +248,7 @@ StGLImageProgram::StGLImageProgram()
        "uniform mat4 uModelMat;\n"
        "uniform vec4 uTexData;\n"
        "uniform vec4 uTexUVData;\n"
+       "uniform float uTexCubeFlipZ;\n"
 
        "attribute vec4 vVertex;\n"
        "attribute vec2 vTexCoord;\n"
@@ -257,8 +258,10 @@ StGLImageProgram::StGLImageProgram()
 
        "void main(void) {\n"
        "    gl_Position = vec4(vVertex.x, vVertex.y, 0.0, 1.0);\n"
-       "    fTexCoord   = (uProjMat * gl_Position).xyz;"
-       "    fTexUVCoord = (uProjMat * gl_Position).xyz;"
+       "    vec3 aTCoord = (uProjMat * gl_Position).xyz;"
+       "    aTCoord.z  *= uTexCubeFlipZ;"
+       "    fTexCoord   = aTCoord;"
+       "    fTexUVCoord = aTCoord;"
        "}\n";
 
     const char F_SHADER_FLAT[] =
@@ -307,6 +310,11 @@ void StGLImageProgram::setTextureMainDataSize(StGLContext&    theCtx,
 void StGLImageProgram::setTextureUVDataSize(StGLContext&    theCtx,
                                             const StGLVec4& theTexDataVec4) {
     theCtx.core20fwd->glUniform4fv(uniTexUVDataLoc, 1, theTexDataVec4);
+}
+
+void StGLImageProgram::setCubeTextureFlipZ(StGLContext& theCtx,
+                                           bool theToFlip) {
+    theCtx.core20fwd->glUniform1f(uniTexCubeFlipZLoc, theToFlip ? 1.0f : -1.0f);
 }
 
 void StGLImageProgram::setupCorrection(StGLContext& theCtx) {
@@ -388,6 +396,7 @@ bool StGLImageProgram::init(StGLContext&                 theCtx,
         uniTexUVDataLoc       = myActiveProgram->getUniformLocation(theCtx, "uTexUVData");
         uniTexSizePxLoc       = myActiveProgram->getUniformLocation(theCtx, "uTexSizePx");
         uniTexelSizePxLoc     = myActiveProgram->getUniformLocation(theCtx, "uTexelSize");
+        uniTexCubeFlipZLoc    = myActiveProgram->getUniformLocation(theCtx, "uTexCubeFlipZ");
         uniColorProcessingLoc = myActiveProgram->getUniformLocation(theCtx, "uColorProcessing");
         uniGammaLoc           = myActiveProgram->getUniformLocation(theCtx, "uGamma");
         myActiveProgram->atrVVertexLoc  = myActiveProgram->getAttribLocation(theCtx, "vVertex");

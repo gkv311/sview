@@ -781,6 +781,8 @@ void StImageViewerGUI::doMobileSettings(const size_t ) {
     aParams.add(myPlugin->StApplication::params.ActiveDevice);
     aParams.add(myImage->params.DisplayMode);
     aRend->getOptions(aParams);
+    aParams.add(myPlugin->params.ToFlipCubeZ6x1);
+    aParams.add(myPlugin->params.ToFlipCubeZ3x2);
     aParams.add(myPlugin->params.ToShowFps);
     aParams.add(myLangMap->params.language);
     aParams.add(myPlugin->params.IsMobileUI);

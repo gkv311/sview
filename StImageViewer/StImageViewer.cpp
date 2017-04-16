@@ -101,6 +101,8 @@ void StImageViewer::updateStrings() {
     params.SrcStereoFormat->setName(tr(MENU_MEDIA_SRC_FORMAT));
     params.ToShowPlayList->setName(tr(PLAYLIST));
     params.ToShowAdjustImage->setName(tr(MENU_VIEW_IMAGE_ADJUST));
+    params.ToFlipCubeZ6x1->setName(tr(MENU_VIEW_FLIPZ_CUBE6x1));
+    params.ToFlipCubeZ3x2->setName(tr(MENU_VIEW_FLIPZ_CUBE3x2));
     params.ToTrackHead->setName(tr(MENU_VIEW_TRACK_HEAD));
     params.ToShowFps->setName(tr(MENU_SHOW_FPS));
     params.ToShowMenu->setName(stCString("Show main menu"));
@@ -161,6 +163,10 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     params.ToShowPlayList->signals.onChanged = stSlot(this, &StImageViewer::doShowPlayList);
     params.ToShowAdjustImage = new StBoolParamNamed(false, stCString("showAdjustImage"));
     params.ToShowAdjustImage->signals.onChanged = stSlot(this, &StImageViewer::doShowAdjustImage);
+    params.ToFlipCubeZ6x1= new StBoolParamNamed(true,  stCString("toFlipCube6x1"));
+    params.ToFlipCubeZ6x1->signals.onChanged = stSlot(this, &StImageViewer::doChangeFlipCubeZ);
+    params.ToFlipCubeZ3x2= new StBoolParamNamed(false, stCString("toFlipCube3x2"));
+    params.ToFlipCubeZ3x2->signals.onChanged = stSlot(this, &StImageViewer::doChangeFlipCubeZ);
     params.ToTrackHead   = new StBoolParamNamed(true,  stCString("toTrackHead"));
     params.ToShowFps     = new StBoolParamNamed(false, stCString("toShowFps"));
     params.ToShowMenu    = new StBoolParamNamed(true,  stCString("toShowMenu"));
@@ -190,6 +196,8 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadString(ST_SETTING_LAST_FOLDER,        params.lastFolder);
     mySettings->loadParam (params.LastUpdateDay);
     mySettings->loadParam (params.CheckUpdatesDays);
+    mySettings->loadParam (params.ToFlipCubeZ6x1);
+    mySettings->loadParam (params.ToFlipCubeZ3x2);
     myToCheckPoorOrient = !mySettings->loadParam(params.ToTrackHead);
     mySettings->loadParam (params.ToShowFps);
     mySettings->loadParam (params.IsMobileUI);
@@ -329,6 +337,8 @@ void StImageViewer::saveAllParams() {
         mySettings->saveParam(params.LastUpdateDay);
         mySettings->saveParam(params.CheckUpdatesDays);
         mySettings->saveString(ST_SETTING_IMAGELIB,  StImageFile::imgLibToString(params.imageLib));
+        mySettings->saveParam (params.ToFlipCubeZ6x1);
+        mySettings->saveParam (params.ToFlipCubeZ3x2);
         mySettings->saveParam (params.ToTrackHead);
         mySettings->saveParam (params.ToShowFps);
         mySettings->saveParam (params.IsMobileUI);
@@ -491,6 +501,8 @@ bool StImageViewer::init() {
                                  myGUI->myImage->getTextureQueue(), myContext->getMaxTextureSize());
     myLoader->signals.onLoaded.connect(this, &StImageViewer::doLoaded);
     myLoader->setCompressMemory(myWindow->isMobile());
+    myLoader->setFlipCubeZ6x1(params.ToFlipCubeZ6x1->getValue());
+    myLoader->setFlipCubeZ3x2(params.ToFlipCubeZ3x2->getValue());
 
     // load this parameter AFTER image thread creation
     mySettings->loadParam(params.SrcStereoFormat);
@@ -1157,6 +1169,15 @@ void StImageViewer::doPanoramaOnOff(const size_t ) {
     myGUI->myImage->params.ViewMode->setValue(aPano == StPanorama_Cubemap6_1 || aPano == StPanorama_Cubemap3_2
                                             ? StViewSurface_Cubemap
                                             : StViewSurface_Sphere);
+}
+
+void StImageViewer::doChangeFlipCubeZ(const bool ) {
+    if(myLoader.isNull()) {
+        return;
+    }
+
+    myLoader->setFlipCubeZ6x1(params.ToFlipCubeZ6x1->getValue());
+    myLoader->setFlipCubeZ3x2(params.ToFlipCubeZ3x2->getValue());
 }
 
 void StImageViewer::doOpen1FileFromGui(StHandle<StString> thePath) {

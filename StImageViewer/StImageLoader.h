@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -134,6 +134,20 @@ class StImageLoader {
      */
     ST_LOCAL void setCompressMemory(const bool theToCompress);
 
+    /**
+     * Flip Z within 6x1 cubemap input.
+     */
+    ST_LOCAL void setFlipCubeZ6x1(bool theToFlip) {
+        myToFlipCubeZ6x1 = theToFlip;
+    }
+
+    /**
+     * Flip Z within 3x2 cubemap input.
+     */
+    ST_LOCAL void setFlipCubeZ3x2(bool theToFlip) {
+        myToFlipCubeZ3x2 = theToFlip;
+    }
+
         public:  //! @name Signals
 
     struct {
@@ -191,6 +205,8 @@ class StImageLoader {
 
     volatile StImageFile::ImageClass myImageLib;
     volatile Action            myAction;
+    volatile bool              myToFlipCubeZ6x1; //!< Flip Z within 6x1 cubemap input.
+    volatile bool              myToFlipCubeZ3x2; //!< Flip Z within 3x2 cubemap input.
 
         private: //! @name no copies, please
 

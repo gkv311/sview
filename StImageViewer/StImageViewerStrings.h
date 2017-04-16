@@ -96,6 +96,8 @@ namespace StImageViewerStrings {
         MENU_VIEW_SURFACE_CUBEMAP   = 1283,
         MENU_VIEW_TRACK_HEAD        = 1285,
         MENU_VIEW_TRACK_HEAD_POOR   = 1286,
+        MENU_VIEW_FLIPZ_CUBE6x1     = 1291,
+        MENU_VIEW_FLIPZ_CUBE3x2     = 1292,
 
         // Root -> Output -> Change Device menu
         MENU_CHANGE_DEVICE  = 1400,

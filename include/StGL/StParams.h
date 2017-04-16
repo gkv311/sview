@@ -64,6 +64,7 @@ class StStereoParams {
       Timestamp(0.0f),
       StereoFormat(StFormat_Mono),
       ToSwapLR(false),
+      ToFlipCubeZ(false),
       PanCenter(0.0f, 0.0f),
       ScaleFactor(1.0f),
       mySepDxPx(0),
@@ -373,6 +374,7 @@ class StStereoParams {
 
     StFormat     StereoFormat;     //!< stereoscopic format
     bool         ToSwapLR;         //!< reverse left/right views
+    bool         ToFlipCubeZ;      //!< reverse Z-coordinate in cubemap
 
     StGLVec2     PanCenter;        //!< relative position
     GLfloat      ScaleFactor;      //!< scaling factor

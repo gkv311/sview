@@ -842,6 +842,7 @@ void StGLImageRegion::stglDrawView(unsigned int theView) {
             myProgram.setTextureSizePx      (aCtx, aTextureSize);
             myProgram.setTextureMainDataSize(aCtx, aClampVec);
             myProgram.setTextureUVDataSize  (aCtx, aClampUV);
+            myProgram.setCubeTextureFlipZ   (aCtx, aParams->ToFlipCubeZ);
 
             const float aScale = THE_PANORAMA_DEF_ZOOM * aParams->ScaleFactor * aVrScale;
             aModelMat.scale(aScale, aScale, 1.0f);

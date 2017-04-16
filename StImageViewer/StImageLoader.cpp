@@ -1,5 +1,5 @@
 /**
- * Copyright © 2007-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2007-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * StImageViewer program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,7 +63,9 @@ StImageLoader::StImageLoader(const StImageFile::ImageClass      theImageLib,
   myTextureQueue(theTextureQueue),
   myMsgQueue(theMsgQueue),
   myImageLib(theImageLib),
-  myAction(Action_NONE) {
+  myAction(Action_NONE),
+  myToFlipCubeZ6x1(false),
+  myToFlipCubeZ3x2(false) {
       myPlayList->setExtensions(myMimeList.getExtensionsList());
       myThread = new StThread(threadFunction, (void* )this, "StImageLoader");
 }
@@ -427,9 +429,11 @@ bool StImageLoader::loadImage(const StHandle<StFileNode>& theSource,
         if(aSizeX1 / 6 == aSizeY1) {
             aCubeCoeffs[0] = 6;
             aCubeCoeffs[1] = 1;
+            theParams->ToFlipCubeZ = myToFlipCubeZ6x1;
         } else if(aSizeX1 / 3 == aSizeY1 / 2) {
             aCubeCoeffs[0] = 3;
             aCubeCoeffs[1] = 2;
+            theParams->ToFlipCubeZ = myToFlipCubeZ3x2;
         }
         if(!anImageFileR->isNull()
         && (aSizeX1 != aSizeX2 || aSizeY1 != aSizeY2)) {

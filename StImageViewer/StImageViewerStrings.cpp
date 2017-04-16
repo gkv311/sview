@@ -124,6 +124,10 @@ void loadDefaults(StLangMap& theStrings) {
                "Track orientation");
     theStrings(MENU_VIEW_TRACK_HEAD_POOR,
                "Track orientation (poor)");
+    theStrings(MENU_VIEW_FLIPZ_CUBE6x1,
+               "Cubemap 6x1 - flip Z");
+    theStrings(MENU_VIEW_FLIPZ_CUBE3x2,
+               "Cubemap 3x2 - flip Z");
     theStrings(MENU_VIEW_DISPLAY_MODE_STEREO,
                "Stereo");
     theStrings(MENU_VIEW_DISPLAY_MODE_LEFT,
