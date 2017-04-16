@@ -99,6 +99,7 @@ echo #ifndef SVIEW_SDK_VER_STATUS>> "%SVIEW_BUILD_CONF%"
 echo   #define SVIEW_SDK_VER_STATUS %releaseStatus%>> "%SVIEW_BUILD_CONF%"
 echo #endif>> "%SVIEW_BUILD_CONF%"
 
+echo #define ST_HAVE_OPENVR>> "%SVIEW_BUILD_CONF%"
 echo #define ST_HAVE_WEBP>> "%SVIEW_BUILD_CONF%"
 echo #define ST_HAVE_MONGOOSE>> "%SVIEW_BUILD_CONF%"
 
