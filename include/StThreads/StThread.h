@@ -1,7 +1,7 @@
 /**
  * This is a header for threads creating/manipulating.
  * (redefinition for WinAPI and POSIX threads)
- * Copyright © 2008-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2008-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at

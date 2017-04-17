@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -114,20 +114,44 @@ void StThread::setCurrentThreadName(const char* theName) {
 }
 
 bool StThread::wait() {
+    if(!isValid()) {
+        return false;
+    }
+
 #ifdef _WIN32
-    return isValid() && (WaitForSingleObject((HANDLE )myThread, INFINITE) != WAIT_FAILED);
+    if(WaitForSingleObject((HANDLE )myThread, INFINITE) == WAIT_FAILED) {
+        return false;
+    }
+    CloseHandle((HANDLE )myThread);
+    myThread = NULL;
 #else
-    return isValid() && (pthread_join(myThread, NULL) == 0);
+    if(pthread_join(myThread, NULL) != 0) {
+        return false;
+    }
+    myHasHandle = false;
 #endif
+    return true;
 }
 
 bool StThread::wait(const int theTimeMilliseconds) {
+    if(!isValid()) {
+        return false;
+    }
+
 #ifdef _WIN32
-    return isValid() && (WaitForSingleObject((HANDLE )myThread, (DWORD )theTimeMilliseconds) != WAIT_TIMEOUT);
+    if(WaitForSingleObject((HANDLE )myThread, (DWORD )theTimeMilliseconds) == WAIT_TIMEOUT) {
+        return false;
+    }
+    CloseHandle((HANDLE )myThread);
+    myThread = NULL;
 #else
     (void )theTimeMilliseconds;
-    return isValid() && (pthread_join(myThread, NULL) == 0);
+    if(pthread_join(myThread, NULL) != 0) {
+        return false;
+    }
+    myHasHandle = false;
 #endif
+    return true;
 }
 
 void StThread::kill() {
