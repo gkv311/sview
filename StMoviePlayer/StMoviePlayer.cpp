@@ -996,6 +996,8 @@ bool StMoviePlayer::open() {
             doOpenRecent(0); // open last opened file
             if(isPaused) {
                 myVideo->pushPlayEvent(ST_PLAYEVENT_PAUSE);
+            } else if(!anArgLast.isValid() && !anArgPause.isValid() && !anArgPaused.isValid()) {
+                myVideo->pushPlayEvent(ST_PLAYEVENT_PAUSE);
             }
         }
         return true;
