@@ -302,6 +302,23 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
 
     anAction = new StActionIntSlot(stCString("DoPanoramaOnOff"), stSlot(this, &StImageViewer::doPanoramaOnOff), 0);
     addAction(Action_PanoramaOnOff, anAction, ST_VK_P);
+
+    {
+    anAction = new StActionIntSlot(stCString("DoOutStereoNormal"), stSlot(this, &StImageViewer::doSetStereoOutput), StGLImageRegion::MODE_STEREO);
+    addAction(Action_OutStereoNormal, anAction);
+
+    anAction = new StActionIntSlot(stCString("DoOutStereoLeftView"), stSlot(this, &StImageViewer::doSetStereoOutput), StGLImageRegion::MODE_ONLY_LEFT);
+    addAction(Action_OutStereoLeftView, anAction);
+
+    anAction = new StActionIntSlot(stCString("DoOutStereoRightView"), stSlot(this, &StImageViewer::doSetStereoOutput), StGLImageRegion::MODE_ONLY_RIGHT);
+    addAction(Action_OutStereoRightView, anAction);
+
+    anAction = new StActionIntSlot(stCString("DoOutStereoParallelPair"), stSlot(this, &StImageViewer::doSetStereoOutput), StGLImageRegion::MODE_PARALLEL);
+    addAction(Action_OutStereoParallelPair, anAction);
+
+    anAction = new StActionIntSlot(stCString("DoOutStereoCrossEyed"), stSlot(this, &StImageViewer::doSetStereoOutput), StGLImageRegion::MODE_CROSSYED);
+    addAction(Action_OutStereoCrossEyed, anAction);
+    }
 }
 
 bool StImageViewer::resetDevice() {
@@ -1157,6 +1174,13 @@ void StImageViewer::doSwitchViewMode(const int32_t theMode) {
     && !myPlayList->isEmpty()) {
         myLoader->doLoadNext();
     }
+}
+
+void StImageViewer::doSetStereoOutput(const size_t theMode) {
+    if(myLoader.isNull()) {
+        return;
+    }
+    myGUI->myImage->params.DisplayMode->setValue((int32_t )theMode);
 }
 
 void StImageViewer::doPanoramaOnOff(const size_t ) {

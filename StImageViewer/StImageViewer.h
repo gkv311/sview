@@ -186,6 +186,7 @@ class StImageViewer : public StApplication {
     ST_LOCAL void doFullscreen(const bool theIsFullscreen);
     ST_LOCAL void doSwitchSrcFormat(const int32_t theSrcFormat);
     ST_LOCAL void doSwitchViewMode(const int32_t theMode);
+    ST_LOCAL void doSetStereoOutput(const size_t theMode);
     ST_LOCAL void doPanoramaOnOff(const size_t );
     ST_LOCAL void doChangeStickPano360(const bool );
     ST_LOCAL void doChangeFlipCubeZ(const bool );
@@ -219,6 +220,11 @@ class StImageViewer : public StApplication {
         Action_StereoParamsBegin,
         Action_StereoParamsEnd = Action_StereoParamsBegin + StGLImageRegion::ActionsNb - 1,
         Action_PanoramaOnOff,
+        Action_OutStereoNormal,
+        Action_OutStereoLeftView,
+        Action_OutStereoRightView,
+        Action_OutStereoParallelPair,
+        Action_OutStereoCrossEyed,
     };
 
         private:

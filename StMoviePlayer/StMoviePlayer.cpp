@@ -500,6 +500,23 @@ StMoviePlayer::StMoviePlayer(const StHandle<StResourceManager>& theResMgr,
 
     anAction = new StActionIntSlot(stCString("DoPanoramaOnOff"), stSlot(this, &StMoviePlayer::doPanoramaOnOff), 0);
     addAction(Action_PanoramaOnOff, anAction, ST_VK_P);
+
+    {
+    anAction = new StActionIntSlot(stCString("DoOutStereoNormal"), stSlot(this, &StMoviePlayer::doSetStereoOutput), StGLImageRegion::MODE_STEREO);
+    addAction(Action_OutStereoNormal, anAction);
+
+    anAction = new StActionIntSlot(stCString("DoOutStereoLeftView"), stSlot(this, &StMoviePlayer::doSetStereoOutput), StGLImageRegion::MODE_ONLY_LEFT);
+    addAction(Action_OutStereoLeftView, anAction);
+
+    anAction = new StActionIntSlot(stCString("DoOutStereoRightView"), stSlot(this, &StMoviePlayer::doSetStereoOutput), StGLImageRegion::MODE_ONLY_RIGHT);
+    addAction(Action_OutStereoRightView, anAction);
+
+    anAction = new StActionIntSlot(stCString("DoOutStereoParallelPair"), stSlot(this, &StMoviePlayer::doSetStereoOutput), StGLImageRegion::MODE_PARALLEL);
+    addAction(Action_OutStereoParallelPair, anAction);
+
+    anAction = new StActionIntSlot(stCString("DoOutStereoCrossEyed"), stSlot(this, &StMoviePlayer::doSetStereoOutput), StGLImageRegion::MODE_CROSSYED);
+    addAction(Action_OutStereoCrossEyed, anAction);
+    }
 }
 
 bool StMoviePlayer::resetDevice() {
@@ -1758,6 +1775,13 @@ void StMoviePlayer::doSwitchSrcFormat(const int32_t theSrcFormat) {
     if(!isPlaying && !aParams.isNull() && myGUI->myImage->hasVideoStream()) {
         myVideo->pushPlayEvent(ST_PLAYEVENT_SEEK, aPts - 0.01);
     }
+}
+
+void StMoviePlayer::doSetStereoOutput(const size_t theMode) {
+    if(myVideo.isNull()) {
+        return;
+    }
+    myGUI->myImage->params.DisplayMode->setValue((int32_t )theMode);
 }
 
 void StMoviePlayer::doScaleGui(const int32_t ) {

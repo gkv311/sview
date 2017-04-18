@@ -643,6 +643,12 @@ void loadDefaults(StLangMap& theStrings) {
     addAction(theStrings, StMoviePlayer::Action_PanoramaOnOff,
               "DoPanoramaOnOff",
               "Enable/disable panorama mode");
+
+    theStrings.addAlias("DoOutStereoNormal",       MENU_VIEW_DISPLAY_MODE_STEREO);
+    theStrings.addAlias("DoOutStereoLeftView",     MENU_VIEW_DISPLAY_MODE_LEFT);
+    theStrings.addAlias("DoOutStereoRightView",    MENU_VIEW_DISPLAY_MODE_RIGHT);
+    theStrings.addAlias("DoOutStereoParallelPair", MENU_VIEW_DISPLAY_MODE_PARALLEL);
+    theStrings.addAlias("DoOutStereoCrossEyed",    MENU_VIEW_DISPLAY_MODE_CROSSYED);
 }
 
 };
