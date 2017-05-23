@@ -806,7 +806,9 @@ void StImageViewer::doDeleteFileBegin(const size_t ) {
         return;
     }
 
+    const bool isReadOnly = StFileNode::isFileReadOnly(myFileToDelete->getPath());
     const StString aText = myLangMap->getValue(StImageViewerStrings::DIALOG_DELETE_FILE_QUESTION)
+                         + (isReadOnly ? "\nWARNING! The file is READ ONLY!" : "")
                          + "\n" + myFileToDelete->getPath();
 
     StGLMessageBox* aDialog = new StGLMessageBox(myGUI.access(), myLangMap->getValue(StImageViewerStrings::DIALOG_DELETE_FILE_TITLE),
@@ -822,6 +824,7 @@ void StImageViewer::doDeleteFileEnd(const size_t ) {
         return;
     }
 
+    StFileNode::removeReadOnlyFlag(myFileToDelete->getPath());
     myPlayList->removePhysically(myFileToDelete);
     if(!myPlayList->isEmpty()) {
         doUpdateStateLoading();

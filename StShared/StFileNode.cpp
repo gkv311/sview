@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -78,6 +78,37 @@ bool StFileNode::isFileExists(const StCString& thePath) {
 #else
     struct stat64 aStatBuffer;
     return stat64(thePath.toCString(), &aStatBuffer) == 0;
+#endif
+}
+
+bool StFileNode::isFileReadOnly(const StCString& thePath) {
+#ifdef _WIN32
+    StStringUtfWide aPath;
+    aPath.fromUnicode(thePath);
+    DWORD anAttribs = ::GetFileAttributesW(aPath.toCString());
+    return (anAttribs & FILE_ATTRIBUTE_READONLY) != 0;
+#else
+    // not implemented
+    return false;
+#endif
+}
+
+bool StFileNode::removeReadOnlyFlag(const StCString& thePath) {
+#ifdef _WIN32
+    StStringUtfWide aPath;
+    aPath.fromUnicode(thePath);
+    DWORD anAttribs = ::GetFileAttributesW(aPath.toCString());
+    if(anAttribs == INVALID_FILE_ATTRIBUTES) {
+        return false;
+    } else if((anAttribs & FILE_ATTRIBUTE_READONLY) == 0) {
+        return true;
+    }
+
+    anAttribs = (anAttribs & ~FILE_ATTRIBUTE_READONLY);
+    return ::SetFileAttributesW(aPath.toCString(), anAttribs) != FALSE;
+#else
+    // not implemented
+    return false;
 #endif
 }
 

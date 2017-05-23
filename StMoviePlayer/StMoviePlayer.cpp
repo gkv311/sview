@@ -707,7 +707,9 @@ void StMoviePlayer::doDeleteFileBegin(const size_t ) {
         return;
     }
 
+    const bool isReadOnly = StFileNode::isFileReadOnly(myFileToDelete->getPath());
     const StString aText = myLangMap->getValue(StMoviePlayerStrings::DIALOG_DELETE_FILE_QUESTION)
+                         + (isReadOnly ? "\nWARNING! The file is READ ONLY!" : "")
                          + "\n" + myFileToDelete->getPath();
 
     StGLMessageBox* aDialog = new StGLMessageBox(myGUI.access(), myLangMap->getValue(StMoviePlayerStrings::DIALOG_DELETE_FILE_TITLE),
@@ -723,6 +725,7 @@ void StMoviePlayer::doDeleteFileEnd(const size_t ) {
         return;
     }
 
+    StFileNode::removeReadOnlyFlag(myFileToDelete->getPath());
     myVideo->doRemovePhysically(myFileToDelete);
     myFileToDelete.nullify();
 }

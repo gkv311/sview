@@ -1,5 +1,5 @@
 /**
- * Copyright © 2010-2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2010-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -203,6 +203,18 @@ class StFileNode : public StNode {
      * @return true if file/folder exists
      */
     ST_CPPEXPORT static bool isFileExists(const StCString& thePath);
+
+    /**
+     * @param thePath file path
+     * @return true if file/folder has read-only flag
+     */
+    ST_CPPEXPORT static bool isFileReadOnly(const StCString& thePath);
+
+    /**
+     * @param thePath file path
+     * @return true if file attributes have been successfully modified
+     */
+    ST_CPPEXPORT static bool removeReadOnlyFlag(const StCString& thePath);
 
     /**
      * Tries to remove file from filesystem.
