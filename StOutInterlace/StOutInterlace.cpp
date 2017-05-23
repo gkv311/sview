@@ -48,7 +48,7 @@ namespace {
         {"HIT8D02", false}, // Hyundai W220S DVID
         {"HIT7003", false}, // Hyundai W240S D-Sub
         {"HIT7D03", false}, // Hyundai W240S D-Sub
-      //{"ACI23C2", false}, // ASUS VG23AH
+        {"ACI23D3", false}, // ASUS VG23AH
         {"ACI27C2", false}, // ASUS VG27AH
         {       "", false}  // NULL-terminate array
     };
