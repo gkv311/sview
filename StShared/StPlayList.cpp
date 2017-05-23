@@ -587,9 +587,9 @@ bool StPlayList::remove(const StString& thePath,
         }
 
         if(myCurrent != NULL) {
-            if(aRemItem->getPlayedFlag() != aPlayedFlag) {
+            if(myCurrent->getPlayedFlag() != aPlayedFlag) {
                 // the item has not been played yet - mark it as such
-                aRemItem->setPlayedFlag(aPlayedFlag);
+                myCurrent->setPlayedFlag(aPlayedFlag);
             } else {
                 // one played item has been removed
                 --myPlayedCount;
