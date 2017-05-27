@@ -440,6 +440,19 @@ namespace stAV {
             return readTag(getFrameMetadata(theFrame), theKey, theValue);
         }
 
+        /**
+         * Retrieve language id from the stream.
+         */
+        inline StString readLang(AVStream* theStream) {
+        #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
+            StString aLang;
+            stAV::meta::readTag(theStream, stCString("language"), aLang);
+            return aLang;
+        #else
+            return theStream->language;
+        #endif
+        }
+
     }
 
 #ifdef ST_AV_NEWSTEREO

@@ -33,6 +33,63 @@ namespace {
         aStVideo->mainLoop();
         return SV_THREAD_RETURN 0;
     }
+
+    /**
+     * Format framerate value.
+     */
+    static StString formatFps(double theVal) {
+        //const uint64_t aVal = lrintf(theVal * 100.0);
+        const uint64_t aVal = uint64_t(theVal * 100.0 + 0.5);
+        char aBuff[256];
+        if(aVal == 0) {
+            stsprintf(aBuff, sizeof(aBuff), "%1.4f", theVal);
+        } else if(aVal % 100) {
+            stsprintf(aBuff, sizeof(aBuff), "%3.2f", theVal);
+        } else if(aVal % (100 * 1000)) {
+            stsprintf(aBuff, sizeof(aBuff), "%1.0f", theVal);
+        } else {
+            stsprintf(aBuff, sizeof(aBuff), "%1.0fk", theVal / 1000);
+        }
+        return aBuff;
+    }
+
+    /**
+     * Format stream info.
+     */
+    static StString formatStreamInfo(const AVStream* theStream) {
+        char aFrmtBuff[4096] = {};
+        avcodec_string(aFrmtBuff, sizeof(aFrmtBuff), theStream->codec, 0);
+        StString aStreamInfo(aFrmtBuff);
+
+    #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(57, 33, 100))
+        //aStreamInfo = aStreamInfo + ", " + theStream->codec_info_nb_frames + ", " + theStream->time_base.num + "/" + theStream->time_base.den;
+        if(theStream->sample_aspect_ratio.num && av_cmp_q(theStream->sample_aspect_ratio, theStream->codecpar->sample_aspect_ratio)) {
+            AVRational aDispAspectRatio;
+            av_reduce(&aDispAspectRatio.num, &aDispAspectRatio.den,
+                      theStream->codecpar->width  * int64_t(theStream->sample_aspect_ratio.num),
+                      theStream->codecpar->height * int64_t(theStream->sample_aspect_ratio.den),
+                      1024 * 1024);
+            aStreamInfo = aStreamInfo + ", SAR " + theStream->sample_aspect_ratio.num + ":" + theStream->sample_aspect_ratio.den
+                                       + " DAR " + aDispAspectRatio.num + ":" + aDispAspectRatio.den;
+        }
+
+        if(theStream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+            if(theStream->avg_frame_rate.den != 0 && theStream->avg_frame_rate.num != 0) {
+                aStreamInfo += StString(", ") + formatFps(av_q2d(theStream->avg_frame_rate)) + " fps";
+            }
+            if(theStream->r_frame_rate.den != 0 && theStream->r_frame_rate.num != 0) {
+                aStreamInfo += StString(", ") + formatFps(av_q2d(theStream->r_frame_rate)) + " tbr";
+            }
+            if(theStream->time_base.den != 0 && theStream->time_base.num != 0) {
+                aStreamInfo += StString(", ") + formatFps(1 / av_q2d(theStream->time_base)) + " tbn";
+            }
+            if(theStream->codec->time_base.den != 0 && theStream->codec->time_base.num != 0) {
+                aStreamInfo += StString(", ") + formatFps(1 / av_q2d(theStream->codec->time_base)) + " tbc";
+            }
+        }
+    #endif
+        return aStreamInfo;
+    }
 }
 
 const char* StVideo::ST_VIDEOS_MIME_STRING = ST_VIDEO_PLUGIN_MIME_CHAR;
@@ -336,6 +393,11 @@ bool StVideo::addFile(const StString& theFileToLoad,
         AVStream* aStream = aFormatCtx->streams[aStreamId];
         theInfo.Duration = stMax(theInfo.Duration, stAV::unitsToSeconds(aStream, aStream->duration));
 
+        StString aLang = stAV::meta::readLang(aStream);
+        if(aLang == "und") {
+            aLang.clear();
+        }
+
         if(aStream->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
             // video track
             if(!myVideoMaster->isInitialized()) {
@@ -407,16 +469,6 @@ bool StVideo::addFile(const StString& theFileToLoad,
             StString aSampleRate    = stAV::audio::getSampleRateString   (aCodecCtx);
             StString aChannelLayout = stAV::audio::getChannelLayoutString(aCodecCtx);
 
-            StString aLang;
-        #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
-            stAV::meta::readTag(aStream, stCString("language"), aLang);
-        #else
-            aLang = aStream->language;
-        #endif
-            if(aLang == "und") {
-                aLang.clear();
-            }
-
             StString aStreamTitle = aCodecName;
             if(!aSampleRate.isEmpty()) {
                 aStreamTitle += StString(", ") + aSampleRate;
@@ -449,16 +501,6 @@ bool StVideo::addFile(const StString& theFileToLoad,
             AVCodec* aCodec = avcodec_find_decoder(aCodecCtx->codec_id);
             if(aCodec != NULL) {
                 aCodecName = aCodec->name;
-            }
-
-            StString aLang;
-        #if(LIBAVUTIL_VERSION_INT >= AV_VERSION_INT(51, 5, 0))
-            stAV::meta::readTag(aStream, stCString("language"), aLang);
-        #else
-            aLang = aStream->language;
-        #endif
-            if(aLang == "und") {
-                aLang.clear();
             }
 
             StString aStreamTitle = aCodecName;
@@ -562,6 +604,33 @@ bool StVideo::openSource(const StHandle<StFileNode>&     theNewSource,
                     }
                 }
             }
+        }
+    }
+
+    // read general information about streams
+    for(size_t aCtxIter = 0; aCtxIter < myCtxList.size(); ++aCtxIter) {
+        AVFormatContext* aFormatCtx = myCtxList[aCtxIter];
+
+        StString aFrmtInfo;
+        if(aFormatCtx->bit_rate != 0) {
+            aFrmtInfo += StString("bitrate: ") + (int64_t(aFormatCtx->bit_rate) / 1000) + " kb/s";
+        }
+        if(!aFrmtInfo.isEmpty()) {
+            StString aStreamInfoKey = StString("input ") + aCtxIter;
+            myFileInfoTmp->Info.add(StArgument(aStreamInfoKey, aFrmtInfo));
+        }
+
+        for(unsigned int aStreamId = 0; aStreamId < aFormatCtx->nb_streams; ++aStreamId) {
+            AVStream* aStream = aFormatCtx->streams[aStreamId];
+            StString aLang = stAV::meta::readLang(aStream);
+            if(aLang.isEmpty()) {
+                aLang = "und";
+            }
+
+            StString aStreamInfoKey = StString("steam ")
+                                    + (myCtxList.size() > 1 ? (StString() + aCtxIter + ":" + aStreamId) : (StString() + aStreamId))
+                                    + " [" + aLang + "]";
+            myFileInfoTmp->Info.add(StArgument(aStreamInfoKey, formatStreamInfo(aStream)));
         }
     }
 
