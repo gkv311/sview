@@ -35,22 +35,25 @@ namespace {
     struct StMonInterlacedInfo_t {
         const stUtf8_t* pnpid;
         bool            isReversed;
+        bool            isRowInterlaced;
     };
 
     /**
      * Database of known interlaced monitors.
      */
     static const StMonInterlacedInfo_t THE_KNOWN_MONITORS[] = {
-        {"ZMT1900", false}, // Zalman Trimon M190S
-        {"ZMT2200", false}, // Zalman Trimon M220W
-        {"ENV2373", true }, // Envision
-        {"HIT8002", false}, // Hyundai W220S D-Sub
-        {"HIT8D02", false}, // Hyundai W220S DVID
-        {"HIT7003", false}, // Hyundai W240S D-Sub
-        {"HIT7D03", false}, // Hyundai W240S D-Sub
-        {"ACI23D3", false}, // ASUS VG23AH
-        {"ACI27C2", false}, // ASUS VG27AH
-        {       "", false}  // NULL-terminate array
+        {"ZMT1900", false, true}, // Zalman Trimon M190S
+        {"ZMT2200", false, true}, // Zalman Trimon M220W
+        {"ENV2373", true , true}, // Envision
+        {"HIT8002", false, true}, // Hyundai W220S D-Sub
+        {"HIT8D02", false, true}, // Hyundai W220S DVID
+        {"HIT7003", false, true}, // Hyundai W240S D-Sub
+        {"HIT7D03", false, true}, // Hyundai W240S D-Sub
+        {"ACI23D3", false, true}, // ASUS VG23AH
+        {"ACI27C2", false, true}, // ASUS VG27AH
+        //
+        {"ST@COL0", false, false}, // Android devices with parallel barrier (column-interleaved)
+        {       "", false, false}  // NULL-terminate array
     };
 
     // translation resources
@@ -87,6 +90,24 @@ namespace {
     static const StGLVarLocation ST_VATTRIB_VERTEX(0);
     static const StGLVarLocation ST_VATTRIB_TCOORD(1);
 
+    inline bool isInterlacedMonitor(const StMonitor& theMon,
+                                    bool&            theIsReversed,
+                                    bool&            theIsRowInterlaced) {
+        if(theMon.getPnPId().getSize() != 7) {
+            return false;
+        }
+        for(size_t anIter = 0;; ++anIter) {
+            const StMonInterlacedInfo_t& aMon = THE_KNOWN_MONITORS[anIter];
+            if(aMon.pnpid[0] == '\0') {
+                return false;
+            } else if(stAreEqual(aMon.pnpid, theMon.getPnPId().toCString(), 7)) {
+                theIsReversed      = aMon.isReversed;
+                theIsRowInterlaced = aMon.isRowInterlaced;
+                return true;
+            }
+        }
+    }
+
 }
 
 StProgramFB::StProgramFB(const StString& theTitle)
@@ -116,27 +137,12 @@ bool StProgramFB::link(StGLContext& theCtx) {
 
 StAtomic<int32_t> StOutInterlace::myInstancesNb(0);
 
-inline bool isInterlacedMonitor(const StMonitor& theMon,
-                                bool&            theIsReversed) {
-    if(theMon.getPnPId().getSize() != 7) {
-        return false;
-    }
-    for(size_t anIter = 0;; ++anIter) {
-        const StMonInterlacedInfo_t& aMon = THE_KNOWN_MONITORS[anIter];
-        if(aMon.pnpid[0] == '\0') {
-            return false;
-        } else if(stAreEqual(aMon.pnpid, theMon.getPnPId().toCString(), 7)) {
-            theIsReversed = aMon.isReversed;
-            return true;
-        }
-    }
-}
-
-StHandle<StMonitor> StOutInterlace::getHInterlaceMonitor(const StArrayList<StMonitor>& theMonitors,
-                                                         bool& theIsReversed) {
+StHandle<StMonitor> StOutInterlace::getInterlacedMonitor(const StArrayList<StMonitor>& theMonitors,
+                                                         bool& theIsReversed,
+                                                         bool& theIsRowInterlaced) {
     for(size_t aMonIter = 0; aMonIter < theMonitors.size(); ++aMonIter) {
         const StMonitor& aMon = theMonitors[aMonIter];
-        if(isInterlacedMonitor(aMon, theIsReversed)) {
+        if(isInterlacedMonitor(aMon, theIsReversed, theIsRowInterlaced)) {
             return new StMonitor(aMon);
         }
     }
@@ -289,10 +295,15 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
 #endif
 
     // detect connected displays
-    bool isDummyReversed= false;
-    StHandle<StMonitor> aMonInterlaced = StOutInterlace::getHInterlaceMonitor(aMonitors, isDummyReversed);
+    bool isDummyReversed = false;
+    bool isRowInterlaced = false;
+    StHandle<StMonitor> aMonInterlaced = getInterlacedMonitor(aMonitors, isDummyReversed, isRowInterlaced);
     if(!aMonInterlaced.isNull()) {
-        aDevRow->Priority = ST_DEVICE_SUPPORT_PREFER;
+        if(isRowInterlaced) {
+            aDevRow->Priority = ST_DEVICE_SUPPORT_PREFER;
+        } else {
+            aDevCol->Priority = ST_DEVICE_SUPPORT_PREFER;
+        }
     }
 
     // options
@@ -316,7 +327,7 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
         StMonitor aMonitor = aMonitors[aRect.center()];
         if(params.BindToMon->getValue()
         && !aMonInterlaced.isNull()
-        && !isInterlacedMonitor(aMonitor, isDummyReversed)) {
+        && !isInterlacedMonitor(aMonitor, isDummyReversed, isRowInterlaced)) {
             aMonitor = *aMonInterlaced;
         }
         if(isLoadedPosition) {
@@ -340,7 +351,7 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     if(!aMonInterlaced.isNull()) {
         myIsMonReversed = false;
         StMonitor aMonitor = aMonitors[StWindow::getPlacement().center()];
-        isInterlacedMonitor(aMonitor, myIsMonReversed);
+        isInterlacedMonitor(aMonitor, myIsMonReversed, isRowInterlaced);
     }
 
     // load device settings
@@ -644,7 +655,8 @@ void StOutInterlace::doNewMonitor(const StSizeEvent& ) {
     // note that this enumeration is not enough to handle rotation direction,
     // which is required to automatically swap lines/columns order)
     myIsMonPortrait = aMon.getOrientation() == StMonitor::Orientation_Portrait;
-    isInterlacedMonitor(aMon, myIsMonReversed);
+    bool isRowInterlaced;
+    isInterlacedMonitor(aMon, myIsMonReversed, isRowInterlaced);
 }
 
 void StOutInterlace::processEvents() {
@@ -1003,12 +1015,13 @@ void StOutInterlace::doSetBindToMonitor(const bool theValue) {
     const StSearchMonitors& aMonitors = StWindow::getMonitors();
     StRectI_t aRect = StWindow::getPlacement();
     StMonitor aMon  = aMonitors[aRect.center()];
-    if(isInterlacedMonitor(aMon, myIsMonReversed)
+    bool isRowInterlaced = false;
+    if(isInterlacedMonitor(aMon, myIsMonReversed, isRowInterlaced)
     || !isMovable()) {
         return;
     }
 
-    StHandle<StMonitor> anInterlacedMon = StOutInterlace::getHInterlaceMonitor(aMonitors, myIsMonReversed);
+    StHandle<StMonitor> anInterlacedMon = getInterlacedMonitor(aMonitors, myIsMonReversed, isRowInterlaced);
     if(anInterlacedMon.isNull()) {
         return;
     }

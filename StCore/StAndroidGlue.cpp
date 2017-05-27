@@ -210,6 +210,15 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
         myMemoryClassMiB = aJniEnv->CallIntMethod(aJActivityMgr, aJMet_getMemoryClass);
     }
 
+    if(jclass aClassBuild = aJniEnv->FindClass("android/os/Build")) {
+        if(jfieldID aJFieldModel = aJniEnv->GetStaticFieldID(aClassBuild, "MODEL", "Ljava/lang/String;")) {
+            myBuildModel = stStringFromJava(aJniEnv, (jstring )aJniEnv->GetStaticObjectField(aClassBuild, aJFieldModel));
+        }
+        if(jfieldID aJFieldDevice = aJniEnv->GetStaticFieldID(aClassBuild, "DEVICE", "Ljava/lang/String;")) {
+            myBuildDevice = stStringFromJava(aJniEnv, (jstring )aJniEnv->GetStaticObjectField(aClassBuild, aJFieldDevice));
+        }
+    }
+
     jmethodID aJMet_getStAppClass = aJniEnv->GetMethodID(aJClass_Activity, "getStAppClass", "()Ljava/lang/String;");
     myStAppClass = stStringFromJava(aJniEnv, (jstring )aJniEnv->CallObjectMethod(myActivity->clazz, aJMet_getStAppClass));
 
@@ -378,6 +387,8 @@ void StAndroidGlue::updateMonitors() {
     aMon.setId(0);
     if(myStereoApiId == "S3DV") {
         aMon.setPnPId("ST@S3DV");
+    } else if(myBuildDevice == "KING7S" || myBuildModel == "PP6000") {
+        aMon.setPnPId("ST@COL0");
     }
     aMon.changeVRect().top()    = 0;
     aMon.changeVRect().left()   = 0;

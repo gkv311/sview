@@ -129,8 +129,12 @@ class StOutInterlace : public StWindow {
 
         private:
 
-    ST_LOCAL static StHandle<StMonitor> getHInterlaceMonitor(const StArrayList<StMonitor>& theMonitors,
-                                                             bool& theIsReversed);
+    /**
+     * Look for interlaced monitors within the given list.
+     */
+    ST_LOCAL static StHandle<StMonitor> getInterlacedMonitor(const StArrayList<StMonitor>& theMonitors,
+                                                             bool& theIsReversed,
+                                                             bool& theIsRowInterlaced);
 
     ST_LOCAL void stglDrawEDCodes();
 

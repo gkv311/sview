@@ -475,6 +475,8 @@ class StAndroidGlue {
 
     StMutex                 myFetchLock;         //!< fetch data lock
     StString                myStAppClass;        //!< application class name (e.g. image, video)
+    StString                myBuildModel;        //!< android.os.Build.MODEL
+    StString                myBuildDevice;       //!< android.os.Build.DEVICE
     StString                myStereoApiId;       //!< stereo API identifier
     bool                    myToEnableStereoHW;  //!< on/off state of stereo API
     StString                myDndPath;           //!< intent data string
