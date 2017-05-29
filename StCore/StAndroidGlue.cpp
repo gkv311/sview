@@ -387,7 +387,9 @@ void StAndroidGlue::updateMonitors() {
     aMon.setId(0);
     if(myStereoApiId == "S3DV") {
         aMon.setPnPId("ST@S3DV");
-    } else if(myBuildDevice == "KING7S" || myBuildModel == "PP6000") {
+    } else if(myBuildDevice == "KING7S" || myBuildModel == "PP6000") { // PPTV King 7S
+        aMon.setPnPId("ST@COL0");
+    } else if(myBuildModel == "Y6 MAX 3D") { // DOOGEE Y6 Max 3D
         aMon.setPnPId("ST@COL0");
     }
     aMon.changeVRect().top()    = 0;
