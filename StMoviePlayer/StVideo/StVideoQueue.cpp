@@ -656,16 +656,16 @@ void StVideoQueue::prepareFrame(const StFormat theSrcFormat) {
                 signals.onError(stCString("FFmpeg: Failed to create SWScaler context"));
                 myToRgbIsBroken = true;
             } else {
-                // assign appropriate parts of RGB buffer to image planes in myFrameRGB
-                const size_t aBufferSize = avpicture_get_size(stAV::PIX_FMT::RGB24, aFrameSizeX, aFrameSizeY);
-                if(aBufferSize == 0
-                || !myDataRGB.initTrash(StImagePlane::ImgRGB, size_t(aFrameSizeX), size_t(aFrameSizeY),
-                                        aBufferSize / size_t(aFrameSizeY))) {
+                if(!myDataRGB.initTrash(StImagePlane::ImgRGB, size_t(aFrameSizeX), size_t(aFrameSizeY))) {
                     signals.onError(stCString("FFmpeg: Failed allocation of RGB frame (out of memory)"));
                     myToRgbIsBroken = true;
                 } else {
-                    avpicture_fill((AVPicture* )myFrameRGB.Frame, myDataRGB.changeData(), stAV::PIX_FMT::RGB24,
-                                   aFrameSizeX, aFrameSizeY);
+                    myFrameRGB.Frame->data[0]     = (uint8_t* )myDataRGB.changeData();
+                    myFrameRGB.Frame->linesize[0] = (int      )myDataRGB.getSizeRowBytes();
+                    for(int aPlaneIter = 1; aPlaneIter < AV_NUM_DATA_POINTERS; ++aPlaneIter) {
+                        myFrameRGB.Frame->data    [aPlaneIter] = NULL;
+                        myFrameRGB.Frame->linesize[aPlaneIter] = 0;
+                    }
                 }
             }
         }

@@ -45,6 +45,10 @@ extern "C" {
     #define ST_AV_NEWCODECPAR
 #endif
 
+#ifndef AV_NUM_DATA_POINTERS
+    #define AV_NUM_DATA_POINTERS 4
+#endif
+
 #ifdef _MSC_VER
     #pragma warning(default : 4244)
 #endif
