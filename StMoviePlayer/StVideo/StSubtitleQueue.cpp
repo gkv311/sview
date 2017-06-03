@@ -177,6 +177,13 @@ void StSubtitleQueue::decodeLoop() {
 
                             StHandle<StSubItem> aNewSubItem = new StSubItem(aPts, aPts + aDuration);
                             aNewSubItem->Image.initTrash(StImagePlane::ImgRGBA, aRect->w, aRect->h);
+                        #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 9, 100))
+                            uint8_t** anImgData = aRect->data;
+                            int* anImgLineSizes = aRect->linesize;
+                        #else
+                            uint8_t** anImgData = aRect->pict.data;
+                            int* anImgLineSizes = aRect->pict.linesize;
+                        #endif
 
                             SwsContext* aCtxToRgb = sws_getContext(aRect->w, aRect->h, stAV::PIX_FMT::PAL8,
                                                                    aRect->w, aRect->h, stAV::PIX_FMT::RGBA32,
@@ -186,20 +193,14 @@ void StSubtitleQueue::decodeLoop() {
                             }
 
                             uint8_t* aDstData[4] = {
-                                (uint8_t* )aNewSubItem->Image.getData(),
-                                NULL,
-                                NULL,
-                                NULL
+                                (uint8_t* )aNewSubItem->Image.getData(), NULL, NULL, NULL
                             };
                             /*const*/ int aDstLinesize[4] = {
-                                (int )aNewSubItem->Image.getSizeRowBytes(),
-                                0,
-                                0,
-                                0
+                                (int )aNewSubItem->Image.getSizeRowBytes(), 0, 0, 0
                             };
 
                             sws_scale(aCtxToRgb,
-                                      aRect->pict.data, aRect->pict.linesize,
+                                      anImgData, anImgLineSizes,
                                       0, aRect->h,
                                       aDstData, aDstLinesize);
                             sws_freeContext(aCtxToRgb);
