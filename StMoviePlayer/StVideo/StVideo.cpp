@@ -57,8 +57,9 @@ namespace {
      * Format stream info.
      */
     static StString formatStreamInfo(const AVStream* theStream) {
+        AVCodecContext* aCodecCtx = stAV::getCodecCtx(theStream);
         char aFrmtBuff[4096] = {};
-        avcodec_string(aFrmtBuff, sizeof(aFrmtBuff), theStream->codec, 0);
+        avcodec_string(aFrmtBuff, sizeof(aFrmtBuff), aCodecCtx, 0);
         StString aStreamInfo(aFrmtBuff);
 
     #ifdef ST_AV_NEWCODECPAR
@@ -83,8 +84,8 @@ namespace {
             if(theStream->time_base.den != 0 && theStream->time_base.num != 0) {
                 aStreamInfo += StString(", ") + formatFps(1 / av_q2d(theStream->time_base)) + " tbn";
             }
-            if(theStream->codec->time_base.den != 0 && theStream->codec->time_base.num != 0) {
-                aStreamInfo += StString(", ") + formatFps(1 / av_q2d(theStream->codec->time_base)) + " tbc";
+            if(aCodecCtx->time_base.den != 0 && aCodecCtx->time_base.num != 0) {
+                aStreamInfo += StString(", ") + formatFps(1 / av_q2d(aCodecCtx->time_base)) + " tbc";
             }
         }
     #endif
@@ -459,13 +460,13 @@ bool StVideo::addFile(const StString& theFileToLoad,
             }
         } else if(aCodecType == AVMEDIA_TYPE_AUDIO) {
             // audio track
-            AVCodecContext* aCodecCtx = aStream->codec;
             StString aCodecName;
             AVCodec* aCodec = avcodec_find_decoder(stAV::getCodecId(aStream));
             if(aCodec != NULL) {
                 aCodecName = aCodec->name;
             }
 
+            AVCodecContext* aCodecCtx = stAV::getCodecCtx (aStream);
             StString aSampleFormat  = stAV::audio::getSampleFormatString (aCodecCtx);
             StString aSampleRate    = stAV::audio::getSampleRateString   (aCodecCtx);
             StString aChannelLayout = stAV::audio::getChannelLayoutString(aCodecCtx);
@@ -497,7 +498,6 @@ bool StVideo::addFile(const StString& theFileToLoad,
             }
         } else if(aCodecType == AVMEDIA_TYPE_SUBTITLE) {
             // subtitles track
-            AVCodecContext* aCodecCtx = aStream->codec;
             StString aCodecName("PLAIN");
             AVCodec* aCodec = avcodec_find_decoder(stAV::getCodecId(aStream));
             if(aCodec != NULL) {
@@ -1340,12 +1340,12 @@ void StVideo::mainLoop() {
 
         if(myVideoMaster->isInContext(myCtxList[0])) {
             myVideoTimer = new StVideoTimer(myVideoMaster, myAudio,
-                1000.0 * av_q2d(myCtxList[0]->streams[myVideoMaster->getId()]->codec->time_base));
+                1000.0 * av_q2d(stAV::getCodecCtx(myCtxList[0]->streams[myVideoMaster->getId()])->time_base));
             myVideoTimer->setAudioDelay(myAudioDelayMSec);
             myVideoTimer->setBenchmark(myIsBenchmark);
         } else if(myCtxList.size() > 1 && myVideoMaster->isInContext(myCtxList[1])) {
             myVideoTimer = new StVideoTimer(myVideoMaster, myAudio,
-                1000.0 * av_q2d(myCtxList[1]->streams[myVideoMaster->getId()]->codec->time_base));
+                1000.0 * av_q2d(stAV::getCodecCtx(myCtxList[1]->streams[myVideoMaster->getId()])->time_base));
             myVideoTimer->setAudioDelay(myAudioDelayMSec);
             myVideoTimer->setBenchmark(myIsBenchmark);
         } else {

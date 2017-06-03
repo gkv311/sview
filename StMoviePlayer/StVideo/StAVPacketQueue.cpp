@@ -103,7 +103,7 @@ bool StAVPacketQueue::init(AVFormatContext*   theFormatCtx,
     myFormatCtx      = theFormatCtx;
     myStream         = myFormatCtx->streams[theStreamId];
     myStreamId       = theStreamId;
-    myCodecCtx       = myStream->codec;
+    myCodecCtx       = stAV::getCodecCtx(myStream);
     myPtsStartBase   = detectPtsStartBase(theFormatCtx);
     myPtsStartStream = unitsToSeconds(myStream->start_time);
     myGetFrmtInit    = myCodecCtx->get_format;

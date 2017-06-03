@@ -289,7 +289,7 @@ bool StAVImage::loadExtra(const StString& theFilePath,
         }
 
         // find the decoder for the video stream
-        myCodecCtx = myFormatCtx->streams[0]->codec;
+        myCodecCtx = stAV::getCodecCtx(myFormatCtx->streams[0]);
         if(theImageType == ST_TYPE_NONE) {
             myCodec = avcodec_find_decoder(myCodecCtx->codec_id);
         }

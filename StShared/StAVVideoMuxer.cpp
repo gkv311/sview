@@ -194,16 +194,18 @@ const char* formatToMetadata(const StFormat theFormat) {
 
 bool StAVVideoMuxer::addStream(AVFormatContext* theContext,
                                AVStream*        theStream) {
+    AVCodecContext* aCodecCtxSrc = stAV::getCodecCtx(theStream);
 #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(57, 0, 0))
-    AVStream* aStreamOut = avformat_new_stream(theContext, theStream->codec->codec);
+    AVStream* aStreamOut = avformat_new_stream(theContext, aCodecCtxSrc->codec);
 #else
-    AVStream* aStreamOut = avformat_new_stream(theContext, (AVCodec* )theStream->codec->codec);
+    AVStream* aStreamOut = avformat_new_stream(theContext, (AVCodec* )aCodecCtxSrc->codec);
 #endif
     if(aStreamOut == NULL) {
         signals.onError(StString("Failed allocating output stream."));
         return false;
     }
-    if(avcodec_copy_context(aStreamOut->codec, theStream->codec) < 0) {
+    AVCodecContext* aCodecCtxNew = stAV::getCodecCtx(aStreamOut);
+    if(avcodec_copy_context(aCodecCtxNew, aCodecCtxSrc) < 0) {
         signals.onError(StString("Failed to copy context from input to output stream codec context."));
         return false;
     }
@@ -211,13 +213,13 @@ bool StAVVideoMuxer::addStream(AVFormatContext* theContext,
 //#if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(54, 2, 100))
 //    myIsAttachedPic = (theStream->disposition & AV_DISPOSITION_ATTACHED_PIC) != 0;
 //#endif
-    if(theStream->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
-        aStreamOut->sample_aspect_ratio        = theStream->sample_aspect_ratio;
-        aStreamOut->codec->sample_aspect_ratio = aStreamOut->sample_aspect_ratio;
+    if(aCodecCtxSrc->codec_type == AVMEDIA_TYPE_VIDEO) {
+        aStreamOut->sample_aspect_ratio   = theStream->sample_aspect_ratio;
+        aCodecCtxNew->sample_aspect_ratio = aStreamOut->sample_aspect_ratio;
     }
 
     if(theContext->oformat->flags & AVFMT_GLOBALHEADER) {
-        aStreamOut->codec->flags |= CODEC_FLAG_GLOBAL_HEADER;
+        aCodecCtxNew->flags |= CODEC_FLAG_GLOBAL_HEADER;
     }
     return true;
 }
