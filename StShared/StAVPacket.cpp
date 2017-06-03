@@ -75,17 +75,21 @@ StAVPacket::~StAVPacket() {
 void StAVPacket::free() {
     if(myIsOwn) {
         avDestructPacket(&myPacket);
+        avInitPacket();
     } else {
-    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
+    #if(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 12, 100))
+        av_packet_unref(&myPacket);
+    #elif(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 0, 0))
         av_free_packet(&myPacket);
+        avInitPacket();
     #else
         if(myPacket.destruct != NULL) {
             myPacket.destruct(&myPacket);
             myPacket.destruct = NULL;
         }
+        avInitPacket();
     #endif
     }
-    avInitPacket();
     myIsOwn = false;
 }
 

@@ -305,7 +305,7 @@ bool StAVVideoMuxer::save(const StString& theFile) {
         return false;
     }
 
-    AVPacket aPacket;
+    StAVPacket aPacket;
     for(;;) {
         size_t aNbEmpty = 0;
         for(size_t aCtxId = 0; aCtxId < aSrcCtxList.size(); ++aCtxId) {
@@ -315,18 +315,18 @@ bool StAVVideoMuxer::save(const StString& theFile) {
                 continue;
             }
 
-            if(av_read_frame(aCtxSrc.Context, &aPacket) < 0) {
+            if(av_read_frame(aCtxSrc.Context, aPacket.getAVpkt()) < 0) {
                 aCtxSrc.State = false;
                 ++aNbEmpty;
                 continue;
             }
 
-            unsigned int aStreamOutIndex = aCtxSrc.Streams[aPacket.stream_index];
+            unsigned int aStreamOutIndex = aCtxSrc.Streams[aPacket.getStreamId()];
             if(aStreamOutIndex == (unsigned int )-1) {
                 continue;
             }
 
-            AVStream* aStreamIn  = aCtxSrc.Context->streams[aPacket.stream_index];
+            AVStream* aStreamIn  = aCtxSrc.Context->streams[aPacket.getStreamId()];
             AVStream* aStreamOut = aCtxOut.Context->streams[aStreamOutIndex];
 
         #ifdef ST_LIBAV_FORK
@@ -334,17 +334,17 @@ bool StAVVideoMuxer::save(const StString& theFile) {
         #else
             const AVRounding aRoundParams = AVRounding(AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX);
         #endif
-            aPacket.pts      = av_rescale_q_rnd(aPacket.pts, aStreamIn->time_base, aStreamOut->time_base, aRoundParams);
-            aPacket.dts      = av_rescale_q_rnd(aPacket.dts, aStreamIn->time_base, aStreamOut->time_base, aRoundParams);
-            aPacket.duration = static_cast<int >(av_rescale_q(aPacket.duration, aStreamIn->time_base, aStreamOut->time_base));
-            aPacket.pos      = -1;
+            aPacket.getAVpkt()->pts      = av_rescale_q_rnd(aPacket.getPts(), aStreamIn->time_base, aStreamOut->time_base, aRoundParams);
+            aPacket.getAVpkt()->dts      = av_rescale_q_rnd(aPacket.getDts(), aStreamIn->time_base, aStreamOut->time_base, aRoundParams);
+            aPacket.getAVpkt()->duration = static_cast<int >(av_rescale_q(aPacket.getDuration(), aStreamIn->time_base, aStreamOut->time_base));
+            aPacket.getAVpkt()->pos      = -1;
 
-            aState = av_interleaved_write_frame(aCtxOut.Context, &aPacket);
+            aState = av_interleaved_write_frame(aCtxOut.Context, aPacket.getAVpkt());
             if(aState < 0) {
                 signals.onError(StString("Error muxing packet (") + stAV::getAVErrorDescription(aState) + ").");
                 return false;
             }
-            av_free_packet(&aPacket);
+            aPacket.free();
         }
         if(aNbEmpty == aSrcCtxList.size()) {
             break;
