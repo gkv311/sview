@@ -23,6 +23,10 @@
   #ifndef _CRT_SECURE_NO_WARNINGS
     #define _CRT_SECURE_NO_WARNINGS
   #endif
+  #ifndef _WINSOCK_DEPRECATED_NO_WARNINGS
+    // Warning C4996 'inet_ntoa': Use inet_ntop() or InetNtop() instead
+    #define _WINSOCK_DEPRECATED_NO_WARNINGS
+  #endif
 #else
 #ifdef __linux__
 #define _XOPEN_SOURCE 600     // For flockfile() on Linux
