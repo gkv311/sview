@@ -61,7 +61,7 @@ namespace {
         avcodec_string(aFrmtBuff, sizeof(aFrmtBuff), theStream->codec, 0);
         StString aStreamInfo(aFrmtBuff);
 
-    #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(57, 33, 100))
+    #ifdef ST_AV_NEWCODECPAR
         //aStreamInfo = aStreamInfo + ", " + theStream->codec_info_nb_frames + ", " + theStream->time_base.num + "/" + theStream->time_base.den;
         if(theStream->sample_aspect_ratio.num && av_cmp_q(theStream->sample_aspect_ratio, theStream->codecpar->sample_aspect_ratio)) {
             AVRational aDispAspectRatio;
@@ -390,7 +390,8 @@ bool StVideo::addFile(const StString& theFileToLoad,
 
     theInfo.Duration = stMax(theInfo.Duration, stAV::unitsToSeconds(aFormatCtx->duration));
     for(unsigned int aStreamId = 0; aStreamId < aFormatCtx->nb_streams; ++aStreamId) {
-        AVStream* aStream = aFormatCtx->streams[aStreamId];
+        AVStream*         aStream    = aFormatCtx->streams[aStreamId];
+        const AVMediaType aCodecType = stAV::getCodecType(aStream);
         theInfo.Duration = stMax(theInfo.Duration, stAV::unitsToSeconds(aStream, aStream->duration));
 
         StString aLang = stAV::meta::readLang(aStream);
@@ -398,7 +399,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
             aLang.clear();
         }
 
-        if(aStream->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
+        if(aCodecType == AVMEDIA_TYPE_VIDEO) {
             // video track
             if(!myVideoMaster->isInitialized()) {
                 myVideoMaster->init(aFormatCtx, aStreamId, aTitleString, theNewParams);
@@ -456,11 +457,11 @@ bool StVideo::addFile(const StString& theFileToLoad,
                     }
                 }
             }
-        } else if(aStream->codec->codec_type == AVMEDIA_TYPE_AUDIO) {
+        } else if(aCodecType == AVMEDIA_TYPE_AUDIO) {
             // audio track
             AVCodecContext* aCodecCtx = aStream->codec;
             StString aCodecName;
-            AVCodec* aCodec = avcodec_find_decoder(aCodecCtx->codec_id);
+            AVCodec* aCodec = avcodec_find_decoder(stAV::getCodecId(aStream));
             if(aCodec != NULL) {
                 aCodecName = aCodec->name;
             }
@@ -494,11 +495,11 @@ bool StVideo::addFile(const StString& theFileToLoad,
             &&  myAudio->init(aFormatCtx, aStreamId, "")) {
                 theInfo.LoadedAudio = (int32_t )(theInfo.AudioList->size() - 1);
             }
-        } else if(aStream->codec->codec_type == AVMEDIA_TYPE_SUBTITLE) {
+        } else if(aCodecType == AVMEDIA_TYPE_SUBTITLE) {
             // subtitles track
             AVCodecContext* aCodecCtx = aStream->codec;
             StString aCodecName("PLAIN");
-            AVCodec* aCodec = avcodec_find_decoder(aCodecCtx->codec_id);
+            AVCodec* aCodec = avcodec_find_decoder(stAV::getCodecId(aStream));
             if(aCodec != NULL) {
                 aCodecName = aCodec->name;
             }
@@ -520,7 +521,7 @@ bool StVideo::addFile(const StString& theFileToLoad,
     && !theInfo.AudioList->isEmpty()) {
         for(unsigned int aStreamId = 0; aStreamId < aFormatCtx->nb_streams; ++aStreamId) {
             AVStream* aStream = aFormatCtx->streams[aStreamId];
-            if(aStream->codec->codec_type != AVMEDIA_TYPE_AUDIO) {
+            if(stAV::getCodecType(aStream) != AVMEDIA_TYPE_AUDIO) {
                 continue;
             }
 
@@ -787,8 +788,8 @@ bool StVideo::doSeekStream(AVFormatContext* theFormatCtx,
 
     if(!isSeekDone) {
         ST_DEBUG_LOG("Error while seeking"
-                   + (aStream->codec->codec_type == AVMEDIA_TYPE_VIDEO ? " Video"
-                   : (aStream->codec->codec_type == AVMEDIA_TYPE_AUDIO ? " Audio" : " "))
+                   + (stAV::getCodecType(aStream) == AVMEDIA_TYPE_VIDEO ? " Video"
+                   : (stAV::getCodecType(aStream) == AVMEDIA_TYPE_AUDIO ? " Audio" : " "))
                    +  "stream to " + theSeekPts + "sec(" + (theSeekPts + stAV::unitsToSeconds(aStream, aStream->start_time)) + "sec)");
     }
     return isSeekDone;
@@ -1018,7 +1019,7 @@ void StVideo::packetsLoop() {
                 for(aCtxId = 0; aCtxId < myCtxList.size() && !myAudio->isInitialized(); ++aCtxId) {
                     aFormatCtx = myCtxList[aCtxId];
                     for(unsigned int aStreamId = 0; aStreamId < aFormatCtx->nb_streams; ++aStreamId) {
-                        if(aFormatCtx->streams[aStreamId]->codec->codec_type == AVMEDIA_TYPE_AUDIO) {
+                        if(stAV::getCodecType(aFormatCtx->streams[aStreamId]) == AVMEDIA_TYPE_AUDIO) {
                             if(aCounter == anActiveStreamId) {
                                 myAudio->init(aFormatCtx, aStreamId, "");
                                 myAudio->pushStart();
@@ -1072,7 +1073,7 @@ void StVideo::packetsLoop() {
                 for(aCtxId = 0; aCtxId < myCtxList.size() && !mySubtitles->isInitialized(); ++aCtxId) {
                     aFormatCtx = myCtxList[aCtxId];
                     for(unsigned int aStreamId = 0; aStreamId < aFormatCtx->nb_streams; ++aStreamId) {
-                        if(aFormatCtx->streams[aStreamId]->codec->codec_type == AVMEDIA_TYPE_SUBTITLE) {
+                        if(stAV::getCodecType(aFormatCtx->streams[aStreamId]) == AVMEDIA_TYPE_SUBTITLE) {
                             if(aCounter == anActiveStreamId) {
                                 mySubtitles->init(aFormatCtx, aStreamId, "");
                                 mySubtitles->pushStart();

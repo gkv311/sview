@@ -258,7 +258,7 @@ bool StAVImage::loadExtra(const StString& theFilePath,
     #endif
         if(avErrCode != 0
         || myFormatCtx->nb_streams < 1
-        || myFormatCtx->streams[0]->codec->codec_id == 0) {
+        || stAV::getCodecId(myFormatCtx->streams[0]) == AV_CODEC_ID_NONE) {
             if(myFormatCtx != NULL) {
             #if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(53, 17, 0))
                 avformat_close_input(&myFormatCtx);

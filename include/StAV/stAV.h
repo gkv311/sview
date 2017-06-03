@@ -41,6 +41,10 @@ extern "C" {
     #include <libavutil/spherical.h>
 #endif
 
+#if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(57, 33, 100))
+    #define ST_AV_NEWCODECPAR
+#endif
+
 #ifdef _MSC_VER
     #pragma warning(default : 4244)
 #endif
@@ -311,6 +315,39 @@ namespace stAV {
         return (theStream->disposition & AV_DISPOSITION_ATTACHED_PIC) != 0;
     #else
         return false;
+    #endif
+    }
+
+    /**
+     * Return codec context from the stream using deprecated API.
+     * The new API suggests using AVStream::codecpar, but this is confusing.
+     * So we would better waiting until old API is completely removed.
+     */
+    inline AVCodecContext* getCodecCtx(const AVStream* theStream) {
+    ST_DISABLE_DEPRECATION_WARNINGS
+        return theStream->codec;
+    ST_ENABLE_DEPRECATION_WARNINGS
+    }
+
+    /**
+     * Get codec type from the stream.
+     */
+    inline AVMediaType getCodecType(const AVStream* theStream) {
+    #ifdef ST_AV_NEWCODECPAR
+        return theStream->codecpar->codec_type;
+    #else
+        return theStream->codec->codec_type;
+    #endif
+    }
+
+    /**
+     * Get codec id from the stream.
+     */
+    inline AVCodecID getCodecId(const AVStream* theStream) {
+    #ifdef ST_AV_NEWCODECPAR
+        return theStream->codecpar->codec_id;
+    #else
+        return theStream->codec->codec_id;
     #endif
     }
 

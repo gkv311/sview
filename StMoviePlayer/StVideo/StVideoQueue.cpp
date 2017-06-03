@@ -383,7 +383,7 @@ bool StVideoQueue::init(AVFormatContext*   theFormatCtx,
     myFrame.reset();
 
     // compute PAR
-    if(myStream->sample_aspect_ratio.num && av_cmp_q(myStream->sample_aspect_ratio, myStream->codec->sample_aspect_ratio)) {
+    if(myStream->sample_aspect_ratio.num && av_cmp_q(myStream->sample_aspect_ratio, myCodecCtx->sample_aspect_ratio)) {
         myPixelRatio = GLfloat(myStream->sample_aspect_ratio.num) / GLfloat(myStream->sample_aspect_ratio.den);
     } else {
         if(myCodecCtx->sample_aspect_ratio.num == 0 ||

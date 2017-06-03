@@ -47,6 +47,23 @@
     #define ST_ATTR_DEPRECATED
 #endif
 
+// Disable deprecation warnings.
+#if defined(__ICL) || defined (__INTEL_COMPILER)
+    #define ST_DISABLE_DEPRECATION_WARNINGS __pragma(warning(push)) __pragma(warning(disable:1478))
+    #define ST_ENABLE_DEPRECATION_WARNINGS  __pragma(warning(pop))
+#elif defined(_MSC_VER)
+    #define ST_DISABLE_DEPRECATION_WARNINGS __pragma(warning(push)) __pragma(warning(disable:4996))
+    #define ST_ENABLE_DEPRECATION_WARNINGS  __pragma(warning(pop))
+#elif (defined(__GNUC__) && __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)) || defined(__clang__)
+    // available since at least gcc 4.2 (maybe earlier), however only gcc 4.6+ supports this pragma inside the function body
+    // CLang also supports this gcc syntax (in addition to "clang diagnostic ignored")
+    #define ST_DISABLE_DEPRECATION_WARNINGS _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
+    #define ST_ENABLE_DEPRECATION_WARNINGS  _Pragma("GCC diagnostic warning \"-Wdeprecated-declarations\"")
+#else
+    #define ST_DISABLE_DEPRECATION_WARNINGS
+    #define ST_ENABLE_DEPRECATION_WARNINGS
+#endif
+
 #if defined(__cplusplus) && (__cplusplus >= 201100L)
   // part of C++11 standard
   #define ST_ATTR_OVERRIDE override

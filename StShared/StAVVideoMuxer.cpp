@@ -254,7 +254,7 @@ bool StAVVideoMuxer::save(const StString& theFile) {
         for(unsigned int aStreamId = 0; aStreamId < aCtxSrc.Context->nb_streams; ++aStreamId) {
             aCtxSrc.Streams.add((unsigned int )-1);
             AVStream* aStreamSrc = aCtxSrc.Context->streams[aStreamId];
-            if(aStreamSrc->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
+            if(stAV::getCodecType(aStreamSrc) == AVMEDIA_TYPE_VIDEO) {
                 if(addStream(aCtxOut.Context, aStreamSrc)) {
                     aCtxSrc.Streams[aStreamId] = aStreamCount++;
                 }
@@ -268,7 +268,7 @@ bool StAVVideoMuxer::save(const StString& theFile) {
         StRemuxContext& aCtxSrc = aSrcCtxList[aCtxId];
         for(unsigned int aStreamId = 0; aStreamId < aCtxSrc.Context->nb_streams; ++aStreamId) {
             AVStream* aStreamSrc = aCtxSrc.Context->streams[aStreamId];
-            if(aStreamSrc->codec->codec_type == AVMEDIA_TYPE_AUDIO
+            if(stAV::getCodecType(aStreamSrc) == AVMEDIA_TYPE_AUDIO
             && addStream(aCtxOut.Context, aStreamSrc)) {
                 aCtxSrc.Streams[aStreamId] = aStreamCount++;
             }
@@ -280,8 +280,8 @@ bool StAVVideoMuxer::save(const StString& theFile) {
         StRemuxContext& aCtxSrc = aSrcCtxList[aCtxId];
         for(unsigned int aStreamId = 0; aStreamId < aCtxSrc.Context->nb_streams; ++aStreamId) {
             AVStream* aStreamSrc = aCtxSrc.Context->streams[aStreamId];
-            if(aStreamSrc->codec->codec_type != AVMEDIA_TYPE_VIDEO
-            && aStreamSrc->codec->codec_type != AVMEDIA_TYPE_AUDIO
+            if(stAV::getCodecType(aStreamSrc) != AVMEDIA_TYPE_VIDEO
+            && stAV::getCodecType(aStreamSrc) != AVMEDIA_TYPE_AUDIO
             && addStream(aCtxOut.Context, aStreamSrc)) {
                 aCtxSrc.Streams[aStreamId] = aStreamCount++;
             }
