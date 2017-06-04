@@ -233,13 +233,29 @@ void StGLSeekBar::stglUpdate(const StPointD_t& theCursor,
         return;
     }
 
-    const double aPos   = stMin(stMax(getPointInEx(theCursor), 0.0), 1.0);
-    const int    aPosPx = int(aPos * double(getRectPx().width()));
-
+    const int aRoundTol = myRoot->scale(1);
+    const int aMaxPosPx = getRectPx().width();
+    double aPos   = stMin(stMax(getPointInEx(theCursor), 0.0), 1.0);
+    int    aPosPx = int(aPos * double(aMaxPosPx));
     const int aMoveTolerPx = myMoveTolerPx > 0 ? myMoveTolerPx : myRoot->scale(theIsPreciseInput ? 1 : 2);
-    if(myClickPos >= 0
-    && std::abs(aPosPx - myClickPos) < aMoveTolerPx) {
-        return;
+    if(std::abs(aPosPx - 0) <= aRoundTol) {
+        aPos   = 0.0;
+        aPosPx = 0;
+    } else if(std::abs(aPosPx - aMaxPosPx) <= aRoundTol) {
+        aPos   = 1.0;
+        aPosPx = aMaxPosPx;
+    }
+
+    if(myClickPos >= 0) {
+        if(myClickPos == aPosPx) {
+            return;
+        }
+
+        if(aPosPx != 0
+        && aPosPx != aMaxPosPx
+        && std::abs(aPosPx - myClickPos) < aMoveTolerPx) {
+            return;
+        }
     }
 
     myClickPos = aPosPx;
@@ -260,9 +276,18 @@ void StGLSeekBar::doMouseClick(const int ) {
 }
 
 void StGLSeekBar::doMouseUnclick(const int mouseBtn) {
-    const double aPos       = stMin(stMax(getPointInEx(myRoot->getCursorZo()), 0.0), 1.0);
-    const int    aTolerance = myRoot->scale(1);
-    const int    aPosPx     = int(aPos * double(getRectPx().width()));
+    const int aTolerance = myRoot->scale(1);
+    const int aMaxPosPx  = getRectPx().width();
+    double aPos   = stMin(stMax(getPointInEx(myRoot->getCursorZo()), 0.0), 1.0);
+    int    aPosPx = int(aPos * double(aMaxPosPx));
+    if(std::abs(aPosPx - 0) <= aTolerance) {
+        aPos   = 0.0;
+        aPosPx = 0;
+    } else if(std::abs(aPosPx - aMaxPosPx) <= aTolerance) {
+        aPos   = 1.0;
+        aPosPx = aMaxPosPx;
+    }
+
     if(myClickPos >= 0
     && std::abs(aPosPx - myClickPos) < aTolerance) {
         myClickPos = -1;
