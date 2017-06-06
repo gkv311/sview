@@ -22,7 +22,9 @@ void StMessageBox::Info(const StString& theMessage) {
     StLogger::GetDefault().write(theMessage, StLogger::ST_INFO);
     StCocoaLocalPool aLocalPool;
     NSString* aMessage = [NSString stringWithUTF8String: theMessage.toCString()];
+ST_DISABLE_DEPRECATION_WARNINGS
     NSRunAlertPanel(@"Info", @"%@", @"OK", nil, nil, aMessage);
+ST_ENABLE_DEPRECATION_WARNINGS
 }
 
 void StMessageBox::Warn(const StString& theMessage) {
@@ -32,7 +34,9 @@ void StMessageBox::Warn(const StString& theMessage) {
     StLogger::GetDefault().write(theMessage, StLogger::ST_WARNING);
     StCocoaLocalPool aLocalPool;
     NSString* aMessage = [NSString stringWithUTF8String: theMessage.toCString()];
+ST_DISABLE_DEPRECATION_WARNINGS
     NSRunAlertPanel(@"Warning", @"%@", @"OK", nil, nil, aMessage);
+ST_ENABLE_DEPRECATION_WARNINGS
 }
 
 void StMessageBox::Error(const StString& theMessage) {
@@ -42,7 +46,9 @@ void StMessageBox::Error(const StString& theMessage) {
     StLogger::GetDefault().write(theMessage, StLogger::ST_ERROR);
     StCocoaLocalPool aLocalPool;
     NSString* aMessage = [NSString stringWithUTF8String: theMessage.toCString()];
+ST_DISABLE_DEPRECATION_WARNINGS
     NSRunAlertPanel(@"Error", @"%@", @"OK", nil, nil, aMessage);
+ST_ENABLE_DEPRECATION_WARNINGS
 }
 
 bool StMessageBox::Question(const StString& theMessage) {
@@ -51,8 +57,10 @@ bool StMessageBox::Question(const StString& theMessage) {
     }
     StCocoaLocalPool aLocalPool;
     NSString* aMessage = [NSString stringWithUTF8String: theMessage.toCString()];
+ST_DISABLE_DEPRECATION_WARNINGS
     int aResult = NSRunAlertPanel(@"Question", @"%@", @"Yes", @"No", nil, aMessage);
     return aResult == NSAlertDefaultReturn;
+ST_ENABLE_DEPRECATION_WARNINGS
 }
 
 #endif // __APPLE__

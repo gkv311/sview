@@ -274,7 +274,9 @@ bool StWindowImpl::create() {
     StCocoaLocalPool aLocalPool;
 
     const bool isNoAccel = false;
+ST_DISABLE_DEPRECATION_WARNINGS
     const NSOpenGLPixelFormatAttribute aDummyAttrib = NSOpenGLPFACompliant;
+ST_ENABLE_DEPRECATION_WARNINGS
     NSOpenGLPixelFormatAttribute anAttribs[] = {
         attribs.IsGlStereo ? NSOpenGLPFAStereo : aDummyAttrib,
         //NSOpenGLPFAColorSize,   32,

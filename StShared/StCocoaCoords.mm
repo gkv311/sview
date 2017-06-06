@@ -42,7 +42,9 @@ bool StCocoaCoords::init() {
     CGDirectDisplayID aDispId = [aNumber unsignedIntValue];
     CGRect aRect = CGDisplayBounds(aDispId);
     myScreenBottom = aRect.origin.y + aRect.size.height;
+ST_DISABLE_DEPRECATION_WARNINGS
     myScale        = [aScreen userSpaceScaleFactor];
+ST_ENABLE_DEPRECATION_WARNINGS
     myUnScale      = 1.0 / myScale;
     return true;
 }

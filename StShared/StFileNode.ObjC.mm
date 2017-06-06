@@ -68,12 +68,14 @@
             [aFilePanel setAllowedFileTypes: myFilter];
         }
 
+    ST_DISABLE_DEPRECATION_WARNINGS
         if([aFilePanel runModal] == NSOKButton) {
             myIsFileSelected = true;
             // automatically convert filenames from decomposed form used by Mac OS X file systems
             NSString* aFileName = [[aFilePanel filename] precomposedStringWithCanonicalMapping];
             myResult = [aFileName UTF8String];
         }
+    ST_ENABLE_DEPRECATION_WARNINGS
     }
 
 @end
