@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -65,13 +65,13 @@
 #endif
 
 #if defined(__cplusplus) && (__cplusplus >= 201100L)
-  // part of C++11 standard
-  #define ST_ATTR_OVERRIDE override
+    // part of C++11 standard
+    #define ST_ATTR_OVERRIDE override
 #elif defined(_MSC_VER) && (_MSC_VER >= 1700)
-  // versions before VS2012 emits warning as MSVC-specific extension
-  #define ST_ATTR_OVERRIDE override
+    // versions before VS2012 emits warning as MSVC-specific extension
+    #define ST_ATTR_OVERRIDE override
 #else
-  #define ST_ATTR_OVERRIDE
+    #define ST_ATTR_OVERRIDE
 #endif
 
 #if defined(_MSC_VER)
@@ -84,6 +84,32 @@
 #include <cstddef>     // size_t, NULL
 #include <cstdlib>
 #include <cstring>     // for memcpy
+
+#if(defined(_MSC_VER) && (_MSC_VER < 1800))
+    // only Visual Studio 2013+ (vc12) provides <cinttypes> header
+    #define PRId64 "I64d"
+    #define PRIu64 "I64u"
+    #define SCNd64 "I64d"
+    #define SCNu64 "I64u"
+    #ifdef _WIN64
+        #define PRIdPTR "I64d"
+        #define PRIuPTR "I64u"
+        #define SCNdPTR "I64d"
+        #define SCNuPTR "I64u"
+    #else
+        #define PRIdPTR "d"
+        #define PRIuPTR "u"
+        #define SCNdPTR "d"
+        #define SCNuPTR "u"
+    #endif
+#else
+    // use <inttypes.h< (C99) instead of <cinttypes> (C++11) for compatibility
+    #ifndef __STDC_FORMAT_MACROS
+        #define __STDC_FORMAT_MACROS
+    #endif
+    #include <inttypes.h>
+#endif
+
 #if defined(__i386) || defined(__x86_64) || defined(_M_IX86) || defined(_M_X64) || defined(_M_AMD64)
     #include <xmmintrin.h> // for memory alignment
 #endif

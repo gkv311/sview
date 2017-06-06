@@ -229,9 +229,9 @@ class StAVPacketQueue {
     /**
      * Open stream.
      */
-    ST_LOCAL virtual bool init(AVFormatContext*   theFormatCtx,
-                               const unsigned int theStreamId,
-                               const StString&    theFileName);
+    ST_LOCAL bool init(AVFormatContext*   theFormatCtx,
+                       const unsigned int theStreamId,
+                       const StString&    theFileName);
 
         protected: //! @name Fields should be full-controlled by heirs
 

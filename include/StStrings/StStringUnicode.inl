@@ -181,14 +181,7 @@ StStringUnicode<Type>::StStringUnicode(const int64_t theInt64) {
     this->Size   = 0;
     this->Length = 0;
     char aBuff[32];
-#if defined(_MSC_VER)
-    stsprintf(aBuff, 32, "%I64i", theInt64);
-#elif (defined(_WIN64) || defined(__WIN64__)\
-   ||  defined(_LP64)  || defined(__LP64__))
-    stsprintf(aBuff, 32, "%li",   theInt64);
-#else
-    stsprintf(aBuff, 32, "%lli",  theInt64);
-#endif
+    stsprintf(aBuff, 32, "%" PRId64, theInt64);
     fromUnicode(aBuff);
 }
 
@@ -198,14 +191,7 @@ StStringUnicode<Type>::StStringUnicode(const uint64_t theUInt64) {
     this->Size   = 0;
     this->Length = 0;
     char aBuff[32];
-#if defined(_MSC_VER)
-    stsprintf(aBuff, 32, "%I64u", theUInt64);
-#elif (defined(_WIN64) || defined(__WIN64__)\
-   ||  defined(_LP64)  || defined(__LP64__))
-    stsprintf(aBuff, 32, "%lu",   theUInt64);
-#else
-    stsprintf(aBuff, 32, "%llu",  theUInt64);
-#endif
+    stsprintf(aBuff, 32, "%" PRIu64, theUInt64);
     fromUnicode(aBuff);
 }
 
@@ -216,14 +202,7 @@ StStringUnicode<Type>::StStringUnicode(const stInt64ext_t theInt64) {
     this->Size   = 0;
     this->Length = 0;
     char aBuff[32];
-#if defined(_MSC_VER)
-    stsprintf(aBuff, 32, "%I64i", theInt64);
-#elif (defined(_WIN64) || defined(__WIN64__)\
-   ||  defined(_LP64)  || defined(__LP64__))
-    stsprintf(aBuff, 32, "%li",   theInt64);
-#else
-    stsprintf(aBuff, 32, "%lli",  theInt64);
-#endif
+    stsprintf(aBuff, 32, "%" PRId64,  (int64_t )theInt64);
     fromUnicode(aBuff);
 }
 
@@ -233,14 +212,7 @@ StStringUnicode<Type>::StStringUnicode(const stUInt64ext_t theUInt64) {
     this->Size   = 0;
     this->Length = 0;
     char aBuff[32];
-#if defined(_MSC_VER)
-    stsprintf(aBuff, 32, "%I64u", theUInt64);
-#elif (defined(_WIN64) || defined(__WIN64__)\
-   ||  defined(_LP64)  || defined(__LP64__))
-    stsprintf(aBuff, 32, "%lu",   theUInt64);
-#else
-    stsprintf(aBuff, 32, "%llu",  theUInt64);
-#endif
+    stsprintf(aBuff, 32, "%" PRIu64, (uint64_t )theUInt64);
     fromUnicode(aBuff);
 }
 #endif

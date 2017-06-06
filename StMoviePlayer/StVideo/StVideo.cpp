@@ -34,6 +34,7 @@ namespace {
         return SV_THREAD_RETURN 0;
     }
 
+#ifdef ST_AV_NEWCODECPAR
     /**
      * Format framerate value.
      */
@@ -52,6 +53,7 @@ namespace {
         }
         return aBuff;
     }
+#endif
 
     /**
      * Format stream info.
