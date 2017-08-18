@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2011-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -20,7 +20,7 @@
     #if defined(_WIN32)
         #define ST_NO_XLOCALE
         #warning xlocale is not supported by compiler!
-    #else
+    #elif !defined(__GLIBC__)
         #include <xlocale.h>
     #endif
 #endif
