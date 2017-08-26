@@ -145,6 +145,10 @@ StHandle<StApplication> StMultiApp::getInstance(const StHandle<StResourceManager
     // select application
     const StString ARGUMENT_DRAWER = "in";
     StArgument anArgDrawer = anArgs[ARGUMENT_DRAWER];
+    if(!anInfo->hasPath() && !anArgDrawer.isValid()) {
+        StApplication::readDefaultDrawer(anInfo);
+        anArgDrawer = anInfo->getArgumentsMap()[ARGUMENT_DRAWER];
+    }
     if(anArgDrawer.isValid()) {
         if(anArgDrawer.getValue() == "image"
         || anArgDrawer.getValue() == "StImageViewer") {

@@ -181,9 +181,12 @@ namespace {
                 }
             }
         }
-        if(TheOpenInfo->hasPath()
-        || anArgsNb > 1) {
-            // create StApplication instance only if we know which drawer plugin to launch
+
+        // create StApplication instance only if we know which drawer plugin to launch
+        bool toStart = true;
+        //bool toStart = TheOpenInfo->hasPath() || anArgsNb > 1;
+        //if(!toStart) { toStart = StApplication::readDefaultDrawer(TheOpenInfo); }
+        if(toStart) {
             [self launchSelf: NULL];
         }
         myIsStarted = true;

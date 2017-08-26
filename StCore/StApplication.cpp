@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -21,9 +21,42 @@
 #include "StEventsBuffer.h"
 
 namespace {
+
     static const StCString ST_SETTING_RENDERER_AUTO = stCString("rendererPluginAuto");
     static const StCString ST_SETTING_RENDERER      = stCString("rendererPlugin");
     static const StCString ST_SETTING_AUTO_VALUE    = stCString("Auto");
+    static const StCString ST_SETTING_DEF_DRAWER    = stCString("defaultDrawer");
+
+    /**
+     * Auxiliary parameter.
+     */
+    class StDefaultDrawerParam : public StBoolParamNamed {
+
+            public:
+
+        /**
+         * Main constructor.
+         */
+        ST_LOCAL StDefaultDrawerParam(const StApplication* theApp, const StString& theDrawer, const StString& theTitle)
+        : StBoolParamNamed(theApp->isDefaultDrawer(theDrawer), StString(), theTitle),
+          myApp(theApp), myAppName(theDrawer) {}
+
+        /**
+         * Return list of available translations.
+         */
+        ST_LOCAL virtual bool setValue(const bool theValue) ST_ATTR_OVERRIDE {
+            const bool aResult = StBoolParamNamed::setValue(theValue);
+            myApp->setDefaultDrawer(theValue ? myAppName : StString());
+            return aResult;
+        }
+
+            private:
+
+        const StApplication* myApp;
+        StString myAppName;
+
+    };
+
 }
 
 void StApplication::doChangeDevice(const int32_t theValue) {
@@ -554,6 +587,41 @@ StHandle<StOpenInfo> StApplication::parseProcessArguments() {
 
     anInfo->setArgumentsMap(anOpenFileArgs);
     return anInfo;
+}
+
+bool StApplication::isDefaultDrawer(const StString& theDrawer) const {
+    StSettings aGlobalSettings(myResMgr, "sview");
+    StString aDefDrawer;
+    aGlobalSettings.loadString(ST_SETTING_DEF_DRAWER, aDefDrawer);
+    return theDrawer == aDefDrawer;
+}
+
+void StApplication::setDefaultDrawer(const StString& theDrawer) const {
+    StSettings aGlobalSettings(myResMgr, "sview");
+    aGlobalSettings.saveString(ST_SETTING_DEF_DRAWER, theDrawer);
+}
+
+bool StApplication::readDefaultDrawer(StHandle<StOpenInfo>& theInfo) {
+    StHandle<StResourceManager> aResMgr = new StResourceManager();
+    StSettings aGlobalSettings(aResMgr, "sview");
+    StString aDefDrawer;
+    aGlobalSettings.loadString(ST_SETTING_DEF_DRAWER, aDefDrawer);
+    if(aDefDrawer.isEmpty()) {
+        return false;
+    }
+
+    if(theInfo.isNull()) {
+        theInfo = new StOpenInfo();
+    }
+    StArgumentsMap anArgs = theInfo->getArgumentsMap();
+    anArgs.add(StArgument("in", aDefDrawer));
+    theInfo->setArgumentsMap(anArgs);
+    return true;
+}
+
+StHandle<StBoolParamNamed> StApplication::createDefaultDrawerParam(const StString& theDrawer,
+                                                                   const StString& theTitle) const {
+    return new StDefaultDrawerParam(this, theDrawer, theTitle);
 }
 
 void StApplication::doChangeLanguage(const int32_t ) {

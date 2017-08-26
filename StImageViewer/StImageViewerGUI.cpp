@@ -799,6 +799,12 @@ void StImageViewerGUI::doMobileSettings(const size_t ) {
     aParams.add(myPlugin->params.CheckUpdatesDays);
 #endif
 
+    if(!myWindow->isMobile()) {
+        StHandle<StBoolParamNamed> aDefDrawerParam = myPlugin->createDefaultDrawerParam(stCString("StImageViewer"),
+                                                                                        stCString("sView launcher starts Image Viewer"));
+        aParams.add(aDefDrawerParam);
+    }
+
     StInfoDialog* aDialog = new StInfoDialog(myPlugin, this, tr(MENU_HELP_SETTINGS), scale(768), scale(300));
 
     const int aWidthMax  = aDialog->getContent()->getRectPx().width();

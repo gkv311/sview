@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2009-2016 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -45,6 +45,27 @@ class StApplication {
      * Parse process arguments.
      */
     ST_CPPEXPORT static StHandle<StOpenInfo> parseProcessArguments();
+
+    /**
+     * Read default drawer from setting.
+     */
+    ST_CPPEXPORT static bool readDefaultDrawer(StHandle<StOpenInfo>& theInfo);
+
+    /**
+     * @return TRUE if specified drawer is set as default in settings.
+     */
+    ST_CPPEXPORT bool isDefaultDrawer(const StString& theDrawer) const;
+
+    /**
+     * Save the drawer as default in settings.
+     */
+    ST_CPPEXPORT void setDefaultDrawer(const StString& theDrawer) const;
+
+    /**
+     * Create a named parameter for setting drawer as default.
+     */
+    ST_CPPEXPORT StHandle<StBoolParamNamed> createDefaultDrawerParam(const StString& theDrawer,
+                                                                     const StString& theTitle) const;
 
         public:
 
