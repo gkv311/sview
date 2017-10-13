@@ -268,7 +268,10 @@ bool StVideoQueue::initCodec(AVCodec*   theCodec,
     av_dict_set(&anOpts, "refcounted_frames", "1", 0);
 #endif
 
-    int aNbThreads = theToUseGpu ? 1 : StThread::countLogicalProcessors();
+    // attached pics are sparse, therefore we would not want to delay their decoding till EOF
+    int aNbThreads = theToUseGpu || isAttachedPicture()
+                   ? 1
+                   : StThread::countLogicalProcessors();
     myCodecCtx->thread_count = aNbThreads;
 #if(LIBAVCODEC_VERSION_INT < AV_VERSION_INT(52, 112, 0))
     avcodec_thread_init(myCodecCtx, aNbThreads);
