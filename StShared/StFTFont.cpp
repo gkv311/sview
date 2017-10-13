@@ -294,56 +294,65 @@ void StFTFont::addAdvanceY(const stUtf32_t  theUChar,
     addAdvanceY(theUCharNext, thePen);
 }
 
-float StFTFont::getAdvanceX(const stUtf32_t theUCharNext) {
-    if(myUChar == 0) {
-        return 0.0f;
+bool StFTFont::getKerning(FT_Vector&      theKern,
+                          const stUtf32_t theUCharCurr,
+                          const stUtf32_t theUCharNext) const {
+    theKern.x = 0;
+    theKern.y = 0;
+    if(theUCharNext != 0 && FT_HAS_KERNING(myFTFace) != 0) {
+        const FT_UInt aCharCurr = FT_Get_Char_Index(myFTFace, theUCharCurr);
+        const FT_UInt aCharNext = FT_Get_Char_Index(myFTFace, theUCharNext);
+        if(aCharCurr == 0 || aCharNext == 0
+        || FT_Get_Kerning (myFTFace, aCharCurr, aCharNext, FT_KERNING_UNFITTED, &theKern) != 0) {
+            theKern.x = 0;
+            theKern.y = 0;
+            return false;
+        }
+        return true;
     }
-
-    if(FT_HAS_KERNING(myFTFace) == 0 || theUCharNext == 0
-    || FT_Get_Kerning(myFTFace, myUChar, theUCharNext, FT_KERNING_UNFITTED, &myKernAdvance) != 0) {
-        return float(myFTFace->glyph->advance.x) / 64.0f;
-    }
-    return float(myKernAdvance.x + myFTFace->glyph->advance.x) / 64.0f;
+    return false;
 }
 
-float StFTFont::getAdvanceY(const stUtf32_t theUCharNext) {
+float StFTFont::getAdvanceX(const stUtf32_t theUCharNext) const {
     if(myUChar == 0) {
         return 0.0f;
     }
 
-    if(FT_HAS_KERNING(myFTFace) == 0 || theUCharNext == 0
-    || FT_Get_Kerning(myFTFace, myUChar, theUCharNext, FT_KERNING_UNFITTED, &myKernAdvance) != 0) {
-        return float(myFTFace->glyph->advance.y) / 64.0f;
+    FT_Vector aKern;
+    getKerning(aKern, myUChar, theUCharNext);
+    return float(aKern.x + myFTFace->glyph->advance.x) / 64.0f;
+}
+
+float StFTFont::getAdvanceY(const stUtf32_t theUCharNext) const {
+    if(myUChar == 0) {
+        return 0.0f;
     }
-    return float(myKernAdvance.y + myFTFace->glyph->advance.y) / 64.0f;
+
+    FT_Vector aKern;
+    getKerning(aKern, myUChar, theUCharNext);
+    return float(aKern.y + myFTFace->glyph->advance.y) / 64.0f;
 }
 
 void StFTFont::addAdvanceX(const stUtf32_t  theUCharNext,
-                           StVec2<GLfloat>& thePen) {
+                           StVec2<GLfloat>& thePen) const {
     if(myUChar == 0) {
         return;
     }
 
-    if(FT_HAS_KERNING(myFTFace) == 0 || theUCharNext == 0
-    || FT_Get_Kerning(myFTFace, myUChar, theUCharNext, FT_KERNING_UNFITTED, &myKernAdvance) != 0) {
-        thePen.x() += float(myFTFace->glyph->advance.x) / 64.0f;
-    } else {
-        thePen.x() += float(myKernAdvance.x + myFTFace->glyph->advance.x) / 64.0f;
-    }
+    FT_Vector aKern;
+    getKerning(aKern, myUChar, theUCharNext);
+    thePen.x() += float(aKern.x + myFTFace->glyph->advance.x) / 64.0f;
 }
 
 void StFTFont::addAdvanceY(const stUtf32_t  theUCharNext,
-                           StVec2<GLfloat>& thePen) {
+                           StVec2<GLfloat>& thePen) const {
     if(myUChar == 0) {
         return;
     }
 
-    if(FT_HAS_KERNING(myFTFace) == 0 || theUCharNext == 0
-    || FT_Get_Kerning(myFTFace, myUChar, theUCharNext, FT_KERNING_UNFITTED, &myKernAdvance) != 0) {
-        thePen.y() += float(myFTFace->glyph->advance.y) / 64.0f;
-    } else {
-        thePen.y() += float(myKernAdvance.y + myFTFace->glyph->advance.y) / 64.0f;
-    }
+    FT_Vector aKern;
+    getKerning(aKern, myUChar, theUCharNext);
+    thePen.y() += float(aKern.y + myFTFace->glyph->advance.y) / 64.0f;
 }
 
 bool StFTFont::hasSymbol(const stUtf32_t theUChar) const {

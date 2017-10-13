@@ -231,7 +231,7 @@ class StFTFont {
      * Assuming text rendered horizontally.
      */
     ST_CPPEXPORT void addAdvanceX(const stUtf32_t  theUCharNext,
-                                  StVec2<GLfloat>& thePen);
+                                  StVec2<GLfloat>& thePen) const;
 
     /**
      * Compute advance to the next character with kerning applied when applicable
@@ -248,7 +248,7 @@ class StFTFont {
      * Assuming text rendered vertically.
      */
     ST_CPPEXPORT void addAdvanceY(const stUtf32_t  theUCharNext,
-                                  StVec2<GLfloat>& thePen);
+                                  StVec2<GLfloat>& thePen) const;
 
     /**
      * Compute advance to the next character with kerning applied when applicable
@@ -263,7 +263,7 @@ class StFTFont {
      * Compute advance to the next character with kerning applied when applicable.
      * Assuming text rendered horizontally.
      */
-    ST_CPPEXPORT float getAdvanceX(const stUtf32_t theUCharNext);
+    ST_CPPEXPORT float getAdvanceX(const stUtf32_t theUCharNext) const;
 
     /**
      * Compute advance to the next character with kerning applied when applicable.
@@ -276,7 +276,7 @@ class StFTFont {
      * Compute advance to the next character with kerning applied when applicable.
      * Assuming text rendered vertically.
      */
-    ST_CPPEXPORT float getAdvanceY(const stUtf32_t theUCharNext);
+    ST_CPPEXPORT float getAdvanceY(const stUtf32_t theUCharNext) const;
 
     /**
      * Compute advance to the next character with kerning applied when applicable.
@@ -339,6 +339,13 @@ class StFTFont {
      */
     ST_CPPEXPORT bool loadGlyph(const stUtf32_t theUChar);
 
+    /**
+     * Wrapper for FT_Get_Kerning - retrieve kerning values.
+     */
+    ST_CPPEXPORT bool getKerning(FT_Vector&      theKern,
+                                 const stUtf32_t theUCharCurr,
+                                 const stUtf32_t theUCharNext) const;
+
         private:
 
     /**
@@ -360,7 +367,6 @@ class StFTFont {
     unsigned int          myGlyphMaxHeight;      //!< maximum glyph height
 
     StImagePlane          myGlyphImg;            //!< cached glyph plane
-    FT_Vector             myKernAdvance;         //!< buffer variable
     stUtf32_t             myUChar;               //!< currently loaded unicode character
 
 };
