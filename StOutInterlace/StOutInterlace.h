@@ -118,11 +118,12 @@ class StOutInterlace : public StWindow {
         private:
 
     enum {
-        DEVICE_AUTO              =-1,
-        DEVICE_ROW_INTERLACED    = 0, //!< interlace (horizontal 1xPixel lines, full color from R or L)
-        DEVICE_COL_INTERLACED    = 1, //!< interlace (vertical 1xPixel lines, full color from R or L)
-        DEVICE_CHESSBOARD        = 2, //!< 1xPixel chessboard (some DLP devices)
-        DEVICE_ROW_INTERLACED_ED = 3, //!< interlace (horizontal 1xPixel lines) + EDimensional onscreen codes
+        DEVICE_AUTO                =-1,
+        DEVICE_ROW_INTERLACED      = 0, //!< interlace (horizontal 1xPixel lines, full color from R or L)
+        DEVICE_COL_INTERLACED      = 1, //!< interlace (vertical 1xPixel lines, full color from R or L)
+        DEVICE_CHESSBOARD          = 2, //!< 1xPixel chessboard (some DLP devices)
+        DEVICE_ROW_INTERLACED_ED   = 3, //!< interlace (horizontal 1xPixel lines) + EDimensional onscreen codes
+        DEVICE_COL_INTERLACED_MI3D = 4, //!< interlace with barrier
 
         DEVICE_NB,
     };
@@ -185,6 +186,21 @@ class StOutInterlace : public StWindow {
 
     } params;
 
+    /**
+     * Parallax barrier state.
+     */
+    enum BarrierState {
+        BarrierState_Unknown = -1,
+        BarrierState_Off     = 0,
+        BarrierState_Landscape,
+        BarrierState_Portrait,
+    };
+
+    /**
+     * Initialize parallax barrier state.
+     */
+    void setBarrierState(BarrierState theBarrierState);
+
         private:
 
     StOutDevicesList          myDevices;
@@ -204,6 +220,7 @@ class StOutInterlace : public StWindow {
     StGLVertexBuffer          myQuadTexCoordBuf;
     int                       myDevice;
     StHandle<StMonitor>       myMonitor;                  //!< current monitor
+    BarrierState              myBarrierState;
 
     StRectI_t                 myWinRect;
     StRectI_t                 myEDRect;

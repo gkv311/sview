@@ -20,6 +20,8 @@
 #include <StImage/StImagePlane.h>
 #include <StVersion.h>
 
+#include <fstream>
+
 namespace {
 
     static const char ST_OUT_PLUGIN_NAME[] = "StOutInterlace";
@@ -55,6 +57,19 @@ namespace {
         {"ST@COL0", false, false}, // Android devices with parallel barrier (column-interleaved)
         {       "", false, false}  // NULL-terminate array
     };
+
+#if defined(__ANDROID__)
+    // Truly / Freevi / Commander  activation
+    namespace mi3d_tn {
+        static const char* CTRL_FILE = "/dev/mi3d_tn_ctrl";
+        enum {
+            SET_TN_OFF           =  16,
+            SET_VERTICAL_TN_ON   =  32,
+            SET_HORIZONTAL_TN_ON =  64,
+            GET_TN_STATUS        = 128,
+        };
+    }
+#endif
 
     // translation resources
     enum {
@@ -159,11 +174,12 @@ const char* StOutInterlace::getRendererId() const {
 
 const char* StOutInterlace::getDeviceId() const {
     switch(myDevice) {
-        case DEVICE_COL_INTERLACED:    return "Col";
-        case DEVICE_CHESSBOARD:        return "Chess";
-        case DEVICE_ROW_INTERLACED_ED: return "RowED";
+        case DEVICE_COL_INTERLACED:      return "Col";
+        case DEVICE_COL_INTERLACED_MI3D: return "ColMI3D";
+        case DEVICE_CHESSBOARD:          return "Chess";
+        case DEVICE_ROW_INTERLACED_ED:   return "RowED";
         case DEVICE_ROW_INTERLACED:
-        default:                       return "Row";
+        default:                         return "Row";
     }
 }
 
@@ -172,6 +188,8 @@ bool StOutInterlace::setDevice(const StString& theDevice) {
         myDevice = DEVICE_ROW_INTERLACED;
     } else if(theDevice == "Col") {
         myDevice = DEVICE_COL_INTERLACED;
+    } else if(theDevice == "ColMI3D") {
+        myDevice = DEVICE_COL_INTERLACED_MI3D;
     } else if(theDevice == "Chess") {
         myDevice = DEVICE_CHESSBOARD;
     } else if(theDevice == "RowED") {
@@ -182,6 +200,9 @@ bool StOutInterlace::setDevice(const StString& theDevice) {
 
 void StOutInterlace::getDevices(StOutDevicesList& theList) const {
     for(size_t anIter = 0; anIter < myDevices.size(); ++anIter) {
+        if(myDevices[anIter]->Priority == ST_DEVICE_SUPPORT_IGNORE) {
+            continue;
+        }
         theList.add(myDevices[anIter]);
     }
 }
@@ -200,12 +221,13 @@ void StOutInterlace::updateStrings() {
     myDevices[DEVICE_ROW_INTERLACED]   ->Desc = aLangMap.changeValueId(STTR_HINTERLACE_DESC,    "Row interlaced displays: Zalman, Hyundai,...");
     myDevices[DEVICE_COL_INTERLACED]   ->Name = aLangMap.changeValueId(STTR_VINTERLACE_NAME,    "Column Interlaced");
     myDevices[DEVICE_COL_INTERLACED]   ->Desc = aLangMap.changeValueId(STTR_VINTERLACE_DESC,    "Column interlaced displays");
-#if !defined(__ANDROID__)
     myDevices[DEVICE_CHESSBOARD]       ->Name = aLangMap.changeValueId(STTR_CHESSBOARD_NAME,    "DLP TV (chessboard)");
     myDevices[DEVICE_CHESSBOARD]       ->Desc = aLangMap.changeValueId(STTR_CHESSBOARD_DESC,    "DLP TV (chessboard)");
     myDevices[DEVICE_ROW_INTERLACED_ED]->Name = aLangMap.changeValueId(STTR_HINTERLACE_ED_NAME, "Interlaced ED");
     myDevices[DEVICE_ROW_INTERLACED_ED]->Desc = aLangMap.changeValueId(STTR_HINTERLACE_ED_DESC, "EDimensional in interlaced mode");
-#endif
+    myDevices[DEVICE_COL_INTERLACED_MI3D]->Name = "Interlaced [MI3D]";
+    myDevices[DEVICE_COL_INTERLACED_MI3D]->Desc = "Interlaced display with parallel barrier";
+
     params.ToReverse->setName(aLangMap.changeValueId(STTR_PARAMETER_REVERSE,  "Reverse Order"));
     params.BindToMon->setName(aLangMap.changeValueId(STTR_PARAMETER_BIND_MON, "Bind To Supported Monitor"));
     params.ToUseMask->setName(aLangMap.changeValueId(STTR_PARAMETER_USE_MASK, "Use texture mask (compatibility)"));
@@ -228,6 +250,7 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
   myTexMaskDevice(DEVICE_AUTO),
   myTexMaskReversed(false),
   myDevice(DEVICE_AUTO),
+  myBarrierState(BarrierState_Unknown),
   myEDTimer(true),
   myEDIntelaceOn(new StGLProgram("ED Interlace On")),
   myEDOff(new StGLProgram("ED Interlace Off")),
@@ -255,11 +278,13 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     myGlPrograms[DEVICE_COL_INTERLACED]       = new StProgramFB("Column Interlace");
     myGlPrograms[DEVICE_CHESSBOARD]           = new StProgramFB("Chessboard");
     myGlPrograms[DEVICE_ROW_INTERLACED_ED]    = myGlPrograms[DEVICE_ROW_INTERLACED];
+    myGlPrograms[DEVICE_COL_INTERLACED_MI3D]  = myGlPrograms[DEVICE_COL_INTERLACED];
 
-    myGlProgramsRev[DEVICE_ROW_INTERLACED]    = new StProgramFB("Row Interlace Inversed");
-    myGlProgramsRev[DEVICE_COL_INTERLACED]    = new StProgramFB("Column Interlace Inversed");
-    myGlProgramsRev[DEVICE_CHESSBOARD]        = new StProgramFB("Chessboard Inversed");
-    myGlProgramsRev[DEVICE_ROW_INTERLACED_ED] = myGlProgramsRev[DEVICE_ROW_INTERLACED];
+    myGlProgramsRev[DEVICE_ROW_INTERLACED]      = new StProgramFB("Row Interlace Inversed");
+    myGlProgramsRev[DEVICE_COL_INTERLACED]      = new StProgramFB("Column Interlace Inversed");
+    myGlProgramsRev[DEVICE_CHESSBOARD]          = new StProgramFB("Chessboard Inversed");
+    myGlProgramsRev[DEVICE_ROW_INTERLACED_ED]   = myGlProgramsRev[DEVICE_ROW_INTERLACED];
+    myGlProgramsRev[DEVICE_COL_INTERLACED_MI3D] = myGlProgramsRev[DEVICE_COL_INTERLACED];
 
     myGlProgramMask = new StProgramFB("Interlace Mask");
 
@@ -278,21 +303,45 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
     aDevCol->Name     = stCString("Column Interlaced");
     myDevices.add(aDevCol);
 
-#if !defined(__ANDROID__)
     StHandle<StOutDevice> aDevChess = new StOutDevice();
     aDevChess->PluginId = ST_OUT_PLUGIN_NAME;
     aDevChess->DeviceId = stCString("Chess");
+#if defined(__ANDROID__)
+    aDevChess->Priority = ST_DEVICE_SUPPORT_IGNORE;
+#else
     aDevChess->Priority = ST_DEVICE_SUPPORT_NONE;
+#endif
     aDevChess->Name     = stCString("DLP TV (chessboard)");
     myDevices.add(aDevChess);
 
     StHandle<StOutDevice> aDevED = new StOutDevice();
     aDevED->PluginId = ST_OUT_PLUGIN_NAME;
     aDevED->DeviceId = stCString("RowED");
+#if defined(__ANDROID__)
+    aDevED->Priority = ST_DEVICE_SUPPORT_IGNORE;
+#else
     aDevED->Priority = ST_DEVICE_SUPPORT_NONE;
+#endif
     aDevED->Name     = stCString("Interlaced ED");
     myDevices.add(aDevED);
+
+    StHandle<StOutDevice> aDevMI3D = new StOutDevice();
+    aDevMI3D->PluginId = ST_OUT_PLUGIN_NAME;
+    aDevMI3D->DeviceId = stCString("ColMI3D");
+    aDevMI3D->Priority = ST_DEVICE_SUPPORT_IGNORE;
+#if defined(__ANDROID__)
+    {
+        std::fstream aCtrlFile;
+        aCtrlFile.open(mi3d_tn::CTRL_FILE, std::ios_base::in);
+        if(aCtrlFile.is_open()) {
+            aCtrlFile.close();
+            aDevMI3D->Priority = ST_DEVICE_SUPPORT_PREFER;
+            setBarrierState(BarrierState_Off);
+        }
+    }
 #endif
+    aDevMI3D->Name = stCString("Interlaced [MI3D]");
+    myDevices.add(aDevMI3D);
 
     // detect connected displays
     bool isDummyReversed = false;
@@ -356,7 +405,9 @@ StOutInterlace::StOutInterlace(const StHandle<StResourceManager>& theResMgr,
 
     // load device settings
     mySettings->loadInt32(ST_SETTING_DEVICE_ID, myDevice);
-    if(myDevice == DEVICE_AUTO) {
+    if(myDevice == DEVICE_AUTO
+    || myDevice >= (int )myDevices.size()
+    || myDevices[myDevice]->Priority == ST_DEVICE_SUPPORT_IGNORE) {
         myDevice = DEVICE_ROW_INTERLACED;
     }
 
@@ -398,6 +449,35 @@ StOutInterlace::~StOutInterlace() {
     releaseResources();
 }
 
+void StOutInterlace::setBarrierState(BarrierState theBarrierState) {
+    if(myBarrierState == theBarrierState) {
+        return;
+    }
+
+    myBarrierState = theBarrierState;
+#if defined(__ANDROID__)
+    unsigned char aValue = mi3d_tn::SET_TN_OFF;
+    switch(myBarrierState) {
+        case BarrierState_Unknown:
+        case BarrierState_Off:
+            aValue = mi3d_tn::SET_TN_OFF;
+            break;
+        case BarrierState_Landscape:
+            aValue = mi3d_tn::SET_VERTICAL_TN_ON;
+            break;
+        case BarrierState_Portrait:
+            aValue = mi3d_tn::SET_HORIZONTAL_TN_ON;
+            break;
+    }
+    std::fstream aCtrlFile;
+    aCtrlFile.open(mi3d_tn::CTRL_FILE);
+    if(aCtrlFile.is_open()) {
+        aCtrlFile << aValue;
+        aCtrlFile.close();
+    }
+#endif
+}
+
 void StOutInterlace::close() {
     StWindow::params.VSyncMode->signals.onChanged -= stSlot(this, &StOutInterlace::doSwitchVSync);
     beforeClose();
@@ -425,6 +505,7 @@ void StOutInterlace::beforeClose() {
             StThread::sleep(10);
         }
     }
+    setBarrierState(BarrierState_Off);
 }
 
 void StOutInterlace::show() {
@@ -725,6 +806,7 @@ bool StOutInterlace::initTextureMask(int  theDevice,
                     }
                     break;
                 }
+                case DEVICE_COL_INTERLACED_MI3D:
                 case DEVICE_COL_INTERLACED: {
                     if(theToReverse) {
                         *aPixel = (aColIter % 2 == 0) ? 255 : 0;
@@ -839,6 +921,8 @@ void StOutInterlace::stglDraw() {
                 }
             }
             stglDrawEDCodes();
+        } else if(myDevice == DEVICE_COL_INTERLACED_MI3D) {
+            setBarrierState(BarrierState_Off);
         }
 
         // decrease FPS to target by thread sleeps
@@ -878,7 +962,9 @@ void StOutInterlace::stglDraw() {
     int aDevice = myDevice;
 
     // handle portrait orientation
-    if(myIsMonPortrait) {
+    if(myDevice == DEVICE_COL_INTERLACED_MI3D) {
+        aDevice = DEVICE_COL_INTERLACED;
+    } else if(myIsMonPortrait) {
         switch(myDevice) {
             case DEVICE_ROW_INTERLACED:
                 aDevice = DEVICE_COL_INTERLACED;
@@ -904,6 +990,7 @@ void StOutInterlace::stglDraw() {
         switch(aDevice) {
             case DEVICE_CHESSBOARD:
             case DEVICE_COL_INTERLACED:
+            case DEVICE_COL_INTERLACED_MI3D:
                 isPixelReverse = !isPixelReverse; break;
         }
     }
@@ -989,6 +1076,8 @@ void StOutInterlace::stglDraw() {
             }
         }
         stglDrawEDCodes();
+    } else if(myDevice == DEVICE_COL_INTERLACED_MI3D) {
+        setBarrierState(myIsMonPortrait ? BarrierState_Portrait : BarrierState_Landscape);
     }
 
     // decrease FPS to target by thread sleeps
