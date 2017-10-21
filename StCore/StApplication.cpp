@@ -37,14 +37,14 @@ namespace {
         /**
          * Main constructor.
          */
-        ST_LOCAL StDefaultDrawerParam(const StApplication* theApp, const StString& theDrawer, const StString& theTitle)
+        StDefaultDrawerParam(const StApplication* theApp, const StString& theDrawer, const StString& theTitle)
         : StBoolParamNamed(theApp->isDefaultDrawer(theDrawer), StString(), theTitle),
           myApp(theApp), myAppName(theDrawer) {}
 
         /**
          * Return list of available translations.
          */
-        ST_LOCAL virtual bool setValue(const bool theValue) ST_ATTR_OVERRIDE {
+        virtual bool setValue(const bool theValue) ST_ATTR_OVERRIDE {
             const bool aResult = StBoolParamNamed::setValue(theValue);
             myApp->setDefaultDrawer(theValue ? myAppName : StString());
             return aResult;
