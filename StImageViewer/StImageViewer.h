@@ -140,6 +140,7 @@ class StImageViewer : public StApplication {
         StHandle<StBoolParamNamed>    ToShowPlayList;   //!< display playlist
         StHandle<StBoolParamNamed>    ToShowAdjustImage;//!< display image adjustment overlay
         StHandle<StBoolParamNamed>    ToShowFps;        //!< display FPS meter
+        StHandle<StFloat32Param>      SlideShowDelay;   //!< slideshow delay
         StHandle<StBoolParamNamed>    IsMobileUI;       //!< display mobile interface (user option)
         StHandle<StBoolParam>         IsMobileUISwitch; //!< display mobile interface (actual value)
         StHandle<StBoolParamNamed>    ToHideStatusBar;  //!< hide system-provided status bar
@@ -263,9 +264,7 @@ class StImageViewer : public StApplication {
 
     StCondition                 myEventLoaded;     //!< indicate that new file was open
     StTimer                     myInactivityTimer; //!< timer initialized when application goes into paused state
-
-    StTimer                     mySlideShowTimer;  //!< slideshow stuff
-    double                      mySlideShowDelay;
+    StTimer                     mySlideShowTimer;  //!< slideshow timer
 
     bool                        myToCheckUpdates;
     bool                        myToSaveSrcFormat; //!< indicates that active source format should be saved or not

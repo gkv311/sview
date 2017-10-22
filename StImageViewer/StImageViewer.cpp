@@ -50,7 +50,6 @@ const char* StImageViewer::ST_DRAWER_PLUGIN_NAME = "StImageViewer";
 
 namespace {
 
-    static const char ST_SETTING_SLIDESHOW_DELAY[] = "slideShowDelay";
     static const char ST_SETTING_LAST_FOLDER[] = "lastFolder";
     static const char ST_SETTING_RECENT_L[]    = "recentL";
     static const char ST_SETTING_RECENT_R[]    = "recentR";
@@ -109,6 +108,7 @@ void StImageViewer::updateStrings() {
     params.ToShowFps->setName(tr(MENU_SHOW_FPS));
     params.ToShowMenu->setName(stCString("Show main menu"));
     params.ToShowTopbar->setName(stCString("Show top toolbar"));
+    params.SlideShowDelay->setName(stCString("Slideshow delay"));
     params.IsMobileUI->setName(stCString("Mobile UI"));
     params.ToHideStatusBar->setName("Hide system status bar");
     params.ToHideNavBar   ->setName(tr(OPTION_HIDE_NAVIGATION_BAR));
@@ -129,7 +129,6 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
   myEventLoaded(false),
   //
   mySlideShowTimer(false),
-  mySlideShowDelay(4.0),
   //
   myToCheckUpdates(true),
   myToSaveSrcFormat(false),
@@ -176,6 +175,12 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     params.ToShowFps     = new StBoolParamNamed(false, stCString("toShowFps"));
     params.ToShowMenu    = new StBoolParamNamed(true,  stCString("toShowMenu"));
     params.ToShowTopbar  = new StBoolParamNamed(true,  stCString("toShowTopbar"));
+    params.SlideShowDelay = new StFloat32Param(4.0f, stCString("slideShowDelay2"));
+    params.SlideShowDelay->setMinMaxValues(1.0f, 10.0f);
+    params.SlideShowDelay->setDefValue(4.0f);
+    params.SlideShowDelay->setStep(1.0f);
+    params.SlideShowDelay->setTolerance(0.1f);
+    params.SlideShowDelay->setFormat(stCString("%01.1f s"));
     params.IsMobileUI    = new StBoolParamNamed(StWindow::isMobile(), stCString("isMobileUI"));
     params.IsMobileUI->signals.onChanged = stSlot(this, &StImageViewer::doChangeMobileUI);
     params.IsMobileUISwitch = new StBoolParam(params.IsMobileUI->getValue());
@@ -207,6 +212,7 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (params.ToFlipCubeZ3x2);
     myToCheckPoorOrient = !mySettings->loadParam(params.ToTrackHead);
     mySettings->loadParam (params.ToShowFps);
+    mySettings->loadParam (params.SlideShowDelay);
     mySettings->loadParam (params.IsMobileUI);
     mySettings->loadParam (params.ToHideStatusBar);
     mySettings->loadParam (params.ToHideNavBar);
@@ -214,10 +220,6 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     mySettings->loadParam (params.IsVSyncOn);
     mySettings->loadParam (params.ToShowPlayList);
     mySettings->loadParam (params.ToShowAdjustImage);
-
-    int32_t aSlideShowDelayInt = int32_t(mySlideShowDelay);
-    mySettings->loadInt32 (ST_SETTING_SLIDESHOW_DELAY,    aSlideShowDelayInt);
-    mySlideShowDelay = double(aSlideShowDelayInt);
 
 #if defined(__ANDROID__)
     addRenderer(new StOutInterlace  (myResMgr, theParentWin));
@@ -358,7 +360,6 @@ void StImageViewer::saveAllParams() {
         mySettings->saveParam (params.ScaleAdjust);
         mySettings->saveParam (params.ScaleHiDPI2X);
         mySettings->saveParam (params.TargetFps);
-        mySettings->saveInt32(ST_SETTING_SLIDESHOW_DELAY, int(mySlideShowDelay));
         mySettings->saveParam(params.LastUpdateDay);
         mySettings->saveParam(params.CheckUpdatesDays);
         mySettings->saveString(ST_SETTING_IMAGELIB,  StImageFile::imgLibToString(params.imageLib));
@@ -367,6 +368,7 @@ void StImageViewer::saveAllParams() {
         mySettings->saveParam (params.ToFlipCubeZ3x2);
         mySettings->saveParam (params.ToTrackHead);
         mySettings->saveParam (params.ToShowFps);
+        mySettings->saveParam (params.SlideShowDelay);
         mySettings->saveParam (params.IsMobileUI);
         mySettings->saveParam (params.ToHideStatusBar);
         mySettings->saveParam (params.ToHideNavBar);
@@ -1044,7 +1046,7 @@ void StImageViewer::beforeDraw() {
         myLoader->doLoadNext();
     }
 
-    if(mySlideShowTimer.getElapsedTimeInSec() > mySlideShowDelay) {
+    if(mySlideShowTimer.getElapsedTimeInSec() > params.SlideShowDelay->getValue()) {
         mySlideShowTimer.restart();
         doListNext();
     }
