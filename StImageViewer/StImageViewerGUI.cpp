@@ -1156,12 +1156,13 @@ void StImageViewerGUI::createImageAdjustments() {
 void StImageViewerGUI::doOpenFile(const size_t ) {
     StGLOpenFile* aDialog = new StGLOpenFile(this, tr(DIALOG_OPEN_FILE), tr(BUTTON_CLOSE));
     aDialog->setMimeList(myPlugin->myLoader->getMimeList());
-#if defined(_WIN32)
-    //
-#else
-    aDialog->addHotItem("/", "Root");
-#endif
-    aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_SdCard));
+
+    const StString anSdCardPath = getResourceManager()->getFolder(StResourceManager::FolderId_SdCard);
+    if(!anSdCardPath.isEmpty()) {
+        StString aFolder, aName;
+        StFileNode::getFolderAndFile(anSdCardPath, aFolder, aName);
+        aDialog->addHotItem(anSdCardPath, stUtfTools::isInteger(aName) ? (StString("sdcard") + aName) : aName);
+    }
     aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Downloads));
     aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Pictures));
     aDialog->addHotItem(getResourceManager()->getFolder(StResourceManager::FolderId_Photos));

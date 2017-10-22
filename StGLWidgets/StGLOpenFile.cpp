@@ -14,6 +14,12 @@
 #include <StGLWidgets/StGLScrollArea.h>
 #include <StGLWidgets/StGLTextureButton.h>
 
+#include <fstream>
+
+#if !defined(_WIN32)
+    #include <unistd.h>
+#endif
+
 StGLOpenFile::StGLOpenFile(StGLWidget*     theParent,
                            const StString& theTitle,
                            const StString& theCloseText)
@@ -56,6 +62,69 @@ StGLOpenFile::StGLOpenFile(StGLWidget*     theParent,
     //if(!myRoot->isMobile()) {
         addButton(theCloseText);
     //}
+
+#if defined(_WIN32)
+    //
+#else
+    // modern Android does not permit listing / content
+    if(access("/", R_OK) == 0) {
+        addHotItem("/", "Root");
+    }
+#endif
+
+#if defined(__ANDROID__)
+    std::ifstream aMountsFile("/proc/mounts");
+    if(!aMountsFile.is_open()) {
+        return;
+    }
+    std::string aLineStd;
+    while(std::getline(aMountsFile, aLineStd)) {
+        const StString aLine(aLineStd.c_str());
+        StHandle<StArrayList<StString> > aMountLine = aLine.split(' ');
+        if(aMountLine->size() < 4) {
+            continue;
+        }
+
+        const StString& aDevice  = aMountLine->getValue(0);
+        const StString& aMount   = aMountLine->getValue(1);
+        const StString& aFileSys = aMountLine->getValue(2);
+        const StString aMountLower = aMount.lowerCased();
+        // filter by unsupported file-system
+        /*if(aFileSys == stCString("tmpfs")
+        || aFileSys == stCString("devpts")
+        || aFileSys == stCString("sysfs")
+        || aFileSys == stCString("selinuxfs")
+        || aFileSys == stCString("debugfs")
+        || aFileSys == stCString("configfs")
+        || aFileSys == stCString("cgroup")
+        || aFileSys == stCString("functionfs")) {
+            continue;
+        }*/
+        // filter by supported file-system
+        if(aFileSys != stCString("fuse")
+        && aFileSys != stCString("vfat")
+        && aFileSys != stCString("ntfs")
+        && aFileSys != stCString("ext4")) {
+            continue;
+        }
+        // filter special paths
+        if(aMountLower.isStartsWith(stCString("/mnt/secure"))
+        || aMountLower.isStartsWith(stCString("/mnt/asec"))
+        || aMountLower.isStartsWith(stCString("/mnt/mapper"))
+        || aMountLower.isStartsWith(stCString("/mnt/obb"))
+        || aMountLower == stCString("/storage/emulated")
+        || aMountLower.isStartsWith(stCString("/mnt/shell/emulated"))         // ignore symlink to /storage/emulated/0/ for current user, Android 4.2+
+        || aMountLower.isStartsWith(stCString("/storage/emulated/legacy"))) { // ignore symlink to /storage/emulated/X/ for current user
+            continue;
+        }
+        // filter bootdevice entities
+        if( aDevice.isStartsWith(stCString("/dev/block"))
+        && !aDevice.isStartsWith(stCString("/dev/block/vold"))) {
+            continue;
+        }
+        addHotItem(aMount);
+    }
+#endif
 }
 
 StGLOpenFile::~StGLOpenFile() {
