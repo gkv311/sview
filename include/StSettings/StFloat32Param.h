@@ -1,5 +1,5 @@
 /**
- * Copyright © 2011-2016 Kirill Gavrilov
+ * Copyright © 2011-2017 Kirill Gavrilov
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -90,6 +90,20 @@ class StFloat32Param : public StParam<float> {
      */
     ST_LOCAL void setName(const StString& theName) {
         myParamName = theName;
+    }
+
+    /**
+     * @return parameter format
+     */
+    ST_LOCAL const StString& getFormat() const {
+        return myParamFormat;
+    }
+
+    /**
+     * Set new parameter format.
+     */
+    ST_LOCAL void setFormat(const StString& theFormat) {
+        myParamFormat = theFormat;
     }
 
     /**
@@ -330,7 +344,12 @@ class StFloat32Param : public StParam<float> {
 
     StString myParamKey;    //!< parameter key (id)
     StString myParamName;   //!< parameter name (label)
+    StString myParamFormat; //!< parameter format
 
 };
+
+// define StHandle template specialization
+ST_DEFINE_HANDLE(StParam<float>, StParamBase);
+ST_DEFINE_HANDLE(StFloat32Param, StParam<float>);
 
 #endif // __StFloat32Param_h_

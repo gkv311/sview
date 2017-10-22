@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2014-2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2014-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -12,6 +12,7 @@
 #include <StGLWidgets/StGLCombobox.h>
 #include <StGLWidgets/StGLCheckbox.h>
 #include <StGLWidgets/StGLMenuItem.h>
+#include <StGLWidgets/StGLRangeFieldFloat32.h>
 #include <StGLWidgets/StGLRootWidget.h>
 
 #include <StGL/StGLContext.h>
@@ -19,6 +20,7 @@
 
 #include <StStrings/StDictionary.h>
 #include <StSettings/StEnumParam.h>
+#include <StSettings/StFloat32Param.h>
 
 #include <stAssert.h>
 
@@ -165,6 +167,7 @@ void StGLTable::fillFromParams(const StParamsList& theParams,
     int aCol2Width = 0;
     StHandle<StBoolParamNamed> aBool;
     StHandle<StEnumParam>      anEnum;
+    StHandle<StFloat32Param>   aFloat32;
     const int anIconMargin = myRoot->scale(8);
     const int anIconWidth  = anIconMargin * 2 + myRoot->scale(16);
     StMarginsI aCheckMargins;
@@ -194,6 +197,18 @@ void StGLTable::fillFromParams(const StParamsList& theParams,
             for(size_t aValIter = 0; aValIter < aValues.size(); ++aValIter) {
                 aCol2Width = stMax(aCol2Width, aButton->computeWidth(aValues[aValIter]));
             }
+        } else if(aFloat32.downcastFrom(aParam)) {
+            StGLRangeFieldFloat32* aRange = new StGLRangeFieldFloat32(&anItem, aFloat32,
+                                                                      0, 0, StGLCorner(ST_VCORNER_CENTER, ST_HCORNER_RIGHT),
+                                                                      StGLRangeFieldFloat32::RangeStyle_Seekbar, myRoot->scale(18));
+            aRange->changeRectPx().right() = myRoot->scale(50);
+            aRange->changeMargins().left   = myRoot->scale(8);
+            aRange->changeMargins().right  = myRoot->scale(8);
+            aRange->setCorner(StGLCorner(ST_VCORNER_TOP, ST_HCORNER_LEFT));
+            if(!aFloat32->getFormat().isEmpty()) {
+                aRange->setFormat(aFloat32->getFormat());
+            }
+            aCol2Width = stMax(aCol2Width, aRange->getRectPx().width());
         } else {
             // skip
         }
@@ -209,10 +224,11 @@ void StGLTable::fillFromParams(const StParamsList& theParams,
             continue;
         }
 
-        StGLCombobox* aButton = dynamic_cast<StGLCombobox* >(anItem.getItem());
-        if(aButton != NULL) {
+        if(StGLCombobox* aButton = dynamic_cast<StGLCombobox* >(anItem.getItem())) {
             anItem.getItem()->changeRectPx().right() = aWidget->getRectPx().left() + aCol2Width;
             aButton->setWidth(aCol2Width);
+        } else if(dynamic_cast<StGLRangeFieldFloat32* >(anItem.getItem()) != NULL) {
+            anItem.getItem()->changeRectPx().right() = aWidget->getRectPx().left() + aCol2Width;
         }
     }
 
@@ -229,6 +245,8 @@ void StGLTable::fillFromParams(const StParamsList& theParams,
             aLabelText = aBool->getName();
         } else if(anEnum.downcastFrom(aParam)) {
             aLabelText = anEnum->getName();
+        } else if(aFloat32.downcastFrom(aParam)) {
+            aLabelText = aFloat32->getName();
         } else {
             // skip
         }
