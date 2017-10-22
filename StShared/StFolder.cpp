@@ -1,5 +1,5 @@
 /**
- * Copyright © 2009-2014 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2009-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -54,12 +54,9 @@ bool StFolder::isFolder(const StCString& thePath) {
     }
     return false;
 #else
-    DIR* aDir = opendir(thePath.toCString());
-    if(aDir == NULL) {
-        return false;
-    }
-    closedir(aDir);
-    return true;
+    struct stat aStatBuffer;
+    return stat(thePath.toCString(), &aStatBuffer) == 0
+        && S_ISDIR(aStatBuffer.st_mode);
 #endif
 }
 

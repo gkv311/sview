@@ -1,6 +1,6 @@
 /**
  * StGLWidgets, small C++ toolkit for writing GUI using OpenGL.
- * Copyright © 2015 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2015-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -104,10 +104,14 @@ bool StGLOpenFile::tryUnClick(const StClickEvent& theEvent,
         myItemToLoad.clear();
         if(StFolder::isFolder(aPath)) {
             openFolder(aPath);
-        } else {
+        } else if(StFileNode::isFileExists(aPath)) {
             StHandle<StString> aPathHandle = new StString(aPath);
             signals.onFileSelected.emit(aPathHandle);
             myRoot->destroyWithDelay(this);
+        } else {
+            StGLMessageBox* aMsgBox = new StGLMessageBox(myRoot, "Error", StString("Path is inaccessible!\n") + aPath);
+            aMsgBox->addButton("Close");
+            aMsgBox->stglInit();
         }
     }
     return aRes;
