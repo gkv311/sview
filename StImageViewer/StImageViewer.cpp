@@ -278,10 +278,10 @@ StImageViewer::StImageViewer(const StHandle<StResourceManager>& theResMgr,
     addAction(Action_ListLast, anAction, ST_VK_END);
 
     anAction = new StActionIntSlot(stCString("DoListPrev"), stSlot(this, &StImageViewer::doListPrev), 0);
-    addAction(Action_ListPrev, anAction, ST_VK_PRIOR);
+    addAction(Action_ListPrev, anAction, ST_VK_PRIOR, StWindow::isMobile() ? ST_VK_VOLUME_UP : 0);
 
     anAction = new StActionIntSlot(stCString("DoListNext"), stSlot(this, &StImageViewer::doListNext), 0);
-    addAction(Action_ListNext, anAction, ST_VK_NEXT);
+    addAction(Action_ListNext, anAction, ST_VK_NEXT,  StWindow::isMobile() ? ST_VK_VOLUME_DOWN : 0);
 
     anAction = new StActionIntSlot(stCString("DoSlideShow"), stSlot(this, &StImageViewer::doSlideShow), 0);
     addAction(Action_SlideShow, anAction, ST_VK_SPACE);
