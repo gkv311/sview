@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -30,6 +30,26 @@ class StKeysState {
      * Destructor.
      */
     ST_CPPEXPORT ~StKeysState();
+
+    /**
+     * Reset map of registered keys.
+     */
+    ST_CPPEXPORT void resetRegisteredKeys();
+
+    /**
+     * Return map of registered keys.
+     */
+    ST_LOCAL const bool* getRegisteredKeys() const { return myRegKeys; }
+
+    /**
+     * Register key.
+     */
+    ST_CPPEXPORT void registerKey(StVirtKey theKey);
+
+    /**
+     * Unregister key.
+     */
+    ST_CPPEXPORT void unregisterKey(StVirtKey theKey);
 
     /**
      * Release all pressed keys (window lost input focus etc.).
@@ -83,9 +103,10 @@ class StKeysState {
 
         private:
 
-    mutable StMutex myLock; //!< mutex for thread-safe access
-    bool    myKeys[256];    //!< virtual keys pressed state
-    double  myTimes[256];   //!< time when key was pressed or released
+    mutable StMutex myLock;              //!< mutex for thread-safe access
+    double          myTimes  [ST_VK_NB]; //!< time when key was pressed or released
+    bool            myKeys   [ST_VK_NB]; //!< virtual keys pressed state
+    bool            myRegKeys[ST_VK_NB]; //!< registered keys (used by some hot-keys)
 
 };
 

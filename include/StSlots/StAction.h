@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -39,75 +39,75 @@ class StAction {
     virtual void doTrigger(const StEvent* theEvent) = 0;
 
     /**
-     * @return hot key 1 to trigger action
+     * @return hot key to trigger action
      */
-    ST_LOCAL unsigned int getHotKey1() const {
-        return myHotKey1;
+    ST_LOCAL unsigned int getHotKey(int theIndex) const {
+        ST_DEBUG_ASSERT(theIndex >= 0 && theIndex <= 1)
+        return myHotKeys[theIndex];
     }
 
     /**
      * @return hot key 1 to trigger action
      */
-    ST_LOCAL unsigned int& changeHotKey1() {
-        return myHotKey1;
+    ST_LOCAL unsigned int getHotKey1() const { return myHotKeys[0]; }
+
+    /**
+     * @return hot key 1 to trigger action
+     */
+    ST_LOCAL unsigned int& changeHotKey1() { return myHotKeys[0]; }
+
+    /**
+     * @param theKey hot key to trigger action
+     */
+    ST_LOCAL void setHotKey(int theIndex, unsigned int theKey) {
+        ST_DEBUG_ASSERT(theIndex >= 0 && theIndex <= 1)
+        myHotKeys[theIndex] = theKey;
     }
 
     /**
      * @param theKey hot key 1 to trigger action
      */
-    ST_LOCAL void setHotKey1(unsigned int theKey) {
-        myHotKey1 = theKey;
-    }
+    ST_LOCAL void setHotKey1(unsigned int theKey) { myHotKeys[0] = theKey; }
 
     /**
      * Default value of hot key 1.
      */
-    ST_LOCAL unsigned int getDefaultHotKey1() const {
-        return myDefaultHotKey1;
-    }
+    ST_LOCAL unsigned int getDefaultHotKey1() const { return myHotKeysDef[0]; }
 
     /**
      * @param theKey default value of hot key 1
      */
     ST_LOCAL void setDefaultHotKey1(unsigned int theKey) {
-        myDefaultHotKey1 = theKey;
-        myHotKey1        = theKey;
+        myHotKeysDef[0] = theKey;
+        myHotKeys[0]    = theKey;
     }
 
     /**
      * @return hot key 2 to trigger action
      */
-    ST_LOCAL unsigned int getHotKey2() const {
-        return myHotKey2;
-    }
+    ST_LOCAL unsigned int getHotKey2() const { return myHotKeys[1]; }
 
     /**
      * @return hot key 2 to trigger action
      */
-    ST_LOCAL unsigned int& changeHotKey2() {
-        return myHotKey2;
-    }
+    ST_LOCAL unsigned int& changeHotKey2() { return myHotKeys[1]; }
 
     /**
      * @param theKey hot key 2 to trigger action
      */
-    ST_LOCAL void setHotKey2(unsigned int theKey) {
-        myHotKey2 = theKey;
-    }
+    ST_LOCAL void setHotKey2(unsigned int theKey) { myHotKeys[1] = theKey; }
 
     /**
      * Default value of hot key 2.
      */
-    ST_LOCAL unsigned int getDefaultHotKey2() const {
-        return myDefaultHotKey2;
-    }
+    ST_LOCAL unsigned int getDefaultHotKey2() const { return myHotKeysDef[1]; }
 
     /**
      * @param theKey default value of hot key 2
      */
     ST_LOCAL void setDefaultHotKey2(unsigned int theKey) {
-        myDefaultHotKey2 = theKey;
-        myHotKey2        = theKey;
+        myHotKeysDef[1] = theKey;
+        myHotKeys[1]    = theKey;
     }
 
     /**
@@ -133,12 +133,10 @@ class StAction {
 
         protected:
 
-    StString     myName;           //!< action name
-    unsigned int myHotKey1;        //!< key combination to execute action
-    unsigned int myHotKey2;        //!< key combination to execute action (extra)
-    unsigned int myDefaultHotKey1; //!< default value of hot-key1
-    unsigned int myDefaultHotKey2; //!< default value of hot-key2
-    bool         myToHoldKey;      //!< this action process key hold event
+    StString     myName;          //!< action name
+    unsigned int myHotKeys[2];    //!< key combination to execute action
+    unsigned int myHotKeysDef[2]; //!< default value of hot-key1
+    bool         myToHoldKey;     //!< this action process key hold event
 
 };
 

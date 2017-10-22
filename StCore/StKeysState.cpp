@@ -1,6 +1,6 @@
 /**
  * StCore, window system independent C++ toolkit for writing OpenGL applications.
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -10,11 +10,24 @@
 #include <StCore/StKeysState.h>
 
 StKeysState::StKeysState() {
-    stMemZero(myKeys, sizeof(myKeys));
+    stMemZero(myKeys,    sizeof(myKeys));
+    stMemZero(myRegKeys, sizeof(myRegKeys));
 }
 
 StKeysState::~StKeysState() {
     //
+}
+
+void StKeysState::resetRegisteredKeys() {
+    stMemZero(myRegKeys, sizeof(myRegKeys));
+}
+
+void StKeysState::registerKey(StVirtKey theKey) {
+    myRegKeys[theKey] = true;
+}
+
+void StKeysState::unregisterKey(StVirtKey theKey) {
+    myRegKeys[theKey] = false;
 }
 
 void StKeysState::reset() {

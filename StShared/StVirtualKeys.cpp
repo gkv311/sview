@@ -317,7 +317,7 @@ StString encodeHotKey(const unsigned int theKey) {
         aStr += "Fn+";
     }
     if(aKey == 0
-    || aKey > 255) {
+    || aKey >= ST_VK_NB) {
         return "";
     }
     if(aKey == ST_VK_SHIFT

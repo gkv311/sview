@@ -78,7 +78,7 @@ bool StWindowImpl::create() {
  * Update StWindow position according to native parent position.
  */
 void StWindowImpl::updateChildRect() {
-    if(!attribs.IsFullScreen && (ANativeWindow* )myParentWin != NULL) {
+    if(!attribs.IsFullScreen && myParentWin != NULL) {
         //myRectNorm.right()  = myRectNorm.left() + widthReturn;
         //myRectNorm.bottom() = myRectNorm.top() + heightReturn;
 
@@ -478,7 +478,7 @@ void StWindowImpl::processEvents() {
     myParentWin->setHardwareStereoOn(myToEnableStereoHW);
     myParentWin->setTrackOrientation(myToTrackOrient);
     myParentWin->setHideSystemBars(myToHideStatusBar, myToHideNavBar);
-    myParentWin->fetchState(aDndFile, myQuaternion, myToSwapEyesHW);
+    myParentWin->fetchState(aDndFile, myQuaternion, myToSwapEyesHW, myKeysState);
     if(!aDndFile.isEmpty()) {
         std::vector<const char*> aDndList;
         aDndList.push_back(aDndFile.toCString());

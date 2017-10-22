@@ -312,6 +312,21 @@ enum StVirtKey {
     ST_VK_FUNCTION     = 0xD9, // 217 | OS X fn key      (NSFunctionKeyMask)
 
 };
+enum {
+    ST_VK_NB = 256 //!< maximum number of virtual keys
+};
+
+/**
+ * Remove modifiers from hot key combination and return the base virtual key.
+ */
+ST_LOCAL inline StVirtKey getBaseKeyFromHotKey(unsigned int theHotKey) {
+    unsigned int aKey = theHotKey & ~(ST_VF_SHIFT | ST_VF_CONTROL | ST_VF_MENU | ST_VF_COMMAND | ST_VF_FUNCTION);
+    if(aKey == 0
+    || aKey >= ST_VK_NB) {
+        return ST_VK_NULL;
+    }
+    return (StVirtKey )aKey;
+}
 
 /**
  * Encode single Virtual Key.

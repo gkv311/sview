@@ -573,13 +573,6 @@ class StWindow {
     ST_CPPEXPORT void stglSwap(const int theWinEnum);
 
     /**
-     * This method should be called only by inheritors
-     * to override keyboard input logic.
-     * @return cached keyboard keys state for this window
-     */
-    ST_CPPEXPORT StKeysState& changeKeysState();
-
-    /**
      * @return upload time in seconds
      */
     ST_CPPEXPORT double getEventTime(const uint32_t theTime) const;
@@ -607,6 +600,13 @@ class StWindow {
     ST_CPPEXPORT void setForcedAspect(double theAspect);
 
         public:
+
+    /**
+     * This method should be called only by inheritors
+     * to override keyboard input logic.
+     * @return cached keyboard keys state for this window
+     */
+    ST_CPPEXPORT StKeysState& changeKeysState();
 
     ST_CPPEXPORT void* getNativeOglWin() const;
     ST_CPPEXPORT void* getNativeOglDC()  const;

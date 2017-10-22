@@ -397,22 +397,32 @@ StHandle<StAction> StApplication::getActionForKey(unsigned int theHKey) const {
 
 void StApplication::registerHotKeys() {
     myKeyActions.clear();
+    StKeysState* aKeysState = !myWindow.isNull() ? &myWindow->changeKeysState() : NULL;
+    if(aKeysState != NULL) {
+        aKeysState->resetRegisteredKeys();
+    }
     for(std::map< int, StHandle<StAction> >::iterator anIter = myActions.begin();
         anIter != myActions.end(); ++anIter) {
         const StHandle<StAction>& anAction = anIter->second;
-        if(anAction->getHotKey1() != 0) {
-            StHandle<StAction> anOldAction = getActionForKey(anAction->getHotKey1());
-            if(!anOldAction.isNull()) {
-                anOldAction->setHotKey1(0);
+        for(int aHotIter = 0; aHotIter < 2; ++aHotIter) {
+            const unsigned int aHotKey = anAction->getHotKey(aHotIter);
+            if(aHotKey == 0) {
+                continue;
             }
-            myKeyActions[anAction->getHotKey1()] = anAction;
-        }
-        if(anAction->getHotKey2() != 0) {
-            StHandle<StAction> anOldAction = getActionForKey(anAction->getHotKey2());
+
+            StHandle<StAction> anOldAction = getActionForKey(aHotKey);
             if(!anOldAction.isNull()) {
-                anOldAction->setHotKey2(0);
+                for(int anOldHotIter = 0; anOldHotIter < 2; ++anOldHotIter) {
+                    if(anOldAction->getHotKey(anOldHotIter) == aHotKey) {
+                        anOldAction->setHotKey(anOldHotIter, 0);
+                    }
+                }
             }
-            myKeyActions[anAction->getHotKey2()] = anAction;
+            myKeyActions[aHotKey] = anAction;
+            if(aKeysState != NULL) {
+                const StVirtKey aVirtKey = getBaseKeyFromHotKey(aHotKey);
+                aKeysState->registerKey(aVirtKey);
+            }
         }
     }
 }

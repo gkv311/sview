@@ -12,6 +12,8 @@
 #ifndef __StAndroidGlue_h_
 #define __StAndroidGlue_h_
 
+#include "StVirtualKeys.h"
+
 #include <StSlots/StSignal.h>
 #include <StStrings/StString.h>
 #include <StThreads/StMutex.h>
@@ -23,6 +25,7 @@
 
 class StAndroidGlue;
 class StApplication;
+class StKeysState;
 
 /**
  * Data associated with an ALooper fd that will be returned as the "outData" when that source has data ready.
@@ -232,10 +235,12 @@ class StAndroidGlue {
      * @param theNewFile pop onNewIntent() open file event
      * @param theQuaternion device orientation
      * @param theToSwapEyes swap left/right views
+     * @param theKeys       keys state
      */
     ST_CPPEXPORT void fetchState(StString&             theNewFile,
                                  StQuaternion<double>& theQuaternion,
-                                 bool&                 theToSwapEyes);
+                                 bool&                 theToSwapEyes,
+                                 const StKeysState&    theKeys);
 
     /**
      * Return device memory class.
@@ -363,6 +368,11 @@ class StAndroidGlue {
      */
     ST_LOCAL void setSwapEyes(bool theToSwapLR);
 
+    /**
+     * Return TRUE if key is processed by application.
+     */
+    ST_LOCAL bool isKeyOverridden(int theKeyCode);
+
         private: //! @name ANativeActivity callbacks
 
     ST_LOCAL static void processInputWrapper(StAndroidGlue*       theApp,
@@ -474,6 +484,7 @@ class StAndroidGlue {
     StAndroidPollSource     myInputPollSource;
 
     StMutex                 myFetchLock;         //!< fetch data lock
+    bool                    myRegKeys[ST_VK_NB]; //!< map of registered (used in hot-key combinations) keys
     StString                myStAppClass;        //!< application class name (e.g. image, video)
     StString                myBuildModel;        //!< android.os.Build.MODEL
     StString                myBuildDevice;       //!< android.os.Build.DEVICE

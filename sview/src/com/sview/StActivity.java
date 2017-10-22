@@ -222,6 +222,17 @@ public class StActivity extends NativeActivity implements SensorEventListener {
         }
     }
 
+    /**
+     * Redirect key event to C++ level.
+     */
+    @Override
+    public boolean dispatchKeyEvent(android.view.KeyEvent theEvent) {
+        if(super.dispatchKeyEvent(theEvent)) {
+            return true;
+        }
+        return myCppGlue != 0 && cppIsKeyOverridden(myCppGlue, theEvent.getKeyCode());
+    }
+
     @Override
     public void surfaceCreated(SurfaceHolder theHolder) {
         super.surfaceCreated(theHolder);
@@ -597,6 +608,12 @@ public class StActivity extends NativeActivity implements SensorEventListener {
      */
     private native void cppSetSwapEyes(long theCppPtr,
                                        boolean theToSwap);
+
+    /**
+     * Return TRUE if key is processed by application.
+     */
+    private native boolean cppIsKeyOverridden(long theCppPtr,
+                                              int theKeyCode);
 
 //endregion
 

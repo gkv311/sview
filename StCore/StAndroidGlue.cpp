@@ -22,6 +22,8 @@
 
 #include <android/window.h>
 
+#include "stvkeysandroid.h" // Android NDK keys to VKEYs lookup array
+
 #define jexp extern "C" JNIEXPORT
 
 StJNIEnv::StJNIEnv(JavaVM* theJavaVM)
@@ -190,6 +192,7 @@ StAndroidGlue::StAndroidGlue(ANativeActivity* theActivity,
   myIsRunning(false),
   myIsStateSaved(false),
   myToDestroy(false) {
+    stMemZero(myRegKeys, sizeof(myRegKeys));
     theActivity->instance = this;
     theActivity->env->GetJavaVM(&myJavaVM);
 
@@ -304,8 +307,11 @@ void StAndroidGlue::setOpenPath(const jstring  theOpenPath,
 
 void StAndroidGlue::fetchState(StString&             theNewFile,
                                StQuaternion<double>& theQuaternion,
-                               bool&                 theToSwapEyes) {
+                               bool&                 theToSwapEyes,
+                               const StKeysState&    theKeys) {
     StMutexAuto aLock(myFetchLock);
+    stMemCpy(myRegKeys, theKeys.getRegisteredKeys(), sizeof(myRegKeys));
+
     theQuaternion = myQuaternion;
     theToSwapEyes = myToSwapEyesHW;
     if(!myDndPath.isEmpty()) {
@@ -918,6 +924,20 @@ void StAndroidGlue::setSwapEyes(bool theToSwapLR) {
     myToSwapEyesHW = theToSwapLR;
 }
 
+bool StAndroidGlue::isKeyOverridden(int theKeyCode) {
+    StVirtKey aVKeySt = ST_VK_NULL;
+    if(theKeyCode < ST_ANDROID2ST_VK_SIZE) {
+        aVKeySt = (StVirtKey )ST_ANDROID2ST_VK[theKeyCode];
+    }
+
+    if(aVKeySt <= 0 || (int )aVKeySt >= ST_VK_NB) {
+        return false;
+    }
+
+    StMutexAuto aLock(myFetchLock);
+    return myRegKeys[aVKeySt];
+}
+
 jexp void JNICALL Java_com_sview_StActivity_cppSetOpenPath(JNIEnv* theEnv, jobject theObj, jlong theCppPtr,
                                                            jstring theOpenPath, jstring theMimeType, jboolean theIsLaunchedFromHistory) {
     ((StAndroidGlue* )theCppPtr)->setOpenPath(theOpenPath, theMimeType, theIsLaunchedFromHistory);
@@ -951,6 +971,11 @@ jexp void JNICALL Java_com_sview_StActivity_cppSetOrientation(JNIEnv* theEnv, jo
 jexp void JNICALL Java_com_sview_StActivity_cppSetSwapEyes(JNIEnv* theEnv, jobject theObj, jlong theCppPtr,
                                                            jboolean theToSwap) {
     ((StAndroidGlue* )theCppPtr)->setSwapEyes(theToSwap == JNI_TRUE);
+}
+
+jexp jboolean JNICALL Java_com_sview_StActivity_cppIsKeyOverridden(JNIEnv* theEnv, jobject theObj, jlong theCppPtr,
+                                                                   jint theKeyCode) {
+    return ((StAndroidGlue* )theCppPtr)->isKeyOverridden(theKeyCode);
 }
 
 #endif // __ANDROID__

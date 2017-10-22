@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013 Kirill Gavrilov <kirill@sview.ru>
+ * Copyright © 2013-2017 Kirill Gavrilov <kirill@sview.ru>
  *
  * Distributed under the Boost Software License, Version 1.0.
  * See accompanying file license-boost.txt or copy at
@@ -11,12 +11,11 @@
 
 StAction::StAction(const StCString& theName)
 : myName(theName),
-  myHotKey1(0),
-  myHotKey2(0),
-  myDefaultHotKey1(0),
-  myDefaultHotKey2(0),
   myToHoldKey(false) {
-    //
+    myHotKeys[0] = 0;
+    myHotKeys[1] = 0;
+    myHotKeysDef[0] = 0;
+    myHotKeysDef[1] = 0;
 }
 
 StAction::~StAction() {}
