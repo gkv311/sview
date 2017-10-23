@@ -23,8 +23,10 @@ aCurrentDate=`date --rfc-2822`
 # Ubuntu 15.10     (Wily Werewolf)
 # Ubuntu 16.04 LTS (Xenial Xerus)
 # Ubuntu 16.10     (Yakkety Yak)
-#aDistribs=("trusty" "vivid" "wily" "xenial" "yakkety")
-aDistribs=("vivid" "wily" "xenial")
+# Ubuntu 17.04     (Zesty Zapus)
+# Ubuntu 17.10     (Artful Aardvark)
+# Ubuntu 18.04 LTS
+aDistribs=("xenial" "zesty" "artful")
 
 # Debian
 #aDistribs=("stable" "unstable" "testing-proposed-updates" "experimental")

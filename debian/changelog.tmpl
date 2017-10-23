@@ -4,6 +4,28 @@ sview (unknown_version) unknown_distrib; urgency=low
 
  -- Kirill Gavrilov <kirill@sview.ru>  unknown_date
 
+sview (17.10-1~unknown_distrib) unknown_distrib; urgency=low
+
+  + Image Viewer - display Slideshow delay parameter in Settings dialog.
+  + Movie Player - add general information about the stream (bitrate, codec, PAR, DAR) in File Info dialog.
+  * Movie Player - fix seeking to the very beginning of the file.
+  * Movie Player - fix (workaround) displaying attached image within some mp3 files.
+  * Fix text rendering artifacts when using glyphs with kerning defined.
+  * Fix compilation on glibc 2.26+ (Ubuntu 17.10+)
+
+ -- Kirill Gavrilov <kirill@sview.ru>  Mon, 23 Oct 2017 22:29:34 +0300
+
+sview (17.04-1~unknown_distrib) unknown_distrib; urgency=low
+
+  + Movie Player - add audio positioning while playing spheric panorama video.
+  + Movie Player - handle rotation info stored within video stream.
+  + Image Viewer, Movie Player - add overlay control for adjusting image color
+  + Movie Player - add option to force HRTF mixing in OpenAL Soft.
+  * Fix saving PNG images when using up-to-date FFmpeg.
+  * Image Viewer, Movie Player - fix too slow opening File Info dialog in case of long metadata.
+
+ -- Kirill Gavrilov <kirill@sview.ru>  Sun, 16 Apr 2017 21:45:20 +0300
+
 sview (16.04-1~unknown_distrib) unknown_distrib; urgency=low
 
   + Movie Player - implement GPU-accelerated conversion of NV12 and XYZ12 formats.
